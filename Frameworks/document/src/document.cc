@@ -299,10 +299,24 @@ namespace document
 			return res;
 		}
 
+		std::vector<document_ptr> all_documents ()
+		{
+			std::vector<document_ptr> res;
+
+			lock_t lock(this);
+			for(auto pair : documents)
+			{
+				if(document_ptr doc = pair.second.lock())
+					res.push_back(doc);
+			}
+
+			return res;
+		}
+
+	private:
 		std::map<oak::uuid_t, document_weak_ptr> documents;
 		std::map<path::identifier_t, document_weak_ptr> documents_by_path;
 
-	private:
 		void add (document_ptr doc)
 		{
 			ASSERT_EQ(lock_count, 1); // we assert that a lock has been obtained by the caller
@@ -1198,15 +1212,8 @@ namespace document
 	std::vector<document_ptr> scanner_t::open_documents ()
 	{
 		std::vector<document_ptr> res;
-
-		document_tracker_t::lock_t lock(&document::documents);
-		iterate(pair, document::documents.documents)
-		{
-			document_ptr doc = pair->second.lock();
-			if(doc && doc->is_open())
-				res.push_back(doc);
-		}
-
+		auto docs = document::documents.all_documents();
+		std::copy_if(docs.begin(), docs.end(), back_inserter(res), [](document::document_ptr doc){ return doc->is_open(); });
 		return res;
 	}
 
@@ -1216,13 +1223,8 @@ namespace document
 
 		if(includeUntitled)
 		{
-			document_tracker_t::lock_t lock(&document::documents);
-			iterate(pair, document::documents.documents)
-			{
-				document_ptr doc = pair->second.lock();
-				if(doc && doc->path() == NULL_STR)
-					documents.push_back(doc);
-			}
+			auto docs = document::documents.all_documents();
+			std::copy_if(docs.begin(), docs.end(), back_inserter(documents), [](document::document_ptr doc){ return doc->path() == NULL_STR; });
 		}
 
 		struct bootstrap_t { static void* main (void* arg) { ((scanner_t*)arg)->thread_main(); return NULL; } };
