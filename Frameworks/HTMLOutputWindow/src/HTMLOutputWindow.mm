@@ -1,6 +1,7 @@
 #import "HTMLOutputWindow.h"
 #import <OakAppKit/OakWindowFrameHelper.h>
 #import <OakFoundation/NSString Additions.h>
+#import <OakSystem/process.h>
 #import <command/runner.h>
 #import <oak/debug.h>
 
