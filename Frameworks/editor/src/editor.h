@@ -6,7 +6,6 @@
 #include <oak/callbacks.h>
 #include <regexp/find.h>
 #include <command/parser.h>
-#include <command/runner.h>
 #include <document/document.h>
 #include <layout/layout.h>
 

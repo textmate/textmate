@@ -9,9 +9,7 @@
 #include <text/parse.h>
 #include <text/tokenize.h>
 #include <text/trim.h>
-#include <OakSystem/command.h>
-#include <cf/run_loop.h>
-#include <command/runner.h>
+#include <io/exec.h>
 
 namespace ng
 {
@@ -374,27 +372,41 @@ namespace ng
 		{
 			std::string run_command (std::string const& cmd, std::map<std::string, std::string> const& environment)
 			{
-				struct command_t : oak::command_t
+				__block int status = 0;
+				__block std::string output, error;
+
+				std::string scriptPath = NULL_STR;
+				std::vector<std::string> argv{ "/bin/sh", "-c", cmd };
+				if(cmd.substr(0, 2) == "#!")
 				{
-					void did_exit (int rc, std::string const& output, std::string const& error)
-					{
-						result = rc == 0 ? output : error;
-						run_loop.stop();
-					}
+					argv = { scriptPath = path::temp("snippet_command") };
+					path::set_content(scriptPath, cmd);
+					chmod(scriptPath.c_str(), S_IRWXU);
+				}
 
-					std::string result;
-					cf::run_loop_t run_loop;
-				};
+				if(io::process_t process = io::spawn(argv, environment))
+				{
+					close(process.in);
 
-				command_t runner;
-				runner.command = cmd;
-				runner.environment = environment;
+					dispatch_group_t group = dispatch_group_create();
+					dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+						io::exhaust_fd(process.out, &output);
+					});
+					dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+						io::exhaust_fd(process.err, &error);
+					});
+					dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+						if(waitpid(process.pid, &status, 0) != process.pid)
+							perror("waitpid");
+					});
+					dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
+					dispatch_release(group);
+				}
 
-				command::fix_shebang(&runner.command);
+				if(scriptPath != NULL_STR)
+					unlink(scriptPath.c_str());
 
-				runner.launch();
-				runner.run_loop.start();
-				return runner.result;
+				return WIFEXITED(status) && WEXITSTATUS(status) == 0 ? output : error;
 			}
 
 		} callback;
