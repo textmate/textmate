@@ -1,5 +1,15 @@
 # Changes
 
+## 2013-05-17 ([a9423](https://github.com/textmate/textmate/compare/a9419...a9423))
+
+* TextMate should now work with _Proxy Auto Discovery_ (for updating itself and the managed bundles).
+* A bunch of (work in progress) refactoring has caused some changes to executing commands:
+	- Scoped variables (which are set via bundle settings) are now setup before the variables in Preferences → Variables, which in turn are setup before path specific variables (`.tm_properties`). This matters when you want to override or augment variables. For example, if you want to setup commenting style variables, you previously had to edit the existing variables found in the language’s bundle. You can now place the variables in `.tm_properties` in a group with the proper scope selector — although presently scope selectors in `.tm_properties` are matched against the file’s scope, not that of the caret (so for languages that are likely embedded, it’s still best to set the variables via a bundle item).
+	- The `requiredCommands` bundle item key (to specify required shell commands) can now be used for completion commands as well. Long-term this will be usable with all types of bundle items (e.g. a snippet or macro may also require the presence of certain shell commands).
+	- The working directory of the command being executed is unspecified except for drop commands (where it is the parent of the current file). We have never documented what the working directory is set to, and if you need it to be set to something specific (e.g. `TM_PROJECT_DIRECTORY`) then you should set it yourself.
+	- Commands being run via `TextMate.system` (JavaScript in HTML output) no longer support being an inline shebang-script.
+	- Shell code embedded in snippets and run via `TextMate.system` no longer source `TM_SUPPORT_PATH/lib/bash_init.sh`.
+
 ## 2013-05-02 ([a9419](https://github.com/textmate/textmate/compare/a9417...a9419))
 
 * _Full Screen_ is now assigned to ⌃⌘F to follow Apple’s recommendations. Previously this key was used for _Replace All_ which is now instead ⌃⌘G and _Replace All in Selection_ is ⌃⇧⌘G. This is somewhat consistent with _Replace & Find_ bound to ⌥⌘G.
