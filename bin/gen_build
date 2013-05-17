@@ -684,6 +684,7 @@ open("#{builddir}/build.ninja", "w") do |io|
     io << "rule #{value[:rule]}\n"
     io << "  command = '#{value[:compiler]}' $FLAGS #{value[:flags]} $RAVE_FLAGS -o $out -MMD -MF $out.d -I$builddir/include $in\n"
     io << "  depfile = $depfile\n"
+    io << "  deps = gcc\n"
     io << "  description = Compile ‘$in’…\n\n"
   end
 
