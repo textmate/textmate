@@ -152,7 +152,7 @@ namespace filter
 
 	static std::map<std::string, std::string> path_variables (std::string const& path)
 	{
-		std::map<std::string, std::string> map;
+		std::map<std::string, std::string> map = oak::basic_environment();
 		if(path != NULL_STR)
 		{
 			map["TM_DISPLAYNAME"] = path::display_name(path);
