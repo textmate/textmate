@@ -1,5 +1,9 @@
 # Changes
 
+## 2013-05-18 ([a9425](https://github.com/textmate/textmate/compare/a9423...a9425))
+
+* Add missing variables (like `PATH`) for export commands.
+
 ## 2013-05-17 ([a9423](https://github.com/textmate/textmate/compare/a9419...a9423))
 
 * TextMate should now work with _Proxy Auto Discovery_ (for updating itself and the managed bundles).
