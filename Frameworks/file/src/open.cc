@@ -304,6 +304,7 @@ namespace file
 {
 	void open_callback_t::obtain_authorization (std::string const& path, osx::authorization_t auth, open_context_ptr context)
 	{
+		fprintf(stderr, "DEBUG Request authorization to open ‘%s’\n", path.c_str());
 		if(auth.obtain_right(kAuthRightName))
 			context->set_authorization(auth);
 	}

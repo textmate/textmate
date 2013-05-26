@@ -421,6 +421,7 @@ namespace file
 
 	void save_callback_t::obtain_authorization (std::string const& path, io::bytes_ptr content, osx::authorization_t auth, save_context_ptr context)
 	{
+		fprintf(stderr, "DEBUG Request authorization to save ‘%s’\n", path.c_str());
 		if(auth.obtain_right(kAuthRightName))
 			context->set_authorization(auth);
 	}
