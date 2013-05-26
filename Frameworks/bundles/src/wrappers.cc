@@ -30,6 +30,8 @@ namespace bundles
 	static std::vector<required_command_t> requirements (item_ptr const& item)
 	{
 		std::vector<required_command_t> res;
+		if(item->kind() != kItemTypeBundle)
+			res = requirements(item->bundle());
 
 		plist::array_t array;
 		if(plist::get_key_path(item->plist(), "requiredCommands", array))
