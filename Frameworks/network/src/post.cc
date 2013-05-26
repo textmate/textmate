@@ -69,6 +69,7 @@ long post_to_server (std::string const& url, std::map<std::string, std::string> 
 		{
 			curl_easy_setopt(handle, CURLOPT_PROXY,     proxySettings.server.c_str());
 			curl_easy_setopt(handle, CURLOPT_PROXYPORT, proxySettings.port);
+			curl_easy_setopt(handle, CURLOPT_PROXYTYPE, proxySettings.socks ? CURLPROXY_SOCKS4 : CURLPROXY_HTTP);
 			if(proxySettings.password != NULL_STR)
 				curl_easy_setopt(handle, CURLOPT_PROXYUSERPWD, (proxySettings.user + ":" + proxySettings.password).c_str());
 		}

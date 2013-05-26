@@ -9,6 +9,7 @@ struct proxy_settings_t
 	explicit operator bool () const { return enabled; }
 
 	bool enabled;
+	bool socks = false;
 	std::string server;
 	long port;
 	std::string user;

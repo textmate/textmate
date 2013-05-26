@@ -165,15 +165,23 @@ proxy_settings_t first_proxy_from_array (CFArrayRef proxies, CFURLRef targetURL)
 				fprintf(stderr, "TextMate/proxy: Expected kCFProxyAutoConfigurationURLKey to be a CFURLRef\n");
 			}
 		}
-		else // kCFProxyTypeHTTP or kCFProxyTypeHTTPS
+		else if(CFEqual(type, kCFProxyTypeHTTP) || CFEqual(type, kCFProxyTypeHTTPS) || CFEqual(type, kCFProxyTypeSOCKS))
 		{
 			CFStringRef hostName   = (CFStringRef)CFDictionaryGetValue(proxy, kCFProxyHostNameKey);
 			CFNumberRef portNumber = (CFNumberRef)CFDictionaryGetValue(proxy, kCFProxyPortNumberKey);
 
 			if(CFGetTypeID(hostName) == CFStringGetTypeID() && CFGetTypeID(portNumber) == CFNumberGetTypeID())
-				return user_pw_settings(hostName, portNumber);
+			{
+				auto res = user_pw_settings(hostName, portNumber);
+				res.socks = CFEqual(type, kCFProxyTypeSOCKS);
+				return res;
+			}
 
 			fprintf(stderr, "TextMate/proxy: Expected kCFProxyHostNameKey/kCFProxyPortNumberKey to be CFStringRef/CFNumberRef\n");
+		}
+		else
+		{
+			fprintf(stderr, "TextMate/proxy: Unknown proxy type: %s\n", cf::to_s(type).c_str());
 		}
 	}
 	return proxy_settings_t();
