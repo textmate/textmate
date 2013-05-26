@@ -87,6 +87,7 @@ namespace
 		void obtain_authorization (std::string const& path, io::bytes_ptr content, osx::authorization_t auth, file::save_context_ptr context)
 		{
 			D(DBF_DocumentController_SaveHelper, bug("\n"););
+			fprintf(stderr, "DEBUG Request authorization to save ‘%s’\n", path.c_str());
 			if(auth.obtain_right(kAuthRightName))
 					context->set_authorization(auth);
 			else	_self.userAbort = YES;
