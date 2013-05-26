@@ -22,7 +22,9 @@ OAK_DEBUG_VAR(AppController_Commands);
 	if(bundles::item_ptr item = bundles::lookup(to_s(uuidString)))
 	{
 		DocumentController* delegate = (DocumentController*)[[NSApp mainWindow] delegate];
-		if([delegate respondsToSelector:@selector(performBundleItem:)])
+		if(![delegate respondsToSelector:@selector(performBundleItem:)])
+			delegate = [NSApp targetForAction:@selector(performBundleItem:)];
+		if(delegate)
 			return [delegate performBundleItem:item];
 
 		switch(item->kind())
