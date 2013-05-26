@@ -56,7 +56,10 @@ std::pair<std::vector<bundles::item_ptr>, std::map< oak::uuid_t, std::vector<oak
 				plist::dictionary_t plist = cache.content(infoPlistPath);
 				if(!plist::get_key_path(plist, bundles::kFieldUUID, bundleUUID))
 				{
-					fprintf(stderr, "*** skip ‘%s’ (no valid UUID)\n", infoPlistPath.c_str());
+					std::string uuidStr;
+					if(plist::get_key_path(plist, bundles::kFieldUUID, uuidStr))
+							fprintf(stderr, "*** skip ‘%s’, invalid UUID ‘%s’\n", infoPlistPath.c_str(), uuidStr.c_str());
+					else	fprintf(stderr, "*** skip ‘%s’, no UUID\n", infoPlistPath.c_str());
 					break;
 				}
 
@@ -164,7 +167,10 @@ std::pair<std::vector<bundles::item_ptr>, std::map< oak::uuid_t, std::vector<oak
 						plist::dictionary_t plist = cache.content(itemPath);
 						if(!plist::get_key_path(plist, bundles::kFieldUUID, uuid))
 						{
-							fprintf(stderr, "*** skip ‘%s’ (no valid UUID)\n", itemPath.c_str());
+							std::string uuidStr;
+							if(plist::get_key_path(plist, bundles::kFieldUUID, uuidStr))
+									fprintf(stderr, "*** skip ‘%s’, invalid UUID ‘%s’\n", itemPath.c_str(), uuidStr.c_str());
+							else	fprintf(stderr, "*** skip ‘%s’, no UUID\n", itemPath.c_str());
 							continue;
 						}
 
