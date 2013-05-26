@@ -131,6 +131,12 @@ namespace fs
 
 	plist::dictionary_t cache_t::content (std::string const& path)
 	{
+		auto it = _cache.find(path);
+		if(it != _cache.end() && it->second.type() == entry_type_t::missing)
+		{
+			fprintf(stderr, "content requested for missing item: ‘%s’\n", path.c_str());
+			_cache.erase(it);
+		}
 		return resolved(path).content();
 	}
 
