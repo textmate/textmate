@@ -103,10 +103,10 @@ namespace ng
 
 				if(delegate->result != NULL_STR)
 				{
-					citerate(line, text::tokenize(delegate->result.begin(), delegate->result.end(), '\n'))
+					for(auto line : text::tokenize(delegate->result.begin(), delegate->result.end(), '\n'))
 					{
-						if(!(*line).empty())
-							commandResult.push_back(*line);
+						if(!line.empty() && utf8::is_valid(line.begin(), line.end()))
+							commandResult.push_back(line);
 					}
 				}
 			}
