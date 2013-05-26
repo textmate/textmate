@@ -844,22 +844,19 @@ namespace path
 			res = true;
 			iterate(pair, attributes)
 			{
-				bool removeAttr = pair->second == NULL_STR;
 				int rc = 0;
-				if(removeAttr)
+				if(pair->second == NULL_STR)
 						rc = fremovexattr(fd, pair->first.c_str(), 0);
 				else	rc = fsetxattr(fd, pair->first.c_str(), pair->second.data(), pair->second.size(), 0, 0);
 
-				if(rc != 0 && removeAttr && errno == ENOATTR)
-					rc = 0;
-				else if(rc != 0 && removeAttr && errno == EINVAL) // We get this from AFP when removing a non-existing attribute
-					rc = 0;
-				else if(rc != 0 && !removeAttr && errno == ENOENT) // We get this from Samba saving to ext4 via virtual machine
-					rc = 0;
-				else if(rc != 0)
-					perror((removeAttr ? text::format("fremovexattr(%d, \"%s\")", fd, pair->first.c_str()) : text::format("fsetxattr(%d, %s, \"%s\")", fd, pair->first.c_str(), pair->second.c_str())).c_str());
-
-				res = res && rc == 0;
+				if(rc != 0 && errno != ENOTSUP && errno != ENOATTR)
+				{
+					// We only log the error since:
+					// fremovexattr() on AFP for non-existing attributes gives us EINVAL
+					// fsetxattr() on Samba saving to ext4 via virtual machine gives us ENOENT
+					// sshfs with ‘-o noappledouble’ will return ENOATTR or EPERM
+					perror((pair->second == NULL_STR ? text::format("fremovexattr(%d, \"%s\")", fd, pair->first.c_str()) : text::format("fsetxattr(%d, %s, \"%s\")", fd, pair->first.c_str(), pair->second.c_str())).c_str());
+				}
 			}
 			close(fd);
 		}
