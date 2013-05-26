@@ -1,8 +1,10 @@
 # Changes
 
-## 2013-05-18 ([a9425](https://github.com/textmate/textmate/compare/a9423...a9425))
+## 2013-05-26 ([a9427](https://github.com/textmate/textmate/compare/a9423...a9427))
 
-* Add missing variables (like `PATH`) for export commands.
+* A bundle’s `info.plist` can now use the `requiredCommands` key. All items in the bundle will inherit the requirements, though they are presently only checked for commands and drag commands.
+* Failing to set/remove extended attributes is no longer treated as an error (to improve compatibility with various file systems).
+* Add SOCKS proxy support for updating and crash report submissions.
 
 ## 2013-05-17 ([a9423](https://github.com/textmate/textmate/compare/a9419...a9423))
 
