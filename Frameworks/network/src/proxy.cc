@@ -28,8 +28,8 @@ static proxy_settings_t user_pw_settings (CFStringRef server, CFNumberRef portNu
 	CFDictionaryRef query = CFDictionaryCreate(NULL, keys, vals, sizeofA(keys), NULL, NULL);
 	
 	CFArrayRef results = NULL;
-	OSStatus err;
-	if(err = SecItemCopyMatching(query, (CFTypeRef*)&results) == errSecSuccess)
+	OSStatus err = SecItemCopyMatching(query, (CFTypeRef*)&results);
+	if(err == errSecSuccess)
 	{
 		CFIndex numResults = CFArrayGetCount(results);
 		for(CFIndex i = 0; user == NULL_STR && i < numResults; ++i)
@@ -58,7 +58,7 @@ static proxy_settings_t user_pw_settings (CFStringRef server, CFNumberRef portNu
 		
 		CFRelease(results);
 	}
-	else
+	else if(err != errSecItemNotFound)
 	{
 		CFStringRef message = SecCopyErrorMessageString(err, NULL);
 		fprintf(stderr, "TextMate/proxy: SecItemCopyMatching() failed with error ‘%s’\n", cf::to_s(message).c_str());
