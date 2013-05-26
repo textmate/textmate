@@ -1297,8 +1297,10 @@ namespace ng
 		_selections = this->replace(replacements, true);
 	}
 
-	bool editor_t::handle_result (std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, text::range_t input_range, std::map<std::string, std::string> environment)
+	bool editor_t::handle_result (std::string const& uncheckedOut, output::type placement, output_format::type format, output_caret::type outputCaret, text::range_t input_range, std::map<std::string, std::string> environment)
 	{
+		std::string const& out = utf8::is_valid(uncheckedOut.begin(), uncheckedOut.end()) ? uncheckedOut : text::to_hex(uncheckedOut.begin(), uncheckedOut.end());
+
 		range_t range;
 		switch(placement)
 		{
