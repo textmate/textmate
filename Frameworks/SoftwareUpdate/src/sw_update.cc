@@ -138,11 +138,15 @@ namespace sw_update
 
 	std::string install_update (std::string const& src)
 	{
+		char date[64];
+		time_t now = time(NULL);
+		strftime(date, sizeof(date), "(%F %T)", localtime(&now));
+
 		std::string const dst         = oak::application_t::path();
 		std::string const oldVersion  = oak::application_t::revision();
 		std::string const srcContents = path::join(src, "Contents");
 		std::string const dstContents = path::join(dst, "Contents");
-		std::string const backup      = dstContents + "-" + oldVersion;
+		std::string const backup      = dstContents + "-" + oldVersion + " " + date;
 		std::string const appExe      = path::join("Contents/MacOS", oak::application_t::name());
 		std::string const srcExe      = path::join(src, appExe);
 		std::string const dstExe      = path::join(dst, appExe);
@@ -156,7 +160,7 @@ namespace sw_update
 			return "Error installing new version.";
 		else if(!path::exists(dstExe))
 			return "Installed application is broken.";
-		else if(!rm_dir(backup, auth))
+		else if(!rm_dir(backup, auth) && path::move_to_trash(backup) == NULL_STR) // Move to trash if unlink fails <issue://991>
 			return "Error removing old version.";
 		rm_dir(src, auth);
 		return NULL_STR;
