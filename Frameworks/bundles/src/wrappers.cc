@@ -43,7 +43,7 @@ namespace bundles
 					plist::get_key_path(info, "variable", variable);
 					if(plist::get_key_path(info, "locations", locations))
 							res.push_back(required_command_t(command, moreInfoURL, variable, convert_locations(locations)));
-					else	res.push_back(required_command_t(command, moreInfoURL));
+					else	res.push_back(required_command_t(command, moreInfoURL, variable));
 				}
 			}
 		}
