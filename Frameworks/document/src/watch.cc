@@ -200,7 +200,8 @@ namespace document
 		D(DBF_Document_WatchFS, bug("client %zu, exists %s\n", client_id, BSTR(it != watch_info.end())););
 		if(it != watch_info.end())
 		{
-			close(it->second->fd);
+			if(it->second->fd != -1)
+				close(it->second->fd);
 			delete it->second;
 			watch_info.erase(it);
 		}
@@ -210,15 +211,19 @@ namespace document
 	{
 		info.path_watched = existing_parent(info.path);
 		info.fd = open(info.path_watched.c_str(), O_EVTONLY|O_CLOEXEC, 0);
-		if(info.fd == -1) // TODO we need to actually handle this error @allan
+		if(info.fd != -1)
+		{
+			struct kevent changeList;
+			struct timespec timeout = { };
+			EV_SET(&changeList, info.fd, EVFILT_VNODE, EV_ADD | EV_ENABLE | EV_CLEAR, NOTE_DELETE | NOTE_WRITE | NOTE_RENAME | NOTE_ATTRIB, 0, (void*)client_id);
+			int n = kevent(event_queue, &changeList, 1 /* number of changes */, NULL /* event list */, 0 /* number of events */, &timeout);
+			if(n == -1)
+				fprintf(stderr, "error observing path, kevent(\"%s\"): %s\n", info.path_watched.c_str(), strerror(errno));
+		}
+		else
+		{
 			fprintf(stderr, "error observing path, open(\"%s\"): %s\n", info.path_watched.c_str(), strerror(errno));
-
-		struct kevent changeList;
-		struct timespec timeout = { };
-		EV_SET(&changeList, info.fd, EVFILT_VNODE, EV_ADD | EV_ENABLE | EV_CLEAR, NOTE_DELETE | NOTE_WRITE | NOTE_RENAME | NOTE_ATTRIB, 0, (void*)client_id);
-		int n = kevent(event_queue, &changeList, 1 /* number of changes */, NULL /* event list */, 0 /* number of events */, &timeout);
-		if(n == -1)
-			fprintf(stderr, "error observing path, kevent(\"%s\"): %s\n", info.path_watched.c_str(), strerror(errno));
+		}
 	}
 
 	void watch_server_t::server_run ()
