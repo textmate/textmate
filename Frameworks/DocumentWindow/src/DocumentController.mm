@@ -2279,7 +2279,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 		{
 			if([NSApp isHidden])
 			{
-				__block id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:NSApplicationDidUnhideNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
+				__weak __block id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:NSApplicationDidUnhideNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
 					[aController showWindow:nil];
 					SetFrontProcessWithOptions(&(ProcessSerialNumber){ 0, kCurrentProcess }, kSetFrontProcessFrontWindowOnly);
 					[[NSNotificationCenter defaultCenter] removeObserver:observerId];
