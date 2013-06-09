@@ -193,6 +193,8 @@ namespace ng
 		}
 		else // findNext, findPrevious, and findAll
 		{
+			if(action == "findPrevious")
+				options |= find::backwards;
 			find(searchFor, options, searchOnlySelection);
 		}
 	}
