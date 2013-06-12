@@ -715,7 +715,10 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 	{
 		NSUInteger selectionIndex = [[outlineView selectedRowIndexes] firstIndex];
 		FFMatch* selectedMatch    = [outlineView itemAtRow:selectionIndex];
-		document::show([selectedMatch match].document, _documentSearch.projectIdentifier ? oak::uuid_t(to_s(_documentSearch.projectIdentifier)) : document::kCollectionAny, [selectedMatch match].range, false);
+		auto doc = [selectedMatch match].document;
+		if(!doc->is_open())
+			doc->set_recent_tracking(false);
+		document::show(doc, _documentSearch.projectIdentifier ? oak::uuid_t(to_s(_documentSearch.projectIdentifier)) : document::kCollectionAny, [selectedMatch match].range, false);
 	}
 }
 
