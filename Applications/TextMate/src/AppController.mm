@@ -177,6 +177,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
 		@"ApplePressAndHoldEnabled" : @NO,
 		@"NSRecentDocumentsLimit"   : @25,
+		@"WebKitDeveloperExtras"    : @YES,
 	}];
 	RegisterDefaults();
 
