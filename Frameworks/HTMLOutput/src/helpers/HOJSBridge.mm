@@ -165,6 +165,9 @@ OAK_DEBUG_VAR(HTMLOutput_JSShellCommand);
 @end
 
 @implementation HOJSShellCommand
+// We need @synthesize to avoid the instance variables from being prefixed with an underscore, as they are mapped to JavaScript
+@synthesize onreadoutput, onreaderror, status;
+
 - (id)initShellCommand:(NSString*)aCommand withEnvironment:(const std::map<std::string, std::string>&)someEnvironment andExitHandler:(id)aHandler
 {
 	D(DBF_HTMLOutput_JSShellCommand, bug("run ‘%s’ with exit handler %s\n", to_s(aCommand).c_str(), BSTR(aHandler)););
@@ -212,12 +215,12 @@ OAK_DEBUG_VAR(HTMLOutput_JSShellCommand);
 			});
 
 			dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-				int status = 0;
-				if(waitpid(process.pid, &status, 0) != process.pid)
+				int result = 0;
+				if(waitpid(process.pid, &result, 0) != process.pid)
 					perror("waitpid");
 				process.pid = -1;
 				dispatch_sync(queue, ^{
-					self.status = WIFEXITED(status) ? WEXITSTATUS(status) : -1;
+					self.status = WIFEXITED(result) ? WEXITSTATUS(result) : -1;
 				});
 			});
 
@@ -333,15 +336,15 @@ OAK_DEBUG_VAR(HTMLOutput_JSShellCommand);
 - (void)setOnreadoutput:(id)aHandler
 {
 	D(DBF_HTMLOutput_JSShellCommand, bug("%s\n", [[aHandler description] UTF8String]););
-	if(_onreadoutput = aHandler)
-		[_onreadoutput callWebScriptMethod:@"call" withArguments:@[ _onreadoutput, [self outputString] ]];
+	if(onreadoutput = aHandler)
+		[onreadoutput callWebScriptMethod:@"call" withArguments:@[ onreadoutput, [self outputString] ]];
 }
 
 - (void)setOnreaderror:(id)aHandler
 {
 	D(DBF_HTMLOutput_JSShellCommand, bug("%s\n", [[aHandler description] UTF8String]););
-	if(_onreaderror = aHandler)
-		[_onreaderror callWebScriptMethod:@"call" withArguments:@[ _onreaderror, [self errorString] ]];
+	if(onreaderror = aHandler)
+		[onreaderror callWebScriptMethod:@"call" withArguments:@[ onreaderror, [self errorString] ]];
 }
 
 - (void)finalizeForWebScript
