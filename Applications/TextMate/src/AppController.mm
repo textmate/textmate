@@ -159,8 +159,8 @@ BOOL HasDocumentWindow (NSArray* windows)
 	{
 		NSInteger daysUntilExpiration = floor([expirationDate timeIntervalSinceNow] / kSecondsPerDay);
 		NSInteger weeksSinceCompilation = floor(-[compileDate timeIntervalSinceNow] / kSecondsPerDay / 7);
-		NSInteger choice = NSRunAlertPanel(@"TextMate is Outdated!", @"You are using a preview of TextMate 2 which is more than %ld weeks old. It will stop working in %ld day%s.", @"Visit Website", @"Cancel", nil, weeksSinceCompilation, daysUntilExpiration, daysUntilExpiration == 1 ? "" : "s");
-		if(choice == NSAlertDefaultReturn) // "Visit Website"
+		NSInteger choice = NSRunAlertPanel(@"TextMate is Outdated!", @"This version of TextMate is more than %ld weeks old and you should update to latest version. You can continue to use this version for another %ld day%s.", @"Continue", @"Visit Download Page", nil, weeksSinceCompilation, daysUntilExpiration, daysUntilExpiration == 1 ? "" : "s");
+		if(choice == NSAlertAlternateReturn) // "Visit Website"
 			[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://macromates.com/download"]];
 	}
 	[NSTimer scheduledTimerWithTimeInterval:kSecondsPerDay target:self selector:@selector(checkExpirationDate:) userInfo:nil repeats:NO];
