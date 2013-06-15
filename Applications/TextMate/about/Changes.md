@@ -1,5 +1,12 @@
 # Changes
 
+## 2013-06-15 ([a9431](https://github.com/textmate/textmate/compare/a9427...a9431))
+
+* Apply injections from child rules without match pattern. *[Joachim Mårtensson]*
+* Don't add files from find window to recent list. *[Jakub Suder]*
+* Enable "Inspect Element" in web preview. *[Zete Lui]*
+* Miscellaneous fixes.
+
 ## 2013-05-26 ([a9427](https://github.com/textmate/textmate/compare/a9423...a9427))
 
 * A bundle’s `info.plist` can now use the `requiredCommands` key. All items in the bundle will inherit the requirements, though they are presently only checked for commands and drag commands.
