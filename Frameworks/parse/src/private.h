@@ -20,7 +20,7 @@ namespace parse
 
 		static size_t rule_id_counter;
 
-		rule_t () : rule_id(++rule_id_counter), include_string(NULL_STR), scope_string(NULL_STR), content_scope_string(NULL_STR), match_string(NULL_STR), while_string(NULL_STR), end_string(NULL_STR), apply_end_last(NULL_STR), resolved_injections(false) { }
+		rule_t () : rule_id(++rule_id_counter), include_string(NULL_STR), scope_string(NULL_STR), content_scope_string(NULL_STR), match_string(NULL_STR), while_string(NULL_STR), end_string(NULL_STR), apply_end_last(NULL_STR) { }
 
 		size_t rule_id;
 
@@ -55,8 +55,6 @@ namespace parse
 		regexp::pattern_t match_pattern;
 		regexp::pattern_t while_pattern;
 		regexp::pattern_t end_pattern;
-
-		bool resolved_injections;
 	};
 
 	struct stack_t
