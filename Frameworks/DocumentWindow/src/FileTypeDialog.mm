@@ -90,7 +90,8 @@ static bool is_installed (oak::uuid_t const& uuid)
 
 	all = installed;
 
-	if(network::can_reach_host("updates.textmate.org"))
+	// Exclude uninstalled grammars when offline
+	if(network::can_reach_host(REST_API))
 	{
 		citerate(bundle, bundles_db::index())
 		{
