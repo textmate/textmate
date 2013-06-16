@@ -396,7 +396,6 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 				FFMatch* firstMatch = [matches firstObject];
 				FFMatch* lastMatch  = [matches lastObject];
 				[documents addObject:@{
-					@"path"            : firstMatch.path,
 					@"identifier"      : [NSString stringWithCxxString:doc->identifier()],
 					@"firstMatchRange" : [NSString stringWithCxxString:[firstMatch match].range],
 					@"lastMatchRange"  : [NSString stringWithCxxString:[lastMatch match].range],
