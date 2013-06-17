@@ -55,9 +55,6 @@
 		for(NSNumber* type in outputOptions)
 			[[menu addItemWithTitle:outputOptions[type] action:@selector(takeOutputTypeFrom:) keyEquivalent:[NSString stringWithFormat:@"%c", ++key]] setTag:[type intValue]];
 
-		[self.resultLabel  setAlignment:NSRightTextAlignment];
-		[self.commandLabel setAlignment:NSRightTextAlignment];
-
 		self.executeButton.action = @selector(execute:);
 		self.cancelButton.action  = @selector(cancel:);
 
