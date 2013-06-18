@@ -19,8 +19,6 @@ static NSData* Digest (NSString* someString)
 
 @interface AboutWindowJSBridge : NSObject
 {
-	std::map<std::string, std::string> currentLicense;
-
 	NSString* version;
 	NSString* licensees;
 }
@@ -39,11 +37,18 @@ static NSData* Digest (NSString* someString)
 
 - (NSString*)licensees
 {
-	if(currentLicense.empty())
-		currentLicense = license::current();
-
-	auto it = currentLicense.find("owner");
-	return it != currentLicense.end() ? [NSString stringWithCxxString:it->second] : nil;
+	if(!licensees)
+	{
+		for(auto owner : license::find_all())
+		{
+			if(license::is_valid(license::decode(license::find(owner)), owner))
+			{
+				licensees = [NSString stringWithCxxString:owner];
+				break;
+			}
+		}
+	}
+	return licensees;
 }
 @end
 

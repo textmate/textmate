@@ -15,6 +15,8 @@
 #include <openssl/pem.h>
 #include <openssl/rsa.h>
 
+extern std::vector<size_t> const& revoked_serials () WEAK_IMPORT_ATTRIBUTE;
+
 namespace
 {
 	static std::string sha_digest (std::string const& str)
@@ -75,77 +77,88 @@ namespace
 		return res;
 	}
 
-	static std::pair<std::string, std::string> search_keychain ()
-	{
-		std::pair<std::string, std::string> res(NULL_STR, NULL_STR);
-		CFTypeRef keys[] = { kSecMatchLimit,    kSecReturnRef,  kSecClass,                kSecAttrCreator,  kSecAttrService,   kSecAttrDescription  };
-		CFTypeRef vals[] = { kSecMatchLimitAll, kCFBooleanTrue, kSecClassGenericPassword, cf::wrap('TxMt'), CFSTR("TextMate"), CFSTR("license key") };
-
-		if(CFDictionaryRef query = CFDictionaryCreate(NULL, keys, vals, sizeofA(keys), NULL, NULL))
-		{
-			OSStatus err;
-
-			CFArrayRef results = NULL;
-			if(err = SecItemCopyMatching(query, (CFTypeRef*)&results) == errSecSuccess)
-			{
-				if(CFArrayGetCount(results) == 1)
-				{
-					void* data = NULL;
-					UInt32 dataLen = 0;
-
-					UInt32 tag    = kSecAccountItemAttr;
-					UInt32 format = CSSM_DB_ATTRIBUTE_FORMAT_STRING;
-					SecKeychainAttributeInfo info = { 1, &tag, &format };
-
-					SecKeychainAttributeList* authAttrList = NULL;
-					if(SecKeychainItemCopyAttributesAndData((SecKeychainItemRef)CFArrayGetValueAtIndex(results, 0), &info, NULL, &authAttrList, &dataLen, &data) == noErr)
-					{
-						res.first  = std::string((char const*)authAttrList->attr->data, ((char const*)authAttrList->attr->data) + authAttrList->attr->length);
-						res.second = std::string((char const*)data, ((char const*)data) + dataLen);
-
-						SecKeychainItemFreeContent(authAttrList, data);
-					}
-				}
-				CFRelease(results);
-			}
-			else
-			{
-				CFStringRef message = SecCopyErrorMessageString(err, NULL);
-				fprintf(stderr, "failed to copy matching items from keychain: ‘%s’\n", cf::to_s(message).c_str());
-				CFRelease(message);
-			}
-			CFRelease(query);
-		}
-		return res;
-	}
-
 	static std::string const& public_key ()
 	{
 		static std::string const key = "-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDLFL3xBKeG19N7/6uCnpPLESJ+\n2VDL3LWH0KxIRse/sdkbWw1bYNPMeXtdVNfZRiF03umdxaPgzpNCN/JY7P91m8Lv\ndizRDO8I411Wcf+G7W5CA3GuJbQfNvBBOn+3KwHrG4v+RR+XtdEbw5uPHyIvYWOI\nmwvjE6oSRSBkWMIATQIDAQAB\n-----END PUBLIC KEY-----\n";
 		return key;
 	}
+
+	static bool is_serial_revoked (size_t serial)
+	{
+		if(revoked_serials)
+		{
+			auto v = revoked_serials();
+			if(std::binary_search(v.begin(), v.end(), serial))
+				return true;
+		}
+		return false;
+	}
 }
 
 namespace license
 {
-	std::map<std::string, std::string> current (std::string const& publicKey)
+	std::map<std::string, std::string> decode (std::string const& license, std::string const& publicKey)
 	{
-		static std::map<std::string, std::string> const err;
+		return parse(ssl_decode(decode::base32(license), publicKey != NULL_STR ? publicKey : public_key()));
+	}
 
-		auto pair = search_keychain();
-		if(pair.second == NULL_STR)
-			return err;
+	bool is_valid (std::map<std::string, std::string> const& license, std::string const& owner)
+	{
+		auto digest = license.find("owner");
+		auto serial = license.find("serial");
+		auto type   = license.find("type");
+		if(digest != license.end() && serial != license.end() && type != license.end())
+		{
+			if(sha_digest(owner) == text::uppercase(digest->second))
+			{
+				static std::string const legacyTypes[] = { "heist", "eval" };
+				if(!oak::contains(std::begin(legacyTypes), std::end(legacyTypes), type->second))
+				{
+					if(!is_serial_revoked(strtol(serial->second.c_str(), NULL, 10)))
+						return true;
+				}
+			}
+		}
+		return false;
+	}
 
-		auto map = parse(ssl_decode(decode::base32(pair.second), publicKey != NULL_STR ? publicKey : public_key()));
-		auto it = map.find("owner");
-		if(it == map.end())
-			return err;
+	bool is_revoked (std::map<std::string, std::string> const& license)
+	{
+		bool res = false;
 
-		if(sha_digest(pair.first) != text::uppercase(it->second))
-			return err;
+		auto serial = license.find("serial");
+		if(serial == license.end())
+			return res;
 
-		it->second = pair.first;
-		return map;
+		if(hostent* bl = gethostbyname(text::format("%zu.bl.textmate.org", strtol(serial->second.c_str(), NULL, 10)).c_str()))
+		{
+			for(size_t i = 0; bl->h_addr_list[i]; ++i)
+			{
+				uint32_t response = ntohl(*(uint32_t*)bl->h_addr_list[i]);
+				if(response == 0xDEADBEEF)
+					res = true;
+			}
+		}
+		return res;
+	}
+
+	std::string error_description (std::string const& license, std::string const& owner, std::string const& publicKey)
+	{
+		auto map = parse(ssl_decode(decode::base32(license), publicKey != NULL_STR ? publicKey : public_key()));
+		if(is_valid(map, owner))
+			return NULL_STR;
+
+		if(map.size() == 0)
+			return "Malformed license key. Try paste it again.";
+		else if(sha_digest(owner) != text::uppercase(map["owner"]))
+			return "This license is tied to another owner name. Check registration email.";
+		else if(map["type"] == "heist")
+			return "This MacHeist license is for TextMate 1.x.";
+		else if(map["type"] == "eval")
+			return "This evaluation license is for TextMate 1.x.";
+		else if(is_serial_revoked(strtol(map["serial"].c_str(), NULL, 10)))
+			return "This license has been revoked.";
+		return "Unknown error.";
 	}
 
 } /* license */
