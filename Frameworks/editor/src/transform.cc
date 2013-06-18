@@ -174,7 +174,7 @@ namespace transform
 			std::string const str = std::string(it->first, it->second);
 			citerate(offset, text::soft_breaks(str, wrap, tabSize))
 			{
-				res += justify_line(unwrapped.substr(from, length_excl_whitespace(str, from, *offset)), wrap, tabSize);
+				res += justify_line(str.substr(from, length_excl_whitespace(str, from, *offset)), wrap, tabSize);
 				res += "\n";
 				from = *offset;
 			}
