@@ -12,7 +12,7 @@ static void perror_keychain (char const* prefix, OSStatus status)
 
 namespace license
 {
-	std::string find (std::string const& key, SecKeychainRef keychain)
+	std::string find (std::string const& key)
 	{
 		std::string res = NULL_STR;
 
@@ -42,7 +42,7 @@ namespace license
 		return res;
 	}
 
-	std::vector<std::string> find_all (SecKeychainRef keychain)
+	std::vector<std::string> find_all ()
 	{
 		std::vector<std::string> res;
 
@@ -92,7 +92,7 @@ namespace license
 		return res;
 	}
 
-	bool add (std::string const& key, std::string const& data, SecKeychainRef keychain)
+	bool add (std::string const& key, std::string const& data)
 	{
 		bool res = false;
 		if(CFDataRef cfData = CFDataCreateWithBytesNoCopy(NULL, (const UInt8*)data.data(), data.size(), kCFAllocatorNull))
