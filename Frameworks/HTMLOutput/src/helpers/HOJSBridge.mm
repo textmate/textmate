@@ -239,7 +239,7 @@ OAK_DEBUG_VAR(HTMLOutput_JSShellCommand);
 
 				while(runLoop->start() == false) // timeout
 				{
-					NSInteger choice = NSRunAlertPanel(@"JavaScript Warning", @"The command ‘%@’ has been running for 15 seconds. Would you like to stop it?", @"Stop Command", @"Cancel", nil, aCommand);
+					NSInteger choice = NSRunAlertPanel(@"JavaScript Warning", @"The command ‘%@’ has been running for 15 seconds. Would you like to stop it?\n\nTo avoid this warning, the bundle command should use the asynchronous version of TextMate.system().", @"Stop Command", @"Cancel", nil, aCommand);
 					if(choice == NSAlertDefaultReturn) // "Stop Command"
 					{
 						delete runLoop;
