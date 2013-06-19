@@ -176,7 +176,7 @@ OAK_DEBUG_VAR(HTMLOutput_JSShellCommand);
 		self.exitHandler = aHandler;
 		if(process = io::spawn(std::vector<std::string>{ "/bin/sh", "-c", to_s(aCommand) }, someEnvironment))
 		{
-			auto runLoop = new cf::run_loop_t(kCFRunLoopDefaultMode, 15);
+			__block auto runLoop = new cf::run_loop_t(kCFRunLoopDefaultMode, 15);
 			auto group = dispatch_group_create();
 			auto queue = aHandler ? dispatch_get_main_queue() : dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
 
@@ -228,8 +228,9 @@ OAK_DEBUG_VAR(HTMLOutput_JSShellCommand);
 				close(process.out);
 				close(process.err);
 				if(self.exitHandler)
-						[self.exitHandler callWebScriptMethod:@"call" withArguments:@[ self.exitHandler, self ]];
-				else	runLoop->stop();
+					[self.exitHandler callWebScriptMethod:@"call" withArguments:@[ self.exitHandler, self ]];
+				else if(runLoop)
+					runLoop->stop();
 			});
 
 			if(!self.exitHandler)
@@ -241,6 +242,8 @@ OAK_DEBUG_VAR(HTMLOutput_JSShellCommand);
 					NSInteger choice = NSRunAlertPanel(@"JavaScript Warning", @"The command ‘%@’ has been running for 15 seconds. Would you like to stop it?", @"Stop Command", @"Cancel", nil, aCommand);
 					if(choice == NSAlertDefaultReturn) // "Stop Command"
 					{
+						delete runLoop;
+						runLoop = nullptr;
 						[self cancelCommand];
 						break;
 					}
