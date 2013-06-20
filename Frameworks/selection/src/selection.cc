@@ -669,13 +669,20 @@ namespace ng
 
 		if(res.size() > 1 && (orgUnit == kSelectionMoveUp || orgUnit == kSelectionMoveDown))
 		{
-			index_t min(SIZE_T_MAX), max(0);
+			std::set<size_t> lines;
 			iterate(range, res)
+				lines.insert(buffer.convert(range->first.index).line);
+
+			if(lines.size() > 1)
 			{
-				min = std::min(min, range->min());
-				max = std::max(max, range->max());
+				index_t min(SIZE_T_MAX), max(0);
+				iterate(range, res)
+				{
+					min = std::min(min, range->min());
+					max = std::max(max, range->max());
+				}
+				res = orgUnit == kSelectionMoveUp ? min : max;
 			}
-			res = orgUnit == kSelectionMoveUp ? min : max;
 		}
 
 		return sanitize(buffer, res);
