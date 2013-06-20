@@ -525,7 +525,7 @@ namespace document
 		}
 
 		settings_t const settings = settings_for_path(virtual_path(), file_type(), path::parent(_path), document_variables());
-		_buffer->indent() = text::indent_t(settings.get(kSettingsTabSizeKey, 4), SIZE_T_MAX, settings.get(kSettingsSoftTabsKey, false));
+		_buffer->indent() = text::indent_t(std::max(1, settings.get(kSettingsTabSizeKey, 4)), SIZE_T_MAX, settings.get(kSettingsSoftTabsKey, false));
 		_buffer->set_spelling_language(settings.get(kSettingsSpellingLanguageKey, "en"));
 		_buffer->set_live_spelling(settings.get(kSettingsSpellCheckingKey, false));
 
