@@ -1778,6 +1778,7 @@ namespace
 - (IBAction)orderFrontFindPanel:(id)sender
 {
 	Find* find              = [Find sharedInstance];
+	BOOL didOwnDialog       = [find.projectIdentifier isEqualToString:self.identifier];
 	find.documentIdentifier = self.selectedDocumentUUID;
 	find.projectFolder      = self.projectPath ?: self.untitledSavePath ?: NSHomeDirectory();
 	find.projectIdentifier  = self.identifier;
@@ -1796,7 +1797,7 @@ namespace
 		{
 			BOOL fileBrowserHasFocus = [self.window.firstResponder respondsToSelector:@selector(isDescendantOf:)] && [(NSView*)self.window.firstResponder isDescendantOf:self.fileBrowser.view];
 			NSString* searchFolder = fileBrowserHasFocus ? self.untitledSavePath : find.projectFolder;
-			if(find.isVisible && find.searchFolder)
+			if(find.isVisible && find.searchFolder && didOwnDialog) // don’t reset search folder, as the user may have picked “Other…” and simply wants the results brought to front
 				searchFolder = find.searchFolder;
 			[find showFindWindowFor:searchFolder];
 		}
