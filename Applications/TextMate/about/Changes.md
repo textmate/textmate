@@ -1,5 +1,12 @@
 # Changes
 
+## 2013-06-21 ([a9435](https://github.com/textmate/textmate/compare/a9433...a9435))
+
+* You can now [add your TextMate (1.x) license](javascript:TextMate.addLicense()) in About → Registration.
+* Using arrow up/down with multiple carets all on same line will no longer leave the multiple carets editing mode. Instead use ⌘←/⌘→ or ⌃A/⌃E to move all carets to the beginning or end of the line (which collapses them into a single caret).
+* Previously using ⌘F with a multiline selection would automatically set the “in” pop-up to “selection”. This is no longer the case, but can be brought back by running: `defaults write findInSelectionByDefault -bool YES`
+* Miscellaneous fixes.
+
 ## 2013-06-15 ([a9433](https://github.com/textmate/textmate/compare/a9427...a9433))
 
 * Don't add files from find window to recent list. *[Jakub Suder]*
