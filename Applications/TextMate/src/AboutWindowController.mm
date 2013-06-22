@@ -178,12 +178,13 @@ static NSTextField* OakCreateTextField ()
 		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 			bool revoked = license::is_revoked(license);
 			dispatch_async(dispatch_get_main_queue(), ^{
+				std::string error = "Unknown error.";
 				if(revoked)
 					NSRunAlertPanel(@"License Has Been Revoked", @"The license provided is no longer valid.\n\nThe most likely reason for revocation is that a chargeback was issued for your credit card transaction.", @"Continue", nil, nil);
-				else if(license::add(to_s(self.ownerString), to_s(self.licenseString)))
+				else if(license::add(to_s(self.ownerString), to_s(self.licenseString), &error))
 					NSRunAlertPanel(@"License Added to Keychain", @"Thanks for your support!", @"Continue", nil, nil);
 				else
-					NSRunAlertPanel(@"Failure Adding License to Keychain", @"The most likely reason is that the application signature is no longer valid.\n\nIt is recommended that you re-download %s and retry.", @"Continue", nil, nil, getprogname());
+					NSRunAlertPanel(@"Failure Adding License to Keychain", [NSString stringWithCxxString:error], @"Continue", nil, nil, getprogname());
 			});
 		});
 	}

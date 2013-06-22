@@ -5,7 +5,7 @@
 
 namespace license
 {
-	PUBLIC bool add (std::string const& date, std::string const& key);
+	PUBLIC bool add (std::string const& date, std::string const& key, std::string* error);
 	PUBLIC std::string find (std::string const& key);
 	PUBLIC std::vector<std::string> find_all ();
 

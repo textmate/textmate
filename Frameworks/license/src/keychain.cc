@@ -1,13 +1,20 @@
 #include "keychain.h"
 #include <text/ctype.h>
+#include <text/format.h>
 #include <cf/cf.h>
 #include <oak/debug.h>
 
-static void perror_keychain (char const* prefix, OSStatus status)
+static std::string error_keychain (char const* prefix, OSStatus status)
 {
 	CFStringRef message = SecCopyErrorMessageString(status, NULL);
-	fprintf(stderr, "%s: %s\n", prefix, cf::to_s(message).c_str());
+	std::string const res = text::format("%s: %s", prefix, cf::to_s(message).c_str());
 	CFRelease(message);
+	return res;
+}
+
+static void perror_keychain (char const* prefix, OSStatus status)
+{
+	fprintf(stderr, "%s\n", error_keychain(prefix, status).c_str());
 }
 
 namespace license
@@ -89,8 +96,11 @@ namespace license
 		return res;
 	}
 
-	bool add (std::string const& key, std::string const& data)
+	bool add (std::string const& key, std::string const& data, std::string* error)
 	{
+		std::string dummy;
+		std::string& err = error ? *error : dummy;
+
 		bool res = false;
 		if(CFDataRef cfData = CFDataCreateWithBytesNoCopy(NULL, (const UInt8*)data.data(), data.size(), kCFAllocatorNull))
 		{
@@ -101,7 +111,11 @@ namespace license
 			if(CFDictionaryRef createDict = CFDictionaryCreate(kCFAllocatorDefault, keys, vals, sizeofA(keys), &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks))
 			{
 				OSStatus status = SecItemAdd(createDict, NULL);
-				if(status == errKCDuplicateItem)
+				if(status == noErr)
+				{
+					res = true;
+				}
+				else if(status == errKCDuplicateItem)
 				{
 					CFTypeRef queryKeys[] = { kSecClass,                kSecAttrService,   kSecAttrDescription,  kSecAttrAccount };
 					CFTypeRef queryVals[] = { kSecClassGenericPassword, CFSTR("TextMate"), CFSTR("license key"), cfKey           };
@@ -112,19 +126,17 @@ namespace license
 						if(CFDictionaryRef updateDict = CFDictionaryCreate(kCFAllocatorDefault, updateKeys, updateVals, sizeofA(updateKeys), &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks))
 						{
 							status = SecItemUpdate(queryDict, updateDict);
+							if(status == noErr)
+									res = true;
+							else	err = error_keychain("SecItemUpdate", status);
 							CFRelease(updateDict);
 						}
 						CFRelease(queryDict);
 					}
 				}
-
-				if(status == noErr)
-				{
-					res = true;
-				}
 				else
 				{
-					perror_keychain("SecItemAdd", status);
+					err = error_keychain("SecItemAdd", status);
 				}
 
 				CFRelease(createDict);
