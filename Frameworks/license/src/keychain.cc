@@ -16,11 +16,10 @@ namespace license
 	{
 		std::string res = NULL_STR;
 
-		auto const cfCreator = cf::wrap('TxMt');
 		auto const cfAccount = cf::wrap(key);
 
-		CFTypeRef keys[] = { kSecReturnData, kSecClass,                kSecAttrCreator, kSecAttrService,   kSecAttrDescription,  kSecAttrAccount };
-		CFTypeRef vals[] = { kCFBooleanTrue, kSecClassGenericPassword, cfCreator,       CFSTR("TextMate"), CFSTR("license key"), cfAccount       };
+		CFTypeRef keys[] = { kSecReturnData, kSecClass,                kSecAttrService,   kSecAttrDescription,  kSecAttrAccount };
+		CFTypeRef vals[] = { kCFBooleanTrue, kSecClassGenericPassword, CFSTR("TextMate"), CFSTR("license key"), cfAccount       };
 
 		if(CFDictionaryRef query = CFDictionaryCreate(kCFAllocatorDefault, keys, vals, sizeofA(keys), &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks))
 		{
@@ -46,10 +45,8 @@ namespace license
 	{
 		std::vector<std::string> res;
 
-		auto const cfCreator = cf::wrap('TxMt');
-
-		CFTypeRef keys[] = { kSecMatchLimit,    kSecReturnRef,  kSecClass,                kSecAttrCreator, kSecAttrService,   kSecAttrDescription  };
-		CFTypeRef vals[] = { kSecMatchLimitAll, kCFBooleanTrue, kSecClassGenericPassword, cfCreator,       CFSTR("TextMate"), CFSTR("license key") };
+		CFTypeRef keys[] = { kSecMatchLimit,    kSecReturnRef,  kSecClass,                kSecAttrService,   kSecAttrDescription  };
+		CFTypeRef vals[] = { kSecMatchLimitAll, kCFBooleanTrue, kSecClassGenericPassword, CFSTR("TextMate"), CFSTR("license key") };
 
 		if(CFDictionaryRef query = CFDictionaryCreate(kCFAllocatorDefault, keys, vals, sizeofA(keys), &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks))
 		{
@@ -97,19 +94,17 @@ namespace license
 		bool res = false;
 		if(CFDataRef cfData = CFDataCreateWithBytesNoCopy(NULL, (const UInt8*)data.data(), data.size(), kCFAllocatorNull))
 		{
-			auto const cfKey     = cf::wrap(key);
-			auto const cfCreator = cf::wrap('TxMt');
-
-			CFTypeRef keys[] = { kSecClass,                kSecAttrCreator, kSecAttrService,   kSecAttrDescription,  kSecAttrLabel,             kSecAttrComment,                kSecAttrAccount, kSecValueData };
-			CFTypeRef vals[] = { kSecClassGenericPassword, cfCreator,       CFSTR("TextMate"), CFSTR("license key"), CFSTR("TextMate license"), CFSTR("Keep prying eyes away"), cfKey,           cfData        };
+			auto const cfKey = cf::wrap(key);
+			CFTypeRef keys[] = { kSecClass,                kSecAttrService,   kSecAttrDescription,  kSecAttrLabel,             kSecAttrComment,                kSecAttrAccount, kSecValueData };
+			CFTypeRef vals[] = { kSecClassGenericPassword, CFSTR("TextMate"), CFSTR("license key"), CFSTR("TextMate license"), CFSTR("Keep prying eyes away"), cfKey,           cfData        };
 
 			if(CFDictionaryRef createDict = CFDictionaryCreate(kCFAllocatorDefault, keys, vals, sizeofA(keys), &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks))
 			{
 				OSStatus status = SecItemAdd(createDict, NULL);
 				if(status == errKCDuplicateItem)
 				{
-					CFTypeRef queryKeys[] = { kSecClass,                kSecAttrCreator, kSecAttrService,   kSecAttrDescription,  kSecAttrLabel,             kSecAttrComment,                kSecAttrAccount };
-					CFTypeRef queryVals[] = { kSecClassGenericPassword, cfCreator,       CFSTR("TextMate"), CFSTR("license key"), CFSTR("TextMate license"), CFSTR("Keep prying eyes away"), cfKey           };
+					CFTypeRef queryKeys[] = { kSecClass,                kSecAttrService,   kSecAttrDescription,  kSecAttrAccount };
+					CFTypeRef queryVals[] = { kSecClassGenericPassword, CFSTR("TextMate"), CFSTR("license key"), cfKey           };
 					if(CFDictionaryRef queryDict = CFDictionaryCreate(kCFAllocatorDefault, queryKeys, queryVals, sizeofA(queryKeys), &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks))
 					{
 						CFTypeRef updateKeys[] = { kSecValueData };
