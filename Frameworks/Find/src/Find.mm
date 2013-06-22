@@ -124,12 +124,13 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	self.windowController.replaceAllButton.enabled = replaceAllEnabled;
 }
 
-- (IBAction)countOccurrences:(id)sender { [self performFindAction:FindActionCountMatches   withWindowController:self.windowController]; }
-- (IBAction)findAll:(id)sender          { [self performFindAction:FindActionFindAll        withWindowController:self.windowController]; }
-- (IBAction)findNext:(id)sender         { [self performFindAction:FindActionFindNext       withWindowController:self.windowController]; }
-- (IBAction)findPrevious:(id)sender     { [self performFindAction:FindActionFindPrevious   withWindowController:self.windowController]; }
-- (IBAction)replaceAll:(id)sender       { [self performFindAction:FindActionReplaceAll     withWindowController:self.windowController]; }
-- (IBAction)replaceAndFind:(id)sender   { [self performFindAction:FindActionReplaceAndFind withWindowController:self.windowController]; }
+- (IBAction)countOccurrences:(id)sender   { [self performFindAction:FindActionCountMatches   withWindowController:self.windowController]; }
+- (IBAction)findAll:(id)sender            { [self performFindAction:FindActionFindAll        withWindowController:self.windowController]; }
+- (IBAction)findAllInSelection:(id)sender { [self performFindAction:FindActionFindAll        withWindowController:self.windowController]; }
+- (IBAction)findNext:(id)sender           { [self performFindAction:FindActionFindNext       withWindowController:self.windowController]; }
+- (IBAction)findPrevious:(id)sender       { [self performFindAction:FindActionFindPrevious   withWindowController:self.windowController]; }
+- (IBAction)replaceAll:(id)sender         { [self performFindAction:FindActionReplaceAll     withWindowController:self.windowController]; }
+- (IBAction)replaceAndFind:(id)sender     { [self performFindAction:FindActionReplaceAndFind withWindowController:self.windowController]; }
 
 - (IBAction)saveAllDocuments:(id)sender
 {
