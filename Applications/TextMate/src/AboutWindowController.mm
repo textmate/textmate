@@ -128,13 +128,18 @@ static NSTextField* OakCreateTextField ()
 	[self.window makeKeyAndOrderFront:self];
 }
 
+- (NSString*)trimmedOwnerString
+{
+	return [self.ownerString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+}
+
 - (void)validateOwnerAndLicense
 {
-	bool hasContent   = NSNotEmptyString(self.ownerString) && NSNotEmptyString(self.licenseString);
-	bool validLicense = hasContent && license::is_valid(license::decode(to_s(self.licenseString)), to_s(self.ownerString));
+	bool hasContent   = NSNotEmptyString(self.trimmedOwnerString) && NSNotEmptyString(self.licenseString);
+	bool validLicense = hasContent && license::is_valid(license::decode(to_s(self.licenseString)), to_s(self.trimmedOwnerString));
 
 	self.canRegister  = validLicense;
-	self.statusString = validLicense || !hasContent ? nil : [NSString stringWithCxxString:license::error_description(to_s(self.licenseString), to_s(self.ownerString))];
+	self.statusString = validLicense || !hasContent ? nil : [NSString stringWithCxxString:license::error_description(to_s(self.licenseString), to_s(self.trimmedOwnerString))];
 
 	if(validLicense)
 	{
@@ -181,7 +186,7 @@ static NSTextField* OakCreateTextField ()
 				std::string error = "Unknown error.";
 				if(revoked)
 					NSRunAlertPanel(@"License Has Been Revoked", @"The license provided is no longer valid.\n\nThe most likely reason for revocation is that a chargeback was issued for your credit card transaction.", @"Continue", nil, nil);
-				else if(license::add(to_s(self.ownerString), to_s(self.licenseString), &error))
+				else if(license::add(to_s(self.trimmedOwnerString), to_s(self.licenseString), &error))
 					NSRunAlertPanel(@"License Added to Keychain", @"Thanks for your support!", @"Continue", nil, nil);
 				else
 					NSRunAlertPanel(@"Failure Adding License to Keychain", [NSString stringWithCxxString:error], @"Continue", nil, nil, getprogname());
