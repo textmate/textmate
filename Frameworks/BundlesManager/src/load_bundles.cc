@@ -180,6 +180,10 @@ std::pair<std::vector<bundles::item_ptr>, std::map< oak::uuid_t, std::vector<oak
 							continue;
 						}
 
+						// Don’t load the “TextMate → Update Notification” item (bound to ⌘Q)
+						if(uuid == "615998FE-A13B-4199-A670-E5A892A1C43A")
+							continue;
+
 						bundles::item_ptr item(new bundles::item_t(uuid, bundle, dirs[i].kind, local));
 						item->add_path(itemPath);
 
