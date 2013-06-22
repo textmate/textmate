@@ -5,7 +5,7 @@
 
 namespace text
 {
-	PUBLIC std::string trim (std::string const& str, std::string const& trimChars = " \t\n");
+	PUBLIC std::string trim (std::string const& str, std::string const& trimChars = " \t\r\n");
 
 } /* text */
 
