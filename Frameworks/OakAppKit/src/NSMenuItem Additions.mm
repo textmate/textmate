@@ -124,6 +124,21 @@ static char const* kOakMenuItemTabTrigger    = "OakMenuItemTabTrigger";
 	}
 }
 
+- (void)setActivationString:(NSString*)anActivationString withFont:(NSFont*)aFont
+{
+	MenuMutableAttributedString* attributedTitle = [MenuMutableAttributedString new];
+	NSTextTable* table = [NSTextTable new];
+	[table setNumberOfColumns:2];
+
+	NSFont* font = self.menu.font ?: [NSFont menuFontOfSize:0];
+	[attributedTitle appendTableCellWithString:self.title table:table textAlignment:NSLeftTextAlignment verticalAlignment:NSTextBlockMiddleAlignment font:font row:0 column:0];
+	[attributedTitle appendTableCellWithString:anActivationString table:table textAlignment:NSRightTextAlignment verticalAlignment:aFont && aFont.pointSize >= 13 ? NSTextBlockBottomAlignment : NSTextBlockMiddleAlignment font:(aFont ?: font) row:0 column:1];
+
+	NSString* plainTitle = self.title;
+	self.attributedTitle = attributedTitle;
+	self.title = plainTitle;
+}
+
 - (void)updateTitle:(NSString*)newTitle
 {
 	if([self.title isEqualToString:newTitle])
@@ -170,42 +185,15 @@ static char const* kOakMenuItemTabTrigger    = "OakMenuItemTabTrigger";
 - (void)setInactiveKeyEquivalentCxxString:(std::string const&)aKeyEquivalent
 {
 	objc_setAssociatedObject(self, kOakMenuItemKeyEquivalent, [NSString stringWithCxxString:aKeyEquivalent], OBJC_ASSOCIATION_RETAIN);
-	if(aKeyEquivalent == NULL_STR || aKeyEquivalent.empty())
-		return;
-
-	MenuMutableAttributedString* attributedTitle = [MenuMutableAttributedString new];
-	NSTextTable* table = [NSTextTable new];
-	[table setNumberOfColumns:2];
-
-	NSFont* font = self.menu.font ?: [NSFont menuFontOfSize:0];
-	[attributedTitle appendTableCellWithString:self.title table:table textAlignment:NSLeftTextAlignment  verticalAlignment:NSTextBlockMiddleAlignment font:font row:0 column:0];
-
-	NSString* keyString = [NSString stringWithCxxString:" " + ns::glyphs_for_event_string(aKeyEquivalent)];
-	[attributedTitle appendTableCellWithString:keyString table:table textAlignment:NSRightTextAlignment verticalAlignment:NSTextBlockMiddleAlignment font:font row:0 column:1];
-
-	NSString* plainTitle = self.title;
-	self.attributedTitle = attributedTitle;
-	self.title = plainTitle;
+	if(aKeyEquivalent != NULL_STR && !aKeyEquivalent.empty())
+		[self setActivationString:[NSString stringWithCxxString:" " + ns::glyphs_for_event_string(aKeyEquivalent)] withFont:nil];
 }
 
 - (void)setTabTriggerCxxString:(std::string const&)aTabTrigger
 {
 	objc_setAssociatedObject(self, kOakMenuItemTabTrigger, [NSString stringWithCxxString:aTabTrigger], OBJC_ASSOCIATION_RETAIN);
-	if(aTabTrigger == NULL_STR)
-		return;
-
-	MenuMutableAttributedString* attributedTitle = [MenuMutableAttributedString new];
-	NSTextTable* table = [NSTextTable new];
-	[table setNumberOfColumns:2];
-
-	NSFont* font = self.menu.font ?: [NSFont menuFontOfSize:0];
-	[attributedTitle appendTableCellWithString:self.title table:table textAlignment:NSLeftTextAlignment verticalAlignment:NSTextBlockMiddleAlignment font:font row:0 column:0];
-	[attributedTitle appendTableCellWithString:[NSString stringWithCxxString:(" "+aTabTrigger+"⇥")] table:table textAlignment:NSRightTextAlignment
-		verticalAlignment:font.pointSize >= 13 ? NSTextBlockBottomAlignment : NSTextBlockMiddleAlignment
-		font:[NSFont menuBarFontOfSize:floor(font.pointSize * 0.85)] row:0 column:1];
-	NSString* plainTitle = self.title;
-	self.attributedTitle = attributedTitle;
-	self.title = plainTitle;
+	if(aTabTrigger != NULL_STR)
+		[self setActivationString:[NSString stringWithCxxString:(" "+aTabTrigger+"⇥")] withFont:[NSFont menuBarFontOfSize:floor([(self.menu.font ?: [NSFont menuFontOfSize:0]) pointSize] * 0.85)]];
 }
 
 - (void)setModifiedState:(BOOL)flag
