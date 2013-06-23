@@ -211,9 +211,7 @@ static char const* kOakMenuItemTabTrigger    = "OakMenuItemTabTrigger";
 - (void)setModifiedState:(BOOL)flag
 {
 	if(NSImage* image = [NSImage imageNamed:@"NSMenuItemBullet"])
-	{
 		[self setMixedStateImage:image];
-		[self setState:NSMixedState];
-	}
+	[self setState:flag ? NSMixedState : NSOffState];
 }
 @end
