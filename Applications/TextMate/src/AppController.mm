@@ -263,6 +263,9 @@ BOOL HasDocumentWindow (NSArray* windows)
 	themesMenu.delegate   = self;
 	spellingMenu.delegate = self;
 
+	NSMenu* selectMenu = [[[[[NSApp mainMenu] itemWithTitle:@"Edit"] submenu] itemWithTitle:@"Select"] submenu];
+	[[selectMenu itemWithTitle:@"Toggle Column Selection"] setActivationString:@"⌥" withFont:nil];
+
 	[TerminalPreferences updateMateIfRequired];
 	[AboutWindowController showChangesIfUpdated];
 	[[BundlesManager sharedInstance] setAutoUpdateBundles:YES];
