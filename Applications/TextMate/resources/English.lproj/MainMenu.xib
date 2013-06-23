@@ -2,9 +2,9 @@
 <archive type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="7.10">
 	<data>
 		<int key="IBDocument.SystemTarget">1070</int>
-		<string key="IBDocument.SystemVersion">12D78</string>
+		<string key="IBDocument.SystemVersion">12E55</string>
 		<string key="IBDocument.InterfaceBuilderVersion">3084</string>
-		<string key="IBDocument.AppKitVersion">1187.37</string>
+		<string key="IBDocument.AppKitVersion">1187.39</string>
 		<string key="IBDocument.HIToolboxVersion">626.00</string>
 		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -709,6 +709,26 @@
 												<string key="NSTitle">All</string>
 												<string key="NSKeyEquiv">a</string>
 												<int key="NSKeyEquivModMask">1048576</int>
+												<int key="NSMnemonicLoc">2147483647</int>
+												<reference key="NSOnImage" ref="944637517"/>
+												<reference key="NSMixedImage" ref="596846250"/>
+											</object>
+											<object class="NSMenuItem" id="1036509160">
+												<reference key="NSMenu" ref="218196469"/>
+												<bool key="NSIsDisabled">YES</bool>
+												<bool key="NSIsSeparator">YES</bool>
+												<string key="NSTitle"/>
+												<string key="NSKeyEquiv"/>
+												<int key="NSKeyEquivModMask">1048576</int>
+												<int key="NSMnemonicLoc">2147483647</int>
+												<reference key="NSOnImage" ref="944637517"/>
+												<reference key="NSMixedImage" ref="596846250"/>
+											</object>
+											<object class="NSMenuItem" id="299878695">
+												<reference key="NSMenu" ref="218196469"/>
+												<string key="NSTitle">Toggle Column Selection</string>
+												<string key="NSKeyEquiv"/>
+												<int key="NSKeyEquivModMask">524288</int>
 												<int key="NSMnemonicLoc">2147483647</int>
 												<reference key="NSOnImage" ref="944637517"/>
 												<reference key="NSMixedImage" ref="596846250"/>
@@ -3733,6 +3753,14 @@
 					<int key="connectionID">841</int>
 				</object>
 				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">toggleColumnSelection:</string>
+						<reference key="source" ref="51167417"/>
+						<reference key="destination" ref="299878695"/>
+					</object>
+					<int key="connectionID">845</int>
+				</object>
+				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
 						<string key="label">bundlesMenuItem</string>
 						<reference key="source" ref="261397727"/>
@@ -4925,6 +4953,8 @@
 							<reference ref="44757637"/>
 							<reference ref="39092050"/>
 							<reference ref="388188290"/>
+							<reference ref="299878695"/>
+							<reference ref="1036509160"/>
 						</object>
 						<reference key="parent" ref="93390909"/>
 					</object>
@@ -5637,6 +5667,16 @@
 						<reference key="object" ref="295203618"/>
 						<reference key="parent" ref="1104"/>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">842</int>
+						<reference key="object" ref="299878695"/>
+						<reference key="parent" ref="218196469"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">844</int>
+						<reference key="object" ref="1036509160"/>
+						<reference key="parent" ref="218196469"/>
+					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -5922,6 +5962,8 @@
 					<string>833.IBPluginDependency</string>
 					<string>836.IBPluginDependency</string>
 					<string>839.IBPluginDependency</string>
+					<string>842.IBPluginDependency</string>
+					<string>844.IBPluginDependency</string>
 				</object>
 				<object class="NSArray" key="dict.values">
 					<bool key="EncodedWithXMLCoder">YES</bool>
@@ -6204,6 +6246,8 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="unlocalizedProperties">
@@ -6218,7 +6262,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">841</int>
+			<int key="maxID">845</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -7394,12 +7438,14 @@
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>saveScratchMacro:</string>
+							<string>toggleColumnSelection:</string>
 							<string>toggleMacroRecording:</string>
 							<string>toggleScrollPastEnd:</string>
 							<string>toggleShowInvisibles:</string>
 						</object>
 						<object class="NSArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
@@ -7411,6 +7457,7 @@
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>saveScratchMacro:</string>
+							<string>toggleColumnSelection:</string>
 							<string>toggleMacroRecording:</string>
 							<string>toggleScrollPastEnd:</string>
 							<string>toggleShowInvisibles:</string>
@@ -7419,6 +7466,10 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<object class="IBActionInfo">
 								<string key="name">saveScratchMacro:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">toggleColumnSelection:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">

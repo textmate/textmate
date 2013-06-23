@@ -60,6 +60,7 @@ PUBLIC @interface OakTextView : OakView <NSTextInput, NSTextFieldDelegate>
 - (scope::context_t)scopeContext;
 - (folding_state_t)foldingStateForLine:(NSUInteger)lineNumber;
 
+- (IBAction)toggleColumnSelection:(id)sender;
 - (IBAction)toggleMacroRecording:(id)sender;
 - (IBAction)toggleFoldingAtLine:(NSUInteger)lineNumber recursive:(BOOL)flag;
 - (IBAction)toggleShowInvisibles:(id)sender;
