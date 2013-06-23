@@ -35,6 +35,7 @@
 	[_variables insertObject:entry atIndex:pos];
 	[[NSUserDefaults standardUserDefaults] setObject:[_variables copy] forKey:kUserDefaultsEnvironmentVariablesKey];
 	[variablesTableView reloadData];
+	[variablesTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:pos] byExtendingSelection:NO];
 	[variablesTableView editColumn:1 row:pos withEvent:nil select:YES];
 }
 
