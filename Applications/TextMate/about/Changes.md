@@ -1,5 +1,10 @@
 # Changes
 
+## 2013-06-24 ([a9437](https://github.com/textmate/textmate/compare/a9435...a9437))
+
+* With the find dialog showing for a document, it is now possible to use ⌥⌘F to activate “Find All”. Be aware that Edit → Find → Find All without the dialog showing is really “select all matches” (possibly limited to a selection).
+* To aid in discovery, I’ve added Edit → Select → Toggle Column Selection which shows just the option modifier key (⌥) as key equivalent, since a single-tap of option is how you switch from stream selection to column selection. This is the same as TextMate 1.x, but many still seem unfamiliar with just how easy it is to create column selections with TextMate, and subsequently, break it into multiple carets. For the latter there now is a [short screencast](http://www.youtube.com/watch?v=Jqc5EdZmpmQ "YouTube » Multiple Carets with TextMate 2") in addition to the [blog post about multiple carets](http://blog.macromates.com/2011/multiple-carets/ "TextMate Blog » Multiple Carets").
+
 ## 2013-06-21 ([a9435](https://github.com/textmate/textmate/compare/a9433...a9435))
 
 * You can now [add your TextMate (1.x) license](javascript:TextMate.addLicense()) in About → Registration.
