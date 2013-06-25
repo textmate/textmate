@@ -675,7 +675,8 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 
 	_records.clear();
 	[self addRecordsForDocuments:_openDocuments];
-	_scanner.reset(new document::scanner_t(to_s(_path), globs_for_path(to_s(_path)), false, false, false));
+	settings_t const settings = settings_for_path(NULL_STR, "", to_s(_path));
+	_scanner.reset(new document::scanner_t(to_s(_path), globs_for_path(to_s(_path)), settings.get(kSettingsFollowSymbolicLinksKey, false), false, false));
 	_scmInfo = scm::info(to_s(_path));
 	if(_scmInfo)
 	{

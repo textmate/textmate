@@ -27,6 +27,8 @@ std::string const kSettingsUseBOMKey                      = "useBOM";
 std::string const kSettingsLineEndingsKey                 = "lineEndings";
 std::string const kSettingsStoreEncodingPerFileKey        = "storeEncodingPerFile";
 
+std::string const kSettingsFollowSymbolicLinksKey         = "followSymbolicLinks";
+
 std::string const kSettingsIncludeKey                     = "include";
 std::string const kSettingsIncludeDirectoriesKey          = "includeDirectories";
 std::string const kSettingsIncludeDirectoriesInBrowserKey = "includeDirectoriesInBrowser";

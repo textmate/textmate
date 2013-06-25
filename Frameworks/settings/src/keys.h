@@ -30,6 +30,8 @@ PUBLIC extern std::string const kSettingsUseBOMKey;
 PUBLIC extern std::string const kSettingsLineEndingsKey;
 PUBLIC extern std::string const kSettingsStoreEncodingPerFileKey;
 
+PUBLIC extern std::string const kSettingsFollowSymbolicLinksKey;
+
 PUBLIC extern std::string const kSettingsIncludeKey;
 PUBLIC extern std::string const kSettingsIncludeDirectoriesKey;
 PUBLIC extern std::string const kSettingsIncludeDirectoriesInBrowserKey;
