@@ -78,19 +78,76 @@ namespace ng
 
 	static ranges_t sanitize (buffer_t const& buffer, ranges_t const& selection)
 	{
-		// TODO Ensure ranges do not overlap.
+		/* This function will transform the selection so that
+		   all indexes are on proper multi-byte boundaries and
+		   ensure that no ranges overlap. The latter should
+		   probably not be done here, but instead prior to
+		   edits (and drawing should take overlap into account).
 
-		std::set<ng::range_t> set;
-		ranges_t res;
-		iterate(range, selection)
+		   The main reason is that the user may temporarily
+		   create overlapping ranges, and if we fix them,
+		   successive selection adjustment commands will not
+		   work as expected.
+
+		   It should also be noted that for column selections
+		   we are not able to ensure that there is no overlap.
+		*/
+
+		struct indexed_range_t
 		{
-			range_t r(index_t(buffer.sanitize_index(range->first.index), range->first.carry), index_t(buffer.sanitize_index(range->last.index), range->last.carry), range->columnar, range->freehanded, range->unanchored);
-			if(set.find(r) == set.end())
+			range_t range;
+			size_t index;
+
+			indexed_range_t (range_t const& range, size_t const& index) : range(range), index(index) { }
+
+			bool operator< (indexed_range_t const& rhs) const
 			{
-				res.push_back(r);
-				set.insert(r);
+				return as_tuple() < rhs.as_tuple();
+			}
+
+		private:
+			std::tuple<size_t, size_t, size_t, size_t, size_t> as_tuple () const
+			{
+				size_t col = range.columnar ? 1 : 0;
+				size_t min = range.min().index;
+				size_t off = range.freehanded ? range.min().carry : 0;
+				size_t max = SIZE_T_MAX - range.max().index;
+				size_t mOff = range.freehanded ? range.max().carry : 0;
+				return std::make_tuple(col, min, off, max, mOff);
+			}
+		};
+
+		size_t index = 0;
+		std::set<indexed_range_t> set;
+		for(auto range : selection)
+			set.emplace(range_t(index_t(buffer.sanitize_index(range.first.index), range.first.carry), index_t(buffer.sanitize_index(range.last.index), range.last.carry), range.columnar, range.freehanded, range.unanchored), index++);
+
+		index_t last;
+		std::map<size_t, range_t> map;
+		for(auto record : set)
+		{
+			range_t range = record.range;
+			auto max = range.normalized().max();
+
+			if(!last || range.columnar)
+			{
+				map.emplace(record.index, range);
+				last = max;
+			}
+			else if(last < max || last == max && range.empty())
+			{
+				auto min = range.normalized().min();
+				if(min < last)
+					range.min() = last;
+				map.emplace(record.index, range);
+				last = max;
 			}
 		}
+
+		ranges_t res;
+		for(auto pair : map)
+			res.push_back(pair.second);
+
 		return res;
 	}
 

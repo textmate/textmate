@@ -44,7 +44,6 @@ namespace ng
 		index_t first, last;
 		bool columnar, freehanded, unanchored;
 
-	private:
 		range_t normalized () const
 		{
 			bool strip = !columnar && !freehanded;
