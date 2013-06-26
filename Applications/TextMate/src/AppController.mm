@@ -468,6 +468,11 @@ BOOL HasDocumentWindow (NSArray* windows)
 				[item updateTitle:[NSString stringWithCxxString:name_with_selection(bundleItem, [textView hasSelection])]];
 		}
 	}
+	else if([item action] == @selector(printDocument:))
+	{
+		NSView* webView = [NSApp targetForAction:@selector(print:)];
+		enabled = [webView isKindOfClass:[NSView class]] && [webView conformsToProtocol:@protocol(WebDocumentView)];
+	}
 	return enabled;
 }
 
@@ -485,5 +490,16 @@ BOOL HasDocumentWindow (NSArray* windows)
 - (void)editBundleItemWithUUIDString:(NSString*)uuidString
 {
 	[[BundleEditor sharedInstance] revealBundleItem:bundles::lookup(to_s(uuidString))];
+}
+
+// ============
+// = Printing =
+// ============
+
+- (void)printDocument:(id)sender
+{
+	NSView* webView = [NSApp targetForAction:@selector(print:)];
+	if([webView isKindOfClass:[NSView class]] && [webView conformsToProtocol:@protocol(WebDocumentView)])
+		[[NSPrintOperation printOperationWithView:webView] runOperationModalForWindow:[webView window] delegate:nil didRunSelector:NULL contextInfo:nil];
 }
 @end
