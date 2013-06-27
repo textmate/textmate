@@ -496,6 +496,11 @@ BOOL HasDocumentWindow (NSArray* windows)
 // = Printing =
 // ============
 
+- (IBAction)runPageLayout:(id)sender
+{
+	[[NSPageLayout pageLayout] runModal];
+}
+
 - (void)printDocument:(id)sender
 {
 	NSView* webView = [NSApp targetForAction:@selector(print:)];

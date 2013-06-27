@@ -39,6 +39,8 @@ namespace find_tags
 
 - (IBAction)newDocumentAndActivate:(id)sender;
 - (IBAction)openDocumentAndActivate:(id)sender;
+
+- (IBAction)runPageLayout:(id)sender;
 @end
 
 @interface AppController (Documents)
