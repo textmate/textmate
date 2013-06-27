@@ -505,6 +505,19 @@ BOOL HasDocumentWindow (NSArray* windows)
 {
 	NSView* webView = [NSApp targetForAction:@selector(print:)];
 	if([webView isKindOfClass:[NSView class]] && [webView conformsToProtocol:@protocol(WebDocumentView)])
-		[[NSPrintOperation printOperationWithView:webView] runOperationModalForWindow:[webView window] delegate:nil didRunSelector:NULL contextInfo:nil];
+	{
+		NSPrintOperation* printer = [NSPrintOperation printOperationWithView:webView];
+		[[printer printPanel] setOptions:[[printer printPanel] options] | NSPrintPanelShowsPaperSize | NSPrintPanelShowsOrientation];
+
+		NSPrintInfo* info = [printer printInfo];
+
+		NSRect display = NSIntersectionRect(info.imageablePageBounds, (NSRect){ NSZeroPoint, info.paperSize });
+		info.leftMargin   = NSMinX(display);
+		info.rightMargin  = info.paperSize.width - NSMaxX(display);
+		info.topMargin    = info.paperSize.height - NSMaxY(display);
+		info.bottomMargin = NSMinY(display);
+
+		[printer runOperationModalForWindow:[webView window] delegate:nil didRunSelector:NULL contextInfo:nil];
+	}
 }
 @end
