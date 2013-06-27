@@ -56,16 +56,6 @@ static NSButton* OakCreateHistoryButton ()
 	return res;
 }
 
-static NSButton* OakCreateCheckBox (NSString* label)
-{
-	NSButton* res = [[NSButton alloc] initWithFrame:NSZeroRect];
-	[res setContentHuggingPriority:NSLayoutPriorityDefaultHigh forOrientation:NSLayoutConstraintOrientationVertical];
-	res.buttonType = NSSwitchButton;
-	res.font       = OakControlFont();
-	res.title      = label;
-	return res;
-}
-
 static NSOutlineView* OakCreateOutlineView (NSScrollView** scrollViewOut)
 {
 	NSOutlineView* res = [[NSOutlineView alloc] initWithFrame:NSZeroRect];

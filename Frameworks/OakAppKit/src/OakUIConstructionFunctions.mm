@@ -34,6 +34,16 @@ NSTextField* OakCreateSmallLabel (NSString* label)
 	return res;
 }
 
+NSButton* OakCreateCheckBox (NSString* label)
+{
+	NSButton* res = [[NSButton alloc] initWithFrame:NSZeroRect];
+	[res setContentHuggingPriority:NSLayoutPriorityDefaultHigh forOrientation:NSLayoutConstraintOrientationVertical];
+	res.buttonType = NSSwitchButton;
+	res.font       = OakControlFont();
+	res.title      = label;
+	return res;
+}
+
 NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel)
 {
 	NSButton* res = [[NSButton alloc] initWithFrame:NSZeroRect];
