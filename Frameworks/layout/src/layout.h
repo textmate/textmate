@@ -64,6 +64,7 @@ namespace ng
 
 		// ======================
 
+		void update_metrics (CGRect visibleRect);
 		void draw (ng::context_t const& context, CGRect rectangle, bool isFlipped, bool showInvisibles, ng::ranges_t const& selection, ng::ranges_t const& highlightRanges = ng::ranges_t(), bool drawBackground = true);
 		ng::index_t index_at_point (CGPoint point) const;
 		CGRect rect_at_index (ng::index_t const& index) const;
@@ -146,7 +147,6 @@ namespace ng
 		void setup_font_metrics ();
 		void clear_text_widths ();
 
-		void update_metrics (CGRect visibleRect);
 		bool update_row (row_tree_t::iterator rowIter);
 
 		void refresh_line_at_index (size_t index, bool fullRefresh);
