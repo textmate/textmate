@@ -122,11 +122,6 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 @implementation FSOutlineViewDelegate
 @synthesize outlineView, dataSource, openURLs, modifiedURLs, pendingSelectURLs, pendingEditURL, pendingMakeVisibleURL, pendingExpandURLs, pendingScrollOffset;
 
-+ (void)initialize
-{
-	[[NSUserDefaults standardUserDefaults] removeObjectForKey:@"SelectedURLs"];
-}
-
 - (id)init
 {
 	if((self = [super init]))
