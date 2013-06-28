@@ -1,5 +1,11 @@
 # Changes
 
+## 2013-06-28 ([a9439](https://github.com/textmate/textmate/compare/a9437...a9439))
+
+* Add support for printing. You can set the theme to use in the print dialog. The font used for printing is the document font settable via _View → Font_ though hardcoded to 11 points. If you want to increase the size then adjust the scale factor.
+* If you want the file chooser (⌘T) to follow symbolic links then you can add `followSymbolicLinks = true` to `.tm_properties`.
+* Miscellaneous fixes.
+
 ## 2013-06-24 ([a9437](https://github.com/textmate/textmate/compare/a9435...a9437))
 
 * With the find dialog showing for a document, it is now possible to use ⌥⌘F to activate “Find All”. Be aware that Edit → Find → Find All without the dialog showing is really “select all matches” (possibly limited to a selection).
