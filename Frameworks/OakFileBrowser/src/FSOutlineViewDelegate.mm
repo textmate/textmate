@@ -146,8 +146,14 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 
 - (void)applicationWillTerminate:(NSNotification*)aNotification
 {
+	static BOOL mergeWithUserDefaults = NO;
+	[expandedURLs intersectSet:VisibleURLs(outlineView, dataSource.rootItem)];
+	if(mergeWithUserDefaults)
+		[expandedURLs unionSet:ConvertURLArrayToStringSet([[NSUserDefaults standardUserDefaults] arrayForKey:@"ExpandedURLs"])];
+
 	Snapshot(outlineView, dataSource.rootItem, expandedURLs, selectedURLs);
 	[[NSUserDefaults standardUserDefaults] setObject:ConvertURLSetToStringArray(expandedURLs) forKey:@"ExpandedURLs"];
+	mergeWithUserDefaults = YES;
 }
 
 - (void)setOutlineView:(NSOutlineView*)anOutlineView
