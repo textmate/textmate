@@ -872,3 +872,269 @@ static std::string const kBookmarkType = "bookmark";
 		return [super accessibilityAttributeValue:attribute];
 }
 @end
+
+// ============
+// = Printing =
+// ============
+
+@interface OakPrintDocumentView : NSView
+{
+	document::document_ptr document;
+	NSString* fontName;
+	CGFloat fontSize;
+
+	std::shared_ptr<ng::layout_t> layout;
+	std::vector<CGRect> pageRects;
+}
+@property (nonatomic) CGFloat pageWidth;
+@property (nonatomic) CGFloat pageHeight;
+@property (nonatomic) CGFloat fontScale;
+@property (nonatomic) NSString* themeUUID;
+
+@property (nonatomic) BOOL needsLayout;
+@end
+
+@implementation OakPrintDocumentView
+- (id)initWithDocument:(document::document_ptr const&)aDocument fontName:(NSString*)aFontName fontSize:(CGFloat)aFontSize
+{
+	if(self = [self initWithFrame:NSZeroRect])
+	{
+		document = aDocument;
+		fontName = aFontName;
+		fontSize = aFontSize;
+	}
+	return self;
+}
+
+- (BOOL)isFlipped
+{
+	return YES;
+}
+
+- (NSString*)printJobTitle
+{
+	return [NSString stringWithCxxString:document->display_name()];
+}
+
+- (BOOL)knowsPageRange:(NSRangePointer)range
+{
+	NSPrintInfo* info = [[NSPrintOperation currentOperation] printInfo];
+
+	NSRect display = NSIntersectionRect(info.imageablePageBounds, (NSRect){ NSZeroPoint, info.paperSize });
+	info.leftMargin   = NSMinX(display);
+	info.rightMargin  = info.paperSize.width - NSMaxX(display);
+	info.topMargin    = info.paperSize.height - NSMaxY(display);
+	info.bottomMargin = NSMinY(display);
+
+	self.pageWidth  = floor(info.paperSize.width - info.leftMargin - info.rightMargin);
+	self.pageHeight = floor(info.paperSize.height - info.topMargin - info.bottomMargin);
+	self.fontScale  = [[[info dictionary] objectForKey:NSPrintScalingFactor] floatValue];
+	self.themeUUID  = [[info dictionary] objectForKey:@"OakPrintThemeUUID"];
+
+	[self layoutIfNeeded];
+	[self setFrame:NSMakeRect(0, 0, self.pageWidth, layout->height())];
+
+	range->location = 1;
+	range->length   = pageRects.size();
+
+	return YES;
+}
+
+- (NSRect)rectForPage:(NSInteger)pageNumber
+{
+	NSParameterAssert(0 < pageNumber && pageNumber <= pageRects.size());
+	return pageRects[pageNumber-1];
+}
+
+- (void)drawRect:(NSRect)aRect
+{
+	NSEraseRect(aRect);
+	if(![NSGraphicsContext currentContextDrawingToScreen] && layout)
+		layout->draw((CGContextRef)[[NSGraphicsContext currentContext] graphicsPort], aRect, [self isFlipped], /* show invisibles: */ false, /* selection: */ ng::ranges_t(), /* highlight: */ ng::ranges_t(), /* draw background: */ false);
+}
+
+- (void)layoutIfNeeded
+{
+	if(!self.needsLayout)
+		return;
+
+	pageRects.clear();
+
+	theme_ptr theme = parse_theme(bundles::lookup(to_s(self.themeUUID)));
+	theme = theme->copy_with_font_name_and_size(to_s(fontName), fontSize * self.fontScale);
+	layout.reset(new ng::layout_t(document->buffer(), theme, /* softWrap: */ true));
+	layout->set_viewport_size(CGSizeMake(self.pageWidth, self.pageHeight));
+	layout->update_metrics(CGRectMake(0, 0, CGFLOAT_MAX, CGFLOAT_MAX));
+
+	CGRect pageRect = CGRectMake(0, 0, self.pageWidth, self.pageHeight);
+	while(true)
+	{
+		CGRect lineRect = layout->rect_at_index(layout->index_at_point(CGPointMake(NSMinX(pageRect), NSMaxY(pageRect))).index);
+		if(NSMaxY(lineRect) <= NSMinY(pageRect))
+			break;
+		else if(CGRectContainsRect(pageRect, lineRect))
+			pageRect.size.height = NSMaxY(lineRect) - NSMinY(pageRect);
+		else
+			pageRect.size.height = NSMinY(lineRect) - NSMinY(pageRect);
+		pageRects.push_back(pageRect);
+
+		pageRect.origin.y = NSMaxY(pageRect);
+		pageRect.size.height = self.pageHeight;
+	}
+
+	self.needsLayout = NO;
+}
+
+- (void)setPageWidth:(CGFloat)newPageWidth    { if(_pageWidth  != newPageWidth)  { _needsLayout = YES; _pageWidth  = newPageWidth;  } }
+- (void)setPageHeight:(CGFloat)newPageHeight  { if(_pageHeight != newPageHeight) { _needsLayout = YES; _pageHeight = newPageHeight; } }
+- (void)setFontScale:(CGFloat)newFontScale    { if(_fontScale  != newFontScale)  { _needsLayout = YES; _fontScale  = newFontScale;  } }
+- (void)setThemeUUID:(NSString*)newThemeUUID  { if(![_themeUUID isEqualToString:newThemeUUID]) { _needsLayout = YES; _themeUUID  = newThemeUUID; } }
+@end
+
+@interface OakTextViewPrintOptionsViewController : NSViewController <NSPrintPanelAccessorizing>
+{
+	std::vector<oak::uuid_t> themeUUIDs;
+}
+@end
+
+#ifndef CONSTRAINT
+#define CONSTRAINT(str, align) [constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:str options:align metrics:nil views:views]]
+#endif
+
+@implementation OakTextViewPrintOptionsViewController
+- (id)init
+{
+	if((self = [super init]))
+	{
+		NSView* contentView = [[NSView alloc] initWithFrame:NSZeroRect];
+		[contentView setTranslatesAutoresizingMaskIntoConstraints:NO];
+
+		NSTextField* themesLabel = OakCreateLabel(@"Theme:");
+		NSPopUpButton* themes    = OakCreatePopUpButton();
+		NSButton* printHeaders   = OakCreateCheckBox(@"Print header and footer");
+
+		NSMenu* themesMenu = themes.menu;
+		[themesMenu removeAllItems];
+
+		std::multimap<std::string, bundles::item_ptr, text::less_t> ordered;
+		for(auto item : bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeTheme))
+			ordered.insert(std::make_pair(item->name(), item));
+
+		for(auto pair : ordered)
+		{
+			[themesMenu addItemWithTitle:[NSString stringWithCxxString:pair.first] action:NULL keyEquivalent:@""];
+			themeUUIDs.push_back(pair.second->uuid());
+		}
+
+		if(ordered.empty())
+			[themesMenu addItemWithTitle:@"No Themes Loaded" action:@selector(nop:) keyEquivalent:@""];
+
+		[themes bind:NSSelectedIndexBinding toObject:self withKeyPath:@"themeIndex" options:nil];
+		[printHeaders bind:NSValueBinding toObject:self withKeyPath:@"printHeaderAndFooter" options:nil];
+
+		NSDictionary* views = @{
+			@"themesLabel"  : themesLabel,
+			@"themes"       : themes,
+			@"printHeaders" : printHeaders
+		};
+
+		for(NSView* view in [views allValues])
+		{
+			[view setTranslatesAutoresizingMaskIntoConstraints:NO];
+			[contentView addSubview:view];
+		}
+
+		NSMutableArray* constraints = [NSMutableArray array];
+		CONSTRAINT(@"H:|-[themesLabel]-[themes]-|",  NSLayoutFormatAlignAllBaseline);
+		CONSTRAINT(@"H:[printHeaders]-|",            0);
+		CONSTRAINT(@"V:|-[themes]-[printHeaders]-|", NSLayoutFormatAlignAllLeft);
+		[contentView addConstraints:constraints];
+
+		self.view = contentView;
+	}
+	return self;
+}
+
+- (void)setRepresentedObject:(NSPrintInfo*)printInfo
+{
+	[super setRepresentedObject:printInfo];
+	[self setThemeIndex:[self themeIndex]];
+	[self setPrintHeaderAndFooter:[self printHeaderAndFooter]];
+}
+
+- (void)setThemeIndex:(NSInteger)anIndex
+{
+	if(anIndex < themeUUIDs.size())
+	{
+		NSPrintInfo* info = [self representedObject];
+		[[info dictionary] setObject:[NSString stringWithCxxString:themeUUIDs[anIndex]] forKey:@"OakPrintThemeUUID"];
+		[[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithCxxString:themeUUIDs[anIndex]] forKey:@"OakPrintThemeUUID"];
+	}
+}
+
+- (NSInteger)themeIndex
+{
+	NSPrintInfo* info = [self representedObject];
+	if(NSString* themeUUID = [[info dictionary] objectForKey:@"OakPrintThemeUUID"])
+	{
+		for(size_t i = 0; i < themeUUIDs.size(); ++i)
+		{
+			if(themeUUIDs[i] == to_s(themeUUID))
+				return i;
+		}
+	}
+	return 0;
+}
+
+- (void)setPrintHeaderAndFooter:(BOOL)flag
+{
+	NSPrintInfo* info = [self representedObject];
+	[[info dictionary] setObject:@(flag) forKey:NSPrintHeaderAndFooter];
+	[[NSUserDefaults standardUserDefaults] setObject:@(flag) forKey:@"OakPrintHeaderAndFooter"];
+}
+
+- (BOOL)printHeaderAndFooter
+{
+	return [[[[self representedObject] dictionary] objectForKey:NSPrintHeaderAndFooter] boolValue];
+}
+
+- (NSSet*)keyPathsForValuesAffectingPreview
+{
+	return [NSSet setWithObjects:@"themeIndex", @"printHeaderAndFooter", nil];
+}
+
+- (NSArray*)localizedSummaryItems
+{
+	return @[ ]; // TODO
+}
+
+- (NSString*)title
+{
+	return @"TextMate";
+}
+@end
+
+@implementation OakDocumentView (Printing)
++ (void)initialize
+{
+	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
+		@"OakPrintThemeUUID"       : @"71D40D9D-AE48-11D9-920A-000D93589AF6",
+		@"OakPrintHeaderAndFooter" : @NO,
+	}];
+}
+
+- (void)printDocument:(id)sender
+{
+	NSPrintOperation* printer = [NSPrintOperation printOperationWithView:[[OakPrintDocumentView alloc] initWithDocument:document fontName:textView.font.fontName fontSize:11]];
+
+	NSMutableDictionary* info = [[printer printInfo] dictionary];
+	info[@"OakPrintThemeUUID"]   = [[NSUserDefaults standardUserDefaults] objectForKey:@"OakPrintThemeUUID"];
+	info[NSPrintHeaderAndFooter] = [[NSUserDefaults standardUserDefaults] objectForKey:@"OakPrintHeaderAndFooter"];
+
+	[[printer printInfo] setVerticallyCentered:NO];
+	[[printer printPanel] setOptions:[[printer printPanel] options] | NSPrintPanelShowsPaperSize | NSPrintPanelShowsOrientation | NSPrintPanelShowsScaling];
+	[[printer printPanel] addAccessoryController:[OakTextViewPrintOptionsViewController new]];
+
+	[printer runOperationModalForWindow:[self window] delegate:nil didRunSelector:NULL contextInfo:nil];
+}
+@end
