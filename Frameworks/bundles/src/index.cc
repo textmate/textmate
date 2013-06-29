@@ -297,7 +297,7 @@ namespace bundles
 	{
 		static struct path_format_t { kind_t type; char const* format; } const PathFormats[] =
 		{
-			{ kItemTypeBundle,         "%s.tmbundle/info.plist"        },
+			{ kItemTypeBundle,         "%s.tmbundle"                   },
 			{ kItemTypeCommand,        "Commands/%s.tmCommand"         },
 			{ kItemTypeDragCommand,    "DragCommands/%s.tmDragCommand" },
 			{ kItemTypeMacro,          "Macros/%s.tmMacro"             },
@@ -338,6 +338,8 @@ namespace bundles
 					std::replace(base.begin(), base.end(), '/', ':');
 					std::replace(base.begin(), base.end(), '.', '_');
 					destPath = path::unique(path::join(location, text::format(PathFormats[i].format, base.c_str())));
+					if(_kind == kItemTypeBundle)
+						destPath = path::join(destPath, "info.plist");
 				}
 			}
 		}
