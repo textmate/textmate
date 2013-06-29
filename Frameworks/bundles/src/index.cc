@@ -372,7 +372,10 @@ namespace bundles
 		bool res = true;
 		if(_local && _paths.size() == 1)
 		{
-			res = path::move_to_trash(_paths.front()) != NULL_STR;
+			std::string path = _paths.front();
+			if(_kind == kItemTypeBundle)
+				path = path::parent(path);
+			res = path::move_to_trash(path) != NULL_STR;
 		}
 		else if(!_paths.empty())
 		{
