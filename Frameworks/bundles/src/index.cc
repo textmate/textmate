@@ -358,6 +358,7 @@ namespace bundles
 		if(!_local)
 		{
 			_local = true;
+			destPath = path::resolve(destPath);
 			if(saveAsDelta)
 					_paths.insert(_paths.begin(), destPath);
 			else	_paths = std::vector<std::string>(1, destPath);
