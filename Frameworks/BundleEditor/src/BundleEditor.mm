@@ -10,6 +10,7 @@
 #import <OakAppKit/OakSound.h>
 #import <OakAppKit/OakFileIconImage.h>
 #import <OakTextView/OakDocumentView.h>
+#import <BundlesManager/BundlesManager.h>
 #import <command/runner.h> // fix_shebang
 #import <plist/ascii.h>
 #import <plist/delta.h>
@@ -453,9 +454,21 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 	std::map<bundles::item_ptr, plist::dictionary_t> failedToSave;
 	iterate(pair, changes)
 	{
-		pair->first->set_plist(pair->second);
-		if(!pair->first->save())
+		auto item = pair->first;
+		bool rescanParentFolder = item->kind() == bundles::kItemTypeBundle && (!item->local() || item->paths().empty());
+
+		item->set_plist(pair->second);
+		if(item->save())
+		{
+			std::string itemFolder = path::parent(item->paths().front());
+			[[BundlesManager sharedInstance] reloadPath:[NSString stringWithCxxString:itemFolder]];
+			if(rescanParentFolder)
+				[[BundlesManager sharedInstance] reloadPath:[NSString stringWithCxxString:path::parent(itemFolder)]];
+		}
+		else
+		{
 			failedToSave.insert(*pair);
+		}
 	}
 	changes.swap(failedToSave);
 
