@@ -1,6 +1,7 @@
 #import "SoftwareUpdate.h"
 #import "DownloadWindowController.h"
 #import "sw_update.h"
+#import "version_compare.h"
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakSound.h>
 #import <OakAppKit/NSMenu Additions.h>
@@ -35,7 +36,7 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 @interface SoftwareUpdate ()
 @property (nonatomic, retain) NSDate* lastPoll;
 @property (nonatomic, assign) BOOL isChecking;
-@property (nonatomic, assign) NSInteger lastVersionDownloaded;
+@property (nonatomic, assign) NSString* lastVersionDownloaded;
 @property (nonatomic, retain) NSString* errorString;
 @property (nonatomic, retain) NSTimer* pollTimer;
 @property (nonatomic, retain) DownloadWindowController* downloadWindow;
@@ -153,27 +154,26 @@ static SoftwareUpdate* SharedInstance;
 				if(!backgroundFlag)
 					NSRunInformationalAlertPanel(@"Error checking for new version", @"%@", @"Continue", nil, nil, self.errorString);
 			}
-			else if(info.revision && info.url != NULL_STR)
+			else if(info.version != NULL_STR && info.url != NULL_STR)
 			{
 				NSString* version    = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
-				NSInteger revision   = [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleVersion"] intValue];
 				NSString* newVersion = [NSString stringWithFormat:@"%@ %@", [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleName"], [NSString stringWithCxxString:info.version]];
 
 				BOOL downloadAndInstall = NO;
 
-				if(info.revision == revision && !backgroundFlag)
+				if(version_equal(info.version, to_s(version)) && !backgroundFlag)
 				{
 					NSInteger choice = NSRunInformationalAlertPanel(@"Up To Date", @"%@ is the latest version available—you have version %@.", @"Continue", nil, redownloadFlag ? @"Redownload" : nil, newVersion, version);
 					if(choice == NSAlertOtherReturn) // “Redownload”
 						downloadAndInstall = YES;
 				}
-				else if(info.revision < revision && !backgroundFlag)
+				else if(version_less(info.version, to_s(version)) && !backgroundFlag)
 				{
 					NSInteger choice = NSRunInformationalAlertPanel(@"Up To Date", @"%@ is the latest version available—you have version %@.", @"Continue", nil, @"Downgrade", newVersion, version);
 					if(choice == NSAlertOtherReturn) // “Downgrade”
 						downloadAndInstall = YES;
 				}
-				else if(info.revision > revision)
+				else if(version_less(to_s(version), info.version))
 				{
 					if(!backgroundFlag || [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsAskBeforeUpdatingKey])
 					{
@@ -183,7 +183,7 @@ static SoftwareUpdate* SharedInstance;
 						else if(choice == NSAlertOtherReturn) // “Later”
 							[[NSUserDefaults standardUserDefaults] setObject:[[NSDate date] dateByAddingTimeInterval:24*60*60] forKey:kUserDefaultsSoftwareUpdateSuspendUntilKey];
 					}
-					else if(info.revision > self.lastVersionDownloaded)
+					else if(version_less(to_s(self.lastVersionDownloaded), info.version))
 					{
 						downloadAndInstall = YES;
 					}
@@ -192,7 +192,7 @@ static SoftwareUpdate* SharedInstance;
 				if(downloadAndInstall)
 				{
 					BOOL interactive = !backgroundFlag || [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsAskBeforeUpdatingKey];
-					self.lastVersionDownloaded = info.revision;
+					self.lastVersionDownloaded = [NSString stringWithCxxString:info.version];
 					[self downloadVersion:newVersion atURL:[NSString stringWithCxxString:info.url] interactively:interactive];
 				}
 			}
