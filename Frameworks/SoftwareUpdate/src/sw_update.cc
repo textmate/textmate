@@ -113,10 +113,10 @@ namespace sw_update
 		{
 			plist::dictionary_t const& plist = plist::load(archiver.path);
 
-			std::string revisionString, version, archive;
-			if(plist::get_key_path(plist, "revision", revisionString) && plist::get_key_path(plist, "version", version) && plist::get_key_path(plist, "url", archive))
+			std::string version, archive;
+			if(plist::get_key_path(plist, "version", version) && plist::get_key_path(plist, "url", archive))
 			{
-				return version_info_t(strtol(revisionString.c_str(), NULL, 10), text::trim(version), archive);
+				return version_info_t(text::trim(version), archive);
 			}
 			else if(error)
 			{
