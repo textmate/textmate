@@ -3,6 +3,7 @@
 #include <plist/plist.h>
 #include <io/entries.h>
 #include <text/decode.h>
+#include <text/trim.h>
 #include <OakSystem/application.h>
 #include <oak/compat.h>
 
@@ -115,7 +116,7 @@ namespace sw_update
 			std::string revisionString, version, archive;
 			if(plist::get_key_path(plist, "revision", revisionString) && plist::get_key_path(plist, "version", version) && plist::get_key_path(plist, "url", archive))
 			{
-				return version_info_t(strtol(revisionString.c_str(), NULL, 10), version, archive);
+				return version_info_t(strtol(revisionString.c_str(), NULL, 10), text::trim(version), archive);
 			}
 			else if(error)
 			{
