@@ -261,7 +261,7 @@ namespace path
 
 	static std::string resolve_links (std::string const& p, bool resolveParent, std::set<std::string>& seen)
 	{
-		if(p == "/" || p == NULL_STR || p.empty() || p[0] != '/')
+		if(p == "/" || !path::is_absolute(p))
 			return p;
 
 		if(seen.find(p) != seen.end())
