@@ -176,7 +176,8 @@ OAK_DEBUG_VAR(HTMLOutput_JSShellCommand);
 		self.exitHandler = aHandler;
 		if(process = io::spawn(std::vector<std::string>{ "/bin/sh", "-c", to_s(aCommand) }, someEnvironment))
 		{
-			__block auto runLoop = new cf::run_loop_t(kCFRunLoopDefaultMode, 15);
+			auto runLoop = std::shared_ptr<cf::run_loop_t>(new cf::run_loop_t(kCFRunLoopDefaultMode, 15));
+			auto weakRunLoop = std::weak_ptr<cf::run_loop_t>(runLoop);
 			auto group = dispatch_group_create();
 			auto queue = aHandler ? dispatch_get_main_queue() : dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
 
@@ -229,7 +230,7 @@ OAK_DEBUG_VAR(HTMLOutput_JSShellCommand);
 				close(process.err);
 				if(self.exitHandler)
 					[self.exitHandler callWebScriptMethod:@"call" withArguments:@[ self.exitHandler, self ]];
-				else if(runLoop)
+				else if(auto runLoop = weakRunLoop.lock())
 					runLoop->stop();
 			});
 
@@ -242,8 +243,7 @@ OAK_DEBUG_VAR(HTMLOutput_JSShellCommand);
 					NSInteger choice = NSRunAlertPanel(@"JavaScript Warning", @"The command ‘%@’ has been running for 15 seconds. Would you like to stop it?\n\nTo avoid this warning, the bundle command should use the asynchronous version of TextMate.system().", @"Stop Command", @"Cancel", nil, aCommand);
 					if(choice == NSAlertDefaultReturn) // "Stop Command"
 					{
-						delete runLoop;
-						runLoop = nullptr;
+						runLoop.reset();
 						[self cancelCommand];
 						break;
 					}
@@ -251,7 +251,6 @@ OAK_DEBUG_VAR(HTMLOutput_JSShellCommand);
 			}
 
 			dispatch_release(group);
-			delete runLoop;
 		}
 	}
 	return self;
