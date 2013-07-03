@@ -589,6 +589,7 @@ namespace document
 
 	void document_t::post_save (std::string const& path, io::bytes_ptr content, encoding::type const& encoding, bool success)
 	{
+		fprintf(stderr, "saved ‘%s’ successfully %s\n", path.c_str(), BSTR(success));
 		if(success)
 		{
 			_key = documents.update_path(shared_from_this(), _key, path::identifier_t(_path));
@@ -603,7 +604,9 @@ namespace document
 			_disk_bom      = encoding.byte_order_mark();
 			_disk_newlines = encoding.newlines();
 
+			bool oldModified = is_modified();
 			check_modified(revision(), revision());
+			fprintf(stderr, "modified %s → %s\n", BSTR(oldModified), BSTR(is_modified()));
 			mark_pristine();
 			broadcast(callback_t::did_save);
 		}

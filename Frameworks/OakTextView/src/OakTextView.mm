@@ -572,8 +572,9 @@ static std::string shell_quote (std::vector<std::string> paths)
 	if(window != self.window)
 		return;
 
-	citerate(item, bundles::query(bundles::kFieldSemanticClass, "callback.document.did-save", [self scopeContext]))
-		[self performBundleItem:*item];
+	NSLog(@"%s %@ is modified: %s", sel_getName(_cmd), [NSString stringWithCxxString:document->display_name()], BSTR(document->is_modified()));
+	for(auto item : bundles::query(bundles::kFieldSemanticClass, "callback.document.did-save", [self scopeContext]))
+		NSLog(@"%s skip ‘%@’", sel_getName(_cmd), [NSString stringWithCxxString:item->full_name()]);
 }
 
 - (void)reflectDocumentSize
