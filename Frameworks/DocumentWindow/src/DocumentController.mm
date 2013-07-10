@@ -1915,6 +1915,18 @@ namespace
 			candidates.insert(path::name(document->path()));
 	}
 
+	auto map = _selectedDocument->document_variables();
+	auto const& scm = _documentSCMVariables.empty() ? _projectSCMVariables : _documentSCMVariables;
+	map.insert(scm.begin(), scm.end());
+	if(self.projectPath)
+		map["projectDirectory"] = to_s(self.projectPath);
+
+	settings_t const settings = settings_for_path(_selectedDocument->virtual_path(), _selectedDocument->file_type() + " " + to_s(self.scopeAttributes), path::parent(documentPath), map);
+	std::string const customCandidate = settings.get(kSettingsFileCounterpartKey, NULL_STR);
+
+	if(customCandidate != NULL_STR && customCandidate != documentPath && (std::find_if(_documents.begin(), _documents.end(), [&customCandidate](document::document_ptr const& doc){ return customCandidate == doc->path(); }) != _documents.end() || path::exists(customCandidate)))
+		return [self openItems:@[ @{ @"path" : [NSString stringWithCxxString:customCandidate] } ] closingOtherTabs:NO];
+
 	citerate(entry, path::entries(documentDir))
 	{
 		std::string const name = (*entry)->d_name;
@@ -1926,7 +1938,6 @@ namespace
 		}
 	}
 
-	settings_t const settings = settings_for_path(_selectedDocument->virtual_path(), _selectedDocument->file_type() + " " + to_s(self.scopeAttributes), _selectedDocument->path() != NULL_STR ? path::parent(_selectedDocument->path()) : to_s(self.untitledSavePath));
 	path::glob_t const excludeGlob(settings.get(kSettingsExcludeKey, ""));
 	path::glob_t const binaryGlob(settings.get(kSettingsBinaryKey, ""));
 
