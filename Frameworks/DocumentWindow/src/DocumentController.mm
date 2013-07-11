@@ -1949,7 +1949,11 @@ namespace
 	}
 
 	if(v.size() == 1)
-		return (void)NSBeep();
+	{
+		if(customCandidate == NULL_STR || customCandidate == documentPath)
+			return (void)NSBeep();
+		v.push_back(customCandidate);
+	}
 
 	std::vector<std::string>::const_iterator it = std::find(v.begin(), v.end(), documentName);
 	ASSERT(it != v.end());
