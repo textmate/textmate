@@ -9,11 +9,12 @@
 	angle_brackets_green = ( jsp, php, php3, php4, php5, phpt, phtml, aw, ctp );
 	angle_brackets_brown = ( dist, xml, tld, pt, cpt, dtml, rss, opml, xsl, xslt );
 	brackets             = ( m, mm, M );
+	braces               = ( go );
 	list                 = ( gtd, gtdlog, properties, json, strings, plist, dict, scriptsuite, scriptterminology, savedsearch, defs.rem, reminders, TODO, tasks, todolist, yaml, yml );
-	grid                 = ( css, css.erb, scss, sass, less );
+	grid                 = ( css, css.erb, scss, sass, less, sql );
 	tree_structure       = ( dot );
-	config_file          = ( conf, htaccess, config, gitconfig, gitignore, gitmodules, ini, cfg, capfile, ssh_config, sshd_config, tm_properties, tmproperties, ant.xml, build.xml, pro, pri, cmake, cmakelists.txt, Makefile, gnumakefile, ocamlmakefile, pom.xml, cm, Rakefile, rake, target, portfile, gemspec, gemfile );
-	
+	config_file          = ( conf, htaccess, config, gitconfig, gitignore, gitmodules, ini, cfg, capfile, ssh_config, sshd_config, tm_properties, tmproperties, ant.xml, build.xml, pro, pri, cmake, cmakelists.txt, Makefile, gnumakefile, ocamlmakefile, pom.xml, cm, Rakefile, rake, target, portfile, gemspec, gemfile, ninja, project.clj, xcodeproj );
+
 	c                    = ( c, cc, cxx, cpp, 'c++' );
 	javascript           = ( js, htc, jsx, jsfl, js.erb );
 	ruby                 = ( rb, rbx, rjs, cgi, fcgi, irbrc, rxml, builder );

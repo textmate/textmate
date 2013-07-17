@@ -520,7 +520,7 @@
 		},
 		{	CFBundleTypeName       = "Source";        /* generic source code types */
 			CFBundleTypeExtensions = (
-				g, vss, d, e, gri, inf, mel, build, re,
+				g, vss, d, e, go, gri, inf, mel, build, re,
 				textmate, fxscript, lgt
 			);
 			CFBundleTypeIconFile   = Blank;
