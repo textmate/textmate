@@ -17,7 +17,7 @@ static NSImage* CustomIconForPath (NSString* path)
 		for(NSString* key in map)
 		{
 			for(NSString* ext in map[key])
-				bindings[ext] = key;
+				bindings[[ext lowercaseString]] = key;
 		}
 	});
 
