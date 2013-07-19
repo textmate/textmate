@@ -544,7 +544,7 @@ namespace
 	NSMutableIndexSet* allTabs = [NSMutableIndexSet indexSetWithIndexesInRange:NSMakeRange(0, _documents.size())];
 	for(size_t i = 0; i < _documents.size(); ++i)
 	{
-		if(_documents[i]->is_modified() && _documents[i]->path() == NULL_STR)
+		if(_documents[i]->is_modified() && _documents[i]->path() == NULL_STR || _documents[i]->sticky())
 			[allTabs removeIndex:i];
 	}
 	[self closeTabsAtIndexes:allTabs askToSaveChanges:YES createDocumentIfEmpty:YES];
@@ -557,7 +557,7 @@ namespace
 	NSMutableIndexSet* otherTabs = [NSMutableIndexSet indexSet];
 	for(size_t i = 0; i < _documents.size(); ++i)
 	{
-		if(i != tabIndex && (!_documents[i]->is_modified() || _documents[i]->path() != NULL_STR))
+		if(i != tabIndex && (!_documents[i]->is_modified() || _documents[i]->path() != NULL_STR) && !_documents[i]->sticky())
 			[otherTabs addIndex:i];
 	}
 	[self closeTabsAtIndexes:otherTabs askToSaveChanges:YES createDocumentIfEmpty:YES];
@@ -793,7 +793,7 @@ namespace
 		for(size_t i = 0; i < newDocuments.size(); ++i)
 		{
 			document::document_ptr doc = newDocuments[i];
-			if(!doc->is_modified() && uuids.find(doc->identifier()) == uuids.end())
+			if(!doc->is_modified() && uuids.find(doc->identifier()) == uuids.end() && !_documents[i]->sticky())
 				[indexSet addIndex:i];
 		}
 		[self closeTabsAtIndexes:indexSet askToSaveChanges:YES createDocumentIfEmpty:NO];
@@ -810,7 +810,7 @@ namespace
 			for(size_t i = 0; i < newDocuments.size(); ++i)
 			{
 				document::document_ptr doc = newDocuments[i];
-				if(!doc->is_modified() && doc->is_on_disk() && uuids.find(doc->identifier()) == uuids.end())
+				if(!doc->is_modified() && doc->is_on_disk() && uuids.find(doc->identifier()) == uuids.end() && !doc->sticky())
 					ranked.insert(std::make_pair(doc->lru(), i));
 			}
 
@@ -1397,6 +1397,16 @@ namespace
 	}
 }
 
+- (void)toggleSticky:(id)sender
+{
+	if(NSIndexSet* indexSet = [self tryObtainIndexSetFrom:sender])
+	{
+		std::vector<document::document_ptr> documents;
+		for(NSUInteger index = [indexSet firstIndex]; index != NSNotFound; index = [indexSet indexGreaterThanIndex:index])
+			_documents[index]->set_sticky(!_documents[index]->sticky());
+	}
+}
+
 - (NSMenu*)menuForTabBarView:(OakTabBarView*)aTabBarView
 {
 	NSInteger tabIndex = aTabBarView.tag;
@@ -1413,28 +1423,32 @@ namespace
 		[rightSideTabs removeIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, tabIndex + 1)]];
 	}
 
+	for(size_t i = 0; i < _documents.size(); ++i)
+	{
+		if(_documents[i]->sticky())
+		{
+			[otherTabs removeIndex:i];
+			[rightSideTabs removeIndex:i];
+		}
+	}
+
 	SEL closeSingleTabSelector = tabIndex == _selectedTabIndex ? @selector(performCloseTab:) : @selector(takeTabsToCloseFrom:);
 
 	NSMenu* menu = [NSMenu new];
-	[menu setAutoenablesItems:NO];
-
-	[menu addItemWithTitle:@"New Tab"                 action:@selector(takeNewTabIndexFrom:)  keyEquivalent:@""];
-	[menu addItem:[NSMenuItem separatorItem]];
-	[menu addItemWithTitle:@"Close Tab"               action:closeSingleTabSelector           keyEquivalent:@""];
-	[menu addItemWithTitle:@"Close Other Tabs"        action:@selector(takeTabsToCloseFrom:)  keyEquivalent:@""];
-	[menu addItemWithTitle:@"Close Tabs to the Right" action:@selector(takeTabsToCloseFrom:)  keyEquivalent:@""];
-	[menu addItem:[NSMenuItem separatorItem]];
+	[menu addItemWithTitle:@"New Tab"                 action:@selector(takeNewTabIndexFrom:)   keyEquivalent:@""];
 	[menu addItemWithTitle:@"Move Tab to New Window"  action:@selector(takeTabsToTearOffFrom:) keyEquivalent:@""];
+	[menu addItem:[NSMenuItem separatorItem]];
+	[menu addItemWithTitle:@"Close Tab"               action:closeSingleTabSelector            keyEquivalent:@""];
+	[menu addItemWithTitle:@"Close Other Tabs"        action:@selector(takeTabsToCloseFrom:)   keyEquivalent:@""];
+	[menu addItemWithTitle:@"Close Tabs to the Right" action:@selector(takeTabsToCloseFrom:)   keyEquivalent:@""];
+	[menu addItem:[NSMenuItem separatorItem]];
+	[menu addItemWithTitle:@"Sticky"                  action:@selector(toggleSticky:)          keyEquivalent:@""];
 
-	NSIndexSet* indexSets[] = { newTabAtTab, nil, clickedTab, otherTabs, rightSideTabs, nil, total > 1 ? clickedTab : [NSIndexSet indexSet] };
+	NSIndexSet* indexSets[] = { newTabAtTab, total > 1 ? clickedTab : [NSIndexSet indexSet], nil, clickedTab, otherTabs, rightSideTabs, nil, clickedTab };
 	for(size_t i = 0; i < sizeofA(indexSets); ++i)
 	{
 		if(NSIndexSet* indexSet = indexSets[i])
-		{
-			if([indexSet count] == 0)
-					[[menu itemAtIndex:i] setEnabled:NO];
-			else	[[menu itemAtIndex:i] setRepresentedObject:indexSet];
-		}
+			[[menu itemAtIndex:i] setRepresentedObject:indexSet];
 	}
 
 	return menu;
@@ -2026,6 +2040,18 @@ namespace
 		[menuItem setTitle:self.window.firstResponder == self.textView ? @"Move Focus to File Browser" : @"Move Focus to Document"];
 	else if([menuItem action] == @selector(takeProjectPathFrom:))
 		[menuItem setState:[self.defaultProjectPath isEqualToString:[menuItem representedObject]] ? NSOnState : NSOffState];
+
+	SEL tabBarActions[] = { @selector(performCloseTab:), @selector(takeNewTabIndexFrom::), @selector(takeTabsToCloseFrom:), @selector(takeTabsToTearOffFrom:), @selector(toggleSticky:) };
+	if(oak::contains(std::begin(tabBarActions), std::end(tabBarActions), [menuItem action]))
+	{
+		if(NSIndexSet* indexSet = [self tryObtainIndexSetFrom:menuItem])
+		{
+			active = [indexSet count] != 0;
+			if(active && [menuItem action] == @selector(toggleSticky:))
+				[menuItem setState:_documents[[indexSet firstIndex]]->sticky() ? NSOnState : NSOffState];
+		}
+	}
+
 	return active;
 }
 
@@ -2154,6 +2180,8 @@ static NSUInteger DisableSessionSavingCount = 0;
 				doc = path ? document::create(to_s(path)) : create_untitled_document_in_folder(to_s(controller.untitledSavePath));
 				if(NSString* displayName = info[@"displayName"])
 					doc->set_custom_name(to_s(displayName));
+				if([info[@"sticky"] boolValue])
+					doc->set_sticky(true);
 			}
 
 			doc->set_recent_tracking(false);
@@ -2227,6 +2255,8 @@ static NSUInteger DisableSessionSavingCount = 0;
 				doc[@"displayName"] = [NSString stringWithCxxString:document->display_name()];
 			if(document == controller.selectedDocument)
 				doc[@"selected"] = @YES;
+			if(document->sticky())
+				doc[@"sticky"] = @YES;
 			[docs addObject:doc];
 		}
 		res[@"documents"] = docs;

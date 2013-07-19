@@ -232,6 +232,9 @@ namespace document
 		bool recent_tracking () const         { return _recent_tracking && _path != NULL_STR; }
 		void set_recent_tracking (bool flag)  { _recent_tracking = flag; }
 
+		bool sticky () const                  { return _sticky; }
+		void set_sticky (bool flag)           { _sticky = flag; }
+
 		ng::buffer_t& buffer ()               { ASSERT(_buffer); return *_buffer; }
 		ng::buffer_t const& buffer () const   { ASSERT(_buffer); return *_buffer; }
 
@@ -293,6 +296,7 @@ namespace document
 		mutable bool _has_lru;
 		bool _is_on_disk;
 		bool _recent_tracking;
+		bool _sticky = false;
 
 		mutable std::string _backup_path;     // if there is a backup, this is set — we can have a backup even when there is no path
 		mutable ssize_t _backup_revision;
