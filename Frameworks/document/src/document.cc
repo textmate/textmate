@@ -157,7 +157,7 @@ namespace document
 			void release () { if(!locked) return; DB(--tracker->lock_count); OSSpinLockUnlock(&spinlock); locked = false; }
 
 		private:
-			document_tracker_t* tracker;
+			DB_VAR document_tracker_t* tracker;
 			bool locked;
 		};
 
