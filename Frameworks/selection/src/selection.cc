@@ -217,11 +217,76 @@ namespace ng
 			std::string first, second;
 			bool matched_first, initialized = false;
 		};
+
+		struct enclosed_range_t
+		{
+			enclosed_range_t (std::string const& opener = NULL_STR, std::string const& closer = NULL_STR) : opener(opener), closer(closer) { }
+
+			operator bool () const { return open_index != SIZE_T_MAX && close_index != 0; }
+
+			std::string opener, closer;
+			size_t open_index = SIZE_T_MAX, close_index = 0;
+			ssize_t open_count = 0, close_count = 0;
+		};
 	}
 
 	static bool does_match (buffer_t const& buffer, size_t index, std::string const& ch)
 	{
 		return index + ch.size() <= buffer.size() && ch == buffer.substr(index, index + ch.size());
+	}
+
+	static enclosed_range_t find_enclosed_range (buffer_t const& buffer, size_t index, std::vector< std::pair<std::string, std::string> > const& pairs)
+	{
+		std::vector<enclosed_range_t> records;
+		for(auto pair : pairs)
+			records.emplace_back(pair.first, pair.second);
+
+		size_t left = index, right = index;
+		while(left > 0 || right < buffer.size())
+		{
+			if(left > 0)
+			{
+				left -= buffer[left-1].size();
+				for(auto& r : records)
+				{
+					if(does_match(buffer, left, r.opener))
+					{
+						if(++r.open_count == 1 && r.open_index == SIZE_T_MAX)
+						{
+							r.open_index = left;
+							if(r)
+								return r;
+						}
+					}
+					else if(does_match(buffer, left, r.closer))
+					{
+						--r.open_count;
+					}
+				}
+			}
+
+			if(right < buffer.size())
+			{
+				for(auto& r : records)
+				{
+					if(does_match(buffer, right, r.closer))
+					{
+						if(++r.close_count == 1 && r.close_index == 0)
+						{
+							r.close_index = right;
+							if(r)
+								return r;
+						}
+					}
+					else if(does_match(buffer, right, r.opener))
+					{
+						--r.close_count;
+					}
+				}
+				right += buffer[right].size();
+			}
+		}
+		return enclosed_range_t();
 	}
 
 	static character_pair_t first_match (buffer_t const& buffer, size_t index, std::vector< std::pair<std::string, std::string> > const& pairs)
@@ -236,42 +301,41 @@ namespace ng
 		return character_pair_t();
 	}
 
+	static character_pair_t first_match_left (buffer_t const& buffer, size_t index, std::vector< std::pair<std::string, std::string> > const& pairs)
+	{
+		citerate(pair, pairs)
+		{
+			if(index < pair->first.size())
+				continue;
+			if(does_match(buffer, index - pair->first.size(), pair->first))
+				return character_pair_t(pair->first, pair->second, true);
+			else if(does_match(buffer, index - pair->second.size(), pair->second))
+				return character_pair_t(pair->first, pair->second, false);
+		}
+		return character_pair_t();
+	}
+
 	static size_t begin_of_typing_pair (buffer_t const& buffer, size_t caret, bool moveToBefore)
 	{
 		size_t orgCaret = caret;
 		auto pairs = character_pairs(buffer.scope(caret), "highlightPairs");
-		bool skip = false;
-		while(0 < caret)
+
+		std::string skipOpener = NULL_STR;
+		if(!moveToBefore)
 		{
-			caret -= buffer[caret-1].size();
-			auto pair = first_match(buffer, caret, pairs);
-			if(!pair)
-				continue;
-
-			if(pair.matched_first)
+			if(auto pair = first_match_left(buffer, caret, pairs))
 			{
-				if(caret + pair.first.size() != orgCaret || moveToBefore)
-					return caret + (skip || moveToBefore || orgCaret < caret + pair.first.size() ? 0 : pair.first.size());
-				continue;
+				skipOpener = pair.matched_first && pair.first != pair.second ? NULL_STR : pair.first;
+				caret -= pair.matched_first ? pair.first.size() : pair.second.size();
 			}
+		}
 
-			if(!moveToBefore && orgCaret <= caret + pair.second.size())
-			{
-				skip = true;
-				continue;
-			}
-
-			std::string const& openCh  = pair.first;
-			std::string const& closeCh = pair.second;
-
-			for(size_t balance = 1; balance != 0 && 0 < caret; )
-			{
-				caret -= buffer[caret-1].size();
-				if(does_match(buffer, caret, openCh))
-					--balance;
-				else if(does_match(buffer, caret, closeCh))
-					++balance;
-			}
+		if(auto range = find_enclosed_range(buffer, caret, pairs))
+		{
+			caret = range.open_index;
+			if(!moveToBefore && !does_match(buffer, caret, skipOpener))
+				caret += range.opener.size();
+			return caret;
 		}
 		return orgCaret;
 	}
@@ -280,51 +344,24 @@ namespace ng
 	{
 		size_t orgCaret = caret;
 		auto pairs = character_pairs(buffer.scope(caret), "highlightPairs");
-		bool skipEnd = false;
+
+		std::string skipCloser = NULL_STR;
 		if(!moveToAfter)
 		{
 			if(auto pair = first_match(buffer, caret, pairs))
 			{
-				skipEnd = pair.matched_first;
+				skipCloser = pair.matched_first ? pair.second : NULL_STR;
 				caret += pair.matched_first ? pair.first.size() : pair.second.size();
 			}
 		}
 
-		while(caret < buffer.size())
+		if(auto range = find_enclosed_range(buffer, caret, pairs))
 		{
-			auto pair = first_match(buffer, caret, pairs);
-			if(!pair)
-			{
-				caret += buffer[caret].size();
-				continue;
-			}
-
-			if(!pair.matched_first)
-				return caret + (skipEnd || moveToAfter ? pair.second.size() : 0);
-
-			std::string const& openCh  = pair.first;
-			std::string const& closeCh = pair.second;
-
-			caret += openCh.size();
-			for(size_t balance = 1; balance != 0 && caret < buffer.size(); )
-			{
-				if(does_match(buffer, caret, closeCh))
-				{
-					--balance;
-					caret += closeCh.size();
-				}
-				else if(does_match(buffer, caret, openCh))
-				{
-					++balance;
-					caret += openCh.size();
-				}
-				else
-				{
-					caret += buffer[caret].size();
-				}
-			}
+			caret = range.close_index;
+			if(moveToAfter || does_match(buffer, caret, skipCloser))
+				caret += range.closer.size();
+			return caret;
 		}
-
 		return orgCaret;
 	}
 

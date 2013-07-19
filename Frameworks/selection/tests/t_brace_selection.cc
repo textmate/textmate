@@ -42,6 +42,19 @@ public:
 		TS_ASSERT_EQUALS(move("this (is (a test)).‸", kSelectionMoveToEndOfTypingPair), "this (is (a test)).‸");
 	}
 
+	void test_bad_nesting ()
+	{
+		TS_ASSERT_EQUALS(move("(bad‸ly} nested)", kSelectionMoveToBeginOfTypingPair), "(‸badly} nested)");
+		TS_ASSERT_EQUALS(move("(bad‸ly} nested)", kSelectionMoveToEndOfTypingPair),   "(badly} nested‸)");
+		TS_ASSERT_EQUALS(move("{bad‸ly) nested}", kSelectionMoveToBeginOfTypingPair), "{‸badly) nested}");
+		TS_ASSERT_EQUALS(move("{bad‸ly) nested}", kSelectionMoveToEndOfTypingPair),   "{badly) nested‸}");
+
+		TS_ASSERT_EQUALS(move("{(bad‸ly} nested)", kSelectionMoveToBeginOfTypingPair), "{‸(badly} nested)");
+		TS_ASSERT_EQUALS(move("{(bad‸ly} nested)", kSelectionMoveToEndOfTypingPair),   "{(badly‸} nested)");
+		TS_ASSERT_EQUALS(move("({bad‸ly) nested}", kSelectionMoveToBeginOfTypingPair), "(‸{badly) nested}");
+		TS_ASSERT_EQUALS(move("({bad‸ly) nested}", kSelectionMoveToEndOfTypingPair),   "({badly‸) nested}");
+	}
+
 	void test_brace_selection ()
 	{
 		ng::buffer_t buf;
