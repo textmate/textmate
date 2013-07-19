@@ -1895,7 +1895,7 @@ namespace
 	}
 }
 
-- (IBAction)goToFileCounterpart:(id)sender
+- (IBAction)goToRelatedFile:(id)sender
 {
 	if(!_selectedDocument)
 		return;
@@ -1922,7 +1922,7 @@ namespace
 		map["projectDirectory"] = to_s(self.projectPath);
 
 	settings_t const settings = settings_for_path(_selectedDocument->virtual_path(), _selectedDocument->file_type() + " " + to_s(self.scopeAttributes), path::parent(documentPath), map);
-	std::string const customCandidate = settings.get(kSettingsFileCounterpartKey, NULL_STR);
+	std::string const customCandidate = settings.get(kSettingsRelatedFilePathKey, NULL_STR);
 
 	if(customCandidate != NULL_STR && customCandidate != documentPath && (std::find_if(_documents.begin(), _documents.end(), [&customCandidate](document::document_ptr const& doc){ return customCandidate == doc->path(); }) != _documents.end() || path::exists(customCandidate)))
 		return [self openItems:@[ @{ @"path" : [NSString stringWithCxxString:customCandidate] } ] closingOtherTabs:NO];

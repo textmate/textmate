@@ -33,7 +33,7 @@ PUBLIC @interface DocumentController : NSObject
 - (IBAction)moveDocumentToNewWindow:(id)sender; // TODO Move to AppController
 - (IBAction)mergeAllWindows:(id)sender;         // TODO Move to AppController
 
-- (IBAction)goToFileCounterpart:(id)sender;
+- (IBAction)goToRelatedFile:(id)sender;
 - (IBAction)selectNextTab:(id)sender;
 - (IBAction)selectPreviousTab:(id)sender;
 - (IBAction)takeSelectedTabIndexFrom:(id)sender;
