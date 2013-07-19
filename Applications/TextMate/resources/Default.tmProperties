@@ -49,3 +49,9 @@ encoding         = "MACROMAN"
 
 [ "{BUILD,README,INSTALL,LICENSE,COPYING,TODO}" ]
 fileType         = "text.plain"
+
+[ *.go ]
+relatedFilePath  = "${TM_FILEPATH/(?=\.go$)/_test/}"
+
+[ *_test.go ]
+relatedFilePath  = "${TM_FILEPATH/_test(?=\.go$)//}"
