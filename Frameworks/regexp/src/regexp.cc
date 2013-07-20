@@ -58,11 +58,6 @@ namespace regexp
 		init(pattern, options);
 	}
 
-	size_t pattern_t::indices_for_group (char const* name, int** list) const
-	{
-		return onig_name_to_group_numbers(compiled_pattern.get(), name, name + strlen(name), list);
-	}
-
 	// ===========
 	// = match_t =
 	// ===========

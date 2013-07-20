@@ -67,7 +67,6 @@ namespace regexp
 
 		bool operator== (pattern_t const& rhs) const { return pattern_string == rhs.pattern_string; }
 		bool operator!= (pattern_t const& rhs) const { return !(*this == rhs); }
-		size_t indices_for_group (char const* name, int** list) const;
 
 		friend std::string to_s (pattern_t const& ptrn);
 	};
