@@ -141,7 +141,6 @@ static void usage (FILE* io)
 		" -m, --name <name>      The display name shown in TextMate.\n"
 		" -r, --recent           Add file to Open Recent menu.\n"
 		" -d, --change-dir       Change TextMates working directory to that of the file.\n"
-		" -n, --no-reactivation  After edit with -w, do not re-activate the calling app.\n"
 		" -h, --help             Show this information.\n"
 		" -v, --version          Print version information.\n"
 		"\n"
