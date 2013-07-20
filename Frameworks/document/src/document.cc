@@ -1053,7 +1053,7 @@ namespace document
 			return;
 
 		ASSERT(_path != NULL_STR);
-		ASSERT(!_buffer)
+		ASSERT(!_buffer);
 
 		ng::buffer_t buf;
 		buf.insert(0, path::content(_path));

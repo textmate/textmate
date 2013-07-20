@@ -122,13 +122,14 @@ namespace scm
 
 	void info_t::pop_callback ()
 	{
-		ASSERT(!_callbacks.empty())
+		ASSERT(!_callbacks.empty());
 		Block_release(_callbacks.back());
 		_callbacks.pop_back();
 	}
 
 	void info_t::did_update_shared_info ()
 	{
+		ASSERT(!dry());
 		for(auto callback : _callbacks)
 			callback(*this);
 	}

@@ -32,8 +32,8 @@ namespace ng
 
 	std::string marks_t::get (size_t index, std::string const& markType) const
 	{
-		ASSERT(_marks.find(markType) != _marks.end())
-		ASSERT(_marks.find(markType)->second.find(index) != _marks.find(markType)->second.end())
+		ASSERT(_marks.find(markType) != _marks.end());
+		ASSERT(_marks.find(markType)->second.find(index) != _marks.find(markType)->second.end());
 		return _marks.find(markType)->second.find(index)->second;
 	}
 
