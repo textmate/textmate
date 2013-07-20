@@ -3,30 +3,43 @@
 
 class BraceSelectionTests : public CxxTest::TestSuite
 {
+	std::string move (std::string input, move_unit_type action)
+	{
+		static std::string const kMarker = "‸";
+
+		size_t pos = input.find(kMarker);
+		TS_ASSERT_DIFFERS(pos, std::string::npos);
+		input.replace(pos, kMarker.size(), "");
+
+		ng::buffer_t buf;
+		buf.insert(0, input);
+		for(auto range : ng::move(buf, ng::range_t(pos), action))
+			buf.replace(range.min().index, range.max().index, "‸");
+		return buf.substr(0, buf.size());
+	}
+
 public:
 	void test_brace_movement ()
 	{
-		ng::buffer_t buf;
-		buf.insert(0, "this (is (a test)).");
+		TS_ASSERT_EQUALS(move("‸this (is (a test)).", kSelectionMoveToBeginOfTypingPair), "‸this (is (a test)).");
+		TS_ASSERT_EQUALS(move("this ‸(is (a test)).", kSelectionMoveToBeginOfTypingPair), "this ‸(is (a test)).");
+		TS_ASSERT_EQUALS(move("this (‸is (a test)).", kSelectionMoveToBeginOfTypingPair), "this (‸is (a test)).");
+		TS_ASSERT_EQUALS(move("this (is ‸(a test)).", kSelectionMoveToBeginOfTypingPair), "this (‸is (a test)).");
+		TS_ASSERT_EQUALS(move("this (is (‸a test)).", kSelectionMoveToBeginOfTypingPair), "this (‸is (a test)).");
+		TS_ASSERT_EQUALS(move("this (is (a test‸)).", kSelectionMoveToBeginOfTypingPair), "this (is (‸a test)).");
+		TS_ASSERT_EQUALS(move("this (is (a test)‸).", kSelectionMoveToBeginOfTypingPair), "this (is ‸(a test)).");
+		TS_ASSERT_EQUALS(move("this (is (a test))‸.", kSelectionMoveToBeginOfTypingPair), "this ‸(is (a test)).");
+		TS_ASSERT_EQUALS(move("this (is (a test)).‸", kSelectionMoveToBeginOfTypingPair), "this (is (a test)).‸");
 
-		TS_ASSERT_EQUALS(to_s(buf, ng::move(buf, ng::range_t( 0), kSelectionMoveToBeginOfTypingPair)),         "1");
-		TS_ASSERT_EQUALS(to_s(buf, ng::move(buf, ng::range_t( 5), kSelectionMoveToBeginOfTypingPair)),       "1:6");
-		TS_ASSERT_EQUALS(to_s(buf, ng::move(buf, ng::range_t( 6), kSelectionMoveToBeginOfTypingPair)),       "1:7");
-		TS_ASSERT_EQUALS(to_s(buf, ng::move(buf, ng::range_t( 9), kSelectionMoveToBeginOfTypingPair)),       "1:7");
-		TS_ASSERT_EQUALS(to_s(buf, ng::move(buf, ng::range_t(10), kSelectionMoveToBeginOfTypingPair)),       "1:7");
-		TS_ASSERT_EQUALS(to_s(buf, ng::move(buf, ng::range_t(16), kSelectionMoveToBeginOfTypingPair)),      "1:11");
-		TS_ASSERT_EQUALS(to_s(buf, ng::move(buf, ng::range_t(17), kSelectionMoveToBeginOfTypingPair)),      "1:10");
-		TS_ASSERT_EQUALS(to_s(buf, ng::move(buf, ng::range_t(18), kSelectionMoveToBeginOfTypingPair)),       "1:6");
-		TS_ASSERT_EQUALS(to_s(buf, ng::move(buf, ng::range_t(19), kSelectionMoveToBeginOfTypingPair)),      "1:20");
-
-		TS_ASSERT_EQUALS(to_s(buf, ng::move(buf, ng::range_t( 0), kSelectionMoveToEndOfTypingPair)),           "1");
-		TS_ASSERT_EQUALS(to_s(buf, ng::move(buf, ng::range_t( 5), kSelectionMoveToEndOfTypingPair)),        "1:19");
-		TS_ASSERT_EQUALS(to_s(buf, ng::move(buf, ng::range_t( 6), kSelectionMoveToEndOfTypingPair)),        "1:18");
-		TS_ASSERT_EQUALS(to_s(buf, ng::move(buf, ng::range_t( 9), kSelectionMoveToEndOfTypingPair)),        "1:18");
-		TS_ASSERT_EQUALS(to_s(buf, ng::move(buf, ng::range_t(10), kSelectionMoveToEndOfTypingPair)),        "1:17");
-		TS_ASSERT_EQUALS(to_s(buf, ng::move(buf, ng::range_t(16), kSelectionMoveToEndOfTypingPair)),        "1:18");
-		TS_ASSERT_EQUALS(to_s(buf, ng::move(buf, ng::range_t(17), kSelectionMoveToEndOfTypingPair)),        "1:18");
-		TS_ASSERT_EQUALS(to_s(buf, ng::move(buf, ng::range_t(18), kSelectionMoveToEndOfTypingPair)),        "1:19");
+		TS_ASSERT_EQUALS(move("‸this (is (a test)).", kSelectionMoveToEndOfTypingPair), "‸this (is (a test)).");
+		TS_ASSERT_EQUALS(move("this ‸(is (a test)).", kSelectionMoveToEndOfTypingPair), "this (is (a test))‸.");
+		TS_ASSERT_EQUALS(move("this (‸is (a test)).", kSelectionMoveToEndOfTypingPair), "this (is (a test)‸).");
+		TS_ASSERT_EQUALS(move("this (is ‸(a test)).", kSelectionMoveToEndOfTypingPair), "this (is (a test)‸).");
+		TS_ASSERT_EQUALS(move("this (is (‸a test)).", kSelectionMoveToEndOfTypingPair), "this (is (a test‸)).");
+		TS_ASSERT_EQUALS(move("this (is (a test‸)).", kSelectionMoveToEndOfTypingPair), "this (is (a test)‸).");
+		TS_ASSERT_EQUALS(move("this (is (a test)‸).", kSelectionMoveToEndOfTypingPair), "this (is (a test)‸).");
+		TS_ASSERT_EQUALS(move("this (is (a test))‸.", kSelectionMoveToEndOfTypingPair), "this (is (a test))‸.");
+		TS_ASSERT_EQUALS(move("this (is (a test)).‸", kSelectionMoveToEndOfTypingPair), "this (is (a test)).‸");
 	}
 
 	void test_brace_selection ()
