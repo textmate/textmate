@@ -2,7 +2,7 @@ PLIST_FLAGS = -d'APP_NAME=$APP_NAME' -d'APP_VERSION=$APP_VERSION' -d'APP_REVISIO
 
 FLAGS += -c -pipe -fPIC -gdwarf-2
 FLAGS += -m64 -mmacosx-version-min=$APP_MIN_OS -isysroot "$sdk"
-FLAGS += -funsigned-char -fvisibility=hidden
+FLAGS += -funsigned-char
 FLAGS += -D'NULL_STR="\uFFFF"'
 FLAGS += -Wall -Wwrite-strings -Wformat -Winit-self -Wmissing-include-dirs -Wno-parentheses -Wno-sign-compare -Wno-switch
 FLAGS += -Wno-address-of-temporary
@@ -13,9 +13,9 @@ FLAGS += -fcolor-diagnostics
 FLAGS += -DNDEBUG -Os
 # LINK   = OakDebug
 
-CXX_FLAGS    += -std=c++11 -stdlib=libc++
-OBJC_FLAGS   += -fobjc-arc -Xclang -fobjc-default-synthesize-properties -std=c99 -fobjc-abi-version=3
-OBJCXX_FLAGS += -std=c++11 -stdlib=libc++ -fobjc-abi-version=3
+CXX_FLAGS    += -fvisibility=hidden -std=c++11 -stdlib=libc++
+OBJC_FLAGS   += -fvisibility=hidden -fobjc-arc -Xclang -fobjc-default-synthesize-properties -std=c99 -fobjc-abi-version=3
+OBJCXX_FLAGS += -fvisibility=hidden -std=c++11 -stdlib=libc++ -fobjc-abi-version=3
 OBJCXX_FLAGS += -fobjc-arc -Xclang -fobjc-default-synthesize-properties -fobjc-call-cxx-cdtors
 LIBS         += c++
 
