@@ -87,4 +87,42 @@ public:
 		TS_ASSERT(plist::equal(plist::merge_delta(plists), newPlist));
 		TS_ASSERT(!plist::equal(oldPlist, newPlist));
 	}
+
+	void test_delta_settings ()
+	{
+		std::string oldPlistString =
+			"{	name = 'Tag Preferences';\n"
+			"	scope = 'meta.tag';\n"
+			"	settings = ( 'smartTypingPairs', 'spellChecking' );\n"
+			"	uuid = '73251DBE-EBD2-470F-8148-E6F2EC1A9641';\n"
+			"}\n";
+
+		std::string deltaPlistString =
+			"{	changed = {\n"
+			"		settings.shellVariables = (\n"
+			"			{	name = 'TM_FOO';\n"
+			"				value = 'bar';\n"
+			"			},\n"
+			"		);\n"
+			"	};\n"
+			"	isDelta = :true;\n"
+			"	uuid = '73251DBE-EBD2-470F-8148-E6F2EC1A9641';\n"
+			"}\n";
+
+		std::string newPlistString =
+			"{	name = 'Tag Preferences';\n"
+			"	scope = 'meta.tag';\n"
+			"	settings = ( 'smartTypingPairs', 'spellChecking', 'shellVariables' );\n"
+			"	uuid = '73251DBE-EBD2-470F-8148-E6F2EC1A9641';\n"
+			"}\n";
+
+		plist::dictionary_t const oldPlist   = boost::get<plist::dictionary_t>(plist::parse_ascii(oldPlistString));
+		plist::dictionary_t const newPlist   = boost::get<plist::dictionary_t>(plist::parse_ascii(newPlistString));
+		plist::dictionary_t const deltaPlist = boost::get<plist::dictionary_t>(plist::parse_ascii(deltaPlistString));
+
+		std::vector<plist::dictionary_t> plists;
+		plists.push_back(deltaPlist);
+		plists.push_back(oldPlist);
+		TS_ASSERT_EQUALS(to_s(plist::merge_delta(plists)), to_s(newPlist));
+	}
 };

@@ -123,6 +123,10 @@ static void update_key_path (plist::dictionary_t& plist, std::string const& keyP
 		{
 			if(plist::dictionary_t* dict = boost::get<plist::dictionary_t>(&it->second))
 				update_key_path(*dict, keyPath.substr(sep+1), value);
+			else if(plist::array_t* array = boost::get<plist::array_t>(&it->second))
+				array->push_back(keyPath.substr(sep+1));
+			else
+				fprintf(stderr, "error: unable to update key path ‘%s’ for plist:\n%s\n", keyPath.c_str(), to_s(plist).c_str());
 		}
 	}
 }
