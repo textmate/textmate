@@ -105,6 +105,18 @@ static NSProgressIndicator* OakCreateProgressIndicator ()
 	return res;
 }
 
+static NSButton* OakCreateStopSearchButton ()
+{
+	NSButton* res     = [[NSButton alloc] initWithFrame:NSZeroRect];
+	res.buttonType    = NSMomentaryChangeButton;
+	res.bordered      = NO;
+	res.image         = [NSImage imageNamed:NSImageNameStopProgressFreestandingTemplate];
+	res.imagePosition = NSImageOnly;
+	res.toolTip       = @"Stop Search";
+	[res.cell setImageScaling:NSImageScaleProportionallyDown];
+	return res;
+}
+
 @interface FindWindowController () <NSTextFieldDelegate, NSWindowDelegate, NSMenuDelegate>
 {
 	BOOL _wrapAround;
@@ -145,6 +157,7 @@ static NSProgressIndicator* OakCreateProgressIndicator ()
 @property (nonatomic, readwrite) NSButton*      replaceAndFindButton;
 @property (nonatomic, readwrite) NSButton*      findPreviousButton;
 @property (nonatomic, readwrite) NSButton*      findNextButton;
+@property (nonatomic, readwrite) NSButton*      stopSearchButton;
 
 @property (nonatomic) NSPopover*                findStringPopver;
 
@@ -212,6 +225,7 @@ static NSProgressIndicator* OakCreateProgressIndicator ()
 		self.replaceAndFindButton      = OakCreateButton(@"Replace & Find");
 		self.findPreviousButton        = OakCreateButton(@"Previous");
 		self.findNextButton            = OakCreateButton(@"Next");
+		self.stopSearchButton          = OakCreateStopSearchButton();
 
 		[self updateSearchInPopUpMenu];
 
@@ -252,6 +266,7 @@ static NSProgressIndicator* OakCreateProgressIndicator ()
 		self.replaceAndFindButton.action  = @selector(replaceAndFind:);
 		self.findPreviousButton.action    = @selector(findPrevious:);
 		self.findNextButton.action        = @selector(findNext:);
+		self.stopSearchButton.action      = @selector(stopSearch:);
 
 		self.objectController = [[NSObjectController alloc] initWithContent:self];
 		self.globHistoryList  = [[OakHistoryList alloc] initWithName:@"Find in Folder Globs.default" stackSize:10 defaultItems:@"*", @"*.txt", @"*.{c,h}", nil];
@@ -278,7 +293,7 @@ static NSProgressIndicator* OakCreateProgressIndicator ()
 			[contentView addSubview:view];
 		}
 
-		for(NSView* view in @[ self.resultsTopDivider, self.resultsScrollView, self.resultsBottomDivider, self.progressIndicator ])
+		for(NSView* view in @[ self.resultsTopDivider, self.resultsScrollView, self.resultsBottomDivider, self.stopSearchButton, self.progressIndicator ])
 			[view setTranslatesAutoresizingMaskIntoConstraints:NO];
 
 		[self updateConstraints];
@@ -362,6 +377,7 @@ static NSProgressIndicator* OakCreateProgressIndicator ()
 		NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithDictionary:views];
 		[dict addEntriesFromDictionary:@{
 			@"busy" : self.progressIndicator,
+			@"stopSearch" : self.stopSearchButton,
 		}];
 		views = dict;
 	}
@@ -418,7 +434,7 @@ static NSProgressIndicator* OakCreateProgressIndicator ()
 
 	if(self.isBusy)
 	{
-		CONSTRAINT(@"H:|-[busy]-[status]-|", NSLayoutFormatAlignAllCenterY);
+		CONSTRAINT(@"H:|-[stopSearch(==13)]-(==6)-[busy]-[status]-|", NSLayoutFormatAlignAllCenterY);
 	}
 	else
 	{
@@ -787,11 +803,13 @@ static NSProgressIndicator* OakCreateProgressIndicator ()
 
 	if(_busy = busyFlag)
 	{
+		[self.window.contentView addSubview:self.stopSearchButton];
 		[self.window.contentView addSubview:self.progressIndicator];
 		[self.progressIndicator startAnimation:self];
 	}
 	else
 	{
+		[self.stopSearchButton removeFromSuperview];
 		[self.progressIndicator stopAnimation:self];
 		[self.progressIndicator removeFromSuperview];
 	}
