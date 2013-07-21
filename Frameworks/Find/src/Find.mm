@@ -32,7 +32,6 @@ enum FindActionTag
 	FindActionReplaceAll,
 	FindActionReplaceAndFind,
 	FindActionReplaceSelected,
-	FindActionStopSearch,
 };
 
 @interface Find () <NSOutlineViewDataSource, NSOutlineViewDelegate>
@@ -63,8 +62,14 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		self.windowController.resultsOutlineView.delegate     = self;
 
 		[self.windowController.window addObserver:self forKeyPath:@"firstResponder" options:0 context:NULL];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowWillClose:) name:NSWindowWillCloseNotification object:nil];
 	}
 	return _windowController;
+}
+
+- (void)windowWillClose:(NSNotification*)aNotification
+{
+	[self stopSearch:self];
 }
 
 // ====================================
@@ -132,7 +137,12 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 - (IBAction)findPrevious:(id)sender       { [self performFindAction:FindActionFindPrevious   withWindowController:self.windowController]; }
 - (IBAction)replaceAll:(id)sender         { [self performFindAction:FindActionReplaceAll     withWindowController:self.windowController]; }
 - (IBAction)replaceAndFind:(id)sender     { [self performFindAction:FindActionReplaceAndFind withWindowController:self.windowController]; }
-- (IBAction)stopSearch:(id)sender         { [self performFindAction:FindActionStopSearch     withWindowController:self.windowController]; }
+
+- (IBAction)stopSearch:(id)sender
+{
+	[self.documentSearch stop];
+	self.windowController.statusString = @"Stopped.";
+}
 
 - (IBAction)saveAllDocuments:(id)sender
 {
@@ -200,8 +210,6 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 				self.documentSearch = folderSearch;
 			}
 			break;
-
-			case FindActionStopSearch: [self.documentSearch stop]; break;
 
 			case FindActionReplaceAll:
 			case FindActionReplaceSelected:

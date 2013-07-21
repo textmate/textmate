@@ -113,6 +113,8 @@ static NSButton* OakCreateStopSearchButton ()
 	res.image         = [NSImage imageNamed:NSImageNameStopProgressFreestandingTemplate];
 	res.imagePosition = NSImageOnly;
 	res.toolTip       = @"Stop Search";
+	res.keyEquivalent = @".";
+	res.keyEquivalentModifierMask = NSCommandKeyMask;
 	[res.cell setImageScaling:NSImageScaleProportionallyDown];
 	return res;
 }
