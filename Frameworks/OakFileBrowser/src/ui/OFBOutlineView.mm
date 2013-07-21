@@ -11,6 +11,13 @@
 @end
 
 @interface OFBOutlineView ()
+{
+	NSTableViewSelectionHighlightStyle defaultSelectionHighlightStyle;
+	NSTableViewDraggingDestinationFeedbackStyle defaultDraggingDestinationFeedbackStyle;
+	CGFloat defaultRowHeight;
+	NSSize defaultIntercellSpacing;
+	NSColor* defaultBackgroundColor;
+}
 @property (nonatomic, retain) NSIndexSet* draggedRows;
 
 - (void)performDoubleClick:(id)sender;
@@ -22,6 +29,70 @@
 
 @implementation OFBOutlineView
 @synthesize draggedRows;
+
+- (void)setRenderAsSourceList:(BOOL)value
+{
+	if(_renderAsSourceList == value)
+		return;
+
+	if(_renderAsSourceList = value)
+	{
+		defaultSelectionHighlightStyle          = [self selectionHighlightStyle];
+		defaultDraggingDestinationFeedbackStyle = [self draggingDestinationFeedbackStyle];
+		defaultRowHeight                        = [self rowHeight];
+		defaultIntercellSpacing                 = [self intercellSpacing];
+		defaultBackgroundColor                  = [self backgroundColor];
+
+		[self setSelectionHighlightStyle:NSTableViewSelectionHighlightStyleSourceList];
+		[self setRowHeight:16];
+		[self setIntercellSpacing:NSMakeSize(3.0, 2.0)];
+	}
+	else
+	{
+		[self setSelectionHighlightStyle:defaultSelectionHighlightStyle];
+		[self setRowHeight:defaultRowHeight];
+		[self setIntercellSpacing:defaultIntercellSpacing];
+
+		// setting selectionHighlightStyle to NSTableViewSelectionHighlightStyleSourceList
+		// will also change these properties and won't automaticlly be restored
+		[self setBackgroundColor:defaultBackgroundColor];
+		[self setDraggingDestinationFeedbackStyle:defaultDraggingDestinationFeedbackStyle];
+	}
+}
+
+/**
+ * Fixes the indentation of the row with the given index.
+ *
+ * When the source list style is used, the second level won't be indented.
+ * The reason for this is most likely due to the first level intended to
+ * be used as a "group row".
+ * But since group rows are not used we need to fix the indentation.
+ */
+- (NSRect)increaseIndentationAtRow:(NSInteger)row rect:(NSRect)rect adjustWidth:(BOOL)adjustWidth
+{
+	if(self.renderAsSourceList && [self levelForRow:row] != 0)
+	{
+		CGFloat indentation = [self indentationPerLevel];
+		rect.origin.x += indentation;
+		if(adjustWidth)
+			rect.size.width -= indentation;
+	}
+	return rect;
+}
+
+// Override to fix indentation
+- (NSRect)frameOfOutlineCellAtRow:(NSInteger)row
+{
+	NSRect rect = [super frameOfOutlineCellAtRow:row];
+	return [self increaseIndentationAtRow:row rect:rect adjustWidth:NO];
+}
+
+// Override to fix indentation
+- (NSRect)frameOfCellAtColumn:(NSInteger)column row:(NSInteger)row
+{
+	NSRect rect = [super frameOfCellAtColumn:column row:row];
+	return [self increaseIndentationAtRow:row rect:rect adjustWidth:YES];
+}
 
 - (void)showContextMenu:(id)sender
 {
