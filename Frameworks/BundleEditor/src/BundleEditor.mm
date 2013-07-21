@@ -331,6 +331,14 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 		changes.erase(trashedItem);
 		bundles::remove_item(trashedItem);
 		[self didChangeModifiedState];
+
+		if(!trashedItem->paths().empty())
+		{
+			std::string itemFolder = path::parent(trashedItem->paths().front());
+			if(trashedItem->kind() == bundles::kItemTypeBundle && trashedItem->paths().size() == 1)
+				itemFolder = path::parent(itemFolder);
+			[[BundlesManager sharedInstance] reloadPath:[NSString stringWithCxxString:itemFolder]];
+		}
 	}
 }
 
