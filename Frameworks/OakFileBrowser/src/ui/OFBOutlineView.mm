@@ -5,6 +5,7 @@
 #import <text/utf8.h>
 #import <oak/debug.h>
 #import <oak/oak.h>
+#import <settings/settings.h>
 
 @protocol FSDataSourceDragSource
 - (void)outlineView:(NSOutlineView*)anOutlineView draggedItems:(NSArray*)someItems endedWithOperation:(NSDragOperation)aDragOperation;
@@ -18,6 +19,16 @@
 - (BOOL)isPointInImage:(NSPoint)point;
 - (BOOL)isPointInText:(NSPoint)aPoint;
 - (BOOL)isPointInCloseButton:(NSPoint)aPoint;
+
+/**
+ * Fixes the indentation of the row with the given index.
+ *
+ * When the source list style is used, when the setting "fileBrowserSourceList"
+ * is enabled, the second level won't be indented. The reason for this is most
+ * likely due to the first level is intended to be used as a "group row".
+ * But since group rows are not used we need to fix the indentation.
+ */
+- (NSRect)fixIndentationAtRow:(NSInteger)row rect:(NSRect)rect decreaseWidth:(BOOL)decreaseWidth;
 @end
 
 @implementation OFBOutlineView
@@ -60,6 +71,36 @@
 	else if(![self.selectedRowIndexes containsIndex:row])
 		[self selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
 	return [self.menuDelegate menuForOutlineView:self];
+}
+
+// Override to fix indentation
+- (NSRect)frameOfOutlineCellAtRow:(NSInteger)row
+{
+	auto rect = [super frameOfOutlineCellAtRow:row];
+	return [self fixIndentationAtRow:row rect:rect decreaseWidth:NO];
+}
+
+// Override to fix indentation
+- (NSRect)frameOfCellAtColumn:(NSInteger)column row:(NSInteger)row
+{
+	auto rect = [super frameOfCellAtColumn:column row:row];
+	return [self fixIndentationAtRow:row rect:rect decreaseWidth:YES];
+}
+
+- (NSRect)fixIndentationAtRow:(NSInteger)row rect:(NSRect)rect decreaseWidth:(BOOL)decreaseWidth
+{
+	auto fixIndentation = [self selectionHighlightStyle] == NSTableViewSelectionHighlightStyleSourceList;
+
+	if (fixIndentation && [self levelForRow:row] != 0)
+	{
+		auto indentation = [self indentationPerLevel];
+		rect.origin.x += indentation;
+
+		if (decreaseWidth)
+			rect.size.width -= indentation;
+	}
+
+	return rect;
 }
 
 // =============================
