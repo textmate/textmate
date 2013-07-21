@@ -22,3 +22,6 @@
 [submodule "vendor/XcodeEditor/vendor"]
 	path = vendor/XcodeEditor/vendor
 	url = https://github.com/textmate/xcode-editor.git
+[submodule "vendor/Onigmo/vendor"]
+	path = vendor/Onigmo/vendor
+	url = https://github.com/textmate/Onigmo.git
