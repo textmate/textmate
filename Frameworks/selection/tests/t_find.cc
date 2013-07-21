@@ -43,7 +43,8 @@ public:
 	{
 		TS_ASSERT_EQUALS(matches("abcdef", "\\h+", find::regular_expression,                 ng::ranges_t(0)),   "1-1:7");
 		TS_ASSERT_EQUALS(matches("abcdef", "\\h+", find::regular_expression,                 ng::ranges_t(3)), "1:4-1:7");
-		TS_WARN("TODO: Investigate possible onigurma bug related to backwards search");
+
+		// The following test fails, see: https://github.com/k-takata/Onigmo/issues/22
 		// TS_ASSERT_EQUALS(matches("abcdef", "\\h+", find::regular_expression|find::backwards, ng::ranges_t(3)),   "1-1:4");
 
 		TS_ASSERT_EQUALS(matches("Foo\nBar", "^.", find::regular_expression, ng::ranges_t(0)), "1-1:2");
