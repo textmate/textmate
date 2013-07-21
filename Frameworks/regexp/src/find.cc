@@ -1,6 +1,6 @@
 #include "find.h"
 #include "private.h"
-#include "oniguruma.h"
+#include <Onigmo/oniguruma.h>
 #include <text/utf8.h>
 #include <cf/cf.h>
 

@@ -1,7 +1,7 @@
 #ifndef ONIG_REGEXP_H_UMTUKY6I
 #define ONIG_REGEXP_H_UMTUKY6I
 
-#include "oniguruma.h"
+#include <Onigmo/oniguruma.h>
 #include <oak/debug.h>
 
 namespace regexp
