@@ -32,6 +32,7 @@ enum FindActionTag
 	FindActionReplaceAll,
 	FindActionReplaceAndFind,
 	FindActionReplaceSelected,
+	FindActionStopSearch,
 };
 
 @interface Find () <NSOutlineViewDataSource, NSOutlineViewDelegate>
@@ -131,6 +132,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 - (IBAction)findPrevious:(id)sender       { [self performFindAction:FindActionFindPrevious   withWindowController:self.windowController]; }
 - (IBAction)replaceAll:(id)sender         { [self performFindAction:FindActionReplaceAll     withWindowController:self.windowController]; }
 - (IBAction)replaceAndFind:(id)sender     { [self performFindAction:FindActionReplaceAndFind withWindowController:self.windowController]; }
+- (IBAction)stopSearch:(id)sender         { [self performFindAction:FindActionStopSearch     withWindowController:self.windowController]; }
 
 - (IBAction)saveAllDocuments:(id)sender
 {
@@ -198,6 +200,8 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 				self.documentSearch = folderSearch;
 			}
 			break;
+
+			case FindActionStopSearch: [self.documentSearch stop]; break;
 
 			case FindActionReplaceAll:
 			case FindActionReplaceSelected:
