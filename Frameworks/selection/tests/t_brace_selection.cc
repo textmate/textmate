@@ -1,5 +1,31 @@
 #include <buffer/buffer.h>
 #include <selection/selection.h>
+#include <test/bundle_index.h>
+
+class HighlightPairFixtures
+{
+public:
+	HighlightPairFixtures ()
+	{
+		static std::string HighlightPairs =
+			"{	name     = 'Highlight Pairs';"
+			"	settings = {"
+			"		highlightPairs = ("
+			"			( '(', ')' ),"
+			"			( '{', '}' ),"
+			"			( '[', ']' ),"
+			"			( '“', '”' ),"
+			"			( '/<\\w+[^>]*>/', '/</\\w+>/' ),"
+			"		);"
+			"	};"
+			"}";
+
+		test::bundle_index_t bundleIndex;
+		bundleIndex.add(bundles::kItemTypeSettings, HighlightPairs);
+		bundleIndex.commit();
+	}
+	
+} singleton;
 
 class BraceSelectionTests : public CxxTest::TestSuite
 {
@@ -55,6 +81,32 @@ public:
 		TS_ASSERT_EQUALS(move("({bad‸ly) nested}", kSelectionMoveToEndOfTypingPair),   "({badly‸) nested}");
 	}
 
+	void test_tag_movement ()
+	{
+		TS_ASSERT_EQUALS(move("<html></html‸>", kSelectionMoveToBeginOfTypingPair), "<html></html‸>");
+		TS_ASSERT_EQUALS(move("<html></html>‸", kSelectionMoveToBeginOfTypingPair), "‸<html></html>");
+		TS_ASSERT_EQUALS(move("<html><body></body‸></html>", kSelectionMoveToBeginOfTypingPair), "<html><body>‸</body></html>");
+		TS_ASSERT_EQUALS(move("<html><body>‸</body></html>", kSelectionMoveToBeginOfTypingPair), "<html>‸<body></body></html>");
+
+		TS_ASSERT_EQUALS(move("<‸html></html>", kSelectionMoveToEndOfTypingPair), "<‸html></html>");
+		TS_ASSERT_EQUALS(move("‸<html></html>", kSelectionMoveToEndOfTypingPair), "<html></html>‸");
+		TS_ASSERT_EQUALS(move("<html><‸body></body></html>", kSelectionMoveToEndOfTypingPair), "<html><body>‸</body></html>");
+		TS_ASSERT_EQUALS(move("<html><body>‸</body></html>", kSelectionMoveToEndOfTypingPair), "<html><body></body>‸</html>");
+
+		TS_ASSERT_EQUALS(move("<ul><li>first‸</li>  <li> <a> <b>hello</b> <em>world</em></a></li><li>third</li></ul>", kSelectionMoveToBeginOfTypingPair), "<ul><li>‸first</li>  <li> <a> <b>hello</b> <em>world</em></a></li><li>third</li></ul>");
+		TS_ASSERT_EQUALS(move("<ul><li>first</li>‸  <li> <a> <b>hello</b> <em>world</em></a></li><li>third</li></ul>", kSelectionMoveToBeginOfTypingPair), "<ul>‸<li>first</li>  <li> <a> <b>hello</b> <em>world</em></a></li><li>third</li></ul>");
+		TS_ASSERT_EQUALS(move("<ul><li>first</li> ‸ <li> <a> <b>hello</b> <em>world</em></a></li><li>third</li></ul>", kSelectionMoveToBeginOfTypingPair), "<ul>‸<li>first</li>  <li> <a> <b>hello</b> <em>world</em></a></li><li>third</li></ul>");
+		TS_ASSERT_EQUALS(move("<ul><li>first</li>  <li‸> <a> <b>hello</b> <em>world</em></a></li><li>third</li></ul>", kSelectionMoveToBeginOfTypingPair), "<ul>‸<li>first</li>  <li> <a> <b>hello</b> <em>world</em></a></li><li>third</li></ul>");
+		TS_ASSERT_EQUALS(move("<ul><li>first</li>  <li>‸ <a> <b>hello</b> <em>world</em></a></li><li>third</li></ul>", kSelectionMoveToBeginOfTypingPair), "<ul>‸<li>first</li>  <li> <a> <b>hello</b> <em>world</em></a></li><li>third</li></ul>");
+		TS_ASSERT_EQUALS(move("<ul><li>first</li>  <li> <a> <b>hello</b>‸ <em>world</em></a></li><li>third</li></ul>", kSelectionMoveToBeginOfTypingPair), "<ul><li>first</li>  <li> <a> ‸<b>hello</b> <em>world</em></a></li><li>third</li></ul>");
+		TS_ASSERT_EQUALS(move("<ul><li>first</li>  <li> <a> <b>hello</b> ‸<em>world</em></a></li><li>third</li></ul>", kSelectionMoveToBeginOfTypingPair), "<ul><li>first</li>  <li> <a>‸ <b>hello</b> <em>world</em></a></li><li>third</li></ul>");
+		TS_ASSERT_EQUALS(move("<ul><li>first</li>  <li> <a> <b>hello</b> <em>world</em></a>‸</li><li>third</li></ul>", kSelectionMoveToBeginOfTypingPair), "<ul><li>first</li>  <li> ‸<a> <b>hello</b> <em>world</em></a></li><li>third</li></ul>");
+
+		TS_ASSERT_EQUALS(move("<ul><li>first‸</li>  <li> <a> <b>hello</b> <em>world</em></a></li><li>third</li></ul>", kSelectionMoveToEndOfTypingPair), "<ul><li>first</li>  <li> <a> <b>hello</b> <em>world</em></a></li><li>third</li>‸</ul>");
+		TS_ASSERT_EQUALS(move("<ul><li>first</li> ‸ <li> <a> <b>hello</b> <em>world</em></a></li><li>third</li></ul>", kSelectionMoveToEndOfTypingPair), "<ul><li>first</li>  <li> <a> <b>hello</b> <em>world</em></a></li><li>third</li>‸</ul>");
+		TS_ASSERT_EQUALS(move("<ul><li>first</li>  <li> <a> <b>hello</b> ‸<em>world</em></a></li><li>third</li></ul>", kSelectionMoveToEndOfTypingPair), "<ul><li>first</li>  <li> <a> <b>hello</b> <em>world</em>‸</a></li><li>third</li></ul>");
+	}
+
 	void test_brace_selection ()
 	{
 		ng::buffer_t buf;
@@ -90,5 +142,17 @@ public:
 		caret = ng::range_t(3);
 		TS_ASSERT_EQUALS(to_s(ng::highlight_ranges_for_movement(buf, caret, ng::move(buf, caret, kSelectionMoveRight))), "(empty)");
 		TS_ASSERT_EQUALS(to_s(ng::highlight_ranges_for_movement(buf, caret, ng::move(buf, caret, kSelectionMoveLeft))),  "(empty)");
+	}
+
+	void test_tag_highlight_pairs ()
+	{
+		ng::buffer_t buf;
+		buf.insert(0, "<a></a>");
+
+		ng::ranges_t caret = ng::range_t(1);
+		TS_ASSERT_EQUALS(to_s(ng::highlight_ranges_for_movement(buf, caret, ng::move(buf, caret, kSelectionMoveLeft))),  "[3-7]");
+
+		caret = ng::range_t(6);
+		TS_ASSERT_EQUALS(to_s(ng::highlight_ranges_for_movement(buf, caret, ng::move(buf, caret, kSelectionMoveRight))), "[0-3]");
 	}
 };
