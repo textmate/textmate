@@ -1,0 +1,7 @@
+SOURCES      = vendor/{enc/{ascii,euc_jp,iso8859_1,sjis,unicode,utf*},{reg*,st}}.c
+SOURCES     += src/*.c
+EXPORT       = vendor/oniguruma.h
+
+FLAGS       += -Ivendor/Onigmo -Ivendor/Onigmo/vendor
+C_FLAGS     += -include vendor/Onigmo/src/setup.h
+C_FLAGS     += -Wno-incompatible-pointer-types -Wno-char-subscripts
