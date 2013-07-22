@@ -121,6 +121,9 @@ OAK_DEBUG_VAR(AppController_Documents);
 					path = path::join(path::home(), urlStr.substr(tilde.size()));
 			}
 
+			if(path == NULL_STR && urlStr.find("file://") == 0)
+				path = path::join(path::home(), urlStr.substr(std::string("file://").size()));
+
 			if(path::is_directory(path))
 			{
 				document::show_browser(path);
