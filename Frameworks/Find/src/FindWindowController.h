@@ -41,6 +41,4 @@ extern NSString* const FFSearchInOpenFiles;
 
 - (IBAction)selectNextResult:(id)sender;
 - (IBAction)selectPreviousResult:(id)sender;
-
-- (void)showSaveChangesAlertAndCallback:(void(^)())callback;
 @end

@@ -16,7 +16,7 @@ extern NSString* const FFDocumentSearchDidFinishNotification;
 - (std::string const&)matchText;
 @end
 
-@interface FFDocumentSearch : NSObject
+@interface FFDocumentSearch : NSDocument
 // Set up the search with these options
 @property (nonatomic, assign) find::options_t options;
 @property (nonatomic, copy) NSString* searchString;
@@ -43,8 +43,6 @@ extern NSString* const FFDocumentSearchDidFinishNotification;
 
 - (BOOL)skipReplacementForMatch:(FFMatch*)aMatch;
 - (void)setSkipReplacement:(BOOL)flag forMatch:(FFMatch*)aMatch;
-
-- (NSUInteger)saveAllDocuments;
 
 @property (nonatomic, assign) BOOL hasPerformedReplacement;
 @property (nonatomic, assign) BOOL hasPerformedSave;

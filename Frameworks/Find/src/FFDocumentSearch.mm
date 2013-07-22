@@ -1,5 +1,8 @@
 #import "FFDocumentSearch.h"
+#import "FindWindowController.h"
+#import <OakAppKit/NSAlert Additions.h>
 #import <OakAppKit/NSImage Additions.h>
+#import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakFileIconImage.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakFoundation/OakTimer.h>
@@ -288,25 +291,42 @@ OAK_DEBUG_VAR(Find_FolderSearch);
 {
 	ASSERTF(!hasPerformedReplacement || !flag, "Replacement has already been performed");
 	hasPerformedReplacement = flag;
+	[self updateChangeCount:NSChangeDone];
 }
 
 - (void)setHasPerformedSave:(BOOL)flag
 {
 	ASSERTF(!hasPerformedSave || !flag, "Save has already been performed");
 	hasPerformedSave = flag;
+	[self updateChangeCount:NSChangeCleared];
 }
 
-- (NSUInteger)saveAllDocuments
+- (IBAction)saveAllDocuments:(id)sender
 {
 	NSUInteger fileCount = 0;
+	std::vector<document::document_ptr> failedDocs;
 	for(FFMatch* fileMatch in [self allDocumentsWithSelectedMatches])
 	{
 		if(document::document_ptr doc = [fileMatch match].document)
-			doc->save();
-		++fileCount;
+		{
+			if(doc->save())
+					++fileCount;
+			else	failedDocs.push_back(doc);
+		}
 	}
-	self.hasPerformedSave = YES;
-	return fileCount;
+
+	FindWindowController* fwc = [[self windowControllers] lastObject];
+	if(failedDocs.empty())
+	{
+		fwc.statusString = [NSString stringWithFormat:@"%lu file%s saved.", fileCount, fileCount == 1 ? "" : "s"];
+		[fwc.resultsOutlineView reloadData];
+		self.hasPerformedSave = YES;
+	}
+	else
+	{
+		NSBeep();
+		fwc.statusString = [NSString stringWithFormat:@"%zu file%s failed to save.", failedDocs.size(), failedDocs.size() == 1 ? "" : "s"];
+	}
 }
 
 // ===================
@@ -373,8 +393,44 @@ OAK_DEBUG_VAR(Find_FolderSearch);
 		matchingDocuments        = [NSMutableArray new];
 		matchInfo                = [NSMutableDictionary new];
 		replacementMatchesToSkip = [NSMutableSet new];
+
+		self.fileType = @"search-results";
 	}
 	return self;
+}
+
+- (void)close
+{
+	[self stop];
+}
+
+- (void)canCloseDocumentWithDelegate:(id)delegate shouldCloseSelector:(SEL)shouldCloseSelector contextInfo:(void*)contextInfo
+{
+	if(![self isDocumentEdited])
+		return [super canCloseDocumentWithDelegate:delegate shouldCloseSelector:shouldCloseSelector contextInfo:contextInfo];
+
+	NSAlert* alert = [NSAlert tmAlertWithMessageText:@"Do you want to save the changes from your replace operation?" informativeText:@"Your changes will be lost if you don’t save them." buttons:@"Save All", @"Cancel", @"Don’t Save", nil];
+	OakShowAlertForWindow(alert, [[self.windowControllers lastObject] window], ^(NSInteger returnCode){
+		BOOL canClose = YES;
+		if(returnCode == NSAlertFirstButtonReturn) // Save All
+		{
+			[self saveAllDocuments:self];
+			canClose = self.hasPerformedSave;
+		}
+		else if(returnCode == NSAlertThirdButtonReturn) // Discard
+			[self updateChangeCount:NSChangeCleared]; // FIXME Undo replacements
+		else if(returnCode == NSAlertSecondButtonReturn) // Cancel
+			canClose = NO;
+
+		((void(*)(id, SEL, NSDocument*, BOOL, void*))[delegate methodForSelector:shouldCloseSelector])(delegate, shouldCloseSelector, self, canClose, contextInfo);
+	});
+}
+
+- (BOOL)validateUserInterfaceItem:(id <NSValidatedUserInterfaceItem>)anItem
+{
+	if(anItem.action == @selector(saveAllDocuments:))
+		return self.hasPerformedReplacement && !self.hasPerformedSave;
+	return [super validateUserInterfaceItem:anItem];
 }
 
 - (void)dealloc

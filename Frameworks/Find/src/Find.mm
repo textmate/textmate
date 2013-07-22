@@ -62,14 +62,8 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		self.windowController.resultsOutlineView.delegate     = self;
 
 		[self.windowController.window addObserver:self forKeyPath:@"firstResponder" options:0 context:NULL];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowWillClose:) name:NSWindowWillCloseNotification object:nil];
 	}
 	return _windowController;
-}
-
-- (void)windowWillClose:(NSNotification*)aNotification
-{
-	[self stopSearch:self];
 }
 
 // ====================================
@@ -81,6 +75,9 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	self.windowController.searchIn = searchScope;
 	[self updateActionButtons:self];
 	[self.windowController showWindow:self];
+
+	if(_documentSearch && _documentSearch.windowControllers.count == 0)
+		[_documentSearch addWindowController:self.windowController];
 }
 
 - (IBAction)showFolderSelectionPanel:(id)sender
@@ -144,13 +141,11 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	self.windowController.statusString = @"Stopped.";
 }
 
-- (IBAction)saveAllDocuments:(id)sender
+- (void)document:(NSDocument*)aDocument shouldClose:(BOOL)flag contextInfo:(FindActionTag*)context
 {
-	D(DBF_Find_Base, bug("\n"););
-	NSUInteger savedFileCount = [_documentSearch saveAllDocuments];
-	self.windowController.statusString = [NSString stringWithFormat:@"%lu file%s saved.", savedFileCount, savedFileCount == 1 ? "" : "s"];
-	self.windowController.window.documentEdited = NO;
-	[self.windowController.resultsOutlineView reloadData];
+	if(flag)
+		[self performFindAction:*context withWindowController:[[aDocument windowControllers] lastObject]];
+	delete context;
 }
 
 - (void)performFindAction:(FindActionTag)action withWindowController:(FindWindowController*)controller
@@ -159,13 +154,8 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	if(controller.findErrorString != nil)
 		return;
 
-	if(self.windowController.window.isDocumentEdited)
-	{
-		[self.windowController showSaveChangesAlertAndCallback:^{
-			[self performFindAction:action withWindowController:controller];
-		}];
-		return;
-	}
+	if(_documentSearch && _documentSearch.isDocumentEdited)
+		return [_documentSearch canCloseDocumentWithDelegate:self shouldCloseSelector:@selector(document:shouldClose:contextInfo:) contextInfo:new FindActionTag(action)];
 
 	_findOptions = (controller.regularExpression ? find::regular_expression : find::none) | (controller.ignoreWhitespace ? find::ignore_whitespace : find::none) | (controller.fullWords ? find::full_words : find::none) | (controller.ignoreCase ? find::ignore_case : find::none) | (controller.wrapAround ? find::wrap_around : find::none);
 	if(action == FindActionFindPrevious)
@@ -345,6 +335,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 {
 	if(_documentSearch)
 	{
+		[_documentSearch removeWindowController:self.windowController];
 		[_documentSearch removeObserver:self forKeyPath:@"currentPath"];
 		[_documentSearch removeObserver:self forKeyPath:@"hasPerformedReplacement"];
 		[[NSNotificationCenter defaultCenter] removeObserver:self name:FFDocumentSearchDidReceiveResultsNotification object:_documentSearch];
@@ -372,6 +363,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(folderSearchDidReceiveResults:) name:FFDocumentSearchDidReceiveResultsNotification object:_documentSearch];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(folderSearchDidFinish:) name:FFDocumentSearchDidFinishNotification object:_documentSearch];
+		[_documentSearch addWindowController:self.windowController];
 		[_documentSearch addObserver:self forKeyPath:@"currentPath" options:(NSKeyValueObservingOptionNew|NSKeyValueObservingOptionOld) context:NULL];
 		[_documentSearch addObserver:self forKeyPath:@"hasPerformedReplacement" options:0 context:NULL];
 		[_documentSearch start];
@@ -833,16 +825,4 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 - (void)copyMatchingPartsWithFilename:(id)sender { [self copyEntireLines:NO  withFilename:YES]; }
 - (void)copyEntireLines:(id)sender               { [self copyEntireLines:YES withFilename:NO ]; }
 - (void)copyEntireLinesWithFilename:(id)sender   { [self copyEntireLines:YES withFilename:YES]; }
-
-// ===================
-// = Menu Validation =
-// ===================
-
-- (BOOL)validateMenuItem:(NSMenuItem*)aMenuItem
-{
-	BOOL res = YES;
-	if(aMenuItem.action == @selector(saveAllDocuments:))
-		res = _documentSearch.hasPerformedReplacement && !_documentSearch.hasPerformedSave;
-	return res;
-}
 @end

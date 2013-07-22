@@ -566,33 +566,6 @@ static NSButton* OakCreateStopSearchButton ()
 	[self commitEditing];
 }
 
-- (BOOL)windowShouldClose:(id)sender
-{
-	if(self.window.isDocumentEdited)
-	{
-		[self showSaveChangesAlertAndCallback:^{ [self close]; }];
-		return NO;
-	}
-	return YES;
-}
-
-- (void)showSaveChangesAlertAndCallback:(void(^)())callback
-{
-	NSAlert* alert = [NSAlert tmAlertWithMessageText:@"Do you want to save the changes from your replace operation?" informativeText:@"Your changes will be lost if you don’t save them." buttons:@"Save All", @"Cancel", @"Don’t Save", nil];
-	OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){
-		if(returnCode == NSAlertFirstButtonReturn) // Save All
-		{
-			[NSApp sendAction:@selector(saveAllDocuments:) to:self.nextResponder from:self];
-			callback();
-		}
-		else if(returnCode == NSAlertThirdButtonReturn) // Discard
-		{
-			self.window.documentEdited = NO; // FIXME Actually undo replacements
-			callback();
-		}
-	});
-}
-
 // ==============================
 // = Create “where” pop-up menu =
 // ==============================
