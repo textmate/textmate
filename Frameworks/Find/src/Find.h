@@ -27,6 +27,6 @@ PUBLIC @interface Find : NSResponder <OakFindServerProtocol>
 @property (nonatomic, readonly) NSString*        replaceString;
 @property (nonatomic, readonly) find::options_t  findOptions;
 
-- (void)didFind:(NSUInteger)aNumber occurrencesOf:(NSString*)aFindString atPosition:(text::pos_t const&)aPosition;
+- (void)didFind:(NSUInteger)aNumber occurrencesOf:(NSString*)aFindString atPosition:(text::pos_t const&)aPosition wrapped:(BOOL)didWrap;
 - (void)didReplace:(NSUInteger)aNumber occurrencesOf:(NSString*)aFindString with:(NSString*)aReplacementString;
 @end

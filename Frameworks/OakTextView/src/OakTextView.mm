@@ -340,7 +340,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 - (NSString*)findString      { return [[OakPasteboard pasteboardWithName:NSFindPboard] current].string;    }
 - (NSString*)replaceString   { return [[OakPasteboard pasteboardWithName:NSReplacePboard] current].string; }
 
-- (void)didFind:(NSUInteger)aNumber occurrencesOf:(NSString*)aFindString atPosition:(text::pos_t const&)aPosition
+- (void)didFind:(NSUInteger)aNumber occurrencesOf:(NSString*)aFindString atPosition:(text::pos_t const&)aPosition wrapped:(BOOL)didWrap
 {
 	static NSString* const formatStrings[2][3] = {
 		{ @"No more occurrences of “%@”.", nil, @"%2$ld occurrences of “%@”." },
@@ -1825,7 +1825,8 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 			if(documents && [documents count] > 1)
 				options &= ~find::wrap_around;
 
-			auto allMatches = ng::find(document->buffer(), editor->ranges(), findStr, options, onlyInSelection ? editor->ranges() : ng::ranges_t());
+			bool didWrap = false;
+			auto allMatches = ng::find(document->buffer(), editor->ranges(), findStr, options, onlyInSelection ? editor->ranges() : ng::ranges_t(), &didWrap);
 
 			ng::ranges_t res;
 			std::transform(allMatches.begin(), allMatches.end(), std::back_inserter(res), [](decltype(allMatches)::value_type const& p){ return p.first; });
@@ -1862,7 +1863,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 			if(isCounting)
 			{
-				[aFindServer didFind:res.size() occurrencesOf:aFindServer.findString atPosition:res.size() == 1 ? document->buffer().convert(res.last().min().index) : text::pos_t::undefined];
+				[aFindServer didFind:res.size() occurrencesOf:aFindServer.findString atPosition:res.size() == 1 ? document->buffer().convert(res.last().min().index) : text::pos_t::undefined wrapped:NO];
 			}
 			else
 			{
@@ -1890,7 +1891,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 				}
 
 				[self highlightRanges:newSelection];
-				[aFindServer didFind:newSelection.size() occurrencesOf:aFindServer.findString atPosition:res.size() == 1 ? document->buffer().convert(res.last().min().index) : text::pos_t::undefined];
+				[aFindServer didFind:newSelection.size() occurrencesOf:aFindServer.findString atPosition:res.size() == 1 ? document->buffer().convert(res.last().min().index) : text::pos_t::undefined wrapped:didWrap];
 			}
 		}
 		break;

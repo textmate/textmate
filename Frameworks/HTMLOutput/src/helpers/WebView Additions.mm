@@ -54,8 +54,8 @@
 			BOOL wrapAround = aFindServer.findOptions & find::wrap_around;
 
 			if([self searchFor:aFindServer.findString direction:!backwards caseSensitive:!ignoreCase wrap:wrapAround])
-					[aFindServer didFind:1 occurrencesOf:[self selection] atPosition:text::pos_t::undefined];
-			else	[aFindServer didFind:0 occurrencesOf:aFindServer.findString atPosition:text::pos_t::undefined];
+					[aFindServer didFind:1 occurrencesOf:[self selection] atPosition:text::pos_t::undefined wrapped:NO];
+			else	[aFindServer didFind:0 occurrencesOf:aFindServer.findString atPosition:text::pos_t::undefined wrapped:NO];
 		}
 		break;
 	}
