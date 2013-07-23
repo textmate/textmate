@@ -1,5 +1,21 @@
 # Changes
 
+## 2013-07-23 ([a9449](https://github.com/textmate/textmate/compare/a9443...a9449))
+
+* If a tab is sticky (settable via its context menu) then it will not close when using the batch close actions like holding option when opening a file via file chooser or file browser, etc.
+
+* The `highlightPairs` setting now support regular expressions. To indicate a value is a regular expression, surround it with slashes, e.g. `/<\w+.*?>/`. This setting is used for highlighting counterparts when caret moves over characters but you can also jump to the next/previous paired character (with same nesting level) via ⌃↓/⌃↑ and you can select the content with ⇧⌘B. The HTML bundle has been updated to declare start/end tags as pairs (_HTML → Settings → Miscellaneous_).
+
+* The file used for _Go → Go to Related File_ (⌥⌘↑) can be set using a `relatedFilePath` setting in `.tm_properties`. If the file does not exist, TextMate will try its built-in search (which looks for files with same base name) and if nothing is found, it will create a new tab using the path specified via `relatedFilePath`. The default properties have added the following settings to allow switching between test and regular `*.go` files:
+
+		[ *.go ]
+		relatedFilePath = "${TM_FILEPATH/(?=\.go$)/_test/}"
+	
+		[ *_test.go ]
+		relatedFilePath = "${TM_FILEPATH/_test(?=\.go$)//}"
+
+* A folder search can now be stopped via the stop button next to the status text or by pressing ⌘.. *[David Howden]*
+
 ## 2013-06-28 ([a9439](https://github.com/textmate/textmate/compare/a9437...a9439))
 
 * Add support for printing. You can set the theme to use in the print dialog. The font used for printing is the document font settable via _View → Font_ though hardcoded to 11 points. If you want to increase the size then adjust the scale factor.
