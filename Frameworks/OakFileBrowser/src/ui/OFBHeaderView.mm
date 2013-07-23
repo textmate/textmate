@@ -24,6 +24,8 @@ static NSPopUpButton* OakCreateFolderPopUpButton ()
 	NSPopUpButton* res = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:YES];
 	[[res cell] setBackgroundStyle:NSBackgroundStyleLight];
 	[res setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
+	[res setContentHuggingPriority:NSLayoutPriorityFittingSizeCompression forOrientation:NSLayoutConstraintOrientationHorizontal];
+	[res setContentHuggingPriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationVertical];
 	[res setBordered:NO];
 	return res;
 }
