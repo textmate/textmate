@@ -824,7 +824,8 @@
 											<object class="NSMenuItem" id="729032971">
 												<reference key="NSMenu" ref="558062756"/>
 												<string key="NSTitle">Ignore Case</string>
-												<string key="NSKeyEquiv"/>
+												<string key="NSKeyEquiv">c</string>
+												<int key="NSKeyEquivModMask">1572864</int>
 												<int key="NSMnemonicLoc">2147483647</int>
 												<reference key="NSOnImage" ref="944637517"/>
 												<reference key="NSMixedImage" ref="596846250"/>
@@ -6442,10 +6443,10 @@
 							<string>goToDesktop:</string>
 							<string>goToFavorites:</string>
 							<string>goToFile:</string>
-							<string>goToRelatedFile:</string>
 							<string>goToHome:</string>
 							<string>goToParentFolder:</string>
 							<string>goToProjectFolder:</string>
+							<string>goToRelatedFile:</string>
 							<string>goToSCMDataSource:</string>
 							<string>mergeAllWindows:</string>
 							<string>moveDocumentToNewWindow:</string>
@@ -6521,10 +6522,10 @@
 							<string>goToDesktop:</string>
 							<string>goToFavorites:</string>
 							<string>goToFile:</string>
-							<string>goToRelatedFile:</string>
 							<string>goToHome:</string>
 							<string>goToParentFolder:</string>
 							<string>goToProjectFolder:</string>
+							<string>goToRelatedFile:</string>
 							<string>goToSCMDataSource:</string>
 							<string>mergeAllWindows:</string>
 							<string>moveDocumentToNewWindow:</string>
@@ -6578,10 +6579,6 @@
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
-								<string key="name">goToRelatedFile:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
 								<string key="name">goToHome:</string>
 								<string key="candidateClassName">id</string>
 							</object>
@@ -6591,6 +6588,10 @@
 							</object>
 							<object class="IBActionInfo">
 								<string key="name">goToProjectFolder:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">goToRelatedFile:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
@@ -6716,12 +6717,12 @@
 							<string>goToComputer:</string>
 							<string>goToFavorites:</string>
 							<string>goToFile:</string>
-							<string>goToRelatedFile:</string>
 							<string>goToHome:</string>
 							<string>goToNextBookmark:</string>
 							<string>goToParentFolder:</string>
 							<string>goToPreviousBookmark:</string>
 							<string>goToProjectFolder:</string>
+							<string>goToRelatedFile:</string>
 							<string>goToSCMDataSource:</string>
 							<string>incrementalSearch:</string>
 							<string>incrementalSearchPrevious:</string>
@@ -6893,12 +6894,12 @@
 							<string>goToComputer:</string>
 							<string>goToFavorites:</string>
 							<string>goToFile:</string>
-							<string>goToRelatedFile:</string>
 							<string>goToHome:</string>
 							<string>goToNextBookmark:</string>
 							<string>goToParentFolder:</string>
 							<string>goToPreviousBookmark:</string>
 							<string>goToProjectFolder:</string>
+							<string>goToRelatedFile:</string>
 							<string>goToSCMDataSource:</string>
 							<string>incrementalSearch:</string>
 							<string>incrementalSearchPrevious:</string>
@@ -7011,10 +7012,6 @@
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
-								<string key="name">goToRelatedFile:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
 								<string key="name">goToHome:</string>
 								<string key="candidateClassName">id</string>
 							</object>
@@ -7032,6 +7029,10 @@
 							</object>
 							<object class="IBActionInfo">
 								<string key="name">goToProjectFolder:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">goToRelatedFile:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
