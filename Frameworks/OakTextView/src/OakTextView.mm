@@ -342,12 +342,17 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 - (void)didFind:(NSUInteger)aNumber occurrencesOf:(NSString*)aFindString atPosition:(text::pos_t const&)aPosition wrapped:(BOOL)didWrap
 {
-	static NSString* const formatStrings[2][3] = {
-		{ @"No more occurrences of “%@”.", nil, @"%2$ld occurrences of “%@”." },
-		{ @"No more matches for “%@”.",    nil, @"%2$ld matches for “%@”."    },
-	};
-	if(NSString* format = formatStrings[(self.findOptions & find::regular_expression) ? 1 : 0][aNumber > 2 ? 2 : aNumber])
-		OakShowToolTip([NSString stringWithFormat:format, aFindString, aNumber], [self.textView positionForWindowUnderCaret]);
+	NSString* format = nil;
+	switch(aNumber)
+	{
+		case 0:  format = @"No more %@ “%@”.";                break;
+		case 1:  format = didWrap ? @"Search wrapped." : nil; break;
+		default: format = @"%2$ld %@ “%@”.";                  break;
+	}
+
+	NSString* classifier = (self.findOptions & find::regular_expression) ? @"matches for" : @"occurrences of";
+	if(format)
+		OakShowToolTip([NSString stringWithFormat:format, classifier, aFindString, aNumber], [self.textView positionForWindowUnderCaret]);
 }
 
 - (void)didReplace:(NSUInteger)aNumber occurrencesOf:(NSString*)aFindString with:(NSString*)aReplacementString
