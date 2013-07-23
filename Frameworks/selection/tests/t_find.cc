@@ -2,6 +2,48 @@
 
 class FindTests : public CxxTest::TestSuite
 {
+	std::string search (std::string const& needle, std::string haystack, find::options_t options = find::none, bool* didWrap = nullptr)
+	{
+		static std::string const kMarker = "‸";
+
+		ng::ranges_t ranges;
+
+		auto first = ng::index_t(haystack.find(kMarker));
+		if(first.index != std::string::npos)
+		{
+			ng::range_t range(first);
+
+			haystack.replace(range.first.index, kMarker.size(), "");
+			auto last = ng::index_t(haystack.find(kMarker));
+			if(last.index != std::string::npos)
+			{
+				range.last = last;
+				haystack.replace(last.index, kMarker.size(), "");
+			}
+
+			ranges.push_back(range);
+		}
+		else
+		{
+			options |= find::all_matches;
+		}
+
+		ng::buffer_t buffer;
+		buffer.insert(0, haystack);
+
+		std::set<size_t> marks;
+		for(auto pair : ng::find(buffer, ranges, needle, options, ng::ranges_t(), didWrap))
+		{
+			marks.insert(pair.first.first.index);
+			marks.insert(pair.first.last.index);
+		}
+
+		riterate(index, marks)
+			haystack.insert(*index, kMarker);
+
+		return haystack;
+	}
+
 	std::string matches (ng::buffer_t const& buffer, std::string const& str, find::options_t options = find::none, ng::ranges_t const& ranges = ng::ranges_t())
 	{
 		ng::ranges_t res;
@@ -14,11 +56,97 @@ public:
 	void test_find_forward ()
 	{
 		TS_ASSERT_EQUALS(matches("this (is (a test)).", "is", find::none, ng::ranges_t(4)), "1:7-1:9");
+
+		bool didWrap = false;
+		auto options = find::none;
+
+		TS_ASSERT_EQUALS("‸xx‸ ‸xx‸ ‸xx‸ ‸xx‸", search("xx", "xx xx xx xx",         options, &didWrap)); TS_ASSERT(!didWrap);
+
+		TS_ASSERT_EQUALS("‸xx‸ xx xx xx",       search("xx", "‸xx xx xx xx",        options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("xx ‸xx‸ xx xx",       search("xx", "x‸x xx xx xx",        options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("xx ‸xx‸ xx xx",       search("xx", "xx‸ xx xx xx",        options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("xx ‸xx‸ xx xx",       search("xx", "xx ‸xx xx xx",        options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("xx ‸xx‸ xx xx",       search("xx", "‸x‸x xx xx xx",       options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("xx ‸xx‸ xx xx",       search("xx", "‸xx‸ xx xx xx",       options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("xx ‸xx‸ xx xx",       search("xx", "‸xx ‸xx xx xx",       options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("xx xx ‸xx‸ xx",       search("xx", "‸xx x‸x xx xx",       options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("xx xx xx xx",         search("xx", "xx xx xx xx‸",        options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("xx xx xx xx",         search("xx", "xx xx xx x‸x",        options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("xx xx xx ‸xx‸",       search("xx", "xx xx xx ‸xx",        options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("xx xx xx ‸xx‸",       search("xx", "xx xx xx‸ xx",        options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("xx xx xx xx",         search("xx", "xx xx xx x‸x‸",       options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("xx xx xx xx",         search("xx", "xx xx xx ‸xx‸",       options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("xx xx xx ‸xx‸",       search("xx", "xx xx xx‸ xx‸",       options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("xx xx xx ‸xx‸",       search("xx", "xx xx x‸x xx‸",       options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("xx xx ‸xx‸ xx",       search("xx", "xx xx ‸xx xx‸",       options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("xx xx ‸xx‸ xx",       search("xx", "xx xx‸ xx xx‸",       options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("xx xx ‸xx‸ xx",       search("xx", "xx x‸x xx xx‸",       options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("xx ‸xx‸ xx xx",       search("xx", "xx ‸xx xx xx‸",       options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("xx ‸xx‸ xx xx",       search("xx", "xx‸ xx xx xx‸",       options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("‸xx‸ xx xx xx",       search("xx", "‸xx xx xx xx‸",       options, &didWrap)); TS_ASSERT(!didWrap);
+
+		auto wrapAround = options | find::wrap_around;
+		TS_ASSERT_EQUALS("‸xx‸ xx xx xx",       search("xx", "xx xx xx xx‸",     wrapAround, &didWrap)); TS_ASSERT(didWrap);
+		TS_ASSERT_EQUALS("‸xx‸ xx xx xx",       search("xx", "xx xx xx x‸x",     wrapAround, &didWrap)); TS_ASSERT(didWrap);
+		TS_ASSERT_EQUALS("xx xx xx ‸xx‸",       search("xx", "xx xx xx ‸xx",     wrapAround, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("xx xx xx ‸xx‸",       search("xx", "xx xx xx‸ xx",     wrapAround, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("‸xx‸ xx xx xx",       search("xx", "xx xx xx x‸x‸",    wrapAround, &didWrap)); TS_ASSERT(didWrap);
+		TS_ASSERT_EQUALS("‸xx‸ xx xx xx",       search("xx", "xx xx xx ‸xx‸",    wrapAround, &didWrap)); TS_ASSERT(didWrap);
+		TS_ASSERT_EQUALS("‸xx‸ xx xx xx",       search("xx", "xx xx xx‸ xx‸",    wrapAround, &didWrap)); TS_ASSERT(didWrap);
+		TS_ASSERT_EQUALS("‸xx‸ xx xx xx",       search("xx", "xx xx ‸xx xx‸",    wrapAround, &didWrap)); TS_ASSERT(didWrap);
+		TS_ASSERT_EQUALS("‸xx‸ xx xx xx",       search("xx", "xx xx‸ xx xx‸",    wrapAround, &didWrap)); TS_ASSERT(didWrap);
+		TS_ASSERT_EQUALS("‸xx‸ xx xx xx",       search("xx", "xx x‸x xx xx‸",    wrapAround, &didWrap)); TS_ASSERT(didWrap);
+		TS_ASSERT_EQUALS("‸xx‸ xx xx xx",       search("xx", "xx ‸xx xx xx‸",    wrapAround, &didWrap)); TS_ASSERT(didWrap);
+		TS_ASSERT_EQUALS("‸xx‸ xx xx xx",       search("xx", "xx‸ xx xx xx‸",    wrapAround, &didWrap)); TS_ASSERT(didWrap);
+		TS_ASSERT_EQUALS("‸xx‸ xx xx xx",       search("xx", "‸xx xx xx xx‸",    wrapAround, &didWrap)); TS_ASSERT(!didWrap);
 	}
 
 	void test_find_backward ()
 	{
 		TS_ASSERT_EQUALS(matches("this (is (a test)).", "is", find::backwards, ng::ranges_t(4)), "1:3-1:5");
+
+		bool didWrap = false;
+		auto options = find::backwards;
+
+		TS_ASSERT_EQUALS("‸xx‸ ‸xx‸ ‸xx‸ ‸xx‸", search("xx", "xx xx xx xx",         options, &didWrap)); TS_ASSERT(!didWrap);
+
+		TS_ASSERT_EQUALS("xx xx xx xx",         search("xx", "‸xx xx xx xx",        options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("xx xx xx xx",         search("xx", "x‸x xx xx xx",        options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("‸xx‸ xx xx xx",       search("xx", "xx‸ xx xx xx",        options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("‸xx‸ xx xx xx",       search("xx", "xx ‸xx xx xx",        options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("xx xx xx xx",         search("xx", "‸x‸x xx xx xx",       options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("xx xx xx xx",         search("xx", "‸xx‸ xx xx xx",       options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("‸xx‸ xx xx xx",       search("xx", "‸xx ‸xx xx xx",       options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("‸xx‸ xx xx xx",       search("xx", "‸xx x‸x xx xx",       options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("xx xx xx ‸xx‸",       search("xx", "xx xx xx xx‸",        options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("xx xx ‸xx‸ xx",       search("xx", "xx xx xx x‸x",        options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("xx xx ‸xx‸ xx",       search("xx", "xx xx xx ‸xx",        options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("xx xx ‸xx‸ xx",       search("xx", "xx xx xx‸ xx",        options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("xx xx ‸xx‸ xx",       search("xx", "xx xx xx x‸x‸",       options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("xx xx ‸xx‸ xx",       search("xx", "xx xx xx ‸xx‸",       options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("xx xx ‸xx‸ xx",       search("xx", "xx xx xx‸ xx‸",       options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("xx ‸xx‸ xx xx",       search("xx", "xx xx x‸x xx‸",       options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("xx ‸xx‸ xx xx",       search("xx", "xx xx ‸xx xx‸",       options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("xx ‸xx‸ xx xx",       search("xx", "xx xx‸ xx xx‸",       options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("‸xx‸ xx xx xx",       search("xx", "xx x‸x xx xx‸",       options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("‸xx‸ xx xx xx",       search("xx", "xx ‸xx xx xx‸",       options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("‸xx‸ xx xx xx",       search("xx", "xx‸ xx xx xx‸",       options, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("xx xx xx ‸xx‸",       search("xx", "‸xx xx xx xx‸",       options, &didWrap)); TS_ASSERT(!didWrap);
+
+		auto wrapAround = options | find::wrap_around;
+		TS_ASSERT_EQUALS("xx xx xx ‸xx‸",       search("xx", "‸xx xx xx xx",     wrapAround, &didWrap)); TS_ASSERT(didWrap);
+		TS_ASSERT_EQUALS("xx xx xx ‸xx‸",       search("xx", "x‸x xx xx xx",     wrapAround, &didWrap)); TS_ASSERT(didWrap);
+		TS_ASSERT_EQUALS("‸xx‸ xx xx xx",       search("xx", "xx‸ xx xx xx",     wrapAround, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("‸xx‸ xx xx xx",       search("xx", "xx ‸xx xx xx",     wrapAround, &didWrap)); TS_ASSERT(!didWrap);
+		TS_ASSERT_EQUALS("xx xx xx ‸xx‸",       search("xx", "‸x‸x xx xx xx",    wrapAround, &didWrap)); TS_ASSERT(didWrap);
+		TS_ASSERT_EQUALS("xx xx xx ‸xx‸",       search("xx", "‸xx‸ xx xx xx",    wrapAround, &didWrap)); TS_ASSERT(didWrap);
+		TS_ASSERT_EQUALS("xx xx xx ‸xx‸",       search("xx", "‸xx ‸xx xx xx",    wrapAround, &didWrap)); TS_ASSERT(didWrap);
+		TS_ASSERT_EQUALS("xx xx xx ‸xx‸",       search("xx", "‸xx xx‸ xx xx",    wrapAround, &didWrap)); TS_ASSERT(didWrap);
+		TS_ASSERT_EQUALS("xx xx xx ‸xx‸",       search("xx", "‸xx xx ‸xx xx",    wrapAround, &didWrap)); TS_ASSERT(didWrap);
+		TS_ASSERT_EQUALS("xx xx xx ‸xx‸",       search("xx", "‸xx xx x‸x xx",    wrapAround, &didWrap)); TS_ASSERT(didWrap);
+		TS_ASSERT_EQUALS("xx xx xx ‸xx‸",       search("xx", "‸xx xx xx‸ xx",    wrapAround, &didWrap)); TS_ASSERT(didWrap);
+		TS_ASSERT_EQUALS("xx xx xx ‸xx‸",       search("xx", "‸xx xx xx ‸xx",    wrapAround, &didWrap)); TS_ASSERT(didWrap);
+		TS_ASSERT_EQUALS("xx xx xx ‸xx‸",       search("xx", "‸xx xx xx xx‸",    wrapAround, &didWrap)); TS_ASSERT(!didWrap);
 	}
 
 	void test_find_forward_extend ()

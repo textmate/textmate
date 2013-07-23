@@ -1260,8 +1260,11 @@ namespace ng
 		return res;
 	}
 
-	std::map< range_t, std::map<std::string, std::string> > find (buffer_t const& buffer, ranges_t const& selection, std::string const& searchFor, find::options_t options, ranges_t const& searchRanges)
+	std::map< range_t, std::map<std::string, std::string> > find (buffer_t const& buffer, ranges_t const& selection, std::string const& searchFor, find::options_t options, ranges_t const& searchRanges, bool* didWrap)
 	{
+		auto setDidWrap = [&didWrap](bool flag){ if(didWrap != nullptr) *didWrap = flag; };
+		setDidWrap(false);
+
 		std::map< range_t, std::map<std::string, std::string> > res;
 		if(searchFor == NULL_STR || searchFor == "")
 			return res;
@@ -1302,32 +1305,74 @@ namespace ng
 			return res;
 		}
 
-		citerate(range, dissect_columnar(buffer, selection))
+		if(tmp.empty())
+			return tmp;
+
+		for(auto const& range : dissect_columnar(buffer, selection))
 		{
 			if(options & find::backwards)
 			{
-				auto it = tmp.lower_bound(range->min());
+				auto it = std::lower_bound(tmp.begin(), tmp.end(), range, [](decltype(tmp)::value_type const& candidate, ng::range_t const& range){
+					return candidate.first.max() <= range.min();
+				});
+
 				if(it == tmp.begin())
 				{
-					if(!(options & find::wrap_around) || tmp.empty())
-						continue;
-					it = --tmp.end();
+					if(options & find::wrap_around)
+					{
+						it = --tmp.end();
+						if(range.sorted() == it->first.sorted())
+							continue;
+						else if(!(range.min() <= it->first.min() && it->first.max() <= range.max()))
+							setDidWrap(true);
+					}
+					else
+					{
+						it = std::upper_bound(tmp.begin(), tmp.end(), range, [](ng::range_t const& range, decltype(tmp)::value_type const& candidate){
+							return range.max() < candidate.first.max();
+						});
+
+						if(it == tmp.begin())
+							continue;
+						--it;
+					}
 				}
 				else
 				{
 					--it;
 				}
 
-				if(range->sorted() != it->first.sorted())
+				if(range.sorted() != it->first.sorted())
 					res.insert(*it);
 			}
 			else
 			{
-				auto it = tmp.upper_bound(range->max());
-				if(it == tmp.end() && (options & find::wrap_around))
-					it = tmp.begin();
+				auto it = std::upper_bound(tmp.begin(), tmp.end(), range, [](ng::range_t const& range, decltype(tmp)::value_type const& candidate){
+					return range.max() <= candidate.first.min();
+				});
 
-				if(it != tmp.end() && range->sorted() != it->first.sorted())
+				if(it == tmp.end())
+				{
+					if(options & find::wrap_around)
+					{
+						it = tmp.begin();
+						if(range.sorted() == it->first.sorted())
+							continue;
+						else if(!(range.min() <= it->first.min() && it->first.max() <= range.max()))
+							setDidWrap(true);
+					}
+					else
+					{
+						it = std::upper_bound(tmp.begin(), tmp.end(), range, [](ng::range_t const& range, decltype(tmp)::value_type const& candidate){
+							return range.min() <= candidate.first.min();
+						});
+
+						if(it == tmp.end())
+							continue;
+					}
+				}
+
+				if(range.sorted() != it->first.sorted())
 					res.insert(*it);
 			}
 		}
