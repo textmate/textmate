@@ -332,11 +332,13 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 		bundles::remove_item(trashedItem);
 		[self didChangeModifiedState];
 
+		NSLog(@"%s deleting ‘%@’…", sel_getName(_cmd), [NSString stringWithCxxString:trashedItem->full_name()]);
 		if(!trashedItem->paths().empty())
 		{
 			std::string itemFolder = path::parent(trashedItem->paths().front());
 			if(trashedItem->kind() == bundles::kItemTypeBundle && trashedItem->paths().size() == 1)
 				itemFolder = path::parent(itemFolder);
+			NSLog(@"%s rescan ‘%@’", sel_getName(_cmd), [NSString stringWithCxxString:itemFolder]);
 			[[BundlesManager sharedInstance] reloadPath:[NSString stringWithCxxString:itemFolder]];
 		}
 	}
@@ -466,12 +468,17 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 		bool rescanParentFolder = item->kind() == bundles::kItemTypeBundle && (!item->local() || item->paths().empty());
 
 		item->set_plist(pair->second);
+		NSLog(@"%s saving ‘%@’…", sel_getName(_cmd), [NSString stringWithCxxString:item->full_name()]);
 		if(item->save())
 		{
 			std::string itemFolder = path::parent(item->paths().front());
+			NSLog(@"%s rescan ‘%@’", sel_getName(_cmd), [NSString stringWithCxxString:itemFolder]);
 			[[BundlesManager sharedInstance] reloadPath:[NSString stringWithCxxString:itemFolder]];
 			if(rescanParentFolder)
+			{
+				NSLog(@"%s rescan ‘%@’", sel_getName(_cmd), [NSString stringWithCxxString:path::parent(itemFolder)]);
 				[[BundlesManager sharedInstance] reloadPath:[NSString stringWithCxxString:path::parent(itemFolder)]];
+			}
 		}
 		else
 		{
