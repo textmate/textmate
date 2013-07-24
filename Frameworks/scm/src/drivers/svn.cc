@@ -35,26 +35,26 @@ static scm::status::type parse_status_string (std::string const& status)
 	return it != StatusMap->end() ? it->second : scm::status::unknown;
 }
 
-static void parse_status_output (scm::status_map_t& entries, std::string const& output)
+static void parse_status_output (scm::status_map_t& entries, std::string const& output, std::string const& dir)
 {
-	citerate(line, text::tokenize(output.begin(), output.end(), '\n'))
+	for(auto const& line : text::tokenize(output.begin(), output.end(), '\n'))
 	{
 		// Massaged Subversion output is as follows: 'FILE_STATUS    FILE_PROPS_STATUS    FILE_PATH'
-		std::vector<std::string> cols = text::split((*line), "    ");
+		std::vector<std::string> cols = text::split(line, "    ");
 		if(cols.size() == 3)
 		{
-			std::string const& file_status       = cols[0];
-			std::string const& file_props_status = cols[1];
-			std::string const& file_path         = cols[2];
+			std::string const file_status       = cols[0];
+			std::string const file_props_status = cols[1];
+			std::string const file_path         = path::join(dir, cols[2]);
 
 			// If the file's status is not normal/none, use the file's status, otherwise use the file's property status
 			if(file_status != "normal" || file_status != "none")
 					entries[file_path] = parse_status_string(file_status);
 			else	entries[file_path] = parse_status_string(file_props_status);
 		}
-		else if((*line).size())
+		else if(line.size())
 		{
-			fprintf(stderr, "TextMate/svn: Unexpected line: ‘%s’\n", (*line).c_str());
+			fprintf(stderr, "TextMate/svn: Unexpected line: ‘%s’\n", line.c_str());
 		}
 	}
 }
@@ -80,7 +80,7 @@ static void collect_all_paths (std::string const& svn, std::string const& xsltPa
 {
 	ASSERT_NE(svn, NULL_STR); ASSERT_NE(xsltPath, NULL_STR);
 	std::string const cmd = text::format("%s status --no-ignore --xml %s|/usr/bin/xsltproc %s -", shell_quote(svn).c_str(), shell_quote(dir).c_str(), shell_quote(xsltPath).c_str());
-	parse_status_output(entries, io::exec("/bin/sh", "-c", cmd.c_str(), NULL));
+	parse_status_output(entries, io::exec("/bin/sh", "-c", cmd.c_str(), NULL), dir);
 }
 
 namespace scm
