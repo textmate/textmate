@@ -192,6 +192,9 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	_outlineView.doubleAction             = @selector(didDoubleClickOutlineView:);
 	_outlineView.menuDelegate             = self;
 
+	if (settings_for_path().get(kSettingsFileBrowserSourceListKey, false))
+		_outlineView.renderAsSourceList = YES;
+
 	[_outlineView setDraggingSourceOperationMask:NSDragOperationCopy|NSDragOperationMove|NSDragOperationLink forLocal:YES];
 	[_outlineView setDraggingSourceOperationMask:NSDragOperationEvery forLocal:NO];
 	[_outlineView registerForDraggedTypes:@[ NSFilenamesPboardType ]];

@@ -24,6 +24,7 @@ PUBLIC extern std::string const kSettingsProjectDirectoryKey;
 PUBLIC extern std::string const kSettingsSCMStatusKey;
 PUBLIC extern std::string const kSettingsWindowTitleKey;
 PUBLIC extern std::string const kSettingsScopeAttributesKey;
+PUBLIC extern std::string const kSettingsFileBrowserSourceListKey;
 
 PUBLIC extern std::string const kSettingsBinaryKey;
 PUBLIC extern std::string const kSettingsEncodingKey;

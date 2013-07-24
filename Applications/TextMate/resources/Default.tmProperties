@@ -7,6 +7,8 @@ exclude  = "{*.{o,pyc},Icon\r,CVS,_darcs,_MTN,\{arch\},blib,*~.nib}"
 include  = "{*,.tm_properties,.htaccess}"
 binary   = "{*.{ai,gif,icns,ico,jpg,jpeg,m4v,nib,o,pdf,png,psd,pyc,rtf,scssc,tif,tiff,xib},Icon\r}"
 
+fileBrowserSourceList = false
+
 windowTitleSCM     = '${TM_SCM_BRANCH:+ ($TM_SCM_NAME: $TM_SCM_BRANCH)}'
 windowTitleProject = '${projectDirectory:+ — ${projectDirectory/^.*\///}}'
 windowTitle        = '$TM_DISPLAYNAME$windowTitleProject$windowTitleSCM'
