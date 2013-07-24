@@ -12,6 +12,13 @@
 @end
 
 @interface OFBOutlineView ()
+{
+	NSTableViewSelectionHighlightStyle defaultSelectionHighlightStyle;
+	NSTableViewDraggingDestinationFeedbackStyle defaultDraggingDestinationFeedbackStyle;
+	CGFloat defaultRowHeight;
+	NSSize defaultIntercellSpacing;
+	NSColor* defaultBackgroundColor;
+}
 @property (nonatomic, retain) NSIndexSet* draggedRows;
 
 - (void)performDoubleClick:(id)sender;
@@ -28,11 +35,49 @@
  * likely due to the first level is intended to be used as a "group row".
  * But since group rows are not used we need to fix the indentation.
  */
-- (NSRect)fixIndentationAtRow:(NSInteger)row rect:(NSRect)rect decreaseWidth:(BOOL)decreaseWidth;
+- (NSRect)fixIndentationAtRow:(NSInteger)row rect:(NSRect)rect decreaseWidth:(BOOL)decreaseWidth;	
 @end
 
 @implementation OFBOutlineView
 @synthesize draggedRows;
+
+- (id)initWithFrame:(NSRect)frameRect
+{
+	if((self = [super initWithFrame:frameRect]))
+	{
+		defaultSelectionHighlightStyle = [self selectionHighlightStyle];
+		defaultDraggingDestinationFeedbackStyle = [self draggingDestinationFeedbackStyle];
+		defaultRowHeight = [self rowHeight];
+		defaultIntercellSpacing = [self intercellSpacing];
+		defaultBackgroundColor = [self backgroundColor];
+	}
+
+	return self;
+}
+
+- (void)setRenderAsSourceList:(BOOL)value
+{
+	_renderAsSourceList = value;
+
+	if(_renderAsSourceList)
+	{
+		[self setSelectionHighlightStyle:NSTableViewSelectionHighlightStyleSourceList];
+		[self setRowHeight:16];
+		[self setIntercellSpacing:NSMakeSize(3.0, 2.0)];
+	}
+
+	else
+	{
+		[self setSelectionHighlightStyle:defaultSelectionHighlightStyle];
+		[self setRowHeight:defaultRowHeight];
+		[self setIntercellSpacing:defaultIntercellSpacing];
+
+		// setting selectionHighlightStyle to NSTableViewSelectionHighlightStyleSourceList
+		// will also change these properties and won't automaticlly be restored
+		[self setBackgroundColor:defaultBackgroundColor];
+		[self setDraggingDestinationFeedbackStyle:defaultDraggingDestinationFeedbackStyle];
+	}
+}
 
 - (void)showContextMenu:(id)sender
 {

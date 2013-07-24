@@ -13,5 +13,6 @@
 	NSIndexSet* draggedRows;
 }
 @property (nonatomic, weak) id <OFBOutlineViewMenuDelegate> menuDelegate;
+@property (nonatomic) BOOL renderAsSourceList;
 - (void)performEditSelectedRow:(id)sender;
 @end
