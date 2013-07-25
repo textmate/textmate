@@ -1,4 +1,4 @@
-TEST_SOURCES = tests/*.cc
+TESTS        = tests/*.cc
 SOURCES      = src/*.cc
 EXPORT       = src/editor.h src/snippets.h src/clipboard.h src/write.h
 LINK        += text buffer selection document regexp command bundles theme OakSystem cf layout

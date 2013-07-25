@@ -1,35 +1,28 @@
 #include <editor/clipboard.h>
 
-class ClipboardTests : public CxxTest::TestSuite
+void test_empty ()
 {
-public:
-	void setUp ()
-	{
-		cb = create_simple_clipboard();
-	}
+	clipboard_ptr cb = create_simple_clipboard();
 
-	void test_empty ()
-	{
-		TS_ASSERT(cb->empty());
-		TS_ASSERT(!cb->previous());
-		TS_ASSERT(!cb->current());
-		TS_ASSERT(!cb->next());
-	}
+	OAK_ASSERT(cb->empty());
+	OAK_ASSERT(!cb->previous());
+	OAK_ASSERT(!cb->current());
+	OAK_ASSERT(!cb->next());
+}
 
-	void test_non_empty ()
-	{
-		cb->push_back("foo");
-		cb->push_back("bar");
-		cb->push_back("fud");
+void test_non_empty ()
+{
+	clipboard_ptr cb = create_simple_clipboard();
 
-		TS_ASSERT_EQUALS(cb->current()->content(),  "fud");
-		TS_ASSERT_EQUALS(cb->previous()->content(), "bar");
-		TS_ASSERT_EQUALS(cb->previous()->content(), "foo");
-		TS_ASSERT(!cb->previous());
-		TS_ASSERT_EQUALS(cb->next()->content(),     "bar");
-		TS_ASSERT_EQUALS(cb->next()->content(),     "fud");
-		TS_ASSERT(!cb->next());
-	}
+	cb->push_back("foo");
+	cb->push_back("bar");
+	cb->push_back("fud");
 
-	clipboard_ptr cb;
-};
+	OAK_ASSERT_EQ(cb->current()->content(),  "fud");
+	OAK_ASSERT_EQ(cb->previous()->content(), "bar");
+	OAK_ASSERT_EQ(cb->previous()->content(), "foo");
+	OAK_ASSERT(!cb->previous());
+	OAK_ASSERT_EQ(cb->next()->content(),     "bar");
+	OAK_ASSERT_EQ(cb->next()->content(),     "fud");
+	OAK_ASSERT(!cb->next());
+}
