@@ -15,6 +15,26 @@ PUBLIC extern std::string const kCharsetUnknown;
 
 namespace encoding
 {
+	template <typename _InputIter>
+	std::string charset_from_bom (_InputIter const& first, _InputIter const& last)
+	{
+		static struct UTFBOMTests { std::string bom; std::string encoding; } const BOMTests[] =
+		{
+			{ std::string("\x00\x00\xFE\xFF", 4), kCharsetUTF32BE },
+			{ std::string("\xFE\xFF",         2), kCharsetUTF16BE },
+			{ std::string("\xFF\xFE\x00\x00", 4), kCharsetUTF32LE },
+			{ std::string("\xFF\xFE",         2), kCharsetUTF16LE },
+			{ std::string("\uFEFF",           3), kCharsetUTF8    }
+		};
+
+		for(size_t i = 0; i < sizeofA(BOMTests); ++i)
+		{
+			if(oak::has_prefix(first, last, BOMTests[i].bom.begin(), BOMTests[i].bom.end()))
+				return BOMTests[i].encoding;
+		}
+		return kCharsetNoEncoding;
+	}
+
 	PUBLIC io::bytes_ptr convert (io::bytes_ptr content, std::string const& from, std::string const& to);
 
 	struct PUBLIC type
