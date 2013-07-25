@@ -206,7 +206,6 @@ namespace command
 	size_t process_server_t::add (pid_t pid, process_t* callback)
 	{
 		D(DBF_Process, bug("pid %d, client key %zu\n", pid, next_client_key););
-		ASSERT(pthread_main_np() != 0);
 		client_to_callback.insert(std::make_pair(next_client_key, callback));
 		struct packet_t { size_t client_key; pid_t pid; } packet = { next_client_key, pid };
 		write(write_to_server, &packet, sizeof(packet));
@@ -216,7 +215,6 @@ namespace command
 	void process_server_t::remove (size_t client_key)
 	{
 		D(DBF_Process, bug("client key %zu\n", client_key););
-		ASSERT(pthread_main_np() != 0);
 		client_to_callback.erase(client_to_callback.find(client_key));
 	}
 
@@ -227,7 +225,6 @@ namespace command
 		tmp.swap(process_exit);
 		pthread_mutex_unlock(&process_exit_mutex);
 
-		ASSERT(pthread_main_np() != 0);
 		iterate(it, tmp)
 		{
 			std::map<size_t, process_t*>::iterator client = client_to_callback.find(it->client_key);
