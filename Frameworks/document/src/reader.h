@@ -59,7 +59,7 @@ namespace reader
 		~open_t ();
 		io::bytes_ptr next ();
 
-	private:
+	protected:
 		int fd;
 	};
 
