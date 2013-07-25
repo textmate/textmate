@@ -1,15 +1,11 @@
 #include <regexp/regexp.h>
 
-class MatchTests : public CxxTest::TestSuite
+void test_match ()
 {
-public:
-	void test_match ()
-	{
-		regexp::match_t const match = regexp::search("(\\w+)\\s+(\\w+)", " foo bar fud");
-		TS_ASSERT(match);
-		TS_ASSERT_EQUALS(match[0], "foo bar");
-		TS_ASSERT_EQUALS(match[1], "foo");
-		TS_ASSERT_EQUALS(match[2], "bar");
-		TS_ASSERT_EQUALS(match[3], NULL_STR);	
-	}
-};
+	regexp::match_t const match = regexp::search("(\\w+)\\s+(\\w+)", " foo bar fud");
+	OAK_ASSERT(match);
+	OAK_ASSERT_EQ(match[0], "foo bar");
+	OAK_ASSERT_EQ(match[1], "foo");
+	OAK_ASSERT_EQ(match[2], "bar");
+	OAK_ASSERT_EQ(match[3], NULL_STR);	
+}

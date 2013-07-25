@@ -1,4 +1,4 @@
-TEST_SOURCES = tests/*.cc
+TESTS        = tests/*.cc
 SOURCES      = src/*.cc
 LINK        += Onigmo text cf
 EXPORT       = src/{find,format_string,parser_fwd,regexp,snippet,glob,indent}.h
