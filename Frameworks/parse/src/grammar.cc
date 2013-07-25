@@ -237,6 +237,9 @@ namespace parse
 
 	grammar_ptr parse_grammar (bundles::item_ptr const& grammarItem)
 	{
+		static std::recursive_mutex Mutex;
+		std::lock_guard<std::recursive_mutex> lock(Mutex);
+
 		static std::map<oak::uuid_t, grammar_ptr> Cache;
 		injected_grammars(); // ensure these are loaded in the main thread
 

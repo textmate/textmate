@@ -68,8 +68,14 @@ namespace bundles
 				return menu != _menus.end() ? menu->second : kEmptyMenu;
 			}
 
+			std::recursive_mutex& mutex ()
+			{
+				return _cache_mutex;
+			}
+
 			void clear ()
 			{
+				std::lock_guard<std::recursive_mutex> lock(_cache_mutex);
 				_cache.clear();
 				_menus.clear();
 			}
@@ -101,6 +107,7 @@ namespace bundles
 				}
 			}
 
+			std::recursive_mutex _cache_mutex;
 			std::map< std::string, std::multimap<std::string, item_ptr> > _cache;
 			std::map< oak::uuid_t, std::vector<item_ptr> > _menus;
 		};
@@ -202,6 +209,7 @@ namespace bundles
 
  	static void cache_search (std::string const& field, std::string const& value, scope::context_t const& scope, int kind, oak::uuid_t const& bundle, bool includeDisabledItems, std::multimap<double, item_ptr>& ordered)
 	{
+		std::lock_guard<std::recursive_mutex> lock(cache().mutex());
 		std::multimap<std::string, item_ptr> const& values = cache().fetch(field);
 		foreach(pair, values.lower_bound(value), field == kFieldSemanticClass ? values.lower_bound(value + "/") : values.upper_bound(value)) // Since kFieldSemanticClass is a prefix match we want lower bound of the first item after the last possible prefix (which would be “value.zzzzz…” → “value/”).
 		{
@@ -278,6 +286,7 @@ namespace bundles
 
 	std::vector<item_ptr> item_t::menu (bool includeDisabledItems) const
 	{
+		std::lock_guard<std::recursive_mutex> lock(cache().mutex());
 		std::vector<item_ptr> res;
 		iterate(item, cache().menu(_uuid))
 		{

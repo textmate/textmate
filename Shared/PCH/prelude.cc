@@ -11,6 +11,7 @@
 #include <functional>
 #include <iterator>
 #include <map>
+#include <mutex>
 #include <set>
 #include <string>
 #include <vector>
