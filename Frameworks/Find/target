@@ -1,5 +1,5 @@
 SOURCES      = src/*.{cc,mm}
-TEST_SOURCES = tests/*.cc
+TESTS        = tests/*.cc
 EXPORT       = src/Find.h src/scan_path.h
 CP_Resources = resources/*
 LINK        += text editor io ns OakAppKit OakFoundation regexp scope
