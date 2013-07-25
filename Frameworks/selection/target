@@ -1,4 +1,4 @@
 SOURCES      = src/*.cc
-TEST_SOURCES = tests/*.cc
+TESTS        = tests/*.cc
 LINK        += text buffer bundles regexp
 EXPORT       = src/selection.h src/types.h
