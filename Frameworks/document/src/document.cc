@@ -1012,9 +1012,69 @@ namespace document
 		struct file_reader_t : reader::open_t
 		{
 			WATCH_LEAKS(file_reader_t);
-			file_reader_t (document_const_ptr const& document) : reader::open_t(document->path()), document(document) { }
+			file_reader_t (document_const_ptr const& document) : reader::open_t(document->path()), document(document), converter((iconv_t)(-1)), read_buffer()
+			{
+				// Reading the first 1024 characters to try to determine the file encoding without using
+				// the settings_for_path function.
+				std::string header(1024, ' ');
+				ssize_t len = read(fd, &header.front(), header.size());
+				header.resize(len);
+				lseek(fd, 0, SEEK_SET);
+
+				// 1. Try to find a bom
+				// 2. If the characters are UTF8 valid we suppose the rest is UTF8
+				// 3. At last, we use settings_for_path to use the specified encoding into the .tm_properties
+				std::string charset = charset_from_bom(&header.front(), &header.back());
+				if(charset == kCharsetNoEncoding)
+				{
+					if(utf8::is_valid(&header.front(), &header.back()))
+						charset = kCharsetUTF8;
+					else
+						charset = settings_for_path(document->path(), "attr.file.unknown-encoding " + file::path_attributes(document->path())).get(kSettingsEncodingKey, kCharsetUnknown);
+				}
+				if(charset != kCharsetUTF8 && charset != kCharsetUnknown && charset != kCharsetNoEncoding)
+					converter = iconv_open(kCharsetUTF8.c_str(), charset.c_str());
+			}
+			
+			~file_reader_t()
+			{
+				if (converter != (iconv_t)(-1))
+					iconv_close(converter);
+			}
 		private:
 			document_const_ptr document;
+			iconv_t converter;
+			std::string read_buffer;
+
+			io::bytes_ptr next ()
+			{
+				io::bytes_ptr content = reader::open_t::next();
+				if(converter == (iconv_t)(-1))
+					return content;
+				if(content)
+					read_buffer.append(content->get(), content->size());
+				if (read_buffer.size() == 0)
+					return io::bytes_ptr();
+
+				char const* first = &read_buffer.front();
+				char const* last  = &read_buffer.back() + 1;
+				size_t srcSize    = last - first;
+
+				std::string converted_buffer(content->size() * 1.5, ' ');
+				char* dst      = &converted_buffer.front();
+				size_t dstSize = converted_buffer.size();
+
+				size_t rc = iconv(converter, (char**)&first, &srcSize, &dst, &dstSize);
+				if(rc == (size_t)(-1) && errno != E2BIG && (errno != EINVAL || converted_buffer.size() - dstSize == 0))
+					return io::bytes_ptr();
+
+				// Erase only the characters that iconv has decoded if the content has ended in the middle
+				// of a multi-byte character. On the next call of next() the remaining characters will be decoded.
+				read_buffer.erase(0, read_buffer.size() - srcSize);
+				converted_buffer.resize(dst - &converted_buffer.front());
+
+				return io::bytes_ptr(new io::bytes_t(converted_buffer));
+			}
 		};
 
 		struct buffer_reader_t : document::document_t::reader_t
