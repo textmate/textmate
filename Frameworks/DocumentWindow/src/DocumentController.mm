@@ -1296,6 +1296,11 @@ namespace
 			if(path::is_absolute(userProjectDirectory))
 				projectPath = [NSString stringWithCxxString:path::normalize(userProjectDirectory)];
 		}
+		else if(NSString* urlString = [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsInitialFileBrowserURLKey])
+		{
+			if(NSURL* url = [NSURL URLWithString:urlString])
+				projectPath = [[url filePathURL] path];
+		}
 
 		self.projectPath         = projectPath;
 		self.documentPath        = [NSString stringWithCxxString:_selectedDocument->path()];
