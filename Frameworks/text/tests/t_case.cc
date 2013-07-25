@@ -1,22 +1,16 @@
 #include <text/case.h>
 
-using namespace text;
-
-class CaseTests : public CxxTest::TestSuite
+void test_upcase ()
 {
-public:
-	void test_upcase ()
-	{
-		TS_ASSERT_EQUALS(uppercase("æbleGRØD"), "ÆBLEGRØD");
-	}
+	OAK_ASSERT_EQ(text::uppercase("æbleGRØD"), "ÆBLEGRØD");
+}
 
-	void test_downcase ()
-	{
-		TS_ASSERT_EQUALS(lowercase("æbleGRØD"), "æblegrød");
-	}
+void test_downcase ()
+{
+	OAK_ASSERT_EQ(text::lowercase("æbleGRØD"), "æblegrød");
+}
 
-	void test_togglecase ()
-	{
-		TS_ASSERT_EQUALS(opposite_case("Den Grønne æbleGRØD"), "dEN gRØNNE ÆBLEgrød");
-	}
-};
+void test_togglecase ()
+{
+	OAK_ASSERT_EQ(text::opposite_case("Den Grønne æbleGRØD"), "dEN gRØNNE ÆBLEgrød");
+}

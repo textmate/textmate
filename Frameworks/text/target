@@ -1,4 +1,4 @@
-TEST_SOURCES = tests/*.cc
+TESTS        = tests/*.cc
 SOURCES      = src/*.cc
 EXPORT       = src/*.h
 FRAMEWORKS   = CoreFoundation
