@@ -27,6 +27,7 @@ struct delegate_t : command::delegate_t
 
 	text::range_t write_unit_to_fd (int fd, input::type unit, input::type fallbackUnit, input_format::type format, scope::selector_t const& scopeSelector, std::map<std::string, std::string>& variables, bool* inputWasSelection)
 	{
+		close(fd);
 		return text::range_t::undefined;
 	}
 

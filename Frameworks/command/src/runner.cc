@@ -61,8 +61,8 @@ namespace command
 
 		int inputPipe[2];
 		pipe(inputPipe);
+		fcntl(inputPipe[1], F_SETFD, FD_CLOEXEC);
 		_input_range = _command.input == input::nothing ? text::range_t::undefined : _delegate->write_unit_to_fd(inputPipe[1], _command.input, _command.input_fallback, _command.input_format, _command.scope_selector, _environment, &_input_was_selection);
-		close(inputPipe[1]);
 
 		// ----------8<----------
 

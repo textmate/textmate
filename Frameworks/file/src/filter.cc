@@ -37,61 +37,6 @@ static std::vector<bundles::item_ptr> path_filters (std::string const& event, st
 	return bundles::query(bundles::kFieldSemanticClass, event, pathAttributes, bundles::kItemTypeCommand);
 }
 
-// ==================
-// = Threaded Write =
-// ==================
-
-namespace filter
-{
-	struct write_t
-	{
-		struct request_t { int fd; io::bytes_ptr bytes; };
-
-		WATCH_LEAKS(write_t);
-
-		write_t (int fd, io::bytes_ptr const& bytes);
-		virtual ~write_t ();
-
-		static int handle_request (write_t::request_t const& request);
-		void handle_reply (int error);
-
-	private:
-		size_t _client_key;
-	};
-
-	static oak::server_t<write_t>& write_server ()
-	{
-		static oak::server_t<write_t> server;
-		return server;
-	}
-
-	write_t::write_t (int fd, io::bytes_ptr const& bytes)
-	{
-		_client_key = write_server().register_client(this);
-		int newFd = dup(fd);
-		fcntl(newFd, F_SETFD, FD_CLOEXEC);
-		write_server().send_request(_client_key, (request_t){ newFd, bytes });
-	}
-
-	write_t::~write_t ()
-	{
-		write_server().unregister_client(_client_key);
-	}
-
-	int write_t::handle_request (write_t::request_t const& request)
-	{
-		bool success = write(request.fd, request.bytes->get(), request.bytes->size()) == request.bytes->size();
-		close(request.fd);
-		return success ? 0 : errno;
-	}
-
-	void write_t::handle_reply (int error)
-	{
-		delete this;
-	}
-	
-} /* filter */
-
 // ==========================
 // = Filter Runner Delegate =
 // ==========================
@@ -118,9 +63,17 @@ namespace
 	text::range_t event_delegate_t::write_unit_to_fd (int fd, input::type unit, input::type fallbackUnit, input_format::type format, scope::selector_t const& scopeSelector, std::map<std::string, std::string>& variables, bool* inputWasSelection)
 	{
 		if(unit != input::entire_document || format != input_format::text)
+		{
+			close(fd);
 			return fprintf(stderr, "*** write unit to fd: unhandled unit/format: %d/%d\n", unit, format), text::range_t::undefined;
+		}
 
-		new filter::write_t(fd, _input);
+		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+			if(write(fd, _input->get(), _input->size()) == -1)
+				perror("write");
+			close(fd);
+		});
+
 		return text::range_t::undefined;
 	}
 

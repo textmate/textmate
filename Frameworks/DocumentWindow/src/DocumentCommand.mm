@@ -56,7 +56,10 @@ namespace
 text::range_t delegate_t::write_unit_to_fd (int fd, input::type unit, input::type fallbackUnit, input_format::type format, scope::selector_t const& scopeSelector, std::map<std::string, std::string>& variables, bool* inputWasSelection)
 {
 	if(!_document)
+	{
+		close(fd);
 		return text::range_t::undefined;
+	}
 
 	bool isOpen = _document->is_open();
 	if(!isOpen)

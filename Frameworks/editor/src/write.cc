@@ -3,56 +3,6 @@
 #include <text/ctype.h>
 #include <oak/server.h>
 
-namespace
-{
-	struct write_t
-	{
-		struct request_t { int fd; std::string str; };
-
-		WATCH_LEAKS(write_t);
-
-		write_t (int fd, std::string const& str);
-		virtual ~write_t ();
-
-		static int handle_request (write_t::request_t const& request);
-		void handle_reply (int error);
-
-	private:
-		size_t client_key;
-	};
-
-	static oak::server_t<write_t>& server ()
-	{
-		static oak::server_t<write_t> instance;
-		return instance;
-	}
-
-	write_t::write_t (int fd, std::string const& str)
-	{
-		client_key = server().register_client(this);
-		int newFd = dup(fd);
-		fcntl(newFd, F_SETFD, FD_CLOEXEC);
-		server().send_request(client_key, (request_t){ newFd, str });
-	}
-
-	write_t::~write_t ()
-	{
-		server().unregister_client(client_key);
-	}
-
-	int write_t::handle_request (write_t::request_t const& request)
-	{
-		bool success = write(request.fd, request.str.data(), request.str.size()) == request.str.size();
-		close(request.fd);
-		return success ? 0 : errno;
-	}
-
-	void write_t::handle_reply (int error)
-	{
-		delete this;
-	}
-}
-
 namespace ng
 {
 	static size_t count_columns (buffer_t const& buffer, index_t caret, size_t tabSize)
@@ -91,9 +41,17 @@ namespace ng
 				str += format == input_format::xml ? to_xml(buffer, range->min().index, range->max().index) : buffer.substr(range->min().index, range->max().index);
 				first = false;
 			}
-			new write_t(fd, str);
+
+			dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+				if(write(fd, str.data(), str.size()) == -1)
+					perror("write");
+				close(fd);
+			});
 		}
-		close(fd);
+		else
+		{
+			close(fd);
+		}
 
 		if(r && actualUnit != input::entire_document)
 		{

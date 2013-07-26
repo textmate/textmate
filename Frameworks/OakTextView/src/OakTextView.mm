@@ -2502,7 +2502,6 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	{
 		bool inputWasSelection = false;
 		text::range_t inputRange = ng::write_unit_to_fd(document->buffer(), editor->ranges().last(), document->buffer().indent().tab_size(), process.in, inputUnit, input::entire_document, input_format::text, scope::selector_t(), environment, &inputWasSelection);
-		close(process.in);
 
 		__block int status = 0;
 		__block std::string output, error;
