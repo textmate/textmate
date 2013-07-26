@@ -1,6 +1,7 @@
 #include "entries.h"
 #include "path.h"
 #include <regexp/glob.h>
+#include <text/format.h>
 
 namespace path
 {
@@ -46,6 +47,10 @@ namespace path
 				}
 			}
 			_helper.reset(new helper_t(entries, size, actual));
+		}
+		else
+		{
+			perror(text::format("scandir(\"%s\")", path.c_str()).c_str());
 		}
 	}
 

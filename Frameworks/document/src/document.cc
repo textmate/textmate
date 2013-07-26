@@ -1337,8 +1337,11 @@ namespace document
 			dirs.pop_front();
 
 			struct stat buf;
-			if(lstat(initialPath.c_str(), &buf) != 0) // get st_dev so we don’t need to stat each path entry (unless it is a symbolic link)
+			if(lstat(initialPath.c_str(), &buf) == -1) // get st_dev so we don’t need to stat each path entry (unless it is a symbolic link)
+			{
+				perror(text::format("lstat(\"%s\")", initialPath.c_str()).c_str());
 				continue;
+			}
 
 			ASSERT(S_ISDIR(buf.st_mode) || S_ISLNK(buf.st_mode));
 
@@ -1386,7 +1389,7 @@ namespace document
 				iterate(link, links)
 				{
 					std::string path = path::resolve(*link);
-					if(lstat(path.c_str(), &buf) == 0)
+					if(lstat(path.c_str(), &buf) != -1)
 					{
 						if(S_ISDIR(buf.st_mode) && follow_links && seen_paths.insert(std::make_pair(buf.st_dev, buf.st_ino)).second)
 						{
@@ -1405,6 +1408,10 @@ namespace document
 									files.insert(std::make_pair(path, path::identifier_t(true, buf.st_dev, buf.st_ino, path)));
 							else	D(DBF_Document_Scanner, bug("skip known path: ‘%s’\n", path.c_str()););
 						}
+					}
+					else
+					{
+						perror(text::format("lstat(\"%s\")", path.c_str()).c_str());
 					}
 				}
 				links.clear();
