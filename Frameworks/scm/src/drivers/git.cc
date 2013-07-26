@@ -71,19 +71,39 @@ static std::string copy_git_index (std::string const& dir)
 			gitDir = path::join(dir, setting.substr(8, setting.size()-9));
 	}
 
+	std::string res = NULL_STR;
+
 	std::string indexPath = path::join(gitDir, "index");
-	if(path::exists(indexPath))
+	int src = open(indexPath.c_str(), O_RDONLY|O_CLOEXEC);
+	if(src != -1)
 	{
 		std::string const tmpIndex = path::temp("git-index");
-		if(path::copy(indexPath, tmpIndex))
-			return tmpIndex;
-		path::remove(tmpIndex);
+		int dst = open(tmpIndex.c_str(), O_CREAT|O_TRUNC|O_WRONLY|O_CLOEXEC, S_IRUSR|S_IWUSR);
+		if(dst != -1)
+		{
+			if(fcopyfile(src, dst, NULL, COPYFILE_ALL | COPYFILE_NOFOLLOW_SRC) != -1)
+			{
+				res = tmpIndex;
+			}
+			else
+			{
+				perror(text::format("copyfile(\"%s\", \"%s\")", indexPath.c_str(), tmpIndex.c_str()).c_str());
+				if(unlink(tmpIndex.c_str()) == -1)
+					perror(text::format("unlink(\"%s\")", tmpIndex.c_str()).c_str());
+			}
+			close(dst);
+		}
+		else
+		{
+			perror(text::format("open(\"%s\", O_CREAT|O_TRUNC|O_WRONLY|O_CLOEXEC, S_IRUSR|S_IWUSR)", tmpIndex.c_str()).c_str());
+		}
+		close(src);
 	}
 	else
 	{
-		fprintf(stderr, "*** missing git index: %s\n", indexPath.c_str());
+		perror(text::format("open(\"%s\", O_RDONLY|O_CLOEXEC)", indexPath.c_str()).c_str());
 	}
-	return NULL_STR;
+	return res;
 }
 
 static void collect_all_paths (std::string const& git, std::map<std::string, scm::status::type>& entries, std::string const& dir)
