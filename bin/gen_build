@@ -23,7 +23,7 @@ require 'shellwords'
 require 'set'
 require 'pp'
 
-GLOB_KEYS     = %w{ CP_Resources CP_SharedSupport CP_PlugIns EXPORT HTML_FOOTER HTML_HEADER MARKDOWN_HEADER MARKDOWN_FOOTER PRELUDE SOURCES TARGETS TESTS TEST_SOURCES }
+GLOB_KEYS     = %w{ CP_Resources CP_SharedSupport CP_PlugIns CP_Library/QuickLook EXPORT HTML_FOOTER HTML_HEADER MARKDOWN_HEADER MARKDOWN_FOOTER PRELUDE SOURCES TARGETS TESTS TEST_SOURCES }
 STRING_KEYS   = %w{ TARGET_NAME BUNDLE_EXTENSION FLAGS C_FLAGS CXX_FLAGS OBJC_FLAGS OBJCXX_FLAGS LN_FLAGS PLIST_FLAGS BUILD }
 
 COMPILER_INFO = {
@@ -90,7 +90,7 @@ class Targets
     dict.delete('TARGETS')
 
     data = File.read(path)
-    assignments = data.scan(/^(\w+)\s*(\+=|-=|=)[ \t]*(.*)$/)
+    assignments = data.scan(/^([\w\/]+)\s*(\+=|-=|=)[ \t]*(.*)$/)
     assignments.each do |arr|
       key, op, value = *arr
       value = Shellwords.shellwords(value) unless STRING_KEYS.include? key
