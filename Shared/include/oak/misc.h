@@ -18,4 +18,20 @@
 #define STRINGIFY(number)  xSTRINGIFY(number)
 #endif
 
+#ifndef OAK_EXTERN_C_BEGIN
+#ifdef __cplusplus
+#define OAK_EXTERN_C_BEGIN extern "C" {
+#else
+#define OAK_EXTERN_C_BEGIN
+#endif
+#endif
+
+#ifndef OAK_EXTERN_C_END
+#ifdef __cplusplus
+#define OAK_EXTERN_C_END }
+#else
+#define OAK_EXTERN_C_END
+#endif
+#endif
+
 #endif /* end of include guard: OAK_MISC_H_35H67VAO */

@@ -8,6 +8,7 @@
 #import <AddressBook/AddressBook.h>
 #import <Cocoa/Cocoa.h>
 #import <ExceptionHandling/NSExceptionHandler.h>
+#import <CoreFoundation/CFPlugInCOM.h> // must be loaded before QuickLook.h
 #import <Quartz/Quartz.h> // includes the private QuickLookUI.h
 #import <WebKit/WebKit.h>
 

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>${TARGET_NAME}</string>
+	<key>CFBundleName</key>
+	<string>${TARGET_NAME}</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.macromates.${APP_NAME}.${TARGET_NAME}</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundlePackageType</key>
+	<string>BNDL</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0.0</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+	<key>CFPlugInDynamicRegistration</key>
+	<false/>
+	<key>CFPlugInFactories</key>
+	<dict>
+		<key>B211F27A-806A-47D3-952C-A8545AA8918E</key>
+		<string>TextMateQuickLookGeneratorPlugInFactory</string>
+	</dict>
+	<key>CFPlugInTypes</key>
+	<dict>
+		<key>5E2D9680-5022-40FA-B806-43349622E5B9</key>
+		<array>
+			<string>B211F27A-806A-47D3-952C-A8545AA8918E</string>
+		</array>
+	</dict>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>QLGenerator</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.source-code</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>

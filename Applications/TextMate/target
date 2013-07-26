@@ -1,11 +1,12 @@
-SOURCES          = src/*.{cc,mm}
-CP_Resources     = resources/* icons/*.icns about/* @PrivilegedTool @mate @tm_query
-CP_SharedSupport = support/*
-CP_PlugIns       = @Dialog @Dialog2
-FLAGS           += -DREST_API='@"$rest_api"'
-LINK            += bundles cf command document editor io network ns plist settings text
-LINK            += BundleMenu BundleEditor BundlesManager CrashReporter DocumentWindow Find HTMLOutputWindow OakAppKit OakFilterList OakFoundation OakSystem OakTextView Preferences SoftwareUpdate updater license
-FRAMEWORKS       = Cocoa
-HTML_HEADER      = templates/header.html
-HTML_FOOTER      = templates/footer.html
-MARKDOWN_FOOTER  = references.md
+SOURCES              = src/*.{cc,mm}
+CP_Resources         = resources/* icons/*.icns about/* @PrivilegedTool @mate @tm_query
+CP_SharedSupport     = support/*
+CP_PlugIns           = @Dialog @Dialog2
+CP_Library/QuickLook = @TextMateQL
+FLAGS               += -DREST_API='@"$rest_api"'
+LINK                += bundles cf command document editor io network ns plist settings text
+LINK                += BundleMenu BundleEditor BundlesManager CrashReporter DocumentWindow Find HTMLOutputWindow OakAppKit OakFilterList OakFoundation OakSystem OakTextView Preferences SoftwareUpdate updater license
+FRAMEWORKS           = Cocoa
+HTML_HEADER          = templates/header.html
+HTML_FOOTER          = templates/footer.html
+MARKDOWN_FOOTER      = references.md
