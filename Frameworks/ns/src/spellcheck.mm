@@ -5,20 +5,28 @@
 
 namespace ns
 {
-	spelling_tag_t::helper_t::helper_t ()
+	long int spelling_tag_t::helper_t::tag ()
 	{
-		_tag = [NSSpellChecker uniqueSpellDocumentTag];
+		if(!_did_setup)
+		{
+			_tag = [NSSpellChecker uniqueSpellDocumentTag];
+			_did_setup = true;
+		}
+		return _tag;
 	}
 
 	spelling_tag_t::helper_t::~helper_t ()
 	{
-		@autoreleasepool {
-			[[NSSpellChecker sharedSpellChecker] closeSpellDocumentWithTag:_tag];
+		if(_did_setup)
+		{
+			@autoreleasepool {
+				[[NSSpellChecker sharedSpellChecker] closeSpellDocumentWithTag:_tag];
+			}
 		}
 	}
 
 	template <typename _OutputIter>
-	_OutputIter spellcheck (char const* first, char const* last, std::string const& language, int tag, size_t offset, _OutputIter out)
+	_OutputIter spellcheck (char const* first, char const* last, std::string const& language, long int tag, size_t offset, _OutputIter out)
 	{
 		NSSpellChecker* spellChecker = [NSSpellChecker sharedSpellChecker];
 		NSString* lang               = [NSString stringWithCxxString:language];

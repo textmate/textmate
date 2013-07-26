@@ -14,14 +14,17 @@ namespace ns
 	struct spelling_tag_t
 	{
 		spelling_tag_t () : _helper(new helper_t) { }
-		operator long int () const { return _helper->_tag; }
+		operator long int () const { return _helper->tag(); }
 
 	private:
 		struct PUBLIC helper_t
 		{
-			helper_t ();
 			~helper_t ();
+			long int tag ();
+
+		private:
 			long int _tag;
+			bool _did_setup = false;
 		};
 
 		std::shared_ptr<helper_t> _helper;
