@@ -1186,7 +1186,13 @@ namespace ng
 			// D(DBF_Editor, bug("replace range %zu-%zu with ‘%s’\n", pair->first.first, pair->first.second, pair->second.c_str()););
 			tmp.insert(std::make_pair(range_t(pair.first.first, pair.first.second), pair.second));
 		}
-		_selections = this->replace(tmp);
+
+		if(!tmp.empty())
+		{
+			preserve_selection_helper_t helper(_buffer, _selections);
+			this->replace(tmp);
+			_selections = helper.get(false);
+		}
 	}
 
 	ng::ranges_t editor_t::insert_tab_with_indent (ng::buffer_t& buffer, ng::ranges_t const& selections, snippet_controller_t& snippets)
