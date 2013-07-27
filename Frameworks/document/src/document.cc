@@ -635,7 +635,9 @@ namespace document
 		{
 			save_callback_wrapper_t (document::document_ptr doc, document::save_callback_ptr callback) : _document(doc), _callback(callback)
 			{
-				_document->open();
+				if(_document->is_open())
+						_document->open();
+				else	_should_close = false;
 			}
 
 			void select_path (std::string const& path, io::bytes_ptr content, file::save_context_ptr context)                                     { _callback->select_path(path, content, context); }
@@ -645,14 +647,17 @@ namespace document
 
 			void did_save (std::string const& path, io::bytes_ptr content, encoding::type const& encoding, bool success, std::string const& message, oak::uuid_t const& filter)
 			{
-				_document->post_save(path, content, encoding, success);
+				if(_should_close)
+					_document->post_save(path, content, encoding, success);
 				_callback->did_save_document(_document, path, success, message, filter);
-				_document->close();
+				if(_should_close)
+					_document->close();
 			}
 
 		private:
 			document::document_ptr _document;
 			document::save_callback_ptr _callback;
+			bool _should_close = true;
 		};
 
 		D(DBF_Document, bug("save ‘%s’\n", _path.c_str()););
