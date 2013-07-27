@@ -1,5 +1,5 @@
 #import "BundlesManager.h"
-#import "load_bundles.h"
+#import <bundles/load.h>
 #import "InstallBundleItems.h"
 #import <OakFoundation/NSDate Additions.h>
 #import <OakFoundation/NSString Additions.h>
