@@ -113,18 +113,6 @@ namespace bundles
 		std::vector<required_executable_t> _required_executables;
 	};
 
-	struct PUBLIC callback_t
-	{
-		virtual ~callback_t () { }
-		virtual void bundles_will_change () { }
-		virtual void bundles_did_change ()  { }
-	};
-
-	PUBLIC void add_callback (callback_t* cb);
-	PUBLIC void remove_callback (callback_t* cb);
-	PUBLIC void add_item (item_ptr item);
-	PUBLIC void remove_item (item_ptr item);
-
 } /* bundles */
 
 #endif /* end of include guard: BUNDLES_INDEX_H_H2GEVOXK */
