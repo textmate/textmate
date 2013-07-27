@@ -31,7 +31,7 @@ static double const kPollInterval = 3*60*60;
 	std::vector<std::string> bundlesPaths;
 	std::string bundlesIndexPath;
 	std::set<std::string> watchList;
-	fs::cache_t cache;
+	plist::cache_t cache;
 }
 @property (nonatomic) NSString* activityText;
 @property (nonatomic) BOOL      isBusy;

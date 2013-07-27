@@ -3,11 +3,11 @@
 #include <text/format.h>
 #include <oak/debug.h>
 
-OAK_DEBUG_VAR(Bundles_Cache);
+OAK_DEBUG_VAR(Plist_Cache);
 
 static std::string read_link (std::string const& path)
 {
-	D(DBF_Bundles_Cache, bug("%s\n", path.c_str()););
+	D(DBF_Plist_Cache, bug("%s\n", path.c_str()););
 
 	char buf[PATH_MAX];
 	ssize_t len = readlink(path.c_str(), buf, sizeof(buf));
@@ -23,7 +23,7 @@ static std::string read_link (std::string const& path)
 	return NULL_STR;
 }
 
-namespace fs
+namespace plist
 {
 	int32_t const cache_t::kPropertyCacheFormatVersion = 1;
 
@@ -79,7 +79,7 @@ namespace fs
 
 	void cache_t::save (std::string const& path) const
 	{
-		D(DBF_Bundles_Cache, bug("%s\n", path.c_str()););
+		D(DBF_Plist_Cache, bug("%s\n", path.c_str()););
 
 		plist::dictionary_t plist;
 		for(auto pair : _cache)
@@ -166,12 +166,12 @@ namespace fs
 		auto it = _cache.find(path);
 		if(it == _cache.end())
 		{
-			D(DBF_Bundles_Cache, bug("no entry for ‘%s’\n", path.c_str()););
+			D(DBF_Plist_Cache, bug("no entry for ‘%s’\n", path.c_str()););
 			return dirty;
 		}
 
 		struct stat buf;
-		D(DBF_Bundles_Cache, bug("lstat ‘%s’\n", path.c_str()););
+		D(DBF_Plist_Cache, bug("lstat ‘%s’\n", path.c_str()););
 		if(lstat(path.c_str(), &buf) == 0)
 		{
 			if(S_ISDIR(buf.st_mode) && it->second.is_directory())
@@ -180,7 +180,7 @@ namespace fs
 				update_entries(it->second, it->second.glob_string());
 				auto newEntries = it->second.entries();
 				dirty = oldEntries != newEntries;
-				D(DBF_Bundles_Cache, bug("entries changed ‘%s’\n", BSTR(oldEntries != newEntries)););
+				D(DBF_Plist_Cache, bug("entries changed ‘%s’\n", BSTR(oldEntries != newEntries)););
 				for(auto name : newEntries)
 				{
 					auto entryIter = _cache.find(path::join(path, name));
@@ -190,14 +190,14 @@ namespace fs
 			}
 			else if(!(it->second.is_file() && S_ISREG(buf.st_mode) && it->second.modified() == buf.st_mtimespec.tv_sec))
 			{
-				D(DBF_Bundles_Cache, bug("erase ‘%s’ (path changed)\n", path.c_str()););
+				D(DBF_Plist_Cache, bug("erase ‘%s’ (path changed)\n", path.c_str()););
 				_cache.erase(it);
 				dirty = true;
 			}
 		}
 		else if(!it->second.is_missing())
 		{
-			D(DBF_Bundles_Cache, bug("erase ‘%s’ (path missing)\n", path.c_str()););
+			D(DBF_Plist_Cache, bug("erase ‘%s’ (path missing)\n", path.c_str()););
 			_cache.erase(it);
 			dirty = true;
 		}
@@ -216,7 +216,7 @@ namespace fs
 		std::vector<std::string> toRemove;
 		std::set_difference(allPaths.begin(), allPaths.end(), reachablePaths.begin(), reachablePaths.end(), back_inserter(toRemove));
 
-		D(DBF_Bundles_Cache, if(!toRemove.empty()) bug("drop:\n - %s\n", text::join(toRemove, "\n - ").c_str()););
+		D(DBF_Plist_Cache, if(!toRemove.empty()) bug("drop:\n - %s\n", text::join(toRemove, "\n - ").c_str()););
 		for(auto path : toRemove)
 			_cache.erase(path);
 		_dirty = _dirty || !toRemove.empty();
@@ -235,7 +235,7 @@ namespace fs
 			entry_type_t type = entry_type_t::missing;
 
 			struct stat buf;
-			D(DBF_Bundles_Cache, bug("lstat ‘%s’\n", path.c_str()););
+			D(DBF_Plist_Cache, bug("lstat ‘%s’\n", path.c_str()););
 			if(lstat(path.c_str(), &buf) == 0)
 			{
 				if(S_ISREG(buf.st_mode))
@@ -249,7 +249,7 @@ namespace fs
 			entry_t entry(path, type, type == entry_type_t::link ? read_link(path) : NULL_STR);
 			if(entry.is_file())
 			{
-				D(DBF_Bundles_Cache, bug("load ‘%s’\n", path.c_str()););
+				D(DBF_Plist_Cache, bug("load ‘%s’\n", path.c_str()););
 				entry.set_content(_prune_dictionary(plist::load(path)));
 				entry.set_modified(buf.st_mtimespec.tv_sec);
 			}
@@ -266,7 +266,7 @@ namespace fs
 
 	void cache_t::update_entries (entry_t& entry, std::string const& globString)
 	{
-		D(DBF_Bundles_Cache, bug("scan-dir ‘%s’\n", entry.path().c_str()););
+		D(DBF_Plist_Cache, bug("scan-dir ‘%s’\n", entry.path().c_str()););
 		std::vector<std::string> entries;
 		for(auto dirEntry : path::entries(entry.path(), globString))
 			entries.emplace_back(dirEntry->d_name);
@@ -274,4 +274,4 @@ namespace fs
 		entry.set_entries(entries, globString);
 	}
 
-} /* fs */
+} /* plist */

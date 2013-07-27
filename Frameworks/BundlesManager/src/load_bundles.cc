@@ -21,7 +21,7 @@ static std::vector<oak::uuid_t> to_menu (plist::array_t const& uuids, std::strin
 	return res;
 }
 
-std::pair<std::vector<bundles::item_ptr>, std::map< oak::uuid_t, std::vector<oak::uuid_t>>> create_bundle_index (std::vector<std::string> const& bundlesPaths, fs::cache_t& cache)
+std::pair<std::vector<bundles::item_ptr>, std::map< oak::uuid_t, std::vector<oak::uuid_t>>> create_bundle_index (std::vector<std::string> const& bundlesPaths, plist::cache_t& cache)
 {
 	struct delta_item_t
 	{
