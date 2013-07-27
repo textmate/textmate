@@ -347,7 +347,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 	{
 		case 0:  format = @"No more %@ “%@”.";                break;
 		case 1:  format = didWrap ? @"Search wrapped." : nil; break;
-		default: format = @"%2$ld %@ “%@”.";                  break;
+		default: format = @"%3$ld %@ “%@”.";                  break;
 	}
 
 	NSString* classifier = (self.findOptions & find::regular_expression) ? @"matches for" : @"occurrences of";
