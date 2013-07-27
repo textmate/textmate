@@ -1,5 +1,5 @@
-#ifndef BUNDLES_INDEX_H_H2GEVOXK
-#define BUNDLES_INDEX_H_H2GEVOXK
+#ifndef BUNDLES_ITEM_H_H2GEVOXK
+#define BUNDLES_ITEM_H_H2GEVOXK
 
 #include <oak/misc.h>
 #include <plist/plist.h>
@@ -115,4 +115,4 @@ namespace bundles
 
 } /* bundles */
 
-#endif /* end of include guard: BUNDLES_INDEX_H_H2GEVOXK */
+#endif /* end of include guard: BUNDLES_ITEM_H_H2GEVOXK */

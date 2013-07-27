@@ -1,5 +1,5 @@
 #import <updater/updater.h>
-#import <bundles/index.h>
+#import <bundles/item.h>
 
 PUBLIC extern NSString* const kUserDefaultsDisableBundleUpdatesKey;
 PUBLIC extern NSString* const kUserDefaultsLastBundleUpdateCheckKey;

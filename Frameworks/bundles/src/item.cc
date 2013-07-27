@@ -1,4 +1,4 @@
-#include "index.h"
+#include "item.h"
 #include "query.h"     // required by item_t::environment
 #include "locations.h" // required by item_t::save
 #include <plist/delta.h>

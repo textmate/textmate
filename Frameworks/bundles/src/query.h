@@ -1,7 +1,7 @@
 #ifndef BUNDLES_QUERY_H_7L9NPR0I
 #define BUNDLES_QUERY_H_7L9NPR0I
 
-#include "index.h"
+#include "item.h"
 
 namespace bundles
 {
