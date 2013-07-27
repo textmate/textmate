@@ -1123,7 +1123,7 @@ namespace document
 	// = Replace =
 	// ===========
 
-	void document_t::replace (std::multimap<text::range_t, std::string> const& replacements)
+	void document_t::replace (std::multimap<std::pair<size_t, size_t>, std::string> const& replacements)
 	{
 		ASSERT(!is_open());
 
@@ -1141,8 +1141,8 @@ namespace document
 
 		riterate(pair, replacements)
 		{
-			D(DBF_Document_Replace, bug("replace %s with ‘%s’\n", std::string(pair->first).c_str(), pair->second.c_str()););
-			buf.replace(buf.convert(pair->first.min()), buf.convert(pair->first.max()), pair->second);
+			D(DBF_Document_Replace, bug("replace range %zu-%zu with ‘%s’\n", pair->first.first, pair->first.second, pair->second.c_str()););
+			buf.replace(pair->first.first, pair->first.second, pair->second);
 		}
 
 		_content.reset(new io::bytes_t(buf.substr(0, buf.size())));

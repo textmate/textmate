@@ -1178,15 +1178,13 @@ namespace ng
 			_selections = selectionHelper.get(action == kChangeCaseOfLetter || action == kChangeCaseOfWord);
 	}
 
-	void editor_t::perform_replacements (std::multimap<text::range_t, std::string> const& replacements)
+	void editor_t::perform_replacements (std::multimap<std::pair<size_t, size_t>, std::string> const& replacements)
 	{
 		std::multimap<range_t, std::string> tmp;
-		riterate(pair, replacements)
+		for(auto pair : replacements)
 		{
-			// D(DBF_Editor, bug("replace %s with ‘%s’\n", std::string(pair->first).c_str(), pair->second.c_str()););
-			size_t from = _buffer.convert(pair->first.min());
-			size_t to   = _buffer.convert(pair->first.max());
-			tmp.insert(std::make_pair(range_t(from, to), pair->second));
+			// D(DBF_Editor, bug("replace range %zu-%zu with ‘%s’\n", pair->first.first, pair->first.second, pair->second.c_str()););
+			tmp.insert(std::make_pair(range_t(pair.first.first, pair.first.second), pair.second));
 		}
 		_selections = this->replace(tmp);
 	}

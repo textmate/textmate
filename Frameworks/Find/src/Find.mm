@@ -208,11 +208,11 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 				std::string replaceString = to_s(controller.replaceString);
 				for(FFMatch* fileMatch in [self.documentSearch allDocumentsWithSelectedMatches])
 				{
-					std::multimap<text::range_t, std::string> replacements;
+					std::multimap<std::pair<size_t, size_t>, std::string> replacements;
 					for(FFMatch* match in [self.documentSearch allSelectedMatchesForDocumentIdentifier:[fileMatch identifier]])
 					{
 						++replaceCount;
-						replacements.insert(std::make_pair([match match].range, controller.regularExpression ? format_string::expand(replaceString, [match match].captures) : replaceString));
+						replacements.insert(std::make_pair(std::make_pair([match match].first, [match match].last), controller.regularExpression ? format_string::expand(replaceString, [match match].captures) : replaceString));
 					}
 
 					if(document::document_ptr doc = [fileMatch match].document)

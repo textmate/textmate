@@ -7,9 +7,9 @@ public:
 		jail.set_content("test.txt",  "Lorem ipsum dolor sit amet, consectetur adipisicing elit.");
 
 		document::document_ptr doc = document::create(jail.path("test.txt"));
-		std::multimap<text::range_t, std::string> replacements;
-		replacements.insert(std::make_pair(text::range_t("1:13-1:18"), "charum"));
-		replacements.insert(std::make_pair(text::range_t("1:29-1:40"), "abetarda"));
+		std::multimap<std::pair<size_t, size_t>, std::string> replacements;
+		replacements.insert(std::make_pair(std::make_pair(12, 17), "charum"));
+		replacements.insert(std::make_pair(std::make_pair(28, 39), "abetarda"));
 		doc->replace(replacements);
 		doc->open();
 		TS_ASSERT_EQUALS(doc->content(), "Lorem ipsum charum sit amet, abetarda adipisicing elit.");
@@ -22,8 +22,8 @@ public:
 		jail.set_content("test.txt",  "Foo\nBar\nFud\n");
 		
 		document::document_ptr doc = document::create(jail.path("test.txt"));
-		std::multimap<text::range_t, std::string> replacements;
-		replacements.insert(std::make_pair(text::range_t("2:1-2:4"), "Jazz"));
+		std::multimap<std::pair<size_t, size_t>, std::string> replacements;
+		replacements.insert(std::make_pair(std::make_pair(4, 7), "Jazz"));
 		doc->replace(replacements);
 		doc->open();
 		TS_ASSERT_EQUALS(doc->content(), "Foo\nJazz\nFud\n");
@@ -35,11 +35,11 @@ public:
 		test::jail_t jail;
 		jail.set_content("test.txt",  "Foo\nBar\nFud\n");
 		
-		std::multimap<text::range_t, std::string> replacements;
-		replacements.insert(std::make_pair(text::range_t("1:1-1:2"), "G"));
-		replacements.insert(std::make_pair(text::range_t("1:4-1:4"), "d"));
-		replacements.insert(std::make_pair(text::range_t("2:1-2:4"), "Jazz"));
-		replacements.insert(std::make_pair(text::range_t("4:1-4:1"), "A new line\n"));
+		std::multimap<std::pair<size_t, size_t>, std::string> replacements;
+		replacements.insert(std::make_pair(std::make_pair(0, 1), "G"));
+		replacements.insert(std::make_pair(std::make_pair(3, 3), "d"));
+		replacements.insert(std::make_pair(std::make_pair(4, 7), "Jazz"));
+		replacements.insert(std::make_pair(std::make_pair(12, 12), "A new line\n"));
 
 		document::document_ptr doc = document::create(jail.path("test.txt"));
 		doc->replace(replacements);
