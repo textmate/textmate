@@ -421,9 +421,9 @@ def dynamic_lib(target)
   dst = target[:dylib] = build_path("#{target[:path]}/#{target[:name]}.dylib")
 
   if target[:CP_Resources].to_a.empty?
-    install_name = "@executable_path/../Frameworks/#{target[:name]}.dylib"
+    install_name = "@rpath/#{target[:name]}.dylib"
   else
-    install_name = "@executable_path/../Frameworks/#{target[:name]}.framework/Versions/A/#{target[:name]}"
+    install_name = "@rpath/#{target[:name]}.framework/Versions/A/#{target[:name]}"
   end
 
   link_with = all_values_for_key(target, 'LINK').map { |name| TARGETS.target_named(name)[:dylib] }
