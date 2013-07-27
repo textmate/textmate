@@ -1024,21 +1024,29 @@ namespace document
 				std::string header(1024, ' ');
 				ssize_t len = read(fd, &header.front(), header.size());
 				header.resize(len != -1 ? len : 0);
-				lseek(fd, 0, SEEK_SET);
 
 				// 1. Try to find a bom
 				// 2. If the characters are UTF8 valid we suppose the rest is UTF8
 				// 3. At last, we use settings_for_path to use the specified encoding into the .tm_properties
-				std::string charset = encoding::charset_from_bom(&header.front(), &header.front() + header.size());
+				size_t bomSize = 0;
+				std::string charset = encoding::charset_from_bom(&header.front(), &header.front() + header.size(), &bomSize);
+				lseek(fd, bomSize, SEEK_SET);
 				if(charset == kCharsetNoEncoding)
 				{
 					if(utf8::is_valid(&header.front(), &header.front() + header.size()))
 							charset = kCharsetUTF8;
 					else	charset = settings_for_path(document->path(), "attr.file.unknown-encoding " + file::path_attributes(document->path())).get(kSettingsEncodingKey, kCharsetUnknown);
 				}
+				else
+				{
+					_encoding.set_byte_order_mark(true);
+				}
 
 				if(charset != kCharsetUTF8 && charset != kCharsetUnknown && charset != kCharsetNoEncoding)
+				{
+					_encoding.set_charset(charset);
 					converter = iconv_open(kCharsetUTF8.c_str(), charset.c_str());
+				}
 			}
 			
 			~file_reader_t()
@@ -1046,11 +1054,6 @@ namespace document
 				if(converter != (iconv_t)(-1))
 					iconv_close(converter);
 			}
-
-		private:
-			document_const_ptr document;
-			std::string read_buffer;
-			iconv_t converter = (iconv_t)-1;
 
 			io::bytes_ptr next ()
 			{
@@ -1079,6 +1082,17 @@ namespace document
 				dest_buffer.resize(dest_buffer.size() - dstBytesLeft);
 				return io::bytes_ptr(new io::bytes_t(dest_buffer));
 			}
+
+			encoding::type const& encoding () const
+			{
+				return _encoding;
+			}
+
+		private:
+			document_const_ptr document;
+			std::string read_buffer;
+			encoding::type _encoding;
+			iconv_t converter = (iconv_t)-1;
 		};
 
 		struct buffer_reader_t : document::document_t::reader_t
@@ -1120,7 +1134,10 @@ namespace document
 		ASSERT(!_buffer);
 
 		ng::buffer_t buf;
-		buf.insert(0, path::content(_path));
+
+		file_reader_t reader(shared_from_this());
+		while(io::bytes_ptr bytes = reader.next())
+			buf.insert(buf.size(), std::string(bytes->begin(), bytes->end()));
 
 		riterate(pair, replacements)
 		{
@@ -1129,6 +1146,7 @@ namespace document
 		}
 
 		_content.reset(new io::bytes_t(buf.substr(0, buf.size())));
+		set_disk_encoding(reader.encoding());
 	}
 
 	static ng::index_t cap (ng::buffer_t const& buf, text::pos_t const& pos)
