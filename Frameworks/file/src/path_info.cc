@@ -10,7 +10,7 @@
 
 namespace file
 {
-	std::string path_attributes (std::string const& path, std::string const& dir)
+	std::string path_attributes (std::string const& path)
 	{
 		std::vector<std::string> res;
 		if(path != NULL_STR)

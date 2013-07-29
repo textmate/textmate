@@ -5,7 +5,7 @@
 
 namespace file
 {
-	PUBLIC std::string path_attributes (std::string const& path, std::string const& dir = NULL_STR);
+	PUBLIC std::string path_attributes (std::string const& path);
 
 } /* file */
 
