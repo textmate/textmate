@@ -1408,7 +1408,7 @@ namespace document
 			citerate(it, path::entries(dir))
 			{
 				if(should_stop_flag)
-					break;
+					return;
 
 				std::string const& path = path::join(dir, (*it)->d_name);
 				if((*it)->d_type == DT_DIR)
