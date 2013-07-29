@@ -140,30 +140,13 @@ namespace document
 	// = Document Tracker =
 	// ====================
 
-	static OSSpinLock spinlock = 0;
 	static pthread_t MainThread = pthread_self();
 
 	static struct document_tracker_t
 	{
-		ssize_t lock_count;
-		document_tracker_t () : lock_count(0) { }
-
-		struct lock_t
-		{
-			lock_t (document_tracker_t* tracker) : tracker(tracker), locked(false) { retain(); }
-			~lock_t ()                                                             { release(); }
-
-			void retain ()  { OSSpinLockLock(&spinlock); DB(++tracker->lock_count); locked = true; };
-			void release () { if(!locked) return; DB(--tracker->lock_count); OSSpinLockUnlock(&spinlock); locked = false; }
-
-		private:
-			DB_VAR document_tracker_t* tracker;
-			bool locked;
-		};
-
 		document_ptr create (std::string const& path, path::identifier_t const& key)
 		{
-			lock_t lock(this);
+			_lock.lock();
 			D(DBF_Document_Tracker, bug("%s\n", path.c_str()););
 
 			std::map<path::identifier_t, document_weak_ptr>::const_iterator it = documents_by_path.find(key);
@@ -172,7 +155,7 @@ namespace document
 				if(document_ptr res = it->second.lock())
 				{
 					D(DBF_Document_Tracker, bug("re-use instance (%s)\n", res->path().c_str()););
-					lock.release();
+					_lock.unlock();
 					if(pthread_self() == MainThread)
 						res->set_path(path);
 					return res;
@@ -189,12 +172,13 @@ namespace document
 			res->_key  = key;
 
 			add(res);
+			_lock.unlock();
 			return res;
 		}
 
 		document_ptr find (oak::uuid_t const& uuid, bool searchBackups)
 		{
-			lock_t lock(this);
+			std::lock_guard<std::mutex> lock(_lock);
 			D(DBF_Document_Tracker, bug("%s\n", to_s(uuid).c_str()););
 			std::map<oak::uuid_t, document_weak_ptr>::const_iterator it = documents.find(uuid);
 			if(it != documents.end())
@@ -245,7 +229,7 @@ namespace document
 
 		void remove (oak::uuid_t const& uuid, path::identifier_t const& key)
 		{
-			lock_t lock(this);
+			std::lock_guard<std::mutex> lock(_lock);
 			D(DBF_Document_Tracker, bug("%s, %s\n", to_s(uuid).c_str(), to_s(key).c_str()););
 			if(key)
 			{
@@ -266,7 +250,7 @@ namespace document
 
 		path::identifier_t const& update_path (document_ptr doc, path::identifier_t const& oldKey, path::identifier_t const& newKey)
 		{
-			lock_t lock(this);
+			std::lock_guard<std::mutex> lock(_lock);
 			D(DBF_Document_Tracker, bug("%s → %s\n", to_s(oldKey).c_str(), to_s(newKey).c_str()););
 			if(oldKey)
 			{
@@ -285,7 +269,7 @@ namespace document
 
 		size_t untitled_counter ()
 		{
-			lock_t lock(this);
+			std::lock_guard<std::mutex> lock(_lock);
 
 			std::set<size_t> reserved;
 			iterate(pair, documents)
@@ -307,7 +291,7 @@ namespace document
 		{
 			std::vector<document_ptr> res;
 
-			lock_t lock(this);
+			std::lock_guard<std::mutex> lock(_lock);
 			for(auto pair : documents)
 			{
 				if(document_ptr doc = pair.second.lock())
@@ -318,12 +302,12 @@ namespace document
 		}
 
 	private:
+		std::mutex _lock;
 		std::map<oak::uuid_t, document_weak_ptr> documents;
 		std::map<path::identifier_t, document_weak_ptr> documents_by_path;
 
 		void add (document_ptr doc)
 		{
-			ASSERT_EQ(lock_count, 1); // we assert that a lock has been obtained by the caller
 			documents.insert(std::make_pair(doc->identifier(), doc));
 			if(doc->_key)
 			{
