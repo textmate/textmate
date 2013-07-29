@@ -284,7 +284,7 @@ namespace document
 		// ==============
 
 		friend document_ptr create (std::string const& path);
-		friend document_ptr from_content (std::string const& content, std::string const& fileType);
+		friend document_ptr from_content (std::string const& content, std::string fileType);
 		friend document_ptr find (oak::uuid_t const& uuid, bool searchBackups);
 
 		oak::uuid_t _identifier;              // to identify this document when there is no path
@@ -336,7 +336,7 @@ namespace document
 
 	PUBLIC document_ptr create (std::string const& path = NULL_STR);
 	PUBLIC document_ptr find (oak::uuid_t const& uuid, bool searchBackups = false);
-	PUBLIC document_ptr from_content (std::string const& content, std::string const& fileType = NULL_STR);
+	PUBLIC document_ptr from_content (std::string const& content, std::string fileType = NULL_STR);
 
 	// ====================
 	// = Document scanner =

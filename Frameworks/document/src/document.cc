@@ -338,12 +338,19 @@ namespace document
 	document_ptr create (std::string const& path, path::identifier_t const& key) { return documents.create(path, key); }
 	document_ptr find (oak::uuid_t const& uuid, bool searchBackups)              { return documents.find(uuid, searchBackups); }
 
-	document_ptr from_content (std::string const& content, std::string const& fileType)
+	document_ptr from_content (std::string const& content, std::string fileType)
 	{
 		D(DBF_Document, bug("%s\n", fileType.c_str()););
+		if(fileType == NULL_STR)
+			fileType = file::type(NULL_STR, io::bytes_ptr(new io::bytes_t(content.data(), content.size(), false)));
+
 		document_ptr doc = create();
 		if(fileType != NULL_STR)
 			doc->set_file_type(fileType);
+
+		auto const settings = settings_for_path(NULL_STR, doc->file_type());
+		doc->set_indent(text::indent_t(std::max(1, settings.get(kSettingsTabSizeKey, 4)), SIZE_T_MAX, settings.get(kSettingsSoftTabsKey, false)));
+
 		doc->set_content(content);
 		return doc;
 	}
