@@ -25,6 +25,16 @@ namespace text
 
 		std::string create (size_t atColumn = 0, size_t units = 1) const;
 
+		bool operator== (indent_t const& rhs) const
+		{
+			return _tab_size == rhs._tab_size && _indent_size == rhs._indent_size && _soft_tabs == rhs._soft_tabs && _tab_follows_indent == rhs._tab_follows_indent;
+		}
+
+		bool operator!= (indent_t const& rhs) const
+		{
+			return _tab_size != rhs._tab_size || _indent_size != rhs._indent_size || _soft_tabs != rhs._soft_tabs || _tab_follows_indent != rhs._tab_follows_indent;
+		}
+
 	private:
 		size_t _tab_size;
 		size_t _indent_size;
