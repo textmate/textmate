@@ -79,7 +79,7 @@ static std::string shell_quote (std::string const& str)
 static void collect_all_paths (std::string const& svn, std::string const& xsltPath, scm::status_map_t& entries, std::string const& dir)
 {
 	ASSERT_NE(svn, NULL_STR); ASSERT_NE(xsltPath, NULL_STR);
-	std::string const cmd = text::format("%s status --no-ignore --xml %s|/usr/bin/xsltproc %s -", shell_quote(svn).c_str(), shell_quote(dir).c_str(), shell_quote(xsltPath).c_str());
+	std::string const cmd = text::format("cd %s && %s status --no-ignore --xml|/usr/bin/xsltproc %s -", shell_quote(dir).c_str(), shell_quote(svn).c_str(), shell_quote(xsltPath).c_str());
 	parse_status_output(entries, io::exec("/bin/sh", "-c", cmd.c_str(), NULL), dir);
 }
 
