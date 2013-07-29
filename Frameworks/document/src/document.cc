@@ -1465,7 +1465,7 @@ namespace document
 					}
 					else
 					{
-						perror(text::format("lstat(\"%s\")", path.c_str()).c_str());
+						perror(text::format("lstat(“%s” → “%s”))", link->c_str(), path.c_str()).c_str());
 					}
 				}
 				links.clear();

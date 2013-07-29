@@ -44,6 +44,10 @@ namespace path
 						else if(S_ISLNK(buf.st_mode))
 							entries[i]->d_type = DT_LNK;
 					}
+					else
+					{
+						perror(text::format("lstat(“%s/%s”)", path.c_str(), entries[i]->d_name).c_str());
+					}
 				}
 			}
 			_helper.reset(new helper_t(entries, size, actual));
