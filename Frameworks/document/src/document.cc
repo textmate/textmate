@@ -549,11 +549,8 @@ namespace document
 		}
 
 		settings_t const settings = settings_for_path(virtual_path(), file_type(), path::parent(_path), document_variables());
-		_buffer->indent() = text::indent_t(std::max(1, settings.get(kSettingsTabSizeKey, 4)), SIZE_T_MAX, settings.get(kSettingsSoftTabsKey, false));
 		_buffer->set_spelling_language(settings.get(kSettingsSpellingLanguageKey, "en"));
 		_buffer->set_live_spelling(settings.get(kSettingsSpellCheckingKey, false));
-
-		const_cast<document_t*>(this)->broadcast(callback_t::did_change_indent_settings);
 
 		D(DBF_Document, bug("done\n"););
 	}
@@ -593,6 +590,7 @@ namespace document
 			_file_watcher.reset(new watch_t(_path, shared_from_this()));
 
 		_buffer.reset(new ng::buffer_t);
+		_buffer->indent() = _indent;
 		setup_buffer();
 		if(content)
 		{
@@ -1015,6 +1013,9 @@ namespace document
 			if(_buffer)
 				setup_buffer();
 			broadcast(callback_t::did_change_file_type);
+
+			auto const settings = settings_for_path(virtual_path(), file_type(), path::parent(_path), document_variables());
+			set_indent(text::indent_t(std::max(1, settings.get(kSettingsTabSizeKey, 4)), SIZE_T_MAX, settings.get(kSettingsSoftTabsKey, false)));
 		}
 	}
 

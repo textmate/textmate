@@ -217,7 +217,10 @@ namespace
 
 	static document::document_ptr create_untitled_document_in_folder (std::string const& suggestedFolder)
 	{
-		return document::from_content("", settings_for_path(NULL_STR, file::path_attributes(NULL_STR), suggestedFolder).get(kSettingsFileTypeKey, "text.plain"));
+		auto doc = document::from_content("", settings_for_path(NULL_STR, file::path_attributes(NULL_STR), suggestedFolder).get(kSettingsFileTypeKey, "text.plain"));
+		auto const settings = settings_for_path(NULL_STR, doc->file_type(), suggestedFolder);
+		doc->set_indent(text::indent_t(std::max(1, settings.get(kSettingsTabSizeKey, 4)), SIZE_T_MAX, settings.get(kSettingsSoftTabsKey, false)));
+		return doc;
 	}
 }
 
@@ -683,7 +686,8 @@ namespace
 	if(NSString* folder = [self.fileBrowser directoryForNewItems])
 	{
 		std::string path = "untitled";
-		for(auto item : bundles::query(bundles::kFieldGrammarScope, settings_for_path(NULL_STR, "attr.untitled", to_s(folder)).get(kSettingsFileTypeKey, "text.plain")))
+		std::string fileType = settings_for_path(NULL_STR, "attr.untitled", to_s(folder)).get(kSettingsFileTypeKey, "text.plain");
+		for(auto item : bundles::query(bundles::kFieldGrammarScope, fileType))
 		{
 			std::string const& ext = item->value_for_field(bundles::kFieldGrammarExtension);
 			if(ext != NULL_STR)
@@ -694,6 +698,10 @@ namespace
 		if([[OakFileManager sharedInstance] createFileAtURL:url window:self.window])
 		{
 			document::document_ptr doc = document::create(to_s([url path]));
+			doc->set_file_type(fileType);
+			auto const settings = settings_for_path(doc->virtual_path(), doc->file_type(), path::parent(doc->path()));
+			doc->set_indent(text::indent_t(std::max(1, settings.get(kSettingsTabSizeKey, 4)), SIZE_T_MAX, settings.get(kSettingsSoftTabsKey, false)));
+
 			doc->open();
 			[self setSelectedDocument:doc];
 			doc->close();

@@ -59,6 +59,12 @@ namespace
 
 		void show_document (std::string const& path, document::document_ptr document)
 		{
+			if(path != NULL_STR)
+			{
+				auto const settings = settings_for_path(document->virtual_path(), document->file_type(), path::parent(path), document->document_variables());
+				document->set_indent(text::indent_t(std::max(1, settings.get(kSettingsTabSizeKey, 4)), SIZE_T_MAX, settings.get(kSettingsSoftTabsKey, false)));
+			}
+
 			[_self didOpenDocument:document];
 			document->close();
 		}
