@@ -231,6 +231,10 @@ namespace document
 					res->_custom_name    = path::get_attr(path, "com.macromates.backup.custom-name");
 					res->_modified       = path::get_attr(path, "com.macromates.backup.modified") == "YES";
 
+					std::string tabSize = path::get_attr(path, "com.macromates.backup.tab-size");
+					if(tabSize != NULL_STR)
+						res->_indent = text::indent_t(std::max(1, atoi(tabSize.c_str())), SIZE_T_MAX, path::get_attr(path, "com.macromates.backup.soft-tabs") == "YES");
+
 					add(res);
 					return res;
 				}
@@ -754,12 +758,14 @@ namespace document
 			path::set_attr(dst, "com.macromates.backup.newlines",       _disk_newlines);
 			path::set_attr(dst, "com.macromates.backup.untitled-count", std::to_string(_untitled_count));
 			path::set_attr(dst, "com.macromates.backup.custom-name",    _custom_name);
+			path::set_attr(dst, "com.macromates.backup.tab-size",       std::to_string(_indent.tab_size()));
+			path::set_attr(dst, "com.macromates.backup.soft-tabs",      _indent.soft_tabs() ? "YES" : "NO");
 			path::set_attr(dst, "com.macromates.bookmarks",             marks_as_string());
 			path::set_attr(dst, "com.macromates.folded",                NULL_STR);
 			if(is_modified())
 				path::set_attr(dst, "com.macromates.backup.modified", "YES");
 
-			// TODO tab size, spell checking, soft wrap, etc. should go into session!?!
+			// TODO spell checking, soft wrap, etc. should go into session!?!
 
 			_backup_revision = revision();
 
