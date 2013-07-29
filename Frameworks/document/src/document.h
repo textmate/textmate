@@ -227,6 +227,9 @@ namespace document
 		void set_disk_encoding (encoding::type const& encoding) { _disk_newlines = encoding.newlines(); _disk_encoding = encoding.charset(); _disk_bom = encoding.byte_order_mark(); }
 		encoding::type disk_encoding () const                   { return encoding::type(_disk_newlines, _disk_encoding, _disk_bom); }
 
+		void set_indent (text::indent_t const& indent);
+		text::indent_t const& indent () const;
+
 		encoding::type encoding_for_save_as_path (std::string const& path);
 
 		bool recent_tracking () const         { return _recent_tracking && _path != NULL_STR; }
@@ -322,6 +325,8 @@ namespace document
 		std::string _disk_encoding;
 		std::string _disk_newlines;
 		bool _disk_bom;
+
+		text::indent_t _indent;
 
 	protected: // so that we can trigger the callback in unit tests
 		watch_ptr _file_watcher;

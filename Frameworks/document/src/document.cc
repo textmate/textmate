@@ -512,6 +512,23 @@ namespace document
 		return map;
 	}
 
+	void document_t::set_indent (text::indent_t const& indent)
+	{
+		if(_buffer)
+			_buffer->indent() = indent;
+
+		if(_indent != indent)
+		{
+			_indent = indent;
+			const_cast<document_t*>(this)->broadcast(callback_t::did_change_indent_settings);
+		}
+	}
+
+	text::indent_t const& document_t::indent () const
+	{
+		return _indent;
+	}
+
 	void document_t::setup_buffer ()
 	{
 		D(DBF_Document, bug("%s, %s\n", display_name().c_str(), _file_type.c_str()););
