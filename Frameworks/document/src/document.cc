@@ -338,9 +338,9 @@ namespace document
 
 	} documents;
 
-	document_ptr create (std::string const& rawPath)                             { std::string const path = path::resolve(rawPath); return path::is_text_clipping(path) ? from_content(path::resource(path, typeUTF8Text, 256)) : documents.create(path, path::identifier_t(path)); }
-	document_ptr create (std::string const& path, path::identifier_t const& key) { return documents.create(path, key); }
-	document_ptr find (oak::uuid_t const& uuid, bool searchBackups)              { return documents.find(uuid, searchBackups); }
+	document_ptr create (std::string const& rawPath)                                  { std::string const path = path::resolve(rawPath); return path::is_text_clipping(path) ? from_content(path::resource(path, typeUTF8Text, 256)) : documents.create(path, path::identifier_t(path)); }
+	document_ptr create (std::string const& path, std::pair<dev_t, ino_t> const& key) { return documents.create(path, path::identifier_t(true, key.first, key.second, path)); }
+	document_ptr find (oak::uuid_t const& uuid, bool searchBackups)                   { return documents.find(uuid, searchBackups); }
 
 	document_ptr from_content (std::string const& content, std::string fileType)
 	{
@@ -1404,7 +1404,7 @@ namespace document
 			pthread_mutex_unlock(&mutex);
 
 			std::vector<std::string> newDirs;
-			std::multimap<std::string, path::identifier_t, text::less_t> files;
+			std::multimap<std::string, std::pair<dev_t, ino_t>, text::less_t> files;
 			citerate(it, path::entries(dir))
 			{
 				if(should_stop_flag)
@@ -1426,7 +1426,7 @@ namespace document
 						continue;
 
 					if(seen_paths.insert(std::make_pair(buf.st_dev, (*it)->d_ino)).second)
-							files.insert(std::make_pair(path, path::identifier_t(true, buf.st_dev, (*it)->d_ino, path)));
+							files.emplace(path, std::make_pair(buf.st_dev, (*it)->d_ino));
 					else	D(DBF_Document_Scanner, bug("skip known path: ‘%s’\n", path.c_str()););
 				}
 				else if((*it)->d_type == DT_LNK)
@@ -1459,7 +1459,7 @@ namespace document
 								continue;
 
 							if(seen_paths.insert(std::make_pair(buf.st_dev, buf.st_ino)).second)
-									files.insert(std::make_pair(path, path::identifier_t(true, buf.st_dev, buf.st_ino, path)));
+									files.emplace(path, std::make_pair(buf.st_dev, buf.st_ino));
 							else	D(DBF_Document_Scanner, bug("skip known path: ‘%s’\n", path.c_str()););
 						}
 					}
