@@ -2232,8 +2232,8 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (theme_ptr const&)theme     { return theme; }
 - (NSFont*)font               { return [NSFont fontWithName:[NSString stringWithCxxString:fontName] size:fontSize]; }
-- (size_t)tabSize             { return document ? document->buffer().indent().tab_size() : 2; }
-- (BOOL)softTabs              { return document ? document->buffer().indent().soft_tabs() : NO; }
+- (size_t)tabSize             { return document ? document->indent().tab_size() : 2; }
+- (BOOL)softTabs              { return document ? document->indent().soft_tabs() : NO; }
 - (BOOL)softWrap              { return layout && layout->wrapping(); }
 
 - (BOOL)continuousIndentCorrections
@@ -2267,7 +2267,11 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 {
 	AUTO_REFRESH;
 	if(document)
-		document->buffer().indent().set_tab_size(newTabSize);
+	{
+		text::indent_t tmp = document->indent();
+		tmp.set_tab_size(newTabSize);
+		document->set_indent(tmp);
+	}
 }
 
 - (void)setShowInvisibles:(BOOL)flag
@@ -2305,7 +2309,11 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 - (void)setSoftTabs:(BOOL)flag
 {
 	if(flag != self.softTabs)
-		document->buffer().indent().set_soft_tabs(flag);
+	{
+		text::indent_t tmp = document->indent();
+		tmp.set_soft_tabs(flag);
+		document->set_indent(tmp);
+	}
 }
 
 - (void)setWrapColumn:(NSInteger)newWrapColumn

@@ -514,14 +514,14 @@ namespace document
 
 	void document_t::set_indent (text::indent_t const& indent)
 	{
+		if(_indent == indent)
+			return;
+
+		_indent = indent;
 		if(_buffer)
 			_buffer->indent() = indent;
 
-		if(_indent != indent)
-		{
-			_indent = indent;
-			const_cast<document_t*>(this)->broadcast(callback_t::did_change_indent_settings);
-		}
+		const_cast<document_t*>(this)->broadcast(callback_t::did_change_indent_settings);
 	}
 
 	text::indent_t const& document_t::indent () const
