@@ -11,7 +11,7 @@ namespace network
 {
 	pid_t launch_tbz (std::string const& dest, int& input, int& output, std::string& error)
 	{
-		if(io::process_t process = io::spawn(std::vector<std::string>{ "/usr/bin/tar", "-jxmkC", dest.c_str(), "--strip-components", "1" }))
+		if(io::process_t process = io::spawn(std::vector<std::string>{ "/usr/bin/tar", "-jxmkC", dest, "--strip-components", "1" }))
 		{
 			input  = process.in;
 			output = process.out;
