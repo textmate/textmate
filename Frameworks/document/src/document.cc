@@ -140,39 +140,118 @@ namespace document
 	// = Document Tracker =
 	// ====================
 
-	static pthread_t MainThread = pthread_self();
+	static bool is_inode_valid (ino_t inode, std::string const& path)
+	{
+		if(inode == 999999999) // Zero-length files on FAT file systems share this magic value
+		{
+			struct statfs sfsb;
+			if(statfs(path.c_str(), &sfsb) == 0)
+				return strcasecmp(sfsb.f_fstypename, "msdos") == 0 && strcasecmp(sfsb.f_fstypename, "exfat") == 0;
+			perror("statfs");
+		}
+		return true;
+	}
+
+	inode_t::inode_t (dev_t device, ino_t inode, std::string const& path) : device(device), inode(inode), valid(true)
+	{
+		if(!is_inode_valid(inode, path))
+		{
+			device = 0;
+			inode  = 0;
+			valid  = false;
+		}
+	}
+
+	inode_t::inode_t (std::string const& path)
+	{
+		struct stat buf;
+		if(lstat(path.c_str(), &buf) == 0)
+		{
+			if(is_inode_valid(buf.st_ino, path))
+			{
+				device = buf.st_dev;
+				inode  = buf.st_ino;
+				valid  = true;
+			}
+		}
+	}
+
+	bool inode_t::operator< (inode_t const& rhs) const
+	{
+		return std::make_tuple(valid ? 1 : 0, inode, device) < std::make_tuple(rhs.valid ? 1 : 0, rhs.inode, rhs.device);
+	}
 
 	static struct document_tracker_t
 	{
-		document_ptr create (std::string const& path, path::identifier_t const& key)
+		std::vector<document_ptr> all_documents ()
 		{
-			_lock.lock();
-			D(DBF_Document_Tracker, bug("%s\n", path.c_str()););
+			std::lock_guard<std::mutex> lock(_lock);
 
-			std::map<path::identifier_t, document_weak_ptr>::const_iterator it = documents_by_path.find(key);
-			if(it != documents_by_path.end())
+			std::vector<document_ptr> res;
+			for(auto pair : _documents_by_uuid)
 			{
-				if(document_ptr res = it->second.lock())
-				{
-					D(DBF_Document_Tracker, bug("re-use instance (%s)\n", res->path().c_str()););
-					_lock.unlock();
-					if(pthread_self() == MainThread)
-						res->set_path(path);
-					return res;
-				}
-				else
-				{
-					D(DBF_Document_Tracker, bug("*** old instance gone\n"););
-				}
+				if(document_ptr doc = pair.second->document.lock())
+					res.push_back(doc);
+			}
+			return res;
+		}
+
+		size_t untitled_counter ()
+		{
+			std::set<size_t> reserved;
+			for(auto doc : all_documents())
+			{
+				if(doc->path() == NULL_STR && doc->custom_name() == NULL_STR)
+					reserved.insert(doc->untitled_count());
 			}
 
+			size_t res = 1;
+			while(reserved.find(res) != reserved.end())
+				++res;
+			return res;
+		}
+
+		document_ptr create (std::string const& path, inode_t const& inode)
+		{
+			std::lock_guard<std::mutex> lock(_lock);
+			D(DBF_Document_Tracker, bug("%s (%llu, %d)\n", path.c_str(), inode.inode, inode.device););
+
+			auto pathIter = _documents_by_path.find(path);
+			if(pathIter != _documents_by_path.end())
+			{
+				D(DBF_Document_Tracker, bug("re-use document with same path\n"););
+				if(document_ptr res = pathIter->second->document.lock())
+				{
+					if(pathIter->second->inode != inode)
+					{
+						// TODO If inode has changed, we should check document content against the disk
+						D(DBF_Document_Tracker, bug("update inode %llu → %llu\n", pathIter->second->inode.inode, inode.inode););
+						remove_no_lock(res->identifier());
+						res->_inode = inode;
+						add_no_lock(res);
+					}
+					return res;
+				}
+				ASSERT(false);
+			}
+
+			auto inodeIter = _documents_by_inode.find(inode);
+			if(inodeIter != _documents_by_inode.end())
+			{
+				D(DBF_Document_Tracker, bug("re-use document with different path ‘%s’\n", inodeIter->second->path.c_str()););
+				// TODO If the old path no longer exist, we should update document’s path
+				if(document_ptr res = inodeIter->second->document.lock())
+					return res;
+				ASSERT(false);
+			}
+
+			D(DBF_Document_Tracker, bug("nothing found, create new document\n"););
 			document_ptr res = document_ptr(new document_t);
 			res->_identifier.generate();
-			res->_path = path;
-			res->_key  = key;
+			res->_path  = path;
+			res->_inode = inode;
 
-			add(res);
-			_lock.unlock();
+			add_no_lock(res);
 			return res;
 		}
 
@@ -180,18 +259,14 @@ namespace document
 		{
 			std::lock_guard<std::mutex> lock(_lock);
 			D(DBF_Document_Tracker, bug("%s\n", to_s(uuid).c_str()););
-			std::map<oak::uuid_t, document_weak_ptr>::const_iterator it = documents.find(uuid);
-			if(it != documents.end())
+
+			auto uuidIter = _documents_by_uuid.find(uuid);
+			if(uuidIter != _documents_by_uuid.end())
 			{
-				if(document_ptr res = it->second.lock())
-				{
-					D(DBF_Document_Tracker, bug("re-use instance\n"););
+				D(DBF_Document_Tracker, bug("re-use document with path ‘%s’\n", uuidIter->second->path.c_str()););
+				if(document_ptr res = uuidIter->second->document.lock())
 					return res;
-				}
-				else
-				{
-					D(DBF_Document_Tracker, bug("*** old instance gone\n"););
-				}
+				ASSERT(false);
 			}
 
 			for(auto dirEntry : path::entries(session_dir()))
@@ -200,13 +275,14 @@ namespace document
 				std::string const attr = path::get_attr(path, "com.macromates.backup.identifier");
 				if(attr != NULL_STR && uuid == oak::uuid_t(attr))
 				{
+					D(DBF_Document_Tracker, bug("found backup with path ‘%s’\n", path.c_str()););
 					document_ptr res = document_ptr(new document_t);
 
 					res->_identifier     = uuid;
 					res->_backup_path    = path;
 
 					res->_path           = path::get_attr(path, "com.macromates.backup.path");
-					res->_key            = path::identifier_t(res->_path);
+					res->_inode          = inode_t(res->_path);
 					res->_file_type      = path::get_attr(path, "com.macromates.backup.file-type");
 					res->_disk_encoding  = path::get_attr(path, "com.macromates.backup.encoding");
 					res->_disk_bom       = path::get_attr(path, "com.macromates.backup.bom") == "YES";
@@ -219,112 +295,110 @@ namespace document
 					if(tabSize != NULL_STR)
 						res->_indent = text::indent_t(std::max(1, atoi(tabSize.c_str())), SIZE_T_MAX, path::get_attr(path, "com.macromates.backup.soft-tabs") == "YES");
 
-					add(res);
+					add_no_lock(res);
 					return res;
 				}
 			}
-			D(DBF_Document_Tracker, bug("no instance found\n"););
+			D(DBF_Document_Tracker, bug("nothing found\n"););
 			return document_ptr();
 		}
 
-		void remove (oak::uuid_t const& uuid, path::identifier_t const& key)
+		inode_t update_document (oak::uuid_t const& uuid)
 		{
 			std::lock_guard<std::mutex> lock(_lock);
-			D(DBF_Document_Tracker, bug("%s, %s\n", to_s(uuid).c_str(), to_s(key).c_str()););
-			if(key)
+			D(DBF_Document_Tracker, bug("%s\n", to_s(uuid).c_str()););
+
+			auto it = _documents_by_uuid.find(uuid);
+			if(it != _documents_by_uuid.end())
 			{
-				std::map<path::identifier_t, document_weak_ptr>::iterator it = documents_by_path.find(key);
-				ASSERTF(it != documents_by_path.end(), "%s, %s", to_s(key).c_str(), to_s(uuid).c_str());
-				if(!it->second.lock())
+				if(document_ptr doc = it->second->document.lock())
 				{
-					documents_by_path.erase(it);
+					inode_t newInode(doc->path());
+					if(doc->path() != it->second->path || newInode != it->second->inode)
+					{
+						D(DBF_Document_Tracker, bug("path ‘%s’ → ‘%s’\n", it->second->path.c_str(), doc->path().c_str()););
+						D(DBF_Document_Tracker, bug("inode (%llu, %d) → (%llu, %d)\n", it->second->inode.inode, it->second->inode.device, newInode.inode, newInode.device););
+						remove_no_lock(uuid);
+						doc->_inode = newInode;
+						add_no_lock(doc);
+					}
+					return newInode;
 				}
-				else
-				{
-					D(DBF_Document_Tracker, bug("*** old instance replaced\n"););
-				}
+				D(DBF_Document_Tracker, bug("weak reference expired\n"););
+				ASSERT(false);
 			}
-			ASSERT(documents.find(uuid) != documents.end());
-			documents.erase(uuid);
+			D(DBF_Document_Tracker, bug("uuid not found\n"););
+			ASSERT(it != _documents_by_uuid.end());
+			return inode_t();
 		}
 
-		path::identifier_t const& update_path (document_ptr doc, path::identifier_t const& oldKey, path::identifier_t const& newKey)
+		void remove (oak::uuid_t const& uuid)
 		{
 			std::lock_guard<std::mutex> lock(_lock);
-			D(DBF_Document_Tracker, bug("%s → %s\n", to_s(oldKey).c_str(), to_s(newKey).c_str()););
-			if(oldKey)
-			{
-				ASSERT(documents_by_path.find(oldKey) != documents_by_path.end());
-				documents_by_path.erase(oldKey);
-			}
+			D(DBF_Document_Tracker, bug("%s\n", to_s(uuid).c_str()););
 
-			if(newKey)
-			{
-				ASSERT(documents_by_path.find(newKey) == documents_by_path.end());
-				documents_by_path.insert(std::make_pair(newKey, doc));
-			}
-
-			return newKey;
-		}
-
-		size_t untitled_counter ()
-		{
-			std::lock_guard<std::mutex> lock(_lock);
-
-			std::set<size_t> reserved;
-			iterate(pair, documents)
-			{
-				if(document_ptr doc = pair->second.lock())
-				{
-					if(doc->path() == NULL_STR && doc->custom_name() == NULL_STR)
-						reserved.insert(doc->untitled_count());
-				}
-			}
-
-			size_t res = 1;
-			while(reserved.find(res) != reserved.end())
-				++res;
-			return res;
-		}
-
-		std::vector<document_ptr> all_documents ()
-		{
-			std::vector<document_ptr> res;
-
-			std::lock_guard<std::mutex> lock(_lock);
-			for(auto pair : documents)
-			{
-				if(document_ptr doc = pair.second.lock())
-					res.push_back(doc);
-			}
-
-			return res;
+			remove_no_lock(uuid);
 		}
 
 	private:
-		std::mutex _lock;
-		std::map<oak::uuid_t, document_weak_ptr> documents;
-		std::map<path::identifier_t, document_weak_ptr> documents_by_path;
-
-		void add (document_ptr doc)
+		struct record_t
 		{
-			documents.insert(std::make_pair(doc->identifier(), doc));
-			if(doc->_key)
+			oak::uuid_t uuid;
+			std::string path;
+			inode_t inode;
+			document_weak_ptr document;
+		};
+
+		typedef std::shared_ptr<record_t> record_ptr;
+
+		std::mutex                        _lock;
+		std::map<oak::uuid_t, record_ptr> _documents_by_uuid;
+		std::map<std::string, record_ptr> _documents_by_path;
+		std::map<inode_t, record_ptr>     _documents_by_inode;
+
+		void add_no_lock (document_ptr doc)
+		{
+			record_ptr r(new record_t);
+			r->uuid     = doc->identifier();
+			r->path     = doc->path();
+			r->inode    = doc->_inode;
+			r->document = doc;
+
+			ASSERT(_documents_by_uuid.find(r->uuid) == _documents_by_uuid.end());
+			_documents_by_uuid.emplace(r->uuid, r);
+
+			if(r->path != NULL_STR)
 			{
-				D(DBF_Document_Tracker, bug("%s\n", doc->path().c_str()););
-				std::map<path::identifier_t, document_weak_ptr>::iterator it = documents_by_path.find(doc->_key);
-				ASSERTF(it == documents_by_path.end() || !it->second.lock(), "%s, %s\n", to_s(doc->_key).c_str(), to_s(doc->identifier()).c_str());
-				if(it == documents_by_path.end())
-						documents_by_path.insert(std::make_pair(doc->_key, doc));
-				else  it->second = doc;
+				ASSERT(_documents_by_path.find(r->path) == _documents_by_path.end());
+				_documents_by_path.emplace(r->path, r);
 			}
+
+			if(r->inode)
+			{
+				ASSERT(_documents_by_inode.find(r->inode) == _documents_by_inode.end());
+				_documents_by_inode.emplace(r->inode, r);
+			}
+		}
+
+		void remove_no_lock (oak::uuid_t const& uuid)
+		{
+			auto it = _documents_by_uuid.find(uuid);
+			if(it != _documents_by_uuid.end())
+			{
+				if(it->second->inode)
+					_documents_by_inode.erase(it->second->inode);
+				if(it->second->path != NULL_STR)
+					_documents_by_path.erase(it->second->path);
+				_documents_by_uuid.erase(it);
+			}
+			ASSERT(it != _documents_by_uuid.end());
 		}
 
 	} documents;
 
-	document_ptr create (std::string const& rawPath)                                  { std::string const path = path::resolve(rawPath); return path::is_text_clipping(path) ? from_content(path::resource(path, typeUTF8Text, 256)) : documents.create(path, path::identifier_t(path)); }
-	document_ptr create (std::string const& path, std::pair<dev_t, ino_t> const& key) { return documents.create(path, path::identifier_t(true, key.first, key.second, path)); }
-	document_ptr find (oak::uuid_t const& uuid, bool searchBackups)                   { return documents.find(uuid, searchBackups); }
+	document_ptr create (std::string const& rawPath)                    { std::string const path = path::resolve(rawPath); return path::is_text_clipping(path) ? from_content(path::resource(path, typeUTF8Text, 256)) : documents.create(path, inode_t(path)); }
+	document_ptr create (std::string const& path, inode_t const& inode) { return documents.create(path, inode); }
+	document_ptr find (oak::uuid_t const& uuid, bool searchBackups)     { return documents.find(uuid, searchBackups); }
 
 	document_ptr from_content (std::string const& content, std::string fileType)
 	{
@@ -462,7 +536,7 @@ namespace document
 		D(DBF_Document, bug("%s\n", display_name().c_str()););
 		if(_path != NULL_STR && _buffer)
 			document::marks.set(_path, marks());
-		documents.remove(_identifier, _key);
+		documents.remove(_identifier);
 	}
 
 	std::string document_t::display_name () const
@@ -601,7 +675,7 @@ namespace document
 	{
 		if(success)
 		{
-			_key = documents.update_path(shared_from_this(), _key, path::identifier_t(_path));
+			_inode = documents.update_document(identifier());
 
 			if(!_is_on_disk)
 			{
@@ -792,8 +866,8 @@ namespace document
 		if(_path == normalizedPath)
 			return;
 
-		_path = normalizedPath;
-		_key  = documents.update_path(shared_from_this(), _key, path::identifier_t(normalizedPath));
+		_path  = normalizedPath;
+		_inode = documents.update_document(identifier());
 		if(is_open())
 		{
 			_is_on_disk = access(_path.c_str(), F_OK) == 0;
@@ -1388,7 +1462,7 @@ namespace document
 			pthread_mutex_unlock(&mutex);
 
 			std::vector<std::string> newDirs;
-			std::multimap<std::string, std::pair<dev_t, ino_t>, text::less_t> files;
+			std::multimap<std::string, inode_t, text::less_t> files;
 			citerate(it, path::entries(dir))
 			{
 				if(should_stop_flag)
@@ -1410,7 +1484,7 @@ namespace document
 						continue;
 
 					if(seen_paths.insert(std::make_pair(buf.st_dev, (*it)->d_ino)).second)
-							files.emplace(path, std::make_pair(buf.st_dev, (*it)->d_ino));
+							files.emplace(path, inode_t(buf.st_dev, (*it)->d_ino, path));
 					else	D(DBF_Document_Scanner, bug("skip known path: ‘%s’\n", path.c_str()););
 				}
 				else if((*it)->d_type == DT_LNK)
@@ -1443,7 +1517,7 @@ namespace document
 								continue;
 
 							if(seen_paths.insert(std::make_pair(buf.st_dev, buf.st_ino)).second)
-									files.emplace(path, std::make_pair(buf.st_dev, buf.st_ino));
+									files.emplace(path, inode_t(buf.st_dev, buf.st_ino, path));
 							else	D(DBF_Document_Scanner, bug("skip known path: ‘%s’\n", path.c_str()););
 						}
 					}

@@ -45,6 +45,22 @@ namespace document
 
 	typedef std::shared_ptr<save_callback_t> save_callback_ptr;
 
+	struct inode_t
+	{
+		inode_t () { }
+		inode_t (dev_t device, ino_t inode, std::string const& path);
+		inode_t (std::string const& path);
+
+		operator bool () const { return valid; }
+		bool operator== (inode_t const& rhs) const { return valid == rhs.valid && inode == rhs.inode && device == rhs.device; }
+		bool operator!= (inode_t const& rhs) const { return valid != rhs.valid || inode != rhs.inode || device != rhs.device; }
+		bool operator< (inode_t const& rhs) const;
+
+		dev_t device = 0;
+		ino_t inode  = 0;
+		bool valid   = false;
+	};
+
 	struct PUBLIC document_t : std::enable_shared_from_this<document_t>
 	{
 		WATCH_LEAKS(document_t);
@@ -288,7 +304,7 @@ namespace document
 		friend document_ptr find (oak::uuid_t const& uuid, bool searchBackups);
 
 		oak::uuid_t _identifier;              // to identify this document when there is no path
-		path::identifier_t _key;
+		inode_t _inode;
 		ssize_t _revision;
 		ssize_t _disk_revision;
 		bool _modified;
