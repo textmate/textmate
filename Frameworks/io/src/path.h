@@ -33,26 +33,6 @@ namespace path
 
 	PUBLIC std::string unique (std::string const& requestedPath, std::string const& suffix = ""); // /foo/bar.txt → /foo/bar«suffix» 2.txt
 
-	struct PUBLIC identifier_t
-	{
-		identifier_t (bool exists, dev_t device, ino_t inode, std::string const& path);
-		identifier_t (std::string const& path = NULL_STR, bool resolve = false);
-		bool operator< (identifier_t const& rhs) const;
-		bool operator== (identifier_t const& rhs) const;
-		bool operator!= (identifier_t const& rhs) const;
-		explicit operator bool () const { return exists || path != NULL_STR; }
-	private:
-		bool can_trust_inode () const;
-		bool exists;
-		dev_t device;
-		ino_t inode;
-		std::string path; // TODO we should only store the path for non-existing files (preferably use a union — this to make the size of an ‘identifier’ small since it may be used in std::set when walking a directory hierarchy)
-		friend std::string to_s (identifier_t const& identifier);
-	};
-
-	PUBLIC identifier_t identifier (std::string const& path);          // opaque type holding device + inode for resolved path (actual path for non-existing files), file_id_t supports operator< for ordering
-	PUBLIC std::string to_s (identifier_t const& identifier);
-
 	namespace flag
 	{
 		PUBLIC extern uint32_t
