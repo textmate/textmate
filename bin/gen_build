@@ -105,11 +105,18 @@ class Targets
         end
       end
 
-      unless op != '+=' || dict[key].nil?
-        if STRING_KEYS.include? key
-          value = "#{dict[key]} #{value}"
-        else
-          value = dict[key].dup.concat(value)
+      oldValue = dict[key]
+      if STRING_KEYS.include? key
+        if op == '+='
+          value = oldValue.nil? ? value : "#{oldValue} #{value}"
+        elsif op == '-='
+          value = oldValue.to_s.gsub(/(^| )#{Regexp.escape value}( |$)/, ' ')
+        end
+      else
+        if op == '+='
+          value = oldValue.dup.concat(value) unless oldValue.nil?
+        elsif op == '-='
+          abort "Operator -= not implemented for non-string keys"
         end
       end
 
