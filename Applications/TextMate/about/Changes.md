@@ -1,5 +1,11 @@
 # Changes
 
+## 2013-07-31 ([a9455](https://github.com/textmate/textmate/compare/a9449...a9455))
+
+* Add Quick Look generator for file types conforming to `public.source-code`. *[Jacob Bandes-Storch]*
+* Folder search now supports UTF-16/32 encoding. If document is not in UTF, TextMate will try a potential `encoding` set in `.tm_properties` (in a `attr.file.unknown-encoding` section). *[Jasmin Lapalme]*
+* Add source list style setting for the file browser. Run `defaults write com.macromates.TextMate.preview fileBrowserStyle SourceList` and relaunch TextMate to enable. *[Jacob Carlborg]*
+
 ## 2013-07-23 ([a9449](https://github.com/textmate/textmate/compare/a9443...a9449))
 
 * If a tab is sticky (settable via its context menu) then it will not close when using the batch close actions like holding option when opening a file via file chooser or file browser, etc.
