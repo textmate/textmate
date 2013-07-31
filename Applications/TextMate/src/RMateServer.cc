@@ -161,16 +161,17 @@ namespace
 
 	struct rmate_server_t
 	{
-		rmate_server_t (uint32_t ip, uint16_t port) : _ip(ip), _port(port)
+		rmate_server_t (uint16_t port, bool listenForRemoteClients) : _port(port), _listen_for_remote_clients(listenForRemoteClients)
 		{
-			D(DBF_RMateServer, bug("%08ux %ud\n", _ip, _port););
+			D(DBF_RMateServer, bug("port %ud, remote clients %s\n", _port, BSTR(_listen_for_remote_clients)););
 
 			static int const on = 1;
-			socket_t fd(socket(AF_INET, SOCK_STREAM, 0));
+			socket_t fd(socket(AF_INET6, SOCK_STREAM, 0));
 			setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
 
 			fcntl(fd, F_SETFD, FD_CLOEXEC);
-			struct sockaddr_in iaddr = { sizeof(sockaddr_in), AF_INET, htons(_port), { htonl(_ip) } };
+			struct sockaddr_in6 iaddr = { sizeof(sockaddr_in6), AF_INET6, htons(_port) };
+			iaddr.sin6_addr   = listenForRemoteClients ? in6addr_any : in6addr_loopback;
 			if(-1 == bind(fd, (sockaddr*)&iaddr, sizeof(iaddr)))
 				fprintf(stderr, "bind(): %s\n", strerror(errno));
 			if(-1 == listen(fd, 5))
@@ -181,29 +182,29 @@ namespace
 
 		~rmate_server_t ()
 		{
-			D(DBF_RMateServer, bug("%08ux %ud\n", _ip, _port););
+			D(DBF_RMateServer, bug("port %ud, remote clients %s\n", _port, BSTR(_listen_for_remote_clients)););
 		}
 
-		uint32_t ip () const   { return _ip; }
-		uint16_t port () const { return _port; }
+		uint16_t port () const                  { return _port; }
+		bool listen_for_remote_clients () const { return _listen_for_remote_clients; }
 
 	private:
-		uint32_t _ip;
 		uint16_t _port;
+		bool _listen_for_remote_clients;
 		socket_callback_ptr _callback;
 	};
 }
 
-void setup_rmate_server (bool enabled, uint32_t ip, uint16_t port)
+void setup_rmate_server (bool enabled, uint16_t port, bool listenForRemoteClients)
 {
 	static mate_server_t mate_server;
 
 	static std::shared_ptr<rmate_server_t> rmate_server;
-	if(!enabled || !rmate_server || ip != rmate_server->ip() || port != rmate_server->port())
+	if(!enabled || !rmate_server || port != rmate_server->port() || listenForRemoteClients != rmate_server->listen_for_remote_clients())
 	{
 		rmate_server.reset();
 		if(enabled)
-			rmate_server.reset(new rmate_server_t(ip, port));
+			rmate_server.reset(new rmate_server_t(port, listenForRemoteClients));
 	}
 }
 

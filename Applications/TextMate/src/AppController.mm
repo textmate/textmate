@@ -137,7 +137,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 	BOOL disableRmate        = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableRMateServerKey];
 	NSString* rmateInterface = [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsRMateServerListenKey];
 	int rmatePort            = [[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsRMateServerPortKey];
-	setup_rmate_server(!disableRmate, [rmateInterface isEqualToString:kRMateServerListenRemote] ? INADDR_ANY : INADDR_LOOPBACK, rmatePort);
+	setup_rmate_server(!disableRmate, rmatePort, [rmateInterface isEqualToString:kRMateServerListenRemote]);
 }
 
 - (void)checkExpirationDate:(id)sender
