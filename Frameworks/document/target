@@ -1,5 +1,5 @@
 TEST_SOURCES = tests/*.cc
 SOURCES      = src/*.cc
 EXPORT       = src/document.h src/directory.h src/collection.h src/reader.h
-LINK        += file text buffer selection bundles command cf io file scm plist OakSystem regexp settings authorization undo
+LINK        += file text buffer selection bundles command cf io file scm plist OakSystem regexp settings authorization undo CrashReporter
 FRAMEWORKS   = ApplicationServices

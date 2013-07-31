@@ -15,6 +15,7 @@
 #include <plist/ascii.h>
 #include <selection/selection.h>
 #include <OakSystem/application.h>
+#include <CrashReporter/utility.h>
 #include <oak/debug.h>
 #include <text/utf8.h>
 #include <text/ctype.h>
@@ -1060,6 +1061,8 @@ namespace document
 
 			if(!_is_on_disk && (_is_on_disk = access(_path.c_str(), F_OK) == 0))
 				broadcast(callback_t::did_change_on_disk_status);
+
+			crash_reporter_info_t crashInfo("reload file with changes");
 
 			open_callback_t* raw = new open_callback_t(shared_from_this(), async);
 			file::open_callback_ptr cb((file::open_callback_t*)raw);
