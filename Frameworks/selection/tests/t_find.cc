@@ -179,6 +179,7 @@ void test_tricky_regexp ()
 void test_find_all ()
 {
 	OAK_ASSERT_EQ(matches("this (is (a test)).", "is"), "1:3-1:5&1:7-1:9");
+	OAK_ASSERT_EQ("‸c̄̌‸ ‸𠻵‸", search("\\b", "c̄̌ 𠻵", find::regular_expression));
 }
 
 void test_find_regexp ()

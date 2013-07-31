@@ -357,8 +357,8 @@ namespace find
 
 				if(last_beg == buffer.size()) // last match was zero-width and end-of-buffer
 					return res;
-				else if(last_beg == last_end) // last match was zero-width, so advance one character to not repeat it
-					++last_end;
+				else if(last_beg == last_end && last_end < buffer.size()) // last match was zero-width, so advance one character to not repeat it
+					last_end += utf8::multibyte<char>::is_start(buffer[last_end]) ? std::min(utf8::multibyte<char>::length(buffer[last_end]), buffer.size() - last_end) : 1;
 
 				OnigUChar const* first = (OnigUChar const*)&buffer[0];
 				OnigUChar const* last = first + buffer.size();
