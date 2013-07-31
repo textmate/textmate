@@ -164,6 +164,35 @@ void test_find_backward_extend ()
 	OAK_ASSERT_EQ(matches("foo foo foo foo", "\\b", find::extend_selection|find::backwards|find::regular_expression, ng::ranges_t{ ng::range_t(3), ng::range_t(4) }), "1&1:4&1:5");
 }
 
+void test_find_forward_regexp ()
+{
+	bool didWrap = false;
+	auto options = find::regular_expression | find::wrap_around;
+
+	OAK_ASSERT_EQ("‸xx‸ ‸xx‸ ‸xx‸ ‸xx‸", search("\\b", "xx xx xx xx",  options, &didWrap)); OAK_ASSERT(!didWrap);
+	OAK_ASSERT_EQ("xx‸ xx xx xx",        search("\\b", "‸xx xx xx xx", options, &didWrap)); OAK_ASSERT(!didWrap);
+	OAK_ASSERT_EQ("xx‸ xx xx xx",        search("\\b", "x‸x xx xx xx", options, &didWrap)); OAK_ASSERT(!didWrap);
+	OAK_ASSERT_EQ("xx ‸xx xx xx",        search("\\b", "xx‸ xx xx xx", options, &didWrap)); OAK_ASSERT(!didWrap);
+	OAK_ASSERT_EQ("xx xx‸ xx xx",        search("\\b", "xx ‸xx xx xx", options, &didWrap)); OAK_ASSERT(!didWrap);
+	OAK_ASSERT_EQ("xx xx xx ‸xx",        search("\\b", "xx xx xx‸ xx", options, &didWrap)); OAK_ASSERT(!didWrap);
+	OAK_ASSERT_EQ("xx xx xx xx‸",        search("\\b", "xx xx xx ‸xx", options, &didWrap)); OAK_ASSERT(!didWrap);
+	OAK_ASSERT_EQ("‸xx xx xx xx",        search("\\b", "xx xx xx xx‸", options, &didWrap)); OAK_ASSERT(didWrap);
+}
+
+void test_find_backward_regexp ()
+{
+	bool didWrap = false;
+	auto options = find::regular_expression | find::backwards | find::wrap_around;
+
+	OAK_ASSERT_EQ("xx xx xx ‸xx",        search("\\b", "xx xx xx xx‸", options, &didWrap)); OAK_ASSERT(!didWrap);
+	OAK_ASSERT_EQ("xx xx xx ‸xx",        search("\\b", "xx xx xx x‸x", options, &didWrap)); OAK_ASSERT(!didWrap);
+	OAK_ASSERT_EQ("xx xx xx‸ xx",        search("\\b", "xx xx xx ‸xx", options, &didWrap)); OAK_ASSERT(!didWrap);
+	OAK_ASSERT_EQ("xx xx ‸xx xx",        search("\\b", "xx xx xx‸ xx", options, &didWrap)); OAK_ASSERT(!didWrap);
+	OAK_ASSERT_EQ("xx‸ xx xx xx",        search("\\b", "xx ‸xx xx xx", options, &didWrap)); OAK_ASSERT(!didWrap);
+	OAK_ASSERT_EQ("‸xx xx xx xx",        search("\\b", "xx‸ xx xx xx", options, &didWrap)); OAK_ASSERT(!didWrap);
+	OAK_ASSERT_EQ("xx xx xx xx‸",        search("\\b", "‸xx xx xx xx", options, &didWrap)); OAK_ASSERT(didWrap);
+}
+
 void test_tricky_regexp ()
 {
 	OAK_ASSERT_EQ(matches("abcdef", "\\h+", find::regular_expression,                 ng::ranges_t(0)),   "1-1:7");

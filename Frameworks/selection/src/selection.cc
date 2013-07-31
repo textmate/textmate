@@ -1245,8 +1245,11 @@ namespace ng
 		return res;
 	}
 
-	static std::map< range_t, std::map<std::string, std::string> > regexp_find (buffer_t const& buffer, std::string const& searchFor, find::options_t options, size_t first, size_t last)
+	static std::map< range_t, std::map<std::string, std::string> > regexp_find (buffer_t const& buffer, std::string const& searchFor, find::options_t options, ng::range_t const& range)
 	{
+		size_t first = (options & find::backwards) ? range.min().index : range.max().index;
+		size_t last  = (options & find::backwards) ?                 0 :     buffer.size();
+
 		std::map< range_t, std::map<std::string, std::string> > res;
 
 		OnigOptionType ptrnOptions = ONIG_OPTION_NONE;
@@ -1254,8 +1257,26 @@ namespace ng
 			ptrnOptions |= ONIG_OPTION_IGNORECASE;
 
 		std::string str = buffer.substr(0, buffer.size());
-		if(regexp::match_t const& m = search(regexp::pattern_t(searchFor, ptrnOptions), str.data(), str.data() + str.size(), str.data() + first, str.data() + last))
-			res.insert(std::make_pair(ng::range_t(m.begin(), m.end()), m.captures()));
+		if(regexp::match_t m = search(regexp::pattern_t(searchFor, ptrnOptions), str.data(), str.data() + str.size(), str.data() + first, str.data() + last))
+		{
+			if(range.sorted() == ng::range_t(m.begin(), m.end()))
+			{
+				if(options & find::backwards)
+				{
+					if(0 < first)
+						first -= buffer[first-1].size();
+				}
+				else
+				{
+					if(first < str.size())
+						first += buffer[first].size();
+				}
+				m = search(regexp::pattern_t(searchFor, ptrnOptions), str.data(), str.data() + str.size(), str.data() + first, str.data() + last);
+			}
+
+			if(m && range.sorted() != ng::range_t(m.begin(), m.end()))
+				res.insert(std::make_pair(ng::range_t(m.begin(), m.end()), m.captures()));
+		}
 
 		return res;
 	}
@@ -1270,11 +1291,7 @@ namespace ng
 			return res;
 
 		if(selection.size() == 1 && (options & (find::regular_expression|find::wrap_around|find::all_matches|find::extend_selection)) == find::regular_expression)
-		{
-			size_t first = (options & find::backwards) ? selection.last().min().index : selection.last().max().index;
-			size_t last  = (options & find::backwards) ?                            0 :                buffer.size();
-			return regexp_find(buffer, searchFor, options, first, last);
-		}
+			return regexp_find(buffer, searchFor, options, selection.last());
 
 		auto tmp = find_all(buffer, searchFor, options, searchRanges);
 		if(options & find::all_matches)
@@ -1313,7 +1330,7 @@ namespace ng
 			if(options & find::backwards)
 			{
 				auto it = std::lower_bound(tmp.begin(), tmp.end(), range, [](decltype(tmp)::value_type const& candidate, ng::range_t const& range){
-					return candidate.first.max() <= range.min();
+					return candidate.first.empty() ? candidate.first.max() < range.min() : candidate.first.max() <= range.min();
 				});
 
 				if(it == tmp.begin())
@@ -1348,7 +1365,7 @@ namespace ng
 			else
 			{
 				auto it = std::upper_bound(tmp.begin(), tmp.end(), range, [](ng::range_t const& range, decltype(tmp)::value_type const& candidate){
-					return range.max() <= candidate.first.min();
+					return candidate.first.empty() ? range.max() < candidate.first.min() : range.max() <= candidate.first.min();
 				});
 
 				if(it == tmp.end())
