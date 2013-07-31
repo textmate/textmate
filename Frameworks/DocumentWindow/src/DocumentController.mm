@@ -22,6 +22,7 @@
 #import <OakFilterList/FileChooser.h>
 #import <OakSystem/application.h>
 #import <Find/Find.h>
+#import <CrashReporter/utility.h>
 #import <file/path_info.h>
 #import <io/entries.h>
 #import <scm/scm.h>
@@ -467,6 +468,9 @@ namespace
 
 - (void)closeTabsAtIndexes:(NSIndexSet*)anIndexSet askToSaveChanges:(BOOL)askToSaveFlag createDocumentIfEmpty:(BOOL)createIfEmptyFlag
 {
+	crash_reporter_info_t crashInfo(text::format("close %lu documents with %zu open and index of selected being %zu.", [anIndexSet count], _documents.size(), _selectedTabIndex));
+	crashInfo << to_s([anIndexSet description]);
+
 	std::vector<document::document_ptr> documentsToClose;
 	for(NSUInteger index = [anIndexSet firstIndex]; index != NSNotFound; index = [anIndexSet indexGreaterThanIndex:index])
 		documentsToClose.push_back(_documents[index]);
@@ -512,6 +516,8 @@ namespace
 		if(selectedUUID == uuid)
 			newSelectedTabIndex = newDocuments.empty() ? 0 : newDocuments.size() - 1;
 	}
+
+	crashInfo << text::format("keep %zu documents open, new selected index at %zu, create untitled %s", newDocuments.size(), newSelectedTabIndex, BSTR((createIfEmptyFlag && newDocuments.empty())));
 
 	if(createIfEmptyFlag && newDocuments.empty())
 		newDocuments.push_back(create_untitled_document_in_folder(to_s(self.untitledSavePath)));
