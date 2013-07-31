@@ -1,0 +1,37 @@
+#!/System/Library/Frameworks/Ruby.framework/Versions/1.8/usr/bin/ruby -wKU
+require 'optparse'
+
+PROGRAM_NAME = File.basename(__FILE__)
+
+new_tag = nil
+
+OptionParser.new do |opts|
+  opts.banner = "Usage: #{PROGRAM_NAME} [options]"
+  opts.on('-t', '--tag=name', 'Tag to use for next release.') { |value| new_tag = value }
+  opts.on_tail('-h', '--help', 'Show this message.')          { puts opts; exit         }
+end.parse!
+
+abort "#{PROGRAM_NAME}: No release tag specified, use -t/--tag." if new_tag.nil?
+
+did_output = false
+ARGF.each do |line|
+  if !did_output && line =~ %r{\(https://github.com/textmate/textmate/compare/.*?\.\.\.(.*?)\)}
+    old_tag = $1
+    abort "#{PROGRAM_NAME}: Changes already added for release tag ‘#{old_tag}’." if new_tag == old_tag
+    changes = %x{git log --pretty=tformat:'* %s *[%an]*' --date=short #{old_tag}..|tail -r}
+    abort "#{PROGRAM_NAME}: Error calling ‘git log’: #{changes}" unless $? == 0
+
+    changes.gsub!(/\.?( \*\[(?:Allan Odgaard|(.+?))\]\*)$/) do
+      $2.nil? ? "." : ".#$1"
+    end
+
+    puts "## #{Time.now.strftime('%Y-%m-%d')} ([#{new_tag}](https://github.com/textmate/textmate/compare/#{old_tag}...#{new_tag}))"
+    puts ""
+    puts changes
+    puts ""
+
+    did_output = true
+  end
+
+  puts line
+end
