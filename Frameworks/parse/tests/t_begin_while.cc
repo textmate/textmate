@@ -1,4 +1,4 @@
-#include "support.cc"
+#include "support.h"
 #include <test/bundle_index.h>
 
 static bundles::item_ptr BeginWhileTestGrammarItem;
