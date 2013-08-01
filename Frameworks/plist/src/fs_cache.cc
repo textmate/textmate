@@ -25,7 +25,7 @@ static std::string read_link (std::string const& path)
 
 namespace plist
 {
-	int32_t const cache_t::kPropertyCacheFormatVersion = 1;
+	int32_t const cache_t::kPropertyCacheFormatVersion = 2;
 
 	void cache_t::load (std::string const& path, plist::dictionary_t (*prune_dictionary)(plist::dictionary_t const&))
 	{
