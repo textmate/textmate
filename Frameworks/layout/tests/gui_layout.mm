@@ -74,7 +74,7 @@ struct refresh_t
 	~refresh_t ()
 	{
 		auto damagedRects = _layout.end_refresh_cycle([_self selection], [_self visibleRect]);
-		OAK_ASSERT(_layout.structural_integrity());
+		TS_ASSERT(_layout.structural_integrity());
 		[_self updateFrameSize];
 		iterate(rect, damagedRects)
 			[_self setNeedsDisplayInRect:*rect];

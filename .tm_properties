@@ -33,9 +33,10 @@ fileType         = 'source.objc++'
 [ attr.untitled ]
 fileType         = 'source.objc++'
 
-[ tests/*.{cc,mm} ]
+[ tests/t_*.{cc,mm} ]
 scopeAttributes  = 'attr.test.cxxtest'
 TM_NINJA_TARGET  = '${TM_FILEPATH/^.*?([^\/]*)\/tests\/.*$/$1\/test/}'
 
-[ tests/t_*.mm ]
-GUI_TESTS        = '${TM_FILENAME/^t_(.*)\.mm$/$1/}'
+[ tests/gui_*.mm ]
+GUI_TESTS        = '${TM_FILENAME/^gui_(.*)\.mm$/$1/}'
+TM_NINJA_TARGET  = '${TM_FILEPATH/^.*?([^\/]*)\/tests\/.*$/$1\/cxx_test/}'

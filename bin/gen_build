@@ -270,13 +270,15 @@ def clean(target)
 end
 
 def tests(target)
-  return '' if target['TEST_SOURCES'].to_s.empty? && target['TESTS'].to_s.empty?
-
   headers = target['LINK'].to_a.map { |goal| "#{goal}/headers" }
-  dst = build_path("#{target[:path]}/test_#{target[:name]}")
+  fws     = prepend('-framework ', all_values_for_key(target, 'FRAMEWORKS'))
+  libs    = prepend('-l', all_values_for_key(target, 'LIBS'))
+
   res = ''
 
   if !target['TESTS'].to_s.empty?
+    dst = build_path("#{target[:path]}/test_#{target[:name]}")
+
     src = target['TESTS'].map { |path| esc_path(File.join(target[:path], path)) }.join(' ')
     ext = target['TESTS'].any? { |path| path =~ /\.mm$/ } ? 'mm' : 'cc'
     test_src = "#{dst}.#{ext}"
@@ -288,34 +290,40 @@ def tests(target)
     res << flags_for_target(target)
     res << "build #{dst}: link_oak_test #{all_values_for_key(target, :objects).join(' ')} #{dst}.o\n"
     res << flags_for_target(target)
-  else
+    res << "  RAVE_FLAGS = #{fws} #{libs}\n"
+
+    res << "build #{dst}.run: run_test #{dst}\n"
+    res << "build #{dst}.always-run: always_run_test #{dst}\n"
+    res << "build #{dst}.coerce: skip_test #{dst}\n"
+    res << "  seal = #{dst}.run\n"
+
+    res << "build #{target[:name]}:        phony #{dst}.run\n"
+    res << "build #{target[:name]}/test:   phony #{dst}.always-run\n"
+    res << "build #{target[:name]}/coerce: phony #{dst}.coerce\n"
+
+    target[:test] = "#{dst}.run"
+  end
+
+  if !target['TEST_SOURCES'].to_s.empty?
+    dst = build_path("#{target[:path]}/cxx_test_#{target[:name]}")
+
     src = target['TEST_SOURCES'].map { |path| esc_path(File.join(target[:path], path)) }.join(' ')
     ext = target['TEST_SOURCES'].any? { |path| path =~ /\.mm$/ } ? 'mm' : 'cc'
     test_src = "#{dst}.#{ext}"
 
-    res << "build #{test_src}: gen_test #{src}\n"
+    res << "build #{test_src}: gen_cxx_test #{src}\n"
     res << "build #{dst}.o: #{compiler_for(test_src)} #{test_src} | #{pch_for(test_src, target)}.gch || #{target[:name]}/headers\n"
     res << "  depfile = #{dst}.o.d\n"
     res << "  PCH_FLAGS = -Ibin/CxxTest -include #{pch_for(test_src, target)}\n"
     res << flags_for_target(target)
-    res << "build #{dst}: link_test #{all_values_for_key(target, :objects).join(' ')} #{dst}.o\n"
+    res << "build #{dst}: link_cxx_test #{all_values_for_key(target, :objects).join(' ')} #{dst}.o\n"
     res << flags_for_target(target)
+    res << "  RAVE_FLAGS = #{fws} #{libs}\n"
+
+    res << "build #{dst}.run:                run_test #{dst}\n"
+    res << "build #{dst}.always-run:         always_run_test #{dst}\n"
+    res << "build #{target[:name]}/cxx_test: phony #{dst}.always-run\n"
   end
-
-  fws  = prepend('-framework ', all_values_for_key(target, 'FRAMEWORKS'))
-  libs = prepend('-l', all_values_for_key(target, 'LIBS'))
-  res << "  RAVE_FLAGS = #{fws} #{libs}\n"
-
-  res << "build #{dst}.run: run_test #{dst}\n"
-  res << "build #{dst}.always-run: always_run_test #{dst}\n"
-  res << "build #{dst}.coerce: skip_test #{dst}\n"
-  res << "  seal = #{dst}.run\n"
-
-  res << "build #{target[:name]}:        phony #{dst}.run\n"
-  res << "build #{target[:name]}/test:   phony #{dst}.always-run\n"
-  res << "build #{target[:name]}/coerce: phony #{dst}.coerce\n"
-
-  target[:test] = "#{dst}.run"
 
   res
 end
@@ -808,11 +816,11 @@ rule gen_ragel
   command = ragel -o $out $in
   description = Generate source from ‘$in’…
 
-rule gen_test
+rule gen_cxx_test
   command = bin/CxxTest/bin/cxxtestgen --have-std -o $out --runner=unix $in
   description = Generate test ‘$out’…
 
-rule link_test
+rule link_cxx_test
   command = '$CXX' -o $out $in $LN_FLAGS $RAVE_FLAGS
   description = Link test ‘$out’…
 

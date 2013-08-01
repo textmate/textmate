@@ -19,8 +19,8 @@ static void OakSetupApplicationWithView (NSResponder* aView, std::string testNam
 	if(testName == NULL_STR)
 	{
 		testName = [[[NSProcessInfo processInfo] processName] UTF8String];
-		if(testName.find("test_") == 0)
-			testName = testName.substr(strlen("test_"));
+		if(testName.find("cxx_test_") == 0)
+			testName = testName.substr(strlen("cxx_test_"));
 	}
 
 	if(!IsGUITestsEnabled(testName))
