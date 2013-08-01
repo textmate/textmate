@@ -1,5 +1,6 @@
 SOURCES      = src/*.mm
-TEST_SOURCES = tests/*.{cc,mm}
+TESTS        = tests/t_*.{cc,mm}
+TEST_SOURCES = tests/gui_*.mm
 LINK        += text OakFoundation plist
 FRAMEWORKS   = Cocoa
 EXPORT       = src/*.h

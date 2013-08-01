@@ -1,48 +1,44 @@
 #include <ns/event.h>
 
-class EventStringTests : public CxxTest::TestSuite
+void test_normalize_event_string ()
 {
-public:
-	void test_normalize_event_string ()
-	{
-		TS_ASSERT_EQUALS(ns::normalize_event_string("@"),    "");
-		TS_ASSERT_EQUALS(ns::normalize_event_string("#"),    "");
-		TS_ASSERT_EQUALS(ns::normalize_event_string("$"),    "");
-		TS_ASSERT_EQUALS(ns::normalize_event_string("^"),    "");
-		TS_ASSERT_EQUALS(ns::normalize_event_string("~"),    "");
-		TS_ASSERT_EQUALS(ns::normalize_event_string("@~"),   "");
-		TS_ASSERT_EQUALS(ns::normalize_event_string("!"),    "!");
+	OAK_ASSERT_EQ(ns::normalize_event_string("@"),    "");
+	OAK_ASSERT_EQ(ns::normalize_event_string("#"),    "");
+	OAK_ASSERT_EQ(ns::normalize_event_string("$"),    "");
+	OAK_ASSERT_EQ(ns::normalize_event_string("^"),    "");
+	OAK_ASSERT_EQ(ns::normalize_event_string("~"),    "");
+	OAK_ASSERT_EQ(ns::normalize_event_string("@~"),   "");
+	OAK_ASSERT_EQ(ns::normalize_event_string("!"),    "!");
 
-		TS_ASSERT_EQUALS(ns::normalize_event_string("\\@"),    "@");
-		TS_ASSERT_EQUALS(ns::normalize_event_string("\\#"),    "#");
-		TS_ASSERT_EQUALS(ns::normalize_event_string("\\$"),    "$");
-		TS_ASSERT_EQUALS(ns::normalize_event_string("\\^"),    "^");
-		TS_ASSERT_EQUALS(ns::normalize_event_string("\\~"),    "~");
-		TS_ASSERT_EQUALS(ns::normalize_event_string("@\\~"),   "@~");
-		TS_ASSERT_EQUALS(ns::normalize_event_string("~\\@"),   "~@");
-		TS_ASSERT_EQUALS(ns::normalize_event_string("\\!"),    "!");
-		TS_ASSERT_EQUALS(ns::normalize_event_string("\\\\"),   "\\");
+	OAK_ASSERT_EQ(ns::normalize_event_string("\\@"),    "@");
+	OAK_ASSERT_EQ(ns::normalize_event_string("\\#"),    "#");
+	OAK_ASSERT_EQ(ns::normalize_event_string("\\$"),    "$");
+	OAK_ASSERT_EQ(ns::normalize_event_string("\\^"),    "^");
+	OAK_ASSERT_EQ(ns::normalize_event_string("\\~"),    "~");
+	OAK_ASSERT_EQ(ns::normalize_event_string("@\\~"),   "@~");
+	OAK_ASSERT_EQ(ns::normalize_event_string("~\\@"),   "~@");
+	OAK_ASSERT_EQ(ns::normalize_event_string("\\!"),    "!");
+	OAK_ASSERT_EQ(ns::normalize_event_string("\\\\"),   "\\");
 
-		TS_ASSERT_EQUALS(ns::normalize_event_string("^$@~#1"), "#^~$@1");
-	}
+	OAK_ASSERT_EQ(ns::normalize_event_string("^$@~#1"), "#^~$@1");
+}
 
-	void test_glyphs_for_event_string ()
-	{
-		TS_ASSERT_EQUALS(ns::glyphs_for_event_string("@"),    "@");
-		TS_ASSERT_EQUALS(ns::glyphs_for_event_string("#"),    "#");
-		TS_ASSERT_EQUALS(ns::glyphs_for_event_string("$"),    "$");
-		TS_ASSERT_EQUALS(ns::glyphs_for_event_string("^"),    "^");
-		TS_ASSERT_EQUALS(ns::glyphs_for_event_string("~"),    "~");
-		TS_ASSERT_EQUALS(ns::glyphs_for_event_string("@~"),   "⌘~");
-		TS_ASSERT_EQUALS(ns::glyphs_for_event_string("~@"),   "⌥@");
-		TS_ASSERT_EQUALS(ns::glyphs_for_event_string("!"),    "!");
-		TS_ASSERT_EQUALS(ns::glyphs_for_event_string("\\"),   "\\");
+void test_glyphs_for_event_string ()
+{
+	OAK_ASSERT_EQ(ns::glyphs_for_event_string("@"),    "@");
+	OAK_ASSERT_EQ(ns::glyphs_for_event_string("#"),    "#");
+	OAK_ASSERT_EQ(ns::glyphs_for_event_string("$"),    "$");
+	OAK_ASSERT_EQ(ns::glyphs_for_event_string("^"),    "^");
+	OAK_ASSERT_EQ(ns::glyphs_for_event_string("~"),    "~");
+	OAK_ASSERT_EQ(ns::glyphs_for_event_string("@~"),   "⌘~");
+	OAK_ASSERT_EQ(ns::glyphs_for_event_string("~@"),   "⌥@");
+	OAK_ASSERT_EQ(ns::glyphs_for_event_string("!"),    "!");
+	OAK_ASSERT_EQ(ns::glyphs_for_event_string("\\"),   "\\");
 
-		TS_ASSERT_EQUALS(ns::glyphs_for_event_string("@1"),    "⌘1");
-		TS_ASSERT_EQUALS(ns::glyphs_for_event_string("#1"),    "1⃣");
-		TS_ASSERT_EQUALS(ns::glyphs_for_event_string("$1"),    "⇧1");
-		TS_ASSERT_EQUALS(ns::glyphs_for_event_string("^1"),    "⌃1");
-		TS_ASSERT_EQUALS(ns::glyphs_for_event_string("~1"),    "⌥1");
-		TS_ASSERT_EQUALS(ns::glyphs_for_event_string("A"),     "⇧A");
-	}
-};
+	OAK_ASSERT_EQ(ns::glyphs_for_event_string("@1"),    "⌘1");
+	OAK_ASSERT_EQ(ns::glyphs_for_event_string("#1"),    "1⃣");
+	OAK_ASSERT_EQ(ns::glyphs_for_event_string("$1"),    "⇧1");
+	OAK_ASSERT_EQ(ns::glyphs_for_event_string("^1"),    "⌃1");
+	OAK_ASSERT_EQ(ns::glyphs_for_event_string("~1"),    "⌥1");
+	OAK_ASSERT_EQ(ns::glyphs_for_event_string("A"),     "⇧A");
+}
