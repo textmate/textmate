@@ -4,8 +4,8 @@
 require "fileutils"
 require "shellwords"
 
-DSYM_ARCHIVE_DIR = "#{ENV['HOME']}/build/TextMate/Applications/TextMate"
-DSYM_CACHE_DIR   = "#{ENV['HOME']}/Library/Caches/com.macromates.TextMate-dsym"
+DSYM_ARCHIVE_DIR = "#{ENV['HOME']}/build/TextMate/Applications/TextMate/dsym"
+DSYM_CACHE_DIR   = "#{ENV['HOME']}/Library/Caches/com.macromates.TextMate/dsym"
 
 BinaryImage = Struct.new(:first, :last, :name, :file)
 
@@ -13,10 +13,7 @@ def find_dsym(process, version)
   path = File.expand_path("#{process}_#{version}", DSYM_CACHE_DIR)
   return path if File.directory?(path)
 
-  archive = File.expand_path("#{process}_#{version}-dSYM.tbz", DSYM_ARCHIVE_DIR)
-  if !File.file?(archive) && version =~ /(\d+)$/
-    archive = File.expand_path("#{process}_r#$1-dSYM.tbz", DSYM_ARCHIVE_DIR) 
-  end
+  archive = File.expand_path("#{process}_#{version}.tbz", DSYM_ARCHIVE_DIR)
   return nil unless File.file?(archive)
 
   FileUtils.mkdir_p(path)
@@ -60,10 +57,10 @@ end
 report = STDIN.read
 
 process = $1 if report =~ /^Process:\s+(\w+)\s+\[\d+\]$/
-version = "#$1-#$2" if report =~ /^Version:.*\b(?:\d+\.?)+-(\w+)\.(\d+) \(.*?\)$/
+version = $1 if report =~ /^Version:\s+(\S+) \(.*\)$/
 
 dsym_dir = find_dsym(process, version)
-abort "No dsym information for version #{version} of #{process}." if dsym_dir.nil?
+abort "No dsym information for #{process} #{version}." if dsym_dir.nil?
 
 images = BinaryImages.new(Dir["#{dsym_dir}/*"], report)
 
