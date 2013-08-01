@@ -579,27 +579,36 @@ end
 def upload(target)
   res = ''
   exe = target[:static_executable]
-  base = "#{exe}_alpha-${APP_REVISION}"
+  dir, _ = File.split(exe)
+
+  name = "#{target[:name]}_${APP_VERSION}"
+  tbz  = "#{dir}/archive/#{name}.tbz"
+  meta = "#{dir}/meta/#{name}"
 
   res << "build #{exe}.sign:    sign_executable #{exe}\n"
-  res << "build #{base}.tbz:    tbz_archive #{exe} | #{exe}.sign\n"
-  res << "build #{base}.upload: upload #{base}.tbz\n"
+  res << "build #{tbz}:         tbz_archive #{exe} | #{exe}.sign\n"
+  res << "build #{meta}.upload: upload #{tbz}\n"
 
-  res << "build #{target[:name]}/deploy: phony #{base}.upload\n"
+  res << "build #{target[:name]}/deploy: phony #{meta}.upload\n"
 end
 
 def deploy(target)
   res = ''
-  base = target[:bundle].sub(/\.[^.]+$/, '_alpha-${APP_REVISION}')
+  dir, _ = File.split(target[:bundle])
 
-  res << "build #{base}-dSYM.tbz: dsym #{target[:bundle]}\n"
-  res << "build #{base}.tbz:      tbz_archive #{target[:bundle]} | #{target[:bundle]}.sign\n"
-  res << "build #{base}.upload:   upload #{base}.tbz\n"
-  res << "build #{base}.deploy:   deploy #{base}.upload | #{base}-dSYM.tbz\n"
+  name = "#{target[:name]}_${APP_VERSION}"
+  dsym = "#{dir}/dsym/#{name}.tbz"
+  tbz  = "#{dir}/archive/#{name}.tbz"
+  meta = "#{dir}/meta/#{name}"
 
-  res << "build #{target[:name]}/dsym:   phony #{base}-dSYM.tbz\n"
-  res << "build #{target[:name]}/tbz:    phony #{base}.tbz\n"
-  res << "build #{target[:name]}/deploy: phony #{base}.deploy\n"
+  res << "build #{dsym}:        dsym #{target[:bundle]}\n"
+  res << "build #{tbz}:         tbz_archive #{target[:bundle]} | #{target[:bundle]}.sign\n"
+  res << "build #{meta}.upload: upload #{tbz}\n"
+  res << "build #{meta}.deploy: deploy #{meta}.upload | #{dsym}\n"
+
+  res << "build #{target[:name]}/dsym:   phony #{dsym}\n"
+  res << "build #{target[:name]}/tbz:    phony #{tbz}\n"
+  res << "build #{target[:name]}/deploy: phony #{meta}.deploy\n"
 end
 
 def all_targets(buildfile, builddir)
@@ -780,6 +789,7 @@ end
 __END__
 rule touch
   command = touch $out
+  generator = true
   description = Touch ‘$out’…
 
 rule cp
@@ -875,18 +885,20 @@ rule tbz_archive
 
 rule upload
   command = bin/upload -k$upload_keyfile -d$upload_destination -m '{"version":"$APP_VERSION","revision":"$APP_REVISION"}' $in > $out~ && mv $out~ $out
+  generator = true
   description = Upload ‘$in’…
 
 rule deploy
   command = curl -sfnd @$in '${rest_api}/releases/nightly' && touch $out
+  generator = true
   description = Deploy…
 
 rule bump_revision
-  command = ruby -pe '$$_.gsub!(/(APP_REVISION\s*=\s*)(\d+)/) { newRev = $$2.to_i + 1; STDERR << "r#$$2 → r#{newRev}\n"; "#$$1#{newRev}#$$3" }' $in > $in~ && mv $in~ $in
+  command = ruby -pe '$$_.gsub!(/(APP_REVISION\s*=\s*)(\d+)/) { newRev = $$2.to_i + 1; STDERR << "r#$$2 → r#{newRev}\n"; "#$$1#{newRev}#$$3" }' $in > $in~ && mv $in~ $in && touch $builddir/bumped
   description = Increment version number…
-build $builddir/revision.next: bump_revision $builddir/build.ninja
-build bump: phony $builddir/revision.next
-build $builddir/revision.$APP_REVISION: touch
+
+build $builddir/always_bump_revision: bump_revision $builddir/build.ninja
+build bump:                           phony $builddir/always_bump_revision
 
 rule clean
   command = rm -r '$path'
@@ -897,6 +909,7 @@ rule dsym
     find $in -name rmate -or -type f -perm +0111 -print|while read line; $
     do dsymutil --flat --out "$$DST/$$(basename "$$line" .dylib).dSYM" "$$line"; $
     done && tar $bzip2_flag -cf $out -C "$$DST" . && rm -rf "$$DST"
+  generator = true
   description = Archive dSYM info for ‘$in’…
 
 rule compile_xib
