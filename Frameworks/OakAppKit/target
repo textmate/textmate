@@ -1,6 +1,6 @@
 SOURCES      = src/*.{cc,mm}
 CP_Resources = resources/* gfx/**/*.{png,tiff,icns} icons/*
-TEST_SOURCES = tests/*.{cc,mm}
+TEST_SOURCES = tests/gui_*.mm
 LINK        += text ns io OakFoundation regexp scm file
 EXPORT       = src/*.h
 FRAMEWORKS   = Carbon Cocoa AudioToolbox Quartz
