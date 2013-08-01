@@ -57,11 +57,6 @@ static double const kPollInterval = 3*60*60;
 	{
 		sourceList   = bundles_db::sources();
 		bundlesIndex = bundles_db::index(kInstallDirectory);
-
-		// remove old cache files
-		unlink(path::join(path::home(), "Library/Application Support/TextMate/Cache/FSNodes.plist").c_str());
-		unlink(path::join(path::home(), "Library/Application Support/TextMate/Cache/PropertyValues.plist").c_str());
-		rmdir(path::join(path::home(), "Library/Application Support/TextMate/Cache").c_str());
 	}
 	return self;
 }
