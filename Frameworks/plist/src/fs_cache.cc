@@ -182,7 +182,7 @@ namespace plist
 		return true;
 	}
 
-	bool cache_t::reload (std::string const& path)
+	bool cache_t::reload (std::string const& path, bool recursive)
 	{
 		bool dirty = false;
 		auto it = _cache.find(path);
@@ -198,7 +198,7 @@ namespace plist
 		{
 			if(S_ISDIR(buf.st_mode) && it->second.is_directory())
 			{
-				auto oldEntries = it->second.entries();
+				auto oldEntries = recursive ? std::vector<std::string>() : it->second.entries();
 				update_entries(it->second, it->second.glob_string());
 				auto newEntries = it->second.entries();
 				dirty = oldEntries != newEntries;
@@ -206,8 +206,8 @@ namespace plist
 				for(auto name : newEntries)
 				{
 					auto entryIter = _cache.find(path::join(path, name));
-					if(entryIter != _cache.end() && entryIter->second.is_file())
-						dirty = reload(path::join(path, name)) || dirty;
+					if(entryIter != _cache.end() && (entryIter->second.is_file() || recursive))
+						dirty = reload(path::join(path, name), recursive) || dirty;
 				}
 			}
 			else if(!(it->second.is_file() && S_ISREG(buf.st_mode) && it->second.modified() == buf.st_mtimespec.tv_sec))

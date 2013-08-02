@@ -21,7 +21,7 @@ namespace plist
 		std::vector<std::string> entries (std::string const& path, std::string const& globString = NULL_STR);
 
 		bool erase (std::string const& path);
-		bool reload (std::string const& path);
+		bool reload (std::string const& path, bool recursive = false);
 		bool cleanup (std::vector<std::string> const& rootPaths);
 
 		template <typename _OutputIter>

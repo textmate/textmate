@@ -218,15 +218,11 @@ static double const kPollInterval = 3*60*60;
 			for(auto bundle : failedBundles)
 				fprintf(stderr, "*** error downloading ‘%s’\n", bundle->url().c_str());
 
-			std::set<std::string> paths;
 			for(auto bundle : bundles)
 			{
+				[self reloadPath:[NSString stringWithCxxString:bundle->path()] recursive:YES];
 				installing.erase(bundle->uuid());
-				paths.insert(path::parent(bundle->path()));
 			}
-
-			for(auto path : paths)
-				[self reloadPath:[NSString stringWithCxxString:path]];
 
 			callback(failedBundles);
 			[[NSNotificationCenter defaultCenter] postNotificationName:BundlesManagerBundlesDidChangeNotification object:self];
@@ -380,7 +376,7 @@ static double const kPollInterval = 3*60*60;
 		void did_change (std::string const& path, std::string const& observedPath, uint64_t eventId, bool recursive)
 		{
 			D(DBF_BundlesManager_FSEvents, bug("%s (observing ‘%s’)\n", path.c_str(), observedPath.c_str()););
-			[[BundlesManager sharedInstance] reloadPath:[NSString stringWithCxxString:path]];
+			[[BundlesManager sharedInstance] reloadPath:[NSString stringWithCxxString:path] recursive:recursive];
 			[[BundlesManager sharedInstance] setEventId:eventId forPath:[NSString stringWithCxxString:observedPath]];
 		}
 	};
@@ -422,8 +418,13 @@ static double const kPollInterval = 3*60*60;
 
 - (void)reloadPath:(NSString*)aPath
 {
+	[self reloadPath:aPath recursive:NO];
+}
+
+- (void)reloadPath:(NSString*)aPath recursive:(BOOL)flag
+{
 	D(DBF_BundlesManager, bug("%s\n", [aPath UTF8String]););
-	if(cache.reload(to_s(aPath)))
+	if(cache.reload(to_s(aPath), flag))
 	{
 		self.needsCreateBundlesIndex = YES;
 		self.needsSaveBundlesIndex   = YES;
