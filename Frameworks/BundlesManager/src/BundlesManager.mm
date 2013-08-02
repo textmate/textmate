@@ -289,9 +289,8 @@ static double const kPollInterval = 3*60*60;
 
 - (void)uninstallBundle:(bundles_db::bundle_ptr const&)aBundle
 {
-	auto path = path::parent(aBundle->path());
 	bundles_db::uninstall(aBundle);
-	[self reloadPath:[NSString stringWithCxxString:path]];
+	[self erasePath:[NSString stringWithCxxString:aBundle->path()]];
 	bundles_db::save_index(bundlesIndex, kInstallDirectory);
 	self.activityText = [NSString stringWithFormat:@"Uninstalled ‘%@’.", [NSString stringWithCxxString:aBundle->name()]];
 }
@@ -404,6 +403,20 @@ static double const kPollInterval = 3*60*60;
 	{
 		D(DBF_BundlesManager_FSEvents, bug("watch ‘%s’\n", path.c_str()););
 		fs::watch(path, &callback, cache.event_id_for_path(path) ?: FSEventsGetCurrentEventId(), 1);
+	}
+}
+
+- (void)erasePath:(NSString*)aPath
+{
+	D(DBF_BundlesManager, bug("%s\n", [aPath UTF8String]););
+	if(cache.erase(to_s(aPath)))
+	{
+		self.needsCreateBundlesIndex = YES;
+		self.needsSaveBundlesIndex   = YES;
+	}
+	else
+	{
+		D(DBF_BundlesManager, bug("no changes\n"););
 	}
 }
 
