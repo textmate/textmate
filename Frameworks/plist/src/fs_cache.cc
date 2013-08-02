@@ -152,10 +152,32 @@ namespace plist
 
 	bool cache_t::erase (std::string const& path)
 	{
-		auto it = _cache.find(path);
-		if(it == _cache.end())
+		auto first = _cache.find(path);
+		D(DBF_Plist_Cache, bug("%s (in cache %s)\n", path.c_str(), BSTR(first != _cache.end())););
+		if(first == _cache.end())
 			return false;
-		_cache.erase(it);
+
+		if(first->second.is_directory())
+		{
+			auto parent = _cache.find(path::parent(path));
+			if(parent != _cache.end() && parent->second.is_directory())
+			{
+				D(DBF_Plist_Cache, bug("remove from parent (%s)\n", parent->first.c_str()););
+				std::vector<std::string> entries = parent->second.entries();
+				auto name = std::find(entries.begin(), entries.end(), path::name(path));
+				if(name != entries.end())
+				{
+					entries.erase(name);
+					parent->second.set_entries(entries, parent->second.glob_string());
+				}
+			}
+			_cache.erase(first, _cache.lower_bound(path + "0")); // path + "0" is the first non-descendent
+		}
+		else
+		{
+			_cache.erase(first);
+		}
+
 		_dirty = true;
 		return true;
 	}
