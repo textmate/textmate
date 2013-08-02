@@ -1,5 +1,9 @@
 # Changes
 
+## 2013-08-02 ([v2.0-alpha.9459](https://github.com/textmate/textmate/compare/a9455...v2.0-alpha.9459))
+
+* TextMate now listens to `rmate` connections via IPv6 meaning that if you are using an ssh tunnel, you should use `localhost` instead of `127.0.0.1`. Also worth mentioning that `rmate` is once again a [standalone script](https://github.com/textmate/rmate) that can be installed without needing rubygems.
+
 ## 2013-07-31 ([a9455](https://github.com/textmate/textmate/compare/a9449...a9455))
 
 * Add Quick Look generator for file types conforming to `public.source-code`. *[Jacob Bandes-Storch]*
