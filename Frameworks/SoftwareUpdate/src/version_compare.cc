@@ -44,6 +44,11 @@ static std::vector<std::string> strip_trailing_zeroes (std::vector<std::string> 
 
 bool version_less (std::string const& lhs, std::string const& rhs)
 {
+	if(lhs == NULL_STR)
+		return rhs != NULL_STR;
+	else if(rhs == NULL_STR)
+		return false;
+
 	auto lhsV = strip_trailing_zeroes(components(lhs));
 	auto rhsV = strip_trailing_zeroes(components(rhs));
 

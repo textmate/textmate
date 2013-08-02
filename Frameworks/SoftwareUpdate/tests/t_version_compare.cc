@@ -27,6 +27,13 @@ void test_trailing_zero ()
 	OAK_ASSERT(greator("2.1-beta",      "2.0"));
 }
 
+void test_null_string ()
+{
+	OAK_ASSERT(   less(NULL_STR, "2.0"));
+	OAK_ASSERT( !equal(NULL_STR, "2.0"));
+	OAK_ASSERT(greator("2.0", NULL_STR));
+}
+
 void test_exhaustive ()
 {
 	std::string const numbers[] = { "1", "1.01", "1.1.1", "1.1.2", "1.2", "1.2.1", "1.10", "2", "2.1", "2.1.1", "2.2" };
@@ -37,6 +44,7 @@ void test_exhaustive ()
 		versions.push_back(number + "-alpha");
 		versions.push_back(number + "-alpha.1");
 		versions.push_back(number + "-alpha.2");
+		versions.push_back(number + "-alpha.3+debug");
 		versions.push_back(number + "-beta");
 		versions.push_back(number + "-beta.1");
 		versions.push_back(number + "-beta.2");
