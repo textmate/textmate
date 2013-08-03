@@ -487,7 +487,7 @@ namespace ng
 
 		iterate(range, foldedRanges)
 		{
-			if(range->second <= first || last <= range->first)
+			if(range->second <= first || last + suffixLen <= range->first)
 				continue;
 
 			did_erase(range->first, range->second);
