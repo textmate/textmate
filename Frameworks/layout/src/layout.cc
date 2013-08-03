@@ -890,17 +890,12 @@ namespace ng
 		return _rows.structural_integrity();
 	}
 
-	static std::string Buffer;
-
-	std::string layout_t::row_to_s (row_tree_t::value_type const& info)
-	{
-		return text::format("y: %.1f-%.1f, w: %1.f, bytes: %zu-%zu\n» %s\n%s", info.offset._height, info.offset._height + info.key._height, info.key._width, info.offset._length, info.offset._length + info.key._length, Buffer.substr(info.offset._length, info.key._length).c_str(), ng::to_s(info.value).c_str());
-	}
-
 	std::string layout_t::to_s () const
 	{
-		Buffer = _buffer.substr(0, _buffer.size());
-		return _rows.to_s(&row_to_s);
+		std::string const buffer = _buffer.substr(0, _buffer.size());
+		return _rows.to_s([&buffer](row_tree_t::value_type info){
+			return text::format("y: %.1f-%.1f, w: %1.f, bytes: %zu-%zu\n» %s\n%s", info.offset._height, info.offset._height + info.key._height, info.key._width, info.offset._length, info.offset._length + info.key._length, buffer.substr(info.offset._length, info.key._length).c_str(), ng::to_s(info.value).c_str());
+		});
 	}
 
 } /* ng */
