@@ -26,8 +26,8 @@ static size_t count_columns (ng::buffer_t const& buf, size_t from, size_t to)
 	size_t const tabSize = buf.indent().tab_size();
 	size_t col = 0;
 	std::string const str = buf.substr(from, to);
-	citerate(ch, diacritics::make_range(str.data(), str.data() + str.size()))
-		col += (*ch == '\t' ? tabSize - (col % tabSize) : (text::is_east_asian_width(*ch) ? 2 : 1));
+	for(auto ch : diacritics::make_range(str.data(), str.data() + str.size()))
+		col += (ch == '\t' ? tabSize - (col % tabSize) : (text::is_east_asian_width(ch) ? 2 : 1));
 	return col;
 }
 
@@ -293,14 +293,14 @@ namespace ng
 	std::vector<CGRect> layout_t::rects_for_ranges (ng::ranges_t const& ranges, kRectsIncludeMode mode) const
 	{
 		std::vector<CGRect> res;
-		citerate(range, ng::dissect_columnar(_buffer, ranges))
+		for(auto const& range : ng::dissect_columnar(_buffer, ranges))
 		{
-			if(mode == kRectsIncludeCarets && !range->empty() || mode == kRectsIncludeSelections && range->empty())
+			if(mode == kRectsIncludeCarets && !range.empty() || mode == kRectsIncludeSelections && range.empty())
 				continue;
 
-			bool includeCarry = range->freehanded;
-			auto r1 = rect_at_index(ng::index_t(range->first.index, includeCarry ? range->first.carry : 0));
-			auto r2 = rect_at_index(ng::index_t(range->last.index,  includeCarry ? range->last.carry  : 0));
+			bool includeCarry = range.freehanded;
+			auto r1 = rect_at_index(ng::index_t(range.first.index, includeCarry ? range.first.carry : 0));
+			auto r2 = rect_at_index(ng::index_t(range.last.index,  includeCarry ? range.last.carry  : 0));
 
 			if(CGRectEqualToRect(r1, r2))
 			{
@@ -308,7 +308,7 @@ namespace ng
 			}
 			else
 			{
-				auto firstRowIter = row_for_offset(range->first.index), lastRowIter = row_for_offset(range->last.index);
+				auto firstRowIter = row_for_offset(range.first.index), lastRowIter = row_for_offset(range.last.index);
 				if(CGRectGetMinY(r1) == CGRectGetMinY(r2) && CGRectGetHeight(r1) == CGRectGetHeight(r2))
 				{
 					res.push_back(OakRectMake(std::min(r1.origin.x, r2.origin.x), r1.origin.y, fabs(r2.origin.x - r1.origin.x), r1.size.height));
@@ -508,23 +508,23 @@ namespace ng
 
 		std::vector< std::pair<size_t, size_t> > foldedRanges;
 		ssize_t nestCount = 0;
-		citerate(pair, _folds->folded())
+		for(auto const& pair : _folds->folded())
 		{
-			if(pair->second && ++nestCount == 1)
-				foldedRanges.push_back(std::make_pair(pair->first, pair->first));
-			else if(!pair->second && --nestCount == 0)
-				foldedRanges.back().second = pair->first;
+			if(pair.second && ++nestCount == 1)
+				foldedRanges.push_back(std::make_pair(pair.first, pair.first));
+			else if(!pair.second && --nestCount == 0)
+				foldedRanges.back().second = pair.first;
 		}
 
-		iterate(range, foldedRanges)
+		for(auto const& range : foldedRanges)
 		{
-			D(DBF_Layout, bug("folded range: %zu-%zu\n", range->first, range->second););
-			if(range->second <= first || last + suffixLen <= range->first)
+			D(DBF_Layout, bug("folded range: %zu-%zu\n", range.first, range.second););
+			if(range.second <= first || last + suffixLen <= range.first)
 				continue;
 
-			did_erase(range->first, range->second);
-			auto row = row_for_offset(range->first);
-			row->value.insert_folded(range->first, range->second - range->first, _buffer, row->offset._length);
+			did_erase(range.first, range.second);
+			auto row = row_for_offset(range.first);
+			row->value.insert_folded(range.first, range.second - range.first, _buffer, row->offset._length);
 			fullRefresh = update_row(row) || fullRefresh;
 		}
 
@@ -544,9 +544,9 @@ namespace ng
 			_pre_refresh_revision   = _buffer.revision();
 			_pre_refresh_caret      = selection.last().last.index;
 
-			iterate(range, highlightRanges)
+			for(auto const& range : highlightRanges)
 			{
-				CGRect const r = rect_for_range(range->min().index, range->max().index);
+				CGRect const r = rect_for_range(range.min().index, range.max().index);
 				OakRectDifference(CGRectInset(r, -2, -2), CGRectInset(r, -1, -1), back_inserter(_pre_refresh_highlight_border));
 				_pre_refresh_highlight_interior.push_back(CGRectInset(r, -1, -1));
 			}
@@ -605,9 +605,9 @@ namespace ng
 
 			std::vector<CGRect> postHighlightBorder;
 			std::vector<CGRect> postHighlightInterior;
-			iterate(range, highlightRanges)
+			for(auto const& range : highlightRanges)
 			{
-				CGRect const r = rect_for_range(range->min().index, range->max().index);
+				CGRect const r = rect_for_range(range.min().index, range.max().index);
 				OakRectDifference(CGRectInset(r, -2, -2), CGRectInset(r, -1, -1), back_inserter(postHighlightBorder));
 				postHighlightInterior.push_back(CGRectInset(r, -1, -1));
 			}
@@ -815,22 +815,22 @@ namespace ng
 		if(_draw_wrap_column)
 			render::fill_rect(context, baseColors.margin_indicator, OakRectMake(_margin.left + _metrics->column_width() * effective_wrap_column(), CGRectGetMinY(visibleRect), 1, CGRectGetHeight(visibleRect)));
 
-		citerate(range, selection)
+		for(auto const& range : selection)
 		{
-			citerate(rect, rects_for_ranges(*range, kRectsIncludeSelections))
+			for(auto const& rect : rects_for_ranges(range, kRectsIncludeSelections))
 			{
-				CGColorRef selColor = _theme->styles_for_scope(_buffer.scope(range->min().index).right).selection();
+				CGColorRef selColor = _theme->styles_for_scope(_buffer.scope(range.min().index).right).selection();
 				if(!_is_key)
 					selColor = CGColorCreateCopyWithAlpha(selColor, 0.5 * CGColorGetAlpha(selColor));
-				render::fill_rect(context, selColor, *rect);
+				render::fill_rect(context, selColor, rect);
 				if(!_is_key)
 					CFRelease(selColor);
 			}
 		}
 
-		iterate(range, highlightRanges)
+		for(auto const& range : highlightRanges)
 		{
-			CGRect const r = rect_for_range(range->min().index, range->max().index);
+			CGRect const r = rect_for_range(range.min().index, range.max().index);
 			render::fill_rect(context, baseColors.marked_text_border, CGRectInset(r, -2, -2));
 			render::fill_rect(context, baseColors.marked_text_background, CGRectInset(r, -1, -1));
 		}
@@ -840,10 +840,10 @@ namespace ng
 
 		if(_draw_caret && !_drop_marker)
 		{
-			citerate(range, selection)
+			for(auto const& range : selection)
 			{
-				citerate(rect, rects_for_ranges(*range, kRectsIncludeCarets))
-					render::fill_rect(context, _theme->styles_for_scope(_buffer.scope(range->min().index).right).caret(), *rect);
+				for(auto const& rect : rects_for_ranges(range, kRectsIncludeCarets))
+					render::fill_rect(context, _theme->styles_for_scope(_buffer.scope(range.min().index).right).caret(), rect);
 			}
 		}
 
@@ -868,8 +868,8 @@ namespace ng
 
 	void layout_t::remove_enclosing_folds (size_t from, size_t to)
 	{
-		citerate(range, _folds->remove_enclosing(from, to))
-			did_fold(range->first, range->second);
+		for(auto const& range : _folds->remove_enclosing(from, to))
+			did_fold(range.first, range.second);
 	}
 
 	void layout_t::toggle_fold_at_line (size_t n, bool recursive)
@@ -881,8 +881,8 @@ namespace ng
 
 	void layout_t::toggle_all_folds_at_level (size_t level)
 	{
-		citerate(range, _folds->toggle_all_at_level(level))
-			did_fold(range->first, range->second);
+		for(auto const& range : _folds->toggle_all_at_level(level))
+			did_fold(range.first, range.second);
 	}
 
 	// =================
