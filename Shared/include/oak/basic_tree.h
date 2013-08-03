@@ -236,8 +236,7 @@ namespace oak
 		bool structural_integrity () const                          { return structural_integrity(_root); }
 		size_t height () const                                      { return height(_root); }
 
-		template <typename _Functor>
-		std::string to_s (_Functor const& dump) const
+		std::string to_s (std::function<std::string(value_type)> const& dump) const
 		{
 			std::string res = "";
 			to_s(_root, _KeyT(), 1, res, dump);
@@ -245,8 +244,7 @@ namespace oak
 		}
 
 	private:
-		template <typename _Functor>
-		static void to_s (node_t* node, _KeyT const& offset, size_t level, std::string& out, _Functor const& dump)
+		static void to_s (node_t* node, _KeyT const& offset, size_t level, std::string& out, std::function<std::string(value_type)> const& dump)
 		{
 			if(!node->is_null())
 			{
