@@ -430,6 +430,29 @@ namespace ng
 			toRow->value.insert(base, prefixLenToInsert, _buffer, base);
 			update_row(toRow);
 			_rows.erase(fromRow, toRow);
+
+			std::vector< std::pair<size_t, size_t> > foldedRanges;
+			ssize_t nestCount = 0;
+			for(auto const& pair : _folds->folded())
+			{
+				if(pair.second && ++nestCount == 1)
+					foldedRanges.push_back(std::make_pair(pair.first, pair.first));
+				else if(!pair.second && --nestCount == 0)
+					foldedRanges.back().second = pair.first;
+			}
+
+			size_t insertFrom = base, insertTo = base + prefixLenToInsert;
+			for(auto const& range : foldedRanges)
+			{
+				if(range.second <= insertFrom || insertTo <= range.first)
+					continue;
+
+				did_erase(range.first, range.second);
+				auto row = row_for_offset(range.first);
+				row->value.insert_folded(range.first, range.second - range.first, _buffer, row->offset._length);
+				fullRefresh = update_row(row) || fullRefresh;
+			}
+
 			fullRefresh = true;
 		}
 		refresh_line_at_index(from, fullRefresh);
