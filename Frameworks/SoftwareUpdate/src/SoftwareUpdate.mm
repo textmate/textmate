@@ -34,13 +34,13 @@ struct shared_state_t
 typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 
 @interface SoftwareUpdate ()
-@property (nonatomic, retain) NSDate* lastPoll;
-@property (nonatomic, assign) BOOL isChecking;
-@property (nonatomic, assign) NSString* lastVersionDownloaded;
-@property (nonatomic, retain) NSString* errorString;
-@property (nonatomic, retain) NSTimer* pollTimer;
-@property (nonatomic, retain) DownloadWindowController* downloadWindow;
-@property (retain) NSString* archive;
+@property (nonatomic) NSDate* lastPoll;
+@property (nonatomic) BOOL isChecking;
+@property (nonatomic) NSString* lastVersionDownloaded;
+@property (nonatomic) NSString* errorString;
+@property (nonatomic) NSTimer* pollTimer;
+@property (nonatomic) DownloadWindowController* downloadWindow;
+@property (nonatomic) NSString* archive;
 
 - (void)scheduleVersionCheck:(id)sender;
 - (void)checkVersionAtURL:(NSURL*)anURL inBackground:(BOOL)backgroundFlag allowRedownload:(BOOL)redownloadFlag;
