@@ -431,6 +431,24 @@ static std::string shell_quote (std::vector<std::string> paths)
 	}
 }
 
+- (void)scrollIndexToFirstVisible:(ng::index_t const&)visibleIndex
+{
+	if(layout && visibleIndex && visibleIndex.index < document->buffer().size())
+	{
+		layout->update_metrics(CGRectMake(0, CGRectGetMinY(layout->rect_at_index(visibleIndex)), CGFLOAT_MAX, NSHeight([self visibleRect])));
+		[self reflectDocumentSize];
+
+		CGRect rect = layout->rect_at_index(visibleIndex);
+		if(CGRectGetMinX(rect) <= layout->margin().left)
+			rect.origin.x = 0;
+		if(CGRectGetMinY(rect) <= layout->margin().top)
+			rect.origin.y = 0;
+		rect.size = [self visibleRect].size;
+
+		[self scrollRectToVisible:CGRectIntegral(rect)];
+	}
+}
+
 - (void)setDocument:(document::document_ptr const&)aDocument
 {
 	if(document && aDocument && *document == *aDocument)
@@ -514,23 +532,8 @@ static std::string shell_quote (std::vector<std::string> paths)
 		[self updateSelection];
 
 		if(visibleIndex && visibleIndex.index < document->buffer().size())
-		{
-			layout->update_metrics(CGRectMake(0, CGRectGetMinY(layout->rect_at_index(visibleIndex)), CGFLOAT_MAX, NSHeight([self visibleRect])));
-			[self reflectDocumentSize];
-
-			CGRect rect = layout->rect_at_index(visibleIndex);
-			if(CGRectGetMinX(rect) <= layout->margin().left)
-				rect.origin.x = 0;
-			if(CGRectGetMinY(rect) <= layout->margin().top)
-				rect.origin.y = 0;
-			rect.size = [self visibleRect].size;
-
-			[self scrollRectToVisible:CGRectIntegral(rect)];
-		}
-		else
-		{
-			[self ensureSelectionIsInVisibleArea:self];
-		}
+				[self scrollIndexToFirstVisible:visibleIndex];
+		else	[self ensureSelectionIsInVisibleArea:self];
 
 		document->buffer().add_callback(callback);
 
@@ -2278,7 +2281,9 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	if(layout)
 	{
 		AUTO_REFRESH;
+		ng::index_t visibleIndex = layout->index_at_point([self visibleRect].origin);
 		layout->set_font(fontName, fontSize);
+		[self scrollIndexToFirstVisible:document->buffer().begin(document->buffer().convert(visibleIndex.index).line)];
 	}
 }
 
@@ -2321,7 +2326,9 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		return;
 
 	AUTO_REFRESH;
+	ng::index_t visibleIndex = layout->index_at_point([self visibleRect].origin);
 	layout->set_wrapping(flag, wrapColumn);
+	[self scrollIndexToFirstVisible:document->buffer().begin(document->buffer().convert(visibleIndex.index).line)];
 	settings_t::set(kSettingsSoftWrapKey, (bool)flag, document->file_type());
 }
 
