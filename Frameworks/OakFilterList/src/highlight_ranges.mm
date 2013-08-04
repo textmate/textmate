@@ -9,7 +9,7 @@ NSAttributedString* AttributedStringWithMarkedUpRanges (std::string const& in, s
 {
 	NSMutableAttributedString* res = [[NSMutableAttributedString alloc] init];
 	NSDictionary* highlightAttrs = @{ FLMatchingTextAttributeName : [NSNull null] };
-	ASSERT(offset >= 0 && offset < in.size());
+	ASSERT_LE(offset, in.size());
 
 	std::string text(in);
 	if(offset > 0)
