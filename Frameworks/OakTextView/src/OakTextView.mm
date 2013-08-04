@@ -515,10 +515,16 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 		if(visibleIndex && visibleIndex.index < document->buffer().size())
 		{
-			CGRect rect = CGRectMake(0, CGRectGetMinY(layout->rect_at_index(visibleIndex)), CGFLOAT_MAX, NSHeight([self visibleRect]));
+			layout->update_metrics(CGRectMake(0, CGRectGetMinY(layout->rect_at_index(visibleIndex)), CGFLOAT_MAX, NSHeight([self visibleRect])));
+			[self reflectDocumentSize];
+
+			CGRect rect = layout->rect_at_index(visibleIndex);
+			if(CGRectGetMinX(rect) <= layout->margin().left)
+				rect.origin.x = 0;
 			if(CGRectGetMinY(rect) <= layout->margin().top)
 				rect.origin.y = 0;
 			rect.size = [self visibleRect].size;
+
 			[self scrollRectToVisible:CGRectIntegral(rect)];
 		}
 		else
