@@ -65,7 +65,7 @@ namespace document
 	{
 		WATCH_LEAKS(document_t);
 
-		document_t () : _did_load_marks(false), _selection(NULL_STR), _folded(NULL_STR), _visible_rect(NULL_STR), _disable_callbacks(false), _revision(0), _disk_revision(0), _modified(false), _path(NULL_STR), _open_count(0), _has_lru(false), _is_on_disk(false), _recent_tracking(true), _backup_path(NULL_STR), _backup_revision(0), _virtual_path(NULL_STR), _custom_name(NULL_STR), _untitled_count(0), _file_type(NULL_STR), /*_folder(NULL_STR),*/ _disk_encoding(NULL_STR), _disk_newlines(NULL_STR), _disk_bom(false) { }
+		document_t () : _did_load_marks(false), _selection(NULL_STR), _folded(NULL_STR), _disable_callbacks(false), _revision(0), _disk_revision(0), _modified(false), _path(NULL_STR), _open_count(0), _has_lru(false), _is_on_disk(false), _recent_tracking(true), _backup_path(NULL_STR), _backup_revision(0), _virtual_path(NULL_STR), _custom_name(NULL_STR), _untitled_count(0), _file_type(NULL_STR), /*_folder(NULL_STR),*/ _disk_encoding(NULL_STR), _disk_newlines(NULL_STR), _disk_bom(false) { }
 		~document_t ();
 
 		bool operator== (document_t const& rhs) const { return _identifier == rhs._identifier; }
@@ -113,7 +113,7 @@ namespace document
 
 		std::string _selection;
 		std::string _folded;
-		std::string _visible_rect;
+		ng::index_t _visible_index;
 		io::bytes_ptr _content;
 
 		// ===============
@@ -281,11 +281,11 @@ namespace document
 		void set_disk_revision (ssize_t rev)                { check_modified(rev, _revision);                                       }
 		std::string const& selection () const               { return _selection;                                                    }
 		std::string const& folded () const                  { return _folded;                                                       }
-		std::string visible_rect () const                   { return _visible_rect;                                                 }
+		ng::index_t visible_index () const                  { return _visible_index;                                                }
 
-		void set_selection (std::string const& sel)         { _selection = sel; _visible_rect = NULL_STR;                           }
+		void set_selection (std::string const& sel)         { _selection = sel; _visible_index = ng::index_t();                     }
 		void set_folded (std::string const& folded)         { _folded = folded;                                                     }
-		void set_visible_rect (std::string const& rect)     { _visible_rect = rect;                                                 }
+		void set_visible_index (ng::index_t index)          { _visible_index = index;                                               }
 
 		void set_authorization (osx::authorization_t const& auth) { _authorization = auth; }
 

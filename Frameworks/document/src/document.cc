@@ -642,10 +642,13 @@ namespace document
 
 		if(_selection == NULL_STR)
 		{
-			std::map<std::string, std::string>::const_iterator sel  = attributes.find("com.macromates.selectionRange");
-			std::map<std::string, std::string>::const_iterator rect = attributes.find("com.macromates.visibleRect");
-			_selection    = sel != attributes.end()  ? sel->second  : NULL_STR;
-			_visible_rect = rect != attributes.end() ? rect->second : NULL_STR;
+			std::map<std::string, std::string>::const_iterator sel = attributes.find("com.macromates.selectionRange");
+			std::map<std::string, std::string>::const_iterator idx = attributes.find("com.macromates.visibleIndex");
+			_selection = sel != attributes.end() ? sel->second : NULL_STR;
+
+			size_t index = SIZE_T_MAX, carry = 0;
+			sscanf(idx->second.c_str(), "%zu:%zu", &index, &carry);
+			_visible_index = ng::index_t(index, carry);
 		}
 
 		_is_on_disk = _path != NULL_STR && access(_path.c_str(), F_OK) == 0;
@@ -759,7 +762,7 @@ namespace document
 		if(volume::settings(_path).extended_attributes())
 		{
 			attributes["com.macromates.selectionRange"] = _selection;
-			attributes["com.macromates.visibleRect"]    = _visible_rect;
+			attributes["com.macromates.visibleIndex"]   = _visible_index ? to_s(_visible_index) : NULL_STR;
 			attributes["com.macromates.bookmarks"]      = marks_as_string();
 			attributes["com.macromates.folded"]         = _folded;
 		}
@@ -810,7 +813,7 @@ namespace document
 			path::set_attr(dst, "com.macromates.backup.path",           _path);
 			path::set_attr(dst, "com.macromates.backup.identifier",     to_s(_identifier));
 			path::set_attr(dst, "com.macromates.selectionRange",        _selection);
-			path::set_attr(dst, "com.macromates.visibleRect",           _visible_rect);
+			path::set_attr(dst, "com.macromates.visibleIndex",          _visible_index ? to_s(_visible_index) : NULL_STR);
 			path::set_attr(dst, "com.macromates.backup.file-type",      _file_type);
 			path::set_attr(dst, "com.macromates.backup.encoding",       _disk_encoding);
 			path::set_attr(dst, "com.macromates.backup.bom",            _disk_bom ? "YES" : "NO");
@@ -943,7 +946,8 @@ namespace document
 		{
 			D(DBF_Document, bug("save attributes for ‘%s’\n", _path.c_str()););
 			path::set_attr(_path, "com.macromates.selectionRange", _selection);
-			path::set_attr(_path, "com.macromates.visibleRect",    _visible_rect);
+			path::set_attr(_path, "com.macromates.visibleRect",    NULL_STR); // clear legacy attribute
+			path::set_attr(_path, "com.macromates.visibleIndex",   _visible_index ? to_s(_visible_index) : NULL_STR);
 			path::set_attr(_path, "com.macromates.bookmarks",      marks_as_string());
 		}
 

@@ -453,6 +453,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 	{
 		document->buffer().remove_callback(callback);
 		document->set_folded(layout->folded_as_string());
+		document->set_visible_index(layout->index_at_point([self visibleRect].origin));
 
 		delete callback;
 		callback = NULL;
@@ -500,7 +501,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 		editor->set_find_clipboard(get_clipboard(NSFindPboard));
 		editor->set_replace_clipboard(get_clipboard(NSReplacePboard));
 
-		std::string const visibleRect = document->visible_rect();
+		ng::index_t visibleIndex = document->visible_index();
 		if(document->selection() != NULL_STR)
 		{
 			ng::ranges_t ranges = convert(document->buffer(), document->selection());
@@ -512,9 +513,18 @@ static std::string shell_quote (std::vector<std::string> paths)
 		[self reflectDocumentSize];
 		[self updateSelection];
 
-		if(visibleRect != NULL_STR)
-				[self scrollRectToVisible:NSRectFromString([NSString stringWithCxxString:visibleRect])];
-		else	[self ensureSelectionIsInVisibleArea:self];
+		if(visibleIndex && visibleIndex.index < document->buffer().size())
+		{
+			CGRect rect = CGRectMake(0, CGRectGetMinY(layout->rect_at_index(visibleIndex)), CGFLOAT_MAX, NSHeight([self visibleRect]));
+			if(CGRectGetMinY(rect) <= layout->margin().top)
+				rect.origin.y = 0;
+			rect.size = [self visibleRect].size;
+			[self scrollRectToVisible:CGRectIntegral(rect)];
+		}
+		else
+		{
+			[self ensureSelectionIsInVisibleArea:self];
+		}
 
 		document->buffer().add_callback(callback);
 
@@ -568,7 +578,10 @@ static std::string shell_quote (std::vector<std::string> paths)
 		[self performBundleItem:*item];
 
 	if(document && layout)
+	{
 		document->set_folded(layout->folded_as_string());
+		document->set_visible_index(layout->index_at_point([self visibleRect].origin));
+	}
 }
 
 - (void)documentDidSave:(NSNotification*)aNotification

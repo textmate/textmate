@@ -310,10 +310,7 @@ private:
 {
 	document::document_ptr oldDocument = document;
 	if(oldDocument)
-	{
 		oldDocument->remove_callback(callback);
-		oldDocument->set_visible_rect(to_s(NSStringFromRect([self.textView visibleRect])));
-	}
 
 	if(aDocument)
 		aDocument->open();
