@@ -4,6 +4,7 @@
 __attribute__((constructor)) static void setup ()
 {
 	NSApplicationLoad();
+	[NSSpellChecker sharedSpellChecker];
 }
 
 void test_spellcheck ()

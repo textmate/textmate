@@ -23,6 +23,7 @@ __attribute__((constructor)) static void setup_fixtures ()
 	bundleIndex.commit();
 
 	NSApplicationLoad();
+	[NSSpellChecker sharedSpellChecker];
 }
 
 void benchmark_insert_50_mb ()
