@@ -11,6 +11,7 @@ PUBLIC @interface DocumentController : NSObject
 @property (nonatomic) std::vector<document::document_ptr> const& documents;
 @property (nonatomic) document::document_ptr              const& selectedDocument;
 @property (nonatomic) NSUInteger                                 selectedTabIndex;
+@property (nonatomic) NSUInteger                                 lastSelectedOverflowTabIndex;
 
 @property (nonatomic) BOOL                                       fileBrowserVisible;
 @property (nonatomic) NSDictionary*                              fileBrowserHistory;
