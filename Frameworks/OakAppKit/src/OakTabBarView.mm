@@ -2,6 +2,7 @@
 #import "OakControl Private.h"
 #import "NSColor Additions.h"
 #import "NSImage Additions.h"
+#import "NSMenuItem Additions.h"
 #import "NSView Additions.h"
 #import <OakFoundation/NSString Additions.h>
 #import <oak/oak.h>
@@ -56,9 +57,10 @@ namespace tab_bar_requisites
 {
 	uint32_t modified = layer_t::last_requisite << 0,
 	         first    = layer_t::last_requisite << 1,
-	         dragged  = layer_t::last_requisite << 2;
+	         dragged  = layer_t::last_requisite << 2,
+	         overflow = layer_t::last_requisite << 3;
 
-	uint32_t all      = (modified|first|dragged);
+	uint32_t all      = (modified|first|dragged|overflow);
 };
 
 // ==================
@@ -240,6 +242,7 @@ uint32_t layout_metrics_t::requisite_from_string (char const* str)
 		{ "modified",             tab_bar_requisites::modified},
 		{ "first",                tab_bar_requisites::first   },
 		{ "dragged",              tab_bar_requisites::dragged },
+		{ "overflow",             tab_bar_requisites::overflow},
 	};
 
 	for(size_t i = 0; i < sizeofA(mapping); ++i)
@@ -552,6 +555,8 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 		filter |= tab_bar_requisites::modified;
 	if(tabIndex == 0)
 		filter |= tab_bar_requisites::first;
+	if(tabIndex >= [self countOfVisibleTabs] - 1 && tabTitles.count > [self countOfVisibleTabs])
+		filter |= tab_bar_requisites::overflow;
 	return filter;
 }
 
@@ -577,7 +582,7 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 {
 	NSRect rect = NSInsetRect([self bounds], metrics->firstTabOffset, 0);
 	NSUInteger maxNumberOfTabs = floor((NSWidth(rect) + metrics->tabSpacing) / (metrics->minTabSize + metrics->tabSpacing));
-	return std::max<NSUInteger>(maxNumberOfTabs, 8);
+	return maxNumberOfTabs;
 }
 
 - (void)updateLayout
@@ -628,17 +633,19 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 	}
 
 	// ==========
-
-	for(NSUInteger tabIndex = 0; tabIndex < numberOfTabs; ++tabIndex)
+	NSUInteger lastVisibleTab = numberOfTabs > 1 ? numberOfTabs-1 : 0;
+	for(NSUInteger tabIndex = 0; tabIndex < tabTitles.count; ++tabIndex)
 	{
 		rect.origin.x += tabDropSpacing.find(tabIndex) != tabDropSpacing.end() ? tabDropSpacing[tabIndex].set_time(CFAbsoluteTimeGetCurrent()) : 0;
-		if(tabIndex == hiddenTab)
+		if(tabIndex == hiddenTab || (tabIndex > lastVisibleTab && tabIndex != selectedTab) || (tabIndex == lastVisibleTab && selectedTab > lastVisibleTab))
 		{
 			tabRects.push_back(NSZeroRect);
 			continue;
 		}
 
-		rect.size.width = tabSizes[tabIndex];
+		if(tabIndex == selectedTab && tabIndex > lastVisibleTab)
+				rect.size.width = tabSizes.back();
+		else	rect.size.width = tabSizes[tabIndex];
 
 		std::string layer_id  = [self layerNameForTabIndex:tabIndex];
 		NSString* toolTipText = SafeObjectAtIndex(tabToolTips, tabIndex);
@@ -705,6 +712,38 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 	D(DBF_TabBarView, bug("\n"););
 	self.tag = selectedTab; // performCloseTab: asks for [sender tag]
 	[NSApp sendAction:@selector(performCloseTab:) to:nil from:self];
+}
+
+- (NSMenu*)overflowTabMenu
+{
+	NSMenu* menu = [NSMenu new];
+	for(NSUInteger i = self.countOfVisibleTabs-1; i < [tabTitles count]; ++i)
+	{
+		NSMenuItem* item = [menu addItemWithTitle:[tabTitles objectAtIndex:i] action:@selector(takeSelectedTabIndexFrom:) keyEquivalent:@""];
+		item.tag     = i;
+		item.toolTip = [tabToolTips objectAtIndex:i];
+		if(i == selectedTab)
+			[item setState:NSOnState];
+		else if([[tabModifiedStates objectAtIndex:i] boolValue])
+			[item setModifiedState:YES];
+	}
+	return menu;
+}
+
+- (void)showOverflowTabMenu:(id)sender
+{
+	NSUInteger overflowTab = self.tag;
+	NSRect tabRect = tabRects[overflowTab];
+	NSRect rect;
+	uint32_t state = [self currentState] | layer_t::mouse_inside | layer_t::mouse_clicked;
+	citerate(it, metrics->layers_for([self layerNameForTabIndex:overflowTab], tabRect, overflowTab, [tabTitles objectAtIndex:overflowTab], nil, [self filterForTabIndex:overflowTab] | tab_bar_requisites::overflow))
+	{
+		if((state & it->requisite_mask) == it->requisite)
+			rect = it->rect;
+	}
+	rect.origin.y -= 6; //shift menu down slightly to base of tab
+	[[self overflowTabMenu] popUpMenuPositioningItem:nil atLocation:(rect.origin) inView:self];
+	self.layoutNeedsUpdate = YES;
 }
 
 - (NSMenu*)menuForEvent:(NSEvent*)anEvent

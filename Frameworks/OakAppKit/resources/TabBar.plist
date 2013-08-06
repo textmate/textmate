@@ -143,7 +143,8 @@
       { rect = (   1, W-2,   2, H-2 ); action = 'selectTab:'; requisite = mouse_clicked; toolTip = 1; },
       { rect = (   1, W-2,   2, H-2 ); action = 'dragTab:'; requisite = mouse_dragged; },
       { rect = (   1, W-2,   2, H-2 ); action = 'didDoubleClickTab:'; requisite = mouse_double_clicked; },
-      { rect = (  23, W-8,   4, H-5 ); text = { shadow = 1; }; },
+      { rect = (  23, W-8,   4, H-5 ); text = { shadow = 1; }; requisiteMask = overflow; },
+      { rect = (  23, W-20,  4, H-5 ); text = { shadow = 1; }; requisite = overflow; },
 
       { rect = (   3,  14,   4,  16 ); requisiteMask = 'mouse_inside|modified';               requisite = '';                                    image = "TabClose";                  },
       { rect = (   3,  14,   4,  16 ); requisiteMask = 'mouse_inside|modified';               requisite = 'modified';                            image = "TabClose_Modified";         },
@@ -151,8 +152,10 @@
       { rect = (   3,  14,   4,  16 ); requisiteMask = 'mouse_inside|modified|mouse_clicked'; requisite = 'mouse_inside|modified';               image = "TabClose_ModifiedRollover"; },
       { rect = (   3,  14,   4,  16 ); requisiteMask = 'mouse_inside|modified|mouse_clicked'; requisite = 'mouse_clicked|mouse_inside';          image = "TabClose_Pressed";          },
       { rect = (   3,  14,   4,  16 ); requisiteMask = 'mouse_inside|modified|mouse_clicked'; requisite = 'mouse_clicked|mouse_inside|modified'; image = "TabClose_ModifiedPressed";  },
+      { rect = ( W-16, W-1,  6,  17 ); requisiteMask = 'overflow';                            requisite = 'overflow';                            image = "TabOverflow";               },
 
-      { rect = (   3,  14,   4,  16 ); requisiteMask = 'mouse_clicked|option'; requisite = 'mouse_clicked';        action = 'performCloseTab:';       preventWindowOrdering = 1; },
-      { rect = (   3,  14,   4,  16 ); requisiteMask = 'mouse_clicked|option'; requisite = 'mouse_clicked|option'; action = 'performCloseOtherTabs:'; preventWindowOrdering = 1; },
+      { rect = (   3,  14,   4,  16 ); requisiteMask = 'mouse_clicked|option';   requisite = 'mouse_clicked';          action = 'performCloseTab:';       preventWindowOrdering = 1; },
+      { rect = (   3,  14,   4,  16 ); requisiteMask = 'mouse_clicked|option';   requisite = 'mouse_clicked|option';   action = 'performCloseOtherTabs:'; preventWindowOrdering = 1; },
+      { rect = ( W-16, W-1,  4, H-2 ); requisiteMask = 'mouse_clicked|overflow'; requisite = 'mouse_clicked|overflow'; action = 'showOverflowTabMenu:';   preventWindowOrdering = 1; },
    );
 }
