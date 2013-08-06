@@ -41,9 +41,6 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	NSScrollView* gutterScrollView;
 	GutterView* gutterView;
 	NSColor* gutterDividerColor;
-	NSDictionary* gutterImages;
-	NSDictionary* gutterHoverImages;
-	NSDictionary* gutterPressedImages;
 
 	NSBox* gutterDividerView;
 	NSBox* statusDividerView;
@@ -60,9 +57,9 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	IBOutlet NSPanel* tabSizeSelectorPanel;
 }
 @property (nonatomic, readonly) OTVStatusBar* statusBar;
-@property (nonatomic, retain) NSDictionary* gutterImages;
-@property (nonatomic, retain) NSDictionary* gutterHoverImages;
-@property (nonatomic, retain) NSDictionary* gutterPressedImages;
+@property (nonatomic) NSDictionary* gutterImages;
+@property (nonatomic) NSDictionary* gutterHoverImages;
+@property (nonatomic) NSDictionary* gutterPressedImages;
 @property (nonatomic) OakFilterWindowController* filterWindowController;
 @property (nonatomic) SymbolChooser*             symbolChooser;
 - (void)updateStyle;
@@ -103,7 +100,6 @@ private:
 
 @implementation OakDocumentView
 @synthesize textView, statusBar;
-@synthesize gutterImages, gutterHoverImages, gutterPressedImages;
 
 - (id)initWithFrame:(NSRect)aRect
 {
@@ -712,19 +708,19 @@ static std::string const kBookmarkType = "bookmark";
 
 - (NSImage*)imageForState:(NSUInteger)state forColumnWithIdentifier:(id)identifier
 {
-	NSArray* array = gutterImages[identifier];
+	NSArray* array = _gutterImages[identifier];
 	return array && state < [array count] && array[state] != [NSNull null] ? array[state] : nil;
 }
 
 - (NSImage*)hoverImageForState:(NSUInteger)state forColumnWithIdentifier:(id)identifier
 {
-	NSArray* array = gutterHoverImages[identifier];
+	NSArray* array = _gutterHoverImages[identifier];
 	return array && state < [array count] && array[state] != [NSNull null] ? array[state] : nil;
 }
 
 - (NSImage*)pressedImageForState:(NSUInteger)state forColumnWithIdentifier:(id)identifier
 {
-	NSArray* array = gutterPressedImages[identifier];
+	NSArray* array = _gutterPressedImages[identifier];
 	return array && state < [array count] && array[state] != [NSNull null] ? array[state] : nil;
 }
 
