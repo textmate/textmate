@@ -475,6 +475,10 @@ static BOOL MyEvent (NSEvent* anEvent, NSView* aView)
 
 - (BOOL)outlineView:(NSOutlineView*)anOutlineView shouldExpandItem:(FSItem*)item
 {
+	// During drag’n’drop the system will repeatedly ask to expand expanded items
+	if([anOutlineView isItemExpanded:item])
+		return YES;
+
 	if(suppressAutoExpansion && ![expandedURLs containsObject:item.url])
 		return NO;
 
