@@ -1675,10 +1675,12 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 	if(aWord)
 	{
+		char key = 0;
 		[[NSSpellChecker sharedSpellChecker] updateSpellingPanelWithMisspelledWord:aWord];
 		for(NSString* guess in [[NSSpellChecker sharedSpellChecker] guessesForWord:aWord])
 		{
-			item = [menu addItemWithTitle:guess action:@selector(contextMenuPerformCorrectWord:) keyEquivalent:@""];
+			item = [menu addItemWithTitle:guess action:@selector(contextMenuPerformCorrectWord:) keyEquivalent:key < 10 ? [NSString stringWithFormat:@"%c", '0' + (++key % 10)] : @""];
+			[item setKeyEquivalentModifierMask:0];
 			[item setRepresentedObject:guess];
 		}
 
