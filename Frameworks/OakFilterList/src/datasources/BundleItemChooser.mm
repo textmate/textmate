@@ -247,7 +247,7 @@ static NSString* const AllScopes    = @"AllScopes";
 	}
 
 	int groupCount = [self numberOfGroupsInScopeBar:scopeBar];
-	int key = 0;
+	char key = 0;
 	for(NSUInteger groupIndex = 0; groupIndex < groupCount; ++groupIndex)
 	{
 		NSArray* identifiers = [self scopeBar:scopeBar itemIdentifiersForGroup:groupIndex];
@@ -255,7 +255,7 @@ static NSString* const AllScopes    = @"AllScopes";
 		{
 			NSString* identifier   = [identifiers objectAtIndex:index];
 			NSString* label        = [self scopeBar:scopeBar titleOfItem:identifier inGroup:groupIndex];
-			NSMenuItem* item       = [aMenu addItemWithTitle:label action:@selector(takeSelectedItemFrom:) keyEquivalent:++key < 10 ? [NSString stringWithFormat:@"%c", '0' + (key % 10)] : @""];
+			NSMenuItem* item       = [aMenu addItemWithTitle:label action:@selector(takeSelectedItemFrom:) keyEquivalent:key < 10 ? [NSString stringWithFormat:@"%c", '0' + (++key % 10)] : @""];
 			item.representedObject = identifier;
 			item.tag               = groupIndex;
 			if([[scopeBar.selectedItems objectAtIndex:groupIndex] containsObject:identifier])

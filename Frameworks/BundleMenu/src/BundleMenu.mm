@@ -151,11 +151,8 @@ bundles::item_ptr OakShowMenuForBundleItems (std::vector<bundles::item_ptr> cons
 		if(menuItem.action == @selector(performBundleItemWithUUIDStringFrom:))
 		{
 			menuItem.target = menuTarget;
-			if(key < 10)
-			{
-				[menuItem setKeyEquivalent:[NSString stringWithFormat:@"%c", '0' + (++key % 10)]];
-				[menuItem setKeyEquivalentModifierMask:0];
-			}
+			[menuItem setKeyEquivalent:key < 10 ? [NSString stringWithFormat:@"%c", '0' + (++key % 10)] : @""];
+			[menuItem setKeyEquivalentModifierMask:0];
 		}
 	}
 
