@@ -1250,6 +1250,6 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 		}
 	}
 
-	return YES;
+	return res;
 }
 @end
