@@ -76,7 +76,7 @@ namespace regexp
 			static int main (OnigUChar const* name, OnigUChar const* name_end, int len, int* list, OnigRegex pattern, void* udata)
 			{
 				match_t const& m = *((match_t const*)udata);
-				foreach(it, list, list + len)
+				for(int* it = list; it != list + len; ++it)
 				{
 					if(m.did_match(*it))
 						m.captured_indices->insert(std::make_pair(std::string(name, name_end), std::make_pair(m.begin(*it), m.end(*it))));

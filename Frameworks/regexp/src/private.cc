@@ -17,7 +17,7 @@ static int copy_matches_for_name (OnigUChar const* name, OnigUChar const* name_e
 
 	std::string value = "";
 	bool has_value = false;
-	foreach(it, list, list + len)
+	for(int* it = list; it != list + len; ++it)
 	{
 		if(match->beg[*it] == -1)
 			continue;

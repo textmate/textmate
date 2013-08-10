@@ -115,7 +115,7 @@ namespace ng
 			auto from = find_pos(first);
 			auto to = _tree.upper_bound(last, &comp_abs);
 
-			foreach(it, from, to)
+			for(auto it = from; it != to; ++it)
 			{
 				size_t i = std::max(it->offset, first) - it->offset;
 				size_t j = std::min(it->offset + it->key, last) - it->offset;

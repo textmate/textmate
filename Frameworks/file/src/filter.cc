@@ -13,9 +13,9 @@ static std::vector<bundles::item_ptr> binary_filters (std::string const& event, 
 {
 	std::string contentAsString = "";
 	size_t contentMatchSize = 256;
-	foreach(ch, content->begin(), content->end())
+	for(char ch : *content)
 	{
-		contentAsString += utf8::to_s(*ch);
+		contentAsString += utf8::to_s(ch);
 		if(--contentMatchSize == 0)
 			break;
 	}

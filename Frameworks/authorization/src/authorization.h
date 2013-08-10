@@ -82,8 +82,8 @@ namespace osx
 				AuthorizationExternalForm extAuth;
 				if(AuthorizationMakeExternalForm(_authorization, &extAuth) == errAuthorizationSuccess)
 				{
-					foreach(ch, (char*)&extAuth, (char*)(&extAuth + 1))
-						res += text::format("%02X", *ch);
+					for(char* it = (char*)&extAuth; it != (char*)(&extAuth + 1); ++it)
+						res += text::format("%02X", *it);
 				}
 				return res;
 			}

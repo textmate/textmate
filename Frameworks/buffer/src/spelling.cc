@@ -24,7 +24,7 @@ namespace ng
 			--from;
 
 		std::set<scope::scope_t> enabled, disabled;
-		foreach(pair, first, last)
+		for(auto pair = first; pair != last; ++pair)
 		{
 			if(enabled.find(pair->second) != enabled.end() || disabled.find(pair->second) != disabled.end())
 				continue;

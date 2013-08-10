@@ -33,7 +33,7 @@ private:
 	void remove (typename tree_t::iterator first, typename tree_t::iterator last)
 	{
 		std::vector<ssize_t> toRemove;
-		foreach(info, first, last)
+		for(typename tree_t::iterator info = first; info != last; ++info)
 			toRemove.push_back(info->offset.length + info->key.length);
 		riterate(key, toRemove)
 			remove(*key);

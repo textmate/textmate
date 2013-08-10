@@ -240,7 +240,7 @@ namespace ng
 			auto it = first;
 			scopes[0] = (--it)->second;
 		}
-		foreach(it, first, last)
+		for(auto it = first; it != last; ++it)
 			scopes[it->first - from] = it->second;
 
 		std::map<size_t, bool> const& m = misspellings(from, to);
