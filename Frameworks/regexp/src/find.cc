@@ -63,6 +63,27 @@ namespace find
 	{
 		dfa_node_t (char byte, std::vector<dfa_node_ptr> const& children) : children(children), byte(byte) { }
 
+		~dfa_node_t ()
+		{
+			std::vector<std::vector<dfa_node_ptr>*> allChildren(1, &children);
+
+			size_t lastPos = 0;
+			while(lastPos < allChildren.size())
+			{
+				size_t oldPos = lastPos;
+				lastPos = allChildren.size();
+				for(size_t i = oldPos; i < lastPos; ++i)
+				{
+					for(auto child : *allChildren[i])
+						allChildren.push_back(&child->children);
+				}
+			}
+
+			// Dispose nodes bottom-up to avoid blowing the stack
+			riterate(it, allChildren)
+				(*it)->clear();
+		}
+
 		bool does_match (char needle) const							{ return needle == byte; }
 		std::vector<dfa_node_ptr> const& descend () const		{ return children; }
 
