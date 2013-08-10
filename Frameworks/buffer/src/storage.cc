@@ -1,4 +1,6 @@
 #include "storage.h"
+#include <CrashReporter/utility.h>
+#include <text/format.h>
 
 namespace ng
 {
@@ -57,6 +59,7 @@ namespace ng
 
 		void storage_t::insert (size_t pos, char const* data, size_t length)
 		{
+			crash_reporter_info_t crashInfo(text::format("storage insert %zu, size %zu", pos, size()));
 			ASSERT_LE(pos, size());
 			if(length == 0)
 				return;
@@ -83,6 +86,7 @@ namespace ng
 
 		void storage_t::erase (size_t first, size_t last)
 		{
+			crash_reporter_info_t crashInfo(text::format("storage erase %zu-%zu, size %zu", first, last, size()));
 			ASSERT_LE(first, last); ASSERT_LE(last, size());
 
 			auto from = find_pos(first);
@@ -96,6 +100,7 @@ namespace ng
 
 		char storage_t::operator[] (size_t i) const
 		{
+			crash_reporter_info_t crashInfo(text::format("storage access %zu, size %zu", i, size()));
 			ASSERT_LE(i, size());
 			auto it = find_pos(i);
 			return it->value.bytes()[i - it->offset];
@@ -103,6 +108,7 @@ namespace ng
 
 		std::string storage_t::substr (size_t first, size_t last) const
 		{
+			crash_reporter_info_t crashInfo(text::format("storage access %zu-%zu, size %zu", first, last, size()));
 			ASSERT_LE(first, last); ASSERT_LE(last, size());
 			std::string res = "";
 

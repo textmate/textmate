@@ -1,4 +1,4 @@
 TESTS        = tests/*.{cc,mm}
 SOURCES      = src/*.cc
-LINK        += text bundles ns parse regexp scope plist
+LINK        += text bundles ns parse regexp scope plist CrashReporter
 EXPORT       = src/buffer.h src/indexed_map.h src/storage.h
