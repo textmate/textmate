@@ -28,10 +28,6 @@
 #define foreach(v,f,l) for(decltype(f) v = (f), _end = (l); v != _end; ++v)
 #endif
 
-#ifndef rforeach
-#define rforeach(v,f,l) for(decltype(f) v = (l), _begin = (f); v-- != _begin; )
-#endif
-
 #ifdef iterate
 #undef iterate
 #endif
