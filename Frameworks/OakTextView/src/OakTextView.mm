@@ -3203,7 +3203,7 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 		editor->perform(anAction, layout.get(), [self continuousIndentCorrections], to_s([self scopeAttributes]));
 	}
 	catch(std::exception const& e) {
-		crash_reporter_info_t info(text::format("%s %s", sel_getName(aSelector), e.what()));
+		crash_reporter_info_t info(text::format("Performing @selector(%s)\nC++ Exception: %s", sel_getName(aSelector), e.what()));
 		abort();
 	}
 }
