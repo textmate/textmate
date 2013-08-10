@@ -468,6 +468,9 @@ namespace
 
 - (void)closeTabsAtIndexes:(NSIndexSet*)anIndexSet askToSaveChanges:(BOOL)askToSaveFlag createDocumentIfEmpty:(BOOL)createIfEmptyFlag
 {
+	if([anIndexSet count] == 0 || _documents.empty())
+		return;
+
 	crash_reporter_info_t crashInfo(text::format("close %lu documents with %zu open and index of selected being %zu.", [anIndexSet count], _documents.size(), _selectedTabIndex));
 	crashInfo << to_s([anIndexSet description]);
 
