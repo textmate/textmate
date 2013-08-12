@@ -186,36 +186,12 @@ namespace find
 
 			if(options & backwards)
 			{
-				// fprintf(stderr, "before:\n");
-				// iterate(rowIter, matrix)
-				// {
-				// 	iterate(colIter, *rowIter)
-				// 	{
-				// 		iterate(it, *colIter)
-				// 			fprintf(stderr, "%04x, ", *it);
-				// 		fprintf(stderr, " | ");
-				// 	}
-				// 	fprintf(stderr, "\n");
-				// }
-
 				std::reverse(matrix.begin(), matrix.end());
 				iterate(rowIter, matrix)
 				{
 					iterate(colIter, *rowIter)
 						std::reverse(colIter->begin(), colIter->end());
 				}
-
-				// fprintf(stderr, "after:\n");
-				// iterate(rowIter, matrix)
-				// {
-				// 	iterate(colIter, *rowIter)
-				// 	{
-				// 		iterate(it, *colIter)
-				// 			fprintf(stderr, "%04x, ", *it);
-				// 		fprintf(stderr, " | ");
-				// 	}
-				// 	fprintf(stderr, "\n");
-				// }
 			}
 
 			riterate(rowIter, matrix)
@@ -241,10 +217,6 @@ namespace find
 			}
 
 			current_node = &children;
-
-			// fprintf(stderr, "DFA:\n");
-			// dump(children);
-			// fprintf(stderr, "\n====\n");
 		}
 
 		std::pair<ssize_t, ssize_t> match (char const* buf, ssize_t len, std::map<std::string, std::string>* captures)
