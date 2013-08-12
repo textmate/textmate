@@ -150,6 +150,7 @@ namespace network
 			curl_easy_setopt(handle, CURLOPT_FOLLOWLOCATION,   true);
 			curl_easy_setopt(handle, CURLOPT_FAILONERROR,      true);
 			curl_easy_setopt(handle, CURLOPT_ENCODING,         "");
+			curl_easy_setopt(handle, CURLOPT_NOSIGNAL,         1);
 
 			std::string const userAgent = request._user_agent == NULL_STR ? create_agent_info_string() : request._user_agent;
 			curl_easy_setopt(handle, CURLOPT_USERAGENT,        userAgent.c_str());

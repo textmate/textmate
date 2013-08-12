@@ -58,6 +58,7 @@ long post_to_server (std::string const& url, std::map<std::string, std::string> 
 
 		curl_easy_setopt(handle, CURLOPT_ERRORBUFFER,      errorbuf);
 		curl_easy_setopt(handle, CURLOPT_FAILONERROR,      true);
+		curl_easy_setopt(handle, CURLOPT_NOSIGNAL,         1);
 
 		if(headersOut)
 		{

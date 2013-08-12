@@ -131,6 +131,7 @@ namespace network
 			curl_easy_setopt(handle, CURLOPT_FAILONERROR,      true);
 			curl_easy_setopt(handle, CURLOPT_ENCODING,         "");
 			curl_easy_setopt(handle, CURLOPT_USERAGENT,        create_agent_info_string().c_str());
+			curl_easy_setopt(handle, CURLOPT_NOSIGNAL,         1);
 
 			char errorbuf[CURL_ERROR_SIZE];
 			curl_easy_setopt(handle, CURLOPT_ERRORBUFFER,      errorbuf);
