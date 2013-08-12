@@ -62,10 +62,9 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 @property (nonatomic) NSDictionary* gutterPressedImages;
 @property (nonatomic) OakFilterWindowController* filterWindowController;
 @property (nonatomic) SymbolChooser*             symbolChooser;
+@property (nonatomic) NSArray* observedKeys;
 - (void)updateStyle;
 @end
-
-static NSString* const ObservedTextViewKeyPaths[] = { @"selectionString", @"tabSize", @"softTabs", @"isMacroRecording"};
 
 struct document_view_callback_t : document::document_t::callback_t
 {
@@ -150,8 +149,9 @@ private:
 		doc->set_custom_name("null document"); // without a name it grabs an ‘untitled’ token
 		[self setDocument:doc];
 
-		iterate(keyPath, ObservedTextViewKeyPaths)
-			[textView addObserver:self forKeyPath:*keyPath options:NSKeyValueObservingOptionInitial context:NULL];
+		self.observedKeys = @[ @"selectionString", @"tabSize", @"softTabs", @"isMacroRecording"];
+		for(NSString* keyPath in self.observedKeys)
+			[textView addObserver:self forKeyPath:keyPath options:NSKeyValueObservingOptionInitial context:NULL];
 	}
 	return self;
 }
@@ -251,7 +251,7 @@ private:
 
 - (void)observeValueForKeyPath:(NSString*)aKeyPath ofObject:(id)observableController change:(NSDictionary*)changeDictionary context:(void*)userData
 {
-	if(observableController != textView || ![[NSArray arrayWithObjects:&ObservedTextViewKeyPaths[0] count:sizeofA(ObservedTextViewKeyPaths)] containsObject:aKeyPath])
+	if(observableController != textView || ![self.observedKeys containsObject:aKeyPath])
 		return;
 
 	if([aKeyPath isEqualToString:@"selectionString"])
@@ -286,8 +286,8 @@ private:
 	gutterView.delegate    = nil;
 	statusBar.delegate     = nil;
 
-	iterate(keyPath, ObservedTextViewKeyPaths)
-		[textView removeObserver:self forKeyPath:*keyPath];
+	for(NSString* keyPath in self.observedKeys)
+		[textView removeObserver:self forKeyPath:keyPath];
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 
 	[self setDocument:document::document_ptr()];
