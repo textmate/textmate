@@ -66,6 +66,7 @@ namespace find
 		~dfa_node_t ()
 		{
 			std::vector<std::vector<dfa_node_ptr>*> allChildren(1, &children);
+			std::set<dfa_node_t*> seen{this};
 
 			size_t lastPos = 0;
 			while(lastPos < allChildren.size())
@@ -74,8 +75,14 @@ namespace find
 				lastPos = allChildren.size();
 				for(size_t i = oldPos; i < lastPos; ++i)
 				{
-					for(auto child : *allChildren[i])
-						allChildren.push_back(&child->children);
+					for(dfa_node_ptr child : *allChildren[i])
+					{
+						if(seen.find(child.get()) == seen.end())
+						{
+							allChildren.push_back(&child->children);
+							seen.insert(child.get());
+						}
+					}
 				}
 			}
 
