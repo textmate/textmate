@@ -15,7 +15,7 @@
 #include <plist/ascii.h>
 #include <selection/selection.h>
 #include <OakSystem/application.h>
-#include <CrashReporter/utility.h>
+#include <crash/info.h>
 #include <oak/debug.h>
 #include <text/utf8.h>
 #include <text/ctype.h>

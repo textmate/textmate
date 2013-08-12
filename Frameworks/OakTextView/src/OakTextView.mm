@@ -15,7 +15,7 @@
 #import <OakFoundation/OakFindProtocol.h>
 #import <OakFoundation/OakTimer.h>
 #import <OakSystem/application.h>
-#import <CrashReporter/utility.h>
+#import <crash/info.h>
 #import <BundleMenu/BundleMenu.h>
 #import <BundlesManager/BundlesManager.h>
 #import <bundles/bundles.h>

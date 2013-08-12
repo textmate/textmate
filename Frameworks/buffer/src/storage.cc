@@ -1,5 +1,5 @@
 #include "storage.h"
-#include <CrashReporter/utility.h>
+#include <crash/info.h>
 #include <text/format.h>
 
 namespace ng

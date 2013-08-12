@@ -1,4 +1,4 @@
-#include "utility.h"
+#include "info.h"
 
 /* CrashReporter info */
 char const* __crashreporter_info__ = NULL;

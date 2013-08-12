@@ -2,7 +2,7 @@
 #include <bundles/bundles.h>
 #include <OakFoundation/NSString Additions.h>
 #include <BundleMenu/BundleMenu.h>
-#include <CrashReporter/utility.h>
+#include <crash/info.h>
 
 /*
 

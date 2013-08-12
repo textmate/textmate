@@ -22,7 +22,7 @@
 #import <OakFilterList/FileChooser.h>
 #import <OakSystem/application.h>
 #import <Find/Find.h>
-#import <CrashReporter/utility.h>
+#import <crash/info.h>
 #import <file/path_info.h>
 #import <io/entries.h>
 #import <scm/scm.h>
