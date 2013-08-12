@@ -1177,6 +1177,7 @@ doScroll:
 
 - (void)performBundleItem:(bundles::item_ptr)item
 {
+	crash_reporter_info_t info(text::format("%s %s", sel_getName(_cmd), item->full_name().c_str()));
 	// D(DBF_OakTextView_BundleItems, bug("%s\n", anItem->full_name().c_str()););
 	AUTO_REFRESH;
 	switch(item->kind())
