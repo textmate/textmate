@@ -29,6 +29,10 @@ namespace be
 
 		std::vector<entry_ptr> entries () const
 		{
+			std::vector<entry_ptr> res;
+			if(_path == NULL_STR)
+				return res;
+
 			std::multimap<std::string, entry_ptr, text::less_t> directories, files;
 			citerate(entry, path::entries(_path))
 			{
@@ -40,7 +44,6 @@ namespace be
 					files.insert(std::make_pair(displayName, entry_ptr(new file_entry_t(displayName, path))));
 			}
 
-			std::vector<entry_ptr> res;
 			std::transform(directories.begin(), directories.end(), back_inserter(res), [](std::pair<std::string, entry_ptr> const& p){ return p.second; });
 			std::transform(files.begin(), files.end(), back_inserter(res), [](std::pair<std::string, entry_ptr> const& p){ return p.second; });
 			return res;
