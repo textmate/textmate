@@ -189,7 +189,7 @@ namespace plist
 		if(it == _cache.end())
 		{
 			D(DBF_Plist_Cache, bug("no entry for ‘%s’\n", path.c_str()););
-			return dirty;
+			return path::is_absolute(path) && path != "/" ? reload(path::parent(path), recursive) : dirty;
 		}
 
 		struct stat buf;

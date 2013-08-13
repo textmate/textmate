@@ -463,15 +463,11 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 	iterate(pair, changes)
 	{
 		auto item = pair->first;
-		bool rescanParentFolder = item->kind() == bundles::kItemTypeBundle && (!item->local() || item->paths().empty());
 
 		item->set_plist(pair->second);
 		if(item->save())
 		{
-			std::string itemFolder = path::parent(item->paths().front());
-			[[BundlesManager sharedInstance] reloadPath:[NSString stringWithCxxString:itemFolder]];
-			if(rescanParentFolder)
-				[[BundlesManager sharedInstance] reloadPath:[NSString stringWithCxxString:path::parent(itemFolder)]];
+			[[BundlesManager sharedInstance] reloadPath:[NSString stringWithCxxString:item->paths().front()]];
 		}
 		else
 		{
