@@ -63,7 +63,7 @@ namespace find
 	{
 		dfa_node_t (char byte, std::vector<dfa_node_ptr> const& children) : children(children), byte(byte) { }
 
-		~dfa_node_t ()
+		void breadth_first_dispose ()
 		{
 			std::vector<std::vector<dfa_node_ptr>*> allChildren(1, &children);
 			std::set<dfa_node_t*> seen{this};
@@ -86,7 +86,6 @@ namespace find
 				}
 			}
 
-			// Dispose nodes bottom-up to avoid blowing the stack
 			riterate(it, allChildren)
 				(*it)->clear();
 		}
@@ -217,6 +216,13 @@ namespace find
 			}
 
 			current_node = &children;
+		}
+
+		~regular_find_t ()
+		{
+			// Ensure non-recursive dispose of nodes to avoid blowing the stack
+			for(dfa_node_ptr node : children)
+				node->breadth_first_dispose();
 		}
 
 		std::pair<ssize_t, ssize_t> match (char const* buf, ssize_t len, std::map<std::string, std::string>* captures)
