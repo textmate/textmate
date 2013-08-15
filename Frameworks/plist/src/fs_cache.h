@@ -33,11 +33,11 @@ namespace plist
 
 	private:
 		static int32_t const kPropertyCacheFormatVersion;
-		enum class entry_type_t { file, directory, link, missing };
+		enum class entry_type_t { file, directory, link, missing, unknown };
 
 		struct entry_t
 		{
-			entry_t (std::string const& path, entry_type_t type, std::string const& link) : _path(path), _type(type), _link(link) { }
+			entry_t (std::string const& path) : _path(path) { }
 
 			bool is_link () const                                    { return _type == entry_type_t::link; }
 			bool is_file () const                                    { return _type == entry_type_t::file; }
@@ -59,11 +59,14 @@ namespace plist
 			void set_modified (time_t modified)                      { _modified = modified; }
 			void set_event_id (uint64_t eventId)                     { _event_id = eventId; }
 			void set_content (plist::dictionary_t const& plist)      { _content = plist; }
+			void set_entries (std::vector<std::string> const& array) { _entries = array; }
+			void set_glob_string (std::string const& globString)     { _glob_string = globString; }
+
 			void set_entries (std::vector<std::string> const& array, std::string const& globString) { _entries = array; _glob_string = globString; }
 
 		private:
 			std::string _path;
-			entry_type_t _type;
+			entry_type_t _type = entry_type_t::unknown;
 			std::string _link;
 			std::string _glob_string;
 			time_t _modified;

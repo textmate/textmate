@@ -37,43 +37,52 @@ namespace plist
 		auto plist = plist::load(path);
 		if(plist::get_key_path(plist, "version", version) && version == kPropertyCacheFormatVersion)
 		{
-			for(auto pair : plist)
+			for(auto const& pair : plist)
 			{
 				if(plist::dictionary_t const* node = boost::get<plist::dictionary_t>(&pair.second))
 				{
-					entry_type_t type = entry_type_t::directory;
-					plist::dictionary_t content;
-					std::string link = NULL_STR;
-					bool flag;
-
-					if(plist::get_key_path(*node, "content", content))
-						type = entry_type_t::file;
-					else if(plist::get_key_path(*node, "link", link))
-						type = entry_type_t::link;
-					else if(plist::get_key_path(*node, "missing", flag) && flag)
-						type = entry_type_t::missing;
-
-					entry_t entry(pair.first, type, link);
-					entry.set_content(content);
-					oak::date_t modified;
-					if(plist::get_key_path(*node, "modified", modified))
-						entry.set_modified(modified.time_value());
-
-					plist::array_t array;
-					std::string globString;
-					if(plist::get_key_path(*node, "entries", array) && plist::get_key_path(*node, "glob", globString))
+					entry_t entry(pair.first);
+					for(auto const& pair : *node)
 					{
-						std::vector<std::string> v;
-						for(auto path : array)
-							v.push_back(boost::get<std::string>(path));
-						entry.set_entries(v, globString);
+						if(pair.first == "content" && boost::get<plist::dictionary_t>(&pair.second))
+						{
+							entry.set_type(entry_type_t::file);
+							entry.set_content(boost::get<plist::dictionary_t>(pair.second));
+						}
+						else if(pair.first == "link" && boost::get<std::string>(&pair.second))
+						{
+							entry.set_type(entry_type_t::link);
+							entry.set_link(boost::get<std::string>(pair.second));
+						}
+						else if(pair.first == "missing" && boost::get<bool>(&pair.second) && boost::get<bool>(pair.second))
+						{
+							entry.set_type(entry_type_t::missing);
+						}
+						else if(pair.first == "entries" && boost::get<plist::array_t>(&pair.second))
+						{
+							std::vector<std::string> v;
+							for(auto path : boost::get<plist::array_t>(pair.second))
+								v.push_back(boost::get<std::string>(path));
+
+							entry.set_type(entry_type_t::directory);
+							entry.set_entries(v);
+						}
+						else if(pair.first == "glob" && boost::get<std::string>(&pair.second))
+						{
+							entry.set_glob_string(boost::get<std::string>(pair.second));
+						}
+						else if(pair.first == "modified" && boost::get<oak::date_t>(&pair.second))
+						{
+							entry.set_modified(boost::get<oak::date_t>(pair.second).time_value());
+						}
+						else if(pair.first == "eventId" && boost::get<uint64_t>(&pair.second))
+						{
+							entry.set_event_id(boost::get<uint64_t>(pair.second));
+						}
 					}
 
-					uint64_t eventId;
-					if(plist::get_key_path(*node, "eventId", eventId))
-						entry.set_event_id(eventId);
-
-					_cache.emplace(pair.first, entry);
+					if(entry.type() != entry_type_t::unknown)
+						_cache.emplace(pair.first, entry);
 				}
 			}
 		}
@@ -256,21 +265,28 @@ namespace plist
 		auto it = _cache.find(path);
 		if(it == _cache.end())
 		{
-			entry_type_t type = entry_type_t::missing;
+			entry_t entry(path);
+			entry.set_type(entry_type_t::missing);
 
 			struct stat buf;
 			D(DBF_Plist_Cache, bug("lstat ‘%s’\n", path.c_str()););
 			if(lstat(path.c_str(), &buf) == 0)
 			{
 				if(S_ISREG(buf.st_mode))
-					type = entry_type_t::file;
+				{
+					entry.set_type(entry_type_t::file);
+				}
 				else if(S_ISLNK(buf.st_mode))
-					type = entry_type_t::link;
+				{
+					entry.set_type(entry_type_t::link);
+					entry.set_link(read_link(path));
+				}
 				else if(S_ISDIR(buf.st_mode))
-					type = entry_type_t::directory;
+				{
+					entry.set_type(entry_type_t::directory);
+				}
 			}
 
-			entry_t entry(path, type, type == entry_type_t::link ? read_link(path) : NULL_STR);
 			if(entry.is_file())
 			{
 				D(DBF_Plist_Cache, bug("load ‘%s’\n", path.c_str()););
