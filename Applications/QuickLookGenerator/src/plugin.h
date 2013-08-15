@@ -7,6 +7,22 @@
 
 #define kTextMateQuickLookGeneratorPlugInFactoryID CFUUIDGetConstantUUIDWithBytes(NULL, 0xB2, 0x11, 0xF2, 0x7A, 0x80, 0x6A, 0x47, 0xD3, 0x95, 0x2C, 0xA8, 0x54, 0x5A, 0xA8, 0x91, 0x8E)
 
+#ifndef OAK_EXTERN_C_BEGIN
+#ifdef __cplusplus
+#define OAK_EXTERN_C_BEGIN extern "C" {
+#else
+#define OAK_EXTERN_C_BEGIN
+#endif
+#endif
+
+#ifndef OAK_EXTERN_C_END
+#ifdef __cplusplus
+#define OAK_EXTERN_C_END }
+#else
+#define OAK_EXTERN_C_END
+#endif
+#endif
+
 OAK_EXTERN_C_BEGIN
 
 typedef struct {
