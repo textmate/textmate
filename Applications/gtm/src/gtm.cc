@@ -23,6 +23,7 @@ void usage (FILE* io)
 		" -t, --trim                Show only first letter of each scope fragment.\n"
 		" -d, --delimiters <string> Surround scopes using argument. See example.\n"
 		" -l, --verbose             Be verbose (output timings).\n"
+		" -i, --load-index          Load bundle index (standard grammars available).\n"
 		" -h, --help                Show this information.\n"
 		" -v, --version             Print version information.\n"
 		"\n", getprogname(), AppVersion, AppRevision
@@ -97,6 +98,26 @@ void parse_stdin (std::string const& grammarSelector = "text.plain", bool verbos
 	exit(1);
 }
 
+static void load_bundle_index (bool verbose)
+{
+	oak::duration_t timer;
+
+	std::string const path = path::join(path::home(), "Library/Caches/com.macromates.TextMate/BundlesIndex.plist");
+
+	plist::cache_t cache;
+	cache.load(path);
+
+	std::vector<std::string> paths;
+	for(auto path : bundles::locations())
+		paths.push_back(path::join(path, "Bundles"));
+	
+	auto index = create_bundle_index(paths, cache);
+	bundles::set_index(index.first, index.second);
+
+	if(verbose)
+		fprintf(stderr, "loaded bundle index in %.2f seconds\n", timer.duration());
+}
+
 int main (int argc, char* const* argv)
 {
 	extern char* optarg;
@@ -107,16 +128,17 @@ int main (int argc, char* const* argv)
 		{ "trim",             no_argument,         0,      't'   },
 		{ "delimiters",       required_argument,   0,      'd'   },
 		{ "verbose",          no_argument,         0,      'l'   },
+		{ "load-index",       no_argument,         0,      'i'   },
 		{ "help",             no_argument,         0,      'h'   },
 		{ "version",          no_argument,         0,      'v'   },
 		{ 0,                  0,                   0,      0     }
 	};
 
-	bool verbose = false, trim = false;
+	bool verbose = false, trim = false, loadIndex = false;
 	std::string grammar = NULL_STR, delimiters = NULL_STR;
 
 	int ch;
-	while((ch = getopt_long(argc, argv, "g:td:lhv", longopts, NULL)) != -1)
+	while((ch = getopt_long(argc, argv, "g:td:lihv", longopts, NULL)) != -1)
 	{
 		switch(ch)
 		{
@@ -124,6 +146,7 @@ int main (int argc, char* const* argv)
 			case 't': trim = true;         break; // TODO
 			case 'd': delimiters = optarg; break; // TODO
 			case 'l': verbose = true;      break;
+			case 'i': loadIndex = true;    break;
 			case 'h': usage(stdout);       return 0;
 			case 'v': version();           return 0;
 			default:  usage(stderr);       return 1;
@@ -133,41 +156,48 @@ int main (int argc, char* const* argv)
 	argc -= optind;
 	argv += optind;
 
-	size_t grammars = 0;
-
-	test::bundle_index_t bundleIndex;
-	for(int i = 0; i < argc; ++i)
+	if(loadIndex)
 	{
-		if(access(argv[i], R_OK) != 0)
-		{
-			fprintf(stderr, "%s: error reading grammar ‘%s’\n", getprogname(), argv[i]);
-			exit(1);
-		}
-
-		std::string tmp;
-		plist::dictionary_t plist = plist::load(argv[i]);
-		if(!plist::get_key_path(plist, "scopeName", tmp))
-		{
-			fprintf(stderr, "%s: error parsing grammar ‘%s’\n", getprogname(), argv[i]);
-			exit(1);
-		}
-
-		if(!bundleIndex.add(bundles::kItemTypeGrammar, plist))
-		{
-			fprintf(stderr, "%s: error parsing grammar ‘%s’\n", getprogname(), argv[i]);
-			exit(1);
-		}
-
-		if(grammar == NULL_STR)
-			grammar = tmp;
-
-		++grammars;
+		load_bundle_index(verbose);
 	}
-
-	if(grammars == 0 || !bundleIndex.commit())
+	else
 	{
-		fprintf(stderr, "%s: no grammars loaded\n", getprogname());
-		exit(1);
+		size_t grammars = 0;
+
+		test::bundle_index_t bundleIndex;
+		for(int i = 0; i < argc; ++i)
+		{
+			if(access(argv[i], R_OK) != 0)
+			{
+				fprintf(stderr, "%s: error reading grammar ‘%s’\n", getprogname(), argv[i]);
+				exit(1);
+			}
+
+			std::string tmp;
+			plist::dictionary_t plist = plist::load(argv[i]);
+			if(!plist::get_key_path(plist, "scopeName", tmp))
+			{
+				fprintf(stderr, "%s: error parsing grammar ‘%s’\n", getprogname(), argv[i]);
+				exit(1);
+			}
+
+			if(!bundleIndex.add(bundles::kItemTypeGrammar, plist))
+			{
+				fprintf(stderr, "%s: error parsing grammar ‘%s’\n", getprogname(), argv[i]);
+				exit(1);
+			}
+
+			if(grammar == NULL_STR)
+				grammar = tmp;
+
+			++grammars;
+		}
+
+		if(grammars == 0 || !bundleIndex.commit())
+		{
+			fprintf(stderr, "%s: no grammars loaded\n", getprogname());
+			exit(1);
+		}
 	}
 
 	parse_stdin(grammar, verbose);
