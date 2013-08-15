@@ -8,7 +8,7 @@ namespace plist
 {
 	struct PUBLIC cache_t
 	{
-		void load (std::string const& path, plist::dictionary_t (*prune_dictionary)(plist::dictionary_t const&));
+		void load (std::string const& path, plist::dictionary_t (*prune_dictionary)(plist::dictionary_t const&) = NULL);
 		void save (std::string const& path) const;
 
 		bool dirty () const        { return _dirty; }

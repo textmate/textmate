@@ -15,8 +15,6 @@
 
 OAK_EXTERN_C_BEGIN
 
-static plist::dictionary_t prune_dictionary (plist::dictionary_t const& plist) { return plist; }
-
 static void initialize (CFBundleRef generatorBundle)
 {
 	static dispatch_once_t onceToken;
@@ -35,7 +33,7 @@ static void initialize (CFBundleRef generatorBundle)
 			paths.push_back(path::join(path, "Bundles"));
 
 		plist::cache_t cache;
-		cache.load(path::join(path::home(), "Library/Caches/com.macromates.TextMate/BundlesIndex.plist"), &prune_dictionary);
+		cache.load(path::join(path::home(), "Library/Caches/com.macromates.TextMate/BundlesIndex.plist"));
 
 		auto index = create_bundle_index(paths, cache);
 		bundles::set_index(index.first, index.second);
