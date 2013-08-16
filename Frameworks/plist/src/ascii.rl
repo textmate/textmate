@@ -103,6 +103,26 @@ static bool parse_string (char const*& p, char const* pe, plist::any_t& res)
 	return matched || backtrack(p, bt, res);
 }
 
+static bool parse_date (char const*& p, char const* pe, plist::any_t& res)
+{
+	char const* bt = p;
+	if(!parse_char(p, pe, '@'))
+		return backtrack(p, bt, res);
+
+	size_t bytes = pe - p;
+	if(bytes >= 25)
+	{
+		oak::date_t date(std::string(p, p + 25));
+		if(date)
+		{
+			res = date;
+			p += 25;
+			return true;
+		}
+	}
+	return backtrack(p, bt, res);
+}
+
 static bool parse_element (char const*& p, char const* pe, plist::any_t& res);
 
 static bool parse_array (char const*& p, char const* pe, plist::any_t& res)
@@ -149,7 +169,7 @@ static bool parse_dict (char const*& p, char const* pe, plist::any_t& res)
 
 static bool parse_element (char const*& p, char const* pe, plist::any_t& res)
 {
-	return parse_string(p, pe, res) || parse_int(p, pe, res) || parse_bool(p, pe, res) || parse_dict(p, pe, res) || parse_array(p, pe, res);
+	return parse_string(p, pe, res) || parse_int(p, pe, res) || parse_bool(p, pe, res) || parse_date(p, pe, res) || parse_dict(p, pe, res) || parse_array(p, pe, res);
 }
 
 namespace plist
