@@ -19,7 +19,7 @@ static std::string fixtures_path ()
 	return path;
 }
 
-__attribute__((constructor)) static void setup_fixtures ()
+void setup_fixtures ()
 {
 	oak::application_t::set_name("TextMate");
 	if(!web::setup_server(WEB_SERVER_PORT))

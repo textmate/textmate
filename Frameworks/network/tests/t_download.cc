@@ -5,7 +5,7 @@
 
 #define WEB_SERVER_PORT 61706
 
-__attribute__((constructor)) static void setup_fixtures ()
+void setup_fixtures ()
 {
 	if(!web::setup_server(WEB_SERVER_PORT))
 	{

@@ -4,7 +4,7 @@
 #include <file/path_info.h>
 #include <command/runner.h>
 
-__attribute__((constructor)) static void setup_fixtures ()
+void setup_fixtures ()
 {
 	static struct proxy_t : document::ui_proxy_t
 	{

@@ -3,7 +3,7 @@
 
 static bundles::item_ptr BeginWhileTestGrammarItem;
 
-__attribute__((constructor)) static void setup_fixtures ()
+void setup_fixtures ()
 {
 	static std::string TestLanguageGrammar =
 		"{ scopeName = 'mdown';"

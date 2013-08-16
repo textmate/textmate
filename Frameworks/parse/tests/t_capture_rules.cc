@@ -3,7 +3,7 @@
 
 static bundles::item_ptr CaptureTestGrammarItem;
 
-__attribute__((constructor)) static void setup_fixtures ()
+void setup_fixtures ()
 {
 	static std::string CaptureTestLanguageGrammar =
 		"{ name           = 'Test';"

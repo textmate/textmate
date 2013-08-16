@@ -5,7 +5,7 @@
 
 static bundles::item_ptr TestGrammarItem;
 
-__attribute__((constructor)) static void setup_fixtures ()
+void setup_fixtures ()
 {
 	static std::string TestLanguageGrammar =
 		"{	fileTypes      = ( txt );\n"

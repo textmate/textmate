@@ -2,7 +2,7 @@
 #include <test/bundle_index.h>
 #include <test/jail.h>
 
-__attribute__((constructor)) static void setup_fixtures ()
+void setup_fixtures ()
 {
 	static std::string BaseEnvironment =
 		"{	name     = 'Base Environment';"

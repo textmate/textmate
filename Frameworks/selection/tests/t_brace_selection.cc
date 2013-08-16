@@ -2,7 +2,7 @@
 #include <selection/selection.h>
 #include <test/bundle_index.h>
 
-__attribute__((constructor)) static void setup_fixtures ()
+void setup_fixtures ()
 {
 	static std::string HighlightPairs =
 		"{	name     = 'Highlight Pairs';"

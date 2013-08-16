@@ -4,7 +4,7 @@
 static bundles::item_ptr AnchorTestGrammarItem;
 static bundles::item_ptr AnchorInCapturesTestGrammarItem;
 
-__attribute__((constructor)) static void setup_fixtures ()
+void setup_fixtures ()
 {
 	static std::string AnchorTestLanguageGrammar =
 		"{ name           = 'Test';"
