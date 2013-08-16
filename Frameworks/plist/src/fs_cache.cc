@@ -23,16 +23,12 @@ static std::string read_link (std::string const& path)
 	return NULL_STR;
 }
 
-static plist::dictionary_t dictionary_identity_function (plist::dictionary_t const& plist) { return plist; }
-
 namespace plist
 {
 	int32_t const cache_t::kPropertyCacheFormatVersion = 2;
 
-	void cache_t::load (std::string const& path, plist::dictionary_t (*prune_dictionary)(plist::dictionary_t const&))
+	void cache_t::load (std::string const& path)
 	{
-		_prune_dictionary = prune_dictionary ?: dictionary_identity_function;
-
 		int32_t version;
 		auto plist = plist::load(path);
 		if(plist::get_key_path(plist, "version", version) && version == kPropertyCacheFormatVersion)
@@ -290,7 +286,8 @@ namespace plist
 			if(entry.is_file())
 			{
 				D(DBF_Plist_Cache, bug("load ‘%s’\n", path.c_str()););
-				entry.set_content(_prune_dictionary(plist::load(path)));
+				auto const content = plist::load(path);
+				entry.set_content(_prune_dictionary ? _prune_dictionary(content) : content);
 				entry.set_modified(buf.st_mtimespec.tv_sec);
 			}
 			else if(entry.is_directory())

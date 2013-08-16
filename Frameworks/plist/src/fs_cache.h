@@ -8,7 +8,7 @@ namespace plist
 {
 	struct PUBLIC cache_t
 	{
-		void load (std::string const& path, plist::dictionary_t (*prune_dictionary)(plist::dictionary_t const&) = NULL);
+		void load (std::string const& path);
 		void save (std::string const& path) const;
 
 		bool dirty () const        { return _dirty; }
@@ -30,6 +30,9 @@ namespace plist
 			*out++ = path;
 			return copy_links(_cache.find(path), out);
 		}
+
+		void set_content_filter (plist::dictionary_t (*f)(plist::dictionary_t const&)) { _prune_dictionary = f; }
+		plist::dictionary_t (*content_filter () const)(plist::dictionary_t const&)     { return _prune_dictionary; }
 
 	private:
 		static int32_t const kPropertyCacheFormatVersion;
@@ -75,7 +78,7 @@ namespace plist
 			std::vector<std::string> _entries;
 		};
 
-		plist::dictionary_t (*_prune_dictionary)(plist::dictionary_t const&);
+		plist::dictionary_t (*_prune_dictionary)(plist::dictionary_t const&) = nullptr;
 		std::map<std::string, entry_t> _cache;
 		bool _dirty = false;
 

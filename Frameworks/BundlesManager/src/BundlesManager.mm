@@ -480,7 +480,8 @@ namespace
 	for(auto path : bundles::locations())
 		bundlesPaths.push_back(path::join(path, "Bundles"));
 	bundlesIndexPath = path::join(path::home(), "Library/Caches/com.macromates.TextMate/BundlesIndex.plist");
-	cache.load(bundlesIndexPath, &prune_dictionary);
+	cache.set_content_filter(&prune_dictionary);
+	cache.load(bundlesIndexPath);
 	_needsCreateBundlesIndex = YES;
 	[self createBundlesIndex:self];
 }
