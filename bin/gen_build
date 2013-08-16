@@ -171,14 +171,18 @@ def flags_for_target(target)
   res
 end
 
-def compiler_for(source)
-  COMPILER_INFO[source[/\b[a-z]+$/]][:rule]
+def source_type(src)
+  src[/\b[a-z]+$/]
+end
+
+def compiler_for(src)
+  COMPILER_INFO[source_type(src)][:rule]
 end
 
 def pch_for(src, target)
-  srcExt = src[/\b[a-z]+$/]
+  srcExt = source_type(src)
   target['PRELUDE'].each do |pch|
-    if srcExt == pch[/\b[a-z]+$/]
+    if srcExt == source_type(pch)
       res = build_path(pch)
       res << "-no-arc" if srcExt == 'm'  && target['OBJC_FLAGS'] =~ /-fno-objc-arc/
       res << "-no-arc" if srcExt == 'mm' && target['OBJCXX_FLAGS'] =~ /-fno-objc-arc/
@@ -714,7 +718,7 @@ open("#{builddir}/build.ninja", "w") do |io|
 
   TARGETS.root['PRELUDE'].each do |src|
     type = { 'c' => '-x c-header', 'm' => '-x objective-c-header', 'cc' => '-x c++-header', 'mm' => '-x objective-c++-header' }
-    ext = src[/\b[a-z]+$/]
+    ext = source_type(src)
     cc = COMPILER_INFO[ext][:compiler]
 
     io << "build #{pch_for(src, TARGETS.root)}.gch: #{compiler_for(src)} #{src} | #{cc}\n"
