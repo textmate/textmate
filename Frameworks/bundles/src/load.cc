@@ -38,16 +38,16 @@ std::pair<std::vector<bundles::item_ptr>, std::map< oak::uuid_t, std::vector<oak
 	std::set<oak::uuid_t> loadedItems;
 
 	bool local = true;
-	for(auto bundlesPath : bundlesPaths)
+	for(auto const& bundlesPath : bundlesPaths)
 	{
-		for(auto bundlePath : cache.entries(bundlesPath, "*.tm[Bb]undle"))
+		for(auto const& bundlePath : cache.entries(bundlesPath, "*.tm[Bb]undle"))
 		{
 			bundles::item_ptr bundle;
 			std::set<oak::uuid_t> hiddenItems;
 			bool skipEclipsedBundle = false;
 
-			auto entries = cache.entries(bundlePath, "{info.plist,Commands,DragCommands,Macros,Preferences,Proxies,Snippets,Syntaxes,Themes}");
-			for(auto infoPlistPath : entries)
+			auto const entries = cache.entries(bundlePath, "{info.plist,Commands,DragCommands,Macros,Preferences,Proxies,Snippets,Syntaxes,Themes}");
+			for(auto const& infoPlistPath : entries)
 			{
 				if(path::name(infoPlistPath) != "info.plist")
 					continue;
@@ -106,7 +106,7 @@ std::pair<std::vector<bundles::item_ptr>, std::map< oak::uuid_t, std::vector<oak
 
 				plist::dictionary_t subMenus;
 				plist::get_key_path(plist, "mainMenu.submenus", subMenus);
-				for(auto submenuIter : subMenus)
+				for(auto const& submenuIter : subMenus)
 				{
 					std::string name;
 					plist::array_t uuids;
@@ -125,7 +125,7 @@ std::pair<std::vector<bundles::item_ptr>, std::map< oak::uuid_t, std::vector<oak
 
 				plist::array_t uuids;
 				plist::get_key_path(plist, "mainMenu.excludedItems", uuids);
-				for(auto uuid : uuids)
+				for(auto const& uuid : uuids)
 				{
 					std::string const* str = boost::get<std::string>(&uuid);
 					if(str && oak::uuid_t::is_valid(*str))
