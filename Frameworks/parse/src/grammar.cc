@@ -237,6 +237,8 @@ namespace parse
 
 	grammar_ptr parse_grammar (bundles::item_ptr const& grammarItem)
 	{
+		ASSERT(grammarItem);
+
 		static std::recursive_mutex Mutex;
 		std::lock_guard<std::recursive_mutex> lock(Mutex);
 
