@@ -3,3 +3,5 @@ build.ninja
 cache
 Applications/TextMate/resources/DefaultBundles.tbz
 Frameworks/license/src/revoked_serials.cc
+*.capnp.c++
+*.capnp.h
