@@ -231,12 +231,8 @@ namespace parse
 
 	static size_t collect_children (rule_ptr const& base, char const* first, char const* last, size_t anchor, size_t i, bool firstLine, std::vector<rule_ptr> const& children, std::set<ranked_match_t>& res, std::map<size_t, regexp::match_t>& match_cache, std::set<size_t>& unique, size_t rank = 0);
 
-	static size_t collect_rule (rule_ptr const& base, char const* first, char const* last, size_t anchor, size_t i, bool firstLine, rule_ptr rule, std::set<ranked_match_t>& res, std::map<size_t, regexp::match_t>& match_cache, std::set<size_t>& unique, size_t rank)
+	static rule_ptr resolve_include (rule_ptr const& base, rule_ptr rule, std::set<size_t>& unique)
 	{
-		if(unique.find(rule->rule_id) != unique.end())
-			return rank;
-
-		unique.insert(rule->rule_id);
 		while(rule && rule->include_string != NULL_STR)
 		{
 			std::string const& name = rule->include_string;
@@ -258,6 +254,16 @@ namespace parse
 				fprintf(stderr, "failed to resolve %s\n", name.c_str());
 			}
 		}
+		return rule;
+	}
+
+	static size_t collect_rule (rule_ptr const& base, char const* first, char const* last, size_t anchor, size_t i, bool firstLine, rule_ptr rule, std::set<ranked_match_t>& res, std::map<size_t, regexp::match_t>& match_cache, std::set<size_t>& unique, size_t rank)
+	{
+		if(unique.find(rule->rule_id) != unique.end())
+			return rank;
+
+		unique.insert(rule->rule_id);
+		rule = resolve_include(base, rule, unique);
 
 		if(!rule)
 			return rank;
