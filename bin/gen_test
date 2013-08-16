@@ -3,7 +3,7 @@ require 'pathname'
 require 'erb'
 
 user_code = ""
-tests, benchmarks = [ ], [ ]
+setup, tests, benchmarks = [ ], [ ], [ ]
 
 ARGV.each do |file|
   if p = Pathname.new(file)
@@ -18,8 +18,9 @@ ARGV.each do |file|
         body << "#line #{lineno} \"#{p.realpath}\"\n"
         body << line
         case line
-          when /^\s*void (test_\w+) \(\)/      then tests      << "#{ns}::#$1"
-          when /^\s*void (benchmark_\w+) \(\)/ then benchmarks << "#{ns}::#$1"
+          when /^\s*void (setup(?:_\w+)?) \(\)/ then setup      << "#{ns}::#$1"
+          when /^\s*void (test_\w+) \(\)/       then tests      << "#{ns}::#$1"
+          when /^\s*void (benchmark_\w+) \(\)/  then benchmarks << "#{ns}::#$1"
         end
       end
       lineno += 1
@@ -32,7 +33,7 @@ end
 STDOUT << ERB.new(DATA.read, 0, '-<>').result(binding)
 
 __END__
-#line 36 "<%= $PROGRAM_NAME %>"
+#line 37 "<%= $PROGRAM_NAME %>"
 static std::string oak_format (char const* format, ...) __attribute__ ((format (printf, 1, 2)));
 static std::string oak_format (char const* format, ...)
 {
@@ -123,7 +124,7 @@ std::string oak_format_bad_relation (char const* lhs, char const* op, char const
 #define OAK_MASSERT_NE(msg, lhs, rhs) if(!((lhs) != (rhs))) oak_assertion_error(msg, __FILE__, __LINE__)
 
 <%= user_code %>
-#line 127 "<%= $PROGRAM_NAME %>"
+#line 128 "<%= $PROGRAM_NAME %>"
 
 static double const AppVersion = 1.0;
 
@@ -180,6 +181,8 @@ int main (int argc, char const* argv[])
       default:  write_usage(stderr);           return 1;
     }
   }
+
+  <%= setup.map { |fun| "#{fun}();" }.join("\n  ") %>
 
   struct function_t
   {
