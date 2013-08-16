@@ -9,7 +9,9 @@ namespace plist
 	struct PUBLIC cache_t
 	{
 		void load (std::string const& path);
+		void load_capnp (std::string const& path);
 		void save (std::string const& path) const;
+		void save_capnp (std::string const& path) const;
 
 		bool dirty () const        { return _dirty; }
 		void set_dirty (bool flag) { _dirty = flag; }

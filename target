@@ -25,6 +25,9 @@ LN_FLAGS += -Wl,-dead_strip
 LN_FLAGS += -Wl,-dead_strip_dylibs
 LN_FLAGS += -rpath @executable_path/../Frameworks
 
+CXX_FLAGS += -I/usr/local/include
+LN_FLAGS  += -L/usr/local/lib
+
 PRELUDE = Shared/PCH/prelude.*
 
 TARGETS  = vendor/target
