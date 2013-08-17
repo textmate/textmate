@@ -229,7 +229,7 @@ namespace parse
 			scope = res[stack.back().first] = stack.back().second;
 	}
 
-	static size_t collect_children (rule_ptr const& base, char const* first, char const* last, size_t anchor, size_t i, bool firstLine, std::vector<rule_ptr> const& children, std::set<ranked_match_t>& res, std::map<size_t, regexp::match_t>& match_cache, std::set<size_t>& unique, size_t rank = 0);
+	static void collect_children (rule_ptr const& base, std::vector<rule_ptr> const& children, std::set<size_t>& unique, std::vector<rule_ptr>& res);
 
 	static rule_ptr resolve_include (rule_ptr const& base, rule_ptr rule, std::set<size_t>& unique)
 	{
@@ -257,69 +257,48 @@ namespace parse
 		return rule;
 	}
 
-	static size_t collect_rule (rule_ptr const& base, char const* first, char const* last, size_t anchor, size_t i, bool firstLine, rule_ptr rule, std::set<ranked_match_t>& res, std::map<size_t, regexp::match_t>& match_cache, std::set<size_t>& unique, size_t rank)
+	static void collect_rule (rule_ptr const& base, rule_ptr rule, std::set<size_t>& unique, std::vector<rule_ptr>& res)
 	{
 		if(unique.find(rule->rule_id) != unique.end())
-			return rank;
+			return;
 
 		unique.insert(rule->rule_id);
 		rule = resolve_include(base, rule, unique);
 
 		if(!rule)
-			return rank;
+			return;
 
 		if(rule->match_pattern)
-		{
-			D(DBF_Parser, bug("rule id %zu, pattern %s\n", rule->rule_id, to_s(rule->match_pattern).c_str()););
-			std::map<size_t, regexp::match_t>::iterator it = match_cache.find(rule->rule_id);
-			if(it != match_cache.end())
-			{
-				if(it->second)
-					res.insert((ranked_match_t){ rule, it->second, ++rank });
-			}
-			else
-			{
-				regexp::match_t const& match = regexp::search(fix_anchor(rule->match_pattern, anchor, i, firstLine), first, last, first + i);
-				if(!pattern_is_anchored(to_s(rule->match_pattern)))
-					match_cache.insert(std::make_pair(rule->rule_id, match));
-				if(match)
-					res.insert((ranked_match_t){ rule, match, ++rank });
-			}
-		}
+			res.push_back(rule);
 		else if(!rule->children.empty())
-		{
-			rank = collect_children(base, first, last, anchor, i, firstLine, rule->children, res, match_cache, unique, rank);
-		}
-		return rank;
+			collect_children(base, rule->children, unique, res);
 	}
 
-	static size_t collect_children (rule_ptr const& base, char const* first, char const* last, size_t anchor, size_t i, bool firstLine, std::vector<rule_ptr> const& children, std::set<ranked_match_t>& res, std::map<size_t, regexp::match_t>& match_cache, std::set<size_t>& unique, size_t rank)
+	static void collect_children (rule_ptr const& base, std::vector<rule_ptr> const& children, std::set<size_t>& unique, std::vector<rule_ptr>& res)
 	{
-		iterate(it, children)
-			rank = collect_rule(base, first, last, anchor, i, firstLine, *it, res, match_cache, unique, rank);
-		return rank;
+		for(rule_ptr const& rule : children)
+			collect_rule(base, rule, unique, res);
 	}
 
-	static size_t collect_injections (rule_ptr const& base, char const* first, char const* last, stack_ptr const& stack, size_t i, bool firstLine, std::set<ranked_match_t>& res, std::map<size_t, regexp::match_t>& match_cache, std::set<size_t>& unique, size_t rank, scope::context_t const& scope)
+	static void collect_injections (rule_ptr const& base, stack_ptr const& stack, std::set<size_t>& unique, scope::context_t const& scope, std::vector<rule_ptr>& res)
 	{
 		for(stack_ptr node = stack; node; node = node->parent)
 		{
 			if(!node->rule->injections)
 				continue;
 
-			iterate(it, *node->rule->injections)
+			for(auto const& pair : *node->rule->injections)
 			{
-				if(scope::selector_t(it->first).does_match(scope))
-					rank = collect_rule(base, first, last, stack->anchor, i, firstLine, it->second, res, match_cache, unique, rank);
+				if(scope::selector_t(pair.first).does_match(scope))
+					collect_rule(base, pair.second, unique, res);
 			}
 		}
 
-		citerate(it, injected_grammars())
+		for(auto const& pair : injected_grammars())
 		{
-			if(it->first.does_match(scope))
-				rank = collect_children(base, first, last, stack->anchor, i, firstLine, it->second->children, res, match_cache, unique, rank);
+			if(pair.first.does_match(scope))
+				collect_children(base, pair.second->children, unique, res);
 		}
-		return rank;
 	}
 
 	static void collect_rules (rule_ptr const& base, char const* first, char const* last, size_t i, bool firstLine, stack_ptr const& stack, std::set<ranked_match_t>& res, std::map<size_t, regexp::match_t>& match_cache)
@@ -334,10 +313,34 @@ namespace parse
 		}
 
 		std::set<size_t> unique;
+		std::vector<rule_ptr> rules;
+		collect_injections(base, stack, unique, scope::context_t(stack->scope, ""), rules);
+		collect_children(base, stack->rule->children, unique, rules);
+		collect_injections(base, stack, unique, scope::context_t("", stack->scope), rules);
+
+		// ============================
+		// = Match rules against text =
+		// ============================
+
 		size_t rank = 0;
-		rank = collect_injections(base, first, last, stack, i, firstLine, res, match_cache, unique, rank, scope::context_t(stack->scope, ""));
-		rank = collect_children(base, first, last, stack->anchor, i, firstLine, stack->rule->children, res, match_cache, unique, rank);
-		rank = collect_injections(base, first, last, stack, i, firstLine, res, match_cache, unique, rank, scope::context_t("", stack->scope));
+		for(rule_ptr const& rule : rules)
+		{
+			D(DBF_Parser, bug("rule id %zu, pattern %s\n", rule->rule_id, to_s(rule->match_pattern).c_str()););
+			std::map<size_t, regexp::match_t>::iterator it = match_cache.find(rule->rule_id);
+			if(it != match_cache.end())
+			{
+				if(it->second)
+					res.insert((ranked_match_t){ rule, it->second, ++rank });
+			}
+			else
+			{
+				regexp::match_t const& match = regexp::search(fix_anchor(rule->match_pattern, stack->anchor, i, firstLine), first, last, first + i);
+				if(!pattern_is_anchored(to_s(rule->match_pattern)))
+					match_cache.insert(std::make_pair(rule->rule_id, match));
+				if(match)
+					res.insert((ranked_match_t){ rule, match, ++rank });
+			}
+		}
 	}
 
 	static bool has_cycle (size_t rule_id, size_t i, stack_ptr const& stack)
