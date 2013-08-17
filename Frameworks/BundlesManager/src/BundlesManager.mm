@@ -337,7 +337,7 @@ static double const kPollInterval = 3*60*60;
 	cache.cleanup(bundlesPaths);
 	if(cache.dirty())
 	{
-		cache.save(bundlesIndexPath);
+		cache.save_capnp(bundlesIndexPath);
 		cache.set_dirty(false);
 	}
 	_needsSaveBundlesIndex = NO;
@@ -479,9 +479,21 @@ namespace
 {
 	for(auto path : bundles::locations())
 		bundlesPaths.push_back(path::join(path, "Bundles"));
-	bundlesIndexPath = path::join(path::home(), "Library/Caches/com.macromates.TextMate/BundlesIndex.plist");
+	bundlesIndexPath = path::join(path::home(), "Library/Caches/com.macromates.TextMate/BundlesIndex.binary");
 	cache.set_content_filter(&prune_dictionary);
-	cache.load(bundlesIndexPath);
+
+	std::string const oldPath = path::join(path::home(), "Library/Caches/com.macromates.TextMate/BundlesIndex.plist");
+	if(access(oldPath.c_str(), R_OK) == 0)
+	{
+		cache.load(oldPath);
+		cache.save_capnp(bundlesIndexPath);
+		unlink(oldPath.c_str());
+	}
+	else
+	{
+		cache.load_capnp(bundlesIndexPath);
+	}
+
 	_needsCreateBundlesIndex = YES;
 	[self createBundlesIndex:self];
 }

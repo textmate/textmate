@@ -1,7 +1,7 @@
 SOURCES       = src/*.{cc,rl,capnp}
 TESTS         = tests/*.cc
 LINK         += text cf io
-LN_FLAGS     += /usr/local/lib/libcapnp.a
+LIBS         += capnp
 
 FRAMEWORKS    = CoreFoundation
 EXPORT        = src/*.h
