@@ -322,24 +322,37 @@ namespace parse
 		// = Match rules against text =
 		// ============================
 
-		size_t rank = 0;
-		for(rule_ptr const& rule : rules)
+		std::vector<std::pair<rule_ptr, size_t>> v;
+		for(size_t j = 0; j < rules.size(); ++j)
 		{
-			D(DBF_Parser, bug("rule id %zu, pattern %s\n", rule->rule_id, to_s(rule->match_pattern).c_str()););
-			std::map<size_t, regexp::match_t>::iterator it = match_cache.find(rule->rule_id);
+			std::map<size_t, regexp::match_t>::iterator it = match_cache.find(rules[j]->rule_id);
 			if(it != match_cache.end())
 			{
 				if(it->second)
-					res.insert((ranked_match_t){ rule, it->second, ++rank });
+					res.insert((ranked_match_t){ rules[j], it->second, j+1 });
 			}
 			else
 			{
-				regexp::match_t const& match = regexp::search(fix_anchor(rule->match_pattern, stack->anchor, i, firstLine), first, last, first + i);
-				if(!pattern_is_anchored(to_s(rule->match_pattern)))
-					match_cache.insert(std::make_pair(rule->rule_id, match));
-				if(match)
-					res.insert((ranked_match_t){ rule, match, ++rank });
+				v.emplace_back(rules[j], j+1);
 			}
+		}
+
+		__block std::vector<regexp::match_t> matches(v.size());
+		size_t anchor = stack->anchor;
+		size_t const stride = 5;
+		dispatch_apply(matches.size() / stride, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t n){
+			for(size_t j = n*stride; j < (n+1)*stride; ++j)
+				matches[j] = regexp::search(fix_anchor(v[j].first->match_pattern, anchor, i, firstLine), first, last, first + i);
+		});
+		for(size_t j = matches.size() - (matches.size() % stride); j < matches.size(); ++j)
+			matches[j] = regexp::search(fix_anchor(v[j].first->match_pattern, anchor, i, firstLine), first, last, first + i);
+
+		for(size_t j = 0; j < matches.size(); ++j)
+		{
+			if(!pattern_is_anchored(to_s(v[j].first->match_pattern)))
+				match_cache.insert(std::make_pair(v[j].first->rule_id, matches[j]));
+			if(matches[j])
+				res.insert((ranked_match_t){ v[j].first, matches[j], v[j].second });
 		}
 	}
 
