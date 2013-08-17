@@ -229,25 +229,19 @@ namespace parse
 			scope = res[stack.back().first] = stack.back().second;
 	}
 
-	static void collect_children (rule_ptr const& base, std::vector<rule_ptr> const& children, std::set<size_t>& unique, std::vector<rule_ptr>& res);
+	static void collect_children (rule_ptr const& base, std::vector<rule_ptr> const& children, std::vector<rule_ptr>& res);
 
-	static rule_ptr resolve_include (rule_ptr const& base, rule_ptr rule, std::set<size_t>& unique)
+	static rule_ptr resolve_include (rule_ptr const& base, rule_ptr rule)
 	{
 		while(rule && rule->include_string != NULL_STR)
 		{
 			std::string const& name = rule->include_string;
 			if(rule = rule->include.lock())
 			{
-				if(unique.find(rule->rule_id) != unique.end())
-					break;
-				unique.insert(rule->rule_id);
 			}
 			else if(name == "$base")
 			{
 				rule = base;
-				if(unique.find(rule->rule_id) != unique.end())
-					break;
-				unique.insert(rule->rule_id);
 			}
 			else
 			{
@@ -257,30 +251,30 @@ namespace parse
 		return rule;
 	}
 
-	static void collect_rule (rule_ptr const& base, rule_ptr rule, std::set<size_t>& unique, std::vector<rule_ptr>& res)
+	static void collect_rule (rule_ptr const& base, rule_ptr rule, std::vector<rule_ptr>& res)
 	{
-		if(unique.find(rule->rule_id) != unique.end())
-			return;
-
-		unique.insert(rule->rule_id);
-		rule = resolve_include(base, rule, unique);
-
-		if(!rule)
+		rule = resolve_include(base, rule);
+		if(!rule || rule->included)
 			return;
 
 		if(rule->match_pattern)
+		{
+			rule->included = true;
 			res.push_back(rule);
+		}
 		else if(!rule->children.empty())
-			collect_children(base, rule->children, unique, res);
+		{
+			collect_children(base, rule->children, res);
+		}
 	}
 
-	static void collect_children (rule_ptr const& base, std::vector<rule_ptr> const& children, std::set<size_t>& unique, std::vector<rule_ptr>& res)
+	static void collect_children (rule_ptr const& base, std::vector<rule_ptr> const& children, std::vector<rule_ptr>& res)
 	{
 		for(rule_ptr const& rule : children)
-			collect_rule(base, rule, unique, res);
+			collect_rule(base, rule, res);
 	}
 
-	static void collect_injections (rule_ptr const& base, stack_ptr const& stack, std::set<size_t>& unique, scope::context_t const& scope, std::vector<rule_ptr>& res)
+	static void collect_injections (rule_ptr const& base, stack_ptr const& stack, scope::context_t const& scope, std::vector<rule_ptr>& res)
 	{
 		for(stack_ptr node = stack; node; node = node->parent)
 		{
@@ -290,14 +284,14 @@ namespace parse
 			for(auto const& pair : *node->rule->injections)
 			{
 				if(scope::selector_t(pair.first).does_match(scope))
-					collect_rule(base, pair.second, unique, res);
+					collect_rule(base, pair.second, res);
 			}
 		}
 
 		for(auto const& pair : injected_grammars())
 		{
 			if(pair.first.does_match(scope))
-				collect_children(base, pair.second->children, unique, res);
+				collect_children(base, pair.second->children, res);
 		}
 	}
 
@@ -312,11 +306,10 @@ namespace parse
 				res.insert((ranked_match_t){ stack->rule, match, stack->apply_end_last ? SIZE_T_MAX : 0 });
 		}
 
-		std::set<size_t> unique;
 		std::vector<rule_ptr> rules;
-		collect_injections(base, stack, unique, scope::context_t(stack->scope, ""), rules);
-		collect_children(base, stack->rule->children, unique, rules);
-		collect_injections(base, stack, unique, scope::context_t("", stack->scope), rules);
+		collect_injections(base, stack, scope::context_t(stack->scope, ""), rules);
+		collect_children(base, stack->rule->children, rules);
+		collect_injections(base, stack, scope::context_t("", stack->scope), rules);
 
 		// ============================
 		// = Match rules against text =
@@ -325,6 +318,8 @@ namespace parse
 		std::vector<std::pair<rule_ptr, size_t>> v;
 		for(size_t j = 0; j < rules.size(); ++j)
 		{
+			rules[j]->included = false;
+
 			std::map<size_t, regexp::match_t>::iterator it = match_cache.find(rules[j]->rule_id);
 			if(it != match_cache.end())
 			{
