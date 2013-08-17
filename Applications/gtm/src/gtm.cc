@@ -1,5 +1,6 @@
 #include <parse/grammar.h>
 #include <parse/parse.h>
+#include <text/parse.h>
 #include <test/bundle_index.h>
 #include <oak/duration.h>
 #include <oak/oak.h>
@@ -118,6 +119,36 @@ static void load_bundle_index (bool verbose)
 		fprintf(stderr, "loaded bundle index in %.2f seconds\n", timer.duration());
 }
 
+static void parse_buffer (std::string const& grammarSelector, std::string const& buf, bool verbose)
+{
+	for(auto item : bundles::query(bundles::kFieldGrammarScope, grammarSelector, scope::wildcard, bundles::kItemTypeGrammar))
+	{
+		if(parse::grammar_ptr grammar = parse::parse_grammar(item))
+		{
+			parse::stack_ptr stack = grammar->seed();
+			scope::scope_t lastScope(grammarSelector);
+
+			oak::duration_t timer;
+			size_t bytes = 0;
+
+			for(auto const& pair : text::to_lines(buf.data(), buf.data() + buf.size()))
+			{
+				std::map<size_t, scope::scope_t> scopes;
+				stack = parse::parse(pair.first, pair.second, stack, scopes, bytes == 0);
+				bytes += pair.second - pair.first;
+			}
+
+			if(verbose)
+				fprintf(stderr, "parsed %zu bytes in %.1fs (%.0f bytes/s)\n", bytes, timer.duration(), bytes / timer.duration());
+
+			return;
+		}
+	}
+
+	fprintf(stderr, "%s: unable to find grammar for selector ‘%s’\n", getprogname(), grammarSelector.c_str());
+	exit(1);
+}
+
 int main (int argc, char* const* argv)
 {
 	extern char* optarg;
@@ -158,6 +189,7 @@ int main (int argc, char* const* argv)
 
 	if(loadIndex)
 	{
+		// while(true)
 		load_bundle_index(verbose);
 	}
 	else
@@ -200,6 +232,15 @@ int main (int argc, char* const* argv)
 		}
 	}
 
-	parse_stdin(grammar, verbose);
+	std::string str;
+	char buf[4096];
+	while(size_t len = fread(buf, 1, sizeof(buf), stdin))
+		str.append(&buf[0], len);
+	fclose(stdin);
+
+	while(true)
+		parse_buffer(grammar, str, verbose);
+
+	// parse_stdin(grammar, verbose);
 	return 0;
 }
