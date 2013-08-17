@@ -166,6 +166,7 @@ namespace parse
 
 	struct ranked_match_t
 	{
+		ranked_match_t (rule_ptr const& rule, regexp::match_t const& match, size_t rank) : rule(rule), match(match), rank(rank) { }
 		rule_ptr rule;
 		regexp::match_t match;
 		size_t rank;
@@ -303,7 +304,7 @@ namespace parse
 		{
 			D(DBF_Parser, bug("end pattern: %s\n", to_s(stack->end_pattern).c_str()););
 			if(regexp::match_t const& match = regexp::search(fix_anchor(stack->end_pattern, stack->anchor, i, firstLine), first, last, first + i))
-				res.insert((ranked_match_t){ stack->rule, match, stack->apply_end_last ? SIZE_T_MAX : 0 });
+				res.emplace(stack->rule, match, stack->apply_end_last ? SIZE_T_MAX : 0);
 		}
 
 		std::vector<rule_ptr> rules;
@@ -324,7 +325,7 @@ namespace parse
 			if(it != match_cache.end())
 			{
 				if(it->second)
-					res.insert((ranked_match_t){ rules[j], it->second, j+1 });
+					res.emplace(rules[j], it->second, j+1);
 			}
 			else
 			{
@@ -347,7 +348,7 @@ namespace parse
 			if(!pattern_is_anchored(to_s(v[j].first->match_pattern)))
 				match_cache.insert(std::make_pair(v[j].first->rule_id, matches[j]));
 			if(matches[j])
-				res.insert((ranked_match_t){ v[j].first, matches[j], v[j].second });
+				res.emplace(v[j].first, matches[j], v[j].second);
 		}
 	}
 
