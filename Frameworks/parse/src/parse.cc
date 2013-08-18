@@ -269,38 +269,25 @@ namespace parse
 		// = Match rules against text =
 		// ============================
 
-		std::vector<std::pair<rule_ptr, size_t>> v;
-		for(size_t j = 0; j < rules.size(); ++j)
+		size_t rank = 0;
+		for(rule_ptr const& rule : rules)
 		{
-			rules[j]->included = false;
+			rule->included = false;
 
-			std::map<size_t, regexp::match_t>::iterator it = match_cache.find(rules[j]->rule_id);
+			auto it = match_cache.find(rule->rule_id);
 			if(it != match_cache.end())
 			{
 				if(it->second)
-					res.emplace(rules[j], it->second, j+1);
+					res.emplace(rule, it->second, ++rank);
 			}
 			else
 			{
-				v.emplace_back(rules[j], j+1);
+				auto match = regexp::search(rule->match_pattern, first, last, first + i, last, options);
+				if(!rule->match_pattern_is_anchored)
+					match_cache.emplace(rule->rule_id, match);
+				if(match)
+					res.emplace(rule, match, ++rank);
 			}
-		}
-
-		__block std::vector<regexp::match_t> matches(v.size());
-		size_t const stride = 5;
-		dispatch_apply(matches.size() / stride, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t n){
-			for(size_t j = n*stride; j < (n+1)*stride; ++j)
-				matches[j] = regexp::search(v[j].first->match_pattern, first, last, first + i, last, options);
-		});
-		for(size_t j = matches.size() - (matches.size() % stride); j < matches.size(); ++j)
-			matches[j] = regexp::search(v[j].first->match_pattern, first, last, first + i, last, options);
-
-		for(size_t j = 0; j < matches.size(); ++j)
-		{
-			if(!v[j].first->match_pattern_is_anchored)
-				match_cache.insert(std::make_pair(v[j].first->rule_id, matches[j]));
-			if(matches[j])
-				res.emplace(v[j].first, matches[j], v[j].second);
 		}
 	}
 
