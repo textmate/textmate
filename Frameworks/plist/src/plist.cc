@@ -367,6 +367,7 @@ namespace plist
 		return to;
 	}
 
+	template PUBLIC bool get (plist::any_t const& from);
 	template PUBLIC int32_t get (plist::any_t const& from);
 	template PUBLIC uint64_t get (plist::any_t const& from);
 	template PUBLIC std::string get (plist::any_t const& from);
