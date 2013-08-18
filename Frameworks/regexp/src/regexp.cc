@@ -111,9 +111,12 @@ namespace regexp
 	{
 		if(ptrn)
 		{
+			char const* gpos = (options & ONIG_OPTION_NOTGPOS) ? nullptr : (from ?: first);
+			options &= ~ONIG_OPTION_NOTGPOS;
+
 			struct helper_t { static void region_free (OnigRegion* r) { onig_region_free(r, 1); } };
 			regexp::region_ptr region(onig_region_new(), &helper_t::region_free);
-			if(ONIG_MISMATCH != onig_search(ptrn.get().get(), (OnigUChar const*)first, (OnigUChar const*)last, (OnigUChar const*)(from ?: first), (OnigUChar const*)(to ?: last), region.get(), options))
+			if(ONIG_MISMATCH != onig_search_gpos(ptrn.get().get(), (OnigUChar const*)first, (OnigUChar const*)last, (OnigUChar*)gpos, (OnigUChar const*)(from ?: first), (OnigUChar const*)(to ?: last), region.get(), options))
 				return match_t(region, ptrn.get(), first);
 		}
 		return match_t();

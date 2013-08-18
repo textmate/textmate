@@ -4,6 +4,8 @@
 #include <Onigmo/oniguruma.h>
 #include <oak/debug.h>
 
+#define ONIG_OPTION_NOTGPOS (ONIG_OPTION_MAXBIT << 1)
+
 namespace regexp
 {
 	typedef std::shared_ptr<regex_t> regex_ptr;
