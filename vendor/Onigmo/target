@@ -1,5 +1,6 @@
 SOURCES      = vendor/{enc/{ascii,euc_jp,iso8859_1,sjis,unicode,utf*},{reg*,st}}.c
 SOURCES     += src/*.c
+TESTS        = tests/t_*.cc
 EXPORT       = vendor/oniguruma.h
 
 FLAGS       += -Ivendor/Onigmo -Ivendor/Onigmo/vendor
