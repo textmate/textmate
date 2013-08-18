@@ -55,6 +55,7 @@ namespace parse
 		regexp::pattern_t match_pattern;
 		regexp::pattern_t while_pattern;
 		regexp::pattern_t end_pattern;
+		bool match_pattern_is_anchored = false;
 
 		// =================
 		// = Mutable State =

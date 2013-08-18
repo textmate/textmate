@@ -94,6 +94,18 @@ namespace parse
 		return false;
 	}
 
+	static bool pattern_is_anchored (std::string const& ptrn)
+	{
+		bool escape = false;
+		iterate(it, ptrn)
+		{
+			if(escape && *it == 'G')
+				return true;
+			escape = !escape && *it == '\\';
+		}
+		return false;
+	}
+
 	// =============
 	// = grammar_t =
 	// =============
@@ -198,6 +210,7 @@ namespace parse
 			if(rule->match_string != NULL_STR)
 			{
 				rule->match_pattern = regexp::pattern_t(rule->match_string);
+				rule->match_pattern_is_anchored = pattern_is_anchored(rule->match_string);
 				if(!rule->match_pattern)
 					fprintf(stderr, "bad begin/match pattern for %s\n", rule->scope_string.c_str());
 			}

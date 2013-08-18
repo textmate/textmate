@@ -44,64 +44,16 @@ namespace parse
 		return res;
 	}
 
-	static bool pattern_is_anchored (std::string const& ptrn)
+	static OnigOptionType anchor_options (bool isFirstLine, bool isGPos, char const* first, char const* last)
 	{
-		bool escape = false;
-		iterate(it, ptrn)
-		{
-			if(escape && strchr("AGz", *it))
-			{
-				D(DBF_Parser, bug("%s: %s\n", ptrn.c_str(), "YES"););
-				return true;
-			}
-			escape = !escape && *it == '\\';
-		}
-		D(DBF_Parser, bug("%s: %s\n", ptrn.c_str(), "NO"););
-		return false;
-	}
-	
-	static regexp::pattern_t fix_anchor (regexp::pattern_t const& ptrn, size_t anchor, size_t offset, bool firstLine)
-	{
-		if(!pattern_is_anchored(to_s(ptrn)))
-			return ptrn;
-
-		bool escape = false;
-		std::string newPatternString("");
-		citerate(it, to_s(ptrn))
-		{
-			if(escape)
-			{
-				if(*it == 'A' && !firstLine)
-				{
-					newPatternString += NULL_STR; // we need something that can never match
-				}
-				else if(*it == 'G' && anchor != offset)
-				{
-					newPatternString += NULL_STR; // we need something that can never match
-				}
-				else if(*it == 'z')
-				{
-					newPatternString += "$(?!\n)(?<!\n)";
-				}
-				else
-				{
-					newPatternString += '\\';
-					newPatternString += *it;
-				}
-				escape = false;
-			}
-			else if(*it == '\\')
-			{
-				escape = true;
-			}
-			else
-			{
-				newPatternString += *it;
-			}
-		}
-		ASSERT(!escape);
-		D(DBF_Parser, bug("%s → %s\n", to_s(ptrn).c_str(), newPatternString.c_str()););
-		return newPatternString;
+		OnigOptionType res = ONIG_OPTION_NONE;
+		if(!isFirstLine)
+			res |= ONIG_OPTION_NOTBOS;
+		if(!isGPos)
+			res |= ONIG_OPTION_NOTGPOS;
+		if(first != last && last[-1] == '\n')
+			res |= ONIG_OPTION_NOTEOS;
+		return res;
 	}
 
 	template <typename _OutputIter>
@@ -300,10 +252,11 @@ namespace parse
 	{
 		res.clear();
 
+		OnigOptionType const options = anchor_options(firstLine, stack->anchor == i, first, last);
 		if(stack->end_pattern)
 		{
 			D(DBF_Parser, bug("end pattern: %s\n", to_s(stack->end_pattern).c_str()););
-			if(regexp::match_t const& match = regexp::search(fix_anchor(stack->end_pattern, stack->anchor, i, firstLine), first, last, first + i))
+			if(regexp::match_t const& match = regexp::search(stack->end_pattern, first, last, first + i, last, options))
 				res.emplace(stack->rule, match, stack->apply_end_last ? SIZE_T_MAX : 0);
 		}
 
@@ -334,18 +287,17 @@ namespace parse
 		}
 
 		__block std::vector<regexp::match_t> matches(v.size());
-		size_t anchor = stack->anchor;
 		size_t const stride = 5;
 		dispatch_apply(matches.size() / stride, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t n){
 			for(size_t j = n*stride; j < (n+1)*stride; ++j)
-				matches[j] = regexp::search(fix_anchor(v[j].first->match_pattern, anchor, i, firstLine), first, last, first + i);
+				matches[j] = regexp::search(v[j].first->match_pattern, first, last, first + i, last, options);
 		});
 		for(size_t j = matches.size() - (matches.size() % stride); j < matches.size(); ++j)
-			matches[j] = regexp::search(fix_anchor(v[j].first->match_pattern, anchor, i, firstLine), first, last, first + i);
+			matches[j] = regexp::search(v[j].first->match_pattern, first, last, first + i, last, options);
 
 		for(size_t j = 0; j < matches.size(); ++j)
 		{
-			if(!pattern_is_anchored(to_s(v[j].first->match_pattern)))
+			if(!v[j].first->match_pattern_is_anchored)
 				match_cache.insert(std::make_pair(v[j].first->rule_id, matches[j]));
 			if(matches[j])
 				res.emplace(v[j].first, matches[j], v[j].second);
@@ -425,7 +377,7 @@ namespace parse
 			if(m.match.begin() < i)
 			{
 				regexp::pattern_t const& ptrn = m.rank == 0 || m.rank == SIZE_T_MAX ? stack->end_pattern : m.rule->match_pattern;
-				if(m.match = regexp::search(fix_anchor(ptrn, stack->anchor, i, firstLine), first, last, first + i))
+				if(m.match = regexp::search(ptrn, first, last, first + i, last, anchor_options(firstLine, stack->anchor == i, first, last)))
 					rules.insert(m);
 				continue;
 			}
@@ -502,7 +454,7 @@ namespace parse
 				}
 				scopes[m.match.end()] = scope;
 
-				if(m.match = regexp::search(fix_anchor(m.rule->match_pattern, stack->anchor, i, firstLine), first, last, first + i))
+				if(m.match = regexp::search(m.rule->match_pattern, first, last, first + i, last, anchor_options(firstLine, stack->anchor == i, first, last)))
 					rules.insert(m);
 
 				continue; // no context change, so skip finding rules for this context
