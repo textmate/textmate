@@ -182,31 +182,18 @@ namespace parse
 			scope = res[stack.back().first] = stack.back().second;
 	}
 
-	static void collect_children (rule_ptr const& base, std::vector<rule_ptr> const& children, std::vector<rule_ptr>& res);
+	static void collect_children (std::vector<rule_ptr> const& children, std::vector<rule_ptr>& res);
 
-	static rule_ptr resolve_include (rule_ptr const& base, rule_ptr rule)
+	static rule_ptr resolve_include (rule_ptr rule)
 	{
 		while(rule && rule->include_string != NULL_STR)
-		{
-			std::string const& name = rule->include_string;
-			if(rule = rule->include.lock())
-			{
-			}
-			else if(name == "$base")
-			{
-				rule = base;
-			}
-			else
-			{
-				fprintf(stderr, "failed to resolve %s\n", name.c_str());
-			}
-		}
+			rule = rule->include.lock();
 		return rule;
 	}
 
-	static void collect_rule (rule_ptr const& base, rule_ptr rule, std::vector<rule_ptr>& res)
+	static void collect_rule (rule_ptr rule, std::vector<rule_ptr>& res)
 	{
-		rule = resolve_include(base, rule);
+		rule = resolve_include(rule);
 		if(!rule || rule->included)
 			return;
 
@@ -217,17 +204,17 @@ namespace parse
 		}
 		else if(!rule->children.empty())
 		{
-			collect_children(base, rule->children, res);
+			collect_children(rule->children, res);
 		}
 	}
 
-	static void collect_children (rule_ptr const& base, std::vector<rule_ptr> const& children, std::vector<rule_ptr>& res)
+	static void collect_children (std::vector<rule_ptr> const& children, std::vector<rule_ptr>& res)
 	{
 		for(rule_ptr const& rule : children)
-			collect_rule(base, rule, res);
+			collect_rule(rule, res);
 	}
 
-	static void collect_injections (rule_ptr const& base, stack_ptr const& stack, scope::context_t const& scope, std::vector<rule_ptr>& res)
+	static void collect_injections (stack_ptr const& stack, scope::context_t const& scope, std::vector<rule_ptr>& res)
 	{
 		for(stack_ptr node = stack; node; node = node->parent)
 		{
@@ -237,18 +224,18 @@ namespace parse
 			for(auto const& pair : *node->rule->injections)
 			{
 				if(scope::selector_t(pair.first).does_match(scope))
-					collect_rule(base, pair.second, res);
+					collect_rule(pair.second, res);
 			}
 		}
 
 		for(auto const& pair : injected_grammars())
 		{
 			if(pair.first.does_match(scope))
-				collect_children(base, pair.second->children, res);
+				collect_children(pair.second->children, res);
 		}
 	}
 
-	static void collect_rules (rule_ptr const& base, char const* first, char const* last, size_t i, bool firstLine, stack_ptr const& stack, std::set<ranked_match_t>& res, std::map<size_t, regexp::match_t>& match_cache)
+	static void collect_rules (char const* first, char const* last, size_t i, bool firstLine, stack_ptr const& stack, std::set<ranked_match_t>& res, std::map<size_t, regexp::match_t>& match_cache)
 	{
 		res.clear();
 
@@ -261,9 +248,9 @@ namespace parse
 		}
 
 		std::vector<rule_ptr> rules;
-		collect_injections(base, stack, scope::context_t(stack->scope, ""), rules);
-		collect_children(base, stack->rule->children, rules);
-		collect_injections(base, stack, scope::context_t("", stack->scope), rules);
+		collect_injections(stack, scope::context_t(stack->scope, ""), rules);
+		collect_children(stack->rule->children, rules);
+		collect_injections(stack, scope::context_t("", stack->scope), rules);
 
 		// ============================
 		// = Match rules against text =
@@ -341,13 +328,9 @@ namespace parse
 		// = Parse rest of line =
 		// ======================
 
-		rule_ptr base = stack->rule;
-		for(stack_ptr node = stack; node; node = node->parent)
-			base = node->rule;
-
 		std::set<ranked_match_t> rules;
 		std::map<size_t, regexp::match_t> match_cache;
-		collect_rules(base, first, last, i, firstLine, stack, rules, match_cache);
+		collect_rules(first, last, i, firstLine, stack, rules, match_cache);
 
 		D(DBF_Parser, bug("%zu rules (out of %zu), parse: %.*s", rules.size(), stack->rule->children.size(), (int)(last - first - i), first + i););
 		while(!rules.empty())
@@ -448,7 +431,7 @@ namespace parse
 			}
 
 			D(DBF_Parser, bug("%zu rules before collecting\n", rules.size()););
-			collect_rules(base, first, last, i, firstLine, stack, rules, match_cache);
+			collect_rules(first, last, i, firstLine, stack, rules, match_cache);
 			D(DBF_Parser, bug("%zu rules after collecting\n", rules.size()););
 		}
 		D(DBF_Parser_Flow, bug("line done (%zu rules)\n", rules.size()););
