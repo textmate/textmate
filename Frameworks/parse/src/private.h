@@ -51,7 +51,7 @@ namespace parse
 		// = Pre-parsed versions =
 		// =======================
 
-		rule_weak_ptr include;
+		rule_t* include = nullptr;
 
 		regexp::pattern_t match_pattern;
 		regexp::pattern_t while_pattern;
@@ -69,11 +69,11 @@ namespace parse
 	{
 		WATCH_LEAKS(stack_t);
 
-		stack_t (rule_ptr const& rule, scope::scope_t const& scope, stack_ptr const& parent = stack_ptr()) : parent(parent), rule(rule), scope(scope), anchor(0) { }
+		stack_t (rule_t const* rule, scope::scope_t const& scope, stack_ptr const& parent = stack_ptr()) : parent(parent), rule(rule), scope(scope), anchor(0) { }
 
 		stack_ptr parent;
 
-		rule_ptr rule;                      // the rule supplying patterns for current context
+		rule_t const* rule;                 // the rule supplying patterns for current context
 		scope::scope_t scope;               // the scope of the current context
 
 		regexp::pattern_t while_pattern;    // a while-pattern active in current context

@@ -143,44 +143,44 @@ namespace parse
 
 	void grammar_t::setup_includes (rule_ptr const& rule, rule_ptr const& base, rule_ptr const& self, grammar_t::rule_stack_t const& stack)
 	{
-		ASSERT(rule->include.expired());
+		ASSERT(!rule->include);
 
 		std::string const include = rule->include_string;
 		if(include == "$base")
 		{
-			rule->include = base;
+			rule->include = base.get();
 		}
 		else if(include == "$self")
 		{
-			rule->include = self;
+			rule->include = self.get();
 		}
 		else if(include != NULL_STR)
 		{
-			static auto find_repository_item = [](rule_t const* rule, std::string const& name) -> rule_ptr
+			static auto find_repository_item = [](rule_t const* rule, std::string const& name) -> rule_t*
 			{
 				if(rule->repository)
 				{
 					auto it = rule->repository->find(name);
 					if(it != rule->repository->end())
-						return it->second;
+						return it->second.get();
 				}
-				return rule_ptr();
+				return nullptr;
 			};
 
 			if(include[0] == '#')
 			{
 				std::string const name = include.substr(1);
-				for(rule_stack_t const* node = &stack; node && rule->include.expired(); node = node->parent)
+				for(rule_stack_t const* node = &stack; node && !rule->include; node = node->parent)
 					rule->include = find_repository_item(node->rule, name);
 			}
 			else
 			{
 				std::string::size_type fragment = include.find('#');
 				if(rule_ptr grammar = find_grammar(include.substr(0, fragment), base))
-					rule->include = fragment == std::string::npos ? grammar : find_repository_item(grammar.get(), include.substr(fragment+1));
+					rule->include = fragment == std::string::npos ? grammar.get() : find_repository_item(grammar.get(), include.substr(fragment+1));
 			}
 
-			if(rule->include.expired())
+			if(!rule->include)
 			{
 				if(base != self)
 						fprintf(stderr, "%s → %s: include not found ‘%s’\n", base->scope_string.c_str(), self->scope_string.c_str(), include.c_str());
@@ -285,7 +285,7 @@ namespace parse
 
 	stack_ptr grammar_t::seed () const
 	{
-		return stack_ptr(new stack_t(_rule, _rule ? _rule->scope_string : ""));
+		return stack_ptr(new stack_t(_rule.get(), _rule ? _rule->scope_string : ""));
 	}
 
 	void grammar_t::bundles_did_change ()
