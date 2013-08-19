@@ -22,6 +22,8 @@ namespace parse
 		grammar_t (bundles::item_ptr const& grammarItem);
 		~grammar_t ();
 
+		void set_item (bundles::item_ptr const& item);
+
 		oak::uuid_t const& uuid () const;
 		stack_ptr seed () const;
 
@@ -52,7 +54,7 @@ namespace parse
 		void bundles_did_change ();
 
 		bundles::item_ptr _item;
-		plist::dictionary_t _old_plist;
+		plist::dictionary_t _plist;
 		bundles_callback_t _bundles_callback;
 		oak::callbacks_t<callback_t> _callbacks;
 		rule_ptr _rule;

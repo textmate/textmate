@@ -222,25 +222,33 @@ namespace parse
 		return grammar;
 	}
 
-	grammar_t::grammar_t (bundles::item_ptr const& grammarItem) : _item(grammarItem), _bundles_callback(*this)
+	grammar_t::grammar_t (bundles::item_ptr const& grammarItem) : _bundles_callback(*this)
 	{
 		bundles::add_callback(&_bundles_callback);
+		set_item(grammarItem);
+	}
 
-		ASSERT(grammarItem);
+	grammar_t::~grammar_t ()
+	{
+		bundles::remove_callback(&_bundles_callback);
+	}
 
-		_old_plist = _item->plist();
-		_rule = add_grammar(_item->value_for_field(bundles::kFieldGrammarScope), _old_plist);
+	void grammar_t::set_item (bundles::item_ptr const& item)
+	{
+		ASSERT(item);
+		_grammars.clear();
+
+		_item  = item;
+		_plist = item->plist();
+		_rule  = add_grammar(item->value_for_field(bundles::kFieldGrammarScope), _plist);
 
 		if(!_rule)
 		{
 			fprintf(stderr, "*** grammar missing for ‘%s’\n", _item->name().c_str());
 			_rule.reset(new rule_t);
 		}
-	}
 
-	grammar_t::~grammar_t ()
-	{
-		bundles::remove_callback(&_bundles_callback);
+		_callbacks(&callback_t::grammar_did_change);
 	}
 
 	oak::uuid_t const& grammar_t::uuid () const
@@ -257,22 +265,8 @@ namespace parse
 	void grammar_t::bundles_did_change ()
 	{
 		bundles::item_ptr newItem = bundles::lookup(uuid());
-		if(newItem && !plist::equal(_old_plist, newItem->plist())) // FIXME this is a kludge, ideally we should register as callback for the bundle item (when that is supported)
-		{
-			_grammars.clear();
-
-			_item = newItem;
-			_old_plist = _item->plist();
-			_rule = add_grammar(_item->value_for_field(bundles::kFieldGrammarScope), _old_plist);
-
-			if(!_rule)
-			{
-				fprintf(stderr, "*** grammar missing for ‘%s’\n", _item->name().c_str());
-				_rule.reset(new rule_t);
-			}
-
-			_callbacks(&callback_t::grammar_did_change);
-		}
+		if(newItem && !plist::equal(_plist, newItem->plist())) // FIXME this is a kludge, ideally we should register as callback for the bundle item (when that is supported)
+			set_item(newItem);
 	}
 
 	// ==============
