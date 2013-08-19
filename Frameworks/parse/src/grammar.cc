@@ -11,13 +11,13 @@ OAK_DEBUG_VAR(Parser);
 
 namespace parse
 {
-	static rule_ptr parse_rule (plist::any_t const& plist);
+	static rule_ptr convert_plist (plist::any_t const& plist);
 
 	static bool convert_array (plist::array_t const& array, std::vector<rule_ptr>& res)
 	{
-		iterate(it, array)
+		for(auto const& plist : array)
 		{
-			if(rule_ptr const& child = parse_rule(*it))
+			if(rule_ptr child = convert_plist(plist))
 				res.push_back(child);
 		}
 		return true;
@@ -26,15 +26,15 @@ namespace parse
 	static bool convert_dictionary (plist::dictionary_t const& dict, repository_ptr& res)
 	{
 		res.reset(new repository_t);
-		iterate(it, dict)
+		for(auto pair : dict)
 		{
-			if(rule_ptr const& child = parse_rule(it->second))
-				res->insert(std::make_pair(it->first, child));
+			if(rule_ptr child = convert_plist(pair.second))
+				res->emplace(pair.first, child);
 		}
 		return true;
 	}
 
-	static rule_ptr parse_rule (plist::any_t const& any)
+	static rule_ptr convert_plist (plist::any_t const& any)
 	{
 		static plist::schema_t<rule_t> schema = plist::schema_t<rule_t>()
 			.map("name",                &rule_t::scope_string                             )
@@ -71,37 +71,37 @@ namespace parse
 	{
 		if(rule->repository)
 		{
-			repository_t::const_iterator it = rule->repository->find(name);
+			auto it = rule->repository->find(name);
 			if(it != rule->repository->end())
 				return it->second;
 		}
 		return rule_ptr();
 	}
 
-	static bool pattern_has_back_references (std::string const& ptrn)
+	static bool pattern_has_back_reference (std::string const& ptrn)
 	{
 		bool escape = false;
-		iterate(it, ptrn)
+		for(char const& ch : ptrn)
 		{
-			if(escape && isdigit(*it))
+			if(escape && isdigit(ch))
 			{
 				D(DBF_Parser, bug("%s: %s\n", ptrn.c_str(), "YES"););
 				return true;
 			}
-			escape = !escape && *it == '\\';
+			escape = !escape && ch == '\\';
 		}
 		D(DBF_Parser, bug("%s: %s\n", ptrn.c_str(), "NO"););
 		return false;
 	}
 
-	static bool pattern_is_anchored (std::string const& ptrn)
+	static bool pattern_has_anchor (std::string const& ptrn)
 	{
 		bool escape = false;
-		iterate(it, ptrn)
+		for(char const& ch : ptrn)
 		{
-			if(escape && *it == 'G')
+			if(escape && ch == 'G')
 				return true;
-			escape = !escape && *it == '\\';
+			escape = !escape && ch == '\\';
 		}
 		return false;
 	}
@@ -113,7 +113,7 @@ namespace parse
 	grammar_t::grammar_t (bundles::item_ptr const& grammarItem) : _item(grammarItem), _bundles_callback(*this)
 	{
 		bundles::add_callback(&_bundles_callback);
-		_rule = parse_rule(_item->plist());
+		_rule = convert_plist(_item->plist());
 
 		if(!_rule)
 		{
@@ -145,7 +145,7 @@ namespace parse
 		bundles::item_ptr newItem = bundles::lookup(uuid());
 		if(newItem && !plist::equal(_old_plist, newItem->plist())) // FIXME this is a kludge, ideally we should register as callback for the bundle item (when that is supported)
 		{
-			if(rule_ptr rule = parse_rule(newItem->plist()))
+			if(rule_ptr rule = convert_plist(newItem->plist()))
 			{
 				_item = newItem;
 				_rule = rule;
@@ -210,17 +210,17 @@ namespace parse
 			if(rule->match_string != NULL_STR)
 			{
 				rule->match_pattern = regexp::pattern_t(rule->match_string);
-				rule->match_pattern_is_anchored = pattern_is_anchored(rule->match_string);
+				rule->match_pattern_is_anchored = pattern_has_anchor(rule->match_string);
 				if(!rule->match_pattern)
 					fprintf(stderr, "bad begin/match pattern for %s\n", rule->scope_string.c_str());
 			}
-			if(rule->while_string != NULL_STR && !pattern_has_back_references(rule->while_string))
+			if(rule->while_string != NULL_STR && !pattern_has_back_reference(rule->while_string))
 			{
 				rule->while_pattern = regexp::pattern_t(rule->while_string);
 				if(!rule->while_pattern)
 					fprintf(stderr, "bad while pattern for %s\n", rule->scope_string.c_str());
 			}
-			if(rule->end_string != NULL_STR && !pattern_has_back_references(rule->end_string))
+			if(rule->end_string != NULL_STR && !pattern_has_back_reference(rule->end_string))
 			{
 				rule->end_pattern = regexp::pattern_t(rule->end_string);
 				if(!rule->end_pattern)
