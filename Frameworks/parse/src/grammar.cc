@@ -67,17 +67,6 @@ namespace parse
 		return rule_ptr();
 	}
 
-	static rule_ptr find_repository_item (rule_ptr const& rule, std::string const& name)
-	{
-		if(rule->repository)
-		{
-			auto it = rule->repository->find(name);
-			if(it != rule->repository->end())
-				return it->second;
-		}
-		return rule_ptr();
-	}
-
 	static bool pattern_has_back_reference (std::string const& ptrn)
 	{
 		bool escape = false;
@@ -110,18 +99,143 @@ namespace parse
 	// = grammar_t =
 	// =============
 
+	static void compile_patterns (rule_t* rule)
+	{
+		if(rule->match_string != NULL_STR)
+		{
+			rule->match_pattern = regexp::pattern_t(rule->match_string);
+			rule->match_pattern_is_anchored = pattern_has_anchor(rule->match_string);
+			if(!rule->match_pattern)
+				fprintf(stderr, "bad begin/match pattern for %s\n", rule->scope_string.c_str());
+		}
+
+		if(rule->while_string != NULL_STR && !pattern_has_back_reference(rule->while_string))
+		{
+			rule->while_pattern = regexp::pattern_t(rule->while_string);
+			if(!rule->while_pattern)
+				fprintf(stderr, "bad while pattern for %s\n", rule->scope_string.c_str());
+		}
+
+		if(rule->end_string != NULL_STR && !pattern_has_back_reference(rule->end_string))
+		{
+			rule->end_pattern = regexp::pattern_t(rule->end_string);
+			if(!rule->end_pattern)
+				fprintf(stderr, "bad end pattern for %s\n", rule->scope_string.c_str());
+		}
+
+		for(rule_ptr child : rule->children)
+			compile_patterns(child.get());
+
+		repository_ptr maps[] = { rule->repository, rule->injections, rule->captures, rule->begin_captures, rule->while_captures, rule->end_captures };
+		for(auto const& map : maps)
+		{
+			if(!map)
+				continue;
+
+			for(auto const& pair : *map)
+				compile_patterns(pair.second.get());
+		}
+	}
+
+	void grammar_t::setup_includes (rule_ptr const& rule, rule_ptr const& base, rule_ptr const& self, grammar_t::rule_stack_t const& stack)
+	{
+		ASSERT(rule->include.expired());
+
+		std::string const include = rule->include_string;
+		if(include == "$base")
+		{
+			rule->include = base;
+		}
+		else if(include == "$self")
+		{
+			rule->include = self;
+		}
+		else if(include != NULL_STR)
+		{
+			static auto find_repository_item = [](rule_t const* rule, std::string const& name) -> rule_ptr
+			{
+				if(rule->repository)
+				{
+					auto it = rule->repository->find(name);
+					if(it != rule->repository->end())
+						return it->second;
+				}
+				return rule_ptr();
+			};
+
+			if(include[0] == '#')
+			{
+				std::string const name = include.substr(1);
+				for(rule_stack_t const* node = &stack; node && rule->include.expired(); node = node->parent)
+					rule->include = find_repository_item(node->rule, name);
+			}
+			else
+			{
+				std::string::size_type fragment = include.find('#');
+				if(rule_ptr grammar = find_grammar(include.substr(0, fragment), base))
+					rule->include = fragment == std::string::npos ? grammar : find_repository_item(grammar.get(), include.substr(fragment+1));
+			}
+
+			if(rule->include.expired())
+			{
+				if(base != self)
+						fprintf(stderr, "%s → %s: include not found ‘%s’\n", base->scope_string.c_str(), self->scope_string.c_str(), include.c_str());
+				else	fprintf(stderr, "%s: include not found ‘%s’\n", self->scope_string.c_str(), include.c_str());
+			}
+		}
+		else
+		{
+			for(rule_ptr child : rule->children)
+				setup_includes(child, base, self, rule_stack_t(rule.get(), &stack));
+
+			repository_ptr maps[] = { rule->repository, rule->injections, rule->captures, rule->begin_captures, rule->while_captures, rule->end_captures };
+			for(auto const& map : maps)
+			{
+				if(!map)
+					continue;
+
+				for(auto const& pair : *map)
+					setup_includes(pair.second, base, self, rule_stack_t(rule.get(), &stack));
+			}
+		}
+	}
+
+	rule_ptr grammar_t::find_grammar (std::string const& scope, rule_ptr const& base)
+	{
+		auto it = _grammars.find(scope);
+		if(it != _grammars.end())
+			return it->second;
+		for(auto item : bundles::query(bundles::kFieldGrammarScope, scope, scope::wildcard, bundles::kItemTypeGrammar))
+			return add_grammar(scope, item->plist(), base);
+		return rule_ptr();
+	}
+
+	rule_ptr grammar_t::add_grammar (std::string const& scope, plist::any_t const& plist, rule_ptr const& base)
+	{
+		rule_ptr grammar = convert_plist(plist);
+		if(grammar)
+		{
+			_grammars.emplace(scope, grammar);
+			setup_includes(grammar, base ?: grammar, grammar, rule_stack_t(grammar.get()));
+			compile_patterns(grammar.get());
+		}
+		return grammar;
+	}
+
 	grammar_t::grammar_t (bundles::item_ptr const& grammarItem) : _item(grammarItem), _bundles_callback(*this)
 	{
 		bundles::add_callback(&_bundles_callback);
-		_rule = convert_plist(_item->plist());
+
+		ASSERT(grammarItem);
+
+		_old_plist = _item->plist();
+		_rule = add_grammar(_item->value_for_field(bundles::kFieldGrammarScope), _old_plist);
 
 		if(!_rule)
 		{
 			fprintf(stderr, "*** grammar missing for ‘%s’\n", _item->name().c_str());
 			_rule.reset(new rule_t);
 		}
-
-		_old_plist = _item->plist();
 	}
 
 	grammar_t::~grammar_t ()
@@ -145,103 +259,20 @@ namespace parse
 		bundles::item_ptr newItem = bundles::lookup(uuid());
 		if(newItem && !plist::equal(_old_plist, newItem->plist())) // FIXME this is a kludge, ideally we should register as callback for the bundle item (when that is supported)
 		{
-			if(rule_ptr rule = convert_plist(newItem->plist()))
-			{
-				_item = newItem;
-				_rule = rule;
-				_old_plist = _item->plist();
-				resolve_includes();
+			_grammars.clear();
 
-				_callbacks(&callback_t::grammar_did_change);
+			_item = newItem;
+			_old_plist = _item->plist();
+			_rule = add_grammar(_item->value_for_field(bundles::kFieldGrammarScope), _old_plist);
+
+			if(!_rule)
+			{
+				fprintf(stderr, "*** grammar missing for ‘%s’\n", _item->name().c_str());
+				_rule.reset(new rule_t);
 			}
+
+			_callbacks(&callback_t::grammar_did_change);
 		}
-	}
-
-	void grammar_t::resolve_includes ()
-	{
-		std::vector<rule_ptr> tmp;
-		resolve_includes(_rule, tmp);
-	}
-
-	void grammar_t::resolve_includes (rule_ptr rule, std::vector<rule_ptr>& stack)
-	{
-		if(!rule)
-			return;
-
-		std::string const& inc = rule->include_string;
-		if(inc != NULL_STR && inc != "$base")
-		{
-			D(DBF_Parser, bug("%s\n", inc.c_str()););
-			if(inc == "$self")
-			{
-				rule->include = stack.front();
-			}
-			else if(inc[0] == '#')
-			{
-				std::string const& name = inc.substr(1);
-				riterate(it, stack)
-				{
-					if(rule_ptr const& res = find_repository_item(*it, name))
-					{
-						rule->include = res;
-						D(DBF_Parser, bug("found include: %s\n", res->scope_string.c_str()););
-						break;
-					}
-				}
-			}
-			else
-			{
-				std::string::size_type fragment = inc.find('#');
-				citerate(item, bundles::query(bundles::kFieldGrammarScope, fragment == std::string::npos ? inc : inc.substr(0, fragment), scope::wildcard, bundles::kItemTypeGrammar))
-				{
-					if(grammar_ptr grammar = parse_grammar(*item))
-					{
-						rule->include = fragment == std::string::npos ? grammar->_rule : find_repository_item(grammar->_rule, inc.substr(fragment+1));
-						break;
-					}
-				}
-			}
-
-			if(rule->include.expired())
-				fprintf(stderr, "*** couldn’t resolve %s\n", inc.c_str());
-		}
-		else
-		{
-			if(rule->match_string != NULL_STR)
-			{
-				rule->match_pattern = regexp::pattern_t(rule->match_string);
-				rule->match_pattern_is_anchored = pattern_has_anchor(rule->match_string);
-				if(!rule->match_pattern)
-					fprintf(stderr, "bad begin/match pattern for %s\n", rule->scope_string.c_str());
-			}
-			if(rule->while_string != NULL_STR && !pattern_has_back_reference(rule->while_string))
-			{
-				rule->while_pattern = regexp::pattern_t(rule->while_string);
-				if(!rule->while_pattern)
-					fprintf(stderr, "bad while pattern for %s\n", rule->scope_string.c_str());
-			}
-			if(rule->end_string != NULL_STR && !pattern_has_back_reference(rule->end_string))
-			{
-				rule->end_pattern = regexp::pattern_t(rule->end_string);
-				if(!rule->end_pattern)
-					fprintf(stderr, "bad end pattern for %s\n", rule->scope_string.c_str());
-			}
-		}
-
-		stack.push_back(rule);
-		iterate(it, rule->children)
-			resolve_includes(*it, stack);
-
-		repository_ptr maps[] = { rule->repository, rule->captures, rule->begin_captures, rule->while_captures, rule->end_captures, rule->injections };
-		iterate(it, maps)
-		{
-			if(!*it)
-				continue;
-
-			iterate(mapIter, **it)
-				resolve_includes(mapIter->second, stack);
-		}
-		stack.pop_back();
 	}
 
 	// ==============
@@ -251,21 +282,8 @@ namespace parse
 	grammar_ptr parse_grammar (bundles::item_ptr const& grammarItem)
 	{
 		ASSERT(grammarItem);
-
-		static std::recursive_mutex Mutex;
-		std::lock_guard<std::recursive_mutex> lock(Mutex);
-
-		static std::map<oak::uuid_t, grammar_ptr> Cache;
 		injected_grammars(); // ensure these are loaded in the main thread
-
-		oak::uuid_t const& uuid = grammarItem->uuid();
-		std::map<oak::uuid_t, grammar_ptr>::iterator grammar = Cache.find(uuid);
-		if(grammar == Cache.end())
-		{
-			grammar = Cache.insert(std::make_pair(uuid, grammar_ptr(new grammar_t(grammarItem)))).first;
-			grammar->second->resolve_includes();
-		}
-		return grammar->second;
+		return grammar_ptr(new grammar_t(grammarItem));
 	}
 
 } /* parse */ 

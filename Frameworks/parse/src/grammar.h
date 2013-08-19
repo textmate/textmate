@@ -28,11 +28,7 @@ namespace parse
 		void add_callback (callback_t* cb)      { _callbacks.add(cb);    }
 		void remove_callback (callback_t* cb)   { _callbacks.remove(cb); }
 
-		void resolve_includes ();
-
 	private:
-		static void resolve_includes (rule_ptr rule, std::vector<rule_ptr>& stack);
-
 		struct bundles_callback_t : bundles::callback_t
 		{
 			bundles_callback_t (grammar_t& grammar) : _grammar(grammar) { }
@@ -41,6 +37,18 @@ namespace parse
 			grammar_t& _grammar;
 		};
 
+		struct rule_stack_t
+		{
+			rule_stack_t (rule_t const* rule, rule_stack_t const* parent = nullptr) : rule(rule), parent(parent) { }
+
+			rule_t const* rule;
+			rule_stack_t const* parent;
+		};
+
+		void setup_includes (rule_ptr const& rule, rule_ptr const& base, rule_ptr const& self, rule_stack_t const& stack);
+		rule_ptr find_grammar (std::string const& scope, rule_ptr const& base);
+		rule_ptr add_grammar (std::string const& scope, plist::any_t const& plist, rule_ptr const& base = rule_ptr());
+
 		void bundles_did_change ();
 
 		bundles::item_ptr _item;
@@ -48,6 +56,7 @@ namespace parse
 		bundles_callback_t _bundles_callback;
 		oak::callbacks_t<callback_t> _callbacks;
 		rule_ptr _rule;
+		std::map<std::string, rule_ptr> _grammars;
 	};
 
 	typedef std::shared_ptr<grammar_t> grammar_ptr;
