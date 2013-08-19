@@ -50,6 +50,7 @@ namespace parse
 		void setup_includes (rule_ptr const& rule, rule_ptr const& base, rule_ptr const& self, rule_stack_t const& stack);
 		rule_ptr find_grammar (std::string const& scope, rule_ptr const& base);
 		rule_ptr add_grammar (std::string const& scope, plist::any_t const& plist, rule_ptr const& base = rule_ptr());
+		std::vector<std::pair<scope::selector_t, rule_ptr>> injection_grammars ();
 
 		void bundles_did_change ();
 

@@ -44,7 +44,8 @@ namespace parse
 		repository_ptr while_captures;
 		repository_ptr end_captures;
 		repository_ptr repository;
-		repository_ptr injections;
+		repository_ptr injection_rules;
+		std::vector<std::pair<scope::selector_t, rule_ptr>> injections;
 
 		// =======================
 		// = Pre-parsed versions =
@@ -84,8 +85,6 @@ namespace parse
 		bool operator== (stack_t const& rhs) const;
 		bool operator!= (stack_t const& rhs) const;
 	};
-
-	std::vector< std::pair<scope::selector_t, rule_ptr> >& injected_grammars ();
 
 } /* parse */
 

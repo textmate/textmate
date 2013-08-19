@@ -10,26 +10,6 @@ OAK_DEBUG_VAR(Parser_Flow);
 
 namespace parse
 {
-	std::vector< std::pair<scope::selector_t, rule_ptr> >& injected_grammars ()
-	{
-		static std::vector< std::pair<scope::selector_t, rule_ptr> > res;
-		static bool needs_setup = true;
-		if(needs_setup)
-		{
-			needs_setup = false;
-			citerate(item, bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeGrammar))
-			{
-				std::string injectionSelector = (*item)->value_for_field(bundles::kFieldGrammarInjectionSelector);
-				if(injectionSelector != NULL_STR)
-				{
-					if(grammar_ptr grammar = parse_grammar(*item))
-						res.push_back(std::make_pair(injectionSelector, grammar->seed()->rule));
-				}
-			}
-		}
-		return res;
-	}
-
 	size_t rule_t::rule_id_counter = 0;
 
 	bool equal (stack_ptr lhs, stack_ptr rhs)
@@ -218,20 +198,11 @@ namespace parse
 	{
 		for(stack_ptr node = stack; node; node = node->parent)
 		{
-			if(!node->rule->injections)
-				continue;
-
-			for(auto const& pair : *node->rule->injections)
+			for(auto const& pair : node->rule->injections)
 			{
-				if(scope::selector_t(pair.first).does_match(scope))
+				if(pair.first.does_match(scope))
 					collect_rule(pair.second, res);
 			}
-		}
-
-		for(auto const& pair : injected_grammars())
-		{
-			if(pair.first.does_match(scope))
-				collect_children(pair.second->children, res);
 		}
 	}
 

@@ -52,7 +52,7 @@ namespace parse
 			.map("whileCaptures",       &rule_t::while_captures,       &convert_dictionary)
 			.map("endCaptures",         &rule_t::end_captures,         &convert_dictionary)
 			.map("repository",          &rule_t::repository,           &convert_dictionary)
-			.map("injections",          &rule_t::injections,           &convert_dictionary)
+			.map("injections",          &rule_t::injection_rules,      &convert_dictionary)
 		;
 
 		if(plist::dictionary_t const* plist = boost::get<plist::dictionary_t>(&any))
@@ -126,7 +126,7 @@ namespace parse
 		for(rule_ptr child : rule->children)
 			compile_patterns(child.get());
 
-		repository_ptr maps[] = { rule->repository, rule->injections, rule->captures, rule->begin_captures, rule->while_captures, rule->end_captures };
+		repository_ptr maps[] = { rule->repository, rule->injection_rules, rule->captures, rule->begin_captures, rule->while_captures, rule->end_captures };
 		for(auto const& map : maps)
 		{
 			if(!map)
@@ -135,6 +135,10 @@ namespace parse
 			for(auto const& pair : *map)
 				compile_patterns(pair.second.get());
 		}
+
+		if(rule->injection_rules)
+			std::copy(rule->injection_rules->begin(), rule->injection_rules->end(), back_inserter(rule->injections));
+		rule->injection_rules.reset();
 	}
 
 	void grammar_t::setup_includes (rule_ptr const& rule, rule_ptr const& base, rule_ptr const& self, grammar_t::rule_stack_t const& stack)
@@ -188,7 +192,7 @@ namespace parse
 			for(rule_ptr child : rule->children)
 				setup_includes(child, base, self, rule_stack_t(rule.get(), &stack));
 
-			repository_ptr maps[] = { rule->repository, rule->injections, rule->captures, rule->begin_captures, rule->while_captures, rule->end_captures };
+			repository_ptr maps[] = { rule->repository, rule->injection_rules, rule->captures, rule->begin_captures, rule->while_captures, rule->end_captures };
 			for(auto const& map : maps)
 			{
 				if(!map)
@@ -208,6 +212,25 @@ namespace parse
 		for(auto item : bundles::query(bundles::kFieldGrammarScope, scope, scope::wildcard, bundles::kItemTypeGrammar))
 			return add_grammar(scope, item->plist(), base);
 		return rule_ptr();
+	}
+
+	std::vector<std::pair<scope::selector_t, rule_ptr>> grammar_t::injection_grammars ()
+	{
+		std::vector<std::pair<scope::selector_t, rule_ptr>> res;
+		for(auto item : bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeGrammar))
+		{
+			std::string injectionSelector = item->value_for_field(bundles::kFieldGrammarInjectionSelector);
+			if(injectionSelector != NULL_STR)
+			{
+				if(rule_ptr grammar = convert_plist(item->plist()))
+				{
+					setup_includes(grammar, grammar, grammar, rule_stack_t(grammar.get()));
+					compile_patterns(grammar.get());
+					res.emplace_back(injectionSelector, grammar);
+				}
+			}
+		}
+		return res;
 	}
 
 	rule_ptr grammar_t::add_grammar (std::string const& scope, plist::any_t const& plist, rule_ptr const& base)
@@ -248,6 +271,9 @@ namespace parse
 			_rule.reset(new rule_t);
 		}
 
+		auto const grammars = injection_grammars();
+		_rule->injections.insert(_rule->injections.end(), grammars.begin(), grammars.end());
+
 		_callbacks(&callback_t::grammar_did_change);
 	}
 
@@ -276,7 +302,6 @@ namespace parse
 	grammar_ptr parse_grammar (bundles::item_ptr const& grammarItem)
 	{
 		ASSERT(grammarItem);
-		injected_grammars(); // ensure these are loaded in the main thread
 		return grammar_ptr(new grammar_t(grammarItem));
 	}
 
