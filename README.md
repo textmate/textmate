@@ -25,6 +25,7 @@ To bootstrap the build you need to run `./configure` (in the root of the source 
 * `builddir` — location of built files. Defaults to `~/build/TextMate`.
 * `identity` — for Apple’s `codesign`. Defaults to ad-hoc signing, which does not use an identity at all.
 * `boostdir` — location of boost includes. By default it will search various locations including MacPorts and Homebrew.
+* `CC` and `CXX` — C and C++ compiler, see [clang 3.2](#clang-32) info below.
 
 In the simplest case you would run:
 
@@ -65,6 +66,14 @@ In practice `hg` ([mercurial][]) is only required for the SCM library’s tests 
 ### Clang 3.2
 
 The version of clang included with Xcode 4.x is not recent enough to build the [Cap’n proto][capnp] library so you need to manually install a newer version of clang. See [Cap’n proto][capnp] install instructions.
+
+To build TextMate with this version of clang you will need to symlink the `arclite` stuff:
+
+    ln -s /usr/lib/arc ~/clang-3.2/lib/arc
+
+Also, to make TextMate use this version of clang, you must set `CC` and `CXX` when calling `./configure`, e.g.:
+
+    CC=$HOME/clang-3.2/bin/clang CXX=$HOME/clang-3.2/bin/clang++ ./configure
 
 ### OS X 10.7 (Lion)
 
