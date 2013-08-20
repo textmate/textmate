@@ -203,6 +203,15 @@ namespace parse
 
 	static void collect_rules (char const* first, char const* last, size_t i, bool firstLine, stack_ptr const& stack, std::set<ranked_match_t>& res, std::map<size_t, regexp::match_t>& match_cache)
 	{
+		std::vector<rule_t*> rules;
+		collect_injections(stack, scope::context_t(stack->scope, ""), rules);
+		collect_children(stack->rule->children, rules);
+		collect_injections(stack, scope::context_t("", stack->scope), rules);
+
+		// ============================
+		// = Match rules against text =
+		// ============================
+
 		res.clear();
 
 		OnigOptionType const options = anchor_options(firstLine, stack->anchor == i, first, last);
@@ -212,15 +221,6 @@ namespace parse
 			if(regexp::match_t const& match = regexp::search(stack->end_pattern, first, last, first + i, last, options))
 				res.emplace(stack->rule, match, stack->apply_end_last ? SIZE_T_MAX : 0);
 		}
-
-		std::vector<rule_t*> rules;
-		collect_injections(stack, scope::context_t(stack->scope, ""), rules);
-		collect_children(stack->rule->children, rules);
-		collect_injections(stack, scope::context_t("", stack->scope), rules);
-
-		// ============================
-		// = Match rules against text =
-		// ============================
 
 		size_t rank = 0;
 		for(rule_t* rule : rules)
