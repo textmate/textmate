@@ -163,12 +163,19 @@ namespace parse
 			scope = res[stack.back().first] = stack.back().second;
 	}
 
-	static void collect_children (std::vector<rule_ptr> const& children, std::vector<rule_t*>& res);
+	static void collect_children (std::vector<rule_ptr> const& children, std::vector<rule_t*>& res, std::vector<rule_t*>* groups);
 
-	static void collect_rule (rule_t* rule, std::vector<rule_t*>& res)
+	static void collect_rule (rule_t* rule, std::vector<rule_t*>& res, std::vector<rule_t*>* groups)
 	{
-		while(rule && rule->include)
+		while(rule && rule->include && !rule->included)
+		{
+			if(groups)
+			{
+				rule->included = true;
+				groups->push_back(rule);
+			}
 			rule = rule->include;
+		}
 
 		if(!rule || rule->included)
 			return;
@@ -180,50 +187,48 @@ namespace parse
 		}
 		else if(!rule->children.empty())
 		{
-			collect_children(rule->children, res);
+			if(groups)
+			{
+				rule->included = true;
+				groups->push_back(rule);
+			}
+
+			collect_children(rule->children, res, groups);
 		}
 	}
 
-	static void collect_children (std::vector<rule_ptr> const& children, std::vector<rule_t*>& res)
+	static void collect_children (std::vector<rule_ptr> const& children, std::vector<rule_t*>& res, std::vector<rule_t*>* groups)
 	{
 		for(rule_ptr const& rule : children)
-			collect_rule(rule.get(), res);
+			collect_rule(rule.get(), res, groups);
 	}
 
-	static void collect_injections (stack_ptr const& stack, scope::context_t const& scope, std::vector<rule_t*>& res)
+	static void collect_injections (stack_ptr const& stack, scope::context_t const& scope, std::vector<rule_t*> const& groups, std::vector<rule_t*>& res)
 	{
 		for(stack_ptr node = stack; node; node = node->parent)
 		{
 			for(auto const& pair : node->rule->injections)
 			{
 				if(pair.first.does_match(scope))
-					collect_rule(pair.second.get(), res);
+					collect_rule(pair.second.get(), res, nullptr);
+			}
+		}
+
+		for(rule_t const* rule : groups)
+		{
+			if(rule->is_root) // already handled via the stack
+				continue;
+
+			for(auto const& pair : rule->injections)
+			{
+				if(pair.first.does_match(scope))
+					collect_rule(pair.second.get(), res, nullptr);
 			}
 		}
 	}
 
-	static void collect_rules (char const* first, char const* last, size_t i, bool firstLine, stack_ptr const& stack, std::set<ranked_match_t>& res, std::map<size_t, regexp::match_t>& match_cache)
+	static size_t apply_rules (size_t rank, std::vector<rule_t*> const& rules, char const* first, char const* last, OnigOptionType options, size_t i, std::set<ranked_match_t>& res, std::map<size_t, regexp::match_t>& match_cache)
 	{
-		std::vector<rule_t*> rules;
-		collect_injections(stack, scope::context_t(stack->scope, ""), rules);
-		collect_children(stack->rule->children, rules);
-		collect_injections(stack, scope::context_t("", stack->scope), rules);
-
-		// ============================
-		// = Match rules against text =
-		// ============================
-
-		res.clear();
-
-		OnigOptionType const options = anchor_options(firstLine, stack->anchor == i, first, last);
-		if(stack->end_pattern)
-		{
-			D(DBF_Parser, bug("end pattern: %s\n", to_s(stack->end_pattern).c_str()););
-			if(regexp::match_t const& match = regexp::search(stack->end_pattern, first, last, first + i, last, options))
-				res.emplace(stack->rule, match, stack->apply_end_last ? SIZE_T_MAX : 0, true);
-		}
-
-		size_t rank = 0;
 		for(rule_t* rule : rules)
 		{
 			rule->included = false;
@@ -243,6 +248,38 @@ namespace parse
 					res.emplace(rule, match, ++rank);
 			}
 		}
+		return rank;
+	}
+
+	static void collect_rules (char const* first, char const* last, size_t i, bool firstLine, stack_ptr const& stack, std::set<ranked_match_t>& res, std::map<size_t, regexp::match_t>& match_cache)
+	{
+		std::vector<rule_t*> rules, groups, injectedRulesPre, injectedRulesPost;
+		collect_children(stack->rule->children, rules, &groups);
+		collect_injections(stack, scope::context_t(stack->scope, ""), groups, injectedRulesPre);
+		collect_injections(stack, scope::context_t("", stack->scope), groups, injectedRulesPost);
+
+		for(rule_t* rule : groups)
+			rule->included = false;
+
+		// ============================
+		// = Match rules against text =
+		// ============================
+
+		res.clear();
+		OnigOptionType const options = anchor_options(firstLine, stack->anchor == i, first, last);
+
+		size_t rank = apply_rules(0, injectedRulesPre, first, last, options, i, res, match_cache);
+		size_t endPatternRank = ++rank;
+		rank = apply_rules(rank, rules, first, last, options, i, res, match_cache);
+
+		if(stack->end_pattern)
+		{
+			D(DBF_Parser, bug("end pattern: %s\n", to_s(stack->end_pattern).c_str()););
+			if(regexp::match_t const& match = regexp::search(stack->end_pattern, first, last, first + i, last, options))
+				res.emplace(stack->rule, match, stack->apply_end_last ? ++rank : endPatternRank, true);
+		}
+
+		rank = apply_rules(rank, injectedRulesPost, first, last, options, i, res, match_cache);
 	}
 
 	static bool has_cycle (size_t rule_id, size_t i, stack_ptr const& stack)

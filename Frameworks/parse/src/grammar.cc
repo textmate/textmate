@@ -273,6 +273,7 @@ namespace parse
 
 		auto const grammars = injection_grammars();
 		_rule->injections.insert(_rule->injections.end(), grammars.begin(), grammars.end());
+		_rule->is_root = true;
 
 		_callbacks(&callback_t::grammar_did_change);
 	}

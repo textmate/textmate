@@ -63,6 +63,7 @@ namespace parse
 		// =================
 
 		bool included = false;
+		bool is_root = false;
 	};
 
 	struct stack_t
