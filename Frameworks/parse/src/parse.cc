@@ -98,10 +98,11 @@ namespace parse
 
 	struct ranked_match_t
 	{
-		ranked_match_t (rule_t const* rule, regexp::match_t const& match, size_t rank) : rule(rule), match(match), rank(rank) { }
+		ranked_match_t (rule_t const* rule, regexp::match_t const& match, size_t rank, bool is_end_pattern = false) : rule(rule), match(match), rank(rank), is_end_pattern(is_end_pattern) { }
 		rule_t const* rule;
 		regexp::match_t match;
 		size_t rank;
+		bool is_end_pattern;
 
 		WATCH_LEAKS(ranked_match_t);
 
@@ -219,7 +220,7 @@ namespace parse
 		{
 			D(DBF_Parser, bug("end pattern: %s\n", to_s(stack->end_pattern).c_str()););
 			if(regexp::match_t const& match = regexp::search(stack->end_pattern, first, last, first + i, last, options))
-				res.emplace(stack->rule, match, stack->apply_end_last ? SIZE_T_MAX : 0);
+				res.emplace(stack->rule, match, stack->apply_end_last ? SIZE_T_MAX : 0, true);
 		}
 
 		size_t rank = 0;
@@ -312,7 +313,7 @@ namespace parse
 
 			if(m.match.begin() < i)
 			{
-				regexp::pattern_t const& ptrn = m.rank == 0 || m.rank == SIZE_T_MAX ? stack->end_pattern : m.rule->match_pattern;
+				regexp::pattern_t const& ptrn = m.is_end_pattern ? stack->end_pattern : m.rule->match_pattern;
 				if(m.match = regexp::search(ptrn, first, last, first + i, last, anchor_options(firstLine, stack->anchor == i, first, last)))
 					rules.insert(m);
 				continue;
@@ -322,7 +323,7 @@ namespace parse
 			D(DBF_Parser_Flow, bug("match %2zu-%2zu: %s\n", m.match.begin(), m.match.end(), m.rule->scope_string != NULL_STR ? m.rule->scope_string.c_str() : "(untitled)"););
 
 			rule_t const* rule = m.rule;
-			if(m.rank == 0 || m.rank == SIZE_T_MAX) // end-part of rule
+			if(m.is_end_pattern)
 			{
 				scope = stack->scope;
 				if(stack->rule->content_scope_string != NULL_STR)
