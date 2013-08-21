@@ -426,6 +426,11 @@ OAK_DEBUG_VAR(Find_FolderSearch);
 	});
 }
 
+- (BOOL)prepareSavePanel:(NSSavePanel *)savePanel
+{
+	return NO;
+}
+
 - (BOOL)validateUserInterfaceItem:(id <NSValidatedUserInterfaceItem>)anItem
 {
 	if(anItem.action == @selector(saveAllDocuments:))
