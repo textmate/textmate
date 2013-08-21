@@ -1,13 +1,9 @@
 # Changes
 
-## 2013-08-12 ([v2.0-alpha.9463](https://github.com/textmate/textmate/compare/v2.0-alpha.9461...v2.0-alpha.9463))
-
-* More fixes, two of them for stuff introduced in last build, sorry about that.
-
-## 2013-08-10 ([v2.0-alpha.9461](https://github.com/textmate/textmate/compare/v2.0-alpha.9459...v2.0-alpha.9461))
+## 2013-08-21 ([v2.0-alpha.9467](https://github.com/textmate/textmate/compare/v2.0-alpha.9459...v2.0-alpha.9467))
 
 * If you select two words separated by non-word characters, ⌃T will now swap the words, rather than reverse the characters of the selection. This also works if the words are surrounded by parentheses.
-* Miscellaneous fixes and improvements.
+* Miscellaneous fixes and improvements — as usual, click the link above for full commit history.
 
 ## 2013-08-02 ([v2.0-alpha.9459](https://github.com/textmate/textmate/compare/a9455...v2.0-alpha.9459))
 
