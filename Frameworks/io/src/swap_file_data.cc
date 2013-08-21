@@ -16,8 +16,12 @@ namespace path
 		if(exchangedata(src.c_str(), dst.c_str(), 0) == 0)
 			return unlink(src.c_str()) == 0;
 
-		if(errno == EFAULT) // Workaround for ExpanDrive
+		if(errno != ENOTSUP && errno != ENOENT && errno != EXDEV)
+		{
+			// ExpanDrive returns EFAULT
+			fprintf(stderr, "warning: exchangedata(“%s”, “%s”) failed with “%s”, treating as “%s”.\n", src.c_str(), dst.c_str(), strerror(errno), strerror(ENOTSUP));
 			errno = ENOTSUP;
+		}
 
 		D(DBF_IO_Swap_File_Data, bug("exchangedata() failed: %s\n", strerror(errno)););
 		if(errno == ENOTSUP || errno == ENOENT)
