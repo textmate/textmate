@@ -71,9 +71,7 @@ void test_delta ()
 
 	OAK_ASSERT_EQ(to_s(plist::create_delta(oldPlist, newPlist)), to_s(deltaPlist));
 
-	std::vector<plist::dictionary_t> plists;
-	plists.push_back(deltaPlist);
-	plists.push_back(oldPlist);
+	std::vector<plist::dictionary_t> plists{ deltaPlist, oldPlist };
 	OAK_ASSERT_EQ(to_s(plist::merge_delta(plists)), to_s(newPlist));
 
 	// =======================
@@ -117,8 +115,6 @@ void test_delta_settings ()
 	plist::dictionary_t const newPlist   = boost::get<plist::dictionary_t>(plist::parse_ascii(newPlistString));
 	plist::dictionary_t const deltaPlist = boost::get<plist::dictionary_t>(plist::parse_ascii(deltaPlistString));
 
-	std::vector<plist::dictionary_t> plists;
-	plists.push_back(deltaPlist);
-	plists.push_back(oldPlist);
+	std::vector<plist::dictionary_t> plists{ deltaPlist, oldPlist };
 	OAK_ASSERT_EQ(to_s(plist::merge_delta(plists)), to_s(newPlist));
 }

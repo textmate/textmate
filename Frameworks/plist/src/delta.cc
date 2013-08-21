@@ -143,21 +143,21 @@ namespace plist
 			dictionary_t const& plist = *it;
 			if(plist.find("isDelta") != plist.end())
 			{
-				if(plist.find("deleted") != plist.end())
+				auto deletedIt = plist.find("deleted");
+				if(array_t const* deleted = deletedIt != plist.end() ? boost::get<array_t>(&deletedIt->second) : nullptr)
 				{
-					array_t const& deleted = boost::get<array_t>(plist.find("deleted")->second);
-					iterate(it, deleted)
+					for(auto item : *deleted)
 					{
-						if(std::string const* str = boost::get<std::string>(&*it))
+						if(std::string const* str = boost::get<std::string>(&item))
 							erase_key_path(res, *str);
 					}
 				}
 
-				if(plist.find("changed") != plist.end())
+				auto changedIt = plist.find("changed");
+				if(dictionary_t const* changed = changedIt != plist.end() ? boost::get<dictionary_t>(&changedIt->second) : nullptr)
 				{
-					dictionary_t const& changed = boost::get<dictionary_t>(plist.find("changed")->second);
-					iterate(it, changed)
-						update_key_path(res, it->first, it->second);
+					for(auto pair : *changed)
+						update_key_path(res, pair.first, pair.second);
 				}
 			}
 			else
