@@ -1756,7 +1756,9 @@ namespace
 
 - (IBAction)toggleHTMLOutput:(id)sender
 {
-	self.htmlOutputVisible = !self.htmlOutputVisible;
+	if(self.htmlOutputVisible && self.htmlOutputInWindow && ![self.htmlOutputWindowController.window isKeyWindow])
+			[self.htmlOutputWindowController.window makeKeyAndOrderFront:self];
+	else	self.htmlOutputVisible = !self.htmlOutputVisible;
 }
 
 - (BOOL)setCommandRunner:(command::runner_ptr const&)aRunner
@@ -2039,7 +2041,7 @@ namespace
 		[menuItem setTitle:self.fileBrowserVisible ? @"Hide File Browser" : @"Show File Browser"];
 	else if([menuItem action] == @selector(toggleHTMLOutput:))
 	{
-		[menuItem setTitle:self.htmlOutputVisible ? @"Hide HTML Output" : @"Show HTML Output"];
+		[menuItem setTitle:(!self.htmlOutputVisible || self.htmlOutputInWindow && ![self.htmlOutputWindowController.window isKeyWindow]) ? @"Show HTML Output" : @"Hide HTML Output"];
 		active = !self.htmlOutputInWindow || self.htmlOutputWindowController;
 	}
 	else if([menuItem action] == @selector(newDocumentInDirectory:))
