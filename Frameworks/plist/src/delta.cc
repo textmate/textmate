@@ -27,32 +27,73 @@ static bool equal (plist::any_t const& lhs, plist::any_t const& rhs)
 	return boost::apply_visitor(test_equal_helper_t(rhs), lhs);
 }
 
+static std::string encode_key (std::string const& key)
+{
+	std::string res;
+	for(char const& ch : key)
+	{
+		if(ch == '\\' || ch == '.')
+			res.append(1, '\\');
+		res.append(1, ch);
+	}
+	return res;
+}
+
 static void delta_plist_helper (plist::dictionary_t const& oldDict, plist::dictionary_t const& newDict, plist::dictionary_t& changed, plist::array_t& deleted, std::vector<std::string> path = std::vector<std::string>())
 {
 	std::set<std::string> deletedKeys;
-	iterate(pair, oldDict)
-		deletedKeys.insert(pair->first);
-	iterate(pair, newDict)
-		deletedKeys.erase(pair->first);
+	for(auto const& pair : oldDict)
+		deletedKeys.insert(pair.first);
+	for(auto const& pair : newDict)
+		deletedKeys.erase(pair.first);
 
-	iterate(key, deletedKeys)
+	for(auto const& key : deletedKeys)
 	{
 		std::vector<std::string> newPath(path);
-		newPath.push_back(*key);
+		newPath.push_back(key);
+		std::transform(newPath.begin(), newPath.end(), newPath.begin(), &encode_key);
 		deleted.push_back(text::join(newPath, "."));
 	}
 
-	iterate(newValue, newDict)
+	for(auto const& newValue : newDict)
 	{
 		std::vector<std::string> newPath(path);
-		newPath.push_back(newValue->first);
+		newPath.push_back(newValue.first);
 
-		plist::dictionary_t::const_iterator oldValue = oldDict.find(newValue->first);
-		if(boost::get<plist::dictionary_t>(&newValue->second) && boost::get<plist::dictionary_t>(&oldValue->second))
-			delta_plist_helper(boost::get<plist::dictionary_t>(oldValue->second), boost::get<plist::dictionary_t>(newValue->second), changed, deleted, newPath);
-		else if(oldValue == oldDict.end() || !equal(oldValue->second, newValue->second))
-			changed.insert(std::make_pair(text::join(newPath, "."), newValue->second));
+		plist::dictionary_t::const_iterator oldValue = oldDict.find(newValue.first);
+		if(boost::get<plist::dictionary_t>(&newValue.second) && boost::get<plist::dictionary_t>(&oldValue->second))
+		{
+			delta_plist_helper(boost::get<plist::dictionary_t>(oldValue->second), boost::get<plist::dictionary_t>(newValue.second), changed, deleted, newPath);
+		}
+		else if(oldValue == oldDict.end() || !equal(oldValue->second, newValue.second))
+		{
+			std::transform(newPath.begin(), newPath.end(), newPath.begin(), &encode_key);
+			changed.insert(std::make_pair(text::join(newPath, "."), newValue.second));
+		}
 	}
+}
+
+static std::vector<std::string> parse_key_path (std::string const& keyPath)
+{
+	std::vector<std::string> res(1);
+	bool escape = false;
+	for(char const& ch : keyPath)
+	{
+		if(!escape && ch == '.')
+		{
+			res.push_back(std::string());
+		}
+		else if(!escape && ch == '\\')
+		{
+			escape = true;
+		}
+		else
+		{
+			res.back().append(1, ch);
+			escape = false;
+		}
+	}
+	return res;
 }
 
 namespace plist
@@ -84,50 +125,54 @@ namespace plist
 
 static void erase_key_path (plist::dictionary_t& plist, std::string const& keyPath)
 {
-	std::string::size_type sep = keyPath.find('.');
-	std::map<std::string, plist::any_t>::iterator it = plist.find(keyPath.substr(0, sep));
-	if(it != plist.end())
+	auto v = parse_key_path(keyPath);
+	plist::dictionary_t* current = &plist;
+
+	for(auto key = v.begin(); key != v.end() && current; )
 	{
-		if(sep == std::string::npos)
-		{
-			plist.erase(it);
-		}
-		else
-		{
-			if(plist::dictionary_t* dict = boost::get<plist::dictionary_t>(&it->second))
-				erase_key_path(*dict, keyPath.substr(sep+1));
-		}
+		auto it = current->find(*key);
+		if(it == current->end())
+			return;
+
+		if(++key != v.end())
+				current = boost::get<plist::dictionary_t>(&it->second);
+		else	current->erase(it);
 	}
 }
 
 static void update_key_path (plist::dictionary_t& plist, std::string const& keyPath, plist::any_t const& value)
 {
-	std::string::size_type sep = keyPath.find('.');
-	std::string const& key = keyPath.substr(0, sep);
-	std::map<std::string, plist::any_t>::iterator it = plist.find(key);
-	if(sep == std::string::npos)
+	auto v = parse_key_path(keyPath);
+	plist::dictionary_t* current = &plist;
+
+	for(auto key = v.begin(); key != v.end(); )
 	{
-		if(it == plist.end())
-				plist.insert(std::make_pair(keyPath, value));
-		else	it->second = value;
-	}
-	else
-	{
-		if(it == plist.end())
+		auto it = current->find(*key);
+		if(it == current->end())
 		{
-			plist::dictionary_t dict;
-			update_key_path(dict, keyPath.substr(sep+1), value);
-			plist.insert(std::make_pair(key, dict));
+			plist::any_t payload = value;
+			for(auto lastKey = v.end(); --lastKey != key; )
+			{
+				plist::dictionary_t tmp;
+				tmp.emplace(*lastKey, payload);
+				payload = tmp;
+			}
+			current->emplace(*key, payload);
+		}
+		else if(++key == v.end())
+		{
+			it->second = value;
 		}
 		else
 		{
-			if(plist::dictionary_t* dict = boost::get<plist::dictionary_t>(&it->second))
-				update_key_path(*dict, keyPath.substr(sep+1), value);
+			if(current = boost::get<plist::dictionary_t>(&it->second))
+				continue;
 			else if(plist::array_t* array = boost::get<plist::array_t>(&it->second))
-				array->push_back(keyPath.substr(sep+1));
+				array->push_back(*key);
 			else
 				fprintf(stderr, "error: unable to update key path ‘%s’ for plist:\n%s\n", keyPath.c_str(), to_s(plist).c_str());
 		}
+		break;
 	}
 }
 
