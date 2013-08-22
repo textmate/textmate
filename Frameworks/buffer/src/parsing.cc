@@ -11,6 +11,7 @@ namespace ng
 
 		struct request_t
 		{
+			parse::grammar_ptr grammar;
 			parse::stack_ptr state;
 			std::string line;
 			std::pair<size_t, size_t> range;
@@ -52,7 +53,7 @@ namespace ng
 	{
 		_client_key = server().register_client(this);
 		_revision = buffer.revision();
-		server().send_request(_client_key, (request_t){ parserState, line, range, batch_start, limit_redraw });
+		server().send_request(_client_key, (request_t){ buffer.grammar(), parserState, line, range, batch_start, limit_redraw });
 	}
 
 	buffer_parser_t::~buffer_parser_t ()
