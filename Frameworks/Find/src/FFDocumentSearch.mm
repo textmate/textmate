@@ -426,15 +426,12 @@ OAK_DEBUG_VAR(Find_FolderSearch);
 	});
 }
 
-- (BOOL)prepareSavePanel:(NSSavePanel *)savePanel
-{
-	return NO;
-}
-
 - (BOOL)validateUserInterfaceItem:(id <NSValidatedUserInterfaceItem>)anItem
 {
 	if(anItem.action == @selector(saveAllDocuments:))
 		return self.hasPerformedReplacement && !self.hasPerformedSave;
+	else if(anItem.action == @selector(saveDocument:) || anItem.action == @selector(saveDocumentAs:))
+		return NO;
 	return [super validateUserInterfaceItem:anItem];
 }
 
