@@ -109,6 +109,7 @@ namespace ng
 		text::indent_t const& indent () const             { return _indent; }
 
 		bool set_grammar (bundles::item_ptr const& grammarItem);
+		parse::grammar_ptr grammar () const { return _grammar; }
 
 		scope::context_t scope (size_t i, bool includeDynamic = true) const;
 		std::map<size_t, scope::scope_t> scopes (size_t from, size_t to) const;

@@ -33,6 +33,7 @@ namespace ng
 		void handle_reply (result_t const& result);
 
 	private:
+		parse::grammar_ptr _grammar;
 		size_t _client_key;
 		buffer_t& _buffer;
 		size_t _revision;
@@ -50,6 +51,7 @@ namespace ng
 
 	buffer_parser_t::buffer_parser_t (buffer_t& buffer, parse::stack_ptr const& parserState, std::string const& line, std::pair<size_t, size_t> const& range, size_t const& batch_start, size_t limit_redraw) : _buffer(buffer)
 	{
+		_grammar = buffer.grammar();
 		_client_key = server().register_client(this);
 		_revision = buffer.revision();
 		server().send_request(_client_key, (request_t){ parserState, line, range, batch_start, limit_redraw });
