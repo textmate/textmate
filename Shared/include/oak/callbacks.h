@@ -18,21 +18,18 @@ namespace oak
 
 		void swap (callbacks_t& rhs)                    { _callbacks.swap(rhs._callbacks); }
 
-		void add (T* callback)                          { ASSERTF(std::find(_callbacks.begin(), _callbacks.end(), callback) == _callbacks.end(), "%p", callback); _callbacks.push_back(callback); }
-		void remove (T* callback)                       { ASSERTF(std::find(_callbacks.begin(), _callbacks.end(), callback) != _callbacks.end(), "%p", callback); _callbacks.erase(std::find(_callbacks.begin(), _callbacks.end(), callback)); }
+		void add (T* callback)                          { std::lock_guard<std::mutex> lock(_mutex); ASSERTF(std::find(_callbacks.begin(), _callbacks.end(), callback) == _callbacks.end(), "%p", callback); _callbacks.push_back(callback); }
+		void remove (T* callback)                       { std::lock_guard<std::mutex> lock(_mutex); ASSERTF(std::find(_callbacks.begin(), _callbacks.end(), callback) != _callbacks.end(), "%p", callback); _callbacks.erase(std::find(_callbacks.begin(), _callbacks.end(), callback)); }
 
-		template <typename M> void operator () (M fun) const                                                                                                 { citerate(cb, dup()) (*cb->*fun)();           }
-		template <typename M, typename A> void operator () (M fun, A const& a) const                                                                         { citerate(cb, dup()) (*cb->*fun)(a);          }
-		template <typename M, typename A, typename B> void operator () (M fun, A const& a, B const& b) const                                                 { citerate(cb, dup()) (*cb->*fun)(a, b);       }
-		template <typename M, typename A, typename B, typename C> void operator () (M fun, A const& a, B const& b, C const& c) const                         { citerate(cb, dup()) (*cb->*fun)(a, b, c);    }
-		template <typename M, typename A, typename B, typename C, typename D> void operator () (M fun, A const& a, B const& b, C const& c, D const& d) const { citerate(cb, dup()) (*cb->*fun)(a, b, c, d); }
+		template <typename M, typename... Args> void operator () (M fun, Args... args) const { for(auto const& cb : dup()) (cb->*fun)(args...); }
 
 		iterator begin () const                         { return _callbacks.begin(); }
 		iterator end () const                           { return _callbacks.end(); }
 
 	private:
-		std::vector<T*> dup () const                    { return _callbacks; }
+		std::vector<T*> dup () const                    { std::lock_guard<std::mutex> lock(_mutex); return _callbacks; }
 		std::vector<T*> _callbacks;
+		mutable std::mutex _mutex;
 	};
 
 } /* oak */
