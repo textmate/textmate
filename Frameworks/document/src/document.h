@@ -291,8 +291,6 @@ namespace document
 
 	private:
 		void setup_buffer ();
-		void grammar_did_change ();
-
 		void set_modified (bool flag);
 
 		// ==============
