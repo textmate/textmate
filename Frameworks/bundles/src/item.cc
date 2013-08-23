@@ -241,6 +241,7 @@ namespace bundles
 
 	plist::dictionary_t const& item_t::plist () const
 	{
+		std::lock_guard<std::mutex> lock(_plist_mutex);
 		if(!_plist)
 		{
 			static plist::dictionary_t const fallback;
@@ -264,6 +265,7 @@ namespace bundles
 
 	void item_t::set_plist (plist::dictionary_t const& plist, bool shouldInitialize)
 	{
+		std::lock_guard<std::mutex> lock(_plist_mutex);
 		_plist.reset(new plist::dictionary_t(plist));
 		if(shouldInitialize)
 			initialize(plist);

@@ -108,6 +108,7 @@ namespace bundles
 		std::multimap<std::string, std::string> _fields;
 
 		mutable std::shared_ptr<plist::dictionary_t> _plist;
+		mutable std::mutex _plist_mutex;
 		mutable std::string _full_name;
 		std::vector<required_bundle_t> _required_bundles;
 		std::vector<required_executable_t> _required_executables;
