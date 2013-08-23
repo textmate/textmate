@@ -231,7 +231,7 @@ def sources(target)
   target['SOURCES'].each do |path|
     src = File.join(target[:path], path)
     case src
-      when /^(.*)\.(c|cc|m|mm)$/ then
+      when /^(.*)\.(c|cc|c\+\+|m|mm)$/ then
         base, ext = $1, $2
         cc  = compiler_for(src)
         dst = build_path("#{base}.o")
