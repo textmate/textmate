@@ -61,7 +61,7 @@ static void delta_plist_helper (plist::dictionary_t const& oldDict, plist::dicti
 		newPath.push_back(newValue.first);
 
 		plist::dictionary_t::const_iterator oldValue = oldDict.find(newValue.first);
-		if(boost::get<plist::dictionary_t>(&newValue.second) && boost::get<plist::dictionary_t>(&oldValue->second))
+		if(boost::get<plist::dictionary_t>(&newValue.second) && oldValue != oldDict.end() && boost::get<plist::dictionary_t>(&oldValue->second))
 		{
 			delta_plist_helper(boost::get<plist::dictionary_t>(oldValue->second), boost::get<plist::dictionary_t>(newValue.second), changed, deleted, newPath);
 		}
