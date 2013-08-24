@@ -18,13 +18,15 @@ namespace parser
 	struct placeholder_transform_t     { size_t index; regexp::pattern_t pattern; nodes_t format; regexp_options::type options; WATCH_LEAKS(parser::placeholder_transform_t); };
 
 	struct variable_t                  { std::string name; WATCH_LEAKS(parser::variable_t); };
-	struct variable_transform_t        { std::string name; regexp::pattern_t pattern; nodes_t format; regexp_options::type options; WATCH_LEAKS(parser::variable_transform_t); };
+	struct variable_transform_t        { std::string name; nodes_t pattern; nodes_t format; regexp_options::type options; WATCH_LEAKS(parser::variable_transform_t); };
 	struct variable_fallback_t         { std::string name; nodes_t fallback; WATCH_LEAKS(parser::variable_fallback_t); };
 	struct variable_condition_t        { std::string name; nodes_t if_set, if_not_set; WATCH_LEAKS(parser::variable_condition_t); };
 	struct variable_change_t           { std::string name; uint8_t change; WATCH_LEAKS(parser::variable_change_t); };
 
 	struct case_change_t               { case_change_t (case_change::type type) : type(type) { } case_change::type type; WATCH_LEAKS(parser::case_change_t); };
 	struct code_t                      { std::string code; WATCH_LEAKS(parser::code_t); };
+
+	OnigOptionType convert (regexp_options::type const& options);
 
 	nodes_t parse_format_string (std::string const& str);
 	nodes_t parse_snippet (std::string const& str);

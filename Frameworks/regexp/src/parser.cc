@@ -44,7 +44,9 @@
 
 */
 
-OnigOptionType convert (parser::regexp_options::type const& options)
+namespace parser {
+
+OnigOptionType convert (regexp_options::type const& options)
 {
 	OnigOptionType res = ONIG_OPTION_NONE;
 	if(options & parser::regexp_options::i)
@@ -58,8 +60,6 @@ OnigOptionType convert (parser::regexp_options::type const& options)
 	return res;
 }
 
-namespace parser {
-
 struct parse_context_t : parser_base_t
 {
 	WATCH_LEAKS(parser::parse_context_t);
@@ -69,6 +69,8 @@ struct parse_context_t : parser_base_t
 	bool parse_regexp_options (regexp_options::type& options);
 
 	bool parse_variable (bool(parse_context_t::*parse_content)(char const* stopChars, nodes_t& nodes), nodes_t& nodes);
+	bool parse_variable_simple (nodes_t& nodes);
+	bool parse_variable_complex (bool(parse_context_t::*parse_content)(char const* stopChars, nodes_t& nodes), nodes_t& nodes);
 	bool parse_condition (nodes_t& nodes);
 	bool parse_case_change (nodes_t& nodes);
 	bool parse_control_code (nodes_t& nodes);
@@ -106,89 +108,96 @@ bool parse_context_t::parse_regexp_options (regexp_options::type& options)
 
 bool parse_context_t::parse_variable (bool(parse_context_t::*parse_content)(char const* stopChars, nodes_t& nodes), nodes_t& nodes)
 {
+	return parse_variable_simple(nodes) || parse_variable_complex(parse_content, nodes);
+}
+
+bool parse_context_t::parse_variable_simple (nodes_t& nodes)
+{
 	char const* backtrack = it;
 	if(parse_char("$"))
 	{
-		std::string name;
-		if(parse_char("{") && parse_until("/:}", name))
-		{
-			if(it[-1] == '}')
-			{
-				return nodes.push_back((variable_t){ name }), true;
-			}
-			else if(it[-1] == '/')
-			{
-				variable_transform_t res = { name };
-				std::string regexp;
-				if(parse_until("/", regexp) && parse_format_string("/", res.format) && parse_regexp_options(res.options) && parse_char("}"))
-				{
-					res.pattern = regexp::pattern_t(regexp, convert(res.options));
-					return nodes.push_back(res), true;
-				}
-			}
-			else // it[-1] == ':'
-			{
-				if(parse_char("+"))
-				{
-					variable_condition_t res = { name };
-					if((this->*parse_content)("}", res.if_set))
-						return nodes.push_back(res), true;
-				}
-				else if(parse_char("?"))
-				{
-					variable_condition_t res = { name };
-					if((this->*parse_content)(":", res.if_set) && (this->*parse_content)("}", res.if_not_set))
-						return nodes.push_back(res), true;
-				}
-				else if(parse_char("/"))
-				{
-					variable_change_t res = { name, transform::kNone };
-					while(it[-1] == '/')
-					{
-						std::string option;
-						if(parse_until("/}", option))
-						{
-							static struct { std::string option; uint8_t change; } const options[] =
-							{
-								{ "upcase",      transform::kUpcase     },
-								{ "downcase",    transform::kDowncase   },
-								{ "capitalize",  transform::kCapitalize },
-								{ "asciify",     transform::kAsciify    },
-							};
+		size_t index;
+		if(parse_int(index))
+			return nodes.push_back((variable_t){ std::to_string(index) }), true;
 
-							for(size_t i = 0; i < sizeofA(options); ++i)
-							{
-								if(option == options[i].option)
-									res.change |= options[i].change;
-							}
-						}
-						else
+		std::string variable;
+		if(parse_chars("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_abcdefghijklmnopqrstuvwxyz", variable))
+			return nodes.push_back((variable_t){ variable }), true;
+	}
+	return it = backtrack, false;
+}
+
+bool parse_context_t::parse_variable_complex (bool(parse_context_t::*parse_content)(char const* stopChars, nodes_t& nodes), nodes_t& nodes)
+{
+	char const* backtrack = it;
+
+	std::string name;
+	if(parse_char("$") && parse_char("{") && parse_until("/:}", name))
+	{
+		if(it[-1] == '}')
+		{
+			return nodes.push_back((variable_t){ name }), true;
+		}
+		else if(it[-1] == '/')
+		{
+			variable_transform_t res = { name };
+			while(it != last && *it != '/' && (parse_escape("\\/", res.pattern) || parse_variable_complex(&parse_context_t::parse_format_string, res.pattern) || parse_text(res.pattern)))
+				;
+			if(parse_char("/") && parse_format_string("/", res.format) && parse_regexp_options(res.options) && parse_char("}"))
+				return nodes.push_back(res), true;
+		}
+		else // it[-1] == ':'
+		{
+			if(parse_char("+"))
+			{
+				variable_condition_t res = { name };
+				if((this->*parse_content)("}", res.if_set))
+					return nodes.push_back(res), true;
+			}
+			else if(parse_char("?"))
+			{
+				variable_condition_t res = { name };
+				if((this->*parse_content)(":", res.if_set) && (this->*parse_content)("}", res.if_not_set))
+					return nodes.push_back(res), true;
+			}
+			else if(parse_char("/"))
+			{
+				variable_change_t res = { name, transform::kNone };
+				while(it[-1] == '/')
+				{
+					std::string option;
+					if(parse_until("/}", option))
+					{
+						static struct { std::string option; uint8_t change; } const options[] =
 						{
-							break;
+							{ "upcase",      transform::kUpcase     },
+							{ "downcase",    transform::kDowncase   },
+							{ "capitalize",  transform::kCapitalize },
+							{ "asciify",     transform::kAsciify    },
+						};
+
+						for(size_t i = 0; i < sizeofA(options); ++i)
+						{
+							if(option == options[i].option)
+								res.change |= options[i].change;
 						}
 					}
+					else
+					{
+						break;
+					}
+				}
 
-					if(it[-1] == '}')
-						return nodes.push_back(res), true;
-				}
-				else
-				{
-					parse_char("-"); // to be backwards compatible, this character is not required
-					variable_fallback_t res = { name };
-					if((this->*parse_content)("}", res.fallback))
-						return nodes.push_back(res), true;
-				}
+				if(it[-1] == '}')
+					return nodes.push_back(res), true;
 			}
-		}
-		else
-		{
-			size_t index;
-			if(parse_int(index))
-				return nodes.push_back((variable_t){ std::to_string(index) }), true;
-			
-			std::string variable;
-			if(parse_chars("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_abcdefghijklmnopqrstuvwxyz", variable))
-				return nodes.push_back((variable_t){ variable }), true;
+			else
+			{
+				parse_char("-"); // to be backwards compatible, this character is not required
+				variable_fallback_t res = { name };
+				if((this->*parse_content)("}", res.fallback))
+					return nodes.push_back(res), true;
+			}
 		}
 	}
 	return it = backtrack, false;

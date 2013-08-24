@@ -112,8 +112,13 @@ struct expand_visitor : boost::static_visitor<void>
 
 	void operator() (parser::variable_transform_t const& v)
 	{
+		expand_visitor tmp(variables, callback);
+		tmp.traverse(v.pattern);
+		tmp.handle_case_changes();
+		auto ptrn = regexp::pattern_t(tmp.res, parser::convert(v.options));
+
 		std::map<std::string, std::string>::const_iterator it = variable(v.name);
-		replace(it != variables.end() ? it->second : "", v.pattern, v.format, v.options & parser::regexp_options::g);
+		replace(it != variables.end() ? it->second : "", ptrn, v.format, v.options & parser::regexp_options::g);
 	}
 
 	void operator() (parser::variable_fallback_t const& v)

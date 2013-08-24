@@ -10,6 +10,25 @@ void test_format_string ()
 	OAK_ASSERT_EQ(replace("æbleGRØD", ".+", "»${0:/capitalize/asciify}«"), "»AEblegrod«");
 }
 
+void test_variables ()
+{
+	std::map<std::string, std::string> variables{
+		{ "a",    "hello"         },
+		{ "b",    " "             },
+		{ "c",    "world"         },
+		{ "d",    "hell"          },
+		{ "dir",  "/path/to"      },
+		{ "path", "/path/to/file" },
+	};
+	OAK_ASSERT_EQ("hello world", format_string::expand("$a$b$c",                  variables));
+	OAK_ASSERT_EQ("hello world", format_string::expand("${a}${b}${c}",            variables));
+	OAK_ASSERT_EQ("hi world",    format_string::expand("${a/hello/hi/}${b}${c}",  variables));
+	OAK_ASSERT_EQ("hi’yo world", format_string::expand("${a/${d}/hi’y/}${b}${c}", variables));
+	OAK_ASSERT_EQ("file",        format_string::expand("${path/^.*\\///}",        variables));
+	OAK_ASSERT_EQ("file",        format_string::expand("${path/${dir}.//}",       variables));
+	OAK_ASSERT_EQ("file",        format_string::expand("${path/${dir}\\///}",     variables));
+}
+
 void test_legacy_conditions ()
 {
 	using format_string::replace;
