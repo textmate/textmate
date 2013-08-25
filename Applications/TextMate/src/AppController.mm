@@ -187,13 +187,10 @@ BOOL HasDocumentWindow (NSArray* windows)
 	{
 		if(NSString* archive = [[NSBundle mainBundle] pathForResource:@"DefaultBundles" ofType:@"tbz"])
 		{
-			int input, output;
-			std::string error;
-
 			path::make_dir(dest);
 
-			pid_t pid = network::launch_tbz(dest, input, output, error);
-			if(pid != -1)
+			network::tbz_t tbz(dest);
+			if(tbz)
 			{
 				int fd = open([archive fileSystemRepresentation], O_RDONLY|O_CLOEXEC);
 				if(fd != -1)
@@ -202,7 +199,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 					ssize_t len;
 					while((len = read(fd, buf, sizeof(buf))) > 0)
 					{
-						if(write(input, buf, len) != len)
+						if(write(tbz.input_fd(), buf, len) != len)
 						{
 							fprintf(stderr, "*** error wrting bytes to tar\n");
 							break;
@@ -211,13 +208,18 @@ BOOL HasDocumentWindow (NSArray* windows)
 					close(fd);
 				}
 
-				if(!network::finish_tbz(pid, input, output, error))
-					fprintf(stderr, "%s\n", error.c_str());
+				std::string output, error;
+				if(!tbz.wait_for_tbz(&output, &error))
+					fprintf(stderr, "%s: %s%s\n", getprogname(), output.c_str(), error.c_str());
 			}
 			else
 			{
-				fprintf(stderr, "%s\n", error.c_str());
+				fprintf(stderr, "%s: unable to launch tar\n", getprogname());
 			}
+		}
+		else
+		{
+			fprintf(stderr, "%s: no ‘DefaultBundles.tbz’ in TextMate.app\n", getprogname());
 		}
 	}
 	[[BundlesManager sharedInstance] loadBundlesIndex];

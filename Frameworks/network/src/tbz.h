@@ -1,12 +1,27 @@
 #ifndef NETWORK_TBZ_H_NEU56OWR
 #define NETWORK_TBZ_H_NEU56OWR
 
+#include <io/exec.h>
 #include <oak/misc.h>
 
 namespace network
 {
-	PUBLIC pid_t launch_tbz (std::string const& dest, int& input, int& output, std::string& error);
-	PUBLIC bool finish_tbz (pid_t pid, int& input, int& output, std::string& error);
+	struct PUBLIC tbz_t
+	{
+		tbz_t (std::string const& dest);
+		~tbz_t ();
+
+		bool wait_for_tbz (std::string* output = nullptr, std::string* error = nullptr);
+
+		int input_fd () const  { return _process.in; }
+		operator bool () const { return _process.pid != -1; }
+
+	private:
+		dispatch_group_t _group = nullptr;
+		io::process_t _process;
+		std::string _output, _error;
+		int _status;
+	};
 
 } /* network */
 

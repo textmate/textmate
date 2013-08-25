@@ -114,8 +114,7 @@ namespace network
 		{
 			std::string tbzDestination = path::cache("dl_archive_contents");
 			mkdir(tbzDestination.c_str(), S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IWGRP|S_IXGRP|S_IROTH|S_IWOTH|S_IXOTH);
-			int tbzInput, tbzOutput;
-			pid_t tbzPid = launch_tbz(tbzDestination, tbzInput, tbzOutput, error);
+			tbz_t tbz(tbzDestination);
 
 			std::string tmpPath = path::temp("dl_bytes");
 			int tmpInput = open(tmpPath.c_str(), O_CREAT|O_TRUNC|O_WRONLY|O_CLOEXEC, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH);
@@ -124,7 +123,7 @@ namespace network
 			// = Curl =
 			// ========
 
-			user_data_t data(keyChain, progress, progressStart, progressStop, stopFlag, tbzInput, tmpInput);
+			user_data_t data(keyChain, progress, progressStart, progressStop, stopFlag, tbz.input_fd(), tmpInput);
 
 			curl_easy_setopt(handle, CURLOPT_URL,              url.c_str());
 			curl_easy_setopt(handle, CURLOPT_FOLLOWLOCATION,   true);
@@ -207,7 +206,7 @@ namespace network
 						if(len == -1)
 							break;
 
-						write(tbzInput, bytes, len);
+						write(tbz.input_fd(), bytes, len);
 						data.receive(len);
 					}
 					close(fd);
@@ -220,10 +219,14 @@ namespace network
 
 			unlink(tmpPath.c_str());
 
-			if(finish_tbz(tbzPid, tbzInput, tbzOutput, error))
+			if(tbz.wait_for_tbz())
 			{
 				if(serverReply == 304 || goodSignature)
 					res = tbzDestination;
+			}
+			else
+			{
+				error = "Extracting archive.";
 			}
 
 			if(res == NULL_STR)
