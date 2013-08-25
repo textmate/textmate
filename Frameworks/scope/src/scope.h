@@ -27,6 +27,7 @@ namespace scope
 
 		scope_t append (std::string const& atom, bool contentScope = false) const;
 		scope_t parent () const;
+		std::string back () const;
 
 		bool operator== (scope_t const& rhs) const;
 		bool operator!= (scope_t const& rhs) const;

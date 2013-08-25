@@ -58,6 +58,13 @@ namespace scope
 		return res;
 	}
 
+	std::string scope_t::back () const
+	{
+		if(path && !path->scopes.empty())
+			return to_s(path->scopes.back());
+		return NULL_STR;
+	}
+
 	bool scope_t::operator== (scope_t const& rhs) const   { return (!path && !rhs.path) || (path && rhs.path && *path == *rhs.path); }
 	bool scope_t::operator!= (scope_t const& rhs) const   { return !(*this == rhs); }
 	bool scope_t::operator< (scope_t const& rhs) const    { return (!path && rhs.path) || (path && rhs.path && *path < *rhs.path); }
