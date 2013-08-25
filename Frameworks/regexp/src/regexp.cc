@@ -15,7 +15,9 @@ namespace regexp
 		OnigRegex tmp = NULL;
 
 		OnigErrorInfo einfo;
-		int r = onig_new(&tmp, (OnigUChar const*)pattern.data(), (OnigUChar const*)pattern.data() + pattern.size(), options | ONIG_OPTION_CAPTURE_GROUP, ONIG_ENCODING_UTF8, ONIG_SYNTAX_DEFAULT, &einfo);
+		if((options & ONIG_OPTION_DONT_CAPTURE_GROUP) == 0)
+			options |= ONIG_OPTION_CAPTURE_GROUP;
+		int r = onig_new(&tmp, (OnigUChar const*)pattern.data(), (OnigUChar const*)pattern.data() + pattern.size(), options, ONIG_ENCODING_UTF8, ONIG_SYNTAX_DEFAULT, &einfo);
 		if(r == ONIG_NORMAL)
 		{
 			compiled_pattern.reset(tmp, onig_free);
