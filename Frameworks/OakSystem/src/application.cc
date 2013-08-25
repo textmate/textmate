@@ -25,16 +25,17 @@ namespace oak
 		return NULL_STR;
 	}
 
-	application_t::application_t (int argc, char const* argv[])
+	application_t::application_t (int argc, char const* argv[], bool redirectStdErr)
 	{
 		_app_name      = getenv("OAK_APP_NAME") ?: path::name(argv[0]);
 		_full_app_path = path::join(path::cwd(), argv[0]);
 		_app_path      = _full_app_path;
 		_pid_path      = support(((CFBundleGetMainBundle() && CFBundleGetIdentifier(CFBundleGetMainBundle())) ? cf::to_s(CFBundleGetIdentifier(CFBundleGetMainBundle())) : _app_name) + ".pid");
 
-		if(char const* logPath = getenv("LOG_PATH"))
+		if(redirectStdErr)
 		{
-			if(path::is_absolute(logPath) && path::make_dir(logPath))
+			char const* logPath = getenv("LOG_PATH");
+			if(logPath && path::is_absolute(logPath) && path::make_dir(logPath))
 			{
 				std::string const logFile = path::join(logPath, _app_name + ".log");
 				if(FILE* fp = freopen(logFile.c_str(), "w+", stderr))

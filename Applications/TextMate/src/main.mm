@@ -32,7 +32,7 @@ int main (int argc, char const* argv[])
 	curl_global_init(CURL_GLOBAL_ALL);
 
 	oak::application_t::set_support(path::join(path::home(), "Library/Application Support/TextMate"));
-	oak::application_t app(argc, argv);
+	oak::application_t app(argc, argv, true);
 
 	signal(SIGUSR1, SIG_IGN);
 	signal(SIGINT,  SIG_IGN);
