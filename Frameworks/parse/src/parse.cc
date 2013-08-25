@@ -128,7 +128,7 @@ namespace parse
 		std::multimap<std::string, std::pair<size_t, size_t> >::const_iterator indexIter = m.capture_indices().begin();
 		while(ruleIter != captures->end() && indexIter != m.capture_indices().end())
 		{
-			if(ruleIter->first == indexIter->first)
+			if(ruleIter->first == indexIter->first && indexIter->second.first != indexIter->second.second)
 				rules.insert(std::make_pair(std::make_pair(indexIter->second.first, -(indexIter->second.second - indexIter->second.first)), ruleIter->second));
 
 			if(ruleIter->first < indexIter->first)
