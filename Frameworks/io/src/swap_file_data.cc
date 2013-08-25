@@ -11,13 +11,7 @@ namespace path
 	{
 		D(DBF_IO_Swap_File_Data, bug("%s → %s\n", src.c_str(), dst.c_str()););
 		ASSERT_EQ(access(src.c_str(), F_OK), 0);
-		if(access(dst.c_str(), F_OK) != 0)
-		{
-			perror(text::format("access(\"%s\", F_OK)", dst.c_str()).c_str());
-			return false;
-		}
-
-		if(!path::make_dir(path::parent(dst)))
+		if(access(dst.c_str(), F_OK) != 0 && !path::make_dir(path::parent(dst)))
 		{
 			perror(text::format("mkdir_p(\"%s\")", path::parent(dst).c_str()).c_str());
 			return false;
