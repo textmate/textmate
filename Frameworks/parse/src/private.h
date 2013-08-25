@@ -77,6 +77,9 @@ namespace parse
 		rule_t const* rule;                 // the rule supplying patterns for current context
 		scope::scope_t scope;               // the scope of the current context
 
+		std::string scope_string = NULL_STR;         // expanded version of rule->scope_string
+		std::string content_scope_string = NULL_STR; // expanded version of rule->content_scope_string
+
 		regexp::pattern_t while_pattern;    // a while-pattern active in current context
 		regexp::pattern_t end_pattern;      // the end-pattern which exits this context
 		size_t anchor;

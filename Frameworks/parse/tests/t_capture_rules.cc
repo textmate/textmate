@@ -35,6 +35,5 @@ void test_captures ()
 	OAK_ASSERT_EQ(markup(grammar, "Lorem ipsum."),                       "«test»Lorem ipsum.«/test»");
 	OAK_ASSERT_EQ(markup(grammar, "fixup! Lorem ipsum."),                "«test»«fixup»fixup!«/fixup» Lorem ipsum.«/test»");
 	OAK_ASSERT_EQ(markup(grammar, "Lorem ipsum dolor sit amet."),        "«test»«warn»Lorem ipsum dolor sit amet.«/warn»«/test»");
-	OAK_WARN("TODO: Applying scope names to “nested” captures (where parser ran on the previous pass).");
-	// OAK_ASSERT_EQ(markup(grammar, "fixup! Lorem ipsum dolor sit amet."), "«test»«warn»«fixup»fixup!«/fixup» Lorem ipsum dolor sit amet.«/warn»«/test»");
+	OAK_ASSERT_EQ(markup(grammar, "fixup! Lorem ipsum dolor sit amet."), "«test»«fixup»«warn»fixup!«/warn»«/fixup»«warn» Lorem ipsum dolor sit amet.«/warn»«/test»");
 }
