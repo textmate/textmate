@@ -174,21 +174,19 @@ namespace ng
 		if(_grammar)
 			_grammar->remove_callback(&_grammar_callback);
 		_grammar.reset();
+		_scopes.clear();
+		_parser_states.clear();
+		_dirty.clear();
 
 		std::string rootScope = NULL_STR;
 		plist::get_key_path(grammarItem->plist(), bundles::kFieldGrammarScope, rootScope);
-		_scopes.clear();
 		_scopes.set(-1, rootScope);
 
 		if(parse::grammar_ptr grammar = parse::parse_grammar(grammarItem))
 		{
 			_grammar = grammar;
 			_grammar->add_callback(&_grammar_callback);
-
-			_parser_states.clear();
 			_parser_states.set(-1, grammar->seed());
-
-			_dirty.clear();
 			_dirty.set(0, true);
 
 			initiate_repair(10);
