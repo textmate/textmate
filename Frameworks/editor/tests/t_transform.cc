@@ -12,4 +12,10 @@ void test_transform ()
 	OAK_ASSERT_EQ("'bar', 'foo'",    transform::transpose("'foo', 'bar'"));
 	OAK_ASSERT_EQ("bar() : foo()",   transform::transpose("foo() : bar()"));
 	OAK_ASSERT_EQ("('bar', 'foo')",  transform::transpose("('foo', 'bar')"));
+	OAK_ASSERT_EQ("bar < foo",       transform::transpose("foo < bar"));
+	OAK_ASSERT_EQ("bar <= foo",      transform::transpose("foo <= bar"));
+	OAK_ASSERT_EQ("bar == foo",      transform::transpose("foo == bar"));
+	OAK_ASSERT_EQ("bar != foo",      transform::transpose("foo != bar"));
+	OAK_ASSERT_EQ("bar > foo",       transform::transpose("foo > bar"));
+	OAK_ASSERT_EQ("bar >= foo",      transform::transpose("foo >= bar"));
 }
