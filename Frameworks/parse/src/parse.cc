@@ -24,10 +24,13 @@ namespace
 
 		scope::scope_t update (scope::scope_t scope, std::map<size_t, scope::scope_t>& out) const
 		{
+			D(DBF_Parser, bug("%s\n", to_s(scope).c_str()););
+
 			size_t pos = 0;
 
 			for(auto const& pair : map)
 			{
+				D(DBF_Parser, bug("%3zu: %c%s\n", pair.first, pair.second.add ? '+' : '-', pair.second.scope.c_str()););
 				if(pos != pair.first)
 				{
 					out.emplace(pos, scope);
@@ -49,6 +52,8 @@ namespace
 						std::vector<std::string> stack;
 						while(scope.back() != pair.second.scope)
 						{
+							ASSERT(scope.back() != NULL_STR);
+							D(DBF_Parser, bug("%s != %s\n", scope.back().c_str(), pair.second.scope.c_str()););
 							stack.emplace_back(scope.back());
 							scope = scope.parent();
 						}
@@ -57,6 +62,7 @@ namespace
 							scope = scope.append(*it, true);
 					}
 				}
+				D(DBF_Parser, bug("→ %s\n", to_s(scope).c_str()););
 			}
 
 			out.emplace(pos, scope);
