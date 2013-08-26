@@ -54,3 +54,17 @@ void test_escape_format_string ()
 	OAK_ASSERT_EQ(expand(escape("Escape\\\\me")),    "Escape\\\\me");
 	OAK_ASSERT_EQ(expand(escape("(?1:baz: buz)")),  "(?1:baz: buz)");
 }
+
+void test_control_codes ()
+{
+	using format_string::expand;
+	OAK_ASSERT_EQ("\t",         expand("\\t"));
+	OAK_ASSERT_EQ("\r",         expand("\\r"));
+	OAK_ASSERT_EQ("\n",         expand("\\n"));
+	OAK_ASSERT_EQ("\\x",        expand("\\x"));
+	OAK_ASSERT_EQ("\\x{foo}",   expand("\\x{foo}"));
+	OAK_ASSERT_EQ("\u2014",     expand("\\x{2014}"));
+	OAK_ASSERT_EQ("\U00020EF5", expand("\\x{20EF5}"));
+	OAK_ASSERT_EQ("\U0010FFFF", expand("\\x{0010FFFF}"));
+	OAK_ASSERT_EQ("Æblegrød",   expand("\\xc3\\x86blegr\\xC3\\xB8d"));
+}

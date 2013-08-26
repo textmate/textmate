@@ -1,6 +1,7 @@
 #include "parser.h"
 #include "parser_base.h"
 #include <text/format.h>
+#include <text/utf8.h>
 #include <oak/oak.h>
 
 /*
@@ -24,7 +25,7 @@
 	$0-n
 
 	\U, \L, \E, \u, \l
-	\n, \t
+	\t, \r, \n, \x{HHHH}, \xHH
 
 	«variables»
 
@@ -238,15 +239,33 @@ bool parse_context_t::parse_case_change (nodes_t& nodes)
 bool parse_context_t::parse_control_code (nodes_t& nodes)
 {
 	char const* backtrack = it;
-	if(parse_char("\\") && parse_char("trn"))
+	if(parse_char("\\") && parse_char("trnx"))
 	{
 		switch(it[-1])
 		{
-			case 't': text_node(nodes) += '\t'; break;
-			case 'r': text_node(nodes) += '\r'; break;
-			case 'n': text_node(nodes) += '\n'; break;
+			case 't': text_node(nodes) += '\t'; return true;
+			case 'r': text_node(nodes) += '\r'; return true;
+			case 'n': text_node(nodes) += '\n'; return true;
+			case 'x':
+			{
+				std::string value;
+				if(parse_char("{") && parse_until("}", value))
+				{
+					if(value.size() <= 8 && std::find_if_not(value.begin(), value.end(), isxdigit) == value.end())
+					{
+						text_node(nodes) += utf8::to_s(std::stoul(value, nullptr, 16));
+						return true;
+					}
+				}
+				else if(it != last && it+1 != last && isxdigit(it[0]) && isxdigit(it[1]))
+				{
+					text_node(nodes) += digittoint(it[0]) << 4 | digittoint(it[1]);
+					it += 2;
+					return true;
+				}
+			}
+			break;
 		}
-		return true;
 	}
 	return it = backtrack, false;
 }
