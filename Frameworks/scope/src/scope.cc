@@ -1,6 +1,7 @@
 #include "scope.h"
 #include "parse.h"
 #include <text/format.h>
+#include <text/parse.h>
 #include <oak/oak.h>
 
 namespace scope
@@ -40,10 +41,9 @@ namespace scope
 	{
 		scope_t res;
 		res.path.reset(new types::path_t(path ? *path : types::path_t()));
-		types::scope_t scope;
-		scope.content_scope = contentScope;
-		parse::scope(atom.data(), atom.data() + atom.size(), scope);
-		res.path->scopes.push_back(scope);
+		res.path->scopes.emplace_back();
+		res.path->scopes.back().atoms = text::split(atom, ".");
+		res.path->scopes.back().content_scope = contentScope;
 		return res;
 	}
 
@@ -61,7 +61,7 @@ namespace scope
 	std::string scope_t::back () const
 	{
 		if(path && !path->scopes.empty())
-			return to_s(path->scopes.back());
+			return text::join(path->scopes.back().atoms, ".");
 		return NULL_STR;
 	}
 
