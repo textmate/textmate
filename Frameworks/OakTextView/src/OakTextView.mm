@@ -417,6 +417,9 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 - (void)highlightRanges:(ng::ranges_t const&)ranges
 {
+	if(ranges.empty())
+		return;
+
 	iterate(range, ranges)
 		layout->remove_enclosing_folds(range->min().index, range->max().index);
 	[self ensureSelectionIsInVisibleArea:self];
