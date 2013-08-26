@@ -773,6 +773,12 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	}
 }
 
+- (void)removeSelectedEntriesFromFavorites:(id)sender
+{
+	for(NSURL* url in self.selectedURLs)
+		[[OakFileManager sharedInstance] trashItemAtURL:url window:_view.window];
+}
+
 - (IBAction)cut:(id)sender
 {
 	NSPasteboard* pboard = [NSPasteboard generalPasteboard];
@@ -888,7 +894,8 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 	if(rootPath || hasFileSelected)
 	{
-		[aMenu addItem:[NSMenuItem separatorItem]];
+		if(hasFileSelected || to_s(rootPath) != oak::application_t::support("Favorites"))
+			[aMenu addItem:[NSMenuItem separatorItem]];
 
 		if(hasFileSelected)
 		{
@@ -897,7 +904,15 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 			[aMenu addItemWithTitle:@"Quick Look" action:@selector(toggleQuickLookPreview:)   keyEquivalent:@""];
 		}
 
-		[aMenu addItemWithTitle:@"Add to Favorites" action:@selector(addSelectedEntriesToFavorites:) keyEquivalent:@""];
+		if(rootPath && to_s(rootPath) == oak::application_t::support("Favorites"))
+		{
+			if(hasFileSelected)
+				[aMenu addItemWithTitle:@"Remove From Favorites" action:@selector(removeSelectedEntriesFromFavorites:) keyEquivalent:@""];
+		}
+		else
+		{
+			[aMenu addItemWithTitle:@"Add to Favorites" action:@selector(addSelectedEntriesToFavorites:) keyEquivalent:@""];
+		}
 	}
 
 	if(hasFileSelected)
@@ -1225,11 +1240,12 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 	struct { NSString* format; SEL action; } const menuTitles[] =
 	{
-		{ @"Cut%@",              @selector(cut:)                           },
-		{ @"Copy%@",             @selector(copy:)                          },
-		{ quickLookTitle,        @selector(toggleQuickLookPreview:)        },
-		{ @"Show%@ in Finder",   @selector(showSelectedEntriesInFinder:)   },
-		{ @"Add%@ to Favorites", @selector(addSelectedEntriesToFavorites:) },
+		{ @"Cut%@",                   @selector(cut:)                                },
+		{ @"Copy%@",                  @selector(copy:)                               },
+		{ quickLookTitle,             @selector(toggleQuickLookPreview:)             },
+		{ @"Show%@ in Finder",        @selector(showSelectedEntriesInFinder:)        },
+		{ @"Add%@ to Favorites",      @selector(addSelectedEntriesToFavorites:)      },
+		{ @"Remove%@ From Favorites", @selector(removeSelectedEntriesFromFavorites:) },
 	};
 
 	for(auto info : menuTitles)
