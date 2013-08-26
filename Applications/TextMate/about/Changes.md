@@ -1,8 +1,14 @@
 # Changes
 
-## 2013-08-24 ([v2.0-alpha.9471](https://github.com/textmate/textmate/compare/v2.0-alpha.9459...v2.0-alpha.9471))
+## 2013-08-26 ([v2.0-alpha.9475](https://github.com/textmate/textmate/compare/v2.0-alpha.9459...v2.0-alpha.9475))
 
-* If you select two words separated by non-word characters, ⌃T will now swap the words, rather than reverse the characters of the selection. This also works if the words are surrounded by parentheses.
+* Support `${var}` in regexp part of format string transformations. For example if you wish the file name in the window title to be relative to `$CWD` (current directory of the `.tm_properties` file) then you can now add:
+
+        windowTitle = '${TM_FILEPATH:?${TM_FILEPATH/${CWD}.//}:$TM_DISPLAYNAME}$windowTitleProject$windowTitleSCM'
+
+    The example makes use of two constructs, the outer being `${var:?«if set»:«if not set»}` and the inner being the regexp substitution. I used `.` to match the trailing slash that we also want to remove, mainly to avoid having to use escapes (if we wanted to use a literal slash).
+
+* Using ⌃T has been improved for the case where two “things” are selected delimited by some operator. It will now swap the two “things” rather than reverse the characters. You can see [examples in the test file](https://github.com/textmate/textmate/blob/master/Frameworks/editor/tests/t_transform.cc).
 * Miscellaneous fixes and improvements — as usual, click the link above for full commit history.
 
 ## 2013-08-02 ([v2.0-alpha.9459](https://github.com/textmate/textmate/compare/a9455...v2.0-alpha.9459))
