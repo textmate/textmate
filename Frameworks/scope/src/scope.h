@@ -47,9 +47,6 @@ namespace scope
 		void setup (std::string const& str);
 
 		friend struct selector_t;
-		friend scope::scope_t shared_prefix (scope_t const& a, scope_t const& b);
-		friend std::string xml_difference (scope_t const& from, scope_t const& to, std::string const& open, std::string const& close);
-		friend std::string to_s (scope_t const& s);
 		types::path_ptr path;
 	};
 
@@ -70,7 +67,7 @@ namespace scope
 
 	PUBLIC extern scope_t wildcard;
 
-	PUBLIC scope_t shared_prefix (scope_t const& a, scope_t const& b);
+	PUBLIC scope_t shared_prefix (scope_t const& lhs, scope_t const& rhs);
 	PUBLIC std::string xml_difference (scope_t const& from, scope_t const& to, std::string const& open = "<", std::string const& close = ">");
 	PUBLIC std::string to_s (scope_t const& s);
 	PUBLIC std::string to_s (context_t const& s);
