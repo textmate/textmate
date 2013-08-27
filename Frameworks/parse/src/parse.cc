@@ -391,7 +391,7 @@ namespace parse
 				if(rule->scope_string != NULL_STR)
 				{
 					std::string const scopeString = expand(rule->scope_string, m);
-					scope = scope ? scope.append(scopeString) : scopeString;
+					scope = scope ? scope.append(scopeString, true) : scopeString;
 					scopes.add(m.begin(), scopeString);
 				}
 
@@ -400,7 +400,7 @@ namespace parse
 				if(rule->content_scope_string != NULL_STR)
 				{
 					std::string const scopeString = expand(rule->content_scope_string, m);
-					scope = scope ? scope.append(scopeString) : scopeString;
+					scope = scope ? scope.append(scopeString, true) : scopeString;
 					scopes.add(m.end(), scopeString);
 				}
 
@@ -479,7 +479,7 @@ namespace parse
 				if(rule->scope_string != NULL_STR)
 				{
 					stack->scope_string = expand(rule->scope_string, m.match);
-					scope = scope ? scope.append(stack->scope_string) : stack->scope_string;
+					scope = scope ? scope.append(stack->scope_string, true) : stack->scope_string;
 					scopes.add(m.match.begin(), stack->scope_string);
 				}
 
@@ -488,7 +488,7 @@ namespace parse
 				if(rule->content_scope_string != NULL_STR)
 				{
 					stack->content_scope_string = expand(rule->content_scope_string, m.match);
-					scope = scope ? scope.append(stack->content_scope_string) : stack->content_scope_string;
+					scope = scope ? scope.append(stack->content_scope_string, true) : stack->content_scope_string;
 					scopes.add(m.match.end(), stack->content_scope_string);
 				}
 
