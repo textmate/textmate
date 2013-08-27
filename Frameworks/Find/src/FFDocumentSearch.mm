@@ -64,7 +64,7 @@ struct document_callback_t : document::document_t::callback_t
 		[self updateIcon];
 	}
 private:
-	FFMatch* self;
+	__weak FFMatch* self;
 };
 
 @implementation FFMatch
