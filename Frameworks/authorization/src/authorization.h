@@ -24,7 +24,7 @@ namespace osx
 			{
 				std::vector<char> v;
 				for(size_t i = 0; i+1 < hex.size() && isxdigit(hex[i]) && isxdigit(hex[i+1]); i += 2)
-					v.push_back(std::stol(hex.substr(i, 2), NULL, 16));
+					v.push_back(digittoint(hex[i]) << 4 | digittoint(hex[i+1]));
 
 				if(v.size() == sizeof(AuthorizationExternalForm))
 				{
