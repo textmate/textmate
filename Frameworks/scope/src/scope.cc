@@ -37,7 +37,7 @@ namespace scope
 		return i == rhsScopes.size();
 	}
 
-	scope_t scope_t::append (std::string const& atom, bool contentScope) const
+	scope_t scope_t::append_scope (std::string const& atom, bool contentScope) const
 	{
 		scope_t res;
 		res.path.reset(new types::path_t(path ? *path : types::path_t()));
@@ -47,7 +47,7 @@ namespace scope
 		return res;
 	}
 
-	scope_t scope_t::parent () const
+	scope_t scope_t::parent_scope () const
 	{
 		scope_t res;
 		if(path && !path->scopes.empty())

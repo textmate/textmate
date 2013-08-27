@@ -219,9 +219,9 @@ namespace ng
 		if(_spelling && includeDynamic)
 		{
 			if(i && _spelling->misspelled_at(i-1))
-				left = left.append("dyn.misspelled");
+				left = left.append_scope("dyn.misspelled");
 			if(i+i < size() && _spelling->misspelled_at(i))
-				right = right.append("dyn.misspelled");
+				right = right.append_scope("dyn.misspelled");
 		}
 
 		return scope::context_t(left, right);
@@ -254,13 +254,13 @@ namespace ng
 			if(spellingIter->first < scopeIter->first)
 			{
 				spelling = spellingIter->second;
-				res[spellingIter->first] = spelling ? scope.append("dyn.misspelled") : scope;
+				res[spellingIter->first] = spelling ? scope.append_scope("dyn.misspelled") : scope;
 				++spellingIter;
 			}
 			else if(scopeIter->first < spellingIter->first)
 			{
 				scope = scopeIter->second;
-				res[scopeIter->first] = spelling ? scope.append("dyn.misspelled") : scope;
+				res[scopeIter->first] = spelling ? scope.append_scope("dyn.misspelled") : scope;
 				++scopeIter;
 			}
 			else
@@ -271,10 +271,10 @@ namespace ng
 		}
 
 		for(; scopeIter != scopes.end(); ++scopeIter)
-			res[scopeIter->first] = spelling ? scopeIter->second.append("dyn.misspelled") : scopeIter->second;
+			res[scopeIter->first] = spelling ? scopeIter->second.append_scope("dyn.misspelled") : scopeIter->second;
 
 		for(; spellingIter != m.end(); ++spellingIter)
-			res[spellingIter->first] = spellingIter->second ? scope.append("dyn.misspelled") : scope;
+			res[spellingIter->first] = spellingIter->second ? scope.append_scope("dyn.misspelled") : scope;
 
 		return res;
 	}

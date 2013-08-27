@@ -25,8 +25,8 @@ namespace scope
 
 		bool has_prefix (scope_t const& rhs) const;
 
-		scope_t append (std::string const& atom, bool contentScope = false) const;
-		scope_t parent () const;
+		scope_t append_scope (std::string const& atom, bool contentScope = false) const;
+		scope_t parent_scope () const;
 		std::string back () const;
 
 		bool operator== (scope_t const& rhs) const;

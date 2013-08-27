@@ -115,7 +115,7 @@ namespace ng
 			{
 				std::string str = representation_for(utf8::to_ch(buffer.substr(bufferOffset, bufferOffset + _length)));
 				std::map<size_t, scope::scope_t> scopes;
-				scopes[0] = buffer.scope(bufferOffset).right.append("deco.unprintable");
+				scopes[0] = buffer.scope(bufferOffset).right.append_scope("deco.unprintable");
 				_line.reset(new ct::line_t(str, scopes, theme, NULL));
 			}
 			break;
@@ -135,7 +135,7 @@ namespace ng
 			case kNodeTypeSoftBreak:
 			{
 				std::map<size_t, scope::scope_t> scopes;
-				scopes[0] = buffer.scope(bufferOffset).right.append("deco.indented-wrap");
+				scopes[0] = buffer.scope(bufferOffset).right.append_scope("deco.indented-wrap");
 				_line.reset(new ct::line_t(fillStr, scopes, theme, NULL));
 			}
 			break;
@@ -170,9 +170,9 @@ namespace ng
 			scope::scope_t scope = _type == kNodeTypeSoftBreak ? buffer.scope(bufferOffset).left : buffer.scope(bufferOffset).right;
 			switch(_type)
 			{
-				case kNodeTypeUnprintable: scope = scope.append("deco.unprintable");   break;
-				case kNodeTypeFolding:     scope = scope.append("deco.folding");       break;
-				case kNodeTypeSoftBreak:   scope = scope.append("deco.indented-wrap"); break;
+				case kNodeTypeUnprintable: scope = scope.append_scope("deco.unprintable");   break;
+				case kNodeTypeFolding:     scope = scope.append_scope("deco.folding");       break;
+				case kNodeTypeSoftBreak:   scope = scope.append_scope("deco.indented-wrap"); break;
 			}
 
 			styles_t const styles = theme->styles_for_scope(scope);
@@ -198,11 +198,11 @@ namespace ng
 			{
 				case kNodeTypeTab:
 					str = "‣";
-					scope = scope.append("deco.invisible.tab");
+					scope = scope.append_scope("deco.invisible.tab");
 				break;
 				case kNodeTypeNewline:
 					str = "¬";
-					scope = scope.append("deco.invisible.newline");
+					scope = scope.append_scope("deco.invisible.newline");
 				break;
 			}
 
@@ -214,7 +214,7 @@ namespace ng
 
 			if(_type == kNodeTypeFolding)
 			{
-				styles_t const styles = theme->styles_for_scope(scope.append("deco.folding"));
+				styles_t const styles = theme->styles_for_scope(scope.append_scope("deco.folding"));
 
 				CGFloat x1 = round(anchor.x);
 				CGFloat x2 = round(anchor.x + _width);

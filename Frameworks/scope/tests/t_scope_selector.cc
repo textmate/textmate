@@ -27,7 +27,7 @@ void test_mixed ()
 void test_dollar ()
 {
 	scope::scope_t scope("foo bar");
-	scope::scope_t dyn = scope.append("dyn");
+	scope::scope_t dyn = scope.append_scope("dyn");
 	OAK_ASSERT_EQ(scope::selector_t("foo bar$").does_match(dyn), true);
 	OAK_ASSERT_EQ(scope::selector_t("foo bar dyn$").does_match(dyn), false);
 	OAK_ASSERT_EQ(scope::selector_t("foo bar dyn").does_match(dyn), true);

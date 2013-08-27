@@ -975,15 +975,15 @@ namespace ng
 				}
 				else if(leftScope.has_prefix(rightScope))
 				{
-					while(leftScope.parent() != rightScope)
-						leftScope = leftScope.parent();
+					while(leftScope.parent_scope() != rightScope)
+						leftScope = leftScope.parent_scope();
 					// D(DBF_TextView_Internal, bug("select left side: %s\n", to_s(leftScope).c_str()););
 					from = extend_scope_left(buffer, from, leftScope);
 				}
 				else if(rightScope.has_prefix(leftScope))
 				{
-					while(rightScope.parent() != leftScope)
-						rightScope = rightScope.parent();
+					while(rightScope.parent_scope() != leftScope)
+						rightScope = rightScope.parent_scope();
 					// D(DBF_TextView_Internal, bug("select right side: %s\n", to_s(rightScope).c_str()););
 					to = extend_scope_right(buffer, to, rightScope);
 				}
@@ -1101,20 +1101,20 @@ namespace ng
 		{
 			citerate(atom, text::tokenize(extraAttributes.begin(), extraAttributes.end(), ' '))
 			{
-				res.left  = res.left.append(*atom);
-				res.right = res.right.append(*atom);
+				res.left  = res.left.append_scope(*atom);
+				res.right = res.right.append_scope(*atom);
 			}
 		}
 
 		if(selection.size() > 1)
 		{
-			res.left  = res.left.append("dyn.caret.mixed");
-			res.right = res.right.append("dyn.caret.mixed");
+			res.left  = res.left.append_scope("dyn.caret.mixed");
+			res.right = res.right.append_scope("dyn.caret.mixed");
 		}
 		else if(selection.last().columnar)
 		{
-			res.left  = res.left.append("dyn.caret.mixed.columnar");
-			res.right = res.right.append("dyn.caret.mixed.columnar");
+			res.left  = res.left.append_scope("dyn.caret.mixed.columnar");
+			res.right = res.right.append_scope("dyn.caret.mixed.columnar");
 		}
 		else
 		{
@@ -1122,20 +1122,20 @@ namespace ng
 			size_t const rightCaret = selection.last().max().index;
 
 			if(leftCaret == 0)
-				res.left = res.left.append("dyn.caret.begin.document");
+				res.left = res.left.append_scope("dyn.caret.begin.document");
 			else if(leftCaret == buffer.begin(buffer.convert(leftCaret).line))
-				res.left = res.left.append("dyn.caret.begin.line");
+				res.left = res.left.append_scope("dyn.caret.begin.line");
 
 			if(rightCaret == buffer.size())
-				res.right = res.right.append("dyn.caret.end.document");
+				res.right = res.right.append_scope("dyn.caret.end.document");
 			else if(rightCaret == buffer.eol(buffer.convert(rightCaret).line))
-				res.right = res.right.append("dyn.caret.end.line");
+				res.right = res.right.append_scope("dyn.caret.end.line");
 		}
 
 		if(not_empty(buffer, selection))
 		{
-			res.left  = res.left.append("dyn.selection");
-			res.right = res.right.append("dyn.selection");
+			res.left  = res.left.append_scope("dyn.selection");
+			res.right = res.right.append_scope("dyn.selection");
 		}
 
 		return res;
