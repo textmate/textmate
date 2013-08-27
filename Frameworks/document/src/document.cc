@@ -646,9 +646,12 @@ namespace document
 			std::map<std::string, std::string>::const_iterator idx = attributes.find("com.macromates.visibleIndex");
 			_selection = sel != attributes.end() ? sel->second : NULL_STR;
 
-			size_t index = SIZE_T_MAX, carry = 0;
-			sscanf(idx->second.c_str(), "%zu:%zu", &index, &carry);
-			_visible_index = ng::index_t(index, carry);
+			if(idx != attributes.end())
+			{
+				size_t index = SIZE_T_MAX, carry = 0;
+				sscanf(idx->second.c_str(), "%zu:%zu", &index, &carry);
+				_visible_index = ng::index_t(index, carry);
+			}
 		}
 
 		_is_on_disk = _path != NULL_STR && access(_path.c_str(), F_OK) == 0;
