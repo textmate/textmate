@@ -39,13 +39,13 @@ namespace
 
 				if(pair.second.add)
 				{
-					scope = scope.append_scope(pair.second.scope, true);
+					scope.push_scope(pair.second.scope, true);
 				}
 				else
 				{
 					if(scope.back() == pair.second.scope)
 					{
-						scope = scope.parent_scope();
+						scope.pop_scope();
 					}
 					else
 					{
@@ -55,11 +55,11 @@ namespace
 							ASSERT(scope.back() != NULL_STR);
 							D(DBF_Parser, bug("%s != %s\n", scope.back().c_str(), pair.second.scope.c_str()););
 							stack.emplace_back(scope.back());
-							scope = scope.parent_scope();
+							scope.pop_scope();
 						}
-						scope = scope.parent_scope();
+						scope.pop_scope();
 						for(auto it = stack.rbegin(); it != stack.rend(); ++it)
-							scope = scope.append_scope(*it, true);
+							scope.push_scope(*it, true);
 					}
 				}
 				D(DBF_Parser, bug("→ %s\n", to_s(scope).c_str()););
@@ -391,7 +391,7 @@ namespace parse
 				if(rule->scope_string != NULL_STR)
 				{
 					std::string const scopeString = expand(rule->scope_string, m);
-					scope = scope ? scope.append_scope(scopeString, true) : scopeString;
+					scope.push_scope(scopeString, true);
 					scopes.add(m.begin(), scopeString);
 				}
 
@@ -400,7 +400,7 @@ namespace parse
 				if(rule->content_scope_string != NULL_STR)
 				{
 					std::string const scopeString = expand(rule->content_scope_string, m);
-					scope = scope ? scope.append_scope(scopeString, true) : scopeString;
+					scope.push_scope(scopeString, true);
 					scopes.add(m.end(), scopeString);
 				}
 
@@ -479,7 +479,7 @@ namespace parse
 				if(rule->scope_string != NULL_STR)
 				{
 					stack->scope_string = expand(rule->scope_string, m.match);
-					scope = scope ? scope.append_scope(stack->scope_string, true) : stack->scope_string;
+					scope.push_scope(stack->scope_string, true);
 					scopes.add(m.match.begin(), stack->scope_string);
 				}
 
@@ -488,7 +488,7 @@ namespace parse
 				if(rule->content_scope_string != NULL_STR)
 				{
 					stack->content_scope_string = expand(rule->content_scope_string, m.match);
-					scope = scope ? scope.append_scope(stack->content_scope_string, true) : stack->content_scope_string;
+					scope.push_scope(stack->content_scope_string, true);
 					scopes.add(m.match.end(), stack->content_scope_string);
 				}
 

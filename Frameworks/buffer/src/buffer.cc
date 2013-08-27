@@ -219,9 +219,9 @@ namespace ng
 		if(_spelling && includeDynamic)
 		{
 			if(i && _spelling->misspelled_at(i-1))
-				left = left.append_scope("dyn.misspelled");
+				left.push_scope("dyn.misspelled");
 			if(i+i < size() && _spelling->misspelled_at(i))
-				right = right.append_scope("dyn.misspelled");
+				right.push_scope("dyn.misspelled");
 		}
 
 		return scope::context_t(left, right);

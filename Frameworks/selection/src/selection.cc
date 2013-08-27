@@ -975,17 +975,19 @@ namespace ng
 				}
 				else if(leftScope.has_prefix(rightScope))
 				{
-					while(leftScope.parent_scope() != rightScope)
-						leftScope = leftScope.parent_scope();
-					// D(DBF_TextView_Internal, bug("select left side: %s\n", to_s(leftScope).c_str()););
-					from = extend_scope_left(buffer, from, leftScope);
+					scope::scope_t scope = leftScope;
+					for(leftScope.pop_scope(); leftScope != rightScope; leftScope.pop_scope())
+						scope = leftScope;
+					// D(DBF_TextView_Internal, bug("select left side: %s\n", to_s(scope).c_str()););
+					from = extend_scope_left(buffer, from, scope);
 				}
 				else if(rightScope.has_prefix(leftScope))
 				{
-					while(rightScope.parent_scope() != leftScope)
-						rightScope = rightScope.parent_scope();
-					// D(DBF_TextView_Internal, bug("select right side: %s\n", to_s(rightScope).c_str()););
-					to = extend_scope_right(buffer, to, rightScope);
+					scope::scope_t scope = rightScope;
+					for(rightScope.pop_scope(); rightScope != leftScope; rightScope.pop_scope())
+						scope = rightScope;
+					// D(DBF_TextView_Internal, bug("select right side: %s\n", to_s(scope).c_str()););
+					to = extend_scope_right(buffer, to, scope);
 				}
 				else if(from == to && buffer.convert(to).column == 0)
 				{
@@ -1101,20 +1103,20 @@ namespace ng
 		{
 			citerate(atom, text::tokenize(extraAttributes.begin(), extraAttributes.end(), ' '))
 			{
-				res.left  = res.left.append_scope(*atom);
-				res.right = res.right.append_scope(*atom);
+				res.left.push_scope(*atom);
+				res.right.push_scope(*atom);
 			}
 		}
 
 		if(selection.size() > 1)
 		{
-			res.left  = res.left.append_scope("dyn.caret.mixed");
-			res.right = res.right.append_scope("dyn.caret.mixed");
+			res.left.push_scope("dyn.caret.mixed");
+			res.right.push_scope("dyn.caret.mixed");
 		}
 		else if(selection.last().columnar)
 		{
-			res.left  = res.left.append_scope("dyn.caret.mixed.columnar");
-			res.right = res.right.append_scope("dyn.caret.mixed.columnar");
+			res.left.push_scope("dyn.caret.mixed.columnar");
+			res.right.push_scope("dyn.caret.mixed.columnar");
 		}
 		else
 		{
@@ -1122,20 +1124,20 @@ namespace ng
 			size_t const rightCaret = selection.last().max().index;
 
 			if(leftCaret == 0)
-				res.left = res.left.append_scope("dyn.caret.begin.document");
+				res.left.push_scope("dyn.caret.begin.document");
 			else if(leftCaret == buffer.begin(buffer.convert(leftCaret).line))
-				res.left = res.left.append_scope("dyn.caret.begin.line");
+				res.left.push_scope("dyn.caret.begin.line");
 
 			if(rightCaret == buffer.size())
-				res.right = res.right.append_scope("dyn.caret.end.document");
+				res.right.push_scope("dyn.caret.end.document");
 			else if(rightCaret == buffer.eol(buffer.convert(rightCaret).line))
-				res.right = res.right.append_scope("dyn.caret.end.line");
+				res.right.push_scope("dyn.caret.end.line");
 		}
 
 		if(not_empty(buffer, selection))
 		{
-			res.left  = res.left.append_scope("dyn.selection");
-			res.right = res.right.append_scope("dyn.selection");
+			res.left.push_scope("dyn.selection");
+			res.right.push_scope("dyn.selection");
 		}
 
 		return res;
