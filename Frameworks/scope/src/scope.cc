@@ -76,20 +76,6 @@ namespace scope
 			path->scopes.pop_back();
 	}
 
-	scope_t scope_t::append_scope (std::string const& atom, bool contentScope) const
-	{
-		scope_t res = *this;
-		res.push_scope(atom);
-		return res;
-	}
-
-	scope_t scope_t::parent_scope () const
-	{
-		scope_t res = *this;
-		res.pop_scope();
-		return res;
-	}
-
 	std::string scope_t::back () const
 	{
 		if(path && !path->scopes.empty())

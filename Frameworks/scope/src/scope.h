@@ -32,9 +32,6 @@ namespace scope
 
 		void push_scope (std::string const& atom, bool contentScope = false);
 		void pop_scope ();
-
-		scope_t append_scope (std::string const& atom, bool contentScope = false) const;
-		scope_t parent_scope () const;
 		std::string back () const;
 
 		bool operator== (scope_t const& rhs) const;
