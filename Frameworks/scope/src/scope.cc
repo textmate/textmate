@@ -100,7 +100,7 @@ namespace scope
 	bool scope_t::operator== (scope_t const& rhs) const   { return (!path && !rhs.path) || (path && rhs.path && *path == *rhs.path); }
 	bool scope_t::operator!= (scope_t const& rhs) const   { return !(*this == rhs); }
 	bool scope_t::operator< (scope_t const& rhs) const    { return (!path && rhs.path) || (path && rhs.path && *path < *rhs.path); }
-	scope_t::operator bool () const                       { return path ? true : false; }
+	scope_t::operator bool () const                       { return path && !path->scopes.empty(); }
 
 	scope_t shared_prefix (scope_t const& lhs, scope_t const& rhs)
 	{

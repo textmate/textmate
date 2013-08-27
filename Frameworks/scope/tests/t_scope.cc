@@ -11,3 +11,12 @@ void test_scope_append ()
 	scope.pop_scope();
 	OAK_ASSERT_EQ("foo", to_s(scope));
 }
+
+void test_operator_bool ()
+{
+	scope::scope_t scope("foo"), empty;
+	OAK_ASSERT(scope);
+	OAK_ASSERT(!empty);
+	scope.pop_scope();
+	OAK_ASSERT(!scope);
+}
