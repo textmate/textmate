@@ -26,12 +26,13 @@ void test_mixed ()
 
 void test_dollar ()
 {
-	scope::scope_t scope("foo bar");
-	scope::scope_t dyn = scope.append_scope("dyn");
+	scope::scope_t dyn("foo bar");
+	dyn.push_scope("dyn");
 	OAK_ASSERT_EQ(scope::selector_t("foo bar$").does_match(dyn), true);
 	OAK_ASSERT_EQ(scope::selector_t("foo bar dyn$").does_match(dyn), false);
 	OAK_ASSERT_EQ(scope::selector_t("foo bar dyn").does_match(dyn), true);
 }
+
 void test_anchor ()
 {
 	OAK_ASSERT_EQ(scope::selector_t("^ foo").does_match("foo bar"), true);

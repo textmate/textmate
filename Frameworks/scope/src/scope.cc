@@ -16,6 +16,30 @@ namespace scope
 	scope_t::scope_t (char const* scope)        { setup(scope); }
 	scope_t::scope_t (std::string const& scope) { setup(scope); }
 
+	scope_t::scope_t (scope_t&& rhs)
+	{
+		std::swap(path, rhs.path);
+	}
+
+	scope_t::scope_t (scope_t const& rhs)
+	{
+		if(rhs.path)
+			path.reset(new scope::types::path_t(*rhs.path));
+	}
+
+	scope_t& scope_t::operator= (scope_t&& rhs)
+	{
+		std::swap(path, rhs.path);
+		return *this;
+	}
+
+	scope_t& scope_t::operator= (scope_t const& rhs)
+	{
+		if(rhs.path)
+			path.reset(new scope::types::path_t(*rhs.path));
+		return *this;
+	}
+
 	void scope_t::setup (std::string const& scope)
 	{
 		path.reset(new scope::types::path_t);
@@ -37,24 +61,32 @@ namespace scope
 		return i == rhsScopes.size();
 	}
 
+	void scope_t::push_scope (std::string const& atom, bool contentScope)
+	{
+		if(!path)
+			path.reset(new scope::types::path_t);
+		path->scopes.emplace_back();
+		path->scopes.back().atoms = text::split(atom, ".");
+		path->scopes.back().content_scope = contentScope;
+	}
+
+	void scope_t::pop_scope ()
+	{
+		if(path && !path->scopes.empty())
+			path->scopes.pop_back();
+	}
+
 	scope_t scope_t::append_scope (std::string const& atom, bool contentScope) const
 	{
-		scope_t res;
-		res.path.reset(new types::path_t(path ? *path : types::path_t()));
-		res.path->scopes.emplace_back();
-		res.path->scopes.back().atoms = text::split(atom, ".");
-		res.path->scopes.back().content_scope = contentScope;
+		scope_t res = *this;
+		res.push_scope(atom);
 		return res;
 	}
 
 	scope_t scope_t::parent_scope () const
 	{
-		scope_t res;
-		if(path && !path->scopes.empty())
-		{
-			res.path.reset(new types::path_t(*path));
-			res.path->scopes.pop_back();
-		}
+		scope_t res = *this;
+		res.pop_scope();
 		return res;
 	}
 

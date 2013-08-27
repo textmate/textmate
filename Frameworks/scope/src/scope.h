@@ -23,7 +23,15 @@ namespace scope
 		scope_t (char const* scope);
 		scope_t (std::string const& scope);
 
+		scope_t (scope_t&& rhs);
+		scope_t (scope_t const& rhs);
+		scope_t& operator= (scope_t&& rhs);
+		scope_t& operator= (scope_t const& rhs);
+
 		bool has_prefix (scope_t const& rhs) const;
+
+		void push_scope (std::string const& atom, bool contentScope = false);
+		void pop_scope ();
 
 		scope_t append_scope (std::string const& atom, bool contentScope = false) const;
 		scope_t parent_scope () const;
