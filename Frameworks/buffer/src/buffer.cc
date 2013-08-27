@@ -233,50 +233,54 @@ namespace ng
 		std::map<size_t, scope::scope_t> scopes;
 		auto first = _scopes.upper_bound(from);
 		auto last  = _scopes.upper_bound(to);
-		if(first != _scopes.begin())
+		if(first != _scopes.begin() && (first == _scopes.end() || (ssize_t)from < first->first))
 		{
 			auto it = first;
-			scopes[0] = (--it)->second;
+			scopes.emplace(0, (--it)->second);
 		}
-		for(auto it = first; it != last; ++it)
-			scopes[it->first - from] = it->second;
+		std::transform(first, last, std::inserter(scopes, scopes.end()), [&from](std::pair<ssize_t, scope::scope_t> const& pair){
+			return std::make_pair(pair.first - from, pair.second);
+		});
 
-		std::map<size_t, bool> const& m = misspellings(from, to);
+		std::map<size_t, bool> const m = misspellings(from, to);
 
-		std::map<size_t, scope::scope_t>::const_iterator scopeIter = scopes.begin();
-		std::map<size_t, bool>::const_iterator spellingIter = m.begin();
+		auto scopeIter       = scopes.begin();
+		auto spellingIter    = m.begin();
 		scope::scope_t scope = scopeIter->second;
-		bool spelling = false;
+		bool misspelled      = false;
 
-		std::map<size_t, scope::scope_t> res;
-		while(spellingIter != m.end() && scopeIter != scopes.end())
+		while(spellingIter != m.end() || (misspelled && scopeIter != scopes.end()))
 		{
-			if(spellingIter->first < scopeIter->first)
+			if(spellingIter == m.end())
 			{
-				spelling = spellingIter->second;
-				res[spellingIter->first] = spelling ? scope.append_scope("dyn.misspelled") : scope;
-				++spellingIter;
-			}
-			else if(scopeIter->first < spellingIter->first)
-			{
-				scope = scopeIter->second;
-				res[scopeIter->first] = spelling ? scope.append_scope("dyn.misspelled") : scope;
+				scopeIter->second.push_scope("dyn.misspelled");
 				++scopeIter;
+			}
+			else if(scopeIter == scopes.end() || spellingIter->first < scopeIter->first)
+			{
+				if((misspelled = spellingIter->second) && scope.back() != "dyn.misspelled")
+					scope.push_scope("dyn.misspelled");
+				else if(scope.back() == "dyn.misspelled")
+					scope.pop_scope();
+				scopes.emplace(spellingIter->first, scope);
+				++spellingIter;
 			}
 			else
 			{
-				spelling = spellingIter->second;
-				++spellingIter;
+				if(scopeIter->first == spellingIter->first)
+				{
+					misspelled = spellingIter->second;
+					++spellingIter;
+				}
+
+				if(misspelled)
+					scopeIter->second.push_scope("dyn.misspelled");
+				scope = scopeIter->second;
+				++scopeIter;
 			}
 		}
 
-		for(; scopeIter != scopes.end(); ++scopeIter)
-			res[scopeIter->first] = spelling ? scopeIter->second.append_scope("dyn.misspelled") : scopeIter->second;
-
-		for(; spellingIter != m.end(); ++spellingIter)
-			res[spellingIter->first] = spellingIter->second ? scope.append_scope("dyn.misspelled") : scope;
-
-		return res;
+		return scopes;
 	}
 
 	// =============
