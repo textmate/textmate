@@ -555,7 +555,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 		if(_documentSearch.hasPerformedReplacement)
 		{
 			NSUInteger count = [[_documentSearch allSelectedMatchesForDocumentIdentifier:[item identifier]] count];
-			return [NSString stringWithFormat:@"%lu occurence%s replaced.", count, count == 1 ? "" : "s"];
+			return [NSString stringWithFormat:@"%lu occurrence%s replaced.", count, count == 1 ? "" : "s"];
 		}
 		else if([(FFMatch*)item match].binary)
 		{
