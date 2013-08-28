@@ -266,10 +266,10 @@ namespace format_string
 		nodes.reset(new parser::nodes_t(n));
 	}
 
-	void format_string_t::init (std::string const& str)
+	void format_string_t::init (std::string const& str, char const* stopChars)
 	{
 		D(DBF_FormatString, bug("%s\n", str.c_str()););
-		parser::nodes_t const& n = parser::parse_format_string(str);
+		parser::nodes_t const& n = parser::parse_format_string(str, stopChars, &_length);
 		nodes.reset(new parser::nodes_t(n));
 	}
 	

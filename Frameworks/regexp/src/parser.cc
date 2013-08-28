@@ -387,11 +387,13 @@ bool parse_context_t::parse_snippet (char const* stopChars, nodes_t& nodes)
 // = API Functions =
 // =================
 
-nodes_t parse_format_string (std::string const& str)
+nodes_t parse_format_string (std::string const& str, char const* stopChars, size_t* length)
 {
 	parse_context_t context(str);
 	nodes_t nodes;
-	context.parse_format_string("", nodes);
+	context.parse_format_string(stopChars, nodes);
+	if(length)
+		*length = context.bytes_parsed();
 	return nodes;
 }
 

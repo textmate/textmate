@@ -28,7 +28,7 @@ namespace parser
 
 	OnigOptionType convert (regexp_options::type const& options);
 
-	nodes_t parse_format_string (std::string const& str);
+	nodes_t parse_format_string (std::string const& str, char const* stopChars = "", size_t* length = nullptr);
 	nodes_t parse_snippet (std::string const& str);
 
 } /* parser */ 

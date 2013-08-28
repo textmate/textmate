@@ -10,7 +10,10 @@ struct parser_base_t
 	bool parse_int (size_t& res);
 	bool parse_until (char const* stopChars, std::string& res);
 
+	size_t bytes_parsed () const { return it - first; }
+
 protected:
+	char const* first;
 	char const* it;
 	char const* last;
 };

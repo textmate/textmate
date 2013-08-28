@@ -2,8 +2,8 @@
 
 parser_base_t::parser_base_t (std::string const& str)
 {
-	it   = str.data();
-	last = str.data() + str.size();
+	first = it = str.data();
+	last = first + str.size();
 }
 
 bool parser_base_t::parse_char (char const* ch)
