@@ -4,6 +4,8 @@
 #import <OakSystem/application.h>
 #import <DocumentWindow/DocumentController.h>
 #import <io/path.h>
+#import <text/format.h>
+#import <crash/info.h>
 
 static void sig_usr1_handler (void* unused)
 {
@@ -59,5 +61,11 @@ int main (int argc, char const* argv[])
 		}
 	}
 
-	return NSApplicationMain(argc, argv);
+	try {
+		return NSApplicationMain(argc, argv);
+	}
+	catch(std::exception const& e) {
+		crash_reporter_info_t info(text::format("C++ Exception: %s", e.what()));
+		abort();
+	}
 }
