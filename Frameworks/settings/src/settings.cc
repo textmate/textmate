@@ -140,7 +140,7 @@ namespace
 		static track_paths_t tracked_paths;
 		static std::map<std::string, std::vector<section_t> > cache;
 
-		if(tracked_paths.is_changed(path))
+		if(path == NULL_STR)
 		{
 			if(cache.size() > 64)
 			{
@@ -150,12 +150,19 @@ namespace
 				cache.clear();
 			}
 
-			D(DBF_Settings, if(cache.find(path) != cache.end()) bug("reload %s\n", path.c_str()););
-			cache[path] = parse_sections(path);
-			D(DBF_Settings, bug("%zu properties files cached\n", cache.size()););
+			static std::vector<section_t> dummy;
+			return dummy;
 		}
-
-		return cache[path];
+		else
+		{
+			if(tracked_paths.is_changed(path))
+			{
+				D(DBF_Settings, if(cache.find(path) != cache.end()) bug("reload %s\n", path.c_str()););
+				cache[path] = parse_sections(path);
+				D(DBF_Settings, bug("%zu properties files cached\n", cache.size()););
+			}
+			return cache[path];
+		}
 	}
 
 	std::map<std::string, std::string> expanded_variables_for (std::string const& directory, std::string const& path, scope::scope_t const& scope, std::map<std::string, std::string> variables)
@@ -166,6 +173,7 @@ namespace
 
 		static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 		pthread_mutex_lock(&mutex);
+		sections(NULL_STR); // clear cache if too big
 
 		std::multimap<double, std::vector<section_t>::const_iterator> orderScopeMatches;
 		citerate(file, paths(directory))
