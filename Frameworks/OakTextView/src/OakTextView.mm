@@ -3054,7 +3054,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteger modifiers)
 {
-	static struct { NSUInteger modifier; std::string scope; } const map[] =
+	static struct { NSUInteger modifier; char const* scope; } const map[] =
 	{
 		{ NSShiftKeyMask,      "dyn.modifier.shift"   },
 		{ NSControlKeyMask,    "dyn.modifier.control" },
@@ -3062,12 +3062,12 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 		{ NSCommandKeyMask,    "dyn.modifier.command" }
 	};
 
-	for(size_t i = 0; i < sizeofA(map); ++i)
+	for(auto const& it : map)
 	{
-		if(modifiers & map[i].modifier)
+		if(modifiers & it.modifier)
 		{
-			scope.left.push_scope(map[i].scope);
-			scope.right.push_scope(map[i].scope);
+			scope.left.push_scope(it.scope);
+			scope.right.push_scope(it.scope);
 		}
 	}
 
