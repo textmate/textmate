@@ -6,6 +6,7 @@
 #import <OakFoundation/NSArray Additions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <ns/ns.h>
+#import <text/decode.h>
 #import <document/collection.h>
 
 OAK_DEBUG_VAR(AppController_Documents);
@@ -85,8 +86,8 @@ OAK_DEBUG_VAR(AppController_Documents);
 			NSArray* keyValue = [part componentsSeparatedByString:@"="];
 			if([keyValue count] == 2)
 			{
-				std::string key = to_s([[keyValue firstObject] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]);
-				parameters[key] = to_s([[keyValue lastObject] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]);
+				std::string key = decode::url_part(to_s((NSString*)[keyValue firstObject]));
+				parameters[key] = decode::url_part(to_s((NSString*)[keyValue lastObject]));
 			}
 		}
 
