@@ -214,7 +214,7 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 	for(NSInteger col = 0; col < [browser lastColumn]+1; ++col)
 	{
 		NSInteger row = [browser selectedRowInColumn:col];
-		if(row == -1)
+		if(row == -1 || row >= entry->children().size())
 			break;
 		entry = entry->children()[row];
 		selection.push_back(entry->identifier());
