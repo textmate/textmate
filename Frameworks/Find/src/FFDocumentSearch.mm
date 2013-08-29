@@ -207,7 +207,7 @@ OAK_DEBUG_VAR(Find_FolderSearch);
 
 - (void)setSearchString:(NSString*)string
 {
-	searchString = [string UTF8String];
+	searchString = to_s(string ?: @"");
 }
 
 - (find::folder_scan_settings_t const&)folderOptions
