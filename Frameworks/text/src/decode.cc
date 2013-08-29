@@ -365,7 +365,7 @@ namespace decode
 			}
 			else
 			{
-				res.append(1, src[i]);
+				res.append(1, src[i] == '+' ? ' ' : src[i]);
 			}
 		}
 		return res;
