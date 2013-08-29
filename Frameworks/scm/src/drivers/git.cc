@@ -1,5 +1,5 @@
 #include "api.h"
-#include <text/parse.h>
+#include <text/tokenize.h>
 #include <text/format.h>
 #include <io/io.h>
 #include <oak/oak.h>
@@ -34,11 +34,13 @@ static void parse_diff (std::map<std::string, scm::status::type>& entries, std::
 	if(output == NULL_STR)
 		return;
 
-	std::vector<std::string> v = text::split(output, std::string(1, 0));
-	ASSERT(v.size() % 2 == 1); ASSERT_EQ(v.back(), "");
-	v.pop_back();
-	for(size_t i = 0; i < v.size(); i += 2)
-		entries[v[i+1]] = parse_status_flag(v[i]);
+	auto v = text::tokenize(output.begin(), output.end(), '\0');
+	for(auto it = v.begin(); it != v.end() && !(*it).empty(); ++it)
+	{
+		scm::status::type flag = parse_status_flag(*it);
+		if(++it != v.end())
+			entries[*it] = flag;
+	}
 }
 
 static void parse_ls (std::map<std::string, scm::status::type>& entries, std::string const& output, scm::status::type state = scm::status::unknown)
@@ -46,13 +48,10 @@ static void parse_ls (std::map<std::string, scm::status::type>& entries, std::st
 	if(output == NULL_STR)
 		return;
 
-	std::vector<std::string> v = text::split(output, std::string(1, 0));
-	ASSERT(!v.empty()); ASSERT_EQ(v.back(), "");
-	v.pop_back();
-	iterate(str, v)
+	for(auto str : text::tokenize(output.begin(), output.end(), '\0'))
 	{
-		ASSERT_EQ((*str)[1], ' ');
-		entries[str->substr(2)] = state != scm::status::unknown ? state : parse_status_flag(str->substr(0, 1));
+		if(str.size() > 1 && str[1] == ' ')
+			entries[str.substr(2)] = state != scm::status::unknown ? state : parse_status_flag(str.substr(0, 1));
 	}
 }
 
