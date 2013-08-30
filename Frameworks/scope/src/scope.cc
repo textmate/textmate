@@ -2,6 +2,7 @@
 #include "parse.h"
 #include <text/format.h>
 #include <text/parse.h>
+#include <text/tokenize.h>
 #include <oak/oak.h>
 
 namespace scope
@@ -43,8 +44,11 @@ namespace scope
 
 	void scope_t::setup (std::string const& scope)
 	{
-		path.reset(new scope::types::path_t);
-		scope::parse::path(scope.data(), scope.data() + scope.size(), *path);
+		for(auto str : text::tokenize(scope.begin(), scope.end(), ' '))
+		{
+			if(!str.empty())
+				push_scope(str, true);
+		}
 	}
 
 	bool scope_t::has_prefix (scope_t const& rhs) const
