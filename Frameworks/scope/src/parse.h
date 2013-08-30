@@ -7,8 +7,6 @@ namespace scope
 {
 	namespace parse
 	{
-		char const* scope (char const* first, char const* last, scope::types::scope_t& scope);
-		char const* path (char const* first, char const* last, scope::types::path_t& path);
 		char const* selector (char const* first, char const* last, scope::types::selector_t& selector);
 	
 	} /* parse */ 

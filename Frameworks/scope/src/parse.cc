@@ -183,22 +183,6 @@ namespace scope
 		// = API =
 		// =======
 
-		char const* scope (char const* first, char const* last, scope::types::scope_t& scope)
-		{
-			context_t context = { first, last };
-			context.ws();
-			context.parse_scope(scope);
-			return context.it;
-		}
-
-		char const* path (char const* first, char const* last, scope::types::path_t& path)
-		{
-			context_t context = { first, last };
-			context.ws();
-			context.parse_path(path);
-			return context.it;
-		}
-
 		char const* selector (char const* first, char const* last, scope::types::selector_t& selector)
 		{
 			context_t context = { first, last };
