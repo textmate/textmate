@@ -64,7 +64,7 @@ namespace scope
 		if(!path)
 			path.reset(new scope::types::path_t);
 		path->scopes.emplace_back();
-		path->scopes.back().atoms = text::split(atom, ".");
+		path->scopes.back().atoms = atom;
 		path->scopes.back().content_scope = contentScope;
 	}
 
@@ -77,7 +77,7 @@ namespace scope
 	std::string scope_t::back () const
 	{
 		if(path && !path->scopes.empty())
-			return text::join(path->scopes.back().atoms, ".");
+			return path->scopes.back().atoms;
 		return NULL_STR;
 	}
 

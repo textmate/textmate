@@ -6,10 +6,6 @@ namespace scope
 {
 	namespace types
 	{
-		atom_t const atom_any = "*";
-
-		std::string to_s (atom_t const& v);
-
 		template <typename T>
 		std::string join (T const& container, std::string const& sep)
 		{
@@ -21,8 +17,7 @@ namespace scope
 
 		std::string to_s (any_ptr const& v)         { return v ? v->to_s() : "(null)"; }
 
-		std::string to_s (atom_t const& v)          { return v.empty() ? "(empty)" : v.c_str(); }
-		std::string to_s (scope_t const& v)         { return (v.anchor_to_previous ? "> " : "") + join(v.atoms, "."); }
+		std::string to_s (scope_t const& v)         { return (v.anchor_to_previous ? "> " : "") + v.atoms; }
 
 		std::string to_s (path_t const& v)          { return (v.anchor_to_bol ? "^ " : "") + join(v.scopes, " ") + (v.anchor_to_eol ? " $" : ""); }
 

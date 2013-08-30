@@ -20,13 +20,10 @@ namespace scope
 
 		typedef std::shared_ptr<any_t> any_ptr;
 
-		typedef std::string atom_t;
-		extern atom_t const atom_any;
-
 		struct scope_t
 		{
 			scope_t () : anchor_to_previous(false), content_scope(true) { }
-			std::vector<atom_t> atoms;
+			std::string atoms;
 			bool anchor_to_previous;
 			bool content_scope;
 

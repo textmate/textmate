@@ -17,20 +17,34 @@ namespace scope
 {
 	namespace types
 	{
-		bool prefix_match (std::vector<scope::types::atom_t> const& lhs, std::vector<scope::types::atom_t> const& rhs)
+		static bool prefix_match (std::string const& lhs, std::string const& rhs)
 		{
 			ENTER;
 			if(lhs.size() > rhs.size())
 				return false;
 
-			for(size_t i = 0; i < lhs.size(); ++i)
-			{
-				assert(i < lhs.size()); assert(i < rhs.size());
-				if(lhs[i] != rhs[i] && lhs[i] != atom_any)
-					return false;
-			}
+			auto lhsIter = lhs.begin();
+			auto rhsIter = rhs.begin();
 
-			return true;
+			while(lhsIter != lhs.end() && rhsIter != rhs.end())
+			{
+				if(*lhsIter == *rhsIter)
+				{
+					++lhsIter;
+					++rhsIter;
+				}
+				else if(*lhsIter == '*')
+				{
+					++lhsIter;
+					while(rhsIter != rhs.end() && *rhsIter != '.')
+						++rhsIter;
+				}
+				else
+				{
+					return false;
+				}
+			}
+			return lhsIter == lhs.end() && (rhsIter == rhs.end() || *rhsIter == '.');
 		}
 
 		bool path_t::does_match (path_t const& lhs, path_t const& path, double* rank) const
@@ -72,10 +86,11 @@ namespace scope
 					reset_j = j;
 				}
 
-				power += path.scopes[i-1].atoms.size();
+				power += std::count(path.scopes[i-1].atoms.begin(), path.scopes[i-1].atoms.end(), '.') + 1;
 				if(prefix_match(scopes[j-1].atoms, path.scopes[i-1].atoms))
 				{
-					for(size_t k = 0; k < scopes[j-1].atoms.size(); ++k)
+					size_t len = std::count(scopes[j-1].atoms.begin(), scopes[j-1].atoms.end(), '.') + 1;
+					for(size_t k = 0; k < len; ++k)
 						score += 1 / exp2(power - k);
 					--j;
 					check_next = anchor_to_previous;

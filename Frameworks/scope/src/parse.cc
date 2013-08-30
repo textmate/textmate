@@ -29,7 +29,6 @@ namespace scope
 
 			bool parse_char (char const* ch, char* dst = NULL);
 
-			bool parse_atom (atom_t& res);
 			bool parse_scope (scope::types::scope_t& res);
 			bool parse_path (path_t& res);
 			bool parse_path (any_ptr& res);
@@ -40,38 +39,21 @@ namespace scope
 			bool parse_selector (selector_t& res);
 		};
 
-		bool context_t::parse_atom (atom_t& res)
-		{
-			ENTER;
-			if(parse_char("*"))
-				return res = scope::types::atom_any, true;
-
-			if(it == last || (!isalnum(*it) && *it < 0x80))
-				return false;
-
-			char const* from = it;
-			while(it != last && (isalnum(*it) || *it == '_' || *it == '-' || *it == '+' || *it > 0x7F))
-				++it;
-			res.insert(res.end(), from, it);
-			return true;
-		}
-
 		bool context_t::parse_scope (scope::types::scope_t& res)
 		{
 			ENTER;
-			bool rc = false;
 			res.anchor_to_previous = parse_char(">") && ws();
-			do {
-				res.atoms.emplace_back();
-				if(!parse_atom(res.atoms.back()))
-				{
-					res.atoms.pop_back();
-					break;
-				}
-				rc = true;
-			} while(parse_char("."));
 
-			return rc;
+			char const* from = it;
+			do {
+				if(it == last || (!isalnum(*it) && *it != '*' && *it < 0x80))
+					break;
+				while(it != last && (isalnum(*it) || *it == '_' || *it == '-' || *it == '+' || *it == '*' || *it > 0x7F))
+					++it;
+			} while(parse_char("."));
+			res.atoms.insert(res.atoms.end(), from, it);
+
+			return from != it;
 		}
 
 		bool context_t::parse_path (path_t& res)
