@@ -80,13 +80,13 @@ namespace scope
 			res.anchor_to_bol = parse_char("^") && ws();
 
 			do {
-				res.scopes.push_back(scope::types::scope_t());
+				res.scopes.emplace_back();
 				if(!parse_scope(res.scopes.back()))
+				{
+					res.scopes.pop_back();
 					break;
+				}
 			} while(ws());
-
-			if(res.scopes.size() > 1)
-				res.scopes.pop_back();
 
 			res.anchor_to_eol = parse_char("$");
 			return true;

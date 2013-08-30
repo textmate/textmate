@@ -12,6 +12,13 @@ void test_scope_append ()
 	OAK_ASSERT_EQ("foo", to_s(scope));
 }
 
+void test_empty_scope ()
+{
+	OAK_ASSERT(scope::scope_t().empty());
+	OAK_ASSERT(scope::scope_t("").empty());
+	OAK_ASSERT_EQ(scope::scope_t(""), scope::scope_t());
+}
+
 void test_operator_bool ()
 {
 	scope::scope_t scope("foo"), empty;
