@@ -1099,12 +1099,12 @@ namespace ng
 			res = scope;
 		}
 
-		if(extraAttributes != NULL_STR)
+		if(!extraAttributes.empty() && extraAttributes != NULL_STR)
 		{
-			citerate(atom, text::tokenize(extraAttributes.begin(), extraAttributes.end(), ' '))
+			for(auto const& str : text::tokenize(extraAttributes.begin(), extraAttributes.end(), ' '))
 			{
-				res.left.push_scope(*atom);
-				res.right.push_scope(*atom);
+				res.left.push_scope(str);
+				res.right.push_scope(str);
 			}
 		}
 
