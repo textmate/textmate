@@ -83,10 +83,20 @@ namespace scope
 		return NULL_STR;
 	}
 
-	bool scope_t::operator== (scope_t const& rhs) const   { return (!path && !rhs.path) || (path && rhs.path && *path == *rhs.path); }
+	size_t scope_t::size () const
+	{
+		return path ? path->scopes.size() : 0;
+	}
+
+	bool scope_t::empty () const
+	{
+		return size() == 0;
+	}
+
+	bool scope_t::operator== (scope_t const& rhs) const   { return (empty() && rhs.empty()) || (path && rhs.path && *path == *rhs.path); }
 	bool scope_t::operator!= (scope_t const& rhs) const   { return !(*this == rhs); }
-	bool scope_t::operator< (scope_t const& rhs) const    { return (!path && rhs.path) || (path && rhs.path && *path < *rhs.path); }
-	scope_t::operator bool () const                       { return path && !path->scopes.empty(); }
+	bool scope_t::operator< (scope_t const& rhs) const    { return (empty() && !rhs.empty()) || (path && rhs.path && *path < *rhs.path); }
+	scope_t::operator bool () const                       { return !empty(); }
 
 	scope_t shared_prefix (scope_t const& lhs, scope_t const& rhs)
 	{
