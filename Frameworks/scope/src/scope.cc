@@ -110,9 +110,9 @@ namespace scope
 	std::string xml_difference (scope_t const& from, scope_t const& to, std::string const& open, std::string const& close)
 	{
 		std::vector<std::string> fromScopes, toScopes;
-		for(scope_t tmp = from; tmp; tmp.pop_scope())
+		for(scope_t tmp = from; !tmp.empty(); tmp.pop_scope())
 			fromScopes.push_back(tmp.back());
-		for(scope_t tmp = to; tmp; tmp.pop_scope())
+		for(scope_t tmp = to; !tmp.empty(); tmp.pop_scope())
 			toScopes.push_back(tmp.back());
 
 		auto fromIter = fromScopes.rbegin(), toIter = toScopes.rbegin();
@@ -130,7 +130,7 @@ namespace scope
 	std::string to_s (scope_t const& s)
 	{
 		std::string res = "";
-		for(scope_t tmp = s; tmp; tmp.pop_scope())
+		for(scope_t tmp = s; !tmp.empty(); tmp.pop_scope())
 		{
 			if(!res.empty())
 				res.append(1, ' ');

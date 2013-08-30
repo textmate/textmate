@@ -1094,7 +1094,7 @@ namespace ng
 			citerate(range, selection)
 			{
 				scope::scope_t newScope = shared_prefix(buffer.scope(range->min().index).right, buffer.scope(range->max().index).left);
-				scope = scope ? shared_prefix(scope, newScope) : newScope;
+				scope = scope.empty() ? newScope : shared_prefix(scope, newScope);
 			}
 			res = scope;
 		}
