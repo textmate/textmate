@@ -23,7 +23,7 @@ namespace scope
 
 	scope_t::scope_t (scope_t const& rhs)
 	{
-		if(rhs.path)
+		if(!rhs.empty())
 			path.reset(new scope::types::path_t(*rhs.path));
 	}
 
@@ -35,8 +35,9 @@ namespace scope
 
 	scope_t& scope_t::operator= (scope_t const& rhs)
 	{
-		if(rhs.path)
-			path.reset(new scope::types::path_t(*rhs.path));
+		if(!rhs.empty())
+				path.reset(new scope::types::path_t(*rhs.path));
+		else	path.reset();
 		return *this;
 	}
 
