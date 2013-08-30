@@ -22,10 +22,9 @@ namespace scope
 
 		struct scope_t
 		{
-			scope_t () : anchor_to_previous(false), content_scope(true) { }
+			scope_t () : anchor_to_previous(false) { }
 			std::string atoms;
 			bool anchor_to_previous;
-			bool content_scope;
 
 			bool operator== (scope_t const& rhs) const { return atoms == rhs.atoms; }
 			bool operator!= (scope_t const& rhs) const { return atoms != rhs.atoms; }

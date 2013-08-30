@@ -39,7 +39,7 @@ namespace
 
 				if(pair.second.add)
 				{
-					scope.push_scope(pair.second.scope, true);
+					scope.push_scope(pair.second.scope);
 				}
 				else
 				{
@@ -59,7 +59,7 @@ namespace
 						}
 						scope.pop_scope();
 						for(auto it = stack.rbegin(); it != stack.rend(); ++it)
-							scope.push_scope(*it, true);
+							scope.push_scope(*it);
 					}
 				}
 				D(DBF_Parser, bug("→ %s\n", to_s(scope).c_str()););
@@ -391,7 +391,7 @@ namespace parse
 				if(rule->scope_string != NULL_STR)
 				{
 					std::string const scopeString = expand(rule->scope_string, m);
-					scope.push_scope(scopeString, true);
+					scope.push_scope(scopeString);
 					scopes.add(m.begin(), scopeString);
 				}
 
@@ -400,7 +400,7 @@ namespace parse
 				if(rule->content_scope_string != NULL_STR)
 				{
 					std::string const scopeString = expand(rule->content_scope_string, m);
-					scope.push_scope(scopeString, true);
+					scope.push_scope(scopeString);
 					scopes.add(m.end(), scopeString);
 				}
 
@@ -479,7 +479,7 @@ namespace parse
 				if(rule->scope_string != NULL_STR)
 				{
 					stack->scope_string = expand(rule->scope_string, m.match);
-					scope.push_scope(stack->scope_string, true);
+					scope.push_scope(stack->scope_string);
 					scopes.add(m.match.begin(), stack->scope_string);
 				}
 
@@ -488,7 +488,7 @@ namespace parse
 				if(rule->content_scope_string != NULL_STR)
 				{
 					stack->content_scope_string = expand(rule->content_scope_string, m.match);
-					scope.push_scope(stack->content_scope_string, true);
+					scope.push_scope(stack->content_scope_string);
 					scopes.add(m.match.end(), stack->content_scope_string);
 				}
 

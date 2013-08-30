@@ -47,6 +47,11 @@ namespace scope
 			return lhsIter == lhs.end() && (rhsIter == rhs.end() || *rhsIter == '.');
 		}
 
+		static bool is_auxiliary_scope (std::string const& scope)
+		{
+			return (scope.size() > 5 && strncmp(scope.data(), "attr.", 5) == 0) || (scope.size() > 4 && strncmp(scope.data(), "dyn.", 4) == 0);
+		}
+
 		bool path_t::does_match (path_t const& lhs, path_t const& path, double* rank) const
 		{
 			ENTER;
@@ -55,7 +60,7 @@ namespace scope
 			bool anchor_to_bol = this->anchor_to_bol;
 			if(anchor_to_eol)
 			{
-				while(i && !path.scopes[i-1].content_scope)
+				while(i && is_auxiliary_scope(path.scopes[i-1].atoms))
 					--i;
 			}
 			const size_t size_i = i;

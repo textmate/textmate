@@ -47,7 +47,7 @@ namespace scope
 		for(auto str : text::tokenize(scope.begin(), scope.end(), ' '))
 		{
 			if(!str.empty())
-				push_scope(str, true);
+				push_scope(str);
 		}
 	}
 
@@ -59,13 +59,12 @@ namespace scope
 		return lhs == rhs;
 	}
 
-	void scope_t::push_scope (std::string const& atom, bool contentScope)
+	void scope_t::push_scope (std::string const& atom)
 	{
 		if(!path)
 			path.reset(new scope::types::path_t);
 		path->scopes.emplace_back();
 		path->scopes.back().atoms = atom;
-		path->scopes.back().content_scope = contentScope;
 	}
 
 	void scope_t::pop_scope ()

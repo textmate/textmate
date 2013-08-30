@@ -30,7 +30,7 @@ namespace scope
 
 		bool has_prefix (scope_t const& rhs) const;
 
-		void push_scope (std::string const& atom, bool contentScope = false);
+		void push_scope (std::string const& atom);
 		void pop_scope ();
 		std::string back () const;
 		size_t size () const;
