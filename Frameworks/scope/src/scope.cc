@@ -48,17 +48,10 @@ namespace scope
 
 	bool scope_t::has_prefix (scope_t const& rhs) const
 	{
-		std::vector<types::scope_t> const& lhsScopes = path     ? path->scopes     : std::vector<types::scope_t>();
-		std::vector<types::scope_t> const& rhsScopes = rhs.path ? rhs.path->scopes : std::vector<types::scope_t>();
-
-		size_t i = 0;
-		for(; i < std::min(lhsScopes.size(), rhsScopes.size()); ++i)
-		{
-			if(lhsScopes[i] != rhsScopes[i])
-				break;
-		}
-
-		return i == rhsScopes.size();
+		scope_t lhs = *this;
+		while(rhs.size() < lhs.size())
+			lhs.pop_scope();
+		return lhs == rhs;
 	}
 
 	void scope_t::push_scope (std::string const& atom, bool contentScope)
@@ -98,18 +91,20 @@ namespace scope
 	bool scope_t::operator< (scope_t const& rhs) const    { return (empty() && !rhs.empty()) || (path && rhs.path && *path < *rhs.path); }
 	scope_t::operator bool () const                       { return !empty(); }
 
-	scope_t shared_prefix (scope_t const& lhs, scope_t const& rhs)
+	scope_t shared_prefix (scope_t lhs, scope_t rhs)
 	{
-		std::vector<std::string> lhsScopes, rhsScopes;
-		for(scope_t tmp = lhs; tmp; tmp.pop_scope())
-			lhsScopes.push_back(tmp.back());
-		for(scope_t tmp = rhs; tmp; tmp.pop_scope())
-			rhsScopes.push_back(tmp.back());
+		while(lhs.size() < rhs.size())
+			rhs.pop_scope();
+		while(rhs.size() < lhs.size())
+			lhs.pop_scope();
 
-		scope_t res;
-		for(auto lhsIter = lhsScopes.rbegin(), rhsIter = rhsScopes.rbegin(); lhsIter != lhsScopes.rend() && rhsIter != rhsScopes.rend() && *lhsIter == *rhsIter; ++lhsIter, ++rhsIter)
-			res.push_scope(*lhsIter);
-		return res;
+		while(lhs != rhs)
+		{
+			lhs.pop_scope();
+			rhs.pop_scope();
+		}
+
+		return lhs;
 	}
 
 	std::string xml_difference (scope_t const& from, scope_t const& to, std::string const& open, std::string const& close)
