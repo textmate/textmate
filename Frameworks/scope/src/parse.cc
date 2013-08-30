@@ -46,11 +46,11 @@ namespace scope
 			if(parse_char("*"))
 				return res = scope::types::atom_any, true;
 
-			if(!isalnum(*it) && *it < 0x80)
+			if(it == last || (!isalnum(*it) && *it < 0x80))
 				return false;
 
 			char const* from = it;
-			while(isalnum(*it) || *it == '_' || *it == '-' || *it == '+' || *it > 0x7F)
+			while(it != last && (isalnum(*it) || *it == '_' || *it == '-' || *it == '+' || *it > 0x7F))
 				++it;
 			res.insert(res.end(), from, it);
 			return true;
