@@ -84,3 +84,56 @@ void test_rank ()
 	OAK_ASSERT(phpSelector.does_match(scope, &phpRank));
 	OAK_ASSERT_LT(phpRank, globalRank);
 }
+
+void test_match ()
+{
+	auto match = [](scope::selector_t const& sel, scope::scope_t const& scope){ return sel.does_match(scope); };
+
+	OAK_ASSERT( match("foo",                  "foo.qux bar.quux.grault baz.corge.garply"));
+	OAK_ASSERT( match("foo bar",              "foo.qux bar.quux.grault baz.corge.garply"));
+	OAK_ASSERT( match("foo bar baz",          "foo.qux bar.quux.grault baz.corge.garply"));
+	OAK_ASSERT( match("foo baz",              "foo.qux bar.quux.grault baz.corge.garply"));
+	OAK_ASSERT( match("foo.*",                "foo.qux bar.quux.grault baz.corge.garply"));
+	OAK_ASSERT( match("foo.qux",              "foo.qux bar.quux.grault baz.corge.garply"));
+	OAK_ASSERT( match("foo.qux baz.*.garply", "foo.qux bar.quux.grault baz.corge.garply"));
+	OAK_ASSERT( match("bar",                  "foo.qux bar.quux.grault baz.corge.garply"));
+	OAK_ASSERT(!match("foo qux",              "foo.qux bar.quux.grault baz.corge.garply"));
+	OAK_ASSERT(!match("foo.bar",              "foo.qux bar.quux.grault baz.corge.garply"));
+	OAK_ASSERT(!match("foo.qux baz.garply",   "foo.qux bar.quux.grault baz.corge.garply"));
+	OAK_ASSERT(!match("bar.*.baz",            "foo.qux bar.quux.grault baz.corge.garply"));
+
+	OAK_ASSERT( match("foo > bar",             "foo bar baz bar baz"));
+	OAK_ASSERT( match("bar > baz",             "foo bar baz bar baz"));
+	OAK_ASSERT( match("foo > bar baz",         "foo bar baz bar baz"));
+	OAK_ASSERT( match("foo bar > baz",         "foo bar baz bar baz"));
+	OAK_ASSERT( match("foo > bar > baz",       "foo bar baz bar baz"));
+	OAK_ASSERT( match("foo > bar bar > baz",   "foo bar baz bar baz"));
+	OAK_ASSERT(!match("foo > bar > bar > baz", "foo bar baz bar baz"));
+
+	OAK_ASSERT( match("baz $",                 "foo bar baz bar baz"));
+	OAK_ASSERT( match("bar > baz $",           "foo bar baz bar baz"));
+	OAK_ASSERT( match("bar > baz $",           "foo bar baz bar baz"));
+	OAK_ASSERT( match("foo bar > baz $",       "foo bar baz bar baz"));
+	OAK_ASSERT( match("foo > bar > baz",       "foo bar baz bar baz"));
+	OAK_ASSERT(!match("foo > bar > baz $",     "foo bar baz bar baz"));
+	OAK_ASSERT(!match("bar $",                 "foo bar baz bar baz"));
+
+	OAK_ASSERT( match("baz $",                 "foo bar baz bar baz dyn.qux"));
+	OAK_ASSERT( match("bar > baz $",           "foo bar baz bar baz dyn.qux"));
+	OAK_ASSERT( match("bar > baz $",           "foo bar baz bar baz dyn.qux"));
+	OAK_ASSERT( match("foo bar > baz $",       "foo bar baz bar baz dyn.qux"));
+	OAK_ASSERT(!match("foo > bar > baz $",     "foo bar baz bar baz dyn.qux"));
+	OAK_ASSERT(!match("bar $",                 "foo bar baz bar baz dyn.qux"));
+
+	OAK_ASSERT( match("^ foo",                 "foo bar foo bar baz"));
+	OAK_ASSERT( match("^ foo > bar",           "foo bar foo bar baz"));
+	OAK_ASSERT( match("^ foo bar > baz",       "foo bar foo bar baz"));
+	OAK_ASSERT( match("^ foo > bar baz",       "foo bar foo bar baz"));
+	OAK_ASSERT(!match("^ foo > bar > baz",     "foo bar foo bar baz"));
+	OAK_ASSERT(!match("^ bar",                 "foo bar foo bar baz"));
+
+	OAK_ASSERT( match("foo > bar > baz",       "foo bar baz foo bar baz"));
+	OAK_ASSERT( match("^ foo > bar > baz",     "foo bar baz foo bar baz"));
+	OAK_ASSERT( match("foo > bar > baz $",     "foo bar baz foo bar baz"));
+	OAK_ASSERT(!match("^ foo > bar > baz $",   "foo bar baz foo bar baz"));
+}
