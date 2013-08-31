@@ -55,6 +55,7 @@ namespace scope
 
 			bool is_auxiliary_scope () const;
 			size_t number_of_atoms () const;
+			char const* c_str () const;
 
 			std::string atoms;
 			node_t* parent;
