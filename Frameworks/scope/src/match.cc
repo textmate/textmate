@@ -17,34 +17,29 @@ namespace scope
 {
 	namespace types
 	{
-		static bool prefix_match (std::string const& lhs, std::string const& rhs)
+		static bool prefix_match (char const* lhs, char const* rhs)
 		{
 			ENTER;
-			if(lhs.size() > rhs.size())
-				return false;
 
-			auto lhsIter = lhs.begin();
-			auto rhsIter = rhs.begin();
-
-			while(lhsIter != lhs.end() && rhsIter != rhs.end())
+			while(*lhs && *rhs)
 			{
-				if(*lhsIter == *rhsIter)
+				if(*lhs == *rhs)
 				{
-					++lhsIter;
-					++rhsIter;
+					++lhs;
+					++rhs;
 				}
-				else if(*lhsIter == '*')
+				else if(*lhs == '*')
 				{
-					++lhsIter;
-					while(rhsIter != rhs.end() && *rhsIter != '.')
-						++rhsIter;
+					++lhs;
+					while(*rhs && *rhs != '.')
+						++rhs;
 				}
 				else
 				{
 					return false;
 				}
 			}
-			return lhsIter == lhs.end() && (rhsIter == rhs.end() || *rhsIter == '.');
+			return *lhs == '\0' && (*rhs == '\0' || *rhs == '.');
 		}
 
 		bool path_t::does_match (scope::scope_t const& unused, scope::scope_t const& scope, double* rank) const
@@ -76,7 +71,7 @@ namespace scope
 					power += node->number_of_atoms();
 
 				bool isRedundantNonBOLMatch = this->anchor_to_bol && node->parent && sel+1 == this->scopes.rend();
-				if(!isRedundantNonBOLMatch && prefix_match(sel->atoms, node->atoms))
+				if(!isRedundantNonBOLMatch && prefix_match(sel->atoms.c_str(), node->c_str()))
 				{
 					if(sel->anchor_to_previous)
 					{
