@@ -47,11 +47,6 @@ namespace scope
 			return lhsIter == lhs.end() && (rhsIter == rhs.end() || *rhsIter == '.');
 		}
 
-		static bool is_auxiliary_scope (std::string const& scope)
-		{
-			return (scope.size() > 5 && strncmp(scope.data(), "attr.", 5) == 0) || (scope.size() > 4 && strncmp(scope.data(), "dyn.", 4) == 0);
-		}
-
 		bool path_t::does_match (scope::scope_t const& unused, scope::scope_t const& scope, double* rank) const
 		{
 			auto node    = scope.node;
@@ -66,10 +61,10 @@ namespace scope
 
 			if(this->anchor_to_eol)
 			{
-				while(node && is_auxiliary_scope(node->atoms))
+				while(node && node->is_auxiliary_scope())
 				{
 					if(rank)
-						power += std::count(node->atoms.begin(), node->atoms.end(), '.') + 1;
+						power += node->number_of_atoms();
 					node = node->parent;
 				}
 				btSelector = sel;
@@ -78,7 +73,7 @@ namespace scope
 			while(node && sel != this->scopes.rend())
 			{
 				if(rank)
-					power += std::count(node->atoms.begin(), node->atoms.end(), '.') + 1;
+					power += node->number_of_atoms();
 
 				bool isRedundantNonBOLMatch = this->anchor_to_bol && node->parent && sel+1 == this->scopes.rend();
 				if(!isRedundantNonBOLMatch && prefix_match(sel->atoms, node->atoms))

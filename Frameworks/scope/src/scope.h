@@ -49,8 +49,12 @@ namespace scope
 
 			node_t (std::string const& atoms, node_t* parent);
 			~node_t ();
+
 			void retain ();
 			void release ();
+
+			bool is_auxiliary_scope () const;
+			size_t number_of_atoms () const;
 
 			std::string atoms;
 			node_t* parent;

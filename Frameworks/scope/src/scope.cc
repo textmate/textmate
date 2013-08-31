@@ -45,6 +45,16 @@ namespace scope
 			delete this;
 	}
 
+	bool scope_t::node_t::is_auxiliary_scope () const
+	{
+		return (atoms.size() > 5 && strncmp(atoms.data(), "attr.", 5) == 0) || (atoms.size() > 4 && strncmp(atoms.data(), "dyn.", 4) == 0);
+	}
+
+	size_t scope_t::node_t::number_of_atoms () const
+	{
+		return std::count(atoms.begin(), atoms.end(), '.') + 1;
+	}
+
 	// =========
 	// = Scope =
 	// =========
