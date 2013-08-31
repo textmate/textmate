@@ -30,6 +30,7 @@ namespace scope
 
 		bool has_prefix (scope_t const& rhs) const;
 
+		void push_scope (char const* atom);
 		void push_scope (std::string const& atom);
 		void pop_scope ();
 		std::string back () const;
@@ -47,6 +48,7 @@ namespace scope
 		{
 			WATCH_LEAKS(scope_t::node_t);
 
+			node_t (char const* atoms, node_t* parent);
 			node_t (std::string const& atoms, node_t* parent);
 			~node_t ();
 
@@ -59,7 +61,7 @@ namespace scope
 			node_t* parent () const { return _parent; }
 
 		private:
-			std::string _atoms;
+			char const* _atoms;
 			node_t* _parent;
 			std::atomic_size_t _retain_count;
 		};
