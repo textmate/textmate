@@ -5,6 +5,10 @@
 #include <text/tokenize.h>
 #include <oak/oak.h>
 
+#define SET_TAG(x) (decltype(x))(((ptrdiff_t)x) | 0x8000000000000000)
+#define CLR_TAG(x) (decltype(x))(((ptrdiff_t)x) & 0x7FFFFFFFFFFFFFFF)
+#define TST_TAG(x) (((ptrdiff_t)x) & 0x8000000000000000)
+
 namespace scope
 {
 	scope_t wildcard("x-any");
@@ -13,14 +17,24 @@ namespace scope
 	// = scope_t::node_t =
 	// ===================
 
-	scope_t::node_t::node_t (std::string const& atoms, node_t* parent) : _atoms(atoms), _parent(parent), _retain_count(1)
+	scope_t::node_t::node_t (char const* atoms, node_t* parent) : _atoms(atoms), _parent(parent), _retain_count(1)
 	{
+	}
+
+	scope_t::node_t::node_t (std::string const& atoms, node_t* parent) : _parent(parent), _retain_count(1)
+	{
+		char* buf = new char[atoms.size()+1];
+		strcpy(buf, atoms.c_str());
+		_atoms = SET_TAG(buf);
 	}
 
 	scope_t::node_t::~node_t ()
 	{
 		if(_parent)
 			_parent->release();
+
+		if(TST_TAG(_atoms))
+			delete[] CLR_TAG(_atoms);
 	}
 
 	void scope_t::node_t::retain ()
@@ -42,12 +56,18 @@ namespace scope
 
 	size_t scope_t::node_t::number_of_atoms () const
 	{
-		return std::count(_atoms.begin(), _atoms.end(), '.') + 1;
+		size_t res = 1;
+		for(char const* it = c_str(); *it; ++it)
+		{
+			if(*it == '.')
+				++res;
+		}
+		return res;
 	}
 
 	char const* scope_t::node_t::c_str () const
 	{
-		return _atoms.c_str();
+		return CLR_TAG(_atoms);
 	}
 
 	// =========
@@ -115,6 +135,11 @@ namespace scope
 		for(ssize_t i = 0; i < lhsSize - rhsSize; ++i)
 			lhs.pop_scope();
 		return lhs == rhs;
+	}
+
+	void scope_t::push_scope (char const* atom)
+	{
+		node = new node_t(atom, node);
 	}
 
 	void scope_t::push_scope (std::string const& atom)
