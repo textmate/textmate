@@ -25,10 +25,6 @@ namespace scope
 			scope_t () : anchor_to_previous(false) { }
 			std::string atoms;
 			bool anchor_to_previous;
-
-			bool operator== (scope_t const& rhs) const { return atoms == rhs.atoms; }
-			bool operator!= (scope_t const& rhs) const { return atoms != rhs.atoms; }
-			bool operator< (scope_t const& rhs) const  { return atoms < rhs.atoms; }
 		};
 
 		struct path_t : any_t
@@ -41,9 +37,6 @@ namespace scope
 			bool anchor_to_eol;
 
 			bool does_match (scope::scope_t const& lhs, scope::scope_t const& rhs, double* rank) const;
-			bool operator== (path_t const& rhs) const { return scopes == rhs.scopes; }
-			bool operator!= (path_t const& rhs) const { return scopes != rhs.scopes; }
-			bool operator< (path_t const& rhs) const  { return scopes < rhs.scopes; }
 			std::string to_s () const;
 		};
 
