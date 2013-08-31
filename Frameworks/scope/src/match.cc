@@ -3,24 +3,12 @@
 #include "scope.h"
 #include <oak/oak.h>
 
-struct dummy_t
-{
-	dummy_t (char const* f) : f(f) { fprintf(stderr, "%s\n", f); }
-	~dummy_t ()                    { fprintf(stderr, "~%s\n", f); }
-	char const* f;
-};
-
-// #define ENTER dummy_t _dummy(__FUNCTION__)
-#define ENTER
-
 namespace scope
 {
 	namespace types
 	{
 		static bool prefix_match (char const* lhs, char const* rhs)
 		{
-			ENTER;
-
 			while(*lhs && *rhs)
 			{
 				if(*lhs == *rhs)
@@ -119,7 +107,6 @@ namespace scope
 
 		bool composite_t::does_match (scope::scope_t const& lhs, scope::scope_t const& rhs, double* rank) const
 		{
-			ENTER;
 			bool res = false;
 			if(rank)
 			{
@@ -177,7 +164,6 @@ namespace scope
 
 		bool selector_t::does_match (scope::scope_t const& lhs, scope::scope_t const& rhs, double* rank) const
 		{
-			ENTER;
 			if(rank)
 			{
 				bool res = false;
@@ -205,13 +191,11 @@ namespace scope
 
 		bool group_t::does_match (scope::scope_t const& lhs, scope::scope_t const& rhs, double* rank) const
 		{
-			ENTER;
 			return selector.does_match(lhs, rhs, rank);
 		}
 
 		bool filter_t::does_match (scope::scope_t const& lhs, scope::scope_t const& rhs, double* rank) const
 		{
-			ENTER;
 			if(filter == both && rank)
 			{
 				double r1, r2;
