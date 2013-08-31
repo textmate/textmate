@@ -32,7 +32,7 @@ namespace scope
 
 		void push_scope (std::string const& atom);
 		void pop_scope ();
-		std::string const& back () const;
+		std::string back () const;
 		size_t size () const;
 		bool empty () const;
 
@@ -56,12 +56,12 @@ namespace scope
 			bool is_auxiliary_scope () const;
 			size_t number_of_atoms () const;
 			char const* c_str () const;
-
-			std::string atoms;
-			node_t* parent;
+			node_t* parent () const { return _parent; }
 
 		private:
-			size_t retain_count = 1;
+			std::string _atoms;
+			node_t* _parent;
+			size_t _retain_count = 1;
 		};
 
 		explicit scope_t (node_t* node);

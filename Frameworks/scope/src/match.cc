@@ -48,7 +48,7 @@ namespace scope
 				{
 					if(rank)
 						power += node->number_of_atoms();
-					node = node->parent;
+					node = node->parent();
 				}
 				btSelector = sel;
 			}
@@ -58,7 +58,7 @@ namespace scope
 				if(rank)
 					power += node->number_of_atoms();
 
-				bool isRedundantNonBOLMatch = this->anchor_to_bol && node->parent && sel+1 == this->scopes.rend();
+				bool isRedundantNonBOLMatch = this->anchor_to_bol && node->parent() && sel+1 == this->scopes.rend();
 				if(!isRedundantNonBOLMatch && prefix_match(sel->atoms.c_str(), node->c_str()))
 				{
 					if(sel->anchor_to_previous)
@@ -96,7 +96,7 @@ namespace scope
 					btSelector = this->scopes.rend();
 				}
 
-				node = node->parent;
+				node = node->parent();
 			}
 
 			if(rank)

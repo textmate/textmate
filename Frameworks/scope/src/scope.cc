@@ -13,14 +13,14 @@ namespace scope
 	// = scope_t::node_t =
 	// ===================
 
-	scope_t::node_t::node_t (std::string const& atoms, node_t* parent) : atoms(atoms), parent(parent), retain_count(1)
+	scope_t::node_t::node_t (std::string const& atoms, node_t* parent) : _atoms(atoms), _parent(parent), _retain_count(1)
 	{
 	}
 
 	scope_t::node_t::~node_t ()
 	{
-		if(parent)
-			parent->release();
+		if(_parent)
+			_parent->release();
 	}
 
 	static std::mutex& retain_count_lock ()
@@ -32,14 +32,14 @@ namespace scope
 	void scope_t::node_t::retain ()
 	{
 		retain_count_lock().lock();
-		++retain_count;
+		++_retain_count;
 		retain_count_lock().unlock();
 	}
 
 	void scope_t::node_t::release ()
 	{
 		retain_count_lock().lock();
-		bool shouldDelete = --retain_count == 0;
+		bool shouldDelete = --_retain_count == 0;
 		retain_count_lock().unlock();
 		if(shouldDelete)
 			delete this;
@@ -52,12 +52,12 @@ namespace scope
 
 	size_t scope_t::node_t::number_of_atoms () const
 	{
-		return std::count(atoms.begin(), atoms.end(), '.') + 1;
+		return std::count(_atoms.begin(), _atoms.end(), '.') + 1;
 	}
 
 	char const* scope_t::node_t::c_str () const
 	{
-		return atoms.c_str();
+		return _atoms.c_str();
 	}
 
 	// =========
@@ -136,21 +136,21 @@ namespace scope
 	{
 		ASSERT(node);
 		node_t* old = node;
-		if(node = node->parent)
+		if(node = node->parent())
 			node->retain();
 		old->release();
 	}
 
-	std::string const& scope_t::back () const
+	std::string scope_t::back () const
 	{
 		ASSERT(node);
-		return node->atoms;
+		return node->c_str();
 	}
 
 	size_t scope_t::size () const
 	{
 		size_t res = 0;
-		for(node_t* n = node; n; n = n->parent)
+		for(node_t* n = node; n; n = n->parent())
 			++res;
 		return res;
 	}
@@ -165,8 +165,8 @@ namespace scope
 		auto n1 = node, n2 = rhs.node;
 		while(n1 && n2 && strcmp(n1->c_str(), n2->c_str()) == 0)
 		{
-			n1 = n1->parent;
-			n2 = n2->parent;
+			n1 = n1->parent();
+			n2 = n2->parent();
 		}
 		return !n1 && !n2;
 	}
@@ -176,8 +176,8 @@ namespace scope
 		auto n1 = node, n2 = rhs.node;
 		while(n1 && n2 && strcmp(n1->c_str(), n2->c_str()) == 0)
 		{
-			n1 = n1->parent;
-			n2 = n2->parent;
+			n1 = n1->parent();
+			n2 = n2->parent();
 		}
 		return (!n1 && n2) || (n1 && n2 && strcmp(n1->c_str(), n2->c_str()) < 0);
 	}
@@ -191,14 +191,14 @@ namespace scope
 		auto n1 = lhs.node, n2 = rhs.node;
 
 		for(size_t i = rhsSize; i < lhsSize; ++i)
-			n1 = n1->parent;
+			n1 = n1->parent();
 		for(size_t i = lhsSize; i < rhsSize; ++i)
-			n2 = n2->parent;
+			n2 = n2->parent();
 
 		while(n1 && n2 && strcmp(n1->c_str(), n2->c_str()) != 0)
 		{
-			n1 = n1->parent;
-			n2 = n2->parent;
+			n1 = n1->parent();
+			n2 = n2->parent();
 		}
 
 		return scope_t(n1);
