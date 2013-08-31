@@ -14,7 +14,7 @@ namespace scope
 		struct any_t
 		{
 			virtual ~any_t () { }
-			virtual bool does_match (path_t const& lhs, path_t const& rhs, double* rank) const = 0;
+			virtual bool does_match (scope::scope_t const& lhs, scope::scope_t const& rhs, double* rank) const = 0;
 			virtual std::string to_s () const = 0;
 		};
 
@@ -40,7 +40,7 @@ namespace scope
 			bool anchor_to_bol;
 			bool anchor_to_eol;
 
-			bool does_match (path_t const& lhs, path_t const& rhs, double* rank) const;
+			bool does_match (scope::scope_t const& lhs, scope::scope_t const& rhs, double* rank) const;
 			bool operator== (path_t const& rhs) const { return scopes == rhs.scopes; }
 			bool operator!= (path_t const& rhs) const { return scopes != rhs.scopes; }
 			bool operator< (path_t const& rhs) const  { return scopes < rhs.scopes; }
@@ -54,14 +54,14 @@ namespace scope
 			bool negate;
 			any_ptr selector;
 
-			bool does_match (path_t const& lhs, path_t const& rhs, double* rank) const;
+			bool does_match (scope::scope_t const& lhs, scope::scope_t const& rhs, double* rank) const;
 		};
 
 		struct composite_t
 		{
 			std::vector<expression_t> expressions;
 
-			bool does_match (path_t const& lhs, path_t const& rhs, double* rank) const;
+			bool does_match (scope::scope_t const& lhs, scope::scope_t const& rhs, double* rank) const;
 		};
 
 		struct selector_t
@@ -70,7 +70,7 @@ namespace scope
 
 			std::vector<composite_t> composites;
 
-			bool does_match (path_t const& lhs, path_t const& rhs, double* rank) const;
+			bool does_match (scope::scope_t const& lhs, scope::scope_t const& rhs, double* rank) const;
 		};
 
 		struct group_t : any_t
@@ -79,7 +79,7 @@ namespace scope
 
 			selector_t selector;
 
-			bool does_match (path_t const& lhs, path_t const& rhs, double* rank) const;
+			bool does_match (scope::scope_t const& lhs, scope::scope_t const& rhs, double* rank) const;
 			std::string to_s () const;
 		};
 
@@ -91,7 +91,7 @@ namespace scope
 			enum side_t { unset, left = 'L', right = 'R', both = 'B' } filter;
 			any_ptr selector;
 
-			bool does_match (path_t const& lhs, path_t const& rhs, double* rank) const;
+			bool does_match (scope::scope_t const& lhs, scope::scope_t const& rhs, double* rank) const;
 			std::string to_s () const;
 		};
 

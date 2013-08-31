@@ -9,6 +9,42 @@ namespace scope
 {
 	scope_t wildcard("x-any");
 
+	// ===================
+	// = scope_t::node_t =
+	// ===================
+
+	scope_t::node_t::node_t (std::string const& atoms, node_t* parent) : atoms(atoms), parent(parent), retain_count(1)
+	{
+	}
+
+	scope_t::node_t::~node_t ()
+	{
+		if(parent)
+			parent->release();
+	}
+
+	static std::mutex& retain_count_lock ()
+	{
+		static std::mutex* res = new std::mutex;
+		return *res;
+	}
+
+	void scope_t::node_t::retain ()
+	{
+		retain_count_lock().lock();
+		++retain_count;
+		retain_count_lock().unlock();
+	}
+
+	void scope_t::node_t::release ()
+	{
+		retain_count_lock().lock();
+		bool shouldDelete = --retain_count == 0;
+		retain_count_lock().unlock();
+		if(shouldDelete)
+			delete this;
+	}
+
 	// =========
 	// = Scope =
 	// =========
@@ -17,28 +53,44 @@ namespace scope
 	scope_t::scope_t (char const* scope)        { setup(scope); }
 	scope_t::scope_t (std::string const& scope) { setup(scope); }
 
+	scope_t::scope_t (scope_t::node_t* node) : node(node)
+	{
+		if(node)
+			node->retain();
+	}
+
+	scope_t::~scope_t ()
+	{
+		if(node)
+			node->release();
+	}
+
 	scope_t::scope_t (scope_t&& rhs)
 	{
-		std::swap(path, rhs.path);
+		std::swap(node, rhs.node);
 	}
 
 	scope_t::scope_t (scope_t const& rhs)
 	{
-		if(!rhs.empty())
-			path.reset(new scope::types::path_t(*rhs.path));
+		if(node = rhs.node)
+			node->retain();
 	}
 
 	scope_t& scope_t::operator= (scope_t&& rhs)
 	{
-		std::swap(path, rhs.path);
+		std::swap(node, rhs.node);
 		return *this;
 	}
 
 	scope_t& scope_t::operator= (scope_t const& rhs)
 	{
-		if(!rhs.empty())
-				path.reset(new scope::types::path_t(*rhs.path));
-		else	path.reset();
+		if(node != rhs.node)
+		{
+			if(node)
+				node->release();
+			if(node = rhs.node)
+				node->retain();
+		}
 		return *this;
 	}
 
@@ -54,61 +106,87 @@ namespace scope
 	bool scope_t::has_prefix (scope_t const& rhs) const
 	{
 		scope_t lhs = *this;
-		while(rhs.size() < lhs.size())
+		ssize_t lhsSize = lhs.size(), rhsSize = rhs.size();
+		for(ssize_t i = 0; i < lhsSize - rhsSize; ++i)
 			lhs.pop_scope();
 		return lhs == rhs;
 	}
 
 	void scope_t::push_scope (std::string const& atom)
 	{
-		if(!path)
-			path.reset(new scope::types::path_t);
-		path->scopes.emplace_back();
-		path->scopes.back().atoms = atom;
+		node = new node_t(atom, node);
 	}
 
 	void scope_t::pop_scope ()
 	{
-		if(path && !path->scopes.empty())
-			path->scopes.pop_back();
+		ASSERT(node);
+		node_t* old = node;
+		if(node = node->parent)
+			node->retain();
+		old->release();
 	}
 
-	std::string scope_t::back () const
+	std::string const& scope_t::back () const
 	{
-		if(path && !path->scopes.empty())
-			return path->scopes.back().atoms;
-		return NULL_STR;
+		ASSERT(node);
+		return node->atoms;
 	}
 
 	size_t scope_t::size () const
 	{
-		return path ? path->scopes.size() : 0;
+		size_t res = 0;
+		for(node_t* n = node; n; n = n->parent)
+			++res;
+		return res;
 	}
 
 	bool scope_t::empty () const
 	{
-		return size() == 0;
+		return !node;
 	}
 
-	bool scope_t::operator== (scope_t const& rhs) const   { return (empty() && rhs.empty()) || (path && rhs.path && *path == *rhs.path); }
+	bool scope_t::operator== (scope_t const& rhs) const
+	{
+		auto n1 = node, n2 = rhs.node;
+		while(n1 && n2 && n1->atoms == n2->atoms)
+		{
+			n1 = n1->parent;
+			n2 = n2->parent;
+		}
+		return !n1 && !n2;
+	}
+
+	bool scope_t::operator< (scope_t const& rhs) const
+	{
+		auto n1 = node, n2 = rhs.node;
+		while(n1 && n2 && n1->atoms == n2->atoms)
+		{
+			n1 = n1->parent;
+			n2 = n2->parent;
+		}
+		return (!n1 && n2) || (n1 && n2 && n1->atoms < n2->atoms);
+	}
+
 	bool scope_t::operator!= (scope_t const& rhs) const   { return !(*this == rhs); }
-	bool scope_t::operator< (scope_t const& rhs) const    { return (empty() && !rhs.empty()) || (path && rhs.path && *path < *rhs.path); }
 	scope_t::operator bool () const                       { return !empty(); }
 
-	scope_t shared_prefix (scope_t lhs, scope_t rhs)
+	scope_t shared_prefix (scope_t const& lhs, scope_t const& rhs)
 	{
-		while(lhs.size() < rhs.size())
-			rhs.pop_scope();
-		while(rhs.size() < lhs.size())
-			lhs.pop_scope();
+		size_t lhsSize = lhs.size(), rhsSize = rhs.size();
+		auto n1 = lhs.node, n2 = rhs.node;
 
-		while(lhs != rhs)
+		for(size_t i = rhsSize; i < lhsSize; ++i)
+			n1 = n1->parent;
+		for(size_t i = lhsSize; i < rhsSize; ++i)
+			n2 = n2->parent;
+
+		while(n1 && n2 && n1->atoms != n2->atoms)
 		{
-			lhs.pop_scope();
-			rhs.pop_scope();
+			n1 = n1->parent;
+			n2 = n2->parent;
 		}
 
-		return lhs;
+		return scope_t(n1);
 	}
 
 	std::string xml_difference (scope_t const& from, scope_t const& to, std::string const& open, std::string const& close)
@@ -174,14 +252,10 @@ namespace scope
 
 	bool selector_t::does_match (context_t const& scope, double* rank) const
 	{
-		if(!selector)
-		{
-			if(rank)
-				*rank = 0;
-			return true;
-		}
-		if(!scope.left.path || !scope.right.path)
-			return false;
-		return scope.left == wildcard || scope.right == wildcard || selector->does_match(*scope.left.path, *scope.right.path, rank);
+		if(selector)
+			return scope.left == wildcard || scope.right == wildcard || selector->does_match(scope.left, scope.right, rank);
+		if(rank)
+			*rank = 0;
+		return true;
 	}
 }

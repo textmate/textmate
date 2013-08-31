@@ -10,7 +10,6 @@ namespace scope
 	{
 		struct path_t;
 		struct selector_t;
-		typedef std::shared_ptr<path_t> path_ptr;
 		typedef std::shared_ptr<selector_t> selector_ptr;
 
 	} /* types */
@@ -22,6 +21,7 @@ namespace scope
 		scope_t ();
 		scope_t (char const* scope);
 		scope_t (std::string const& scope);
+		~scope_t ();
 
 		scope_t (scope_t&& rhs);
 		scope_t (scope_t const& rhs);
@@ -32,7 +32,7 @@ namespace scope
 
 		void push_scope (std::string const& atom);
 		void pop_scope ();
-		std::string back () const;
+		std::string const& back () const;
 		size_t size () const;
 		bool empty () const;
 
@@ -43,10 +43,27 @@ namespace scope
 		explicit operator bool () const;
 
 	private:
-		void setup (std::string const& str);
+		struct node_t
+		{
+			WATCH_LEAKS(scope_t::node_t);
 
-		friend struct selector_t;
-		types::path_ptr path;
+			node_t (std::string const& atoms, node_t* parent);
+			~node_t ();
+			void retain ();
+			void release ();
+
+			std::string atoms;
+			node_t* parent;
+
+		private:
+			size_t retain_count = 1;
+		};
+
+		explicit scope_t (node_t* node);
+		void setup (std::string const& str);
+		friend struct scope::types::path_t;
+		friend scope_t shared_prefix (scope_t const& lhs, scope_t const& rhs);
+		node_t* node = nullptr;
 	};
 
 	struct PUBLIC context_t
@@ -66,7 +83,7 @@ namespace scope
 
 	PUBLIC extern scope_t wildcard;
 
-	PUBLIC scope_t shared_prefix (scope_t lhs, scope_t rhs);
+	PUBLIC scope_t shared_prefix (scope_t const& lhs, scope_t const& rhs);
 	PUBLIC std::string xml_difference (scope_t const& from, scope_t const& to, std::string const& open = "<", std::string const& close = ">");
 	PUBLIC std::string to_s (scope_t const& s);
 	PUBLIC std::string to_s (context_t const& s);

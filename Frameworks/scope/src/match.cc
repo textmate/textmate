@@ -52,13 +52,13 @@ namespace scope
 			return (scope.size() > 5 && strncmp(scope.data(), "attr.", 5) == 0) || (scope.size() > 4 && strncmp(scope.data(), "dyn.", 4) == 0);
 		}
 
-		bool path_t::does_match (path_t const& unused, path_t const& scope, double* rank) const
+		bool path_t::does_match (scope::scope_t const& unused, scope::scope_t const& scope, double* rank) const
 		{
-			auto node    = scope.scopes.rbegin();
+			auto node    = scope.node;
 			auto sel     = this->scopes.rbegin();
 			double score = 0;
 
-			auto btNode     = scope.scopes.rend();
+			decltype(node) btNode = nullptr;
 			auto btSelector = this->scopes.rend();
 			double btScore  = 0;
 
@@ -66,21 +66,21 @@ namespace scope
 
 			if(this->anchor_to_eol)
 			{
-				while(node != scope.scopes.rend() && is_auxiliary_scope(node->atoms))
+				while(node && is_auxiliary_scope(node->atoms))
 				{
 					if(rank)
 						power += std::count(node->atoms.begin(), node->atoms.end(), '.') + 1;
-					++node;
+					node = node->parent;
 				}
 				btSelector = sel;
 			}
 
-			while(node != scope.scopes.rend() && sel != this->scopes.rend())
+			while(node && sel != this->scopes.rend())
 			{
 				if(rank)
 					power += std::count(node->atoms.begin(), node->atoms.end(), '.') + 1;
 
-				bool isRedundantNonBOLMatch = this->anchor_to_bol && node+1 != scope.scopes.rend() && sel+1 == this->scopes.rend();
+				bool isRedundantNonBOLMatch = this->anchor_to_bol && node->parent && sel+1 == this->scopes.rend();
 				if(!isRedundantNonBOLMatch && prefix_match(sel->atoms, node->atoms))
 				{
 					if(sel->anchor_to_previous)
@@ -108,7 +108,7 @@ namespace scope
 				}
 				else if(btSelector != this->scopes.rend())
 				{
-					if(btNode == scope.scopes.rend())
+					if(!btNode)
 						break;
 
 					node  = btNode;
@@ -118,7 +118,7 @@ namespace scope
 					btSelector = this->scopes.rend();
 				}
 
-				++node;
+				node = node->parent;
 			}
 
 			if(rank)
@@ -127,7 +127,7 @@ namespace scope
 			return sel == this->scopes.rend();
 		}
 
-		bool composite_t::does_match (path_t const& lhs, path_t const& rhs, double* rank) const
+		bool composite_t::does_match (scope::scope_t const& lhs, scope::scope_t const& rhs, double* rank) const
 		{
 			ENTER;
 			bool res = false;
@@ -185,7 +185,7 @@ namespace scope
 			return res;
 		}
 
-		bool selector_t::does_match (path_t const& lhs, path_t const& rhs, double* rank) const
+		bool selector_t::does_match (scope::scope_t const& lhs, scope::scope_t const& rhs, double* rank) const
 		{
 			ENTER;
 			if(rank)
@@ -213,13 +213,13 @@ namespace scope
 			return false;
 		}
 
-		bool group_t::does_match (path_t const& lhs, path_t const& rhs, double* rank) const
+		bool group_t::does_match (scope::scope_t const& lhs, scope::scope_t const& rhs, double* rank) const
 		{
 			ENTER;
 			return selector.does_match(lhs, rhs, rank);
 		}
 
-		bool filter_t::does_match (path_t const& lhs, path_t const& rhs, double* rank) const
+		bool filter_t::does_match (scope::scope_t const& lhs, scope::scope_t const& rhs, double* rank) const
 		{
 			ENTER;
 			if(filter == both && rank)
