@@ -1308,7 +1308,7 @@ namespace
 		if(projectPath)
 		{
 			std::map<std::string, std::string> const map = { { "projectDirectory", to_s(projectPath) } };
-			settings_t const settings = settings_for_path(NULL_STR, NULL_STR, to_s(projectPath), map);
+			settings_t const settings = settings_for_path(NULL_STR, scope::scope_t(), to_s(projectPath), map);
 			std::string const userProjectDirectory = settings.get(kSettingsProjectDirectoryKey, NULL_STR);
 			if(path::is_absolute(userProjectDirectory))
 				projectPath = [NSString stringWithCxxString:path::normalize(userProjectDirectory)];

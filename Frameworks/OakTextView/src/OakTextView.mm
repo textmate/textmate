@@ -380,7 +380,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 {
 	if([self.delegate respondsToSelector:@selector(scopeAttributes)])
 		return [self.delegate scopeAttributes];
-	return nil;
+	return @"";
 }
 
 // =================================
