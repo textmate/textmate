@@ -9,8 +9,6 @@ namespace scope
 
 	namespace types
 	{
-		struct path_t;
-
 		struct any_t
 		{
 			virtual ~any_t () { }
@@ -88,8 +86,6 @@ namespace scope
 			std::string to_s () const;
 		};
 
-		std::string to_s (scope_t const& scope);
-		std::string to_s (path_t const& path);
 		std::string to_s (selector_t const& selector);
 
 	} /* types */
