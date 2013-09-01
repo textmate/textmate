@@ -64,7 +64,7 @@ namespace encoding
 		{
 			ASSERT(to != kCharsetUTF8 || utf8::is_valid(buffer.begin(), buffer.end()));
 			buffer.resize(buffer_contains);
-			res.reset(new io::bytes_t(buffer));
+			res = std::make_shared<io::bytes_t>(buffer);
 		}
 
 		return res;

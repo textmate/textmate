@@ -211,7 +211,7 @@ static SoftwareUpdate* SharedInstance;
 
 - (void)downloadVersion:(NSString*)versionName atURL:(NSString*)downloadURL interactively:(BOOL)interactive
 {
-	sharedState.reset(new shared_state_t);
+	sharedState = std::make_shared<shared_state_t>();
 	secondsLeft = CGFLOAT_MAX;
 
 	self.downloadWindow.delegate     = self;

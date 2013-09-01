@@ -13,9 +13,9 @@ namespace ng
 {
 	buffer_t::buffer_t (char const* str) : _grammar_callback(*this), _revision(0), _next_revision(1), _spelling_language("en")
 	{
-		_symbols.reset(new symbols_t);   _meta_data.push_back(_symbols.get());
-		_marks.reset(new marks_t);       _meta_data.push_back(_marks.get());
-		_pairs.reset(new pairs_t);       _meta_data.push_back(_pairs.get());
+		_meta_data.push_back((_symbols = std::make_shared<symbols_t>()).get());
+		_meta_data.push_back((_marks = std::make_shared<marks_t>()).get());
+		_meta_data.push_back((_pairs = std::make_shared<pairs_t>()).get());
 		_scopes.set(-1, "text");
 
 		if(str)

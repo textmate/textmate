@@ -8,8 +8,8 @@ namespace osx
 {
 	struct authorization_t
 	{
-		authorization_t () : helper(new helper_t) { }
-		authorization_t (std::string const& hex) : helper(new helper_t(hex)) { }
+		authorization_t () : helper(std::make_shared<helper_t>()) { }
+		authorization_t (std::string const& hex) : helper(std::make_shared<helper_t>(hex)) { }
 
 		bool check_right (std::string const& right) const  { return helper->copy_right(right, kAuthorizationFlagDefaults); }
 		bool obtain_right (std::string const& right) const { return helper->copy_right(right, kAuthorizationFlagInteractionAllowed|kAuthorizationFlagExtendRights); }

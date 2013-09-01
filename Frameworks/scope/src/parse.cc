@@ -78,7 +78,10 @@ namespace scope
 		{
 			path_t tmp;
 			if(parse_path(tmp))
-				return res.reset(new path_t(tmp)), true;
+			{
+				res = std::make_shared<path_t>(tmp);
+				return true;
+			}
 			return false;
 		}
 
@@ -88,7 +91,10 @@ namespace scope
 			char const* bt = it;
 			group_t group;
 			if(parse_char("(") && parse_selector(group.selector) && ws() && parse_char(")"))
-				return res.reset(new group_t(group)), true;
+			{
+				res = std::make_shared<group_t>(group);
+				return true;
+			}
 			return it = bt, false;
 		}
 
@@ -99,7 +105,11 @@ namespace scope
 			filter_t filter;
 			char side;
 			if(parse_char("LRB", &side) && parse_char(":") && ws() && (parse_group(filter.selector) || parse_path(filter.selector)))
-				return filter.filter = filter_t::side_t(side), res.reset(new filter_t(filter)), true;
+			{
+				filter.filter = filter_t::side_t(side);
+				res = std::make_shared<filter_t>(filter);
+				return true;
+			}
 			return it = bt, false;
 		}
 

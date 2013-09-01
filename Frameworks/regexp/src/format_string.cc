@@ -212,7 +212,7 @@ struct expand_visitor : boost::static_visitor<void>
 		if(fields.find(v.index) == fields.end())
 			traverse(v.content);
 		snippet::pos_t to(res.size(), rank_count += 2);
-		snippet::field_ptr field(new snippet::placeholder_t(v.index, from, to));
+		auto field = std::make_shared<snippet::placeholder_t>(v.index, from, to);
 		if(v.content.empty() || fields.find(v.index) != fields.end())
 				mirrors.insert(std::make_pair(v.index, field));
 		else	fields.insert(std::make_pair(v.index, field));
@@ -221,7 +221,7 @@ struct expand_visitor : boost::static_visitor<void>
 	void operator() (parser::placeholder_transform_t const& v)
 	{
 		snippet::pos_t pos(res.size(), ++rank_count);
-		snippet::field_ptr field(new snippet::transform_t(v.index, pos, snippet::pos_t(res.size(), rank_count += 2), v.pattern, v.format, v.options & parser::regexp_options::g));
+		auto field = std::make_shared<snippet::transform_t>(v.index, pos, snippet::pos_t(res.size(), rank_count += 2), v.pattern, v.format, v.options & parser::regexp_options::g);
 		mirrors.insert(std::make_pair(v.index, field));
 	}
 
@@ -241,7 +241,7 @@ struct expand_visitor : boost::static_visitor<void>
 
 		snippet::pos_t pos(res.size(), ++rank_count);
 		res += all_choices[0];
-		snippet::field_ptr field(new snippet::choice_t(v.index, pos, snippet::pos_t(res.size(), rank_count += 2), all_choices));
+		auto field = std::make_shared<snippet::choice_t>(v.index, pos, snippet::pos_t(res.size(), rank_count += 2), all_choices);
 		fields.insert(std::make_pair(v.index, field));
 	}
 
@@ -263,14 +263,14 @@ namespace format_string
 	
 	format_string_t::format_string_t (parser::nodes_t const& n)
 	{
-		nodes.reset(new parser::nodes_t(n));
+		nodes = std::make_shared<parser::nodes_t>(n);
 	}
 
 	void format_string_t::init (std::string const& str, char const* stopChars)
 	{
 		D(DBF_FormatString, bug("%s\n", str.c_str()););
 		parser::nodes_t const& n = parser::parse_format_string(str, stopChars, &_length);
-		nodes.reset(new parser::nodes_t(n));
+		nodes = std::make_shared<parser::nodes_t>(n);
 	}
 	
 	std::string format_string_t::expand (std::map<std::string, std::string> const& variables) const

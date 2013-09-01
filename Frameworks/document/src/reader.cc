@@ -59,7 +59,7 @@ namespace reader
 			return io::bytes_ptr();
 
 		offset += request->aio_nbytes;
-		io::bytes_ptr res(new io::bytes_t((char const*)request->aio_buf, request->aio_nbytes));
+		auto res = std::make_shared<io::bytes_t>((char const*)request->aio_buf, request->aio_nbytes);
 
 		delete request;
 		setup_request();
@@ -115,7 +115,7 @@ namespace reader
 			return io::bytes_ptr();
 
 		memory = (char*)mmap(NULL, mapped_size, PROT_READ, MAP_PRIVATE, fd, offset);
-		return io::bytes_ptr(new io::bytes_t(memory, mapped_size, false));
+		return std::make_shared<io::bytes_t>(memory, mapped_size, false);
 	}
 
 	// ===========
@@ -141,7 +141,7 @@ namespace reader
 
 		char* buf = new char[BLOCK_SIZE];
 		if(size_t len = fread(buf, 1, BLOCK_SIZE, fp))
-			return io::bytes_ptr(new io::bytes_t(buf, len));
+			return std::make_shared<io::bytes_t>(buf, len);
 		delete[] buf;
 		return io::bytes_ptr();
 	}
@@ -170,7 +170,7 @@ namespace reader
 		char* buf = new char[BLOCK_SIZE];
 		ssize_t len = read(fd, buf, BLOCK_SIZE);
 		if(len > 0)
-			return io::bytes_ptr(new io::bytes_t(buf, len));
+			return std::make_shared<io::bytes_t>(buf, len);
 		delete[] buf;
 		return io::bytes_ptr();
 	}

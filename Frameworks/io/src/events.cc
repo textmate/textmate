@@ -128,7 +128,7 @@ namespace
 
 		void watch (std::string const& path, fs::event_callback_t* cb, uint64_t eventId, CFTimeInterval latency)
 		{
-			stream_ptr stream(new stream_t(path, cb, eventId, latency));
+			auto stream = std::make_shared<stream_t>(path, cb, eventId, latency);
 
 			streams_mutex.lock();
 			streams.push_back(stream);

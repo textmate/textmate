@@ -83,7 +83,7 @@ void key_chain_t::load (std::string const& path)
 			std::string name, keyData;
 			if(plist::get_key_path(identity->second, "name", name) && plist::get_key_path(identity->second, "key", keyData))
 			{
-				keys.push_back(key_ptr(new key_t(identity->first, name, keyData)));
+				keys.push_back(std::make_shared<key_t>(identity->first, name, keyData));
 			}
 			else
 			{
@@ -116,7 +116,7 @@ void key_chain_t::save (std::string const& path) const
 
 void key_chain_t::add (key_t const& key)
 {
-	keys.push_back(key_ptr(new key_t(key.identity(), key.name(), key._key_data)));
+	keys.push_back(std::make_shared<key_t>(key.identity(), key.name(), key._key_data));
 }
 
 key_chain_t::key_ptr key_chain_t::find (std::string const& identity) const

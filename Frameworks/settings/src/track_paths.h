@@ -77,7 +77,7 @@ private:
 				close(fd);
 			});
 
-			record_ptr record(new record_t(source));
+			auto record = std::make_shared<record_t>(source);
 			dispatch_source_set_event_handler(source, ^{
 				record->changed = true;
 			});

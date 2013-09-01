@@ -33,7 +33,7 @@ namespace command
 
 	static reader_server_ptr server ()
 	{
-		static reader_server_ptr instance(new reader_server_t);
+		static auto instance = std::make_shared<reader_server_t>();
 		return instance;
 	}
 

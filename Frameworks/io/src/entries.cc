@@ -50,7 +50,7 @@ namespace path
 					}
 				}
 			}
-			_helper.reset(new helper_t(entries, size, actual));
+			_helper = std::make_shared<helper_t>(entries, size, actual);
 		}
 		else
 		{

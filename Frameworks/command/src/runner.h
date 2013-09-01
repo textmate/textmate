@@ -48,8 +48,8 @@ namespace command
 
 	struct PUBLIC runner_t : std::enable_shared_from_this<runner_t>
 	{
-		friend runner_ptr runner (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, std::map<std::string, std::string> const& environment, delegate_ptr delegate, std::string const& pwd);
 		runner_t () = delete;
+		runner_t (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, std::map<std::string, std::string> const& environment, std::string const& pwd, delegate_ptr delegate);
 
 		void launch ();
 		void wait (bool alsoForDetached = false);
@@ -65,8 +65,6 @@ namespace command
 		std::map<std::string, std::string> const& environment () const { return _environment; }
 
 	private:
-		runner_t (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, std::map<std::string, std::string> const& environment, std::string const& pwd, delegate_ptr delegate);
-
 		struct my_process_t : process_t
 		{
 			WATCH_LEAKS(my_process_t);

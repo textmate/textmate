@@ -52,7 +52,7 @@ namespace cf
 	};
 
 	typedef std::shared_ptr<callback_t> callback_ptr;
-	inline callback_ptr create_callback (std::function<void()> const& cb) { return callback_ptr(new callback_t(cb)); }
+	inline callback_ptr create_callback (std::function<void()> const& cb) { return std::make_shared<callback_t>(cb); }
 
 } /* cf */
 

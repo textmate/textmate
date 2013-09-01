@@ -29,5 +29,5 @@ private:
 
 clipboard_ptr create_simple_clipboard ()
 {
-	return clipboard_ptr(new simple_clipboard_t);
+	return std::make_shared<simple_clipboard_t>();
 }

@@ -369,7 +369,7 @@ private:
 	std::string const path = to_s([anItem.url path]);
 	auto record = visibleItems.find(path);
 	if(record == visibleItems.end())
-		record = visibleItems.insert(std::make_pair(path, item_record_ptr(new item_record_t(self, anItem)))).first;
+		record = visibleItems.insert(std::make_pair(path, std::make_shared<item_record_t>(self, anItem))).first;
 	record->second->reload(flag);
 }
 

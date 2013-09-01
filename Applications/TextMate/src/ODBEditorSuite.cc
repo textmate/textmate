@@ -34,7 +34,7 @@ struct ae_record_t
 	{
 		AEDesc item;
 		if(noErr == AEGetNthDesc(&value, i+1, type, NULL, &item))
-			return ae_record_ptr(new ae_record_t(item));
+			return std::make_shared<ae_record_t>(item);
 		return ae_record_ptr();
 	}
 
@@ -42,7 +42,7 @@ struct ae_record_t
 	{
 		AEDesc item;
 		if(noErr == AEGetParamDesc(&value, key, type, &item))
-			return ae_record_ptr(new ae_record_t(item));
+			return std::make_shared<ae_record_t>(item);
 		return ae_record_ptr();
 	}
 

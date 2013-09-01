@@ -495,7 +495,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 		editor = ng::editor_for_document(document);
 		wrapColumn = settings.get(kSettingsWrapColumnKey, wrapColumn);
-		layout.reset(new ng::layout_t(document->buffer(), theme, settings.get(kSettingsSoftWrapKey, false), self.scrollPastEnd, wrapColumn, document->folded()));
+		layout = std::make_shared<ng::layout_t>(document->buffer(), theme, settings.get(kSettingsSoftWrapKey, false), self.scrollPastEnd, wrapColumn, document->folded());
 		if(settings.get(kSettingsShowWrapColumnKey, false))
 			layout->set_draw_wrap_column(true);
 
@@ -2635,7 +2635,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 			plist[bundles::kFieldUUID] = to_s(uuid);
 			plist[bundles::kFieldName] = std::string("untitled");
 
-			bundles::item_ptr item(new bundles::item_t(uuid, bundle, bundles::kItemTypeMacro));
+			auto item = std::make_shared<bundles::item_t>(uuid, bundle, bundles::kItemTypeMacro);
 			item->set_plist(plist);
 			bundles::add_item(item);
 

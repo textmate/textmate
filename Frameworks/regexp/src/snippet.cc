@@ -173,7 +173,7 @@ namespace snippet
 		}
 		
 		if(fields.find(0) == fields.end())
-			fields[0] = field_ptr(new placeholder_t(0, pos_t(text.size(), SIZE_T_MAX-2), pos_t(text.size(), SIZE_T_MAX)));
+			fields[0] = std::make_shared<placeholder_t>(0, pos_t(text.size(), SIZE_T_MAX-2), pos_t(text.size(), SIZE_T_MAX));
 
 		tabs_to_spaces(text, indent_info.create(), fields, mirrors);
 		indent(text, indent_string, fields, mirrors);

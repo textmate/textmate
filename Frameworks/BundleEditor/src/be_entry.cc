@@ -39,9 +39,9 @@ namespace be
 				std::string const path = path::join(_path, (*entry)->d_name);
 				std::string const displayName = path::display_name(path);
 				if((*entry)->d_type == DT_DIR)
-					directories.insert(std::make_pair(displayName, entry_ptr(new directory_entry_t(displayName, path))));
+					directories.insert(std::make_pair(displayName, std::make_shared<directory_entry_t>(displayName, path)));
 				else if((*entry)->d_type == DT_REG || (*entry)->d_type == DT_LNK)
-					files.insert(std::make_pair(displayName, entry_ptr(new file_entry_t(displayName, path))));
+					files.insert(std::make_pair(displayName, std::make_shared<file_entry_t>(displayName, path)));
 			}
 
 			std::transform(directories.begin(), directories.end(), back_inserter(res), [](std::pair<std::string, entry_ptr> const& p){ return p.second; });
@@ -65,8 +65,8 @@ namespace be
 			citerate(item, _item->menu(true))
 			{
 				if((*item)->kind() == bundles::kItemTypeMenu)
-						res.push_back(entry_ptr(new menu_entry_t((*item)->name(), *item)));
-				else	res.push_back(entry_ptr(new bundle_item_entry_t(*item)));
+						res.push_back(std::make_shared<menu_entry_t>((*item)->name(), *item));
+				else	res.push_back(std::make_shared<bundle_item_entry_t>(*item));
 			}
 			return res;
 		}
@@ -84,7 +84,7 @@ namespace be
 
 			std::vector<entry_ptr> res;
 			iterate(pair, ordered)
-				res.push_back(entry_ptr(new bundle_item_entry_t(pair->second)));
+				res.push_back(std::make_shared<bundle_item_entry_t>(pair->second));
 			return res;
 		}
 
@@ -108,7 +108,7 @@ namespace be
 
 			std::vector<entry_ptr> res;
 			iterate(pair, ordered)
-				res.push_back(entry_ptr(new bundle_item_entry_t(pair->second)));
+				res.push_back(std::make_shared<bundle_item_entry_t>(pair->second));
 			return res;
 		}
 
@@ -123,14 +123,14 @@ namespace be
 		std::vector<entry_ptr> entries () const
 		{
 			std::vector<entry_ptr> res;
-			res.push_back(entry_ptr(new menu_entry_t("Menu Actions",       _item)));
-			res.push_back(entry_ptr(new other_entry_t("Other Actions",     _item)));
-			res.push_back(entry_ptr(new group_entry_t("File Drop Actions", _item, bundles::kItemTypeDragCommand)));
-			res.push_back(entry_ptr(new group_entry_t("Language Grammars", _item, bundles::kItemTypeGrammar)));
-			res.push_back(entry_ptr(new group_entry_t("Settings",          _item, bundles::kItemTypeSettings)));
-			res.push_back(entry_ptr(new directory_entry_t("Support", _item->support_path())));
-			// res.push_back(entry_ptr(new group_entry_t("Templates",         _item, bundles::kItemTypeTemplates)));
-			res.push_back(entry_ptr(new group_entry_t("Themes",            _item, bundles::kItemTypeTheme)));
+			res.push_back(std::make_shared<menu_entry_t>("Menu Actions",       _item));
+			res.push_back(std::make_shared<other_entry_t>("Other Actions",     _item));
+			res.push_back(std::make_shared<group_entry_t>("File Drop Actions", _item, bundles::kItemTypeDragCommand));
+			res.push_back(std::make_shared<group_entry_t>("Language Grammars", _item, bundles::kItemTypeGrammar));
+			res.push_back(std::make_shared<group_entry_t>("Settings",          _item, bundles::kItemTypeSettings));
+			res.push_back(std::make_shared<directory_entry_t>("Support", _item->support_path()));
+			// res.push_back(std::make_shared<group_entry_t>("Templates",         _item, bundles::kItemTypeTemplates));
+			res.push_back(std::make_shared<group_entry_t>("Themes",            _item, bundles::kItemTypeTheme));
 			return res;
 		}
 	};
@@ -147,14 +147,14 @@ namespace be
 
 			std::vector<entry_ptr> res;
 			iterate(pair, ordered)
-				res.push_back(entry_ptr(new bundle_entry_t(pair->second)));
+				res.push_back(std::make_shared<bundle_entry_t>(pair->second));
 			return res;
 		}
 	};
 
 	entry_ptr bundle_entries ()
 	{
-		return entry_ptr(new bundles_entry_t);
+		return std::make_shared<bundles_entry_t>();
 	}
 
 } /* be */

@@ -118,7 +118,7 @@ namespace find
 			}
 
 			merged.insert(merged.end(), tmp.begin(), tmp.end());
-			return dfa_node_ptr(new dfa_node_t(byte, merged));
+			return std::make_shared<dfa_node_t>(byte, merged);
 		}
 
 	private:
@@ -299,7 +299,7 @@ namespace find
 			{
 				tmp.swap(children);
 				children.clear();
-				children.push_back(dfa_node_ptr(new dfa_node_t(*it, tmp)));
+				children.push_back(std::make_shared<dfa_node_t>(*it, tmp));
 			}
 			return children.front();
 		}
@@ -431,8 +431,8 @@ namespace find
 	find_t::find_t (std::string const& str, options_t options)
 	{
 		if(options & regular_expression)
-				pimpl.reset(new regexp_find_t(str, options));
-		else	pimpl.reset(new regular_find_t(str, options));
+				pimpl = std::make_shared<regexp_find_t>(str, options);
+		else	pimpl = std::make_shared<regular_find_t>(str, options);
 	}
 
 	std::pair<ssize_t, ssize_t> find_t::match (char const* buf, ssize_t len, std::map<std::string, std::string>* captures) { return pimpl->match(buf, len, captures); }

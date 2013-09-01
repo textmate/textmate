@@ -158,7 +158,7 @@ namespace
 		entry_t (helper_ptr helper, std::string const& key, bool is_dir) : _helper(helper), _key(key), _is_dir(is_dir) { }
 
 	public:
-		entry_t (std::map<std::string, scm::status::type> const& entries) : _key(""), _is_dir(true) { _helper.reset(new helper_t(entries)); }
+		entry_t (std::map<std::string, scm::status::type> const& entries) : _key(""), _is_dir(true) { _helper = std::make_shared<helper_t>(entries); }
 
 		entry_t operator[] (std::string const& path) { return entry_t(_helper, path, _helper->_entries.find(path) == _helper->_entries.end()); }
 		bool is_dir () const                         { return _is_dir; }

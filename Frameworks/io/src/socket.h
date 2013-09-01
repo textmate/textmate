@@ -8,7 +8,7 @@ struct socket_t
 	WATCH_LEAKS(socket_t);
 
 	socket_t ()                     { }
-	socket_t (int fd)               { helper.reset(new helper_t(fd)); }
+	socket_t (int fd)               { helper = std::make_shared<helper_t>(fd); }
 	operator int () const           { ASSERT(helper); return helper->fd; }
 	explicit operator bool () const { return helper ? helper->fd != -1 : false; }
 

@@ -29,7 +29,7 @@ static clipboard_t::entry_ptr to_entry (OakPasteboardEntry* src, BOOL includeFin
 		map["ignoreCase"] = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFindIgnoreCase] ? "1" : "0";
 	}
 
-	return clipboard_t::entry_ptr(new my_entry_t(to_s(src.string), map));
+	return std::make_shared<my_entry_t>(to_s(src.string), map);
 }
 
 struct oak_pasteboard_t : clipboard_t
@@ -54,5 +54,5 @@ private:
 
 clipboard_ptr get_clipboard (NSString* pboardName)
 {
-	return clipboard_ptr(new oak_pasteboard_t(pboardName));
+	return std::make_shared<oak_pasteboard_t>(pboardName);
 }

@@ -262,7 +262,7 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 		if(NSString* email = [value valueAtIndex:[value indexForIdentifier:[value primaryIdentifier]]])
 			environment.insert(std::make_pair("TM_ROT13_EMAIL", decode::rot13(to_s(email))));
 
-		bundles::item_ptr item(new bundles::item_t(oak::uuid_t().generate(), aType == bundles::kItemTypeBundle ? bundles::item_ptr() : bundle, aType));
+		auto item = std::make_shared<bundles::item_t>(oak::uuid_t().generate(), aType == bundles::kItemTypeBundle ? bundles::item_ptr() : bundle, aType);
 		plist::dictionary_t plist = plist::load(to_s(path));
 		expand_visitor_t visitor(environment);
 		visitor(plist);

@@ -218,7 +218,7 @@ layout_metrics_ptr layout_metrics_t::parse (NSDictionary* dict)
 			r.layers[[key UTF8String]].push_back(parse_layer(item));
 	}
 
-	return layout_metrics_ptr(new layout_metrics_t(r));
+	return std::make_shared<layout_metrics_t>(r);
 }
 
 uint32_t layout_metrics_t::requisite_from_string (char const* str)

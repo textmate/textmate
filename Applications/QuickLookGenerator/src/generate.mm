@@ -65,7 +65,7 @@ OSStatus TextMateQuickLookPlugIn_GeneratePreviewForURL (void* instance, QLPrevie
 
 	// Apply appropriate grammar
 	std::string filePath = to_s([[(__bridge NSURL*)url filePathURL] path]);
-	std::string fileType = file::type(filePath, io::bytes_ptr(new io::bytes_t(fileContents.data(), fileContents.size(), false)));
+	std::string fileType = file::type(filePath, std::make_shared<io::bytes_t>(fileContents.data(), fileContents.size(), false));
 	if(fileType != NULL_STR)
 	{
 		for(auto item : bundles::query(bundles::kFieldGrammarScope, fileType, scope::wildcard, bundles::kItemTypeGrammar))

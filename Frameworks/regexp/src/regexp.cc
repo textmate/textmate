@@ -89,7 +89,7 @@ namespace regexp
 
 		if(!captured_indices)
 		{
-			captured_indices.reset(new std::multimap<std::string, std::pair<size_t, size_t> >);
+			captured_indices = std::make_shared<std::multimap<std::string, std::pair<size_t, size_t>>>();
 			for(size_t i = 0; i < size(); ++i)
 			{
 				if(did_match(i))

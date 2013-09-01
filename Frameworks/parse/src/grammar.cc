@@ -25,7 +25,7 @@ namespace parse
 
 	static bool convert_dictionary (plist::dictionary_t const& dict, repository_ptr& res)
 	{
-		res.reset(new repository_t);
+		res = std::make_shared<repository_t>();
 		for(auto pair : dict)
 		{
 			if(rule_ptr child = convert_plist(pair.second))
@@ -59,7 +59,7 @@ namespace parse
 		{
 			if(!plist->empty() && (plist->find("disabled") == plist->end() || !plist::get<int32_t>(plist->find("disabled")->second)))
 			{
-				rule_ptr res(new rule_t);
+				rule_ptr res = std::make_shared<rule_t>();
 				if(schema.convert(*plist, res.get()))
 					return res;
 			}
@@ -268,7 +268,7 @@ namespace parse
 		if(!_rule)
 		{
 			fprintf(stderr, "*** grammar missing for ‘%s’\n", _item->name().c_str());
-			_rule.reset(new rule_t);
+			_rule = std::make_shared<rule_t>();
 		}
 
 		auto const grammars = injection_grammars();
@@ -286,7 +286,7 @@ namespace parse
 
 	stack_ptr grammar_t::seed () const
 	{
-		return stack_ptr(new stack_t(_rule.get(), _rule ? _rule->scope_string : ""));
+		return std::make_shared<stack_t>(_rule.get(), _rule ? _rule->scope_string : "");
 	}
 
 	void grammar_t::bundles_did_change ()
@@ -303,7 +303,7 @@ namespace parse
 	grammar_ptr parse_grammar (bundles::item_ptr const& grammarItem)
 	{
 		ASSERT(grammarItem);
-		return grammar_ptr(new grammar_t(grammarItem));
+		return std::make_shared<grammar_t>(grammarItem);
 	}
 
 } /* parse */ 

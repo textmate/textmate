@@ -63,7 +63,7 @@ std::pair<std::vector<bundles::item_ptr>, std::map< oak::uuid_t, std::vector<oak
 					break;
 				}
 
-				bundle.reset(new bundles::item_t(bundleUUID, bundles::item_ptr(), bundles::kItemTypeBundle, local));
+				bundle = std::make_shared<bundles::item_t>(bundleUUID, bundles::item_ptr(), bundles::kItemTypeBundle, local);
 				bundle->add_path(infoPlistPath);
 
 				bool isDelta = false;
@@ -112,7 +112,7 @@ std::pair<std::vector<bundles::item_ptr>, std::map< oak::uuid_t, std::vector<oak
 					plist::array_t uuids;
 					if(oak::uuid_t::is_valid(submenuIter.first) && plist::get_key_path(submenuIter.second, bundles::kFieldName, name) && plist::get_key_path(submenuIter.second, "items", uuids))
 					{
-						bundles::item_ptr item(new bundles::item_t(submenuIter.first, bundle, bundles::kItemTypeMenu));
+						auto item = std::make_shared<bundles::item_t>(submenuIter.first, bundle, bundles::kItemTypeMenu);
 						item->set_name(name);
 						items.push_back(item);
 						menus.insert(std::make_pair(submenuIter.first, to_menu(uuids, infoPlistPath)));
@@ -184,7 +184,7 @@ std::pair<std::vector<bundles::item_ptr>, std::map< oak::uuid_t, std::vector<oak
 						if(uuid == "615998FE-A13B-4199-A670-E5A892A1C43A")
 							continue;
 
-						bundles::item_ptr item(new bundles::item_t(uuid, bundle, dirs[i].kind, local));
+						auto item = std::make_shared<bundles::item_t>(uuid, bundle, dirs[i].kind, local);
 						item->add_path(itemPath);
 
 						bool isDelta = false;

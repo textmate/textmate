@@ -38,7 +38,7 @@ namespace command
 
 	static process_server_ptr server ()
 	{
-		static process_server_ptr instance(new process_server_t);
+		static auto instance = std::make_shared<process_server_t>();
 		return instance;
 	}
 
@@ -63,7 +63,7 @@ namespace command
 
 	static cleanup_server_ptr cleaner ()
 	{
-		static cleanup_server_ptr instance(new cleanup_server_t);
+		static auto instance = std::make_shared<cleanup_server_t>();
 		return instance;
 	}
 

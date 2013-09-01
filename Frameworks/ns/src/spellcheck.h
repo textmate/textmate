@@ -13,7 +13,7 @@ namespace ns
 
 	struct spelling_tag_t
 	{
-		spelling_tag_t () : _helper(new helper_t) { }
+		spelling_tag_t () : _helper(std::make_shared<helper_t>()) { }
 		operator long int () const { return _helper->tag(); }
 
 	private:

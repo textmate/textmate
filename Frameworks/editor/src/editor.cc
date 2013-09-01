@@ -41,7 +41,7 @@ namespace ng
 		if(editor == editors().end())
 		{
 			document->add_callback(&callback);
-			editor = editors().insert(std::make_pair(document->identifier(), editor_ptr(new editor_t(document)))).first;
+			editor = editors().insert(std::make_pair(document->identifier(), std::make_shared<editor_t>(document))).first;
 		}
 		return editor->second;
 	}
@@ -342,7 +342,7 @@ namespace ng
 		citerate(range, dissect_columnar(buffer, selections))
 			v.push_back(buffer.substr(range->min().index, range->max().index));
 		bool columnar = selections.size() == 1 && selections.last().columnar;
-		return clipboard_t::entry_ptr(new my_clipboard_entry_t(text::join(v, "\n"), indent, complete, v.size(), columnar));
+		return std::make_shared<my_clipboard_entry_t>(text::join(v, "\n"), indent, complete, v.size(), columnar);
 	}
 
 	static bool suitable_for_reindent (std::string const& str)
@@ -954,9 +954,9 @@ namespace ng
 					if(clipboard_t::entry_ptr oldEntry = yank_clipboard()->current())
 					{
 						if(action == kAppendSelectionToYankPboard)
-							entry.reset(new my_clipboard_entry_t(oldEntry->content() + entry->content(), "", false, 1, false));
+							entry = std::make_shared<my_clipboard_entry_t>(oldEntry->content() + entry->content(), "", false, 1, false);
 						else if(action == kPrependSelectionToYankPboard)
-							entry.reset(new my_clipboard_entry_t(entry->content() + oldEntry->content(), "", false, 1, false));
+							entry = std::make_shared<my_clipboard_entry_t>(entry->content() + oldEntry->content(), "", false, 1, false);
 					}
 				}
 				yank_clipboard()->push_back(entry);

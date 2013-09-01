@@ -198,7 +198,7 @@ OAK_DEBUG_VAR(FilterList_SymbolChooser);
 
 	if(_document = aDocument)
 	{
-		if(_document->try_open(document::open_callback_ptr((document::open_callback_t*)new callback_t(self))))
+		if(_document->try_open(std::make_shared<callback_t>(self)))
 			[self updateItemsArray];
 	}
 }

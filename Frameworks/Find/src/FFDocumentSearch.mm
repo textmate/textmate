@@ -223,7 +223,7 @@ OAK_DEBUG_VAR(Find_FolderSearch);
 - (void)start
 {
 	D(DBF_Find_FolderSearch, bug("folder: %s searchString: %s documentIdentifier: %s\n", folderOptions.path.c_str(), searchString.c_str(), to_s(self.documentIdentifier).c_str()););
-	scanner.reset(new find::scan_path_t);
+	scanner = std::make_shared<find::scan_path_t>();
 	scanner->set_folder_options(folderOptions);
 	scanner->set_string(searchString);
 	scanner->set_file_options(options);

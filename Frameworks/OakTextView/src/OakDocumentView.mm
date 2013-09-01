@@ -955,7 +955,7 @@ static std::string const kBookmarkType = "bookmark";
 
 	theme_ptr theme = parse_theme(bundles::lookup(to_s(self.themeUUID)));
 	theme = theme->copy_with_font_name_and_size(to_s(fontName), fontSize * self.fontScale);
-	layout.reset(new ng::layout_t(document->buffer(), theme, /* softWrap: */ true));
+	layout = std::make_shared<ng::layout_t>(document->buffer(), theme, /* softWrap: */ true);
 	layout->set_viewport_size(CGSizeMake(self.pageWidth, self.pageHeight));
 	layout->update_metrics(CGRectMake(0, 0, CGFLOAT_MAX, CGFLOAT_MAX));
 

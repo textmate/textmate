@@ -92,7 +92,7 @@ namespace ng
 			auto state  = from == 0 ? _parser_states.begin() : _parser_states.find(from);
 			D(DBF_Buffer_Parsing, bug("line %zu dirty, offset %zu → %zu-%zu\n", n, _dirty.begin()->first, from, to););
 			if(state != _parser_states.end())
-					parser.reset(new buffer_parser_t(*this, state->second, substr(from, to), std::make_pair(from, to), batch_start ==-1? from : batch_start, limit_redraw));
+					parser = std::make_shared<buffer_parser_t>(*this, state->second, substr(from, to), std::make_pair(from, to), batch_start ==-1? from : batch_start, limit_redraw);
 			else	fprintf(stderr, "no parser state for %zu-%zu (%p)\n%s\n%s\n", from, to, this, substr(0, size()).c_str(), to_s(*this).c_str());
 		}
 	}

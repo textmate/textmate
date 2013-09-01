@@ -160,8 +160,8 @@ gutter_styles_t::~gutter_styles_t ()
 theme_ptr theme_t::copy_with_font_name_and_size (std::string const& fontName, CGFloat fontSize)
 {
 	if(_font_name == fontName && _font_size == fontSize)
-		return theme_ptr(new theme_t::theme_t(*this));
-	return theme_ptr(new theme_t::theme_t(this->_item, fontName, fontSize));
+		return std::make_shared<theme_t::theme_t>(*this);
+	return std::make_shared<theme_t::theme_t>(this->_item, fontName, fontSize);
 }
 
 theme_t::theme_t (bundles::item_ptr const& themeItem, std::string const& fontName, CGFloat fontSize) :_item(themeItem), _font_name(fontName), _font_size(fontSize)
@@ -493,7 +493,7 @@ theme_t::shared_styles_ptr theme_t::find_shared_styles (bundles::item_ptr const&
 	oak::uuid_t const& uuid = themeItem ? themeItem->uuid() : kEmptyThemeUUID;
 	auto theme = Cache.find(uuid);
 	if(theme == Cache.end())
-		theme = Cache.insert(std::make_pair(uuid, shared_styles_ptr(new shared_styles_t(themeItem)))).first;
+		theme = Cache.insert(std::make_pair(uuid, std::make_shared<shared_styles_t>(themeItem))).first;
 	return theme->second;
 }
 
@@ -509,6 +509,6 @@ theme_ptr parse_theme (bundles::item_ptr const& themeItem)
 	oak::uuid_t const& uuid = themeItem ? themeItem->uuid() : kEmptyThemeUUID;
 	auto theme = Cache.find(uuid);
 	if(theme == Cache.end())
-		theme = Cache.insert(std::make_pair(uuid, theme_ptr(new theme_t(themeItem)))).first;
+		theme = Cache.insert(std::make_pair(uuid, std::make_shared<theme_t>(themeItem))).first;
 	return theme->second;
 }

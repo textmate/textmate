@@ -43,7 +43,7 @@ struct socket_callback_t
 	{
 		D(DBF_RMateServer, bug("%p, %d\n", this, (int)fd););
 
-		helper.reset(new helper_t<F>(f, fd, this));
+		helper = std::make_shared<helper_t<F>>(f, fd, this);
 
 		CFSocketContext const context = { 0, helper.get(), NULL, NULL, NULL };
 		socket = CFSocketCreateWithNative(kCFAllocatorDefault, fd, kCFSocketReadCallBack, callback, &context);
@@ -145,7 +145,7 @@ namespace
 			else if(listen(fd, 5) == -1)
 				OakRunIOAlertPanel("Could not listen to socket");
 
-			_callback.reset(new socket_callback_t(&rmate_connection_handler_t, fd));
+			_callback = std::make_shared<socket_callback_t>(&rmate_connection_handler_t, fd);
 		}
 
 		~mate_server_t ()
@@ -177,7 +177,7 @@ namespace
 			if(-1 == listen(fd, 5))
 				fprintf(stderr, "listen(): %s\n", strerror(errno));
 
-			_callback.reset(new socket_callback_t(&rmate_connection_handler_t, fd));
+			_callback = std::make_shared<socket_callback_t>(&rmate_connection_handler_t, fd);
 		}
 
 		~rmate_server_t ()
@@ -204,7 +204,7 @@ void setup_rmate_server (bool enabled, uint16_t port, bool listenForRemoteClient
 	{
 		rmate_server.reset();
 		if(enabled)
-			rmate_server.reset(new rmate_server_t(port, listenForRemoteClients));
+			rmate_server = std::make_shared<rmate_server_t>(port, listenForRemoteClients);
 	}
 }
 
@@ -242,7 +242,7 @@ struct record_t
 	{
 		if(!file)
 		{
-			file.reset(new temp_file_t);
+			file = std::make_shared<temp_file_t>();
 			arguments["data"] = std::string(*file);
 		}
 
@@ -363,7 +363,7 @@ namespace // wrap in anonymous namespace to avoid clashing with other callbacks 
 		struct helper_t { helper_t () : open_documents(0) { } size_t open_documents; WATCH_LEAKS(reactivate_callback_t); };
 		typedef std::shared_ptr<helper_t> helper_ptr;
 
-		reactivate_callback_t () : helper(helper_ptr(new helper_t))
+		reactivate_callback_t () : helper(std::make_shared<helper_t>())
 		{
 			D(DBF_RMateServer, bug("%p\n", this););
 			GetFrontProcess(&psn);

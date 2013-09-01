@@ -22,7 +22,7 @@ namespace fs
 
 	snapshot_t::nodes_ptr snapshot_t::collect (std::string const& dir)
 	{
-		nodes_ptr res(new std::map<ino_t, node_t>);
+		auto res = std::make_shared<std::map<ino_t, node_t>>();
 		citerate(entry, path::entries(dir))
 		{
 			std::string const path = path::join(dir, (*entry)->d_name);

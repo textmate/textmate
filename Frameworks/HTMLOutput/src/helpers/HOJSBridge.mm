@@ -176,7 +176,7 @@ OAK_DEBUG_VAR(HTMLOutput_JSShellCommand);
 		self.exitHandler = aHandler;
 		if(process = io::spawn(std::vector<std::string>{ "/bin/sh", "-c", to_s(aCommand) }, someEnvironment))
 		{
-			auto runLoop = std::shared_ptr<cf::run_loop_t>(new cf::run_loop_t(kCFRunLoopDefaultMode, 15));
+			auto runLoop = std::make_shared<cf::run_loop_t>(kCFRunLoopDefaultMode, 15);
 			auto weakRunLoop = std::weak_ptr<cf::run_loop_t>(runLoop);
 			auto group = dispatch_group_create();
 			auto queue = aHandler ? dispatch_get_main_queue() : dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);

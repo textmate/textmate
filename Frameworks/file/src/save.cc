@@ -441,8 +441,8 @@ namespace file
 
 	void save (std::string const& path, save_callback_ptr cb, osx::authorization_t auth, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, std::string const& fileType, encoding::type const& encoding, std::vector<oak::uuid_t> const& binaryImportFilters, std::vector<oak::uuid_t> const& textImportFilters)
 	{
-		save_context_ptr context(new file_context_t(cb, path, auth, content, attributes, fileType, encoding, binaryImportFilters, textImportFilters));
-		std::static_pointer_cast<file_context_t>(context)->proceed();
+		auto context = std::make_shared<file_context_t>(cb, path, auth, content, attributes, fileType, encoding, binaryImportFilters, textImportFilters);
+		context->proceed();
 	}
 
 } /* file */

@@ -247,7 +247,7 @@ namespace document
 			}
 
 			D(DBF_Document_Tracker, bug("nothing found, create new document\n"););
-			document_ptr res = document_ptr(new document_t);
+			document_ptr res = std::make_shared<document_t>();
 			res->_identifier.generate();
 			res->_path  = path;
 			res->_inode = inode;
@@ -277,7 +277,7 @@ namespace document
 				if(attr != NULL_STR && uuid == oak::uuid_t(attr))
 				{
 					D(DBF_Document_Tracker, bug("found backup with path ‘%s’\n", path.c_str()););
-					document_ptr res = document_ptr(new document_t);
+					document_ptr res = std::make_shared<document_t>();
 
 					res->_identifier     = uuid;
 					res->_backup_path    = path;
@@ -359,7 +359,7 @@ namespace document
 
 		void add_no_lock (document_ptr doc)
 		{
-			record_ptr r(new record_t);
+			auto r = std::make_shared<record_t>();
 			r->uuid     = doc->identifier();
 			r->path     = doc->path();
 			r->inode    = doc->_inode;
@@ -405,7 +405,7 @@ namespace document
 	{
 		D(DBF_Document, bug("%s\n", fileType.c_str()););
 		if(fileType == NULL_STR)
-			fileType = file::type(NULL_STR, io::bytes_ptr(new io::bytes_t(content.data(), content.size(), false)));
+			fileType = file::type(NULL_STR, std::make_shared<io::bytes_t>(content.data(), content.size(), false));
 
 		document_ptr doc = create();
 		if(fileType != NULL_STR)
@@ -656,9 +656,9 @@ namespace document
 
 		_is_on_disk = _path != NULL_STR && access(_path.c_str(), F_OK) == 0;
 		if(_is_on_disk)
-			_file_watcher.reset(new watch_t(_path, shared_from_this()));
+			_file_watcher = std::make_shared<watch_t>(_path, shared_from_this());
 
-		_buffer.reset(new ng::buffer_t);
+		_buffer = std::make_shared<ng::buffer_t>();
 		_buffer->indent() = _indent;
 		setup_buffer();
 		if(content)
@@ -673,7 +673,7 @@ namespace document
 		_buffer->bump_revision();
 		check_modified(_buffer->revision(), _buffer->revision());
 		mark_pristine();
-		_undo_manager.reset(new ng::undo_manager_t(buffer()));
+		_undo_manager = std::make_shared<ng::undo_manager_t>(buffer());
 
 		broadcast(callback_t::did_change_open_status);
 	}
@@ -700,7 +700,7 @@ namespace document
 		}
 
 		if(_is_on_disk)
-			_file_watcher.reset(new watch_t(_path, shared_from_this()));
+			_file_watcher = std::make_shared<watch_t>(_path, shared_from_this());
 	}
 
 	encoding::type document_t::encoding_for_save_as_path (std::string const& path)
@@ -770,11 +770,8 @@ namespace document
 			attributes["com.macromates.folded"]         = _folded;
 		}
 
-		save_callback_wrapper_t* cb = new save_callback_wrapper_t(shared_from_this(), callback);
-		save_callback_ptr sharedPtr((save_callback_t*)cb);
-
-		io::bytes_ptr bytes(new io::bytes_t(content()));
-
+		auto sharedPtr = std::make_shared<save_callback_wrapper_t>(shared_from_this(), callback);
+		auto bytes = std::make_shared<io::bytes_t>(content());
 		encoding::type const encoding = encoding_for_save_as_path(_path);
 		file::save(_path, sharedPtr, _authorization, bytes, attributes, _file_type, encoding, std::vector<oak::uuid_t>() /* binary import filters */, std::vector<oak::uuid_t>() /* text import filters */);
 	}
@@ -799,9 +796,8 @@ namespace document
 		};
 
 		bool res = false;
-		stall_t* cb = new stall_t(res);
-		save_callback_ptr sharedPtr((save_callback_t*)cb);
-		try_save(sharedPtr);
+		auto cb = std::make_shared<stall_t>(res);
+		try_save(cb);
 		cb->wait();
 
 		return res;
@@ -880,7 +876,7 @@ namespace document
 			_is_on_disk = access(_path.c_str(), F_OK) == 0;
 			_file_watcher.reset(_is_on_disk ? new watch_t(_path, shared_from_this()) : NULL);
 
-			std::string newFileType = file::type(_path, io::bytes_ptr(new io::bytes_t(content())), _virtual_path);
+			std::string newFileType = file::type(_path, std::make_shared<io::bytes_t>(content()), _virtual_path);
 			if(newFileType != NULL_STR)
 				set_file_type(newFileType);
 		}
@@ -895,13 +891,13 @@ namespace document
 			if(_backup_path != NULL_STR)
 			{
 				bool modified = _modified;
-				post_load(_path, io::bytes_ptr(new io::bytes_t(path::content(_backup_path))), path::attributes(_backup_path), _file_type, encoding::type(_disk_newlines, _disk_encoding, _disk_bom));
+				post_load(_path, std::make_shared<io::bytes_t>(path::content(_backup_path)), path::attributes(_backup_path), _file_type, encoding::type(_disk_newlines, _disk_encoding, _disk_bom));
 				if(modified)
 					set_revision(buffer().bump_revision());
 				return true;
 			}
 
-			_open_callback.reset(new open_callback_wrapper_t(shared_from_this(), callback));
+			_open_callback = std::make_shared<open_callback_wrapper_t>(shared_from_this(), callback);
 			file::open(_path, _authorization, _open_callback, _content, _virtual_path);
 			_content.reset();
 			return false;
@@ -931,9 +927,8 @@ namespace document
 			cf::run_loop_t _run_loop;
 		};
 
-		stall_t* cb = new stall_t;
-		document::open_callback_ptr sharedPtr((document::open_callback_t*)cb);
-		if(!try_open(sharedPtr))
+		auto cb = std::make_shared<stall_t>();
+		if(!try_open(cb))
 			cb->wait();
 	}
 
@@ -1071,10 +1066,9 @@ namespace document
 
 			crash_reporter_info_t crashInfo("reload file with changes");
 
-			open_callback_t* raw = new open_callback_t(shared_from_this(), async);
-			file::open_callback_ptr cb((file::open_callback_t*)raw);
+			auto cb = std::make_shared<open_callback_t>(shared_from_this(), async);
 			file::open(_path, _authorization, cb);
-			raw->wait();
+			cb->wait();
 		}
 	}
 
@@ -1098,7 +1092,7 @@ namespace document
 		D(DBF_Document, bug("%.*s… (%zu bytes), file type %s\n", std::min<int>(32, str.size()), str.data(), str.size(), _file_type.c_str()););
 		if(_buffer)
 				_buffer->replace(0, _buffer->size(), str); 
-		else	_content.reset(new io::bytes_t(str));
+		else	_content = std::make_shared<io::bytes_t>(str);
 	}
 
 	std::string document_t::content () const
@@ -1179,7 +1173,7 @@ namespace document
 				// of a multi-byte character. On the next call of next() the remaining characters will be decoded.
 				read_buffer.erase(0, read_buffer.size() - srcBytesLeft);
 				dest_buffer.resize(dest_buffer.size() - dstBytesLeft);
-				return io::bytes_ptr(new io::bytes_t(dest_buffer));
+				return std::make_shared<io::bytes_t>(dest_buffer);
 			}
 
 			encoding::type const& encoding () const
@@ -1214,8 +1208,8 @@ namespace document
 	document_t::reader_ptr document_t::create_reader () const
 	{
 		if(is_open())
-			return reader_ptr(new buffer_reader_t(io::bytes_ptr(new io::bytes_t(content()))));
-		return reader_ptr(new file_reader_t(shared_from_this()));
+			return std::make_shared<buffer_reader_t>(std::make_shared<io::bytes_t>(content()));
+		return std::make_shared<file_reader_t>(shared_from_this());
 	}
 
 	// ===========
@@ -1244,7 +1238,7 @@ namespace document
 			buf.replace(pair->first.first, pair->first.second, pair->second);
 		}
 
-		_content.reset(new io::bytes_t(buf.substr(0, buf.size())));
+		_content = std::make_shared<io::bytes_t>(buf.substr(0, buf.size()));
 		set_disk_encoding(reader.encoding());
 	}
 

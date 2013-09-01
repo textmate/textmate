@@ -191,7 +191,7 @@ void run_impl (bundle_command_t const& command, ng::buffer_t const& buffer, ng::
 		}
 	}
 
-	command::runner_ptr runner = command::runner(command, buffer, selection, baseEnv, command::delegate_ptr((command::delegate_t*)new delegate_t(controller, document)), pwd);
+	command::runner_ptr runner = command::runner(command, buffer, selection, baseEnv, std::make_shared<delegate_t>(controller, document), pwd);
 	runner->launch();
 	runner->wait();
 }

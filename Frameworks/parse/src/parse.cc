@@ -225,7 +225,7 @@ namespace parse
 			if(!rule->children.empty())
 			{
 				D(DBF_Parser, bug("re-parse: ‘%.*s’ (range %zu-%zu)\n", (int)(to - from), m.buffer() + from, from, to););
-				parse::stack_ptr stack(new parse::stack_t(rule.get(), scope));
+				auto stack = std::make_shared<parse::stack_t>(rule.get(), scope);
 				stack->anchor = from;
 				parse(m.buffer(), m.buffer() + to, stack, scopes, firstLine, from);
 			}
@@ -473,7 +473,7 @@ namespace parse
 					break;
 				}
 
-				stack.reset(new stack_t(rule, scope::scope_t(), stack));
+				stack = std::make_shared<stack_t>(rule, scope::scope_t(), stack);
 
 				if(rule->scope_string != NULL_STR)
 				{

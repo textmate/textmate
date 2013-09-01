@@ -38,7 +38,7 @@ namespace cf
 
 	inline timer_ptr setup_timer (CFAbsoluteTime delay, std::function<void()> const& callback)
 	{
-		return timer_ptr(new timer_t(CFAbsoluteTimeGetCurrent() + delay, callback));
+		return std::make_shared<timer_t>(CFAbsoluteTimeGetCurrent() + delay, callback);
 	}
 
 } /* cf */

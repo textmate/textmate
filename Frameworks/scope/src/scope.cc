@@ -252,7 +252,7 @@ namespace scope
 
 	void selector_t::setup (std::string const& str)
 	{
-		selector.reset(new scope::types::selector_t);
+		selector = std::make_shared<scope::types::selector_t>();
 		scope::parse::selector(str.data(), str.data() + str.size(), *selector);
 	}
 

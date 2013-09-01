@@ -107,7 +107,7 @@ namespace ng
 		{
 			case kNodeTypeText:
 			{
-				_line.reset(new ct::line_t(buffer.substr(bufferOffset, bufferOffset + _length), buffer.scopes(bufferOffset, bufferOffset + _length), theme, NULL));
+				_line = std::make_shared<ct::line_t>(buffer.substr(bufferOffset, bufferOffset + _length), buffer.scopes(bufferOffset, bufferOffset + _length), theme, nullptr);
 			}
 			break;
 
@@ -115,7 +115,7 @@ namespace ng
 			{
 				scope::scope_t scope = buffer.scope(bufferOffset).right;
 				scope.push_scope("deco.unprintable");
-				_line.reset(new ct::line_t(representation_for(utf8::to_ch(buffer.substr(bufferOffset, bufferOffset + _length))), std::map<size_t, scope::scope_t>{ { 0, scope } }, theme, NULL));
+				_line = std::make_shared<ct::line_t>(representation_for(utf8::to_ch(buffer.substr(bufferOffset, bufferOffset + _length))), std::map<size_t, scope::scope_t>{ { 0, scope } }, theme, nullptr);
 			}
 			break;
 
@@ -135,7 +135,7 @@ namespace ng
 			{
 				scope::scope_t scope = buffer.scope(bufferOffset).right;
 				scope.push_scope("deco.indented-wrap");
-				_line.reset(new ct::line_t(fillStr, std::map<size_t, scope::scope_t>{ { 0, scope } }, theme, NULL));
+				_line = std::make_shared<ct::line_t>(fillStr, std::map<size_t, scope::scope_t>{ { 0, scope } }, theme, nullptr);
 			}
 			break;
 		}

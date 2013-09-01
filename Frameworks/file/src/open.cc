@@ -168,7 +168,7 @@ namespace file
 			if(fstat(fd, &sbuf) != -1)
 			{
 				fcntl(fd, F_NOCACHE, 1);
-				result.bytes.reset(new io::bytes_t(sbuf.st_size));
+				result.bytes = std::make_shared<io::bytes_t>(sbuf.st_size);
 				if(read(fd, result.bytes->get(), result.bytes->size()) != sbuf.st_size)
 					result.bytes.reset();
 			}
@@ -187,7 +187,7 @@ namespace file
 				conn << "read" << request.path;
 				std::string content;
 				conn >> content >> result.attributes;
-				result.bytes.reset(new io::bytes_t(content));
+				result.bytes = std::make_shared<io::bytes_t>(content);
 			}
 			else
 			{
@@ -204,7 +204,7 @@ namespace file
 	void read_t::handle_reply (read_t::result_t const& result)
 	{
 		if(!result.bytes && result.error_code == ENOENT)
-				_context->set_content(io::bytes_ptr(new io::bytes_t("")), result.attributes);
+				_context->set_content(std::make_shared<io::bytes_t>(""), result.attributes);
 		else	_context->set_content(result.bytes, result.attributes);
 		delete this;
 	}
@@ -538,8 +538,8 @@ namespace file
 {
 	void open (std::string const& path, osx::authorization_t auth, open_callback_ptr cb, io::bytes_ptr existingContent, std::string const& virtualPath)
 	{
-		open_context_ptr context(new open_file_context_t(path, existingContent, auth, cb, virtualPath));
-		std::static_pointer_cast<open_file_context_t>(context)->proceed();
+		auto context = std::make_shared<open_file_context_t>(path, existingContent, auth, cb, virtualPath);
+		context->proceed();
 	}
 
 } /* file */

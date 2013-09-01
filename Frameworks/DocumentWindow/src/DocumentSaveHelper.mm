@@ -186,7 +186,7 @@ namespace
 
 	document::document_ptr document = documents.back();
 	D(DBF_DocumentController_SaveHelper, bug("%s (%zu total)\n", document->display_name().c_str(), documents.size()););
-	document->try_save(document::save_callback_ptr((document::save_callback_t*)new save_callback_t(document, self, self.window)));
+	document->try_save(std::make_shared<save_callback_t>(document, self, self.window));
 }
 
 - (void)trySaveDocuments:(std::vector<document::document_ptr> const&)someDocuments forWindow:(NSWindow*)aWindow defaultDirectory:(NSString*)aFolder completionHandler:(void(^)(BOOL success))callback

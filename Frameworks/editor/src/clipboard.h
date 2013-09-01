@@ -26,7 +26,7 @@ struct PUBLIC clipboard_t
 	virtual entry_ptr next () = 0;
 	virtual void push_back (entry_ptr entry) = 0;
 
-	void push_back (std::string const& content) { push_back(entry_ptr(new entry_t(content))); }
+	void push_back (std::string const& content) { push_back(std::make_shared<entry_t>(content)); }
 };
 
 typedef std::shared_ptr<clipboard_t> clipboard_ptr;

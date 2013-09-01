@@ -85,7 +85,7 @@ namespace
 {
 	D(DBF_DocumentController_OpenHelper, bug("%s, already open %s\n", aDocument->display_name().c_str(), BSTR(aDocument->is_open())););
 	self.callback = aCompletionHandler;
-	if(aDocument->try_open(document::open_callback_ptr((document::open_callback_t*)new open_callback_t(self, aWindow))))
+	if(aDocument->try_open(std::make_shared<open_callback_t>(self, aWindow)))
 	{
 		[self didOpenDocument:aDocument];
 		aDocument->close();

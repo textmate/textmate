@@ -19,7 +19,7 @@ namespace test
 			if(!plist::get_key_path(plist, bundles::kFieldUUID, uuid))
 				uuid.generate();
 
-			bundles::item_ptr item(new bundles::item_t(uuid, itemKind == bundles::kItemTypeBundle ? bundles::item_ptr() : _bundle, itemKind));
+			auto item = std::make_shared<bundles::item_t>(uuid, itemKind == bundles::kItemTypeBundle ? bundles::item_ptr() : _bundle, itemKind);
 			item->set_plist(plist);
 			_items.push_back(item);
 

@@ -96,7 +96,7 @@ namespace ng
 			}
 			else
 			{
-				completion_command_delegate_ptr delegate(new completion_command_delegate_t(_buffer, _selections));
+				auto delegate = std::make_shared<completion_command_delegate_t>(_buffer, _selections);
 				command::runner_ptr runner = command::runner(cmd, _buffer, _selections, env, delegate);
 				runner->launch();
 				runner->wait();

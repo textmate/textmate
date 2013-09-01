@@ -151,7 +151,7 @@ namespace scm
 		_clients.insert(client);
 		if(_clients.size() == 1)
 		{
-			_watcher.reset(new scm::watcher_t(_root_path, std::bind(&shared_info_t::fs_did_change, this, std::placeholders::_1)));
+			_watcher = std::make_shared<scm::watcher_t>(_root_path, std::bind(&shared_info_t::fs_did_change, this, std::placeholders::_1));
 			schedule_update();
 		}
 		else
@@ -272,7 +272,7 @@ namespace scm
 			{
 				if(driver && driver->has_info_for_directory(cwd))
 				{
-					shared_info_ptr res(new shared_info_t(cwd, driver));
+					auto res = std::make_shared<shared_info_t>(cwd, driver);
 					cache()[cwd] = res;
 					return res;
 				}
@@ -337,7 +337,7 @@ namespace scm
 		if(!scm_enabled_for_path(path))
 			return info_ptr();
 
-		info_ptr res(new info_t(path));
+		auto res = std::make_shared<info_t>(path);
 
 		__block bool performBackgroundDriverSearch = true;
 		dispatch_sync(cache_access_queue(), ^{

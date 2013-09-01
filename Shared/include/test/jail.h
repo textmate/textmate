@@ -9,7 +9,7 @@ namespace test
 	{
 		jail_t ()
 		{
-			helper.reset(new helper_t);
+			helper = std::make_shared<helper_t>();
 		}
 
 		void mkdir (std::string const& relativeToRoot)
