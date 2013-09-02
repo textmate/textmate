@@ -2416,6 +2416,20 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	}
 }
 
+- (void)checkSpelling:(id)sender
+{
+	size_t endOfSelection = editor->ranges().last().last.index;
+	auto nextMisspelling = document->buffer().next_misspelling(endOfSelection);
+	if(nextMisspelling.first == nextMisspelling.second)
+		return;
+	if(endOfSelection != nextMisspelling.second)
+	{
+		AUTO_REFRESH;
+		editor->set_selections(ng::range_t(nextMisspelling.first, nextMisspelling.second));
+	}
+	[self showContextMenu:sender];
+}
+
 - (void)toggleContinuousSpellChecking:(id)sender
 {
 	bool flag = !document->buffer().live_spelling();

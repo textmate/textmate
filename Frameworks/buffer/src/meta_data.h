@@ -11,6 +11,7 @@ namespace ng
 		std::map<size_t, bool> misspellings (buffer_t const* buffer, size_t from, size_t to) const;
 
 		bool misspelled_at (size_t i) const;
+		std::pair<size_t, size_t> next_misspelling (size_t from) const;
 		void recheck (buffer_t const* buffer, size_t from, size_t to);
 
 	private:

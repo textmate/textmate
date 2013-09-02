@@ -122,6 +122,7 @@ namespace ng
 		void set_spelling_language (std::string const& lang);
 		std::string const& spelling_language () const;
 		std::map<size_t, bool> misspellings (size_t from, size_t to) const;
+		std::pair<size_t, size_t> next_misspelling (size_t from) const;
 		ns::spelling_tag_t spelling_tag () const;
 
 		pairs_t& pairs ()              { return *_pairs.get(); }
