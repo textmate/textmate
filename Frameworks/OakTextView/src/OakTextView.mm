@@ -1764,12 +1764,20 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 {
 	D(DBF_OakTextView_Spelling, bug("%s\n", [[sender representedObject] UTF8String]););
 	[[NSSpellChecker sharedSpellChecker] ignoreWord:[sender representedObject] inSpellDocumentWithTag:document->buffer().spelling_tag()];
+
+	ng::ranges_t ranges = editor->ranges();
+	if(ranges.size() == 1)
+		document->buffer().recheck_spelling(ranges.first().min().index, ranges.first().max().index);
 }
 
 - (void)contextMenuPerformLearnSpelling:(id)sender
 {
 	D(DBF_OakTextView_Spelling, bug("%s\n", [[sender representedObject] UTF8String]););
 	[[NSSpellChecker sharedSpellChecker] learnWord:[sender representedObject]];
+
+	ng::ranges_t ranges = editor->ranges();
+	if(ranges.size() == 1)
+		document->buffer().recheck_spelling(ranges.first().min().index, ranges.first().max().index);
 }
 
 // =========================
