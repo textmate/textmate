@@ -124,6 +124,7 @@ namespace ng
 		std::map<size_t, bool> misspellings (size_t from, size_t to) const;
 		std::pair<size_t, size_t> next_misspelling (size_t from) const;
 		ns::spelling_tag_t spelling_tag () const;
+		void recheck_spelling (size_t from, size_t to);
 
 		pairs_t& pairs ()              { return *_pairs.get(); }
 		pairs_t const& pairs () const  { return *_pairs.get(); }
