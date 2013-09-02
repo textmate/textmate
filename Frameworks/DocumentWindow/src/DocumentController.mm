@@ -511,6 +511,7 @@ namespace
 	std::vector<document::document_ptr> newDocuments;
 	NSUInteger newSelectedTabIndex = _selectedTabIndex;
 	oak::uuid_t const selectedUUID = _documents[_selectedTabIndex]->identifier();
+	oak::uuid_t const previousSelectedUUID = _documents[_lastSelectedOverflowTabIndex]->identifier();
 	for(auto document : _documents)
 	{
 		oak::uuid_t const& uuid = document->identifier();
@@ -518,6 +519,12 @@ namespace
 			newDocuments.push_back(document);
 		if(selectedUUID == uuid)
 			newSelectedTabIndex = newDocuments.empty() ? 0 : newDocuments.size() - 1;
+		if(previousSelectedUUID == uuid)
+		{
+			if(newDocuments.size() <= [self.tabBarView countOfVisibleTabs])
+				_lastSelectedOverflowTabIndex = 0;
+			else self.lastSelectedOverflowTabIndex = newDocuments.size() <= _lastSelectedOverflowTabIndex ? _lastSelectedOverflowTabIndex - 1 : 0;	
+		}
 	}
 
 	crashInfo << text::format("keep %zu documents open, new selected index at %zu, create untitled %s", newDocuments.size(), newSelectedTabIndex, BSTR((createIfEmptyFlag && newDocuments.empty())));
@@ -1340,8 +1347,18 @@ namespace
 
 - (void)setSelectedTabIndex:(NSUInteger)newSelectedTabIndex
 {
+	self.lastSelectedOverflowTabIndex = _selectedTabIndex;
 	_selectedTabIndex = newSelectedTabIndex;
 	[self.tabBarView setSelectedTab:newSelectedTabIndex];
+}
+
+- (void)setLastSelectedOverflowTabIndex:(NSUInteger)newLastSelectedOverflowTabIndex
+{
+	if(newLastSelectedOverflowTabIndex > [self.tabBarView countOfVisibleTabs]-1)
+		_lastSelectedOverflowTabIndex = newLastSelectedOverflowTabIndex;
+	if(newLastSelectedOverflowTabIndex == [self.tabBarView countOfVisibleTabs]-1)
+		_lastSelectedOverflowTabIndex = 0;
+	[self.tabBarView setLastSelectedOverflowTab:_lastSelectedOverflowTabIndex];
 }
 
 - (void)setIdentifier:(NSString*)newIdentifier
@@ -1427,6 +1444,28 @@ namespace
 		for(NSUInteger index = [indexSet firstIndex]; index != NSNotFound; index = [indexSet indexGreaterThanIndex:index])
 			_documents[index]->set_sticky(!_documents[index]->sticky());
 	}
+}
+- (NSMenu*)menuForOverflowTab:(OakTabBarView*)aTabBarView
+{
+	int lastVisibleTab = [aTabBarView countOfVisibleTabs] - 1;
+	NSMenu* aMenu = [NSMenu new];
+	int i;
+	for(auto document : _documents)
+	{
+		if(i >= lastVisibleTab)
+		{
+			NSMenuItem* item = [aMenu addItemWithTitle:[NSString stringWithCxxString:document->display_name()] action:@selector(takeSelectedTabIndexFrom:) keyEquivalent:@""];
+			item.tag     = i;
+			item.toolTip = [[NSString stringWithCxxString:document->path()] stringByAbbreviatingWithTildeInPath];
+			item.image   = [OakFileIconImage fileIconImageWithPath:[NSString stringWithCxxString:document->path()] isModified:document->is_modified()];
+			if(i == _selectedTabIndex)
+				[item setState:NSOnState];
+			else if(document->is_modified())
+				[item setModifiedState:YES];
+		}
+		++i;
+	}
+	return aMenu;
 }
 
 - (NSMenu*)menuForTabBarView:(OakTabBarView*)aTabBarView

@@ -56,9 +56,10 @@ namespace tab_bar_requisites
 {
 	uint32_t modified = layer_t::last_requisite << 0,
 	         first    = layer_t::last_requisite << 1,
-	         dragged  = layer_t::last_requisite << 2;
+	         dragged  = layer_t::last_requisite << 2,
+	         overflow = layer_t::last_requisite << 3;
 
-	uint32_t all      = (modified|first|dragged);
+	uint32_t all      = (modified|first|dragged|overflow);
 };
 
 // ==================
@@ -240,6 +241,7 @@ uint32_t layout_metrics_t::requisite_from_string (char const* str)
 		{ "modified",             tab_bar_requisites::modified},
 		{ "first",                tab_bar_requisites::first   },
 		{ "dragged",              tab_bar_requisites::dragged },
+		{ "overflow",             tab_bar_requisites::overflow},
 	};
 
 	for(size_t i = 0; i < sizeofA(mapping); ++i)
@@ -314,6 +316,7 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 	BOOL layoutNeedsUpdate;
 	NSUInteger selectedTab;
 	NSUInteger hiddenTab;
+	NSUInteger lastSelectedOverflowTab;
 
 	layout_metrics_ptr metrics;
 	std::vector<NSRect> tabRects;
@@ -552,6 +555,8 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 		filter |= tab_bar_requisites::modified;
 	if(tabIndex == 0)
 		filter |= tab_bar_requisites::first;
+	if(tabIndex >= [self countOfVisibleTabs] - 1 && tabTitles.count > [self countOfVisibleTabs])
+		filter |= tab_bar_requisites::overflow;
 	return filter;
 }
 
@@ -577,7 +582,7 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 {
 	NSRect rect = NSInsetRect([self bounds], metrics->firstTabOffset, 0);
 	NSUInteger maxNumberOfTabs = floor((NSWidth(rect) + metrics->tabSpacing) / (metrics->minTabSize + metrics->tabSpacing));
-	return std::max<NSUInteger>(maxNumberOfTabs, 8);
+	return maxNumberOfTabs;
 }
 
 - (void)updateLayout
@@ -628,17 +633,52 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 	}
 
 	// ==========
-
-	for(NSUInteger tabIndex = 0; tabIndex < numberOfTabs; ++tabIndex)
+	NSUInteger lastVisibleTab = numberOfTabs > 1 ? numberOfTabs-1 : 0;
+	for(NSUInteger tabIndex = 0; tabIndex < tabTitles.count; ++tabIndex)
 	{
 		rect.origin.x += tabDropSpacing.find(tabIndex) != tabDropSpacing.end() ? tabDropSpacing[tabIndex].set_time(CFAbsoluteTimeGetCurrent()) : 0;
+		rect.size.width = tabSizes[tabIndex];
+
 		if(tabIndex == hiddenTab)
 		{
 			tabRects.push_back(NSZeroRect);
 			continue;
 		}
+		// Do we need to remove the last tab to render the selectedTab or lastSelectedOverflowTab
+		if(tabIndex == lastVisibleTab)
+		{
+			if(selectedTab > lastVisibleTab)
+			{
+				tabRects.push_back(NSZeroRect);
+				continue;
+			}
+			else if(lastSelectedOverflowTab > lastVisibleTab && lastSelectedOverflowTab > selectedTab && selectedTab < lastVisibleTab)
+			{
+				tabRects.push_back(NSZeroRect);
+				continue;
+			}
+		}
+		if(selectedTab >= lastVisibleTab)
+		{
+			if(tabIndex > lastVisibleTab && (tabIndex < selectedTab || tabIndex > selectedTab))
+			{
+				tabRects.push_back(NSZeroRect);
+				continue;
+			}
+			if(tabIndex == selectedTab)
+				rect.size.width = tabSizes.back();
+		}
+		else if (lastSelectedOverflowTab >= lastVisibleTab & lastSelectedOverflowTab > selectedTab)
+		{
+			if(tabIndex > lastVisibleTab && (tabIndex < lastSelectedOverflowTab || tabIndex > lastSelectedOverflowTab))
+			{
+				tabRects.push_back(NSZeroRect);
+				continue;
+			}
 
-		rect.size.width = tabSizes[tabIndex];
+			if(tabIndex == lastSelectedOverflowTab)
+				rect.size.width = tabSizes.back();
+		}
 
 		std::string layer_id  = [self layerNameForTabIndex:tabIndex];
 		NSString* toolTipText = SafeObjectAtIndex(tabToolTips, tabIndex);
@@ -652,6 +692,7 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 		tabRects.push_back(rect);
 		rect.origin.x += rect.size.width + metrics->tabSpacing;
 	}
+
 	newLayout.insert(newLayout.end(), selectedTabLayers.begin(), selectedTabLayers.end());
 	[self setLayers:newLayout];
 }
@@ -705,6 +746,29 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 	D(DBF_TabBarView, bug("\n"););
 	self.tag = selectedTab; // performCloseTab: asks for [sender tag]
 	[NSApp sendAction:@selector(performCloseTab:) to:nil from:self];
+}
+
+- (void)tabBarOverflow:(id)sender
+{
+	NSUInteger overflowTab = self.tag;
+	NSRect tabRect = tabRects[overflowTab];
+	NSRect rect;
+	uint32_t state = [self currentState] | layer_t::mouse_inside | layer_t::mouse_clicked;
+	citerate(it, metrics->layers_for([self layerNameForTabIndex:overflowTab], tabRect, overflowTab, [tabTitles objectAtIndex:overflowTab], nil, [self filterForTabIndex:overflowTab] | tab_bar_requisites::overflow))
+	{
+		if((state & it->requisite_mask) == it->requisite)
+			rect = it->rect;
+	}
+	rect.origin.y -= 6; //shift menu down slightly to base of tab
+	[[self.delegate menuForOverflowTab:self] popUpMenuPositioningItem:nil atLocation:(rect.origin) inView:self];
+	self.layoutNeedsUpdate = YES;
+}
+
+- (void)setLastSelectedOverflowTab:(NSUInteger)anIndex
+{
+	if(lastSelectedOverflowTab == anIndex)
+		return;
+	lastSelectedOverflowTab = anIndex;
 }
 
 - (NSMenu*)menuForEvent:(NSEvent*)anEvent

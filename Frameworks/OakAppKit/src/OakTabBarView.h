@@ -13,6 +13,7 @@ PUBLIC @interface OakTabBarView : OakControl
 @property (nonatomic, readonly) NSUInteger countOfVisibleTabs;
 - (void)reloadData;
 - (void)setSelectedTab:(NSUInteger)anIndex;
+- (void)setLastSelectedOverflowTab:(NSUInteger)anIndex;
 @end
 
 @protocol OakTabBarViewDelegate <NSObject>
@@ -21,6 +22,7 @@ PUBLIC @interface OakTabBarView : OakControl
 - (void)tabBarView:(OakTabBarView*)aTabBarView didDoubleClickIndex:(NSUInteger)anIndex;
 - (void)tabBarViewDidDoubleClick:(OakTabBarView*)aTabBarView;
 - (NSMenu*)menuForTabBarView:(OakTabBarView*)aTabBarView;
+- (NSMenu*)menuForOverflowTab:(OakTabBarView*)aTabBarView;
 
 // Methods sent to the delegate which the tab was dragged from
 // When called, the delegate should set up the drag pasteboard using -addTypes:owner: with the data it requires
