@@ -16,6 +16,16 @@ namespace ng
 		return it != _misspellings.begin() ? (--it)->second : false;
 	}
 
+	ssize_t spelling_t::next_misspelling (size_t from) const
+	{
+		tree_t::iterator it = _misspellings.upper_bound(from);
+		if(it == _misspellings.end())
+			it = _misspellings.begin();
+		else if(!it->second && it != _misspellings.begin())
+			--it;
+		return it->second ? it->first : -1;
+	}
+
 	void spelling_t::did_parse (buffer_t const* buffer, size_t from, size_t to)
 	{
 		auto first = buffer->_scopes.lower_bound(from);

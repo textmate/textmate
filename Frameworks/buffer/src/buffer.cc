@@ -297,6 +297,7 @@ namespace ng
 	bool buffer_t::live_spelling () const                                          { return _spelling ? true : false; }
 	std::string const& buffer_t::spelling_language () const                        { return _spelling_language; }
 	std::map<size_t, bool> buffer_t::misspellings (size_t from, size_t to) const   { return _spelling ? _spelling->misspellings(this, from, to) : std::map<size_t, bool>(); }
+	ssize_t buffer_t::next_misspelling (size_t from) const                         { return _spelling ? _spelling->next_misspelling(from) : -1; }
 	ns::spelling_tag_t buffer_t::spelling_tag () const                             { return _spelling_tag; }
 
 	void buffer_t::set_live_spelling (bool flag)
