@@ -1637,7 +1637,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	CGRect r1 = layout->rect_at_index(editor->ranges().last().first);
 	CGRect r2 = layout->rect_at_index(editor->ranges().last().last);
 	CGRect r = r1.origin.y == r2.origin.y && r1.origin.x < r2.origin.x ? r1 : r2;
-	NSPoint p = NSMakePoint(CGRectGetMinX(r), CGRectGetMaxY(r)-1);
+	NSPoint p = NSMakePoint(CGRectGetMinX(r), CGRectGetMaxY(r)+4);
 	if(NSPointInRect(p, [self visibleRect]))
 			{ p = [[self window] convertBaseToScreen:[self convertPoint:p toView:nil]]; }
 	else	{ p = [NSEvent mouseLocation]; p.y -= 16; }
