@@ -1692,9 +1692,13 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 			[menu addItemWithTitle:@"No Guesses Found" action:nil keyEquivalent:@""];
 
 		[menu addItem:[NSMenuItem separatorItem]];
-		item = [menu addItemWithTitle:@"Ignore Spelling" action:@selector(contextMenuPerformIgnoreSpelling:) keyEquivalent:@""];
+		item = [menu addItemWithTitle:@"Ignore Spelling" action:@selector(contextMenuPerformIgnoreSpelling:) keyEquivalent:@"-"];
+		[item setKeyEquivalentModifierMask:0];
 		[item setRepresentedObject:aWord];
-		item = [menu addItemWithTitle:@"Learn Spelling" action:@selector(contextMenuPerformLearnSpelling:) keyEquivalent:@""];
+		item = [menu addItemWithTitle:@"Learn Spelling" action:@selector(contextMenuPerformLearnSpelling:) keyEquivalent:@"="];
+		[item setKeyEquivalentModifierMask:0];
+		[item setRepresentedObject:aWord];
+		item = [menu addItemWithTitle:@"Show Next" action:@selector(checkSpelling:) keyEquivalent:@";"];
 		[item setRepresentedObject:aWord];
 		[menu addItem:[NSMenuItem separatorItem]];
 	}
