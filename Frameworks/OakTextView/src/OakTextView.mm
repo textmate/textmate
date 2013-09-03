@@ -2437,7 +2437,10 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		AUTO_REFRESH;
 		editor->set_selections(ng::range_t(nextMisspelling.first, nextMisspelling.second));
 	}
-	[self showContextMenu:sender];
+
+	if([sender isKindOfClass:[NSMenuItem class]])
+			[self showContextMenu:sender];
+	else	[self selectAndReturnMisspelledWordAtIndex:nextMisspelling.first];
 }
 
 - (void)toggleContinuousSpellChecking:(id)sender
