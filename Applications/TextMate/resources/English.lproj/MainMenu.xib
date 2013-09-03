@@ -1754,15 +1754,7 @@
 								<bool key="EncodedWithXMLCoder">YES</bool>
 								<object class="NSMenuItem" id="246914251">
 									<reference key="NSMenu" ref="564325342"/>
-									<string key="NSTitle">Transpose Characters</string>
-									<string key="NSKeyEquiv"/>
-									<int key="NSMnemonicLoc">2147483647</int>
-									<reference key="NSOnImage" ref="944637517"/>
-									<reference key="NSMixedImage" ref="596846250"/>
-								</object>
-								<object class="NSMenuItem" id="819363239">
-									<reference key="NSMenu" ref="564325342"/>
-									<string key="NSTitle">Transpose Words</string>
+									<string key="NSTitle">Transpose</string>
 									<string key="NSKeyEquiv"/>
 									<int key="NSMnemonicLoc">2147483647</int>
 									<reference key="NSOnImage" ref="944637517"/>
@@ -2898,14 +2890,6 @@
 						<reference key="destination" ref="246914251"/>
 					</object>
 					<int key="connectionID">366</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBActionConnection" key="connection">
-						<string key="label">transposeWords:</string>
-						<reference key="source" ref="51167417"/>
-						<reference key="destination" ref="819363239"/>
-					</object>
-					<int key="connectionID">367</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBActionConnection" key="connection">
@@ -4571,7 +4555,6 @@
 						<object class="NSMutableArray" key="children">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<reference ref="246914251"/>
-							<reference ref="819363239"/>
 							<reference ref="465097494"/>
 							<reference ref="952428662"/>
 							<reference ref="577163704"/>
@@ -4597,11 +4580,6 @@
 					<object class="IBObjectRecord">
 						<int key="objectID">344</int>
 						<reference key="object" ref="246914251"/>
-						<reference key="parent" ref="564325342"/>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">346</int>
-						<reference key="object" ref="819363239"/>
 						<reference key="parent" ref="564325342"/>
 					</object>
 					<object class="IBObjectRecord">
@@ -5786,7 +5764,6 @@
 					<string>342.IBPluginDependency</string>
 					<string>343.IBPluginDependency</string>
 					<string>344.IBPluginDependency</string>
-					<string>346.IBPluginDependency</string>
 					<string>347.IBPluginDependency</string>
 					<string>348.IBPluginDependency</string>
 					<string>349.IBPluginDependency</string>
@@ -6054,7 +6031,6 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>OakMainMenu</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
