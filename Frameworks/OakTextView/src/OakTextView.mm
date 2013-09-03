@@ -1637,7 +1637,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	CGRect r1 = layout->rect_at_index(editor->ranges().last().first);
 	CGRect r2 = layout->rect_at_index(editor->ranges().last().last);
 	CGRect r = r1.origin.y == r2.origin.y && r1.origin.x < r2.origin.x ? r1 : r2;
-	NSPoint p = NSMakePoint(CGRectGetMinX(r), CGRectGetMaxY(r)-1);
+	NSPoint p = NSMakePoint(CGRectGetMinX(r), CGRectGetMaxY(r)+4);
 	if(NSPointInRect(p, [self visibleRect]))
 			{ p = [[self window] convertBaseToScreen:[self convertPoint:p toView:nil]]; }
 	else	{ p = [NSEvent mouseLocation]; p.y -= 16; }
@@ -1692,9 +1692,13 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 			[menu addItemWithTitle:@"No Guesses Found" action:nil keyEquivalent:@""];
 
 		[menu addItem:[NSMenuItem separatorItem]];
-		item = [menu addItemWithTitle:@"Ignore Spelling" action:@selector(contextMenuPerformIgnoreSpelling:) keyEquivalent:@""];
+		item = [menu addItemWithTitle:@"Ignore Spelling" action:@selector(contextMenuPerformIgnoreSpelling:) keyEquivalent:@"-"];
+		[item setKeyEquivalentModifierMask:0];
 		[item setRepresentedObject:aWord];
-		item = [menu addItemWithTitle:@"Learn Spelling" action:@selector(contextMenuPerformLearnSpelling:) keyEquivalent:@""];
+		item = [menu addItemWithTitle:@"Learn Spelling" action:@selector(contextMenuPerformLearnSpelling:) keyEquivalent:@"="];
+		[item setKeyEquivalentModifierMask:0];
+		[item setRepresentedObject:aWord];
+		item = [menu addItemWithTitle:@"Show Next" action:@selector(checkSpelling:) keyEquivalent:@";"];
 		[item setRepresentedObject:aWord];
 		[menu addItem:[NSMenuItem separatorItem]];
 	}
@@ -1760,12 +1764,20 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 {
 	D(DBF_OakTextView_Spelling, bug("%s\n", [[sender representedObject] UTF8String]););
 	[[NSSpellChecker sharedSpellChecker] ignoreWord:[sender representedObject] inSpellDocumentWithTag:document->buffer().spelling_tag()];
+
+	ng::ranges_t ranges = editor->ranges();
+	if(ranges.size() == 1)
+		document->buffer().recheck_spelling(ranges.first().min().index, ranges.first().max().index);
 }
 
 - (void)contextMenuPerformLearnSpelling:(id)sender
 {
 	D(DBF_OakTextView_Spelling, bug("%s\n", [[sender representedObject] UTF8String]););
 	[[NSSpellChecker sharedSpellChecker] learnWord:[sender representedObject]];
+
+	ng::ranges_t ranges = editor->ranges();
+	if(ranges.size() == 1)
+		document->buffer().recheck_spelling(ranges.first().min().index, ranges.first().max().index);
 }
 
 // =========================
@@ -2414,6 +2426,23 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		layout->set_draw_wrap_column(flag);
 		settings_t::set(kSettingsShowWrapColumnKey, flag);
 	}
+}
+
+- (void)checkSpelling:(id)sender
+{
+	size_t end_of_selection = editor->ranges().last().last.index;
+	ssize_t next_misspelling_pos = document->buffer().next_misspelling(end_of_selection);
+	if(next_misspelling_pos == -1)
+		return;
+	if(end_of_selection != next_misspelling_pos)
+	{
+		AUTO_REFRESH;
+		editor->set_selections(ng::range_t(next_misspelling_pos));
+	}
+	if([sender isKindOfClass:[NSMenuItem class]])
+		[self showContextMenu:sender];
+	else
+		[self selectAndReturnMisspelledWordAtIndex:next_misspelling_pos];
 }
 
 - (void)toggleContinuousSpellChecking:(id)sender
