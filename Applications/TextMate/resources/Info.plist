@@ -26,490 +26,393 @@
 	);
 
 	CFBundleDocumentTypes = (
-		{	CFBundleTypeName       = "ADA source";
-			CFBundleTypeExtensions = (adb, ads);
-			CFBundleTypeIconFile   = Blank;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Compiled AppleScript";
-			CFBundleTypeExtensions = (scpt);
-			CFBundleTypeIconFile   = AS;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "AppleScript source";
-			CFBundleTypeExtensions = (applescript);
-			CFBundleTypeIconFile   = AS;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "ActionScript source";
-			CFBundleTypeExtensions = (as);
-			CFBundleTypeIconFile   = AS;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "ASP document";
-			CFBundleTypeExtensions = (asp, asa);
-			CFBundleTypeIconFile   = ASP;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "ASP.NET document";
-			CFBundleTypeExtensions = (aspx, ascx, asmx, ashx);
-			CFBundleTypeIconFile   = ASP;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "BibTeX bibliography";
-			CFBundleTypeExtensions = (bib);
-			CFBundleTypeIconFile   = BibTeX;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "C source";
-			CFBundleTypeExtensions = (c);
-			CFBundleTypeIconFile   = C;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "C++ source";
-			CFBundleTypeExtensions = (cc, cp, cpp, cxx, "c++");
-			CFBundleTypeIconFile   = "C++";
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "C# source";
-			CFBundleTypeExtensions = (cs);
-			CFBundleTypeIconFile   = "C#";
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "CoffeeScript source";
-			CFBundleTypeExtensions = (coffee);
-			CFBundleTypeIconFile   = CoffeeScript;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Context Free Design Grammar";
-			CFBundleTypeExtensions = (cfdg);
-			CFBundleTypeIconFile   = Blank;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Comma separated values";
-			CFBundleTypeExtensions = (csv);
-			CFBundleTypeIconFile   = Text;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Tab separated values";
-			CFBundleTypeExtensions = (tsv);
-			CFBundleTypeIconFile   = Text;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "CGI script";
-			CFBundleTypeExtensions = (cgi, fcgi);
-			CFBundleTypeIconFile   = Blank;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Configuration file";
-			CFBundleTypeExtensions = (cfg, conf, config, htaccess);
-			CFBundleTypeIconFile   = Blank;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Cascading style sheet";
-			CFBundleTypeExtensions = (css);
-			CFBundleTypeIconFile   = CSS;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Differences file";
-			CFBundleTypeExtensions = (diff);
-			CFBundleTypeIconFile   = Diff;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Document Type Definition";
-			CFBundleTypeExtensions = (dtd);
-			CFBundleTypeIconFile   = XML;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Dylan source";
-			CFBundleTypeExtensions = (dylan);
-			CFBundleTypeIconFile   = Blank;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Erlang source";
-			CFBundleTypeExtensions = (erl, hrl);
-			CFBundleTypeIconFile   = Erlang;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "F-Script source";
-			CFBundleTypeExtensions = (fscript);
-			CFBundleTypeIconFile   = "Blank";
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Fortran source";
-			CFBundleTypeExtensions = (f, for, fpp, f77, f90, f95);
-			CFBundleTypeIconFile   = Fortran;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Header";
-			CFBundleTypeExtensions = (h, pch);
-			CFBundleTypeIconFile   = H;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "C++ header";
-			CFBundleTypeExtensions = (hh, hpp, hxx, "h++");
-			CFBundleTypeIconFile   = "H++";
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "GTD document";
-			CFBundleTypeExtensions = (gtd, gtdlog);
-			CFBundleTypeIconFile   = GTD;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Haskell source";
-			CFBundleTypeExtensions = (hs, lhs);
-			CFBundleTypeIconFile   = Haskell;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "HTML document";
-			CFBundleTypeExtensions = (htm, html, phtml, shtml);
-			CFBundleTypeIconFile   = HTML;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Include file";
-			CFBundleTypeExtensions = (inc);
-			CFBundleTypeIconFile   = Blank;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "iCalendar schedule";
-			CFBundleTypeExtensions = (ics);
-			CFBundleTypeIconFile   = Blank;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "MS Windows initialization file";
-			CFBundleTypeExtensions = (ini);
-			CFBundleTypeIconFile   = INI;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Io source";
-			CFBundleTypeExtensions = (io);
-			CFBundleTypeIconFile   = Blank;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Java source";
-			CFBundleTypeExtensions = (java);
-			CFBundleTypeIconFile   = Java;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "BeanShell script";
-			CFBundleTypeExtensions = (bsh);
-			CFBundleTypeIconFile   = Java;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Java properties file";
-			CFBundleTypeExtensions = (properties);
-			CFBundleTypeIconFile   = Java;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "JavaScript source";
-			CFBundleTypeExtensions = (js, htc);
-			CFBundleTypeIconFile   = JavaScript;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Java Server Page";
-			CFBundleTypeExtensions = (jsp);
-			CFBundleTypeIconFile   = Java;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "JSON file";
-			CFBundleTypeExtensions = (json);
-			CFBundleTypeIconFile   = JSON;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "LDAP Data Interchange Format";
-			CFBundleTypeExtensions = (ldif);
-			CFBundleTypeIconFile   = Blank;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Lisp source";
-			CFBundleTypeExtensions = (lisp, cl, l, lsp, mud, el);
-			CFBundleTypeIconFile   = Lisp;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Log file";
-			CFBundleTypeExtensions = (log);
-			CFBundleTypeIconFile   = Text;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Logo source";
-			CFBundleTypeExtensions = (logo);
-			CFBundleTypeIconFile   = Blank;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Lua source";
-			CFBundleTypeExtensions = (lua);
-			CFBundleTypeIconFile   = Lua;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Markdown document";
-			CFBundleTypeExtensions = (markdown, mdown, markdn, md);
-			CFBundleTypeIconFile   = Markdown;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Mediawiki document";
-			CFBundleTypeExtensions = (wiki, wikipedia, mediawiki);
-			CFBundleTypeIconFile   = Text;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "MIPS assembler source";
-			CFBundleTypeExtensions = (s, mips, spim, asm);
-			CFBundleTypeIconFile   = Blank;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Modula-3 source";
-			CFBundleTypeExtensions = (m3, cm3);
-			CFBundleTypeIconFile   = Blank;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "MoinMoin document";
-			CFBundleTypeExtensions = (moinmoin);
-			CFBundleTypeIconFile   = Text;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Objective-C source";
-			CFBundleTypeExtensions = (m);
-			CFBundleTypeIconFile   = "Obj-C";
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Objective-C++ source";
-			CFBundleTypeExtensions = (mm);
-			CFBundleTypeIconFile   = "Obj-C++";
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "OCaml source";
-			CFBundleTypeExtensions = (ml, mli, mll, mly);
-			CFBundleTypeIconFile   = Blank;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Pascal source";
-			CFBundleTypeExtensions = (pas, p);
-			CFBundleTypeIconFile   = Pascal;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Patch file";
-			CFBundleTypeExtensions = (patch);
-			CFBundleTypeIconFile   = Patch;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Perl source";
-			CFBundleTypeExtensions = (pl, pod, perl);
-			CFBundleTypeIconFile   = Perl;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Perl module";
-			CFBundleTypeExtensions = (pm);
-			CFBundleTypeIconFile   = Perl;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "PHP source";
-			CFBundleTypeExtensions = (php, php3, php4, php5);
-			CFBundleTypeIconFile   = PHP;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "PostScript source";
-			CFBundleTypeExtensions = (ps, eps);
-			CFBundleTypeIconFile   = Blank;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Property list";
-			CFBundleTypeExtensions = (dict, plist, scriptSuite, scriptTerminology);
-			CFBundleTypeIconFile   = Plist;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Python source";
-			CFBundleTypeExtensions = (py, rpy, cpy, python);
-			CFBundleTypeIconFile   = Python;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "R source";
-			CFBundleTypeExtensions = (r, s);
-			CFBundleTypeIconFile   = R;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Ragel source";
-			CFBundleTypeExtensions = (rl, ragel);
-			CFBundleTypeIconFile   = Ragel;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Remind document";
-			CFBundleTypeExtensions = (rem, remind);
-			CFBundleTypeIconFile   = Blank;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "reStructuredText document";
-			CFBundleTypeExtensions = (rst, rest);
-			CFBundleTypeIconFile   = reST;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "HTML with embedded Ruby";
-			CFBundleTypeExtensions = (rhtml);
-			CFBundleTypeIconFile   = RHTML;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "SQL with embedded Ruby";
-			CFBundleTypeExtensions = (erbsql);
-			CFBundleTypeIconFile   = SQL;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Ruby source";
-			CFBundleTypeExtensions = (rb, rbx, rjs, rxml);
-			CFBundleTypeIconFile   = Ruby;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Scheme source";
-			CFBundleTypeExtensions = (scm, sch);
-			CFBundleTypeIconFile   = Blank;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Setext document";
-			CFBundleTypeExtensions = (ext);
-			CFBundleTypeIconFile   = Text;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Shell script";
-			CFBundleTypeExtensions = (sh, ss, bashrc, "bash_profile", "bash_login", profile, "bash_logout");
-			CFBundleTypeIconFile   = Shell;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Slate source";
-			CFBundleTypeExtensions = (slate);
-			CFBundleTypeIconFile   = Blank;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "SQL source";
-			CFBundleTypeExtensions = (sql);
-			CFBundleTypeIconFile   = SQL;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Standard ML source";
-			CFBundleTypeExtensions = (sml);
-			CFBundleTypeIconFile   = Blank;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Strings document";
-			CFBundleTypeExtensions = (strings);
-			CFBundleTypeIconFile   = Strings;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Scalable vector graphics";
-			CFBundleTypeExtensions = (svg);
-			CFBundleTypeIconFile   = XML;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "SWIG source";
-			CFBundleTypeExtensions = (i, swg);
-			CFBundleTypeIconFile   = SWIG;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Tcl source";
-			CFBundleTypeExtensions = (tcl);
-			CFBundleTypeIconFile   = Blank;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "TeX document";
-			CFBundleTypeExtensions = (tex, sty, cls);
-			CFBundleTypeIconFile   = TeX;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Plain text document";
-			CFBundleTypeExtensions = (text, txt, utf8);
-			CFBundleTypeIconFile   = Text;
-			CFBundleTypeMIMETypes  = ("text/plain");
-			CFBundleTypeOSTypes    = (TEXT, sEXT, ttro);
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Textile document";
-			CFBundleTypeExtensions = (textile);
-			CFBundleTypeIconFile   = Text;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "XHTML document";
-			CFBundleTypeExtensions = (xhtml);
-			CFBundleTypeIconFile   = XML;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "XML document";
-			CFBundleTypeExtensions = (xml, xsd, xib, rss, tld, pt, cpt, dtml);
-			CFBundleTypeIconFile   = XML;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "XSL stylesheet";
-			CFBundleTypeExtensions = (xsl, xslt);
-			CFBundleTypeIconFile   = XML;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Electronic business card";
-			CFBundleTypeExtensions = (vcf, vcard);
-			CFBundleTypeIconFile   = Blank;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "Visual Basic source";
-			CFBundleTypeExtensions = (vb);
-			CFBundleTypeIconFile   = Blank;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "YAML document";
-			CFBundleTypeExtensions = (yaml, yml);
-			CFBundleTypeIconFile   = YAML;
-			CFBundleTypeRole       = Editor;
-		},
-
-		/* bundle items */
-
-		{	CFBundleTypeName       = "TextMate snippet";
-			CFBundleTypeExtensions = (tmSnippet);
-			CFBundleTypeIconFile   = 'TextMate Snippet';
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "TextMate macro";
-			CFBundleTypeExtensions = (tmMacro);
-			CFBundleTypeIconFile   = 'TextMate Macro';
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "TextMate language grammar";
-			CFBundleTypeExtensions = (tmLanguage);
-			CFBundleTypeIconFile   = 'TextMate Grammar';
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "TextMate preferences";
-			CFBundleTypeExtensions = (tmPreferences);
-			CFBundleTypeIconFile   = 'TextMate Settings';
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "TextMate command";
-			CFBundleTypeExtensions = (tmCommand);
-			CFBundleTypeIconFile   = 'TextMate Command';
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "TextMate drag command";
-			CFBundleTypeExtensions = (tmDragCommand);
-			CFBundleTypeIconFile   = 'TextMate Bundle Item';
-			CFBundleTypeRole       = Editor;
-		},
-
-		/* other textmate types */
-
-		{	CFBundleTypeName       = "TextMate release notes";
-			CFBundleTypeExtensions = (tmReleaseNotes);
-			CFBundleTypeIconFile   = Text;
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "TextMate theme";
-			CFBundleTypeExtensions = (tmTheme, tmtheme);
-			CFBundleTypeIconFile   = 'TextMate Theme';
-			CFBundleTypeRole       = Editor;
-		},
-		{	CFBundleTypeName       = "TextMate bundle";
-			CFBundleTypeExtensions = (tmBundle, tmbundle);
-			CFBundleTypeIconFile   = 'TextMate Bundle';
-			CFBundleTypeRole       = Editor;
-			LSTypeIsPackage        = 1;
-		},
-		{	CFBundleTypeName       = "TextMate plug-in";
-			CFBundleTypeExtensions = (tmPlugIn, tmPlugin, tmplugin);
-			CFBundleTypeIconFile   = 'TextMate PlugIn';
-			CFBundleTypeRole       = Editor;
-			LSTypeIsPackage        = 1;
+		{	LSItemContentTypes = ( "public.ada-source" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "com.apple.applescript.text" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "com.apple.applescript.script" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "com.adobe.actionscript" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "com.microsoft.asp" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "com.microsoft.asp.net" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "org.tug.tex.bibtex" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "public.c-source" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "public.c-plus-plus-source" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "com.microsoft.c-sharp" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "org.coffeescript.coffeescript" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "org.contextfreeart.contextfree" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "public.comma-separated-values-text" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "public.tab-separated-values-text" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "com.macromates.textmate.cgi-script" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "com.macromates.textmate.config-file" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "org.w3.css" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "public.patch-file" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "org.w3.xml-dtd" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "public.dylan-source" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "org.erlang.erlang" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "org.fscript.fscript" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "public.fortran-source" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "public.fortran-77-source" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "public.fortran-90-source" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "public.fortran-95-source" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "public.c-header" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "public.c-plus-plus-header" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "com.macromates.textmate.gtd" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "org.haskell.haskell" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "public.html" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "com.macromates.textmate.include-file" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "com.apple.ical.ics" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "com.microsoft.ini" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "org.iolanguage.io" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "com.sun.java-source" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "org.beanshell.beanshell" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "com.sun.java-properties" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "com.netscape.javascript-source" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "com.sun.java-server-pages" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "public.json" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "org.ietf.ldap-data-interchange-format" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "com.macromates.textmate.lisp" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "com.apple.log" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "com.macromates.textmate.logo" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "org.lua.lua" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "net.daringfireball.markdown" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "org.mediawiki.wiki-source" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "com.mips.mips-assembler" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "com.dec.modula-3" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "in.moinmo.wiki-source" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "public.objective-c-source" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "public.objective-c-plus-plus-source" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "org.ocaml.ocaml" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "public.pascal-source" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "public.perl-script" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "public.php-script" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "com.adobe.postscript" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "com.adobe.encapsulated-postscript" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "com.apple.property-list" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "public.python-script" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "org.r-project.r" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "org.complang.ragel" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "com.roaringpenguin.remind" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "org.python.restructuredtext" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "org.ruby-lang.eruby" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "org.rubyonrails.erb-sql" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "public.ruby-script" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "com.macromates.textmate.scheme" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "com.macromates.textmate.setext" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "public.shell-script" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "org.slatelanguage.slate" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "org.iso.sql" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "com.macromates.textmate.standard-ml" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "com.apple.xcode.strings-text" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "public.svg-image" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "org.swig.swig" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "tk.tcl.tcl" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "org.tug.tex" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "public.plain-text" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "com.textpattern.textile" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "public.xhtml" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "public.xml" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "org.w3.xsl" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "public.vcard" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "com.microsoft.visual-basic" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "org.yaml.yaml" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Alternate;
+		},
+		{	LSItemContentTypes = ( "com.macromates.textmate.snippet" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Owner;
+		},
+		{	LSItemContentTypes = ( "com.macromates.textmate.macro" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Owner;
+		},
+		{	LSItemContentTypes = ( "com.macromates.textmate.language" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Owner;
+		},
+		{	LSItemContentTypes = ( "com.macromates.textmate.preferences" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Owner;
+		},
+		{	LSItemContentTypes = ( "com.macromates.textmate.command" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Owner;
+		},
+		{	LSItemContentTypes = ( "com.macromates.textmate.drag-command" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Owner;
+		},
+		{	LSItemContentTypes = ( "com.macromates.textmate.theme" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Owner;
+		},
+		{	LSItemContentTypes = ( "com.macromates.textmate.release-notes" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Owner;
+		},
+		{	LSItemContentTypes = ( "com.macromates.textmate.bundle" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Owner;
+		},
+		{	LSItemContentTypes = ( "com.macromates.textmate.plugin" );
+			CFBundleTypeRole   = Editor;
+			LSHandlerRank      = Owner;
 		},
 
 		/* generic types */
@@ -546,6 +449,991 @@
 
 		{	CFBundleTypeRole       = "Editor";
 			LSItemContentTypes     = ( "public.directory", "com.apple.bundle", "com.apple.resolvable" );
+		},
+	);
+
+	UTImportedTypeDeclarations = (
+		{
+			UTTypeIdentifier   = "public.ada-source";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( ada, adb, ads );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "ADA";
+			UTTypeDescription  = "Ada source";
+			UTTypeReferenceURL = "http://en.wikipedia.org/wiki/Ada_(programming_language)";
+		},
+		{
+			UTTypeIdentifier   = "com.apple.applescript.text";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( applescript );
+			};
+			UTTypeConformsTo   = ( "public.script", "public.source-code", "public.plain-text" );
+			UTTypeIconFile     = "AppleScript";
+			UTTypeDescription  = "AppleScript source";
+		},
+		{
+			UTTypeIdentifier   = "com.apple.applescript.script";
+			UTTypeTagSpecification = {
+				com.apple.ostype          = "osas";
+				public.filename-extension = ( scpt );
+			};
+			UTTypeConformsTo   = ( "public.data" );
+			UTTypeIconFile     = "AppleScript";
+			UTTypeDescription  = "Compiled AppleScript";
+		},
+		{
+			UTTypeIdentifier   = "com.adobe.actionscript";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( as );
+				public.mime-type          = "application/ecmascript";
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "ActionScript";
+			UTTypeDescription  = "ActionScript source";
+			UTTypeReferenceURL = "http://www.adobe.com/devnet/actionscript.html";
+		},
+		{
+			UTTypeIdentifier   = "com.microsoft.asp";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( asp, asa );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "ASP";
+			UTTypeDescription  = "ASP document";
+			UTTypeReferenceURL = "http://en.wikipedia.org/wiki/Active_Server_Pages";
+		},
+		{
+			UTTypeIdentifier   = "com.microsoft.asp.net";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( aspx, ascx, asmx, ashx );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "ASPNET";
+			UTTypeDescription  = "ASP.NET document";
+			UTTypeReferenceURL = "http://www.asp.net";
+		},
+		{
+			UTTypeIdentifier   = "org.tug.tex.bibtex";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( bib );
+			};
+			UTTypeConformsTo   = ( "public.text" );
+			UTTypeIconFile     = "BibTeX";
+			UTTypeDescription  = "BibTeX Database";
+		},
+		{
+			UTTypeIdentifier   = "public.c-source";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( c );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "C";
+			UTTypeDescription  = "C source";
+		},
+		{
+			UTTypeIdentifier   = "public.c-plus-plus-source";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( cc, cp, cpp, cxx, "c++" );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "C++";
+			UTTypeDescription  = "C++ source";
+		},
+		{
+			UTTypeIdentifier   = "com.microsoft.c-sharp";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( cs );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "C#";
+			UTTypeDescription  = "C# source";
+			UTTypeReferenceURL = "http://www.microsoft.com/en-us/download/details.aspx?id=7029";
+		},
+		{
+			UTTypeIdentifier   = "org.coffeescript.coffeescript";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( coffee );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "CoffeeScript";
+			UTTypeDescription  = "CoffeeScript source";
+			UTTypeReferenceURL = "http://coffeescript.org";
+		},
+		{
+			UTTypeIdentifier   = "org.contextfreeart.contextfree";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( cfdg );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "CFDG";
+			UTTypeDescription  = "ContextFree Design Document";
+			UTTypeReferenceURL = "http://www.contextfreeart.org/";
+		},
+		{
+			UTTypeIdentifier   = "public.delimited-values-text";
+			UTTypeConformsTo   = ( "public.text" );
+			UTTypeDescription  = "delimited text values";
+		},
+		{
+			UTTypeIdentifier   = "public.comma-separated-values-text";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( csv );
+				public.mime-type          = ( "text/csv", "text/comma-separated-values" );
+			};
+			UTTypeConformsTo   = ( "public.delimited-values-text" );
+			UTTypeIconFile     = "Text";
+			UTTypeDescription  = "Comma Separated Values";
+			UTTypeReferenceURL = "http://tools.ietf.org/html/rfc4180";
+		},
+		{
+			UTTypeIdentifier   = "public.tab-separated-values-text";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( tsv );
+				public.mime-type          = "text/tab-separated-values";
+			};
+			UTTypeConformsTo   = ( "public.delimited-values-text" );
+			UTTypeIconFile     = "Text";
+			UTTypeDescription  = "Tab Separated Values";
+		},
+		{
+			UTTypeIdentifier   = "com.macromates.textmate.cgi-script";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( cgi, fcgi );
+			};
+			UTTypeConformsTo   = ( "public.script" );
+			UTTypeIconFile     = "CGI";
+			UTTypeDescription  = "CGI script";
+		},
+		{
+			UTTypeIdentifier   = "com.macromates.textmate.config-file";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( cfg, conf, config, htaccess );
+			};
+			UTTypeConformsTo   = ( "public.text" );
+			UTTypeIconFile     = "Config";
+			UTTypeDescription  = "Configuration file";
+		},
+		{
+			UTTypeIdentifier   = "org.w3.css";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( css );
+				public.mime-type          = "text/css";
+			};
+			UTTypeConformsTo   = ( "public.text" );
+			UTTypeIconFile     = "CSS";
+			UTTypeDescription  = "Cascading Style Sheet";
+			UTTypeReferenceURL = "http://www.w3.org/Style/CSS/";
+		},
+		{
+			UTTypeIdentifier   = "public.patch-file";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( diff );
+			};
+			UTTypeConformsTo   = ( "public.plain-text" );
+			UTTypeIconFile     = "Diff";
+			UTTypeDescription  = "Differences File";
+			UTTypeReferenceURL = "http://www.gnu.org/software/diffutils/";
+		},
+		{
+			UTTypeIdentifier   = "org.w3.xml-dtd";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( dtd );
+				public.mime-type          = "application/xml-dtd";
+			};
+			UTTypeConformsTo   = ( "public.text" );
+			UTTypeIconFile     = "DTD";
+			UTTypeDescription  = "Document Type Definition";
+			UTTypeReferenceURL = "http://www.w3.org/XML/";
+		},
+		{
+			UTTypeIdentifier   = "public.dylan-source";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( dylan );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "Dylan";
+			UTTypeDescription  = "Dylan source";
+			UTTypeReferenceURL = "http://opendylan.org";
+		},
+		{
+			UTTypeIdentifier   = "org.erlang.erlang";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( erl, hrl );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "Erlang";
+			UTTypeDescription  = "Erlang source";
+			UTTypeReferenceURL = "http://www.erlang.org";
+		},
+		{
+			UTTypeIdentifier   = "org.fscript.fscript";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( fscript );
+			};
+			UTTypeConformsTo   = ( "public.script" );
+			UTTypeIconFile     = "F-Script";
+			UTTypeDescription  = "F-Script source";
+			UTTypeReferenceURL = "http://www.fscript.org";
+		},
+		{
+			UTTypeIdentifier   = "public.fortran-source";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( f, for, fpp );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "Fortran";
+			UTTypeDescription  = "Fortran source";
+		},
+		{
+			UTTypeIdentifier   = "public.fortran-77-source";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( f77 );
+			};
+			UTTypeConformsTo   = ( "public.fortran-source" );
+			UTTypeIconFile     = "Fortran";
+			UTTypeDescription  = "Fortran source";
+		},
+		{
+			UTTypeIdentifier   = "public.fortran-90-source";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( f90 );
+			};
+			UTTypeConformsTo   = ( "public.fortran-source" );
+			UTTypeIconFile     = "Fortran";
+			UTTypeDescription  = "Fortran source";
+		},
+		{
+			UTTypeIdentifier   = "public.fortran-95-source";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( f95 );
+			};
+			UTTypeConformsTo   = ( "public.fortran-source" );
+			UTTypeIconFile     = "Fortran";
+			UTTypeDescription  = "Fortran source";
+		},
+		{
+			UTTypeIdentifier   = "public.c-header";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( h, pch );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "H";
+			UTTypeDescription  = "Header";
+		},
+		{
+			UTTypeIdentifier   = "public.c-plus-plus-header";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( hh, hpp, hxx, "h++" );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "H++";
+			UTTypeDescription  = "C++ Header";
+		},
+		{
+			UTTypeIdentifier   = "com.macromates.textmate.gtd";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( gtd, gtdlog );
+			};
+			UTTypeConformsTo   = ( "public.plain-text" );
+			UTTypeIconFile     = "GTD";
+			UTTypeDescription  = "GTD document";
+			UTTypeReferenceURL = "http://en.wikipedia.org/wiki/Getting_Things_Done";
+		},
+		{
+			UTTypeIdentifier   = "org.haskell.haskell";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( hs, lhs );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "Haskell";
+			UTTypeDescription  = "Haskell source";
+			UTTypeReferenceURL = "http://www.haskell.org/";
+		},
+		{
+			UTTypeIdentifier   = "public.html";
+			UTTypeTagSpecification = {
+				com.apple.ostype          = "HTML";
+				public.filename-extension = ( htm, html, phtml, shtml );
+				public.mime-type          = "text/html";
+			};
+			UTTypeConformsTo   = ( "public.text" );
+			UTTypeIconFile     = "HTML";
+			UTTypeDescription  = "HTML document";
+			UTTypeReferenceURL = "http://www.w3.org/html/";
+		},
+		{
+			UTTypeIdentifier   = "com.macromates.textmate.include-file";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( inc );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "Inc";
+			UTTypeDescription  = "Include file";
+		},
+		{
+			UTTypeIdentifier   = "com.apple.ical.ics";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( ics, ifb );
+				public.mime-type          = "text/calendar";
+			};
+			UTTypeConformsTo   = ( "public.text", "public.item", "public.calendar-event" );
+			UTTypeIconFile     = "iCal";
+			UTTypeDescription  = "iCalendar schedule";
+			UTTypeReferenceURL = "http://tools.ietf.org/html/rfc5545";
+		},
+		{
+			UTTypeIdentifier   = "com.microsoft.ini";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( ini );
+			};
+			UTTypeConformsTo   = ( "public.text" );
+			UTTypeIconFile     = "INI";
+			UTTypeDescription  = "MS Windows initialization file";
+		},
+		{
+			UTTypeIdentifier   = "org.iolanguage.io";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( io );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "Io";
+			UTTypeDescription  = "Io source";
+			UTTypeReferenceURL = "http://iolanguage.org";
+		},
+		{
+			UTTypeIdentifier   = "com.sun.java-source";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( java, jav );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "Java";
+			UTTypeDescription  = "Java source";
+			UTTypeReferenceURL = "http://www.java.com/";
+		},
+		{
+			UTTypeIdentifier   = "org.beanshell.beanshell";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( bsh );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "Java";
+			UTTypeDescription  = "BeanShell script";
+			UTTypeReferenceURL = "http://www.beanshell.org";
+		},
+		{
+			UTTypeIdentifier   = "com.sun.java-properties";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( properties );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "Java";
+			UTTypeDescription  = "Java Properties File";
+			UTTypeReferenceURL = "http://www.java.com/";
+		},
+		{
+			UTTypeIdentifier   = "com.netscape.javascript-source";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( js, htc, jscript, javascript );
+				public.mime-type          = "text/javascript";
+			};
+			UTTypeConformsTo   = ( "public.source-code", "public.executable" );
+			UTTypeIconFile     = "JavaScript";
+			UTTypeDescription  = "JavaScript source";
+			UTTypeReferenceURL = "http://en.wikipedia.org/wiki/JavaScript";
+		},
+		{
+			UTTypeIdentifier   = "com.sun.java-server-pages";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( jsp );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "JSP";
+			UTTypeDescription  = "Java Server Page";
+			UTTypeReferenceURL = "http://www.oracle.com/technetwork/java/javaee/jsp/index.html";
+		},
+		{
+			UTTypeIdentifier   = "public.json";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( json );
+				public.mime-type          = "application/json";
+			};
+			UTTypeConformsTo   = ( "public.text" );
+			UTTypeIconFile     = "JSON";
+			UTTypeDescription  = "JSON file";
+			UTTypeReferenceURL = "http://www.json.org";
+		},
+		{
+			UTTypeIdentifier   = "org.ietf.ldap-data-interchange-format";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( ldif );
+			};
+			UTTypeConformsTo   = ( "public.text" );
+			UTTypeIconFile     = "Blank";
+			UTTypeDescription  = "LDAP Data Interchange Format";
+			UTTypeReferenceURL = "http://tools.ietf.org/html/rfc2849";
+		},
+		{
+			UTTypeIdentifier   = "com.macromates.textmate.lisp";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( lisp, cl, l, lsp, mud, el );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "Lisp";
+			UTTypeDescription  = "Lisp source";
+		},
+		{
+			UTTypeIdentifier   = "com.apple.log";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( log );
+			};
+			UTTypeConformsTo   = ( "public.plain-text" );
+			UTTypeIconFile     = "Log";
+			UTTypeDescription  = "Log File";
+		},
+		{
+			UTTypeIdentifier   = "com.macromates.textmate.logo";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( logo );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "Logo";
+			UTTypeDescription  = "Logo source";
+		},
+		{
+			UTTypeIdentifier   = "org.lua.lua";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( lua );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "Lua";
+			UTTypeDescription  = "Lua source";
+			UTTypeReferenceURL = "http://www.lua.org";
+		},
+		{
+			UTTypeIdentifier   = "net.daringfireball.markdown";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( markdown, mdown, markdn, md );
+			};
+			UTTypeConformsTo   = ( "public.text" );
+			UTTypeIconFile     = "Markdown";
+			UTTypeDescription  = "Markdown document";
+			UTTypeReferenceURL = "http://daringfireball.net/projects/markdown/";
+		},
+		{
+			UTTypeIdentifier   = "org.mediawiki.wiki-source";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( wiki, wikipedia, mediawiki );
+			};
+			UTTypeConformsTo   = ( "public.text" );
+			UTTypeIconFile     = "Wiki";
+			UTTypeDescription  = "Mediawiki document";
+			UTTypeReferenceURL = "http://www.mediawiki.org";
+		},
+		{
+			UTTypeIdentifier   = "com.mips.mips-assembler";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( s, mips, spim, asm );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "ASM";
+			UTTypeDescription  = "MIPS assembler source";
+		},
+		{
+			UTTypeIdentifier   = "com.dec.modula-3";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( m3, cm3 );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "Modula";
+			UTTypeDescription  = "Modula-3 source";
+		},
+		{
+			UTTypeIdentifier   = "in.moinmo.wiki-source";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( moinmoin );
+			};
+			UTTypeConformsTo   = ( "public.text" );
+			UTTypeIconFile     = "Wiki";
+			UTTypeDescription  = "MoinMoin document";
+			UTTypeReferenceURL = "http://moinmo.in";
+		},
+		{
+			UTTypeIdentifier   = "public.objective-c-source";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( m );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "Obj-C";
+			UTTypeDescription  = "Objective-C source";
+			UTTypeReferenceURL = "http://en.wikipedia.org/wiki/Objective-C";
+		},
+		{
+			UTTypeIdentifier   = "public.objective-c-plus-plus-source";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( mm );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "Obj-C++";
+			UTTypeDescription  = "Objective-C++ source";
+			UTTypeReferenceURL = "http://en.wikipedia.org/wiki/Objective-c";
+		},
+		{
+			UTTypeIdentifier   = "org.ocaml.ocaml";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( ml, mli, mll, mly );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "OCaml";
+			UTTypeDescription  = "OCaml source";
+			UTTypeReferenceURL = "http://ocaml.org";
+		},
+		{
+			UTTypeIdentifier   = "public.pascal-source";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( pas, p );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "Pascal";
+			UTTypeDescription  = "Pascal source";
+		},
+		{
+			UTTypeIdentifier   = "public.patch-file";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( patch );
+			};
+			UTTypeConformsTo   = ( "public.plain-text" );
+			UTTypeIconFile     = "Patch";
+			UTTypeDescription  = "Patch file";
+		},
+		{
+			UTTypeIdentifier   = "public.perl-script";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( pl, pod, perl, pm );
+				public.mime-type          = "text/x-perl-script";
+			};
+			UTTypeConformsTo   = ( "public.shell-script" );
+			UTTypeIconFile     = "Perl";
+			UTTypeDescription  = "Perl source";
+			UTTypeReferenceURL = "";
+		},
+		{
+			UTTypeIdentifier   = "public.php-script";
+			UTTypeTagSpecification = {
+				com.apple.ostype          = "";
+				public.filename-extension = ( php, php3, php4, php5, ph3, ph4, phtml );
+				public.mime-type          = "text/php";
+			};
+			UTTypeConformsTo   = ( "public.shell-script" );
+			UTTypeIconFile     = "PHP";
+			UTTypeDescription  = "PHP source";
+			UTTypeReferenceURL = "http://php.net";
+		},
+		{
+			UTTypeIdentifier   = "com.adobe.postscript";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( ps );
+				public.mime-type          = "application/postscript";
+			};
+			UTTypeConformsTo   = ( "public.data", "public.composite-content" );
+			UTTypeIconFile     = "PostScript";
+			UTTypeDescription  = "PostScript";
+			UTTypeReferenceURL = "http://partners.adobe.com/public/developer/en/ps/PLRM.pdf";
+		},
+		{
+			UTTypeIdentifier   = "com.adobe.encapsulated-postscript";
+			UTTypeTagSpecification = {
+				com.apple.nspboard-type = ( "NeXT Encapsulated PostScript v1.2 pasteboard type", "NSPostScriptPboardType" );
+				com.apple.ostype          = "EPSF";
+				public.filename-extension = ( eps );
+			};
+			UTTypeConformsTo   = ( "com.adobe.postscript" );
+			UTTypeIconFile     = "PostScript";
+			UTTypeDescription  = "Encapsulated PostScript";
+			UTTypeReferenceURL = "http://partners.adobe.com/public/developer/en/ps/5002.EPSF_Spec.pdf";
+		},
+		{
+			UTTypeIdentifier   = "com.apple.property-list";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( dict, plist, scriptSuite, scriptTerminology );
+			};
+			UTTypeConformsTo   = ( "public.text" );
+			UTTypeIconFile     = "Plist";
+			UTTypeDescription  = "Property List";
+			UTTypeReferenceURL = "http://en.wikipedia.org/wiki/Property_list";
+		},
+		{
+			UTTypeIdentifier   = "public.python-script";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( py, rpy, cpy, python );
+				public.mime-type          = "text/x-python-script";
+			};
+			UTTypeConformsTo   = ( "public.shell-script" );
+			UTTypeIconFile     = "Python";
+			UTTypeDescription  = "Python source";
+			UTTypeReferenceURL = "http://www.python.org";
+		},
+		{
+			UTTypeIdentifier   = "org.r-project.r";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( r, s );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "R";
+			UTTypeDescription  = "R source";
+			UTTypeReferenceURL = "http://www.r-project.org";
+		},
+		{
+			UTTypeIdentifier   = "org.complang.ragel";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( rl, ragel );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "Ragel";
+			UTTypeDescription  = "Ragel source";
+			UTTypeReferenceURL = "http://www.complang.org/ragel/";
+		},
+		{
+			UTTypeIdentifier   = "com.roaringpenguin.remind";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( rem, remind );
+			};
+			UTTypeConformsTo   = ( "public.text" );
+			UTTypeIconFile     = "Blank";
+			UTTypeDescription  = "Remind document";
+			UTTypeReferenceURL = "http://www.roaringpenguin.com/products/remind";
+		},
+		{
+			UTTypeIdentifier   = "org.python.restructuredtext";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( rst, rest );
+			};
+			UTTypeConformsTo   = ( "public.text" );
+			UTTypeIconFile     = "reST";
+			UTTypeDescription  = "reStructuredText document";
+			UTTypeReferenceURL = "http://docutils.sourceforge.net/rst.html";
+		},
+		{
+			UTTypeIdentifier   = "org.ruby-lang.eruby";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( rhtml );
+			};
+			UTTypeConformsTo   = ( "public.html" );
+			UTTypeIconFile     = "RHTML";
+			UTTypeDescription  = "HTML with embedded Ruby";
+			UTTypeReferenceURL = "https://www.ruby-lang.org/en/";
+		},
+		{
+			UTTypeIdentifier   = "org.rubyonrails.erb-sql";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( erbsql );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "SQL";
+			UTTypeDescription  = "SQL with embedded Ruby";
+		},
+		{
+			UTTypeIdentifier   = "public.ruby-script";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( rb, rbx, rjs, rxml );
+				public.mime-type          = "text/ruby-script";
+			};
+			UTTypeConformsTo   = ( "public.shell-script" );
+			UTTypeIconFile     = "Ruby";
+			UTTypeDescription  = "Ruby source";
+			UTTypeReferenceURL = "https://www.ruby-lang.org";
+		},
+		{
+			UTTypeIdentifier   = "com.macromates.textmate.scheme";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( scm, sch );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "Scheme";
+			UTTypeDescription  = "Scheme source";
+			UTTypeReferenceURL = "http://www.r6rs.org";
+		},
+		{
+			UTTypeIdentifier   = "com.macromates.textmate.setext";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( ext );
+			};
+			UTTypeConformsTo   = ( "public.text" );
+			UTTypeIconFile     = "Blank";
+			UTTypeDescription  = "Setext document";
+			UTTypeReferenceURL = "http://docutils.sourceforge.net/mirror/setext/setext_concepts_Aug92.etx.txt";
+		},
+		{
+			UTTypeIdentifier   = "public.shell-script";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( sh, ss, bashrc, "bash_profile", "bash_login", profile, "bash_logout" );
+			};
+			UTTypeConformsTo   = ( "public.shell-script" );
+			UTTypeIconFile     = "Shell";
+			UTTypeDescription  = "Shell script";
+		},
+		{
+			UTTypeIdentifier   = "org.slatelanguage.slate";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( slate );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "Slate";
+			UTTypeDescription  = "Slate source";
+			UTTypeReferenceURL = "http://slatelanguage.org";
+		},
+		{
+			UTTypeIdentifier   = "org.iso.sql";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( sql );
+				public.mime-type          = "application/sql";
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "SQL";
+			UTTypeDescription  = "SQL source";
+		},
+		{
+			UTTypeIdentifier   = "com.macromates.textmate.standard-ml";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( sml );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "SML";
+			UTTypeDescription  = "Standard ML source";
+		},
+		{
+			UTTypeIdentifier   = "com.apple.xcode.strings-text";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( strings );
+			};
+			UTTypeConformsTo   = ( "public.text" );
+			UTTypeIconFile     = "Strings";
+			UTTypeDescription  = "Strings document";
+		},
+		{
+			UTTypeIdentifier   = "public.svg-image";
+			UTTypeTagSpecification = {
+				com.apple.ostype          = ( "svg ", "svgz" );
+				public.filename-extension = ( "svg", "svgz" );
+				public.mime-type          = "image/svg+xml";
+			};
+			UTTypeConformsTo   = ( "public.image" );
+			UTTypeIconFile     = "SVG";
+			UTTypeDescription  = "Scalable vector graphics (SVG)";
+			UTTypeReferenceURL = "http://www.w3.org/Graphics/SVG/";
+		},
+		{
+			UTTypeIdentifier   = "org.swig.swig";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( i, swg );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "SWIG";
+			UTTypeDescription  = "SWIG source";
+			UTTypeReferenceURL = "http://swig.org";
+		},
+		{
+			UTTypeIdentifier   = "tk.tcl.tcl";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( tcl );
+				public.mime-type          = "application/x-tcl";
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "Tcl";
+			UTTypeDescription  = "Tcl source";
+			UTTypeReferenceURL = "http://www.tcl.tk";
+		},
+		{
+			UTTypeIdentifier   = "org.tug.tex";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( tex, sty, cls );
+			};
+			UTTypeConformsTo   = ( "public.text" );
+			UTTypeIconFile     = "TeX";
+			UTTypeDescription  = "TeX document";
+			UTTypeReferenceURL = "http://www.latex-project.org";
+		},
+		{
+			UTTypeIdentifier   = "public.plain-text";
+			UTTypeTagSpecification = {
+				com.apple.ostype          = ( TEXT, sEXT, ttro );
+				public.filename-extension = ( text, txt, utf8 );
+				public.mime-type          = "text/plain";
+			};
+			UTTypeConformsTo   = ( "public.text" );
+			UTTypeIconFile     = "Text";
+			UTTypeDescription  = "Plain text document";
+		},
+		{
+			UTTypeIdentifier   = "com.textpattern.textile";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( textile );
+			};
+			UTTypeConformsTo   = ( "public.text" );
+			UTTypeIconFile     = "Textile";
+			UTTypeDescription  = "Textile document";
+		},
+		{
+			UTTypeIdentifier   = "public.xhtml";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( xhtml, xhtm, xht );
+				public.mime-type          = "application/xhtml+xml";
+			};
+			UTTypeConformsTo   = ( "public.xml" );
+			UTTypeIconFile     = "XHTML";
+			UTTypeDescription  = "XHTML document";
+			UTTypeReferenceURL = "http://en.wikipedia.org/wiki/XHTML";
+		},
+		{
+			UTTypeIdentifier   = "public.xml";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( xml, xsd, xib, rss, tld, pt, cpt, dtml );
+				public.mime-type          = ( "application/xml", "text/xml" );	
+			};
+			UTTypeConformsTo   = ( "public.text" );
+			UTTypeIconFile     = "XML";
+			UTTypeDescription  = "XML document";
+			UTTypeReferenceURL = "http://www.w3.org/XML/";
+		},
+		{
+			UTTypeIdentifier   = "org.w3.xsl";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( xsl, xslt );
+				public.mime-type          = "xslt+xml";
+			};
+			UTTypeConformsTo   = ( "public.xml" );
+			UTTypeIconFile     = "XSL";
+			UTTypeDescription  = "XSL stylesheet";
+			UTTypeReferenceURL = "http://www.w3.org/Style/XSL/";
+		},
+		{
+			UTTypeIdentifier   = "public.vcard";
+			UTTypeTagSpecification = {
+				com.apple.nspboard-type   = "Apple VCard pasteboard type";
+				com.apple.ostype          = "vCrd";
+				public.filename-extension = ( vcf, vcard );
+				public.mime-type          = ( "text/directory", "text/vcard", "text/x-vcard" );
+			};
+			UTTypeConformsTo   = ( "public.text", "public.contact" );
+			UTTypeIconFile     = "Blank";
+			UTTypeDescription  = "Electronic business card";
+		},
+		{
+			UTTypeIdentifier   = "com.microsoft.visual-basic";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( vb );
+			};
+			UTTypeConformsTo   = ( "public.source-code" );
+			UTTypeIconFile     = "Visual Basic source";
+			UTTypeDescription  = "VisualBasic";
+			UTTypeReferenceURL = "http://msdn.microsoft.com/en-US/vstudio/";
+		},
+		{
+			UTTypeIdentifier   = "org.yaml.yaml";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( yaml, yml );
+			};
+			UTTypeConformsTo   = ( "public.text" );
+			UTTypeIconFile     = "YAML";
+			UTTypeDescription  = "YAML document";
+			UTTypeReferenceURL = "http://yaml.org";
+		},
+	);
+	UTExportedTypeDeclarations = (
+		/* bundle items */
+		
+		{
+			UTTypeIdentifier   = "com.macromates.textmate.snippet";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( tmSnippet );
+			};
+			UTTypeConformsTo   = ( "com.apple.property-list" );
+			UTTypeIconFile     = "TextMate Snippet";
+			UTTypeDescription  = "TextMate Snippet";
+		},
+		{
+			UTTypeIdentifier   = "com.macromates.textmate.macro";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( tmMacro );
+			};
+			UTTypeConformsTo   = ( "com.apple.property-list" );
+			UTTypeIconFile     = "TextMate Macro";
+			UTTypeDescription  = "TextMate Macro";
+		},
+		{
+			UTTypeIdentifier   = "com.macromates.textmate.language";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( tmLanguage );
+			};
+			UTTypeConformsTo   = ( "com.apple.property-list" );
+			UTTypeIconFile     = "TextMate Grammar";
+			UTTypeDescription  = "TextMate Language Grammar";
+		},
+		{
+			UTTypeIdentifier   = "com.macromates.textmate.preferences";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( tmPreferences );
+			};
+			UTTypeConformsTo   = ( "com.apple.property-list" );
+			UTTypeIconFile     = "TextMate Settings";
+			UTTypeDescription  = "TextMate Preferences";
+		},
+		{
+			UTTypeIdentifier   = "com.macromates.textmate.command";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( tmCommand );
+			};
+			UTTypeConformsTo   = ( "com.apple.property-list" );
+			UTTypeIconFile     = "TextMate Command";
+			UTTypeDescription  = "TextMate Command";
+		},
+		{
+			UTTypeIdentifier   = "com.macromates.textmate.drag-command";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( tmDragCommand );
+			};
+			UTTypeConformsTo   = ( "com.apple.property-list" );
+			UTTypeIconFile     = "TextMate Bundle Item";
+			UTTypeDescription  = "TextMate Drag Command";
+		},
+		{
+			UTTypeIdentifier   = "com.macromates.textmate.theme";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( tmTheme, tmtheme );
+			};
+			UTTypeConformsTo   = ( "com.apple.property-list" );
+			UTTypeIconFile     = "TextMate Theme";
+			UTTypeDescription  = "TextMate Theme";
+		},
+
+		/* other textmate types */
+		
+		{
+			UTTypeIdentifier   = "com.macromates.textmate.release-notes";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( tmReleaseNotes );
+			};
+			UTTypeConformsTo   = ( "public.text" );
+			UTTypeIconFile     = "Text";
+			UTTypeDescription  = "TextMate release notes";
+		},
+		{
+			UTTypeIdentifier   = "com.macromates.textmate.bundle";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( tmBundle, tmbundle );
+			};
+			UTTypeConformsTo   = ( "com.apple.package" );
+			UTTypeIconFile     = "TextMate Bundle";
+			UTTypeDescription  = "TextMate Bundle";
+		},
+		{
+			UTTypeIdentifier   = "com.macromates.textmate.plugin";
+			UTTypeTagSpecification = {
+				public.filename-extension = ( tmPlugIn, tmPlugin, tmplugin );
+			};
+			UTTypeConformsTo   = ( "com.apple.package" );
+			UTTypeIconFile     = "TextMate PlugIn";
+			UTTypeDescription  = "TextMate PlugIn";
 		},
 	);
 }
