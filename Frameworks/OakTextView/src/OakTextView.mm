@@ -2429,8 +2429,9 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 - (void)checkSpelling:(id)sender
 {
 	NSSpellChecker* speller = [NSSpellChecker sharedSpellChecker];
+	ng::buffer_t& buf = document->buffer();
 
-	auto nextMisspelling = document->buffer().next_misspelling(editor->ranges().last().last.index);
+	auto nextMisspelling = buf.next_misspelling(editor->ranges().last().last.index);
 	if(nextMisspelling.first != nextMisspelling.second)
 	{
 		{
@@ -2438,7 +2439,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 			editor->set_selections(ng::range_t(nextMisspelling.first, nextMisspelling.second));
 		}
 
-		NSString* word = [NSString stringWithCxxString:document->buffer().substr(nextMisspelling.first, nextMisspelling.second)];
+		NSString* word = [NSString stringWithCxxString:buf.substr(nextMisspelling.first, nextMisspelling.second)];
 		[speller updateSpellingPanelWithMisspelledWord:word];
 
 		if(![[speller spellingPanel] isVisible])
