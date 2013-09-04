@@ -2428,19 +2428,26 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (void)checkSpelling:(id)sender
 {
-	size_t endOfSelection = editor->ranges().last().last.index;
-	auto nextMisspelling = document->buffer().next_misspelling(endOfSelection);
-	if(nextMisspelling.first == nextMisspelling.second)
-		return;
-	if(endOfSelection != nextMisspelling.second)
-	{
-		AUTO_REFRESH;
-		editor->set_selections(ng::range_t(nextMisspelling.first, nextMisspelling.second));
-	}
+	NSSpellChecker* speller = [NSSpellChecker sharedSpellChecker];
 
-	if([sender isKindOfClass:[NSMenuItem class]])
+	auto nextMisspelling = document->buffer().next_misspelling(editor->ranges().last().last.index);
+	if(nextMisspelling.first != nextMisspelling.second)
+	{
+		{
+			AUTO_REFRESH;
+			editor->set_selections(ng::range_t(nextMisspelling.first, nextMisspelling.second));
+		}
+
+		NSString* word = [NSString stringWithCxxString:document->buffer().substr(nextMisspelling.first, nextMisspelling.second)];
+		[speller updateSpellingPanelWithMisspelledWord:word];
+
+		if(![[speller spellingPanel] isVisible])
 			[self showContextMenu:sender];
-	else	[self selectAndReturnMisspelledWordAtIndex:nextMisspelling.first];
+	}
+	else
+	{
+		[speller updateSpellingPanelWithMisspelledWord:@""];
+	}
 }
 
 - (void)toggleContinuousSpellChecking:(id)sender
