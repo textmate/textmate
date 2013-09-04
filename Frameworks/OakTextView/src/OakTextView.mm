@@ -1672,7 +1672,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	return word;
 }
 
-- (NSMenu*)contextMenuWithMisspelledWord:(NSString*)aWord
+- (NSMenu*)contextMenuWithMisspelledWord:(NSString*)aWord andOtherActions:(BOOL)otherActions
 {
 	NSMenu* menu = [[NSMenu alloc] initWithTitle:@""];
 	NSMenuItem* item = nil;
@@ -1698,9 +1698,13 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 		item = [menu addItemWithTitle:@"Learn Spelling" action:@selector(contextMenuPerformLearnSpelling:) keyEquivalent:@"="];
 		[item setKeyEquivalentModifierMask:0];
 		[item setRepresentedObject:aWord];
-		item = [menu addItemWithTitle:@"Show Next" action:@selector(checkSpelling:) keyEquivalent:@";"];
-		[item setRepresentedObject:aWord];
 		[menu addItem:[NSMenuItem separatorItem]];
+
+		if(!otherActions)
+		{
+			[menu addItemWithTitle:@"Find Next" action:@selector(checkSpelling:) keyEquivalent:@";"];
+			return menu;
+		}
 	}
 
 	static struct { NSString* title; SEL action; } const items[] =
@@ -1726,14 +1730,11 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 {
 	NSPoint point = [self convertPoint:[anEvent locationInWindow] fromView:nil];
 	ng::index_t const& click = layout->index_at_point(point);
-	return [self contextMenuWithMisspelledWord:[self selectAndReturnMisspelledWordAtIndex:click.index]];
+	return [self contextMenuWithMisspelledWord:[self selectAndReturnMisspelledWordAtIndex:click.index] andOtherActions:YES];
 }
 
-- (void)showContextMenu:(id)sender
+- (void)showMenu:(NSMenu*)aMenu
 {
-	NSString* word = [self selectAndReturnMisspelledWordAtIndex:editor->ranges().last().last.index];
-	NSMenu* menu = [self contextMenuWithMisspelledWord:word];
-
 	NSWindow* win = [self window];
 	NSEvent* anEvent = [NSApp currentEvent];
 	NSEvent* fakeEvent = [NSEvent
@@ -1747,8 +1748,14 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 		clickCount:1
 		pressure:1];
 
-	[NSMenu popUpContextMenu:menu withEvent:fakeEvent forView:self];
+	[NSMenu popUpContextMenu:aMenu withEvent:fakeEvent forView:self];
 	[win performSelector:@selector(invalidateCursorRectsForView:) withObject:self afterDelay:0.0]; // with option used as modifier, the cross-hair cursor will stick
+}
+
+- (void)showContextMenu:(id)sender
+{
+	NSString* word = [self selectAndReturnMisspelledWordAtIndex:editor->ranges().last().last.index];
+	[self showMenu:[self contextMenuWithMisspelledWord:word andOtherActions:YES]];
 }
 
 - (void)contextMenuPerformCorrectWord:(NSMenuItem*)menuItem
@@ -2463,7 +2470,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		[speller updateSpellingPanelWithMisspelledWord:word];
 
 		if(![[speller spellingPanel] isVisible])
-			[self showContextMenu:sender];
+			[self showMenu:[self contextMenuWithMisspelledWord:word andOtherActions:NO]];
 	}
 	else
 	{
