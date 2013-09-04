@@ -956,13 +956,13 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 	if(hasFileSelected)
 	{
-		OakFinderLabelChooser* swatch = [[OakFinderLabelChooser alloc] initWithFrame:NSMakeRect(0, 0, 166, 37)];
+		OakFinderLabelChooser* swatch = [[OakFinderLabelChooser alloc] initWithFrame:NSMakeRect(0, 0, 166, 55)];
 		swatch.selectedIndex = [[selectedItems lastObject] labelIndex];
 		swatch.action        = @selector(changeColor:);
 		swatch.target        = self;
+		swatch.font          = [aMenu font];
 
 		[aMenu addItem:[NSMenuItem separatorItem]];
-		[aMenu addItemWithTitle:@"Label:" action:@selector(nop:) keyEquivalent:@""];
 		[[aMenu addItemWithTitle:@"Color Swatch" action:@selector(nop:) keyEquivalent:@""] setView:swatch];
 	}
 
