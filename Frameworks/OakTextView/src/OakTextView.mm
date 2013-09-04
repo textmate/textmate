@@ -54,7 +54,7 @@ NSString* const kUserDefaultsScrollPastEndKey      = @"scrollPastEnd";
 
 struct buffer_refresh_callback_t;
 
-@interface OakTextView ()
+@interface OakTextView () <NSIgnoreMisspelledWords, NSChangeSpelling>
 {
 	OBJC_WATCH_LEAKS(OakTextView);
 
@@ -1770,10 +1770,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 - (void)contextMenuPerformIgnoreSpelling:(id)sender
 {
 	D(DBF_OakTextView_Spelling, bug("%s\n", [[sender representedObject] UTF8String]););
-	[[NSSpellChecker sharedSpellChecker] ignoreWord:[sender representedObject] inSpellDocumentWithTag:document->buffer().spelling_tag()];
-
-	document->buffer().recheck_spelling(0, document->buffer().size());
-	[self setNeedsDisplay:YES];
+	[self ignoreSpelling:[sender representedObject]];
 }
 
 - (void)contextMenuPerformLearnSpelling:(id)sender
@@ -1783,6 +1780,33 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 	document->buffer().recheck_spelling(0, document->buffer().size());
 	[self setNeedsDisplay:YES];
+}
+
+- (void)ignoreSpelling:(id)sender
+{
+	NSString* word = nil;
+	if([sender respondsToSelector:@selector(selectedCell)])
+		word = [[sender selectedCell] stringValue];
+	else if([sender isKindOfClass:[NSString class]])
+		word = sender;
+
+	D(DBF_OakTextView_Spelling, bug("%s → %s\n", [[sender description] UTF8String], [word UTF8String]););
+	if(word)
+	{
+		[[NSSpellChecker sharedSpellChecker] ignoreWord:word inSpellDocumentWithTag:document->buffer().spelling_tag()];
+		document->buffer().recheck_spelling(0, document->buffer().size());
+		[self setNeedsDisplay:YES];
+	}
+}
+
+- (void)changeSpelling:(id)sender
+{
+	D(DBF_OakTextView_Spelling, bug("%s\n", [[sender description] UTF8String]););
+	if([sender respondsToSelector:@selector(selectedCell)])
+	{
+		AUTO_REFRESH;
+		editor->insert(to_s((NSString*)[[sender selectedCell] stringValue]));
+	}
 }
 
 // =========================
