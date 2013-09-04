@@ -2431,6 +2431,12 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	NSSpellChecker* speller = [NSSpellChecker sharedSpellChecker];
 	ng::buffer_t& buf = document->buffer();
 
+	if(!buf.live_spelling())
+	{
+		buf.set_live_spelling(true);
+		[self setNeedsDisplay:YES];
+	}
+
 	auto nextMisspelling = buf.next_misspelling(editor->ranges().last().last.index);
 	if(nextMisspelling.first != nextMisspelling.second)
 	{
