@@ -2431,6 +2431,20 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	NSSpellChecker* speller = [NSSpellChecker sharedSpellChecker];
 	ng::buffer_t& buf = document->buffer();
 
+	NSString* lang = [NSString stringWithCxxString:buf.spelling_language()];
+	if([[speller spellingPanel] isVisible])
+	{
+		if(![[speller language] isEqualToString:lang])
+		{
+			buf.set_spelling_language(to_s([speller language]));
+			[self setNeedsDisplay:YES];
+		}
+	}
+	else
+	{
+		[speller setLanguage:lang];
+	}
+
 	if(!buf.live_spelling())
 	{
 		buf.set_live_spelling(true);
