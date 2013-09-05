@@ -110,8 +110,9 @@ void OakPrintBadAssertion (char const* lhs, char const* op, char const* rhs, std
 
 + (void)enableAllExceptions:(NSNotification*)aNotification
 {
+	static OakExceptionHandlerDelegate* exceptionDelegate = [self new];
 	[[NSExceptionHandler defaultExceptionHandler] setExceptionHandlingMask:NSLogAndHandleEveryExceptionMask];
-	[[NSExceptionHandler defaultExceptionHandler] setDelegate:[self new]];
+	[[NSExceptionHandler defaultExceptionHandler] setDelegate:exceptionDelegate];
 }
 
 - (BOOL)exceptionHandler:(NSExceptionHandler*)sender shouldLogException:(NSException*)exception mask:(NSUInteger)mask
