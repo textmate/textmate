@@ -32,6 +32,8 @@ namespace parse
 		void add_callback (callback_t* cb)      { _callbacks.add(cb);    }
 		void remove_callback (callback_t* cb)   { _callbacks.remove(cb); }
 
+		std::mutex& mutex () { return _mutex; }
+
 	private:
 		struct bundles_callback_t : bundles::callback_t
 		{
@@ -62,6 +64,7 @@ namespace parse
 		oak::callbacks_t<callback_t> _callbacks;
 		rule_ptr _rule;
 		std::map<std::string, rule_ptr> _grammars;
+		std::mutex _mutex;
 	};
 
 	typedef std::shared_ptr<grammar_t> grammar_ptr;

@@ -63,6 +63,8 @@ namespace ng
 
 	buffer_parser_t::result_t buffer_parser_t::handle_request (request_t const& request)
 	{
+		std::lock_guard<std::mutex> lock(request.grammar->mutex());
+
 		result_t result;
 		result.state = parse::parse(request.line.data(), request.line.data() + request.line.size(), request.state, result.scopes, request.range.first == 0);
 		result.range = request.range;
@@ -136,6 +138,7 @@ namespace ng
 	void buffer_t::wait_for_repair ()
 	{
 		parser.reset();
+		std::lock_guard<std::mutex> lock(grammar()->mutex());
 		while(!_dirty.empty() && !_parser_states.empty())
 		{
 			size_t n    = convert(_dirty.begin()->first).line;
