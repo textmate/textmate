@@ -1,5 +1,5 @@
 SOURCES      = src/*.cc
 TESTS        = tests/*.cc
-LINK        += text cf regexp
+LINK        += text cf regexp crash
 FRAMEWORKS   = Carbon Security
 EXPORT       = src/*.h
