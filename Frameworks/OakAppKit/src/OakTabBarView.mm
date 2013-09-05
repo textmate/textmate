@@ -317,6 +317,7 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 	BOOL layoutNeedsUpdate;
 	NSUInteger selectedTab;
 	NSUInteger hiddenTab;
+	NSUInteger previousShowAsLastTab;
 
 	layout_metrics_ptr metrics;
 	std::vector<NSRect> tabRects;
@@ -634,16 +635,24 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 
 	// ==========
 	NSUInteger lastVisibleTab = numberOfTabs > 1 ? numberOfTabs-1 : 0;
+
+	NSUInteger showAsLastTab = lastVisibleTab;
+	if(lastVisibleTab <= selectedTab)
+		showAsLastTab = selectedTab;
+	else if(lastVisibleTab < previousShowAsLastTab)
+		showAsLastTab = previousShowAsLastTab;
+	previousShowAsLastTab = showAsLastTab == lastVisibleTab ? 0 : showAsLastTab;
+
 	for(NSUInteger tabIndex = 0; tabIndex < tabTitles.count; ++tabIndex)
 	{
 		rect.origin.x += tabDropSpacing.find(tabIndex) != tabDropSpacing.end() ? tabDropSpacing[tabIndex].set_time(CFAbsoluteTimeGetCurrent()) : 0;
-		if(tabIndex == hiddenTab || (tabIndex > lastVisibleTab && tabIndex != selectedTab) || (tabIndex == lastVisibleTab && selectedTab > lastVisibleTab))
+		if(tabIndex == hiddenTab || (tabIndex >= lastVisibleTab && tabIndex != showAsLastTab))
 		{
 			tabRects.push_back(NSZeroRect);
 			continue;
 		}
 
-		if(tabIndex == selectedTab && tabIndex > lastVisibleTab)
+		if(tabIndex == showAsLastTab)
 				rect.size.width = tabSizes.back();
 		else	rect.size.width = tabSizes[tabIndex];
 
