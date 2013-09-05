@@ -68,7 +68,7 @@ static void delta_plist_helper (plist::dictionary_t const& oldDict, plist::dicti
 		else if(oldValue == oldDict.end() || !equal(oldValue->second, newValue.second))
 		{
 			std::transform(newPath.begin(), newPath.end(), newPath.begin(), &encode_key);
-			changed.insert(std::make_pair(text::join(newPath, "."), newValue.second));
+			changed.emplace(text::join(newPath, "."), newValue.second);
 		}
 	}
 }

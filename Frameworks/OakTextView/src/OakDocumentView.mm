@@ -587,7 +587,7 @@ private:
 
 	std::multimap<std::string, bundles::item_ptr, text::less_t> ordered;
 	for(auto item : bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeBundle))
-		ordered.insert(std::make_pair(item->name(), item));
+		ordered.emplace(item->name(), item);
 
 	NSMenuItem* selectedItem = nil;
 	for(auto pair : ordered)
@@ -1011,7 +1011,7 @@ static std::string const kBookmarkType = "bookmark";
 
 		std::multimap<std::string, bundles::item_ptr, text::less_t> ordered;
 		for(auto item : bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeTheme))
-			ordered.insert(std::make_pair(item->name(), item));
+			ordered.emplace(item->name(), item);
 
 		for(auto pair : ordered)
 		{

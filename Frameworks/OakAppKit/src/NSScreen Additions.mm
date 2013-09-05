@@ -7,7 +7,7 @@
 	for(NSScreen* scr in [NSScreen screens])
 	{
 		NSRect r = NSIntersectionRect([scr visibleFrame], rect);
-		rank.insert(std::make_pair(- NSWidth(r) * NSHeight(r), scr));
+		rank.emplace(- NSWidth(r) * NSHeight(r), scr);
 	}
 
 	if(rank.empty() || rank.begin()->first == 0.0)

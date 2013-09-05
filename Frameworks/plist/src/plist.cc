@@ -67,7 +67,7 @@ namespace plist
 		CFDictionaryGetKeysAndValues(dict, keys, values);
 		for(CFIndex i = 0; i < len; ++i)
 		{
-			std::map<std::string, any_t>::iterator it = ref.insert(std::make_pair(cf::to_s((CFStringRef)keys[i]), any_t())).first;
+			std::map<std::string, any_t>::iterator it = ref.emplace(cf::to_s((CFStringRef)keys[i]), any_t()).first;
 			convert_any(values[i], it->second);
 		}
 	}

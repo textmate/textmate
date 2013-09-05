@@ -39,9 +39,9 @@ namespace be
 				std::string const path = path::join(_path, (*entry)->d_name);
 				std::string const displayName = path::display_name(path);
 				if((*entry)->d_type == DT_DIR)
-					directories.insert(std::make_pair(displayName, std::make_shared<directory_entry_t>(displayName, path)));
+					directories.emplace(displayName, std::make_shared<directory_entry_t>(displayName, path));
 				else if((*entry)->d_type == DT_REG || (*entry)->d_type == DT_LNK)
-					files.insert(std::make_pair(displayName, std::make_shared<file_entry_t>(displayName, path)));
+					files.emplace(displayName, std::make_shared<file_entry_t>(displayName, path));
 			}
 
 			std::transform(directories.begin(), directories.end(), back_inserter(res), [](std::pair<std::string, entry_ptr> const& p){ return p.second; });
@@ -80,7 +80,7 @@ namespace be
 		{
 			std::multimap<std::string, bundles::item_ptr, text::less_t> ordered;
 			citerate(item, bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, _kind, _bundle->uuid(), false, true))
-				ordered.insert(std::make_pair((*item)->name(), *item));
+				ordered.emplace((*item)->name(), *item);
 
 			std::vector<entry_ptr> res;
 			iterate(pair, ordered)
@@ -103,7 +103,7 @@ namespace be
 			citerate(item, bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeMenuTypes, _bundle->uuid(), false, true))
 			{
 				if((*item)->hidden_from_user())
-					ordered.insert(std::make_pair((*item)->name(), *item));
+					ordered.emplace((*item)->name(), *item);
 			}
 
 			std::vector<entry_ptr> res;
@@ -143,7 +143,7 @@ namespace be
 		{
 			std::multimap<std::string, bundles::item_ptr, text::less_t> ordered;
 			citerate(item, bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeBundle, oak::uuid_t(), false, true))
-				ordered.insert(std::make_pair((*item)->name(), *item));
+				ordered.emplace((*item)->name(), *item);
 
 			std::vector<entry_ptr> res;
 			iterate(pair, ordered)

@@ -56,9 +56,9 @@ namespace ng
 		if(r && actualUnit != input::entire_document)
 		{
 			text::pos_t const& pos = buffer.convert(r.min().index);
-			variables.insert(std::make_pair("TM_INPUT_START_LINE",       std::to_string(pos.line + 1)));
-			variables.insert(std::make_pair("TM_INPUT_START_LINE_INDEX", std::to_string(pos.column)));
-			variables.insert(std::make_pair("TM_INPUT_START_COLUMN",     std::to_string(count_columns(buffer, r.min(), tabSize) + 1)));
+			variables.emplace("TM_INPUT_START_LINE",       std::to_string(pos.line + 1));
+			variables.emplace("TM_INPUT_START_LINE_INDEX", std::to_string(pos.column));
+			variables.emplace("TM_INPUT_START_COLUMN",     std::to_string(count_columns(buffer, r.min(), tabSize) + 1));
 		}
 		return text::range_t(buffer.convert(r.min().index), buffer.convert(r.max().index));
 	}

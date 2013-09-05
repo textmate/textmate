@@ -94,7 +94,7 @@ OAK_DEBUG_VAR(FilterList_SymbolChooser);
 	{
 		text::selection_t sel(to_s(item.selectionString));
 		text::pos_t pos = sel.last().min();
-		symbolItems.insert(std::make_pair(pos, item));
+		symbolItems.emplace(pos, item);
 	}
 
 	for(text::range_t const& range : text::selection_t(to_s(_selectionString)))

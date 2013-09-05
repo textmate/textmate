@@ -56,7 +56,7 @@ NSArray* SymbolListForDocument (document::document_ptr const& document, std::str
 
 		std::vector< std::pair<size_t, size_t> > ranges;
 		if(double rank = oak::rank(filter, it->second, &ranges))
-			rankedItems.insert(std::make_pair(1 - rank, CreateItem(document, it->first, indented && sectionName != NULL_STR ? (it->second + " — " + sectionName) : it->second, ranges)));
+			rankedItems.emplace(1 - rank, CreateItem(document, it->first, indented && sectionName != NULL_STR ? (it->second + " — " + sectionName) : it->second, ranges));
 	}
 
 	iterate(pair, rankedItems)

@@ -731,7 +731,7 @@ namespace path
 						{
 							char value[size];
 							if(fgetxattr(fd, mem + i, value, size, 0, 0) == size)
-								res.insert(std::make_pair(mem + i, std::string(value, value + size)));
+								res.emplace(mem + i, std::string(value, value + size));
 							else
 								perror(("fgetxattr(" + path + ", " + (mem+i) + ")").c_str());
 						}

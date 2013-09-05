@@ -38,7 +38,7 @@ OAK_DEBUG_VAR(AppController_Menus);
 
 	std::multimap<std::string, bundles::item_ptr, text::less_t> ordered;
 	citerate(item, bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeBundle))
-		ordered.insert(std::make_pair((*item)->name(), *item));
+		ordered.emplace((*item)->name(), *item);
 
 	iterate(pair, ordered)
 	{
@@ -61,7 +61,7 @@ OAK_DEBUG_VAR(AppController_Menus);
 
 	std::multimap<std::string, bundles::item_ptr, text::less_t> ordered;
 	citerate(item, bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeTheme))
-		ordered.insert(std::make_pair((*item)->name(), *item));
+		ordered.emplace((*item)->name(), *item);
 
 	iterate(pair, ordered)
 	{
@@ -93,7 +93,7 @@ OAK_DEBUG_VAR(AppController_Menus);
 		D(DBF_AppController_Menus, bug("%s\n", [lang UTF8String]););
 		NSString* str = (NSString*)CFBridgingRelease(CFLocaleCopyDisplayNameForPropertyValue(CFLocaleGetSystem(), kCFLocaleIdentifier, (__bridge CFStringRef)lang));
 		D(DBF_AppController_Menus, bug("→ %s\n", [(str ?: lang) UTF8String]););
-		ordered.insert(std::make_pair(to_s(str ?: lang), lang));
+		ordered.emplace(to_s(str ?: lang), lang);
 	}
 
 	iterate(it, ordered)

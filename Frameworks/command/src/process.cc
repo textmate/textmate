@@ -206,7 +206,7 @@ namespace command
 	size_t process_server_t::add (pid_t pid, process_t* callback)
 	{
 		D(DBF_Process, bug("pid %d, client key %zu\n", pid, next_client_key););
-		client_to_callback.insert(std::make_pair(next_client_key, callback));
+		client_to_callback.emplace(next_client_key, callback);
 		struct packet_t { size_t client_key; pid_t pid; } packet = { next_client_key, pid };
 		write(write_to_server, &packet, sizeof(packet));
 		return next_client_key++;

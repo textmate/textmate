@@ -73,7 +73,7 @@ static std::string file_type_from_bytes (io::bytes_ptr const& bytes)
 				last = first_n_lines(first, last, lines_matched_by_regexp(*pattern));
 
 			if(regexp::match_t const& m = regexp::search(*pattern, first, last))
-				ordering.insert(std::make_pair(-m.end(), *item));
+				ordering.emplace(-m.end(), *item);
 		}
 	}
 	return ordering.empty() ? NULL_STR : file_type_from_grammars(std::vector<bundles::item_ptr>(1, ordering.begin()->second));

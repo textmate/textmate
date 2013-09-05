@@ -37,7 +37,7 @@ static void initialize_environment () {
 	{
 		char* value = strchr(*pair, '=');
 		if(value && *value == '=')
-			env.insert(std::make_pair(std::string(*pair, value), value + 1));
+			env.emplace(std::string(*pair, value), value + 1);
 	}
 	oak::set_basic_environment(env);
 }

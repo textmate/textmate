@@ -927,7 +927,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 			std::multimap<std::string, bundles::item_ptr, text::less_t> sorted;
 			iterate(item, items)
-				sorted.insert(std::make_pair((*item)->name(), *item));
+				sorted.emplace((*item)->name(), *item);
 
 			for(auto pair : sorted)
 				[[aMenu addItemWithTitle:[NSString stringWithCxxString:pair.first] action:@selector(executeBundleCommand:) keyEquivalent:@""] setRepresentedObject:[NSString stringWithCxxString:pair.second->uuid()]];

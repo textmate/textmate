@@ -66,7 +66,7 @@ static std::map<std::string, std::string> parse_info_output (std::string const& 
 	{
 		std::string::size_type n = (*line).find(':');
 		if(n != std::string::npos)
-			res.insert(std::make_pair((*line).substr(0, n), (*line).substr(n+2)));
+			res.emplace((*line).substr(0, n), (*line).substr(n+2));
 	}
 	return res;
 }
@@ -120,7 +120,7 @@ namespace scm
 				auto info = parse_info_output(io::exec(executable(), "info", wcPath.c_str(), NULL));
 				auto urlInfo = info.find("URL");
 				if(urlInfo != info.end())
-					res.insert(std::make_pair("TM_SCM_BRANCH", urlInfo->second));
+					res.emplace("TM_SCM_BRANCH", urlInfo->second);
 			}
 			return res;
 		}
@@ -134,7 +134,7 @@ namespace scm
 			status_map_t relativePaths, res;
 			collect_all_paths(executable(), _xslt_path, relativePaths, wcPath);
 			iterate(pair, relativePaths)
-				res.insert(std::make_pair(path::join(wcPath, pair->first), pair->second));
+				res.emplace(path::join(wcPath, pair->first), pair->second);
 			return res;
 		}
 

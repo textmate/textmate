@@ -69,7 +69,7 @@ std::pair<std::vector<bundles::item_ptr>, std::map< oak::uuid_t, std::vector<oak
 				bool isDelta = false;
 				if(plist::get_key_path(plist, bundles::kFieldIsDelta, isDelta) && isDelta)
 				{
-					deltaItems.insert(std::make_pair(bundleUUID, delta_item_t(bundle, plist)));
+					deltaItems.emplace(bundleUUID, delta_item_t(bundle, plist));
 					break;
 				}
 
@@ -102,7 +102,7 @@ std::pair<std::vector<bundles::item_ptr>, std::map< oak::uuid_t, std::vector<oak
 
 				plist::array_t mainMenu;
 				plist::get_key_path(plist, "mainMenu.items", mainMenu);
-				menus.insert(std::make_pair(bundleUUID, to_menu(mainMenu, infoPlistPath)));
+				menus.emplace(bundleUUID, to_menu(mainMenu, infoPlistPath));
 
 				plist::dictionary_t subMenus;
 				plist::get_key_path(plist, "mainMenu.submenus", subMenus);
@@ -115,7 +115,7 @@ std::pair<std::vector<bundles::item_ptr>, std::map< oak::uuid_t, std::vector<oak
 						auto item = std::make_shared<bundles::item_t>(submenuIter.first, bundle, bundles::kItemTypeMenu);
 						item->set_name(name);
 						items.push_back(item);
-						menus.insert(std::make_pair(submenuIter.first, to_menu(uuids, infoPlistPath)));
+						menus.emplace(submenuIter.first, to_menu(uuids, infoPlistPath));
 					}
 					else
 					{
@@ -190,7 +190,7 @@ std::pair<std::vector<bundles::item_ptr>, std::map< oak::uuid_t, std::vector<oak
 						bool isDelta = false;
 						if(plist::get_key_path(plist, bundles::kFieldIsDelta, isDelta) && isDelta)
 						{
-							deltaItems.insert(std::make_pair(uuid, delta_item_t(item, plist)));
+							deltaItems.emplace(uuid, delta_item_t(item, plist));
 							continue;
 						}
 
@@ -208,7 +208,7 @@ std::pair<std::vector<bundles::item_ptr>, std::map< oak::uuid_t, std::vector<oak
 						}
 
 						if(hiddenItems.find(item->uuid()) != hiddenItems.end())
-							plist.insert(std::make_pair(bundles::kFieldHideFromUser, true));
+							plist.emplace(bundles::kFieldHideFromUser, true);
 
 						item->initialize(plist);
 						items.push_back(item);

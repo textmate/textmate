@@ -19,9 +19,9 @@ static std::map<uint32_t, bool> east_asian_width_ranges ()
 
 	std::map<uint32_t, bool> res;
 	iterate(ch, RangeEnd)
-		res.insert(std::make_pair(*ch + 1, false));
+		res.emplace(*ch + 1, false);
 	iterate(ch, RangeBegin)
-		res.insert(std::make_pair(*ch, true));
+		res.emplace(*ch, true);
 	return res;
 }
 

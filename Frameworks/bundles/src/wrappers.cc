@@ -204,7 +204,7 @@ namespace bundles
 			citerate(ext, (*item)->values_for_field(kFieldGrammarExtension))
 			{
 				if(ssize_t rank = path::rank(path, *ext))
-					ordering.insert(std::make_pair(rank, *item));
+					ordering.emplace(rank, *item);
 			}
 		}
 		return ordering.empty() ? std::vector<item_ptr>() : std::vector<item_ptr>(1, ordering.begin()->second);

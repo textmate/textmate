@@ -91,7 +91,7 @@ int main (int argc, char const* argv[])
 	{
 		std::string tmp;
 		if(plist::get_key_path(plist, "settings." + pair.first, tmp))
-			array.insert(std::make_pair(pair.second, tmp));
+			array.emplace(pair.second, tmp);
 	}
 	
 	// ==========

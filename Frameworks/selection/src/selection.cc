@@ -1225,7 +1225,7 @@ namespace ng
 				{
 					range_t r(total + offset + m.first, total + offset + m.second, false, false, true);
 					if(is_subset(r, ranges))
-						res.insert(std::make_pair(r, captures));
+						res.emplace(r, captures);
 				}
 				ASSERT_NE(m.second, 0); ASSERT_LE(m.second, len - offset);
 				offset += m.second;
@@ -1239,7 +1239,7 @@ namespace ng
 		{
 			range_t r(total + m.first, total + m.second, false, false, true);
 			if(is_subset(r, ranges))
-				res.insert(std::make_pair(r, captures));
+				res.emplace(r, captures);
 			captures.clear();
 			m = f.match(NULL, 0, &captures);
 		}
@@ -1277,7 +1277,7 @@ namespace ng
 			}
 
 			if(m && range.sorted() != ng::range_t(m.begin(), m.end()))
-				res.insert(std::make_pair(ng::range_t(m.begin(), m.end()), m.captures()));
+				res.emplace(ng::range_t(m.begin(), m.end()), m.captures());
 		}
 
 		return res;
@@ -1305,7 +1305,7 @@ namespace ng
 			iterate(range, selection)
 			{
 				anchor = options & find::backwards ? std::min(range->min(), anchor) : std::max(range->max(), anchor);
-				res.insert(std::make_pair(*range, std::map<std::string, std::string>()));
+				res.emplace(*range, std::map<std::string, std::string>());
 			}
 
 			if(options & find::backwards)

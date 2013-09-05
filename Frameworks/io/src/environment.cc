@@ -50,15 +50,15 @@ namespace oak
 		char* path = new char[len];
 		sysctl(mib, 2, path, &len, NULL, 0);
 
-		res.insert(std::make_pair("HOME",    entry->pw_dir));
-		res.insert(std::make_pair("PATH",    path));
-		res.insert(std::make_pair("TMPDIR",  path::temp()));
-		res.insert(std::make_pair("LOGNAME", entry->pw_name));
-		res.insert(std::make_pair("USER",    entry->pw_name));
+		res.emplace("HOME",    entry->pw_dir);
+		res.emplace("PATH",    path);
+		res.emplace("TMPDIR",  path::temp());
+		res.emplace("LOGNAME", entry->pw_name);
+		res.emplace("USER",    entry->pw_name);
 
-		res.insert(std::make_pair("TM_APP_IDENTIFIER", cf::to_s(CFBundleGetIdentifier(CFBundleGetMainBundle()))));
-		res.insert(std::make_pair("TM_FULLNAME",       entry->pw_gecos ?: "John Doe"));
-		res.insert(std::make_pair("TM_PID",            std::to_string(getpid())));
+		res.emplace("TM_APP_IDENTIFIER", cf::to_s(CFBundleGetIdentifier(CFBundleGetMainBundle())));
+		res.emplace("TM_FULLNAME",       entry->pw_gecos ?: "John Doe");
+		res.emplace("TM_PID",            std::to_string(getpid()));
 
 		return res;
 	}

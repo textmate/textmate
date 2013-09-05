@@ -146,7 +146,7 @@ namespace document
 	size_t watch_server_t::add (std::string const& path, watch_base_t* callback)
 	{
 		D(DBF_Document_WatchFS, bug("%zu: %s — %p\n", next_client_id, path.c_str(), callback););
-		clients.insert(std::make_pair(next_client_id, callback));
+		clients.emplace(next_client_id, callback);
 		struct { size_t client_id; std::string* path; } packet = { next_client_id, new std::string(path) };
 		write(write_to_server_pipe, &packet, sizeof(packet));
 		return next_client_id++;
@@ -190,7 +190,7 @@ namespace document
 	{
 		D(DBF_Document_WatchFS, bug("%zu: %s\n", client_id, path.c_str()););
 		watch_info_t* info = new watch_info_t(path);
-		watch_info.insert(std::make_pair(client_id, info));
+		watch_info.emplace(client_id, info);
 		observe(*info, client_id);
 	}
 

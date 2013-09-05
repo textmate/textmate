@@ -8,7 +8,7 @@ namespace oak
 		// a node is an integer and represents a task to perform
 		void add_node (size_t node)
 		{
-			dependencies.insert(std::make_pair(node, std::set<size_t>()));
+			dependencies.emplace(node, std::set<size_t>());
 		}
 
 		// an edge establishes a dependency from one node (first argument) to another (second argument)

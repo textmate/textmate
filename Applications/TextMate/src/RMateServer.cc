@@ -497,7 +497,7 @@ struct socket_observer_t
 					{
 						D(DBF_RMateServer, bug("Got argument: %s = %s\n", key.c_str(), value.c_str()););
 						if(!value.empty())
-							records.back().arguments.insert(std::make_pair(key, value));
+							records.back().arguments.emplace(key, value);
 					}
 				}
 			}

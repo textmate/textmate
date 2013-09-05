@@ -184,7 +184,7 @@ namespace
 				{
 					double rank = 0;
 					if(section->scope_selector.does_match(scope, &rank))
-						orderScopeMatches.insert(std::make_pair(rank, section));
+						orderScopeMatches.emplace(rank, section);
 				}
 				else if(!section->has_file_glob || section->file_glob.does_match(path == NULL_STR ? directory : path))
 				{
@@ -273,7 +273,7 @@ static std::map<std::string, std::map<std::string, std::string>> read_file (std:
 		iterate(name, names)
 		{
 			iterate(pair, section->values)
-				sections[*name].insert(std::make_pair(pair->name, pair->value));
+				sections[*name].emplace(pair->name, pair->value);
 		}
 	}
 	return sections;

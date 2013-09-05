@@ -89,7 +89,7 @@ namespace command
 
 	size_t reader_server_t::add (int fd, reader_t* callback)
 	{
-		client_to_callback.insert(std::make_pair(next_client_key, callback));
+		client_to_callback.emplace(next_client_key, callback);
 		struct packet_t { size_t client_key; int fd; } packet = { next_client_key, fd };
 		write(write_to_server, &packet, sizeof(packet));
 		return next_client_key++;

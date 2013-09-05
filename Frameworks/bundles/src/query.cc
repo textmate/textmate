@@ -34,7 +34,7 @@ namespace bundles
 					if(deleted_or_disabled(*item))
 						continue;
 					citerate(value, (*item)->values_for_field(field))
-						res.insert(std::make_pair(*value, *item));
+						res.emplace(*value, *item);
 				}
 				return res;
 			}
@@ -47,7 +47,7 @@ namespace bundles
 					iterate(item, AllItems)
 					{
 						if((*item)->bundle())
-							map[(*item)->bundle()].insert(std::make_pair((*item)->uuid(), *item));
+							map[(*item)->bundle()].emplace((*item)->uuid(), *item);
 					}
 
 					iterate(bundle, map)
@@ -60,7 +60,7 @@ namespace bundles
 						{
 							item_ptr item = pair->second;
 							if((item->kind() & kItemTypeMenuTypes) && !item->hidden_from_user() && didInclude.find(item) == didInclude.end())
-								leftOut.insert(std::make_pair(item->name(), item));
+								leftOut.emplace(item->name(), item);
 						}
 
 						if(!leftOut.empty())
@@ -154,7 +154,7 @@ namespace bundles
 		iterate(item, items)
 		{
 			if((*item)->bundle())
-				map[(*item)->bundle()].insert(std::make_pair((*item)->uuid(), *item));
+				map[(*item)->bundle()].emplace((*item)->uuid(), *item);
 		}
 
 		iterate(bundle, map)
@@ -223,7 +223,7 @@ namespace bundles
 			{
 				if(pair->second->kind() == kItemTypeProxy)
 						resolve_proxy(pair->second, scope, kind, bundle, includeDisabledItems, ordered);
-				else	ordered.insert(std::make_pair(rank, pair->second));
+				else	ordered.emplace(rank, pair->second);
 			}
 		}
 	}
@@ -240,7 +240,7 @@ namespace bundles
 			{
 				if((*item)->kind() == kItemTypeProxy)
 						resolve_proxy(*item, scope, kind, bundle, includeDisabledItems, ordered);
-				else	ordered.insert(std::make_pair(rank, *item));
+				else	ordered.emplace(rank, *item);
 			}
 		}
 	}

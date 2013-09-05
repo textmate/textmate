@@ -1256,7 +1256,7 @@ static plist::any_t normalize_potential_dictionary (plist::any_t const& action)
 	{
 		plist::dictionary_t res;
 		citerate(pair, *dict)
-			res.insert(std::make_pair(ns::normalize_event_string(pair->first), normalize_potential_dictionary(pair->second)));
+			res.emplace(ns::normalize_event_string(pair->first), normalize_potential_dictionary(pair->second));
 		return res;
 	}
 	return action;
@@ -1296,14 +1296,14 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 		iterate(path, KeyBindingLocations)
 		{
 			citerate(pair, plist::load(*path))
-				KeyBindings.insert(std::make_pair(ns::normalize_event_string(pair->first), normalize_potential_dictionary(pair->second)));
+				KeyBindings.emplace(ns::normalize_event_string(pair->first), normalize_potential_dictionary(pair->second));
 		}
 
 		action_to_key_t actionToKey;
 		iterate(pair, KeyBindings)
 		{
 			if(std::string const* selector = boost::get<std::string>(&pair->second))
-				actionToKey.insert(std::make_pair(*selector, pair->first));
+				actionToKey.emplace(*selector, pair->first);
 		}
 
 		update_menu_key_equivalents([NSApp mainMenu], actionToKey);
@@ -1873,7 +1873,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 		{
 			std::map<std::string, std::string> variables;
 			for(NSString* key in [captures allKeys])
-				variables.insert(std::make_pair(to_s(key), to_s((NSString*)captures[key])));
+				variables.emplace(to_s(key), to_s((NSString*)captures[key]));
 			replacement = format_string::expand(replacement, variables);
 		}
 		editor->insert(replacement, true);

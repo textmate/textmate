@@ -260,7 +260,7 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 		std::map<std::string, std::string> environment = variables_for_path(oak::basic_environment());
 		ABMutableMultiValue* value = [[[ABAddressBook sharedAddressBook] me] valueForProperty:kABEmailProperty];
 		if(NSString* email = [value valueAtIndex:[value indexForIdentifier:[value primaryIdentifier]]])
-			environment.insert(std::make_pair("TM_ROT13_EMAIL", decode::rot13(to_s(email))));
+			environment.emplace("TM_ROT13_EMAIL", decode::rot13(to_s(email)));
 
 		auto item = std::make_shared<bundles::item_t>(oak::uuid_t().generate(), aType == bundles::kItemTypeBundle ? bundles::item_ptr() : bundle, aType);
 		plist::dictionary_t plist = plist::load(to_s(path));
@@ -270,7 +270,7 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 		if(plist.find(bundles::kFieldName) == plist.end())
 			plist[bundles::kFieldName] = std::string("untitled");
 		item->set_plist(plist);
-		changes.insert(std::make_pair(item, plist));
+		changes.emplace(item, plist);
 		bundles::add_item(item);
 		[self revealBundleItem:item];
 		[self didChangeModifiedState];
@@ -349,7 +349,7 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 
 	if(anItem->paths().empty())
 	{
-		changes.insert(std::make_pair(anItem, anItem->plist()));
+		changes.emplace(anItem, anItem->plist());
 		[self didChangeModifiedState];
 	}
 

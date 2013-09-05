@@ -26,7 +26,7 @@ static int copy_matches_for_name (OnigUChar const* name, OnigUChar const* name_e
 	}
 
 	if(has_value)
-		data.res.insert(std::make_pair(std::string(name, name_end), value));
+		data.res.emplace(std::string(name, name_end), value);
 
 	return 0;
 }
@@ -37,7 +37,7 @@ std::map<std::string, std::string> extract_captures (OnigUChar const* buffer, On
 	for(size_t i = 0; i < match->num_regs; ++i)
 	{
 		if(match->beg[i] != -1)
-			res.insert(std::make_pair(std::to_string(i), std::string(buffer + match->beg[i], buffer + match->end[i])));
+			res.emplace(std::to_string(i), std::string(buffer + match->beg[i], buffer + match->end[i]));
 	}
 	udata_t udata = { buffer, match, res };
 	onig_foreach_name(regexp, &copy_matches_for_name, (void*)&udata);

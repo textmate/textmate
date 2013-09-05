@@ -26,7 +26,7 @@ namespace
 			iterate(key, toDelete)
 				_records.erase(*key);
 
-			return _records.insert(std::make_pair(_next_key++, (record_t){ processId, std::string(), false, nil, false })).first->first;
+			return _records.emplace(_next_key++, (record_t){ processId, std::string(), false, nil, false }).first->first;
 		}
 
 		void output (int key, char const* data, size_t len)

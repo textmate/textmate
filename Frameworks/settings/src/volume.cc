@@ -14,7 +14,7 @@ namespace volume
 				plist::get_key_path(pair->second, "extendedAttributes", info._extended_attributes);
 				plist::get_key_path(pair->second, "scmBadges",          info._scm_badges);
 				plist::get_key_path(pair->second, "displayNames",       info._display_names);
-				res.insert(std::make_pair(pair->first, info));
+				res.emplace(pair->first, info);
 			}
 			CFRelease(cfPlist);
 		}

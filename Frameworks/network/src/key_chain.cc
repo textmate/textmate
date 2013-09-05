@@ -103,13 +103,13 @@ void key_chain_t::save (std::string const& path) const
 	iterate(key, keys)
 	{
 		plist::dictionary_t entry;
-		entry.insert(std::make_pair("name", (*key)->name()));
-		entry.insert(std::make_pair("key",  (*key)->_key_data));
-		identities.insert(std::make_pair((*key)->identity(), entry));
+		entry.emplace("name", (*key)->name());
+		entry.emplace("key",  (*key)->_key_data);
+		identities.emplace((*key)->identity(), entry);
 	}
 
 	plist::dictionary_t plist;
-	plist.insert(std::make_pair("identities", identities));
+	plist.emplace("identities", identities);
 
 	plist::save(path, plist);
 }

@@ -662,7 +662,7 @@ namespace
 	{
 		auto iter = _trackedDocuments.find(aDocument->identifier());
 		if(iter == _trackedDocuments.end())
-			iter = _trackedDocuments.insert(std::make_pair(aDocument->identifier(), tracking_info_t(self, aDocument))).first;
+			iter = _trackedDocuments.emplace(aDocument->identifier(), tracking_info_t(self, aDocument)).first;
 		iter->second.track();
 	}
 }
@@ -828,7 +828,7 @@ namespace
 			{
 				document::document_ptr doc = newDocuments[i];
 				if(!doc->is_modified() && doc->is_on_disk() && uuids.find(doc->identifier()) == uuids.end() && !doc->sticky())
-					ranked.insert(std::make_pair(doc->lru(), i));
+					ranked.emplace(doc->lru(), i);
 			}
 
 			NSMutableIndexSet* indexSet = [NSMutableIndexSet indexSet];
@@ -2413,7 +2413,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 					iterate(parent, parents)
 					{
 						if(path::is_child(*parent, projectPath))
-							candidates.insert(std::make_pair(parent->size() - projectPath.size(), candidate));
+							candidates.emplace(parent->size() - projectPath.size(), candidate);
 					}
 				}
 			}

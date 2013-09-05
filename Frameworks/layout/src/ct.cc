@@ -36,7 +36,7 @@ namespace ng
 		auto size = std::make_pair(width, height);
 		auto it = _folding_dots_cache.find(size);
 		if(it == _folding_dots_cache.end())
-			it = _folding_dots_cache.insert(std::make_pair(size, _folding_dots_create(width, height))).first;
+			it = _folding_dots_cache.emplace(size, _folding_dots_create(width, height)).first;
 		return it->second;
 	}
 

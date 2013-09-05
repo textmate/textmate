@@ -92,7 +92,7 @@ namespace oak
 	size_t server_t<T, ARG, RESULT>::register_client (T* callback)
 	{
 		std::lock_guard<std::mutex> lock(client_lock);
-		client_to_callback.insert(std::make_pair(next_client_key, callback));
+		client_to_callback.emplace(next_client_key, callback);
 		return next_client_key++;
 	}
 

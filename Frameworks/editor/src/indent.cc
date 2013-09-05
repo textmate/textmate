@@ -25,7 +25,7 @@ namespace indent
 			if(std::string const* value = boost::get<std::string>(&plist))
 			{
 				D(DBF_Indent, bug("%s = %s\n", pair.first.c_str(), value->c_str()););
-				res.insert(std::make_pair(pair.second, *value));
+				res.emplace(pair.second, *value);
 			}
 		}
 		return res;

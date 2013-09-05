@@ -34,7 +34,7 @@ std::map<CFAbsoluteTime, std::string> find_reports (std::string const& process)
 		{
 			std::string file((*entry)->d_name);
 			if((*entry)->d_type == DT_REG && file.find(process) == 0)
-				res.insert(std::make_pair(parse_date(file, process + "_%F-\x25H\x25M%S"), path::join(*location, (*entry)->d_name)));
+				res.emplace(parse_date(file, process + "_%F-\x25H\x25M%S"), path::join(*location, (*entry)->d_name));
 		}
 	}
 	return res;

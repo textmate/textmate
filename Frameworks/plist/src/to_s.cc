@@ -153,7 +153,7 @@ namespace
 		key_less_than_t (std::vector<std::string> const& order)
 		{
 			for(size_t i = 0; i < order.size(); ++i)
-				_key_ranks.insert(std::make_pair(order[i], i));
+				_key_ranks.emplace(order[i], i);
 		}
 
 		bool operator() (std::pair<std::string, plist::any_t> const& lhs, std::pair<std::string, plist::any_t> const& rhs) const

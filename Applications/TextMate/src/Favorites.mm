@@ -84,12 +84,12 @@
 					citerate(subentry, path::entries(path))
 					{
 						if((*subentry)->d_type == DT_DIR)
-							favorites.insert(std::make_pair(text::format("%s — %s", (*subentry)->d_name, (*entry)->d_name + 6), path::join(path, (*subentry)->d_name)));
+							favorites.emplace(text::format("%s — %s", (*subentry)->d_name, (*entry)->d_name + 6), path::join(path, (*subentry)->d_name));
 					}
 				}
 				else
 				{
-					favorites.insert(std::make_pair((*entry)->d_name, path));
+					favorites.emplace((*entry)->d_name, path);
 				}
 			}
 		}
@@ -131,13 +131,13 @@
 	{
 		if(filterString == "")
 		{
-			ranked.insert(std::make_pair(ranked.size(), *pair));
+			ranked.emplace(ranked.size(), *pair);
 		}
 		else
 		{
 			double rank = oak::rank(filterString, pair->first);
 			if(rank > 0)
-				ranked.insert(std::make_pair(-rank, *pair));
+				ranked.emplace(-rank, *pair);
 		}
 	}
 

@@ -437,7 +437,7 @@ namespace bundles_db
 
 		std::map<oak::uuid_t, bundle_ptr> bundles;
 		iterate(bundle, bundlesByRank)
-			bundles.insert(std::make_pair((*bundle)->uuid(), *bundle));
+			bundles.emplace((*bundle)->uuid(), *bundle);
 
 		citerate(bundle, bundle_t::local_bundles(installDir))
 		{
@@ -451,7 +451,7 @@ namespace bundles_db
 			}
 			else
 			{
-				bundles.insert(std::make_pair((*bundle)->uuid(), (*bundle)));
+				bundles.emplace((*bundle)->uuid(), (*bundle));
 				fprintf(stderr, "Bundle missing in remote index: ‘%s’ (source ‘%s’)\n", (*bundle)->name().c_str(), (*bundle)->origin().c_str());
 			}
 		}
@@ -485,7 +485,7 @@ namespace bundles_db
 
 			plist::dictionary_t::iterator array = plist.find("bundles");
 			if(array == plist.end())
-				array = plist.insert(std::make_pair("bundles", plist::array_t())).first;
+				array = plist.emplace("bundles", plist::array_t()).first;
 			boost::get<plist::array_t>(array->second).push_back(dict);
 		}
 		return plist::save(local_index_path(installDir), plist);
@@ -579,7 +579,7 @@ namespace bundles_db
 	{
 		std::map<oak::uuid_t, bundle_ptr> bundles;
 		iterate(bundle, index)
-			bundles.insert(std::make_pair((*bundle)->uuid(), *bundle));
+			bundles.emplace((*bundle)->uuid(), *bundle);
 
 		std::set<oak::uuid_t> dependencies, queue;
 		iterate(bundle, startBundles)

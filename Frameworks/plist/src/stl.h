@@ -25,7 +25,7 @@ namespace plist
 	{
 		dictionary_t res;
 		iterate(it, map)
-			res.insert(std::make_pair(it->first, to_plist(it->second)));
+			res.emplace(it->first, to_plist(it->second));
 		return res;
 	}
 

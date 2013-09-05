@@ -212,7 +212,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 					for(FFMatch* match in [self.documentSearch allSelectedMatchesForDocumentIdentifier:[fileMatch identifier]])
 					{
 						++replaceCount;
-						replacements.insert(std::make_pair(std::make_pair([match match].first, [match match].last), controller.regularExpression ? format_string::expand(replaceString, [match match].captures) : replaceString));
+						replacements.emplace(std::make_pair([match match].first, [match match].last), controller.regularExpression ? format_string::expand(replaceString, [match match].captures) : replaceString);
 					}
 
 					if(document::document_ptr doc = [fileMatch match].document)

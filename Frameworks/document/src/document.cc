@@ -108,7 +108,7 @@ static std::multimap<text::range_t, document::document_t::mark_t> parse_marks (s
 			iterate(bm, *array)
 			{
 				if(std::string const* str = boost::get<std::string>(&*bm))
-					marks.insert(std::make_pair(*str, "bookmark"));
+					marks.emplace(*str, "bookmark");
 			}
 		}
 	}
@@ -468,7 +468,7 @@ namespace document
 					iterate(path, paths)
 					{
 						if(std::string const* str = boost::get<std::string>(&*path))
-							map.insert(std::make_pair(*str, t - (1.0 + map.size())));
+							map.emplace(*str, t - (1.0 + map.size()));
 					}
 				}
 			}
@@ -478,7 +478,7 @@ namespace document
 		{
 			std::map<oak::date_t, std::string> sorted;
 			iterate(item, map)
-				sorted.insert(std::make_pair(item->second, item->first));
+				sorted.emplace(item->second, item->first);
 
 			std::map< std::string, std::vector<std::string> > plist;
 			std::vector<std::string>& paths = plist["paths"];
@@ -513,7 +513,7 @@ namespace document
 
 			std::map<std::string, marks_t>::const_iterator it = marks.find(path);
 			if(it == marks.end())
-				it = marks.insert(std::make_pair(path, parse_marks(path::get_attr(path, "com.macromates.bookmarks")))).first;
+				it = marks.emplace(path, parse_marks(path::get_attr(path, "com.macromates.bookmarks"))).first;
 			return it->second;
 		}
 
@@ -1295,7 +1295,7 @@ namespace document
 		{
 			std::multimap<text::range_t, document_t::mark_t> res;
 			citerate(pair, _buffer->get_marks(0, _buffer->size()))
-				res.insert(std::make_pair(_buffer->convert(pair->first), pair->second));
+				res.emplace(_buffer->convert(pair->first), pair->second);
 			return res;
 		}
 		return document::marks.get(_path);
@@ -1310,7 +1310,7 @@ namespace document
 		else
 		{
 			load_marks(_path);
-			_marks.insert(std::make_pair(range, mark));
+			_marks.emplace(range, mark);
 		}
 		broadcast(callback_t::did_change_marks);
 	}
@@ -1376,7 +1376,7 @@ namespace document
 
 		std::map<text::pos_t, std::string> res;
 		citerate(pair, _buffer->symbols())
-			res.insert(std::make_pair(_buffer->convert(pair->first), pair->second));
+			res.emplace(_buffer->convert(pair->first), pair->second);
 		return res;
 	}
 
@@ -1478,7 +1478,7 @@ namespace document
 					if(glob.exclude(path, path::kPathItemDirectory))
 						continue;
 
-					if(seen_paths.insert(std::make_pair(buf.st_dev, (*it)->d_ino)).second)
+					if(seen_paths.emplace(buf.st_dev, (*it)->d_ino).second)
 							newDirs.push_back(path);
 					else	D(DBF_Document_Scanner, bug("skip known path: ‘%s’\n", path.c_str()););
 				}
@@ -1487,7 +1487,7 @@ namespace document
 					if(glob.exclude(path, path::kPathItemFile))
 						continue;
 
-					if(seen_paths.insert(std::make_pair(buf.st_dev, (*it)->d_ino)).second)
+					if(seen_paths.emplace(buf.st_dev, (*it)->d_ino).second)
 							files.emplace(path, inode_t(buf.st_dev, (*it)->d_ino, path));
 					else	D(DBF_Document_Scanner, bug("skip known path: ‘%s’\n", path.c_str()););
 				}
@@ -1507,7 +1507,7 @@ namespace document
 					std::string path = path::resolve(*link);
 					if(lstat(path.c_str(), &buf) != -1)
 					{
-						if(S_ISDIR(buf.st_mode) && follow_links && seen_paths.insert(std::make_pair(buf.st_dev, buf.st_ino)).second)
+						if(S_ISDIR(buf.st_mode) && follow_links && seen_paths.emplace(buf.st_dev, buf.st_ino).second)
 						{
 							if(glob.exclude(path, path::kPathItemDirectory))
 								continue;
@@ -1520,7 +1520,7 @@ namespace document
 							if(glob.exclude(path, path::kPathItemFile))
 								continue;
 
-							if(seen_paths.insert(std::make_pair(buf.st_dev, buf.st_ino)).second)
+							if(seen_paths.emplace(buf.st_dev, buf.st_ino).second)
 									files.emplace(path, inode_t(buf.st_dev, buf.st_ino, path));
 							else	D(DBF_Document_Scanner, bug("skip known path: ‘%s’\n", path.c_str()););
 						}

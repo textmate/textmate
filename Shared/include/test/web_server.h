@@ -100,7 +100,7 @@ struct request_t
 			std::string key(bol, value);
 			while(++value != it && *value == ' ')
 				continue;
-			this->headers.insert(std::make_pair(key, std::string(value, it)));
+			this->headers.emplace(key, std::string(value, it));
 		}
 	}
 };

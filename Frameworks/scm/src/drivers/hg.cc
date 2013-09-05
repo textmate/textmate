@@ -64,7 +64,7 @@ namespace scm
 			if(executable() != NULL_STR)
 			{
 				std::string branchName = io::exec(executable(), "branch", "--cwd", wcPath.c_str(), NULL);
-				res.insert(std::make_pair("TM_SCM_BRANCH", branchName.substr(0, branchName.find("\n"))));
+				res.emplace("TM_SCM_BRANCH", branchName.substr(0, branchName.find("\n")));
 			}
 			return res;
 		}
@@ -78,7 +78,7 @@ namespace scm
 			status_map_t relativePaths, res;
 			collect_all_paths(executable(), relativePaths, wcPath);
 			iterate(pair, relativePaths)
-				res.insert(std::make_pair(path::join(wcPath, pair->first), pair->second));
+				res.emplace(path::join(wcPath, pair->first), pair->second);
 			return res;
 		}
 	};

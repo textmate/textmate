@@ -159,7 +159,7 @@ static double const kPollInterval = 3*60*60;
 
 	std::multimap<std::string, bundles::item_ptr, text::less_t> ordered;
 	for(auto item : bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeBundle))
-		ordered.insert(std::make_pair(item->name(), item));
+		ordered.emplace(item->name(), item);
 
 	for(auto pair : ordered)
 	{
@@ -458,13 +458,13 @@ namespace
 					plist::array_t settings;
 					iterate(settingsPair, *dictionary)
 						settings.push_back(settingsPair->first);
-					res.insert(std::make_pair(pair.first, settings));
+					res.emplace(pair.first, settings);
 				}
 			}
 			else if(pair.first == kFieldChangedItems)
 			{
 				if(plist::dictionary_t const* dictionary = boost::get<plist::dictionary_t>(&pair.second))
-					res.insert(std::make_pair(pair.first, prune_dictionary(*dictionary)));
+					res.emplace(pair.first, prune_dictionary(*dictionary));
 			}
 			else
 			{

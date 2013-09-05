@@ -53,7 +53,7 @@ void OakAddBundlesToMenu (std::vector<bundles::item_ptr> const& items, bool setK
 	{
 		std::multimap<std::string, bundles::item_ptr, text::less_t> ordering;
 		iterate(item, items)
-			ordering.insert(std::make_pair((*item)->name(), *item));
+			ordering.emplace((*item)->name(), *item);
 
 		iterate(pair, ordering)
 		{
@@ -71,7 +71,7 @@ void OakAddBundlesToMenu (std::vector<bundles::item_ptr> const& items, bool setK
 	{
 		std::multimap<bundles::item_ptr, bundles::item_ptr> byBundle;
 		iterate(item, items)
-			byBundle.insert(std::make_pair((*item)->bundle(), *item));
+			byBundle.emplace((*item)->bundle(), *item);
 
 		std::multimap<std::string, std::vector<bundles::item_ptr>, text::less_t> menus;
 		while(!byBundle.empty())
@@ -86,10 +86,10 @@ void OakAddBundlesToMenu (std::vector<bundles::item_ptr> const& items, bool setK
 
 			std::multimap<std::string, bundles::item_ptr, text::less_t> ordering;
 			iterate(item, includedItems)
-				ordering.insert(std::make_pair((*item)->name(), *item));
+				ordering.emplace((*item)->name(), *item);
 			std::transform(ordering.begin(), ordering.end(), back_inserter(menuItems), [](std::pair<std::string, bundles::item_ptr> const& p){ return p.second; });
 
-			menus.insert(std::make_pair(bundle->name(), menuItems));
+			menus.emplace(bundle->name(), menuItems);
 		}
 
 		bool showBundleHeadings = menus.size() > 1;

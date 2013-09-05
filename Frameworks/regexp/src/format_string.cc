@@ -214,15 +214,15 @@ struct expand_visitor : boost::static_visitor<void>
 		snippet::pos_t to(res.size(), rank_count += 2);
 		auto field = std::make_shared<snippet::placeholder_t>(v.index, from, to);
 		if(v.content.empty() || fields.find(v.index) != fields.end())
-				mirrors.insert(std::make_pair(v.index, field));
-		else	fields.insert(std::make_pair(v.index, field));
+				mirrors.emplace(v.index, field);
+		else	fields.emplace(v.index, field);
 	}
 
 	void operator() (parser::placeholder_transform_t const& v)
 	{
 		snippet::pos_t pos(res.size(), ++rank_count);
 		auto field = std::make_shared<snippet::transform_t>(v.index, pos, snippet::pos_t(res.size(), rank_count += 2), v.pattern, v.format, v.options & parser::regexp_options::g);
-		mirrors.insert(std::make_pair(v.index, field));
+		mirrors.emplace(v.index, field);
 	}
 
 	void operator() (parser::placeholder_choice_t const& v)
@@ -242,7 +242,7 @@ struct expand_visitor : boost::static_visitor<void>
 		snippet::pos_t pos(res.size(), ++rank_count);
 		res += all_choices[0];
 		auto field = std::make_shared<snippet::choice_t>(v.index, pos, snippet::pos_t(res.size(), rank_count += 2), all_choices);
-		fields.insert(std::make_pair(v.index, field));
+		fields.emplace(v.index, field);
 	}
 
 	void operator() (parser::code_t const& v)

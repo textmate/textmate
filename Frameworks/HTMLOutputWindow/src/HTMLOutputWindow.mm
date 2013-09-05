@@ -67,7 +67,7 @@ static std::multimap<oak::uuid_t, HTMLOutputWindowController*> Windows;
 		Windows.erase(runner->uuid());
 
 	runner = aRunner;
-	Windows.insert(std::make_pair(runner->uuid(), self));
+	Windows.emplace(runner->uuid(), self);
 
 	self.window.title = [NSString stringWithCxxString:runner->name()];
 

@@ -26,7 +26,7 @@ static std::vector<bundles::item_ptr> binary_filters (std::string const& event, 
 		citerate(pattern, (*item)->values_for_field(bundles::kFieldContentMatch))
 		{
 			if(regexp::match_t const& m = regexp::search(*pattern, contentAsString))
-				ordering.insert(std::make_pair(-m.end(), *item));
+				ordering.emplace(-m.end(), *item);
 		}
 	}
 	return ordering.empty() ? std::vector<bundles::item_ptr>() : std::vector<bundles::item_ptr>(1, ordering.begin()->second);

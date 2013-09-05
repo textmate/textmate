@@ -13,7 +13,7 @@ static std::map<std::string, bundles::item_ptr> installed_items ()
 	citerate(item, bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeAny, oak::uuid_t(), false, true))
 	{
 		citerate(path, (*item)->paths())
-			res.insert(std::make_pair(*path, *item));
+			res.emplace(*path, *item);
 	}
 	return res;
 }

@@ -206,7 +206,7 @@ private:
 				dispatch_async(dispatch_get_main_queue(), ^{
 					std::map< std::pair<dev_t, ino_t>, FSFileItem* > existingItems;
 					for(FSFileItem* item in rootItem.children)
-						existingItems.insert(std::make_pair(std::make_pair(item.device, item.inode), item));
+						existingItems.emplace(std::make_pair(item.device, item.inode), item);
 
 					std::set<std::string> pathsOnDisk;
 					scm::info_ptr scmInfo = weakSCMInfo.lock();
@@ -369,7 +369,7 @@ private:
 	std::string const path = to_s([anItem.url path]);
 	auto record = visibleItems.find(path);
 	if(record == visibleItems.end())
-		record = visibleItems.insert(std::make_pair(path, std::make_shared<item_record_t>(self, anItem))).first;
+		record = visibleItems.emplace(path, std::make_shared<item_record_t>(self, anItem)).first;
 	record->second->reload(flag);
 }
 

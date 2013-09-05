@@ -162,7 +162,7 @@ static bool parse_dict (char const*& p, char const* pe, plist::any_t& res)
 	plist::any_t key, value;
 	std::map<std::string, plist::any_t>& ref = boost::get< std::map<std::string, plist::any_t> >(res = std::map<std::string, plist::any_t>());
 	for(char const* lp = p; parse_key(lp, pe, key) && parse_char(lp, pe, '=') && parse_element(lp, pe, value) && parse_char(lp, pe, ';'); p = lp)
-		ref.insert(std::make_pair(boost::get<std::string>(key), value));
+		ref.emplace(boost::get<std::string>(key), value);
 
 	return parse_char(p, pe, '}') || backtrack(p, bt, res);
 }

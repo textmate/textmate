@@ -112,7 +112,7 @@ namespace ng
 			{
 				plist::any_t const& symbolTransformationValue = bundles::value_for_setting("symbolTransformation", *it);
 				std::string const* symbolTransformation = boost::get<std::string>(&symbolTransformationValue);
-				transforms.insert(std::make_pair(*it, transform_t(symbolTransformation ? *symbolTransformation : "")));
+				transforms.emplace(*it, transform_t(symbolTransformation ? *symbolTransformation : ""));
 			}
 		}
 
