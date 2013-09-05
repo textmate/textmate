@@ -29,6 +29,7 @@ static std::string read_link (std::string const& path)
 namespace plist
 {
 	int32_t const cache_t::kPropertyCacheFormatVersion = 2;
+	uint32_t const kCapnpCacheFormatVersion = 1;
 
 	void cache_t::load (std::string const& path)
 	{
@@ -93,7 +94,14 @@ namespace plist
 		if(fd != -1)
 		{
 			capnp::PackedFdMessageReader message(kj::AutoCloseFd{fd});
-			for(auto src : message.getRoot<Cache>().getEntries())
+			auto cache = message.getRoot<Cache>();
+			if(cache.getVersion() != kCapnpCacheFormatVersion)
+			{
+				fprintf(stderr, "skip ‘%s’ version %u (expected %u)\n", path.c_str(), cache.getVersion(), kCapnpCacheFormatVersion);
+				return;
+			}
+
+			for(auto src : cache.getEntries())
 			{
 				entry_t entry(src.getPath().cStr());
 				switch(src.getType().which())
@@ -195,6 +203,7 @@ namespace plist
 
 		capnp::MallocMessageBuilder message;
 		auto cache = message.initRoot<Cache>();
+		cache.setVersion(kCapnpCacheFormatVersion);
 		auto entries = cache.initEntries(_cache.size());
 
 		size_t i = 0;
