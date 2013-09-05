@@ -3,11 +3,11 @@
 struct Entry {
 	path @0 :Text;
 
-	type @1 union {
-		file      @2 :File;
-		directory @3 :Directory;
-		link      @4 :Text;
-		missing   @5 :Void;
+	type :union {
+		file      @1 :File;
+		directory @2 :Directory;
+		link      @3 :Text;
+		missing   @4 :Void;
 	}
 
 	struct File {
@@ -30,5 +30,5 @@ struct Entry {
 
 struct Cache {
 	entries @0 :List(Entry);
-	version @1 :UInt32 = 1;
+	version @1 :UInt32 = 2;
 }

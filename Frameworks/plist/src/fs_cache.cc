@@ -29,7 +29,7 @@ static std::string read_link (std::string const& path)
 namespace plist
 {
 	int32_t const cache_t::kPropertyCacheFormatVersion = 2;
-	uint32_t const kCapnpCacheFormatVersion = 1;
+	uint32_t const kCapnpCacheFormatVersion = 2;
 
 	void cache_t::load (std::string const& path)
 	{
@@ -103,7 +103,7 @@ namespace plist
 
 			for(auto src : cache.getEntries())
 			{
-				entry_t entry(src.getPath().cStr());
+				entry_t entry(src.getPath());
 				switch(src.getType().which())
 				{
 					case Entry::Type::Which::FILE:
@@ -116,12 +116,12 @@ namespace plist
 						{
 							if(pair.hasValue())
 							{
-								plist.emplace(pair.getKey().cStr(), std::string(pair.getValue().cStr()));
+								plist.emplace(pair.getKey(), std::string(pair.getValue()));
 							}
 							else
 							{
 								auto array = pair.getPlist();
-								plist.emplace(pair.getKey().cStr(), plist::parse(std::string(array.begin(), array.end())));
+								plist.emplace(pair.getKey(), plist::parse(std::string(array.begin(), array.end())));
 							}
 						}
 						entry.set_content(plist);
@@ -132,11 +132,11 @@ namespace plist
 					{
 						entry.set_type(entry_type_t::directory);
 						entry.set_event_id(src.getType().getDirectory().getEventId());
-						entry.set_glob_string(src.getType().getDirectory().getGlob().cStr());
+						entry.set_glob_string(src.getType().getDirectory().getGlob());
 
 						std::vector<std::string> v;
 						for(auto path : src.getType().getDirectory().getItems())
-							v.push_back(path.cStr());
+							v.push_back(path);
 						entry.set_entries(v);
 					}
 					break;
@@ -144,7 +144,7 @@ namespace plist
 					case Entry::Type::Which::LINK:
 					{
 						entry.set_type(entry_type_t::link);
-						entry.set_link(src.getType().getLink().cStr());
+						entry.set_link(src.getType().getLink());
 					}
 					break;
 
@@ -156,7 +156,7 @@ namespace plist
 				}
 
 				if(entry.type() != entry_type_t::unknown)
-					_cache.emplace(src.getPath().cStr(), entry);
+					_cache.emplace(src.getPath(), entry);
 			}
 		}
 	}
@@ -210,7 +210,7 @@ namespace plist
 		for(auto pair : _cache)
 		{
 			auto entry = entries[i++];
-			entry.setPath(pair.first.c_str());
+			entry.setPath(pair.first);
 
 			if(pair.second.is_file())
 			{
@@ -223,7 +223,7 @@ namespace plist
 				for(auto src : plist)
 				{
 					auto dst = content[j++];
-					dst.setKey(src.first.c_str());
+					dst.setKey(src.first);
 					if(std::string const* str = boost::get<std::string>(&src.second))
 					{
 						dst.setValue(str->c_str());
@@ -245,17 +245,17 @@ namespace plist
 			else if(pair.second.is_directory())
 			{
 				auto dir = entry.getType().initDirectory();
-				dir.setGlob(pair.second.glob_string().c_str());
+				dir.setGlob(pair.second.glob_string());
 				dir.setEventId(pair.second.event_id());
 
 				auto const& v = pair.second.entries();
 				auto items = dir.initItems(v.size());
 				for(size_t j = 0; j < v.size(); ++j)
-					items.set(j, v[j].c_str());
+					items.set(j, v[j]);
 			}
 			else if(pair.second.is_link())
 			{
-				entry.getType().setLink(pair.second.link().c_str());
+				entry.getType().setLink(pair.second.link());
 			}
 			else if(pair.second.is_missing())
 			{
