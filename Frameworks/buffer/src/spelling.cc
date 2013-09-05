@@ -68,7 +68,11 @@ namespace ng
 		}
 
 		// TODO We should delay checking to the misspellings function. This way we won’t spell check entire document on load etc.
-		_misspellings.remove(_misspellings.lower_bound(from), _misspellings.upper_bound(to));
+		auto fromIter = _misspellings.lower_bound(from);
+		auto toIter   = _misspellings.upper_bound(to);
+		if(fromIter != toIter && fromIter->first >= to && fromIter->second)
+			fromIter = toIter;
+		_misspellings.remove(fromIter, toIter);
 		iterate(r, ranges)
 		{
 			std::string const& text = buffer->substr(r->first, r->second);
