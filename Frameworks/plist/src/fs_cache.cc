@@ -92,7 +92,7 @@ namespace plist
 		int fd = open(path.c_str(), O_RDONLY|O_CLOEXEC);
 		if(fd != -1)
 		{
-			capnp::PackedFdMessageReader message(fd);
+			capnp::PackedFdMessageReader message(kj::AutoCloseFd{fd});
 			for(auto src : message.getRoot<Cache>().getEntries())
 			{
 				entry_t entry(src.getPath().cStr());
@@ -150,8 +150,6 @@ namespace plist
 				if(entry.type() != entry_type_t::unknown)
 					_cache.emplace(src.getPath().cStr(), entry);
 			}
-
-			close(fd);
 		}
 	}
 
