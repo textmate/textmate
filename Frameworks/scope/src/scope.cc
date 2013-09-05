@@ -23,24 +23,14 @@ namespace scope
 			_parent->release();
 	}
 
-	static std::mutex& retain_count_lock ()
-	{
-		static std::mutex* res = new std::mutex;
-		return *res;
-	}
-
 	void scope_t::node_t::retain ()
 	{
-		retain_count_lock().lock();
 		++_retain_count;
-		retain_count_lock().unlock();
 	}
 
 	void scope_t::node_t::release ()
 	{
-		retain_count_lock().lock();
 		bool shouldDelete = --_retain_count == 0;
-		retain_count_lock().unlock();
 		if(shouldDelete)
 			delete this;
 	}

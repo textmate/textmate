@@ -61,7 +61,7 @@ namespace scope
 		private:
 			std::string _atoms;
 			node_t* _parent;
-			size_t _retain_count = 1;
+			std::atomic_size_t _retain_count;
 		};
 
 		explicit scope_t (node_t* node);
