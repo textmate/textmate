@@ -12,6 +12,11 @@ namespace
 {
 	struct scopes_t
 	{
+		void add (size_t pos, char const* scope)
+		{
+			map.emplace(pos, record_t(scope, true));
+		}
+
 		void add (size_t pos, std::string const& scope)
 		{
 			map.emplace(pos, record_t(scope, true));
@@ -39,7 +44,9 @@ namespace
 
 				if(pair.second.add)
 				{
-					scope.push_scope(pair.second.scope);
+					if(pair.second.scope_c_string)
+							scope.push_scope(pair.second.scope_c_string);
+					else	scope.push_scope(pair.second.scope);
 				}
 				else
 				{
@@ -71,7 +78,9 @@ namespace
 	private:
 		struct record_t
 		{
+			record_t (char const* scope, bool add) : scope_c_string(scope), add(add) { }
 			record_t (std::string const& scope, bool add) : scope(scope), add(add) { }
+			char const* scope_c_string = nullptr;
 			std::string scope;
 			bool add;
 		};
@@ -217,9 +226,17 @@ namespace parse
 			rule_ptr const& rule = it->second;
 			if(rule->scope_string != NULL_STR)
 			{
-				std::string const scopeString = expand(rule->scope_string, m);
-				scopes.add(from, scopeString);
-				scopes.remove(to, scopeString);
+				if(pattern_is_format_string(rule->scope_string))
+				{
+					std::string const scopeString = format_string::expand(rule->scope_string, m.captures());
+					scopes.add(from, scopeString);
+					scopes.remove(to, scopeString);
+				}
+				else
+				{
+					scopes.add(from, rule->scope_string.c_str());
+					scopes.remove(to, rule->scope_string);
+				}
 			}
 
 			if(!rule->children.empty())
@@ -389,18 +406,34 @@ namespace parse
 				rule_t const* rule = (*it)->rule;
 				if(rule->scope_string != NULL_STR)
 				{
-					std::string const scopeString = expand(rule->scope_string, m);
-					scope.push_scope(scopeString);
-					scopes.add(m.begin(), scopeString);
+					if(pattern_is_format_string(rule->scope_string))
+					{
+						std::string const scopeString = format_string::expand(rule->scope_string, m.captures());
+						scope.push_scope(scopeString);
+						scopes.add(m.begin(), scopeString);
+					}
+					else
+					{
+						scope.push_scope(rule->scope_string.c_str());
+						scopes.add(m.begin(), rule->scope_string.c_str());
+					}
 				}
 
 				apply_captures(scope, m, rule->while_captures ?: rule->captures, scopes, firstLine);
 
 				if(rule->content_scope_string != NULL_STR)
 				{
-					std::string const scopeString = expand(rule->content_scope_string, m);
-					scope.push_scope(scopeString);
-					scopes.add(m.end(), scopeString);
+					if(pattern_is_format_string(rule->scope_string))
+					{
+						std::string const scopeString = format_string::expand(rule->content_scope_string, m.captures());
+						scope.push_scope(scopeString);
+						scopes.add(m.end(), scopeString);
+					}
+					else
+					{
+						scope.push_scope(rule->content_scope_string.c_str());
+						scopes.add(m.end(), rule->content_scope_string.c_str());
+					}
 				}
 
 				stack->anchor = i = m.end();
@@ -478,8 +511,16 @@ namespace parse
 				if(rule->scope_string != NULL_STR)
 				{
 					stack->scope_string = expand(rule->scope_string, m.match);
-					scope.push_scope(stack->scope_string);
-					scopes.add(m.match.begin(), stack->scope_string);
+					if(pattern_is_format_string(rule->scope_string))
+					{
+						scope.push_scope(stack->scope_string);
+						scopes.add(m.match.begin(), stack->scope_string);
+					}
+					else
+					{
+						scope.push_scope(rule->scope_string.c_str());
+						scopes.add(m.match.begin(), rule->scope_string.c_str());
+					}
 				}
 
 				apply_captures(scope, m.match, rule->begin_captures ?: rule->captures, scopes, firstLine);
@@ -487,8 +528,16 @@ namespace parse
 				if(rule->content_scope_string != NULL_STR)
 				{
 					stack->content_scope_string = expand(rule->content_scope_string, m.match);
-					scope.push_scope(stack->content_scope_string);
-					scopes.add(m.match.end(), stack->content_scope_string);
+					if(pattern_is_format_string(rule->scope_string))
+					{
+						scope.push_scope(stack->content_scope_string);
+						scopes.add(m.match.end(), stack->content_scope_string);
+					}
+					else
+					{
+						scope.push_scope(rule->content_scope_string.c_str());
+						scopes.add(m.match.end(), rule->content_scope_string.c_str());
+					}
 				}
 
 				stack->scope          = scope;
@@ -516,9 +565,17 @@ namespace parse
 
 				if(rule->scope_string != NULL_STR)
 				{
-					std::string const scopeString = expand(rule->scope_string, m.match);
-					scopes.add(m.match.begin(), scopeString);
-					scopes.remove(m.match.end(), scopeString);
+					if(pattern_is_format_string(rule->scope_string))
+					{
+						std::string const scopeString = expand(rule->scope_string, m.match);
+						scopes.add(m.match.begin(), scopeString);
+						scopes.remove(m.match.end(), scopeString);
+					}
+					else
+					{
+						scopes.add(m.match.begin(), rule->scope_string.c_str());
+						scopes.remove(m.match.end(), rule->scope_string);
+					}
 				}
 
 				apply_captures(scope, m.match, rule->captures, scopes, firstLine);
