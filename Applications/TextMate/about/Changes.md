@@ -1,5 +1,11 @@
 # Changes
 
+## 2013-09-06 ([v2.0-alpha.9477](https://github.com/textmate/textmate/compare/v2.0-alpha.9475...v2.0-alpha.9477))
+
+* Edit → Spelling → Check Spelling (⌘;) has been implemented. This will select the next misspelled word and, if the spelling panel is not showing, open a context menu with guesses, otherwise, it’ll update the spelling panel. *[Adam Strzelecki]*
+* When all of the open documents don’t fit in the tab bar, the last visible tab is used as a proxy tab with an attached menu to select between non-visible documents. *[Ronald Wampler]*
+* The format string syntax now supports `\x{HHHH}` for unicode code points and `\xHH` for raw byte values (normally you would only use the former syntax).
+
 ## 2013-08-26 ([v2.0-alpha.9475](https://github.com/textmate/textmate/compare/v2.0-alpha.9459...v2.0-alpha.9475))
 
 * Support `${var}` in regexp part of format string transformations. For example if you wish the file name in the window title to be relative to `$CWD` (current directory of the `.tm_properties` file) then you can now add:
