@@ -21,6 +21,7 @@ static const CGFloat LabelNameHeight = 15;
 {
 	if(self = [super initWithFrame:rect])
 	{
+		self.font             = [NSFont systemFontOfSize:14];
 		self.enabled          = YES;
 		self.highlightedIndex = -1;
 	}
@@ -89,6 +90,14 @@ static const CGFloat LabelNameHeight = 15;
 		{ { 252, 162, 154}, { 251, 100,  91} }, // Red
 		{ { 249, 206, 143}, { 246, 170,  68} }, // Orange
 	};
+
+	NSMutableDictionary* titleAttributes;
+	titleAttributes = [NSMutableDictionary dictionary];
+	[titleAttributes setObject:[NSFont menuFontOfSize:self.font.pointSize] forKey:NSFontAttributeName];
+	if(!self.enabled)
+		[titleAttributes setObject:[NSColor grayColor] forKey:NSForegroundColorAttributeName];
+
+	[@"Label:" drawInRect:NSInsetRect(rect, 22, 0) withAttributes:titleAttributes];
 
 	for(NSInteger i = 0; i < 8; ++i)
 	{
