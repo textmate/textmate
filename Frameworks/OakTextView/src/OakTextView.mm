@@ -1178,7 +1178,7 @@ doScroll:
 		std::map<size_t, bool> misspellings = document->buffer().misspellings(from, to);
 		auto pair = misspellings.begin();
 		auto const end = misspellings.end();
-		ASSERT(pair->second);
+		ASSERT((pair == end) || pair->second);
 		runRange = NSMakeRange(0, 0);
 		if (pair != end)
 			runRange.length = utf16::distance(text.data(), text.data() + pair->first);
