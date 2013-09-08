@@ -1081,7 +1081,7 @@ doScroll:
 			PATTR(BoundsForRange),
 			// PATTR(RTFForRange),
 			// PATTR(StyleRangeForIndex),
-			// PATTR(AttributedStringForRange),
+			PATTR(AttributedStringForRange),
 		]];
 
 		attributes = [[set setByAddingObjectsFromArray:[super accessibilityParameterizedAttributeNames]] allObjects];
@@ -1135,7 +1135,83 @@ doScroll:
 		ret = [NSValue valueWithRect:rect];
 	// } HANDLE_PATTR(RTFForRange) { // TODO
 	// } HANDLE_PATTR(StyleRangeForIndex) { // TODO
-	// } HANDLE_PATTR(AttributedStringForRange) { // TODO
+	} HANDLE_PATTR(AttributedStringForRange) {
+#define TATTR(attr) NSAccessibility##attr##TextAttribute
+#define TKEY(key) NSAccessibility##key##Key
+		NSRange aRange = [((NSValue *)parameter) rangeValue];
+		ng::range_t const range = [self rangeForNSRange:aRange];
+		size_t const from = range.min().index, to = range.max().index;
+		std::string const text = editor->as_string(from, to);
+		NSMutableAttributedString* res = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithCxxString:text]];
+
+		// Add style
+		std::map<size_t, scope::scope_t> scopes = document->buffer().scopes(from, to);
+		NSRange runRange = NSMakeRange(0, 0);
+		for(auto pair = scopes.begin(); pair != scopes.end(); )
+		{
+			styles_t const& styles = theme->styles_for_scope(pair->second);
+
+			size_t i = pair->first;
+			size_t j = ++pair != scopes.end() ? pair->first : to - from;
+
+			runRange.location += runRange.length;
+			runRange.length = utf16::distance(text.data() + i, text.data() + j);
+			NSFont* font = (__bridge NSFont *)styles.font();
+			NSMutableDictionary* attributes = [NSMutableDictionary dictionaryWithCapacity:4];
+			[attributes addEntriesFromDictionary:@{
+				TATTR(Font): @{
+					TKEY(FontName): [font fontName],
+					TKEY(FontFamily): [font familyName],
+					TKEY(VisibleName): [font displayName],
+					TKEY(FontSize): @([font pointSize]),
+				},
+				TATTR(ForegroundColor): (__bridge id)styles.foreground(),
+				TATTR(BackgroundColor): (__bridge id)styles.background(),
+			}];
+			if(styles.underlined())
+				attributes[TATTR(Underline)] = @(NSUnderlineStyleSingle | NSUnderlinePatternSolid); // TODO is this always so?
+
+			[res setAttributes:attributes range:runRange];
+		}
+
+		// Add misspellings
+		std::map<size_t, bool> misspellings = document->buffer().misspellings(from, to);
+		auto pair = misspellings.begin();
+		auto const end = misspellings.end();
+		ASSERT((pair == end) || pair->second);
+		runRange = NSMakeRange(0, 0);
+		if(pair != end)
+			runRange.length = utf16::distance(text.data(), text.data() + pair->first);
+		while(pair != end)
+		{
+			ASSERT(pair != end);
+			ASSERT(pair->second);
+			// assert(runRange.location + runRange.length ~ pair->first)
+			size_t const i = pair->first;
+			size_t const j = (++pair != end) ? pair->first : to - from;
+			ASSERT((pair == end) || (!pair->second));
+			runRange.location += runRange.length;
+			runRange.length = utf16::distance(text.data() + i, text.data() + j);
+
+			[res addAttribute:TATTR(Misspelled) value:@(true) range:runRange];
+			[res addAttribute:@"AXMarkedMisspelled" value:@(true) range:runRange];
+
+			if((pair != end) && (++pair != end))
+			{
+				ASSERT(pair->second);
+				size_t const k = pair->first;
+				runRange.location += runRange.length;
+				runRange.length = utf16::distance(text.data() + j, text.data() + k);
+			}
+		}
+
+		// Add text language
+		NSString* lang = [NSString stringWithCxxString:document->buffer().spelling_language()];
+		[res addAttribute:@"AXNaturalLanguageText" value:lang range:NSMakeRange(0, [res length])];
+
+		return res;
+#undef TATTR
+#undef TKEY
 	} else {
 		ret = [super accessibilityAttributeValue:attribute forParameter:parameter];
 	}
