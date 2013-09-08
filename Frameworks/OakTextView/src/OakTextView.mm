@@ -1189,7 +1189,7 @@ doScroll:
 			// assert(runRange.location + runRange.length ~ pair->first)
 			size_t const i = pair->first;
 			size_t const j = (++pair != end) ? pair->first : to - from;
-			ASSERT((!pair->first) || (pair == end));
+			ASSERT((pair == end) || (!pair->second));
 			runRange.location += runRange.length;
 			runRange.length = utf16::distance(text.data() + i, text.data() + j);
 
