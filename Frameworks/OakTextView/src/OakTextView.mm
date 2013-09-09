@@ -62,6 +62,7 @@ struct buffer_refresh_callback_t;
 	theme_ptr theme;
 	std::string fontName;
 	CGFloat fontSize;
+	std::string invisibles;
 	ng::editor_ptr editor;
 	std::shared_ptr<ng::layout_t> layout;
 	NSUInteger refreshNestCount;
@@ -496,6 +497,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 		editor = ng::editor_for_document(document);
 		wrapColumn = settings.get(kSettingsWrapColumnKey, wrapColumn);
 		layout = std::make_shared<ng::layout_t>(document->buffer(), theme, settings.get(kSettingsSoftWrapKey, false), self.scrollPastEnd, wrapColumn, document->folded());
+		layout->set_invisibles(invisibles);
 		if(settings.get(kSettingsShowWrapColumnKey, false))
 			layout->set_draw_wrap_column(true);
 
@@ -555,6 +557,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 		theme          = parse_theme(bundles::lookup(settings.get(kSettingsThemeKey, NULL_STR)));
 		fontName       = settings.get(kSettingsFontNameKey, NULL_STR);
 		fontSize       = settings.get(kSettingsFontSizeKey, 11);
+		invisibles     = settings.get(kSettingsInvisiblesKey, NULL_STR);
 		theme          = theme->copy_with_font_name_and_size(fontName, fontSize);
 
 		_showInvisibles = settings.get(kSettingsShowInvisiblesKey, false);
