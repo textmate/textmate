@@ -98,6 +98,45 @@ namespace ng
 		clear_text_widths();
 	}
 
+	void layout_t::set_invisibles (std::string const& invisibles)
+	{
+		int i;
+		int len = invisibles.length();
+		std::string *current_string = NULL;
+		for (i=0;i<len;++i)
+		{
+			switch(invisibles[i])
+			{
+				case '\t':
+					_invisibles.tab = "";
+					if (i > 0 && invisibles[i-1] == '~') {
+						current_string = NULL;
+					} else {
+						current_string = &_invisibles.tab;
+					}
+				break;
+				case ' ':
+					_invisibles.space = "";
+					if (i > 0 && invisibles[i-1] == '~') {
+						current_string = NULL;
+					} else {
+						current_string = &_invisibles.space;
+					}
+					break;
+				case '\n':
+					_invisibles.newline = "";
+					if (i > 0 && invisibles[i-1] == '~') {
+						current_string = NULL;
+					} else {
+						current_string = &_invisibles.newline;
+					}
+				break;
+			}
+			if(i < len-1 && current_string && invisibles[i+1] != '~')
+				current_string->append(invisibles,i+1,1);
+		}
+	}
+
 	void layout_t::set_tab_size (size_t tabSize)
 	{
 		if(tabSize == _tab_size)
@@ -794,6 +833,8 @@ namespace ng
 
 		CGContextSetTextMatrix(context, CGAffineTransformMake(1, 0, 0, 1, 0, 0));
 
+		_invisibles.show = showInvisibles;
+
 		CGColorRef background = _theme->background(scope::to_s(_buffer.scope(0).left));
 		if(drawBackground)
 			render::fill_rect(context, background, visibleRect);
@@ -808,7 +849,7 @@ namespace ng
 		if(drawBackground)
 		{
 			foreach(row, firstY, _rows.lower_bound(yMax, &row_y_comp))
-				row->value.draw_background(_theme, *_metrics, context, isFlipped, visibleRect, showInvisibles, background, _buffer, row->offset._length, CGPointMake(_margin.left, _margin.top + row->offset._height));
+				row->value.draw_background(_theme, *_metrics, context, isFlipped, visibleRect, _invisibles, background, _buffer, row->offset._length, CGPointMake(_margin.left, _margin.top + row->offset._height));
 		}
 
 		base_colors_t const& baseColors = get_base_colors(_theme->is_dark());
@@ -836,7 +877,7 @@ namespace ng
 		}
 
 		foreach(row, firstY, _rows.lower_bound(yMax, &row_y_comp))
-			row->value.draw_foreground(_theme, *_metrics, context, isFlipped, visibleRect, showInvisibles, _buffer, row->offset._length, selection, CGPointMake(_margin.left, _margin.top + row->offset._height));
+			row->value.draw_foreground(_theme, *_metrics, context, isFlipped, visibleRect, _invisibles, _buffer, row->offset._length, selection, CGPointMake(_margin.left, _margin.top + row->offset._height));
 
 		if(_draw_caret && !_drop_marker)
 		{

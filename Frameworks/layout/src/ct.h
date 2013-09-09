@@ -20,6 +20,14 @@ namespace ng
 		std::function<CGImageRef(double, double)> _folding_dots_create;
 		mutable std::map<std::pair<double, double>, CGImageRef> _folding_dots_cache;
 	};
+	
+	struct invisibles_t
+	{
+		bool show;
+		std::string tab;
+		std::string space;
+		std::string newline;
+	};
 
 } /* ng */
 
