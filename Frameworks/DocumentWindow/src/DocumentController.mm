@@ -817,7 +817,7 @@ namespace
 	}
 	else
 	{
-		NSInteger excessTabs = _documents.size() - self.tabBarView.countOfVisibleTabs;
+		NSInteger excessTabs = _documents.size() - std::max<NSUInteger>(self.tabBarView.countOfVisibleTabs, 8);
 		if(self.tabBarView && excessTabs > 0)
 		{
 			std::set<oak::uuid_t> uuids;
