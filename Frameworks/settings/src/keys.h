@@ -19,6 +19,7 @@ PUBLIC extern std::string const kSettingsSoftWrapKey;
 PUBLIC extern std::string const kSettingsWrapColumnKey;
 PUBLIC extern std::string const kSettingsShowWrapColumnKey;
 PUBLIC extern std::string const kSettingsShowInvisiblesKey;
+PUBLIC extern std::string const kSettingsInvisiblesMapKey;
 
 PUBLIC extern std::string const kSettingsProjectDirectoryKey;
 PUBLIC extern std::string const kSettingsSCMStatusKey;

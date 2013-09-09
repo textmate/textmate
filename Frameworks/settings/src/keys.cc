@@ -16,6 +16,7 @@ std::string const kSettingsSoftWrapKey                    = "softWrap";
 std::string const kSettingsWrapColumnKey                  = "wrapColumn";
 std::string const kSettingsShowWrapColumnKey              = "showWrapColumn";
 std::string const kSettingsShowInvisiblesKey              = "showInvisibles";
+std::string const kSettingsInvisiblesMapKey               = "invisiblesMap";
 
 std::string const kSettingsProjectDirectoryKey            = "projectDirectory";
 std::string const kSettingsSCMStatusKey                   = "scmStatus";
