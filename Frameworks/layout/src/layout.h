@@ -37,6 +37,7 @@ namespace ng
 
 		void set_theme (theme_ptr const& theme);
 		void set_font (std::string const& fontName, CGFloat fontSize);
+		void set_character_mapping (std::string const& newInvisibles);
 		void set_margin (margin_t const& margin);
 		void set_wrapping (bool softWrap, size_t wrapColumn);
 		void set_scroll_past_end (bool scrollPastEnd);
@@ -171,6 +172,7 @@ namespace ng
 		size_t             _wrap_column;
 		margin_t           _margin;
 		CGSize             _viewport_size = CGSizeZero;
+		invisibles_t       _invisibles;
 
 		bool               _is_key = false;
 		bool               _draw_caret = false;

@@ -21,6 +21,14 @@ namespace ng
 		mutable std::map<std::pair<double, double>, CGImageRef> _folding_dots_cache;
 	};
 
+	struct invisibles_t
+	{
+		bool enabled        = false;
+		std::string tab     = "‣";
+		std::string space   = "·";
+		std::string newline = "¬";
+	};
+
 } /* ng */
 
 namespace ct
