@@ -133,7 +133,8 @@ namespace ng
 
 			case kNodeTypeSoftBreak:
 			{
-				scope::scope_t scope = buffer.scope(bufferOffset).right;
+				scope::context_t const context = buffer.scope(bufferOffset);
+				scope::scope_t scope = shared_prefix(context.left, context.right);
 				scope.push_scope("deco.indented-wrap");
 				_line = std::make_shared<ct::line_t>(fillStr, std::map<size_t, scope::scope_t>{ { 0, scope } }, theme, nullptr);
 			}
