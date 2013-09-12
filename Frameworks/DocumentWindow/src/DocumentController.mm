@@ -575,6 +575,13 @@ namespace
 	[self closeTabsAtIndexes:otherTabs askToSaveChanges:YES createDocumentIfEmpty:YES];
 }
 
+- (IBAction)performCloseTabsToTheRight:(id)sender
+{
+	NSUInteger from = _selectedTabIndex + 1, to = _documents.size();
+	if(from < to)
+		[self closeTabsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(from, to - from)] askToSaveChanges:YES createDocumentIfEmpty:YES];
+}
+
 - (BOOL)windowShouldClose:(id)sender
 {
 	[self.htmlOutputView stopLoading];
