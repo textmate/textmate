@@ -26,393 +26,490 @@
 	);
 
 	CFBundleDocumentTypes = (
-		{	LSItemContentTypes = ( "public.ada-source" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "com.apple.applescript.text" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "com.apple.applescript.script" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "com.adobe.actionscript" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "com.microsoft.asp" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "com.microsoft.asp.net" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "org.tug.tex.bibtex" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "public.c-source" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "public.c-plus-plus-source" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "com.microsoft.c-sharp" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "org.coffeescript.coffeescript" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "org.contextfreeart.contextfree" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "public.comma-separated-values-text" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "public.tab-separated-values-text" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "com.macromates.textmate.cgi-script" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "com.macromates.textmate.config-file" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "org.w3.css" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "public.patch-file" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "org.w3.xml-dtd" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "public.dylan-source" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "org.erlang.erlang" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "org.fscript.fscript" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "public.fortran-source" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "public.fortran-77-source" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "public.fortran-90-source" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "public.fortran-95-source" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "public.c-header" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "public.c-plus-plus-header" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "com.macromates.textmate.gtd" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "org.haskell.haskell" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "public.html" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "com.macromates.textmate.include-file" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "com.apple.ical.ics" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "com.microsoft.ini" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "org.iolanguage.io" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "com.sun.java-source" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "org.beanshell.beanshell" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "com.sun.java-properties" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "com.netscape.javascript-source" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "com.sun.java-server-pages" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "public.json" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "org.ietf.ldap-data-interchange-format" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "com.macromates.textmate.lisp" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "com.apple.log" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "com.macromates.textmate.logo" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "org.lua.lua" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "net.daringfireball.markdown" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "org.mediawiki.wiki-source" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "com.mips.mips-assembler" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "com.dec.modula-3" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "in.moinmo.wiki-source" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "public.objective-c-source" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "public.objective-c-plus-plus-source" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "org.ocaml.ocaml" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "public.pascal-source" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "public.perl-script" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "public.php-script" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "com.adobe.postscript" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "com.adobe.encapsulated-postscript" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "com.apple.property-list" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "public.python-script" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "org.r-project.r" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "org.complang.ragel" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "com.roaringpenguin.remind" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "org.python.restructuredtext" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "org.ruby-lang.eruby" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "org.rubyonrails.erb-sql" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "public.ruby-script" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "com.macromates.textmate.scheme" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "com.macromates.textmate.setext" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "public.shell-script" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "org.slatelanguage.slate" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "org.iso.sql" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "com.macromates.textmate.standard-ml" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "com.apple.xcode.strings-text" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "public.svg-image" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "org.swig.swig" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "tk.tcl.tcl" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "org.tug.tex" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "public.plain-text" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "com.textpattern.textile" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "public.xhtml" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "public.xml" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "org.w3.xsl" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "public.vcard" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "com.microsoft.visual-basic" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "org.yaml.yaml" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Alternate;
-		},
-		{	LSItemContentTypes = ( "com.macromates.textmate.snippet" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Owner;
-		},
-		{	LSItemContentTypes = ( "com.macromates.textmate.macro" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Owner;
-		},
-		{	LSItemContentTypes = ( "com.macromates.textmate.language" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Owner;
-		},
-		{	LSItemContentTypes = ( "com.macromates.textmate.preferences" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Owner;
-		},
-		{	LSItemContentTypes = ( "com.macromates.textmate.command" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Owner;
-		},
-		{	LSItemContentTypes = ( "com.macromates.textmate.drag-command" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Owner;
-		},
-		{	LSItemContentTypes = ( "com.macromates.textmate.theme" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Owner;
-		},
-		{	LSItemContentTypes = ( "com.macromates.textmate.release-notes" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Owner;
-		},
-		{	LSItemContentTypes = ( "com.macromates.textmate.bundle" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Owner;
-		},
-		{	LSItemContentTypes = ( "com.macromates.textmate.plugin" );
-			CFBundleTypeRole   = Editor;
-			LSHandlerRank      = Owner;
+		{	LSItemContentTypes   = ( "public.ada-source" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "ADA";
+		},
+		{	LSItemContentTypes   = ( "com.apple.applescript.text" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "AppleScript";
+		},
+		{	LSItemContentTypes   = ( "com.apple.applescript.script" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "AppleScript";
+		},
+		{	LSItemContentTypes   = ( "com.adobe.actionscript" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "ActionScript";
+		},
+		{	LSItemContentTypes   = ( "com.microsoft.asp" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "ASP";
+		},
+		{	LSItemContentTypes   = ( "com.microsoft.asp.net" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "ASPNET";
+		},
+		{	LSItemContentTypes   = ( "org.tug.tex.bibtex" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "BibTeX";
+		},
+		{	LSItemContentTypes   = ( "public.c-source" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "C";
+		},
+		{	LSItemContentTypes   = ( "public.c-plus-plus-source" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "C++";
+		},
+		{	LSItemContentTypes   = ( "com.microsoft.c-sharp" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "C#";
+		},
+		{	LSItemContentTypes   = ( "org.coffeescript.coffeescript" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "CoffeeScript";
+		},
+		{	LSItemContentTypes   = ( "org.contextfreeart.contextfree" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "CFDG";
+		},
+		{	LSItemContentTypes   = ( "public.comma-separated-values-text" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Text";
+		},
+		{	LSItemContentTypes   = ( "public.tab-separated-values-text" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Text";
+		},
+		{	LSItemContentTypes   = ( "com.macromates.textmate.cgi-script" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "CGI";
+		},
+		{	LSItemContentTypes   = ( "com.macromates.textmate.config-file" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Config";
+		},
+		{	LSItemContentTypes   = ( "org.w3.css" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "CSS";
+		},
+		{	LSItemContentTypes   = ( "public.patch-file" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Diff";
+		},
+		{	LSItemContentTypes   = ( "org.w3.xml-dtd" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "DTD";
+		},
+		{	LSItemContentTypes   = ( "public.dylan-source" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Dylan";
+		},
+		{	LSItemContentTypes   = ( "org.erlang.erlang" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Erlang";
+		},
+		{	LSItemContentTypes   = ( "org.fscript.fscript" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "F-Script";
+		},
+		{	LSItemContentTypes   = ( "public.fortran-source" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Fortran";
+		},
+		{	LSItemContentTypes   = ( "public.fortran-77-source" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Fortran";
+		},
+		{	LSItemContentTypes   = ( "public.fortran-90-source" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Fortran";
+		},
+		{	LSItemContentTypes   = ( "public.fortran-95-source" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Fortran";
+		},
+		{	LSItemContentTypes   = ( "public.c-header" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "H";
+		},
+		{	LSItemContentTypes   = ( "public.c-plus-plus-header" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "H++";
+		},
+		{	LSItemContentTypes   = ( "com.macromates.textmate.gtd" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "GTD";
+		},
+		{	LSItemContentTypes   = ( "org.haskell.haskell" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Haskell";
+		},
+		{	LSItemContentTypes   = ( "public.html" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "HTML";
+		},
+		{	LSItemContentTypes   = ( "com.macromates.textmate.include-file" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Inc";
+		},
+		{	LSItemContentTypes   = ( "com.apple.ical.ics" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "iCal";
+		},
+		{	LSItemContentTypes   = ( "com.microsoft.ini" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "INI";
+		},
+		{	LSItemContentTypes   = ( "org.iolanguage.io" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Io";
+		},
+		{	LSItemContentTypes   = ( "com.sun.java-source" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Java";
+		},
+		{	LSItemContentTypes   = ( "org.beanshell.beanshell" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Java";
+		},
+		{	LSItemContentTypes   = ( "com.sun.java-properties" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Java";
+		},
+		{	LSItemContentTypes   = ( "com.netscape.javascript-source" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "JavaScript";
+		},
+		{	LSItemContentTypes   = ( "com.sun.java-server-pages" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "JSP";
+		},
+		{	LSItemContentTypes   = ( "public.json" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "JSON";
+		},
+		{	LSItemContentTypes   = ( "org.ietf.ldap-data-interchange-format" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Blank";
+		},
+		{	LSItemContentTypes   = ( "com.macromates.textmate.lisp" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Lisp";
+		},
+		{	LSItemContentTypes   = ( "com.apple.log" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Log";
+		},
+		{	LSItemContentTypes   = ( "com.macromates.textmate.logo" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Logo";
+		},
+		{	LSItemContentTypes   = ( "org.lua.lua" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Lua";
+		},
+		{	LSItemContentTypes   = ( "net.daringfireball.markdown" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Markdown";
+		},
+		{	LSItemContentTypes   = ( "org.mediawiki.wiki-source" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Wiki";
+		},
+		{	LSItemContentTypes   = ( "com.mips.mips-assembler" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "ASM";
+		},
+		{	LSItemContentTypes   = ( "com.dec.modula-3" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Modula";
+		},
+		{	LSItemContentTypes   = ( "in.moinmo.wiki-source" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Wiki";
+		},
+		{	LSItemContentTypes   = ( "public.objective-c-source" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Obj-C";
+		},
+		{	LSItemContentTypes   = ( "public.objective-c-plus-plus-source" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Obj-C++";
+		},
+		{	LSItemContentTypes   = ( "org.ocaml.ocaml" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "OCaml";
+		},
+		{	LSItemContentTypes   = ( "public.pascal-source" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Pascal";
+		},
+		{	LSItemContentTypes   = ( "public.perl-script" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Perl";
+		},
+		{	LSItemContentTypes   = ( "public.php-script" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "PHP";
+		},
+		{	LSItemContentTypes   = ( "com.adobe.postscript" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "PostScript";
+		},
+		{	LSItemContentTypes   = ( "com.adobe.encapsulated-postscript" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "PostScript";
+		},
+		{	LSItemContentTypes   = ( "com.apple.property-list" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Plist";
+		},
+		{	LSItemContentTypes   = ( "public.python-script" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Python";
+		},
+		{	LSItemContentTypes   = ( "org.r-project.r" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "R";
+		},
+		{	LSItemContentTypes   = ( "org.complang.ragel" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Ragel";
+		},
+		{	LSItemContentTypes   = ( "com.roaringpenguin.remind" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Blank";
+		},
+		{	LSItemContentTypes   = ( "org.python.restructuredtext" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "reST";
+		},
+		{	LSItemContentTypes   = ( "org.ruby-lang.eruby" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "RHTML";
+		},
+		{	LSItemContentTypes   = ( "org.rubyonrails.erb-sql" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "SQL";
+		},
+		{	LSItemContentTypes   = ( "public.ruby-script" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Ruby";
+		},
+		{	LSItemContentTypes   = ( "com.macromates.textmate.scheme" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Scheme";
+		},
+		{	LSItemContentTypes   = ( "com.macromates.textmate.setext" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Blank";
+		},
+		{	LSItemContentTypes   = ( "public.shell-script" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Shell";
+		},
+		{	LSItemContentTypes   = ( "org.slatelanguage.slate" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Slate";
+		},
+		{	LSItemContentTypes   = ( "org.iso.sql" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "SQL";
+		},
+		{	LSItemContentTypes   = ( "com.macromates.textmate.standard-ml" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "SML";
+		},
+		{	LSItemContentTypes   = ( "com.apple.xcode.strings-text" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Strings";
+		},
+		{	LSItemContentTypes   = ( "public.svg-image" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "SVG";
+		},
+		{	LSItemContentTypes   = ( "org.swig.swig" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "SWIG";
+		},
+		{	LSItemContentTypes   = ( "tk.tcl.tcl" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Tcl";
+		},
+		{	LSItemContentTypes   = ( "org.tug.tex" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "TeX";
+		},
+		{	LSItemContentTypes   = ( "public.plain-text" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Text";
+		},
+		{	LSItemContentTypes   = ( "com.textpattern.textile" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Textile";
+		},
+		{	LSItemContentTypes   = ( "public.xhtml" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "XHTML";
+		},
+		{	LSItemContentTypes   = ( "public.xml" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "XML";
+		},
+		{	LSItemContentTypes   = ( "org.w3.xsl" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "XSL";
+		},
+		{	LSItemContentTypes   = ( "public.vcard" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "Blank";
+		},
+		{	LSItemContentTypes   = ( "com.microsoft.visual-basic" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "VisualBasic";
+		},
+		{	LSItemContentTypes   = ( "org.yaml.yaml" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Alternate;
+			CFBundleTypeIconFile = "YAML";
+		},
+		{	LSItemContentTypes   = ( "com.macromates.textmate.snippet" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Owner;
+			CFBundleTypeIconFile = "TextMate Snippet";
+		},
+		{	LSItemContentTypes   = ( "com.macromates.textmate.macro" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Owner;
+			CFBundleTypeIconFile = "TextMate Macro";
+		},
+		{	LSItemContentTypes   = ( "com.macromates.textmate.language" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Owner;
+			CFBundleTypeIconFile = "TextMate Grammar";
+		},
+		{	LSItemContentTypes   = ( "com.macromates.textmate.preferences" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Owner;
+			CFBundleTypeIconFile = "TextMate Settings";
+		},
+		{	LSItemContentTypes   = ( "com.macromates.textmate.command" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Owner;
+			CFBundleTypeIconFile = "TextMate Command";
+		},
+		{	LSItemContentTypes   = ( "com.macromates.textmate.drag-command" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Owner;
+			CFBundleTypeIconFile = "TextMate Bundle Item";
+		},
+		{	LSItemContentTypes   = ( "com.macromates.textmate.theme" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Owner;
+			CFBundleTypeIconFile = "TextMate Theme";
+		},
+		{	LSItemContentTypes   = ( "com.macromates.textmate.release-notes" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Owner;
+			CFBundleTypeIconFile = "Text";
+		},
+		{	LSItemContentTypes   = ( "com.macromates.textmate.bundle" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Owner;
+			CFBundleTypeIconFile = "TextMate Bundle";
+		},
+		{	LSItemContentTypes   = ( "com.macromates.textmate.plugin" );
+			CFBundleTypeRole     = Editor;
+			LSHandlerRank        = Owner;
+			CFBundleTypeIconFile = "TextMate PlugIn";
 		},
 
 		/* generic types */
