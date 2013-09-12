@@ -347,15 +347,6 @@
 									<reference key="NSOnImage" ref="944637517"/>
 									<reference key="NSMixedImage" ref="596846250"/>
 								</object>
-								<object class="NSMenuItem" id="530077982">
-									<reference key="NSMenu" ref="276589048"/>
-									<string key="NSTitle">Close Other Tabs</string>
-									<string key="NSKeyEquiv">w</string>
-									<int key="NSKeyEquivModMask">1310720</int>
-									<int key="NSMnemonicLoc">2147483647</int>
-									<reference key="NSOnImage" ref="944637517"/>
-									<reference key="NSMixedImage" ref="596846250"/>
-								</object>
 								<object class="NSMenuItem" id="265413523">
 									<reference key="NSMenu" ref="276589048"/>
 									<string key="NSTitle">Close All Tabs</string>
@@ -365,7 +356,43 @@
 									<reference key="NSOnImage" ref="944637517"/>
 									<reference key="NSMixedImage" ref="596846250"/>
 								</object>
+								<object class="NSMenuItem" id="530077982">
+									<reference key="NSMenu" ref="276589048"/>
+									<string key="NSTitle">Close Other Tabs</string>
+									<string key="NSKeyEquiv">w</string>
+									<int key="NSKeyEquivModMask">1310720</int>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="944637517"/>
+									<reference key="NSMixedImage" ref="596846250"/>
+								</object>
+								<object class="NSMenuItem" id="872857653">
+									<reference key="NSMenu" ref="276589048"/>
+									<string key="NSTitle">Close Tabs to the Right</string>
+									<string key="NSKeyEquiv"/>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="944637517"/>
+									<reference key="NSMixedImage" ref="596846250"/>
+								</object>
 								<object class="NSMenuItem" id="318577453">
+									<reference key="NSMenu" ref="276589048"/>
+									<bool key="NSIsDisabled">YES</bool>
+									<bool key="NSIsSeparator">YES</bool>
+									<string key="NSTitle"/>
+									<string key="NSKeyEquiv"/>
+									<int key="NSKeyEquivModMask">1048576</int>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="944637517"/>
+									<reference key="NSMixedImage" ref="596846250"/>
+								</object>
+								<object class="NSMenuItem" id="1025400400">
+									<reference key="NSMenu" ref="276589048"/>
+									<string key="NSTitle">Sticky</string>
+									<string key="NSKeyEquiv"/>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="944637517"/>
+									<reference key="NSMixedImage" ref="596846250"/>
+								</object>
+								<object class="NSMenuItem" id="495221014">
 									<reference key="NSMenu" ref="276589048"/>
 									<bool key="NSIsDisabled">YES</bool>
 									<bool key="NSIsSeparator">YES</bool>
@@ -3748,6 +3775,22 @@
 					<int key="connectionID">557</int>
 				</object>
 				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">performCloseTabsToTheRight:</string>
+						<reference key="source" ref="51167417"/>
+						<reference key="destination" ref="872857653"/>
+					</object>
+					<int key="connectionID">855</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">toggleSticky:</string>
+						<reference key="source" ref="51167417"/>
+						<reference key="destination" ref="1025400400"/>
+					</object>
+					<int key="connectionID">859</int>
+				</object>
+				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
 						<string key="label">bundlesMenuItem</string>
 						<reference key="source" ref="261397727"/>
@@ -4036,7 +4079,6 @@
 							<reference ref="847636686"/>
 							<reference ref="597193033"/>
 							<reference ref="292083791"/>
-							<reference ref="265413523"/>
 							<reference ref="919055911"/>
 							<reference ref="303859393"/>
 							<reference ref="633070634"/>
@@ -4045,7 +4087,11 @@
 							<reference ref="780763689"/>
 							<reference ref="197884203"/>
 							<reference ref="387113119"/>
+							<reference ref="265413523"/>
+							<reference ref="872857653"/>
+							<reference ref="1025400400"/>
 							<reference ref="318577453"/>
+							<reference ref="495221014"/>
 						</object>
 						<reference key="parent" ref="341435176"/>
 					</object>
@@ -5672,6 +5718,21 @@
 						<reference key="object" ref="438030254"/>
 						<reference key="parent" ref="1024"/>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">853</int>
+						<reference key="object" ref="872857653"/>
+						<reference key="parent" ref="276589048"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">856</int>
+						<reference key="object" ref="1025400400"/>
+						<reference key="parent" ref="276589048"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">858</int>
+						<reference key="object" ref="495221014"/>
+						<reference key="parent" ref="276589048"/>
+					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -5960,6 +6021,9 @@
 					<string>844.IBPluginDependency</string>
 					<string>851.IBPluginDependency</string>
 					<string>851.IBShouldRemoveOnLegacySave</string>
+					<string>853.IBPluginDependency</string>
+					<string>856.IBPluginDependency</string>
+					<string>858.IBPluginDependency</string>
 				</object>
 				<object class="NSArray" key="dict.values">
 					<bool key="EncodedWithXMLCoder">YES</bool>
@@ -6245,6 +6309,9 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<integer value="1"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="unlocalizedProperties">
@@ -6259,7 +6326,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">851</int>
+			<int key="maxID">859</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -6437,6 +6504,7 @@
 							<string>performCloseOtherTabs:</string>
 							<string>performCloseSplit:</string>
 							<string>performCloseTab:</string>
+							<string>performCloseTabsToTheRight:</string>
 							<string>performCloseWindow:</string>
 							<string>revealFileInProject:</string>
 							<string>saveAllDocuments:</string>
@@ -6448,9 +6516,12 @@
 							<string>takeSelectedTabIndexFrom:</string>
 							<string>toggleFileBrowser:</string>
 							<string>toggleHTMLOutput:</string>
+							<string>toggleSticky:</string>
 						</object>
 						<object class="NSArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
@@ -6516,6 +6587,7 @@
 							<string>performCloseOtherTabs:</string>
 							<string>performCloseSplit:</string>
 							<string>performCloseTab:</string>
+							<string>performCloseTabsToTheRight:</string>
 							<string>performCloseWindow:</string>
 							<string>revealFileInProject:</string>
 							<string>saveAllDocuments:</string>
@@ -6527,6 +6599,7 @@
 							<string>takeSelectedTabIndexFrom:</string>
 							<string>toggleFileBrowser:</string>
 							<string>toggleHTMLOutput:</string>
+							<string>toggleSticky:</string>
 						</object>
 						<object class="NSArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
@@ -6627,6 +6700,10 @@
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
+								<string key="name">performCloseTabsToTheRight:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
 								<string key="name">performCloseWindow:</string>
 								<string key="candidateClassName">id</string>
 							</object>
@@ -6668,6 +6745,10 @@
 							</object>
 							<object class="IBActionInfo">
 								<string key="name">toggleHTMLOutput:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">toggleSticky:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 						</object>
