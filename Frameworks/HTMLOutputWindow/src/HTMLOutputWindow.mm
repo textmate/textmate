@@ -11,6 +11,7 @@ static std::multimap<oak::uuid_t, HTMLOutputWindowController*> Windows;
 
 @interface HTMLOutputWindowController ()
 {
+	OBJC_WATCH_LEAKS(HTMLOutputWindowController);
 	command::runner_ptr runner;
 }
 @property (nonatomic, retain) OakHTMLOutputView* htmlOutputView;
@@ -20,6 +21,7 @@ static std::multimap<oak::uuid_t, HTMLOutputWindowController*> Windows;
 @implementation HTMLOutputWindowController
 - (id)initWithRunner:(command::runner_ptr const&)aRunner
 {
+	D(DBF_HTMLOutputWindow, bug("\n"););
 	if(self = [super init])
 	{
 		self.window         = [[NSWindow alloc] initWithContentRect:NSMakeRect(100, 100, 100, 100) styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask) backing:NSBackingStoreBuffered defer:NO];
@@ -120,6 +122,7 @@ static std::multimap<oak::uuid_t, HTMLOutputWindowController*> Windows;
 
 - (void)dealloc
 {
+	D(DBF_HTMLOutputWindow, bug("\n"););
 	self.window.delegate = nil;
 }
 

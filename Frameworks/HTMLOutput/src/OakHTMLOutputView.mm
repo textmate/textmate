@@ -3,19 +3,20 @@
 #import "helpers/HOAutoScroll.h"
 #import "helpers/HOJSBridge.h"
 #import <OakFoundation/NSString Additions.h>
+#import <oak/debug.h>
 
 extern NSString* const kCommandRunnerURLScheme; // from HTMLOutput.h
 
 @interface OakHTMLOutputView ()
+{
+	OBJC_WATCH_LEAKS(OakHTMLOutputView);
+	std::map<std::string, std::string> environment;
+}
 @property (nonatomic, assign) BOOL runningCommand;
 @property (nonatomic, retain) HOAutoScroll* autoScrollHelper;
 @end
 
 @implementation OakHTMLOutputView
-{
-	std::map<std::string, std::string> environment;
-}
-
 - (id)initWithFrame:(NSRect)frame
 {
 	if(self = [super initWithFrame:frame])
