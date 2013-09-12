@@ -66,6 +66,11 @@
 	[[sender window] makeKeyAndOrderFront:self];
 }
 
+- (void)webViewClose:(WebView*)sender
+{
+	[sender tryToPerform:@selector(toggleHTMLOutput:) with:self];
+}
+
 // This is an undocumented WebView delegate method
 - (void)webView:(WebView*)webView addMessageToConsole:(NSDictionary*)dictionary;
 {
