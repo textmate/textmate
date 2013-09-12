@@ -66,8 +66,10 @@
 - (void)dealloc
 {
 	[self setUpdatesProgress:NO];
-	[_webView setResourceLoadDelegate:nil];
-	[_webView setFrameLoadDelegate:nil];
+	_webView.frameLoadDelegate      = nil;
+	_webView.UIDelegate             = nil;
+	_webView.resourceLoadDelegate   = nil;
+	_webView.policyDelegate         = nil;
 	[[_webView mainFrame] stopLoading];
 }
 

@@ -317,8 +317,9 @@ static NSTextField* OakCreateTextField ()
 
 - (void)dealloc
 {
-	[self.webView setFrameLoadDelegate:nil];
-	[[self.webView mainFrame] stopLoading];
+	_webView.policyDelegate    = nil;
+	_webView.frameLoadDelegate = nil;
+	[[_webView mainFrame] stopLoading];
 }
 
 - (void)showAboutWindow:(id)sender
