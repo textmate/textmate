@@ -318,6 +318,7 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 	NSUInteger selectedTab;
 	NSUInteger hiddenTab;
 	NSUInteger previousShowAsLastTab;
+	NSUInteger previousTabTitlesCount;
 
 	layout_metrics_ptr metrics;
 	std::vector<NSRect> tabRects;
@@ -636,12 +637,16 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 	// ==========
 	NSUInteger lastVisibleTab = numberOfTabs > 1 ? numberOfTabs-1 : 0;
 
+	if(previousTabTitlesCount > tabTitles.count && previousTabTitlesCount > numberOfTabs)
+		previousShowAsLastTab -= 1;
+
 	NSUInteger showAsLastTab = lastVisibleTab;
 	if(lastVisibleTab <= selectedTab)
 		showAsLastTab = selectedTab;
 	else if(lastVisibleTab < previousShowAsLastTab)
 		showAsLastTab = previousShowAsLastTab;
-	previousShowAsLastTab = showAsLastTab == lastVisibleTab ? 0 : showAsLastTab;
+	previousShowAsLastTab = showAsLastTab < lastVisibleTab ? 0 : showAsLastTab;	
+	previousTabTitlesCount = tabTitles.count;
 
 	for(NSUInteger tabIndex = 0; tabIndex < tabTitles.count; ++tabIndex)
 	{
