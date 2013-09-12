@@ -1372,10 +1372,12 @@ namespace
 
 - (NSIndexSet*)tryObtainIndexSetFrom:(id)sender
 {
-	id res = sender;
-	if([sender respondsToSelector:@selector(representedObject)])
-		res = [sender representedObject];
-	return [res isKindOfClass:[NSIndexSet class]] ? res : nil;
+	id res = [sender respondsToSelector:@selector(representedObject)] ? [sender representedObject] : sender;
+	if([res isKindOfClass:[NSIndexSet class]])
+		return res;
+	else if(!_documents.empty())
+		return [NSIndexSet indexSetWithIndex:self.selectedTabIndex];
+	return nil;
 }
 
 - (void)takeNewTabIndexFrom:(id)sender
