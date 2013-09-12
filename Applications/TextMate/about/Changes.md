@@ -1,5 +1,9 @@
 # Changes
 
+## 2013-09-13 ([v2.0-alpha.9479](https://github.com/textmate/textmate/compare/v2.0-alpha.9477...v2.0-alpha.9479))
+
+* Support text attributes with VoiceOver. See [commit for details](https://github.com/textmate/textmate/commit/21088105a8646db664f5fcfccc18f3d612931694). *[Boris Dušek]*
+
 ## 2013-09-06 ([v2.0-alpha.9477](https://github.com/textmate/textmate/compare/v2.0-alpha.9475...v2.0-alpha.9477))
 
 * Edit → Spelling → Check Spelling (⌘;) has been implemented. This will select the next misspelled word and, if the spelling panel is not showing, open a context menu with guesses, otherwise, it’ll update the spelling panel. *[Adam Strzelecki]*
