@@ -1428,7 +1428,7 @@ namespace
 	}
 }
 
-- (void)toggleSticky:(id)sender
+- (IBAction)toggleSticky:(id)sender
 {
 	if(NSIndexSet* indexSet = [self tryObtainIndexSetFrom:sender])
 	{

@@ -37,6 +37,7 @@ PUBLIC @interface DocumentController : NSObject
 - (IBAction)selectNextTab:(id)sender;
 - (IBAction)selectPreviousTab:(id)sender;
 - (IBAction)takeSelectedTabIndexFrom:(id)sender;
+- (IBAction)toggleSticky:(id)sender;
 
 - (NSPoint)positionForWindowUnderCaret;
 - (void)performBundleItem:(bundles::item_ptr const&)anItem;
@@ -50,6 +51,7 @@ PUBLIC @interface DocumentController : NSObject
 - (IBAction)performCloseWindow:(id)sender;
 - (IBAction)performCloseAllTabs:(id)sender;
 - (IBAction)performCloseOtherTabs:(id)sender;
+- (IBAction)performCloseTabsToTheRight:(id)sender;
 
 - (IBAction)saveDocument:(id)sender;
 - (IBAction)saveDocumentAs:(id)sender;
