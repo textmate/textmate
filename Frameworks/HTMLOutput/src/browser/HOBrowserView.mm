@@ -55,6 +55,11 @@
 	return self;
 }
 
+- (BOOL)needsNewWebView
+{
+	return _webViewDelegateHelper.needsNewWebView;
+}
+
 - (NSString*)projectUUID                       { return _webViewDelegateHelper.projectUUID; }
 - (void)setProjectUUID:(NSString*)aProjectUUID { _webViewDelegateHelper.projectUUID = aProjectUUID; }
 

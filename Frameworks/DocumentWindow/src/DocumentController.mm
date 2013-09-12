@@ -1723,7 +1723,7 @@ namespace
 		}
 		else
 		{
-			if(!self.htmlOutputView)
+			if(!self.htmlOutputView || self.htmlOutputView.needsNewWebView)
 				self.htmlOutputView = [[OakHTMLOutputView alloc] initWithFrame:NSZeroRect];
 			self.layoutView.htmlOutputView = self.htmlOutputView;
 		}
@@ -1767,7 +1767,7 @@ namespace
 	{
 		_runner = aRunner;
 
-		if(!self.htmlOutputWindowController || [self.htmlOutputWindowController running])
+		if(!self.htmlOutputWindowController || [self.htmlOutputWindowController running] || self.htmlOutputWindowController.needsNewWebView)
 				self.htmlOutputWindowController = [HTMLOutputWindowController HTMLOutputWindowWithRunner:_runner];
 		else	[self.htmlOutputWindowController setCommandRunner:_runner];
 	}

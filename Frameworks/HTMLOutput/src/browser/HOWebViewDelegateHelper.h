@@ -5,4 +5,5 @@
 @interface HOWebViewDelegateHelper : NSObject
 @property (nonatomic, weak) id /*<HOWebViewDelegateHelperProtocol>*/ delegate;
 @property (nonatomic, retain) NSString* projectUUID;
+@property (nonatomic) BOOL needsNewWebView;
 @end

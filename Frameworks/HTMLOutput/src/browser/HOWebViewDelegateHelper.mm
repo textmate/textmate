@@ -69,6 +69,8 @@
 - (void)webViewClose:(WebView*)sender
 {
 	[sender tryToPerform:@selector(toggleHTMLOutput:) with:self];
+	// We cannot re-use WebView objects where window.close() has been executed because of https://bugs.webkit.org/show_bug.cgi?id=121232
+	self.needsNewWebView = YES;
 }
 
 // This is an undocumented WebView delegate method

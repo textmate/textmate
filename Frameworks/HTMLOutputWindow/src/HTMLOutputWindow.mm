@@ -93,6 +93,11 @@ static std::multimap<oak::uuid_t, HTMLOutputWindowController*> Windows;
 	return runner->running();
 }
 
+- (BOOL)needsNewWebView
+{
+	return _htmlOutputView.needsNewWebView;
+}
+
 - (void)tearDown
 {
 	foreach(it, Windows.lower_bound(runner->uuid()), Windows.upper_bound(runner->uuid()))
