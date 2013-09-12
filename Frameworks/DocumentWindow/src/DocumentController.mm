@@ -2073,6 +2073,10 @@ namespace
 		[menuItem setTitle:self.window.firstResponder == self.textView ? @"Move Focus to File Browser" : @"Move Focus to Document"];
 	else if([menuItem action] == @selector(takeProjectPathFrom:))
 		[menuItem setState:[self.defaultProjectPath isEqualToString:[menuItem representedObject]] ? NSOnState : NSOffState];
+	else if([menuItem action] == @selector(performCloseOtherTabs:))
+		active = _documents.size() > 1;
+	else if([menuItem action] == @selector(performCloseTabsToTheRight:))
+		active = _selectedTabIndex + 1 < _documents.size();
 
 	SEL tabBarActions[] = { @selector(performCloseTab:), @selector(takeNewTabIndexFrom::), @selector(takeTabsToCloseFrom:), @selector(takeTabsToTearOffFrom:), @selector(toggleSticky:) };
 	if(oak::contains(std::begin(tabBarActions), std::end(tabBarActions), [menuItem action]))
