@@ -790,6 +790,19 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 		[modifiedStates addObject:@([self.dataSource tabBarView:self isEditedAtIndex:i])];
 	}
 
+	if(previousShowAsLastTab != 0 && count != tabTitles.count && previousShowAsLastTab < tabTitles.count)
+	{
+		// We use tool tip as identifer since this is tilde-abbreviated path and thus more unique than the title
+		// Ideally we should introduce a real (unique) identifier, like the document’s UUID
+		NSString* tabIdentifier = tabToolTips[previousShowAsLastTab];
+		if([tabIdentifier isEqualToString:@""])
+				previousShowAsLastTab = [toolTips indexOfObject:tabTitles[previousShowAsLastTab]];
+		else	previousShowAsLastTab = [toolTips indexOfObject:tabIdentifier];
+
+		if(previousShowAsLastTab == NSNotFound)
+			previousShowAsLastTab = 0;
+	}
+
 	[tabTitles setArray:titles];
 	[tabToolTips setArray:toolTips];
 	[tabModifiedStates setArray:modifiedStates];
