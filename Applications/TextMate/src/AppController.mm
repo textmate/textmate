@@ -201,7 +201,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 					{
 						if(write(tbz.input_fd(), buf, len) != len)
 						{
-							fprintf(stderr, "*** error wrting bytes to tar\n");
+							fprintf(stderr, "*** error writing bytes to tar\n");
 							break;
 						}
 					}
