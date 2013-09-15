@@ -137,6 +137,9 @@ namespace ng
 
 	void buffer_t::wait_for_repair ()
 	{
+		if(!grammar())
+			return;
+
 		parser.reset();
 		std::lock_guard<std::mutex> lock(grammar()->mutex());
 		while(!_dirty.empty() && !_parser_states.empty())
