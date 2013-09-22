@@ -181,7 +181,8 @@ private:
 	for(size_t i = 0; i < [stackedViews count]-1; ++i)
 		[self addConstraint:[NSLayoutConstraint constraintWithItem:stackedViews[i] attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:stackedViews[i+1] attribute:NSLayoutAttributeTop multiplier:1 constant:0]];
 
-	for(NSArray* views : { topAuxiliaryViews, bottomAuxiliaryViews })
+	NSArray* array[] = { topAuxiliaryViews, bottomAuxiliaryViews };
+	for(NSArray* views : array)
 	{
 		for(NSView* view in views)
 			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[view]|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(view)]];
