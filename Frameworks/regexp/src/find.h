@@ -27,7 +27,6 @@ namespace find
 	PUBLIC options_t& operator&= (options_t& lhs, unsigned rhs);
 
 	struct find_implementation_t;
-	typedef std::shared_ptr<find_implementation_t> find_implementation_ptr;
 
 	struct PUBLIC find_t
 	{
@@ -38,7 +37,7 @@ namespace find
 		void set_skip_last (ssize_t offset);
 
 	private:
-		find_implementation_ptr pimpl;
+		std::shared_ptr<find_implementation_t> pimpl;
 	};
 }
 

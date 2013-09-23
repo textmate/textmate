@@ -88,9 +88,7 @@ private:
 		socket_callback_t* parent;
 	};
 
-	typedef std::shared_ptr<helper_base_t> helper_ptr;
-
-	helper_ptr helper;
+	std::shared_ptr<helper_base_t> helper;
 	CFSocketRef socket;
 	CFRunLoopSourceRef run_loop_source;
 };
@@ -360,10 +358,7 @@ namespace // wrap in anonymous namespace to avoid clashing with other callbacks 
 	{
 		WATCH_LEAKS(reactivate_callback_t);
 
-		struct helper_t { helper_t () : open_documents(0) { } size_t open_documents; WATCH_LEAKS(reactivate_callback_t); };
-		typedef std::shared_ptr<helper_t> helper_ptr;
-
-		reactivate_callback_t () : helper(std::make_shared<helper_t>())
+		reactivate_callback_t () : shared_count(std::make_shared<size_t>(0))
 		{
 			D(DBF_RMateServer, bug("%p\n", this););
 			GetFrontProcess(&psn);
@@ -371,19 +366,19 @@ namespace // wrap in anonymous namespace to avoid clashing with other callbacks 
 
 		void watch_document (document::document_ptr document)
 		{
-			++helper->open_documents;
+			++*shared_count;
 			document->add_callback(new reactivate_callback_t(*this));
 		}
 
 		void close_document (document::document_ptr document)
 		{
-			D(DBF_RMateServer, bug("%zu → %zu\n", helper->open_documents, helper->open_documents - 1););
-			if(--helper->open_documents == 0)
+			D(DBF_RMateServer, bug("%zu → %zu\n", *shared_count, *shared_count - 1););
+			if(--*shared_count == 0)
 				SetFrontProcess(&psn);
 		}
 
 	private:
-		helper_ptr helper;
+		std::shared_ptr<size_t> shared_count;
 		struct ProcessSerialNumber psn;
 	};
 }
