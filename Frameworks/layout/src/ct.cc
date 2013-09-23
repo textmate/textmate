@@ -3,6 +3,7 @@
 #include <cf/cf.h>
 #include <text/utf8.h>
 #include <text/utf16.h>
+#include <crash/info.h>
 
 namespace ng
 {
@@ -97,7 +98,9 @@ namespace ct
 
 	line_t::line_t (std::string const& text, std::map<size_t, scope::scope_t> const& scopes, theme_ptr const& theme, CGColorRef textColor) : _text(text)
 	{
+		crash_reporter_info_t info(text::format("text size %zu, last scope at %zu", text.size(), scopes.empty() ? 0 : (--scopes.end())->first));
 		ASSERT(utf8::is_valid(text.begin(), text.end()));
+		ASSERT(scopes.empty() || (--scopes.end())->first <= text.size());
 
 		CFMutableAttributedStringRef toDraw = CFAttributedStringCreateMutable(kCFAllocatorDefault, 0);
 		for(auto pair = scopes.begin(); pair != scopes.end(); )
