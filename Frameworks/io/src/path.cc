@@ -729,9 +729,9 @@ namespace path
 						ssize_t size = fgetxattr(fd, mem + i, NULL, 0, 0, 0);
 						if(size > 0)
 						{
-							char value[size];
-							if(fgetxattr(fd, mem + i, value, size, 0, 0) == size)
-								res.emplace(mem + i, std::string(value, value + size));
+							std::string value(size, '\0');
+							if(fgetxattr(fd, mem + i, &value.front(), value.size(), 0, 0) == size)
+								res.emplace(mem + i, value);
 							else
 								perror(("fgetxattr(" + path + ", " + (mem+i) + ")").c_str());
 						}
