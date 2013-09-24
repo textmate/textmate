@@ -2,6 +2,7 @@
 #include "transform.h"
 #include "indent.h"
 #include <bundles/bundles.h>
+#include <command/runner.h>
 #include <text/case.h>
 #include <text/ctype.h>
 #include <text/classification.h>
@@ -376,16 +377,14 @@ namespace ng
 				__block int status = 0;
 				__block std::string output, error;
 
-				std::string scriptPath = NULL_STR;
-				std::vector<std::string> argv{ "/bin/sh", "-c", cmd };
-				if(cmd.substr(0, 2) == "#!")
-				{
-					argv = { scriptPath = path::temp("snippet_command") };
-					path::set_content(scriptPath, cmd);
-					chmod(scriptPath.c_str(), S_IRWXU);
-				}
+				std::string script = cmd;
+				command::fix_shebang(&script);
 
-				if(io::process_t process = io::spawn(argv, environment))
+				std::string scriptPath = path::temp("snippet_command");
+				path::set_content(scriptPath, script);
+				chmod(scriptPath.c_str(), S_IRWXU);
+
+				if(io::process_t process = io::spawn(std::vector<std::string>{ scriptPath }, environment))
 				{
 					close(process.in);
 
@@ -404,8 +403,7 @@ namespace ng
 					dispatch_release(group);
 				}
 
-				if(scriptPath != NULL_STR)
-					unlink(scriptPath.c_str());
+				unlink(scriptPath.c_str());
 
 				std::string const& res = WIFEXITED(status) && WEXITSTATUS(status) == 0 ? output : error;
 				if(!utf8::is_valid(res.begin(), res.end()))
