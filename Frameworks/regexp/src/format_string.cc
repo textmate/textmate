@@ -23,6 +23,7 @@ struct expand_visitor : boost::static_visitor<void>
 	size_t rank_count;
 	std::map<size_t, snippet::field_ptr> fields;
 	std::multimap<size_t, snippet::field_ptr> mirrors;
+	std::multimap<size_t, snippet::field_ptr> ambiguous;
 
 	expand_visitor (std::map<std::string, std::string> const& variables, snippet::run_command_callback_t* callback) : variables(variables), callback(callback)
 	{
@@ -213,9 +214,12 @@ struct expand_visitor : boost::static_visitor<void>
 			traverse(v.content);
 		snippet::pos_t to(res.size(), rank_count += 2);
 		auto field = std::make_shared<snippet::placeholder_t>(v.index, from, to);
-		if(v.content.empty() || fields.find(v.index) != fields.end())
-				mirrors.emplace(v.index, field);
-		else	fields.emplace(v.index, field);
+		if(fields.find(v.index) != fields.end())
+			mirrors.emplace(v.index, field);
+		else if(v.content.empty())
+			ambiguous.emplace(v.index, field);
+		else
+			fields.emplace(v.index, field);
 	}
 
 	void operator() (parser::placeholder_transform_t const& v)
@@ -293,7 +297,6 @@ namespace format_string
 		v.replace(src, ptrn, *format.nodes, repeat);
 		v.handle_case_changes();
 		return v.res;
-		
 	}
 
 	std::string expand (std::string const& format, std::map<std::string, std::string> const& variables)
@@ -336,6 +339,14 @@ namespace snippet
 		expand_visitor v(variables, callback);
 		v.traverse(parser::parse_snippet(str));
 		v.handle_case_changes();
+
+		for(auto const& pair : v.ambiguous)
+		{
+			if(v.fields.find(pair.first) == v.fields.end())
+					v.fields.insert(pair);
+			else	v.mirrors.insert(pair);
+		}
+
 		return snippet_t(v.res, v.fields, v.mirrors, variables, indentString, indent);
 	}
 
