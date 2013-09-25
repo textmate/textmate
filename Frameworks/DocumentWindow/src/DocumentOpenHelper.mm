@@ -20,7 +20,7 @@ namespace
 {
 	struct open_callback_t : document::open_callback_t
 	{
-		open_callback_t (DocumentOpenHelper* self, NSWindow* window) : _self(self), _window(window)
+		open_callback_t (document::document_ptr const& document, DocumentOpenHelper* self, NSWindow* window) : _document(document), _self(self), _window(window)
 		{
 			ASSERT(_window);
 		}
@@ -29,14 +29,13 @@ namespace
 		{
 			[_window.attachedSheet orderOut:_self];
 
-			NSAlert* alert = [NSAlert alertWithMessageText:@"Unknown Encoding" defaultButton:@"Continue" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"This file is not UTF-8 nor does it have any encoding information stored."];
-			EncodingViewController* controller = [[EncodingViewController alloc] initWithFirst:content->begin() last:content->end()];
-			[alert setAccessoryView:controller.view];
-			OakShowAlertForWindow(alert, _window, ^(NSInteger returnCode){
-				if(returnCode == NSAlertDefaultReturn)
-					context->set_charset(text::split(to_s(controller.currentEncoding), " ")[0]);
+			EncodingWindowController* controller = [[EncodingWindowController alloc] initWithFirst:content->begin() last:content->end()];
+			controller.displayName = [NSString stringWithCxxString:_document->display_name()];
+			[controller.window layoutIfNeeded];
+			OakShowSheetForWindow(controller.window, _window, ^(NSInteger returnCode){
+				if(returnCode != NSRunAbortedResponse)
+					context->set_charset(to_s(controller.encoding));
 			});
-			[[alert window] recalculateKeyViewLoop];
 		}
 
 		void select_file_type (std::string const& path, io::bytes_ptr content, file::open_context_ptr context)
@@ -75,6 +74,7 @@ namespace
 		}
 
 	private:
+		document::document_ptr _document;
 		DocumentOpenHelper* _self;
 		NSWindow* _window;
 	};
@@ -85,7 +85,7 @@ namespace
 {
 	D(DBF_DocumentController_OpenHelper, bug("%s, already open %s\n", aDocument->display_name().c_str(), BSTR(aDocument->is_open())););
 	self.callback = aCompletionHandler;
-	if(aDocument->try_open(std::make_shared<open_callback_t>(self, aWindow)))
+	if(aDocument->try_open(std::make_shared<open_callback_t>(aDocument, self, aWindow)))
 	{
 		[self didOpenDocument:aDocument];
 		aDocument->close();
