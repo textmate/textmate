@@ -70,11 +70,11 @@ namespace parse
 	{
 		WATCH_LEAKS(stack_t);
 
-		stack_t (rule_t const* rule, scope::scope_t const& scope, stack_ptr const& parent = stack_ptr()) : parent(parent), rule(rule), scope(scope), anchor(0) { }
+		stack_t (rule_t* rule, scope::scope_t const& scope, stack_ptr const& parent = stack_ptr()) : parent(parent), rule(rule), scope(scope), anchor(0) { }
 
 		stack_ptr parent;
 
-		rule_t const* rule;                 // the rule supplying patterns for current context
+		rule_t* rule;                       // the rule supplying patterns for current context
 		scope::scope_t scope;               // the scope of the current context
 
 		std::string scope_string = NULL_STR;         // expanded version of rule->scope_string

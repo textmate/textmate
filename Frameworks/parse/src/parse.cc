@@ -169,8 +169,8 @@ namespace parse
 
 	struct ranked_match_t
 	{
-		ranked_match_t (rule_t const* rule, regexp::match_t const& match, size_t rank, bool is_end_pattern = false) : rule(rule), match(match), rank(rank), is_end_pattern(is_end_pattern) { }
-		rule_t const* rule;
+		ranked_match_t (rule_t* rule, regexp::match_t const& match, size_t rank, bool is_end_pattern = false) : rule(rule), match(match), rank(rank), is_end_pattern(is_end_pattern) { }
+		rule_t* rule;
 		regexp::match_t match;
 		size_t rank;
 		bool is_end_pattern;
@@ -444,7 +444,7 @@ namespace parse
 			i = m.match.end();
 			D(DBF_Parser_Flow, bug("match %2zu-%2zu: %s\n", m.match.begin(), m.match.end(), m.rule->scope_string != NULL_STR ? m.rule->scope_string.c_str() : "(untitled)"););
 
-			rule_t const* rule = m.rule;
+			rule_t* rule = m.rule;
 			if(m.is_end_pattern)
 			{
 				if(stack->content_scope_string != NULL_STR)
