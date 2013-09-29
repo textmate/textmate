@@ -274,6 +274,7 @@ namespace parse
 
 	static void collect_injections (stack_ptr const& stack, scope::context_t const& scope, std::vector<rule_t*> const& groups, std::vector<rule_t*>& res)
 	{
+		D(DBF_Parser_Flow, bug("%s\n", to_s(scope).c_str()););
 		for(stack_ptr node = stack; node; node = node->parent)
 		{
 			for(auto const& pair : node->rule->injections)
@@ -290,6 +291,7 @@ namespace parse
 
 			for(auto const& pair : rule->injections)
 			{
+				D(DBF_Parser_Flow, bug("selector: ‘%s’ → %s\n", to_s(pair.first).c_str(), BSTR(pair.first.does_match(scope))););
 				if(pair.first.does_match(scope))
 					collect_rule(pair.second.get(), res, nullptr);
 			}
