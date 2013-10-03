@@ -215,6 +215,20 @@ namespace // PopulateMenu{Flat,Hierarchical}
 	if(_encoding && ![self.availableEncodings containsObject:_encoding])
 		[self updateAvailableEncodings];
 	[self updateMenu];
+
+	if(NSDictionary* info = [self infoForBinding:@"encoding"])
+	{
+		id controller     = info[NSObservedObjectKey];
+		NSString* keyPath = info[NSObservedKeyPathKey];
+		if(controller && controller != [NSNull null] && keyPath && (id)keyPath != [NSNull null])
+		{
+			NSString* newValue = _encoding;
+
+			NSString* oldValue = [controller valueForKeyPath:keyPath];
+			if(!oldValue || ![oldValue isEqualToString:newValue])
+				[controller setValue:newValue forKeyPath:keyPath];
+		}
+	}
 }
 
 - (void)setAvailableEncodings:(NSArray*)newEncodings
