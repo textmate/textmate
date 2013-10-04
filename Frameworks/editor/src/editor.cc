@@ -547,7 +547,9 @@ namespace ng
 					str = indent + str;
 				if(complete)
 				{
-					std::string const& rightOfCaret = buffer.substr(index, buffer.eol(line));
+					size_t const rightIndex = selections.last().max().index;
+					size_t const lastLine  = buffer.convert(rightIndex).line;
+					std::string const& rightOfCaret = buffer.substr(rightIndex, buffer.eol(lastLine));
 					if(!text::is_blank(rightOfCaret.data(), rightOfCaret.data() + rightOfCaret.size()))
 						str += '\n';
 				}
