@@ -3,6 +3,7 @@
 #import "FileTypeDialog.h"
 #import <OakAppKit/OakAppKit.h>
 #import <OakFoundation/NSString Additions.h>
+#import <encoding/encoding.h>
 #import <ns/ns.h>
 #import <text/parse.h>
 #import <oak/debug.h>
@@ -31,10 +32,28 @@ namespace
 
 			EncodingWindowController* controller = [[EncodingWindowController alloc] initWithFirst:content->begin() last:content->end()];
 			controller.displayName = [NSString stringWithCxxString:_document->display_name()];
+
+			__block encoding::classifier_t db;
+			static std::string const kEncodingFrequenciesPath = path::join(path::home(), "Library/Caches/com.macromates.TextMate/EncodingFrequencies.binary");
+			db.load(kEncodingFrequenciesPath);
+
+			std::multimap<double, std::string> probabilities;
+			for(auto const& charset : db.charsets())
+				probabilities.emplace(1 - db.probability(content->begin(), content->end(), charset), charset);
+			if(!probabilities.empty() && probabilities.begin()->first < 1)
+				controller.encoding = [NSString stringWithCxxString:probabilities.begin()->second];
+
 			[controller.window layoutIfNeeded];
 			OakShowSheetForWindow(controller.window, _window, ^(NSInteger returnCode){
 				if(returnCode != NSRunAbortedResponse)
+				{
 					context->set_charset(to_s(controller.encoding));
+					if(controller.trainClassifier)
+					{
+						db.learn(content->begin(), content->end(), to_s(controller.encoding));
+						db.save(kEncodingFrequenciesPath);
+					}
+				}
 			});
 		}
 

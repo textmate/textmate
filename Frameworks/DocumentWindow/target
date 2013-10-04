@@ -1,6 +1,6 @@
 SOURCES          = src/*.mm
 CP_Resources     = resources/*
 FLAGS           += -DREST_API='"$rest_api"'
-LINK            += command text authorization scm bundles cf Find HTMLOutputWindow io ns OakAppKit OakFileBrowser OakFilterList OakFoundation OakSystem OakTextView BundleEditor network Preferences
+LINK            += command text authorization scm bundles cf Find HTMLOutputWindow io ns OakAppKit OakFileBrowser OakFilterList OakFoundation OakSystem OakTextView BundleEditor network Preferences encoding
 EXPORT           = src/DocumentController.h
 FRAMEWORKS       = Cocoa
