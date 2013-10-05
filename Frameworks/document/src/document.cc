@@ -13,6 +13,7 @@
 #include <file/type.h>
 #include <file/path_info.h>
 #include <plist/ascii.h>
+#include <encoding/encoding.h>
 #include <selection/selection.h>
 #include <OakSystem/application.h>
 #include <crash/info.h>
@@ -1004,7 +1005,28 @@ namespace document
 			{
 				open_callback_t (document::document_ptr doc, bool async) : _document(doc), _wait(!async) { }
 
-				void select_charset (std::string const& path, io::bytes_ptr content, file::open_context_ptr context)    { context->set_charset(_document->_disk_encoding); }
+				void select_charset (std::string const& path, io::bytes_ptr content, file::open_context_ptr context)
+				{
+					if(_try_disk_encoding)
+					{
+						_try_disk_encoding = false;
+						context->set_charset(_document->_disk_encoding);
+					}
+					else
+					{
+						encoding::classifier_t db;
+						static std::string const kEncodingFrequenciesPath = path::join(path::home(), "Library/Caches/com.macromates.TextMate/EncodingFrequencies.binary");
+						db.load(kEncodingFrequenciesPath);
+
+						std::multimap<double, std::string> probabilities;
+						for(auto const& charset : db.charsets())
+							probabilities.emplace(1 - db.probability(content->begin(), content->end(), charset), charset);
+						if(!probabilities.empty() && probabilities.begin()->first < 1)
+								context->set_charset(probabilities.begin()->second);
+						else	context->set_charset("ISO-8859-1");
+					}
+				}
+
 				void select_line_feeds (std::string const& path, io::bytes_ptr content, file::open_context_ptr context) { context->set_line_feeds(_document->_disk_newlines); }
 				void select_file_type (std::string const& path, io::bytes_ptr content, file::open_context_ptr context)  { context->set_file_type(_document->_file_type); }
 				void show_error (std::string const& path, std::string const& message, oak::uuid_t const& filter)        { fprintf(stderr, "%s: %s\n", path.c_str(), message.c_str()); }
@@ -1057,6 +1079,7 @@ namespace document
 
 			private:
 				document::document_ptr _document;
+				bool _try_disk_encoding = true;
 				bool _wait;
 				cf::run_loop_t _run_loop;
 			};
