@@ -679,25 +679,18 @@ private:
 
 enum bookmark_state_t { kBookmarkNoMark, kBookmarkRegularMark, kBookmarkSearchMark };
 
-static std::string const kBookmarkType = "bookmark";
+static std::string const kBookmarkType   = "bookmark";
+static std::string const kSearchmarkType = "search";
 
 - (NSUInteger)stateForColumnWithIdentifier:(id)columnIdentifier atLine:(NSUInteger)lineNumber
 {
 	if([columnIdentifier isEqualToString:kBookmarksColumnIdentifier])
 	{
 		ng::buffer_t const& buf = document->buffer();
-		std::map<size_t, std::string> const& marks = buf.get_marks(buf.begin(lineNumber), buf.eol(lineNumber));
-		iterate(pair, marks)
-		{
-			if(pair->second == kBookmarkType)
-				return kBookmarkRegularMark;
-		}
-
-		iterate(pair, marks)
-		{
-			if(pair->second == "search")
-				return kBookmarkSearchMark;
-		}
+		if(!buf.get_marks(buf.begin(lineNumber), buf.eol(lineNumber), kBookmarkType).empty())
+			return kBookmarkRegularMark;
+		if(!buf.get_marks(buf.begin(lineNumber), buf.eol(lineNumber), kSearchmarkType).empty())
+			return kBookmarkSearchMark;
 		return kBookmarkNoMark;
 	}
 	else if([columnIdentifier isEqualToString:kFoldingsColumnIdentifier])
