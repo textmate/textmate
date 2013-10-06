@@ -213,7 +213,7 @@ static NSTextView* MyCreateTextView ()
 }
 @end
 
-@interface EncodingWindowController ()
+@interface EncodingWindowController () <NSWindowDelegate>
 {
 	OBJC_WATCH_LEAKS(EncodingWindowController);
 	char const* first;
@@ -283,6 +283,7 @@ static NSTextView* MyCreateTextView ()
 
 		[self.window.contentView addSubview:contentView];
 		self.window.defaultButtonCell = self.openButton.cell;
+		self.window.delegate = self;
 
 		[self.popUpButton   bind:@"encoding"      toObject:_objectController withKeyPath:@"content.encoding"           options:nil];
 		[self.learnCheckBox bind:NSValueBinding   toObject:_objectController withKeyPath:@"content.trainClassifier"    options:nil];
