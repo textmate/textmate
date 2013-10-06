@@ -197,7 +197,7 @@ static NSTextView* MyCreateTextView ()
 {
 	OBJC_WATCH_LEAKS(EncodingContentView);
 }
-@property (nonatomic, weak) id delegate;
+@property (nonatomic, assign) id delegate;
 @end
 
 @implementation EncodingContentView
@@ -229,7 +229,7 @@ static NSTextView* MyCreateTextView ()
 @property (nonatomic) NSButton* learnCheckBox;
 @property (nonatomic) NSButton* openButton;
 @property (nonatomic) NSButton* cancelButton;
-@property (nonatomic) NSView* contentView;
+@property (nonatomic) EncodingContentView* contentView;
 @property (nonatomic) NSMutableArray* myConstraints;
 @end
 
@@ -354,6 +354,7 @@ static NSTextView* MyCreateTextView ()
 
 - (void)cleanup
 {
+	self.contentView.delegate     = nil;
 	self.objectController.content = nil;
 }
 
