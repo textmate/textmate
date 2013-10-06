@@ -194,6 +194,9 @@ static NSTextView* MyCreateTextView ()
 }
 
 @interface EncodingContentView : NSView
+{
+	OBJC_WATCH_LEAKS(EncodingContentView);
+}
 @property (nonatomic, weak) id delegate;
 @end
 
@@ -212,6 +215,7 @@ static NSTextView* MyCreateTextView ()
 
 @interface EncodingWindowController ()
 {
+	OBJC_WATCH_LEAKS(EncodingWindowController);
 	char const* first;
 	char const* last;
 }
@@ -347,15 +351,22 @@ static NSTextView* MyCreateTextView ()
 	[self updateTextView];
 }
 
+- (void)cleanup
+{
+	self.objectController.content = nil;
+}
+
 - (IBAction)performOpenDocument:(id)sender
 {
 	[self.window orderOut:self];
 	[NSApp endSheet:self.window returnCode:NSRunStoppedResponse];
+	[self cleanup];
 }
 
 - (IBAction)performCancelOperation:(id)sender
 {
 	[self.window orderOut:self];
 	[NSApp endSheet:self.window returnCode:NSRunAbortedResponse];
+	[self cleanup];
 }
 @end
