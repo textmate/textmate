@@ -7,6 +7,7 @@
 
 @interface OakEncodingSaveOptionsViewController : NSViewController
 {
+	OBJC_WATCH_LEAKS(OakEncodingSaveOptionsViewController);
 	IBOutlet OakEncodingPopUpButton* encodingPopUpButton;
 
 	encoding::type _encodingOptions;
@@ -35,16 +36,10 @@
 	return self;
 }
 
-- (void)dealloc
-{
-	[self unbind:@"encoding"];
-}
-
 - (void)loadView
 {
 	[super loadView];
-	encodingPopUpButton.encoding = self.encoding;
-	[self bind:@"encoding" toObject:encodingPopUpButton withKeyPath:@"encoding" options:nil];
+	[encodingPopUpButton bind:@"encoding" toObject:self withKeyPath:@"encoding" options:nil];
 }
 
 - (BOOL)canUseByteOrderMark { return _encodingOptions.supports_byte_order_mark(_encodingOptions.charset()); }
