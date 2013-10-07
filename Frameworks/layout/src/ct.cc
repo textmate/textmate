@@ -3,6 +3,7 @@
 #include <cf/cf.h>
 #include <text/utf8.h>
 #include <text/utf16.h>
+#include <text/hexdump.h>
 #include <crash/info.h>
 
 namespace ng
@@ -98,7 +99,7 @@ namespace ct
 
 	line_t::line_t (std::string const& text, std::map<size_t, scope::scope_t> const& scopes, theme_ptr const& theme, CGColorRef textColor) : _text(text)
 	{
-		crash_reporter_info_t info(text::format("text size %zu, last scope at %zu", text.size(), scopes.empty() ? 0 : (--scopes.end())->first));
+		crash_reporter_info_t info(text::format("text size: %zu, is valid utf-8: %s, %zu scope(s): %zu-%zu", text.size(), BSTR(utf8::is_valid(text.begin(), text.end())), scopes.size(), scopes.empty() ? 0 : scopes.begin()->first, scopes.empty() ? 0 : (--scopes.end())->first));
 		ASSERT(utf8::is_valid(text.begin(), text.end()));
 		ASSERT(scopes.empty() || (--scopes.end())->first <= text.size());
 
@@ -109,8 +110,21 @@ namespace ct
 			size_t i = pair->first;
 			size_t j = ++pair != scopes.end() ? pair->first : text.size();
 
+			if(j < i)
+			{
+				info << text::format("bad range: %zu-%zu (at end: %s)", i, j, BSTR(pair == scopes.end()));
+				abort();
+			}
+
+			std::string const cStr = text.substr(i, j - i);
+			if(!utf8::is_valid(cStr.begin(), cStr.end()))
+			{
+				info << text::format("range %zu-%zu is not UTF-8:\n%s", i, j, text::to_hex(cStr.begin(), cStr.end()).c_str());
+				abort();
+			}
+
 			CFMutableAttributedStringRef str = CFAttributedStringCreateMutable(kCFAllocatorDefault, 0);
-			CFAttributedStringReplaceString(str, CFRangeMake(0, 0), cf::wrap(text.substr(i, j - i)));
+			CFAttributedStringReplaceString(str, CFRangeMake(0, 0), cf::wrap(cStr));
 			CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTFontAttributeName, styles.font());
 			CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTForegroundColorAttributeName, textColor ?: styles.foreground());
 			CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTLigatureAttributeName, cf::wrap(0));
