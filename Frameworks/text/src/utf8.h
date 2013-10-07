@@ -198,6 +198,45 @@ namespace utf8
 		return (it + multibyte<T>::length(*it) > last) ? it : last;
 	}
 
+	template <typename _Iter>
+	_Iter remove_malformed (_Iter it, _Iter const& last)
+	{
+		auto dst = it;
+		for(; it != last; ++it)
+		{
+			bool valid = true;
+			size_t len = 0;
+
+			char ch = *it;
+			if((ch & 0x80) == 0x00)
+				len = 0;
+			else if((ch & 0xE0) == 0xC0)
+				len = 1;
+			else if((ch & 0xF0) == 0xE0)
+				len = 2;
+			else if((ch & 0xF8) == 0xF0)
+				len = 3;
+			else if((ch & 0xFC) == 0xF8)
+				len = 4;
+			else if((ch & 0xFE) == 0xFC)
+				len = 5;
+			else
+				valid = false;
+
+			auto bt = it;
+			for(size_t i = 0; i < len && valid; ++i)
+				valid = ++it != last && (*it & 0xC0) == 0x80;
+
+			if(!valid)
+				it = bt;
+			else if(dst == bt)
+				std::advance(dst, len+1);
+			else
+				dst = std::copy_n(bt, len+1, dst);
+		}
+		return dst;
+	}
+
 } /* utf8 */
 
 namespace diacritics

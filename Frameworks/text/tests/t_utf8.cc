@@ -69,3 +69,19 @@ void test_to_s ()
 		str += utf8::to_s(*ch);
 	OAK_ASSERT_EQ(str, "“Æblegrød…” — 𠻵");
 }
+
+static std::string sanitize (std::string str)
+{
+	str.erase(utf8::remove_malformed(str.begin(), str.end()), str.end());
+	return str;
+}
+
+void test_sanitize ()
+{
+	OAK_ASSERT_EQ("Æblegrød", sanitize("Æblegrød"));
+	OAK_ASSERT_EQ("Æblegrød", sanitize("Æb\xFFlegrød"));
+	OAK_ASSERT_EQ("Æblegrød", sanitize("Æb\xC0legrød"));
+	OAK_ASSERT_EQ("Æblegrød", sanitize("Æb\xC0\xFElegrød"));
+	OAK_ASSERT_EQ("Æblegrød", sanitize("Æb\xFE\xC0legrød"));
+	OAK_ASSERT_EQ("Æblegrød", sanitize("Æblegrød\xFE"));
+}
