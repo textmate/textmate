@@ -105,7 +105,8 @@ namespace ng
 				{
 					for(auto line : text::tokenize(delegate->result.begin(), delegate->result.end(), '\n'))
 					{
-						if(!line.empty() && utf8::is_valid(line.begin(), line.end()))
+						line.erase(utf8::remove_malformed(line.begin(), line.end()), line.end());
+						if(!line.empty())
 							commandResult.push_back(line);
 					}
 				}
