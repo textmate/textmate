@@ -474,6 +474,7 @@ namespace ng
 		std::string str                            = entry->content();
 		std::map<std::string, std::string> options = entry->options();
 		std::replace(str.begin(), str.end(), '\r', '\n');
+		str.erase(utf8::remove_malformed(str.begin(), str.end()), str.end());
 
 		std::string const& indent = options["indent"];
 		bool const complete       = options["complete"] == "1";
