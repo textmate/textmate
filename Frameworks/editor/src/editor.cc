@@ -47,6 +47,12 @@ namespace ng
 		return editor->second;
 	}
 
+	std::string sanitized_utf8 (std::string str)
+	{
+		str.erase(utf8::remove_malformed(str.begin(), str.end()), str.end());
+		return str;
+	}
+
 	static find::options_t convert (std::map<std::string, std::string> const& options)
 	{
 		static struct { std::string key; find::options_t flag; } const map[] =
@@ -406,9 +412,7 @@ namespace ng
 				unlink(scriptPath.c_str());
 
 				std::string const& res = WIFEXITED(status) && WEXITSTATUS(status) == 0 ? output : error;
-				if(!utf8::is_valid(res.begin(), res.end()))
-					return text::to_hex(res.begin(), res.end());
-				return res;
+				return utf8::is_valid(res.begin(), res.end()) ? res : sanitized_utf8(res);
 			}
 
 		} callback;
@@ -1303,7 +1307,7 @@ namespace ng
 
 	bool editor_t::handle_result (std::string const& uncheckedOut, output::type placement, output_format::type format, output_caret::type outputCaret, text::range_t input_range, std::map<std::string, std::string> environment)
 	{
-		std::string const& out = utf8::is_valid(uncheckedOut.begin(), uncheckedOut.end()) ? uncheckedOut : text::to_hex(uncheckedOut.begin(), uncheckedOut.end());
+		std::string const& out = utf8::is_valid(uncheckedOut.begin(), uncheckedOut.end()) ? uncheckedOut : sanitized_utf8(uncheckedOut);
 
 		range_t range;
 		switch(placement)
