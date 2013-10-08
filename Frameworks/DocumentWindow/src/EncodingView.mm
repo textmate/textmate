@@ -78,6 +78,12 @@ size_t newline_size (_InputIter first, _InputIter const& last)
 	return 0;
 }
 
+static void append (NSMutableAttributedString* dst, char const* first, char const* last, NSDictionary* styles)
+{
+	NSString* str = [NSString stringWithUTF8String:first length:last - first] ?: @"\uFFFD";
+	[dst appendAttributedString:[[NSAttributedString alloc] initWithString:str attributes:styles]];
+}
+
 static NSAttributedString* convert_and_highlight (char const* first, char const* last, std::string const& encodeFrom = "UTF-8", std::string const& encodeTo = "UTF-8", bool* success = nullptr)
 {
 	std::set<ptrdiff_t> offsets;
@@ -153,21 +159,21 @@ static NSAttributedString* convert_and_highlight (char const* first, char const*
 					continue;
 				}
 
-				[output appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithUTF8String:dst.data() + bol length:*offset - bol] attributes:lineHighlightStyle]];
+				append(output, dst.data() + bol, dst.data() + *offset, lineHighlightStyle);
 
 				bol = *offset;
 				while(bol != dst.size() && dst[bol] > 0x7F)
 					++bol;
 
-				[output appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithUTF8String:dst.data() + *offset length:bol - *offset] attributes:characterHighlightStyle]];
+				append(output, dst.data() + *offset, dst.data() + bol, characterHighlightStyle);
 
 				++offset;
 			}
-			[output appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithUTF8String:dst.data() + bol length:eol + crlf - bol] attributes:lineHighlightStyle]];
+			append(output, dst.data() + bol, dst.data() + eol + crlf, lineHighlightStyle);
 		}
 		else
 		{
-			[output appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithUTF8String:dst.data() + bol length:eol + crlf - bol] attributes:regularStyle]];
+			append(output, dst.data() + bol, dst.data() + eol + crlf, regularStyle);
 		}
 
 		bol = eol + crlf;
