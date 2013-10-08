@@ -1,5 +1,5 @@
 SOURCES      = src/*.cc
 TEST_SOURCES = tests/*.cc
-EXPORT       = src/{bytes,open,save,status,encoding,type,path_info}.h
-LINK        += io authorization plist scm settings text bundles command
+EXPORT       = src/{bytes,open,save,status,encoding,type,path_info,reader}.h
+LINK        += io authorization plist scm settings text bundles command encoding
 LIBS         = iconv
