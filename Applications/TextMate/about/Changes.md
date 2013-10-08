@@ -1,5 +1,9 @@
 # Changes
 
+## 2013-10-08 ([v2.0-alpha.9487](https://github.com/textmate/textmate/compare/v2.0-alpha.9479...v2.0-alpha.9487))
+
+* Add `invisiblesMap` option to the `.tm_properties` file. This can be set to a string which is used to control which glyphs are used for invisible characters. Add either `\n`, `\t`, or a space to the string, followed by the glyph that should be used to render the character, or prefix it with `~` to disable rendering of that character. For example to disable rendering of spaces and render tabs as `┊` add this to `.tm_properties`: `invisiblesMap = "~ \t┊"`. *[Steven Clukey]*
+
 ## 2013-09-13 ([v2.0-alpha.9479](https://github.com/textmate/textmate/compare/v2.0-alpha.9477...v2.0-alpha.9479))
 
 * Support text attributes with VoiceOver. See [commit for details](https://github.com/textmate/textmate/commit/21088105a8646db664f5fcfccc18f3d612931694). *[Boris Dušek]*
