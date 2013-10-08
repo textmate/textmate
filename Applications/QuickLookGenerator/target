@@ -2,7 +2,7 @@ TARGET_NAME       = TextMateQL
 SOURCES           = src/*.{c,mm}
 CP_Resources      = resources/*
 FRAMEWORKS        = CoreFoundation QuickLook
-LINK             += layout buffer bundles file ns OakAppKit OakFoundation
+LINK             += layout buffer bundles file cf ns OakAppKit OakFoundation
 
 LN_FLAGS         -= -Wl,-dead_strip_dylibs
 LN_FLAGS         += -bundle
