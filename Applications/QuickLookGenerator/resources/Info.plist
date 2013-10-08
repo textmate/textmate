@@ -54,8 +54,6 @@
 				<string>com.microsoft.c-sharp</string>
 				<string>org.coffeescript.coffeescript</string>
 				<string>org.contextfreeart.contextfree</string>
-				<string>public.comma-separated-values-text</string>
-				<string>public.tab-separated-values-text</string>
 				<string>com.macromates.textmate.cgi-script</string>
 				<string>com.macromates.textmate.config-file</string>
 				<string>org.w3.css</string>
@@ -72,9 +70,7 @@
 				<string>public.c-plus-plus-header</string>
 				<string>com.macromates.textmate.gtd</string>
 				<string>org.haskell.haskell</string>
-				<string>public.html</string>
 				<string>com.macromates.textmate.include-file</string>
-				<string>com.apple.ical.ics</string>
 				<string>com.microsoft.ini</string>
 				<string>org.iolanguage.io</string>
 				<string>com.sun.java-source</string>
