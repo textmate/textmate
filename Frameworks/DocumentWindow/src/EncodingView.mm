@@ -148,7 +148,10 @@ static NSAttributedString* convert_and_highlight (char const* first, char const*
 			while(offset != decodedOffsets.end() && *offset < eol)
 			{
 				if(*offset < bol)
+				{
+					++offset;
 					continue;
+				}
 
 				[output appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithUTF8String:dst.data() + bol length:*offset - bol] attributes:lineHighlightStyle]];
 
