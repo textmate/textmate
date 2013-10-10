@@ -116,14 +116,12 @@ static bool is_installed (oak::uuid_t const& uuid)
 		}
 	}
 
-	if(recommended.empty())
+	iterate(info, all)
 	{
-		iterate(info, all)
-		{
-			if(info->scope == "text.plain")
-				recommended.insert(*info);
-		}
+		if(info->scope == "text.plain")
+			recommended.insert(*info);
 	}
+	
 
 	self.recommendedGrammars = wrap(recommended);
 	self.installedGrammars   = wrap(installed);
