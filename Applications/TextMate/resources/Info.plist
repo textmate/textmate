@@ -244,7 +244,7 @@
 		{	LSItemContentTypes   = ( "com.apple.log" );
 			CFBundleTypeRole     = Editor;
 			LSHandlerRank        = Alternate;
-			CFBundleTypeIconFile = "Log";
+			CFBundleTypeIconFile = "Blank";
 		},
 		{	LSItemContentTypes   = ( "com.macromates.textmate.logo" );
 			CFBundleTypeRole     = Editor;
@@ -985,7 +985,7 @@
 				public.filename-extension = ( log );
 			};
 			UTTypeConformsTo   = ( "public.plain-text" );
-			UTTypeIconFile     = "Log";
+			UTTypeIconFile     = "Blank";
 			UTTypeDescription  = "Log File";
 		},
 		{
