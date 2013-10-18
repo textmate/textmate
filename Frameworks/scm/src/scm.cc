@@ -259,7 +259,20 @@ namespace scm
 
 	static bool scm_enabled_for_path (std::string const& path)
 	{
-		return path::is_absolute(path) && path != "/" && path != path::home() && path::is_local(path) && settings_for_path(NULL_STR, "", path).get(kSettingsSCMStatusKey, true);
+		if(!path::is_absolute(path))
+			return false;
+
+		settings_t settings = settings_for_path(NULL_STR, "", path);
+
+		std::string s = settings.get(kSettingsSCMStatusKey, "localDisk");
+		if(s == "everyDisk")  return true;  // Don't apply logic, just trust the setting.
+		if(s == "systemDisk") return path != "/" && path != path::home() && path::device(path) == path::device("/");
+
+		// Default to localDisk, because traversal can take too long on networked volumes.
+		if(s == "localDisk" || settings.get(kSettingsSCMStatusKey, true))
+			return path != "/" && path != path::home() && path::is_local(path);
+
+		return false;
 	}
 
 	static shared_info_ptr find_shared_info_for (std::string const& path)
