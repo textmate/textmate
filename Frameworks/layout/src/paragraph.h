@@ -56,7 +56,7 @@ namespace ng
 		bool structural_integrity () const { return true; }
 
 	private:
-		enum node_type_t { kNodeTypeText, kNodeTypeSpace, kNodeTypeTab, kNodeTypeUnprintable, kNodeTypeFolding, kNodeTypeSoftBreak, kNodeTypeNewline };
+		enum node_type_t { kNodeTypeText, kNodeTypeTab, kNodeTypeUnprintable, kNodeTypeFolding, kNodeTypeSoftBreak, kNodeTypeNewline };
 
 		struct node_t
 		{
@@ -89,7 +89,6 @@ namespace ng
 
 		void insert_text (size_t i, size_t len);
 		void insert_tab (size_t i);
-		void insert_space (size_t i);
 		void insert_unprintable (size_t i, size_t len);
 		void insert_newline (size_t i, size_t len);
 

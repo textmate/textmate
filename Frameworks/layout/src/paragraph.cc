@@ -106,7 +106,6 @@ namespace ng
 		switch(_type)
 		{
 			case kNodeTypeText:
-			case kNodeTypeSpace:
 			{
 				_line = std::make_shared<ct::line_t>(buffer.substr(bufferOffset, bufferOffset + _length), buffer.scopes(bufferOffset, bufferOffset + _length), theme, nullptr);
 			}
@@ -191,7 +190,7 @@ namespace ng
 		if(_line)
 			_line->draw_foreground(CGPointMake(anchor.x, anchor.y + baseline), context, isFlipped, misspelled);
 
-		if(invisibles.enabled || (_type != kNodeTypeTab && _type != kNodeTypeNewline && _type != kNodeTypeSpace))
+		if(invisibles.enabled || (_type != kNodeTypeTab && _type != kNodeTypeNewline))
 		{
 			std::string str = NULL_STR;
 			scope::scope_t scope = buffer.scope(bufferOffset).right;
@@ -200,10 +199,6 @@ namespace ng
 				case kNodeTypeTab:
 					str = invisibles.tab;
 					scope.push_scope("deco.invisible.tab");
-				break;
-				case kNodeTypeSpace:
-					str = invisibles.space;
-					scope.push_scope("deco.invisible.space");
 				break;
 				case kNodeTypeNewline:
 					str = invisibles.newline;
@@ -253,15 +248,13 @@ namespace ng
 		size_t from = 0, i = 0;
 		citerate(ch, diacritics::make_range(str.data(), str.data() + str.size()))
 		{
-			if(*ch == ' ' || *ch == '\t' || *ch == '\n' || representation_for(*ch) != NULL_STR)
+			if(*ch == '\t' || *ch == '\n' || representation_for(*ch) != NULL_STR)
 			{
 				if(from != i)
 					insert_text(pos - bufferOffset + from, i - from);
 
 				if(*ch == '\t')
 					insert_tab(pos - bufferOffset + i);
-				else if(*ch == ' ')
-					insert_space(pos - bufferOffset + i);
 				else if(*ch == '\n')
 					insert_newline(pos - bufferOffset + i, ch.length());
 				else
@@ -469,11 +462,6 @@ namespace ng
 	void paragraph_t::insert_tab (size_t i)
 	{
 		_nodes.insert(iterator_at(i), node_t(kNodeTypeTab, 1, 10));
-	}
-
-	void paragraph_t::insert_space (size_t i)
-	{
-		_nodes.insert(iterator_at(i), node_t(kNodeTypeSpace, 1));
 	}
 
 	void paragraph_t::insert_unprintable (size_t i, size_t len)
