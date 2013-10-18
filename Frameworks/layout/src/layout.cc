@@ -100,7 +100,7 @@ namespace ng
 
 	void layout_t::set_character_mapping (std::string const& invisibles)
 	{
-		enum state_t { kWaiting, kExclude, kSpace, kTab, kNewline } state = kWaiting;
+		enum state_t { kWaiting, kExclude, kSpace, kTab, kNewline, kEOF } state = kWaiting;
 		for(auto ch : diacritics::make_range(invisibles.data(), invisibles.data() + invisibles.size()))
 		{
 			if(state == kWaiting)
@@ -111,6 +111,7 @@ namespace ng
 					case ' ':  state = kSpace;   break;
 					case '\t': state = kTab;     break;
 					case '\n': state = kNewline; break;
+					case 'D':  state = kEOF;     break;
 				}
 			}
 			else
@@ -124,6 +125,7 @@ namespace ng
 							case ' ':  _invisibles.space   = ""; break;
 							case '\t': _invisibles.tab     = ""; break;
 							case '\n': _invisibles.newline = ""; break;
+							case 'D':  _invisibles.eof     = ""; break;
 						}
 					}
 					break;
@@ -131,6 +133,7 @@ namespace ng
 					case kSpace:   _invisibles.space   = utf8::to_s(ch); break;
 					case kTab:     _invisibles.tab     = utf8::to_s(ch); break;
 					case kNewline: _invisibles.newline = utf8::to_s(ch); break;
+					case kEOF:     _invisibles.eof     = utf8::to_s(ch); break;
 				}
 				state = kWaiting;
 			}
@@ -416,6 +419,8 @@ namespace ng
 		rowIter->key._length = rowIter->value.length();
 		rowIter->key._width  = rowIter->value.width();
 		rowIter->key._height = rowIter->value.height(*_metrics);
+		rowIter->value.isFirst = rowIter == _rows.begin();
+		rowIter->value.isLast  = rowIter == --_rows.end();
 
 		_rows.update_key(rowIter);
 		return oldHeight != rowIter->key._height;

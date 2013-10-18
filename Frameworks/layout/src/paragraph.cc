@@ -180,7 +180,7 @@ namespace ng
 			if(!CFEqual(backgroundColor, styles.background()))
 			{
 				CGFloat x1 = round(anchor.x);
-				CGFloat x2 = round(_type == kNodeTypeSoftBreak || _type == kNodeTypeNewline ? CGRectGetMaxX(visibleRect) : anchor.x + _width);
+				CGFloat x2 = round(_type == kNodeTypeSoftBreak || _type == kNodeTypeNewline || _type == kNodeTypeEOF ? CGRectGetMaxX(visibleRect) : anchor.x + _width);
 				render::fill_rect(context, styles.background(), CGRectMake(x1, anchor.y, x2 - x1, lineHeight));
 			}
 		}
@@ -191,7 +191,7 @@ namespace ng
 		if(_line)
 			_line->draw_foreground(CGPointMake(anchor.x, anchor.y + baseline), context, isFlipped, misspelled);
 
-		if(invisibles.enabled || (_type != kNodeTypeTab && _type != kNodeTypeNewline && _type != kNodeTypeSpace))
+		if(invisibles.enabled || (_type != kNodeTypeTab && _type != kNodeTypeNewline && _type != kNodeTypeSpace && _type != kNodeTypeEOF))
 		{
 			std::string str = NULL_STR;
 			scope::scope_t scope = buffer.scope(bufferOffset).right;
@@ -208,6 +208,10 @@ namespace ng
 				case kNodeTypeNewline:
 					str = invisibles.newline;
 					scope.push_scope("deco.invisible.newline");
+				break;
+				case kNodeTypeEOF:
+					str = invisibles.eof;
+					scope.push_scope("deco.invisible.eof");
 				break;
 				case kNodeTypeFolding:
 					scope.push_scope("deco.folding");
@@ -560,7 +564,7 @@ namespace ng
 							res -= buffer[res-1].size();
 						return res;
 					}
-					else if(node->type() == kNodeTypeNewline)
+					else if(node->type() == kNodeTypeNewline || node->type() == kNodeTypeEOF)
 					{
 						size_t carry = point.x > anchor.x + x ? (size_t)floor((point.x - (anchor.x + x)) / metrics.column_width()) : 0;
 						return ng::index_t(bufferOffset + offset, carry);
@@ -659,6 +663,8 @@ namespace ng
 				return i - buffer[i-1].size();
 			if(index <= i && node->type() == kNodeTypeNewline)
 				return i;
+			if(index <= i && node->type() == kNodeTypeEOF)
+				return i;
 			i += node->length();
 		}
 		return i;
@@ -748,6 +754,8 @@ namespace ng
 				x += node->width();
 				offset += node->length();
 			}
+
+			if(isLast && i+1 == lines.size()) node_t(kNodeTypeEOF, 0).draw_foreground(theme, context, isFlipped, visibleRect, invisibles, buffer, offset, std::vector< std::pair<size_t, size_t> >(), CGPointMake(anchor.x + x, anchor.y + lines[i].y), lines[i].baseline);
 		}
 	}
 
