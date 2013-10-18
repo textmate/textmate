@@ -65,6 +65,8 @@ namespace path
 	PUBLIC bool is_directory (std::string const& path);
 	PUBLIC bool is_executable (std::string const& path);
 	PUBLIC bool is_local (std::string const& path);
+	PUBLIC bool is_from_volume (std::string const& path, std::string const& volume); // Can't be true if 'volume' isn't the path of a volume.
+	PUBLIC bool is_same_volume (std::string const& path1, std::string const& path2); // True iff paths are on the same volume.
 	PUBLIC bool is_trashed (std::string const& path);
 
 	PUBLIC std::string for_fd (int fd);

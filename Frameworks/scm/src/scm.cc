@@ -259,7 +259,26 @@ namespace scm
 
 	static bool scm_enabled_for_path (std::string const& path)
 	{
-		return path::is_absolute(path) && path != "/" && path != path::home() && path::is_local(path) && settings_for_path(NULL_STR, "", path).get(kSettingsSCMStatusKey, true);
+		if(!path::is_absolute(path))
+			return false;
+
+		settings_t settings = settings_for_path(NULL_STR, "", path);
+
+		// Accept "0" and "false" as disabling scmStatus; "1" or "true" will be the default local-only behavior.
+		if(!settings.get(kSettingsSCMStatusKey, true))
+			return false;
+
+		std::string s = settings.get(kSettingsSCMStatusKey, std::string());
+		if(s != "")
+		{
+			if(s == "enable")  return true;  // Don't apply logic, just trust the glob.
+			if(s == "disable") return false;
+			if(s == "local")   return path != "/" && path != path::home() && path::is_local(path);
+			if(s == "rootvol") return path != "/" && path != path::home() && path::is_from_volume(path, "/");
+		}
+
+		// Default to local only, because traversal can take too long on networked volumes.
+		return path != "/" && path != path::home() && path::is_local(path);
 	}
 
 	static shared_info_ptr find_shared_info_for (std::string const& path)
