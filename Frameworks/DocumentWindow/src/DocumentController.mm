@@ -2024,7 +2024,7 @@ namespace
 	int i = 0;
 	for(auto document : _documents)
 	{
-		NSMenuItem* item = [aMenu addItemWithTitle:[NSString stringWithCxxString:document->display_name()] action:@selector(takeSelectedTabIndexFrom:) keyEquivalent:i < 10 ? [NSString stringWithFormat:@"%c", '0' + ((i+1) % 10)] : @""];
+		NSMenuItem* item = [aMenu addItemWithTitle:[NSString stringWithCxxString:document->display_name()] action:@selector(takeSelectedTabIndexFrom:) keyEquivalent:i < 9 ? [NSString stringWithFormat:@"%c", '0' + ((i+1) % 10)] : @""];
 		item.tag     = i;
 		item.toolTip = [[NSString stringWithCxxString:document->path()] stringByAbbreviatingWithTildeInPath];
 		item.image   = [OakFileIconImage fileIconImageWithPath:[NSString stringWithCxxString:document->path()] isModified:document->is_modified()];
@@ -2036,7 +2036,17 @@ namespace
 	}
 
 	if(i == 0)
+	{
 		[aMenu addItemWithTitle:@"No Tabs Open" action:@selector(nop:) keyEquivalent:@""];
+	}
+	else
+	{
+		[aMenu addItem:[NSMenuItem separatorItem]];
+
+		NSMenuItem* item = [aMenu addItemWithTitle:@"Last Tab" action:@selector(takeSelectedTabIndexFrom:) keyEquivalent:@"0"];
+		item.tag     = _documents.size()-1;
+		item.toolTip = [NSString stringWithCxxString:_documents.back()->display_name()];
+	}
 }
 
 // ====================
