@@ -1346,9 +1346,29 @@ namespace ng
 
 			case output_format::text:
 			{
-				if(range)
-					_selections = range;
-				insert(out, outputCaret == output_caret::select_output);
+				size_t bol = 0, eol = out.find('\n');
+				if(placement == output::replace_input && range.columnar && eol != std::string::npos)
+				{
+					std::multimap<range_t, std::string> replacements;
+					for(auto const& r : dissect_columnar(_buffer, range))
+					{
+						replacements.emplace(r, out.substr(bol == std::string::npos ? out.size() : bol, eol == std::string::npos ? eol : eol - bol));
+						bol = eol == std::string::npos ? eol : eol + 1;
+						eol = bol == std::string::npos ? bol : out.find('\n', bol);
+					}
+
+					_selections = replace_helper(_buffer, _snippets, replacements);
+					if(outputCaret != output_caret::select_output)
+						_selections = ng::move(_buffer, _selections, kSelectionMoveToEndOfSelection);
+				}
+				else
+				{
+					if(range)
+						_selections = range;
+
+					insert(out, outputCaret == output_caret::select_output);
+				}
+
 				if(range && outputCaret == output_caret::interpolate_by_char)
 				{
 					offset = utf8::find_safe_end(out.begin(), out.begin() + std::min(offset, out.size())) - out.begin();
