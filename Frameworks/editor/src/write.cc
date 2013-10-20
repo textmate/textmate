@@ -14,7 +14,7 @@ namespace ng
 		return len + caret.carry;
 	}
 
-	text::range_t write_unit_to_fd (buffer_t const& buffer, range_t const& range, size_t tabSize, int fd, input::type unit, input::type fallbackUnit, input_format::type format, scope::selector_t const& scopeSelector, std::map<std::string, std::string>& variables, bool* inputWasSelection) // TODO Move write_unit_to_fd to command framework.
+	ng::range_t write_unit_to_fd (buffer_t const& buffer, range_t const& range, size_t tabSize, int fd, input::type unit, input::type fallbackUnit, input_format::type format, scope::selector_t const& scopeSelector, std::map<std::string, std::string>& variables, bool* inputWasSelection) // TODO Move write_unit_to_fd to command framework.
 	{
 		input::type actualUnit = unit == input::selection && range.empty() ? fallbackUnit : unit;
 		*inputWasSelection = actualUnit == input::selection;
@@ -60,7 +60,7 @@ namespace ng
 			variables.emplace("TM_INPUT_START_LINE_INDEX", std::to_string(pos.column));
 			variables.emplace("TM_INPUT_START_COLUMN",     std::to_string(count_columns(buffer, r.min(), tabSize) + 1));
 		}
-		return text::range_t(buffer.convert(r.min().index), buffer.convert(r.max().index));
+		return r;
 	}
 
 } /* ng */

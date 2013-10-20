@@ -25,10 +25,10 @@ struct delegate_t : command::delegate_t
 
 	delegate_t () : out(""), err(""), html(""), rc(0), placement(output::discard) { }
 
-	text::range_t write_unit_to_fd (int fd, input::type unit, input::type fallbackUnit, input_format::type format, scope::selector_t const& scopeSelector, std::map<std::string, std::string>& variables, bool* inputWasSelection)
+	ng::range_t write_unit_to_fd (int fd, input::type unit, input::type fallbackUnit, input_format::type format, scope::selector_t const& scopeSelector, std::map<std::string, std::string>& variables, bool* inputWasSelection)
 	{
 		close(fd);
-		return text::range_t::undefined;
+		return ng::range_t();
 	}
 
 	bool accept_html_data (command::runner_ptr runner, char const* data, size_t len)
@@ -36,7 +36,7 @@ struct delegate_t : command::delegate_t
 		return html.insert(html.end(), data, data + len), true;
 	}
 
-	bool accept_result (std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, text::range_t inputRange, std::map<std::string, std::string> const& environment)
+	bool accept_result (std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, ng::range_t inputRange, std::map<std::string, std::string> const& environment)
 	{
 		this->out       = out;
 		this->placement = placement;

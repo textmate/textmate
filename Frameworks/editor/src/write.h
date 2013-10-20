@@ -7,7 +7,7 @@
 
 namespace ng
 {
-	PUBLIC text::range_t write_unit_to_fd (buffer_t const& buffer, range_t const& ranges, size_t tabSize, int fd, input::type unit, input::type fallbackUnit, input_format::type format, scope::selector_t const& scopeSelector, std::map<std::string, std::string>& variables, bool* inputWasSelection);
+	PUBLIC ng::range_t write_unit_to_fd (buffer_t const& buffer, range_t const& ranges, size_t tabSize, int fd, input::type unit, input::type fallbackUnit, input_format::type format, scope::selector_t const& scopeSelector, std::map<std::string, std::string>& variables, bool* inputWasSelection);
 
 } /* ng */
 

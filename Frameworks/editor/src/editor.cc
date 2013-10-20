@@ -1306,18 +1306,18 @@ namespace ng
 		_selections = this->replace(replacements, true);
 	}
 
-	bool editor_t::handle_result (std::string const& uncheckedOut, output::type placement, output_format::type format, output_caret::type outputCaret, text::range_t input_range, std::map<std::string, std::string> environment)
+	bool editor_t::handle_result (std::string const& uncheckedOut, output::type placement, output_format::type format, output_caret::type outputCaret, ng::range_t input_range, std::map<std::string, std::string> environment)
 	{
 		std::string const& out = utf8::is_valid(uncheckedOut.begin(), uncheckedOut.end()) ? uncheckedOut : sanitized_utf8(uncheckedOut);
 
 		range_t range;
 		switch(placement)
 		{
-			case output::replace_input:     range = range_t(_buffer.convert(input_range.min()), _buffer.convert(input_range.max())); break;
-			case output::replace_document:  range = range_t(0, _buffer.size());                  break;
-			case output::at_caret:          range = _selections.last().last;                    break;
-			case output::after_input:       range = range_t(_buffer.convert(input_range.max())); break;
-			case output::replace_selection: range = _selections.last();                              break;
+			case output::replace_input:     range = input_range;                break;
+			case output::replace_document:  range = range_t(0, _buffer.size()); break;
+			case output::at_caret:          range = _selections.last().last;    break;
+			case output::after_input:       range = input_range.max();          break;
+			case output::replace_selection: range = _selections.last();         break;
 		}
 
 		size_t caret = _selections.last().last.index;
