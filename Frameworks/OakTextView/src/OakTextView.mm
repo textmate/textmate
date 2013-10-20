@@ -16,6 +16,7 @@
 #import <OakFoundation/OakTimer.h>
 #import <OakSystem/application.h>
 #import <crash/info.h>
+#import <buffer/indexed_map.h>
 #import <BundleMenu/BundleMenu.h>
 #import <BundlesManager/BundlesManager.h>
 #import <bundles/bundles.h>
@@ -53,6 +54,171 @@ NSString* const kUserDefaultsDisableTypingPairsKey = @"disableTypingPairs";
 NSString* const kUserDefaultsScrollPastEndKey      = @"scrollPastEnd";
 
 struct buffer_refresh_callback_t;
+
+@interface OakAccessibleLink : NSObject
+- (id)initWithTextView:(OakTextView*)textView range:(ng::range_t)range title:(NSString*)title URL:(NSString*)URL frame:(NSRect)frame;
+@property (nonatomic, weak) OakTextView* textView;
+@property (nonatomic) ng::range_t range;
+@property (nonatomic) NSString* title;
+@property (nonatomic) NSString* URL;
+@property (nonatomic) NSRect frame;
+@end
+
+@implementation OakAccessibleLink
+- (id)initWithTextView:(OakTextView*)textView range:(ng::range_t)range title:(NSString*)title URL:(NSString*)URL frame:(NSRect)frame
+{
+	if((self = [super init]))
+	{
+		_textView = textView;
+		_range = range;
+		_title = title;
+		_URL = URL;
+		_frame = frame;
+	}
+	return self;
+}
+
+- (NSString*)description
+{
+	return [NSString stringWithFormat:@"[%@](%@), range = %@, frame = %@", self.title, self.URL, [NSString stringWithCxxString:to_s(self.range)], NSStringFromRect(self.frame)];
+}
+
+- (BOOL)isEqual:(id)object
+{
+	if([object isKindOfClass:[OakAccessibleLink class]])
+	{
+		OakAccessibleLink* link = (OakAccessibleLink*)object;
+		return self.range == link.range && [self.textView isEqual:link.textView];
+	}
+	return NO;
+}
+
+- (NSUInteger)hash
+{
+	return [self.textView hash] + _range.min().index + _range.max().index;
+}
+
+- (BOOL)accessibilityIsIgnored
+{
+	return NO;
+}
+
+- (NSArray*)accessibilityAttributeNames
+{
+	static NSArray* attributes = nil;
+	if(!attributes)
+	{
+		attributes = @[
+			NSAccessibilityRoleAttribute,
+			NSAccessibilityRoleDescriptionAttribute,
+			NSAccessibilitySubroleAttribute,
+			NSAccessibilityParentAttribute,
+			NSAccessibilityWindowAttribute,
+			NSAccessibilityTopLevelUIElementAttribute,
+			NSAccessibilityPositionAttribute,
+			NSAccessibilitySizeAttribute,
+			NSAccessibilityTitleAttribute,
+			NSAccessibilityURLAttribute,
+		];
+	}
+	return attributes;
+}
+
+- (id)accessibilityAttributeValue:(NSString*)attribute
+{
+	id value = nil;
+
+	if([attribute isEqualToString:NSAccessibilityRoleAttribute]) {
+		value = NSAccessibilityLinkRole;
+	} else if([attribute isEqualToString:NSAccessibilitySubroleAttribute]) {
+		value = NSAccessibilityTextLinkSubrole;
+	} else if([attribute isEqualToString:NSAccessibilityRoleDescriptionAttribute]) {
+		value = NSAccessibilityRoleDescriptionForUIElement(self);
+	} else if([attribute isEqualToString:NSAccessibilityParentAttribute]) {
+		value = self.textView;
+	} else if([attribute isEqualToString:NSAccessibilityWindowAttribute] || [attribute isEqualToString:NSAccessibilityTopLevelUIElementAttribute]) {
+		value = [self.textView accessibilityAttributeValue:attribute];
+	} else if([attribute isEqualToString:NSAccessibilityPositionAttribute] || [attribute isEqualToString:NSAccessibilitySizeAttribute]) {
+		NSRect frame = self.frame;
+		frame = [self.textView convertRect:frame toView:nil];
+		frame = [self.textView.window convertRectToScreen:frame];
+		if([attribute isEqualToString:NSAccessibilityPositionAttribute])
+			value = [NSValue valueWithPoint:frame.origin];
+		else
+			value = [NSValue valueWithSize:frame.size];
+	} else if([attribute isEqualToString:NSAccessibilityTitleAttribute]) {
+		value = self.title;
+	} else if([attribute isEqualToString:NSAccessibilityURLAttribute]) {
+		value = self.URL;
+	} else {
+		@throw [NSException exceptionWithName:NSAccessibilityException reason:[NSString stringWithFormat:@"Getting accessibility attribute not supported: %@", attribute] userInfo:nil];
+	}
+
+	return value;
+}
+
+- (BOOL)accessibilityIsAttributeSettable:(NSString*)attribute
+{
+	return NO;
+}
+
+- (void)accessibilitySetValue:(id)value forAttribute:(NSString*)attribute
+{
+	@throw [NSException exceptionWithName:NSAccessibilityException reason:[NSString stringWithFormat:@"Setting accessibility attribute not supported: %@", attribute] userInfo:nil];
+}
+
+- (NSArray*)accessibilityParameterizedAttributeNames
+{
+	return @[];
+}
+
+- (id)accessibilityAttributeValue:(NSString*)attribute forParameter:(id)parameter
+{
+	@throw [NSException exceptionWithName:NSAccessibilityException reason:[NSString stringWithFormat:@"Accessibility parameterized attribute not supported: %@", attribute] userInfo:nil];
+}
+
+- (NSArray*)accessibilityActionNames
+{
+	static NSArray* actions = nil;
+	if(!actions)
+	{
+		actions = @[
+			NSAccessibilityPressAction,
+		];
+	}
+	return actions;
+}
+
+- (NSString*)accessibilityActionDescription:(NSString*)action
+{
+	return NSAccessibilityActionDescription(action);
+}
+
+- (void)accessibilityPerformAction:(NSString*)action
+{
+	if([action isEqualToString:NSAccessibilityPressAction])
+	{
+		// TODO
+	}
+	else
+	{
+		@throw [NSException exceptionWithName:NSAccessibilityException reason:[NSString stringWithFormat:@"Accessibility action not supported: %@", action] userInfo:nil];
+	}
+}
+
+- (id)accessibilityHitTest:(NSPoint)point
+{
+	return self;
+}
+
+- (id)accessibilityFocusedUIElement
+{
+	return NSAccessibilityUnignoredAncestor(self.textView);
+}
+@end
+
+typedef indexed_map_t<OakAccessibleLink*> links_t;
+typedef std::shared_ptr<links_t> links_ptr;
 
 @interface OakTextView () <NSIgnoreMisspelledWords, NSChangeSpelling>
 {
@@ -119,6 +285,12 @@ struct buffer_refresh_callback_t;
 
 	OakChoiceMenu* choiceMenu;
 	std::vector<std::string> choiceVector;
+
+	// =================
+	// = Accessibility =
+	// =================
+
+	links_ptr _links;
 }
 + (NSArray*)dropTypes;
 - (void)ensureSelectionIsInVisibleArea:(id)sender;
@@ -147,6 +319,7 @@ struct buffer_refresh_callback_t;
 @property (nonatomic) LiveSearchView* liveSearchView;
 @property (nonatomic, copy) NSString* liveSearchString;
 @property (nonatomic) ng::ranges_t const& liveSearchRanges;
+@property (nonatomic, readonly) links_ptr links;
 @end
 
 static std::vector<bundles::item_ptr> items_for_tab_expansion (ng::buffer_t const& buffer, ng::ranges_t const& ranges, std::string const& scopeAttributes, ng::range_t* range)
@@ -543,6 +716,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 		[self resetBlinkCaretTimer];
 		[self setNeedsDisplay:YES];
+		_links.reset();
 		NSAccessibilityPostNotification(self, NSAccessibilityValueChangedNotification);
 	}
 }
@@ -751,6 +925,7 @@ doScroll:
 {
 	AUTO_REFRESH;
 	layout->did_update_scopes(from, to);
+	_links.reset();
 }
 
 - (void)drawRect:(NSRect)aRect
@@ -1006,6 +1181,7 @@ doScroll:
 			ATTR(SelectedTextRange),
 			ATTR(SelectedTextRanges),
 			// ATTR(VisibleCharacterRange),
+			ATTR(Children),
 		]];
 
 		attributes = [[set setByAddingObjectsFromArray:[super accessibilityAttributeNames]] allObjects];
@@ -1041,6 +1217,12 @@ doScroll:
 			[nsRanges addObject:[NSValue valueWithRange:[self nsRangeForRange:(*range)]]];
 		ret = nsRanges;
 	// } HANDLE_ATTR(VisibleCharacterRange) { //TODO
+	} HANDLE_ATTR(Children) {
+		NSMutableArray* links = [NSMutableArray array];
+		std::shared_ptr<links_t> links_ = self.links;
+		for(auto const& pair : *links_)
+			[links addObject:pair.second];
+		return links;
 	} else {
 		ret = [super accessibilityAttributeValue:attribute];
 	}
@@ -1076,6 +1258,52 @@ doScroll:
 		editor->set_selections(ranges);
 	} else {
 		[super accessibilitySetValue:value forAttribute:attribute];
+	}
+}
+
+- (NSUInteger)accessibilityArrayAttributeCount:(NSString* )attribute
+{
+	if([attribute isEqualToString:NSAccessibilityChildrenAttribute])
+	{
+		return self.links->size();
+	}
+	else
+	{
+		return [super accessibilityArrayAttributeCount:attribute];
+	}
+}
+
+- (NSArray*)accessibilityArrayAttributeValues:(NSString*)attribute index:(NSUInteger)index maxCount:(NSUInteger)maxCount
+{
+	if([attribute isEqualToString:NSAccessibilityChildrenAttribute])
+	{
+		links_ptr const links = self.links;
+		NSMutableArray* values = [NSMutableArray arrayWithCapacity:maxCount];
+		for(auto it = links->nth(index); maxCount && it != links->end(); ++it, --maxCount)
+			[values addObject:it->second];
+		return values;
+	}
+	else
+	{
+		return [super accessibilityArrayAttributeValues:attribute index:index maxCount:maxCount];
+	}
+}
+
+- (NSUInteger)accessibilityIndexOfChild:(id)child
+{
+	if([child isKindOfClass:[OakAccessibleLink class]])
+	{
+		OakAccessibleLink* link = (OakAccessibleLink* )child;
+		links_ptr const links = self.links;
+		auto it = links->find(link.range.max().index);
+		if(it != links->end())
+			return it.index();
+		else
+			return NSNotFound;
+	}
+	else
+	{
+		return [super accessibilityIndexOfChild:child];
 	}
 }
 
@@ -1186,6 +1414,28 @@ doScroll:
 			[res setAttributes:attributes range:runRange];
 		}
 
+		// Add links
+		const links_ptr links = self.links;
+		auto lbegin = links->upper_bound(from);
+		auto lend   = links->lower_bound(to);
+		if(lend != links->end() && to >= lend->second.range.min().index)
+			++lend;
+
+		std::for_each(lbegin, lend, [=](links_t::iterator::value_type const& pair){
+			ng::range_t range = pair.second.range;
+			range.first = oak::cap(ng::index_t(from), range.min(), ng::index_t(to));
+			range.last  = oak::cap(ng::index_t(from), range.max(), ng::index_t(to));
+			if(!range.empty())
+			{
+				range.first.index -= from;
+				range.last.index  -= from;
+				NSRange linkRange;
+				linkRange.location = utf16::distance(text.data(), text.data() + range.first.index);
+				linkRange.length   = utf16::distance(text.data() + range.first.index, text.data() + range.last.index);
+				[res addAttribute:TATTR(Link) value:pair.second range:linkRange];
+			}
+		});
+
 		// Add misspellings
 		std::map<size_t, bool> misspellings = document->buffer().misspellings(from, to);
 		auto pair = misspellings.begin();
@@ -1228,6 +1478,49 @@ doScroll:
 		ret = [super accessibilityAttributeValue:attribute forParameter:parameter];
 	}
 	return ret;
+}
+
+- (id)accessibilityHitTest:(NSPoint)screenPoint
+{
+	NSPoint point = [self convertRect:[self.window convertRectFromScreen:NSMakeRect(screenPoint.x, screenPoint.y, 0, 0)] fromView:nil].origin;
+	ng::index_t index = layout->index_at_point(NSPointToCGPoint(point));
+	const links_ptr links = self.links;
+	auto it = links->lower_bound(index.index);
+	if(it != links->end() && it->second.range.min() <= index)
+	{
+		OakAccessibleLink* link = it->second;
+		if(NSMouseInRect(point, link.frame, YES))
+			return [link accessibilityHitTest:screenPoint];
+	}
+	return self;
+}
+
+- (links_ptr)links
+{
+	if(!_links)
+	{
+		links_ptr links(new links_t());
+		scope::selector_t linkSelector = "markup.underline.link";
+		ng::buffer_t const& buffer = document->buffer();
+		std::map<size_t, scope::scope_t> scopes = buffer.scopes(0, buffer.size());
+		for(auto pair = scopes.begin(); pair != scopes.end(); )
+		{
+			if(!linkSelector.does_match(pair->second))
+			{
+				++pair;
+				continue;
+			}
+			size_t i = pair->first;
+			size_t j = ++pair != scopes.end() ? pair->first : buffer.size();
+			NSString* title = [NSString stringWithCxxString:buffer.substr(i, j)];
+			NSRect frame = NSRectFromCGRect(layout->rect_for_range(i, j));
+			ng::range_t range(i, j);
+			OakAccessibleLink* link = [[OakAccessibleLink alloc] initWithTextView:self range:range title:title URL:nil frame:frame];
+			links->set(j, link);
+		}
+		_links = links;
+	}
+	return _links;
 }
 
 #undef ATTR
