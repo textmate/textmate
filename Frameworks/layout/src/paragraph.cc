@@ -261,7 +261,7 @@ namespace ng
 				if(*ch == '\t')
 					insert_tab(pos - bufferOffset + i);
 				else if(*ch == ' ')
-					insert_space(pos - bufferOffset + i);
+					insert_space(pos - bufferOffset + i, ch.length());
 				else if(*ch == '\n')
 					insert_newline(pos - bufferOffset + i, ch.length());
 				else
@@ -471,9 +471,9 @@ namespace ng
 		_nodes.insert(iterator_at(i), node_t(kNodeTypeTab, 1, 10));
 	}
 
-	void paragraph_t::insert_space (size_t i)
+	void paragraph_t::insert_space (size_t i, size_t len)
 	{
-		_nodes.insert(iterator_at(i), node_t(kNodeTypeSpace, 1));
+		_nodes.insert(iterator_at(i), node_t(kNodeTypeSpace, len));
 	}
 
 	void paragraph_t::insert_unprintable (size_t i, size_t len)

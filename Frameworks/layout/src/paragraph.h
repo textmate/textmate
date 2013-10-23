@@ -89,7 +89,7 @@ namespace ng
 
 		void insert_text (size_t i, size_t len);
 		void insert_tab (size_t i);
-		void insert_space (size_t i);
+		void insert_space (size_t i, size_t len);
 		void insert_unprintable (size_t i, size_t len);
 		void insert_newline (size_t i, size_t len);
 
