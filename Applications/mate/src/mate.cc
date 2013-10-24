@@ -140,7 +140,7 @@ static void usage (FILE* io)
 		" -t, --type <filetype>  Treat file as having <filetype>.\n"
 		" -m, --name <name>      The display name shown in TextMate.\n"
 		" -r, --recent           Add file to Open Recent menu.\n"
-		" -d, --change-dir       Change TextMates working directory to that of the file.\n"
+		" -d, --change-dir       Change TextMate's working directory to that of the file.\n"
 		" -h, --help             Show this information.\n"
 		" -v, --version          Print version information.\n"
 		"\n"
