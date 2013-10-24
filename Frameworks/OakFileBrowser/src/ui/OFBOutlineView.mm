@@ -12,6 +12,11 @@
 
 @interface OFBOutlineView ()
 {
+	OBJC_WATCH_LEAKS(OFBOutlineView);
+
+	BOOL fieldEditorWasUp;
+	NSRect mouseHoverRect;
+
 	NSTableViewSelectionHighlightStyle defaultSelectionHighlightStyle;
 	NSTableViewDraggingDestinationFeedbackStyle defaultDraggingDestinationFeedbackStyle;
 	CGFloat defaultRowHeight;
@@ -28,8 +33,6 @@
 @end
 
 @implementation OFBOutlineView
-@synthesize draggedRows;
-
 - (void)setRenderAsSourceList:(BOOL)value
 {
 	if(_renderAsSourceList == value)
@@ -213,10 +216,10 @@
 
 - (void)draggedImage:(NSImage*)anImage endedAt:(NSPoint)aPoint operation:(NSDragOperation)aDragOperation
 {
-	if(draggedRows && [self.dataSource respondsToSelector:@selector(outlineView:draggedItems:endedWithOperation:)])
+	if(self.draggedRows && [self.dataSource respondsToSelector:@selector(outlineView:draggedItems:endedWithOperation:)])
 	{
 		NSMutableArray* items = [NSMutableArray array];
-		for(NSUInteger index = [draggedRows firstIndex]; index != NSNotFound; index = [draggedRows indexGreaterThanIndex:index])
+		for(NSUInteger index = [self.draggedRows firstIndex]; index != NSNotFound; index = [self.draggedRows indexGreaterThanIndex:index])
 			[items addObject:[self itemAtRow:index]];
 		[(id <FSDataSourceDragSource>)self.dataSource outlineView:self draggedItems:items endedWithOperation:aDragOperation];
 	}
