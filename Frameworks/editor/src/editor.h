@@ -194,7 +194,7 @@ namespace ng
 		std::string as_string (size_t from = 0, size_t to = SIZE_T_MAX) const { return _buffer.substr(from, to != SIZE_T_MAX ? to : _buffer.size()); }
 
 		void perform_replacements (std::multimap<std::pair<size_t, size_t>, std::string> const& replacements);
-		bool handle_result (std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, text::range_t input_range, std::map<std::string, std::string> environment);
+		bool handle_result (std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, ng::range_t input_range, std::map<std::string, std::string> environment);
 
 		void clear_snippets ();
 

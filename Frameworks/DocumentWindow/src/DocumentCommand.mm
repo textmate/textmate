@@ -31,10 +31,10 @@ namespace
 				_collection = to_s(_controller.identifier);
 		}
 
-		text::range_t write_unit_to_fd (int fd, input::type unit, input::type fallbackUnit, input_format::type format, scope::selector_t const& scopeSelector, std::map<std::string, std::string>& variables, bool* inputWasSelection);
+		ng::range_t write_unit_to_fd (int fd, input::type unit, input::type fallbackUnit, input_format::type format, scope::selector_t const& scopeSelector, std::map<std::string, std::string>& variables, bool* inputWasSelection);
 
 		bool accept_html_data (command::runner_ptr runner, char const* data, size_t len);
-		bool accept_result (std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, text::range_t inputRange, std::map<std::string, std::string> const& environment);
+		bool accept_result (std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, ng::range_t inputRange, std::map<std::string, std::string> const& environment);
 		void discard_html ();
 
 		void show_tool_tip (std::string const& str);
@@ -53,18 +53,18 @@ namespace
 // = Init, Saving, Input =
 // =======================
 
-text::range_t delegate_t::write_unit_to_fd (int fd, input::type unit, input::type fallbackUnit, input_format::type format, scope::selector_t const& scopeSelector, std::map<std::string, std::string>& variables, bool* inputWasSelection)
+ng::range_t delegate_t::write_unit_to_fd (int fd, input::type unit, input::type fallbackUnit, input_format::type format, scope::selector_t const& scopeSelector, std::map<std::string, std::string>& variables, bool* inputWasSelection)
 {
 	if(!_document)
 	{
 		close(fd);
-		return text::range_t::undefined;
+		return ng::range_t();
 	}
 
 	bool isOpen = _document->is_open();
 	if(!isOpen)
 		_document->open();
-	text::range_t res = ng::write_unit_to_fd(_document->buffer(), ng::editor_for_document(_document)->ranges().last(), _document->buffer().indent().tab_size(), fd, unit, fallbackUnit, format, scopeSelector, variables, inputWasSelection);
+	ng::range_t res = ng::write_unit_to_fd(_document->buffer(), ng::editor_for_document(_document)->ranges().last(), _document->buffer().indent().tab_size(), fd, unit, fallbackUnit, format, scopeSelector, variables, inputWasSelection);
 	if(!isOpen)
 		_document->close();
 	return res;
@@ -98,7 +98,7 @@ void delegate_t::discard_html ()
 		_controller.htmlOutputVisible = NO;
 }
 
-bool delegate_t::accept_result (std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, text::range_t inputRange, std::map<std::string, std::string> const& environment)
+bool delegate_t::accept_result (std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, ng::range_t inputRange, std::map<std::string, std::string> const& environment)
 {
 	bool res;
 	if(_document && _document->is_open())
@@ -109,7 +109,7 @@ bool delegate_t::accept_result (std::string const& out, output::type placement, 
 	{
 		document::document_ptr doc = document::create();
 		doc->open();
-		res = ng::editor_for_document(doc)->handle_result(out, placement, format, outputCaret, text::pos_t(0, 0) /* inputRange */, environment);
+		res = ng::editor_for_document(doc)->handle_result(out, placement, format, outputCaret, ng::range_t(0) /* inputRange */, environment);
 		document::show(doc);
 		doc->close();
 	}

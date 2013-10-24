@@ -1007,13 +1007,15 @@ namespace document
 
 				void select_charset (std::string const& path, io::bytes_ptr content, file::open_context_ptr context)
 				{
-					if(_try_disk_encoding)
+					if(_encoding_state == kEncodingUseDisk)
 					{
-						_try_disk_encoding = false;
+						_encoding_state = kEncodingTestProbability;
 						context->set_charset(_document->_disk_encoding);
 					}
-					else
+					else if(_encoding_state == kEncodingTestProbability)
 					{
+						_encoding_state = kEncodingUseFallback;
+
 						encoding::classifier_t db;
 						static std::string const kEncodingFrequenciesPath = path::join(path::home(), "Library/Caches/com.macromates.TextMate/EncodingFrequencies.binary");
 						db.load(kEncodingFrequenciesPath);
@@ -1024,6 +1026,16 @@ namespace document
 						if(!probabilities.empty() && probabilities.begin()->first < 1)
 								context->set_charset(probabilities.begin()->second);
 						else	context->set_charset("ISO-8859-1");
+					}
+					else if(_encoding_state == kEncodingUseFallback)
+					{
+						_encoding_state = kEncodingAbort;
+						context->set_charset("WINDOWS-1252");
+					}
+					else
+					{
+						crash_reporter_info_t info("unknown encoding");
+						abort();
 					}
 				}
 
@@ -1079,7 +1091,7 @@ namespace document
 
 			private:
 				document::document_ptr _document;
-				bool _try_disk_encoding = true;
+				enum { kEncodingUseDisk, kEncodingTestProbability, kEncodingUseFallback, kEncodingAbort } _encoding_state = kEncodingUseDisk;
 				bool _wait;
 				cf::run_loop_t _run_loop;
 			};

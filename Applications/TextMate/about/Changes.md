@@ -1,5 +1,12 @@
 # Changes
 
+## 2013-10-23 ([v2.0-alpha.9489](https://github.com/textmate/textmate/compare/v2.0-alpha.9487...v2.0-alpha.9489))
+
+* Using a “filtering” command with a column selection now has defined behavior: The command’s output will replace the subset selected on each line in the selection. The output is truncated if it has more lines than what’s selected and otherwise padded with blank lines. This isn’t identical to how TextMate 1.x dealt with this, but I find the new behavior slightly more useful, for example make a (zero-width) column selection and use _Text → Filter Through Command…_ (⌘|) to insert sequence numbers by running `seq 100` (no need to count how many lines are actually selected).
+* Add _Go → Go to Tab → Last Tab_ bound to ⌘0 (this is similar to iTerm and Chrome, although they use ⌘9, so perhaps TM should do the same).
+* Allow sorting by the “installed” state in Preferences → Bundles. *[Ryan Goulden]*
+* Show Invisibles will no longer treat space as an invisible (which was added in previous build) as it was causing issues with right-to-left rendering and combining marks used after spaces. The feature might be back, but needs to be implemented differently.
+
 ## 2013-10-08 ([v2.0-alpha.9487](https://github.com/textmate/textmate/compare/v2.0-alpha.9479...v2.0-alpha.9487))
 
 * Add `invisiblesMap` option to the `.tm_properties` file. This can be set to a string which is used to control which glyphs are used for invisible characters. Add either `\n`, `\t`, or a space to the string, followed by the glyph that should be used to render the character, or prefix it with `~` to disable rendering of that character. For example to disable rendering of spaces and render tabs as `┊` add this to `.tm_properties`: `invisiblesMap = "~ \t┊"`. *[Steven Clukey]*

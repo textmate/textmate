@@ -109,6 +109,8 @@ namespace encoding
 		}
 
 	private:
+		void real_load (std::string const& path);
+
 		template <typename _InputIter, typename _F>
 		static void each_word (_InputIter const& first, _InputIter const& last, _F op)
 		{

@@ -196,9 +196,10 @@ static NSTextView* MyCreateTextView ()
 {
 	NSTextView* res = [[NSTextView alloc] initWithFrame:NSZeroRect];
 	[res setVerticallyResizable:YES];
-	[res setHorizontallyResizable:NO];
-	[res setAutoresizingMask:NSViewWidthSizable];
-	[[res textContainer] setWidthTracksTextView:YES];
+	[res setHorizontallyResizable:YES];
+	[res setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
+	[[res textContainer] setWidthTracksTextView:NO];
+	[[res textContainer] setContainerSize:NSMakeSize(CGFLOAT_MAX, CGFLOAT_MAX)];
 	return res;
 }
 
@@ -270,7 +271,7 @@ static NSTextView* MyCreateTextView ()
 		[self.popUpButton setContentHuggingPriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
 
 		self.scrollView.hasVerticalScroller   = YES;
-		self.scrollView.hasHorizontalScroller = NO;
+		self.scrollView.hasHorizontalScroller = YES;
 		self.scrollView.borderType            = NSBezelBorder;
 		self.scrollView.documentView          = self.textView;
 

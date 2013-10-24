@@ -1306,18 +1306,18 @@ namespace ng
 		_selections = this->replace(replacements, true);
 	}
 
-	bool editor_t::handle_result (std::string const& uncheckedOut, output::type placement, output_format::type format, output_caret::type outputCaret, text::range_t input_range, std::map<std::string, std::string> environment)
+	bool editor_t::handle_result (std::string const& uncheckedOut, output::type placement, output_format::type format, output_caret::type outputCaret, ng::range_t input_range, std::map<std::string, std::string> environment)
 	{
 		std::string const& out = utf8::is_valid(uncheckedOut.begin(), uncheckedOut.end()) ? uncheckedOut : sanitized_utf8(uncheckedOut);
 
 		range_t range;
 		switch(placement)
 		{
-			case output::replace_input:     range = range_t(_buffer.convert(input_range.min()), _buffer.convert(input_range.max())); break;
-			case output::replace_document:  range = range_t(0, _buffer.size());                  break;
-			case output::at_caret:          range = _selections.last().last;                    break;
-			case output::after_input:       range = range_t(_buffer.convert(input_range.max())); break;
-			case output::replace_selection: range = _selections.last();                              break;
+			case output::replace_input:     range = input_range;                break;
+			case output::replace_document:  range = range_t(0, _buffer.size()); break;
+			case output::at_caret:          range = _selections.last().last;    break;
+			case output::after_input:       range = input_range.max();          break;
+			case output::replace_selection: range = _selections.last();         break;
 		}
 
 		size_t caret = _selections.last().last.index;
@@ -1346,9 +1346,29 @@ namespace ng
 
 			case output_format::text:
 			{
-				if(range)
-					_selections = range;
-				insert(out, outputCaret == output_caret::select_output);
+				size_t bol = 0, eol = out.find('\n');
+				if(placement == output::replace_input && range.columnar && eol != std::string::npos)
+				{
+					std::multimap<range_t, std::string> replacements;
+					for(auto const& r : dissect_columnar(_buffer, range))
+					{
+						replacements.emplace(r, out.substr(bol == std::string::npos ? out.size() : bol, eol == std::string::npos ? eol : eol - bol));
+						bol = eol == std::string::npos ? eol : eol + 1;
+						eol = bol == std::string::npos ? bol : out.find('\n', bol);
+					}
+
+					_selections = replace_helper(_buffer, _snippets, replacements);
+					if(outputCaret != output_caret::select_output)
+						_selections = ng::move(_buffer, _selections, kSelectionMoveToEndOfSelection);
+				}
+				else
+				{
+					if(range)
+						_selections = range;
+
+					insert(out, outputCaret == output_caret::select_output);
+				}
+
 				if(range && outputCaret == output_caret::interpolate_by_char)
 				{
 					offset = utf8::find_safe_end(out.begin(), out.begin() + std::min(offset, out.size())) - out.begin();

@@ -90,6 +90,16 @@ namespace plist
 
 	void cache_t::load_capnp (std::string const& path)
 	{
+		try {
+			real_load(path);
+		}
+		catch(std::exception const& e) {
+			fprintf(stderr, "exception thrown while loading ‘%s’: %s\n", path.c_str(), e.what());
+		}
+	}
+
+	void cache_t::real_load (std::string const& path)
+	{
 		int fd = open(path.c_str(), O_RDONLY|O_CLOEXEC);
 		if(fd != -1)
 		{

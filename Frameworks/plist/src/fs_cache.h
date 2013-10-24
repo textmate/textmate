@@ -37,6 +37,8 @@ namespace plist
 		plist::dictionary_t (*content_filter () const)(plist::dictionary_t const&)     { return _prune_dictionary; }
 
 	private:
+		void real_load (std::string const& path);
+
 		static int32_t const kPropertyCacheFormatVersion;
 		enum class entry_type_t { file, directory, link, missing, unknown };
 

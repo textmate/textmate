@@ -94,6 +94,8 @@ namespace io
 		va_end(args);
 
 		process_t process = spawn(command, environment);
+		if(!process)
+			return NULL_STR;
 		close(process.in);
 
 		__block std::string output, error;

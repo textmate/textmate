@@ -34,7 +34,7 @@ namespace command
 	// = Command Runner =
 	// ==================
 
-	runner_t::runner_t (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, std::map<std::string, std::string> const& environment, std::string const& pwd, delegate_ptr delegate) : _command(command), _environment(environment), _directory(pwd), _delegate(delegate), _input_range(text::range_t::undefined), _input_was_selection(false), _output_is_html(false), _did_detach(false), _retain_count(3), _process(this), _return_code(-2)
+	runner_t::runner_t (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, std::map<std::string, std::string> const& environment, std::string const& pwd, delegate_ptr delegate) : _command(command), _environment(environment), _directory(pwd), _delegate(delegate), _input_was_selection(false), _output_is_html(false), _did_detach(false), _retain_count(3), _process(this), _return_code(-2)
 	{
 		fix_shebang(&_command.command);
 	}
@@ -62,7 +62,7 @@ namespace command
 		int inputPipe[2];
 		pipe(inputPipe);
 		fcntl(inputPipe[1], F_SETFD, FD_CLOEXEC);
-		_input_range = _command.input == input::nothing ? (close(inputPipe[1]), text::range_t::undefined) : _delegate->write_unit_to_fd(inputPipe[1], _command.input, _command.input_fallback, _command.input_format, _command.scope_selector, _environment, &_input_was_selection);
+		_input_range = _command.input == input::nothing ? (close(inputPipe[1]), ng::range_t()) : _delegate->write_unit_to_fd(inputPipe[1], _command.input, _command.input_fallback, _command.input_format, _command.scope_selector, _environment, &_input_was_selection);
 
 		// ----------8<----------
 
@@ -189,7 +189,7 @@ namespace command
 					outputCaret = output_caret::after_output;
 			}
 
-			if(_input_range.is_undefined())
+			if(!_input_range)
 			{
 				switch(placement)
 				{
