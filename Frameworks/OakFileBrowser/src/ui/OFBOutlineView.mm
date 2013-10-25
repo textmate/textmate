@@ -26,10 +26,6 @@
 @property (nonatomic, retain) NSIndexSet* draggedRows;
 
 - (void)performDoubleClick:(id)sender;
-
-- (BOOL)isPointInImage:(NSPoint)point;
-- (BOOL)isPointInText:(NSPoint)aPoint;
-- (BOOL)isPointInCloseButton:(NSPoint)aPoint;
 @end
 
 @implementation OFBOutlineView
@@ -142,20 +138,21 @@
 
 - (BOOL)shouldActivate
 {
-	NSEvent* event = [NSApp currentEvent];
-	BOOL res = [event type] != NSLeftMouseDown || ([event modifierFlags] & (NSShiftKeyMask | NSControlKeyMask | NSAlternateKeyMask));
-
 	id firstResponder = [[self window] firstResponder];
-	res = res || ([firstResponder respondsToSelector:@selector(delegate)] && [firstResponder delegate] == self);
-	res = res || fieldEditorWasUp;
-	if(res)
+	if(([firstResponder respondsToSelector:@selector(delegate)] && [firstResponder delegate] == self) || fieldEditorWasUp)
 		return YES;
 
-	NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
-	if([self isPointInImage:p] || [self isPointInCloseButton:p])
-		return NO; // Don’t activate when clicking an image to open a document
+	NSEvent* event = [NSApp currentEvent];
+	if([event type] != NSLeftMouseDown)
+		return YES;
 
-	return [self isRowSelected:[self rowAtPoint:p]] && (event.modifierFlags & NSCommandKeyMask) == 0;
+	NSInteger row = [self rowAtPoint:[self convertPoint:[event locationInWindow] fromView:nil]];
+	NSUInteger hit = row == -1 ? 0 : [[self preparedCellAtColumn:0 row:row] hitTestForEvent:event inRect:[self frameOfCellAtColumn:0 row:row] ofView:self];
+	if(hit & (OFBPathInfoCellHitOpenItem | OFBPathInfoCellHitRevealItem | NSCellHitTrackableArea))
+		return NO;
+
+	NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
+	return [self isRowSelected:[self rowAtPoint:p]] && !(event.modifierFlags & NSCommandKeyMask);
 }
 
 - (BOOL)acceptsFirstResponder
@@ -343,18 +340,4 @@
 	}
 	[super mouseExited:anEvent];
 }
-
-// ========================
-// = Hit Testing The Cell =
-// ========================
-
-- (NSUInteger)hitTestForPoint:(NSPoint)aPoint
-{
-	NSInteger row = [self rowAtPoint:aPoint];
-	return row == -1 ? 0 : [[self preparedCellAtColumn:0 row:row] hitTestForEvent:[NSApp currentEvent] inRect:[self frameOfCellAtColumn:0 row:row] ofView:self];
-}
-
-- (BOOL)isPointInImage:(NSPoint)aPoint       { return ([self hitTestForPoint:aPoint] & OakImageAndTextCellHitImage)   == OakImageAndTextCellHitImage;   }
-- (BOOL)isPointInText:(NSPoint)aPoint        { return ([self hitTestForPoint:aPoint] & OakImageAndTextCellHitText)    == OakImageAndTextCellHitText;    }
-- (BOOL)isPointInCloseButton:(NSPoint)aPoint { return ([self hitTestForPoint:aPoint] & OFBPathInfoCellHitCloseButton) == OFBPathInfoCellHitCloseButton; }
 @end

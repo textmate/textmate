@@ -1082,21 +1082,15 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	NSInteger row = [_outlineView clickedRow];
 	NSInteger col = [_outlineView clickedColumn];
 	col = row != -1 && col == -1 ? 0 : col; // Clicking a row which participates in multi-row selection causes clickedColumn to return -1 <rdar://10382268>
-	OFBPathInfoCell* cell = (OFBPathInfoCell*)[_outlineView preparedCellAtColumn:col row:row];
-	NSInteger hit = [cell hitTestForEvent:[NSApp currentEvent] inRect:[_outlineView frameOfCellAtColumn:col row:row] ofView:_outlineView];
-	if(hit & OakImageAndTextCellHitImage)
-	{
-		NSURL* itemURL = ((FSItem*)[_outlineView itemAtRow:row]).url;
-		
-		if(([[NSApp currentEvent] modifierFlags] & NSCommandKeyMask) && [itemURL isFileURL])
-			[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:@[ itemURL ]];
-		else	[self didDoubleClickOutlineView:sender];
-	}
+	NSCell* cell = [_outlineView preparedCellAtColumn:col row:row];
+	NSUInteger hit = [cell hitTestForEvent:[NSApp currentEvent] inRect:[_outlineView frameOfCellAtColumn:col row:row] ofView:_outlineView];
+	FSItem* item = [_outlineView itemAtRow:row];
+	if((hit & OFBPathInfoCellHitRevealItem) && [item.url isFileURL])
+		[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:@[ item.url ]];
+	else if(hit & (OFBPathInfoCellHitOpenItem | OFBPathInfoCellHitRevealItem))
+		[self didDoubleClickOutlineView:sender];
 	else if(hit & OFBPathInfoCellHitCloseButton)
-	{
-		FSItem* item = [_outlineView itemAtRow:row];
 		[_delegate fileBrowser:self closeURL:item.url];
-	}
 }
 
 - (IBAction)reload:(id)sender

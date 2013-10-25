@@ -431,11 +431,9 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 	NSInteger row = [anOutlineView clickedRow];
 	if(col != -1 && row != -1)
 	{
-		OFBPathInfoCell* cell = (OFBPathInfoCell*)[anOutlineView preparedCellAtColumn:col row:row];
-		NSInteger hit = [cell hitTestForEvent:[NSApp currentEvent] inRect:[anOutlineView frameOfCellAtColumn:col row:row] ofView:anOutlineView];
-		if(hit & OakImageAndTextCellHitImage)
-			return NO;
-		else if(hit & NSCellHitTrackableArea)
+		NSCell* cell = [anOutlineView preparedCellAtColumn:col row:row];
+		NSUInteger hit = [cell hitTestForEvent:[NSApp currentEvent] inRect:[anOutlineView frameOfCellAtColumn:col row:row] ofView:anOutlineView];
+		if(hit & (OFBPathInfoCellHitOpenItem | OFBPathInfoCellHitRevealItem | NSCellHitTrackableArea))
 			return NO;
 	}
 	return YES;

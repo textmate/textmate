@@ -174,7 +174,14 @@ static void DrawSpinner (NSRect cellFrame, BOOL isFlipped, NSColor* color, doubl
 	if(NSMouseInRect(point, [self closeButtonRectInFrame:cellFrame], [controlView isFlipped]))
 		return NSCellHitContentArea | NSCellHitTrackableArea | OFBPathInfoCellHitCloseButton;
 
-	return [super hitTestForEvent:event inRect:cellFrame ofView:controlView];
+	NSUInteger res = [super hitTestForEvent:event inRect:cellFrame ofView:controlView];
+	if((res & OakImageAndTextCellHitImage) && ([event type] == NSLeftMouseDown || [event type] == NSLeftMouseUp) && !([event modifierFlags] & (NSShiftKeyMask | NSControlKeyMask)))
+	{
+		if(([event modifierFlags] & NSCommandKeyMask))
+				res |= OFBPathInfoCellHitRevealItem;
+		else	res |= OFBPathInfoCellHitOpenItem;
+	}
+	return res;
 }
 
 - (BOOL)trackMouse:(NSEvent*)theEvent inRect:(NSRect)cellFrame ofView:(NSView*)controlView untilMouseUp:(BOOL)untilMouseUp
