@@ -2,6 +2,7 @@
 #import <OakAppKit/NSColor Additions.h>
 #import <OakAppKit/NSImage Additions.h>
 #import <OakFoundation/OakTimer.h>
+#import <Preferences/Keys.h>
 #import <oak/debug.h>
 #import "../io/FSItem.h"
 #import <OakFoundation/NSString Additions.h>
@@ -175,11 +176,21 @@ static void DrawSpinner (NSRect cellFrame, BOOL isFlipped, NSColor* color, doubl
 		return NSCellHitContentArea | NSCellHitTrackableArea | OFBPathInfoCellHitCloseButton;
 
 	NSUInteger res = [super hitTestForEvent:event inRect:cellFrame ofView:controlView];
-	if((res & OakImageAndTextCellHitImage) && ([event type] == NSLeftMouseDown || [event type] == NSLeftMouseUp) && !([event modifierFlags] & (NSShiftKeyMask | NSControlKeyMask)))
+	if(([event type] == NSLeftMouseDown || [event type] == NSLeftMouseUp) && !([event modifierFlags] & (NSShiftKeyMask | NSControlKeyMask)))
 	{
-		if(([event modifierFlags] & NSCommandKeyMask))
+		if([event modifierFlags] & NSCommandKeyMask)
+		{
+			if(res & OakImageAndTextCellHitImage)
 				res |= OFBPathInfoCellHitRevealItem;
-		else	res |= OFBPathInfoCellHitOpenItem;
+		}
+		else
+		{
+			BOOL clickTextToOpen = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFileBrowserSingleClickToOpenKey];
+			if((res & OakImageAndTextCellHitImage) && !clickTextToOpen)
+				res |= OFBPathInfoCellHitOpenItem;
+			else if((res & OakImageAndTextCellHitText) && clickTextToOpen)
+				res |= OFBPathInfoCellHitOpenItem;
+		}
 	}
 	return res;
 }
