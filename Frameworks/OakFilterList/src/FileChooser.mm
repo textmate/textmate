@@ -1,5 +1,6 @@
 #import "FileChooser.h"
 #import "OakAbbreviations.h"
+#import "ui/TableView.h"
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakFileIconImage.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
@@ -46,54 +47,6 @@ static NSButton* OakCreateScopeButton (NSString* label, SEL action, NSUInteger t
 		return [super accessibilityAttributeValue:attribute];
 }
 @end
-
-@interface OakNonActivatingTableView : NSTableView
-@end
-
-@implementation OakNonActivatingTableView
-- (NSCell*)preparedCellAtColumn:(NSInteger)column row:(NSInteger)row
-{
-	OFBPathInfoCell* res = (OFBPathInfoCell*)[super preparedCellAtColumn:column row:row];
-	res.disableHighlight = [self.window isKeyWindow];
-	return res;
-}
-
-- (void)highlightSelectionInClipRect:(NSRect)clipRect
-{
-	if(![self.window isKeyWindow])
-		return [super highlightSelectionInClipRect:clipRect];
-
-	[[NSColor alternateSelectedControlColor] set];
-	[[self selectedRowIndexes] enumerateRangesInRange:[self rowsInRect:clipRect] options:0 usingBlock:^(NSRange range, BOOL* stop){
-		for(NSUInteger row = range.location; row < NSMaxRange(range); ++row)
-		{
-			NSRect rect = [self rectOfRow:row];
-			rect.size.height -= 1;
-			NSRectFill(rect);
-		}
-	}];
-}
-@end
-
-static NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (NSFont* baseFont, NSColor* textColor, NSColor* matchedTextColor, std::string const& in, std::vector< std::pair<size_t, size_t> > const& ranges, size_t offset = 0)
-{
-	NSDictionary* baseAttributes      = @{ NSForegroundColorAttributeName : textColor,        };
-	NSDictionary* highlightAttributes = @{ NSForegroundColorAttributeName : matchedTextColor, NSUnderlineStyleAttributeName : @1 };
-
-	NSMutableAttributedString* res = [[NSMutableAttributedString alloc] init];
-
-	size_t from = 0;
-	for(auto range : ranges)
-	{
-		[res appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:std::string(in.begin() + from, in.begin() + range.first + offset)] attributes:baseAttributes]];
-		[res appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:std::string(in.begin() + range.first + offset, in.begin() + range.second + offset)] attributes:highlightAttributes]];
-		from = range.second + offset;
-	}
-	if(from < in.size())
-		[res appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:in.substr(from)] attributes:baseAttributes]];
-
-	return res;
-}
 
 // =======================
 
@@ -193,7 +146,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	return res;
 }
 
-@interface FileChooser () <NSWindowDelegate, NSTextFieldDelegate, NSTableViewDataSource, NSTableViewDelegate>
+@interface FileChooser () <NSWindowDelegate, NSTableViewDataSource, NSTableViewDelegate>
 {
 	scm::info_ptr                                 _scmInfo;
 	std::vector<document::document_ptr>           _openDocuments;
@@ -206,7 +159,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 @property (nonatomic) NSButton*            allButton;
 @property (nonatomic) NSButton*            openDocumentsButton;
 @property (nonatomic) NSButton*            scmChangesButton;
-@property (nonatomic) NSTableView*         tableView;
+@property (nonatomic) OakInactiveTableView* tableView;
 @property (nonatomic) NSTextField*         statusTextField;
 @property (nonatomic) NSTextField*         itemCountTextField;
 @property (nonatomic) NSProgressIndicator* progressIndicator;
@@ -234,13 +187,11 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	{
 		_items = @[ ];
 
-		_searchField               = [[NSSearchField alloc] initWithFrame:NSZeroRect];
-		_searchField.delegate      = self;
+		_searchField = [[NSSearchField alloc] initWithFrame:NSZeroRect];
 		[_searchField.cell setScrollable:YES];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(controlTextDidChange:) name:NSControlTextDidChangeNotification object:_searchField];
 		if(![NSApp isFullKeyboardAccessEnabled])
-		{
 			_searchField.focusRingType = NSFocusRingTypeNone;
-		}
 
 		_allButton           = OakCreateScopeButton(@"All",                   @selector(takeSourceIndexFrom:), 0);
 		_openDocumentsButton = OakCreateScopeButton(@"Open Documents",        @selector(takeSourceIndexFrom:), 1);
@@ -267,7 +218,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 		NSTableColumn* tableColumn = [[NSTableColumn alloc] initWithIdentifier:@"name"];
 		[tableColumn setDataCell:cell];
 
-		_tableView = [[OakNonActivatingTableView alloc] initWithFrame:NSZeroRect];
+		_tableView = [[OakInactiveTableView alloc] initWithFrame:NSZeroRect];
 		[_tableView addTableColumn:tableColumn];
 		_tableView.headerView              = nil;
 		_tableView.focusRingType           = NSFocusRingTypeNone;
@@ -278,6 +229,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 		_tableView.target                  = self;
 		_tableView.dataSource              = self;
 		_tableView.delegate                = self;
+		_tableView.linkedTextField         = _searchField;
 
 		NSScrollView* scrollView         = [[NSScrollView alloc] initWithFrame:NSZeroRect];
 		scrollView.hasVerticalScroller   = YES;
@@ -364,8 +316,9 @@ static path::glob_list_t globs_for_path (std::string const& path)
 
 - (void)dealloc
 {
+	[[NSNotificationCenter defaultCenter] removeObserver:self name:NSControlTextDidChangeNotification object:_searchField];
+
 	_window.delegate      = nil;
-	_searchField.delegate = nil;
 	_tableView.target     = nil;
 	_tableView.dataSource = nil;
 	_tableView.delegate   = nil;
@@ -947,49 +900,9 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 	return activate;
 }
 
-// =========================
-// = Search Field Delegate =
-// =========================
-
-- (void)moveSelectedRowByOffset:(NSInteger)anOffset extendingSelection:(BOOL)extend
-{
-	if([_tableView numberOfRows])
-	{
-		if(_tableView.allowsMultipleSelection == NO)
-			extend = NO;
-		NSInteger row = oak::cap((NSInteger)0, [_tableView selectedRow] + anOffset, [_tableView numberOfRows] - 1);
-		[_tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:extend];
-		[_tableView scrollRowToVisible:row];
-	}
-}
-
-- (int)visibleRows                                      { return (int)floorf(NSHeight([_tableView visibleRect]) / ([_tableView rowHeight]+[_tableView intercellSpacing].height)) - 1; }
-
-- (void)moveUp:(id)sender                               { [self moveSelectedRowByOffset:-1 extendingSelection:NO]; }
-- (void)moveDown:(id)sender                             { [self moveSelectedRowByOffset:+1 extendingSelection:NO]; }
-- (void)moveUpAndModifySelection:(id)sender             { [self moveSelectedRowByOffset:-1 extendingSelection:YES];}
-- (void)moveDownAndModifySelection:(id)sender           { [self moveSelectedRowByOffset:+1 extendingSelection:YES];}
-- (void)movePageUp:(id)sender                           { [self moveSelectedRowByOffset:-[self visibleRows] extendingSelection:NO]; }
-- (void)movePageDown:(id)sender                         { [self moveSelectedRowByOffset:+[self visibleRows] extendingSelection:NO]; }
-- (void)moveToBeginningOfDocument:(id)sender            { [self moveSelectedRowByOffset:-(INT_MAX >> 1) extendingSelection:NO]; }
-- (void)moveToEndOfDocument:(id)sender                  { [self moveSelectedRowByOffset:+(INT_MAX >> 1) extendingSelection:NO]; }
-
-- (void)pageUp:(id)sender                               { [self movePageUp:sender]; }
-- (void)pageDown:(id)sender                             { [self movePageDown:sender]; }
-- (void)scrollPageUp:(id)sender                         { [self movePageUp:sender]; }
-- (void)scrollPageDown:(id)sender                       { [self movePageDown:sender]; }
-
-- (IBAction)insertNewline:(id)sender                    { [self accept:sender]; }
-- (IBAction)insertNewlineIgnoringFieldEditor:(id)sender { [self accept:sender]; }
-- (IBAction)cancelOperation:(id)sender                  { [self cancel:sender]; }
-
-- (BOOL)control:(NSControl*)aControl textView:(NSTextView*)aTextView doCommandBySelector:(SEL)aCommand
-{
-	static auto const forward = new std::set<SEL>{ @selector(moveUp:), @selector(moveDown:), @selector(moveUpAndModifySelection:), @selector(moveDownAndModifySelection:), @selector(pageUp:), @selector(pageDown:), @selector(movePageUp:), @selector(movePageDown:), @selector(scrollPageUp:), @selector(scrollPageDown:), @selector(moveToBeginningOfDocument:), @selector(moveToEndOfDocument:), @selector(insertNewline:), @selector(insertNewlineIgnoringFieldEditor:), @selector(cancelOperation:) };
-	if(forward->find(aCommand) != forward->end() && [self respondsToSelector:aCommand])
-		return [NSApp sendAction:aCommand to:self from:aControl];
-	return NO;
-}
+// =============================
+// = Search Field Notification =
+// =============================
 
 - (void)controlTextDidChange:(NSNotification*)aNotification
 {
