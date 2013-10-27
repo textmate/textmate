@@ -1890,8 +1890,7 @@ namespace
 			fc.filterString = entry.string;
 	}
 
-	[self positionWindow:fc.window];
-	[fc showWindow:nil];
+	[fc showWindowRelativeToFrame:[self.window convertRectToScreen:[self.textView convertRect:[self.textView visibleRect] toView:nil]]];
 }
 
 - (void)fileChooserDidSelectItems:(FileChooser*)sender
