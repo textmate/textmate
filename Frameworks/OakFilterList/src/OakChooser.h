@@ -12,6 +12,7 @@ PUBLIC @interface OakChooser : NSObject
 @property (nonatomic, readonly) NSArray* selectedItems;
 
 - (void)showWindow:(id)sender;
+- (void)showWindowRelativeToFrame:(NSRect)parentFrame;
 - (void)close;
 
 // For subclasses

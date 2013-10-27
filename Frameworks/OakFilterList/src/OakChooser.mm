@@ -123,6 +123,21 @@ NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string
 	[_window makeFirstResponder:_searchField];
 }
 
+- (void)showWindowRelativeToFrame:(NSRect)parentFrame
+{
+	if(![_window isVisible])
+	{
+		[_window layoutIfNeeded];
+		NSRect frame  = [_window frame];
+		NSRect parent = parentFrame;
+
+		frame.origin.x = NSMinX(parent) + round((NSWidth(parent)  - NSWidth(frame))  * 1 / 4);
+		frame.origin.y = NSMinY(parent) + round((NSHeight(parent) - NSHeight(frame)) * 3 / 4);
+		[_window setFrame:frame display:NO];
+	}
+	[self showWindow:self];
+}
+
 - (void)close
 {
 	[_window performClose:self];
