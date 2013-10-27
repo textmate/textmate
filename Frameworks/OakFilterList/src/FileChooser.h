@@ -8,7 +8,6 @@ PUBLIC @interface FileChooser : OakChooser
 @property (nonatomic) oak::uuid_t const& currentDocument;
 
 @property (nonatomic) BOOL onlyShowOpenDocuments;
-@property (nonatomic) BOOL allowsMultipleSelection;
 
 + (instancetype)sharedInstance;
 @end

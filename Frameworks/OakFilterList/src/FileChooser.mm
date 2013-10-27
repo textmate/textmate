@@ -177,6 +177,8 @@ static path::glob_list_t globs_for_path (std::string const& path)
 {
 	if((self = [super init]))
 	{
+		self.tableView.allowsMultipleSelection = YES;
+
 		NSCell* cell = [OFBPathInfoCell new];
 		cell.lineBreakMode = NSLineBreakByTruncatingMiddle;
 		[[self.tableView tableColumnWithIdentifier:@"name"] setDataCell:cell];
@@ -263,9 +265,6 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	}
 	self.window.title = [NSString stringWithFormat:@"Go to File… — %@", src];
 }
-
-- (BOOL)allowsMultipleSelection                             { return self.tableView.allowsMultipleSelection; }
-- (void)setAllowsMultipleSelection:(BOOL)flag               { self.tableView.allowsMultipleSelection = flag; }
 
 - (oak::uuid_t const&)currentDocument                       { return _currentDocument; }
 - (void)setCurrentDocument:(oak::uuid_t const&)newDocument  { _currentDocument = newDocument; [self reload]; }
