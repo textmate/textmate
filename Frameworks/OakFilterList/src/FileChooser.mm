@@ -647,15 +647,7 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 			path += " — " + text::join(v, "/");
 		}
 
-		NSColor* textColor        = [NSColor controlTextColor];
-		NSColor* matchedTextColor = [NSColor controlTextColor];
-		if([aTableView isRowSelected:rowIndex] && [self.window isKeyWindow])
-		{
-			textColor        = [NSColor alternateSelectedControlTextColor];
-			matchedTextColor = [NSColor alternateSelectedControlTextColor];
-		}
-
-		NSMutableAttributedString* str = CreateAttributedStringWithMarkedUpRanges(OakControlFont(), textColor, matchedTextColor, path, record.cover);
+		NSMutableAttributedString* str = CreateAttributedStringWithMarkedUpRanges(path, record.cover);
 		NSMutableParagraphStyle* pStyle = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
 		[pStyle setLineBreakMode:NSLineBreakByTruncatingMiddle];
 		[str addAttribute:NSParagraphStyleAttributeName value:pStyle range:NSMakeRange(0, str.length)];

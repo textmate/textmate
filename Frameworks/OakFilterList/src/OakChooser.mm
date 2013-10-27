@@ -6,10 +6,10 @@
 #import <ns/ns.h>
 #import <text/ranker.h>
 
-NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (NSFont* baseFont, NSColor* textColor, NSColor* matchedTextColor, std::string const& in, std::vector< std::pair<size_t, size_t> > const& ranges, size_t offset)
+NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string const& in, std::vector< std::pair<size_t, size_t> > const& ranges, size_t offset)
 {
-	NSDictionary* baseAttributes      = @{ NSForegroundColorAttributeName : textColor,        };
-	NSDictionary* highlightAttributes = @{ NSForegroundColorAttributeName : matchedTextColor, NSUnderlineStyleAttributeName : @1 };
+	NSDictionary* baseAttributes      = @{ };
+	NSDictionary* highlightAttributes = @{ NSUnderlineStyleAttributeName : @1 };
 
 	NSMutableAttributedString* res = [[NSMutableAttributedString alloc] init];
 
