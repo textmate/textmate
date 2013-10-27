@@ -263,7 +263,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 		case 1: src = @"Open Documents";                               break;
 		case 2: src = @"Uncommitted Documents";                        break;
 	}
-	self.window.title = [NSString stringWithFormat:@"Go to File… — %@", src];
+	self.window.title = [NSString stringWithFormat:@"Go to File — %@", src];
 }
 
 - (oak::uuid_t const&)currentDocument                       { return _currentDocument; }
