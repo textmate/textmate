@@ -210,9 +210,7 @@ NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string
 
 - (id)tableView:(NSTableView*)aTableView objectValueForTableColumn:(NSTableColumn*)aTableColumn row:(NSInteger)rowIndex
 {
-	if([aTableColumn.identifier isEqualToString:@"name"])
-		return _items[rowIndex];
-	return nil;
+	return [_items[rowIndex] objectForKey:aTableColumn.identifier];
 }
 
 - (void)tableViewSelectionDidChange:(NSNotification*)notification
