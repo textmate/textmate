@@ -251,7 +251,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	_openDocumentsMap.clear();
 	_records.clear();
 
-	[super windowWillClose:aNotification];
+	self.items = @[ ];
 }
 
 - (void)updateWindowTitle

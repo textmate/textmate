@@ -22,6 +22,5 @@ PUBLIC @interface OakChooser : NSObject
 @property (nonatomic) NSTextField*   statusTextField;
 @property (nonatomic) NSTextField*   itemCountTextField;
 
-- (void)windowWillClose:(NSNotification*)aNotification;
 - (void)accept:(id)sender;
 @end

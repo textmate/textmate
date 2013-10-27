@@ -27,7 +27,6 @@ NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string
 }
 
 @interface OakChooser () <NSWindowDelegate, NSTableViewDataSource, NSTableViewDelegate>
-@property (nonatomic) OakChooser* retainedSelf;
 @end
 
 @implementation OakChooser
@@ -99,8 +98,6 @@ NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string
 		_window.delegate                    = self;
 		_window.level                       = NSFloatingWindowLevel;
 		_window.releasedWhenClosed          = NO;
-
-		_retainedSelf = self;
 	}
 	return self;
 }
@@ -122,12 +119,6 @@ NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string
 
 - (void)showWindow:(id)sender
 {
-	_retainedSelf = self;
-
-	_tableView.target     = self;
-	_tableView.dataSource = self;
-	_tableView.delegate   = self;
-
 	[_window makeKeyAndOrderFront:self];
 	[_window makeFirstResponder:_searchField];
 }
@@ -135,15 +126,6 @@ NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string
 - (void)close
 {
 	[_window performClose:self];
-}
-
-- (void)windowWillClose:(NSNotification*)aNotification
-{
-	_tableView.target     = nil;
-	_tableView.dataSource = nil;
-	_tableView.delegate   = nil;
-
-	_retainedSelf = nil;
 }
 
 // ==============
@@ -190,8 +172,7 @@ NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string
 	[_window orderOut:self];
 	if(_action)
 		[NSApp sendAction:_action to:_target from:self];
-
-	[_window close]; // Should be last as it gives up ‘retainedSelf’
+	[_window close];
 }
 
 - (void)cancel:(id)sender
