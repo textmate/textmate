@@ -60,8 +60,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 @property (nonatomic) NSDictionary* gutterImages;
 @property (nonatomic) NSDictionary* gutterHoverImages;
 @property (nonatomic) NSDictionary* gutterPressedImages;
-@property (nonatomic) OakFilterWindowController* filterWindowController;
-@property (nonatomic) SymbolChooser*             symbolChooser;
+@property (nonatomic) SymbolChooser* symbolChooser;
 @property (nonatomic) NSArray* observedKeys;
 - (void)updateStyle;
 @end
@@ -294,8 +293,7 @@ private:
 	[self setDocument:document::document_ptr()];
 	delete callback;
 
-	self.filterWindowController = nil;
-	self.symbolChooser          = nil;
+	self.symbolChooser = nil;
 }
 
 - (document::document_ptr const&)document
@@ -328,7 +326,10 @@ private:
 	[self updateStyle];
 
 	if(_symbolChooser)
-		_symbolChooser.document = document;
+	{
+		_symbolChooser.document        = document;
+		_symbolChooser.selectionString = textView.selectionString;
+	}
 
 	if(oldDocument)
 	{
@@ -475,44 +476,40 @@ private:
 // = Symbol Chooser =
 // ==================
 
-- (void)setFilterWindowController:(OakFilterWindowController*)controller
+- (void)setSymbolChooser:(SymbolChooser*)aSymbolChooser
 {
-	if(_filterWindowController == controller)
+	if(_symbolChooser == aSymbolChooser)
 		return;
 
-	if(_filterWindowController)
+	if(_symbolChooser)
 	{
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowWillCloseNotification object:_filterWindowController.window];
-		_filterWindowController.target = nil;
-		[_filterWindowController close];
+		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowWillCloseNotification object:_symbolChooser.window];
+
+		_symbolChooser.target   = nil;
+		_symbolChooser.document = document::document_ptr();
 	}
 
-	if(_filterWindowController = controller)
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(filterWindowWillClose:) name:NSWindowWillCloseNotification object:_filterWindowController.window];
+	if(_symbolChooser = aSymbolChooser)
+	{
+		_symbolChooser.target          = self;
+		_symbolChooser.action          = @selector(symbolChooserDidSelectItems:);
+		_symbolChooser.filterString    = @"";
+		_symbolChooser.document        = document;
+		_symbolChooser.selectionString = textView.selectionString;
+
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(symbolChooserWillClose:) name:NSWindowWillCloseNotification object:_symbolChooser.window];		
+	}
 }
 
-- (void)filterWindowWillClose:(NSNotification*)notification
+- (void)symbolChooserWillClose:(NSNotification*)aNotification
 {
-	self.filterWindowController = nil;
 	self.symbolChooser = nil;
 }
 
 - (IBAction)showSymbolChooser:(id)sender
 {
-	if(self.filterWindowController)
-	{
-		[self.filterWindowController.window makeKeyAndOrderFront:self];
-		return;
-	}
-
-	self.symbolChooser = [SymbolChooser symbolChooserForDocument:document];
-	self.symbolChooser.selectionString = textView.selectionString;
-
-	self.filterWindowController                         = [OakFilterWindowController new];
-	self.filterWindowController.dataSource              = self.symbolChooser;
-	self.filterWindowController.action                  = @selector(symbolChooserDidSelectItems:);
-	self.filterWindowController.sendActionOnSingleClick = YES;
-	[self.filterWindowController showWindowRelativeToWindow:self.window];
+	self.symbolChooser = [SymbolChooser sharedInstance];
+	[self.symbolChooser showWindowRelativeToFrame:[self.window convertRectToScreen:[textView convertRect:[textView visibleRect] toView:nil]]];
 }
 
 - (void)symbolChooserDidSelectItems:(id)sender
