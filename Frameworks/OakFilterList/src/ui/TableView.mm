@@ -101,23 +101,3 @@
 	_linkedTextField.delegate = nil;
 }
 @end
-
-NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (NSFont* baseFont, NSColor* textColor, NSColor* matchedTextColor, std::string const& in, std::vector< std::pair<size_t, size_t> > const& ranges, size_t offset)
-{
-	NSDictionary* baseAttributes      = @{ NSForegroundColorAttributeName : textColor,        };
-	NSDictionary* highlightAttributes = @{ NSForegroundColorAttributeName : matchedTextColor, NSUnderlineStyleAttributeName : @1 };
-
-	NSMutableAttributedString* res = [[NSMutableAttributedString alloc] init];
-
-	size_t from = 0;
-	for(auto range : ranges)
-	{
-		[res appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:std::string(in.begin() + from, in.begin() + range.first + offset)] attributes:baseAttributes]];
-		[res appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:std::string(in.begin() + range.first + offset, in.begin() + range.second + offset)] attributes:highlightAttributes]];
-		from = range.second + offset;
-	}
-	if(from < in.size())
-		[res appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:in.substr(from)] attributes:baseAttributes]];
-
-	return res;
-}

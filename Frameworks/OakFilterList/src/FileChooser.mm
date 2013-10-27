@@ -1,6 +1,5 @@
 #import "FileChooser.h"
 #import "OakAbbreviations.h"
-#import "ui/TableView.h"
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakFileIconImage.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
@@ -146,7 +145,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	return res;
 }
 
-@interface FileChooser () <NSWindowDelegate, NSTableViewDataSource, NSTableViewDelegate>
+@interface FileChooser ()
 {
 	scm::info_ptr                                 _scmInfo;
 	std::vector<document::document_ptr>           _openDocuments;
@@ -155,29 +154,22 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	std::vector<document_record_t>                _records;
 	document::scanner_ptr                         _scanner;
 }
-@property (nonatomic) NSSearchField*       searchField;
 @property (nonatomic) NSButton*            allButton;
 @property (nonatomic) NSButton*            openDocumentsButton;
 @property (nonatomic) NSButton*            scmChangesButton;
-@property (nonatomic) OakInactiveTableView* tableView;
-@property (nonatomic) NSTextField*         statusTextField;
-@property (nonatomic) NSTextField*         itemCountTextField;
 @property (nonatomic) NSProgressIndicator* progressIndicator;
 
 @property (nonatomic) NSUInteger           sourceIndex;
-@property (nonatomic) NSArray*             items;
 
 @property (nonatomic) BOOL                 polling;
 @property (nonatomic) NSTimer*             pollTimer;
 @property (nonatomic) CGFloat              pollInterval;
-
-@property (nonatomic) FileChooser*         retainedSelf;
 @end
 
 @implementation FileChooser
-+ (FileChooser*)sharedInstance
++ (instancetype)sharedInstance
 {
-	static FileChooser* sharedInstance = [FileChooser new];
+	static id sharedInstance = [self new];
 	return sharedInstance;
 }
 
@@ -185,13 +177,9 @@ static path::glob_list_t globs_for_path (std::string const& path)
 {
 	if((self = [super init]))
 	{
-		_items = @[ ];
-
-		_searchField = [[NSSearchField alloc] initWithFrame:NSZeroRect];
-		[_searchField.cell setScrollable:YES];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(controlTextDidChange:) name:NSControlTextDidChangeNotification object:_searchField];
-		if(![NSApp isFullKeyboardAccessEnabled])
-			_searchField.focusRingType = NSFocusRingTypeNone;
+		NSCell* cell = [OFBPathInfoCell new];
+		cell.lineBreakMode = NSLineBreakByTruncatingMiddle;
+		[[self.tableView tableColumnWithIdentifier:@"name"] setDataCell:cell];
 
 		_allButton           = OakCreateScopeButton(@"All",                   @selector(takeSourceIndexFrom:), 0);
 		_openDocumentsButton = OakCreateScopeButton(@"Open Documents",        @selector(takeSourceIndexFrom:), 1);
@@ -212,90 +200,30 @@ static path::glob_list_t globs_for_path (std::string const& path)
 		[scopeBar addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[allButton]-[openDocumentsButton]-[scmChangesButton]|" options:0 metrics:nil views:scopeButtons]];
 		[scopeBar addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[allButton]|" options:0 metrics:0 views:scopeButtons]];
 
-		NSCell* cell = [OFBPathInfoCell new];
-		cell.lineBreakMode = NSLineBreakByTruncatingMiddle;
-
-		NSTableColumn* tableColumn = [[NSTableColumn alloc] initWithIdentifier:@"name"];
-		[tableColumn setDataCell:cell];
-
-		_tableView = [[OakInactiveTableView alloc] initWithFrame:NSZeroRect];
-		[_tableView addTableColumn:tableColumn];
-		_tableView.headerView              = nil;
-		_tableView.focusRingType           = NSFocusRingTypeNone;
-		_tableView.allowsEmptySelection    = NO;
-		_tableView.allowsMultipleSelection = YES;
-		_tableView.refusesFirstResponder   = YES;
-		_tableView.doubleAction            = @selector(accept:);
-		_tableView.target                  = self;
-		_tableView.dataSource              = self;
-		_tableView.delegate                = self;
-		_tableView.linkedTextField         = _searchField;
-
-		NSScrollView* scrollView         = [[NSScrollView alloc] initWithFrame:NSZeroRect];
-		scrollView.hasVerticalScroller   = YES;
-		scrollView.hasHorizontalScroller = NO;
-		scrollView.autohidesScrollers    = YES;
-		scrollView.borderType            = NSNoBorder;
-		scrollView.documentView          = _tableView;
-
-		_statusTextField = [[NSTextField alloc] initWithFrame:NSZeroRect];
-		_statusTextField.bezeled         = NO;
-		_statusTextField.bordered        = NO;
-		_statusTextField.drawsBackground = NO;
-		_statusTextField.editable        = NO;
-		_statusTextField.font            = OakStatusBarFont();
-		_statusTextField.selectable      = NO;
-		[[_statusTextField cell] setBackgroundStyle:NSBackgroundStyleRaised];
-
-		_itemCountTextField = [[NSTextField alloc] initWithFrame:NSZeroRect];
-		_itemCountTextField.bezeled         = NO;
-		_itemCountTextField.bordered        = NO;
-		_itemCountTextField.drawsBackground = NO;
-		_itemCountTextField.editable        = NO;
-		_itemCountTextField.font            = OakStatusBarFont();
-		_itemCountTextField.selectable      = NO;
-		[[_itemCountTextField cell] setBackgroundStyle:NSBackgroundStyleRaised];
-
 		_progressIndicator = [[NSProgressIndicator alloc] initWithFrame:NSZeroRect];
 		_progressIndicator.style                = NSProgressIndicatorSpinningStyle;
 		_progressIndicator.controlSize          = NSSmallControlSize;
 		_progressIndicator.displayedWhenStopped = NO;
 
-		_window = [[NSPanel alloc] initWithContentRect:NSMakeRect(600, 700, 400, 500) styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSTexturedBackgroundWindowMask) backing:NSBackingStoreBuffered defer:NO];
-		[_window setAutorecalculatesContentBorderThickness:NO forEdge:NSMaxYEdge];
-		[_window setAutorecalculatesContentBorderThickness:NO forEdge:NSMinYEdge];
-		[_window setContentBorderThickness:57 forEdge: NSMaxYEdge];
-		[_window setContentBorderThickness:23 forEdge: NSMinYEdge];
-		[[_window standardWindowButton:NSWindowMiniaturizeButton] setHidden:YES];
-		[[_window standardWindowButton:NSWindowZoomButton] setHidden:YES];
-		_window.autorecalculatesKeyViewLoop = YES;
-		_window.delegate                    = self;
-		_window.level                       = NSFloatingWindowLevel;
-		_window.releasedWhenClosed          = NO;
-
 		NSDictionary* views = @{
-			@"searchField"        : _searchField,
+			@"searchField"        : self.searchField,
 			@"aboveScopeBarDark"  : OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]),
 			@"aboveScopeBarLight" : OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.797 alpha:1.000], [NSColor colorWithCalibratedWhite:0.912 alpha:1.000]),
 			@"scopeBar"           : scopeBar,
 			@"topDivider"         : OakCreateHorizontalLine([NSColor darkGrayColor], [NSColor colorWithCalibratedWhite:0.551 alpha:1.000]),
-			@"scrollView"         : scrollView,
+			@"scrollView"         : self.scrollView,
 			@"bottomDivider"      : OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]),
-			@"statusTextField"    : _statusTextField,
-			@"itemCountTextField" : _itemCountTextField,
+			@"statusTextField"    : self.statusTextField,
+			@"itemCountTextField" : self.itemCountTextField,
 			@"progressIndicator"  : _progressIndicator,
 		};
 
-		NSView* contentView = _window.contentView;
+		NSView* contentView = self.window.contentView;
 		for(NSView* view in [views allValues])
 		{
 			[view setTranslatesAutoresizingMaskIntoConstraints:NO];
 			[contentView addSubview:view];
 		}
-
-		[_statusTextField setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
-		[_statusTextField setContentHuggingPriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
-		[_itemCountTextField setContentHuggingPriority:NSLayoutPriorityDefaultHigh forOrientation:NSLayoutConstraintOrientationHorizontal];
 
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[searchField(>=50)]-(8)-|"                      options:0 metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[aboveScopeBarDark(==aboveScopeBarLight)]|"          options:0 metrics:nil views:views]];
@@ -308,53 +236,20 @@ static path::glob_list_t globs_for_path (std::string const& path)
 			self.sourceIndex = 1;
 
 		[self updateWindowTitle];
-
-		_retainedSelf = self;
 	}
 	return self;
-}
-
-- (void)dealloc
-{
-	[[NSNotificationCenter defaultCenter] removeObserver:self name:NSControlTextDidChangeNotification object:_searchField];
-
-	_window.delegate      = nil;
-	_tableView.target     = nil;
-	_tableView.dataSource = nil;
-	_tableView.delegate   = nil;
-}
-
-- (void)showWindow:(id)sender
-{
-	_retainedSelf = self;
-
-	_tableView.target     = self;
-	_tableView.dataSource = self;
-	_tableView.delegate   = self;
-
-	[_window makeKeyAndOrderFront:self];
-	[_window makeFirstResponder:_searchField];
-}
-
-- (void)close
-{
-	[_window performClose:self];
 }
 
 - (void)windowWillClose:(NSNotification*)aNotification
 {
 	[self shutdownScanner];
 
-	_tableView.target     = nil;
-	_tableView.dataSource = nil;
-	_tableView.delegate   = nil;
-
 	_scmInfo.reset();
 	_openDocuments.clear();
 	_openDocumentsMap.clear();
 	_records.clear();
 
-	_retainedSelf = nil;
+	[super windowWillClose:aNotification];
 }
 
 - (void)updateWindowTitle
@@ -366,11 +261,11 @@ static path::glob_list_t globs_for_path (std::string const& path)
 		case 1: src = @"Open Documents";                               break;
 		case 2: src = @"Uncommitted Documents";                        break;
 	}
-	_window.title = [NSString stringWithFormat:@"Go to File… — %@", src];
+	self.window.title = [NSString stringWithFormat:@"Go to File… — %@", src];
 }
 
-- (BOOL)allowsMultipleSelection                             { return _tableView.allowsMultipleSelection; }
-- (void)setAllowsMultipleSelection:(BOOL)flag               { _tableView.allowsMultipleSelection = flag; }
+- (BOOL)allowsMultipleSelection                             { return self.tableView.allowsMultipleSelection; }
+- (void)setAllowsMultipleSelection:(BOOL)flag               { self.tableView.allowsMultipleSelection = flag; }
 
 - (oak::uuid_t const&)currentDocument                       { return _currentDocument; }
 - (void)setCurrentDocument:(oak::uuid_t const&)newDocument  { _currentDocument = newDocument; [self reload]; }
@@ -408,20 +303,6 @@ static path::glob_list_t globs_for_path (std::string const& path)
 		[button setState:[button tag] == _sourceIndex ? NSOnState : NSOffState];
 
 	[self updateWindowTitle];
-}
-
-// =================
-// = Filter String =
-// =================
-
-- (void)setFilterString:(NSString*)aString
-{
-	if(_filterString == aString || [_filterString isEqualToString:aString])
-		return;
-
-	_filterString = [aString copy];
-	_searchField.stringValue = aString;
-	[self updateRecordsFrom:0];
 }
 
 - (void)addRecordsForDocuments:(std::vector<document::document_ptr> const&)documents
@@ -520,7 +401,7 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 
 - (void)updateRecordsFrom:(NSUInteger)first
 {
-	filter_string_t filter(to_s(_filterString));
+	filter_string_t filter(to_s(self.filterString));
 	path::glob_list_t glob;
 	std::string const basePath = to_s(_path);
 
@@ -556,35 +437,24 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 
 - (void)updateParents
 {
-	if(filter_string_t(to_s(_filterString)).path != NULL_STR)
+	if(filter_string_t(to_s(self.filterString)).path != NULL_STR)
 		return;
 
 	std::vector<std::string> paths;
-	for(NSNumber* index in _items)
+	for(NSNumber* index in self.items)
 	{
 		document_record_t const& record = _records[index.unsignedIntValue];
 		paths.push_back(record.full_path);
 	}
 
 	std::vector<size_t> const& visibleParents = path::disambiguate(paths);
-	for(NSUInteger i = 0; i < _items.count; ++i)
+	for(NSUInteger i = 0; i < self.items.count; ++i)
 	{
-		NSNumber* index = _items[i];
+		NSNumber* index = self.items[i];
 		_records[index.unsignedIntValue].display_parents = visibleParents[i];
 	}
 
-	[_tableView reloadData];
-}
-
-- (void)setItems:(NSArray*)anArray
-{
-	_items = anArray;
-	[_tableView reloadData];
-	[_tableView scrollRowToVisible:_tableView.selectedRow == -1 ? 0 : _tableView.selectedRow];
-
-	[self updateStatusText:self];
-
-	_itemCountTextField.stringValue = [NSString stringWithFormat:@"%@ item%s", [NSNumberFormatter localizedStringFromNumber:@(_items.count) numberStyle:NSNumberFormatterDecimalStyle], _items.count == 1 ? "" : "s"];
+	[self.tableView reloadData];
 }
 
 - (void)updateSCMStatus
@@ -592,10 +462,10 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 	if(!_scmInfo)
 		return;
 
-	NSRange visibleRange = [_tableView rowsInRect:[_tableView visibleRect]];
+	NSRange visibleRange = [self.tableView rowsInRect:[self.tableView visibleRect]];
 	for(NSUInteger row = visibleRange.location; row < NSMaxRange(visibleRange); ++row)
 	{
-		NSNumber* index = _items[row];
+		NSNumber* index = self.items[row];
 		document_record_t const& record = _records[index.unsignedIntValue];
 		if(record.full_path != NULL_STR)
 		{
@@ -603,7 +473,7 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 			if(record.image.scmStatus != scmStatus)
 			{
 				record.image.scmStatus = scmStatus;
-				[_tableView setNeedsDisplayInRect:[_tableView rectOfRow:row]];
+				[self.tableView setNeedsDisplayInRect:[self.tableView rectOfRow:row]];
 			}
 		}
 	}
@@ -698,21 +568,26 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 	_scanner.reset();
 }
 
+- (void)updateItems:(id)sender
+{
+	[self updateRecordsFrom:0];
+}
+
 - (void)updateStatusText:(id)sender
 {
 	if(_scanner)
 	{
 		std::string path = path::relative_to(_scanner->get_current_path(), to_s(_path));
-		[_statusTextField.cell setLineBreakMode:NSLineBreakByTruncatingMiddle];
-		_statusTextField.stringValue = [NSString stringWithFormat:@"Searching “%@”…", [NSString stringWithCxxString:path]];
+		[self.statusTextField.cell setLineBreakMode:NSLineBreakByTruncatingMiddle];
+		self.statusTextField.stringValue = [NSString stringWithFormat:@"Searching “%@”…", [NSString stringWithCxxString:path]];
 	}
-	else if(_tableView.selectedRow == -1)
+	else if(self.tableView.selectedRow == -1)
 	{
-		_statusTextField.stringValue = @"";
+		self.statusTextField.stringValue = @"";
 	}
 	else
 	{
-		NSNumber* index = _items[_tableView.selectedRow];
+		NSNumber* index = self.items[self.tableView.selectedRow];
 		document_record_t const& record = _records[index.unsignedIntValue];
 
 		std::string prefix = record.full_path;
@@ -728,25 +603,41 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 		}
 
 		std::string path = prefix + record.display;
-		[_statusTextField.cell setLineBreakMode:NSLineBreakByTruncatingHead];
-		_statusTextField.stringValue = [NSString stringWithCxxString:path];
+		[self.statusTextField.cell setLineBreakMode:NSLineBreakByTruncatingHead];
+		self.statusTextField.stringValue = [NSString stringWithCxxString:path];
 	}
+}
+
+- (NSArray*)selectedItems
+{
+	NSMutableArray* res = [NSMutableArray array];
+	NSIndexSet* indexes = [self.tableView selectedRowIndexes];
+	for(NSUInteger i = [indexes firstIndex]; i != NSNotFound; i = [indexes indexGreaterThanIndex:i])
+	{
+		NSNumber* index = self.items[i];
+		document_record_t const& record = _records[index.unsignedIntValue];
+
+		NSMutableDictionary* item = [NSMutableDictionary dictionary];
+		item[@"identifier"] = [NSString stringWithCxxString:record.identifier];
+		filter_string_t filter(to_s(self.filterString));
+		if(filter.selection != NULL_STR)
+			item[@"selectionString"] = [NSString stringWithCxxString:filter.selection];
+		if(record.full_path != NULL_STR)
+			item[@"path"] = [NSString stringWithCxxString:record.full_path];
+		[res addObject:item];
+	}
+	return res;
 }
 
 // =========================
 // = NSTableViewDataSource =
 // =========================
 
-- (NSInteger)numberOfRowsInTableView:(NSTableView*)aTableView
-{
-	return _items.count;
-}
-
 - (id)tableView:(NSTableView*)aTableView objectValueForTableColumn:(NSTableColumn*)aTableColumn row:(NSInteger)rowIndex
 {
 	if([aTableColumn.identifier isEqualToString:@"name"])
 	{
-		NSNumber* index = _items[rowIndex];
+		NSNumber* index = self.items[rowIndex];
 		document_record_t const& record = _records[index.unsignedIntValue];
 
 		std::string path = record.display;
@@ -774,38 +665,12 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 	return nil;
 }
 
-- (void)tableViewSelectionDidChange:(NSNotification*)notification
-{
-	[self updateStatusText:self];
-}
-
-- (NSArray*)selectedItems
-{
-	NSMutableArray* res = [NSMutableArray array];
-	NSIndexSet* indexes = [_tableView selectedRowIndexes];
-	for(NSUInteger i = [indexes firstIndex]; i != NSNotFound; i = [indexes indexGreaterThanIndex:i])
-	{
-		NSNumber* index = _items[i];
-		document_record_t const& record = _records[index.unsignedIntValue];
-
-		NSMutableDictionary* item = [NSMutableDictionary dictionary];
-		item[@"identifier"] = [NSString stringWithCxxString:record.identifier];
-		filter_string_t filter(to_s(_filterString));
-		if(filter.selection != NULL_STR)
-			item[@"selectionString"] = [NSString stringWithCxxString:filter.selection];
-		if(record.full_path != NULL_STR)
-			item[@"path"] = [NSString stringWithCxxString:record.full_path];
-		[res addObject:item];
-	}
-	return res;
-}
-
 - (void)tableView:(NSTableView*)aTableView willDisplayCell:(OFBPathInfoCell*)cell forTableColumn:(NSTableColumn*)aTableColumn row:(NSInteger)rowIndex
 {
 	if(![aTableColumn.identifier isEqualToString:@"name"])
 		return;
 
-	NSNumber* index = _items[rowIndex];
+	NSNumber* index = self.items[rowIndex];
 	document_record_t& record = _records[index.unsignedIntValue];
 
 	BOOL isOpen = NO, isModified = NO, isOnDisk = YES;
@@ -845,18 +710,14 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 
 - (void)accept:(id)sender
 {
-	[_window orderOut:self];
-	if(_action)
-		[NSApp sendAction:_action to:_target from:self];
-
-	if(_filterString)
+	if(self.filterString)
 	{
-		filter_string_t filter(to_s(_filterString));
+		filter_string_t filter(to_s(self.filterString));
 
-		NSIndexSet* indexes = [_tableView selectedRowIndexes];
+		NSIndexSet* indexes = [self.tableView selectedRowIndexes];
 		for(NSUInteger i = [indexes firstIndex]; i != NSNotFound; i = [indexes indexGreaterThanIndex:i])
 		{
-			NSNumber* index = _items[i];
+			NSNumber* index = self.items[i];
 			document_record_t const& record = _records[index.unsignedIntValue];
 
 			if(record.full_path != NULL_STR)
@@ -864,12 +725,7 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 		}
 	}
 
-	[_window close]; // Should be last as it gives up ‘retainedSelf’
-}
-
-- (void)cancel:(id)sender
-{
-	[self close];
+	[super accept:sender];
 }
 
 - (IBAction)goToParentFolder:(id)sender
@@ -879,7 +735,7 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 
 - (void)updateGoToMenu:(NSMenu*)aMenu
 {
-	if(_window.isKeyWindow)
+	if(self.window.isKeyWindow)
 	{
 		[[aMenu addItemWithTitle:@"All" action:@selector(takeSourceIndexFrom:) keyEquivalent:@"1"] setTag:0];
 		[[aMenu addItemWithTitle:@"Open Documents" action:@selector(takeSourceIndexFrom:) keyEquivalent:@"2"] setTag:1];
@@ -898,14 +754,5 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 	else if([item action] == @selector(takeSourceIndexFrom:))
 		[item setState:[item tag] == self.sourceIndex ? NSOnState : NSOffState];
 	return activate;
-}
-
-// =============================
-// = Search Field Notification =
-// =============================
-
-- (void)controlTextDidChange:(NSNotification*)aNotification
-{
-	self.filterString = _searchField.stringValue;
 }
 @end
