@@ -1,5 +1,13 @@
 # Changes
 
+## 2013-10-27 ([v2.0-alpha.9491](https://github.com/textmate/textmate/compare/v2.0-alpha.9489...v2.0-alpha.9491))
+
+* Opening files in the file browser can be done by single-clicking the icon. If you think the click-target is too small, you can make it open by clicking the text instead, this is activated by running the following in a terminal:
+
+        defaults write com.macromates.TextMate.preview fileBrowserSingleClickToOpen -bool true
+
+    If you wish to select items you either need to click to the left of the text, or hold down command (⌘) when clicking the item’s text.
+
 ## 2013-10-23 ([v2.0-alpha.9489](https://github.com/textmate/textmate/compare/v2.0-alpha.9487...v2.0-alpha.9489))
 
 * Using a “filtering” command with a column selection now has defined behavior: The command’s output will replace the subset selected on each line in the selection. The output is truncated if it has more lines than what’s selected and otherwise padded with blank lines. This isn’t identical to how TextMate 1.x dealt with this, but I find the new behavior slightly more useful, for example make a (zero-width) column selection and use _Text → Filter Through Command…_ (⌘|) to insert sequence numbers by running `seq 100` (no need to count how many lines are actually selected).
