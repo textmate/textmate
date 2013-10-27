@@ -54,10 +54,6 @@
 
 // ========================================
 
-@interface NSCell (DisableHighlight)
-@property (nonatomic) BOOL disableHighlight;
-@end
-
 @interface OakInactiveTableView ()
 @property (nonatomic) OakTextFieldMovementDelegate* textFieldMovementDelegate;
 @end
@@ -66,8 +62,11 @@
 - (NSCell*)preparedCellAtColumn:(NSInteger)column row:(NSInteger)row
 {
 	NSCell* res = [super preparedCellAtColumn:column row:row];
-	if([res respondsToSelector:@selector(setDisableHighlight:)])
-		[res setDisableHighlight:[self.window isKeyWindow]];
+	if(res.isHighlighted && [self.window isKeyWindow])
+	{
+		res.backgroundStyle = NSBackgroundStyleDark;
+		res.highlighted     = NO;
+	}
 	return res;
 }
 
