@@ -1,4 +1,6 @@
-@interface OakAbbreviations : NSObject
+#import <oak/misc.h>
+
+PUBLIC @interface OakAbbreviations : NSObject
 + (OakAbbreviations*)abbreviationsForName:(NSString*)aName;
 
 - (NSArray*)stringsForAbbreviation:(NSString*)anAbbreviation;
