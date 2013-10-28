@@ -353,11 +353,9 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 - (IBAction)openFavorites:(id)sender
 {
-	OakFilterWindowController* controller = [OakFilterWindowController new];
-	controller.dataSource              = [FavoritesDataSource favoritesDataSource];
-	controller.action                  = @selector(didSelectFavorite:);
-	controller.allowsMultipleSelection = YES;
-	[controller showWindow:self];
+	FavoriteChooser* chooser = [FavoriteChooser sharedInstance];
+	chooser.action = @selector(didSelectFavorite:);
+	[chooser showWindow:self];
 }
 
 - (void)didSelectFavorite:(id)sender

@@ -1,7 +1,5 @@
-#import <OakFilterList/OakFilterList.h>
-#import <text/ctype.h>
+#import <OakFilterList/OakChooser.h>
 
-@interface FavoritesDataSource : NSObject <FilterListDataSource>
-+ (FavoritesDataSource*)favoritesDataSource;
-@property (nonatomic, readonly) NSString* filterString;
+@interface FavoriteChooser : OakChooser
++ (instancetype)sharedInstance;
 @end
