@@ -177,6 +177,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 {
 	if((self = [super init]))
 	{
+		[self.window setContentBorderThickness:57 forEdge:NSMaxYEdge];
 		self.tableView.allowsMultipleSelection = YES;
 
 		NSCell* cell = [OFBPathInfoCell new];

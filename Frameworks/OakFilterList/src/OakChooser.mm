@@ -90,8 +90,8 @@ NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string
 		_window = [[NSPanel alloc] initWithContentRect:NSMakeRect(600, 700, 400, 500) styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSTexturedBackgroundWindowMask) backing:NSBackingStoreBuffered defer:NO];
 		[_window setAutorecalculatesContentBorderThickness:NO forEdge:NSMaxYEdge];
 		[_window setAutorecalculatesContentBorderThickness:NO forEdge:NSMinYEdge];
-		[_window setContentBorderThickness:57 forEdge: NSMaxYEdge];
-		[_window setContentBorderThickness:23 forEdge: NSMinYEdge];
+		[_window setContentBorderThickness:32 forEdge:NSMaxYEdge];
+		[_window setContentBorderThickness:23 forEdge:NSMinYEdge];
 		[[_window standardWindowButton:NSWindowMiniaturizeButton] setHidden:YES];
 		[[_window standardWindowButton:NSWindowZoomButton] setHidden:YES];
 		_window.autorecalculatesKeyViewLoop = YES;
