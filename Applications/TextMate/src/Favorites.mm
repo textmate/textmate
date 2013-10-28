@@ -1,4 +1,5 @@
 #import "Favorites.h"
+#import <OakFilterList/OakAbbreviations.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakSystem/application.h>
@@ -92,6 +93,10 @@
 {
 	std::string const filter = to_s(self.filterString);
 
+	std::vector<std::string> bindings;
+	for(NSString* str in [[OakAbbreviations abbreviationsForName:@"OakFavoriteChooserBindings"] stringsForAbbreviation:self.filterString])
+		bindings.push_back(to_s(str));
+
 	std::multimap<double, NSDictionary*> ranked;
 	for(auto const& pair : favorites)
 	{
@@ -109,7 +114,12 @@
 			double rank = oak::rank(filter, pair.first, &ranges);
 			if(rank > 0)
 			{
-				ranked.emplace(-rank, @{
+				size_t bindingIndex = std::find(bindings.begin(), bindings.end(), pair.second) - bindings.begin();
+				if(bindingIndex != bindings.size())
+						rank = -1.0 * (bindings.size() - bindingIndex);
+				else	rank = -rank;
+
+				ranked.emplace(rank, @{
 					@"name" : CreateAttributedStringWithMarkedUpRanges(pair.first, ranges),
 					@"info" : [NSString stringWithCxxString:path::with_tilde(pair.second)],
 					@"path" : [NSString stringWithCxxString:pair.second],
@@ -135,5 +145,15 @@
 	{
 		self.statusTextField.stringValue = @"";
 	}
+}
+
+- (void)accept:(id)sender
+{
+	if(self.filterString)
+	{
+		for(NSDictionary* item in self.selectedItems)
+			[[OakAbbreviations abbreviationsForName:@"OakFavoriteChooserBindings"] learnAbbreviation:self.filterString forString:[item objectForKey:@"path"]];
+	}
+	[super accept:sender];
 }
 @end
