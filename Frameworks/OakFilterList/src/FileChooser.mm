@@ -590,19 +590,18 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 		NSNumber* index = self.items[self.tableView.selectedRow];
 		document_record_t const& record = _records[index.unsignedIntValue];
 
-		std::string prefix = record.full_path;
-		if(prefix != NULL_STR)
+		std::string path = record.full_path;
+		if(path != NULL_STR)
 		{
-			prefix = path::with_tilde(prefix.substr(0, prefix.size() - record.display.size()));
-			if(prefix.size() && prefix[prefix.size()-1] != '/')
-				prefix += '/';
+			if(path.find(to_s(self.path)) == 0)
+					path = path::relative_to(path, to_s(self.path));
+			else	path = path::with_tilde(path);
 		}
 		else // untitled file
 		{
-			prefix = "";
+			path = record.display;
 		}
 
-		std::string path = prefix + record.display;
 		[self.statusTextField.cell setLineBreakMode:NSLineBreakByTruncatingHead];
 		self.statusTextField.stringValue = [NSString stringWithCxxString:path];
 	}
