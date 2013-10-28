@@ -4,7 +4,7 @@
 #import <text/ranker.h>
 #import <ns/ns.h>
 
-@interface FileChooserSymbolItem : NSObject
+@interface SymbolChooserItem : NSObject
 @property (nonatomic) NSString* path;
 @property (nonatomic) NSString* identifier;
 @property (nonatomic) NSString* selectionString;
@@ -12,13 +12,13 @@
 @property (nonatomic) NSString* infoString;
 @end
 
-@implementation FileChooserSymbolItem
+@implementation SymbolChooserItem
 - (id)objectForKey:(id)key { return [self valueForKey:key]; }
 @end
 
-static FileChooserSymbolItem* CreateItem (document::document_ptr const& document, text::pos_t const& pos, std::string const& candidate, std::vector< std::pair<size_t, size_t> > const& ranges)
+static SymbolChooserItem* CreateItem (document::document_ptr const& document, text::pos_t const& pos, std::string const& candidate, std::vector< std::pair<size_t, size_t> > const& ranges)
 {
-	FileChooserSymbolItem* res = [FileChooserSymbolItem new];
+	SymbolChooserItem* res = [SymbolChooserItem new];
 	res.path            = [NSString stringWithCxxString:document->path()];
 	res.identifier      = [NSString stringWithCxxString:document->identifier()];
 	res.selectionString = [NSString stringWithCxxString:pos];
@@ -101,15 +101,15 @@ static FileChooserSymbolItem* CreateItem (document::document_ptr const& document
 {
 	_selectionString = aString;
 
-	std::map<text::pos_t, FileChooserSymbolItem*> symbolItems;
-	for(FileChooserSymbolItem* item in self.items)
+	std::map<text::pos_t, SymbolChooserItem*> symbolItems;
+	for(SymbolChooserItem* item in self.items)
 	{
 		text::selection_t sel(to_s(item.selectionString));
 		text::pos_t pos = sel.last().min();
 		symbolItems.emplace(pos, item);
 	}
 
-	FileChooserSymbolItem* item = nil;
+	SymbolChooserItem* item = nil;
 	for(text::range_t const& range : text::selection_t(to_s(_selectionString)))
 	{
 		auto it = symbolItems.upper_bound(range.min());
@@ -139,7 +139,7 @@ static FileChooserSymbolItem* CreateItem (document::document_ptr const& document
 		else
 		{
 			std::string sectionName = NULL_STR;
-			std::multimap<double, FileChooserSymbolItem*> rankedItems;
+			std::multimap<double, SymbolChooserItem*> rankedItems;
 			for(auto const& pair : _document->symbols())
 			{
 				if(pair.second == "-")
@@ -165,7 +165,7 @@ static FileChooserSymbolItem* CreateItem (document::document_ptr const& document
 {
 	if(self.items.count != 0)
 	{
-		FileChooserSymbolItem* item = self.items[self.tableView.selectedRow == -1 ? 0 : self.tableView.selectedRow];
+		SymbolChooserItem* item = self.items[self.tableView.selectedRow == -1 ? 0 : self.tableView.selectedRow];
 		self.statusTextField.stringValue = item.infoString;
 	}
 	else
