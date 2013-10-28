@@ -1,6 +1,6 @@
 #include <oak/misc.h>
 
-NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string const& in, std::vector< std::pair<size_t, size_t> > const& ranges, size_t offset = 0);
+PUBLIC NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string const& in, std::vector< std::pair<size_t, size_t> > const& ranges, size_t offset = 0);
 
 PUBLIC @interface OakChooser : NSObject
 @property (nonatomic) NSWindow* window;
