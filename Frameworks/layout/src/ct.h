@@ -27,6 +27,7 @@ namespace ng
 		std::string tab     = "‣";
 		std::string space   = "·";
 		std::string newline = "¬";
+		std::string eof     = "⌁";
 	};
 
 } /* ng */

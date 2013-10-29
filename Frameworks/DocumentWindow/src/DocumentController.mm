@@ -869,7 +869,14 @@ namespace
 			if(filterUUID)
 				show_command_error(error, filterUUID);
 
-			[self openAndSelectDocument:document::from_content("TODO Reselect previously open document")];
+			if(_documents.empty() || (_documents.size() == 1 && _documents.front() == doc))
+				[self close];
+			else if(_documents[_selectedTabIndex]->identifier() == doc->identifier()) {
+				[self closeTabsAtIndexes:[NSIndexSet indexSetWithIndex:_selectedTabIndex] askToSaveChanges:NO createDocumentIfEmpty:NO];
+			} else {
+				// I don't think this can actually happen currently.
+				[self openAndSelectDocument:document::from_content("TODO Handle unhanded case of reselect previously open document")];
+			}
 		}
 	}];
 }

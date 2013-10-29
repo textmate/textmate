@@ -25,6 +25,8 @@ namespace ng
 	struct PUBLIC paragraph_t
 	{
 		size_t length () const;
+		bool isFirst;
+		bool isLast;
 
 		void insert (size_t pos, size_t len, ng::buffer_t const& buffer, size_t bufferOffset);
 		void insert_folded (size_t pos, size_t len, ng::buffer_t const& buffer, size_t bufferOffset);
@@ -56,7 +58,7 @@ namespace ng
 		bool structural_integrity () const { return true; }
 
 	private:
-		enum node_type_t { kNodeTypeText, kNodeTypeTab, kNodeTypeUnprintable, kNodeTypeFolding, kNodeTypeSoftBreak, kNodeTypeNewline };
+		enum node_type_t { kNodeTypeText, kNodeTypeTab, kNodeTypeUnprintable, kNodeTypeFolding, kNodeTypeSoftBreak, kNodeTypeNewline, kNodeTypeEOF };
 
 		struct node_t
 		{
