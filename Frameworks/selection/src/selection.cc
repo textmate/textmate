@@ -53,8 +53,14 @@ namespace ng
 			return boost::get<std::string>(value);
 		else if(text::is_word_char(buffer[index]))
 			return kCharacterClassWord;
-		else if(text::is_whitespace(buffer[index]))
-			return kCharacterClassSpace;
+		else
+		{
+			value = bundles::value_for_setting("wordCharacters", buffer.scope(index), &match);
+			if(match && boost::get<std::string>(value).find(buffer[index]) != std::string::npos)
+				return kCharacterClassWord;
+			else if(text::is_whitespace(buffer[index]))
+				return kCharacterClassSpace;
+		}
 		return kCharacterClassOther;
 	}
 
