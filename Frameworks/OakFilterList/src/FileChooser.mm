@@ -121,6 +121,76 @@ namespace
 		NSNumber* tableview_item = nil;
 		OakFileIconImage* image = nil;
 	};
+
+	inline void rank_record (document_record_t& record, filter_string_t const& filter, std::string const& basePath, path::glob_list_t const& glob, std::vector<std::string> const& bindings)
+	{
+		record.matched = false;
+		if(glob.exclude(record.full_path))
+			return;
+
+		if(filter.extension != NULL_STR)
+		{
+			// Check if filter string’s extension is a subset and that the
+			// subset match is followed by a period or is end of string.
+			std::string::size_type ext = record.name.find(filter.extension);
+			if(ext == std::string::npos || ext + filter.extension.size() < record.name.size() && record.name[ext + filter.extension.size()] != '.')
+				return;
+		}
+
+		record.cover.clear();
+		record.display         = record.name;
+		record.display_parents = 0;
+
+		if(!filter)
+		{
+			record.matched = true;
+			record.rank    = record.place_last ? 1 : 0;
+			return;
+		}
+
+		double path_rank = 1;
+		std::vector<std::pair<size_t, size_t>> path_cover;
+		if(filter.path != NULL_STR)
+		{
+			std::string prefix = (record.full_path == NULL_STR) ? "" : path::relative_to(path::parent(record.full_path), basePath);
+			if(double rank = oak::rank(filter.path, prefix, &path_cover))
+			{
+				path_rank = 1 - rank;
+				record.display = (record.full_path == NULL_STR) ? "" : prefix + (prefix.empty() ? "" : "/");
+			}
+			else
+			{
+				return;
+			}
+		}
+
+		if(double rank = oak::rank(filter.name, record.name, &record.cover))
+		{
+			record.matched = true;
+
+			if(filter.path != NULL_STR)
+			{
+				for(auto pair : record.cover)
+					path_cover.push_back(std::make_pair(pair.first + record.display.size(), pair.second + record.display.size()));
+				record.display = record.display + record.name;
+				record.cover.swap(path_cover);
+			}
+
+			size_t bindingIndex = std::find(bindings.begin(), bindings.end(), record.full_path) - bindings.begin();
+			if((filter.selection != NULL_STR || filter.symbol != NULL_STR) && record.place_last && filter.full_path().empty())
+				record.rank = 0;
+			else if(!filter.raw_path.empty() && path::is_child(filter.raw_path, record.full_path))
+				record.rank = 0;
+			else if(record.place_last)
+				record.rank = 1;
+			else if(bindingIndex != bindings.size())
+				record.rank = -1.0 * (bindings.size() - bindingIndex);
+			else if(filter.name.empty())
+				record.rank = path_rank;
+			else
+				record.rank = path_rank * (1 - rank);
+		}
+	}
 }
 
 static path::glob_list_t globs_for_path (std::string const& path)
@@ -327,76 +397,6 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	}
 
 	[self updateRecordsFrom:firstDirty];
-}
-
-inline void rank_record (document_record_t& record, filter_string_t const& filter, std::string const& basePath, path::glob_list_t const& glob, std::vector<std::string> const& bindings)
-{
-	record.matched = false;
-	if(glob.exclude(record.full_path))
-		return;
-
-	if(filter.extension != NULL_STR)
-	{
-		// Check if filter string’s extension is a subset and that the
-		// subset match is followed by a period or is end of string.
-		std::string::size_type ext = record.name.find(filter.extension);
-		if(ext == std::string::npos || ext + filter.extension.size() < record.name.size() && record.name[ext + filter.extension.size()] != '.')
-			return;
-	}
-
-	record.cover.clear();
-	record.display         = record.name;
-	record.display_parents = 0;
-
-	if(!filter)
-	{
-		record.matched = true;
-		record.rank    = record.place_last ? 1 : 0;
-		return;
-	}
-
-	double path_rank = 1;
-	std::vector<std::pair<size_t, size_t>> path_cover;
-	if(filter.path != NULL_STR)
-	{
-		std::string prefix = (record.full_path == NULL_STR) ? "" : path::relative_to(path::parent(record.full_path), basePath);
-		if(double rank = oak::rank(filter.path, prefix, &path_cover))
-		{
-			path_rank = 1 - rank;
-			record.display = (record.full_path == NULL_STR) ? "" : prefix + (prefix.empty() ? "" : "/");
-		}
-		else
-		{
-			return;
-		}
-	}
-
-	if(double rank = oak::rank(filter.name, record.name, &record.cover))
-	{
-		record.matched = true;
-
-		if(filter.path != NULL_STR)
-		{
-			for(auto pair : record.cover)
-				path_cover.push_back(std::make_pair(pair.first + record.display.size(), pair.second + record.display.size()));
-			record.display = record.display + record.name;
-			record.cover.swap(path_cover);
-		}
-
-		size_t bindingIndex = std::find(bindings.begin(), bindings.end(), record.full_path) - bindings.begin();
-		if((filter.selection != NULL_STR || filter.symbol != NULL_STR) && record.place_last && filter.full_path().empty())
-			record.rank = 0;
-		else if(!filter.raw_path.empty() && path::is_child(filter.raw_path, record.full_path))
-			record.rank = 0;
-		else if(record.place_last)
-			record.rank = 1;
-		else if(bindingIndex != bindings.size())
-			record.rank = -1.0 * (bindings.size() - bindingIndex);
-		else if(filter.name.empty())
-			record.rank = path_rank;
-		else
-			record.rank = path_rank * (1 - rank);
-	}
 }
 
 - (void)updateRecordsFrom:(NSUInteger)first
