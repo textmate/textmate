@@ -55,7 +55,6 @@ namespace
 	{
 		std::string path      = NULL_STR;
 		std::string name      = NULL_STR;
-		std::string extension = NULL_STR;
 		std::string selection = NULL_STR;
 		std::string symbol    = NULL_STR;
 		std::string raw_path  = NULL_STR;
@@ -65,15 +64,14 @@ namespace
 			if(str == NULL_STR || str.empty())
 				return;
 
-			if(regexp::match_t const& m = regexp::search("(?x)  \\A  (?: (?:/(?=.*/))? (.*) / )?  ([^/]*?)  (\\.[^/]+?)?  (?: :([\\d+:-x\\+]*) | @(.*) )?  \\z", str))
+			if(regexp::match_t const& m = regexp::search("(?x)  \\A  (?: (?:/(?=.*/))? (.*) / )?  ([^/]*?)  (?: :([\\d+:-x\\+]*) | @(.*) )?  \\z", str))
 			{
 				_initialized = true;
 
 				path      = m[1];
 				name      = m.did_match(2) ? m[2] : "";
-				extension = m[3];
-				selection = m[4];
-				symbol    = m[5];
+				selection = m[3];
+				symbol    = m[4];
 
 				raw_path = full_path();
 
@@ -84,7 +82,7 @@ namespace
 
 		std::string full_path () const
 		{
-			return (path != NULL_STR ? path + "/" : "") + name + (extension != NULL_STR ? extension : "");
+			return (path != NULL_STR ? path + "/" : "") + name;
 		}
 
 		explicit operator bool () const { return _initialized; }
@@ -127,15 +125,6 @@ namespace
 		record.matched = false;
 		if(glob.exclude(record.full_path))
 			return;
-
-		if(filter.extension != NULL_STR)
-		{
-			// Check if filter string’s extension is a subset and that the
-			// subset match is followed by a period or is end of string.
-			std::string::size_type ext = record.name.find(filter.extension);
-			if(ext == std::string::npos || ext + filter.extension.size() < record.name.size() && record.name[ext + filter.extension.size()] != '.')
-				return;
-		}
 
 		record.cover.clear();
 		record.display         = record.name;
