@@ -64,7 +64,12 @@ namespace
 			if(str == NULL_STR || str.empty())
 				return;
 
-			if(regexp::match_t const& m = regexp::search("(?x)  \\A  (?: (?:/(?=.*/))? (.*) / )?  ([^/]*?)  (?: :([\\d+:-x\\+]*) | @(.*) )?  \\z", str))
+			if(str.find("*") != std::string::npos)
+			{
+				_is_glob = true;
+				_glob = path::glob_t(str);
+			}
+			else if(regexp::match_t const& m = regexp::search("(?x)  \\A  (?: (?:/(?=.*/))? (.*) / )?  ([^/]*?)  (?: :([\\d+:-x\\+]*) | @(.*) )?  \\z", str))
 			{
 				_initialized = true;
 
@@ -85,10 +90,22 @@ namespace
 			return (path != NULL_STR ? path + "/" : "") + name;
 		}
 
+		bool is_glob () const
+		{
+			return _is_glob;
+		}
+
+		path::glob_t glob () const
+		{
+			return _glob;
+		}
+
 		explicit operator bool () const { return _initialized; }
 
 	private:
 		bool _initialized = false;
+		bool _is_glob = false;
+		path::glob_t _glob = "*";
 	};
 
 	struct document_record_t
@@ -391,29 +408,58 @@ static path::glob_list_t globs_for_path (std::string const& path)
 - (void)updateRecordsFrom:(NSUInteger)first
 {
 	filter_string_t filter(to_s(self.filterString));
-	path::glob_list_t glob;
 	std::string const basePath = to_s(_path);
-
-	std::vector<std::string> bindings;
-	for(NSString* str in [[OakAbbreviations abbreviationsForName:@"OakFileChooserBindings"] stringsForAbbreviation:[NSString stringWithCxxString:filter.full_path()]])
-		bindings.push_back(to_s(str));
-
-	size_t const count  = _records.size() - first;
-	size_t const stride = 256;
-	dispatch_apply(count / stride, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t n){
-		for(size_t i = n*stride; i < (n+1)*stride; ++i)
-			rank_record(_records[first + i], filter, basePath, glob, bindings);
-	});
-   for(size_t i = count - (count % stride); i < count; ++i)
-		rank_record(_records[first + i], filter, basePath, glob, bindings);
-
 	std::vector<document_record_t const*> include;
-	for(auto const& record : _records)
+
+	if(filter.is_glob())
 	{
-		if(record.matched)
-			include.push_back(&record);
+		for(size_t i = first; i < _records.size(); ++i)
+		{
+			auto& record = _records[i];
+			record.cover.clear();
+			record.display_parents = 0;
+
+			for(auto const& str : { record.name, path::relative_to(record.full_path, basePath), record.full_path })
+			{
+				if(record.matched = filter.glob().does_match(str))
+				{
+					record.display = str;
+					break;
+				}
+			}
+		}
+
+		for(auto const& record : _records)
+		{
+			if(record.matched)
+				include.push_back(&record);
+		}
+		std::sort(include.begin(), include.end(), [](document_record_t const* lhs, document_record_t const* rhs){ return lhs->name < rhs->name; });
 	}
-	std::sort(include.begin(), include.end(), [](document_record_t const* lhs, document_record_t const* rhs){ return (lhs->rank < rhs->rank) || ((lhs->rank == rhs->rank) && ((lhs->lru_rank < rhs->lru_rank) || (lhs->lru_rank == rhs->lru_rank && lhs->name < rhs->name))); });
+	else
+	{
+		path::glob_list_t glob;
+
+		std::vector<std::string> bindings;
+		for(NSString* str in [[OakAbbreviations abbreviationsForName:@"OakFileChooserBindings"] stringsForAbbreviation:[NSString stringWithCxxString:filter.full_path()]])
+			bindings.push_back(to_s(str));
+
+		size_t const count  = _records.size() - first;
+		size_t const stride = 256;
+		dispatch_apply(count / stride, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t n){
+			for(size_t i = n*stride; i < (n+1)*stride; ++i)
+				rank_record(_records[first + i], filter, basePath, glob, bindings);
+		});
+	   for(size_t i = count - (count % stride); i < count; ++i)
+			rank_record(_records[first + i], filter, basePath, glob, bindings);
+
+		for(auto const& record : _records)
+		{
+			if(record.matched)
+				include.push_back(&record);
+		}
+		std::sort(include.begin(), include.end(), [](document_record_t const* lhs, document_record_t const* rhs){ return (lhs->rank < rhs->rank) || ((lhs->rank == rhs->rank) && ((lhs->lru_rank < rhs->lru_rank) || (lhs->lru_rank == rhs->lru_rank && lhs->name < rhs->name))); });
+	}
 
 	NSMutableArray* array = [NSMutableArray arrayWithCapacity:include.size()];
 	for(auto record : include)
