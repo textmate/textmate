@@ -65,6 +65,7 @@ NSString* const kUserDefaultsShowFileExtensionsKey             = @"showFileExten
 NSString* const kUserDefaultsInitialFileBrowserURLKey          = @"initialFileBrowserURL";
 NSString* const kUserDefaultsFileBrowserPlacementKey           = @"fileBrowserPlacement";
 NSString* const kUserDefaultsFileBrowserSingleClickToOpenKey   = @"fileBrowserSingleClickToOpen";
+NSString* const kUserDefaultsFileBrowserOpenAnimationDisabled  = @"fileBrowserOpenAnimationDisabled";
 NSString* const kUserDefaultsFileBrowserStyleKey               = @"fileBrowserStyle";
 NSString* const kUserDefaultsHTMLOutputPlacementKey            = @"htmlOutputPlacement";
 NSString* const kUserDefaultsTabsAboveDocumentKey              = @"tabsAboveDocument";

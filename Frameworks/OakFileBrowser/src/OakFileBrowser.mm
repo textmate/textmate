@@ -1071,8 +1071,12 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 		}
 	}
 
-	for(FSItem* item in itemsToAnimate)
-		[OakZoomingIcon zoomIcon:item.icon fromRect:[self iconFrameForEntry:item]];
+	if(![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFileBrowserOpenAnimationDisabled])
+	{
+		for(FSItem* item in itemsToAnimate)
+			[OakZoomingIcon zoomIcon:item.icon fromRect:[self iconFrameForEntry:item]];
+	}
+
 	if([urlsToOpen count])
 		[_delegate fileBrowser:self openURLs:urlsToOpen];
 }
