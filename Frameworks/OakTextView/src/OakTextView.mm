@@ -165,7 +165,7 @@ static std::vector<bundles::item_ptr> items_for_tab_expansion (ng::buffer_t cons
 		bool isWordChar = CFCharacterSetIsLongCharacterMember(CFCharacterSetGetPredefined(kCFCharacterSetAlphaNumeric), utf8::to_ch(buffer[i]));
 		std::string characterClass = character_class(buffer, i);
 
-		if(i == bol || lastWasWordChar != isWordChar || lastCharacterClass != characterClass)
+		if(i == bol || lastWasWordChar != isWordChar || lastCharacterClass != characterClass || !isWordChar)
 		{
 			std::vector<bundles::item_ptr> const& items = bundles::query(bundles::kFieldTabTrigger, buffer.substr(i, caret), scope::context_t(ng::scope(buffer, ng::ranges_t(i), scopeAttributes).left, rightScope));
 			if(!items.empty())
