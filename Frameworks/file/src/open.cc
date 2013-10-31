@@ -12,6 +12,7 @@
 #include <settings/settings.h>
 #include <text/trim.h>
 #include <text/utf8.h>
+#include <text/newlines.h>
 #include <oak/server.h>
 #include <oak/debug.h>
 
@@ -240,42 +241,6 @@ static io::bytes_ptr convert (io::bytes_ptr content, std::string const& from, st
 	return bom ? remove_bom(content) : content;
 }
 
-// =====================
-// = Line Feed Support =
-// =====================
-
-template <typename _InputIter>
-std::string find_line_endings (_InputIter const& first, _InputIter const& last)
-{
-	size_t cr_count = std::count(first, last, '\r');
-	size_t lf_count = std::count(first, last, '\n');
-
-	if(cr_count == 0)
-		return kLF;
-	else if(lf_count == 0)
-		return kCR;
-	else if(lf_count == cr_count)
-		return kCRLF;
-	else
-		return kLF;
-}
-
-template <typename _InputIter>
-_InputIter harmonize_line_endings (_InputIter first, _InputIter last, std::string const& lineFeeds)
-{
-	_InputIter out = first;
-	while(first != last)
-	{
-		bool isCR = *first == '\r';
-		if(out != first || isCR)
-			*out = isCR ? '\n' : *first;
-		if(++first != last && isCR && *first == '\n')
-			++first;
-		++out;
-	}
-	return out;
-}
-
 // ===================================
 // = Default Callback Implementation =
 // ===================================
@@ -456,7 +421,7 @@ namespace
 					_state      = kStateIdle;
 					_next_state = kStateHarmonizeLineFeeds;
 
-					_encoding.set_newlines(find_line_endings(_content->begin(), _content->end()));
+					_encoding.set_newlines(text::estimate_line_endings(_content->begin(), _content->end()));
 					if(_encoding.newlines() != kMIX)
 							proceed();
 					else	_callback->select_line_feeds(_path, _content, shared_from_this());
@@ -467,7 +432,7 @@ namespace
 				{
 					if(_encoding.newlines() != kLF)
 					{
-						char* newEnd = harmonize_line_endings(_content->begin(), _content->end(), _encoding.newlines());
+						char* newEnd = text::convert_line_endings(_content->begin(), _content->end(), _encoding.newlines());
 						_content->resize(newEnd - _content->begin());
 					}
 					_state = kStateExecuteTextImportFilter;

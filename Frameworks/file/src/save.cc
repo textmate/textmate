@@ -1,5 +1,4 @@
 #include "save.h"
-#include "constants.h"
 #include "status.h"
 #include "encoding.h"
 #include "filter.h"
@@ -9,6 +8,7 @@
 #include <io/intermediate.h>
 #include <io/path.h>
 #include <text/trim.h>
+#include <text/newlines.h>
 #include <settings/settings.h>
 #include <command/parser.h>
 #include <oak/debug.h>
