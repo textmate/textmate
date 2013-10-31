@@ -1,5 +1,17 @@
 # Changes
 
+## 2013-10-31 ([v2.0-alpha.9493](https://github.com/textmate/textmate/compare/v2.0-alpha.9491...v2.0-alpha.9493))
+
+* If the _Go to File_ filter string contains an asterisk (`*`) it will be considered a file glob. Support for extension matching (by using a period in the filter string) has been removed. It did more harm than good, and the same can now be achieved by using an explicit glob string.
+* The zoom animation shown when opening items can now be disabled by running this in a terminal: `defaults write com.macromates.TextMate.preview fileBrowserOpenAnimationDisabled -bool YES`
+* You can now define word characters similar to 1.x by creating a new setting in the bundle editor with this content:
+
+		{ wordCharacters = «value»; }
+
+    The `«value»` is a string of which characters should be considered word characters. You can set the scope selector if you wish to limit the scope in which the characters should be considered a word character.
+
+    Units for word movement/selection, completion, etc. are defined using a different system, see [this FAQ item](https://github.com/textmate/textmate/wiki/FAQ#completion-considers-var-var-and-var-as-different).
+
 ## 2013-10-27 ([v2.0-alpha.9491](https://github.com/textmate/textmate/compare/v2.0-alpha.9489...v2.0-alpha.9491))
 
 * Opening files in the file browser can be done by single-clicking the icon. If you think the click-target is too small, you can make it open by clicking the text instead, this is activated by running the following in a terminal:
