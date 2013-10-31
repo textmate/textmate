@@ -263,8 +263,8 @@ void theme_t::shared_styles_t::setup_styles ()
 
 	// We assume that the first style is the unscoped root style
 
-	_foreground     = _styles.empty() ? CGColorPtr(CGColorCreate(_color_space, (CGFloat[4]){ 1, 1, 1, 1 }), CGColorRelease) : OakColorCreateFromThemeColor(_styles[0].foreground, _color_space);
-	_background     = _styles.empty() ? CGColorPtr(CGColorCreate(_color_space, (CGFloat[4]){ 0, 0, 0, 1 }), CGColorRelease) : OakColorCreateFromThemeColor(_styles[0].background, _color_space);
+	_foreground     = (_styles.empty() ? CGColorPtr() : OakColorCreateFromThemeColor(_styles[0].foreground, _color_space)) ?: CGColorPtr(CGColorCreate(_color_space, (CGFloat[4]){ 1, 1, 1, 1 }), CGColorRelease);
+	_background     = (_styles.empty() ? CGColorPtr() : OakColorCreateFromThemeColor(_styles[0].background, _color_space)) ?: CGColorPtr(CGColorCreate(_color_space, (CGFloat[4]){ 0, 0, 0, 1 }), CGColorRelease);
 	_is_dark        = color_is_dark(_background.get());
 	_is_transparent = CGColorGetAlpha(_background.get()) < 1;
 
