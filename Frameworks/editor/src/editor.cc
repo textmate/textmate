@@ -8,6 +8,7 @@
 #include <text/classification.h>
 #include <text/utf8.h>
 #include <text/hexdump.h>
+#include <text/newlines.h>
 #include <text/parse.h>
 #include <text/tokenize.h>
 #include <text/trim.h>
@@ -473,7 +474,7 @@ namespace ng
 
 		std::string str                            = entry->content();
 		std::map<std::string, std::string> options = entry->options();
-		std::replace(str.begin(), str.end(), '\r', '\n');
+		str.erase(text::convert_line_endings(str.begin(), str.end(), text::estimate_line_endings(str.begin(), str.end())), str.end());
 		str.erase(utf8::remove_malformed(str.begin(), str.end()), str.end());
 
 		std::string const& indent = options["indent"];
