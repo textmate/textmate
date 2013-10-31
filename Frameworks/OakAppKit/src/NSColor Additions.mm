@@ -1,5 +1,6 @@
 #import "NSColor Additions.h"
 #import <OakFoundation/OakFoundation.h>
+#import <oak/debug.h>
 
 @implementation NSColor (TMColorAdditions)
 + (NSColor*)colorWithString:(NSString*)aString
@@ -19,6 +20,7 @@
 
 + (NSColor*)tmColorWithCGColor:(CGColorRef)aColor
 {
+	ASSERT(aColor != nullptr);
 	if([self respondsToSelector:@selector(colorWithCGColor:)])
 		return [self colorWithCGColor:aColor];
 	return [NSColor colorWithColorSpace:[[NSColorSpace alloc] initWithCGColorSpace:CGColorGetColorSpace(aColor)] components:CGColorGetComponents(aColor) count:CGColorGetNumberOfComponents(aColor)];
