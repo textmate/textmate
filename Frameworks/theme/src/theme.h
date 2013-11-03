@@ -36,6 +36,8 @@ struct PUBLIC gutter_styles_t
 	gutter_styles_t& operator= (gutter_styles_t const& rhs) = delete;
 	~gutter_styles_t ();
 
+	bool is_transparent () const;
+
 	CGColorRef divider               = NULL;
 	CGColorRef selectionBorder       = NULL;
 
