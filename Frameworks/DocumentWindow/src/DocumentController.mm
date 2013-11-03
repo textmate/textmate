@@ -1887,7 +1887,11 @@ namespace
 	{
 		std::string str = to_s(entry.string);
 		if(regexp::search("\\A.*?(\\.|/).*?:\\d+\\z", str))
-			fc.filterString = entry.string;
+		{
+			if([entry.string hasPrefix:fc.path])
+					fc.filterString = [NSString stringWithCxxString:path::relative_to(str, to_s(fc.path))];
+			else	fc.filterString = entry.string;
+		}
 	}
 
 	[fc showWindowRelativeToFrame:[self.window convertRectToScreen:[self.textView convertRect:[self.textView visibleRect] toView:nil]]];
