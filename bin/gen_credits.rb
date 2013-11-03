@@ -13,6 +13,7 @@ require 'cgi'
 require 'dbm'
 require 'date'
 require 'yaml'
+require 'set'
 
 # Helper class to handle searching for GitHub users
 # by their email address. Caches mappings to a file
@@ -89,6 +90,7 @@ end
 
 def generate_credits(dbm_file)
   GitHubLookup.initialize(dbm_file)
+  did_warn_db = Set.new
 
   # use git's log command to pull out basic info:
   # git hash, author name, email address, author date, commit summary
@@ -116,7 +118,12 @@ def generate_credits(dbm_file)
       # profile.
       if !user || user == ''
         user = nil
-        STDERR << "WARNING: failed to find GitHub user for #{name} <#{fields[2]}>\n";
+
+        key = "#{name} <#{fields[2]}>"
+        unless did_warn_db.include?(key)
+          did_warn_db.add(key)
+          STDERR << "WARNING: failed to find GitHub user for #{key}\n";
+        end
       end
 
       yield(hash, name, subject, body, userpic, date, user)
