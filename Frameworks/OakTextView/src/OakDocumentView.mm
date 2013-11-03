@@ -344,7 +344,7 @@ private:
 	{
 		auto theme = [textView theme];
 
-		[[self window] setOpaque:!theme->is_transparent()];
+		[[self window] setOpaque:!theme->is_transparent() && !theme->gutter_styles().is_transparent()];
 		[textScrollView setBackgroundColor:[NSColor tmColorWithCGColor:theme->background(document->file_type())]];
 
 		if(theme->is_dark())
