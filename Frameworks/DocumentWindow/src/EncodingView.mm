@@ -180,6 +180,9 @@ static NSAttributedString* convert_and_highlight (char const* first, char const*
 		eol += crlf - 1;
 	}
 
+	if(bol < dst.size())
+		append(output, dst.data() + bol, dst.data() + dst.size(), regularStyle);
+
 	return output;
 }
 
