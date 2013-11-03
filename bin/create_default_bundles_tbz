@@ -17,5 +17,5 @@ bl="$builddir/Applications/bl/bl"
 { [ -x "$bl" ] || ninja "$bl"; } && \
 	mkdir -p "$BUNDLES_DST/Managed" && \
 	"$bl" -C "$BUNDLES_DST/Managed" install Apache Bundle\ Development Bundle\ Support C CSS Diff Git HTML Hyperlink\ Helper JavaScript JSON Mail Make Markdown Math Mercurial Objective-C PHP Property\ List Python Ruby SCM Shell\ Script Source SQL Subversion Text TextMate Themes TODO XML && \
-	gnutar -cf "$TBZ_DST~" "$BZIP2_FLAG" -C "$BUNDLES_DST" "Managed" && \
+	/usr/bin/tar -cf "$TBZ_DST~" "$BZIP2_FLAG" -C "$BUNDLES_DST" "Managed" && \
 	mv "$TBZ_DST~" "$TBZ_DST"
