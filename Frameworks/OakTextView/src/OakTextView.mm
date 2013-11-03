@@ -738,6 +738,11 @@ doScroll:
 // = Generic view stuff =
 // ======================
 
++ (BOOL)isCompatibleWithResponsiveScrolling
+{
+	return NO;
+}
+
 - (BOOL)acceptsFirstResponder       { return YES; }
 - (BOOL)isFlipped                   { return YES; }
 - (BOOL)isOpaque                    { return YES; }
