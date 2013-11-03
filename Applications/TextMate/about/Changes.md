@@ -1,6 +1,6 @@
 # Changes
 
-## 2013-10-31 ([v2.0-alpha.9493](https://github.com/textmate/textmate/compare/v2.0-alpha.9491...v2.0-alpha.9493))
+## 2013-11-03 ([v2.0-alpha.9495](https://github.com/textmate/textmate/compare/v2.0-alpha.9489...v2.0-alpha.9495))
 
 * If the _Go to File_ filter string contains an asterisk (`*`) it will be considered a file glob. Support for extension matching (by using a period in the filter string) has been removed. It did more harm than good, and the same can now be achieved by using an explicit glob string.
 * The zoom animation shown when opening items can now be disabled by running this in a terminal: `defaults write com.macromates.TextMate.preview fileBrowserOpenAnimationDisabled -bool YES`
@@ -12,13 +12,13 @@
 
     Units for word movement/selection, completion, etc. are defined using a different system, see [this FAQ item](https://github.com/textmate/textmate/wiki/FAQ#completion-considers-var-var-and-var-as-different).
 
-## 2013-10-27 ([v2.0-alpha.9491](https://github.com/textmate/textmate/compare/v2.0-alpha.9489...v2.0-alpha.9491))
-
 * Opening files in the file browser can be done by single-clicking the icon. If you think the click-target is too small, you can make it open by clicking the text instead, this is activated by running the following in a terminal:
 
         defaults write com.macromates.TextMate.preview fileBrowserSingleClickToOpen -bool true
 
     If you wish to select items you either need to click to the left of the text, or hold down command (⌘) when clicking the item’s text.
+
+* Fix missing transparent backgrounds on 10.9.
 
 ## 2013-10-23 ([v2.0-alpha.9489](https://github.com/textmate/textmate/compare/v2.0-alpha.9487...v2.0-alpha.9489))
 
