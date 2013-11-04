@@ -122,10 +122,10 @@
 	if([[request URL] isFileURL])
 	{
 		NSURL* redirectURL = [NSURL URLWithString:[NSString stringWithFormat:@"file://localhost%@?path=%@&error=1", [[[NSBundle bundleForClass:[self class]] pathForResource:@"error_not_found" ofType:@"html"] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], [[[request URL] path] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]];
-		std::string const path = [[[request URL] path] fileSystemRepresentation];
+		char const* path = [[[request URL] path] fileSystemRepresentation];
 
 		struct stat buf;
-		if(stat(path.c_str(), &buf) == 0)
+		if(path && stat(path, &buf) == 0)
 		{
 			if(S_ISREG(buf.st_mode) || S_ISLNK(buf.st_mode))
 			{
