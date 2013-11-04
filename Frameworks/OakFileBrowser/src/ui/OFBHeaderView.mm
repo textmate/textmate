@@ -49,12 +49,9 @@ static NSPopUpButton* OakCreateFolderPopUpButton ()
 		[self.goBackButton.cell accessibilitySetOverrideValue:self.goBackButton.toolTip forAttribute:NSAccessibilityDescriptionAttribute];
 		[self.goForwardButton.cell accessibilitySetOverrideValue:self.goForwardButton.toolTip forAttribute:NSAccessibilityDescriptionAttribute];
 
-		NSImageView* divider = OakCreateDividerImageView();
-		[divider setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationVertical];
-
 		NSDictionary* views = @{
 			@"folder"   : self.folderPopUpButton,
-			@"divider"  : divider,
+			@"divider"  : OakCreateDividerImageView(),
 			@"back"     : self.goBackButton,
 			@"forward"  : self.goForwardButton,
 		};

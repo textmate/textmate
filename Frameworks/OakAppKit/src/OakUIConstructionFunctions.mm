@@ -176,5 +176,6 @@ NSImageView* OakCreateDividerImageView ()
 {
 	NSImageView* res = [[NSImageView alloc] initWithFrame:NSZeroRect];
 	[res setImage:[NSImage imageNamed:@"Divider" inSameBundleAsClass:[OakDividerLineView class]]];
+	[res setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
 	return res;
 }
