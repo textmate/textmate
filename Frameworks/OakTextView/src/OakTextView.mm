@@ -755,7 +755,13 @@ doScroll:
 
 - (void)drawRect:(NSRect)aRect
 {
-	if(theme && theme->is_transparent())
+	if(!editor || !theme || !layout)
+	{
+		NSEraseRect(aRect);
+		return;
+	}
+
+	if(theme->is_transparent())
 	{
 		[[NSColor clearColor] set];
 		NSRectFill(aRect);
