@@ -116,7 +116,7 @@ namespace indent
 		{
 			if(type & (kIncrease | kDecrease))
 				_carry = 0;
-			if(type & kDecrease)
+			if(type & kDecrease && (!(type & kIncrease) || _level > 0))
 				_level -= _indent_size;
 
 			res = _level + _carry;
