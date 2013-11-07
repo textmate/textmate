@@ -17,7 +17,12 @@
 	{
 		if(_tableView.allowsMultipleSelection == NO)
 			extend = NO;
-		NSInteger row = oak::cap((NSInteger)0, [_tableView selectedRow] + anOffset, [_tableView numberOfRows] - 1);
+
+		// let the selection wrap
+		NSInteger row = [_tableView selectedRow] + anOffset;
+		if (row < 0) row = [_tableView numberOfRows] - 1;
+		else if (row > [_tableView numberOfRows] - 1) row = (NSInteger)0;
+
 		[_tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:extend];
 		[_tableView scrollRowToVisible:row];
 	}
