@@ -5,7 +5,7 @@ encoding = "UTF-8"
 
 exclude  = "{*.{o,pyc},Icon\r,CVS,_darcs,_MTN,\{arch\},blib,*~.nib}"
 include  = "{*,.tm_properties,.htaccess}"
-binary   = "{*.{ai,gif,icns,ico,jpg,jpeg,m4v,nib,o,pdf,png,psd,pyc,rtf,scssc,tif,tiff,xib},Icon\r}"
+binary   = "{*.{ai,bz2,gif,gz,icns,ico,jpg,jpeg,m4v,nib,o,pdf,png,psd,pyc,rtf,scssc,tar,tbz,tgz,tif,tiff,xib,zip},Icon\r}"
 
 windowTitleSCM     = '${TM_SCM_BRANCH:+ ($TM_SCM_NAME: $TM_SCM_BRANCH)}'
 windowTitleProject = '${projectDirectory:+ — ${projectDirectory/^.*\///}}'
