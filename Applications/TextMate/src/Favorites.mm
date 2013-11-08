@@ -51,31 +51,35 @@
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView(==topDivider,==bottomDivider)]|"         options:0 metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[statusTextField]-[itemCountTextField]-|"      options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(2)-[searchField]-(8)-[topDivider][scrollView(>=50)][bottomDivider]-(4)-[statusTextField]-(5)-|" options:0 metrics:nil views:views]];
-
-		std::string const favoritesPath = oak::application_t::support("Favorites");
-		for(auto const& entry : path::entries(favoritesPath))
-		{
-			if(entry->d_type == DT_LNK)
-			{
-				std::string const path = path::resolve(path::join(favoritesPath, entry->d_name));
-				if(strncmp("[DIR] ", entry->d_name, 6) == 0)
-				{
-					for(auto const& subentry : path::entries(path))
-					{
-						if(subentry->d_type == DT_DIR)
-							favorites.emplace(text::format("%s — %s", subentry->d_name, entry->d_name + 6), path::join(path, subentry->d_name));
-					}
-				}
-				else
-				{
-					favorites.emplace(entry->d_name, path);
-				}
-			}
-		}
-
-		[self updateItems:self];
 	}
 	return self;
+}
+
+- (void)scanFavoritesDirectory:(id)sender
+{
+	favorites.clear();
+
+	std::string const favoritesPath = oak::application_t::support("Favorites");
+	for(auto const& entry : path::entries(favoritesPath))
+	{
+		if(entry->d_type == DT_LNK)
+		{
+			std::string const path = path::resolve(path::join(favoritesPath, entry->d_name));
+			if(strncmp("[DIR] ", entry->d_name, 6) == 0)
+			{
+				for(auto const& subentry : path::entries(path))
+				{
+					if(subentry->d_type == DT_DIR)
+						favorites.emplace(text::format("%s — %s", subentry->d_name, entry->d_name + 6), path::join(path, subentry->d_name));
+				}
+			}
+			else
+			{
+				favorites.emplace(entry->d_name, path);
+			}
+		}
+	}
+	[self updateItems:self];
 }
 
 - (void)showWindow:(id)sender
@@ -83,6 +87,7 @@
 	if(![self.window isVisible])
 	{
 		self.filterString = @"";
+		[self scanFavoritesDirectory:self];
 		if([self.tableView numberOfRows])
 			[self.tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
 	}
