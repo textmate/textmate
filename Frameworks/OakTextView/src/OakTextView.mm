@@ -1005,7 +1005,7 @@ doScroll:
 			ATTR(SelectedText),
 			ATTR(SelectedTextRange),
 			ATTR(SelectedTextRanges),
-			// ATTR(VisibleCharacterRange),
+			ATTR(VisibleCharacterRange),
 		]];
 
 		attributes = [[set setByAddingObjectsFromArray:[super accessibilityAttributeNames]] allObjects];
@@ -1040,7 +1040,14 @@ doScroll:
 		iterate(range, ranges)
 			[nsRanges addObject:[NSValue valueWithRange:[self nsRangeForRange:(*range)]]];
 		ret = nsRanges;
-	// } HANDLE_ATTR(VisibleCharacterRange) { //TODO
+	} HANDLE_ATTR(VisibleCharacterRange) {
+		NSRect visibleRect = [self visibleRect];
+		CGPoint startPoint = NSPointToCGPoint(NSMakePoint(NSMinX(visibleRect), NSMaxY(visibleRect)));
+		CGPoint   endPoint = NSPointToCGPoint(NSMakePoint(NSMinX(visibleRect), NSMinY(visibleRect)));
+		ng::range_t visibleRange(layout->index_at_point(startPoint), layout->index_at_point(endPoint));
+		visibleRange = visibleRange.sorted();
+		visibleRange.last = layout->index_below(visibleRange.last);
+		return [NSValue valueWithRange:[self nsRangeForRange:visibleRange]];
 	} else {
 		ret = [super accessibilityAttributeValue:attribute];
 	}
