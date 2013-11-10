@@ -416,6 +416,7 @@ namespace ng
 		rowIter->key._length = rowIter->value.length();
 		rowIter->key._width  = rowIter->value.width();
 		rowIter->key._height = rowIter->value.height(*_metrics);
+		rowIter->key._softlines = rowIter->value.softline_count(*_metrics);
 
 		_rows.update_key(rowIter);
 		return oldHeight != rowIter->key._height;

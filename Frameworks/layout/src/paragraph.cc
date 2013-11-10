@@ -428,6 +428,11 @@ namespace ng
 		return softlines;
 	}
 
+	size_t paragraph_t::softline_count(ct::metrics_t const& metrics, bool softBreaksOnNewline) const
+	{
+		return softlines(metrics, softBreaksOnNewline).size();
+	}
+
 	std::vector<paragraph_t::node_t>::iterator paragraph_t::iterator_at (size_t i)
 	{
 		size_t from = 0;
