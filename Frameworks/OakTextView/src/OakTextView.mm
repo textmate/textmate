@@ -1134,13 +1134,7 @@ doScroll:
 		ret = [NSValue valueWithRange:[self nsRangeForRange:ng::range_t(index, index + length)]];
 	} HANDLE_PATTR(BoundsForRange) {
 		ng::range_t range = [self rangeForNSRange:[((NSValue*)parameter) rangeValue]];
-		if(!range.empty()) // TODO ask accessibility-dev@lists.apple.com if there is a better approach for dealing with newlines
-		{
-			size_t const max = range.max().index;
-			if(editor->as_string(max - 1, max) == "\n")
-				range.max().index -= 1;
-		}
-		NSRect rect = layout->rect_for_range(range.min().index, range.max().index);
+		NSRect rect = layout->rect_for_range(range.min().index, range.max().index, true);
 		rect = [self convertRect:rect toView:nil];
 		rect = [[self window] convertRectToScreen:rect];
 		ret = [NSValue valueWithRect:rect];
