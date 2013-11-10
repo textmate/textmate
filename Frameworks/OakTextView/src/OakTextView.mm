@@ -1025,7 +1025,7 @@ doScroll:
 	} HANDLE_ATTR(Value) {
 		ret = [NSString stringWithCxxString:editor->as_string()];
 	} HANDLE_ATTR(InsertionPointLineNumber) {
-		ret = [NSNumber numberWithUnsignedLong:buffer.convert(editor->ranges().last().min().index).line];
+		ret = [NSNumber numberWithUnsignedLong:layout->softline_for_index(editor->ranges().last().min())];
 	} HANDLE_ATTR(NumberOfCharacters) {
 		ret = [NSNumber numberWithUnsignedInteger:[self nsRangeForRange:ng::range_t(0, buffer.size())].length];
 	} HANDLE_ATTR(SelectedText) {
@@ -1109,12 +1109,11 @@ doScroll:
 	} HANDLE_PATTR(LineForIndex) {
 		size_t index = [((NSNumber*)parameter) unsignedLongValue];
 		index = [self rangeForNSRange:NSMakeRange(index, 0)].min().index;
-		text::pos_t pos = document->buffer().convert(index);
-		ret = [NSNumber numberWithUnsignedLong:pos.line];
+		size_t line = layout->softline_for_index(index);
+		ret = [NSNumber numberWithUnsignedLong:line];
 	} HANDLE_PATTR(RangeForLine) {
 		size_t line = [((NSNumber*)parameter) unsignedLongValue];
-		size_t begin = document->buffer().begin(line), end = document->buffer().end(line);
-		ng::range_t const range(begin, end);
+		ng::range_t const range = layout->range_for_softline(line);
 		ret = [NSValue valueWithRange:[self nsRangeForRange:range]];
 	} HANDLE_PATTR(StringForRange) {
 		ng::range_t range = [self rangeForNSRange:[((NSValue*)parameter) rangeValue]];
