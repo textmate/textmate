@@ -789,6 +789,20 @@ namespace ng
 		return advance(_buffer, bolPageDown.index, count_columns(_buffer, bol.index, index.index) + index.carry, eolPageDown.index);
 	}
 
+	size_t layout_t::softline_for_index(ng::index_t const& index) const
+	{
+		auto row = row_for_offset(index.index);
+		return row->value.softline_for_index(index.index, _buffer, row->offset._length, row->offset._softlines, *_metrics);
+	}
+
+	ng::range_t layout_t::range_for_softline(size_t softline) const
+	{
+		auto row = _rows.upper_bound(softline, &row_softline_comp);
+		if(row != _rows.begin())
+			--row;
+		return row->value.range_for_softline(softline, _buffer, row->offset._length, row->offset._softlines, *_metrics);
+	}
+
 	// =============
 	// = Rendering =
 	// =============
