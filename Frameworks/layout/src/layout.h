@@ -88,6 +88,9 @@ namespace ng
 		ng::index_t page_up_for (index_t const& index) const;
 		ng::index_t page_down_for (index_t const& index) const;
 
+		size_t softline_for_index (ng::index_t const& index) const;
+		ng::range_t range_for_softline (size_t softline) const;
+
 		// ===================
 		// = Folding Support =
 		// ===================
