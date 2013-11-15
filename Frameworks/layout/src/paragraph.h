@@ -36,7 +36,7 @@ namespace ng
 		void draw_foreground (theme_ptr const& theme, ct::metrics_t const& metrics, ng::context_t const& context, bool isFlipped, CGRect visibleRect, ng::invisibles_t const& invisibles, ng::buffer_t const& buffer, size_t bufferOffset, ng::ranges_t const& selection, CGPoint anchor) const;
 
 		ng::index_t index_at_point (CGPoint point, ct::metrics_t const& metrics, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor) const;
-		CGRect rect_at_index (ng::index_t const& index, ct::metrics_t const& metrics, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor) const;
+		CGRect rect_at_index (ng::index_t const& index, ct::metrics_t const& metrics, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor, bool bol_as_eol = false) const;
 
 		ng::line_record_t line_record_for (size_t line, size_t pos, ct::metrics_t const& metrics, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor) const;
 
@@ -45,6 +45,10 @@ namespace ng
 
 		size_t index_left_of (size_t index, ng::buffer_t const& buffer, size_t bufferOffset) const;
 		size_t index_right_of (size_t index, ng::buffer_t const& buffer, size_t bufferOffset) const;
+
+		size_t softline_count (ct::metrics_t const& metrics, bool softBreaksOnNewline = false) const;
+		size_t softline_for_index(ng::index_t const& index, ng::buffer_t const& buffer, size_t bufferOffset, size_t softlineOffset, ct::metrics_t const& metrics, bool softBreaksOnNewline = false) const;
+		ng::range_t range_for_softline(size_t softline, ng::buffer_t const& buffer, size_t bufferOffset, size_t softlineOffset, ct::metrics_t const& metrics, bool softBreaksOnNewline = false) const;
 
 		void set_wrapping (bool softWrap, size_t wrapColumn, ct::metrics_t const& metrics);
 		void set_tab_size (size_t tabSize, ct::metrics_t const& metrics);

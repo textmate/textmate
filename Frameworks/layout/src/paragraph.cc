@@ -428,6 +428,31 @@ namespace ng
 		return softlines;
 	}
 
+	size_t paragraph_t::softline_count(ct::metrics_t const& metrics, bool softBreaksOnNewline) const
+	{
+		return softlines(metrics, softBreaksOnNewline).size();
+	}
+
+	size_t paragraph_t::softline_for_index(ng::index_t const& index, ng::buffer_t const& buffer, size_t bufferOffset, size_t softlineOffset, ct::metrics_t const& metrics, bool softBreaksOnNewline) const
+	{
+		std::vector<softline_t> const softlines = this->softlines(metrics, softBreaksOnNewline);
+		auto it = std::upper_bound(softlines.begin(), softlines.end(), index.index - bufferOffset, [](size_t offset, softline_t const& softline) -> bool {
+			return offset < softline.offset;
+		});
+		ASSERT_NE(it, softlines.begin());
+		return softlineOffset + (--it - softlines.begin());
+	}
+
+	ng::range_t paragraph_t::range_for_softline(size_t softline, ng::buffer_t const& buffer, size_t bufferOffset, size_t softlineOffset, ct::metrics_t const& metrics, bool softBreaksOnNewline) const
+	{
+		std::vector<softline_t> const softlines = this->softlines(metrics, softBreaksOnNewline);
+		ASSERT_LT(softline - softlineOffset, softlines.size());
+		auto it = softlines.begin() + (softline - softlineOffset);
+		ng::range_t range(it->offset);
+		range.last = ++it != softlines.end() ? it->offset : length();
+		return range + bufferOffset;
+	}
+
 	std::vector<paragraph_t::node_t>::iterator paragraph_t::iterator_at (size_t i)
 	{
 		size_t from = 0;
@@ -577,7 +602,7 @@ namespace ng
 		return bufferOffset + length();
 	}
 
-	CGRect paragraph_t::rect_at_index (ng::index_t const& index, ct::metrics_t const& metrics, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor) const
+	CGRect paragraph_t::rect_at_index (ng::index_t const& index, ct::metrics_t const& metrics, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor, bool bol_as_eol) const
 	{
 		size_t needle = index.index - bufferOffset;
 		CGFloat caretOffset = index.carry * metrics.column_width();
@@ -585,7 +610,8 @@ namespace ng
 		auto lines = softlines(metrics);
 		for(size_t i = 0; i < lines.size(); ++i)
 		{
-			if(lines[i].offset <= needle && (i+1 == lines.size() || needle < lines[i+1].offset))
+			if(lines[i].offset <= needle && (i+1 == lines.size() || needle < lines[i+1].offset ||
+				(bol_as_eol && needle == lines[i+1].offset)))
 			{
 				CGFloat x = lines[i].x, y = lines[i].y;
 				size_t offset = lines[i].offset;
