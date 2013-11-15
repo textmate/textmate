@@ -97,6 +97,23 @@ NSString* const OakFileManagerPathKey                      = @"directory";
 - (void)doRemoveFile:(NSURL*)fileURL window:(NSWindow*)window
 {
 	NSError* error;
+
+	NSNumber* fileSize;
+	if([fileURL getResourceValue:&fileSize forKey:NSURLFileSizeKey error:&error])
+	{
+		if([fileSize unsignedLongLongValue])
+		{
+			NSInteger choice = NSRunCriticalAlertPanel(@"Document Not Empty!", [self expandFormat:@"Do you wish to delete “%@”?" withURL:fileURL], @"Delete Document", @"Cancel", nil);
+			if(choice == NSAlertAlternateReturn) // "Cancel"
+				return;
+		}
+	}
+	else if(error)
+	{
+		[window presentError:error];
+		return;
+	}
+
 	[[NSNotificationCenter defaultCenter] postNotificationName:OakFileManagerWillDeleteItemAtPath object:self userInfo:@{ OakFileManagerPathKey : [[fileURL filePathURL] path] }];
 	if([[NSFileManager defaultManager] removeItemAtURL:fileURL error:&error])
 	{
