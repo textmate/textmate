@@ -1218,8 +1218,8 @@ doScroll:
 		ret = nsRanges;
 	} HANDLE_ATTR(VisibleCharacterRange) {
 		NSRect visibleRect = [self visibleRect];
-		CGPoint startPoint = NSPointToCGPoint(NSMakePoint(NSMinX(visibleRect), NSMaxY(visibleRect)));
-		CGPoint   endPoint = NSPointToCGPoint(NSMakePoint(NSMinX(visibleRect), NSMinY(visibleRect)));
+		CGPoint startPoint = NSMakePoint(NSMinX(visibleRect), NSMaxY(visibleRect));
+		CGPoint   endPoint = NSMakePoint(NSMinX(visibleRect), NSMinY(visibleRect));
 		ng::range_t visibleRange(layout->index_at_point(startPoint), layout->index_at_point(endPoint));
 		visibleRange = visibleRange.sorted();
 		visibleRange.last = layout->index_below(visibleRange.last);
@@ -1483,7 +1483,7 @@ doScroll:
 - (id)accessibilityHitTest:(NSPoint)screenPoint
 {
 	NSPoint point = [self convertRect:[self.window convertRectFromScreen:NSMakeRect(screenPoint.x, screenPoint.y, 0, 0)] fromView:nil].origin;
-	ng::index_t index = layout->index_at_point(NSPointToCGPoint(point));
+	ng::index_t index = layout->index_at_point(point);
 	const links_ptr links = self.links;
 	auto it = links->lower_bound(index.index);
 	if(it != links->end() && it->second.range.min() <= index)

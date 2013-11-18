@@ -43,7 +43,7 @@ static CGPoint MenuPosition ()
 	NSPoint pos = [NSEvent mouseLocation];
 	pos.y -= 16;
 
-	return NSPointToCGPoint(pos);
+	return pos;
 }
 
 @interface OakMainMenu : NSMenu
