@@ -145,7 +145,7 @@ TextMate is a trademark of Allan Odgaard.
 [capnp]:         http://kentonv.github.io/capnproto/
 [clang 3.2]:     http://clang.llvm.org/
 [MacPorts]:      http://www.macports.org/
-[homebrew]:      http://mxcl.github.com/homebrew/
+[homebrew]:      http://brew.sh/
 [NinjaBundle]:   https://github.com/textmate/ninja.tmbundle
 [CxxTest]:       https://github.com/textmate/cxxtest.tmbundle
 [#textmate]:     irc://irc.freenode.net/#textmate
