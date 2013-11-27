@@ -614,7 +614,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 - (id)validRequestorForSendType:(NSString*)sendType returnType:(NSString*)returnType
 {
-	if(returnType == nil && ([sendType isEqualToString:NSFilenamesPboardType] || [sendType isEqualToString:NSStringPboardType]))
+	if(returnType == nil && [sendType isEqualToString:NSFilenamesPboardType])
 			return self;
 	else	return [super validRequestorForSendType:sendType returnType:returnType];
 }
