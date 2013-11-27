@@ -77,8 +77,14 @@ _Iter prune_path_children (_Iter it, _Iter last)
 {
 	std::string root = scm::root_for_path([aPath fileSystemRepresentation]);
 	if(root != NULL_STR)
-		return [NSURL URLWithString:[NSString stringWithCxxString:"scm://localhost" + encode::url_part(root, "/") + "/"]];
-	return [NSURL fileURLWithPath:aPath];
+		return [NSURL URLWithString:[NSString stringWithCxxString:"scm://localhost" + encode::url_part(root, "/") + "/?status=all"]];
+	return [NSURL URLWithString:[@"scm://locahost" stringByAppendingString:[aPath stringByAppendingString:@"?status=unversioned"]]];
+}
+
++ (NSString*)parseSCMURLStatusQuery:(NSURL*)anURL
+{
+	NSString* query = [anURL query];
+	return [[query componentsSeparatedByString:@"="] objectAtIndex:1];
 }
 
 - (NSArray*)repositoryStatus
@@ -104,13 +110,13 @@ _Iter prune_path_children (_Iter it, _Iter last)
 	std::sort(unstagedPaths.begin(), unstagedPaths.end(), text::less_t());
 	std::sort(untrackedPaths.begin(), untrackedPaths.end(), text::less_t());
 
-	FSItem* unstagedItem  = [FSItem itemWithURL:URLAppend(self.rootItem.url, @".unstaged/")];
+	FSItem* unstagedItem  = [FSItem itemWithURL:URLAppend(self.rootItem.url, @"?status=unstaged")];
 	unstagedItem.icon     = SCMFolderIcon();
 	unstagedItem.name     = @"Uncommitted Changes";
 	unstagedItem.group    = YES;
 	unstagedItem.children = convert(unstagedPaths, scmInfo->root_path(), options);
 
-	FSItem* untrackedItem  = [FSItem itemWithURL:URLAppend(self.rootItem.url, @".untracked/")];
+	FSItem* untrackedItem  = [FSItem itemWithURL:URLAppend(self.rootItem.url, @"?status=untracked")];
 	untrackedItem.icon     = SCMFolderIcon();
 	untrackedItem.name     = @"Untracked Items";
 	untrackedItem.group    = YES;
@@ -134,9 +140,21 @@ _Iter prune_path_children (_Iter it, _Iter last)
 		options = someOptions;
 
 		std::string const rootPath = [[anURL path] fileSystemRepresentation];
+		NSString* status = [FSSCMDataSource parseSCMURLStatusQuery:anURL];
+		std::string name = path::display_name(rootPath);
+
+		if([status isEqualToString:@"unversioned"])
+		{
+			self.rootItem          = [FSItem itemWithURL:nil];
+			self.rootItem.icon     = [NSImage imageNamed:NSImageNameFolderSmart];
+			self.rootItem.name     = [NSString stringWithCxxString:text::format("%s (%s)", name.c_str(), "Unversioned")];
+			self.rootItem.children = nil;
+
+			return self;
+		}
+
 		if(scmInfo = scm::info(rootPath))
 		{
-			std::string name = path::display_name(rootPath);
 			if(!scmInfo->dry())
 			{
 				auto const& vars = scmInfo->scm_variables();
@@ -145,10 +163,30 @@ _Iter prune_path_children (_Iter it, _Iter last)
 					name = text::format("%s (%s)", path::display_name(scmInfo->root_path()).c_str(), branch->second.c_str());
 			}
 
-			self.rootItem          = [FSItem itemWithURL:anURL];
-			self.rootItem.icon     = [NSImage imageNamed:NSImageNameFolderSmart];
-			self.rootItem.name     = [NSString stringWithCxxString:name];
-			self.rootItem.children = [self repositoryStatus];
+			if([status isEqualToString:@"all"])
+			{
+				self.rootItem          = [FSItem itemWithURL:anURL];
+				self.rootItem.icon     = [NSImage imageNamed:NSImageNameFolderSmart];
+				self.rootItem.name     = [NSString stringWithCxxString:name];
+				self.rootItem.children = [self repositoryStatus];
+			}
+			else
+			{
+				name = path::display_name(rootPath);
+				NSArray* items = [self repositoryStatus];
+
+				for(FSItem* item in items)
+				{
+					if([[FSSCMDataSource parseSCMURLStatusQuery:item.url] isEqualToString:status])
+					{
+						self.rootItem          = [FSItem itemWithURL:anURL];
+						self.rootItem.icon     = [NSImage imageNamed:NSImageNameFolderSmart];
+						self.rootItem.name     = [NSString stringWithFormat:@"%@ (%@)", [NSString stringWithCxxString:name], item.name];
+						self.rootItem.children = item.children;
+					}
+
+				}
+			}
 
 			__weak FSSCMDataSource* weakSelf = self;
 			scmInfo->add_callback(^(scm::info_t const&){
@@ -161,6 +199,6 @@ _Iter prune_path_children (_Iter it, _Iter last)
 
 - (NSArray*)expandedURLs
 {
-	return @[ URLAppend(self.rootItem.url, @".unstaged/"), URLAppend(self.rootItem.url, @".untracked/") ];
+	return @[ URLAppend(self.rootItem.url, @"?status=unstaged"), URLAppend(self.rootItem.url, @"?status=untracked") ];
 }
 @end
