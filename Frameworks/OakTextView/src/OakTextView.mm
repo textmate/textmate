@@ -29,6 +29,7 @@
 #import <ns/spellcheck.h>
 #import <text/classification.h>
 #import <text/format.h>
+#import <text/newlines.h>
 #import <text/trim.h>
 #import <text/utf16.h>
 #import <text/utf8.h>
@@ -3326,8 +3327,12 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		}
 		else
 		{
+			std::string str = to_s(text);
+			str.erase(text::convert_line_endings(str.begin(), str.end(), text::estimate_line_endings(str.begin(), str.end())), str.end());
+			str.erase(utf8::remove_malformed(str.begin(), str.end()), str.end());
+
 			editor->set_selections(ng::range_t(pos));
-			editor->insert(to_s(text));
+			editor->insert(str);
 		}
 	}
 	else if(files)
