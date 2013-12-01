@@ -635,6 +635,7 @@ def deploy(target)
 
   res << "build #{target[:name]}/dsym:   phony #{dsym}\n"
   res << "build #{target[:name]}/tbz:    phony #{tbz}\n"
+  res << "build #{target[:name]}/upload: phony #{meta}.upload\n"
   res << "build #{target[:name]}/deploy: phony #{meta}.deploy\n"
 end
 
