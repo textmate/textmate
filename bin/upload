@@ -37,36 +37,30 @@ def sign_file(path, keyfile, password)
   Base64.encode64(signature).gsub("\n", '')
 end
 
-def aws_upload(path, url, key, acl, filename, content_type, access_key, policy, signature)
-  rc = %x{curl -sw'%{http_code}' --show-error -o/dev/null \
-     -F "key=#{key}" \
-     -F "acl=#{acl}" \
-     -F "success_action_status=201" \
-     -F "Filename=#{filename}" \
-     -F "Content-Type=#{content_type}" \
-     -F "AWSAccessKeyId=#{access_key}" \
-     -F "Policy=#{policy}" \
-     -F "Signature=#{signature}" \
-     -F "file=@#{path}" \
-     #{url}
-  }
-  STDERR << "*** error uploading to #{url} (#{rc})\n" unless rc == '201'
-  return rc == '201'
-end
-
-def create_download(path, repository, description, content_type)
-  payload = { 'name' => File::basename(path), 'size' => File::size(path), 'content_type' => content_type || 'application/octet-stream' }
-  payload['description'] = description unless description.nil?
-
-  open("|curl -snd '#{payload.to_json}' https://api.github.com/repos/#{repository}/downloads") do |io|
+def create_release(path, repository, tag, description, content_type)
+  name = tag.sub(/^v(.*?)-(.*?)\.(.*)$/, 'TextMate \1 (\2 \3)')
+  basename = File::basename(path)
+  accept = "-H'Accept: application/vnd.github.manifold-preview'"
+  payload = { 'name' => name, 'tag_name' => tag, 'draft' => false, 'prerelease' => true }
+  payload['body'] = description unless description.nil?
+  open("|curl #{accept} -snd '#{payload.to_json}' https://api.github.com/repos/#{repository}/releases") do |io|
     github = JSON.parse(io.read)
-    abort "github error: #{github['errors'].inspect} for #{repository}"     if github.include?('errors')
-    abort "github unexpected response: #{github.inspect} for #{repository}" unless github.include?('html_url')
-    return github['html_url'] if aws_upload(path, github['s3_url'], github['path'], github['acl'], payload['name'], payload['content_type'], github['accesskeyid'], github['policy'], github['signature'])
-    open("|curl -snX DELETE https://api.github.com/repos/#{repository}/downloads/#{github['id']}") { |io| STDERR << "Removing partial upload\n" }
-    abort
+    abort "GitHub error: #{github['errors'].inspect} for #{repository}" if github.include?('errors')
+    if url = github['upload_url']
+      url.sub!(/\{\?name\}/, '')
+      auth = "-H'Authorization: token b8babd96eb93a0baa4a1cda59f5b886060e6c21e'"
+      upload_url = "|curl #{accept} -s #{auth} -H'Content-Type: #{content_type}' --data-binary @'#{path}' '#{url}?name=#{basename}'"
+      open(upload_url) do |io|
+        res = JSON.parse(io.read)
+        return "https://github.com/#{repository}/releases/download/#{tag}/#{basename}" if res.include?('url')
+        STDERR << "Unexpected response (asset): #{res.inspect}\n"
+      end
+    else
+      STDERR << "Unexpected response (release): #{github.inspect}\n"
+    end
+    open("|curl #{accept} -snX DELETE #{github['url']}") { |io| STDERR << "Removing release: #{github['url']}\n" }
   end
-  nil
+  abort
 end
 
 if __FILE__ == $PROGRAM_NAME
@@ -102,7 +96,7 @@ if __FILE__ == $PROGRAM_NAME
 
   if path = ARGV.shift
     info = base_info.merge({
-      'url'       => create_download(path, destination, description, 'application/x-bzip2'),
+      'url'       => create_release(path, destination, tag, description, 'application/x-bzip2'),
       'signature' => sign_file(path, keyfile, netinfo.password),
       'signee'    => netinfo.login
     })
