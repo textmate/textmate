@@ -74,12 +74,14 @@ if __FILE__ == $PROGRAM_NAME
     [ '--help',        '-h', GetoptLong::NO_ARGUMENT       ],
     [ '--keyfile',     '-k', GetoptLong::REQUIRED_ARGUMENT ],
     [ '--destination', '-d', GetoptLong::REQUIRED_ARGUMENT ],
+    [ '--tag',         '-t', GetoptLong::REQUIRED_ARGUMENT ],
     [ '--merge',       '-m', GetoptLong::REQUIRED_ARGUMENT ],
     [ '--description', '-s', GetoptLong::REQUIRED_ARGUMENT ]
   )
 
   keyfile     = nil
   destination = 'textmate/textmate'
+  tag         = nil
   base_info   = { }
   description = nil
   netinfo     = Net::Netrc.locate("sign.textmate.org") or abort "*** missing passphrase in ~/.netrc."
@@ -89,12 +91,14 @@ if __FILE__ == $PROGRAM_NAME
       when '--help'        then RDoc::usage
       when '--keyfile'     then keyfile     = arg
       when '--destination' then destination = arg
+      when '--tag'         then tag         = arg
       when '--merge'       then base_info   = JSON.parse(arg)
       when '--description' then description = arg
     end
   end
 
   abort 'No signing key provided' if keyfile.nil?
+  abort "No tag specified"        if tag.nil?
 
   if path = ARGV.shift
     info = base_info.merge({
