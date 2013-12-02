@@ -88,8 +88,15 @@ OAK_DEBUG_VAR(WindowFrameHelper);
 
 - (void)snapshotWindowFrame
 {
-	if((([self.window styleMask] & NSFullScreenWindowMask) != NSFullScreenWindowMask))
-		[[NSUserDefaults standardUserDefaults] setObject:NSStringFromRect([self windowFrame:self.window]) forKey:self.autosaveName];
+	if((([self.window styleMask] & NSFullScreenWindowMask) != NSFullScreenWindowMask)) {
+		NSString* zoomedKey = [self.autosaveName stringByAppendingString:@"Zoomed"];
+		if(self.window.isZoomed) {
+			[[NSUserDefaults standardUserDefaults] setBool:YES forKey:zoomedKey];
+		} else {
+			[[NSUserDefaults standardUserDefaults] removeObjectForKey:zoomedKey];
+			[[NSUserDefaults standardUserDefaults] setObject:NSStringFromRect([self windowFrame:self.window]) forKey:self.autosaveName];
+		}
+	}
 }
 
 - (BOOL)ignoreWindow:(NSWindow*)aWindow
@@ -108,6 +115,7 @@ OAK_DEBUG_VAR(WindowFrameHelper);
 {
 	NSString* rectStr = [[NSUserDefaults standardUserDefaults] stringForKey:self.autosaveName];
 	NSRect r = rectStr ? NSRectFromString(rectStr) : NSZeroRect;
+	BOOL zoom = NO;
 
 	NSWindow* lowerWin = nil;
 	CGFloat winYPos = CGFLOAT_MAX;
@@ -166,7 +174,13 @@ OAK_DEBUG_VAR(WindowFrameHelper);
 		D(DBF_WindowFrameHelper, bug("center window\n"););
 		r = [[NSScreen mainScreen] visibleFrame];
 		r = NSIntegralRect(NSInsetRect(r, NSWidth(r) / 3, NSHeight(r) / 5));
+	} else if([[NSUserDefaults standardUserDefaults] boolForKey:[self.autosaveName stringByAppendingString:@"Zoomed"]]) {
+		zoom = YES;
 	}
+
 	[aWindow setFrame:[[NSScreen screenWithFrame:r] restrainFrameToVisibleScreen:r] display:NO];
+
+	if(zoom)
+		[aWindow zoom:self];
 }
 @end
