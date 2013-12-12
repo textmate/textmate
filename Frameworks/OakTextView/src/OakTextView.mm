@@ -2197,6 +2197,8 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 - (void)performFindOperation:(id <OakFindServerProtocol>)aFindServer
 {
+	[[NSNotificationCenter defaultCenter] postNotificationName:@"OakTextViewWillPerformFindOperation" object:self];
+
 	if(![aFindServer isKindOfClass:[OakTextViewFindServer class]])
 	{
 		NSMutableDictionary* dict = [NSMutableDictionary dictionary];

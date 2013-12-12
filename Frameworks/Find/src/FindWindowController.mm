@@ -313,6 +313,7 @@ static NSButton* OakCreateStopSearchButton ()
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(findClipboardDidChange:) name:OakPasteboardDidChangeNotification object:[OakPasteboard pasteboardWithName:NSFindPboard]];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(replaceClipboardDidChange:) name:OakPasteboardDidChangeNotification object:[OakPasteboard pasteboardWithName:NSReplacePboard]];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textViewWillPerformFindOperation:) name:@"OakTextViewWillPerformFindOperation" object:nil];
 
 		[self.window addObserver:self forKeyPath:@"firstResponder" options:0 context:NULL];
 	}
@@ -564,6 +565,12 @@ static NSButton* OakCreateStopSearchButton ()
 - (void)windowWillClose:(NSNotification*)aNotification
 {
 	[self commitEditing];
+}
+
+- (void)textViewWillPerformFindOperation:(NSNotification*)aNotification
+{
+	if([self isWindowLoaded] && [self.window isVisible] && [self.window isKeyWindow])
+		[self commitEditing];
 }
 
 // ==============================
