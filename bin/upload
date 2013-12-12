@@ -45,7 +45,20 @@ def create_release(path, repository, tag, description, content_type)
   payload['body'] = description unless description.nil?
   open("|curl #{accept} -snd '#{payload.to_json}' https://api.github.com/repos/#{repository}/releases") do |io|
     github = JSON.parse(io.read)
-    abort "GitHub error: #{github['errors'].inspect} for #{repository}" if github.include?('errors')
+
+    if github.include?('errors')
+      err = github['errors'].first
+      if err['code'] == 'already_exists' && err['field'] == 'tag_name'
+        open("|curl #{accept} -sn https://api.github.com/repos/#{repository}/releases") do |io|
+          github = JSON.parse(io.read)
+          github = github.find { |e| e['tag_name'] == tag }
+          STDERR << "Upload to existing release: #{github['html_url']}\n"
+        end
+      else
+        abort "GitHub error: #{github['errors'].inspect} for #{repository}" if github.include?('errors')
+      end
+    end
+
     if url = github['upload_url']
       url.sub!(/\{\?name\}/, '')
       auth = "-H'Authorization: token b8babd96eb93a0baa4a1cda59f5b886060e6c21e'"
