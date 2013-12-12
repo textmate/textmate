@@ -2589,14 +2589,16 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	static auto const RequiresSelection = new std::set<SEL>{ @selector(cut:), @selector(copy:), @selector(delete:), @selector(copySelectionToFindPboard:) };
 	if(RequiresSelection->find([aMenuItem action]) != RequiresSelection->end())
 		return [self hasSelection];
+	else if([aMenuItem action] == @selector(toggleMacroRecording:))
+		[aMenuItem setTitle:self.isMacroRecording ? @"Stop Recording" : @"Start Recording"];
 	else if([aMenuItem action] == @selector(toggleShowInvisibles:))
-		[aMenuItem setState:self.showInvisibles ? NSOnState : NSOffState];
+		[aMenuItem setTitle:self.showInvisibles ? @"Hide Invisible Characters" : @"Show Invisible Characters"];
 	else if([aMenuItem action] == @selector(toggleSoftWrap:))
-		[aMenuItem setState:self.softWrap ? NSOnState : NSOffState];
+		[aMenuItem setTitle:self.softWrap ? @"Disable Soft Wrap" : @"Enable Soft Wrap"];
 	else if([aMenuItem action] == @selector(toggleScrollPastEnd:))
-		[aMenuItem setState:self.scrollPastEnd ? NSOnState : NSOffState];
+		[aMenuItem setTitle:self.scrollPastEnd ? @"Disallow Scroll Past End" : @"Allow Scroll Past End"];
 	else if([aMenuItem action] == @selector(toggleShowWrapColumn:))
-		[aMenuItem setState:(layout && layout->draw_wrap_column()) ? NSOnState : NSOffState];
+		[aMenuItem setTitle:(layout && layout->draw_wrap_column()) ? @"Hide Wrap Column" : @"Show Wrap Column"];
 	else if([aMenuItem action] == @selector(toggleContinuousSpellChecking:))
 		[aMenuItem setState:document->buffer().live_spelling() ? NSOnState : NSOffState];
 	else if([aMenuItem action] == @selector(takeSpellingLanguageFrom:))

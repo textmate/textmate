@@ -1232,7 +1232,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	else if([item action] == @selector(editSelectedEntries:))
 		res = selectedFiles == 1;
 	else if([item action] == @selector(toggleShowInvisibles:))
-		[item setState:self.showExcludedItems ? NSOnState : NSOffState];
+		[item setTitle:self.showExcludedItems ? @"Hide Invisible Files" : @"Show Invisible Files"];
 
 	NSString* quickLookTitle = [QLPreviewPanel sharedPreviewPanelExists] && [[QLPreviewPanel sharedPreviewPanel] isVisible] ? @"Close Quick Look" : @"Quick Look%@";
 

@@ -394,7 +394,7 @@ private:
 - (BOOL)validateMenuItem:(NSMenuItem*)aMenuItem
 {
 	if([aMenuItem action] == @selector(toggleLineNumbers:))
-		[aMenuItem setState:[gutterView visibilityForColumnWithIdentifier:GVLineNumbersColumnIdentifier] ? NSOffState : NSOnState];
+		[aMenuItem setTitle:[gutterView visibilityForColumnWithIdentifier:GVLineNumbersColumnIdentifier] ? @"Hide Line Numbers" : @"Show Line Numbers"];
 	else if([aMenuItem action] == @selector(takeThemeUUIDFrom:))
 		[aMenuItem setState:[textView theme]->uuid() == [[aMenuItem representedObject] UTF8String] ? NSOnState : NSOffState];
 	else if([aMenuItem action] == @selector(takeTabSizeFrom:))
@@ -425,6 +425,14 @@ private:
 			bool selectedGrammar = document && document->file_type() == bundleItem->value_for_field(bundles::kFieldGrammarScope);
 			[aMenuItem setState:selectedGrammar ? NSOnState : NSOffState];
 		}
+	}
+	else if([aMenuItem action] == @selector(toggleCurrentBookmark:))
+	{
+		text::selection_t sel([textView.selectionString UTF8String]);
+		size_t lineNumber = sel.last().max().line;
+
+		ng::buffer_t const& buf = document->buffer();
+		[aMenuItem setTitle:buf.get_marks(buf.begin(lineNumber), buf.eol(lineNumber), kBookmarkType).empty() ? @"Set Bookmark" : @"Remove Bookmark"];
 	}
 	return YES;
 }

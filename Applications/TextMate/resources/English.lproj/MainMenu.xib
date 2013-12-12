@@ -572,20 +572,20 @@ CA
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="499"/>
-                            <menuItem title="Show Invisibles" keyEquivalent="i" id="515">
+                            <menuItem title="Toggle Invisibles" keyEquivalent="i" id="515">
                                 <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                 <connections>
                                     <action selector="toggleShowInvisibles:" target="-1" id="519"/>
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="516"/>
-                            <menuItem title="Soft Wrap" keyEquivalent="w" id="211">
+                            <menuItem title="Toggle Soft Wrap" keyEquivalent="w" id="211">
                                 <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                 <connections>
                                     <action selector="toggleSoftWrap:" target="-1" id="256"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Show Wrap Column" id="778">
+                            <menuItem title="Toggle Wrap Column" id="778">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="toggleShowWrapColumn:" target="-1" id="780"/>
@@ -759,7 +759,7 @@ CA
                                 </menu>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="540"/>
-                            <menuItem title="Scroll Past End" id="833">
+                            <menuItem title="Toggle Scroll Past End" id="833">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="toggleScrollPastEnd:" target="-1" id="835"/>
