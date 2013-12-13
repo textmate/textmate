@@ -61,8 +61,7 @@ def create_release(path, repository, tag, description, content_type)
 
     if url = github['upload_url']
       url.sub!(/\{\?name\}/, '')
-      auth = "-H'Authorization: token b8babd96eb93a0baa4a1cda59f5b886060e6c21e'"
-      upload_url = "|curl #{accept} -s #{auth} -H'Content-Type: #{content_type}' --data-binary @'#{path}' '#{url}?name=#{basename}'"
+      upload_url = "|curl #{accept} -sn -H'Content-Type: #{content_type}' --data-binary @'#{path}' '#{url}?name=#{basename}'"
       open(upload_url) do |io|
         res = JSON.parse(io.read)
         return "https://github.com/#{repository}/releases/download/#{tag}/#{basename}" if res.include?('url')
