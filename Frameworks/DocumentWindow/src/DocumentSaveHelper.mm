@@ -84,6 +84,20 @@ namespace
 			});
 		}
 
+		void select_create_parent (std::string const& path, io::bytes_ptr content, file::save_context_ptr context)
+		{
+			D(DBF_DocumentController_SaveHelper, bug("\n"););
+			init(context);
+
+			NSAlert* alert = [NSAlert tmAlertWithMessageText:[NSString stringWithCxxString:text::format("No parent folder for “%s”.", _document->display_name().c_str())] informativeText:[NSString stringWithFormat:@"Do you wish to create a folder at “%@”?", [NSString stringWithCxxString:path::with_tilde(path::parent(path))]] buttons:@"Create Folder", @"Cancel", nil];
+			OakShowAlertForWindow(alert, _window, ^(NSInteger returnCode){
+				if(returnCode == NSAlertFirstButtonReturn)
+						context->set_create_parent(true);
+				else	_self.userAbort = YES;
+				[_self setContext:file::save_context_ptr()];
+			});
+		}
+
 		void obtain_authorization (std::string const& path, io::bytes_ptr content, osx::authorization_t auth, file::save_context_ptr context)
 		{
 			D(DBF_DocumentController_SaveHelper, bug("\n"););

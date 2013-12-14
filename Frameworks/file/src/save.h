@@ -16,6 +16,7 @@ namespace file
 		virtual ~save_context_t () { }
 		virtual void set_path (std::string const& path) = 0;
 		virtual void set_make_writable (bool flag) = 0;
+		virtual void set_create_parent (bool flag) = 0;
 		virtual void set_authorization (osx::authorization_t auth) = 0;
 		virtual void set_charset (std::string const& charset) = 0;
 		virtual void filter_error (bundle_command_t const& command, int rc, std::string const& out, std::string const& err) = 0;
@@ -28,6 +29,7 @@ namespace file
 		virtual ~save_callback_t () { }
 		virtual void select_path (std::string const& path, io::bytes_ptr content, save_context_ptr context);
 		virtual void select_make_writable (std::string const& path, io::bytes_ptr content, save_context_ptr context);
+		virtual void select_create_parent (std::string const& path, io::bytes_ptr content, save_context_ptr context);
 		virtual void obtain_authorization (std::string const& path, io::bytes_ptr content, osx::authorization_t auth, save_context_ptr context);
 		virtual void select_charset (std::string const& path, io::bytes_ptr content, std::string const& charset, save_context_ptr context);
 		virtual void did_save (std::string const& path, io::bytes_ptr content, encoding::type const& encoding, bool success, std::string const& message, oak::uuid_t const& filter) = 0;

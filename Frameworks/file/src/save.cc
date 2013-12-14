@@ -35,6 +35,7 @@ namespace
 
 		void set_path (std::string const& path)                   { _path = path;                     proceed(); }
 		void set_make_writable (bool flag)                        { _make_writable = flag;            proceed(); }
+		void set_create_parent (bool flag)                        { _create_parent = flag;            proceed(); }
 		void set_authorization (osx::authorization_t auth)        { _authorization = auth;            proceed(); }
 		void set_content (io::bytes_ptr content)                  { _content = content;               proceed(); }
 		void set_charset (std::string const& charset)             { _encoding.set_charset(charset);   proceed(); }
@@ -75,6 +76,7 @@ namespace
 		state_t                              _state;
 		state_t                              _next_state;
 		bool                                 _make_writable;
+		bool                                 _create_parent = false;
 		bool                                 _saved;
 
 		file::save_callback_ptr              _callback;
@@ -250,6 +252,20 @@ namespace
 						break;
 
 						case kFileTestNoParent:
+						{
+							if(_create_parent)
+							{
+								if(path::make_dir(path::parent(_path)))
+									proceed();
+							}
+							else
+							{
+								_next_state = kStateMakeWritable;
+								_callback->select_create_parent(_path, _content, shared_from_this());
+							}
+						}
+						break;
+
 						case kFileTestReadOnly:
 							// TODO show error
 						break;
@@ -417,6 +433,10 @@ namespace file
 	void save_callback_t::select_make_writable (std::string const& path, io::bytes_ptr content, save_context_ptr context)
 	{
 		context->set_make_writable(false);
+	}
+
+	void save_callback_t::select_create_parent (std::string const& path, io::bytes_ptr content, save_context_ptr context)
+	{
 	}
 
 	void save_callback_t::obtain_authorization (std::string const& path, io::bytes_ptr content, osx::authorization_t auth, save_context_ptr context)
