@@ -837,7 +837,8 @@ namespace path
 		if(path != NULL_STR && !exists(path))
 		{
 			make_dir(parent(path));
-			mkdir(path.c_str(), S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IWGRP|S_IXGRP|S_IROTH|S_IWOTH|S_IXOTH);
+			if(mkdir(path.c_str(), S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IWGRP|S_IXGRP|S_IROTH|S_IWOTH|S_IXOTH) == -1)
+				perror(text::format("mkdir(“%s”)", path.c_str()).c_str());
 		}
 		return exists(path) && info(resolve(path)) & flag::directory;
 	}
