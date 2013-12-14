@@ -41,7 +41,7 @@ namespace
 					std::string name, value; bool enabled;
 					plist::dictionary_t const& plist = plist::convert(CFArrayGetValueAtIndex(cfArray, i));
 					if(plist::get_key_path(plist, "name", name) && plist::get_key_path(plist, "value", value) && (!plist::get_key_path(plist, "enabled", enabled) || enabled))
-						res.push_back(std::make_pair(name, value));
+						res.emplace_back(name, value);
 				}
 			}
 			CFRelease(cfPlist);
@@ -75,9 +75,9 @@ namespace
 	static bool is_scope_selector (std::string const& str)
 	{
 		static std::string const RootScopes[] = { "text", "source", "attr" };
-		iterate(scope, RootScopes)
+		for(auto const& scope : RootScopes)
 		{
-			if(str.find(*scope) == 0 && (str.size() == scope->size() || str.find_first_of("., ", scope->size()) == scope->size()))
+			if(str.find(scope) == 0 && (str.size() == scope.size() || str.find_first_of("., ", scope.size()) == scope.size()))
 				return true;
 		}
 		return str == "";
@@ -106,29 +106,29 @@ namespace
 			parse_ini(content.data(), content.data() + content.size(), iniFile);
 
 		std::vector<section_t> res;
-		iterate(section, iniFile.sections)
+		for(auto const& section : iniFile.sections)
 		{
 			std::vector< std::pair<std::string, std::string> > variables;
-			if(section->names.empty())
+			if(section.names.empty())
 			{
-				variables.push_back(std::make_pair("CWD", path::parent(path)));
-				variables.push_back(std::make_pair("TM_PROPERTIES_PATH", text::format("%s${TM_PROPERTIES_PATH:+:$TM_PROPERTIES_PATH}", path.c_str())));
+				variables.emplace_back("CWD", path::parent(path));
+				variables.emplace_back("TM_PROPERTIES_PATH", text::format("%s${TM_PROPERTIES_PATH:+:$TM_PROPERTIES_PATH}", path.c_str()));
 			}
 
-			iterate(pair, section->values)
-				variables.push_back(std::make_pair(pair->name, pair->value));
+			for(auto const& pair : section.values)
+				variables.emplace_back(pair.name, pair.value);
 
-			if(section->names.empty())
+			if(section.names.empty())
 			{
 				res.emplace_back(variables);
 			}
 			else
 			{
-				iterate(name, section->names)
+				for(auto const& name : section.names)
 				{
-					if(is_scope_selector(*name))
-							res.emplace_back(scope::selector_t(*name), variables);
-					else	res.emplace_back(path::glob_t(*name), variables);
+					if(is_scope_selector(name))
+							res.emplace_back(scope::selector_t(name), variables);
+					else	res.emplace_back(path::glob_t(name), variables);
 				}
 			}
 		}
@@ -145,8 +145,8 @@ namespace
 			if(cache.size() > 64)
 			{
 				D(DBF_Settings, bug("clear cache\n"););
-				iterate(pair, cache)
-					tracked_paths.remove(pair->first);
+				for(auto const& pair : cache)
+					tracked_paths.remove(pair.first);
 				cache.clear();
 			}
 
@@ -168,46 +168,46 @@ namespace
 	std::map<std::string, std::string> expanded_variables_for (std::string const& directory, std::string const& path, scope::scope_t const& scope, std::map<std::string, std::string> variables)
 	{
 		D(DBF_Settings, bug("%s, %s, %s\n", directory.c_str(), path.c_str(), to_s(scope).c_str()););
-		citerate(pair, global_variables())
-			expand_variable(pair->first, pair->second, variables);
+		for(auto const& pair : global_variables())
+			expand_variable(pair.first, pair.second, variables);
 
 		static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 		pthread_mutex_lock(&mutex);
 		sections(NULL_STR); // clear cache if too big
 
-		std::multimap<double, std::vector<section_t>::const_iterator> orderScopeMatches;
-		citerate(file, paths(directory))
+		std::multimap<double, section_t const*> orderScopeMatches;
+		for(auto const& file : paths(directory))
 		{
-			citerate(section, sections(*file))
+			for(auto const& section : sections(file))
 			{
-				if(section->has_scope_selector)
+				if(section.has_scope_selector)
 				{
 					double rank = 0;
-					if(section->scope_selector.does_match(scope, &rank))
-						orderScopeMatches.emplace(rank, section);
+					if(section.scope_selector.does_match(scope, &rank))
+						orderScopeMatches.emplace(rank, &section);
 				}
-				else if(!section->has_file_glob)
+				else if(!section.has_file_glob)
 				{
-					iterate(pair, section->variables)
-						expand_variable(pair->first, pair->second, variables);
+					for(auto const& pair : section.variables)
+						expand_variable(pair.first, pair.second, variables);
 				}
 			}
 		}
 
-		iterate(section, orderScopeMatches)
+		for(auto const& section : orderScopeMatches)
 		{
-			iterate(pair, section->second->variables)
-				expand_variable(pair->first, pair->second, variables);
+			for(auto const& pair : section.second->variables)
+				expand_variable(pair.first, pair.second, variables);
 		}
 
-		citerate(file, paths(directory))
+		for(auto const& file : paths(directory))
 		{
-			citerate(section, sections(*file))
+			for(auto const& section : sections(file))
 			{
-				if(section->has_file_glob && section->file_glob.does_match(path == NULL_STR ? directory : path))
+				if(section.has_file_glob && section.file_glob.does_match(path == NULL_STR ? directory : path))
 				{
-					iterate(pair, section->variables)
-						expand_variable(pair->first, pair->second, variables);
+					for(auto const& pair : section.variables)
+						expand_variable(pair.first, pair.second, variables);
 				}
 			}
 		}
@@ -279,13 +279,13 @@ static std::map<std::string, std::map<std::string, std::string>> read_file (std:
 		parse_ini(content.data(), content.data() + content.size(), iniFile);
 
 	std::map<std::string, std::map<std::string, std::string>> sections;
-	iterate(section, iniFile.sections)
+	for(auto const& section : iniFile.sections)
 	{
-		std::vector<std::string> names = section->names.empty() ? std::vector<std::string>(1, "") : section->names;
-		iterate(name, names)
+		std::vector<std::string> names = section.names.empty() ? std::vector<std::string>(1, "") : section.names;
+		for(auto const& name : names)
 		{
-			iterate(pair, section->values)
-				sections[*name].emplace(pair->name, pair->value);
+			for(auto const& pair : section.values)
+				sections[name].emplace(pair.name, pair.value);
 		}
 	}
 	return sections;
@@ -332,34 +332,34 @@ void settings_t::set (std::string const& key, std::string const& value, std::str
 		sectionNames.push_back(path);
 
 	auto sections = read_file(global_settings_path());
-	iterate(sectionName, sectionNames)
-		sections[*sectionName][key] = value;
+	for(auto const& sectionName : sectionNames)
+		sections[sectionName][key] = value;
 
 	auto defaults = read_file(default_settings_path());
 	if(FILE* fp = fopen(global_settings_path().c_str(), "w"))
 	{
 		fprintf(fp, "# Version 1.0 -- Generated content!\n");
-		iterate(section, sections)
+		for(auto const& section : sections)
 		{
-			if(section->second.empty())
+			if(section.second.empty())
 				continue;
 
-			if(!section->first.empty())
-				fprintf(fp, "\n[ %s ]\n", quote_string(section->first).c_str());
+			if(!section.first.empty())
+				fprintf(fp, "\n[ %s ]\n", quote_string(section.first).c_str());
 
-			auto defaultsSection = defaults.find(section->first);
-			iterate(pair, section->second)
+			auto defaultsSection = defaults.find(section.first);
+			for(auto const& pair : section.second)
 			{
-				if(pair->second == NULL_STR)
+				if(pair.second == NULL_STR)
 					continue;
 
 				if(defaultsSection != defaults.end())
 				{
-					auto it = defaultsSection->second.find(pair->first);
-					if(it != defaultsSection->second.end() && it->second == pair->second)
+					auto it = defaultsSection->second.find(pair.first);
+					if(it != defaultsSection->second.end() && it->second == pair.second)
 						continue;
 				}
-				fprintf(fp, "%-16s = %s\n", pair->first.c_str(), quote_string(pair->second).c_str());
+				fprintf(fp, "%-16s = %s\n", pair.first.c_str(), quote_string(pair.second).c_str());
 			}
 		}
 		fclose(fp);
