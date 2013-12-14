@@ -244,7 +244,7 @@ private:
 	if(NSFont* newFont = [sender convertFont:textView.font])
 	{
 		settings_t::set(kSettingsFontNameKey, to_s([newFont fontName]));
-		settings_t::set(kSettingsFontSizeKey, (size_t)[newFont pointSize]);
+		settings_t::set(kSettingsFontSizeKey, [newFont pointSize]);
 		[self setFont:newFont];
 	}
 }

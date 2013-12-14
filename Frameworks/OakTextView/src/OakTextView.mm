@@ -730,7 +730,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 		theme          = parse_theme(bundles::lookup(settings.get(kSettingsThemeKey, NULL_STR)));
 		fontName       = settings.get(kSettingsFontNameKey, NULL_STR);
-		fontSize       = settings.get(kSettingsFontSizeKey, 11);
+		fontSize       = settings.get(kSettingsFontSizeKey, 11.0);
 		theme          = theme->copy_with_font_name_and_size(fontName, fontSize);
 
 		_showInvisibles = settings.get(kSettingsShowInvisiblesKey, false);
