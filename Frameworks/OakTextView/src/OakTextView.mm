@@ -3556,7 +3556,12 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 		return (void)(ignoreMouseDown = NO);
 
 	if(macroRecordingArray && [anEvent type] == NSLeftMouseDown)
-		return (void)NSRunAlertPanel(@"You are recording a macro", @"While recording macros it is not possible to select text or reposition the caret using your mouse.\nYou can stop macro recording from the Edit → Macros menu.", @"Continue", nil, nil);
+	{
+		NSInteger choice = NSRunAlertPanel(@"You are recording a macro", @"While recording macros it is not possible to select text or reposition the caret using your mouse.", @"Continue", @"Stop Recording", nil);
+		if(choice == NSAlertAlternateReturn) // "Stop Macro Recording"
+			self.isMacroRecording = NO;
+		return;
+	}
 
 	std::vector<bundles::item_ptr> const& items = bundles::query(bundles::kFieldSemanticClass, "callback.mouse-click", add_modifiers_to_scope(ng::scope(document->buffer(), layout->index_at_point([self convertPoint:[anEvent locationInWindow] fromView:nil]), to_s([self scopeAttributes])), [anEvent modifierFlags]));
 	if(!items.empty())
