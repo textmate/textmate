@@ -942,6 +942,21 @@ namespace ng
 			did_fold(range.first, range.second);
 	}
 
+	ng::range_t layout_t::folded_range_at_point (CGPoint point) const
+	{
+		CGFloat clickedY = point.y - _margin.top;
+		auto rowIter = _rows.upper_bound(clickedY, &row_y_comp);
+		if(rowIter != _rows.begin())
+			--rowIter;
+
+		if(clickedY < rowIter->offset._height)
+			return {};
+		else if(clickedY < rowIter->offset._height + rowIter->key._height)
+			return rowIter->value.folded_range_at_point(point, *_metrics, _buffer, rowIter->offset._length, CGPointMake(_margin.left, _margin.top + rowIter->offset._height));
+		else
+			return {};
+	}
+
 	// =================
 	// = Debug Support =
 	// =================

@@ -39,6 +39,7 @@ namespace ng
 		CGRect rect_at_index (ng::index_t const& index, ct::metrics_t const& metrics, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor, bool bol_as_eol = false) const;
 
 		ng::line_record_t line_record_for (size_t line, size_t pos, ct::metrics_t const& metrics, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor) const;
+		ng::range_t folded_range_at_point (CGPoint point, ct::metrics_t const& metrics, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor) const;
 
 		size_t bol (size_t index, ng::buffer_t const& buffer, size_t bufferOffset) const;
 		size_t eol (size_t index, ng::buffer_t const& buffer, size_t bufferOffset) const;

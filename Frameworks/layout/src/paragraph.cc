@@ -648,6 +648,31 @@ namespace ng
 		return ng::line_record_t(line, 0, 0, 0, 0);
 	}
 
+	ng::range_t paragraph_t::folded_range_at_point (CGPoint point, ct::metrics_t const& metrics, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor) const
+	{
+		auto lines = softlines(metrics);
+		for(size_t i = 0; i < lines.size(); ++i)
+		{
+			if(anchor.y + lines[i].y <= point.y && point.y < anchor.y + lines[i].y + lines[i].height)
+			{
+				CGFloat x = lines[i].x;
+				size_t offset = lines[i].offset;
+
+				foreach(node, _nodes.begin() + lines[i].first, _nodes.begin() + lines[i].last)
+				{
+					if(point.x <= anchor.x + x)
+						return {};
+					else if(anchor.x + x < point.x && point.x < anchor.x + x + node->width() && node->type() == kNodeTypeFolding)
+						return ng::range_t{ bufferOffset + offset, bufferOffset + offset + node->length() };
+
+					x += node->width();
+					offset += node->length();
+				}
+			}
+		}
+		return {};
+	}
+
 	size_t paragraph_t::bol (size_t index, ng::buffer_t const& buffer, size_t bufferOffset) const
 	{
 		size_t i = bufferOffset;
