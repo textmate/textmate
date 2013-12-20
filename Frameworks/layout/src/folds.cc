@@ -121,6 +121,24 @@ namespace ng
 		set_folded(newFoldings);
 	}
 
+	bool folds_t::unfold (size_t from, size_t to)
+	{
+		bool found = false;
+
+		std::vector< std::pair<size_t, size_t> > res, newFoldings;
+		iterate(pair, _folded)
+		{
+			if(from == pair->first && pair->second <= to || from <= pair->first && pair->second == to)
+					found = true;
+			else	newFoldings.push_back(*pair);
+		}
+
+		if(found)
+			set_folded(newFoldings);
+
+		return found;
+	}
+
 	std::vector< std::pair<size_t, size_t> > folds_t::remove_enclosing (size_t from, size_t to)
 	{
 		std::vector< std::pair<size_t, size_t> > res, newFoldings;

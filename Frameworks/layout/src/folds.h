@@ -21,6 +21,7 @@ namespace ng
 		indexed_map_t<bool> const& folded () const;
 
 		void fold (size_t from, size_t to);
+		bool unfold (size_t from, size_t to);
 		std::vector< std::pair<size_t, size_t> > remove_enclosing (size_t from, size_t to);
 
 		std::pair<size_t, size_t> toggle_at_line (size_t n, bool recursive);

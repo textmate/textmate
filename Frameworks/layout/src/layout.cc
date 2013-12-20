@@ -923,6 +923,12 @@ namespace ng
 		did_fold(from, to);
 	}
 
+	void layout_t::unfold (size_t from, size_t to)
+	{
+		if(_folds->unfold(from, to))
+			did_fold(from, to);
+	}
+
 	void layout_t::remove_enclosing_folds (size_t from, size_t to)
 	{
 		for(auto const& range : _folds->remove_enclosing(from, to))
