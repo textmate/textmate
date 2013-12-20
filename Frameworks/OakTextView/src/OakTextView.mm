@@ -3555,6 +3555,12 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 	if(!layout || [anEvent type] != NSLeftMouseDown || ignoreMouseDown)
 		return (void)(ignoreMouseDown = NO);
 
+	if(ng::range_t r = layout->folded_range_at_point([self convertPoint:[anEvent locationInWindow] fromView:nil]))
+	{
+		layout->unfold(r.min().index, r.max().index);
+		return;
+	}
+
 	if(macroRecordingArray && [anEvent type] == NSLeftMouseDown)
 	{
 		NSInteger choice = NSRunAlertPanel(@"You are recording a macro", @"While recording macros it is not possible to select text or reposition the caret using your mouse.", @"Continue", @"Stop Recording", nil);
