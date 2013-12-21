@@ -212,25 +212,32 @@ static void DrawSpinner (NSRect cellFrame, BOOL isFlipped, NSColor* color, doubl
 // = Accessibility =
 // =================
 
+- (NSSet*)myAccessibilityAttributeNames
+{
+	static NSSet* set = [NSSet setWithArray:@[
+		NSAccessibilityDescriptionAttribute,
+		NSAccessibilityHelpAttribute,
+		NSAccessibilityURLAttribute,
+		NSAccessibilityFilenameAttribute,
+	]];
+	return set;
+}
+
 - (NSArray*)accessibilityAttributeNames
 {
 	if(self.representedObject && [self.representedObject isKindOfClass:[FSItem class]])
 	{
-		static NSArray* attributes = nil;
-		if(!attributes)
-		{
-			NSSet* set = [NSSet setWithArray:[super accessibilityAttributeNames]];
-			set = [set setByAddingObjectsFromArray:@[
-				NSAccessibilityDescriptionAttribute,
-				NSAccessibilityHelpAttribute,
-				NSAccessibilityURLAttribute,
-				NSAccessibilityFilenameAttribute,
-			]];
-			attributes = [set allObjects];
-		}
+		static NSArray* attributes = [[[self myAccessibilityAttributeNames] setByAddingObjectsFromArray:[super accessibilityAttributeNames]] allObjects];
 		return attributes;
 	}
 	return [super accessibilityAttributeNames];
+}
+
+- (BOOL)accessibilityIsAttributeSettable:(NSString*)attribute
+{
+	if([[self myAccessibilityAttributeNames] containsObject:attribute])
+		return NO;
+	return [super accessibilityIsAttributeSettable:attribute];
 }
 
 - (id)accessibilityAttributeValue:(NSString*)attribute

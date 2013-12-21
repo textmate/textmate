@@ -104,24 +104,26 @@ struct buffer_refresh_callback_t;
 	return NO;
 }
 
+- (NSSet*)myAccessibilityAttributeNames
+{
+	static NSSet* set = [NSSet setWithArray:@[
+		NSAccessibilityRoleAttribute,
+		NSAccessibilityRoleDescriptionAttribute,
+		NSAccessibilitySubroleAttribute,
+		NSAccessibilityParentAttribute,
+		NSAccessibilityWindowAttribute,
+		NSAccessibilityTopLevelUIElementAttribute,
+		NSAccessibilityPositionAttribute,
+		NSAccessibilitySizeAttribute,
+		NSAccessibilityTitleAttribute,
+		NSAccessibilityURLAttribute,
+	]];
+	return set;
+}
+
 - (NSArray*)accessibilityAttributeNames
 {
-	static NSArray* attributes = nil;
-	if(!attributes)
-	{
-		attributes = @[
-			NSAccessibilityRoleAttribute,
-			NSAccessibilityRoleDescriptionAttribute,
-			NSAccessibilitySubroleAttribute,
-			NSAccessibilityParentAttribute,
-			NSAccessibilityWindowAttribute,
-			NSAccessibilityTopLevelUIElementAttribute,
-			NSAccessibilityPositionAttribute,
-			NSAccessibilitySizeAttribute,
-			NSAccessibilityTitleAttribute,
-			NSAccessibilityURLAttribute,
-		];
-	}
+	static NSArray* attributes = [[[self myAccessibilityAttributeNames] setByAddingObjectsFromArray:[super accessibilityAttributeNames]] allObjects];
 	return attributes;
 }
 
@@ -160,12 +162,16 @@ struct buffer_refresh_callback_t;
 
 - (BOOL)accessibilityIsAttributeSettable:(NSString*)attribute
 {
-	return NO;
+	if([[self myAccessibilityAttributeNames] containsObject:attribute])
+		return NO;
+	return [super accessibilityIsAttributeSettable:attribute];
 }
 
 - (void)accessibilitySetValue:(id)value forAttribute:(NSString*)attribute
 {
-	@throw [NSException exceptionWithName:NSAccessibilityException reason:[NSString stringWithFormat:@"Setting accessibility attribute not supported: %@", attribute] userInfo:nil];
+	if([[self myAccessibilityAttributeNames] containsObject:attribute])
+		@throw [NSException exceptionWithName:NSAccessibilityException reason:[NSString stringWithFormat:@"Setting accessibility attribute not supported: %@", attribute] userInfo:nil];
+	[super accessibilitySetValue:value forAttribute:attribute];
 }
 
 - (NSArray*)accessibilityParameterizedAttributeNames
@@ -1168,25 +1174,25 @@ doScroll:
 #define HANDLE_ATTR(attr) else if(ATTREQ_(ATTR(attr)))
 #define HANDLE_PATTR(attr) else if(ATTREQ_(PATTR(attr)))
 
+- (NSSet*)myAccessibilityAttributeNames
+{
+	static NSSet* set = [NSSet setWithArray:@[
+		ATTR(Role),
+		ATTR(Value),
+		ATTR(InsertionPointLineNumber),
+		ATTR(NumberOfCharacters),
+		ATTR(SelectedText),
+		ATTR(SelectedTextRange),
+		ATTR(SelectedTextRanges),
+		ATTR(VisibleCharacterRange),
+		ATTR(Children),
+	]];
+	return set;
+}
+
 - (NSArray*)accessibilityAttributeNames
 {
-	static NSArray* attributes = nil;
-	if(!attributes)
-	{
-		NSSet* set = [NSSet setWithArray:@[
-			ATTR(Role),
-			ATTR(Value),
-			ATTR(InsertionPointLineNumber),
-			ATTR(NumberOfCharacters),
-			ATTR(SelectedText),
-			ATTR(SelectedTextRange),
-			ATTR(SelectedTextRanges),
-			ATTR(VisibleCharacterRange),
-			ATTR(Children),
-		]];
-
-		attributes = [[set setByAddingObjectsFromArray:[super accessibilityAttributeNames]] allObjects];
-	}
+	static NSArray* attributes = [[[self myAccessibilityAttributeNames] setByAddingObjectsFromArray:[super accessibilityAttributeNames]] allObjects];
 	return attributes;
 }
 
@@ -1239,9 +1245,9 @@ doScroll:
 
 - (BOOL)accessibilityIsAttributeSettable:(NSString*)attribute
 {
-	NSArray* settable = @[ ATTR(Value), ATTR(SelectedText), ATTR(SelectedTextRange), ATTR(SelectedTextRanges) ];
-	if([settable containsObject:attribute])
-		return YES;
+	static NSArray* settable = @[ ATTR(Value), ATTR(SelectedText), ATTR(SelectedTextRange), ATTR(SelectedTextRanges) ];
+	if([[self myAccessibilityAttributeNames] containsObject:attribute])
+		return [settable containsObject:attribute];
 	return [super accessibilityIsAttributeSettable:attribute];
 }
 

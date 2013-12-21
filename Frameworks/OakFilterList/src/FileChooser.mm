@@ -37,7 +37,32 @@ static NSButton* OakCreateScopeButton (NSString* label, SEL action, NSUInteger t
 @end
 
 @implementation OakScopeBarView
-- (BOOL)accessibilityIsIgnored { return NO; }
+- (BOOL)accessibilityIsIgnored
+{
+	return NO;
+}
+
+- (NSSet*)myAccessibilityAttributeNames
+{
+	static NSSet* set = [NSSet setWithArray:@[
+		NSAccessibilityRoleAttribute,
+	]];
+	return set;
+}
+
+- (NSArray*)accessibilityAttributeNames
+{
+	static NSArray* attributes = [[[self myAccessibilityAttributeNames] setByAddingObjectsFromArray:[super accessibilityAttributeNames]] allObjects];
+	return attributes;
+}
+
+- (BOOL)accessibilityIsAttributeSettable:(NSString*)attribute
+{
+	if([[self myAccessibilityAttributeNames] containsObject:attribute])
+		return NO;
+	return [super accessibilityIsAttributeSettable:attribute];
+}
+
 - (id)accessibilityAttributeValue:(NSString *)attribute
 {
 	if([attribute isEqualToString:NSAccessibilityRoleAttribute])

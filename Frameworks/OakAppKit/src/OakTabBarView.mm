@@ -373,26 +373,22 @@ layout_metrics_t::raw_layer_t layout_metrics_t::parse_layer (NSDictionary* item)
 
 - (NSArray*)accessibilityAttributeNames
 {
-	static NSArray* attributes = nil;
-	if(!attributes)
-	{
-		attributes = @[
-			// generic
-			NSAccessibilityParentAttribute,
-			NSAccessibilityPositionAttribute,
-			NSAccessibilityRoleAttribute,
-			NSAccessibilityRoleDescriptionAttribute,
-			NSAccessibilitySizeAttribute,
-			NSAccessibilityTopLevelUIElementAttribute,
-			NSAccessibilityWindowAttribute,
-			// radio button
-			NSAccessibilityEnabledAttribute,
-			NSAccessibilityFocusedAttribute,
-			NSAccessibilityTitleAttribute,
-			NSAccessibilityValueAttribute,
-			NSAccessibilityHelpAttribute,
-		];
-	}
+	static NSArray* attributes = @[
+		// generic
+		NSAccessibilityParentAttribute,
+		NSAccessibilityPositionAttribute,
+		NSAccessibilityRoleAttribute,
+		NSAccessibilityRoleDescriptionAttribute,
+		NSAccessibilitySizeAttribute,
+		NSAccessibilityTopLevelUIElementAttribute,
+		NSAccessibilityWindowAttribute,
+		// radio button
+		NSAccessibilityEnabledAttribute,
+		NSAccessibilityFocusedAttribute,
+		NSAccessibilityTitleAttribute,
+		NSAccessibilityValueAttribute,
+		NSAccessibilityHelpAttribute,
+	];
 	return attributes;
 }
 
@@ -970,25 +966,32 @@ layout_metrics_t::raw_layer_t layout_metrics_t::parse_layer (NSDictionary* item)
 	return NO;
 }
 
+- (NSSet*)myAccessibilityAttributeNames
+{
+	static NSSet* set = [NSSet setWithArray:@[
+		// generic
+		NSAccessibilityRoleAttribute,
+		// tab group
+		NSAccessibilityChildrenAttribute,
+		NSAccessibilityContentsAttribute,
+		NSAccessibilityFocusedAttribute,
+		NSAccessibilityTabsAttribute,
+		NSAccessibilityValueAttribute,
+	]];
+	return set;
+}
+
 - (NSArray*)accessibilityAttributeNames
 {
-	static NSArray* attributes = nil;
-	if(!attributes)
-	{
-		NSSet* set = [NSSet setWithArray:[super accessibilityAttributeNames]];
-		set = [set setByAddingObjectsFromArray:@[
-			// generic
-			NSAccessibilityRoleAttribute,
-			// tab group
-			NSAccessibilityChildrenAttribute,
-			NSAccessibilityContentsAttribute,
-			NSAccessibilityFocusedAttribute,
-			NSAccessibilityTabsAttribute,
-			NSAccessibilityValueAttribute,
-		]];
-		attributes = [set allObjects];
-	}
+	static NSArray* attributes = [[[self myAccessibilityAttributeNames] setByAddingObjectsFromArray:[super accessibilityAttributeNames]] allObjects];
 	return attributes;
+}
+
+- (BOOL)accessibilityIsAttributeSettable:(NSString*)attribute
+{
+	if([[self myAccessibilityAttributeNames] containsObject:attribute])
+		return NO;
+	return [super accessibilityIsAttributeSettable:attribute];
 }
 
 - (id)accessibilityAttributeValue:(NSString*)attribute
