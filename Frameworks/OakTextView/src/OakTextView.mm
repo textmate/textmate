@@ -1206,8 +1206,8 @@ doScroll:
 	} HANDLE_ATTR(NumberOfCharacters) {
 		ret = [NSNumber numberWithUnsignedInteger:[self nsRangeForRange:ng::range_t(0, buffer.size())].length];
 	} HANDLE_ATTR(SelectedText) {
-		ng::range_t const& selection = editor->ranges().last();
-		std::string const& text = buffer.substr(selection.min().index, selection.max().index);
+		ng::range_t const selection = editor->ranges().last();
+		std::string const text = buffer.substr(selection.min().index, selection.max().index);
 		ret = [NSString stringWithCxxString:text];
 	} HANDLE_ATTR(SelectedTextRange) {
 		ret = [NSValue valueWithRange:[self nsRangeForRange:editor->ranges().last()]];
