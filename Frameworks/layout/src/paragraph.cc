@@ -439,7 +439,7 @@ namespace ng
 		auto it = std::upper_bound(softlines.begin(), softlines.end(), index.index - bufferOffset, [](size_t offset, softline_t const& softline) -> bool {
 			return offset < softline.offset;
 		});
-		ASSERT_NE(it, softlines.begin());
+		ASSERT(it != softlines.begin());
 		return softlineOffset + (--it - softlines.begin());
 	}
 
