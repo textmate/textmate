@@ -308,7 +308,9 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	NSMenu* folderPopUpMenu = _headerView.folderPopUpButton.menu;
 	[folderPopUpMenu removeAllItems];
 
-	NSMenuItem* menuItem = [folderPopUpMenu addItemWithTitle:_outlineViewDelegate.dataSource.rootItem.name action:@selector(takeURLFrom:) keyEquivalent:@""];
+	NSString* title = _outlineViewDelegate.dataSource.rootItem.name != nil ? _outlineViewDelegate.dataSource.rootItem.name : @"";
+
+	NSMenuItem* menuItem = [folderPopUpMenu addItemWithTitle:title action:@selector(takeURLFrom:) keyEquivalent:@""];
 	menuItem.image = _outlineViewDelegate.dataSource.rootItem.icon;
 	menuItem.image.size = NSMakeSize(16, 16);
 	menuItem.target = self;
@@ -1046,7 +1048,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 			type    = tmp.urlType;
 			itemURL = tmp.target ?: tmp.url;
 		}
-		
+
 		if(type == FSItemURLTypePackage && OakIsAlternateKeyOrMouseEvent())
 			type = FSItemURLTypeFolder;
 		else if(type == FSItemURLTypeFile && is_binary([itemURL.path fileSystemRepresentation]) && !OakIsAlternateKeyOrMouseEvent())
