@@ -5,6 +5,7 @@
 #import "NSMenuItem Additions.h"
 #import "NSView Additions.h"
 #import <OakFoundation/NSString Additions.h>
+#import <OakFoundation/NSArray Additions.h>
 #import <oak/oak.h>
 #import <text/format.h>
 #import <regexp/format_string.h>
@@ -301,11 +302,6 @@ layout_metrics_t::raw_layer_t layout_metrics_t::parse_layer (NSDictionary* item)
 
 // ===========================================
 
-static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
-{
-	return (index < [array count] && [array objectAtIndex:index] != [NSNull null]) ? [array objectAtIndex:index] : nil;
-}
-
 @interface OakTabBarView ()
 {
 	OBJC_WATCH_LEAKS(OakTabBarView);
@@ -552,7 +548,7 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 - (uint32_t)filterForTabIndex:(NSUInteger)tabIndex
 {
 	uint32_t filter = 0;
-	if([SafeObjectAtIndex(tabModifiedStates, tabIndex) boolValue])
+	if([[tabModifiedStates safeObjectAtIndex:tabIndex] boolValue])
 		filter |= tab_bar_requisites::modified;
 	if(tabIndex == 0)
 		filter |= tab_bar_requisites::first;
@@ -566,7 +562,7 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 	double totalWidth = 0;
 	for(NSUInteger tabIndex = 0; tabIndex < tabTitles.count; ++tabIndex)
 	{
-		double width = WidthOfText(SafeObjectAtIndex(tabTitles, tabIndex));
+		double width = WidthOfText([tabTitles safeObjectAtIndex:tabIndex]);
 		citerate(it, metrics->layers_for([self layerNameForTabIndex:tabIndex], CGRectZero, tabIndex, @"LabelPlaceholder"))
 		{
 			if(it->text)
@@ -657,8 +653,8 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 		else	rect.size.width = tabSizes[tabIndex];
 
 		std::string layer_id  = [self layerNameForTabIndex:tabIndex];
-		NSString* toolTipText = SafeObjectAtIndex(tabToolTips, tabIndex);
-		NSString* title       = SafeObjectAtIndex(tabTitles, tabIndex);
+		NSString* toolTipText = [tabToolTips safeObjectAtIndex:tabIndex];
+		NSString* title       = [tabTitles safeObjectAtIndex:tabIndex];
 
 		std::vector<layer_t> const& layers = metrics->layers_for(layer_id, rect, tabIndex, title, toolTipText, [self filterForTabIndex:tabIndex]);
 		if(tabIndex == selectedTab)
@@ -1048,9 +1044,9 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 - (OakTabFauxUIElement*)accessibilityChildAtIndex:(NSUInteger)index
 {
 	NSRect rect = index < tabRects.size() ? tabRects[index] : [self bounds];
-	NSString* title = SafeObjectAtIndex(tabTitles, index);
-	NSString* toolTip = SafeObjectAtIndex(tabToolTips, index);
-	BOOL modified = [((NSNumber*)SafeObjectAtIndex(tabModifiedStates, index)) boolValue];
+	NSString* title = [tabTitles safeObjectAtIndex:index];
+	NSString* toolTip = [tabToolTips safeObjectAtIndex:index];
+	BOOL modified = [(NSNumber*)[tabModifiedStates safeObjectAtIndex:index] boolValue];
 	return [[OakTabFauxUIElement alloc] initWithTabBarView:self index:index rect:rect title:title toolTip:toolTip modified:modified selected:selectedTab==index];
 }
 
