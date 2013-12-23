@@ -308,7 +308,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	NSMenu* folderPopUpMenu = _headerView.folderPopUpButton.menu;
 	[folderPopUpMenu removeAllItems];
 
-	NSMenuItem* menuItem = [folderPopUpMenu addItemWithTitle:_outlineViewDelegate.dataSource.rootItem.name action:@selector(takeURLFrom:) keyEquivalent:@""];
+	NSMenuItem* menuItem = [folderPopUpMenu addItemWithTitle:(_outlineViewDelegate.dataSource.rootItem.name ?: @"") action:@selector(takeURLFrom:) keyEquivalent:@""];
 	menuItem.image = _outlineViewDelegate.dataSource.rootItem.icon;
 	menuItem.image.size = NSMakeSize(16, 16);
 	menuItem.target = self;
