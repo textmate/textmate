@@ -1,6 +1,4 @@
 #import "NSArray Additions.h"
-#import "NSString Additions.h"
-#import <oak/oak.h>
 
 @implementation NSArray (Other)
 - (id)firstObject
