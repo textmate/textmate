@@ -10,6 +10,7 @@
 #import <bundles/bundles.h>
 #import <OakFilterList/SymbolChooser.h>
 #import <OakFoundation/NSString Additions.h>
+#import <OakFoundation/NSArray Additions.h>
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/NSColor Additions.h>
 #import <OakAppKit/NSImage Additions.h>
@@ -708,19 +709,19 @@ static std::string const kSearchmarkType = "search";
 - (NSImage*)imageForState:(NSUInteger)state forColumnWithIdentifier:(id)identifier
 {
 	NSArray* array = _gutterImages[identifier];
-	return array && state < [array count] && array[state] != [NSNull null] ? array[state] : nil;
+	return [array safeObjectAtIndex:state];
 }
 
 - (NSImage*)hoverImageForState:(NSUInteger)state forColumnWithIdentifier:(id)identifier
 {
 	NSArray* array = _gutterHoverImages[identifier];
-	return array && state < [array count] && array[state] != [NSNull null] ? array[state] : nil;
+	return [array safeObjectAtIndex:state];
 }
 
 - (NSImage*)pressedImageForState:(NSUInteger)state forColumnWithIdentifier:(id)identifier
 {
 	NSArray* array = _gutterPressedImages[identifier];
-	return array && state < [array count] && array[state] != [NSNull null] ? array[state] : nil;
+	return [array safeObjectAtIndex:state];
 }
 
 // =============================
