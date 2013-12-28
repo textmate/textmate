@@ -190,11 +190,12 @@ static scm::status::type status_for (entry_t const& root)
 	if(!root.is_dir())
 		return root.status();
 
-	size_t untracked = 0, ignored = 0, tracked = 0, modified = 0, added = 0, deleted = 0, mixed = 0;
+	size_t untracked = 0, ignored = 0, tracked = 0, modified = 0, added = 0, deleted = 0, mixed = 0, conflicted = 0;
 	citerate(entry, root.entries())
 	{
 		switch(status_for(*entry))
 		{
+			case scm::status::conflicted:   ++conflicted;break;
 			case scm::status::unversioned:  ++untracked; break;
 			case scm::status::ignored:      ++ignored;   break;
 			case scm::status::none:         ++tracked;   break;
@@ -205,10 +206,12 @@ static scm::status::type status_for (entry_t const& root)
 		}
 	}
 	
+	if(conflicted > 0) return scm::status::conflicted;
 	if(mixed > 0) return scm::status::mixed;
 	
-	size_t total = untracked + ignored + tracked + modified + added + deleted;
+	size_t total = untracked + ignored + tracked + modified + added + deleted + conflicted;
 	
+	if(total == conflicted)return scm::status::conflicted;
 	if(total == untracked) return scm::status::unversioned;
 	if(total == ignored)   return scm::status::none;
 	if(total == tracked)   return scm::status::none;
