@@ -47,7 +47,7 @@ To build the source the following must first be installed on your system:
  * [mercurial][]     — distributed SCM system
  * [Cap’n Proto][capnp] — serialization library
 
-You need to manually install [Cap’n Proto][capnp], the rest can be installed via [MacPorts][] or [homebrew][].
+You need to manually install [Cap’n Proto][capnp] if you're not using [homebrew][], the rest can be installed via [MacPorts][] or [homebrew][].
 
 To install using [MacPorts][] run:
 
@@ -59,7 +59,7 @@ If `port` fails with a build error then likely you need to agree (system-wide) t
 
 To install using [homebrew][] run:
 
-	brew install ragel boost multimarkdown hg ninja
+	brew install ragel boost multimarkdown hg ninja capnp
 
 In practice `hg` ([mercurial][]) is only required for the SCM library’s tests so you can skip this dependency if you don’t mind a failing test.
 
