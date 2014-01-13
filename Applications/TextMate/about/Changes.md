@@ -1,5 +1,9 @@
 # Changes
 
+## 2014-01-13 ([v2.0-alpha.9503](https://github.com/textmate/textmate/compare/v2.0-alpha.9495...v2.0-alpha.9503))
+
+* Various changes, click link above for details.
+
 ## 2013-11-03 ([v2.0-alpha.9495](https://github.com/textmate/textmate/compare/v2.0-alpha.9489...v2.0-alpha.9495))
 
 * If the _Go to File_ filter string contains an asterisk (`*`) it will be considered a file glob. Support for extension matching (by using a period in the filter string) has been removed. It did more harm than good, and the same can now be achieved by using an explicit glob string.
