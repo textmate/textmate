@@ -224,7 +224,7 @@ namespace network
 				if(serverReply == 304 || goodSignature)
 					res = tbzDestination;
 			}
-			else
+			else if(serverReply == 200 || serverReply == 304)
 			{
 				error = "Extracting archive.";
 			}
