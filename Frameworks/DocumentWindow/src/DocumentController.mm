@@ -63,6 +63,7 @@ static BOOL IsInShouldTerminateEventLoop = NO;
 @property (nonatomic) OakFileBrowser*             fileBrowser;
 
 @property (nonatomic) BOOL                        disableFileBrowserWindowResize;
+@property (nonatomic) BOOL                        autoRevealFile;
 @property (nonatomic) NSRect                      oldWindowFrame;
 @property (nonatomic) NSRect                      newWindowFrame;
 
@@ -353,6 +354,7 @@ namespace
 {
 	self.htmlOutputInWindow = [[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsHTMLOutputPlacementKey] isEqualToString:@"window"];
 	self.disableFileBrowserWindowResize = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableFileBrowserWindowResizeKey];
+	self.autoRevealFile = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsAutoRevealFileKey];
 
 	if(self.layoutView.fileBrowserOnRight != [[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsFileBrowserPlacementKey] isEqualToString:@"right"])
 	{
@@ -1011,8 +1013,11 @@ namespace
 {
 	[self updateWindowTitle];
 	
-	if(_selectedDocument && _selectedDocument->path() != NULL_STR)
-		[self revealFileInProject:self];
+	if(self.autoRevealFile)
+	{
+		if(_selectedDocument && _selectedDocument->path() != NULL_STR)
+			[self revealFileInProject:self];
+	}
 }
 
 - (void)updateWindowTitle
