@@ -1007,6 +1007,14 @@ namespace
 	}
 }
 
+- (void)updateWindowTitleAndRevealFile
+{
+	[self updateWindowTitle];
+	
+	if(_selectedDocument && _selectedDocument->path() != NULL_STR)
+		[self revealFileInProject:self];
+}
+
 - (void)updateWindowTitle
 {
 	if(_selectedDocument)
@@ -1119,7 +1127,7 @@ namespace
 			_projectScopeAttributes.push_back(customAttributes);
 
 		[self updateExternalAttributes];
-		[self updateWindowTitle];
+		[self updateWindowTitleAndRevealFile];
 	}
 }
 
@@ -1177,7 +1185,7 @@ namespace
 
 		[self updateExternalAttributes];
 		[self updateProxyIcon];
-		[self updateWindowTitle];
+		[self updateWindowTitleAndRevealFile];
 	}
 }
 
@@ -1186,7 +1194,7 @@ namespace
 	if(_documentDisplayName != newDisplayName && ![_documentDisplayName isEqualToString:newDisplayName])
 	{
 		_documentDisplayName = newDisplayName;
-		[self updateWindowTitle];
+		[self updateWindowTitleAndRevealFile];
 	}
 }
 
@@ -1222,7 +1230,7 @@ namespace
 	if(_projectSCMVariables != newVariables)
 	{
 		_projectSCMVariables = newVariables;
-		[self updateWindowTitle];
+		[self updateWindowTitleAndRevealFile];
 	}
 }
 
@@ -1231,7 +1239,7 @@ namespace
 	if(_documentSCMVariables != newVariables)
 	{
 		_documentSCMVariables = newVariables;
-		[self updateWindowTitle];
+		[self updateWindowTitleAndRevealFile];
 	}
 }
 
