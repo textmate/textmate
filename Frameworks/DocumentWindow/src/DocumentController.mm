@@ -63,6 +63,7 @@ static BOOL IsInShouldTerminateEventLoop = NO;
 @property (nonatomic) OakFileBrowser*             fileBrowser;
 
 @property (nonatomic) BOOL                        disableFileBrowserWindowResize;
+@property (nonatomic) BOOL                        autoRevealFile;
 @property (nonatomic) NSRect                      oldWindowFrame;
 @property (nonatomic) NSRect                      newWindowFrame;
 
@@ -353,6 +354,7 @@ namespace
 {
 	self.htmlOutputInWindow = [[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsHTMLOutputPlacementKey] isEqualToString:@"window"];
 	self.disableFileBrowserWindowResize = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableFileBrowserWindowResizeKey];
+	self.autoRevealFile = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsAutoRevealFileKey];
 
 	if(self.layoutView.fileBrowserOnRight != [[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsFileBrowserPlacementKey] isEqualToString:@"right"])
 	{
@@ -1007,6 +1009,17 @@ namespace
 	}
 }
 
+- (void)updateWindowTitleAndRevealFile
+{
+	[self updateWindowTitle];
+	
+	if(self.autoRevealFile)
+	{
+		if(_selectedDocument && _selectedDocument->path() != NULL_STR)
+			[self revealFileInProject:self];
+	}
+}
+
 - (void)updateWindowTitle
 {
 	if(_selectedDocument)
@@ -1119,7 +1132,7 @@ namespace
 			_projectScopeAttributes.push_back(customAttributes);
 
 		[self updateExternalAttributes];
-		[self updateWindowTitle];
+		[self updateWindowTitleAndRevealFile];
 	}
 }
 
@@ -1177,7 +1190,7 @@ namespace
 
 		[self updateExternalAttributes];
 		[self updateProxyIcon];
-		[self updateWindowTitle];
+		[self updateWindowTitleAndRevealFile];
 	}
 }
 
@@ -1186,7 +1199,7 @@ namespace
 	if(_documentDisplayName != newDisplayName && ![_documentDisplayName isEqualToString:newDisplayName])
 	{
 		_documentDisplayName = newDisplayName;
-		[self updateWindowTitle];
+		[self updateWindowTitleAndRevealFile];
 	}
 }
 
@@ -1222,7 +1235,7 @@ namespace
 	if(_projectSCMVariables != newVariables)
 	{
 		_projectSCMVariables = newVariables;
-		[self updateWindowTitle];
+		[self updateWindowTitleAndRevealFile];
 	}
 }
 
@@ -1231,7 +1244,7 @@ namespace
 	if(_documentSCMVariables != newVariables)
 	{
 		_documentSCMVariables = newVariables;
-		[self updateWindowTitle];
+		[self updateWindowTitleAndRevealFile];
 	}
 }
 

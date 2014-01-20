@@ -70,6 +70,7 @@ NSString* const kUserDefaultsFileBrowserStyleKey               = @"fileBrowserSt
 NSString* const kUserDefaultsHTMLOutputPlacementKey            = @"htmlOutputPlacement";
 NSString* const kUserDefaultsTabsAboveDocumentKey              = @"tabsAboveDocument";
 NSString* const kUserDefaultsDisableFileBrowserWindowResizeKey = @"disableFileBrowserWindowResize";
+NSString* const kUserDefaultsAutoRevealFileKey                 = @"autoRevealFile";
 
 // ===========
 // = Bundles =
