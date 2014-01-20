@@ -21,6 +21,7 @@
 			@"showFileExtensions"      : kUserDefaultsShowFileExtensionsKey,
 			@"disableTabBarCollapsing" : kUserDefaultsDisableTabBarCollapsingKey,
 			@"disableAutoResize"       : kUserDefaultsDisableFileBrowserWindowResizeKey,
+			@"autoRevealFile"          : kUserDefaultsAutoRevealFileKey,
 			@"fileBrowserPlacement"    : kUserDefaultsFileBrowserPlacementKey,
 			@"htmlOutputPlacement"     : kUserDefaultsHTMLOutputPlacementKey,
 		};
