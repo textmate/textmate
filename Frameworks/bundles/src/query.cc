@@ -13,9 +13,14 @@ namespace bundles
 	void add_callback (callback_t* cb)    { Callbacks.add(cb); }
 	void remove_callback (callback_t* cb) { Callbacks.remove(cb); }
 
-	static bool deleted_or_disabled (item_ptr item)
+	static bool is_deleted (item_ptr item)
 	{
-		return item->deleted() || item->disabled() || item->bundle() && (item->bundle()->deleted() || item->bundle()->disabled());
+		return item->deleted() || item->bundle() && item->bundle()->deleted();
+	}
+
+	static bool is_disabled (item_ptr item)
+	{
+		return item->disabled() || item->bundle() && item->bundle()->disabled();
 	}
 
 	namespace
@@ -31,7 +36,7 @@ namespace bundles
 				std::multimap<std::string, item_ptr>& res = _cache[field];
 				iterate(item, AllItems)
 				{
-					if(deleted_or_disabled(*item))
+					if(is_deleted(*item) || is_disabled(*item))
 						continue;
 					citerate(value, (*item)->values_for_field(field))
 						res.emplace(*value, *item);
@@ -232,7 +237,7 @@ namespace bundles
 	{
 		iterate(item, AllItems)
 		{
-			if(!includeDisabledItems && deleted_or_disabled(*item))
+			if(is_deleted(*item) || !includeDisabledItems && is_disabled(*item))
 				continue;
 
 			double rank = 1.0;
@@ -295,7 +300,7 @@ namespace bundles
 		std::vector<item_ptr> res;
 		iterate(item, cache().menu(_uuid))
 		{
-			if(!includeDisabledItems && deleted_or_disabled(*item))
+			if(is_deleted(*item) || !includeDisabledItems && is_disabled(*item))
 				continue;
 			res.push_back(*item);
 		}
