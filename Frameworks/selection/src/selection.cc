@@ -906,7 +906,7 @@ namespace ng
 				{
 					if(outerLeftType == outerRightType)
 						extendLeft = extendRight = true;
-					else if(outerRightType == kCharacterClassWord || outerLeftType == kCharacterClassSpace || outerLeftType == kCharacterClassUnknown || (outerLeftType == kCharacterClassOther && outerRightType != kCharacterClassSpace && outerRightType != kCharacterClassUnknown))
+					else if(outerRightType != kCharacterClassUnknown && (outerRightType == kCharacterClassWord || outerLeftType == kCharacterClassSpace || outerLeftType == kCharacterClassUnknown || (outerLeftType == kCharacterClassOther && outerRightType != kCharacterClassSpace)))
 						extendRight = true;
 					else
 						extendLeft = true;
