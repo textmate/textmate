@@ -374,6 +374,13 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 		{
 			if([parentURL isEqual:currentURL])
 				isChild = YES;
+
+			if([currentURL isFileURL] && (path::info([[currentURL path] fileSystemRepresentation]) & path::flag::package))
+			{
+				parentURL = currentURL;
+				isChild = YES;
+				break;
+			}
 		}
 		[self goToURL:isChild ? parentURL : ParentForURL(aURL)];
 	}
