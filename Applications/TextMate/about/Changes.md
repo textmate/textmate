@@ -1,5 +1,21 @@
 # Changes
 
+## 2014-02-03 ([v2.0-alpha.9505](https://github.com/textmate/textmate/compare/v2.0-alpha.9503...v2.0-alpha.9505))
+
+  * Preference to auto-reveal the current file in the project browser:
+
+    An option called _“Auto-reveal open file in project browser”_ has been added to the Projects preference pane. When checked, the currently open file will be revealed in the project’s file browser. *[Torsten Trautwein]*
+
+  * Add setting to disable tab re-ordering:
+
+    When opening a document it will be placed to the right of the current one (in the tab bar) even if the document being opened is already in the tab bar, this is to make ⌘W work to “close and go back” without having to keep a list of previously selected tabs.
+
+    This feature can now be disabled using:
+
+        defaults write com.macromates.TextMate.preview disableTabReordering -bool YES
+
+    Note though that if one selects multiple documents to open then it will potentially re-order the tab bar so that the documents selected are adjacent.
+
 ## 2014-01-13 ([v2.0-alpha.9503](https://github.com/textmate/textmate/compare/v2.0-alpha.9495...v2.0-alpha.9503))
 
 * Various changes, click link above for details.
