@@ -1033,7 +1033,7 @@ namespace
 {
 	[self updateWindowTitle];
 	
-	if(self.autoRevealFile)
+	if(self.autoRevealFile && self.fileBrowserVisible)
 	{
 		if(_selectedDocument && _selectedDocument->path() != NULL_STR)
 			[self revealFileInProject:self];
@@ -1655,6 +1655,8 @@ namespace
 		{
 			self.fileBrowser.nextResponder = self.fileBrowser.view.nextResponder;
 			self.fileBrowser.view.nextResponder = self.fileBrowser;
+			if(self.autoRevealFile && _selectedDocument && _selectedDocument->path() != NULL_STR)
+				[self revealFileInProject:self];
 		}
 
 		if(!self.disableFileBrowserWindowResize && ([self.window styleMask] & NSFullScreenWindowMask) != NSFullScreenWindowMask)
