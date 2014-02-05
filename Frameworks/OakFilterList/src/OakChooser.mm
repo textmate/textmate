@@ -8,8 +8,11 @@
 
 NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string const& in, std::vector< std::pair<size_t, size_t> > const& ranges, size_t offset)
 {
-	NSDictionary* baseAttributes      = @{ };
-	NSDictionary* highlightAttributes = @{ NSUnderlineStyleAttributeName : @1 };
+	NSMutableParagraphStyle* paragraphStyle = [[NSMutableParagraphStyle alloc] init];
+	[paragraphStyle setLineBreakMode:NSLineBreakByTruncatingMiddle];
+
+	NSDictionary* baseAttributes      = @{ NSParagraphStyleAttributeName : paragraphStyle };
+	NSDictionary* highlightAttributes = @{ NSParagraphStyleAttributeName : paragraphStyle, NSUnderlineStyleAttributeName : @1 };
 
 	NSMutableAttributedString* res = [[NSMutableAttributedString alloc] init];
 
@@ -44,6 +47,7 @@ NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string
 
 		NSTableColumn* tableColumn = [[NSTableColumn alloc] initWithIdentifier:@"name"];
 		tableColumn.dataCell = [[NSTextFieldCell alloc] initTextCell:@""];
+		[tableColumn.dataCell setLineBreakMode:NSLineBreakByTruncatingMiddle];
 
 		OakInactiveTableView* tableView = [[OakInactiveTableView alloc] initWithFrame:NSZeroRect];
 		[tableView addTableColumn:tableColumn];
