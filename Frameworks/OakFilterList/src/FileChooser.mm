@@ -3,6 +3,7 @@
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakFileIconImage.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
+#import <OakAppKit/OakScopeBarView.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakFileBrowser/OFBPathInfoCell.h>
 #import <ns/ns.h>
@@ -14,65 +15,6 @@
 #import <oak/duration.h>
 
 static NSString* const kUserDefaultsShowOpenFilesInFileChooserKey = @"showOpenFilesInFileChooser";
-
-static NSButton* OakCreateScopeButton (NSString* label, SEL action, NSUInteger tag)
-{
-	NSButton* res = [NSButton new];
-	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
-	[[res cell] setControlSize:NSSmallControlSize];
-	NSString* accessibilityRole = NSAccessibilityRadioButtonRole;
-	[[res cell] accessibilitySetOverrideValue:accessibilityRole forAttribute:NSAccessibilityRoleAttribute];
-	[[res cell] accessibilitySetOverrideValue:NSAccessibilityRoleDescription(accessibilityRole, nil) forAttribute:NSAccessibilityRoleDescriptionAttribute];
-	res.bezelStyle                      = NSRecessedBezelStyle;
-	res.buttonType                      = NSPushOnPushOffButton;
-	res.title                           = label;
-	res.tag                             = tag;
-	res.action                          = action;
-	res.showsBorderOnlyWhileMouseInside = YES;
-
-	return res;
-}
-
-@interface OakScopeBarView : NSView
-@end
-
-@implementation OakScopeBarView
-- (BOOL)accessibilityIsIgnored
-{
-	return NO;
-}
-
-- (NSSet*)myAccessibilityAttributeNames
-{
-	static NSSet* set = [NSSet setWithArray:@[
-		NSAccessibilityRoleAttribute,
-	]];
-	return set;
-}
-
-- (NSArray*)accessibilityAttributeNames
-{
-	static NSArray* attributes = [[[self myAccessibilityAttributeNames] setByAddingObjectsFromArray:[super accessibilityAttributeNames]] allObjects];
-	return attributes;
-}
-
-- (BOOL)accessibilityIsAttributeSettable:(NSString*)attribute
-{
-	if([[self myAccessibilityAttributeNames] containsObject:attribute])
-		return NO;
-	return [super accessibilityIsAttributeSettable:attribute];
-}
-
-- (id)accessibilityAttributeValue:(NSString *)attribute
-{
-	if([attribute isEqualToString:NSAccessibilityRoleAttribute])
-		return NSAccessibilityRadioGroupRole;
-	else
-		return [super accessibilityAttributeValue:attribute];
-}
-@end
-
-// =======================
 
 namespace
 {
@@ -255,9 +197,6 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	std::vector<document_record_t>                _records;
 	document::scanner_ptr                         _scanner;
 }
-@property (nonatomic) NSButton*            allButton;
-@property (nonatomic) NSButton*            openDocumentsButton;
-@property (nonatomic) NSButton*            scmChangesButton;
 @property (nonatomic) NSProgressIndicator* progressIndicator;
 
 @property (nonatomic) NSUInteger           sourceIndex;
@@ -285,24 +224,9 @@ static path::glob_list_t globs_for_path (std::string const& path)
 		cell.lineBreakMode = NSLineBreakByTruncatingMiddle;
 		[[self.tableView tableColumnWithIdentifier:@"name"] setDataCell:cell];
 
-		_allButton           = OakCreateScopeButton(@"All",                   @selector(takeSourceIndexFrom:), 0);
-		_openDocumentsButton = OakCreateScopeButton(@"Open Documents",        @selector(takeSourceIndexFrom:), 1);
-		_scmChangesButton    = OakCreateScopeButton(@"Uncommitted Documents", @selector(takeSourceIndexFrom:), 2);
-		[_allButton setState:NSOnState];
-		[_scmChangesButton setEnabled:NO];
 		OakScopeBarView* scopeBar = [OakScopeBarView new];
-		NSDictionary* scopeButtons = @{
-			@"allButton"           : _allButton,
-			@"openDocumentsButton" : _openDocumentsButton,
-			@"scmChangesButton"    : _scmChangesButton,
-		};
-		for(NSView* scopeButton in @[_allButton, _openDocumentsButton, _scmChangesButton])
-		{
-			[scopeButton setTranslatesAutoresizingMaskIntoConstraints:NO];
-			[scopeBar addSubview:scopeButton];
-		}
-		[scopeBar addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[allButton]-[openDocumentsButton]-[scmChangesButton]|" options:0 metrics:nil views:scopeButtons]];
-		[scopeBar addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[allButton]|" options:0 metrics:0 views:scopeButtons]];
+		scopeBar.labels = @[ @"All", @"Open Documents", @"Uncommitted Documents" ];
+		[scopeBar.buttons[2] setEnabled:NO];
 
 		_progressIndicator = [[NSProgressIndicator alloc] initWithFrame:NSZeroRect];
 		_progressIndicator.style                = NSProgressIndicatorSpinningStyle;
@@ -340,6 +264,8 @@ static path::glob_list_t globs_for_path (std::string const& path)
 			self.sourceIndex = 1;
 
 		[self updateWindowTitle];
+
+		[scopeBar bind:NSValueBinding toObject:self withKeyPath:@"sourceIndex" options:nil];
 	}
 	return self;
 }
@@ -392,6 +318,9 @@ static path::glob_list_t globs_for_path (std::string const& path)
 
 - (void)setSourceIndex:(NSUInteger)newIndex
 {
+	if(_sourceIndex == newIndex)
+		return;
+
 	_sourceIndex = newIndex;
 	switch(newIndex)
 	{
@@ -399,10 +328,6 @@ static path::glob_list_t globs_for_path (std::string const& path)
 		case 1: self.onlyShowOpenDocuments = YES; break;
 		case 2: break;
 	}
-
-	for(NSButton* button in @[ _allButton, _openDocumentsButton, _scmChangesButton ])
-		[button setState:[button tag] == _sourceIndex ? NSOnState : NSOffState];
-
 	[self updateWindowTitle];
 }
 
