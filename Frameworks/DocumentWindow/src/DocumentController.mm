@@ -2297,6 +2297,51 @@ static NSUInteger DisableSessionSavingCount = 0;
 	return res;
 }
 
+- (NSDictionary*)sessionInfoIncludingUntitledDocuments:(BOOL)includeUntitled
+{
+	NSMutableDictionary* res = [NSMutableDictionary dictionary];
+
+	if(NSString* projectPath = self.defaultProjectPath)
+		res[@"projectPath"] = projectPath;
+	if(NSDictionary* history = self.fileBrowserHistory)
+		res[@"fileBrowserState"] = history;
+
+	if(([self.window styleMask] & NSFullScreenWindowMask) == NSFullScreenWindowMask)
+			res[@"fullScreen"] = @YES;
+	else	res[@"windowFrame"] = NSStringFromRect([self.window frame]);
+
+	res[@"miniaturized"]       = @([self.window isMiniaturized]);
+	res[@"htmlOutputSize"]     = NSStringFromSize(self.htmlOutputSize);
+	res[@"fileBrowserVisible"] = @(self.fileBrowserVisible);
+	res[@"fileBrowserWidth"]   = @(self.fileBrowserWidth);
+
+	NSMutableArray* docs = [NSMutableArray array];
+	for(auto document : self.documents)
+	{
+		if(!includeUntitled && (document->path() == NULL_STR || !path::exists(document->path())))
+			continue;
+
+		NSMutableDictionary* doc = [NSMutableDictionary dictionary];
+		if(document->is_modified() || document->path() == NULL_STR)
+		{
+			doc[@"identifier"] = [NSString stringWithCxxString:document->identifier()];
+			if(document->is_open())
+				document->backup();
+		}
+		if(document->path() != NULL_STR)
+			doc[@"path"] = [NSString stringWithCxxString:document->path()];
+		if(document->display_name() != NULL_STR)
+			doc[@"displayName"] = [NSString stringWithCxxString:document->display_name()];
+		if(document == self.selectedDocument)
+			doc[@"selected"] = @YES;
+		if(document->sticky())
+			doc[@"sticky"] = @YES;
+		[docs addObject:doc];
+	}
+	res[@"documents"] = docs;
+	return res;
+}
+
 + (BOOL)saveSessionIncludingUntitledDocuments:(BOOL)includeUntitled
 {
 	if(DisableSessionSavingCount)
@@ -2304,49 +2349,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 
 	NSMutableArray* projects = [NSMutableArray array];
 	for(DocumentController* controller in [SortedControllers() reverseObjectEnumerator])
-	{
-		NSMutableDictionary* res = [NSMutableDictionary dictionary];
-
-		if(NSString* projectPath = controller.defaultProjectPath)
-			res[@"projectPath"] = projectPath;
-		if(NSDictionary* history = controller.fileBrowserHistory)
-			res[@"fileBrowserState"] = history;
-
-		if(([controller.window styleMask] & NSFullScreenWindowMask) == NSFullScreenWindowMask)
-				res[@"fullScreen"] = @YES;
-		else	res[@"windowFrame"] = NSStringFromRect([controller.window frame]);
-
-		res[@"miniaturized"]       = @([controller.window isMiniaturized]);
-		res[@"htmlOutputSize"]     = NSStringFromSize(controller.htmlOutputSize);
-		res[@"fileBrowserVisible"] = @(controller.fileBrowserVisible);
-		res[@"fileBrowserWidth"]   = @(controller.fileBrowserWidth);
-
-		NSMutableArray* docs = [NSMutableArray array];
-		for(auto document : controller.documents)
-		{
-			if(!includeUntitled && (document->path() == NULL_STR || !path::exists(document->path())))
-				continue;
-
-			NSMutableDictionary* doc = [NSMutableDictionary dictionary];
-			if(document->is_modified() || document->path() == NULL_STR)
-			{
-				doc[@"identifier"] = [NSString stringWithCxxString:document->identifier()];
-				if(document->is_open())
-					document->backup();
-			}
-			if(document->path() != NULL_STR)
-				doc[@"path"] = [NSString stringWithCxxString:document->path()];
-			if(document->display_name() != NULL_STR)
-				doc[@"displayName"] = [NSString stringWithCxxString:document->display_name()];
-			if(document == controller.selectedDocument)
-				doc[@"selected"] = @YES;
-			if(document->sticky())
-				doc[@"sticky"] = @YES;
-			[docs addObject:doc];
-		}
-		res[@"documents"] = docs;
-		[projects addObject:res];
-	}
+		[projects addObject:[controller sessionInfoIncludingUntitledDocuments:includeUntitled]];
 
 	NSDictionary* session = @{ @"projects" : projects };
 	return [session writeToFile:[self sessionPath] atomically:YES];
