@@ -1,0 +1,4 @@
+SOURCES      = vendor/kvdb/*.m
+EXPORT       = vendor/kvdb/kvdb.h
+FRAMEWORKS   = Cocoa
+LIBS        += sqlite3

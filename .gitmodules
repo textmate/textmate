@@ -25,3 +25,6 @@
 [submodule "vendor/Onigmo/vendor"]
 	path = vendor/Onigmo/vendor
 	url = https://github.com/textmate/Onigmo.git
+[submodule "vendor/kvdb/vendor"]
+	path = vendor/kvdb/vendor
+	url = https://github.com/textmate/kvdb.git
