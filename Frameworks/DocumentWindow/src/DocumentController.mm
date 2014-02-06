@@ -2239,62 +2239,63 @@ static NSUInteger DisableSessionSavingCount = 0;
 	for(NSDictionary* project in session[@"projects"])
 	{
 		DocumentController* controller = [DocumentController new];
-
-		if(NSString* fileBrowserWidth = project[@"fileBrowserWidth"])
-			controller.fileBrowserWidth = [fileBrowserWidth floatValue];
-		if(NSString* htmlOutputSize = project[@"htmlOutputSize"])
-			controller.htmlOutputSize = NSSizeFromString(htmlOutputSize);
-
-		controller.defaultProjectPath = project[@"projectPath"];
-		controller.fileBrowserHistory = project[@"fileBrowserState"];
-		controller.fileBrowserVisible = [project[@"fileBrowserVisible"] boolValue];
-
+		[controller setupControllerForProject:project];
 		if(NSString* windowFrame = project[@"windowFrame"])
 			[controller.window setFrame:NSRectFromString(windowFrame) display:NO];
-
-		std::vector<document::document_ptr> documents;
-		NSInteger selectedTabIndex = 0;
-
-		for(NSDictionary* info in project[@"documents"])
-		{
-			document::document_ptr doc;
-			NSString* identifier = info[@"identifier"];
-			if(!identifier || !(doc = document::find(to_s(identifier), true)))
-			{
-				NSString* path = info[@"path"];
-				doc = path ? document::create(to_s(path)) : create_untitled_document_in_folder(to_s(controller.untitledSavePath));
-				if(NSString* displayName = info[@"displayName"])
-					doc->set_custom_name(to_s(displayName));
-				if([info[@"sticky"] boolValue])
-					doc->set_sticky(true);
-			}
-
-			doc->set_recent_tracking(false);
-			documents.push_back(doc);
-
-			if([info[@"selected"] boolValue])
-				selectedTabIndex = documents.size() - 1;
-		}
-
-		if(documents.empty())
-			documents.push_back(create_untitled_document_in_folder(to_s(controller.untitledSavePath)));
-
-		controller.documents        = documents;
-		controller.selectedTabIndex = selectedTabIndex;
-
-		[controller openAndSelectDocument:documents[selectedTabIndex]];
 		[controller showWindow:nil];
-
 		if([project[@"miniaturized"] boolValue])
 			[controller.window miniaturize:nil];
 		else if([project[@"fullScreen"] boolValue])
 			[controller.window toggleFullScreen:self];
-
 		res = YES;
 	}
 
 	--DisableSessionSavingCount;
 	return res;
+}
+
+- (void)setupControllerForProject:(NSDictionary*)project
+{
+	if(NSString* fileBrowserWidth = project[@"fileBrowserWidth"])
+		self.fileBrowserWidth = [fileBrowserWidth floatValue];
+	if(NSString* htmlOutputSize = project[@"htmlOutputSize"])
+		self.htmlOutputSize = NSSizeFromString(htmlOutputSize);
+
+	self.defaultProjectPath = project[@"projectPath"];
+	self.fileBrowserHistory = project[@"fileBrowserState"];
+	self.fileBrowserVisible = [project[@"fileBrowserVisible"] boolValue];
+
+	std::vector<document::document_ptr> documents;
+	NSInteger selectedTabIndex = 0;
+
+	for(NSDictionary* info in project[@"documents"])
+	{
+		document::document_ptr doc;
+		NSString* identifier = info[@"identifier"];
+		if(!identifier || !(doc = document::find(to_s(identifier), true)))
+		{
+			NSString* path = info[@"path"];
+			doc = path ? document::create(to_s(path)) : create_untitled_document_in_folder(to_s(self.untitledSavePath));
+			if(NSString* displayName = info[@"displayName"])
+				doc->set_custom_name(to_s(displayName));
+			if([info[@"sticky"] boolValue])
+				doc->set_sticky(true);
+		}
+
+		doc->set_recent_tracking(false);
+		documents.push_back(doc);
+
+		if([info[@"selected"] boolValue])
+			selectedTabIndex = documents.size() - 1;
+	}
+
+	if(documents.empty())
+		documents.push_back(create_untitled_document_in_folder(to_s(self.untitledSavePath)));
+
+	self.documents        = documents;
+	self.selectedTabIndex = selectedTabIndex;
+
+	[self openAndSelectDocument:documents[selectedTabIndex]];
 }
 
 - (NSDictionary*)sessionInfoIncludingUntitledDocuments:(BOOL)includeUntitled
