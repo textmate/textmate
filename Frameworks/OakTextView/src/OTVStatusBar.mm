@@ -170,6 +170,7 @@ static NSButton* OakCreateImageToggleButton (NSImage* image)
 
 - (void)grammarPopUpButtonWillPopUp:(NSNotification*)aNotification
 {
+	NSMenuItem* selectedItem = [self.grammarPopUp selectedItem];
 	NSMenu* grammarMenu = self.grammarPopUp.menu;
 	[grammarMenu removeAllItems];
 
@@ -192,11 +193,7 @@ static NSButton* OakCreateImageToggleButton (NSImage* image)
 
 	[grammarMenu update];
 
-	for(NSMenuItem* item in grammarMenu.itemArray)
-	{
-		if([item state] == NSOnState)
-			[self.grammarPopUp selectItem:item];
-	}
+	[self.grammarPopUp selectItemWithTitle:selectedItem.title];
 }
 
 - (void)bundleItemsPopUpButtonWillPopUp:(NSNotification*)aNotification
