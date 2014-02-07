@@ -2,6 +2,7 @@
 #import <OakFilterList/OakAbbreviations.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakAppKit/OakScopeBarView.h>
+#import <OakAppKit/OakSound.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakSystem/application.h>
 #import <text/ranker.h>
@@ -221,6 +222,29 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 			[[OakAbbreviations abbreviationsForName:@"OakFavoriteChooserBindings"] learnAbbreviation:self.filterString forString:[item objectForKey:@"path"]];
 	}
 	[super accept:sender];
+}
+
+- (void)delete:(id)sender
+{
+	NSArray* items = self.selectedItems;
+	if(!items.count)
+		return;
+
+	for(NSDictionary* item in items)
+	{
+		NSString* path = item[@"path"];
+		if(self.sourceIndex == kOakSourceIndexRecentProjects)
+		{
+			KVDB* db = [self sharedProjectStateDB];
+			[db removeObjectForKey:path];
+		}
+		else if(self.sourceIndex == kOakSourceIndexFavorites)
+		{
+			NSLog(@"%s %@", sel_getName(_cmd), path);
+		}
+	}
+	[self loadItems:self];
+	OakPlayUISound(OakSoundDidTrashItemUISound);
 }
 
 - (void)takeSourceIndexFrom:(id)sender
