@@ -1,5 +1,13 @@
 # Changes
 
+## 2014-02-07 ([v2.0-alpha.9507](https://github.com/textmate/textmate/compare/v2.0-alpha.9505...v2.0-alpha.9507))
+
+  * TextMate will now remember open tabs for “project folders”. This means that if you run `mate «folder»`, open a few tabs and close the window, then if you later open the same folder, TextMate will restore the open tabs (and file browser state).
+
+    You can see which folders TextMate has stored state for via _File → Open Favorites…_ (⇧⌘O) — probably soon to be renamed “Open Project…”.
+
+    _The feature is work in progress._
+
 ## 2014-02-03 ([v2.0-alpha.9505](https://github.com/textmate/textmate/compare/v2.0-alpha.9503...v2.0-alpha.9505))
 
   * Preference to auto-reveal the current file in the project browser:
