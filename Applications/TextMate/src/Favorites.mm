@@ -1,6 +1,7 @@
 #import "Favorites.h"
 #import <OakFilterList/OakAbbreviations.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
+#import <OakAppKit/OakScopeBarView.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakSystem/application.h>
 #import <text/ranker.h>
@@ -9,11 +10,18 @@
 #import <text/ctype.h>
 #import <io/path.h>
 #import <ns/ns.h>
+#import <kvdb/kvdb.h>
+
+static NSString* const kUserDefaultsOpenProjectSourceIndex = @"openProjectSourceIndex";
+
+static NSUInteger const kOakSourceIndexRecentProjects = 0;
+static NSUInteger const kOakSourceIndexFavorites      = 1;
 
 @interface FavoriteChooser ()
 {
 	std::multimap<std::string, std::string, text::less_t> favorites;
 }
+@property (nonatomic) NSInteger sourceIndex;
 @end
 
 @implementation FavoriteChooser
@@ -23,17 +31,38 @@
 	return sharedInstance;
 }
 
++ (void)initialize
+{
+	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
+		kUserDefaultsOpenProjectSourceIndex : @0,
+	}];
+}
+
+- (KVDB*)sharedProjectStateDB
+{
+	NSString* appSupport = [[NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES) objectAtIndex:0] stringByAppendingPathComponent:@"TextMate"];
+	return [KVDB sharedDBUsingFile:@"project-state.db" inDirectory:appSupport];
+}
+
 - (id)init
 {
 	if((self = [super init]))
 	{
+		_sourceIndex = NSNotFound;
+
 		self.window.title = @"Open Favorite";
 		self.window.frameAutosaveName = @"Open Favorite";
 		self.tableView.allowsMultipleSelection = YES;
 
+		OakScopeBarView* scopeBar = [OakScopeBarView new];
+		scopeBar.labels = @[ @"Recent Projects", @"Favorites" ];
+
 		NSDictionary* views = @{
 			@"searchField"        : self.searchField,
-			@"topDivider"         : OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]),
+			@"aboveScopeBarDark"  : OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]),
+			@"aboveScopeBarLight" : OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.797 alpha:1.000], [NSColor colorWithCalibratedWhite:0.912 alpha:1.000]),
+			@"scopeBar"           : scopeBar,
+			@"topDivider"         : OakCreateHorizontalLine([NSColor darkGrayColor], [NSColor colorWithCalibratedWhite:0.551 alpha:1.000]),
 			@"scrollView"         : self.scrollView,
 			@"bottomDivider"      : OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]),
 			@"statusTextField"    : self.statusTextField,
@@ -48,11 +77,26 @@
 		}
 
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[searchField(>=50)]-(8)-|"                      options:0 metrics:nil views:views]];
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[aboveScopeBarDark(==aboveScopeBarLight)]|"          options:0 metrics:nil views:views]];
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[scopeBar]-(>=8)-|"                             options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView(==topDivider,==bottomDivider)]|"         options:0 metrics:nil views:views]];
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[statusTextField]-[itemCountTextField]-|"      options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(2)-[searchField]-(8)-[topDivider][scrollView(>=50)][bottomDivider]-(4)-[statusTextField]-(5)-|" options:0 metrics:nil views:views]];
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[statusTextField]-[itemCountTextField]-|"           options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(2)-[searchField]-(8)-[aboveScopeBarDark][aboveScopeBarLight]-(3)-[scopeBar]-(4)-[topDivider][scrollView(>=50)][bottomDivider]-(4)-[statusTextField]-(5)-|" options:0 metrics:nil views:views]];
+
+		self.sourceIndex = [[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsOpenProjectSourceIndex];
+		[scopeBar bind:NSValueBinding toObject:self withKeyPath:@"sourceIndex" options:nil];
 	}
 	return self;
+}
+
+- (void)setSourceIndex:(NSInteger)newIndex
+{
+	if(_sourceIndex == newIndex)
+		return;
+
+	_sourceIndex = newIndex;
+	[self loadItems:self];
+	[[NSUserDefaults standardUserDefaults] setInteger:newIndex forKey:kUserDefaultsOpenProjectSourceIndex];
 }
 
 - (void)scanFavoritesDirectory:(id)sender
@@ -79,6 +123,23 @@
 			}
 		}
 	}
+}
+
+- (void)loadItems:(id)sender
+{
+	if(_sourceIndex == kOakSourceIndexRecentProjects)
+	{
+		favorites.clear();
+		for(id pair in [[self sharedProjectStateDB] allObjects])
+		{
+			std::string const path = to_s((NSString*)pair[@"key"]);
+			favorites.emplace(path::name(path), path);
+		}
+	}
+	else if(_sourceIndex == kOakSourceIndexFavorites)
+	{
+		[self scanFavoritesDirectory:self];
+	}
 	[self updateItems:self];
 }
 
@@ -87,7 +148,7 @@
 	if(![self.window isVisible])
 	{
 		self.filterString = @"";
-		[self scanFavoritesDirectory:self];
+		[self loadItems:self];
 		if([self.tableView numberOfRows])
 			[self.tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
 	}
@@ -160,5 +221,32 @@
 			[[OakAbbreviations abbreviationsForName:@"OakFavoriteChooserBindings"] learnAbbreviation:self.filterString forString:[item objectForKey:@"path"]];
 	}
 	[super accept:sender];
+}
+
+- (void)takeSourceIndexFrom:(id)sender
+{
+	if([sender respondsToSelector:@selector(tag)])
+		self.sourceIndex = [sender tag];
+}
+
+- (void)updateGoToMenu:(NSMenu*)aMenu
+{
+	if(self.window.isKeyWindow)
+	{
+		[[aMenu addItemWithTitle:@"Recent Projects" action:@selector(takeSourceIndexFrom:) keyEquivalent:@"1"] setTag:kOakSourceIndexRecentProjects];
+		[[aMenu addItemWithTitle:@"Favorites" action:@selector(takeSourceIndexFrom:) keyEquivalent:@"2"] setTag:kOakSourceIndexFavorites];
+	}
+	else
+	{
+		[aMenu addItemWithTitle:@"No Sources" action:@selector(nop:) keyEquivalent:@""];
+	}
+}
+
+- (BOOL)validateMenuItem:(NSMenuItem*)item
+{
+	BOOL activate = YES;
+	if([item action] == @selector(takeSourceIndexFrom:))
+		[item setState:[item tag] == self.sourceIndex ? NSOnState : NSOffState];
+	return activate;
 }
 @end
