@@ -30,6 +30,7 @@
 #import <text/utf8.h>
 #import <ns/ns.h>
 #import <oak/compat.h>
+#import <kvdb/kvdb.h>
 
 namespace find_tags { enum { in_document = 1, in_selection, in_project, in_folder }; } // From AppController.h
 
@@ -258,6 +259,12 @@ namespace
 	scm::info_ptr                          _documentSCMInfo;
 	std::map<std::string, std::string>     _documentSCMVariables;
 	std::vector<std::string>               _documentScopeAttributes;
+}
+
++ (KVDB*)sharedProjectStateDB
+{
+	NSString* appSupport = [[NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES) objectAtIndex:0] stringByAppendingPathComponent:@"TextMate"];
+	return [KVDB sharedDBUsingFile:@"project-state.db" inDirectory:appSupport];
 }
 
 - (id)init
@@ -607,11 +614,19 @@ namespace
 	std::copy_if(_documents.begin(), _documents.end(), back_inserter(documents), [](document::document_ptr const& doc){ return doc->is_modified(); });
 
 	if(documents.empty())
+	{
+		if(self.treatAsProjectWindow)
+			[[DocumentController sharedProjectStateDB] setValue:[self sessionInfoIncludingUntitledDocuments:NO] forKey:self.projectPath];
 		return YES;
+	}
 
 	[self showCloseWarningUIForDocuments:documents completionHandler:^(BOOL canClose){
 		if(canClose)
+		{
+			if(self.treatAsProjectWindow)
+				[[DocumentController sharedProjectStateDB] setValue:[self sessionInfoIncludingUntitledDocuments:NO] forKey:self.projectPath];
 			[self.window close];
+		}
 	}];
 
 	return NO;
@@ -1961,6 +1976,11 @@ namespace
 	return res;
 }
 
+- (BOOL)treatAsProjectWindow
+{
+	return self.projectPath && (self.fileBrowserVisible || _documents.size() > 1);
+}
+
 - (NSPoint)positionForWindowUnderCaret
 {
 	return [self.textView positionForWindowUnderCaret];
@@ -2567,12 +2587,19 @@ static NSUInteger DisableSessionSavingCount = 0;
 			else if(controller.selectedDocument)
 				[controller selectedDocument]->set_custom_name("not untitled"); // release potential untitled token used
 
-			controller.defaultProjectPath = [NSString stringWithCxxString:folder];
-			controller.fileBrowserVisible = YES;
-			controller.documents          = make_vector(create_untitled_document_in_folder(folder));
-			controller.fileBrowser.url    = [NSURL fileURLWithPath:[NSString stringWithCxxString:folder]];
+			if(NSDictionary* project = [[DocumentController sharedProjectStateDB] valueForKey:[NSString stringWithCxxString:folder]])
+			{
+				[controller setupControllerForProject:project];
+			}
+			else
+			{
+				controller.defaultProjectPath = [NSString stringWithCxxString:folder];
+				controller.fileBrowserVisible = YES;
+				controller.documents          = make_vector(create_untitled_document_in_folder(folder));
+				controller.fileBrowser.url    = [NSURL fileURLWithPath:[NSString stringWithCxxString:folder]];
 
-			[controller openAndSelectDocument:[controller documents][controller.selectedTabIndex]];
+				[controller openAndSelectDocument:[controller documents][controller.selectedTabIndex]];
+			}
 			bring_to_front(controller);
 		}
 
