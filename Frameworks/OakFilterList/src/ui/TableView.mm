@@ -48,7 +48,9 @@
 - (BOOL)control:(NSControl*)aControl textView:(NSTextView*)aTextView doCommandBySelector:(SEL)aCommand
 {
 	static auto const forward = new std::set<SEL>{ @selector(moveUp:), @selector(moveDown:), @selector(moveUpAndModifySelection:), @selector(moveDownAndModifySelection:), @selector(pageUp:), @selector(pageDown:), @selector(movePageUp:), @selector(movePageDown:), @selector(scrollPageUp:), @selector(scrollPageDown:), @selector(moveToBeginningOfDocument:), @selector(moveToEndOfDocument:), @selector(scrollToBeginningOfDocument:), @selector(scrollToEndOfDocument:), @selector(insertNewline:), @selector(insertNewlineIgnoringFieldEditor:), @selector(cancelOperation:) };
-	if(forward->find(aCommand) != forward->end() && [self respondsToSelector:aCommand])
+	if(aCommand == @selector(deleteToBeginningOfLine:) && [aControl.window tryToPerform:@selector(delete:) with:aControl])
+		return YES;
+	else if(forward->find(aCommand) != forward->end() && [self respondsToSelector:aCommand])
 		return [NSApp sendAction:aCommand to:self from:aControl];
 	return NO;
 }
