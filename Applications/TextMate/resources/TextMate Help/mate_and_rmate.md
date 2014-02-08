@@ -172,9 +172,9 @@ To do it's job, `rmate` needs a connection back to your computer so that it can 
 
 The easiest way to do this is to connect to your server using a command like:
 
-    ssh -R 52698:127.0.0.1:52698 example.com
+    ssh -R 52698:localhost:52698 example.com
 
-The `-R` option sets up a reverse tunnel.  The first `52698` names a port on the remote.  It will be connected to `127.0.0.1:52698` or the same port on the connecting box.  That port number is the default for TextMate 2 and `rmate`, so you should now be able to edit away.
+The `-R` option sets up a reverse tunnel.  The first `52698` names a port on the remote.  It will be connected to `localhost:52698` or the same port on the connecting box.  That port number is the default for TextMate 2 and `rmate`, so you should now be able to edit away.
 
 To test things out, just try a command like:
 
@@ -202,12 +202,12 @@ After you verify that things are working, feel free to update your SSH setting t
 For a single server just add an entry like the following to your `~/.ssh/config`:
 
     Host example.com
-    RemoteForward 52698 127.0.0.1:52698
+    RemoteForward 52698 localhost:52698
 
 If you want to make those settings the default for all of your servers, use the wildcard host:
 
     Host *
-    RemoteForward 52698 127.0.0.1:52698
+    RemoteForward 52698 localhost:52698
 
 With settings like those in place, a bare `ssh` command (without `-R`) should still establish the tunnel for you and allow you to use `rmate`.
 
