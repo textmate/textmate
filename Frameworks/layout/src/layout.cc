@@ -447,6 +447,33 @@ namespace ng
 		}
 	}
 
+	bool layout_t::repair_folds (size_t from, size_t to)
+	{
+		bool fullRefresh = false;
+		std::vector< std::pair<size_t, size_t> > foldedRanges;
+		ssize_t nestCount = 0;
+		for(auto const& pair : _folds->folded())
+		{
+			if(pair.second && ++nestCount == 1)
+				foldedRanges.push_back(std::make_pair(pair.first, pair.first));
+			else if(!pair.second && --nestCount == 0)
+				foldedRanges.back().second = pair.first;
+		}
+
+		for(auto const& range : foldedRanges)
+		{
+			D(DBF_Layout, bug("range: %zu-%zu\n", range.first, range.second););
+			if(range.second <= from || to <= range.first)
+				continue;
+
+			did_erase(range.first, range.second);
+			auto row = row_for_offset(range.first);
+			row->value.insert_folded(range.first, range.second - range.first, _buffer, row->offset._length);
+			fullRefresh = update_row(row) || fullRefresh;
+		}
+		return fullRefresh;
+	}
+
 	// ================
 	// = Insert/erase =
 	// ================
@@ -477,29 +504,7 @@ namespace ng
 			update_row(toRow);
 			_rows.erase(fromRow, toRow);
 
-			std::vector< std::pair<size_t, size_t> > foldedRanges;
-			ssize_t nestCount = 0;
-			for(auto const& pair : _folds->folded())
-			{
-				if(pair.second && ++nestCount == 1)
-					foldedRanges.push_back(std::make_pair(pair.first, pair.first));
-				else if(!pair.second && --nestCount == 0)
-					foldedRanges.back().second = pair.first;
-			}
-
-			size_t insertFrom = base, insertTo = base + prefixLenToInsert;
-			for(auto const& range : foldedRanges)
-			{
-				D(DBF_Layout, bug("range: %zu-%zu\n", range.first, range.second););
-				if(range.second <= insertFrom || insertTo <= range.first)
-					continue;
-
-				did_erase(range.first, range.second);
-				auto row = row_for_offset(range.first);
-				row->value.insert_folded(range.first, range.second - range.first, _buffer, row->offset._length);
-				fullRefresh = update_row(row) || fullRefresh;
-			}
-
+			repair_folds(base, base + prefixLenToInsert);
 			fullRefresh = true;
 		}
 		refresh_line_at_index(from, fullRefresh);
@@ -544,31 +549,7 @@ namespace ng
 			fullRefresh = update_row(row) || fullRefresh;
 		}
 
-		// ===================
-		// = Update foldings =
-		// ===================
-
-		std::vector< std::pair<size_t, size_t> > foldedRanges;
-		ssize_t nestCount = 0;
-		for(auto const& pair : _folds->folded())
-		{
-			if(pair.second && ++nestCount == 1)
-				foldedRanges.push_back(std::make_pair(pair.first, pair.first));
-			else if(!pair.second && --nestCount == 0)
-				foldedRanges.back().second = pair.first;
-		}
-
-		for(auto const& range : foldedRanges)
-		{
-			D(DBF_Layout, bug("folded range: %zu-%zu\n", range.first, range.second););
-			if(range.second <= first || last + suffixLen <= range.first)
-				continue;
-
-			did_erase(range.first, range.second);
-			auto row = row_for_offset(range.first);
-			row->value.insert_folded(range.first, range.second - range.first, _buffer, row->offset._length);
-			fullRefresh = update_row(row) || fullRefresh;
-		}
+		fullRefresh = repair_folds(first, last + suffixLen) || fullRefresh;
 
 		refresh_line_at_index(first, fullRefresh);
 	}
