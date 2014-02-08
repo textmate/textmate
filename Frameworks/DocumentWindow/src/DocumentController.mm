@@ -2259,7 +2259,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 	for(NSDictionary* project in session[@"projects"])
 	{
 		DocumentController* controller = [DocumentController new];
-		[controller setupControllerForProject:project];
+		[controller setupControllerForProject:project skipMissingFiles:NO];
 		if(NSString* windowFrame = project[@"windowFrame"])
 			[controller.window setFrame:NSRectFromString(windowFrame) display:NO];
 		[controller showWindow:nil];
@@ -2274,7 +2274,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 	return res;
 }
 
-- (void)setupControllerForProject:(NSDictionary*)project
+- (void)setupControllerForProject:(NSDictionary*)project skipMissingFiles:(BOOL)skipMissing
 {
 	if(NSString* fileBrowserWidth = project[@"fileBrowserWidth"])
 		self.fileBrowserWidth = [fileBrowserWidth floatValue];
@@ -2295,6 +2295,9 @@ static NSUInteger DisableSessionSavingCount = 0;
 		if(!identifier || !(doc = document::find(to_s(identifier), true)))
 		{
 			NSString* path = info[@"path"];
+			if(path && skipMissing && access([path fileSystemRepresentation], F_OK) != 0)
+				continue;
+
 			doc = path ? document::create(to_s(path)) : create_untitled_document_in_folder(to_s(self.untitledSavePath));
 			if(NSString* displayName = info[@"displayName"])
 				doc->set_custom_name(to_s(displayName));
@@ -2589,7 +2592,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 
 			if(NSDictionary* project = [[DocumentController sharedProjectStateDB] valueForKey:[NSString stringWithCxxString:folder]])
 			{
-				[controller setupControllerForProject:project];
+				[controller setupControllerForProject:project skipMissingFiles:YES];
 			}
 			else
 			{
