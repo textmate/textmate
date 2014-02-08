@@ -156,6 +156,7 @@ namespace ng
 
 		bool update_row (row_tree_t::iterator rowIter);
 
+		bool repair_folds (size_t from, size_t to);
 		void refresh_line_at_index (size_t index, bool fullRefresh);
 		void did_fold (size_t from, size_t to);
 
