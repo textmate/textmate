@@ -458,7 +458,7 @@ struct socket_observer_t
 			}
 			else if(state == command)
 			{
-				if(str == ".")
+				if(str == "." || strcasecmp(str.c_str(), "quit") == 0)
 				{
 					state = done;
 				}
