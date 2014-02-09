@@ -185,7 +185,7 @@ static NSButton* OakCreateStopSearchButton ()
 		self.window.title              = @"Find";
 		self.window.frameAutosaveName  = @"Find";
 		self.window.hidesOnDeactivate  = NO;
-		self.window.collectionBehavior = self.window.collectionBehavior | NSWindowCollectionBehaviorMoveToActiveSpace;
+		self.window.collectionBehavior = NSWindowCollectionBehaviorMoveToActiveSpace|NSWindowCollectionBehaviorFullScreenAuxiliary;
 		self.window.delegate           = self;
 
 		self.findLabel                 = OakCreateLabel(@"Find:");
