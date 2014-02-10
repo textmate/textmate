@@ -2363,6 +2363,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 		[docs addObject:doc];
 	}
 	res[@"documents"] = docs;
+	res[@"lastRecentlyUsed"] = [NSDate date];
 	return res;
 }
 

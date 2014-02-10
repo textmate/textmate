@@ -20,7 +20,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 
 @interface FavoriteChooser ()
 {
-	std::multimap<std::string, std::string, text::less_t> favorites;
+	std::vector<std::pair<std::string, std::string>> favorites;
 }
 @property (nonatomic) NSInteger sourceIndex;
 @end
@@ -102,7 +102,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 
 - (void)scanFavoritesDirectory:(id)sender
 {
-	favorites.clear();
+	std::multimap<std::string, std::string, text::less_t> items;
 
 	std::string const favoritesPath = oak::application_t::support("Favorites");
 	for(auto const& entry : path::entries(favoritesPath))
@@ -115,30 +115,52 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 				for(auto const& subentry : path::entries(path))
 				{
 					if(subentry->d_type == DT_DIR)
-						favorites.emplace(text::format("%s — %s", subentry->d_name, entry->d_name + 6), path::join(path, subentry->d_name));
+						items.emplace(text::format("%s — %s", subentry->d_name, entry->d_name + 6), path::join(path, subentry->d_name));
 				}
 			}
 			else
 			{
-				favorites.emplace(entry->d_name, path);
+				items.emplace(entry->d_name, path);
 			}
 		}
 	}
+
+	favorites.clear();
+	std::copy(items.begin(), items.end(), back_inserter(favorites));
+}
+
+static NSInteger LRUSort (id lhs, id rhs, void* context)
+{
+	NSDate* lhsDate = lhs[@"value"][@"lastRecentlyUsed"];
+	NSDate* rhsDate = rhs[@"value"][@"lastRecentlyUsed"];
+	NSString* lhsKey = lhs[@"key"];
+	NSString* rhsKey = rhs[@"key"];
+
+	if(lhsDate && rhsDate)
+		return [rhsDate compare:lhsDate];
+	else if(!lhsDate && !rhsDate)
+		return [[lhsKey lastPathComponent] compare:[rhsKey lastPathComponent]];
+	else if(lhsDate)
+		return NSOrderedAscending;
+	else
+		return NSOrderedDescending;
 }
 
 - (void)loadItems:(id)sender
 {
 	if(_sourceIndex == kOakSourceIndexRecentProjects)
 	{
-		favorites.clear();
-		for(id pair in [[self sharedProjectStateDB] allObjects])
+		std::vector<std::string> paths;
+		for(id pair in [[[self sharedProjectStateDB] allObjects] sortedArrayUsingFunction:&LRUSort context:nullptr])
 		{
 			if(access([pair[@"key"] fileSystemRepresentation], F_OK) == 0)
-			{
-				std::string const path = to_s((NSString*)pair[@"key"]);
-				favorites.emplace(path::name(path), path);
-			}
+				paths.push_back(to_s((NSString*)pair[@"key"]));
 		}
+		auto parents = path::disambiguate(paths);
+
+		favorites.clear();
+		for(size_t i = 0; i < paths.size(); ++i)
+			favorites.emplace_back(path::display_name(paths[i], parents[i]), paths[i]);
 	}
 	else if(_sourceIndex == kOakSourceIndexFavorites)
 	{
