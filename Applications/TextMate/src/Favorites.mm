@@ -192,32 +192,27 @@ static NSInteger LRUSort (id lhs, id rhs, void* context)
 	std::multimap<double, NSDictionary*> ranked;
 	for(auto const& pair : favorites)
 	{
-		if(filter == NULL_STR || filter == "")
-		{
-			ranked.emplace(ranked.size(), @{
-				@"name" : [NSString stringWithCxxString:pair.first],
-				@"info" : [NSString stringWithCxxString:path::with_tilde(pair.second)],
-				@"path" : [NSString stringWithCxxString:pair.second],
-			});
-		}
-		else
+		double rank = ranked.size();
+		id name = [NSString stringWithCxxString:pair.first];
+		if(filter != NULL_STR && filter != "")
 		{
 			std::vector<std::pair<size_t, size_t>> ranges;
-			double rank = oak::rank(filter, pair.first, &ranges);
-			if(rank > 0)
-			{
-				size_t bindingIndex = std::find(bindings.begin(), bindings.end(), pair.second) - bindings.begin();
-				if(bindingIndex != bindings.size())
-						rank = -1.0 * (bindings.size() - bindingIndex);
-				else	rank = -rank;
+			rank = oak::rank(filter, pair.first, &ranges);
+			if(rank <= 0)
+				continue;
 
-				ranked.emplace(rank, @{
-					@"name" : CreateAttributedStringWithMarkedUpRanges(pair.first, ranges),
-					@"info" : [NSString stringWithCxxString:path::with_tilde(pair.second)],
-					@"path" : [NSString stringWithCxxString:pair.second],
-				});
-			}
+			size_t bindingIndex = std::find(bindings.begin(), bindings.end(), pair.second) - bindings.begin();
+			if(bindingIndex != bindings.size())
+					rank = -1.0 * (bindings.size() - bindingIndex);
+			else	rank = -rank;
+			name = CreateAttributedStringWithMarkedUpRanges(pair.first, ranges);
 		}
+
+		ranked.emplace(rank, @{
+			@"name" : name,
+			@"info" : [NSString stringWithCxxString:path::with_tilde(pair.second)],
+			@"path" : [NSString stringWithCxxString:pair.second],
+		});
 	}
 
 	NSMutableArray* res = [NSMutableArray array];
