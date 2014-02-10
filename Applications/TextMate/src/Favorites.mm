@@ -133,8 +133,11 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 		favorites.clear();
 		for(id pair in [[self sharedProjectStateDB] allObjects])
 		{
-			std::string const path = to_s((NSString*)pair[@"key"]);
-			favorites.emplace(path::name(path), path);
+			if(access([pair[@"key"] fileSystemRepresentation], F_OK) == 0)
+			{
+				std::string const path = to_s((NSString*)pair[@"key"]);
+				favorites.emplace(path::name(path), path);
+			}
 		}
 	}
 	else if(_sourceIndex == kOakSourceIndexFavorites)
