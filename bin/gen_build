@@ -909,7 +909,7 @@ rule run_application
   description = Run ‘$in’…
 
 rule sign_executable
-  command = codesign --deep -fs "$identity" $in && touch $out
+  command = codesign --timestamp=none --deep -fs "$identity" $in && touch $out
   description = Sign ‘$in’…
 
 rule tbz_archive
