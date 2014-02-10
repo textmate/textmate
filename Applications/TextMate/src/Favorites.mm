@@ -1,8 +1,10 @@
 #import "Favorites.h"
 #import <OakFilterList/OakAbbreviations.h>
+#import <OakAppKit/OakFileIconImage.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakAppKit/OakScopeBarView.h>
 #import <OakAppKit/OakSound.h>
+#import <OakFileBrowser/OFBPathInfoCell.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakSystem/application.h>
 #import <text/ranker.h>
@@ -55,6 +57,10 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 		self.window.frameAutosaveName = @"Open Favorite";
 		self.tableView.allowsMultipleSelection = YES;
 
+		NSCell* cell = [OFBPathInfoCell new];
+		cell.lineBreakMode = NSLineBreakByTruncatingMiddle;
+		[[self.tableView tableColumnWithIdentifier:@"name"] setDataCell:cell];
+
 		OakScopeBarView* scopeBar = [OakScopeBarView new];
 		scopeBar.labels = @[ @"Recent Projects", @"Favorites" ];
 
@@ -88,6 +94,15 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 		[scopeBar bind:NSValueBinding toObject:self withKeyPath:@"sourceIndex" options:nil];
 	}
 	return self;
+}
+
+- (void)tableView:(NSTableView*)aTableView willDisplayCell:(OFBPathInfoCell*)cell forTableColumn:(NSTableColumn*)aTableColumn row:(NSInteger)rowIndex
+{
+	if(![aTableColumn.identifier isEqualToString:@"name"])
+		return;
+
+	if([cell respondsToSelector:@selector(setImage:)])
+		[cell setImage:self.items[rowIndex][@"icon"]];
 }
 
 - (void)setSourceIndex:(NSInteger)newIndex
@@ -212,6 +227,7 @@ static NSInteger LRUSort (id lhs, id rhs, void* context)
 			@"name" : name,
 			@"info" : [NSString stringWithCxxString:path::with_tilde(pair.second)],
 			@"path" : [NSString stringWithCxxString:pair.second],
+			@"icon" : [OakFileIconImage fileIconImageWithPath:[NSString stringWithCxxString:pair.second] size:NSMakeSize(16, 16)],
 		});
 	}
 
