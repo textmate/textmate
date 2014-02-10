@@ -441,10 +441,15 @@ static NSDictionary* RemoveOldCommits (NSDictionary* src)
 	NSMutableDictionary* res = [src mutableCopy];
 	NSMutableArray* commits = [NSMutableArray array];
 
+	NSInteger year = [[[[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar] components:NSYearCalendarUnit fromDate:[NSDate date]] year];
+	NSMutableArray* years = [NSMutableArray array];
+	for(size_t i = year-2; i <= year; ++i)
+		[years addObject:[NSString stringWithFormat:@"%4zu-", i]];
+
 	for(NSDictionary* commit in src[@"commits"])
 	{
 		NSString* dateString = commit[@"date"];
-		for(NSString* prefix in @[ @"2012-", @"2013-" ])
+		for(NSString* prefix in years)
 		{
 			if([dateString hasPrefix:prefix]) // this is significantly faster than having to parse the date
 				[commits addObject:commit];
