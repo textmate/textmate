@@ -36,6 +36,7 @@ namespace find_tags { enum { in_document = 1, in_selection, in_project, in_folde
 
 static NSString* const kUserDefaultsFindInSelectionByDefault = @"findInSelectionByDefault";
 static NSString* const kUserDefaultsDisableTabReordering = @"disableTabReordering";
+static NSString* const kUserDefaultsDisableFolderStateRestore = @"disableFolderStateRestore";
 static NSString* const OakDocumentPboardType = @"OakDocumentPboardType"; // drag’n’drop of tabs
 static BOOL IsInShouldTerminateEventLoop = NO;
 
@@ -2591,7 +2592,8 @@ static NSUInteger DisableSessionSavingCount = 0;
 			else if(controller.selectedDocument)
 				[controller selectedDocument]->set_custom_name("not untitled"); // release potential untitled token used
 
-			if(NSDictionary* project = [[DocumentController sharedProjectStateDB] valueForKey:[NSString stringWithCxxString:folder]])
+			BOOL disableFolderStateRestore = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableFolderStateRestore];
+			if(NSDictionary* project = (disableFolderStateRestore ? nil : [[DocumentController sharedProjectStateDB] valueForKey:[NSString stringWithCxxString:folder]]))
 			{
 				[controller setupControllerForProject:project skipMissingFiles:YES];
 			}
