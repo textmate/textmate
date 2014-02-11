@@ -1435,12 +1435,12 @@ namespace ng
 				map.emplace("TM_LINE_INDEX",    std::to_string(pos.column));
 				map.emplace("TM_LINE_NUMBER",   std::to_string(pos.line+1));
 				map.emplace("TM_COLUMN_NUMBER", std::to_string(visual_distance(_buffer, _buffer.begin(pos.line), caret)+1));
+				map.emplace("TM_CURRENT_LINE",  _buffer.substr(_buffer.begin(pos.line), _buffer.eol(pos.line)));
+				map.emplace("TM_SCOPE_LEFT",    to_s(s.left));
 
 				range_t wordRange = ng::extend(_buffer, _selections, kSelectionExtendToWord).last();
-				map.emplace("TM_CURRENT_WORD",  _buffer.substr(wordRange.min().index, wordRange.max().index));
-				map.emplace("TM_CURRENT_LINE",  _buffer.substr(_buffer.begin(pos.line), _buffer.eol(pos.line)));
-
-				map.emplace("TM_SCOPE_LEFT",    to_s(s.left));
+				if(!wordRange.empty())
+					map.emplace("TM_CURRENT_WORD", _buffer.substr(wordRange.min().index, wordRange.max().index));
 			}
 			else
 			{
