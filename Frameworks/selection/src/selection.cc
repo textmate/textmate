@@ -1409,6 +1409,23 @@ namespace ng
 	// = All Words =
 	// =============
 
+	range_t word_at (buffer_t const& buffer, range_t const& range)
+	{
+		if(range.empty())
+		{
+			size_t i   = range.first.index;
+			size_t bol = buffer.begin(buffer.convert(i).line);
+			size_t eol = buffer.eol(buffer.convert(i).line);
+
+			std::string leftType  = i == bol ? kCharacterClassSpace : character_class(buffer, i-1);
+			std::string rightType = i == eol ? kCharacterClassSpace : character_class(buffer, i);
+
+			if(leftType == kCharacterClassSpace && rightType == kCharacterClassSpace)
+				return range;
+		}
+		return extend_if_empty(buffer, range, kSelectionExtendToWord).last();
+	}
+
 	ranges_t all_words (buffer_t const& buffer)
 	{
 		ranges_t res;

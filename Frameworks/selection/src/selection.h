@@ -39,6 +39,7 @@ namespace ng
 	PUBLIC ranges_t highlight_ranges_for_movement (buffer_t const& buffer, ranges_t const& oldSelection, ranges_t const& newSelection);
 	PUBLIC std::map< range_t, std::map<std::string, std::string> > find (buffer_t const& buffer, ranges_t const& selection, std::string const& searchFor, find::options_t options, ranges_t const& searchRanges = ranges_t(), bool* didWrap = nullptr);
 	PUBLIC std::map< range_t, std::map<std::string, std::string> > find_all (buffer_t const& buffer, std::string const& searchFor, find::options_t options, ranges_t const& searchRanges = ranges_t());
+	PUBLIC range_t word_at (buffer_t const& buffer, range_t const& range);
 	PUBLIC ranges_t all_words (buffer_t const& buffer);
 
 	PUBLIC ranges_t dissect_columnar (buffer_t const& buffer, ranges_t const& selection);

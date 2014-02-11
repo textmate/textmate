@@ -23,25 +23,7 @@ namespace ng
 		switch(actualUnit)
 		{
 			case input::character:        r = extend_if_empty(buffer, range, kSelectionExtendRight).last();        break;
-
-			case input::word:
-			{
-				if(range.empty())
-				{
-					size_t i   = range.first.index;
-					size_t bol = buffer.begin(buffer.convert(i).line);
-					size_t eol = buffer.eol(buffer.convert(i).line);
-
-					std::string leftType  = i == bol ? kCharacterClassSpace : character_class(buffer, i-1);
-					std::string rightType = i == eol ? kCharacterClassSpace : character_class(buffer, i);
-
-					if(leftType == kCharacterClassSpace && rightType == kCharacterClassSpace)
-						break;
-				}
-				r = extend_if_empty(buffer, range, kSelectionExtendToWord).last();
-			}
-			break;
-
+			case input::word:             r = word_at(buffer, range);                                          break;
 			case input::line:             r = extend_if_empty(buffer, range, kSelectionExtendToLineExclLF).last(); break;
 			case input::scope:            r = select_scope(buffer, range, scopeSelector).last();                   break;
 			case input::selection:        r = range;                                                               break;
