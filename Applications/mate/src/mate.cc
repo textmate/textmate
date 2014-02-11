@@ -4,8 +4,9 @@
 #include <text/format.h>
 #include <cf/cf.h>
 #include <io/path.h>
+#include <plist/uuid.h>
 
-static double const AppVersion  = 2.4;
+static double const AppVersion  = 2.5;
 static size_t const AppRevision = APP_REVISION;
 
 static char const* socket_path ()
@@ -141,6 +142,7 @@ static void usage (FILE* io)
 		" -m, --name <name>      The display name shown in TextMate.\n"
 		" -r, --recent           Add file to Open Recent menu.\n"
 		" -d, --change-dir       Change TextMate's working directory to that of the file.\n"
+		" -u, --uuid             Reference an already open document using its UUID.\n"
 		" -h, --help             Show this information.\n"
 		" -v, --version          Print version information.\n"
 		"\n"
@@ -180,6 +182,8 @@ static void write_key_pair (int fd, std::string const& key, std::string const& v
 	write(fd, str.data(), str.size());
 }
 
+static const std::string kUUIDPrefix = "uuid://";
+
 int main (int argc, char* argv[])
 {
 	extern char* optarg;
@@ -194,6 +198,7 @@ int main (int argc, char* argv[])
 		{ "project",          required_argument,   0,      'p'   },
 		{ "recent",           no_argument,         0,      'r'   },
 		{ "change-dir",       no_argument,         0,      'd'   },
+		{ "uuid",             required_argument,   0,      'u'   },
 		{ "help",             no_argument,         0,      'h'   },
 		{ "version",          no_argument,         0,      'v'   },
 		{ "server",           no_argument,         0,      's'   },
@@ -201,6 +206,7 @@ int main (int argc, char* argv[])
 	};
 
 	std::vector<std::string> files, lines, types, names, projects;
+	oak::uuid_t uuid;
 
 	bool add_to_recent = false;
 	bool change_dir    = false;
@@ -212,7 +218,7 @@ int main (int argc, char* argv[])
 
 	install_auth_tool();
 
-	while((ch = getopt_long(argc, argv, "awrdhvl:t:m:sp:", longopts, NULL)) != -1)
+	while((ch = getopt_long(argc, argv, "awrdhvl:t:m:u:sp:", longopts, NULL)) != -1)
 	{
 		switch(ch)
 		{
@@ -222,6 +228,7 @@ int main (int argc, char* argv[])
 			case 't': append(optarg, types);    break;
 			case 'm': append(optarg, names);    break;
 			case 'p': append(optarg, projects); break;
+			case 'u': uuid = optarg;            break;
 			case 'r': add_to_recent = true;     break;
 			case 'd': change_dir = true;        break;
 			case 'h': usage(stdout);            return 0;
@@ -261,9 +268,15 @@ int main (int argc, char* argv[])
 
 	std::string defaultProject = projects.empty() ? (getenv("TM_PROJECT_UUID") ?: "") : projects.back();
 
+	if(files.empty() && !uuid && should_wait != true && getenv("TM_DOCUMENT_UUID"))
+		uuid = getenv("TM_DOCUMENT_UUID");
+
 	bool stdinIsAPipe = isatty(STDIN_FILENO) == 0;
-	if(files.empty() && (should_wait == true || stdinIsAPipe))
+	if(files.empty() && !uuid && (should_wait == true || stdinIsAPipe))
 		files.push_back("-");
+
+	if(files.empty() && uuid)
+		files.push_back(kUUIDPrefix + to_s(uuid));
 
 	int fd = socket(AF_UNIX, SOCK_STREAM, 0);
 	struct sockaddr_un addr = { 0, AF_UNIX };
@@ -308,6 +321,10 @@ int main (int argc, char* argv[])
 			write_key_pair(fd, "data-on-close",       wait && stdoutIsAPipe ? "yes" : "no");
 			write_key_pair(fd, "wait",                wait                  ? "yes" : "no");
 			write_key_pair(fd, "re-activate",         wait                  ? "yes" : "no");
+		}
+		else if(files[i].find(kUUIDPrefix) == 0)
+ 		{
+			write_key_pair(fd, "uuid", files[i].substr(kUUIDPrefix.size()));
 		}
 		else
 		{
