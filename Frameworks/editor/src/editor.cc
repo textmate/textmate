@@ -1438,7 +1438,7 @@ namespace ng
 				map.emplace("TM_CURRENT_LINE",  _buffer.substr(_buffer.begin(pos.line), _buffer.eol(pos.line)));
 				map.emplace("TM_SCOPE_LEFT",    to_s(s.left));
 
-				range_t wordRange = ng::extend(_buffer, _selections, kSelectionExtendToWord).last();
+				range_t wordRange = ng::word_at(_buffer, range);
 				if(!wordRange.empty())
 					map.emplace("TM_CURRENT_WORD", _buffer.substr(wordRange.min().index, wordRange.max().index));
 			}
