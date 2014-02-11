@@ -12,6 +12,7 @@ OAK_DEBUG_VAR(RMateServer);
 /*
 	open
 	path: [«path»|-]
+	uuid: «uuid»
 	real-path: «path»
 	token: «string»
 	display-name: «string»
@@ -523,6 +524,11 @@ struct socket_observer_t
 					continue;
 				}
 				doc = document::create(args["path"]);
+			}
+			else if(args.find("uuid") != args.end())
+			{
+				if(!(doc = document::find(args["uuid"])))
+					continue;
 			}
 			else if(args.find("data") != args.end())
 			{
