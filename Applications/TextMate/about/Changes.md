@@ -1,5 +1,13 @@
 # Changes
 
+## 2014-02-11 ([v2.0-alpha.9509](https://github.com/textmate/textmate/compare/v2.0-alpha.9507...v2.0-alpha.9509))
+
+* Added an `--uuid` option to the `mate` shell command which allows referencing untitled documents. If `mate` is called from a TextMate command without any file argument then the UUID defaults to that of the current document, meaning a command can use something like `"$TM_MATE" -l10-10:5` to select the first four characters on line 10.
+* The _Bundles_ page in this about window would not show changes for 2014. This is now fixed.
+* It is possible to disable restoring open tabs and file browser state when opening a folder:
+
+		defaults write com.macromates.TextMate.preview disableFolderStateRestore -bool YES
+
 ## 2014-02-07 ([v2.0-alpha.9507](https://github.com/textmate/textmate/compare/v2.0-alpha.9505...v2.0-alpha.9507))
 
   * TextMate will now remember open tabs for “project folders”. This means that if you run `mate «folder»`, open a few tabs and close the window, then if you later open the same folder, TextMate will restore the open tabs (and file browser state).
