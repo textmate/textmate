@@ -136,7 +136,10 @@ namespace command
 		process_id = vfork();
 		if(process_id == 0)
 		{
+			signal(SIGINT,  SIG_DFL);
+			signal(SIGTERM, SIG_DFL);
 			signal(SIGPIPE, SIG_DFL);
+			signal(SIGUSR1, SIG_DFL);
 			setpgid(0, getpid());
 
 			int const oldOutErr[] = { 0, 1, 2 };
