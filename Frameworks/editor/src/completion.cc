@@ -183,7 +183,7 @@ namespace ng
 			info.set_prefix_ranges(dissect_columnar(_buffer, _selections));
 			ng::range_t r = info.prefix_ranges().last();
 			size_t from = r.min().index, to = r.max().index;
-			r = ng::extend(_buffer, r, kSelectionExtendToWord).last();
+			r = ng::word_at(_buffer, r);
 			size_t bow = r.min().index, eow = r.max().index;
 
 			info.set_suggestions(completions(bow, eow, _buffer.substr(bow, from), _buffer.substr(to, eow), scopeAttributes));
