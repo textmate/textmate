@@ -117,6 +117,7 @@ namespace command
 
 		std::string _out, _err;
 		int _return_code;
+		bool _user_abort = false;
 
 		oak::callbacks_t<callback_t> _callbacks;
 	};

@@ -1,5 +1,6 @@
 #include "runner.h"
 #include <OakSystem/application.h>
+#include <OakSystem/process.h>
 #include <io/path.h>
 #include <regexp/format_string.h>
 
@@ -119,6 +120,15 @@ namespace command
 				{
 					[NSApp sendEvent:event];
 				}
+				else if([event type] == NSKeyDown && (([[event charactersIgnoringModifiers] isEqualToString:@"c"] && ([event modifierFlags] & (NSShiftKeyMask|NSControlKeyMask|NSAlternateKeyMask|NSCommandKeyMask)) == NSControlKeyMask) || ([[event charactersIgnoringModifiers] isEqualToString:@"."] && ([event modifierFlags] & (NSShiftKeyMask|NSControlKeyMask|NSAlternateKeyMask|NSCommandKeyMask)) == NSCommandKeyMask)))
+				{
+					NSInteger choice = NSRunAlertPanel(@"Stop Command Execution", @"Would you like to kill the current shell command?", @"Kill Command", @"Cancel", nil);
+					if(choice == NSAlertDefaultReturn) // "Kill Command"
+					{
+						_user_abort = true;
+						oak::kill_process_group_in_background(process_id());
+					}
+				}
 				else
 				{
 					[queuedEvents addObject:event];
@@ -167,7 +177,7 @@ namespace command
 		}
 
 		D(DBF_Command_Runner, bug("placement %d, format %d\n", placement, format););
-		if(_return_code != 0 && !(200 <= _return_code && _return_code <= 207))
+		if(_return_code != 0 && !_user_abort && !(200 <= _return_code && _return_code <= 207))
 		{
 			_delegate->show_error(_command, _return_code, _out, _err);
 		}
