@@ -1,4 +1,4 @@
 TEST_SOURCES = tests/*.cc
-SOURCES = src/*.cc
+SOURCES = src/*.{cc,mm}
 EXPORT  = src/*.h
 LINK   += text regexp io bundles plist OakSystem settings buffer selection
