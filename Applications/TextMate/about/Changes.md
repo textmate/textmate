@@ -1,5 +1,9 @@
 # Changes
 
+## 2014-02-12 ([v2.0-alpha.9511](https://github.com/textmate/textmate/compare/v2.0-alpha.9509...v2.0-alpha.9511))
+
+* Commands executed by TextMate can now be interrupted by pressing ⌘. or ⌃C.
+
 ## 2014-02-11 ([v2.0-alpha.9509](https://github.com/textmate/textmate/compare/v2.0-alpha.9507...v2.0-alpha.9509))
 
 * Added an `--uuid` option to the `mate` shell command which allows referencing untitled documents. If `mate` is called from a TextMate command without any file argument then the UUID defaults to that of the current document, meaning a command can use something like `"$TM_MATE" -l10-10:5` to select the first four characters on line 10.
