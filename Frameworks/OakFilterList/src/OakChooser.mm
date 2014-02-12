@@ -78,6 +78,7 @@ NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string
 		_statusTextField.font            = OakStatusBarFont();
 		_statusTextField.selectable      = NO;
 		[[_statusTextField cell] setBackgroundStyle:NSBackgroundStyleRaised];
+		[[_statusTextField cell] setLineBreakMode:NSLineBreakByTruncatingMiddle];
 		[_statusTextField setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
 		[_statusTextField setContentHuggingPriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
 
