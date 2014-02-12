@@ -52,6 +52,8 @@ namespace command
 			finish();
 			_output_reader = my_reader_ptr();
 			_error_reader  = my_reader_ptr();
+
+			[NSApp postEvent:[NSEvent otherEventWithType:NSApplicationDefined location:NSZeroPoint modifierFlags:0 timestamp:0 windowNumber:0 context:NULL subtype:0 data1:0 data2:0] atStart:NO];
 		}
 	}
 
@@ -107,11 +109,29 @@ namespace command
 
 	void runner_t::wait (bool alsoForDetached)
 	{
+		NSMutableArray* queuedEvents = [NSMutableArray array];
 		while(_retain_count != 0 && (alsoForDetached || !_did_detach))
 		{
-			if(CFRunLoopRunInMode(kCFRunLoopDefaultMode, 20, true) == kCFRunLoopRunFinished)
+			if(NSEvent* event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:[NSDate distantFuture] inMode:NSDefaultRunLoopMode dequeue:YES])
+			{
+				static NSEventType const events[] = { NSLeftMouseDown, NSLeftMouseUp, NSRightMouseDown, NSRightMouseUp, NSOtherMouseDown, NSOtherMouseUp, NSLeftMouseDragged, NSRightMouseDragged, NSOtherMouseDragged, NSKeyDown, NSKeyUp, NSFlagsChanged };
+				if(!oak::contains(std::begin(events), std::end(events), [event type]))
+				{
+					[NSApp sendEvent:event];
+				}
+				else
+				{
+					[queuedEvents addObject:event];
+				}
+			}
+			else
+			{
 				break;
+			}
 		}
+
+		for(NSEvent* event in queuedEvents)
+			[NSApp postEvent:event atStart:NO];
 	}
 
 	void runner_t::did_exit (int rc)
