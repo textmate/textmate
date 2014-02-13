@@ -418,15 +418,6 @@ private:
 		[aMenuItem setState:textView.softTabs ? NSOffState : NSOnState];
 	else if([aMenuItem action] == @selector(setIndentWithSpaces:))
 		[aMenuItem setState:textView.softTabs ? NSOnState : NSOffState];
-	else if([aMenuItem action] == @selector(takeGrammarUUIDFrom:))
-	{
-		NSString* uuidString = [aMenuItem representedObject];
-		if(bundles::item_ptr bundleItem = bundles::lookup(to_s(uuidString)))
-		{
-			bool selectedGrammar = document && document->file_type() == bundleItem->value_for_field(bundles::kFieldGrammarScope);
-			[aMenuItem setState:selectedGrammar ? NSOnState : NSOffState];
-		}
-	}
 	else if([aMenuItem action] == @selector(toggleCurrentBookmark:))
 	{
 		text::selection_t sel([textView.selectionString UTF8String]);
