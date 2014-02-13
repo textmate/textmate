@@ -140,6 +140,7 @@ private:
 
 		statusBar = [[OTVStatusBar alloc] initWithFrame:NSZeroRect];
 		statusBar.delegate = self;
+		statusBar.target = self;
 		[self addSubview:statusBar];
 
 		for(NSView* view in @[ gutterScrollView, gutterView, gutterDividerView, textScrollView, statusDividerView, statusBar ])

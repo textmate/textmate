@@ -15,4 +15,5 @@
 @property (nonatomic) int32_t tabSize;
 
 @property (nonatomic, weak) id <OTVStatusBarDelegate> delegate;
+@property (nonatomic, weak) id target;
 @end

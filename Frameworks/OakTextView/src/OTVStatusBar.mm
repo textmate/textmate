@@ -70,6 +70,8 @@ static NSButton* OakCreateImageToggleButton (NSImage* image)
 		[self.symbolPopUp.cell          accessibilitySetOverrideValue:@"Symbol"         forAttribute:NSAccessibilityDescriptionAttribute];
 		[self.macroRecordingButton.cell accessibilitySetOverrideValue:@"Record a macro" forAttribute:NSAccessibilityDescriptionAttribute];
 
+		[self setupTabSizeMenu:self];
+
 		// ===========================
 		// = Wrap/Clip Bundles PopUp =
 		// ===========================
@@ -85,24 +87,6 @@ static NSButton* OakCreateImageToggleButton (NSImage* image)
 		[self.bundleItemsPopUp setTranslatesAutoresizingMaskIntoConstraints:NO];
 		[wrappedBundleItemsPopUpButton addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[popup]|" options:0 metrics:nil views:@{ @"popup" : self.bundleItemsPopUp }]];
 		[wrappedBundleItemsPopUpButton addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[popup]|" options:0 metrics:nil views:@{ @"popup" : self.bundleItemsPopUp }]];
-
-		// =======================
-		// = Setup Tab Size Menu =
-		// =======================
-
-		NSMenu* tabSizeMenu = self.tabSizePopUp.menu;
-		[tabSizeMenu removeAllItems];
-		[tabSizeMenu addItemWithTitle:@"Current Indent" action:@selector(nop:) keyEquivalent:@""];
-		[tabSizeMenu addItemWithTitle:@"Indent Size" action:@selector(nop:) keyEquivalent:@""];
-		for(auto size : { 2, 3, 4, 8 })
-			[[tabSizeMenu addItemWithTitle:[NSString stringWithFormat:@"\u2003%d", size] action:@selector(takeTabSizeFrom:) keyEquivalent:@""] setTag:size];
-		[tabSizeMenu addItemWithTitle:@"\u2003Other…" action:@selector(showTabSizeSelectorPanel:) keyEquivalent:@""];
-		[tabSizeMenu addItem:[NSMenuItem separatorItem]];
-		[tabSizeMenu addItemWithTitle:@"Indent Using" action:@selector(nop:) keyEquivalent:@""];
-		[tabSizeMenu addItemWithTitle:@"\u2003Tabs" action:@selector(setIndentWithTabs:) keyEquivalent:@""];
-		[tabSizeMenu addItemWithTitle:@"\u2003Spaces" action:@selector(setIndentWithSpaces:) keyEquivalent:@""];
-
-		// =======================
 
 		NSDictionary* views = @{
 			@"line"         : OakCreateTextField(@"Line:"),
@@ -146,6 +130,31 @@ static NSButton* OakCreateImageToggleButton (NSImage* image)
 	return self;
 }
 
+- (void)setupTabSizeMenu:(id)sender
+{
+	NSMenu* tabSizeMenu = self.tabSizePopUp.menu;
+	[tabSizeMenu removeAllItems];
+	[tabSizeMenu addItemWithTitle:@"Current Indent" action:@selector(nop:) keyEquivalent:@""];
+	[tabSizeMenu addItemWithTitle:@"Indent Size" action:@selector(nop:) keyEquivalent:@""];
+	for(auto size : { 2, 3, 4, 8 })
+	{
+		NSMenuItem* item = [tabSizeMenu addItemWithTitle:[NSString stringWithFormat:@"\u2003%d", size] action:@selector(takeTabSizeFrom:) keyEquivalent:@""];
+		[item setTag:size];
+		[item setTarget:self.target];
+	}
+	[[tabSizeMenu addItemWithTitle:@"\u2003Other…" action:@selector(showTabSizeSelectorPanel:) keyEquivalent:@""] setTarget:self.target];
+	[tabSizeMenu addItem:[NSMenuItem separatorItem]];
+	[[tabSizeMenu addItemWithTitle:@"Indent Using" action:@selector(nop:) keyEquivalent:@""] setTarget:self.target];
+	[[tabSizeMenu addItemWithTitle:@"\u2003Tabs" action:@selector(setIndentWithTabs:) keyEquivalent:@""] setTarget:self.target];
+	[[tabSizeMenu addItemWithTitle:@"\u2003Spaces" action:@selector(setIndentWithSpaces:) keyEquivalent:@""] setTarget:self.target];
+}
+
+- (void)setTarget:(id)newTarget
+{
+	_target = newTarget;
+	[self setupTabSizeMenu:self];
+}
+
 - (NSSize)intrinsicContentSize
 {
 	return NSMakeSize(NSViewNoInstrinsicMetric, 24);
@@ -184,6 +193,7 @@ static NSButton* OakCreateImageToggleButton (NSImage* image)
 			NSMenuItem* item = [grammarMenu addItemWithTitle:[NSString stringWithCxxString:pair.first] action:@selector(takeGrammarUUIDFrom:) keyEquivalent:@""];
 			[item setKeyEquivalentCxxString:key_equivalent(pair.second)];
 			[item setRepresentedObject:[NSString stringWithCxxString:pair.second->uuid()]];
+			[item setTarget:self.target];
 		}
 	}
 
