@@ -16,7 +16,7 @@
 	NSAppleScriptEnabled                 = YES;
 	NSMainNibFile                        = MainMenu;
 	NSPrincipalClass                     = NSApplication;
-	NSContactsUsageDescription           = 'Your email address is used as identifier for crash report submission. It can be changed in Preferences.\n\nIt is also used as a default contact address if you create your own bundle. This can be changed in the bundle editor after you create a bundle.';
+	NSContactsUsageDescription           = 'Your email address is used as an identifier for crash report submission. It can be changed in Preferences.\n\nIt is also used as a default contact address if you create your own bundle. This can be changed in the bundle editor after you create a bundle.';
 	NSSupportsAutomaticGraphicsSwitching = YES;
 
 	CFBundleURLTypes = (
