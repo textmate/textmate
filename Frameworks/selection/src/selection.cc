@@ -1423,7 +1423,7 @@ namespace ng
 			if(leftType == kCharacterClassSpace && rightType == kCharacterClassSpace)
 				return range;
 		}
-		return extend_if_empty(buffer, range, kSelectionExtendToWord).last();
+		return extend(buffer, range, kSelectionExtendToWord).last();
 	}
 
 	ranges_t all_words (buffer_t const& buffer)
