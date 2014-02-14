@@ -40,16 +40,15 @@ end
 def create_release(path, repository, tag, description, content_type)
   name = tag.sub(/^v(.*?)-(.*?)\.(.*)$/, 'TextMate \1 (\2 \3)')
   basename = File::basename(path)
-  accept = "-H'Accept: application/vnd.github.manifold-preview'"
   payload = { 'name' => name, 'tag_name' => tag, 'draft' => false, 'prerelease' => true }
   payload['body'] = description unless description.nil?
-  open("|curl #{accept} -snd '#{payload.to_json}' https://api.github.com/repos/#{repository}/releases") do |io|
+  open("|curl -snd '#{payload.to_json}' https://api.github.com/repos/#{repository}/releases") do |io|
     github = JSON.parse(io.read)
 
     if github.include?('errors')
       err = github['errors'].first
       if err['code'] == 'already_exists' && err['field'] == 'tag_name'
-        open("|curl #{accept} -sn https://api.github.com/repos/#{repository}/releases") do |io|
+        open("|curl -sn https://api.github.com/repos/#{repository}/releases") do |io|
           github = JSON.parse(io.read)
           github = github.find { |e| e['tag_name'] == tag }
           STDERR << "Upload to existing release: #{github['html_url']}\n"
@@ -61,7 +60,7 @@ def create_release(path, repository, tag, description, content_type)
 
     if url = github['upload_url']
       url.sub!(/\{\?name\}/, '')
-      upload_url = "|curl #{accept} -sn -H'Content-Type: #{content_type}' --data-binary @'#{path}' '#{url}?name=#{basename}'"
+      upload_url = "|curl -sn -H'Content-Type: #{content_type}' --data-binary @'#{path}' '#{url}?name=#{basename}'"
       open(upload_url) do |io|
         res = JSON.parse(io.read)
         return "https://github.com/#{repository}/releases/download/#{tag}/#{basename}" if res.include?('url')
@@ -70,7 +69,7 @@ def create_release(path, repository, tag, description, content_type)
     else
       STDERR << "Unexpected response (release): #{github.inspect}\n"
     end
-    open("|curl #{accept} -snX DELETE #{github['url']}") { |io| STDERR << "Removing release: #{github['url']}\n" }
+    open("|curl -snX DELETE #{github['url']}") { |io| STDERR << "Removing release: #{github['url']}\n" }
   end
   abort
 end
