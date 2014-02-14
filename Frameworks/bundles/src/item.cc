@@ -357,6 +357,24 @@ namespace bundles
 		if(saveAsDelta)
 		{
 			plist::dictionary_t oldPlist = plist::load(_paths[_local ? 1 : 0]);
+			if(!hidden_from_user()) newPlist.erase(kFieldHideFromUser);
+			if(!disabled())         newPlist.erase(kFieldIsDisabled);
+			if(!deleted())          newPlist.erase(kFieldIsDeleted);
+
+			if(oldPlist == newPlist && _kind != kItemTypeBundle)
+			{
+				if(unlink(destPath.c_str()) == 0 || errno == ENOENT)
+				{
+					if(_local)
+					{
+						_local = false;
+						if(_paths.size() > 1)
+							_paths.erase(_paths.begin(), ++_paths.begin());
+					}
+					return true;
+				}
+			}
+
 			newPlist = plist::create_delta(oldPlist, newPlist);
 		}
 
