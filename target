@@ -14,9 +14,9 @@ FLAGS += -DNDEBUG -Os
 # LINK   = OakDebug
 
 CXX_FLAGS    += -fvisibility=hidden -std=c++11 -stdlib=libc++
-OBJC_FLAGS   += -fvisibility=hidden -fobjc-arc -Xclang -fobjc-default-synthesize-properties -std=c99 -fobjc-abi-version=3
+OBJC_FLAGS   += -fvisibility=hidden -fobjc-arc -std=c99 -fobjc-abi-version=3
 OBJCXX_FLAGS += -fvisibility=hidden -std=c++11 -stdlib=libc++ -fobjc-abi-version=3
-OBJCXX_FLAGS += -fobjc-arc -Xclang -fobjc-default-synthesize-properties -fobjc-call-cxx-cdtors
+OBJCXX_FLAGS += -fobjc-arc -fobjc-call-cxx-cdtors
 LIBS         += c++
 
 LN_FLAGS += -m64 -mmacosx-version-min=$APP_MIN_OS -isysroot "$sdk"
