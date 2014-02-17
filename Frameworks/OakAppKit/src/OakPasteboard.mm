@@ -167,7 +167,67 @@ namespace
 	}
 }
 
+static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
+
 @implementation OakPasteboard
++ (void)initialize
+{
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidBecomeActiveNotification:) name:NSApplicationDidBecomeActiveNotification object:NSApp];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidResignActiveNotification:) name:NSApplicationDidResignActiveNotification object:NSApp];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:NSApp];
+}
+
++ (void)applicationDidBecomeActiveNotification:(id)sender
+{
+	for(NSString* key in SharedInstances)
+		[SharedInstances[key] checkForExternalPasteboardChanges];
+	idle_callback().start();
+}
+
++ (void)applicationDidResignActiveNotification:(id)sender
+{
+	idle_callback().stop();
+}
+
++ (void)applicationWillTerminate:(NSNotification*)aNotification
+{
+	for(NSString* key in SharedInstances)
+		[SharedInstances[key] saveToDefaults];
+}
+
++ (OakPasteboard*)pasteboardWithName:(NSString*)aName
+{
+	OakPasteboard* res = SharedInstances[aName];
+	if(!res)
+	{
+		NSMutableArray* entries = [NSMutableArray new];
+
+		if(![[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsDisablePersistentClipboardHistory] boolValue])
+		{
+			if(NSArray* history = [[NSUserDefaults standardUserDefaults] arrayForKey:aName])
+			{
+				for(NSDictionary* entry in history)
+				{
+					NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithDictionary:entry];
+					[dict removeObjectForKey:@"string"];
+					if(NSString* str = entry[@"string"])
+						[entries addObject:[OakPasteboardEntry pasteboardEntryWithString:str andOptions:dict]];
+				}
+			}
+		}
+
+		SharedInstances[aName] = res = [[OakPasteboard alloc] init];
+		res.pasteboardName   = aName;
+		res.avoidsDuplicates = ![aName isEqualToString:NSGeneralPboard];
+		res.entries          = entries;
+
+		idle_callback().add(res);
+	}
+
+	[res checkForExternalPasteboardChanges];
+	return res;
+}
+
 - (NSPasteboard*)pasteboard
 {
 	return [NSPasteboard pasteboardWithName:_pasteboardName];
@@ -207,17 +267,6 @@ namespace
 	}
 }
 
-- (void)applicationDidBecomeActiveNotification:(id)sender
-{
-	[self checkForExternalPasteboardChanges];
-	idle_callback().start();
-}
-
-- (void)applicationDidResignActiveNotification:(id)sender
-{
-	idle_callback().stop();
-}
-
 - (void)setIndex:(NSUInteger)newIndex
 {
 	D(DBF_Pasteboard, bug("%zu → %zu\n", (size_t)_index, (size_t)newIndex););
@@ -235,66 +284,6 @@ namespace
 			[[NSNotificationCenter defaultCenter] postNotificationName:OakPasteboardDidChangeNotification object:self];
 		}
 	}
-}
-
-- (id)initWithName:(NSString*)aName
-{
-	if(self = [super init])
-	{
-		_pasteboardName = aName;
-
-		_entries = [NSMutableArray new];
-		if(![[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsDisablePersistentClipboardHistory] boolValue])
-		{
-			if(NSArray* history = [[NSUserDefaults standardUserDefaults] arrayForKey:_pasteboardName])
-			{
-				for(NSDictionary* entry in history)
-				{
-					NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithDictionary:entry];
-					[dict removeObjectForKey:@"string"];
-					if(NSString* str = entry[@"string"])
-						[_entries addObject:[OakPasteboardEntry pasteboardEntryWithString:str andOptions:dict]];
-				}
-
-				_index = [_entries count]-1;
-			}
-		}
-
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:NSApp];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidBecomeActiveNotification:) name:NSApplicationDidBecomeActiveNotification object:NSApp];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidResignActiveNotification:) name:NSApplicationDidResignActiveNotification object:NSApp];
-		[self checkForExternalPasteboardChanges];
-		idle_callback().add(self);
-	}
-	return self;
-}
-
-- (void)applicationWillTerminate:(NSNotification*)aNotification
-{
-	[self saveToDefaults];
-}
-
-- (void)dealloc
-{
-	idle_callback().remove(self);
-	[[NSNotificationCenter defaultCenter] removeObserver:self name:NSApplicationDidBecomeActiveNotification object:NSApp];
-	[[NSNotificationCenter defaultCenter] removeObserver:self name:NSApplicationDidResignActiveNotification object:NSApp];
-	[[NSNotificationCenter defaultCenter] removeObserver:self name:NSApplicationWillTerminateNotification object:NSApp];
-}
-
-+ (OakPasteboard*)pasteboardWithName:(NSString*)aName
-{
-	static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
-	OakPasteboard* res = SharedInstances[aName];
-	if(!res)
-	{
-		SharedInstances[aName] = res = [[OakPasteboard alloc] initWithName:aName];
-		if(![aName isEqualToString:NSGeneralPboard])
-			res.avoidsDuplicates = YES;
-	}
-
-	[res checkForExternalPasteboardChanges];
-	return res;
 }
 
 - (void)addEntryWithString:(NSString*)aString
