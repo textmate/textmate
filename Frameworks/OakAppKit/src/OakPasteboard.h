@@ -12,9 +12,6 @@ extern PUBLIC NSString* const OakFindFullWordsOption;
 extern PUBLIC NSString* const OakFindRegularExpressionOption;
 
 PUBLIC @interface OakPasteboardEntry : NSObject
-+ (OakPasteboardEntry*)pasteboardEntryWithString:(NSString*)aString;
-+ (OakPasteboardEntry*)pasteboardEntryWithString:(NSString*)aString andOptions:(NSDictionary*)someOptions;
-
 @property (nonatomic, copy) NSString* string;
 @property (nonatomic, copy) NSDictionary* options;
 
@@ -28,7 +25,9 @@ PUBLIC @interface OakPasteboardEntry : NSObject
 
 PUBLIC @interface OakPasteboard : NSObject
 + (OakPasteboard*)pasteboardWithName:(NSString*)aName;
-- (void)addEntry:(OakPasteboardEntry*)anEntry;
+
+- (void)addEntryWithString:(NSString*)aString;
+- (void)addEntryWithString:(NSString*)aString andOptions:(NSDictionary*)someOptions;
 
 @property (nonatomic) BOOL avoidsDuplicates;
 

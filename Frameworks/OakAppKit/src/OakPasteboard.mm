@@ -46,11 +46,6 @@ NSString* const kUserDefaultsDisablePersistentClipboardHistory = @"disablePersis
 	return [[self alloc] initWithString:aString andOptions:someOptions];
 }
 
-+ (OakPasteboardEntry*)pasteboardEntryWithString:(NSString*)aString
-{
-	return [self pasteboardEntryWithString:aString andOptions:nil];
-}
-
 - (void)setOptions:(NSDictionary*)aDictionary
 {
 	if(_options == aDictionary)
@@ -302,10 +297,16 @@ namespace
 	return res;
 }
 
-- (void)addEntry:(OakPasteboardEntry*)anEntry
+- (void)addEntryWithString:(NSString*)aString
 {
-	D(DBF_Pasteboard, bug("%s (currently at %zu / %zu)\n", [[anEntry string] UTF8String], (size_t)_index, (size_t)[_entries count]););
+	[self addEntryWithString:aString andOptions:nil];
+}
+
+- (void)addEntryWithString:(NSString*)aString andOptions:(NSDictionary*)someOptions
+{
+	D(DBF_Pasteboard, bug("%s (currently at %zu / %zu)\n", [aString UTF8String], (size_t)_index, (size_t)[_entries count]););
 	[self checkForExternalPasteboardChanges];
+	OakPasteboardEntry* anEntry = [OakPasteboardEntry pasteboardEntryWithString:aString andOptions:someOptions];
 	if(_avoidsDuplicates && [[_entries lastObject] isEqual:anEntry])
 	{
 		_index = [_entries count]-1;

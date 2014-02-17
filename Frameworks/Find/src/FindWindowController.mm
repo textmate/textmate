@@ -536,7 +536,7 @@ static NSButton* OakCreateStopSearchButton ()
 	{
 		OakPasteboardEntry* oldEntry = [[OakPasteboard pasteboardWithName:NSFindPboard] current];
 		if(!oldEntry || ![oldEntry.string isEqualToString:_findString])
-			[[OakPasteboard pasteboardWithName:NSFindPboard] addEntry:[OakPasteboardEntry pasteboardEntryWithString:_findString andOptions:newOptions]];
+			[[OakPasteboard pasteboardWithName:NSFindPboard] addEntryWithString:_findString andOptions:newOptions];
 		else if(![oldEntry.options isEqualToDictionary:newOptions])
 			oldEntry.options = newOptions;
 	}
@@ -545,7 +545,7 @@ static NSButton* OakCreateStopSearchButton ()
 	{
 		NSString* oldReplacement = [[[OakPasteboard pasteboardWithName:NSReplacePboard] current] string];
 		if(!oldReplacement || ![oldReplacement isEqualToString:_replaceString])
-			[[OakPasteboard pasteboardWithName:NSReplacePboard] addEntry:[OakPasteboardEntry pasteboardEntryWithString:_replaceString]];
+			[[OakPasteboard pasteboardWithName:NSReplacePboard] addEntryWithString:_replaceString];
 	}
 
 	return res;

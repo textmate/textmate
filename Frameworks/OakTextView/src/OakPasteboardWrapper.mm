@@ -46,7 +46,7 @@ struct oak_pasteboard_t : clipboard_t
 	entry_ptr current () const              { return to_entry([pasteboard current], includeFindOptions); }
 	entry_ptr next ()                       { return to_entry([pasteboard next], includeFindOptions); }
 
-	void push_back (entry_ptr entry)        { [pasteboard addEntry:[OakPasteboardEntry pasteboardEntryWithString:[NSString stringWithCxxString:entry->content()] andOptions:(__bridge NSDictionary*)((CFDictionaryRef)cf::wrap(entry->options()))]]; }
+	void push_back (entry_ptr entry)        { [pasteboard addEntryWithString:[NSString stringWithCxxString:entry->content()] andOptions:(__bridge NSDictionary*)((CFDictionaryRef)cf::wrap(entry->options()))]; }
 private:
 	OakPasteboard* pasteboard;
 	BOOL includeFindOptions;

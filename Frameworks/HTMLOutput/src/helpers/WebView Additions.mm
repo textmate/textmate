@@ -31,14 +31,14 @@
 - (IBAction)copySelectionToFindPboard:(id)sender
 {
 	if(NSString* str = [self selection])
-			[[OakPasteboard pasteboardWithName:NSFindPboard] addEntry:[OakPasteboardEntry pasteboardEntryWithString:str andOptions:nil]];
+			[[OakPasteboard pasteboardWithName:NSFindPboard] addEntryWithString:str];
 	else	NSBeep();
 }
 
 - (IBAction)copySelectionToReplacePboard:(id)sender
 {
 	if(NSString* str = [self selection])
-			[[OakPasteboard pasteboardWithName:NSReplacePboard] addEntry:[OakPasteboardEntry pasteboardEntryWithString:str]];
+			[[OakPasteboard pasteboardWithName:NSReplacePboard] addEntryWithString:str];
 	else	NSBeep();
 }
 
