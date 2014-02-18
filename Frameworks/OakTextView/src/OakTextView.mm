@@ -327,6 +327,7 @@ typedef std::shared_ptr<links_t> links_ptr;
 @property (nonatomic, copy) NSString* liveSearchString;
 @property (nonatomic) ng::ranges_t const& liveSearchRanges;
 @property (nonatomic, readonly) links_ptr links;
+@property (nonatomic) NSDictionary* matchCaptures; // Captures from last regexp match
 @end
 
 static std::vector<bundles::item_ptr> items_for_tab_expansion (ng::buffer_t const& buffer, ng::ranges_t const& ranges, std::string const& scopeAttributes, ng::range_t* range)
@@ -2259,7 +2260,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	if(findOperation == kFindOperationReplace || findOperation == kFindOperationReplaceAndFind)
 	{
 		std::string replacement = to_s(aFindServer.replaceString);
-		if(NSDictionary* captures = [OakPasteboard pasteboardWithName:OakReplacePboard].auxiliaryOptionsForCurrent)
+		if(NSDictionary* captures = self.matchCaptures)
 		{
 			std::map<std::string, std::string> variables;
 			for(NSString* key in [captures allKeys])
@@ -2280,7 +2281,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 		case kFindOperationFind:
 		case kFindOperationCount:
 		{
-			[OakPasteboard pasteboardWithName:OakReplacePboard].auxiliaryOptionsForCurrent = nil;
+			self.matchCaptures = nil;
 			bool isCounting = findOperation == kFindOperationCount || findOperation == kFindOperationCountInSelection;
 
 			std::string const findStr = to_s(aFindServer.findString);
@@ -2351,7 +2352,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 						NSMutableDictionary* captures = [NSMutableDictionary dictionary];
 						for(auto pair : allMatches[res.last()])
 							captures[[NSString stringWithCxxString:pair.first]] = [NSString stringWithCxxString:pair.second];
-						[OakPasteboard pasteboardWithName:OakReplacePboard].auxiliaryOptionsForCurrent = captures;
+						self.matchCaptures = captures;
 					}
 				}
 
