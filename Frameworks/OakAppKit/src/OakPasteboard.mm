@@ -9,7 +9,7 @@
 
 OAK_DEBUG_VAR(Pasteboard);
 
-NSString* const NSReplacePboard                    = @"NSReplacePboard";
+NSString* const OakReplacePboard                   = @"NSReplacePboard";
 NSString* const OakPasteboardDidChangeNotification = @"OakClipboardDidChangeNotification";
 NSString* const OakPasteboardOptionsPboardType     = @"OakPasteboardOptionsPboardType";
 

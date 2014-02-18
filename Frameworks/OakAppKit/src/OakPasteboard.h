@@ -1,7 +1,7 @@
 #import <oak/oak.h>
 #import <regexp/find.h> // for find::options_t
 
-extern PUBLIC NSString* const NSReplacePboard;
+extern PUBLIC NSString* const OakReplacePboard;
 extern PUBLIC NSString* const OakPasteboardDidChangeNotification;
 
 extern PUBLIC NSString* const kUserDefaultsFindWrapAround;

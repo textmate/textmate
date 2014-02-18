@@ -518,7 +518,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 }
 
 - (NSString*)findString      { return [[OakPasteboard pasteboardWithName:NSFindPboard] current].string;    }
-- (NSString*)replaceString   { return [[OakPasteboard pasteboardWithName:NSReplacePboard] current].string; }
+- (NSString*)replaceString   { return [[OakPasteboard pasteboardWithName:OakReplacePboard] current].string; }
 
 - (void)didFind:(NSUInteger)aNumber occurrencesOf:(NSString*)aFindString atPosition:(text::pos_t const&)aPosition wrapped:(BOOL)didWrap
 {
@@ -701,7 +701,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 		editor->set_clipboard(get_clipboard(NSGeneralPboard));
 		editor->set_find_clipboard(get_clipboard(NSFindPboard));
-		editor->set_replace_clipboard(get_clipboard(NSReplacePboard));
+		editor->set_replace_clipboard(get_clipboard(OakReplacePboard));
 
 		ng::index_t visibleIndex = document->visible_index();
 		if(document->selection() != NULL_STR)
@@ -2259,7 +2259,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	if(findOperation == kFindOperationReplace || findOperation == kFindOperationReplaceAndFind)
 	{
 		std::string replacement = to_s(aFindServer.replaceString);
-		if(NSDictionary* captures = [OakPasteboard pasteboardWithName:NSReplacePboard].auxiliaryOptionsForCurrent)
+		if(NSDictionary* captures = [OakPasteboard pasteboardWithName:OakReplacePboard].auxiliaryOptionsForCurrent)
 		{
 			std::map<std::string, std::string> variables;
 			for(NSString* key in [captures allKeys])
@@ -2280,7 +2280,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 		case kFindOperationFind:
 		case kFindOperationCount:
 		{
-			[OakPasteboard pasteboardWithName:NSReplacePboard].auxiliaryOptionsForCurrent = nil;
+			[OakPasteboard pasteboardWithName:OakReplacePboard].auxiliaryOptionsForCurrent = nil;
 			bool isCounting = findOperation == kFindOperationCount || findOperation == kFindOperationCountInSelection;
 
 			std::string const findStr = to_s(aFindServer.findString);
@@ -2351,7 +2351,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 						NSMutableDictionary* captures = [NSMutableDictionary dictionary];
 						for(auto pair : allMatches[res.last()])
 							captures[[NSString stringWithCxxString:pair.first]] = [NSString stringWithCxxString:pair.second];
-						[OakPasteboard pasteboardWithName:NSReplacePboard].auxiliaryOptionsForCurrent = captures;
+						[OakPasteboard pasteboardWithName:OakReplacePboard].auxiliaryOptionsForCurrent = captures;
 					}
 				}
 

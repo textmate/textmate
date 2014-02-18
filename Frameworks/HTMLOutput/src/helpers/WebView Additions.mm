@@ -38,7 +38,7 @@
 - (IBAction)copySelectionToReplacePboard:(id)sender
 {
 	if(NSString* str = [self selection])
-			[[OakPasteboard pasteboardWithName:NSReplacePboard] addEntryWithString:str];
+			[[OakPasteboard pasteboardWithName:OakReplacePboard] addEntryWithString:str];
 	else	NSBeep();
 }
 
