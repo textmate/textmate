@@ -98,13 +98,6 @@ NSString* const kUserDefaultsDisablePersistentClipboardHistory = @"disablePersis
 		([self regularExpression]   ? find::regular_expression : find::none));
 }
 
-- (void)setFindOptions:(find::options_t)findOptions
-{
-	self.fullWordMatch     = (findOptions & find::full_words        ) != 0;
-	self.ignoreWhitespace  = (findOptions & find::ignore_whitespace ) != 0;
-	self.regularExpression = (findOptions & find::regular_expression) != 0;
-}
-
 - (NSDictionary*)asDictionary
 {
 	NSMutableDictionary* res = [NSMutableDictionary dictionaryWithDictionary:_options];
@@ -117,6 +110,7 @@ NSString* const kUserDefaultsDisablePersistentClipboardHistory = @"disablePersis
 {
 	NSMutableArray* _entries;
 }
+@property (nonatomic) BOOL avoidsDuplicates;
 @property (nonatomic) NSString* pasteboardName;
 @property (nonatomic) NSInteger changeCount;
 @property (nonatomic) NSArray* entries;

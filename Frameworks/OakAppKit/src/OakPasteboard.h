@@ -12,15 +12,14 @@ extern PUBLIC NSString* const OakFindFullWordsOption;
 extern PUBLIC NSString* const OakFindRegularExpressionOption;
 
 PUBLIC @interface OakPasteboardEntry : NSObject
-@property (nonatomic, copy) NSString* string;
-@property (nonatomic, copy) NSDictionary* options;
+@property (nonatomic) NSString* string;
+@property (nonatomic) NSDictionary* options;
 
 @property (nonatomic) BOOL fullWordMatch;
 @property (nonatomic) BOOL ignoreWhitespace;
 @property (nonatomic) BOOL regularExpression;
 
-- (find::options_t)findOptions;
-- (void)setFindOptions:(find::options_t)findOptions;
+@property (nonatomic, readonly) find::options_t findOptions;
 @end
 
 PUBLIC @interface OakPasteboard : NSObject
@@ -28,8 +27,6 @@ PUBLIC @interface OakPasteboard : NSObject
 
 - (void)addEntryWithString:(NSString*)aString;
 - (void)addEntryWithString:(NSString*)aString andOptions:(NSDictionary*)someOptions;
-
-@property (nonatomic) BOOL avoidsDuplicates;
 
 - (OakPasteboardEntry*)previous;
 - (OakPasteboardEntry*)current;
