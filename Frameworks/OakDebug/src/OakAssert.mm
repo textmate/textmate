@@ -22,7 +22,7 @@ PUBLIC std::string OakStackDump (int linesToSkip)
 	// = Run atos =
 	// ============
 
-	std::string cmd = text::format("/usr/bin/atos -p %d %s | /usr/bin/tail -n +%d | /usr/bin/c++filt", getpid(), trace, linesToSkip + 1);
+	std::string cmd = text::format("/usr/bin/xcrun atos -p %d %s | /usr/bin/tail -n +%d | /usr/bin/c++filt", getpid(), trace, linesToSkip + 1);
 	char const* argv[] = { "/bin/sh", "-c", cmd.c_str(), NULL };
 
 	int output[2];

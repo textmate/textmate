@@ -46,7 +46,7 @@ class BinaryImages
   def lookup(addr)
     @images.each do |image|
       next unless image.first <= addr && addr < image.last
-      res = %x{atos 2>/dev/null -o #{image.file} -l 0x#{image.first.to_s(16)} 0x#{addr.to_s(16)}}.chomp
+      res = %x{xcrun atos 2>/dev/null -o #{image.file} -l 0x#{image.first.to_s(16)} 0x#{addr.to_s(16)}}.chomp
       res.gsub!(/ \(in #{File.basename image.file}\)/, '')
       return res
     end
