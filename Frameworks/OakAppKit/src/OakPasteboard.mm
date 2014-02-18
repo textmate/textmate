@@ -24,7 +24,7 @@ NSString* const kUserDefaultsDisablePersistentClipboardHistory = @"disablePersis
 
 @interface OakPasteboardEntry ()
 {
-	NSMutableDictionary* _options;
+	NSDictionary* _options;
 }
 @end
 
@@ -36,7 +36,7 @@ NSString* const kUserDefaultsDisablePersistentClipboardHistory = @"disablePersis
 	if(self = [super init])
 	{
 		self.string = aString;
-		self.options = [[NSMutableDictionary alloc] initWithDictionary:someOptions];
+		self.options = someOptions;
 	}
 	return self;
 }
@@ -50,7 +50,17 @@ NSString* const kUserDefaultsDisablePersistentClipboardHistory = @"disablePersis
 {
 	if(_options == aDictionary)
 		return;
-	_options = [NSMutableDictionary dictionaryWithDictionary:aDictionary];
+
+	NSSet* keysToRemvoe = [aDictionary keysOfEntriesPassingTest:^(id key, id obj, BOOL* stop){ return BOOL([obj isKindOfClass:[NSNumber class]] && ![obj boolValue]); }];
+	if([keysToRemvoe count])
+	{
+		NSMutableDictionary* tmp = [aDictionary mutableCopy];
+		for(id key in keysToRemvoe)
+			[tmp removeObjectForKey:key];
+		aDictionary = tmp;
+	}
+
+	_options = [aDictionary count] ? aDictionary : nil;
 }
 
 - (BOOL)isEqual:(OakPasteboardEntry*)otherEntry
@@ -64,15 +74,14 @@ NSString* const kUserDefaultsDisablePersistentClipboardHistory = @"disablePersis
 
 - (void)setOption:(NSString*)aKey toBoolean:(BOOL)flag
 {
-	if(!flag)
-	{
-		[_options removeObjectForKey:aKey];
+	if([self.options[aKey] boolValue] == flag)
 		return;
-	}
 
-	if(!_options)
-		_options = [NSMutableDictionary new];
-	_options[aKey] = @YES;
+	NSMutableDictionary* newOptions = [self.options mutableCopy] ?: [NSMutableDictionary dictionary];
+	if(flag)
+			[newOptions setObject:@YES forKey:aKey];
+	else	[newOptions removeObjectForKey:aKey];
+	self.options = newOptions;
 }
 
 - (void)setFullWordMatch:(BOOL)flag       { return [self setOption:OakFindFullWordsOption toBoolean:flag]; };
