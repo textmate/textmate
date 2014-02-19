@@ -4,12 +4,13 @@
 
 #import "OakPasteboard.h"
 #import "OakPasteboardSelector.h"
+#import <OakFoundation/NSArray Additions.h>
 #import <oak/oak.h>
 #import <oak/debug.h>
 
 OAK_DEBUG_VAR(Pasteboard);
 
-NSString* const OakReplacePboard                   = @"NSReplacePboard";
+NSString* const OakReplacePboard                   = @"OakReplacePboard";
 NSString* const OakPasteboardDidChangeNotification = @"OakClipboardDidChangeNotification";
 NSString* const OakPasteboardOptionsPboardType     = @"OakPasteboardOptionsPboardType";
 
@@ -22,12 +23,23 @@ NSString* const OakFindRegularExpressionOption     = @"regularExpression";
 
 NSString* const kUserDefaultsDisablePersistentClipboardHistory = @"disablePersistentClipboardHistory";
 
+@interface OakPasteboardEntry ()
+@property (nonatomic) OakPasteboard* pasteboard;
+@end
+
+@interface OakPasteboardEntry (PrimitiveAccessors)
+- (NSString*)primitiveOptions;
+- (void)setPrimitiveOptions:(NSDictionary*)aDictionary;
+@end
+
 @implementation OakPasteboardEntry
-+ (OakPasteboardEntry*)pasteboardEntryWithString:(NSString*)aString andOptions:(NSDictionary*)someOptions
+@dynamic string, options, pasteboard;
+
++ (OakPasteboardEntry*)pasteboardEntryWithString:(NSString*)aString andOptions:(NSDictionary*)someOptions inContext:(NSManagedObjectContext*)context
 {
 	D(DBF_Pasteboard, bug("%s, %s\n", aString.UTF8String, someOptions.description.UTF8String););
 	ASSERT(aString != nil);
-	OakPasteboardEntry* res = [[self alloc] init];
+	OakPasteboardEntry* res = [NSEntityDescription insertNewObjectForEntityForName:@"PasteboardEntry" inManagedObjectContext:context];
 	res.string = aString;
 	res.options = someOptions;
 	return res;
@@ -35,9 +47,6 @@ NSString* const kUserDefaultsDisablePersistentClipboardHistory = @"disablePersis
 
 - (void)setOptions:(NSDictionary*)aDictionary
 {
-	if(_options == aDictionary)
-		return;
-
 	NSSet* keysToRemvoe = [aDictionary keysOfEntriesPassingTest:^(id key, id obj, BOOL* stop){ return BOOL([obj isKindOfClass:[NSNumber class]] && ![obj boolValue]); }];
 	if([keysToRemvoe count])
 	{
@@ -46,8 +55,9 @@ NSString* const kUserDefaultsDisablePersistentClipboardHistory = @"disablePersis
 			[tmp removeObjectForKey:key];
 		aDictionary = tmp;
 	}
-
-	_options = [aDictionary count] ? aDictionary : nil;
+	[self willChangeValueForKey:@"options"];
+	[self setPrimitiveOptions:[aDictionary count] ? aDictionary : nil];
+	[self didChangeValueForKey:@"options"];
 }
 
 - (BOOL)fullWordMatch       { return [self.options[OakFindFullWordsOption] boolValue]; };
@@ -79,24 +89,14 @@ NSString* const kUserDefaultsDisablePersistentClipboardHistory = @"disablePersis
 		([self ignoreWhitespace]    ? find::ignore_whitespace  : find::none) |
 		([self regularExpression]   ? find::regular_expression : find::none));
 }
-
-- (NSDictionary*)asDictionary
-{
-	NSMutableDictionary* res = [NSMutableDictionary dictionaryWithDictionary:self.options];
-	res[@"string"] = self.string ?: @"";
-	return res;
-}
 @end
 
 @interface OakPasteboard ()
-{
-	NSMutableArray* _entries;
-}
-@property (nonatomic) BOOL avoidsDuplicates;
-@property (nonatomic) NSString* pasteboardName;
+@property (nonatomic) NSString* name;
 @property (nonatomic) NSInteger changeCount;
-@property (nonatomic) NSArray* entries;
+@property (nonatomic) NSMutableOrderedSet* entries;
 @property (nonatomic) NSUInteger index;
+- (BOOL)avoidsDuplicates;
 - (void)checkForExternalPasteboardChanges;
 @end
 
@@ -155,6 +155,9 @@ namespace
 static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 
 @implementation OakPasteboard
+@dynamic name, entries, index, auxiliaryOptionsForCurrent;
+@synthesize changeCount;
+
 + (void)initialize
 {
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidBecomeActiveNotification:) name:NSApplicationDidBecomeActiveNotification object:NSApp];
@@ -176,8 +179,140 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 
 + (void)applicationWillTerminate:(NSNotification*)aNotification
 {
-	for(NSString* key in SharedInstances)
-		[SharedInstances[key] saveToDefaults];
+	[self saveContext];
+}
+
++ (NSManagedObjectContext*)managedObjectContext
+{
+	static NSManagedObjectContext* managedObjectContext;
+	if(!managedObjectContext)
+	{
+		managedObjectContext = [[NSManagedObjectContext alloc] init];
+		managedObjectContext.persistentStoreCoordinator = self.persistentStoreCoordinator;
+		managedObjectContext.undoManager = nil;
+	}
+	return managedObjectContext;
+}
+
++ (NSPersistentStoreCoordinator*)persistentStoreCoordinator
+{
+	static NSPersistentStoreCoordinator* persistentStoreCoordinator;
+	if(!persistentStoreCoordinator)
+	{
+		NSURL* appSupport = [[[[NSFileManager defaultManager] URLsForDirectory:NSApplicationSupportDirectory inDomains:NSUserDomainMask] firstObject] URLByAppendingPathComponent:@"TextMate"];
+
+		NSError* error = nil;
+		if(![[NSFileManager defaultManager] createDirectoryAtURL:appSupport withIntermediateDirectories:YES attributes:nil error:&error])
+		{
+			NSLog(@"unable to create folder ‘%@’: %@", [appSupport path], error);
+			[NSApp presentError:error];
+			abort();
+		}
+
+		NSURL* storeURL = [appSupport URLByAppendingPathComponent:@"ClipboardHistory.db"];
+		if([[NSFileManager defaultManager] fileExistsAtPath:[storeURL path]])
+		{
+			if(NSDictionary* metaData = [NSPersistentStoreCoordinator metadataForPersistentStoreOfType:NSSQLiteStoreType URL:storeURL error:&error])
+			{
+				if(![self.managedObjectModel isConfiguration:nil compatibleWithStoreMetadata:metaData])
+				{
+					NSLog(@"delete old (incompatible) store: ‘%@’", [storeURL path]);
+					if(![[NSFileManager defaultManager] removeItemAtURL:storeURL error:&error])
+						NSLog(@"unable to delete old store ‘%@’: %@", [storeURL path], error);
+				}
+			}
+			else
+			{
+				NSLog(@"unable to obtain metadata for ‘%@’: %@", [storeURL path], error);
+			}
+		}
+
+		persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:self.managedObjectModel];
+		if(![persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeURL options:nil error:&error])
+		{
+			NSLog(@"unable to create persistent store ‘%@’: %@", [storeURL path], error);
+			[NSApp presentError:error];
+			abort();
+		}
+	}
+	return persistentStoreCoordinator;
+}
+
++ (NSManagedObjectModel*)managedObjectModel
+{
+	static NSManagedObjectModel* managedObjectModel;
+	if(!managedObjectModel)
+	{
+		NSEntityDescription* pasteboardEntity        = [[NSEntityDescription alloc] init];
+		NSAttributeDescription* pasteboardName       = [[NSAttributeDescription alloc] init];
+		NSRelationshipDescription* pasteboardItems   = [[NSRelationshipDescription alloc] init];
+		NSAttributeDescription* pasteboardIndex      = [[NSAttributeDescription alloc] init];
+		NSAttributeDescription* pasteboardAuxOptions = [[NSAttributeDescription alloc] init];
+
+		NSEntityDescription* itemEntity              = [[NSEntityDescription alloc] init];
+		NSAttributeDescription* itemContent          = [[NSAttributeDescription alloc] init];
+		NSAttributeDescription* itemOptions          = [[NSAttributeDescription alloc] init];
+		NSRelationshipDescription* itemPasteboard    = [[NSRelationshipDescription alloc] init];
+
+		pasteboardName.name                          = @"name";
+		pasteboardName.attributeType                 = NSStringAttributeType;
+		pasteboardName.optional                      = NO;
+
+		pasteboardItems.name                         = @"entries";
+		pasteboardItems.destinationEntity            = itemEntity;
+		pasteboardItems.inverseRelationship          = itemPasteboard;
+		pasteboardItems.deleteRule                   = NSCascadeDeleteRule;
+		pasteboardItems.ordered                      = YES;
+
+		pasteboardIndex.name                         = @"index";
+		pasteboardIndex.attributeType                = NSInteger64AttributeType;
+
+		pasteboardAuxOptions.name                    = @"auxiliaryOptionsForCurrent";
+		pasteboardAuxOptions.transient               = YES;
+		pasteboardAuxOptions.attributeType           = NSUndefinedAttributeType;
+		pasteboardAuxOptions.attributeValueClassName = @"NSDictionary";
+
+		pasteboardEntity.name                        = @"Pasteboard";
+		pasteboardEntity.managedObjectClassName      = @"OakPasteboard";
+		pasteboardEntity.properties                  = @[ pasteboardName, pasteboardItems, pasteboardIndex, pasteboardAuxOptions ];
+
+		itemContent.name                             = @"string";
+		itemContent.attributeType                    = NSStringAttributeType;
+		itemContent.optional                         = NO;
+
+		itemOptions.name                             = @"options";
+		itemOptions.attributeType                    = NSTransformableAttributeType;
+
+		itemPasteboard.name                          = @"pasteboard";
+		itemPasteboard.destinationEntity             = pasteboardEntity;
+		itemPasteboard.inverseRelationship           = pasteboardItems;
+		itemPasteboard.deleteRule                    = NSNullifyDeleteRule;
+		itemPasteboard.maxCount                      = 1;
+		itemPasteboard.minCount                      = 1;
+
+		itemEntity.name                              = @"PasteboardEntry";
+		itemEntity.managedObjectClassName            = @"OakPasteboardEntry";
+		itemEntity.properties                        = @[ itemContent, itemOptions, itemPasteboard ];
+
+		managedObjectModel = [[NSManagedObjectModel alloc] init];
+		managedObjectModel.entities = @[ pasteboardEntity, itemEntity ];
+	}
+	return managedObjectModel;
+}
+
++ (BOOL)saveContext
+{
+	if([[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsDisablePersistentClipboardHistory] boolValue])
+		return YES;
+
+	BOOL res = YES;
+	if([self.managedObjectContext hasChanges])
+	{
+		NSError* error = nil;
+		if(!(res = [self.managedObjectContext save:&error]))
+			NSLog(@"failed to save context: %@", error);
+	}
+	return res;
 }
 
 + (OakPasteboard*)pasteboardWithName:(NSString*)aName
@@ -185,28 +320,35 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 	OakPasteboard* res = SharedInstances[aName];
 	if(!res)
 	{
-		NSMutableArray* entries = [NSMutableArray new];
-
-		if(![[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsDisablePersistentClipboardHistory] boolValue])
+		NSFetchRequest* request = [[NSFetchRequest alloc] init];
+		request.entity = [NSEntityDescription entityForName:@"Pasteboard" inManagedObjectContext:self.managedObjectContext];
+		request.predicate = [NSPredicate predicateWithFormat:@"name == %@", aName];
+		NSError* error;
+		if(!(res = [[self.managedObjectContext executeFetchRequest:request error:&error] lastObject]))
 		{
-			if(NSArray* history = [[NSUserDefaults standardUserDefaults] arrayForKey:aName])
+			NSMutableOrderedSet* entries = [NSMutableOrderedSet new];
+
+			NSString* userDefaultsKey = [aName isEqualToString:OakReplacePboard] ? @"NSReplacePboard" : aName;
+			if(NSArray* history = [[NSUserDefaults standardUserDefaults] arrayForKey:userDefaultsKey])
 			{
 				for(NSDictionary* entry in history)
 				{
 					NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithDictionary:entry];
 					[dict removeObjectForKey:@"string"];
 					if(NSString* str = entry[@"string"])
-						[entries addObject:[OakPasteboardEntry pasteboardEntryWithString:str andOptions:dict]];
+						[entries addObject:[OakPasteboardEntry pasteboardEntryWithString:str andOptions:dict inContext:self.managedObjectContext]];
 				}
+
+				[[NSUserDefaults standardUserDefaults] removeObjectForKey:userDefaultsKey];
 			}
+
+			res = [NSEntityDescription insertNewObjectForEntityForName:@"Pasteboard" inManagedObjectContext:self.managedObjectContext];
+			res.name    = aName;
+			res.entries = entries;
+			res.index   = [entries count]-1;
 		}
 
-		SharedInstances[aName] = res = [[OakPasteboard alloc] init];
-		res.pasteboardName   = aName;
-		res.avoidsDuplicates = ![aName isEqualToString:NSGeneralPboard];
-		res.entries          = entries;
-		res.index            = [entries count]-1;
-
+		SharedInstances[aName] = res;
 		idle_callback().add(res);
 	}
 
@@ -216,16 +358,12 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 
 - (NSPasteboard*)pasteboard
 {
-	return [NSPasteboard pasteboardWithName:self.pasteboardName];
+	return [NSPasteboard pasteboardWithName:self.name];
 }
 
-- (void)saveToDefaults
+- (BOOL)avoidsDuplicates
 {
-	if([[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsDisablePersistentClipboardHistory] boolValue])
-		return [[NSUserDefaults standardUserDefaults] removeObjectForKey:self.pasteboardName];
-
-	NSArray* tmp = [self.entries count] < 50 ? self.entries : [self.entries subarrayWithRange:NSMakeRange([self.entries count]-50, 50)];
-	[[NSUserDefaults standardUserDefaults] setObject:[tmp valueForKey:@"asDictionary"] forKey:self.pasteboardName];
+	return ![self.name isEqualToString:NSGeneralPboard];
 }
 
 - (void)checkForExternalPasteboardChanges
@@ -242,11 +380,12 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 		self.changeCount = [[self pasteboard] changeCount];
 		if((onClipboard && !onStack) || (onClipboard && onStack && ![onStack isEqualToString:onClipboard]))
 		{
-			[_entries addObject:[OakPasteboardEntry pasteboardEntryWithString:onClipboard andOptions:[[self pasteboard] availableTypeFromArray:@[ OakPasteboardOptionsPboardType ]] ? [[self pasteboard] propertyListForType:OakPasteboardOptionsPboardType] : nil]];
+			NSMutableOrderedSet* entries = [self mutableOrderedSetValueForKey:@"entries"];
+			[entries addObject:[OakPasteboardEntry pasteboardEntryWithString:onClipboard andOptions:[[self pasteboard] availableTypeFromArray:@[ OakPasteboardOptionsPboardType ]] ? [[self pasteboard] propertyListForType:OakPasteboardOptionsPboardType] : nil inContext:self.managedObjectContext]];
 			self.index = [self.entries count]-1;
 			self.auxiliaryOptionsForCurrent = nil;
 			[[NSNotificationCenter defaultCenter] postNotificationName:OakPasteboardDidChangeNotification object:self];
-			[self saveToDefaults];
+			[OakPasteboard saveContext];
 		}
 	}
 }
@@ -265,7 +404,7 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 	[[NSNotificationCenter defaultCenter] postNotificationName:OakPasteboardDidChangeNotification object:self];
 
 	if(saveFlag)
-		[self saveToDefaults];
+		[OakPasteboard saveContext];
 }
 
 - (void)addEntryWithString:(NSString*)aString
@@ -288,7 +427,10 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 	}
 
 	if(createNewEntry)
-		[_entries addObject:[OakPasteboardEntry pasteboardEntryWithString:aString andOptions:someOptions]];
+	{
+		NSMutableOrderedSet* entries = [self mutableOrderedSetValueForKey:@"entries"];
+		[entries addObject:[OakPasteboardEntry pasteboardEntryWithString:aString andOptions:someOptions inContext:self.managedObjectContext]];
+	}
 	self.index = [self.entries count]-1;
 	[self didUpdateHistoryShouldSave:createNewEntry];
 }
@@ -309,7 +451,12 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 	if([[self pasteboard] availableTypeFromArray:@[ @"org.nspasteboard.TransientType", @"org.nspasteboard.ConcealedType", @"org.nspasteboard.AutoGeneratedType" ]])
 	{
 		if(NSString* onClipboard = [[self pasteboard] availableTypeFromArray:@[ NSStringPboardType ]] ? [[self pasteboard] stringForType:NSStringPboardType] : nil)
-			return [OakPasteboardEntry pasteboardEntryWithString:onClipboard andOptions:[[self pasteboard] availableTypeFromArray:@[ OakPasteboardOptionsPboardType ]] ? [[self pasteboard] propertyListForType:OakPasteboardOptionsPboardType] : nil];
+		{
+			OakPasteboardEntry* res = (OakPasteboardEntry*)[[NSManagedObject alloc] initWithEntity:[NSEntityDescription entityForName:@"PasteboardEntry" inManagedObjectContext:self.managedObjectContext] insertIntoManagedObjectContext:nil];
+			res.string  = onClipboard;
+			res.options = [[self pasteboard] availableTypeFromArray:@[ OakPasteboardOptionsPboardType ]] ? [[self pasteboard] propertyListForType:OakPasteboardOptionsPboardType] : nil;
+			return res;
+		}
 	}
 	return [self.entries count] == 0 ? nil : self.entries[self.index];
 }
@@ -337,7 +484,7 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 		[pasteboardSelector setPerformsActionOnSingleClick];
 	selectedRow = [pasteboardSelector showAtLocation:location];
 
-	self.entries = [[[[pasteboardSelector entries] reverseObjectEnumerator] allObjects] mutableCopy];
+	self.entries = [NSMutableOrderedSet orderedSetWithArray:[[[pasteboardSelector entries] reverseObjectEnumerator] allObjects]];
 	self.index   = ([self.entries count]-1) - selectedRow;
 	[self didUpdateHistoryShouldSave:YES];
 
