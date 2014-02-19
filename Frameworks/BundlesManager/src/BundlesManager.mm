@@ -328,6 +328,7 @@ static double const kPollInterval = 3*60*60;
 	D(DBF_BundlesManager, bug("%s\n", BSTR(_needsCreateBundlesIndex)););
 	if(_needsCreateBundlesIndex == NO)
 		return;
+	_needsCreateBundlesIndex = NO;
 
 	auto pair = create_bundle_index(bundlesPaths, cache);
 	bundles::set_index(pair.first, pair.second);
@@ -336,8 +337,6 @@ static double const kPollInterval = 3*60*60;
 	for(auto path : bundlesPaths)
 		cache.copy_heads_for_path(path, std::inserter(newWatchList, newWatchList.end()));
 	[self updateWatchList:newWatchList];
-
-	_needsCreateBundlesIndex = NO;
 }
 
 - (void)saveBundlesIndex:(id)sender
