@@ -301,6 +301,17 @@ namespace bundles
 		return match;
 	}
 
+	plist::dictionary_t erase_false_values (plist::dictionary_t const& plist)
+	{
+		plist::dictionary_t res;
+		for(auto const& pair : plist)
+		{
+			if(!boost::get<bool>(&pair.second) || boost::get<bool>(pair.second))
+				res.insert(res.end(), pair);
+		}
+		return res;
+	}
+
 	bool item_t::save (bool useDeltaIfNonLocal)
 	{
 		static struct path_format_t { kind_t type; char const* format; } const PathFormats[] =
@@ -352,15 +363,11 @@ namespace bundles
 			}
 		}
 
-		plist::dictionary_t newPlist = plist();
+		plist::dictionary_t newPlist = erase_false_values(plist());
 		bool saveAsDelta = useDeltaIfNonLocal && (!_local && !_paths.empty() || _paths.size() > 1);
 		if(saveAsDelta)
 		{
-			plist::dictionary_t oldPlist = plist::load(_paths[_local ? 1 : 0]);
-			if(!hidden_from_user()) newPlist.erase(kFieldHideFromUser);
-			if(!disabled())         newPlist.erase(kFieldIsDisabled);
-			if(!deleted())          newPlist.erase(kFieldIsDeleted);
-
+			plist::dictionary_t oldPlist = erase_false_values(plist::load(_paths[_local ? 1 : 0]));
 			if(oldPlist == newPlist && _kind != kItemTypeBundle)
 			{
 				if(unlink(destPath.c_str()) == 0 || errno == ENOENT)
