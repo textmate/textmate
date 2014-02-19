@@ -57,8 +57,17 @@ static double const kPollInterval = 3*60*60;
 	{
 		sourceList   = bundles_db::sources();
 		bundlesIndex = bundles_db::index(kInstallDirectory);
+
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:NSApp];
 	}
 	return self;
+}
+
+- (void)applicationWillTerminate:(NSNotification*)aNotification
+{
+	D(DBF_BundlesManager, bug("\n"););
+	if(self.needsSaveBundlesIndex)
+		[self saveBundlesIndex:self];
 }
 
 - (void)setAutoUpdateBundles:(BOOL)flag
