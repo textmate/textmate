@@ -175,6 +175,11 @@ BOOL HasDocumentWindow (NSArray* windows)
 	settings_t::set_default_settings_path([[[NSBundle mainBundle] pathForResource:@"Default" ofType:@"tmProperties"] fileSystemRepresentation]);
 	settings_t::set_global_settings_path(path::join(path::home(), "Library/Application Support/TextMate/Global.tmProperties"));
 
+	std::string const src = path::join(path::home(), "Library/Application Support/TextMate/project-state.db");
+	std::string const dst = path::join(path::home(), "Library/Application Support/TextMate/RecentProjects.db");
+	if(path::exists(src) && !path::exists(dst))
+		rename(src.c_str(), dst.c_str());
+
 	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
 		@"ApplePressAndHoldEnabled" : @NO,
 		@"NSRecentDocumentsLimit"   : @25,

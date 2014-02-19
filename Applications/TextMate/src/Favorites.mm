@@ -44,7 +44,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 - (KVDB*)sharedProjectStateDB
 {
 	NSString* appSupport = [[NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES) objectAtIndex:0] stringByAppendingPathComponent:@"TextMate"];
-	return [KVDB sharedDBUsingFile:@"project-state.db" inDirectory:appSupport];
+	return [KVDB sharedDBUsingFile:@"RecentProjects.db" inDirectory:appSupport];
 }
 
 - (id)init
