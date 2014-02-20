@@ -86,7 +86,10 @@ static bool is_installed (oak::uuid_t const& uuid)
 	std::set<grammar_info_t> recommended, installed, all;
 
 	citerate(item, bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeGrammar))
-		installed.insert(grammar_info_t((*item)->name(), (*item)->value_for_field(bundles::kFieldGrammarScope), (*item)->uuid(), (*item)->bundle_uuid()));
+	{
+		if((*item)->value_for_field(bundles::kFieldGrammarScope) != NULL_STR)
+			installed.insert(grammar_info_t((*item)->name(), (*item)->value_for_field(bundles::kFieldGrammarScope), (*item)->uuid(), (*item)->bundle_uuid()));
+	}
 
 	all = installed;
 

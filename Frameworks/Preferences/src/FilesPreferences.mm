@@ -67,6 +67,8 @@
 		iterate(pair, grammars)
 		{
 			std::string const& fileType = pair->second->value_for_field(bundles::kFieldGrammarScope);
+			if(fileType == NULL_STR)
+				continue;
 
 			NSMenuItem* item = [newDocumentTypesMenu addItemWithTitle:[NSString stringWithCxxString:pair->first] action:@selector(selectNewFileType:) keyEquivalent:@""];
 			[item setRepresentedObject:[NSString stringWithCxxString:fileType]];

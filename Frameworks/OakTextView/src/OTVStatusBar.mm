@@ -184,7 +184,10 @@ static NSButton* OakCreateImageToggleButton (NSImage* image)
 
 	std::multimap<std::string, bundles::item_ptr, text::less_t> grammars;
 	for(auto item : bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeGrammar))
-		grammars.emplace(item->name(), item);
+	{
+		if(item->value_for_field(bundles::kFieldGrammarScope) != NULL_STR)
+			grammars.emplace(item->name(), item);
+	}
 
 	for(auto pair : grammars)
 	{
