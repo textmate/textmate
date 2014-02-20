@@ -942,11 +942,16 @@ namespace ng
 			case kReplace:
 			case kReplaceAndFind:
 			{
-				if(action == kReplace)
+				if(clipboard_t::entry_ptr replaceEntry = replace_clipboard()->current())
 				{
-					/* TODO Implement ‘Replace’ (after find) action */
+					std::string replacement = replaceEntry->content();
+					if(!match_captures().empty())
+						replacement = format_string::expand(replacement, match_captures());
+					insert(replacement, true);
 				}
-				perform(kFindNext, layout, indentCorrections, scopeAttributes);
+
+				if(action == kReplaceAndFind)
+					perform(kFindNext, layout, indentCorrections, scopeAttributes);
 			}
 			break;
 
