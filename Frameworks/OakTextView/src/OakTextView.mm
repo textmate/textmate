@@ -2210,11 +2210,9 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	{
 		NSMutableDictionary* dict = [NSMutableDictionary dictionary];
 
-		dict[@"findString"] = aFindServer.findString;
+		dict[@"findString"]    = aFindServer.findString;
+		dict[@"replaceString"] = aFindServer.replaceString;
 
-		static find_operation_t const replaceActions[] = { kFindOperationReplaceAll, kFindOperationReplaceAllInSelection, kFindOperationReplace, kFindOperationReplaceAndFind };
-		if(oak::contains(std::begin(replaceActions), std::end(replaceActions), aFindServer.findOperation))
-			dict[@"replaceString"] = aFindServer.replaceString;
 		static find_operation_t const inSelectionActions[] = { kFindOperationFindInSelection, kFindOperationReplaceAllInSelection };
 		if(oak::contains(std::begin(inSelectionActions), std::end(inSelectionActions), aFindServer.findOperation))
 			dict[@"replaceAllScope"] = @"selection";
