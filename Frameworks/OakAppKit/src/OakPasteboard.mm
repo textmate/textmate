@@ -428,6 +428,13 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 
 	if(createNewEntry)
 	{
+		static NSInteger const kHistorySize = 10000;
+		if([self.entries count] > kHistorySize)
+		{
+			for(OakPasteboardEntry* entry in [self.entries objectsAtIndexes:[[NSIndexSet alloc] initWithIndexesInRange:NSMakeRange(0, [self.entries count] - kHistorySize/2)]])
+				[entry.managedObjectContext deleteObject:entry];
+		}
+
 		NSMutableOrderedSet* entries = [self mutableOrderedSetValueForKey:@"entries"];
 		[entries addObject:[OakPasteboardEntry pasteboardEntryWithString:aString andOptions:someOptions inContext:self.managedObjectContext]];
 	}
