@@ -1471,6 +1471,8 @@ namespace ng
 
 	void editor_t::find (std::string const& searchFor, find::options_t options, bool searchOnlySelection)
 	{
+		set_match_captures(std::map<std::string, std::string>());
+
 		ranges_t res;
 		if(options & find::all_matches)
 		{
@@ -1486,8 +1488,12 @@ namespace ng
 		}
 		else
 		{
-			citerate(pair, ng::find(_buffer, _selections, searchFor, options))
-				res.push_back(pair->first);
+			auto matches = ng::find(_buffer, _selections, searchFor, options);
+			for(auto const& pair : matches)
+				res.push_back(pair.first);
+
+			if(matches.size() == 1)
+				set_match_captures(matches.begin()->second);
 		}
 
 		if(!res.empty())

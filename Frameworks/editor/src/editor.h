@@ -183,6 +183,7 @@ namespace ng
 
 		scope::context_t scope (std::string const& scopeAttributes) const;
 		std::map<std::string, std::string> editor_variables (std::string const& scopeAttributes) const;
+		std::map<std::string, std::string> const& match_captures () const { return _match_captures; }
 
 		std::vector<std::string> const& choices () const;
 		std::string placeholder_content (ng::range_t* placeholderSelection = NULL) const;
@@ -271,6 +272,7 @@ namespace ng
 		ranges_t snippet (size_t from, size_t to, std::string const& str, std::map<std::string, std::string> const& variables, bool disableIndent);
 
 		void find (std::string const& searchFor, find::options_t options = find::none, bool searchOnlySelection = false);
+		void set_match_captures (std::map<std::string, std::string> const& match_captures) { _match_captures = match_captures; }
 		ranges_t replace (std::multimap<range_t, std::string> const& replacements, bool selectInsertions = false);
 		void move_selection (int deltaX, int deltaY);
 
@@ -283,6 +285,7 @@ namespace ng
 		snippet_controller_t _snippets;
 
 		completion_info_t _completion_info;
+		std::map<std::string, std::string> _match_captures;
 
 		clipboard_ptr _clipboard;
 		clipboard_ptr _find_clipboard;
