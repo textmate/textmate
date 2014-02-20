@@ -1,7 +1,42 @@
 #include "editor.h"
 #include "transform.h"
+#include "clipboard.h"
 #include <command/parser.h>
 #include <document/collection.h>
+
+namespace
+{
+	struct macro_clipboard_t : clipboard_t
+	{
+		macro_clipboard_t (clipboard_ptr old) : _old(old) { }
+
+		bool empty () const               { return _stack.empty(); }
+
+		entry_ptr previous ()             { return _index == 0               ? entry_ptr() : _stack[--_index]; }
+		entry_ptr current () const        { return _index == _stack.size()   ? entry_ptr() : _stack[  _index]; }
+		entry_ptr next ()                 { return _index+1 >= _stack.size() ? entry_ptr() : _stack[++_index]; }
+
+		void push_back (entry_ptr entry)
+		{
+			_stack.push_back(entry);
+			_index = _stack.size()-1;
+		}
+
+		clipboard_ptr _old;
+
+	private:
+		std::vector<entry_ptr> _stack;
+		size_t _index = 0;
+	};
+
+	clipboard_ptr create_macro_clipboard (clipboard_ptr old)
+	{
+		clipboard_ptr res = std::make_shared<macro_clipboard_t>(old);
+		if(old && old->current())
+			res->push_back(old->current());
+		return res;
+	}
+}
 
 namespace ng
 {
@@ -226,9 +261,17 @@ namespace ng
 		if(!plist::get_key_path(plist, "commands", commands))
 			return;
 
-		// // TODO macro: useGlobalClipboard
-		// bool useGlobalClipboard = false;
-		// plist::get_key_path(plist, "useGlobalClipboard", useGlobalClipboard);
+		bool useGlobalClipboard = false;
+		plist::get_key_path(plist, "useGlobalClipboard", useGlobalClipboard);
+
+		clipboard_ptr oldClipboard        = clipboard();
+		clipboard_ptr oldFindClipboard    = find_clipboard();
+		clipboard_ptr oldReplaceClipboard = replace_clipboard();
+
+		if(!useGlobalClipboard)
+			set_clipboard(create_macro_clipboard(oldClipboard));
+		set_find_clipboard(create_macro_clipboard(oldFindClipboard));
+		set_replace_clipboard(create_macro_clipboard(oldReplaceClipboard));
 
 		iterate(command, commands)
 		{
@@ -268,6 +311,11 @@ namespace ng
 				}
 			}
 		}
+
+		if(!useGlobalClipboard)
+			set_clipboard(oldClipboard);
+		set_find_clipboard(oldFindClipboard);
+		set_replace_clipboard(oldReplaceClipboard);
 	}
 
 } /* ng */
