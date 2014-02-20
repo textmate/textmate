@@ -175,6 +175,11 @@ namespace ng
 		plist::get_key_path(args, "findString", searchFor);
 		plist::get_key_path(args, "replaceString", replaceWith);
 
+		if(searchFor != NULL_STR)
+			find_clipboard()->push_back(searchFor);
+		if(replaceWith != NULL_STR)
+			replace_clipboard()->push_back(replaceWith);
+
 		std::string where;
 		bool searchOnlySelection = plist::get_key_path(args, "replaceAllScope", where) && where == "selection";
 
