@@ -491,8 +491,14 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 		[pasteboardSelector setPerformsActionOnSingleClick];
 	selectedRow = [pasteboardSelector showAtLocation:location];
 
-	self.entries = [NSMutableOrderedSet orderedSetWithArray:[[[pasteboardSelector entries] reverseObjectEnumerator] allObjects]];
-	self.index   = ([self.entries count]-1) - selectedRow;
+	NSSet* keep = [NSSet setWithArray:[pasteboardSelector entries]];
+	for(OakPasteboardEntry* entry in self.entries)
+	{
+		if(![keep containsObject:entry])
+			[entry.managedObjectContext deleteObject:entry];
+	}
+
+	self.index = ([keep count]-1) - selectedRow;
 	[self didUpdateHistoryShouldSave:YES];
 
 	return [pasteboardSelector shouldSendAction];
