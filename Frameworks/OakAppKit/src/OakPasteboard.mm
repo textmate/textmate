@@ -275,6 +275,7 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 		itemContent.name                             = @"string";
 		itemContent.attributeType                    = NSStringAttributeType;
 		itemContent.optional                         = NO;
+		itemContent.indexed                          = YES;
 
 		itemOptions.name                             = @"options";
 		itemOptions.attributeType                    = NSTransformableAttributeType;
