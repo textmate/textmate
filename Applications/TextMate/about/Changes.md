@@ -1,5 +1,11 @@
 # Changes
 
+## 2014-02-21 ([v2.0-alpha.9513](https://github.com/textmate/textmate/compare/v2.0-alpha.9511...v2.0-alpha.9513))
+
+* If you want the file browser to show symbolic links as expandable items then run the following in a terminal:
+
+		defaults write com.macromates.TextMate.preview allowExpandingLinks -bool YES
+
 ## 2014-02-12 ([v2.0-alpha.9511](https://github.com/textmate/textmate/compare/v2.0-alpha.9509...v2.0-alpha.9511))
 
 * Commands executed by TextMate can now be interrupted by pressing ⌘. or ⌃C.
