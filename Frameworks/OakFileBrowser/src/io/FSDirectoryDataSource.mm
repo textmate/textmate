@@ -18,6 +18,8 @@
 
 OAK_DEBUG_VAR(FileBrowser_DSDirectory);
 
+static NSString* const kUserDefaultsAllowExpandingLinksKey = @"allowExpandingLinks";
+
 @interface FSFileItem : FSItem
 @property (nonatomic) dev_t device;
 @property (nonatomic) ino_t inode;
@@ -167,6 +169,8 @@ private:
 
 	static void async_reload (FSDirectoryDataSource* dataSource, FSItem* rootItem, scm::weak_info_ptr weakSCMInfo, bool reloadWasRequested)
 	{
+		BOOL allowExpandingLinks = [[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsAllowExpandingLinksKey] boolValue];
+
 		std::string const dir = to_s([rootItem.url path]);
 		bool includeHidden = (dataSource.dataSourceOptions & kFSDataSourceOptionIncludeHidden) == kFSDataSourceOptionIncludeHidden;
 
@@ -242,6 +246,9 @@ private:
 						item.sortAsFolder = fsItem.sort_as_directory;
 						item.leaf         = !fsItem.treat_as_directory;
 						item.target       = fsItem.target != NULL_STR ? [NSURL URLWithString:[NSString stringWithCxxString:fsItem.target]] : nil;
+
+						if(allowExpandingLinks && fsItem.is_link && fsItem.sort_as_directory && item.leaf)
+							item.leaf = NO;
 
 						[array addObject:item];
 						pathsOnDisk.insert(fsItem.path);
