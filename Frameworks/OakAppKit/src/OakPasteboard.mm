@@ -1,7 +1,3 @@
-/*
-	TODO Filter duplicates
-*/
-
 #import "OakPasteboard.h"
 #import "OakPasteboardSelector.h"
 #import <OakFoundation/NSArray Additions.h>
@@ -380,9 +376,7 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 		self.changeCount = [[self pasteboard] changeCount];
 		if((onClipboard && !onStack) || (onClipboard && onStack && ![onStack isEqualToString:onClipboard]))
 		{
-			NSMutableOrderedSet* entries = [self mutableOrderedSetValueForKey:@"entries"];
-			[entries addObject:[OakPasteboardEntry pasteboardEntryWithString:onClipboard andOptions:[[self pasteboard] availableTypeFromArray:@[ OakPasteboardOptionsPboardType ]] ? [[self pasteboard] propertyListForType:OakPasteboardOptionsPboardType] : nil inContext:self.managedObjectContext]];
-			self.index = [self.entries count]-1;
+			[self internalAddEntryWithString:onClipboard andOptions:[[self pasteboard] availableTypeFromArray:@[ OakPasteboardOptionsPboardType ]] ? [[self pasteboard] propertyListForType:OakPasteboardOptionsPboardType] : nil];
 			self.auxiliaryOptionsForCurrent = nil;
 			[[NSNotificationCenter defaultCenter] postNotificationName:OakPasteboardDidChangeNotification object:self];
 			[OakPasteboard saveContext];
@@ -427,19 +421,42 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 	}
 
 	if(createNewEntry)
-	{
-		static NSInteger const kHistorySize = 10000;
-		if([self.entries count] > kHistorySize)
-		{
-			for(OakPasteboardEntry* entry in [self.entries objectsAtIndexes:[[NSIndexSet alloc] initWithIndexesInRange:NSMakeRange(0, [self.entries count] - kHistorySize/2)]])
-				[entry.managedObjectContext deleteObject:entry];
-		}
-
-		NSMutableOrderedSet* entries = [self mutableOrderedSetValueForKey:@"entries"];
-		[entries addObject:[OakPasteboardEntry pasteboardEntryWithString:aString andOptions:someOptions inContext:self.managedObjectContext]];
-	}
+		[self internalAddEntryWithString:aString andOptions:someOptions];
 	self.index = [self.entries count]-1;
 	[self didUpdateHistoryShouldSave:createNewEntry];
+}
+
+- (void)internalAddEntryWithString:(NSString*)aString andOptions:(NSDictionary*)someOptions
+{
+	if(self.avoidsDuplicates)
+	{
+		NSFetchRequest* request = [[NSFetchRequest alloc] init];
+		request.entity = [NSEntityDescription entityForName:@"PasteboardEntry" inManagedObjectContext:self.managedObjectContext];
+		request.predicate = [NSPredicate predicateWithFormat:@"pasteboard.name == %@ AND string == %@", self.name, aString];
+
+		NSError* error;
+		if(OakPasteboardEntry* entry = [[self.managedObjectContext executeFetchRequest:request error:&error] firstObject])
+		{
+			NSMutableOrderedSet* entries = [self mutableOrderedSetValueForKey:@"entries"];
+			[entries removeObject:entry];
+			entry.options = someOptions;
+			[entries addObject:entry];
+			self.index = [entries count]-1;
+
+			return;
+		}
+	}
+
+	static NSInteger const kHistorySize = 10000;
+	if([self.entries count] > kHistorySize)
+	{
+		for(OakPasteboardEntry* entry in [self.entries objectsAtIndexes:[[NSIndexSet alloc] initWithIndexesInRange:NSMakeRange(0, [self.entries count] - kHistorySize/2)]])
+			[entry.managedObjectContext deleteObject:entry];
+	}
+
+	NSMutableOrderedSet* entries = [self mutableOrderedSetValueForKey:@"entries"];
+	[entries addObject:[OakPasteboardEntry pasteboardEntryWithString:aString andOptions:someOptions inContext:self.managedObjectContext]];
+	self.index = [self.entries count]-1;
 }
 
 - (OakPasteboardEntry*)previous
