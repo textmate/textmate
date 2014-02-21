@@ -245,6 +245,7 @@ private:
 						item.labelIndex   = fsItem.label;
 						item.sortAsFolder = fsItem.sort_as_directory;
 						item.leaf         = !fsItem.treat_as_directory;
+						item.link         = fsItem.is_link;
 						item.target       = fsItem.target != NULL_STR ? [NSURL URLWithString:[NSString stringWithCxxString:fsItem.target]] : nil;
 
 						if(allowExpandingLinks && fsItem.is_link && fsItem.sort_as_directory && item.leaf)

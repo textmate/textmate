@@ -170,6 +170,9 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 {
 	for(FSItem* child in anItem.children)
 	{
+		if(flag && child.link)
+			continue;
+
 		if(!child.leaf && (flag || [expandedURLs containsObject:child.url]))
 		{
 			if(flag)
