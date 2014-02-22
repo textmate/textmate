@@ -381,15 +381,15 @@ namespace ng
 		if(std::string const* str = boost::get<std::string>(&ptrn))
 			startPattern = *str;
 
-		ptrn = bundles::value_for_setting("foldingStopMarker", scope);
+		ptrn = bundles::value_for_setting("foldingStopMarker", scope, &didFindPatterns);
 		if(std::string const* str = boost::get<std::string>(&ptrn))
 			stopPattern = *str;
 
-		ptrn = bundles::value_for_setting("foldingIndentedBlockStart", scope);
+		ptrn = bundles::value_for_setting("foldingIndentedBlockStart", scope, &didFindPatterns);
 		if(std::string const* str = boost::get<std::string>(&ptrn))
 			indentPattern = *str;
 
-		ptrn = bundles::value_for_setting("foldingIndentedBlockIgnore", scope);
+		ptrn = bundles::value_for_setting("foldingIndentedBlockIgnore", scope, &didFindPatterns);
 		if(std::string const* str = boost::get<std::string>(&ptrn))
 			ignorePattern = *str;
 
