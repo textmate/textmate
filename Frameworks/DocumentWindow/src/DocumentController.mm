@@ -35,7 +35,6 @@
 namespace find_tags { enum { in_document = 1, in_selection, in_project, in_folder }; } // From AppController.h
 
 static NSString* const kUserDefaultsFindInSelectionByDefault = @"findInSelectionByDefault";
-static NSString* const kUserDefaultsDisableTabReordering = @"disableTabReordering";
 static NSString* const kUserDefaultsDisableFolderStateRestore = @"disableFolderStateRestore";
 static NSString* const OakDocumentPboardType = @"OakDocumentPboardType"; // drag’n’drop of tabs
 static BOOL IsInShouldTerminateEventLoop = NO;
@@ -795,7 +794,7 @@ namespace
 
 - (BOOL)disableTabReordering
 {
-	return [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableTabReordering];;
+	return [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableTabReorderingKey];;
 }
 
 - (void)openItems:(NSArray*)items closingOtherTabs:(BOOL)closeOtherTabsFlag

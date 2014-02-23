@@ -4,6 +4,7 @@
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/OakFileIconImage.h>
 #import <OakAppKit/OakFileManager.h>
+#import <Preferences/Keys.h>
 #import <oak/server.h>
 #import <io/entries.h>
 #import <io/events.h>
@@ -17,8 +18,6 @@
 #import <oak/debug.h>
 
 OAK_DEBUG_VAR(FileBrowser_DSDirectory);
-
-static NSString* const kUserDefaultsAllowExpandingLinksKey = @"allowExpandingLinks";
 
 @interface FSFileItem : FSItem
 @property (nonatomic) dev_t device;

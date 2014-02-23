@@ -29,6 +29,8 @@ PUBLIC extern NSString* const kUserDefaultsHTMLOutputPlacementKey;
 PUBLIC extern NSString* const kUserDefaultsTabsAboveDocumentKey;
 PUBLIC extern NSString* const kUserDefaultsDisableFileBrowserWindowResizeKey;
 PUBLIC extern NSString* const kUserDefaultsAutoRevealFileKey;
+PUBLIC extern NSString* const kUserDefaultsAllowExpandingLinksKey;
+PUBLIC extern NSString* const kUserDefaultsDisableTabReorderingKey;
 
 // ===========
 // = Bundles =
