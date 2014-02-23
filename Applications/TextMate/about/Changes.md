@@ -1,46 +1,26 @@
 # Changes
 
-## 2014-02-21 ([v2.0-alpha.9513](https://github.com/textmate/textmate/compare/v2.0-alpha.9511...v2.0-alpha.9513))
+## 2014-02-23 ([v2.0-alpha.9515](https://github.com/textmate/textmate/compare/v2.0-alpha.9503...v2.0-alpha.9515))
 
-* If you want the file browser to show symbolic links as expandable items then run the following in a terminal:
+  * If you want the file browser to show symbolic links as expandable items then select _Preferences → Projects → Show links as expandable_.
 
-		defaults write com.macromates.TextMate.preview allowExpandingLinks -bool YES
+  * If you want the current document to always be selected in the file browser then select _Preferences → Projects → Keep current document selected_. *[Torsten Trautwein]*
 
-## 2014-02-12 ([v2.0-alpha.9511](https://github.com/textmate/textmate/compare/v2.0-alpha.9509...v2.0-alpha.9511))
-
-* Commands executed by TextMate can now be interrupted by pressing ⌘. or ⌃C.
-
-## 2014-02-11 ([v2.0-alpha.9509](https://github.com/textmate/textmate/compare/v2.0-alpha.9507...v2.0-alpha.9509))
-
-* Added an `--uuid` option to the `mate` shell command which allows referencing untitled documents. If `mate` is called from a TextMate command without any file argument then the UUID defaults to that of the current document, meaning a command can use something like `"$TM_MATE" -l10-10:5` to select the first four characters on line 10.
-* The _Bundles_ page in this about window would not show changes for 2014. This is now fixed.
-* It is possible to disable restoring open tabs and file browser state when opening a folder:
-
-		defaults write com.macromates.TextMate.preview disableFolderStateRestore -bool YES
-
-## 2014-02-07 ([v2.0-alpha.9507](https://github.com/textmate/textmate/compare/v2.0-alpha.9505...v2.0-alpha.9507))
+  * If you dislike how TextMate moves tabs to be “right of current” when opening an already open document then disable _Preferences → Projects → Re-order when opening a file_.
 
   * TextMate will now remember open tabs for “project folders”. This means that if you run `mate «folder»`, open a few tabs and close the window, then if you later open the same folder, TextMate will restore the open tabs (and file browser state).
 
     You can see which folders TextMate has stored state for via _File → Open Favorites…_ (⇧⌘O) — probably soon to be renamed “Open Project…”.
 
-    _The feature is work in progress._
+    The feature can be disabled using:
 
-## 2014-02-03 ([v2.0-alpha.9505](https://github.com/textmate/textmate/compare/v2.0-alpha.9503...v2.0-alpha.9505))
+        defaults write com.macromates.TextMate.preview disableFolderStateRestore -bool YES
 
-  * Preference to auto-reveal the current file in the project browser:
+  * Commands executed by TextMate can now be interrupted by pressing ⌘. or ⌃C.
 
-    An option called _“Auto-reveal open file in project browser”_ has been added to the Projects preference pane. When checked, the currently open file will be revealed in the project’s file browser. *[Torsten Trautwein]*
+  * Added an `--uuid` option to the `mate` shell command which allows referencing untitled documents. If `mate` is called from a TextMate command without any file argument then the UUID defaults to that of the current document, meaning a command can use something like `"$TM_MATE" -l10-10:5` to select the first four characters on line 10.
 
-  * Add setting to disable tab re-ordering:
-
-    When opening a document it will be placed to the right of the current one (in the tab bar) even if the document being opened is already in the tab bar, this is to make ⌘W work to “close and go back” without having to keep a list of previously selected tabs.
-
-    This feature can now be disabled using:
-
-        defaults write com.macromates.TextMate.preview disableTabReordering -bool YES
-
-    Note though that if one selects multiple documents to open then it will potentially re-order the tab bar so that the documents selected are adjacent.
+  * The _Bundles_ page in this about window would not show changes for 2014. This is now fixed.
 
 ## 2014-01-13 ([v2.0-alpha.9503](https://github.com/textmate/textmate/compare/v2.0-alpha.9495...v2.0-alpha.9503))
 
