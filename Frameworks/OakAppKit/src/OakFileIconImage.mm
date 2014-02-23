@@ -204,7 +204,7 @@ static NSImage* BadgeForSCMStatus (scm::status::type scmStatus)
 	return [self initWithSize:NSZeroSize];
 }
 
-- (id)initWithWithPath:(NSString*)aPath isModified:(BOOL)modifiedFlag size:(NSSize)aSize
+- (id)initWithPath:(NSString*)aPath isModified:(BOOL)modifiedFlag size:(NSSize)aSize
 {
 	if((self = [self initWithSize:aSize]))
 	{
@@ -305,7 +305,7 @@ static NSImage* BadgeForSCMStatus (scm::status::type scmStatus)
 	}
 }
 
-+ (id)fileIconImageWithPath:(NSString*)aPath isModified:(BOOL)flag size:(NSSize)aSize { return [[self alloc] initWithWithPath:aPath isModified:flag size:aSize]; }
++ (id)fileIconImageWithPath:(NSString*)aPath isModified:(BOOL)flag size:(NSSize)aSize { return [[self alloc] initWithPath:aPath isModified:flag size:aSize]; }
 + (id)fileIconImageWithPath:(NSString*)aPath isModified:(BOOL)flag                    { return [self fileIconImageWithPath:aPath isModified:flag size:NSMakeSize(16, 16)]; }
 + (id)fileIconImageWithPath:(NSString*)aPath size:(NSSize)aSize                       { return [self fileIconImageWithPath:aPath isModified:NO size:aSize]; }
 @end
