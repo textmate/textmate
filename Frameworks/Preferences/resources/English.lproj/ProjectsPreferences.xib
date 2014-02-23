@@ -14,18 +14,18 @@
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
         <customObject id="-3" userLabel="Application"/>
         <customView id="1">
-            <rect key="frame" x="0.0" y="0.0" width="495" height="357"/>
+            <rect key="frame" x="0.0" y="0.0" width="495" height="411"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
             <subviews>
                 <box autoresizesSubviews="NO" verticalHuggingPriority="750" title="Box" boxType="separator" titlePosition="noTitle" id="3">
-                    <rect key="frame" x="12" y="46" width="456" height="5"/>
+                    <rect key="frame" x="12" y="45" width="456" height="5"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <color key="borderColor" white="0.0" alpha="0.41999999999999998" colorSpace="calibratedWhite"/>
                     <color key="fillColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                     <font key="titleFont" metaFont="system"/>
                 </box>
                 <textField verticalHuggingPriority="750" id="12">
-                    <rect key="frame" x="205" y="89" width="222" height="22"/>
+                    <rect key="frame" x="205" y="120" width="222" height="22"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="13">
                         <font key="font" metaFont="system"/>
@@ -37,7 +37,7 @@
                     </connections>
                 </textField>
                 <textField verticalHuggingPriority="750" id="14">
-                    <rect key="frame" x="53" y="59" width="147" height="17"/>
+                    <rect key="frame" x="52" y="90" width="147" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Include files matching:" id="17">
                         <font key="font" metaFont="system"/>
@@ -46,7 +46,7 @@
                     </textFieldCell>
                 </textField>
                 <textField verticalHuggingPriority="750" id="15">
-                    <rect key="frame" x="205" y="57" width="222" height="22"/>
+                    <rect key="frame" x="205" y="88" width="222" height="22"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="16">
                         <font key="font" metaFont="system"/>
@@ -58,7 +58,7 @@
                     </connections>
                 </textField>
                 <textField verticalHuggingPriority="750" id="18">
-                    <rect key="frame" x="103" y="20" width="97" height="17"/>
+                    <rect key="frame" x="102" y="58" width="97" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Non-text files:" id="21">
                         <font key="font" metaFont="system"/>
@@ -67,7 +67,7 @@
                     </textFieldCell>
                 </textField>
                 <textField verticalHuggingPriority="750" id="19">
-                    <rect key="frame" x="206" y="18" width="221" height="22"/>
+                    <rect key="frame" x="205" y="56" width="222" height="22"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="20">
                         <font key="font" metaFont="system"/>
@@ -79,7 +79,7 @@
                     </connections>
                 </textField>
                 <button id="55">
-                    <rect key="frame" x="203" y="292" width="114" height="18"/>
+                    <rect key="frame" x="203" y="348" width="114" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Folders on top" bezelStyle="regularSquare" imagePosition="left" alignment="left" state="on" inset="2" id="56">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -90,45 +90,46 @@
                     </connections>
                 </button>
                 <button id="119">
-                    <rect key="frame" x="203" y="166" width="179" height="18"/>
+                    <rect key="frame" x="203" y="177" width="239" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <buttonCell key="cell" type="check" title="Tab bar above document" bezelStyle="regularSquare" imagePosition="left" alignment="left" state="on" inset="2" id="120">
+                    <string key="toolTip">The document tabs take up the full window’s width, being shown above a potential file browser. If this option is disabled, the document tab bar will be limited to the width of the current document.</string>
+                    <buttonCell key="cell" type="check" title="Extend to the width of the window" bezelStyle="regularSquare" imagePosition="left" alignment="left" state="on" inset="2" id="120">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                         <font key="font" metaFont="system"/>
                     </buttonCell>
                     <connections>
-                        <binding destination="-2" name="value" keyPath="tabsAboveDocument" id="123"/>
+                        <binding destination="-2" name="value" keyPath="tabsAboveDocument" id="Q4p-Px-itG">
+                            <dictionary key="options">
+                                <string key="NSValueTransformerName">NSNegateBoolean</string>
+                            </dictionary>
+                        </binding>
                     </connections>
                 </button>
-                <button id="57">
-                    <rect key="frame" x="203" y="272" width="170" height="18"/>
+                <button id="OLx-G3-8R9">
+                    <rect key="frame" x="203" y="157" width="207" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <buttonCell key="cell" type="check" title="All filename extensions" bezelStyle="regularSquare" imagePosition="left" alignment="left" state="on" inset="2" id="58">
+                    <string key="toolTip">When opening a file its document tab will normally be shown to the right of the currently selected tab, even when the document being opened is already shown in an existing tab. Disabling this option will not move already open tabs.</string>
+                    <buttonCell key="cell" type="check" title="Re-order when opening a file" bezelStyle="regularSquare" imagePosition="left" alignment="left" state="on" inset="2" id="VF1-sn-R4h">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                         <font key="font" metaFont="system"/>
                     </buttonCell>
                     <connections>
-                        <binding destination="-2" name="value" keyPath="showFileExtensions" id="68"/>
+                        <binding destination="-2" name="value" keyPath="disableTabReordering" id="rIH-2N-ABt">
+                            <dictionary key="options">
+                                <string key="NSValueTransformerName">NSNegateBoolean</string>
+                            </dictionary>
+                        </binding>
                     </connections>
                 </button>
-                <textField verticalHuggingPriority="750" id="59">
-                    <rect key="frame" x="145" y="294" width="55" height="17"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Display:" id="60">
-                        <font key="font" metaFont="system"/>
-                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                    </textFieldCell>
-                </textField>
                 <box autoresizesSubviews="NO" verticalHuggingPriority="750" title="Box" boxType="separator" titlePosition="noTitle" id="61">
-                    <rect key="frame" x="12" y="117" width="456" height="5"/>
+                    <rect key="frame" x="12" y="148" width="456" height="5"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <color key="borderColor" white="0.0" alpha="0.41999999999999998" colorSpace="calibratedWhite"/>
                     <color key="fillColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                     <font key="titleFont" metaFont="system"/>
                 </box>
                 <textField verticalHuggingPriority="750" id="62">
-                    <rect key="frame" x="49" y="91" width="151" height="17"/>
+                    <rect key="frame" x="48" y="122" width="151" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Exclude files matching:" id="63">
                         <font key="font" metaFont="system"/>
@@ -136,10 +137,10 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <button id="69">
-                    <rect key="frame" x="203" y="186" width="184" height="18"/>
+                <button toolTip="With this option disabled, the tab bar above the document will not show when the window only contains a single document." id="69">
+                    <rect key="frame" x="203" y="197" width="186" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <buttonCell key="cell" type="check" title="Tab bar with only one tab" bezelStyle="regularSquare" imagePosition="left" alignment="left" state="on" inset="2" id="70">
+                    <buttonCell key="cell" type="check" title="Show for single document" bezelStyle="regularSquare" imagePosition="left" alignment="left" state="on" inset="2" id="70">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                         <font key="font" metaFont="system"/>
                     </buttonCell>
@@ -148,7 +149,7 @@
                     </connections>
                 </button>
                 <popUpButton verticalHuggingPriority="750" id="74">
-                    <rect key="frame" x="202" y="313" width="150" height="26"/>
+                    <rect key="frame" x="203" y="369" width="150" height="26"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <popUpButtonCell key="cell" type="push" title="Computer" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="77" id="75">
                         <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
@@ -165,16 +166,16 @@
                     </popUpButtonCell>
                 </popUpButton>
                 <textField verticalHuggingPriority="750" id="82">
-                    <rect key="frame" x="102" y="318" width="98" height="17"/>
+                    <rect key="frame" x="60" y="374" width="139" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Initial location:" id="83">
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="File browser location:" id="83">
                         <font key="font" metaFont="system"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
                 <popUpButton verticalHuggingPriority="750" id="84">
-                    <rect key="frame" x="202" y="233" width="150" height="26"/>
+                    <rect key="frame" x="203" y="249" width="150" height="26"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <popUpButtonCell key="cell" type="push" title="Left side" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="93" id="87">
                         <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
@@ -204,7 +205,7 @@
                     </connections>
                 </popUpButton>
                 <textField verticalHuggingPriority="750" id="85">
-                    <rect key="frame" x="60" y="238" width="140" height="17"/>
+                    <rect key="frame" x="59" y="254" width="140" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Show file browser on:" id="86">
                         <font key="font" metaFont="system"/>
@@ -212,8 +213,17 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
+                <textField verticalHuggingPriority="750" id="iDX-XT-3Hz">
+                    <rect key="frame" x="95" y="199" width="104" height="17"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Document tabs:" id="fUU-mg-NRT">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
                 <popUpButton verticalHuggingPriority="750" id="95">
-                    <rect key="frame" x="202" y="207" width="150" height="26"/>
+                    <rect key="frame" x="203" y="15" width="150" height="26"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <popUpButtonCell key="cell" type="push" title="Below text view" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="100" id="98">
                         <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
@@ -237,7 +247,7 @@
                     </connections>
                 </popUpButton>
                 <textField verticalHuggingPriority="750" id="96">
-                    <rect key="frame" x="46" y="212" width="154" height="17"/>
+                    <rect key="frame" x="45" y="20" width="154" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Show command output:" id="97">
                         <font key="font" metaFont="system"/>
@@ -246,16 +256,24 @@
                     </textFieldCell>
                 </textField>
                 <box autoresizesSubviews="NO" verticalHuggingPriority="750" title="Box" boxType="separator" titlePosition="noTitle" id="124">
-                    <rect key="frame" x="12" y="263" width="456" height="5"/>
+                    <rect key="frame" x="12" y="279" width="456" height="5"/>
+                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                    <color key="borderColor" white="0.0" alpha="0.41999999999999998" colorSpace="calibratedWhite"/>
+                    <color key="fillColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                    <font key="titleFont" metaFont="system"/>
+                </box>
+                <box autoresizesSubviews="NO" verticalHuggingPriority="750" title="Box" boxType="separator" titlePosition="noTitle" id="xzR-t3-M8W">
+                    <rect key="frame" x="12" y="219" width="456" height="5"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <color key="borderColor" white="0.0" alpha="0.41999999999999998" colorSpace="calibratedWhite"/>
                     <color key="fillColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                     <font key="titleFont" metaFont="system"/>
                 </box>
                 <button id="125">
-                    <rect key="frame" x="203" y="146" width="180" height="18"/>
+                    <rect key="frame" x="203" y="228" width="257" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <buttonCell key="cell" type="check" title="Auto-adjust window size" bezelStyle="regularSquare" imagePosition="left" alignment="left" state="on" inset="2" id="126">
+                    <string key="toolTip">When showing or hiding the file browser, the width of the window will be increased or decreased so that the document’s width remains the same.</string>
+                    <buttonCell key="cell" type="check" title="Adjust window when toggling display" bezelStyle="regularSquare" imagePosition="left" alignment="left" state="on" inset="2" id="126">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                         <font key="font" metaFont="system"/>
                     </buttonCell>
@@ -267,15 +285,37 @@
                         </binding>
                     </connections>
                 </button>
-                <button id="AHH-NX-VZc">
-                    <rect key="frame" x="202" y="126" width="275" height="18"/>
+                <button toolTip="When you change to another tab, the file browser will reveal and select the file representing the tab being switched to." id="AHH-NX-VZc">
+                    <rect key="frame" x="203" y="288" width="226" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <buttonCell key="cell" type="check" title="Auto-reveal open file in project browser" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="BO2-cb-8hv">
+                    <buttonCell key="cell" type="check" title="Keep current document selected" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="BO2-cb-8hv">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                         <font key="font" metaFont="system"/>
                     </buttonCell>
                     <connections>
                         <binding destination="-2" name="value" keyPath="autoRevealFile" id="Fdd-wC-W1n"/>
+                    </connections>
+                </button>
+                <button toolTip="With this enabled, the file browser will allow inline expansion of symbolic links." id="O8U-A0-T0y">
+                    <rect key="frame" x="203" y="328" width="183" height="18"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <buttonCell key="cell" type="check" title="Show links as expandable" bezelStyle="regularSquare" imagePosition="left" alignment="left" state="on" inset="2" id="HjH-aU-cx2">
+                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                        <font key="font" metaFont="system"/>
+                    </buttonCell>
+                    <connections>
+                        <binding destination="-2" name="value" keyPath="allowExpandingLinks" id="6B4-7B-EdT"/>
+                    </connections>
+                </button>
+                <button id="wpe-lT-aox">
+                    <rect key="frame" x="203" y="308" width="179" height="18"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <buttonCell key="cell" type="check" title="Open files on single click" bezelStyle="regularSquare" imagePosition="left" alignment="left" state="on" inset="2" id="EzO-Ef-D1M">
+                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                        <font key="font" metaFont="system"/>
+                    </buttonCell>
+                    <connections>
+                        <binding destination="-2" name="value" keyPath="fileBrowserSingleClickToOpen" id="MLI-EQ-wuS"/>
                     </connections>
                 </button>
             </subviews>

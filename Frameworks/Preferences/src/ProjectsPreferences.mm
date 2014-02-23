@@ -24,6 +24,10 @@
 			@"autoRevealFile"          : kUserDefaultsAutoRevealFileKey,
 			@"fileBrowserPlacement"    : kUserDefaultsFileBrowserPlacementKey,
 			@"htmlOutputPlacement"     : kUserDefaultsHTMLOutputPlacementKey,
+
+			@"allowExpandingLinks"          : kUserDefaultsAllowExpandingLinksKey,
+			@"fileBrowserSingleClickToOpen" : kUserDefaultsFileBrowserSingleClickToOpenKey,
+			@"disableTabReordering"         : kUserDefaultsDisableTabReorderingKey,
 		};
 
 		self.tmProperties = @{
