@@ -5,6 +5,7 @@
 #include <cf/cf.h>
 #include <io/path.h>
 #include <plist/uuid.h>
+#include <sysexits.h>
 
 static double const AppVersion  = 2.5;
 static size_t const AppRevision = APP_REVISION;
@@ -81,7 +82,7 @@ static void launch_app (bool disableUntitled)
 
 	FSRef appFSRef;
 	if(!find_app(&appFSRef, NULL))
-		abort();
+		exit(EX_UNAVAILABLE);
 
 	cf::array_t args(disableUntitled ? std::vector<std::string>{ "-disableNewDocumentAtStartup", "1" } : std::vector<std::string>{ });
 
@@ -90,7 +91,7 @@ static void launch_app (bool disableUntitled)
 	if(err != noErr)
 	{
 		fprintf(stderr, "Can’t launch TextMate.app (error %d)", (int)err);
-		abort();
+		exit(EX_UNAVAILABLE);
 	}
 }
 
@@ -100,7 +101,7 @@ static void install_auth_tool ()
 	{
 		std::string appStr = NULL_STR;
 		if(!find_app(NULL, &appStr))
-			abort();
+			exit(EX_UNAVAILABLE);
 
 		std::string toolPath = path::join(appStr, "Contents/Resources/PrivilegedTool");
 		char const* arg0 = toolPath.c_str();
@@ -108,7 +109,7 @@ static void install_auth_tool ()
 		if(access(arg0, X_OK) != 0)
 		{
 			fprintf(stderr, "No such executable file: ‘%s’\n", arg0);
-			abort();
+			exit(EX_UNAVAILABLE);
 		}
 
 		pid_t pid = vfork();
@@ -234,9 +235,9 @@ int main (int argc, char* argv[])
 			case 'h': usage(stdout);            return 0;
 			case 'v': version();                return 0;
 			case 's': server = true;            break;
-			case '?': /* unknown option */      return 1;
-			case ':': /* missing option */      return 1;
-			default:  usage(stderr);            return 1;
+			case '?': /* unknown option */      exit(EX_USAGE);
+			case ':': /* missing option */      exit(EX_USAGE);
+			default:  usage(stderr);            exit(EX_USAGE);
 		}
 	}
 
