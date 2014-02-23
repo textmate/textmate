@@ -1,4 +1,5 @@
 #include <plist/ascii.h>
+#include <sysexits.h>
 
 static double const AppVersion  = 2.1;
 static size_t const AppRevision = APP_REVISION;
@@ -36,7 +37,7 @@ static void parse_plist (FILE* fp, bool ascii, bool extended)
 	if(data.empty())
 	{
 		fprintf(stderr, "empty property list\n");
-		abort();
+		exit(EX_DATAERR);
 	}
 
 	if(ascii)
@@ -109,7 +110,7 @@ int main (int argc, char* const* argv)
 		else
 		{
 			perror("fopen");
-			abort();
+			exit(EX_NOINPUT);
 		}
 	}
 
