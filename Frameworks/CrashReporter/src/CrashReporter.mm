@@ -55,7 +55,7 @@ static std::string create_gzipped_file (std::string const& path)
 	return instance;
 }
 
-+ (void)initialize
+- (void)setupUserDefaultsContact:(id)sender
 {
 	NSString* name = NSFullUserName();
 	if(ABAddressBook* ab = [ABAddressBook sharedAddressBook])
@@ -126,6 +126,15 @@ static std::string create_gzipped_file (std::string const& path)
 		std::vector<std::string> shouldSend;
 		std::set_difference(canSend.begin(), canSend.end(), hasSent.begin(), hasSent.end(), back_inserter(shouldSend));
 
+		std::string __block contact;
+		if(!shouldSend.empty())
+		{
+			dispatch_sync(dispatch_get_main_queue(), ^{
+				[self setupUserDefaultsContact:self];
+				contact = to_s([[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsCrashReportsContactInfoKey]);
+			});
+		}
+
 		std::set<std::string> didSend;
 		for(auto report : shouldSend)
 		{
@@ -134,7 +143,7 @@ static std::string create_gzipped_file (std::string const& path)
 			{
 				std::map<std::string, std::string> payload, response;
 				payload["hardware"] = hardware_info(HW_MODEL) + "/" + hardware_info(HW_MACHINE) + "/" + hardware_info(HW_NCPU, true);
-				payload["contact"]  = to_s([[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsCrashReportsContactInfoKey]);
+				payload["contact"]  = contact;
 				payload["report"]   = "@" + gzippedReport;
 
 				long rc = post_to_server(to_s(aURL), payload, &response);

@@ -26,6 +26,8 @@
 {
 	if(self = [super initWithNibName:@"SoftwareUpdatePreferences" label:@"Software Update" image:[NSImage imageNamed:@"Software Update" inSameBundleAsClass:[self class]]])
 	{
+		[[CrashReporter sharedInstance] setupUserDefaultsContact:self];
+
 		[OakStringListTransformer createTransformerWithName:@"OakSoftwareUpdateChannelTransformer" andObjectsArray:@[ kSoftwareUpdateChannelRelease, kSoftwareUpdateChannelBeta ]];
 		[self bind:@"isChecking"  toObject:[SoftwareUpdate sharedInstance] withKeyPath:@"isChecking"  options:nil];
 		[self bind:@"lastPoll"    toObject:[SoftwareUpdate sharedInstance] withKeyPath:@"lastPoll"    options:nil];
