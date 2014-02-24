@@ -254,6 +254,8 @@ namespace ng
 
 			std::string const pad = orgRange.freehanded && orgRange.first.carry ? std::string(orgRange.first.carry, ' ') : "";
 			orgRange.first.carry = orgRange.last.carry = 0;
+			ng::range_t original(orgRange.first.index + pad.size(), orgRange.first.index + pad.size() + p1->second.size());
+			bool goodCaretMatch = false;
 
 			std::vector< std::pair<range_t, std::string> > const& real = snippets.replace(orgRange.first.index, orgRange.last.index, pad + p1->second);
 			iterate(p2, real)
@@ -263,10 +265,20 @@ namespace ng
 
 				size_t from = range.first.index + adjustment, to = range.last.index + adjustment;
 				size_t caret = buffer.replace(from, to, str);
-				if(range == ng::range_t(orgRange.first.index, orgRange.last.index))
-					res.push_back(range_t(from + pad.size(), caret, false, orgRange.freehanded, true));
+				if(snippets.empty() && range == ng::range_t(orgRange.first.index, orgRange.last.index))
+				{
+					original = range_t(from + pad.size(), caret, false, orgRange.freehanded, true);
+				}
+				else if(!snippets.empty() && !goodCaretMatch && snippets.current().min().index <= from + pad.size() && caret <= snippets.current().max().index)
+				{
+					// FIXME This is a heuristic to figure out which of the returned ranges correspond to our caret, as multiple ranges will be returned when the snippet has mirrors. Ideally we would update the API to return the new caret range. Though I am postponing that to a potential refactor that would also allow snippets to work with multiple carets.
+
+					original = ng::range_t(from + pad.size(), caret, false, orgRange.freehanded, true);
+					goodCaretMatch = snippets.current().min().index < from + pad.size() && caret < snippets.current().max().index || (from + pad.size() != caret && (snippets.current().min().index < from + pad.size() || caret < snippets.current().max().index));
+				}
 				adjustment += str.size() - (to - from);
 			}
+			res.push_back(original);
 		}
 		return res;
 	}
