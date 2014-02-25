@@ -7,7 +7,7 @@
 #include <plist/uuid.h>
 #include <sysexits.h>
 
-static double const AppVersion  = 2.5;
+static double const AppVersion  = 2.6;
 static size_t const AppRevision = APP_REVISION;
 
 static char const* socket_path ()
@@ -269,15 +269,14 @@ int main (int argc, char* argv[])
 
 	std::string defaultProject = projects.empty() ? (getenv("TM_PROJECT_UUID") ?: "") : projects.back();
 
-	if(files.empty() && !uuid && should_wait != true && getenv("TM_DOCUMENT_UUID"))
-		uuid = getenv("TM_DOCUMENT_UUID");
-
 	bool stdinIsAPipe = isatty(STDIN_FILENO) == 0;
-	if(files.empty() && !uuid && (should_wait == true || stdinIsAPipe))
-		files.push_back("-");
-
-	if(files.empty() && uuid)
-		files.push_back(kUUIDPrefix + to_s(uuid));
+	if(files.empty())
+	{
+		if(uuid)
+			files.push_back(kUUIDPrefix + to_s(uuid));
+		else if(should_wait == true || stdinIsAPipe)
+			files.push_back("-");
+	}
 
 	int fd = socket(AF_UNIX, SOCK_STREAM, 0);
 	struct sockaddr_un addr = { 0, AF_UNIX };
@@ -308,20 +307,29 @@ int main (int argc, char* argv[])
 			if(!stdinIsAPipe)
 				fprintf(stderr, "Reading from stdin, press ^D to stop\n");
 
+			ssize_t total = 0;
 			while(ssize_t len = read(STDIN_FILENO, buf, sizeof(buf)))
 			{
 				if(len == -1)
 					break;
 				write_key_pair(fd, "data", std::to_string(len));
+				total += len;
 				write(fd, buf, len);
 			}
 
-			bool stdoutIsAPipe = isatty(STDOUT_FILENO) == 0;
-			bool wait = should_wait == true || (should_wait != false && stdoutIsAPipe);
-			write_key_pair(fd, "display-name",        i < names.size()      ? names[i] : "untitled (stdin)");
-			write_key_pair(fd, "data-on-close",       wait && stdoutIsAPipe ? "yes" : "no");
-			write_key_pair(fd, "wait",                wait                  ? "yes" : "no");
-			write_key_pair(fd, "re-activate",         wait                  ? "yes" : "no");
+			if(stdinIsAPipe && total == 0 && should_wait != true && getenv("TM_DOCUMENT_UUID"))
+			{
+				write_key_pair(fd, "uuid", getenv("TM_DOCUMENT_UUID"));
+			}
+			else
+			{
+				bool stdoutIsAPipe = isatty(STDOUT_FILENO) == 0;
+				bool wait = should_wait == true || (should_wait != false && stdoutIsAPipe);
+				write_key_pair(fd, "display-name",        i < names.size()      ? names[i] : "untitled (stdin)");
+				write_key_pair(fd, "data-on-close",       wait && stdoutIsAPipe ? "yes" : "no");
+				write_key_pair(fd, "wait",                wait                  ? "yes" : "no");
+				write_key_pair(fd, "re-activate",         wait                  ? "yes" : "no");
+			}
 		}
 		else if(files[i].find(kUUIDPrefix) == 0)
  		{
