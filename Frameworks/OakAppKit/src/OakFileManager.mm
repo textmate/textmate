@@ -128,18 +128,22 @@ NSString* const OakFileManagerPathKey                      = @"directory";
 
 - (BOOL)doCreateCopy:(NSURL*)dstURL ofURL:(NSURL*)srcURL window:(NSWindow*)window
 {
-	BOOL res;
-	NSError* error;
-	if(res = [[NSFileManager defaultManager] copyItemAtURL:srcURL toURL:dstURL error:&error])
+	BOOL res = NO;
+
+	NSError* error = nil;
+	if(path::is_child([[[dstURL filePathURL] path] fileSystemRepresentation], [[[srcURL filePathURL] path] fileSystemRepresentation]))
+	{
+		error = [NSError errorWithDomain:NSPOSIXErrorDomain code:ENOTSUP userInfo:nil];
+	}
+	else if(res = [[NSFileManager defaultManager] copyItemAtURL:srcURL toURL:dstURL error:&error])
 	{
 		[[[window undoManager] prepareWithInvocationTarget:self] doRemoveCopy:dstURL ofURL:srcURL window:window];
 		[self playSound:OakSoundDidMoveItemUISound];
 		[self postDidChangeContentsOfDirectory:[[dstURL path] stringByDeletingLastPathComponent]];
 	}
-	else
-	{
+
+	if(!res && error)
 		[window presentError:error];
-	}
 	return res;
 }
 
