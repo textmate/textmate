@@ -14,7 +14,11 @@
 #import <oak/algorithm.h>
 #import <oak/duration.h>
 
-static NSString* const kUserDefaultsShowOpenFilesInFileChooserKey = @"showOpenFilesInFileChooser";
+static NSString* const kUserDefaultsFileChooserSourceIndexKey = @"fileChooserSourceIndex";
+
+NSUInteger const kFileChooserAllSourceIndex                = 0;
+NSUInteger const kFileChooserOpenDocumentsSourceIndex      = 1;
+NSUInteger const kFileChooserUncommittedChangesSourceIndex = 2;
 
 namespace
 {
@@ -199,8 +203,6 @@ static path::glob_list_t globs_for_path (std::string const& path)
 }
 @property (nonatomic) NSProgressIndicator* progressIndicator;
 
-@property (nonatomic) NSUInteger           sourceIndex;
-
 @property (nonatomic) BOOL                 polling;
 @property (nonatomic) NSTimer*             pollTimer;
 @property (nonatomic) CGFloat              pollInterval;
@@ -260,8 +262,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(24)-[statusTextField]-[itemCountTextField]-(4)-[progressIndicator]-(4)-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(2)-[searchField]-(8)-[aboveScopeBarDark][aboveScopeBarLight]-(3)-[scopeBar]-(4)-[topDivider][scrollView(>=50)][bottomDivider]-(4)-[statusTextField]-(5)-|" options:0 metrics:nil views:views]];
 
-		if([[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsShowOpenFilesInFileChooserKey])
-			self.sourceIndex = 1;
+		self.sourceIndex = [[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsFileChooserSourceIndexKey];
 
 		[self updateWindowTitle];
 
@@ -287,9 +288,9 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	NSString* src = nil;
 	switch(self.sourceIndex)
 	{
-		case 0: src = [self.path stringByAbbreviatingWithTildeInPath]; break;
-		case 1: src = @"Open Documents";                               break;
-		case 2: src = @"Uncommitted Documents";                        break;
+		case kFileChooserAllSourceIndex:                src = [self.path stringByAbbreviatingWithTildeInPath]; break;
+		case kFileChooserOpenDocumentsSourceIndex:      src = @"Open Documents";                               break;
+		case kFileChooserUncommittedChangesSourceIndex: src = @"Uncommitted Documents";                        break;
 	}
 	self.window.title = [NSString stringWithFormat:@"Go to File — %@", src];
 }
@@ -318,17 +319,16 @@ static path::glob_list_t globs_for_path (std::string const& path)
 
 - (void)setSourceIndex:(NSUInteger)newIndex
 {
-	if(_sourceIndex == newIndex)
-		return;
-
-	_sourceIndex = newIndex;
-	switch(newIndex)
+	if(_sourceIndex != newIndex)
 	{
-		case 0: self.onlyShowOpenDocuments = NO;  break;
-		case 1: self.onlyShowOpenDocuments = YES; break;
-		case 2: break;
+		_sourceIndex = newIndex;
+		[self updateWindowTitle];
+		[self reload];
+
+		if(_sourceIndex == 0)
+				[[NSUserDefaults standardUserDefaults] removeObjectForKey:kUserDefaultsFileChooserSourceIndexKey];
+		else	[[NSUserDefaults standardUserDefaults] setObject:@(_sourceIndex) forKey:kUserDefaultsFileChooserSourceIndexKey];
 	}
-	[self updateWindowTitle];
 }
 
 - (void)addRecordsForDocuments:(std::vector<document::document_ptr> const&)documents
@@ -474,7 +474,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 		return;
 	_path = aString;
 
-	if(_onlyShowOpenDocuments)
+	if(_sourceIndex != kFileChooserAllSourceIndex)
 		return;
 
 	[self shutdownScanner];
@@ -500,30 +500,29 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	[self updateWindowTitle];
 }
 
-- (void)setOnlyShowOpenDocuments:(BOOL)flag
-{
-	if(_onlyShowOpenDocuments == flag)
-		return;
-
-	_onlyShowOpenDocuments = flag;
-	[self reload];
-	[[NSUserDefaults standardUserDefaults] setObject:@(_onlyShowOpenDocuments) forKey:kUserDefaultsShowOpenFilesInFileChooserKey];
-}
-
 - (void)reload
 {
-	if(_onlyShowOpenDocuments)
+	switch(_sourceIndex)
 	{
-		[self shutdownScanner];
+		case kFileChooserAllSourceIndex:
+		{
+			NSString* path = _path;
+			_path = nil;
+			self.path = path;
+		}
+		break;
 
-		_records.clear();
-		[self addRecordsForDocuments:_openDocuments];
-	}
-	else
-	{
-		NSString* path = _path;
-		_path = nil;
-		self.path = path;
+		case kFileChooserOpenDocumentsSourceIndex:
+		{
+			[self shutdownScanner];
+
+			_records.clear();
+			[self addRecordsForDocuments:_openDocuments];
+		}
+		break;
+
+		case kFileChooserUncommittedChangesSourceIndex:
+		break;
 	}
 }
 
@@ -713,8 +712,8 @@ static path::glob_list_t globs_for_path (std::string const& path)
 {
 	if(self.window.isKeyWindow)
 	{
-		[[aMenu addItemWithTitle:@"All" action:@selector(takeSourceIndexFrom:) keyEquivalent:@"1"] setTag:0];
-		[[aMenu addItemWithTitle:@"Open Documents" action:@selector(takeSourceIndexFrom:) keyEquivalent:@"2"] setTag:1];
+		[[aMenu addItemWithTitle:@"All" action:@selector(takeSourceIndexFrom:) keyEquivalent:@"1"] setTag:kFileChooserAllSourceIndex];
+		[[aMenu addItemWithTitle:@"Open Documents" action:@selector(takeSourceIndexFrom:) keyEquivalent:@"2"] setTag:kFileChooserOpenDocumentsSourceIndex];
 	}
 	else
 	{
@@ -726,7 +725,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 {
 	BOOL activate = YES;
 	if([item action] == @selector(goToParentFolder:))
-		activate = _onlyShowOpenDocuments == NO && to_s(_path) != path::parent(to_s(_path));
+		activate = _sourceIndex == kFileChooserAllSourceIndex && to_s(_path) != path::parent(to_s(_path));
 	else if([item action] == @selector(takeSourceIndexFrom:))
 		[item setState:[item tag] == self.sourceIndex ? NSOnState : NSOffState];
 	return activate;
