@@ -1668,11 +1668,8 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 + (void)initialize
 {
-	static bool didLoad = false;
-	if(!didLoad)
-	{
-		didLoad = true;
-
+	static dispatch_once_t onceToken = 0;
+	dispatch_once(&onceToken, ^{
 		static std::string const KeyBindingLocations[] =
 		{
 			oak::application_t::support("KeyBindings.dict"),
@@ -1700,7 +1697,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 		[[NSUserDefaults standardUserDefaults] registerDefaults:@{
 			kUserDefaultsFontSmoothingKey : @(OTVFontSmoothingDisabledForDarkHiDPI),
 		}];
-	}
+	});
 
 	[NSApp registerServicesMenuSendTypes:@[ NSStringPboardType ] returnTypes:@[ NSStringPboardType ]];
 }

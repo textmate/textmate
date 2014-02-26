@@ -25,8 +25,11 @@
 
 + (void)initialize
 {
-	[OakStringListTransformer createTransformerWithName:@"OakLineEndingsTransformer" andObjectsArray:@[ @"\n", @"\r", @"\r\n" ]];
-	[OakStringListTransformer createTransformerWithName:@"OakLineEndingsListTransformer" andObjectsArray:@[ @"\n", @"\r", @"\r\n" ]];
+	static dispatch_once_t onceToken = 0;
+	dispatch_once(&onceToken, ^{
+		[OakStringListTransformer createTransformerWithName:@"OakLineEndingsTransformer" andObjectsArray:@[ @"\n", @"\r", @"\r\n" ]];
+		[OakStringListTransformer createTransformerWithName:@"OakLineEndingsListTransformer" andObjectsArray:@[ @"\n", @"\r", @"\r\n" ]];
+	});
 }
 
 - (id)initWithEncodingOptions:(encoding::type const&)someEncodingOptions
