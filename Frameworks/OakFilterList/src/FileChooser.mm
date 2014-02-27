@@ -228,7 +228,6 @@ static path::glob_list_t globs_for_path (std::string const& path)
 
 		OakScopeBarView* scopeBar = [OakScopeBarView new];
 		scopeBar.labels = @[ @"All", @"Open Documents", @"Uncommitted Documents" ];
-		[scopeBar.buttons[2] setEnabled:NO];
 
 		_progressIndicator = [[NSProgressIndicator alloc] initWithFrame:NSZeroRect];
 		_progressIndicator.style                = NSProgressIndicatorSpinningStyle;
@@ -454,6 +453,12 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	if(!_scmInfo)
 		return;
 
+	if(_sourceIndex == kFileChooserUncommittedChangesSourceIndex)
+	{
+		[self reloadSCMStatus];
+		return;
+	}
+
 	NSRange visibleRange = [self.tableView rowsInRect:[self.tableView visibleRect]];
 	for(NSUInteger row = visibleRange.location; row < NSMaxRange(visibleRange); ++row)
 	{
@@ -484,6 +489,8 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	_scmInfo.reset();
 	[self obtainSCMInfo];
 
+	if(_sourceIndex == kFileChooserUncommittedChangesSourceIndex)
+		[self reloadSCMStatus];
 	if(_sourceIndex != kFileChooserAllSourceIndex)
 		return;
 
@@ -536,8 +543,28 @@ static path::glob_list_t globs_for_path (std::string const& path)
 		break;
 
 		case kFileChooserUncommittedChangesSourceIndex:
+		{
+			[self shutdownScanner];
+			[self reloadSCMStatus];
+		}
 		break;
 	}
+}
+
+- (void)reloadSCMStatus
+{
+	std::vector<document::document_ptr> scmStatus;
+	if([self obtainSCMInfo])
+	{
+		for(auto pair : _scmInfo->status())
+		{
+			if(pair.second & (scm::status::modified|scm::status::added|scm::status::deleted|scm::status::conflicted))
+				scmStatus.push_back(document::create(pair.first));
+		}
+	}
+
+	_records.clear();
+	[self addRecordsForDocuments:scmStatus];
 }
 
 - (void)fetchScannerResults:(NSTimer*)aTimer
@@ -728,6 +755,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	{
 		[[aMenu addItemWithTitle:@"All" action:@selector(takeSourceIndexFrom:) keyEquivalent:@"1"] setTag:kFileChooserAllSourceIndex];
 		[[aMenu addItemWithTitle:@"Open Documents" action:@selector(takeSourceIndexFrom:) keyEquivalent:@"2"] setTag:kFileChooserOpenDocumentsSourceIndex];
+		[[aMenu addItemWithTitle:@"Uncommitted Documents" action:@selector(takeSourceIndexFrom:) keyEquivalent:@"3"] setTag:kFileChooserUncommittedChangesSourceIndex];
 	}
 	else
 	{
