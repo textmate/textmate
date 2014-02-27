@@ -312,9 +312,14 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 	BOOL res = YES;
 	if([self.managedObjectContext hasChanges])
 	{
-		NSError* error = nil;
-		if(!(res = [self.managedObjectContext save:&error]))
-			NSLog(@"failed to save context: %@", error);
+		@try {
+			NSError* error = nil;
+			if(!(res = [self.managedObjectContext save:&error]))
+				NSLog(@"failed to save context: %@", error);
+		}
+		@catch(NSException* e) {
+			NSRunAlertPanel(@"Failed Saving Clipboard History", @"CoreData threw the following exception: %@", @"Continue", nil, nil, e);
+		}
 	}
 	return res;
 }
