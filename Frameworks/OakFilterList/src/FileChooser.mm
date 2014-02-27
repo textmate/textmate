@@ -271,6 +271,13 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	return self;
 }
 
+- (void)showWindow:(id)sender
+{
+	if(_path && !_scmInfo)
+		[self obtainSCMInfo];
+	[super showWindow:sender];
+}
+
 - (void)windowWillClose:(NSNotification*)aNotification
 {
 	[self shutdownScanner];
@@ -474,6 +481,9 @@ static path::glob_list_t globs_for_path (std::string const& path)
 		return;
 	_path = aString;
 
+	_scmInfo.reset();
+	[self obtainSCMInfo];
+
 	if(_sourceIndex != kFileChooserAllSourceIndex)
 		return;
 
@@ -485,19 +495,23 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	[self addRecordsForDocuments:_openDocuments];
 	settings_t const settings = settings_for_path(NULL_STR, "", to_s(_path));
 	_scanner = std::make_shared<document::scanner_t>(to_s(_path), globs_for_path(to_s(_path)), settings.get(kSettingsFollowSymbolicLinksKey, false), false, false);
-	_scmInfo = scm::info(to_s(_path));
-	if(_scmInfo)
-	{
-		_scmInfo->add_callback(^(scm::info_t const& info){
-			[self updateSCMStatus];
-		});
-	}
 
 	_pollInterval = 0.01;
 	_pollTimer = [NSTimer scheduledTimerWithTimeInterval:_pollInterval target:self selector:@selector(fetchScannerResults:) userInfo:nil repeats:NO];
 	[_progressIndicator startAnimation:self];
 
 	[self updateWindowTitle];
+}
+
+- (scm::info_ptr)obtainSCMInfo
+{
+	if(!_scmInfo && (_scmInfo = scm::info(to_s(_path))))
+	{
+		_scmInfo->add_callback(^(scm::info_t const& info){
+			[self updateSCMStatus];
+		});
+	}
+	return _scmInfo;
 }
 
 - (void)reload
