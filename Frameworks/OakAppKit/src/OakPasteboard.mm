@@ -465,7 +465,7 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 	{
 		NSFetchRequest* request = [[NSFetchRequest alloc] init];
 		request.entity = [NSEntityDescription entityForName:@"PasteboardEntry" inManagedObjectContext:self.managedObjectContext];
-		request.predicate = [NSPredicate predicateWithFormat:@"pasteboard.name == %@ AND string == %@", self.name, aString];
+		request.predicate = [NSPredicate predicateWithFormat:@"pasteboard == %@ AND string == %@", self, aString];
 
 		NSError* error;
 		if(OakPasteboardEntry* entry = [[self.managedObjectContext executeFetchRequest:request error:&error] firstObject])
