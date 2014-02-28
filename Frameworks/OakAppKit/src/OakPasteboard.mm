@@ -22,15 +22,11 @@ NSString* const kUserDefaultsDisablePersistentClipboardHistory = @"disablePersis
 @interface OakPasteboardEntry ()
 @property (nonatomic) NSDate* date;
 @property (nonatomic) OakPasteboard* pasteboard;
-@end
-
-@interface OakPasteboardEntry (PrimitiveAccessors)
-- (NSString*)primitiveOptions;
-- (void)setPrimitiveOptions:(NSDictionary*)aDictionary;
+@property (nonatomic) NSDictionary* primitiveOptions;
 @end
 
 @implementation OakPasteboardEntry
-@dynamic string, options, date, pasteboard;
+@dynamic string, options, date, pasteboard, primitiveOptions;
 
 + (OakPasteboardEntry*)pasteboardEntryWithString:(NSString*)aString andOptions:(NSDictionary*)someOptions inContext:(NSManagedObjectContext*)context
 {
