@@ -89,6 +89,7 @@ NSString* const kUserDefaultsDisablePersistentClipboardHistory = @"disablePersis
 @property (nonatomic) NSString* name;
 @property (nonatomic) NSInteger changeCount;
 @property (nonatomic) BOOL needsSavePasteboardHistory;
+@property (nonatomic) OakPasteboardEntry* primitiveCurrentEntry;
 - (BOOL)avoidsDuplicates;
 - (void)checkForExternalPasteboardChanges;
 @end
@@ -151,7 +152,7 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 {
 	BOOL _needsSavePasteboardHistory;
 }
-@dynamic name, currentEntry, auxiliaryOptionsForCurrent;
+@dynamic name, currentEntry, auxiliaryOptionsForCurrent, primitiveCurrentEntry;
 @synthesize changeCount;
 
 + (void)initialize
@@ -387,28 +388,37 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 		}
 
 		NSString* onClipboard = [[self pasteboard] availableTypeFromArray:@[ NSStringPboardType ]] ? [[self pasteboard] stringForType:NSStringPboardType] : nil;
-		NSString* onStack = self.currentEntry.string;
+		NSString* inHistory = self.currentEntry.string;
 		self.changeCount = [[self pasteboard] changeCount];
-		if((onClipboard && !onStack) || (onClipboard && onStack && ![onStack isEqualToString:onClipboard]))
-		{
+		if((onClipboard && !inHistory) || (onClipboard && inHistory && ![inHistory isEqualToString:onClipboard]))
 			[self internalAddEntryWithString:onClipboard andOptions:[[self pasteboard] availableTypeFromArray:@[ OakPasteboardOptionsPboardType ]] ? [[self pasteboard] propertyListForType:OakPasteboardOptionsPboardType] : nil];
-			self.auxiliaryOptionsForCurrent = nil;
-			[[NSNotificationCenter defaultCenter] postNotificationName:OakPasteboardDidChangeNotification object:self];
-		}
 	}
 }
 
-- (void)didUpdateHistory
+- (void)setCurrentEntry:(OakPasteboardEntry*)newEntry
 {
-	if(OakPasteboardEntry* current = self.currentEntry)
-	{
-		[[self pasteboard] declareTypes:@[ NSStringPboardType, OakPasteboardOptionsPboardType ] owner:nil];
-		[[self pasteboard] setString:[current string] forType:NSStringPboardType];
-		[[self pasteboard] setPropertyList:[current options] forType:OakPasteboardOptionsPboardType];
-		self.changeCount = [[self pasteboard] changeCount];
-	}
+	D(DBF_Pasteboard, bug("%s\n", [newEntry.string UTF8String]););
+	if(self.primitiveCurrentEntry == newEntry)
+		return;
 
+	if(newEntry)
+	{
+		NSString* onClipboard = [[self pasteboard] availableTypeFromArray:@[ NSStringPboardType ]] ? [[self pasteboard] stringForType:NSStringPboardType] : nil;
+		if(!onClipboard || ![newEntry.string isEqualToString:onClipboard])
+		{
+			[[self pasteboard] declareTypes:@[ NSStringPboardType, OakPasteboardOptionsPboardType ] owner:nil];
+			[[self pasteboard] setString:newEntry.string forType:NSStringPboardType];
+			[[self pasteboard] setPropertyList:newEntry.options forType:OakPasteboardOptionsPboardType];
+		}
+		self.changeCount = [[self pasteboard] changeCount];
+		self.needsSavePasteboardHistory = YES;
+	}
 	self.auxiliaryOptionsForCurrent = nil;
+
+	[self willChangeValueForKey:@"currentEntry"];
+	[self setPrimitiveCurrentEntry:newEntry];
+	[self didChangeValueForKey:@"currentEntry"];
+
 	[[NSNotificationCenter defaultCenter] postNotificationName:OakPasteboardDidChangeNotification object:self];
 }
 
@@ -422,14 +432,8 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 	D(DBF_Pasteboard, bug("%s\n", [aString UTF8String]););
 	[self checkForExternalPasteboardChanges];
 	if(self.avoidsDuplicates && [self.currentEntry.string isEqual:aString])
-	{
-		self.currentEntry.date = [NSDate date];
-	}
-	else
-	{
-		[self internalAddEntryWithString:aString andOptions:someOptions];
-		[self didUpdateHistory];
-	}
+			self.currentEntry.date = [NSDate date];
+	else	[self internalAddEntryWithString:aString andOptions:someOptions];
 }
 
 - (void)savePasteboardHistory:(id)sender
@@ -483,7 +487,6 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 	OakPasteboardEntry* entry = [OakPasteboardEntry pasteboardEntryWithString:aString andOptions:someOptions inContext:self.managedObjectContext];
 	entry.pasteboard = self;
 	self.currentEntry = entry;
-	self.needsSavePasteboardHistory = YES;
 }
 
 - (OakPasteboardEntry*)previous
@@ -497,10 +500,7 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 	request.fetchLimit = 1;
 
 	if(OakPasteboardEntry* prev = [[self.managedObjectContext executeFetchRequest:request error:nullptr] firstObject])
-	{
 		self.currentEntry = prev;
-		[self didUpdateHistory];
-	}
 
 	return self.currentEntry;
 }
@@ -510,14 +510,11 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 	[self checkForExternalPasteboardChanges];
 
 	OakPasteboardEntry* res = self.currentEntry;
-	if(!res)
+	if(!res && [[self pasteboard] availableTypeFromArray:@[ NSStringPboardType ]])
 	{
-		if(NSString* onClipboard = [[self pasteboard] availableTypeFromArray:@[ NSStringPboardType ]] ? [[self pasteboard] stringForType:NSStringPboardType] : nil)
-		{
-			res = (OakPasteboardEntry*)[[NSManagedObject alloc] initWithEntity:[NSEntityDescription entityForName:@"PasteboardEntry" inManagedObjectContext:self.managedObjectContext] insertIntoManagedObjectContext:nil];
-			res.string  = onClipboard;
-			res.options = [[self pasteboard] availableTypeFromArray:@[ OakPasteboardOptionsPboardType ]] ? [[self pasteboard] propertyListForType:OakPasteboardOptionsPboardType] : nil;
-		}
+		res = (OakPasteboardEntry*)[[NSManagedObject alloc] initWithEntity:[NSEntityDescription entityForName:@"PasteboardEntry" inManagedObjectContext:self.managedObjectContext] insertIntoManagedObjectContext:nil];
+		res.string  = [[self pasteboard] stringForType:NSStringPboardType];
+		res.options = [[self pasteboard] availableTypeFromArray:@[ OakPasteboardOptionsPboardType ]] ? [[self pasteboard] propertyListForType:OakPasteboardOptionsPboardType] : nil;
 	}
 	return res;
 }
@@ -533,10 +530,7 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 	request.fetchLimit = 1;
 
 	if(OakPasteboardEntry* next = [[self.managedObjectContext executeFetchRequest:request error:nullptr] firstObject])
-	{
 		self.currentEntry = next;
-		[self didUpdateHistory];
-	}
 
 	return self.currentEntry;
 }
@@ -574,8 +568,6 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 	}
 
 	self.currentEntry = [[pasteboardSelector entries] objectAtIndex:selectedRow];
-	self.needsSavePasteboardHistory = YES;
-	[self didUpdateHistory];
 
 	return [pasteboardSelector shouldSendAction];
 }
