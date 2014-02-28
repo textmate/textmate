@@ -32,6 +32,7 @@ PUBLIC @interface OakPasteboard : NSManagedObject
 - (OakPasteboardEntry*)current;
 - (OakPasteboardEntry*)next;
 
+@property (nonatomic) OakPasteboardEntry* currentEntry;
 @property (nonatomic) NSDictionary* auxiliaryOptionsForCurrent;
 
 - (void)selectItemAtPosition:(NSPoint)aLocation andCall:(SEL)aSelector;
