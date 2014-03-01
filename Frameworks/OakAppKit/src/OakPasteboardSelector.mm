@@ -188,9 +188,10 @@ static size_t line_count (std::string const& text)
 		[tableView setDataSource:self];
 		[tableView setDelegate:self];
 		[tableView reloadData];
-		[tableView setUsesAlternatingRowBackgroundColors:YES];
+		[tableView setUsesAlternatingRowBackgroundColors:NO];
 		[[[tableView tableColumns] objectAtIndex:0] setDataCell:[OakPasteboardSelectorMultiLineCell cellWithMaxLines:3]];
-
+		[tableView setIntercellSpacing:NSMakeSize(5.0, 4.0)];
+		
 		NSResponder* nextResponder = [tableView nextResponder];
 		[tableView setNextResponder:self];
 		[self setNextResponder:nextResponder];
@@ -302,6 +303,7 @@ static size_t line_count (std::string const& text)
 	{
 		[self setShouldCascadeWindows:NO];
 		[self window];
+		self.window.backgroundColor = NSColor.whiteColor;
 	}
 	return self;
 }
