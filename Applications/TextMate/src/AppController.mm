@@ -154,6 +154,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 		NSInteger choice = NSRunAlertPanel(@"TextMate is Outdated!", @"You can get a new version from https://macromates.com/download.", @"Visit Website", nil, nil);
 		if(choice == NSAlertDefaultReturn) // "Visit Website"
 			[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://macromates.com/download"]];
+		[DocumentController disableSessionSave];
 		[NSApp terminate:self];
 	}
 	else if([currentDate laterDate:warningDate] == currentDate)
