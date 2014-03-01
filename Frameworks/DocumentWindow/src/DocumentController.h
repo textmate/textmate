@@ -20,6 +20,8 @@ PUBLIC @interface DocumentController : NSObject
 @property (nonatomic) NSSize                                     htmlOutputSize;
 
 + (BOOL)restoreSession;
++ (void)disableSessionSave;
++ (void)enableSessionSave;
 + (BOOL)saveSessionIncludingUntitledDocuments:(BOOL)includeUntitled;
 + (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication*)sender;
 

@@ -2252,6 +2252,9 @@ namespace
 
 static NSUInteger DisableSessionSavingCount = 0;
 
++ (void)disableSessionSave { ++DisableSessionSavingCount; }
++ (void)enableSessionSave  { --DisableSessionSavingCount; }
+
 + (BOOL)restoreSession
 {
 	BOOL res = NO;
