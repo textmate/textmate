@@ -20,8 +20,8 @@ static clipboard_t::entry_ptr to_entry (OakPasteboardEntry* src, BOOL includeFin
 
 	std::map<std::string, std::string> map;
 	plist::dictionary_t const& plist = plist::convert((__bridge CFDictionaryRef)src.options);
-	iterate(pair, plist)
-		plist::get_key_path(plist, pair->first, map[pair->first]);
+	for(auto const& pair : plist)
+		plist::get_key_path(plist, pair.first, map[pair.first]);
 
 	if(includeFindOptions)
 	{

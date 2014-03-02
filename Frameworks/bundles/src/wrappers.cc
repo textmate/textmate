@@ -19,9 +19,9 @@ namespace bundles
 	static std::vector<std::string> convert_locations (plist::array_t const& array)
 	{
 		std::vector<std::string> res;
-		iterate(it, array)
+		for(auto const& it : array)
 		{
-			if(std::string const* str = boost::get<std::string>(&*it))
+			if(std::string const* str = boost::get<std::string>(&it))
 				res.push_back(*str);
 		}
 		return res;
@@ -67,8 +67,8 @@ namespace bundles
 		else
 		{
 			fprintf(stderr, "no PATH!!!\n");
-			iterate(pair, environment)
-				fprintf(stderr, "%s = %s\n", pair->first.c_str(), pair->second.c_str());
+			for(auto const& pair : environment)
+				fprintf(stderr, "%s = %s\n", pair.first.c_str(), pair.second.c_str());
 		}
 		return res;
 	}
@@ -115,11 +115,11 @@ namespace bundles
 		plist::get_key_path(item->plist(), "settings.shellVariables", variables);
 
 		std::vector< std::pair<std::string, std::string> > res;
-		iterate(it, variables)
+		for(auto const& it : variables)
 		{
 			bool disabled;
 			std::string key, value;
-			if(!(plist::get_key_path(*it, "disabled", disabled) && disabled) && plist::get_key_path(*it, "name", key) && plist::get_key_path(*it, "value", value))
+			if(!(plist::get_key_path(it, "disabled", disabled) && disabled) && plist::get_key_path(it, "name", key) && plist::get_key_path(it, "value", value))
 				res.push_back(std::make_pair(key, value));
 		}
 		return res;
@@ -155,8 +155,8 @@ namespace bundles
 
 		std::vector<std::string> tmp;
 		std::set_difference(shouldUnset.begin(), shouldUnset.end(), didSet.begin(), didSet.end(), back_inserter(tmp));
-		iterate(key, tmp)
-			res.erase(*key);
+		for(auto const& key : tmp)
+			res.erase(key);
 
 		return res;
 	}
@@ -167,13 +167,13 @@ namespace bundles
 
 	plist::any_t value_for_setting (std::string const& setting, scope::context_t const& scope, item_ptr* match)
 	{
-		citerate(item, query(kFieldSettingName, setting, scope, kItemTypeSettings))
+		for(auto const& item : query(kFieldSettingName, setting, scope, kItemTypeSettings))
 		{
 			plist::any_t res;
-			if(plist::get_key_path((*item)->plist(), "settings." + setting, res))
+			if(plist::get_key_path(item->plist(), "settings." + setting, res))
 			{
 				if(match)
-					*match = *item;
+					*match = item;
 				return res;
 			}
 		}
@@ -199,12 +199,12 @@ namespace bundles
 	std::vector<item_ptr> grammars_for_path (std::string const& path)
 	{
 		std::multimap<ssize_t, item_ptr> ordering;
-		citerate(item, query(kFieldAny, NULL_STR, scope::wildcard, kItemTypeGrammar))
+		for(auto const& item : query(kFieldAny, NULL_STR, scope::wildcard, kItemTypeGrammar))
 		{
-			citerate(ext, (*item)->values_for_field(kFieldGrammarExtension))
+			for(auto const& ext : item->values_for_field(kFieldGrammarExtension))
 			{
-				if(ssize_t rank = path::rank(path, *ext))
-					ordering.emplace(rank, *item);
+				if(ssize_t rank = path::rank(path, ext))
+					ordering.emplace(rank, item);
 			}
 		}
 		return ordering.empty() ? std::vector<item_ptr>() : std::vector<item_ptr>(1, ordering.begin()->second);

@@ -79,8 +79,8 @@ struct document_view_callback_t : document::document_t::callback_t
 		}
 		else if(event == did_change_file_type)
 		{
-			citerate(item, bundles::query(bundles::kFieldGrammarScope, document->file_type()))
-				self.statusBar.grammarName = [NSString stringWithCxxString:(*item)->name()];
+			for(auto const& item : bundles::query(bundles::kFieldGrammarScope, document->file_type()))
+				self.statusBar.grammarName = [NSString stringWithCxxString:item->name()];
 		}
 		else if(event == did_change_indent_settings)
 		{
@@ -318,8 +318,8 @@ private:
 		document->add_callback(callback);
 		document->show();
 
-		citerate(item, bundles::query(bundles::kFieldGrammarScope, document->file_type()))
-			statusBar.grammarName = [NSString stringWithCxxString:(*item)->name()];
+		for(auto const& item : bundles::query(bundles::kFieldGrammarScope, document->file_type()))
+			statusBar.grammarName = [NSString stringWithCxxString:item->name()];
 		statusBar.tabSize  = document->buffer().indent().tab_size();
 		statusBar.softTabs = document->buffer().indent().soft_tabs();
 	}
@@ -744,11 +744,11 @@ static std::string const kSearchmarkType = "search";
 {
 	ng::buffer_t& buf = document->buffer();
 	std::map<size_t, std::string> const& marks = buf.get_marks(0, buf.size(), kBookmarkType);
-	iterate(pair, marks)
+	for(auto const& pair : marks)
 	{
-		size_t n = buf.convert(pair->first).line;
+		size_t n = buf.convert(pair.first).line;
 		NSMenuItem* item = [aMenu addItemWithTitle:[NSString stringWithCxxString:text::pad(n+1, 4) + ": " + buf.substr(buf.begin(n), buf.eol(n))] action:@selector(takeBookmarkFrom:) keyEquivalent:@""];
-		[item setRepresentedObject:[NSString stringWithCxxString:buf.convert(pair->first)]];
+		[item setRepresentedObject:[NSString stringWithCxxString:buf.convert(pair.first)]];
 	}
 
 	if(!marks.empty())
@@ -766,10 +766,10 @@ static std::string const kSearchmarkType = "search";
 	{
 		ng::buffer_t& buf = document->buffer();
 		std::map<size_t, std::string> const& marks = buf.get_marks(buf.begin(lineNumber), buf.eol(lineNumber), kBookmarkType);
-		iterate(pair, marks)
+		for(auto const& pair : marks)
 		{
-			if(pair->second == kBookmarkType)
-				return buf.remove_mark(buf.begin(lineNumber) + pair->first, pair->second);
+			if(pair.second == kBookmarkType)
+				return buf.remove_mark(buf.begin(lineNumber) + pair.first, pair.second);
 		}
 		buf.set_mark(buf.begin(lineNumber), kBookmarkType);
 	}
@@ -793,10 +793,10 @@ static std::string const kSearchmarkType = "search";
 
 	std::vector<size_t> toRemove;
 	std::map<size_t, std::string> const& marks = buf.get_marks(buf.begin(lineNumber), buf.eol(lineNumber), kBookmarkType);
-	iterate(pair, marks)
+	for(auto const& pair : marks)
 	{
-		if(pair->second == kBookmarkType)
-			toRemove.push_back(buf.begin(lineNumber) + pair->first);
+		if(pair.second == kBookmarkType)
+			toRemove.push_back(buf.begin(lineNumber) + pair.first);
 	}
 
 	if(toRemove.empty())
@@ -805,8 +805,8 @@ static std::string const kSearchmarkType = "search";
 	}
 	else
 	{
-		iterate(index, toRemove)
-			buf.remove_mark(*index, kBookmarkType);
+		for(auto const& index : toRemove)
+			buf.remove_mark(index, kBookmarkType);
 	}
 	[[NSNotificationCenter defaultCenter] postNotificationName:GVColumnDataSourceDidChange object:self];
 }

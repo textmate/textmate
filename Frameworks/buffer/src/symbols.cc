@@ -69,8 +69,8 @@ namespace
 		{
 			static regexp::pattern_t newline("\n");
 			std::string res = replace(str, newline, format_string::format_string_t(" "));
-			iterate(it, records)
-				res = replace(res, it->regexp, it->format, it->repeat);
+			for(auto const& it : records)
+				res = replace(res, it.regexp, it.format, it.repeat);
 			res = replace(res, newline, format_string::format_string_t("↵"));
 
 			return res;
@@ -106,13 +106,13 @@ namespace ng
 			all_scopes.insert(all_scopes.end(), it->second);
 
 		std::map<scope::scope_t, transform_t> transforms;
-		iterate(it, all_scopes)
+		for(auto const& it : all_scopes)
 		{
-			if(plist::is_true(bundles::value_for_setting("showInSymbolList", *it)))
+			if(plist::is_true(bundles::value_for_setting("showInSymbolList", it)))
 			{
-				plist::any_t const& symbolTransformationValue = bundles::value_for_setting("symbolTransformation", *it);
+				plist::any_t const& symbolTransformationValue = bundles::value_for_setting("symbolTransformation", it);
 				std::string const* symbolTransformation = boost::get<std::string>(&symbolTransformationValue);
-				transforms.emplace(*it, transform_t(symbolTransformation ? *symbolTransformation : ""));
+				transforms.emplace(it, transform_t(symbolTransformation ? *symbolTransformation : ""));
 			}
 		}
 
@@ -143,8 +143,8 @@ namespace ng
 	std::map<size_t, std::string> symbols_t::symbols (buffer_t const* buffer) const
 	{
 		std::map<size_t, std::string> res;
-		iterate(it, _symbols)
-			res.insert(*it);
+		for(auto const& it : _symbols)
+			res.insert(it);
 		return res;
 	}
 

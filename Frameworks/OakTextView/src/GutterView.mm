@@ -95,10 +95,10 @@ struct data_source_t
 - (void)dealloc
 {
 	D(DBF_GutterView, bug("\n"););
-	iterate(it, columnDataSources)
+	for(auto const& it : columnDataSources)
 	{
-		if(it->datasource)
-			[[NSNotificationCenter defaultCenter] removeObserver:self name:GVColumnDataSourceDidChange object:it->datasource];
+		if(it.datasource)
+			[[NSNotificationCenter defaultCenter] removeObserver:self name:GVColumnDataSourceDidChange object:it.datasource];
 	}
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 }
@@ -108,9 +108,9 @@ struct data_source_t
 	backgroundRects.clear();
 	borderRects.clear();
 
-	citerate(range, text::selection_t(highlightedRange))
+	for(auto const& range : text::selection_t(highlightedRange))
 	{
-		auto from = range->min(), to = range->max();
+		auto from = range.min(), to = range.max();
 		CGFloat firstY = [self.delegate lineFragmentForLine:from.line column:from.column].firstY;
 		auto fragment = [self.delegate lineFragmentForLine:to.line column:to.column];
 		CGFloat lastY = to.column == 0 && from.line != to.line ? fragment.firstY : fragment.lastY;
@@ -138,8 +138,8 @@ struct data_source_t
 
 	OakRectSymmetricDifference(oldBackgroundRects, backgroundRects,    back_inserter(refreshRects));
 	OakRectSymmetricDifference(oldBorderRects,     borderRects,        back_inserter(refreshRects));
-	iterate(rect, refreshRects)
-		[self setNeedsDisplayInRect:*rect];
+	for(auto const& rect : refreshRects)
+		[self setNeedsDisplayInRect:rect];
 }
 
 - (void)setPartnerView:(NSView*)aView
@@ -206,10 +206,10 @@ struct data_source_t
 
 - (data_source_t*)columnWithIdentifier:(std::string const&)identifier
 {
-	iterate(it, columnDataSources)
+	for(auto& it : columnDataSources)
 	{
-		if(it->identifier == identifier)
-			return &(*it);
+		if(it.identifier == identifier)
+			return &it;
 	}
 	ASSERT(false);
 	return NULL;
@@ -218,10 +218,10 @@ struct data_source_t
 - (std::vector<data_source_t>)visibleColumnDataSources
 {
 	std::vector<data_source_t> visibleColumnDataSources;
-	iterate(it, columnDataSources)
+	for(auto const& it : columnDataSources)
 	{
-		if([self visibilityForColumnWithIdentifier:[NSString stringWithCxxString:it->identifier]])
-			visibleColumnDataSources.push_back(*it);
+		if([self visibilityForColumnWithIdentifier:[NSString stringWithCxxString:it.identifier]])
+			visibleColumnDataSources.push_back(it);
 	}
 	return visibleColumnDataSources;
 }
@@ -322,12 +322,12 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 	[self setupSelectionRects];
 
 	[self.selectionBackgroundColor set];
-	iterate(rect, backgroundRects)
-		NSRectFillUsingOperation(NSIntersectionRect(*rect, NSIntersectionRect(aRect, self.frame)), NSCompositeSourceOver);
+	for(auto const& rect : backgroundRects)
+		NSRectFillUsingOperation(NSIntersectionRect(rect, NSIntersectionRect(aRect, self.frame)), NSCompositeSourceOver);
 
 	[self.selectionBorderColor set];
-	iterate(rect, borderRects)
-		NSRectFillUsingOperation(NSIntersectionRect(*rect, NSIntersectionRect(aRect, self.frame)), NSCompositeSourceOver);
+	for(auto const& rect : borderRects)
+		NSRectFillUsingOperation(NSIntersectionRect(rect, NSIntersectionRect(aRect, self.frame)), NSCompositeSourceOver);
 
 	std::pair<NSUInteger, NSUInteger> prevLine(NSNotFound, 0);
 	for(CGFloat y = NSMinY(aRect); y < NSMaxY(aRect); )
@@ -338,13 +338,13 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 		prevLine = std::make_pair(record.lineNumber, record.softlineOffset);
 
 		BOOL selectedRow = NO;
-		iterate(rect, backgroundRects)
-			selectedRow = selectedRow || NSIntersectsRect(*rect, NSMakeRect(0, record.firstY, CGRectGetWidth(self.frame), record.lastY - record.firstY));
+		for(auto const& rect : backgroundRects)
+			selectedRow = selectedRow || NSIntersectsRect(rect, NSMakeRect(0, record.firstY, CGRectGetWidth(self.frame), record.lastY - record.firstY));
 
-		citerate(dataSource, [self visibleColumnDataSources])
+		for(auto const& dataSource : [self visibleColumnDataSources])
 		{
-			NSRect columnRect = NSMakeRect(dataSource->x0, record.firstY, dataSource->width, record.lastY - record.firstY);
-			if(dataSource->identifier == GVLineNumbersColumnIdentifier.UTF8String)
+			NSRect columnRect = NSMakeRect(dataSource.x0, record.firstY, dataSource.width, record.lastY - record.firstY);
+			if(dataSource.identifier == GVLineNumbersColumnIdentifier.UTF8String)
 			{
 				NSColor* textColor = selectedRow ? self.selectionForegroundColor : self.foregroundColor;
 				DrawText(record.softlineOffset == 0 ? std::to_string(record.lineNumber + 1) : "·", columnRect, NSMinY(columnRect) + record.baseline, self.lineNumberFont, textColor);
@@ -361,7 +361,7 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 				else if(isHoveringRect)                [self.iconHoverColor            set];
 				else                                   [self.iconColor                 set];
 
-				NSImage* image = [self imageForColumn:dataSource->identifier atLine:record.lineNumber hovering:isHoveringRect && NSEqualPoints(mouseDownAtPoint, NSMakePoint(-1, -1)) pressed:isHoveringRect && isDownInRect];
+				NSImage* image = [self imageForColumn:dataSource.identifier atLine:record.lineNumber hovering:isHoveringRect && NSEqualPoints(mouseDownAtPoint, NSMakePoint(-1, -1)) pressed:isHoveringRect && isDownInRect];
 				if([image size].height > 0 && [image size].width > 0)
 				{
 					// The placement of the center of image is aligned with the center of the capHeight.
@@ -398,18 +398,18 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 	static const CGFloat columnPadding = 1;
 
 	CGFloat currentX = 0, totalWidth = 0;
-	iterate(it, columnDataSources)
+	for(auto& it : columnDataSources)
 	{
-		it->x0 = currentX;
-		if([self visibilityForColumnWithIdentifier:[NSString stringWithCxxString:it->identifier]])
+		it.x0 = currentX;
+		if([self visibilityForColumnWithIdentifier:[NSString stringWithCxxString:it.identifier]])
 		{
-			it->width   = [self widthForColumnWithIdentifier:it->identifier];
-			totalWidth += it->width + columnPadding;
-			currentX   += it->width + columnPadding;
+			it.width   = [self widthForColumnWithIdentifier:it.identifier];
+			totalWidth += it.width + columnPadding;
+			currentX   += it.width + columnPadding;
 		}
 		else
 		{
-			it->width = 0;
+			it.width = 0;
 		}
 	}
 
@@ -435,12 +435,12 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 	GVLineRecord record = [self.delegate lineRecordForPosition:aPoint.y];
 	if(record.lineNumber != NSNotFound && record.softlineOffset == 0)
 	{
-		citerate(dataSource, [self visibleColumnDataSources])
+		for(auto const& dataSource : [self visibleColumnDataSources])
 		{
-			if(dataSource->identifier == [GVLineNumbersColumnIdentifier UTF8String])
+			if(dataSource.identifier == [GVLineNumbersColumnIdentifier UTF8String])
 				continue;
 
-			NSRect columnRect = NSMakeRect(dataSource->x0, record.firstY, dataSource->width, record.lastY - record.firstY);
+			NSRect columnRect = NSMakeRect(dataSource.x0, record.firstY, dataSource.width, record.lastY - record.firstY);
 			if(NSPointInRect(aPoint, columnRect))
 				return columnRect;
 		}
@@ -468,11 +468,11 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 		if(NSEqualRects(columnRect, [self columnRectForPoint:mouseHoveringAtPoint]))
 		{
 			GVLineRecord record = [self.delegate lineRecordForPosition:mouseDownAtPoint.y];
-			citerate(dataSource, [self visibleColumnDataSources])
+			for(auto const& dataSource : [self visibleColumnDataSources])
 			{
-				NSRect columnRect = NSMakeRect(dataSource->x0, record.firstY, dataSource->width, record.lastY - record.firstY);
+				NSRect columnRect = NSMakeRect(dataSource.x0, record.firstY, dataSource.width, record.lastY - record.firstY);
 				if(NSPointInRect(mouseDownAtPoint, columnRect))
-					[dataSource->delegate userDidClickColumnWithIdentifier:[NSString stringWithCxxString:dataSource->identifier] atLine:record.lineNumber];
+					[dataSource.delegate userDidClickColumnWithIdentifier:[NSString stringWithCxxString:dataSource.identifier] atLine:record.lineNumber];
 			}
 		}
 		else

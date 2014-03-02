@@ -45,8 +45,8 @@ static std::string search (std::string const& needle, std::string haystack, find
 static std::string matches (ng::buffer_t const& buffer, std::string const& str, find::options_t options = find::none, ng::ranges_t const& ranges = ng::ranges_t())
 {
 	ng::ranges_t res;
-	citerate(pair, ng::find(buffer, ranges, str, options | (ranges.empty() ? find::all_matches : find::none)))
-		res.push_back(pair->first);
+	for(auto const& pair : ng::find(buffer, ranges, str, options | (ranges.empty() ? find::all_matches : find::none)))
+		res.push_back(pair.first);
 	return to_s(buffer, res);
 }
 

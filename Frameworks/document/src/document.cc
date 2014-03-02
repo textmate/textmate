@@ -106,9 +106,9 @@ static std::multimap<text::range_t, document::document_t::mark_t> parse_marks (s
 		plist::any_t const& plist = plist::parse(str);
 		if(plist::array_t const* array = boost::get<plist::array_t>(&plist))
 		{
-			iterate(bm, *array)
+			for(auto const& bm : *array)
 			{
-				if(std::string const* str = boost::get<std::string>(&*bm))
+				if(std::string const* str = boost::get<std::string>(&bm))
 					marks.emplace(*str, "bookmark");
 			}
 		}
@@ -466,9 +466,9 @@ namespace document
 				if(plist::get_key_path(plist, "paths", paths))
 				{
 					oak::date_t t = oak::date_t::now();
-					iterate(path, paths)
+					for(auto const& path : paths)
 					{
-						if(std::string const* str = boost::get<std::string>(&*path))
+						if(std::string const* str = boost::get<std::string>(&path))
 							map.emplace(*str, t - (1.0 + map.size()));
 					}
 				}
@@ -478,8 +478,8 @@ namespace document
 		void save () const
 		{
 			std::map<oak::date_t, std::string> sorted;
-			iterate(item, map)
-				sorted.emplace(item->second, item->first);
+			for(auto const& item : map)
+				sorted.emplace(item.second, item.first);
 
 			std::map< std::string, std::vector<std::string> > plist;
 			std::vector<std::string>& paths = plist["paths"];
@@ -605,9 +605,9 @@ namespace document
 		D(DBF_Document, bug("%s, %s\n", display_name().c_str(), _file_type.c_str()););
 		if(_file_type != NULL_STR)
 		{
-			citerate(item, bundles::query(bundles::kFieldGrammarScope, _file_type, scope::wildcard, bundles::kItemTypeGrammar))
+			for(auto const& item : bundles::query(bundles::kFieldGrammarScope, _file_type, scope::wildcard, bundles::kItemTypeGrammar))
 			{
-				_buffer->set_grammar(*item);
+				_buffer->set_grammar(item);
 				break;
 			}
 		}
@@ -1248,8 +1248,8 @@ namespace document
 
 	static void copy_marks (ng::buffer_t& buf, std::multimap<text::range_t, document_t::mark_t> const& marks)
 	{
-		iterate(pair, marks)
-			buf.set_mark(cap(buf, pair->first.from).index, pair->second.type);
+		for(auto const& pair : marks)
+			buf.set_mark(cap(buf, pair.first.from).index, pair.second.type);
 	}
 
 	void document_t::setup_marks (std::string const& src, ng::buffer_t& buf) const
@@ -1270,8 +1270,8 @@ namespace document
 		if(_buffer)
 		{
 			std::multimap<text::range_t, document_t::mark_t> res;
-			citerate(pair, _buffer->get_marks(0, _buffer->size()))
-				res.emplace(_buffer->convert(pair->first), pair->second);
+			for(auto const& pair : _buffer->get_marks(0, _buffer->size()))
+				res.emplace(_buffer->convert(pair.first), pair.second);
 			return res;
 		}
 		return document::marks.get(_path);
@@ -1304,10 +1304,10 @@ namespace document
 			std::multimap<text::range_t, mark_t> newMarks;
 			if(typeToClear != NULL_STR)
 			{
-				iterate(it, _marks)
+				for(auto const& it : _marks)
 				{
-					if(it->second.type != typeToClear)
-						newMarks.insert(*it);
+					if(it.second.type != typeToClear)
+						newMarks.insert(it);
 				}
 			}
 
@@ -1321,19 +1321,19 @@ namespace document
 		std::vector<std::string> v;
 		if(_buffer)
 		{
-			citerate(pair, _buffer->get_marks(0, _buffer->size()))
+			for(auto const& pair : _buffer->get_marks(0, _buffer->size()))
 			{
-				if(pair->second == "bookmark")
-					v.push_back(text::format("'%s'", std::string(_buffer->convert(pair->first)).c_str()));
+				if(pair.second == "bookmark")
+					v.push_back(text::format("'%s'", std::string(_buffer->convert(pair.first)).c_str()));
 			}
 		}
 		else
 		{
 			load_marks(_path);
-			iterate(mark, _marks)
+			for(auto const& mark : _marks)
 			{
-				if(mark->second.type == "bookmark")
-					v.push_back(text::format("'%s'", std::string(mark->first).c_str()));
+				if(mark.second.type == "bookmark")
+					v.push_back(text::format("'%s'", std::string(mark.first).c_str()));
 			}
 		}
 		return v.empty() ? NULL_STR : "( " + text::join(v, ", ") + " )";
@@ -1351,8 +1351,8 @@ namespace document
 		_buffer->wait_for_repair();
 
 		std::map<text::pos_t, std::string> res;
-		citerate(pair, _buffer->symbols())
-			res.emplace(_buffer->convert(pair->first), pair->second);
+		for(auto const& pair : _buffer->symbols())
+			res.emplace(_buffer->convert(pair.first), pair.second);
 		return res;
 	}
 
@@ -1443,31 +1443,31 @@ namespace document
 
 			std::vector<std::string> newDirs;
 			std::multimap<std::string, inode_t, text::less_t> files;
-			citerate(it, path::entries(dir))
+			for(auto const& it : path::entries(dir))
 			{
 				if(should_stop_flag)
 					return;
 
-				std::string const& path = path::join(dir, (*it)->d_name);
-				if((*it)->d_type == DT_DIR)
+				std::string const& path = path::join(dir, it->d_name);
+				if(it->d_type == DT_DIR)
 				{
 					if(glob.exclude(path, path::kPathItemDirectory))
 						continue;
 
-					if(seen_paths.emplace(buf.st_dev, (*it)->d_ino).second)
+					if(seen_paths.emplace(buf.st_dev, it->d_ino).second)
 							newDirs.push_back(path);
 					else	D(DBF_Document_Scanner, bug("skip known path: ‘%s’\n", path.c_str()););
 				}
-				else if((*it)->d_type == DT_REG)
+				else if(it->d_type == DT_REG)
 				{
 					if(glob.exclude(path, path::kPathItemFile))
 						continue;
 
-					if(seen_paths.emplace(buf.st_dev, (*it)->d_ino).second)
-							files.emplace(path, inode_t(buf.st_dev, (*it)->d_ino, path));
+					if(seen_paths.emplace(buf.st_dev, it->d_ino).second)
+							files.emplace(path, inode_t(buf.st_dev, it->d_ino, path));
 					else	D(DBF_Document_Scanner, bug("skip known path: ‘%s’\n", path.c_str()););
 				}
-				else if((*it)->d_type == DT_LNK)
+				else if(it->d_type == DT_LNK)
 				{
 					links.push_back(path); // handle later since link may point to another device plus if link is “local” and will be seen later, we reported the local path rather than this link
 				}
@@ -1478,9 +1478,9 @@ namespace document
 
 			if(dirs.empty())
 			{
-				iterate(link, links)
+				for(auto const& link : links)
 				{
-					std::string path = path::resolve(*link);
+					std::string path = path::resolve(link);
 					if(lstat(path.c_str(), &buf) != -1)
 					{
 						if(S_ISDIR(buf.st_mode) && follow_links && seen_paths.emplace(buf.st_dev, buf.st_ino).second)
@@ -1488,7 +1488,7 @@ namespace document
 							if(glob.exclude(path, path::kPathItemDirectory))
 								continue;
 
-							D(DBF_Document_Scanner, bug("follow link: %s → %s\n", link->c_str(), path.c_str()););
+							D(DBF_Document_Scanner, bug("follow link: %s → %s\n", link.c_str(), path.c_str()););
 							dirs.push_back(path);
 						}
 						else if(S_ISREG(buf.st_mode))
@@ -1503,15 +1503,15 @@ namespace document
 					}
 					else
 					{
-						perror(text::format("lstat(“%s” → “%s”))", link->c_str(), path.c_str()).c_str());
+						perror(text::format("lstat(“%s” → “%s”))", link.c_str(), path.c_str()).c_str());
 					}
 				}
 				links.clear();
 			}
 
 			pthread_mutex_lock(&mutex);
-			iterate(file, files)
-				documents.push_back(document::create(file->first, file->second));
+			for(auto const& file : files)
+				documents.push_back(document::create(file.first, file.second));
 			pthread_mutex_unlock(&mutex);
 		}
 	}

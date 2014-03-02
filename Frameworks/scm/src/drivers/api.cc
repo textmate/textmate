@@ -23,20 +23,20 @@ namespace scm
 		std::map<std::string, std::string>::const_iterator pathList = variables.find("PATH");
 		if(pathList != variables.end())
 		{
-			citerate(path, text::tokenize(pathList->second.begin(), pathList->second.end(), ':'))
-				candidates.push_back(path::join(*path, name));
+			for(auto const& path : text::tokenize(pathList->second.begin(), pathList->second.end(), ':'))
+				candidates.push_back(path::join(path, name));
 		}
 
 		if(char const* pathList = getenv("PATH"))
 		{
-			citerate(path, text::tokenize(pathList, pathList + strlen(pathList), ':'))
-				candidates.push_back(path::join(*path, name));
+			for(auto const& path : text::tokenize(pathList, pathList + strlen(pathList), ':'))
+				candidates.push_back(path::join(path, name));
 		}
 
-		iterate(path, candidates)
+		for(auto const& path : candidates)
 		{
-			if(path::is_executable(*path))
-				return *path;
+			if(path::is_executable(path))
+				return path;
 		}
 
 		return NULL_STR;
@@ -77,13 +77,13 @@ namespace scm
 		static driver_t* const drivers[] = { git_driver(), hg_driver(), p4_driver(), svn_driver() };
 		for(std::string cwd = path; cwd != "/"; cwd = path::parent(cwd))
 		{
-			iterate(driver, drivers)
+			for(auto const& driver : drivers)
 			{
-				if(*driver && (*driver)->has_info_for_directory(cwd))
+				if(driver && driver->has_info_for_directory(cwd))
 				{
 					if(wcPath)
 						*wcPath = cwd;
-					return *driver;
+					return driver;
 				}
 			}
 		}

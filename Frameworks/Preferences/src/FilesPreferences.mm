@@ -53,10 +53,10 @@
 	[unknownDocumentTypesMenu addItem:[NSMenuItem separatorItem]];
 
 	std::multimap<std::string, bundles::item_ptr, text::less_t> grammars;
-	citerate(item, bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeGrammar))
+	for(auto const& item : bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeGrammar))
 	{
-		if(!(*item)->hidden_from_user())
-			grammars.emplace((*item)->name(), *item);
+		if(!item->hidden_from_user())
+			grammars.emplace(item->name(), item);
 	}
 
 	if(!grammars.empty())
@@ -64,20 +64,20 @@
 		std::string const defaultNewFileType     = settings_t::raw_get(kSettingsFileTypeKey, "attr.untitled");
 		std::string const defaultUnknownFileType = settings_t::raw_get(kSettingsFileTypeKey, "attr.file.unknown-type");
 
-		iterate(pair, grammars)
+		for(auto const& pair : grammars)
 		{
-			std::string const& fileType = pair->second->value_for_field(bundles::kFieldGrammarScope);
+			std::string const& fileType = pair.second->value_for_field(bundles::kFieldGrammarScope);
 			if(fileType == NULL_STR)
 				continue;
 
-			NSMenuItem* item = [newDocumentTypesMenu addItemWithTitle:[NSString stringWithCxxString:pair->first] action:@selector(selectNewFileType:) keyEquivalent:@""];
+			NSMenuItem* item = [newDocumentTypesMenu addItemWithTitle:[NSString stringWithCxxString:pair.first] action:@selector(selectNewFileType:) keyEquivalent:@""];
 			[item setRepresentedObject:[NSString stringWithCxxString:fileType]];
 			[item setTarget:self];
 
 			if(fileType == defaultNewFileType)
 				[newDocumentTypesPopUp selectItem:item];
 
-			item = [unknownDocumentTypesMenu addItemWithTitle:[NSString stringWithCxxString:pair->first] action:@selector(selectUnknownFileType:) keyEquivalent:@""];
+			item = [unknownDocumentTypesMenu addItemWithTitle:[NSString stringWithCxxString:pair.first] action:@selector(selectUnknownFileType:) keyEquivalent:@""];
 			[item setRepresentedObject:[NSString stringWithCxxString:fileType]];
 			[item setTarget:self];
 

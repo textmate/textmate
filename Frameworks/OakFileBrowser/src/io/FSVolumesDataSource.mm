@@ -9,9 +9,9 @@
 - (NSArray*)volumeList
 {
 	NSMutableArray* volumes = [NSMutableArray new];
-	citerate(volume, path::volumes())
+	for(auto const& volume : path::volumes())
 	{
-		NSURL* url = [NSURL fileURLWithPath:[NSString stringWithCxxString:*volume] isDirectory:YES];
+		NSURL* url = [NSURL fileURLWithPath:[NSString stringWithCxxString:volume] isDirectory:YES];
 		FSItem* item = [FSItem itemWithURL:url];
 		item.target = url;
 		item.leaf   = YES;

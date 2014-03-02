@@ -160,14 +160,14 @@ namespace oak
 		pthread_mutex_unlock(&results_mutex);
 
 		std::lock_guard<std::mutex> lock(client_lock);
-		iterate(it, offload)
+		for(auto const& it : offload)
 		{
-			typename std::map<size_t, T*>::iterator client = client_to_callback.find(it->first);
+			typename std::map<size_t, T*>::iterator client = client_to_callback.find(it.first);
 			if(client != client_to_callback.end())
 			{
 				T* obj = client->second;
 				client_lock.unlock();
-				obj->handle_reply(it->second);
+				obj->handle_reply(it.second);
 				client_lock.lock();
 			}
 		}

@@ -343,15 +343,15 @@ OAK_DEBUG_VAR(Find_FolderSearch);
 	if(!matches.empty())
 	{
 		[self willChangeValueForKey:@"countOfMatches"];
-		iterate(pair, matches)
+		for(auto const& pair : matches)
 		{
-			NSString* uuid = [NSString stringWithCxxString:pair->first->identifier()];
+			NSString* uuid = [NSString stringWithCxxString:pair.first->identifier()];
 			if(![matchInfo objectForKey:uuid])
 			{
 				[matchInfo setObject:[NSMutableArray array] forKey:uuid];
-				[matchingDocuments addObject:[[FFMatch alloc] initWithDocument:pair->first]];
+				[matchingDocuments addObject:[[FFMatch alloc] initWithDocument:pair.first]];
 			}
-			FFMatch* match = [[FFMatch alloc] initWithMatch:pair->second];
+			FFMatch* match = [[FFMatch alloc] initWithMatch:pair.second];
 			[[matchInfo objectForKey:uuid] addObject:match];
 			if(match.match.binary)
 				[replacementMatchesToSkip addObject:match];

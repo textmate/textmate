@@ -160,8 +160,8 @@ namespace find
 
 		if(search.path == find::folder_scan_settings_t::open_files)
 		{
-			citerate(doc, document::scanner_t::open_documents())
-				scan_document(*doc);
+			for(auto const& doc : document::scanner_t::open_documents())
+				scan_document(doc);
 			is_running_flag = false;
 			return;
 		}
@@ -174,10 +174,10 @@ namespace find
 			isRunning = scanner.is_running();
 
 			std::vector<document::document_ptr> const& documents = scanner.accept_documents();
-			iterate(doc, documents)
+			for(auto const& doc : documents)
 			{
-				if(!should_stop_flag && (*doc)->path() != NULL_STR)
-					scan_document(*doc);
+				if(!should_stop_flag && doc->path() != NULL_STR)
+					scan_document(doc);
 			}
 
 			if(should_stop_flag || !isRunning)
@@ -260,11 +260,11 @@ namespace find
 			{
 				bool binary = !utf8.is_valid();
 				pthread_mutex_lock(&mutex);
-				iterate(it, ranges)
+				for(auto const& it : ranges)
 				{
-					text::pos_t from(nl.line_for_offset(it->from), nl.col_for_offset(it->from));
-					text::pos_t to(nl.line_for_offset(it->to), nl.col_for_offset(it->to));
-					matches.push_back(std::make_pair(document, match_t(document, it->from, it->to, text::range_t(from, to), it->captures, nl.bol_for_offset(it->from), nl.eol_for_offset(it->to), binary)));
+					text::pos_t from(nl.line_for_offset(it.from), nl.col_for_offset(it.from));
+					text::pos_t to(nl.line_for_offset(it.to), nl.col_for_offset(it.to));
+					matches.push_back(std::make_pair(document, match_t(document, it.from, it.to, text::range_t(from, to), it.captures, nl.bol_for_offset(it.from), nl.eol_for_offset(it.to), binary)));
 				}
 				pthread_mutex_unlock(&mutex);
 			}

@@ -243,9 +243,9 @@ void theme_t::shared_styles_t::setup_styles ()
 		plist::array_t items;
 		if(plist::get_key_path(_item->plist(), "settings", items))
 		{
-			iterate(it, items)
+			for(auto const& it : items)
 			{
-				if(plist::dictionary_t const* styles = boost::get<plist::dictionary_t>(&*it))
+				if(plist::dictionary_t const* styles = boost::get<plist::dictionary_t>(&it))
 				{
 					_styles.push_back(parse_styles(*styles));
 					if(!_styles.back().invisibles.is_blank())
@@ -302,14 +302,14 @@ void theme_t::shared_styles_t::setup_styles ()
 			{ "selectionIconsPressed", &gutter_styles_t::selectionIconsPressed },
 		};
 
-		iterate(gutterKey, gutterKeys)
+		for(auto const& gutterKey : gutterKeys)
 		{
 			theme_t::color_info_t color;
-			if(get_key_path(gutterSettings, gutterKey->key, color))
+			if(get_key_path(gutterSettings, gutterKey.key, color))
 			{
-				if(_gutter_styles.*(gutterKey->field))
-					CGColorRelease(_gutter_styles.*(gutterKey->field));
-				_gutter_styles.*(gutterKey->field) = CGColorRetain(OakColorCreateFromThemeColor(color, _color_space).get());
+				if(_gutter_styles.*(gutterKey.field))
+					CGColorRelease(_gutter_styles.*(gutterKey.field));
+				_gutter_styles.*(gutterKey.field) = CGColorRetain(OakColorCreateFromThemeColor(color, _color_space).get());
 			}
 		}
 	}
@@ -374,23 +374,23 @@ styles_t const& theme_t::styles_for_scope (scope::scope_t const& scope) const
 	if(styles == _cache.end())
 	{
 		std::multimap<double, decomposed_style_t> ordering;
-		citerate(it, global_styles(scope))
+		for(auto const& it : global_styles(scope))
 		{
 			double rank = 0;
-			if(it->scope_selector.does_match(scope, &rank))
-				ordering.emplace(rank, *it);
+			if(it.scope_selector.does_match(scope, &rank))
+				ordering.emplace(rank, it);
 		}
 
-		iterate(it, _styles->_styles)
+		for(auto const& it : _styles->_styles)
 		{
 			double rank = 0;
-			if(it->scope_selector.does_match(scope, &rank))
-				ordering.emplace(rank, *it);
+			if(it.scope_selector.does_match(scope, &rank))
+				ordering.emplace(rank, it);
 		}
 
 		decomposed_style_t base(scope::selector_t(), _font_name, _font_size);
-		iterate(it, ordering)
-			base += it->second;
+		for(auto const& it : ordering)
+			base += it.second;
 
 		CTFontPtr font(CTFontCreateWithName(cf::wrap(base.font_name), base.font_size, NULL), CFRelease);
 		if(CTFontSymbolicTraits traits = (base.bold == bool_true ? kCTFontBoldTrait : 0) + (base.italic == bool_true ? kCTFontItalicTrait : 0))

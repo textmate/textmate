@@ -950,9 +950,9 @@ namespace ng
 
 	bool layout_t::structural_integrity () const
 	{
-		iterate(row, _rows)
+		for(auto const& row : _rows)
 		{
-			if(!row->value.structural_integrity())
+			if(!row.value.structural_integrity())
 				return false;
 		}
 		return _rows.structural_integrity();

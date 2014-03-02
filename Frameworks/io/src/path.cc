@@ -766,12 +766,12 @@ namespace path
 		if(fd != -1)
 		{
 			res = true;
-			iterate(pair, attributes)
+			for(auto const& pair : attributes)
 			{
 				int rc = 0;
-				if(pair->second == NULL_STR)
-						rc = fremovexattr(fd, pair->first.c_str(), 0);
-				else	rc = fsetxattr(fd, pair->first.c_str(), pair->second.data(), pair->second.size(), 0, 0);
+				if(pair.second == NULL_STR)
+						rc = fremovexattr(fd, pair.first.c_str(), 0);
+				else	rc = fsetxattr(fd, pair.first.c_str(), pair.second.data(), pair.second.size(), 0, 0);
 
 				if(rc != 0 && errno != ENOTSUP && errno != ENOATTR)
 				{
@@ -779,7 +779,7 @@ namespace path
 					// fremovexattr() on AFP for non-existing attributes gives us EINVAL
 					// fsetxattr() on Samba saving to ext4 via virtual machine gives us ENOENT
 					// sshfs with ‘-o noappledouble’ will return ENOATTR or EPERM
-					perror((pair->second == NULL_STR ? text::format("fremovexattr(%d, \"%s\")", fd, pair->first.c_str()) : text::format("fsetxattr(%d, %s, \"%s\")", fd, pair->first.c_str(), pair->second.c_str())).c_str());
+					perror((pair.second == NULL_STR ? text::format("fremovexattr(%d, \"%s\")", fd, pair.first.c_str()) : text::format("fsetxattr(%d, %s, \"%s\")", fd, pair.first.c_str(), pair.second.c_str())).c_str());
 				}
 			}
 			close(fd);
@@ -847,10 +847,10 @@ namespace path
 	{
 		lutimes(basePath.c_str(), NULL);
 
-		citerate(entry, path::entries(basePath))
+		for(auto const& entry : path::entries(basePath))
 		{
-			std::string path = path::join(basePath, (*entry)->d_name);
-			int type = (*entry)->d_type;
+			std::string path = path::join(basePath, entry->d_name);
+			int type = entry->d_type;
 			if(type == DT_DIR)
 				touch_tree(path);
 			if(type == DT_LNK || type == DT_REG)

@@ -57,8 +57,8 @@ static NSAttributedString* PathComponentString (std::string const& path, std::st
 {
 	std::vector<std::string> components;
 	std::string str = path::relative_to(path, base);
-	citerate(component, text::tokenize(str.begin(), str.end(), '/'))
-		components.push_back(*component);
+	for(auto const& component : text::tokenize(str.begin(), str.end(), '/'))
+		components.push_back(component);
 	if(components.front() == "")
 		components.front() = path::display_name("/");
 	components.back() = "";

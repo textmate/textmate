@@ -33,10 +33,10 @@ namespace // encoding_list
 		plist::array_t encodings;
 		if(plist::get_key_path(plist::load(path), "encodings", encodings))
 		{
-			iterate(item, encodings)
+			for(auto const& item : encodings)
 			{
 				std::string name, code;
-				if(plist::get_key_path(*item, "name", name) && plist::get_key_path(*item, "code", code))
+				if(plist::get_key_path(item, "name", name) && plist::get_key_path(item, "code", code))
 					res.emplace_back(name, code);
 			}
 		}
@@ -59,13 +59,13 @@ namespace // PopulateMenu{Flat,Hierarchical}
 	static NSMenuItem* PopulateMenuFlat (NSMenu* menu, std::vector<menu_item_t> const& items, id target, SEL action, std::string const& selected)
 	{
 		NSMenuItem* res = nil;
-		iterate(item, items)
+		for(auto const& item : items)
 		{
-			NSMenuItem* menuItem = [menu addItemWithTitle:[NSString stringWithCxxString:item->group + " – " + item->title] action:action keyEquivalent:@""];
-			[menuItem setRepresentedObject:[NSString stringWithCxxString:item->represented_object]];
+			NSMenuItem* menuItem = [menu addItemWithTitle:[NSString stringWithCxxString:item.group + " – " + item.title] action:action keyEquivalent:@""];
+			[menuItem setRepresentedObject:[NSString stringWithCxxString:item.represented_object]];
 			[menuItem setTarget:target];
 
-			if(item->represented_object == selected)
+			if(item.represented_object == selected)
 				res = menuItem;
 		}
 		return res;
@@ -75,21 +75,21 @@ namespace // PopulateMenu{Flat,Hierarchical}
 	{
 		std::string groupName = NULL_STR;
 		NSMenu* menu = nil;
-		iterate(item, items)
+		for(auto const& item : items)
 		{
-			if(groupName != item->group)
+			if(groupName != item.group)
 			{
-				groupName = item->group;
+				groupName = item.group;
 
 				menu = [NSMenu new];
 				[menu setAutoenablesItems:NO];
 				[[containingMenu addItemWithTitle:[NSString stringWithCxxString:groupName] action:NULL keyEquivalent:@""] setSubmenu:menu];
 			}
 
-			NSMenuItem* menuItem = [menu addItemWithTitle:[NSString stringWithCxxString:item->title] action:action keyEquivalent:@""];
-			[menuItem setRepresentedObject:[NSString stringWithCxxString:item->represented_object]];
+			NSMenuItem* menuItem = [menu addItemWithTitle:[NSString stringWithCxxString:item.title] action:action keyEquivalent:@""];
+			[menuItem setRepresentedObject:[NSString stringWithCxxString:item.represented_object]];
 			[menuItem setTarget:target];
-			if(selected == item->represented_object)
+			if(selected == item.represented_object)
 				[menuItem setState:NSOnState];
 		}
 	}
@@ -130,16 +130,16 @@ namespace // PopulateMenu{Flat,Hierarchical}
 {
 	std::vector<menu_item_t> items;
 	std::string currentEncodingsTitle = to_s(self.encoding);
-	citerate(charset, encoding_list())
+	for(auto const& charset : encoding_list())
 	{
-		if([self.availableEncodings containsObject:[NSString stringWithCxxString:charset->code()]])
+		if([self.availableEncodings containsObject:[NSString stringWithCxxString:charset.code()]])
 		{
-			auto v = text::split(charset->name(), " – ");
+			auto v = text::split(charset.name(), " – ");
 			if(v.size() == 2)
 			{
-				items.push_back(menu_item_t(v.front(), v.back(), charset->code()));
-				if(to_s(self.encoding) == charset->code())
-					currentEncodingsTitle = charset->name();
+				items.push_back(menu_item_t(v.front(), v.back(), charset.code()));
+				if(to_s(self.encoding) == charset.code())
+					currentEncodingsTitle = charset.name();
 			}
 		}
 	}
@@ -272,13 +272,13 @@ namespace // PopulateMenu{Flat,Hierarchical}
 			enabledEncodings.insert(to_s(encoding));
 
 		encodings = [NSMutableArray new];
-		citerate(charset, encoding_list())
+		for(auto const& charset : encoding_list())
 		{
-			bool enabled = enabledEncodings.find(charset->code()) != enabledEncodings.end();
+			bool enabled = enabledEncodings.find(charset.code()) != enabledEncodings.end();
 			id item = [NSMutableDictionary dictionaryWithObjectsAndKeys:
 				@(enabled), @"enabled",
-				[NSString stringWithCxxString:charset->name()], @"name",
-				[NSString stringWithCxxString:charset->code()], @"charset",
+				[NSString stringWithCxxString:charset.name()], @"name",
+				[NSString stringWithCxxString:charset.code()], @"charset",
 				nil];
 			[encodings addObject:item];
 		}

@@ -34,12 +34,12 @@ namespace bundles
 					return it->second;
 
 				std::multimap<std::string, item_ptr>& res = _cache[field];
-				iterate(item, AllItems)
+				for(auto const& item : AllItems)
 				{
-					if(is_deleted(*item) || is_disabled(*item))
+					if(is_deleted(item) || is_disabled(item))
 						continue;
-					citerate(value, (*item)->values_for_field(field))
-						res.emplace(*value, *item);
+					for(auto const& value : item->values_for_field(field))
+						res.emplace(value, item);
 				}
 				return res;
 			}
@@ -49,27 +49,27 @@ namespace bundles
 				if(_menus.empty())
 				{
 					std::map< item_ptr, std::map<oak::uuid_t, item_ptr> > map; // bundle → { item_uuid → bundle_item }
-					iterate(item, AllItems)
+					for(auto const& item : AllItems)
 					{
-						if((*item)->bundle())
-							map[(*item)->bundle()].emplace((*item)->uuid(), *item);
+						if(item->bundle())
+							map[item->bundle()].emplace(item->uuid(), item);
 					}
 
-					iterate(bundle, map)
+					for(auto const& bundle : map)
 					{
 						std::set<item_ptr> didInclude;
-						setup_menu(bundle->first, bundle->second, AllMenus, _menus, didInclude);
+						setup_menu(bundle.first, bundle.second, AllMenus, _menus, didInclude);
 
 						std::multimap<std::string, item_ptr, text::less_t> leftOut;
-						iterate(pair, bundle->second)
+						for(auto const& pair : bundle.second)
 						{
-							item_ptr item = pair->second;
+							item_ptr item = pair.second;
 							if((item->kind() & kItemTypeMenuTypes) && !item->hidden_from_user() && didInclude.find(item) == didInclude.end())
 								leftOut.emplace(item->name(), item);
 						}
 
 						if(!leftOut.empty())
-							std::transform(leftOut.begin(), leftOut.end(), back_inserter(_menus[bundle->first->uuid()]), [](std::pair<std::string, item_ptr> const& p){ return p.second; });
+							std::transform(leftOut.begin(), leftOut.end(), back_inserter(_menus[bundle.first->uuid()]), [](std::pair<std::string, item_ptr> const& p){ return p.second; });
 					}
 				}
 
@@ -97,9 +97,9 @@ namespace bundles
 				if(menu != menus.end())
 				{
 					std::vector<item_ptr>& resolved = res[menuItem->uuid()];
-					iterate(itemUUID, menu->second)
+					for(auto const& itemUUID : menu->second)
 					{
-						std::map<oak::uuid_t, item_ptr>::const_iterator item = items.find(*itemUUID);
+						std::map<oak::uuid_t, item_ptr>::const_iterator item = items.find(itemUUID);
 						if(item != items.end())
 						{
 							didInclude.insert(item->second);
@@ -109,7 +109,7 @@ namespace bundles
 							if(item->second->kind() == kItemTypeMenu)
 								setup_menu(item->second, items, menus, res, didInclude);
 						}
-						else if(*itemUUID == item_t::menu_item_separator()->uuid())
+						else if(itemUUID == item_t::menu_item_separator()->uuid())
 						{
 							resolved.push_back(item_t::menu_item_separator());
 						}
@@ -134,9 +134,9 @@ namespace bundles
 		std::map< oak::uuid_t, std::vector<oak::uuid_t> >::const_iterator menu = menus.find(menuUUID);
 		if(menu != menus.end())
 		{
-			iterate(uuid, menu->second)
+			for(auto const& uuid : menu->second)
 			{
-				std::map<oak::uuid_t, item_ptr>::const_iterator item = items.find(*uuid);
+				std::map<oak::uuid_t, item_ptr>::const_iterator item = items.find(uuid);
 				if(item == items.end())
 					continue;
 
@@ -156,20 +156,20 @@ namespace bundles
 		cache().clear();
 
 		std::map< item_ptr, std::map<oak::uuid_t, item_ptr> > map; // bundle → { item_uuid → bundle_item }
-		iterate(item, items)
+		for(auto const& item : items)
 		{
-			if((*item)->bundle())
-				map[(*item)->bundle()].emplace((*item)->uuid(), *item);
+			if(item->bundle())
+				map[item->bundle()].emplace(item->uuid(), item);
 		}
 
-		iterate(bundle, map)
-			setup_full_name(bundle->first->uuid(), menus, bundle->second, "", " — " + bundle->first->name());
+		for(auto const& bundle : map)
+			setup_full_name(bundle.first->uuid(), menus, bundle.second, "", " — " + bundle.first->name());
 
 		Callbacks(&callback_t::bundles_did_change);
 
 		bool res = true;
-		iterate(item, AllItems)
-			res = res && *item;
+		for(auto const& item : AllItems)
+			res = res && item;
 		return res;
 	}
 
@@ -207,10 +207,10 @@ namespace bundles
 		std::string actionClass;
 		if(plist::get_key_path(item->plist(), "content", actionClass))
 		{
-			citerate(aClass, text::split(actionClass, "||"))
+			for(auto const& aClass : text::split(actionClass, "||"))
 			{
 				size_t oldSize = ordered.size();
-				search(kFieldSemanticClass, text::trim(*aClass), scope, kind, bundle, includeDisabledItems, ordered);
+				search(kFieldSemanticClass, text::trim(aClass), scope, kind, bundle, includeDisabledItems, ordered);
 				if(ordered.size() != oldSize)
 					break;
 			}
@@ -235,17 +235,17 @@ namespace bundles
 
  	static void linear_search (std::string const& field, std::string const& value, scope::context_t const& scope, int kind, oak::uuid_t const& bundle, bool includeDisabledItems, std::multimap<double, item_ptr>& ordered)
 	{
-		iterate(item, AllItems)
+		for(auto const& item : AllItems)
 		{
-			if(is_deleted(*item) || !includeDisabledItems && is_disabled(*item))
+			if(is_deleted(item) || !includeDisabledItems && is_disabled(item))
 				continue;
 
 			double rank = 1.0;
-			if((*item)->does_match(field, value, scope, kind, bundle, &rank))
+			if(item->does_match(field, value, scope, kind, bundle, &rank))
 			{
-				if((*item)->kind() == kItemTypeProxy)
-						resolve_proxy(*item, scope, kind, bundle, includeDisabledItems, ordered);
-				else	ordered.emplace(rank, *item);
+				if(item->kind() == kItemTypeProxy)
+						resolve_proxy(item, scope, kind, bundle, includeDisabledItems, ordered);
+				else	ordered.emplace(rank, item);
 			}
 		}
 	}
@@ -274,9 +274,9 @@ namespace bundles
 		std::string actionClass;
 		if(plist::get_key_path(proxyItem->plist(), "content", actionClass))
 		{
-			citerate(aClass, text::split(actionClass, "||"))
+			for(auto const& aClass : text::split(actionClass, "||"))
 			{
-				auto const res = query(kFieldSemanticClass, text::trim(*aClass), scope, kind, bundle, filter, includeDisabledItems);
+				auto const res = query(kFieldSemanticClass, text::trim(aClass), scope, kind, bundle, filter, includeDisabledItems);
 				if(!res.empty())
 					return res;
 			}
@@ -286,10 +286,10 @@ namespace bundles
 
 	item_ptr lookup (oak::uuid_t const& uuid)
 	{
-		iterate(item, AllItems)
+		for(auto const& item : AllItems)
 		{
-			if((*item)->uuid() == uuid)
-				return *item;
+			if(item->uuid() == uuid)
+				return item;
 		}
 		return item_ptr();
 	}
@@ -298,11 +298,11 @@ namespace bundles
 	{
 		std::lock_guard<std::recursive_mutex> lock(cache().mutex());
 		std::vector<item_ptr> res;
-		iterate(item, cache().menu(_uuid))
+		for(auto const& item : cache().menu(_uuid))
 		{
-			if(is_deleted(*item) || !includeDisabledItems && is_disabled(*item))
+			if(is_deleted(item) || !includeDisabledItems && is_disabled(item))
 				continue;
-			res.push_back(*item);
+			res.push_back(item);
 		}
 		return res;
 	}
@@ -345,16 +345,16 @@ namespace bundles
 		if(sClass == NULL_STR)
 			return res;
 
-		iterate(proxyItem, AllItems)
+		for(auto const& proxyItem : AllItems)
 		{
-			if((*proxyItem)->kind() != kItemTypeProxy)
+			if(proxyItem->kind() != kItemTypeProxy)
 				continue;
 
 			std::string actionClass;
-			if(plist::get_key_path((*proxyItem)->plist(), "content", actionClass))
+			if(plist::get_key_path(proxyItem->plist(), "content", actionClass))
 			{
 				if(sClass.find(actionClass) == 0)
-					return key_equivalent(*proxyItem);
+					return key_equivalent(proxyItem);
 			}
 		}
 

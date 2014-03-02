@@ -273,9 +273,9 @@ namespace ng
 		set_find_clipboard(create_macro_clipboard(oldFindClipboard));
 		set_replace_clipboard(create_macro_clipboard(oldReplaceClipboard));
 
-		iterate(command, commands)
+		for(auto const& command : commands)
 		{
-			plist::dictionary_t dict = boost::get<plist::dictionary_t>(*command); // TODO ASSERT this!
+			plist::dictionary_t dict = boost::get<plist::dictionary_t>(command); // TODO ASSERT this!
 			std::string sel, str;
 			plist::dictionary_t args;
 			if(plist::get_key_path(dict, "command", sel))

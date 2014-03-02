@@ -10,9 +10,9 @@
 template <typename _OutputIter>
 _OutputIter words_with_prefix_and_suffix (ng::buffer_t const& buffer, std::string const& prefix, std::string const& suffix, std::string const& excludeWord, _OutputIter out)
 {
-	citerate(pair, ng::find_all(buffer, prefix.size() < suffix.size() ? suffix : prefix, find::none))
+	for(auto const& pair : ng::find_all(buffer, prefix.size() < suffix.size() ? suffix : prefix, find::none))
 	{
-		ng::range_t range = ng::extend(buffer, pair->first, kSelectionExtendToWord).last();
+		ng::range_t range = ng::extend(buffer, pair.first, kSelectionExtendToWord).last();
 		size_t bow = range.min().index, eow = range.max().index;
 		if(prefix.size() < (eow - bow) && prefix == buffer.substr(bow, bow + prefix.size()) && suffix.size() < (eow - bow) && suffix == buffer.substr(eow - suffix.size(), eow) && excludeWord != buffer.substr(bow, eow))
 			*out++ = std::make_pair(bow, buffer.substr(bow, eow));
@@ -145,16 +145,16 @@ namespace ng
 		// ===============================================
 
 		std::map<std::string, ssize_t> ranked;
-		iterate(pair, tmp)
+		for(auto const& pair : tmp)
 		{
-			std::string word = pair->second;
+			std::string word = pair.second;
 
 			bool hasPrefix = prefix.empty() || (prefix.size() < word.size() && word.find(prefix) == 0);
 			bool hasSuffix = hasPrefix && !suffix.empty() && suffix.size() < word.size() && word.find(suffix, word.size() - suffix.size()) == word.size() - suffix.size();
 			if(!hasPrefix || word == currentWord)
 				continue;
 
-			ssize_t rank = bow <= pair->first ? pair->first - bow : bow - (pair->first + word.size());
+			ssize_t rank = bow <= pair.first ? pair.first - bow : bow - (pair.first + word.size());
 			word = word.substr(prefix.size(), word.size() - prefix.size() - (hasSuffix ? suffix.size() : 0));
 
 			auto it = ranked.find(word);
@@ -164,8 +164,8 @@ namespace ng
 		}
 
 		std::map<ssize_t, std::string> ordered;
-		iterate(pair, ranked)
-			ordered.emplace(pair->second, pair->first);
+		for(auto const& pair : ranked)
+			ordered.emplace(pair.second, pair.first);
 
 		std::vector<std::string> res;
 		std::transform(ordered.begin(), ordered.end(), back_inserter(res), [](std::pair<ssize_t, std::string> const& p){ return p.second; });
@@ -199,8 +199,8 @@ namespace ng
 			info.advance();
 
 			std::multimap<range_t, std::string> insertions;
-			citerate(range, info.prefix_ranges())
-				insertions.emplace(*range, info.current());
+			for(auto const& range : info.prefix_ranges())
+				insertions.emplace(range, info.current());
 			info.set_prefix_ranges(this->replace(insertions, true));
 			info.set_revision(_buffer.next_revision());
 			info.set_ranges(ng::move(_buffer, info.prefix_ranges(), kSelectionMoveToEndOfSelection));
@@ -216,8 +216,8 @@ namespace ng
 			info.retreat();
 
 			std::multimap<range_t, std::string> insertions;
-			citerate(range, info.prefix_ranges())
-				insertions.emplace(*range, info.current());
+			for(auto const& range : info.prefix_ranges())
+				insertions.emplace(range, info.current());
 			info.set_prefix_ranges(this->replace(insertions, true));
 			info.set_revision(_buffer.next_revision());
 			info.set_ranges(ng::move(_buffer, info.prefix_ranges(), kSelectionMoveToEndOfSelection));

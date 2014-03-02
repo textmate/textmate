@@ -30,8 +30,8 @@ struct PUBLIC connection_t
 	connection_t& operator<< (T const& container)
 	{
 		*this << container.size();
-		iterate(value, container)
-			*this << *value;
+		for(auto const& value : container)
+			*this << value;
 		return *this;
 	}
 

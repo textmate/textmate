@@ -25,10 +25,10 @@ static bool is_copyable_dir (std::string const& path)
 	}
 
 	bool res = true;
-	citerate(it, path::entries(path))
+	for(auto const& it : path::entries(path))
 	{
-		std::string const& newSrc = path::join(path, (*it)->d_name);
-		if((*it)->d_type == DT_REG)
+		std::string const& newSrc = path::join(path, it->d_name);
+		if(it->d_type == DT_REG)
 		{
 			if(access(newSrc.c_str(), R_OK) != 0)
 			{
@@ -36,17 +36,17 @@ static bool is_copyable_dir (std::string const& path)
 				res = false;
 			}
 		}
-		else if((*it)->d_type == DT_DIR)
+		else if(it->d_type == DT_DIR)
 		{
 			res = is_copyable_dir(newSrc);
 		}
-		else if((*it)->d_type == DT_LNK)
+		else if(it->d_type == DT_LNK)
 		{
 			return true;
 		}
 		else
 		{
-			D(DBF_IO_Failure, bug("unknown file type: %s (%d)\n", newSrc.c_str(), (*it)->d_type););
+			D(DBF_IO_Failure, bug("unknown file type: %s (%d)\n", newSrc.c_str(), it->d_type););
 			res = false;
 		}
 
@@ -97,15 +97,15 @@ namespace path
 		}
 
 		bool res = true;
-		citerate(it, path::entries(src))
+		for(auto const& it : path::entries(src))
 		{
-			std::string const& newSrc = path::join(src, (*it)->d_name);
-			std::string const& newDst = path::join(dst, (*it)->d_name);
-			if((*it)->d_type == DT_DIR)
+			std::string const& newSrc = path::join(src, it->d_name);
+			std::string const& newDst = path::join(dst, it->d_name);
+			if(it->d_type == DT_DIR)
 			{
 				res = path::copy(newSrc, newDst) && res;
 			}
-			else if((*it)->d_type == DT_REG || (*it)->d_type == DT_LNK)
+			else if(it->d_type == DT_REG || it->d_type == DT_LNK)
 			{
 				if(copyfile(newSrc.c_str(), newDst.c_str(), NULL, COPYFILE_ALL | COPYFILE_NOFOLLOW_SRC) != 0)
 				{
@@ -115,7 +115,7 @@ namespace path
 			}
 			else
 			{
-				D(DBF_IO_Failure, bug("skip unknown type: %s (%d)\n", newSrc.c_str(), (*it)->d_type););
+				D(DBF_IO_Failure, bug("skip unknown type: %s (%d)\n", newSrc.c_str(), it->d_type););
 				res = false;
 			}
 		}
@@ -178,10 +178,10 @@ namespace path
 	static bool remove_dir (std::string const& path)
 	{
 		bool res = true;
-		citerate(it, path::entries(path))
+		for(auto const& it : path::entries(path))
 		{
-			std::string const& newSrc = path::join(path, (*it)->d_name);
-			if((*it)->d_type == DT_DIR)
+			std::string const& newSrc = path::join(path, it->d_name);
+			if(it->d_type == DT_DIR)
 			{
 				res = path::remove_dir(newSrc) && res;
 			}

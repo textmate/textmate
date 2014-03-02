@@ -8,8 +8,8 @@ static BOOL IsGUITestsEnabled (std::string const& testName)
 {
 	std::set<std::string> tests;
 	std::string envVar = getenv("GUI_TESTS") ?: "";
-	citerate(test, text::tokenize(envVar.begin(), envVar.end(), ' '))
-		tests.insert(*test);
+	for(auto const& test : text::tokenize(envVar.begin(), envVar.end(), ' '))
+		tests.insert(test);
 
 	return tests.find("all") != tests.end() || tests.find(testName) != tests.end();
 }

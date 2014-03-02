@@ -76,8 +76,8 @@ struct refresh_t
 		auto damagedRects = _layout.end_refresh_cycle([_self selection], [_self visibleRect]);
 		TS_ASSERT(_layout.structural_integrity());
 		[_self updateFrameSize];
-		iterate(rect, damagedRects)
-			[_self setNeedsDisplayInRect:*rect];
+		for(auto const& rect : damagedRects)
+			[_self setNeedsDisplayInRect:rect];
 
 		if(!NSContainsRect([_self visibleRect], _layout.rect_at_index([_self selection].last().last)))
 			[_self scrollRectToVisible:NSInsetRect(_layout.rect_at_index([_self selection].last().last), -15, -15)];
@@ -129,8 +129,8 @@ private:
 		static buffer_refresh_callback_t cb(self);
 		buffer.add_callback(&cb);
 
-		citerate(item, bundles::query(bundles::kFieldGrammarScope, "source.c++"))
-			buffer.set_grammar(*item);
+		for(auto const& item : bundles::query(bundles::kFieldGrammarScope, "source.c++"))
+			buffer.set_grammar(item);
 
 		theme_ptr theme = parse_theme(bundles::lookup("71D40D9D-AE48-11D9-920A-000D93589AF6"));
 		theme = theme->copy_with_font_name_and_size("Gill Sans", 14);
@@ -195,17 +195,17 @@ private:
 	static ng::ranges_t res;
 	res = ng::ranges_t();
 	ssize_t offset = 0;
-	citerate(range, dissect_columnar(buffer, someRanges).sorted())
+	for(auto const& range : dissect_columnar(buffer, someRanges).sorted())
 	{
-		ng::index_t from = range->min(), to = range->max();
-		if(range->freehanded && from.carry)
+		ng::index_t from = range.min(), to = range.max();
+		if(range.freehanded && from.carry)
 		{
 			buffer.replace(from.index + offset, from.index + offset, std::string(from.carry, ' '));
 			offset += from.carry;
 		}
 
 		res.push_back(buffer.replace(from.index + offset, to.index + offset, aString));
-		offset += aString.size() - (range->max().index - range->min().index);
+		offset += aString.size() - (range.max().index - range.min().index);
 	}
 	return res;
 }

@@ -56,9 +56,9 @@ _OutputIter entity_escape (_InputIter first, _InputIter const& last, _OutputIter
 
 void parse_stdin (std::string const& grammarSelector = "text.plain", bool verbose = false)
 {
-	citerate(item, bundles::query(bundles::kFieldGrammarScope, grammarSelector, scope::wildcard, bundles::kItemTypeGrammar))
+	for(auto const& item : bundles::query(bundles::kFieldGrammarScope, grammarSelector, scope::wildcard, bundles::kItemTypeGrammar))
 	{
-		if(parse::grammar_ptr grammar = parse::parse_grammar(*item))
+		if(parse::grammar_ptr grammar = parse::parse_grammar(item))
 		{
 			parse::stack_ptr stack = grammar->seed();
 			scope::scope_t lastScope(grammarSelector);
@@ -74,13 +74,13 @@ void parse_stdin (std::string const& grammarSelector = "text.plain", bool verbos
 				bytes += strlen(buf);
 
 				size_t lastPos = 0;
-				iterate(it, scopes)
+				for(auto const& it : scopes)
 				{
-					entity_escape(buf + lastPos, buf + it->first, std::ostream_iterator<char>(std::cout));
-					// std::copy(buf + lastPos, buf + it->first, std::ostream_iterator<char>(std::cout));
-					std::cout << xml_difference(lastScope, it->second, "<", ">");
-					lastScope = it->second;
-					lastPos = it->first;
+					entity_escape(buf + lastPos, buf + it.first, std::ostream_iterator<char>(std::cout));
+					// std::copy(buf + lastPos, buf + it.first, std::ostream_iterator<char>(std::cout));
+					std::cout << xml_difference(lastScope, it.second, "<", ">");
+					lastScope = it.second;
+					lastPos = it.first;
 				}
 				entity_escape(buf + lastPos, buf + strlen(buf), std::ostream_iterator<char>(std::cout));
 				// std::copy(buf + lastPos, buf + strlen(buf), std::ostream_iterator<char>(std::cout));

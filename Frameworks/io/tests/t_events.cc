@@ -44,8 +44,8 @@ struct callback_t : fs::event_callback_t
 		if(_log)
 		{
 			fprintf(stderr, "observing ‘%s’\n", observedPath.c_str());
-			iterate(path, _must_see)
-				fprintf(stderr, "\tmust see: %s\n", path::relative_to(*path, _jail.path()).c_str());
+			for(auto const& path : _must_see)
+				fprintf(stderr, "\tmust see: %s\n", path::relative_to(path, _jail.path()).c_str());
 			fprintf(stderr, "starting event loop:\n");
 		}
 
@@ -53,8 +53,8 @@ struct callback_t : fs::event_callback_t
 		{
 			if(CFRunLoopRunInMode(kCFRunLoopDefaultMode, 5, false) == kCFRunLoopRunTimedOut)
 			{
-				iterate(path, _must_see)
-					fprintf(stderr, "*** waiting: %s\n", path::relative_to(*path, _jail.path()).c_str());
+				for(auto const& path : _must_see)
+					fprintf(stderr, "*** waiting: %s\n", path::relative_to(path, _jail.path()).c_str());
 			}
 		}
 

@@ -113,21 +113,21 @@ std::vector<layer_t> layout_metrics_t::layers_for (std::string const& layer_id, 
 	if(l == layers.end())
 		return res;
 
-	iterate(it, l->second)
+	for(auto const& it : l->second)
 	{
-		if((it->layer.requisite_mask & tab_bar_requisites::all) != layer_t::no_requisite) // layer is testing on OTBV requisite flags
+		if((it.layer.requisite_mask & tab_bar_requisites::all) != layer_t::no_requisite) // layer is testing on OTBV requisite flags
 		{
-			if((it->layer.requisite & tab_bar_requisites::all) != (requisiteFilter & it->layer.requisite_mask))
+			if((it.layer.requisite & tab_bar_requisites::all) != (requisiteFilter & it.layer.requisite_mask))
 				continue;
 		}
 
-		if(it->padding.size() != 4)
+		if(it.padding.size() != 4)
 			continue;
 
 		CGFloat values[4] = { };
 		for(size_t i = 0; i < sizeofA(values); ++i)
 		{
-			std::string const& str = it->padding[i];
+			std::string const& str = it.padding[i];
 			switch(str.empty() ? '\0' : str[0])
 			{
 				case 'W': values[i] = CGRectGetWidth(rect)  + strtod(str.substr(1).c_str(), NULL); break;
@@ -136,13 +136,13 @@ std::vector<layer_t> layout_metrics_t::layers_for (std::string const& layer_id, 
 			}
 		}
 
-		res.push_back(it->layer);
+		res.push_back(it.layer);
 		res.back().requisite      &= ~tab_bar_requisites::all;
 		res.back().requisite_mask &= ~tab_bar_requisites::all;
 
-		if(it->has_label)
+		if(it.has_label)
 			res.back().text = label;
-		if(it->has_tool_tip)
+		if(it.has_tool_tip)
 			res.back().tool_tip = toolTip;
 		res.back().tag = tag;
 		res.back().rect = CGRectMake(CGRectGetMinX(rect) + values[0], CGRectGetMinY(rect) + values[2], values[1]-values[0] + 1, values[3]-values[2] + 1);
@@ -559,10 +559,10 @@ layout_metrics_t::raw_layer_t layout_metrics_t::parse_layer (NSDictionary* item)
 	for(NSUInteger tabIndex = 0; tabIndex < tabTitles.count; ++tabIndex)
 	{
 		double width = WidthOfText([tabTitles safeObjectAtIndex:tabIndex]);
-		citerate(it, metrics->layers_for([self layerNameForTabIndex:tabIndex], CGRectZero, tabIndex, @"LabelPlaceholder"))
+		for(auto const& it : metrics->layers_for([self layerNameForTabIndex:tabIndex], CGRectZero, tabIndex, @"LabelPlaceholder"))
 		{
-			if(it->text)
-				width -= it->rect.size.width - 1;
+			if(it.text)
+				width -= it.rect.size.width - 1;
 		}
 		width = oak::cap(metrics->minTabSize, width, metrics->maxTabSize);
 		tabSizes.push_back(width);
@@ -607,8 +607,8 @@ layout_metrics_t::raw_layer_t layout_metrics_t::parse_layer (NSDictionary* item)
 			numberOfTabs = maxNumberOfTabs ?: 1;
 			tabSizes.resize(numberOfTabs);
 			totalWidth = 0;
-			iterate(it, tabSizes)
-				totalWidth += *it;
+			for(auto const& it : tabSizes)
+				totalWidth += it;
 		}
 
 		double fat  = totalWidth - (numberOfTabs * metrics->minTabSize);
@@ -737,10 +737,10 @@ layout_metrics_t::raw_layer_t layout_metrics_t::parse_layer (NSDictionary* item)
 	NSRect tabRect = tabRects[overflowTab];
 	NSRect rect;
 	uint32_t state = [self currentState] | layer_t::mouse_inside | layer_t::mouse_clicked;
-	citerate(it, metrics->layers_for([self layerNameForTabIndex:overflowTab], tabRect, overflowTab, [tabTitles objectAtIndex:overflowTab], nil, [self filterForTabIndex:overflowTab] | tab_bar_requisites::overflow))
+	for(auto const& it : metrics->layers_for([self layerNameForTabIndex:overflowTab], tabRect, overflowTab, [tabTitles objectAtIndex:overflowTab], nil, [self filterForTabIndex:overflowTab] | tab_bar_requisites::overflow))
 	{
-		if((state & it->requisite_mask) == it->requisite)
-			rect = it->rect;
+		if((state & it.requisite_mask) == it.requisite)
+			rect = it.rect;
 	}
 	rect.origin.y -= 6; //shift menu down slightly to base of tab
 	[[self overflowTabMenu] popUpMenuPositioningItem:nil atLocation:(rect.origin) inView:self];
@@ -880,10 +880,10 @@ layout_metrics_t::raw_layer_t layout_metrics_t::parse_layer (NSDictionary* item)
 	[image lockFocus];
 
 	uint32_t state = [self currentState] | layer_t::mouse_inside | layer_t::mouse_down;
-	citerate(it, metrics->layers_for([self layerNameForTabIndex:draggedTab], (NSRect){NSZeroPoint, tabRect.size}, draggedTab, [tabTitles objectAtIndex:draggedTab], nil, [self filterForTabIndex:draggedTab] | tab_bar_requisites::dragged))
+	for(auto const& it : metrics->layers_for([self layerNameForTabIndex:draggedTab], (NSRect){NSZeroPoint, tabRect.size}, draggedTab, [tabTitles objectAtIndex:draggedTab], nil, [self filterForTabIndex:draggedTab] | tab_bar_requisites::dragged))
 	{
-		if((state & it->requisite_mask) == it->requisite)
-			[self drawLayer:*it];
+		if((state & it.requisite_mask) == it.requisite)
+			[self drawLayer:it];
 	}
 	[image unlockFocus];
 

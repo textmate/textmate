@@ -292,12 +292,12 @@ namespace
 					_next_state = kStateConvertLineFeeds;
 
 					std::vector<bundles::item_ptr> filters;
-					citerate(item, filter::find(_path, _content, _path_attributes, filter::kBundleEventTextExport))
+					for(auto const& item : filter::find(_path, _content, _path_attributes, filter::kBundleEventTextExport))
 					{
-						if(!oak::contains(_text_export_filters.begin(), _text_export_filters.end(), (*item)->uuid()))
+						if(!oak::contains(_text_export_filters.begin(), _text_export_filters.end(), item->uuid()))
 						{
-							filters.push_back(*item);
-							_text_export_filters.push_back((*item)->uuid());
+							filters.push_back(item);
+							_text_export_filters.push_back(item->uuid());
 							break; // FIXME see next FIXME
 						}
 					}
@@ -374,12 +374,12 @@ namespace
 					_next_state = kStateSaveContent;
 
 					std::vector<bundles::item_ptr> filters;
-					citerate(item, filter::find(_path, _content, _path_attributes, filter::kBundleEventBinaryExport))
+					for(auto const& item : filter::find(_path, _content, _path_attributes, filter::kBundleEventBinaryExport))
 					{
-						if(!oak::contains(_binary_export_filters.begin(), _binary_export_filters.end(), (*item)->uuid()))
+						if(!oak::contains(_binary_export_filters.begin(), _binary_export_filters.end(), item->uuid()))
 						{
-							filters.push_back(*item);
-							_binary_export_filters.push_back((*item)->uuid());
+							filters.push_back(item);
+							_binary_export_filters.push_back(item->uuid());
 							break; // FIXME see next FIXME
 						}
 					}

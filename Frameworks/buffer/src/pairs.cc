@@ -24,14 +24,14 @@ namespace ng
 			if(!ranksToRemove.empty())
 			{
 				std::set<ssize_t> indicesToRemove;
-				iterate(it, _pairs)
+				for(auto const& it : _pairs)
 				{
-					if(ranksToRemove.find(it->second) != ranksToRemove.end())
-						indicesToRemove.insert(it->first);
+					if(ranksToRemove.find(it.second) != ranksToRemove.end())
+						indicesToRemove.insert(it.first);
 				}
 
-				iterate(index, indicesToRemove)
-					_pairs.remove(*index);
+				for(auto const& index : indicesToRemove)
+					_pairs.remove(index);
 			}
 		}
 		_pairs.replace(from, to, str.size());
@@ -72,11 +72,11 @@ namespace ng
 		ASSERT(_pairs.find(index) != _pairs.end());
 		size_t rank = _pairs.find(index)->second;
 		D(DBF_Buffer_Pairs, bug("%zu, rank %zu\n", index, rank););
-		iterate(it, _pairs)
+		for(auto const& it : _pairs)
 		{
-			D(DBF_Buffer_Pairs, bug("%zd, rank %zu → %s\n", it->first, it->second, BSTR((it->second & ~1) == (rank & ~1) && it->second != rank)););
-			if((it->second & ~1) == (rank & ~1) && it->second != rank)
-				return it->first;
+			D(DBF_Buffer_Pairs, bug("%zd, rank %zu → %s\n", it.first, it.second, BSTR((it.second & ~1) == (rank & ~1) && it.second != rank)););
+			if((it.second & ~1) == (rank & ~1) && it.second != rank)
+				return it.first;
 		}
 		ASSERT(false);
 		return index;

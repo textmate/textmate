@@ -10,10 +10,10 @@ static std::string soft_breaks (std::string const& str)
 {
 	std::string res = "";
 	size_t from = 0;
-	citerate(offset, text::soft_breaks(str, kWrapColumn, kTabSize))
+	for(auto const& offset : text::soft_breaks(str, kWrapColumn, kTabSize))
 	{
-		res += str.substr(from, *offset - from) + "‸";
-		from = *offset;
+		res += str.substr(from, offset - from) + "‸";
+		from = offset;
 	}
 	return res + str.substr(from);
 }
@@ -23,10 +23,10 @@ static std::string indented_wrap (std::string const& str, size_t width, size_t i
 	std::vector<std::string> lines;
 
 	size_t from = 0;
-	citerate(offset, text::soft_breaks(str, width, kTabSize, indentWidth))
+	for(auto const& offset : text::soft_breaks(str, width, kTabSize, indentWidth))
 	{
-		lines.push_back(str.substr(from, *offset - from));
-		from = *offset;
+		lines.push_back(str.substr(from, offset - from));
+		from = offset;
 	}
 	lines.push_back(str.substr(from));
 	return text::join(lines, "\n" + std::string(indentWidth, ' '));

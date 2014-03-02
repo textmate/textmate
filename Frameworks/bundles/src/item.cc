@@ -92,9 +92,9 @@ namespace bundles
 			{
 				if(plist::array_t const* array = boost::get<plist::array_t>(&pair.second))
 				{
-					iterate(any, *array)
+					for(auto const& any : *array)
 					{
-						if(std::string const* str = boost::get<std::string>(&*any))
+						if(std::string const* str = boost::get<std::string>(&any))
 							_fields.emplace(pair.first, *str);
 					}
 				}
@@ -104,14 +104,14 @@ namespace bundles
 				// initialize from a tmSettings file
 				if(plist::dictionary_t const* dictionary = boost::get<plist::dictionary_t>(&pair.second))
 				{
-					iterate(dictPair, *dictionary)
-						_fields.emplace(pair.first, dictPair->first);
+					for(auto const& dictPair : *dictionary)
+						_fields.emplace(pair.first, dictPair.first);
 				}
 				else if(plist::array_t const* array = boost::get<plist::array_t>(&pair.second))
 				{
-					iterate(any, *array) // initialize from cache
+					for(auto const& any : *array) // initialize from cache
 					{
-						if(std::string const* str = boost::get<std::string>(&*any))
+						if(std::string const* str = boost::get<std::string>(&any))
 							_fields.emplace(pair.first, *str);
 					}
 				}
@@ -203,9 +203,9 @@ namespace bundles
 		if(_kind != kItemTypeBundle)
 			return bundle()->support_path();
 
-		iterate(path, _paths)
+		for(auto const& path : _paths)
 		{
-			std::string supportPath = path::join(*path, "../Support");
+			std::string supportPath = path::join(path, "../Support");
 			if(path::exists(supportPath))
 				return supportPath;
 		}
@@ -254,8 +254,8 @@ namespace bundles
 				default:
 				{
 					std::vector<plist::dictionary_t> plists;
-					iterate(path, _paths)
-						plists.push_back(plist::load(*path));
+					for(auto const& path : _paths)
+						plists.push_back(plist::load(path));
 					_plist = std::make_shared<plist::dictionary_t>(plist::merge_delta(plists));
 				}
 				break;

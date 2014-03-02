@@ -42,17 +42,17 @@ static std::vector< std::pair<NSString*, NSURL*> > ApplicationURLsForPaths (NSSe
 	}
 
 	NSURL* defaultApplicationURL = defaultApplicationURLs.count == 1 ? defaultApplicationURLs.anyObject : nil;
-	iterate(appIter, apps)
+	for(auto const& appIter : apps)
 	{
-		riterate(versIter, appIter->second)
+		riterate(versIter, appIter.second)
 		{
-			NSString* appName = [NSString stringWithCxxString:appIter->first];
+			NSString* appName = [NSString stringWithCxxString:appIter.first];
 			NSURL* appURL = versIter->second;
 
 			if([defaultApplicationURL isEqual:appURL])
 				appName = [NSString stringWithFormat:@"%@ (default)", appName];
 
-			if(appIter->second.size() > 1) // we have more than one version
+			if(appIter.second.size() > 1) // we have more than one version
 				appName = [NSString stringWithFormat:@"%@ (%@)", appName, [NSString stringWithCxxString:versIter->first]];
 
 			res.insert(([defaultApplicationURL isEqual:appURL] ? res.begin() : res.end()), std::make_pair(appName, appURL));
@@ -91,14 +91,14 @@ static std::vector< std::pair<NSString*, NSURL*> > ApplicationURLsForPaths (NSSe
 		return;
 	}
 
-	iterate(app, appURLs)
+	for(auto const& app : appURLs)
 	{
-		NSMenuItem* menuItem = [menu addItemWithTitle:app->first action:@selector(openWith:) keyEquivalent:@""];
+		NSMenuItem* menuItem = [menu addItemWithTitle:app.first action:@selector(openWith:) keyEquivalent:@""];
 		[menuItem setTarget:self];
-		[menuItem setRepresentedObject:app->second];
+		[menuItem setRepresentedObject:app.second];
 
 		NSImage* image = nil;
-		if([app->second getResourceValue:&image forKey:NSURLEffectiveIconKey error:NULL] || (image = [[NSWorkspace sharedWorkspace] iconForFile:[app->second path]]))
+		if([app.second getResourceValue:&image forKey:NSURLEffectiveIconKey error:NULL] || (image = [[NSWorkspace sharedWorkspace] iconForFile:[app.second path]]))
 		{
 			image = [image copy];
 			image.size = NSMakeSize(16, 16);

@@ -52,14 +52,14 @@ _OutputIter OakRectDifference (CGRect const& r, CGRect s, _OutputIter out)
 template <typename _OutputIter>
 _OutputIter OakRectDifference (std::vector<CGRect> const& rList, std::vector<CGRect> const& sList, _OutputIter out)
 {
-	iterate(r, rList)
+	for(auto const& r : rList)
 	{
-		std::vector<CGRect> tList(1, *r);
-		iterate(s, sList)
+		std::vector<CGRect> tList(1, r);
+		for(auto const& s : sList)
 		{
 			std::vector<CGRect> tmp;
-			iterate(t, tList)
-				OakRectDifference(*t, *s, back_inserter(tmp));
+			for(auto const& t : tList)
+				OakRectDifference(t, s, back_inserter(tmp));
 			tList.swap(tmp);
 		}
 		out = std::copy(tList.begin(), tList.end(), out);

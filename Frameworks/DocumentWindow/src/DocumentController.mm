@@ -876,9 +876,9 @@ namespace
 			}
 
 			NSMutableIndexSet* indexSet = [NSMutableIndexSet indexSet];
-			iterate(pair, ranked)
+			for(auto const& pair : ranked)
 			{
-				[indexSet addIndex:pair->second];
+				[indexSet addIndex:pair.second];
 				if([indexSet count] == excessTabs)
 					break;
 			}
@@ -1184,14 +1184,14 @@ namespace
 		{
 			std::string const path = to_s(_documentPath);
 			std::vector<std::string> revPath;
-			citerate(token, text::tokenize(path.begin(), path.end(), '/'))
+			for(auto const& token : text::tokenize(path.begin(), path.end(), '/'))
 			{
-				std::string tmp = *token;
-				citerate(subtoken, text::tokenize(tmp.begin(), tmp.end(), '.'))
+				std::string tmp = token;
+				for(auto const& subtoken : text::tokenize(tmp.begin(), tmp.end(), '.'))
 				{
-					if((*subtoken).empty())
+					if(subtoken.empty())
 						continue;
-					revPath.push_back(*subtoken);
+					revPath.push_back(subtoken);
 					std::replace(revPath.back().begin(), revPath.back().end(), ' ', '_');
 				}
 			}
@@ -2032,10 +2032,10 @@ namespace
 	if(customCandidate != NULL_STR && customCandidate != documentPath && (std::find_if(_documents.begin(), _documents.end(), [&customCandidate](document::document_ptr const& doc){ return customCandidate == doc->path(); }) != _documents.end() || path::exists(customCandidate)))
 		return [self openItems:@[ @{ @"path" : [NSString stringWithCxxString:customCandidate] } ] closingOtherTabs:NO];
 
-	citerate(entry, path::entries(documentDir))
+	for(auto const& entry : path::entries(documentDir))
 	{
-		std::string const name = (*entry)->d_name;
-		if((*entry)->d_type == DT_REG && documentBase == path::strip_extensions(name) && path::extensions(name) != "")
+		std::string const name = entry->d_name;
+		if(entry->d_type == DT_REG && documentBase == path::strip_extensions(name) && path::extensions(name) != "")
 		{
 			std::string const content = path::content(path::join(documentDir, name));
 			if(utf8::is_valid(content.data(), content.data() + content.size()))
@@ -2047,10 +2047,10 @@ namespace
 	path::glob_t const binaryGlob(settings.get(kSettingsBinaryKey, ""));
 
 	std::vector<std::string> v;
-	iterate(path, candidates)
+	for(auto const& path : candidates)
 	{
-		if(*path == documentPath || !binaryGlob.does_match(*path) && !excludeGlob.does_match(*path))
-			v.push_back(*path);
+		if(path == documentPath || !binaryGlob.does_match(path) && !excludeGlob.does_match(path))
+			v.push_back(path);
 	}
 
 	if(v.size() == 1)
@@ -2508,10 +2508,10 @@ static NSUInteger DisableSessionSavingCount = 0;
 				if(candidate.projectPath)
 				{
 					std::string const projectPath = to_s(candidate.projectPath);
-					iterate(parent, parents)
+					for(auto const& parent : parents)
 					{
-						if(path::is_child(*parent, projectPath))
-							candidates.emplace(parent->size() - projectPath.size(), candidate);
+						if(path::is_child(parent, projectPath))
+							candidates.emplace(parent.size() - projectPath.size(), candidate);
 					}
 				}
 			}

@@ -95,10 +95,10 @@ void test_erase ()
 	OAK_ASSERT(std::equal(tree.begin(), tree.end(), keys.begin(), &numeric_bin_comp));
 
 	std::random_shuffle(keys.begin(), keys.end());
-	iterate(key, keys)
+	for(auto const& key : keys)
 	{
-		OAK_ASSERT(tree.find(*key, &numeric_comp) != tree.end());
-		tree.erase(tree.find(*key, &numeric_comp));
+		OAK_ASSERT(tree.find(key, &numeric_comp) != tree.end());
+		tree.erase(tree.find(key, &numeric_comp));
 		OAK_ASSERT(tree.structural_integrity());
 	}
 
@@ -118,18 +118,18 @@ void test_search ()
 			nonExistingKeys.insert(key);
 	}
 
-	iterate(key, existingKeys)
+	for(auto const& key : existingKeys)
 	{
-		OAK_ASSERT(tree.find(*key, &numeric_comp) != tree.end());
-		OAK_ASSERT_EQ(tree.find(*key, &numeric_comp)->key, *key);
+		OAK_ASSERT(tree.find(key, &numeric_comp) != tree.end());
+		OAK_ASSERT_EQ(tree.find(key, &numeric_comp)->key, key);
 
-		OAK_ASSERT(tree.lower_bound(*key, &numeric_comp) != tree.end());
-		OAK_ASSERT_EQ(tree.lower_bound(*key, &numeric_comp)->key, *key);
+		OAK_ASSERT(tree.lower_bound(key, &numeric_comp) != tree.end());
+		OAK_ASSERT_EQ(tree.lower_bound(key, &numeric_comp)->key, key);
 
-		OAK_ASSERT(tree.upper_bound(*key, &numeric_comp) == ++tree.find(*key, &numeric_comp));
-		if(++tree.find(*key, &numeric_comp) != tree.end())
+		OAK_ASSERT(tree.upper_bound(key, &numeric_comp) == ++tree.find(key, &numeric_comp));
+		if(++tree.find(key, &numeric_comp) != tree.end())
 		{
-			OAK_ASSERT_LT(*key, tree.upper_bound(*key, &numeric_comp)->key);
+			OAK_ASSERT_LT(key, tree.upper_bound(key, &numeric_comp)->key);
 		}
 	}
 
@@ -137,25 +137,25 @@ void test_search ()
 	// = find =
 	// ========
 
-	iterate(key, nonExistingKeys)
+	for(auto const& key : nonExistingKeys)
 	{
-		OAK_ASSERT(tree.find(*key, &numeric_comp) == tree.end());
+		OAK_ASSERT(tree.find(key, &numeric_comp) == tree.end());
 	}
 
 	// ===============
 	// = lower bound =
 	// ===============
 
-	iterate(key, nonExistingKeys)
+	for(auto const& key : nonExistingKeys)
 	{
-		if(existingKeys.lower_bound(*key) == existingKeys.end())
+		if(existingKeys.lower_bound(key) == existingKeys.end())
 		{
-			OAK_ASSERT(tree.lower_bound(*key, &numeric_comp) == tree.end());
+			OAK_ASSERT(tree.lower_bound(key, &numeric_comp) == tree.end());
 		}
 		else
 		{
-			OAK_ASSERT_LE(*key, tree.lower_bound(*key, &numeric_comp)->key);
-			OAK_ASSERT_EQ(tree.lower_bound(*key, &numeric_comp)->key, *existingKeys.lower_bound(*key));
+			OAK_ASSERT_LE(key, tree.lower_bound(key, &numeric_comp)->key);
+			OAK_ASSERT_EQ(tree.lower_bound(key, &numeric_comp)->key, *existingKeys.lower_bound(key));
 		}
 	}
 
@@ -163,16 +163,16 @@ void test_search ()
 	// = upper bound =
 	// ===============
 
-	iterate(key, nonExistingKeys)
+	for(auto const& key : nonExistingKeys)
 	{
-		if(existingKeys.upper_bound(*key) == existingKeys.end())
+		if(existingKeys.upper_bound(key) == existingKeys.end())
 		{
-			OAK_ASSERT(tree.upper_bound(*key, &numeric_comp) == tree.end());
+			OAK_ASSERT(tree.upper_bound(key, &numeric_comp) == tree.end());
 		}
 		else
 		{
-			OAK_ASSERT_LT(*key, tree.upper_bound(*key, &numeric_comp)->key);
-			OAK_ASSERT_EQ(tree.upper_bound(*key, &numeric_comp)->key, *existingKeys.upper_bound(*key));
+			OAK_ASSERT_LT(key, tree.upper_bound(key, &numeric_comp)->key);
+			OAK_ASSERT_EQ(tree.upper_bound(key, &numeric_comp)->key, *existingKeys.upper_bound(key));
 		}
 	}
 }

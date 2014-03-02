@@ -190,8 +190,8 @@ namespace document
 				document::document_ptr doc = _document;
 
 				_document->post_load(path, content, attributes, fileType, encoding);
-				iterate(cb, callbacks)
-					(*cb)->show_document(path, doc);
+				for(auto const& cb : callbacks)
+					cb->show_document(path, doc);
 			}
 
 			void show_error (std::string const& path, std::string const& message, oak::uuid_t const& filter)
@@ -201,8 +201,8 @@ namespace document
 				document::document_ptr doc = _document;
 
 				_document->post_load(path, io::bytes_ptr(), std::map<std::string, std::string>(), NULL_STR, encoding::type());
-				iterate(cb, callbacks)
-					(*cb)->show_error(path, doc, message, filter);
+				for(auto const& cb : callbacks)
+					cb->show_error(path, doc, message, filter);
 			}
 
 		private:

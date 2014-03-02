@@ -64,8 +64,8 @@ void test_basic_tree_delta ()
 
 	// test primary key
 	std::string buf = "";
-	iterate(it, tree)
-		buf.insert(buf.size(), buffer.substr(it->offset.buffer_size, it->key.buffer_size));
+	for(auto const& it : tree)
+		buf.insert(buf.size(), buffer.substr(it.offset.buffer_size, it.key.buffer_size));
 	OAK_ASSERT_EQ(buf, buffer);
 
 	buf = "";

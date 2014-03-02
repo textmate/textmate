@@ -32,8 +32,8 @@ void test_track_file ()
 		path::set_content(paths[i], "");
 
 	track_paths_t tracker;
-	iterate(path, paths)
-		tracker.add(*path);
+	for(auto const& path : paths)
+		tracker.add(path);
 	usleep(100000);
 	OAK_ASSERT(test_range(tracker, paths, 50, 50));
 

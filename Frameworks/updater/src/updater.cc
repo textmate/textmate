@@ -49,12 +49,12 @@ namespace bundles_db
 		plist::array_t keys;
 		if(plist::get_key_path(plist::load(_path), "keys", keys))
 		{
-			iterate(key, keys)
+			for(auto const& key : keys)
 			{
 				std::string identity, name, publicKey;
-				if(plist::get_key_path(*key, "identity", identity) && plist::get_key_path(*key, "name", name) && plist::get_key_path(*key, "publicKey", publicKey))
+				if(plist::get_key_path(key, "identity", identity) && plist::get_key_path(key, "name", name) && plist::get_key_path(key, "publicKey", publicKey))
 						res.add(key_chain_t::key_t(identity, name, publicKey));
-				else	fprintf(stderr, "bad public key entry:\n%s\n", to_s(*key).c_str());
+				else	fprintf(stderr, "bad public key entry:\n%s\n", to_s(key).c_str());
 			}
 		}
 		else
@@ -103,17 +103,17 @@ namespace bundles_db
 		plist::dictionary_t sources;
 		if(plist::get_key_path(plist, "sources", sources))
 		{
-			iterate(source, sources)
+			for(auto const& source : sources)
 			{
 				std::string name = NULL_STR, url = NULL_STR;
 				int32_t rank = 0; bool disabled = false;
 
-				plist::get_key_path(source->second, "name",     name);
-				plist::get_key_path(source->second, "url",      url);
-				plist::get_key_path(source->second, "rank",     rank);
-				plist::get_key_path(source->second, "disabled", disabled);
+				plist::get_key_path(source.second, "name",     name);
+				plist::get_key_path(source.second, "url",      url);
+				plist::get_key_path(source.second, "rank",     rank);
+				plist::get_key_path(source.second, "disabled", disabled);
 
-				res.push_back(std::make_shared<source_t>(name, source->first, url, path::join(sources_path(installDir), source->first), rank, disabled));
+				res.push_back(std::make_shared<source_t>(name, source.first, url, path::join(sources_path(installDir), source.first), rank, disabled));
 			}
 		}
 
@@ -124,14 +124,14 @@ namespace bundles_db
 	bool save_sources (std::vector<source_ptr> const& sources, std::string const& installDir)
 	{
 		plist::dictionary_t dict;
-		iterate(source, sources)
+		for(auto const& source : sources)
 		{
 			plist::dictionary_t item;
-			item["name"]     = (*source)->name();
-			item["url"]      = (*source)->url();
-			item["rank"]     = (*source)->rank();
-			item["disabled"] = (*source)->disabled();
-			dict[(*source)->identifier()] = item;
+			item["name"]     = source->name();
+			item["url"]      = source->url();
+			item["rank"]     = source->rank();
+			item["disabled"] = source->disabled();
+			dict[source->identifier()] = item;
 		}
 
 		plist::dictionary_t plist;
@@ -188,12 +188,12 @@ namespace bundles_db
 
 	static bundle_ptr find_bundle (std::string const& scope, std::vector<bundle_ptr> const& bundles)
 	{
-		citerate(bundle, bundles)
+		for(auto const& bundle : bundles)
 		{
-			citerate(grammarInfo, (*bundle)->grammars())
+			for(auto const& grammarInfo : bundle->grammars())
 			{
-				if((*grammarInfo)->scope() == scope)
-					return *bundle;
+				if(grammarInfo->scope() == scope)
+					return bundle;
 			}
 		}
 		return bundle_ptr();
@@ -201,10 +201,10 @@ namespace bundles_db
 
 	static bundle_ptr find_bundle (oak::uuid_t const& uuid, std::vector<bundle_ptr> const& bundles)
 	{
-		citerate(bundle, bundles)
+		for(auto const& bundle : bundles)
 		{
-			if((*bundle)->uuid() == uuid)
-				return *bundle;
+			if(bundle->uuid() == uuid)
+				return bundle;
 		}
 		return bundle_ptr();
 	}
@@ -226,18 +226,18 @@ namespace bundles_db
 				if(current != this)
 					res.push_back(current);
 
-				citerate(dependency, current->_dependencies)
+				for(auto const& dependency : current->_dependencies)
 				{
-					if(bundle_ptr bundle = (*dependency)->_uuid ? find_bundle((*dependency)->_uuid, bundles) : find_bundle((*dependency)->_grammar, bundles))
+					if(bundle_ptr bundle = dependency->_uuid ? find_bundle(dependency->_uuid, bundles) : find_bundle(dependency->_grammar, bundles))
 						pending.push_back(bundle.get());
 				}
 			}
 		}
 		else
 		{
-			citerate(dependency, _dependencies)
+			for(auto const& dependency : _dependencies)
 			{
-				if(bundle_ptr bundle = (*dependency)->_uuid ? find_bundle((*dependency)->_uuid, bundles) : find_bundle((*dependency)->_grammar, bundles))
+				if(bundle_ptr bundle = dependency->_uuid ? find_bundle(dependency->_uuid, bundles) : find_bundle(dependency->_grammar, bundles))
 					res.push_back(bundle.get());
 			}
 		}
@@ -251,21 +251,21 @@ namespace bundles_db
 	template <typename _OutputIter>
 	_OutputIter parse_grammars_array (plist::array_t const& grammars, _OutputIter out)
 	{
-		iterate(grammar, grammars)
+		for(auto const& grammar : grammars)
 		{
 			auto info = std::make_shared<grammar_info_t>();
 
-			plist::get_key_path(*grammar, "name", info->_name);
-			plist::get_key_path(*grammar, "scope", info->_scope);
-			plist::get_key_path(*grammar, "uuid", info->_uuid);
-			plist::get_key_path(*grammar, "firstLineMatch", info->_mode_line);
+			plist::get_key_path(grammar, "name", info->_name);
+			plist::get_key_path(grammar, "scope", info->_scope);
+			plist::get_key_path(grammar, "uuid", info->_uuid);
+			plist::get_key_path(grammar, "firstLineMatch", info->_mode_line);
 
 			plist::array_t fileTypes;
-			if(plist::get_key_path(*grammar, "fileTypes", fileTypes))
+			if(plist::get_key_path(grammar, "fileTypes", fileTypes))
 			{
-				iterate(type, fileTypes)
+				for(auto const& type : fileTypes)
 				{
-					if(std::string const* ext = boost::get<std::string>(&*type))
+					if(std::string const* ext = boost::get<std::string>(&type))
 						info->_file_types.push_back(*ext);
 				}
 			}
@@ -279,12 +279,12 @@ namespace bundles_db
 	template <typename _OutputIter>
 	_OutputIter parse_dependencies_array (plist::array_t const& dependencies, _OutputIter out)
 	{
-		iterate(dependency, dependencies)
+		for(auto const& dependency : dependencies)
 		{
 			auto info = std::make_shared<dependency_info_t>();
-			plist::get_key_path(*dependency, "uuid", info->_uuid);
-			plist::get_key_path(*dependency, "name", info->_name);
-			plist::get_key_path(*dependency, "grammar", info->_grammar);
+			plist::get_key_path(dependency, "uuid", info->_uuid);
+			plist::get_key_path(dependency, "name", info->_name);
+			plist::get_key_path(dependency, "grammar", info->_grammar);
 			*out++ = info;
 		}
 
@@ -294,49 +294,49 @@ namespace bundles_db
 	template <typename _OutputIter>
 	_OutputIter parse_remote_bundle_index (source_ptr src, _OutputIter out)
 	{
-		citerate(pair, plist::load(src->path()))
+		for(auto const& pair : plist::load(src->path()))
 		{
-			if(pair->first != "bundles")
+			if(pair.first != "bundles")
 				continue;
 
-			citerate(item, plist::as_array(pair->second))
+			for(auto const& item : plist::as_array(pair.second))
 			{
 				auto bundle = std::make_shared<bundle_t>();
 				bundle->_source = src;
 
-				if(!plist::get_key_path(*item, "uuid", bundle->_uuid))
+				if(!plist::get_key_path(item, "uuid", bundle->_uuid))
 					continue;
 
 				plist::array_t versions;
-				if(!plist::get_key_path(*item, "versions", versions))
+				if(!plist::get_key_path(item, "versions", versions))
 					continue;
 
-				iterate(version, versions)
+				for(auto const& version : versions)
 				{
-					plist::get_key_path(*version, "url",       bundle->_url);
-					plist::get_key_path(*version, "updated",   bundle->_url_updated);
-					plist::get_key_path(*version, "size",      bundle->_size);
+					plist::get_key_path(version, "url",       bundle->_url);
+					plist::get_key_path(version, "updated",   bundle->_url_updated);
+					plist::get_key_path(version, "size",      bundle->_size);
 				}
 
-				plist::get_key_path(*item, "name",              bundle->_name);
-				plist::get_key_path(*item, "category",          bundle->_category);
-				plist::get_key_path(*item, "html_url",          bundle->_html_url);
-				plist::get_key_path(*item, "contactName",       bundle->_contact_name);
-				plist::get_key_path(*item, "contactEmailRot13", bundle->_contact_email);
-				plist::get_key_path(*item, "description",       bundle->_description);
+				plist::get_key_path(item, "name",              bundle->_name);
+				plist::get_key_path(item, "category",          bundle->_category);
+				plist::get_key_path(item, "html_url",          bundle->_html_url);
+				plist::get_key_path(item, "contactName",       bundle->_contact_name);
+				plist::get_key_path(item, "contactEmailRot13", bundle->_contact_email);
+				plist::get_key_path(item, "description",       bundle->_description);
 
 				if(bundle->_contact_email != NULL_STR)
 					bundle->_contact_email = decode::rot13(bundle->_contact_email);
 
 				plist::array_t grammars;
-				if(plist::get_key_path(*item, "grammars", grammars))
+				if(plist::get_key_path(item, "grammars", grammars))
 				{
 					parse_grammars_array(grammars, back_inserter(bundle->_grammars));
 					std::sort(bundle->_grammars.begin(), bundle->_grammars.end(), [](grammar_info_ptr lhs, grammar_info_ptr const& rhs){ return text::less_t()(lhs->name(), rhs->name()); });
 				}
 
 				plist::array_t dependencies;
-				if(plist::get_key_path(*item, "dependencies", dependencies))
+				if(plist::get_key_path(item, "dependencies", dependencies))
 					parse_dependencies_array(dependencies, back_inserter(bundle->_dependencies));
 
 				*out++ = bundle;
@@ -348,8 +348,8 @@ namespace bundles_db
 	static std::vector<bundle_ptr> remote_bundles (std::string const& installDir)
 	{
 		std::vector<bundle_ptr> res;
-		citerate(src, bundles_db::sources(installDir))
-			parse_remote_bundle_index(*src, back_inserter(res));
+		for(auto const& src : bundles_db::sources(installDir))
+			parse_remote_bundle_index(src, back_inserter(res));
 		return res;
 	}
 
@@ -364,15 +364,15 @@ namespace bundles_db
 		plist::dictionary_t const localIndexPlist = plist::load(local_index_path(installDir));
 
 		std::set<std::string> actualPaths, indexedPaths;
-		citerate(entry, path::entries(base, "*.tm[Bb]undle"))
-			actualPaths.insert(path::join(base, (*entry)->d_name));
+		for(auto const& entry : path::entries(base, "*.tm[Bb]undle"))
+			actualPaths.insert(path::join(base, entry->d_name));
 
-		iterate(pair, localIndexPlist)
+		for(auto const& pair : localIndexPlist)
 		{
-			citerate(item, plist::as_array(pair->second))
+			for(auto const& item : plist::as_array(pair.second))
 			{
 				std::string path;
-				if(plist::get_key_path(*item, "path", path))
+				if(plist::get_key_path(item, "path", path))
 					indexedPaths.insert(expand_path(path, installDir));
 			}
 		}
@@ -383,17 +383,17 @@ namespace bundles_db
 		std::set_difference(indexedPaths.begin(), indexedPaths.end(), actualPaths.begin(), actualPaths.end(), inserter(inIndexButNotDisk, inIndexButNotDisk.begin()));
 
 		std::vector<bundle_ptr> res;
-		iterate(pair, localIndexPlist)
+		for(auto const& pair : localIndexPlist)
 		{
-			if(pair->first != "bundles")
+			if(pair.first != "bundles")
 				continue;
 
-			citerate(item, plist::as_array(pair->second))
+			for(auto const& item : plist::as_array(pair.second))
 			{
 				auto bundle = std::make_shared<bundle_t>();
-				if(!plist::get_key_path(*item, "category", bundle->_category))
+				if(!plist::get_key_path(item, "category", bundle->_category))
 					bundle->_category = "Discontinued";
-				if(plist::get_key_path(*item, "source", bundle->_origin) && plist::get_key_path(*item, "name", bundle->_name) && plist::get_key_path(*item, "uuid", bundle->_uuid) && plist::get_key_path(*item, "updated", bundle->_path_updated) && plist::get_key_path(*item, "path", bundle->_path))
+				if(plist::get_key_path(item, "source", bundle->_origin) && plist::get_key_path(item, "name", bundle->_name) && plist::get_key_path(item, "uuid", bundle->_uuid) && plist::get_key_path(item, "updated", bundle->_path_updated) && plist::get_key_path(item, "path", bundle->_path))
 				{
 					bundle->_path = expand_path(bundle->_path, installDir);
 					if(inIndexButNotDisk.find(bundle->_path) == inIndexButNotDisk.end())
@@ -403,18 +403,18 @@ namespace bundles_db
 			}
 		}
 
-		iterate(path, onDiskButNotIndex)
+		for(auto const& path : onDiskButNotIndex)
 		{
 			auto bundle = std::make_shared<bundle_t>();
 			bundle->_category     = "Orphaned";
-			bundle->_path         = *path;
-			bundle->_path_updated = path::get_attr(*path, kBundleAttributeUpdated);
-			bundle->_origin       = path::get_attr(*path, kBundleAttributeOrigin);
+			bundle->_path         = path;
+			bundle->_path_updated = path::get_attr(path, kBundleAttributeUpdated);
+			bundle->_origin       = path::get_attr(path, kBundleAttributeOrigin);
 
 			if(bundle->_origin == NULL_STR)
 				bundle->_origin = "x.unknown.origin";
 
-			plist::dictionary_t infoPlist = plist::load(path::join(*path, "info.plist"));
+			plist::dictionary_t infoPlist = plist::load(path::join(path, "info.plist"));
 			if(plist::get_key_path(infoPlist, "uuid", bundle->_uuid) && plist::get_key_path(infoPlist, "name", bundle->_name))
 			{
 				plist::get_key_path(infoPlist, "description", bundle->_description);
@@ -436,23 +436,23 @@ namespace bundles_db
 		std::sort(bundlesByRank.begin(), bundlesByRank.end(), [](bundle_ptr const& lhs, bundle_ptr const& rhs){ return lhs->source()->rank() > rhs->source()->rank(); });
 
 		std::map<oak::uuid_t, bundle_ptr> bundles;
-		iterate(bundle, bundlesByRank)
-			bundles.emplace((*bundle)->uuid(), *bundle);
+		for(auto const& bundle : bundlesByRank)
+			bundles.emplace(bundle->uuid(), bundle);
 
-		citerate(bundle, bundle_t::local_bundles(installDir))
+		for(auto const& bundle : bundle_t::local_bundles(installDir))
 		{
-			std::map<oak::uuid_t, bundle_ptr>::iterator remote = bundles.find((*bundle)->uuid());
+			std::map<oak::uuid_t, bundle_ptr>::iterator remote = bundles.find(bundle->uuid());
 			if(remote != bundles.end())
 			{
-				remote->second->_name         = (*bundle)->_name;
-				remote->second->_path         = (*bundle)->_path;
-				remote->second->_path_updated = (*bundle)->_path_updated;
-				remote->second->_origin       = (*bundle)->_origin;
+				remote->second->_name         = bundle->_name;
+				remote->second->_path         = bundle->_path;
+				remote->second->_path_updated = bundle->_path_updated;
+				remote->second->_origin       = bundle->_origin;
 			}
 			else
 			{
-				bundles.emplace((*bundle)->uuid(), (*bundle));
-				fprintf(stderr, "Bundle missing in remote index: ‘%s’ (source ‘%s’)\n", (*bundle)->name().c_str(), (*bundle)->origin().c_str());
+				bundles.emplace(bundle->uuid(), bundle);
+				fprintf(stderr, "Bundle missing in remote index: ‘%s’ (source ‘%s’)\n", bundle->name().c_str(), bundle->origin().c_str());
 			}
 		}
 
@@ -470,18 +470,18 @@ namespace bundles_db
 	bool save_index (std::vector<bundle_ptr> const& bundles, std::string const& installDir)
 	{
 		plist::dictionary_t plist;
-		iterate(bundle, bundles)
+		for(auto const& bundle : bundles)
 		{
-			if(!(*bundle)->installed())
+			if(!bundle->installed())
 				continue;
 
 			plist::dictionary_t dict;
-			dict["name"]     = (*bundle)->name();
-			dict["uuid"]     = to_s((*bundle)->uuid());
-			dict["category"] = (*bundle)->category();
-			dict["path"]     = path::relative_to((*bundle)->path(), local_bundle_path(installDir));
-			dict["updated"]  = (*bundle)->path_updated();
-			dict["source"]   = (*bundle)->origin();
+			dict["name"]     = bundle->name();
+			dict["uuid"]     = to_s(bundle->uuid());
+			dict["category"] = bundle->category();
+			dict["path"]     = path::relative_to(bundle->path(), local_bundle_path(installDir));
+			dict["updated"]  = bundle->path_updated();
+			dict["source"]   = bundle->origin();
 
 			plist::dictionary_t::iterator array = plist.find("bundles");
 			if(array == plist.end())
@@ -578,26 +578,26 @@ namespace bundles_db
 	std::vector<bundle_ptr> dependencies (std::vector<bundle_ptr> const& index, std::vector<bundle_ptr> const& startBundles, bool excludeInstalledBundles, bool excludeStartBundles)
 	{
 		std::map<oak::uuid_t, bundle_ptr> bundles;
-		iterate(bundle, index)
-			bundles.emplace((*bundle)->uuid(), *bundle);
+		for(auto const& bundle : index)
+			bundles.emplace(bundle->uuid(), bundle);
 
 		std::set<oak::uuid_t> dependencies, queue;
-		iterate(bundle, startBundles)
-			queue.insert((*bundle)->uuid());
+		for(auto const& bundle : startBundles)
+			queue.insert(bundle->uuid());
 
 		while(!queue.empty())
 		{
 			dependencies.insert(queue.begin(), queue.end());
 			std::set<oak::uuid_t> tmp;
 			tmp.swap(queue);
-			iterate(uuid, tmp)
+			for(auto const& uuid : tmp)
 			{
-				citerate(dependency, bundles[*uuid]->dependencies(index))
+				for(auto const& dependency : bundles[uuid]->dependencies(index))
 				{
-					if(dependencies.find((*dependency)->uuid()) == dependencies.end())
+					if(dependencies.find(dependency->uuid()) == dependencies.end())
 					{
-						dependencies.insert((*dependency)->uuid());
-						queue.insert((*dependency)->uuid());
+						dependencies.insert(dependency->uuid());
+						queue.insert(dependency->uuid());
 					}
 				}
 			}
@@ -606,16 +606,16 @@ namespace bundles_db
 		std::set<oak::uuid_t> exclude;
 		if(excludeStartBundles)
 		{
-			iterate(bundle, startBundles)
-				exclude.insert((*bundle)->uuid());
+			for(auto const& bundle : startBundles)
+				exclude.insert(bundle->uuid());
 		}
 
 		if(excludeInstalledBundles)
 		{
-			iterate(bundle, index)
+			for(auto const& bundle : index)
 			{
-				if((*bundle)->installed())
-					exclude.insert((*bundle)->uuid());
+				if(bundle->installed())
+					exclude.insert(bundle->uuid());
 			}
 		}
 
@@ -623,8 +623,8 @@ namespace bundles_db
 		std::set_difference(dependencies.begin(), dependencies.end(), exclude.begin(), exclude.end(), back_inserter(missing));
 
 		std::vector<bundle_ptr> res;
-		iterate(uuid, missing)
-			res.push_back(bundles[*uuid]);
+		for(auto const& uuid : missing)
+			res.push_back(bundles[uuid]);
 		std::sort(res.begin(), res.end(), &bundle_name_less);
 		return res;
 	}
@@ -633,22 +633,22 @@ namespace bundles_db
 	{
 		std::vector<bundle_ptr> res;
 		std::set<oak::uuid_t> seen;
-		iterate(bundle, bundles)
+		for(auto const& bundle : bundles)
 		{
-			iterate(candidate, index)
+			for(auto const& candidate : index)
 			{
-				if(onlyInstalledBundles && !(*candidate)->installed())
+				if(onlyInstalledBundles && !candidate->installed())
 					continue;
 
-				if(seen.find((*candidate)->uuid()) != seen.end())
+				if(seen.find(candidate->uuid()) != seen.end())
 					continue;
 
-				citerate(dependency, (*candidate)->dependencies(index, false))
+				for(auto const& dependency : candidate->dependencies(index, false))
 				{
-					if((*bundle)->uuid() == (*dependency)->uuid())
+					if(bundle->uuid() == dependency->uuid())
 					{
-						res.push_back(*candidate);
-						seen.insert((*candidate)->uuid());
+						res.push_back(candidate);
+						seen.insert(candidate->uuid());
 						break;
 					}
 				}

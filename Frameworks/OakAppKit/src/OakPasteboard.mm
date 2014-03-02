@@ -130,8 +130,8 @@ namespace
 	private:
 		static void callback (CFRunLoopObserverRef observer, CFRunLoopActivity activity, void* info)
 		{
-			iterate(it, idle_callback()._pasteboards)
-				[*it checkForExternalPasteboardChanges];
+			for(auto const& it : idle_callback()._pasteboards)
+				[it checkForExternalPasteboardChanges];
 		}
 
 		bool _running;

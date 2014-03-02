@@ -17,14 +17,14 @@ namespace
 			std::lock_guard<std::mutex> lock(_lock);
 
 			std::vector<int> toDelete;
-			iterate(record, _records)
+			for(auto const& record : _records)
 			{
-				if(record->second.done && record->second.stop)
-					toDelete.push_back(record->first);
+				if(record.second.done && record.second.stop)
+					toDelete.push_back(record.first);
 			}
 
-			iterate(key, toDelete)
-				_records.erase(*key);
+			for(auto const& key : toDelete)
+				_records.erase(key);
 
 			return _records.emplace(_next_key++, (record_t){ processId, std::string(), false, nil, false }).first->first;
 		}

@@ -32,8 +32,8 @@ template <int N>
 std::vector< std::pair<ssize_t, size_t> > expected (value_pair(&array)[N])
 {
 	std::vector< std::pair<ssize_t, size_t> > res;
-	iterate(pair, array)
-		res.push_back(std::make_pair(pair->first, pair->second));
+	for(auto const& pair : array)
+		res.push_back(std::make_pair(pair.first, pair.second));
 	return res;
 }
 
@@ -47,8 +47,8 @@ void test_basic ()
 
 	std::vector<ssize_t> keys(tmp.begin(), tmp.end());
 	std::random_shuffle(keys.begin(), keys.end());
-	iterate(key, keys)
-		map.set(*key, true);
+	for(auto const& key : keys)
+		map.set(key, true);
 
 	std::vector<ssize_t> sorted;
 	std::transform(map.begin(), map.end(), back_inserter(sorted), [](std::pair<ssize_t, bool> const& p){ return p.first; });
@@ -62,8 +62,8 @@ void test_basic ()
 
 		tmp.erase(keys[i]);
 		sorted.clear();
-		iterate(pair, map)
-			sorted.push_back(pair->first);
+		for(auto const& pair : map)
+			sorted.push_back(pair.first);
 		OAK_ASSERT_EQ(tmp.size(), sorted.size());
 		OAK_ASSERT(std::equal(tmp.begin(), tmp.end(), sorted.begin()));
 	}
@@ -71,14 +71,14 @@ void test_basic ()
 	std::sort(keys.begin(), keys.end());
 
 	sorted.clear();
-	iterate(pair, map)
-		sorted.push_back(pair->first);
+	for(auto const& pair : map)
+		sorted.push_back(pair.first);
 	OAK_ASSERT_EQ(keys.size(), sorted.size());
 	OAK_ASSERT(std::equal(keys.begin(), keys.end(), sorted.begin()));
 
 	std::random_shuffle(sorted.begin(), sorted.end());
-	iterate(key, sorted)
-		map.remove(*key);
+	for(auto const& key : sorted)
+		map.remove(key);
 	OAK_ASSERT(map.empty());
 }
 
@@ -90,8 +90,8 @@ void test_child_count ()
 
 		std::next_permutation(keys.begin(), keys.end());
 		indexed_map_t<bool> map;
-		iterate(key, keys)
-			map.set(*key, true);
+		for(auto const& key : keys)
+			map.set(key, true);
 
 		OAK_ASSERT_EQ(map.size(), 5);
 
@@ -143,8 +143,8 @@ void test_find ()
 
 		std::next_permutation(keys.begin(), keys.end());
 		indexed_map_t<bool> map;
-		iterate(key, TestKeys)
-			map.set(*key, true);
+		for(auto const& key : TestKeys)
+			map.set(key, true);
 
 		OAK_ASSERT_EQ(map.find(10-1).index(), 5);
 		OAK_ASSERT_EQ(map.find(20-1).index(), 5);
@@ -175,8 +175,8 @@ void test_lower_bound ()
 
 		std::next_permutation(keys.begin(), keys.end());
 		indexed_map_t<bool> map;
-		iterate(key, TestKeys)
-			map.set(*key, true);
+		for(auto const& key : TestKeys)
+			map.set(key, true);
 
 		OAK_ASSERT_EQ(map.lower_bound(10-1).index(), 0);
 		OAK_ASSERT_EQ(map.lower_bound(20-1).index(), 1);
@@ -207,8 +207,8 @@ void test_upper_bound ()
 
 		std::next_permutation(keys.begin(), keys.end());
 		indexed_map_t<bool> map;
-		iterate(key, TestKeys)
-			map.set(*key, true);
+		for(auto const& key : TestKeys)
+			map.set(key, true);
 
 		OAK_ASSERT_EQ(map.upper_bound(10-1).index(), 0);
 		OAK_ASSERT_EQ(map.upper_bound(20-1).index(), 1);
@@ -248,19 +248,19 @@ void test_preserve ()
 
 void test_bind_right ()
 {
-	iterate(row, TestKeys)
+	for(auto const& row : TestKeys)
 	{
-		std::vector<ssize_t> keys(std::begin(*row), std::end(*row));
+		std::vector<ssize_t> keys(std::begin(row), std::end(row));
 		do {
 
 			indexed_map_t<bool> map;
 
 			ssize_t pivot = 30, pad = 5;
 			std::vector<ssize_t> expected, actual;
-			iterate(key, keys)
+			for(auto const& key : keys)
 			{
-				map.set(*key, true);
-				expected.push_back(*key < pivot ? *key : *key + pad);
+				map.set(key, true);
+				expected.push_back(key < pivot ? key : key + pad);
 			}
 
 			map.replace(pivot, pivot, pad, true /* bindRight */);
@@ -271,25 +271,25 @@ void test_bind_right ()
 
 			std::next_permutation(keys.begin(), keys.end());
 
-		} while(!std::equal(keys.begin(), keys.end(), std::begin(*row)));
+		} while(!std::equal(keys.begin(), keys.end(), std::begin(row)));
 	}
 }
 
 void test_bind_left ()
 {
-	iterate(row, TestKeys)
+	for(auto const& row : TestKeys)
 	{
-		std::vector<ssize_t> keys(std::begin(*row), std::end(*row));
+		std::vector<ssize_t> keys(std::begin(row), std::end(row));
 		do {
 
 			indexed_map_t<bool> map;
 
 			ssize_t pivot = 30, pad = 5;
 			std::vector<ssize_t> expected, actual;
-			iterate(key, keys)
+			for(auto const& key : keys)
 			{
-				map.set(*key, true);
-				expected.push_back(*key <= pivot ? *key : *key + pad);
+				map.set(key, true);
+				expected.push_back(key <= pivot ? key : key + pad);
 			}
 
 			map.replace(pivot, pivot, pad, false /* bindRight */);
@@ -300,7 +300,7 @@ void test_bind_left ()
 
 			std::next_permutation(keys.begin(), keys.end());
 
-		} while(!std::equal(keys.begin(), keys.end(), std::begin(*row)));
+		} while(!std::equal(keys.begin(), keys.end(), std::begin(row)));
 	}
 }
 

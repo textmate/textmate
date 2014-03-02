@@ -68,10 +68,10 @@ namespace
 	OakDebugBaseClass::registry()[[[menuItem representedObject] UTF8String]] ^= true;
 
 	NSMutableArray* debugEnabled = [NSMutableArray array];
-	iterate(it, OakDebugBaseClass::registry())
+	for(auto const& it : OakDebugBaseClass::registry())
 	{
-		if(it->second)
-			[debugEnabled addObject:@(it->first.c_str())];
+		if(it.second)
+			[debugEnabled addObject:@(it.first.c_str())];
 	}
 	[[NSUserDefaults standardUserDefaults] setObject:debugEnabled forKey:@"OakDebug Enabled"];
 }
@@ -116,14 +116,14 @@ namespace
 
 	std::vector<std::string> sectionNames = OakDebugBaseClass::sectionNames();;
 	NSMenu* submenu = nil;
-	iterate(it, OakDebugBaseClass::registry())
+	for(auto const& it : OakDebugBaseClass::registry())
 	{
-		std::string const& sectionName = OakDebugBaseClass::sectionName(it->first);
+		std::string const& sectionName = OakDebugBaseClass::sectionName(it.first);
 		NSMenuItem* item;
 		if(oak::contains(sectionNames.begin(), sectionNames.end(), sectionName))
 		{
 			NSString* section = @(sectionName.c_str());
-			NSString* title   = sectionName.size() == it->first.size() ? @"Base" : @(it->first.substr(sectionName.size() + 1).c_str());
+			NSString* title   = sectionName.size() == it.first.size() ? @"Base" : @(it.first.substr(sectionName.size() + 1).c_str());
 			if(![[submenu title] isEqualToString:section])
 			{
 				submenu = [[NSMenu alloc] initWithTitle:section];
@@ -133,11 +133,11 @@ namespace
 		}
 		else
 		{
-			item = [aMenu addItemWithTitle:@(it->first.c_str()) action:@selector(toggleDebugOption:) keyEquivalent:@""];
+			item = [aMenu addItemWithTitle:@(it.first.c_str()) action:@selector(toggleDebugOption:) keyEquivalent:@""];
 		}
-		[item setRepresentedObject:@(it->first.c_str())];
+		[item setRepresentedObject:@(it.first.c_str())];
 		[item setTarget:self];
-		[item setState:it->second ? NSOnState : NSOffState];
+		[item setState:it.second ? NSOnState : NSOffState];
 	}
 }
 

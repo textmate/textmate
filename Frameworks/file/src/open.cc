@@ -324,12 +324,12 @@ namespace
 						break;
 
 					std::vector<bundles::item_ptr> filters;
-					citerate(item, filter::find(_path, _content, _path_attributes, filter::kBundleEventBinaryImport))
+					for(auto const& item : filter::find(_path, _content, _path_attributes, filter::kBundleEventBinaryImport))
 					{
-						if(!oak::contains(_binary_import_filters.begin(), _binary_import_filters.end(), (*item)->uuid()))
+						if(!oak::contains(_binary_import_filters.begin(), _binary_import_filters.end(), item->uuid()))
 						{
-							filters.push_back(*item);
-							_binary_import_filters.push_back((*item)->uuid());
+							filters.push_back(item);
+							_binary_import_filters.push_back(item->uuid());
 							break; // FIXME see next FIXME
 						}
 					}
@@ -445,12 +445,12 @@ namespace
 					_next_state = kStateEstimateFileType;
 
 					std::vector<bundles::item_ptr> filters;
-					citerate(item, filter::find(_path, _content, _path_attributes, filter::kBundleEventTextImport))
+					for(auto const& item : filter::find(_path, _content, _path_attributes, filter::kBundleEventTextImport))
 					{
-						if(!oak::contains(_text_import_filters.begin(), _text_import_filters.end(), (*item)->uuid()))
+						if(!oak::contains(_text_import_filters.begin(), _text_import_filters.end(), item->uuid()))
 						{
-							filters.push_back(*item);
-							_text_import_filters.push_back((*item)->uuid());
+							filters.push_back(item);
+							_text_import_filters.push_back(item->uuid());
 							break; // FIXME see next FIXME
 						}
 					}

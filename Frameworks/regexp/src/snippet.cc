@@ -39,35 +39,35 @@ namespace snippet
 		buffer.replace(range.from.offset, range.size(), str);
 
 		std::vector<pos_t*> tmp;
-		iterate(it, fields)   { tmp.push_back(&it->second->range.from); tmp.push_back(&it->second->range.to); }
-		iterate(it, mirrors)  { tmp.push_back(&it->second->range.from); tmp.push_back(&it->second->range.to); }
+		for(auto const& it : fields)   { tmp.push_back(&it.second->range.from); tmp.push_back(&it.second->range.to); }
+		for(auto const& it : mirrors)  { tmp.push_back(&it.second->range.from); tmp.push_back(&it.second->range.to); }
 
-		iterate(it, tmp)
+		for(auto const& it : tmp)
 		{
-			if(range.contains(**it))
-				(*it)->offset = range.from.offset;
-			else if(range.from < **it)
-				(*it)->offset = (*it)->offset + str.size() - range.size();
+			if(range.contains(*it))
+				it->offset = range.from.offset;
+			else if(range.from < *it)
+				it->offset = it->offset + str.size() - range.size();
 		}
 	}
 
 	static oak::dependency_graph build_graph (std::map<size_t, field_ptr> const& fields, std::multimap<size_t, field_ptr> const& mirrors)
 	{
 		oak::dependency_graph graph;
-		iterate(field, fields)
+		for(auto const& field : fields)
 		{
-			graph.add_node(field->first);
+			graph.add_node(field.first);
 
-			iterate(otherField, fields)
+			for(auto const& otherField : fields)
 			{
-				if(field->second->range.contains(otherField->second->range))
-					graph.add_edge(field->first, otherField->first);
+				if(field.second->range.contains(otherField.second->range))
+					graph.add_edge(field.first, otherField.first);
 			}
 
-			iterate(mirror, mirrors)
+			for(auto const& mirror : mirrors)
 			{
-				if(field->second->range.contains(mirror->second->range))
-					graph.add_edge(field->first, mirror->first);
+				if(field.second->range.contains(mirror.second->range))
+					graph.add_edge(field.first, mirror.first);
 			}
 		}
 		return graph;
@@ -76,15 +76,15 @@ namespace snippet
 	void snippet_t::update_mirrors (std::set<size_t> const& forFields)
 	{
 		oak::dependency_graph const& graph = build_graph(fields, mirrors);
-		citerate(node, graph.topological_order())
+		for(auto const& node : graph.topological_order())
 		{
-			if(!forFields.empty() && forFields.find(*node) == forFields.end())
+			if(!forFields.empty() && forFields.find(node) == forFields.end())
 				continue;
 
-			std::string const& src = fields[*node]->range.to_s(text);
-			D(DBF_Snippet, bug("update mirrors of %zu (%s)\n", *node, src.c_str()););
+			std::string const& src = fields[node]->range.to_s(text);
+			D(DBF_Snippet, bug("update mirrors of %zu (%s)\n", node, src.c_str()););
 
-			foreach(mirror, mirrors.lower_bound(*node), mirrors.upper_bound(*node))
+			foreach(mirror, mirrors.lower_bound(node), mirrors.upper_bound(node))
 			{
 				std::string str = mirror->second->transform(src, variables);
 				str = tabs_to_spaces(str, indent_info.create());
@@ -98,8 +98,8 @@ namespace snippet
 	static void indent (std::string& buffer, std::string const& indent_string, std::map<size_t, field_ptr>& fields, std::multimap<size_t, field_ptr>& mirrors)
 	{
 		std::vector<pos_t*> positions;
-		iterate(it, fields)   { positions.push_back(&it->second->range.from); positions.push_back(&it->second->range.to); }
-		iterate(it, mirrors)  { positions.push_back(&it->second->range.from); positions.push_back(&it->second->range.to); }
+		for(auto const& it : fields)   { positions.push_back(&it.second->range.from); positions.push_back(&it.second->range.to); }
+		for(auto const& it : mirrors)  { positions.push_back(&it.second->range.from); positions.push_back(&it.second->range.to); }
 
 		char const* data = buffer.data();
 		size_t size = buffer.size();
@@ -111,10 +111,10 @@ namespace snippet
 		riterate(pair, lines)
 		{
 			size_t offset = pair->first - data;
-			iterate(pos, positions)
+			for(auto const& pos : positions)
 			{
-				if(offset <= (*pos)->offset)
-					(*pos)->offset += indent_string.size();
+				if(offset <= pos->offset)
+					pos->offset += indent_string.size();
 			}
 			D(DBF_Snippet, bug("indent line: %s", buffer.substr(offset, pair->second - pair->first).c_str()););
 			buffer.insert(buffer.begin() + offset, indent_string.begin(), indent_string.end());
@@ -129,8 +129,8 @@ namespace snippet
 			return;
 
 		std::vector<pos_t*> positions;
-		iterate(it, fields)   { positions.push_back(&it->second->range.from); positions.push_back(&it->second->range.to); }
-		iterate(it, mirrors)  { positions.push_back(&it->second->range.from); positions.push_back(&it->second->range.to); }
+		for(auto const& it : fields)   { positions.push_back(&it.second->range.from); positions.push_back(&it.second->range.to); }
+		for(auto const& it : mirrors)  { positions.push_back(&it.second->range.from); positions.push_back(&it.second->range.to); }
 
 		char const* data = buffer.data();
 		size_t size = buffer.size();
@@ -144,16 +144,16 @@ namespace snippet
 
 		std::string newBuffer;
 		size_t lastIndex = 0;
-		iterate(index, tabStops)
+		for(auto const& index : tabStops)
 		{
-			newBuffer.insert(newBuffer.end(), data + lastIndex, data + *index);
+			newBuffer.insert(newBuffer.end(), data + lastIndex, data + index);
 			newBuffer.append(tabString);
-			lastIndex = *index + 1;
+			lastIndex = index + 1;
 		}
 		newBuffer.insert(newBuffer.end(), data + lastIndex, data + size);
 
-		iterate(pos, positions)
-			(*pos)->offset += (tabString.size() - 1) * std::distance(tabStops.begin(), std::lower_bound(tabStops.begin(), tabStops.end(), (*pos)->offset));
+		for(auto const& pos : positions)
+			pos->offset += (tabString.size() - 1) * std::distance(tabStops.begin(), std::lower_bound(tabStops.begin(), tabStops.end(), pos->offset));
 		buffer.swap(newBuffer);
 
 		D(DBF_Snippet, bug("new snippet:\n%s\n", buffer.c_str()););
@@ -166,10 +166,10 @@ namespace snippet
 		std::transform(mirrors.begin(), mirrors.end(), inserter(known_mirrors, known_mirrors.end()), [](std::pair<size_t, field_ptr> const& p){ return p.first; });
 		std::vector<size_t> to_move;
 		set_difference(known_mirrors.begin(), known_mirrors.end(), known_fields.begin(), known_fields.end(), back_inserter(to_move));
-		iterate(it, to_move)
+		for(auto const& it : to_move)
 		{
-			fields.insert(*mirrors.lower_bound(*it));
-			mirrors.erase(mirrors.lower_bound(*it));
+			fields.insert(*mirrors.lower_bound(it));
+			mirrors.erase(mirrors.lower_bound(it));
 		}
 		
 		if(fields.find(0) == fields.end())
@@ -188,11 +188,11 @@ namespace snippet
 		std::set<size_t> dirty = graph.touch(n);
 
 		replacements_t updated;
-		citerate(node, graph.topological_order())
+		for(auto const& node : graph.topological_order())
 		{
-			if(dirty.find(*node) != dirty.end())
+			if(dirty.find(node) != dirty.end())
 			{
-				foreach(mirror, mirrors.lower_bound(*node), mirrors.upper_bound(*node))
+				foreach(mirror, mirrors.lower_bound(node), mirrors.upper_bound(node))
 					updated.push_back(std::make_pair(mirror->second->range, std::string()));
 			}
 		}
@@ -201,17 +201,17 @@ namespace snippet
 		update_mirrors(dirty);
 
 		size_t i = 0;
-		citerate(node, graph.topological_order())
+		for(auto const& node : graph.topological_order())
 		{
-			if(dirty.find(*node) != dirty.end())
+			if(dirty.find(node) != dirty.end())
 			{
-				foreach(mirror, mirrors.lower_bound(*node), mirrors.upper_bound(*node))
+				foreach(mirror, mirrors.lower_bound(node), mirrors.upper_bound(node))
 					updated[i++].second = mirror->second->range.to_s(text);
 			}
 		}
 
 		std::sort(updated.begin(), updated.end());
-		D(DBF_Snippet, iterate(it, updated) bug("%2zu-%2zu: %s\n", it->first.from.offset, it->first.to.offset, it->second.c_str()););
+		D(DBF_Snippet, for(auto const& it : updated) bug("%2zu-%2zu: %s\n", it.first.from.offset, it.first.to.offset, it.second.c_str()););
 		return updated;
 	}
 
@@ -242,8 +242,8 @@ namespace snippet
 			}
 		}
 
-		iterate(mirror, mirrors_to_remove)
-			mirrors.erase(*mirror);
+		for(auto const& mirror : mirrors_to_remove)
+			mirrors.erase(mirror);
 
 		D(DBF_Snippet, bug("replace range %zu (%zu) - %zu (%zu) with ‘%s’\n", currentField.from.offset, currentField.from.rank, currentField.to.offset, currentField.to.rank, str.c_str()););
 		replacements_t const& res = replace_helper(current_field, range, str);
@@ -251,21 +251,21 @@ namespace snippet
 
 
 		std::vector<size_t> fields_to_remove;
-		iterate(field, fields)
+		for(auto const& field : fields)
 		{
-			if(currentField.contains(field->second->range))
-				fields_to_remove.push_back(field->first);
+			if(currentField.contains(field.second->range))
+				fields_to_remove.push_back(field.first);
 		}
 
-		iterate(field, fields_to_remove)
+		for(auto const& field : fields_to_remove)
 		{
-			D(DBF_Snippet, bug("remove placeholder: %zu\n", *field););
-			fields.erase(fields.find(*field));
-			mirrors.erase(mirrors.lower_bound(*field), mirrors.upper_bound(*field));
+			D(DBF_Snippet, bug("remove placeholder: %zu\n", field););
+			fields.erase(fields.find(field));
+			mirrors.erase(mirrors.lower_bound(field), mirrors.upper_bound(field));
 		}
 
-		D(DBF_Snippet, bug("Fields:\n");  iterate(field, fields)   bug("\t%zu) %zu (%zu) - %zu (%zu)\n", field->first,  field->second->range.from.offset,  field->second->range.from.rank,  field->second->range.to.offset,  field->second->range.to.rank););
-		D(DBF_Snippet, bug("Mirrors:\n"); iterate(mirror, mirrors) bug("\t%zu) %zu (%zu) - %zu (%zu)\n", mirror->first, mirror->second->range.from.offset, mirror->second->range.from.rank, mirror->second->range.to.offset, mirror->second->range.to.rank););
+		D(DBF_Snippet, bug("Fields:\n");  for(auto const& field : fields)   bug("\t%zu) %zu (%zu) - %zu (%zu)\n", field.first,  field.second->range.from.offset,  field.second->range.from.rank,  field.second->range.to.offset,  field.second->range.to.rank););
+		D(DBF_Snippet, bug("Mirrors:\n"); for(auto const& mirror : mirrors) bug("\t%zu) %zu (%zu) - %zu (%zu)\n", mirror.first, mirror.second->range.from.offset, mirror.second->range.from.rank, mirror.second->range.to.offset, mirror.second->range.to.rank););
 
 		return res;
 	}
@@ -295,10 +295,10 @@ namespace snippet
 			return res;
 
 		std::vector<size_t> offsets(1, 0);
-		iterate(record, records)
-			offsets.push_back(offsets.back() + record->snippet.fields[record->snippet.current_field]->range.from.offset + record->caret);
+		for(auto& record : records)
+			offsets.push_back(offsets.back() + record.snippet.fields[record.snippet.current_field]->range.from.offset + record.caret);
 
-		D(DBF_Snippet_Stack, bug("offsets:\n"); iterate(offset, offsets) bug("\t%zu\n", *offset););
+		D(DBF_Snippet_Stack, bug("offsets:\n"); for(auto const& offset : offsets) bug("\t%zu\n", offset););
 
 		riterate(record, records)
 		{
@@ -310,11 +310,11 @@ namespace snippet
 			local.from.rank = local.to.rank = s.fields[s.current_field]->range.from.rank + 1;
 
 			std::vector< std::pair<snippet::range_t, std::string> > prepend;
-			citerate(it, s.replace(local, replacement))
+			for(auto const& it : s.replace(local, replacement))
 			{
-				if(it->first.from < local.from)
-						prepend.push_back(std::make_pair(it->first + offsets.back(), it->second));
-				else	res.push_back(std::make_pair(it->first + offsets.back(), it->second));
+				if(it.first.from < local.from)
+						prepend.push_back(std::make_pair(it.first + offsets.back(), it.second));
+				else	res.push_back(std::make_pair(it.first + offsets.back(), it.second));
 			}
 			res.insert(res.begin(), prepend.begin(), prepend.end());
 

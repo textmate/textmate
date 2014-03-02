@@ -40,8 +40,8 @@ namespace cf
 		array_t (std::vector<T> const& v)
 		{
 			CFMutableArrayRef value = CFArrayCreateMutable(kCFAllocatorDefault, 0, &kCFTypeArrayCallBacks);
-			iterate(it, v)
-				CFArrayAppendValue(value, cf::wrap(*it));
+			for(auto const& it : v)
+				CFArrayAppendValue(value, cf::wrap(it));
 			array.reset(value, CFRelease);
 		}
 		operator CFArrayRef () const { return array.get(); }
@@ -58,8 +58,8 @@ namespace cf
 		dictionary_t (std::map<K, V> const& map)
 		{
 			CFMutableDictionaryRef value = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-			iterate(it, map)
-				CFDictionaryAddValue(value, cf::wrap(it->first).get(), cf::wrap(it->second).get());
+			for(auto const& it : map)
+				CFDictionaryAddValue(value, cf::wrap(it.first).get(), cf::wrap(it.second).get());
 			dictionary.reset(value, CFRelease);
 		}
 		operator CFDictionaryRef () const { return dictionary.get(); }
@@ -76,8 +76,8 @@ namespace cf
 		set_t (std::set<T> const& v)
 		{
 			CFMutableSetRef value = CFSetCreateMutable(kCFAllocatorDefault, 0, &kCFTypeSetCallBacks);
-			iterate(it, v)
-				CFSetAddValue(value, cf::wrap(*it));
+			for(auto const& it : v)
+				CFSetAddValue(value, cf::wrap(it));
 			set.reset(value, CFRelease);
 		}
 		operator CFSetRef () const { return set.get(); }

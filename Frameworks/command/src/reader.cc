@@ -110,18 +110,18 @@ namespace command
 		data_received.swap(tmp);
 		pthread_mutex_unlock(&data_received_mutex);
 
-		iterate(it, tmp)
+		for(auto const& it : tmp)
 		{
-			// required check as we may receive a post-EOF “bytes available” with ‘it->length == 0’
-			if(clients_consumed_eof.find(it->client_key) == clients_consumed_eof.end())
+			// required check as we may receive a post-EOF “bytes available” with ‘it.length == 0’
+			if(clients_consumed_eof.find(it.client_key) == clients_consumed_eof.end())
 			{
-				std::map<size_t, reader_t*>::iterator client = client_to_callback.find(it->client_key);
+				std::map<size_t, reader_t*>::iterator client = client_to_callback.find(it.client_key);
 				if(client != client_to_callback.end())
-					client->second->receive_data(it->bytes, it->length);
-				if(it->length == 0)
-					clients_consumed_eof.insert(it->client_key);
+					client->second->receive_data(it.bytes, it.length);
+				if(it.length == 0)
+					clients_consumed_eof.insert(it.client_key);
 			}
-			delete it->bytes;
+			delete it.bytes;
 		}
 	}
 

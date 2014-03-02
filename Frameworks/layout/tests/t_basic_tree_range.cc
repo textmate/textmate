@@ -97,12 +97,12 @@ void test_range_tree ()
 	std::random_shuffle(keys.begin(), keys.end());
 
 	tree_t tree;
-	iterate(key, keys)
-		set(tree, *key);
+	for(auto const& key : keys)
+		set(tree, key);
 
 	std::vector<ssize_t> fromTree;
-	iterate(it, tree)
-		fromTree.push_back(it->offset.position + it->key.position);
+	for(auto const& it : tree)
+		fromTree.push_back(it.offset.position + it.key.position);
 
 	std::sort(keys.begin(), keys.end());
 	OAK_ASSERT_EQ(fromTree, keys);
@@ -114,15 +114,15 @@ void test_range_tree ()
 	std::random_shuffle(keys.begin(), keys.end());
 	ssize_t pos = keys[0], distance = 200;
 	adjust(tree, pos, distance);
-	iterate(key, keys)
+	for(auto& key : keys)
 	{
-		if(pos <= *key)
-			*key += distance;
+		if(pos <= key)
+			key += distance;
 	}
 
-	iterate(key, keys)
+	for(auto const& key : keys)
 	{
-		OAK_ASSERT(tree.find(*key, &position_comp) != tree.end());
+		OAK_ASSERT(tree.find(key, &position_comp) != tree.end());
 	}
 
 	// =======================
@@ -142,7 +142,7 @@ void test_range_tree ()
 	OAK_ASSERT_EQ(tree.size(), keys.size());
 
 	std::random_shuffle(keys.begin(), keys.end());
-	iterate(key, keys)
-		unset(tree, *key);
+	for(auto const& key : keys)
+		unset(tree, key);
 	OAK_ASSERT(tree.empty());
 }

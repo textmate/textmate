@@ -23,12 +23,12 @@ static NSURL* URLAppend (NSURL* base, NSString* relativePath)
 static NSArray* convert (std::vector<std::string> const& paths, std::string const& wcPath, NSUInteger options, bool hideSCMBadge = false)
 {
 	NSMutableArray* res = [NSMutableArray array];
-	iterate(path, paths)
+	for(auto const& path : paths)
 	{
-		FSItem* item    = [FSItem itemWithURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:*path]]];
-		item.target     = [NSURL fileURLWithPath:[NSString stringWithCxxString:*path]];
-		item.labelIndex = path::label_index(*path);
-		item.toolTip    = [NSString stringWithCxxString:path::relative_to(*path, wcPath)];
+		FSItem* item    = [FSItem itemWithURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:path]]];
+		item.target     = [NSURL fileURLWithPath:[NSString stringWithCxxString:path]];
+		item.labelIndex = path::label_index(path);
+		item.toolTip    = [NSString stringWithCxxString:path::relative_to(path, wcPath)];
 		item.leaf       = YES;
 
 		if(hideSCMBadge)

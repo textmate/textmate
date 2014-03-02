@@ -19,11 +19,11 @@ NSAttributedString* AttributedStringWithMarkedUpRanges (std::string const& in, s
 	}
 
 	size_t from = 0;
-	iterate(it, ranges)
+	for(auto const& it : ranges)
 	{
-		[res appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:std::string(text.begin() + from, text.begin() + it->first)] attributes:nil]];
-		[res appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:std::string(text.begin() + it->first, text.begin() + it->second)] attributes:highlightAttrs]];
-		from = it->second;
+		[res appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:std::string(text.begin() + from, text.begin() + it.first)] attributes:nil]];
+		[res appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:std::string(text.begin() + it.first, text.begin() + it.second)] attributes:highlightAttrs]];
+		from = it.second;
 	}
 	if(from < text.size())
 		[res appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:std::string(text.begin() + from, text.end())] attributes:nil]];

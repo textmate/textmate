@@ -311,8 +311,8 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (search::type sear
 		kindMask = bundles::kItemTypeTheme;
 
 	std::map<std::string, bundles::item_ptr, text::less_t> sorted;
-	citerate(item, bundles::query(bundles::kFieldAny, NULL_STR, scope, kindMask, oak::uuid_t(), false))
-		sorted.emplace(full_name_with_selection(*item, hasSelection), *item);
+	for(auto const& item : bundles::query(bundles::kFieldAny, NULL_STR, scope, kindMask, oak::uuid_t(), false))
+		sorted.emplace(full_name_with_selection(item, hasSelection), item);
 
 	std::vector<bundles::item_ptr> res;
 	std::transform(sorted.begin(), sorted.end(), back_inserter(res), [](std::pair<std::string, bundles::item_ptr> const& p){ return p.second; });
@@ -352,8 +352,8 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (search::type sear
 		searchType = newType;
 		all_items = relevant_items_in_scope(searchType, scope::wildcard, hasSelection);
 
-		citerate(item, relevant_items_in_scope(searchType, scope, hasSelection))
-			items_filtered_by_scope.insert((*item)->uuid());
+		for(auto const& item : relevant_items_in_scope(searchType, scope, hasSelection))
+			items_filtered_by_scope.insert(item->uuid());
 		[[NSNotificationCenter defaultCenter] postNotificationName:FLDataSourceItemsDidChangeNotification object:self];
 	}
 }
@@ -463,8 +463,8 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (search::type sear
 	}
 
 	NSMutableArray* items = [NSMutableArray array];
-	iterate(it, rankedItems)
-		[items addObject:it->second];
+	for(auto const& it : rankedItems)
+		[items addObject:it.second];
 
 	return items;
 }

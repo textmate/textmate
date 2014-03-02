@@ -32,8 +32,8 @@ struct expand_visitor : boost::static_visitor<void>
 
 	void traverse (parser::nodes_t const& nodes)
 	{
-		iterate(it, nodes)
-			boost::apply_visitor(*this, *it);
+		for(auto const& it : nodes)
+			boost::apply_visitor(*this, it);
 	}
 
 	void handle_case_changes ()
@@ -45,12 +45,12 @@ struct expand_visitor : boost::static_visitor<void>
 		char const* data = res.data();
 		size_t prev = 0;
 		parser::case_change::type style = parser::case_change::none;
-		iterate(it, case_changes)
+		for(auto const& it : case_changes)
 		{
-			if(prev < it->first)
+			if(prev < it.first)
 			{
 				bool only_next = style == parser::case_change::upper_next || style == parser::case_change::lower_next;
-				char const* to = only_next ? &(diacritics::begin_of(data + prev, data + it->first) + 1) : data + it->first;
+				char const* to = only_next ? &(diacritics::begin_of(data + prev, data + it.first) + 1) : data + it.first;
 
 				switch(style)
 				{
@@ -60,11 +60,11 @@ struct expand_visitor : boost::static_visitor<void>
 					case parser::case_change::upper:      tmp += text::uppercase(std::string(data + prev, to)); break;
 					case parser::case_change::lower:      tmp += text::lowercase(std::string(data + prev, to)); break;
 				}
-				std::copy(to, data + it->first, back_inserter(tmp));
+				std::copy(to, data + it.first, back_inserter(tmp));
 			}
 
-			prev = it->first;
-			style = it->second;
+			prev = it.first;
+			style = it.second;
 		}
 		tmp.swap(res);
 	}
@@ -235,10 +235,10 @@ struct expand_visitor : boost::static_visitor<void>
 			return;
 
 		std::vector<std::string> all_choices;
-		iterate(it, v.choices)
+		for(auto const& it : v.choices)
 		{
 			expand_visitor tmp(variables, callback);
-			tmp.traverse(*it);
+			tmp.traverse(it);
 			tmp.handle_case_changes();
 			all_choices.push_back(tmp.res);
 		}

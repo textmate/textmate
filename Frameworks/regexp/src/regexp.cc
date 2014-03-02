@@ -46,9 +46,9 @@ namespace regexp
 	pattern_t::pattern_t (std::string const& pattern, std::string const& str_options) : pattern_string(pattern)
 	{
 		OnigOptionType options = ONIG_OPTION_NONE;
-		iterate(it, str_options)
+		for(auto const& it : str_options)
 		{
-			switch(*it)
+			switch(it)
 			{
 				case 'e': options |= ONIG_OPTION_EXTEND;		break;
 				// case 'g': options |= ONIG_OPTION_REPEAT;		break;

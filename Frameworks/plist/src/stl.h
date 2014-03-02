@@ -15,8 +15,8 @@ namespace plist
 	array_t to_plist (std::vector<T> const& v)
 	{
 		array_t res;
-		iterate(it, v)
-			res.push_back(to_plist(*it));
+		for(auto const& it : v)
+			res.push_back(to_plist(it));
 		return res;
 	}
 
@@ -24,8 +24,8 @@ namespace plist
 	dictionary_t to_plist (std::map<K, V> const& map)
 	{
 		dictionary_t res;
-		iterate(it, map)
-			res.emplace(it->first, to_plist(it->second));
+		for(auto const& it : map)
+			res.emplace(it.first, to_plist(it.second));
 		return res;
 	}
 

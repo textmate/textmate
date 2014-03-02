@@ -14,9 +14,9 @@ namespace
 		CFPropertyListRef operator() (plist::array_t const& array) const
 		{
 			CFMutableArrayRef res = CFArrayCreateMutable(kCFAllocatorDefault, 0, &kCFTypeArrayCallBacks);
-			iterate(it, array)
+			for(auto const& it : array)
 			{
-				CFPropertyListRef value = boost::apply_visitor(*this, *it);
+				CFPropertyListRef value = boost::apply_visitor(*this, it);
 				CFArrayAppendValue(res, value);
 				CFRelease(value);
 			}
@@ -26,10 +26,10 @@ namespace
 		CFPropertyListRef operator() (plist::dictionary_t const& dict) const
 		{
 			CFMutableDictionaryRef res = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-			iterate(it, dict)
+			for(auto const& it : dict)
 			{
-				CFPropertyListRef key = (*this)(it->first);
-				CFPropertyListRef value = boost::apply_visitor(*this, it->second);
+				CFPropertyListRef key = (*this)(it.first);
+				CFPropertyListRef value = boost::apply_visitor(*this, it.second);
 				CFDictionarySetValue(res, key, value);
 				CFRelease(key);
 				CFRelease(value);

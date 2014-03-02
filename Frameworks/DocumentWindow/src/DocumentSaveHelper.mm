@@ -18,9 +18,9 @@ OAK_DEBUG_VAR(DocumentController_SaveHelper);
 
 NSString* DefaultSaveNameForDocument (document::document_ptr const& aDocument)
 {
-	citerate(item, bundles::query(bundles::kFieldGrammarScope, aDocument->file_type()))
+	for(auto const& item : bundles::query(bundles::kFieldGrammarScope, aDocument->file_type()))
 	{
-		std::string const& ext = (*item)->value_for_field(bundles::kFieldGrammarExtension);
+		std::string const& ext = item->value_for_field(bundles::kFieldGrammarExtension);
 		if(ext != NULL_STR)
 			return [NSString stringWithCxxString:aDocument->display_name() + "." + ext];
 	}

@@ -196,10 +196,10 @@ namespace oak
 	std::string normalize_filter (std::string const& filter)
 	{
 		std::string res = "";
-		citerate(ch, text::lowercase(filter))
+		for(auto const& ch : text::lowercase(filter))
 		{
-			if(*ch != ' ')
-				res += *ch;
+			if(ch != ' ')
+				res += ch;
 		}
 		return res;
 	}

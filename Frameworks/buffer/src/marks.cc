@@ -5,13 +5,13 @@ namespace ng
 {
 	void marks_t::replace (buffer_t* buffer, size_t from, size_t to, std::string const& str)
 	{
-		iterate(m, _marks)
+		for(auto& m : _marks)
 		{
-			tree_t::iterator it = m->second.upper_bound(to);
-			std::string preserveMark = it != m->second.begin() && from < (--it)->first && it->first <= to ? it->second : NULL_STR;
-			m->second.replace(from, to, str.size(), false);
+			tree_t::iterator it = m.second.upper_bound(to);
+			std::string preserveMark = it != m.second.begin() && from < (--it)->first && it->first <= to ? it->second : NULL_STR;
+			m.second.replace(from, to, str.size(), false);
 			if(preserveMark != NULL_STR)
-				m->second.set(from + str.size(), preserveMark);
+				m.second.set(from + str.size(), preserveMark);
 		}
 	}
 
@@ -74,9 +74,9 @@ namespace ng
 
 		if(markType == NULL_STR)
 		{
-			iterate(m, _marks)
+			for(auto const& m : _marks)
 			{
-				foreach(it, m->second.lower_bound(from), m->second.upper_bound(to))
+				foreach(it, m.second.lower_bound(from), m.second.upper_bound(to))
 					res[it->first - from] = it->second;
 			}
 		}

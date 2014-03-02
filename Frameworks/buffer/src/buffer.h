@@ -149,8 +149,8 @@ namespace ng
 	private:
 		void did_parse (size_t first, size_t last)
 		{
-			iterate(hook, _meta_data)
-				(*hook)->did_parse(this, first, last);
+			for(auto const& hook : _meta_data)
+				hook->did_parse(this, first, last);
 			_callbacks(&callback_t::did_parse, first, last);
 		}
 

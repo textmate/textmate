@@ -37,10 +37,10 @@ static void parse_status_output (scm::status_map_t& entries, std::string const& 
 	std::vector<std::string> v = text::split(output, std::string(1, '\0'));
 	ASSERT_EQ(v.back(), "");
 	v.pop_back();
-	iterate(line, v)
+	for(auto const& line : v)
 	{
-		ASSERT_EQ((*line)[1], ' ');
-		entries[line->substr(2)] = parse_status_flag((*line)[0]);
+		ASSERT_EQ(line[1], ' ');
+		entries[line.substr(2)] = parse_status_flag(line[0]);
 	}
 }
 
@@ -77,8 +77,8 @@ namespace scm
 
 			status_map_t relativePaths, res;
 			collect_all_paths(executable(), relativePaths, wcPath);
-			iterate(pair, relativePaths)
-				res.emplace(path::join(wcPath, pair->first), pair->second);
+			for(auto const& pair : relativePaths)
+				res.emplace(path::join(wcPath, pair.first), pair.second);
 			return res;
 		}
 	};

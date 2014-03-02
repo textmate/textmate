@@ -50,8 +50,8 @@ namespace command
 	{
 		~cleanup_server_t ()
 		{
-			iterate(path, _paths)
-				unlink(path->c_str());
+			for(auto const& path : _paths)
+				unlink(path.c_str());
 		}
 
 		void insert (std::string const& path) { _paths.insert(path); }
@@ -95,10 +95,10 @@ namespace command
 
 	pid_t process_t::launch ()
 	{
-		iterate(it, environment)
+		for(auto const& it : environment)
 		{
-			if(it->first.size() + it->second.size() + 2 >= ARG_MAX)
-				fprintf(stderr, "*** variable exceeds ARG_MAX: %s\n", it->first.c_str());
+			if(it.first.size() + it.second.size() + 2 >= ARG_MAX)
+				fprintf(stderr, "*** variable exceeds ARG_MAX: %s\n", it.first.c_str());
 		}
 
 		ASSERT(command.find("#!") == 0);
@@ -228,11 +228,11 @@ namespace command
 		tmp.swap(process_exit);
 		pthread_mutex_unlock(&process_exit_mutex);
 
-		iterate(it, tmp)
+		for(auto const& it : tmp)
 		{
-			std::map<size_t, process_t*>::iterator client = client_to_callback.find(it->client_key);
+			std::map<size_t, process_t*>::iterator client = client_to_callback.find(it.client_key);
 			if(client != client_to_callback.end())
-				client->second->did_exit(it->return_code);
+				client->second->did_exit(it.return_code);
 		}
 	}
 

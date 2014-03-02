@@ -34,13 +34,13 @@ namespace be
 				return res;
 
 			std::multimap<std::string, entry_ptr, text::less_t> directories, files;
-			citerate(entry, path::entries(_path))
+			for(auto const& entry : path::entries(_path))
 			{
-				std::string const path = path::join(_path, (*entry)->d_name);
+				std::string const path = path::join(_path, entry->d_name);
 				std::string const displayName = path::display_name(path);
-				if((*entry)->d_type == DT_DIR)
+				if(entry->d_type == DT_DIR)
 					directories.emplace(displayName, std::make_shared<directory_entry_t>(displayName, path));
-				else if((*entry)->d_type == DT_REG || (*entry)->d_type == DT_LNK)
+				else if(entry->d_type == DT_REG || entry->d_type == DT_LNK)
 					files.emplace(displayName, std::make_shared<file_entry_t>(displayName, path));
 			}
 
@@ -62,11 +62,11 @@ namespace be
 		std::vector<entry_ptr> entries () const
 		{
 			std::vector<entry_ptr> res;
-			citerate(item, _item->menu(true))
+			for(auto const& item : _item->menu(true))
 			{
-				if((*item)->kind() == bundles::kItemTypeMenu)
-						res.push_back(std::make_shared<menu_entry_t>((*item)->name(), *item));
-				else	res.push_back(std::make_shared<bundle_item_entry_t>(*item));
+				if(item->kind() == bundles::kItemTypeMenu)
+						res.push_back(std::make_shared<menu_entry_t>(item->name(), item));
+				else	res.push_back(std::make_shared<bundle_item_entry_t>(item));
 			}
 			return res;
 		}
@@ -79,12 +79,12 @@ namespace be
 		std::vector<entry_ptr> entries () const
 		{
 			std::multimap<std::string, bundles::item_ptr, text::less_t> ordered;
-			citerate(item, bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, _kind, _bundle->uuid(), false, true))
-				ordered.emplace((*item)->name(), *item);
+			for(auto const& item : bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, _kind, _bundle->uuid(), false, true))
+				ordered.emplace(item->name(), item);
 
 			std::vector<entry_ptr> res;
-			iterate(pair, ordered)
-				res.push_back(std::make_shared<bundle_item_entry_t>(pair->second));
+			for(auto const& pair : ordered)
+				res.push_back(std::make_shared<bundle_item_entry_t>(pair.second));
 			return res;
 		}
 
@@ -100,15 +100,15 @@ namespace be
 		std::vector<entry_ptr> entries () const
 		{
 			std::multimap<std::string, bundles::item_ptr, text::less_t> ordered;
-			citerate(item, bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeMenuTypes, _bundle->uuid(), false, true))
+			for(auto const& item : bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeMenuTypes, _bundle->uuid(), false, true))
 			{
-				if((*item)->hidden_from_user())
-					ordered.emplace((*item)->name(), *item);
+				if(item->hidden_from_user())
+					ordered.emplace(item->name(), item);
 			}
 
 			std::vector<entry_ptr> res;
-			iterate(pair, ordered)
-				res.push_back(std::make_shared<bundle_item_entry_t>(pair->second));
+			for(auto const& pair : ordered)
+				res.push_back(std::make_shared<bundle_item_entry_t>(pair.second));
 			return res;
 		}
 
@@ -142,12 +142,12 @@ namespace be
 		std::vector<entry_ptr> entries () const
 		{
 			std::multimap<std::string, bundles::item_ptr, text::less_t> ordered;
-			citerate(item, bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeBundle, oak::uuid_t(), false, true))
-				ordered.emplace((*item)->name(), *item);
+			for(auto const& item : bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeBundle, oak::uuid_t(), false, true))
+				ordered.emplace(item->name(), item);
 
 			std::vector<entry_ptr> res;
-			iterate(pair, ordered)
-				res.push_back(std::make_shared<bundle_entry_t>(pair->second));
+			for(auto const& pair : ordered)
+				res.push_back(std::make_shared<bundle_entry_t>(pair.second));
 			return res;
 		}
 	};

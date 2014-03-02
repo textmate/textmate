@@ -31,8 +31,8 @@ void test_ranker ()
 	};
 
 	std::multimap<double, std::string> ranked;
-	iterate(file, files)
-		ranked.insert(std::make_pair(oak::rank("otbv", *file), *file));
+	for(auto const& file : files)
+		ranked.insert(std::make_pair(oak::rank("otbv", file), file));
 	ranked.erase(0);
 
 	OAK_ASSERT_EQ(ranked.size(), 2);

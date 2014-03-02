@@ -32,7 +32,7 @@ public:
 		TS_ASSERT_EQUALS(doc->selection(), "2:2&3:1");
 
 		// ng::ranges_t const sel = convert(doc->buffer(), doc->selection());
-		// iterate(range, sel)
-		// 	fprintf(stderr, "%zu-%zu\n", range->first.index, range->last.index);
+		// for(auto const& range : sel)
+		// 	fprintf(stderr, "%zu-%zu\n", range.first.index, range.last.index);
 	}
 };

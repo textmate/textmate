@@ -131,11 +131,11 @@ namespace parse
 	{
 		bool escape = false;
 		std::string res;
-		iterate(it, ptrn)
+		for(auto const& it : ptrn)
 		{
-			if(escape && isdigit(*it))
+			if(escape && isdigit(it))
 			{
-				int i = digittoint(*it);
+				int i = digittoint(it);
 				if(!m.empty(i))
 					escape_regexp(m.buffer() + m.begin(i), m.buffer() + m.end(i), back_inserter(res));
 				escape = false;
@@ -144,8 +144,8 @@ namespace parse
 
 			if(escape)
 				res += '\\';
-			if(!(escape = !escape && *it == '\\'))
-				res += *it;
+			if(!(escape = !escape && it == '\\'))
+				res += it;
 		}
 		D(DBF_Parser, bug("%s → %s\n", ptrn.c_str(), res.c_str()););
 		return res;
@@ -209,12 +209,12 @@ namespace parse
 			else	++indexIter;
 		}
 
-		iterate(it, rules)
+		for(auto const& it : rules)
 		{
-			size_t from = it->first.first;
-			size_t to = it->first.first - it->first.second;
+			size_t from = it.first.first;
+			size_t to = it.first.first - it.first.second;
 
-			rule_ptr const& rule = it->second;
+			rule_ptr const& rule = it.second;
 			if(rule->scope_string != NULL_STR)
 			{
 				std::string const scopeString = expand(rule->scope_string, m);
@@ -428,8 +428,8 @@ namespace parse
 		{
 			DB(
 				D(DBF_Parser, bug("offset: %zu\n", i););
-				iterate(it, rules)
-					D(DBF_Parser, bug("\t%zu-%zu, %s\n", it->match.begin(), it->match.end(), to_s(it->rule->match_pattern).c_str()););
+				for(auto const& it : rules)
+					D(DBF_Parser, bug("\t%zu-%zu, %s\n", it.match.begin(), it.match.end(), to_s(it.rule->match_pattern).c_str()););
 			)
 
 			ranked_match_t m = *rules.begin();

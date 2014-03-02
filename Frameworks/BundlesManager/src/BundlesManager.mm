@@ -464,8 +464,8 @@ namespace
 				if(plist::dictionary_t const* dictionary = boost::get<plist::dictionary_t>(&pair.second))
 				{
 					plist::array_t settings;
-					iterate(settingsPair, *dictionary)
-						settings.push_back(settingsPair->first);
+					for(auto const& settingsPair : *dictionary)
+						settings.push_back(settingsPair.first);
 					res.emplace(pair.first, settings);
 				}
 			}

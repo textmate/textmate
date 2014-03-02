@@ -277,8 +277,8 @@ private:
 					}
 
 					NSMutableArray* lostItems = [NSMutableArray array];
-					iterate(pair, existingItems)
-						add_item_and_children(pair->second, lostItems);
+					for(auto const& pair : existingItems)
+						add_item_and_children(pair.second, lostItems);
 					[dataSource lostItems:lostItems];
 					[dataSource setLastModified:buf.st_mtimespec forPath:dir];
 

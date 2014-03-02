@@ -34,11 +34,11 @@ namespace ng
 		{
 			std::string str = "";
 			bool first = true;
-			citerate(range, dissect_columnar(buffer, r))
+			for(auto const& range : dissect_columnar(buffer, r))
 			{
 				if(!first)
 					str += "\n";
-				str += format == input_format::xml ? to_xml(buffer, range->min().index, range->max().index) : buffer.substr(range->min().index, range->max().index);
+				str += format == input_format::xml ? to_xml(buffer, range.min().index, range.max().index) : buffer.substr(range.min().index, range.max().index);
 				first = false;
 			}
 

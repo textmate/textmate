@@ -178,8 +178,8 @@ namespace
 			}
 
 			std::vector<entry_t> res;
-			iterate(pair, tmp)
-				res.push_back(entry_t(_helper, base + pair->first, pair->second));
+			for(auto const& pair : tmp)
+				res.push_back(entry_t(_helper, base + pair.first, pair.second));
 			return res;
 		}
 	};
@@ -191,9 +191,9 @@ static scm::status::type status_for (entry_t const& root)
 		return root.status();
 
 	size_t untracked = 0, ignored = 0, tracked = 0, modified = 0, added = 0, deleted = 0, mixed = 0, conflicted = 0;
-	citerate(entry, root.entries())
+	for(auto const& entry : root.entries())
 	{
-		switch(status_for(*entry))
+		switch(status_for(entry))
 		{
 			case scm::status::conflicted:   ++conflicted;break;
 			case scm::status::unversioned:  ++untracked; break;
@@ -226,12 +226,12 @@ static scm::status::type status_for (entry_t const& root)
 
 static void filter (scm::status_map_t& statusMap, entry_t const& root, std::string const& base)
 {
-	citerate(entry, root.entries())
+	for(auto& entry : root.entries())
 	{
-		scm::status::type status = status_for(*entry);
-		statusMap.emplace(path::join(base, entry->path()), status);
-		if(entry->is_dir() && status != scm::status::ignored)
-			filter(statusMap, (*entry)[entry->path()], base);
+		scm::status::type status = status_for(entry);
+		statusMap.emplace(path::join(base, entry.path()), status);
+		if(entry.is_dir() && status != scm::status::ignored)
+			filter(statusMap, entry[entry.path()], base);
 	}
 }
 

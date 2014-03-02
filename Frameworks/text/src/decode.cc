@@ -271,9 +271,9 @@ namespace decode
 		std::string dst = "";
 
 		uint32_t value = 0, bits = 0;
-		iterate(it, src)
+		for(auto const& it : src)
 		{
-			char ch = toupper(*it);
+			char ch = toupper(it);
 			if('A' <= ch && ch <= 'Z')
 				value = (value << 5) | ch-'A';
 			else if('2' <= ch && ch <= '7')
@@ -293,10 +293,10 @@ namespace decode
 		std::string dst = "";
 
 		uint32_t value = 0, bits = 0;
-		iterate(it, src)
+		for(auto const& it : src)
 		{
 			static char const Table[65] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-			uint32_t i = std::find(Table, Table + 64, *it) - Table;
+			uint32_t i = std::find(Table, Table + 64, it) - Table;
 			if(i == 64)
 				continue;
 			value = (value << 6) | i;
@@ -310,12 +310,12 @@ namespace decode
 
 	std::string rot13 (std::string src)
 	{
-		iterate(ch, src)
+		for(auto& ch : src)
 		{
-			if('A' <= *ch && *ch <= 'Z')
-				*ch = *ch-13 >= 'A' ? *ch-13 : *ch-13+'Z'+1-'A';
-			else if('a' <= *ch && *ch <= 'z')
-				*ch = *ch-13 >= 'a' ? *ch-13 : *ch-13+'z'+1-'a';
+			if('A' <= ch && ch <= 'Z')
+				ch = ch-13 >= 'A' ? ch-13 : ch-13+'Z'+1-'A';
+			else if('a' <= ch && ch <= 'z')
+				ch = ch-13 >= 'a' ? ch-13 : ch-13+'z'+1-'a';
 		}
 		return src;
 	}

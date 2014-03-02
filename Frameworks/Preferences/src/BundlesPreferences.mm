@@ -91,8 +91,8 @@ static std::string textify (std::string str)
 	NSMutableArray* res = [NSMutableArray array];
 	if(groupNumber == 0)
 	{
-		iterate(category, categories)
-			[res addObject:[NSString stringWithCxxString:*category]];
+		for(auto const& category : categories)
+			[res addObject:[NSString stringWithCxxString:category]];
 	}
 	return res;
 }

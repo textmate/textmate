@@ -105,10 +105,10 @@ namespace ng
 		D(DBF_Buffer_Parsing, bug("did parse %zu-%zu (revision %zu), at EOL %s\n", range.first, range.second, revision(), BSTR(atEOF)););
 
 		_scopes.remove(_scopes.lower_bound(range.first), atEOF ? _scopes.end() : _scopes.lower_bound(range.second));
-		iterate(pair, newScopes)
+		for(auto const& pair : newScopes)
 		{
-			if(range.first + pair->first < range.second || atEOF)
-				_scopes.set(range.first + pair->first, pair->second);
+			if(range.first + pair.first < range.second || atEOF)
+				_scopes.set(range.first + pair.first, pair.second);
 		}
 
 		_dirty.remove(_dirty.lower_bound(range.first), atEOF ? _dirty.end() : _dirty.lower_bound(range.second));

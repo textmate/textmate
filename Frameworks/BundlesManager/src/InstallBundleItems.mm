@@ -10,10 +10,10 @@
 static std::map<std::string, bundles::item_ptr> installed_items ()
 {
 	std::map<std::string, bundles::item_ptr> res;
-	citerate(item, bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeAny, oak::uuid_t(), false, true))
+	for(auto const& item : bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeAny, oak::uuid_t(), false, true))
 	{
-		citerate(path, (*item)->paths())
-			res.emplace(*path, *item);
+		for(auto const& path : item->paths())
+			res.emplace(path, item);
 	}
 	return res;
 }
@@ -65,52 +65,52 @@ void InstallBundleItems (NSArray* itemPaths)
 		}
 	}
 
-	iterate(info, delta)
+	for(auto const& info : delta)
 	{
-		char const* type = info->is_bundle ? "bundle" : "bundle item";
-		std::string const name = path::name(path::strip_extension(info->path));
+		char const* type = info.is_bundle ? "bundle" : "bundle item";
+		std::string const name = path::name(path::strip_extension(info.path));
 		std::string const title = text::format("The %s “%s” could not be installed because it is in delta format.", type, name.c_str());
 		NSRunAlertPanel([NSString stringWithCxxString:title], @"Contact the author of this %s to get a properly exported version.", @"OK", nil, nil, type);
 	}
 
-	iterate(info, malformed)
+	for(auto const& info : malformed)
 	{
-		char const* type = info->is_bundle ? "bundle" : "bundle item";
-		std::string const name = path::name(path::strip_extension(info->path));
+		char const* type = info.is_bundle ? "bundle" : "bundle item";
+		std::string const name = path::name(path::strip_extension(info.path));
 		std::string const title = text::format("The %s “%s” could not be installed because it is malformed.", type, name.c_str());
 		NSRunAlertPanel([NSString stringWithCxxString:title], @"The %s lacks mandatory keys in its property list file.", @"OK", nil, nil, type);
 	}
 
-	iterate(info, installed)
+	for(auto const& info : installed)
 	{
-		char const* type = info->is_bundle ? "bundle" : "bundle item";
-		std::string const name = info->name;
+		char const* type = info.is_bundle ? "bundle" : "bundle item";
+		std::string const name = info.name;
 		std::string const title = text::format("The %s “%s” is already installed.", type, name.c_str());
 		int choice = NSRunAlertPanel([NSString stringWithCxxString:title], @"You can edit the installed %s to inspect it.", @"OK", @"Edit", nil, type);
 		if(choice == NSAlertAlternateReturn) // "Edit"
-			[NSApp sendAction:@selector(editBundleItemWithUUIDString:) to:nil from:[NSString stringWithCxxString:info->uuid]];
+			[NSApp sendAction:@selector(editBundleItemWithUUIDString:) to:nil from:[NSString stringWithCxxString:info.uuid]];
 	}
 
 	std::set<std::string> pathsToReload;
-	iterate(info, toInstall)
+	for(auto const& info : toInstall)
 	{
-		if(info->is_bundle)
+		if(info.is_bundle)
 		{
-			int choice = NSRunAlertPanel([NSString stringWithFormat:@"Would you like to install the “%@” bundle?", [NSString stringWithCxxString:info->name]], @"Installing a bundle adds new functionality to TextMate.", @"Install", @"Cancel", nil);
+			int choice = NSRunAlertPanel([NSString stringWithFormat:@"Would you like to install the “%@” bundle?", [NSString stringWithCxxString:info.name]], @"Installing a bundle adds new functionality to TextMate.", @"Install", @"Cancel", nil);
 			if(choice == NSAlertDefaultReturn) // "Install"
 			{
 				std::string const installDir = path::join(path::home(), "Library/Application Support/Avian/Pristine Copy/Bundles");
 				if(path::make_dir(installDir))
 				{
-					std::string const installPath = path::unique(path::join(installDir, path::name(info->path)));
-					if(path::copy(info->path, installPath))
+					std::string const installPath = path::unique(path::join(installDir, path::name(info.path)));
+					if(path::copy(info.path, installPath))
 					{
 						pathsToReload.insert(installDir);
 						fprintf(stderr, "installed bundle at: %s\n", installPath.c_str());
 						continue;
 					}
 				}
-				fprintf(stderr, "failed to install bundle: %s\n", info->path.c_str());
+				fprintf(stderr, "failed to install bundle: %s\n", info.path.c_str());
 			}
 		}
 		else
@@ -133,19 +133,19 @@ void InstallBundleItems (NSArray* itemPaths)
 				if(bundle->local() || bundle->save())
 				{
 					std::string dest = path::parent(bundle->paths().front());
-					iterate(iter, DirectoryMap)
+					for(auto const& iter : DirectoryMap)
 					{
-						if(path::extension(info->path) == iter->extension)
+						if(path::extension(info.path) == iter.extension)
 						{
-							dest = path::join(dest, iter->directory);
+							dest = path::join(dest, iter.directory);
 							if(path::make_dir(dest))
 							{
-								dest = path::join(dest, path::name(info->path));
+								dest = path::join(dest, path::name(info.path));
 								pathsToReload.insert(dest);
 								dest = path::unique(dest);
-								if(path::copy(info->path, dest))
+								if(path::copy(info.path, dest))
 										break;
-								else	fprintf(stderr, "error: copy(‘%s’, ‘%s’)\n", info->path.c_str(), dest.c_str());
+								else	fprintf(stderr, "error: copy(‘%s’, ‘%s’)\n", info.path.c_str(), dest.c_str());
 							}
 							else
 							{

@@ -62,10 +62,10 @@ namespace
 
 	item_info_t const& info_for (bundles::kind_t kind)
 	{
-		iterate(it, item_infos)
+		for(auto const& it : item_infos)
 		{
-			if(it->kind == kind)
-				return *it;
+			if(it.kind == kind)
+				return it;
 		}
 
 		static item_info_t dummy;
@@ -76,8 +76,8 @@ namespace
 static NSMutableArray* wrap_array (std::vector<std::string> const& array, NSString* key)
 {
 	NSMutableArray* res = [NSMutableArray array];
-	iterate(str, array)
-		[res addObject:[NSMutableDictionary dictionaryWithObject:[NSString stringWithCxxString:*str] forKey:key]];
+	for(auto const& str : array)
+		[res addObject:[NSMutableDictionary dictionaryWithObject:[NSString stringWithCxxString:str] forKey:key]];
 	return res;
 }
 
@@ -98,8 +98,8 @@ namespace
 		template <typename T>
 		void operator() (T value) const                   { }
 		void operator() (std::string& str) const          { str = format_string::expand(str, _variables); }
-		void operator() (plist::array_t& array) const     { iterate(it, array) boost::apply_visitor(*this, *it); }
-		void operator() (plist::dictionary_t& dict) const { iterate(pair, dict) boost::apply_visitor(*this, pair->second); }
+		void operator() (plist::array_t& array) const     { for(auto const& item : array) boost::apply_visitor(*this, item); }
+		void operator() (plist::dictionary_t& dict) const { for(auto const& pair : dict) boost::apply_visitor(*this, pair.second); }
 
 	private:
 		std::map<std::string, std::string> const& _variables;
@@ -282,11 +282,11 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 	// kItemTypeMacro, kItemTypeMenu, kItemTypeMenuItemSeparator
 
 	NSMenu* menu = [[NSMenu alloc] initWithTitle:@"Item Types"];
-	iterate(it, item_infos)
+	for(auto const& it : item_infos)
 	{
 		static int const types = bundles::kItemTypeBundle|bundles::kItemTypeCommand|bundles::kItemTypeDragCommand|bundles::kItemTypeSnippet|bundles::kItemTypeSettings|bundles::kItemTypeGrammar|bundles::kItemTypeProxy|bundles::kItemTypeTheme;
-		if((it->kind & types) == it->kind)
-			[[menu addItemWithTitle:it->file action:NULL keyEquivalent:@""] setTag:it->kind];
+		if((it.kind & types) == it.kind)
+			[[menu addItemWithTitle:it.file action:NULL keyEquivalent:@""] setTag:it.kind];
 	}
 
 	NSAlert* alert = [NSAlert alertWithMessageText:@"Create New Item" defaultButton:@"Create" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"Please choose what you want to create:"];
@@ -311,9 +311,9 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 
 		bundles::item_ptr newSelectedItem;
 		bool foundItem = false;
-		iterate(entry, parent_for_column(browser, [browser selectedColumn], bundles)->children())
+		for(auto const& entry : parent_for_column(browser, [browser selectedColumn], bundles)->children())
 		{
-			if(bundles::item_ptr item = (*entry)->represented_item())
+			if(bundles::item_ptr item = entry->represented_item())
 			{
 				if(item->uuid() == bundleItem->uuid())
 					foundItem = true;
@@ -419,11 +419,11 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 			else if(info.kind == bundles::kItemTypeTheme)
 				keys = { "gutterSettings", "settings", "colorSpaceName" };
 
-			iterate(key, keys)
+			for(auto const& key : keys)
 			{
-				if(plistSubset->find(*key) != plistSubset->end())
-						plist[*key] = plistSubset->find(*key)->second;
-				else	plist.erase(*key);
+				if(plistSubset->find(key) != plistSubset->end())
+						plist[key] = plistSubset->find(key)->second;
+				else	plist.erase(key);
 			}
 		}
 	}
@@ -460,18 +460,18 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 {
 	[self commitEditing];
 	std::map<bundles::item_ptr, plist::dictionary_t> failedToSave;
-	iterate(pair, changes)
+	for(auto const& pair : changes)
 	{
-		auto item = pair->first;
+		auto item = pair.first;
 
-		item->set_plist(pair->second);
+		item->set_plist(pair.second);
 		if(item->save())
 		{
 			[[BundlesManager sharedInstance] reloadPath:[NSString stringWithCxxString:item->paths().front()]];
 		}
 		else
 		{
-			failedToSave.insert(*pair);
+			failedToSave.insert(pair);
 		}
 	}
 	changes.swap(failedToSave);
@@ -569,9 +569,9 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 
 	NSMutableDictionary* oldProperties = bundleItemProperties;
 	bundleItemProperties = someProperties;
-	iterate(str, BindingKeys)
+	for(auto const& str : BindingKeys)
 	{
-		NSString* key = [NSString stringWithCxxString:*str];
+		NSString* key = [NSString stringWithCxxString:str];
 		[oldProperties removeObserver:self forKeyPath:key];
 		[someProperties addObserver:self forKeyPath:key options:0 context:NULL];
 	}
@@ -678,10 +678,10 @@ static NSMutableDictionary* DictionaryForPropertyList (plist::dictionary_t const
 			keys = { "gutterSettings", "settings", "colorSpaceName" };
 
 		plist::dictionary_t plistSubset;
-		iterate(key, keys)
+		for(auto const& key : keys)
 		{
-			if(plist.find(*key) != plist.end())
-				plistSubset[*key] = plist.find(*key)->second;
+			if(plist.find(key) != plist.end())
+				plistSubset[key] = plist.find(key)->second;
 		}
 		bundleItemContent = document::from_content(to_s(plistSubset, plist::kPreferSingleQuotedStrings, PlistKeySortOrder()), info.grammar);
 	}

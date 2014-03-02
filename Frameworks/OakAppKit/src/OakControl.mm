@@ -96,40 +96,40 @@ OAK_DEBUG_VAR(OakControl);
 - (void)setLayers:(std::vector<layer_t> const&)aLayout
 {
 	// Remove views that are no longer in the layout
-	iterate(oldLayer, layout)
+	for(auto const& oldLayer : layout)
 	{
-		if(oldLayer->view)
+		if(oldLayer.view)
 		{
 			BOOL found = NO;
-			iterate(newLayer, aLayout)
+			for(auto const& newLayer : aLayout)
 			{
-				if(newLayer->view == oldLayer->view)
+				if(newLayer.view == oldLayer.view)
 				{
 					found = YES;
 					break;
 				}
 			}
 			if(!found)
-				[oldLayer->view removeFromSuperview];
+				[oldLayer.view removeFromSuperview];
 		}
 	}
 
 	// TODO this triggers a redraw — may want to consider if we can delta update…
 	layout = aLayout;
 	NSRect coveredRect = NSZeroRect;
-	iterate(layer, layout)
+	for(auto const& layer : layout)
 	{
-		if(layer->color || layer->image && layer->requisite == layer_t::no_requisite)
-			coveredRect = NSUnionRect(coveredRect, layer->rect);
-		if(NSView* view = layer->view)
+		if(layer.color || layer.image && layer.requisite == layer_t::no_requisite)
+			coveredRect = NSUnionRect(coveredRect, layer.rect);
+		if(NSView* view = layer.view)
 		{
 			if([view superview] != self)
 				[view removeFromSuperview];
-			NSRect viewFrame = layer->rect;
+			NSRect viewFrame = layer.rect;
 			if(view.frame.size.height > 0)
 				viewFrame.size.height = view.frame.size.height;
-			viewFrame.origin.x += layer->content_offset.x;
-			viewFrame.origin.y += layer->content_offset.y;
+			viewFrame.origin.x += layer.content_offset.x;
+			viewFrame.origin.y += layer.content_offset.y;
 			[view setFrame:viewFrame];
 			[self addSubview:view];
 		}
@@ -151,10 +151,10 @@ OAK_DEBUG_VAR(OakControl);
 - (NSInteger)tagForLayerContainingPoint:(NSPoint)aPoint
 {
 	NSInteger res = NSNotFound;
-	iterate(it, layout)
+	for(auto const& it : layout)
 	{
-		if(NSMouseInRect(aPoint, it->rect, [self isFlipped]))
-			res = it->tag;
+		if(NSMouseInRect(aPoint, it.rect, [self isFlipped]))
+			res = it.tag;
 	}
 	return res;
 }
@@ -162,24 +162,24 @@ OAK_DEBUG_VAR(OakControl);
 - (BOOL)shouldDelayWindowOrderingForEvent:(NSEvent*)event
 {
 	// This code is copy/paste from mouseDown: and should ideally be de-duplicated.
-	layer_t* clickLayer = NULL;
-	layer_t* dragLayer  = NULL;
-	uint32_t state      = [self currentState] | layer_t::mouse_clicked | layer_t::mouse_dragged | layer_t::mouse_down | layer_t::menu_gesture;
-	NSPoint mousePos    = [self convertPoint:[event locationInWindow] fromView:nil];
+	layer_t const* clickLayer = NULL;
+	layer_t const* dragLayer  = NULL;
+	uint32_t state            = [self currentState] | layer_t::mouse_clicked | layer_t::mouse_dragged | layer_t::mouse_down | layer_t::menu_gesture;
+	NSPoint mousePos          = [self convertPoint:[event locationInWindow] fromView:nil];
 
-	iterate(it, layout)
+	for(auto const& it : layout)
 	{
-		if(!it->action || it->requisite != (state & it->requisite_mask) || !NSMouseInRect(mousePos, it->rect, [self isFlipped]))
+		if(!it.action || it.requisite != (state & it.requisite_mask) || !NSMouseInRect(mousePos, it.rect, [self isFlipped]))
 			continue;
 
-		if(it->requisite & it->requisite_mask & (layer_t::mouse_clicked | layer_t::mouse_down | layer_t::menu_gesture | layer_t::mouse_double_clicked))
+		if(it.requisite & it.requisite_mask & (layer_t::mouse_clicked | layer_t::mouse_down | layer_t::menu_gesture | layer_t::mouse_double_clicked))
 		{
-			clickLayer = &*it;
+			clickLayer = &it;
 			dragLayer  = NULL; // we ignore all drag layers “behind” the click-layer, for example the close button of a tab is a click-layer, behind it is the bigger (draggable) tab, but we want to ignore that when clicking (and dragging) the close button
 		}
 
-		if([event clickCount] == 1 && (it->requisite & it->requisite_mask & layer_t::mouse_dragged))
-			dragLayer = &*it;
+		if([event clickCount] == 1 && (it.requisite & it.requisite_mask & layer_t::mouse_dragged))
+			dragLayer = &it;
 	}
 
 	return dragLayer || clickLayer && clickLayer->prevent_window_ordering;
@@ -240,17 +240,17 @@ OAK_DEBUG_VAR(OakControl);
 	NSPoint mousePos = [self convertPoint:[[self window] mouseLocationOutsideOfEventStream] fromView:nil];
 	uint32_t state   = [self currentState];
 
-	iterate(it, layout)
+	for(auto const& it : layout)
 	{
-		if(NSEqualRects(NSIntersectionRect(aRect, it->rect), NSZeroRect))
+		if(NSEqualRects(NSIntersectionRect(aRect, it.rect), NSZeroRect))
 			continue;
 
 		// if we are in a mouseDown: then use the location from that first press for all but the clicked layer (so moving mouse while holding left mouse button doesn’t update layer states)
 		uint32_t mouseState = 0;
 		if(!mouseTrackingDisabled)
 		{
-			bool isInLayer    = NSMouseInRect(mousePos, it->rect, [self isFlipped]);
-			bool clickedLayer = NSMouseInRect(mouseDownPos, it->rect, [self isFlipped]);
+			bool isInLayer    = NSMouseInRect(mousePos, it.rect, [self isFlipped]);
+			bool clickedLayer = NSMouseInRect(mouseDownPos, it.rect, [self isFlipped]);
 
 			if(isInLayer)
 				mouseState |= layer_t::mouse_inside;
@@ -259,8 +259,8 @@ OAK_DEBUG_VAR(OakControl);
 				mouseState |= layer_t::mouse_clicked|layer_t::menu_gesture;
 		}
 
-		if(((state | mouseState) & it->requisite_mask) == it->requisite)
-			[self drawLayer:*it];
+		if(((state | mouseState) & it.requisite_mask) == it.requisite)
+			[self drawLayer:it];
 	}
 }
 
@@ -284,27 +284,27 @@ OAK_DEBUG_VAR(OakControl);
 {
 	D(DBF_OakControl, bug("\n"););
 
-	layer_t* clickLayer = NULL;
-	layer_t* dragLayer  = NULL;
-	uint32_t state      = [self currentState] | layer_t::mouse_clicked | layer_t::mouse_dragged | layer_t::mouse_down | layer_t::menu_gesture;
-	mouseDownPos        = [self convertPoint:[event locationInWindow] fromView:nil];
+	layer_t const* clickLayer = NULL;
+	layer_t const* dragLayer  = NULL;
+	uint32_t state            = [self currentState] | layer_t::mouse_clicked | layer_t::mouse_dragged | layer_t::mouse_down | layer_t::menu_gesture;
+	mouseDownPos              = [self convertPoint:[event locationInWindow] fromView:nil];
 
 	if([event clickCount] == 2)
 		state |= layer_t::mouse_double_clicked;
 
-	iterate(it, layout)
+	for(auto const& it : layout)
 	{
-		if(!it->action || it->requisite != (state & it->requisite_mask) || !NSMouseInRect(mouseDownPos, it->rect, [self isFlipped]))
+		if(!it.action || it.requisite != (state & it.requisite_mask) || !NSMouseInRect(mouseDownPos, it.rect, [self isFlipped]))
 			continue;
 
-		if(it->requisite & it->requisite_mask & (layer_t::mouse_clicked | layer_t::mouse_down | layer_t::menu_gesture | layer_t::mouse_double_clicked))
+		if(it.requisite & it.requisite_mask & (layer_t::mouse_clicked | layer_t::mouse_down | layer_t::menu_gesture | layer_t::mouse_double_clicked))
 		{
-			clickLayer = &*it;
+			clickLayer = &it;
 			dragLayer  = NULL; // we ignore all drag layers “behind” the click-layer, for example the close button of a tab is a click-layer, behind it is the bigger (draggable) tab, but we want to ignore that when clicking (and dragging) the close button
 		}
 
-		if([event clickCount] == 1 && (it->requisite & it->requisite_mask & layer_t::mouse_dragged))
-			dragLayer = &*it;
+		if([event clickCount] == 1 && (it.requisite & it.requisite_mask & layer_t::mouse_dragged))
+			dragLayer = &it;
 	}
 
 	if(!clickLayer && !dragLayer)
@@ -396,22 +396,22 @@ struct rect_cmp_t
 		return;
 
 	std::map<NSRect, std::vector<layer_t>, rect_cmp_t> trackedLayers;
-	iterate(it, layout)
+	for(auto const& it : layout)
 	{
-		if(it->requisite & layer_t::mouse_inside || it->requisite_mask & layer_t::mouse_inside)
-			trackedLayers[it->rect].push_back(*it);
+		if(it.requisite & layer_t::mouse_inside || it.requisite_mask & layer_t::mouse_inside)
+			trackedLayers[it.rect].push_back(it);
 
-		if(it->tool_tip)
-			[self addToolTipRect:it->rect owner:it->tool_tip userData:NULL];
+		if(it.tool_tip)
+			[self addToolTipRect:it.rect owner:it.tool_tip userData:NULL];
 	}
 
-	iterate(it, trackedLayers)
+	for(auto const& it : trackedLayers)
 	{
 		NSTrackingAreaOptions trackingOptions = NSTrackingMouseEnteredAndExited;
 
-		iterate(layer, it->second)
+		for(auto const& layer : it.second)
 		{
-			if(!(layer->requisite & layer_t::window_key))
+			if(!(layer.requisite & layer_t::window_key))
 			{
 				trackingOptions |= NSTrackingActiveAlways;
 				break;
@@ -421,7 +421,7 @@ struct rect_cmp_t
 		if(!(trackingOptions & NSTrackingActiveAlways))
 			trackingOptions |= NSTrackingActiveInKeyWindow;
 
-		[self addTrackingArea:[[NSTrackingArea alloc] initWithRect:it->first options:trackingOptions owner:self userInfo:nil]];
+		[self addTrackingArea:[[NSTrackingArea alloc] initWithRect:it.first options:trackingOptions owner:self userInfo:nil]];
 	}
 }
 

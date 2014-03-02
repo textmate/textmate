@@ -70,9 +70,9 @@ static bool matches (std::string const& str, std::vector<std::string> const& glo
 	if(globs.empty())
 		return true;
 
-	iterate(glob, globs)
+	for(auto const& glob : globs)
 	{
-		if(path::glob_t(*glob).does_match(str))
+		if(path::glob_t(glob).does_match(str))
 			return true;
 	}
 
@@ -83,14 +83,14 @@ static std::vector<bundles_db::bundle_ptr> filtered_bundles (std::vector<bundles
 {
 	std::vector<bundles_db::bundle_ptr> res;
 	std::set<oak::uuid_t> seen;
-	iterate(bundle, index)
+	for(auto const& bundle : index)
 	{
-		if(matches((*bundle)->source() ? (*bundle)->source()->identifier() : NULL_STR, sourceNames) && matches(text::lowercase((*bundle)->name()), bundleNames))
+		if(matches(bundle->source() ? bundle->source()->identifier() : NULL_STR, sourceNames) && matches(text::lowercase(bundle->name()), bundleNames))
 		{
-			if(seen.find((*bundle)->uuid()) == seen.end())
+			if(seen.find(bundle->uuid()) == seen.end())
 			{
-				seen.insert((*bundle)->uuid());
-				res.push_back(*bundle);
+				seen.insert(bundle->uuid());
+				res.push_back(bundle);
 			}
 		}
 	}
@@ -172,10 +172,10 @@ int main (int argc, char const* argv[])
 	if(CommandsNeedingUpdatedSources.find(command) != CommandsNeedingUpdatedSources.end())
 	{
 		std::vector<bundles_db::source_ptr> toUpdate;
-		citerate(source, bundles_db::sources(installDir))
+		for(auto const& source : bundles_db::sources(installDir))
 		{
-			if(!(*source)->disabled() && (*source)->needs_update())
-				toUpdate.push_back(*source);
+			if(!source->disabled() && source->needs_update())
+				toUpdate.push_back(source);
 		}
 
 		__block std::vector<bundles_db::source_ptr> failedUpdate;
@@ -195,20 +195,20 @@ int main (int argc, char const* argv[])
 	std::vector<bundles_db::bundle_ptr> index = bundles_db::index(installDir);
 	if(command == "list")
 	{
-		citerate(bundle, filtered_bundles(index, sourceNames, bundleNames))
+		for(auto const& bundle : filtered_bundles(index, sourceNames, bundleNames))
 		{
-			if(!((onlyInstalled && !(*bundle)->installed()) || (onlyUpdated && !onlyInstalled && !(*bundle)->has_update())))
-				fprintf(stdout, "%s\n", short_bundle_info(*bundle, get_width()).c_str());
+			if(!((onlyInstalled && !bundle->installed()) || (onlyUpdated && !onlyInstalled && !bundle->has_update())))
+				fprintf(stdout, "%s\n", short_bundle_info(bundle, get_width()).c_str());
 		}
 	}
 	else if(command == "install")
 	{
 		std::vector<bundles_db::bundle_ptr> toInstall;
-		citerate(bundle, filtered_bundles(index, sourceNames, bundleNames))
+		for(auto const& bundle : filtered_bundles(index, sourceNames, bundleNames))
 		{
-			if(!(*bundle)->installed())
-					toInstall.push_back(*bundle);
-			else	fprintf(stderr, "skip ‘%s’ (%s) -- already installed\n", (*bundle)->name().c_str(), (*bundle)->origin().c_str());
+			if(!bundle->installed())
+					toInstall.push_back(bundle);
+			else	fprintf(stderr, "skip ‘%s’ (%s) -- already installed\n", bundle->name().c_str(), bundle->origin().c_str());
 		}
 
 		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -254,18 +254,18 @@ int main (int argc, char const* argv[])
 	}
 	else if(command == "uninstall")
 	{
-		citerate(bundle, filtered_bundles(index, sourceNames, bundleNames))
+		for(auto const& bundle : filtered_bundles(index, sourceNames, bundleNames))
 		{
-			if((*bundle)->installed())
+			if(bundle->installed())
 			{
-				fprintf(stderr, "Uninstalling ‘%s’...", (*bundle)->name().c_str());
-				if(uninstall(*bundle, installDir))
+				fprintf(stderr, "Uninstalling ‘%s’...", bundle->name().c_str());
+				if(uninstall(bundle, installDir))
 						fprintf(stderr, "ok!\n");
 				else	fprintf(stderr, " *** failed!\n");
 			}
 			else
 			{
-				fprintf(stderr, "skip ‘%s’ (%s) -- not installed\n", (*bundle)->name().c_str(), (*bundle)->origin().c_str());
+				fprintf(stderr, "skip ‘%s’ (%s) -- not installed\n", bundle->name().c_str(), bundle->origin().c_str());
 			}
 		}
 		save_index(index, installDir);
@@ -273,60 +273,60 @@ int main (int argc, char const* argv[])
 	else if(command == "show")
 	{
 		bool first = true;
-		citerate(bundle, filtered_bundles(index, sourceNames, bundleNames))
+		for(auto const& bundle : filtered_bundles(index, sourceNames, bundleNames))
 		{
 			if(first)
 					first = false;
 			else	fprintf(stdout, "\n");
 
-			fprintf(stdout, "name:         %s\n", (*bundle)->name().c_str());
-			fprintf(stdout, "source:       %s\n", (*bundle)->source() ? (*bundle)->source()->identifier().c_str() : "«no remote source»");
-			fprintf(stdout, "uuid:         %s\n", to_s((*bundle)->uuid()).c_str());
+			fprintf(stdout, "name:         %s\n", bundle->name().c_str());
+			fprintf(stdout, "source:       %s\n", bundle->source() ? bundle->source()->identifier().c_str() : "«no remote source»");
+			fprintf(stdout, "uuid:         %s\n", to_s(bundle->uuid()).c_str());
 
-			bool hasName  = (*bundle)->contact_name() != NULL_STR;
-			bool hasEmail = (*bundle)->contact_email() != NULL_STR;
+			bool hasName  = bundle->contact_name() != NULL_STR;
+			bool hasEmail = bundle->contact_email() != NULL_STR;
 			char const* fmt[] = { "", "contact:      %1$s\n", "contact:      <%2$s>\n\0%1$s", "contact:      %1$s <%2$s>\n" };
-			fprintf(stdout, fmt[(hasName ? 1 : 0) + (hasEmail ? 2 : 0)], (*bundle)->contact_name().c_str(), (*bundle)->contact_email().c_str());
+			fprintf(stdout, fmt[(hasName ? 1 : 0) + (hasEmail ? 2 : 0)], bundle->contact_name().c_str(), bundle->contact_email().c_str());
 
-			if((*bundle)->url_updated())
-				fprintf(stdout, "date:         %s\n", to_s((*bundle)->url_updated()).c_str());
-			if((*bundle)->url() != NULL_STR)
-				fprintf(stdout, "url:          %s (%d bytes)\n", (*bundle)->url().c_str(), (*bundle)->size());
-			if((*bundle)->path() != NULL_STR)
-				fprintf(stdout, "path:         %s\n", path::with_tilde((*bundle)->path()).c_str());
-			if((*bundle)->origin() != NULL_STR)
-				fprintf(stdout, "origin:       %s\n", (*bundle)->origin().c_str());
+			if(bundle->url_updated())
+				fprintf(stdout, "date:         %s\n", to_s(bundle->url_updated()).c_str());
+			if(bundle->url() != NULL_STR)
+				fprintf(stdout, "url:          %s (%d bytes)\n", bundle->url().c_str(), bundle->size());
+			if(bundle->path() != NULL_STR)
+				fprintf(stdout, "path:         %s\n", path::with_tilde(bundle->path()).c_str());
+			if(bundle->origin() != NULL_STR)
+				fprintf(stdout, "origin:       %s\n", bundle->origin().c_str());
 
-			citerate(grammar, (*bundle)->grammars())
+			for(auto const& grammar : bundle->grammars())
 			{
 				std::vector<std::string> fileTypes;
-				citerate(ext, (*grammar)->file_types())
-					fileTypes.push_back(*ext);
-				if((*grammar)->mode_line() != NULL_STR)
-					fileTypes.push_back(text::format("/%s/", (*grammar)->mode_line().c_str()));
+				for(auto const& ext : grammar->file_types())
+					fileTypes.push_back(ext);
+				if(grammar->mode_line() != NULL_STR)
+					fileTypes.push_back(text::format("/%s/", grammar->mode_line().c_str()));
 				if(fileTypes.empty())
-					fileTypes.push_back((*grammar)->scope());
-				fprintf(stdout, "grammar:      %s (%s)\n", (*grammar)->name().c_str(), text::join(fileTypes, ", ").c_str());
+					fileTypes.push_back(grammar->scope());
+				fprintf(stdout, "grammar:      %s (%s)\n", grammar->name().c_str(), text::join(fileTypes, ", ").c_str());
 			}
 
 			std::vector<std::string> dependencies;
-			citerate(dependency, (*bundle)->dependencies(index))
-				dependencies.push_back((*dependency)->name());
+			for(auto const& dependency : bundle->dependencies(index))
+				dependencies.push_back(dependency->name());
 			if(!dependencies.empty())
 				fprintf(stderr, "dependencies: %s\n", text::join(dependencies, ", ").c_str());
 
-			if((*bundle)->description() != NULL_STR)
-				fprintf(stdout, "description:  %s\n", textify((*bundle)->description()).c_str());
+			if(bundle->description() != NULL_STR)
+				fprintf(stdout, "description:  %s\n", textify(bundle->description()).c_str());
 		}
 	}
 	else if(command == "update")
 	{
-		citerate(bundle, filtered_bundles(index, sourceNames, bundleNames))
+		for(auto const& bundle : filtered_bundles(index, sourceNames, bundleNames))
 		{
-			if((*bundle)->has_update())
+			if(bundle->has_update())
 			{
-				fprintf(stderr, "Updating ‘%s’...", (*bundle)->name().c_str());
-				if(update(*bundle, installDir))
+				fprintf(stderr, "Updating ‘%s’...", bundle->name().c_str());
+				if(update(bundle, installDir))
 						fprintf(stderr, "ok!\n");
 				else	fprintf(stderr, " *** failed!\n");
 			}
@@ -336,19 +336,19 @@ int main (int argc, char const* argv[])
 	else if(command == "dependencies")
 	{
 		std::vector<bundles_db::bundle_ptr> bundles;
-		citerate(bundle, filtered_bundles(index, sourceNames, bundleNames))
+		for(auto const& bundle : filtered_bundles(index, sourceNames, bundleNames))
 		{
-			if(!bundleNames.empty() || (*bundle)->installed())
-				bundles.push_back(*bundle);
+			if(!bundleNames.empty() || bundle->installed())
+				bundles.push_back(bundle);
 		}
 
-		citerate(bundle, dependencies(index, bundles, false))
-			fprintf(stdout, "%s\n", short_bundle_info(*bundle, get_width()).c_str());
+		for(auto const& bundle : dependencies(index, bundles, false))
+			fprintf(stdout, "%s\n", short_bundle_info(bundle, get_width()).c_str());
 	}
 	else if(command == "dependents")
 	{
-		citerate(bundle, dependents(index, filtered_bundles(index, sourceNames, bundleNames), onlyInstalled))
-			fprintf(stdout, "%s\n", short_bundle_info(*bundle, get_width()).c_str());
+		for(auto const& bundle : dependents(index, filtered_bundles(index, sourceNames, bundleNames), onlyInstalled))
+			fprintf(stdout, "%s\n", short_bundle_info(bundle, get_width()).c_str());
 	}
 	else
 	{

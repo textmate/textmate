@@ -26,10 +26,10 @@ namespace
 	{
 		~helper_t ()
 		{
-			citerate(it, get_counts().counts)
+			for(auto const& it : get_counts().counts)
 			{
-				if(it->second != 0)
-					bug("%4zd: %s\n", it->second, it->first.c_str());
+				if(it.second != 0)
+					bug("%4zd: %s\n", it.second, it.first.c_str());
 			}
 		}
 

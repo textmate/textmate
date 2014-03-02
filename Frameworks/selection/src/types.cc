@@ -16,8 +16,8 @@ namespace ng
 	std::string to_s (ranges_t const& ranges)
 	{
 		std::vector<std::string> v;
-		iterate(range, ranges)
-			v.push_back(to_s(*range));
+		for(auto const& range : ranges)
+			v.push_back(to_s(range));
 		return v.empty() ? "(empty)" : text::join(v, "&");
 	}
 

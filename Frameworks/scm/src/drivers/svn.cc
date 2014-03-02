@@ -62,11 +62,11 @@ static void parse_status_output (scm::status_map_t& entries, std::string const& 
 static std::map<std::string, std::string> parse_info_output (std::string const& str)
 {
 	std::map<std::string, std::string> res;
-	citerate(line, text::tokenize(str.begin(), str.end(), '\n'))
+	for(auto const& line : text::tokenize(str.begin(), str.end(), '\n'))
 	{
-		std::string::size_type n = (*line).find(':');
+		std::string::size_type n = line.find(':');
 		if(n != std::string::npos)
-			res.emplace((*line).substr(0, n), (*line).substr(n+2));
+			res.emplace(line.substr(0, n), line.substr(n+2));
 	}
 	return res;
 }
@@ -133,8 +133,8 @@ namespace scm
 
 			status_map_t relativePaths, res;
 			collect_all_paths(executable(), _xslt_path, relativePaths, wcPath);
-			iterate(pair, relativePaths)
-				res.emplace(path::join(wcPath, pair->first), pair->second);
+			for(auto const& pair : relativePaths)
+				res.emplace(path::join(wcPath, pair.first), pair.second);
 			return res;
 		}
 

@@ -282,13 +282,13 @@ namespace ng
 		ASSERT_LE(bufferOffset, from); ASSERT_LE(to, bufferOffset + length());
 
 		size_t i = bufferOffset;
-		iterate(node, _nodes)
+		for(auto& node : _nodes)
 		{
-			size_t len = node->length();
+			size_t len = node.length();
 			if(i <= from && from < i + len)
 			{
 				size_t last = std::min(to - i, len);
-				node->erase(from - i, last);
+				node.erase(from - i, last);
 				from = i + last;
 				if(to - i <= last)
 					break;
@@ -312,10 +312,10 @@ namespace ng
 	void paragraph_t::did_update_scopes (size_t from, size_t to, ng::buffer_t const& buffer, size_t bufferOffset)
 	{
 		size_t i = bufferOffset;
-		iterate(node, _nodes)
+		for(auto& node : _nodes)
 		{
-			node->did_update_scopes(from - i, to - i);
-			i += node->length();
+			node.did_update_scopes(from - i, to - i);
+			i += node.length();
 		}
 		_dirty = true;
 	}
@@ -327,11 +327,11 @@ namespace ng
 
 		std::vector<node_t> newNodes;
 		bool hasFoldings = false;
-		iterate(node, _nodes)
+		for(auto const& node : _nodes)
 		{
-			if(node->type() != kNodeTypeSoftBreak)
-				newNodes.push_back(*node);
-			hasFoldings = hasFoldings || node->type() == kNodeTypeFolding;
+			if(node.type() != kNodeTypeSoftBreak)
+				newNodes.push_back(node);
+			hasFoldings = hasFoldings || node.type() == kNodeTypeFolding;
 		}
 		_nodes.swap(newNodes);
 
@@ -373,17 +373,17 @@ namespace ng
 				}
 			}
 
-			citerate(offset, text::soft_breaks(str, wrapColumn, tabSize, fillStrWidth))
-				_nodes.insert(iterator_at(*offset), node_t(kNodeTypeSoftBreak, 0, fillStrWidth * metrics.column_width()));
+			for(auto const& offset : text::soft_breaks(str, wrapColumn, tabSize, fillStrWidth))
+				_nodes.insert(iterator_at(offset), node_t(kNodeTypeSoftBreak, 0, fillStrWidth * metrics.column_width()));
 		}
 
 		CGFloat x = 0;
 		size_t i = bufferOffset;
-		iterate(node, _nodes)
+		for(auto& node : _nodes)
 		{
-			node->layout(x, tabSize * metrics.column_width(), theme, softWrap, wrapColumn, metrics, buffer, i, fillStr);
-			x += node->width();
-			i += node->length();
+			node.layout(x, tabSize * metrics.column_width(), theme, softWrap, wrapColumn, metrics, buffer, i, fillStr);
+			x += node.width();
+			i += node.length();
 		}
 
 		_dirty = false;
@@ -475,11 +475,11 @@ namespace ng
 	void paragraph_t::insert_text (size_t i, size_t len)
 	{
 		size_t from = 0;
-		iterate(node, _nodes)
+		for(auto& node : _nodes)
 		{
-			if(from <= i && i <= from + node->length() && node->type() == kNodeTypeText)
-				return node->insert(i - from, len);
-			from += node->length();
+			if(from <= i && i <= from + node.length() && node.type() == kNodeTypeText)
+				return node.insert(i - from, len);
+			from += node.length();
 		}
 		_nodes.insert(iterator_at(i), node_t(kNodeTypeText, len));
 	}
@@ -524,26 +524,26 @@ namespace ng
 	void paragraph_t::reset_font_metrics (ct::metrics_t const& metrics)
 	{
 		_dirty = true;
-		iterate(node, _nodes)
-			node->reset_font_metrics(metrics);
+		for(auto& node : _nodes)
+			node.reset_font_metrics(metrics);
 	}
 
 	size_t paragraph_t::length () const
 	{
 		size_t res = 0;
-		iterate(node, _nodes)
-			res += node->length();
+		for(auto const& node : _nodes)
+			res += node.length();
 		return res;
 	}
 
 	CGFloat paragraph_t::width () const
 	{
 		CGFloat x = 0, res = 0;
-		iterate(node, _nodes)
+		for(auto const& node : _nodes)
 		{
-			if(node->type() == kNodeTypeSoftBreak)
+			if(node.type() == kNodeTypeSoftBreak)
 				x = 0;
-			x += node->width();
+			x += node.width();
 			res = std::max(x, res);
 		}
 		return res;
@@ -677,12 +677,12 @@ namespace ng
 	{
 		size_t i = bufferOffset;
 		size_t bol = i;
-		iterate(node, _nodes)
+		for(auto const& node : _nodes)
 		{
 			if(index < i)
 				break;
-			i += node->length();
-			if(node->type() == kNodeTypeSoftBreak)
+			i += node.length();
+			if(node.type() == kNodeTypeSoftBreak)
 				bol = i;
 		}
 		return bol;
@@ -691,13 +691,13 @@ namespace ng
 	size_t paragraph_t::eol (size_t index, ng::buffer_t const& buffer, size_t bufferOffset) const
 	{
 		size_t i = bufferOffset;
-		iterate(node, _nodes)
+		for(auto const& node : _nodes)
 		{
-			if(index < i && node->type() == kNodeTypeSoftBreak)
+			if(index < i && node.type() == kNodeTypeSoftBreak)
 				return i - buffer[i-1].size();
-			if(index <= i && node->type() == kNodeTypeNewline)
+			if(index <= i && node.type() == kNodeTypeNewline)
 				return i;
-			i += node->length();
+			i += node.length();
 		}
 		return i;
 	}
@@ -708,11 +708,11 @@ namespace ng
 			index -= buffer[index-1].size();;
 
 		size_t i = bufferOffset;
-		iterate(node, _nodes)
+		for(auto const& node : _nodes)
 		{
-			if(i < index && index < i + node->length() && node->type() == kNodeTypeFolding)
+			if(i < index && index < i + node.length() && node.type() == kNodeTypeFolding)
 				return i;
-			i += node->length();
+			i += node.length();
 		}
 
 		return index;
@@ -724,11 +724,11 @@ namespace ng
 			index += buffer[index].size();
 
 		size_t i = bufferOffset;
-		iterate(node, _nodes)
+		for(auto const& node : _nodes)
 		{
-			if(i < index && index < i + node->length() && node->type() == kNodeTypeFolding)
-				return i + node->length();
-			i += node->length();
+			if(i < index && index < i + node.length() && node.type() == kNodeTypeFolding)
+				return i + node.length();
+			i += node.length();
 		}
 
 		return index;
@@ -773,8 +773,8 @@ namespace ng
 						if(flag)
 						{
 							bool intersects = false;
-							iterate(range, selection)
-								intersects = intersects || !(to + offset < range->min().index || range->max().index < from + offset);
+							for(auto const& range : selection)
+								intersects = intersects || !(to + offset < range.min().index || range.max().index < from + offset);
 
 							if(!intersects)
 								misspelled.push_back(std::make_pair(from, to));

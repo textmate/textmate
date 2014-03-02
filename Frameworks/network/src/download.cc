@@ -79,11 +79,11 @@ namespace network
 
 			char const* first = (const char*)ptr;
 			char const* last  = std::search(first, first + size * nmemb, &kCRLF[0], &kCRLF[2]);
-			iterate(filter, userData.request._filters)
+			for(auto const& filter : userData.request._filters)
 			{
-				if(!(*filter)->receive_status(std::string(first, last)))
+				if(!filter->receive_status(std::string(first, last)))
 				{
-					userData.error = text::format("%s: receiving status", (*filter)->name().c_str());
+					userData.error = text::format("%s: receiving status", filter->name().c_str());
 					return 0;
 				}
 			}
@@ -104,11 +104,11 @@ namespace network
 
 			if(valueFirst != len)
 			{
-				iterate(filter, userData.request._filters)
+				for(auto const& filter : userData.request._filters)
 				{
-					if(!(*filter)->receive_header(text::lowercase(std::string(bytes, bytes + keyLast)), std::string(bytes + valueFirst, bytes + len)))
+					if(!filter->receive_header(text::lowercase(std::string(bytes, bytes + keyLast)), std::string(bytes + valueFirst, bytes + len)))
 					{
-						userData.error = text::format("%s: receiving header", (*filter)->name().c_str());
+						userData.error = text::format("%s: receiving header", filter->name().c_str());
 						return 0;
 					}
 				}
@@ -120,11 +120,11 @@ namespace network
 	size_t receive_data (void* ptr, size_t size, size_t nmemb, void* udata)
 	{
 		user_data_t& userData = *((user_data_t*)udata);
-		iterate(filter, userData.request._filters)
+		for(auto const& filter : userData.request._filters)
 		{
-			if(!(*filter)->receive_data((const char*)ptr, size * nmemb))
+			if(!filter->receive_data((const char*)ptr, size * nmemb))
 			{
-				userData.error = text::format("%s: receiving data", (*filter)->name().c_str());
+				userData.error = text::format("%s: receiving data", filter->name().c_str());
 				return 0;
 			}
 		}
@@ -133,12 +133,12 @@ namespace network
 
 	long download (request_t const& request, std::string* error)
 	{
-		iterate(filter, request._filters)
+		for(auto const& filter : request._filters)
 		{
-			if(!(*filter)->setup())
+			if(!filter->setup())
 			{
 				if(error)
-					*error = text::format("%s: setup", (*filter)->name().c_str());
+					*error = text::format("%s: setup", filter->name().c_str());
 				return 0;
 			}
 		}
@@ -194,14 +194,14 @@ namespace network
 			{
 				if(res == 304) // not modified so ignore filter errors
 				{
-					iterate(filter, request._filters)
-						(*filter)->receive_end(userData.error);
+					for(auto const& filter : request._filters)
+						filter->receive_end(userData.error);
 				}
 				else
 				{
-					iterate(filter, request._filters)
+					for(auto const& filter : request._filters)
 					{
-						if(!(*filter)->receive_end(userData.error))
+						if(!filter->receive_end(userData.error))
 						{
 							if(error)
 								*error = userData.error;

@@ -410,8 +410,8 @@ namespace oak
 					queue.push_back(current->_right);
 			}
 
-			iterate(node, queue)
-				delete *node;
+			for(auto const& node : queue)
+				delete node;
 		}
 
 		void remove_node (node_t* node)

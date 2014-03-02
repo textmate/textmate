@@ -99,11 +99,11 @@ int main (int argc, char const* argv[])
 	// ==========
 
 	text::indent_t indent(tabSize, indentSize, softTabs);
-	iterate(file, files)
+	for(auto const& file : files)
 	{
 		indent::fsm_t fsm(1, 1);
 
-		std::string const str = path::content(*file);
+		std::string const str = path::content(file);
 		std::string::size_type n = 0;
 		while(n != std::string::npos)
 		{

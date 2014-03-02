@@ -29,10 +29,10 @@ static std::string justify_line (std::string const& str, size_t width, size_t ta
 	size_t spaceCount     = 0;
 
 	std::string res = "";
-	iterate(ch, str)
+	for(auto const& ch : str)
 	{
-		res.insert(res.end(), 1, *ch);
-		if(*ch == ' ')
+		res.insert(res.end(), 1, ch);
+		if(ch == ' ')
 		{
 			size_t from = (extraSpaces * spaceCount + numberOfSpaces/2) / numberOfSpaces;
 			size_t to = (extraSpaces * (spaceCount+1) + numberOfSpaces/2) / numberOfSpaces;
@@ -116,10 +116,10 @@ namespace transform
 	std::string shift::operator() (std::string const& src) const
 	{
 		std::string res;
-		citerate(it, text::to_lines(src.data(), src.data() + src.size()))
+		for(auto const& it : text::to_lines(src.data(), src.data() + src.size()))
 		{
-			char const* from = it->first;
-			char const* to   = it->second;
+			char const* from = it.first;
+			char const* to   = it.second;
 
 			if(amount > 0 && !text::is_blank(from, to))
 			{
@@ -157,13 +157,13 @@ namespace transform
 		size_t from = 0;
 		std::string const unwrapped = unwrap(src);
 		std::string const fillStr = fill_string(unwrapped);
-		citerate(offset, text::soft_breaks(unwrapped, wrap, tabSize, fillStr.size()))
+		for(auto const& offset : text::soft_breaks(unwrapped, wrap, tabSize, fillStr.size()))
 		{
-			res += unwrapped.substr(from, length_excl_whitespace(unwrapped, from, *offset));
+			res += unwrapped.substr(from, length_excl_whitespace(unwrapped, from, offset));
 			res += "\n";
-			if(*offset != unwrapped.size())
+			if(offset != unwrapped.size())
 				res += fillStr;
-			from = *offset;
+			from = offset;
 		}
 		res += unwrapped.substr(from, length_excl_whitespace(unwrapped, from, unwrapped.size()));
 		return newline ? res + "\n" : res;
@@ -173,15 +173,15 @@ namespace transform
 	{
 		std::string res;
 		std::string const unwrapped = unwrap(src);
-		citerate(it, text::to_lines(unwrapped.data(), unwrapped.data() + unwrapped.size()))
+		for(auto const& it : text::to_lines(unwrapped.data(), unwrapped.data() + unwrapped.size()))
 		{
 			size_t from = 0;
-			std::string const str = std::string(it->first, it->second);
-			citerate(offset, text::soft_breaks(str, wrap, tabSize))
+			std::string const str = std::string(it.first, it.second);
+			for(auto const& offset : text::soft_breaks(str, wrap, tabSize))
 			{
-				res += justify_line(str.substr(from, length_excl_whitespace(str, from, *offset)), wrap, tabSize);
+				res += justify_line(str.substr(from, length_excl_whitespace(str, from, offset)), wrap, tabSize);
 				res += "\n";
-				from = *offset;
+				from = offset;
 			}
 			res += str.substr(from, length_excl_whitespace(str, from, str.size()));
 		}

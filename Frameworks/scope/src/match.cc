@@ -111,15 +111,15 @@ namespace scope
 			if(rank)
 			{
 				double r, sum = 0;
-				iterate(expr, expressions)
+				for(auto const& expr : expressions)
 				{
-					expression_t::op_t op = expr->op;
+					expression_t::op_t op = expr.op;
 
-					bool local = expr->selector->does_match(lhs, rhs, &r);
+					bool local = expr.selector->does_match(lhs, rhs, &r);
 					if(local)
 						sum = std::max(r, sum);
 
-					if(expr->negate)
+					if(expr.negate)
 						local = !local;
 
 					switch(op)
@@ -137,9 +137,9 @@ namespace scope
 				return res;
 			}
 
-			iterate(expr, expressions)
+			for(auto const& expr : expressions)
 			{
-				expression_t::op_t op = expr->op;
+				expression_t::op_t op = expr.op;
 				if(res && op == expression_t::op_or) // skip ORs when we already have a true value
 					continue;
 				else if(!res && op == expression_t::op_and) // skip ANDs when we have a false value
@@ -147,8 +147,8 @@ namespace scope
 				else if(!res && op == expression_t::op_minus) // skip intersection when we have a false value
 					continue;
 
-				bool local = expr->selector->does_match(lhs, rhs, rank);
-				if(expr->negate)
+				bool local = expr.selector->does_match(lhs, rhs, rank);
+				if(expr.negate)
 					local = !local;
 
 				switch(op)
@@ -168,9 +168,9 @@ namespace scope
 			{
 				bool res = false;
 				double r, sum = 0;
-				iterate(composite, composites)
+				for(auto const& composite : composites)
 				{
-					if(composite->does_match(lhs, rhs, &r))
+					if(composite.does_match(lhs, rhs, &r))
 					{
 						sum = std::max(r, sum);
 						res = true;
@@ -181,9 +181,9 @@ namespace scope
 				return res;
 			}
 
-			iterate(composite, composites)
+			for(auto const& composite : composites)
 			{
-				if(composite->does_match(lhs, rhs, rank))
+				if(composite.does_match(lhs, rhs, rank))
 					return true;
 			}
 			return false;

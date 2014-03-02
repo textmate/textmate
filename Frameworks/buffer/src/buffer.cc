@@ -162,8 +162,8 @@ namespace ng
 				_hardlines.set(from + i, true);
 		}
 
-		iterate(hook, _meta_data)
-			(*hook)->replace(this, from, to, str);
+		for(auto const& hook : _meta_data)
+			hook->replace(this, from, to, str);
 
 		_callbacks(&callback_t::did_replace, from, to, str);
 		return from + str.size();

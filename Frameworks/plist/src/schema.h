@@ -37,10 +37,10 @@ namespace plist
 	template <typename OBJ_TYPE>
 	bool schema_t<OBJ_TYPE>::convert (plist::dictionary_t const& dict, OBJ_TYPE* dst) const
 	{
-		iterate(pair, dict)
+		for(auto const& pair : dict)
 		{
-			typename std::map<std::string, field_ptr>::const_iterator it = _fields.find(pair->first);
-			if(it != _fields.end() && !it->second->handle(pair->second, dst))
+			typename std::map<std::string, field_ptr>::const_iterator it = _fields.find(pair.first);
+			if(it != _fields.end() && !it->second->handle(pair.second, dst))
 				return false;
 		}
 		return true;

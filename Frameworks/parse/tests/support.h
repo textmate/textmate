@@ -37,8 +37,8 @@ static std::map<size_t, scope::scope_t> scopes_for (std::string const& buf, pars
 		std::map<size_t, scope::scope_t> scopes;
 		parserState = parse::parse(line.data(), line.data() + line.size(), parserState, scopes, i == 0);
 
-		iterate(pair, scopes)
-			res[i + pair->first] = pair->second;
+		for(auto const& pair : scopes)
+			res[i + pair.first] = pair.second;
 
 		i = eol;
 	}

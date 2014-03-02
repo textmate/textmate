@@ -42,8 +42,8 @@ namespace path
 		_negate = glob.empty() ? false : glob[0] == '!';
 
 		std::vector<std::string> expanded;
-		citerate(str, expand_braces(_negate ? glob.substr(1) : glob))
-			expanded.push_back(format_string::replace(*str, glob_matcher, (matchDotFiles || _negate) ? glob_formater_match_dot_files : glob_formater));
+		for(auto const& str : expand_braces(_negate ? glob.substr(1) : glob))
+			expanded.push_back(format_string::replace(str, glob_matcher, (matchDotFiles || _negate) ? glob_formater_match_dot_files : glob_formater));
 
 		std::string ptrn = "^(.*/)?(" + text::join(expanded, "|") + ")$";
 		_compiled = regexp::pattern_t(ptrn);
@@ -102,10 +102,10 @@ namespace path
 				heads.push_back("");
 
 			std::vector<std::string> res;
-			iterate(head, heads)
+			for(auto const& head : heads)
 			{
-				iterate(tail, tails)
-					res.push_back(*head + node->text + *tail);
+				for(auto const& tail : tails)
+					res.push_back(head + node->text + tail);
 			}
 
 			return res;

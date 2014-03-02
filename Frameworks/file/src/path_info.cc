@@ -16,14 +16,14 @@ namespace file
 		if(path != NULL_STR)
 		{
 			std::vector<std::string> revPath;
-			citerate(token, text::tokenize(path.begin(), path.end(), '/'))
+			for(auto const& token : text::tokenize(path.begin(), path.end(), '/'))
 			{
-				std::string tmp = *token;
-				citerate(subtoken, text::tokenize(tmp.begin(), tmp.end(), '.'))
+				std::string tmp = token;
+				for(auto const& subtoken : text::tokenize(tmp.begin(), tmp.end(), '.'))
 				{
-					if((*subtoken).empty())
+					if(subtoken.empty())
 						continue;
-					revPath.push_back(*subtoken);
+					revPath.push_back(subtoken);
 					std::replace(revPath.back().begin(), revPath.back().end(), ' ', '_');
 				}
 			}

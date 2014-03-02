@@ -63,9 +63,9 @@ namespace
 			if(plist::get_key_path(savedSearch, "RawQueryDict.SearchScopes", scopes))
 			{
 				std::vector<std::string> searchScopes;
-				iterate(it, scopes)
+				for(auto const& it : scopes)
 				{
-					if(std::string const* str = boost::get<std::string>(&*it))
+					if(std::string const* str = boost::get<std::string>(&it))
 					{
 						D(DBF_FileBrowser_Spotlight, bug("scope ‘%s’\n", str->c_str()););
 						searchScopes.push_back(*str);
@@ -89,8 +89,8 @@ namespace
 	if((self = [super init]))
 	{
 		NSMutableArray* results = [NSMutableArray new];
-		citerate(item, execute_saved_search([[anURL path] fileSystemRepresentation]))
-			[results addObject:[FSItem itemWithURL:[NSURL fileURLWithPath:CFBridgingRelease(MDItemCopyAttribute(*item, kMDItemPath)) isDirectory:NO]]];
+		for(auto const& item : execute_saved_search([[anURL path] fileSystemRepresentation]))
+			[results addObject:[FSItem itemWithURL:[NSURL fileURLWithPath:CFBridgingRelease(MDItemCopyAttribute(item, kMDItemPath)) isDirectory:NO]]];
 
 		self.rootItem = [FSItem itemWithURL:anURL];
 		self.rootItem.icon     = [OakFileIconImage fileIconImageWithPath:[anURL path] size:NSMakeSize(16, 16)];

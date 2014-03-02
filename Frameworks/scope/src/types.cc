@@ -10,8 +10,8 @@ namespace scope
 		std::string join (T const& container, std::string const& sep)
 		{
 			std::string res = "";
-			iterate(it, container)
-				res += (res.empty() ? "" : sep) + to_s(*it);
+			for(auto const& it : container)
+				res += (res.empty() ? "" : sep) + to_s(it);
 			return res;
 		}
 

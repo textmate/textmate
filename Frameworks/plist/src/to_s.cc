@@ -31,10 +31,10 @@ namespace
 		{
 			bool singleLineItems = true;
 			bool compositeItems = false;
-			iterate(it, array)
+			for(auto const& it : array)
 			{
-				singleLineItems = singleLineItems && boost::apply_visitor(*this, *it);
-				compositeItems = compositeItems || boost::apply_visitor(is_composite(), *it);
+				singleLineItems = singleLineItems && boost::apply_visitor(*this, it);
+				compositeItems = compositeItems || boost::apply_visitor(is_composite(), it);
 			}
 			return singleLineItems && (array.size() <= 1 || !compositeItems);
 		}
@@ -42,8 +42,8 @@ namespace
 		bool operator() (plist::dictionary_t const& dict) const
 		{
 			bool res = dict.size() <= 1;
-			iterate(it, dict)
-				res = res && boost::apply_visitor(*this, it->second);
+			for(auto const& it : dict)
+				res = res && boost::apply_visitor(*this, it.second);
 			return res;
 		}
 	};
@@ -108,11 +108,11 @@ static std::string pretty_data (std::vector<char> const& data)
 {
 	std::string res = "<";
 	size_t i = 3;
-	iterate(byte, data)
+	for(auto const& byte : data)
 	{
 		if(++i != 4 && i % 4 == 0)
 			res.push_back(' ');
-		text::int_to_hex(*byte, back_inserter(res), 2);
+		text::int_to_hex(byte, back_inserter(res), 2);
 	}
 	return res + ">";
 }
@@ -209,7 +209,7 @@ namespace
 			else if(fits_single_line()(array))
 			{
 				size_t wrap = 0;
-				iterate(it, array)
+				for(auto const& it : array)
 				{
 					if(!res.empty())
 						res += ", ";
@@ -221,7 +221,7 @@ namespace
 						wrap = res.size();
 					}
 
-					res += boost::apply_visitor(pretty(flags, key_compare), *it);
+					res += boost::apply_visitor(pretty(flags, key_compare), it);
 				}
 
 				res = " " + res + " ";
@@ -234,12 +234,12 @@ namespace
 			}
 			else
 			{
-				iterate(it, array)
+				for(auto const& it : array)
 				{
 					if(!res.empty())
 						res += "\n";
 					res += indent_string() + '\t';
-					res += boost::apply_visitor(pretty(flags, key_compare, indent+1, false), *it);
+					res += boost::apply_visitor(pretty(flags, key_compare, indent+1, false), it);
 					res += ",";
 				}
 				res = "\n" + res + "\n" + indent_string();
@@ -265,12 +265,12 @@ namespace
 				std::vector<std::pair<std::string, plist::any_t>> values(dict.begin(), dict.end());
 				std::sort(values.begin(), values.end(), key_compare);
 
-				iterate(it, values)
+				for(auto const& it : values)
 				{
 					if(!res.empty())
 						res += indent_string();
-					std::string const& key = pretty_key(it->first, flags);
-					std::string const& value = boost::apply_visitor(pretty(flags, key_compare, indent+1, false, true), it->second);
+					std::string const& key = pretty_key(it.first, flags);
+					std::string const& value = boost::apply_visitor(pretty(flags, key_compare, indent+1, false, true), it.second);
 					res += text::format("\t%s = %s;\n", key.c_str(), value.c_str());
 				}
 				res = (is_key ? "\n" + indent_string() : "") + res + indent_string();

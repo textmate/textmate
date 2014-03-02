@@ -78,16 +78,16 @@ void key_chain_t::load (std::string const& path)
 	plist::dictionary_t identities;
 	if(plist::get_key_path(plist::load(path), "identities", identities))
 	{
-		iterate(identity, identities)
+		for(auto const& identity : identities)
 		{
 			std::string name, keyData;
-			if(plist::get_key_path(identity->second, "name", name) && plist::get_key_path(identity->second, "key", keyData))
+			if(plist::get_key_path(identity.second, "name", name) && plist::get_key_path(identity.second, "key", keyData))
 			{
-				keys.push_back(std::make_shared<key_t>(identity->first, name, keyData));
+				keys.push_back(std::make_shared<key_t>(identity.first, name, keyData));
 			}
 			else
 			{
-				fprintf(stderr, "no name/key in entry:\n%s", to_s(identity->second).c_str());
+				fprintf(stderr, "no name/key in entry:\n%s", to_s(identity.second).c_str());
 			}
 		}
 	}
@@ -100,12 +100,12 @@ void key_chain_t::load (std::string const& path)
 void key_chain_t::save (std::string const& path) const
 {
 	plist::dictionary_t identities;
-	iterate(key, keys)
+	for(auto const& key : keys)
 	{
 		plist::dictionary_t entry;
-		entry.emplace("name", (*key)->name());
-		entry.emplace("key",  (*key)->_key_data);
-		identities.emplace((*key)->identity(), entry);
+		entry.emplace("name", key->name());
+		entry.emplace("key",  key->_key_data);
+		identities.emplace(key->identity(), entry);
 	}
 
 	plist::dictionary_t plist;
@@ -121,10 +121,10 @@ void key_chain_t::add (key_t const& key)
 
 key_chain_t::key_ptr key_chain_t::find (std::string const& identity) const
 {
-	iterate(key, keys)
+	for(auto const& key : keys)
 	{
-		if((*key)->identity() == identity && (*key)->setup())
-			return *key;
+		if(key->identity() == identity && key->setup())
+			return key;
 	}
 	return key_ptr();
 }

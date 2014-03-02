@@ -73,10 +73,10 @@ static bool rm_file (std::string const& path, AuthorizationRef& auth)
 
 static bool rm_dir (std::string const& path, AuthorizationRef& auth)
 {
-	citerate(it, path::entries(path))
+	for(auto const& it : path::entries(path))
 	{
-		std::string const& newPath = path::join(path, (*it)->d_name);
-		if((*it)->d_type == DT_DIR)
+		std::string const& newPath = path::join(path, it->d_name);
+		if(it->d_type == DT_DIR)
 		{
 			if(!rm_dir(newPath, auth))
 				return false;

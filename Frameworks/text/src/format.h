@@ -35,12 +35,12 @@ namespace text
 	{
 		std::string res = "";
 		bool first = true;
-		iterate(item, items)
+		for(auto const& item : items)
 		{
 			if(first)
 					first = false;
 			else	res += sep;
-			res += std::string(*item);
+			res += std::string(item);
 		}
 		return res;
 	}

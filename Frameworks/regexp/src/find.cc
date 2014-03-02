@@ -99,15 +99,15 @@ namespace find
 		{
 			std::vector<dfa_node_ptr> merged = children, tmp;
 
-			iterate(newChildIter, rhs->children)
+			for(auto const& newChildIter : rhs->children)
 			{
-				dfa_node_ptr new_node = *newChildIter;
+				dfa_node_ptr new_node = newChildIter;
 
-				iterate(it, merged)
+				for(auto& it : merged)
 				{
-					if((*it)->can_merge(new_node))
+					if(it->can_merge(new_node))
 					{
-						*it = (*it)->merge(new_node);
+						it = it->merge(new_node);
 						new_node.reset();
 						break;
 					}
@@ -133,8 +133,8 @@ namespace find
 	static void all_variations (CFStringRef src, options_t options, std::vector<std::string>& out)
 	{
 		CFMutableStringRef strings[6];
-		iterate(it, strings)
-			*it = CFStringCreateMutableCopy(kCFAllocatorDefault, 0, src);
+		for(auto& it : strings)
+			it = CFStringCreateMutableCopy(kCFAllocatorDefault, 0, src);
 
 		CFStringNormalize(strings[0], kCFStringNormalizationFormC);
 		CFStringNormalize(strings[1], kCFStringNormalizationFormC);
@@ -151,14 +151,14 @@ namespace find
 		}
 
 		std::set<std::string> res;
-		iterate(it, strings)
+		for(auto const& it : strings)
 		{
-			res.insert(res.end(), cf::to_s(*it));
-			CFRelease(*it);
+			res.insert(res.end(), cf::to_s(it));
+			CFRelease(it);
 		}
 
-		iterate(it, res)
-			out.push_back(*it);
+		for(auto const& it : res)
+			out.push_back(it);
 	}
 
 	static bool is_whitespace (uint32_t ch)
@@ -186,24 +186,24 @@ namespace find
 			if(options & backwards)
 			{
 				std::reverse(matrix.begin(), matrix.end());
-				iterate(rowIter, matrix)
+				for(auto& rowIter : matrix)
 				{
-					iterate(colIter, *rowIter)
-						std::reverse(colIter->begin(), colIter->end());
+					for(auto& colIter : rowIter)
+						std::reverse(colIter.begin(), colIter.end());
 				}
 			}
 
 			riterate(rowIter, matrix)
 			{
 				std::vector<dfa_node_ptr> tmp;
-				iterate(colIter, *rowIter)
+				for(auto const& colIter : *rowIter)
 				{
-					dfa_node_ptr new_node = node_from_string(*colIter, children);
-					iterate(it, tmp)
+					dfa_node_ptr new_node = node_from_string(colIter, children);
+					for(auto& it : tmp)
 					{
-						if((*it)->can_merge(new_node))
+						if(it->can_merge(new_node))
 						{
-							*it = (*it)->merge(new_node);
+							it = it->merge(new_node);
 							new_node.reset();
 							break;
 						}
@@ -247,12 +247,12 @@ namespace find
 				}
 
 				bool did_match = false;
-				iterate(nodeIter, *current_node)
+				for(auto const& nodeIter : *current_node)
 				{
-					if((*nodeIter)->does_match(buf[i]))
+					if(nodeIter->does_match(buf[i]))
 					{
 						match_data.push_back(buf[i]);
-						current_node = &(*nodeIter)->descend();
+						current_node = &nodeIter->descend();
 						did_match = true;
 						break;
 					}

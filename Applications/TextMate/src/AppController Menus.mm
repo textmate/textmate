@@ -37,16 +37,16 @@ OAK_DEBUG_VAR(AppController_Menus);
 	}
 
 	std::multimap<std::string, bundles::item_ptr, text::less_t> ordered;
-	citerate(item, bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeBundle))
-		ordered.emplace((*item)->name(), *item);
+	for(auto const& item : bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeBundle))
+		ordered.emplace(item->name(), item);
 
-	iterate(pair, ordered)
+	for(auto const& pair : ordered)
 	{
-		if(pair->second->menu().empty())
+		if(pair.second->menu().empty())
 			continue;
 
-		NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithCxxString:pair->first] action:NULL keyEquivalent:@""];
-		menuItem.submenu = [[NSMenu alloc] initWithTitle:[NSString stringWithCxxString:pair->second->uuid()]];
+		NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithCxxString:pair.first] action:NULL keyEquivalent:@""];
+		menuItem.submenu = [[NSMenu alloc] initWithTitle:[NSString stringWithCxxString:pair.second->uuid()]];
 		menuItem.submenu.delegate = [BundleMenuDelegate sharedInstance];
 	}
 
@@ -60,14 +60,14 @@ OAK_DEBUG_VAR(AppController_Menus);
 	[aMenu removeAllItems];
 
 	std::multimap<std::string, bundles::item_ptr, text::less_t> ordered;
-	citerate(item, bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeTheme))
-		ordered.emplace((*item)->name(), *item);
+	for(auto const& item : bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeTheme))
+		ordered.emplace(item->name(), item);
 
-	iterate(pair, ordered)
+	for(auto const& pair : ordered)
 	{
-		NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithCxxString:pair->first] action:@selector(takeThemeUUIDFrom:) keyEquivalent:@""];
-		[menuItem setKeyEquivalentCxxString:key_equivalent(pair->second)];
-		[menuItem setRepresentedObject:[NSString stringWithCxxString:pair->second->uuid()]];
+		NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithCxxString:pair.first] action:@selector(takeThemeUUIDFrom:) keyEquivalent:@""];
+		[menuItem setKeyEquivalentCxxString:key_equivalent(pair.second)];
+		[menuItem setRepresentedObject:[NSString stringWithCxxString:pair.second->uuid()]];
 	}
 
 	if(ordered.empty())
@@ -96,12 +96,12 @@ OAK_DEBUG_VAR(AppController_Menus);
 		ordered.emplace(to_s(str ?: lang), lang);
 	}
 
-	iterate(it, ordered)
+	for(auto const& it : ordered)
 	{
-		D(DBF_AppController_Menus, bug("Add Item: %s\n", it->first.c_str()););
-		NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithCxxString:it->first] action:@selector(takeSpellingLanguageFrom:) keyEquivalent:@""];
-		D(DBF_AppController_Menus, bug("Represented Object: %s\n", [it->second UTF8String]););
-		menuItem.representedObject = it->second;
+		D(DBF_AppController_Menus, bug("Add Item: %s\n", it.first.c_str()););
+		NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithCxxString:it.first] action:@selector(takeSpellingLanguageFrom:) keyEquivalent:@""];
+		D(DBF_AppController_Menus, bug("Represented Object: %s\n", [it.second UTF8String]););
+		menuItem.representedObject = it.second;
 	}
 }
 

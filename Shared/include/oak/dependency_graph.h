@@ -30,13 +30,13 @@ namespace oak
 				res.insert(n);
 				active.pop_back();
 
-				iterate(it, dependencies)
+				for(auto const& it : dependencies)
 				{
-					std::set<size_t>::const_iterator node = it->second.find(n);
-					if(node == it->second.end() || res.find(it->first) != res.end())
+					std::set<size_t>::const_iterator node = it.second.find(n);
+					if(node == it.second.end() || res.find(it.first) != res.end())
 						continue;
 
-					active.push_back(it->first);
+					active.push_back(it.first);
 				}
 			}
 
@@ -47,10 +47,10 @@ namespace oak
 		std::vector<size_t> topological_order () const
 		{
 			std::vector<size_t> res, active;
-			iterate(it, dependencies)
+			for(auto const& it : dependencies)
 			{
-				if(it->second.empty())
-					active.push_back(it->first);
+				if(it.second.empty())
+					active.push_back(it.first);
 			}
 
 			std::map< size_t, std::set<size_t> > tmp = dependencies;
@@ -60,15 +60,15 @@ namespace oak
 				res.push_back(n);
 				active.pop_back();
 
-				iterate(it, tmp)
+				for(auto& it : tmp)
 				{
-					std::set<size_t>::const_iterator node = it->second.find(n);
-					if(node == it->second.end())
+					std::set<size_t>::const_iterator node = it.second.find(n);
+					if(node == it.second.end())
 						continue;
 
-					it->second.erase(node);
-					if(it->second.empty())
-						active.push_back(it->first);
+					it.second.erase(node);
+					if(it.second.empty())
+						active.push_back(it.first);
 				}
 			}
 

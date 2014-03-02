@@ -33,13 +33,13 @@ namespace
 static NSArray* wrap (std::set<grammar_info_t> const& array)
 {
 	NSMutableArray* res = [NSMutableArray array];
-	iterate(info, array)
+	for(auto const& info : array)
 	{
 		NSMutableDictionary* dictionary = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-			[NSString stringWithCxxString:info->name],         @"name",
-			[NSString stringWithCxxString:info->scope],        @"scope",
-			[NSString stringWithCxxString:info->uuid],         @"uuid",
-			[NSString stringWithCxxString:info->bundle_uuid],  @"bundleUUID",
+			[NSString stringWithCxxString:info.name],         @"name",
+			[NSString stringWithCxxString:info.scope],        @"scope",
+			[NSString stringWithCxxString:info.uuid],         @"uuid",
+			[NSString stringWithCxxString:info.bundle_uuid],  @"bundleUUID",
 			nil];
 		[res addObject:dictionary];
 	}
@@ -85,10 +85,10 @@ static bool is_installed (oak::uuid_t const& uuid)
 {
 	std::set<grammar_info_t> recommended, installed, all;
 
-	citerate(item, bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeGrammar))
+	for(auto const& item : bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeGrammar))
 	{
-		if((*item)->value_for_field(bundles::kFieldGrammarScope) != NULL_STR)
-			installed.insert(grammar_info_t((*item)->name(), (*item)->value_for_field(bundles::kFieldGrammarScope), (*item)->uuid(), (*item)->bundle_uuid()));
+		if(item->value_for_field(bundles::kFieldGrammarScope) != NULL_STR)
+			installed.insert(grammar_info_t(item->name(), item->value_for_field(bundles::kFieldGrammarScope), item->uuid(), item->bundle_uuid()));
 	}
 
 	all = installed;
@@ -96,22 +96,22 @@ static bool is_installed (oak::uuid_t const& uuid)
 	// Exclude uninstalled grammars when offline
 	if(network::can_reach_host(REST_API))
 	{
-		citerate(bundle, bundles_db::index())
+		for(auto const& bundle : bundles_db::index())
 		{
-			citerate(grammar, (*bundle)->grammars())
+			for(auto const& grammar : bundle->grammars())
 			{
-				grammar_info_t info((*grammar)->name(), (*grammar)->scope(), (*grammar)->uuid(), (*bundle)->uuid());
+				grammar_info_t info(grammar->name(), grammar->scope(), grammar->uuid(), bundle->uuid());
 				all.insert(info);
 
-				if((*grammar)->mode_line() != NULL_STR && regexp::search((*grammar)->mode_line(), firstLine))
+				if(grammar->mode_line() != NULL_STR && regexp::search(grammar->mode_line(), firstLine))
 				{
 					recommended.insert(info);
 				}
 				else
 				{
-					iterate(ext, (*grammar)->file_types())
+					for(auto const& ext : grammar->file_types())
 					{
-						if(path::rank(to_s(self.path), *ext))
+						if(path::rank(to_s(self.path), ext))
 							recommended.insert(info);
 					}
 				}
@@ -119,10 +119,10 @@ static bool is_installed (oak::uuid_t const& uuid)
 		}
 	}
 
-	iterate(info, all)
+	for(auto const& info : all)
 	{
-		if(info->scope == "text.plain")
-			recommended.insert(*info);
+		if(info.scope == "text.plain")
+			recommended.insert(info);
 	}
 	
 
@@ -203,9 +203,9 @@ static bool is_installed (oak::uuid_t const& uuid)
 			return aCompletionHandler(self.fileType);
 		}
 
-		citerate(bundle, bundles_db::index())
+		for(auto const& bundle : bundles_db::index())
 		{
-			if(bundleUUID == (*bundle)->uuid())
+			if(bundleUUID == bundle->uuid())
 			{
 				[installingBundleActivityTextField bind:NSValueBinding toObject:[BundlesManager sharedInstance] withKeyPath:@"activityText" options:nil];
 				[installingBundleProgressIndicator bind:NSValueBinding toObject:[BundlesManager sharedInstance] withKeyPath:@"progress" options:nil];
@@ -214,7 +214,7 @@ static bool is_installed (oak::uuid_t const& uuid)
 
 				OakShowSheetForWindow(installingBundleWindow, aWindow, ^(NSInteger returnCode){ });
 
-				[[BundlesManager sharedInstance] installBundle:*bundle completionHandler:^(BOOL success){
+				[[BundlesManager sharedInstance] installBundle:bundle completionHandler:^(BOOL success){
 					[installingBundleProgressIndicator stopAnimation:self];
 					[installingBundleProgressIndicator unbind:NSValueBinding];
 					[installingBundleActivityTextField unbind:NSValueBinding];

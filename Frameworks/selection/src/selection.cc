@@ -176,8 +176,8 @@ namespace ng
 	ranges_t convert (buffer_t const& buf, text::selection_t const& sel)
 	{
 		ranges_t res;
-		iterate(range, sel)
-			res.push_back(cap(buf, *range));
+		for(auto const& range : sel)
+			res.push_back(cap(buf, range));
 		return sanitize(buf, res);
 	}
 
@@ -411,31 +411,31 @@ namespace ng
 	bool not_empty (buffer_t const& buffer, ranges_t const& selection)
 	{
 		bool isEmpty = true;
-		iterate(range, selection)
-			isEmpty = isEmpty && (range->empty() || (range->columnar && count_columns(buffer, range->first) == count_columns(buffer, range->last)));
+		for(auto const& range : selection)
+			isEmpty = isEmpty && (range.empty() || (range.columnar && count_columns(buffer, range.first) == count_columns(buffer, range.last)));
 		return !isEmpty;
 	}
 
 	bool multiline (buffer_t const& buffer, ranges_t const& selection)
 	{
 		bool isMultiline = false;
-		iterate(range, selection)
-			isMultiline = isMultiline || buffer.convert(range->first.index).line != buffer.convert(range->last.index).line;
+		for(auto const& range : selection)
+			isMultiline = isMultiline || buffer.convert(range.first.index).line != buffer.convert(range.last.index).line;
 		return isMultiline;
 	}
 
 	ranges_t dissect_columnar (buffer_t const& buffer, ranges_t const& selection)
 	{
 		ranges_t res;
-		iterate(range, selection)
+		for(auto const& range : selection)
 		{
-			if(range->columnar && !range->empty())
+			if(range.columnar && !range.empty())
 			{
-				size_t colA = count_columns(buffer, range->first);
-				size_t colB = count_columns(buffer, range->last);
+				size_t colA = count_columns(buffer, range.first);
+				size_t colB = count_columns(buffer, range.last);
 
-				size_t lineA = buffer.convert(range->first.index).line;
-				size_t lineB = buffer.convert(range->last.index).line;
+				size_t lineA = buffer.convert(range.first.index).line;
+				size_t lineB = buffer.convert(range.last.index).line;
 
 				size_t fromLine = std::min(lineA, lineB), fromCol = std::min(colA, colB);
 				size_t toLine   = std::max(lineA, lineB), toCol   = std::max(colA, colB);
@@ -448,7 +448,7 @@ namespace ng
 			}
 			else
 			{
-				res.push_back(range_t(range->min(), range->max(), range->columnar, range->freehanded));
+				res.push_back(range_t(range.min(), range.max(), range.columnar, range.freehanded));
 			}
 		}
 		return res;
@@ -755,25 +755,25 @@ namespace ng
 		bool isRightward = rightward.find(orgUnit) != rightward.end();
 
 		ranges_t res;
-		citerate(range, isLeftward || isRightward ? dissect_columnar(buffer, selection) : selection)
+		for(auto const& range : isLeftward || isRightward ? dissect_columnar(buffer, selection) : selection)
 		{
 			move_unit_type unit = orgUnit;
-			index_t index       = range->last;
-			bool freehanded     = range->freehanded;
+			index_t index       = range.last;
+			bool freehanded     = range.freehanded;
 
-			if(!range->empty())
+			if(!range.empty())
 			{
 				if(isLeftward || isRightward)
 				{
-					index = isLeftward ? range->min() : range->max();
+					index = isLeftward ? range.min() : range.max();
 
 					static std::set<move_unit_type> const left_right = { kSelectionMoveLeft,  kSelectionMoveRight, kSelectionMoveFreehandedRight, kSelectionMoveFreehandedLeft                                                                                                           };
 					if(left_right.find(unit) != left_right.end())
 						unit = kSelectionMoveNowhere;
 				}
-				else if(!range->columnar && (unit == kSelectionMoveUp || unit == kSelectionMoveDown) && buffer.convert(range->first.index).line != buffer.convert(range->last.index).line)
+				else if(!range.columnar && (unit == kSelectionMoveUp || unit == kSelectionMoveDown) && buffer.convert(range.first.index).line != buffer.convert(range.last.index).line)
 				{
-					index = unit == kSelectionMoveUp ? range->min() : range->max();
+					index = unit == kSelectionMoveUp ? range.min() : range.max();
 					if(unit == kSelectionMoveDown && buffer.begin(buffer.convert(index.index).line) == index.index)
 						unit = kSelectionMoveNowhere;
 				}
@@ -789,12 +789,12 @@ namespace ng
 
 			switch(unit)
 			{
-				case kSelectionMoveToBeginOfSelection: index = range->min();                      break;
-				case kSelectionMoveToEndOfSelection:   index = range->max();                      break;
+				case kSelectionMoveToBeginOfSelection: index = range.min();                      break;
+				case kSelectionMoveToEndOfSelection:   index = range.max();                      break;
 				default:                               index = move(buffer, index, unit, layout); break;
 			}
 
-			if(freehanded && orgUnit == kSelectionMoveLeft && range->empty() && buffer.convert(index.index).line + 1 == buffer.convert(range->last.index).line)
+			if(freehanded && orgUnit == kSelectionMoveLeft && range.empty() && buffer.convert(index.index).line + 1 == buffer.convert(range.last.index).line)
 				freehanded = false;
 
 			res.push_back(range_t(index, index, false, freehanded));
@@ -803,16 +803,16 @@ namespace ng
 		if(res.size() > 1 && (orgUnit == kSelectionMoveUp || orgUnit == kSelectionMoveDown))
 		{
 			std::set<size_t> lines;
-			iterate(range, res)
-				lines.insert(buffer.convert(range->first.index).line);
+			for(auto const& range : res)
+				lines.insert(buffer.convert(range.first.index).line);
 
 			if(lines.size() > 1)
 			{
 				index_t min(SIZE_T_MAX), max(0);
-				iterate(range, res)
+				for(auto const& range : res)
 				{
-					min = std::min(min, range->min());
-					max = std::max(max, range->max());
+					min = std::min(min, range.min());
+					max = std::max(max, range.max());
 				}
 				res = orgUnit == kSelectionMoveUp ? min : max;
 			}
@@ -1021,25 +1021,25 @@ namespace ng
 		bool shouldDissect = isColumnar && splittingUnits.find(unit) != splittingUnits.end();
 
 		ranges_t res;
-		citerate(range, shouldDissect ? dissect_columnar(buffer, selection) : selection)
-			res.push_back(extend(buffer, *range, unit, layout));
+		for(auto const& range : shouldDissect ? dissect_columnar(buffer, selection) : selection)
+			res.push_back(extend(buffer, range, unit, layout));
 		return sanitize(buffer, res);
 	}
 
 	ranges_t extend_if_empty (buffer_t const& buffer, ranges_t const& selection, select_unit_type const unit, layout_movement_t const* layout)
 	{
 		ranges_t res;
-		iterate(range, selection)
+		for(auto const& range : selection)
 		{
-			if(not_empty(buffer, *range))
+			if(not_empty(buffer, range))
 			{
-				res.push_back(*range);
+				res.push_back(range);
 			}
 			else
 			{
-				citerate(r, dissect_columnar(buffer, *range))
+				for(auto const& r : dissect_columnar(buffer, range))
 				{
-					range_t range = extend(buffer, *r, unit, layout);
+					range_t range = extend(buffer, r, unit, layout);
 					if(unit == kSelectionExtendToEndOfParagraph && range.empty())
 						range = extend(buffer, range, kSelectionExtendRight, layout);
 					res.push_back(range);
@@ -1075,8 +1075,8 @@ namespace ng
 	ranges_t select_scope (buffer_t const& buffer, ranges_t const& selection, scope::selector_t const& scopeSelector)
 	{
 		ranges_t res;
-		iterate(range, selection)
-			res.push_back(select_scope(buffer, *range, scopeSelector));
+		for(auto const& range : selection)
+			res.push_back(select_scope(buffer, range, scopeSelector));
 		return sanitize(buffer, res);
 	}
 
@@ -1097,9 +1097,9 @@ namespace ng
 		else
 		{
 			scope::scope_t scope;
-			citerate(range, selection)
+			for(auto const& range : selection)
 			{
-				scope::scope_t newScope = shared_prefix(buffer.scope(range->min().index).right, buffer.scope(range->max().index).left);
+				scope::scope_t newScope = shared_prefix(buffer.scope(range.min().index).right, buffer.scope(range.max().index).left);
 				scope = scope.empty() ? newScope : shared_prefix(scope, newScope);
 			}
 			res = scope;
@@ -1200,9 +1200,9 @@ namespace ng
 
 	static bool is_subset (range_t const& range, ranges_t const& ranges)
 	{
-		iterate(r, ranges)
+		for(auto const& r : ranges)
 		{
-			if(r->min() <= range.min() && range.max() <= r->max())
+			if(r.min() <= range.min() && range.max() <= r.max())
 				return true;
 		}
 		return ranges.empty();
@@ -1218,10 +1218,10 @@ namespace ng
 		find::find_t f(searchFor, (find::options_t)(options & ~find::backwards));
 
 		ssize_t total = 0;
-		iterate(memory, buffer)
+		for(auto const& memory : buffer)
 		{
-			char const* buf = (*memory).data();
-			size_t len      = (*memory).size();
+			char const* buf = memory.data();
+			size_t len      = memory.size();
 
 			for(ssize_t offset = 0; offset < len; )
 			{
@@ -1308,10 +1308,10 @@ namespace ng
 		if(options & find::extend_selection)
 		{
 			ng::index_t anchor(options & find::backwards ? buffer.size() : 0);
-			iterate(range, selection)
+			for(auto const& range : selection)
 			{
-				anchor = options & find::backwards ? std::min(range->min(), anchor) : std::max(range->max(), anchor);
-				res.emplace(*range, std::map<std::string, std::string>());
+				anchor = options & find::backwards ? std::min(range.min(), anchor) : std::max(range.max(), anchor);
+				res.emplace(range, std::map<std::string, std::string>());
 			}
 
 			if(options & find::backwards)
@@ -1458,20 +1458,20 @@ namespace ng
 	ranges_t from_string (buffer_t const& buffer, std::string const& str)
 	{
 		ranges_t res;
-		citerate(range, text::selection_t(str))
-			res.push_back(range_t(index_t(buffer.convert(range->from), range->from.offset), index_t(buffer.convert(range->to), range->to.offset), range->columnar, range->from.offset || range->to.offset));
+		for(auto const& range : text::selection_t(str))
+			res.push_back(range_t(index_t(buffer.convert(range.from), range.from.offset), index_t(buffer.convert(range.to), range.to.offset), range.columnar, range.from.offset || range.to.offset));
 		return res;
 	}
 
 	std::string to_s (buffer_t const& buffer, ranges_t const& ranges)
 	{
 		text::selection_t res;
-		iterate(range, ranges)
+		for(auto const& range : ranges)
 		{
-			text::pos_t from = buffer.convert(range->first.index), to = buffer.convert(range->last.index);
-			from.offset = range->freehanded ? range->first.carry : 0;
-			to.offset   = range->freehanded ? range->last.carry  : 0;
-			res.push_back(text::range_t(from, to, range->columnar));
+			text::pos_t from = buffer.convert(range.first.index), to = buffer.convert(range.last.index);
+			from.offset = range.freehanded ? range.first.carry : 0;
+			to.offset   = range.freehanded ? range.last.carry  : 0;
+			res.push_back(text::range_t(from, to, range.columnar));
 		}
 		return res;
 	}

@@ -19,8 +19,8 @@ namespace ng
 	std::string folds_t::folded_as_string () const
 	{
 		std::vector<std::string> v;
-		iterate(pair, _folded)
-			v.push_back(text::format("(%zu,%zu)", pair->first, pair->second));
+		for(auto const& pair : _folded)
+			v.push_back(text::format("(%zu,%zu)", pair.first, pair.second));
 		return v.empty() ? NULL_STR : "(" + text::join(v, ",") + ")";
 	}
 
@@ -32,9 +32,9 @@ namespace ng
 			bool validRanges = true;
 
 			std::vector< std::pair<size_t, size_t> > newFoldings;
-			iterate(pair, *array)
+			for(auto const& pair : *array)
 			{
-				if(plist::array_t const* value = boost::get<plist::array_t>(&*pair))
+				if(plist::array_t const* value = boost::get<plist::array_t>(&pair))
 				{
 					int32_t const* from = value->size() == 2 ? boost::get<int32_t>(&(*value)[0]) : NULL;
 					int32_t const* to   = value->size() == 2 ? boost::get<int32_t>(&(*value)[1]) : NULL;
@@ -56,9 +56,9 @@ namespace ng
 	bool folds_t::has_folded (size_t n) const
 	{
 		size_t bol = _buffer.begin(n), eol = _buffer.eol(n);
-		iterate(pair, _folded)
+		for(auto const& pair : _folded)
 		{
-			if(pair->first <= bol && bol <= pair->second || pair->first <= eol && eol <= pair->second)
+			if(pair.first <= bol && bol <= pair.second || pair.first <= eol && eol <= pair.second)
 				return true;
 		}
 		return false;
@@ -89,24 +89,24 @@ namespace ng
 		std::sort(_folded.begin(), _folded.end());
 
 		std::map<size_t, ssize_t> tmp;
-		iterate(pair, _folded)
+		for(auto const& pair : _folded)
 		{
-			++tmp[pair->first];
-			--tmp[pair->second];
+			++tmp[pair.first];
+			--tmp[pair.second];
 		}
 
 		_legacy.clear();
 		ssize_t level = 0;
-		iterate(pair, tmp)
+		for(auto const& pair : tmp)
 		{
-			if(pair->second == 0)
+			if(pair.second == 0)
 				continue;
 
-			if(level == 0 && pair->second > 0)
-				_legacy.set(pair->first, true);
-			level += pair->second;
+			if(level == 0 && pair.second > 0)
+				_legacy.set(pair.first, true);
+			level += pair.second;
 			if(level == 0)
-				_legacy.set(pair->first, false);
+				_legacy.set(pair.first, false);
 		}
 	}
 
@@ -126,11 +126,11 @@ namespace ng
 		bool found = false;
 
 		std::vector< std::pair<size_t, size_t> > res, newFoldings;
-		iterate(pair, _folded)
+		for(auto const& pair : _folded)
 		{
-			if(from == pair->first && pair->second <= to || from <= pair->first && pair->second == to)
+			if(from == pair.first && pair.second <= to || from <= pair.first && pair.second == to)
 					found = true;
-			else	newFoldings.push_back(*pair);
+			else	newFoldings.push_back(pair);
 		}
 
 		if(found)
@@ -143,11 +143,11 @@ namespace ng
 	{
 		std::vector< std::pair<size_t, size_t> > res, newFoldings;
 
-		iterate(pair, _folded)
+		for(auto const& pair : _folded)
 		{
-			if(pair->first <= from && from < pair->second || pair->first < to && to <= pair->second)
-					res.push_back(*pair);
-			else	newFoldings.push_back(*pair);
+			if(pair.first <= from && from < pair.second || pair.first < to && to <= pair.second)
+					res.push_back(pair);
+			else	newFoldings.push_back(pair);
 		}
 
 		set_folded(newFoldings);
@@ -162,16 +162,16 @@ namespace ng
 		{
 			size_t bol = _buffer.begin(n), eol = _buffer.eol(n);
 			std::vector< std::pair<size_t, size_t> > newFoldings;
-			iterate(pair, _folded)
+			for(auto const& pair : _folded)
 			{
-				if(oak::cap(pair->first, bol, pair->second) == bol || oak::cap(pair->first, eol, pair->second) == eol)
+				if(oak::cap(pair.first, bol, pair.second) == bol || oak::cap(pair.first, eol, pair.second) == eol)
 				{
 					if(res.first == res.second)
-						res = *pair;
+						res = pair;
 				}
-				else if(!recursive || !(res.first <= pair->first && pair->second <= res.second))
+				else if(!recursive || !(res.first <= pair.first && pair.second <= res.second))
 				{
-					newFoldings.push_back(*pair);
+					newFoldings.push_back(pair);
 				}
 			}
 			set_folded(newFoldings);
@@ -183,10 +183,10 @@ namespace ng
 			{
 				if(recursive)
 				{
-					citerate(pair, foldable_ranges())
+					for(auto const& pair : foldable_ranges())
 					{
-						if(res.first <= pair->first && pair->second <= res.second)
-							fold(pair->first, pair->second);
+						if(res.first <= pair.first && pair.second <= res.second)
+							fold(pair.first, pair.second);
 					}
 				}
 				else
@@ -204,14 +204,14 @@ namespace ng
 		std::vector< std::pair<size_t, size_t> > const& folded = _folded;
 
 		std::vector< std::pair<size_t, size_t> > unfolded, canFoldAtLevel, foldedAtLevel, nestingStack;
-		citerate(pair, foldable_ranges())
+		for(auto const& pair : foldable_ranges())
 		{
-			while(!nestingStack.empty() && nestingStack.back().second <= pair->first)
+			while(!nestingStack.empty() && nestingStack.back().second <= pair.first)
 				nestingStack.pop_back();
-			nestingStack.push_back(*pair);
+			nestingStack.push_back(pair);
 
 			if(level == 0 || level == nestingStack.size())
-				unfolded.push_back(*pair);
+				unfolded.push_back(pair);
 		}
 
 		std::sort(unfolded.begin(), unfolded.end());
@@ -220,8 +220,8 @@ namespace ng
 
 		if(canFoldAtLevel.size() >= foldedAtLevel.size())
 		{
-			iterate(pair, canFoldAtLevel)
-				fold(pair->first, pair->second);
+			for(auto const& pair : canFoldAtLevel)
+				fold(pair.first, pair.second);
 			return canFoldAtLevel;
 		}
 
@@ -239,9 +239,9 @@ namespace ng
 	{
 		std::vector< std::pair<size_t, size_t> > newFoldings;
 		ssize_t delta = str.size() - (to - from);
-		iterate(pair, _folded)
+		for(auto const& pair : _folded)
 		{
-			ssize_t foldFrom = pair->first, foldTo = pair->second;
+			ssize_t foldFrom = pair.first, foldTo = pair.second;
 			if(to <= foldFrom)
 				newFoldings.push_back(std::make_pair(foldFrom + delta, foldTo + delta));
 			else if(foldFrom <= from && to <= foldTo && delta != foldFrom - foldTo)
@@ -282,9 +282,9 @@ namespace ng
 
 	bool folds_t::integrity () const
 	{
-		iterate(info, _levels)
+		for(auto const& info : _levels)
 		{
-			size_t pos = info->offset + info->key;
+			size_t pos = info.offset + info.key;
 			if(_buffer.size() < pos || _buffer.convert(pos).column != 0)
 			{
 				size_t n = _buffer.convert(pos).line;
@@ -346,14 +346,14 @@ namespace ng
 		std::sort(res.begin(), res.end());
 
 		std::vector< std::pair<size_t, size_t> > nestingStack, unique;
-		citerate(pair, res)
+		for(auto const& pair : res)
 		{
-			while(!nestingStack.empty() && nestingStack.back().second <= pair->first)
+			while(!nestingStack.empty() && nestingStack.back().second <= pair.first)
 				nestingStack.pop_back();
-			if(!nestingStack.empty() && nestingStack.back().second < pair->second)
+			if(!nestingStack.empty() && nestingStack.back().second < pair.second)
 				continue;
-			nestingStack.push_back(*pair);
-			unique.push_back(*pair);
+			nestingStack.push_back(pair);
+			unique.push_back(pair);
 		}
 		return unique;
 	}
@@ -363,10 +363,10 @@ namespace ng
 		std::pair<size_t, size_t> res(0, 0);
 
 		size_t bol = _buffer.begin(n), eol = _buffer.eol(n);
-		citerate(pair, foldable_ranges())
+		for(auto const& pair : foldable_ranges())
 		{
-			if(oak::cap(pair->first, bol, pair->second) == bol || oak::cap(pair->first, eol, pair->second) == eol)
-				res = *pair;
+			if(oak::cap(pair.first, bol, pair.second) == bol || oak::cap(pair.first, eol, pair.second) == eol)
+				res = pair;
 		}
 		return res;
 	}
@@ -395,11 +395,11 @@ namespace ng
 
 		if(!didFindPatterns) // legacy — this has bad performance
 		{
-			citerate(item, bundles::query(bundles::kFieldGrammarScope, to_s(buffer.scope(0, false).left), scope::wildcard, bundles::kItemTypeGrammar))
+			for(auto const& item : bundles::query(bundles::kFieldGrammarScope, to_s(buffer.scope(0, false).left), scope::wildcard, bundles::kItemTypeGrammar))
 			{
 				std::string foldingStartMarker = NULL_STR, foldingStopMarker = NULL_STR;
-				plist::get_key_path((*item)->plist(), "foldingStartMarker", foldingStartMarker);
-				plist::get_key_path((*item)->plist(), "foldingStopMarker", foldingStopMarker);
+				plist::get_key_path(item->plist(), "foldingStartMarker", foldingStartMarker);
+				plist::get_key_path(item->plist(), "foldingStopMarker", foldingStopMarker);
 				startPattern = foldingStartMarker;
 				stopPattern  = foldingStopMarker;
 			}

@@ -13,8 +13,8 @@ static void set (std::vector<std::string>& canvas, CGRect const& r, char m = 'x'
 static std::string to_str (std::vector<CGRect> const& rList)
 {
 	std::vector<std::string> canvas(3, "...");
-	iterate(r, rList)
-		set(canvas, *r);
+	for(auto const& r : rList)
+		set(canvas, r);
 	return text::join(canvas, "");
 }
 

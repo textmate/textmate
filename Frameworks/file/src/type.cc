@@ -14,9 +14,9 @@ OAK_DEBUG_VAR(File_UserBindings);
 
 static std::string file_type_from_grammars (std::vector<bundles::item_ptr> const& grammars)
 {
-	iterate(grammar, grammars)
+	for(auto const& grammar : grammars)
 	{
-		std::string const& scopeName = (*grammar)->value_for_field(bundles::kFieldGrammarScope);
+		std::string const& scopeName = grammar->value_for_field(bundles::kFieldGrammarScope);
 		if(scopeName != NULL_STR)
 			return scopeName;
 	}
@@ -33,15 +33,15 @@ static size_t lines_matched_by_regexp (std::string const& pattern)
 	size_t newlines = 1;
 
 	bool esc = false;
-	iterate(ch, pattern)
+	for(auto const& ch : pattern)
 	{
-		if(*ch == '\\')
+		if(ch == '\\')
 		{
 			esc = !esc;
 			continue;
 		}
 
-		if(esc && *ch == 'n' || *ch == '\n')
+		if(esc && ch == 'n' || ch == '\n')
 			++newlines;
 		esc = false;
 	}
@@ -63,17 +63,17 @@ static std::string file_type_from_bytes (io::bytes_ptr const& bytes)
 		return NULL_STR;
 
 	std::multimap<ssize_t, bundles::item_ptr> ordering;
-	citerate(item, bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeGrammar))
+	for(auto const& item : bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeGrammar))
 	{
-		citerate(pattern, (*item)->values_for_field(bundles::kFieldGrammarFirstLineMatch))
+		for(auto const& pattern : item->values_for_field(bundles::kFieldGrammarFirstLineMatch))
 		{
 			char const* first = bytes->begin();
 			char const* last  = bytes->end();
-			if(pattern->find("(?m)") == std::string::npos)
-				last = first_n_lines(first, last, lines_matched_by_regexp(*pattern));
+			if(pattern.find("(?m)") == std::string::npos)
+				last = first_n_lines(first, last, lines_matched_by_regexp(pattern));
 
-			if(regexp::match_t const& m = regexp::search(*pattern, first, last))
-				ordering.emplace(-m.end(), *item);
+			if(regexp::match_t const& m = regexp::search(pattern, first, last))
+				ordering.emplace(-m.end(), item);
 		}
 	}
 	return ordering.empty() ? NULL_STR : file_type_from_grammars(std::vector<bundles::item_ptr>(1, ordering.begin()->second));

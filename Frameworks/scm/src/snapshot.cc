@@ -23,15 +23,15 @@ namespace fs
 	snapshot_t::nodes_ptr snapshot_t::collect (std::string const& dir)
 	{
 		auto res = std::make_shared<std::map<ino_t, node_t>>();
-		citerate(entry, path::entries(dir))
+		for(auto const& entry : path::entries(dir))
 		{
-			std::string const path = path::join(dir, (*entry)->d_name);
-			if((*entry)->d_type == DT_REG)
-				res->insert(std::make_pair((*entry)->d_ino, node_t((*entry)->d_name, node_t::kNodeTypeFile, modified(path))));
-			else if((*entry)->d_type == DT_LNK)
-				res->insert(std::make_pair((*entry)->d_ino, node_t((*entry)->d_name, node_t::kNodeTypeLink, modified(path))));
-			else if((*entry)->d_type == DT_DIR)
-				res->insert(std::make_pair((*entry)->d_ino, node_t((*entry)->d_name, node_t::kNodeTypeDirectory, modified(path), collect(path))));
+			std::string const path = path::join(dir, entry->d_name);
+			if(entry->d_type == DT_REG)
+				res->insert(std::make_pair(entry->d_ino, node_t(entry->d_name, node_t::kNodeTypeFile, modified(path))));
+			else if(entry->d_type == DT_LNK)
+				res->insert(std::make_pair(entry->d_ino, node_t(entry->d_name, node_t::kNodeTypeLink, modified(path))));
+			else if(entry->d_type == DT_DIR)
+				res->insert(std::make_pair(entry->d_ino, node_t(entry->d_name, node_t::kNodeTypeDirectory, modified(path), collect(path))));
 		}
 		return res;
 	}

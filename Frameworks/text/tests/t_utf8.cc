@@ -65,8 +65,8 @@ void test_to_s ()
 
 	static uint32_t const chars[] = { 0x201C, 0xC6, 0x62, 0x6C, 0x65, 0x67, 0x72, 0xF8, 0x64, 0x2026, 0x201D, 0x20, 0x2014, 0x20, 0x20EF5 };
 	std::string str = "";
-	iterate(ch, chars)
-		str += utf8::to_s(*ch);
+	for(auto const& ch : chars)
+		str += utf8::to_s(ch);
 	OAK_ASSERT_EQ(str, "“Æblegrød…” — 𠻵");
 }
 
