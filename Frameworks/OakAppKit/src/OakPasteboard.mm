@@ -502,7 +502,7 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 	if(OakPasteboardEntry* prev = [[self.managedObjectContext executeFetchRequest:request error:nullptr] firstObject])
 		self.currentEntry = prev;
 
-	return self.currentEntry;
+	return self.current;
 }
 
 - (OakPasteboardEntry*)current
@@ -532,7 +532,7 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 	if(OakPasteboardEntry* next = [[self.managedObjectContext executeFetchRequest:request error:nullptr] firstObject])
 		self.currentEntry = next;
 
-	return self.currentEntry;
+	return self.current;
 }
 
 - (BOOL)selectItemAtPosition:(NSPoint)location withWidth:(CGFloat)width respondToSingleClick:(BOOL)singleClick
