@@ -16,6 +16,7 @@
 #import <OakAppKit/NSImage Additions.h>
 #import <OakAppKit/OakToolTip.h>
 #import <OakAppKit/OakPasteboard.h>
+#import <OakAppKit/OakPasteboardChooser.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakAppKit/NSMenuItem Additions.h>
 #import <BundleMenu/BundleMenu.h>
@@ -474,12 +475,16 @@ private:
 
 - (void)showClipboardHistory:(id)sender
 {
-	[[OakPasteboard pasteboardWithName:NSGeneralPboard] selectItemAtPosition:[textView positionForWindowUnderCaret] andCall:@selector(paste:)];
+	OakPasteboardChooser* chooser = [[OakPasteboardChooser alloc] initWithPasteboard:[OakPasteboard pasteboardWithName:NSGeneralPboard]];
+	chooser.action = @selector(paste:);
+	[chooser showWindowRelativeToFrame:[self.window convertRectToScreen:[textView convertRect:[textView visibleRect] toView:nil]]];
 }
 
 - (void)showFindHistory:(id)sender
 {
-	[[OakPasteboard pasteboardWithName:NSFindPboard] selectItemAtPosition:[textView positionForWindowUnderCaret] andCall:@selector(findNext:)];
+	OakPasteboardChooser* chooser = [[OakPasteboardChooser alloc] initWithPasteboard:[OakPasteboard pasteboardWithName:NSFindPboard]];
+	chooser.action = @selector(findNext:);
+	[chooser showWindowRelativeToFrame:[self.window convertRectToScreen:[textView convertRect:[textView visibleRect] toView:nil]]];
 }
 
 // ==================
