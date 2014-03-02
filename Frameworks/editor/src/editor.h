@@ -157,6 +157,8 @@ namespace ng
 		virtual std::map<std::string, std::string> variables_for_bundle_item (bundles::item_ptr item) = 0;
 	};
 
+	enum indent_correction_t { kIndentCorrectNever, kIndentCorrectNonEmptyLines, kIndentCorrectAlways };
+
 	struct PUBLIC editor_t
 	{
 		editor_t ();
@@ -166,12 +168,12 @@ namespace ng
 		editor_delegate_t* delegate () const            { return _delegate; }
 		void set_delegate (editor_delegate_t* delegate) { _delegate = delegate; }
 
-		void perform (action_t action, layout_t const* layout = NULL, bool indentCorrections = false, std::string const& scopeAttributes = NULL_STR);
+		void perform (action_t action, layout_t const* layout = NULL, indent_correction_t indentCorrections = kIndentCorrectAlways, std::string const& scopeAttributes = NULL_STR);
 
 		bool disallow_tab_expansion () const;
 
 		void insert (std::string const& str, bool selectInsertion = false);
-		void insert_with_pairing (std::string const& str, bool indentCorrections, bool autoPairing, std::string const& scopeAttributes = NULL_STR);
+		void insert_with_pairing (std::string const& str, indent_correction_t indentCorrections, bool autoPairing, std::string const& scopeAttributes = NULL_STR);
 		void move_selection_to (ng::index_t const& index, bool selectInsertion = true);
 		ranges_t replace_all (std::string const& searchFor, std::string const& replaceWith, find::options_t options = find::none, bool searchOnlySelection = false);
 		void delete_tab_trigger (std::string const& str);

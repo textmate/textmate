@@ -629,7 +629,7 @@ namespace ng
 
 	struct indent_helper_t : ng::callback_t
 	{
-		indent_helper_t (editor_t& editor, buffer_t& buffer, bool indentCorrections) : _disabled(!indentCorrections), _editor(editor), _buffer(buffer)
+		indent_helper_t (editor_t& editor, buffer_t& buffer, indent_correction_t indentCorrections) : _disabled(indentCorrections == kIndentCorrectNever), _indent_correct(indentCorrections), _editor(editor), _buffer(buffer)
 		{
 			_disabled = _disabled || editor._selections.size() != 1 || editor._selections.last().columnar;
 			if(_disabled)
@@ -642,8 +642,11 @@ namespace ng
 		{
 			text::pos_t pos = _buffer.convert(from);
 
-			indent::fsm_t fsm = indent::create_fsm(_buffer, pos.line, _buffer.indent().indent_size(), _buffer.indent().tab_size());
 			std::string const line = _buffer.substr(_buffer.begin(pos.line), _buffer.eol(pos.line));
+			if(_indent_correct == kIndentCorrectNonEmptyLines && (line.empty() || text::is_blank(line.data(), line.data() + line.size())))
+				return;
+
+			indent::fsm_t fsm = indent::create_fsm(_buffer, pos.line, _buffer.indent().indent_size(), _buffer.indent().tab_size());
 			bool ignored = fsm.is_ignored(line, indent::patterns_for_line(_buffer, pos.line));
 			int actual = indent::leading_whitespace(line.data(), line.data() + line.size(), _buffer.indent().tab_size());
 			size_t desired = fsm.scan_line(line, indent::patterns_for_line(_buffer, pos.line));
@@ -691,6 +694,7 @@ namespace ng
 
 	private:
 		bool _disabled;
+		indent_correction_t _indent_correct;
 		editor_t& _editor;
 		buffer_t& _buffer;
 		std::map<size_t, int> _lines;
@@ -718,7 +722,7 @@ namespace ng
 		return NULL_STR;
 	}
 
-	void editor_t::insert_with_pairing (std::string const& str, bool indentCorrections, bool autoPairing, std::string const& scopeAttributes)
+	void editor_t::insert_with_pairing (std::string const& str, indent_correction_t indentCorrections, bool autoPairing, std::string const& scopeAttributes)
 	{
 		if(autoPairing && !has_selection())
 		{
@@ -784,7 +788,7 @@ namespace ng
 		_selections = this->snippet(from, to, str, variables, disableIndent);
 	}
 
-	void editor_t::perform (action_t action, layout_t const* layout, bool indentCorrections, std::string const& scopeAttributes)
+	void editor_t::perform (action_t action, layout_t const* layout, indent_correction_t indentCorrections, std::string const& scopeAttributes)
 	{
 		static std::string const kSingleMarkType = "•";
 		preserve_selection_helper_t selectionHelper(_buffer, _selections);

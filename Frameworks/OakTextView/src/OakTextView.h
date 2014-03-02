@@ -43,7 +43,7 @@ PUBLIC @interface OakTextView : OakView <NSTextInput, NSTextFieldDelegate>
 @property (nonatomic) BOOL                                  softWrap;
 @property (nonatomic) BOOL                                  scrollPastEnd;
 @property (nonatomic) BOOL                                  softTabs;
-@property (nonatomic, readonly) BOOL                        continuousIndentCorrections;
+@property (nonatomic, readonly) ng::indent_correction_t     indentCorrections;
 
 @property (nonatomic, readonly) BOOL                        hasMultiLineSelection;
 @property (nonatomic, readonly) BOOL                        hasSelection;

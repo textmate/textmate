@@ -1926,7 +1926,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 		if(event != OakChoiceMenuKeyCancel)
 		{
-			editor->perform(ng::kInsertTab, layout.get(), [self continuousIndentCorrections], to_s([self scopeAttributes]));
+			editor->perform(ng::kInsertTab, layout.get(), [self indentCorrections], to_s([self scopeAttributes]));
 			choiceVector.clear();
 		}
 	}
@@ -1987,7 +1987,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 	[self recordSelector:_cmd withArgument:[aString copy]];
 	bool autoPairing = !macroRecordingArray && ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableTypingPairsKey];
-	editor->insert_with_pairing([aString UTF8String], [self continuousIndentCorrections], autoPairing, to_s([self scopeAttributes]));
+	editor->insert_with_pairing([aString UTF8String], [self indentCorrections], autoPairing, to_s([self scopeAttributes]));
 }
 
 - (IBAction)toggleCurrentFolding:(id)sender
@@ -2554,7 +2554,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	if(![self expandTabTrigger:sender])
 	{
 		[self recordSelector:_cmd withArgument:nil];
-		editor->perform(ng::kInsertTab, layout.get(), [self continuousIndentCorrections], to_s([self scopeAttributes]));
+		editor->perform(ng::kInsertTab, layout.get(), [self indentCorrections], to_s([self scopeAttributes]));
 	}
 }
 
@@ -2693,9 +2693,20 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 - (BOOL)softTabs              { return document ? document->indent().soft_tabs() : NO; }
 - (BOOL)softWrap              { return layout && layout->wrapping(); }
 
-- (BOOL)continuousIndentCorrections
+- (ng::indent_correction_t)indentCorrections
 {
-	return !plist::is_true(bundles::value_for_setting("disableIndentCorrections", [self scopeContext]));
+	plist::any_t indentCorrections = bundles::value_for_setting("disableIndentCorrections", [self scopeContext]);
+	if(std::string const* str = boost::get<std::string>(&indentCorrections))
+	{
+		if(str->find("emptyLines") == 0)
+			return ng::kIndentCorrectNonEmptyLines;
+		NSLog(@"%s unrecognized indent option: ‘%s’", sel_getName(_cmd), str->c_str());
+	}
+	else if(plist::is_true(indentCorrections))
+	{
+		return ng::kIndentCorrectNever;
+	}
+	return ng::kIndentCorrectAlways;
 }
 
 - (void)setTheme:(theme_ptr const&)newTheme
@@ -3693,7 +3704,7 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 	AUTO_REFRESH;
 	[self recordSelector:aSelector withArgument:nil];
 	try {
-		editor->perform(anAction, layout.get(), [self continuousIndentCorrections], to_s([self scopeAttributes]));
+		editor->perform(anAction, layout.get(), [self indentCorrections], to_s([self scopeAttributes]));
 	}
 	catch(std::exception const& e) {
 		crash_reporter_info_t info(text::format("Performing @selector(%s)\nC++ Exception: %s", sel_getName(aSelector), e.what()));
