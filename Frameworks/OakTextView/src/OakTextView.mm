@@ -769,7 +769,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 	if(window != self.window)
 		return;
 
-	citerate(item, bundles::query(bundles::kFieldSemanticClass, "callback.document.will-save", [self scopeContext]))
+	citerate(item, bundles::query(bundles::kFieldSemanticClass, "callback.document.will-save", [self scopeContext], bundles::kItemTypeMost, oak::uuid_t(), false))
 		[self performBundleItem:*item];
 
 	if(document && layout)
@@ -785,7 +785,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 	if(window != self.window)
 		return;
 
-	citerate(item, bundles::query(bundles::kFieldSemanticClass, "callback.document.did-save", [self scopeContext]))
+	citerate(item, bundles::query(bundles::kFieldSemanticClass, "callback.document.did-save", [self scopeContext], bundles::kItemTypeMost, oak::uuid_t(), false))
 		[self performBundleItem:*item];
 }
 
@@ -1622,13 +1622,13 @@ doScroll:
 
 - (void)applicationDidBecomeActiveNotification:(NSNotification*)aNotification
 {
-	citerate(item, bundles::query(bundles::kFieldSemanticClass, "callback.application.did-activate", [self scopeContext]))
+	citerate(item, bundles::query(bundles::kFieldSemanticClass, "callback.application.did-activate", [self scopeContext], bundles::kItemTypeMost, oak::uuid_t(), false))
 		[self performBundleItem:*item];
 }
 
 - (void)applicationDidResignActiveNotification:(NSNotification*)aNotification
 {
-	citerate(item, bundles::query(bundles::kFieldSemanticClass, "callback.application.did-deactivate", [self scopeContext]))
+	citerate(item, bundles::query(bundles::kFieldSemanticClass, "callback.application.did-deactivate", [self scopeContext], bundles::kItemTypeMost, oak::uuid_t(), false))
 		[self performBundleItem:*item];
 }
 
