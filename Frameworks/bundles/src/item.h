@@ -10,7 +10,9 @@ namespace fs { struct node_t; }
 namespace bundles
 {
 	enum kind_t { kItemTypeCommand = 1, kItemTypeDragCommand = 2, kItemTypeGrammar = 4, kItemTypeMacro = 8, kItemTypeSettings = 16, kItemTypeSnippet = 32, kItemTypeProxy = 64, kItemTypeTheme = 128, kItemTypeBundle = 256, kItemTypeMenu = 512, kItemTypeMenuItemSeparator = 1024, kItemTypeUnknown = 2048 };
+
 	PUBLIC extern int kItemTypeMenuTypes;
+	PUBLIC extern int kItemTypeMost;
 	PUBLIC extern int kItemTypeAny;
 
 	PUBLIC extern std::string const kFieldName;

@@ -9,6 +9,7 @@
 namespace bundles
 {
 	int kItemTypeMenuTypes = kItemTypeCommand|kItemTypeMacro|kItemTypeSnippet|kItemTypeProxy;
+	int kItemTypeMost      = ~(kItemTypeSettings|kItemTypeBundle|kItemTypeMenu|kItemTypeMenuItemSeparator|kItemTypeUnknown);
 	int kItemTypeAny       = -1;
 
 	std::string const kFieldUUID                     = "uuid";

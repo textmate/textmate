@@ -20,7 +20,7 @@ namespace bundles
 	PUBLIC void add_item (item_ptr item);
 	PUBLIC void remove_item (item_ptr item);
 
-	PUBLIC std::vector<item_ptr> query (std::string const& field, std::string const& value, scope::context_t const& scope = scope::wildcard, int kind = kItemTypeCommand|kItemTypeDragCommand|kItemTypeGrammar|kItemTypeMacro|kItemTypeSnippet|kItemTypeProxy|kItemTypeTheme, oak::uuid_t const& bundle = oak::uuid_t(), bool filter = true, bool includeDisabledItems = false);
+	PUBLIC std::vector<item_ptr> query (std::string const& field, std::string const& value, scope::context_t const& scope = scope::wildcard, int kind = kItemTypeMost, oak::uuid_t const& bundle = oak::uuid_t(), bool filter = true, bool includeDisabledItems = false);
 	PUBLIC std::vector<item_ptr> items_for_proxy (item_ptr proxyItem, scope::context_t const& scope = scope::wildcard, int kind = kItemTypeCommand|kItemTypeDragCommand|kItemTypeGrammar|kItemTypeMacro|kItemTypeSnippet|kItemTypeProxy|kItemTypeTheme, oak::uuid_t const& bundle = oak::uuid_t(), bool filter = true, bool includeDisabledItems = false);
 	PUBLIC item_ptr lookup (oak::uuid_t const& uuid);
 	PUBLIC std::string name_with_selection (item_ptr const& item, bool hasSelection);
