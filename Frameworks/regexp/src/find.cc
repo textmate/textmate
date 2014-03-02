@@ -172,7 +172,7 @@ namespace find
 		regular_find_t (std::string const& str, options_t options) : options(options)
 		{
 			std::vector< std::vector<std::string> > matrix;
-			iterate(it, diacritics::make_range(str.data(), str.data() + str.size()))
+			citerate(it, diacritics::make_range(str.data(), str.data() + str.size()))
 			{
 				if((options & ignore_whitespace) && is_whitespace(*it))
 					continue;
