@@ -572,12 +572,6 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 	return [pasteboardSelector shouldSendAction];
 }
 
-- (void)selectItemAtPosition:(NSPoint)aLocation andCall:(SEL)aSelector
-{
-	if([self selectItemAtPosition:aLocation withWidth:0 respondToSingleClick:NO])
-		[NSApp sendAction:aSelector to:nil from:self];
-}
-
 - (void)selectItemForControl:(NSView*)controlView
 {
 	NSPoint origin = [[controlView window] convertBaseToScreen:[controlView frame].origin];

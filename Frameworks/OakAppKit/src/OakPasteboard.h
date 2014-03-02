@@ -35,6 +35,5 @@ PUBLIC @interface OakPasteboard : NSManagedObject
 @property (nonatomic) OakPasteboardEntry* currentEntry;
 @property (nonatomic) NSDictionary* auxiliaryOptionsForCurrent;
 
-- (void)selectItemAtPosition:(NSPoint)aLocation andCall:(SEL)aSelector;
 - (void)selectItemForControl:(NSView*)controlView;
 @end
