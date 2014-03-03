@@ -186,16 +186,25 @@ namespace utf8
 	template <typename _Iter>
 	_Iter find_safe_end (_Iter const& first, _Iter const& last)
 	{
-		typedef typename std::iterator_traits<_Iter>::value_type T;
-
-		if(first == last || !multibyte<T>::partial(last[-1]))
-			return last;
+		static struct { char mask, expect; } const Codes[] =
+		{
+			{ 0x80, 0x00 }, // 0xxxxxxx
+			{ 0xE0, 0xC0 }, // 110xxxxx
+			{ 0xF0, 0xE0 }, // 1110xxxx
+			{ 0xF8, 0xF0 }, // 11110xxx
+			{ 0xFC, 0xF8 }, // 11110xxx
+			{ 0xFE, 0xFC }, // 111110xx
+		};
 
 		_Iter it = last;
-		while(!multibyte<T>::is_start(*--it) && it != first)
-			;
-
-		return (it + multibyte<T>::length(*it) > last) ? it : last;
+		for(auto const& code : Codes)
+		{
+			if(it == first || (*--it & code.mask) == code.expect)
+				return last;
+			if((*it & 0xC0) == 0xC0) // 11xxxxxx
+				return it;
+		}
+		return last;
 	}
 
 	template <typename _Iter>

@@ -15,6 +15,8 @@ void test_safe_end ()
 	OAK_ASSERT_EQ(utf8::find_safe_end(first, last-2),  last-3);
 	OAK_ASSERT_EQ(utf8::find_safe_end(first, last-3),  last-3);
 	OAK_ASSERT_EQ(utf8::find_safe_end(first, last-4),  last-4);
+
+	OAK_ASSERT_EQ(utf8::find_safe_end(first+1, first+2), first+2);
 }
 
 void test_utf8_iterate ()
