@@ -28,6 +28,7 @@
 #import <ns/ns.h>
 #import <ns/spellcheck.h>
 #import <text/classification.h>
+#import <text/ctype.h>
 #import <text/format.h>
 #import <text/newlines.h>
 #import <text/trim.h>
@@ -53,6 +54,19 @@ NSString* const kUserDefaultsFontSmoothingKey      = @"fontSmoothing";
 NSString* const kUserDefaultsDisableAntiAliasKey   = @"disableAntiAlias";
 NSString* const kUserDefaultsDisableTypingPairsKey = @"disableTypingPairs";
 NSString* const kUserDefaultsScrollPastEndKey      = @"scrollPastEnd";
+
+namespace ng
+{
+	static size_t count_columns (buffer_t const& buffer, index_t caret)
+	{
+		size_t const tabSize = buffer.indent().tab_size();
+		std::string const str = buffer.substr(buffer.begin(buffer.convert(caret.index).line), caret.index);
+		size_t len = 0;
+		citerate(ch, diacritics::make_range(str.data(), str.data() + str.size()))
+			len += *ch == '\t' ? tabSize - (len % tabSize) : (text::is_east_asian_width(*ch) ? 2 : 1);
+		return len + caret.carry;
+	}
+}
 
 struct buffer_refresh_callback_t;
 
@@ -2973,13 +2987,17 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	{
 		text::pos_t from = document->buffer().convert(range->first.index);
 		text::pos_t to   = document->buffer().convert(range->last.index);
+		size_t from_col_visual = ng::count_columns(document->buffer(), range->first);
+		size_t to_col_visual   = ng::count_columns(document->buffer(), range->last);
+		text::pos_t from_visual(from.line, from_col_visual, from.offset);
+		text::pos_t to_visual(to.line, to_col_visual, to.offset);
 		if(!range->freehanded && !range->columnar)
-			withoutCarry.push_back(text::range_t(from, to, range->columnar));
-		from.offset = range->first.carry;
-		to.offset   = range->last.carry;
+			withoutCarry.push_back(text::range_t(from_visual, to_visual, range->columnar));
+		from_visual.offset = range->first.carry;
+		to_visual.offset   = range->last.carry;
 		if(range->freehanded || range->columnar)
-			withoutCarry.push_back(text::range_t(from, to, range->columnar));
-		ranges.push_back(text::range_t(from, to, range->columnar));
+			withoutCarry.push_back(text::range_t(from_visual, to_visual, range->columnar));
+		ranges.push_back(text::range_t(from_visual, to_visual, range->columnar));
 	}
 	document->set_selection(ranges);
 
