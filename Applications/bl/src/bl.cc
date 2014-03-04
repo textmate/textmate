@@ -216,19 +216,22 @@ int main (int argc, char const* argv[])
 			__block std::vector<bundles_db::bundle_ptr> failed;
 			__block std::vector<double> progress(n);
 
-			if(dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_main_queue()))
+			if(isatty(STDERR_FILENO))
 			{
-				dispatch_source_set_timer(timer, DISPATCH_TIME_NOW, NSEC_PER_SEC / 10, NSEC_PER_SEC / 5);
-				dispatch_source_set_event_handler(timer, ^{
-					double current = 0, total = 0;
-					for(size_t i = 0; i < n; ++i)
-					{
-						current += toInstall[i]->size() * progress[i];
-						total   += toInstall[i]->size();
-					}
-					fprintf(stderr, "\rDownloading... %4.1f%%", 100 * current / total);
-				});
-				dispatch_resume(timer);
+				if(dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_main_queue()))
+				{
+					dispatch_source_set_timer(timer, DISPATCH_TIME_NOW, NSEC_PER_SEC / 10, NSEC_PER_SEC / 5);
+					dispatch_source_set_event_handler(timer, ^{
+						double current = 0, total = 0;
+						for(size_t i = 0; i < n; ++i)
+						{
+							current += toInstall[i]->size() * progress[i];
+							total   += toInstall[i]->size();
+						}
+						fprintf(stderr, "\rDownloading... %4.1f%%", 100 * current / total);
+					});
+					dispatch_resume(timer);
+				}
 			}
 
 			dispatch_apply(n, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t i){
@@ -237,7 +240,8 @@ int main (int argc, char const* argv[])
 			});
 
 			dispatch_async(dispatch_get_main_queue(), ^{
-				fprintf(stderr, "\rDownloading... Done!   \n");
+				if(isatty(STDERR_FILENO))
+					fprintf(stderr, "\rDownloading... Done!   \n");
 				if(!failed.empty())
 				{
 					std::vector<std::string> names;
