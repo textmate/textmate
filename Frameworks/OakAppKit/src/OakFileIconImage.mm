@@ -129,12 +129,24 @@ static NSImage* BadgeForSCMStatus (scm::status::type scmStatus)
 
 			if(res.count == 0)
 			{
+				NSBundle *mainBundle = [NSBundle mainBundle];
+				NSString *file = [mainBundle pathForResource: @"CustomFolder" ofType: @"icns"];
+				BOOL customFolderIconExists = [[NSFileManager defaultManager] fileExistsAtPath:file];
 				NSImage* image;
-				if(![[NSURL fileURLWithPath:_path isDirectory:_directory] getResourceValue:&image forKey:NSURLEffectiveIconKey error:NULL])
-					image = [[NSWorkspace sharedWorkspace] iconForFile:_path];
+				
+				if (!customFolderIconExists)
+				{
+					if(![[NSURL fileURLWithPath:_path isDirectory:_directory] getResourceValue:&image forKey:NSURLEffectiveIconKey error:NULL])
+					    image = [[NSWorkspace sharedWorkspace] iconForFile:_path];
 
-				if(image)
+					if(image)
+					    [res addObject:image];
+				}
+				else
+				{
+					image = [[NSImage alloc] initWithContentsOfFile:file];
 					[res addObject:image];
+				}
 			}
 		}
 		else if(_exists)
