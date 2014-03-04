@@ -1,6 +1,8 @@
 #import "OakPasteboard.h"
 #import "OakPasteboardSelector.h"
 #import <OakFoundation/NSArray Additions.h>
+#import <crash/info.h>
+#import <ns/ns.h>
 #import <oak/oak.h>
 #import <oak/debug.h>
 
@@ -206,6 +208,7 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 		{
 			NSLog(@"unable to create folder ‘%@’: %@", [appSupport path], error);
 			[NSApp presentError:error];
+			crash_reporter_info_t crashInfo(to_s(error));
 			abort();
 		}
 
@@ -232,6 +235,7 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 		{
 			NSLog(@"unable to create persistent store ‘%@’: %@", [storeURL path], error);
 			[NSApp presentError:error];
+			crash_reporter_info_t crashInfo(to_s(error));
 			abort();
 		}
 	}
