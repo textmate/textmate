@@ -1,5 +1,11 @@
 # Changes
 
+## 2014-03-04 ([v2.0-alpha.9517](https://github.com/textmate/textmate/compare/v2.0-alpha.9515...v2.0-alpha.9517))
+
+* The browser used for clipboard and search history, available using _Edit → Paste → Show History_ (⌃⌥⌘V) and _Edit → Find → Show History_ (⌃⌥⌘F), now support “type to filter”.
+* It is now possible to set the `disableIndentCorrections` to `emptyLines`. This will disable the indent corrections only when typing on empty lines, which has been made default for HTML.
+* Various fixes and improvements, click link above for full details.
+
 ## 2014-02-23 ([v2.0-alpha.9515](https://github.com/textmate/textmate/compare/v2.0-alpha.9503...v2.0-alpha.9515))
 
   * If you want the file browser to show symbolic links as expandable items then select _Preferences → Projects → Show links as expandable_.
