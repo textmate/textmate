@@ -1,7 +1,9 @@
 ## TextMate version <script>document.write(TextMate.version)</script>
 
-Alpha means that some functionality is missing or cumbersome to use, the user interface may sometimes be misleading (e.g. a button may not do what it says) and there are a few performance issues.
+This is an alpha release which means a few functions are missing but otherwise the program should be reliable and fine for normal use.
 
-Overall though TextMate 2 should be quite usable.
+The manual is a work in progress and can be found at <http://manual.textmate.org/>. The MacroMates Blog has a [TextMate 2 category](http://blog.macromates.com/categories/textmate-2/).
+
+For comments, questions, and general feedback see <https://macromates.com/support>
 
 _TextMate is a trademark of Allan Odgaard and the program is <script>document.write(TextMate.copyright)</script>._
