@@ -4,4 +4,4 @@ Alpha means that some functionality is missing or cumbersome to use, the user in
 
 Overall though TextMate 2 should be quite usable.
 
-_TextMate is a trademark of Allan Odgaard and the program is copyrighted by MacroMates Ltd., 2013._
+_TextMate is a trademark of Allan Odgaard and the program is <script>document.write(TextMate.copyright)</script>._

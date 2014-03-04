@@ -203,6 +203,7 @@ static NSTextField* OakCreateTextField ()
 @interface AboutWindowJSBridge : NSObject
 {
 	NSString* version;
+	NSString* copyright;
 	NSString* licensees;
 }
 - (void)addLicense;
@@ -210,13 +211,18 @@ static NSTextField* OakCreateTextField ()
 
 @implementation AboutWindowJSBridge
 + (BOOL)isSelectorExcludedFromWebScript:(SEL)aSelector { return aSelector != @selector(addLicense); }
-+ (BOOL)isKeyExcludedFromWebScript:(char const*)name   { return strcmp(name, "version") != 0 && strcmp(name, "licensees") != 0; }
++ (BOOL)isKeyExcludedFromWebScript:(char const*)name   { return strcmp(name, "version") != 0 && strcmp(name, "copyright") != 0 && strcmp(name, "licensees") != 0; }
 + (NSString*)webScriptNameForSelector:(SEL)aSelector   { return NSStringFromSelector(aSelector); }
 + (NSString*)webScriptNameForKey:(char const*)name     { return @(name); }
 
 - (NSString*)version
 {
 	return [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
+}
+
+- (NSString*)copyright
+{
+	return [[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSHumanReadableCopyright"];
 }
 
 - (NSString*)licensees
