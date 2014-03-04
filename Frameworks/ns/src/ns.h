@@ -7,6 +7,7 @@
 
 PUBLIC std::string to_s (NSString* aString);
 PUBLIC std::string to_s (NSData* aString);
+PUBLIC std::string to_s (NSError* anError);
 PUBLIC std::string to_s (NSEvent* anEvent, bool preserveNumPadFlag = false);
 
 namespace ns

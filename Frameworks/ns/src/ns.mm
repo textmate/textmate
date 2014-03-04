@@ -21,6 +21,11 @@ std::string to_s (NSData* someData)
 	return someData ? std::string((char const*)[someData bytes], (char const*)[someData bytes] + [someData length]) : NULL_STR;
 }
 
+std::string to_s (NSError* anError)
+{
+	return text::format("Error Domain=%s Code=%ld “%s”", [[anError domain] UTF8String], [anError code], [[anError localizedDescription] UTF8String]);
+}
+
 static std::string string_for (CGKeyCode key, CGEventFlags flags)
 {
 	CGEventRef event = CGEventCreateKeyboardEvent(NULL, key, true);
