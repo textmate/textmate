@@ -72,6 +72,7 @@ static void* kOakPasteboardChooserCurrentEntryBinding = &kOakPasteboardChooserCu
 
 		_searchField = [[NSSearchField alloc] initWithFrame:NSZeroRect];
 		[_searchField.cell setScrollable:YES];
+		[_searchField.cell setSendsSearchStringImmediately:YES];
 		_searchField.delegate = self;
 
 		OakScopeBarView* scopeBar = [OakScopeBarView new];
