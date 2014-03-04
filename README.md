@@ -123,8 +123,6 @@ The source for TextMate is released under the GNU General Public License as publ
 
 TextMate is a trademark of Allan Odgaard.
 
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/sorbits/textmate/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
-
 [boost]:         http://www.boost.org/
 [ninja]:         http://martine.github.com/ninja/
 [multimarkdown]: http://fletcherpenney.net/multimarkdown/
