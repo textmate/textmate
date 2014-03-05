@@ -290,7 +290,7 @@ static NSString* const AllScopes    = @"AllScopes";
 	scope::context_t scope;
 	BOOL hasSelection;
 	std::vector<bundles::item_ptr> all_items;
-	std::set<oak::uuid_t> items_filtered_by_scope;
+	std::map<oak::uuid_t, double> items_filtered_by_scope;
 	BOOL searchAllScopes;
 	std::string originalFilterString;
 	std::string filterString;
@@ -310,12 +310,20 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (search::type sear
 	else if(searchType == search::themes)
 		kindMask = bundles::kItemTypeTheme;
 
-	std::map<std::string, bundles::item_ptr, text::less_t> sorted;
-	for(auto const& item : bundles::query(bundles::kFieldAny, NULL_STR, scope, kindMask, oak::uuid_t(), false))
-		sorted.emplace(full_name_with_selection(item, hasSelection), item);
-
 	std::vector<bundles::item_ptr> res;
-	std::transform(sorted.begin(), sorted.end(), back_inserter(res), [](std::pair<std::string, bundles::item_ptr> const& p){ return p.second; });
+	for(auto const& item : bundles::query(bundles::kFieldAny, NULL_STR, scope, kindMask, oak::uuid_t(), false))
+		res.push_back(item);
+
+	if(scope == scope::wildcard)
+	{
+		std::map<std::string, bundles::item_ptr, text::less_t> sorted;
+		for(auto const& item : res)
+			sorted.emplace(full_name_with_selection(item, hasSelection), item);
+
+		res.clear();
+		std::transform(sorted.begin(), sorted.end(), back_inserter(res), [](std::pair<std::string, bundles::item_ptr> const& p){ return p.second; });
+	}
+
 	return res;
 }
 
@@ -352,8 +360,9 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (search::type sear
 		searchType = newType;
 		all_items = relevant_items_in_scope(searchType, scope::wildcard, hasSelection);
 
+		double rank = 0;
 		for(auto const& item : relevant_items_in_scope(searchType, scope, hasSelection))
-			items_filtered_by_scope.insert(item->uuid());
+			items_filtered_by_scope.emplace(item->uuid(), rank++);
 		[[NSNotificationCenter defaultCenter] postNotificationName:FLDataSourceItemsDidChangeNotification object:self];
 	}
 }
@@ -420,7 +429,8 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (search::type sear
 	{
 		for(size_t index = 0; index < all_items.size(); ++index)
 		{
-			if(!searchAllScopes && items_filtered_by_scope.find(all_items[index]->uuid()) == items_filtered_by_scope.end())
+			auto itemIter = items_filtered_by_scope.find(all_items[index]->uuid());
+			if(!searchAllScopes && itemIter == items_filtered_by_scope.end())
 				continue;
 
 			if(!filterString.empty() && key_equivalent(all_items[index]) != originalFilterString)
@@ -429,7 +439,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (search::type sear
 			BundleItemChooserItem* item = [BundleItemChooserItem new];
 			[item setIndex:index];
 			[item setUuid:all_items[index]->uuid()];
-			rankedItems.emplace(0, item);
+			rankedItems.emplace(itemIter->second, item);
 		}
 	}
 	else
