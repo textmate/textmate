@@ -14,7 +14,7 @@ static std::multimap<oak::uuid_t, HTMLOutputWindowController*> Windows;
 	OBJC_WATCH_LEAKS(HTMLOutputWindowController);
 	command::runner_ptr runner;
 }
-@property (nonatomic, retain) OakHTMLOutputView* htmlOutputView;
+@property (nonatomic) OakHTMLOutputView* htmlOutputView;
 @property (nonatomic, readonly) BOOL running;
 @end
 

@@ -20,10 +20,10 @@ OAK_DEBUG_VAR(OakTimer);
 
 @interface OakTimer ()
 @property (nonatomic, weak) id target;
-@property (nonatomic, assign) SEL selector;
+@property (nonatomic) SEL selector;
 
-@property (nonatomic, retain) OakRetainedTimerTarget* timerTarget;
-@property (nonatomic, retain) NSTimer* timer;
+@property (nonatomic) OakRetainedTimerTarget* timerTarget;
+@property (nonatomic) NSTimer* timer;
 @end
 
 @implementation OakTimer

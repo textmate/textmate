@@ -4,7 +4,7 @@
 
 PUBLIC @interface OakDocumentView : NSView
 @property (nonatomic, readonly) OakTextView* textView;
-@property (nonatomic, assign) document::document_ptr const& document;
+@property (nonatomic) document::document_ptr const& document;
 - (IBAction)toggleLineNumbers:(id)sender;
 - (IBAction)takeThemeUUIDFrom:(id)sender;
 

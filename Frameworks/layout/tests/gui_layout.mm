@@ -26,8 +26,8 @@ typedef std::shared_ptr<ng::layout_t> layout_ptr;
 
 	NSDate* optionDownDate;
 }
-@property (nonatomic, retain) NSDate* optionDownDate;
-@property (nonatomic, assign) ng::ranges_t const& selection;
+@property (nonatomic) NSDate* optionDownDate;
+@property (nonatomic) ng::ranges_t const& selection;
 - (void)updateFrameSize;
 @end
 

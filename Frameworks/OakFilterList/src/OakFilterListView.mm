@@ -12,9 +12,9 @@ NSString* const FLDataSourceItemsShouldDescendNotification = @"FLDataSourceItems
 NSString* const FLDataSourceItemsShouldAscendNotification  = @"FLDataSourceItemsShouldAscendNotification";
 
 @interface OakFilterListView ()
-@property (nonatomic, assign) BOOL isWaitingForItems;
-@property (nonatomic, retain) NSArray* items;
-@property (nonatomic, retain) NSAttributedString* infoString;
+@property (nonatomic) BOOL isWaitingForItems;
+@property (nonatomic) NSArray* items;
+@property (nonatomic) NSAttributedString* infoString;
 @end
 
 @implementation OakFilterListView

@@ -35,9 +35,9 @@ enum FindActionTag
 };
 
 @interface Find () <NSOutlineViewDataSource, NSOutlineViewDelegate>
-@property (nonatomic, retain) FindWindowController* windowController;
-@property (nonatomic, retain) FFDocumentSearch* documentSearch;
-@property (nonatomic, assign) BOOL closeWindowOnSuccess;
+@property (nonatomic) FindWindowController* windowController;
+@property (nonatomic) FFDocumentSearch* documentSearch;
+@property (nonatomic) BOOL closeWindowOnSuccess;
 @end
 
 NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";

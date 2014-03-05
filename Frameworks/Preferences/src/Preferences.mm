@@ -17,8 +17,8 @@ OAK_DEBUG_VAR(Preferences);
 @end
 
 @interface Preferences ()
-@property (nonatomic, retain) MASPreferencesWindowController* windowController;
-@property (nonatomic, retain) NSArray* viewControllers;
+@property (nonatomic) MASPreferencesWindowController* windowController;
+@property (nonatomic) NSArray* viewControllers;
 @end
 
 @implementation Preferences

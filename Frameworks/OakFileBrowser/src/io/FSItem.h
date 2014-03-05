@@ -5,18 +5,18 @@
 enum FSItemURLType { FSItemURLTypeUnknown = 0, FSItemURLTypeFile, FSItemURLTypeFolder, FSItemURLTypePackage, FSItemURLTypeAlias, FSItemURLTypeMissing };
 
 @interface FSItem : NSObject
-@property (nonatomic, retain) OakFileIconImage* icon;
-@property (nonatomic, retain) NSString* name;
-@property (nonatomic, retain) NSString* toolTip;
-@property (nonatomic, assign) NSInteger labelIndex;
-@property (nonatomic, retain) NSURL* url;
-@property (nonatomic, assign) FSItemURLType urlType;
-@property (nonatomic, retain) NSURL* target;
-@property (nonatomic, retain) NSArray* children;
-@property (nonatomic, assign) BOOL leaf;
-@property (nonatomic, assign) BOOL group;
-@property (nonatomic, assign) BOOL sortAsFolder;
-@property (nonatomic, assign) BOOL link;
+@property (nonatomic) OakFileIconImage* icon;
+@property (nonatomic) NSString* name;
+@property (nonatomic) NSString* toolTip;
+@property (nonatomic) NSInteger labelIndex;
+@property (nonatomic) NSURL* url;
+@property (nonatomic) FSItemURLType urlType;
+@property (nonatomic) NSURL* target;
+@property (nonatomic) NSArray* children;
+@property (nonatomic) BOOL leaf;
+@property (nonatomic) BOOL group;
+@property (nonatomic) BOOL sortAsFolder;
+@property (nonatomic) BOOL link;
 
 @property (nonatomic, readonly) NSString* path; // legacy
 

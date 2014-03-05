@@ -67,11 +67,11 @@ PUBLIC @interface OakFilterWindowController : NSWindowController
 	IBOutlet NSView* filterControlsView;
 }
 - (void)showWindowRelativeToWindow:(NSWindow*)parentWindow;
-@property (nonatomic, retain) id <FilterListDataSource> dataSource;
-@property (nonatomic, retain) id target;
-@property (nonatomic, assign) SEL action;
-@property (nonatomic, assign) SEL accessoryAction;
-@property (nonatomic, assign) BOOL sendActionOnSingleClick;
-@property (nonatomic, assign) BOOL allowsMultipleSelection;
+@property (nonatomic) id <FilterListDataSource> dataSource;
+@property (nonatomic) id target;
+@property (nonatomic) SEL action;
+@property (nonatomic) SEL accessoryAction;
+@property (nonatomic) BOOL sendActionOnSingleClick;
+@property (nonatomic) BOOL allowsMultipleSelection;
 @property (nonatomic, readonly) NSArray* selectedItems;
 @end

@@ -70,8 +70,8 @@ struct layer_t
 };
 
 @interface OakControl ()
-@property (nonatomic, assign) NSInteger tag; // tag of the most recent layer causing an action
-@property (nonatomic, assign) BOOL mouseTrackingDisabled;
+@property (nonatomic) NSInteger tag; // tag of the most recent layer causing an action
+@property (nonatomic) BOOL mouseTrackingDisabled;
 - (uint32_t)currentState;
 - (NSInteger)tagForLayerContainingPoint:(NSPoint)aPoint;
 - (void)drawLayer:(layer_t const&)aLayer;

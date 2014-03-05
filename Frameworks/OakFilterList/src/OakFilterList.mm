@@ -6,8 +6,8 @@
 - (void)sendAction:(id)sender;
 - (IBAction)accept:(id)sender;
 - (IBAction)cancel:(id)sender;
-@property (nonatomic, retain) NSView* filterControls;
-@property (nonatomic, retain) OakFilterWindowController* retainedSelf;
+@property (nonatomic) NSView* filterControls;
+@property (nonatomic) OakFilterWindowController* retainedSelf;
 @end
 
 @implementation OakFilterWindowController

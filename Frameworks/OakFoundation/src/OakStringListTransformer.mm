@@ -2,7 +2,7 @@
 #import <oak/debug.h>
 
 @interface OakStringListTransformer ()
-@property (nonatomic, retain) NSArray* stringList;
+@property (nonatomic) NSArray* stringList;
 @end
 
 @implementation OakStringListTransformer

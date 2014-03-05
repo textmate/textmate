@@ -10,15 +10,15 @@ extern NSString* const FFDocumentSearchDidFinishNotification;
 @interface FFMatch : NSObject <NSCopying>
 - (id)initWithMatch:(find::match_t const&)aMatch;
 - (find::match_t const&)match;
-@property (nonatomic, readonly) NSString*            path;
-@property (nonatomic, readonly) NSString*            identifier;
-@property (nonatomic, readonly) NSImage*             icon;
+@property (nonatomic, readonly) NSString* path;
+@property (nonatomic, readonly) NSString* identifier;
+@property (nonatomic, readonly) NSImage*  icon;
 - (std::string const&)matchText;
 @end
 
 @interface FFDocumentSearch : NSDocument
 // Set up the search with these options
-@property (nonatomic, assign) find::options_t options;
+@property (nonatomic) find::options_t options;
 @property (nonatomic, copy) NSString* searchString;
 
 // Either folderOptions _or_ a documentIdentifier should be provided
@@ -44,8 +44,8 @@ extern NSString* const FFDocumentSearchDidFinishNotification;
 - (BOOL)skipReplacementForMatch:(FFMatch*)aMatch;
 - (void)setSkipReplacement:(BOOL)flag forMatch:(FFMatch*)aMatch;
 
-@property (nonatomic, assign) BOOL hasPerformedReplacement;
-@property (nonatomic, assign) BOOL hasPerformedSave;
+@property (nonatomic) BOOL hasPerformedReplacement;
+@property (nonatomic) BOOL hasPerformedSave;
 
 // Scan information
 - (NSUInteger)countOfMatches;

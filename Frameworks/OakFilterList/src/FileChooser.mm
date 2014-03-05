@@ -203,9 +203,9 @@ static path::glob_list_t globs_for_path (std::string const& path)
 }
 @property (nonatomic) NSProgressIndicator* progressIndicator;
 
-@property (nonatomic) BOOL                 polling;
-@property (nonatomic) NSTimer*             pollTimer;
-@property (nonatomic) CGFloat              pollInterval;
+@property (nonatomic) BOOL     polling;
+@property (nonatomic) NSTimer* pollTimer;
+@property (nonatomic) CGFloat  pollInterval;
 @end
 
 @implementation FileChooser

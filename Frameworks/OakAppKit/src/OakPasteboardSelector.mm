@@ -21,7 +21,7 @@ static size_t line_count (std::string const& text)
 {
 	size_t maxLines;
 }
-@property (nonatomic, assign) size_t maxLines;
+@property (nonatomic) size_t maxLines;
 + (id)cellWithMaxLines:(size_t)maxLines;
 - (CGFloat)rowHeightForText:(NSString*)text;
 @end

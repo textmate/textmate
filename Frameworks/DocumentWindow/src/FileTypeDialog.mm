@@ -52,15 +52,15 @@ static bool is_installed (oak::uuid_t const& uuid)
 }
 
 @interface FileTypeDialog ()
-@property (nonatomic, retain) NSString* path;
+@property (nonatomic) NSString* path;
 
-@property (nonatomic, retain) NSArray* recommendedGrammars;
-@property (nonatomic, retain) NSArray* installedGrammars;
-@property (nonatomic, retain) NSArray* allGrammars;
+@property (nonatomic) NSArray* recommendedGrammars;
+@property (nonatomic) NSArray* installedGrammars;
+@property (nonatomic) NSArray* allGrammars;
 
-@property (nonatomic, retain) NSString* alertFormatString;
-@property (nonatomic, retain) NSString* infoFormatString;
-@property (nonatomic, retain) NSString* useForAllFormatString;
+@property (nonatomic) NSString* alertFormatString;
+@property (nonatomic) NSString* infoFormatString;
+@property (nonatomic) NSString* useForAllFormatString;
 
 @property (nonatomic, readonly) NSDictionary* grammar;
 @property (nonatomic, readonly) NSString* fileType;

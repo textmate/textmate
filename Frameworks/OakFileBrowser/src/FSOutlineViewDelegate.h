@@ -1,10 +1,10 @@
 @class FSDataSource;
 
 @interface FSOutlineViewDelegate : NSObject
-@property (nonatomic, retain) NSOutlineView* outlineView;
-@property (nonatomic, retain) FSDataSource* dataSource;
-@property (nonatomic, retain) NSArray* openURLs;
-@property (nonatomic, retain) NSArray* modifiedURLs;
+@property (nonatomic) NSOutlineView* outlineView;
+@property (nonatomic) FSDataSource* dataSource;
+@property (nonatomic) NSArray* openURLs;
+@property (nonatomic) NSArray* modifiedURLs;
 
 - (void)selectURLs:(NSArray*)someURLs expandChildren:(BOOL)expandAncestors;
 - (void)editURL:(NSURL*)anURL;

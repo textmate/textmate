@@ -17,7 +17,7 @@ static std::string textify (std::string str)
 }
 
 @interface BundlesPreferences ()
-@property (nonatomic, retain) BundlesManager* bundlesManager;
+@property (nonatomic) BundlesManager* bundlesManager;
 @end
 
 @implementation BundlesPreferences

@@ -8,11 +8,11 @@ enum {
 };
 
 PUBLIC @interface OFBPathInfoCell : OakImageAndTextCell
-@property (nonatomic, assign) NSUInteger labelIndex;
+@property (nonatomic) NSUInteger labelIndex;
 
-@property (nonatomic, assign) BOOL isOpen;
-@property (nonatomic, assign) BOOL isVisible;
-@property (nonatomic, assign) BOOL isLoading;
+@property (nonatomic) BOOL isOpen;
+@property (nonatomic) BOOL isVisible;
+@property (nonatomic) BOOL isLoading;
 
 - (NSRect)closeButtonRectInFrame:(NSRect)cellFrame;
 @end

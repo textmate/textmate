@@ -13,7 +13,7 @@ PUBLIC @interface TerminalPreferences : PreferencesPane
 	std::string statusTextFormat;
 	std::string summaryTextFormat;
 }
-@property (nonatomic, retain) NSImage* installIndicaitorImage;
+@property (nonatomic) NSImage* installIndicaitorImage;
 - (IBAction)performInstallMate:(id)sender;
 - (IBAction)performUninstallMate:(id)sender;
 

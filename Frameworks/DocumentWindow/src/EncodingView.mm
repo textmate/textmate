@@ -210,7 +210,7 @@ static NSTextView* MyCreateTextView ()
 {
 	OBJC_WATCH_LEAKS(EncodingContentView);
 }
-@property (nonatomic, assign) id delegate;
+@property (nonatomic) id delegate;
 @end
 
 @implementation EncodingContentView

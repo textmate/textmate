@@ -11,12 +11,12 @@
 // kUserDefaultsLastBundleUpdateCheckKey
 
 @interface SoftwareUpdatePreferences ()
-@property (nonatomic, assign) BOOL isChecking;
-@property (nonatomic, retain) NSDate* lastPoll;
-@property (nonatomic, retain) NSString* errorString;
+@property (nonatomic) BOOL isChecking;
+@property (nonatomic) NSDate* lastPoll;
+@property (nonatomic) NSString* errorString;
 
-@property (nonatomic, retain) NSString* lastPollString;
-@property (nonatomic, retain) NSTimer* updateLastPollStringTimer;
+@property (nonatomic) NSString* lastPollString;
+@property (nonatomic) NSTimer* updateLastPollStringTimer;
 @end
 
 @implementation SoftwareUpdatePreferences

@@ -39,8 +39,8 @@ static void DrawSpinner (NSRect cellFrame, BOOL isFlipped, NSColor* color, doubl
 	OBJC_WATCH_LEAKS(OFBPathInfoCell);
 	double spinnerValue;
 }
-@property (nonatomic, retain) OakTimer* spinTimer;
-@property (nonatomic, assign) BOOL mouseDownInCloseButton;
+@property (nonatomic) OakTimer* spinTimer;
+@property (nonatomic) BOOL mouseDownInCloseButton;
 - (BOOL)isMouseInCloseButtonInFrame:(NSRect)cellFrame controlView:(NSView*)controlView;
 @end
 

@@ -43,8 +43,8 @@ static id RetrieveObjectAtKeyPath (std::string const& keyPath)
 
 @interface OakHistoryList ()
 @property (nonatomic, copy) NSString* name;
-@property (nonatomic, retain) NSMutableArray* list;
-@property (nonatomic, assign) NSUInteger stackSize;
+@property (nonatomic) NSMutableArray* list;
+@property (nonatomic) NSUInteger stackSize;
 @end
 
 @implementation OakHistoryList

@@ -6,7 +6,7 @@
 {
 	NSString* keyString;
 }
-@property (nonatomic, retain) NSString* keyString;
+@property (nonatomic) NSString* keyString;
 @end
 
 @implementation MyEventView

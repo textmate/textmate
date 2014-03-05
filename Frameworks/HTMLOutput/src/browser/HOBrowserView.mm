@@ -7,7 +7,7 @@
 @interface HOBrowserView ()
 @property (nonatomic, readwrite) WebView* webView;
 @property (nonatomic, readwrite) HOStatusBar* statusBar;
-@property (nonatomic, retain) HOWebViewDelegateHelper* webViewDelegateHelper;
+@property (nonatomic) HOWebViewDelegateHelper* webViewDelegateHelper;
 @end
 
 @implementation HOBrowserView

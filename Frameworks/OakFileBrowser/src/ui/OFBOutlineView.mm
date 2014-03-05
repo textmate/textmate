@@ -23,7 +23,7 @@
 	NSSize defaultIntercellSpacing;
 	NSColor* defaultBackgroundColor;
 }
-@property (nonatomic, retain) NSIndexSet* draggedRows;
+@property (nonatomic) NSIndexSet* draggedRows;
 
 - (void)performDoubleClick:(id)sender;
 @end

@@ -50,7 +50,7 @@ static std::string range_from_document (document::document_ptr const& document, 
 	NSImage* icon;
 }
 - (void)updateIcon;
-@property (nonatomic, retain, readwrite) NSImage* icon;
+@property (nonatomic, readwrite) NSImage* icon;
 @end
 
 struct document_callback_t : document::document_t::callback_t
@@ -159,8 +159,8 @@ private:
 
 	NSString* currentPath;
 }
-@property (nonatomic, retain) OakTimer* scannerProbeTimer;
-@property (nonatomic, retain, readwrite) NSString* currentPath;
+@property (nonatomic) OakTimer* scannerProbeTimer;
+@property (nonatomic, readwrite) NSString* currentPath;
 @end
 
 OAK_DEBUG_VAR(Find_FolderSearch);

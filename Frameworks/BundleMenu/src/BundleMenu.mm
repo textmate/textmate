@@ -7,7 +7,7 @@
 #import <oak/oak.h>
 
 @interface BundlePopupMenuTarget : NSObject
-@property (nonatomic, retain) NSString* selectedItemUUID;
+@property (nonatomic) NSString* selectedItemUUID;
 @end
 
 @implementation BundlePopupMenuTarget

@@ -11,10 +11,10 @@ PUBLIC extern NSString* const kSoftwareUpdateChannelBeta;
 PUBLIC extern NSString* const kSoftwareUpdateChannelNightly;
 
 PUBLIC @interface SoftwareUpdate : NSObject <DownloadWindowControllerDelegate>
-@property (nonatomic, retain)           NSDictionary* channels;
-@property (nonatomic, retain, readonly) NSDate*       lastPoll;
-@property (nonatomic, assign, readonly) BOOL          isChecking;
-@property (nonatomic, retain, readonly) NSString*     errorString;
+@property (nonatomic)           NSDictionary* channels;
+@property (nonatomic, readonly) NSDate*       lastPoll;
+@property (nonatomic, readonly) BOOL          isChecking;
+@property (nonatomic, readonly) NSString*     errorString;
 
 - (void)setSignee:(key_chain_t::key_t const&)aSignee;
 

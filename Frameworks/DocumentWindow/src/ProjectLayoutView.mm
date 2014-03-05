@@ -9,12 +9,12 @@ NSString* const kUserDefaultsFileBrowserWidthKey = @"fileBrowserWidth";
 NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 
 @interface ProjectLayoutView ()
-@property (nonatomic, retain) NSView* fileBrowserDivider;
-@property (nonatomic, retain) NSView* htmlOutputDivider;
-@property (nonatomic, retain) NSView* fileBrowserTopDivider;
-@property (nonatomic, retain) NSLayoutConstraint* fileBrowserWidthConstraint;
-@property (nonatomic, retain) NSLayoutConstraint* htmlOutputSizeConstraint;
-@property (nonatomic, retain) NSMutableArray* myConstraints;
+@property (nonatomic) NSView* fileBrowserDivider;
+@property (nonatomic) NSView* htmlOutputDivider;
+@property (nonatomic) NSView* fileBrowserTopDivider;
+@property (nonatomic) NSLayoutConstraint* fileBrowserWidthConstraint;
+@property (nonatomic) NSLayoutConstraint* htmlOutputSizeConstraint;
+@property (nonatomic) NSMutableArray* myConstraints;
 @property (nonatomic) BOOL tabsAboveDocument;
 @property (nonatomic) BOOL mouseDownRecursionGuard;
 @end

@@ -8,7 +8,7 @@ NSUInteger const OakChoiceMenuKeyCancel   = 3;
 NSUInteger const OakChoiceMenuKeyMovement = 4;
 
 @interface OakChoiceMenu ()
-@property (nonatomic, retain) NSWindow* window;
+@property (nonatomic) NSWindow* window;
 @end
 
 enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMoveUp, kActionMoveDown, kActionPageUp, kActionPageDown, kActionMoveToBeginning, kActionMoveToEnd };

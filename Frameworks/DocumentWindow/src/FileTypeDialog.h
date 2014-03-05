@@ -11,11 +11,11 @@ enum enabled_grammar_t { kEnabledGrammarsRecommended = 0, kEnabledGrammarsInstal
 	IBOutlet NSTextField* installingBundleActivityTextField;
 	IBOutlet NSProgressIndicator* installingBundleProgressIndicator;
 }
-@property (nonatomic, assign) NSInteger enabledGrammars;
-@property (nonatomic, retain) NSArray* grammars;
-@property (nonatomic, retain) NSIndexSet* selectedGrammarIndexes;
-@property (nonatomic, assign) BOOL persistentSetting;
-@property (nonatomic, assign) BOOL canOpenDocument;
+@property (nonatomic) NSInteger enabledGrammars;
+@property (nonatomic) NSArray* grammars;
+@property (nonatomic) NSIndexSet* selectedGrammarIndexes;
+@property (nonatomic) BOOL persistentSetting;
+@property (nonatomic) BOOL canOpenDocument;
 
 - (id)initWithPath:(NSString*)aPath first:(char const*)firstPointer last:(char const*)lastPointer;
 - (void)beginSheetModalForWindow:(NSWindow*)aWindow completionHandler:(void(^)(NSString* fileType))aCompletionHandler;

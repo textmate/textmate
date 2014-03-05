@@ -4,7 +4,7 @@
 #import <ns/ns.h>
 
 @interface VariablesPreferences ()
-@property (nonatomic, retain) NSMutableArray* variables;
+@property (nonatomic) NSMutableArray* variables;
 @end
 
 @implementation VariablesPreferences

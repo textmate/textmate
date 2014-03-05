@@ -26,9 +26,9 @@ static BundleEditor* SharedInstance;
 @interface BundleEditor ()
 - (void)didChangeBundleItems;
 - (void)didChangeModifiedState;
-@property (nonatomic, retain) PropertiesViewController* sharedPropertiesViewController;
-@property (nonatomic, retain) PropertiesViewController* extraPropertiesViewController;
-@property (nonatomic, retain) NSMutableDictionary* bundleItemProperties;
+@property (nonatomic) PropertiesViewController* sharedPropertiesViewController;
+@property (nonatomic) PropertiesViewController* extraPropertiesViewController;
+@property (nonatomic) NSMutableDictionary* bundleItemProperties;
 - (bundles::item_ptr const&)bundleItem;
 - (void)setBundleItem:(bundles::item_ptr const&)aBundleItem;
 @end

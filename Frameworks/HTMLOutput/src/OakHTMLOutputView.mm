@@ -12,8 +12,8 @@ extern NSString* const kCommandRunnerURLScheme; // from HTMLOutput.h
 	OBJC_WATCH_LEAKS(OakHTMLOutputView);
 	std::map<std::string, std::string> environment;
 }
-@property (nonatomic, assign) BOOL runningCommand;
-@property (nonatomic, retain) HOAutoScroll* autoScrollHelper;
+@property (nonatomic) BOOL runningCommand;
+@property (nonatomic) HOAutoScroll* autoScrollHelper;
 @end
 
 @implementation OakHTMLOutputView

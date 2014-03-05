@@ -5,7 +5,7 @@ extern NSString* const FSItemDidReloadNotification;
 @interface FSDataSource : NSObject <NSOutlineViewDataSource>
 + (NSArray*)sortArray:(NSArray*)anArray usingOptions:(NSUInteger)someOptions;
 
-@property (nonatomic, retain) FSItem* rootItem;
+@property (nonatomic) FSItem* rootItem;
 - (BOOL)reloadItem:(FSItem*)anItem; // Returns YES if reload happens in the background. An FSItemDidReloadNotification is posted when reload has completed.
 - (BOOL)unloadItem:(FSItem*)anItem;
 - (NSArray*)expandedURLs;

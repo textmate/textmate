@@ -20,7 +20,7 @@ OAK_DEBUG_VAR(FilterList_BundleItemChooser);
 	NSUInteger index;
 	oak::uuid_t uuid;
 }
-@property (nonatomic, assign) NSUInteger index;
+@property (nonatomic) NSUInteger index;
 - (NSString*)uuid;
 - (void)setUuid:(oak::uuid_t const&)other;
 @end
@@ -84,7 +84,7 @@ OAK_DEBUG_VAR(FilterList_BundleItemChooser);
 @end
 
 @interface BundleItemChooserView : NSView
-@property (nonatomic, assign) BundleItemChooserViewController* viewController;
+@property (nonatomic) BundleItemChooserViewController* viewController;
 @end
 
 @implementation BundleItemChooserView

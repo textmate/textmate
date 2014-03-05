@@ -1,12 +1,12 @@
 @interface ProjectLayoutView : NSView
-@property (nonatomic, retain) NSView* tabBarView;
-@property (nonatomic, retain) NSView* documentView;
-@property (nonatomic, retain) NSView* fileBrowserView;
-@property (nonatomic, retain) NSView* htmlOutputView;
+@property (nonatomic) NSView* tabBarView;
+@property (nonatomic) NSView* documentView;
+@property (nonatomic) NSView* fileBrowserView;
+@property (nonatomic) NSView* htmlOutputView;
 
-@property (nonatomic, assign) CGFloat fileBrowserWidth;
-@property (nonatomic, assign) BOOL fileBrowserOnRight;
+@property (nonatomic) CGFloat fileBrowserWidth;
+@property (nonatomic) BOOL fileBrowserOnRight;
 
-@property (nonatomic, assign) NSSize htmlOutputSize;
-@property (nonatomic, assign) BOOL htmlOutputOnRight;
+@property (nonatomic) NSSize htmlOutputSize;
+@property (nonatomic) BOOL htmlOutputOnRight;
 @end

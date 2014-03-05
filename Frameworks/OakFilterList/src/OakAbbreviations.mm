@@ -9,7 +9,7 @@ static NSString* const FCExpandedStringKey	= @"long";
 
 @interface OakAbbreviations ()
 @property (nonatomic, copy)   NSString* name;
-@property (nonatomic, retain) NSMutableArray* bindings;
+@property (nonatomic) NSMutableArray* bindings;
 - (id)initWithName:(NSString*)aName;
 @end
 

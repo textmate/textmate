@@ -8,8 +8,8 @@ If the list grows beyond _stackSize_ objects, the last object will be removed be
 */
 
 PUBLIC @interface OakHistoryList : NSObject
-@property (nonatomic, assign, readonly) NSUInteger stackSize;
-@property (nonatomic, retain) id head;
+@property (nonatomic, readonly) NSUInteger stackSize;
+@property (nonatomic) id head;
 
 - (id)initWithName:(NSString*)defaultsName stackSize:(NSUInteger)size;
 - (id)initWithName:(NSString*)defaultsName stackSize:(NSUInteger)size defaultItems:(id)firstItem, ...;

@@ -1,6 +1,6 @@
 @protocol HOJSBridgeDelegate
-@property (nonatomic, assign) BOOL isBusy;
-@property (nonatomic, assign) double progress;
+@property (nonatomic) BOOL isBusy;
+@property (nonatomic) double progress;
 @end
 
 @interface HOJSBridge : NSObject

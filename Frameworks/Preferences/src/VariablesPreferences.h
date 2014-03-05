@@ -9,7 +9,7 @@
 @property (nonatomic, readonly) NSImage*  toolbarItemImage;
 @property (nonatomic, readonly) NSString* toolbarItemLabel;
 
-@property (nonatomic, assign) BOOL canRemove;
+@property (nonatomic) BOOL canRemove;
 
 - (IBAction)addVariable:(id)sender;
 - (IBAction)delete:(id)sender;
