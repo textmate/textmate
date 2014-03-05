@@ -179,9 +179,17 @@ static NSImage* BadgeForSCMStatus (scm::status::type scmStatus)
 	BOOL              _directory;
 	BOOL              _alias;
 	scm::status::type _scmStatus;
+	NSUInteger        _needsSetupMask;
 }
 @property (nonatomic) OakFileIconImageRep* fileIconImageRep;
 @end
+
+enum {
+	kNeedExists    = 1,
+	kNeedDirectory = 2,
+	kNeedAlias     = 4,
+	kNeedSCMStatus = 8
+};
 
 @implementation OakFileIconImage
 - (id)initWithSize:(NSSize)aSize
@@ -209,23 +217,35 @@ static NSImage* BadgeForSCMStatus (scm::status::type scmStatus)
 		_modified   = modifiedFlag;
 		_exists     = NO;
 
-		if(_path)
-		{
-			std::string path = [_path fileSystemRepresentation];
-
-			struct stat buf;
-			if(lstat(path.c_str(), &buf) == 0)
-			{
-				_exists    = YES;
-				_directory = S_ISDIR(buf.st_mode);
-				_alias     = S_ISLNK(buf.st_mode);
-			}
-
-			if(auto scmDriver = scm::info(path::parent(path)))
-				_scmStatus = scmDriver->status(path);
-		}
+		_needsSetupMask = (kNeedExists|kNeedDirectory|kNeedAlias|kNeedSCMStatus);
 	}
 	return self;
+}
+
+- (void)checkSetupMask
+{
+	if(!_path || !_needsSetupMask)
+		return;
+
+	std::string const path = [_path fileSystemRepresentation];
+	if((_needsSetupMask & (kNeedExists|kNeedDirectory|kNeedAlias)) != 0)
+	{
+		struct stat buf;
+		if(lstat(path.c_str(), &buf) == 0)
+		{
+			_exists    = YES;
+			_directory = S_ISDIR(buf.st_mode);
+			_alias     = S_ISLNK(buf.st_mode);
+		}
+		_needsSetupMask &= ~(kNeedExists|kNeedDirectory|kNeedAlias);
+	}
+
+	if((_needsSetupMask & kNeedSCMStatus) == kNeedSCMStatus)
+	{
+		if(auto scmDriver = scm::info(path::parent(path)))
+			_scmStatus = scmDriver->status(path);
+		_needsSetupMask &= ~kNeedSCMStatus;
+	}
 }
 
 - (id)copyWithZone:(NSZone*)zone
@@ -237,14 +257,15 @@ static NSImage* BadgeForSCMStatus (scm::status::type scmStatus)
 	copy->_directory        = _directory;
 	copy->_alias            = _alias;
 	copy->_scmStatus        = _scmStatus;
+	copy->_needsSetupMask   = _needsSetupMask;
 	copy->_modified         = _modified;
 	return copy;
 }
 
-- (BOOL)exists                 { return _exists;    }
-- (BOOL)isDirectory            { return _directory; }
-- (BOOL)isAlias                { return _alias;     }
-- (scm::status::type)scmStatus { return _scmStatus; }
+- (BOOL)exists                 { [self checkSetupMask]; return _exists;    }
+- (BOOL)isDirectory            { [self checkSetupMask]; return _directory; }
+- (BOOL)isAlias                { [self checkSetupMask]; return _alias;     }
+- (scm::status::type)scmStatus { [self checkSetupMask]; return _scmStatus; }
 
 - (void)recache
 {
@@ -263,6 +284,7 @@ static NSImage* BadgeForSCMStatus (scm::status::type scmStatus)
 
 - (void)setExists:(BOOL)newExists
 {
+	_needsSetupMask &= ~kNeedExists;
 	if(_exists != newExists)
 	{
 		_exists = newExists;
@@ -272,6 +294,7 @@ static NSImage* BadgeForSCMStatus (scm::status::type scmStatus)
 
 - (void)setDirectory:(BOOL)newDirectory
 {
+	_needsSetupMask &= ~kNeedDirectory;
 	if(_directory != newDirectory)
 	{
 		_directory = newDirectory;
@@ -281,6 +304,7 @@ static NSImage* BadgeForSCMStatus (scm::status::type scmStatus)
 
 - (void)setAlias:(BOOL)newAlias
 {
+	_needsSetupMask &= ~kNeedAlias;
 	if(_alias != newAlias)
 	{
 		_alias = newAlias;
@@ -290,6 +314,7 @@ static NSImage* BadgeForSCMStatus (scm::status::type scmStatus)
 
 - (void)setScmStatus:(scm::status::type)newScmStatus
 {
+	_needsSetupMask &= ~kNeedSCMStatus;
 	if(_scmStatus != newScmStatus)
 	{
 		_scmStatus = newScmStatus;
