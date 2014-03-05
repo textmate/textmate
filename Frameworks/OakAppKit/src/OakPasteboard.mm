@@ -435,9 +435,7 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 {
 	D(DBF_Pasteboard, bug("%s\n", [aString UTF8String]););
 	[self checkForExternalPasteboardChanges];
-	if(self.avoidsDuplicates && [self.currentEntry.string isEqual:aString])
-			self.currentEntry.date = [NSDate date];
-	else	[self internalAddEntryWithString:aString andOptions:someOptions];
+	[self internalAddEntryWithString:aString andOptions:someOptions];
 }
 
 - (void)savePasteboardHistory:(id)sender
