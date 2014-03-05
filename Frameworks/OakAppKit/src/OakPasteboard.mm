@@ -402,6 +402,7 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 - (void)setCurrentEntry:(OakPasteboardEntry*)newEntry
 {
 	D(DBF_Pasteboard, bug("%s\n", [newEntry.string UTF8String]););
+	self.auxiliaryOptionsForCurrent = nil;
 	if(self.primitiveCurrentEntry == newEntry)
 		return;
 
@@ -417,7 +418,6 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 		self.changeCount = [[self pasteboard] changeCount];
 		self.needsSavePasteboardHistory = YES;
 	}
-	self.auxiliaryOptionsForCurrent = nil;
 
 	[self willChangeValueForKey:@"currentEntry"];
 	[self setPrimitiveCurrentEntry:newEntry];
