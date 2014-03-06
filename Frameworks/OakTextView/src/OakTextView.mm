@@ -2696,16 +2696,16 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 - (ng::indent_correction_t)indentCorrections
 {
 	plist::any_t indentCorrections = bundles::value_for_setting("disableIndentCorrections", [self scopeContext]);
+
 	if(std::string const* str = boost::get<std::string>(&indentCorrections))
 	{
-		if(str->find("emptyLines") == 0)
+		if(*str == "emptyLines")
 			return ng::kIndentCorrectNonEmptyLines;
-		NSLog(@"%s unrecognized indent option: ‘%s’", sel_getName(_cmd), str->c_str());
 	}
-	else if(plist::is_true(indentCorrections))
-	{
+
+	if(plist::is_true(indentCorrections))
 		return ng::kIndentCorrectNever;
-	}
+
 	return ng::kIndentCorrectAlways;
 }
 
