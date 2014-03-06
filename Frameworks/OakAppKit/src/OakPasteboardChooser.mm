@@ -1,8 +1,8 @@
 #import "OakPasteboardChooser.h"
 #import "OakPasteboard.h"
-#import <OakAppKit/OakAppKit.h>
-#import <OakAppKit/OakScopeBarView.h>
-#import <OakAppKit/OakUIConstructionFunctions.h>
+#import "OakAppKit.h"
+#import "OakScopeBarView.h"
+#import "OakUIConstructionFunctions.h"
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSArray Additions.h>
 #import <OakFoundation/NSString Additions.h>
