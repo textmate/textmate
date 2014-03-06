@@ -34,16 +34,15 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 
 - (void)sizeToFit
 {
+	CGFloat const kTableViewPadding = 4;
+	CGFloat const kScrollBarWidth   = 15;
+
 	CGFloat width = 60;
-	NSCell* dataCell = [[tableView.tableColumns lastObject] dataCell];
-	for(size_t i = 0; i < [choices count]; ++i)
-	{
-		[dataCell setStringValue:[choices objectAtIndex:i]];
-		width = std::max(width, [dataCell cellSize].width + 4);
-	}
+	for(NSInteger i = 0; i < tableView.numberOfRows; ++i)
+		width = std::max(width, kTableViewPadding + [[tableView preparedCellAtColumn:0 row:i] cellSizeForBounds:NSMakeRect(0, 0, CGFLOAT_MAX, tableView.rowHeight)].width);
 
 	if([choices count] > 10)
-		width += 15;
+		width += kScrollBarWidth;
 
 	CGFloat height = std::min<NSUInteger>([choices count], 10) * ([tableView rowHeight]+[tableView intercellSpacing].height);
 	NSRect frame   = { { NSMinX(window.frame), NSMaxY(window.frame) - height }, { std::min<CGFloat>(ceil(width), 400), height } };
