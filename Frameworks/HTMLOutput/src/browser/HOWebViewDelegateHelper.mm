@@ -3,6 +3,9 @@
 #import <OakAppKit/NSAlert Additions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <io/path.h>
+#import <oak/debug.h>
+
+OAK_DEBUG_VAR(HTMLOutput_WebViewDelegate);
 
 @implementation HOWebViewDelegateHelper
 // =====================
@@ -46,6 +49,7 @@
 
 - (WebView*)webView:(WebView*)sender createWebViewWithRequest:(NSURLRequest*)request
 {
+	D(DBF_HTMLOutput_WebViewDelegate, bug("%s\n", [[request description] UTF8String]););
 	NSPoint origin = [sender.window cascadeTopLeftFromPoint:NSMakePoint(NSMinX(sender.window.frame), NSMaxY(sender.window.frame))];
 	origin.y -= NSHeight(sender.window.frame);
 
@@ -66,11 +70,13 @@
 
 - (void)webViewShow:(WebView*)sender
 {
+	D(DBF_HTMLOutput_WebViewDelegate, bug("%s\n", [[sender description] UTF8String]););
 	[[sender window] makeKeyAndOrderFront:self];
 }
 
 - (void)webViewClose:(WebView*)sender
 {
+	D(DBF_HTMLOutput_WebViewDelegate, bug("\n"););
 	if(![sender tryToPerform:@selector(toggleHTMLOutput:) with:self])
 		[sender tryToPerform:@selector(performClose:) with:self];
 	// We cannot re-use WebView objects where window.close() has been executed because of https://bugs.webkit.org/show_bug.cgi?id=121232
@@ -90,6 +96,7 @@
 
 - (NSURLRequest*)webView:(WebView*)sender resource:(id)identifier willSendRequest:(NSURLRequest*)request redirectResponse:(NSURLResponse*)redirectResponse fromDataSource:(WebDataSource*)dataSource
 {
+	D(DBF_HTMLOutput_WebViewDelegate, bug("%s\n", [[request description] UTF8String]););
 	if([[[request URL] scheme] isEqualToString:@"tm-file"])
 	{
 		NSString* fragment = [[request URL] fragment];
