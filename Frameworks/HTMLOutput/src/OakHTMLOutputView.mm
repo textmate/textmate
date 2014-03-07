@@ -10,34 +10,22 @@ extern NSString* const kCommandRunnerURLScheme; // from HTMLOutput.h
 @interface OakHTMLOutputView ()
 {
 	OBJC_WATCH_LEAKS(OakHTMLOutputView);
-	std::map<std::string, std::string> environment;
 }
 @property (nonatomic) BOOL runningCommand;
 @property (nonatomic) HOAutoScroll* autoScrollHelper;
+@property (nonatomic) std::map<std::string, std::string> environment;
 @end
 
 @implementation OakHTMLOutputView
-- (id)initWithFrame:(NSRect)frame
+- (void)loadRequest:(NSURLRequest*)aRequest environment:(std::map<std::string, std::string> const&)anEnvironment autoScrolls:(BOOL)flag
 {
-	if(self = [super initWithFrame:frame])
+	if(flag)
 	{
 		self.autoScrollHelper = [HOAutoScroll new];
+		self.autoScrollHelper.webFrame = self.webView.mainFrame.frameView;
 	}
-	return self;
-}
 
-- (void)setEnvironment:(std::map<std::string, std::string> const&)anEnvironment
-{
-	environment = anEnvironment;
-
-	if(environment.find("TM_PROJECT_UUID") != environment.end())
-			self.projectUUID = [NSString stringWithCxxString:environment["TM_PROJECT_UUID"]];
-	else	self.projectUUID = nil;
-}
-
-- (void)loadRequest:(NSURLRequest*)aRequest autoScrolls:(BOOL)flag
-{
-	_autoScrollHelper.webFrame = flag ? self.webView.mainFrame.frameView : nil;
+	self.environment = anEnvironment;
 	self.runningCommand = [[[aRequest URL] scheme] isEqualToString:kCommandRunnerURLScheme];
 	[self.webView.mainFrame loadRequest:aRequest];
 }
@@ -47,16 +35,16 @@ extern NSString* const kCommandRunnerURLScheme; // from HTMLOutput.h
 	[self.webView.mainFrame stopLoading];
 }
 
+// =======================
+// = Frame Load Delegate =
+// =======================
+
 - (void)webView:(WebView*)sender didStartProvisionalLoadForFrame:(WebFrame*)frame
 {
 	self.statusBar.isBusy = YES;
 	if(NSString* scheme = [[[[[self.webView mainFrame] provisionalDataSource] request] URL] scheme])
 		[self setUpdatesProgress:![scheme isEqualToString:kCommandRunnerURLScheme]];
 }
-
-// =================
-// = Script object =
-// =================
 
 - (void)webView:(WebView*)sender didClearWindowObject:(WebScriptObject*)windowScriptObject forFrame:(WebFrame*)frame
 {
@@ -65,7 +53,7 @@ extern NSString* const kCommandRunnerURLScheme; // from HTMLOutput.h
 	{
 		HOJSBridge* bridge = [HOJSBridge new];
 		[bridge setDelegate:self.statusBar];
-		[bridge setEnvironment:environment];
+		[bridge setEnvironment:_environment];
 		[windowScriptObject setValue:bridge forKey:@"TextMate"];
 	}
 }
@@ -73,8 +61,39 @@ extern NSString* const kCommandRunnerURLScheme; // from HTMLOutput.h
 - (void)webView:(WebView*)sender didFinishLoadForFrame:(WebFrame*)frame
 {
 	self.runningCommand = NO;
+	self.autoScrollHelper = nil;
+
 	if(frame == [sender mainFrame])
 		[self webView:sender didClearWindowObject:[frame windowObject] forFrame:frame];
+
 	[super webView:sender didFinishLoadForFrame:frame];
+}
+
+// =========================================
+// = WebPolicyDelegate : Intercept txmt:// =
+// =========================================
+
+- (void)webView:(WebView*)sender decidePolicyForNavigationAction:(NSDictionary*)actionInformation request:(NSURLRequest*)request frame:(WebFrame*)frame decisionListener:(id <WebPolicyDecisionListener>)listener
+{
+	if([NSURLConnection canHandleRequest:request])
+	{
+		[listener use];
+	}
+	else
+	{
+		[listener ignore];
+		NSURL* url = request.URL;
+		if([[url scheme] isEqualToString:@"txmt"])
+		{
+			auto projectUUID = _environment.find("TM_PROJECT_UUID");
+			if(projectUUID != _environment.end())
+				url = [NSURL URLWithString:[[url absoluteString] stringByAppendingFormat:@"&project=%@", [NSString stringWithCxxString:projectUUID->second]]];
+			[NSApp sendAction:@selector(handleTxMtURL:) to:nil from:url];
+		}
+		else
+		{
+			[[NSWorkspace sharedWorkspace] openURL:url];
+		}
+	}
 }
 @end

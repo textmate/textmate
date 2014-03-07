@@ -79,10 +79,7 @@ static std::multimap<oak::uuid_t, HTMLOutputWindowController*> Windows;
 	Windows.emplace(runner->uuid(), self);
 
 	self.window.title = [NSString stringWithCxxString:runner->name()];
-
-	[self.htmlOutputView setEnvironment:runner->environment()];
-	[self.htmlOutputView loadRequest:URLRequestForCommandRunner(runner) autoScrolls:runner->auto_scroll_output()];
-
+	[self.htmlOutputView loadRequest:URLRequestForCommandRunner(runner) environment:runner->environment() autoScrolls:runner->auto_scroll_output()];
 	[self.window makeKeyAndOrderFront:nil];
 
 	return YES;

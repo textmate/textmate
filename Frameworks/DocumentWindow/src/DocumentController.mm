@@ -1843,8 +1843,7 @@ namespace
 
 		self.htmlOutputVisible = YES;
 		[self.window makeFirstResponder:self.htmlOutputView.webView];
-		[self.htmlOutputView setEnvironment:_runner->environment()];
-		[self.htmlOutputView loadRequest:URLRequestForCommandRunner(_runner) autoScrolls:_runner->auto_scroll_output()];
+		[self.htmlOutputView loadRequest:URLRequestForCommandRunner(_runner) environment:_runner->environment() autoScrolls:_runner->auto_scroll_output()];
 	}
 	return YES;
 }

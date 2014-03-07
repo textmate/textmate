@@ -80,33 +80,6 @@
 		fprintf(stderr, "%s: %s on line %d\n", [[[[[[webView mainFrame] dataSource] request] URL] absoluteString] UTF8String], [[dictionary objectForKey:@"message"] UTF8String], [[dictionary objectForKey:@"lineNumber"] intValue]);
 }
 
-// =========================================
-// = WebPolicyDelegate : Intercept txmt:// =
-// =========================================
-
-- (void)webView:(WebView*)sender decidePolicyForNavigationAction:(NSDictionary*)actionInformation request:(NSURLRequest*)request frame:(WebFrame*)frame decisionListener:(id <WebPolicyDecisionListener>)listener
-{
-	if([NSURLConnection canHandleRequest:request])
-	{
-		[listener use];
-	}
-	else
-	{
-		[listener ignore];
-		NSURL* url = request.URL;
-		if([[url scheme] isEqualToString:@"txmt"])
-		{
-			if(_projectUUID)
-				url = [NSURL URLWithString:[[url absoluteString] stringByAppendingFormat:@"&project=%@", _projectUUID]];
-			[NSApp sendAction:@selector(handleTxMtURL:) to:nil from:url];
-		}
-		else
-		{
-			[[NSWorkspace sharedWorkspace] openURL:url];
-		}
-	}
-}
-
 // =====================================================
 // = WebResourceLoadDelegate: Redirect tm-file to file =
 // =====================================================

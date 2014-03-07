@@ -3,8 +3,7 @@
 extern NSString* const kCommandRunnerURLScheme;
 
 @interface OakHTMLOutputView : NSView
-- (void)setEnvironment:(std::map<std::string, std::string> const&)anEnvironment;
-- (void)loadRequest:(NSURLRequest*)aRequest autoScrolls:(BOOL)flag;
+- (void)loadRequest:(NSURLRequest*)aRequest environment:(std::map<std::string, std::string> const&)anEnvironment autoScrolls:(BOOL)flag;
 - (void)stopLoading;
 
 @property (nonatomic, readonly) BOOL runningCommand;
