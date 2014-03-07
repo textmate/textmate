@@ -55,9 +55,12 @@
 																	 backing:NSBackingStoreBuffered
 																		defer:NO];
 	[window bind:NSTitleBinding toObject:view.webView withKeyPath:@"mainFrameTitle" options:nil];
-	[window setReleasedWhenClosed:YES];
 	[window setContentView:view];
 	[[view.webView mainFrame] loadRequest:request];
+
+	__attribute__ ((unused)) CFTypeRef dummy = CFBridgingRetain(window);
+	[window setReleasedWhenClosed:YES];
+
 	return view.webView;
 }
 
@@ -68,7 +71,8 @@
 
 - (void)webViewClose:(WebView*)sender
 {
-	[sender tryToPerform:@selector(toggleHTMLOutput:) with:self];
+	if(![sender tryToPerform:@selector(toggleHTMLOutput:) with:self])
+		[sender tryToPerform:@selector(performClose:) with:self];
 	// We cannot re-use WebView objects where window.close() has been executed because of https://bugs.webkit.org/show_bug.cgi?id=121232
 	self.needsNewWebView = YES;
 }
