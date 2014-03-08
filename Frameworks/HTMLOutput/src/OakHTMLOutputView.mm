@@ -63,6 +63,7 @@ extern NSString* const kCommandRunnerURLScheme; // from HTMLOutput.h
 	self.runningCommand = NO;
 	self.autoScrollHelper = nil;
 
+	// Sending goBack:/goForward: to a WebView does not call this WebFrameLoadDelegate method
 	if(frame == [sender mainFrame])
 		[self webView:sender didClearWindowObject:[frame windowObject] forFrame:frame];
 
