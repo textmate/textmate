@@ -28,7 +28,12 @@ OAK_DEBUG_VAR(Preferences);
 	return SharedInstance;
 }
 
-- (void)showWindow:(id)sender
++ (void)restoreWindowWithIdentifier:(NSString*)identifier state:(NSCoder*)state completionHandler:(void (^)(NSWindow*, NSError*))completionHandler
+{
+	completionHandler([self sharedInstance].windowController.window, nil);
+}
+
+- (NSWindowController*)windowController
 {
 	if(!_windowController)
 	{
@@ -42,23 +47,32 @@ OAK_DEBUG_VAR(Preferences);
 		];
 
 		self.windowController = [[MASPreferencesWindowController alloc] initWithViewControllers:self.viewControllers];
-		[_windowController setNextResponder:self];
+		_windowController.nextResponder = self;
+		_windowController.window.identifier = @"preferences";
+		_windowController.window.restorationClass = [self class];
+		_windowController.window.restorable = YES;
+		[_windowController.window invalidateRestorableState];
 	}
-	[_windowController showWindow:self];
+	return _windowController;
+}
+
+- (void)showWindow:(id)sender
+{
+	[self.windowController showWindow:self];
 }
 
 - (void)takeSelectedViewControllerIndexFrom:(id)sender
 {
 	NSUInteger index = [sender tag];
-	[_windowController selectControllerAtIndex:index];
+	[self.windowController selectControllerAtIndex:index];
 }
 
 - (void)updateGoToMenu:(NSMenu*)aMenu
 {
-	if(![_windowController.window isKeyWindow])
+	if(![self.windowController.window isKeyWindow])
 		return;
 
-	NSString* const selectedIdentifier = [_windowController selectedViewController].identifier;
+	NSString* const selectedIdentifier = [self.windowController selectedViewController].identifier;
 
 	int i = 0;
 	for(NSViewController <MASPreferencesViewController>* viewController in _viewControllers)
