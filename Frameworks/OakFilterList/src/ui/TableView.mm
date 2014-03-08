@@ -11,7 +11,7 @@
 @end
 
 @implementation OakTextFieldMovementDelegate
-- (void)moveSelectedRowByOffset:(NSInteger)anOffset extendingSelection:(BOOL)extend
+- (void)moveSelectedRowByOffset:(NSInteger)anOffset extendingSelection:(BOOL)extend sender:(id)sender
 {
 	if([_tableView numberOfRows])
 	{
@@ -20,19 +20,35 @@
 		NSInteger row = oak::cap((NSInteger)0, [_tableView selectedRow] + anOffset, [_tableView numberOfRows] - 1);
 		[_tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:extend];
 		[_tableView scrollRowToVisible:row];
+#if defined(MAC_OS_X_VERSION_10_9)
+		if ([sender isKindOfClass:[NSView class]])
+		{
+			id element = sender;
+			if ([sender isKindOfClass:[NSControl class]])
+				element = [sender cell];
+			NSMutableArray* descriptionBits = [NSMutableArray arrayWithCapacity:[_tableView tableColumns].count];
+			[[_tableView tableColumns] enumerateObjectsUsingBlock:^(NSTableColumn* column, NSUInteger index, BOOL *stop) {
+				NSCell* cell = [_tableView preparedCellAtColumn:index row:row];
+				NSString* description = [cell stringValue];
+				[descriptionBits addObject:description];
+			}];
+			NSString* description = [descriptionBits componentsJoinedByString:@", "];
+			NSAccessibilityPostNotificationWithUserInfo(element, NSAccessibilityAnnouncementRequestedNotification, @{NSAccessibilityAnnouncementKey: description});
+		}
+#endif
 	}
 }
 
 - (int)visibleRows                                      { return (int)floorf(NSHeight([_tableView visibleRect]) / ([_tableView rowHeight]+[_tableView intercellSpacing].height)) - 1; }
 
-- (void)moveUp:(id)sender                               { [self moveSelectedRowByOffset:-1 extendingSelection:NO]; }
-- (void)moveDown:(id)sender                             { [self moveSelectedRowByOffset:+1 extendingSelection:NO]; }
-- (void)moveUpAndModifySelection:(id)sender             { [self moveSelectedRowByOffset:-1 extendingSelection:YES];}
-- (void)moveDownAndModifySelection:(id)sender           { [self moveSelectedRowByOffset:+1 extendingSelection:YES];}
-- (void)movePageUp:(id)sender                           { [self moveSelectedRowByOffset:-[self visibleRows] extendingSelection:NO]; }
-- (void)movePageDown:(id)sender                         { [self moveSelectedRowByOffset:+[self visibleRows] extendingSelection:NO]; }
-- (void)moveToBeginningOfDocument:(id)sender            { [self moveSelectedRowByOffset:-(INT_MAX >> 1) extendingSelection:NO]; }
-- (void)moveToEndOfDocument:(id)sender                  { [self moveSelectedRowByOffset:+(INT_MAX >> 1) extendingSelection:NO]; }
+- (void)moveUp:(id)sender                               { [self moveSelectedRowByOffset:-1 extendingSelection:NO sender:sender]; }
+- (void)moveDown:(id)sender                             { [self moveSelectedRowByOffset:+1 extendingSelection:NO sender:sender]; }
+- (void)moveUpAndModifySelection:(id)sender             { [self moveSelectedRowByOffset:-1 extendingSelection:YES sender:sender];}
+- (void)moveDownAndModifySelection:(id)sender           { [self moveSelectedRowByOffset:+1 extendingSelection:YES sender:sender];}
+- (void)movePageUp:(id)sender                           { [self moveSelectedRowByOffset:-[self visibleRows] extendingSelection:NO sender:sender]; }
+- (void)movePageDown:(id)sender                         { [self moveSelectedRowByOffset:+[self visibleRows] extendingSelection:NO sender:sender]; }
+- (void)moveToBeginningOfDocument:(id)sender            { [self moveSelectedRowByOffset:-(INT_MAX >> 1) extendingSelection:NO sender:sender]; }
+- (void)moveToEndOfDocument:(id)sender                  { [self moveSelectedRowByOffset:+(INT_MAX >> 1) extendingSelection:NO sender:sender]; }
 
 - (void)pageUp:(id)sender                               { [self movePageUp:sender]; }
 - (void)pageDown:(id)sender                             { [self movePageDown:sender]; }
