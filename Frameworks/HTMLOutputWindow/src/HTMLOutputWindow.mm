@@ -1,4 +1,5 @@
 #import "HTMLOutputWindow.h"
+#import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakWindowFrameHelper.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakSystem/process.h>
@@ -107,17 +108,6 @@ static std::multimap<oak::uuid_t, HTMLOutputWindowController*> Windows;
 	}
 }
 
-- (void)closeWarningDidEnd:(NSAlert*)alert returnCode:(NSInteger)returnCode contextInfo:(void*)stack
-{
-	D(DBF_HTMLOutputWindow, bug("close %s\n", BSTR(returnCode == NSAlertDefaultReturn)););
-	if(returnCode == NSAlertDefaultReturn) /* "Stop" */
-	{
-		oak::kill_process_group_in_background(runner->process_id());
-		[self.window close];
-		[self tearDown];
-	}
-}
-
 - (BOOL)windowShouldClose:(id)aWindow
 {
 	D(DBF_HTMLOutputWindow, bug("\n"););
@@ -125,7 +115,15 @@ static std::multimap<oak::uuid_t, HTMLOutputWindowController*> Windows;
 		return [self tearDown], YES;
 
 	NSAlert* alert = [NSAlert alertWithMessageText:@"Stop task before closing?" defaultButton:@"Stop Task" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"The job that the task is performing will not be completed."];
-	[alert beginSheetModalForWindow:self.window modalDelegate:self didEndSelector:@selector(closeWarningDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+	OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){
+		D(DBF_HTMLOutputWindow, bug("close %s\n", BSTR(returnCode == NSAlertDefaultReturn)););
+		if(returnCode == NSAlertDefaultReturn) /* "Stop" */
+		{
+			oak::kill_process_group_in_background(runner->process_id());
+			[self.window close];
+			[self tearDown];
+		}
+	});
 	return NO;
 }
 
