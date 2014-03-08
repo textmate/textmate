@@ -1,5 +1,6 @@
 #import "OakChooser.h"
 #import "ui/TableView.h"
+#import "ui/SearchField.h"
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakFoundation/NSString Additions.h>
@@ -39,7 +40,7 @@ NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string
 	{
 		_items = @[ ];
 
-		_searchField = [[NSSearchField alloc] initWithFrame:NSZeroRect];
+		_searchField = [[OakLinkedSearchField alloc] initWithFrame:NSZeroRect];
 		[_searchField.cell setScrollable:YES];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(controlTextDidChange:) name:NSControlTextDidChangeNotification object:_searchField];
 		if(![NSApp isFullKeyboardAccessEnabled])
