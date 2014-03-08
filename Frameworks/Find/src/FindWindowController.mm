@@ -182,7 +182,7 @@ static NSButton* OakCreateStopSearchButton ()
 	NSRect r = [[NSScreen mainScreen] visibleFrame];
 	if((self = [super initWithWindow:[[NSPanel alloc] initWithContentRect:NSMakeRect(NSMidX(r)-100, NSMidY(r)+100, 200, 200) styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask) backing:NSBackingStoreBuffered defer:NO]]))
 	{
-		self.window.title              = @"Find";
+		self.window.title              = [self windowTitleForDocumentDisplayName:nil];
 		self.window.frameAutosaveName  = @"Find";
 		self.window.hidesOnDeactivate  = NO;
 		self.window.collectionBehavior = NSWindowCollectionBehaviorMoveToActiveSpace|NSWindowCollectionBehaviorFullScreenAuxiliary;
@@ -497,6 +497,11 @@ static NSButton* OakCreateStopSearchButton ()
 		if(![firstResponder isKindOfClass:[NSTextView class]])
 			self.showReplacementPreviews = firstResponder == self.replaceTextField;
 	}
+}
+
+- (NSString*)windowTitleForDocumentDisplayName:(NSString*)aString
+{
+	return self.searchFolder ? [NSString localizedStringWithFormat:MSG_FIND_IN_FOLDER_WINDOW_TITLE, [self.searchFolder stringByAbbreviatingWithTildeInPath]] : MSG_WINDOW_TITLE;
 }
 
 - (void)showWindow:(id)sender
@@ -817,7 +822,7 @@ static NSButton* OakCreateStopSearchButton ()
 
 	_searchIn = aString;
 	self.folderSearch = self.searchFolder != nil;
-	self.window.title = self.searchFolder ? [NSString localizedStringWithFormat:MSG_FIND_IN_FOLDER_WINDOW_TITLE, [self.searchFolder stringByAbbreviatingWithTildeInPath]] : MSG_WINDOW_TITLE;
+	self.window.title = [self windowTitleForDocumentDisplayName:nil];
 	if(NSString* folder = self.searchFolder)
 		[self.recentFolders addObject:folder];
 	[self updateSearchInPopUpMenu];
