@@ -385,6 +385,11 @@ OAK_DEBUG_VAR(Find_FolderSearch);
 // = Setup/Teardown =
 // ==================
 
++ (BOOL)autosavesDrafts
+{
+	return NO;
+}
+
 - (id)init
 {
 	if(self = [super init])
