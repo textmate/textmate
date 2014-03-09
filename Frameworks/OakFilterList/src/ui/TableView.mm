@@ -20,7 +20,6 @@
 		NSInteger row = oak::cap((NSInteger)0, [_tableView selectedRow] + anOffset, [_tableView numberOfRows] - 1);
 		[_tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:extend];
 		[_tableView scrollRowToVisible:row];
-#if defined(MAC_OS_X_VERSION_10_9)
 		if ([sender isKindOfClass:[NSView class]])
 		{
 			id element = sender;
@@ -35,7 +34,6 @@
 			NSString* description = [descriptionBits componentsJoinedByString:@", "];
 			NSAccessibilityPostNotificationWithUserInfo(element, NSAccessibilityAnnouncementRequestedNotification, @{NSAccessibilityAnnouncementKey: description});
 		}
-#endif
 	}
 }
 
