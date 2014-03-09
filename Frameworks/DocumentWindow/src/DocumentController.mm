@@ -1766,7 +1766,7 @@ namespace
 
 - (BOOL)htmlOutputVisible
 {
-	return self.layoutView.htmlOutputView || [self.htmlOutputWindowController.window isVisible];
+	return self.htmlOutputInWindow ? [self.htmlOutputWindowController.window isVisible] : self.layoutView.htmlOutputView != nil;
 }
 
 - (void)setHtmlOutputVisible:(BOOL)makeVisibleFlag
@@ -1792,8 +1792,9 @@ namespace
 		if(self.layoutView.htmlOutputView && [[self.window firstResponder] isKindOfClass:[NSView class]] && [(NSView*)[self.window firstResponder] isDescendantOf:self.layoutView.htmlOutputView])
 			[self makeTextViewFirstResponder:self];
 
-		[self.htmlOutputWindowController.window orderOut:self];
-		self.layoutView.htmlOutputView = nil;
+		if(self.layoutView.htmlOutputView)
+				self.layoutView.htmlOutputView = nil;
+		else	[self.htmlOutputWindowController.window orderOut:self];
 	}
 }
 
@@ -1822,25 +1823,40 @@ namespace
 
 - (BOOL)setCommandRunner:(command::runner_ptr const&)aRunner
 {
-	if(self.htmlOutputInWindow)
+	_runner = aRunner;
+	if(self.htmlOutputInWindow || self.htmlOutputView.runningCommand)
 	{
-		_runner = aRunner;
+		HTMLOutputWindowController* target = nil;
 
-		if(!self.htmlOutputWindowController || [self.htmlOutputWindowController running] || self.htmlOutputWindowController.needsNewWebView)
-				self.htmlOutputWindowController = [HTMLOutputWindowController HTMLOutputWindowWithRunner:_runner];
-		else	[self.htmlOutputWindowController setCommandRunner:_runner];
+		HTMLOutputWindowController* candidate = self.htmlOutputWindowController;
+		if(candidate && !candidate.running && candidate.commandRunner->uuid() == _runner->uuid() && !candidate.needsNewWebView)
+		{
+			target = candidate;
+		}
+		else
+		{
+			for(NSWindow* window in [NSApp orderedWindows])
+			{
+				HTMLOutputWindowController* candidate = [window delegate];
+				if(![window isMiniaturized] && [window isVisible] && [candidate isKindOfClass:[HTMLOutputWindowController class]])
+				{
+					if(candidate && !candidate.running && candidate.commandRunner->uuid() == _runner->uuid() && !candidate.needsNewWebView)
+					{
+						target = candidate;
+						break;
+					}
+				}
+			}
+		}
+
+		if(!target)
+			target = [HTMLOutputWindowController new];
+
+		target.commandRunner = _runner;
+		self.htmlOutputWindowController = target;
 	}
 	else
 	{
-		if(_runner && _runner->running())
-		{
-			NSInteger choice = [[NSAlert alertWithMessageText:@"Stop current task first?" defaultButton:@"Stop Task" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"There already is a task running. If you stop this then the task it is performing will not be completed."] runModal];
-			if(choice != NSAlertDefaultReturn) /* "Stop" */
-				return NO;
-		}
-
-		_runner = aRunner;
-
 		self.htmlOutputVisible = YES;
 		[self.window makeFirstResponder:self.htmlOutputView.webView];
 		[self.htmlOutputView loadRequest:URLRequestForCommandRunner(_runner) environment:_runner->environment() autoScrolls:_runner->auto_scroll_output()];
