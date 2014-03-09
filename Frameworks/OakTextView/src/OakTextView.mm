@@ -328,6 +328,7 @@ typedef std::shared_ptr<links_t> links_ptr;
 @property (nonatomic) ng::ranges_t const& liveSearchRanges;
 @property (nonatomic, readonly) links_ptr links;
 @property (nonatomic) NSDictionary* matchCaptures; // Captures from last regexp match
+@property (nonatomic) BOOL needsEnsureSelectionIsInVisibleArea;
 @end
 
 static std::vector<bundles::item_ptr> items_for_tab_expansion (ng::buffer_t const& buffer, ng::ranges_t const& ranges, std::string const& scopeAttributes, ng::range_t* range)
@@ -446,7 +447,7 @@ struct refresh_helper_t
 					}
 				}
 
-				if(_revision != _document->buffer().revision() || _selection != _editor->ranges())
+				if(_revision != _document->buffer().revision() || _selection != _editor->ranges() || _self.needsEnsureSelectionIsInVisibleArea)
 				{
 					if(_revision != _document->buffer().revision()) // FIXME document_t needs to skip work in set_revision if nothing changed.
 						_document->set_revision(_document->buffer().revision());
@@ -890,6 +891,8 @@ doScroll:
 	if([contentView respondsToSelector:@selector(_extendNextScrollRelativeToCurrentPosition)])
 		[contentView performSelector:@selector(_extendNextScrollRelativeToCurrentPosition)]; // Workaround for <rdar://9295929>
 	[self scrollRectToVisible:CGRectMake(round(x), round(y), w, h)];
+
+	self.needsEnsureSelectionIsInVisibleArea = NO;
 }
 
 - (void)updateChoiceMenu:(id)sender
@@ -3705,6 +3708,10 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 	[self recordSelector:aSelector withArgument:nil];
 	try {
 		editor->perform(anAction, layout.get(), [self indentCorrections], to_s([self scopeAttributes]));
+
+		auto SilentActions = new std::set<ng::action_t>{ ng::kCopy, ng::kCopySelectionToFindPboard, ng::kCopySelectionToReplacePboard, ng::kCopySelectionToYankPboard, ng::kAppendSelectionToYankPboard, ng::kPrependSelectionToYankPboard, ng::kSetMark, ng::kNop };
+		if(SilentActions->find(anAction) == SilentActions->end())
+			self.needsEnsureSelectionIsInVisibleArea = YES;
 	}
 	catch(std::exception const& e) {
 		crash_reporter_info_t info(text::format("Performing @selector(%s)\nC++ Exception: %s", sel_getName(aSelector), e.what()));
