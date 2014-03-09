@@ -1056,6 +1056,43 @@ namespace
 	return windows;
 }
 
+- (void)bundleItemReuseOutputForCommand:(bundle_command_t const&)aCommand completionHandler:(void(^)(BOOL success))callback
+{
+	if(aCommand.output_reuse == output_reuse::reuse_busy || aCommand.output_reuse == output_reuse::abort_and_reuse_busy)
+	{
+		NSArray* windows = [self outputWindowsForCommandUUID:aCommand.uuid];
+		if([windows count] && [windows indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL* stop){ return (BOOL)!((HTMLOutputWindowController*)obj).running; }] == NSNotFound)
+		{
+			HTMLOutputWindowController* candidate = [windows firstObject];
+			switch(aCommand.output_reuse)
+			{
+				case output_reuse::reuse_busy:
+				{
+					NSAlert* alert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Stop “%@”?", [NSString stringWithCxxString:aCommand.name]] defaultButton:@"Stop" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"The job that the task is performing will not be completed."];
+					OakShowAlertForWindow(alert, candidate.window, ^(NSInteger returnCode){
+						if(returnCode == NSAlertDefaultReturn) /* "Stop" */
+						{
+							oak::kill_process_group_in_background(candidate.commandRunner->process_id());
+							candidate.commandRunner->wait(true);
+						}
+						callback(returnCode == NSAlertDefaultReturn);
+					});
+					return;
+				}
+				break;
+
+				case output_reuse::abort_and_reuse_busy:
+				{
+					oak::kill_process_group_in_background(candidate.commandRunner->process_id());
+					candidate.commandRunner->wait(true);
+				}
+				break;
+			}
+		}
+	}
+	callback(YES);
+}
+
 // ================
 // = Window Title =
 // ================
@@ -1862,10 +1899,13 @@ namespace
 	{
 		HTMLOutputWindowController* target = nil;
 
-		NSArray* windows = [self outputWindowsForCommandUUID:_runner->uuid()];
-		NSUInteger index = [windows indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL* stop){ return (BOOL)!((HTMLOutputWindowController*)obj).running; }];
-		if(index != NSNotFound)
-			target = windows[index];
+		if(_runner->output_reuse() != output_reuse::reuse_none)
+		{
+			NSArray* windows = [self outputWindowsForCommandUUID:_runner->uuid()];
+			NSUInteger index = [windows indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL* stop){ return (BOOL)!((HTMLOutputWindowController*)obj).running; }];
+			if(index != NSNotFound)
+				target = windows[index];
+		}
 
 		if(!target)
 			target = [HTMLOutputWindowController new];
