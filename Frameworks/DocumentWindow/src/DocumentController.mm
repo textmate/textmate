@@ -1035,6 +1035,27 @@ namespace
 	}
 }
 
+- (NSArray*)outputWindowsForCommandUUID:(oak::uuid_t const&)anUUID
+{
+	NSMutableArray* windows = [NSMutableArray array];
+
+	HTMLOutputWindowController* candidate = self.htmlOutputWindowController;
+	if(candidate && candidate.commandRunner->uuid() == anUUID && !candidate.needsNewWebView)
+		[windows addObject:candidate];
+
+	for(NSWindow* window in [NSApp orderedWindows])
+	{
+		HTMLOutputWindowController* candidate = [window delegate];
+		if(candidate != self.htmlOutputWindowController && ![window isMiniaturized] && [window isVisible] && [candidate isKindOfClass:[HTMLOutputWindowController class]])
+		{
+			if(candidate && candidate.commandRunner->uuid() == anUUID && !candidate.needsNewWebView)
+				[windows addObject:candidate];
+		}
+	}
+
+	return windows;
+}
+
 // ================
 // = Window Title =
 // ================
@@ -1841,26 +1862,10 @@ namespace
 	{
 		HTMLOutputWindowController* target = nil;
 
-		HTMLOutputWindowController* candidate = self.htmlOutputWindowController;
-		if(candidate && !candidate.running && candidate.commandRunner->uuid() == _runner->uuid() && !candidate.needsNewWebView)
-		{
-			target = candidate;
-		}
-		else
-		{
-			for(NSWindow* window in [NSApp orderedWindows])
-			{
-				HTMLOutputWindowController* candidate = [window delegate];
-				if(![window isMiniaturized] && [window isVisible] && [candidate isKindOfClass:[HTMLOutputWindowController class]])
-				{
-					if(candidate && !candidate.running && candidate.commandRunner->uuid() == _runner->uuid() && !candidate.needsNewWebView)
-					{
-						target = candidate;
-						break;
-					}
-				}
-			}
-		}
+		NSArray* windows = [self outputWindowsForCommandUUID:_runner->uuid()];
+		NSUInteger index = [windows indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL* stop){ return (BOOL)!((HTMLOutputWindowController*)obj).running; }];
+		if(index != NSNotFound)
+			target = windows[index];
 
 		if(!target)
 			target = [HTMLOutputWindowController new];
