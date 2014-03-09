@@ -13,16 +13,13 @@ static std::multimap<oak::uuid_t, HTMLOutputWindowController*> Windows;
 @interface HTMLOutputWindowController ()
 {
 	OBJC_WATCH_LEAKS(HTMLOutputWindowController);
-	command::runner_ptr runner;
 }
 @property (nonatomic) OakHTMLOutputView* htmlOutputView;
-@property (nonatomic, readonly) BOOL running;
 @end
 
 @implementation HTMLOutputWindowController
-- (id)initWithRunner:(command::runner_ptr const&)aRunner
+- (id)init
 {
-	D(DBF_HTMLOutputWindow, bug("\n"););
 	if(self = [super init])
 	{
 		self.window         = [[NSWindow alloc] initWithContentRect:NSMakeRect(100, 100, 100, 100) styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask) backing:NSBackingStoreBuffered defer:NO];
@@ -39,7 +36,15 @@ static std::multimap<oak::uuid_t, HTMLOutputWindowController*> Windows;
 		[self.window setCollectionBehavior:NSWindowCollectionBehaviorMoveToActiveSpace|NSWindowCollectionBehaviorFullScreenAuxiliary];
 
 		[OakWindowFrameHelper windowFrameHelperWithWindow:self.window];
+	}
+	return self;
+}
 
+- (id)initWithRunner:(command::runner_ptr const&)aRunner
+{
+	D(DBF_HTMLOutputWindow, bug("\n"););
+	if(self = [self init])
+	{
 		[self setCommandRunner:aRunner];
 	}
 	return self;
@@ -71,24 +76,23 @@ static std::multimap<oak::uuid_t, HTMLOutputWindowController*> Windows;
 	return [[self alloc] initWithRunner:aRunner];
 }
 
-- (BOOL)setCommandRunner:(command::runner_ptr const&)aRunner
+- (void)setCommandRunner:(command::runner_ptr)aRunner
 {
-	if(runner)
-		Windows.erase(runner->uuid());
+	if(_commandRunner)
+		Windows.erase(_commandRunner->uuid());
 
-	runner = aRunner;
-	Windows.emplace(runner->uuid(), self);
+	_commandRunner = aRunner;
+	Windows.emplace(_commandRunner->uuid(), self);
 
-	self.window.title = [NSString stringWithCxxString:runner->name()];
-	[self.htmlOutputView loadRequest:URLRequestForCommandRunner(runner) environment:runner->environment() autoScrolls:runner->auto_scroll_output()];
+	self.window.title = [NSString stringWithCxxString:_commandRunner->name()];
+	[self.htmlOutputView loadRequest:URLRequestForCommandRunner(_commandRunner) environment:_commandRunner->environment() autoScrolls:_commandRunner->auto_scroll_output()];
 	[self.window makeKeyAndOrderFront:nil];
 
-	return YES;
 }
 
 - (BOOL)running
 {
-	return runner->running();
+	return _commandRunner->running();
 }
 
 - (BOOL)needsNewWebView
@@ -98,7 +102,7 @@ static std::multimap<oak::uuid_t, HTMLOutputWindowController*> Windows;
 
 - (void)tearDown
 {
-	foreach(it, Windows.lower_bound(runner->uuid()), Windows.upper_bound(runner->uuid()))
+	foreach(it, Windows.lower_bound(_commandRunner->uuid()), Windows.upper_bound(_commandRunner->uuid()))
 	{
 		if(it->second == self)
 		{
@@ -111,7 +115,7 @@ static std::multimap<oak::uuid_t, HTMLOutputWindowController*> Windows;
 - (BOOL)windowShouldClose:(id)aWindow
 {
 	D(DBF_HTMLOutputWindow, bug("\n"););
-	if(!runner->running())
+	if(!_commandRunner->running())
 		return [self tearDown], YES;
 
 	NSAlert* alert = [NSAlert alertWithMessageText:@"Stop task before closing?" defaultButton:@"Stop Task" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"The job that the task is performing will not be completed."];
@@ -119,7 +123,7 @@ static std::multimap<oak::uuid_t, HTMLOutputWindowController*> Windows;
 		D(DBF_HTMLOutputWindow, bug("close %s\n", BSTR(returnCode == NSAlertDefaultReturn)););
 		if(returnCode == NSAlertDefaultReturn) /* "Stop" */
 		{
-			oak::kill_process_group_in_background(runner->process_id());
+			oak::kill_process_group_in_background(_commandRunner->process_id());
 			[self.window close];
 			[self tearDown];
 		}
