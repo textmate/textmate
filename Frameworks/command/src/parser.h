@@ -12,6 +12,7 @@ namespace input_format  { enum type { text = 0, xml }; }
 namespace output        { enum type { replace_input = 0, replace_document, at_caret, after_input, new_window, tool_tip, discard, replace_selection }; }
 namespace output_format { enum type { text = 0, snippet, html, completion_list, snippet_no_auto_indent }; }
 namespace output_caret  { enum type { after_output = 0, select_output, interpolate_by_char, interpolate_by_line, heuristic }; }
+namespace output_reuse  { enum type { reuse_available = 0, reuse_none, reuse_busy, abort_and_reuse_busy }; }
 
 #ifndef NDEBUG
 inline char const* to_s (input::type const& input)
@@ -58,6 +59,7 @@ struct PUBLIC bundle_command_t
 	output::type output;
 	output_format::type output_format;
 	output_caret::type output_caret;
+	output_reuse::type output_reuse;
 
 	bool auto_scroll_output;
 	bool disable_output_auto_indent;
