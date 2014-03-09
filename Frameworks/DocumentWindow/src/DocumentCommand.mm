@@ -80,14 +80,8 @@ bool delegate_t::accept_html_data (command::runner_ptr runner, char const* data,
 	{
 		_did_open_html_window = true;
 		if(_controller)
-		{
-			if(![_controller setCommandRunner:runner])
-				oak::kill_process_group_in_background(runner->process_id());
-		}
-		else
-		{
-			[HTMLOutputWindowController HTMLOutputWindowWithRunner:runner];
-		}
+				[_controller setCommandRunner:runner];
+		else	[HTMLOutputWindowController HTMLOutputWindowWithRunner:runner];
 	}
 	return true;
 }

@@ -1834,7 +1834,7 @@ namespace
 	else	self.htmlOutputVisible = !self.htmlOutputVisible;
 }
 
-- (BOOL)setCommandRunner:(command::runner_ptr const&)aRunner
+- (void)setCommandRunner:(command::runner_ptr const&)aRunner
 {
 	_runner = aRunner;
 	if(self.htmlOutputInWindow || self.htmlOutputView.runningCommand)
@@ -1874,7 +1874,6 @@ namespace
 		[self.window makeFirstResponder:self.htmlOutputView.webView];
 		[self.htmlOutputView loadRequest:URLRequestForCommandRunner(_runner) environment:_runner->environment() autoScrolls:_runner->auto_scroll_output()];
 	}
-	return YES;
 }
 
 // =============================
