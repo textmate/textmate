@@ -21,6 +21,7 @@
 #import <HTMLOutputWindow/HTMLOutputWindow.h>
 #import <OakFilterList/FileChooser.h>
 #import <OakSystem/application.h>
+#import <OakSystem/process.h>
 #import <Find/Find.h>
 #import <crash/info.h>
 #import <file/path_info.h>
@@ -608,7 +609,19 @@ namespace
 
 - (BOOL)windowShouldClose:(id)sender
 {
-	[self.htmlOutputView stopLoading];
+	if(!self.htmlOutputInWindow && _runner && _runner->running())
+	{
+		NSAlert* alert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Stop “%@”?", [NSString stringWithCxxString:_runner->name()]] defaultButton:@"Stop" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"The job that the task is performing will not be completed."];
+		OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){
+			if(returnCode == NSAlertDefaultReturn) /* "Stop" */
+			{
+				oak::kill_process_group_in_background(_runner->process_id());
+				_runner.reset();
+				[sender performSelector:@selector(performClose:) withObject:self afterDelay:0];
+			}
+		});
+		return NO;
+	}
 
 	std::vector<document::document_ptr> documents;
 	std::copy_if(_documents.begin(), _documents.end(), back_inserter(documents), [](document::document_ptr const& doc){ return doc->is_modified(); });
