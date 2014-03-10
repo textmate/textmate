@@ -123,7 +123,7 @@ struct buffer_refresh_callback_t;
 
 - (NSArray*)accessibilityAttributeNames
 {
-	static NSArray* attributes = [[[self myAccessibilityAttributeNames] setByAddingObjectsFromArray:[super accessibilityAttributeNames]] allObjects];
+	static NSArray* attributes = [[self myAccessibilityAttributeNames] allObjects];
 	return attributes;
 }
 
