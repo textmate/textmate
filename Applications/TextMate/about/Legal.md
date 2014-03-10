@@ -1,3 +1,5 @@
+Title: Legal
+
 # Legal
 
 TextMate makes use of the following frameworks.

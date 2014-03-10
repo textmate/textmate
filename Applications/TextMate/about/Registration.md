@@ -1,3 +1,5 @@
+Title: Registration
+
 # Registration
 
 <script>

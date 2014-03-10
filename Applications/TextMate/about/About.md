@@ -1,3 +1,5 @@
+Title: About TextMate
+
 ## TextMate version <script>document.write(TextMate.version)</script>
 
 This is an alpha release which means a few functions are missing but otherwise the program should be reliable and fine for normal use.
