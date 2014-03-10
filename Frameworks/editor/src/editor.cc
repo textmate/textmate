@@ -1332,6 +1332,22 @@ namespace ng
 	{
 		std::string const& out = utf8::is_valid(uncheckedOut.begin(), uncheckedOut.end()) ? uncheckedOut : sanitized_utf8(uncheckedOut);
 
+		if(input_range.columnar)
+		{
+			text::pos_t const fromPos = _buffer.convert(input_range.min().index);
+			text::pos_t const toPos   = _buffer.convert(input_range.max().index);
+
+			size_t fromCol = visual_distance(_buffer, _buffer.begin(fromPos.line), input_range.min());
+			size_t toCol   = visual_distance(_buffer, _buffer.begin(toPos.line), input_range.max());
+
+			if(toCol < fromCol)
+			{
+				std::swap(fromCol, toCol);
+				input_range.first = visual_advance(_buffer, _buffer.begin(fromPos.line), fromCol);
+				input_range.last  = visual_advance(_buffer, _buffer.begin(toPos.line), toCol);
+			}
+		}
+
 		range_t range;
 		switch(placement)
 		{
