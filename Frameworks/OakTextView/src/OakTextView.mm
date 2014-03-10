@@ -824,6 +824,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 - (void)ensureSelectionIsInVisibleArea:(id)sender
 {
+	self.needsEnsureSelectionIsInVisibleArea = NO;
 	if(([NSEvent pressedMouseButtons] & 1) == 1) // User is drag-selecting
 		return;
 
@@ -891,8 +892,6 @@ doScroll:
 	if([contentView respondsToSelector:@selector(_extendNextScrollRelativeToCurrentPosition)])
 		[contentView performSelector:@selector(_extendNextScrollRelativeToCurrentPosition)]; // Workaround for <rdar://9295929>
 	[self scrollRectToVisible:CGRectMake(round(x), round(y), w, h)];
-
-	self.needsEnsureSelectionIsInVisibleArea = NO;
 }
 
 - (void)updateChoiceMenu:(id)sender
