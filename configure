@@ -66,7 +66,7 @@ test -L "${builddir}/include/boost" || error "*** boost not installed."
 # ==================================
 
 xcodedir=/Developer
-sdk="/Developer/SDKs/${sdk:-MacOSX10.8}.sdk"
+sdk="/Developer/SDKs/${sdk:-MacOSX10.9}.sdk"
 
 if which -s xcode-select; then
 	xcodedir=$(xcode-select -print-path)

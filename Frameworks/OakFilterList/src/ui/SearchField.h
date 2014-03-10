@@ -1,0 +1,2 @@
+@interface OakLinkedSearchField : NSSearchField
+@end
