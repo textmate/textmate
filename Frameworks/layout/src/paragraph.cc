@@ -12,18 +12,46 @@ namespace ng
 {
 	namespace
 	{
+		static std::set<uint32_t> const SpecialCharacters = {
+			// Spaces
+			0x2000, // EN QUAD
+			0x2001, // EM QUAD
+			0x2002, // EN SPACE
+			0x2003, // EM SPACE
+			0x2004, // THREE-PER-EM SPACE
+			0x2005, // FOUR-PER-EM SPACE
+			0x2006, // SIX-PER-EM SPACE
+			0x2007, // FIGURE SPACE
+			0x2008, // PUNCTUATION SPACE
+			0x2009, // THIN SPACE
+			0x200A, // HAIR SPACE
+			0x200B, // ZERO WIDTH SPACE
+			0x202F, // NARROW NO-BREAK SPACE
+			0x205F, // MEDIUM MATHEMATICAL SPACE
+			0x3000, // IDEOGRAPHIC SPACE
+
+			// Marks
+			0x061C, // ARABIC LETTER MARK
+			0x200C, // ZERO WIDTH NON-JOINER
+			0x200D, // ZERO WIDTH JOINER
+			0x200E, // LEFT-TO-RIGHT MARK
+			0x200F, // RIGHT-TO-LEFT MARK
+			0x2028, // LINE SEPARATOR
+			0x2029, // PARAGRAPH SEPARATOR
+			0x202A, // LEFT-TO-RIGHT EMBEDDING
+			0x202B, // RIGHT-TO-LEFT EMBEDDING
+			0x202C, // POP DIRECTIONAL FORMATTING
+			0x202D, // LEFT-TO-RIGHT OVERRIDE
+			0x202E, // RIGHT-TO-LEFT OVERRIDE
+			0x2060, // WORD JOINER
+			0x2066, // LEFT-TO-RIGHT ISOLATE
+			0x2067, // RIGHT-TO-LEFT ISOLATE
+			0x2068, // FIRST STRONG ISOLATE
+			0x2069, // POP DIRECTIONAL ISOLATE
+		};
+
 		static std::string representation_for (uint32_t ch)
 		{
-			static std::set<uint32_t> const SpaceCharacters = {
-				0x200B, // ZERO WIDTH SPACE
-				0x200C, // ZERO WIDTH NON-JOINER
-				0x200D, // ZERO WIDTH JOINER
-				0x2028, // LINE SEPARATOR
-				0x2029, // PARAGRAPH SEPARATOR
-				0x2060, // WORD JOINER
-				0xFEFF  // ZERO WIDTH NO-BREAK SPACE
-			};
-
 			if(0x20 <= ch && ch <= 0x7E || ch == '\t' || ch == '\n')
 				return NULL_STR;
 
@@ -38,7 +66,8 @@ namespace ng
 				case 0x1D: return "<GS>";
 				case 0x1E: return "<RS>";
 				case 0x1F: return "<US>";
-				case 0xA0: return "·";
+				case 0xA0: return "~";           // Like in TeX
+				case 0xFEFF: return "<U+FEFF>";  // ZERO WIDTH NO-BREAK SPACE
 
 				default:
 				{
@@ -46,8 +75,6 @@ namespace ng
 						return "^" + std::string(1, ch-1+'A');
 					else if(ch < 0x20 || (0x7E < ch && ch < 0xA0))
 						return "◆";
-					else if(SpaceCharacters.find(ch) != SpaceCharacters.end())
-						return text::format("<U+%04X>", ch);
 				}
 				break;
 			}
@@ -106,6 +133,8 @@ namespace ng
 		switch(_type)
 		{
 			case kNodeTypeText:
+			case kNodeTypeSpace:
+			case kNodeTypeSpecial:
 			{
 				_line = std::make_shared<ct::line_t>(buffer.substr(bufferOffset, bufferOffset + _length), buffer.scopes(bufferOffset, bufferOffset + _length), theme, nullptr);
 			}
@@ -190,12 +219,16 @@ namespace ng
 		if(_line)
 			_line->draw_foreground(CGPointMake(anchor.x, anchor.y + baseline), context, isFlipped, misspelled);
 
-		if(invisibles.enabled || (_type != kNodeTypeTab && _type != kNodeTypeNewline))
+		if(invisibles.enabled || (_type != kNodeTypeSpace && _type != kNodeTypeTab && _type != kNodeTypeNewline && _type != kNodeTypeSpecial))
 		{
 			std::string str = NULL_STR;
 			scope::scope_t scope = buffer.scope(bufferOffset).right;
 			switch(_type)
 			{
+				case kNodeTypeSpace:
+					str = invisibles.space;
+					scope.push_scope("deco.invisible.space");
+				break;
 				case kNodeTypeTab:
 					str = invisibles.tab;
 					scope.push_scope("deco.invisible.tab");
@@ -206,6 +239,10 @@ namespace ng
 				break;
 				case kNodeTypeFolding:
 					scope.push_scope("deco.folding");
+				break;
+				case kNodeTypeSpecial:
+					str = invisibles.special;
+					scope.push_scope("deco.invisible.special");
 				break;
 			}
 
@@ -248,15 +285,20 @@ namespace ng
 		size_t from = 0, i = 0;
 		citerate(ch, diacritics::make_range(str.data(), str.data() + str.size()))
 		{
-			if(*ch == '\t' || *ch == '\n' || representation_for(*ch) != NULL_STR)
+			if(*ch == ' ' || *ch == '\t' || *ch == '\n' || (SpecialCharacters.find(*ch) != SpecialCharacters.end()) || representation_for(*ch) != NULL_STR)
+			// if(*ch == ' ' || *ch == '\t' || *ch == '\n' || representation_for(*ch) != NULL_STR)
 			{
 				if(from != i)
 					insert_text(pos - bufferOffset + from, i - from);
 
-				if(*ch == '\t')
+				if(*ch == ' ')
+					insert_space(pos - bufferOffset + i, ch.length());
+				else if(*ch == '\t')
 					insert_tab(pos - bufferOffset + i);
 				else if(*ch == '\n')
 					insert_newline(pos - bufferOffset + i, ch.length());
+				else if(SpecialCharacters.find(*ch) != SpecialCharacters.end())
+					insert_special(pos - bufferOffset + i, ch.length());
 				else
 					insert_unprintable(pos - bufferOffset + i, ch.length());
 
@@ -484,9 +526,19 @@ namespace ng
 		_nodes.insert(iterator_at(i), node_t(kNodeTypeText, len));
 	}
 
+	void paragraph_t::insert_space (size_t i, size_t len)
+	{
+		_nodes.insert(iterator_at(i), node_t(kNodeTypeSpace, 1, len));
+	}
+
 	void paragraph_t::insert_tab (size_t i)
 	{
 		_nodes.insert(iterator_at(i), node_t(kNodeTypeTab, 1, 10));
+	}
+
+	void paragraph_t::insert_special (size_t i, size_t len)
+	{
+		_nodes.insert(iterator_at(i), node_t(kNodeTypeSpecial, len));
 	}
 
 	void paragraph_t::insert_unprintable (size_t i, size_t len)
