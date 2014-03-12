@@ -2,6 +2,19 @@ Title: Release Notes
 
 # Changes
 
+## 2014-03-12 ([v2.0-alpha.9519](https://github.com/textmate/textmate/compare/v2.0-alpha.9517...v2.0-alpha.9519))
+
+  * With VoiceOver the current item will be announced in the various item choosers: File → Open Favorites… (⇧⌘O), Go → Go to File… (⌘T), and Navigate → Go to Symbol… (⇧⌘T). If you want to hear the first result (which is not automatically spoken), first press arrow up to hear it, then you can use arrows down/up as usual. If you want to browse the results without entering a search string, quickly type any letter and delete it to suppress VoiceOver information about menu command and current window. *[Boris Dušek]*
+
+  * Commands with HTML output can decide how TextMate should act if the same command was previously run and its output window is still showing. This is done by setting the `reuseOutput` key in the `tmCommand` property list. Possible values are:
+
+      1. `reuseAvailable` — re-use existing window unless command is running (default).
+      2. `reuseNone` — always open a new window.
+      3. `reuseBusy` — re-use existing window even if command is running, but warn the user first.
+      4. `reuseBusyAutoAbort` — re-use existing window, killing the running command (if any).
+
+    The third option is suited for something like a build command where you are unlikely to want multiple simultaneous instances running.
+
 ## 2014-03-04 ([v2.0-alpha.9517](https://github.com/textmate/textmate/compare/v2.0-alpha.9515...v2.0-alpha.9517))
 
 * The browser used for clipboard and search history, available using _Edit → Paste → Show History_ (⌃⌥⌘V) and _Edit → Find → Show History_ (⌃⌥⌘F), now support “type to filter”.
