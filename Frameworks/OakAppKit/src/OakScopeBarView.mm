@@ -78,12 +78,12 @@ static NSButton* OakCreateScopeButton (NSString* label, NSUInteger tag, SEL acti
 
 - (void)setSelectedIndex:(NSInteger)newSelectedIndex
 {
+	for(NSButton* button in _buttons)
+		[button setState:[button tag] == newSelectedIndex ? NSOnState : NSOffState];
 	if(_selectedIndex == newSelectedIndex)
 		return;
 
 	_selectedIndex = newSelectedIndex;
-	for(NSButton* button in _buttons)
-		[button setState:[button tag] == _selectedIndex ? NSOnState : NSOffState];
 
 	if(NSDictionary* info = [self infoForBinding:NSValueBinding])
 	{
