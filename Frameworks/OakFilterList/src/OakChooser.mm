@@ -100,10 +100,9 @@ NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string
 		[_window setContentBorderThickness:23 forEdge:NSMinYEdge];
 		[[_window standardWindowButton:NSWindowMiniaturizeButton] setHidden:YES];
 		[[_window standardWindowButton:NSWindowZoomButton] setHidden:YES];
-		_window.autorecalculatesKeyViewLoop = YES;
-		_window.delegate                    = self;
-		_window.level                       = NSFloatingWindowLevel;
-		_window.releasedWhenClosed          = NO;
+		_window.delegate           = self;
+		_window.level              = NSFloatingWindowLevel;
+		_window.releasedWhenClosed = NO;
 	}
 	return self;
 }
@@ -125,6 +124,7 @@ NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string
 
 - (void)showWindow:(id)sender
 {
+	[_window recalculateKeyViewLoop];
 	[_window makeKeyAndOrderFront:self];
 	[_window makeFirstResponder:_searchField];
 }
