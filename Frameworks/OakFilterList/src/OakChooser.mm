@@ -42,7 +42,7 @@ NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string
 
 		_searchField = [[OakLinkedSearchField alloc] initWithFrame:NSZeroRect];
 		[_searchField.cell setScrollable:YES];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(controlTextDidChange:) name:NSControlTextDidChangeNotification object:_searchField];
+		[_searchField.cell setSendsSearchStringImmediately:YES];
 		if(![NSApp isFullKeyboardAccessEnabled])
 			_searchField.focusRingType = NSFocusRingTypeNone;
 
@@ -103,23 +103,20 @@ NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string
 		_window.delegate           = self;
 		_window.level              = NSFloatingWindowLevel;
 		_window.releasedWhenClosed = NO;
+
+		[_searchField bind:NSValueBinding toObject:self withKeyPath:@"filterString" options:nil];
 	}
 	return self;
 }
 
 - (void)dealloc
 {
-	[[NSNotificationCenter defaultCenter] removeObserver:self name:NSControlTextDidChangeNotification object:_searchField];
+	[_searchField unbind:NSValueBinding];
 
 	_window.delegate      = nil;
 	_tableView.target     = nil;
 	_tableView.dataSource = nil;
 	_tableView.delegate   = nil;
-}
-
-- (void)controlTextDidChange:(NSNotification*)aNotification
-{
-	self.filterString = _searchField.stringValue;
 }
 
 - (void)showWindow:(id)sender
@@ -159,7 +156,7 @@ NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string
 		return;
 
 	_filterString = [aString copy];
-	_searchField.stringValue = aString;
+	_searchField.stringValue = aString ?: @"";
 
 	[self updateItems:self];
 }
