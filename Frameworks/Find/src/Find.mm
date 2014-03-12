@@ -60,8 +60,6 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		self.windowController.resultsOutlineView.target       = self;
 		self.windowController.resultsOutlineView.dataSource   = self;
 		self.windowController.resultsOutlineView.delegate     = self;
-
-		[self.windowController.window addObserver:self forKeyPath:@"firstResponder" options:0 context:NULL];
 	}
 	return _windowController;
 }
