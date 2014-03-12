@@ -86,7 +86,7 @@ APPKIT_EXTERN NSString *const NSAccessibilityAnnouncementKey            NS_AVAIL
 - (NSCell*)preparedCellAtColumn:(NSInteger)column row:(NSInteger)row
 {
 	NSCell* res = [super preparedCellAtColumn:column row:row];
-	if(res.isHighlighted && [self.window isKeyWindow])
+	if(res.isHighlighted && [self.window isKeyWindow] && [self renderAsKeyViewWithFirstResponder:[self.window firstResponder]])
 	{
 		res.backgroundStyle = NSBackgroundStyleDark;
 		res.highlighted     = NO;
@@ -96,7 +96,7 @@ APPKIT_EXTERN NSString *const NSAccessibilityAnnouncementKey            NS_AVAIL
 
 - (void)highlightSelectionInClipRect:(NSRect)clipRect
 {
-	if(![self.window isKeyWindow])
+	if(![self.window isKeyWindow] || ![self renderAsKeyViewWithFirstResponder:[self.window firstResponder]])
 		return [super highlightSelectionInClipRect:clipRect];
 
 	[[NSColor alternateSelectedControlColor] set];
@@ -123,5 +123,41 @@ APPKIT_EXTERN NSString *const NSAccessibilityAnnouncementKey            NS_AVAIL
 - (void)dealloc
 {
 	_linkedTextField.delegate = nil;
+}
+
+// =================================================
+// = Redraw when linked text field gain/lose focus =
+// =================================================
+
+static void* kFirstResponderBinding = &kFirstResponderBinding;
+
+- (void)viewWillMoveToWindow:(NSWindow*)aWindow
+{
+	if(aWindow)
+			[aWindow addObserver:self forKeyPath:@"firstResponder" options:NSKeyValueObservingOptionNew|NSKeyValueObservingOptionOld context:kFirstResponderBinding];
+	else	[self.window removeObserver:self forKeyPath:@"firstResponder" context:kFirstResponderBinding];
+}
+
+- (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)object change:(NSDictionary*)change context:(void*)context
+{
+	if(context == kFirstResponderBinding)
+	{
+		if([self renderAsKeyViewWithFirstResponder:change[NSKeyValueChangeNewKey]] || [self renderAsKeyViewWithFirstResponder:change[NSKeyValueChangeOldKey]])
+		{
+			[[self selectedRowIndexes] enumerateRangesInRange:[self rowsInRect:[self visibleRect]] options:0 usingBlock:^(NSRange range, BOOL* stop){
+				for(NSUInteger row = range.location; row < NSMaxRange(range); ++row)
+				{
+					NSRect rect = [self rectOfRow:row];
+					rect.size.height -= 1;
+					[self setNeedsDisplayInRect:rect];
+				}
+			}];
+		}
+	}
+}
+
+- (BOOL)renderAsKeyViewWithFirstResponder:(NSResponder*)aView
+{
+	return aView == self.linkedTextField || ([aView isKindOfClass:[NSText class]] && [(NSText*)aView delegate] == (id)self.linkedTextField);
 }
 @end
