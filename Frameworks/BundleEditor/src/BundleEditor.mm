@@ -23,7 +23,7 @@ OAK_DEBUG_VAR(BundleEditor);
 
 static BundleEditor* SharedInstance;
 
-@interface BundleEditor ()
+@interface BundleEditor () <OakTextViewDelegate>
 - (void)didChangeBundleItems;
 - (void)didChangeModifiedState;
 @property (nonatomic) PropertiesViewController* sharedPropertiesViewController;
@@ -47,17 +47,17 @@ namespace
 		return *res;
 	}
 
-	static struct item_info_t { bundles::kind_t kind; std::string plist_key; std::string grammar; std::string file_type; std::string kind_string; NSString* view_controller; NSString* file; } item_infos[] =
+	static struct item_info_t { bundles::kind_t kind; std::string plist_key; std::string grammar; std::string file_type; std::string kind_string; NSString* scope; NSString* view_controller; NSString* file; } item_infos[] =
 	{
-		{ bundles::kItemTypeBundle,       "description", "text.html.basic",                "tmBundle",       "bundle",         @"BundleProperties",     @"Bundle"       },
-		{ bundles::kItemTypeCommand,      "command",     NULL_STR,                         "tmCommand",      "command",        @"CommandProperties",    @"Command"      },
-		{ bundles::kItemTypeDragCommand,  "command",     NULL_STR,                         "tmDragCommand",  "dragCommand",    @"FileDropProperties",   @"Drag Command" },
-		{ bundles::kItemTypeSnippet,      "content",     "text.tm-snippet",                "tmSnippet",      "snippet",        @"SnippetProperties",    @"Snippet"      },
-		{ bundles::kItemTypeSettings,     "settings",    "source.plist.textmate.settings", "tmPreferences",  "settings",       nil,                     @"Settings"     },
-		{ bundles::kItemTypeGrammar,      NULL_STR,      "source.plist.textmate.grammar",  "tmLanguage",     "grammar",        @"GrammarProperties",    @"Grammar"      },
-		{ bundles::kItemTypeProxy,        "content",     "text.plain",                     "tmProxy",        "proxy",          nil,                     @"Proxy"        },
-		{ bundles::kItemTypeTheme,        NULL_STR,      "source.plist",                   "tmTheme",        "theme",          @"ThemeProperties",      @"Theme"        },
-		{ bundles::kItemTypeMacro,        "commands",    "source.plist",                   "tmMacro",        "macro",          @"MacroProperties",      @"Macro"        },
+		{ bundles::kItemTypeBundle,       "description", "text.html.basic",                "tmBundle",       "bundle",         @"attr.bundle-editor.bundle",         @"BundleProperties",     @"Bundle"       },
+		{ bundles::kItemTypeCommand,      "command",     NULL_STR,                         "tmCommand",      "command",        @"attr.bundle-editor.command",        @"CommandProperties",    @"Command"      },
+		{ bundles::kItemTypeDragCommand,  "command",     NULL_STR,                         "tmDragCommand",  "dragCommand",    @"attr.bundle-editor.command.drop",   @"FileDropProperties",   @"Drag Command" },
+		{ bundles::kItemTypeSnippet,      "content",     "text.tm-snippet",                "tmSnippet",      "snippet",        @"attr.bundle-editor.snippet",        @"SnippetProperties",    @"Snippet"      },
+		{ bundles::kItemTypeSettings,     "settings",    "source.plist.textmate.settings", "tmPreferences",  "settings",       @"attr.bundle-editor.settings",       nil,                     @"Settings"     },
+		{ bundles::kItemTypeGrammar,      NULL_STR,      "source.plist.textmate.grammar",  "tmLanguage",     "grammar",        @"attr.bundle-editor.grammar",        @"GrammarProperties",    @"Grammar"      },
+		{ bundles::kItemTypeProxy,        "content",     "text.plain",                     "tmProxy",        "proxy",          @"attr.bundle-editor.proxy",          nil,                     @"Proxy"        },
+		{ bundles::kItemTypeTheme,        NULL_STR,      "source.plist",                   "tmTheme",        "theme",          @"attr.bundle-editor.theme",          @"ThemeProperties",      @"Theme"        },
+		{ bundles::kItemTypeMacro,        "commands",    "source.plist",                   "tmMacro",        "macro",          @"attr.bundle-editor.macro",          @"MacroProperties",      @"Macro"        },
 	};
 
 	item_info_t const& info_for (bundles::kind_t kind)
@@ -204,7 +204,14 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 	[browser loadColumnZero];
 	[browser setAutohidesScroller:YES];
 
+	documentView.textView.delegate = self;
+
 	[[self window] makeFirstResponder:browser];
+}
+
+- (NSString*)scopeAttributes
+{
+	return bundleItem && bundleItemContent ? info_for(bundleItem->kind()).scope : nil;
 }
 
 - (void)didChangeBundleItems
