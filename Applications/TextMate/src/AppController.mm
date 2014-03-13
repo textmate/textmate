@@ -243,7 +243,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 		if(promptUser)
 		{
-			NSInteger choice = NSRunAlertPanel(@"Disable Session Restore?", promptUser, @"Disable", @"Restore Documents", nil);
+			NSInteger choice = NSRunAlertPanel(@"Disable Session Restore?", @"%@", @"Disable", @"Restore Documents", nil, promptUser);
 			if(choice == NSAlertDefaultReturn) // "Disable"
 				restoreSession = NO;
 		}

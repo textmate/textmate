@@ -66,7 +66,7 @@ NSString* const OakFileManagerPathKey                      = @"directory";
 	NSArray* contents = [[NSFileManager defaultManager] contentsOfDirectoryAtURL:dirURL includingPropertiesForKeys:nil options:NSDirectoryEnumerationSkipsHiddenFiles error:&error];
 	if([contents count] != 0)
 	{
-		NSInteger choice = NSRunCriticalAlertPanel(@"Folder Not Empty!", [self expandFormat:@"Do you wish to delete “%@” and all the contained items?" withURL:dirURL], @"Delete Folder", @"Cancel", nil);
+		NSInteger choice = NSRunCriticalAlertPanel(@"Folder Not Empty!", @"%@", @"Delete Folder", @"Cancel", nil, [self expandFormat:@"Do you wish to delete “%@” and all the contained items?" withURL:dirURL]);
 		if(choice == NSAlertAlternateReturn) // "Cancel"
 			return;
 	}
@@ -103,7 +103,7 @@ NSString* const OakFileManagerPathKey                      = @"directory";
 	{
 		if([fileSize unsignedLongLongValue])
 		{
-			NSInteger choice = NSRunCriticalAlertPanel(@"Document Not Empty!", [self expandFormat:@"Do you wish to delete “%@”?" withURL:fileURL], @"Delete Document", @"Cancel", nil);
+			NSInteger choice = NSRunCriticalAlertPanel(@"Document Not Empty!", @"%@", @"Delete Document", @"Cancel", nil, [self expandFormat:@"Do you wish to delete “%@”?" withURL:fileURL]);
 			if(choice == NSAlertAlternateReturn) // "Cancel"
 				return;
 		}
