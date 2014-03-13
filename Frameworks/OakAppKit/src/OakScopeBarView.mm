@@ -27,6 +27,10 @@ static NSButton* OakCreateScopeButton (NSString* label, NSUInteger tag, SEL acti
 @implementation OakScopeBarView
 - (void)setLabels:(NSArray*)anArray
 {
+	if(_labels == anArray || [_labels isEqualTo:anArray])
+		return;
+	_labels = anArray;
+
 	_selectedIndex = NSNotFound;
 	for(NSView* button in _buttons)
 		[button removeFromSuperview];
