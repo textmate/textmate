@@ -131,14 +131,14 @@ namespace io
 		return success ? output : NULL_STR;
 	}
 
-	std::string exec (std::map<std::string, std::string> const& env, std::string const& cmd, ...)
+	std::string exec (std::map<std::string, std::string> const& env, std::string const cmd, ...)
 	{
 		va_list args;
 		va_start(args, cmd);
 		return vexec(env, cmd, args);
 	}
 
-	std::string exec (std::string const& cmd, ...)
+	std::string exec (std::string const cmd, ...)
 	{
 		va_list args;
 		va_start(args, cmd);

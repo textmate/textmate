@@ -2,7 +2,7 @@
 #include <bundles/bundles.h>
 
 template <typename T>
-T pick (std::string const& value, ...)
+T pick (std::string const value, ...)
 {
 	va_list ap;
 	va_start(ap, value);

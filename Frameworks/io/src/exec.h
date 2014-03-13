@@ -18,8 +18,8 @@ namespace io
 	PUBLIC void exhaust_fd (int fd, std::string* out);
 
 	// takes NULL-terminated list of arguments
-	PUBLIC std::string exec (std::string const& cmd, ...);
-	PUBLIC std::string exec (std::map<std::string, std::string> const& environment, std::string const& cmd, ...);
+	PUBLIC std::string exec (std::string const cmd, ...);
+	PUBLIC std::string exec (std::map<std::string, std::string> const& environment, std::string const cmd, ...);
 
 } /* io */
 

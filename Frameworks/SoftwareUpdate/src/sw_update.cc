@@ -7,7 +7,7 @@
 #include <OakSystem/application.h>
 #include <oak/compat.h>
 
-static bool run_auth_command (AuthorizationRef& auth, std::string const& cmd, ...)
+static bool run_auth_command (AuthorizationRef& auth, std::string const cmd, ...)
 {
 	if(!auth && AuthorizationCreate(NULL, kAuthorizationEmptyEnvironment, kAuthorizationFlagDefaults, &auth) != errAuthorizationSuccess)
 		return false;

@@ -31,7 +31,7 @@ static void CreateHyperLink (NSTextField* textField, NSString* text, NSString* u
 	[textField setAttributedStringValue:attrString];
 }
 
-static bool run_auth_command (AuthorizationRef& auth, std::string const& cmd, ...)
+static bool run_auth_command (AuthorizationRef& auth, std::string const cmd, ...)
 {
 	if(!auth && AuthorizationCreate(NULL, kAuthorizationEmptyEnvironment, kAuthorizationFlagDefaults, &auth) != errAuthorizationSuccess)
 		return false;
