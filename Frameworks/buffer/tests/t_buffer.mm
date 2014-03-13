@@ -206,3 +206,20 @@ void test_sanitize_index ()
 	OAK_ASSERT_EQ(ng::buffer_t("c̄̌𠻵").sanitize_index(10),  9);
 	OAK_ASSERT_EQ(ng::buffer_t("c̄̌𠻵").size(), 9);
 }
+
+void test_thai_script ()
+{
+	ng::buffer_t buf;
+	buf.insert(0, "สวัสดี");
+
+	size_t i = 0;
+	OAK_ASSERT_EQ("ส", buf[i]);
+	i += buf[i].size();
+	OAK_ASSERT_EQ("วั", buf[i]);
+	i += buf[i].size();
+	OAK_ASSERT_EQ("ส", buf[i]);
+	i += buf[i].size();
+	OAK_ASSERT_EQ("ดี", buf[i]);
+	i += buf[i].size();
+	OAK_ASSERT_EQ(i, buf.size());
+}
