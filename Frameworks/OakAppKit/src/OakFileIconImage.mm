@@ -82,7 +82,11 @@ static NSImage* BadgeForSCMStatus (scm::status::type scmStatus)
 // ===============================
 
 @interface OakFileIconImageRep : NSImageRep
+#if !defined(MAC_OS_X_VERSION_10_7) || (MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_7)
+@property (nonatomic, assign) OakFileIconImage* fileIconImage;
+#else
 @property (nonatomic, weak) OakFileIconImage* fileIconImage;
+#endif
 @property (nonatomic) NSArray* imageStack;
 @end
 
