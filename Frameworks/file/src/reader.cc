@@ -68,12 +68,18 @@ namespace file
 	{
 		_fd = open(_path.c_str(), O_RDONLY|O_CLOEXEC);
 		if(_fd == -1)
-			return io_error("open");
+		{
+			io_error("open");
+			return;
+		}
 
 		char buf[4];
 		ssize_t len = read(_fd, buf, sizeof(buf));
 		if(len == -1)
-			return io_error("read");
+		{
+			io_error("read");
+			return;
+		}
 
 		size_t bomSize = 0;
 		std::string charset = encoding::charset_from_bom(std::begin(buf), std::begin(buf) + len, &bomSize);
@@ -81,7 +87,10 @@ namespace file
 		{
 			set_charset(charset);
 			if(_cd == (iconv_t)-1)
-				return io_error("iconv_open");
+			{
+				io_error("iconv_open");
+				return;
+			}
 		}
 
 		lseek(_fd, bomSize, SEEK_SET);
