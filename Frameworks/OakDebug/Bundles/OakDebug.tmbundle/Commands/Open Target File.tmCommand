@@ -5,8 +5,7 @@
 	<key>beforeRunningCommand</key>
 	<string>nop</string>
 	<key>command</key>
-	<string>#!/usr/bin/env ruby -wKU
-
+	<string>#!/System/Library/Frameworks/Ruby.framework/Versions/1.8/usr/bin/ruby -wKU
 require "#{ENV['TM_SUPPORT_PATH']}/lib/escape"
 
 dir = ENV['TM_DIRECTORY']
@@ -17,19 +16,27 @@ until File.exist?("#{dir}/target")
   dir = parent
 end
 
-%x{ #{e_sh "#{ENV['TM_SUPPORT_PATH']}/bin/mate"} #{e_sh "#{dir}/target"} }
+%x{ "$TM_MATE" #{e_sh "#{dir}/target"} }
 </string>
 	<key>input</key>
 	<string>none</string>
+	<key>inputFormat</key>
+	<string>text</string>
 	<key>keyEquivalent</key>
 	<string>~@</string>
 	<key>name</key>
 	<string>Open Target File</string>
-	<key>output</key>
-	<string>showAsTooltip</string>
+	<key>outputCaret</key>
+	<string>afterOutput</string>
+	<key>outputFormat</key>
+	<string>text</string>
+	<key>outputLocation</key>
+	<string>toolTip</string>
 	<key>scope</key>
 	<string>source.c, source.c++, source.objc, source.objc++</string>
 	<key>uuid</key>
 	<string>DD542BA4-D16F-43E1-A4B4-BC66CFB26BC3</string>
+	<key>version</key>
+	<integer>2</integer>
 </dict>
 </plist>
