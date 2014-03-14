@@ -837,7 +837,7 @@ rule gen_ragel
   description = Generate source from ‘$in’…
 
 rule gen_capnp
-  command = capnp compile -oc++ $in
+  command = PATH="$builddir/../bin:$PATH" capnp compile -oc++ $in
   generator = 1
   description = Generate source from ‘$in’…
 
