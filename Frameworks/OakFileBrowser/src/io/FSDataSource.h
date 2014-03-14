@@ -13,7 +13,6 @@ extern NSString* const FSItemDidReloadNotification;
 
 static NSUInteger const kFSDataSourceOptionGroupsFirst   = (1 << 0);
 static NSUInteger const kFSDataSourceOptionIncludeHidden = (1 << 1);
-static NSUInteger const kFSDataSourceOptionSortByType    = (1 << 2);
-static NSUInteger const kFSDataSourceOptionShowExtension = (1 << 3);
+static NSUInteger const kFSDataSourceOptionShowExtension = (1 << 2);
 
 FSDataSource* DataSourceForURL (NSURL* anURL, NSUInteger someOptions = kFSDataSourceOptionGroupsFirst);
