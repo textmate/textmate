@@ -423,6 +423,12 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 	if([cell respondsToSelector:@selector(setIsOpen:)])
 		((OFBPathInfoCell*)cell).isOpen = [openURLs containsObject:item.url];
 	// cell.isLoading         = item.isLoading;
+
+	if([anOutlineView editedRow] != -1 && item == [anOutlineView itemAtRow:[anOutlineView editedRow]])
+	{
+		if(NSString* path = [[item.url filePathURL] path])
+			cell.stringValue = [NSString stringWithCxxString:path::display_name([path fileSystemRepresentation])];
+	}
 }
 
 - (BOOL)outlineView:(NSOutlineView*)anOutlineView shouldSelectItem:(id)item
