@@ -43,7 +43,7 @@ FSDataSource* DataSourceForURL (NSURL* anURL, NSUInteger someOptions)
 	NSMutableArray* descriptors = [NSMutableArray array];
 	if(someOptions & kFSDataSourceOptionGroupsFirst)
 		[descriptors addObject:[[NSSortDescriptor alloc] initWithKey:@"sortAsFolder" ascending:NO]];
-	[descriptors addObject:[[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES selector:@selector(localizedStandardCompare:)]];
+	[descriptors addObject:[[NSSortDescriptor alloc] initWithKey:@"displayName" ascending:YES selector:@selector(localizedStandardCompare:)]];
 	return [anArray sortedArrayUsingDescriptors:descriptors];
 }
 
@@ -96,7 +96,7 @@ static ino_t inode (std::string const& path)
 
 - (void)outlineView:(NSOutlineView*)anOutlineView setObjectValue:(id)objectValue forTableColumn:(NSTableColumn*)tableColumn byItem:(FSItem*)item
 {
-	if(![item.url isFileURL] || [item.name isEqualToString:objectValue] || [objectValue length] == 0)
+	if(![item.url isFileURL] || [item.displayName isEqualToString:objectValue] || [objectValue length] == 0)
 		return;
 
 	std::string src = [[item.url path] fileSystemRepresentation];
@@ -104,7 +104,7 @@ static ino_t inode (std::string const& path)
 
 	// “hidden extension” is ignored if Finder is set to show all file extensions, if there are multiple extensions, or if no application is assigned to the extension.
 	std::string const baseName    = path::name(src);
-	std::string const displayName = to_s(item.name);
+	std::string const displayName = to_s(item.displayName);
 	bool hiddenExtension = baseName != displayName && (path::info(src) & path::flag::hidden_extension);
 
 	if(src == dst && hiddenExtension)
@@ -132,8 +132,8 @@ static ino_t inode (std::string const& path)
 			NSURL* dstURL = [NSURL fileURLWithPath:[NSString stringWithCxxString:dst]];
 			if([[OakFileManager sharedInstance] renameItemAtURL:item.url toURL:dstURL window:anOutlineView.window])
 			{
-				item.url  = dstURL;
-				item.name = [NSString stringWithCxxString:path::display_name(dst)];
+				item.url         = dstURL;
+				item.displayName = [NSString stringWithCxxString:path::display_name(dst)];
 			}
 		}
 	}
@@ -148,7 +148,7 @@ static ino_t inode (std::string const& path)
 	for(FSItem* item in items)
 	{
 		[urls addObject:item.url];
-		[names addObject:item.name];
+		[names addObject:item.displayName];
 		if([item.url isFileURL])
 			[paths addObject:[item.url path]];
 	}

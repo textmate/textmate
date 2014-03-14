@@ -113,7 +113,7 @@ static NSString *caseSensitiveMatchInArrayForString(NSArray *array, NSString *st
 - (FSItem*)itemForProject:(XCProject*)project atURL:(NSURL*)anURL
 {
 	FSItem* item = [FSItem itemWithURL:anURL];
-	item.name = [[[project filePath] lastPathComponent] stringByDeletingPathExtension];
+	item.displayName = [[[project filePath] lastPathComponent] stringByDeletingPathExtension];
 	item.url = [anURL URLByDeletingLastPathComponent];
 
 	NSMutableArray* results = [NSMutableArray array];
@@ -124,7 +124,7 @@ static NSString *caseSensitiveMatchInArrayForString(NSArray *array, NSString *st
 			continue;
 
 		FSItem* item = [FSItem itemWithURL:pathURLWithBaseAndRelativePath(basePath, [group pathRelativeToProjectRoot])];
-		item.name = [anURL lastPathComponent];
+		item.displayName = [anURL lastPathComponent];
 		item.children = [self itemsForGroup:group withBasePath:basePath inProject:project];
 		[results addObject:item];
 	}
@@ -160,7 +160,7 @@ static NSString *caseSensitiveMatchInArrayForString(NSArray *array, NSString *st
 		else
 		{
 			FSItem* item = [FSItem itemWithURL:itemURL];
-			item.name = member.displayName;
+			item.displayName = member.displayName;
 
 			if ([member groupMemberType] == PBXGroup)
 			{

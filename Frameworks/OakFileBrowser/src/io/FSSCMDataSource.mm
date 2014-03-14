@@ -110,17 +110,17 @@ _Iter prune_path_children (_Iter it, _Iter last)
 	std::sort(unstagedPaths.begin(), unstagedPaths.end(), text::less_t());
 	std::sort(untrackedPaths.begin(), untrackedPaths.end(), text::less_t());
 
-	FSItem* unstagedItem  = [FSItem itemWithURL:URLAppend(self.rootItem.url, @"?status=unstaged")];
-	unstagedItem.icon     = SCMFolderIcon();
-	unstagedItem.name     = @"Uncommitted Changes";
-	unstagedItem.group    = YES;
-	unstagedItem.children = convert(unstagedPaths, scmInfo->root_path(), options);
+	FSItem* unstagedItem = [FSItem itemWithURL:URLAppend(self.rootItem.url, @"?status=unstaged")];
+	unstagedItem.icon        = SCMFolderIcon();
+	unstagedItem.displayName = @"Uncommitted Changes";
+	unstagedItem.group       = YES;
+	unstagedItem.children    = convert(unstagedPaths, scmInfo->root_path(), options);
 
-	FSItem* untrackedItem  = [FSItem itemWithURL:URLAppend(self.rootItem.url, @"?status=untracked")];
-	untrackedItem.icon     = SCMFolderIcon();
-	untrackedItem.name     = @"Untracked Items";
-	untrackedItem.group    = YES;
-	untrackedItem.children = convert(untrackedPaths, scmInfo->root_path(), options, true);
+	FSItem* untrackedItem = [FSItem itemWithURL:URLAppend(self.rootItem.url, @"?status=untracked")];
+	untrackedItem.icon        = SCMFolderIcon();
+	untrackedItem.displayName = @"Untracked Items";
+	untrackedItem.group       = YES;
+	untrackedItem.children    = convert(untrackedPaths, scmInfo->root_path(), options, true);
 
 	NSMutableArray* children = [NSMutableArray array];
 	[children addObject:unstagedItem];
@@ -145,10 +145,10 @@ _Iter prune_path_children (_Iter it, _Iter last)
 		NSString* status = [FSSCMDataSource parseSCMURLStatusQuery:anURL];
 		if([status isEqualToString:@"unversioned"])
 		{
-			self.rootItem          = [FSItem itemWithURL:nil];
-			self.rootItem.icon     = [NSImage imageNamed:NSImageNameFolderSmart];
-			self.rootItem.name     = [NSString stringWithCxxString:text::format("%s (%s)", name.c_str(), "Unversioned")];
-			self.rootItem.children = nil;
+			self.rootItem             = [FSItem itemWithURL:nil];
+			self.rootItem.icon        = [NSImage imageNamed:NSImageNameFolderSmart];
+			self.rootItem.displayName = [NSString stringWithCxxString:text::format("%s (%s)", name.c_str(), "Unversioned")];
+			self.rootItem.children    = nil;
 
 			return self;
 		}
@@ -165,10 +165,10 @@ _Iter prune_path_children (_Iter it, _Iter last)
 
 			if([status isEqualToString:@"all"])
 			{
-				self.rootItem          = [FSItem itemWithURL:anURL];
-				self.rootItem.icon     = [NSImage imageNamed:NSImageNameFolderSmart];
-				self.rootItem.name     = [NSString stringWithCxxString:name];
-				self.rootItem.children = [self repositoryStatus];
+				self.rootItem             = [FSItem itemWithURL:anURL];
+				self.rootItem.icon        = [NSImage imageNamed:NSImageNameFolderSmart];
+				self.rootItem.displayName = [NSString stringWithCxxString:name];
+				self.rootItem.children    = [self repositoryStatus];
 			}
 			else
 			{
@@ -177,10 +177,10 @@ _Iter prune_path_children (_Iter it, _Iter last)
 				{
 					if([[FSSCMDataSource parseSCMURLStatusQuery:item.url] isEqualToString:status])
 					{
-						self.rootItem          = [FSItem itemWithURL:anURL];
-						self.rootItem.icon     = [NSImage imageNamed:NSImageNameFolderSmart];
-						self.rootItem.name     = [NSString stringWithFormat:@"%@ (%@)", [NSString stringWithCxxString:name], item.name];
-						self.rootItem.children = item.children;
+						self.rootItem             = [FSItem itemWithURL:anURL];
+						self.rootItem.icon        = [NSImage imageNamed:NSImageNameFolderSmart];
+						self.rootItem.displayName = [NSString stringWithFormat:@"%@ (%@)", [NSString stringWithCxxString:name], item.displayName];
+						self.rootItem.children    = item.children;
 					}
 				}
 			}

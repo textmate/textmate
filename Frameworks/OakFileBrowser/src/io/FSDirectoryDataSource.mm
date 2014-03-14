@@ -239,7 +239,7 @@ private:
 							image.scmStatus = scmInfo->status(fsItem.path);
 
 						item.url          = [NSURL fileURLWithPath:[NSString stringWithCxxString:fsItem.path] isDirectory:fsItem.is_directory];
-						item.name         = [NSString stringWithCxxString:path::display_name(fsItem.path)];
+						item.displayName  = [NSString stringWithCxxString:path::display_name(fsItem.path)];
 						item.icon         = image;
 						item.labelIndex   = fsItem.label;
 						item.sortAsFolder = fsItem.sort_as_directory;
@@ -267,10 +267,10 @@ private:
 							image.scmStatus = pair.second;
 
 							FSFileItem* item = [FSFileItem new];
-							item.url  = [NSURL fileURLWithPath:[NSString stringWithCxxString:pair.first] isDirectory:NO];
-							item.name = [NSString stringWithCxxString:path::name(pair.first)];
-							item.icon = image;
-							item.leaf = YES;
+							item.url         = [NSURL fileURLWithPath:[NSString stringWithCxxString:pair.first] isDirectory:NO];
+							item.displayName = [NSString stringWithCxxString:path::name(pair.first)];
+							item.icon        = image;
+							item.leaf        = YES;
 
 							[array addObject:item];
 						}

@@ -275,7 +275,7 @@ static void DrawSpinner (NSRect cellFrame, BOOL isFlipped, NSColor* color, doubl
 		else if([attribute isEqualToString:NSAccessibilityURLAttribute])
 			return item.url;
 		else if([attribute isEqualToString:NSAccessibilityFilenameAttribute])
-			return item.name;
+			return item.displayName;
 	}
 	return [super accessibilityAttributeValue:attribute];
 }

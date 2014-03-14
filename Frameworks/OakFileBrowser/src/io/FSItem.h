@@ -6,7 +6,7 @@ enum FSItemURLType { FSItemURLTypeUnknown = 0, FSItemURLTypeFile, FSItemURLTypeF
 
 @interface FSItem : NSObject
 @property (nonatomic) OakFileIconImage* icon;
-@property (nonatomic) NSString* name;
+@property (nonatomic) NSString* displayName;
 @property (nonatomic) NSString* toolTip;
 @property (nonatomic) NSInteger labelIndex;
 @property (nonatomic) NSURL* url;

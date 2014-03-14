@@ -414,7 +414,7 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 			item.icon.modified = [modifiedURLs containsObject:item.url];
 		[cell setImage:item.icon];
 	}
-	cell.stringValue       = item.name;
+	cell.stringValue       = item.displayName;
 	// cell.textColor         = lstat([[item.url path] fileSystemRepresentation], &(struct stat){ 0 }) == 0 ? [NSColor textColor] : [NSColor redColor];
 	// cell.target            = delegate;
 	cell.representedObject = item;

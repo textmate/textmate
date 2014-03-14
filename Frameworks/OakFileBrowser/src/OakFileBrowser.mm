@@ -315,7 +315,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	NSMenu* folderPopUpMenu = _headerView.folderPopUpButton.menu;
 	[folderPopUpMenu removeAllItems];
 
-	NSMenuItem* menuItem = [folderPopUpMenu addItemWithTitle:(_outlineViewDelegate.dataSource.rootItem.name ?: @"") action:@selector(takeURLFrom:) keyEquivalent:@""];
+	NSMenuItem* menuItem = [folderPopUpMenu addItemWithTitle:(_outlineViewDelegate.dataSource.rootItem.displayName ?: @"") action:@selector(takeURLFrom:) keyEquivalent:@""];
 	menuItem.image = _outlineViewDelegate.dataSource.rootItem.icon;
 	menuItem.image.size = NSMakeSize(16, 16);
 	menuItem.target = self;
@@ -1270,7 +1270,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 				switch(selectedFiles)
 				{
 					case 0:  items = [NSString stringWithFormat:@" “%@”", DisplayName(_url)]; break;
-					case 1:  items = [NSString stringWithFormat:@" “%@”", ((FSItem*)[self.selectedItems lastObject]).name]; break;
+					case 1:  items = [NSString stringWithFormat:@" “%@”", ((FSItem*)[self.selectedItems lastObject]).displayName]; break;
 					default: items = [NSString stringWithFormat:@" %ld Items", selectedFiles]; break;
 				}
 			}

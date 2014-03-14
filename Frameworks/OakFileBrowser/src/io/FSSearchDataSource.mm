@@ -93,9 +93,9 @@ namespace
 			[results addObject:[FSItem itemWithURL:[NSURL fileURLWithPath:CFBridgingRelease(MDItemCopyAttribute(item, kMDItemPath)) isDirectory:NO]]];
 
 		self.rootItem = [FSItem itemWithURL:anURL];
-		self.rootItem.icon     = [OakFileIconImage fileIconImageWithPath:[anURL path] size:NSMakeSize(16, 16)];
-		self.rootItem.name     = [NSString stringWithCxxString:path::display_name([[anURL path] fileSystemRepresentation])];
-		self.rootItem.children = results;
+		self.rootItem.icon        = [OakFileIconImage fileIconImageWithPath:[anURL path] size:NSMakeSize(16, 16)];
+		self.rootItem.displayName = [NSString stringWithCxxString:path::display_name([[anURL path] fileSystemRepresentation])];
+		self.rootItem.children    = results;
 	}
 	return self;
 }

@@ -14,7 +14,7 @@
 		if([anURL isFileURL])
 		{
 			self.icon         = [OakFileIconImage fileIconImageWithPath:[anURL path] size:NSMakeSize(16, 16)];
-			self.name         = [NSString stringWithCxxString:path::display_name([[anURL path] fileSystemRepresentation])];
+			self.displayName  = [NSString stringWithCxxString:path::display_name([[anURL path] fileSystemRepresentation])];
 			self.leaf         = ![[anURL absoluteString] hasSuffix:@"/"];
 			self.sortAsFolder = !self.leaf;
 			self.target       = self.leaf ? nil : anURL;
