@@ -323,6 +323,16 @@ static void* kOakPasteboardChooserCurrentEntryBinding = &kOakPasteboardChooserCu
 	[_arrayController removeObjects:entries];
 }
 
+- (void)insertTab:(id)sender
+{
+	[_window selectNextKeyView:self];
+}
+ 
+- (void)insertBacktab:(id)sender
+{
+	[_window selectPreviousKeyView:self];
+}
+
 - (void)insertText:(id)aString
 {
 	self.filterString = aString;
