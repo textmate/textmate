@@ -16,6 +16,7 @@ LC_CTYPE    = "en_US.UTF-8"
 TM_APP_PATH = "${CWD/\/Contents\/Resources$//}"
 TM_MATE     = "$CWD/mate"
 TM_QUERY    = "$CWD/tm_query"
+TM_COMMIT   = "$CWD/commit"
 
 [ attr.untitled ]
 fileType         = text.plain
