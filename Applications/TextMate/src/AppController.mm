@@ -8,6 +8,7 @@
 #import <CrashReporter/CrashReporter.h>
 #import <DocumentWindow/DocumentController.h>
 #import <Find/Find.h>
+#import <CommitWindow/CommitWindow.h>
 #import <OakAppKit/NSMenuItem Additions.h>
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakPasteboard.h>
@@ -296,6 +297,8 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 	[[CrashReporter sharedInstance] applicationDidFinishLaunching:aNotification];
 	[[CrashReporter sharedInstance] postNewCrashReportsToURLString:REST_API @"/crashes"];
+
+	[OakCommitWindowServer sharedInstance]; // Setup server
 
 	self.didFinishLaunching = YES;
 }
