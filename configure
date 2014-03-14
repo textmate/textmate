@@ -8,6 +8,7 @@ function error () { printf >&2 "%s\n\nPlease see README.md for build instruction
 
 : ${builddir:=$HOME/build/TextMate}
 : ${identity:=-}
+: ${capnp_prefix:=/usr/local}
 : ${rest_api:=https://api.textmate.org}
 
 # ========================================================
@@ -93,6 +94,8 @@ fi
 # = Check various dependencies =
 # ==============================
 
+test -x "${capnp_prefix}/bin/capnp" || error "*** cap’n’proto not installed in ‘${capnp_prefix}’. Set \`capnp_prefix\` if installed elsewhere."
+
 for dep in ninja ragel multimarkdown pgrep pkill "$CC" "$CXX"; do
 	which -s "$dep" || error "*** dependency missing: ‘${dep}’."
 done
@@ -104,7 +107,7 @@ done
 mkdir -p "$builddir/Frameworks/SoftwareUpdate/fixtures"
 DST=$(cd >/dev/null "$builddir/Frameworks/SoftwareUpdate/fixtures"; pwd) make -C Frameworks/SoftwareUpdate/fixtures
 
-bin/gen_build -o build.ninja -C "$builddir" -dAPP_NAME="$name" -dAPP_REVISION="$rev" -dAPP_VERSION="$ver" -dAPP_MIN_OS="$min_os" -dCC="$CC" -dCXX="$CXX" -dxcodedir="$xcodedir" -didentity="$identity" -drest_api="$rest_api" -dsdk="$sdk" -dbzip2_flag="$bzip2_flag" target
+bin/gen_build -o build.ninja -C "$builddir" -dAPP_NAME="$name" -dAPP_REVISION="$rev" -dAPP_VERSION="$ver" -dAPP_MIN_OS="$min_os" -dCC="$CC" -dCXX="$CXX" -dxcodedir="$xcodedir" -didentity="$identity" -drest_api="$rest_api" -dsdk="$sdk" -dbzip2_flag="$bzip2_flag" -dcapnp_prefix="$capnp_prefix" target
 
 ninja Frameworks/encoding/src/frequencies.capnp.h
 ninja Frameworks/plist/src/cache.capnp.h
