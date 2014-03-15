@@ -15,9 +15,6 @@ namespace ng
 		static std::string representation_for (uint32_t ch)
 		{
 			static std::set<uint32_t> const SpaceCharacters = {
-				0x200B, // ZERO WIDTH SPACE
-				0x200C, // ZERO WIDTH NON-JOINER
-				0x200D, // ZERO WIDTH JOINER
 				0x2028, // LINE SEPARATOR
 				0x2029, // PARAGRAPH SEPARATOR
 				0x2060, // WORD JOINER
