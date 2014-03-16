@@ -188,12 +188,12 @@ namespace utf8
 	{
 		static struct { char mask, expect; } const Codes[] =
 		{
-			{ 0x80, 0x00 }, // 0xxxxxxx
-			{ 0xE0, 0xC0 }, // 110xxxxx
-			{ 0xF0, 0xE0 }, // 1110xxxx
-			{ 0xF8, 0xF0 }, // 11110xxx
-			{ 0xFC, 0xF8 }, // 11110xxx
-			{ 0xFE, 0xFC }, // 111110xx
+			{ 0b10000000, 0b00000000 },
+			{ 0b11100000, 0b11000000 },
+			{ 0b11110000, 0b11100000 },
+			{ 0b11111000, 0b11110000 },
+			{ 0b11111100, 0b11111000 },
+			{ 0b11111110, 0b11111100 },
 		};
 
 		_Iter it = last;
@@ -201,7 +201,7 @@ namespace utf8
 		{
 			if(it == first || (*--it & code.mask) == code.expect)
 				return last;
-			if((*it & 0xC0) == 0xC0) // 11xxxxxx
+			if((*it & 0b11000000) == 0b11000000)
 				return it;
 		}
 		return last;
