@@ -2292,12 +2292,12 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 			auto allMatches = ng::find(document->buffer(), editor->ranges(), findStr, options, onlyInSelection ? editor->ranges() : ng::ranges_t(), &didWrap);
 
 			ng::ranges_t res;
-			std::transform(allMatches.begin(), allMatches.end(), std::back_inserter(res), [](decltype(allMatches)::value_type const& p){ return p.first; });
+			std::transform(allMatches.begin(), allMatches.end(), std::back_inserter(res), [](auto const& p){ return p.first; });
 			if(onlyInSelection && res.sorted() == editor->ranges().sorted())
 			{
 				res = ng::ranges_t();
 				allMatches = ng::find(document->buffer(), editor->ranges(), findStr, options, ng::ranges_t());
-				std::transform(allMatches.begin(), allMatches.end(), std::back_inserter(res), [](decltype(allMatches)::value_type const& p){ return p.first; });
+				std::transform(allMatches.begin(), allMatches.end(), std::back_inserter(res), [](auto const& p){ return p.first; });
 			}
 
 			if(res.empty() && !isCounting && documents && [documents count] > 1)

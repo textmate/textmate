@@ -1337,7 +1337,7 @@ namespace ng
 		{
 			if(options & find::backwards)
 			{
-				auto it = std::lower_bound(tmp.begin(), tmp.end(), range, [](decltype(tmp)::value_type const& candidate, ng::range_t const& range){
+				auto it = std::lower_bound(tmp.begin(), tmp.end(), range, [](auto const& candidate, ng::range_t const& range){
 					return candidate.first.empty() ? candidate.first.max() < range.min() : candidate.first.max() <= range.min();
 				});
 
