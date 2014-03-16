@@ -39,10 +39,9 @@ namespace oak
 		std::string res = "( ";
 		for(typename T::const_iterator it = v.begin(); it != v.end(); ++it)
 		{
-			if(!first)
+			if(!std::exchange(first, false))
 				res += ", ";
 			res += to_s(*it);
-			first = false;
 		}
 		return res + " )";
 	}

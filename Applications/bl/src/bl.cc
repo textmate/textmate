@@ -279,9 +279,8 @@ int main (int argc, char const* argv[])
 		bool first = true;
 		for(auto const& bundle : filtered_bundles(index, sourceNames, bundleNames))
 		{
-			if(first)
-					first = false;
-			else	fprintf(stdout, "\n");
+			if(!std::exchange(first, false))
+				fprintf(stdout, "\n");
 
 			fprintf(stdout, "name:         %s\n", bundle->name().c_str());
 			fprintf(stdout, "source:       %s\n", bundle->source() ? bundle->source()->identifier().c_str() : "«no remote source»");

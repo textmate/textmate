@@ -121,7 +121,7 @@ static std::string pretty_key (std::string const& key, int flags)
 {
 	bool should_quote = false;
 	bool all_digits = true;
-	bool first_char = true;
+	bool first = true;
 	citerate(it, diacritics::make_range(key.data(), key.data() + key.size()))
 	{
 		uint32_t const val = utf8::to_ch(std::string(&it, &it + it.length()));
@@ -137,9 +137,8 @@ static std::string pretty_key (std::string const& key, int flags)
 		}
 
 		// Also allow "".-" when not the first char
-		if(!first_char && (val == '.' || val == '-'))
+		if(!std::exchange(first, false) && (val == '.' || val == '-'))
 			local_should_quote = false;
-		first_char = false;
 
 		should_quote = should_quote || local_should_quote;
 	}

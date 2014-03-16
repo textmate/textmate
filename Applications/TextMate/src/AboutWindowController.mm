@@ -482,9 +482,8 @@ static NSDictionary* RemoveOldCommits (NSDictionary* src)
 			{
 				if(NSData* data = [NSJSONSerialization dataWithJSONObject:RemoveOldCommits(obj) options:0 error:&err])
 				{
-					if(!first)
+					if(!std::exchange(first, false))
 						[str appendString:@","];
-					first = false;
 
 					[str appendString:[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]];
 					continue;

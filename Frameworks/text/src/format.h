@@ -37,9 +37,8 @@ namespace text
 		bool first = true;
 		for(auto const& item : items)
 		{
-			if(first)
-					first = false;
-			else	res += sep;
+			if(!std::exchange(first, false))
+				res += sep;
 			res += std::string(item);
 		}
 		return res;

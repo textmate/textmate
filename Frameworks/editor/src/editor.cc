@@ -1486,11 +1486,10 @@ namespace ng
 					bool first = true;
 					for(auto const& r : dissect_columnar(_buffer, range))
 					{
-						if(first)
+						if(std::exchange(first, false))
 								map["TM_SELECTED_TEXT"] = "";
 						else	map["TM_SELECTED_TEXT"] += "\n";
 						map["TM_SELECTED_TEXT"] += _buffer.substr(r.min().index, r.max().index);
-						first = false;
 					}
 				}
 				else

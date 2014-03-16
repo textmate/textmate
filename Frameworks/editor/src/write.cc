@@ -36,10 +36,9 @@ namespace ng
 			bool first = true;
 			for(auto const& range : dissect_columnar(buffer, r))
 			{
-				if(!first)
+				if(!std::exchange(first, false))
 					str += "\n";
 				str += format == input_format::xml ? to_xml(buffer, range.min().index, range.max().index) : buffer.substr(range.min().index, range.max().index);
-				first = false;
 			}
 
 			dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
