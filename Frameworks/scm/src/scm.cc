@@ -257,6 +257,11 @@ namespace scm
 		return *res;
 	}
 
+	static bool scm_enabled_for_path (std::string const& path)
+	{
+		return path::is_absolute(path) && path != "/" && path != path::home() && path::is_local(path) && settings_for_path(NULL_STR, "", path).get(kSettingsSCMStatusKey, true);
+	}
+
 	static shared_info_ptr find_shared_info_for (std::string const& path)
 	{
 		for(std::string cwd = path; cwd != "/"; cwd = path::parent(cwd))
@@ -270,7 +275,7 @@ namespace scm
 
 			for(driver_t* driver : drivers())
 			{
-				if(driver && driver->has_info_for_directory(cwd))
+				if(driver && driver->has_info_for_directory(cwd) && scm_enabled_for_path(cwd))
 				{
 					auto res = std::make_shared<shared_info_t>(cwd, driver);
 					cache()[cwd] = res;
@@ -279,11 +284,6 @@ namespace scm
 			}
 		}
 		return shared_info_ptr();
-	}
-
-	static bool scm_enabled_for_path (std::string const& path)
-	{
-		return path::is_absolute(path) && path != "/" && path != path::home() && path::is_local(path) && settings_for_path(NULL_STR, "", path).get(kSettingsSCMStatusKey, true);
 	}
 
 	void disable ()
@@ -320,7 +320,7 @@ namespace scm
 				{
 					for(driver_t* driver : drivers())
 					{
-						if(driver && driver->has_info_for_directory(cwd))
+						if(driver && driver->has_info_for_directory(cwd) && scm_enabled_for_path(cwd))
 						{
 							res = cwd;
 							break;
