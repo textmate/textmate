@@ -648,7 +648,14 @@ namespace ng
 
 			case kSelectionMoveToBeginOfSubWord:
 			{
-				static regexp::pattern_t ptrn("(\\p{Upper}\\p{Lower}+|\\p{Upper}+|\\p{Lower}+)[^\\p{Upper}\\p{Lower}]?$|[^\\p{Upper}\\p{Lower}]+$");
+				static regexp::pattern_t ptrn(
+					    "(\\p{Upper}\\p{Lower}+"
+					    "|\\p{Upper}+"
+					    "|\\p{Lower}+"
+					    ")"
+					    "[^\\p{Upper}\\p{Lower}]?$"
+					"|" "[^\\p{Upper}\\p{Lower}]+$"
+				);
 
 				size_t n = line && caret == buffer.begin(line) ? line-1 : line;
 				std::string const& line = buffer.substr(buffer.begin(n), caret);
