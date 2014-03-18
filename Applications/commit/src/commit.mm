@@ -43,6 +43,7 @@ static size_t const AppRevision = APP_REVISION;
 	NSNumber* rc = aResult[kOakCommitWindowReturnCode];
 	exit([rc intValue]);
 }
+
 @end
 
 int main (int argc, char* argv[])
