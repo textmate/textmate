@@ -165,12 +165,12 @@ namespace
 			D(DBF_RMateServer, bug("port %ud, remote clients %s\n", _port, BSTR(_listen_for_remote_clients)););
 
 			static int const on = 1;
-			socket_t fd(socket(AF_INET6, SOCK_STREAM, 0));
+			socket_t fd(socket(PF_INET6, SOCK_STREAM, 0));
 			setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
 
 			fcntl(fd, F_SETFD, FD_CLOEXEC);
 			struct sockaddr_in6 iaddr = { sizeof(sockaddr_in6), AF_INET6, htons(_port) };
-			iaddr.sin6_addr   = listenForRemoteClients ? in6addr_any : in6addr_loopback;
+			iaddr.sin6_addr = listenForRemoteClients ? in6addr_any : in6addr_loopback;
 			if(-1 == bind(fd, (sockaddr*)&iaddr, sizeof(iaddr)))
 				fprintf(stderr, "bind(): %s\n", strerror(errno));
 			if(-1 == listen(fd, SOMAXCONN))
