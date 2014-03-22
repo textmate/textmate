@@ -95,11 +95,14 @@ namespace
 	{
 		expand_visitor_t (std::map<std::string, std::string> const& variables) : _variables(variables) { }
 
-		template <typename T>
-		void operator() (T value) const                   { }
-		void operator() (std::string& str) const          { str = format_string::expand(str, _variables); }
-		void operator() (plist::array_t& array) const     { for(auto const& item : array) boost::apply_visitor(*this, item); }
-		void operator() (plist::dictionary_t& dict) const { for(auto const& pair : dict) boost::apply_visitor(*this, pair.second); }
+		void operator() (bool value) const                     { }
+		void operator() (int32_t value) const                  { }
+		void operator() (uint64_t value) const                 { }
+		void operator() (oak::date_t const& value) const       { }
+		void operator() (std::vector<char> const& value) const { }
+		void operator() (std::string& str) const               { str = format_string::expand(str, _variables); }
+		void operator() (plist::array_t& array) const          { for(auto& item : array) boost::apply_visitor(*this, item); }
+		void operator() (plist::dictionary_t& dict) const      { for(auto& pair : dict)  boost::apply_visitor(*this, pair.second); }
 
 	private:
 		std::map<std::string, std::string> const& _variables;
