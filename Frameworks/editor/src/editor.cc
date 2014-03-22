@@ -1202,7 +1202,7 @@ namespace ng
 
 		static std::set<action_t> const preserveSelectionActions = { kCapitalizeWord, kUppercaseWord, kLowercaseWord, kChangeCaseOfLetter, kIndent, kShiftLeft, kShiftRight, kReformatText, kReformatTextAndJustify, kUnwrapText };
 		if(preserveSelectionActions.find(action) != preserveSelectionActions.end())
-			_selections = selectionHelper.get(action == kChangeCaseOfLetter || action == kChangeCaseOfWord);
+			_selections = selectionHelper.get(action == kChangeCaseOfLetter);
 	}
 
 	void editor_t::perform_replacements (std::multimap<std::pair<size_t, size_t>, std::string> const& replacements)
