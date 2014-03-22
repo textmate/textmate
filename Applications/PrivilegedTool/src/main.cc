@@ -65,7 +65,7 @@ static int setup_socket ()
 	int rc = bind(fd, (sockaddr*)&addr, sizeof(addr));
 	chmod(kAuthSocketPath, S_IRWXU|S_IRWXG|S_IRWXO);
 	assert(rc != -1);
-	rc = listen(fd, 5);
+	rc = listen(fd, SOMAXCONN);
 	assert(rc != -1);
 
 	return fd;

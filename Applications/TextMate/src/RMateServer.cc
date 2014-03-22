@@ -141,7 +141,7 @@ namespace
 			addr.sun_len = SUN_LEN(&addr);
 			if(bind(fd, (sockaddr*)&addr, sizeof(addr)) == -1)
 				OakRunIOAlertPanel("Could not bind to socket:\n%s", _socket_path);
-			else if(listen(fd, 5) == -1)
+			else if(listen(fd, SOMAXCONN) == -1)
 				OakRunIOAlertPanel("Could not listen to socket");
 
 			_callback = std::make_shared<socket_callback_t>(&rmate_connection_handler_t, fd);
@@ -173,7 +173,7 @@ namespace
 			iaddr.sin6_addr   = listenForRemoteClients ? in6addr_any : in6addr_loopback;
 			if(-1 == bind(fd, (sockaddr*)&iaddr, sizeof(iaddr)))
 				fprintf(stderr, "bind(): %s\n", strerror(errno));
-			if(-1 == listen(fd, 5))
+			if(-1 == listen(fd, SOMAXCONN))
 				fprintf(stderr, "listen(): %s\n", strerror(errno));
 
 			_callback = std::make_shared<socket_callback_t>(&rmate_connection_handler_t, fd);
