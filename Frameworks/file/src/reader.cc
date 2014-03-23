@@ -173,6 +173,15 @@ namespace file
 
 		std::string dst(buf.size(), ' ');
 		size_t consumed = convert(_cd, buf.data(), buf.size(), dst);
+
+		if(len == 0 && consumed == 0 && !buf.empty())
+		{
+			fprintf(stderr, "error decoding ‘%s’ from %s: unable to continue decoding with %zu byte(s) left\n", _path.c_str(), _encoding.charset().c_str(), buf.size());
+
+			dst = "\uFFFD";
+			consumed = 1;
+		}
+
 		_spillover = std::string(buf.begin() + consumed, buf.end());
 		return std::make_shared<io::bytes_t>(dst);
 	}
