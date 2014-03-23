@@ -22,11 +22,17 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
 
+/* Define to 1 if you have the `pthread' library (-lpthread). */
+#define HAVE_LIBPTHREAD 1
+
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
 
 /* Define if compilerr supports prototypes */
 #define HAVE_PROTOTYPES 1
+
+/* Define to 1 if you have the <pthread.h> header file. */
+#define HAVE_PTHREAD_H 1
 
 /* Define if compiler supports stdarg prototypes */
 #define HAVE_STDARG_PROTOTYPES 1
@@ -115,8 +121,17 @@
 /* Define if enable CR+NL as line terminator */
 /* #undef USE_CRNL_AS_LINE_TERMINATOR */
 
+/* Define if enable the default multithread system */
+#define USE_DEFAULT_MULTI_THREAD_SYSTEM 1
+
+/* Define if enbale multithread support */
+#define USE_MULTI_THREAD_SYSTEM 1
+
 /* Version number of package */
 #define VERSION "5.13.5"
 
 /* Define to empty if `const' does not conform to ANSI C. */
 /* #undef const */
+
+/* Define to `unsigned int' if <sys/types.h> does not define. */
+/* #undef size_t */

@@ -4,5 +4,4 @@ TESTS        = tests/t_*.cc
 EXPORT       = vendor/oniguruma.h
 
 FLAGS       += -Ivendor/Onigmo -Ivendor/Onigmo/vendor
-C_FLAGS     += -include vendor/Onigmo/src/setup.h
 C_FLAGS     += -Wno-incompatible-pointer-types -Wno-char-subscripts
