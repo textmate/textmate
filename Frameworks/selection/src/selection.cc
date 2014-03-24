@@ -1041,6 +1041,7 @@ namespace ng
 			if(not_empty(buffer, range))
 			{
 				res.push_back(range);
+				res.last().color = true;
 			}
 			else
 			{
@@ -1050,6 +1051,7 @@ namespace ng
 					if(unit == kSelectionExtendToEndOfParagraph && range.empty())
 						range = extend(buffer, range, kSelectionExtendRight, layout);
 					res.push_back(range);
+					res.last().color = false;
 				}
 			}
 		}
