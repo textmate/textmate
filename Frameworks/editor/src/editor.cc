@@ -162,7 +162,7 @@ namespace ng
 			_buffer.remove_callback(this);
 		}
 
-		ranges_t get (bool moveToEnd)
+		ranges_t get ()
 		{
 			ranges_t sel;
 			for(size_t i = 0; i < _marks.size(); i += 2)
@@ -170,7 +170,7 @@ namespace ng
 				ASSERT(i+1 < _marks.size() && _marks[i+1].type == mark_t::kEndMark);
 				if(_marks[i].type == mark_t::kUnpairedMark)
 				{
-					sel.push_back(_marks[moveToEnd ? i+1 : i].position);
+					sel.push_back(_marks[i].position);
 				}
 				else
 				{
@@ -279,6 +279,7 @@ namespace ng
 				adjustment += str.size() - (to - from);
 			}
 			res.push_back(original);
+			res.last().color = orgRange.color;
 		}
 		return res;
 	}
@@ -286,7 +287,10 @@ namespace ng
 	template <typename F>
 	ng::ranges_t apply (ng::buffer_t& buffer, ng::ranges_t const& selections, snippet_controller_t& snippets, F op)
 	{
-		return ng::move(buffer, replace_helper(buffer, snippets, map(buffer, selections, op)), kSelectionMoveToEndOfSelection);
+		ng::ranges_t res;
+		for(auto const& range : replace_helper(buffer, snippets, map(buffer, selections, op)))
+			res.push_back(range.color ? range : range.max());
+		return res;
 	}
 
 	// ============
@@ -688,7 +692,7 @@ namespace ng
 			{
 				preserve_selection_helper_t helper(_buffer, _editor._selections);
 				_editor.replace(replacements);
-				_editor._selections = helper.get(false);
+				_editor._selections = helper.get();
 			}
 		}
 
@@ -1200,9 +1204,9 @@ namespace ng
 			case kMoveSelectionRight:      move_selection(+1,  0); break;
 		}
 
-		static std::set<action_t> const preserveSelectionActions = { kCapitalizeWord, kUppercaseWord, kLowercaseWord, kChangeCaseOfLetter, kIndent, kShiftLeft, kShiftRight, kReformatText, kReformatTextAndJustify, kUnwrapText };
+		static std::set<action_t> const preserveSelectionActions = { kCapitalizeWord, kUppercaseWord, kLowercaseWord, kIndent, kShiftLeft, kShiftRight, kReformatText, kReformatTextAndJustify, kUnwrapText };
 		if(preserveSelectionActions.find(action) != preserveSelectionActions.end())
-			_selections = selectionHelper.get(action == kChangeCaseOfLetter);
+			_selections = selectionHelper.get();
 	}
 
 	void editor_t::perform_replacements (std::multimap<std::pair<size_t, size_t>, std::string> const& replacements)
@@ -1218,7 +1222,7 @@ namespace ng
 		{
 			preserve_selection_helper_t helper(_buffer, _selections);
 			this->replace(tmp);
-			_selections = helper.get(false);
+			_selections = helper.get();
 		}
 	}
 
@@ -1546,7 +1550,7 @@ namespace ng
 			for(auto const& pair : ng::find_all(_buffer, searchFor, options, searchOnlySelection ? _selections : ranges_t()))
 				replacements.emplace(pair.first, options & find::regular_expression ? format_string::expand(replaceWith, pair.second) : replaceWith);
 			res = this->replace(replacements, true);
-			_selections = helper.get(false);
+			_selections = helper.get();
 		}
 		return res;
 	}
