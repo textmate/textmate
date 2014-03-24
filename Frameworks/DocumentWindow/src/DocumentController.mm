@@ -2668,8 +2668,11 @@ static NSUInteger DisableSessionSavingCount = 0;
 			else if(controller.selectedDocument)
 				[controller selectedDocument]->set_custom_name("not untitled"); // release potential untitled token used
 
-			BOOL disableFolderStateRestore = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableFolderStateRestore];
-			if(NSDictionary* project = (disableFolderStateRestore ? nil : [[DocumentController sharedProjectStateDB] valueForKey:[NSString stringWithCxxString:folder]]))
+			NSDictionary* project;
+			if(![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableFolderStateRestore])
+				project = [[DocumentController sharedProjectStateDB] valueForKey:[NSString stringWithCxxString:folder]];
+
+			if(project && [project[@"documents"] count])
 			{
 				[controller setupControllerForProject:project skipMissingFiles:YES];
 			}
