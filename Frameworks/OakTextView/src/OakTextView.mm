@@ -3249,7 +3249,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (NSDragOperation)draggingSourceOperationMaskForLocal:(BOOL)isLocal
 {
-	return isLocal ? (NSDragOperationCopy | NSDragOperationMove) : NSDragOperationCopy;
+	return isLocal ? (NSDragOperationCopy|NSDragOperationMove) : (NSDragOperationCopy|NSDragOperationGeneric);
 }
 
 // ====================

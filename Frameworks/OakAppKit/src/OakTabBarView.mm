@@ -912,7 +912,7 @@ layout_metrics_t::raw_layer_t layout_metrics_t::parse_layer (NSDictionary* item)
 
 - (NSDragOperation)draggingSourceOperationMaskForLocal:(BOOL)isLocal
 {
-	return NSDragOperationMove|NSDragOperationCopy|NSDragOperationLink;
+	return isLocal ? (NSDragOperationCopy|NSDragOperationMove|NSDragOperationLink) : (NSDragOperationCopy|NSDragOperationGeneric);
 }
 
 - (void)draggedImage:(NSImage*)image endedAt:(NSPoint)point operation:(NSDragOperation)operation
