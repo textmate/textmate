@@ -127,7 +127,7 @@ namespace ng
 		size_t index = 0;
 		std::set<indexed_range_t> set;
 		for(auto range : selection)
-			set.emplace(range_t(index_t(buffer.sanitize_index(range.first.index), range.first.carry), index_t(buffer.sanitize_index(range.last.index), range.last.carry), range.columnar, range.freehanded, range.unanchored), index++);
+			set.emplace(range_t(index_t(buffer.sanitize_index(range.first.index), range.first.carry), index_t(buffer.sanitize_index(range.last.index), range.last.carry), range.columnar, range.freehanded, range.unanchored, range.color), index++);
 
 		index_t last;
 		std::map<size_t, range_t> map;
@@ -443,12 +443,12 @@ namespace ng
 				for(size_t n = fromLine; n <= toLine; ++n)
 				{
 					index_t from = at_column(buffer, n, fromCol), to = at_column(buffer, n, toCol);
-					res.push_back(range_t(from, to, false, from.carry || to.carry));
+					res.push_back(range_t(from, to, false, from.carry || to.carry, range.unanchored, range.color));
 				}
 			}
 			else
 			{
-				res.push_back(range_t(range.min(), range.max(), range.columnar, range.freehanded));
+				res.push_back(range_t(range.min(), range.max(), range.columnar, range.freehanded, range.unanchored, range.color));
 			}
 		}
 		return res;

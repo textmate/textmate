@@ -25,29 +25,30 @@ namespace ng
 	struct PUBLIC range_t
 	{
 		range_t () : columnar(false), freehanded(false), unanchored(false) { }
-		range_t (index_t first, index_t last = index_t(), bool columnar = false, bool freehanded = false, bool unanchored = false) : first(first), last(last ?: first), columnar(columnar), freehanded(last ? freehanded : first.carry != 0), unanchored(unanchored) { }
+		range_t (index_t first, index_t last = index_t(), bool columnar = false, bool freehanded = false, bool unanchored = false, bool color = false) : first(first), last(last ?: first), columnar(columnar), freehanded(last ? freehanded : first.carry != 0), unanchored(unanchored), color(color) { }
 
 		index_t& min ()                            { return first < last ? first : last;  }
 		index_t& max ()                            { return first < last ? last  : first; }
 		index_t const& min () const                { return first < last ? first : last;  }
 		index_t const& max () const                { return first < last ? last  : first; }
-		range_t sorted () const                    { return range_t(min(), max(), columnar, freehanded); }
+		range_t sorted () const                    { return range_t(min(), max(), columnar, freehanded, unanchored, color); }
 		bool empty () const                        { return freehanded ? first == last : first.index == last.index; }
 		explicit operator bool () const            { return first ? true : false; }
 		bool operator== (range_t const& tmp) const { auto lhs = normalized(), rhs = tmp.normalized(); return lhs.first == rhs.first && lhs.last == rhs.last && lhs.columnar == rhs.columnar && lhs.freehanded == rhs.freehanded; }
 		bool operator!= (range_t const& tmp) const { auto lhs = normalized(), rhs = tmp.normalized(); return lhs.first != rhs.first || lhs.last != rhs.last || lhs.columnar != rhs.columnar || lhs.freehanded != rhs.freehanded; }
 		bool operator< (range_t const& tmp) const  { auto lhs = normalized(), rhs = tmp.normalized(); return lhs.first < rhs.first || lhs.first == rhs.first && lhs.last < rhs.last; }
-		range_t operator+ (ssize_t i) const        { return range_t(first + i, last + i, columnar, freehanded); }
+		range_t operator+ (ssize_t i) const        { return range_t(first + i, last + i, columnar, freehanded, unanchored, color); }
 
 		range_t& operator= (index_t const& rhs)    { first = last = rhs; return *this; }
 
 		index_t first, last;
 		bool columnar, freehanded, unanchored;
+		bool color = false;
 
 		range_t normalized () const
 		{
 			bool strip = !columnar && !freehanded;
-			return range_t(strip ? min().index : min(), strip ? max().index : max(), columnar, freehanded, unanchored);
+			return range_t(strip ? min().index : min(), strip ? max().index : max(), columnar, freehanded, unanchored, color);
 		}
 	};
 
