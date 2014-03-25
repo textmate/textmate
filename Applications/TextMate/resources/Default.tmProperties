@@ -11,12 +11,12 @@ windowTitleSCM     = '${TM_SCM_BRANCH:+ ($TM_SCM_NAME: $TM_SCM_BRANCH)}'
 windowTitleProject = '${projectDirectory:+ — ${projectDirectory/^.*\///}}'
 windowTitle        = '$TM_DISPLAYNAME$windowTitleProject$windowTitleSCM'
 
-LANG        = "en_US.UTF-8"
-LC_CTYPE    = "en_US.UTF-8"
-TM_APP_PATH = "${CWD/\/Contents\/Resources$//}"
-TM_MATE     = "$CWD/mate"
-TM_QUERY    = "$CWD/tm_query"
-TM_COMMIT   = "$CWD/commit"
+LANG                   = "en_US.UTF-8"
+LC_CTYPE               = "en_US.UTF-8"
+TM_APP_PATH            = "${CWD/\/Contents\/Resources$//}"
+TM_MATE                = "$CWD/mate"
+TM_QUERY               = "$CWD/tm_query"
+TM_SCM_COMMIT_WINDOW   = "$CWD/commit"
 
 [ attr.untitled ]
 fileType         = text.plain
