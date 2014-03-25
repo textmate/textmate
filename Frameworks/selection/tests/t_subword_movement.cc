@@ -16,45 +16,48 @@ static std::string move (std::string input, move_unit_type action)
 	return buf.substr(0, buf.size());
 }
 
+static std::string left  (std::string const& input) { return move(input, kSelectionMoveToBeginOfSubWord); }
+static std::string right (std::string const& input) { return move(input, kSelectionMoveToEndOfSubWord);   }
+
 void test_subword_movement ()
 {
-	OAK_ASSERT_EQ(move(" ‸NSNotFound ", kSelectionMoveToEndOfSubWord),   " NS‸NotFound ");
-	OAK_ASSERT_EQ(move(" NS‸NotFound ", kSelectionMoveToEndOfSubWord),   " NSNot‸Found ");
-	OAK_ASSERT_EQ(move(" NSNot‸Found ", kSelectionMoveToEndOfSubWord),   " NSNotFound‸ ");
-	OAK_ASSERT_EQ(move(" NSNotFound‸ ", kSelectionMoveToBeginOfSubWord), " NSNot‸Found ");
-	OAK_ASSERT_EQ(move(" NSNot‸Found ", kSelectionMoveToBeginOfSubWord), " NS‸NotFound ");
-	OAK_ASSERT_EQ(move(" NS‸NotFound ", kSelectionMoveToBeginOfSubWord), " ‸NSNotFound ");
+	OAK_ASSERT_EQ(right(" ‸NSNotFound "), " NS‸NotFound ");
+	OAK_ASSERT_EQ(right(" NS‸NotFound "), " NSNot‸Found ");
+	OAK_ASSERT_EQ(right(" NSNot‸Found "), " NSNotFound‸ ");
+	OAK_ASSERT_EQ( left(" NSNotFound‸ "), " NSNot‸Found ");
+	OAK_ASSERT_EQ( left(" NSNot‸Found "), " NS‸NotFound ");
+	OAK_ASSERT_EQ( left(" NS‸NotFound "), " ‸NSNotFound ");
 
-	OAK_ASSERT_EQ(move(" ‸camelCase ", kSelectionMoveToEndOfSubWord),   " camel‸Case ");
-	OAK_ASSERT_EQ(move(" camel‸Case ", kSelectionMoveToEndOfSubWord),   " camelCase‸ ");
-	OAK_ASSERT_EQ(move(" camelCase‸ ", kSelectionMoveToBeginOfSubWord), " camel‸Case ");
-	OAK_ASSERT_EQ(move(" camel‸Case ", kSelectionMoveToBeginOfSubWord), " ‸camelCase ");
+	OAK_ASSERT_EQ(right(" ‸camelCase "), " camel‸Case ");
+	OAK_ASSERT_EQ(right(" camel‸Case "), " camelCase‸ ");
+	OAK_ASSERT_EQ( left(" camelCase‸ "), " camel‸Case ");
+	OAK_ASSERT_EQ( left(" camel‸Case "), " ‸camelCase ");
 
-	OAK_ASSERT_EQ(move(" ‸CamelCase ", kSelectionMoveToEndOfSubWord),   " Camel‸Case ");
-	OAK_ASSERT_EQ(move(" Camel‸Case ", kSelectionMoveToEndOfSubWord),   " CamelCase‸ ");
-	OAK_ASSERT_EQ(move(" CamelCase‸ ", kSelectionMoveToBeginOfSubWord), " Camel‸Case ");
-	OAK_ASSERT_EQ(move(" Camel‸Case ", kSelectionMoveToBeginOfSubWord), " ‸CamelCase ");
+	OAK_ASSERT_EQ(right(" ‸CamelCase "), " Camel‸Case ");
+	OAK_ASSERT_EQ(right(" Camel‸Case "), " CamelCase‸ ");
+	OAK_ASSERT_EQ( left(" CamelCase‸ "), " Camel‸Case ");
+	OAK_ASSERT_EQ( left(" Camel‸Case "), " ‸CamelCase ");
 
-	OAK_ASSERT_EQ(move(" ‸snake_Case ", kSelectionMoveToEndOfSubWord),   " snake‸_Case ");
-	OAK_ASSERT_EQ(move(" snake‸_Case ", kSelectionMoveToEndOfSubWord),   " snake_Case‸ ");
-	OAK_ASSERT_EQ(move(" snake_Case‸ ", kSelectionMoveToBeginOfSubWord), " snake_‸Case ");
-	OAK_ASSERT_EQ(move(" snake_‸Case ", kSelectionMoveToBeginOfSubWord), " ‸snake_Case ");
+	OAK_ASSERT_EQ(right(" ‸snake_Case "), " snake‸_Case ");
+	OAK_ASSERT_EQ(right(" snake‸_Case "), " snake_Case‸ ");
+	OAK_ASSERT_EQ( left(" snake_Case‸ "), " snake_‸Case ");
+	OAK_ASSERT_EQ( left(" snake_‸Case "), " ‸snake_Case ");
 
-	OAK_ASSERT_EQ(move(" ‸NDEBUG ", kSelectionMoveToEndOfSubWord),   " NDEBUG‸ ");
-	OAK_ASSERT_EQ(move(" NDEBUG‸ ", kSelectionMoveToBeginOfSubWord), " ‸NDEBUG ");
+	OAK_ASSERT_EQ(right(" ‸NDEBUG "), " NDEBUG‸ ");
+	OAK_ASSERT_EQ( left(" NDEBUG‸ "), " ‸NDEBUG ");
 
-	OAK_ASSERT_EQ(move(" ‸ space ", kSelectionMoveToEndOfSubWord),   "  space‸ ");
-	OAK_ASSERT_EQ(move(" space ‸ ", kSelectionMoveToBeginOfSubWord), " ‸space  ");
+	OAK_ASSERT_EQ(right(" ‸ space "), "  space‸ ");
+	OAK_ASSERT_EQ( left(" space ‸ "), " ‸space  ");
 
-	OAK_ASSERT_EQ(move(" ‸  space ", kSelectionMoveToEndOfSubWord),   "   ‸space ");
-	OAK_ASSERT_EQ(move(" space  ‸ ", kSelectionMoveToBeginOfSubWord), " space‸   ");
+	OAK_ASSERT_EQ(right(" ‸  space "), "   ‸space ");
+	OAK_ASSERT_EQ( left(" space  ‸ "), " space‸   ");
 
-	OAK_ASSERT_EQ(move("‸0b0000'0000", kSelectionMoveToEndOfSubWord),   "0b‸0000'0000");
-	OAK_ASSERT_EQ(move("0b‸0000'0000", kSelectionMoveToEndOfSubWord),   "0b0000‸'0000");
-	OAK_ASSERT_EQ(move("0b0000‸'0000", kSelectionMoveToEndOfSubWord),   "0b0000'‸0000");
-	OAK_ASSERT_EQ(move("0b0000'‸0000", kSelectionMoveToEndOfSubWord),   "0b0000'0000‸");
-	OAK_ASSERT_EQ(move("0b0000'0000‸", kSelectionMoveToBeginOfSubWord), "0b0000'‸0000");
-	OAK_ASSERT_EQ(move("0b0000'‸0000", kSelectionMoveToBeginOfSubWord), "0b0000‸'0000");
-	OAK_ASSERT_EQ(move("0b0000‸'0000", kSelectionMoveToBeginOfSubWord), "0b‸0000'0000");
-	OAK_ASSERT_EQ(move("0b‸0000'0000", kSelectionMoveToBeginOfSubWord), "0‸b0000'0000");
+	OAK_ASSERT_EQ(right("‸0b0000'0000"), "0b‸0000'0000");
+	OAK_ASSERT_EQ(right("0b‸0000'0000"), "0b0000‸'0000");
+	OAK_ASSERT_EQ(right("0b0000‸'0000"), "0b0000'‸0000");
+	OAK_ASSERT_EQ(right("0b0000'‸0000"), "0b0000'0000‸");
+	OAK_ASSERT_EQ( left("0b0000'0000‸"), "0b0000'‸0000");
+	OAK_ASSERT_EQ( left("0b0000'‸0000"), "0b0000‸'0000");
+	OAK_ASSERT_EQ( left("0b0000‸'0000"), "0b‸0000'0000");
+	OAK_ASSERT_EQ( left("0b‸0000'0000"), "0‸b0000'0000");
 }
