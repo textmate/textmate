@@ -63,6 +63,24 @@ NSPopUpButton* OakCreatePopUpButton (BOOL pullsDown, NSString* initialItemTitle)
 	return res;
 }
 
+NSPopUpButton* OakCreateActionPopUpButton (BOOL bordered)
+{
+	NSPopUpButton* res = [NSPopUpButton new];
+	res.bordered  = bordered;
+	res.pullsDown = YES;
+	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
+
+	NSMenuItem* item = [NSMenuItem new];
+	item.title = @"";
+	item.image = [NSImage imageNamed:NSImageNameActionTemplate];
+	[item.image setSize:NSMakeSize(14, 14)];
+
+	[[res cell] setUsesItemFromMenu:NO];
+	[[res cell] setMenuItem:item];
+
+	return res;
+}
+
 NSPopUpButton* OakCreateStatusBarPopUpButton (NSString* initialItemTitle)
 {
 	NSPopUpButton* res = OakCreatePopUpButton(NO, initialItemTitle);
