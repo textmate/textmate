@@ -2,6 +2,10 @@ Title: Release Notes
 
 # Changes
 
+## 2014-03-25 ([v2.0-alpha.9523](https://github.com/textmate/textmate/compare/v2.0-alpha.9519...v2.0-alpha.9523))
+
+* Fixes and improvements.
+
 ## 2014-03-12 ([v2.0-alpha.9519](https://github.com/textmate/textmate/compare/v2.0-alpha.9517...v2.0-alpha.9519))
 
   * With VoiceOver the current item will be announced in the various item choosers: File → Open Favorites… (⇧⌘O), Go → Go to File… (⌘T), and Navigate → Go to Symbol… (⇧⌘T). If you want to hear the first result (which is not automatically spoken), first press arrow up to hear it, then you can use arrows down/up as usual. If you want to browse the results without entering a search string, quickly type any letter and delete it to suppress VoiceOver information about menu command and current window. *[Boris Dušek]*
