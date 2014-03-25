@@ -1865,6 +1865,17 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 {
 	D(DBF_OakTextView_TextInput, bug("%s\n", [[anEvent description] UTF8String]););
 	crash_reporter_info_t info(text::format("%s %s", sel_getName(_cmd), to_s(anEvent).c_str()));
+	try {
+		[self realKeyDown:anEvent];
+	}
+	catch(std::exception const& e) {
+		crash_reporter_info_t info(text::format("C++ Exception: %s", e.what()));
+		abort();
+	}
+}
+
+- (void)realKeyDown:(NSEvent*)anEvent
+{
 	AUTO_REFRESH;
 	if(!choiceMenu)
 		return [self oldKeyDown:anEvent];
