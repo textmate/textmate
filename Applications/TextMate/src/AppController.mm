@@ -356,7 +356,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 {
 	D(DBF_AppController, bug("\n"););
 	[goToLinePanel orderOut:self];
-	[NSApp sendAction:@selector(setSelectionString:) to:nil from:[goToLineTextField stringValue]];
+	[NSApp sendAction:@selector(selectAndCenter:) to:nil from:[goToLineTextField stringValue]];
 }
 
 - (IBAction)showPreferences:(id)sender
