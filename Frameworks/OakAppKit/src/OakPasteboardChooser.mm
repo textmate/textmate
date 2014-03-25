@@ -8,36 +8,41 @@
 #import <OakFoundation/NSString Additions.h>
 #import <ns/ns.h>
 
-static NSAttributedString* JoinedAttributedString (NSArray* components, NSAttributedString* joiner)
+@implementation OakPasteboardEntry (DisplayString)
+- (NSAttributedString*)displayString
 {
-	NSMutableAttributedString* res = [[NSMutableAttributedString alloc] init];
-	BOOL first = YES;
-	for(id str in components)
-	{
-		if(!first)
-			[res appendAttributedString:joiner];
-		first = NO;
+	static NSAttributedString* const lineJoiner = [[NSAttributedString alloc] initWithString:@"¬" attributes:@{ NSForegroundColorAttributeName : [NSColor lightGrayColor] }];
+	static NSAttributedString* const tabJoiner  = [[NSAttributedString alloc] initWithString:@"‣" attributes:@{ NSForegroundColorAttributeName : [NSColor lightGrayColor] }];
+	static NSAttributedString* const ellipsis   = [[NSAttributedString alloc] initWithString:@"…" attributes:@{ NSForegroundColorAttributeName : [NSColor lightGrayColor] }];
 
-		NSAttributedString* aStr = [str isKindOfClass:[NSString class]] ? [[NSAttributedString alloc] initWithString:str] : str;
-		[res appendAttributedString:aStr];
-	}
+	NSMutableAttributedString* res = [[NSMutableAttributedString alloc] init];
+
+	__block bool firstLine = true;
+	[self.string enumerateLinesUsingBlock:^(NSString* line, BOOL* stop){
+		if(!std::exchange(firstLine, false))
+			[res appendAttributedString:lineJoiner];
+
+		bool firstTab = true;
+		for(NSString* str in [line componentsSeparatedByString:@"\t"])
+		{
+			if([[res string] length] > 1024)
+			{
+				[res appendAttributedString:ellipsis];
+				*stop = YES;
+				break;
+			}
+
+			if(!std::exchange(firstTab, false))
+				[res appendAttributedString:tabJoiner];
+			[res appendAttributedString:[[NSAttributedString alloc] initWithString:str]];
+		}
+	}];
 
 	NSMutableParagraphStyle* paragraphStyle = [[NSMutableParagraphStyle alloc] init];
 	[paragraphStyle setLineBreakMode:NSLineBreakByTruncatingTail];
 	[res addAttributes:@{ NSParagraphStyleAttributeName : paragraphStyle } range:NSMakeRange(0, [[res string] length])];
 
 	return res;
-}
-
-@implementation OakPasteboardEntry (DisplayString)
-- (NSAttributedString*)displayString
-{
-	static NSDictionary* const styles = @{ NSForegroundColorAttributeName : [NSColor lightGrayColor] };
-
-	NSMutableArray* tmp = [NSMutableArray array];
-	for(NSString* line in [self.string componentsSeparatedByString:@"\n"])
-		[tmp addObject:JoinedAttributedString([line componentsSeparatedByString:@"\t"], [[NSAttributedString alloc] initWithString:@"‣" attributes:styles])];
-	return JoinedAttributedString(tmp, [[NSAttributedString alloc] initWithString:@"¬" attributes:styles]);
 }
 @end
 
