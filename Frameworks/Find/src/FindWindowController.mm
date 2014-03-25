@@ -209,7 +209,7 @@ static NSButton* OakCreateStopSearchButton ()
 		self.wherePopUpButton          = OakCreatePopUpButton();
 		self.matchingLabel             = OakCreateLabel(@"matching");
 		self.globTextField             = OakCreateComboBox();
-		self.actionsPopUpButton        = OakCreatePopUpButton(YES /* pulls down */);
+		self.actionsPopUpButton        = OakCreateActionPopUpButton(YES /* bordered */);
 
 		NSScrollView* resultsScrollView = nil;
 		self.resultsTopDivider         = OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1]);
@@ -237,11 +237,8 @@ static NSButton* OakCreateStopSearchButton ()
 		// =============================
 
 		NSMenu* actionMenu = self.actionsPopUpButton.menu;
-		[actionMenu removeAllItems];
 
-		NSMenuItem* titleItem = [actionMenu addItemWithTitle:@"" action:@selector(nop:) keyEquivalent:@""];
-		titleItem.image = [NSImage imageNamed:NSImageNameActionTemplate];
-
+		[actionMenu addItemWithTitle:@"Placeholder" action:@selector(nop:) keyEquivalent:@""];
 		[actionMenu addItemWithTitle:@"Follow Symbolic Links" action:@selector(toggleFollowSymbolicLinks:) keyEquivalent:@""];
 		[actionMenu addItemWithTitle:@"Search Hidden Folders" action:@selector(toggleSearchHiddenFolders:) keyEquivalent:@""];
 		[actionMenu addItem:[NSMenuItem separatorItem]];

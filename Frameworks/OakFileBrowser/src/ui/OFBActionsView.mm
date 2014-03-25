@@ -23,24 +23,6 @@ static NSButton* OakCreateImageButton (NSImage* image)
 	return res;
 }
 
-static NSPopUpButton* OakCreateActionPopUpButton ()
-{
-	NSPopUpButton* res = [NSPopUpButton new];
-	res.bordered  = NO;
-	res.pullsDown = YES;
-	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
-
-	NSMenuItem* item = [NSMenuItem new];
-	item.title = @"";
-	item.image = [NSImage imageNamed:NSImageNameActionTemplate];
-	[item.image setSize:NSMakeSize(14, 14)];
-
-	[[res cell] setUsesItemFromMenu:NO];
-	[[res cell] setMenuItem:item];
-
-	return res;
-}
-
 @implementation OFBActionsView
 - (id)initWithFrame:(NSRect)aRect
 {
@@ -52,7 +34,7 @@ static NSPopUpButton* OakCreateActionPopUpButton ()
 		self.searchButton       = OakCreateImageButton([NSImage imageNamed:@"Search" inSameBundleAsClass:[self class]]);
 		self.favoritesButton    = OakCreateImageButton([NSImage imageNamed:@"Favorites" inSameBundleAsClass:[self class]]);
 		self.scmButton          = OakCreateImageButton([NSImage imageNamed:@"SCM" inSameBundleAsClass:[self class]]);
-		
+
 		self.createButton.toolTip       = @"Create new file";
 		self.reloadButton.toolTip       = @"Reload file browser";
 		self.searchButton.toolTip       = @"Search current folder";
