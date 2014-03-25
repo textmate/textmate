@@ -48,4 +48,13 @@ void test_subword_movement ()
 
 	OAK_ASSERT_EQ(move(" ‸  space ", kSelectionMoveToEndOfSubWord),   "   ‸space ");
 	OAK_ASSERT_EQ(move(" space  ‸ ", kSelectionMoveToBeginOfSubWord), " space‸   ");
+
+	OAK_ASSERT_EQ(move("‸0b0000'0000", kSelectionMoveToEndOfSubWord),   "0b‸0000'0000");
+	OAK_ASSERT_EQ(move("0b‸0000'0000", kSelectionMoveToEndOfSubWord),   "0b0000‸'0000");
+	OAK_ASSERT_EQ(move("0b0000‸'0000", kSelectionMoveToEndOfSubWord),   "0b0000'‸0000");
+	OAK_ASSERT_EQ(move("0b0000'‸0000", kSelectionMoveToEndOfSubWord),   "0b0000'0000‸");
+	OAK_ASSERT_EQ(move("0b0000'0000‸", kSelectionMoveToBeginOfSubWord), "0b0000'‸0000");
+	OAK_ASSERT_EQ(move("0b0000'‸0000", kSelectionMoveToBeginOfSubWord), "0b0000‸'0000");
+	OAK_ASSERT_EQ(move("0b0000‸'0000", kSelectionMoveToBeginOfSubWord), "0b‸0000'0000");
+	OAK_ASSERT_EQ(move("0b‸0000'0000", kSelectionMoveToBeginOfSubWord), "0‸b0000'0000");
 }

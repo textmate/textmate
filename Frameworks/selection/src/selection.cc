@@ -654,7 +654,9 @@ namespace ng
 					    "|\\p{Lower}+"
 					    ")"
 					    "[^\\p{Upper}\\p{Lower}]?$"
-					"|" "[^\\p{Upper}\\p{Lower}]+$"
+					"|" "[^\\p{Alnum}]+$"
+					"|" "[\\p{Digit}]+$"
+					"|" "[^\\p{Digit}\\p{Upper}\\p{Lower}]+$"
 				);
 
 				size_t n = line && caret == buffer.begin(line) ? line-1 : line;
@@ -671,7 +673,11 @@ namespace ng
 					"|\\p{Upper}\\p{Upper}+"                          // NDEBUG‸
 					"|\\p{Upper}\\p{Lower}*"                          // Camel‸Case || Camel‸_case
 					"|\\p{Lower}+"                                    // camel‸Case || camel‸_case
-					")|[^\\p{Upper}\\p{Lower}]*)");                   //    ‸leading_whitespace
+					")"
+					"|[^\\p{Alnum}]+"
+					"|[\\p{Digit}]+"
+					"|[^\\p{Digit}\\p{Upper}\\p{Lower}]+"
+					")");
 
 				size_t n = line+1 < buffer.lines() && caret == buffer.eol(line) ? line+1 : line;
 				std::string const& line = buffer.substr(caret, buffer.eol(n));
