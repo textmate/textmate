@@ -13,6 +13,8 @@ data:     <DEADBEEF>
 date:     @2010-05-10 20:34:12 +0000
 */
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-const-variable"
 %%{
 
 	machine string;
@@ -44,6 +46,7 @@ date:     @2010-05-10 20:34:12 +0000
 	write data;
 
 }%%
+#pragma clang diagnostic pop
 
 static bool backtrack (char const*& p, char const* bt, plist::any_t& res)
 {
