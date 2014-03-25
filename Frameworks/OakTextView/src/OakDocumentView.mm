@@ -491,6 +491,12 @@ private:
 // = Symbol Chooser =
 // ==================
 
+- (void)selectAndCenter:(NSString*)aSelectionString
+{
+	textView.selectionString = aSelectionString;
+	[textView centerSelectionInVisibleArea:self];
+}
+
 - (void)setSymbolChooser:(SymbolChooser*)aSymbolChooser
 {
 	if(_symbolChooser == aSymbolChooser)
@@ -530,7 +536,7 @@ private:
 - (void)symbolChooserDidSelectItems:(id)sender
 {
 	for(id item in [sender selectedItems])
-		[textView setSelectionString:[item selectionString]];
+		[self selectAndCenter:[item selectionString]];
 }
 
 // =======================
@@ -545,7 +551,7 @@ private:
 
 - (void)goToSymbol:(id)sender
 {
-	[textView setSelectionString:[sender representedObject]];
+	[self selectAndCenter:[sender representedObject]];
 }
 
 - (void)showSymbolSelector:(NSPopUpButton*)symbolPopUp
@@ -737,7 +743,7 @@ static std::string const kSearchmarkType = "search";
 - (void)takeBookmarkFrom:(id)sender
 {
 	if([sender respondsToSelector:@selector(representedObject)])
-		[textView setSelectionString:[sender representedObject]];
+		[self selectAndCenter:[sender representedObject]];
 }
 
 - (void)updateBookmarksMenu:(NSMenu*)aMenu
