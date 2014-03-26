@@ -130,7 +130,7 @@ static ino_t inode (std::string const& path)
 		else
 		{
 			NSURL* dstURL = [NSURL fileURLWithPath:[NSString stringWithCxxString:dst]];
-			if([[OakFileManager sharedInstance] renameItemAtURL:item.url toURL:dstURL window:anOutlineView.window])
+			if([[OakFileManager sharedInstance] renameItemAtURL:item.url toURL:dstURL view:anOutlineView])
 			{
 				item.url         = dstURL;
 				item.displayName = [NSString stringWithCxxString:path::display_name(dst)];
@@ -279,11 +279,11 @@ static NSDragOperation filter (NSDragOperation mask)
 
 		OakFileManager* fm = [OakFileManager sharedInstance];
 		if(op == NSDragOperationMove)
-			[fm moveItemAtURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:src]] toURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:dst]] window:anOutlineView.window];
+			[fm moveItemAtURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:src]] toURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:dst]] view:anOutlineView];
 		else if(op == NSDragOperationCopy)
-			[fm copyItemAtURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:src]] toURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:dst]] window:anOutlineView.window];
+			[fm copyItemAtURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:src]] toURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:dst]] view:anOutlineView];
 		else if(op == NSDragOperationLink)
-			[fm createSymbolicLinkAtURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:dst]] withDestinationURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:src]] window:anOutlineView.window];
+			[fm createSymbolicLinkAtURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:dst]] withDestinationURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:src]] view:anOutlineView];
 	}
 	return YES;
 }
@@ -295,7 +295,7 @@ static NSDragOperation filter (NSDragOperation mask)
 		for(FSItem* item in someItems)
 		{
 			if([item.url isFileURL])
-				[[OakFileManager sharedInstance] trashItemAtURL:item.url window:anOutlineView.window];
+				[[OakFileManager sharedInstance] trashItemAtURL:item.url view:anOutlineView];
 		}
 	}
 }

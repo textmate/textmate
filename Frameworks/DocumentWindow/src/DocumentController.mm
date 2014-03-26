@@ -756,7 +756,7 @@ namespace
 		}
 
 		NSURL* url = [NSURL fileURLWithPath:[NSString stringWithCxxString:path::unique(path::join([folder fileSystemRepresentation], path))]];
-		if([[OakFileManager sharedInstance] createFileAtURL:url window:self.window])
+		if([[OakFileManager sharedInstance] createFileAtURL:url view:self.fileBrowser.view])
 		{
 			document::document_ptr doc = document::create(to_s([url path]));
 			doc->set_file_type(fileType);

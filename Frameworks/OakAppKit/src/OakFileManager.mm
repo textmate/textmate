@@ -43,23 +43,23 @@ NSString* const OakFileManagerPathKey                      = @"directory";
 // = Stacked Actions =
 // ===================
 
-- (BOOL)doCreateDirectory:(NSURL*)dirURL window:(NSWindow*)window
+- (BOOL)doCreateDirectory:(NSURL*)dirURL view:(NSView*)view
 {
 	BOOL res;
 	NSError* error;
 	if(res = [[NSFileManager defaultManager] createDirectoryAtURL:dirURL withIntermediateDirectories:NO attributes:nil error:&error])
 	{
-		[[[window undoManager] prepareWithInvocationTarget:self] doRemoveDirectory:dirURL window:window];
+		[[[view undoManager] prepareWithInvocationTarget:self] doRemoveDirectory:dirURL view:view];
 		[self postDidChangeContentsOfDirectory:[[dirURL path] stringByDeletingLastPathComponent]];
 	}
 	else
 	{
-		[window presentError:error];
+		[view.window presentError:error];
 	}
 	return res;
 }
 
-- (void)doRemoveDirectory:(NSURL*)dirURL window:(NSWindow*)window
+- (void)doRemoveDirectory:(NSURL*)dirURL view:(NSView*)view
 {
 	NSError* error;
 
@@ -73,28 +73,28 @@ NSString* const OakFileManagerPathKey                      = @"directory";
 
 	if([[NSFileManager defaultManager] removeItemAtURL:dirURL error:&error])
 	{
-		[[[window undoManager] prepareWithInvocationTarget:self] doCreateDirectory:dirURL window:window];
+		[[[view undoManager] prepareWithInvocationTarget:self] doCreateDirectory:dirURL view:view];
 		[self postDidChangeContentsOfDirectory:[[dirURL path] stringByDeletingLastPathComponent]];
 	}
 	else
 	{
-		[window presentError:error];
+		[view.window presentError:error];
 	}
 }
 
-- (BOOL)doCreateFile:(NSURL*)fileURL window:(NSWindow*)window
+- (BOOL)doCreateFile:(NSURL*)fileURL view:(NSView*)view
 {
 	int fd = open([[fileURL path] fileSystemRepresentation], O_CREAT|O_EXCL|O_WRONLY|O_CLOEXEC, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH);
 	if(fd != -1)
 	{
 		close(fd);
-		[[[window undoManager] prepareWithInvocationTarget:self] doRemoveFile:fileURL window:window];
+		[[[view undoManager] prepareWithInvocationTarget:self] doRemoveFile:fileURL view:view];
 		[self postDidChangeContentsOfDirectory:[[fileURL path] stringByDeletingLastPathComponent]];
 	}
 	return fd != -1;
 }
 
-- (void)doRemoveFile:(NSURL*)fileURL window:(NSWindow*)window
+- (void)doRemoveFile:(NSURL*)fileURL view:(NSView*)view
 {
 	NSError* error;
 
@@ -110,23 +110,23 @@ NSString* const OakFileManagerPathKey                      = @"directory";
 	}
 	else if(error)
 	{
-		[window presentError:error];
+		[view.window presentError:error];
 		return;
 	}
 
 	[[NSNotificationCenter defaultCenter] postNotificationName:OakFileManagerWillDeleteItemAtPath object:self userInfo:@{ OakFileManagerPathKey : [[fileURL filePathURL] path] }];
 	if([[NSFileManager defaultManager] removeItemAtURL:fileURL error:&error])
 	{
-		[[[window undoManager] prepareWithInvocationTarget:self] doCreateFile:fileURL window:window];
+		[[[view undoManager] prepareWithInvocationTarget:self] doCreateFile:fileURL view:view];
 		[self postDidChangeContentsOfDirectory:[[fileURL path] stringByDeletingLastPathComponent]];
 	}
 	else
 	{
-		[window presentError:error];
+		[view.window presentError:error];
 	}
 }
 
-- (BOOL)doCreateCopy:(NSURL*)dstURL ofURL:(NSURL*)srcURL window:(NSWindow*)window
+- (BOOL)doCreateCopy:(NSURL*)dstURL ofURL:(NSURL*)srcURL view:(NSView*)view
 {
 	BOOL res = NO;
 
@@ -137,69 +137,69 @@ NSString* const OakFileManagerPathKey                      = @"directory";
 	}
 	else if(res = [[NSFileManager defaultManager] copyItemAtURL:srcURL toURL:dstURL error:&error])
 	{
-		[[[window undoManager] prepareWithInvocationTarget:self] doRemoveCopy:dstURL ofURL:srcURL window:window];
+		[[[view undoManager] prepareWithInvocationTarget:self] doRemoveCopy:dstURL ofURL:srcURL view:view];
 		[self playSound:OakSoundDidMoveItemUISound];
 		[self postDidChangeContentsOfDirectory:[[dstURL path] stringByDeletingLastPathComponent]];
 	}
 
 	if(!res && error)
-		[window presentError:error];
+		[view.window presentError:error];
 	return res;
 }
 
-- (void)doRemoveCopy:(NSURL*)dstURL ofURL:(NSURL*)srcURL window:(NSWindow*)window
+- (void)doRemoveCopy:(NSURL*)dstURL ofURL:(NSURL*)srcURL view:(NSView*)view
 {
 	NSError* error;
 	[[NSNotificationCenter defaultCenter] postNotificationName:OakFileManagerWillDeleteItemAtPath object:self userInfo:@{ OakFileManagerPathKey : [[dstURL filePathURL] path] }];
 	if([[NSFileManager defaultManager] removeItemAtURL:dstURL error:&error])
 	{
-		[[[window undoManager] prepareWithInvocationTarget:self] doCreateCopy:dstURL ofURL:srcURL window:window];
+		[[[view undoManager] prepareWithInvocationTarget:self] doCreateCopy:dstURL ofURL:srcURL view:view];
 		[self playSound:OakSoundDidMoveItemUISound];
 		[self postDidChangeContentsOfDirectory:[[dstURL path] stringByDeletingLastPathComponent]];
 	}
 	else
 	{
-		[window presentError:error];
+		[view.window presentError:error];
 	}
 }
 
-- (BOOL)doCreateLink:(NSURL*)linkURL withDestinationURL:(NSURL*)contentURL window:(NSWindow*)window
+- (BOOL)doCreateLink:(NSURL*)linkURL withDestinationURL:(NSURL*)contentURL view:(NSView*)view
 {
 	BOOL res;
 	NSError* error;
 	if(res = [[NSFileManager defaultManager] createSymbolicLinkAtURL:linkURL withDestinationURL:contentURL error:&error])
 	{
-		[[[window undoManager] prepareWithInvocationTarget:self] doRemoveLink:linkURL withDestinationURL:contentURL window:window];
+		[[[view undoManager] prepareWithInvocationTarget:self] doRemoveLink:linkURL withDestinationURL:contentURL view:view];
 		[self postDidChangeContentsOfDirectory:[[linkURL path] stringByDeletingLastPathComponent]];
 	}
 	else
 	{
-		[window presentError:error];
+		[view.window presentError:error];
 	}
 	return res;
 }
 
-- (void)doRemoveLink:(NSURL*)linkURL withDestinationURL:(NSURL*)contentURL window:(NSWindow*)window
+- (void)doRemoveLink:(NSURL*)linkURL withDestinationURL:(NSURL*)contentURL view:(NSView*)view
 {
 	NSError* error;
 	if([[NSFileManager defaultManager] removeItemAtURL:linkURL error:&error])
 	{
-		[[[window undoManager] prepareWithInvocationTarget:self] doCreateLink:linkURL withDestinationURL:contentURL window:window];
+		[[[view undoManager] prepareWithInvocationTarget:self] doCreateLink:linkURL withDestinationURL:contentURL view:view];
 		[self postDidChangeContentsOfDirectory:[[linkURL path] stringByDeletingLastPathComponent]];
 	}
 	else
 	{
-		[window presentError:error];
+		[view.window presentError:error];
 	}
 }
 
-- (BOOL)doMove:(NSURL*)srcURL toURL:(NSURL*)dstURL withSound:(BOOL)playSoundFlag window:(NSWindow*)window
+- (BOOL)doMove:(NSURL*)srcURL toURL:(NSURL*)dstURL withSound:(BOOL)playSoundFlag view:(NSView*)view
 {
 	BOOL res;
 	NSError* error;
 	if(res = [[NSFileManager defaultManager] tmMoveItemAtURL:srcURL toURL:dstURL error:&error])
 	{
-		[[[window undoManager] prepareWithInvocationTarget:self] doMove:dstURL toURL:srcURL withSound:playSoundFlag window:window];
+		[[[view undoManager] prepareWithInvocationTarget:self] doMove:dstURL toURL:srcURL withSound:playSoundFlag view:view];
 		if(playSoundFlag)
 			[self playSound:OakSoundDidMoveItemUISound];
 		[self postDidChangeContentsOfDirectory:[[srcURL path] stringByDeletingLastPathComponent]];
@@ -207,12 +207,12 @@ NSString* const OakFileManagerPathKey                      = @"directory";
 	}
 	else
 	{
-		[window presentError:error];
+		[view.window presentError:error];
 	}
 	return res;
 }
 
-- (BOOL)doTrashItem:(NSURL*)trashURL window:(NSWindow*)window
+- (BOOL)doTrashItem:(NSURL*)trashURL view:(NSView*)view
 {
 	NSError* error = nil;
 	NSURL* inTrashURL;
@@ -220,7 +220,7 @@ NSString* const OakFileManagerPathKey                      = @"directory";
 	[[NSNotificationCenter defaultCenter] postNotificationName:OakFileManagerWillDeleteItemAtPath object:self userInfo:@{ OakFileManagerPathKey : [[trashURL filePathURL] path] }];
 	if([[NSFileManager defaultManager] tmTrashItemAtURL:trashURL resultingItemURL:&inTrashURL error:&error])
 	{
-		[[[window undoManager] prepareWithInvocationTarget:self] doRestoreItem:inTrashURL toURL:trashURL window:window];
+		[[[view undoManager] prepareWithInvocationTarget:self] doRestoreItem:inTrashURL toURL:trashURL view:view];
 		[self playSound:OakSoundDidTrashItemUISound];
 		[self postDidChangeContentsOfDirectory:[[trashURL path] stringByDeletingLastPathComponent]];
 		return YES;
@@ -242,23 +242,23 @@ NSString* const OakFileManagerPathKey                      = @"directory";
 	}
 
 	if(error)
-		[window presentError:error];
+		[view.window presentError:error];
 
 	return NO;
 }
 
-- (void)doRestoreItem:(NSURL*)inTrashURL toURL:(NSURL*)orgURL window:(NSWindow*)window
+- (void)doRestoreItem:(NSURL*)inTrashURL toURL:(NSURL*)orgURL view:(NSView*)view
 {
 	NSError* error;
 	if([[NSFileManager defaultManager] moveItemAtURL:inTrashURL toURL:orgURL error:&error])
 	{
-		[[[window undoManager] prepareWithInvocationTarget:self] doTrashItem:orgURL window:window];
+		[[[view undoManager] prepareWithInvocationTarget:self] doTrashItem:orgURL view:view];
 		[self playSound:OakSoundDidMoveItemUISound];
 		[self postDidChangeContentsOfDirectory:[[orgURL path] stringByDeletingLastPathComponent]];
 	}
 	else
 	{
-		[window presentError:error];
+		[view.window presentError:error];
 	}
 }
 
@@ -275,71 +275,71 @@ NSString* const OakFileManagerPathKey                      = @"directory";
 // = API =
 // =======
 
-- (NSURL*)createUntitledDirectoryAtURL:(NSURL*)anURL window:(NSWindow*)window
+- (NSURL*)createUntitledDirectoryAtURL:(NSURL*)anURL view:(NSView*)view
 {
 	NSURL* dst = [NSURL fileURLWithPath:[NSString stringWithCxxString:path::unique(path::join([[anURL path] fileSystemRepresentation], "untitled folder"))] isDirectory:YES];
-	if([self doCreateDirectory:dst window:window])
+	if([self doCreateDirectory:dst view:view])
 	{
-		[[window undoManager] setActionName:@"New Folder"];
+		[[view undoManager] setActionName:@"New Folder"];
 		return dst;
 	}
 	return nil;
 }
 
-- (BOOL)createFileAtURL:(NSURL*)anURL window:(NSWindow*)window
+- (BOOL)createFileAtURL:(NSURL*)anURL view:(NSView*)view
 {
-	if([self doCreateFile:anURL window:window])
+	if([self doCreateFile:anURL view:view])
 	{
-		[[window undoManager] setActionName:@"New Document"];
+		[[view undoManager] setActionName:@"New Document"];
 		return YES;
 	}
 	return NO;
 }
 
-- (NSURL*)createDuplicateOfURL:(NSURL*)srcURL window:(NSWindow*)window
+- (NSURL*)createDuplicateOfURL:(NSURL*)srcURL view:(NSView*)view
 {
 	NSNumber* isDirectory = @NO;
 	[srcURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:nil];
 	NSURL* dst = [NSURL fileURLWithPath:[NSString stringWithCxxString:path::unique([[srcURL path] fileSystemRepresentation], " copy")] isDirectory:[isDirectory boolValue]];
-	if([self doCreateCopy:dst ofURL:srcURL window:window])
+	if([self doCreateCopy:dst ofURL:srcURL view:view])
 	{
-		[[window undoManager] setActionName:[self expandFormat:@"Duplicate of “%@”" withURL:srcURL]];
+		[[view undoManager] setActionName:[self expandFormat:@"Duplicate of “%@”" withURL:srcURL]];
 		return dst;
 	}
 	return nil;
 }
 
-- (void)createSymbolicLinkAtURL:(NSURL*)anURL withDestinationURL:(NSURL*)dstURL window:(NSWindow*)window
+- (void)createSymbolicLinkAtURL:(NSURL*)anURL withDestinationURL:(NSURL*)dstURL view:(NSView*)view
 {
-	if([self doCreateLink:anURL withDestinationURL:dstURL window:window])
-		[[window undoManager] setActionName:[self expandFormat:@"Create Link “%@”" withURL:anURL]];
+	if([self doCreateLink:anURL withDestinationURL:dstURL view:view])
+		[[view undoManager] setActionName:[self expandFormat:@"Create Link “%@”" withURL:anURL]];
 }
 
-- (BOOL)renameItemAtURL:(NSURL*)srcURL toURL:(NSURL*)dstURL window:(NSWindow*)window
+- (BOOL)renameItemAtURL:(NSURL*)srcURL toURL:(NSURL*)dstURL view:(NSView*)view
 {
-	if([self doMove:srcURL toURL:dstURL withSound:NO window:window])
+	if([self doMove:srcURL toURL:dstURL withSound:NO view:view])
 	{
-		[[window undoManager] setActionName:@"Rename"];
+		[[view undoManager] setActionName:@"Rename"];
 		return YES;
 	}
 	return NO;
 }
 
-- (void)copyItemAtURL:(NSURL*)srcURL toURL:(NSURL*)dstURL window:(NSWindow*)window
+- (void)copyItemAtURL:(NSURL*)srcURL toURL:(NSURL*)dstURL view:(NSView*)view
 {
-	if([self doCreateCopy:dstURL ofURL:srcURL window:window])
-		[[window undoManager] setActionName:[self expandFormat:@"Copy of “%@”" withURL:srcURL]];
+	if([self doCreateCopy:dstURL ofURL:srcURL view:view])
+		[[view undoManager] setActionName:[self expandFormat:@"Copy of “%@”" withURL:srcURL]];
 }
 
-- (void)moveItemAtURL:(NSURL*)srcURL toURL:(NSURL*)dstURL window:(NSWindow*)window
+- (void)moveItemAtURL:(NSURL*)srcURL toURL:(NSURL*)dstURL view:(NSView*)view
 {
-	if([self doMove:srcURL toURL:dstURL withSound:YES window:window])
-		[[window undoManager] setActionName:[self expandFormat:@"Move of “%@”" withURL:srcURL]];
+	if([self doMove:srcURL toURL:dstURL withSound:YES view:view])
+		[[view undoManager] setActionName:[self expandFormat:@"Move of “%@”" withURL:srcURL]];
 }
 
-- (void)trashItemAtURL:(NSURL*)anURL window:(NSWindow*)window
+- (void)trashItemAtURL:(NSURL*)anURL view:(NSView*)view
 {
-	if([self doTrashItem:anURL window:window])
-		[[window undoManager] setActionName:[self expandFormat:@"Move of “%@”" withURL:anURL]];
+	if([self doTrashItem:anURL view:view])
+		[[view undoManager] setActionName:[self expandFormat:@"Move of “%@”" withURL:anURL]];
 }
 @end

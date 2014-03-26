@@ -651,7 +651,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	{
 		if([url isFileURL])
 		{
-			if(NSURL* res = [[OakFileManager sharedInstance] createDuplicateOfURL:url window:_view.window])
+			if(NSURL* res = [[OakFileManager sharedInstance] createDuplicateOfURL:url view:_view])
 				[duplicatedURLs addObject:res];
 		}
 	}
@@ -725,7 +725,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 {
 	if(NSString* folder = [self directoryForNewItems])
 	{
-		if(NSURL* res = [[OakFileManager sharedInstance] createUntitledDirectoryAtURL:[NSURL fileURLWithPath:folder] window:_view.window])
+		if(NSURL* res = [[OakFileManager sharedInstance] createUntitledDirectoryAtURL:[NSURL fileURLWithPath:folder] view:_view])
 			[self editURL:res];
 	}
 }
@@ -753,7 +753,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	for(NSURL* url in self.selectedURLs)
 	{
 		if([url isFileURL])
-			[[OakFileManager sharedInstance] trashItemAtURL:url window:_view.window];
+			[[OakFileManager sharedInstance] trashItemAtURL:url view:_view];
 	}
 
 	if(itemToSelect)
@@ -783,14 +783,14 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	for(NSURL* url in urls)
 	{
 		std::string const dst = path::join(favFolder, path::name(to_s([url path])));
-		[[OakFileManager sharedInstance] createSymbolicLinkAtURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:dst]] withDestinationURL:url window:_view.window];
+		[[OakFileManager sharedInstance] createSymbolicLinkAtURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:dst]] withDestinationURL:url view:_view];
 	}
 }
 
 - (void)removeSelectedEntriesFromFavorites:(id)sender
 {
 	for(NSURL* url in self.selectedURLs)
-		[[OakFileManager sharedInstance] trashItemAtURL:url window:_view.window];
+		[[OakFileManager sharedInstance] trashItemAtURL:url view:_view];
 }
 
 - (IBAction)cut:(id)sender
@@ -828,8 +828,8 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 			std::string const dst = path::unique(path::join([folder fileSystemRepresentation], path::name([path fileSystemRepresentation])));
 			NSURL* dstURL = [NSURL fileURLWithPath:[NSString stringWithCxxString:dst]];
 			if(cut)
-					[[OakFileManager sharedInstance] moveItemAtURL:[NSURL fileURLWithPath:path] toURL:dstURL window:_view.window];
-			else	[[OakFileManager sharedInstance] copyItemAtURL:[NSURL fileURLWithPath:path] toURL:dstURL window:_view.window];
+					[[OakFileManager sharedInstance] moveItemAtURL:[NSURL fileURLWithPath:path] toURL:dstURL view:_view];
+			else	[[OakFileManager sharedInstance] copyItemAtURL:[NSURL fileURLWithPath:path] toURL:dstURL view:_view];
 			[created addObject:[NSURL fileURLWithPath:[dstURL path]]]; // recreate to set ‘isDirectory’
 		}
 	}
@@ -987,7 +987,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 			[item setTarget:self];
 	}
 
-	if([_view.window.undoManager canUndo] || [_view.window.undoManager canRedo])
+	if([_view.undoManager canUndo] || [_view.undoManager canRedo])
 	{
 		if(countOfExistingItems != [aMenu numberOfItems])
 			[aMenu addItem:[NSMenuItem separatorItem]];

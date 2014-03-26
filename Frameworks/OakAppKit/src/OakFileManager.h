@@ -6,12 +6,12 @@ PUBLIC extern NSString* const OakFileManagerPathKey;
 
 PUBLIC @interface OakFileManager : NSObject
 + (OakFileManager*)sharedInstance;
-- (NSURL*)createUntitledDirectoryAtURL:(NSURL*)anURL window:(NSWindow*)window;
-- (BOOL)createFileAtURL:(NSURL*)anURL window:(NSWindow*)window;
-- (NSURL*)createDuplicateOfURL:(NSURL*)srcURL window:(NSWindow*)window;
-- (void)createSymbolicLinkAtURL:(NSURL*)anURL withDestinationURL:(NSURL*)dstURL window:(NSWindow*)window;
-- (BOOL)renameItemAtURL:(NSURL*)srcURL toURL:(NSURL*)dstURL window:(NSWindow*)window;
-- (void)copyItemAtURL:(NSURL*)srcURL toURL:(NSURL*)dstURL window:(NSWindow*)window;
-- (void)moveItemAtURL:(NSURL*)srcURL toURL:(NSURL*)dstURL window:(NSWindow*)window;
-- (void)trashItemAtURL:(NSURL*)anURL window:(NSWindow*)window;
+- (NSURL*)createUntitledDirectoryAtURL:(NSURL*)anURL view:(NSView*)view;
+- (BOOL)createFileAtURL:(NSURL*)anURL view:(NSView*)view;
+- (NSURL*)createDuplicateOfURL:(NSURL*)srcURL view:(NSView*)view;
+- (void)createSymbolicLinkAtURL:(NSURL*)anURL withDestinationURL:(NSURL*)dstURL view:(NSView*)view;
+- (BOOL)renameItemAtURL:(NSURL*)srcURL toURL:(NSURL*)dstURL view:(NSView*)view;
+- (void)copyItemAtURL:(NSURL*)srcURL toURL:(NSURL*)dstURL view:(NSView*)view;
+- (void)moveItemAtURL:(NSURL*)srcURL toURL:(NSURL*)dstURL view:(NSView*)view;
+- (void)trashItemAtURL:(NSURL*)anURL view:(NSView*)view;
 @end
