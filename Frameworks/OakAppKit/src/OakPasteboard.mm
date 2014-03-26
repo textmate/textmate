@@ -90,6 +90,7 @@ NSString* const kUserDefaultsDisablePersistentClipboardHistory = @"disablePersis
 @interface OakPasteboard ()
 @property (nonatomic) NSString* name;
 @property (nonatomic) NSInteger changeCount;
+@property (nonatomic) BOOL disableSystemPasteboardUpdating;
 @property (nonatomic) BOOL needsSavePasteboardHistory;
 @property (nonatomic) OakPasteboardEntry* primitiveCurrentEntry;
 - (BOOL)avoidsDuplicates;
@@ -155,7 +156,7 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 	BOOL _needsSavePasteboardHistory;
 }
 @dynamic name, currentEntry, auxiliaryOptionsForCurrent, primitiveCurrentEntry;
-@synthesize changeCount;
+@synthesize changeCount, disableSystemPasteboardUpdating;
 
 + (void)initialize
 {
@@ -395,7 +396,11 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 		NSString* inHistory = self.currentEntry.string;
 		self.changeCount = [[self pasteboard] changeCount];
 		if((onClipboard && !inHistory) || (onClipboard && inHistory && ![inHistory isEqualToString:onClipboard]))
+		{
+			self.disableSystemPasteboardUpdating = YES;
 			[self internalAddEntryWithString:onClipboard andOptions:[[self pasteboard] availableTypeFromArray:@[ OakPasteboardOptionsPboardType ]] ? [[self pasteboard] propertyListForType:OakPasteboardOptionsPboardType] : nil];
+			self.disableSystemPasteboardUpdating = NO;
+		}
 	}
 }
 
@@ -408,8 +413,7 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 
 	if(newEntry)
 	{
-		NSString* onClipboard = [[self pasteboard] availableTypeFromArray:@[ NSStringPboardType ]] ? [[self pasteboard] stringForType:NSStringPboardType] : nil;
-		if(!onClipboard || ![newEntry.string isEqualToString:onClipboard])
+		if(!self.disableSystemPasteboardUpdating)
 		{
 			[[self pasteboard] declareTypes:@[ NSStringPboardType, OakPasteboardOptionsPboardType ] owner:nil];
 			[[self pasteboard] setString:newEntry.string forType:NSStringPboardType];
