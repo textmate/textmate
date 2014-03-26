@@ -108,6 +108,7 @@ static NSImage* IconImage (NSURL* url, NSSize size = NSMakeSize(16, 16))
 {
 	OBJC_WATCH_LEAKS(OakFileBrowser);
 	NSUInteger _historyIndex;
+	NSUndoManager* _localUndoManager;
 }
 @property (nonatomic, readwrite)         OakFileBrowserView* view;
 @property (nonatomic)                    OFBHeaderView* headerView;
@@ -992,8 +993,8 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 		if(countOfExistingItems != [aMenu numberOfItems])
 			[aMenu addItem:[NSMenuItem separatorItem]];
 
-		[[aMenu addItemWithTitle:[_view.undoManager undoMenuItemTitle] action:@selector(undo:) keyEquivalent:@""] setTarget:_view.window];
-		[[aMenu addItemWithTitle:[_view.undoManager redoMenuItemTitle] action:@selector(redo:) keyEquivalent:@""] setTarget:_view.window];
+		[[aMenu addItemWithTitle:[_view.undoManager undoMenuItemTitle] action:@selector(undo:) keyEquivalent:@""] setTarget:self];
+		[[aMenu addItemWithTitle:[_view.undoManager redoMenuItemTitle] action:@selector(redo:) keyEquivalent:@""] setTarget:self];
 	}
 
 	if(countOfExistingItems == [aMenu numberOfItems])
@@ -1218,6 +1219,27 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	}];
 }
 
+// =============
+// = Undo/Redo =
+// =============
+
+- (NSUndoManager*)undoManager
+{
+	if(!_localUndoManager)
+		_localUndoManager = [NSUndoManager new];
+	return _localUndoManager;
+}
+
+- (void)undo:(id)sender
+{
+	[_view.undoManager undo];
+}
+
+- (void)redo:(id)sender
+{
+	[_view.undoManager redo];
+}
+
 // ===================
 // = Menu Validation =
 // ===================
@@ -1247,6 +1269,16 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 		res = selectedFiles == 1;
 	else if([item action] == @selector(toggleShowInvisibles:))
 		[item setTitle:self.showExcludedItems ? @"Hide Invisible Files" : @"Show Invisible Files"];
+	else if([item action] == @selector(undo:))
+	{
+		[item setTitle:[_view.undoManager undoMenuItemTitle]];
+		res = [_view.undoManager canUndo];
+	}
+	else if([item action] == @selector(redo:))
+	{
+		[item setTitle:[_view.undoManager redoMenuItemTitle]];
+		res = [_view.undoManager canRedo];
+	}
 
 	NSString* quickLookTitle = [QLPreviewPanel sharedPreviewPanelExists] && [[QLPreviewPanel sharedPreviewPanel] isVisible] ? @"Close Quick Look" : @"Quick Look%@";
 
