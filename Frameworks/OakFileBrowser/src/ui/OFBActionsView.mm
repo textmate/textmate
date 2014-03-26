@@ -49,11 +49,6 @@ static NSButton* OakCreateImageButton (NSImage* image)
 
 		[self.actionsPopUpButton.cell accessibilitySetOverrideValue:@"Actions" forAttribute:NSAccessibilityDescriptionAttribute];
 
-		NSMenu* menu = [NSMenu new];
-		[menu addItemWithTitle:@"Unused" action:@selector(nop:) keyEquivalent:@""];
-		[menu addItemWithTitle:@"Create Folder" action:@selector(nop:) keyEquivalent:@""];
-		self.actionsPopUpButton.menu = menu;
-
 		NSView* wrappedActionsPopUpButton = [NSView new];
 		[wrappedActionsPopUpButton addSubview:self.actionsPopUpButton];
 		[self.actionsPopUpButton setTranslatesAutoresizingMaskIntoConstraints:NO];
