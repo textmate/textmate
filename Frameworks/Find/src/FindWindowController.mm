@@ -414,8 +414,10 @@ static NSButton* OakCreateStopSearchButton ()
 	CONSTRAINT(@"V:[replace]-[ignoreWhitespace]-[wrapAround]",                                       0);
 
 	CONSTRAINT(@"H:|-(>=20,==20@75)-[whereLabel]-[where(<=180)]-[matching]", NSLayoutFormatAlignAllBaseline);
-	CONSTRAINT(@"H:[matching]-[glob]",                                       0);
-	CONSTRAINT(@"H:[where]-(>=8)-[glob]-[actions]",                          NSLayoutFormatAlignAllTop);
+	CONSTRAINT(@"H:[matching]-[glob]-[actions]",                             0);
+	[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self.actionsPopUpButton attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.globTextField    attribute:NSLayoutAttributeTop multiplier:1 constant:1]];
+	[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self.actionsPopUpButton attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.wherePopUpButton attribute:NSLayoutAttributeTop multiplier:1 constant:0]];
+
 	CONSTRAINT(@"V:[ignoreCase]-[where]",                                    NSLayoutFormatAlignAllLeft);
 	[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self.replaceTextField attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self.globTextField attribute:NSLayoutAttributeRight multiplier:1 constant:0]];
 
