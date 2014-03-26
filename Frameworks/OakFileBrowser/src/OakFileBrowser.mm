@@ -992,8 +992,8 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 		if(countOfExistingItems != [aMenu numberOfItems])
 			[aMenu addItem:[NSMenuItem separatorItem]];
 
-		[[aMenu addItemWithTitle:@"Undo" action:@selector(undo:) keyEquivalent:@""] setTarget:_view.window];
-		[[aMenu addItemWithTitle:@"Redo" action:@selector(redo:) keyEquivalent:@""] setTarget:_view.window];
+		[[aMenu addItemWithTitle:[_view.undoManager undoMenuItemTitle] action:@selector(undo:) keyEquivalent:@""] setTarget:_view.window];
+		[[aMenu addItemWithTitle:[_view.undoManager redoMenuItemTitle] action:@selector(redo:) keyEquivalent:@""] setTarget:_view.window];
 	}
 
 	if(countOfExistingItems == [aMenu numberOfItems])
