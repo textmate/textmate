@@ -190,9 +190,21 @@ NSBox* OakCreateHorizontalLine (NSColor* primaryColor, NSColor* secondaryColor)
 
 // =============================
 
+@interface OakDisableAccessibilityImageView : NSImageView
+@end
+
+@implementation OakDisableAccessibilityImageView
+- (NSArray*)accessibilityAttributeNames
+{
+	NSMutableArray* res = [[super accessibilityAttributeNames] mutableCopy];
+	[res removeObjectIdenticalTo:NSAccessibilityChildrenAttribute];
+	return res;
+}
+@end
+
 NSImageView* OakCreateDividerImageView ()
 {
-	NSImageView* res = [[NSImageView alloc] initWithFrame:NSZeroRect];
+	NSImageView* res = [[OakDisableAccessibilityImageView alloc] initWithFrame:NSZeroRect];
 	[res setImage:[NSImage imageNamed:@"Divider" inSameBundleAsClass:[OakDividerLineView class]]];
 	[res setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
 	[res setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationVertical];
