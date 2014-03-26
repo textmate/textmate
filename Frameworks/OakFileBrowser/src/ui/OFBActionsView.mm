@@ -47,8 +47,6 @@ static NSButton* OakCreateImageButton (NSImage* image)
 		[self.favoritesButton.cell accessibilitySetOverrideValue:self.favoritesButton.toolTip forAttribute:NSAccessibilityDescriptionAttribute];
 		[self.scmButton.cell       accessibilitySetOverrideValue:self.scmButton.toolTip       forAttribute:NSAccessibilityDescriptionAttribute];
 
-		[self.actionsPopUpButton.cell accessibilitySetOverrideValue:@"Actions" forAttribute:NSAccessibilityDescriptionAttribute];
-
 		NSView* wrappedActionsPopUpButton = [NSView new];
 		[wrappedActionsPopUpButton addSubview:self.actionsPopUpButton];
 		[self.actionsPopUpButton setTranslatesAutoresizingMaskIntoConstraints:NO];
