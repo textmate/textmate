@@ -167,7 +167,6 @@ static void* kOakPasteboardChooserCurrentEntryBinding = &kOakPasteboardChooserCu
 		[_tableView setNextResponder:self];
 		[self setNextResponder:nextResponder];
 
-		[_searchField bind:NSValueBinding toObject:self withKeyPath:@"filterString" options:nil];
 		[deleteButton bind:NSEnabledBinding toObject:_arrayController withKeyPath:@"canRemove" options:nil];
 		[actionButton bind:NSEnabledBinding toObject:_arrayController withKeyPath:@"canRemove" options:nil];
 		[tableColumn bind:NSValueBinding toObject:_arrayController withKeyPath:@"arrangedObjects.displayString" options:nil];
@@ -182,7 +181,6 @@ static void* kOakPasteboardChooserCurrentEntryBinding = &kOakPasteboardChooserCu
 	[_arrayController removeObserver:self forKeyPath:@"selection" context:kOakPasteboardChooserSelectionBinding];
 	[_pasteboard removeObserver:self forKeyPath:@"currentEntry" context:kOakPasteboardChooserCurrentEntryBinding];
 	[[[_tableView tableColumns] lastObject] unbind:NSValueBinding];
-	[_searchField unbind:NSValueBinding];
 
 	_window.delegate    = nil;
 	_tableView.delegate = nil;
@@ -192,6 +190,7 @@ static void* kOakPasteboardChooserCurrentEntryBinding = &kOakPasteboardChooserCu
 - (void)showWindow:(id)sender
 {
 	self.retainedSelf = self;
+	[_searchField bind:NSValueBinding toObject:self withKeyPath:@"filterString" options:nil];
 	[_arrayController fetch:self];
 	[self performSelector:@selector(arrayControllerDidFinishInitialFetch:) withObject:nil afterDelay:0];
 }
@@ -225,6 +224,7 @@ static void* kOakPasteboardChooserCurrentEntryBinding = &kOakPasteboardChooserCu
 
 - (void)windowWillClose:(NSNotification*)aNotification
 {
+	[_searchField unbind:NSValueBinding];
 	[self performSelector:@selector(setRetainedSelf:) withObject:nil afterDelay:0];
 }
 
