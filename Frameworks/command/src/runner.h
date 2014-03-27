@@ -3,7 +3,6 @@
 
 #include "parser.h"
 #include "process.h"
-#include "reader.h"
 #include <buffer/buffer.h>
 #include <selection/selection.h>
 #include <text/types.h>
@@ -77,20 +76,7 @@ namespace command
 			runner_t* _callback;
 		};
 
-		struct my_reader_t : reader_t
-		{
-			WATCH_LEAKS(my_reader_t);
-
-			my_reader_t (int fd, runner_ptr callback, bool is_error) : reader_t(fd), _callback(callback), _is_error(is_error) { }
-			void receive_data (char const* bytes, size_t len);
-		private:
-			runner_ptr _callback;
-			bool _is_error;
-		};
-
-		typedef std::shared_ptr<my_reader_t> my_reader_ptr;
-
-		friend struct my_reader_t;
+		static void exhaust_fd_in_queue (int fd, runner_ptr runner, bool isError);
 		void receive_data (char const* bytes, size_t len, bool isError);
 
 		friend struct my_process_t;
@@ -114,8 +100,6 @@ namespace command
 		size_t _retain_count;
 
 		my_process_t _process;
-		my_reader_ptr _output_reader;
-		my_reader_ptr _error_reader;
 
 		std::string _out, _err;
 		int _return_code;

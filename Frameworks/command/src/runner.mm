@@ -26,11 +26,6 @@ namespace command
 		_callback->did_exit(rc);
 	}
 
-	void runner_t::my_reader_t::receive_data (char const* bytes, size_t len)
-	{
-		_callback->receive_data(bytes, len, _is_error);
-	}
-
 	// ==================
 	// = Command Runner =
 	// ==================
@@ -51,9 +46,6 @@ namespace command
 		if(--_retain_count == 0)
 		{
 			finish();
-			_output_reader = my_reader_ptr();
-			_error_reader  = my_reader_ptr();
-
 			[NSApp postEvent:[NSEvent otherEventWithType:NSApplicationDefined location:NSZeroPoint modifierFlags:0 timestamp:0 windowNumber:0 context:NULL subtype:0 data1:0 data2:0] atStart:NO];
 		}
 	}
@@ -76,8 +68,8 @@ namespace command
 
 		_process.launch();
 
-		_output_reader = std::make_shared<my_reader_t>(_process.output_fd, shared_from_this(), false);
-		_error_reader  = std::make_shared<my_reader_t>(_process.error_fd, shared_from_this(), true);
+		exhaust_fd_in_queue(_process.output_fd, shared_from_this(), false);
+		exhaust_fd_in_queue(_process.error_fd, shared_from_this(), true);
 
 		if(_command.output == output::new_window && _command.output_format == output_format::html)
 		{
@@ -85,6 +77,27 @@ namespace command
 			_delegate->detach();
 			_did_detach = true;
 		}
+	}
+
+	void runner_t::exhaust_fd_in_queue (int fd, runner_ptr runner, bool isError)
+	{
+		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+			char buf[8192];
+			ssize_t len = 0;
+			while((len = read(fd, buf, sizeof(buf))) != -1)
+			{
+				char const* bytes = buf;
+				dispatch_sync(dispatch_get_main_queue(), ^{
+					runner->receive_data(bytes, len, isError);
+				});
+
+				if(len == 0)
+					break;
+			}
+			if(len == -1)
+				perror("read");
+			close(fd);
+		});
 	}
 
 	void runner_t::send_html_data (char const* bytes, size_t len)
