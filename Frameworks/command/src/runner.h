@@ -91,7 +91,7 @@ namespace command
 		typedef std::shared_ptr<my_reader_t> my_reader_ptr;
 
 		friend struct my_reader_t;
-		void receive_data (char const* bytes, size_t len, bool is_error);
+		void receive_data (char const* bytes, size_t len, bool isError);
 
 		friend struct my_process_t;
 		void did_exit (int rc);

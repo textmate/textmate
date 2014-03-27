@@ -94,13 +94,13 @@ namespace command
 		_callbacks(&callback_t::output, shared_from_this(), bytes, len);
 	}
 
-	void runner_t::receive_data (char const* bytes, size_t len, bool is_error)
+	void runner_t::receive_data (char const* bytes, size_t len, bool isError)
 	{
-		D(DBF_Command_Runner, bug("%zu bytes (error: %s)\n", len, BSTR(is_error)););
+		D(DBF_Command_Runner, bug("%zu bytes (error: %s)\n", len, BSTR(isError)););
 		if(len == 0)
 			return release();
 
-		if(is_error)
+		if(isError)
 			_err.insert(_err.end(), bytes, bytes + len);
 		else if(_output_is_html)
 			send_html_data(bytes, len);
