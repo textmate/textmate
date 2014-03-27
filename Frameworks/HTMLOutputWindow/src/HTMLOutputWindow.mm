@@ -55,15 +55,24 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 	return [[self alloc] initWithRunner:aRunner];
 }
 
+- (void)showWindow:(id)sender
+{
+	self.retainedSelf = self;
+	[self.window makeKeyAndOrderFront:nil];
+}
+
+- (void)close
+{
+	[self.window close];
+}
+
 - (void)setCommandRunner:(command::runner_ptr)aRunner
 {
 	_commandRunner = aRunner;
 
 	self.window.title = [NSString stringWithCxxString:_commandRunner->name()];
 	[self.htmlOutputView loadRequest:URLRequestForCommandRunner(_commandRunner) environment:_commandRunner->environment() autoScrolls:_commandRunner->auto_scroll_output()];
-	[self.window makeKeyAndOrderFront:nil];
-
-	self.retainedSelf = self;
+	[self showWindow:self];
 }
 
 - (BOOL)running
@@ -76,23 +85,28 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 	return _htmlOutputView.needsNewWebView;
 }
 
-- (BOOL)windowShouldClose:(id)aWindow
+- (BOOL)windowShouldClose:(id)sender
 {
 	D(DBF_HTMLOutputWindow, bug("\n"););
 	if(!_commandRunner->running())
-		return [self performSelector:@selector(setRetainedSelf:) withObject:nil afterDelay:0], YES;
+		return YES;
 
 	NSAlert* alert = [NSAlert alertWithMessageText:@"Stop task before closing?" defaultButton:@"Stop Task" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"The job that the task is performing will not be completed."];
 	OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){
 		D(DBF_HTMLOutputWindow, bug("close %s\n", BSTR(returnCode == NSAlertDefaultReturn)););
 		if(returnCode == NSAlertDefaultReturn) /* "Stop" */
 		{
+			[self.window orderOut:self];
 			oak::kill_process_group_in_background(_commandRunner->process_id());
 			[self.window close];
-			[self performSelector:@selector(setRetainedSelf:) withObject:nil afterDelay:0];
 		}
 	});
 	return NO;
+}
+
+- (void)windowWillClose:(NSNotification*)notification
+{
+	[self performSelector:@selector(setRetainedSelf:) withObject:nil afterDelay:0];
 }
 
 - (void)dealloc

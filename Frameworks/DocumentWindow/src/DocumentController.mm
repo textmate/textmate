@@ -1849,7 +1849,7 @@ namespace
 	{
 		if(self.htmlOutputInWindow)
 		{
-			[self.htmlOutputWindowController.window makeKeyAndOrderFront:self];
+			[self.htmlOutputWindowController showWindow:self];
 		}
 		else
 		{
@@ -1865,7 +1865,7 @@ namespace
 
 		if(self.layoutView.htmlOutputView)
 				self.layoutView.htmlOutputView = nil;
-		else	[self.htmlOutputWindowController.window orderOut:self];
+		else	[self.htmlOutputWindowController close];
 	}
 }
 
@@ -1888,7 +1888,7 @@ namespace
 - (IBAction)toggleHTMLOutput:(id)sender
 {
 	if(self.htmlOutputVisible && self.htmlOutputInWindow && ![self.htmlOutputWindowController.window isKeyWindow])
-			[self.htmlOutputWindowController.window makeKeyAndOrderFront:self];
+			[self.htmlOutputWindowController showWindow:self];
 	else	self.htmlOutputVisible = !self.htmlOutputVisible;
 }
 
