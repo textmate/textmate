@@ -2,19 +2,25 @@
 #include <bundles/bundles.h>
 
 template <typename T>
-T pick (std::string const value, ...)
+void parse (plist::dictionary_t const& plist, std::string const& key, T* out, ...)
 {
+	std::string value;
+	if(!plist::get_key_path(plist, key, value))
+		return;
+
 	va_list ap;
-	va_start(ap, value);
+	va_start(ap, out);
 	size_t i = 0;
 	while(char const* str = va_arg(ap, char const*))
 	{
 		if(value == str)
-			return T(i);
+		{
+			*out = T(i);
+			return;
+		}
 		++i;
 	}
 	va_end(ap);
-	return T(0);
 }
 
 plist::dictionary_t convert_command_from_v1 (plist::dictionary_t plist)
@@ -102,32 +108,15 @@ static void setup_fields (plist::dictionary_t const& plist, bundle_command_t& re
 	if(plist::get_key_path(plist, "scope", scopeSelectorString))
 		res.scope_selector = scopeSelectorString;
 
-	if(plist::get_key_path(plist, "beforeRunningCommand", preExecString))
-		res.pre_exec = pick<pre_exec::type>(preExecString, "nop", "saveActiveFile", "saveModifiedFiles", NULL);
-
-	if(plist::get_key_path(plist, "inputFormat", inputFormatString))
-		res.input_format = pick<input_format::type>(inputFormatString, "text", "xml", NULL);
-
-	if(plist::get_key_path(plist, "input", inputString))
-		res.input = pick<input::type>(inputString, "selection", "document", "scope", "line", "word", "character", "none", NULL);
-
-	if(plist::get_key_path(plist, "fallbackInput", inputFallbackString))
-		res.input_fallback = pick<input::type>(inputFallbackString, "selection", "document", "scope", "line", "word", "character", "none", NULL);
-
-	if(plist::get_key_path(plist, "outputFormat", outputFormatString))
-		res.output_format = pick<output_format::type>(outputFormatString, "text", "snippet", "html", "completionList", NULL);
-
-	if(plist::get_key_path(plist, "outputLocation", outputLocationString))
-		res.output = pick<output::type>(outputLocationString, "replaceInput", "replaceDocument", "atCaret", "afterInput", "newWindow", "toolTip", "discard", "replaceSelection", NULL);
-
-	if(plist::get_key_path(plist, "outputCaret", outputCaretString))
-		res.output_caret = pick<output_caret::type>(outputCaretString, "afterOutput", "selectOutput", "interpolateByChar", "interpolateByLine", "heuristic", NULL);
-
-	if(plist::get_key_path(plist, "outputReuse", outputReuseString))
-		res.output_reuse = pick<output_reuse::type>(outputReuseString, "reuseAvailable", "reuseNone", "reuseBusy", "reuseBusyAutoAbort", NULL);
-
-	if(plist::get_key_path(plist, "autoRefresh", autoRefreshString))
-		res.auto_refresh = pick<auto_refresh::type>(autoRefreshString, "newer", "onDocumentChange", NULL);
+	parse(plist, "beforeRunningCommand", &res.pre_exec,       "nop", "saveActiveFile", "saveModifiedFiles", NULL);
+	parse(plist, "inputFormat",          &res.input_format,   "text", "xml", NULL);
+	parse(plist, "input",                &res.input,          "selection", "document", "scope", "line", "word", "character", "none", NULL);
+	parse(plist, "fallbackInput",        &res.input_fallback, "selection", "document", "scope", "line", "word", "character", "none", NULL);
+	parse(plist, "outputFormat",         &res.output_format,  "text", "snippet", "html", "completionList", NULL);
+	parse(plist, "outputLocation",       &res.output,         "replaceInput", "replaceDocument", "atCaret", "afterInput", "newWindow", "toolTip", "discard", "replaceSelection", NULL);
+	parse(plist, "outputCaret",          &res.output_caret,   "afterOutput", "selectOutput", "interpolateByChar", "interpolateByLine", "heuristic", NULL);
+	parse(plist, "outputReuse",          &res.output_reuse,   "reuseAvailable", "reuseNone", "reuseBusy", "reuseBusyAutoAbort", NULL);
+	parse(plist, "autoRefresh",          &res.auto_refresh,   "newer", "onDocumentChange", NULL);
 
 	plist::get_key_path(plist, "autoScrollOutput", res.auto_scroll_output);
 	plist::get_key_path(plist, "disableOutputAutoIndent", res.disable_output_auto_indent);
