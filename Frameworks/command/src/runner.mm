@@ -3,6 +3,7 @@
 #include <OakSystem/process.h>
 #include <io/path.h>
 #include <regexp/format_string.h>
+#include <oak/datatypes.h>
 
 OAK_DEBUG_VAR(Command_Runner);
 
@@ -20,17 +21,11 @@ namespace command
 			command->insert(0, "#!/usr/bin/env bash\n[[ -f \"${TM_SUPPORT_PATH}/lib/bash_init.sh\" ]] && . \"${TM_SUPPORT_PATH}/lib/bash_init.sh\"\n\n");
 	}
 
-	void runner_t::my_process_t::did_exit (int rc)
-	{
-		process_t::did_exit(rc);
-		_callback->did_exit(rc);
-	}
-
 	// ==================
 	// = Command Runner =
 	// ==================
 
-	runner_t::runner_t (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, std::map<std::string, std::string> const& environment, std::string const& pwd, delegate_ptr delegate) : _command(command), _environment(environment), _directory(pwd), _delegate(delegate), _input_was_selection(false), _output_is_html(false), _did_detach(false), _retain_count(3), _process(this), _return_code(-2)
+	runner_t::runner_t (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, std::map<std::string, std::string> const& environment, std::string const& pwd, delegate_ptr delegate) : _command(command), _environment(environment), _directory(pwd), _delegate(delegate), _input_was_selection(false), _output_is_html(false), _did_detach(false), _retain_count(3), _return_code(-2)
 	{
 		fix_shebang(&_command.command);
 	}
@@ -50,26 +45,71 @@ namespace command
 		}
 	}
 
+	static std::tuple<pid_t, int, int> my_fork (char* cmd, int stdinFd, std::map<std::string, std::string> const& environment, std::string const& cwd)
+	{
+		for(auto const& pair : environment)
+		{
+			if(pair.first.size() + pair.second.size() + 2 >= ARG_MAX)
+				fprintf(stderr, "*** variable exceeds ARG_MAX: %s\n", pair.first.c_str());
+		}
+
+		int outputPipe[2], errorPipe[2];
+		pipe(outputPipe);
+		pipe(errorPipe);
+		fcntl(outputPipe[0], F_SETFD, FD_CLOEXEC);
+		fcntl(errorPipe[0],  F_SETFD, FD_CLOEXEC);
+
+		char const* workingDir = cwd.c_str();
+		oak::c_array env(environment);
+
+		pid_t pid = vfork();
+		if(pid == 0)
+		{
+			int const signals[] = { SIGINT, SIGTERM, SIGPIPE, SIGUSR1 };
+			for(int sig : signals) signal(sig, SIG_DFL);
+
+			int const oldOutErr[] = { 0, 1, 2 };
+			int const newOutErr[] = { stdinFd, outputPipe[1], errorPipe[1] };
+			for(int fd : oldOutErr) close(fd);
+			for(int fd : newOutErr) dup(fd);
+			for(int fd : newOutErr) close(fd);
+
+			setpgid(0, getpid());
+			chdir(workingDir);
+
+			char* argv[] = { cmd, NULL };
+			execve(argv[0], argv, env);
+			perror("interpreter failed");
+			_exit(0);
+		}
+
+		int const fds[] = { stdinFd, outputPipe[1], errorPipe[1] };
+		for(int fd : fds) close(fd);
+
+		return std::make_tuple(pid, outputPipe[0], errorPipe[0]);
+	}
+
 	void runner_t::launch ()
 	{
 		ASSERT(_delegate);
+		ASSERT(_command.command.find("#!") == 0);
+
+		_temp_path = strdup(path::join(path::temp(), "textmate_command.XXXXXX").c_str());
+		int cmdFd = mkstemp(_temp_path);
+		fchmod(cmdFd, S_IRWXU);
+		write(cmdFd, _command.command.data(), _command.command.size());
+		close(cmdFd);
 
 		int inputPipe[2];
 		pipe(inputPipe);
 		fcntl(inputPipe[1], F_SETFD, FD_CLOEXEC);
 		_input_range = _command.input == input::nothing ? (close(inputPipe[1]), ng::range_t()) : _delegate->write_unit_to_fd(inputPipe[1], _command.input, _command.input_fallback, _command.input_format, _command.scope_selector, _environment, &_input_was_selection);
 
-		// ----------8<----------
+		int outputFd, errorFd;
+		std::tie(_process_id, outputFd, errorFd) = my_fork(_temp_path, inputPipe[0], _environment, _directory);
 
-		_process.command     = _command.command;
-		_process.input_fd    = inputPipe[0];
-		_process.environment = _environment;
-		_process.directory   = _directory;
-
-		_process.launch();
-
-		exhaust_fd_in_queue(_process.output_fd, shared_from_this(), false);
-		exhaust_fd_in_queue(_process.error_fd, shared_from_this(), true);
+		exhaust_fd_in_queue(outputFd, shared_from_this(), false);
+		exhaust_fd_in_queue(errorFd, shared_from_this(), true);
 
 		if(_command.output == output::new_window && _command.output_format == output_format::html)
 		{
@@ -77,6 +117,8 @@ namespace command
 			_delegate->detach();
 			_did_detach = true;
 		}
+
+		wait_for_process_in_queue(_process_id, shared_from_this());
 	}
 
 	void runner_t::exhaust_fd_in_queue (int fd, runner_ptr runner, bool isError)
@@ -97,6 +139,26 @@ namespace command
 			if(len == -1)
 				perror("read");
 			close(fd);
+		});
+	}
+
+	void runner_t::wait_for_process_in_queue (pid_t pid, runner_ptr runner)
+	{
+		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+			int status = 0;
+			bool didFindProcess = waitpid(pid, &status, 0) == pid;
+			int rc = didFindProcess && WIFEXITED(status) ? WEXITSTATUS(status) : (WIFSIGNALED(status) ? 0 : -1);
+
+			if(!didFindProcess)
+				fprintf(stderr, "*** no process for pid %d\n", pid);
+			else if(WIFSIGNALED(status))
+				fprintf(stderr, "*** process terminated: %s\n", strsignal(WTERMSIG(status)));
+			else if(!WIFEXITED(status))
+				fprintf(stderr, "*** process terminated abnormally %d\n", status);
+
+			dispatch_sync(dispatch_get_main_queue(), ^{
+				runner->did_exit(rc);
+			});
 		});
 	}
 
@@ -161,16 +223,23 @@ namespace command
 	{
 		D(DBF_Command_Runner, bug("%d\n", rc););
 		_return_code = rc;
+		_process_id = -1;
 		release();
 	}
 
 	void runner_t::finish ()
 	{
+		ASSERT(_temp_path);
+
 		std::string newOut, newErr;
-		oak::replace_copy(_out.begin(), _out.end(), _process.temp_path, _process.temp_path + strlen(_process.temp_path), _command.name.begin(), _command.name.end(), back_inserter(newOut));
-		oak::replace_copy(_err.begin(), _err.end(), _process.temp_path, _process.temp_path + strlen(_process.temp_path), _command.name.begin(), _command.name.end(), back_inserter(newErr));
+		oak::replace_copy(_out.begin(), _out.end(), _temp_path, _temp_path + strlen(_temp_path), _command.name.begin(), _command.name.end(), back_inserter(newOut));
+		oak::replace_copy(_err.begin(), _err.end(), _temp_path, _temp_path + strlen(_temp_path), _command.name.begin(), _command.name.end(), back_inserter(newErr));
 		newOut.swap(_out);
 		newErr.swap(_err);
+
+		unlink(_temp_path);
+		free(_temp_path);
+		_temp_path = nullptr;
 
 		output::type placement         = _command.output;
 		output_format::type format     = _command.output_format;

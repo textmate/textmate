@@ -2,7 +2,6 @@
 #define COMMAND_RUNNER_H_MW7OSOTP
 
 #include "parser.h"
-#include "process.h"
 #include <buffer/buffer.h>
 #include <selection/selection.h>
 #include <text/types.h>
@@ -61,25 +60,15 @@ namespace command
 		bool auto_scroll_output () const                               { return _command.auto_scroll_output; }
 		output_reuse::type output_reuse () const                       { return _command.output_reuse; }
 		auto_refresh::type auto_refresh () const                       { return _command.auto_refresh; }
-		bool running () const                                          { return _process.is_running; }
-		pid_t process_id () const                                      { return _process.process_id; }
+		bool running () const                                          { return _process_id != -1; }
+		pid_t process_id () const                                      { return _process_id; }
 		std::map<std::string, std::string> const& environment () const { return _environment; }
 
 	private:
-		struct my_process_t : process_t
-		{
-			WATCH_LEAKS(my_process_t);
-
-			my_process_t (runner_t* callback) : _callback(callback) { }
-			void did_exit (int rc);
-		private:
-			runner_t* _callback;
-		};
-
 		static void exhaust_fd_in_queue (int fd, runner_ptr runner, bool isError);
 		void receive_data (char const* bytes, size_t len, bool isError);
 
-		friend struct my_process_t;
+		static void wait_for_process_in_queue (pid_t pid, runner_ptr runner);
 		void did_exit (int rc);
 
 		void send_html_data (char const* bytes, size_t len);
@@ -99,7 +88,8 @@ namespace command
 		bool _did_detach;
 		size_t _retain_count;
 
-		my_process_t _process;
+		pid_t _process_id = -1;
+		char* _temp_path = nullptr;
 
 		std::string _out, _err;
 		int _return_code;
