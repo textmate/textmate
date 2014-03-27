@@ -94,7 +94,7 @@ plist::dictionary_t convert_command_from_v1 (plist::dictionary_t plist)
 
 static void setup_fields (plist::dictionary_t const& plist, bundle_command_t& res)
 {
-	std::string scopeSelectorString, preExecString, inputString, inputFormatString, inputFallbackString, outputFormatString, outputLocationString, outputCaretString, outputReuseString;
+	std::string scopeSelectorString, preExecString, inputString, inputFormatString, inputFallbackString, outputFormatString, outputLocationString, outputCaretString, outputReuseString, autoRefreshString;
 
 	plist::get_key_path(plist, "name", res.name);
 	plist::get_key_path(plist, "uuid", res.uuid);
@@ -125,6 +125,9 @@ static void setup_fields (plist::dictionary_t const& plist, bundle_command_t& re
 
 	if(plist::get_key_path(plist, "outputReuse", outputReuseString))
 		res.output_reuse = pick<output_reuse::type>(outputReuseString, "reuseAvailable", "reuseNone", "reuseBusy", "reuseBusyAutoAbort", NULL);
+
+	if(plist::get_key_path(plist, "autoRefresh", autoRefreshString))
+		res.auto_refresh = pick<auto_refresh::type>(autoRefreshString, "newer", "onDocumentChange", NULL);
 
 	plist::get_key_path(plist, "autoScrollOutput", res.auto_scroll_output);
 	plist::get_key_path(plist, "disableOutputAutoIndent", res.disable_output_auto_indent);

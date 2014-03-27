@@ -61,6 +61,7 @@ namespace command
 		oak::uuid_t const& uuid () const                               { return _command.uuid; }
 		bool auto_scroll_output () const                               { return _command.auto_scroll_output; }
 		output_reuse::type output_reuse () const                       { return _command.output_reuse; }
+		auto_refresh::type auto_refresh () const                       { return _command.auto_refresh; }
 		bool running () const                                          { return _process.is_running; }
 		pid_t process_id () const                                      { return _process.process_id; }
 		std::map<std::string, std::string> const& environment () const { return _environment; }
