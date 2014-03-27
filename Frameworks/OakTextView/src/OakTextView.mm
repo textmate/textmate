@@ -825,7 +825,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 - (void)ensureSelectionIsInVisibleArea:(id)sender
 {
 	self.needsEnsureSelectionIsInVisibleArea = NO;
-	if(([NSEvent pressedMouseButtons] & 1) == 1) // User is drag-selecting
+	if([[self.window currentEvent] type] == NSLeftMouseDragged) // User is drag-selecting
 		return;
 
 	ng::range_t range = editor->ranges().last();
