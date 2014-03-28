@@ -87,7 +87,7 @@ static id RetrieveObjectAtKeyPath (std::string const& keyPath)
 - (void)addObject:(id)newItem;
 {
 	D(DBF_Find_HistoryList, bug("adding %s to list %s\n", [[newItem description] UTF8String], [self.name UTF8String]););
-	if(NSIsEmptyString(newItem) || [newItem isEqual:[self.list firstObject]])
+	if(OakIsEmptyString(newItem) || [newItem isEqual:[self.list firstObject]])
 		return;
 
 	[self willChangeValueForKey:@"head"];

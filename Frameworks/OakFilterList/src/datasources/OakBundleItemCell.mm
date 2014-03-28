@@ -25,7 +25,7 @@
 
 - (void)drawWithFrame:(NSRect)cellFrame inView:(NSView*)controlView
 {
-	if(NSNotEmptyString(self.attributedTabTrigger.string))
+	if(OakNotEmptyString(self.attributedTabTrigger.string))
 	{
 		NSMutableAttributedString* attrStr = [self.attributedTabTrigger mutableCopy];
 
@@ -58,7 +58,7 @@
 
 		CFRelease(str);
 	}
-	else if(NSNotEmptyString(self.keyEquivalent))
+	else if(OakNotEmptyString(self.keyEquivalent))
 	{
 		size_t keyStartsAt = 0;
 		std::string const glyphString = ns::glyphs_for_event_string(to_s(self.keyEquivalent), &keyStartsAt);

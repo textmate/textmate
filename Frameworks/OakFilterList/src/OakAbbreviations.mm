@@ -53,7 +53,7 @@ static NSString* const FCExpandedStringKey	= @"long";
 	NSMutableArray* exactMatches  = [NSMutableArray array];
 	NSMutableArray* prefixMatches = [NSMutableArray array];
 
-	if(NSIsEmptyString(anAbbreviation))
+	if(OakIsEmptyString(anAbbreviation))
 		return exactMatches;
 
 	for(NSDictionary* binding in self.bindings)
@@ -76,7 +76,7 @@ static NSString* const FCExpandedStringKey	= @"long";
 - (void)learnAbbreviation:(NSString*)anAbbreviation forString:(NSString*)aString
 {
 	D(DBF_FilterList_Abbreviations, bug("%s → %s\n", [anAbbreviation UTF8String], [aString UTF8String]););
-	if(NSIsEmptyString(anAbbreviation) || NSIsEmptyString(aString))
+	if(OakIsEmptyString(anAbbreviation) || OakIsEmptyString(aString))
 		return;
 
 	NSDictionary* dict = @{ FCAbbreviationKey : anAbbreviation, FCExpandedStringKey : aString };

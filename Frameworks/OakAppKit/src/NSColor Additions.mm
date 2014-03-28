@@ -5,7 +5,7 @@
 @implementation NSColor (TMColorAdditions)
 + (NSColor*)colorWithString:(NSString*)aString
 {
-	if(NSIsEmptyString(aString))
+	if(OakIsEmptyString(aString))
 		return nil;
 
 	unsigned int red = 0, green = 0, blue = 0, alpha = 0xFF;

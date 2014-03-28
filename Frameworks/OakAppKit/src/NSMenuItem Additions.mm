@@ -112,7 +112,7 @@ static char const* kOakMenuItemTabTrigger    = "OakMenuItemTabTrigger";
 	NSImage* icon = nil;
 	if([[NSFileManager defaultManager] fileExistsAtPath:path])
 		icon = [OakFileIconImage fileIconImageWithPath:path size:NSMakeSize(16, 16)];
-	else if(NSNotEmptyString([path pathExtension]))
+	else if(OakNotEmptyString([path pathExtension]))
 		icon = [[NSWorkspace sharedWorkspace] iconForFileType:[path pathExtension]];
 	else
 		icon = [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kUnknownFSObjectIcon)];

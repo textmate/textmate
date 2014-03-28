@@ -175,7 +175,7 @@ static ino_t inode (std::string const& path)
 		if(generalPboard)
 		{
 			string = [names componentsJoinedByString:@"\r"];
-			if(NSNotEmptyString(string))
+			if(OakNotEmptyString(string))
 				[types addObject:NSStringPboardType];
 		}
 		else if(dragPboard)

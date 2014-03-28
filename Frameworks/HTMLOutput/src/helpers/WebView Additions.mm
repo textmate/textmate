@@ -25,7 +25,7 @@
 	while(DOMNode* node = [iter nextNode])
 		[str appendString:[node nodeValue]];
 
-	return NSIsEmptyString(str) ? nil : str;
+	return OakIsEmptyString(str) ? nil : str;
 }
 
 - (IBAction)copySelectionToFindPboard:(id)sender
@@ -64,14 +64,14 @@
 - (IBAction)findNext:(id)sender
 {
 	OakPasteboardEntry* entry = [[OakPasteboard pasteboardWithName:NSFindPboard] current];
-	if(NSNotEmptyString(entry.string))
+	if(OakNotEmptyString(entry.string))
 		[self searchFor:entry.string direction:YES caseSensitive:![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFindIgnoreCase] wrap:[[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFindWrapAround]];
 }
 
 - (IBAction)findPrevious:(id)sender
 {
 	OakPasteboardEntry* entry = [[OakPasteboard pasteboardWithName:NSFindPboard] current];
-	if(NSNotEmptyString(entry.string))
+	if(OakNotEmptyString(entry.string))
 		[self searchFor:entry.string direction:NO caseSensitive:![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFindIgnoreCase] wrap:[[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFindWrapAround]];
 }
 
@@ -80,7 +80,7 @@
 	WebDataSource* dataSource = [[self mainFrame] dataSource];
 
 	NSString* encoding = [[dataSource textEncodingName] lowercaseString];
-	if(NSIsEmptyString(encoding))
+	if(OakIsEmptyString(encoding))
 		encoding = @"utf-8";
 
 	std::string str;

@@ -260,7 +260,7 @@ static void* kOakPasteboardChooserCurrentEntryBinding = &kOakPasteboardChooserCu
 	_filterString = newString;
 	[self didChangeValueForKey:@"filterString"];
 
-	if(NSIsEmptyString(_filterString))
+	if(OakIsEmptyString(_filterString))
 			_arrayController.fetchPredicate = [NSPredicate predicateWithFormat:@"pasteboard == %@", _pasteboard];
 	else	_arrayController.fetchPredicate = [NSPredicate predicateWithFormat:@"pasteboard == %@ AND string LIKE[nc] %@", _pasteboard, [NSString stringWithFormat:@"*%@*", _filterString]];
 	[_arrayController fetch:self];

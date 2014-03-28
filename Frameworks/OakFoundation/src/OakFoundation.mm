@@ -1,11 +1,11 @@
 #import "OakFoundation.h"
 
-BOOL NSIsEmptyString (NSString* str)
+BOOL OakIsEmptyString (NSString* str)
 {
 	return !str || [str isEqualToString:@""];
 }
 
-BOOL NSNotEmptyString (NSString* str)
+BOOL OakNotEmptyString (NSString* str)
 {
 	return str && ![str isEqualToString:@""];
 }

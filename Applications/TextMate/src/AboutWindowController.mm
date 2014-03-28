@@ -135,7 +135,7 @@ static NSTextField* OakCreateTextField ()
 
 - (void)validateOwnerAndLicense
 {
-	bool hasContent   = NSNotEmptyString(self.trimmedOwnerString) && NSNotEmptyString(self.licenseString);
+	bool hasContent   = OakNotEmptyString(self.trimmedOwnerString) && OakNotEmptyString(self.licenseString);
 	bool validLicense = hasContent && license::is_valid(license::decode(to_s(self.licenseString)), to_s(self.trimmedOwnerString));
 
 	self.canRegister  = validLicense;

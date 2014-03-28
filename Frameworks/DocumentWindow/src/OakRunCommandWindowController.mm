@@ -111,7 +111,7 @@
 
 - (void)commandChanged:(NSNotification*)notification
 {
-	self.executeButton.enabled = NSNotEmptyString([self.commandComboBox.stringValue stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]);
+	self.executeButton.enabled = OakNotEmptyString([self.commandComboBox.stringValue stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]);
 }
 
 - (IBAction)execute:(id)sender

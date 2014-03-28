@@ -45,7 +45,7 @@ static NSString* const kRecordingPlaceholderString = @"…";
 
 	_eventString = aString;
 
-	self.showClearButton = NSNotEmptyString(self.eventString) && !self.recording;
+	self.showClearButton = OakNotEmptyString(self.eventString) && !self.recording;
 	self.displayString = self.recording ? kRecordingPlaceholderString : [NSString stringWithCxxString:ns::glyphs_for_event_string(to_s(_eventString))];
 
 	for(NSDictionary* info in _observers)
@@ -103,7 +103,7 @@ static NSString* const kRecordingPlaceholderString = @"…";
 		return;
 
 	_recording = flag;
-	self.showClearButton = NSNotEmptyString(self.eventString) && !self.recording;
+	self.showClearButton = OakNotEmptyString(self.eventString) && !self.recording;
 	self.displayString = _recording ? kRecordingPlaceholderString : [NSString stringWithCxxString:ns::glyphs_for_event_string(to_s(self.eventString))];
 
 	if(self.disableGlobalHotkeys)

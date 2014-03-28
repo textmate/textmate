@@ -537,7 +537,7 @@ static NSButton* OakCreateStopSearchButton ()
 		OakFindFullWordsOption         : @(self.fullWords),
 	};
 
-	if(NSNotEmptyString(_findString))
+	if(OakNotEmptyString(_findString))
 	{
 		OakPasteboardEntry* oldEntry = [[OakPasteboard pasteboardWithName:NSFindPboard] current];
 		if(!oldEntry || ![oldEntry.string isEqualToString:_findString])
