@@ -254,7 +254,7 @@ static size_t line_count (std::string const& text)
 	}
 }
 
-- (int)visibleRows                             { return (int)floorf(NSHeight([tableView visibleRect]) / ([tableView rowHeight]+[tableView intercellSpacing].height)) - 1; }
+- (int)visibleRows                             { return (int)floor(NSHeight([tableView visibleRect]) / ([tableView rowHeight]+[tableView intercellSpacing].height)) - 1; }
 
 - (void)moveUp:(id)sender                      { [self moveSelectedRowByOffset:-1]; }
 - (void)moveDown:(id)sender                    { [self moveSelectedRowByOffset:+1];}

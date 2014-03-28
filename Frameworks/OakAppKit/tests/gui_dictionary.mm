@@ -122,7 +122,7 @@
 
 - (NSUInteger)characterIndexForPoint:(NSPoint)thePoint
 {
-	NSUInteger index = floorf([self convertPoint:[[self window] convertScreenToBase:thePoint] fromView:nil].x / 7.0f);
+	NSUInteger index = floor([self convertPoint:[[self window] convertScreenToBase:thePoint] fromView:nil].x / 7.0f);
 	NSLog(@"%s %@ (%lu)", sel_getName(_cmd), NSStringFromPoint(thePoint), index);
 	return index;
 }

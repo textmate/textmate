@@ -169,7 +169,7 @@
 	}
 }
 
-- (int)visibleRows                                      { return (int)floorf(NSHeight([filterView visibleRect]) / ([filterView rowHeight]+[filterView intercellSpacing].height)) - 1; }
+- (int)visibleRows                                      { return (int)floor(NSHeight([filterView visibleRect]) / ([filterView rowHeight]+[filterView intercellSpacing].height)) - 1; }
 
 - (void)moveUp:(id)sender                               { [self moveSelectedRowByOffset:-1 extendingSelection:NO]; }
 - (void)moveDown:(id)sender                             { [self moveSelectedRowByOffset:+1 extendingSelection:NO]; }
