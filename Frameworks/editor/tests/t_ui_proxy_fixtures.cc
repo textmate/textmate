@@ -43,12 +43,9 @@ void setup_fixtures ()
 				document::document_ptr _document;
 			};
 
-			// The following is only required because runner_t::wait currently uses a CFRunLoop
-			dispatch_sync(dispatch_get_main_queue(), ^{
-				command::runner_ptr runner = command::runner(command, buffer, selection, baseEnv, command::delegate_ptr((command::delegate_t*)new delegate_t(document)));
-				runner->launch();
-				runner->wait();
-			});
+			command::runner_ptr runner = command::runner(command, buffer, selection, baseEnv, command::delegate_ptr((command::delegate_t*)new delegate_t(document)));
+			runner->launch();
+			runner->wait_for_command();
 		}
 
 	} proxy;

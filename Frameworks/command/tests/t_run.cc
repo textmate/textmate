@@ -97,7 +97,7 @@ public:
 		delegate_ptr delegate(new delegate_t);
 		command::runner_ptr runner = command::runner(parse_command(convert_command_from_v1(plist)), ng::buffer_t(), ng::ranges_t(), variables_for_path(oak::basic_environment()), delegate);
 		runner->launch();
-		runner->wait(true);
+		runner->wait_for_command();
 		return delegate;
 	}
 

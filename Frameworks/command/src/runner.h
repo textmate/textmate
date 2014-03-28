@@ -50,7 +50,7 @@ namespace command
 		runner_t (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, std::map<std::string, std::string> const& environment, std::string const& pwd, delegate_ptr delegate);
 
 		void launch (dispatch_queue_t queue = dispatch_get_main_queue());
-		void wait (bool alsoForDetached = false);
+		void wait ();
 		void wait_for_command ();
 
 		void add_callback (callback_t* callback)    { _callbacks.add(callback); }

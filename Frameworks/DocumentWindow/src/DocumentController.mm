@@ -1073,7 +1073,7 @@ namespace
 						if(returnCode == NSAlertDefaultReturn) /* "Stop" */
 						{
 							oak::kill_process_group_in_background(candidate.commandRunner->process_id());
-							candidate.commandRunner->wait(true);
+							candidate.commandRunner->wait_for_command();
 						}
 						callback(returnCode == NSAlertDefaultReturn);
 					});
@@ -1084,7 +1084,7 @@ namespace
 				case output_reuse::abort_and_reuse_busy:
 				{
 					oak::kill_process_group_in_background(candidate.commandRunner->process_id());
-					candidate.commandRunner->wait(true);
+					candidate.commandRunner->wait_for_command();
 				}
 				break;
 			}

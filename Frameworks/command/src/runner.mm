@@ -167,10 +167,10 @@ namespace command
 		_callbacks(&callback_t::output, shared_from_this(), bytes, len);
 	}
 
-	void runner_t::wait (bool alsoForDetached)
+	void runner_t::wait ()
 	{
 		NSMutableArray* queuedEvents = [NSMutableArray array];
-		while(_process_id != -1 && (alsoForDetached || !_did_detach))
+		while(_process_id != -1 && !_did_detach)
 		{
 			if(NSEvent* event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:[NSDate distantFuture] inMode:NSDefaultRunLoopMode dequeue:YES])
 			{
