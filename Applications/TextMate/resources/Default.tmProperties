@@ -47,6 +47,9 @@ softTabs         = true
 [ "/System/Library/Frameworks/**/Headers/**/*" ]
 encoding         = "MACROMAN"
 
+[ "hg-editor-*.txt" ]
+fileType         = "text.hg-commit"
+
 [ "{BUILD,README,INSTALL,LICENSE,COPYING,TODO}" ]
 fileType         = "text.plain"
 
