@@ -77,7 +77,7 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 
 - (BOOL)running
 {
-	return _commandRunner->running();
+	return self.htmlOutputView.runningCommand;
 }
 
 - (BOOL)needsNewWebView
@@ -88,7 +88,7 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 - (BOOL)windowShouldClose:(id)sender
 {
 	D(DBF_HTMLOutputWindow, bug("\n"););
-	if(!_commandRunner->running())
+	if(!self.running)
 		return YES;
 
 	NSAlert* alert = [NSAlert alertWithMessageText:@"Stop task before closing?" defaultButton:@"Stop Task" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"The job that the task is performing will not be completed."];
