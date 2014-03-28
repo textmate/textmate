@@ -13,7 +13,7 @@ static std::string trim_right (std::string const& str, std::string const& trimCh
 	return len == std::string::npos ? "" : str.substr(0, len+1);
 }
 
-static std::tuple<pid_t, int, int> my_fork (char* cmd, int stdinFd, std::map<std::string, std::string> const& environment, std::string const& cwd)
+static std::tuple<pid_t, int, int> my_fork (char const* cmd, int stdinFd, std::map<std::string, std::string> const& environment, char const* workingDir)
 {
 	for(auto const& pair : environment)
 	{
@@ -27,7 +27,6 @@ static std::tuple<pid_t, int, int> my_fork (char* cmd, int stdinFd, std::map<std
 	fcntl(outputPipe[0], F_SETFD, FD_CLOEXEC);
 	fcntl(errorPipe[0],  F_SETFD, FD_CLOEXEC);
 
-	char const* workingDir = cwd.c_str();
 	oak::c_array env(environment);
 
 	pid_t pid = vfork();
@@ -45,7 +44,7 @@ static std::tuple<pid_t, int, int> my_fork (char* cmd, int stdinFd, std::map<std
 		setpgid(0, getpid());
 		chdir(workingDir);
 
-		char* argv[] = { cmd, NULL };
+		char* argv[] = { (char*)cmd, NULL };
 		execve(argv[0], argv, env);
 		perror("interpreter failed");
 		_exit(0);
@@ -75,11 +74,11 @@ static void exhaust_fd_in_queue (dispatch_group_t group, int fd, void(^handler)(
 	});
 }
 
-static pid_t run_command (char* cmd, int stdinFd, std::map<std::string, std::string> const& env, std::string const& cwd, void(^stdoutHandler)(char const* bytes, size_t len), void(^stderrHandler)(char const* bytes, size_t len), void(^completionHandler)(int status))
+static pid_t run_command (std::string const& cmd, int stdinFd, std::map<std::string, std::string> const& env, std::string const& cwd, void(^stdoutHandler)(char const* bytes, size_t len), void(^stderrHandler)(char const* bytes, size_t len), void(^completionHandler)(int status))
 {
 	pid_t pid;
 	int outputFd, errorFd;
-	std::tie(pid, outputFd, errorFd) = my_fork(cmd, stdinFd, env, cwd);
+	std::tie(pid, outputFd, errorFd) = my_fork(cmd.c_str(), stdinFd, env, cwd.c_str());
 
 	dispatch_group_t group = dispatch_group_create();
 
@@ -128,7 +127,8 @@ namespace command
 		ASSERT(_delegate);
 		ASSERT(_command.command.find("#!") == 0);
 
-		_temp_path = strdup(path::temp("command", _command.command).c_str());
+		_temp_path = path::temp("command", _command.command);
+		ASSERT(_temp_path != NULL_STR);
 
 		int inputPipe[2];
 		pipe(inputPipe);
@@ -210,17 +210,14 @@ namespace command
 
 		_process_id = -1;
 
-		ASSERT(_temp_path);
-
 		std::string newOut, newErr;
-		oak::replace_copy(_out.begin(), _out.end(), _temp_path, _temp_path + strlen(_temp_path), _command.name.begin(), _command.name.end(), back_inserter(newOut));
-		oak::replace_copy(_err.begin(), _err.end(), _temp_path, _temp_path + strlen(_temp_path), _command.name.begin(), _command.name.end(), back_inserter(newErr));
+		oak::replace_copy(_out.begin(), _out.end(), _temp_path.begin(), _temp_path.end(), _command.name.begin(), _command.name.end(), back_inserter(newOut));
+		oak::replace_copy(_err.begin(), _err.end(), _temp_path.begin(), _temp_path.end(), _command.name.begin(), _command.name.end(), back_inserter(newErr));
 		newOut.swap(_out);
 		newErr.swap(_err);
 
-		unlink(_temp_path);
-		free(_temp_path);
-		_temp_path = nullptr;
+		unlink(_temp_path.c_str());
+		_temp_path = NULL_STR;
 
 		output::type placement         = _command.output;
 		output_format::type format     = _command.output_format;

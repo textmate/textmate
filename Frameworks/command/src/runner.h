@@ -80,7 +80,7 @@ namespace command
 		bool _did_detach;
 
 		pid_t _process_id = -1;
-		char* _temp_path = nullptr;
+		std::string _temp_path = NULL_STR;
 
 		std::string _out, _err;
 		bool _user_abort = false;
