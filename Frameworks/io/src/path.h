@@ -96,7 +96,7 @@ namespace path
 	PUBLIC std::string cwd ();
 	PUBLIC std::string home ();
 	PUBLIC std::string trash (std::string const& forPath);
-	PUBLIC std::string temp (std::string const& file = NULL_STR);
+	PUBLIC std::string temp (std::string const& file = NULL_STR, std::string const& content = NULL_STR);
 	PUBLIC std::string cache (std::string const& file = NULL_STR);
 	PUBLIC std::string desktop ();
 

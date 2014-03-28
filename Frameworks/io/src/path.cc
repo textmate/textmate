@@ -932,39 +932,47 @@ namespace path
 		return FSFindFolder(info.volume, kTrashFolderType, false, &res) == noErr ? to_s(res) : NULL_STR;;
 	}
 
-	static std::string temp_file_in_directory (std::string const& path, std::string const& file)
-	{
-		if(file == NULL_STR)
-			return path;
-
-		std::string res = path::join(path, std::string(getprogname() ?: "untitled") + "_" + file + ".XXXXXX");
-		res.c_str(); // ensure the buffer is zero terminated, should probably move to a better approach
-		mktemp(&res[0]);
-
-		D(DBF_IO_Path, bug("%s\n", res.c_str()););
-		return res;
-	}
-
-	std::string temp (std::string const& file)
+	static std::string system_directory (int name, std::string const& file, std::string const& content)
 	{
 		std::string str(128, ' ');
-		size_t len = confstr(_CS_DARWIN_USER_TEMP_DIR, &str[0], str.size());
+		size_t len = confstr(name, &str[0], str.size());
 		if(0 < len && len < 128) // if length is 128 the path was truncated and unusable
 				str.resize(len - 1);
 		else	str = getenv("TMPDIR") ?: "/tmp";
 
-		return temp_file_in_directory(str, file);
+		if(file != NULL_STR)
+		{
+			str = join(str, std::string(getprogname() ?: "untitled") + "_" + file + ".XXXXXX");
+			str.c_str(); // ensure the buffer is zero terminated, should probably move to a better approach
+
+			if(content != NULL_STR)
+			{
+				int fd = mkstemp(&str[0]);
+				fchmod(fd, S_IRWXU);
+				if(write(fd, content.data(), content.size()) != content.size())
+				{
+					perror("write");
+					unlink(str.c_str());
+					str = NULL_STR;
+				}
+				close(fd);
+			}
+			else
+			{
+				mktemp(&str[0]);
+			}
+		}
+		return str;
+	}
+
+	std::string temp (std::string const& file, std::string const& content)
+	{
+		return system_directory(_CS_DARWIN_USER_TEMP_DIR, file, content);
 	}
 
 	std::string cache (std::string const& file)
 	{
-		std::string str(128, ' ');
-		size_t len = confstr(_CS_DARWIN_USER_CACHE_DIR, &str[0], str.size());
-		if(0 < len && len < 128) // if length is 128 the path was truncated and unusable
-				str.resize(len - 1);
-		else	str = path::temp();
-
-		return temp_file_in_directory(str, file);
+		return system_directory(_CS_DARWIN_USER_CACHE_DIR, file, NULL_STR);
 	}
 
 	std::string desktop ()
