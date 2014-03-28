@@ -56,7 +56,7 @@ static std::tuple<pid_t, int, int> my_fork (char const* cmd, int stdinFd, std::m
 	return std::make_tuple(pid, outputPipe[0], errorPipe[0]);
 }
 
-static void exhaust_fd_in_queue (dispatch_group_t group, int fd, void(^handler)(char const* bytes, size_t len))
+static void exhaust_fd_in_queue (dispatch_group_t group, dispatch_queue_t queue, int fd, void(^handler)(char const* bytes, size_t len))
 {
 	dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 		char buf[8192];
@@ -64,7 +64,7 @@ static void exhaust_fd_in_queue (dispatch_group_t group, int fd, void(^handler)(
 		while((len = read(fd, buf, sizeof(buf))) > 0)
 		{
 			char const* bytes = buf;
-			dispatch_sync(dispatch_get_main_queue(), ^{
+			dispatch_sync(queue, ^{
 				handler(bytes, len);
 			});
 		}
@@ -74,16 +74,15 @@ static void exhaust_fd_in_queue (dispatch_group_t group, int fd, void(^handler)(
 	});
 }
 
-static pid_t run_command (std::string const& cmd, int stdinFd, std::map<std::string, std::string> const& env, std::string const& cwd, void(^stdoutHandler)(char const* bytes, size_t len), void(^stderrHandler)(char const* bytes, size_t len), void(^completionHandler)(int status))
+static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, int stdinFd, std::map<std::string, std::string> const& env, std::string const& cwd, dispatch_queue_t queue, void(^stdoutHandler)(char const* bytes, size_t len), void(^stderrHandler)(char const* bytes, size_t len), void(^completionHandler)(int status))
 {
 	pid_t pid;
 	int outputFd, errorFd;
 	std::tie(pid, outputFd, errorFd) = my_fork(cmd.c_str(), stdinFd, env, cwd.c_str());
 
 	dispatch_group_t group = dispatch_group_create();
-
-	exhaust_fd_in_queue(group, outputFd, stdoutHandler);
-	exhaust_fd_in_queue(group, errorFd, stderrHandler);
+	exhaust_fd_in_queue(group, queue, outputFd, stdoutHandler);
+	exhaust_fd_in_queue(group, queue, errorFd, stderrHandler);
 
 	__block int status = 0;
 	dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -91,10 +90,13 @@ static pid_t run_command (std::string const& cmd, int stdinFd, std::map<std::str
 			perror("waitpid");
 	});
 
-	dispatch_group_notify(group, dispatch_get_main_queue(), ^{
+	dispatch_retain(rootGroup);
+	dispatch_group_enter(rootGroup);
+	dispatch_group_notify(group, queue, ^{
 		completionHandler(status);
+		dispatch_group_leave(rootGroup);
+		dispatch_release(rootGroup);
 	});
-
 	dispatch_release(group);
 
 	return pid;
@@ -122,7 +124,7 @@ namespace command
 		return std::make_shared<runner_t>(command, buffer, selection, environment, pwd, delegate);
 	}
 
-	void runner_t::launch ()
+	void runner_t::launch (dispatch_queue_t queue)
 	{
 		ASSERT(_delegate);
 		ASSERT(_command.command.find("#!") == 0);
@@ -148,7 +150,8 @@ namespace command
 		};
 
 		bool hasHTMLOutput = _command.output == output::new_window && _command.output_format == output_format::html;
-		_process_id = run_command(_temp_path, inputPipe[0], _environment, _directory, hasHTMLOutput ? htmlOutHandler : textOutHandler, stderrHandler, completionHandler);
+		_dispatch_group = dispatch_group_create();
+		_process_id = run_command(_dispatch_group, _temp_path, inputPipe[0], _environment, _directory, queue, hasHTMLOutput ? htmlOutHandler : textOutHandler, stderrHandler, completionHandler);
 
 		if(hasHTMLOutput)
 		{
@@ -200,6 +203,11 @@ namespace command
 			[NSApp postEvent:event atStart:NO];
 	}
 
+	void runner_t::wait_for_command ()
+	{
+		dispatch_group_wait(_dispatch_group, DISPATCH_TIME_FOREVER);
+	}
+
 	void runner_t::did_exit (int status)
 	{
 		D(DBF_Command_Runner, bug("%d\n", status););
@@ -209,6 +217,7 @@ namespace command
 			fprintf(stderr, "*** process terminated abnormally %d\n", status);
 
 		_process_id = -1;
+		dispatch_release(_dispatch_group);
 
 		std::string newOut, newErr;
 		oak::replace_copy(_out.begin(), _out.end(), _temp_path.begin(), _temp_path.end(), _command.name.begin(), _command.name.end(), back_inserter(newOut));

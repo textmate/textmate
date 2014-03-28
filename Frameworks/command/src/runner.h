@@ -49,8 +49,9 @@ namespace command
 		runner_t () = delete;
 		runner_t (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, std::map<std::string, std::string> const& environment, std::string const& pwd, delegate_ptr delegate);
 
-		void launch ();
+		void launch (dispatch_queue_t queue = dispatch_get_main_queue());
 		void wait (bool alsoForDetached = false);
+		void wait_for_command ();
 
 		void add_callback (callback_t* callback)    { _callbacks.add(callback); }
 		void remove_callback (callback_t* callback) { _callbacks.remove(callback); }
@@ -80,6 +81,7 @@ namespace command
 		bool _did_detach;
 
 		pid_t _process_id = -1;
+		dispatch_group_t _dispatch_group;
 		std::string _temp_path = NULL_STR;
 
 		std::string _out, _err;
