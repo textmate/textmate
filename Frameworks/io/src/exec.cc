@@ -27,9 +27,9 @@ namespace io
 		OAK_CHECK(fcntl(out[0], F_SETFD, FD_CLOEXEC));
 		OAK_CHECK(fcntl(err[0], F_SETFD, FD_CLOEXEC));
 		OAK_CHECK(posix_spawn_file_actions_init(&fileActions));
-		OAK_CHECK(posix_spawn_file_actions_adddup2(&fileActions, in[0],  0));
-		OAK_CHECK(posix_spawn_file_actions_adddup2(&fileActions, out[1], 1));
-		OAK_CHECK(posix_spawn_file_actions_adddup2(&fileActions, err[1], 2));
+		OAK_CHECK(posix_spawn_file_actions_adddup2(&fileActions, in[0],  STDIN_FILENO));
+		OAK_CHECK(posix_spawn_file_actions_adddup2(&fileActions, out[1], STDOUT_FILENO));
+		OAK_CHECK(posix_spawn_file_actions_adddup2(&fileActions, err[1], STDERR_FILENO));
 		OAK_CHECK(posix_spawn_file_actions_addclose(&fileActions, in[0]));
 		OAK_CHECK(posix_spawn_file_actions_addclose(&fileActions, out[1]));
 		OAK_CHECK(posix_spawn_file_actions_addclose(&fileActions, err[1]));

@@ -31,7 +31,7 @@ PUBLIC std::string OakStackDump (int linesToSkip)
 	pid_t pid = vfork();
 	if(pid == 0)
 	{
-		close(1); close(2);
+		close(STDOUT_FILENO); close(STDERR_FILENO);
 		dup(output[1]); dup(output[1]);
 		close(output[0]); close(output[1]);
 

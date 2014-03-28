@@ -35,7 +35,7 @@ static std::tuple<pid_t, int, int> my_fork (char const* cmd, int stdinFd, std::m
 		int const signals[] = { SIGINT, SIGTERM, SIGPIPE, SIGUSR1 };
 		for(int sig : signals) signal(sig, SIG_DFL);
 
-		int const oldOutErr[] = { 0, 1, 2 };
+		int const oldOutErr[] = { STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO };
 		int const newOutErr[] = { stdinFd, outputPipe[1], errorPipe[1] };
 		for(int fd : oldOutErr) close(fd);
 		for(int fd : newOutErr) dup(fd);
