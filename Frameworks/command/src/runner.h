@@ -65,16 +65,9 @@ namespace command
 		std::map<std::string, std::string> const& environment () const { return _environment; }
 
 	private:
-		static void exhaust_fd_in_queue (int fd, runner_ptr runner, bool isError);
-		void receive_data (char const* bytes, size_t len, bool isError);
-
-		static void wait_for_process_in_queue (pid_t pid, runner_ptr runner);
-		void did_exit (int rc);
-
+		void did_exit (int status);
 		void send_html_data (char const* bytes, size_t len);
 		void show_document ();
-		void release ();
-		void finish ();
 
 		bundle_command_t _command;
 		std::map<std::string, std::string> _environment;
@@ -83,16 +76,13 @@ namespace command
 
 		ng::range_t _input_range;     // used when output replaces input
 		bool _input_was_selection;    // used with ‘exit_insert_snippet’ and when ‘output_caret == heuristic’
-		bool _output_is_html;
 		bool _did_send_html = false;
 		bool _did_detach;
-		size_t _retain_count;
 
 		pid_t _process_id = -1;
 		char* _temp_path = nullptr;
 
 		std::string _out, _err;
-		int _return_code;
 		bool _user_abort = false;
 
 		oak::callbacks_t<callback_t> _callbacks;
