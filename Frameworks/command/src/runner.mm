@@ -128,11 +128,7 @@ namespace command
 		ASSERT(_delegate);
 		ASSERT(_command.command.find("#!") == 0);
 
-		_temp_path = strdup(path::join(path::temp(), "textmate_command.XXXXXX").c_str());
-		int cmdFd = mkstemp(_temp_path);
-		fchmod(cmdFd, S_IRWXU);
-		write(cmdFd, _command.command.data(), _command.command.size());
-		close(cmdFd);
+		_temp_path = strdup(path::temp("command", _command.command).c_str());
 
 		int inputPipe[2];
 		pipe(inputPipe);

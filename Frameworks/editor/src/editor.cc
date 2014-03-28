@@ -402,10 +402,7 @@ namespace ng
 
 				std::string script = cmd;
 				command::fix_shebang(&script);
-
-				std::string scriptPath = path::temp("snippet_command");
-				path::set_content(scriptPath, script);
-				chmod(scriptPath.c_str(), S_IRWXU);
+				std::string scriptPath = path::temp("snippet_command", script);
 
 				if(io::process_t process = io::spawn(std::vector<std::string>{ scriptPath }, environment))
 				{

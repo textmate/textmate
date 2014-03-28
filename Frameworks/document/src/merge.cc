@@ -1,26 +1,11 @@
 #include "merge.h"
 #include <io/io.h>
 
-static std::string save (std::string const& buf)
-{
-	std::string res = NULL_STR;
-
-	std::string dst = path::join(path::temp(), "textmate_merge.XXXXXX");
-	if(int fd = mkstemp(&dst[0]))
-	{
-		if(write(fd, buf.data(), buf.size()) == buf.size())
-			res = dst;
-		close(fd);
-	}
-
-	return res;
-}
-
 std::string merge (std::string const& oldContent, std::string const& myContent, std::string const& yourContent, bool* conflict)
 {
-	std::string oldFile  = save(oldContent);
-	std::string myFile   = save(myContent);
-	std::string yourFile = save(yourContent);
+	std::string oldFile  = path::temp("merge", oldContent);
+	std::string myFile   = path::temp("merge", myContent);
+	std::string yourFile = path::temp("merge", yourContent);
 
 	ASSERT(oldFile != NULL_STR && myFile != NULL_STR && yourFile != NULL_STR);
 
