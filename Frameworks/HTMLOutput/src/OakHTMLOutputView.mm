@@ -70,6 +70,18 @@ extern NSString* const kCommandRunnerURLScheme; // from HTMLOutput.h
 	[super webView:sender didFinishLoadForFrame:frame];
 }
 
+- (void)webView:(WebView*)sender didFailProvisionalLoadWithError:(NSError*)error forFrame:(WebFrame*)frame
+{
+	self.runningCommand = NO;
+	self.autoScrollHelper = nil;
+}
+
+- (void)webView:(WebView*)sender didFailLoadWithError:(NSError*)error forFrame:(WebFrame*)frame
+{
+	self.runningCommand = NO;
+	self.autoScrollHelper = nil;
+}
+
 // =========================================
 // = WebPolicyDelegate : Intercept txmt:// =
 // =========================================
