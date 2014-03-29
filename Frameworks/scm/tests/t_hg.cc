@@ -2,6 +2,7 @@
 #include <scm/scm.h>
 #include <test/jail.h>
 #include <io/path.h>
+#include <io/exec.h>
 
 void test_basic_status ()
 {
@@ -12,7 +13,7 @@ void test_basic_status ()
 
 	std::string const wcPath = jail.path();
 	std::string const script = text::format("{ cd '%1$s' && '%2$s' init && touch {clean,ignored,modified,added,missing,untracked}.txt && echo ignored.txt > .hgignore && '%2$s' add {.hgignore,{clean,modified,missing}.txt} && '%2$s' commit -u 'Test User' -m 'Initial commit' && '%2$s' add added.txt && rm missing.txt && echo foo > modified.txt; } >/dev/null", wcPath.c_str(), hg.c_str());
-	if(system(script.c_str()) != 0)
+	if(io::exec("/bin/sh", "-c", script.c_str(), nullptr) == NULL_STR)
 		OAK_FAIL("error in setup: " + script);
 
 	if(auto info = scm::info(jail.path()))
