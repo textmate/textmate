@@ -83,12 +83,12 @@ namespace bundles
 				candidates.push_back(environment[requirement.variable]);
 
 			for(auto path : search_paths(environment))
-				candidates.push_back(path::join(path, requirement.command));
+				candidates.push_back(path::escape(path::join(path, requirement.command)));
 
 			for(auto path : requirement.locations)
-				candidates.push_back(format_string::expand(path, environment));
+				candidates.push_back(path::escape(format_string::expand(path, environment)));
 
-			auto exe = std::find_if(candidates.begin(), candidates.end(), [](std::string const& path){ return path::is_executable(path); });
+			auto exe = std::find_if(candidates.begin(), candidates.end(), [](std::string const& path){ return path::is_executable(path::unescape(path).front()); });
 			if(exe != candidates.end())
 			{
 				if(requirement.variable != NULL_STR)
