@@ -167,6 +167,40 @@ namespace path
 		return format_string::replace(str, "(\n)|[^A-Za-z0-9_\\-.,:/@\x7F-\xFF]", "${1:?'\n':\\\\$0}");
 	}
 
+	std::vector<std::string> unescape (std::string const& str)
+	{
+		std::vector<std::string> res(1, std::string());
+
+		bool escape = false, singleQuoted = false, doubleQuoted = false;
+		for(char const& ch : str)
+		{
+			if(!escape && ch == '\'')
+			{
+				singleQuoted = !singleQuoted;
+			}
+			else if(!escape && !singleQuoted && ch == '"')
+			{
+				doubleQuoted = !doubleQuoted;
+			}
+			else if(!escape && !singleQuoted && ch == '\\')
+			{
+				escape = true;
+			}
+			else if(!escape && !singleQuoted && !doubleQuoted && ch == ' ')
+			{
+				if(!res.back().empty())
+					res.emplace_back();
+			}
+			else
+			{
+				escape = false;
+				res.back().push_back(ch);
+			}
+		}
+
+		return res;
+	}
+
 	size_t rank (std::string const& path, std::string const& ext)
 	{
 		size_t rank = 0;
