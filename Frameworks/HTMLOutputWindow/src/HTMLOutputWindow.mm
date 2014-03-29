@@ -38,20 +38,12 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 	return self;
 }
 
-- (id)initWithRunner:(command::runner_ptr const&)aRunner
-{
-	D(DBF_HTMLOutputWindow, bug("\n"););
-	if(self = [self init])
-	{
-		[self setCommandRunner:aRunner];
-	}
-	return self;
-}
-
 + (HTMLOutputWindowController*)HTMLOutputWindowWithRunner:(command::runner_ptr const&)aRunner
 {
 	D(DBF_HTMLOutputWindow, bug("%s\n", to_s(aRunner->uuid()).c_str()););
-	return [[self alloc] initWithRunner:aRunner];
+	HTMLOutputWindowController* res = [[self alloc] init];
+	[res setCommandRunner:aRunner];
+	return res;
 }
 
 - (void)showWindow:(id)sender
