@@ -2,6 +2,7 @@
 #include <OakSystem/application.h>
 #include <OakSystem/process.h>
 #include <io/path.h>
+#include <io/pipe.h>
 #include <regexp/format_string.h>
 #include <oak/datatypes.h>
 
@@ -13,7 +14,7 @@ static std::string trim_right (std::string const& str, std::string const& trimCh
 	return len == std::string::npos ? "" : str.substr(0, len+1);
 }
 
-static std::tuple<pid_t, int, int> my_fork (char const* cmd, int stdinFd, std::map<std::string, std::string> const& environment, char const* workingDir)
+static std::tuple<pid_t, int, int> my_fork (char const* cmd, int inputRead, std::map<std::string, std::string> const& environment, char const* workingDir)
 {
 	for(auto const& pair : environment)
 	{
@@ -21,11 +22,9 @@ static std::tuple<pid_t, int, int> my_fork (char const* cmd, int stdinFd, std::m
 			fprintf(stderr, "*** variable exceeds ARG_MAX: %s\n", pair.first.c_str());
 	}
 
-	int outputPipe[2], errorPipe[2];
-	pipe(outputPipe);
-	pipe(errorPipe);
-	fcntl(outputPipe[0], F_SETFD, FD_CLOEXEC);
-	fcntl(errorPipe[0],  F_SETFD, FD_CLOEXEC);
+	int outputRead, outputWrite, errorRead, errorWrite;
+	std::tie(outputRead, outputWrite) = io::create_pipe();
+	std::tie(errorRead,  errorWrite)  = io::create_pipe();
 
 	oak::c_array env(environment);
 
@@ -36,10 +35,9 @@ static std::tuple<pid_t, int, int> my_fork (char const* cmd, int stdinFd, std::m
 		for(int sig : signals) signal(sig, SIG_DFL);
 
 		int const oldOutErr[] = { STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO };
-		int const newOutErr[] = { stdinFd, outputPipe[1], errorPipe[1] };
+		int const newOutErr[] = { inputRead, outputWrite, errorWrite };
 		for(int fd : oldOutErr) close(fd);
 		for(int fd : newOutErr) dup(fd);
-		for(int fd : newOutErr) close(fd);
 
 		setpgid(0, getpid());
 		chdir(workingDir);
@@ -50,10 +48,10 @@ static std::tuple<pid_t, int, int> my_fork (char const* cmd, int stdinFd, std::m
 		_exit(0);
 	}
 
-	int const fds[] = { stdinFd, outputPipe[1], errorPipe[1] };
+	int const fds[] = { inputRead, outputWrite, errorWrite };
 	for(int fd : fds) close(fd);
 
-	return std::make_tuple(pid, outputPipe[0], errorPipe[0]);
+	return { pid, outputRead, errorRead };
 }
 
 static void exhaust_fd_in_queue (dispatch_group_t group, dispatch_queue_t queue, int fd, void(^handler)(char const* bytes, size_t len))
@@ -132,10 +130,9 @@ namespace command
 		_temp_path = path::temp("command", _command.command);
 		ASSERT(_temp_path != NULL_STR);
 
-		int inputPipe[2];
-		pipe(inputPipe);
-		fcntl(inputPipe[1], F_SETFD, FD_CLOEXEC);
-		_input_range = _command.input == input::nothing ? (close(inputPipe[1]), ng::range_t()) : _delegate->write_unit_to_fd(inputPipe[1], _command.input, _command.input_fallback, _command.input_format, _command.scope_selector, _environment, &_input_was_selection);
+		int stdinRead, stdinWrite;
+		std::tie(stdinRead, stdinWrite) = io::create_pipe();
+		_input_range = _command.input == input::nothing ? (close(stdinWrite), ng::range_t()) : _delegate->write_unit_to_fd(stdinWrite, _command.input, _command.input_fallback, _command.input_format, _command.scope_selector, _environment, &_input_was_selection);
 
 		auto textOutHandler = ^(char const* bytes, size_t len) { _out.insert(_out.end(), bytes, bytes + len); };
 		auto htmlOutHandler = ^(char const* bytes, size_t len) { send_html_data(bytes, len); };
@@ -151,7 +148,7 @@ namespace command
 
 		bool hasHTMLOutput = _command.output == output::new_window && _command.output_format == output_format::html;
 		_dispatch_group = dispatch_group_create();
-		_process_id = run_command(_dispatch_group, _temp_path, inputPipe[0], _environment, _directory, queue, hasHTMLOutput ? htmlOutHandler : textOutHandler, stderrHandler, completionHandler);
+		_process_id = run_command(_dispatch_group, _temp_path, stdinRead, _environment, _directory, queue, hasHTMLOutput ? htmlOutHandler : textOutHandler, stderrHandler, completionHandler);
 
 		if(hasHTMLOutput)
 		{
