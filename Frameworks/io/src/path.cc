@@ -948,6 +948,7 @@ namespace path
 			if(content != NULL_STR)
 			{
 				int fd = mkstemp(&str[0]);
+				fcntl(fd, F_SETFD, FD_CLOEXEC);
 				fchmod(fd, S_IRWXU);
 				if(write(fd, content.data(), content.size()) != content.size())
 				{
