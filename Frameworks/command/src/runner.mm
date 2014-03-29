@@ -36,6 +36,17 @@ static std::tuple<pid_t, int, int> my_fork (char const* cmd, int inputRead, std:
 
 		int const oldOutErr[] = { STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO };
 		int const newOutErr[] = { inputRead, outputWrite, errorWrite };
+
+		for(int fd = getdtablesize(); --fd > STDERR_FILENO; )
+		{
+			int flags = fcntl(fd, F_GETFD);
+			if((flags == -1 && errno == EBADF) || (flags & FD_CLOEXEC) == FD_CLOEXEC)
+				continue;
+
+			if(close(fd) == -1)
+				fprintf(stderr, "failed to close fd %d\n", fd);
+		}
+
 		for(int fd : oldOutErr) close(fd);
 		for(int fd : newOutErr) dup(fd);
 
