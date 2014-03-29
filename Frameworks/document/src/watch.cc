@@ -119,8 +119,8 @@ namespace document
 
 	watch_server_t::watch_server_t () : next_client_id(1)
 	{
-		io::create_pipe(read_from_server_pipe, write_to_master_pipe, true);
-		io::create_pipe(read_from_master_pipe, write_to_server_pipe, true);
+		std::tie(read_from_server_pipe, write_to_master_pipe) = io::create_pipe();
+		std::tie(read_from_master_pipe, write_to_server_pipe) = io::create_pipe();
 		pthread_create(&server_thread, NULL, &watch_server_t::server_run_stub, this);
 
 		// attach to run-loop

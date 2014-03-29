@@ -5,7 +5,7 @@
 
 namespace io
 {
-	PUBLIC void create_pipe (int& read_pipe, int& write_pipe, bool close_on_exec);
+	PUBLIC std::tuple<int, int> create_pipe ();
 	
 } /* io */
 
