@@ -14,6 +14,7 @@ extern NSString* const kCommandRunnerURLScheme; // from HTMLOutput.h
 @property (nonatomic) BOOL runningCommand;
 @property (nonatomic) HOAutoScroll* autoScrollHelper;
 @property (nonatomic) std::map<std::string, std::string> environment;
+@property (nonatomic) NSRect pendingVisibleRect;
 @end
 
 @implementation OakHTMLOutputView
@@ -33,6 +34,12 @@ extern NSString* const kCommandRunnerURLScheme; // from HTMLOutput.h
 - (void)stopLoading
 {
 	[self.webView.mainFrame stopLoading];
+}
+
+- (void)loadHTMLString:(NSString*)someHTML
+{
+	self.pendingVisibleRect = [[[[self.webView mainFrame] frameView] documentView] visibleRect];
+	[[self.webView mainFrame] loadHTMLString:someHTML baseURL:[NSURL fileURLWithPath:NSHomeDirectory()]];
 }
 
 // =======================
@@ -66,6 +73,10 @@ extern NSString* const kCommandRunnerURLScheme; // from HTMLOutput.h
 	// Sending goBack:/goForward: to a WebView does not call this WebFrameLoadDelegate method
 	if(frame == [sender mainFrame])
 		[self webView:sender didClearWindowObject:[frame windowObject] forFrame:frame];
+
+	if(!NSEqualRects(self.pendingVisibleRect, NSZeroRect))
+		[[[[self.webView mainFrame] frameView] documentView] scrollRectToVisible:self.pendingVisibleRect];
+	self.pendingVisibleRect = NSZeroRect;
 
 	[super webView:sender didFinishLoadForFrame:frame];
 }
