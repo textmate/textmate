@@ -1,5 +1,6 @@
 #include "exec.h"
 #include "environment.h"
+#include "pipe.h"
 #include <text/format.h>
 #include <oak/datatypes.h>
 #include <oak/debug/OakDebugLog.h>
@@ -14,54 +15,50 @@ namespace io
 {
 	process_t spawn (std::vector<std::string> const& args, std::map<std::string, std::string> const& environment)
 	{
-		int in[2], out[2], err[2];
-		posix_spawn_file_actions_t fileActions;
-		posix_spawnattr_t flags;
-
-		short closeOnExecFlag = (oak::os_major() == 10 && oak::os_minor() == 7) ? 0 : POSIX_SPAWN_CLOEXEC_DEFAULT;
-
-		OAK_CHECK(pipe(&in[0]));
-		OAK_CHECK(pipe(&out[0]));
-		OAK_CHECK(pipe(&err[0]));
-		OAK_CHECK(fcntl(in[1],  F_SETFD, FD_CLOEXEC));
-		OAK_CHECK(fcntl(out[0], F_SETFD, FD_CLOEXEC));
-		OAK_CHECK(fcntl(err[0], F_SETFD, FD_CLOEXEC));
-		OAK_CHECK(posix_spawn_file_actions_init(&fileActions));
-		OAK_CHECK(posix_spawn_file_actions_adddup2(&fileActions, in[0],  STDIN_FILENO));
-		OAK_CHECK(posix_spawn_file_actions_adddup2(&fileActions, out[1], STDOUT_FILENO));
-		OAK_CHECK(posix_spawn_file_actions_adddup2(&fileActions, err[1], STDERR_FILENO));
-		OAK_CHECK(posix_spawn_file_actions_addclose(&fileActions, in[0]));
-		OAK_CHECK(posix_spawn_file_actions_addclose(&fileActions, out[1]));
-		OAK_CHECK(posix_spawn_file_actions_addclose(&fileActions, err[1]));
-		OAK_CHECK(posix_spawnattr_init(&flags));
-		OAK_CHECK(posix_spawnattr_setflags(&flags, POSIX_SPAWN_SETSIGDEF|closeOnExecFlag));
-
-		char* argv[args.size() + 1];
-		std::transform(args.begin(), args.end(), &argv[0], [](std::string const& str){ return (char*)str.c_str(); });
-		argv[args.size()] = NULL;
-
+		short const closeOnExecFlag = (oak::os_major() == 10 && oak::os_minor() == 7) ? 0 : POSIX_SPAWN_CLOEXEC_DEFAULT;
 		process_t res;
-		int rc = posix_spawn(&res.pid, argv[0], &fileActions, &flags, argv, oak::c_array(environment));
-		if(rc != 0)
-			perror(text::format("posix_spawn(\"%s\")", argv[0]).c_str());
 
-		OAK_CHECK(posix_spawnattr_destroy(&flags));
-		OAK_CHECK(posix_spawn_file_actions_destroy(&fileActions));
-		OAK_CHECK(close(in[0]));
-		OAK_CHECK(close(out[1]));
-		OAK_CHECK(close(err[1]));
+		int in, out, err;
+		std::tie(in, res.in)   = io::create_pipe();
+		std::tie(res.out, out) = io::create_pipe();
+		std::tie(res.err, err) = io::create_pipe();
 
-		if(rc == 0)
+		int rc = -1;
+		if(in != -1 && out != -1 && err != -1)
 		{
-			res.in  = in[1];
-			res.out = out[0];
-			res.err = err[0];
+			posix_spawn_file_actions_t fileActions;
+			OAK_CHECK(posix_spawn_file_actions_init(&fileActions));
+			OAK_CHECK(posix_spawn_file_actions_adddup2(&fileActions, in,  STDIN_FILENO));
+			OAK_CHECK(posix_spawn_file_actions_adddup2(&fileActions, out, STDOUT_FILENO));
+			OAK_CHECK(posix_spawn_file_actions_adddup2(&fileActions, err, STDERR_FILENO));
+
+			posix_spawnattr_t flags;
+			OAK_CHECK(posix_spawnattr_init(&flags));
+			OAK_CHECK(posix_spawnattr_setflags(&flags, POSIX_SPAWN_SETSIGDEF|closeOnExecFlag));
+
+			char* argv[args.size() + 1];
+			std::transform(args.begin(), args.end(), &argv[0], [](std::string const& str){ return (char*)str.c_str(); });
+			argv[args.size()] = NULL;
+
+			rc = posix_spawn(&res.pid, argv[0], &fileActions, &flags, argv, oak::c_array(environment));
+			if(rc != 0)
+				perror(text::format("posix_spawn(\"%s\")", argv[0]).c_str());
+
+			OAK_CHECK(posix_spawnattr_destroy(&flags));
+			OAK_CHECK(posix_spawn_file_actions_destroy(&fileActions));
 		}
-		else
+
+		close(in);
+		close(out);
+		close(err);
+
+		if(rc != 0)
 		{
-			OAK_CHECK(close(in[1]));
-			OAK_CHECK(close(out[0]));
-			OAK_CHECK(close(err[0]));
+			close(res.in);
+			close(res.out);
+			close(res.err);
+
+			res.in = res.out = res.err = -1;
 		}
 
 		return res;
