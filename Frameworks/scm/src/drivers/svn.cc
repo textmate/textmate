@@ -71,15 +71,10 @@ static std::map<std::string, std::string> parse_info_output (std::string const& 
 	return res;
 }
 
-static std::string shell_quote (std::string const& str)
-{
-	return format_string::replace(str, ".+", "'${0/'/'\\''/g}'");
-}
-
 static void collect_all_paths (std::string const& svn, std::string const& xsltPath, scm::status_map_t& entries, std::string const& dir)
 {
 	ASSERT_NE(svn, NULL_STR); ASSERT_NE(xsltPath, NULL_STR);
-	std::string const cmd = text::format("cd %s && %s status --no-ignore --xml|/usr/bin/xsltproc %s -", shell_quote(dir).c_str(), shell_quote(svn).c_str(), shell_quote(xsltPath).c_str());
+	std::string const cmd = text::format("cd %s && %s status --no-ignore --xml|/usr/bin/xsltproc %s -", path::escape(dir).c_str(), path::escape(svn).c_str(), path::escape(xsltPath).c_str());
 	parse_status_output(entries, io::exec("/bin/sh", "-c", cmd.c_str(), NULL), dir);
 }
 

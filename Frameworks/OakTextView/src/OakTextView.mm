@@ -494,8 +494,7 @@ void buffer_refresh_callback_t::did_replace (size_t, size_t, std::string const&)
 
 static std::string shell_quote (std::vector<std::string> paths)
 {
-	for(auto& it : paths)
-		it = format_string::replace(it, ".+", "'${0/'/'\\''/g}'");
+	std::transform(paths.begin(), paths.end(), paths.begin(), &path::escape);
 	return text::join(paths, " ");
 }
 
