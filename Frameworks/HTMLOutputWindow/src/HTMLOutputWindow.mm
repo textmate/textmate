@@ -12,7 +12,6 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 {
 	OBJC_WATCH_LEAKS(HTMLOutputWindowController);
 }
-@property (nonatomic) OakHTMLOutputView* htmlOutputView;
 @property (nonatomic) HTMLOutputWindowController* retainedSelf;
 @end
 

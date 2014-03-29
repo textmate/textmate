@@ -3,6 +3,7 @@
 
 PUBLIC @interface HTMLOutputWindowController : NSObject <NSWindowDelegate>
 @property (nonatomic) NSWindow* window;
+@property (nonatomic) OakHTMLOutputView* htmlOutputView;
 @property (nonatomic) command::runner_ptr commandRunner;
 @property (nonatomic, readonly) BOOL running;
 @property (nonatomic, readonly) BOOL needsNewWebView;
