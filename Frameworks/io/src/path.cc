@@ -6,6 +6,7 @@
 #include <text/tokenize.h>
 #include <text/format.h>
 #include <regexp/regexp.h>
+#include <regexp/format_string.h>
 #include <cf/cf.h>
 
 OAK_DEBUG_VAR(IO_Path);
@@ -159,6 +160,11 @@ namespace path
 				n = m;
 		}
 		return n == std::string::npos ? "" : path.substr(n);
+	}
+
+	std::string escape (std::string const& str)
+	{
+		return format_string::replace(str, "(\n)|[^A-Za-z0-9_\\-.,:/@\x7F-\xFF]", "${1:?'\n':\\\\$0}");
 	}
 
 	size_t rank (std::string const& path, std::string const& ext)

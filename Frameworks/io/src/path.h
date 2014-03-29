@@ -17,6 +17,8 @@ namespace path
 	PUBLIC std::string extension (std::string const& path);         // /Users/me/foo.html.erb → .erb
 	PUBLIC std::string extensions (std::string const& path);        // /Users/me/foo.html.erb → .html.erb
 
+	PUBLIC std::string escape (std::string const& src); // Shell escape path
+
 	PUBLIC size_t rank (std::string const& path, std::string const& ext); // returns a score for how well the “extension” covers the path (smaller values are better, except 0 means “no match”)
 
 	PUBLIC std::string join (std::string const& base, std::string const& path); // this will normalize the (resulting) path
