@@ -192,6 +192,7 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 	{
 		managedObjectContext = [[NSManagedObjectContext alloc] init];
 		managedObjectContext.persistentStoreCoordinator = self.persistentStoreCoordinator;
+		managedObjectContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy;
 		managedObjectContext.undoManager = nil;
 	}
 	return managedObjectContext;
