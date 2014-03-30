@@ -55,7 +55,7 @@ static NSString* const kOakCommitWindowCommitMessages = @"commitMessages";
 static NSUInteger const kOakCommitWindowCommitMessagesTitleLength = 30;
 static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 
-@interface OakCommitWindow : NSWindowController <NSWindowDelegate, NSTableViewDelegate, NSMenuDelegate, OakTextViewDelegate>
+@interface OakCommitWindow () <NSWindowDelegate, NSTableViewDelegate, NSMenuDelegate, OakTextViewDelegate>
 @property (nonatomic) NSMutableDictionary*               options;
 @property (nonatomic) NSMutableArray*                    parameters;
 @property (nonatomic) std::map<std::string, std::string> environment;
@@ -381,6 +381,21 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 	document::document_ptr commitMessage = document::from_content([message UTF8String], self.documentView.document->file_type());
 	[self.documentView setDocument:commitMessage];
 }
+
+- (void)performBundleItem:(bundles::item_ptr const&)anItem
+{
+	if(anItem->kind() == bundles::kItemTypeTheme)
+	{
+		[self.documentView setThemeWithUUID:[NSString stringWithCxxString:anItem->uuid()]];
+	}
+	else
+	{
+		[self showWindow:self];
+		[self.window makeFirstResponder:self.documentView.textView];
+		[self.documentView.textView performBundleItem:anItem];
+	}
+}
+
 
 // ==================
 // = Action Methods =

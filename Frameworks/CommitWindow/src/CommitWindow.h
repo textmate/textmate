@@ -1,4 +1,5 @@
 #import <oak/misc.h>
+#import <bundles/bundles.h>
 
 static NSString* const kOakCommitWindowServerConnectionName = @"com.macromates.textmate.commit-window-server";
 static NSString* const kOakCommitWindowClientPortName       = @"clientPortName";
@@ -18,4 +19,8 @@ static NSString* const kOakCommitWindowReturnCode           = @"returnCode";
 
 PUBLIC @interface OakCommitWindowServer : NSObject <OakCommitWindowServerProtocol>
 + (instancetype)sharedInstance;
+@end
+
+PUBLIC @interface OakCommitWindow : NSWindowController
+- (void)performBundleItem:(bundles::item_ptr const&)anItem;
 @end
