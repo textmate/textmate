@@ -1653,10 +1653,12 @@ namespace
 - (BOOL)performTabDropFromTabBar:(OakTabBarView*)aTabBar atIndex:(NSUInteger)droppedIndex fromPasteboard:(NSPasteboard*)aPasteboard operation:(NSDragOperation)operation
 {
 	NSDictionary* plist = [aPasteboard propertyListForType:OakDocumentPboardType];
-	oak::uuid_t docId   = to_s((NSString*)plist[@"document"]);
+	document::document_ptr srcDocument = document::find(to_s((NSString*)plist[@"document"]));
+	if(!srcDocument)
+		return NO;
 
 	std::vector<document::document_ptr> newDocuments;
-	merge_documents_splitting_at(_documents, make_vector(document::find(docId)), droppedIndex, newDocuments);
+	merge_documents_splitting_at(_documents, make_vector(srcDocument), droppedIndex, newDocuments);
 	self.documents = newDocuments;
 
 	if(_selectedDocument)
