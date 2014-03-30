@@ -2,6 +2,10 @@ Title: Release Notes
 
 # Changes
 
+## 2014-03-30 ([v2.0-alpha.9527](https://github.com/textmate/textmate/compare/v2.0-alpha.9523...v2.0-alpha.9527))
+
+* When a command requires a (shell) command and has that dependency specified via [`requiredCommands`](http://manual.textmate.org/commands#required-commands) then the value (of the environment variable set by TextMate) will now be shell escaped. This means commands should not double-quote `$VARIABLES` when using them in a shell context, and if using them in another context (e.g. ruby) the command should ideally call [`Shellwords.split`](http://ruby-doc.org/stdlib-2.0.0/libdoc/shellwords/rdoc/Shellwords.html#method-c-shellsplit). The reason for this change is that specifying what to run via `TM_«executable»` might not be a single executable, e.g. we may want to set `TM_CC` to `/usr/bin/xcrun clang` or `TM_MARKDOWN` to `/usr/local/bin/multimarkdown --nosmart`.
+
 ## 2014-03-25 ([v2.0-alpha.9523](https://github.com/textmate/textmate/compare/v2.0-alpha.9519...v2.0-alpha.9523))
 
 * Fixes and improvements.
