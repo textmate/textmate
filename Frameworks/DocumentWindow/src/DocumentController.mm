@@ -1064,30 +1064,33 @@ namespace
 		if([windows count] && [windows indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL* stop){ return (BOOL)!((HTMLOutputWindowController*)obj).running; }] == NSNotFound)
 		{
 			HTMLOutputWindowController* candidate = [windows firstObject];
-			switch(aCommand.output_reuse)
-			{
-				case output_reuse::reuse_busy:
-				{
-					NSAlert* alert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Stop “%@”?", [NSString stringWithCxxString:aCommand.name]] defaultButton:@"Stop" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"The job that the task is performing will not be completed."];
-					OakShowAlertForWindow(alert, candidate.window, ^(NSInteger returnCode){
-						if(returnCode == NSAlertDefaultReturn) /* "Stop" */
-						{
-							oak::kill_process_group_in_background(candidate.commandRunner->process_id());
-							candidate.commandRunner->wait_for_command();
-						}
-						callback(returnCode == NSAlertDefaultReturn);
-					});
-					return;
-				}
-				break;
-
-				case output_reuse::abort_and_reuse_busy:
+			auto sheetResponseHandler = ^(NSInteger returnCode){
+				if(returnCode == NSAlertDefaultReturn) /* "Stop" */
 				{
 					oak::kill_process_group_in_background(candidate.commandRunner->process_id());
-					candidate.commandRunner->wait_for_command();
+					dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+						candidate.commandRunner->wait_for_command(); // Must not be called in main queue
+						dispatch_async(dispatch_get_main_queue(), ^{
+							callback(YES);
+						});
+					});
 				}
-				break;
+				else
+				{
+					callback(NO);
+				}
+			};
+
+			if(aCommand.output_reuse == output_reuse::reuse_busy)
+			{
+				NSAlert* alert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Stop “%@”?", [NSString stringWithCxxString:aCommand.name]] defaultButton:@"Stop" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"The job that the task is performing will not be completed."];
+				OakShowAlertForWindow(alert, candidate.window, sheetResponseHandler);
 			}
+			else // output_reuse::abort_and_reuse_busy
+			{
+				sheetResponseHandler(NSAlertDefaultReturn);
+			}
+			return;
 		}
 	}
 	callback(YES);
