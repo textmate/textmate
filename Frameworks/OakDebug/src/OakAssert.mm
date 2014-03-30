@@ -137,7 +137,7 @@ void OakBadAssertion (char const* name, char const* format, ...)
 		va_end(ap);
 
 		info = buf;
-		if(!info.empty() && info[info.size()-1] != '\n')
+		if(!info.empty() && info.back() != '\n')
 			info += "\n";
 
 		free(buf);

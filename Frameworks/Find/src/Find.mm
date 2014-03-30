@@ -575,7 +575,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 			std::string middle = str.substr(from, to - from);
 			std::string suffix = str.substr(to);
 
-			if(!suffix.empty() && suffix[suffix.size()-1] == '\n')
+			if(!suffix.empty() && suffix.back() == '\n')
 				suffix = suffix.substr(0, suffix.size()-1);
 
 			if(utf8::is_valid(prefix.begin(), prefix.end()) && utf8::is_valid(middle.begin(), middle.end()) && utf8::is_valid(suffix.begin(), suffix.end()))
@@ -805,7 +805,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 
 		if(!entireLines)
 			str = str.substr(from, to - from);
-		else if(str.size() && str[str.size()-1] == '\n')
+		else if(str.size() && str.back() == '\n')
 			str.erase(str.size()-1);
 
 		if(withFilename)

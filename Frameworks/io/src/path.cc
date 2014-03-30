@@ -244,7 +244,7 @@ namespace path
 	std::string with_tilde (std::string const& p)
 	{
 		std::string const& base = home();
-		std::string const& path = normalize(p) + (p.size() > 1 && p[p.size()-1] == '/' ? "/" : "");
+		std::string const& path = normalize(p) + (p.size() > 1 && p.back() == '/' ? "/" : "");
 		if(oak::has_prefix(path.begin(), path.end(), base.begin(), base.end()) && (path.size() == base.size() || path[base.size()] == '/'))
 			return "~" + path.substr(base.size());
 		return path;

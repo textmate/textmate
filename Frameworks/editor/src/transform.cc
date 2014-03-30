@@ -66,7 +66,7 @@ namespace transform
 	std::string transpose (std::string const& src)
 	{
 		std::vector< std::pair<char const*, char const*> > v = text::to_lines(src.data(), src.data() + src.size());
-		bool hasNewline = !src.empty() && src[src.size()-1] == '\n';
+		bool hasNewline = !src.empty() && src.back() == '\n';
 
 		std::string res("");
 		if(v.size() == 1 || (v.size() == 2 && v.back().first == v.back().second))

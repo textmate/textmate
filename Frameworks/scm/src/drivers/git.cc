@@ -66,7 +66,7 @@ static std::string copy_git_index (std::string const& dir)
 	{
 		// Submodules have their git dir in the super project (starting with 1.7.6) — if we know the user has 1.7.6 we should ask git for the git dir using: git rev-parse --resolve-git-dir /path/to/repository/.git
 		std::string const setting = path::content(gitDir);
-		if(setting.find("gitdir: ") == 0 && setting[setting.size()-1] == '\n')
+		if(setting.find("gitdir: ") == 0 && setting.back() == '\n')
 			gitDir = path::join(dir, setting.substr(8, setting.size()-9));
 	}
 

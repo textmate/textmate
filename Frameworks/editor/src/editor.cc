@@ -594,7 +594,7 @@ namespace ng
 						while(len > 0 && (str[len-1] == '\t' || str[len-1] == ' '))
 							--len;
 						str = str.substr(0, len);
-						if(!str.empty() && str[str.size()-1] == '\n')
+						if(!str.empty() && str.back() == '\n')
 							str += leftOfCaret;
 					}
 				} 
@@ -613,7 +613,7 @@ namespace ng
 						break;
 					}
 
-					if(!str.empty() && str[str.size()-1] == '\n')
+					if(!str.empty() && str.back() == '\n')
 						str += leftOfCaret;
 				}
 				return ng::move(buffer, replace_helper(buffer, snippets, map(buffer, range_t(buffer.begin(line), selections.last().max()), transform::replace(str))), kSelectionMoveToEndOfSelection);

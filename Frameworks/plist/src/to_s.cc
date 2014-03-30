@@ -215,7 +215,7 @@ namespace
 
 					if(res.size() - wrap > 80)
 					{
-						res[res.size()-1] = '\n';
+						res.back() = '\n';
 						res += indent_string() + '\t';
 						wrap = res.size();
 					}
@@ -227,7 +227,7 @@ namespace
 				
 				if(res.find('\n') != std::string::npos)
 				{
-					res[res.size()-1] = '\n';
+					res.back() = '\n';
 					res += indent_string();
 				}
 			}

@@ -448,7 +448,7 @@ struct socket_observer_t
 		{
 			std::string::size_type eol = line.find('\n');
 			std::string str = line.substr(0, eol);
-			if(!str.empty() && str[str.size()-1] == '\r')
+			if(!str.empty() && str.back() == '\r')
 				str.resize(str.size()-1);
 			line.erase(line.begin(), line.begin() + eol + 1);
 

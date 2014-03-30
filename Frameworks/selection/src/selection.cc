@@ -193,7 +193,7 @@ namespace ng
 
 			pattern_t (std::string const& plain) : plain(plain)
 			{
-				if(plain.size() > 2 && plain[0] == '/' && plain[plain.size()-1] == '/')
+				if(plain.size() > 2 && plain.front() == '/' && plain.back() == '/')
 				{
 					left_anchored_regexp = "\\G" + plain.substr(1, plain.size()-2);
 					right_anchored_regexp = plain.substr(1, plain.size()-2) + "\\G";
