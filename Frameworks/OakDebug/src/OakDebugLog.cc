@@ -55,7 +55,7 @@ std::vector<std::string> OakDebugBaseClass::sectionNames ()
 	return res;
 }
 
-bool OakDebugBaseClass::checkForDebugVar (const char *name)
+bool OakDebugBaseClass::checkForDebugVar (char const* name)
 {
 	std::lock_guard<std::mutex> lock(RegistryMutex);
 	return registry()["All"] || registry()[name];

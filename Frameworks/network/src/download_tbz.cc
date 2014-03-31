@@ -64,7 +64,7 @@ namespace network
 
 			if(len > 7 && strncmp("HTTP/1.", bytes, 7) == 0 && std::find(bytes, bytes + len, ':') == bytes + len)
 			{
-				static const char kCRLF[] = "\r\n";
+				static char const kCRLF[] = "\r\n";
 				char const* last  = std::search(bytes, bytes + size * nmemb, &kCRLF[0], &kCRLF[2]);
 				if(std::string(bytes, last).find("HTTP/1.1 304") == 0)
 					data.modified = false;

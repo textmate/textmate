@@ -395,7 +395,7 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 
 - (void)updateSize
 {
-	static const CGFloat columnPadding = 1;
+	static CGFloat const columnPadding = 1;
 
 	CGFloat currentX = 0, totalWidth = 0;
 	for(auto& it : columnDataSources)

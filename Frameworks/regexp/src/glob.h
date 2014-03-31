@@ -7,7 +7,7 @@ namespace path
 {
 	struct PUBLIC glob_t
 	{
-		glob_t (const char* glob, bool matchDotFiles = false)        { setup(glob, matchDotFiles); }
+		glob_t (char const* glob, bool matchDotFiles = false)        { setup(glob, matchDotFiles); }
 		glob_t (std::string const& glob, bool matchDotFiles = false) { setup(glob, matchDotFiles); }
 
 		bool does_match (std::string const& filename) const;
@@ -23,7 +23,7 @@ namespace path
 
 	struct PUBLIC glob_list_t
 	{
-		glob_list_t (const char* glob = NULL)
+		glob_list_t (char const* glob = NULL)
 		{
 			if(glob)
 				add_include_glob(glob);

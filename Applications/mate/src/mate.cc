@@ -183,7 +183,7 @@ static void write_key_pair (int fd, std::string const& key, std::string const& v
 	write(fd, str.data(), str.size());
 }
 
-static const std::string kUUIDPrefix = "uuid://";
+static std::string const kUUIDPrefix = "uuid://";
 
 int main (int argc, char* argv[])
 {

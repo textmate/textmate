@@ -1,8 +1,8 @@
 #import "OakFinderLabelChooser.h"
 
-static const CGFloat SwatchDiameter  = 9;
-static const CGFloat SwatchMargin    = 4;
-static const CGFloat LabelNameHeight = 15;
+static CGFloat const SwatchDiameter  = 9;
+static CGFloat const SwatchMargin    = 4;
+static CGFloat const LabelNameHeight = 15;
 
 @interface OakFinderLabelChooser ()
 {

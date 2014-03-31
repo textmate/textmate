@@ -9,15 +9,15 @@
 
 static NSImage* ImageForBadgeCounter (NSInteger count)
 {
-	static const NSInteger BADGE_BUFFER_LEFT         = 4;
-	static const NSInteger BADGE_BUFFER_SIDE         = 3;
-	static const NSInteger BADGE_BUFFER_LEFT_SMALL   = 3;
-	static const NSInteger BADGE_CIRCLE_BUFFER_RIGHT = 5;
-	static const NSInteger BADGE_TEXT_HEIGHT         = 14;
-	static const NSInteger BADGE_X_RADIUS            = 7;
-	static const NSInteger BADGE_Y_RADIUS            = 8;
-	static const NSInteger BADGE_TEXT_MINI           = 8;
-	static const NSInteger BADGE_TEXT_SMALL          = 20;
+	static NSInteger const BADGE_BUFFER_LEFT         = 4;
+	static NSInteger const BADGE_BUFFER_SIDE         = 3;
+	static NSInteger const BADGE_BUFFER_LEFT_SMALL   = 3;
+	static NSInteger const BADGE_CIRCLE_BUFFER_RIGHT = 5;
+	static NSInteger const BADGE_TEXT_HEIGHT         = 14;
+	static NSInteger const BADGE_X_RADIUS            = 7;
+	static NSInteger const BADGE_Y_RADIUS            = 8;
+	static NSInteger const BADGE_TEXT_MINI           = 8;
+	static NSInteger const BADGE_TEXT_SMALL          = 20;
 
 	if(count == 0)
 		return nil;

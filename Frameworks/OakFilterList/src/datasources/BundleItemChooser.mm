@@ -107,7 +107,7 @@ static NSString* const AllScopes    = @"AllScopes";
 	{
 		self.itemChooser = chooser;
 
-		static const CGFloat initialViewWidth = 1200;
+		static CGFloat const initialViewWidth = 1200;
 
 		searchField                  = [[NSSearchField alloc] initWithFrame:NSMakeRect(7, 8, initialViewWidth-14, 22)];
 		searchField.action           = @selector(didChangeFilterString:);

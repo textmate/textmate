@@ -12,7 +12,7 @@ OAK_DEBUG_VAR(Network_Download);
 
 namespace network
 {
-	static const char kCRLF[] = "\r\n";
+	static char const kCRLF[] = "\r\n";
 
 	// =============
 	// = request_t =
@@ -77,7 +77,7 @@ namespace network
 			if(len > 12 && strncmp("HTTP/1", bytes, 6) == 0 && bytes[9] == '2')
 				userData.receiving_body = true;
 
-			char const* first = (const char*)ptr;
+			char const* first = (char const*)ptr;
 			char const* last  = std::search(first, first + size * nmemb, &kCRLF[0], &kCRLF[2]);
 			for(auto const& filter : userData.request._filters)
 			{
@@ -122,7 +122,7 @@ namespace network
 		user_data_t& userData = *((user_data_t*)udata);
 		for(auto const& filter : userData.request._filters)
 		{
-			if(!filter->receive_data((const char*)ptr, size * nmemb))
+			if(!filter->receive_data((char const*)ptr, size * nmemb))
 			{
 				userData.error = text::format("%s: receiving data", filter->name().c_str());
 				return 0;

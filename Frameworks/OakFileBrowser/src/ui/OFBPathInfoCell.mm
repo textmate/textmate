@@ -11,7 +11,7 @@ static CGFloat kCloseButtonRightMargin = 5;
 
 static void DrawSpinner (NSRect cellFrame, BOOL isFlipped, NSColor* color, double value)
 {
-	static const CGFloat deg2rad = 0.017453292519943295;
+	static CGFloat const deg2rad = 0.017453292519943295;
 
 	CGFloat const cellSize = 16;
 	CGFloat const strokeWidth = cellSize*0.08;

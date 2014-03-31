@@ -11,7 +11,7 @@
 #include <map>
 #include <io/path.h>
 
-static const char kCRLF[] = "\r\n";
+static char const kCRLF[] = "\r\n";
 
 static int create_socket (int port)
 {

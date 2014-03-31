@@ -40,7 +40,7 @@ namespace cf
 
 	struct string : value<CFStringRef>
 	{
-		string (const char* str) { reset(CFStringCreateWithBytes(kCFAllocatorDefault, (UInt8*)str, strlen(str), kCFStringEncodingUTF8, false)); }
+		string (char const* str) { reset(CFStringCreateWithBytes(kCFAllocatorDefault, (UInt8*)str, strlen(str), kCFStringEncodingUTF8, false)); }
 		string (std::string const& str) { reset(CFStringCreateWithBytes(kCFAllocatorDefault, (UInt8*)str.data(), str.size(), kCFStringEncodingUTF8, false)); }
 	};
 
@@ -51,7 +51,7 @@ namespace cf
 		dictionary () { reset(CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks)); }
 
 		dict_helper operator[] (string const& key);
-		dict_helper operator[] (const char* key);
+		dict_helper operator[] (char const* key);
 	};
 
 	struct dict_helper
@@ -70,7 +70,7 @@ namespace cf
 	};
 
 	inline dict_helper dictionary::operator[] (string const& key) { return dict_helper(*this, key); }
-	inline dict_helper dictionary::operator[] (const char* key)   { return dict_helper(*this, cf::string(key)); }
+	inline dict_helper dictionary::operator[] (char const* key)   { return dict_helper(*this, cf::string(key)); }
 
 	struct array : value<CFMutableArrayRef>
 	{
