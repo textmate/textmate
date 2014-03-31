@@ -24,7 +24,7 @@ static NSTextField* OakCreateTextField (NSString* label)
 	return res;
 }
 
-static NSButton* OakCreateImageToggleButton (NSImage* image)
+static NSButton* OakCreateImageToggleButton (NSImage* image, NSObject* accessibilityLabel)
 {
 	NSButton* res = [NSButton new];
 
@@ -35,6 +35,7 @@ static NSButton* OakCreateImageToggleButton (NSImage* image)
 
 	[res setImage:image];
 	[res setImagePosition:NSImageOnly];
+	OakSetAccessibilityLabel(res, accessibilityLabel);
 
 	return res;
 }
@@ -57,18 +58,14 @@ static NSButton* OakCreateImageToggleButton (NSImage* image)
 	if(self = [super initWithGradient:[[NSGradient alloc] initWithColorsAndLocations: [NSColor colorWithCalibratedWhite:1.000 alpha:0.68], 0.0, [NSColor colorWithCalibratedWhite:1.000 alpha:0.5], 0.0416, [NSColor colorWithCalibratedWhite:1.000 alpha:0.0], 1.0, nil] inactiveGradient:[[NSGradient alloc] initWithColorsAndLocations: [NSColor colorWithCalibratedWhite:1.000 alpha:0.68], 0.0, [NSColor colorWithCalibratedWhite:1.000 alpha:0.5], 0.0416, [NSColor colorWithCalibratedWhite:1.000 alpha:0.0], 1.0, nil]])
 	{
 		self.selectionField               = OakCreateTextField(@"1:1");
-		self.grammarPopUp                 = OakCreateStatusBarPopUpButton(@"");
+		self.grammarPopUp                 = OakCreateStatusBarPopUpButton(@"", @"Grammar");
 		self.tabSizePopUp                 = OakCreateStatusBarPopUpButton();
 		self.tabSizePopUp.pullsDown       = YES;
-		self.bundleItemsPopUp             = OakCreateStatusBarPopUpButton();
-		self.symbolPopUp                  = OakCreateStatusBarPopUpButton(@"");
-		self.macroRecordingButton         = OakCreateImageToggleButton([NSImage imageNamed:@"Recording" inSameBundleAsClass:[self class]]);
+		self.bundleItemsPopUp             = OakCreateStatusBarPopUpButton(nil, @"Bundle Item");
+		self.symbolPopUp                  = OakCreateStatusBarPopUpButton(@"", @"Symbol");
+		self.macroRecordingButton         = OakCreateImageToggleButton([NSImage imageNamed:@"Recording" inSameBundleAsClass:[self class]], @"Record a macro");
 		self.macroRecordingButton.action  = @selector(toggleMacroRecording:);
 		self.macroRecordingButton.toolTip = @"Click to start recording a macro";
-
-		[self.grammarPopUp.cell         accessibilitySetOverrideValue:@"Grammar"        forAttribute:NSAccessibilityDescriptionAttribute];
-		[self.symbolPopUp.cell          accessibilitySetOverrideValue:@"Symbol"         forAttribute:NSAccessibilityDescriptionAttribute];
-		[self.macroRecordingButton.cell accessibilitySetOverrideValue:@"Record a macro" forAttribute:NSAccessibilityDescriptionAttribute];
 
 		[self setupTabSizeMenu:self];
 
@@ -80,7 +77,6 @@ static NSButton* OakCreateImageToggleButton (NSImage* image)
 		item.image = [NSImage imageNamed:NSImageNameActionTemplate];
 		[[self.bundleItemsPopUp cell] setUsesItemFromMenu:NO];
 		[[self.bundleItemsPopUp cell] setMenuItem:item];
-		[[self.bundleItemsPopUp cell] accessibilitySetOverrideValue:@"Bundle Item" forAttribute:NSAccessibilityDescriptionAttribute];
 
 		NSView* wrappedBundleItemsPopUpButton = [NSView new];
 		[wrappedBundleItemsPopUpButton addSubview:self.bundleItemsPopUp];

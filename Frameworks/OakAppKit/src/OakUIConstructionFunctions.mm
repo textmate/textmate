@@ -54,12 +54,13 @@ NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel)
 	return res;
 }
 
-NSPopUpButton* OakCreatePopUpButton (BOOL pullsDown, NSString* initialItemTitle)
+NSPopUpButton* OakCreatePopUpButton (BOOL pullsDown, NSString* initialItemTitle, NSObject* accessibilityLabel)
 {
 	NSPopUpButton* res = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:pullsDown];
 	res.font = OakControlFont();
 	if(initialItemTitle)
 		[[res cell] setMenuItem:[[NSMenuItem alloc] initWithTitle:initialItemTitle action:@selector(nop:) keyEquivalent:@""]];
+	OakSetAccessibilityLabel(res, accessibilityLabel);
 	return res;
 }
 
@@ -77,24 +78,26 @@ NSPopUpButton* OakCreateActionPopUpButton (BOOL bordered)
 
 	[[res cell] setUsesItemFromMenu:NO];
 	[[res cell] setMenuItem:item];
-	[[res cell] accessibilitySetOverrideValue:@"Actions" forAttribute:NSAccessibilityDescriptionAttribute];
+	OakSetAccessibilityLabel(res, @"Actions");
 
 	return res;
 }
 
-NSPopUpButton* OakCreateStatusBarPopUpButton (NSString* initialItemTitle)
+NSPopUpButton* OakCreateStatusBarPopUpButton (NSString* initialItemTitle, NSObject* accessibilityLabel)
 {
 	NSPopUpButton* res = OakCreatePopUpButton(NO, initialItemTitle);
 	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
 	res.font     = OakStatusBarFont();
 	res.bordered = NO;
+	OakSetAccessibilityLabel(res, accessibilityLabel);
 	return res;
 }
 
-NSComboBox* OakCreateComboBox ()
+NSComboBox* OakCreateComboBox (NSObject* accessibilityLabel)
 {
 	NSComboBox* res = [[NSComboBox alloc] initWithFrame:NSZeroRect];
 	res.font = OakControlFont();
+	OakSetAccessibilityLabel(res, accessibilityLabel);
 	return res;
 }
 
@@ -210,4 +213,24 @@ NSImageView* OakCreateDividerImageView ()
 	[res setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
 	[res setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationVertical];
 	return res;
+}
+
+BOOL OakSetAccessibilityLabel(NSObject* element, NSObject* label)
+{
+	if([element isKindOfClass:[NSControl class]])
+		element = [(NSControl*)element cell] ?: element; // e.g. NSTableView is an NSControl with a nil cell
+	else if(!([element isKindOfClass:[NSView class]] || [element isKindOfClass:[NSCell class]]))
+		return NO;
+
+	NSString* attribute = NSAccessibilityDescriptionAttribute;
+	if([label isKindOfClass:[NSView class]] || [label isKindOfClass:[NSCell class]])
+	{
+		attribute = NSAccessibilityTitleUIElementAttribute;
+		if ([label isKindOfClass:[NSControl class]])
+			label = [(NSControl*)label cell] ?: label;
+	}
+	else if(![label isKindOfClass:[NSString class]])
+		return NO;
+
+	return [element accessibilitySetOverrideValue:label forAttribute:attribute];
 }

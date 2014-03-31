@@ -38,25 +38,28 @@ NSString* const kUserDefaultsFindResultsHeightKey = @"findResultsHeight";
 }
 @end
 
-static OakAutoSizingTextField* OakCreateTextField (id <NSTextFieldDelegate> delegate)
+static OakAutoSizingTextField* OakCreateTextField (id <NSTextFieldDelegate> delegate, NSObject* accessibilityLabel = nil)
 {
 	OakAutoSizingTextField* res = [[OakAutoSizingTextField alloc] initWithFrame:NSZeroRect];
 	res.font = OakControlFont();
 	[[res cell] setWraps:YES];
+	OakSetAccessibilityLabel(res, accessibilityLabel);
 	res.delegate = delegate;
 	return res;
 }
 
-static NSButton* OakCreateHistoryButton ()
+static NSButton* OakCreateHistoryButton (NSString* toolTip)
 {
 	NSButton* res = [[NSButton alloc] initWithFrame:NSZeroRect];
 	res.bezelStyle = NSRoundedDisclosureBezelStyle;
 	res.buttonType = NSMomentaryLightButton;
 	res.title      = @"";
+	res.toolTip = toolTip;
+	OakSetAccessibilityLabel(res, toolTip);
 	return res;
 }
 
-static NSOutlineView* OakCreateOutlineView (NSScrollView** scrollViewOut)
+static NSOutlineView* OakCreateOutlineView (NSScrollView** scrollViewOut, NSObject* accessibilityLabel)
 {
 	NSOutlineView* res = [[NSOutlineView alloc] initWithFrame:NSZeroRect];
 	res.focusRingType                      = NSFocusRingTypeNone;
@@ -64,6 +67,7 @@ static NSOutlineView* OakCreateOutlineView (NSScrollView** scrollViewOut)
 	res.autoresizesOutlineColumn           = NO;
 	res.usesAlternatingRowBackgroundColors = YES;
 	res.headerView                         = nil;
+	OakSetAccessibilityLabel(res, accessibilityLabel);
 
 	NSTableColumn* tableColumn = [[NSTableColumn alloc] initWithIdentifier:@"checkbox"];
 	NSButtonCell* dataCell = [NSButtonCell new];
@@ -113,6 +117,7 @@ static NSButton* OakCreateStopSearchButton ()
 	res.image         = [NSImage imageNamed:NSImageNameStopProgressFreestandingTemplate];
 	res.imagePosition = NSImageOnly;
 	res.toolTip       = @"Stop Search";
+	OakSetAccessibilityLabel(res, res.toolTip);
 	res.keyEquivalent = @".";
 	res.keyEquivalentModifierMask = NSCommandKeyMask;
 	[res.cell setImageScaling:NSImageScaleProportionallyDown];
@@ -190,13 +195,16 @@ static NSButton* OakCreateStopSearchButton ()
 		self.window.restorable         = NO;
 
 		self.findLabel                 = OakCreateLabel(@"Find:");
-		self.findTextField             = OakCreateTextField(self);
-		self.findHistoryButton         = OakCreateHistoryButton();
+		self.findTextField             = OakCreateTextField(self, self.findLabel);
+		self.findHistoryButton         = OakCreateHistoryButton(@"Show Find History");
 		self.countButton               = OakCreateButton(@"Σ", NSSmallSquareBezelStyle);
 
+		self.countButton.toolTip = @"Show Results Count";
+		OakSetAccessibilityLabel(self.countButton, self.countButton.toolTip);
+
 		self.replaceLabel              = OakCreateLabel(@"Replace:");
-		self.replaceTextField          = OakCreateTextField(self);
-		self.replaceHistoryButton      = OakCreateHistoryButton();
+		self.replaceTextField          = OakCreateTextField(self, self.replaceLabel);
+		self.replaceHistoryButton      = OakCreateHistoryButton(@"Show Replace History");
 
 		self.optionsLabel              = OakCreateLabel(@"Options:");
 
@@ -206,14 +214,14 @@ static NSButton* OakCreateStopSearchButton ()
 		self.wrapAroundCheckBox        = OakCreateCheckBox(@"Wrap Around");
 
 		self.whereLabel                = OakCreateLabel(@"In:");
-		self.wherePopUpButton          = OakCreatePopUpButton();
+		self.wherePopUpButton          = OakCreatePopUpButton(NO, nil, self.whereLabel);
 		self.matchingLabel             = OakCreateLabel(@"matching");
-		self.globTextField             = OakCreateComboBox();
+		self.globTextField             = OakCreateComboBox(self.matchingLabel);
 		self.actionsPopUpButton        = OakCreateActionPopUpButton(YES /* bordered */);
 
 		NSScrollView* resultsScrollView = nil;
 		self.resultsTopDivider         = OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1]);
-		self.resultsOutlineView        = OakCreateOutlineView(&resultsScrollView);
+		self.resultsOutlineView        = OakCreateOutlineView(&resultsScrollView, @"Results");
 		self.resultsScrollView         = resultsScrollView;
 		self.resultsBottomDivider      = OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1]);
 
@@ -696,6 +704,21 @@ static NSButton* OakCreateStopSearchButton ()
 		[self.findStringPopver close];
 		self.findStringPopver = nil;
 	}
+}
+
+- (void)setStatusString:(NSString*)statusString
+{
+	if (_statusString != statusString && ![_statusString isEqualToString:statusString])
+	{
+		_statusString = statusString;
+	}
+
+	for (id element in @[
+		self.countButton.cell,
+	])
+		NSAccessibilityPostNotificationWithUserInfo(element, NSAccessibilityAnnouncementRequestedNotification, @{
+			NSAccessibilityAnnouncementKey: statusString,
+		});
 }
 
 - (void)updateFindErrorString
