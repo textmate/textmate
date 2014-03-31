@@ -706,6 +706,21 @@ static NSButton* OakCreateStopSearchButton ()
 	}
 }
 
+- (void)setStatusString:(NSString*)statusString
+{
+	if (_statusString != statusString && ![_statusString isEqualToString:statusString])
+	{
+		_statusString = statusString;
+	}
+
+	for (id element in @[
+		self.countButton.cell,
+	])
+		NSAccessibilityPostNotificationWithUserInfo(element, NSAccessibilityAnnouncementRequestedNotification, @{
+			NSAccessibilityAnnouncementKey: statusString,
+		});
+}
+
 - (void)updateFindErrorString
 {
 	NSString* errorString = nil;
