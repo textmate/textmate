@@ -2,15 +2,7 @@ Title: Release Notes
 
 # Changes
 
-## 2014-03-30 ([v2.0-alpha.9527](https://github.com/textmate/textmate/compare/v2.0-alpha.9523...v2.0-alpha.9527))
-
-* When a command requires a (shell) command and has that dependency specified via [`requiredCommands`](http://manual.textmate.org/commands#required-commands) then the value (of the environment variable set by TextMate) will now be shell escaped. This means commands should not double-quote `$VARIABLES` when using them in a shell context, and if using them in another context (e.g. ruby) the command should ideally call [`Shellwords.split`](http://ruby-doc.org/stdlib-2.0.0/libdoc/shellwords/rdoc/Shellwords.html#method-c-shellsplit). The reason for this change is that specifying what to run via `TM_«executable»` might not be a single executable, e.g. we may want to set `TM_CC` to `/usr/bin/xcrun clang` or `TM_MARKDOWN` to `/usr/local/bin/multimarkdown --nosmart`.
-
-## 2014-03-25 ([v2.0-alpha.9523](https://github.com/textmate/textmate/compare/v2.0-alpha.9519...v2.0-alpha.9523))
-
-* Fixes and improvements.
-
-## 2014-03-12 ([v2.0-alpha.9519](https://github.com/textmate/textmate/compare/v2.0-alpha.9517...v2.0-alpha.9519))
+## 2014-03-31 ([v2.0-alpha.9529](https://github.com/textmate/textmate/compare/v2.0-alpha.9515...v2.0-alpha.9529))
 
   * With VoiceOver the current item will be announced in the various item choosers: File → Open Favorites… (⇧⌘O), Go → Go to File… (⌘T), and Navigate → Go to Symbol… (⇧⌘T). If you want to hear the first result (which is not automatically spoken), first press arrow up to hear it, then you can use arrows down/up as usual. If you want to browse the results without entering a search string, quickly type any letter and delete it to suppress VoiceOver information about menu command and current window. *[Boris Dušek]*
 
@@ -23,11 +15,11 @@ Title: Release Notes
 
     The third option is suited for something like a build command where you are unlikely to want multiple simultaneous instances running.
 
-## 2014-03-04 ([v2.0-alpha.9517](https://github.com/textmate/textmate/compare/v2.0-alpha.9515...v2.0-alpha.9517))
+  * The browser used for clipboard and search history, available using _Edit → Paste → Show History_ (⌃⌥⌘V) and _Edit → Find → Show History_ (⌃⌥⌘F), now support “type to filter”.
 
-* The browser used for clipboard and search history, available using _Edit → Paste → Show History_ (⌃⌥⌘V) and _Edit → Find → Show History_ (⌃⌥⌘F), now support “type to filter”.
-* It is now possible to set the `disableIndentCorrections` to `emptyLines`. This will disable the indent corrections only when typing on empty lines, which has been made default for HTML.
-* Various fixes and improvements, click link above for full details.
+  * It is now possible to set the `disableIndentCorrections` to `emptyLines`. This will disable the indent corrections only when typing on empty lines, which has been made default for HTML.
+
+  * Various fixes and improvements, click link above for full details.
 
 ## 2014-02-23 ([v2.0-alpha.9515](https://github.com/textmate/textmate/compare/v2.0-alpha.9503...v2.0-alpha.9515))
 
