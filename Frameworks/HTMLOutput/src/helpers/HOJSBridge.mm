@@ -1,4 +1,5 @@
 #import "HOJSBridge.h"
+#import "add_to_buffer.h"
 #import <OakFoundation/NSString Additions.h>
 #import <oak/debug.h>
 #import <OakFoundation/NSArray Additions.h>
@@ -181,39 +182,8 @@ OAK_DEBUG_VAR(HTMLOutput_JSShellCommand);
 			auto group = dispatch_group_create();
 			auto queue = aHandler ? dispatch_get_main_queue() : dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
 
-			dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-				std::vector<char> buf(1024);
-				while(ssize_t len = read(process.out, buf.data(), buf.size()))
-				{
-					if(len < 0)
-						break;
-
-					dispatch_sync(queue, ^{
-						if(self.onreadoutput)
-							output.erase(output.begin(), utf8::find_safe_end(output.begin(), output.end()));
-						output.insert(output.end(), buf.begin(), buf.begin() + len);
-						if(self.onreadoutput)
-							[self.onreadoutput callWebScriptMethod:@"call" withArguments:@[ self.onreadoutput, [self outputString] ]];
-					});
-				}
-			});
-
-			dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-				std::vector<char> buf(1024);
-				while(ssize_t len = read(process.err, buf.data(), buf.size()))
-				{
-					if(len < 0)
-						break;
-
-					dispatch_sync(queue, ^{
-						if(self.onreaderror)
-							error.erase(error.begin(), utf8::find_safe_end(error.begin(), error.end()));
-						error.insert(error.end(), buf.begin(), buf.begin() + len);
-						if(self.onreaderror)
-							[self.onreaderror callWebScriptMethod:@"call" withArguments:@[ self.onreaderror, [self errorString] ]];
-					});
-				}
-			});
+			[self exhaustFileDescriptor:process.out inQueue:queue group:group buffer:output isError:NO];
+			[self exhaustFileDescriptor:process.err inQueue:queue group:group buffer:error isError:YES];
 
 			dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 				int result = 0;
@@ -254,6 +224,27 @@ OAK_DEBUG_VAR(HTMLOutput_JSShellCommand);
 		}
 	}
 	return self;
+}
+
+- (void)exhaustFileDescriptor:(int)fd inQueue:(dispatch_queue_t)queue group:(dispatch_group_t)group buffer:(std::string&)buf isError:(BOOL)isError
+{
+	dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+		char tmp[1024];
+		while(ssize_t len = read(fd, &tmp[0], sizeof(tmp)))
+		{
+			if(len < 0)
+				break;
+
+			char const* bytes = &tmp[0];
+			dispatch_sync(queue, ^{
+				id handler = isError ? self.onreaderror : self.onreadoutput;
+
+				auto range = add_bytes_to_utf8_buffer(buf, bytes, bytes + len, handler != nil);
+				if(handler && range.first != range.second)
+					[handler callWebScriptMethod:@"call" withArguments:@[ handler, [NSString stringWithCxxString:std::string(range.first, range.second)] ]];
+			});
+		}
+	});
 }
 
 - (void)cancelCommand
