@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby -wKU
+#!/usr/bin/env ruby -w
 #
 # http://developer.apple.com/library/mac/#technotes/tn2004/tn2123.html
 require "fileutils"
