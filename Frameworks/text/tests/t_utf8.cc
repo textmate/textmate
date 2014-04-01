@@ -80,10 +80,32 @@ static std::string sanitize (std::string str)
 
 void test_sanitize ()
 {
-	OAK_ASSERT_EQ("Æblegrød", sanitize("Æblegrød"));
-	OAK_ASSERT_EQ("Æblegrød", sanitize("Æb\xFFlegrød"));
-	OAK_ASSERT_EQ("Æblegrød", sanitize("Æb\xC0legrød"));
-	OAK_ASSERT_EQ("Æblegrød", sanitize("Æb\xC0\xFElegrød"));
-	OAK_ASSERT_EQ("Æblegrød", sanitize("Æb\xFE\xC0legrød"));
-	OAK_ASSERT_EQ("Æblegrød", sanitize("Æblegrød\xFE"));
+	OAK_ASSERT_EQ(sanitize("Æblegrød"),           "Æblegrød");
+	OAK_ASSERT_EQ(sanitize("Æb\xFFlegrød"),       "Æblegrød");
+	OAK_ASSERT_EQ(sanitize("Æb\xC0legrød"),       "Æblegrød");
+	OAK_ASSERT_EQ(sanitize("Æb\xC0\xFElegrød"),   "Æblegrød");
+	OAK_ASSERT_EQ(sanitize("Æb\xFE\xC0legrød"),   "Æblegrød");
+	OAK_ASSERT_EQ(sanitize("Æblegrød\xFE"),       "Æblegrød");
+
+	OAK_ASSERT_EQ(sanitize("x\xE2\x99\xA5y"),     "x\xE2\x99\xA5y");
+	OAK_ASSERT_EQ(sanitize("x\xE2\x99y"),         "xy");
+	OAK_ASSERT_EQ(sanitize("x\xE2y"),             "xy");
+	OAK_ASSERT_EQ(sanitize("x\x99\xA5y"),         "xy");
+	OAK_ASSERT_EQ(sanitize("x\xA5y"),             "xy");
+
+	OAK_ASSERT_EQ(sanitize("\xE2\x99\xA5"),       "\xE2\x99\xA5");
+	OAK_ASSERT_EQ(sanitize("\xE2\x99"),           "");
+	OAK_ASSERT_EQ(sanitize("\xE2"),               "");
+	OAK_ASSERT_EQ(sanitize("\x99\xA5"),           "");
+	OAK_ASSERT_EQ(sanitize("\xA5"),               "");
+
+	OAK_ASSERT_EQ(sanitize("x\xF0\xA0\xBB\xB5y"), "x\xF0\xA0\xBB\xB5y");
+	OAK_ASSERT_EQ(sanitize("x\xF0\xA0\xBBy"),     "xy");
+	OAK_ASSERT_EQ(sanitize("x\xF0\xA0y"),         "xy");
+	OAK_ASSERT_EQ(sanitize("x\xF0y"),             "xy");
+
+	OAK_ASSERT_EQ(sanitize("\xF0\xA0\xBB\xB5"),   "\xF0\xA0\xBB\xB5");
+	OAK_ASSERT_EQ(sanitize("\xF0\xA0\xBB"),       "");
+	OAK_ASSERT_EQ(sanitize("\xF0\xA0"),           "");
+	OAK_ASSERT_EQ(sanitize("\xF0"),               "");
 }
