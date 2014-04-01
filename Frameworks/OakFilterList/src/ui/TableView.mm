@@ -1,12 +1,7 @@
 #import "TableView.h"
 #import <OakFoundation/NSString Additions.h>
+#import <OakAppKit/OakAppKit.h> // Accessibility API missing from 10.7/10.8 SDK.
 #import <oak/algorithm.h>
-
-#if !defined(MAC_OS_X_VERSION_10_9) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_9)
-APPKIT_EXTERN void NSAccessibilityPostNotificationWithUserInfo(id element, NSString *notification, NSDictionary *userInfo) NS_AVAILABLE_MAC(10_7);
-APPKIT_EXTERN NSString *const NSAccessibilityAnnouncementRequestedNotification NS_AVAILABLE_MAC(10_7);
-APPKIT_EXTERN NSString *const NSAccessibilityAnnouncementKey            NS_AVAILABLE_MAC(10_7);
-#endif
 
 // ========================================
 // = Forward NSTextField Movement Actions =
