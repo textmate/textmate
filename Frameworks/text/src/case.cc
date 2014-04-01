@@ -4,25 +4,31 @@
 
 namespace text
 {
-	static std::string convert_helper (std::string bytes, void(*operation)(CFMutableStringRef, CFLocaleRef))
+	static std::string convert_helper (std::string const& bytes, void(*operation)(CFMutableStringRef, CFLocaleRef))
 	{
-		CFStringRef tmp = CFStringCreateWithBytes(kCFAllocatorDefault, (UInt8*)bytes.data(), bytes.size(), kCFStringEncodingUTF8, FALSE);
-		CFMutableStringRef str = CFStringCreateMutableCopy(kCFAllocatorDefault, 0, tmp);
-
-		operation(str, NULL);
-
-		CFIndex len = 0;
-		if(CFStringGetBytes(str, CFRangeMake(0, CFStringGetLength(str)), kCFStringEncodingUTF8, '?', false, NULL, 0, &len) > 0)
+		std::string res;
+		if(CFStringRef tmp = CFStringCreateWithBytes(kCFAllocatorDefault, (UInt8*)bytes.data(), bytes.size(), kCFStringEncodingUTF8, FALSE))
 		{
-			char buf[len];
-			if(CFStringGetBytes(str, CFRangeMake(0, CFStringGetLength(str)), kCFStringEncodingUTF8, '?', false, (UInt8*)buf, len, NULL) > 0)
-				bytes = std::string(buf, buf + len);
+			if(CFMutableStringRef str = CFStringCreateMutableCopy(kCFAllocatorDefault, 0, tmp))
+			{
+				CFIndex srcLen = CFStringGetLength(str);
+				if(srcLen > 0)
+				{
+					operation(str, NULL);
+
+					CFIndex len = 0;
+					if(CFStringGetBytes(str, CFRangeMake(0, srcLen), kCFStringEncodingUTF8, '?', false, NULL, 0, &len) == srcLen)
+					{
+						res.resize(len);
+						if(CFStringGetBytes(str, CFRangeMake(0, srcLen), kCFStringEncodingUTF8, '?', false, (UInt8*)&res[0], res.size(), nullptr) != srcLen)
+							res.clear();
+					}
+				}
+				CFRelease(str);
+			}
+			CFRelease(tmp);
 		}
-
-		CFRelease(str);
-		CFRelease(tmp);
-
-		return bytes;
+		return res;
 	}
 
 	std::string uppercase (std::string const& str)
