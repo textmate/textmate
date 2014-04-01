@@ -521,6 +521,12 @@ static std::string shell_quote (std::vector<std::string> paths)
 - (NSString*)findString      { return [[OakPasteboard pasteboardWithName:NSFindPboard] current].string;    }
 - (NSString*)replaceString   { return [[OakPasteboard pasteboardWithName:OakReplacePboard] current].string; }
 
+- (void)showToolTip:(NSString*)aToolTip
+{
+	OakShowToolTip(aToolTip, [self.textView positionForWindowUnderCaret]);
+	NSAccessibilityPostNotificationWithUserInfo(self.textView, NSAccessibilityAnnouncementRequestedNotification, @{ NSAccessibilityAnnouncementKey : aToolTip });
+}
+
 - (void)didFind:(NSUInteger)aNumber occurrencesOf:(NSString*)aFindString atPosition:(text::pos_t const&)aPosition wrapped:(BOOL)didWrap
 {
 	NSString* format = nil;
@@ -533,7 +539,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 	NSString* classifier = (self.findOptions & find::regular_expression) ? @"matches for" : @"occurrences of";
 	if(format)
-		OakShowToolTip([NSString stringWithFormat:format, classifier, aFindString, aNumber], [self.textView positionForWindowUnderCaret]);
+		[self showToolTip:[NSString stringWithFormat:format, classifier, aFindString, aNumber]];
 }
 
 - (void)didReplace:(NSUInteger)aNumber occurrencesOf:(NSString*)aFindString with:(NSString*)aReplacementString
@@ -543,7 +549,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 		{ @"Nothing replaced (no matches for “%@”).",    @"Replaced one match of “%@”.",      @"Replaced %2$ld matches of “%@”."     }
 	};
 	NSString* format = formatStrings[(self.findOptions & find::regular_expression) ? 1 : 0][aNumber > 2 ? 2 : aNumber];
-	OakShowToolTip([NSString stringWithFormat:format, aFindString, aNumber], [self.textView positionForWindowUnderCaret]);
+	[self showToolTip:[NSString stringWithFormat:format, aFindString, aNumber]];
 }
 @end
 
