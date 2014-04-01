@@ -314,6 +314,12 @@ static NSTextField* OakCreateTextField ()
 		self.webView.policyDelegate = self;
 		[contentView addSubview:self.webView];
 
+		WebPreferences* webViewPrefs = [WebPreferences standardPreferences];
+		webViewPrefs.plugInsEnabled = NO;
+		webViewPrefs.usesPageCache  = NO;
+		webViewPrefs.cacheModel     = WebCacheModelDocumentViewer;
+		self.webView.preferences = webViewPrefs;
+
 		NSDictionary* views = @{ @"webView" : self.webView };
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[webView(>=200)]|" options:NSLayoutFormatAlignAllTop     metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[webView(>=200)]|" options:NSLayoutFormatAlignAllLeading metrics:nil views:views]];
