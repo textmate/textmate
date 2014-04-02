@@ -13,6 +13,7 @@
 	CFBundlePackageType                  = APPL;
 	CFBundleSignature                    = avin; // we didn’t register this code with Apple
 	LSMinimumSystemVersion               = "${APP_MIN_OS}";
+	LSApplicationCategoryType            = "public.app-category.developer-tools"; // View-->Arrange by Application Category
 	NSAppleScriptEnabled                 = YES;
 	NSMainNibFile                        = MainMenu;
 	NSPrincipalClass                     = NSApplication;
