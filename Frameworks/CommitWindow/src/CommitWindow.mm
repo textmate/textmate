@@ -11,6 +11,9 @@
 #import <document/document.h>
 #import <io/io.h>
 #import <text/trim.h>
+#import <text/tokenize.h>
+#import <text/parse.h>
+#import <ns/ns.h>
 #import <oak/oak.h>
 
 @interface actionCommandObj : NSObject
@@ -48,6 +51,23 @@ static std::map<std::string, std::string> convert (NSDictionary* dict)
 	for(NSString* key in dict)
 		res[[key UTF8String]] = [[dict objectForKey:key] UTF8String];
 	return res;
+}
+
+static std::string absolute_path_for_tool (std::string const& tool, std::map<std::string, std::string> const& env)
+{
+	if(!path::is_executable(tool))
+	{
+		std::map<std::string, std::string>::const_iterator pathList = env.find("PATH");
+		if(pathList != env.end())
+		{
+			for(auto const& dir : text::tokenize(pathList->second.begin(), pathList->second.end(), ':'))
+			{
+				if(path::is_executable(path::join(dir, tool)))
+					return path::join(dir, tool);
+			}
+		}
+	}
+	return tool;
 }
 
 static NSString* const kOakCommitWindowCommitMessages = @"commitMessages";
@@ -334,19 +354,6 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 		item.commit = aState;
 }
 
-- (NSString*)absolutePathForPath:(NSString*)path
-{
-	NSString* newPath;
-	std::string const oldPath = [path UTF8String];
-
-	std::string res = io::exec("/usr/bin/which", oldPath.c_str(), NULL);
-	if(res != NULL_STR)
-			newPath = [NSString stringWithCxxString:path::escape(text::trim(res))];
-	else	newPath = [NSString stringWithCxxString:path::escape([path UTF8String])];
-
-	return newPath;
-}
-
 - (void)saveCommitMessage:(NSString*)aCommitMessage
 {
 	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
@@ -402,22 +409,23 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 
 	if(NSString* diffCommand = [self.options objectForKey:@"--diff-cmd"])
 	{
+		std::vector<std::string> diffCmd = text::split(to_s(diffCommand), ",");
+		diffCmd.front() = absolute_path_for_tool(diffCmd.front(), _environment);
+
 		NSInteger row = [_tableView rowForView:sender] == -1 ? _tableView.clickedRow : [_tableView rowForView:sender];
+		NSString* filePath = [[[_arrayController arrangedObjects] objectAtIndex:row] path];
+		diffCmd.push_back(to_s(filePath));
+
+		std::transform(diffCmd.begin(), diffCmd.end(), diffCmd.begin(), &path::escape);
 
 		std::string const pwd = _environment["PWD"];
-		std::string const tm_mate = _environment["TM_MATE"];
-		NSMutableArray* arguments = [[diffCommand componentsSeparatedByString:@","] mutableCopy];
-		NSString* filePath = [[[_arrayController arrangedObjects] objectAtIndex:row] path];
-		[arguments replaceObjectAtIndex:0 withObject:[self absolutePathForPath:[arguments objectAtIndex:0]]];
-		NSString* joinedArguments = [arguments componentsJoinedByString:@" "];
-
-		std::string const cmd_string = text::format("cd %s && %s %s|%s --async", path::escape(pwd).c_str(), [joinedArguments UTF8String], path::escape([filePath UTF8String]).c_str(), path::escape(tm_mate).c_str());
+		std::string const cmdString = text::format("cd %s && %s|\"$TM_MATE\" --async", path::escape(pwd).c_str(), text::join(diffCmd, " ").c_str());
 		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-			bool success = io::exec(_environment, "/bin/sh", "-c", cmd_string.c_str(), NULL) != NULL_STR;
+			bool success = io::exec(_environment, "/bin/sh", "-c", cmdString.c_str(), NULL) != NULL_STR;
 			if(!success)
 			{
 				dispatch_async(dispatch_get_main_queue(), ^{
-					NSAlert* alert = [NSAlert tmAlertWithMessageText:@"Failed running diff command." informativeText:[NSString stringWithCxxString:cmd_string] buttons:@"OK", nil];
+					NSAlert* alert = [NSAlert tmAlertWithMessageText:@"Failed running diff command." informativeText:[NSString stringWithCxxString:cmdString] buttons:@"OK", nil];
 					OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){});
 				});
 			}
@@ -449,16 +457,21 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 
 - (void)performActionCommand:(id)sender
 {
-	actionCommandObj* cmd = [sender representedObject];
-	NSMutableArray* arguments = [cmd.command mutableCopy];
-	NSInteger row             = [_tableView clickedColumn] == -1 ? [_tableView selectedRow] : [_tableView clickedRow];
+	std::vector<std::string> command;
 
-	std::string const filePath = [[[[_arrayController arrangedObjects] objectAtIndex:row] path] UTF8String];
-	NSString* pathToCommand = [self absolutePathForPath:[arguments objectAtIndex:0]];
-	[arguments replaceObjectAtIndex:0 withObject:pathToCommand];
+	actionCommandObj* obj = [sender representedObject];
+	for(NSString* str in obj.command)
+		command.push_back(to_s(str));
+	command.front() = absolute_path_for_tool(command.front(), _environment);
 
-	std::string const cmd_string = text::format("%s %s", [[arguments componentsJoinedByString:@" "] UTF8String], path::escape(filePath).c_str());
-	std::string res = io::exec(_environment, "/bin/sh", "-c", cmd_string.c_str(), NULL);
+	NSInteger row = [_tableView clickedColumn] == -1 ? [_tableView selectedRow] : [_tableView clickedRow];
+	NSString* filePath = [[[_arrayController arrangedObjects] objectAtIndex:row] path];
+	command.push_back(to_s(filePath));
+
+	std::transform(command.begin(), command.end(), command.begin(), &path::escape);
+	std::string const cmdString = text::join(command, " ");
+
+	std::string res = io::exec(_environment, "/bin/sh", "-c", cmdString.c_str(), NULL);
 	if(res != NULL_STR)
 	{
 		NSString* outputStatus = [NSString stringWithCxxString:res];
@@ -466,7 +479,7 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 
 		if(rangeOfStatus.location == NSNotFound)
 		{
-			NSAlert* alert = [NSAlert tmAlertWithMessageText:@"Cannot understand output from command" informativeText:[NSString stringWithCxxString:cmd_string] buttons:@"OK", nil];
+			NSAlert* alert = [NSAlert tmAlertWithMessageText:@"Cannot understand output from command" informativeText:[NSString stringWithCxxString:cmdString] buttons:@"OK", nil];
 			OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){});
 		}
 		NSString* newStatus = [outputStatus substringToIndex:rangeOfStatus.location];
@@ -476,7 +489,7 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 	}
 	else
 	{
-		NSAlert* alert = [NSAlert tmAlertWithMessageText:@"Failed running command" informativeText:[NSString stringWithCxxString:cmd_string] buttons:@"OK", nil];
+		NSAlert* alert = [NSAlert tmAlertWithMessageText:@"Failed running command" informativeText:[NSString stringWithCxxString:cmdString] buttons:@"OK", nil];
 		OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){});
 	}
 }
