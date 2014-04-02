@@ -125,7 +125,13 @@ namespace command
 
 	runner_t::runner_t (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, std::map<std::string, std::string> const& environment, std::string const& pwd, delegate_ptr delegate) : _command(command), _environment(environment), _directory(pwd), _delegate(delegate), _input_was_selection(false), _did_detach(false)
 	{
+		_dispatch_group = dispatch_group_create();
 		fix_shebang(&_command.command);
+	}
+
+	runner_t::~runner_t ()
+	{
+		dispatch_release(_dispatch_group);
 	}
 
 	runner_ptr runner (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, std::map<std::string, std::string> const& environment, delegate_ptr delegate, std::string const& pwd)
@@ -158,7 +164,6 @@ namespace command
 		};
 
 		bool hasHTMLOutput = _command.output == output::new_window && _command.output_format == output_format::html;
-		_dispatch_group = dispatch_group_create();
 		_process_id = run_command(_dispatch_group, _temp_path, stdinRead, _environment, _directory, queue, hasHTMLOutput ? htmlOutHandler : textOutHandler, stderrHandler, completionHandler);
 
 		if(hasHTMLOutput)
@@ -225,7 +230,6 @@ namespace command
 			fprintf(stderr, "*** process terminated abnormally %d\n", status);
 
 		_process_id = -1;
-		dispatch_release(_dispatch_group);
 
 		std::string newOut, newErr;
 		oak::replace_copy(_out.begin(), _out.end(), _temp_path.begin(), _temp_path.end(), _command.name.begin(), _command.name.end(), back_inserter(newOut));
