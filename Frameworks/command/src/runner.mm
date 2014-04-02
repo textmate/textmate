@@ -44,7 +44,7 @@ static std::tuple<pid_t, int, int> my_fork (char const* cmd, int inputRead, std:
 				continue;
 
 			if(close(fd) == -1)
-				fprintf(stderr, "failed to close fd %d\n", fd);
+				perror("error closing fd after fork:");
 		}
 
 		for(int fd : oldOutErr) close(fd);
