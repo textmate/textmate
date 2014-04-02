@@ -111,7 +111,7 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 		_scrollView.borderType            = NSNoBorder;
 		_scrollView.documentView          = _tableView;
 
-		self.window = [[NSPanel alloc] initWithContentRect:NSMakeRect(600, 700, 400, 500) styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSTexturedBackgroundWindowMask) backing:NSBackingStoreBuffered defer:NO];
+		self.window = [[NSWindow alloc] initWithContentRect:NSMakeRect(600, 700, 400, 500) styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSTexturedBackgroundWindowMask) backing:NSBackingStoreBuffered defer:NO];
 		self.window.delegate           = self;
 		self.window.level              = NSFloatingWindowLevel;
 		self.window.releasedWhenClosed = NO;
