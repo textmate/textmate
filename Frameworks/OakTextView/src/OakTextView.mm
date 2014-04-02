@@ -1874,7 +1874,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 		[self realKeyDown:anEvent];
 	}
 	catch(std::exception const& e) {
-		crash_reporter_info_t info(text::format("C++ Exception: %s", e.what()));
+		info << text::format("C++ Exception: %s", e.what());
 		abort();
 	}
 }
