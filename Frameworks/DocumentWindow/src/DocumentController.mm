@@ -222,7 +222,7 @@ namespace
 		std::transform(newDocuments.begin(), newDocuments.end(), inserter(uuids, uuids.end()), [](document::document_ptr const& doc){ return doc->identifier(); });
 
 		std::copy_if(oldDocuments.begin(), oldDocuments.begin() + splitAt, back_inserter(out), [&uuids](document::document_ptr const& doc){ return uuids.find(doc->identifier()) == uuids.end(); });
-		std::copy(newDocuments.begin(), newDocuments.end(), back_inserter(out));	
+		std::copy(newDocuments.begin(), newDocuments.end(), back_inserter(out));
 		std::copy_if(oldDocuments.begin() + splitAt, oldDocuments.end(), back_inserter(out), [&uuids](document::document_ptr const& doc){ return uuids.find(doc->identifier()) == uuids.end(); });
 
 		auto iter = std::find(out.begin(), out.end(), newDocuments.front());
@@ -1121,7 +1121,7 @@ namespace
 - (void)updateWindowTitleAndRevealFile
 {
 	[self updateWindowTitle];
-	
+
 	if(self.autoRevealFile && self.fileBrowserVisible)
 	{
 		if(_selectedDocument && _selectedDocument->path() != NULL_STR)
@@ -2484,6 +2484,14 @@ static NSUInteger DisableSessionSavingCount = 0;
 	if(self.fileBrowser)
 		res = [self.fileBrowser variables];
 
+	auto const& vars = _documentSCMVariables.empty() ? _projectSCMVariables : _documentSCMVariables;
+	auto scmName = vars.find("TM_SCM_NAME");
+	auto scmBranch = vars.find("TM_SCM_BRANCH");
+	if(scmName != vars.end())
+		res["TM_SCM_NAME"] = scmName->second;
+	if(scmBranch != vars.end())
+		res["TM_SCM_BRANCH"] = scmBranch->second;
+
 	if(NSString* projectDir = self.projectPath)
 	{
 		res["TM_PROJECT_DIRECTORY"] = [projectDir fileSystemRepresentation];
@@ -2650,7 +2658,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 		void show_browser (std::string const& path) const
 		{
 			std::string const folder = path::resolve(path);
-			[[NSDocumentController sharedDocumentController] noteNewRecentDocumentURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:folder]]]; 
+			[[NSDocumentController sharedDocumentController] noteNewRecentDocumentURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:folder]]];
 
 			for(DocumentController* candidate in SortedControllers())
 			{

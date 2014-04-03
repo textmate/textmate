@@ -1,0 +1,5 @@
+SOURCES      = src/*.mm
+EXPORT       = src/CommitWindow.h
+LINK        += OakAppKit OakFoundation OakTextView
+CP_Resources = resources/*
+FRAMEWORKS   = Cocoa
