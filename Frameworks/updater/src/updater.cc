@@ -514,11 +514,23 @@ namespace bundles_db
 		if(src != NULL_STR)
 		{
 			std::string const dst = bundle->_path == NULL_STR ? path::join(local_bundle_path(installDir), text::format("Bundles/%s.tmbundle", safe_basename(bundle->name()).c_str())) : bundle->_path;
-			if(path::exists(dst) && !path::remove(dst))
+			std::string trash = NULL_STR;
+
+			if(path::exists(dst))
 			{
-				fprintf(stderr, "destination already exists ‘%s’\n", dst.c_str());
+				char date[64];
+				time_t now = time(NULL);
+				strftime(date, sizeof(date), "(%F %T)", localtime(&now));
+				trash = dst + ".updating." + date;
+
+				if(rename(dst.c_str(), trash.c_str()) != 0)
+				{
+					fprintf(stderr, "unable to rename old bundle ‘%s’ → ‘%s’: %s\n", dst.c_str(), trash.c_str(), strerror(errno));
+					return false;
+				}
 			}
-			else if(!path::make_dir(path::parent(dst)))
+
+			if(!path::make_dir(path::parent(dst)))
 			{
 				fprintf(stderr, "destination directoy doesn’t exist ‘%s’\n", path::parent(dst).c_str());
 			}
@@ -529,6 +541,10 @@ namespace bundles_db
 				bundle->_origin       = bundle->source()->identifier();
 				path::set_attr(dst, kBundleAttributeUpdated, to_s(bundle->_url_updated));
 				path::set_attr(dst, kBundleAttributeOrigin, bundle->origin());
+
+				if(trash != NULL_STR && !path::remove(trash))
+					fprintf(stderr, "unable to remove old bundle ‘%s’\n", trash.c_str());
+
 				return true;
 			}
 		}
