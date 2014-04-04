@@ -106,6 +106,53 @@ void setup_fixtures ()
 		"	isDisabled    = 1;"
 		"}";
 
+	static std::string TrueWithLocation =
+		"{	name = 'TrueWithLocation';"
+		"	requiredCommands = ("
+		"		{	command = 'true';"
+		"			locations = ( '/usr/bin/true' );"
+		"		},"
+		"	);"
+		"}";
+
+	static std::string TrueWithVariable =
+		"{	name = 'TrueWithVariable';"
+		"	requiredCommands = ("
+		"		{	command = 'true';"
+		"			variable = 'TM_TRUE';"
+		"		},"
+		"	);"
+		"}";
+
+	static std::string TrueWithLocationAndVariable =
+		"{	name = 'TrueWithLocationAndVariable';"
+		"	requiredCommands = ("
+		"		{	command = 'true';"
+		"			locations = ( '/usr/bin/true' );"
+		"			variable = 'TM_TRUE';"
+		"		},"
+		"	);"
+		"}";
+
+	static std::string TrueWithBadLocation =
+		"{	name = 'TrueWithBadLocation';"
+		"	requiredCommands = ("
+		"		{	command = 'true';"
+		"			locations = ( '/foo/bar/true' );"
+		"		},"
+		"	);"
+		"}";
+
+	static std::string TrueWithBadLocationAndVariable =
+		"{	name = 'TrueWithBadLocationAndVariable';"
+		"	requiredCommands = ("
+		"		{	command = 'true';"
+		"			locations = ( '/foo/bar/true' );"
+		"			variable = 'TM_TRUE';"
+		"		},"
+		"	);"
+		"}";
+
 	test::bundle_index_t bundleIndex;
 	bundleIndex.add(bundles::kItemTypeSettings, BaseEnvironment);
 	bundleIndex.add(bundles::kItemTypeSettings, BaseCommentEnvironment);
@@ -117,6 +164,13 @@ void setup_fixtures ()
 	bundleIndex.add(bundles::kItemTypeSnippet,  BaseSnippet);
 	bundleIndex.add(bundles::kItemTypeSnippet,  CxxSnippet);
 	bundleIndex.add(bundles::kItemTypeSnippet,  DisabledCxxSnippet);
+
+	bundleIndex.add(bundles::kItemTypeCommand,  TrueWithLocation);
+	bundleIndex.add(bundles::kItemTypeCommand,  TrueWithVariable);
+	bundleIndex.add(bundles::kItemTypeCommand,  TrueWithLocationAndVariable);
+	bundleIndex.add(bundles::kItemTypeCommand,  TrueWithBadLocation);
+	bundleIndex.add(bundles::kItemTypeCommand,  TrueWithBadLocationAndVariable);
+
 	bundles::item_ptr dialogBundle = bundleIndex.add(bundles::kItemTypeBundle, "{ name = 'Dialog'; uuid = 'B0B94C92-1870-491C-A928-9528387EEACA'; }");
 
 	static test::jail_t jail;
