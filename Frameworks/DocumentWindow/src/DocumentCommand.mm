@@ -183,7 +183,10 @@ void run_impl (bundle_command_t const& command, ng::buffer_t const& buffer, ng::
 			}
 
 			std::string const title = text::format("Unable to run “%.*s”.", (int)command.name.size(), command.name.data());
-			std::string const message = text::format("This command requires ‘%1$s’ which wasn’t found on your system.\n\nThe following locations were searched:%2$s\n\nIf ‘%1$s’ is installed elsewhere then you need to set %3$s in Preferences → Variables to the full path of where you installed it.", failedRequirement.command.c_str(), ("\n\u2003• " + text::join(paths, "\n\u2003• ")).c_str(), failedRequirement.variable.c_str());
+			std::string message;
+			if(failedRequirement.variable != NULL_STR)
+					message = text::format("This command requires ‘%1$s’ which wasn’t found on your system.\n\nThe following locations were searched:%2$s\n\nIf ‘%1$s’ is installed elsewhere then you need to set %3$s in Preferences → Variables to the full path of where you installed it.", failedRequirement.command.c_str(), ("\n\u2003• " + text::join(paths, "\n\u2003• ")).c_str(), failedRequirement.variable.c_str());
+			else	message = text::format("This command requires ‘%1$s’ which wasn’t found on your system.\n\nThe following locations were searched:%2$s\n\nIf ‘%1$s’ is installed elsewhere then you need to set PATH in Preferences → Variables to include the folder in which it can be found.", failedRequirement.command.c_str(), ("\n\u2003• " + text::join(paths, "\n\u2003• ")).c_str());
 
 			NSAlert* alert = [[NSAlert alloc] init];
 			[alert setAlertStyle:NSCriticalAlertStyle];
