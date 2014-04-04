@@ -79,16 +79,36 @@ namespace bundles
 		{
 			std::vector<std::string> candidates;
 
-			if(environment.find(requirement.variable) != environment.end())
-				candidates.push_back(environment[requirement.variable]);
+			auto envVariable = environment.find(requirement.variable);
+			if(envVariable != environment.end())
+			{
+				auto value = envVariable->second;
+				auto firstSpace = value.find(" ");
+				if(firstSpace != std::string::npos)
+					candidates.push_back(value.substr(0, firstSpace));
+				candidates.push_back(value);
 
+				if(std::find_if(candidates.begin(), candidates.end(), [](std::string const& path){ return path::is_executable(path); }) != candidates.end())
+					return false;
+			}
+
+			candidates.clear();
 			for(auto path : search_paths(environment))
 				candidates.push_back(path::join(path, requirement.command));
 
+			auto exe = std::find_if(candidates.begin(), candidates.end(), [](std::string const& path){ return path::is_executable(path); });
+			if(exe != candidates.end())
+			{
+				if(requirement.variable != NULL_STR)
+					environment[requirement.variable] = *exe;
+				return false;
+			}
+
+			candidates.clear();
 			for(auto path : requirement.locations)
 				candidates.push_back(format_string::expand(path, environment));
 
-			auto exe = std::find_if(candidates.begin(), candidates.end(), [](std::string const& path){ return path::is_executable(path); });
+			exe = std::find_if(candidates.begin(), candidates.end(), [](std::string const& path){ return path::is_executable(path); });
 			if(exe != candidates.end())
 			{
 				if(requirement.variable != NULL_STR)
