@@ -156,16 +156,14 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 		previousCommitMessagesPopUpButton.bordered   = YES;
 		previousCommitMessagesPopUpButton.pullsDown  = YES;
 		previousCommitMessagesPopUpButton.bezelStyle = NSTexturedRoundedBezelStyle;
-		NSMenuItem* placeholder = [NSMenuItem new];
-		placeholder.title = @"Previous Commit Messages";
-		[[previousCommitMessagesPopUpButton cell] setUsesItemFromMenu:NO];
-		[[previousCommitMessagesPopUpButton cell] setMenuItem:placeholder];
 
 		// ========================================
 		// = Create previous commit messages menu =
 		// ========================================
 
 		NSMenu* aMenu = [previousCommitMessagesPopUpButton menu];
+		[aMenu addItemWithTitle:@"Previous Commit Messages" action:@selector(nop:) keyEquivalent:@""];
+
 		NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
 		NSArray* commitMessages = [defaults arrayForKey:kOakCommitWindowCommitMessages];
 		if(commitMessages == nil)
