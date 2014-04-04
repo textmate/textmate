@@ -18,6 +18,7 @@ namespace utf16
 	template <typename _Iter>
 	_Iter advance (_Iter const& first, size_t distance, _Iter const& last)
 	{
+		ASSERT(last == utf8::find_safe_end(first, last));
 		utf8::iterator_t<char const*> it(first);
 		for(; distance && &it != last; ++it)
 			distance -= (*it > 0xFFFF) ? 2 : 1;
@@ -27,8 +28,9 @@ namespace utf16
 	template <typename _Iter>
 	size_t distance (_Iter const& first, _Iter const& last)
 	{
+		ASSERT(last == utf8::find_safe_end(first, last));
 		size_t res = 0;
-		foreach(it, utf8::make(first), utf8::make(last))
+		foreach(it, utf8::make(first), utf8::make(utf8::find_safe_end(first, last)))
 			res += (*it > 0xFFFF) ? 2 : 1;
 		return res;
 	}
