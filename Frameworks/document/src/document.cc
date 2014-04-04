@@ -641,20 +641,6 @@ namespace document
 		if(_file_type == NULL_STR)
 			_file_type = fileType;
 
-		if(_selection == NULL_STR)
-		{
-			std::map<std::string, std::string>::const_iterator sel = attributes.find("com.macromates.selectionRange");
-			std::map<std::string, std::string>::const_iterator idx = attributes.find("com.macromates.visibleIndex");
-			_selection = sel != attributes.end() ? sel->second : NULL_STR;
-
-			if(idx != attributes.end())
-			{
-				size_t index = SIZE_T_MAX, carry = 0;
-				sscanf(idx->second.c_str(), "%zu:%zu", &index, &carry);
-				_visible_index = ng::index_t(index, carry);
-			}
-		}
-
 		_is_on_disk = _path != NULL_STR && access(_path.c_str(), F_OK) == 0;
 		if(_is_on_disk)
 			_file_watcher = std::make_shared<watch_t>(_path, shared_from_this());
@@ -670,6 +656,20 @@ namespace document
 			std::map<std::string, std::string>::const_iterator folded = attributes.find("com.macromates.folded");
 			if(folded != attributes.end())
 				_folded = folded->second;
+
+			if(_selection == NULL_STR)
+			{
+				std::map<std::string, std::string>::const_iterator sel = attributes.find("com.macromates.selectionRange");
+				std::map<std::string, std::string>::const_iterator idx = attributes.find("com.macromates.visibleIndex");
+				_selection = sel != attributes.end() ? sel->second : NULL_STR;
+
+				if(idx != attributes.end())
+				{
+					size_t index = SIZE_T_MAX, carry = 0;
+					sscanf(idx->second.c_str(), "%zu:%zu", &index, &carry);
+					_visible_index = ng::index_t(_buffer->sanitize_index(index), carry);
+				}
+			}
 		}
 		_buffer->bump_revision();
 		check_modified(_buffer->revision(), _buffer->revision());
