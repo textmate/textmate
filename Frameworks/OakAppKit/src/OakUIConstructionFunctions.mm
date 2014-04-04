@@ -194,15 +194,26 @@ NSBox* OakCreateHorizontalLine (NSColor* primaryColor, NSColor* secondaryColor)
 
 // =============================
 
+@interface OakDisableAccessibilityImageCell : NSImageCell
+@end
+
+@implementation OakDisableAccessibilityImageCell
+- (BOOL)accessibilityIsIgnored
+{
+	return YES;
+}
+@end
+
 @interface OakDisableAccessibilityImageView : NSImageView
 @end
 
 @implementation OakDisableAccessibilityImageView
-- (NSArray*)accessibilityAttributeNames
++ (void)initialize
 {
-	NSMutableArray* res = [[super accessibilityAttributeNames] mutableCopy];
-	[res removeObjectIdenticalTo:NSAccessibilityChildrenAttribute];
-	return res;
+	if(self == OakDisableAccessibilityImageView.class)
+	{
+		[OakDisableAccessibilityImageView setCellClass:[OakDisableAccessibilityImageCell class]];
+	}
 }
 @end
 
