@@ -300,6 +300,13 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 
 - (void)windowWillClose:(NSNotification*)aNotification
 {
+	if(self.documentView.document)
+	{
+		NSString* commitMessage = [NSString stringWithCxxString:self.documentView.document->content()];
+		if([[commitMessage stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length] > 0)
+			[self saveCommitMessage:commitMessage];
+	}
+
 	[self.documentView setDocument:document::document_ptr()];
 	[self sendCommitMessageToClient:NO];
 }
@@ -316,9 +323,6 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 		if(success)
 		{
 			NSString* commitMessage = [NSString stringWithCxxString:self.documentView.document->content()];
-
-			if([[commitMessage stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length] > 0)
-				[self saveCommitMessage:commitMessage];
 
 			NSMutableArray* outputArray = [NSMutableArray array];
 			[outputArray addObject:[NSString stringWithFormat:@" -m '%@' ", [commitMessage stringByReplacingOccurrencesOfString:@"'" withString:@"'\"'\"'"]]];
