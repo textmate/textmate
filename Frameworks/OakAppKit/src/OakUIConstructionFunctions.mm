@@ -229,20 +229,16 @@ NSImageView* OakCreateDividerImageView ()
 
 BOOL OakSetAccessibilityLabel (NSObject* element, NSObject* label)
 {
-	if([element isKindOfClass:[NSControl class]])
-		element = [(NSControl*)element cell] ?: element; // e.g. NSTableView is an NSControl with a nil cell
-	else if(!([element isKindOfClass:[NSView class]] || [element isKindOfClass:[NSCell class]]))
+	if (!(element = NSAccessibilityUnignoredDescendant(element)))
 		return NO;
 
 	NSString* attribute = NSAccessibilityDescriptionAttribute;
-	if([label isKindOfClass:[NSView class]] || [label isKindOfClass:[NSCell class]])
+	if(![label isKindOfClass:NSString.class])
 	{
 		attribute = NSAccessibilityTitleUIElementAttribute;
-		if([label isKindOfClass:[NSControl class]])
-			label = [(NSControl*)label cell] ?: label;
+		if(!(label = NSAccessibilityUnignoredDescendant(label)))
+			return NO;
 	}
-	else if(![label isKindOfClass:[NSString class]])
-		return NO;
 
 	return [element accessibilitySetOverrideValue:label forAttribute:attribute];
 }
