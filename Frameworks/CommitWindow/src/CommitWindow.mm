@@ -156,16 +156,14 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 		previousCommitMessagesPopUpButton.bordered   = YES;
 		previousCommitMessagesPopUpButton.pullsDown  = YES;
 		previousCommitMessagesPopUpButton.bezelStyle = NSTexturedRoundedBezelStyle;
-		NSMenuItem* placeholder = [NSMenuItem new];
-		placeholder.title = @"Previous Commit Messages";
-		[[previousCommitMessagesPopUpButton cell] setUsesItemFromMenu:NO];
-		[[previousCommitMessagesPopUpButton cell] setMenuItem:placeholder];
 
 		// ========================================
 		// = Create previous commit messages menu =
 		// ========================================
 
 		NSMenu* aMenu = [previousCommitMessagesPopUpButton menu];
+		[aMenu addItemWithTitle:@"Previous Commit Messages" action:@selector(nop:) keyEquivalent:@""];
+
 		NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
 		NSArray* commitMessages = [defaults arrayForKey:kOakCommitWindowCommitMessages];
 		if(commitMessages == nil)
@@ -264,8 +262,8 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 
 - (void)populateTableView
 {
-	auto selected_files = _environment.find("TM_SELECTED_FILES");
-	BOOL didSelectFiles = selected_files != _environment.end();
+	auto selectedFiles = _environment.find("TM_SELECTED_FILES");
+	BOOL didSelectFiles = selectedFiles != _environment.end();
 
 	NSArray* statuses = [[self.options objectForKey:@"--status"] componentsSeparatedByString:@":"];
 	for(NSUInteger i = 0; i < [statuses count]; i++)
@@ -278,19 +276,19 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 
 - (void)showWindow:(id)sender
 {
-	std::string file_type = "text.plain";
-	auto scm_name = _environment.find("TM_SCM_NAME");
-	if(scm_name != _environment.end())
+	std::string fileType = "text.plain";
+	auto scmName = _environment.find("TM_SCM_NAME");
+	if(scmName != _environment.end())
 	{
-		std::string file_grammar = "text." + scm_name->second + "-commit";
-		for(auto item : bundles::query(bundles::kFieldGrammarScope, file_grammar, scope::wildcard, bundles::kItemTypeGrammar))
-			file_type = item->value_for_field(bundles::kFieldGrammarScope);
+		std::string fileGrammar = "text." + scmName->second + "-commit";
+		for(auto item : bundles::query(bundles::kFieldGrammarScope, fileGrammar, scope::wildcard, bundles::kItemTypeGrammar))
+			fileType = item->value_for_field(bundles::kFieldGrammarScope);
 	}
 
-	document::document_ptr commitMessage = document::from_content("", file_type);
+	document::document_ptr commitMessage = document::from_content("", fileType);
 	[self.documentView setDocument:commitMessage];
 
-	std::string title = text::format("Commit (%s %s: %s)", path::display_name(_environment["TM_PROJECT_DIRECTORY"]).c_str(), scm_name->second.c_str(), _environment["TM_SCM_BRANCH"].c_str());
+	std::string title = text::format("Commit (%s %s: %s)", path::display_name(_environment["TM_PROJECT_DIRECTORY"]).c_str(), scmName->second.c_str(), _environment["TM_SCM_BRANCH"].c_str());
 	[self.window setTitle:[NSString stringWithCxxString:title]];
 
 	[self.window recalculateKeyViewLoop];
@@ -419,7 +417,7 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 		std::transform(diffCmd.begin(), diffCmd.end(), diffCmd.begin(), &path::escape);
 
 		std::string const pwd = _environment["PWD"];
-		std::string const cmdString = text::format("cd %s && %s|\"$TM_MATE\" --async", path::escape(pwd).c_str(), text::join(diffCmd, " ").c_str());
+		std::string const cmdString = text::format("cd %s && %s|\"$TM_MATE\" --async  --name \"---/+++ %s\"", path::escape(pwd).c_str(), text::join(diffCmd, " ").c_str(), path::display_name(to_s(filePath)).c_str());
 		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 			bool success = io::exec(_environment, "/bin/sh", "-c", cmdString.c_str(), NULL) != NULL_STR;
 			if(!success)
@@ -548,9 +546,9 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 - (std::map<std::string, std::string>)variables
 {
 	std::map<std::string, std::string> res;
-	auto project_directory = _environment.find("TM_PROJECT_DIRECTORY");
-	if(project_directory != _environment.end())
-		res["TM_PROJECT_DIRECTORY"] = project_directory->second;
+	auto projectDirectory = _environment.find("TM_PROJECT_DIRECTORY");
+	if(projectDirectory != _environment.end())
+		res["TM_PROJECT_DIRECTORY"] = projectDirectory->second;
 	return res;
 }
 
