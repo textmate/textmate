@@ -164,6 +164,9 @@ static NSString* CreateSpacedString(NSUInteger length)
 @implementation OakLinkedSearchField
 + (void)initialize
 {
-	[OakLinkedSearchField setCellClass:[OakLinkedSearchFieldCell class]];
+	if(self == OakLinkedSearchField.class)
+	{
+		[OakLinkedSearchField setCellClass:[OakLinkedSearchFieldCell class]];
+	}
 }
 @end
