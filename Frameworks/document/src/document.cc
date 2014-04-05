@@ -778,15 +778,17 @@ namespace document
 		file::save(_path, sharedPtr, _authorization, bytes, attributes, _file_type, encoding, std::vector<oak::uuid_t>() /* binary import filters */, std::vector<oak::uuid_t>() /* text import filters */);
 	}
 
-	bool document_t::save ()
+	bool document_t::save (bool debug)
 	{
 		struct stall_t : save_callback_t
 		{
-			stall_t (bool& res) : _res(res), _run_loop(CFSTR("OakThreadSignalsRunLoopMode")) { }
+			stall_t (bool& res, bool debug) : _res(res), _run_loop(CFSTR("OakThreadSignalsRunLoopMode"), DBL_MAX, debug), _debug(debug) { }
 
 			void did_save_document (document_ptr document, std::string const& path, bool success, std::string const& message, oak::uuid_t const& filter)
 			{
 				_res = success;
+				if(_debug)
+					fprintf(stderr, "debug: document: did save, break run-loop\n");
 				_run_loop.stop();
 			}
 
@@ -795,12 +797,17 @@ namespace document
 		private:
 			bool& _res;
 			cf::run_loop_t _run_loop;
+			bool _debug;
 		};
 
 		bool res = false;
-		auto cb = std::make_shared<stall_t>(res);
+		auto cb = std::make_shared<stall_t>(res, debug);
+		if(debug)
+			fprintf(stderr, "debug: document: will save ‘%s’\n", display_name().c_str());
 		try_save(cb);
 		cb->wait();
+		if(debug)
+			fprintf(stderr, "debug: document: did save ‘%s’\n", display_name().c_str());
 
 		return res;
 	}

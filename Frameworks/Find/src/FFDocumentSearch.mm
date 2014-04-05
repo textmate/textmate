@@ -305,15 +305,17 @@ OAK_DEBUG_VAR(Find_FolderSearch);
 {
 	NSUInteger fileCount = 0;
 	std::vector<document::document_ptr> failedDocs;
+	fprintf(stderr, "debug: find in folder: save %lu documents\n", [[self allDocumentsWithSelectedMatches] count]);
 	for(FFMatch* fileMatch in [self allDocumentsWithSelectedMatches])
 	{
 		if(document::document_ptr doc = [fileMatch match].document)
 		{
-			if(doc->save())
+			if(doc->save(true))
 					++fileCount;
 			else	failedDocs.push_back(doc);
 		}
 	}
+	fprintf(stderr, "debug: find in folder: %lu documents saved\n", fileCount);
 
 	FindWindowController* fwc = [[self windowControllers] lastObject];
 	if(failedDocs.empty())

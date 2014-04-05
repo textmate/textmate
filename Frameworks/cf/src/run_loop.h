@@ -7,7 +7,7 @@ namespace cf
 {
 	struct PUBLIC run_loop_t
 	{
-		run_loop_t (CFStringRef mode = kCFRunLoopDefaultMode, double timeout = DBL_MAX);
+		run_loop_t (CFStringRef mode = kCFRunLoopDefaultMode, double timeout = DBL_MAX, bool debug = false);
 		run_loop_t (run_loop_t const& rhs) = delete;
 		run_loop_t& operator= (run_loop_t const& rhs) = delete;
 		~run_loop_t ();
@@ -22,6 +22,7 @@ namespace cf
 		CFRunLoopSourceRef _source;
 		CFRunLoopRef _run_loop;
 		bool _should_stop;
+		bool _debug;
 		double _timeout;
 	};
 	
