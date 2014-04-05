@@ -913,7 +913,7 @@ rule sign_executable
   description = Sign ‘$in’…
 
 rule tbz_archive
-  command = tar $bzip2_flag -cf $out -C "$$(dirname $in)" "$$(basename $in)"
+  command = tar $bzip2_flag -cf $out~ -C "$$(dirname $in)" "$$(basename $in)" && mv $out~ $out
   generator = true
   description = Archive ‘$in’…
 
