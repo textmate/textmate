@@ -9,6 +9,7 @@
 #import <OakAppKit/NSMenuItem Additions.h>
 #import <OakAppKit/OakToolTip.h>
 #import <OakFoundation/NSString Additions.h>
+#import <OakTextView/OakTextView.h>
 #import <oak/debug.h>
 #import <BundleMenu/BundleMenu.h>
 
@@ -105,6 +106,30 @@ OAK_DEBUG_VAR(AppController_Menus);
 	}
 }
 
+- (void)wrapColumnMenuNeedsUpdate:(NSMenu*)aMenu
+{
+	D(DBF_AppController_Menus, bug("\n"););
+	[aMenu removeAllItems];
+
+	SEL action = @selector(takeWrapColumnFrom:);
+	NSMenuItem* menuItem;
+
+	menuItem = [aMenu addItemWithTitle:@"Use Window Frame" action:action keyEquivalent:@""];
+	menuItem.tag = NSWrapColumnWindowWidth;
+	[aMenu addItem:[NSMenuItem separatorItem]];
+
+	NSArray* presets = [[NSUserDefaults standardUserDefaults] arrayForKey:kUserDefaultsWrapColumnPresetsKey];
+	for(NSNumber* preset in [presets sortedArrayUsingSelector:@selector(compare:)])
+	{
+		menuItem = [aMenu addItemWithTitle:[NSString stringWithFormat:@"%@", preset] action:action keyEquivalent:@""];
+		menuItem.tag = [preset integerValue];
+	}
+
+	[aMenu addItem:[NSMenuItem separatorItem]];
+	menuItem = [aMenu addItemWithTitle:@"Other…" action:action keyEquivalent:@""];
+	menuItem.tag = NSWrapColumnAskUser;
+}
+
 - (void)menuNeedsUpdate:(NSMenu*)aMenu
 {
 	if(aMenu == bundlesMenu)
@@ -113,5 +138,7 @@ OAK_DEBUG_VAR(AppController_Menus);
 		[self themesMenuNeedsUpdate:aMenu];
 	else if(aMenu == spellingMenu)
 		[self spellingMenuNeedsUpdate:aMenu];
+	else if(aMenu == wrapColumnMenu)
+		[self wrapColumnMenuNeedsUpdate:aMenu];
 }
 @end

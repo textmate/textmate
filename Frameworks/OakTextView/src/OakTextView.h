@@ -6,9 +6,10 @@
 #import <document/document.h>
 #import <oak/debug.h>
 
-extern int32_t const NSWrapColumnWindowWidth;
-extern int32_t const NSWrapColumnAskUser;
-extern NSString* const kUserDefaultsDisableAntiAliasKey;
+PUBLIC extern int32_t const NSWrapColumnWindowWidth;
+PUBLIC extern int32_t const NSWrapColumnAskUser;
+PUBLIC extern NSString* const kUserDefaultsWrapColumnPresetsKey;
+PUBLIC extern NSString* const kUserDefaultsDisableAntiAliasKey;
 
 namespace bundles { struct item_t; typedef std::shared_ptr<item_t> item_ptr; }
 

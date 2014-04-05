@@ -49,6 +49,7 @@ OAK_DEBUG_VAR(OakTextView_Macros);
 int32_t const NSWrapColumnWindowWidth =  0;
 int32_t const NSWrapColumnAskUser     = -1;
 
+NSString* const kUserDefaultsWrapColumnPresetsKey  = @"wrapColumnPresets";
 NSString* const kUserDefaultsFontSmoothingKey      = @"fontSmoothing";
 NSString* const kUserDefaultsDisableAntiAliasKey   = @"disableAntiAlias";
 NSString* const kUserDefaultsDisableTypingPairsKey = @"disableTypingPairs";
@@ -1702,7 +1703,8 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 		update_menu_key_equivalents([NSApp mainMenu], actionToKey);
 
 		[[NSUserDefaults standardUserDefaults] registerDefaults:@{
-			kUserDefaultsFontSmoothingKey : @(OTVFontSmoothingDisabledForDarkHiDPI),
+			kUserDefaultsFontSmoothingKey     : @(OTVFontSmoothingDisabledForDarkHiDPI),
+			kUserDefaultsWrapColumnPresetsKey : @[ @40, @80 ],
 		}];
 	});
 
@@ -2626,16 +2628,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	else if([aMenuItem action] == @selector(takeSpellingLanguageFrom:))
 		[aMenuItem setState:[[NSString stringWithCxxString:document->buffer().spelling_language()] isEqualToString:[aMenuItem representedObject]] ? NSOnState : NSOffState];
 	else if([aMenuItem action] == @selector(takeWrapColumnFrom:))
-	{
-		static std::set<NSInteger> const Presets = { NSWrapColumnWindowWidth, 40, 80 };
 		[aMenuItem setState:wrapColumn == [aMenuItem tag] ? NSOnState : NSOffState];
-		if([aMenuItem tag] == NSWrapColumnAskUser)
-		{
-			bool custom = Presets.find(wrapColumn) == Presets.end();
-			[aMenuItem setTitle:custom ? [NSString stringWithFormat:@"Other (%d)…", wrapColumn] : @"Other…"];
-			[aMenuItem setState:custom ? NSOnState : NSOffState];
-		}
-	}
 	else if([aMenuItem action] == @selector(undo:))
 	{
 		[aMenuItem setTitle:@"Undo"];
@@ -2813,6 +2806,19 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 	wrapColumn = newWrapColumn;
 	settings_t::set(kSettingsWrapColumnKey, wrapColumn);
+
+	if(wrapColumn != NSWrapColumnWindowWidth)
+	{
+		NSInteger const kWrapColumnPresetsHistorySize = 5;
+
+		NSMutableArray* presets = [[[NSUserDefaults standardUserDefaults] arrayForKey:kUserDefaultsWrapColumnPresetsKey] mutableCopy];
+		[presets removeObject:@(wrapColumn)];
+		[presets addObject:@(wrapColumn)];
+		if(presets.count > kWrapColumnPresetsHistorySize)
+			[presets removeObjectsInRange:NSMakeRange(0, presets.count - kWrapColumnPresetsHistorySize)];
+		[[NSUserDefaults standardUserDefaults] setObject:presets forKey:kUserDefaultsWrapColumnPresetsKey];
+	}
+
 	if(layout)
 	{
 		AUTO_REFRESH;

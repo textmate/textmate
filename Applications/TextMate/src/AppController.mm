@@ -284,9 +284,10 @@ BOOL HasDocumentWindow (NSArray* windows)
 	[self userDefaultsDidChange:nil]; // setup mate/rmate server
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
 
-	bundlesMenu.delegate  = self;
-	themesMenu.delegate   = self;
-	spellingMenu.delegate = self;
+	bundlesMenu.delegate    = self;
+	themesMenu.delegate     = self;
+	spellingMenu.delegate   = self;
+	wrapColumnMenu.delegate = self;
 
 	NSMenu* selectMenu = [[[[[NSApp mainMenu] itemWithTitle:@"Edit"] submenu] itemWithTitle:@"Select"] submenu];
 	[[selectMenu itemWithTitle:@"Toggle Column Selection"] setActivationString:@"⌥" withFont:nil];

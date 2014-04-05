@@ -14,6 +14,7 @@ namespace find_tags
 	IBOutlet NSMenu* bundlesMenu;
 	IBOutlet NSMenu* themesMenu;
 	IBOutlet NSMenu* spellingMenu;
+	IBOutlet NSMenu* wrapColumnMenu;
 
 	IBOutlet NSPanel* goToLinePanel;
 	IBOutlet NSTextField* goToLineTextField;

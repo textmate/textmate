@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4514" systemVersion="13A603" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="5053" systemVersion="13C64" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment version="1070" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="4514"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="5053"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="NSApplication">
@@ -20,6 +20,7 @@
                 <outlet property="goToLineTextField" destination="393" id="404"/>
                 <outlet property="spellingMenu" destination="185" id="514"/>
                 <outlet property="themesMenu" destination="496" id="498"/>
+                <outlet property="wrapColumnMenu" destination="502" id="o3z-0F-CV0"/>
             </connections>
         </customObject>
         <menu title="MainMenu" systemMenu="main" id="29" userLabel="MainMenu" customClass="OakMainMenu">
@@ -1161,7 +1162,7 @@ CQ
                 <outlet property="bundlesMenuItem" destination="265" id="794"/>
             </connections>
         </menu>
-        <window title="Go to Line" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" wantsToBeColor="NO" visibleAtLaunch="NO" frameAutosaveName="Go to Line" animationBehavior="default" id="391" userLabel="GoToLine" customClass="NSPanel">
+        <window title="Go to Line" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" frameAutosaveName="Go to Line" animationBehavior="default" id="391" userLabel="GoToLine" customClass="NSPanel">
             <windowStyleMask key="styleMask" titled="YES" closable="YES"/>
             <windowCollectionBehavior key="collectionBehavior" moveToActiveSpace="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
