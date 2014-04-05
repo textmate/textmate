@@ -7,7 +7,7 @@ struct PUBLIC clipboard_t
 {
 	struct PUBLIC entry_t
 	{
-		entry_t (std::string const& content) : _content(content) { }
+		entry_t (std::string const& content);
 		virtual ~entry_t ()                                      { }
 		virtual std::string const& content () const              { return _content; }
 		virtual std::map<std::string, std::string> const& options () const;

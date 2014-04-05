@@ -1,4 +1,15 @@
 #include "clipboard.h"
+#include <text/utf8.h>
+#include <text/hexdump.h>
+
+clipboard_t::entry_t::entry_t (std::string const& content) : _content(content)
+{
+	if(!utf8::is_valid(_content.begin(), _content.end()))
+	{
+		std::string const prefix = "*** malformed UTF-8 data on clipboard:\n";
+		_content = prefix + text::to_hex(_content.begin(), _content.end());
+	}
+}
 
 std::map<std::string, std::string> const& clipboard_t::entry_t::options () const
 {
