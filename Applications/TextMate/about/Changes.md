@@ -2,6 +2,11 @@ Title: Release Notes
 
 # Changes
 
+## 2014-04-05 ([v2.0-alpha.9531](https://github.com/textmate/textmate/compare/v2.0-alpha.9529...v2.0-alpha.9531))
+
+* Rework the commit window (shown e.g. when using ⌘Y and selecting “Commit”) to run as part of TextMate and use it’s text editing features. *[Ronald Wampler]*
+* Improve accessibility support in find window. Notifications like “no more occurrences” when pressing ⌘G are now broadcast. *[Boris Dušek]*
+
 ## 2014-03-31 ([v2.0-alpha.9529](https://github.com/textmate/textmate/compare/v2.0-alpha.9515...v2.0-alpha.9529))
 
   * With VoiceOver the current item will be announced in the various item choosers: File → Open Favorites… (⇧⌘O), Go → Go to File… (⌘T), and Navigate → Go to Symbol… (⇧⌘T). If you want to hear the first result (which is not automatically spoken), first press arrow up to hear it, then you can use arrows down/up as usual. If you want to browse the results without entering a search string, quickly type any letter and delete it to suppress VoiceOver information about menu command and current window. *[Boris Dušek]*
