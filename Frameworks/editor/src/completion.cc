@@ -113,6 +113,9 @@ namespace ng
 			}
 		}
 
+		if(commandResult.empty() && prefix.empty() && suffix.empty())
+			return { };
+
 		for(ssize_t i = 0; i < commandResult.size(); ++i)
 			tmp.push_back(std::make_pair(-commandResult.size() + i, commandResult[i]));
 
