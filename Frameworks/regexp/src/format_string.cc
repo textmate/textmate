@@ -80,6 +80,12 @@ struct expand_visitor : boost::static_visitor<void>
 
 			std::map<std::string, std::string> tmp(m.captures());
 			tmp.insert(variables.begin(), variables.end());
+			for(size_t i = 0; i < m.size(); ++i)
+			{
+				if(!m.did_match(i))
+					tmp.erase(std::to_string(i));
+			}
+
 			tmp.swap(variables);
 			traverse(format);
 			tmp.swap(variables);

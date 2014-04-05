@@ -68,3 +68,12 @@ void test_control_codes ()
 	OAK_ASSERT_EQ("\U0010FFFF", expand("\\x{0010FFFF}"));
 	OAK_ASSERT_EQ("Æblegrød",   expand("\\xc3\\x86blegr\\xC3\\xB8d"));
 }
+
+void test_implicit_variables ()
+{
+	// We do not want $1 from root match to be inherited by format string
+	using format_string::replace;
+	OAK_ASSERT_EQ(replace("=",   "(=+)", "${1/=(=)?(=)?/${2:?2:${1:?1:0}}/}"), "0");
+	OAK_ASSERT_EQ(replace("==",  "(=+)", "${1/=(=)?(=)?/${2:?2:${1:?1:0}}/}"), "1");
+	OAK_ASSERT_EQ(replace("===", "(=+)", "${1/=(=)?(=)?/${2:?2:${1:?1:0}}/}"), "2");
+}
