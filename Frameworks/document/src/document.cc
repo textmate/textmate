@@ -875,7 +875,9 @@ namespace document
 		_inode = documents.update_document(identifier());
 		if(is_open())
 		{
-			_is_on_disk = access(_path.c_str(), F_OK) == 0;
+			bool wasOnDisk = std::exchange(_is_on_disk, access(_path.c_str(), F_OK) == 0);
+			if(wasOnDisk != _is_on_disk)
+				broadcast(callback_t::did_change_on_disk_status);
 			_file_watcher.reset(_is_on_disk ? new watch_t(_path, shared_from_this()) : NULL);
 
 			std::string newFileType = file::type(_path, std::make_shared<io::bytes_t>(content()), _virtual_path);
