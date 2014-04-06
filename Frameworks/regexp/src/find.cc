@@ -283,7 +283,7 @@ namespace find
 					i -= increment;
 				}
 			}
-			return std::make_pair(len+1, len);
+			return { len+1, len };
 		}
 
 	private:

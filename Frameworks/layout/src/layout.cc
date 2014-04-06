@@ -594,9 +594,9 @@ namespace ng
 			size_t first = from + it->first;
 			size_t last  = ++it != map.end() ? from + it->first : to;
 			if(oak::cap(first, index, last) == index)
-				return std::make_pair(first, last);
+				return { first, last };
 		}
-		return std::make_pair(0, 0);
+		return { 0, 0 };
 	}
 
 	std::vector<CGRect> layout_t::end_refresh_cycle (ng::ranges_t const& selection, CGRect visibleRect, ng::ranges_t const& highlightRanges)

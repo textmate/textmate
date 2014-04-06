@@ -237,5 +237,5 @@ std::pair<std::vector<bundles::item_ptr>, std::map< oak::uuid_t, std::vector<oak
 		}
 	}
 
-	return std::make_pair(items, menus);
+	return { items, menus };
 }

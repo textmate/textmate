@@ -28,9 +28,9 @@ namespace ng
 		{
 			auto from = it;
 			if(++it != _misspellings.end() && !it->second)
-				return std::make_pair(from->first, it->first);
+				return { from->first, it->first };
 		}
-		return std::make_pair(0, 0);
+		return { 0, 0 };
 	}
 
 	void spelling_t::did_parse (buffer_t const* buffer, size_t from, size_t to)

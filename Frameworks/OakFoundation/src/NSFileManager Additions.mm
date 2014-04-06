@@ -7,7 +7,7 @@ static std::pair<dev_t, ino_t> inode (std::string const& path)
 {
 	struct stat buf;
 	if(lstat(path.c_str(), &buf) == 0)
-		return std::make_pair(buf.st_dev, buf.st_ino);
+		return { buf.st_dev, buf.st_ino };
 	return std::pair<dev_t, ino_t>();
 }
 
