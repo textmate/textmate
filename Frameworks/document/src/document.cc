@@ -728,7 +728,7 @@ namespace document
 			save_callback_wrapper_t (document::document_ptr doc, document::save_callback_ptr callback) : _document(doc), _callback(callback)
 			{
 				if(_document->is_open())
-						_document->open();
+						_document->sync_open();
 				else	_should_close = false;
 			}
 
@@ -778,7 +778,7 @@ namespace document
 		file::save(_path, sharedPtr, _authorization, bytes, attributes, _file_type, encoding, std::vector<oak::uuid_t>() /* binary import filters */, std::vector<oak::uuid_t>() /* text import filters */);
 	}
 
-	bool document_t::save ()
+	bool document_t::sync_save ()
 	{
 		struct stall_t : save_callback_t
 		{
@@ -918,7 +918,7 @@ namespace document
 		}
 	}
 
-	void document_t::open ()
+	void document_t::sync_open ()
 	{
 		struct stall_t : document::open_callback_t
 		{

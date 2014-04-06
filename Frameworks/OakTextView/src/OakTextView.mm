@@ -381,7 +381,7 @@ struct refresh_helper_t
 	{
 		if(++_self.refreshNestCount == 1)
 		{
-			_document->open();
+			_document->sync_open();
 
 			_revision  = document->buffer().revision();
 			_selection = editor->ranges();

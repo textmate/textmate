@@ -309,7 +309,7 @@ OAK_DEBUG_VAR(Find_FolderSearch);
 	{
 		if(document::document_ptr doc = [fileMatch match].document)
 		{
-			if(doc->save())
+			if(doc->sync_save())
 					++fileCount;
 			else	failedDocs.push_back(doc);
 		}

@@ -63,7 +63,7 @@ ng::range_t delegate_t::write_unit_to_fd (int fd, input::type unit, input::type 
 
 	bool isOpen = _document->is_open();
 	if(!isOpen)
-		_document->open();
+		_document->sync_open();
 	ng::range_t res = ng::write_unit_to_fd(_document->buffer(), ng::editor_for_document(_document)->ranges().last(), _document->buffer().indent().tab_size(), fd, unit, fallbackUnit, format, scopeSelector, variables, inputWasSelection);
 	if(!isOpen)
 		_document->close();
@@ -102,7 +102,7 @@ bool delegate_t::accept_result (std::string const& out, output::type placement, 
 	else
 	{
 		document::document_ptr doc = document::create();
-		doc->open();
+		doc->sync_open();
 		res = ng::editor_for_document(doc)->handle_result(out, placement, format, outputCaret, ng::range_t(0) /* inputRange */, environment);
 		document::show(doc);
 		doc->close();

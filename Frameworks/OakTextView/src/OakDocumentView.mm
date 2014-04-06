@@ -311,7 +311,7 @@ private:
 		oldDocument->remove_callback(callback);
 
 	if(aDocument)
-		aDocument->open();
+		aDocument->sync_open();
 
 	if(document = aDocument)
 	{

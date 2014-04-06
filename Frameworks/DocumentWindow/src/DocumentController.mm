@@ -145,7 +145,7 @@ namespace
 
 			if(!_did_open && _document->is_open())
 			{
-				_document->open();
+				_document->sync_open();
 				_did_open = true;
 			}
 		}
@@ -763,7 +763,7 @@ namespace
 			auto const settings = settings_for_path(doc->virtual_path(), doc->file_type(), path::parent(doc->path()));
 			doc->set_indent(text::indent_t(std::max(1, settings.get(kSettingsTabSizeKey, 4)), SIZE_T_MAX, settings.get(kSettingsSoftTabsKey, false)));
 
-			doc->open();
+			doc->sync_open();
 			[self setSelectedDocument:doc];
 			doc->close();
 
@@ -1514,7 +1514,7 @@ namespace
 	if(NSIndexSet* indexSet = [self tryObtainIndexSetFrom:sender])
 	{
 		document::document_ptr doc = create_untitled_document_in_folder(to_s(self.untitledSavePath));
-		doc->open();
+		doc->sync_open();
 		[self setSelectedDocument:doc];
 		doc->close();
 

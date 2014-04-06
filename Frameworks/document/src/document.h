@@ -217,7 +217,7 @@ namespace document
 
 	public:
 		bool try_open (document::open_callback_ptr callback);
-		void open ();
+		void sync_open ();
 		void close ();
 
 		void show ();
@@ -225,7 +225,7 @@ namespace document
 		oak::date_t const& lru () const;
 
 		void try_save (document::save_callback_ptr callback);
-		bool save ();
+		bool sync_save ();
 		bool backup ();
 		void detach_backup () { _backup_path = NULL_STR; }
 
