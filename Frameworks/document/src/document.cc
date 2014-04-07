@@ -778,11 +778,11 @@ namespace document
 		file::save(_path, sharedPtr, _authorization, bytes, attributes, _file_type, encoding, std::vector<oak::uuid_t>() /* binary import filters */, std::vector<oak::uuid_t>() /* text import filters */);
 	}
 
-	bool document_t::sync_save ()
+	bool document_t::sync_save (CFStringRef runLoopMode)
 	{
 		struct stall_t : save_callback_t
 		{
-			stall_t (bool& res) : _res(res), _run_loop(CFSTR("OakThreadSignalsRunLoopMode")) { }
+			stall_t (bool& res, CFStringRef runLoopMode) : _res(res), _run_loop(runLoopMode) { }
 
 			void did_save_document (document_ptr document, std::string const& path, bool success, std::string const& message, oak::uuid_t const& filter)
 			{
@@ -798,7 +798,7 @@ namespace document
 		};
 
 		bool res = false;
-		auto cb = std::make_shared<stall_t>(res);
+		auto cb = std::make_shared<stall_t>(res, runLoopMode);
 		try_save(cb);
 		cb->wait();
 

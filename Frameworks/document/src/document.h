@@ -225,7 +225,7 @@ namespace document
 		oak::date_t const& lru () const;
 
 		void try_save (document::save_callback_ptr callback);
-		bool sync_save ();
+		bool sync_save (CFStringRef runLoopMode = kCFRunLoopDefaultMode);
 		bool backup ();
 		void detach_backup () { _backup_path = NULL_STR; }
 
