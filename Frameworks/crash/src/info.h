@@ -5,12 +5,10 @@
 
 struct PUBLIC crash_reporter_info_t
 {
-	crash_reporter_info_t (std::string const& string);
+	crash_reporter_info_t (std::string const& str);
 	~crash_reporter_info_t ();
 	crash_reporter_info_t& operator= (std::string const& str);
 	crash_reporter_info_t& operator<< (std::string const& str);
-private:
-	std::string _string;
 };
 
 #endif /* end of include guard: CRASH_REPORTER_UTILITY_H_PWH2E0EP */
