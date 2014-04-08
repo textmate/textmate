@@ -3075,6 +3075,14 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 			{
 				OakShowToolTip([NSString stringWithCxxString:text::trim(output)], [self positionForWindowUnderCaret]);
 			}
+			else if(outputUnit == output::new_window)
+			{
+				oak::uuid_t projectIdentifier = document::kCollectionAny;
+				if([self.window.delegate respondsToSelector:@selector(identifier)]) // FIXME This should be a formal interface
+					projectIdentifier = to_s((NSString*)[self.window.delegate performSelector:@selector(identifier)]);
+
+				document::show(document::from_content(output, document->file_type()), projectIdentifier);
+			}
 			else
 			{
 				AUTO_REFRESH;

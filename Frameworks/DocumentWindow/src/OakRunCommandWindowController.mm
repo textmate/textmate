@@ -42,18 +42,18 @@
 		self.executeButton        = OakCreateButton(@"Execute");
 		self.cancelButton         = OakCreateButton(@"Cancel");
 
-		NSDictionary* outputOptions = @{
-			@(output::replace_input) : @"Replace Input",
-			@(output::after_input)   : @"Insert After Input",
-			// @(output::new_window)    : @"New Window",
-			@(output::tool_tip)      : @"Tool Tip",
+		struct { NSString* title; NSInteger outputOption; } outputOptions[] =
+		{
+			{ @"Replace Input",      output::replace_input },
+			{ @"Insert After Input", output::after_input   },
+			{ @"New Document",       output::new_window    },
+			{ @"Tool Tip",           output::tool_tip      },
 		};
 
 		NSMenu* menu = [self.resultPopUpButton menu];
 		[menu removeAllItems];
-		char key = '0';
-		for(NSNumber* type in outputOptions)
-			[[menu addItemWithTitle:outputOptions[type] action:@selector(takeOutputTypeFrom:) keyEquivalent:[NSString stringWithFormat:@"%c", ++key]] setTag:[type intValue]];
+		for(size_t i = 0; i < sizeofA(outputOptions); ++i)
+			[[menu addItemWithTitle:outputOptions[i].title action:@selector(takeOutputTypeFrom:) keyEquivalent:[NSString stringWithFormat:@"%c", '1' + (char)i]] setTag:outputOptions[i].outputOption];
 
 		self.executeButton.action = @selector(execute:);
 		self.cancelButton.action  = @selector(cancel:);
