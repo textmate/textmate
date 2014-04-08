@@ -657,6 +657,21 @@ namespace
 		[self.window makeFirstResponder:oldFirstResponder];
 }
 
++ (void)saveSessionAndDetachBackups
+{
+	BOOL restoresSession = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableSessionRestoreKey];
+	[DocumentController saveSessionIncludingUntitledDocuments:restoresSession];
+	if(restoresSession)
+	{
+		// Ensure we do not remove backup files, as they are used to restore untitled documents
+		for(DocumentController* controller in [SortedControllers() reverseObjectEnumerator])
+		{
+			for(auto document : controller.documents)
+				document->detach_backup();
+		}
+	}
+}
+
 + (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication*)sender
 {
 	BOOL restoresSession = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableSessionRestoreKey];
@@ -666,23 +681,14 @@ namespace
 
 	if(documents.empty())
 	{
-		[DocumentController saveSessionIncludingUntitledDocuments:restoresSession];
-		if(restoresSession)
-		{
-			// Ensure we do not remove backup files, as they are used to restore untitled documents
-			for(DocumentController* controller in [SortedControllers() reverseObjectEnumerator])
-			{
-				for(auto document : controller.documents)
-					document->detach_backup();
-			}
-		}
+		[self saveSessionAndDetachBackups];
 		return NSTerminateNow;
 	}
 
 	DocumentController* controller = [SortedControllers() firstObject];
 	[controller showCloseWarningUIForDocuments:documents completionHandler:^(BOOL canClose){
 		if(canClose)
-			[DocumentController saveSessionIncludingUntitledDocuments:NO];
+			[self saveSessionAndDetachBackups];
 		[NSApp replyToApplicationShouldTerminate:canClose];
 	}];
 
