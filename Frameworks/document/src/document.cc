@@ -918,11 +918,11 @@ namespace document
 		}
 	}
 
-	void document_t::sync_open ()
+	void document_t::sync_open (CFStringRef runLoopMode)
 	{
 		struct stall_t : document::open_callback_t
 		{
-			stall_t () : _run_loop(CFSTR("OakThreadSignalsRunLoopMode")) { }
+			stall_t (CFStringRef runLoopMode) : _run_loop(runLoopMode) { }
 			void show_document (std::string const& path, document_ptr document)                                                     { _run_loop.stop(); }
 			void show_error (std::string const& path, document_ptr document, std::string const& message, oak::uuid_t const& filter) { _run_loop.stop(); }
 			void wait () { _run_loop.start(); }
@@ -931,7 +931,7 @@ namespace document
 			cf::run_loop_t _run_loop;
 		};
 
-		auto cb = std::make_shared<stall_t>();
+		auto cb = std::make_shared<stall_t>(runLoopMode);
 		if(!try_open(cb))
 			cb->wait();
 	}
