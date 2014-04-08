@@ -38,7 +38,6 @@ namespace find_tags { enum { in_document = 1, in_selection, in_project, in_folde
 static NSString* const kUserDefaultsFindInSelectionByDefault = @"findInSelectionByDefault";
 static NSString* const kUserDefaultsDisableFolderStateRestore = @"disableFolderStateRestore";
 static NSString* const OakDocumentPboardType = @"OakDocumentPboardType"; // drag’n’drop of tabs
-static BOOL IsInShouldTerminateEventLoop = NO;
 
 @interface QuickLookNSURLWrapper : NSObject <QLPreviewItem>
 @property (nonatomic) NSURL* url;
@@ -460,12 +459,6 @@ namespace
 		{
 			case NSAlertFirstButtonReturn: /* "Save" */
 			{
-				if(IsInShouldTerminateEventLoop)
-				{
-					IsInShouldTerminateEventLoop = NO;
-					[NSApp replyToApplicationShouldTerminate:NO];
-				}
-
 				[DocumentSaveHelper trySaveDocuments:documentsToSave forWindow:self.window defaultDirectory:self.untitledSavePath completionHandler:^(BOOL success){
 					callback(success);
 				}];
@@ -686,19 +679,11 @@ namespace
 		return NSTerminateNow;
 	}
 
-	IsInShouldTerminateEventLoop = YES;
-
 	DocumentController* controller = [SortedControllers() firstObject];
 	[controller showCloseWarningUIForDocuments:documents completionHandler:^(BOOL canClose){
 		if(canClose)
 			[DocumentController saveSessionIncludingUntitledDocuments:NO];
-
-		if(IsInShouldTerminateEventLoop)
-			[NSApp replyToApplicationShouldTerminate:canClose];
-		else if(canClose)
-			[NSApp terminate:self];
-
-		IsInShouldTerminateEventLoop = NO;
+		[NSApp replyToApplicationShouldTerminate:canClose];
 	}];
 
 	return NSTerminateLater;
