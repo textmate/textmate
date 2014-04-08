@@ -1,24 +1,20 @@
 #include <test/jail.h>
 #include <document/document.h>
 
-class SymlinksTests : public CxxTest::TestSuite
+void test_symlinks ()
 {
-public:
-	void test_symlinks ()
-	{
-		test::jail_t jail;
+	test::jail_t jail;
 
-		jail.touch("test.txt");
-		jail.ln("link.txt", "test.txt");
+	jail.touch("test.txt");
+	jail.ln("link.txt", "test.txt");
 
-		TS_ASSERT_EQUALS(path::exists(jail.path("test.txt")), true);
-		TS_ASSERT_EQUALS(path::exists(jail.path("link.txt")), true);
+	OAK_ASSERT_EQ(path::exists(jail.path("test.txt")), true);
+	OAK_ASSERT_EQ(path::exists(jail.path("link.txt")), true);
 
-		document::document_ptr srcDoc  = document::create(jail.path("test.txt"));
-		document::document_ptr linkDoc = document::create(jail.path("link.txt"));
-		TS_ASSERT_EQUALS(srcDoc->identifier(), linkDoc->identifier());
+	document::document_ptr srcDoc  = document::create(jail.path("test.txt"));
+	document::document_ptr linkDoc = document::create(jail.path("link.txt"));
+	OAK_ASSERT_EQ(srcDoc->identifier(), linkDoc->identifier());
 
-		document::document_ptr aliasDoc = document::create(jail.path("./test.txt"));
-		TS_ASSERT_EQUALS(srcDoc->identifier(), aliasDoc->identifier());
-	}
-};
+	document::document_ptr aliasDoc = document::create(jail.path("./test.txt"));
+	OAK_ASSERT_EQ(srcDoc->identifier(), aliasDoc->identifier());
+}

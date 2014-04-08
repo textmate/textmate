@@ -6,75 +6,71 @@ struct helper_t : document::document_t
 	using document::document_t::watch_callback;
 };
 
-void notify (document::document_ptr doc, int flags, std::string const& path = NULL_STR)
+static void notify (document::document_ptr doc, int flags, std::string const& path = NULL_STR)
 {
 	((*doc).*(&helper_t::watch_callback))(flags, path, false);
 }
 
-std::string content (document::document_ptr doc)
+static std::string content (document::document_ptr doc)
 {
 	return doc->content();
 }
 
-class FileWatchTests : public CxxTest::TestSuite
+void test_file_watch ()
 {
-public:
-	void test_file_watch ()
-	{
-		test::jail_t jail;
-		jail.set_content("file.txt", "Hello\n");
+	test::jail_t jail;
+	jail.set_content("file.txt", "Hello\n");
 
-		document::document_ptr doc = document::create(jail.path("file.txt"));
-		doc->open();
+	document::document_ptr doc = document::create(jail.path("file.txt"));
+	doc->sync_open();
 
-		jail.set_content("file.txt", "Hello\nworld\n");
-		notify(doc, NOTE_WRITE);
-		TS_ASSERT_EQUALS(content(doc), "Hello\nworld\n");
+	jail.set_content("file.txt", "Hello\nworld\n");
+	notify(doc, NOTE_WRITE);
+	OAK_ASSERT_EQ(content(doc), "Hello\nworld\n");
 
-		doc->buffer().insert(5, ", ");
-		doc->set_revision(doc->buffer().bump_revision());
-		TS_ASSERT_EQUALS(doc->is_modified(), true);
-		jail.set_content("file.txt", "Hello, \nworld\n");
-		notify(doc, NOTE_WRITE);
-		TS_ASSERT_EQUALS(content(doc), "Hello, \nworld\n");
-		TS_ASSERT_EQUALS(doc->is_modified(), false);
+	doc->buffer().insert(5, ", ");
+	doc->set_revision(doc->buffer().bump_revision());
+	OAK_ASSERT_EQ(doc->is_modified(), true);
+	jail.set_content("file.txt", "Hello, \nworld\n");
+	notify(doc, NOTE_WRITE);
+	OAK_ASSERT_EQ(content(doc), "Hello, \nworld\n");
+	OAK_ASSERT_EQ(doc->is_modified(), false);
 
-		jail.set_content("file.txt", "Hello\n");
-		notify(doc, NOTE_WRITE);
-		TS_ASSERT_EQUALS(content(doc), "Hello\n");
-		TS_ASSERT_EQUALS(doc->is_modified(), false);
+	jail.set_content("file.txt", "Hello\n");
+	notify(doc, NOTE_WRITE);
+	OAK_ASSERT_EQ(content(doc), "Hello\n");
+	OAK_ASSERT_EQ(doc->is_modified(), false);
 
-		doc->close();
-	}
+	doc->close();
+}
 
-	void test_merge ()
-	{
-		std::string const original = "Hello\n--\n";
-		std::string const buffer   = "Hello, world\n--\n";
-		std::string const disk     = "Hello\n--\nworld\n";
-		std::string const merged   = "Hello, world\n--\nworld\n";
+void test_merge ()
+{
+	std::string const original = "Hello\n--\n";
+	std::string const buffer   = "Hello, world\n--\n";
+	std::string const disk     = "Hello\n--\nworld\n";
+	std::string const merged   = "Hello, world\n--\nworld\n";
 
-		test::jail_t jail;
-		jail.set_content("file.txt", original);
+	test::jail_t jail;
+	jail.set_content("file.txt", original);
 
-		document::document_ptr doc = document::create(jail.path("file.txt"));
-		doc->open();
+	document::document_ptr doc = document::create(jail.path("file.txt"));
+	doc->sync_open();
 
-		doc->set_content(buffer);
-		doc->set_revision(doc->buffer().bump_revision());
-		TS_ASSERT_EQUALS(content(doc), buffer);
-		TS_ASSERT_EQUALS(doc->is_modified(), true);
+	doc->set_content(buffer);
+	doc->set_revision(doc->buffer().bump_revision());
+	OAK_ASSERT_EQ(content(doc), buffer);
+	OAK_ASSERT_EQ(doc->is_modified(), true);
 
-		jail.set_content("file.txt", disk);
-		notify(doc, NOTE_WRITE);
-		TS_ASSERT_EQUALS(content(doc), merged);
-		TS_ASSERT_EQUALS(doc->is_modified(), true);
+	jail.set_content("file.txt", disk);
+	notify(doc, NOTE_WRITE);
+	OAK_ASSERT_EQ(content(doc), merged);
+	OAK_ASSERT_EQ(doc->is_modified(), true);
 
-		jail.set_content("file.txt", merged);
-		notify(doc, NOTE_WRITE);
-		TS_ASSERT_EQUALS(content(doc), merged);
-		TS_ASSERT_EQUALS(doc->is_modified(), false);
+	jail.set_content("file.txt", merged);
+	notify(doc, NOTE_WRITE);
+	OAK_ASSERT_EQ(content(doc), merged);
+	OAK_ASSERT_EQ(doc->is_modified(), false);
 
-		doc->close();
-	}
-};
+	doc->close();
+}
