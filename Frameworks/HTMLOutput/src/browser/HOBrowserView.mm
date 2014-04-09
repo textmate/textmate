@@ -27,6 +27,11 @@
 	{
 		_webView = [[WebView alloc] initWithFrame:NSZeroRect];
 
+		NSString* const kHTMLOutputPreferencesIdentifier = @"HTML Output Preferences Identifier";
+		WebPreferences* webViewPrefs = [[WebPreferences alloc] initWithIdentifier:kHTMLOutputPreferencesIdentifier];
+		webViewPrefs.plugInsEnabled = NO;
+		self.webView.preferencesIdentifier = kHTMLOutputPreferencesIdentifier;
+
 		_statusBar = [[HOStatusBar alloc] initWithFrame:NSZeroRect];
 		_statusBar.delegate = _webView;
 
