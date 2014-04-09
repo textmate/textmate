@@ -1549,6 +1549,25 @@ doScroll:
 // = Bundle Items =
 // ================
 
+// FIXME copy/paste from bundles/src/query.cc
+static std::string format_bundle_item_title (std::string title, bool hasSelection)
+{
+	static std::string const kSelectionSubString = " / Selection";
+
+	std::string::size_type pos = title.find(kSelectionSubString);
+	if(pos == 0 || pos == std::string::npos)
+		return title;
+
+	if(hasSelection)
+	{
+		std::string::size_type from = title.rfind(' ', pos - 1);
+		if(from == std::string::npos)
+			return title.erase(0, pos + 3);
+		return title.erase(from + 1, pos + 3 - from - 1);
+	}
+	return title.erase(pos, kSelectionSubString.size());
+}
+
 - (std::map<std::string, std::string>)variablesForBundleItem:(bundles::item_ptr const&)item
 {
 	std::map<std::string, std::string> res = oak::basic_environment();
@@ -1594,6 +1613,7 @@ doScroll:
 			[self recordSelector:@selector(executeCommandWithOptions:) withArgument:ns::to_dictionary(item->plist())];
 
 			auto command = parse_command(item);
+			command.name = format_bundle_item_title(command.name, self.hasSelection);
 			if([self.delegate respondsToSelector:@selector(bundleItemPreExec:completionHandler:)])
 			{
 				[self.delegate bundleItemPreExec:command.pre_exec completionHandler:^(BOOL success){
@@ -2576,25 +2596,6 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 		[self recordSelector:_cmd withArgument:nil];
 		editor->perform(ng::kInsertTab, layout.get(), [self indentCorrections], to_s([self scopeAttributes]));
 	}
-}
-
-// FIXME copy/paste from bundles/src/query.cc
-static std::string format_bundle_item_title (std::string title, bool hasSelection)
-{
-	static std::string const kSelectionSubString = " / Selection";
-
-	std::string::size_type pos = title.find(kSelectionSubString);
-	if(pos == 0 || pos == std::string::npos)
-		return title;
-
-	if(hasSelection)
-	{
-		std::string::size_type from = title.rfind(' ', pos - 1);
-		if(from == std::string::npos)
-			return title.erase(0, pos + 3);
-		return title.erase(from + 1, pos + 3 - from - 1);
-	}
-	return title.erase(pos, kSelectionSubString.size());
 }
 
 static char const* kOakMenuItemTitle = "OakMenuItemTitle";

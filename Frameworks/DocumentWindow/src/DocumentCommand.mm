@@ -127,7 +127,7 @@ void delegate_t::show_document (std::string const& str)
 
 void delegate_t::show_error (bundle_command_t const& command, int rc, std::string const& out, std::string const& err)
 {
-	show_command_error(text::trim(err + out).empty() ? text::format("Command returned status code %d.", rc) : err + out, command.uuid, _controller.window);
+	show_command_error(text::trim(err + out).empty() ? text::format("Command returned status code %d.", rc) : err + out, command.uuid, _controller.window, command.name);
 }
 
 // ==============
@@ -210,10 +210,11 @@ void run_impl (bundle_command_t const& command, ng::buffer_t const& buffer, ng::
 	runner->wait();
 }
 
-void show_command_error (std::string const& message, oak::uuid_t const& uuid, NSWindow* window)
+void show_command_error (std::string const& message, oak::uuid_t const& uuid, NSWindow* window, std::string commandName)
 {
 	bundles::item_ptr bundleItem = bundles::lookup(uuid);
-	std::string commandName = bundleItem ? bundleItem->name() : "(unknown)";
+	if(commandName == NULL_STR)
+		commandName = bundleItem ? bundleItem->name() : "(unknown)";
 
 	NSAlert* alert = [[NSAlert alloc] init];
 	[alert setAlertStyle:NSCriticalAlertStyle];

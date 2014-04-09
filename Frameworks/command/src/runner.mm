@@ -1,6 +1,7 @@
 #include "runner.h"
 #include <OakSystem/application.h>
 #include <OakSystem/process.h>
+#include <OakFoundation/NSString Additions.h>
 #include <io/path.h>
 #include <io/pipe.h>
 #include <regexp/format_string.h>
@@ -194,7 +195,7 @@ namespace command
 				}
 				else if([event type] == NSKeyDown && (([[event charactersIgnoringModifiers] isEqualToString:@"c"] && ([event modifierFlags] & (NSShiftKeyMask|NSControlKeyMask|NSAlternateKeyMask|NSCommandKeyMask)) == NSControlKeyMask) || ([[event charactersIgnoringModifiers] isEqualToString:@"."] && ([event modifierFlags] & (NSShiftKeyMask|NSControlKeyMask|NSAlternateKeyMask|NSCommandKeyMask)) == NSCommandKeyMask)))
 				{
-					NSInteger choice = NSRunAlertPanel(@"Stop Command Execution", @"Would you like to kill the current shell command?", @"Kill Command", @"Cancel", nil);
+					NSInteger choice = NSRunAlertPanel([NSString stringWithFormat:@"Stop “%@”", [NSString stringWithCxxString:_command.name]], @"Would you like to kill the current shell command?", @"Kill Command", @"Cancel", nil);
 					if(choice == NSAlertDefaultReturn) // "Kill Command"
 					{
 						_user_abort = true;
