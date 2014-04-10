@@ -132,9 +132,11 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 		_scrollView.borderType            = NSNoBorder;
 		_scrollView.documentView          = _tableView;
 
-		self.window = [[NSWindow alloc] initWithContentRect:NSMakeRect(600, 700, 400, 500) styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask|NSTexturedBackgroundWindowMask) backing:NSBackingStoreBuffered defer:NO];
+		self.window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 540, 500) styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask|NSTexturedBackgroundWindowMask) backing:NSBackingStoreBuffered defer:NO];
+		[self.window center];
 		self.window.delegate           = self;
 		self.window.releasedWhenClosed = NO;
+		self.window.frameAutosaveName  = @"Commit Window";
 		self.window.title              = @"Commit";
 		[self.window setAutorecalculatesContentBorderThickness:NO forEdge:NSMaxYEdge];
 		[self.window setContentBorderThickness:29 forEdge:NSMaxYEdge];
