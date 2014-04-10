@@ -173,6 +173,7 @@ NSBox* OakCreateViewWithColor (NSColor* color, NSColor* secondaryColor)
 {
 	OakDividerLineView* res = OakCreateDividerLineWithColor(color, secondaryColor);
 	res.intrinsicContentSize = NSMakeSize(NSViewNoInstrinsicMetric, NSViewNoInstrinsicMetric);
+	res.translatesAutoresizingMaskIntoConstraints = NO;
 	return res;
 }
 
