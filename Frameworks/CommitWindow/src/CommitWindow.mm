@@ -288,7 +288,7 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 	document::document_ptr commitMessage = document::from_content("", fileType);
 	[self.documentView setDocument:commitMessage];
 
-	std::string title = text::format("Commit (%s %s: %s)", path::display_name(_environment["TM_PROJECT_DIRECTORY"]).c_str(), scmName->second.c_str(), _environment["TM_SCM_BRANCH"].c_str());
+	std::string const title = format_string::expand("Commit — ${TM_PROJECT_DIRECTORY/^.*\\///} ($TM_SCM_NAME: $TM_SCM_BRANCH)", _environment);
 	[self.window setTitle:[NSString stringWithCxxString:title]];
 
 	[self.window recalculateKeyViewLoop];
