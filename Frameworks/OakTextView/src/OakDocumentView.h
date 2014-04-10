@@ -5,6 +5,7 @@
 PUBLIC @interface OakDocumentView : NSView
 @property (nonatomic, readonly) OakTextView* textView;
 @property (nonatomic) document::document_ptr const& document;
+@property (nonatomic) BOOL hideStatusBar;
 - (IBAction)toggleLineNumbers:(id)sender;
 - (IBAction)takeThemeUUIDFrom:(id)sender;
 

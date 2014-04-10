@@ -168,18 +168,21 @@ private:
 	[self removeConstraints:[self constraints]];
 	[super updateConstraints];
 
-	NSDictionary* views = NSDictionaryOfVariableBindings(gutterScrollView, gutterView, gutterDividerView, textScrollView, statusDividerView, statusBar);
-	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[gutterScrollView(==gutterView)][gutterDividerView(==1)][textScrollView(>=100)]|" options:NSLayoutFormatAlignAllTop|NSLayoutFormatAlignAllBottom metrics:nil views:views]];
-	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[statusBar]|"                                                                     options:0 metrics:nil views:views]];
-	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[statusDividerView][statusBar]|"                                                   options:NSLayoutFormatAlignAllLeft|NSLayoutFormatAlignAllRight metrics:nil views:views]];
-
 	NSMutableArray* stackedViews = [NSMutableArray array];
 	[stackedViews addObjectsFromArray:topAuxiliaryViews];
 	[stackedViews addObject:gutterScrollView];
 	[stackedViews addObjectsFromArray:bottomAuxiliaryViews];
-	[stackedViews addObject:statusDividerView];
 
+	if(statusBar)
+	{
+		[stackedViews addObjectsFromArray:@[ statusDividerView, statusBar ]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[statusBar(==statusDividerView)]|" options:NSLayoutFormatAlignAllLeft|NSLayoutFormatAlignAllRight metrics:nil views:NSDictionaryOfVariableBindings(statusDividerView, statusBar)]];
+	}
+
+	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[gutterScrollView(==gutterView)][gutterDividerView(==1)][textScrollView(>=100)]|" options:NSLayoutFormatAlignAllTop|NSLayoutFormatAlignAllBottom metrics:nil views:NSDictionaryOfVariableBindings(gutterScrollView, gutterView, gutterDividerView, textScrollView)]];
 	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[topView]" options:0 metrics:nil views:@{ @"topView" : stackedViews[0] }]];
+	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[bottomView]|" options:0 metrics:nil views:@{ @"bottomView" : [stackedViews lastObject] }]];
+
 	for(size_t i = 0; i < [stackedViews count]-1; ++i)
 		[self addConstraint:[NSLayoutConstraint constraintWithItem:stackedViews[i] attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:stackedViews[i+1] attribute:NSLayoutAttributeTop multiplier:1 constant:0]];
 
@@ -189,6 +192,35 @@ private:
 		for(NSView* view in views)
 			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[view]|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(view)]];
 	}
+}
+
+- (void)setHideStatusBar:(BOOL)flag
+{
+	if(_hideStatusBar == flag)
+		return;
+
+	_hideStatusBar = flag;
+	if(_hideStatusBar)
+	{
+		[statusDividerView removeFromSuperview];
+		statusDividerView = nil;
+
+		[statusBar removeFromSuperview];
+		statusBar.delegate = nil;
+		statusBar.target = nil;
+		statusBar = nil;
+	}
+	else
+	{
+		statusDividerView = OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1], [NSColor colorWithCalibratedWhite:0.750 alpha:1]);
+		[self addSubview:statusDividerView];
+
+		statusBar = [[OTVStatusBar alloc] initWithFrame:NSZeroRect];
+		statusBar.delegate = self;
+		statusBar.target = self;
+		[self addSubview:statusBar];
+	}
+	[self setNeedsUpdateConstraints:YES];
 }
 
 - (NSImage*)gutterImage:(NSString*)aName

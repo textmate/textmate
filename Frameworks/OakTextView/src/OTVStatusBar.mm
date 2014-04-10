@@ -53,6 +53,11 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSObject* accessibi
 @end
 
 @implementation OTVStatusBar
++ (BOOL)requiresConstraintBasedLayout
+{
+	return YES;
+}
+
 - (id)initWithFrame:(NSRect)aRect
 {
 	if(self = [super initWithGradient:[[NSGradient alloc] initWithColorsAndLocations: [NSColor colorWithCalibratedWhite:1.000 alpha:0.68], 0.0, [NSColor colorWithCalibratedWhite:1.000 alpha:0.5], 0.0416, [NSColor colorWithCalibratedWhite:1.000 alpha:0.0], 1.0, nil] inactiveGradient:[[NSGradient alloc] initWithColorsAndLocations: [NSColor colorWithCalibratedWhite:1.000 alpha:0.68], 0.0, [NSColor colorWithCalibratedWhite:1.000 alpha:0.5], 0.0416, [NSColor colorWithCalibratedWhite:1.000 alpha:0.0], 1.0, nil]])
@@ -113,7 +118,9 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSObject* accessibi
 
 		[self.symbolPopUp setContentHuggingPriority:NSLayoutPriorityDefaultLow-1 forOrientation:NSLayoutConstraintOrientationHorizontal];
 		[self.symbolPopUp setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow-1 forOrientation:NSLayoutConstraintOrientationHorizontal];
-		
+
+		[self setTranslatesAutoresizingMaskIntoConstraints:NO];
+
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-10-[line]-[selection(>=50,<=225)]-8-[dividerOne]-(-2)-[grammar(>=125,<=225)]-5-[dividerTwo]-(-2)-[tabSize(<=102)]-4-[dividerThree]-5-[items(==30)]-4-[dividerFour]-(-2)-[symbol(>=125)]-5-[dividerFive]-6-[recording]-7-|" options:0 metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[line]-5-|" options:0 metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[selection]-5-|" options:0 metrics:nil views:views]];
