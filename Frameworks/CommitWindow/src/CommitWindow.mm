@@ -81,6 +81,7 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 @property (nonatomic) std::map<std::string, std::string> environment;
 @property (nonatomic) NSArrayController*                 arrayController;
 @property (nonatomic) NSString*                          clientPortName;
+@property (nonatomic) NSPopUpButton*                     previousCommitMessagesPopUpButton;
 @property (nonatomic) OakDocumentView*                   documentView;
 @property (nonatomic) NSScrollView*                      scrollView;
 @property (nonatomic) NSTableView*                       tableView;
@@ -152,45 +153,18 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 		_actionPopUpButton.bezelStyle = NSTexturedRoundedBezelStyle;
 		_actionPopUpButton.menu.delegate = self;
 
-		NSPopUpButton* previousCommitMessagesPopUpButton = [NSPopUpButton new];
-		previousCommitMessagesPopUpButton.bordered   = YES;
-		previousCommitMessagesPopUpButton.pullsDown  = YES;
-		previousCommitMessagesPopUpButton.bezelStyle = NSTexturedRoundedBezelStyle;
-
-		// ========================================
-		// = Create previous commit messages menu =
-		// ========================================
-
-		NSMenu* aMenu = [previousCommitMessagesPopUpButton menu];
-		[aMenu addItemWithTitle:@"Previous Commit Messages" action:@selector(nop:) keyEquivalent:@""];
-
-		NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
-		NSArray* commitMessages = [defaults arrayForKey:kOakCommitWindowCommitMessages];
-		if(commitMessages == nil)
-		{
-			[previousCommitMessagesPopUpButton setEnabled:NO];
-		}
-		else
-		{
-			[commitMessages enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(NSString* message, NSUInteger idx, BOOL* stop){
-				NSString* title = message;
-				if([title length] > kOakCommitWindowCommitMessagesTitleLength)
-					title = [[title substringToIndex:kOakCommitWindowCommitMessagesTitleLength] stringByAppendingString:@"…"];
-
-				NSMenuItem* item = [aMenu addItemWithTitle:title action:@selector(restorePreviousCommitMessage:) keyEquivalent:@""];
-				[item setToolTip:message];
-				[item setTarget:self];
-				[item setRepresentedObject:message];
-			}];
-			[previousCommitMessagesPopUpButton setMenu:aMenu];
-		}
+		_previousCommitMessagesPopUpButton = [NSPopUpButton new];
+		_previousCommitMessagesPopUpButton.bordered   = YES;
+		_previousCommitMessagesPopUpButton.pullsDown  = YES;
+		_previousCommitMessagesPopUpButton.bezelStyle = NSTexturedRoundedBezelStyle;
+		[self setupPreviousCommitMessagesMenu];
 
 		// ===============
 		// = Constraints =
 		// ===============
 
 		NSDictionary* views = @{
-			@"previousMessages"   : previousCommitMessagesPopUpButton,
+			@"previousMessages"   : self.previousCommitMessagesPopUpButton,
 			@"topDivider"         : OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]),
 			@"documentView"       : self.documentView,
 			@"middleDivider"      : OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]),
@@ -379,11 +353,46 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 	[defaults synchronize];
 }
 
+- (void)setupPreviousCommitMessagesMenu
+{
+	NSMenu* menu = [self.previousCommitMessagesPopUpButton menu];
+	[menu removeAllItems];
+	[menu addItemWithTitle:@"Previous Commit Messages" action:@selector(nop:) keyEquivalent:@""];
+
+	if(NSArray* commitMessages = [[NSUserDefaults standardUserDefaults] arrayForKey:kOakCommitWindowCommitMessages])
+	{
+		[commitMessages enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(NSString* message, NSUInteger idx, BOOL* stop){
+			NSString* title = message;
+			if([title length] > kOakCommitWindowCommitMessagesTitleLength)
+				title = [[title substringToIndex:kOakCommitWindowCommitMessagesTitleLength] stringByAppendingString:@"…"];
+
+			NSMenuItem* item = [menu addItemWithTitle:title action:@selector(restorePreviousCommitMessage:) keyEquivalent:@""];
+			[item setToolTip:message];
+			[item setTarget:self];
+			[item setRepresentedObject:message];
+		}];
+
+		[menu addItem:[NSMenuItem separatorItem]];
+		NSMenuItem* item = [menu addItemWithTitle:@"Clear Menu" action:@selector(clearPreviousCommitMessages:) keyEquivalent:@""];
+		[item setTarget:self];
+	}
+	else
+	{
+		[self.previousCommitMessagesPopUpButton setEnabled:NO];
+	}
+}
+
 - (void)restorePreviousCommitMessage:(id)sender
 {
 	NSString* message = [sender representedObject];
 	document::document_ptr commitMessage = document::from_content([message UTF8String], self.documentView.document->file_type());
 	[self.documentView setDocument:commitMessage];
+}
+
+- (void)clearPreviousCommitMessages:(id)sender
+{
+	[[NSUserDefaults standardUserDefaults] removeObjectForKey:kOakCommitWindowCommitMessages];
+	[self setupPreviousCommitMessagesMenu];
 }
 
 - (void)performBundleItem:(bundles::item_ptr const&)anItem
