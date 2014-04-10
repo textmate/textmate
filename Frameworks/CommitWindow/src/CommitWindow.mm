@@ -262,6 +262,10 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 	}
 
 	document::document_ptr commitMessage = document::from_content("", fileType);
+
+	if(NSString* logArgument = [self.options objectForKey:@"--log"])
+		commitMessage->set_content(to_s(logArgument));
+
 	[self.documentView setDocument:commitMessage];
 
 	std::string const title = format_string::expand("Commit — ${TM_PROJECT_DIRECTORY/^.*\\///} ($TM_SCM_NAME: $TM_SCM_BRANCH)", _environment);
