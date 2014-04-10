@@ -42,7 +42,11 @@ struct stall_t : file::open_callback_t
 	   dispatch_semaphore_signal(_semaphore);
 	}
 
-	void wait () { dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER); }
+	void wait ()
+	{
+		OAK_ASSERT(dispatch_get_current_queue() != dispatch_get_main_queue());
+		dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER);
+	}
 
 	bool _error = false;
 	dispatch_semaphore_t _semaphore;

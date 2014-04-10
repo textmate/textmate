@@ -7,7 +7,7 @@ struct callback_t : document::open_callback_t
 	void select_charset (std::string const& path, io::bytes_ptr content, file::open_context_ptr context)                              { std::string encoding = _encoding; _encoding = NULL_STR; if(encoding != NULL_STR) context->set_charset(encoding); }
 	void show_document (std::string const& path, document::document_ptr document)                                                     { _success = true; stop(); }
 	void show_error (std::string const& path, document::document_ptr document, std::string const& message, oak::uuid_t const& filter) { stop(); }
-	void wait ()                                                                                                                      { dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER); }
+	void wait ()                                                                                                                      { OAK_ASSERT(dispatch_get_current_queue() != dispatch_get_main_queue()); dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER); }
 	void stop ()                                                                                                                      { dispatch_semaphore_signal(_semaphore); }
 
 	dispatch_semaphore_t _semaphore;
