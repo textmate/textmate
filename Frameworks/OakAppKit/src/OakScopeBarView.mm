@@ -49,7 +49,7 @@ static NSButton* OakCreateScopeButton (NSString* label, NSUInteger tag, SEL acti
 	if(_buttons.count)
 		self.selectedIndex = 0;
 
-	[self setNeedsLayout:YES];
+	[self setNeedsUpdateConstraints:YES];
 }
 
 - (void)updateConstraints
