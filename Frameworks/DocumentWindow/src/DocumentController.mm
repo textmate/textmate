@@ -37,6 +37,7 @@ namespace find_tags { enum { in_document = 1, in_selection, in_project, in_folde
 
 static NSString* const kUserDefaultsFindInSelectionByDefault = @"findInSelectionByDefault";
 static NSString* const kUserDefaultsDisableFolderStateRestore = @"disableFolderStateRestore";
+static NSString* const kUserDefaultsHideStatusBarKey = @"hideStatusBar";
 static NSString* const OakDocumentPboardType = @"OakDocumentPboardType"; // drag’n’drop of tabs
 
 @interface QuickLookNSURLWrapper : NSObject <QLPreviewItem>
@@ -377,6 +378,7 @@ namespace
 	self.htmlOutputInWindow = [[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsHTMLOutputPlacementKey] isEqualToString:@"window"];
 	self.disableFileBrowserWindowResize = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableFileBrowserWindowResizeKey];
 	self.autoRevealFile = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsAutoRevealFileKey];
+	self.documentView.hideStatusBar = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsHideStatusBarKey];
 
 	if(self.layoutView.fileBrowserOnRight != [[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsFileBrowserPlacementKey] isEqualToString:@"right"])
 	{
