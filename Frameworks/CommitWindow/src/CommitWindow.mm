@@ -436,8 +436,7 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 
 		std::transform(diffCmd.begin(), diffCmd.end(), diffCmd.begin(), &path::escape);
 
-		std::string const pwd = _environment["PWD"];
-		std::string const cmdString = text::format("cd %s && %s|\"$TM_MATE\" --async  --name \"---/+++ %s\"", path::escape(pwd).c_str(), text::join(diffCmd, " ").c_str(), path::display_name(to_s(filePath)).c_str());
+		std::string const cmdString = text::format("cd \"${TM_PROJECT_DIRECTORY}\" && %s|\"$TM_MATE\" --async  --name \"---/+++ %s\"", text::join(diffCmd, " ").c_str(), path::display_name(to_s(filePath)).c_str());
 		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 			bool success = io::exec(_environment, "/bin/sh", "-c", cmdString.c_str(), NULL) != NULL_STR;
 			if(!success)
@@ -487,7 +486,7 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 	command.push_back(to_s(filePath));
 
 	std::transform(command.begin(), command.end(), command.begin(), &path::escape);
-	std::string const cmdString = text::join(command, " ");
+	std::string const cmdString = "cd \"${TM_PROJECT_DIRECTORY}\" && " + text::join(command, " ");
 
 	std::string res = io::exec(_environment, "/bin/sh", "-c", cmdString.c_str(), NULL);
 	if(res != NULL_STR)
