@@ -143,6 +143,7 @@ namespace document
 				// did_change_display_name,
 				did_change_marks,
 				// did_change_symbols,
+				did_change_content,
 			};
 
 			virtual ~callback_t () { }

@@ -1069,6 +1069,7 @@ namespace document
 						_document->check_modified(_document->_buffer->revision(), _document->_buffer->revision());
 						_document->mark_pristine();
 						_document->undo_manager().end_undo_group(ng::ranges_t(0));
+						_document->broadcast(callback_t::did_change_content);
 					}
 					else
 					{
@@ -1081,6 +1082,7 @@ namespace document
 							_document->_buffer->replace(0, _document->_buffer->size(), merged);
 							_document->set_revision(_document->_buffer->bump_revision());
 							_document->undo_manager().end_undo_group(ng::ranges_t(0));
+							_document->broadcast(callback_t::did_change_content);
 							// TODO if there was a conflict, we shouldn’t take the merged content (but ask user what to do)
 							// TODO mark_pristine() but using ‘yours’
 						}
