@@ -1,7 +1,6 @@
 #ifndef CF_TIMER_H_SCWA7DUD
 #define CF_TIMER_H_SCWA7DUD
 
-#include "callback.h"
 #include <oak/debug.h>
 
 namespace cf
