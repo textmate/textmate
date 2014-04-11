@@ -48,7 +48,7 @@ namespace ng
 		return editor->second;
 	}
 
-	std::string sanitized_utf8 (std::string str)
+	static std::string sanitized_utf8 (std::string str)
 	{
 		str.erase(utf8::remove_malformed(str.begin(), str.end()), str.end());
 		return str;
