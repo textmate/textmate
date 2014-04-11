@@ -217,7 +217,7 @@ namespace document
 
 	public:
 		bool try_open (document::open_callback_ptr callback);
-		void sync_open (CFStringRef runLoopMode = CFSTR("OakThreadSignalsRunLoopMode"));
+		void sync_open (CFStringRef runLoopMode = kCFRunLoopDefaultMode);
 		void close ();
 
 		void show ();
