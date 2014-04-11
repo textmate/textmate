@@ -295,6 +295,8 @@ namespace ng
 
 	CGRect layout_t::rect_at_index (ng::index_t const& index, bool bol_as_eol) const
 	{
+		ASSERT_LE(index.index, _buffer.size());
+
 		auto row = row_for_offset(index.index);
 		if(bol_as_eol && index.index == row->offset._length && row != _rows.begin())
 			--row;
