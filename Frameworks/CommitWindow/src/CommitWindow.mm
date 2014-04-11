@@ -159,6 +159,7 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 		_previousCommitMessagesPopUpButton.bordered   = YES;
 		_previousCommitMessagesPopUpButton.pullsDown  = YES;
 		_previousCommitMessagesPopUpButton.bezelStyle = NSTexturedRoundedBezelStyle;
+		_previousCommitMessagesPopUpButton.menu.autoenablesItems = NO;
 		[self setupPreviousCommitMessagesMenu];
 
 		// ===============
