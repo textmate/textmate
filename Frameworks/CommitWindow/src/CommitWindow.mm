@@ -546,10 +546,17 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 	NSInteger row = [_tableView clickedColumn] == -1 || [_tableView clickedRow] == -1 ? [_tableView selectedRow] : [_tableView clickedRow];
 	if([menuItem action] == @selector(performActionCommand:))
 	{
+		if(row == -1)
+			return NO;
+
 		CWItem* cwItem = [[_arrayController arrangedObjects] objectAtIndex:row];
 		actionCommandObj* cmd = [menuItem representedObject];
-		if(![cmd.targetStatuses containsObject:cwItem.scmStatus])
-			active = NO;
+
+		std::map<std::string, std::string> variables;
+		if(active = [cmd.targetStatuses containsObject:cwItem.scmStatus])
+			variables = { { "TM_DISPLAYNAME", path::display_name(to_s(cwItem.path)) } };
+
+		menuItem.title = [NSString stringWithCxxString:format_string::expand(to_s(cmd.name), variables)];
 	}
 	return active;
 }
