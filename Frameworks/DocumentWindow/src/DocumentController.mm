@@ -2640,7 +2640,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 				else	++split;
 
 				std::vector<document::document_ptr> newDocuments;
-				split = merge_documents_splitting_at(oldDocuments, documents, split, newDocuments, true);
+				split = merge_documents_splitting_at(oldDocuments, documents, split, newDocuments, [controller disableTabReordering]);
 				controller.documents = newDocuments;
 				controller.selectedTabIndex = split;
 			}
