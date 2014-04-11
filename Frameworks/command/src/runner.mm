@@ -219,7 +219,7 @@ namespace command
 
 	void runner_t::wait_for_command ()
 	{
-		ASSERT(dispatch_get_main_queue() == dispatch_get_current_queue());
+		ASSERT(dispatch_get_main_queue() != dispatch_get_current_queue());
 		dispatch_group_wait(_dispatch_group, DISPATCH_TIME_FOREVER);
 	}
 
