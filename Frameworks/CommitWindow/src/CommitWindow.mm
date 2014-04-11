@@ -190,7 +190,7 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[cancel]-[commit]-(8)-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[action(==36)]" options:0 metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[previousMessages(>=200)]-(8)-|" options:0 metrics:nil views:views]];
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(3)-[previousMessages]-(3)-[topDivider][documentView(>=100)][middleDivider][scrollView(>=200)][bottomDivider]-(5)-[commit]-(6)-|" options:0 metrics:nil views:views]];
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(3)-[previousMessages]-(3)-[topDivider][documentView(>=100)][middleDivider][scrollView(==190)][bottomDivider]-(5)-[commit]-(6)-|" options:0 metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[bottomDivider]-(5)-[action]-(6)-|" options:0 metrics:nil views:views]];
 	}
 	return self;
