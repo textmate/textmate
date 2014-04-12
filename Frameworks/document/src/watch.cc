@@ -63,9 +63,11 @@ namespace document
 		void data_from_server ();
 	};
 
-	static watch_server_t& server ()
+	typedef std::shared_ptr<watch_server_t> watch_server_ptr;
+
+	static watch_server_ptr server ()
 	{
-		static watch_server_t instance;
+		static watch_server_ptr instance = std::make_shared<watch_server_t>();
 		return instance;
 	}
 
@@ -80,16 +82,16 @@ namespace document
 	// = watch_base_t =
 	// ================
 
-	watch_base_t::watch_base_t (std::string const& path)
+	watch_base_t::watch_base_t (std::string const& path) : _server(server())
 	{
-		client_id = server().add(path, this);
-		D(DBF_Document_WatchFS, bug("%s, got client key %zu\n", path.c_str(), client_id););
+		_client_id = _server->add(path, this);
+		D(DBF_Document_WatchFS, bug("%s, got client key %zu\n", path.c_str(), _client_id););
 	}
 
 	watch_base_t::~watch_base_t ()
 	{
-		D(DBF_Document_WatchFS, bug("client key %zu\n", client_id););
-		server().remove(client_id);
+		D(DBF_Document_WatchFS, bug("client key %zu\n", _client_id););
+		_server->remove(_client_id);
 	}
 
 	void watch_base_t::callback (int flags, std::string const& newPath)
@@ -166,7 +168,7 @@ namespace document
 
 	void watch_server_t::data_from_server_stub (CFSocketRef s, CFSocketCallBackType callbackType, CFDataRef address, void const* data, void* info)
 	{
-		document::server().data_from_server();
+		document::server()->data_from_server();
 	}
 
 	void watch_server_t::data_from_server ()

@@ -9,6 +9,9 @@
 
 namespace document
 {
+	struct watch_server_t;
+	typedef std::shared_ptr<watch_server_t> watch_server_ptr;
+
 	struct PUBLIC watch_base_t
 	{
 		watch_base_t (std::string const& path);
@@ -16,7 +19,8 @@ namespace document
 		virtual void callback (int flags, std::string const& newPath);
 
 	private:
-		size_t client_id;
+		size_t _client_id;
+		watch_server_ptr _server;
 	};
 
 } /* document */
