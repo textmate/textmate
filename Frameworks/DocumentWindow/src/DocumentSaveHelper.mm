@@ -188,7 +188,7 @@ namespace
 - (file::save_context_ptr const&)context                         { return context; }
 - (void)setContext:(file::save_context_ptr const&)newContext     { context = newContext; }
 
-- (void)saveNextDocument
+- (void)saveNextDocument:(id)sender
 {
 	if(documents.empty() || self.failed)
 	{
@@ -212,7 +212,7 @@ namespace
 
 	std::reverse(documents.begin(), documents.end());
 	[[NSNotificationCenter defaultCenter] postNotificationName:@"OakDocumentNotificationWillSave" object:self userInfo:@{ @"window" : self.window }];
-	[self saveNextDocument];
+	[self saveNextDocument:self];
 }
 
 - (void)postDidSaveNotification:(id)sender
@@ -222,15 +222,15 @@ namespace
 
 - (void)didSaveDocument:(document::document_ptr const&)aDocument success:(BOOL)flag error:(std::string const&)aMessage usingFilter:(oak::uuid_t const&)aFilter
 {
+	// This method is indirectly being called from a block executed in the main
+	// queue, as saving is running in a background queue. We need to get out of that
+	// block before posting the “did save” notification or saving next file, as
+	// while we are in this block, new blocks won’t be executed in the main queue,
+	// which we might rely on when running a local event loop (for executing commands).
+
 	D(DBF_DocumentController_SaveHelper, bug("‘%s’, success %s, user abort %s\n", aDocument->path().c_str(), BSTR(flag), BSTR(self.userAbort)););
 	if(flag)
 	{
-		// This method is indirectly being called from a block executed in the main
-		// queue, as saving is running in a background queue. We need to get out of that
-		// block because the “did save” notification may execute commands that run a
-		// local event loop until completion status is posted to main queue, and if we
-		// do not first leave the block being executed in the main queue, further blocks
-		// will not be executed.
 		[self performSelector:@selector(postDidSaveNotification:) withObject:self afterDelay:0];
 	}
 	else if(!self.userAbort)
@@ -243,6 +243,6 @@ namespace
 
 	documents.pop_back();
 	self.failed = self.failed || !flag || self.userAbort;
-	[self saveNextDocument];
+	[self performSelector:@selector(saveNextDocument:) withObject:self afterDelay:0];
 }
 @end
