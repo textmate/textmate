@@ -144,12 +144,15 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 		NSButton* commitButton = OakCreateButton(@"Commit", NSTexturedRoundedBezelStyle);
 		NSButton* cancelButton = OakCreateButton(@"Cancel", NSTexturedRoundedBezelStyle);
 
-		commitButton.action = @selector(performCommit:);
-		[commitButton setKeyEquivalent:@"\r"];
-		[commitButton setKeyEquivalentModifierMask:NSCommandKeyMask];
+		commitButton.action                    = @selector(performCommit:);
+		commitButton.keyEquivalent             = @"\r";
+		commitButton.keyEquivalentModifierMask = NSCommandKeyMask;
+		commitButton.target                    = self;
 
-		cancelButton.action = @selector(cancel:);
-		cancelButton.target = self;
+		cancelButton.action                    = @selector(cancel:);
+		cancelButton.keyEquivalent             = @".";
+		cancelButton.keyEquivalentModifierMask = NSCommandKeyMask;
+		cancelButton.target                    = self;
 
 		_actionPopUpButton = OakCreateActionPopUpButton(YES);
 		_actionPopUpButton.bezelStyle = NSTexturedRoundedBezelStyle;
