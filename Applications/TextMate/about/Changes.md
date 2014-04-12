@@ -2,6 +2,12 @@ Title: Release Notes
 
 # Changes
 
+## 2014-04-12 ([v2.0-alpha.9533](https://github.com/textmate/textmate/compare/v2.0-alpha.9531...v2.0-alpha.9533))
+
+* You can disable the status bar using `defaults write com.macromates.TextMate.preview hideStatusBar -bool YES`. Be aware that currently not all of the status bar actions have menu equivalents.
+* _Text → Filter Through Command…_ (⌘|) now has a _“New Document”_ (⌘3) output option.
+* _View → Wrap Column_ now remember the last 5 values used.
+
 ## 2014-04-05 ([v2.0-alpha.9531](https://github.com/textmate/textmate/compare/v2.0-alpha.9529...v2.0-alpha.9531))
 
 * Rework the commit window (shown e.g. when using ⌘Y and selecting “Commit”) to run as part of TextMate and use it’s text editing features. *[Ronald Wampler]*
