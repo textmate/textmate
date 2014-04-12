@@ -13,7 +13,6 @@ PUBLIC NSPopUpButton* OakCreateStatusBarPopUpButton (NSString* initialItemTitle 
 PUBLIC NSComboBox* OakCreateComboBox (NSObject* accessibilityLabel = nil);
 PUBLIC NSImageView* OakCreateDividerImageView ();
 
-PUBLIC NSBox* OakCreateViewWithColor (NSColor* color = nil, NSColor* secondaryColor = nil);
 PUBLIC NSBox* OakCreateVerticalLine (NSColor* primaryColor, NSColor* secondaryColor = nil);
 PUBLIC NSBox* OakCreateHorizontalLine (NSColor* primaryColor, NSColor* secondaryColor = nil);
 PUBLIC BOOL OakSetAccessibilityLabel (NSObject* element, NSObject* label);

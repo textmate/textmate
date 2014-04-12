@@ -160,6 +160,7 @@ NSComboBox* OakCreateComboBox (NSObject* accessibilityLabel)
 static OakDividerLineView* OakCreateDividerLineWithColor (NSColor* color, NSColor* secondaryColor)
 {
 	OakDividerLineView* box = [[OakDividerLineView alloc] initWithFrame:NSZeroRect];
+	box.translatesAutoresizingMaskIntoConstraints = NO;
 	box.boxType         = NSBoxCustom;
 	box.borderType      = NSLineBorder;
 	box.borderColor     = color;
@@ -167,14 +168,6 @@ static OakDividerLineView* OakCreateDividerLineWithColor (NSColor* color, NSColo
 	box.secondaryColor  = secondaryColor;
 	box.usePrimaryColor = YES;
 	return box;
-}
-
-NSBox* OakCreateViewWithColor (NSColor* color, NSColor* secondaryColor)
-{
-	OakDividerLineView* res = OakCreateDividerLineWithColor(color, secondaryColor);
-	res.intrinsicContentSize = NSMakeSize(NSViewNoInstrinsicMetric, NSViewNoInstrinsicMetric);
-	res.translatesAutoresizingMaskIntoConstraints = NO;
-	return res;
 }
 
 NSBox* OakCreateVerticalLine (NSColor* primaryColor, NSColor* secondaryColor)
