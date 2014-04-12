@@ -134,12 +134,12 @@ NSComboBox* OakCreateComboBox (NSObject* accessibilityLabel)
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidChangeMainOrKey:) name:NSWindowDidResignKeyNotification object:newWindow];
 	}
 
-	self.usePrimaryColor = [newWindow isMainWindow] || [newWindow isKeyWindow];
+	self.usePrimaryColor = ([newWindow styleMask] & NSFullScreenWindowMask) || [newWindow isMainWindow] || [newWindow isKeyWindow];
 }
 
 - (void)windowDidChangeMainOrKey:(NSNotification*)aNotification
 {
-	self.usePrimaryColor = [self.window isMainWindow] || [self.window isKeyWindow];
+	self.usePrimaryColor = ([self.window styleMask] & NSFullScreenWindowMask) || [self.window isMainWindow] || [self.window isKeyWindow];
 }
 
 - (void)setUsePrimaryColor:(BOOL)flag

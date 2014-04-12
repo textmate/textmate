@@ -47,7 +47,7 @@
 
 - (void)tmWindowDidChangeStatus:(NSNotification*)aNotification
 {
-	self.renderInactive = ![self.window isKeyWindow] && ![self.window isMainWindow];
+	self.renderInactive = !([self.window styleMask] & NSFullScreenWindowMask) && ![self.window isKeyWindow] && ![self.window isMainWindow];
 }
 
 - (void)setRenderInactive:(BOOL)flag

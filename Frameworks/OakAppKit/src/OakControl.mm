@@ -205,7 +205,7 @@ OAK_DEBUG_VAR(OakControl);
 		if(states[i].active)
 			res |= states[i].requisite;
 	}
-	if(res & layer_t::window_main || res & layer_t::window_key)
+	if(res & layer_t::window_main || res & layer_t::window_key || [[self window] styleMask] & NSFullScreenWindowMask)
 		res |= layer_t::window_main_or_key;
 	return res;
 }
