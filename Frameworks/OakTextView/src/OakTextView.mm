@@ -1168,6 +1168,19 @@ doScroll:
 	[self tryToPerform:aSelector with:self];
 }
 
+- (BOOL)respondsToSelector:(SEL)aSelector
+{
+	// Do not handle cancelOperation: (as complete:) when caret is not on a word (instead give next responder a chance)
+	if(aSelector == @selector(cancelOperation:) && ng::word_at(document->buffer(), editor->ranges().last()).empty())
+		return NO;
+	return [super respondsToSelector:aSelector];
+}
+
+- (void)cancelOperation:(id)sender
+{
+	[self complete:sender];
+}
+
 // =================
 // = Accessibility =
 // =================
