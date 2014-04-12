@@ -35,6 +35,11 @@ namespace ng
 					document->remove_callback(this);
 					editors().erase(document->identifier());
 				}
+				else if(event == did_change_content)
+				{
+					for(auto pair : editors())
+						pair.second->sanitize_selection();
+				}
 			}
 
 		} callback;
@@ -321,6 +326,11 @@ namespace ng
 	{
 		ASSERT(document->is_open());
 		setup();
+	}
+
+	void editor_t::sanitize_selection ()
+	{
+		_selections = ng::sanitize(_buffer, _selections);
 	}
 
 	struct my_clipboard_entry_t : clipboard_t::entry_t

@@ -28,6 +28,7 @@ namespace ng
 	};
 
 	PUBLIC ranges_t convert (buffer_t const& buffer, text::selection_t const& selection);
+	PUBLIC ranges_t sanitize (buffer_t const& buffer, ranges_t const& selection);
 	PUBLIC bool not_empty (buffer_t const& buffer, ranges_t const& selection);
 	PUBLIC bool multiline (buffer_t const& buffer, ranges_t const& selection);
 	PUBLIC ranges_t move (buffer_t const& buffer, ranges_t const& selection, move_unit_type const unit, layout_movement_t const* layout = NULL);

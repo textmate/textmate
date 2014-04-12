@@ -83,7 +83,7 @@ namespace ng
 		return caret;
 	}
 
-	static ranges_t sanitize (buffer_t const& buffer, ranges_t const& selection)
+	ranges_t sanitize (buffer_t const& buffer, ranges_t const& selection)
 	{
 		/* This function will transform the selection so that
 		   all indexes are on proper multi-byte boundaries and
