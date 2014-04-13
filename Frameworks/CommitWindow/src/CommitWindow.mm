@@ -137,7 +137,6 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 		self.window.delegate           = self;
 		self.window.releasedWhenClosed = NO;
 		self.window.frameAutosaveName  = @"Commit Window";
-		self.window.title              = @"Commit";
 		[self.window setAutorecalculatesContentBorderThickness:NO forEdge:NSMaxYEdge];
 		[self.window setContentBorderThickness:29 forEdge:NSMaxYEdge];
 
@@ -272,7 +271,7 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 
 	[self.documentView setDocument:commitMessage];
 
-	std::string const title = format_string::expand("Commit — ${TM_PROJECT_DIRECTORY/^.*\\///} ($TM_SCM_NAME: $TM_SCM_BRANCH)", _environment);
+	std::string const title = format_string::expand("${TM_BUNDLE_ITEM_NAME:?${TM_BUNDLE_ITEM_NAME/…$//g}:Commit} — ${TM_PROJECT_DIRECTORY/^.*\\///} ($TM_SCM_NAME: $TM_SCM_BRANCH)", _environment);
 	[self.window setTitle:[NSString stringWithCxxString:title]];
 
 	[self.window recalculateKeyViewLoop];
