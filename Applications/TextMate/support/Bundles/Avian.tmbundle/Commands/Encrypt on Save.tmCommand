@@ -5,14 +5,13 @@
 	<key>beforeRunningCommand</key>
 	<string>nop</string>
 	<key>command</key>
-	<string>#!/usr/bin/ruby -KU
-require ENV['TM_SUPPORT_PATH'] + '/lib/textmate.rb'
-require ENV['TM_SUPPORT_PATH'] + '/lib/escape.rb'
-require ENV['TM_SUPPORT_PATH'] + '/lib/ui.rb'
+	<string>#!/System/Library/Frameworks/Ruby.framework/Versions/1.8/usr/bin/ruby -wKU
+require "#{ENV['TM_SUPPORT_PATH']}/lib/ui.rb"
+require "shellwords"
 
 passwd = TextMate::UI.request_string :title =&gt; "Password", :prompt =&gt; "Enter password to encrypt file:"
 abort "No password." if passwd.nil?
-STDOUT &lt;&lt; %x{ /usr/bin/openssl enc -e -aes128 -pass pass:#{e_sh passwd} }
+STDOUT &lt;&lt; %x{ /usr/bin/openssl enc -e -aes128 -pass pass:#{passwd.shellescape} }
 </string>
 	<key>hideFromUser</key>
 	<string>1</string>

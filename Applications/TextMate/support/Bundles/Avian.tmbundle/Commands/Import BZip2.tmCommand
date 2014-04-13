@@ -6,7 +6,7 @@
 	<string>nop</string>
 	<key>command</key>
 	<string>#!/bin/bash
-/usr/bin/bunzip2
+exec /usr/bin/bunzip2
 </string>
 	<key>contentMatch</key>
 	<string>\ABZh[1-9]</string>

@@ -5,8 +5,8 @@
 	<key>beforeRunningCommand</key>
 	<string>nop</string>
 	<key>command</key>
-	<string>#!/usr/bin/env ruby -wKU
-require "#{ENV['TM_SUPPORT_PATH']}/lib/escape"
+	<string>#!/System/Library/Frameworks/Ruby.framework/Versions/1.8/usr/bin/ruby -wKU
+require "#{ENV['TM_SUPPORT_PATH']}/lib/escape.rb"
 require "shellwords"
 
 abort "Select one or more items in file browser" unless ENV.has_key? 'TM_SELECTED_FILES'

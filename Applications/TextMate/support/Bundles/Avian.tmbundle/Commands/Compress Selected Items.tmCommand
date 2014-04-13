@@ -5,8 +5,7 @@
 	<key>beforeRunningCommand</key>
 	<string>nop</string>
 	<key>command</key>
-	<string>#!/usr/bin/env ruby -wKU
-require "#{ENV['TM_SUPPORT_PATH']}/lib/escape"
+	<string>#!/System/Library/Frameworks/Ruby.framework/Versions/1.8/usr/bin/ruby -wKU
 require "shellwords"
 
 abort "Select one or more items in file browser" unless ENV.has_key? 'TM_SELECTED_FILES'
@@ -40,7 +39,7 @@ dest_path = find_unique_path("#{dest_dir}/#{dest_base}", ".tbz")
 
 relative_paths = paths.map { |path| path.sub(/#{Regexp.escape dest_dir}\//, '') }
 
-%x{tar -cjf #{e_sh dest_path} -C #{e_sh dest_dir + '/'} #{relative_paths.map { |path| e_sh path }.join(' ')}}
+%x{tar -cjf #{dest_path.shellescape} -C #{dest_dir.shellescape}/ #{relative_paths.shelljoin}}
 </string>
 	<key>input</key>
 	<string>none</string>

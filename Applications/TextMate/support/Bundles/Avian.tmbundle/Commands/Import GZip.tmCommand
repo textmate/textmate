@@ -6,7 +6,7 @@
 	<string>nop</string>
 	<key>command</key>
 	<string>#!/bin/bash
-/usr/bin/gunzip
+exec /usr/bin/gunzip
 </string>
 	<key>contentMatch</key>
 	<string>\A\x{1F}\x{8B}\x{08}</string>
