@@ -324,6 +324,8 @@ namespace bundles_db
 				plist::get_key_path(item, "contactName",       bundle->_contact_name);
 				plist::get_key_path(item, "contactEmailRot13", bundle->_contact_email);
 				plist::get_key_path(item, "description",       bundle->_description);
+				plist::get_key_path(item, "isDefault",         bundle->_is_default);
+				plist::get_key_path(item, "isMandatory",       bundle->_is_mandatory);
 
 				if(bundle->_contact_email != NULL_STR)
 					bundle->_contact_email = decode::rot13(bundle->_contact_email);

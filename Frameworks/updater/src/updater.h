@@ -60,6 +60,8 @@ namespace bundles_db
 		oak::date_t path_updated () const      { return _path_updated; }
 		int32_t rank () const                  { return _source ? _source->rank() : 0; }
 		int32_t size () const                  { return _size; }
+		bool is_mandatory () const             { return _is_mandatory; }
+		bool is_default () const               { return _is_default; }
 
 		bool installed () const                { return _path != NULL_STR; }
 		bool has_update () const               { return installed() && _path_updated < _url_updated; }
@@ -95,6 +97,8 @@ namespace bundles_db
 		std::string _url;
 		oak::date_t _url_updated;
 		int32_t _size;
+		bool _is_default = false;
+		bool _is_mandatory = false;
 
 		std::string _path;
 		oak::date_t	_path_updated;
