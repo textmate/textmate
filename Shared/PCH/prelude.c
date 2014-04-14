@@ -45,6 +45,7 @@
 #import <sys/un.h>
 #import <sys/wait.h>
 #import <sys/xattr.h>
+#import <sysexits.h>
 #import <unistd.h>
 #import <uuid/uuid.h>
 

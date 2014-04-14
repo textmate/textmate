@@ -5,7 +5,6 @@
 #include <cf/cf.h>
 #include <io/path.h>
 #include <plist/uuid.h>
-#include <sysexits.h>
 
 static double const AppVersion  = 2.6;
 static size_t const AppRevision = APP_REVISION;

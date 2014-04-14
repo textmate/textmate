@@ -1,5 +1,4 @@
 #include <plist/ascii.h>
-#include <sysexits.h>
 
 static double const AppVersion  = 2.1;
 static size_t const AppRevision = APP_REVISION;
