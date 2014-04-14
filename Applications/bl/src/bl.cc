@@ -22,8 +22,8 @@ static int get_width ()
 	struct winsize ws; 
 	if(ioctl(0, TIOCGWINSZ, &ws) == -1)
 	{
-		fprintf(stderr, "TIOCGWINSZ: %s\n", strerror(errno));
-		exit(1);
+		perror("TIOCGWINSZ");
+		exit(EX_OSERR);
 	}
 	return ws.ws_col;
 }
@@ -162,20 +162,20 @@ int main (int argc, char const* argv[])
 		{
 			case 'C': installDir = optarg;                    break;
 			case 's': sourceNames.push_back(optarg);          break;
-			case 'v': version();                              return 0;
-			case 'h': usage();                                return 0;
-			case '?': /* unknown option */                    return 1;
-			case ':': /* missing option */                    return 1;
-			default:  usage(stderr);                          return 1;
+			case 'v': version();                              return EX_OK;
+			case 'h': usage();                                return EX_OK;
+			case '?': /* unknown option */                    return EX_USAGE;
+			case ':': /* missing option */                    return EX_USAGE;
+			default:  usage(stderr);                          return EX_USAGE;
 		}
 	}
 
 	if(optind == argc)
-		return usage(stderr), 1;
+		return usage(stderr), EX_USAGE;
 
 	std::string command = argv[optind];
 	if(command == "help")
-		return usage(stdout), 0;
+		return usage(stdout), EX_OK;
 
 	std::vector<std::string> bundleNames;
 	for(int i = optind + 1; i < argc; ++i)
@@ -185,7 +185,7 @@ int main (int argc, char const* argv[])
 	if(bundleNames.empty() && CommandsNeedingBundleList.find(command) != CommandsNeedingBundleList.end())
 	{
 		fprintf(stderr, "no bundles specified\n");
-		return 1;
+		return EX_USAGE;
 	}
 
 	static std::set<std::string> const CommandsNeedingUpdatedSources = { "update", "install", "list", "show" };
@@ -209,7 +209,7 @@ int main (int argc, char const* argv[])
 			fprintf(stderr, "*** failed to update source: ‘%s’ (%s)\n", source->name().c_str(), source->url().c_str());
 
 		if(!failedUpdate.empty())
-			exit(1);
+			exit(EX_UNAVAILABLE);
 	}
 
 	std::vector<bundles_db::bundle_ptr> index = bundles_db::index(installDir);
@@ -267,8 +267,8 @@ int main (int argc, char const* argv[])
 				}
 				save_index(index, installDir);
 				if(!failed.empty())
-					exit(1);
-				exit(0);
+					exit(EX_UNAVAILABLE);
+				exit(EX_OK);
 			});
 		});
 		dispatch_main();
@@ -373,7 +373,7 @@ int main (int argc, char const* argv[])
 	else
 	{
 		fprintf(stderr, "unknown command: %s\n", command.c_str());
-		return 1;
+		return EX_USAGE;
 	}
-	return 0;
+	return EX_OK;
 }
