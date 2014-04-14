@@ -9,7 +9,7 @@
 #include <io/io.h>
 #include <OakSystem/application.h>
 
-static double const AppVersion  = 1.2;
+static double const AppVersion  = 1.3;
 static size_t const AppRevision = APP_REVISION;
 
 // example: bl install Apache AppleScript Blogging Bundle\ Development C CSS Diff Git HTML Hyperlink\ Helper JavaScript Mail Make Markdown Math Objective-C PHP Perl Property\ List Ragel Remind Ruby SQL Shell\ Script Source Subversion TODO Text TextMate XML Xcode 
@@ -42,12 +42,12 @@ extern int optind;
 static void usage (FILE* io = stdout)
 {
 	fprintf(io, "%1$s %2$.1f (" COMPILE_DATE " revision %3$zu)\n", getprogname(), AppVersion, AppRevision);
-	fprintf(io, "Usage: %s list [Cius] [«bundle» ..]\n", getprogname());
+	fprintf(io, "Usage: %s list [Cs] [«bundle» ..]\n", getprogname());
 	fprintf(io, "       %s install [Cs] «bundle» ..\n", getprogname());
 	fprintf(io, "       %s uninstall [Cs] «bundle» ..\n", getprogname());
 	fprintf(io, "       %s show [C] «bundle» ..\n", getprogname());
 	fprintf(io, "       %s dependencies [Cs] [«bundle» ..]\n", getprogname());
-	fprintf(io, "       %s dependents [Ci] [«bundle» ..]\n", getprogname());
+	fprintf(io, "       %s dependents [C] [«bundle» ..]\n", getprogname());
 	fprintf(io, "       %s update [C]\n", getprogname());
 	fprintf(io, "       %s help\n", getprogname());
 	fprintf(io, "\n");
@@ -55,14 +55,18 @@ static void usage (FILE* io = stdout)
 	fprintf(io, " -h/--help              Show this help.\n");
 	fprintf(io, " -v/--version           Show version number.\n");
 	fprintf(io, " -C/--directory «path»  Use «path» for local bundles.\n");
-	fprintf(io, " -i/--installed         Only include installed bundles.\n");
-	fprintf(io, " -u/--updated           Only include bundles which have pending updates.\n");
 	fprintf(io, " -s/--source «name»     Restrict bundles to the given source. Multiple sources are allowed.\n");
 	fprintf(io, "\n");
 	fprintf(io, "Globs: Both source and bundle names can contain wild cards:\n");
 	fprintf(io, " ?               Match any single character\n");
 	fprintf(io, " *               Match any characters\n");
 	fprintf(io, " {«a»,«b»,«c»}   Match «a», «b», or «c».\n");
+	fprintf(io, "\n");
+	fprintf(io, "Special bundle names:\n");
+	fprintf(io, " outdated        Bundles with a pending update\n");
+	fprintf(io, " installed       Bundles already installed\n");
+	fprintf(io, " defaults        Default bundles (excl. mandatories)\n");
+	fprintf(io, " mandatories     Mandatory bundles\n");
 }
 
 static bool matches (std::string const& str, std::vector<std::string> const& globs)
@@ -79,13 +83,35 @@ static bool matches (std::string const& str, std::vector<std::string> const& glo
 	return false;
 }
 
+static bool matches (bundles_db::bundle_ptr bundle, std::vector<std::string> const& globs)
+{
+	if(globs.empty())
+		return true;
+
+	for(auto const& glob : globs)
+	{
+		if(glob == "outdated" && bundle->has_update())
+			return true;
+		if(glob == "installed" && bundle->installed())
+			return true;
+		if(glob == "defaults" && bundle->is_default())
+			return true;
+		if(glob == "mandatories" && bundle->is_mandatory())
+			return true;
+		if(path::glob_t(glob).does_match(text::lowercase(bundle->name())))
+			return true;
+	}
+
+	return false;
+}
+
 static std::vector<bundles_db::bundle_ptr> filtered_bundles (std::vector<bundles_db::bundle_ptr> const& index, std::vector<std::string> const& sourceNames, std::vector<std::string> const& bundleNames)
 {
 	std::vector<bundles_db::bundle_ptr> res;
 	std::set<oak::uuid_t> seen;
 	for(auto const& bundle : index)
 	{
-		if(matches(bundle->source() ? bundle->source()->identifier() : NULL_STR, sourceNames) && matches(text::lowercase(bundle->name()), bundleNames))
+		if(matches(bundle->source() ? bundle->source()->identifier() : NULL_STR, sourceNames) && matches(bundle, bundleNames))
 		{
 			if(seen.find(bundle->uuid()) == seen.end())
 			{
@@ -121,8 +147,6 @@ int main (int argc, char const* argv[])
 	static struct option const longopts[] = {
 		{ "directory",        required_argument,   0,      'C'   },
 		{ "source",           required_argument,   0,      's'   },
-		{ "updated",          no_argument,         0,      'u'   },
-		{ "installed",        no_argument,         0,      'i'   },
 		{ "help",             no_argument,         0,      'h'   },
 		{ "version",          no_argument,         0,      'v'   },
 		{ 0,                  0,                   0,      0     }
@@ -130,16 +154,12 @@ int main (int argc, char const* argv[])
 
 	std::vector<std::string> sourceNames;
 	std::string installDir = NULL_STR;
-	bool onlyUpdated       = false;
-	bool onlyInstalled     = false;
 
 	unsigned int ch;
-	while((ch = getopt_long(argc, (char* const*)argv, "s:uiC:hv", longopts, NULL)) != -1)
+	while((ch = getopt_long(argc, (char* const*)argv, "s:C:hv", longopts, NULL)) != -1)
 	{
 		switch(ch)
 		{
-			case 'u': onlyUpdated = true;                     break;
-			case 'i': onlyInstalled = true;                   break;
 			case 'C': installDir = optarg;                    break;
 			case 's': sourceNames.push_back(optarg);          break;
 			case 'v': version();                              return 0;
@@ -196,10 +216,7 @@ int main (int argc, char const* argv[])
 	if(command == "list")
 	{
 		for(auto const& bundle : filtered_bundles(index, sourceNames, bundleNames))
-		{
-			if(!((onlyInstalled && !bundle->installed()) || (onlyUpdated && !onlyInstalled && !bundle->has_update())))
-				fprintf(stdout, "%s\n", short_bundle_info(bundle, get_width()).c_str());
-		}
+			fprintf(stdout, "%s\n", short_bundle_info(bundle, get_width()).c_str());
 	}
 	else if(command == "install")
 	{
@@ -350,7 +367,7 @@ int main (int argc, char const* argv[])
 	}
 	else if(command == "dependents")
 	{
-		for(auto const& bundle : dependents(index, filtered_bundles(index, sourceNames, bundleNames), onlyInstalled))
+		for(auto const& bundle : dependents(index, filtered_bundles(index, sourceNames, bundleNames)))
 			fprintf(stdout, "%s\n", short_bundle_info(bundle, get_width()).c_str());
 	}
 	else
