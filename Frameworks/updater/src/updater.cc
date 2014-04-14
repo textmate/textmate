@@ -156,7 +156,7 @@ namespace bundles_db
 		}
 
 		path::set_attr(source->path(), "last-check", to_s(oak::date_t::now()));
-		return path != NULL_STR;
+		return path != NULL_STR || etag != NULL_STR;
 	}
 
 	// ===========
