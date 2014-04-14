@@ -93,6 +93,8 @@
 {
 	NSMutableDictionary* newValue = [NSMutableDictionary dictionaryWithDictionary:_variables[rowIndex]];
 	[newValue setObject:anObject forKey:[aTableColumn identifier]];
+	if(![[aTableColumn identifier] isEqualToString:@"enabled"] && ![[newValue objectForKey:@"enabled"] boolValue])
+		[newValue setObject:@YES forKey:@"enabled"];
 	[_variables replaceObjectAtIndex:rowIndex withObject:newValue];
 	[[NSUserDefaults standardUserDefaults] setObject:[_variables copy] forKey:kUserDefaultsEnvironmentVariablesKey];
 }
