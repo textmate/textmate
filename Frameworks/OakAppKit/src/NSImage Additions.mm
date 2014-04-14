@@ -43,7 +43,7 @@
 		[transform scaleXBy:1 yBy:-1];
 		[transform concat];
 
-		dstRect.origin.y = 0.0; // The transform above places the y-origin right where the image should be drawn.
+		dstRect.origin.y = 0; // The transform above places the y-origin right where the image should be drawn.
 		[self drawInRect:dstRect fromRect:srcRect operation:op fraction:delta];
 
 		[context restoreGraphicsState];

@@ -232,7 +232,7 @@ private:
 		CGFloat height = [gutterView.lineNumberFont capHeight];
 		CGFloat width = [res size].width * height / [res size].height;
 
-		CGFloat scaleFactor = 1.0;
+		CGFloat scaleFactor = 1;
 
 		// Since all images are vector based and don’t contain any spacing to
 		// align it, we need to set the individual scaleFactor per image.

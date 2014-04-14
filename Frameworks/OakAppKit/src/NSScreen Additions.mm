@@ -10,7 +10,7 @@
 		rank.emplace(- NSWidth(r) * NSHeight(r), scr);
 	}
 
-	if(rank.empty() || rank.begin()->first == 0.0)
+	if(rank.empty() || rank.begin()->first == 0)
 			return [NSScreen mainScreen];
 	else	return rank.begin()->second;
 }

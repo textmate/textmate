@@ -63,7 +63,7 @@ OAK_DEBUG_VAR(FilterList_BundleItemChooser);
 	NSRect lineRect = [self bounds];
 	lineRect.origin.y += 1;
 	lineRect.size.height = 1;
-	[[NSColor colorWithCalibratedWhite:0.59 alpha:1.0] set];
+	[[NSColor colorWithCalibratedWhite:0.59 alpha:1] set];
 	NSRectFill(lineRect);
 
 	lineRect = [self bounds];

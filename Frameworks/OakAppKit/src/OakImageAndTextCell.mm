@@ -41,7 +41,7 @@
 - (NSRect)expansionFrameWithFrame:(NSRect)cellFrame inView:(NSView*)view
 {
 	NSRect frame = [super expansionFrameWithFrame:[self textFrameWithFrame:cellFrame inControlView:view] inView:view];
-	frame.size.width -= self.image ? [self.image size].width + 3.0 : 0.0;
+	frame.size.width -= self.image ? [self.image size].width + 3 : 0;
 	return frame;
 }
 
@@ -55,7 +55,7 @@
 			[[self backgroundColor] set];
 			NSRectFill(imageRect);
 		}
-		[self.image drawAdjustedInRect:imageRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+		[self.image drawAdjustedInRect:imageRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1];
 	}
 
 	[super drawWithFrame:[self textFrameWithFrame:cellFrame inControlView:controlView] inView:controlView];
@@ -64,7 +64,7 @@
 - (NSSize)cellSize
 {
 	NSSize cellSize = [super cellSize];
-	cellSize.width += self.image ? [self.image size].width + 3.0 : 0.0;
+	cellSize.width += self.image ? [self.image size].width + 3 : 0;
 	return cellSize;
 }
 

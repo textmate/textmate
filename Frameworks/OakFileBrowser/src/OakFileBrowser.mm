@@ -281,8 +281,8 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	if(rowIndex == -1)
 		return NSZeroRect;
 	NSRect r = [_outlineView frameOfCellAtColumn:0 row:rowIndex];
-	r.origin.x += 7.0; // FIXME some hard-coded values here
-	r.origin.y -= 1.0;
+	r.origin.x += 7; // FIXME some hard-coded values here
+	r.origin.y -= 1;
 	r.size = NSMakeSize(16, 16);
 	r = [_outlineView convertRect:r toView:nil];
 	r.origin = [_outlineView.window convertBaseToScreen:r.origin];

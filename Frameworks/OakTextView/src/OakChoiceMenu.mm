@@ -116,7 +116,7 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 	[window setReleasedWhenClosed:NO];
 	[window setOpaque:NO];
 	window.alphaValue         = 0.97;
-	window.backgroundColor    = [NSColor colorWithCalibratedRed:1.0 green:0.96 blue:0.76 alpha:1.0];
+	window.backgroundColor    = [NSColor colorWithCalibratedRed:1.00 green:0.96 blue:0.76 alpha:1];
 	window.hasShadow          = YES;
 	window.level              = NSStatusWindowLevel;
 	window.ignoresMouseEvents = YES;

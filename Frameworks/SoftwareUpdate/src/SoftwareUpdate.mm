@@ -273,7 +273,7 @@ static SoftwareUpdate* SharedInstance;
 
 	NSDate* downloadStartDate = [aTimer userInfo];
 	NSTimeInterval secondsElapsed = -[downloadStartDate timeIntervalSinceNow];
-	if(secondsElapsed < 1.0 || self.downloadWindow.progress < 0.01)
+	if(secondsElapsed < 1 || self.downloadWindow.progress < 0.01)
 		return;
 
 	NSTimeInterval left = secondsElapsed / self.downloadWindow.progress - secondsElapsed;

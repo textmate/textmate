@@ -222,12 +222,12 @@ OAK_DEBUG_VAR(OakControl);
 	{
 		if(aLayer.image_options & layer_t::stretch)
 		{
-			[aLayer.image drawInRect:aLayer.rect fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
+			[aLayer.image drawInRect:aLayer.rect fromRect:NSZeroRect operation:NSCompositeCopy fraction:1];
 		}
 		else
 		{
 			NSPoint origin = NSMakePoint(aLayer.rect.origin.x + aLayer.content_offset.x, aLayer.rect.origin.y + aLayer.content_offset.y);
-			[aLayer.image drawAtPoint:origin fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+			[aLayer.image drawAtPoint:origin fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1];
 		}
 	}
 

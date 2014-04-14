@@ -228,7 +228,7 @@ NSString* const FLDataSourceItemsShouldAscendNotification  = @"FLDataSourceItems
 			{
 				CGFloat width = self.window.frame.size.width - [text attributedSubstringFromRange:NSMakeRange(tabIndex, text.length - tabIndex)].size.width - 10;
 				NSMutableParagraphStyle* rightAlignStyle = [[text attribute:NSParagraphStyleAttributeName atIndex:tabIndex effectiveRange:NULL] mutableCopy];
-				[rightAlignStyle setTabStops:@[ [[NSTextTab alloc] initWithType:NSLeftTabStopType location:width + 1.0] ]];
+				[rightAlignStyle setTabStops:@[ [[NSTextTab alloc] initWithType:NSLeftTabStopType location:width + 1] ]];
 				[text addAttribute:NSParagraphStyleAttributeName value:rightAlignStyle range:NSMakeRange(0, text.length)];
 			}
 
