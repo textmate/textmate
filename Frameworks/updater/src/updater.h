@@ -62,6 +62,8 @@ namespace bundles_db
 		int32_t size () const                  { return _size; }
 		bool is_mandatory () const             { return _is_mandatory; }
 		bool is_default () const               { return _is_default; }
+		bool is_dependency () const            { return _is_dependency; }
+		void set_dependency (bool flag)        { _is_dependency = flag; }
 
 		bool installed () const                { return _path != NULL_STR; }
 		bool has_update () const               { return installed() && _path_updated < _url_updated; }
@@ -99,6 +101,7 @@ namespace bundles_db
 		int32_t _size;
 		bool _is_default = false;
 		bool _is_mandatory = false;
+		bool _is_dependency = false; // if installed because another bundle depends on it
 
 		std::string _path;
 		oak::date_t	_path_updated;

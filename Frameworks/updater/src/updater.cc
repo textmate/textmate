@@ -398,6 +398,7 @@ namespace bundles_db
 				if(plist::get_key_path(item, "source", bundle->_origin) && plist::get_key_path(item, "name", bundle->_name) && plist::get_key_path(item, "uuid", bundle->_uuid) && plist::get_key_path(item, "updated", bundle->_path_updated) && plist::get_key_path(item, "path", bundle->_path))
 				{
 					bundle->_path = expand_path(bundle->_path, installDir);
+					plist::get_key_path(item, "isDependency", bundle->_is_dependency);
 					if(inIndexButNotDisk.find(bundle->_path) == inIndexButNotDisk.end())
 							res.push_back(bundle);
 					else	fprintf(stderr, "Bundle missing on disk: ‘%s’ (source ‘%s’)\n", path::with_tilde(bundle->_path).c_str(), bundle->_origin.c_str());
@@ -446,10 +447,11 @@ namespace bundles_db
 			std::map<oak::uuid_t, bundle_ptr>::iterator remote = bundles.find(bundle->uuid());
 			if(remote != bundles.end())
 			{
-				remote->second->_name         = bundle->_name;
-				remote->second->_path         = bundle->_path;
-				remote->second->_path_updated = bundle->_path_updated;
-				remote->second->_origin       = bundle->_origin;
+				remote->second->_name          = bundle->_name;
+				remote->second->_path          = bundle->_path;
+				remote->second->_path_updated  = bundle->_path_updated;
+				remote->second->_origin        = bundle->_origin;
+				remote->second->_is_dependency = bundle->_is_dependency;
 			}
 			else
 			{
@@ -484,6 +486,8 @@ namespace bundles_db
 			dict["path"]     = path::relative_to(bundle->path(), local_bundle_path(installDir));
 			dict["updated"]  = bundle->path_updated();
 			dict["source"]   = bundle->origin();
+			if(bundle->is_dependency())
+				dict["isDependency"] = true;
 
 			plist::dictionary_t::iterator array = plist.find("bundles");
 			if(array == plist.end())

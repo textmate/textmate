@@ -117,7 +117,11 @@ static double const kPollInterval = 3*60*60;
 				for(auto bundle : bundles_db::dependencies(bundlesIndex, installedBundle, false, false))
 				{
 					if((bundle->has_update() || !bundle->installed()) && installing.find(bundle->uuid()) == installing.end())
+					{
+						if(!bundle->installed())
+							bundle->set_dependency(true);
 						outdatedBundles.push_back(bundle);
+					}
 				}
 			}
 		}
@@ -273,6 +277,8 @@ static double const kPollInterval = 3*60*60;
 	{
 		if(installing.find(bundle->uuid()) == installing.end())
 		{
+			if(bundle != aBundle && !bundle->installed())
+				bundle->set_dependency(true);
 			bundles.push_back(bundle);
 			installing.insert(bundle->uuid());
 		}
