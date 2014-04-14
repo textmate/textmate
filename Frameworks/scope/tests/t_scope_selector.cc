@@ -21,7 +21,7 @@ void test_mixed ()
 	OAK_ASSERT_EQ(scope::selector_t("bar > foo $").does_match("foo bar foo"), true);
 	OAK_ASSERT_EQ(scope::selector_t("^ foo > bar > baz").does_match("foo bar baz foo bar baz"), true);
 	OAK_ASSERT_EQ(scope::selector_t("^ foo > bar > baz").does_match("foo foo bar baz foo bar baz"), false);
-			
+
 }
 
 void test_dollar ()

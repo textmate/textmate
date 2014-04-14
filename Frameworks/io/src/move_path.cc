@@ -237,5 +237,5 @@ namespace path
 		}
 		return false;
 	}
-	
+
 } /* path */

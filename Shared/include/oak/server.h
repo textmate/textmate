@@ -51,6 +51,6 @@ namespace oak
 		});
 	}
 
-} /* oak */ 
+} /* oak */
 
 #endif /* end of include guard: OAK_SERVER_H_Q8M693GB */

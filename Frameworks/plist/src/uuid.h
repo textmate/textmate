@@ -35,4 +35,3 @@ namespace oak
 } /* oak */
 
 #endif /* end of include guard: UUID_H_7R1D1FHT */
-

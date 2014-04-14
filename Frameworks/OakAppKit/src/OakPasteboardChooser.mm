@@ -332,7 +332,7 @@ static void* kOakPasteboardChooserCurrentEntryBinding = &kOakPasteboardChooserCu
 {
 	[_window selectNextKeyView:self];
 }
- 
+
 - (void)insertBacktab:(id)sender
 {
 	[_window selectPreviousKeyView:self];

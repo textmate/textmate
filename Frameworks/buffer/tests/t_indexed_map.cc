@@ -54,7 +54,7 @@ void test_basic ()
 	std::transform(map.begin(), map.end(), back_inserter(sorted), [](std::pair<ssize_t, bool> const& p){ return p.first; });
 	OAK_ASSERT_EQ(tmp.size(), sorted.size());
 	OAK_ASSERT(std::equal(tmp.begin(), tmp.end(), sorted.begin()));
-	
+
 	std::random_shuffle(keys.begin(), keys.end());
 	for(size_t i = keys.size() >> 1; i < keys.size(); ++i)
 	{

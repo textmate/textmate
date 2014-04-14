@@ -116,7 +116,7 @@ namespace plist
 			res["uuid"] = uuid->second;
 		return res;
 	}
-	
+
 } /* plist */
 
 // ===============

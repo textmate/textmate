@@ -217,5 +217,5 @@ namespace scope
 		}
 
 	} /* types */
-	
-} /* scope */ 
+
+} /* scope */

@@ -234,5 +234,5 @@ namespace network
 		}
 		return res;
 	}
-	
+
 } /* network */

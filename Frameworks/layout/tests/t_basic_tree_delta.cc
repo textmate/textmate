@@ -98,6 +98,6 @@ void test_basic_tree_delta ()
 
 	// cleanup
 	OAK_ASSERT(tree.structural_integrity());
-	tree.clear(); 
+	tree.clear();
 	OAK_ASSERT(tree.structural_integrity());
 };

@@ -425,29 +425,29 @@ namespace path
 	namespace flag
 	{
 		uint32_t
-			meta_self        = (1 <<  0), 
-			meta_parent      = (1 <<  1), 
+			meta_self        = (1 <<  0),
+			meta_parent      = (1 <<  1),
 
-			file_bsd         = (1 <<  2), 
-			file_finder      = (1 <<  3), 
-			directory_bsd    = (1 <<  4), 
-			directory_finder = (1 <<  5), 
+			file_bsd         = (1 <<  2),
+			file_finder      = (1 <<  3),
+			directory_bsd    = (1 <<  4),
+			directory_finder = (1 <<  5),
 			symlink_bsd      = (1 <<  6),
 			symlink_finder   = (1 <<  7),
 			socket_bsd       = (1 <<  8),
 
-			hidden_bsd       = (1 <<  9), 
+			hidden_bsd       = (1 <<  9),
 			hidden_finder    = (1 << 10), /* this is (hidden_bsd|hidden_dotfile) */
-			hidden_dotfile   = (1 << 11), 
-			hidden_volume    = (1 << 12), 
+			hidden_dotfile   = (1 << 11),
+			hidden_volume    = (1 << 12),
 
-			volume_bsd       = (1 << 13), 
-			volume_finder    = (1 << 14), 
+			volume_bsd       = (1 << 13),
+			volume_finder    = (1 << 14),
 
-			alias            = (1 << 15), 
-			package          = (1 << 16), 
+			alias            = (1 << 15),
+			package          = (1 << 16),
 			application      = (1 << 17),
-			stationery_pad   = (1 << 18), 
+			stationery_pad   = (1 << 18),
 			hidden_extension = (1 << 19),
 
 			meta             = (meta_self|meta_parent),
@@ -968,7 +968,7 @@ namespace path
 	{
 		FSRef res;
 		FSCatalogInfo info;
-		FSGetCatalogInfo(fsref_t(forPath), kFSCatInfoVolume, &info, 0, 0, 0); 
+		FSGetCatalogInfo(fsref_t(forPath), kFSCatInfoVolume, &info, 0, 0, 0);
 		return FSFindFolder(info.volume, kTrashFolderType, false, &res) == noErr ? to_s(res) : NULL_STR;;
 	}
 
@@ -1021,4 +1021,4 @@ namespace path
 		return home() + "/Desktop";
 	}
 
-} /* path */ 
+} /* path */

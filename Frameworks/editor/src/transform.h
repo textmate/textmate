@@ -45,7 +45,7 @@ namespace transform
 	private:
 		std::string text;
 	};
-	
+
 	struct surround
 	{
 		surround (std::string const& prefix, std::string const& suffix) : prefix(prefix), suffix(suffix) { }
@@ -53,7 +53,7 @@ namespace transform
 	private:
 		std::string prefix, suffix;
 	};
-	
-} /* transform */ 
+
+} /* transform */
 
 #endif /* end of include guard: TRANSFORM_H_XNV2O2H */

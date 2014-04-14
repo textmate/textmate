@@ -20,7 +20,7 @@
 {
 	DOMDocumentFragment* selection = [[self selectedDOMRange] cloneContents];
 	DOMNodeIterator* iter = selection ? [[[self selectedFrame] DOMDocument] createNodeIterator:selection whatToShow:DOM_SHOW_TEXT filter:nil expandEntityReferences:YES] : nil;
-	
+
 	NSMutableString* str = [NSMutableString string];
 	while(DOMNode* node = [iter nextNode])
 		[str appendString:[node nodeValue]];

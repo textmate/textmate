@@ -35,6 +35,6 @@ namespace utf16
 		return res;
 	}
 
-} /* utf16 */ 
+} /* utf16 */
 
 #endif /* end of include guard: UTF16_H_VKRVH0HR */

@@ -33,7 +33,6 @@ OneShotNSColorFromTriplet(BackColorForFileIgnore, 0xED, 0xAE, 0xF5)
 OneShotNSColorFromTriplet(ForeColorForExternal, 0xFF, 0xFF, 0xFF)
 OneShotNSColorFromTriplet(BackColorForExternal, 0x00, 0x00, 0x00)
 
-
 static inline void ColorsFromStatus(NSString* status, NSColor** foreColor, NSColor** backColor )
 {
 	if([status isEqualToString:@"M"] || [status isEqualToString:@"G"])

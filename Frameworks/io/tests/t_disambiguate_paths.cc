@@ -75,4 +75,3 @@ void test_localisation ()
 	std::string const paths[] = { a + "/bar", b + "/bar" };
 	run_test(paths, "bar — a/A/Foo (Localised)");
 }
-

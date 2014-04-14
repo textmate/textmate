@@ -13,6 +13,6 @@ namespace parse
 	PUBLIC stack_ptr parse (char const* first, char const* last, stack_ptr stack, std::map<size_t, scope::scope_t>& scopes, bool firstLine);
 	PUBLIC bool equal (stack_ptr lhs, stack_ptr rhs);
 
-} /* parse */ 
+} /* parse */
 
 #endif /* end of include guard: GRAMMAR_TYPES_H_4M8CRK03 */

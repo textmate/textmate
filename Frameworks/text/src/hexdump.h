@@ -47,6 +47,6 @@ namespace text
 		return str;
 	}
 
-} /* text */ 
+} /* text */
 
 #endif /* end of include guard: TEXT_HEXDUMP_RLPHB9XL */

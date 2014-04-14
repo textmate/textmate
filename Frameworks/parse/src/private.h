@@ -26,7 +26,7 @@ namespace parse
 
 		bool operator== (rule_t const& rhs) const { return rule_id == rhs.rule_id; }
 		bool operator!= (rule_t const& rhs) const { return rule_id != rhs.rule_id; }
-		
+
 		std::string include_string;
 
 		std::string scope_string;
@@ -35,7 +35,7 @@ namespace parse
 		std::string match_string;
 		std::string while_string;
 		std::string end_string;
-		
+
 		std::string apply_end_last;
 
 		std::vector<rule_ptr> children;

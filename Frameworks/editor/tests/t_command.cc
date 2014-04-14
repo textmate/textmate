@@ -2,7 +2,7 @@
 
 void test_replace_selection_command ()
 {
-	static std::string const plistSrc = 
+	static std::string const plistSrc =
 		"{ command = '#!/bin/sh\necho Hello';"
 		"  input = 'document';"
 		"  output = 'insertAsSnippet';"

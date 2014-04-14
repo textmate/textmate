@@ -183,6 +183,6 @@ namespace scope
 			return context.it;
 		}
 
-	} /* parse */ 
+	} /* parse */
 
-} /* scope */ 
+} /* scope */

@@ -46,7 +46,7 @@ namespace fs
 	};
 
 	std::string to_s (snapshot_t const& snapshot);
-	
+
 } /* fs */
 
 #endif /* end of include guard: SNAPSHOT_H_UOFPK7X7 */

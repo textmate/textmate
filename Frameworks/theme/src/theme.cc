@@ -410,11 +410,11 @@ styles_t const& theme_t::styles_for_scope (scope::scope_t const& scope) const
 	return styles->second;
 }
 
-static theme_t::color_info_t read_color (std::string const& str_color ) 
+static theme_t::color_info_t read_color (std::string const& str_color)
 {
 	enum { R, G, B, A };
 	unsigned int col[4] = { 0x00, 0x00, 0x00, 0xFF } ;
-	
+
 	if(3 <= sscanf(str_color.c_str(), "#%02x%02x%02x%02x", &col[R], &col[G], &col[B], &col[A]))
 		return theme_t::color_info_t::color_info_t(col[R]/255.0, col[G]/255.0, col[B]/255.0, col[A]/255.0);
 

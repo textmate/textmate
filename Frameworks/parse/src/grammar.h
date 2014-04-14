@@ -70,6 +70,6 @@ namespace parse
 	typedef std::shared_ptr<grammar_t> grammar_ptr;
 	PUBLIC grammar_ptr parse_grammar (bundles::item_ptr const& grammarItem);
 
-} /* parse */ 
+} /* parse */
 
 #endif /* end of include guard: LOAD_GRAMMAR_H_FPR2TQML */

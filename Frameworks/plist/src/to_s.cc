@@ -224,7 +224,7 @@ namespace
 				}
 
 				res = " " + res + " ";
-				
+
 				if(res.find('\n') != std::string::npos)
 				{
 					res.back() = '\n';

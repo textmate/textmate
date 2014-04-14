@@ -31,6 +31,6 @@ namespace parser
 	nodes_t parse_format_string (std::string const& str, char const* stopChars = "", size_t* length = nullptr);
 	nodes_t parse_snippet (std::string const& str);
 
-} /* parser */ 
+} /* parser */
 
 #endif /* end of include guard: PARSER_H_E2QKW5G8 */

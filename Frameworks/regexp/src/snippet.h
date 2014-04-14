@@ -13,7 +13,7 @@ namespace snippet
 	{
 		pos_t (size_t offset = 0, size_t rank = 0) : offset(offset), rank(rank) { }
 		size_t offset, rank;
-		
+
 		bool operator<  (pos_t const& rhs) const { return offset < rhs.offset || (offset == rhs.offset && rank < rhs.rank); }
 		bool operator== (pos_t const& rhs) const { return offset == rhs.offset && rank == rhs.rank; }
 
@@ -60,13 +60,13 @@ namespace snippet
 	struct PUBLIC transform_t : placeholder_t
 	{
 		transform_t (size_t index, pos_t const& from, pos_t const& to, regexp::pattern_t const& pattern, format_string::format_string_t const& format, bool repeat) : placeholder_t(index, from, to), pattern(pattern), format(format), repeat(repeat) { }
-		
+
 		virtual std::string transform (std::string const& src, std::map<std::string, std::string> const& variables) const { return replace(src, pattern, format, repeat, variables); }
 
 		regexp::pattern_t pattern;
 		format_string::format_string_t format;
 		bool repeat;
-		
+
 		WATCH_LEAKS(snippet::transform_t);
 	};
 
@@ -79,7 +79,7 @@ namespace snippet
 		std::vector<std::string> _choices;
 		WATCH_LEAKS(snippet::choice_t);
 	};
-	
+
 	typedef std::shared_ptr<placeholder_t> field_ptr;
 
 	struct PUBLIC snippet_t
@@ -98,7 +98,7 @@ namespace snippet
 		text::indent_t indent_info;
 
 		size_t current_field;
-		
+
 	private:
 		void setup ();
 		void update_mirrors (std::set<size_t> const& forFields = std::set<size_t>());

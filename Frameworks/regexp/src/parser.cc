@@ -81,7 +81,7 @@ struct parse_context_t : parser_base_t
 	bool parse_placeholder (nodes_t& nodes);
 	bool parse_code (nodes_t& nodes);
 	bool parse_snippet (char const* stopChars, nodes_t& nodes);
-	
+
 	std::string& text_node (nodes_t& nodes)
 	{
 		if(nodes.empty() || !boost::get<text_t>(&nodes.back()))
@@ -286,7 +286,7 @@ bool parse_context_t::parse_text (nodes_t& nodes)
 bool parse_context_t::parse_format_string (char const* stopChars, nodes_t& nodes)
 {
 	char const* backtrack = it;
-	
+
 	std::string esc = std::string("\\$(") + stopChars;
 	while(it != last && !strchr(stopChars, *it))
 	{
@@ -405,4 +405,4 @@ nodes_t parse_snippet (std::string const& str)
 	return nodes;
 }
 
-} /* parser */ 
+} /* parser */

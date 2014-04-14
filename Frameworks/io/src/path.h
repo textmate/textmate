@@ -103,6 +103,6 @@ namespace path
 	PUBLIC std::string cache (std::string const& file = NULL_STR);
 	PUBLIC std::string desktop ();
 
-} /* path */ 
+} /* path */
 
 #endif /* end of include guard: PATH_H_SS5GJIGI */

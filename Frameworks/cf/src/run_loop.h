@@ -24,7 +24,7 @@ namespace cf
 		bool _should_stop;
 		double _timeout;
 	};
-	
+
 } /* cf */
 
 #endif /* end of include guard: CF_RUN_LOOP_H_YH1AM5OH */

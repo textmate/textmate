@@ -41,6 +41,6 @@ namespace text
 		}
 	};
 
-} /* text */ 
+} /* text */
 
 #endif /* end of include guard: TEXT_CDEF_H_GWU81P7L */

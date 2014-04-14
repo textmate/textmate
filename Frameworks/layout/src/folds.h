@@ -60,7 +60,7 @@ namespace ng
 		std::vector< std::pair<size_t, size_t> > _folded;
 		indexed_map_t<bool> _legacy;
 	};
-	
+
 } /* ng */
 
 #endif /* end of include guard: NG_BUFFER_FOLDS_H_3NU0J3FS */

@@ -212,7 +212,7 @@ struct expand_visitor : boost::static_visitor<void>
 	// =================
 	// = Snippet Stuff =
 	// =================
-	
+
 	void operator() (parser::placeholder_t const& v)
 	{
 		snippet::pos_t from(res.size(), ++rank_count);
@@ -270,7 +270,7 @@ namespace format_string
 	// ===================
 	// = format_string_t =
 	// ===================
-	
+
 	format_string_t::format_string_t (parser::nodes_t const& n)
 	{
 		nodes = std::make_shared<parser::nodes_t>(n);
@@ -282,7 +282,7 @@ namespace format_string
 		parser::nodes_t const& n = parser::parse_format_string(str, stopChars, &_length);
 		nodes = std::make_shared<parser::nodes_t>(n);
 	}
-	
+
 	std::string format_string_t::expand (std::map<std::string, std::string> const& variables) const
 	{
 		expand_visitor v(variables, NULL);
@@ -294,11 +294,11 @@ namespace format_string
 	// =======
 	// = API =
 	// =======
-	
+
 	std::string replace (std::string const& src, regexp::pattern_t const& ptrn, format_string_t const& format, bool repeat, std::map<std::string, std::string> const& variables)
 	{
 		D(DBF_FormatString, bug("%s\n", src.c_str()););
-		
+
 		expand_visitor v(variables, NULL);
 		v.replace(src, ptrn, *format.nodes, repeat);
 		v.handle_case_changes();
@@ -356,4 +356,4 @@ namespace snippet
 		return snippet_t(v.res, v.fields, v.mirrors, variables, indentString, indent);
 	}
 
-} /* snippet */ 
+} /* snippet */

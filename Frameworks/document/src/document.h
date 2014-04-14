@@ -391,7 +391,7 @@ namespace document
 	};
 
 	typedef std::shared_ptr<scanner_t> scanner_ptr;
-	
+
 } /* document */
 
 #endif /* end of include guard: DOCUMENT_H_MIJOONQT */

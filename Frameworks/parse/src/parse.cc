@@ -505,7 +505,7 @@ namespace parse
 					stack->while_pattern = expand_back_references(rule->while_string, m.match);
 				if(!rule->end_pattern && rule->end_string != NULL_STR)
 					stack->end_pattern = expand_back_references(rule->end_string, m.match);
-				
+
 				D(DBF_Parser_Flow, bug("descending, new scope %s\n", to_s(scope).c_str()););
 			}
 			else // regular match-rule

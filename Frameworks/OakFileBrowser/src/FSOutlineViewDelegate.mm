@@ -265,16 +265,16 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 
 		self.pendingMakeVisibleURL = nil;
 	}
-	
+
 	for(NSInteger i = 0; i < [outlineView numberOfRows] && [pendingExpandURLs count]; ++i)
 	{
 		id item = [outlineView itemAtRow:i];
-		
+
 		if(![pendingExpandURLs containsObject:[item url]])
 			continue;
-		
+
 		[outlineView expandItem:item];
-		
+
 		[pendingExpandURLs removeObject:[item url]];
 	}
 	if([pendingExpandURLs count] == 0)
@@ -289,34 +289,34 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 	self.pendingSelectURLs = [NSSet setWithArray:someURLs];
 	if([someURLs count] == 1)
 		self.pendingMakeVisibleURL = [someURLs lastObject];
-	
+
 	if(expandAncestors)
 	{
 		[expandedURLs removeAllObjects];
 
 		NSMutableSet* ancestors = [NSMutableSet set];
 		NSURL* rootURL = dataSource.rootItem.url;
-		
+
 		for(NSURL* targetURL in someURLs)
 		{
 			NSMutableSet* currentAncestors = [NSMutableSet set];
 			NSURL* currentURL;
-			
+
 			for(currentURL = ParentForURL(targetURL); currentURL; currentURL = ParentForURL(currentURL))
 			{
 				if([currentURL isEqual:rootURL])
 					break;
-				
+
 				[currentAncestors addObject:currentURL];
 			}
-			
+
 			if(currentURL)
 				[ancestors unionSet:currentAncestors];
 		}
-		
+
 		self.pendingExpandURLs = ancestors;
 	}
-	
+
 	[self checkPendingSelectAndEditURLs];
 }
 

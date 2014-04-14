@@ -1131,7 +1131,7 @@ namespace document
 	{
 		D(DBF_Document, bug("%.*s… (%zu bytes), file type %s\n", std::min<int>(32, str.size()), str.data(), str.size(), _file_type.c_str()););
 		if(_buffer)
-				_buffer->replace(0, _buffer->size(), str); 
+				_buffer->replace(0, _buffer->size(), str);
 		else	_content = std::make_shared<io::bytes_t>(str);
 	}
 
@@ -1519,5 +1519,5 @@ namespace document
 			pthread_mutex_unlock(&mutex);
 		}
 	}
-	
+
 } /* document */

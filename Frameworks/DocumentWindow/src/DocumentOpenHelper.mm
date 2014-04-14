@@ -115,7 +115,7 @@ namespace
 {
 	D(DBF_DocumentController_OpenHelper, bug("%s\n", aDocument->display_name().c_str()););
 	if(aDocument->recent_tracking() && aDocument->path() != NULL_STR)
-		[[NSDocumentController sharedDocumentController] noteNewRecentDocumentURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:aDocument->path()]]]; 
+		[[NSDocumentController sharedDocumentController] noteNewRecentDocumentURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:aDocument->path()]]];
 	self.callback(NULL_STR, oak::uuid_t());
 }
 

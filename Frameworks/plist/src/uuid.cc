@@ -42,17 +42,17 @@ namespace oak
 	{
 		return uuid_compare(data, rhs.data) < 0;
 	}
-	
+
 	bool uuid_t::operator== (uuid_t const& rhs) const
 	{
 		return uuid_compare(data, rhs.data) == 0;
 	}
-	
+
 	bool uuid_t::operator!= (uuid_t const& rhs) const
 	{
 		return uuid_compare(data, rhs.data) != 0;
 	}
-	
+
 	uuid_t::operator bool () const
 	{
 		return *this != uuid_t();

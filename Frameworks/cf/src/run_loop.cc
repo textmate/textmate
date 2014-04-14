@@ -50,5 +50,5 @@ namespace cf
 		CFRunLoopSourceSignal(_source);
 		CFRunLoopWakeUp(_run_loop);
 	}
-	
+
 } /* cf */

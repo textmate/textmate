@@ -17,7 +17,7 @@ namespace path
 		std::string _resolved;
 		std::string _intermediate;
 	};
-	
+
 } /* path */
 
 #endif /* end of include guard: INTERMEDIATE_H_LWU9YRUW */

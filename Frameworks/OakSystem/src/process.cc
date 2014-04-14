@@ -17,4 +17,4 @@ namespace oak
 		});
 	}
 
-} /* oak */ 
+} /* oak */

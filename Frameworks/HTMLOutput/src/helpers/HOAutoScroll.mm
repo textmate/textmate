@@ -70,7 +70,7 @@ OAK_DEBUG_VAR(HTMLOutput_AutoScroll);
 		}
 		_lastFrame = [view frame];
 	}
-	
+
 	if(view == _webFrame)
 	{
 		D(DBF_HTMLOutput_AutoScroll, bug("vislble rect changed: %s → %s\n", NSStringFromRect(_lastVisibleRect).UTF8String, NSStringFromRect([[_webFrame documentView] visibleRect]).UTF8String););

@@ -306,4 +306,4 @@ namespace parse
 		return std::make_shared<grammar_t>(grammarItem);
 	}
 
-} /* parse */ 
+} /* parse */

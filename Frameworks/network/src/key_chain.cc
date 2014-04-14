@@ -27,9 +27,9 @@ bool key_chain_t::key_t::setup () const
 {
 	if(_sec_key)
 		return true;
-	
+
 	bool res = false;
-	
+
 	SecItemImportExportKeyParameters params = { .keyUsage = NULL, .keyAttributes = NULL };
 	SecExternalItemType type = kSecItemTypePublicKey;
 	SecExternalFormat format = kSecFormatPEMSequence;
@@ -53,7 +53,7 @@ bool key_chain_t::key_t::setup () const
 		fprintf(stderr, "*** error importing key: %s\n", cf::to_s(message).c_str());
 		CFRelease(message);
 	}
-	
+
 	CFRelease(data);
 
 	return res;

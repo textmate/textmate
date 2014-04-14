@@ -205,12 +205,12 @@ static scm::status::type status_for (entry_t const& root)
 			case scm::status::mixed:        ++mixed;     break;
 		}
 	}
-	
+
 	if(conflicted > 0) return scm::status::conflicted;
 	if(mixed > 0) return scm::status::mixed;
-	
+
 	size_t total = untracked + ignored + tracked + modified + added + deleted + conflicted;
-	
+
 	if(total == conflicted)return scm::status::conflicted;
 	if(total == untracked) return scm::status::unversioned;
 	if(total == ignored)   return scm::status::none;
@@ -218,9 +218,9 @@ static scm::status::type status_for (entry_t const& root)
 	if(total == modified)  return scm::status::modified;
 	if(total == added)     return scm::status::added;
 	if(total == deleted)   return scm::status::deleted;
-	
+
 	if(total > 0) return scm::status::mixed;
-	
+
 	return scm::status::none;
 }
 

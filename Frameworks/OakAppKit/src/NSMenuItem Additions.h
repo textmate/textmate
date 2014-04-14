@@ -7,4 +7,3 @@
 - (void)setTabTriggerCxxString:(std::string const&)aTabTrigger;
 - (void)setModifiedState:(BOOL)flag;
 @end
-

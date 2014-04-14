@@ -1061,7 +1061,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 			type    = tmp.urlType;
 			itemURL = tmp.target ?: tmp.url;
 		}
-		
+
 		if(type == FSItemURLTypePackage && OakIsAlternateKeyOrMouseEvent())
 			type = FSItemURLTypeFolder;
 		else if(type == FSItemURLTypeFile && is_binary([itemURL.path fileSystemRepresentation]) && !OakIsAlternateKeyOrMouseEvent())

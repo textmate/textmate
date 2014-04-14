@@ -101,7 +101,7 @@ static std::string glyphs_for_key (std::string const& key, bool numpad = false)
 static std::string string_for (NSUInteger flags)
 {
 	static struct EventFlag_t { NSUInteger flag; std::string symbol; } const EventFlags[] =
-	{ 
+	{
 		{ NSNumericPadKeyMask, "#" },
 		{ NSControlKeyMask,    "^" },
 		{ NSAlternateKeyMask,  "~" },

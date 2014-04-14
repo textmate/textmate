@@ -2,26 +2,26 @@
 #define OAK_ITERATOR_MACROS_H_1SQFE1YN
 
 // The essential macro is foreeach, rforeach doing a reverse iteration. Example:
-// 	
+//
 // 	std::vector<char> v;
 // 	foreach(it, v.begin(), v.end())
 // 		cout << *it;
-// 
+//
 // The iterate/riterate macros are taking a container instead, and calls beginof/endof on the container. Example:
-// 
+//
 // 	std::vector<char> v;
 // 	iterate(it, v)
 // 		cout << *it;
-// 
+//
 // The citerate macro is like iterate but will use a temporary variable for the result of the expression passed in as the container, take this example:
-// 
+//
 // 	std::vector<char> create_vector () { return std::vector<char>(32, 'a'); }
-// 
+//
 // 	…later…
-// 
+//
 // 		citerate(it, create_vector())
 // 			cout << *it;
-// 
+//
 // Using the regular iterate macro is not safe since we would call create_vector() twice and (likely) get incompatible begin/end iterators.
 
 #ifndef foreach

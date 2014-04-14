@@ -13,7 +13,7 @@ namespace format_string
 
 		format_string_t (char const* str = "", char const* stopChars = "")   { init(str, stopChars); }
 		format_string_t (std::string const& str, char const* stopChars = "") { init(str, stopChars); }
-		
+
 		format_string_t (parser::nodes_t const& nodes);
 		std::string expand (std::map<std::string, std::string> const& variables) const;
 

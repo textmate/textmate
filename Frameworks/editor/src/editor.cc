@@ -606,7 +606,7 @@ namespace ng
 						if(!str.empty() && str.back() == '\n')
 							str += leftOfCaret;
 					}
-				} 
+				}
 				else if(!pasteBehavior || *pasteBehavior != "disable")
 				{
 					indent::fsm_t fsm = indent::create_fsm(buffer, line, indentSize, tabSize);
@@ -1000,7 +1000,7 @@ namespace ng
 				_extend_yank_clipboard = true;
 			}
 			// continue
-         
+
 			case kDeleteSelection:
 			{
 				indent_helper_t indent_helper(*this, _buffer, indentCorrections);

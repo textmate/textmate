@@ -171,7 +171,7 @@ namespace snippet
 			fields.insert(*mirrors.lower_bound(it));
 			mirrors.erase(mirrors.lower_bound(it));
 		}
-		
+
 		if(fields.find(0) == fields.end())
 			fields[0] = std::make_shared<placeholder_t>(0, pos_t(text.size(), SIZE_T_MAX-2), pos_t(text.size(), SIZE_T_MAX));
 
@@ -248,7 +248,6 @@ namespace snippet
 		D(DBF_Snippet, bug("replace range %zu (%zu) - %zu (%zu) with ‘%s’\n", currentField.from.offset, currentField.from.rank, currentField.to.offset, currentField.to.rank, str.c_str()););
 		replacements_t const& res = replace_helper(current_field, range, str);
 		D(DBF_Snippet, bug("new current field: %zu (%zu) - %zu (%zu)\n", currentField.from.offset, currentField.from.rank, currentField.to.offset, currentField.to.rank););
-
 
 		std::vector<size_t> fields_to_remove;
 		for(auto const& field : fields)

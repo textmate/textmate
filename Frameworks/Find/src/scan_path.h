@@ -92,7 +92,7 @@ namespace find
 		mutable pthread_mutex_t mutex;
 	};
 
-} /* find */ 
+} /* find */
 
 typedef std::shared_ptr<find::scan_path_t> scan_path_ptr;
 

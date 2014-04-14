@@ -110,7 +110,7 @@ static void load_bundle_index (bool verbose)
 	std::vector<std::string> paths;
 	for(auto path : bundles::locations())
 		paths.push_back(path::join(path, "Bundles"));
-	
+
 	auto index = create_bundle_index(paths, cache);
 	bundles::set_index(index.first, index.second);
 

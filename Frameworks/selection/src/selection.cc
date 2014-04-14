@@ -518,7 +518,7 @@ namespace ng
 
 		switch(unit)
 		{
-			case kSelectionMoveToBeginOfDocument:     return 0; 
+			case kSelectionMoveToBeginOfDocument:     return 0;
 			case kSelectionMoveToEndOfDocument:       return buffer.size();
 			case kSelectionMoveToBeginOfParagraph:    return buffer.begin(line);
 			case kSelectionMoveToEndOfParagraph:      return buffer.eol(line);
@@ -1098,7 +1098,7 @@ namespace ng
 	// ================
 	// = Obtain Scope =
 	// ================
-	
+
 	scope::context_t scope (buffer_t const& buffer, ranges_t const& selection, std::string const& extraAttributes)
 	{
 		scope::context_t res;

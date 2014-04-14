@@ -24,4 +24,3 @@ void test_regexp_backward ()
 	ssize_t base = text.size();
 	OAK_ASSERT_EQ(range_t(base + m.first, base + m.second), range_t(6, 17));
 }
-

@@ -161,7 +161,7 @@ namespace document
 		struct { size_t client_id; std::string* path; } packet = { client_id, NULL };
 		write(write_to_server_pipe, &packet, sizeof(packet));
 	}
-	
+
 	// ====================
 	// = Run-loop related =
 	// ====================
@@ -187,7 +187,7 @@ namespace document
 	// ============================
 	// = Running in server thread =
 	// ============================
-	
+
 	void watch_server_t::server_add (size_t client_id, std::string const& path)
 	{
 		D(DBF_Document_WatchFS, bug("%zu: %s\n", client_id, path.c_str()););
@@ -240,7 +240,7 @@ namespace document
 		int n = kevent(event_queue, &changeList, 1 /* number of changes */, NULL /* event list */, 0 /* number of events */, &timeout);
 		if(n == -1)
 			perror("watch server, error monitoring pipe");
-		
+
 		struct kevent changed;
 		while(kevent(event_queue, NULL /* change list */, 0 /* number of changes */, &changed /* event list */, 1 /* number of events */, NULL) == 1)
 		{
@@ -263,7 +263,7 @@ namespace document
 			else if(changed.filter == EVFILT_VNODE)
 			{
 				size_t client_id = (size_t)changed.udata;
-				
+
 				std::map<size_t, watch_info_t*>::iterator it = watch_info.find(client_id);
 				if(it != watch_info.end())
 				{

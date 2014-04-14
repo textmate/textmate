@@ -43,9 +43,9 @@
 		_webView.frameLoadDelegate      = self;
 
 		NSDictionary* views = @{
-			@"webView"   : _webView, 
+			@"webView"   : _webView,
 			@"divider"   : OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1], [NSColor colorWithCalibratedWhite:0.750 alpha:1]),
-			@"statusBar" : _statusBar	
+			@"statusBar" : _statusBar
 		};
 
 		for(NSView* view in [views allValues])

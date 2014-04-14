@@ -205,4 +205,3 @@ void test_glob_negating ()
 	OAK_ASSERT( path::glob_t("!html/**/*"     ).does_match("/path/to/page/foo/fud.txt"));
 	OAK_ASSERT( path::glob_t("!html/**/*.txt" ).does_match("/path/to/page/foo/fud.txt"));
 }
-

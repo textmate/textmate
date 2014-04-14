@@ -27,7 +27,7 @@ namespace parser
 
 	typedef std::vector<node_t> nodes_t;
 
-} /* parser */ 
+} /* parser */
 
 #undef RW
 

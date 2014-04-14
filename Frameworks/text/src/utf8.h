@@ -327,7 +327,7 @@ namespace diacritics
 	{
 		return range_t<_BaseIter>(iterator_t<_BaseIter>(utf8::iterator_t<_BaseIter>(first), utf8::iterator_t<_BaseIter>(last)), iterator_t<_BaseIter>(utf8::iterator_t<_BaseIter>(last), utf8::iterator_t<_BaseIter>(last)));
 	}
-	
+
 } /* diacritics */
 
 #endif /* end of include guard: TEXT_UTF8_H_8I8S2ODM */

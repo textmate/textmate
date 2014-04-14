@@ -215,7 +215,7 @@ namespace bundles
 		}
 		return query(kFieldDropExtension, "*", scope, kItemTypeDragCommand);
 	}
-	
+
 	std::vector<item_ptr> grammars_for_path (std::string const& path)
 	{
 		std::multimap<ssize_t, item_ptr> ordering;

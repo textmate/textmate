@@ -19,7 +19,7 @@ void test_replace_multiple_lines ()
 {
 	test::jail_t jail;
 	jail.set_content("test.txt",  "Foo\nBar\nFud\n");
-	
+
 	document::document_ptr doc = document::create(jail.path("test.txt"));
 	std::multimap<std::pair<size_t, size_t>, std::string> replacements;
 	replacements.insert(std::make_pair(std::make_pair(4, 7), "Jazz"));
@@ -33,7 +33,7 @@ void test_replace_several ()
 {
 	test::jail_t jail;
 	jail.set_content("test.txt",  "Foo\nBar\nFud\n");
-	
+
 	std::multimap<std::pair<size_t, size_t>, std::string> replacements =
 	{
 		{ {  0,  1 }, "G"            },

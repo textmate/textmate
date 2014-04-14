@@ -32,6 +32,6 @@ namespace text
 	PUBLIC std::vector<std::string> split (std::string const& str, std::string const& sep = ", ");
 	PUBLIC std::vector<size_t> soft_breaks (std::string const& str, size_t width, size_t tabSize, size_t prefixSize = 0);
 
-} /* text */ 
+} /* text */
 
 #endif /* end of include guard: TEXT_PARSE_H_4CKIHQHS */

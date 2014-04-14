@@ -79,6 +79,6 @@ namespace oak
 		std::map< size_t, std::set<size_t> > dependencies;
 	};
 
-} /* oak */ 
+} /* oak */
 
 #endif /* end of include guard: DEPENDENCY_GRAPH_H_A254DOQ */

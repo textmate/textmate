@@ -88,7 +88,7 @@ namespace scan
 		ssize_t offset;
 		char last_character;
 	};
-	
+
 } /* scan */
 
 namespace find
@@ -270,5 +270,5 @@ namespace find
 			}
 		}
 	}
-	
-} /* find */ 
+
+} /* find */

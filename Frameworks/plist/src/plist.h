@@ -35,7 +35,7 @@ namespace plist
 	// to_s flags
 	enum { kStandard = 0, kPreferSingleQuotedStrings = 1 };
 
-} /* plist */ 
+} /* plist */
 
 namespace boost // we place this in the boost namespace to support ADL
 {

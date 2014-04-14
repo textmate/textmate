@@ -93,7 +93,7 @@ int main (int argc, char const* argv[])
 		if(plist::get_key_path(plist, "settings." + pair.first, tmp))
 			array.emplace(pair.second, tmp);
 	}
-	
+
 	// ==========
 	// = Indent =
 	// ==========

@@ -12,14 +12,14 @@
 static double const AppVersion  = 1.3;
 static size_t const AppRevision = APP_REVISION;
 
-// example: bl install Apache AppleScript Blogging Bundle\ Development C CSS Diff Git HTML Hyperlink\ Helper JavaScript Mail Make Markdown Math Objective-C PHP Perl Property\ List Ragel Remind Ruby SQL Shell\ Script Source Subversion TODO Text TextMate XML Xcode 
+// example: bl install Apache AppleScript Blogging Bundle\ Development C CSS Diff Git HTML Hyperlink\ Helper JavaScript Mail Make Markdown Math Objective-C PHP Perl Property\ List Ragel Remind Ruby SQL Shell\ Script Source Subversion TODO Text TextMate XML Xcode
 
 static int get_width ()
 {
 	if(!isatty(STDIN_FILENO))
 		return INT_MAX;
 
-	struct winsize ws; 
+	struct winsize ws;
 	if(ioctl(0, TIOCGWINSZ, &ws) == -1)
 	{
 		perror("TIOCGWINSZ");

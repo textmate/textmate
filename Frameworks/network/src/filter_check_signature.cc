@@ -9,7 +9,7 @@ namespace network
 	check_signature_t::check_signature_t (key_chain_t const& keyChain, std::string const& signeeHeader, std::string const& signatureHeader) : _key_chain(keyChain), _signee_header(signeeHeader), _signature_header(signatureHeader), _data(NULL)
 	{
 	}
-	
+
 	check_signature_t::~check_signature_t ()
 	{
 		if(_data)
@@ -20,7 +20,7 @@ namespace network
 	{
 		if(_data)
 			CFRelease(_data);
-		
+
 		return _data = CFDataCreateMutable(NULL, 0);
 	}
 
@@ -45,13 +45,13 @@ namespace network
 			return (error = "Missing signee."), false;
 		if(_signature == NULL_STR)
 			return (error = "Missing signature."), false;
-		
+
 		bool res = false;
-		
+
 		if(key_chain_t::key_ptr key = _key_chain.find(_signee))
 		{
 			std::string signature = decode::base64(_signature);
-			
+
 			CFErrorRef err = NULL;
 			CFDataRef sig_data = CFDataCreateWithBytesNoCopy(NULL, (const UInt8*)signature.data(), signature.size(), kCFAllocatorNull);
 			if(SecTransformRef verifier = SecVerifyTransformCreate(*key, sig_data, &err))
@@ -59,18 +59,18 @@ namespace network
 				if(SecTransformSetAttribute(verifier, kSecTransformInputAttributeName, _data, &err))
 				{
 					res = SecTransformExecute(verifier, &err) == kCFBooleanTrue;
-					
+
 					if(!res)
 						error = text::format("Bad signature.");
 				}
 				else
 					error = text::format("Error setting transform input: ‘%s’.", cf::to_s(err).c_str());
-				
+
 				CFRelease(verifier);
 			}
 			else
 				error = text::format("Error creating verify transform: ‘%s’.", cf::to_s(err).c_str());
-			
+
 			if(sig_data)
 				CFRelease(sig_data);
 		}

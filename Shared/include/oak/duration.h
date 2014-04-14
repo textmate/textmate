@@ -29,6 +29,6 @@ namespace oak
 		double start_time;
 	};
 
-} /* oak */ 
+} /* oak */
 
 #endif /* end of include guard: OAK_DURATION_H_NQISZ9T7 */

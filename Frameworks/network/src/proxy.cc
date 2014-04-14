@@ -26,7 +26,7 @@ static proxy_settings_t user_pw_settings (CFStringRef server, CFNumberRef portNu
 		server
 	};
 	CFDictionaryRef query = CFDictionaryCreate(NULL, keys, vals, sizeofA(keys), NULL, NULL);
-	
+
 	CFArrayRef results = NULL;
 	OSStatus err = SecItemCopyMatching(query, (CFTypeRef*)&results);
 	if(err == errSecSuccess)
@@ -35,7 +35,7 @@ static proxy_settings_t user_pw_settings (CFStringRef server, CFNumberRef portNu
 		for(CFIndex i = 0; user == NULL_STR && i < numResults; ++i)
 		{
 			SecKeychainItemRef item = (SecKeychainItemRef)CFArrayGetValueAtIndex(results, i);
-			
+
 			UInt32 tag    = kSecAccountItemAttr;
 			UInt32 format = CSSM_DB_ATTRIBUTE_FORMAT_STRING;
 			SecKeychainAttributeInfo info = { 1, &tag, &format };
@@ -55,7 +55,7 @@ static proxy_settings_t user_pw_settings (CFStringRef server, CFNumberRef portNu
 			else
 				D(DBF_Proxy, bug("unable to obtain attributes from key chain entry\n"););
 		}
-		
+
 		CFRelease(results);
 	}
 	else if(err != errSecItemNotFound)

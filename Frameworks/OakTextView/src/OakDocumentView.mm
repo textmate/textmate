@@ -91,7 +91,7 @@ struct document_view_callback_t : document::document_t::callback_t
 		if(document->recent_tracking() && document->path() != NULL_STR)
 		{
 			if(event == did_save || event == did_change_path || (event == did_change_open_status && document->is_open()))
-				[[NSDocumentController sharedDocumentController] noteNewRecentDocumentURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:document->path()]]]; 
+				[[NSDocumentController sharedDocumentController] noteNewRecentDocumentURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:document->path()]]];
 		}
 	}
 private:
@@ -550,7 +550,7 @@ private:
 		_symbolChooser.document        = document;
 		_symbolChooser.selectionString = textView.selectionString;
 
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(symbolChooserWillClose:) name:NSWindowWillCloseNotification object:_symbolChooser.window];		
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(symbolChooserWillClose:) name:NSWindowWillCloseNotification object:_symbolChooser.window];
 	}
 }
 

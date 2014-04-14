@@ -173,12 +173,11 @@ namespace ng
 
 		_dirty_rects.push_back(OakRectMake(0, 0, width(), height()));
 	}
-	
+
 	void layout_t::set_scroll_past_end (bool scrollPastEnd)
 	{
 		_scroll_past_end = scrollPastEnd;
 	}
-
 
 	// ======================
 	// = Display Attributes =

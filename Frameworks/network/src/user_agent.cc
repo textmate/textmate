@@ -50,4 +50,3 @@ std::string create_agent_info_string ()
 		hardware_info(HW_NCPU, true).c_str()
 	);
 }
-
