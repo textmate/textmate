@@ -127,6 +127,8 @@ static std::string short_bundle_info (bundles_db::bundle_ptr bundle, int width)
 {
 	int descWidth = std::max(10, width - 23);
 	char status = bundle->installed() ? (bundle->has_update() ? 'U' : 'I') : ' ';
+	if(bundle->is_dependency())
+		status = tolower(status);
 	std::string desc = bundle->description();
 	desc = desc == NULL_STR ? "(no description)" : textify(desc);
 	if(desc.size() > descWidth)
