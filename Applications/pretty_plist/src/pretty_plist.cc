@@ -87,9 +87,9 @@ int main (int argc, char* const* argv)
 		{
 			case 'a': ascii = true;        break;
 			case 'x': extended = true;     break;
-			case 'h': usage(stdout);       return 0;
-			case 'v': version();           return 0;
-			default:  usage(stderr);       return 1;
+			case 'h': usage(stdout);       return EX_OK;
+			case 'v': version();           return EX_OK;
+			default:  usage(stderr);       return EX_USAGE;
 		}
 	}
 
@@ -113,5 +113,5 @@ int main (int argc, char* const* argv)
 		}
 	}
 
-	return 0;
+	return EX_OK;
 }
