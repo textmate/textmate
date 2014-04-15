@@ -1230,14 +1230,19 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	return _localUndoManager;
 }
 
+- (NSUndoManager*)activeUndoManager
+{
+	return [[_view.window firstResponder] undoManager];
+}
+
 - (void)undo:(id)sender
 {
-	[_view.undoManager undo];
+	[self.activeUndoManager undo];
 }
 
 - (void)redo:(id)sender
 {
-	[_view.undoManager redo];
+	[self.activeUndoManager redo];
 }
 
 // ===================
@@ -1271,13 +1276,13 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 		[item setTitle:self.showExcludedItems ? @"Hide Invisible Files" : @"Show Invisible Files"];
 	else if([item action] == @selector(undo:))
 	{
-		[item setTitle:[_view.undoManager undoMenuItemTitle]];
-		res = [_view.undoManager canUndo];
+		[item setTitle:[self.activeUndoManager undoMenuItemTitle]];
+		res = [self.activeUndoManager canUndo];
 	}
 	else if([item action] == @selector(redo:))
 	{
-		[item setTitle:[_view.undoManager redoMenuItemTitle]];
-		res = [_view.undoManager canRedo];
+		[item setTitle:[self.activeUndoManager redoMenuItemTitle]];
+		res = [self.activeUndoManager canRedo];
 	}
 
 	NSString* quickLookTitle = [QLPreviewPanel sharedPreviewPanelExists] && [[QLPreviewPanel sharedPreviewPanel] isVisible] ? @"Close Quick Look" : @"Quick Look%@";
