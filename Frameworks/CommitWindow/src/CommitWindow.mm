@@ -121,7 +121,6 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 		tableView.menu.delegate                      = self;
 		_tableView                                   = tableView;
 
-		[_tableView registerNib:[[NSNib alloc] initWithNibNamed:@"CWTableCellView" bundle:[NSBundle bundleForClass:[self class]]] forIdentifier:@"path"];
 		[self populateTableView];
 		[_tableView bind:NSContentBinding toObject:_arrayController withKeyPath:@"arrangedObjects" options:0];
 
@@ -586,7 +585,13 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 
 - (NSView*)tableView:(NSTableView*)aTableView viewForTableColumn:(NSTableColumn*)aTableColumn row:(NSInteger)row
 {
-	CWTableCellView* cellView = [aTableView makeViewWithIdentifier:@"path" owner:self];
+	CWTableCellView* cellView = [aTableView makeViewWithIdentifier:aTableColumn.identifier owner:self];
+	if(!cellView)
+	{
+		NSViewController* viewController = [[NSViewController alloc] initWithNibName:@"CWTableCellView" bundle:[NSBundle bundleForClass:[self class]]];
+		cellView = (CWTableCellView*)viewController.view;
+		cellView.identifier = aTableColumn.identifier;
+	}
 
 	[cellView.textField bind:NSValueBinding toObject:cellView withKeyPath:@"objectValue.path" options:0];
 	[cellView.commitCheckBox bind:NSValueBinding toObject:cellView withKeyPath:@"objectValue.commit" options:0];
