@@ -38,9 +38,18 @@ static size_t const AppRevision = APP_REVISION;
 
 	_returnCode = [someOptions[kOakCommitWindowReturnCode] intValue];
 
-	// Tear down the connection in next event loop iteration.
-	// This should allow the sender to get a reply.
+	// Tear down the connection in next run loop iteration.
+	// This should make us run long enough to allow the sender to get a reply.
 	[self performSelector:@selector(setConnection:) withObject:nil afterDelay:0];
+
+	// Prior to 10.9 the above does not cause runMode:beforeDate: to return,
+	// so for the benefit of 10.7 and 10.8 users, we explicitly call exit()
+	[self performSelector:@selector(terminate:) withObject:nil afterDelay:0];
+}
+
+- (void)terminate:(id)sender
+{
+	exit(self.returnCode);
 }
 @end
 
