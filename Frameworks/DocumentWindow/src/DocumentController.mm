@@ -2083,7 +2083,7 @@ namespace
 	std::string const documentName = path::name(documentPath);
 	std::string const documentBase = path::strip_extensions(documentName);
 
-	std::set<std::string> candidates(&documentName, &documentName + 1);
+	std::set<std::string> candidates = { documentName };
 	for(auto document : _documents)
 	{
 		if(documentDir == path::parent(document->path()) && documentBase == path::strip_extensions(path::name(document->path())))
