@@ -15,7 +15,6 @@ namespace path
 	private:
 		friend std::string to_s (glob_t const& glob);
 		void setup (std::string const& glob, bool matchDotFiles);
-		bool _negate;
 		regexp::pattern_t _compiled;
 	};
 

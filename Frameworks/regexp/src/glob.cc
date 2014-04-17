@@ -11,15 +11,14 @@ namespace path
 {
 	void glob_t::setup (std::string const& glob, bool matchDotFiles)
 	{
-		_negate = glob.empty() ? false : glob[0] == '!';
-		std::string ptrn = convert_glob_to_regexp(_negate ? glob.substr(1) : glob, matchDotFiles || _negate);
+		std::string ptrn = convert_glob_to_regexp(glob, matchDotFiles);
 		_compiled = regexp::pattern_t(ptrn);
 		D(DBF_Glob, bug("%s → %s\n", glob.c_str(), ptrn.c_str()););
 	}
 
 	bool glob_t::does_match (std::string const& filename) const
 	{
-		bool res = _negate ^ (bool)regexp::search(_compiled, filename);
+		bool res = (bool)regexp::search(_compiled, filename);
 		D(DBF_Glob, bug("%s → %s\n", filename.c_str(), BSTR(res)););
 		return res;
 	}

@@ -206,7 +206,7 @@ namespace
 	bool parse_glob_t::parse_exclude ()
 	{
 		char const* backtrack = it;
-		if(parse_char("~") && it != last)
+		if((parse_char("~") || parse_char("!")) && it != last)
 		{
 			_root = new node_t(node_t::kExclude, nullptr, _root);
 			_last = &_root->_left;
