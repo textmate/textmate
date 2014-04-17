@@ -919,6 +919,7 @@ rule tbz_archive
 
 rule upload
   command = bin/upload -k$upload_keyfile -d$upload_destination -t'v$APP_VERSION' -m'{"version":"$APP_VERSION","revision":"$APP_REVISION"}' $in > $out~ && mv $out~ $out
+  pool = console
   generator = true
   description = Upload ‘$in’…
 
