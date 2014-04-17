@@ -175,10 +175,13 @@ namespace utf8
 		static bool partial (T ch)       { return ch & 0x80; }
 		static bool is_start (T ch)      { return (ch & 0xC0) == 0xC0; }
 		static size_t length (T ch)      {
-			ASSERT(is_start(ch)); ASSERT((ch & 0xF8) != 0xF8);
 			size_t numBytes = 1;
-			while((ch & (1 << (7-numBytes))) && numBytes < 6)
-				++numBytes;
+			if(is_start(ch))
+			{
+				ASSERT((ch & 0xF8) != 0xF8);
+				while((ch & (1 << (7-numBytes))) && numBytes < 6)
+					++numBytes;
+			}
 			return numBytes;
 		}
 	};
