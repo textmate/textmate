@@ -6,6 +6,11 @@ static std::string expand (std::string const& str)
 	return text::join(path::expand_braces(str), ":");
 }
 
+void test_empty_glob ()
+{
+	OAK_ASSERT(!path::glob_t("").does_match("foo"));
+}
+
 void test_glob ()
 {
 	OAK_ASSERT( path::glob_t("*.{cc,mm,h}").does_match("test.cc"  ));
