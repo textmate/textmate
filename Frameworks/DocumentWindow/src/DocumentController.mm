@@ -2117,10 +2117,10 @@ namespace
 	path::glob_t const binaryGlob(settings.get(kSettingsBinaryKey, ""));
 
 	std::vector<std::string> v;
-	for(auto const& path : candidates)
+	for(auto const& name : candidates)
 	{
-		if(path == documentPath || !binaryGlob.does_match(path) && !excludeGlob.does_match(path))
-			v.push_back(path);
+		if(name == documentName || !binaryGlob.does_match(name) && !excludeGlob.does_match(name))
+			v.push_back(name);
 	}
 
 	if(v.size() == 1)
