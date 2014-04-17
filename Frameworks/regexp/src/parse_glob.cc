@@ -15,7 +15,7 @@ namespace
 {
 	struct node_t
 	{
-		enum type { kText, kCharClass, kOptional, kRoot, kGroup, kOr, kAny, kAnyRecursive };
+		enum type { kText, kCharClass, kOptional, kRoot, kGroup, kOr, kAny, kAnyRecursive, kExclude };
 
 		node_t (type t, node_t* left = nullptr, node_t* right = nullptr) : _type(t), _left(left), _right(right) { }
 		node_t (type t, std::string const& text, node_t* left = nullptr, node_t* right = nullptr) : _type(t), _text(text), _left(left), _right(right) { }
@@ -24,6 +24,16 @@ namespace
 		{
 			delete _left;
 			delete _right;
+		}
+
+		std::string excludes () const
+		{
+			if(!this || _type != kExclude)
+				return { };
+
+			std::string const left  = _left->to_regexp(true);
+			std::string const right = _right->excludes();
+			return right.empty() ? left : right + "|" + left;
 		}
 
 		std::string to_regexp (bool matchDotFiles) const
@@ -65,7 +75,7 @@ namespace
 	struct parse_glob_t : parser_base_t
 	{
 		parse_glob_t (std::string const& str) : parser_base_t(str) { }
-		node_t* parse (char const* stopChars = "");
+		node_t* parse (char const* stopChars = "", bool enableExcludes = true);
 
 	private:
 		bool parse_escape ();
@@ -88,7 +98,7 @@ namespace
 		node_t** _last;
 	};
 
-	node_t* parse_glob_t::parse (char const* stopChars)
+	node_t* parse_glob_t::parse (char const* stopChars, bool enableExcludes)
 	{
 		_root = nullptr;
 		_last = &_root;
@@ -102,6 +112,7 @@ namespace
 				|| parse_any()
 				|| parse_brace_expansion()
 				|| parse_character_class()
+				|| enableExcludes && parse_exclude()
 				|| parse_text())
 				continue;
 
@@ -163,7 +174,7 @@ namespace
 			node_t* localRoot = nullptr;
 			while(true)
 			{
-				localRoot = new node_t(node_t::kOr, localRoot, parse(",}"));
+				localRoot = new node_t(node_t::kOr, localRoot, parse(",}", false));
 				if(parse_char("}"))
 				{
 					_root = oldRoot;
@@ -189,6 +200,18 @@ namespace
 		std::string group;
 		if(parse_char("[") && parse_until("]", group))
 			return add_node(new node_t(node_t::kCharClass, group));
+		return (it = backtrack), false;
+	}
+
+	bool parse_glob_t::parse_exclude ()
+	{
+		char const* backtrack = it;
+		if(parse_char("~") && it != last)
+		{
+			_root = new node_t(node_t::kExclude, nullptr, _root);
+			_last = &_root->_left;
+			return true;
+		}
 		return (it = backtrack), false;
 	}
 
@@ -218,7 +241,16 @@ std::string convert_glob_to_regexp (std::string const& str, bool matchDotFiles)
 	std::string res = NULL_STR;
 	if(node_t* root = parse_glob_t(str).parse())
 	{
-		res = "^(?:.*/)?(?:" + root->to_regexp(matchDotFiles) + ")$";
+		std::string const incldues = root->to_regexp(matchDotFiles);
+		std::string const excludes = root->excludes();
+
+		res  = "^";
+
+		res += !excludes.empty() ? "(?!(?:.*/)?(?:" + excludes + ")$)" : "";
+		res += !incldues.empty() ? "(?:.*/)?(?:" + incldues + ")" : ".*";
+
+		res += "$";
+
 		delete root;
 	}
 	return res;
