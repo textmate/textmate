@@ -886,7 +886,8 @@ rule run_executable
   description = Run ‘$in’…
 
 rule debug_executable
-  command = osascript >/dev/null -e $$'tell app "Terminal" \n activate \n do script "gdb $in" \n end tell'
+  command = lldb $in
+  pool = console
   description = Debug ‘$in’…
 
 rule run_application
