@@ -1,8 +1,7 @@
 #include "glob.h"
-#include "format_string.h"
+#include "parse_glob.h"
 #include "parser_base.h"
 #include <oak/oak.h>
-#include <text/format.h>
 #include <oak/debug.h>
 
 OAK_DEBUG_VAR(Glob);
@@ -12,40 +11,8 @@ namespace path
 {
 	void glob_t::setup (std::string const& glob, bool matchDotFiles)
 	{
-		static regexp::pattern_t const glob_matcher = "(?:"
-			"(\\\\.)"                     "|"
-			"(\\*\\*(/?))"                "|"
-			"(\\*)"                       "|"
-			"(\\?)"                       "|"
-			"(\\[.*?\\])"                 "|"
-			"([\\\\|\\[().?*+{^$])"       ")"
-		;
-
-		static std::string const glob_formater = ""
-			"${1}"
-			"${2:+(((?!\\.)|(?<!^|/))[^/]*(/(?!\\.)[^/]*)*$3)?}"
-			"${4:+((?!\\.)|(?<!^|/))[^/]*}"
-			"${5:+.}"
-			"${6}"
-			"${7:+\\\\$7}"
-		;
-
-		static std::string const glob_formater_match_dot_files = ""
-			"${1}"
-			"${2:+(.*$3)?}"
-			"${4:+[^/]*}"
-			"${5:+.}"
-			"${6}"
-			"${7:+\\\\$7}"
-		;
-
 		_negate = glob.empty() ? false : glob[0] == '!';
-
-		std::vector<std::string> expanded;
-		for(auto const& str : expand_braces(_negate ? glob.substr(1) : glob))
-			expanded.push_back(format_string::replace(str, glob_matcher, (matchDotFiles || _negate) ? glob_formater_match_dot_files : glob_formater));
-
-		std::string ptrn = "^(.*/)?(" + text::join(expanded, "|") + ")$";
+		std::string ptrn = convert_glob_to_regexp(_negate ? glob.substr(1) : glob, matchDotFiles || _negate);
 		_compiled = regexp::pattern_t(ptrn);
 		D(DBF_Glob, bug("%s → %s\n", glob.c_str(), ptrn.c_str()););
 	}
