@@ -828,4 +828,12 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 - (void)copyMatchingPartsWithFilename:(id)sender { [self copyEntireLines:NO  withFilename:YES]; }
 - (void)copyEntireLines:(id)sender               { [self copyEntireLines:YES withFilename:NO ]; }
 - (void)copyEntireLinesWithFilename:(id)sender   { [self copyEntireLines:YES withFilename:YES]; }
+
+- (BOOL)validateMenuItem:(NSMenuItem*)aMenuItem
+{
+	static std::set<SEL> const copyActions = { @selector(copy:), @selector(copyMatchingParts:), @selector(copyMatchingPartsWithFilename:), @selector(copyEntireLines:), @selector(copyEntireLinesWithFilename:) };
+	if(copyActions.find(aMenuItem.action) != copyActions.end())
+		return [self.windowController.resultsOutlineView numberOfRows] != 0;
+	return YES;
+}
 @end

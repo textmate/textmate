@@ -285,7 +285,6 @@ static NSButton* OakCreateStopSearchButton ()
 		[self.globTextField             bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.globHistoryList.head" options:nil];
 		[self.globTextField             bind:NSContentValuesBinding toObject:_objectController withKeyPath:@"content.globHistoryList.list" options:nil];
 		[self.globTextField             bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.folderSearch"         options:nil];
-		[self.actionsPopUpButton        bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.folderSearch"         options:nil];
 		[self.ignoreCaseCheckBox        bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.ignoreCase"           options:nil];
 		[self.ignoreWhitespaceCheckBox  bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.ignoreWhitespace"     options:nil];
 		[self.regularExpressionCheckBox bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.regularExpression"    options:nil];
