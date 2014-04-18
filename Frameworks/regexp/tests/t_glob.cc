@@ -250,3 +250,14 @@ void test_glob_exclusion ()
 	OAK_ASSERT( path::glob_t("~html/**/*"     ).does_match("/path/to/page/foo/fud.txt"));
 	OAK_ASSERT( path::glob_t("~html/**/*.txt" ).does_match("/path/to/page/foo/fud.txt"));
 }
+
+void test_glob_brace_expansion_match ()
+{
+	OAK_ASSERT(path::glob_t("foo{bar}.txt").does_match("foo{bar}.txt"));
+	OAK_ASSERT(path::glob_t("foo{,bar}.txt").does_match("foo.txt"));
+	OAK_ASSERT(path::glob_t("foo{,bar}.txt").does_match("foobar.txt"));
+	OAK_ASSERT(path::glob_t("foo{\\,bar}.txt").does_match("foo{,bar}.txt"));
+	OAK_ASSERT(path::glob_t("{foo,{bar},baz}.txt").does_match("foo.txt"));
+	OAK_ASSERT(path::glob_t("{foo,{bar},baz}.txt").does_match("{bar}.txt"));
+	OAK_ASSERT(path::glob_t("{foo,{bar},baz}.txt").does_match("baz.txt"));
+}

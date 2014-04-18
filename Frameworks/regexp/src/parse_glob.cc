@@ -171,6 +171,7 @@ namespace
 
 		if(parse_char("{"))
 		{
+			bool hasComma = false;
 			node_t* localRoot = nullptr;
 			while(true)
 			{
@@ -179,9 +180,21 @@ namespace
 				{
 					_root = oldRoot;
 					_last = oldLast;
-					return add_node(new node_t(node_t::kGroup, localRoot));
+					if(hasComma)
+						return add_node(new node_t(node_t::kGroup, localRoot));
+
+					delete localRoot;
+
+					char const* parseTo = std::exchange(it, backtrack);
+					while(it != parseTo && (parse_escape() || parse_text()))
+						;
+					return it != parseTo ? ((it = backtrack), false) : true;
 				}
-				else if(!parse_char(","))
+				else if(parse_char(","))
+				{
+					hasComma = true;
+				}
+				else
 				{
 					break;
 				}
