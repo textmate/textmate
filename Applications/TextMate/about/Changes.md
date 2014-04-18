@@ -2,6 +2,10 @@ Title: Release Notes
 
 # Changes
 
+## 2014-04-18 ([v2.0-alpha.9539](https://github.com/textmate/textmate/compare/v2.0-alpha.9533...v2.0-alpha.9539))
+
+* In file pattern globs the tilde (`~`) and bang (`!`) operators both indicate that what follows must not match the file path. For example: `*.{c,h}~vendor/**` will match `.c` and `.h` files except when under the `vendor/` directory. It’s possible to specify multiple exclusion patterns and also to start the pattern with the exclude operator, e.g. `!build/*!cache/*` will match anything not in `build/` or `cache/`. If the operator is used inside brace expansion (e.g. `{Icon\r,*~.nib}`) then it’ll be treated as a literal match, similarly when used last in the pattern (e.g. `*.txt~`).
+
 ## 2014-04-12 ([v2.0-alpha.9533](https://github.com/textmate/textmate/compare/v2.0-alpha.9531...v2.0-alpha.9533))
 
 * You can disable the status bar using `defaults write com.macromates.TextMate.preview hideStatusBar -bool YES`. Be aware that currently not all of the status bar actions have menu equivalents.
@@ -10,7 +14,7 @@ Title: Release Notes
 
 ## 2014-04-05 ([v2.0-alpha.9531](https://github.com/textmate/textmate/compare/v2.0-alpha.9529...v2.0-alpha.9531))
 
-* Rework the commit window (shown e.g. when using ⌘Y and selecting “Commit”) to run as part of TextMate and use it’s text editing features. *[Ronald Wampler]*
+* Rework the commit window (shown e.g. when using ⌘Y and selecting “Commit”) to run as part of TextMate and use its text editing features. *[Ronald Wampler]*
 * Improve accessibility support in find window. Notifications like “no more occurrences” when pressing ⌘G are now broadcast. *[Boris Dušek]*
 
 ## 2014-03-31 ([v2.0-alpha.9529](https://github.com/textmate/textmate/compare/v2.0-alpha.9515...v2.0-alpha.9529))
