@@ -374,15 +374,8 @@ static path::glob_list_t globs_for_path (std::string const& path)
 			auto& record = _records[i];
 			record.cover.clear();
 			record.display_parents = 0;
-
-			for(auto const& str : { record.name, path::relative_to(record.full_path, basePath), record.full_path })
-			{
-				if(record.matched = filter.glob().does_match(str))
-				{
-					record.display = str;
-					break;
-				}
-			}
+			if(record.matched = filter.glob().does_match(record.full_path))
+				record.display = record.name;
 		}
 
 		for(auto const& record : _records)
