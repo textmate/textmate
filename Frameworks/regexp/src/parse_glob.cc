@@ -27,6 +27,28 @@ namespace
 			delete _right;
 		}
 
+		void expand_braces (std::vector<std::string>& strings) const
+		{
+			if(_type == kOr && _left && _right)
+			{
+				std::vector<std::string> tmp = strings;
+				_right->expand_braces(tmp);
+				_left->expand_braces(strings);
+				strings.insert(strings.end(), tmp.begin(), tmp.end());
+
+				return;
+			}
+
+			if(_type == kText)
+				std::for_each(strings.begin(), strings.end(), [&](std::string& str){ str += _text; });
+
+			if(_left)
+				_left->expand_braces(strings);
+
+			if(_right)
+				_right->expand_braces(strings);
+		}
+
 		std::string excludes () const
 		{
 			if(!this || _type != kExclude)
@@ -73,20 +95,71 @@ namespace
 		node_t* _right;
 	};
 
-	struct parse_glob_t : parser_base_t
+	struct parse_common_t : parser_base_t
 	{
-		parse_glob_t (std::string const& str) : parser_base_t(str) { }
-		node_t* parse (char const* stopChars = "", bool enableExcludes = true);
+		parse_common_t (std::string const& str) : parser_base_t(str) { }
+		virtual node_t* parse (char const* stopChars, bool parsingBraces) = 0;
 
-	private:
-		bool parse_escape ();
-		bool parse_optional ();
-		bool parse_any_recursive ();
-		bool parse_any ();
-		bool parse_brace_expansion ();
-		bool parse_character_class ();
-		bool parse_exclude ();
-		bool parse_text ();
+	protected:
+		virtual bool parse_escape () = 0;
+
+		bool parse_text (char const* stopChars)
+		{
+			char const* backtrack = it;
+			if(it != last)
+			{
+				while(++it != last && !strchr(stopChars, *it))
+					;
+				return add_node(new node_t(node_t::kText, std::string(backtrack, it)));
+			}
+			return (it = backtrack), false;
+		}
+
+		bool parse_brace_expansion ()
+		{
+			char const* backtrack = it;
+			node_t* oldRoot = _root;
+			node_t** oldLast = _last;
+
+			if(parse_char("{"))
+			{
+				bool hasComma = false;
+				node_t* localRoot = nullptr;
+				while(true)
+				{
+					localRoot = new node_t(node_t::kOr, localRoot, parse(",}", true));
+					if(parse_char("}"))
+					{
+						_root = oldRoot;
+						_last = oldLast;
+						if(hasComma)
+							return add_node(new node_t(node_t::kGroup, localRoot));
+
+						delete localRoot;
+
+						std::swap(it, backtrack);
+						std::swap(last, backtrack);
+						while(it != last && (parse_escape() || parse_text("\\")))
+							;
+						std::swap(last, backtrack);
+						return true;
+					}
+					else if(parse_char(","))
+					{
+						hasComma = true;
+					}
+					else
+					{
+						break;
+					}
+				}
+				delete localRoot;
+			}
+
+			_root = oldRoot;
+			_last = oldLast;
+			return (it = backtrack), false;
+		}
 
 		bool add_node (node_t* node)
 		{
@@ -99,7 +172,55 @@ namespace
 		node_t** _last;
 	};
 
-	node_t* parse_glob_t::parse (char const* stopChars, bool enableExcludes)
+	struct parse_braces_t : parse_common_t
+	{
+		parse_braces_t (std::string const& str) : parse_common_t(str) { }
+
+		node_t* parse (char const* stopChars = "", bool parsingBraces = false) override
+		{
+			_root = nullptr;
+			_last = &_root;
+
+			while(it != last && !strchr(stopChars, *it))
+			{
+				if(false
+					|| parse_escape()
+					|| parse_brace_expansion()
+					|| parse_text(parsingBraces ? "\\{,}" : "\\{"))
+					continue;
+
+				delete _root;
+				_root = nullptr;
+			}
+
+			return std::exchange(_root, nullptr);
+		}
+
+	private:
+		bool parse_escape () override
+		{
+			char const* backtrack = it;
+			if(parse_char("\\") && it != last && strchr("\\{,}", *it))
+				return add_node(new node_t(node_t::kText, std::string(1, *it++)));
+			return it = backtrack, false;
+		}
+	};
+
+	struct parse_glob_t : parse_common_t
+	{
+		parse_glob_t (std::string const& str) : parse_common_t(str) { }
+		node_t* parse (char const* stopChars = "", bool parsingBraces = false) override;
+
+	private:
+		bool parse_escape () override;
+		bool parse_optional ();
+		bool parse_any_recursive ();
+		bool parse_any ();
+		bool parse_character_class ();
+		bool parse_exclude ();
+	};
+
+	node_t* parse_glob_t::parse (char const* stopChars, bool parsingBraces)
 	{
 		_root = nullptr;
 		_last = &_root;
@@ -113,8 +234,8 @@ namespace
 				|| parse_any()
 				|| parse_brace_expansion()
 				|| parse_character_class()
-				|| enableExcludes && parse_exclude()
-				|| parse_text())
+				|| !parsingBraces && parse_exclude()
+				|| parse_text(parsingBraces ? "\\?*{[,}" : "\\?*{[!~"))
 				continue;
 
 			delete _root;
@@ -129,14 +250,24 @@ namespace
 		char const* backtrack = it;
 		if(parse_char("\\") && it != last)
 		{
-			if(!strchr("trn", *it))
-				return parse_text();
-
-			switch(*it++)
+			if(strchr("trn", *it))
 			{
-				case 't': return add_node(new node_t(node_t::kText, "\t"));
-				case 'r': return add_node(new node_t(node_t::kText, "\r"));
-				case 'n': return add_node(new node_t(node_t::kText, "\n"));
+				switch(*it++)
+				{
+					case 't': return add_node(new node_t(node_t::kText, "\t"));
+					case 'r': return add_node(new node_t(node_t::kText, "\r"));
+					case 'n': return add_node(new node_t(node_t::kText, "\n"));
+				}
+			}
+			else
+			{
+				size_t len = utf8::multibyte<char>::length(*it);
+				while(it != last)
+				{
+					++it;
+					if(--len == 0)
+						return add_node(new node_t(node_t::kText, std::string(backtrack+1, it)));
+				}
 			}
 		}
 		return it = backtrack, false;
@@ -164,50 +295,6 @@ namespace
 		return it = backtrack, false;
 	}
 
-	bool parse_glob_t::parse_brace_expansion ()
-	{
-		char const* backtrack = it;
-		node_t* oldRoot = _root;
-		node_t** oldLast = _last;
-
-		if(parse_char("{"))
-		{
-			bool hasComma = false;
-			node_t* localRoot = nullptr;
-			while(true)
-			{
-				localRoot = new node_t(node_t::kOr, localRoot, parse(",}", false));
-				if(parse_char("}"))
-				{
-					_root = oldRoot;
-					_last = oldLast;
-					if(hasComma)
-						return add_node(new node_t(node_t::kGroup, localRoot));
-
-					delete localRoot;
-
-					char const* parseTo = std::exchange(it, backtrack);
-					while(it != parseTo && (parse_escape() || parse_text()))
-						;
-					return it != parseTo ? ((it = backtrack), false) : true;
-				}
-				else if(parse_char(","))
-				{
-					hasComma = true;
-				}
-				else
-				{
-					break;
-				}
-			}
-			delete localRoot;
-		}
-
-		_root = oldRoot;
-		_last = oldLast;
-		return (it = backtrack), false;
-	}
-
 	bool parse_glob_t::parse_character_class ()
 	{
 		char const* backtrack = it;
@@ -225,22 +312,6 @@ namespace
 			_root = new node_t(node_t::kExclude, nullptr, _root);
 			_last = &_root->_left;
 			return true;
-		}
-		return (it = backtrack), false;
-	}
-
-	bool parse_glob_t::parse_text ()
-	{
-		char const* backtrack = it;
-		if(it != last)
-		{
-			size_t len = utf8::multibyte<char>::length(*it);
-			while(it != last)
-			{
-				++it;
-				if(--len == 0)
-					return add_node(new node_t(node_t::kText, std::string(backtrack, it)));
-			}
 		}
 		return (it = backtrack), false;
 	}
@@ -265,6 +336,17 @@ std::string convert_glob_to_regexp (std::string const& str, bool matchDotFiles)
 
 		res += "$";
 
+		delete root;
+	}
+	return res;
+}
+
+std::vector<std::string> expand_braces (std::string const& str)
+{
+	std::vector<std::string> res = { "" };
+	if(node_t* root = parse_braces_t(str).parse())
+	{
+		root->expand_braces(res);
 		delete root;
 	}
 	return res;

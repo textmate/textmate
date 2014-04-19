@@ -197,7 +197,7 @@ void test_brace_expansion ()
 
 void test_glob_brace_expansion ()
 {
-	OAK_ASSERT_EQ(expand("{a,b,{c},d}"),     "a,d}:b,d}:{c,d}");
+	OAK_ASSERT_EQ(expand("{a,b,{c},d}"),     "a:b:{c}:d");
 	OAK_ASSERT_EQ(expand("{a,b,\\{c\\},d}"), "a:b:{c}:d");
 }
 
