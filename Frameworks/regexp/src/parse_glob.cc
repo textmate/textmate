@@ -1,6 +1,7 @@
 #include "parse_glob.h"
 #include "parser_base.h"
 #include <text/utf8.h>
+#include <oak/debug.h>
 
 // \«char»           -- Literal «char»
 // ?                 -- Match one character
@@ -16,6 +17,8 @@ namespace
 {
 	struct node_t
 	{
+		WATCH_LEAKS(node_t);
+
 		enum type { kText, kCharClass, kOptional, kRoot, kGroup, kOr, kAny, kAnyRecursive, kExclude };
 
 		node_t (type t, node_t* left = nullptr, node_t* right = nullptr) : _type(t), _left(left), _right(right) { }
