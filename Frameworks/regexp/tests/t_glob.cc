@@ -6,6 +6,13 @@ static std::string expand (std::string const& str)
 	return text::join(path::expand_braces(str), ":");
 }
 
+static std::vector<std::string> sorted (std::string const& str)
+{
+	auto v = path::expand_braces(str);
+	std::sort(v.begin(), v.end());
+	return v;
+}
+
 void test_empty_glob ()
 {
 	OAK_ASSERT(!path::glob_t("").does_match("foo"));
@@ -181,11 +188,11 @@ void test_brace_expansion ()
 	OAK_ASSERT_EQ(expand_braces("{a,b{c,d}}")[1],             "bc");
 	OAK_ASSERT_EQ(expand_braces("{a,b{c,d}}")[2],             "bd");
 
-	OAK_ASSERT_EQ(expand_braces("{a,b}{c,d}").size(),         4);
-	OAK_ASSERT_EQ(expand_braces("{a,b}{c,d}")[0],             "ac");
-	OAK_ASSERT_EQ(expand_braces("{a,b}{c,d}")[1],             "ad");
-	OAK_ASSERT_EQ(expand_braces("{a,b}{c,d}")[2],             "bc");
-	OAK_ASSERT_EQ(expand_braces("{a,b}{c,d}")[3],             "bd");
+	OAK_ASSERT_EQ(sorted("{a,b}{c,d}").size(),                4);
+	OAK_ASSERT_EQ(sorted("{a,b}{c,d}")[0],                    "ac");
+	OAK_ASSERT_EQ(sorted("{a,b}{c,d}")[1],                    "ad");
+	OAK_ASSERT_EQ(sorted("{a,b}{c,d}")[2],                    "bc");
+	OAK_ASSERT_EQ(sorted("{a,b}{c,d}")[3],                    "bd");
 }
 
 void test_glob_brace_expansion ()
