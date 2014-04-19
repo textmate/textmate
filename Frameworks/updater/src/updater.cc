@@ -366,8 +366,11 @@ namespace bundles_db
 		plist::dictionary_t const localIndexPlist = plist::load(local_index_path(installDir));
 
 		std::set<std::string> actualPaths, indexedPaths;
-		for(auto const& entry : path::entries(base, "*.tm[Bb]undle"))
-			actualPaths.insert(path::join(base, entry->d_name));
+		if(path::exists(base))
+		{
+			for(auto const& entry : path::entries(base, "*.tm[Bb]undle"))
+				actualPaths.insert(path::join(base, entry->d_name));
+		}
 
 		for(auto const& pair : localIndexPlist)
 		{
