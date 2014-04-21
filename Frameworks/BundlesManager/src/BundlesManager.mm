@@ -141,7 +141,7 @@ static double const kPollInterval = 3*60*60;
 				for(auto source : failedSources)
 					fprintf(stderr, "*** error downloading ‘%s’\n", source->url().c_str());
 				for(auto bundle : failedBundles)
-					fprintf(stderr, "*** error downloading ‘%s’\n", bundle->url().c_str());
+					fprintf(stderr, "*** error updating %s bundle\n", bundle->name().c_str());
 			}
 
 			self.isBusy = NO;
@@ -228,9 +228,6 @@ static double const kPollInterval = 3*60*60;
 		});
 
 		dispatch_async(dispatch_get_main_queue(), ^{
-			for(auto bundle : failedBundles)
-				fprintf(stderr, "*** error downloading ‘%s’\n", bundle->url().c_str());
-
 			for(auto bundle : bundles)
 			{
 				[self reloadPath:[NSString stringWithCxxString:bundle->path()] recursive:YES];
