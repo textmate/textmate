@@ -246,7 +246,7 @@ static NSButton* OakCreateStopSearchButton ()
 
 		NSMenu* actionMenu = self.actionsPopUpButton.menu;
 
-		[actionMenu addItemWithTitle:@"Placeholder" action:@selector(nop:) keyEquivalent:@""];
+		[actionMenu addItemWithTitle:@"Placeholder" action:NULL keyEquivalent:@""];
 		[actionMenu addItemWithTitle:@"Follow Symbolic Links" action:@selector(toggleFollowSymbolicLinks:) keyEquivalent:@""];
 		[actionMenu addItemWithTitle:@"Search Hidden Folders" action:@selector(toggleSearchHiddenFolders:) keyEquivalent:@""];
 		[actionMenu addItem:[NSMenuItem separatorItem]];
