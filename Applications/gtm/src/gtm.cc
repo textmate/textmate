@@ -95,7 +95,7 @@ void parse_stdin (std::string const& grammarSelector = "text.plain", bool verbos
 	}
 
 	fprintf(stderr, "%s: unable to find grammar for selector ‘%s’\n", getprogname(), grammarSelector.c_str());
-	exit(1);
+	exit(EX_UNAVAILABLE);
 }
 
 static void load_bundle_index (bool verbose)
@@ -147,9 +147,9 @@ int main (int argc, char* const* argv)
 			case 'd': delimiters = optarg; break; // TODO
 			case 'l': verbose = true;      break;
 			case 'i': loadIndex = true;    break;
-			case 'h': usage(stdout);       return 0;
-			case 'v': version();           return 0;
-			default:  usage(stderr);       return 1;
+			case 'h': usage(stdout);       return EX_OK;
+			case 'v': version();           return EX_OK;
+			default:  usage(stderr);       return EX_USAGE;
 		}
 	}
 
@@ -170,7 +170,7 @@ int main (int argc, char* const* argv)
 			if(access(argv[i], R_OK) != 0)
 			{
 				fprintf(stderr, "%s: error reading grammar ‘%s’\n", getprogname(), argv[i]);
-				exit(1);
+				exit(EX_NOINPUT);
 			}
 
 			std::string tmp;
@@ -178,13 +178,13 @@ int main (int argc, char* const* argv)
 			if(!plist::get_key_path(plist, "scopeName", tmp))
 			{
 				fprintf(stderr, "%s: error parsing grammar ‘%s’\n", getprogname(), argv[i]);
-				exit(1);
+				exit(EX_PROTOCOL);
 			}
 
 			if(!bundleIndex.add(bundles::kItemTypeGrammar, plist))
 			{
 				fprintf(stderr, "%s: error parsing grammar ‘%s’\n", getprogname(), argv[i]);
-				exit(1);
+				exit(EX_PROTOCOL);
 			}
 
 			if(grammar == NULL_STR)
@@ -196,10 +196,10 @@ int main (int argc, char* const* argv)
 		if(grammars == 0 || !bundleIndex.commit())
 		{
 			fprintf(stderr, "%s: no grammars loaded\n", getprogname());
-			exit(1);
+			exit(EX_NOINPUT);
 		}
 	}
 
 	parse_stdin(grammar, verbose);
-	return 0;
+	return EX_OK;
 }

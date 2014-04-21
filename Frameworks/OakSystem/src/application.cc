@@ -77,7 +77,7 @@ namespace oak
 					else
 					{
 						D(DBF_Application, bug("timeout expired, terminate\n"););
-						exit(1);
+						exit(EXIT_FAILURE);
 					}
 				}
 				else
@@ -87,7 +87,7 @@ namespace oak
 					if(noErr == GetProcessForPID(pid, &psn))
 					{
 						SetFrontProcess(&psn);
-						exit(0);
+						exit(EXIT_SUCCESS);
 					}
 					// procNotFound
 				}
@@ -226,7 +226,7 @@ namespace oak
 			char const* argv[] = { _full_app_path.c_str(), "-disableSessionRestore", "0", NULL };
 			execve(argv[0], (char* const*)argv, env);
 			perror("relaunch");
-			_exit(-1);
+			_exit(EXIT_FAILURE);
 		}
 		else
 		{

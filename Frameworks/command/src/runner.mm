@@ -57,7 +57,7 @@ static std::tuple<pid_t, int, int> my_fork (char const* cmd, int inputRead, std:
 		char* argv[] = { (char*)cmd, NULL };
 		execve(argv[0], argv, env);
 		perror("interpreter failed");
-		_exit(0);
+		_exit(EXIT_FAILURE);
 	}
 
 	int const fds[] = { inputRead, outputWrite, errorWrite };

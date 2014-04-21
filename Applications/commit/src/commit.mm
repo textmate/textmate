@@ -58,7 +58,7 @@ int main (int argc, char* argv[])
 	if(argc == 2 && (strcmp(argv[1], "-v") == 0 || strcmp(argv[1], "--version") == 0))
 	{
 		fprintf(stderr, "%1$s %2$.1f (" COMPILE_DATE " revision %3$zu)\n", getprogname(), AppVersion, AppRevision);
-		return 0;
+		return EX_OK;
 	}
 
 	@autoreleasepool {
@@ -90,5 +90,5 @@ int main (int argc, char* argv[])
 			}
 		}
 	}
-	return 0;
+	return EX_OK;
 }

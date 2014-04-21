@@ -44,9 +44,9 @@ int main (int argc, char* const* argv)
 	{
 		switch(ch)
 		{
-			case 'h': usage();             return 0;
-			case 'v': version();           return 0;
-			default:  usage(stderr);       return 1;
+			case 'h': usage();             return EX_OK;
+			case 'v': version();           return EX_OK;
+			default:  usage(stderr);       return EX_USAGE;
 		}
 	}
 
@@ -63,5 +63,5 @@ int main (int argc, char* const* argv)
 			scmls(path::join(path::cwd(), argv[i]));
 	}
 
-	return 0;
+	return EX_OK;
 }

@@ -82,9 +82,9 @@ int main (int argc, char* const* argv)
 		switch(ch)
 		{
 			case 's': key = optarg;        break;
-			case 'h': usage();             return 0;
-			case 'v': version();           return 0;
-			default:  usage(stderr);       return 1;
+			case 'h': usage();             return EX_OK;
+			case 'v': version();           return EX_OK;
+			default:  usage(stderr);       return EX_USAGE;
 		}
 	}
 
@@ -106,7 +106,7 @@ int main (int argc, char* const* argv)
 
 		settings_t const settings = settings_for_path(path::join(path::cwd(), argv[i]));
 		if(!print_settings(settings, key))
-			return 1;
+			return EX_UNAVAILABLE;
 	}
 	if (0 == argc) {
 		std::string path  = getenv("TM_FILEPATH")  ?: NULL_STR;
@@ -115,8 +115,8 @@ int main (int argc, char* const* argv)
 
 		settings_t const settings = settings_for_path(path, scope, dir);
 		if(!print_settings(settings, key))
-			return 1;
+			return EX_UNAVAILABLE;
 	}
 
-	return 0;
+	return EX_OK;
 }

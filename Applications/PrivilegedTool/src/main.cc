@@ -166,9 +166,9 @@ int main (int argc, char const* argv[])
 			case 's': server = true;    break;
 			case 'i': install = true;   break;
 			case 'u': uninstall = true; break;
-			case 'h': usage();          return 0;
-			case 'v': version();        return 0;
-			default:  usage(stderr);    return 1;
+			case 'h': usage();          return EX_OK;
+			case 'v': version();        return EX_OK;
+			default:  usage(stderr);    return EX_USAGE;
 		}
 	}
 
@@ -206,11 +206,11 @@ int main (int argc, char const* argv[])
 			{
 				D(DBF_AuthServer, bug("new connection\n"););
 				handle_connection(newFd);
-				// _exit(0);
+				// _exit(EXIT_SUCCESS);
 			}
 		}
 	}
 
 	close_socket(fd);
-	return 0;
+	return EX_OK;
 }

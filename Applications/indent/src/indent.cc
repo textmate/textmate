@@ -56,11 +56,11 @@ int main (int argc, char const* argv[])
 			case 't': tabSize = strtol(optarg, NULL, 10);     break;
 			case 'i': indentSize = strtol(optarg, NULL, 10);  break;
 			case 's': softTabs = true;                        break;
-			case 'h': usage();                                return 0;
-			case 'v': version();                              return 0;
-			case '?': /* unknown option */                    return 1;
-			case ':': /* missing option */                    return 1;
-			default:  usage(stderr);                          return 1;
+			case 'h': usage();                                return EX_OK;
+			case 'v': version();                              return EX_OK;
+			case '?': /* unknown option */                    return EX_USAGE;
+			case ':': /* missing option */                    return EX_USAGE;
+			default:  usage(stderr);                          return EX_USAGE;
 		}
 	}
 
@@ -121,5 +121,5 @@ int main (int argc, char const* argv[])
 		}
 	}
 
-	return 0;
+	return EX_OK;
 }

@@ -231,12 +231,12 @@ int main (int argc, char* argv[])
 			case 'u': uuid = optarg;            break;
 			case 'r': add_to_recent = true;     break;
 			case 'd': change_dir = true;        break;
-			case 'h': usage(stdout);            return 0;
-			case 'v': version();                return 0;
+			case 'h': usage(stdout);            return EX_OK;
+			case 'v': version();                return EX_OK;
 			case 's': server = true;            break;
-			case '?': /* unknown option */      exit(EX_USAGE);
-			case ':': /* missing option */      exit(EX_USAGE);
-			default:  usage(stderr);            exit(EX_USAGE);
+			case '?': /* unknown option */      return EX_USAGE;
+			case ':': /* missing option */      return EX_USAGE;
+			default:  usage(stderr);            return EX_USAGE;
 		}
 	}
 
@@ -259,7 +259,7 @@ int main (int argc, char* argv[])
 			else
 			{
 				fprintf(stderr, "failed to get current working directory\n");
-				exit(1);
+				exit(EX_OSERR);
 			}
 		}
 
@@ -294,7 +294,7 @@ int main (int argc, char* argv[])
 	char buf[1024];
 	ssize_t len = read(fd, buf, sizeof(buf));
 	if(len == -1)
-		exit(-1);
+		exit(EX_IOERR);
 	// fprintf(stderr, "%.*s", (int)len, buf);
 
 	for(size_t i = 0; i < files.size(); ++i)
@@ -442,5 +442,5 @@ int main (int argc, char* argv[])
 	}
 
 	close(fd);
-	return 0;
+	return EX_OK;
 }

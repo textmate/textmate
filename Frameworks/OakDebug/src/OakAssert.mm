@@ -46,7 +46,7 @@ PUBLIC std::string OakStackDump (int linesToSkip)
 
 		char const* envp[] = { "LANG=en_US.UTF-8", "LC_CTYPE=en_US.UTF-8", buf, NULL };
 		execve(argv[0], (char* const*)argv, (char* const*)envp);
-		_exit(-1);
+		_exit(EXIT_FAILURE);
 	}
 	else if(pid != -1)
 	{
@@ -97,7 +97,7 @@ namespace oak
 void OakPrintBadAssertion (char const* lhs, char const* op, char const* rhs, std::string const& realLHS, char const* realOp, std::string const& realRHS, char const* file, int line)
 {
 	fprintf(stderr, "%s:%d: Expected (%s %s %s), found (%s %s %s)\n%s\n", file, line, lhs, op, rhs, realLHS.c_str(), realOp, realRHS.c_str(), OakStackDump(2).c_str());
-	_exit(-1);
+	_exit(EXIT_FAILURE);
 }
 
 @implementation OakExceptionHandlerDelegate
@@ -148,5 +148,5 @@ void OakBadAssertion (char const* name, char const* format, ...)
 	    "%s"
 	    "------------------------------------------------------------\n"
 	    "%s", name, info.c_str(), OakStackDump(2).c_str());
-	_exit(-1);
+	_exit(EXIT_FAILURE);
 }
