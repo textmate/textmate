@@ -59,7 +59,7 @@ NSPopUpButton* OakCreatePopUpButton (BOOL pullsDown, NSString* initialItemTitle,
 	NSPopUpButton* res = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:pullsDown];
 	res.font = OakControlFont();
 	if(initialItemTitle)
-		[[res cell] setMenuItem:[[NSMenuItem alloc] initWithTitle:initialItemTitle action:@selector(nop:) keyEquivalent:@""]];
+		[[res cell] setMenuItem:[[NSMenuItem alloc] initWithTitle:initialItemTitle action:NULL keyEquivalent:@""]];
 	OakSetAccessibilityLabel(res, accessibilityLabel);
 	return res;
 }

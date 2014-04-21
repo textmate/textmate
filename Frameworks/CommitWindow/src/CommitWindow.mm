@@ -160,7 +160,6 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 		_previousCommitMessagesPopUpButton.bordered   = YES;
 		_previousCommitMessagesPopUpButton.pullsDown  = YES;
 		_previousCommitMessagesPopUpButton.bezelStyle = NSTexturedRoundedBezelStyle;
-		_previousCommitMessagesPopUpButton.menu.autoenablesItems = NO;
 		[self setupPreviousCommitMessagesMenu];
 
 		// ===============
@@ -365,7 +364,7 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 {
 	NSMenu* menu = [self.previousCommitMessagesPopUpButton menu];
 	[menu removeAllItems];
-	[menu addItemWithTitle:@"Previous Commit Messages" action:@selector(nop:) keyEquivalent:@""];
+	[menu addItemWithTitle:@"Previous Commit Messages" action:NULL keyEquivalent:@""];
 
 	if(NSArray* commitMessages = [[NSUserDefaults standardUserDefaults] arrayForKey:kOakCommitWindowCommitMessages])
 	{
@@ -520,7 +519,7 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 {
 	[menu removeAllItems];
 	if([_tableView clickedColumn] == -1)
-		[menu addItemWithTitle:@"Dummy" action:@selector(nop:) keyEquivalent:@""];
+		[menu addItemWithTitle:@"Dummy" action:NULL keyEquivalent:@""];
 
 	NSInteger row = [_tableView clickedRow];
 	if(row == -1 && [_tableView selectedRow] == -1)

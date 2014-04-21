@@ -78,7 +78,7 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSObject* accessibi
 		// = Wrap/Clip Bundles PopUp =
 		// ===========================
 
-		NSMenuItem* item = [[NSMenuItem alloc] initWithTitle:@"" action:@selector(nop:) keyEquivalent:@""];
+		NSMenuItem* item = [[NSMenuItem alloc] initWithTitle:@"" action:NULL keyEquivalent:@""];
 		item.image = [NSImage imageNamed:NSImageNameActionTemplate];
 		[[self.bundleItemsPopUp cell] setUsesItemFromMenu:NO];
 		[[self.bundleItemsPopUp cell] setMenuItem:item];
@@ -137,7 +137,7 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSObject* accessibi
 {
 	NSMenu* tabSizeMenu = self.tabSizePopUp.menu;
 	[tabSizeMenu removeAllItems];
-	[tabSizeMenu addItemWithTitle:@"Current Indent" action:@selector(nop:) keyEquivalent:@""];
+	[tabSizeMenu addItemWithTitle:@"Current Indent" action:NULL keyEquivalent:@""];
 	[tabSizeMenu addItemWithTitle:@"Indent Size" action:@selector(nop:) keyEquivalent:@""];
 	for(auto size : { 2, 3, 4, 8 })
 	{

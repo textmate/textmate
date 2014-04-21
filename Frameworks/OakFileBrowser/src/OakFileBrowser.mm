@@ -978,7 +978,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 		swatch.font          = [aMenu font];
 
 		[aMenu addItem:[NSMenuItem separatorItem]];
-		[[aMenu addItemWithTitle:@"Color Swatch" action:@selector(nop:) keyEquivalent:@""] setView:swatch];
+		[[aMenu addItemWithTitle:@"Color Swatch" action:NULL keyEquivalent:@""] setView:swatch];
 	}
 
 	for(NSUInteger i = countOfExistingItems; i < [aMenu numberOfItems]; ++i)
@@ -1035,7 +1035,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 - (void)menuNeedsUpdate:(NSMenu*)aMenu
 {
 	[aMenu removeAllItems];
-	[aMenu addItemWithTitle:@"Dummy" action:@selector(nop:) keyEquivalent:@""];
+	[aMenu addItemWithTitle:@"Dummy" action:NULL keyEquivalent:@""];
 	[self updateMenu:aMenu];
 }
 
