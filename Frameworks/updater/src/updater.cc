@@ -319,6 +319,7 @@ namespace bundles_db
 				}
 
 				plist::get_key_path(item, "name",              bundle->_name);
+				plist::get_key_path(item, "requires",          bundle->_requires);
 				plist::get_key_path(item, "category",          bundle->_category);
 				plist::get_key_path(item, "html_url",          bundle->_html_url);
 				plist::get_key_path(item, "contactName",       bundle->_contact_name);
