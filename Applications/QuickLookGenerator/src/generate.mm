@@ -46,19 +46,35 @@ static void initialize (CFBundleRef generatorBundle)
 // = QLGenerator interface =
 // =========================
 
+// I see no attempt here at memory management, is it ok for QL generators to leak?
+
+
 OSStatus TextMateQuickLookPlugIn_GenerateThumbnailForURL (void* instance, QLThumbnailRequestRef request, CFURLRef url, CFStringRef contentTypeUTI, CFDictionaryRef options, CGSize maxSize)
 {
+	initialize(QLPreviewRequestGetGeneratorBundle(request));
+	
+	
+	NSAttributedString* output = TextMateQuickLookPlugIn_CreateAttributedString(url);
+	
+	
+    CGContextRef cgContext = QLPreviewRequestCreateContext(preview, &maxSize, false, NULL);
+    if(cgContext) {
+        NSGraphicsContext* context = [NSGraphicsContext graphicsContextWithGraphicsPort:(void *)cgContext flipped:YES];
+        if(context) {
+			NSRect destRect = NSMakeRect(0,0,maxSize.width, maxSize.height);
+            [output drawInRect:destRect];
+        }
+        QLPreviewRequestFlushContext(preview, cgContext);
+        CFRelease(cgContext);
+    }
+
 	return noErr;
 }
 
-void TextMateQuickLookPlugIn_CancelThumbnailGeneration (void* instance, QLThumbnailRequestRef request)
+// As written here this has the HUGE bug of reading in the entire file. We only need 40 lines for a thumbnail, and say 500 for a preview...
+// a 2GB file will trash quite badly it looks like.
+NSAttributedString* TextMateQuickLookPlugIn_CreateAttributedString(CFURLRef url)
 {
-}
-
-OSStatus TextMateQuickLookPlugIn_GeneratePreviewForURL (void* instance, QLPreviewRequestRef request, CFURLRef url, CFStringRef contentTypeUTI, CFDictionaryRef options)
-{
-	initialize(QLPreviewRequestGetGeneratorBundle(request));
-
 	// Load file
 	ng::buffer_t buffer;
 
@@ -119,6 +135,18 @@ OSStatus TextMateQuickLookPlugIn_GeneratePreviewForURL (void* instance, QLPrevie
 
 		from = to;
 	}
+	return output;
+}
+
+void TextMateQuickLookPlugIn_CancelThumbnailGeneration (void* instance, QLThumbnailRequestRef request)
+{
+}
+
+OSStatus TextMateQuickLookPlugIn_GeneratePreviewForURL (void* instance, QLPreviewRequestRef request, CFURLRef url, CFStringRef contentTypeUTI, CFDictionaryRef options)
+{
+	initialize(QLPreviewRequestGetGeneratorBundle(request));
+	
+	NSAttributedString* output = TextMateQuickLookPlugIn_CreateAttributedString(url);
 
 	NSData* outputData = [output RTFFromRange:NSMakeRange(0, [output length]) documentAttributes:@{
 		NSDocumentTypeDocumentAttribute : [NSString stringWithCxxString:fileType],
