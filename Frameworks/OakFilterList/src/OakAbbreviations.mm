@@ -4,8 +4,8 @@
 
 OAK_DEBUG_VAR(FilterList_Abbreviations);
 
-static NSString* const FCAbbreviationKey		= @"short";
-static NSString* const FCExpandedStringKey	= @"long";
+static NSString* const FCAbbreviationKey   = @"short";
+static NSString* const FCExpandedStringKey = @"long";
 
 @interface OakAbbreviations ()
 @property (nonatomic, copy)   NSString* name;

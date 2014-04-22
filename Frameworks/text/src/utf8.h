@@ -63,17 +63,17 @@ namespace utf8
 		iterator_t (_Iter const& base_iterator) : base_iterator(base_iterator) { }
 		iterator_t () { }
 
-		self& operator++ ()								{ fetch(); std::advance(base_iterator, mb_length); return *this; }
-		self& operator-- ()								{ do { --base_iterator; } while((*base_iterator & 0xC0) == 0x80); return *this; }
+		self& operator++ ()                       { fetch(); std::advance(base_iterator, mb_length); return *this; }
+		self& operator-- ()                       { do { --base_iterator; } while((*base_iterator & 0xC0) == 0x80); return *this; }
 
-		bool operator== (self const& rhs) const	{ return base_iterator == rhs.base_iterator; }
-		bool operator!= (self const& rhs) const	{ return base_iterator != rhs.base_iterator; }
+		bool operator== (self const& rhs) const   { return base_iterator == rhs.base_iterator; }
+		bool operator!= (self const& rhs) const   { return base_iterator != rhs.base_iterator; }
 
-		uint32_t& operator* ()                  { fetch(); return value; }
-		uint32_t const& operator* () const      { fetch(); return value; }
+		uint32_t& operator* ()                    { fetch(); return value; }
+		uint32_t const& operator* () const        { fetch(); return value; }
 
-		_Iter operator& () const						{ return base_iterator; }
-		ssize_t length () const							{ fetch(); return mb_length; }
+		_Iter operator& () const                  { return base_iterator; }
+		ssize_t length () const                   { fetch(); return mb_length; }
 
 	private:
 		void fetch () const
@@ -102,7 +102,7 @@ namespace utf8
 		mutable ssize_t mb_length;
 	};
 
-	template <typename _BaseIter> iterator_t<_BaseIter> make (_BaseIter const& base)	{ return iterator_t<_BaseIter>(base); }
+	template <typename _BaseIter> iterator_t<_BaseIter> make (_BaseIter const& base) { return iterator_t<_BaseIter>(base); }
 
 	struct validate_t
 	{
@@ -244,7 +244,7 @@ namespace diacritics
 
 		iterator_t (utf8::iterator_t<_Iter> const& first, utf8::iterator_t<_Iter> const& last) : current(first), stop(last) { }
 
-		self& operator++ ()											{ fetch(); current = next; return *this; }
+		self& operator++ () { fetch(); current = next; return *this; }
 
 		self& operator-- ()
 		{
@@ -281,14 +281,14 @@ namespace diacritics
 			return res;
 		}
 
-		bool operator== (self const& rhs) const				{ return current == rhs.current; }
-		bool operator!= (self const& rhs) const				{ return current != rhs.current; }
+		bool operator== (self const& rhs) const    { return current == rhs.current; }
+		bool operator!= (self const& rhs) const    { return current != rhs.current; }
 
 		uint32_t& operator* ()                     { ASSERT(current != stop); return *current; }
 		uint32_t const& operator* () const         { ASSERT(current != stop); return *current; }
 
-		_Iter operator& () const									{ return &current; }
-		ssize_t length () const										{ fetch(); return &next - &current; }
+		_Iter operator& () const                   { return &current; }
+		ssize_t length () const                    { fetch(); return &next - &current; }
 
 	private:
 		utf8::iterator_t<_Iter> current, stop;
@@ -306,8 +306,8 @@ namespace diacritics
 		}
 	};
 
-	template <typename _BaseIter> iterator_t<_BaseIter> begin_of (_BaseIter const& first, _BaseIter const& last)	{ return iterator_t<_BaseIter>(utf8::iterator_t<_BaseIter>(first), utf8::iterator_t<_BaseIter>(last)); }
-	template <typename _BaseIter> iterator_t<_BaseIter> end_of (_BaseIter const& first, _BaseIter const& last)		{ return iterator_t<_BaseIter>(utf8::iterator_t<_BaseIter>(last), utf8::iterator_t<_BaseIter>(last)); }
+	template <typename _BaseIter> iterator_t<_BaseIter> begin_of (_BaseIter const& first, _BaseIter const& last) { return iterator_t<_BaseIter>(utf8::iterator_t<_BaseIter>(first), utf8::iterator_t<_BaseIter>(last)); }
+	template <typename _BaseIter> iterator_t<_BaseIter> end_of (_BaseIter const& first, _BaseIter const& last)   { return iterator_t<_BaseIter>(utf8::iterator_t<_BaseIter>(last), utf8::iterator_t<_BaseIter>(last)); }
 
 	template <typename _BaseIter>
 	struct range_t
@@ -315,11 +315,11 @@ namespace diacritics
 		typedef iterator_t<_BaseIter> const_iterator;
 
 		range_t (iterator_t<_BaseIter> const& first, iterator_t<_BaseIter> const& last) : first(first), last(last) { }
-		iterator_t<_BaseIter> begin () const	{ return first; }
-		iterator_t<_BaseIter> end () const		{ return last; }
+		iterator_t<_BaseIter> begin () const                     { return first; }
+		iterator_t<_BaseIter> end () const                       { return last; }
 
-		std::reverse_iterator< iterator_t<_BaseIter> > rbegin ()			{ return std::reverse_iterator< iterator_t<_BaseIter> >(last); }
-		std::reverse_iterator< iterator_t<_BaseIter> > rend ()					{ return std::reverse_iterator< iterator_t<_BaseIter> >(first); }
+		std::reverse_iterator< iterator_t<_BaseIter> > rbegin () { return std::reverse_iterator< iterator_t<_BaseIter> >(last); }
+		std::reverse_iterator< iterator_t<_BaseIter> > rend ()   { return std::reverse_iterator< iterator_t<_BaseIter> >(first); }
 
 	private:
 		iterator_t<_BaseIter> first, last;

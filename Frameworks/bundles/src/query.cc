@@ -200,7 +200,7 @@ namespace bundles
 	// = Query Functions =
 	// ===================
 
- 	static void search (std::string const& field, std::string const& value, scope::context_t const& scope, int kind, oak::uuid_t const& bundle, bool includeDisabledItems, std::multimap<double, item_ptr>& ordered);
+	static void search (std::string const& field, std::string const& value, scope::context_t const& scope, int kind, oak::uuid_t const& bundle, bool includeDisabledItems, std::multimap<double, item_ptr>& ordered);
 
 	static void resolve_proxy (item_ptr item, scope::context_t const& scope, int kind, oak::uuid_t const& bundle, bool includeDisabledItems, std::multimap<double, item_ptr>& ordered)
 	{
@@ -217,7 +217,7 @@ namespace bundles
 		}
 	}
 
- 	static void cache_search (std::string const& field, std::string const& value, scope::context_t const& scope, int kind, oak::uuid_t const& bundle, bool includeDisabledItems, std::multimap<double, item_ptr>& ordered)
+	static void cache_search (std::string const& field, std::string const& value, scope::context_t const& scope, int kind, oak::uuid_t const& bundle, bool includeDisabledItems, std::multimap<double, item_ptr>& ordered)
 	{
 		std::lock_guard<std::recursive_mutex> lock(cache().mutex());
 		std::multimap<std::string, item_ptr> const& values = cache().fetch(field);
@@ -233,7 +233,7 @@ namespace bundles
 		}
 	}
 
- 	static void linear_search (std::string const& field, std::string const& value, scope::context_t const& scope, int kind, oak::uuid_t const& bundle, bool includeDisabledItems, std::multimap<double, item_ptr>& ordered)
+	static void linear_search (std::string const& field, std::string const& value, scope::context_t const& scope, int kind, oak::uuid_t const& bundle, bool includeDisabledItems, std::multimap<double, item_ptr>& ordered)
 	{
 		for(auto const& item : AllItems)
 		{
@@ -250,7 +250,7 @@ namespace bundles
 		}
 	}
 
- 	static void search (std::string const& field, std::string const& value, scope::context_t const& scope, int kind, oak::uuid_t const& bundle, bool includeDisabledItems, std::multimap<double, item_ptr>& ordered)
+	static void search (std::string const& field, std::string const& value, scope::context_t const& scope, int kind, oak::uuid_t const& bundle, bool includeDisabledItems, std::multimap<double, item_ptr>& ordered)
 	{
 		static auto const CachedFields = new std::set<std::string>{ kFieldKeyEquivalent, kFieldTabTrigger, kFieldSemanticClass, kFieldGrammarScope, kFieldSettingName };
 		if(!includeDisabledItems && !bundle && CachedFields->find(field) != CachedFields->end())

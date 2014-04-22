@@ -1949,7 +1949,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 			}
 			else
 			{
-	 			for(size_t i = 0; i < newChoices.size(); ++i)
+				for(size_t i = 0; i < newChoices.size(); ++i)
 				{
 					if(newChoices[i].find(newContent) != 0)
 						continue;

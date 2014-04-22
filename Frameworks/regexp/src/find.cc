@@ -90,11 +90,11 @@ namespace find
 				(*it)->clear();
 		}
 
-		bool does_match (char needle) const							{ return needle == byte; }
-		std::vector<dfa_node_ptr> const& descend () const		{ return children; }
+		bool does_match (char needle) const                   { return needle == byte; }
+		std::vector<dfa_node_ptr> const& descend () const     { return children; }
 
-		char get_byte () const											{ return byte; }
-		bool can_merge (dfa_node_ptr const& rhs) const			{ return byte == rhs->byte; }
+		char get_byte () const                                { return byte; }
+		bool can_merge (dfa_node_ptr const& rhs) const        { return byte == rhs->byte; }
 		dfa_node_ptr merge (dfa_node_ptr const& rhs) const
 		{
 			std::vector<dfa_node_ptr> merged = children, tmp;

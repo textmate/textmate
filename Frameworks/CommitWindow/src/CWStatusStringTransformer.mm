@@ -1,6 +1,6 @@
 //  Created by Chris Thomas on 2/6/05.
 //  Copyright 2005-2007 Chris Thomas. All rights reserved.
-//	MIT license.
+//  MIT license.
 //
 #import "CWStatusStringTransformer.h"
 
@@ -9,7 +9,7 @@
 #define OneShotNSColorFromTriplet(accessorName,r,g,b) \
 static inline NSColor* accessorName(void)\
 {\
-	static NSColor*	color = nil;\
+	static NSColor* color = nil;\
 	if(color == nil)\
 		color = [NSColor colorWithDeviceRed:RGB8ComponentTransform(r) green:RGB8ComponentTransform(g) blue:RGB8ComponentTransform(b) alpha:1.0];\
 	return color;\

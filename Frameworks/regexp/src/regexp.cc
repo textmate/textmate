@@ -50,11 +50,11 @@ namespace regexp
 		{
 			switch(it)
 			{
-				case 'e': options |= ONIG_OPTION_EXTEND;		break;
-				// case 'g': options |= ONIG_OPTION_REPEAT;		break;
-				case 'i': options |= ONIG_OPTION_IGNORECASE;	break;
-				case 'm': options |= ONIG_OPTION_MULTILINE;	break;
-				case 's': options |= ONIG_OPTION_SINGLELINE;	break;
+				case 'e': options |= ONIG_OPTION_EXTEND;     break;
+				// case 'g': options |= ONIG_OPTION_REPEAT;     break;
+				case 'i': options |= ONIG_OPTION_IGNORECASE; break;
+				case 'm': options |= ONIG_OPTION_MULTILINE;  break;
+				case 's': options |= ONIG_OPTION_SINGLELINE; break;
 			}
 		}
 		init(pattern, options);

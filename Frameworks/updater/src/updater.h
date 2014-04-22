@@ -44,8 +44,6 @@ namespace bundles_db
 
 	struct PUBLIC bundle_t
 	{
-		bundle_t () : _name(NULL_STR), _category(NULL_STR), _html_url(NULL_STR), _origin(NULL_STR), _description(NULL_STR), _contact_name(NULL_STR), _contact_email(NULL_STR), _url(NULL_STR), _size(0), _path(NULL_STR) { }
-
 		oak::uuid_t uuid () const              { return _uuid; }
 		std::string origin () const            { return _origin; }
 		std::string name () const              { return _name; }
@@ -84,27 +82,27 @@ namespace bundles_db
 
 		oak::uuid_t _uuid;
 
-		std::string _name;
-		std::string _category;
-		std::string _html_url;
-		std::string _origin;
-		std::string _description;
-		std::string _contact_name;
-		std::string _contact_email;
+		std::string _name          = NULL_STR;
+		std::string _category      = NULL_STR;
+		std::string _html_url      = NULL_STR;
+		std::string _origin        = NULL_STR;
+		std::string _description   = NULL_STR;
+		std::string _contact_name  = NULL_STR;
+		std::string _contact_email = NULL_STR;
 
 		std::vector<grammar_info_ptr> _grammars;
 		std::vector<dependency_info_ptr> _dependencies;
 
 		source_ptr _source;
-		std::string _url;
+		std::string _url = NULL_STR;
 		oak::date_t _url_updated;
-		int32_t _size;
+		int32_t _size = 0;
 		bool _is_default = false;
 		bool _is_mandatory = false;
 		bool _is_dependency = false; // if installed because another bundle depends on it
 
-		std::string _path;
-		oak::date_t	_path_updated;
+		std::string _path = NULL_STR;
+		oak::date_t _path_updated;
 	};
 
 	struct PUBLIC grammar_info_t

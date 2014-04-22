@@ -31,19 +31,19 @@ namespace regexp
 	public:
 		match_t () : buf(NULL) { }
 
-		int size () const						{ return region ? region->num_regs : 0; }
-		bool empty (int i = 0) const		{ return begin(i) == end(i); }
+		int size () const                { return region ? region->num_regs : 0; }
+		bool empty (int i = 0) const     { return begin(i) == end(i); }
 
-		bool did_match (int i = 0) const	{ return i < size() && region->beg[i] != -1; }
+		bool did_match (int i = 0) const { return i < size() && region->beg[i] != -1; }
 
-		explicit operator bool () const	{ return did_match(); }
+		explicit operator bool () const  { return did_match(); }
 
-		char const* buffer () const		{ return buf; }
+		char const* buffer () const      { return buf; }
 
-		size_t begin () const				{ return did_match() ? (size_t)region->beg[0] : SIZE_T_MAX; }
-		size_t end () const					{ return did_match() ? (size_t)region->end[0] : SIZE_T_MAX; }
-		size_t begin (int i) const			{ return did_match(i) ? (size_t)region->beg[i] : end(); }
-		size_t end (int i) const			{ return did_match(i) ? (size_t)region->end[i] : end(); }
+		size_t begin () const            { return did_match() ? (size_t)region->beg[0] : SIZE_T_MAX; }
+		size_t end () const              { return did_match() ? (size_t)region->end[0] : SIZE_T_MAX; }
+		size_t begin (int i) const       { return did_match(i) ? (size_t)region->beg[i] : end(); }
+		size_t end (int i) const         { return did_match(i) ? (size_t)region->end[i] : end(); }
 
 		std::map<std::string, std::string> const& captures () const;
 		std::multimap<std::string, std::pair<size_t, size_t> > const& capture_indices () const;

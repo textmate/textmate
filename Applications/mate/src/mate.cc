@@ -331,7 +331,7 @@ int main (int argc, char* argv[])
 			}
 		}
 		else if(files[i].find(kUUIDPrefix) == 0)
- 		{
+		{
 			write_key_pair(fd, "uuid", files[i].substr(kUUIDPrefix.size()));
 		}
 		else
