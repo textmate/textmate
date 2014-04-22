@@ -1,7 +1,7 @@
 #import "SoftwareUpdate.h"
 #import "DownloadWindowController.h"
 #import "sw_update.h"
-#import "version_compare.h"
+#import <version/version.h>
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakSound.h>
 #import <OakAppKit/NSMenu Additions.h>
@@ -161,19 +161,19 @@ static SoftwareUpdate* SharedInstance;
 
 				BOOL downloadAndInstall = NO;
 
-				if(version_equal(info.version, to_s(version)) && !backgroundFlag)
+				if(version::equal(info.version, to_s(version)) && !backgroundFlag)
 				{
 					NSInteger choice = NSRunInformationalAlertPanel(@"Up To Date", @"%@ is the latest version available—you have version %@.", @"Continue", nil, redownloadFlag ? @"Redownload" : nil, newVersion, version);
 					if(choice == NSAlertOtherReturn) // “Redownload”
 						downloadAndInstall = YES;
 				}
-				else if(version_less(info.version, to_s(version)) && !backgroundFlag)
+				else if(version::less(info.version, to_s(version)) && !backgroundFlag)
 				{
 					NSInteger choice = NSRunInformationalAlertPanel(@"Up To Date", @"%@ is the latest version available—you have version %@.", @"Continue", nil, @"Downgrade", newVersion, version);
 					if(choice == NSAlertOtherReturn) // “Downgrade”
 						downloadAndInstall = YES;
 				}
-				else if(version_less(to_s(version), info.version))
+				else if(version::less(to_s(version), info.version))
 				{
 					if(!backgroundFlag || [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsAskBeforeUpdatingKey])
 					{
@@ -183,7 +183,7 @@ static SoftwareUpdate* SharedInstance;
 						else if(choice == NSAlertOtherReturn) // “Later”
 							[[NSUserDefaults standardUserDefaults] setObject:[[NSDate date] dateByAddingTimeInterval:24*60*60] forKey:kUserDefaultsSoftwareUpdateSuspendUntilKey];
 					}
-					else if(version_less(to_s(self.lastVersionDownloaded), info.version))
+					else if(version::less(to_s(self.lastVersionDownloaded), info.version))
 					{
 						downloadAndInstall = YES;
 					}

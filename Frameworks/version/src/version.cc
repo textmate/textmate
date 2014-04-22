@@ -1,4 +1,4 @@
-#include "version_compare.h"
+#include "version.h"
 
 static bool is_numeric (std::string const& str)
 {
@@ -42,38 +42,42 @@ static std::vector<std::string> strip_trailing_zeroes (std::vector<std::string> 
 	return res;
 }
 
-bool version_less (std::string const& lhs, std::string const& rhs)
+namespace version
 {
-	if(lhs == NULL_STR)
-		return rhs != NULL_STR;
-	else if(rhs == NULL_STR)
-		return false;
-
-	auto lhsV = strip_trailing_zeroes(components(lhs));
-	auto rhsV = strip_trailing_zeroes(components(rhs));
-
-	auto lhsIt = lhsV.begin();
-	auto rhsIt = rhsV.begin();
-
-	while(lhsIt != lhsV.end() && rhsIt != rhsV.end())
+	bool less (std::string const& lhs, std::string const& rhs)
 	{
-		bool numberCompare = is_numeric(*lhsIt) && is_numeric(*rhsIt);
-		if(*lhsIt != *rhsIt && (!numberCompare || std::stol(*lhsIt) != std::stol(*rhsIt)))
-		{
-			if(numberCompare)
-				return std::stol(*lhsIt) < std::stol(*rhsIt);
-			else if(lhsIt->find_first_not_of(".-+") == std::string::npos)
-				return *lhsIt == "-" || (*lhsIt == "+" && *rhsIt == ".");
-			return *lhsIt < *rhsIt;
-		}
-		else if(*lhsIt == "+")
-		{
+		if(lhs == NULL_STR)
+			return rhs != NULL_STR;
+		else if(rhs == NULL_STR)
 			return false;
+
+		auto lhsV = strip_trailing_zeroes(components(lhs));
+		auto rhsV = strip_trailing_zeroes(components(rhs));
+
+		auto lhsIt = lhsV.begin();
+		auto rhsIt = rhsV.begin();
+
+		while(lhsIt != lhsV.end() && rhsIt != rhsV.end())
+		{
+			bool numberCompare = is_numeric(*lhsIt) && is_numeric(*rhsIt);
+			if(*lhsIt != *rhsIt && (!numberCompare || std::stol(*lhsIt) != std::stol(*rhsIt)))
+			{
+				if(numberCompare)
+					return std::stol(*lhsIt) < std::stol(*rhsIt);
+				else if(lhsIt->find_first_not_of(".-+") == std::string::npos)
+					return *lhsIt == "-" || (*lhsIt == "+" && *rhsIt == ".");
+				return *lhsIt < *rhsIt;
+			}
+			else if(*lhsIt == "+")
+			{
+				return false;
+			}
+
+			++lhsIt;
+			++rhsIt;
 		}
 
-		++lhsIt;
-		++rhsIt;
+		return lhsIt != lhsV.end() ? *lhsIt == "-" : (rhsIt != rhsV.end() && *rhsIt == ".");
 	}
 
-	return lhsIt != lhsV.end() ? *lhsIt == "-" : (rhsIt != rhsV.end() && *rhsIt == ".");
-}
+} /* version */

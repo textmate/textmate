@@ -2,5 +2,5 @@ TESTS        = tests/*.cc
 SOURCES      = src/*.{cc,mm}
 EXPORT       = src/*.h
 CP_Resources = resources/*
-LINK        += OakAppKit OakFoundation OakSystem network ns cf plist
+LINK        += OakAppKit OakFoundation OakSystem version network ns cf plist
 FRAMEWORKS   = Cocoa WebKit
