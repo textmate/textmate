@@ -4,6 +4,7 @@ FLAGS += -c -pipe -fPIC -gdwarf-2
 FLAGS += -m64 -mmacosx-version-min=$APP_MIN_OS -isysroot "$sdk"
 FLAGS += -funsigned-char
 FLAGS += -D'NULL_STR="\uFFFF"'
+FLAGS += -DREST_API='"$rest_api"'
 FLAGS += -Wall -Wwrite-strings -Wformat -Winit-self -Wmissing-include-dirs -Wno-parentheses -Wno-sign-compare -Wno-switch
 FLAGS += -Wno-address-of-temporary
 FLAGS += -IShared/include

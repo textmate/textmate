@@ -3,7 +3,6 @@ CP_Resources         = resources/* icons/*.icns about/* @PrivilegedTool @mate @t
 CP_SharedSupport     = support/*
 CP_PlugIns           = @Dialog @Dialog2
 CP_Library/QuickLook = @TextMateQL
-FLAGS               += -DREST_API='@"$rest_api"'
 LINK                += bundles cf command document editor io network ns plist settings text kvdb
 LINK                += BundleMenu BundleEditor BundlesManager CrashReporter DocumentWindow Find HTMLOutputWindow OakAppKit OakFilterList OakFoundation OakSystem OakTextView Preferences SoftwareUpdate updater license
 LINK                += CommitWindow
