@@ -9,9 +9,6 @@ namespace network
 {
 	bool can_reach_host (char const* host)
 	{
-		if(char const* realHost = strstr(host, "://"))
-			host = realHost + 3;
-
 		bool res = false;
 		if(SCNetworkReachabilityRef ref = SCNetworkReachabilityCreateWithName(kCFAllocatorDefault, host))
 		{
