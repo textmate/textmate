@@ -2336,7 +2336,11 @@ static NSUInteger DisableSessionSavingCount = 0;
 		DocumentController* controller = [DocumentController new];
 		[controller setupControllerForProject:project skipMissingFiles:NO];
 		if(NSString* windowFrame = project[@"windowFrame"])
-			[controller.window setFrame:NSRectFromString(windowFrame) display:NO];
+		{
+			if([windowFrame hasPrefix:@"{"]) // Legacy NSRect
+					[controller.window setFrame:NSRectFromString(windowFrame) display:NO];
+			else	[controller.window setFrameFromString:windowFrame];
+		}
 		[controller showWindow:nil];
 		if([project[@"miniaturized"] boolValue])
 			[controller.window miniaturize:nil];
@@ -2407,7 +2411,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 
 	if(([self.window styleMask] & NSFullScreenWindowMask) == NSFullScreenWindowMask)
 			res[@"fullScreen"] = @YES;
-	else	res[@"windowFrame"] = NSStringFromRect([self.window frame]);
+	else	res[@"windowFrame"] = [self.window stringWithSavedFrame];
 
 	res[@"miniaturized"]       = @([self.window isMiniaturized]);
 	res[@"htmlOutputSize"]     = NSStringFromSize(self.htmlOutputSize);
