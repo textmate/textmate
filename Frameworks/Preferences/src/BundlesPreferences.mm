@@ -150,6 +150,16 @@ static std::string textify (std::string str)
 	[aTableView reloadData];
 }
 
+- (void)tableView:(NSTableView*)aTableView willDisplayCell:(id)aCell forTableColumn:(NSTableColumn*)aTableColumn row:(int)rowIndex
+{
+	if([[aTableColumn identifier] isEqualToString:@"link"])
+	{
+		BOOL enabled = bundles[rowIndex]->html_url() != NULL_STR;
+		[aCell setEnabled:enabled];
+		[aCell setImage:enabled ? [NSImage imageNamed:@"NSFollowLinkFreestandingTemplate"] : nil];
+	}
+}
+
 - (BOOL)tableView:(NSTableView*)aTableView shouldEditTableColumn:(NSTableColumn*)aTableColumn row:(NSInteger)rowIndex
 {
 	if([[aTableColumn identifier] isEqualToString:@"installed"])
