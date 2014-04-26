@@ -16,7 +16,6 @@ namespace bundles_db
 		if(res == 304) // not modified
 		{
 			path::remove(archiver.path);
-			return NULL_STR;
 		}
 		else if(res == 200)
 		{
@@ -24,12 +23,12 @@ namespace bundles_db
 				*etag = collect_etag.etag;
 			return archiver.path;
 		}
-		else if(res != 0)
+		else
 		{
-			error = text::format("got ‘%ld’ from server (expected 200)", res);
+			if(res != 0)
+					fprintf(stderr, "*** download_etag(‘%s’): got ‘%ld’ from server (expected 200)\n", url.c_str(), res);
+			else	fprintf(stderr, "*** download_etag(‘%s’): %s\n", url.c_str(), error.c_str());
 		}
-
-		fprintf(stderr, "*** download_etag(‘%s’): %s\n", url.c_str(), res == 0 ? error.c_str() : "unexpected server response");
 		return NULL_STR;
 	}
 }
