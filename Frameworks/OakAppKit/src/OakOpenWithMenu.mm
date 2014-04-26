@@ -45,15 +45,21 @@ static NSArray* ApplicationURLsForPaths (NSSet* paths)
 	{
 		if(NSBundle* bundle = [NSBundle bundleWithURL:url])
 		{
-			NSString* identifier = [bundle bundleIdentifier];
-			counts[identifier] = @([counts[identifier] intValue] + 1);
-			[apps addObject:@{
-				@"identifier" : identifier,
-				@"name"       : [bundle objectForInfoDictionaryKey:@"CFBundleName"],
-				@"version"    : [bundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"] ?: ([bundle objectForInfoDictionaryKey:@"CFBundleVersion"] ?: @"???"),
-				@"url"        : url,
-				@"isDefault"  : @([defaultAppURLs containsObject:url]),
-			}];
+			if(NSString* identifier = [bundle bundleIdentifier])
+			{
+				counts[identifier] = @([counts[identifier] intValue] + 1);
+				[apps addObject:@{
+					@"identifier" : identifier,
+					@"name"       : [[NSFileManager defaultManager] displayNameAtPath:[url path]],
+					@"version"    : [bundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"] ?: ([bundle objectForInfoDictionaryKey:@"CFBundleVersion"] ?: @"???"),
+					@"url"        : url,
+					@"isDefault"  : @([defaultAppURLs containsObject:url]),
+				}];
+			}
+			else
+			{
+				NSLog(@"warning: missing CFBundleIdentifier: %@", bundle);
+			}
 		}
 	}
 
