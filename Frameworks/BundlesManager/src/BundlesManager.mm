@@ -5,6 +5,7 @@
 #import <OakFoundation/NSString Additions.h>
 #import <bundles/locations.h>
 #import <bundles/query.h> // set_index
+#import <version/version.h>
 #import <regexp/format_string.h>
 #import <text/ctype.h>
 #import <ns/ns.h>
@@ -114,14 +115,37 @@ static double const kPollInterval = 3*60*60;
 				if(!installedBundle->has_update())
 					continue;
 
+				std::vector<bundles_db::bundle_ptr> tmp;
 				for(auto bundle : bundles_db::dependencies(bundlesIndex, installedBundle, false, false))
 				{
-					if((bundle->has_update() || !bundle->installed()) && installing.find(bundle->uuid()) == installing.end())
+					if((bundle->installed() && !bundle->has_update()) || installing.find(bundle->uuid()) != installing.end())
+						continue;
+
+					std::string appVersion = to_s((NSString*)[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"]);
+					if(version::less(appVersion, bundle->requires()))
 					{
-						if(!bundle->installed())
-							bundle->set_dependency(true);
-						outdatedBundles.push_back(bundle);
+						if(!bundle->installed() || bundle == installedBundle)
+						{
+							fprintf(stderr, "*** skip updating %s bundle: requires TextMate %s\n", installedBundle->name().c_str(), bundle->requires().c_str());
+							tmp.clear();
+							break;
+						}
+						else
+						{
+							fprintf(stderr, "*** skip updating %s bundle: requires TextMate %s (while updating %s bundle)\n", bundle->name().c_str(), installedBundle->name().c_str(), bundle->requires().c_str());
+						}
 					}
+					else
+					{
+						tmp.push_back(bundle);
+					}
+				}
+
+				for(auto bundle : tmp)
+				{
+					if(!bundle->installed())
+						bundle->set_dependency(true);
+					outdatedBundles.push_back(bundle);
 				}
 			}
 		}
