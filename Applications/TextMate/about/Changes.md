@@ -2,6 +2,10 @@ Title: Release Notes
 
 # Changes
 
+## 2014-04-28 ([v2.0-alpha.9543](https://github.com/textmate/textmate/compare/v2.0-alpha.9539...v2.0-alpha.9543))
+
+* Various fixes and improvements.
+
 ## 2014-04-18 ([v2.0-alpha.9539](https://github.com/textmate/textmate/compare/v2.0-alpha.9533...v2.0-alpha.9539))
 
 * In file pattern globs the tilde (`~`) and bang (`!`) operators both indicate that what follows must not match the file path. For example: `*.{c,h}~vendor/**` will match `.c` and `.h` files except when under the `vendor/` directory. It’s possible to specify multiple exclusion patterns and also to start the pattern with the exclude operator, e.g. `!build/*!cache/*` will match anything not in `build/` or `cache/`. If the operator is used inside brace expansion (e.g. `{Icon\r,*~.nib}`) then it’ll be treated as a literal match, similarly when used last in the pattern (e.g. `*.txt~`).
