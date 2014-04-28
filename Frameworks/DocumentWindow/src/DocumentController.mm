@@ -39,6 +39,7 @@ static NSString* const kUserDefaultsFindInSelectionByDefault = @"findInSelection
 static NSString* const kUserDefaultsDisableFolderStateRestore = @"disableFolderStateRestore";
 static NSString* const kUserDefaultsHideStatusBarKey = @"hideStatusBar";
 static NSString* const OakDocumentPboardType = @"OakDocumentPboardType"; // drag’n’drop of tabs
+static BOOL IsInShouldTerminateEventLoop = NO;
 
 @interface QuickLookNSURLWrapper : NSObject <QLPreviewItem>
 @property (nonatomic) NSURL* url;
@@ -461,6 +462,9 @@ namespace
 		{
 			case NSAlertFirstButtonReturn: /* "Save" */
 			{
+				if(std::exchange(IsInShouldTerminateEventLoop, NO))
+					[NSApp replyToApplicationShouldTerminate:NO];
+
 				[DocumentSaveHelper trySaveDocuments:documentsToSave forWindow:self.window defaultDirectory:self.untitledSavePath completionHandler:^(BOOL success){
 					callback(success);
 				}];
@@ -692,11 +696,17 @@ namespace
 		return NSTerminateNow;
 	}
 
+	IsInShouldTerminateEventLoop = YES;
+
 	DocumentController* controller = [SortedControllers() firstObject];
 	[controller showCloseWarningUIForDocuments:documents completionHandler:^(BOOL canClose){
 		if(canClose)
 			[self saveSessionAndDetachBackups];
-		[NSApp replyToApplicationShouldTerminate:canClose];
+
+		if(std::exchange(IsInShouldTerminateEventLoop, NO))
+			[NSApp replyToApplicationShouldTerminate:canClose];
+		else if(canClose)
+			[NSApp terminate:self];
 	}];
 
 	return NSTerminateLater;
