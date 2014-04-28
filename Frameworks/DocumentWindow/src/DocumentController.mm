@@ -669,7 +669,12 @@ namespace
 		for(DocumentController* controller in [SortedControllers() reverseObjectEnumerator])
 		{
 			for(auto document : controller.documents)
+			{
+				std::string const backupPath = document->backup_path();
 				document->detach_backup();
+				if(backupPath != NULL_STR && document->path() != NULL_STR)
+					unlink(backupPath.c_str());
+			}
 		}
 	}
 }
