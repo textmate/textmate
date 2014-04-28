@@ -350,9 +350,15 @@ namespace
 					_state      = kStateIdle;
 					_next_state = kStateNotifyCallback;
 
-					_error = write_to_path(_path, _content, _attributes, _authorization);
-					_saved = _error == NULL_STR;
-					proceed();
+					auto retainedSelf = std::static_pointer_cast<file_context_t>(shared_from_this());
+					dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+						std::string error = write_to_path(_path, _content, _attributes, _authorization);
+						dispatch_async(dispatch_get_main_queue(), ^{
+							_saved = error == NULL_STR;
+							_error = error;
+							retainedSelf->proceed();
+						});
+					});
 				}
 				break;
 
