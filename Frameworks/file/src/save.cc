@@ -12,8 +12,6 @@
 #include <settings/settings.h>
 #include <command/parser.h>
 #include <oak/debug.h>
-#include <oak/server.h>
-#include <oak/debug.h>
 
 OAK_DEBUG_VAR(File_Save);
 
@@ -39,7 +37,6 @@ namespace
 		void set_authorization (osx::authorization_t auth)        { _authorization = auth;            proceed(); }
 		void set_content (io::bytes_ptr content)                  { _content = content;               proceed(); }
 		void set_charset (std::string const& charset)             { _encoding.set_charset(charset);   proceed(); }
-		void set_saved (bool flag, std::string const& error)      { _saved = flag; _error = error;    proceed(); }
 
 		void filter_error (bundle_command_t const& command, int rc, std::string const& out, std::string const& err)
 		{
@@ -104,65 +101,31 @@ namespace
 	typedef std::shared_ptr<file_context_t> file_context_ptr;
 }
 
-// ==================
-// = Threaded Write =
-// ==================
+// ====================
+// = Context Datatype =
+// ====================
 
-namespace file
+namespace
 {
-	struct write_t
-	{
-		struct request_t { std::string path; io::bytes_ptr bytes; std::map<std::string, std::string> attributes; osx::authorization_t authorization; };
-
-		WATCH_LEAKS(write_t);
-
-		write_t (std::string const& path, io::bytes_ptr const& bytes, std::map<std::string, std::string> const& attributes, osx::authorization_t authorization, file_context_ptr callback);
-		virtual ~write_t ();
-
-		static std::string handle_request (write_t::request_t const& request);
-		void handle_reply (std::string const& error);
-
-	private:
-		size_t _client_key;
-		file_context_ptr _callback;
-	};
-
-	static oak::server_t<write_t>& write_server ()
-	{
-		static oak::server_t<write_t> server;
-		return server;
-	}
-
-	write_t::write_t (std::string const& path, io::bytes_ptr const& bytes, std::map<std::string, std::string> const& attributes, osx::authorization_t authorization, file_context_ptr callback) : _callback(callback)
-	{
-		_client_key = write_server().register_client(this);
-		write_server().send_request(_client_key, (request_t){ path, bytes, attributes, authorization });
-	}
-
-	write_t::~write_t ()
-	{
-		write_server().unregister_client(_client_key);
-	}
-
-	std::string write_t::handle_request (write_t::request_t const& request)
+	static std::string write_to_path (std::string const& path, io::bytes_ptr const& bytes, std::map<std::string, std::string> const& attributes, osx::authorization_t authorization)
 	{
 		std::string error = NULL_STR;
-		file_status_t status = file::status(request.path);
+		file_status_t status = file::status(path);
 		if(status == kFileTestWritable || status == kFileTestNotWritableButOwner)
 		{
 			if(status == kFileTestNotWritableButOwner)
 			{
 				struct stat sbuf;
-				if(stat(request.path.c_str(), &sbuf) == 0)
-					chmod(request.path.c_str(), sbuf.st_mode | S_IWUSR);
+				if(stat(path.c_str(), &sbuf) == 0)
+					chmod(path.c_str(), sbuf.st_mode | S_IWUSR);
 			}
 
-			path::intermediate_t dest(request.path);
+			path::intermediate_t dest(path);
 
 			int fd = open(dest, O_CREAT|O_TRUNC|O_WRONLY|O_CLOEXEC, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH);
 			if(fd == -1)
 				error = text::format("open(\"%s\"): %s", (char const*)dest, strerror(errno));
-			else if(write(fd, request.bytes->get(), request.bytes->size()) != request.bytes->size())
+			else if(write(fd, bytes->get(), bytes->size()) != bytes->size())
 			{
 				close(fd);
 				error = text::format("write(): %s", strerror(errno));
@@ -171,14 +134,14 @@ namespace file
 				error = text::format("close(): %s", strerror(errno));
 			else if(!dest.commit())
 				error = text::format("Atomic save: %s", strerror(errno));
-			else if(!path::set_attributes(request.path, request.attributes))
+			else if(!path::set_attributes(path, attributes))
 				error = text::format("Setting extended attributes: %s", strerror(errno));
 		}
 		else if(status == kFileTestWritableByRoot || status == kFileTestNotWritable)
 		{
-			if(connection_t conn = connect_to_auth_server(request.authorization))
+			if(connection_t conn = connect_to_auth_server(authorization))
 			{
-				conn << "write" << request.path << std::string(request.bytes->begin(), request.bytes->end()) << request.attributes;
+				conn << "write" << path << std::string(bytes->begin(), bytes->end()) << attributes;
 				conn >> error;
 			}
 			else
@@ -189,20 +152,6 @@ namespace file
 		return error;
 	}
 
-	void write_t::handle_reply (std::string const& error)
-	{
-		_callback->set_saved(error == NULL_STR, error);
-		delete this;
-	}
-
-} /* file */
-
-// ====================
-// = Context Datatype =
-// ====================
-
-namespace
-{
 	void file_context_t::event_loop ()
 	{
 		_next_state = kStateIdle;
@@ -401,7 +350,15 @@ namespace
 					_state      = kStateIdle;
 					_next_state = kStateNotifyCallback;
 
-					new file::write_t(_path, _content, _attributes, _authorization, std::static_pointer_cast<file_context_t>(shared_from_this()));
+					auto retainedSelf = std::static_pointer_cast<file_context_t>(shared_from_this());
+					dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+						std::string error = write_to_path(_path, _content, _attributes, _authorization);
+						dispatch_async(dispatch_get_main_queue(), ^{
+							_saved = error == NULL_STR;
+							_error = error;
+							retainedSelf->proceed();
+						});
+					});
 				}
 				break;
 
