@@ -215,12 +215,23 @@ namespace
 	[self saveNextDocument:self];
 }
 
+- (void)postDidSaveNotification:(id)sender
+{
+	[[NSNotificationCenter defaultCenter] postNotificationName:@"OakDocumentNotificationDidSave" object:self userInfo:@{ @"window" : self.window }];
+}
+
 - (void)didSaveDocument:(document::document_ptr const&)aDocument success:(BOOL)flag error:(std::string const&)aMessage usingFilter:(oak::uuid_t const&)aFilter
 {
+	// This method is indirectly being called from a block executed in the main
+	// queue, as saving is running in a background queue. We need to get out of that
+	// block before posting the “did save” notification or saving next file, as
+	// while we are in this block, new blocks won’t be executed in the main queue,
+	// which we might rely on when running a local event loop (for executing commands).
+
 	D(DBF_DocumentController_SaveHelper, bug("‘%s’, success %s, user abort %s\n", aDocument->path().c_str(), BSTR(flag), BSTR(self.userAbort)););
 	if(flag)
 	{
-		[[NSNotificationCenter defaultCenter] postNotificationName:@"OakDocumentNotificationDidSave" object:self userInfo:@{ @"window" : self.window }];
+		[self performSelector:@selector(postDidSaveNotification:) withObject:self afterDelay:0];
 	}
 	else if(!self.userAbort)
 	{
@@ -232,6 +243,6 @@ namespace
 
 	documents.pop_back();
 	self.failed = self.failed || !flag || self.userAbort;
-	[self saveNextDocument:self];
+	[self performSelector:@selector(saveNextDocument:) withObject:self afterDelay:0];
 }
 @end
