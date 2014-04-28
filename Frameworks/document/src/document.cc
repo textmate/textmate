@@ -758,7 +758,7 @@ namespace document
 		if(!is_open())
 		{
 			if(!_content && _backup_path == NULL_STR)
-				return callback->did_save(_path, io::bytes_ptr(), encoding::type(_disk_newlines, _disk_encoding, _disk_bom), false, NULL_STR, oak::uuid_t());
+				return callback->did_save_document(shared_from_this(), _path, true, NULL_STR, oak::uuid_t());
 		}
 
 		_file_watcher.reset();
