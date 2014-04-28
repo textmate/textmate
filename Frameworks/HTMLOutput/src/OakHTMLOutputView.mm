@@ -85,12 +85,14 @@ extern NSString* const kCommandRunnerURLScheme; // from HTMLOutput.h
 {
 	self.runningCommand = NO;
 	self.autoScrollHelper = nil;
+	[super webView:sender didFailProvisionalLoadWithError:error forFrame:frame];
 }
 
 - (void)webView:(WebView*)sender didFailLoadWithError:(NSError*)error forFrame:(WebFrame*)frame
 {
 	self.runningCommand = NO;
 	self.autoScrollHelper = nil;
+	[super webView:sender didFailLoadWithError:error forFrame:frame];
 }
 
 // =========================================
