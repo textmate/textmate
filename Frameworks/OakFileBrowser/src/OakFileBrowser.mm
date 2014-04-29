@@ -405,17 +405,14 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 {
 	std::map<std::string, std::string> env;
 
-	std::vector<std::string> selection;
-	for(NSString* aPath in self.selectedPaths)
-		selection.push_back([aPath fileSystemRepresentation]);
-
-	if(!selection.empty())
+	if(self.selectedPaths.count)
 	{
-		std::vector<std::string> quoted;
-		for(auto const& path : selection)
-			quoted.push_back(format_string::replace(path, "\\A(?m:.*)\\z", "'${0/'/'\\''/}'"));
-		env["TM_SELECTED_FILE"]  = selection.back();
-		env["TM_SELECTED_FILES"] = text::join(quoted, " ");
+		std::vector<std::string> paths;
+		for(NSString* aPath in self.selectedPaths)
+			paths.emplace_back(path::escape(to_s(aPath)));
+
+		env["TM_SELECTED_FILE"]  = [[self.selectedPaths lastObject] fileSystemRepresentation];
+		env["TM_SELECTED_FILES"] = text::join(paths, " ");
 	}
 
 	return env;
