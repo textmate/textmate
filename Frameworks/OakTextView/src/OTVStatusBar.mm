@@ -40,6 +40,14 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSObject* accessibi
 	return res;
 }
 
+static NSMenuItem* OakCreateIndentMenuItem (NSString* title, SEL action, id target)
+{
+	NSMenuItem* res = [[NSMenuItem alloc] initWithTitle:title action:action keyEquivalent:@""];
+	[res setTarget:target];
+	[res setIndentationLevel:1];
+	return res;
+}
+
 @interface OTVStatusBar () <NSMenuDelegate>
 @property (nonatomic) CGFloat recordingTime;
 @property (nonatomic) NSTimer* recordingTimer;
@@ -141,15 +149,15 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSObject* accessibi
 	[tabSizeMenu addItemWithTitle:@"Indent Size" action:@selector(nop:) keyEquivalent:@""];
 	for(auto size : { 2, 3, 4, 8 })
 	{
-		NSMenuItem* item = [tabSizeMenu addItemWithTitle:[NSString stringWithFormat:@"\u2003%d", size] action:@selector(takeTabSizeFrom:) keyEquivalent:@""];
+		NSMenuItem* item = OakCreateIndentMenuItem([NSString stringWithFormat:@"%d", size], @selector(takeTabSizeFrom:), self.target);
 		[item setTag:size];
-		[item setTarget:self.target];
+		[tabSizeMenu addItem:item];
 	}
-	[[tabSizeMenu addItemWithTitle:@"\u2003Other…" action:@selector(showTabSizeSelectorPanel:) keyEquivalent:@""] setTarget:self.target];
+	[tabSizeMenu addItem:OakCreateIndentMenuItem(@"Other…", @selector(showTabSizeSelectorPanel:), self.target)];
 	[tabSizeMenu addItem:[NSMenuItem separatorItem]];
 	[[tabSizeMenu addItemWithTitle:@"Indent Using" action:@selector(nop:) keyEquivalent:@""] setTarget:self.target];
-	[[tabSizeMenu addItemWithTitle:@"\u2003Tabs" action:@selector(setIndentWithTabs:) keyEquivalent:@""] setTarget:self.target];
-	[[tabSizeMenu addItemWithTitle:@"\u2003Spaces" action:@selector(setIndentWithSpaces:) keyEquivalent:@""] setTarget:self.target];
+	[tabSizeMenu addItem:OakCreateIndentMenuItem(@"Tabs", @selector(setIndentWithTabs:), self.target)];
+	[tabSizeMenu addItem:OakCreateIndentMenuItem(@"Spaces", @selector(setIndentWithSpaces:), self.target)];
 }
 
 - (void)setTarget:(id)newTarget
