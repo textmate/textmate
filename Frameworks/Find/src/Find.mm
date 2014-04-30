@@ -162,7 +162,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		_findOptions |= find::all_matches;
 
 	NSString* folder = controller.searchFolder;
-	if(folder || (action == FindActionFindAll && [controller.searchIn isEqualToString:FFSearchInDocument] && self.documentIdentifier))
+	if(folder || [controller.searchIn isEqualToString:FFSearchInOpenFiles] || (action == FindActionFindAll && [controller.searchIn isEqualToString:FFSearchInDocument] && self.documentIdentifier))
 	{
 		switch(action)
 		{
