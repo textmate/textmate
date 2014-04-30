@@ -33,8 +33,6 @@
 #import <oak/compat.h>
 #import <kvdb/kvdb.h>
 
-namespace find_tags { enum { in_document = 1, in_selection, in_project, in_folder }; } // From AppController.h
-
 static NSString* const kUserDefaultsFindInSelectionByDefault = @"findInSelectionByDefault";
 static NSString* const kUserDefaultsDisableFolderStateRestore = @"disableFolderStateRestore";
 static NSString* const kUserDefaultsHideStatusBarKey = @"hideStatusBar";

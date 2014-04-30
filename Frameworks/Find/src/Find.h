@@ -1,5 +1,10 @@
 #import <OakFoundation/OakFindProtocol.h>
 
+namespace find_tags
+{
+	enum { in_document = 1, in_selection, in_project, in_folder};
+}
+
 PUBLIC extern NSString* const FFSearchInDocument;
 PUBLIC extern NSString* const FFSearchInSelection;
 extern NSString* const FFSearchInOpenFiles;
