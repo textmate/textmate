@@ -612,7 +612,7 @@ static NSButton* OakCreateStopSearchButton ()
 	[[whereMenu itemAtIndex:0] setRepresentedObject:FFSearchInDocument];
 	[[whereMenu addItemWithTitle:@"Selection" action:@selector(takeSearchInFrom:) keyEquivalent:@""] setRepresentedObject:FFSearchInSelection];
 	[whereMenu addItem:[NSMenuItem separatorItem]];
-	[[whereMenu addItemWithTitle:@"Open Files" action:@selector(nop:) keyEquivalent:@""] setRepresentedObject:FFSearchInOpenFiles];
+	[[whereMenu addItemWithTitle:@"Open Files" action:@selector(takeSearchInFrom:) keyEquivalent:@""] setRepresentedObject:FFSearchInOpenFiles];
 	[[whereMenu addItemWithTitle:@"Project Folder" action:@selector(orderFrontFindPanel:) keyEquivalent:@"F"] setTag:3];
 	[whereMenu addItemWithTitle:@"Other Folder…" action:@selector(showFolderSelectionPanel:) keyEquivalent:@""];
 
@@ -828,7 +828,7 @@ static NSButton* OakCreateStopSearchButton ()
 	}
 
 	_searchIn = aString;
-	self.folderSearch = self.searchFolder != nil;
+	self.folderSearch = self.searchFolder != nil || [aString isEqualTo:FFSearchInOpenFiles];
 	self.window.title = [self windowTitleForDocumentDisplayName:nil];
 	if(NSString* folder = self.searchFolder)
 		[self.recentFolders addObject:folder];
