@@ -1130,26 +1130,31 @@ doScroll:
 	ng::range_t const& r = [self rangeForNSRange:theRange];
 	size_t from = r.min().index, to = r.max().index;
 
-	CFMutableAttributedStringRef res = CFAttributedStringCreateMutable(kCFAllocatorDefault, 0);
-	std::map<size_t, scope::scope_t> scopes = document->buffer().scopes(from, to);
-	for(auto pair = scopes.begin(); pair != scopes.end(); )
+	if(CFMutableAttributedStringRef res = CFAttributedStringCreateMutable(kCFAllocatorDefault, 0))
 	{
-		styles_t const& styles = theme->styles_for_scope(pair->second);
+		std::map<size_t, scope::scope_t> scopes = document->buffer().scopes(from, to);
+		for(auto pair = scopes.begin(); pair != scopes.end(); )
+		{
+			styles_t const& styles = theme->styles_for_scope(pair->second);
 
-		size_t i = from + pair->first;
-		size_t j = ++pair != scopes.end() ? from + pair->first : to;
+			size_t i = from + pair->first;
+			size_t j = ++pair != scopes.end() ? from + pair->first : to;
 
-		CFMutableAttributedStringRef str = CFAttributedStringCreateMutable(kCFAllocatorDefault, 0);
-		CFAttributedStringReplaceString(str, CFRangeMake(0, 0), cf::wrap(document->buffer().substr(i, j)));
-		CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTFontAttributeName, styles.font());
-		CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTForegroundColorAttributeName, styles.foreground());
-		if(styles.underlined())
-			CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTUnderlineStyleAttributeName, cf::wrap(0x1|kCTUnderlinePatternSolid));
-		CFAttributedStringReplaceAttributedString(res, CFRangeMake(CFAttributedStringGetLength(res), 0), str);
-		CFRelease(str);
+			if(CFMutableAttributedStringRef str = CFAttributedStringCreateMutable(kCFAllocatorDefault, 0))
+			{
+				CFAttributedStringReplaceString(str, CFRangeMake(0, 0), cf::wrap(document->buffer().substr(i, j)));
+				CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTFontAttributeName, styles.font());
+				CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTForegroundColorAttributeName, styles.foreground());
+				if(styles.underlined())
+					CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTUnderlineStyleAttributeName, cf::wrap(0x1|kCTUnderlinePatternSolid));
+				CFAttributedStringReplaceAttributedString(res, CFRangeMake(CFAttributedStringGetLength(res), 0), str);
+
+				CFRelease(str);
+			}
+		}
+		return (NSAttributedString*)CFBridgingRelease(res);
 	}
-
-	return (NSAttributedString*)CFBridgingRelease(res);
+	return nil;
 }
 
 - (NSRect)firstRectForCharacterRange:(NSRange)theRange

@@ -64,25 +64,30 @@ namespace ct
 
 	metrics_t::metrics_t (std::string const& fontName, CGFloat fontSize)
 	{
-		CTFontRef font = CTFontCreateWithName(cf::wrap(fontName), fontSize, NULL);
-		CFMutableAttributedStringRef str = CFAttributedStringCreateMutable(kCFAllocatorDefault, 0);
-		CFAttributedStringReplaceString(str, CFRangeMake(0, 0), CFSTR("n"));
-		CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTFontAttributeName, font);
-		CTLineRef line = CTLineCreateWithAttributedString(str);
-
-		_ascent       = CTFontGetAscent(font);
-		_descent      = CTFontGetDescent(font);
-		_leading      = CTFontGetLeading(font);
-		_x_height     = CTFontGetXHeight(font);
-		_cap_height   = CTFontGetCapHeight(font);
-		_column_width = CTLineGetTypographicBounds(line, NULL, NULL, NULL);
-
 		_ascent_delta  = read_double_from_defaults(CFSTR("fontAscentDelta"), 1);
 		_leading_delta = read_double_from_defaults(CFSTR("fontLeadingDelta"), 1);
 
-		CFRelease(line);
-		CFRelease(str);
-		CFRelease(font);
+		if(CTFontRef font = CTFontCreateWithName(cf::wrap(fontName), fontSize, NULL))
+		{
+			_ascent     = CTFontGetAscent(font);
+			_descent    = CTFontGetDescent(font);
+			_leading    = CTFontGetLeading(font);
+			_x_height   = CTFontGetXHeight(font);
+			_cap_height = CTFontGetCapHeight(font);
+
+			if(CFMutableAttributedStringRef str = CFAttributedStringCreateMutable(kCFAllocatorDefault, 0))
+			{
+				CFAttributedStringReplaceString(str, CFRangeMake(0, 0), CFSTR("n"));
+				CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTFontAttributeName, font);
+				if(CTLineRef line = CTLineCreateWithAttributedString(str))
+				{
+					_column_width = CTLineGetTypographicBounds(line, NULL, NULL, NULL);
+					CFRelease(line);
+				}
+				CFRelease(str);
+			}
+			CFRelease(font);
+		}
 	}
 
 	CGFloat metrics_t::line_height (CGFloat minAscent, CGFloat minDescent, CGFloat minLeading) const

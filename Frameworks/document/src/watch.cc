@@ -126,11 +126,15 @@ namespace document
 		pthread_create(&server_thread, NULL, &watch_server_t::server_run_stub, this);
 
 		// attach to run-loop
-		CFSocketRef socket = CFSocketCreateWithNative(kCFAllocatorDefault, read_from_server_pipe, kCFSocketReadCallBack, &watch_server_t::data_from_server_stub, NULL);
-		CFRunLoopSourceRef source = CFSocketCreateRunLoopSource(kCFAllocatorDefault, socket, 0);
-		CFRunLoopAddSource(CFRunLoopGetCurrent(), source, kCFRunLoopDefaultMode);
-		CFRelease(source);
-		CFRelease(socket);
+		if(CFSocketRef socket = CFSocketCreateWithNative(kCFAllocatorDefault, read_from_server_pipe, kCFSocketReadCallBack, &watch_server_t::data_from_server_stub, NULL))
+		{
+			if(CFRunLoopSourceRef source = CFSocketCreateRunLoopSource(kCFAllocatorDefault, socket, 0))
+			{
+				CFRunLoopAddSource(CFRunLoopGetCurrent(), source, kCFRunLoopDefaultMode);
+				CFRelease(source);
+			}
+			CFRelease(socket);
+		}
 	}
 
 	watch_server_t::~watch_server_t ()

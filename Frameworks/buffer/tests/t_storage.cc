@@ -56,18 +56,23 @@ static std::string create_buffer (size_t size = 50 * 1024)
 void benchmark_cfstring_random_insert_1_mb ()
 {
 	std::string const buffer = create_buffer(1 * 1024*1024);
-	CFMutableStringRef storage = CFStringCreateMutable(kCFAllocatorDefault, 0);
-
-	for(auto range : reverse(random_ranges(buffer.size())))
+	if(CFMutableStringRef storage = CFStringCreateMutable(kCFAllocatorDefault, 0))
 	{
-		CFStringRef substr = CFStringCreateWithBytes(kCFAllocatorDefault, (UInt8 const*)buffer.data() + range.src, range.len, kCFStringEncodingASCII, false);
-		CFStringInsert(storage, range.dst, substr);
-		CFRelease(substr);
-	}
+		for(auto range : reverse(random_ranges(buffer.size())))
+		{
+			if(CFStringRef substr = CFStringCreateWithBytes(kCFAllocatorDefault, (UInt8 const*)buffer.data() + range.src, range.len, kCFStringEncodingASCII, false))
+			{
+				CFStringInsert(storage, range.dst, substr);
+				CFRelease(substr);
+			}
+		}
 
-	std::string c(CFStringGetLength(storage) + 1, '\0');
-	OAK_ASSERT(CFStringGetCString(storage, &c[0], c.size(), kCFStringEncodingASCII));
-	OAK_ASSERT_EQ(buffer, c.substr(0, c.size()-1));
+		std::string c(CFStringGetLength(storage) + 1, '\0');
+		OAK_ASSERT(CFStringGetCString(storage, &c[0], c.size(), kCFStringEncodingASCII));
+		OAK_ASSERT_EQ(buffer, c.substr(0, c.size()-1));
+
+		CFRelease(storage);
+	}
 }
 
 void benchmark_cxxstring_random_insert_1_mb ()

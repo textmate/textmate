@@ -28,10 +28,12 @@ void OakPlayUISound (OakSoundIdentifier aSound)
 				std::string const path_10_7 = path::join("/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds", sounds[i].path);
 				std::string const path = path::exists(path_10_7) ? path_10_7 : path_10_6;
 
-				CFURLRef url = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault, (UInt8 const*)path.data(), path.size(), false);
-				AudioServicesCreateSystemSoundID(url, &sounds[i].sound);
-				CFRelease(url);
-				sounds[i].initialized = true;
+				if(CFURLRef url = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault, (UInt8 const*)path.data(), path.size(), false))
+				{
+					AudioServicesCreateSystemSoundID(url, &sounds[i].sound);
+					sounds[i].initialized = true;
+					CFRelease(url);
+				}
 			}
 
 			if(sounds[i].sound)

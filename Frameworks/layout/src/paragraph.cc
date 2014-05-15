@@ -54,22 +54,25 @@ namespace ng
 		static void draw_line (CGPoint pos, std::string const& text, CGColorRef color, CTFontRef font, CGContextRef context, bool isFlipped)
 		{
 			ASSERT(utf8::is_valid(text.begin(), text.end()));
+			if(CFMutableAttributedStringRef str = CFAttributedStringCreateMutable(kCFAllocatorDefault, 0))
+			{
+				CFAttributedStringReplaceString(str, CFRangeMake(0, 0), cf::wrap(text));
+				CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTFontAttributeName, font);
+				CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTForegroundColorAttributeName, color);
 
-			CFMutableAttributedStringRef str = CFAttributedStringCreateMutable(kCFAllocatorDefault, 0);
-			CFAttributedStringReplaceString(str, CFRangeMake(0, 0), cf::wrap(text));
-			CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTFontAttributeName, font);
-			CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTForegroundColorAttributeName, color);
-			CTLineRef line = CTLineCreateWithAttributedString(str);
-			CFRelease(str);
+				if(CTLineRef line = CTLineCreateWithAttributedString(str))
+				{
+					CGContextSaveGState(context);
+					if(isFlipped)
+						CGContextConcatCTM(context, CGAffineTransformMake(1, 0, 0, -1, 0, 2 * pos.y));
+					CGContextSetTextPosition(context, pos.x, pos.y);
+					CTLineDraw(line, context);
+					CGContextRestoreGState(context);
 
-			CGContextSaveGState(context);
-			if(isFlipped)
-				CGContextConcatCTM(context, CGAffineTransformMake(1, 0, 0, -1, 0, 2 * pos.y));
-			CGContextSetTextPosition(context, pos.x, pos.y);
-			CTLineDraw(line, context);
-			CGContextRestoreGState(context);
-
-			CFRelease(line);
+					CFRelease(line);
+				}
+				CFRelease(str);
+			}
 		}
 	}
 

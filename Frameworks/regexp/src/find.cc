@@ -177,10 +177,12 @@ namespace find
 				if((options & ignore_whitespace) && is_whitespace(*it))
 					continue;
 
-				CFStringRef tmp = CFStringCreateWithBytes(kCFAllocatorDefault, (UInt8*)&it, it.length(), kCFStringEncodingUTF8, false);
-				matrix.push_back(std::vector<std::string>());
-				all_variations(tmp, options, matrix.back());
-				CFRelease(tmp);
+				if(CFStringRef tmp = CFStringCreateWithBytes(kCFAllocatorDefault, (UInt8*)&it, it.length(), kCFStringEncodingUTF8, false))
+				{
+					matrix.push_back(std::vector<std::string>());
+					all_variations(tmp, options, matrix.back());
+					CFRelease(tmp);
+				}
 			}
 
 			if(options & backwards)

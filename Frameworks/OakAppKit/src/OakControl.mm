@@ -39,28 +39,27 @@ static void DrawTextWithOptions (NSString* string, NSRect bounds, uint32_t textO
 	CGContextRef context = (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort];
 	CGContextSetTextMatrix(context, CGAffineTransformIdentity);
 
-	CGMutablePathRef path = CGPathCreateMutable();
-	CGPathAddRect(path, NULL, bounds);
+	if(CGMutablePathRef path = CGPathCreateMutable())
+	{
+		CGPathAddRect(path, NULL, bounds);
+		if(CFAttributedStringRef attrStr = (CFAttributedStringRef)CFBridgingRetain(AttributedStringWithOptions(string, textOptions, bounds.size.width < 12 ? NSLineBreakByClipping : NSLineBreakByTruncatingTail)))
+		{
+			if(CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString(attrStr))
+			{
+				if(CTFrameRef frame = CTFramesetterCreateFrame(framesetter, CFRangeMake(0, 0), path, NULL))
+				{
+					if(textOptions & layer_t::shadow)
+						CGContextSetShadowWithColor(context, NSMakeSize(0, -1), 1, [[NSColor colorWithCalibratedWhite:1 alpha:0.6] tmCGColor]);
+					CTFrameDraw(frame, context);
 
-	CFAttributedStringRef attrStr = (CFAttributedStringRef)CFBridgingRetain(AttributedStringWithOptions(string, textOptions, bounds.size.width < 12 ? NSLineBreakByClipping : NSLineBreakByTruncatingTail));
-	if(!attrStr)
-		return;
-	CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString(attrStr);
-	CFRelease(attrStr);
-	if(!framesetter)
-		return;
-	CTFrameRef frame = CTFramesetterCreateFrame(framesetter, CFRangeMake(0, 0), path, NULL);
-	CFRelease(framesetter);
-	if(!frame)
-		return;
-
-	if(textOptions & layer_t::shadow)
-		CGContextSetShadowWithColor(context, NSMakeSize(0, -1), 1, [[NSColor colorWithCalibratedWhite:1 alpha:0.6] tmCGColor]);
-
-	CTFrameDraw(frame, context);
-
-	CFRelease(frame);
-	CFRelease(path);
+					CFRelease(frame);
+				}
+				CFRelease(framesetter);
+			}
+			CFRelease(attrStr);
+		}
+		CFRelease(path);
+	}
 
 	[NSGraphicsContext restoreGraphicsState];
 }

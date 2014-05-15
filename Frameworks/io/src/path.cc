@@ -948,12 +948,16 @@ namespace path
 			}
 			else if((responseFlags & 0x3) == kCFUserNotificationAlternateResponse)
 			{
-				CFURLRef url = CFURLCreateWithString(kCFAllocatorDefault, cf::wrap("http://openradar.appspot.com/10261043"), NULL);
-				CFMutableArrayRef urls = CFArrayCreateMutable(kCFAllocatorDefault, 0, &kCFTypeArrayCallBacks);
-				CFArrayAppendValue(urls, url);
-				LSOpenURLsWithRole(urls, kLSRolesViewer, NULL, NULL, NULL, 0);
-				CFRelease(urls);
-				CFRelease(url);
+				if(CFURLRef url = CFURLCreateWithString(kCFAllocatorDefault, cf::wrap("http://openradar.appspot.com/10261043"), NULL))
+				{
+					if(CFMutableArrayRef urls = CFArrayCreateMutable(kCFAllocatorDefault, 0, &kCFTypeArrayCallBacks))
+					{
+						CFArrayAppendValue(urls, url);
+						LSOpenURLsWithRole(urls, kLSRolesViewer, NULL, NULL, NULL, 0);
+						CFRelease(urls);
+					}
+					CFRelease(url);
+				}
 			}
 		}
 		return entry;

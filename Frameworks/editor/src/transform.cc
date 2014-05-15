@@ -100,10 +100,13 @@ namespace transform
 	// this is copy/paste from string_ranker.cc
 	static std::string decompose_string (std::string const& src)
 	{
-		CFMutableStringRef tmp = CFStringCreateMutableCopy(kCFAllocatorDefault, 0, cf::wrap(src));
-		CFStringNormalize(tmp, kCFStringNormalizationFormD);
-		std::string const& res = cf::to_s(tmp);
-		CFRelease(tmp);
+		std::string res;
+		if(CFMutableStringRef tmp = CFStringCreateMutableCopy(kCFAllocatorDefault, 0, cf::wrap(src)))
+		{
+			CFStringNormalize(tmp, kCFStringNormalizationFormD);
+			res = cf::to_s(tmp);
+			CFRelease(tmp);
+		}
 		return res;
 	}
 

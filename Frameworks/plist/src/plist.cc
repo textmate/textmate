@@ -118,13 +118,15 @@ namespace plist
 				v.insert(v.end(), tmp, tmp + len);
 			fclose(fp);
 
-			CFDataRef data = CFDataCreateWithBytesNoCopy(kCFAllocatorDefault, &v[0], v.size(), kCFAllocatorNull);
-			if(CFPropertyListRef plist = CFPropertyListCreateFromXMLData(kCFAllocatorDefault, data, kCFPropertyListImmutable, NULL))
+			if(CFDataRef data = CFDataCreateWithBytesNoCopy(kCFAllocatorDefault, &v[0], v.size(), kCFAllocatorNull))
 			{
-				res = convert(plist);
-				CFRelease(plist);
+				if(CFPropertyListRef plist = CFPropertyListCreateFromXMLData(kCFAllocatorDefault, data, kCFPropertyListImmutable, NULL))
+				{
+					res = convert(plist);
+					CFRelease(plist);
+				}
+				CFRelease(data);
 			}
-			CFRelease(data);
 		}
 		return res;
 	}
@@ -133,17 +135,19 @@ namespace plist
 	{
 		any_t res;
 
-		CFDataRef data = CFDataCreateWithBytesNoCopy(kCFAllocatorDefault, (UInt8 const*)str.data(), str.size(), kCFAllocatorNull);
-		if(CFPropertyListRef plist = CFPropertyListCreateFromXMLData(kCFAllocatorDefault, data, kCFPropertyListImmutable, NULL))
+		if(CFDataRef data = CFDataCreateWithBytesNoCopy(kCFAllocatorDefault, (UInt8 const*)str.data(), str.size(), kCFAllocatorNull))
 		{
-			convert_any(plist, res);
-			CFRelease(plist);
+			if(CFPropertyListRef plist = CFPropertyListCreateFromXMLData(kCFAllocatorDefault, data, kCFPropertyListImmutable, NULL))
+			{
+				convert_any(plist, res);
+				CFRelease(plist);
+			}
+			else
+			{
+				fprintf(stderr, "error parsing plist: ‘%s’\n", str.c_str());
+			}
+			CFRelease(data);
 		}
-		else
-		{
-			fprintf(stderr, "error parsing plist: ‘%s’\n", str.c_str());
-		}
-		CFRelease(data);
 
 		return res;
 	}
