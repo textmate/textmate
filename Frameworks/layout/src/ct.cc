@@ -145,6 +145,7 @@ namespace ct
 				}
 			}
 			_line.reset(CTLineCreateWithAttributedString(toDraw), CFRelease);
+			CFRelease(toDraw);
 		}
 	}
 

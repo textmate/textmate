@@ -3752,8 +3752,8 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 	try {
 		editor->perform(anAction, layout.get(), [self indentCorrections], to_s([self scopeAttributes]));
 
-		auto SilentActions = new std::set<ng::action_t>{ ng::kCopy, ng::kCopySelectionToFindPboard, ng::kCopySelectionToReplacePboard, ng::kCopySelectionToYankPboard, ng::kAppendSelectionToYankPboard, ng::kPrependSelectionToYankPboard, ng::kSetMark, ng::kNop };
-		if(SilentActions->find(anAction) == SilentActions->end())
+		static std::set<ng::action_t> const SilentActions = { ng::kCopy, ng::kCopySelectionToFindPboard, ng::kCopySelectionToReplacePboard, ng::kCopySelectionToYankPboard, ng::kAppendSelectionToYankPboard, ng::kPrependSelectionToYankPboard, ng::kSetMark, ng::kNop };
+		if(SilentActions.find(anAction) == SilentActions.end())
 			self.needsEnsureSelectionIsInVisibleArea = YES;
 	}
 	catch(std::exception const& e) {

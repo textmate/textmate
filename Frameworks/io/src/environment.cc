@@ -47,8 +47,8 @@ namespace oak
 		int mib[2] = { CTL_USER, USER_CS_PATH };
 		size_t len = 0;
 		sysctl(mib, 2, NULL, &len, NULL, 0);
-		char* path = new char[len];
-		sysctl(mib, 2, path, &len, NULL, 0);
+		std::string path(len, 0);
+		sysctl(mib, 2, &path[0], &len, NULL, 0);
 
 		res.emplace("HOME",    entry->pw_dir);
 		res.emplace("PATH",    path);
