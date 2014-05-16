@@ -1,83 +1,26 @@
 #include "buffer.h"
-#include <oak/server.h>
 
 OAK_DEBUG_VAR(Buffer_Parsing);
 
 namespace ng
 {
-	struct buffer_parser_t
-	{
-		WATCH_LEAKS(buffer_parser_t);
-
-		struct request_t
-		{
-			parse::grammar_ptr grammar;
-			parse::stack_ptr state;
-			std::string line;
-			std::pair<size_t, size_t> range;
-			size_t batch_start;
-			size_t limit_redraw;
-		};
-
-		struct result_t
-		{
-			parse::stack_ptr state;
-			std::map<size_t, scope::scope_t> scopes;
-			std::pair<size_t, size_t> range;
-			size_t batch_start;
-			size_t limit_redraw;
-		};
-
-		buffer_parser_t (buffer_t& buffer, parse::stack_ptr const& parserState, std::string const& line, std::pair<size_t, size_t> const& range, size_t const& batch_start, size_t limit_redraw);
-		~buffer_parser_t ();
-		static result_t handle_request (request_t const& request);
-		void handle_reply (result_t const& result);
-
-	private:
-		size_t _client_key;
-		buffer_t& _buffer;
-		size_t _revision;
-	};
-
-	static oak::server_t<buffer_parser_t>& server ()
-	{
-		static oak::server_t<buffer_parser_t> server;
-		return server;
-	}
-
 	// ===================
 	// = buffer_parser_t =
 	// ===================
 
-	buffer_parser_t::buffer_parser_t (buffer_t& buffer, parse::stack_ptr const& parserState, std::string const& line, std::pair<size_t, size_t> const& range, size_t const& batch_start, size_t limit_redraw) : _buffer(buffer)
+	struct result_t
 	{
-		_client_key = server().register_client(this);
-		_revision = buffer.revision();
-		server().send_request(_client_key, (request_t){ buffer.grammar(), parserState, line, range, batch_start, limit_redraw });
-	}
+		parse::stack_ptr state;
+		std::map<size_t, scope::scope_t> scopes;
+	};
 
-	buffer_parser_t::~buffer_parser_t ()
+	result_t handle_request (parse::grammar_ptr grammar, parse::stack_ptr state, std::string const& line, std::pair<size_t, size_t> range, size_t batch_start, size_t limit_redraw)
 	{
-		server().unregister_client(_client_key);
-	}
-
-	buffer_parser_t::result_t buffer_parser_t::handle_request (request_t const& request)
-	{
-		std::lock_guard<std::mutex> lock(request.grammar->mutex());
+		std::lock_guard<std::mutex> lock(grammar->mutex());
 
 		result_t result;
-		result.state = parse::parse(request.line.data(), request.line.data() + request.line.size(), request.state, result.scopes, request.range.first == 0);
-		result.range = request.range;
-		result.batch_start = request.batch_start;
-		result.limit_redraw = request.limit_redraw;
+		result.state = parse::parse(line.data(), line.data() + line.size(), state, result.scopes, range.first == 0);
 		return result;
-	}
-
-	void buffer_parser_t::handle_reply (result_t const& result)
-	{
-		if(_buffer.revision() == _revision)
-				_buffer.update_scopes(result.limit_redraw, result.batch_start, result.range, result.scopes, result.state);
-		else	_buffer.initiate_repair();
 	}
 
 	// ============
@@ -88,14 +31,39 @@ namespace ng
 	{
 		if(!_dirty.empty() && !_parser_states.empty())
 		{
-			size_t n    = convert(_dirty.begin()->first).line;
-			size_t from = begin(n);
-			size_t to   = end(n);
-			auto state  = from == 0 ? _parser_states.begin() : _parser_states.find(from);
+			size_t n       = convert(_dirty.begin()->first).line;
+			size_t from    = begin(n);
+			size_t to      = end(n);
+			auto stateIter = from == 0 ? _parser_states.begin() : _parser_states.find(from);
 			D(DBF_Buffer_Parsing, bug("line %zu dirty, offset %zu → %zu-%zu\n", n, _dirty.begin()->first, from, to););
-			if(state != _parser_states.end())
-					parser = std::make_shared<buffer_parser_t>(*this, state->second, substr(from, to), std::make_pair(from, to), batch_start ==-1? from : batch_start, limit_redraw);
-			else	fprintf(stderr, "no parser state for %zu-%zu (%p)\n%s\n%s\n", from, to, this, substr(0, size()).c_str(), to_s(*this).c_str());
+			if(stateIter != _parser_states.end())
+			{
+				if(batch_start == -1)
+					batch_start = from;
+
+				auto grammarRef = grammar();
+				auto state      = stateIter->second;
+				auto line       = substr(from, to);
+
+				size_t bufferRev = revision();
+				auto bufferRef   = parser_reference();
+
+				dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+					result_t result = handle_request(grammarRef, state, line, { from, to }, batch_start, limit_redraw);
+					dispatch_async(dispatch_get_main_queue(), ^{
+						if(bufferRef.lock())
+						{
+							if(bufferRev == revision())
+									update_scopes(limit_redraw, batch_start, { from, to }, result.scopes, result.state);
+							else	initiate_repair();
+						}
+					});
+				});
+			}
+			else
+			{
+				fprintf(stderr, "no parser state for %zu-%zu (%p)\n%s\n%s\n", from, to, this, substr(0, size()).c_str(), to_s(*this).c_str());
+			}
 		}
 	}
 
@@ -123,7 +91,7 @@ namespace ng
 			}
 		}
 
-		parser.reset();
+		_parser_reference.reset();
 		if(!next_line_needs_update || limit_redraw == 0)
 		{
 			did_parse(batch_start, range.second);
@@ -140,7 +108,7 @@ namespace ng
 		if(!grammar())
 			return;
 
-		parser.reset();
+		_parser_reference.reset();
 		std::lock_guard<std::mutex> lock(grammar()->mutex());
 		while(!_dirty.empty() && !_parser_states.empty())
 		{

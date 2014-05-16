@@ -60,8 +60,6 @@ namespace ng
 	struct symbols_t;
 	struct marks_t;
 	struct lines_t;
-	struct buffer_parser_t;
-	typedef std::shared_ptr<buffer_parser_t> buffer_parser_ptr;
 
 	struct PUBLIC buffer_t
 	{
@@ -185,11 +183,18 @@ namespace ng
 		friend std::string to_s (buffer_t const& buf, size_t first, size_t last);
 		friend std::string to_xml (buffer_t const& buf, size_t first, size_t last);
 
-		friend struct buffer_parser_t;
-		buffer_parser_ptr parser;
 		text::indent_t _indent;
 		void initiate_repair (size_t limit_redraw = 0, size_t super_from = -1);
 		void update_scopes (size_t limit_redraw, size_t const& super_range,std::pair<size_t, size_t> const& range, std::map<size_t, scope::scope_t> const& newScopes, parse::stack_ptr parserState);
+
+		std::shared_ptr<bool> _parser_reference;
+
+		std::weak_ptr<bool> parser_reference ()
+		{
+			if(!_parser_reference)
+				_parser_reference = std::make_shared<bool>(true);
+			return _parser_reference;
+		}
 
 		size_t _revision, _next_revision;
 		std::string _spelling_language;
