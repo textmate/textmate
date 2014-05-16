@@ -27,6 +27,7 @@
 #import <file/path_info.h>
 #import <io/entries.h>
 #import <scm/scm.h>
+#import <text/parse.h>
 #import <text/tokenize.h>
 #import <text/utf8.h>
 #import <ns/ns.h>
@@ -1256,34 +1257,9 @@ namespace
 	if(_documentPath != newDocumentPath && !([_documentPath isEqualToString:newDocumentPath]) || _documentScopeAttributes.empty())
 	{
 		_documentPath = newDocumentPath;
+		_documentScopeAttributes = text::split(file::path_attributes(to_s(_documentPath)), " ");
 
 		std::string docDirectory = _documentPath ? path::parent(to_s(_documentPath)) : to_s(self.projectPath);
-
-		_documentScopeAttributes = { text::format("attr.os-version.%zu.%zu.%zu", oak::os_major(), oak::os_minor(), oak::os_patch()) };
-		if(_documentPath)
-		{
-			std::string const path = to_s(_documentPath);
-			std::vector<std::string> revPath;
-			for(auto const& token : text::tokenize(path.begin(), path.end(), '/'))
-			{
-				std::string tmp = token;
-				for(auto const& subtoken : text::tokenize(tmp.begin(), tmp.end(), '.'))
-				{
-					if(subtoken.empty())
-						continue;
-					revPath.push_back(subtoken);
-					std::replace(revPath.back().begin(), revPath.back().end(), ' ', '_');
-				}
-			}
-			revPath.push_back("rev-path");
-			revPath.push_back("attr");
-			std::reverse(revPath.begin(), revPath.end());
-			_documentScopeAttributes.push_back(text::join(revPath, "."));
-		}
-		else
-		{
-			_documentScopeAttributes.push_back("attr.untitled");
-		}
 
 		std::string const customAttributes = settings_for_path(to_s(_documentPath), text::join(_documentScopeAttributes, " "), docDirectory).get(kSettingsScopeAttributesKey, NULL_STR);
 		if(customAttributes != NULL_STR)
