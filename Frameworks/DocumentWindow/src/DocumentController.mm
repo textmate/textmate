@@ -646,6 +646,12 @@ namespace
 		[self closeTabsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(from, to - from)] askToSaveChanges:YES createDocumentIfEmpty:YES];
 }
 
+- (void)saveProjectState
+{
+	if(self.treatAsProjectWindow)
+		[[DocumentController sharedProjectStateDB] setValue:[self sessionInfoIncludingUntitledDocuments:NO] forKey:self.projectPath];
+}
+
 - (BOOL)windowShouldClose:(id)sender
 {
 	if(!self.htmlOutputInWindow && _runner && _runner->running())
@@ -667,16 +673,14 @@ namespace
 
 	if(documents.empty())
 	{
-		if(self.treatAsProjectWindow)
-			[[DocumentController sharedProjectStateDB] setValue:[self sessionInfoIncludingUntitledDocuments:NO] forKey:self.projectPath];
+		[self saveProjectState];
 		return YES;
 	}
 
 	[self showCloseWarningUIForDocuments:documents completionHandler:^(BOOL canClose){
 		if(canClose)
 		{
-			if(self.treatAsProjectWindow)
-				[[DocumentController sharedProjectStateDB] setValue:[self sessionInfoIncludingUntitledDocuments:NO] forKey:self.projectPath];
+			[self saveProjectState];
 			[self.window close];
 		}
 	}];
@@ -707,10 +711,12 @@ namespace
 {
 	BOOL restoresSession = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableSessionRestoreKey];
 	[DocumentController saveSessionIncludingUntitledDocuments:restoresSession];
-	if(restoresSession)
+	for(DocumentController* controller in [SortedControllers() reverseObjectEnumerator])
 	{
+		[controller saveProjectState];
+
 		// Ensure we do not remove backup files, as they are used to restore untitled documents
-		for(DocumentController* controller in [SortedControllers() reverseObjectEnumerator])
+		if(restoresSession)
 		{
 			for(auto document : controller.documents)
 			{
