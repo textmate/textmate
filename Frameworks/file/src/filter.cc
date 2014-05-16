@@ -6,7 +6,6 @@
 #include <regexp/regexp.h>
 #include <settings/settings.h>
 #include <io/path.h>
-#include <oak/server.h>
 #include <oak/debug.h>
 
 static std::vector<bundles::item_ptr> binary_filters (std::string const& event, std::string const& pathAttributes, io::bytes_ptr content)

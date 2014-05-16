@@ -1,7 +1,6 @@
 #include "write.h"
 #include <text/utf8.h>
 #include <text/ctype.h>
-#include <oak/server.h>
 
 namespace ng
 {

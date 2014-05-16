@@ -5,7 +5,6 @@
 #import <OakAppKit/OakFileIconImage.h>
 #import <OakAppKit/OakFileManager.h>
 #import <Preferences/Keys.h>
-#import <oak/server.h>
 #import <io/entries.h>
 #import <io/events.h>
 #import <io/path.h>

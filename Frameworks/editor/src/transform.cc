@@ -3,7 +3,6 @@
 #include <regexp/regexp.h>
 #include <regexp/format_string.h>
 #include <oak/oak.h>
-#include <oak/server.h>
 #include <text/case.h>
 #include <text/ctype.h>
 #include <text/parse.h>

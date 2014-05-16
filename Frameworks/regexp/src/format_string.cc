@@ -5,7 +5,6 @@
 
 #include <oak/oak.h>
 #include <oak/compat.h>
-#include <oak/server.h>
 #include <text/case.h>
 #include <text/utf8.h>
 
