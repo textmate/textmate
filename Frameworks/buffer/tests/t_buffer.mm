@@ -110,7 +110,6 @@ void test_spelling ()
 	buf.set_live_spelling(true);
 	buf.insert(0, "myfo god\nthat ibs nice\nlamere check\n");
 	buf.bump_revision();
-	buf.wait_for_repair();
 
 	OAK_ASSERT_EQ(buf.misspellings(0, buf.size()).size(), 6);
 
@@ -127,7 +126,6 @@ void test_spelling_2 ()
 	buf.set_live_spelling(true);
 	buf.insert(0, "it mq xy");
 	buf.bump_revision();
-	buf.wait_for_repair();
 
 	std::map<size_t, bool> bad = buf.misspellings(0, buf.size());
 	OAK_ASSERT_EQ(bad.size(), 3);
@@ -142,7 +140,6 @@ void test_spelling_3 ()
 	buf.set_live_spelling(true);
 	buf.insert(0, "it mq xy");
 	buf.bump_revision();
-	buf.wait_for_repair();
 
 	std::map<size_t, bool> bad = buf.misspellings(4, 7);
 	OAK_ASSERT_EQ(bad.size(), 3);
@@ -158,11 +155,9 @@ void test_spelling_4 ()
 
 	buf.insert(0, "hxllo world");
 	buf.bump_revision();
-	buf.wait_for_repair();
 
 	buf.replace(1, 2, "e");
 	buf.bump_revision();
-	buf.wait_for_repair();
 	OAK_ASSERT_EQ(buf.substr(0, buf.size()), "hello world");
 
 	std::map<size_t, bool> bad = buf.misspellings(0, buf.size());
@@ -175,7 +170,6 @@ void test_scopes ()
 	buf.set_grammar(TestGrammarItem);
 	buf.insert(0, "foobar");
 	buf.bump_revision();
-	buf.wait_for_repair();
 
 	OAK_ASSERT_EQ(to_s(buf), "«test»«foo»foo«/foo»«bar»bar«/bar»«/test»");
 

@@ -45,6 +45,13 @@ namespace ng
 				auto state      = stateIter->second;
 				auto line       = substr(from, to);
 
+				if(!pthread_main_np()) // ng::buffer_t is used from a test running in a global dispatch queue
+				{
+					result_t result = handle_request(grammarRef, state, line, { from, to }, batch_start, limit_redraw);
+					update_scopes(limit_redraw, batch_start, { from, to }, result.scopes, result.state);
+					return;
+				}
+
 				size_t bufferRev = revision();
 				auto bufferRef   = parser_reference();
 
