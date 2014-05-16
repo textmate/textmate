@@ -38,7 +38,6 @@ namespace file
 		}
 
 		res.push_back(text::format("attr.os-version.%zu.%zu.%zu", oak::os_major(), oak::os_minor(), oak::os_patch()));
-		res.erase(std::remove(res.begin(), res.end(), ""), res.end());
 		return text::join(res, " ");
 	}
 
