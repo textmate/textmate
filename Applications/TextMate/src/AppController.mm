@@ -147,8 +147,8 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 	NSDate* currentDate    = [NSDate date];
 	NSDate* compileDate    = [NSDate dateWithString:@COMPILE_DATE @" 00:00:00 +0000"];
-	NSDate* warningDate    = [compileDate dateByAddingTimeInterval:45*kSecondsPerDay];
-	NSDate* expirationDate = [compileDate dateByAddingTimeInterval:90*kSecondsPerDay];
+	NSDate* warningDate    = [compileDate dateByAddingTimeInterval: 90*kSecondsPerDay];
+	NSDate* expirationDate = [compileDate dateByAddingTimeInterval:120*kSecondsPerDay];
 
 	if([currentDate laterDate:expirationDate] == currentDate)
 	{
