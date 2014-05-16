@@ -26,6 +26,8 @@ PUBLIC extern std::string const kSettingsSCMStatusKey;
 PUBLIC extern std::string const kSettingsWindowTitleKey;
 PUBLIC extern std::string const kSettingsScopeAttributesKey;
 
+PUBLIC extern std::string const kSettingsSaveOnBlurKey;
+
 PUBLIC extern std::string const kSettingsBinaryKey;
 PUBLIC extern std::string const kSettingsEncodingKey;
 PUBLIC extern std::string const kSettingsUseBOMKey;

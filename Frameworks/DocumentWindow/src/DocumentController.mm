@@ -395,6 +395,47 @@ namespace
 
 - (void)applicationDidResignActiveNotification:(NSNotification*)aNotification
 {
+	struct save_callback_t : document::save_callback_t, std::enable_shared_from_this<save_callback_t>
+	{
+		save_callback_t (std::vector<document::document_ptr> documents) : _documents(documents) { }
+
+		void select_path (std::string const& path, io::bytes_ptr content, file::save_context_ptr context)          { }
+		void select_make_writable (std::string const& path, io::bytes_ptr content, file::save_context_ptr context) { }
+		void select_create_parent (std::string const& path, io::bytes_ptr content, file::save_context_ptr context) { }
+		void obtain_authorization (std::string const& path, io::bytes_ptr content, osx::authorization_t auth, file::save_context_ptr context) { }
+		void select_charset (std::string const& path, io::bytes_ptr content, std::string const& charset, file::save_context_ptr context)      { }
+
+		void did_save_document (document::document_ptr document, std::string const& path, bool success, std::string const& message, oak::uuid_t const& filter)
+		{
+			++_current;
+			save_next();
+		}
+
+		void save_next ()
+		{
+			if(_current < _documents.size())
+				_documents[_current]->try_save(shared_from_this());
+		}
+
+	private:
+		std::vector<document::document_ptr> _documents;
+		size_t _current = 0;
+	};
+
+	std::vector<document::document_ptr> documentsToSave;
+	for(auto doc : _documents)
+	{
+		if(doc->is_modified() && doc->path() != NULL_STR)
+		{
+			settings_t const settings = settings_for_path(doc->virtual_path(), doc->file_type(), path::parent(doc->path()));
+			if(settings.get(kSettingsSaveOnBlurKey, false))
+				documentsToSave.push_back(doc);
+		}
+	}
+
+	auto callback = std::make_shared<save_callback_t>(documentsToSave);
+	callback->save_next();
+
 	if(!_documents.empty())
 		[self.textView performSelector:@selector(applicationDidResignActiveNotification:) withObject:aNotification];
 }

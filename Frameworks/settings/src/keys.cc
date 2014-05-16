@@ -23,6 +23,8 @@ std::string const kSettingsSCMStatusKey                   = "scmStatus";
 std::string const kSettingsWindowTitleKey                 = "windowTitle";
 std::string const kSettingsScopeAttributesKey             = "scopeAttributes";
 
+std::string const kSettingsSaveOnBlurKey                  = "saveOnBlur";
+
 std::string const kSettingsBinaryKey                      = "binary";
 std::string const kSettingsEncodingKey                    = "encoding";
 std::string const kSettingsUseBOMKey                      = "useBOM";
