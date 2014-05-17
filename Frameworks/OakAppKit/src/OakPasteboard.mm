@@ -233,9 +233,14 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 		}
 
 		persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:self.managedObjectModel];
-		if(![persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeURL options:nil error:&error])
+		while(![persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeURL options:nil error:&error])
 		{
 			NSLog(@"unable to create persistent store ‘%@’: %@", [storeURL path], error);
+			if([error.domain isEqualToString:NSCocoaErrorDomain] && error.code == NSFileReadCorruptFileError)
+			{
+				if([[NSFileManager defaultManager] removeItemAtURL:storeURL error:&error])
+					continue;
+			}
 			[NSApp presentError:error];
 			crash_reporter_info_t crashInfo(to_s(error));
 			abort();
