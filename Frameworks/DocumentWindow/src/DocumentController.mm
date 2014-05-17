@@ -1208,19 +1208,21 @@ namespace
 	struct attribute_rule_t { std::string attribute; path::glob_t glob; std::string group; };
 	static auto const rules = new std::vector<attribute_rule_t>
 	{
-		{ "attr.scm.svn",       ".svn",           "scm",   },
-		{ "attr.scm.hg",        ".hg",            "scm",   },
-		{ "attr.scm.git",       ".git",           "scm",   },
-		{ "attr.scm.p4",        ".p4config",      "scm",   },
-		{ "attr.project.ninja", "build.ninja",    "build", },
-		{ "attr.project.make",  "Makefile",       "build", },
-		{ "attr.project.xcode", "*.xcodeproj",    "build", },
-		{ "attr.project.rake",  "Rakefile",       "build", },
-		{ "attr.project.ant",   "build.xml",      "build", },
-		{ "attr.project.cmake", "CMakeLists.txt", "build", },
-		{ "attr.project.maven", "pom.xml",        "build", },
-		{ "attr.project.scons", "SConstruct",     "build", },
-		{ "attr.project.lein",  "project.clj",    "build", },
+		{ "attr.scm.svn",         ".svn",           "scm"     },
+		{ "attr.scm.hg",          ".hg",            "scm"     },
+		{ "attr.scm.git",         ".git",           "scm"     },
+		{ "attr.scm.p4",          ".p4config",      "scm"     },
+		{ "attr.project.ninja",   "build.ninja",    "build"   },
+		{ "attr.project.make",    "Makefile",       "build"   },
+		{ "attr.project.xcode",   "*.xcodeproj",    "build"   },
+		{ "attr.project.rake",    "Rakefile",       "build"   },
+		{ "attr.project.ant",     "build.xml",      "build"   },
+		{ "attr.project.cmake",   "CMakeLists.txt", "build"   },
+		{ "attr.project.maven",   "pom.xml",        "build"   },
+		{ "attr.project.scons",   "SConstruct",     "build"   },
+		{ "attr.project.lein",    "project.clj",    "build"   },
+		{ "attr.project.vagrant", "Vagrantfile",    "vagrant" },
+		{ "attr.project.jekyll",  "_config.yml",    "jekyll"  },
 	};
 
 	_externalScopeAttributes.clear();
