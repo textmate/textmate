@@ -145,11 +145,17 @@ std::vector<theme_t::decomposed_style_t> theme_t::global_styles (scope::scope_t 
 
 gutter_styles_t::~gutter_styles_t ()
 {
-	CGColorRef colors[] = { divider, selectionBorder, foreground, background, icons, iconsHover, iconsPressed, selectionForeground, selectionBackground, selectionIcons, selectionIconsHover, selectionIconsPressed };
-	for(auto color : colors)
+	clear();
+}
+
+void gutter_styles_t::clear ()
+{
+	CGColorRef* colors[] = { &divider, &selectionBorder, &foreground, &background, &icons, &iconsHover, &iconsPressed, &selectionForeground, &selectionBackground, &selectionIcons, &selectionIconsHover, &selectionIconsPressed };
+	for(CGColorRef* ref : colors)
 	{
-		if(color)
-			CGColorRelease(color);
+		if(*ref)
+			CGColorRelease(*ref);
+		*ref = nullptr;
 	}
 }
 
@@ -220,6 +226,7 @@ theme_t::shared_styles_t::~shared_styles_t ()
 void theme_t::shared_styles_t::setup_styles ()
 {
 	_styles.clear();
+	_gutter_styles.clear();
 
 	if(_color_space)
 	{
