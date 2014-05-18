@@ -49,6 +49,7 @@ namespace oak
 		sysctl(mib, 2, NULL, &len, NULL, 0);
 		std::string path(len, 0);
 		sysctl(mib, 2, &path[0], &len, NULL, 0);
+		path.pop_back();
 
 		res.emplace("HOME",    entry->pw_dir);
 		res.emplace("PATH",    path);
