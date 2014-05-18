@@ -2,6 +2,10 @@ Title: Release Notes
 
 # Changes
 
+## 2014-05-18 ([v2.0-alpha.9547](https://github.com/textmate/textmate/compare/v2.0-alpha.9545...v2.0-alpha.9547))
+
+* Fix bug where the `PATH` variable would contain a trailing zero byte and thus everything appended to it was ignored.
+
 ## 2014-05-18 ([v2.0-alpha.9545](https://github.com/textmate/textmate/compare/v2.0-alpha.9543...v2.0-alpha.9545))
 
 * You can now set `saveOnBlur` in `.tm_properties` to make TextMate save files when focus is lost. Previously the recommended way was to create a command set to “Save Modified Files” with a semantic class of `callback.application.did-deactivate`, though incase of a save error, such command would bring up UI where `saveOnBlur` will ignore errors. Using `.tm_properties` also allows to easily target specific file types, for example one could use:
@@ -11,7 +15,7 @@ Title: Release Notes
 
 	This would then only have `.php` files in the `ui` folder auto-save when focus is lost.
 
-* Two new projects scopes have been introduced:
+* Two new project scopes have been introduced:
 
 	1. `attr.project.vagrant` is set when your project has a `Vagrantfile` and a corresponding Vagrant bundle can be installed from _Preferences → Bundles_ to start up and shut down your [vagrant environment](http://www.vagrantup.com/).
 
