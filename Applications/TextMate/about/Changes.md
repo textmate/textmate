@@ -2,6 +2,23 @@ Title: Release Notes
 
 # Changes
 
+## 2014-05-18 ([v2.0-alpha.9545](https://github.com/textmate/textmate/compare/v2.0-alpha.9543...v2.0-alpha.9545))
+
+* You can now set `saveOnBlur` in `.tm_properties` to make TextMate save files when focus is lost. Previously the recommended way was to create a command set to “Save Modified Files” with a semantic class of `callback.application.did-deactivate`, though incase of a save error, such command would bring up UI where `saveOnBlur` will ignore errors. Using `.tm_properties` also allows to easily target specific file types, for example one could use:
+
+		[ ui/**.php ]
+		saveOnBlur = true
+
+	This would then only have `.php` files in the `ui` folder auto-save when focus is lost.
+
+* Two new projects scopes have been introduced:
+
+	1. `attr.project.vagrant` is set when your project has a `Vagrantfile` and a corresponding Vagrant bundle can be installed from _Preferences → Bundles_ to start up and shut down your [vagrant environment](http://www.vagrantup.com/).
+
+	2. `attr.project.jekyll` is set when your project has a `_config.yml` file (in lack of a better indicator). There are a few [jekyll bundles on GitHub](https://github.com/itspriddle/jekyll-tmbundle/network/members), but we haven’t yet added any of them to the index (shown in _Preferences → Bundles_).
+
+* Allow searching _Open Files_ in the Find in Folder dialog. *[Ronald Wampler]*
+
 ## 2014-04-28 ([v2.0-alpha.9543](https://github.com/textmate/textmate/compare/v2.0-alpha.9539...v2.0-alpha.9543))
 
 * Various fixes and improvements.
