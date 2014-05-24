@@ -143,10 +143,7 @@ namespace ng
 			return;
 		_tab_size = tabSize;
 		iterate(row, _rows)
-		{
-			row->value.set_tab_size(tabSize, *_metrics);
-			update_row(row);
-		}
+			row->value.set_tab_size(*_metrics);
 		_dirty_rects.push_back(OakRectMake(0, 0, width(), height()));
 	}
 
