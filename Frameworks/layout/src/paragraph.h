@@ -52,7 +52,7 @@ namespace ng
 		ng::range_t range_for_softline (size_t softline, ng::buffer_t const& buffer, size_t bufferOffset, size_t softlineOffset, ct::metrics_t const& metrics, bool softBreaksOnNewline = false) const;
 
 		void set_wrapping (bool softWrap, size_t wrapColumn, ct::metrics_t const& metrics);
-		void set_tab_size (size_t tabSize, ct::metrics_t const& metrics);
+		void set_tab_size (ct::metrics_t const& metrics);
 		void reset_font_metrics (ct::metrics_t const& metrics);
 
 		CGFloat width () const;
@@ -61,7 +61,7 @@ namespace ng
 		bool structural_integrity () const { return true; }
 
 	private:
-		enum node_type_t { kNodeTypeText, kNodeTypeTab, kNodeTypeUnprintable, kNodeTypeFolding, kNodeTypeSoftBreak, kNodeTypeNewline };
+		enum node_type_t { kNodeTypeText, kNodeTypeUnprintable, kNodeTypeFolding, kNodeTypeSoftBreak, kNodeTypeNewline };
 
 		struct node_t
 		{
@@ -80,7 +80,7 @@ namespace ng
 			size_t length () const                         { return _length; }
 			std::shared_ptr<ct::line_t> line () const { return _line; }
 			CGFloat width () const;
-			void update_tab_width (CGFloat x, CGFloat tabWidth, ct::metrics_t const& metrics);
+			void update_tab_width ();
 
 		private:
 			node_type_t _type;
@@ -93,7 +93,6 @@ namespace ng
 		std::vector<node_t>::iterator iterator_at (size_t i);
 
 		void insert_text (size_t i, size_t len);
-		void insert_tab (size_t i);
 		void insert_unprintable (size_t i, size_t len);
 		void insert_newline (size_t i, size_t len);
 
