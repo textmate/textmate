@@ -153,6 +153,7 @@
       { rect = (   3,  14,   4,  16 ); requisiteMask = 'mouse_inside|modified|mouse_clicked'; requisite = 'mouse_clicked|mouse_inside';          image = "TabClose_Pressed";          },
       { rect = (   3,  14,   4,  16 ); requisiteMask = 'mouse_inside|modified|mouse_clicked'; requisite = 'mouse_clicked|mouse_inside|modified'; image = "TabClose_ModifiedPressed";  },
       { rect = ( W-16, W-1,  6,  17 ); requisiteMask = 'overflow';                            requisite = 'overflow';                            image = "TabOverflow";               },
+      { rect = ( W-16, W-1,  6,  17 ); requisiteMask = 'mouse_clicked|overflow';              requisite = 'mouse_clicked|overflow';              image = "TabOverflow_Pressed";       },
 
       { rect = (   3,  14,   4,  16 ); requisiteMask = 'mouse_clicked|option';   requisite = 'mouse_clicked';          action = 'performCloseTab:';       preventWindowOrdering = 1; },
       { rect = (   3,  14,   4,  16 ); requisiteMask = 'mouse_clicked|option';   requisite = 'mouse_clicked|option';   action = 'performCloseOtherTabs:'; preventWindowOrdering = 1; },
