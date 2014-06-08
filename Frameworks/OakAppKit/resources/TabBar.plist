@@ -157,6 +157,6 @@
 
       { rect = (   3,  14,   4,  16 ); requisiteMask = 'mouse_clicked|option';   requisite = 'mouse_clicked';          action = 'performCloseTab:';       preventWindowOrdering = 1; },
       { rect = (   3,  14,   4,  16 ); requisiteMask = 'mouse_clicked|option';   requisite = 'mouse_clicked|option';   action = 'performCloseOtherTabs:'; preventWindowOrdering = 1; },
-      { rect = ( W-16, W-1,  4, H-2 ); requisiteMask = 'mouse_clicked|overflow'; requisite = 'mouse_clicked|overflow'; action = 'showOverflowTabMenu:';   preventWindowOrdering = 1; },
+      { rect = ( W-16, W-1,  6,  17 ); requisiteMask = 'mouse_clicked|overflow'; requisite = 'mouse_clicked|overflow'; action = 'showOverflowTabMenu:';   preventWindowOrdering = 1; },
    );
 }
