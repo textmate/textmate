@@ -1,4 +1,4 @@
-#!/System/Library/Frameworks/Ruby.framework/Versions/1.8/usr/bin/ruby -wKU
+#!/System/Library/Frameworks/Ruby.framework/Versions/Current/usr/bin/ruby -w
 require 'pathname'
 require 'erb'
 
@@ -26,7 +26,7 @@ ARGV.each do |file|
       lineno += 1
     end
 
-    user_code << "#{includes}namespace #{ns} {\n#{body}} /* #{ns} */\n"
+    user_code << "#{includes.join}namespace #{ns} {\n#{body.join}} /* #{ns} */\n"
   end
 end
 

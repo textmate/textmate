@@ -1,4 +1,4 @@
-#!/System/Library/Frameworks/Ruby.framework/Versions/1.8/usr/bin/ruby -wKU
+#!/System/Library/Frameworks/Ruby.framework/Versions/Current/usr/bin/ruby -w
 # == Synopsis
 #
 # upload [-k «keyfile»] [-d «destination»] [-m «json»] «file»

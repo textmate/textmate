@@ -1,4 +1,4 @@
-#!/System/Library/Frameworks/Ruby.framework/Versions/1.8/usr/bin/ruby -wKU
+#!/System/Library/Frameworks/Ruby.framework/Versions/Current/usr/bin/ruby -w
 require 'optparse'
 
 PROGRAM_NAME = File.basename(__FILE__)
