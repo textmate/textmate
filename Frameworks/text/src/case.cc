@@ -11,18 +11,15 @@ namespace text
 		{
 			if(CFMutableStringRef str = CFStringCreateMutableCopy(kCFAllocatorDefault, 0, tmp))
 			{
+				operation(str, NULL);
 				CFIndex srcLen = CFStringGetLength(str);
-				if(srcLen > 0)
-				{
-					operation(str, NULL);
 
-					CFIndex len = 0;
-					if(CFStringGetBytes(str, CFRangeMake(0, srcLen), kCFStringEncodingUTF8, '?', false, NULL, 0, &len) == srcLen)
-					{
-						res.resize(len);
-						if(CFStringGetBytes(str, CFRangeMake(0, srcLen), kCFStringEncodingUTF8, '?', false, (UInt8*)&res[0], res.size(), nullptr) != srcLen)
-							res.clear();
-					}
+				CFIndex len = 0;
+				if(CFStringGetBytes(str, CFRangeMake(0, srcLen), kCFStringEncodingUTF8, '?', false, NULL, 0, &len) == srcLen)
+				{
+					res.resize(len);
+					if(CFStringGetBytes(str, CFRangeMake(0, srcLen), kCFStringEncodingUTF8, '?', false, (UInt8*)&res[0], res.size(), nullptr) != srcLen)
+						res.clear();
 				}
 				CFRelease(str);
 			}

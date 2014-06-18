@@ -3,6 +3,7 @@
 void test_upcase ()
 {
 	OAK_ASSERT_EQ(text::uppercase("æbleGRØD"), "ÆBLEGRØD");
+	OAK_ASSERT_EQ(text::uppercase("außer"), "AUSSER");
 }
 
 void test_downcase ()
