@@ -36,8 +36,8 @@ bool key_chain_t::key_t::setup () const
 
 	CFDataRef data = CFDataCreateWithBytesNoCopy(NULL, (const UInt8*)_key_data.data(), _key_data.size(), kCFAllocatorNull);
 	CFArrayRef items = NULL;
-	OSStatus err;
-	if(err = SecItemImport(data, NULL, &type, &format, 0, &params, NULL, &items) == errSecSuccess)
+	OSStatus err = SecItemImport(data, NULL, &format, &type, 0, &params, NULL, &items);
+	if(err == errSecSuccess)
 	{
 		_sec_key = (SecKeyRef)CFArrayGetValueAtIndex(items, 0);
 		if(_sec_key != NULL)
