@@ -57,10 +57,10 @@ namespace license
 
 		if(CFDictionaryRef query = CFDictionaryCreate(kCFAllocatorDefault, keys, vals, sizeofA(keys), &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks))
 		{
-			OSStatus err;
-
 			CFArrayRef results = NULL;
-			if(err = SecItemCopyMatching(query, (CFTypeRef*)&results) == errSecSuccess)
+
+			OSStatus err = SecItemCopyMatching(query, (CFTypeRef*)&results);
+			if(err == errSecSuccess)
 			{
 				for(CFIndex i = 0; i < CFArrayGetCount(results); ++i)
 				{
