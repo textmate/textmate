@@ -41,7 +41,7 @@ namespace license
 			}
 			else
 			{
-				perror_keychain("SecItemCopyMatching", err);
+				perror_keychain("find: SecItemCopyMatching", err);
 			}
 			CFRelease(query);
 		}
@@ -87,7 +87,7 @@ namespace license
 			}
 			else
 			{
-				perror_keychain("SecItemCopyMatching", err);
+				perror_keychain("find_all: SecItemCopyMatching", err);
 			}
 			CFRelease(query);
 		}
