@@ -4,6 +4,7 @@
 #import "NSImage Additions.h"
 #import "NSMenuItem Additions.h"
 #import "NSView Additions.h"
+#import <OakAppKit/OakFileIconImage.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakFoundation/NSArray Additions.h>
 #import <oak/oak.h>
@@ -723,6 +724,7 @@ layout_metrics_t::raw_layer_t layout_metrics_t::parse_layer (NSDictionary* item)
 		NSMenuItem* item = [menu addItemWithTitle:[tabTitles objectAtIndex:i] action:@selector(takeSelectedTabIndexFrom:) keyEquivalent:@""];
 		item.tag     = i;
 		item.toolTip = [[tabPaths objectAtIndex:i] stringByAbbreviatingWithTildeInPath];
+		item.image   = [OakFileIconImage fileIconImageWithPath:[[tabPaths objectAtIndex:i] isEqualTo:@""] ? NULL : [tabPaths objectAtIndex:i] isModified:[[tabModifiedStates objectAtIndex:i] boolValue]];
 		if(i == selectedTab)
 			[item setState:NSOnState];
 		else if([[tabModifiedStates objectAtIndex:i] boolValue])
