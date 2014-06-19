@@ -16,7 +16,6 @@ struct layer_t
 		color(nil),
 		text(nil),
 		image(nil),
-		view(nil),
 		text_options(none),
 		image_options(no_repeat),
 		content_offset(),
@@ -52,7 +51,6 @@ struct layer_t
 	NSString* text;
 	NSImage* image;
 	NSString* tool_tip;
-	NSView* view;
 	enum text_options_t { none, shadow };
 	uint32_t text_options;
 	enum image_options_t { no_repeat, stretch, /* repeat_x, repeat_y, repeat_xy */ };

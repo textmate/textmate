@@ -94,25 +94,6 @@ OAK_DEBUG_VAR(OakControl);
 
 - (void)setLayers:(std::vector<layer_t> const&)aLayout
 {
-	// Remove views that are no longer in the layout
-	for(auto const& oldLayer : layout)
-	{
-		if(oldLayer.view)
-		{
-			BOOL found = NO;
-			for(auto const& newLayer : aLayout)
-			{
-				if(newLayer.view == oldLayer.view)
-				{
-					found = YES;
-					break;
-				}
-			}
-			if(!found)
-				[oldLayer.view removeFromSuperview];
-		}
-	}
-
 	// TODO this triggers a redraw — may want to consider if we can delta update…
 	layout = aLayout;
 	NSRect coveredRect = NSZeroRect;
@@ -120,18 +101,6 @@ OAK_DEBUG_VAR(OakControl);
 	{
 		if(layer.color || layer.image && layer.requisite == layer_t::no_requisite)
 			coveredRect = NSUnionRect(coveredRect, layer.rect);
-		if(NSView* view = layer.view)
-		{
-			if([view superview] != self)
-				[view removeFromSuperview];
-			NSRect viewFrame = layer.rect;
-			if(view.frame.size.height > 0)
-				viewFrame.size.height = view.frame.size.height;
-			viewFrame.origin.x += layer.content_offset.x;
-			viewFrame.origin.y += layer.content_offset.y;
-			[view setFrame:viewFrame];
-			[self addSubview:view];
-		}
 	}
 	isTransparent = !NSContainsRect(coveredRect, [self bounds]);
 	[self setupTrackingRects];
