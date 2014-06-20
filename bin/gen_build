@@ -236,7 +236,6 @@ def sources(target)
         cc  = compiler_for(src)
         dst = build_path("#{base}.o")
         res << "build #{dst}: #{cc} #{esc_path src} | #{pch_for(src, target)}.gch || #{esc_path(headers).join(' ')}\n"
-        res << "  depfile = #{dst}.d\n"
         res << "  PCH_FLAGS = -D#{target[:name].gsub(/[^A-Za-z_]/, '_')}_EXPORTS -include #{pch_for(src, target)}\n"
         res << flags_for_target(target)
 
@@ -251,7 +250,6 @@ def sources(target)
         cc  = compiler_for(dst)
         obj = build_path("#{base}.o")
         res << "build #{obj}: #{cc} #{dst} | #{pch_for(dst, target)}.gch || #{esc_path(headers).join(' ')}\n"
-        res << "  depfile = #{obj}.d\n"
         res << "  PCH_FLAGS = -D#{target[:name].gsub(/[^A-Za-z_]/, '_')}_EXPORTS -include #{pch_for(dst, target)} -iquote#{esc_path File.dirname(src)}\n"
         res << flags_for_target(target)
 
@@ -265,7 +263,6 @@ def sources(target)
         cc  = compiler_for(src)
         dst = build_path("#{base}.o")
         res << "build #{dst}: #{cc} #{esc_path src} | #{pch_for(src, target)}.gch || #{esc_path(headers).join(' ')}\n"
-        res << "  depfile = #{dst}.d\n"
         res << "  PCH_FLAGS = -D#{target[:name].gsub(/[^A-Za-z_]/, '_')}_EXPORTS -include #{pch_for(src, target)}\n"
         res << flags_for_target(target)
 
@@ -304,7 +301,6 @@ def tests(target)
 
     res << "build #{test_src}: gen_oak_test #{src} | bin/gen_test\n"
     res << "build #{dst}.o: #{compiler_for(test_src)} #{test_src} | #{pch_for(test_src, target)}.gch || #{target[:name]}/headers\n"
-    res << "  depfile = #{dst}.o.d\n"
     res << "  PCH_FLAGS = -include #{pch_for(test_src, target)}\n"
     res << flags_for_target(target)
     res << "build #{dst}: link_oak_test #{all_values_for_key(target, :objects).join(' ')} #{dst}.o\n"
@@ -332,7 +328,6 @@ def tests(target)
 
     res << "build #{test_src}: gen_cxx_test #{src}\n"
     res << "build #{dst}.o: #{compiler_for(test_src)} #{test_src} | #{pch_for(test_src, target)}.gch || #{target[:name]}/headers\n"
-    res << "  depfile = #{dst}.o.d\n"
     res << "  PCH_FLAGS = -Ibin/CxxTest -include #{pch_for(test_src, target)}\n"
     res << flags_for_target(target)
     res << "build #{dst}: link_cxx_test #{all_values_for_key(target, :objects).join(' ')} #{dst}.o\n"
@@ -727,7 +722,7 @@ open("#{builddir}/build.ninja", "w") do |io|
   COMPILER_INFO.each do |key, value|
     io << "rule #{value[:rule]}\n"
     io << "  command = '#{value[:compiler]}' $PCH_FLAGS $FLAGS #{value[:flags]} $RAVE_FLAGS -o $out -MMD -MF $out.d -I$builddir/include $in\n"
-    io << "  depfile = $depfile\n"
+    io << "  depfile = $out.d\n"
     io << "  deps = gcc\n"
     io << "  description = Compile ‘$in’…\n\n"
   end
@@ -738,12 +733,10 @@ open("#{builddir}/build.ninja", "w") do |io|
     cc = COMPILER_INFO[ext][:compiler]
 
     io << "build #{pch_for(src, TARGETS.root)}.gch: #{compiler_for(src)} #{src} | #{cc}\n"
-    io << "  depfile = #{pch_for(src, TARGETS.root)}.gch.d\n"
     io << "  RAVE_FLAGS = #{type[ext]}\n\n"
 
     if ext =~ /^mm?$/
       io << "build #{pch_for(src, TARGETS.root)}-no-arc.gch: #{compiler_for(src)} #{src} | #{cc}\n"
-      io << "  depfile = #{pch_for(src, TARGETS.root)}-no-arc.gch.d\n"
       io << "  RAVE_FLAGS = #{type[ext]} -fno-objc-arc\n\n"
     end
   end
