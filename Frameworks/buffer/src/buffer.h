@@ -137,6 +137,9 @@ namespace ng
 
 		void wait_for_repair ();
 
+		bool async_parsing () const        { return _async_parsing; }
+		void set_async_parsing (bool flag) { _async_parsing = flag; }
+
 		// ============
 		// = Callback =
 		// ============
@@ -188,6 +191,7 @@ namespace ng
 		void update_scopes (size_t limit_redraw, size_t const& super_range,std::pair<size_t, size_t> const& range, std::map<size_t, scope::scope_t> const& newScopes, parse::stack_ptr parserState);
 
 		std::shared_ptr<bool> _parser_reference;
+		bool _async_parsing = false;
 
 		std::weak_ptr<bool> parser_reference ()
 		{

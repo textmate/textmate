@@ -670,6 +670,7 @@ namespace document
 				}
 			}
 		}
+		_buffer->set_async_parsing(true);
 		_buffer->bump_revision();
 		check_modified(_buffer->revision(), _buffer->revision());
 		mark_pristine();
