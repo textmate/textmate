@@ -49,7 +49,7 @@ static void DrawTextWithOptions (NSString* string, NSRect bounds, uint32_t textO
 				if(CTFrameRef frame = CTFramesetterCreateFrame(framesetter, CFRangeMake(0, 0), path, NULL))
 				{
 					if(textOptions & layer_t::shadow)
-						CGContextSetShadowWithColor(context, NSMakeSize(0, -1), 1, [[NSColor colorWithCalibratedWhite:1 alpha:0.6] tmCGColor]);
+						CGContextSetShadowWithColor(context, NSMakeSize(0, -0.5), 0.6, [[NSColor colorWithCalibratedWhite:1 alpha:0.6] tmCGColor]);
 					CTFrameDraw(frame, context);
 
 					CFRelease(frame);
