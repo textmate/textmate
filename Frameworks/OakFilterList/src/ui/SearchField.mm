@@ -1,4 +1,5 @@
 #import "SearchField.h"
+#import <OakAppKit/OakAppKit.h>
 
 static id TranslateAXRange(NSRange range, NSUInteger length, id (^process)(NSUInteger left, NSRange range, NSUInteger right), NSUInteger leftMargin = 1, NSUInteger rightMargin = 1)
 {
@@ -164,7 +165,7 @@ static NSString* CreateSpacedString(NSUInteger length)
 @implementation OakLinkedSearchField
 + (void)initialize
 {
-	if(self == OakLinkedSearchField.class)
+	if((nil == &NSAccessibilitySharedFocusElementsAttribute) && (self == OakLinkedSearchField.class))
 	{
 		[OakLinkedSearchField setCellClass:[OakLinkedSearchFieldCell class]];
 	}
