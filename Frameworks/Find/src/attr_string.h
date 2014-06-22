@@ -32,8 +32,8 @@ namespace ns
 		};
 		struct line_break
 		{
-			line_break(NSUInteger mode) : mode(mode) {}
-			NSUInteger mode;
+			line_break(NSLineBreakMode mode) : mode(mode) {}
+			NSLineBreakMode mode;
 		};
 	}
 
