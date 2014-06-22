@@ -14,6 +14,8 @@ struct layer_t
 		tag(0),
 		action(nil),
 		color(nil),
+		borderColor(nil),
+		cornerRadius(0),
 		text(nil),
 		image(nil),
 		view(nil),
@@ -49,6 +51,8 @@ struct layer_t
 	SEL menuAction;
 
 	NSColor* color;
+	NSColor* borderColor;
+	CGFloat cornerRadius;
 	NSString* text;
 	NSImage* image;
 	NSString* tool_tip;

@@ -274,6 +274,10 @@ layout_metrics_t::raw_layer_t layout_metrics_t::parse_layer (NSDictionary* item)
 
 	if(NSString* color = [item objectForKey:@"color"])
 		res.layer.color = [NSColor colorWithString:color];
+	if(NSString* borderColor = [item objectForKey:@"borderColor"])
+		res.layer.borderColor = [NSColor colorWithString:borderColor];
+	if(NSString *cornerRadius = [item objectForKey:@"cornerRadius"])
+		res.layer.cornerRadius = [cornerRadius doubleValue];
 	if(NSString* requisite = [item objectForKey:@"requisite"])
 		res.layer.requisite = parse_requisite([requisite UTF8String]);
 	res.layer.requisite_mask = res.layer.requisite;
