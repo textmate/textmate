@@ -27,11 +27,20 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 @property (nonatomic) NSInteger sourceIndex;
 @end
 
+@interface FavoriteChooserPanel : NSPanel
+@property (nonatomic) OakScopeBarView* scopeBar;
+@end
+
 @implementation FavoriteChooser
 + (instancetype)sharedInstance
 {
 	static id sharedInstance = [self new];
 	return sharedInstance;
+}
+
++ (Class)chooserWindowClass
+{
+	return [FavoriteChooserPanel class];
 }
 
 + (void)initialize
@@ -92,6 +101,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 
 		self.sourceIndex = [[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsOpenProjectSourceIndex];
 		[scopeBar bind:NSValueBinding toObject:self withKeyPath:@"sourceIndex" options:nil];
+		((FavoriteChooserPanel*)self.window).scopeBar = scopeBar;
 	}
 	return self;
 }
@@ -309,4 +319,9 @@ static NSInteger LRUSort (id lhs, id rhs, void* context)
 		[item setState:[item tag] == self.sourceIndex ? NSOnState : NSOffState];
 	return activate;
 }
+@end
+
+@implementation FavoriteChooserPanel
+- (IBAction)selectNextTab:(id)sender     { _scopeBar.selectedIndex = (_scopeBar.selectedIndex + 1) % _scopeBar.labels.count;                          }
+- (IBAction)selectPreviousTab:(id)sender { _scopeBar.selectedIndex = (_scopeBar.selectedIndex + _scopeBar.labels.count - 1) % _scopeBar.labels.count; }
 @end

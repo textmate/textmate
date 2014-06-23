@@ -34,6 +34,11 @@ NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string
 @end
 
 @implementation OakChooser
++ (Class)chooserWindowClass
+{
+	return [NSPanel class];
+}
+
 - (id)init
 {
 	if((self = [super init]))
@@ -93,7 +98,7 @@ NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string
 		[[_itemCountTextField cell] setBackgroundStyle:NSBackgroundStyleRaised];
 		[_itemCountTextField setContentHuggingPriority:NSLayoutPriorityDefaultHigh forOrientation:NSLayoutConstraintOrientationHorizontal];
 
-		_window = [[NSPanel alloc] initWithContentRect:NSMakeRect(600, 700, 400, 500) styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSTexturedBackgroundWindowMask) backing:NSBackingStoreBuffered defer:NO];
+		_window = [[[[self class] chooserWindowClass] alloc] initWithContentRect:NSMakeRect(600, 700, 400, 500) styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSTexturedBackgroundWindowMask) backing:NSBackingStoreBuffered defer:NO];
 		[_window setAutorecalculatesContentBorderThickness:NO forEdge:NSMaxYEdge];
 		[_window setAutorecalculatesContentBorderThickness:NO forEdge:NSMinYEdge];
 		[_window setContentBorderThickness:32 forEdge:NSMaxYEdge];
