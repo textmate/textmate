@@ -9,7 +9,7 @@ namespace network
 	{
 		if(_group = dispatch_group_create())
 		{
-			if(_process = io::spawn(std::vector<std::string>{ "/usr/bin/tar", "-jxmkC", dest, "--strip-components", "1" }))
+			if(_process = io::spawn(std::vector<std::string>{ "/usr/bin/tar", "-jxmkC", dest, "--strip-components", "1", "--disable-copyfile", "--exclude", "._*" }))
 			{
 				dispatch_group_async(_group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 					io::exhaust_fd(_process.out, &_output);
