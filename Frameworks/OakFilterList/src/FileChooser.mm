@@ -201,6 +201,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	std::vector<document_record_t>                _records;
 	document::scanner_ptr                         _scanner;
 }
+@property (nonatomic) NSArray* sourceListLabels;
 @property (nonatomic) NSProgressIndicator* progressIndicator;
 
 @property (nonatomic) BOOL     polling;
@@ -219,6 +220,8 @@ static path::glob_list_t globs_for_path (std::string const& path)
 {
 	if((self = [super init]))
 	{
+		_sourceListLabels = @[ @"All", @"Open Documents", @"Uncommitted Documents" ];
+
 		[self.window setContentBorderThickness:57 forEdge:NSMaxYEdge];
 		self.tableView.allowsMultipleSelection = YES;
 
@@ -227,7 +230,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 		[[self.tableView tableColumnWithIdentifier:@"name"] setDataCell:cell];
 
 		OakScopeBarView* scopeBar = [OakScopeBarView new];
-		scopeBar.labels = @[ @"All", @"Open Documents", @"Uncommitted Documents" ];
+		scopeBar.labels = self.sourceListLabels;
 
 		_progressIndicator = [[NSProgressIndicator alloc] initWithFrame:NSZeroRect];
 		_progressIndicator.style                = NSProgressIndicatorSpinningStyle;
@@ -269,6 +272,9 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	}
 	return self;
 }
+
+- (IBAction)selectNextTab:(id)sender     { self.sourceIndex = (self.sourceIndex + 1) % self.sourceListLabels.count; }
+- (IBAction)selectPreviousTab:(id)sender { self.sourceIndex = (self.sourceIndex + self.sourceListLabels.count - 1) % self.sourceListLabels.count; }
 
 - (void)showWindow:(id)sender
 {

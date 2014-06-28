@@ -25,6 +25,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 	std::vector<std::pair<std::string, std::string>> favorites;
 }
 @property (nonatomic) NSInteger sourceIndex;
+@property (nonatomic) NSArray* sourceListLabels;
 @end
 
 @implementation FavoriteChooser
@@ -51,7 +52,8 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 {
 	if((self = [super init]))
 	{
-		_sourceIndex = NSNotFound;
+		_sourceIndex      = NSNotFound;
+		_sourceListLabels = @[ @"Recent Projects", @"Favorites" ];
 
 		self.window.title = @"Open Favorite";
 		self.window.frameAutosaveName = @"Open Favorite";
@@ -62,7 +64,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 		[[self.tableView tableColumnWithIdentifier:@"name"] setDataCell:cell];
 
 		OakScopeBarView* scopeBar = [OakScopeBarView new];
-		scopeBar.labels = @[ @"Recent Projects", @"Favorites" ];
+		scopeBar.labels = self.sourceListLabels;
 
 		NSDictionary* views = @{
 			@"searchField"        : self.searchField,
@@ -95,6 +97,9 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 	}
 	return self;
 }
+
+- (IBAction)selectNextTab:(id)sender     { self.sourceIndex = (self.sourceIndex + 1) % self.sourceListLabels.count; }
+- (IBAction)selectPreviousTab:(id)sender { self.sourceIndex = (self.sourceIndex + self.sourceListLabels.count - 1) % self.sourceListLabels.count; }
 
 - (void)tableView:(NSTableView*)aTableView willDisplayCell:(OFBPathInfoCell*)cell forTableColumn:(NSTableColumn*)aTableColumn row:(NSInteger)rowIndex
 {
