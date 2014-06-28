@@ -275,6 +275,10 @@ layout_metrics_t::raw_layer_t layout_metrics_t::parse_layer (NSDictionary* item)
 
 	if(NSString* color = [item objectForKey:@"color"])
 		res.layer.color = [NSColor colorWithString:color];
+	if(NSString* borderColor = [item objectForKey:@"borderColor"])
+		res.layer.borderColor = [NSColor colorWithString:borderColor];
+	if(NSString *cornerRadius = [item objectForKey:@"cornerRadius"])
+		res.layer.cornerRadius = [cornerRadius doubleValue];
 	if(NSString* requisite = [item objectForKey:@"requisite"])
 		res.layer.requisite = parse_requisite([requisite UTF8String]);
 	res.layer.requisite_mask = res.layer.requisite;
@@ -1067,4 +1071,24 @@ layout_metrics_t::raw_layer_t layout_metrics_t::parse_layer (NSDictionary* item)
 	}
 	return self;
 }
+@end
+
+// ==================
+// = Tab Bar Colors =
+// ==================
+
+@implementation NSColor (OakTabBarViewColors)
+#define TAB_BAR_COLOR(name, white) \
+  + (NSColor*)tm##name { return [NSColor colorWithCalibratedWhite:white alpha:1]; }
+
+TAB_BAR_COLOR(WindowDividerColor,           0.25);
+TAB_BAR_COLOR(WindowDividerColorInactive,   0.52);
+TAB_BAR_COLOR(TabBarDividerColor,           0.33);
+TAB_BAR_COLOR(TabBarDividerColorInactive,   0.66);
+TAB_BAR_COLOR(TabBarColor,                  0.52);
+TAB_BAR_COLOR(TabBarColorInactive,          0.80);
+TAB_BAR_COLOR(TabBarHighlightColor,         0.66);
+TAB_BAR_COLOR(TabBarHighlightColorInactive, 0.87);
+TAB_BAR_COLOR(TabHoverColor,                0.46);
+TAB_BAR_COLOR(TabHoverColorInactive,        0.60);
 @end

@@ -49,7 +49,7 @@ static void DrawTextWithOptions (NSString* string, NSRect bounds, uint32_t textO
 				if(CTFrameRef frame = CTFramesetterCreateFrame(framesetter, CFRangeMake(0, 0), path, NULL))
 				{
 					if(textOptions & layer_t::shadow)
-						CGContextSetShadowWithColor(context, NSMakeSize(0, -1), 1, [[NSColor colorWithCalibratedWhite:1 alpha:0.6] tmCGColor]);
+						CGContextSetShadowWithColor(context, NSMakeSize(0, -0.5), 0.6, [[NSColor colorWithCalibratedWhite:1 alpha:0.6] tmCGColor]);
 					CTFrameDraw(frame, context);
 
 					CFRelease(frame);
@@ -183,7 +183,19 @@ OAK_DEBUG_VAR(OakControl);
 	if(aLayer.color)
 	{
 		[aLayer.color set];
-		NSRectFill(aLayer.rect);
+		if(aLayer.cornerRadius > 0.0)
+			[[NSBezierPath bezierPathWithRoundedRect:aLayer.rect xRadius:aLayer.cornerRadius yRadius:aLayer.cornerRadius] fill];
+		else
+			NSRectFill(aLayer.rect);
+	}
+
+	if(aLayer.borderColor)
+	{
+		[aLayer.borderColor set];
+		if(aLayer.cornerRadius > 0.0)
+			[[NSBezierPath bezierPathWithRoundedRect:NSInsetRect(aLayer.rect, -0.5, -0.5) xRadius:aLayer.cornerRadius yRadius:aLayer.cornerRadius] stroke];
+		else
+			[NSBezierPath strokeRect:NSInsetRect(aLayer.rect, -0.5, -0.5)];
 	}
 
 	if(aLayer.image)
