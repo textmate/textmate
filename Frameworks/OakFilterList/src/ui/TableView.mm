@@ -22,7 +22,7 @@
 		[_tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:extend];
 		[_tableView scrollRowToVisible:row];
 
-		if((nil == &NSAccessibilitySharedFocusElementsAttribute) && [sender isKindOfClass:[NSSearchField class]])
+		if((NSAccessibilitySharedFocusElementsAttribute == nil) && [sender isKindOfClass:[NSSearchField class]])
 		{
 			NSMutableArray* descriptionBits = [NSMutableArray arrayWithCapacity:[_tableView tableColumns].count];
 			[[_tableView tableColumns] enumerateObjectsUsingBlock:^(NSTableColumn* column, NSUInteger index, BOOL* stop) {

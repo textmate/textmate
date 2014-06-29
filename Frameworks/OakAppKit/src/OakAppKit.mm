@@ -61,6 +61,5 @@ void OakShowAlertForWindow (NSAlert* alert, NSWindow* window, void(^callback)(NS
 #ifndef NSAppKitVersionNumber10_9
 #define NSAppKitVersionNumber10_9 1265
 #endif
-NSString *const _NSAccessibilitySharedFocusElementsAttribute = @"AXSharedFocusElements";
-NSString *const *const pNSAccessibilitySharedFocusElementsAttribute = (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_9) ? nil : &_NSAccessibilitySharedFocusElementsAttribute;
+NSString *const NSAccessibilitySharedFocusElementsAttribute = (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_9) ? nil : @"AXSharedFocusElements";
 #endif

@@ -14,6 +14,7 @@ APPKIT_EXTERN NSString *const NSAccessibilityAnnouncementKey            NS_AVAIL
 #endif
 
 #if !defined(MAC_OS_X_VERSION_10_10) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_10)
-PUBLIC extern NSString *const *const pNSAccessibilitySharedFocusElementsAttribute;
-#define NSAccessibilitySharedFocusElementsAttribute (*pNSAccessibilitySharedFocusElementsAttribute)
+PUBLIC extern NSString *const NSAccessibilitySharedFocusElementsAttribute;
+#else
+APPKIT_EXTERN NSString *const NSAccessibilitySharedFocusElementsAttribute WEAK_IMPORT_ATTRIBUTE;
 #endif

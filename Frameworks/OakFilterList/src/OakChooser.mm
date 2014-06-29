@@ -62,7 +62,7 @@ NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string
 		tableView.dataSource              = self;
 		tableView.delegate                = self;
 		tableView.linkedTextField         = _searchField;
-		if (nil != &NSAccessibilitySharedFocusElementsAttribute)
+		if(NSAccessibilitySharedFocusElementsAttribute != nil)
 			[_searchField.cell accessibilitySetOverrideValue:@[tableView] forAttribute:NSAccessibilitySharedFocusElementsAttribute];
 		_tableView = tableView;
 
