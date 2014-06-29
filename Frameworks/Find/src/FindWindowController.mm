@@ -967,6 +967,61 @@ static NSButton* OakCreateStopSearchButton ()
 	}
 }
 
+- (IBAction)selectNextTab:(id)sender
+{
+	if([self.resultsOutlineView numberOfRows] == 0 || ![[self.resultsOutlineView delegate] respondsToSelector:@selector(outlineView:isGroupItem:)])
+		return;
+
+	NSInteger row = [self.resultsOutlineView selectedRow];
+	while(true)
+	{
+		if(++row == [self.resultsOutlineView numberOfRows])
+		{
+			row = -1;
+			continue;
+		}
+
+		if([[self.resultsOutlineView delegate] outlineView:self.resultsOutlineView isGroupItem:[self.resultsOutlineView itemAtRow:row]])
+		{
+			++row;
+			[self.resultsOutlineView expandItem:[self.resultsOutlineView itemAtRow:row]];
+			[self.resultsOutlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+			[self.resultsOutlineView scrollRowToVisible:row];
+			[self.resultsOutlineView.window makeFirstResponder:self.resultsOutlineView];
+			break;
+		}
+	}
+}
+
+- (IBAction)selectPreviousTab:(id)sender
+{
+	if([self.resultsOutlineView numberOfRows] == 0 || ![[self.resultsOutlineView delegate] respondsToSelector:@selector(outlineView:isGroupItem:)])
+		return;
+
+	NSInteger row = [self.resultsOutlineView selectedRow];
+	if(--row < 0)
+		row = [self.resultsOutlineView numberOfRows];
+
+	while(true)
+	{
+		if(--row < 0)
+		{
+			row = [self.resultsOutlineView numberOfRows];
+			continue;
+		}
+
+		if([[self.resultsOutlineView delegate] outlineView:self.resultsOutlineView isGroupItem:[self.resultsOutlineView itemAtRow:row]])
+		{
+			++row;
+			[self.resultsOutlineView expandItem:[self.resultsOutlineView itemAtRow:row]];
+			[self.resultsOutlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+			[self.resultsOutlineView scrollRowToVisible:row];
+			[self.resultsOutlineView.window makeFirstResponder:self.resultsOutlineView];
+			break;
+		}
+	}
+}
+
 - (BOOL)control:(NSControl*)control textView:(NSTextView*)textView doCommandBySelector:(SEL)command
 {
 	if(command == @selector(moveDown:))
