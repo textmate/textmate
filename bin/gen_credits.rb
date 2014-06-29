@@ -59,6 +59,10 @@ class GitHubLookup
     @db['f889181fc58ccb702822b54fe3702d24'] = 'codykrieger'
     @db['571db4b87bd7d2fec3dcd5524cb7d9ae'] = 'rdwampler'
     @db['a4c0d688809489ab98a162b10c57381c'] = 'dusek'
+    @db['7e9f543f0ffdb7c9a899e628fe76e7f3'] = 'jtbandes'
+    @db['04581c59babdab9788e932ecb79f9617'] = 'zadr'
+    @db['0ee1291a38e3c76fdfaadb2a0fa3428a'] = 'duanemoody'
+    @db['71c216d75354dda636b879dfc95654fb'] = 'charliepark'
     ObjectSpace.define_finalizer(@db, proc {|id| db.close })
   end
 
