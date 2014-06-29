@@ -4,7 +4,7 @@
 #import "NSImage Additions.h"
 #import "NSMenuItem Additions.h"
 #import "NSView Additions.h"
-#import <OakAppKit/OakFileIconImage.h>
+#import "OakFileIconImage.h"
 #import <OakFoundation/NSString Additions.h>
 #import <OakFoundation/NSArray Additions.h>
 #import <oak/oak.h>
