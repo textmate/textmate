@@ -5,6 +5,7 @@
 #import <MGScopeBar/MGScopeBar.h>
 #import <ns/ns.h>
 #import <regexp/format_string.h>
+#import <text/case.h>
 #import <text/ctype.h>
 #import <text/decode.h>
 
@@ -48,7 +49,18 @@ static std::string textify (std::string str)
 	{
 		bundles_db::bundle_ptr bundle = [_bundlesManager bundleAtIndex:i];
 		if(enabledCategories.empty() || enabledCategories.find(bundle->category()) != enabledCategories.end())
-			bundles.push_back(bundle);
+		{
+			if(!filterString || [filterString isEqualToString:@""])
+			{
+				bundles.push_back(bundle);
+			}
+			else
+			{
+				std::string filter = text::lowercase(to_s(filterString));
+				if(text::lowercase(bundle->name()).find(filter) != std::string::npos)
+					bundles.push_back(bundle);
+			}
+		}
 	}
 	for(NSTableColumn* tableColumn in [bundlesTableView tableColumns])
 		[bundlesTableView setIndicatorImage:nil inTableColumn:tableColumn];
@@ -117,6 +129,17 @@ static std::string textify (std::string str)
 	if(selected)
 			enabledCategories.insert(to_s(identifier));
 	else	enabledCategories.erase(to_s(identifier));
+	[self bundlesDidChange:self];
+}
+
+- (NSView*)accessoryViewForScopeBar:(MGScopeBar*)theScopeBar
+{
+	return searchField;
+}
+
+- (IBAction)filterStringDidChange:(id)sender
+{
+	filterString = searchField.stringValue;
 	[self bundlesDidChange:self];
 }
 
