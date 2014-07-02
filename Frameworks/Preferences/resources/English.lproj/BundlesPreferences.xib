@@ -10,6 +10,7 @@
                 <outlet property="activityTextField" destination="16" id="28"/>
                 <outlet property="bundlesTableView" destination="6" id="12"/>
                 <outlet property="categoriesScopeBar" destination="33" id="35"/>
+                <outlet property="searchField" destination="Lpz-eY-Nrt" id="4Om-x4-VOA"/>
                 <outlet property="view" destination="1" id="2"/>
             </connections>
         </customObject>
@@ -159,6 +160,18 @@
                 </progressIndicator>
             </subviews>
         </customView>
+        <searchField verticalHuggingPriority="750" id="Lpz-eY-Nrt">
+            <rect key="frame" x="0.0" y="0.0" width="100" height="19"/>
+            <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMinY="YES"/>
+            <searchFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" borderStyle="bezel" placeholderString="Bundle" usesSingleLineMode="YES" bezelStyle="round" sendsSearchStringImmediately="YES" id="hgN-VX-b5J">
+                <font key="font" metaFont="smallSystem"/>
+                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+            </searchFieldCell>
+            <connections>
+                <action selector="filterStringDidChange:" target="-2" id="opP-sc-4g1"/>
+            </connections>
+        </searchField>
     </objects>
     <resources>
         <image name="NSFollowLinkFreestandingTemplate" width="10" height="10"/>
