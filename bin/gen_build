@@ -711,7 +711,7 @@ open("#{builddir}/build.ninja", "w") do |io|
   io << "rule configure\n"
   io << "  command = bin/gen_build -C \"$builddir\" #{args} -o $out $in\n"
   io << "  depfile = $builddir/$out.d\n"
-  io << "  generator = 1\n"
+  io << "  generator = true\n"
   io << "  description = Generate ‘$out’…\n"
   io << "\n"
   io << "build build.ninja: configure #{manifest} | bin/gen_build\n"
@@ -831,7 +831,6 @@ rule gen_ragel
 
 rule gen_capnp
   command = PATH="$capnp_prefix/bin:$PATH" capnp compile -oc++ $in
-  generator = 1
   description = Generate source from ‘$in’…
 
 rule gen_cxx_test
