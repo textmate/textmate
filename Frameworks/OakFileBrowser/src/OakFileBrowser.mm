@@ -1252,8 +1252,9 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	static std::set<SEL> const requireSelection{ @selector(didDoubleClickOutlineView:), @selector(editSelectedEntries:), @selector(duplicateSelectedEntries:), @selector(cut:), @selector(copy:), @selector(delete:) };
 
 	NSUInteger selectedFiles = 0;
+	struct stat buf;
 	for(FSItem* item in self.selectedItems)
-		selectedFiles += [item.url isFileURL] && path::exists([[item.url path] fileSystemRepresentation]) ? 1 : 0;
+		selectedFiles += [item.url isFileURL] && lstat([[item.url path] fileSystemRepresentation], &buf) == 0 ? 1 : 0;
 
 	if([item action] == @selector(goToParentFolder:))
 		res = ParentForURL(_url) != nil;
