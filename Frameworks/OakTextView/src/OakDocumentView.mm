@@ -276,7 +276,7 @@ private:
 
 - (void)changeFont:(id)sender
 {
-	if(NSFont* newFont = [sender convertFont:textView.font])
+	if(NSFont* newFont = [sender convertFont:textView.font ?: [NSFont userFixedPitchFontOfSize:0]])
 	{
 		settings_t::set(kSettingsFontNameKey, to_s([newFont fontName]));
 		settings_t::set(kSettingsFontSizeKey, [newFont pointSize]);
