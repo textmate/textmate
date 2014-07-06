@@ -42,8 +42,8 @@ def create_release(path, repository, tag, description, content_type)
   basename = File::basename(path)
   payload = { 'name' => name, 'tag_name' => tag, 'draft' => false, 'prerelease' => true }
   payload['body'] = description unless description.nil?
-  open("|curl -snd '#{payload.to_json}' https://api.github.com/repos/#{repository}/releases") do |io|
-    github = JSON.parse(io.read)
+  open("|curl -snd '#{payload.to_json}' https://api.github.com/repos/#{repository}/releases") do |response|
+    github = JSON.parse(response.read)
 
     if github.include?('errors')
       err = github['errors'].first
