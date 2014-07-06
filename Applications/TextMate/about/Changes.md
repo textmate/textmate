@@ -2,6 +2,14 @@ Title: Release Notes
 
 # Changes
 
+## 2014-07-06 ([v2.0-alpha.9549](https://github.com/textmate/textmate/compare/v2.0-alpha.9547...v2.0-alpha.9549))
+
+* TextMate now works with the [Haskell Ligature font](https://github.com/i-tu/Hasklig). If you are using the Mensch font and see `fi` drawn as `ﬁ` then update to [Mensch version 2.0](http://robey.lag.net/2012/08/22/mensch-2.html).
+* You can now use ⌘{ and ⌘} in the file and favorites chooser to cycle between sources. These keys can also be used in Preferences, the About window, and the Find in Folder (to cycle through files with matches). In these windows you can also use ⌘1-⌘n for the n’th “source” (but this is not new).
+* Draw properly rounded corners for tabs on retina displays. *[Adam Strzelecki]*
+* Improve VoiceOver feedback for file and favorite choosers when running on 10.10. *[Boris Dušek]*
+* Visual changes/improvements: tab overflow menu has document icons, the icon for it has multiple states (retina), the variables and bundles list in Preferences now use a smaller font and the latter has a search field to filter the list. *[Ronald Wampler]*
+
 ## 2014-05-18 ([v2.0-alpha.9547](https://github.com/textmate/textmate/compare/v2.0-alpha.9545...v2.0-alpha.9547))
 
 * Fix bug where the `PATH` variable would contain a trailing zero byte and thus everything appended to it was ignored.
