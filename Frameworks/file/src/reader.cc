@@ -208,13 +208,20 @@ namespace file
 		return _encoding;
 	}
 
-	std::string read_utf8 (std::string const& path, std::string* charset)
+	std::string read_utf8 (std::string const& path, std::string* charset, size_t limit)
 	{
 		reader_t reader(path);
 
 		std::string res;
 		while(auto bytes = reader.next())
+		{
 			res.insert(res.end(), bytes->begin(), bytes->end());
+			if(res.size() > limit)
+			{
+				res.resize(limit);
+				break;
+			}
+		}
 
 		if(charset)
 			*charset = reader.encoding().charset();
