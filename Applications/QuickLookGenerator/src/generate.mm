@@ -69,7 +69,7 @@ OSStatus TextMateQuickLookPlugIn_GeneratePreviewForURL (void* instance, QLPrevie
 		CFRelease(path);
 	}
 
-	std::string fileContents = file::read_utf8(filePath);
+	std::string fileContents = file::read_utf8(filePath, nullptr, 20480);
 	buffer.insert(0, fileContents);
 
 	// Apply appropriate grammar
