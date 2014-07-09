@@ -81,7 +81,7 @@
 - (NSCell*)preparedCellAtColumn:(NSInteger)column row:(NSInteger)row
 {
 	NSCell* res = [super preparedCellAtColumn:column row:row];
-	if(res.isHighlighted && [self.window isKeyWindow] && [self renderAsKeyViewWithFirstResponder:[self.window firstResponder]])
+	if(res.isHighlighted && [self.window isKeyWindow] && self.drawAsHighlighted)
 	{
 		res.backgroundStyle = NSBackgroundStyleDark;
 		res.highlighted     = NO;
@@ -91,7 +91,7 @@
 
 - (void)highlightSelectionInClipRect:(NSRect)clipRect
 {
-	if(![self.window isKeyWindow] || ![self renderAsKeyViewWithFirstResponder:[self.window firstResponder]])
+	if(![self.window isKeyWindow] || !self.drawAsHighlighted)
 		return [super highlightSelectionInClipRect:clipRect];
 
 	[[NSColor alternateSelectedControlColor] set];
@@ -137,22 +137,25 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 {
 	if(context == kFirstResponderBinding)
 	{
-		if([self renderAsKeyViewWithFirstResponder:change[NSKeyValueChangeNewKey]] || [self renderAsKeyViewWithFirstResponder:change[NSKeyValueChangeOldKey]])
-		{
-			[[self selectedRowIndexes] enumerateRangesInRange:[self rowsInRect:[self visibleRect]] options:0 usingBlock:^(NSRange range, BOOL* stop){
-				for(NSUInteger row = range.location; row < NSMaxRange(range); ++row)
-				{
-					NSRect rect = [self rectOfRow:row];
-					rect.size.height -= 1;
-					[self setNeedsDisplayInRect:rect];
-				}
-			}];
-		}
+		NSResponder* newResponder = change[NSKeyValueChangeNewKey];
+		self.drawAsHighlighted = newResponder == self.linkedTextField || newResponder == [self.linkedTextField currentEditor];
 	}
 }
 
-- (BOOL)renderAsKeyViewWithFirstResponder:(NSResponder*)aView
+- (void)setDrawAsHighlighted:(BOOL)flag
 {
-	return aView == self.linkedTextField || ([aView isKindOfClass:[NSText class]] && [(NSText*)aView delegate] == (id)self.linkedTextField);
+	if(_drawAsHighlighted == flag)
+		return;
+
+	_drawAsHighlighted = flag;
+
+	[[self selectedRowIndexes] enumerateRangesInRange:[self rowsInRect:[self visibleRect]] options:0 usingBlock:^(NSRange range, BOOL* stop){
+		for(NSUInteger row = range.location; row < NSMaxRange(range); ++row)
+		{
+			NSRect rect = [self rectOfRow:row];
+			rect.size.height -= 1;
+			[self setNeedsDisplayInRect:rect];
+		}
+	}];
 }
 @end
