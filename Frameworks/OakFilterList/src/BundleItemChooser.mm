@@ -114,6 +114,14 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 
 	[self.window.contentView addConstraints:constraints];
 	self.layoutConstraints = constraints;
+
+	// The auto-calculated key-view loop is sometimes wrong, my theory is that it’s because of delayed layout
+	[self performSelector:@selector(delayedRecalculateKeyViewLoop:) withObject:self afterDelay:0];
+}
+
+- (void)delayedRecalculateKeyViewLoop:(id)sender
+{
+	[self.window recalculateKeyViewLoop];
 }
 
 - (void)showWindow:(id)sender
@@ -161,7 +169,6 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	}
 
 	[self setupLayoutConstraints];
-	[self.window recalculateKeyViewLoop];
 	[self.window makeFirstResponder:self.keyEquivalentInput ? self.keyEquivalentView : self.searchField];
 
 	self.keyEquivalentView.eventString = nil;
