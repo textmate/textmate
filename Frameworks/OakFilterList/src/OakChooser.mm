@@ -125,7 +125,8 @@ NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string
 {
 	[_window recalculateKeyViewLoop];
 	[_window makeKeyAndOrderFront:self];
-	[_window makeFirstResponder:_searchField];
+	if(_searchField.window)
+		[_window makeFirstResponder:_searchField];
 }
 
 - (void)showWindowRelativeToFrame:(NSRect)parentFrame
