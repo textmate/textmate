@@ -13,7 +13,6 @@
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakPasteboard.h>
 #import <OakFilterList/BundleItemChooser.h>
-#import <OakFilterList/OakFilterList.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakTextView/OakDocumentView.h>
 #import <Preferences/Keys.h>
@@ -81,7 +80,6 @@ BOOL HasDocumentWindow (NSArray* windows)
 }
 
 @interface AppController ()
-@property (nonatomic) OakFilterWindowController* filterWindowController;
 @property (nonatomic) BOOL didFinishLaunching;
 @property (nonatomic) BOOL currentResponderIsOakTextView;
 @end
@@ -394,48 +392,15 @@ BOOL HasDocumentWindow (NSArray* windows)
 // = Bundle Item Chooser =
 // =======================
 
-- (void)setFilterWindowController:(OakFilterWindowController*)controller
-{
-	if(controller != _filterWindowController)
-	{
-		if(_filterWindowController)
-		{
-			[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowWillCloseNotification object:_filterWindowController.window];
-			_filterWindowController.target = nil;
-			[_filterWindowController close];
-		}
-
-		if(_filterWindowController = controller)
-			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(filterWindowWillClose:) name:NSWindowWillCloseNotification object:_filterWindowController.window];
-	}
-}
-
-- (void)filterWindowWillClose:(NSNotification*)notification
-{
-	BundleItemChooser* dataSource = [_filterWindowController dataSource];
-	bundleItemSearch.filter_string  = to_s([dataSource filterString]);
-	bundleItemSearch.key_equivalent = [dataSource keyEquivalentSearch];
-	bundleItemSearch.all_scopes     = [dataSource searchAllScopes];
-	bundleItemSearch.search_type    = [dataSource searchType];
-	self.filterWindowController     = nil;
-}
-
 - (IBAction)showBundleItemChooser:(id)sender
 {
-	self.filterWindowController            = [OakFilterWindowController new];
-	OakTextView* textView                  = [NSApp targetForAction:@selector(scopeContext)];
-
-	BundleItemChooser* dataSource          = [BundleItemChooser bundleItemChooserForScope:textView ? [textView scopeContext] : scope::wildcard];
-	dataSource.searchType                  = search::type(bundleItemSearch.search_type);
-	dataSource.keyEquivalentSearch         = bundleItemSearch.key_equivalent;
-	dataSource.textViewHasSelection        = [textView hasSelection];
-	dataSource.searchAllScopes             = bundleItemSearch.all_scopes;
-	dataSource.filterString                = [NSString stringWithCxxString:bundleItemSearch.filter_string];
-
-	_filterWindowController.dataSource      = dataSource;
-	_filterWindowController.action          = @selector(bundleItemChooserDidSelectItems:);
-	_filterWindowController.accessoryAction = @selector(editBundleItem:);
-	[_filterWindowController showWindowRelativeToWindow:[textView window]];
+	BundleItemChooser* chooser  = [BundleItemChooser sharedInstance];
+	OakTextView* textView = [NSApp targetForAction:@selector(scopeContext)];
+	chooser.scope        = textView ? [textView scopeContext] : scope::wildcard;
+	chooser.hasSelection = [textView hasSelection];
+	chooser.action       = @selector(bundleItemChooserDidSelectItems:);
+	chooser.editAction   = @selector(editBundleItem:);
+	[chooser showWindowRelativeToFrame:[textView.window convertRectToScreen:[textView convertRect:[textView visibleRect] toView:nil]]];
 }
 
 - (void)bundleItemChooserDidSelectItems:(id)sender
@@ -507,8 +472,6 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 	if(NSString* uuid = [[[sender selectedItems] lastObject] objectForKey:@"uuid"])
 		[[BundleEditor sharedInstance] revealBundleItem:bundles::lookup(to_s(uuid))];
-
-	self.filterWindowController = nil;
 }
 
 - (void)editBundleItemWithUUIDString:(NSString*)uuidString

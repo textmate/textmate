@@ -1,530 +1,276 @@
 #import "BundleItemChooser.h"
-#import "../OakAbbreviations.h"
-#import "../highlight_ranges.h"
-#import <bundles/bundles.h>
-#import <ns/ns.h>
-#import <scope/scope.h>
-#import <OakFoundation/NSString Additions.h>
-#import <OakAppKit/NSMenu Additions.h>
-#import <text/case.h>
-#import <text/ctype.h>
-#import <text/ranker.h>
 #import "OakBundleItemCell.h"
+#import <OakAppKit/OakAppKit.h>
+#import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakAppKit/OakKeyEquivalentView.h>
-#import <MGScopeBar/MGScopeBar.h>
+#import <OakFoundation/OakFoundation.h>
+#import <OakFoundation/NSString Additions.h>
+#import <bundles/bundles.h>
+#import <text/ranker.h>
+#import <text/ctype.h>
+#import <ns/ns.h>
 
-OAK_DEBUG_VAR(FilterList_BundleItemChooser);
-
-@interface BundleItemChooserItem : NSObject
+static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t const& scope, bool hasSelection, int mask = bundles::kItemTypeMenuTypes)
 {
-	NSUInteger index;
-	oak::uuid_t uuid;
-}
-@property (nonatomic) NSUInteger index;
-- (NSString*)uuid;
-- (void)setUuid:(oak::uuid_t const&)other;
-@end
-
-@implementation BundleItemChooserItem
-@synthesize index;
-
-- (NSString*)uuid
-{
-	return [NSString stringWithCxxString:uuid];
-}
-
-- (void)setUuid:(oak::uuid_t const&)other
-{
-	uuid = other;
-}
-
-- (id)objectForKey:(id)anId
-{
-	ASSERT([anId isEqual:@"uuid"]);
-	return [self uuid];
-}
-
-- (BOOL)isEqual:(id)anotherItem
-{
-	return [anotherItem isKindOfClass:[BundleItemChooserItem class]] && ((BundleItemChooserItem*)anotherItem)->uuid == uuid;
-}
-@end
-
-@interface OakScopeBar : MGScopeBar
-{
-}
-@end
-
-@implementation OakScopeBar
-- (void)drawRect:(NSRect)aRect
-{
-	[super drawRect:aRect];
-
-	NSRect lineRect = [self bounds];
-	lineRect.origin.y += 1;
-	lineRect.size.height = 1;
-	[[NSColor colorWithCalibratedWhite:0.59 alpha:1] set];
-	NSRectFill(lineRect);
-
-	lineRect = [self bounds];
-	lineRect.size.height = 1;
-	[[NSColor darkGrayColor] set];
-	NSRectFill(lineRect);
-}
-@end
-
-@interface BundleItemChooserViewController : NSViewController <MGScopeBarDelegate>
-{
-	NSSearchField* searchField;
-	OakKeyEquivalentView* keyEquivField;
-	NSSegmentedControl* sourceSelector;
-	MGScopeBar* scopeBar;
-}
-@property (nonatomic, weak) BundleItemChooser* itemChooser;
-@end
-
-@interface BundleItemChooserView : NSView
-@property (nonatomic) BundleItemChooserViewController* viewController;
-@end
-
-@implementation BundleItemChooserView
-- (void)viewDidMoveToWindow
-{
-	[self.window makeFirstResponder:[self.viewController valueForKey:self.viewController.itemChooser.keyEquivalentSearch ? @"keyEquivField" : @"searchField"]];
-}
-@end
-
-static NSString* const TitleSearchMode         = @"TitleSearchMode";
-static NSString* const KeyEquivalentSearchMode = @"KeyEquivalentSearchMode";
-
-static NSString* const CurrentScope = @"CurrentScope";
-static NSString* const AllScopes    = @"AllScopes";
-
-@implementation BundleItemChooserViewController
-- (id)initWithBundleItemChooser:(BundleItemChooser*)chooser
-{
-	if((self = [super init]))
-	{
-		self.itemChooser = chooser;
-
-		static CGFloat const initialViewWidth = 1200;
-
-		searchField                  = [[NSSearchField alloc] initWithFrame:NSMakeRect(7, 8, initialViewWidth-14, 22)];
-		searchField.action           = @selector(didChangeFilterString:);
-		searchField.target           = self;
-		searchField.autoresizingMask = NSViewWidthSizable|NSViewMinYMargin;
-		[searchField.cell setScrollable:YES];
-
-		keyEquivField                      = [[OakKeyEquivalentView alloc] initWithFrame:searchField.frame];
-		keyEquivField.autoresizingMask     = NSViewWidthSizable|NSViewMinYMargin;
-		keyEquivField.disableGlobalHotkeys = NO;
-		[keyEquivField setHidden:YES];
-
-		scopeBar                  = [[OakScopeBar alloc] initWithFrame:NSMakeRect(0, NSMaxY(searchField.frame) + 6, initialViewWidth, 25)];
-		scopeBar.autoresizingMask = NSViewWidthSizable|NSViewMinYMargin;
-
-		self.view = [[BundleItemChooserView alloc] initWithFrame:NSMakeRect(0, 0, initialViewWidth, NSMaxY(scopeBar.frame))];
-		((BundleItemChooserView*)self.view).viewController = self;
-		self.view.autoresizingMask = NSViewWidthSizable;
-		[self.view addSubview:searchField];
-		[self.view addSubview:keyEquivField];
-
-		[self.view addSubview:scopeBar];
-
-		BOOL searchAllScopes     = chooser.searchAllScopes;
-		BOOL keyEquivalentSearch = chooser.keyEquivalentSearch;
-		search::type searchType  = chooser.searchType;
-		NSString* filterString   = chooser.filterString;
-
-		scopeBar.delegate = self;
-		[scopeBar reloadData];
-		[scopeBar adjustSubviews];
-
-		[scopeBar setSelected:searchAllScopes forItem:AllScopes inGroup:0];
-		[scopeBar setSelected:keyEquivalentSearch forItem:KeyEquivalentSearchMode inGroup:1];
-		switch(searchType)
-		{
-			case search::actions:  [scopeBar setSelected:YES forItem:@"Actions" inGroup:2];  break;
-			case search::grammars: [scopeBar setSelected:YES forItem:@"Grammars" inGroup:2]; break;
-			case search::themes:   [scopeBar setSelected:YES forItem:@"Themes" inGroup:2];   break;
-		}
-
-		chooser.filterString = filterString;
-
-		if(chooser.keyEquivalentSearch)
-				keyEquivField.eventString = filterString;
-		else	searchField.stringValue = filterString;
-
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(viewFrameDidChange:) name:NSViewFrameDidChangeNotification object:self.view];
-		[keyEquivField bind:NSValueBinding toObject:chooser withKeyPath:@"filterString" options:nil];
-	}
-	return self;
-}
-
-- (void)dealloc
-{
-	searchField.target = nil;
-	[[NSNotificationCenter defaultCenter] removeObserver:self];
-	[keyEquivField unbind:NSValueBinding];
-}
-
-- (int)numberOfGroupsInScopeBar:(MGScopeBar*)theScopeBar
-{
-	return 3;
-}
-
-- (NSArray*)scopeBar:(MGScopeBar*)theScopeBar itemIdentifiersForGroup:(int)groupNumber
-{
-	if(groupNumber == 0)
-		return @[ CurrentScope, AllScopes ];
-	else if(groupNumber == 1)
-		return @[ TitleSearchMode, KeyEquivalentSearchMode ];
-	else if(groupNumber == 2)
-		return @[ @"Actions", @"Grammars", @"Themes" ];
-	return nil;
-}
-
-- (NSString*)scopeBar:(MGScopeBar*)theScopeBar labelForGroup:(int)groupNumber
-{
-	return nil;
-}
-
-- (MGScopeBarGroupSelectionMode)scopeBar:(MGScopeBar*)theScopeBar selectionModeForGroup:(int)groupNumber
-{
-	return MGRadioSelectionMode;
-}
-
-- (NSString*)scopeBar:(MGScopeBar*)theScopeBar titleOfItem:(NSString*)identifier inGroup:(int)groupNumber
-{
-	if(identifier == TitleSearchMode)               return @"Title";
-	else if(identifier == KeyEquivalentSearchMode)  return @"Key Equivalent";
-	else if(identifier == CurrentScope)             return @"Current Scope";
-	else if(identifier == AllScopes)                return @"All Scopes";
-	else                                            return identifier;
-}
-
-- (void)scopeBar:(MGScopeBar*)theScopeBar selectedStateChanged:(BOOL)selected forItem:(NSString*)identifier inGroup:(int)groupNumber
-{
-	if(!selected)
-		return;
-
-	if(groupNumber == 1)
-	{
-		if(identifier == TitleSearchMode)
-		{
-			[searchField setHidden:NO];
-			[keyEquivField setHidden:YES];
-			[self.view.window makeFirstResponder:searchField];
-			self.itemChooser.keyEquivalentSearch = NO;
-		}
-		else if(identifier == KeyEquivalentSearchMode)
-		{
-			[searchField setHidden:YES];
-			[keyEquivField setHidden:NO];
-			[self.view.window makeFirstResponder:keyEquivField];
-			self.itemChooser.keyEquivalentSearch = YES;
-			keyEquivField.recording = YES;
-		}
-	}
-	else if(groupNumber == 0)
-	{
-		self.itemChooser.searchAllScopes = identifier == AllScopes;
-	}
-	else if(groupNumber == 2)
-	{
-		if([identifier isEqualToString:@"Actions"])       self.itemChooser.searchType = search::actions;
-		else if([identifier isEqualToString:@"Grammars"]) self.itemChooser.searchType = search::grammars;
-		else if([identifier isEqualToString:@"Themes"])   self.itemChooser.searchType = search::themes;
-	}
-}
-
-- (void)updateGoToMenu:(NSMenu*)aMenu
-{
-	if(!self.view.window.isKeyWindow)
-	{
-		[aMenu addItemWithTitle:@"No Sources" action:@selector(nop:) keyEquivalent:@""];
-		return;
-	}
-
-	int groupCount = [self numberOfGroupsInScopeBar:scopeBar];
-	char key = 0;
-	for(NSUInteger groupIndex = 0; groupIndex < groupCount; ++groupIndex)
-	{
-		NSArray* identifiers = [self scopeBar:scopeBar itemIdentifiersForGroup:groupIndex];
-		for(NSUInteger index = 0; index < identifiers.count; ++index)
-		{
-			NSString* identifier   = [identifiers objectAtIndex:index];
-			NSString* label        = [self scopeBar:scopeBar titleOfItem:identifier inGroup:groupIndex];
-			NSMenuItem* item       = [aMenu addItemWithTitle:label action:@selector(takeSelectedItemFrom:) keyEquivalent:key < 10 ? [NSString stringWithFormat:@"%c", '0' + (++key % 10)] : @""];
-			item.representedObject = identifier;
-			item.tag               = groupIndex;
-			if([[scopeBar.selectedItems objectAtIndex:groupIndex] containsObject:identifier])
-				item.state = NSOnState;
-		}
-		if(groupIndex+1 < groupCount)
-			[aMenu addItem:[NSMenuItem separatorItem]];
-	}
-}
-
-- (void)takeSelectedItemFrom:(NSMenuItem*)item
-{
-	NSString* identifier  = [item representedObject];
-	NSUInteger groupIndex = [item tag];
-	[scopeBar setSelected:YES forItem:identifier inGroup:groupIndex];
-}
-
-- (void)didChangeFilterString:(NSSearchField*)sender { self.itemChooser.filterString = sender.stringValue; }
-- (void)setSearchFieldDelegate:(id)aDelegate         { searchField.delegate = aDelegate; }
-
-- (void)viewFrameDidChange:(NSNotification*)notification
-{
-	// Distribute source segment widths
-	for(NSUInteger index = 0; index < sourceSelector.segmentCount; ++index)
-		[sourceSelector setWidth:(sourceSelector.superview.frame.size.width / sourceSelector.segmentCount) forSegment:index];
-}
-@end
-
-@implementation BundleItemChooser
-{
-	OBJC_WATCH_LEAKS(BundleItemChooser);
-	scope::context_t scope;
-	BOOL hasSelection;
-	std::vector<bundles::item_ptr> all_items;
-	std::map<oak::uuid_t, double> items_filtered_by_scope;
-	BOOL searchAllScopes;
-	std::string originalFilterString;
-	std::string filterString;
-	NSViewController* viewController;
-	BOOL keyEquivalentSearch;
-	search::type searchType;
-}
-@synthesize keyEquivalentSearch, textViewHasSelection = hasSelection, searchAllScopes, searchType;
-
-static std::vector<bundles::item_ptr> relevant_items_in_scope (search::type searchType, scope::context_t const& scope, bool hasSelection)
-{
-	int kindMask = 0;
-	if(searchType == search::actions)
-		kindMask = bundles::kItemTypeMenuTypes;
-	else if(searchType == search::grammars)
-		kindMask = bundles::kItemTypeGrammar;
-	else if(searchType == search::themes)
-		kindMask = bundles::kItemTypeTheme;
+	std::map<std::string, bundles::item_ptr, text::less_t> sorted;
+	for(auto const& item : bundles::query(bundles::kFieldAny, NULL_STR, scope, mask, oak::uuid_t(), false))
+		sorted.emplace(full_name_with_selection(item, hasSelection), item);
 
 	std::vector<bundles::item_ptr> res;
-	for(auto const& item : bundles::query(bundles::kFieldAny, NULL_STR, scope, kindMask, oak::uuid_t(), false))
-		res.push_back(item);
-
-	if(scope == scope::wildcard)
-	{
-		std::map<std::string, bundles::item_ptr, text::less_t> sorted;
-		for(auto const& item : res)
-			sorted.emplace(full_name_with_selection(item, hasSelection), item);
-
-		res.clear();
-		std::transform(sorted.begin(), sorted.end(), back_inserter(res), [](std::pair<std::string, bundles::item_ptr> const& p){ return p.second; });
-	}
-
+	std::transform(sorted.begin(), sorted.end(), back_inserter(res), [](std::pair<std::string, bundles::item_ptr> const& p){ return p.second; });
 	return res;
 }
 
-- (id)initWithScope:(scope::context_t const&)aScope
+@interface BundleItemChooserItem : NSObject
+@property (nonatomic) id name;
+@property (nonatomic) NSString* uuid;
+@property (nonatomic) bundles::item_ptr item;
+@end
+
+@implementation BundleItemChooserItem
+- (id)objectForKey:(id)aKey     { return [self valueForKey:aKey]; }
+- (BOOL)isEqual:(id)anotherItem { return [anotherItem isKindOfClass:[BundleItemChooserItem class]] && [self.uuid isEqualToString:((BundleItemChooserItem*)anotherItem).uuid]; }
+@end
+
+@interface BundleItemChooser () <NSToolbarDelegate>
+@property (nonatomic) OakKeyEquivalentView* keyEquivalentView;
+@property (nonatomic) NSPopUpButton* actionsPopUpButton;
+@property (nonatomic) NSBox* topDivider;
+@property (nonatomic) NSBox* bottomDivider;
+@property (nonatomic) NSButton* selectButton;
+@property (nonatomic) NSButton* editButton;
+@property (nonatomic) NSArray* layoutConstraints;
+
+@property (nonatomic) NSString* keyEquivalentString;
+@property (nonatomic) BOOL keyEquivalentInput;
+@property (nonatomic) BOOL searchAllScopes;
+@end
+
+@implementation BundleItemChooser
++ (instancetype)sharedInstance
 {
-	D(DBF_FilterList_BundleItemChooser, bug("scope: ‘%s’, ‘%s’\n", to_s(aScope.left).c_str(), to_s(aScope.right).c_str()););
-	if(self = [super init])
+	static id sharedInstance = [self new];
+	return sharedInstance;
+}
+
+- (id)init
+{
+	if((self = [super init]))
 	{
-		scope           = aScope;
-		self.searchType = search::actions;
+		self.window.title = @"Select Bundle Item";
+		[self.window setContentBorderThickness:31 forEdge:NSMinYEdge];
+
+		NSCell* cell = [OakBundleItemCell new];
+		[[self.tableView tableColumnWithIdentifier:@"name"] setDataCell:cell];
+
+		self.actionsPopUpButton = OakCreateActionPopUpButton(YES /* bordered */);
+		NSMenu* actionMenu = self.actionsPopUpButton.menu;
+		[actionMenu addItemWithTitle:@"Placeholder" action:NULL keyEquivalent:@""];
+		[actionMenu addItemWithTitle:@"Search by Key Equivalent" action:@selector(toggleKeyEquivalentInput:) keyEquivalent:@"1"];
+		[actionMenu addItem:[NSMenuItem separatorItem]];
+		[actionMenu addItemWithTitle:@"Search All Scopes" action:@selector(toggleSearchAllScopes:) keyEquivalent:@"2"];
+
+		self.topDivider          = OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]);
+		self.bottomDivider       = OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]);
+
+		self.selectButton        = OakCreateButton(@"Select");
+		self.selectButton.target = self;
+		self.selectButton.action = @selector(accept:);
+
+		self.editButton          = OakCreateButton(@"Edit");
+		self.editButton.target   = self;
+		self.editButton.action   = @selector(editItem:);
+
+		for(NSView* view in @[ self.searchField, self.actionsPopUpButton, self.topDivider, self.scrollView, self.bottomDivider, self.editButton, self.selectButton ])
+		{
+			[view setTranslatesAutoresizingMaskIntoConstraints:NO];
+			[self.window.contentView addSubview:view];
+		}
+
+		[self setupLayoutConstraints];
+		self.window.defaultButtonCell = self.selectButton.cell;
 	}
 	return self;
 }
 
-+ (id)bundleItemChooserForScope:(scope::context_t const&)aScope
+- (void)setupLayoutConstraints
 {
-	return [[self alloc] initWithScope:aScope];
+	NSDictionary* views = @{
+		@"searchField"        : self.keyEquivalentInput ? self.keyEquivalentView : self.searchField,
+		@"actions"            : self.actionsPopUpButton,
+		@"topDivider"         : self.topDivider,
+		@"scrollView"         : self.scrollView,
+		@"bottomDivider"      : self.bottomDivider,
+		@"edit"               : self.editButton,
+		@"select"             : self.selectButton,
+	};
+
+	NSMutableArray* constraints = [NSMutableArray array];
+	[constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[searchField(>=50)]-[actions]-(8)-|"        options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
+	[constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView(==topDivider,==bottomDivider)]|"     options:0 metrics:nil views:views]];
+	[constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[edit]-[select]-|"                                options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
+	[constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(8)-[searchField]-(8)-[topDivider][scrollView(>=50)][bottomDivider]-(4)-[select]-(5)-|" options:0 metrics:nil views:views]];
+
+	[self.window.contentView addConstraints:constraints];
+	self.layoutConstraints = constraints;
 }
 
-- (NSString*)title
+- (OakKeyEquivalentView*)keyEquivalentView
 {
-	return @"Select Bundle Item";
-}
-
-- (NSTextFieldCell*)itemDataCell
-{
-	return [[OakBundleItemCell alloc] initTextCell:@""];
-}
-
-- (void)setSearchType:(search::type)newType
-{
-	if(newType != searchType || all_items.empty())
+	if(!_keyEquivalentView)
 	{
-		searchType = newType;
-		all_items = relevant_items_in_scope(searchType, scope::wildcard, hasSelection);
-
-		double rank = 0;
-		for(auto const& item : relevant_items_in_scope(searchType, scope, hasSelection))
-			items_filtered_by_scope.emplace(item->uuid(), rank++);
-		[[NSNotificationCenter defaultCenter] postNotificationName:FLDataSourceItemsDidChangeNotification object:self];
+		_keyEquivalentView = [[OakKeyEquivalentView alloc] initWithFrame:NSZeroRect];
+		[_keyEquivalentView setTranslatesAutoresizingMaskIntoConstraints:NO];
+		[_keyEquivalentView bind:NSValueBinding toObject:self withKeyPath:@"keyEquivalentString" options:nil];
 	}
+	return _keyEquivalentView;
 }
 
-- (void)setKeyEquivalentSearch:(BOOL)flag
+- (void)toggleKeyEquivalentInput:(id)sender
 {
-	if(keyEquivalentSearch != flag)
+	self.keyEquivalentInput = !self.keyEquivalentInput;
+}
+
+- (void)setKeyEquivalentInput:(BOOL)flag
+{
+	if(_keyEquivalentInput == flag)
+		return;
+
+	_keyEquivalentInput = flag;
+
+	NSView* contentView = self.window.contentView;
+	[contentView removeConstraints:self.layoutConstraints];
+	self.layoutConstraints = nil;
+
+	if(flag)
 	{
-		keyEquivalentSearch = flag;
-		self.filterString = nil;
-		[[NSNotificationCenter defaultCenter] postNotificationName:FLDataSourceItemsDidChangeNotification object:self];
-	}
-}
-
-- (void)setSearchAllScopes:(BOOL)flag
-{
-	if(searchAllScopes != flag)
-	{
-		searchAllScopes = flag;
-		[[NSNotificationCenter defaultCenter] postNotificationName:FLDataSourceItemsDidChangeNotification object:self];
-	}
-}
-
-- (NSString*)filterString
-{
-	return [NSString stringWithCxxString:originalFilterString];
-}
-
-- (void)setFilterString:(NSString*)string
-{
-	originalFilterString = string.UTF8String ?: "";
-	std::string const& newFilterString = string.lowercaseString.UTF8String ?: "";
-	if(newFilterString != filterString)
-	{
-		filterString = newFilterString;
-		[[NSNotificationCenter defaultCenter] postNotificationName:FLDataSourceItemsDidChangeNotification object:self];
-	}
-}
-
-- (NSViewController*)viewController
-{
-	if(!viewController)
-		viewController = [[BundleItemChooserViewController alloc] initWithBundleItemChooser:self];
-	return viewController;
-}
-
-- (NSButtonCell*)accessoryButton
-{
-	NSButtonCell* button = [NSButtonCell new];
-	[button setButtonType:NSSwitchButton];
-	[button setBezelStyle:NSSmallSquareBezelStyle];
-	[button setImagePosition:NSImageOnly];
-	[button setBordered:NO];
-	[button setImage:[NSImage imageNamed:NSImageNameFollowLinkFreestandingTemplate]];
-	[button setAlternateImage:[NSImage imageNamed:NSImageNameFollowLinkFreestandingTemplate]];
-	return button;
-}
-
-- (NSArray*)items
-{
-	std::multimap<double, BundleItemChooserItem*> rankedItems;
-
-	if(keyEquivalentSearch)
-	{
-		for(size_t index = 0; index < all_items.size(); ++index)
-		{
-			auto itemIter = items_filtered_by_scope.find(all_items[index]->uuid());
-			if(!searchAllScopes && itemIter == items_filtered_by_scope.end())
-				continue;
-
-			if(!filterString.empty() && key_equivalent(all_items[index]) != originalFilterString)
-				continue;
-
-			BundleItemChooserItem* item = [BundleItemChooserItem new];
-			[item setIndex:index];
-			[item setUuid:all_items[index]->uuid()];
-			rankedItems.emplace(itemIter->second, item);
-		}
+		[self.searchField removeFromSuperview];
+		[contentView addSubview:self.keyEquivalentView];
 	}
 	else
 	{
-		NSArray* bestMatches = [[OakAbbreviations abbreviationsForName:@"BundleItemChooserBindings"] stringsForAbbreviation:[NSString stringWithCxxString:filterString]];
-		for(size_t index = 0; index < all_items.size(); ++index)
+		[self.keyEquivalentView removeFromSuperview];
+		[contentView addSubview:self.searchField];
+	}
+
+	[self setupLayoutConstraints];
+	[self.window recalculateKeyViewLoop];
+	[self.window makeFirstResponder:self.keyEquivalentInput ? self.keyEquivalentView : self.searchField];
+
+	self.keyEquivalentView.eventString = nil;
+	self.keyEquivalentView.recording   = self.keyEquivalentInput;
+
+	[self updateItems:self];
+}
+
+- (void)toggleSearchAllScopes:(id)sender
+{
+	self.searchAllScopes = !self.searchAllScopes;
+	[self updateItems:self];
+}
+
+- (void)setScope:(scope::context_t)aScope
+{
+	_scope = aScope;
+	[self updateItems:self];
+}
+
+- (void)setKeyEquivalentString:(NSString*)aString
+{
+	if([_keyEquivalentString isEqualToString:aString])
+		return;
+
+	_keyEquivalentString = aString;
+	[self updateItems:self];
+}
+
+- (void)tableView:(NSTableView*)aTableView willDisplayCell:(OakBundleItemCell*)cell forTableColumn:(NSTableColumn*)aTableColumn row:(NSInteger)rowIndex
+{
+	if(![aTableColumn.identifier isEqualToString:@"name"])
+		return;
+
+	BundleItemChooserItem* entry = self.items[rowIndex];
+	cell.keyEquivalent = [NSString stringWithCxxString:key_equivalent(entry.item)];
+	cell.tabTrigger    = [NSString stringWithCxxString:entry.item->value_for_field(bundles::kFieldTabTrigger)];
+}
+
+- (void)updateItems:(id)sender
+{
+	std::string const filter = to_s(self.filterString);
+
+	std::multimap<double, BundleItemChooserItem*> rankedItems;
+	for(auto const& item : relevant_items_in_scope(self.searchAllScopes ? scope::wildcard : self.scope, self.hasSelection))
+	{
+		std::string const fullName = full_name_with_selection(item, self.hasSelection);
+
+		if(self.keyEquivalentInput && OakNotEmptyString(self.keyEquivalentString))
 		{
-			if(!searchAllScopes && items_filtered_by_scope.find(all_items[index]->uuid()) == items_filtered_by_scope.end())
-				continue;
-
-			double rank = 1;
-			NSUInteger bestMatchIndex = [bestMatches indexOfObject:[NSString stringWithCxxString:all_items[index]->uuid()]];
-			if(bestMatchIndex != NSNotFound)
+			if(key_equivalent(item) == to_s(self.keyEquivalentString))
 			{
-				rank = -((double)(bestMatches.count - bestMatchIndex) - 1); // since we go from 0-1 with 0 = best, <0 means “even better” :)
+				BundleItemChooserItem* entry = [BundleItemChooserItem new];
+				entry.name = [NSString stringWithCxxString:fullName];
+				entry.uuid = [NSString stringWithCxxString:item->uuid()];
+				entry.item = item;
+				rankedItems.emplace(rankedItems.size(), entry);
 			}
-			else if(!filterString.empty())
-			{
-				double nameRank    = oak::rank(filterString, full_name_with_selection(all_items[index], hasSelection));
-				double triggerRank = oak::rank(filterString, all_items[index]->value_for_field(bundles::kFieldTabTrigger));
-				if(nameRank == 0 && triggerRank == 0)
-					continue;
-				rank = 1 - std::max(nameRank, triggerRank);
-			}
-
-			BundleItemChooserItem* item = [BundleItemChooserItem new];
-			[item setIndex:index];
-			[item setUuid:all_items[index]->uuid()];
-			rankedItems.emplace(rank, item);
 		}
-	}
-
-	NSMutableArray* items = [NSMutableArray array];
-	for(auto const& it : rankedItems)
-		[items addObject:it.second];
-
-	return items;
-}
-
-- (NSAttributedString*)displayStringForItem:(BundleItemChooserItem*)item
-{
-	NSUInteger index = [item index];
-	std::string const itemName = full_name_with_selection(all_items[index], hasSelection);
-
-	std::vector< std::pair<size_t, size_t> > ranges;
-	double nameRank    = oak::rank(filterString, full_name_with_selection(all_items[index], hasSelection));
-	double triggerRank = oak::rank(filterString, all_items[index]->value_for_field(bundles::kFieldTabTrigger));
-	if(nameRank > triggerRank)
-		oak::rank(text::lowercase(filterString), itemName, &ranges);
-	return AttributedStringWithMarkedUpRanges(itemName, ranges);
-}
-
-- (void)makeItemsBestFitForCurrentSearch:(NSArray*)theItems
-{
-	if(!keyEquivalentSearch)
-	{
-		for(BundleItemChooserItem* item in theItems)
-			[[OakAbbreviations abbreviationsForName:@"BundleItemChooserBindings"] learnAbbreviation:self.filterString forString:[item uuid]];
-	}
-}
-
-- (void)willDisplayCell:(NSTextFieldCell*)aCell forItem:(BundleItemChooserItem*)anItem
-{
-	NSUInteger index = [anItem index];
-	[(OakBundleItemCell*)aCell setKeyEquivalent:[NSString stringWithCxxString:key_equivalent(all_items[index])]];
-
-	std::string const& tabTrigger = all_items[index]->value_for_field(bundles::kFieldTabTrigger);
-	if(tabTrigger != NULL_STR)
-	{
-		double nameRank    = oak::rank(filterString, full_name_with_selection(all_items[index], hasSelection));
-		double triggerRank = oak::rank(filterString, tabTrigger);
-		if(triggerRank > nameRank)
+		else if(!self.keyEquivalentInput && OakNotEmptyString(self.filterString))
 		{
 			std::vector< std::pair<size_t, size_t> > ranges;
-			oak::rank(text::lowercase(filterString), tabTrigger, &ranges);
-			[(OakBundleItemCell*)aCell setAttributedTabTrigger:AttributedStringWithMarkedUpRanges(tabTrigger, ranges)];
+			if(double rank = oak::rank(filter, fullName, &ranges))
+			{
+				BundleItemChooserItem* entry = [BundleItemChooserItem new];
+				entry.name = CreateAttributedStringWithMarkedUpRanges(fullName, ranges);
+				entry.uuid = [NSString stringWithCxxString:item->uuid()];
+				entry.item = item;
+				rankedItems.emplace(-rank, entry);
+			}
 		}
 		else
 		{
-			[(OakBundleItemCell*)aCell setTabTrigger:[NSString stringWithCxxString:tabTrigger]];
+			BundleItemChooserItem* entry = [BundleItemChooserItem new];
+			entry.name = [NSString stringWithCxxString:fullName];
+			entry.uuid = [NSString stringWithCxxString:item->uuid()];
+			entry.item = item;
+			rankedItems.emplace(rankedItems.size(), entry);
 		}
+	}
+
+	NSMutableArray* res = [NSMutableArray array];
+	for(auto const& pair : rankedItems)
+		[res addObject:pair.second];
+	self.items = res;
+
+	self.window.title = [NSString stringWithFormat:@"Select Bundle Item (%@)", self.itemCountTextField.stringValue];
+}
+
+- (void)updateStatusText:(id)sender
+{
+	if(self.tableView.selectedRow != -1)
+	{
+		BundleItemChooserItem* item = self.items[self.tableView.selectedRow];
+		self.statusTextField.stringValue = item.uuid;
 	}
 	else
 	{
-		[(OakBundleItemCell*)aCell setTabTrigger:nil];
+		self.statusTextField.stringValue = @"";
 	}
+}
+
+- (BOOL)validateMenuItem:(NSMenuItem*)aMenuItem
+{
+	if(aMenuItem.action == @selector(toggleKeyEquivalentInput:))
+		aMenuItem.title = self.keyEquivalentInput ? @"Search by Title" : @"Search by Key Equivalent";
+	else if(aMenuItem.action == @selector(toggleSearchAllScopes:))
+		aMenuItem.state = self.searchAllScopes ? NSOnState : NSOffState;
+	return YES;
+}
+
+- (IBAction)editItem:(id)sender
+{
+	[self.window orderOut:self];
+	if(self.editAction)
+		[NSApp sendAction:self.editAction to:self.target from:self];
+	[self.window close];
 }
 @end
