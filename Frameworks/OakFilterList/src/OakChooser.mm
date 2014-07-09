@@ -3,6 +3,7 @@
 #import "ui/SearchField.h"
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
+#import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <ns/ns.h>
 #import <text/ranker.h>
@@ -160,6 +161,12 @@ NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string
 
 	_filterString = [aString copy];
 	_searchField.stringValue = aString ?: @"";
+
+	if([_tableView numberOfRows] != 0)
+	{
+		[_tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
+		[_tableView scrollRowToVisible:0];
+	}
 
 	[self updateItems:self];
 }
