@@ -234,7 +234,7 @@ static NSString* const kRecordingPlaceholderString = @"…";
 	else
 	{
 		static std::set<std::string> const ClearKeys     = { utf8::to_s(NSDeleteCharacter), utf8::to_s(NSDeleteFunctionKey) };
-		static std::set<std::string> const RecordingKeys = { " ", "\n", "\r" };
+		static std::set<std::string> const RecordingKeys = { " " };
 		std::string const keyString = to_s(anEvent);
 		if(ClearKeys.find(keyString) != ClearKeys.end())
 			[self clearKeyEquivalent:self];
