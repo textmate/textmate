@@ -38,6 +38,11 @@ static NSString* const kRecordingPlaceholderString = @"…";
 		[info[kBindingInfoControllerKey] removeObserver:self forKeyPath:info[kBindingInfoKeyPathKey]];
 }
 
+- (NSSize)intrinsicContentSize
+{
+	return NSMakeSize(NSViewNoInstrinsicMetric, 22);
+}
+
 - (void)setEventString:(NSString*)aString
 {
 	if(_eventString == aString || [_eventString isEqualToString:aString])
