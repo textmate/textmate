@@ -120,28 +120,6 @@
 	_linkedTextField.delegate = nil;
 }
 
-// =================================================
-// = Redraw when linked text field gain/lose focus =
-// =================================================
-
-static void* kFirstResponderBinding = &kFirstResponderBinding;
-
-- (void)viewWillMoveToWindow:(NSWindow*)aWindow
-{
-	if(aWindow)
-			[aWindow addObserver:self forKeyPath:@"firstResponder" options:NSKeyValueObservingOptionNew|NSKeyValueObservingOptionOld context:kFirstResponderBinding];
-	else	[self.window removeObserver:self forKeyPath:@"firstResponder" context:kFirstResponderBinding];
-}
-
-- (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)object change:(NSDictionary*)change context:(void*)context
-{
-	if(context == kFirstResponderBinding)
-	{
-		NSResponder* newResponder = change[NSKeyValueChangeNewKey];
-		self.drawAsHighlighted = newResponder == self.linkedTextField || newResponder == [self.linkedTextField currentEditor];
-	}
-}
-
 - (void)setDrawAsHighlighted:(BOOL)flag
 {
 	if(_drawAsHighlighted == flag)
