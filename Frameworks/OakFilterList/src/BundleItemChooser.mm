@@ -115,6 +115,12 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	self.layoutConstraints = constraints;
 }
 
+- (void)showWindow:(id)sender
+{
+	self.keyEquivalentInput = NO;
+	[super showWindow:sender];
+}
+
 - (OakKeyEquivalentView*)keyEquivalentView
 {
 	if(!_keyEquivalentView)
