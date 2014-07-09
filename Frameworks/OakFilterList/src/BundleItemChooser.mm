@@ -1,5 +1,5 @@
 #import "BundleItemChooser.h"
-#import "OakBundleItemCell.h"
+#import "ui/OakBundleItemCell.h"
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakAppKit/OakKeyEquivalentView.h>

@@ -1,8 +1,4 @@
-#ifdef OakFilterList_EXPORTS
-#import "../OakChooser.h"
-#else
 #import "OakChooser.h"
-#endif
 #import <scope/scope.h>
 
 PUBLIC @interface BundleItemChooser : OakChooser
