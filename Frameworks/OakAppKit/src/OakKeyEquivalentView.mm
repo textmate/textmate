@@ -241,20 +241,8 @@ static NSString* const kRecordingPlaceholderString = @"…";
 		else if(RecordingKeys.find(keyString) != RecordingKeys.end())
 			self.recording = YES;
 		else
-			[self interpretKeyEvents:@[ anEvent ]];
+			[super keyDown:anEvent];
 	}
-}
-
-- (void)insertTab:(id)sender
-{
-	if([[self window] firstResponder] == self)
-		[[self window] selectNextKeyView:self];
-}
-
-- (void)insertBacktab:(id)sender
-{
-	if([[self window] firstResponder] == self)
-		[[self window] selectPreviousKeyView:self];
 }
 
 - (void)drawRect:(NSRect)aRect
