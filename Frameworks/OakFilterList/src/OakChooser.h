@@ -24,4 +24,5 @@ PUBLIC @interface OakChooser : NSObject
 @property (nonatomic) NSTextField*   itemCountTextField;
 
 - (void)accept:(id)sender;
+- (void)cancel:(id)sender;
 @end
