@@ -72,6 +72,8 @@ static std::string textify (std::string str)
 {
 	if(self = [super initWithNibName:@"BundlesPreferences" bundle:[NSBundle bundleForClass:[self class]]])
 	{
+		[MGScopeBar class]; // Ensure that we reference the class so that the linker doesn’t strip the framework
+
 		self.bundlesManager = [BundlesManager sharedInstance];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(bundlesDidChange:) name:BundlesManagerBundlesDidChangeNotification object:_bundlesManager];
 		[self bundlesDidChange:self];
