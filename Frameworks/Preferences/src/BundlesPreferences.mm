@@ -25,7 +25,7 @@ static std::string textify (std::string str)
 - (NSString*)identifier            { return @"Bundles"; }
 - (NSImage*)toolbarItemImage       { return [[NSWorkspace sharedWorkspace] iconForFileType:@"tmbundle"]; }
 - (NSString*)toolbarItemLabel      { return @"Bundles"; }
-- (NSView*)initialKeyView          { return bundlesTableView; }
+- (NSView*)initialKeyView          { return searchField; }
 
 - (void)bundlesDidChange:(id)sender
 {
