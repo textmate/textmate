@@ -14,6 +14,7 @@
 #import <theme/theme.h>
 #import <OakAppKit/NSColor Additions.h>
 #import <OakFoundation/NSString Additions.h>
+#import <AppKit/AppKit.h>
 
 OAK_EXTERN_C_BEGIN
 
@@ -42,12 +43,97 @@ static void initialize (CFBundleRef generatorBundle)
 	});
 }
 
+static std::string URLtoString(CFURLRef url)
+{
+	std::string filePath = NULL_STR;
+	if(CFStringRef path = CFURLCopyFileSystemPath(url, kCFURLPOSIXPathStyle))
+	{
+		filePath = cf::to_s(path);
+		CFRelease(path);
+	}
+	return filePath;
+}
+
 // =========================
 // = QLGenerator interface =
 // =========================
 
 OSStatus TextMateQuickLookPlugIn_GenerateThumbnailForURL (void* instance, QLThumbnailRequestRef request, CFURLRef url, CFStringRef contentTypeUTI, CFDictionaryRef options, CGSize maxSize)
 {
+	initialize(QLThumbnailRequestGetGeneratorBundle(request));
+
+	// Load file
+	ng::buffer_t buffer;
+	std::string filePath = URLtoString(url);
+	std::string fileContents = file::read_utf8(filePath, nullptr, 2048); // 2Kb should be more than enough
+	buffer.insert(0, fileContents);
+
+	// Apply appropriate grammar
+	std::string fileType = file::type(filePath, std::make_shared<io::bytes_t>(fileContents.data(), fileContents.size(), false));
+	if(fileType != NULL_STR)
+	{
+		for(auto item : bundles::query(bundles::kFieldGrammarScope, fileType, scope::wildcard, bundles::kItemTypeGrammar))
+		{
+			buffer.set_grammar(item);
+			break;
+		}
+	}
+
+	// Apply appropriate theme
+	settings_t const settings = settings_for_path(filePath, fileType);
+	std::string themeUUID = settings.get(kSettingsThemeKey, NULL_STR);
+	bundles::item_ptr themeItem = themeUUID != NULL_STR ? bundles::lookup(themeUUID) : bundles::item_ptr();
+	theme_ptr theme = themeItem ? parse_theme(themeItem) : theme_ptr();
+	if(theme)
+		theme = theme->copy_with_font_name_and_size(settings.get(kSettingsFontNameKey, NULL_STR), settings.get(kSettingsFontSizeKey, 11));
+
+	if(!theme)
+		return noErr;
+
+	// Perform syntax highlighting
+	buffer.wait_for_repair();
+	std::map<size_t, scope::scope_t> scopes = buffer.scopes(0, buffer.size());
+
+	// Construct RTF output
+	NSMutableAttributedString* output = (__bridge_transfer NSMutableAttributedString*)CFAttributedStringCreateMutable(kCFAllocatorDefault, buffer.size());
+	size_t from = 0;
+	for(auto pair = scopes.begin(); pair != scopes.end(); )
+	{
+		styles_t styles = theme->styles_for_scope(pair->second);
+
+		size_t to = ++pair != scopes.end() ? pair->first : buffer.size();
+
+		// White background, hardcoded font with small size
+		[output appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:buffer.substr(from, to)] attributes:@{
+																																					  NSForegroundColorAttributeName : [NSColor tmColorWithCGColor:styles.foreground()],
+																																					  NSBackgroundColorAttributeName : [NSColor whiteColor],
+																																					  NSFontAttributeName            : [NSFont fontWithName:@"Courier" size:10.0],
+																																					  NSUnderlineStyleAttributeName  : @(styles.underlined() ? NSUnderlineStyleSingle : NSUnderlineStyleNone),
+																																					  }]];
+
+		from = to;
+	}
+
+	// w/e the 3rd parameter, the context will always be a bitmap context
+	CGContextRef bitmapContext = QLThumbnailRequestCreateContext(request, maxSize, true, NULL);
+	if (bitmapContext)
+	{
+		NSGraphicsContext* context = [NSGraphicsContext graphicsContextWithGraphicsPort:bitmapContext flipped:YES];
+		if (context)
+		{
+			[NSGraphicsContext saveGraphicsState];
+			[NSGraphicsContext setCurrentContext:context];
+			CGContextSaveGState(bitmapContext);
+			CGContextTranslateCTM(bitmapContext, 0.0, maxSize.height);
+			CGContextScaleCTM(bitmapContext, 1.0, -1.0);
+			[output drawAtPoint:(CGPoint){0.0, 0.0}];
+			CGContextRestoreGState(bitmapContext);
+			[NSGraphicsContext restoreGraphicsState];
+		}
+		QLThumbnailRequestFlushContext(request, bitmapContext);
+		CGContextRelease(bitmapContext);
+	}
+
 	return noErr;
 }
 
@@ -61,14 +147,7 @@ OSStatus TextMateQuickLookPlugIn_GeneratePreviewForURL (void* instance, QLPrevie
 
 	// Load file
 	ng::buffer_t buffer;
-
-	std::string filePath = NULL_STR;
-	if(CFStringRef path = CFURLCopyFileSystemPath(url, kCFURLPOSIXPathStyle))
-	{
-		filePath = cf::to_s(path);
-		CFRelease(path);
-	}
-
+	std::string filePath = URLtoString(url);
 	std::string fileContents = file::read_utf8(filePath, nullptr, 20480);
 	buffer.insert(0, fileContents);
 
@@ -111,20 +190,20 @@ OSStatus TextMateQuickLookPlugIn_GeneratePreviewForURL (void* instance, QLPrevie
 		size_t to = ++pair != scopes.end() ? pair->first : buffer.size();
 
 		[output appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:buffer.substr(from, to)] attributes:@{
-			NSForegroundColorAttributeName : [NSColor tmColorWithCGColor:styles.foreground()],
-			NSBackgroundColorAttributeName : [NSColor tmColorWithCGColor:styles.background()],
-			NSFontAttributeName            : (__bridge NSFont*)styles.font(),
-			NSUnderlineStyleAttributeName  : @(styles.underlined() ? NSUnderlineStyleSingle : NSUnderlineStyleNone),
-		}]];
+																																					  NSForegroundColorAttributeName : [NSColor tmColorWithCGColor:styles.foreground()],
+																																					  NSBackgroundColorAttributeName : [NSColor tmColorWithCGColor:styles.background()],
+																																					  NSFontAttributeName            : (__bridge NSFont*)styles.font(),
+																																					  NSUnderlineStyleAttributeName  : @(styles.underlined() ? NSUnderlineStyleSingle : NSUnderlineStyleNone),
+																																					  }]];
 
 		from = to;
 	}
 
 	NSData* outputData = [output RTFFromRange:NSMakeRange(0, [output length]) documentAttributes:@{
-		NSDocumentTypeDocumentAttribute : [NSString stringWithCxxString:fileType],
-		NSBackgroundColorDocumentAttribute : theme ? [NSColor tmColorWithCGColor:theme->background(fileType)] : [NSColor whiteColor],
-	}];
-
+																								   NSDocumentTypeDocumentAttribute : [NSString stringWithCxxString:fileType],
+																								   NSBackgroundColorDocumentAttribute : theme ? [NSColor tmColorWithCGColor:theme->background(fileType)] : [NSColor whiteColor],
+																								   }];
+	
 	QLPreviewRequestSetDataRepresentation(request, (__bridge CFDataRef)outputData, kUTTypeRTF, nil);
 	return noErr;
 }
