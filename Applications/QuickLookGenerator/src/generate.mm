@@ -15,6 +15,7 @@
 #import <OakAppKit/NSColor Additions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <AppKit/AppKit.h>
+#import <sstream>
 
 OAK_EXTERN_C_BEGIN
 
@@ -66,7 +67,14 @@ OSStatus TextMateQuickLookPlugIn_GenerateThumbnailForURL (void* instance, QLThum
 	ng::buffer_t buffer;
 	std::string filePath = URLtoString(url);
 	std::string fileContents = file::read_utf8(filePath, nullptr, 1024); // 1Kb should be more than enough
-	buffer.insert(0, fileContents);
+
+	// Trim to 50 lines, since we don't need more
+	std::istringstream f(fileContents);
+	std::string line, res;
+	int i = 0;
+	while (std::getline(f, line) && (++i < 50))
+		res += line + "\n";
+	buffer.insert(0, res);
 
 	// Apply appropriate grammar
 	std::string fileType = file::type(filePath, std::make_shared<io::bytes_t>(fileContents.data(), fileContents.size(), false));
