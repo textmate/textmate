@@ -76,6 +76,10 @@ OSStatus TextMateQuickLookPlugIn_GenerateThumbnailForURL (void* instance, QLThum
 		res += line + "\n";
 	buffer.insert(0, res);
 
+	// Check if cancelled
+	if (QLThumbnailRequestIsCancelled(request))
+		return noErr;
+
 	// Apply appropriate grammar
 	std::string fileType = file::type(filePath, std::make_shared<io::bytes_t>(fileContents.data(), fileContents.size(), false));
 	if(fileType != NULL_STR)
@@ -87,15 +91,22 @@ OSStatus TextMateQuickLookPlugIn_GenerateThumbnailForURL (void* instance, QLThum
 		}
 	}
 
+	// Check if cancelled
+	if (QLThumbnailRequestIsCancelled(request))
+		return noErr;
+
 	// Apply appropriate theme
 	settings_t const settings = settings_for_path(filePath, fileType);
 	std::string themeUUID = settings.get(kSettingsThemeKey, NULL_STR);
 	bundles::item_ptr themeItem = themeUUID != NULL_STR ? bundles::lookup(themeUUID) : bundles::item_ptr();
 	theme_ptr theme = themeItem ? parse_theme(themeItem) : theme_ptr();
-	if(theme)
-		theme = theme->copy_with_font_name_and_size(settings.get(kSettingsFontNameKey, NULL_STR), settings.get(kSettingsFontSizeKey, 8));
+	if(theme) theme = theme->copy_with_font_name_and_size(settings.get(kSettingsFontNameKey, NULL_STR), settings.get(kSettingsFontSizeKey, 8));
 
 	if(!theme)
+		return noErr;
+
+	// Check if cancelled
+	if (QLThumbnailRequestIsCancelled(request))
 		return noErr;
 
 	// Perform syntax highlighting
@@ -121,6 +132,10 @@ OSStatus TextMateQuickLookPlugIn_GenerateThumbnailForURL (void* instance, QLThum
 
 		from = to;
 	}
+
+	// Check if cancelled
+	if (QLThumbnailRequestIsCancelled(request))
+		return noErr;
 
 	// w/e the 3rd parameter, the context will always be a bitmap context
 	CGContextRef bitmapContext = QLThumbnailRequestCreateContext(request, maxSize, true, NULL);
@@ -159,6 +174,10 @@ OSStatus TextMateQuickLookPlugIn_GeneratePreviewForURL (void* instance, QLPrevie
 	std::string fileContents = file::read_utf8(filePath, nullptr, 20480);
 	buffer.insert(0, fileContents);
 
+	// Check if cancelled
+	if (QLPreviewRequestIsCancelled(request))
+		return noErr;
+
 	// Apply appropriate grammar
 	std::string fileType = file::type(filePath, std::make_shared<io::bytes_t>(fileContents.data(), fileContents.size(), false));
 	if(fileType != NULL_STR)
@@ -177,6 +196,10 @@ OSStatus TextMateQuickLookPlugIn_GeneratePreviewForURL (void* instance, QLPrevie
 		return noErr;
 	}
 
+	// Check if cancelled
+	if (QLPreviewRequestIsCancelled(request))
+		return noErr;
+
 	// Apply appropriate theme
 	settings_t const settings = settings_for_path(filePath, fileType);
 	std::string themeUUID = settings.get(kSettingsThemeKey, NULL_STR);
@@ -191,9 +214,17 @@ OSStatus TextMateQuickLookPlugIn_GeneratePreviewForURL (void* instance, QLPrevie
 		return noErr;
 	}
 
+	// Check if cancelled
+	if (QLPreviewRequestIsCancelled(request))
+		return noErr;
+
 	// Perform syntax highlighting
 	buffer.wait_for_repair();
 	std::map<size_t, scope::scope_t> scopes = buffer.scopes(0, buffer.size());
+
+	// Check if cancelled
+	if (QLPreviewRequestIsCancelled(request))
+		return noErr;
 
 	// Construct RTF output
 	NSMutableAttributedString* output = (__bridge_transfer NSMutableAttributedString*)CFAttributedStringCreateMutable(kCFAllocatorDefault, buffer.size());
@@ -213,6 +244,10 @@ OSStatus TextMateQuickLookPlugIn_GeneratePreviewForURL (void* instance, QLPrevie
 
 		from = to;
 	}
+
+	// Check if cancelled
+	if (QLPreviewRequestIsCancelled(request))
+		return noErr;
 
 	NSData* outputData = [output RTFFromRange:NSMakeRange(0, [output length]) documentAttributes:@{
 			NSDocumentTypeDocumentAttribute : [NSString stringWithCxxString:fileType],
