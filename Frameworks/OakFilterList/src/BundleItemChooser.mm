@@ -1,4 +1,5 @@
 #import "BundleItemChooser.h"
+#import "OakAbbreviations.h"
 #import "ui/OakBundleItemCell.h"
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
@@ -113,6 +114,14 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 
 	[self.window.contentView addConstraints:constraints];
 	self.layoutConstraints = constraints;
+
+	// The auto-calculated key-view loop is sometimes wrong, my theory is that it’s because of delayed layout
+	[self performSelector:@selector(delayedRecalculateKeyViewLoop:) withObject:self afterDelay:0];
+}
+
+- (void)delayedRecalculateKeyViewLoop:(id)sender
+{
+	[self.window recalculateKeyViewLoop];
 }
 
 - (void)showWindow:(id)sender
@@ -160,7 +169,6 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	}
 
 	[self setupLayoutConstraints];
-	[self.window recalculateKeyViewLoop];
 	[self.window makeFirstResponder:self.keyEquivalentInput ? self.keyEquivalentView : self.searchField];
 
 	self.keyEquivalentView.eventString = nil;
@@ -204,6 +212,10 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 {
 	std::string const filter = to_s(self.filterString);
 
+	std::vector<oak::uuid_t> uuids;
+	for(NSString* uuid in [[OakAbbreviations abbreviationsForName:@"OakBundleItemChooserBindings"] stringsForAbbreviation:self.filterString])
+		uuids.push_back(to_s(uuid));
+
 	std::multimap<double, BundleItemChooserItem*> rankedItems;
 	for(auto const& item : relevant_items_in_scope(self.searchAllScopes ? scope::wildcard : self.scope, self.hasSelection))
 	{
@@ -229,6 +241,11 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 				entry.name = CreateAttributedStringWithMarkedUpRanges(fullName, ranges);
 				entry.uuid = [NSString stringWithCxxString:item->uuid()];
 				entry.item = item;
+
+				size_t rankIndex = std::find(uuids.begin(), uuids.end(), item->uuid()) - uuids.begin();
+				if(rankIndex != uuids.size())
+					rank = uuids.size() - rankIndex;
+
 				rankedItems.emplace(-rank, entry);
 			}
 		}
@@ -270,6 +287,16 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	else if(aMenuItem.action == @selector(toggleSearchAllScopes:))
 		aMenuItem.state = self.searchAllScopes ? NSOnState : NSOffState;
 	return YES;
+}
+
+- (void)accept:(id)sender
+{
+	if(!self.keyEquivalentInput && OakNotEmptyString(self.filterString) && (self.tableView.selectedRow > 0 || [self.filterString length] > 1))
+	{
+		BundleItemChooserItem* item = self.items[self.tableView.selectedRow];
+		[[OakAbbreviations abbreviationsForName:@"OakBundleItemChooserBindings"] learnAbbreviation:self.filterString forString:item.uuid];
+	}
+	[super accept:sender];
 }
 
 - (IBAction)editItem:(id)sender

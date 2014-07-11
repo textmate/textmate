@@ -3,6 +3,7 @@
 #import "ui/SearchField.h"
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
+#import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <ns/ns.h>
 #import <text/ranker.h>
@@ -32,6 +33,8 @@ NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string
 
 @interface OakChooser () <NSWindowDelegate, NSTableViewDataSource, NSTableViewDelegate>
 @end
+
+static void* kFirstResponderBinding = &kFirstResponderBinding;
 
 @implementation OakChooser
 - (id)init
@@ -107,6 +110,7 @@ NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string
 		_window.releasedWhenClosed = NO;
 
 		[_searchField bind:NSValueBinding toObject:self withKeyPath:@"filterString" options:nil];
+		[_window addObserver:self forKeyPath:@"firstResponder" options:NSKeyValueObservingOptionNew context:kFirstResponderBinding];
 	}
 	return self;
 }
@@ -114,6 +118,7 @@ NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string
 - (void)dealloc
 {
 	[_searchField unbind:NSValueBinding];
+	[_window removeObserver:self forKeyPath:@"firstResponder" context:kFirstResponderBinding];
 
 	_window.delegate      = nil;
 	_tableView.target     = nil;
@@ -149,6 +154,19 @@ NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string
 	[_window performClose:self];
 }
 
+// ===============================================================================
+// = Set wether to render table view as active when search field gain/lose focus =
+// ===============================================================================
+
+- (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)object change:(NSDictionary*)change context:(void*)context
+{
+	if(context == kFirstResponderBinding)
+	{
+		NSResponder* newResponder = change[NSKeyValueChangeNewKey];
+		[(OakInactiveTableView*)_tableView setDrawAsHighlighted:newResponder == _searchField || newResponder == _searchField.currentEditor];
+	}
+}
+
 // ==============
 // = Properties =
 // ==============
@@ -160,6 +178,12 @@ NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string
 
 	_filterString = [aString copy];
 	_searchField.stringValue = aString ?: @"";
+
+	if([_tableView numberOfRows] != 0)
+	{
+		[_tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
+		[_tableView scrollRowToVisible:0];
+	}
 
 	[self updateItems:self];
 }

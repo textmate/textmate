@@ -53,18 +53,21 @@ static NSString* const kRecordingPlaceholderString = @"…";
 	self.showClearButton = OakNotEmptyString(self.eventString) && !self.recording;
 	self.displayString = self.recording ? kRecordingPlaceholderString : [NSString stringWithCxxString:ns::glyphs_for_event_string(to_s(_eventString))];
 
-	for(NSDictionary* info in _observers)
+	if(NSDictionary* info = [self infoForBinding:NSValueBinding])
 	{
-		if([info[kBindingInfoBindingKey] isEqualToString:NSValueBinding])
+		id controller     = info[NSObservedObjectKey];
+		NSString* keyPath = info[NSObservedKeyPathKey];
+		if(controller && controller != [NSNull null] && keyPath && (id)keyPath != [NSNull null])
 		{
-			id controller = info[kBindingInfoControllerKey];
-			NSString* keyPath = info[kBindingInfoKeyPathKey];
-			NSString* oldValue = [controller valueForKeyPath:keyPath];
-			if(!oldValue || ![oldValue isEqualToString:_eventString])
+			id oldValue = [controller valueForKeyPath:keyPath];
+			if(!oldValue || ![oldValue isEqualTo:_eventString])
 				[controller setValue:_eventString forKeyPath:keyPath];
 		}
 	}
 }
+
+- (id)value                   { return self.eventString; }
+- (void)setValue:(id)newValue { self.eventString = newValue; }
 
 - (void)setDisplayString:(NSString*)aString
 {
@@ -234,27 +237,15 @@ static NSString* const kRecordingPlaceholderString = @"…";
 	else
 	{
 		static std::set<std::string> const ClearKeys     = { utf8::to_s(NSDeleteCharacter), utf8::to_s(NSDeleteFunctionKey) };
-		static std::set<std::string> const RecordingKeys = { " ", "\n", "\r" };
+		static std::set<std::string> const RecordingKeys = { " " };
 		std::string const keyString = to_s(anEvent);
 		if(ClearKeys.find(keyString) != ClearKeys.end())
 			[self clearKeyEquivalent:self];
 		else if(RecordingKeys.find(keyString) != RecordingKeys.end())
 			self.recording = YES;
 		else
-			[self interpretKeyEvents:@[ anEvent ]];
+			[super keyDown:anEvent];
 	}
-}
-
-- (void)insertTab:(id)sender
-{
-	if([[self window] firstResponder] == self)
-		[[self window] selectNextKeyView:self];
-}
-
-- (void)insertBacktab:(id)sender
-{
-	if([[self window] firstResponder] == self)
-		[[self window] selectPreviousKeyView:self];
 }
 
 - (void)drawRect:(NSRect)aRect
@@ -292,45 +283,5 @@ static NSString* const kRecordingPlaceholderString = @"…";
 - (NSRect)focusRingMaskBounds
 {
 	return [self bounds];
-}
-
-// ============
-// = Bindings =
-// ============
-
-- (void)bind:(NSString*)aBinding toObject:(id)observableController withKeyPath:(NSString*)aKeyPath options:(NSDictionary*)someOptions
-{
-	_observers = _observers ?: [NSMutableArray new];
-	[_observers addObject:@{
-		kBindingInfoBindingKey    : aBinding,
-		kBindingInfoControllerKey : observableController,
-		kBindingInfoKeyPathKey    : aKeyPath,
-	}];
-	[observableController addObserver:self forKeyPath:aKeyPath options:NSKeyValueObservingOptionInitial context:NULL];
-}
-
-- (void)unbind:(NSString*)aBinding
-{
-	for(NSUInteger i = [_observers count]; i > 0; --i)
-	{
-		NSDictionary* info = _observers[i-1];
-		if([aBinding isEqualToString:info[kBindingInfoBindingKey]])
-		{
-			[info[kBindingInfoControllerKey] removeObserver:self forKeyPath:info[kBindingInfoKeyPathKey]];
-			[_observers removeObjectAtIndex:i-i];
-		}
-	}
-}
-
-- (void)observeValueForKeyPath:(NSString*)aKeyPath ofObject:(id)observableController change:(NSDictionary*)changeDictionary context:(void*)userData
-{
-	for(NSDictionary* info in _observers)
-	{
-		if(observableController == info[kBindingInfoControllerKey] && [aKeyPath isEqualToString:info[kBindingInfoKeyPathKey]])
-		{
-			if([info[kBindingInfoBindingKey] isEqualToString:NSValueBinding])
-				self.eventString = [observableController valueForKeyPath:aKeyPath];
-		}
-	}
 }
 @end
