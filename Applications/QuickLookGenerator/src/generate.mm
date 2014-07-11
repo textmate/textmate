@@ -161,8 +161,13 @@ OSStatus TextMateQuickLookPlugIn_GeneratePreviewForURL (void* instance, QLPrevie
 			break;
 		}
 	}
-	// TODO: if there is no bundle for this type of file the preview will just be a zoom of the thumbnail
-	// Perhaps choose a generic type?
+	else
+	{
+		// We don't know the type, let the system handle it
+		NSData* data = [NSData dataWithContentsOfURL:(__bridge NSURL*)url];
+		QLPreviewRequestSetDataRepresentation(request, (__bridge CFDataRef)data, kUTTypePlainText, nil);
+		return noErr;
+	}
 
 	// Apply appropriate theme
 	settings_t const settings = settings_for_path(filePath, fileType);
