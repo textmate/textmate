@@ -2,6 +2,10 @@ Title: Release Notes
 
 # Changes
 
+## 2014-07-12 ([v2.0-alpha.9551](https://github.com/textmate/textmate/compare/v2.0-alpha.9549...v2.0-alpha.9551))
+
+* Reworked the bundle item chooser window. This is work in progress.
+
 ## 2014-07-06 ([v2.0-alpha.9549](https://github.com/textmate/textmate/compare/v2.0-alpha.9547...v2.0-alpha.9549))
 
 * TextMate now works with the [Haskell Ligature font](https://github.com/i-tu/Hasklig). If you are using the Mensch font and see `fi` drawn as `ﬁ` then update to [Mensch version 2.0](http://robey.lag.net/2012/08/22/mensch-2.html).
