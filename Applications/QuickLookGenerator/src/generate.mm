@@ -168,6 +168,10 @@ OSStatus TextMateQuickLookPlugIn_GeneratePreviewForURL (void* instance, QLPrevie
 	std::string fileContents = file::read_utf8(filePath, nullptr, 20480);
 	buffer.insert(0, fileContents);
 
+	// Check if cancelled
+	if(QLPreviewRequestIsCancelled(request))
+		return noErr;
+
 	// Apply appropriate grammar
 	std::string fileType = file::type(filePath, std::make_shared<io::bytes_t>(fileContents.data(), fileContents.size(), false));
 	if(fileType != NULL_STR)
@@ -178,6 +182,10 @@ OSStatus TextMateQuickLookPlugIn_GeneratePreviewForURL (void* instance, QLPrevie
 			break;
 		}
 	}
+
+	// Check if cancelled
+	if(QLPreviewRequestIsCancelled(request))
+		return noErr;
 
 	// Apply appropriate theme
 	settings_t const settings = settings_for_path(filePath, fileType);
@@ -193,9 +201,17 @@ OSStatus TextMateQuickLookPlugIn_GeneratePreviewForURL (void* instance, QLPrevie
 		return noErr;
 	}
 
+	// Check if cancelled
+	if(QLPreviewRequestIsCancelled(request))
+		return noErr;
+
 	// Perform syntax highlighting
 	buffer.wait_for_repair();
 	std::map<size_t, scope::scope_t> scopes = buffer.scopes(0, buffer.size());
+
+	// Check if cancelled
+	if(QLPreviewRequestIsCancelled(request))
+		return noErr;
 
 	// Construct RTF output
 	NSMutableAttributedString* output = (__bridge_transfer NSMutableAttributedString*)CFAttributedStringCreateMutable(kCFAllocatorDefault, buffer.size());
@@ -215,6 +231,10 @@ OSStatus TextMateQuickLookPlugIn_GeneratePreviewForURL (void* instance, QLPrevie
 
 		from = to;
 	}
+
+	// Check if cancelled
+	if(QLPreviewRequestIsCancelled(request))
+		return noErr;
 
 	NSData* outputData = [output RTFFromRange:NSMakeRange(0, [output length]) documentAttributes:@{
 		NSDocumentTypeDocumentAttribute : [NSString stringWithCxxString:fileType],
