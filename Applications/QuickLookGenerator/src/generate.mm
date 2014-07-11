@@ -182,6 +182,13 @@ OSStatus TextMateQuickLookPlugIn_GeneratePreviewForURL (void* instance, QLPrevie
 			break;
 		}
 	}
+	else
+	{
+		// We don't know the type, let the system handle it
+		NSData* data = [NSData dataWithContentsOfURL:(__bridge NSURL*)url];
+		QLPreviewRequestSetDataRepresentation(request, (__bridge CFDataRef)data, kUTTypePlainText, nil);
+		return noErr;
+	}
 
 	// Check if cancelled
 	if(QLPreviewRequestIsCancelled(request))
