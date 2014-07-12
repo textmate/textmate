@@ -160,6 +160,9 @@ namespace ct
 			{
 				switch(*ch)
 				{
+					case ' ':
+						_spaceLocations.push_back(i);
+						break;
 					case '\t':
 						double x = CTLineGetOffsetForStringIndex(tmpLine, j, NULL);
 						double newX = (x - standardTabWidths + newTabWidths);
@@ -255,6 +258,8 @@ namespace ct
 		{
 			if(invisibles.tab != "")
 				draw_invisible(_tabLocations, pos, invisibles.tab, theme->styles_for_scope("deco.invisible.tab"), context, isFlipped);
+			if(invisibles.space != "")
+				draw_invisible(_spaceLocations, pos, invisibles.space, theme->styles_for_scope("deco.invisible.space"), context, isFlipped);
 		}
 
 		for(auto const& pair : _underlines) // Draw our own underline since CoreText does an awful job <rdar://5845224>
