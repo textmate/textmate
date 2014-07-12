@@ -1557,6 +1557,20 @@ doScroll:
 	return _links;
 }
 
+- (void)updateZoom
+{
+	NSRange selectedRange = [[self accessibilityAttributeValue:NSAccessibilitySelectedTextRangeAttribute] rangeValue];
+	NSRect  selectedRect  = [[self accessibilityAttributeValue:NSAccessibilityBoundsForRangeParameterizedAttribute forParameter:[NSValue valueWithRange:selectedRange]] rectValue];
+	NSRect  viewRect      = [self convertRect:[self visibleRect] toView:nil];
+	viewRect = [[self window] convertRectToScreen:viewRect];
+	viewRect.origin.y = [[NSScreen mainScreen] frame].size.height - (viewRect.origin.y + viewRect.size.height);
+	selectedRect.origin.y = [[NSScreen mainScreen] frame].size.height - (selectedRect.origin.y + selectedRect.size.height);
+	if(selectedRect.size.width == -1)
+		selectedRect.size.width = 1;
+	UAZoomChangeFocus(&viewRect, &selectedRect, kUAZoomFocusTypeInsertionPoint);
+}
+
+
 #undef ATTR
 #undef PATTR
 #undef ATTREQ_
@@ -2984,15 +2998,9 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	NSAccessibilityPostNotification(self, NSAccessibilitySelectedTextChangedNotification);
 	if(UAZoomEnabled())
 	{
-		NSRange selectedRange = [[self accessibilityAttributeValue:NSAccessibilitySelectedTextRangeAttribute] rangeValue];
-		NSRect  selectedRect  = [[self accessibilityAttributeValue:NSAccessibilityBoundsForRangeParameterizedAttribute forParameter:[NSValue valueWithRange:selectedRange]] rectValue];
-		NSRect  viewRect      = [self convertRect:[self visibleRect] toView:nil];
-		viewRect = [[self window] convertRectToScreen:viewRect];
-		viewRect.origin.y = [[NSScreen mainScreen] frame].size.height - (viewRect.origin.y + viewRect.size.height);
-		selectedRect.origin.y = [[NSScreen mainScreen] frame].size.height - (selectedRect.origin.y + selectedRect.size.height);
-		if(selectedRect.size.width == -1)
-			selectedRect.size.width = 1;
-		UAZoomChangeFocus(&viewRect, &selectedRect, kUAZoomFocusTypeInsertionPoint);
+		dispatch_async(dispatch_get_main_queue(), ^{
+			[self updateZoom];
+		});
 	}
 	if(isUpdatingSelection)
 		return;
