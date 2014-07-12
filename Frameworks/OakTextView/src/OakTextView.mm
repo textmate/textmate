@@ -1559,14 +1559,14 @@ doScroll:
 
 - (void)updateZoom
 {
-	NSRange selectedRange = [[self accessibilityAttributeValue:NSAccessibilitySelectedTextRangeAttribute] rangeValue];
-	NSRect  selectedRect  = [[self accessibilityAttributeValue:NSAccessibilityBoundsForRangeParameterizedAttribute forParameter:[NSValue valueWithRange:selectedRange]] rectValue];
-	NSRect  viewRect      = [self convertRect:[self visibleRect] toView:nil];
+	size_t const index = editor->ranges().last().min().index;
+	NSRect selectedRect = layout->rect_at_index(index, false);
+	selectedRect = [self convertRect:selectedRect toView:nil];
+	selectedRect = [[self window] convertRectToScreen:selectedRect];
+	NSRect viewRect = [self convertRect:[self visibleRect] toView:nil];
 	viewRect = [[self window] convertRectToScreen:viewRect];
 	viewRect.origin.y = [[NSScreen mainScreen] frame].size.height - (viewRect.origin.y + viewRect.size.height);
 	selectedRect.origin.y = [[NSScreen mainScreen] frame].size.height - (selectedRect.origin.y + selectedRect.size.height);
-	if(selectedRect.size.width == -1)
-		selectedRect.size.width = 1;
 	UAZoomChangeFocus(&viewRect, &selectedRect, kUAZoomFocusTypeInsertionPoint);
 }
 
