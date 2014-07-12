@@ -307,7 +307,7 @@ namespace ng
 		ASSERT_LE(first, last);
 
 		auto r1 = rect_at_index(first);
-		auto r2 = rect_at_index(last, bol_as_eol);
+		auto r2 = rect_at_index(last, bol_as_eol && (first != last));
 		auto res = CGRectZero;
 
 		if(CGRectGetMinY(r1) == CGRectGetMinY(r2) && CGRectGetHeight(r1) == CGRectGetHeight(r2))
