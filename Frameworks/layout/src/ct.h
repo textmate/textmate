@@ -72,6 +72,7 @@ namespace ct
 		size_t index_for_offset (CGFloat offset) const;
 		CGFloat offset_for_index (size_t index) const;
 		std::vector<size_t> _tabLocations;
+		std::vector<size_t> _spaceLocations;
 
 	private:
 		void draw_invisible (std::vector<size_t> locations, CGPoint pos, std::string text, styles_t styles, ng::context_t const& context, bool isFlipped) const;
