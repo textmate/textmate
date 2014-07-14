@@ -72,7 +72,7 @@
 
 - (void)tableViewSelectionDidChange:(NSNotification*)aNotification
 {
-	self.canRemove = [variablesTableView selectedRow] != -1;
+	self.canRemove = [variablesTableView selectedRow] != -1 && [_variables count] != 0;
 }
 
 // ==========================
