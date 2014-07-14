@@ -44,6 +44,12 @@
 	NSInteger row = [variablesTableView selectedRow];
 	if(row != -1)
 	{
+		if([variablesTableView editedColumn] != -1)
+		{
+			[variablesTableView abortEditing];
+			[[[self view] window] makeFirstResponder:variablesTableView];
+		}
+
 		[_variables removeObjectAtIndex:row];
 		[[NSUserDefaults standardUserDefaults] setObject:[_variables copy] forKey:kUserDefaultsEnvironmentVariablesKey];
 		[variablesTableView reloadData];
