@@ -1570,7 +1570,6 @@ doScroll:
 	UAZoomChangeFocus(&viewRect, &selectedRect, kUAZoomFocusTypeInsertionPoint);
 }
 
-
 #undef ATTR
 #undef PATTR
 #undef ATTREQ_
