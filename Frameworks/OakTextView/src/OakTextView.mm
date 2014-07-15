@@ -2997,11 +2997,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	selectionString = [aSelectionString copy];
 	NSAccessibilityPostNotification(self, NSAccessibilitySelectedTextChangedNotification);
 	if(UAZoomEnabled())
-	{
-		dispatch_async(dispatch_get_main_queue(), ^{
-			[self updateZoom];
-		});
-	}
+		[self performSelector:@selector(updateZoom) withObject:nil afterDelay:0];
 	if(isUpdatingSelection)
 		return;
 
