@@ -20,9 +20,4 @@
 	return [[NSFileManager defaultManager] fileExistsAtPath:self];
 }
 
-- (BOOL)isDirectory
-{
-	BOOL isDir = NO;
-	return [[NSFileManager defaultManager] fileExistsAtPath:self isDirectory:&isDir] && isDir;
-}
 @end

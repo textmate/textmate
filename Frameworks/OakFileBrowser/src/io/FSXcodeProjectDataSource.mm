@@ -17,6 +17,12 @@ static BOOL isFaultyProductGroup(XCGroup* group)
 	return ([group groupMemberType] == PBXGroup && [[group alias] isEqualToString:@"Products"]);
 }
 
+static BOOL isDirectory(NSString* aPath)
+{
+	BOOL isDir = NO;
+	return [[NSFileManager defaultManager] fileExistsAtPath:aPath isDirectory:&isDir] && isDir;
+}
+
 static NSURL* pathURLWithBaseAndRelativePath(NSString* basePath, NSString* relativePath)
 {
 	return [NSURL fileURLWithPath:[[basePath stringByAppendingPathComponent:relativePath] stringByResolvingSymlinksInPath]];
@@ -80,7 +86,7 @@ static NSString *caseSensitiveMatchInArrayForString(NSArray *array, NSString *st
 			continue;
 
 		NSString* workingPath = [path stringByAppendingPathComponent:file];
-		if (![workingPath isDirectory])
+		if(!isDirectory(workingPath))
 			continue;
 
 		FSItem* item = [FSItem itemWithURL:[NSURL fileURLWithPath:workingPath]];
@@ -100,7 +106,7 @@ static NSString *caseSensitiveMatchInArrayForString(NSArray *array, NSString *st
 		NSString* file = [path stringByAppendingPathComponent:name];
 
 		FSItem* item = [FSItem itemWithURL:[NSURL fileURLWithPath:file]];
-		if ([file isDirectory])
+		if(isDirectory(file))
 			item.children = [self itemsForDirectoryAtPath:file];
 		[results addObject:item];
 	}
