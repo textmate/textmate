@@ -53,7 +53,7 @@ static NSString *caseSensitiveMatchInArrayForString(NSArray *array, NSString *st
 		_projects = [[NSMutableDictionary alloc] init];
 
 		NSString* xcodeprojPath = [anURL path];
-		if ([xcodeprojPath existsAsPath])
+		if ([[NSFileManager defaultManager] fileExistsAtPath:xcodeprojPath])
 		{
 			XCProject* project = [XCProject projectWithFilePath:xcodeprojPath];
 
@@ -134,19 +134,21 @@ static NSString *caseSensitiveMatchInArrayForString(NSArray *array, NSString *st
 - (NSArray*)itemsForGroup:(XCGroup*)group withBasePath:(NSString*)basePath inProject:(XCProject*)project
 {
 	NSMutableArray* results = [NSMutableArray array];
+	NSFileManager* fm = [NSFileManager defaultManager];
+
 	for (id<XcodeGroupMember> member in [group members])
 	{
 		NSURL* itemURL = pathURLWithBaseAndRelativePath(basePath, [member pathRelativeToProjectRoot]);
-		if (![[itemURL path] existsAsPath])
+		if (![fm fileExistsAtPath:[itemURL path]])
 			itemURL = pathURLWithBaseAndRelativePath(basePath, [[group pathRelativeToProjectRoot] stringByAppendingPathComponent:[member pathRelativeToProjectRoot]]);
-		if (![[itemURL path] existsAsPath])
+		if (![fm fileExistsAtPath:[itemURL path]])
 			itemURL = pathURLWithBaseAndRelativePath(basePath, [[group pathRelativeToProjectRoot] stringByAppendingPathComponent:[member displayName]]);
-		if (![[itemURL path] existsAsPath])
+		if (![fm fileExistsAtPath:[itemURL path]])
 			itemURL = [NSURL fileURLWithPath:basePath];
 
 		if ([[[member pathRelativeToProjectRoot] pathExtension] isEqualToString:@"xcodeproj"])
 		{
-			if ([[itemURL path] existsAsPath])
+			if ([fm fileExistsAtPath:[itemURL path]])
 			{
 				XCProject* project = [XCProject projectWithFilePath:[itemURL path]];
 				[results addObject:[self itemForProject:project atURL:itemURL]];
