@@ -1,5 +1,4 @@
 #import "NSString Additions.h"
-#import <io/path.h>
 #import <text/utf8.h>
 
 @implementation NSString (Additions)
