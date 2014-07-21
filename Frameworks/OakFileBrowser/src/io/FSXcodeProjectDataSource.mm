@@ -28,11 +28,11 @@ static NSURL* pathURLWithBaseAndRelativePath(NSString* basePath, NSString* relat
 	return [NSURL fileURLWithPath:[[basePath stringByAppendingPathComponent:relativePath] stringByResolvingSymlinksInPath]];
 }
 
-static NSString *caseSensitiveMatchInArrayForString(NSArray *array, NSString *stringToMatch)
+static NSString* caseSensitiveMatchInArrayForString(NSArray* array, NSString* stringToMatch)
 {
-	for (NSString *possibleString in array)
+	for(NSString* possibleString in array)
 	{
-		if (![stringToMatch caseInsensitiveCompare:possibleString])
+		if(![stringToMatch caseInsensitiveCompare:possibleString])
 			return [possibleString copy];
 	}
 	return nil;
@@ -55,11 +55,12 @@ static NSString *caseSensitiveMatchInArrayForString(NSArray *array, NSString *st
 @implementation FSXcodeProjectDataSource
 - (id)initWithURL:(NSURL*)anURL options:(NSUInteger)someOptions
 {
-	if((self = [super init])) {
+	if(self = [super init])
+	{
 		_projects = [[NSMutableDictionary alloc] init];
 
 		NSString* xcodeprojPath = [anURL path];
-		if ([[NSFileManager defaultManager] fileExistsAtPath:xcodeprojPath])
+		if([[NSFileManager defaultManager] fileExistsAtPath:xcodeprojPath])
 		{
 			XCProject* project = [XCProject projectWithFilePath:xcodeprojPath];
 
@@ -68,7 +69,9 @@ static NSString *caseSensitiveMatchInArrayForString(NSArray *array, NSString *st
 			[_projects setObject:project forKey:[NSURL fileURLWithPath:xcodeprojPath]];
 		}
 		else
+		{
 			self.rootItem = [FSItem itemWithURL:anURL];
+		}
 	}
 	return self;
 }
@@ -80,9 +83,9 @@ static NSString *caseSensitiveMatchInArrayForString(NSArray *array, NSString *st
 	FSItem* item = [FSItem itemWithURL:[NSURL fileURLWithPath:path]];
 
 	NSMutableArray* results = [NSMutableArray array];
-	for (NSString* file in [[NSFileManager defaultManager] contentsOfDirectoryAtPath:path error:nil])
+	for(NSString* file in [[NSFileManager defaultManager] contentsOfDirectoryAtPath:path error:nil])
 	{
-		if ([file hasPrefix:@"_CodeSignature"])
+		if([file hasPrefix:@"_CodeSignature"])
 			continue;
 
 		NSString* workingPath = [path stringByAppendingPathComponent:file];
@@ -101,7 +104,7 @@ static NSString *caseSensitiveMatchInArrayForString(NSArray *array, NSString *st
 - (NSArray*)itemsForDirectoryAtPath:(NSString*)path
 {
 	NSMutableArray* results = [NSMutableArray array];
-	for (NSString* name in [[NSFileManager defaultManager] contentsOfDirectoryAtPath:path error:nil])
+	for(NSString* name in [[NSFileManager defaultManager] contentsOfDirectoryAtPath:path error:nil])
 	{
 		NSString* file = [path stringByAppendingPathComponent:name];
 
@@ -123,9 +126,9 @@ static NSString *caseSensitiveMatchInArrayForString(NSArray *array, NSString *st
 
 	NSMutableArray* results = [NSMutableArray array];
 	NSString* basePath = [[project filePath] stringByDeletingLastPathComponent];
-	for (XCGroup* group in [project rootGroups])
+	for(XCGroup* group in [project rootGroups])
 	{
-		if (isFaultyProductGroup(group))
+		if(isFaultyProductGroup(group))
 			continue;
 
 		FSItem* item = [FSItem itemWithURL:pathURLWithBaseAndRelativePath(basePath, [group pathRelativeToProjectRoot])];
@@ -142,19 +145,19 @@ static NSString *caseSensitiveMatchInArrayForString(NSArray *array, NSString *st
 	NSMutableArray* results = [NSMutableArray array];
 	NSFileManager* fm = [NSFileManager defaultManager];
 
-	for (id<XcodeGroupMember> member in [group members])
+	for(id<XcodeGroupMember> member in [group members])
 	{
 		NSURL* itemURL = pathURLWithBaseAndRelativePath(basePath, [member pathRelativeToProjectRoot]);
-		if (![fm fileExistsAtPath:[itemURL path]])
+		if(![fm fileExistsAtPath:[itemURL path]])
 			itemURL = pathURLWithBaseAndRelativePath(basePath, [[group pathRelativeToProjectRoot] stringByAppendingPathComponent:[member pathRelativeToProjectRoot]]);
-		if (![fm fileExistsAtPath:[itemURL path]])
+		if(![fm fileExistsAtPath:[itemURL path]])
 			itemURL = pathURLWithBaseAndRelativePath(basePath, [[group pathRelativeToProjectRoot] stringByAppendingPathComponent:[member displayName]]);
-		if (![fm fileExistsAtPath:[itemURL path]])
+		if(![fm fileExistsAtPath:[itemURL path]])
 			itemURL = [NSURL fileURLWithPath:basePath];
 
-		if ([[[member pathRelativeToProjectRoot] pathExtension] isEqualToString:@"xcodeproj"])
+		if([[[member pathRelativeToProjectRoot] pathExtension] isEqualToString:@"xcodeproj"])
 		{
-			if ([fm fileExistsAtPath:[itemURL path]])
+			if([fm fileExistsAtPath:[itemURL path]])
 			{
 				XCProject* project = [XCProject projectWithFilePath:[itemURL path]];
 				[results addObject:[self itemForProject:project atURL:itemURL]];
@@ -162,28 +165,30 @@ static NSString *caseSensitiveMatchInArrayForString(NSArray *array, NSString *st
 				[_projects setObject:project forKey:itemURL];
 			}
 			else
+			{
 				[results addObject:[FSItem itemWithURL:itemURL]];
+			}
 		}
 		else
 		{
 			FSItem* item = [FSItem itemWithURL:itemURL];
 			item.displayName = member.displayName;
 
-			if ([member groupMemberType] == PBXGroup)
+			if([member groupMemberType] == PBXGroup)
 			{
-				if (isFaultyProductGroup(member))
+				if(isFaultyProductGroup(member))
 					continue;
 				item.children = [self itemsForGroup:member withBasePath:basePath inProject:project];
 			}
 			else
 			{
-				if (([(XCSourceFile* )member type] == Framework || [[member pathRelativeToProjectRoot] hasSuffix:@"dylib"]))
+				if(([(XCSourceFile* )member type] == Framework || [[member pathRelativeToProjectRoot] hasSuffix:@"dylib"]))
 				{
 					NSArray* targets = [project targets];
-					if (![targets count])
+					if(![targets count])
 						continue;
 
-					if (![_developerDirectoryPath length])
+					if(![_developerDirectoryPath length])
 					{
 						std::string xcodePath = io::exec("/usr/bin/xcode-select", "--print-path", NULL);
 						xcodePath = xcodePath.substr(0, (xcodePath.length() - 1));
@@ -196,16 +201,16 @@ static NSString *caseSensitiveMatchInArrayForString(NSArray *array, NSString *st
 					XCBuildConfigurationList* projectBuildConfiguration = [project defaultConfiguration];
 
 					NSString* SDKRoot = [targetBuildConfiguration valueForKey:@"SDKROOT"];
-					if (!SDKRoot.length)
+					if(!SDKRoot.length)
 						SDKRoot = [projectBuildConfiguration valueForKey:@"SDKROOT"];
 
-					if (!SDKRoot.length)
+					if(!SDKRoot.length)
 						SDKRoot = @"macosx";
 
 					NSString* frameworkPath = [self frameworkPathForSDKRoot:SDKRoot];
 
 					frameworkPath = [frameworkPath stringByAppendingPathComponent:[member pathRelativeToProjectRoot]];
-					if ([frameworkPath hasSuffix:@"framework"])
+					if([frameworkPath hasSuffix:@"framework"])
 						item = [self itemForFrameworkAtPath:frameworkPath];
 					else
 						item.url = [NSURL fileURLWithPath:frameworkPath];
@@ -222,34 +227,34 @@ static NSString *caseSensitiveMatchInArrayForString(NSArray *array, NSString *st
 
 - (NSString*)frameworkPathForSDKRoot:(NSString*)SDKRoot
 {
-	NSString *frameworkPath = nil;
-	if ([SDKRoot rangeOfString:@"iphoneos" options:(NSCaseInsensitiveSearch | NSAnchoredSearch) range:NSMakeRange(0, SDKRoot.length)].location != NSNotFound)
+	NSString* frameworkPath = nil;
+	if([SDKRoot rangeOfString:@"iphoneos" options:(NSCaseInsensitiveSearch | NSAnchoredSearch) range:NSMakeRange(0, SDKRoot.length)].location != NSNotFound)
 		frameworkPath = [_developerDirectoryPath stringByAppendingPathComponent:@"/Platforms/iPhoneOS.platform/Developer/SDKs/"];
-	else if ([SDKRoot rangeOfString:@"mac" options:(NSCaseInsensitiveSearch | NSAnchoredSearch) range:NSMakeRange(0, SDKRoot.length)].location != NSNotFound)
+	else if([SDKRoot rangeOfString:@"mac" options:(NSCaseInsensitiveSearch | NSAnchoredSearch) range:NSMakeRange(0, SDKRoot.length)].location != NSNotFound)
 		frameworkPath = [_developerDirectoryPath stringByAppendingPathComponent:@"/Platforms/MacOSX.platform/Developer/SDKs/"];
 
-	NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:frameworkPath error:nil];
-	NSString *workingSDKRoot = caseSensitiveMatchInArrayForString(files, [SDKRoot stringByAppendingString:@".sdk"]);
+	NSArray* files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:frameworkPath error:nil];
+	NSString* workingSDKRoot = caseSensitiveMatchInArrayForString(files, [SDKRoot stringByAppendingString:@".sdk"]);
 
 	// if an SDK version was specified directly, use it
-	if (workingSDKRoot)
+	if(workingSDKRoot)
 		return [frameworkPath stringByAppendingPathComponent:workingSDKRoot];
 
 	NSInteger index = NSNotFound;
-	if ([SDKRoot isEqualToString:@"iphoneos"])
+	if([SDKRoot isEqualToString:@"iphoneos"])
 		index = @"iphoneos".length;
-	else if ([SDKRoot isEqualToString:@"macosx"])
+	else if([SDKRoot isEqualToString:@"macosx"])
 		index = @"macosx".length;
 
-	if (index == NSNotFound)
+	if(index == NSNotFound)
 		return nil;
 
 	files = [files sortedArrayUsingComparator:^(id one, id two) {
 		CGFloat oneFloat = [[one substringFromIndex:index] floatValue];
 		CGFloat twoFloat = [[two substringFromIndex:index] floatValue];
-		if (oneFloat > twoFloat)
+		if(oneFloat > twoFloat)
 			return (NSComparisonResult)NSOrderedDescending;
-		if (oneFloat < twoFloat)
+		if(oneFloat < twoFloat)
 			return (NSComparisonResult)NSOrderedAscending;
 		return (NSComparisonResult)NSOrderedSame;
 	}];
