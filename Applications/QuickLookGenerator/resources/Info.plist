@@ -47,5 +47,11 @@
 			</array>
 		</dict>
 	</array>
+	<key>QLThumbnailMinimumSize</key>
+	<integer>32</integer>
+	<key>QLSupportsConcurrentRequests</key>
+	<true/>
+	<key>QLNeedsToBeRunInMainThread</key>
+	<false/>
 </dict>
 </plist>
