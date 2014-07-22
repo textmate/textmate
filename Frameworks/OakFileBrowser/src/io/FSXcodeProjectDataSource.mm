@@ -56,16 +56,12 @@ static NSString* caseSensitiveMatchInArrayForString(NSArray* array, NSString* st
 {
 	if(self = [super init])
 	{
-		_projects = [[NSMutableDictionary alloc] init];
-
 		NSString* xcodeprojPath = [anURL path];
 		if([[NSFileManager defaultManager] fileExistsAtPath:xcodeprojPath])
 		{
 			XCProject* project = [XCProject projectWithFilePath:xcodeprojPath];
 
 			self.rootItem = [self itemForProject:project atURL:[NSURL fileURLWithPath:xcodeprojPath]];
-
-			[_projects setObject:project forKey:[NSURL fileURLWithPath:xcodeprojPath]];
 		}
 		else
 		{
@@ -160,8 +156,6 @@ static NSString* caseSensitiveMatchInArrayForString(NSArray* array, NSString* st
 			{
 				XCProject* project = [XCProject projectWithFilePath:[itemURL path]];
 				[results addObject:[self itemForProject:project atURL:itemURL]];
-
-				[_projects setObject:project forKey:itemURL];
 			}
 			else
 			{
