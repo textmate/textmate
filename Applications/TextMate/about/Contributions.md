@@ -13,7 +13,7 @@ See [commits at GitHub][1].
 last_group_heading = ''
 
 require 'bin/gen_credits'
-generate_credits(File.expand_path('~/Library/Caches/com.macromates.TextMate/githubcredits')) do |hash, author, subject, body, userpic, date, github_user|
+generate_credits(File.expand_path('~/Library/Caches/com.macromates.TextMate/githubcredits'), warn) do |hash, author, subject, body, userpic, date, github_user|
   group_heading = date.strftime('%b %e, %Y')
 
   if last_group_heading != group_heading

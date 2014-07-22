@@ -4,8 +4,6 @@
 # Module to assist in building the Contributors page using git commit history.
 #
 
-require 'getoptlong'
-require 'rdoc/usage'
 require 'digest/md5'
 require 'net/https'
 require 'uri'
@@ -94,7 +92,7 @@ class GitHubLookup
 
 end
 
-def generate_credits(dbm_file)
+def generate_credits(dbm_file, warn=false)
   GitHubLookup.initialize(dbm_file)
   did_warn_db = Set.new
 
@@ -128,7 +126,9 @@ def generate_credits(dbm_file)
         key = "#{name} <#{fields[2]}>"
         unless did_warn_db.include?(key)
           did_warn_db.add(key)
-          STDERR << "WARNING: failed to find GitHub user for #{key}\n";
+          if warn
+            STDERR << "WARNING: failed to find GitHub user for #{key}\n";
+          end
         end
       end
 

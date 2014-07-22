@@ -66,10 +66,11 @@ opts = GetoptLong.new(
   [ '--title',  '-t', GetoptLong::REQUIRED_ARGUMENT ],
   [ '--header', '-h', GetoptLong::REQUIRED_ARGUMENT ],
   [ '--footer', '-f', GetoptLong::REQUIRED_ARGUMENT ],
+  [ '--warn',   '-w', GetoptLong::NO_ARGUMENT       ],
   [ '--help',         GetoptLong::NO_ARGUMENT       ]
 )
 
-title, header, footer = 'untitled', nil, nil
+title, header, footer, warn = 'untitled', nil, nil, false
 
 opts.each do |opt, arg|
   case opt
@@ -79,6 +80,8 @@ opts.each do |opt, arg|
       header = arg
     when '--footer'
       footer = arg
+    when '--warn'
+      warn = true
   end
 end
 
