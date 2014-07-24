@@ -27,7 +27,7 @@
 			NSMutableArray* descriptionBits = [NSMutableArray arrayWithCapacity:[_tableView tableColumns].count];
 			[[_tableView tableColumns] enumerateObjectsUsingBlock:^(NSTableColumn* column, NSUInteger index, BOOL* stop) {
 				NSCell* cell = [_tableView preparedCellAtColumn:index row:row];
-				NSString* description = [cell stringValue];
+				NSString* description = (NSString*)[[cell accessibilityAttributeValue:NSAccessibilityValueAttribute] description];
 				[descriptionBits addObject:description];
 			}];
 			NSString* description = [descriptionBits componentsJoinedByString:@", "];

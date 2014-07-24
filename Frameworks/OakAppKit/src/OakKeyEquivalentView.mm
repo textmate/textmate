@@ -64,6 +64,7 @@ static NSString* const kRecordingPlaceholderString = @"…";
 				[controller setValue:_eventString forKeyPath:keyPath];
 		}
 	}
+	NSAccessibilityPostNotification(self, NSAccessibilityValueChangedNotification);
 }
 
 - (id)value                   { return self.eventString; }
@@ -283,5 +284,52 @@ static NSString* const kRecordingPlaceholderString = @"…";
 - (NSRect)focusRingMaskBounds
 {
 	return [self bounds];
+}
+
+- (BOOL)accessibilityIsIgnored
+{
+	return NO;
+}
+
+- (NSArray*)accessibilityAttributeNames
+{
+	static NSArray *attributes = nil;
+	if(!attributes)
+	{
+		NSSet *set = [NSSet setWithArray:[super accessibilityAttributeNames]];
+		set = [set setByAddingObjectsFromArray:@[
+			NSAccessibilityValueAttribute,
+			NSAccessibilityNumberOfCharactersAttribute,
+			NSAccessibilityDescriptionAttribute,
+			NSAccessibilitySelectedTextAttribute,
+			NSAccessibilitySelectedTextRangeAttribute,
+			NSAccessibilityVisibleCharacterRangeAttribute,
+		]];
+		attributes = [set allObjects];
+	}
+	return attributes;
+}
+
+- (id)accessibilityAttributeValue:(NSString*)attribute
+{
+	id value = nil;
+	BOOL isEmptyRecording = [self.displayString isEqualToString:kRecordingPlaceholderString];
+	if([attribute isEqualToString:NSAccessibilityRoleAttribute])
+		value = NSAccessibilityTextFieldRole;
+	else if([attribute isEqualToString:NSAccessibilityValueAttribute])
+		value = isEmptyRecording ? @"" : self.displayString;
+	else if([attribute isEqualToString:NSAccessibilityNumberOfCharactersAttribute])
+		value = @(isEmptyRecording ? 0 : self.displayString.length);
+	else if(
+			  [attribute isEqualToString:NSAccessibilitySelectedTextAttribute]
+			||[attribute isEqualToString:NSAccessibilitySelectedTextRangeAttribute]
+			||[attribute isEqualToString:NSAccessibilityVisibleCharacterRangeAttribute]
+				)
+		value = nil;
+	else if([attribute isEqualToString:NSAccessibilityDescriptionAttribute])
+		value = @"Key Equivalent";
+	else
+		value = [super accessibilityAttributeValue:attribute];
+	return value;
 }
 @end

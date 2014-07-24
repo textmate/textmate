@@ -92,4 +92,35 @@
 	cellSize.width += 55;
 	return cellSize;
 }
+
+- (id)accessibilityAttributeValue:(NSString*)attribute
+{
+	if([attribute isEqualToString:NSAccessibilityValueAttribute])
+	{
+		NSString *additionalInfo = nil;
+		if(OakNotEmptyString(self.attributedTabTrigger.string))
+			additionalInfo = [NSString stringWithFormat:@"tab trigger is %@", self.attributedTabTrigger.string];
+		else if(OakNotEmptyString(self.keyEquivalent))
+		{
+			NSString *equivalent = [NSString stringWithCxxString:ns::glyphs_for_event_string(to_s(self.keyEquivalent))];
+			additionalInfo = [NSString stringWithFormat:@"shortcut is %@", equivalent];
+		}
+		NSString *value = [super accessibilityAttributeValue:attribute];
+		if(additionalInfo)
+			value = [NSString stringWithFormat:@"%@, %@", value, additionalInfo];
+		return value;
+	}
+	return [super accessibilityAttributeValue:attribute];
+}
+
+- (id)accessibilityAttributeValue:(NSString*)attribute forParameter:(id)parameter
+{
+	// Make sure VoiceOver is forced to use our implementation of AXValue above
+	if(   [attribute isEqualToString:NSAccessibilityAttributedStringForRangeParameterizedAttribute]
+		|| [attribute isEqualToString:NSAccessibilityStringForRangeParameterizedAttribute]
+		)
+		return nil;
+
+	return [super accessibilityAttributeValue:attribute forParameter:parameter];
+}
 @end
