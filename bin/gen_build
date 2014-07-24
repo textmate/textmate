@@ -687,6 +687,8 @@ all_old_targets = all_targets(outfile, builddir)
 
 open(outfile, "w") do |io|
   userfile = "#{ENV['USER']}.ninja"
+  io << "ninja_required_version = 1.5\n"
+  io << "\n"
   io << "###########################################\n"
   io << "# AUTOMATICALLY GENERATED -- DO NOT EDIT! #\n"
   io << "###########################################\n"
