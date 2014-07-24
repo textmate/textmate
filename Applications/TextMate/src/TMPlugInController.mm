@@ -1,5 +1,7 @@
 #import "TMPlugInController.h"
 #import <OakSystem/application.h>
+#import <io/path.h>
+#import <ns/ns.h>
 #import <oak/debug.h>
 
 OAK_DEBUG_VAR(PlugInController);
@@ -57,6 +59,17 @@ static id CreateInstanceOfPlugInClass (Class cl, TMPlugInController* controller)
 		{
 			if([[bundle objectForInfoDictionaryKey:@"TMPlugInAPIVersion"] intValue] == kPlugInAPIVersion)
 			{
+				std::string const crashedDuringPlugInLoad = path::join(path::temp(), "load_" + to_s(identifier));
+
+				if(path::exists(crashedDuringPlugInLoad))
+				{
+					NSInteger choice = NSRunAlertPanel([NSString stringWithFormat:@"Skip Loading %@ Plug-In?", name ?: identifier], @"Previous attempt of loading the plug-in caused abnormal exit. Would you like to skip it?", @"Skip", @"Load Anyway", nil);
+					if(choice == NSAlertDefaultReturn) // "Skip"
+						return;
+				}
+
+				path::set_content(crashedDuringPlugInLoad, "");
+
 				if([bundle load])
 				{
 					if(id instance = CreateInstanceOfPlugInClass([bundle principalClass], self))
@@ -72,6 +85,8 @@ static id CreateInstanceOfPlugInClass (Class cl, TMPlugInController* controller)
 				{
 					NSLog(@"Failed to load plug-in: %@, path %@", name ?: identifier, aPath);
 				}
+
+				unlink(crashedDuringPlugInLoad.c_str());
 			}
 			else
 			{
