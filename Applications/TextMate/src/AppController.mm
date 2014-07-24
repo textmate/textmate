@@ -232,7 +232,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 	if(BOOL restoreSession = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableSessionRestoreKey])
 	{
-		std::string const prematureTerminationDuringRestore = path::join(path::home(), "Library/Application Support/TextMate/Session/restore_in_progress");;
+		std::string const prematureTerminationDuringRestore = path::join(path::temp(), "textmate_session_restore");
 
 		NSString* promptUser = nil;
 		if(path::exists(prematureTerminationDuringRestore))

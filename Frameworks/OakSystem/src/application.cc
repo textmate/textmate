@@ -30,7 +30,7 @@ namespace oak
 		_app_name      = getenv("OAK_APP_NAME") ?: path::name(argv[0]);
 		_full_app_path = path::join(path::cwd(), argv[0]);
 		_app_path      = _full_app_path;
-		_pid_path      = support(((CFBundleGetMainBundle() && CFBundleGetIdentifier(CFBundleGetMainBundle())) ? cf::to_s(CFBundleGetIdentifier(CFBundleGetMainBundle())) : _app_name) + ".pid");
+		_pid_path      = path::join(path::temp(), (((CFBundleGetMainBundle() && CFBundleGetIdentifier(CFBundleGetMainBundle())) ? cf::to_s(CFBundleGetIdentifier(CFBundleGetMainBundle())) : _app_name) + ".pid"));
 
 		if(redirectStdErr)
 		{
