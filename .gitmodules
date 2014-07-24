@@ -4,9 +4,6 @@
 [submodule "vendor/MASPreferences/vendor"]
 	path = vendor/MASPreferences/vendor
 	url = https://github.com/textmate/MASPreferences.git
-[submodule "rmate"]
-	path = rmate
-	url = https://github.com/textmate/rmate.git
 [submodule "vendor/MGScopeBar/vendor"]
 	path = vendor/MGScopeBar/vendor
 	url = https://github.com/textmate/MGScopeBar.git
