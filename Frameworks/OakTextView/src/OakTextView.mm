@@ -1082,7 +1082,7 @@ doScroll:
 {
 	D(DBF_OakTextView_TextInput, bug("\n"););
 	AUTO_REFRESH;
-	markedRanges = ng::ranges_t();
+	markedRanges = pendingMarkedRanges = ng::ranges_t();
 }
 
 - (BOOL)hasMarkedText
@@ -2045,6 +2045,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 		[self delete:nil];
 		markedRanges = ng::ranges_t();
 	}
+	pendingMarkedRanges = ng::ranges_t();
 
 	if(![aString isKindOfClass:[NSString class]])
 	{
