@@ -6,15 +6,10 @@
 #import <ns/ns.h>
 #import <text/utf8.h>
 
-static NSString* const kBindingInfoControllerKey   = @"controller";
-static NSString* const kBindingInfoBindingKey      = @"binding";
-static NSString* const kBindingInfoKeyPathKey      = @"keyPath";
-
 static NSString* const kRecordingPlaceholderString = @"…";
 
 @interface OakKeyEquivalentView ()
 {
-	NSMutableArray* _observers;
 	NSRect _clearButtonRect;
 	void* _hotkeyToken;
 	BOOL _mouseDown;
@@ -30,12 +25,6 @@ static NSString* const kRecordingPlaceholderString = @"…";
 	if(self = [super initWithFrame:aRect])
 		self.disableGlobalHotkeys = YES;
 	return self;
-}
-
-- (void)dealloc
-{
-	for(NSDictionary* info in _observers)
-		[info[kBindingInfoControllerKey] removeObserver:self forKeyPath:info[kBindingInfoKeyPathKey]];
 }
 
 - (NSSize)intrinsicContentSize
