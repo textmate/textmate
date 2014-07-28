@@ -181,19 +181,21 @@ namespace ct
 
 			if(!tabs.empty())
 			{
-				CFArrayRef tabStops = CFArrayCreate(kCFAllocatorDefault, (const void**) (&tabs[0]), tabs.size(), &kCFTypeArrayCallBacks);
-				for(CTTextTabRef t : tabs)
-					CFRelease(t);
-
-				CTParagraphStyleSetting settings[] = {
-					{ kCTParagraphStyleSpecifierTabStops,           sizeof(CFArrayRef), &tabStops },
-					{ kCTParagraphStyleSpecifierDefaultTabInterval, sizeof(tabWidth),   &tabWidth }
-				};
-				CTParagraphStyleRef paragraphStyle = CTParagraphStyleCreate(settings, sizeofA(settings));
-				CFAttributedStringSetAttribute(toDraw, CFRangeMake(0, CFAttributedStringGetLength(toDraw)), kCTParagraphStyleAttributeName, paragraphStyle);
-				CFRelease(paragraphStyle);
-				CFRelease(tabStops);
-				_line.reset(CTLineCreateWithAttributedString(toDraw), CFRelease);
+				if(CFArrayRef tabStops = CFArrayCreate(kCFAllocatorDefault, (const void**) (&tabs[0]), tabs.size(), &kCFTypeArrayCallBacks))
+				{
+					CTParagraphStyleSetting settings[] = {
+						{ kCTParagraphStyleSpecifierTabStops,           sizeof(CFArrayRef), &tabStops },
+						{ kCTParagraphStyleSpecifierDefaultTabInterval, sizeof(tabWidth),   &tabWidth }
+					};
+					if(CTParagraphStyleRef paragraphStyle = CTParagraphStyleCreate(settings, sizeofA(settings)))
+					{
+						CFAttributedStringSetAttribute(toDraw, CFRangeMake(0, CFAttributedStringGetLength(toDraw)), kCTParagraphStyleAttributeName, paragraphStyle);
+						_line.reset(CTLineCreateWithAttributedString(toDraw), CFRelease);
+						CFRelease(paragraphStyle);
+					}
+					CFRelease(tabStops);
+				}
+				std::for_each(tabs.begin(), tabs.end(), CFRelease);
 			}
 
 			CFRelease(toDraw);
