@@ -155,7 +155,6 @@ namespace ct
 			CGFloat newTabWidths = 0;
 			CFIndex j = 0;
 			std::vector<CTTextTabRef> tabs;
-			tabs.push_back(CTTextTabCreate(kCTNaturalTextAlignment, 0, NULL));
 			for(size_t i = 0; i < text.size(); ++i)
 			{
 				switch(text[i])
