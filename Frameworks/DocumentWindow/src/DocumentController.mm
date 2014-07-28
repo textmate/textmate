@@ -34,7 +34,7 @@
 #import <oak/compat.h>
 #import <kvdb/kvdb.h>
 
-static NSString* const kUserDefaultsFindInSelectionByDefault = @"findInSelectionByDefault";
+static NSString* const kUserDefaultsAlwaysFindInDocument = @"alwaysFindInDocument";
 static NSString* const kUserDefaultsDisableFolderStateRestore = @"disableFolderStateRestore";
 static NSString* const kUserDefaultsHideStatusBarKey = @"hideStatusBar";
 static NSString* const OakDocumentPboardType = @"OakDocumentPboardType"; // drag’n’drop of tabs
@@ -1989,7 +1989,7 @@ namespace
 	find.projectIdentifier  = self.identifier;
 
 	NSInteger mode = [sender respondsToSelector:@selector(tag)] ? [sender tag] : find_tags::in_document;
-	if(mode == find_tags::in_document && [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFindInSelectionByDefault] && [self.window isKeyWindow] && self.textView.hasMultiLineSelection)
+	if(mode == find_tags::in_document && ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsAlwaysFindInDocument] && [self.window isKeyWindow] && self.textView.hasMultiLineSelection)
 		mode = find_tags::in_selection;
 
 	switch(mode)
