@@ -15,6 +15,7 @@
 #import <text/parse.h>
 #import <ns/ns.h>
 #import <oak/oak.h>
+#import <plist/uuid.h>
 
 @interface actionCommandObj : NSObject
 @property (nonatomic, readonly) NSString* name;
@@ -97,6 +98,9 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 		self.clientPortName = someOptions[kOakCommitWindowClientPortName];
 		[self parseArguments:someOptions[kOakCommitWindowArguments]];
 		self.environment = convert(someOptions[kOakCommitWindowEnvironment]);
+
+		// send all diffs to a separate window
+		_environment["TM_PROJECT_UUID"] = to_s(oak::uuid_t().generate());
 
 		self.documentView = [[OakDocumentView alloc] initWithFrame:NSZeroRect];
 		self.documentView.textView.delegate = self;
