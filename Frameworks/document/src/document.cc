@@ -556,7 +556,31 @@ namespace document
 	std::string document_t::backup_path () const
 	{
 		if(_backup_path == NULL_STR)
-			_backup_path = ::backup_path(display_name());
+		{
+			std::string suffix = "";
+			if(_path == NULL_STR && _buffer)
+			{
+				if(parse::grammar_ptr grammar = _buffer->grammar())
+				{
+					plist::array_t fileTypes;
+					if(bundles::item_ptr grammarItem = bundles::lookup(grammar->uuid()))
+					{
+						if(plist::get_key_path(grammarItem->plist(), "fileTypes", fileTypes))
+						{
+							for(auto const& type : fileTypes)
+							{
+								if(std::string const* ext = boost::get<std::string>(&type))
+								{
+									suffix = "." + *ext;
+									break;
+								}
+							}
+						}
+					}
+				}
+			}
+			_backup_path = ::backup_path(display_name() + suffix);
+		}
 		return _backup_path;
 	}
 
@@ -1124,6 +1148,12 @@ namespace document
 
 			auto const settings = settings_for_path(virtual_path(), file_type(), path::parent(_path), document_variables());
 			set_indent(text::indent_t(std::max(1, settings.get(kSettingsTabSizeKey, 4)), SIZE_T_MAX, settings.get(kSettingsSoftTabsKey, false)));
+
+			if(_path == NULL_STR && _backup_path != NULL_STR)
+			{
+				std::string oldBackupPath = std::exchange(_backup_path, NULL_STR);
+				rename(oldBackupPath.c_str(), backup_path().c_str());
+			}
 		}
 	}
 
