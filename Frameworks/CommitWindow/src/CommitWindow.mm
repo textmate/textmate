@@ -82,11 +82,21 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 @property (nonatomic) std::map<std::string, std::string> environment;
 @property (nonatomic) NSArrayController*                 arrayController;
 @property (nonatomic) NSString*                          clientPortName;
+
 @property (nonatomic) NSPopUpButton*                     previousCommitMessagesPopUpButton;
 @property (nonatomic) OakDocumentView*                   documentView;
 @property (nonatomic) NSScrollView*                      scrollView;
 @property (nonatomic) NSTableView*                       tableView;
-@property (nonatomic) NSPopUpButton*                     actionPopUpButton;
+
+@property (nonatomic) NSBox*                             topDivider;
+@property (nonatomic) NSBox*                             middleDivider;
+@property (nonatomic) NSBox*                             bottomDivider;
+
+@property (nonatomic) NSButton*                          showFilesCheckBox;
+@property (nonatomic) NSButton*                          commitButton;
+@property (nonatomic) NSButton*                          cancelButton;
+
+@property (nonatomic) BOOL                               showsTableView;
 @property (nonatomic) OakCommitWindow*                   retainedSelf;
 @end
 
@@ -103,6 +113,7 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 		_environment["TM_PROJECT_UUID"] = to_s(oak::uuid_t().generate());
 
 		self.documentView = [[OakDocumentView alloc] initWithFrame:NSZeroRect];
+		self.documentView.hideStatusBar     = YES;
 		self.documentView.textView.delegate = self;
 
 		_arrayController = [[NSArrayController alloc] init];
@@ -135,30 +146,25 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 		_scrollView.borderType            = NSNoBorder;
 		_scrollView.documentView          = _tableView;
 
-		self.window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 540, 500) styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask|NSTexturedBackgroundWindowMask) backing:NSBackingStoreBuffered defer:NO];
-		[self.window center];
+		self.window = [[NSWindow alloc] initWithContentRect:NSZeroRect styleMask:NSTitledWindowMask|NSResizableWindowMask backing:NSBackingStoreBuffered defer:NO];
 		self.window.delegate           = self;
 		self.window.releasedWhenClosed = NO;
 		self.window.frameAutosaveName  = @"Commit Window";
-		[self.window setAutorecalculatesContentBorderThickness:NO forEdge:NSMaxYEdge];
-		[self.window setContentBorderThickness:29 forEdge:NSMaxYEdge];
 
-		NSButton* commitButton = OakCreateButton(@"Commit", NSTexturedRoundedBezelStyle);
-		NSButton* cancelButton = OakCreateButton(@"Cancel", NSTexturedRoundedBezelStyle);
+		_commitButton = OakCreateButton(@"Commit", NSRoundedBezelStyle);
+		_commitButton.action                    = @selector(performCommit:);
+		_commitButton.keyEquivalent             = @"\r";
+		_commitButton.keyEquivalentModifierMask = NSCommandKeyMask;
+		_commitButton.target                    = self;
 
-		commitButton.action                    = @selector(performCommit:);
-		commitButton.keyEquivalent             = @"\r";
-		commitButton.keyEquivalentModifierMask = NSCommandKeyMask;
-		commitButton.target                    = self;
+		_cancelButton = OakCreateButton(@"Cancel", NSRoundedBezelStyle);
+		_cancelButton.action                    = @selector(cancel:);
+		_cancelButton.keyEquivalent             = @".";
+		_cancelButton.keyEquivalentModifierMask = NSCommandKeyMask;
+		_cancelButton.target                    = self;
 
-		cancelButton.action                    = @selector(cancel:);
-		cancelButton.keyEquivalent             = @".";
-		cancelButton.keyEquivalentModifierMask = NSCommandKeyMask;
-		cancelButton.target                    = self;
-
-		_actionPopUpButton = OakCreateActionPopUpButton(YES);
-		_actionPopUpButton.bezelStyle = NSTexturedRoundedBezelStyle;
-		_actionPopUpButton.menu.delegate = self;
+		_showFilesCheckBox = OakCreateCheckBox(@"Show files to be committed");
+		[_showFilesCheckBox bind:NSValueBinding toObject:self withKeyPath:@"showsTableView" options:nil];
 
 		_previousCommitMessagesPopUpButton = [NSPopUpButton new];
 		_previousCommitMessagesPopUpButton.bordered   = YES;
@@ -166,39 +172,63 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 		_previousCommitMessagesPopUpButton.bezelStyle = NSTexturedRoundedBezelStyle;
 		[self setupPreviousCommitMessagesMenu];
 
-		// ===============
-		// = Constraints =
-		// ===============
-
-		NSDictionary* views = @{
-			@"previousMessages"   : self.previousCommitMessagesPopUpButton,
-			@"topDivider"         : OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]),
-			@"documentView"       : self.documentView,
-			@"middleDivider"      : OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]),
-			@"scrollView"         : self.scrollView,
-			@"bottomDivider"      : OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]),
-			@"action"             : self.actionPopUpButton,
-			@"cancel"             : cancelButton,
-			@"commit"             : commitButton,
-		};
+		_topDivider     = OakCreateHorizontalLine([NSColor grayColor]);
+		_middleDivider  = OakCreateHorizontalLine([NSColor grayColor]);
+		_bottomDivider  = OakCreateHorizontalLine([NSColor grayColor]);
 
 		NSView* contentView = self.window.contentView;
-		for(NSView* view in [views allValues])
+		for(NSView* view in [self.allViews allValues])
 		{
 			[view setTranslatesAutoresizingMaskIntoConstraints:NO];
 			[contentView addSubview:view];
 		}
 
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[topDivider]|" options:NSLayoutFormatAlignAllLeft|NSLayoutFormatAlignAllRight metrics:nil views:views]];
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[documentView(==middleDivider)]|" options:0 metrics:nil views:views]];
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView(==bottomDivider)]|" options:0 metrics:nil views:views]];
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[cancel]-[commit]-(8)-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[action(==36)]" options:0 metrics:nil views:views]];
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[previousMessages(>=200)]-(8)-|" options:0 metrics:nil views:views]];
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(3)-[previousMessages]-(3)-[topDivider][documentView(>=100)][middleDivider][scrollView(==190)][bottomDivider]-(5)-[commit]-(6)-|" options:0 metrics:nil views:views]];
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[bottomDivider]-(5)-[action]-(6)-|" options:0 metrics:nil views:views]];
+		[self updateConstraints];
 	}
 	return self;
+}
+
+- (NSDictionary*)allViews
+{
+	NSDictionary* views = @{
+		@"previousMessages"   : self.previousCommitMessagesPopUpButton,
+		@"topDivider"         : self.topDivider,
+		@"documentView"       : self.documentView,
+		@"middleDivider"      : self.middleDivider,
+		@"scrollView"         : self.scrollView,
+		@"bottomDivider"      : self.bottomDivider,
+		@"checkBox"           : self.showFilesCheckBox,
+		@"cancel"             : self.cancelButton,
+		@"commit"             : self.commitButton,
+	};
+
+	return views;
+}
+
+- (void)updateConstraints
+{
+	NSView* contentView = self.window.contentView;
+	[contentView removeConstraints:[contentView constraints]];
+
+	NSDictionary* views = self.allViews;
+
+	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[previousMessages(>=200)]-(5)-|" options:0 metrics:nil views:views]];
+	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[documentView(>=400,==topDivider,==bottomDivider)]|" options:0 metrics:nil views:views]];
+
+	if(self.showsTableView)
+	{
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView(==documentView,==middleDivider)]|" options:0 metrics:nil views:views]];
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-[previousMessages]-(5)-[topDivider][documentView(>=195)][middleDivider][scrollView(==190)][bottomDivider]-(8)-[commit]-(8)-|" options:0 metrics:nil views:views]];
+	}
+	else
+	{
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-[previousMessages]-(5)-[topDivider][documentView(>=195)][bottomDivider]-(8)-[commit]-(8)-|" options:0 metrics:nil views:views]];
+	}
+
+	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(5)-[checkBox]" options:0 metrics:nil views:views]];
+	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[cancel]-[commit]-(5)-|" options:0 metrics:nil views:views]];
+	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[bottomDivider]-(8)-[checkBox]-(8)-|" options:0 metrics:nil views:views]];
+	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[bottomDivider]-(8)-[cancel]-(8)-|" options:0 metrics:nil views:views]];
 }
 
 - (void)parseArguments:(NSArray*)args
@@ -255,7 +285,38 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 	}
 }
 
-- (void)showWindow:(id)sender
+- (void)setShowsTableView:(BOOL)flag
+{
+	if(_showsTableView == flag)
+		return;
+
+	_showsTableView = flag;
+
+	for(NSView* view in @[self.middleDivider, self.scrollView])
+	{
+		if(_showsTableView)
+			[self.window.contentView addSubview:view];
+		else [view removeFromSuperview];
+	}
+
+	[self updateConstraints];
+}
+
+- (void)sheetDidEnd:(id)sheetOrAlert returnCode:(NSInteger)returnCode contextInfo:(void*)unused
+{
+	if(self.documentView.document)
+	{
+		NSString* commitMessage = [NSString stringWithCxxString:self.documentView.document->content()];
+		if([[commitMessage stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length] > 0)
+			[self saveCommitMessage:commitMessage];
+	}
+
+	[self.documentView setDocument:document::document_ptr()];
+	[self sendCommitMessageToClient:NO];
+	[self.window orderOut:self];
+}
+
+- (void)beginSheetModalForWindow:(NSWindow*)aWindow completionHandler:(void(^)(NSInteger returnCode))aCompletionHandler
 {
 	std::string fileType = "text.plain";
 	auto scmName = _environment.find("TM_SCM_NAME");
@@ -273,27 +334,12 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 
 	[self.documentView setDocument:commitMessage];
 
-	std::string const title = format_string::expand("${TM_BUNDLE_ITEM_NAME:?${TM_BUNDLE_ITEM_NAME/…$//g}:Commit} — ${TM_PROJECT_DIRECTORY/^.*\\///} ($TM_SCM_NAME: $TM_SCM_BRANCH)", _environment);
-	[self.window setTitle:[NSString stringWithCxxString:title]];
-
 	[self.window recalculateKeyViewLoop];
 	[self.window makeFirstResponder:self.documentView];
-	[super showWindow:sender];
 
 	self.retainedSelf = self;
-}
 
-- (void)windowWillClose:(NSNotification*)aNotification
-{
-	if(self.documentView.document)
-	{
-		NSString* commitMessage = [NSString stringWithCxxString:self.documentView.document->content()];
-		if([[commitMessage stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length] > 0)
-			[self saveCommitMessage:commitMessage];
-	}
-
-	[self.documentView setDocument:document::document_ptr()];
-	[self sendCommitMessageToClient:NO];
+	[NSApp beginSheet:self.window modalForWindow:aWindow modalDelegate:self didEndSelector:@selector(sheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
 }
 
 - (void)sendCommitMessageToClient:(BOOL)success
@@ -457,13 +503,13 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 - (void)performCommit:(id)sender
 {
 	[self sendCommitMessageToClient:YES];
-	[self close];
+	[NSApp endSheet:self.window returnCode:NSRunStoppedResponse];
 }
 
 - (void)cancel:(id)sender
 {
 	[self sendCommitMessageToClient:NO];
-	[self close];
+	[NSApp endSheet:self.window returnCode:NSRunAbortedResponse];
 }
 
 - (void)checkAll:(id)sender
@@ -522,8 +568,6 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 - (void)menuNeedsUpdate:(NSMenu*)menu
 {
 	[menu removeAllItems];
-	if([_tableView clickedColumn] == -1)
-		[menu addItemWithTitle:@"Dummy" action:NULL keyEquivalent:@""];
 
 	NSInteger row = [_tableView clickedRow];
 	if(row == -1 && [_tableView selectedRow] == -1)
@@ -635,6 +679,6 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 - (void)connectFromClientWithOptions:(NSDictionary*)someOptions
 {
 	OakCommitWindow* commitWindow = [[OakCommitWindow alloc] initWithOptions:someOptions];
-	[commitWindow showWindow:self];
+	[commitWindow beginSheetModalForWindow:[NSApp mainWindow] completionHandler:^(NSInteger returnCode){ }];
 }
 @end
