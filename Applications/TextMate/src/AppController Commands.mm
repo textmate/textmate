@@ -21,7 +21,10 @@ OAK_DEBUG_VAR(AppController_Commands);
 {
 	if(bundles::item_ptr item = bundles::lookup(to_s(uuidString)))
 	{
-		id delegate = [[NSApp mainWindow] delegate];
+		NSWindow* mainWindow = [NSApp mainWindow];
+
+		id delegate = [([mainWindow attachedSheet] ?: mainWindow) delegate];
+
 		if(![delegate respondsToSelector:@selector(performBundleItem:)])
 			delegate = [NSApp targetForAction:@selector(performBundleItem:)];
 		if(delegate)
