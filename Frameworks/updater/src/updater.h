@@ -19,7 +19,7 @@ namespace bundles_db
 
 	struct PUBLIC source_t
 	{
-		source_t (std::string const& name, std::string const& identifier, std::string const& url, std::string const& path, int32_t rank, bool disabled) : _name(name), _identifier(identifier), _url(url), _path(path), _rank(rank), _disabled(disabled) { }
+		source_t (std::string const& name, std::string const& identifier, std::string const& url, std::string const& path, int32_t rank = 0, bool disabled = false) : _name(name), _identifier(identifier), _url(url), _path(path), _rank(rank), _disabled(disabled) { }
 
 		std::string name () const       { return _name; }
 		std::string identifier () const { return _identifier; }
@@ -129,7 +129,6 @@ namespace bundles_db
 
 	PUBLIC bool update (source_ptr source, double* progress = NULL, double min = 0, double max = 1);
 	PUBLIC std::vector<source_ptr> sources (std::string const& installDir = NULL_STR);
-	PUBLIC bool save_sources (std::vector<source_ptr> const& sources, std::string const& installDir = NULL_STR);
 
 	PUBLIC std::vector<bundle_ptr> index (std::string const& installDir = NULL_STR);
 	PUBLIC bool save_index (std::vector<bundle_ptr> const& bundles, std::string const& installDir = NULL_STR);

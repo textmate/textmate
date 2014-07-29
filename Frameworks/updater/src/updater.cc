@@ -32,7 +32,6 @@ namespace bundles_db
 	// ===========
 
 	static std::string sources_base_path (std::string const& installDir)            { return installDir == NULL_STR ? path::join(path::home(), "Library/Application Support/TextMate/Managed") : installDir; }
-	static std::string sources_index_path (std::string const& installDir)           { return path::join(sources_base_path(installDir), "Sources.plist"); }
 	static std::string sources_path (std::string const& installDir)                 { return path::join(sources_base_path(installDir), "Cache"); }
 
 	static std::string local_bundle_path (std::string const& installDir = NULL_STR) { return installDir == NULL_STR ? path::join(path::home(), "Library/Application Support/TextMate/Managed") : installDir; }
@@ -59,85 +58,19 @@ namespace bundles_db
 		}
 		else
 		{
-			std::string const key_chain_path = path::join(path::home(), "Library/Application Support/TextMate/Managed/KeyChain.plist");
-			if(path::exists(key_chain_path))
-			{
-				res.load(key_chain_path);
-			}
-			else
-			{
-				res.add(key_chain_t::key_t("org.textmate.duff",    "Allan Odgaard",  "-----BEGIN PUBLIC KEY-----\nMIIBtjCCASsGByqGSM44BAEwggEeAoGBAPIE9PpXPK3y2eBDJ0dnR/D8xR1TiT9m\n8DnPXYqkxwlqmjSShmJEmxYycnbliv2JpojYF4ikBUPJPuerlZfOvUBC99ERAgz7\nN1HYHfzFIxVo1oTKWurFJ1OOOsfg8AQDBDHnKpS1VnwVoDuvO05gK8jjQs9E5LcH\ne/opThzSrI7/AhUAy02E9H7EOwRyRNLofdtPxpa10o0CgYBKDfcBscidAoH4pkHR\nIOEGTCYl3G2Pd1yrblCp0nCCUEBCnvmrWVSXUTVa2/AyOZUTN9uZSC/Kq9XYgqwj\nhgzqa8h/a8yD+ao4q8WovwGeb6Iso3WlPl8waz6EAPR/nlUTnJ4jzr9t6iSH9owS\nvAmWrgeboia0CI2AH++liCDvigOBhAACgYAFWO66xFvmF2tVIB+4E7CwhrSi2uIk\ndeBrpmNcZZ+AVFy1RXJelNe/cZ1aXBYskn/57xigklpkfHR6DGqpEbm6KC/47Jfy\ny5GEx+F/eBWEePi90XnLinytjmXRmS2FNqX6D15XNG1xJfjociA8bzC7s4gfeTUd\nlpQkBq2z71yitA==\n-----END PUBLIC KEY-----\n"));
-				res.add(key_chain_t::key_t("org.textmate.msheets", "Michael Sheets", "-----BEGIN PUBLIC KEY-----\nMIIDOzCCAi4GByqGSM44BAEwggIhAoIBAQDfYsqBc18uL7yYb/bDrrEtVTBG8tML\nmMtNFyU8XhlVKWdQJwBGG/fV2Wjc0hVYSeTWv3VueITZbuuVZEePXlem6Dki1DEL\nsMNeDvE/l0MKHXi1+sr1cht7QvuTi/c1UK4I6QNWDJWi7KmqJg3quLCwJfMef1x5\n/qgLUln5cU6+pAj43Vp62bzHJBjAnrC432yD7F4Mxu4oV/PEm5QC6pU7RcvUwAox\np7m7c8+CxX7Aq4dH6Jd8Jt6XuYIktlfcFivvvF60CvxhABDBdGMra4roO0wlJmID\n91oQ3PLxFBsDmbluPJlkmTp4YetsF8/Zd9P3WwBQUArtNdiqKZIQ4uHXAhUAvNZ5\ntZkzuUiblIxZKmOCBN/JeMsCggEBAK9jUiC98+hwY5XcDQjDSLPE4uvv+dHZ29Bx\n8KevX+qzd6shIhp6urvyBXrM+h8l7iB6Jh4Wm3WhqKMBjquRqyGogQDGxJr7QBVk\nQSOiyaKDT4Ue/Nhg1MFsrt3PtS1/nscZ6GGWswrCfQ1t4m/wXDasUSfz2smae+Jd\nZ6UGBzWQMRawyU/O/LX0PlJkBOMHopecAUcxHc2G02P2QwAMKPavwksQ4tWCJvIr\n7ZELfCcVQtG2UnpTRWqLZQaVwSYMHoNK9/reu099sdv9CQ+trH2Q5LlBXJmHloFK\nafiuQPjTmaJVf/piiQ79xJB6VmwoEpOJJG4NYNt7f+I7YCk07xwDggEFAAKCAQA5\nSBwWJouMKUI6Hi0EZ4/Yh98qQmItx4uWTYFdjcUVVYCKK7GIuXu67rfkbCJUrvT9\nID1vw2eyTmbuW2TPuRDsxUcB7WRyyLekl67vpUgMgLBLgYMXQf6RF4HM2tW7UWg7\noNQHkZKWbhDgXdumKzKf/qZPB/LT2Yndv/zqkQ+YXIu08j0RGkxJaAjB7nEv1XGq\nL2VJf8aEi+MnihAtMPCHcW34qswqO1kOCbOWNShlfWHGjKlfdsPYv87RcalHNqps\nk1r60kyEkeZvKGM+FDT80N7cafX286v8n9L4IvvnLr/FDOH4XXzEjXB9Vr5Ffvj1\ndxNPRmDZOo6JNKA8Uvki\n-----END PUBLIC KEY-----\n"));
-				res.save(key_chain_path);
-			}
+			res.add(key_chain_t::key_t("org.textmate.duff",    "Allan Odgaard",  "-----BEGIN PUBLIC KEY-----\nMIIBtjCCASsGByqGSM44BAEwggEeAoGBAPIE9PpXPK3y2eBDJ0dnR/D8xR1TiT9m\n8DnPXYqkxwlqmjSShmJEmxYycnbliv2JpojYF4ikBUPJPuerlZfOvUBC99ERAgz7\nN1HYHfzFIxVo1oTKWurFJ1OOOsfg8AQDBDHnKpS1VnwVoDuvO05gK8jjQs9E5LcH\ne/opThzSrI7/AhUAy02E9H7EOwRyRNLofdtPxpa10o0CgYBKDfcBscidAoH4pkHR\nIOEGTCYl3G2Pd1yrblCp0nCCUEBCnvmrWVSXUTVa2/AyOZUTN9uZSC/Kq9XYgqwj\nhgzqa8h/a8yD+ao4q8WovwGeb6Iso3WlPl8waz6EAPR/nlUTnJ4jzr9t6iSH9owS\nvAmWrgeboia0CI2AH++liCDvigOBhAACgYAFWO66xFvmF2tVIB+4E7CwhrSi2uIk\ndeBrpmNcZZ+AVFy1RXJelNe/cZ1aXBYskn/57xigklpkfHR6DGqpEbm6KC/47Jfy\ny5GEx+F/eBWEePi90XnLinytjmXRmS2FNqX6D15XNG1xJfjociA8bzC7s4gfeTUd\nlpQkBq2z71yitA==\n-----END PUBLIC KEY-----\n"));
+			res.add(key_chain_t::key_t("org.textmate.msheets", "Michael Sheets", "-----BEGIN PUBLIC KEY-----\nMIIDOzCCAi4GByqGSM44BAEwggIhAoIBAQDfYsqBc18uL7yYb/bDrrEtVTBG8tML\nmMtNFyU8XhlVKWdQJwBGG/fV2Wjc0hVYSeTWv3VueITZbuuVZEePXlem6Dki1DEL\nsMNeDvE/l0MKHXi1+sr1cht7QvuTi/c1UK4I6QNWDJWi7KmqJg3quLCwJfMef1x5\n/qgLUln5cU6+pAj43Vp62bzHJBjAnrC432yD7F4Mxu4oV/PEm5QC6pU7RcvUwAox\np7m7c8+CxX7Aq4dH6Jd8Jt6XuYIktlfcFivvvF60CvxhABDBdGMra4roO0wlJmID\n91oQ3PLxFBsDmbluPJlkmTp4YetsF8/Zd9P3WwBQUArtNdiqKZIQ4uHXAhUAvNZ5\ntZkzuUiblIxZKmOCBN/JeMsCggEBAK9jUiC98+hwY5XcDQjDSLPE4uvv+dHZ29Bx\n8KevX+qzd6shIhp6urvyBXrM+h8l7iB6Jh4Wm3WhqKMBjquRqyGogQDGxJr7QBVk\nQSOiyaKDT4Ue/Nhg1MFsrt3PtS1/nscZ6GGWswrCfQ1t4m/wXDasUSfz2smae+Jd\nZ6UGBzWQMRawyU/O/LX0PlJkBOMHopecAUcxHc2G02P2QwAMKPavwksQ4tWCJvIr\n7ZELfCcVQtG2UnpTRWqLZQaVwSYMHoNK9/reu099sdv9CQ+trH2Q5LlBXJmHloFK\nafiuQPjTmaJVf/piiQ79xJB6VmwoEpOJJG4NYNt7f+I7YCk07xwDggEFAAKCAQA5\nSBwWJouMKUI6Hi0EZ4/Yh98qQmItx4uWTYFdjcUVVYCKK7GIuXu67rfkbCJUrvT9\nID1vw2eyTmbuW2TPuRDsxUcB7WRyyLekl67vpUgMgLBLgYMXQf6RF4HM2tW7UWg7\noNQHkZKWbhDgXdumKzKf/qZPB/LT2Yndv/zqkQ+YXIu08j0RGkxJaAjB7nEv1XGq\nL2VJf8aEi+MnihAtMPCHcW34qswqO1kOCbOWNShlfWHGjKlfdsPYv87RcalHNqps\nk1r60kyEkeZvKGM+FDT80N7cafX286v8n9L4IvvnLr/FDOH4XXzEjXB9Vr5Ffvj1\ndxNPRmDZOo6JNKA8Uvki\n-----END PUBLIC KEY-----\n"));
 		}
 		return res;
 	}
 
 	std::vector<source_ptr> sources (std::string const& installDir)
 	{
-		plist::any_t default_index = plist::parse_ascii(
-			"{	version = 4;"
-			"	sources = {"
-			"		org.textmate.updates.default  = { rank =  0; name = 'TextMate Bundles'; url = '" REST_API "/bundles/default'; };"
-			"	};"
-			"}"
-			"");
+		// Cleanup legacy files
+		unlink(path::join(path::home(), "Library/Application Support/TextMate/Managed/KeyChain.plist").c_str());
+		unlink(path::join(sources_base_path(installDir), "Sources.plist").c_str());
 
-		std::string const path = sources_index_path(installDir);
-		if(!path::exists(path))
-			plist::save(path, default_index);
-
-		plist::any_t plist = plist::load(path);
-
-		int32_t version = 0, minVersion = 0;
-		plist::get_key_path(default_index, "version", minVersion);
-		if(!plist::get_key_path(plist, "version", version) || version < minVersion)
-		{
-			plist = default_index;
-			plist::save(path, plist);
-		}
-
-		std::vector<source_ptr> res;
-
-		plist::dictionary_t sources;
-		if(plist::get_key_path(plist, "sources", sources))
-		{
-			for(auto const& source : sources)
-			{
-				std::string name = NULL_STR, url = NULL_STR;
-				int32_t rank = 0; bool disabled = false;
-
-				plist::get_key_path(source.second, "name",     name);
-				plist::get_key_path(source.second, "url",      url);
-				plist::get_key_path(source.second, "rank",     rank);
-				plist::get_key_path(source.second, "disabled", disabled);
-
-				res.push_back(std::make_shared<source_t>(name, source.first, url, path::join(sources_path(installDir), source.first), rank, disabled));
-			}
-		}
-
-		std::sort(res.begin(), res.end(), [](source_ptr const& lhs, source_ptr const& rhs){ return lhs->rank() > rhs->rank(); });
-		return res;
-	}
-
-	bool save_sources (std::vector<source_ptr> const& sources, std::string const& installDir)
-	{
-		plist::dictionary_t dict;
-		for(auto const& source : sources)
-		{
-			plist::dictionary_t item;
-			item["name"]     = source->name();
-			item["url"]      = source->url();
-			item["rank"]     = source->rank();
-			item["disabled"] = source->disabled();
-			dict[source->identifier()] = item;
-		}
-
-		plist::dictionary_t plist;
-		plist["version"] = 1;
-		plist["sources"] = dict;
-		return plist::save(sources_index_path(installDir), plist);
+		return { std::make_shared<source_t>("TextMate Bundles", "org.textmate.updates.default", REST_API "/bundles", path::join(sources_path(installDir), "org.textmate.updates.default")) };
 	}
 
 	bool update (source_ptr source, double* progress, double min, double max)
