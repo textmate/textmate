@@ -11,10 +11,38 @@
 #import <text/ctype.h>
 #import <ns/ns.h>
 
-static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t const& scope, bool hasSelection, int mask = bundles::kItemTypeMenuTypes)
+static NSUInteger const kBundleItemTitleField          = 0;
+static NSUInteger const kBundleItemKeyEquivalentField  = 1;
+static NSUInteger const kBundleItemTabTriggerField     = 2;
+static NSUInteger const kBundleItemSemanticClassField  = 3;
+static NSUInteger const kBundleItemScopeSelectorField  = 4;
+
+static NSUInteger const kSearchSourceActionItems      = (1 << 0);
+static NSUInteger const kSearchSourceSettingsItems    = (1 << 1);
+static NSUInteger const kSearchSourceGrammarItems     = (1 << 2);
+static NSUInteger const kSearchSourceThemeItems       = (1 << 3);
+static NSUInteger const kSearchSourceDragCommandItems = (1 << 4);
+
+static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t const& scope, bool hasSelection, NSUInteger sourceMask)
 {
+	int mask = 0;
+	if(sourceMask & kSearchSourceActionItems)
+		mask |= bundles::kItemTypeCommand|bundles::kItemTypeMacro|bundles::kItemTypeSnippet;
+	if(sourceMask & kSearchSourceSettingsItems)
+		mask |= bundles::kItemTypeSettings;
+	if(sourceMask & kSearchSourceGrammarItems)
+		mask |= bundles::kItemTypeGrammar;
+	if(sourceMask & kSearchSourceThemeItems)
+		mask |= bundles::kItemTypeTheme;
+	if(sourceMask & kSearchSourceDragCommandItems)
+		mask |= bundles::kItemTypeDragCommand;
+
+	auto allItems = bundles::query(bundles::kFieldAny, NULL_STR, scope, mask, oak::uuid_t(), false);
+	if(sourceMask == kSearchSourceSettingsItems)
+		return allItems;
+
 	std::map<std::string, bundles::item_ptr, text::less_t> sorted;
-	for(auto const& item : bundles::query(bundles::kFieldAny, NULL_STR, scope, mask, oak::uuid_t(), false))
+	for(auto const& item : allItems)
 		sorted.emplace(full_name_with_selection(item, hasSelection), item);
 
 	std::vector<bundles::item_ptr> res;
@@ -42,6 +70,9 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 @property (nonatomic) NSButton* editButton;
 @property (nonatomic) NSArray* layoutConstraints;
 
+@property (nonatomic) NSUInteger searchSource;
+@property (nonatomic) NSUInteger bundleItemField;
+
 @property (nonatomic) NSString* keyEquivalentString;
 @property (nonatomic) BOOL keyEquivalentInput;
 @property (nonatomic) BOOL searchAllScopes;
@@ -58,6 +89,9 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 {
 	if((self = [super init]))
 	{
+		_bundleItemField = kBundleItemTitleField;
+		_searchSource    = kSearchSourceActionItems;
+
 		self.window.title = @"Select Bundle Item";
 		[self.window setContentBorderThickness:31 forEdge:NSMinYEdge];
 
@@ -67,9 +101,45 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		self.actionsPopUpButton = OakCreateActionPopUpButton(YES /* bordered */);
 		NSMenu* actionMenu = self.actionsPopUpButton.menu;
 		[actionMenu addItemWithTitle:@"Placeholder" action:NULL keyEquivalent:@""];
-		[actionMenu addItemWithTitle:@"Search by Key Equivalent" action:@selector(toggleKeyEquivalentInput:) keyEquivalent:@"1"];
+
+		struct { NSString* title; NSUInteger tag; } const fields[] =
+		{
+			{ @"Title",          kBundleItemTitleField         },
+			{ @"Key Equivalent", kBundleItemKeyEquivalentField },
+			{ @"Tab Trigger",    kBundleItemTabTriggerField    },
+			{ @"Semantic Class", kBundleItemSemanticClassField },
+			{ @"Scope Selector", kBundleItemScopeSelectorField },
+		};
+
+		struct { NSString* title; NSUInteger tag; } const sources[] =
+		{
+			{ @"Actions",           kSearchSourceActionItems   },
+			{ @"Settings",          kSearchSourceSettingsItems },
+			{ @"Language Grammars", kSearchSourceGrammarItems  },
+			{ @"Themes",            kSearchSourceThemeItems    },
+		};
+
+		char key = 0;
+
+		[actionMenu addItemWithTitle:@"Search" action:@selector(nop:) keyEquivalent:@""];
+		for(auto&& info : fields)
+		{
+			NSMenuItem* item = [actionMenu addItemWithTitle:info.title action:@selector(takeBundleItemFieldFrom:) keyEquivalent:key < 2 ? [NSString stringWithFormat:@"%c", '0' + (++key % 10)] : @""];
+			[item setIndentationLevel:1];
+			[item setTag:info.tag];
+		}
+
 		[actionMenu addItem:[NSMenuItem separatorItem]];
-		[actionMenu addItemWithTitle:@"Search All Scopes" action:@selector(toggleSearchAllScopes:) keyEquivalent:@"2"];
+		[actionMenu addItemWithTitle:@"Sources" action:@selector(nop:) keyEquivalent:@""];
+		for(auto&& info : sources)
+		{
+			NSMenuItem* item = [actionMenu addItemWithTitle:info.title action:@selector(takeSearchSourceFrom:) keyEquivalent:@""];
+			[item setIndentationLevel:1];
+			[item setTag:info.tag];
+		}
+
+		[actionMenu addItem:[NSMenuItem separatorItem]];
+		[actionMenu addItemWithTitle:@"Search All Scopes" action:@selector(toggleSearchAllScopes:) keyEquivalent:key < 10 ? [NSString stringWithFormat:@"%c", '0' + (++key % 10)] : @""];
 
 		self.topDivider          = OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]);
 		self.bottomDivider       = OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]);
@@ -126,7 +196,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 
 - (void)showWindow:(id)sender
 {
-	self.keyEquivalentInput = NO;
+	self.bundleItemField = kBundleItemTitleField;
 	[super showWindow:sender];
 }
 
@@ -139,11 +209,6 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		[_keyEquivalentView bind:NSValueBinding toObject:self withKeyPath:@"keyEquivalentString" options:nil];
 	}
 	return _keyEquivalentView;
-}
-
-- (void)toggleKeyEquivalentInput:(id)sender
-{
-	self.keyEquivalentInput = !self.keyEquivalentInput;
 }
 
 - (void)setKeyEquivalentInput:(BOOL)flag
@@ -198,6 +263,38 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	[self updateItems:self];
 }
 
+- (void)setBundleItemField:(NSUInteger)newBundleItemField
+{
+	if(_bundleItemField == newBundleItemField)
+		return;
+
+	_bundleItemField = newBundleItemField;
+	self.keyEquivalentInput = _bundleItemField == kBundleItemKeyEquivalentField;
+	self.filterString = nil;
+	[self updateItems:self];
+}
+
+- (void)setSearchSource:(NSUInteger)newSearchSource
+{
+	if(_searchSource == newSearchSource)
+		return;
+
+	_searchSource = newSearchSource;
+	[self updateItems:self];
+}
+
+- (void)takeBundleItemFieldFrom:(id)sender
+{
+	if([sender respondsToSelector:@selector(tag)])
+		self.bundleItemField = [sender tag];
+}
+
+- (void)takeSearchSourceFrom:(id)sender
+{
+	if([sender respondsToSelector:@selector(tag)])
+		self.searchSource = self.searchSource == [sender tag] ? kSearchSourceActionItems : (self.searchSource ^ [sender tag]);
+}
+
 - (void)tableView:(NSTableView*)aTableView willDisplayCell:(OakBundleItemCell*)cell forTableColumn:(NSTableColumn*)aTableColumn row:(NSInteger)rowIndex
 {
 	if(![aTableColumn.identifier isEqualToString:@"name"])
@@ -210,52 +307,77 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 
 - (void)updateItems:(id)sender
 {
-	std::string const filter = to_s(self.filterString);
+	std::string const filter = to_s(self.keyEquivalentInput ? self.keyEquivalentString : self.filterString);
 
 	std::vector<oak::uuid_t> uuids;
 	for(NSString* uuid in [[OakAbbreviations abbreviationsForName:@"OakBundleItemChooserBindings"] stringsForAbbreviation:self.filterString])
 		uuids.push_back(to_s(uuid));
 
 	std::multimap<double, BundleItemChooserItem*> rankedItems;
-	for(auto const& item : relevant_items_in_scope(self.searchAllScopes ? scope::wildcard : self.scope, self.hasSelection))
+	for(auto const& item : relevant_items_in_scope(self.searchAllScopes ? scope::wildcard : self.scope, self.hasSelection, self.searchSource))
 	{
 		std::string const fullName = full_name_with_selection(item, self.hasSelection);
 
-		if(self.keyEquivalentInput && OakNotEmptyString(self.keyEquivalentString))
+		id title     = [NSString stringWithCxxString:fullName];
+		bool include = filter == NULL_STR || filter.empty();
+		double rank  = rankedItems.size();
+
+		if(!include)
 		{
-			if(key_equivalent(item) == to_s(self.keyEquivalentString))
+			switch(_bundleItemField)
 			{
-				BundleItemChooserItem* entry = [BundleItemChooserItem new];
-				entry.name = [NSString stringWithCxxString:fullName];
-				entry.uuid = [NSString stringWithCxxString:item->uuid()];
-				entry.item = item;
-				rankedItems.emplace(rankedItems.size(), entry);
+				case kBundleItemTitleField:
+				{
+					std::vector< std::pair<size_t, size_t> > ranges;
+					if(double score = oak::rank(filter, fullName, &ranges))
+					{
+						size_t rankIndex = std::find(uuids.begin(), uuids.end(), item->uuid()) - uuids.begin();
+						if(rankIndex != uuids.size())
+							score = uuids.size() - rankIndex;
+
+						title   = CreateAttributedStringWithMarkedUpRanges(fullName, ranges);
+						include = true;
+						rank    = -score;
+					}
+				}
+				break;
+
+				case kBundleItemKeyEquivalentField:
+				{
+					include = key_equivalent(item) == filter;
+				}
+				break;
+
+				case kBundleItemTabTriggerField:
+				{
+					std::string const tabTrigger = item->value_for_field(bundles::kFieldTabTrigger);
+					include = tabTrigger.find(filter) != std::string::npos;
+				}
+				break;
+
+				case kBundleItemSemanticClassField:
+				{
+					std::string const semanticClass = item->value_for_field(bundles::kFieldSemanticClass);
+					include = semanticClass.find(filter) != std::string::npos;
+				}
+				break;
+
+				case kBundleItemScopeSelectorField:
+				{
+					std::string const scopeSelector = to_s(item->scope_selector());
+					include = scopeSelector.find(filter) != std::string::npos;
+				}
+				break;
 			}
 		}
-		else if(!self.keyEquivalentInput && OakNotEmptyString(self.filterString))
-		{
-			std::vector< std::pair<size_t, size_t> > ranges;
-			if(double rank = oak::rank(filter, fullName, &ranges))
-			{
-				BundleItemChooserItem* entry = [BundleItemChooserItem new];
-				entry.name = CreateAttributedStringWithMarkedUpRanges(fullName, ranges);
-				entry.uuid = [NSString stringWithCxxString:item->uuid()];
-				entry.item = item;
 
-				size_t rankIndex = std::find(uuids.begin(), uuids.end(), item->uuid()) - uuids.begin();
-				if(rankIndex != uuids.size())
-					rank = uuids.size() - rankIndex;
-
-				rankedItems.emplace(-rank, entry);
-			}
-		}
-		else
+		if(include)
 		{
 			BundleItemChooserItem* entry = [BundleItemChooserItem new];
-			entry.name = [NSString stringWithCxxString:fullName];
+			entry.name = title;
 			entry.uuid = [NSString stringWithCxxString:item->uuid()];
 			entry.item = item;
-			rankedItems.emplace(rankedItems.size(), entry);
+			rankedItems.emplace(rank, entry);
 		}
 	}
 
@@ -282,10 +404,13 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 
 - (BOOL)validateMenuItem:(NSMenuItem*)aMenuItem
 {
-	if(aMenuItem.action == @selector(toggleKeyEquivalentInput:))
-		aMenuItem.title = self.keyEquivalentInput ? @"Search by Title" : @"Search by Key Equivalent";
+	if(aMenuItem.action == @selector(takeBundleItemFieldFrom:))
+		aMenuItem.state = self.bundleItemField == aMenuItem.tag ? NSOnState : NSOffState;
+	else if(aMenuItem.action == @selector(takeSearchSourceFrom:))
+		aMenuItem.state = (self.searchSource & aMenuItem.tag) ? NSOnState : NSOffState;
 	else if(aMenuItem.action == @selector(toggleSearchAllScopes:))
 		aMenuItem.state = self.searchAllScopes ? NSOnState : NSOffState;
+
 	return YES;
 }
 
