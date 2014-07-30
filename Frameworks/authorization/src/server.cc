@@ -9,12 +9,17 @@
 
 OAK_DEBUG_VAR(File_Auth);
 
+static std::string auth_tool_source_path ()
+{
+	return oak::application_t::path("Contents/Resources/PrivilegedTool");
+}
+
 static bool install_auth_tool (osx::authorization_t const& auth)
 {
 	D(DBF_File_Auth, bug("\n"););
 	bool res = false;
 
-	std::string toolPath = oak::application_t::path("Contents/Resources/PrivilegedTool");
+	std::string const toolPath = auth_tool_source_path();
 	ASSERT(path::exists(toolPath));
 
 	if(auth.obtain_right("system.privilege.admin"))
@@ -47,13 +52,14 @@ static double version_of_tool (std::string const& toolPath)
 
 static bool auth_server_too_old ()
 {
-	if(path::exists(kAuthToolPath))
+	bool hasNewToolToInstall = path::exists(auth_tool_source_path());
+	if(hasNewToolToInstall && path::exists(kAuthToolPath))
 	{
 		double oldVersion = version_of_tool(kAuthToolPath);
-		double newVersion = version_of_tool(oak::application_t::path("Contents/Resources/PrivilegedTool"));
+		double newVersion = version_of_tool(auth_tool_source_path());
 		return oldVersion < newVersion;
 	}
-	return true;
+	return hasNewToolToInstall;
 }
 
 connection_t connect_to_auth_server (osx::authorization_t const& auth, bool retry)
