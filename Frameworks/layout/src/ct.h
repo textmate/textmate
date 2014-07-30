@@ -37,12 +37,12 @@ namespace ct
 	{
 		metrics_t (std::string const& fontName, CGFloat fontSize);
 
-		CGFloat ascent () const       { return _ascent;       }
-		CGFloat descent () const      { return _descent;      }
-		CGFloat leading () const      { return _leading;      }
-		CGFloat x_height () const     { return _x_height;     }
-		CGFloat cap_height () const   { return _cap_height;   }
-		CGFloat column_width () const { return _column_width; }
+		CGFloat ascent () const            { return _ascent;       }
+		CGFloat descent () const           { return _descent;      }
+		CGFloat leading () const           { return _leading;      }
+		CGFloat x_height () const          { return _x_height;     }
+		CGFloat cap_height () const        { return _cap_height;   }
+		CGFloat column_width () const      { return _column_width; }
 
 		CGFloat baseline (CGFloat minAscent = 0) const { return round(std::max(minAscent, _ascent) + _ascent_delta); }
 
@@ -62,17 +62,21 @@ namespace ct
 
 	struct line_t
 	{
-		line_t (std::string const& text, std::map<size_t, scope::scope_t> const& scopes, theme_ptr const& theme, CGColorRef textColor = NULL);
+		line_t (std::string const& text, std::map<size_t, scope::scope_t> const& scopes, theme_ptr const& theme, CGFloat tabSize, ct::metrics_t const& metrics, CGColorRef textColor = NULL);
 
-		void draw_foreground (CGPoint pos, ng::context_t const& context, bool isFlipped, std::vector< std::pair<size_t, size_t> > const& misspelled) const;
+		void draw_foreground (CGPoint pos, ng::context_t const& context, bool isFlipped, std::vector< std::pair<size_t, size_t> > const& misspelled, ng::invisibles_t const& invisibles, theme_ptr const& theme) const;
 		void draw_background (CGPoint pos, CGFloat height, ng::context_t const& context, bool isFlipped, CGColorRef currentBackground) const;
 
 		CGFloat width (CGFloat* ascent = NULL, CGFloat* descent = NULL, CGFloat* leading = NULL) const;
 
 		size_t index_for_offset (CGFloat offset) const;
 		CGFloat offset_for_index (size_t index) const;
+		std::vector<size_t> _tabLocations;
+		std::vector<size_t> _spaceLocations;
 
 	private:
+		void draw_invisible (std::vector<size_t> locations, CGPoint pos, std::string text, styles_t styles, ng::context_t const& context, bool isFlipped) const;
+
 		typedef std::shared_ptr<struct __CTLine const> CTLinePtr;
 		typedef std::shared_ptr<struct CGColor> CGColorPtr;
 

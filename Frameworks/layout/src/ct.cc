@@ -102,7 +102,7 @@ namespace ct
 	// = line_t =
 	// ==========
 
-	line_t::line_t (std::string const& text, std::map<size_t, scope::scope_t> const& scopes, theme_ptr const& theme, CGColorRef textColor) : _text(text)
+	line_t::line_t (std::string const& text, std::map<size_t, scope::scope_t> const& scopes, theme_ptr const& theme, CGFloat tabSize, ct::metrics_t const& metrics, CGColorRef textColor) : _text(text)
 	{
 		ASSERT(utf8::is_valid(text.begin(), text.end()));
 		ASSERT(scopes.empty() || (--scopes.end())->first <= text.size());
@@ -148,6 +148,49 @@ namespace ct
 					fprintf(stderr, "%s: failed to create CFString for ‘%.*s’\n", getprogname(), int(j - i), text.data() + i);
 				}
 			}
+
+			CTLineRef tmpLine = CTLineCreateWithAttributedString(toDraw);
+			double tabWidth = tabSize * metrics.column_width();
+			double standardTabWidths = 0;
+			double newTabWidths = 0;
+			size_t j = 0, i = 0;
+			std::vector<CTTextTabRef> tabs;
+			tabs.push_back(CTTextTabCreate(kCTNaturalTextAlignment, 0, NULL));
+			citerate(ch, diacritics::make_range(text.data(), text.data() + text.size()))
+			{
+				switch(*ch)
+				{
+					case ' ':
+						_spaceLocations.push_back(i);
+						break;
+					case '\t':
+						double x = CTLineGetOffsetForStringIndex(tmpLine, j, NULL);
+						double newX = (x - standardTabWidths + newTabWidths);
+						double stopLocation = (floor(newX / tabWidth)+1) * tabWidth;
+						if (stopLocation - newX < metrics.column_width()*0.5)
+							stopLocation += tabWidth;
+						newTabWidths += stopLocation - newX;
+						standardTabWidths += CTLineGetOffsetForStringIndex(tmpLine, j+1, NULL) - x;
+						tabs.push_back(CTTextTabCreate(kCTNaturalTextAlignment, stopLocation, NULL));
+						_tabLocations.push_back(i);
+						break;
+				}
+				i += ch.length();
+				++j;
+			}
+
+			CFArrayRef tabStops = CFArrayCreate(kCFAllocatorDefault, (const void**) (&tabs[0]), tabs.size(), &kCFTypeArrayCallBacks);
+			for(CTTextTabRef t : tabs)
+				CFRelease(t);
+
+			CTParagraphStyleSetting settings[] = {
+				{kCTParagraphStyleSpecifierTabStops, sizeof(CFArrayRef), &tabStops},
+				{kCTParagraphStyleSpecifierDefaultTabInterval, sizeof(tabWidth), &tabWidth}
+			};
+			CTParagraphStyleRef paragraphStyle = CTParagraphStyleCreate(settings, 2);
+			CFAttributedStringSetAttribute(toDraw, CFRangeMake(0, CFAttributedStringGetLength(toDraw)), kCTParagraphStyleAttributeName, paragraphStyle);
+			CFRelease(paragraphStyle);
+			CFRelease(tabStops);
 			_line.reset(CTLineCreateWithAttributedString(toDraw), CFRelease);
 			CFRelease(toDraw);
 		}
@@ -181,10 +224,43 @@ namespace ct
 		}
 	}
 
-	void line_t::draw_foreground (CGPoint pos, ng::context_t const& context, bool isFlipped, std::vector< std::pair<size_t, size_t> > const& misspelled) const
+	void line_t::draw_invisible (std::vector<size_t> locations, CGPoint pos, std::string text, styles_t styles, ng::context_t const& context, bool isFlipped) const
+	{
+		CFMutableAttributedStringRef str = CFAttributedStringCreateMutable(kCFAllocatorDefault, 0);
+		CFAttributedStringReplaceString(str, CFRangeMake(0, 0), cf::wrap(text));
+		CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTFontAttributeName, styles.font());
+		CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTForegroundColorAttributeName, styles.foreground());
+		CTLineRef line = CTLineCreateWithAttributedString(str);
+		CFRelease(str);
+		CGContextSaveGState(context);
+		if(isFlipped)
+			CGContextConcatCTM(context, CGAffineTransformMake(1, 0, 0, -1, 0, 2 * pos.y));
+
+		for(auto const& location : locations)
+		{
+			if (location > 5000) break;
+			CGFloat x1 = round(pos.x + offset_for_index(location));
+			CGFloat x2 = round(pos.x + offset_for_index(location+1));
+			CGFloat x = x2 < x1 ? x1 - CTLineGetTypographicBounds(line, NULL, NULL, NULL) : x1;
+			CGContextSetTextPosition(context, x, pos.y);
+			CTLineDraw(line, context);
+		}
+		CGContextRestoreGState(context);
+		CFRelease(line);
+	}
+
+	void line_t::draw_foreground (CGPoint pos, ng::context_t const& context, bool isFlipped, std::vector< std::pair<size_t, size_t> > const& misspelled, ng::invisibles_t const& invisibles, theme_ptr const& theme) const
 	{
 		if(!_line)
 			return;
+
+		if(invisibles.enabled)
+		{
+			if(invisibles.tab != "")
+				draw_invisible(_tabLocations, pos, invisibles.tab, theme->styles_for_scope("deco.invisible.tab"), context, isFlipped);
+			if(invisibles.space != "")
+				draw_invisible(_spaceLocations, pos, invisibles.space, theme->styles_for_scope("deco.invisible.space"), context, isFlipped);
+		}
 
 		for(auto const& pair : _underlines) // Draw our own underline since CoreText does an awful job <rdar://5845224>
 		{
