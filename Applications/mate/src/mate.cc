@@ -205,6 +205,7 @@ int main (int argc, char* argv[])
 		{ 0,                  0,                   0,      0     }
 	};
 
+	osx::authorization_t auth;
 	std::vector<std::string> files, lines, types, names, projects;
 	oak::uuid_t uuid;
 
@@ -342,9 +343,8 @@ int main (int argc, char* argv[])
 			write_key_pair(fd, "re-activate",      should_wait == true ? "yes" : "no");
 		}
 
-		osx::authorization_t* auth = new osx::authorization_t; // we deliberately do not dispose this since it need to be valid when the server acts on it
-		if(geteuid() == 0 && auth->obtain_right(kAuthRightName))
-			write_key_pair(fd, "authorization", *auth);
+		if(geteuid() == 0 && auth.obtain_right(kAuthRightName))
+			write_key_pair(fd, "authorization", auth);
 
 		write_key_pair(fd, "selection",        i < lines.size()    ? lines[i] : "");
 		write_key_pair(fd, "file-type",        i < types.size()    ? types[i] : "");
