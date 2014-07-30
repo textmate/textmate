@@ -35,7 +35,7 @@ namespace osx
 			}
 
 			helper_t () : _valid(false) { }
-			~helper_t ()                { if(_valid) AuthorizationFree(_authorization, kAuthorizationFlagDestroyRights); }
+			~helper_t ()                { if(_valid) AuthorizationFree(_authorization, kAuthorizationFlagDefaults); }
 
 			bool copy_right (std::string const& right, AuthorizationFlags flags)
 			{

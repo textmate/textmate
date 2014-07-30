@@ -8,7 +8,7 @@
 
 OAK_DEBUG_VAR(AuthServer);
 
-static double const AppVersion  = 1.1;
+static double const AppVersion  = 1.2;
 static size_t const AppRevision = APP_REVISION;
 
 extern char* optarg;
