@@ -199,7 +199,7 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 
 - (void)parseArguments:(NSArray*)args
 {
-	NSArray* optionKeys = @[@"--ask", @"--log", @"--diff-cmd", @"--action-cmd", @"--status"];
+	NSArray* optionKeys = @[@"--log", @"--diff-cmd", @"--action-cmd", @"--status"];
 	args = [args subarrayWithRange:NSMakeRange(1, [args count]-1)];
 	self.options    = [NSMutableDictionary dictionary];
 	self.parameters = [NSMutableArray array];
