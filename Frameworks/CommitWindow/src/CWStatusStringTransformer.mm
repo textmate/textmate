@@ -89,7 +89,6 @@ static NSAttributedString* attributedStatusString (NSString* aString)
 		NSMutableAttributedString* attributedCharString;
 		NSColor* foreColor;
 		NSColor* backColor;
-		NSDictionary* attributes;
 
 		// We pass in underscores for empty multicolumn attributes
 		if(character == '_')
@@ -99,7 +98,7 @@ static NSAttributedString* attributedStatusString (NSString* aString)
 
 		ColorsFromStatus(charString, &foreColor, &backColor);
 
-		attributes = [NSDictionary dictionaryWithObjectsAndKeys:foreColor, NSForegroundColorAttributeName, backColor, NSBackgroundColorAttributeName, nil];
+		NSDictionary* attributes = @{NSForegroundColorAttributeName : foreColor, NSBackgroundColorAttributeName : backColor};
 
 		attributedCharString = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithFormat:@"%C%@%C", hairSpace, charString, hairSpace] attributes:attributes];
 
