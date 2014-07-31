@@ -2,6 +2,15 @@ Title: Release Notes
 
 # Changes
 
+## 2014-07-31 ([v2.0-alpha.9555](https://github.com/textmate/textmate/compare/v2.0-alpha.9551...v2.0-alpha.9555))
+
+* Showing invisible characters will (again) show spaces. As mentioned previously the way to control which glyphs are used are done using the `invisiblesMap` option in `.tm_properties`. Add either `\n`, `\t`, or a space to the string, followed by the glyph that should be used to render the character, or prefix it with `~` to disable rendering of that character. For example to disable rendering of spaces and render tabs as `┊` add this to `.tm_properties`: `invisiblesMap = "~ \t┊"`. *[Steven Clukey]*
+* QuickLook generator will now handle thumbnail generation. *[Nyx0uf]*
+* The bundle item chooser (⌃⌘T) have some new search capabilities, look in its drop-down menu, though still work in progress.
+* Accessibility improvements for the bundle item chooser and key equivalent recorder. *[Boris Dušek]*
+* Previously using ⌘F with a multiline selection would set the _in_ pop-up to _Document_ (unless `findInSelectionByDefault` was set). This is no longer the case, but can be brought back by running: `defaults write alwaysFindInDocument -bool YES`. *[Jeremy Whitlock]*
+* Fixed issue where having the find or HTML output window open in another space and switching focus to TextMate, would bring the window to the active space, rather than switch to TextMate’s space. *[Etienne Samson]*
+
 ## 2014-07-12 ([v2.0-alpha.9551](https://github.com/textmate/textmate/compare/v2.0-alpha.9549...v2.0-alpha.9551))
 
 * Reworked the bundle item chooser window. This is work in progress.
