@@ -101,8 +101,8 @@
 
 		if(OakNotEmptyString(self.attributedTabTrigger.string))
 			[value appendFormat:@", tab trigger is %@", self.attributedTabTrigger.string];
-		if(OakNotEmptyString(self.keyEquivalentString))
-			[value appendFormat:@", shortcut is %@", [NSString stringWithCxxString:ns::glyphs_for_event_string(to_s(self.keyEquivalentString))]];
+		if(OakNotEmptyString(self.keyEquivalent))
+			[value appendFormat:@", key equivalent is %@", [NSString stringWithCxxString:ns::glyphs_for_event_string(to_s(self.keyEquivalent))]];
 
 		return value;
 	}
