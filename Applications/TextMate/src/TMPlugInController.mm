@@ -1,5 +1,6 @@
 #import "TMPlugInController.h"
 #import <OakSystem/application.h>
+#import <crash/info.h>
 #import <io/path.h>
 #import <ns/ns.h>
 #import <oak/debug.h>
@@ -72,6 +73,7 @@ static id CreateInstanceOfPlugInClass (Class cl, TMPlugInController* controller)
 
 				if([bundle load])
 				{
+					crash_reporter_info_t crashInfo("bad plug-in: " + to_s(identifier));
 					if(id instance = CreateInstanceOfPlugInClass([bundle principalClass], self))
 					{
 						self.loadedPlugIns[identifier] = instance;
