@@ -1,4 +1,4 @@
-#!/System/Library/Frameworks/Ruby.framework/Versions/1.8/usr/bin/ruby -wKU
+#!/System/Library/Frameworks/Ruby.framework/Versions/Current/usr/bin/ruby
 # == Synopsis
 #
 # gen_html: generates HTML file from markdown and optional template(s)
@@ -20,9 +20,9 @@
 #    append «file» as footer (erb)
 #
 # FILE: The markdown document to read (defaults to stdin)
+$KCODE = 'U' if RUBY_VERSION < "1.9"
 
-require 'getoptlong'
-require 'rdoc/usage'
+require 'optparse'
 require 'erb'
 
 def expand_tpl(str, binding)
@@ -62,28 +62,35 @@ def wrap_in_article(html)
   end
 end
 
-opts = GetoptLong.new(
-  [ '--title',  '-t', GetoptLong::REQUIRED_ARGUMENT ],
-  [ '--header', '-h', GetoptLong::REQUIRED_ARGUMENT ],
-  [ '--footer', '-f', GetoptLong::REQUIRED_ARGUMENT ],
-  [ '--warn',   '-w', GetoptLong::NO_ARGUMENT       ],
-  [ '--help',         GetoptLong::NO_ARGUMENT       ]
-)
-
 title, header, footer, warn = 'untitled', nil, nil, false
 
-opts.each do |opt, arg|
-  case opt
-    when '--help'
-      RDoc::usage
-    when '--header'
-      header = arg
-    when '--footer'
-      footer = arg
-    when '--warn'
-      warn = true
+OptionParser.new do |opts|
+  opts.banner = "Usage: gen_html [options] [file]"
+  opts.separator "Synopsis:"
+  opts.separator "gen_html: generates HTML file from markdown and optional template(s)"
+  opts.separator "Options:"
+
+  opts.on("-?", "--help", "show help.") do |v|
+    puts opts
+    exit
   end
-end
+
+  opts.on("-h","--header FILE", "prepend «file» as header (erb)") do |arg|
+    header = arg
+  end
+
+  opts.on("-f","--footer FILE", "append «file» as footer (erb)") do |arg|
+    footer = arg
+  end
+
+  opts.on("-t","--title TITLE", "make «title» available to template (as `page_name`)") do |arg|
+    title = arg
+  end
+
+  opts.on("-w","--warn", "enable warnings") do |arg|
+    warn = true
+  end
+end.parse!
 
 MARKDOWN_COMPILERS = %w[ multimarkdown ]
 
