@@ -699,7 +699,12 @@ open(outfile, "w") do |io|
 end
 
 open("#{builddir}/build.ninja", "w") do |io|
-  user_variables = TARGETS.root.to_a.reject { |arr| arr[0].class != String || GLOB_KEYS.include?(arr[0]) }.sort { |lhs, rhs| lhs[0] <=> rhs[0] }
+  user_variables = []
+  TARGETS.root.each do |key, value|
+    user_variables << [ key, value.kind_of?(Array) ? value.join(' ') : value ] unless key.class != String || GLOB_KEYS.include?(key)
+  end
+  user_variables.sort! { |lhs, rhs| lhs[0] <=> rhs[0] }
+
   tmp = variables.dup.concat(user_variables) 
   width = tmp.map { |arr| arr[0].length }.max { |lhs, rhs| lhs <=> rhs }
 
