@@ -11,6 +11,8 @@
 @property (nonatomic, weak) NSTableView* tableView;
 @end
 
+static NSString* const kUserDefaultsEnableLoopFilterList = @"enableLoopFilterList";
+
 @implementation OakTextFieldMovementDelegate
 - (void)moveSelectedRowByOffset:(NSInteger)anOffset extendingSelection:(BOOL)extend sender:(id)sender
 {
@@ -18,7 +20,15 @@
 	{
 		if(_tableView.allowsMultipleSelection == NO)
 			extend = NO;
-		NSInteger row = oak::cap((NSInteger)0, [_tableView selectedRow] + anOffset, [_tableView numberOfRows] - 1);
+
+		NSInteger row = [_tableView selectedRow] + anOffset;
+		NSInteger numberOfRows = [_tableView numberOfRows];
+		if(abs(anOffset) == 1 && numberOfRows && [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsEnableLoopFilterList])
+		{
+			row = (row + numberOfRows) % numberOfRows;
+		}
+		row = oak::cap((NSInteger)0, row, numberOfRows - 1);
+
 		[_tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:extend];
 		[_tableView scrollRowToVisible:row];
 
