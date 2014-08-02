@@ -71,6 +71,13 @@ Or using [homebrew][]:
 
 	brew install proctools
 
+### OS X 10.10 (Yosemite)
+
+If you are on OS X 10.10 you need to specify sdk manually when running configure.
+
+       sdk='MacOSX10.10' ./configure
+
+
 ## Building from within TextMate
 
 You should install the [Ninja][NinjaBundle] and [CxxTest][] bundles. Both can be installed via _Preferences_ → _Bundles_.
