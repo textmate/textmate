@@ -1,4 +1,4 @@
 {	draggedFileExtensions = ( txt );
-	command = '#!/System/Library/Frameworks/Ruby.framework/Versions/1.8/usr/bin/ruby -wKU\nputs "» #{ENV[\'TM_DROPPED_FILE\']}"\n';
+	command = '#!/usr/bin/env ruby18 -wKU\nputs "» #{ENV[\'TM_DROPPED_FILE\']}"\n';
 	output = insertAsSnippet;
 }
