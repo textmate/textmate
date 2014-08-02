@@ -95,9 +95,6 @@ class GitHubLookup
 
 end
 
-def rgxp_utf8(pattern)
-  Regexp.new(pattern.encode('utf-8'), 0)
-end
 def generate_credits(dbm_file, warn=false)
   GitHubLookup.initialize(dbm_file)
   did_warn_db = Set.new
