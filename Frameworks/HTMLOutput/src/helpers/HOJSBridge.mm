@@ -86,7 +86,7 @@ OAK_DEBUG_VAR(HTMLOutput_JSBridge);
 
 - (double)progress
 {
-	return [_delegate progress];
+	return [(id <HOJSBridgeDelegate>)_delegate progress];
 }
 
 - (void)log:(NSString*)aMessage
