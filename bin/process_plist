@@ -1,4 +1,4 @@
-#!/System/Library/Frameworks/Ruby.framework/Versions/1.8/usr/bin/ruby -wKU
+#!/System/Library/Frameworks/Ruby.framework/Versions/Current/usr/bin/ruby
 # == Synopsis
 #
 # process_plist: substitute ${VARIABLES} in text files
@@ -7,16 +7,10 @@
 #
 # --help:
 #    show help
+$KCODE = 'U' if RUBY_VERSION < "1.9"
 
-require 'getoptlong'
-require 'rdoc/usage'
+require 'optparse'
 require 'shellwords'
-
-opts = GetoptLong.new(
-  [ '--variables', '-v', GetoptLong::REQUIRED_ARGUMENT ],
-  [ '--define',    '-d', GetoptLong::REQUIRED_ARGUMENT ],
-  [ '--help',      '-h', GetoptLong::NO_ARGUMENT       ]
-)
 
 def parse_variables(path)
   res = { }
@@ -30,29 +24,38 @@ def parse_variables(path)
 end
 
 variables = { }
-
-opts.each do |opt, arg|
-  case opt
-    when '--help'
-      RDoc::usage
-    when '--variables'
-      variables.merge!(parse_variables(arg))
-    when '--define'
-      if arg =~ /^(\w+)\s*(=)[ \t]*(.*)$/
-        variables[$1] = Shellwords.shellwords($3)
-      end
+OptionParser.new do |opts|
+  opts.banner = "Usage: gen_build [options]"
+  opts.separator "Synopsis:"
+  opts.separator "gen_build: substitute ${VARIABLES} in text files"
+  opts.separator "Options:"
+  opts.on("-h","--help", "show help.") do |v|
+    puts opts
+    exit
   end
-end
+
+  opts.on("-v","--variables FILE", "the «file» to write build info into.") do |arg|
+    variables.merge!(parse_variables(arg))
+  end
+
+  opts.on("-d", "--define NAME=VALUE", "define a variable that ends up in build.ninja") do |arg|
+    if arg =~ /^(\w+)\s*(=)[ \t]*(.*)$/
+      variables[$1] = Shellwords.shellwords($3)
+    end
+  end
+end.parse!
 
 while gets
   $_.gsub!(/\$\{(.*?)\}/) do
+    value = nil
     if variables.include?($1)
-      variables[$1]
+      value = variables[$1]
     elsif ENV.include?($1)
-      ENV[$1]
+      value = ENV[$1]
     else
       abort "*** unknown variable: ‘#$1’"
     end
+    value.kind_of?(Array) ? value.join(' ') : value
   end
   print $_
 end
