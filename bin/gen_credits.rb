@@ -1,8 +1,9 @@
-#!/System/Library/Frameworks/Ruby.framework/Versions/Current/usr/bin/ruby -w
+#!/System/Library/Frameworks/Ruby.framework/Versions/Current/usr/bin/ruby
 # == Synopsis
 #
 # Module to assist in building the Contributors page using git commit history.
 #
+$KCODE = 'U' if RUBY_VERSION < "1.9"
 
 require 'digest/md5'
 require 'net/https'
@@ -94,6 +95,9 @@ class GitHubLookup
 
 end
 
+def rgxp_utf8(pattern)
+  Regexp.new(pattern.encode('utf-8'), 0)
+end
 def generate_credits(dbm_file, warn=false)
   GitHubLookup.initialize(dbm_file)
   did_warn_db = Set.new
@@ -102,7 +106,7 @@ def generate_credits(dbm_file, warn=false)
   # git hash, author name, email address, author date, commit summary
   cmd = 'git log -z --date=iso --pretty=format:"%H%n%an%n%ae%n%ad%n%s%n%B"'
 
-  `#{cmd}`.split(/\x00/s).each {|commit|
+  `#{cmd}`.split(/\x00/).each {|commit|
     fields = commit.split(/\n/, 6)
 
     # omit commits from Allan; he gets enough credit already ;)
@@ -117,7 +121,7 @@ def generate_credits(dbm_file, warn=false)
       user = GitHubLookup.user_by_email(fields[2])
       date = DateTime.parse(fields[3])
       subject = CGI.escapeHTML(fields[4])
-      body = CGI.escapeHTML(fields[5].sub(fields[4], '').sub(/[\s\x00]+$/s, '').sub(/^[\s\x00]+/s, ''))
+      body = CGI.escapeHTML(fields[5].sub(fields[4], '').sub(/[\s\x00]+$/, '').sub(/^[\s\x00]+/, ''))
       userpic = "http://www.gravatar.com/avatar/#{emailhash}?s=48&amp;d=https://a248.e.akamai.net/assets.github.com%2Fimages%2Fgravatars%2Fgravatar-user-420.png"
 
       # if we have a github username, populate a link to their
