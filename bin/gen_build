@@ -1,4 +1,4 @@
-#!/System/Library/Frameworks/Ruby.framework/Versions/1.8/usr/bin/ruby -wKU
+#!/System/Library/Frameworks/Ruby.framework/Versions/Current/usr/bin/ruby
 # == Synopsis
 #
 # gen_build: create build.ninja based on target files
@@ -16,9 +16,8 @@
 #
 # --define/-d «name»=«value»:
 #    define a variable that ends up in build.ninja.
-
-require 'getoptlong'
-require 'rdoc/usage'
+$KCODE = 'U' if RUBY_VERSION < "1.9"
+require 'optparse'
 require 'shellwords'
 require 'set'
 require 'pp'
@@ -641,7 +640,7 @@ def all_targets(buildfile, builddir)
   Dir.chdir(File.dirname(buildfile)) do
     targets = %x{ ${TM_NINJA:-ninja} -f #{buildfile.shellescape} -t targets all }
     return nil if $? != 0
-    targets.each do |line|
+    targets.each_line do |line|
       if line =~ /.*(?=:(?! phony))/
         path = $&
         res << path if path =~ /^#{Regexp.escape(builddir)}/ # ignore targets outside builddir
@@ -656,28 +655,32 @@ end
 # = Program Starts Here =
 # =======================
 
-opts = GetoptLong.new(
-  [ '--help',            '-h', GetoptLong::NO_ARGUMENT       ],
-  [ '--output',          '-o', GetoptLong::REQUIRED_ARGUMENT ],
-  [ '--build-directory', '-C', GetoptLong::REQUIRED_ARGUMENT ],
-  [ '--define',          '-d', GetoptLong::REQUIRED_ARGUMENT ]
-)
-
 outfile, builddir = '/dev/stdout', File.expand_path('~/build')
 variables = [ ]
 
-opts.each do |opt, arg|
-  case opt
-    when '--help'
-      RDoc::usage
-    when '--output'
-      outfile = arg
-    when '--build-directory'
-      builddir = arg
-    when '--define'
-      variables << [ $1, $2 ] if arg =~ /^(\w+)\s*=\s*(.*)$/
+OptionParser.new do |opts|
+  opts.banner = "Usage: gen_build [options] "
+  opts.separator "Synopsis"
+  opts.separator "gen_build: create build.ninja based on target files"
+  opts.separator "Options:"
+
+  opts.on("-h","--help", "show help.") do |v|
+    puts opts
+    exit
   end
-end
+
+  opts.on("-o","--output FILE", "the «file» to write build info into.") do |v|
+    outfile = v
+  end
+
+  opts.on("-C", "--build-directory DIRECTORY", "where build files should go.") do |v|
+    builddir = v
+  end
+
+  opts.on("-d", "--define NAME=VALUE", "define a variable that ends up in build.ninja") do |v|
+    variables << [  $1, $2 ] if v =~ /^(\w+)\s*=\s*(.*)$/
+  end
+end.parse!
 
 abort "No root target file specified" if ARGV.empty?
 manifest = ARGV[0]
@@ -698,6 +701,7 @@ open(outfile, "w") do |io|
   io << "include #{userfile}\n" if userfile != 'build.ninja' && File.exists?(File.join(File.dirname(outfile), userfile))
 end
 
+
 open("#{builddir}/build.ninja", "w") do |io|
   user_variables = []
   TARGETS.root.each do |key, value|
@@ -708,10 +712,10 @@ open("#{builddir}/build.ninja", "w") do |io|
   tmp = variables.dup.concat(user_variables) 
   width = tmp.map { |arr| arr[0].length }.max { |lhs, rhs| lhs <=> rhs }
 
-  io << variables.map { |arr| format("%-#{width}s = %s\n", *arr) }
+  variables.each { |arr| io << format("%-#{width}s = %s\n", *arr) }
   io << "\n"
 
-  io << user_variables.map { |arr| format("%-#{width}s = %s\n", *arr) }
+  user_variables.each { |arr| io << format("%-#{width}s = %s\n", *arr) }
   io << "\n"
 
   args = variables.map { |key, value| "-d'#{key}=#{value =~ /\$/ ? value.gsub(/\$/, '$$') :  "$#{key}"}'" }.join(' ')
