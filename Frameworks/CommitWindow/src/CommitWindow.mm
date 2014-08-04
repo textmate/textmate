@@ -184,8 +184,15 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 		}
 
 		[self updateConstraints];
+
+		[_arrayController addObserver:self forKeyPath:@"arrangedObjects.commit" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:NULL];
 	}
 	return self;
+}
+
+- (void)dealloc
+{
+	[self.arrayController removeObserver:self forKeyPath:@"arrangedObjects.commit"];
 }
 
 - (NSDictionary*)allViews
@@ -282,6 +289,20 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 		NSString* status = [statuses objectAtIndex:i];
 		CWItem* item = [CWItem itemWithPath:[self.parameters objectAtIndex:i] andSCMStatus:status commit:([status hasPrefix:@"X"] || ([status hasPrefix:@"?"] && !didSelectFiles)) ? NO : YES];
 		[self.arrayController addObject:item];
+	}
+}
+
+- (void)observeValueForKeyPath:(NSString*)aKeyPath ofObject:(id)anObject change:(NSDictionary*)someChange context:(void*)context
+{
+	if([aKeyPath isEqualToString:@"arrangedObjects.commit"])
+	{
+		NSUInteger totalFilesToCommit = 0;
+		for(CWItem* item in [_arrayController arrangedObjects])
+		{
+			if(item.commit)
+				totalFilesToCommit += 1;
+		}
+		self.commitButton.title = totalFilesToCommit == 1 ? [NSString stringWithFormat:@"Commit %lu File", totalFilesToCommit] : [NSString stringWithFormat:@"Commit %lu Files", totalFilesToCommit];
 	}
 }
 
