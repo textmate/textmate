@@ -71,6 +71,7 @@ static std::string absolute_path_for_tool (std::string const& tool, std::map<std
 	return tool;
 }
 
+static NSString* const kOakCommitWindowShowFileList = @"showFileListInCommitWindow";
 static NSString* const kOakCommitWindowCommitMessages = @"commitMessages";
 
 static NSUInteger const kOakCommitWindowCommitMessagesTitleLength = 30;
@@ -323,6 +324,8 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 		else [view removeFromSuperview];
 	}
 
+	[[NSUserDefaults standardUserDefaults] setBool:_showsTableView forKey:kOakCommitWindowShowFileList];
+
 	[self updateConstraints];
 }
 
@@ -360,6 +363,8 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 
 	[self.window recalculateKeyViewLoop];
 	[self.window makeFirstResponder:self.documentView];
+
+	self.showsTableView = [[NSUserDefaults standardUserDefaults] boolForKey:kOakCommitWindowShowFileList];
 
 	self.retainedSelf = self;
 
