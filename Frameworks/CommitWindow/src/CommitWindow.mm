@@ -92,7 +92,7 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 @property (nonatomic) NSBox*                             middleDivider;
 @property (nonatomic) NSBox*                             bottomDivider;
 
-@property (nonatomic) NSButton*                          showFilesCheckBox;
+@property (nonatomic) NSButton*                          showTableButton;
 @property (nonatomic) NSButton*                          commitButton;
 @property (nonatomic) NSButton*                          cancelButton;
 
@@ -163,8 +163,11 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 		_cancelButton.keyEquivalentModifierMask = NSCommandKeyMask;
 		_cancelButton.target                    = self;
 
-		_showFilesCheckBox = OakCreateCheckBox(@"Show files to be committed");
-		[_showFilesCheckBox bind:NSValueBinding toObject:self withKeyPath:@"showsTableView" options:nil];
+		_showTableButton = [[NSButton alloc] initWithFrame:NSZeroRect];
+		_showTableButton.buttonType = NSOnOffButton;
+		_showTableButton.bezelStyle = NSRoundedDisclosureBezelStyle;
+		_showTableButton.title = @"";
+		[_showTableButton bind:NSValueBinding toObject:self withKeyPath:@"showsTableView" options:nil];
 
 		_previousCommitMessagesPopUpButton = [NSPopUpButton new];
 		_previousCommitMessagesPopUpButton.bordered   = YES;
@@ -204,7 +207,7 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 		@"middleDivider"      : self.middleDivider,
 		@"scrollView"         : self.scrollView,
 		@"bottomDivider"      : self.bottomDivider,
-		@"checkBox"           : self.showFilesCheckBox,
+		@"showTableButton"           : self.showTableButton,
 		@"cancel"             : self.cancelButton,
 		@"commit"             : self.commitButton,
 	};
@@ -232,9 +235,9 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-[previousMessages]-(5)-[topDivider][documentView(>=195)][bottomDivider]-(8)-[commit]-(8)-|" options:0 metrics:nil views:views]];
 	}
 
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(5)-[checkBox]" options:0 metrics:nil views:views]];
+	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(5)-[showTableButton]" options:0 metrics:nil views:views]];
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[cancel]-[commit]-(5)-|" options:0 metrics:nil views:views]];
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[bottomDivider]-(8)-[checkBox]-(8)-|" options:0 metrics:nil views:views]];
+	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[bottomDivider]-(8)-[showTableButton]-(8)-|" options:0 metrics:nil views:views]];
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[bottomDivider]-(8)-[cancel]-(8)-|" options:0 metrics:nil views:views]];
 }
 
