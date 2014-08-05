@@ -1100,7 +1100,7 @@ doScroll:
 - (void)updateMarkedRanges
 {
 	if(!markedRanges.empty() && pendingMarkedRanges.empty())
-		[[NSInputManager currentInputManager] markedTextAbandoned:self];
+		[[NSTextInputContext currentInputContext] discardMarkedText];
 
 	markedRanges = pendingMarkedRanges;
 	pendingMarkedRanges = ng::ranges_t();
