@@ -11,6 +11,7 @@ static NSString* const kRecordingPlaceholderString = @"…";
 @interface OakKeyEquivalentView ()
 {
 	NSRect _clearButtonRect;
+	id _eventMonitor;
 	void* _hotkeyToken;
 	BOOL _mouseDown;
 }
@@ -104,11 +105,35 @@ static NSString* const kRecordingPlaceholderString = @"…";
 	self.showClearButton = OakNotEmptyString(self.eventString) && !self.recording;
 	self.displayString = _recording ? kRecordingPlaceholderString : [NSString stringWithCxxString:ns::glyphs_for_event_string(to_s(self.eventString))];
 
-	if(self.disableGlobalHotkeys)
+	if(self.recording)
 	{
-		if(self.recording)
-				_hotkeyToken = PushSymbolicHotKeyMode(kHIHotKeyModeAllDisabled);
-		else	PopSymbolicHotKeyMode(_hotkeyToken);
+		if(self.disableGlobalHotkeys)
+			_hotkeyToken = PushSymbolicHotKeyMode(kHIHotKeyModeAllDisabled);
+
+		_eventMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:NSFlagsChangedMask|NSKeyDownMask handler:^NSEvent*(NSEvent* event){
+			if([event type] == NSFlagsChanged)
+			{
+				std::string const str = ns::glyphs_for_flags([event modifierFlags]);
+				self.displayString = str == "" ? kRecordingPlaceholderString : [NSString stringWithCxxString:str];
+			}
+			else if([event type] == NSKeyDown)
+			{
+				self.eventString = [NSString stringWithCxxString:to_s(event)];
+				self.recording = NO;
+			}
+			return nil;
+		}];
+	}
+	else
+	{
+		[NSEvent removeMonitor:_eventMonitor];
+		_eventMonitor = nil;
+
+		if(self.disableGlobalHotkeys)
+		{
+			PopSymbolicHotKeyMode(_hotkeyToken);
+			_hotkeyToken  = nullptr;
+		}
 	}
 }
 
@@ -124,7 +149,7 @@ static NSString* const kRecordingPlaceholderString = @"…";
 {
 	[super setKeyState:newState];
 
-	BOOL doesHaveResponder = (newState & (OakViewViewIsFirstResponderMask)) == (OakViewViewIsFirstResponderMask);
+	BOOL doesHaveResponder = (newState & (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask)) == (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask);
 	if(!doesHaveResponder)
 		self.recording = NO;
 
@@ -199,43 +224,17 @@ static NSString* const kRecordingPlaceholderString = @"…";
 	self.mouseInClearButton = NSMouseInRect([self convertPoint:[anEvent locationInWindow] fromView:nil], _clearButtonRect, [self isFlipped]);
 }
 
-- (void)flagsChanged:(NSEvent*)anEvent
-{
-	if(self.recording)
-	{
-		std::string const str = ns::glyphs_for_flags([anEvent modifierFlags]);
-		self.displayString = str == "" ? kRecordingPlaceholderString : [NSString stringWithCxxString:str];
-	}
-}
-
-- (BOOL)performKeyEquivalent:(NSEvent*)anEvent
-{
-	if(!self.recording)
-		return NO;
-
-	self.eventString = [NSString stringWithCxxString:to_s(anEvent)];
-	self.recording = NO;
-	return YES;
-}
-
 - (void)keyDown:(NSEvent*)anEvent
 {
-	if(self.recording)
-	{
-		[self performKeyEquivalent:anEvent];
-	}
+	static std::set<std::string> const ClearKeys     = { utf8::to_s(NSDeleteCharacter), utf8::to_s(NSDeleteFunctionKey) };
+	static std::set<std::string> const RecordingKeys = { " " };
+	std::string const keyString = to_s(anEvent);
+	if(ClearKeys.find(keyString) != ClearKeys.end())
+		[self clearKeyEquivalent:self];
+	else if(RecordingKeys.find(keyString) != RecordingKeys.end())
+		self.recording = YES;
 	else
-	{
-		static std::set<std::string> const ClearKeys     = { utf8::to_s(NSDeleteCharacter), utf8::to_s(NSDeleteFunctionKey) };
-		static std::set<std::string> const RecordingKeys = { " " };
-		std::string const keyString = to_s(anEvent);
-		if(ClearKeys.find(keyString) != ClearKeys.end())
-			[self clearKeyEquivalent:self];
-		else if(RecordingKeys.find(keyString) != RecordingKeys.end())
-			self.recording = YES;
-		else
-			[super keyDown:anEvent];
-	}
+		[super keyDown:anEvent];
 }
 
 - (void)drawRect:(NSRect)aRect
