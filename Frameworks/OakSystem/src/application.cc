@@ -48,6 +48,8 @@ namespace oak
 			_app_path.erase(_app_path.end() - appBinary.size(), _app_path.end());
 
 		std::string content = path::content(_pid_path);
+		if(content == NULL_STR) // Support updating from 2.0-alpha.9553 or earlier
+			content = path::content(support(((CFBundleGetMainBundle() && CFBundleGetIdentifier(CFBundleGetMainBundle())) ? cf::to_s(CFBundleGetIdentifier(CFBundleGetMainBundle())) : _app_name) + ".pid"));
 		long pid = content != NULL_STR ? strtol(content.c_str(), NULL, 10) : 0;
 		if(pid != 0 && process_name(pid) == _app_name)
 		{
