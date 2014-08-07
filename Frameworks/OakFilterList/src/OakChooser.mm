@@ -112,7 +112,7 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 		_window.releasedWhenClosed = NO;
 
 		[_searchField bind:NSValueBinding toObject:self withKeyPath:@"filterString" options:nil];
-		[_window addObserver:self forKeyPath:@"firstResponder" options:NSKeyValueObservingOptionNew context:kFirstResponderBinding];
+		[_window addObserver:self forKeyPath:@"firstResponder" options:NSKeyValueObservingOptionOld|NSKeyValueObservingOptionNew context:kFirstResponderBinding];
 	}
 	return self;
 }
@@ -165,8 +165,10 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 {
 	if(context == kFirstResponderBinding)
 	{
-		NSResponder* newResponder = change[NSKeyValueChangeNewKey];
-		[(OakInactiveTableView*)_tableView setDrawAsHighlighted:newResponder == _searchField || newResponder == _searchField.currentEditor];
+		BOOL oldIsSearchField = change[NSKeyValueChangeOldKey] == _searchField || change[NSKeyValueChangeOldKey] == _searchField.currentEditor;
+		BOOL newIsSearchField = change[NSKeyValueChangeNewKey] == _searchField || change[NSKeyValueChangeNewKey] == _searchField.currentEditor;
+		if(oldIsSearchField != newIsSearchField)
+			[(OakInactiveTableView*)_tableView setDrawAsHighlighted:newIsSearchField];
 	}
 }
 

@@ -183,6 +183,14 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	else
 	{
 		[super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+
+		if(_keyEquivalentView && !_keyEquivalentView.recording && [keyPath isEqualToString:@"firstResponder"])
+		{
+			BOOL oldIsKeyEquivalentView = change[NSKeyValueChangeOldKey] == _keyEquivalentView;
+			BOOL newIsKeyEquivalentView = change[NSKeyValueChangeNewKey] == _keyEquivalentView;
+			if(oldIsKeyEquivalentView != newIsKeyEquivalentView)
+				[(OakInactiveTableView*)self.tableView setDrawAsHighlighted:newIsKeyEquivalentView];
+		}
 	}
 }
 
