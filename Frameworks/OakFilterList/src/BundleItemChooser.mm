@@ -1,6 +1,8 @@
 #import "BundleItemChooser.h"
 #import "OakAbbreviations.h"
 #import "ui/OakBundleItemCell.h"
+#import "ui/TableView.h"
+#import "ui/TableViewAction.h"
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakAppKit/OakKeyEquivalentView.h>
@@ -22,6 +24,8 @@ static NSUInteger const kSearchSourceSettingsItems    = (1 << 1);
 static NSUInteger const kSearchSourceGrammarItems     = (1 << 2);
 static NSUInteger const kSearchSourceThemeItems       = (1 << 3);
 static NSUInteger const kSearchSourceDragCommandItems = (1 << 4);
+
+static void* kRecordingBinding = &kRecordingBinding;
 
 static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t const& scope, bool hasSelection, NSUInteger sourceMask)
 {
@@ -164,6 +168,24 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	return self;
 }
 
+- (void)dealloc
+{
+	[_keyEquivalentView removeObserver:self forKeyPath:@"recording" context:kRecordingBinding];
+}
+
+- (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)object change:(NSDictionary*)change context:(void*)context
+{
+	if(context == kRecordingBinding)
+	{
+		NSNumber* isRecording = change[NSKeyValueChangeNewKey];
+		[(OakInactiveTableView*)self.tableView setDrawAsHighlighted:![isRecording boolValue]];
+	}
+	else
+	{
+		[super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+	}
+}
+
 - (void)setupLayoutConstraints
 {
 	NSDictionary* views = @{
@@ -200,6 +222,11 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	[super showWindow:sender];
 }
 
+- (void)keyDown:(NSEvent*)anEvent
+{
+	OakPerformTableViewActionFromKeyEvent(self.tableView, anEvent);
+}
+
 - (OakKeyEquivalentView*)keyEquivalentView
 {
 	if(!_keyEquivalentView)
@@ -207,6 +234,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		_keyEquivalentView = [[OakKeyEquivalentView alloc] initWithFrame:NSZeroRect];
 		[_keyEquivalentView setTranslatesAutoresizingMaskIntoConstraints:NO];
 		[_keyEquivalentView bind:NSValueBinding toObject:self withKeyPath:@"keyEquivalentString" options:nil];
+		[_keyEquivalentView addObserver:self forKeyPath:@"recording" options:NSKeyValueObservingOptionNew context:kRecordingBinding];
 	}
 	return _keyEquivalentView;
 }

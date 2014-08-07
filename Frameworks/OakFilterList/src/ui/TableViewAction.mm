@@ -64,6 +64,11 @@ static NSString* const kUserDefaultsEnableLoopFilterList = @"enableLoopFilterLis
 }
 @end
 
+void OakPerformTableViewActionFromKeyEvent (NSTableView* tableView, NSEvent* event)
+{
+	[[OakTableViewActionHelper tableViewActionHelperWithTableView:tableView] interpretKeyEvents:@[ event ]];
+}
+
 BOOL OakPerformTableViewActionFromSelector (NSTableView* tableView, SEL selector, NSTextView* textView)
 {
 	if(selector == @selector(deleteToBeginningOfLine:) && [textView.window tryToPerform:@selector(delete:) with:textView])
