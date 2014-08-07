@@ -2,7 +2,7 @@
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <ns/ns.h>
-#import "../highlight_ranges.h"
+#import "highlight_ranges.h"
 
 @implementation OakBundleItemCell
 - (id)copyWithZone:(NSZone*)zone
