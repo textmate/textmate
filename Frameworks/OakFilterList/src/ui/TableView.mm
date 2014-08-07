@@ -29,20 +29,6 @@ static NSString* const kUserDefaultsEnableLoopFilterList = @"enableLoopFilterLis
 
 		[_tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:extend];
 		[_tableView scrollRowToVisible:row];
-
-		if((nil == &NSAccessibilitySharedFocusElementsAttribute) && [sender isKindOfClass:[NSSearchField class]])
-		{
-			NSMutableArray* descriptionBits = [NSMutableArray arrayWithCapacity:[_tableView tableColumns].count];
-			[[_tableView tableColumns] enumerateObjectsUsingBlock:^(NSTableColumn* column, NSUInteger index, BOOL* stop) {
-				NSCell* cell = [_tableView preparedCellAtColumn:index row:row];
-				NSString* description = (NSString*)[[cell accessibilityAttributeValue:NSAccessibilityValueAttribute] description];
-				[descriptionBits addObject:description];
-			}];
-			NSString* description = [descriptionBits componentsJoinedByString:@", "];
-
-			id element = [sender isKindOfClass:[NSControl class]] ? [sender cell] : sender;
-			NSAccessibilityPostNotificationWithUserInfo(element, NSAccessibilityAnnouncementRequestedNotification, @{ NSAccessibilityAnnouncementKey : description });
-		}
 	}
 }
 
@@ -143,5 +129,35 @@ static NSString* const kUserDefaultsEnableLoopFilterList = @"enableLoopFilterLis
 			[self setNeedsDisplayInRect:rect];
 		}
 	}];
+}
+
+- (void)selectRowIndexes:(NSIndexSet*)indexes byExtendingSelection:(BOOL)extend
+{
+	BOOL announce = _drawAsHighlighted && [indexes count] && self.window.firstResponder != self && ![indexes isEqualToIndexSet:[self selectedRowIndexes]];
+	[super selectRowIndexes:indexes byExtendingSelection:extend];
+	if(announce && (nil == &NSAccessibilitySharedFocusElementsAttribute))
+	{
+		NSInteger selectedRow = [indexes lastIndex];
+
+		NSMutableArray* descriptionBits = [NSMutableArray arrayWithCapacity:[self tableColumns].count];
+		[[self tableColumns] enumerateObjectsUsingBlock:^(NSTableColumn* column, NSUInteger index, BOOL* stop) {
+			NSCell* cell = [self preparedCellAtColumn:index row:selectedRow];
+			NSString* description = (NSString*)[[cell accessibilityAttributeValue:NSAccessibilityValueAttribute] description];
+			[descriptionBits addObject:description];
+		}];
+		NSString* description = [descriptionBits componentsJoinedByString:@", "];
+
+		id element = self.window.firstResponder;
+
+		// Is first responder the field editor? Then we must get the actual view.
+		if([element respondsToSelector:@selector(delegate)] && [[element performSelector:@selector(delegate)] isKindOfClass:[NSControl class]])
+			element = [element performSelector:@selector(delegate)];
+
+		// Is the view an NSControl? Then we must use its cell for accessibility notifications.
+		element = [element isKindOfClass:[NSControl class]] ? [element cell] : element;
+
+		if([element respondsToSelector:@selector(accessibilityIsIgnored)] && ![element accessibilityIsIgnored])
+			NSAccessibilityPostNotificationWithUserInfo(element, NSAccessibilityAnnouncementRequestedNotification, @{ NSAccessibilityAnnouncementKey : description });
+	}
 }
 @end
