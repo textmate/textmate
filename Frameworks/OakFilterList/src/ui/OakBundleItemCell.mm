@@ -8,17 +8,17 @@
 - (id)copyWithZone:(NSZone*)zone
 {
 	OakBundleItemCell* cell   = [super copyWithZone:zone];
-	cell.keyEquivalent        = [self.keyEquivalent copy];
+	cell.keyEquivalentString  = [self.keyEquivalentString copy];
 	cell.attributedTabTrigger = [self.attributedTabTrigger copy];
 	return cell;
 }
 
-- (NSString*)tabTrigger
+- (NSString*)tabTriggerString
 {
 	return self.attributedTabTrigger.string;
 }
 
-- (void)setTabTrigger:(NSString*)tabTrigger
+- (void)setTabTriggerString:(NSString*)tabTrigger
 {
 	self.attributedTabTrigger = tabTrigger ? [[NSAttributedString alloc] initWithString:tabTrigger attributes:nil] : nil;
 }
@@ -58,10 +58,10 @@
 
 		CFRelease(str);
 	}
-	else if(OakNotEmptyString(self.keyEquivalent))
+	else if(OakNotEmptyString(self.keyEquivalentString))
 	{
 		size_t keyStartsAt = 0;
-		std::string const glyphString = ns::glyphs_for_event_string(to_s(self.keyEquivalent), &keyStartsAt);
+		std::string const glyphString = ns::glyphs_for_event_string(to_s(self.keyEquivalentString), &keyStartsAt);
 		NSString* modifiers = [NSString stringWithCxxString:glyphString.substr(0, keyStartsAt)];
 		NSString* key       = [NSString stringWithCxxString:glyphString.substr(keyStartsAt)];
 
@@ -101,8 +101,8 @@
 
 		if(OakNotEmptyString(self.attributedTabTrigger.string))
 			[value appendFormat:@", tab trigger is %@", self.attributedTabTrigger.string];
-		if(OakNotEmptyString(self.keyEquivalent))
-			[value appendFormat:@", shortcut is %@", [NSString stringWithCxxString:ns::glyphs_for_event_string(to_s(self.keyEquivalent))]];
+		if(OakNotEmptyString(self.keyEquivalentString))
+			[value appendFormat:@", shortcut is %@", [NSString stringWithCxxString:ns::glyphs_for_event_string(to_s(self.keyEquivalentString))]];
 
 		return value;
 	}

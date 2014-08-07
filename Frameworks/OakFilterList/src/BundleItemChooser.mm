@@ -301,8 +301,8 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		return;
 
 	BundleItemChooserItem* entry = self.items[rowIndex];
-	cell.keyEquivalent = [NSString stringWithCxxString:key_equivalent(entry.item)];
-	cell.tabTrigger    = [NSString stringWithCxxString:entry.item->value_for_field(bundles::kFieldTabTrigger)];
+	cell.keyEquivalentString = [NSString stringWithCxxString:key_equivalent(entry.item)];
+	cell.tabTriggerString    = [NSString stringWithCxxString:entry.item->value_for_field(bundles::kFieldTabTrigger)];
 }
 
 - (void)updateItems:(id)sender
