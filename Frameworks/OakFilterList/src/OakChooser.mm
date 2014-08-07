@@ -1,5 +1,6 @@
 #import "OakChooser.h"
 #import "ui/TableView.h"
+#import "ui/TableViewAction.h"
 #import "ui/SearchField.h"
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
@@ -31,7 +32,7 @@ NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string
 	return res;
 }
 
-@interface OakChooser () <NSWindowDelegate, NSTableViewDataSource, NSTableViewDelegate>
+@interface OakChooser () <NSWindowDelegate, NSTextFieldDelegate, NSTableViewDataSource, NSTableViewDelegate>
 @end
 
 static void* kFirstResponderBinding = &kFirstResponderBinding;
@@ -48,6 +49,7 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 		[_searchField.cell setSendsSearchStringImmediately:YES];
 		if(![NSApp isFullKeyboardAccessEnabled])
 			_searchField.focusRingType = NSFocusRingTypeNone;
+		_searchField.delegate = self;
 
 		NSTableColumn* tableColumn = [[NSTableColumn alloc] initWithIdentifier:@"name"];
 		tableColumn.dataCell = [[NSTextFieldCell alloc] initTextCell:@""];
@@ -64,7 +66,6 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 		tableView.target                  = self;
 		tableView.dataSource              = self;
 		tableView.delegate                = self;
-		tableView.linkedTextField         = _searchField;
 		if(nil != &NSAccessibilitySharedFocusElementsAttribute)
 			[_searchField.cell accessibilitySetOverrideValue:@[tableView] forAttribute:NSAccessibilitySharedFocusElementsAttribute];
 		_tableView = tableView;
@@ -118,6 +119,7 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 
 - (void)dealloc
 {
+	_searchField.delegate = nil;
 	[_searchField unbind:NSValueBinding];
 	[_window removeObserver:self forKeyPath:@"firstResponder" context:kFirstResponderBinding];
 
@@ -166,6 +168,15 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 		NSResponder* newResponder = change[NSKeyValueChangeNewKey];
 		[(OakInactiveTableView*)_tableView setDrawAsHighlighted:newResponder == _searchField || newResponder == _searchField.currentEditor];
 	}
+}
+
+// ======================================================
+// = Forward Search Field Movement Actions to TableView =
+// ======================================================
+
+- (BOOL)control:(NSControl*)aControl textView:(NSTextView*)aTextView doCommandBySelector:(SEL)aCommand
+{
+	return OakPerformTableViewActionFromSelector(self.tableView, aCommand, aTextView);
 }
 
 // ==============
