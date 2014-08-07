@@ -2,7 +2,7 @@
 
 PUBLIC NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string const& in, std::vector< std::pair<size_t, size_t> > const& ranges, size_t offset = 0);
 
-PUBLIC @interface OakChooser : NSObject
+PUBLIC @interface OakChooser : NSResponder
 @property (nonatomic) NSWindow* window;
 
 @property (nonatomic) SEL action;

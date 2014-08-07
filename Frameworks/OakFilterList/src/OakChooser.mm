@@ -106,6 +106,7 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 		[[_window standardWindowButton:NSWindowMiniaturizeButton] setHidden:YES];
 		[[_window standardWindowButton:NSWindowZoomButton] setHidden:YES];
 		_window.delegate           = self;
+		_window.nextResponder      = self;
 		_window.level              = NSFloatingWindowLevel;
 		_window.releasedWhenClosed = NO;
 
