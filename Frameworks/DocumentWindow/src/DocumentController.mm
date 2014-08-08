@@ -1223,6 +1223,7 @@ namespace
 		{ "attr.project.lein",    "project.clj",    "build"   },
 		{ "attr.project.vagrant", "Vagrantfile",    "vagrant" },
 		{ "attr.project.jekyll",  "_config.yml",    "jekyll"  },
+		{ "attr.test.rspec",      ".rspec",         "test"    },
 	};
 
 	_externalScopeAttributes.clear();
