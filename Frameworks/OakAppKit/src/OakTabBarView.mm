@@ -5,6 +5,7 @@
 #import "NSMenuItem Additions.h"
 #import "NSView Additions.h"
 #import "OakFileIconImage.h"
+#import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakFoundation/NSArray Additions.h>
 #import <oak/oak.h>
@@ -793,7 +794,7 @@ layout_metrics_t::raw_layer_t layout_metrics_t::parse_layer (NSDictionary* item)
 		// We use the path as an identifer since this is more unique than the title
 		// Ideally we should introduce a real (unique) identifier, like the document’s UUID
 		NSString* tabIdentifier = tabPaths[previousShowAsLastTab];
-		if([tabIdentifier isEqualToString:@""])
+		if(OakIsEmptyString(tabIdentifier))
 				previousShowAsLastTab = [paths indexOfObject:tabTitles[previousShowAsLastTab]];
 		else	previousShowAsLastTab = [paths indexOfObject:tabIdentifier];
 

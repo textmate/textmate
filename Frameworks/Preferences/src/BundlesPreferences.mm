@@ -1,5 +1,6 @@
 #import "BundlesPreferences.h"
 #import <BundlesManager/BundlesManager.h>
+#import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSDate Additions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <MGScopeBar/MGScopeBar.h>
@@ -50,7 +51,7 @@ static std::string textify (std::string str)
 		bundles_db::bundle_ptr bundle = [_bundlesManager bundleAtIndex:i];
 		if(enabledCategories.empty() || enabledCategories.find(bundle->category()) != enabledCategories.end())
 		{
-			if(!filterString || [filterString isEqualToString:@""])
+			if(OakIsEmptyString(filterString))
 			{
 				bundles.push_back(bundle);
 			}

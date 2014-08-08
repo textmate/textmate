@@ -12,6 +12,7 @@
 #import <OakAppKit/OakPopOutAnimation.h>
 #import <OakAppKit/OakToolTip.h>
 #import <OakFoundation/NSString Additions.h>
+#import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/OakFindProtocol.h>
 #import <OakFoundation/OakTimer.h>
 #import <OakSystem/application.h>
@@ -1718,7 +1719,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	{
 		SEL action = [item action];
 		action_to_key_t::const_iterator it = actionToKey.find(sel_getName(action));
-		if(it != actionToKey.end() && [[item keyEquivalent] isEqualToString:@""])
+		if(it != actionToKey.end() && OakIsEmptyString([item keyEquivalent]))
 			[item setKeyEquivalentCxxString:it->second];
 
 		update_menu_key_equivalents([item submenu], actionToKey);
