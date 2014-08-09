@@ -324,6 +324,9 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 		else [view removeFromSuperview];
 	}
 
+	if(!_showsTableView)
+		[self.window makeFirstResponder:self.documentView.textView];
+
 	[[NSUserDefaults standardUserDefaults] setBool:_showsTableView forKey:kOakCommitWindowShowFileList];
 
 	[self updateConstraints];
