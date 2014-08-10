@@ -284,8 +284,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	r.origin.x += 7; // FIXME some hard-coded values here
 	r.origin.y -= 1;
 	r.size = NSMakeSize(16, 16);
-	r = [_outlineView convertRect:r toView:nil];
-	r.origin = [_outlineView.window convertBaseToScreen:r.origin];
+	r = [_outlineView.window convertRectToScreen:[_outlineView convertRect:r toView:nil]];
 	return r;
 }
 
