@@ -115,14 +115,14 @@
 - (NSRect)firstRectForCharacterRange:(NSRange)theRange
 {
 	NSRect rect = [self convertRect:NSMakeRect(7.0f * theRange.location, 0, 7.0f * theRange.length, 20.0f) toView:nil];
-	rect.origin = [[self window] convertBaseToScreen:rect.origin];
+	rect = [[self window] convertRectToScreen:rect];
 	NSLog(@"%s %@ (%@)", sel_getName(_cmd), NSStringFromRange(theRange), NSStringFromRect(rect));
 	return rect;
 }
 
 - (NSUInteger)characterIndexForPoint:(NSPoint)thePoint
 {
-	NSUInteger index = floor([self convertPoint:[[self window] convertScreenToBase:thePoint] fromView:nil].x / 7.0f);
+	NSUInteger index = floor([self convertPoint:[[self window] convertRectFromScreen:(NSRect){ thePoint, NSZeroSize }].origin fromView:nil].x / 7.0f);
 	NSLog(@"%s %@ (%lu)", sel_getName(_cmd), NSStringFromPoint(thePoint), index);
 	return index;
 }

@@ -417,8 +417,7 @@ struct refresh_helper_t
 					{
 						NSRect imageRect;
 						NSImage* image = [_self imageForRanges:range imageRect:&imageRect];
-						imageRect = [_self convertRect:imageRect toView:nil];
-						imageRect.origin = [[_self window] convertBaseToScreen:imageRect.origin];
+						imageRect = [[_self window] convertRectToScreen:[_self convertRect:imageRect toView:nil]];
 						OakShowPopOutAnimation(imageRect, image);
 					}
 				}
@@ -617,8 +616,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 	{
 		NSRect imageRect;
 		NSImage* image = [self imageForRanges:range imageRect:&imageRect];
-		imageRect = [self convertRect:imageRect toView:nil];
-		imageRect.origin = [[self window] convertBaseToScreen:imageRect.origin];
+		imageRect = [[self window] convertRectToScreen:[self convertRect:imageRect toView:nil]];
 		OakShowPopOutAnimation(imageRect, image);
 	}
 }
@@ -1119,7 +1117,7 @@ doScroll:
 
 - (NSUInteger)characterIndexForPoint:(NSPoint)thePoint
 {
-	NSPoint p = [self convertPoint:[[self window] convertScreenToBase:thePoint] fromView:nil];
+	NSPoint p = [self convertPoint:[[self window] convertRectFromScreen:(NSRect){ thePoint, NSZeroSize }].origin fromView:nil];
 	std::string const text = editor->as_string();
 	size_t index = layout->index_at_point(p).index;
 	D(DBF_OakTextView_TextInput, bug("%s → %zu\n", [NSStringFromPoint(thePoint) UTF8String], index););
@@ -1161,8 +1159,7 @@ doScroll:
 - (NSRect)firstRectForCharacterRange:(NSRange)theRange
 {
 	ng::range_t const& r = [self rangeForNSRange:theRange];
-	NSRect rect = [self convertRect:layout->rect_at_index(r.min()) toView:nil];
-	rect.origin = [[self window] convertBaseToScreen:rect.origin];
+	NSRect rect = [[self window] convertRectToScreen:[self convertRect:layout->rect_at_index(r.min()) toView:nil]];
 	D(DBF_OakTextView_TextInput, bug("%s → %s\n", [NSStringFromRange(theRange) UTF8String], [NSStringFromRect(rect) UTF8String]););
 	return rect;
 }
@@ -1390,7 +1387,7 @@ doScroll:
 		ret = [NSString stringWithCxxString:editor->as_string(range.min().index, range.max().index)];
 	} HANDLE_PATTR(RangeForPosition) {
 		NSPoint point = [((NSValue*)parameter) pointValue];
-		point = [[self window] convertScreenToBase:point];
+		point = [[self window] convertRectFromScreen:(NSRect){ point, NSZeroSize }].origin;
 		point = [self convertPoint:point fromView:nil];
 		size_t index = layout->index_at_point(point).index;
 		index = document->buffer().sanitize_index(index);
@@ -2198,7 +2195,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	NSEvent* anEvent = [NSApp currentEvent];
 	NSEvent* fakeEvent = [NSEvent
 		mouseEventWithType:NSLeftMouseDown
-		location:[win convertScreenToBase:[self positionForWindowUnderCaret]]
+		location:[win convertRectFromScreen:(NSRect){ [self positionForWindowUnderCaret], NSZeroSize }].origin
 		modifierFlags:0
 		timestamp:[anEvent timestamp]
 		windowNumber:[win windowNumber]
