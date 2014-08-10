@@ -72,7 +72,7 @@
 {
 	NSRect imageRect = [self imageFrameWithFrame:cellFrame inControlView:controlView];
 	NSRect textRect  = [self textFrameWithFrame:cellFrame inControlView:controlView];
-	NSPoint point    = [controlView convertPoint:([event window] ? [event locationInWindow] : [[controlView window] convertScreenToBase:[event locationInWindow]]) fromView:nil];
+	NSPoint point    = [controlView convertPoint:([event window] ? [event locationInWindow] : [[controlView window] convertRectFromScreen:(NSRect){ [event locationInWindow], NSMakeSize(0, 0) }].origin) fromView:nil];
 
 	NSUInteger res = NSCellHitContentArea;
 	if(NSMouseInRect(point, imageRect, controlView.isFlipped))
