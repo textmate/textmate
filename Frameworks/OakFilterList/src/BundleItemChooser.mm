@@ -99,6 +99,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		[self.window setContentBorderThickness:31 forEdge:NSMinYEdge];
 
 		NSCell* cell = [OakBundleItemCell new];
+		cell.lineBreakMode = NSLineBreakByTruncatingMiddle;
 		[[self.tableView tableColumnWithIdentifier:@"name"] setDataCell:cell];
 
 		self.actionsPopUpButton = OakCreateActionPopUpButton(YES /* bordered */);
