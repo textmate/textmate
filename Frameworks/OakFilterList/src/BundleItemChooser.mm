@@ -9,6 +9,7 @@
 #import <OakFoundation/NSString Additions.h>
 #import <bundles/bundles.h>
 #import <text/ranker.h>
+#import <text/case.h>
 #import <text/ctype.h>
 #import <ns/ns.h>
 
@@ -23,8 +24,69 @@ static NSUInteger const kSearchSourceSettingsItems    = (1 << 1);
 static NSUInteger const kSearchSourceGrammarItems     = (1 << 2);
 static NSUInteger const kSearchSourceThemeItems       = (1 << 3);
 static NSUInteger const kSearchSourceDragCommandItems = (1 << 4);
+static NSUInteger const kSearchSourceMenuItems        = (1 << 5);
 
 static void* kRecordingBinding = &kRecordingBinding;
+
+static std::string key_equivalent_for_menu_item (NSMenuItem* menuItem)
+{
+	if(OakIsEmptyString([menuItem keyEquivalent]))
+		return NULL_STR;
+
+	static struct { NSUInteger flag; std::string symbol; } const EventFlags[] =
+	{
+		{ NSNumericPadKeyMask, "#" },
+		{ NSControlKeyMask,    "^" },
+		{ NSAlternateKeyMask,  "~" },
+		{ NSShiftKeyMask,      "$" },
+		{ NSCommandKeyMask,    "@" },
+	};
+
+	std::string key  = to_s([menuItem keyEquivalent]);
+	NSUInteger flags = [menuItem keyEquivalentModifierMask];
+
+	if(flags & NSShiftKeyMask)
+	{
+		std::string const upCased = text::uppercase(key);
+		if(key != upCased)
+		{
+			flags &= ~NSShiftKeyMask;
+			key = upCased;
+		}
+	}
+
+	std::string modifiers = "";
+	for(auto const& record : EventFlags)
+		modifiers += (flags & record.flag) ? record.symbol : "";
+	return modifiers + key;
+}
+
+namespace
+{
+	struct menu_item_t
+	{
+		std::string title;
+		NSMenuItem* menu_item;
+	};
+}
+
+template <typename _OutputIter>
+_OutputIter copy_menu_items (NSMenu* menu, _OutputIter out, NSArray* parentNames = @[ ])
+{
+	for(NSMenuItem* item in [menu itemArray])
+	{
+		NSArray* titlePath = [parentNames arrayByAddingObject:[item title]];
+
+		if(id target = [NSApp targetForAction:[item action]])
+		{
+			if(![target respondsToSelector:@selector(validateMenuItem:)] || [target validateMenuItem:item])
+				*out++ = { to_s([[titlePath componentsJoinedByString:@" » "] stringByAppendingString:@" — Main Menu"]), item };
+		}
+
+		out = copy_menu_items([item submenu], out, titlePath);
+	}
+	return out;
+}
 
 static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t const& scope, bool hasSelection, NSUInteger sourceMask)
 {
@@ -57,6 +119,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 @property (nonatomic) id name;
 @property (nonatomic) NSString* uuid;
 @property (nonatomic) bundles::item_ptr item;
+@property (nonatomic) NSMenuItem* menuItem;
 @end
 
 @implementation BundleItemChooserItem
@@ -93,7 +156,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	if((self = [super init]))
 	{
 		_bundleItemField = kBundleItemTitleField;
-		_searchSource    = kSearchSourceActionItems;
+		_searchSource    = kSearchSourceActionItems|kSearchSourceMenuItems;
 
 		self.window.title = @"Select Bundle Item";
 		[self.window setContentBorderThickness:31 forEdge:NSMinYEdge];
@@ -121,6 +184,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 			{ @"Settings",          kSearchSourceSettingsItems },
 			{ @"Language Grammars", kSearchSourceGrammarItems  },
 			{ @"Themes",            kSearchSourceThemeItems    },
+			{ @"Menu Items",        kSearchSourceMenuItems     },
 		};
 
 		char key = 0;
@@ -344,8 +408,16 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		return;
 
 	BundleItemChooserItem* entry = self.items[rowIndex];
-	cell.keyEquivalentString = [NSString stringWithCxxString:key_equivalent(entry.item)];
-	cell.tabTriggerString    = [NSString stringWithCxxString:entry.item->value_for_field(bundles::kFieldTabTrigger)];
+	if(entry.item)
+	{
+		cell.keyEquivalentString = [NSString stringWithCxxString:key_equivalent(entry.item)];
+		cell.tabTriggerString    = [NSString stringWithCxxString:entry.item->value_for_field(bundles::kFieldTabTrigger)];
+	}
+	else if(entry.menuItem)
+	{
+		cell.keyEquivalentString = [NSString stringWithCxxString:key_equivalent_for_menu_item(entry.menuItem)];
+		cell.tabTriggerString    = nil;
+	}
 }
 
 - (void)updateItems:(id)sender
@@ -424,6 +496,50 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		}
 	}
 
+	if(self.searchSource & kSearchSourceMenuItems)
+	{
+		std::vector<menu_item_t> menuItems;
+		copy_menu_items([NSApp mainMenu], back_inserter(menuItems));
+		for(auto const& record : menuItems)
+		{
+			id title     = nil;
+			bool include = filter == NULL_STR || filter.empty();
+			double rank  = rankedItems.size();
+
+			if(!include)
+			{
+				switch(_bundleItemField)
+				{
+					case kBundleItemTitleField:
+					{
+						std::vector< std::pair<size_t, size_t> > ranges;
+						if(double score = oak::rank(filter, record.title, &ranges))
+						{
+							title   = CreateAttributedStringWithMarkedUpRanges(record.title, ranges);
+							include = true;
+							rank    = -score;
+						}
+					}
+					break;
+
+					case kBundleItemKeyEquivalentField:
+					{
+						include = key_equivalent_for_menu_item(record.menu_item) == filter;
+					}
+					break;
+				}
+			}
+
+			if(include)
+			{
+				BundleItemChooserItem* entry = [BundleItemChooserItem new];
+				entry.name     = title ?: [NSString stringWithCxxString:record.title];
+				entry.menuItem = record.menu_item;
+				rankedItems.emplace(rank, entry);
+			}
+		}
+	}
+
 	NSMutableArray* res = [NSMutableArray array];
 	for(auto const& pair : rankedItems)
 		[res addObject:pair.second];
@@ -437,7 +553,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	if(self.tableView.selectedRow != -1)
 	{
 		BundleItemChooserItem* item = self.items[self.tableView.selectedRow];
-		self.statusTextField.stringValue = item.uuid;
+		self.statusTextField.stringValue = item.uuid ?: @"";
 	}
 	else
 	{
@@ -457,21 +573,45 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	return YES;
 }
 
+- (BOOL)canEdit
+{
+	BundleItemChooserItem* item = self.tableView.selectedRow != -1 ? self.items[self.tableView.selectedRow] : nil;
+	return item.uuid && self.editAction;
+}
+
 - (void)accept:(id)sender
 {
 	if(!self.keyEquivalentInput && OakNotEmptyString(self.filterString) && (self.tableView.selectedRow > 0 || [self.filterString length] > 1))
 	{
 		BundleItemChooserItem* item = self.items[self.tableView.selectedRow];
-		[[OakAbbreviations abbreviationsForName:@"OakBundleItemChooserBindings"] learnAbbreviation:self.filterString forString:item.uuid];
+		if(item.uuid)
+			[[OakAbbreviations abbreviationsForName:@"OakBundleItemChooserBindings"] learnAbbreviation:self.filterString forString:item.uuid];
 	}
+
+	if(self.tableView.selectedRow != -1)
+	{
+		BundleItemChooserItem* item = self.items[self.tableView.selectedRow];
+		if(NSMenuItem* menuItem = item.menuItem)
+		{
+			[self.window orderOut:self];
+			if(menuItem.action)
+				[NSApp sendAction:menuItem.action to:menuItem.target from:self];
+			[self.window close];
+
+			return;
+		}
+	}
+
 	[super accept:sender];
 }
 
 - (IBAction)editItem:(id)sender
 {
+	if(![self canEdit])
+		return NSBeep();
+
 	[self.window orderOut:self];
-	if(self.editAction)
-		[NSApp sendAction:self.editAction to:self.target from:self];
+	[NSApp sendAction:self.editAction to:self.target from:self];
 	[self.window close];
 }
 @end
