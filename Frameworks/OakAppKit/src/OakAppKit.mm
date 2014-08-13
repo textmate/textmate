@@ -122,6 +122,11 @@ NSUInteger const OakMoveNoActionReturn = 3;
 - (IBAction)insertNewline:(id)sender                    { self.returnCode = OakMoveAcceptReturn; }
 - (IBAction)insertNewlineIgnoringFieldEditor:(id)sender { self.returnCode = OakMoveAcceptReturn; }
 - (IBAction)cancelOperation:(id)sender                  { self.returnCode = OakMoveCancelReturn; }
+
+- (void)doCommandBySelector:(SEL)aSelector
+{
+	[self tryToPerform:aSelector with:self];
+}
 @end
 
 NSUInteger OakPerformTableViewActionFromKeyEvent (NSTableView* tableView, NSEvent* event)
