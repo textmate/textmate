@@ -232,7 +232,11 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 
 - (void)keyDown:(NSEvent*)anEvent
 {
-	OakPerformTableViewActionFromKeyEvent(self.tableView, anEvent);
+	NSUInteger res = OakPerformTableViewActionFromKeyEvent(self.tableView, anEvent);
+	if(res == OakMoveAcceptReturn)
+		[self accept:self];
+	else if(res == OakMoveCancelReturn)
+		[self cancel:self];
 }
 
 - (OakKeyEquivalentView*)keyEquivalentView

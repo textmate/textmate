@@ -178,7 +178,15 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 
 - (BOOL)control:(NSControl*)aControl textView:(NSTextView*)aTextView doCommandBySelector:(SEL)aCommand
 {
-	return OakPerformTableViewActionFromSelector(self.tableView, aCommand, aTextView);
+	if(aCommand == @selector(deleteToBeginningOfLine:) && [aTextView.window tryToPerform:@selector(delete:) with:aTextView])
+		return YES;
+
+	NSUInteger res = OakPerformTableViewActionFromSelector(self.tableView, aCommand, aTextView);
+	if(res == OakMoveAcceptReturn)
+		[self accept:self];
+	else if(res == OakMoveCancelReturn)
+		[self cancel:self];
+	return res != OakMoveNoActionReturn;
 }
 
 // ==============

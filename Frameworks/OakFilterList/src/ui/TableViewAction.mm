@@ -3,15 +3,22 @@
 
 static NSString* const kUserDefaultsEnableLoopFilterList = @"enableLoopFilterList";
 
+NSUInteger const OakMoveMoveReturn     = 0;
+NSUInteger const OakMoveAcceptReturn   = 1;
+NSUInteger const OakMoveCancelReturn   = 2;
+NSUInteger const OakMoveNoActionReturn = 3;
+
 @interface OakTableViewActionHelper : NSResponder
 @property (nonatomic) NSTableView* tableView;
+@property (nonatomic) NSUInteger returnCode;
 @end
 
 @implementation OakTableViewActionHelper
 + (instancetype)tableViewActionHelperWithTableView:(NSTableView*)aTableView
 {
 	OakTableViewActionHelper* helper = [[self alloc] init];
-	helper.tableView = aTableView;
+	helper.tableView  = aTableView;
+	helper.returnCode = OakMoveNoActionReturn;
 	return helper;
 }
 
@@ -30,6 +37,8 @@ static NSString* const kUserDefaultsEnableLoopFilterList = @"enableLoopFilterLis
 
 		[_tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:extend];
 		[_tableView scrollRowToVisible:row];
+
+		self.returnCode = OakMoveMoveReturn;
 	}
 }
 
@@ -51,27 +60,21 @@ static NSString* const kUserDefaultsEnableLoopFilterList = @"enableLoopFilterLis
 - (void)scrollToBeginningOfDocument:(id)sender          { [self moveToBeginningOfDocument:sender]; }
 - (void)scrollToEndOfDocument:(id)sender                { [self moveToEndOfDocument:sender]; }
 
-- (IBAction)insertNewline:(id)sender                    { [NSApp sendAction:@selector(accept:) to:nil from:sender]; }
-- (IBAction)insertNewlineIgnoringFieldEditor:(id)sender { [NSApp sendAction:@selector(accept:) to:nil from:sender]; }
-- (IBAction)cancelOperation:(id)sender                  { [NSApp sendAction:@selector(cancel:) to:nil from:sender]; }
-
-- (BOOL)doCommandBySelector:(SEL)aSelector withSender:(id)aSender
-{
-	static auto const forward = new std::set<SEL>{ @selector(moveUp:), @selector(moveDown:), @selector(moveUpAndModifySelection:), @selector(moveDownAndModifySelection:), @selector(pageUp:), @selector(pageDown:), @selector(movePageUp:), @selector(movePageDown:), @selector(scrollPageUp:), @selector(scrollPageDown:), @selector(moveToBeginningOfDocument:), @selector(moveToEndOfDocument:), @selector(scrollToBeginningOfDocument:), @selector(scrollToEndOfDocument:), @selector(insertNewline:), @selector(insertNewlineIgnoringFieldEditor:), @selector(cancelOperation:) };
-	if(forward->find(aSelector) != forward->end() && [self respondsToSelector:aSelector])
-		return [NSApp sendAction:aSelector to:self from:aSender];
-	return NO;
-}
+- (IBAction)insertNewline:(id)sender                    { self.returnCode = OakMoveAcceptReturn; }
+- (IBAction)insertNewlineIgnoringFieldEditor:(id)sender { self.returnCode = OakMoveAcceptReturn; }
+- (IBAction)cancelOperation:(id)sender                  { self.returnCode = OakMoveCancelReturn; }
 @end
 
-void OakPerformTableViewActionFromKeyEvent (NSTableView* tableView, NSEvent* event)
+NSUInteger OakPerformTableViewActionFromKeyEvent (NSTableView* tableView, NSEvent* event)
 {
-	[[OakTableViewActionHelper tableViewActionHelperWithTableView:tableView] interpretKeyEvents:@[ event ]];
+	OakTableViewActionHelper* helper = [OakTableViewActionHelper tableViewActionHelperWithTableView:tableView];
+	[helper interpretKeyEvents:@[ event ]];
+	return helper.returnCode;
 }
 
-BOOL OakPerformTableViewActionFromSelector (NSTableView* tableView, SEL selector, NSTextView* textView)
+NSUInteger OakPerformTableViewActionFromSelector (NSTableView* tableView, SEL selector, NSTextView* textView)
 {
-	if(selector == @selector(deleteToBeginningOfLine:) && [textView.window tryToPerform:@selector(delete:) with:textView])
-		return YES;
-	return [[OakTableViewActionHelper tableViewActionHelperWithTableView:tableView] doCommandBySelector:selector withSender:textView];
+	OakTableViewActionHelper* helper = [OakTableViewActionHelper tableViewActionHelperWithTableView:tableView];
+	[helper doCommandBySelector:selector];
+	return helper.returnCode;
 }
