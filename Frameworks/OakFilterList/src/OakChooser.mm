@@ -1,6 +1,5 @@
 #import "OakChooser.h"
 #import "ui/TableView.h"
-#import "ui/TableViewAction.h"
 #import "ui/SearchField.h"
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
