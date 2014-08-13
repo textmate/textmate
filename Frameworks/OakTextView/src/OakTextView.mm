@@ -3558,7 +3558,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	[pboard declareTypes:@[ NSStringPboardType ] owner:self];
 	[pboard setString:[NSString stringWithCxxString:text::join(v, "\n")] forType:NSStringPboardType];
 
-	[self dragImage:image at:NSMakePoint(NSMinX(srcRect), NSMaxY(srcRect)) offset:NSMakeSize(0, 0) event:anEvent pasteboard:pboard source:self slideBack:YES];
+	[self dragImage:image at:NSMakePoint(NSMinX(srcRect), NSMaxY(srcRect)) offset:NSZeroSize event:anEvent pasteboard:pboard source:self slideBack:YES];
 	self.showDragCursor = NO;
 }
 
