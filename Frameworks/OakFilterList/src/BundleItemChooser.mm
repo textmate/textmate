@@ -228,7 +228,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		self.editButton.target   = self;
 		self.editButton.action   = @selector(editItem:);
 
-		for(NSView* view in @[ self.searchField, self.actionsPopUpButton, self.topDivider, self.scrollView, self.bottomDivider, self.editButton, self.selectButton ])
+		for(NSView* view in @[ self.searchField, self.actionsPopUpButton, self.topDivider, self.scrollView, self.bottomDivider, self.statusTextField, self.editButton, self.selectButton ])
 		{
 			[view setTranslatesAutoresizingMaskIntoConstraints:NO];
 			[self.window.contentView addSubview:view];
@@ -274,6 +274,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		@"topDivider"         : self.topDivider,
 		@"scrollView"         : self.scrollView,
 		@"bottomDivider"      : self.bottomDivider,
+		@"status"             : self.statusTextField,
 		@"edit"               : self.editButton,
 		@"select"             : self.selectButton,
 	};
@@ -281,7 +282,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	NSMutableArray* constraints = [NSMutableArray array];
 	[constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[searchField(>=50)]-[actions]-(8)-|"        options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
 	[constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView(==topDivider,==bottomDivider)]|"     options:0 metrics:nil views:views]];
-	[constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[edit]-[select]-|"                                options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
+	[constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(24)-[status]-[edit]-[select]-|"                options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
 	[constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(8)-[searchField]-(8)-[topDivider][scrollView(>=50)][bottomDivider]-(4)-[select]-(5)-|" options:0 metrics:nil views:views]];
 
 	[self.window.contentView addConstraints:constraints];
@@ -562,6 +563,22 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 
 - (void)updateStatusText:(id)sender
 {
+	NSString* status = nil;
+	if(self.tableView.selectedRow != -1)
+	{
+		if(BundleItemChooserItem* selected = self.items[self.tableView.selectedRow])
+		{
+			if(bundles::item_ptr item = selected.item)
+			{
+				if(_bundleItemField == kBundleItemSemanticClassField)
+					status = [NSString stringWithCxxString:item->value_for_field(bundles::kFieldSemanticClass)];
+				else if(_bundleItemField == kBundleItemScopeSelectorField)
+					status = [NSString stringWithCxxString:to_s(item->scope_selector())];
+			}
+		}
+	}
+	self.statusTextField.stringValue = status ?: @"";
+
 	// Our super class will ask for updated status text each time selection changes
 	// so we use this to update enabled state for action buttons
 	// FIXME Since ‘canEdit’ depends on ‘editAction’ we must update ‘enabled’ when ‘editAction’ changes.
