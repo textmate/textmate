@@ -562,15 +562,10 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 
 - (void)updateStatusText:(id)sender
 {
-	if(self.tableView.selectedRow != -1)
-	{
-		BundleItemChooserItem* item = self.items[self.tableView.selectedRow];
-		self.statusTextField.stringValue = item.uuid ?: @"";
-	}
-	else
-	{
-		self.statusTextField.stringValue = @"";
-	}
+	// Our super class will ask for updated status text each time selection changes
+	// so we use this to update enabled state for action buttons
+	// FIXME Since ‘canEdit’ depends on ‘editAction’ we must update ‘enabled’ when ‘editAction’ changes.
+	self.editButton.enabled = self.canEdit;
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem*)aMenuItem
