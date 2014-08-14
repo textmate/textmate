@@ -50,7 +50,7 @@
 
 		HIRect bounds = { { NSMinX(podRect) - 5, NSMinY(podRect) }, { NSWidth(podRect), NSHeight(podRect) } };
 		[[NSColor textColor] set];
-		if([self isHighlighted] && ([[controlView window] firstResponder] == controlView || ([[[controlView window] firstResponder] respondsToSelector:@selector(delegate)] && [[[controlView window] firstResponder] performSelector:@selector(delegate)] == controlView)) && [[controlView window] isKeyWindow])
+		if(self.backgroundStyle == NSBackgroundStyleDark)
 			[[NSColor alternateSelectedControlTextColor] set];
 
 		CGContextRef context = (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort];
@@ -73,7 +73,7 @@
 		[pStyle setTabStops:@[ [[NSTextTab alloc] initWithType:NSRightTabStopType location:width], [[NSTextTab alloc] initWithType:NSLeftTabStopType location:width + 1] ]];
 		[aStr addAttributes:@{ NSParagraphStyleAttributeName : pStyle } range:NSMakeRange(0, [aStr length])];
 
-		if([self isHighlighted] && ([[controlView window] firstResponder] == controlView || ([[[controlView window] firstResponder] respondsToSelector:@selector(delegate)] && [[[controlView window] firstResponder] performSelector:@selector(delegate)] == controlView)) && [[controlView window] isKeyWindow])
+		if(self.backgroundStyle == NSBackgroundStyleDark)
 			[aStr addAttributes:@{ NSForegroundColorAttributeName : [NSColor alternateSelectedControlTextColor] } range:NSMakeRange(0, [aStr length])];
 
 		NSRect triggerFrame;
