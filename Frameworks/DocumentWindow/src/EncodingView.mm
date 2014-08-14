@@ -10,7 +10,7 @@
 
 static void grow (char*& outBuf, size_t& outBufSize, std::string& dst, size_t& copied)
 {
-	dst.resize(dst.size() * 3 / 2);
+	dst.resize((dst.size() * 3 + 1) / 2);
 	outBuf     = &dst.front() + copied;
 	outBufSize = dst.size() - copied;
 }
