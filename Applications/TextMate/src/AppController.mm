@@ -394,12 +394,14 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 - (IBAction)showBundleItemChooser:(id)sender
 {
-	BundleItemChooser* chooser  = [BundleItemChooser sharedInstance];
+	BundleItemChooser* chooser = [BundleItemChooser sharedInstance];
+	chooser.action     = @selector(bundleItemChooserDidSelectItems:);
+	chooser.editAction = @selector(editBundleItem:);
+
 	OakTextView* textView = [NSApp targetForAction:@selector(scopeContext)];
 	chooser.scope        = textView ? [textView scopeContext] : scope::wildcard;
 	chooser.hasSelection = [textView hasSelection];
-	chooser.action       = @selector(bundleItemChooserDidSelectItems:);
-	chooser.editAction   = @selector(editBundleItem:);
+
 	[chooser showWindowRelativeToFrame:[textView.window convertRectToScreen:[textView convertRect:[textView visibleRect] toView:nil]]];
 }
 
