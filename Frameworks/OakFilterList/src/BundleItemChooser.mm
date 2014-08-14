@@ -594,7 +594,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		{
 			[self.window orderOut:self];
 			if(menuItem.action)
-				[NSApp sendAction:menuItem.action to:menuItem.target from:self];
+				[NSApp sendAction:menuItem.action to:menuItem.target from:menuItem];
 			[self.window close];
 
 			return;
