@@ -402,7 +402,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 	chooser.scope        = textView ? [textView scopeContext] : scope::wildcard;
 	chooser.hasSelection = [textView hasSelection];
 
-	[chooser showWindowRelativeToFrame:[textView.window convertRectToScreen:[textView convertRect:[textView visibleRect] toView:nil]]];
+	[chooser showWindowRelativeToFrame:textView.window ? [textView.window convertRectToScreen:[textView convertRect:[textView visibleRect] toView:nil]] : [[NSScreen mainScreen] visibleFrame]];
 }
 
 - (void)bundleItemChooserDidSelectItems:(id)sender
