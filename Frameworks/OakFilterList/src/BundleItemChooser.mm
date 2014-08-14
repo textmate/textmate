@@ -28,6 +28,15 @@ static NSUInteger const kSearchSourceMenuItems        = (1 << 5);
 
 static void* kRecordingBinding = &kRecordingBinding;
 
+static NSString* OakMenuItemIdentifier (NSMenuItem* menuItem)
+{
+	if(!menuItem.action)
+		return nil;
+
+	NSString* str = NSStringFromSelector(menuItem.action);
+	return menuItem.tag ? [str stringByAppendingFormat:@"%ld", menuItem.tag] : str;
+}
+
 static std::string key_equivalent_for_menu_item (NSMenuItem* menuItem)
 {
 	if(OakIsEmptyString([menuItem keyEquivalent]))
@@ -423,9 +432,9 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 {
 	std::string const filter = to_s(self.keyEquivalentInput ? self.keyEquivalentString : self.filterString);
 
-	std::vector<oak::uuid_t> uuids;
-	for(NSString* uuid in [[OakAbbreviations abbreviationsForName:@"OakBundleItemChooserBindings"] stringsForAbbreviation:self.filterString])
-		uuids.push_back(to_s(uuid));
+	std::vector<std::string> identifiers;
+	for(NSString* identifier in [[OakAbbreviations abbreviationsForName:@"OakBundleItemChooserBindings"] stringsForAbbreviation:self.filterString])
+		identifiers.push_back(to_s(identifier));
 
 	std::multimap<double, BundleItemChooserItem*> rankedItems;
 	for(auto const& item : relevant_items_in_scope(self.searchAllScopes ? scope::wildcard : self.scope, self.hasSelection, self.searchSource))
@@ -445,9 +454,9 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 					std::vector< std::pair<size_t, size_t> > ranges;
 					if(double score = oak::rank(filter, fullName, &ranges))
 					{
-						size_t rankIndex = std::find(uuids.begin(), uuids.end(), item->uuid()) - uuids.begin();
-						if(rankIndex != uuids.size())
-							score = uuids.size() - rankIndex;
+						size_t rankIndex = std::find(identifiers.begin(), identifiers.end(), to_s(item->uuid())) - identifiers.begin();
+						if(rankIndex != identifiers.size())
+							score = identifiers.size() - rankIndex;
 
 						title   = CreateAttributedStringWithMarkedUpRanges(fullName, ranges);
 						include = true;
@@ -514,6 +523,10 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 						std::vector< std::pair<size_t, size_t> > ranges;
 						if(double score = oak::rank(filter, record.title, &ranges))
 						{
+							size_t rankIndex = std::find(identifiers.begin(), identifiers.end(), to_s(OakMenuItemIdentifier(record.menu_item))) - identifiers.begin();
+							if(rankIndex != identifiers.size())
+								score = identifiers.size() - rankIndex;
+
 							title   = CreateAttributedStringWithMarkedUpRanges(record.title, ranges);
 							include = true;
 							rank    = -score;
@@ -585,6 +598,8 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		BundleItemChooserItem* item = self.items[self.tableView.selectedRow];
 		if(item.uuid)
 			[[OakAbbreviations abbreviationsForName:@"OakBundleItemChooserBindings"] learnAbbreviation:self.filterString forString:item.uuid];
+		else if(NSMenuItem* menuItem = item.menuItem)
+			[[OakAbbreviations abbreviationsForName:@"OakBundleItemChooserBindings"] learnAbbreviation:self.filterString forString:OakMenuItemIdentifier(menuItem)];
 	}
 
 	if(self.tableView.selectedRow != -1)
