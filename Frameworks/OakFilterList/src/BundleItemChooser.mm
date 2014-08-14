@@ -71,19 +71,18 @@ namespace
 }
 
 template <typename _OutputIter>
-_OutputIter copy_menu_items (NSMenu* menu, _OutputIter out, NSArray* parentNames = @[ ])
+_OutputIter copy_menu_items (NSMenu* menu, _OutputIter out, NSArray* parentNames = @[ @"Main Menu" ])
 {
 	for(NSMenuItem* item in [menu itemArray])
 	{
-		NSArray* titlePath = [parentNames arrayByAddingObject:[item title]];
-
 		if(id target = [NSApp targetForAction:[item action]])
 		{
 			if(![target respondsToSelector:@selector(validateMenuItem:)] || [target validateMenuItem:item])
-				*out++ = { to_s([[titlePath componentsJoinedByString:@" » "] stringByAppendingString:@" — Main Menu"]), item };
+				*out++ = { to_s([[item title] stringByAppendingFormat:@" — %@", [parentNames componentsJoinedByString:@" » "]]), item };
 		}
 
-		out = copy_menu_items([item submenu], out, titlePath);
+		if(NSMenu* submenu = [item submenu])
+			out = copy_menu_items(submenu, out, [parentNames arrayByAddingObject:[item title]]);
 	}
 	return out;
 }
