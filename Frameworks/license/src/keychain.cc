@@ -75,7 +75,7 @@ namespace license
 						if(err == noErr)
 						{
 							res.emplace_back((char const*)authAttrList->attr->data, ((char const*)authAttrList->attr->data) + authAttrList->attr->length);
-							SecKeychainItemFreeContent(authAttrList, NULL);
+							SecKeychainItemFreeAttributesAndData(authAttrList, NULL);
 						}
 						else
 						{
