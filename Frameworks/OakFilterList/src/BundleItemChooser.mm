@@ -300,6 +300,11 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 - (void)showWindow:(id)sender
 {
 	self.bundleItemField = kBundleItemTitleField;
+	if([self.tableView numberOfRows] > 0)
+	{
+		[self.tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
+		[self.tableView scrollRowToVisible:0];
+	}
 	[super showWindow:sender];
 }
 
