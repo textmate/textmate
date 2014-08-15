@@ -2698,7 +2698,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 
 			for(DocumentController* candidate in SortedControllers())
 			{
-				if(folder == to_s(candidate.projectPath))
+				if(folder == to_s(candidate.projectPath ?: candidate.defaultProjectPath))
 					return bring_to_front(candidate);
 			}
 
