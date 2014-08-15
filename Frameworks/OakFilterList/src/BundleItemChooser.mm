@@ -413,7 +413,14 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 - (void)takeSearchSourceFrom:(id)sender
 {
 	if([sender respondsToSelector:@selector(tag)])
-		self.searchSource = self.searchSource == [sender tag] ? kSearchSourceActionItems : (self.searchSource ^ [sender tag]);
+	{
+		if(OakIsAlternateKeyOrMouseEvent())
+			self.searchSource = [sender tag];
+		else if(self.searchSource == [sender tag])
+			self.searchSource = kSearchSourceActionItems;
+		else
+			self.searchSource = self.searchSource ^ [sender tag];
+	}
 }
 
 - (void)tableView:(NSTableView*)aTableView willDisplayCell:(OakBundleItemCell*)cell forTableColumn:(NSTableColumn*)aTableColumn row:(NSInteger)rowIndex
