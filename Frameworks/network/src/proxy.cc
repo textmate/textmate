@@ -49,7 +49,7 @@ static proxy_settings_t user_pw_settings (CFStringRef server, CFNumberRef portNu
 				ASSERT(authAttrList->count == 1 && authAttrList->attr->tag == kSecAccountItemAttr);
 				user = std::string((char const*)authAttrList->attr->data, ((char const*)authAttrList->attr->data) + authAttrList->attr->length);
 				pw   = std::string((char const*)data, ((char const*)data) + dataLen);
-				SecKeychainItemFreeContent(authAttrList, data);
+				SecKeychainItemFreeAttributesAndData(authAttrList, data);
 				D(DBF_Proxy, bug("found user ‘%s’\n", user.c_str()););
 			}
 			else
