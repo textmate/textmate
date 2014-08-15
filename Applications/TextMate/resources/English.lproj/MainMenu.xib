@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="5053" systemVersion="13C64" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="5056" systemVersion="13E28" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment version="1070" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="5053"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="5056"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="NSApplication">
@@ -296,7 +296,7 @@ CA
                             <menuItem title="Macros" id="484">
                                 <menu key="submenu" title="Macros" id="485">
                                     <items>
-                                        <menuItem title="Toggle Recording" keyEquivalent="m" id="487">
+                                        <menuItem title="Start Recording" keyEquivalent="m" id="487">
                                             <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                             <connections>
                                                 <action selector="toggleMacroRecording:" target="-1" id="492"/>
@@ -554,39 +554,39 @@ CA
                                     </items>
                                 </menu>
                             </menuItem>
-                            <menuItem title="Toggle File Browser" keyEquivalent="d" id="386">
+                            <menuItem title="Show File Browser" keyEquivalent="d" id="386">
                                 <modifierMask key="keyEquivalentModifierMask" control="YES" option="YES" command="YES"/>
                                 <connections>
                                     <action selector="toggleFileBrowser:" target="-1" id="388"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Toggle HTML Output" keyEquivalent="h" id="616">
+                            <menuItem title="Show HTML Output" keyEquivalent="h" id="616">
                                 <modifierMask key="keyEquivalentModifierMask" control="YES" option="YES" command="YES"/>
                                 <connections>
                                     <action selector="toggleHTMLOutput:" target="-1" id="617"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Toggle Line Numbers" keyEquivalent="l" id="314">
+                            <menuItem title="Show Line Numbers" keyEquivalent="l" id="314">
                                 <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                 <connections>
                                     <action selector="toggleLineNumbers:" target="-1" id="315"/>
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="499"/>
-                            <menuItem title="Toggle Invisibles" keyEquivalent="i" id="515">
+                            <menuItem title="Show Invisibles" keyEquivalent="i" id="515">
                                 <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                 <connections>
                                     <action selector="toggleShowInvisibles:" target="-1" id="519"/>
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="516"/>
-                            <menuItem title="Toggle Soft Wrap" keyEquivalent="w" id="211">
+                            <menuItem title="Enable Soft Wrap" keyEquivalent="w" id="211">
                                 <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                 <connections>
                                     <action selector="toggleSoftWrap:" target="-1" id="256"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Toggle Wrap Column" id="778">
+                            <menuItem title="Show Wrap Column" id="778">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="toggleShowWrapColumn:" target="-1" id="780"/>
@@ -797,7 +797,7 @@ CA
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="851"/>
-                            <menuItem title="Toggle Bookmark" keyEquivalent="" id="423">
+                            <menuItem title="Set Bookmark" keyEquivalent="" id="423">
                                 <connections>
                                     <action selector="toggleCurrentBookmark:" target="-1" id="426"/>
                                 </connections>
@@ -851,7 +851,7 @@ CA
                                 </menu>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="804"/>
-                            <menuItem title="Move Focus" id="803">
+                            <menuItem title="Move Focus to File Browser" id="803">
                                 <string key="keyEquivalent" base64-UTF8="YES">
 CQ
 </string>
@@ -909,13 +909,13 @@ CQ
                             <menuItem isSeparatorItem="YES" id="412">
                                 <modifierMask key="keyEquivalentModifierMask" command="YES"/>
                             </menuItem>
-                            <menuItem title="Toggle Case of Character / Selection" id="347">
+                            <menuItem title="Toggle Case of Character" id="347">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="changeCaseOfLetter:" target="-1" id="379"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Toggle Case of Word / Selection" id="348">
+                            <menuItem title="Toggle Case of Word" id="348">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="changeCaseOfWord:" target="-1" id="368"/>
@@ -924,17 +924,17 @@ CQ
                             <menuItem isSeparatorItem="YES" id="361">
                                 <modifierMask key="keyEquivalentModifierMask" command="YES"/>
                             </menuItem>
-                            <menuItem title="Uppercase Word / Selection" id="349">
+                            <menuItem title="Uppercase Word" id="349">
                                 <connections>
                                     <action selector="uppercaseWord:" target="-1" id="369"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Lowercase Word / Selection" id="350">
+                            <menuItem title="Lowercase Word" id="350">
                                 <connections>
                                     <action selector="lowercaseWord:" target="-1" id="370"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Titlecase Word / Selection" id="351">
+                            <menuItem title="Titlecase Word" id="351">
                                 <connections>
                                     <action selector="capitalizeWord:" target="-1" id="371"/>
                                 </connections>
@@ -952,7 +952,7 @@ CQ
                                     <action selector="shiftRight:" target="-1" id="375"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Indent Line / Selection" id="356">
+                            <menuItem title="Indent Line" id="356">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="indent:" target="-1" id="380"/>
