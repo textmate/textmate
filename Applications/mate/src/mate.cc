@@ -191,17 +191,17 @@ int main (int argc, char* argv[])
 
 	static struct option const longopts[] = {
 		{ "async",            no_argument,         0,      'a'   },
-		{ "wait",             no_argument,         0,      'w'   },
+		{ "change-dir",       no_argument,         0,      'd'   },
+		{ "help",             no_argument,         0,      'h'   },
 		{ "line",             required_argument,   0,      'l'   },
-		{ "type",             required_argument,   0,      't'   },
 		{ "name",             required_argument,   0,      'm'   },
 		{ "project",          required_argument,   0,      'p'   },
 		{ "recent",           no_argument,         0,      'r'   },
-		{ "change-dir",       no_argument,         0,      'd'   },
-		{ "uuid",             required_argument,   0,      'u'   },
-		{ "help",             no_argument,         0,      'h'   },
-		{ "version",          no_argument,         0,      'v'   },
 		{ "server",           no_argument,         0,      's'   },
+		{ "type",             required_argument,   0,      't'   },
+		{ "uuid",             required_argument,   0,      'u'   },
+		{ "version",          no_argument,         0,      'v'   },
+		{ "wait",             no_argument,         0,      'w'   },
 		{ 0,                  0,                   0,      0     }
 	};
 
@@ -219,22 +219,22 @@ int main (int argc, char* argv[])
 
 	install_auth_tool();
 
-	while((ch = getopt_long(argc, argv, "awrdhvl:t:m:u:sp:", longopts, NULL)) != -1)
+	while((ch = getopt_long(argc, argv, "adhl:m:p:rst:u:vw", longopts, NULL)) != -1)
 	{
 		switch(ch)
 		{
 			case 'a': should_wait = false;      break;
-			case 'w': should_wait = true;       break;
-			case 'l': append(optarg, lines);    break;
-			case 't': append(optarg, types);    break;
-			case 'm': append(optarg, names);    break;
-			case 'p': append(optarg, projects); break;
-			case 'u': uuid = optarg;            break;
-			case 'r': add_to_recent = true;     break;
 			case 'd': change_dir = true;        break;
 			case 'h': usage(stdout);            return EX_OK;
-			case 'v': version();                return EX_OK;
+			case 'l': append(optarg, lines);    break;
+			case 'm': append(optarg, names);    break;
+			case 'p': append(optarg, projects); break;
+			case 'r': add_to_recent = true;     break;
 			case 's': server = true;            break;
+			case 't': append(optarg, types);    break;
+			case 'u': uuid = optarg;            break;
+			case 'v': version();                return EX_OK;
+			case 'w': should_wait = true;       break;
 			case '?': /* unknown option */      return EX_USAGE;
 			case ':': /* missing option */      return EX_USAGE;
 			default:  usage(stderr);            return EX_USAGE;
