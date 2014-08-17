@@ -6,7 +6,7 @@
 #include <io/path.h>
 #include <plist/uuid.h>
 
-static double const AppVersion  = 2.6;
+static double const AppVersion  = 2.7;
 static size_t const AppRevision = APP_REVISION;
 
 static char const* socket_path ()
@@ -143,6 +143,7 @@ static void usage (FILE* io)
 		" -r, --recent           Add file to Open Recent menu.\n"
 		" -d, --change-dir       Change TextMate's working directory to that of the file.\n"
 		" -u, --uuid             Reference an already open document using its UUID.\n"
+		" -e, --preserve-escapes Set this if you want ANSI escapes from stdin to be preserved.\n"
 		" -h, --help             Show this information.\n"
 		" -v, --version          Print version information.\n"
 		"\n"
@@ -184,6 +185,58 @@ static void write_key_pair (int fd, std::string const& key, std::string const& v
 
 static std::string const kUUIDPrefix = "uuid://";
 
+namespace
+{
+	enum class escape_state_t {
+		kPlain, kEscape, kANSI
+	};
+}
+
+template <typename _InputIter>
+_InputIter remove_ansi_escapes (_InputIter it, _InputIter last, escape_state_t* state)
+{
+	auto dst = it;
+	for(; it != last; ++it)
+	{
+		auto const& ch = *it;
+		switch(*state)
+		{
+			case escape_state_t::kPlain:
+			{
+				if(ch == '\e')
+					*state = escape_state_t::kEscape;
+				else if(it == dst)
+					++dst;
+				else
+					*dst++ = *it;
+			}
+			break;
+
+			case escape_state_t::kEscape:
+			{
+				if(ch == '[')
+						*state = escape_state_t::kANSI;
+				else	*state = escape_state_t::kPlain;
+			}
+			break;
+
+			case escape_state_t::kANSI:
+			{
+				if(0x40 <= ch && ch <= 0x7E)
+					*state = escape_state_t::kPlain;
+			}
+			break;
+		}
+	}
+	return dst;
+}
+
+static bool boolean (char const* optarg)
+{
+	static std::string const FalseValues[] = { "0", "NO", "no", "FALSE", "false" };
+	return !optarg || !oak::contains(std::begin(FalseValues), std::end(FalseValues), optarg);
+}
+
 int main (int argc, char* argv[])
 {
 	extern char* optarg;
@@ -192,6 +245,7 @@ int main (int argc, char* argv[])
 	static struct option const longopts[] = {
 		{ "async",            no_argument,         0,      'a'   },
 		{ "change-dir",       no_argument,         0,      'd'   },
+		{ "preserve-escapes", optional_argument,   0,      'e'   },
 		{ "help",             no_argument,         0,      'h'   },
 		{ "line",             required_argument,   0,      'l'   },
 		{ "name",             required_argument,   0,      'm'   },
@@ -209,22 +263,24 @@ int main (int argc, char* argv[])
 	std::vector<std::string> files, lines, types, names, projects;
 	oak::uuid_t uuid;
 
-	bool add_to_recent = false;
-	bool change_dir    = false;
-	bool server        = false;
-	int should_wait    = -1, ch;
+	bool add_to_recent   = false;
+	bool change_dir      = false;
+	bool server          = false;
+	int should_wait      = -1, ch;
+	int preserve_escapes = -1;
 
 	if(strlen(getprogname()) > 5 && strcmp(getprogname() + strlen(getprogname()) - 5, "_wait") == 0)
 		should_wait = true;
 
 	install_auth_tool();
 
-	while((ch = getopt_long(argc, argv, "adhl:m:p:rst:u:vw", longopts, NULL)) != -1)
+	while((ch = getopt_long(argc, argv, "ade::hl:m:p:rst:u:vw", longopts, NULL)) != -1)
 	{
 		switch(ch)
 		{
 			case 'a': should_wait = false;      break;
 			case 'd': change_dir = true;        break;
+			case 'e': preserve_escapes = boolean(optarg); break;
 			case 'h': usage(stdout);            return EX_OK;
 			case 'l': append(optarg, lines);    break;
 			case 'm': append(optarg, names);    break;
@@ -307,14 +363,26 @@ int main (int argc, char* argv[])
 				fprintf(stderr, "Reading from stdin, press ^D to stop\n");
 
 			ssize_t total = 0;
+			bool didStripEscapes = false;
+			escape_state_t state = escape_state_t::kPlain;
 			while(ssize_t len = read(STDIN_FILENO, buf, sizeof(buf)))
 			{
 				if(len == -1)
 					break;
+
+				if(preserve_escapes != true)
+				{
+					size_t oldLen = std::exchange(len, remove_ansi_escapes(buf, buf + len, &state) - buf);
+					didStripEscapes = didStripEscapes || oldLen != len;
+				}
+
 				write_key_pair(fd, "data", std::to_string(len));
 				total += len;
 				write(fd, buf, len);
 			}
+
+			if(didStripEscapes && preserve_escapes != false)
+				fprintf(stderr, "WARNING: Removed ANSI escape codes. Use -e/--preserve-escapes[=0].\n");
 
 			if(stdinIsAPipe && total == 0 && should_wait != true && getenv("TM_DOCUMENT_UUID"))
 			{
