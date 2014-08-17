@@ -2,6 +2,11 @@ Title: Release Notes
 
 # Changes
 
+## 2014-08-17 ([v2.0-alpha.9559](https://github.com/textmate/textmate/compare/v2.0-alpha.9555...v2.0-alpha.9559))
+
+* The bundle item chooser (⌃⌘T) now include menu items. This also works with key equivalent searching.
+* In the chooser lists (fuzzy file finder, bundle item chooser, and symbol list) it is now possible to make the selection loop around, that is, move from first to last item with arrow up, etc. This is enabled by running: `defaults write com.macromates.TextMate.preview enableLoopFilterList --bool YES` *[Zete Lui]*
+
 ## 2014-07-31 ([v2.0-alpha.9555](https://github.com/textmate/textmate/compare/v2.0-alpha.9551...v2.0-alpha.9555))
 
 * Showing invisible characters will (again) show spaces. As mentioned previously the way to control which glyphs are used are done using the `invisiblesMap` option in `.tm_properties`. Add either `\n`, `\t`, or a space to the string, followed by the glyph that should be used to render the character, or prefix it with `~` to disable rendering of that character. For example to disable rendering of spaces and render tabs as `┊` add this to `.tm_properties`: `invisiblesMap = "~ \t┊"`. *[Steven Clukey]*
