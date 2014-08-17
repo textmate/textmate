@@ -296,7 +296,6 @@ int main (int argc, char* argv[])
 	ssize_t len = read(fd, buf, sizeof(buf));
 	if(len == -1)
 		exit(EX_IOERR);
-	// fprintf(stderr, "%.*s", (int)len, buf);
 
 	for(size_t i = 0; i < files.size(); ++i)
 	{
@@ -376,7 +375,6 @@ int main (int argc, char* argv[])
 		if(state == data)
 		{
 			ssize_t dataLen = std::min(len, bytesLeft);
-			// fprintf(stderr, "Got data, %zd bytes\n", dataLen);
 			write(STDOUT_FILENO, buf, dataLen);
 			memmove(buf, buf + dataLen, len - dataLen);
 			bytesLeft -= dataLen;
@@ -401,7 +399,6 @@ int main (int argc, char* argv[])
 			if(str.empty())
 			{
 				state = command;
-				// fprintf(stderr, "Got ‘end of record’\n");
 			}
 			else if(state == command)
 			{
@@ -409,7 +406,6 @@ int main (int argc, char* argv[])
 				{
 					state = arguments;
 				}
-				// fprintf(stderr, "Got command ‘%s’\n", str.c_str());
 			}
 			else if(state == arguments)
 			{
@@ -422,19 +418,13 @@ int main (int argc, char* argv[])
 					if(key == "data")
 					{
 						bytesLeft = strtol(value.c_str(), NULL, 10);
-						// fprintf(stderr, "Got data of size %zd\n", bytesLeft);
 
 						size_t dataLen = std::min((ssize_t)line.size(), bytesLeft);
-						// fprintf(stderr, "Got data, %zd bytes\n", dataLen);
 						write(STDOUT_FILENO, line.data(), dataLen);
 						line.erase(line.begin(), line.begin() + dataLen);
 						bytesLeft -= dataLen;
 
 						state = bytesLeft == 0 ? arguments : data;
-					}
-					else
-					{
-						// fprintf(stderr, "Got argument: %s = %s\n", key.c_str(), value.c_str());
 					}
 				}
 			}
