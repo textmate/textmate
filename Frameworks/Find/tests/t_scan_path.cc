@@ -20,7 +20,7 @@ void test_simple ()
 	scanner.set_folder_options(folder_scan_settings_t(jail.path()));
 	run_scanner(scanner);
 
-	scan_path_matches_t matches = scanner.accept_matches();
+	std::vector<match_t> matches = scanner.accept_matches();
 	OAK_ASSERT_EQ(matches.size(), 1);
 	OAK_ASSERT_EQ(scanner.get_scanned_file_count(), 2);
 	OAK_ASSERT_EQ(matches.front().document->path(), jail.path("matches"));
@@ -38,7 +38,7 @@ void test_globs ()
 	scanner.set_folder_options(folder_scan_settings_t(jail.path(), "*.{x,z}"));
 	run_scanner(scanner);
 
-	scan_path_matches_t matches = scanner.accept_matches();
+	std::vector<match_t> matches = scanner.accept_matches();
 	OAK_ASSERT_EQ(matches.size(), 1);
 	OAK_ASSERT_EQ(scanner.get_scanned_file_count(), 2);
 	OAK_ASSERT_EQ(matches.front().document->path(), jail.path("text.x"));
@@ -60,7 +60,7 @@ void test_exclude_globs ()
 	scanner.set_folder_options(folder_scan_settings_t(jail.path(), globs));
 	run_scanner(scanner);
 
-	scan_path_matches_t matches = scanner.accept_matches();
+	std::vector<match_t> matches = scanner.accept_matches();
 	OAK_ASSERT_EQ(scanner.get_scanned_file_count(), 2);
 	OAK_ASSERT_EQ(matches.size(), 2);
 	OAK_ASSERT_EQ(matches[0].document->path(), jail.path("text.x"));
@@ -73,7 +73,7 @@ void test_ignore_hidden ()
 	jail.set_content("visible", "text");
 	jail.set_content(".hidden/hidden", "text");
 
-	scan_path_matches_t matches;
+	std::vector<match_t> matches;
 	folder_scan_settings_t search(jail.path());
 
 	scan_path_t scanner;
@@ -103,7 +103,7 @@ void test_follow_links ()
 	jail.set_content("linked/match.txt", "text");
 	jail.ln("start/link", "linked");
 
-	scan_path_matches_t matches;
+	std::vector<match_t> matches;
 	folder_scan_settings_t search(jail.path("start"));
 
 	scan_path_t scanner;
@@ -137,7 +137,7 @@ void test_file_links_are_skipped ()
 	scanner.set_folder_options(folder_scan_settings_t(jail.path()));
 	run_scanner(scanner);
 
-	scan_path_matches_t matches = scanner.accept_matches();
+	std::vector<match_t> matches = scanner.accept_matches();
 	OAK_ASSERT_EQ(matches.size(), 1);
 	OAK_ASSERT_EQ(scanner.get_scanned_file_count(), 1);
 }
@@ -156,7 +156,7 @@ void test_duplicate_links ()
 	scanner.set_folder_options(search);
 	run_scanner(scanner);
 
-	scan_path_matches_t matches = scanner.accept_matches();
+	std::vector<match_t> matches = scanner.accept_matches();
 	OAK_ASSERT_EQ(matches.size(), 1);
 	OAK_ASSERT_EQ(scanner.get_scanned_file_count(), 1);
 }
@@ -171,7 +171,7 @@ void test_file_lf ()
 	scanner.set_folder_options(folder_scan_settings_t(jail.path()));
 	run_scanner(scanner);
 
-	scan_path_matches_t matches = scanner.accept_matches();
+	std::vector<match_t> matches = scanner.accept_matches();
 	OAK_ASSERT_EQ(matches.size(), 4);
 
 	OAK_ASSERT_EQ(matches[0].range.min().line, 0);
@@ -190,7 +190,7 @@ void test_file_cr ()
 	scanner.set_folder_options(folder_scan_settings_t(jail.path()));
 	run_scanner(scanner);
 
-	scan_path_matches_t matches = scanner.accept_matches();
+	std::vector<match_t> matches = scanner.accept_matches();
 	OAK_ASSERT_EQ(matches.size(), 4);
 
 	OAK_ASSERT_EQ(matches[0].range.min().line, 0);
@@ -209,7 +209,7 @@ void test_file_crlf ()
 	scanner.set_folder_options(folder_scan_settings_t(jail.path()));
 	run_scanner(scanner);
 
-	scan_path_matches_t matches = scanner.accept_matches();
+	std::vector<match_t> matches = scanner.accept_matches();
 	OAK_ASSERT_EQ(matches.size(), 4);
 
 	OAK_ASSERT_EQ(matches[0].range.min().line, 0);

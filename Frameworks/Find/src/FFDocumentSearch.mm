@@ -339,7 +339,7 @@ OAK_DEBUG_VAR(Find_FolderSearch);
 
 	BOOL scannerIsStopped = !scanner->is_running();
 
-	find::scan_path_matches_t const& matches = scanner->accept_matches();
+	std::vector<find::match_t> const& matches = scanner->accept_matches();
 	if(!matches.empty())
 	{
 		[self willChangeValueForKey:@"countOfMatches"];

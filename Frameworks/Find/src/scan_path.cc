@@ -128,10 +128,10 @@ namespace find
 		return is_running_flag;
 	}
 
-	scan_path_matches_t scan_path_t::accept_matches ()
+	std::vector<match_t> scan_path_t::accept_matches ()
 	{
 		pthread_mutex_lock(&mutex);
-		scan_path_matches_t res;
+		std::vector<match_t> res;
 		res.swap(matches);
 		pthread_mutex_unlock(&mutex);
 		return res;

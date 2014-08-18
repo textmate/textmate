@@ -35,8 +35,6 @@ namespace find
 		bool binary;
 	};
 
-	typedef std::vector<match_t> scan_path_matches_t;
-
 	// NOTE: This class is public _only_ for use in testing
 	struct PUBLIC scan_path_t
 	{
@@ -65,7 +63,7 @@ namespace find
 		// while running, probe it to see if it is still running, periodically accept results, and update the folder it shows as being scanned
 		bool is_running () const;
 
-		scan_path_matches_t accept_matches ();
+		std::vector<match_t> accept_matches ();
 		std::string get_current_path () const;
 		std::string const& get_string () const { return string; };
 		folder_scan_settings_t const& folder_options () const { return search; };
@@ -83,7 +81,7 @@ namespace find
 		folder_scan_settings_t search;
 		std::string current_path;
 
-		scan_path_matches_t matches;
+		std::vector<match_t> matches;
 
 		volatile bool is_running_flag, should_stop_flag;
 		size_t scanned_file_count;
