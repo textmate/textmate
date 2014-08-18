@@ -1185,7 +1185,7 @@ namespace
 
 - (void)updateWindowTitle
 {
-	if(_selectedDocument)
+	if(_selectedDocument && _documentDisplayName)
 	{
 		auto map = _selectedDocument->document_variables();
 		auto const& scm = _documentSCMVariables.empty() ? _projectSCMVariables : _documentSCMVariables;
