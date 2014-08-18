@@ -178,7 +178,7 @@ void run_impl (bundle_command_t const& command, ng::buffer_t const& buffer, ng::
 			std::string const tmp = baseEnv["PATH"];
 			for(auto path : text::tokenize(tmp.begin(), tmp.end(), ':'))
 			{
-				if(path != "")
+				if(path != "" && path::is_directory(path))
 					paths.push_back(path::with_tilde(path));
 			}
 
