@@ -117,9 +117,12 @@ static SymbolChooserItem* CreateItem (document::document_ptr const& document, te
 			item = (--it)->second;
 	}
 
-	NSInteger row = item ? [self.items indexOfObject:item] : 0;
-	[self.tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-	[self.tableView scrollRowToVisible:row];
+	if(item)
+	{
+		NSInteger row = [self.items indexOfObject:item];
+		[self.tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+		[self.tableView scrollRowToVisible:row];
+	}
 }
 
 - (void)updateItems:(id)sender
