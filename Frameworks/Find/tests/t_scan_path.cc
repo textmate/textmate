@@ -23,7 +23,7 @@ void test_simple ()
 	scan_path_matches_t matches = scanner.accept_matches();
 	OAK_ASSERT_EQ(matches.size(), 1);
 	OAK_ASSERT_EQ(scanner.get_scanned_file_count(), 2);
-	OAK_ASSERT_EQ(matches.begin()->first->path(), jail.path("matches"));
+	OAK_ASSERT_EQ(matches.front().document->path(), jail.path("matches"));
 }
 
 void test_globs ()
@@ -41,7 +41,7 @@ void test_globs ()
 	scan_path_matches_t matches = scanner.accept_matches();
 	OAK_ASSERT_EQ(matches.size(), 1);
 	OAK_ASSERT_EQ(scanner.get_scanned_file_count(), 2);
-	OAK_ASSERT_EQ(matches.begin()->first->path(), jail.path("text.x"));
+	OAK_ASSERT_EQ(matches.front().document->path(), jail.path("text.x"));
 }
 
 void test_exclude_globs ()
@@ -63,8 +63,8 @@ void test_exclude_globs ()
 	scan_path_matches_t matches = scanner.accept_matches();
 	OAK_ASSERT_EQ(scanner.get_scanned_file_count(), 2);
 	OAK_ASSERT_EQ(matches.size(), 2);
-	OAK_ASSERT_EQ(matches[0].first->path(), jail.path("text.x"));
-	OAK_ASSERT_EQ(matches[1].first->path(), jail.path("text.z"));
+	OAK_ASSERT_EQ(matches[0].document->path(), jail.path("text.x"));
+	OAK_ASSERT_EQ(matches[1].document->path(), jail.path("text.z"));
 }
 
 void test_ignore_hidden ()
@@ -174,10 +174,10 @@ void test_file_lf ()
 	scan_path_matches_t matches = scanner.accept_matches();
 	OAK_ASSERT_EQ(matches.size(), 4);
 
-	OAK_ASSERT_EQ(matches[0].second.range.min().line, 0);
-	OAK_ASSERT_EQ(matches[1].second.range.min().line, 1);
-	OAK_ASSERT_EQ(matches[2].second.range.min().line, 2);
-	OAK_ASSERT_EQ(matches[3].second.range.min().line, 3);
+	OAK_ASSERT_EQ(matches[0].range.min().line, 0);
+	OAK_ASSERT_EQ(matches[1].range.min().line, 1);
+	OAK_ASSERT_EQ(matches[2].range.min().line, 2);
+	OAK_ASSERT_EQ(matches[3].range.min().line, 3);
 }
 
 void test_file_cr ()
@@ -193,10 +193,10 @@ void test_file_cr ()
 	scan_path_matches_t matches = scanner.accept_matches();
 	OAK_ASSERT_EQ(matches.size(), 4);
 
-	OAK_ASSERT_EQ(matches[0].second.range.min().line, 0);
-	OAK_ASSERT_EQ(matches[1].second.range.min().line, 1);
-	OAK_ASSERT_EQ(matches[2].second.range.min().line, 2);
-	OAK_ASSERT_EQ(matches[3].second.range.min().line, 3);
+	OAK_ASSERT_EQ(matches[0].range.min().line, 0);
+	OAK_ASSERT_EQ(matches[1].range.min().line, 1);
+	OAK_ASSERT_EQ(matches[2].range.min().line, 2);
+	OAK_ASSERT_EQ(matches[3].range.min().line, 3);
 }
 
 void test_file_crlf ()
@@ -212,8 +212,8 @@ void test_file_crlf ()
 	scan_path_matches_t matches = scanner.accept_matches();
 	OAK_ASSERT_EQ(matches.size(), 4);
 
-	OAK_ASSERT_EQ(matches[0].second.range.min().line, 0);
-	OAK_ASSERT_EQ(matches[1].second.range.min().line, 1);
-	OAK_ASSERT_EQ(matches[2].second.range.min().line, 2);
-	OAK_ASSERT_EQ(matches[3].second.range.min().line, 3);
+	OAK_ASSERT_EQ(matches[0].range.min().line, 0);
+	OAK_ASSERT_EQ(matches[1].range.min().line, 1);
+	OAK_ASSERT_EQ(matches[2].range.min().line, 2);
+	OAK_ASSERT_EQ(matches[3].range.min().line, 3);
 }

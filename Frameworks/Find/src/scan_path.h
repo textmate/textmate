@@ -35,7 +35,7 @@ namespace find
 		bool binary;
 	};
 
-	typedef std::vector< std::pair<document::document_ptr, match_t> > scan_path_matches_t;
+	typedef std::vector<match_t> scan_path_matches_t;
 
 	// NOTE: This class is public _only_ for use in testing
 	struct PUBLIC scan_path_t

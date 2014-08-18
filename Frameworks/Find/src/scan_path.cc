@@ -264,7 +264,7 @@ namespace find
 				{
 					text::pos_t from(nl.line_for_offset(it.from), nl.col_for_offset(it.from));
 					text::pos_t to(nl.line_for_offset(it.to), nl.col_for_offset(it.to));
-					matches.push_back(std::make_pair(document, match_t(document, it.from, it.to, text::range_t(from, to), it.captures, nl.bol_for_offset(it.from), nl.eol_for_offset(it.to), binary)));
+					matches.emplace_back(document, it.from, it.to, text::range_t(from, to), it.captures, nl.bol_for_offset(it.from), nl.eol_for_offset(it.to), binary);
 				}
 				pthread_mutex_unlock(&mutex);
 			}
