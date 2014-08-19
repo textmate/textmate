@@ -14,37 +14,10 @@
 NSString* const FFDocumentSearchDidReceiveResultsNotification = @"FFDocumentSearchDidReceiveResultsNotification";
 NSString* const FFDocumentSearchDidFinishNotification         = @"FFDocumentSearchDidFinishNotification";
 
-static std::string range_from_document (document::document_ptr const& document, off_t from, off_t to)
-{
-	std::string res = "";
-	if(document::document_t::reader_ptr reader = document->create_reader())
-	{
-		off_t pos = 0;
-		while(io::bytes_ptr const& data = reader->next())
-		{
-			off_t len = data->size();
-			if(from < pos + len)
-			{
-				off_t skip     = std::max(pos, from)     - pos;
-				off_t limit    = std::min(pos + len, to) - pos;
-				char const* buf = data->get();
-				std::copy(buf + skip, buf + limit, back_inserter(res));
-
-				if(to <= pos + len)
-					break;
-			}
-			pos += len;
-		}
-	}
-	ASSERTF(res.size() == to - from, "Wrong result size (%zu) for %s (%llu-%llu)", res.size(), document->display_name().c_str(), from, to);
-	return res;
-}
-
 @interface FFMatch ()
 {
 	OBJC_WATCH_LEAKS(FFMatch);
 
-	std::string matchText;
 	find::match_t match;
 	document::document_t::callback_t* callback;
 	NSImage* icon;
@@ -126,13 +99,6 @@ private:
 - (NSString*)identifier
 {
 	return [NSString stringWithCxxString:match.document->identifier()];
-}
-
-- (std::string const&)matchText
-{
-	if(matchText.empty())
-		matchText = range_from_document(match.document, match.bol_offset, match.eol_offset);
-	return matchText;
 }
 @end
 

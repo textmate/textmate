@@ -23,16 +23,20 @@ namespace find
 	{
 		WATCH_LEAKS(find::match_t);
 
-		match_t (document::document_ptr document, size_t first, size_t last, text::range_t const& range, std::map<std::string, std::string> const& captures, off_t bol_offset, off_t eol_offset, bool binary) : document(document), first(first), last(last), range(range), captures(captures), bol_offset(bol_offset), eol_offset(eol_offset), binary(binary) { }
 		match_t () { }
-		match_t (document::document_ptr document) : document(document), first(0), last(0), range(text::range_t::undefined) { }
+		match_t (document::document_ptr document) : document(document) { }
+		match_t (document::document_ptr document, size_t first, size_t last, text::range_t const& range, std::map<std::string, std::string> const& captures) : document(document), first(first), last(last), range(range), captures(captures) { }
+
+		size_t line_span () const;
 
 		document::document_ptr document;
-		size_t first, last;
-		text::range_t range;
+		size_t first = 0, last = 0;
+		text::range_t range = text::range_t::undefined;
 		std::map<std::string, std::string> captures;
-		off_t bol_offset, eol_offset;
-		bool binary;
+		std::string excerpt;
+		size_t excerpt_offset = 0;
+		size_t line_number = 0;
+		bool binary = false;
 	};
 
 	// NOTE: This class is public _only_ for use in testing

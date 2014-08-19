@@ -571,14 +571,13 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 		else
 		{
 			find::match_t const& m = [(FFMatch*)item match];
-			std::string str = [(FFMatch*)item matchText];
 
-			size_t from = std::min<size_t>(m.first - m.bol_offset, str.size());
-			size_t to   = std::min<size_t>(m.last  - m.bol_offset, str.size());
+			size_t from = m.first - m.excerpt_offset;
+			size_t to   = m.last  - m.excerpt_offset;
 
-			std::string prefix = str.substr(0, from);
-			std::string middle = str.substr(from, to - from);
-			std::string suffix = str.substr(to);
+			std::string prefix = m.excerpt.substr(0, from);
+			std::string middle = m.excerpt.substr(from, to - from);
+			std::string suffix = m.excerpt.substr(to);
 
 			if(!suffix.empty() && suffix.back() == '\n')
 				suffix = suffix.substr(0, suffix.size()-1);
@@ -587,7 +586,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 			{
 				if(self.windowController.showReplacementPreviews && ![_documentSearch skipReplacementForMatch:item])
 					middle = self.windowController.regularExpression ? format_string::expand(to_s(self.replaceString), m.captures) : to_s(self.replaceString);
-				return AttributedStringForMatch(prefix + middle + suffix, prefix.size(), prefix.size() + middle.size(), m.range.from.line);
+				return AttributedStringForMatch(prefix + middle + suffix, prefix.size(), prefix.size() + middle.size(), m.line_number);
 			}
 			else
 			{
@@ -661,13 +660,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 
 	find::match_t const& m = [(FFMatch*)item match];
 	if(!m.binary && !_documentSearch.hasPerformedReplacement)
-	{
-		size_t firstLine = m.range.from.line;
-		size_t lastLine = m.range.to.line;
-		if(firstLine == lastLine || m.range.to.column != 0)
-			++lastLine;
-		lines = (lastLine - firstLine);
-	}
+		lines = m.line_span();
 
 	return lines * [outlineView rowHeight];
 }
@@ -804,17 +797,15 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 			continue;
 
 		find::match_t const& m = [item match];
-		std::string str = [item matchText];
-		size_t from = std::min<size_t>(m.first - m.bol_offset, str.size());
-		size_t to   = std::min<size_t>(m.last  - m.bol_offset, str.size());
+		std::string str = m.excerpt;
 
 		if(!entireLines)
-			str = str.substr(from, to - from);
+			str = str.substr(m.first - m.excerpt_offset, m.last - m.first);
 		else if(str.size() && str.back() == '\n')
 			str.erase(str.size()-1);
 
 		if(withFilename)
-			str = text::format("%s:%lu\t", [item.path UTF8String], m.range.from.line + 1) + str;
+			str = text::format("%s:%lu\t", [item.path UTF8String], m.line_number + 1) + str;
 
 		res.push_back(str);
 	}

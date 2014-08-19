@@ -13,7 +13,6 @@ extern NSString* const FFDocumentSearchDidFinishNotification;
 @property (nonatomic, readonly) NSString* path;
 @property (nonatomic, readonly) NSString* identifier;
 @property (nonatomic, readonly) NSImage*  icon;
-- (std::string const&)matchText;
 @end
 
 @interface FFDocumentSearch : NSDocument
