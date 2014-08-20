@@ -23,26 +23,9 @@ NSString* const FFDocumentSearchDidFinishNotification         = @"FFDocumentSear
 	NSImage* icon;
 }
 - (void)updateIcon;
-@property (nonatomic, readwrite) NSImage* icon;
 @end
 
-struct document_callback_t : document::document_t::callback_t
-{
-	WATCH_LEAKS(document_callback_t);
-	document_callback_t (FFMatch* self) : self(self) {}
-	void handle_document_event (document::document_ptr document, event_t event)
-	{
-		if(event != did_change_modified_status)
-			return;
-		[self updateIcon];
-	}
-private:
-	__weak FFMatch* self;
-};
-
 @implementation FFMatch
-@synthesize icon;
-
 - (id)initWithMatch:(find::match_t const&)aMatch;
 {
 	if(self = [self init])
@@ -79,8 +62,22 @@ private:
 
 - (NSImage*)icon
 {
+	struct document_callback_t : document::document_t::callback_t
+	{
+		WATCH_LEAKS(document_callback_t);
+		document_callback_t (FFMatch* self) : self(self) {}
+		void handle_document_event (document::document_ptr document, event_t event)
+		{
+			if(event != did_change_modified_status)
+				return;
+			[self updateIcon];
+		}
+	private:
+		__weak FFMatch* self;
+	};
+
 	if(!icon)
-		self.icon = [OakFileIconImage fileIconImageWithPath:[NSString stringWithCxxString:match.document->path()] isModified:match.document->is_modified()];
+		icon = [OakFileIconImage fileIconImageWithPath:[NSString stringWithCxxString:match.document->path()] isModified:match.document->is_modified()];
 	if(!callback)
 		match.document->add_callback(callback = new document_callback_t(self));
 	return icon;
@@ -88,7 +85,7 @@ private:
 
 - (void)updateIcon
 {
-	self.icon = nil;
+	icon = nil;
 }
 
 - (NSString*)path
