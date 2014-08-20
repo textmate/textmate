@@ -250,7 +250,7 @@ namespace ng
 			std::string const& current () const                                { ASSERT_LT(_index, _suggestions.size()); return _suggestions[_index]; }
 
 			void advance ()                                                    { if(++_index >= _suggestions.size()) _index = 0;  }
-			void retreat ()                                                    { if(--_index < 0) _index = _suggestions.size()-1; }
+			void recede ()                                                     { if(--_index < 0) _index = _suggestions.size()-1; }
 
       private:
 			size_t _revision = 0;

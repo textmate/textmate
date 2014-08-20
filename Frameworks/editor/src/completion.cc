@@ -216,7 +216,7 @@ namespace ng
 		if(setup_completion(scopeAttributes))
 		{
 			completion_info_t& info = _completion_info;
-			info.retreat();
+			info.recede();
 
 			std::multimap<range_t, std::string> insertions;
 			for(auto const& range : info.prefix_ranges())
