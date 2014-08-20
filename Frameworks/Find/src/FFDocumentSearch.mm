@@ -97,6 +97,11 @@ NSString* const FFDocumentSearchDidFinishNotification         = @"FFDocumentSear
 {
 	return [NSString stringWithCxxString:match.document->identifier()];
 }
+
+- (NSString*)description
+{
+	return [NSString stringWithFormat:@"Match in ‘%@’ at line %zu: %@", [NSString stringWithCxxString:match.document->display_name()], match.line_number, [NSString stringWithCxxString:match.excerpt]];
+}
 @end
 
 @interface FFDocumentSearch ()
