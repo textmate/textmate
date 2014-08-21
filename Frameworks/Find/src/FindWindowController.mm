@@ -260,6 +260,10 @@ static NSButton* OakCreateStopSearchButton ()
 		[actionMenu addItemWithTitle:@"Copy Entire Lines"                  action:@selector(copyEntireLines:)               keyEquivalent:@""];
 		[actionMenu addItemWithTitle:@"Copy Entire Lines With Filenames"   action:@selector(copyEntireLinesWithFilename:)   keyEquivalent:@""];
 
+		[actionMenu addItem:[NSMenuItem separatorItem]];
+		[actionMenu addItemWithTitle:@"Check All" action:@selector(checkAll:) keyEquivalent:@""];
+		[actionMenu addItemWithTitle:@"Uncheck All" action:@selector(uncheckAll:) keyEquivalent:@""];
+
 		// =============================
 
 		self.findHistoryButton.action     = @selector(showFindHistory:);

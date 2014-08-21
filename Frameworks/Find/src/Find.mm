@@ -916,6 +916,34 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 - (void)copyEntireLines:(id)sender               { [self copyEntireLines:YES withFilename:NO ]; }
 - (void)copyEntireLinesWithFilename:(id)sender   { [self copyEntireLines:YES withFilename:YES]; }
 
+// =====================
+// = Check/Uncheck All =
+// =====================
+
+- (void)allMatchesSetExclude:(BOOL)exclude
+{
+	for(NSDictionary* fileMatch in _matches)
+	{
+		for(FFMatch* match in fileMatch[@"matches"])
+		{
+			if(match.exclude != exclude)
+				_countOfExcludedMatches += (match.exclude = exclude) ? +1 : -1;
+		}
+	}
+	[_windowController.resultsOutlineView reloadData];
+	[self updateActionButtons:self];
+}
+
+- (IBAction)checkAll:(id)sender
+{
+	[self allMatchesSetExclude:NO];
+}
+
+- (IBAction)uncheckAll:(id)sender
+{
+	[self allMatchesSetExclude:YES];
+}
+
 - (BOOL)validateMenuItem:(NSMenuItem*)aMenuItem
 {
 	static std::set<SEL> const copyActions = { @selector(copy:), @selector(copyMatchingParts:), @selector(copyMatchingPartsWithFilename:), @selector(copyEntireLines:), @selector(copyEntireLinesWithFilename:) };
@@ -927,6 +955,8 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 		return NO;
 	else if(aMenuItem.action == @selector(takeLevelToFoldFrom:) && aMenuItem.tag == -1)
 		[aMenuItem setTitle:self.resultsCollapsed ? @"Expand Results" : @"Collapse Results"];
+	else if(aMenuItem.action == @selector(checkAll:) || aMenuItem.action == @selector(uncheckAll:) )
+		return [_matches count];
 	return YES;
 }
 @end
