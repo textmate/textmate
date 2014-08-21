@@ -125,10 +125,6 @@ static NSButton* OakCreateStopSearchButton ()
 }
 
 @interface FindWindowController () <NSTextFieldDelegate, NSWindowDelegate, NSMenuDelegate>
-{
-	BOOL _wrapAround;
-	BOOL _ignoreCase;
-}
 @property (nonatomic) NSTextField*              findLabel;
 @property (nonatomic) OakAutoSizingTextField*   findTextField;
 @property (nonatomic) NSButton*                 findHistoryButton;
