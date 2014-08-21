@@ -81,6 +81,7 @@ namespace find
 		std::string const& search_string () const             { return _search_string; };
 		folder_scan_settings_t const& folder_options () const { return _search; };
 		size_t scanned_file_count () const                    { return _scanned_file_count; }
+		size_t scanned_byte_count () const                    { return _scanned_byte_count; }
 
 		void scan_document (document::document_ptr const& document);
 
@@ -98,6 +99,7 @@ namespace find
 
 		volatile bool _is_running = false, _should_stop = false;
 		size_t _scanned_file_count = 0;
+		size_t _scanned_byte_count = 0;
 
 		pthread_t _thread;
 		mutable pthread_mutex_t _mutex;

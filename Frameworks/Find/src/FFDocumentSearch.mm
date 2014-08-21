@@ -141,6 +141,11 @@ OAK_DEBUG_VAR(Find_FolderSearch);
 	return _scanner->scanned_file_count();
 }
 
+- (NSUInteger)scannedByteCount
+{
+	return _scanner->scanned_byte_count();
+}
+
 // ===================
 // = Scanner Probing =
 // ===================

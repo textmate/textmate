@@ -38,6 +38,7 @@ namespace find
 		};
 		_is_running = true;
 		_scanned_file_count = 0;
+		_scanned_byte_count = 0;
 		pthread_create(&_thread, NULL, &runner_t::server, this);
 	}
 
@@ -176,6 +177,7 @@ namespace find
 				m = f.match(NULL, 0, &captures);
 			}
 
+			_scanned_byte_count += total;
 			++_scanned_file_count;
 			if(ranges.empty())
 				return;

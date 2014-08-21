@@ -34,4 +34,5 @@ extern NSString* const FFDocumentSearchDidFinishNotification;
 @property (nonatomic, readonly) NSString*      currentPath;
 @property (nonatomic, readonly) NSTimeInterval searchDuration;
 @property (nonatomic, readonly) NSUInteger     scannedFileCount;
+@property (nonatomic, readonly) NSUInteger     scannedByteCount;
 @end
