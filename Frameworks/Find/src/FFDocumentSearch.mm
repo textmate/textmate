@@ -1,14 +1,8 @@
 #import "FFDocumentSearch.h"
-#import "FindWindowController.h"
-#import <OakAppKit/NSAlert Additions.h>
-#import <OakAppKit/NSImage Additions.h>
-#import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakFileIconImage.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakFoundation/OakTimer.h>
-#import <text/utf8.h>
 #import <ns/ns.h>
-#import <scope/scope.h>
 #import <oak/oak.h>
 
 NSString* const FFDocumentSearchDidReceiveResultsNotification = @"FFDocumentSearchDidReceiveResultsNotification";
@@ -108,24 +102,8 @@ NSString* const FFDocumentSearchDidFinishNotification         = @"FFDocumentSear
 {
 	OBJC_WATCH_LEAKS(FFDocumentSearch);
 
-	std::string searchString;
-	find::options_t options;
-	find::folder_scan_settings_t folderOptions;
-	NSString* projectIdentifier;
-	NSString* documentIdentifier;
-
-	NSMutableArray* matchingDocuments; // FFMatches in order of searching, containing document
-	NSMutableDictionary* matchInfo;    // Document identifier → array of FFMatch instances
-	NSMutableSet* replacementMatchesToSkip;
-
-	BOOL hasPerformedReplacement;
-	BOOL hasPerformedSave;
-
 	scan_path_ptr scanner;
-	OakTimer* scannerProbeTimer;
 	oak::duration_t timer;
-
-	NSString* currentPath;
 }
 @property (nonatomic) OakTimer* scannerProbeTimer;
 @property (nonatomic, readwrite) NSString* currentPath;
@@ -134,67 +112,13 @@ NSString* const FFDocumentSearchDidFinishNotification         = @"FFDocumentSear
 OAK_DEBUG_VAR(Find_FolderSearch);
 
 @implementation FFDocumentSearch
-// ==============
-// = Public API =
-// ==============
-
-@synthesize options, scannerProbeTimer, currentPath, projectIdentifier, documentIdentifier;
-@synthesize hasPerformedReplacement, hasPerformedSave;
-
-- (NSArray*)allDocumentsWithMatches
-{
-	return matchingDocuments;
-}
-
-- (NSArray*)allDocumentsWithSelectedMatches
-{
-	NSMutableArray* documents = [NSMutableArray array];
-	for(FFMatch* document in matchingDocuments)
-	{
-		if([[self allSelectedMatchesForDocumentIdentifier:document.identifier] count] > 0)
-			[documents addObject:document];
-	}
-	return documents;
-}
-
-- (NSArray*)allSelectedMatchesForDocumentIdentifier:(NSString*)identifier
-{
-	NSMutableArray* matches = [NSMutableArray array];
-	for(FFMatch* match in [self allMatchesForDocumentIdentifier:identifier])
-	{
-		if(![self skipReplacementForMatch:match])
-			[matches addObject:match];
-	}
-	return matches;
-}
-
-- (NSString*)searchString
-{
-	return [NSString stringWithCxxString:searchString];
-}
-
-- (void)setSearchString:(NSString*)string
-{
-	searchString = to_s(string ?: @"");
-}
-
-- (find::folder_scan_settings_t const&)folderOptions
-{
-	return folderOptions;
-}
-
-- (void)setFolderOptions:(find::folder_scan_settings_t const&)newFolderOptions
-{
-	folderOptions = newFolderOptions;
-}
-
 - (void)start
 {
-	D(DBF_Find_FolderSearch, bug("folder: %s searchString: %s documentIdentifier: %s\n", folderOptions.path.c_str(), searchString.c_str(), to_s(self.documentIdentifier).c_str()););
+	D(DBF_Find_FolderSearch, bug("folder: %s searchString: %s documentIdentifier: %s\n", self.folderOptions.path.c_str(), to_s(self.searchString).c_str(), to_s(self.documentIdentifier).c_str()););
 	scanner = std::make_shared<find::scan_path_t>();
-	scanner->set_folder_options(folderOptions);
-	scanner->set_string(searchString);
-	scanner->set_file_options(options);
+	scanner->set_folder_options(self.folderOptions);
+	scanner->set_string(to_s(self.searchString));
+	scanner->set_file_options(self.options);
 
 	timer.reset();
 	self.scannerProbeTimer = [OakTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(updateMatches:) userInfo:NULL repeats:YES];
@@ -211,90 +135,14 @@ OAK_DEBUG_VAR(Find_FolderSearch);
 	}
 }
 
-- (NSArray*)allMatchesForDocumentIdentifier:(NSString*)identifier
-{
-	return [matchInfo objectForKey:identifier];
-}
-
 - (double)searchDuration
 {
 	return timer.duration();
 }
 
-- (NSUInteger)countOfMatches
-{
-	return [[[matchInfo allValues] valueForKeyPath:@"@sum.@count"] intValue];
-}
-
-+ (NSSet*)keyPathsForValuesAffectingSelectedMatchCount
-{
-	return [NSSet setWithObject:@"countOfMatches"];
-}
-
-- (NSUInteger)countOfSelectedMatches
-{
-	return self.countOfMatches - replacementMatchesToSkip.count;
-}
-
 - (NSUInteger)scannedFileCount
 {
 	return scanner->get_scanned_file_count();
-}
-
-- (BOOL)skipReplacementForMatch:(FFMatch*)aMatch
-{
-	return [replacementMatchesToSkip containsObject:aMatch];
-}
-
-- (void)setSkipReplacement:(BOOL)flag forMatch:(FFMatch*)aMatch
-{
-	[self willChangeValueForKey:@"countOfSelectedMatches"];
-	if(flag)
-			[replacementMatchesToSkip addObject:aMatch];
-	else	[replacementMatchesToSkip removeObject:aMatch];
-	[self didChangeValueForKey:@"countOfSelectedMatches"];
-}
-
-- (void)setHasPerformedReplacement:(BOOL)flag
-{
-	ASSERTF(!hasPerformedReplacement || !flag, "Replacement has already been performed");
-	hasPerformedReplacement = flag;
-	[self updateChangeCount:NSChangeDone];
-}
-
-- (void)setHasPerformedSave:(BOOL)flag
-{
-	ASSERTF(!hasPerformedSave || !flag, "Save has already been performed");
-	hasPerformedSave = flag;
-	[self updateChangeCount:NSChangeCleared];
-}
-
-- (IBAction)saveAllDocuments:(id)sender
-{
-	NSUInteger fileCount = 0;
-	std::vector<document::document_ptr> failedDocs;
-	for(FFMatch* fileMatch in [self allDocumentsWithSelectedMatches])
-	{
-		if(document::document_ptr doc = [fileMatch match].document)
-		{
-			if(doc->sync_save(kCFRunLoopDefaultMode))
-					++fileCount;
-			else	failedDocs.push_back(doc);
-		}
-	}
-
-	FindWindowController* fwc = [[self windowControllers] lastObject];
-	if(failedDocs.empty())
-	{
-		fwc.statusString = [NSString stringWithFormat:@"%lu file%s saved.", fileCount, fileCount == 1 ? "" : "s"];
-		[fwc.resultsOutlineView reloadData];
-		self.hasPerformedSave = YES;
-	}
-	else
-	{
-		NSBeep();
-		fwc.statusString = [NSString stringWithFormat:@"%zu file%s failed to save.", failedDocs.size(), failedDocs.size() == 1 ? "" : "s"];
-	}
 }
 
 // ===================
@@ -310,22 +158,10 @@ OAK_DEBUG_VAR(Find_FolderSearch);
 	std::vector<find::match_t> const& matches = scanner->accept_matches();
 	if(!matches.empty())
 	{
-		[self willChangeValueForKey:@"countOfMatches"];
-		for(auto const& m : matches)
-		{
-			NSString* uuid = [NSString stringWithCxxString:m.document->identifier()];
-			if(![matchInfo objectForKey:uuid])
-			{
-				[matchInfo setObject:[NSMutableArray array] forKey:uuid];
-				[matchingDocuments addObject:[[FFMatch alloc] initWithDocument:m.document]];
-			}
-			FFMatch* match = [[FFMatch alloc] initWithMatch:m];
-			[[matchInfo objectForKey:uuid] addObject:match];
-			if(m.binary)
-				[replacementMatchesToSkip addObject:match];
-		}
-		[self didChangeValueForKey:@"countOfMatches"];
-		[[NSNotificationCenter defaultCenter] postNotificationName:FFDocumentSearchDidReceiveResultsNotification object:self];
+		NSMutableArray* newMatches = [NSMutableArray array];
+		for(auto const& match : matches)
+			[newMatches addObject:[[FFMatch alloc] initWithMatch:match]];
+		[[NSNotificationCenter defaultCenter] postNotificationName:FFDocumentSearchDidReceiveResultsNotification object:self userInfo:@{ @"matches" : newMatches }];
 	}
 
 	self.currentPath = [NSString stringWithCxxString:scanner->get_current_path()];
@@ -352,61 +188,6 @@ OAK_DEBUG_VAR(Find_FolderSearch);
 // ==================
 // = Setup/Teardown =
 // ==================
-
-+ (BOOL)autosavesDrafts
-{
-	return NO;
-}
-
-- (id)init
-{
-	if(self = [super init])
-	{
-		D(DBF_Find_FolderSearch, bug("\n"););
-		matchingDocuments        = [NSMutableArray new];
-		matchInfo                = [NSMutableDictionary new];
-		replacementMatchesToSkip = [NSMutableSet new];
-
-		self.fileType = @"search-results";
-	}
-	return self;
-}
-
-- (void)close
-{
-	[self stop];
-}
-
-- (void)canCloseDocumentWithDelegate:(id)delegate shouldCloseSelector:(SEL)shouldCloseSelector contextInfo:(void*)contextInfo
-{
-	if(![self isDocumentEdited])
-		return [super canCloseDocumentWithDelegate:delegate shouldCloseSelector:shouldCloseSelector contextInfo:contextInfo];
-
-	NSAlert* alert = [NSAlert tmAlertWithMessageText:@"Do you want to save the changes from your replace operation?" informativeText:@"Your changes will be lost if you don’t save them." buttons:@"Save All", @"Cancel", @"Don’t Save", nil];
-	OakShowAlertForWindow(alert, [[self.windowControllers lastObject] window], ^(NSInteger returnCode){
-		BOOL canClose = YES;
-		if(returnCode == NSAlertFirstButtonReturn) // Save All
-		{
-			[self saveAllDocuments:self];
-			canClose = self.hasPerformedSave;
-		}
-		else if(returnCode == NSAlertThirdButtonReturn) // Discard
-			[self updateChangeCount:NSChangeCleared]; // FIXME Undo replacements
-		else if(returnCode == NSAlertSecondButtonReturn) // Cancel
-			canClose = NO;
-
-		((void(*)(id, SEL, NSDocument*, BOOL, void*))[delegate methodForSelector:shouldCloseSelector])(delegate, shouldCloseSelector, self, canClose, contextInfo);
-	});
-}
-
-- (BOOL)validateUserInterfaceItem:(id <NSValidatedUserInterfaceItem>)anItem
-{
-	if(anItem.action == @selector(saveAllDocuments:))
-		return self.hasPerformedReplacement && !self.hasPerformedSave;
-	else if(anItem.action == @selector(saveDocument:) || anItem.action == @selector(saveDocumentAs:))
-		return NO;
-	return [super validateUserInterfaceItem:anItem];
-}
 
 - (void)dealloc
 {

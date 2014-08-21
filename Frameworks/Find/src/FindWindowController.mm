@@ -584,6 +584,13 @@ static NSButton* OakCreateStopSearchButton ()
 	[self commitEditing];
 }
 
+- (BOOL)windowShouldClose:(id)sender
+{
+	if([self.nextResponder respondsToSelector:@selector(windowShouldClose:)])
+		return [(id)self.nextResponder windowShouldClose:sender];
+	return YES;
+}
+
 - (void)windowWillClose:(NSNotification*)aNotification
 {
 	[self commitEditing];

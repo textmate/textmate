@@ -13,42 +13,26 @@ extern NSString* const FFDocumentSearchDidFinishNotification;
 @property (nonatomic, readonly) NSString* path;
 @property (nonatomic, readonly) NSString* identifier;
 @property (nonatomic, readonly) NSImage*  icon;
+@property (nonatomic) BOOL exclude;
+@property (nonatomic) BOOL replacementDone;
 @end
 
-@interface FFDocumentSearch : NSDocument
+@interface FFDocumentSearch : NSObject
 // Set up the search with these options
 @property (nonatomic) find::options_t options;
 @property (nonatomic, copy) NSString* searchString;
 
 // Either folderOptions _or_ a documentIdentifier should be provided
 // If a documentIdentifier is set only that document will be searched.
-- (find::folder_scan_settings_t const&)folderOptions;
-- (void)setFolderOptions:(find::folder_scan_settings_t const&)newFolderOptions;
+@property (nonatomic) find::folder_scan_settings_t folderOptions;
 @property (nonatomic) NSString* documentIdentifier;
-
-@property (nonatomic) NSString* projectIdentifier;
 
 // Start the search, observing the currentPath, and prematurely stop it if desired.
 - (void)start;
 @property (nonatomic, readonly) NSString* currentPath;
 - (void)stop;
 
-// Attain matches during/after the search
-- (NSArray*)allDocumentsWithMatches;
-- (NSArray*)allMatchesForDocumentIdentifier:(NSString*)identifier;
-
-- (NSArray*)allDocumentsWithSelectedMatches;
-- (NSArray*)allSelectedMatchesForDocumentIdentifier:(NSString*)identifier;
-
-- (BOOL)skipReplacementForMatch:(FFMatch*)aMatch;
-- (void)setSkipReplacement:(BOOL)flag forMatch:(FFMatch*)aMatch;
-
-@property (nonatomic) BOOL hasPerformedReplacement;
-@property (nonatomic) BOOL hasPerformedSave;
-
 // Scan information
-- (NSUInteger)countOfMatches;
-- (NSUInteger)countOfSelectedMatches;
 - (double)searchDuration;
 - (NSUInteger)scannedFileCount;
 @end
