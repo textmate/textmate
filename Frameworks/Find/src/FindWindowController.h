@@ -13,7 +13,6 @@ extern NSString* const FFSearchInOpenFiles;
 
 @property (nonatomic) BOOL showsResultsOutlineView;
 @property (nonatomic) BOOL disableResultsCheckBoxes;
-@property (nonatomic) BOOL showResultsCollapsed;
 @property (nonatomic) BOOL showReplacementPreviews;
 
 @property (nonatomic) NSString* projectFolder;

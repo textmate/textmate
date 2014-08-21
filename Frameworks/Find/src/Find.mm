@@ -444,7 +444,6 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		self.windowController.busy                     = YES;
 		self.windowController.statusString             = MSG_SEARCHING_FMT;
 		self.windowController.showsResultsOutlineView  = YES;
-		self.windowController.showResultsCollapsed     = NO;
 		self.windowController.disableResultsCheckBoxes = _documentSearch.documentIdentifier != nil;
 
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(folderSearchDidReceiveResults:) name:FFDocumentSearchDidReceiveResultsNotification object:_documentSearch];
@@ -808,6 +807,27 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 		[self openDocumentForSelectedRow:self];
 }
 
+// ===========================
+// = Expand/Collapse Results =
+// ===========================
+
+- (BOOL)resultsCollapsed
+{
+	NSUInteger expanded = 0;
+	for(NSDictionary* fileMatch in _matches)
+		expanded += [_windowController.resultsOutlineView isItemExpanded:fileMatch] ? 1 : 0;
+	return [_matches count] && 2 * expanded <= [_matches count];
+}
+
+- (IBAction)takeLevelToFoldFrom:(id)sender
+{
+	if(self.resultsCollapsed)
+			[_windowController.resultsOutlineView expandItem:nil expandChildren:YES];
+	else	[_windowController.resultsOutlineView collapseItem:nil collapseChildren:YES];
+
+	[_windowController.resultsOutlineView setNeedsDisplay:YES];
+}
+
 // ==================
 // = Go to… Submenu =
 // ==================
@@ -905,6 +925,8 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 		return self.performedReplaceAll && !self.performedSaveAll;
 	else if(aMenuItem.action == @selector(saveDocument:) || aMenuItem.action == @selector(saveDocumentAs:))
 		return NO;
+	else if(aMenuItem.action == @selector(takeLevelToFoldFrom:) && aMenuItem.tag == -1)
+		[aMenuItem setTitle:self.resultsCollapsed ? @"Expand Results" : @"Collapse Results"];
 	return YES;
 }
 @end

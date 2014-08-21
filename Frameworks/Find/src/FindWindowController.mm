@@ -790,14 +790,6 @@ static NSButton* OakCreateStopSearchButton ()
 	[self.resultsOutlineView setOutlineTableColumn:[self.resultsOutlineView tableColumnWithIdentifier:flag ? @"match" : @"checkbox"]];
 }
 
-- (void)setShowResultsCollapsed:(BOOL)flag
-{
-	if(_showResultsCollapsed = flag)
-			[self.resultsOutlineView collapseItem:nil collapseChildren:YES];
-	else	[self.resultsOutlineView expandItem:nil expandChildren:YES];
-	[self.resultsOutlineView setNeedsDisplay:YES];
-}
-
 - (void)setShowReplacementPreviews:(BOOL)flag
 {
 	if(_showReplacementPreviews != flag)
@@ -922,7 +914,6 @@ static NSButton* OakCreateStopSearchButton ()
 
 - (IBAction)toggleFollowSymbolicLinks:(id)sender { self.followSymbolicLinks = !self.followSymbolicLinks; }
 - (IBAction)toggleSearchHiddenFolders:(id)sender { self.searchHiddenFolders = !self.searchHiddenFolders; }
-- (IBAction)takeLevelToFoldFrom:(id)sender       { self.showResultsCollapsed = !self.showResultsCollapsed; }
 
 - (IBAction)selectNextResult:(id)sender
 {
@@ -957,8 +948,6 @@ static NSButton* OakCreateStopSearchButton ()
 {
 	if([self.resultsOutlineView numberOfRows] == 0)
 		return;
-
-	self.showResultsCollapsed = NO;
 
 	NSInteger row = [self.resultsOutlineView selectedRow];
 	if(row == -1)
@@ -1077,8 +1066,6 @@ static NSButton* OakCreateStopSearchButton ()
 		[aMenuItem setState:self.followSymbolicLinks ? NSOnState : NSOffState];
 	else if(aMenuItem.action == @selector(toggleSearchHiddenFolders:))
 		[aMenuItem setState:self.searchHiddenFolders ? NSOnState : NSOffState];
-	else if(aMenuItem.action == @selector(takeLevelToFoldFrom:) && aMenuItem.tag == -1)
-		[aMenuItem setTitle:self.showResultsCollapsed ? @"Expand Results" : @"Collapse Results"];
 	else if(aMenuItem.action == @selector(goToParentFolder:))
 		res = self.searchFolder != nil;
 	return res;
