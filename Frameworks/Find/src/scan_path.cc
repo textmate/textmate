@@ -17,17 +17,17 @@ namespace find
 		return (range.to.line - range.from.line) + (range.to.column != 0 ? 1 : 0);
 	}
 
-	scan_path_t::scan_path_t () : options(find::none), is_running_flag(false), should_stop_flag(false)
+	scan_path_t::scan_path_t ()
 	{
-		pthread_mutex_init(&mutex, NULL);
+		pthread_mutex_init(&_mutex, NULL);
 	}
 
 	scan_path_t::~scan_path_t ()
 	{
 		stop();
 		D(DBF_Find_Scan_Path, bug("wait for thread\n"););
-		pthread_join(thread, NULL);
-		pthread_mutex_destroy(&mutex);
+		pthread_join(_thread, NULL);
+		pthread_mutex_destroy(&_mutex);
 		D(DBF_Find_Scan_Path, bug("thread has terminated\n"););
 	}
 
@@ -36,42 +36,37 @@ namespace find
 		struct runner_t {
 			static void* server (void* arg)  { ((scan_path_t*)arg)->server_run(); return NULL; }
 		};
-		is_running_flag = true;
-		scanned_file_count = 0;
-		pthread_create(&thread, NULL, &runner_t::server, this);
+		_is_running = true;
+		_scanned_file_count = 0;
+		pthread_create(&_thread, NULL, &runner_t::server, this);
 	}
 
 	void scan_path_t::stop ()
 	{
-		D(DBF_Find_Scan_Path, bug("%s → YES\n", BSTR(should_stop_flag)););
-		should_stop_flag = true;
+		D(DBF_Find_Scan_Path, bug("%s → YES\n", BSTR(_should_stop)););
+		_should_stop = true;
 	}
 
 	bool scan_path_t::is_running () const
 	{
-		return is_running_flag;
+		return _is_running;
 	}
 
 	std::vector<match_t> scan_path_t::accept_matches ()
 	{
-		pthread_mutex_lock(&mutex);
+		pthread_mutex_lock(&_mutex);
 		std::vector<match_t> res;
-		res.swap(matches);
-		pthread_mutex_unlock(&mutex);
+		res.swap(_matches);
+		pthread_mutex_unlock(&_mutex);
 		return res;
 	}
 
-	std::string scan_path_t::get_current_path () const
+	std::string scan_path_t::current_path () const
 	{
-		pthread_mutex_lock(&mutex);
-		std::string res = current_path;
-		pthread_mutex_unlock(&mutex);
+		pthread_mutex_lock(&_mutex);
+		std::string res = _current_path;
+		pthread_mutex_unlock(&_mutex);
 		return res;
-	}
-
-	size_t scan_path_t::get_scanned_file_count () const
-	{
-		return scanned_file_count;
 	}
 
 	// =========================
@@ -82,45 +77,45 @@ namespace find
 	{
 		oak::set_thread_name("find::scan_path_t");
 
-		if(search.path == find::folder_scan_settings_t::open_files)
+		if(_search.path == find::folder_scan_settings_t::open_files)
 		{
 			for(auto const& doc : document::scanner_t::open_documents())
 				scan_document(doc);
-			is_running_flag = false;
+			_is_running = false;
 			return;
 		}
 
-		document::scanner_t scanner(search.path, search.globs, search.follow_links, true /* depth first */);
+		document::scanner_t scanner(_search.path, _search.globs, _search.follow_links, true /* depth first */);
 
 		bool isRunning = true;
-		while(isRunning && !should_stop_flag)
+		while(isRunning && !_should_stop)
 		{
 			isRunning = scanner.is_running();
 
 			std::vector<document::document_ptr> const& documents = scanner.accept_documents();
 			for(auto const& doc : documents)
 			{
-				if(!should_stop_flag && doc->path() != NULL_STR)
+				if(!_should_stop && doc->path() != NULL_STR)
 					scan_document(doc);
 			}
 
-			if(should_stop_flag || !isRunning)
+			if(_should_stop || !isRunning)
 				break;
 
 			std::string currentDir = scanner.get_current_path();
 			update_current_path(currentDir);
 			usleep(40000);
 		}
-		is_running_flag = false;
+		_is_running = false;
 
 		D(DBF_Find_Scan_Path, bug("leave\n"););
 	}
 
 	void scan_path_t::update_current_path (std::string const& path)
 	{
-		pthread_mutex_lock(&mutex);
-		current_path = path;
-		pthread_mutex_unlock(&mutex);
+		pthread_mutex_lock(&_mutex);
+		_current_path = path;
+		pthread_mutex_unlock(&_mutex);
 	}
 
 	static size_t linefeed_length (std::string const& str, size_t offset)
@@ -148,13 +143,13 @@ namespace find
 
 		if(document::document_t::reader_ptr reader = document->create_reader())
 		{
-			find::find_t f(string, options);
+			find::find_t f(_search_string, _options);
 			std::vector<range_match_t> ranges;
 
 			ssize_t total = 0;
 			while(io::bytes_ptr const& data = reader->next())
 			{
-				if(should_stop_flag)
+				if(_should_stop)
 					return;
 
 				char const* buf = data->get();
@@ -181,7 +176,7 @@ namespace find
 				m = f.match(NULL, 0, &captures);
 			}
 
-			++scanned_file_count;
+			++_scanned_file_count;
 			if(ranges.empty())
 				return;
 
@@ -190,7 +185,7 @@ namespace find
 				std::string text;
 				while(io::bytes_ptr const& data = reader->next())
 				{
-					if(should_stop_flag)
+					if(_should_stop)
 						return;
 					text.insert(text.end(), data->get(), data->get() + data->size());
 				}
@@ -246,9 +241,9 @@ namespace find
 					results.push_back(res);
 				}
 
-				pthread_mutex_lock(&mutex);
-				matches.insert(matches.end(), results.begin(), results.end());
-				pthread_mutex_unlock(&mutex);
+				pthread_mutex_lock(&_mutex);
+				_matches.insert(_matches.end(), results.begin(), results.end());
+				pthread_mutex_unlock(&_mutex);
 			}
 		}
 	}

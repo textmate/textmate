@@ -39,8 +39,7 @@ namespace find
 		bool binary = false;
 	};
 
-	// NOTE: This class is public _only_ for use in testing
-	struct PUBLIC scan_path_t
+	struct scan_path_t
 	{
 		WATCH_LEAKS(find::scan_path_t);
 
@@ -49,16 +48,25 @@ namespace find
 		~scan_path_t ();
 
 		// before doing a search, setup at least a search string and folder
-		void set_string (std::string const& aString)   { ASSERT(!is_running()); string = aString; }
-		void set_folder_options (folder_scan_settings_t const& aSearch)
+		void set_search_string (std::string const& search_string)
 		{
 			ASSERT(!is_running());
-			search = aSearch;
-			current_path = aSearch.path;
+			_search_string = search_string;
+		}
+
+		void set_folder_options (folder_scan_settings_t const& search)
+		{
+			ASSERT(!is_running());
+			_search = search;
+			_current_path = search.path;
 		}
 
 		// optinally set some options or a file glob
-		void set_file_options (find::options_t someOptions) { ASSERT(!is_running()); options = someOptions; }
+		void set_file_options (find::options_t options)
+		{
+			ASSERT(!is_running());
+			_options = options;
+		}
 
 		// then start the search, and potentially prematurely stop it
 		void start ();
@@ -68,10 +76,11 @@ namespace find
 		bool is_running () const;
 
 		std::vector<match_t> accept_matches ();
-		std::string get_current_path () const;
-		std::string const& get_string () const { return string; };
-		folder_scan_settings_t const& folder_options () const { return search; };
-		size_t get_scanned_file_count () const;
+		std::string current_path () const;
+
+		std::string const& search_string () const             { return _search_string; };
+		folder_scan_settings_t const& folder_options () const { return _search; };
+		size_t scanned_file_count () const                    { return _scanned_file_count; }
 
 		void scan_document (document::document_ptr const& document);
 
@@ -79,19 +88,19 @@ namespace find
 		void server_run ();
 		void update_current_path (std::string const& path);
 
-		std::string string;
-		find::options_t options;
+		std::string _search_string;
+		find::options_t _options = find::none;
 
-		folder_scan_settings_t search;
-		std::string current_path;
+		folder_scan_settings_t _search;
+		std::string _current_path;
 
-		std::vector<match_t> matches;
+		std::vector<match_t> _matches;
 
-		volatile bool is_running_flag, should_stop_flag;
-		size_t scanned_file_count;
+		volatile bool _is_running = false, _should_stop = false;
+		size_t _scanned_file_count = 0;
 
-		pthread_t thread;
-		mutable pthread_mutex_t mutex;
+		pthread_t _thread;
+		mutable pthread_mutex_t _mutex;
 	};
 
 } /* find */

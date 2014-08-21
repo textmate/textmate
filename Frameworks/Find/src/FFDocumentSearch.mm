@@ -118,7 +118,7 @@ OAK_DEBUG_VAR(Find_FolderSearch);
 	D(DBF_Find_FolderSearch, bug("folder: %s searchString: %s documentIdentifier: %s\n", self.folderOptions.path.c_str(), to_s(self.searchString).c_str(), to_s(self.documentIdentifier).c_str()););
 	_scanner = std::make_shared<find::scan_path_t>();
 	_scanner->set_folder_options(self.folderOptions);
-	_scanner->set_string(to_s(self.searchString));
+	_scanner->set_search_string(to_s(self.searchString));
 	_scanner->set_file_options(self.options);
 
 	_searchStartDate   = [NSDate new];
@@ -138,7 +138,7 @@ OAK_DEBUG_VAR(Find_FolderSearch);
 
 - (NSUInteger)scannedFileCount
 {
-	return _scanner->get_scanned_file_count();
+	return _scanner->scanned_file_count();
 }
 
 // ===================
@@ -160,7 +160,7 @@ OAK_DEBUG_VAR(Find_FolderSearch);
 		[[NSNotificationCenter defaultCenter] postNotificationName:FFDocumentSearchDidReceiveResultsNotification object:self userInfo:@{ @"matches" : newMatches }];
 	}
 
-	self.currentPath = [NSString stringWithCxxString:_scanner->get_current_path()];
+	self.currentPath = [NSString stringWithCxxString:_scanner->current_path()];
 
 	if(scannerIsStopped)
 		[self stop];
