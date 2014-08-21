@@ -10,6 +10,7 @@
 
 #define MSG_SEARCHED_FILES_ONE               FFString(@" (searched one file in %2$.1f seconds)",  @"Find all completion status, one file")
 #define MSG_SEARCHED_FILES_MULTIPLE          FFString(@" (searched %@ files in %.1f seconds)",    @"Find all completion status, multiple files")
+#define MSG_SEARCHED_BYTES                   FFString(@" (searched %@ in %.1f seconds)",          @"Find all completion status, quantity in bytes")
 
 #define MSG_SEARCHING_FOLDER_FMT             FFString(@"Searching “%@”…",     @"Find all progress status.")
 #define MSG_SEARCHING_FMT                    FFString(@"Searching…",          @"Find all initial progress status.")
