@@ -46,7 +46,7 @@
 
 - (void)tick:(NSTimer*)aTimer
 {
-	NSTimeInterval delta = -[self.startTime timeIntervalSinceNow];
+	NSTimeInterval delta = [[NSDate date] timeIntervalSinceDate:self.startTime];
 	CGFloat t = std::min(1.0, delta / self.duration);
 
 	t = log2(5.0*(t) + 1.0) / log2(6.0);

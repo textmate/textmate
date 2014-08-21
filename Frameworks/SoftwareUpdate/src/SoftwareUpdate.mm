@@ -117,7 +117,7 @@ static SoftwareUpdate* SharedInstance;
 
 - (void)performVersionCheck:(NSTimer*)aTimer
 {
-	D(DBF_SoftwareUpdate_Check, bug("last check was %.1f hours ago\n", -[self.lastPoll timeIntervalSinceNow] / (60*60)););
+	D(DBF_SoftwareUpdate_Check, bug("last check was %.1f hours ago\n", [[NSDate date] timeIntervalSinceDate:self.lastPoll] / (60*60)););
 	if(_downloadWindow.isWorking)
 		return;
 
@@ -272,7 +272,7 @@ static SoftwareUpdate* SharedInstance;
 	self.downloadWindow.progress = sharedState->progress;
 
 	NSDate* downloadStartDate = [aTimer userInfo];
-	NSTimeInterval secondsElapsed = -[downloadStartDate timeIntervalSinceNow];
+	NSTimeInterval secondsElapsed = [[NSDate date] timeIntervalSinceDate:downloadStartDate];
 	if(secondsElapsed < 1 || self.downloadWindow.progress < 0.01)
 		return;
 

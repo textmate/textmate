@@ -223,7 +223,7 @@ private:
 
 	NSInteger modifiers   = [anEvent modifierFlags] & (NSAlternateKeyMask | NSControlKeyMask | NSCommandKeyMask);
 	BOOL didPressOption   = modifiers == NSAlternateKeyMask;
-	BOOL didReleaseOption = modifiers == 0 && optionDownDate && [optionDownDate timeIntervalSinceNow] > -0.18;
+	BOOL didReleaseOption = modifiers == 0 && optionDownDate && [[NSDate date] timeIntervalSinceDate:optionDownDate] < 0.18;
 
 	self.optionDownDate = didPressOption ? [NSDate date] : nil;
 

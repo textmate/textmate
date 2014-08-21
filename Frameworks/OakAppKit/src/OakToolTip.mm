@@ -115,7 +115,7 @@ void OakShowToolTip (NSString* msg, NSPoint location)
 		return YES;
 
 	CGFloat ignorePeriod = [[NSUserDefaults standardUserDefaults] floatForKey:@"OakToolTipMouseMoveIgnorePeriod"];
-	if(-[didOpenAtDate timeIntervalSinceNow] < ignorePeriod)
+	if([[NSDate date] timeIntervalSinceDate:didOpenAtDate] < ignorePeriod)
 		return NO;
 
 	if(NSEqualPoints(mousePositionWhenOpened, NSZeroPoint))
@@ -219,7 +219,7 @@ void OakShowToolTip (NSString* msg, NSPoint location)
 
 - (void)animationTick:(id)sender
 {
-	CGFloat alpha = 0.97 * (1 - oak::slow_in_out(-1.5 * [self.animationStart timeIntervalSinceNow]));
+	CGFloat alpha = 0.97 * (1 - oak::slow_in_out(1.5 * [[NSDate date] timeIntervalSinceDate:self.animationStart]));
 	if(alpha > 0)
 	{
 		[self setAlphaValue:alpha];

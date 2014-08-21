@@ -10,7 +10,7 @@
 	NSTimeInterval const month  =  31*day;
 	NSTimeInterval const year   = 365*day;
 
-	NSTimeInterval t = -[self timeIntervalSinceNow];
+	NSTimeInterval t = [[NSDate date] timeIntervalSinceDate:self];
 	if(t < 1)
 		return @"Just now";
 	if(t < minute)
