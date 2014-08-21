@@ -102,10 +102,11 @@ NSString* const FFDocumentSearchDidFinishNotification         = @"FFDocumentSear
 {
 	OBJC_WATCH_LEAKS(FFDocumentSearch);
 
-	scan_path_ptr scanner;
-	oak::duration_t timer;
+	scan_path_ptr  _scanner;
+	OakTimer*      _scannerProbeTimer;
+	NSDate*        _searchStartDate;
+	NSTimeInterval _searchDuration;
 }
-@property (nonatomic) OakTimer* scannerProbeTimer;
 @property (nonatomic, readwrite) NSString* currentPath;
 @end
 
@@ -115,34 +116,29 @@ OAK_DEBUG_VAR(Find_FolderSearch);
 - (void)start
 {
 	D(DBF_Find_FolderSearch, bug("folder: %s searchString: %s documentIdentifier: %s\n", self.folderOptions.path.c_str(), to_s(self.searchString).c_str(), to_s(self.documentIdentifier).c_str()););
-	scanner = std::make_shared<find::scan_path_t>();
-	scanner->set_folder_options(self.folderOptions);
-	scanner->set_string(to_s(self.searchString));
-	scanner->set_file_options(self.options);
+	_scanner = std::make_shared<find::scan_path_t>();
+	_scanner->set_folder_options(self.folderOptions);
+	_scanner->set_string(to_s(self.searchString));
+	_scanner->set_file_options(self.options);
 
-	timer.reset();
-	self.scannerProbeTimer = [OakTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(updateMatches:) userInfo:NULL repeats:YES];
+	_searchStartDate   = [NSDate new];
+	_scannerProbeTimer = [OakTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(updateMatches:) userInfo:NULL repeats:YES];
 
 	if(self.documentIdentifier)
 	{
 		if(document::document_ptr doc = document::find(to_s(self.documentIdentifier)))
-			scanner->scan_document(doc);
+			_scanner->scan_document(doc);
 		[self stop];
 	}
 	else
 	{
-		scanner->start();
+		_scanner->start();
 	}
-}
-
-- (double)searchDuration
-{
-	return timer.duration();
 }
 
 - (NSUInteger)scannedFileCount
 {
-	return scanner->get_scanned_file_count();
+	return _scanner->get_scanned_file_count();
 }
 
 // ===================
@@ -153,9 +149,9 @@ OAK_DEBUG_VAR(Find_FolderSearch);
 {
 	D(DBF_Find_FolderSearch, bug("\n"););
 
-	BOOL scannerIsStopped = !scanner->is_running();
+	BOOL scannerIsStopped = !_scanner->is_running();
 
-	std::vector<find::match_t> const& matches = scanner->accept_matches();
+	std::vector<find::match_t> const& matches = _scanner->accept_matches();
 	if(!matches.empty())
 	{
 		NSMutableArray* newMatches = [NSMutableArray array];
@@ -164,7 +160,7 @@ OAK_DEBUG_VAR(Find_FolderSearch);
 		[[NSNotificationCenter defaultCenter] postNotificationName:FFDocumentSearchDidReceiveResultsNotification object:self userInfo:@{ @"matches" : newMatches }];
 	}
 
-	self.currentPath = [NSString stringWithCxxString:scanner->get_current_path()];
+	self.currentPath = [NSString stringWithCxxString:_scanner->get_current_path()];
 
 	if(scannerIsStopped)
 		[self stop];
@@ -173,13 +169,15 @@ OAK_DEBUG_VAR(Find_FolderSearch);
 - (void)stop
 {
 	D(DBF_Find_FolderSearch, bug("\n"););
-	if(scanner)
-		scanner->stop();
+	if(_scanner)
+		_scanner->stop();
 
-	if(self.scannerProbeTimer)
+	_searchDuration = [[NSDate date] timeIntervalSinceDate:_searchStartDate];
+
+	if(_scannerProbeTimer)
 	{
-		[self.scannerProbeTimer invalidate];
-		self.scannerProbeTimer = nil;
+		[_scannerProbeTimer invalidate];
+		_scannerProbeTimer = nil;
 		[self updateMatches:nil];
 		[[NSNotificationCenter defaultCenter] postNotificationName:FFDocumentSearchDidFinishNotification object:self];
 	}

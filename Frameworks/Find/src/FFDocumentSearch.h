@@ -29,10 +29,9 @@ extern NSString* const FFDocumentSearchDidFinishNotification;
 
 // Start the search, observing the currentPath, and prematurely stop it if desired.
 - (void)start;
-@property (nonatomic, readonly) NSString* currentPath;
 - (void)stop;
 
-// Scan information
-- (double)searchDuration;
-- (NSUInteger)scannedFileCount;
+@property (nonatomic, readonly) NSString*      currentPath;
+@property (nonatomic, readonly) NSTimeInterval searchDuration;
+@property (nonatomic, readonly) NSUInteger     scannedFileCount;
 @end
