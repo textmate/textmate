@@ -11,9 +11,9 @@ NSFont* OakControlFont ()
 	return [NSFont controlContentFontOfSize:[NSFont systemFontSizeForControlSize:NSRegularControlSize]];
 }
 
-NSTextField* OakCreateLabel (NSString* label)
+NSTextField* OakCreateLabel (NSString* label, Class cl)
 {
-	NSTextField* res = [[NSTextField alloc] initWithFrame:NSZeroRect];
+	NSTextField* res = [[cl alloc] initWithFrame:NSZeroRect];
 	[[res cell] setWraps:NO];
 	res.alignment       = NSRightTextAlignment;
 	res.bezeled         = NO;
@@ -26,9 +26,9 @@ NSTextField* OakCreateLabel (NSString* label)
 	return res;
 }
 
-NSTextField* OakCreateSmallLabel (NSString* label)
+NSTextField* OakCreateSmallLabel (NSString* label, Class cl)
 {
-	NSTextField* res = OakCreateLabel(label);
+	NSTextField* res = OakCreateLabel(label, cl);
 	res.alignment = NSLeftTextAlignment;
 	res.font      = [NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]];
 	return res;

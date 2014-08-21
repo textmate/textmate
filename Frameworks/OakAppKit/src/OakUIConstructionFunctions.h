@@ -3,8 +3,8 @@
 PUBLIC NSFont* OakStatusBarFont ();
 PUBLIC NSFont* OakControlFont ();
 
-PUBLIC NSTextField* OakCreateLabel (NSString* label = @"");
-PUBLIC NSTextField* OakCreateSmallLabel (NSString* label = @"");
+PUBLIC NSTextField* OakCreateLabel (NSString* label = @"", Class cl = [NSTextField class]);
+PUBLIC NSTextField* OakCreateSmallLabel (NSString* label = @"", Class cl = [NSTextField class]);
 PUBLIC NSButton* OakCreateCheckBox (NSString* label);
 PUBLIC NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel = NSRoundedBezelStyle);
 PUBLIC NSPopUpButton* OakCreatePopUpButton (BOOL pullsDown = NO, NSString* initialItemTitle = nil, NSObject* accessibilityLabel = nil);
