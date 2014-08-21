@@ -18,6 +18,22 @@
 NSString* const kUserDefaultsFolderOptionsKey     = @"Folder Search Options";
 NSString* const kUserDefaultsFindResultsHeightKey = @"findResultsHeight";
 
+@interface OakClickableStatusBar : NSTextField
+@property (nonatomic) NSString* alternateString;
+@end
+
+@implementation OakClickableStatusBar
+- (void)mouseDown:(NSEvent*)anEvent
+{
+	if(OakNotEmptyString(self.alternateString))
+	{
+		NSString* old = self.stringValue;
+		self.stringValue = self.alternateString;
+		self.alternateString = old;
+	}
+}
+@end
+
 @interface OakAutoSizingTextField : NSTextField
 @property (nonatomic) NSSize myIntrinsicContentSize;
 @end
@@ -153,7 +169,7 @@ static NSButton* OakCreateStopSearchButton ()
 @property (nonatomic) NSView*                   resultsBottomDivider;
 
 @property (nonatomic) NSProgressIndicator*      progressIndicator;
-@property (nonatomic) NSTextField*              statusTextField;
+@property (nonatomic) OakClickableStatusBar*    statusTextField;
 
 @property (nonatomic, readwrite) NSButton*      findAllButton;
 @property (nonatomic, readwrite) NSButton*      replaceAllButton;
@@ -222,7 +238,7 @@ static NSButton* OakCreateStopSearchButton ()
 		self.resultsBottomDivider      = OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1]);
 
 		self.progressIndicator         = OakCreateProgressIndicator();
-		self.statusTextField           = OakCreateSmallLabel();
+		self.statusTextField           = (OakClickableStatusBar*)OakCreateSmallLabel(@"", [OakClickableStatusBar class]);
 
 		[self.statusTextField setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
 		[self.statusTextField.cell setLineBreakMode:NSLineBreakByTruncatingTail];
@@ -290,7 +306,6 @@ static NSButton* OakCreateStopSearchButton ()
 		[self.regularExpressionCheckBox bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.regularExpression"    options:nil];
 		[self.wrapAroundCheckBox        bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.wrapAround"           options:nil];
 		[self.ignoreWhitespaceCheckBox  bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.canIgnoreWhitespace"  options:nil];
-		[self.statusTextField           bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.statusString"         options:nil];
 		[self.replaceAndFindButton      bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.folderSearch"         options:@{ NSValueTransformerNameBindingOption: @"NSNegateBoolean" }];
 
 		NSView* contentView = self.window.contentView;
@@ -821,6 +836,17 @@ static NSButton* OakCreateStopSearchButton ()
 		[self.progressIndicator removeFromSuperview];
 	}
 	[self updateConstraints];
+}
+
+- (void)setStatusString:(NSString*)aString
+{
+	self.statusTextField.stringValue = _statusString = aString;
+	self.alternateStatusString = nil;
+}
+
+- (void)setAlternateStatusString:(NSString*)aString
+{
+	self.statusTextField.alternateString = _alternateStatusString = aString;
 }
 
 - (NSString*)searchFolder

@@ -34,6 +34,7 @@ extern NSString* const FFSearchInOpenFiles;
 
 @property (nonatomic, getter = isBusy) BOOL busy;
 @property (nonatomic) NSString* statusString;
+@property (nonatomic) NSString* alternateStatusString;
 
 @property (nonatomic) NSString* findErrorString;
 - (void)updateFindErrorString;
