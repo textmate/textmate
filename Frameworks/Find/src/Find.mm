@@ -61,12 +61,15 @@ enum FindActionTag
 	if(!_matches)
 		_matches = [NSMutableArray array];
 
-	aMatch.previous      = [_matches lastObject];
+	aMatch.previous      = self.lastMatch;
 	aMatch.previous.next = aMatch;
 	aMatch.parent        = self;
 
 	[_matches addObject:aMatch];
 }
+
+- (FFResultNode*)firstMatch { return [_matches firstObject]; }
+- (FFResultNode*)lastMatch  { return [_matches lastObject]; }
 
 - (document::document_ptr)document
 {
@@ -532,16 +535,11 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	NSMutableArray* documents = [NSMutableArray array];
 	for(FFResultNode* parent in _results.matches)
 	{
-		FFMatch* firstMatch = ((FFResultNode*)[parent.matches firstObject]).match;
-		FFMatch* lastMatch  = ((FFResultNode*)[parent.matches lastObject]).match;
-		if(firstMatch && lastMatch)
-		{
-			[documents addObject:@{
-				@"identifier"      : [NSString stringWithCxxString:[firstMatch match].document->identifier()],
-				@"firstMatchRange" : [NSString stringWithCxxString:[firstMatch match].range],
-				@"lastMatchRange"  : [NSString stringWithCxxString:[lastMatch match].range],
-			}];
-		}
+		[documents addObject:@{
+			@"identifier"      : [NSString stringWithCxxString:parent.firstMatch.document->identifier()],
+			@"firstMatchRange" : [NSString stringWithCxxString:[parent.firstMatch.match match].range],
+			@"lastMatchRange"  : [NSString stringWithCxxString:[parent.lastMatch.match match].range],
+		}];
 	}
 	[OakPasteboard pasteboardWithName:NSFindPboard].auxiliaryOptionsForCurrent = @{ @"documents" : documents };
 
@@ -946,7 +944,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 
 - (void)allMatchesSetExclude:(BOOL)exclude
 {
-	for(FFResultNode* child = [[_results.matches.firstObject matches] firstObject]; child; child = child.next ?: child.parent.next.matches.firstObject)
+	for(FFResultNode* child = _results.firstMatch.firstMatch; child; child = child.next ?: child.parent.next.firstMatch)
 	{
 		if(child.exclude != exclude)
 			_countOfExcludedMatches += (child.exclude = exclude) ? +1 : -1;
