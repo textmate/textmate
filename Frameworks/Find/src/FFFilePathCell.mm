@@ -103,6 +103,19 @@ static NSAttributedString* PathComponentString (std::string const& path, std::st
 	textFrame.origin.x   += 20;
 	textFrame.size.width -= 21;
 
+	if(self.charset)
+	{
+		auto str = ns::attr_string_t() << [NSFont systemFontOfSize:11] << [NSColor blackColor] << self.charset;
+		CGFloat charsetWidth = [str size].width;
+		if(charsetWidth + 5 < NSWidth(textFrame))
+		{
+			NSRect charsetFrame;
+			NSDivideRect(textFrame, &charsetFrame, &textFrame, charsetWidth, NSMaxXEdge);
+			[str drawInRect:charsetFrame];
+			textFrame.size.width -= 5;
+		}
+	}
+
 	if(NSImage* badge = ImageForBadgeCounter(self.count))
 	{
 		NSPoint badgeOrigin = textFrame.origin;
