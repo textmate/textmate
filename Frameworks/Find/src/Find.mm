@@ -710,7 +710,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 			FFMatch* match = item[@"match"];
 			pathCell.icon = [match icon];
 			pathCell.path = [match path] ?: [NSString stringWithCxxString:[match match].document->display_name()];
-			pathCell.base = self.searchFolder;
+			pathCell.base = self.searchFolder ?: self.projectFolder;
 			pathCell.count = [outlineView isItemExpanded:item] ? 0 : [item[@"matches"] count];
 		}
 	}
