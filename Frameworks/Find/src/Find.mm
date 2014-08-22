@@ -859,22 +859,30 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 // = Go to… Submenu =
 // ==================
 
-- (IBAction)takeSelectedPathFrom:(id)sender
+- (void)showResultNode:(FFResultNode*)aResultNode
 {
-	FFResultNode* item = [sender representedObject];
-	if(![item isKindOfClass:[FFResultNode class]])
+	if(!aResultNode)
 		return;
 
-	NSOutlineView* outlineView = self.windowController.resultsOutlineView;
-	NSInteger row = [outlineView rowForItem:item];
+	NSOutlineView* outlineView = _windowController.resultsOutlineView;
+	if(![outlineView isItemExpanded:aResultNode.parent])
+		[outlineView expandItem:aResultNode.parent];
+	[outlineView scrollRowToVisible:[outlineView rowForItem:aResultNode.parent]];
+
+	NSInteger row = [outlineView rowForItem:aResultNode];
 	if(row != -1)
 	{
-		[outlineView expandItem:item];
-		[outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row + 1] byExtendingSelection:NO];
-		[outlineView scrollRowToVisible:outlineView.numberOfRows-1];
+		[outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
 		[outlineView scrollRowToVisible:row];
 		[outlineView.window makeFirstResponder:outlineView];
 	}
+}
+
+- (IBAction)takeSelectedPathFrom:(id)sender
+{
+	FFResultNode* item = [sender representedObject];
+	if([item isKindOfClass:[FFResultNode class]])
+		[self showResultNode:item.firstResultNode];
 }
 
 - (void)updateGoToMenu:(NSMenu*)aMenu
