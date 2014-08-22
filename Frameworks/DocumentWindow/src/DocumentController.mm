@@ -2070,7 +2070,7 @@ namespace
 
 - (NSString*)untitledSavePath
 {
-	NSString* res = self.projectPath;
+	NSString* res = self.projectPath ?: [self.documentPath stringByDeletingLastPathComponent];
 	if(self.fileBrowserVisible)
 	{
 		NSArray* selectedURLs = self.fileBrowser.selectedURLs;
