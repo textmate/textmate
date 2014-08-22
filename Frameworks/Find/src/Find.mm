@@ -82,7 +82,7 @@ enum FindActionTag
 @interface Find () <NSOutlineViewDataSource, NSOutlineViewDelegate>
 @property (nonatomic) FindWindowController* windowController;
 @property (nonatomic) FFDocumentSearch* documentSearch;
-@property (nonatomic) NSMutableArray* matches;
+@property (nonatomic) FFResultNode* results;
 @property (nonatomic) NSUInteger countOfMatches;
 @property (nonatomic) NSUInteger countOfExcludedMatches;
 @property (nonatomic) BOOL closeWindowOnSuccess;
@@ -196,7 +196,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	NSUInteger fileCount = 0;
 	std::vector<document::document_ptr> failedDocs;
 
-	for(FFResultNode* parent in _matches)
+	for(FFResultNode* parent in _results.matches)
 	{
 		for(FFResultNode* child in parent.matches)
 		{
@@ -317,7 +317,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 				NSUInteger replaceCount = 0, fileCount = 0;
 				std::string replaceString = to_s(controller.replaceString);
 
-				for(FFResultNode* parent in _matches)
+				for(FFResultNode* parent in _results.matches)
 				{
 					std::multimap<std::pair<size_t, size_t>, std::string> replacements;
 					for(FFResultNode* child in parent.matches)
@@ -456,13 +456,13 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 - (void)clearMatches
 {
-	for(FFResultNode* parent in _matches)
+	for(FFResultNode* parent in _results.matches)
 	{
 		if(document::document_ptr doc = parent.document)
 			doc->remove_all_marks("search");
 	}
 
-	_matches                = [NSMutableArray new];
+	_results                = [FFResultNode new];
 	_countOfMatches         = 0;
 	_countOfExcludedMatches = 0;
 
@@ -508,7 +508,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 		FFResultNode* node = [FFResultNode resultNodeWithMatch:match];
 		if(!parent || parent.document->identifier() != node.document->identifier())
-			[_matches addObject:(parent = [FFResultNode resultNodeWithMatch:[[FFMatch alloc] initWithMatch:find::match_t([match match].document)]])];
+			[_results addMatch:(parent = [FFResultNode resultNodeWithMatch:[[FFMatch alloc] initWithMatch:find::match_t([match match].document)]])];
 		[parent addMatch:node];
 	}
 	_countOfMatches += [matches count];
@@ -530,7 +530,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		return;
 
 	NSMutableArray* documents = [NSMutableArray array];
-	for(FFResultNode* parent in _matches)
+	for(FFResultNode* parent in _results.matches)
 	{
 		FFMatch* firstMatch = ((FFResultNode*)[parent.matches firstObject]).match;
 		FFMatch* lastMatch  = ((FFResultNode*)[parent.matches lastObject]).match;
@@ -591,7 +591,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 - (NSInteger)outlineView:(NSOutlineView*)outlineView numberOfChildrenOfItem:(FFResultNode*)item
 {
-	return [(item ? item.matches : _matches) count];
+	return [(item ?: _results).matches count];
 }
 
 - (BOOL)outlineView:(NSOutlineView*)outlineView isItemExpandable:(FFResultNode*)item
@@ -601,7 +601,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 - (id)outlineView:(NSOutlineView*)outlineView child:(NSInteger)childIndex ofItem:(FFResultNode*)item
 {
-	return [(item ? item.matches : _matches) objectAtIndex:childIndex];
+	return [(item ?: _results).matches objectAtIndex:childIndex];
 }
 
 static NSAttributedString* AttributedStringForMatch (std::string const& text, size_t from, size_t to, size_t n)
@@ -843,9 +843,9 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 - (BOOL)resultsCollapsed
 {
 	NSUInteger expanded = 0;
-	for(FFResultNode* parent in _matches)
+	for(FFResultNode* parent in _results.matches)
 		expanded += [_windowController.resultsOutlineView isItemExpanded:parent] ? 1 : 0;
-	return [_matches count] && 2 * expanded <= [_matches count];
+	return [_results.matches count] && 2 * expanded <= [_results.matches count];
 }
 
 - (IBAction)takeLevelToFoldFrom:(id)sender
@@ -865,7 +865,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 {
 	if(NSString* path = [sender representedObject])
 	{
-		for(FFResultNode* parent in _matches)
+		for(FFResultNode* parent in _results.matches)
 		{
 			if([parent.match.path isEqualToString:path])
 			{
@@ -886,14 +886,14 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 
 - (void)updateGoToMenu:(NSMenu*)aMenu
 {
-	if(_matches.count == 0)
+	if(_results.matches.count == 0)
 	{
 		[[aMenu addItemWithTitle:@"No Results" action:@selector(nop:) keyEquivalent:@""] setEnabled:NO];
 	}
 	else
 	{
 		char key = 0;
-		for(FFResultNode* parent in _matches)
+		for(FFResultNode* parent in _results.matches)
 		{
 			document::document_ptr doc = parent.document;
 			NSMenuItem* item = [aMenu addItemWithTitle:[NSString stringWithCxxString:doc->path() == NULL_STR ? doc->display_name() : path::relative_to(doc->path(), to_s(self.searchFolder))] action:@selector(takeSelectedPathFrom:) keyEquivalent:key < 10 ? [NSString stringWithFormat:@"%c", '0' + (++key % 10)] : @""];
@@ -949,7 +949,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 
 - (void)allMatchesSetExclude:(BOOL)exclude
 {
-	for(FFResultNode* parent in _matches)
+	for(FFResultNode* parent in _results.matches)
 	{
 		for(FFResultNode* child in parent.matches)
 		{
@@ -983,7 +983,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 	else if(aMenuItem.action == @selector(takeLevelToFoldFrom:) && aMenuItem.tag == -1)
 		[aMenuItem setTitle:self.resultsCollapsed ? @"Expand Results" : @"Collapse Results"];
 	else if(aMenuItem.action == @selector(checkAll:) || aMenuItem.action == @selector(uncheckAll:) )
-		return [_matches count];
+		return [_results.matches count];
 	return YES;
 }
 @end
