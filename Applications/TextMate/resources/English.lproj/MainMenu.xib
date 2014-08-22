@@ -934,7 +934,7 @@ CQ
                                     <action selector="lowercaseWord:" target="-1" id="370"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Titlecase Word" id="351">
+                            <menuItem title="Titlecase Line" id="351">
                                 <connections>
                                     <action selector="capitalizeWord:" target="-1" id="371"/>
                                 </connections>
