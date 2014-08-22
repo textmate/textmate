@@ -35,6 +35,50 @@ enum FindActionTag
 	FindActionReplaceSelected,
 };
 
+@interface FFResultNode : NSObject <NSCopying>
+@property (nonatomic) FFMatch* match;
+@property (nonatomic) NSMutableArray* matches;
+@property (nonatomic) BOOL exclude;
+@property (nonatomic) BOOL replacementDone;
+
+@property (nonatomic, readonly) document::document_ptr document;
+
+@property (nonatomic, weak) FFResultNode* parent;
+@property (nonatomic, weak) FFResultNode* next;
+@property (nonatomic, weak) FFResultNode* previous;
+@end
+
+@implementation FFResultNode
++ (FFResultNode*)resultNodeWithMatch:(FFMatch*)aMatch
+{
+	FFResultNode* res = [FFResultNode new];
+	res.match = aMatch;
+	return res;
+}
+
+- (void)addMatch:(FFResultNode*)aMatch
+{
+	if(!_matches)
+		_matches = [NSMutableArray array];
+
+	aMatch.previous      = [_matches lastObject];
+	aMatch.previous.next = aMatch;
+	aMatch.parent        = self;
+
+	[_matches addObject:aMatch];
+}
+
+- (document::document_ptr)document
+{
+	return [_match match].document;
+}
+
+- (id)copyWithZone:(NSZone*)zone
+{
+	return self;
+}
+@end
+
 @interface Find () <NSOutlineViewDataSource, NSOutlineViewDelegate>
 @property (nonatomic) FindWindowController* windowController;
 @property (nonatomic) FFDocumentSearch* documentSearch;
@@ -152,14 +196,14 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	NSUInteger fileCount = 0;
 	std::vector<document::document_ptr> failedDocs;
 
-	for(NSDictionary* fileMatch in _matches)
+	for(FFResultNode* parent in _matches)
 	{
-		for(FFMatch* match in fileMatch[@"matches"])
+		for(FFResultNode* child in parent.matches)
 		{
-			if(!match.replacementDone)
+			if(!child.replacementDone)
 				continue;
 
-			if(document::document_ptr doc = [match match].document)
+			if(document::document_ptr doc = child.document)
 			{
 				if(doc->sync_save(kCFRunLoopDefaultMode))
 						++fileCount;
@@ -273,22 +317,22 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 				NSUInteger replaceCount = 0, fileCount = 0;
 				std::string replaceString = to_s(controller.replaceString);
 
-				for(NSDictionary* fileMatch in _matches)
+				for(FFResultNode* parent in _matches)
 				{
 					std::multimap<std::pair<size_t, size_t>, std::string> replacements;
-					for(FFMatch* match in fileMatch[@"matches"])
+					for(FFResultNode* child in parent.matches)
 					{
-						if(match.exclude || match.replacementDone)
+						if(child.exclude || child.replacementDone)
 							continue;
-						match.replacementDone = YES;
+						child.replacementDone = YES;
 						_countOfExcludedMatches += 1;
-						replacements.emplace(std::make_pair([match match].first, [match match].last), controller.regularExpression ? format_string::expand(replaceString, [match match].captures) : replaceString);
+						replacements.emplace(std::make_pair([child.match match].first, [child.match match].last), controller.regularExpression ? format_string::expand(replaceString, [child.match match].captures) : replaceString);
 					}
 
 					if(replacements.empty())
 						continue;
 
-					if(document::document_ptr doc = [(FFMatch*)fileMatch[@"match"] match].document)
+					if(document::document_ptr doc = parent.document)
 					{
 						if(doc->is_open())
 						{
@@ -412,13 +456,10 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 - (void)clearMatches
 {
-	for(NSDictionary* fileMatch in _matches)
+	for(FFResultNode* parent in _matches)
 	{
-		for(FFMatch* match in fileMatch[@"matches"])
-		{
-			if(document::document_ptr doc = [match match].document)
-				doc->remove_all_marks("search");
-		}
+		if(document::document_ptr doc = parent.document)
+			doc->remove_all_marks("search");
 	}
 
 	_matches                = [NSMutableArray new];
@@ -459,17 +500,16 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 - (void)folderSearchDidReceiveResults:(NSNotification*)aNotification
 {
 	NSArray* matches = [aNotification userInfo][@"matches"];
-	FFMatch* lastMatch = nil;
+	FFResultNode* parent = nil;
 	for(FFMatch* match in matches)
 	{
 		if(document::document_ptr doc = [match match].document)
 			doc->add_mark([match match].range, "search");
 
-		if(!lastMatch || [match match].document->identifier() != [lastMatch match].document->identifier())
-			[_matches addObject:[@{ @"match" : [[FFMatch alloc] initWithMatch:find::match_t([match match].document)], @"matches" : [NSMutableArray array] } mutableCopy]];
-		[[_matches lastObject][@"matches"] addObject:lastMatch = match];
-
-		_countOfExcludedMatches += match.exclude ? 1 : 0;
+		FFResultNode* node = [FFResultNode resultNodeWithMatch:match];
+		if(!parent || parent.document->identifier() != node.document->identifier())
+			[_matches addObject:(parent = [FFResultNode resultNodeWithMatch:[[FFMatch alloc] initWithMatch:find::match_t([match match].document)]])];
+		[parent addMatch:node];
 	}
 	_countOfMatches += [matches count];
 
@@ -490,13 +530,12 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		return;
 
 	NSMutableArray* documents = [NSMutableArray array];
-	for(NSDictionary* fileMatch in _matches)
+	for(FFResultNode* parent in _matches)
 	{
-		NSArray* matches = fileMatch[@"matches"];
-		if([matches firstObject] && [matches lastObject])
+		FFMatch* firstMatch = ((FFResultNode*)[parent.matches firstObject]).match;
+		FFMatch* lastMatch  = ((FFResultNode*)[parent.matches lastObject]).match;
+		if(firstMatch && lastMatch)
 		{
-			FFMatch* firstMatch = [matches firstObject];
-			FFMatch* lastMatch  = [matches lastObject];
 			[documents addObject:@{
 				@"identifier"      : [NSString stringWithCxxString:[firstMatch match].document->identifier()],
 				@"firstMatchRange" : [NSString stringWithCxxString:[firstMatch match].range],
@@ -550,19 +589,19 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 // = Outline view data source =
 // ============================
 
-- (NSInteger)outlineView:(NSOutlineView*)outlineView numberOfChildrenOfItem:(id)item
+- (NSInteger)outlineView:(NSOutlineView*)outlineView numberOfChildrenOfItem:(FFResultNode*)item
 {
-	return [(item ? item[@"matches"] : _matches) count];
+	return [(item ? item.matches : _matches) count];
 }
 
-- (BOOL)outlineView:(NSOutlineView*)outlineView isItemExpandable:(id)item
+- (BOOL)outlineView:(NSOutlineView*)outlineView isItemExpandable:(FFResultNode*)item
 {
 	return [self outlineView:outlineView isGroupItem:item];
 }
 
-- (id)outlineView:(NSOutlineView*)outlineView child:(NSInteger)childIndex ofItem:(id)item
+- (id)outlineView:(NSOutlineView*)outlineView child:(NSInteger)childIndex ofItem:(FFResultNode*)item
 {
-	return [(item ? item[@"matches"] : _matches) objectAtIndex:childIndex];
+	return [(item ? item.matches : _matches) objectAtIndex:childIndex];
 }
 
 static NSAttributedString* AttributedStringForMatch (std::string const& text, size_t from, size_t to, size_t n)
@@ -628,19 +667,18 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 	return str;
 }
 
-- (id)outlineView:(NSOutlineView*)outlineView objectValueForTableColumn:(NSTableColumn*)tableColumn byItem:(id)item
+- (id)outlineView:(NSOutlineView*)outlineView objectValueForTableColumn:(NSTableColumn*)tableColumn byItem:(FFResultNode*)item
 {
 	if([self outlineView:outlineView isGroupItem:item])
 		return item;
 
-	FFMatch* match = item;
 	if([[tableColumn identifier] isEqualToString:@"checkbox"])
 	{
-		return @(!match.exclude);
+		return @(!item.exclude);
 	}
 	else if([[tableColumn identifier] isEqualToString:@"match"])
 	{
-		find::match_t const& m = [match match];
+		find::match_t const& m = [item.match match];
 
 		size_t from = m.first - m.excerpt_offset;
 		size_t to   = m.last  - m.excerpt_offset;
@@ -658,7 +696,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 			return res.get();
 		}
 
-		if(match.replacementDone || !match.exclude && self.windowController.showReplacementPreviews)
+		if(item.replacementDone || !item.exclude && self.windowController.showReplacementPreviews)
 			middle = self.windowController.regularExpression ? format_string::expand(to_s(self.replaceString), m.captures) : to_s(self.replaceString);
 
 		return AttributedStringForMatch(prefix + middle + suffix, prefix.size(), prefix.size() + middle.size(), m.line_number);
@@ -666,33 +704,18 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 	return nil;
 }
 
-- (void)outlineView:(NSOutlineView*)outlineView setObjectValue:(id)objectValue forTableColumn:(NSTableColumn*)tableColumn byItem:(id)item
+- (void)outlineView:(NSOutlineView*)outlineView setObjectValue:(id)objectValue forTableColumn:(NSTableColumn*)tableColumn byItem:(FFResultNode*)item
 {
 	if(![tableColumn.identifier isEqualToString:@"checkbox"])
 		return;
 
-	FFMatch* clicked = item;
-	NSArray* items = @[ clicked ];
-
-	if(OakIsAlternateKeyOrMouseEvent())
-	{
-		NSMutableArray* array = [NSMutableArray array];
-		for(NSDictionary* fileMatch in _matches)
-		{
-			for(FFMatch* sibling in fileMatch[@"matches"])
-			{
-				if([clicked match].document->identifier() == [sibling match].document->identifier())
-					[array addObject:sibling];
-			}
-		}
-		items = array;
-	}
-
 	BOOL exclude = ![objectValue boolValue];
-	for(FFMatch* item in items)
+
+	NSArray* items = OakIsAlternateKeyOrMouseEvent() ? item.parent.matches : @[ item ];
+	for(FFResultNode* node in items)
 	{
-		if(item.exclude != exclude)
-			_countOfExcludedMatches += (item.exclude = exclude) ? +1 : -1;
+		if(node.exclude != exclude)
+			_countOfExcludedMatches += (node.exclude = exclude) ? +1 : -1;
 	}
 
 	[self updateActionButtons:self];
@@ -700,18 +723,18 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 		[outlineView reloadData];
 }
 
-- (void)outlineView:(NSOutlineView*)outlineView willDisplayCell:(id)cell forTableColumn:(NSTableColumn*)tableColumn item:(id)item
+- (void)outlineView:(NSOutlineView*)outlineView willDisplayCell:(id)cell forTableColumn:(NSTableColumn*)tableColumn item:(FFResultNode*)item
 {
 	if([self outlineView:outlineView isGroupItem:item])
 	{
 		if(!tableColumn && [cell isKindOfClass:[FFFilePathCell class]])
 		{
 			FFFilePathCell* pathCell = (FFFilePathCell*)cell;
-			FFMatch* match = item[@"match"];
+			FFMatch* match = item.match;
 			pathCell.icon = [match icon];
 			pathCell.path = [match path] ?: [NSString stringWithCxxString:[match match].document->display_name()];
 			pathCell.base = self.searchFolder ?: self.projectFolder;
-			pathCell.count = [outlineView isItemExpanded:item] ? 0 : [item[@"matches"] count];
+			pathCell.count = [outlineView isItemExpanded:item] ? 0 : [item.matches count];
 		}
 	}
 	else if([[tableColumn identifier] isEqualToString:@"checkbox"])
@@ -730,21 +753,21 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 	}
 }
 
-- (BOOL)outlineView:(NSOutlineView*)outlineView isGroupItem:(id)item
+- (BOOL)outlineView:(NSOutlineView*)outlineView isGroupItem:(FFResultNode*)item
 {
 	return [outlineView levelForItem:item] == 0;
 }
 
-- (CGFloat)outlineView:(NSOutlineView*)outlineView heightOfRowByItem:(id)item
+- (CGFloat)outlineView:(NSOutlineView*)outlineView heightOfRowByItem:(FFResultNode*)item
 {
 	if([self outlineView:outlineView isGroupItem:item])
 		return 22;
 
-	find::match_t const& m = [(FFMatch*)item match];
+	find::match_t const& m = [item.match match];
 	return m.line_span() * [outlineView rowHeight];
 }
 
-- (NSCell*)outlineView:(NSOutlineView*)outlineView dataCellForTableColumn:(NSTableColumn*)tableColumn item:(id)item
+- (NSCell*)outlineView:(NSOutlineView*)outlineView dataCellForTableColumn:(NSTableColumn*)tableColumn item:(FFResultNode*)item
 {
 	if(tableColumn == nil && [self outlineView:outlineView isGroupItem:item])
 		return [FFFilePathCell new];
@@ -755,7 +778,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 // = Should Select Item =
 // ======================
 
-- (BOOL)outlineView:(NSOutlineView*)outlineView shouldSelectItem:(id)item
+- (BOOL)outlineView:(NSOutlineView*)outlineView shouldSelectItem:(FFResultNode*)item
 {
 	if([self outlineView:outlineView isGroupItem:item])
 		return NO;
@@ -768,7 +791,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 	return YES;
 }
 
-- (BOOL)outlineView:(NSOutlineView*)outlineView shouldTrackCell:(NSCell*)cell forTableColumn:(NSTableColumn*)tableColumn item:(id)item
+- (BOOL)outlineView:(NSOutlineView*)outlineView shouldTrackCell:(NSCell*)cell forTableColumn:(NSTableColumn*)tableColumn item:(FFResultNode*)item
 {
 	return YES;
 }
@@ -793,12 +816,12 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 	NSOutlineView* outlineView = self.windowController.resultsOutlineView;
 	if([outlineView numberOfSelectedRows] == 1)
 	{
-		NSUInteger selectionIndex = [[outlineView selectedRowIndexes] firstIndex];
-		FFMatch* selectedMatch    = [outlineView itemAtRow:selectionIndex];
-		auto doc = [selectedMatch match].document;
+		NSUInteger selectionIndex  = [[outlineView selectedRowIndexes] firstIndex];
+		FFResultNode* selectedNode = [outlineView itemAtRow:selectionIndex];
+		auto doc = selectedNode.document;
 		if(!doc->is_open())
 			doc->set_recent_tracking(false);
-		document::show(doc, self.projectIdentifier ? oak::uuid_t(to_s(self.projectIdentifier)) : document::kCollectionAny, [selectedMatch match].range, false);
+		document::show(doc, self.projectIdentifier ? oak::uuid_t(to_s(self.projectIdentifier)) : document::kCollectionAny, [selectedNode.match match].range, false);
 	}
 }
 
@@ -820,8 +843,8 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 - (BOOL)resultsCollapsed
 {
 	NSUInteger expanded = 0;
-	for(NSDictionary* fileMatch in _matches)
-		expanded += [_windowController.resultsOutlineView isItemExpanded:fileMatch] ? 1 : 0;
+	for(FFResultNode* parent in _matches)
+		expanded += [_windowController.resultsOutlineView isItemExpanded:parent] ? 1 : 0;
 	return [_matches count] && 2 * expanded <= [_matches count];
 }
 
@@ -842,16 +865,15 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 {
 	if(NSString* path = [sender representedObject])
 	{
-		for(NSDictionary* item in _matches)
+		for(FFResultNode* parent in _matches)
 		{
-			FFMatch* match = item[@"match"];
-			if([match.path isEqualToString:path])
+			if([parent.match.path isEqualToString:path])
 			{
 				NSOutlineView* outlineView = self.windowController.resultsOutlineView;
-				NSUInteger row = [outlineView rowForItem:item];
-				if(![outlineView isItemExpanded:item])
-					[outlineView expandItem:item];
-				NSUInteger firstMatch = row + ([outlineView isItemExpanded:item] ? 1 : 0);
+				NSUInteger row = [outlineView rowForItem:parent];
+				if(![outlineView isItemExpanded:parent])
+					[outlineView expandItem:parent];
+				NSUInteger firstMatch = row + ([outlineView isItemExpanded:parent] ? 1 : 0);
 				[outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:firstMatch] byExtendingSelection:NO];
 				[outlineView scrollRowToVisible:outlineView.numberOfRows-1];
 				[outlineView scrollRowToVisible:row];
@@ -871,13 +893,12 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 	else
 	{
 		char key = 0;
-		for(NSDictionary* record in _matches)
+		for(FFResultNode* parent in _matches)
 		{
-			FFMatch* match = record[@"match"];
-			document::document_ptr doc = [match match].document;
+			document::document_ptr doc = parent.document;
 			NSMenuItem* item = [aMenu addItemWithTitle:[NSString stringWithCxxString:doc->path() == NULL_STR ? doc->display_name() : path::relative_to(doc->path(), to_s(self.searchFolder))] action:@selector(takeSelectedPathFrom:) keyEquivalent:key < 10 ? [NSString stringWithFormat:@"%c", '0' + (++key % 10)] : @""];
-			[item setImage:match.icon];
-			[item setRepresentedObject:match.path];
+			[item setImage:parent.match.icon];
+			[item setRepresentedObject:parent.match.path];
 		}
 	}
 }
@@ -894,11 +915,11 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 	NSIndexSet* selectedRows = [outlineView numberOfSelectedRows] == 0 ? [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [outlineView numberOfRows])] : [outlineView selectedRowIndexes];
 	for(NSUInteger index = [selectedRows firstIndex]; index != NSNotFound; index = [selectedRows indexGreaterThanIndex:index])
 	{
-		FFMatch* item = [outlineView itemAtRow:index];
-		if([self outlineView:outlineView isGroupItem:item])
+		FFResultNode* item = [outlineView itemAtRow:index];
+		if([item.matches count])
 			continue;
 
-		find::match_t const& m = [item match];
+		find::match_t const& m = [item.match match];
 		std::string str = m.excerpt;
 
 		if(!entireLines)
@@ -907,7 +928,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 			str.erase(str.size()-1);
 
 		if(withFilename)
-			str = text::format("%s:%lu\t", [item.path UTF8String], m.line_number + 1) + str;
+			str = text::format("%s:%lu\t", [item.match.path UTF8String], m.line_number + 1) + str;
 
 		res.push_back(str);
 	}
@@ -928,12 +949,12 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 
 - (void)allMatchesSetExclude:(BOOL)exclude
 {
-	for(NSDictionary* fileMatch in _matches)
+	for(FFResultNode* parent in _matches)
 	{
-		for(FFMatch* match in fileMatch[@"matches"])
+		for(FFResultNode* child in parent.matches)
 		{
-			if(match.exclude != exclude)
-				_countOfExcludedMatches += (match.exclude = exclude) ? +1 : -1;
+			if(child.exclude != exclude)
+				_countOfExcludedMatches += (child.exclude = exclude) ? +1 : -1;
 		}
 	}
 	[_windowController.resultsOutlineView reloadData];

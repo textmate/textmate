@@ -13,8 +13,6 @@ extern NSString* const FFDocumentSearchDidFinishNotification;
 @property (nonatomic, readonly) NSString* path;
 @property (nonatomic, readonly) NSString* identifier;
 @property (nonatomic, readonly) NSImage*  icon;
-@property (nonatomic) BOOL exclude;
-@property (nonatomic) BOOL replacementDone;
 @end
 
 @interface FFDocumentSearch : NSObject
