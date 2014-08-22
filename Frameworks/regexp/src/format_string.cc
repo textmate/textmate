@@ -143,7 +143,7 @@ struct expand_visitor : boost::static_visitor<void>
 
 	static std::string capitalize (std::string const& src)
 	{
-		return format_string::replace(text::lowercase(src), "^(\\s+)?(\\w+)|\\b((?!(?:else|from|over|then|when)\\b)\\w{4,}|\\w+\\s*$)", "${1:?$1\\u$2:\\u$0}");
+		return format_string::replace(format_string::replace(src, "\\b\\p{Upper}\\p{^Upper}+?\\b", "${0:/downcase}"), "^([\\W\\d]*)(\\w[-\\w]*)|\\b((?!(?:else|from|over|then|when)\\b)\\w[-\\w]{3,}|\\w[-\\w]*[\\W\\d]*$)", "${1:?$1\\u$2:\\u$0}");
 	}
 
 	static std::string asciify (std::string const& src)

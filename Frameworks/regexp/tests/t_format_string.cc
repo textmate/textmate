@@ -5,9 +5,20 @@ void test_format_string ()
 	using format_string::replace;
 	OAK_ASSERT_EQ(replace("æbleGRØD", ".+", "»${0:/upcase}«"),             "»ÆBLEGRØD«");
 	OAK_ASSERT_EQ(replace("æbleGRØD", ".+", "»${0:/downcase}«"),           "»æblegrød«");
-	OAK_ASSERT_EQ(replace("æbleGRØD", ".+", "»${0:/capitalize}«"),         "»Æblegrød«");
 	OAK_ASSERT_EQ(replace("æbleGRØD", ".+", "»${0:/asciify}«"),            "»aebleGROD«");
-	OAK_ASSERT_EQ(replace("æbleGRØD", ".+", "»${0:/capitalize/asciify}«"), "»AEblegrod«");
+	OAK_ASSERT_EQ(replace("æblegrød", ".+", "»${0:/capitalize}«"),         "»Æblegrød«");
+	OAK_ASSERT_EQ(replace("æblegrød", ".+", "»${0:/capitalize/asciify}«"), "»AEblegrod«");
+}
+
+void test_capitalize ()
+{
+	using format_string::replace;
+	OAK_ASSERT_EQ(replace("this is a title", ".+", "${0:/capitalize}"),                    "This is a Title");
+	OAK_ASSERT_EQ(replace("word-based capitalization", ".+", "${0:/capitalize}"),          "Word-based Capitalization");
+	OAK_ASSERT_EQ(replace("# 2014-08-22: it works now #", ".+", "${0:/capitalize}"),       "# 2014-08-22: It Works Now #");
+	OAK_ASSERT_EQ(replace("# 2014-08-22: it works now again #", ".+", "${0:/capitalize}"), "# 2014-08-22: It Works now Again #");
+	OAK_ASSERT_EQ(replace("my NSTableView subclass", ".+", "${0:/capitalize}"),            "My NSTableView Subclass");
+	OAK_ASSERT_EQ(replace("This Is The Wrong", ".+", "${0:/capitalize}"),                  "This is the Wrong");
 }
 
 void test_variables ()
