@@ -172,6 +172,8 @@ namespace
 					case did_change_path:
 						[_self setDocumentPath:[NSString stringWithCxxString:document->path()]];
 						[_self setDocumentDisplayName:[NSString stringWithCxxString:document->display_name()]];
+						if(!_self.projectPath)
+							_self.projectPath = [NSString stringWithCxxString:path::parent(document->path())];
 					break;
 
 					case did_change_on_disk_status:  [_self setDocumentIsOnDisk:document->is_on_disk()];                      break;
