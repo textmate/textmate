@@ -863,24 +863,19 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 
 - (IBAction)takeSelectedPathFrom:(id)sender
 {
-	if(NSString* path = [sender representedObject])
+	FFResultNode* item = [sender representedObject];
+	if(![item isKindOfClass:[FFResultNode class]])
+		return;
+
+	NSOutlineView* outlineView = self.windowController.resultsOutlineView;
+	NSInteger row = [outlineView rowForItem:item];
+	if(row != -1)
 	{
-		for(FFResultNode* parent in _results.matches)
-		{
-			if([parent.match.path isEqualToString:path])
-			{
-				NSOutlineView* outlineView = self.windowController.resultsOutlineView;
-				NSUInteger row = [outlineView rowForItem:parent];
-				if(![outlineView isItemExpanded:parent])
-					[outlineView expandItem:parent];
-				NSUInteger firstMatch = row + ([outlineView isItemExpanded:parent] ? 1 : 0);
-				[outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:firstMatch] byExtendingSelection:NO];
-				[outlineView scrollRowToVisible:outlineView.numberOfRows-1];
-				[outlineView scrollRowToVisible:row];
-				[outlineView.window makeFirstResponder:outlineView];
-				break;
-			}
-		}
+		[outlineView expandItem:item];
+		[outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row + 1] byExtendingSelection:NO];
+		[outlineView scrollRowToVisible:outlineView.numberOfRows-1];
+		[outlineView scrollRowToVisible:row];
+		[outlineView.window makeFirstResponder:outlineView];
 	}
 }
 
@@ -895,10 +890,12 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 		char key = 0;
 		for(FFResultNode* parent in _results.matches)
 		{
-			document::document_ptr doc = parent.document;
-			NSMenuItem* item = [aMenu addItemWithTitle:[NSString stringWithCxxString:doc->path() == NULL_STR ? doc->display_name() : path::relative_to(doc->path(), to_s(self.searchFolder))] action:@selector(takeSelectedPathFrom:) keyEquivalent:key < 10 ? [NSString stringWithFormat:@"%c", '0' + (++key % 10)] : @""];
-			[item setImage:parent.match.icon];
-			[item setRepresentedObject:parent.match.path];
+			if(document::document_ptr doc = parent.document)
+			{
+				NSMenuItem* item = [aMenu addItemWithTitle:[NSString stringWithCxxString:doc->path() == NULL_STR ? doc->display_name() : path::relative_to(doc->path(), to_s(self.searchFolder))] action:@selector(takeSelectedPathFrom:) keyEquivalent:key < 10 ? [NSString stringWithFormat:@"%c", '0' + (++key % 10)] : @""];
+				[item setImage:parent.match.icon];
+				[item setRepresentedObject:parent];
+			}
 		}
 	}
 }
