@@ -946,13 +946,10 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 
 - (void)allMatchesSetExclude:(BOOL)exclude
 {
-	for(FFResultNode* parent in _results.matches)
+	for(FFResultNode* child = [[_results.matches.firstObject matches] firstObject]; child; child = child.next ?: child.parent.next.matches.firstObject)
 	{
-		for(FFResultNode* child in parent.matches)
-		{
-			if(child.exclude != exclude)
-				_countOfExcludedMatches += (child.exclude = exclude) ? +1 : -1;
-		}
+		if(child.exclude != exclude)
+			_countOfExcludedMatches += (child.exclude = exclude) ? +1 : -1;
 	}
 	[_windowController.resultsOutlineView reloadData];
 	[self updateActionButtons:self];
