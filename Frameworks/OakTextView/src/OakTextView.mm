@@ -1193,24 +1193,18 @@ doScroll:
 	return NO;
 }
 
-#define ATTR(attr) NSAccessibility##attr##Attribute
-#define PATTR(attr) NSAccessibility##attr##ParameterizedAttribute
-#define ATTREQ_(attribute_) [attribute isEqualToString:attribute_]
-#define HANDLE_ATTR(attr) else if(ATTREQ_(ATTR(attr)))
-#define HANDLE_PATTR(attr) else if(ATTREQ_(PATTR(attr)))
-
 - (NSSet*)myAccessibilityAttributeNames
 {
 	static NSSet* set = [NSSet setWithArray:@[
-		ATTR(Role),
-		ATTR(Value),
-		ATTR(InsertionPointLineNumber),
-		ATTR(NumberOfCharacters),
-		ATTR(SelectedText),
-		ATTR(SelectedTextRange),
-		ATTR(SelectedTextRanges),
-		ATTR(VisibleCharacterRange),
-		ATTR(Children),
+		NSAccessibilityRoleAttribute,
+		NSAccessibilityValueAttribute,
+		NSAccessibilityInsertionPointLineNumberAttribute,
+		NSAccessibilityNumberOfCharactersAttribute,
+		NSAccessibilitySelectedTextAttribute,
+		NSAccessibilitySelectedTextRangeAttribute,
+		NSAccessibilitySelectedTextRangesAttribute,
+		NSAccessibilityVisibleCharacterRangeAttribute,
+		NSAccessibilityChildrenAttribute,
 	]];
 	return set;
 }
@@ -1228,27 +1222,27 @@ doScroll:
 	ng::buffer_t const& buffer = document->buffer();
 
 	if(false) {
-	} HANDLE_ATTR(Role) {
+	} else if([attribute isEqualToString:NSAccessibilityRoleAttribute]) {
 		ret = NSAccessibilityTextAreaRole;
-	} HANDLE_ATTR(Value) {
+	} else if([attribute isEqualToString:NSAccessibilityValueAttribute]) {
 		ret = [NSString stringWithCxxString:editor->as_string()];
-	} HANDLE_ATTR(InsertionPointLineNumber) {
+	} else if([attribute isEqualToString:NSAccessibilityInsertionPointLineNumberAttribute]) {
 		ret = [NSNumber numberWithUnsignedLong:layout->softline_for_index(editor->ranges().last().min())];
-	} HANDLE_ATTR(NumberOfCharacters) {
+	} else if([attribute isEqualToString:NSAccessibilityNumberOfCharactersAttribute]) {
 		ret = [NSNumber numberWithUnsignedInteger:[self nsRangeForRange:ng::range_t(0, buffer.size())].length];
-	} HANDLE_ATTR(SelectedText) {
+	} else if([attribute isEqualToString:NSAccessibilitySelectedTextAttribute]) {
 		ng::range_t const selection = editor->ranges().last();
 		std::string const text = buffer.substr(selection.min().index, selection.max().index);
 		ret = [NSString stringWithCxxString:text];
-	} HANDLE_ATTR(SelectedTextRange) {
+	} else if([attribute isEqualToString:NSAccessibilitySelectedTextRangeAttribute]) {
 		ret = [NSValue valueWithRange:[self nsRangeForRange:editor->ranges().last()]];
-	} HANDLE_ATTR(SelectedTextRanges) {
+	} else if([attribute isEqualToString:NSAccessibilitySelectedTextRangesAttribute]) {
 		ng::ranges_t const ranges = editor->ranges();
 		NSMutableArray* nsRanges = [NSMutableArray arrayWithCapacity:ranges.size()];
 		for(auto const& range : ranges)
 			[nsRanges addObject:[NSValue valueWithRange:[self nsRangeForRange:range]]];
 		ret = nsRanges;
-	} HANDLE_ATTR(VisibleCharacterRange) {
+	} else if([attribute isEqualToString:NSAccessibilityVisibleCharacterRangeAttribute]) {
 		NSRect visibleRect = [self visibleRect];
 		CGPoint startPoint = NSMakePoint(NSMinX(visibleRect), NSMaxY(visibleRect));
 		CGPoint   endPoint = NSMakePoint(NSMinX(visibleRect), NSMinY(visibleRect));
@@ -1256,7 +1250,7 @@ doScroll:
 		visibleRange = visibleRange.sorted();
 		visibleRange.last = layout->index_below(visibleRange.last);
 		return [NSValue valueWithRange:[self nsRangeForRange:visibleRange]];
-	} HANDLE_ATTR(Children) {
+	} else if([attribute isEqualToString:NSAccessibilityChildrenAttribute]) {
 		NSMutableArray* links = [NSMutableArray array];
 		std::shared_ptr<links_t> links_ = self.links;
 		for(auto const& pair : *links_)
@@ -1270,7 +1264,12 @@ doScroll:
 
 - (BOOL)accessibilityIsAttributeSettable:(NSString*)attribute
 {
-	static NSArray* settable = @[ ATTR(Value), ATTR(SelectedText), ATTR(SelectedTextRange), ATTR(SelectedTextRanges) ];
+	static NSArray* settable = @[
+		NSAccessibilityValueAttribute,
+		NSAccessibilitySelectedTextAttribute,
+		NSAccessibilitySelectedTextRangeAttribute,
+		NSAccessibilitySelectedTextRangesAttribute,
+	];
 	if([[self myAccessibilityAttributeNames] containsObject:attribute])
 		return [settable containsObject:attribute];
 	return [super accessibilityIsAttributeSettable:attribute];
@@ -1280,15 +1279,15 @@ doScroll:
 {
 	D(DBF_OakTextView_Accessibility, bug("%s <- %s\n", to_s(attribute).c_str(), to_s([value description]).c_str()););
 	if(false) {
-	} HANDLE_ATTR(Value) {
+	} else if([attribute isEqualToString:NSAccessibilityValueAttribute]) {
 		AUTO_REFRESH;
 		document->set_content(to_s((NSString*)value));
-	} HANDLE_ATTR(SelectedText) {
+	} else if([attribute isEqualToString:NSAccessibilitySelectedTextAttribute]) {
 		AUTO_REFRESH;
 		editor->insert(to_s((NSString*)value));
-	} HANDLE_ATTR(SelectedTextRange) {
+	} else if([attribute isEqualToString:NSAccessibilitySelectedTextRangeAttribute]) {
 		[self accessibilitySetValue:@[ value ] forAttribute:NSAccessibilitySelectedTextRangesAttribute];
-	} HANDLE_ATTR(SelectedTextRanges) {
+	} else if([attribute isEqualToString:NSAccessibilitySelectedTextRangesAttribute]) {
 		NSArray* nsRanges = (NSArray*)value;
 		ng::ranges_t ranges;
 		for(NSValue* nsRangeValue in nsRanges)
@@ -1352,15 +1351,15 @@ doScroll:
 	if(!attributes)
 	{
 		NSSet* set = [NSSet setWithArray:@[
-			PATTR(LineForIndex),
-			PATTR(RangeForLine),
-			PATTR(StringForRange),
-			PATTR(RangeForPosition),
-			PATTR(RangeForIndex),
-			PATTR(BoundsForRange),
-			// PATTR(RTFForRange),
-			// PATTR(StyleRangeForIndex),
-			PATTR(AttributedStringForRange),
+			NSAccessibilityLineForIndexParameterizedAttribute,
+			NSAccessibilityRangeForLineParameterizedAttribute,
+			NSAccessibilityStringForRangeParameterizedAttribute,
+			NSAccessibilityRangeForPositionParameterizedAttribute,
+			NSAccessibilityRangeForIndexParameterizedAttribute,
+			NSAccessibilityBoundsForRangeParameterizedAttribute,
+			// NSAccessibilityRTFForRangeParameterizedAttribute,
+			// NSAccessibilityStyleRangeForIndexParameterizedAttribute,
+			NSAccessibilityAttributedStringForRangeParameterizedAttribute,
 		]];
 
 		attributes = [[set setByAddingObjectsFromArray:[super accessibilityParameterizedAttributeNames]] allObjects];
@@ -1373,19 +1372,19 @@ doScroll:
 	D(DBF_OakTextView_Accessibility, bug("%s(%s)\n", to_s(attribute).c_str(), to_s([parameter description]).c_str()););
 	id ret = nil;
 	if(false) {
-	} HANDLE_PATTR(LineForIndex) {
+	} else if([attribute isEqualToString:NSAccessibilityLineForIndexParameterizedAttribute]) {
 		size_t index = [((NSNumber*)parameter) unsignedLongValue];
 		index = [self rangeForNSRange:NSMakeRange(index, 0)].min().index;
 		size_t line = layout->softline_for_index(index);
 		ret = [NSNumber numberWithUnsignedLong:line];
-	} HANDLE_PATTR(RangeForLine) {
+	} else if([attribute isEqualToString:NSAccessibilityRangeForLineParameterizedAttribute]) {
 		size_t line = [((NSNumber*)parameter) unsignedLongValue];
 		ng::range_t const range = layout->range_for_softline(line);
 		ret = [NSValue valueWithRange:[self nsRangeForRange:range]];
-	} HANDLE_PATTR(StringForRange) {
+	} else if([attribute isEqualToString:NSAccessibilityStringForRangeParameterizedAttribute]) {
 		ng::range_t range = [self rangeForNSRange:[((NSValue*)parameter) rangeValue]];
 		ret = [NSString stringWithCxxString:editor->as_string(range.min().index, range.max().index)];
-	} HANDLE_PATTR(RangeForPosition) {
+	} else if([attribute isEqualToString:NSAccessibilityRangeForPositionParameterizedAttribute]) {
 		NSPoint point = [((NSValue*)parameter) pointValue];
 		point = [[self window] convertRectFromScreen:(NSRect){ point, NSZeroSize }].origin;
 		point = [self convertPoint:point fromView:nil];
@@ -1393,23 +1392,21 @@ doScroll:
 		index = document->buffer().sanitize_index(index);
 		size_t const length = document->buffer()[index].length();
 		ret = [NSValue valueWithRange:[self nsRangeForRange:ng::range_t(index, index + length)]];
-	} HANDLE_PATTR(RangeForIndex) {
+	} else if([attribute isEqualToString:NSAccessibilityRangeForIndexParameterizedAttribute]) {
 		size_t index = [((NSNumber*)parameter) unsignedLongValue];
 		index = [self rangeForNSRange:NSMakeRange(index, 0)].min().index;
 		index = document->buffer().sanitize_index(index);
 		size_t const length = document->buffer()[index].length();
 		ret = [NSValue valueWithRange:[self nsRangeForRange:ng::range_t(index, index + length)]];
-	} HANDLE_PATTR(BoundsForRange) {
+	} else if([attribute isEqualToString:NSAccessibilityBoundsForRangeParameterizedAttribute]) {
 		ng::range_t range = [self rangeForNSRange:[((NSValue*)parameter) rangeValue]];
 		NSRect rect = layout->rect_for_range(range.min().index, range.max().index, true);
 		rect = [self convertRect:rect toView:nil];
 		rect = [[self window] convertRectToScreen:rect];
 		ret = [NSValue valueWithRect:rect];
-	// } HANDLE_PATTR(RTFForRange) { // TODO
-	// } HANDLE_PATTR(StyleRangeForIndex) { // TODO
-	} HANDLE_PATTR(AttributedStringForRange) {
-#define TATTR(attr) NSAccessibility##attr##TextAttribute
-#define TKEY(key) NSAccessibility##key##Key
+	// } else if([attribute isEqualToString:NSAccessibilityRTFForRangeParameterizedAttribute]) { // TODO
+	// } else if([attribute isEqualToString:NSAccessibilityStyleRangeForIndexParameterizedAttribute]) { // TODO
+	} else if([attribute isEqualToString:NSAccessibilityAttributedStringForRangeParameterizedAttribute]) {
 		NSRange aRange = [((NSValue *)parameter) rangeValue];
 		ng::range_t const range = [self rangeForNSRange:aRange];
 		size_t const from = range.min().index, to = range.max().index;
@@ -1431,17 +1428,17 @@ doScroll:
 			NSFont* font = (__bridge NSFont *)styles.font();
 			NSMutableDictionary* attributes = [NSMutableDictionary dictionaryWithCapacity:4];
 			[attributes addEntriesFromDictionary:@{
-				TATTR(Font): @{
-					TKEY(FontName): [font fontName],
-					TKEY(FontFamily): [font familyName],
-					TKEY(VisibleName): [font displayName],
-					TKEY(FontSize): @([font pointSize]),
+				NSAccessibilityFontTextAttribute: @{
+					NSAccessibilityFontNameKey: [font fontName],
+					NSAccessibilityFontFamilyKey: [font familyName],
+					NSAccessibilityVisibleNameKey: [font displayName],
+					NSAccessibilityFontSizeKey: @([font pointSize]),
 				},
-				TATTR(ForegroundColor): (__bridge id)styles.foreground(),
-				TATTR(BackgroundColor): (__bridge id)styles.background(),
+				NSAccessibilityForegroundColorTextAttribute: (__bridge id)styles.foreground(),
+				NSAccessibilityBackgroundColorTextAttribute: (__bridge id)styles.background(),
 			}];
 			if(styles.underlined())
-				attributes[TATTR(Underline)] = @(NSUnderlineStyleSingle | NSUnderlinePatternSolid); // TODO is this always so?
+				attributes[NSAccessibilityUnderlineTextAttribute] = @(NSUnderlineStyleSingle | NSUnderlinePatternSolid); // TODO is this always so?
 
 			[res setAttributes:attributes range:runRange];
 		}
@@ -1464,7 +1461,7 @@ doScroll:
 				NSRange linkRange;
 				linkRange.location = utf16::distance(text.data(), text.data() + range.first.index);
 				linkRange.length   = utf16::distance(text.data() + range.first.index, text.data() + range.last.index);
-				[res addAttribute:TATTR(Link) value:pair.second range:linkRange];
+				[res addAttribute:NSAccessibilityLinkTextAttribute value:pair.second range:linkRange];
 			}
 		});
 
@@ -1487,7 +1484,7 @@ doScroll:
 			runRange.location += runRange.length;
 			runRange.length = utf16::distance(text.data() + i, text.data() + j);
 
-			[res addAttribute:TATTR(Misspelled) value:@(true) range:runRange];
+			[res addAttribute:NSAccessibilityMisspelledTextAttribute value:@(true) range:runRange];
 			[res addAttribute:@"AXMarkedMisspelled" value:@(true) range:runRange];
 
 			if((pair != end) && (++pair != end))
@@ -1504,8 +1501,6 @@ doScroll:
 		[res addAttribute:@"AXNaturalLanguageText" value:lang range:NSMakeRange(0, [res length])];
 
 		return res;
-#undef TATTR
-#undef TKEY
 	} else {
 		ret = [super accessibilityAttributeValue:attribute forParameter:parameter];
 	}
@@ -1567,12 +1562,6 @@ doScroll:
 	selectedRect.origin.y = [[NSScreen mainScreen] frame].size.height - (selectedRect.origin.y + selectedRect.size.height);
 	UAZoomChangeFocus(&viewRect, &selectedRect, kUAZoomFocusTypeInsertionPoint);
 }
-
-#undef ATTR
-#undef PATTR
-#undef ATTREQ_
-#undef HANDLE_ATTR
-#undef HANDLE_PATTR
 
 // ================
 // = Bundle Items =
