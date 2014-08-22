@@ -56,20 +56,20 @@ enum FindActionTag
 	return res;
 }
 
-- (void)addMatch:(FFResultNode*)aMatch
+- (void)addResultNode:(FFResultNode*)aMatch
 {
 	if(!_matches)
 		_matches = [NSMutableArray array];
 
-	aMatch.previous      = self.lastMatch;
+	aMatch.previous      = self.lastResultNode;
 	aMatch.previous.next = aMatch;
 	aMatch.parent        = self;
 
 	[_matches addObject:aMatch];
 }
 
-- (FFResultNode*)firstMatch { return [_matches firstObject]; }
-- (FFResultNode*)lastMatch  { return [_matches lastObject]; }
+- (FFResultNode*)firstResultNode { return [_matches firstObject]; }
+- (FFResultNode*)lastResultNode  { return [_matches lastObject]; }
 
 - (document::document_ptr)document
 {
@@ -511,8 +511,8 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 		FFResultNode* node = [FFResultNode resultNodeWithMatch:match];
 		if(!parent || parent.document->identifier() != node.document->identifier())
-			[_results addMatch:(parent = [FFResultNode resultNodeWithMatch:[[FFMatch alloc] initWithMatch:find::match_t([match match].document)]])];
-		[parent addMatch:node];
+			[_results addResultNode:(parent = [FFResultNode resultNodeWithMatch:[[FFMatch alloc] initWithMatch:find::match_t([match match].document)]])];
+		[parent addResultNode:node];
 	}
 	_countOfMatches += [matches count];
 
@@ -536,9 +536,9 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	for(FFResultNode* parent in _results.matches)
 	{
 		[documents addObject:@{
-			@"identifier"      : [NSString stringWithCxxString:parent.firstMatch.document->identifier()],
-			@"firstMatchRange" : [NSString stringWithCxxString:[parent.firstMatch.match match].range],
-			@"lastMatchRange"  : [NSString stringWithCxxString:[parent.lastMatch.match match].range],
+			@"identifier"      : [NSString stringWithCxxString:parent.firstResultNode.document->identifier()],
+			@"firstMatchRange" : [NSString stringWithCxxString:[parent.firstResultNode.match match].range],
+			@"lastMatchRange"  : [NSString stringWithCxxString:[parent.lastResultNode.match match].range],
 		}];
 	}
 	[OakPasteboard pasteboardWithName:NSFindPboard].auxiliaryOptionsForCurrent = @{ @"documents" : documents };
@@ -944,7 +944,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 
 - (void)allMatchesSetExclude:(BOOL)exclude
 {
-	for(FFResultNode* child = _results.firstMatch.firstMatch; child; child = child.next ?: child.parent.next.firstMatch)
+	for(FFResultNode* child = _results.firstResultNode.firstResultNode; child; child = child.next ?: child.parent.next.firstResultNode)
 	{
 		if(child.exclude != exclude)
 			_countOfExcludedMatches += (child.exclude = exclude) ? +1 : -1;
