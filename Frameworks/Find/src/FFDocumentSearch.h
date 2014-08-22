@@ -5,14 +5,10 @@
 extern NSString* const FFDocumentSearchDidReceiveResultsNotification;
 extern NSString* const FFDocumentSearchDidFinishNotification;
 
-// This is largely an Obj-C wrapper around match_t so that it can be used as an NSCell’s value
-// It may be better off moved to the window controller in future.
-@interface FFMatch : NSObject <NSCopying>
+// This is an Obj-C wrapper around match_t so that we can put it in an NSArray
+@interface FFMatch : NSObject
 - (id)initWithMatch:(find::match_t const&)aMatch;
 - (find::match_t const&)match;
-@property (nonatomic, readonly) NSString* path;
-@property (nonatomic, readonly) NSString* identifier;
-@property (nonatomic, readonly) NSImage*  icon;
 @end
 
 @interface FFDocumentSearch : NSObject

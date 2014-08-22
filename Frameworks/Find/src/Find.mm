@@ -9,6 +9,7 @@
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/NSAlert Additions.h>
 #import <OakAppKit/OakAppKit.h>
+#import <OakAppKit/OakFileIconImage.h>
 #import <OakAppKit/OakPasteboard.h>
 #import <ns/ns.h>
 #import <text/types.h>
@@ -36,16 +37,22 @@ enum FindActionTag
 };
 
 @interface FFResultNode : NSObject <NSCopying>
+{
+	document::document_t::callback_t* _callback;
+}
+@property (nonatomic, weak) FFResultNode* parent;
+@property (nonatomic, weak) FFResultNode* next;
+@property (nonatomic, weak) FFResultNode* previous;
+
 @property (nonatomic) FFMatch* match;
 @property (nonatomic) NSMutableArray* matches;
 @property (nonatomic) BOOL exclude;
 @property (nonatomic) BOOL replacementDone;
+@property (nonatomic) NSImage* icon;
 
 @property (nonatomic, readonly) document::document_ptr document;
-
-@property (nonatomic, weak) FFResultNode* parent;
-@property (nonatomic, weak) FFResultNode* next;
-@property (nonatomic, weak) FFResultNode* previous;
+@property (nonatomic, readonly) NSString* path;
+@property (nonatomic, readonly) NSString* identifier;
 @end
 
 @implementation FFResultNode
@@ -54,6 +61,20 @@ enum FindActionTag
 	FFResultNode* res = [FFResultNode new];
 	res.match = aMatch;
 	return res;
+}
+
+- (void)dealloc
+{
+	if(_callback)
+	{
+		self.document->remove_callback(_callback);
+		delete _callback;
+	}
+}
+
+- (id)copyWithZone:(NSZone*)zone
+{
+	return self;
 }
 
 - (void)addResultNode:(FFResultNode*)aMatch
@@ -68,17 +89,34 @@ enum FindActionTag
 	[_matches addObject:aMatch];
 }
 
-- (FFResultNode*)firstResultNode { return [_matches firstObject]; }
-- (FFResultNode*)lastResultNode  { return [_matches lastObject]; }
+- (FFResultNode*)firstResultNode   { return [_matches firstObject]; }
+- (FFResultNode*)lastResultNode    { return [_matches lastObject]; }
+- (document::document_ptr)document { return [_match match].document; }
+- (NSString*)path                  { return [NSString stringWithCxxString:self.document->path()]; }
+- (NSString*)identifier            { return [NSString stringWithCxxString:self.document->identifier()]; }
 
-- (document::document_ptr)document
+- (NSImage*)icon
 {
-	return [_match match].document;
-}
+	struct document_callback_t : document::document_t::callback_t
+	{
+		WATCH_LEAKS(document_callback_t);
+		document_callback_t (FFResultNode* self) : _self(self) {}
+		void handle_document_event (document::document_ptr document, event_t event)
+		{
+			if(event == did_change_modified_status)
+				_self.icon = nil;
+		}
 
-- (id)copyWithZone:(NSZone*)zone
-{
-	return self;
+	private:
+		__weak FFResultNode* _self;
+	};
+
+	if(!_icon)
+		_icon = [OakFileIconImage fileIconImageWithPath:self.path isModified:self.document->is_modified()];
+	if(!_callback)
+		self.document->add_callback(_callback = new document_callback_t(self));
+
+	return _icon;
 }
 @end
 
@@ -728,9 +766,8 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 		if(!tableColumn && [cell isKindOfClass:[FFFilePathCell class]])
 		{
 			FFFilePathCell* pathCell = (FFFilePathCell*)cell;
-			FFMatch* match = item.match;
-			pathCell.icon = [match icon];
-			pathCell.path = [match path] ?: [NSString stringWithCxxString:[match match].document->display_name()];
+			pathCell.icon = [item icon];
+			pathCell.path = [item path] ?: [NSString stringWithCxxString:item.document->display_name()];
 			pathCell.base = self.searchFolder ?: self.projectFolder;
 			pathCell.count = [outlineView isItemExpanded:item] ? 0 : [item.matches count];
 		}
@@ -899,7 +936,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 			if(document::document_ptr doc = parent.document)
 			{
 				NSMenuItem* item = [aMenu addItemWithTitle:[NSString stringWithCxxString:doc->path() == NULL_STR ? doc->display_name() : path::relative_to(doc->path(), to_s(self.searchFolder))] action:@selector(takeSelectedPathFrom:) keyEquivalent:key < 10 ? [NSString stringWithFormat:@"%c", '0' + (++key % 10)] : @""];
-				[item setImage:parent.match.icon];
+				[item setImage:parent.icon];
 				[item setRepresentedObject:parent];
 			}
 		}
@@ -931,7 +968,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 			str.erase(str.size()-1);
 
 		if(withFilename)
-			str = text::format("%s:%lu\t", [item.match.path UTF8String], m.line_number + 1) + str;
+			str = text::format("%s:%lu\t", [item.path UTF8String], m.line_number + 1) + str;
 
 		res.push_back(str);
 	}
