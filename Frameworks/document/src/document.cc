@@ -1201,7 +1201,7 @@ namespace document
 		struct buffer_reader_t : document::document_t::reader_t
 		{
 			WATCH_LEAKS(buffer_reader_t);
-			buffer_reader_t (io::bytes_ptr const& data) : _data(data) { }
+			buffer_reader_t (io::bytes_ptr const& data, encoding::type const& encoding) : _data(data), _encoding(encoding) { }
 
 			io::bytes_ptr next ()
 			{
@@ -1210,15 +1210,21 @@ namespace document
 				return res;
 			}
 
+			encoding::type encoding () const
+			{
+				return _encoding;
+			}
+
 		private:
 			io::bytes_ptr _data;
+			encoding::type _encoding;
 		};
 	}
 
 	document_t::reader_ptr document_t::create_reader () const
 	{
 		if(is_open())
-			return std::make_shared<buffer_reader_t>(std::make_shared<io::bytes_t>(content()));
+			return std::make_shared<buffer_reader_t>(std::make_shared<io::bytes_t>(content()), disk_encoding());
 		return std::make_shared<file_reader_t>(shared_from_this());
 	}
 

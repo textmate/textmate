@@ -75,7 +75,7 @@ namespace document
 		// = Doing one-pass reading of file (find in arbitrary files) =
 		// ============================================================
 
-		struct reader_t { virtual io::bytes_ptr next () = 0; virtual ~reader_t () { } };
+		struct reader_t { virtual io::bytes_ptr next () = 0; virtual encoding::type encoding () const = 0; virtual ~reader_t () { } };
 		typedef std::shared_ptr<reader_t> reader_ptr;
 		reader_ptr create_reader () const;
 
