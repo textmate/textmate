@@ -38,7 +38,4 @@ extern NSString* const FFSearchInOpenFiles;
 
 @property (nonatomic) NSString* findErrorString;
 - (void)updateFindErrorString;
-
-- (IBAction)selectNextResult:(id)sender;
-- (IBAction)selectPreviousResult:(id)sender;
 @end

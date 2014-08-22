@@ -360,8 +360,8 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 			}
 			break;
 
-			case FindActionFindNext:     [self.windowController selectNextResult:self];     break;
-			case FindActionFindPrevious: [self.windowController selectPreviousResult:self]; break;
+			case FindActionFindNext:     [self selectNextResult:self];     break;
+			case FindActionFindPrevious: [self selectPreviousResult:self]; break;
 		}
 	}
 	else
@@ -969,6 +969,44 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 - (IBAction)uncheckAll:(id)sender
 {
 	[self allMatchesSetExclude:YES];
+}
+
+- (IBAction)selectNextResult:(id)sender
+{
+	NSInteger row = [_windowController.resultsOutlineView selectedRow];
+	FFResultNode* item = row == -1 ? nil : [_windowController.resultsOutlineView itemAtRow:row];
+
+	item = item ? (item.next ?: item.parent.next.firstResultNode) : _results.firstResultNode.firstResultNode;
+	if(!item && _windowController.wrapAround)
+		item = _results.firstResultNode.firstResultNode;
+
+	[self showResultNode:item];
+}
+
+- (IBAction)selectPreviousResult:(id)sender
+{
+	NSInteger row = [_windowController.resultsOutlineView selectedRow];
+	FFResultNode* item = row == -1 ? nil : [_windowController.resultsOutlineView itemAtRow:row];
+
+	item = item ? (item.previous ?: item.parent.previous.lastResultNode) : _results.lastResultNode.lastResultNode;
+	if(!item && _windowController.wrapAround)
+		item = _results.lastResultNode.lastResultNode;
+
+	[self showResultNode:item];
+}
+
+- (IBAction)selectNextTab:(id)sender
+{
+	NSInteger row = [_windowController.resultsOutlineView selectedRow];
+	FFResultNode* item = row == -1 ? nil : [_windowController.resultsOutlineView itemAtRow:row];
+	[self showResultNode:item.parent.next.firstResultNode ?: _results.firstResultNode.firstResultNode];
+}
+
+- (IBAction)selectPreviousTab:(id)sender
+{
+	NSInteger row = [_windowController.resultsOutlineView selectedRow];
+	FFResultNode* item = row == -1 ? nil : [_windowController.resultsOutlineView itemAtRow:row];
+	[self showResultNode:item.parent.previous.firstResultNode ?: _results.lastResultNode.firstResultNode];
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem*)aMenuItem
