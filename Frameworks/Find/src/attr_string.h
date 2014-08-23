@@ -2,15 +2,8 @@
 // Ciarán Walsh, 2008
 // Visit http://github.com/ciaran/attr_string/tree/master for the latest version
 
-#import <Foundation/Foundation.h>
-#import <AppKit/AppKit.h>
-#import <string>
-#import <vector>
+#import <oak/misc.h>
 #import <stack>
-
-#ifndef sizeofA
-#define sizeofA(a) (sizeof(a)/sizeof(a[0]))
-#endif
 
 namespace ns
 {
