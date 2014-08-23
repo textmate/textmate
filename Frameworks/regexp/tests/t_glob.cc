@@ -62,6 +62,14 @@ void test_glob ()
 	OAK_ASSERT(!path::glob_t("{*.{cc,h},Makefile}").does_match(".test.cc"     ));
 }
 
+void test_glob_case_sensitive ()
+{
+	OAK_ASSERT( path::glob_t("Makefile", false,  true).does_match("Makefile"));
+	OAK_ASSERT(!path::glob_t("Makefile", false,  true).does_match("makefile"));
+	OAK_ASSERT( path::glob_t("Makefile", false, false).does_match("Makefile"));
+	OAK_ASSERT( path::glob_t("Makefile", false, false).does_match("makefile"));
+}
+
 void test_glob_hidden_files ()
 {
 	OAK_ASSERT( path::glob_t(".*").does_match(".htaccess"));

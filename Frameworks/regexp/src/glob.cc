@@ -9,10 +9,10 @@ OAK_DEBUG_VAR(Glob_Parser);
 
 namespace path
 {
-	void glob_t::setup (std::string const& glob, bool matchDotFiles)
+	void glob_t::setup (std::string const& glob, bool matchDotFiles, bool caseSensitive)
 	{
 		std::string ptrn = convert_glob_to_regexp(glob, matchDotFiles);
-		_compiled = regexp::pattern_t(ptrn);
+		_compiled = regexp::pattern_t(ptrn, caseSensitive ? ONIG_OPTION_NONE : ONIG_OPTION_IGNORECASE);
 		D(DBF_Glob, bug("%s → %s\n", glob.c_str(), ptrn.c_str()););
 	}
 

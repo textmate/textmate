@@ -7,14 +7,14 @@ namespace path
 {
 	struct PUBLIC glob_t
 	{
-		glob_t (char const* glob, bool matchDotFiles = false)        { setup(glob, matchDotFiles); }
-		glob_t (std::string const& glob, bool matchDotFiles = false) { setup(glob, matchDotFiles); }
+		glob_t (char const* glob, bool matchDotFiles = false, bool caseSensitive = true)        { setup(glob, matchDotFiles, caseSensitive); }
+		glob_t (std::string const& glob, bool matchDotFiles = false, bool caseSensitive = true) { setup(glob, matchDotFiles, caseSensitive); }
 
 		bool does_match (std::string const& filename) const;
 
 	private:
 		friend std::string to_s (glob_t const& glob);
-		void setup (std::string const& glob, bool matchDotFiles);
+		void setup (std::string const& glob, bool matchDotFiles, bool caseSensitive);
 		regexp::pattern_t _compiled;
 	};
 
