@@ -233,8 +233,11 @@ namespace find
 					text::pos_t to(lfCount, it.to - bol);
 
 					size_t eol = offset;
-					while(eol+1 < text.size() && linefeed_length(text, eol) == 0)
-						++eol;
+					if(bol < offset)
+					{
+						while(eol+1 < text.size() && linefeed_length(text, eol) == 0)
+							++eol;
+					}
 
 					match_t res(document, it.from, it.to, text::range_t(from, to), it.captures);
 					res.excerpt        = text.substr(fromLine, eol - fromLine);
