@@ -38,7 +38,7 @@ namespace
 			if(str.find("*") != std::string::npos)
 			{
 				_is_glob = true;
-				_glob = path::glob_t(str);
+				_glob = path::glob_t(str, false, false);
 			}
 			else if(regexp::match_t const& m = regexp::search("(?x)  \\A  (?: (?:/(?=.*/))? (.*) / )?  ([^/]*?)  (?: :([\\d+:-x\\+]*) | @(.*) )?  \\z", str))
 			{
