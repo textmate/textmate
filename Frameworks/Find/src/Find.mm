@@ -221,6 +221,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 @property (nonatomic) NSUInteger countOfMatches;
 @property (nonatomic) NSUInteger countOfExcludedMatches;
 @property (nonatomic) BOOL closeWindowOnSuccess;
+@property (nonatomic) BOOL performingFolderSearch;
 @property (nonatomic) BOOL performedReplaceAll;
 @property (nonatomic) BOOL performedSaveAll;
 @end
@@ -238,15 +239,22 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 {
 	if(!_windowController)
 	{
-		self.windowController = [FindWindowController new];
-		self.windowController.nextResponder = self;
-		self.windowController.resultsOutlineView.action       = @selector(didSingleClickResultsOutlineView:);
-		self.windowController.resultsOutlineView.doubleAction = @selector(didDoubleClickResultsOutlineView:);
-		self.windowController.resultsOutlineView.target       = self;
-		self.windowController.resultsOutlineView.dataSource   = self;
-		self.windowController.resultsOutlineView.delegate     = self;
+		_windowController = [FindWindowController new];
+		_windowController.nextResponder = self;
+		_windowController.resultsOutlineView.action       = @selector(didSingleClickResultsOutlineView:);
+		_windowController.resultsOutlineView.doubleAction = @selector(didDoubleClickResultsOutlineView:);
+		_windowController.resultsOutlineView.target       = self;
+		_windowController.resultsOutlineView.dataSource   = self;
+		_windowController.resultsOutlineView.delegate     = self;
+
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowWillClose:) name:NSWindowWillCloseNotification object:_windowController.window];
 	}
 	return _windowController;
+}
+
+- (void)windowWillClose:(NSNotification*)aNotification
+{
+	[self stopSearch:self];
 }
 
 // ====================================
@@ -318,8 +326,11 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 - (IBAction)stopSearch:(id)sender
 {
-	[self.documentSearch stop];
-	self.windowController.statusString = @"Stopped.";
+	if(_performingFolderSearch)
+	{
+		[_documentSearch stop];
+		self.windowController.statusString = @"Stopped.";
+	}
 }
 
 // These are disabled via menu validation
@@ -626,6 +637,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(folderSearchDidReceiveResults:) name:FFDocumentSearchDidReceiveResultsNotification object:_documentSearch];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(folderSearchDidFinish:) name:FFDocumentSearchDidFinishNotification object:_documentSearch];
 		[_documentSearch addObserver:self forKeyPath:@"currentPath" options:(NSKeyValueObservingOptionNew|NSKeyValueObservingOptionOld) context:NULL];
+		self.performingFolderSearch = YES;
 		[_documentSearch start];
 	}
 
@@ -660,6 +672,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 - (void)folderSearchDidFinish:(NSNotification*)aNotification
 {
+	self.performingFolderSearch = NO;
 	self.windowController.busy = NO;
 	if(!_documentSearch)
 		return;
