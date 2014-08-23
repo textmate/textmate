@@ -12,11 +12,6 @@ namespace find
 
 namespace find
 {
-	size_t match_t::line_span () const
-	{
-		return (range.to.line - range.from.line) + (range.to.column != 0 ? 1 : 0);
-	}
-
 	scan_path_t::scan_path_t ()
 	{
 		pthread_mutex_init(&_mutex, NULL);

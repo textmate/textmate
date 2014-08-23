@@ -36,6 +36,69 @@ enum FindActionTag
 	FindActionReplaceSelected,
 };
 
+static NSAttributedString* AttributedStringForMatch (std::string const& text, size_t from, size_t to, size_t n)
+{
+	ns::attr_string_t str;
+	str.add(ns::style::line_break(NSLineBreakByTruncatingTail));
+	str.add([NSColor darkGrayColor]);
+	str.add([NSFont systemFontOfSize:11]);
+
+	str.add(text::pad(++n, 4) + ": ");
+
+	bool inMatch = false;
+	size_t last = text.size();
+	for(size_t it = 0; it != last; )
+	{
+		size_t eol = std::find(text.begin() + it, text.end(), '\n') - text.begin();
+
+		if(oak::cap(it, from, eol) == from)
+		{
+			str.add(text.substr(it, from-it));
+			it = from;
+			inMatch = true;
+		}
+
+		if(inMatch)
+		{
+			str.add([NSFont boldSystemFontOfSize:11]);
+			str.add([NSColor blackColor]);
+		}
+
+		if(inMatch && oak::cap(it, to, eol) == to)
+		{
+			str.add(text.substr(it, to-it));
+			it = to;
+			inMatch = false;
+
+			str.add([NSColor darkGrayColor]);
+			str.add([NSFont systemFontOfSize:11]);
+		}
+
+		str.add(text.substr(it, eol-it));
+
+		if(eol != last)
+		{
+			str.add("¬");
+
+			if(inMatch)
+			{
+				str.add([NSFont systemFontOfSize:11]);
+				str.add([NSColor darkGrayColor]);
+			}
+
+			if(++eol == to)
+				inMatch = false;
+
+			if(eol != last)
+				str.add("\n" + text::pad(++n, 4) + ": ");
+		}
+
+		it = eol;
+	}
+
+	return str;
+}
+
 @interface FFResultNode : NSObject <NSCopying>
 {
 	document::document_t::callback_t* _callback;
@@ -94,6 +157,37 @@ enum FindActionTag
 - (document::document_ptr)document { return [_match match].document; }
 - (NSString*)path                  { return [NSString stringWithCxxString:self.document->path()]; }
 - (NSString*)identifier            { return [NSString stringWithCxxString:self.document->identifier()]; }
+
+- (NSUInteger)lineSpan
+{
+	return ([_match match].range.to.line - [_match match].range.from.line) + ([_match match].range.to.column != 0 ? 1 : 0);
+}
+
+- (NSAttributedString*)excerptWithReplacement:(NSString*)replacementString
+{
+	find::match_t const& m = [_match match];
+
+	size_t from = m.first - m.excerpt_offset;
+	size_t to   = m.last  - m.excerpt_offset;
+
+	std::string prefix = m.excerpt.substr(0, from);
+	std::string middle = m.excerpt.substr(from, to - from);
+	std::string suffix = m.excerpt.substr(to);
+
+	if(replacementString)
+		middle = m.captures.empty() ? to_s(replacementString) : format_string::expand(to_s(replacementString), m.captures);
+
+	if(!utf8::is_valid(prefix.begin(), prefix.end()) && utf8::is_valid(middle.begin(), middle.end()) && utf8::is_valid(suffix.begin(), suffix.end()))
+	{
+		ns::attr_string_t res;
+		res = ns::attr_string_t([NSColor darkGrayColor])
+		    << ns::style::line_break(NSLineBreakByTruncatingTail)
+		    << text::format("%zu-%zu: Range is not valid UTF-8, please contact: http://macromates.com/support", m.first, m.last);
+		return res.get();
+	}
+
+	return AttributedStringForMatch(prefix + middle + suffix, prefix.size(), prefix.size() + middle.size(), m.line_number);
+}
 
 - (NSImage*)icon
 {
@@ -549,7 +643,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 		FFResultNode* node = [FFResultNode resultNodeWithMatch:match];
 		if(!parent || parent.document->identifier() != node.document->identifier())
-			[_results addResultNode:(parent = [FFResultNode resultNodeWithMatch:[[FFMatch alloc] initWithMatch:find::match_t([match match].document)]])];
+			[_results addResultNode:(parent = [FFResultNode resultNodeWithMatch:match])];
 		[parent addResultNode:node];
 	}
 	_countOfMatches += [matches count];
@@ -640,103 +734,14 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	return [(item ?: _results).matches objectAtIndex:childIndex];
 }
 
-static NSAttributedString* AttributedStringForMatch (std::string const& text, size_t from, size_t to, size_t n)
-{
-	ns::attr_string_t str;
-	str.add(ns::style::line_break(NSLineBreakByTruncatingTail));
-	str.add([NSColor darkGrayColor]);
-	str.add([NSFont systemFontOfSize:11]);
-
-	str.add(text::pad(++n, 4) + ": ");
-
-	bool inMatch = false;
-	size_t last = text.size();
-	for(size_t it = 0; it != last; )
-	{
-		size_t eol = std::find(text.begin() + it, text.end(), '\n') - text.begin();
-
-		if(oak::cap(it, from, eol) == from)
-		{
-			str.add(text.substr(it, from-it));
-			it = from;
-			inMatch = true;
-		}
-
-		if(inMatch)
-		{
-			str.add([NSFont boldSystemFontOfSize:11]);
-			str.add([NSColor blackColor]);
-		}
-
-		if(inMatch && oak::cap(it, to, eol) == to)
-		{
-			str.add(text.substr(it, to-it));
-			it = to;
-			inMatch = false;
-
-			str.add([NSColor darkGrayColor]);
-			str.add([NSFont systemFontOfSize:11]);
-		}
-
-		str.add(text.substr(it, eol-it));
-
-		if(eol != last)
-		{
-			str.add("¬");
-
-			if(inMatch)
-			{
-				str.add([NSFont systemFontOfSize:11]);
-				str.add([NSColor darkGrayColor]);
-			}
-
-			if(++eol == to)
-				inMatch = false;
-
-			if(eol != last)
-				str.add("\n" + text::pad(++n, 4) + ": ");
-		}
-
-		it = eol;
-	}
-
-	return str;
-}
-
 - (id)outlineView:(NSOutlineView*)outlineView objectValueForTableColumn:(NSTableColumn*)tableColumn byItem:(FFResultNode*)item
 {
 	if([self outlineView:outlineView isGroupItem:item])
 		return item;
-
-	if([[tableColumn identifier] isEqualToString:@"checkbox"])
-	{
+	else if([[tableColumn identifier] isEqualToString:@"checkbox"])
 		return @(!item.exclude);
-	}
 	else if([[tableColumn identifier] isEqualToString:@"match"])
-	{
-		find::match_t const& m = [item.match match];
-
-		size_t from = m.first - m.excerpt_offset;
-		size_t to   = m.last  - m.excerpt_offset;
-
-		std::string prefix = m.excerpt.substr(0, from);
-		std::string middle = m.excerpt.substr(from, to - from);
-		std::string suffix = m.excerpt.substr(to);
-
-		if(!utf8::is_valid(prefix.begin(), prefix.end()) && utf8::is_valid(middle.begin(), middle.end()) && utf8::is_valid(suffix.begin(), suffix.end()))
-		{
-			ns::attr_string_t res;
-			res = ns::attr_string_t([NSColor darkGrayColor])
-			    << ns::style::line_break(NSLineBreakByTruncatingTail)
-			    << text::format("%zu-%zu: Range is not valid UTF-8, please contact: http://macromates.com/support", m.first, m.last);
-			return res.get();
-		}
-
-		if(item.replacementDone || !item.exclude && self.windowController.showReplacementPreviews)
-			middle = self.windowController.regularExpression ? format_string::expand(to_s(self.replaceString), m.captures) : to_s(self.replaceString);
-
-		return AttributedStringForMatch(prefix + middle + suffix, prefix.size(), prefix.size() + middle.size(), m.line_number);
-	}
+		return [item excerptWithReplacement:(item.replacementDone || !item.exclude && self.windowController.showReplacementPreviews) ? self.replaceString : nil];
 	return nil;
 }
 
@@ -795,11 +800,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 
 - (CGFloat)outlineView:(NSOutlineView*)outlineView heightOfRowByItem:(FFResultNode*)item
 {
-	if([self outlineView:outlineView isGroupItem:item])
-		return 22;
-
-	find::match_t const& m = [item.match match];
-	return m.line_span() * [outlineView rowHeight];
+	return [self outlineView:outlineView isGroupItem:item] ? 22 : item.lineSpan * [outlineView rowHeight];
 }
 
 - (NSCell*)outlineView:(NSOutlineView*)outlineView dataCellForTableColumn:(NSTableColumn*)tableColumn item:(FFResultNode*)item
