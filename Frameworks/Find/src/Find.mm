@@ -428,31 +428,36 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 				[self clearMatches];
 
 				FFDocumentSearch* folderSearch = [FFDocumentSearch new];
-				folderSearch.searchString      = controller.findString;
-				folderSearch.options           = _findOptions;
+				folderSearch.searchString = controller.findString;
+				folderSearch.options      = _findOptions;
+
 				if(self.documentIdentifier && [controller.searchIn isEqualToString:FFSearchInDocument])
 				{
 					folderSearch.documentIdentifier = self.documentIdentifier;
 				}
+				else if([controller.searchIn isEqualToString:FFSearchInOpenFiles])
+				{
+					folderSearch.directory = [NSString stringWithCxxString:find::kSearchOpenFiles];
+				}
 				else
 				{
-					path::glob_list_t globs;
-					if(![controller.searchIn isEqualToString:FFSearchInOpenFiles])
-					{
-						auto const settings = settings_for_path(NULL_STR, "", to_s(folder));
-						globs.add_exclude_glob(settings.get(kSettingsExcludeDirectoriesInFolderSearchKey, NULL_STR), path::kPathItemDirectory);
-						globs.add_exclude_glob(settings.get(kSettingsExcludeDirectoriesKey,               NULL_STR), path::kPathItemDirectory);
-						globs.add_exclude_glob(settings.get(kSettingsExcludeFilesInFolderSearchKey,       NULL_STR), path::kPathItemFile);
-						globs.add_exclude_glob(settings.get(kSettingsExcludeFilesKey,                     NULL_STR), path::kPathItemFile);
-						for(auto key : { kSettingsExcludeInFolderSearchKey, kSettingsExcludeKey, kSettingsBinaryKey })
-							globs.add_exclude_glob(settings.get(key, NULL_STR));
-						globs.add_include_glob(controller.searchHiddenFolders ? "{,.}*" : "*", path::kPathItemDirectory);
-						globs.add_include_glob(to_s(controller.globString), path::kPathItemFile);
-					}
+					auto const settings = settings_for_path(NULL_STR, "", to_s(folder));
 
-					find::folder_scan_settings_t search([controller.searchIn isEqualToString:FFSearchInOpenFiles] ? find::folder_scan_settings_t::open_files : to_s(folder), globs, controller.followSymbolicLinks);
-					[folderSearch setFolderOptions:search];
+					path::glob_list_t globs;
+					globs.add_exclude_glob(settings.get(kSettingsExcludeDirectoriesInFolderSearchKey, NULL_STR), path::kPathItemDirectory);
+					globs.add_exclude_glob(settings.get(kSettingsExcludeDirectoriesKey,               NULL_STR), path::kPathItemDirectory);
+					globs.add_exclude_glob(settings.get(kSettingsExcludeFilesInFolderSearchKey,       NULL_STR), path::kPathItemFile);
+					globs.add_exclude_glob(settings.get(kSettingsExcludeFilesKey,                     NULL_STR), path::kPathItemFile);
+					for(auto key : { kSettingsExcludeInFolderSearchKey, kSettingsExcludeKey, kSettingsBinaryKey })
+						globs.add_exclude_glob(settings.get(key, NULL_STR));
+					globs.add_include_glob(controller.searchHiddenFolders ? "{,.}*" : "*", path::kPathItemDirectory);
+					globs.add_include_glob(to_s(controller.globString), path::kPathItemFile);
+
+					folderSearch.directory   = folder;
+					folderSearch.globList    = globs;
+					folderSearch.followLinks = controller.followSymbolicLinks;
 				}
+
 				self.documentSearch = folderSearch;
 			}
 			break;

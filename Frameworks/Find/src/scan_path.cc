@@ -7,11 +7,8 @@ OAK_DEBUG_VAR(Find_Scan_Path);
 
 namespace find
 {
-	std::string folder_scan_settings_t::open_files = "open_files";
-} /* find */
+	std::string const kSearchOpenFiles = "internal://open-files";
 
-namespace find
-{
 	scan_path_t::scan_path_t ()
 	{
 		pthread_mutex_init(&_mutex, NULL);
@@ -73,7 +70,7 @@ namespace find
 	{
 		oak::set_thread_name("find::scan_path_t");
 
-		if(_search.path == find::folder_scan_settings_t::open_files)
+		if(_path == kSearchOpenFiles)
 		{
 			for(auto const& doc : document::scanner_t::open_documents())
 				scan_document(doc);
@@ -81,7 +78,7 @@ namespace find
 			return;
 		}
 
-		document::scanner_t scanner(_search.path, _search.globs, _search.follow_links, true /* depth first */);
+		document::scanner_t scanner(_path, _glob_list, _follow_links, true /* depth first */);
 
 		bool isRunning = true;
 		while(isRunning && !_should_stop)

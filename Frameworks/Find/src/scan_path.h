@@ -8,16 +8,7 @@
 
 namespace find
 {
-	struct folder_scan_settings_t
-	{
-		static std::string open_files;
-
-		folder_scan_settings_t (std::string const& path = "/", path::glob_list_t const& globs = path::glob_list_t("*"), bool follow_links = false) : path(path), globs(globs), follow_links(follow_links) { }
-
-		std::string path;
-		path::glob_list_t globs;
-		bool follow_links;
-	};
+	extern std::string const kSearchOpenFiles;
 
 	struct match_t
 	{
@@ -39,45 +30,24 @@ namespace find
 	{
 		WATCH_LEAKS(find::scan_path_t);
 
-		// you can just delete this object and forget about it, it will gracefully terminate thread etc.
 		scan_path_t ();
 		~scan_path_t ();
 
-		// before doing a search, setup at least a search string and folder
-		void set_search_string (std::string const& search_string)
-		{
-			ASSERT(!is_running());
-			_search_string = search_string;
-		}
+		void set_search_string (std::string const& str)     { ASSERT(!is_running()); _search_string = str; }
+		void set_options (find::options_t searchOptions)    { ASSERT(!is_running()); _options = searchOptions; }
+		void set_path (std::string const& path)             { ASSERT(!is_running()); _path = _current_path = path; }
+		void set_glob_list (path::glob_list_t const& globs) { ASSERT(!is_running()); _glob_list = globs; }
+		void set_follow_links (bool follow_links)           { ASSERT(!is_running()); _follow_links = follow_links; }
 
-		void set_folder_options (folder_scan_settings_t const& search)
-		{
-			ASSERT(!is_running());
-			_search = search;
-			_current_path = search.path;
-		}
-
-		// optinally set some options or a file glob
-		void set_file_options (find::options_t options)
-		{
-			ASSERT(!is_running());
-			_options = options;
-		}
-
-		// then start the search, and potentially prematurely stop it
 		void start ();
 		void stop ();
-
-		// while running, probe it to see if it is still running, periodically accept results, and update the folder it shows as being scanned
 		bool is_running () const;
 
 		std::vector<match_t> accept_matches ();
 		std::string current_path () const;
 
-		std::string const& search_string () const             { return _search_string; };
-		folder_scan_settings_t const& folder_options () const { return _search; };
-		size_t scanned_file_count () const                    { return _scanned_file_count; }
-		size_t scanned_byte_count () const                    { return _scanned_byte_count; }
+		size_t scanned_file_count () const  { return _scanned_file_count; }
+		size_t scanned_byte_count () const  { return _scanned_byte_count; }
 
 		void scan_document (document::document_ptr const& document);
 
@@ -88,17 +58,20 @@ namespace find
 		std::string _search_string;
 		find::options_t _options = find::none;
 
-		folder_scan_settings_t _search;
+		std::string _path;
+		path::glob_list_t _glob_list = path::glob_list_t("*");
+		bool _follow_links = false;
+
 		std::string _current_path;
-
 		std::vector<match_t> _matches;
-
-		volatile bool _is_running = false, _should_stop = false;
 		size_t _scanned_file_count = 0;
 		size_t _scanned_byte_count = 0;
 
 		pthread_t _thread;
 		mutable pthread_mutex_t _mutex;
+
+		volatile bool _is_running  = false;
+		volatile bool _should_stop = false;
 	};
 
 } /* find */

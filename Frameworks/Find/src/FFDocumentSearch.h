@@ -7,19 +7,21 @@ extern NSString* const FFDocumentSearchDidFinishNotification;
 
 // This is an Obj-C wrapper around match_t so that we can put it in an NSArray
 @interface FFMatch : NSObject
-- (id)initWithMatch:(find::match_t const&)aMatch;
 - (find::match_t const&)match;
 @end
 
 @interface FFDocumentSearch : NSObject
 // Set up the search with these options
-@property (nonatomic) find::options_t options;
 @property (nonatomic, copy) NSString* searchString;
+@property (nonatomic) find::options_t options;
 
-// Either folderOptions _or_ a documentIdentifier should be provided
+// Either directory _or_ a documentIdentifier should be provided
 // If a documentIdentifier is set only that document will be searched.
-@property (nonatomic) find::folder_scan_settings_t folderOptions;
+@property (nonatomic) NSString* directory;
 @property (nonatomic) NSString* documentIdentifier;
+
+@property (nonatomic) BOOL followLinks;
+@property (nonatomic) path::glob_list_t globList;
 
 // Start the search, observing the currentPath, and prematurely stop it if desired.
 - (void)start;

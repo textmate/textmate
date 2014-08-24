@@ -1,4 +1,5 @@
 #import "FFDocumentSearch.h"
+#import "scan_path.h"
 #import <OakFoundation/NSString Additions.h>
 #import <OakFoundation/OakTimer.h>
 #import <ns/ns.h>
@@ -54,9 +55,11 @@ OAK_DEBUG_VAR(Find_FolderSearch);
 {
 	D(DBF_Find_FolderSearch, bug("folder: %s searchString: %s documentIdentifier: %s\n", self.folderOptions.path.c_str(), to_s(self.searchString).c_str(), to_s(self.documentIdentifier).c_str()););
 	_scanner = std::make_shared<find::scan_path_t>();
-	_scanner->set_folder_options(self.folderOptions);
-	_scanner->set_search_string(to_s(self.searchString));
-	_scanner->set_file_options(self.options);
+	_scanner->set_path(to_s(_directory));
+	_scanner->set_follow_links(_followLinks);
+	_scanner->set_glob_list(_globList);
+	_scanner->set_search_string(to_s(_searchString));
+	_scanner->set_options(_options);
 
 	_searchStartDate   = [NSDate new];
 	_scannerProbeTimer = [OakTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(updateMatches:) userInfo:NULL repeats:YES];
