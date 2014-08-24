@@ -851,6 +851,17 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		if(index == NSNotFound)
 			return;
 
+		if(OakIsAlternateKeyOrMouseEvent())
+		{
+			if(item.document->path() != NULL_STR)
+			{
+				std::string path = path::relative_to(item.document->path(), to_s(_documentSearch.directory));
+				NSString* newGlob = [_windowController.globString stringByAppendingFormat:@"~%@", [NSString stringWithCxxString:path]];
+				NSLog(@"%s %@", sel_getName(_cmd), newGlob);
+				// _windowController.globString = newGlob;
+			}
+		}
+
 		[item removeFromParent];
 
 		NSString* fmt = MSG_SHOWING_ZERO_MATCHES_FMT;
