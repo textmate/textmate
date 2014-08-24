@@ -460,7 +460,7 @@ static NSButton* OakCreateStopSearchButton ()
 	if(self.showsResultsOutlineView)
 	{
 		CONSTRAINT(@"H:|[results(==resultsTopDivider,==resultsBottomDivider)]|", 0);
-		[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[where]-[resultsTopDivider][results(>=50,==height@490)][resultsBottomDivider]-(8)-[status]" options:0 metrics:@{ @"height" : @(self.findResultsHeight) } views:views]];
+		[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[where]-[resultsTopDivider][results(==height@490)][resultsBottomDivider]-(8)-[status]" options:0 metrics:@{ @"height" : @(self.findResultsHeight) } views:views]];
 	}
 	else
 	{
@@ -753,9 +753,37 @@ static NSButton* OakCreateStopSearchButton ()
 {
 	if(_showsResultsOutlineView == flag)
 		return;
+	_showsResultsOutlineView = flag;
 
 	BOOL isWindowLoaded = [self isWindowLoaded];
 	CGFloat desiredHeight = self.findResultsHeight;
+
+	if(flag == NO)
+	{
+		NSLayoutConstraint* heightConstraint = [NSLayoutConstraint constraintWithItem:self.resultsScrollView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:NSHeight(self.resultsScrollView.frame)];
+		heightConstraint.priority = NSLayoutPriorityRequired;
+		[self.resultsScrollView addConstraint:heightConstraint];
+
+		[NSAnimationContext beginGrouping];
+
+		[NSAnimationContext currentContext].completionHandler = ^{
+			[self.resultsScrollView removeConstraint:heightConstraint];
+			[self updateConstraints];
+
+			for(NSView* view in @[ self.resultsTopDivider, self.resultsScrollView, self.resultsBottomDivider ])
+				[view removeFromSuperview];
+
+			self.window.defaultButtonCell = flag ? self.findAllButton.cell : self.findNextButton.cell;
+		};
+
+		CABasicAnimation* anim = [CABasicAnimation animation];
+		heightConstraint.animations = @{ @"constant" : anim };
+		[heightConstraint.animator setConstant:0];
+
+		[NSAnimationContext endGrouping];
+
+		return;
+	}
 
 	for(NSView* view in @[ self.resultsTopDivider, self.resultsScrollView, self.resultsBottomDivider ])
 	{
