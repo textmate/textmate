@@ -87,7 +87,17 @@ _OutputIter copy_menu_items (NSMenu* menu, _OutputIter out, NSArray* parentNames
 		if(id target = [NSApp targetForAction:[item action]])
 		{
 			if(![target respondsToSelector:@selector(validateMenuItem:)] || [target validateMenuItem:item])
-				*out++ = { to_s([[item title] stringByAppendingFormat:@" — %@", [parentNames componentsJoinedByString:@" » "]]), item };
+			{
+				NSString* title = [item title];
+				if([item state] == NSOnState)
+				{
+					if([[[item onStateImage] name] isEqualToString:@"NSMenuItemBullet"])
+							title = [title stringByAppendingString:@" (•)"];
+					else	title = [title stringByAppendingString:@" (✓)"];
+				}
+				title = [title stringByAppendingFormat:@" — %@", [parentNames componentsJoinedByString:@" » "]];
+				*out++ = { to_s(title), item };
+			}
 		}
 
 		if(NSMenu* submenu = [item submenu])
