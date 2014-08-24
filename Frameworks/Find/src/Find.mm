@@ -152,6 +152,13 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 	[_matches addObject:aMatch];
 }
 
+- (void)removeFromParent
+{
+	_next.previous = _previous;
+	_previous.next = _next;
+	[_parent.matches removeObject:self];
+}
+
 - (FFResultNode*)firstResultNode   { return [_matches firstObject]; }
 - (FFResultNode*)lastResultNode    { return [_matches lastObject]; }
 - (document::document_ptr)document { return [_match match].document; }
