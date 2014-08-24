@@ -8,6 +8,10 @@
 #define MSG_ONE_MATCH_FMT                    FFString(@"Found one result for “%@”.",        @"Find all completion status, one match.")
 #define MSG_MULTIPLE_MATCHES_FMT             FFString(@"Found %2$@ results for “%1$@”.",    @"Find all completion status, multiple matches.")
 
+#define MSG_SHOWING_ZERO_MATCHES_FMT         FFString(@"No results for “%@”.",              @"Status text for zero matches.")
+#define MSG_SHOWING_ONE_MATCH_FMT            FFString(@"Showing one result for “%@”.",      @"Status text for one match.")
+#define MSG_SHOWING_MULTIPLE_MATCHES_FMT     FFString(@"Showing %2$@ results for “%1$@”.",  @"Status text for multiple matches.")
+
 #define MSG_SEARCHED_FILES_ONE               FFString(@" (searched one file in %2$.1f seconds)",  @"Find all completion status, one file")
 #define MSG_SEARCHED_FILES_MULTIPLE          FFString(@" (searched %@ files in %.1f seconds)",    @"Find all completion status, multiple files")
 #define MSG_SEARCHED_BYTES                   FFString(@" (searched %@ in %.1f seconds)",          @"Find all completion status, quantity in bytes")
