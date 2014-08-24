@@ -167,7 +167,9 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 
 - (NSUInteger)lineSpan
 {
-	return ([_match match].range.to.line - [_match match].range.from.line) + ([_match match].range.to.column != 0 ? 1 : 0);
+	text::pos_t const from = [_match match].range.from;
+	text::pos_t const to   = [_match match].range.to;
+	return to.line - from.line + (from == to || to.column != 0 ? 1 : 0);
 }
 
 - (NSAttributedString*)excerptWithReplacement:(NSString*)replacementString
