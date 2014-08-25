@@ -110,7 +110,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 @property (nonatomic) NSUInteger countOfExcluded;
 
 @property (nonatomic) FFMatch* match;
-@property (nonatomic) NSArray* matches;
+@property (nonatomic) NSArray* children;
 @property (nonatomic) BOOL exclude;
 @property (nonatomic) BOOL replacementDone;
 @property (nonatomic) NSImage* icon;
@@ -161,9 +161,9 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 
 - (void)addResultNode:(FFResultNode*)aMatch
 {
-	if(!_matches)
+	if(!_children)
 	{
-		_matches = [NSMutableArray array];
+		_children = [NSMutableArray array];
 		if(_countOfLeafs)
 			self.countOfLeafs -= 1;
 	}
@@ -172,7 +172,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 	aMatch.previous.next = aMatch;
 	aMatch.parent        = self;
 
-	[(NSMutableArray*)_matches addObject:aMatch];
+	[(NSMutableArray*)_children addObject:aMatch];
 	self.countOfLeafs    += aMatch.countOfLeafs;
 	self.countOfExcluded += aMatch.countOfExcluded;
 }
@@ -181,16 +181,16 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 {
 	_next.previous = _previous;
 	_previous.next = _next;
-	[(NSMutableArray*)_parent.matches removeObject:self];
+	[(NSMutableArray*)_parent.children removeObject:self];
 	_parent.countOfExcluded -= _countOfExcluded;
 	_parent.countOfLeafs    -= _countOfLeafs;
 }
 
 - (void)setExclude:(BOOL)flag
 {
-	if(_matches)
+	if(_children)
 	{
-		for(FFResultNode* child in _matches)
+		for(FFResultNode* child in _children)
 			child.exclude = flag;
 	}
 	else
@@ -201,11 +201,11 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 
 - (BOOL)exclude
 {
-	return !_matches && _countOfExcluded == 1;
+	return !_children && _countOfExcluded == 1;
 }
 
-- (FFResultNode*)firstResultNode   { return [_matches firstObject]; }
-- (FFResultNode*)lastResultNode    { return [_matches lastObject]; }
+- (FFResultNode*)firstResultNode   { return [_children firstObject]; }
+- (FFResultNode*)lastResultNode    { return [_children lastObject]; }
 - (document::document_ptr)document { return [_match match].document; }
 - (NSString*)path                  { return [NSString stringWithCxxString:self.document->path()]; }
 - (NSString*)identifier            { return [NSString stringWithCxxString:self.document->identifier()]; }
@@ -399,9 +399,9 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	NSUInteger fileCount = 0;
 	std::vector<document::document_ptr> failedDocs;
 
-	for(FFResultNode* parent in _results.matches)
+	for(FFResultNode* parent in _results.children)
 	{
-		for(FFResultNode* child in parent.matches)
+		for(FFResultNode* child in parent.children)
 		{
 			if(!child.replacementDone)
 				continue;
@@ -525,10 +525,10 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 				NSUInteger replaceCount = 0, fileCount = 0;
 				std::string replaceString = to_s(controller.replaceString);
 
-				for(FFResultNode* parent in _results.matches)
+				for(FFResultNode* parent in _results.children)
 				{
 					std::multimap<std::pair<size_t, size_t>, std::string> replacements;
-					for(FFResultNode* child in parent.matches)
+					for(FFResultNode* child in parent.children)
 					{
 						if(child.exclude || child.replacementDone)
 							continue;
@@ -663,7 +663,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 - (void)clearMatches
 {
-	for(FFResultNode* parent in _results.matches)
+	for(FFResultNode* parent in _results.children)
 	{
 		if(document::document_ptr doc = parent.document)
 			doc->remove_all_marks("search");
@@ -735,7 +735,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		return;
 
 	NSMutableArray* documents = [NSMutableArray array];
-	for(FFResultNode* parent in _results.matches)
+	for(FFResultNode* parent in _results.children)
 	{
 		[documents addObject:@{
 			@"identifier"      : [NSString stringWithCxxString:parent.firstResultNode.document->identifier()],
@@ -791,7 +791,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 - (NSInteger)outlineView:(NSOutlineView*)outlineView numberOfChildrenOfItem:(FFResultNode*)item
 {
-	return [(item ?: _results).matches count];
+	return [(item ?: _results).children count];
 }
 
 - (BOOL)outlineView:(NSOutlineView*)outlineView isItemExpandable:(FFResultNode*)item
@@ -801,7 +801,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 - (id)outlineView:(NSOutlineView*)outlineView child:(NSInteger)childIndex ofItem:(FFResultNode*)item
 {
-	return [(item ?: _results).matches objectAtIndex:childIndex];
+	return [(item ?: _results).children objectAtIndex:childIndex];
 }
 
 - (id)outlineView:(NSOutlineView*)outlineView objectValueForTableColumn:(NSTableColumn*)tableColumn byItem:(FFResultNode*)item
@@ -945,9 +945,9 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 - (BOOL)resultsCollapsed
 {
 	NSUInteger expanded = 0;
-	for(FFResultNode* parent in _results.matches)
+	for(FFResultNode* parent in _results.children)
 		expanded += [_windowController.resultsOutlineView isItemExpanded:parent] ? 1 : 0;
-	return [_results.matches count] && 2 * expanded <= [_results.matches count];
+	return [_results.children count] && 2 * expanded <= [_results.children count];
 }
 
 - (IBAction)takeLevelToFoldFrom:(id)sender
@@ -998,7 +998,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	else
 	{
 		char key = 0;
-		for(FFResultNode* parent in _results.matches)
+		for(FFResultNode* parent in _results.children)
 		{
 			if(document::document_ptr doc = parent.document)
 			{
@@ -1023,7 +1023,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	for(NSUInteger index = [selectedRows firstIndex]; index != NSNotFound; index = [selectedRows indexGreaterThanIndex:index])
 	{
 		FFResultNode* item = [outlineView itemAtRow:index];
-		if([item.matches count])
+		if([item.children count])
 			continue;
 
 		find::match_t const& m = [item.match match];
