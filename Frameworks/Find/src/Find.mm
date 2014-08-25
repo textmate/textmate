@@ -111,7 +111,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 
 @property (nonatomic) FFMatch* match;
 @property (nonatomic) NSArray* children;
-@property (nonatomic) BOOL exclude;
+@property (nonatomic) BOOL excluded;
 @property (nonatomic) BOOL replacementDone;
 @property (nonatomic) NSImage* icon;
 
@@ -186,12 +186,12 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 	_parent.countOfLeafs    -= _countOfLeafs;
 }
 
-- (void)setExclude:(BOOL)flag
+- (void)setExcluded:(BOOL)flag
 {
 	if(_children)
 	{
 		for(FFResultNode* child in _children)
-			child.exclude = flag;
+			child.excluded = flag;
 	}
 	else
 	{
@@ -199,7 +199,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 	}
 }
 
-- (BOOL)exclude
+- (BOOL)excluded
 {
 	return !_children && _countOfExcluded == 1;
 }
@@ -530,7 +530,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 					std::multimap<std::pair<size_t, size_t>, std::string> replacements;
 					for(FFResultNode* child in parent.children)
 					{
-						if(child.exclude || child.replacementDone)
+						if(child.excluded || child.replacementDone)
 							continue;
 						child.replacementDone = YES;
 						replacements.emplace(std::make_pair([child.match match].first, [child.match match].last), controller.regularExpression ? format_string::expand(replaceString, [child.match match].captures) : replaceString);
@@ -809,9 +809,9 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	if([self outlineView:outlineView isGroupItem:item])
 		return item;
 	else if([[tableColumn identifier] isEqualToString:@"checkbox"])
-		return @(!item.exclude);
+		return @(!item.excluded);
 	else if([[tableColumn identifier] isEqualToString:@"match"])
-		return [item excerptWithReplacement:(item.replacementDone || !item.exclude && self.windowController.showReplacementPreviews) ? self.replaceString : nil];
+		return [item excerptWithReplacement:(item.replacementDone || !item.excluded && self.windowController.showReplacementPreviews) ? self.replaceString : nil];
 	return nil;
 }
 
@@ -822,8 +822,8 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 	BOOL exclude = ![objectValue boolValue];
 	if(OakIsAlternateKeyOrMouseEvent())
-			item.parent.exclude = exclude;
-	else	item.exclude = exclude;
+			item.parent.excluded = exclude;
+	else	item.excluded = exclude;
 
 	[self updateActionButtons:self];
 	if(OakIsAlternateKeyOrMouseEvent())
@@ -1056,7 +1056,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 - (void)allMatchesSetExclude:(BOOL)exclude
 {
-	_results.exclude = exclude;
+	_results.excluded = exclude;
 	[_windowController.resultsOutlineView reloadData];
 	[self updateActionButtons:self];
 }
