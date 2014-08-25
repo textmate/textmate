@@ -106,9 +106,11 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 @property (nonatomic, weak) FFResultNode* parent;
 @property (nonatomic, weak) FFResultNode* next;
 @property (nonatomic, weak) FFResultNode* previous;
+@property (nonatomic) NSUInteger countOfLeafs;
+@property (nonatomic) NSUInteger countOfExcluded;
 
 @property (nonatomic) FFMatch* match;
-@property (nonatomic) NSMutableArray* matches;
+@property (nonatomic) NSArray* matches;
 @property (nonatomic) BOOL exclude;
 @property (nonatomic) BOOL replacementDone;
 @property (nonatomic) NSImage* icon;
@@ -122,6 +124,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 + (FFResultNode*)resultNodeWithMatch:(FFMatch*)aMatch
 {
 	FFResultNode* res = [FFResultNode new];
+	res.countOfLeafs = 1;
 	res.match = aMatch;
 	return res;
 }
@@ -140,23 +143,65 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 	return self;
 }
 
+- (void)setCountOfLeafs:(NSUInteger)countOfLeafs
+{
+	if(_countOfLeafs == countOfLeafs)
+		return;
+	_parent.countOfLeafs += countOfLeafs - _countOfLeafs;
+	_countOfLeafs = countOfLeafs;
+}
+
+- (void)setCountOfExcluded:(NSUInteger)countOfExcluded
+{
+	if(_countOfExcluded == countOfExcluded)
+		return;
+	_parent.countOfExcluded += countOfExcluded - _countOfExcluded;
+	_countOfExcluded = countOfExcluded;
+}
+
 - (void)addResultNode:(FFResultNode*)aMatch
 {
 	if(!_matches)
+	{
 		_matches = [NSMutableArray array];
+		if(_countOfLeafs)
+			self.countOfLeafs -= 1;
+	}
 
 	aMatch.previous      = self.lastResultNode;
 	aMatch.previous.next = aMatch;
 	aMatch.parent        = self;
 
-	[_matches addObject:aMatch];
+	[(NSMutableArray*)_matches addObject:aMatch];
+	self.countOfLeafs    += aMatch.countOfLeafs;
+	self.countOfExcluded += aMatch.countOfExcluded;
 }
 
 - (void)removeFromParent
 {
 	_next.previous = _previous;
 	_previous.next = _next;
-	[_parent.matches removeObject:self];
+	[(NSMutableArray*)_parent.matches removeObject:self];
+	_parent.countOfExcluded -= _countOfExcluded;
+	_parent.countOfLeafs    -= _countOfLeafs;
+}
+
+- (void)setExclude:(BOOL)flag
+{
+	if(_matches)
+	{
+		for(FFResultNode* child in _matches)
+			child.exclude = flag;
+	}
+	else
+	{
+		self.countOfExcluded = flag ? 1 : 0;
+	}
+}
+
+- (BOOL)exclude
+{
+	return !_matches && _countOfExcluded == 1;
 }
 
 - (FFResultNode*)firstResultNode   { return [_matches firstObject]; }
@@ -227,8 +272,8 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 @property (nonatomic) FindWindowController* windowController;
 @property (nonatomic) FFDocumentSearch* documentSearch;
 @property (nonatomic) FFResultNode* results;
-@property (nonatomic) NSUInteger countOfMatches;
-@property (nonatomic) NSUInteger countOfExcludedMatches;
+@property (nonatomic, readonly) NSUInteger countOfMatches;
+@property (nonatomic, readonly) NSUInteger countOfExcludedMatches;
 @property (nonatomic) BOOL closeWindowOnSuccess;
 @property (nonatomic) BOOL performingFolderSearch;
 @property (nonatomic) BOOL performedReplaceAll;
@@ -306,6 +351,9 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 // ================
 // = Find actions =
 // ================
+
+- (NSUInteger)countOfMatches         { return _results.countOfLeafs; }
+- (NSUInteger)countOfExcludedMatches { return _results.countOfExcluded; }
 
 - (void)updateActionButtons:(id)sender
 {
@@ -485,7 +533,6 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 						if(child.exclude || child.replacementDone)
 							continue;
 						child.replacementDone = YES;
-						_countOfExcludedMatches += 1;
 						replacements.emplace(std::make_pair([child.match match].first, [child.match match].last), controller.regularExpression ? format_string::expand(replaceString, [child.match match].captures) : replaceString);
 					}
 
@@ -622,10 +669,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 			doc->remove_all_marks("search");
 	}
 
-	_results                = [FFResultNode new];
-	_countOfMatches         = 0;
-	_countOfExcludedMatches = 0;
-
+	_results = [FFResultNode new];
 	[_windowController.resultsOutlineView reloadData];
 }
 
@@ -672,7 +716,6 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 			[_results addResultNode:(parent = [FFResultNode resultNodeWithMatch:match])];
 		[parent addResultNode:node];
 	}
-	_countOfMatches += [matches count];
 
 	NSInteger first = [self.windowController.resultsOutlineView numberOfRows];
 	[self.windowController.resultsOutlineView reloadData];
@@ -778,13 +821,9 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		return;
 
 	BOOL exclude = ![objectValue boolValue];
-
-	NSArray* items = OakIsAlternateKeyOrMouseEvent() ? item.parent.matches : @[ item ];
-	for(FFResultNode* node in items)
-	{
-		if(node.exclude != exclude)
-			_countOfExcludedMatches += (node.exclude = exclude) ? +1 : -1;
-	}
+	if(OakIsAlternateKeyOrMouseEvent())
+			item.parent.exclude = exclude;
+	else	item.exclude = exclude;
 
 	[self updateActionButtons:self];
 	if(OakIsAlternateKeyOrMouseEvent())
@@ -801,7 +840,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 			pathCell.icon = [item icon];
 			pathCell.path = [item path] ?: [NSString stringWithCxxString:item.document->display_name()];
 			pathCell.base = self.searchFolder ?: self.projectFolder;
-			pathCell.count = [outlineView isItemExpanded:item] ? 0 : [item.matches count];
+			pathCell.count = [outlineView isItemExpanded:item] ? 0 : item.countOfLeafs;
 		}
 	}
 	else if([[tableColumn identifier] isEqualToString:@"checkbox"])
@@ -952,7 +991,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 - (void)updateGoToMenu:(NSMenu*)aMenu
 {
-	if(_results.matches.count == 0)
+	if(self.countOfMatches == 0)
 	{
 		[[aMenu addItemWithTitle:@"No Results" action:@selector(nop:) keyEquivalent:@""] setEnabled:NO];
 	}
@@ -1017,11 +1056,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 - (void)allMatchesSetExclude:(BOOL)exclude
 {
-	for(FFResultNode* child = _results.firstResultNode.firstResultNode; child; child = child.next ?: child.parent.next.firstResultNode)
-	{
-		if(child.exclude != exclude)
-			_countOfExcludedMatches += (child.exclude = exclude) ? +1 : -1;
-	}
+	_results.exclude = exclude;
 	[_windowController.resultsOutlineView reloadData];
 	[self updateActionButtons:self];
 }
@@ -1085,8 +1120,10 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		return NO;
 	else if(aMenuItem.action == @selector(takeLevelToFoldFrom:) && aMenuItem.tag == -1)
 		[aMenuItem setTitle:self.resultsCollapsed ? @"Expand Results" : @"Collapse Results"];
-	else if(aMenuItem.action == @selector(checkAll:) || aMenuItem.action == @selector(uncheckAll:) )
-		return [_results.matches count];
+	else if(aMenuItem.action == @selector(checkAll:))
+		return self.countOfExcludedMatches > 0;
+	else if(aMenuItem.action == @selector(uncheckAll:) )
+		return self.countOfExcludedMatches < self.countOfMatches;
 	return YES;
 }
 @end
