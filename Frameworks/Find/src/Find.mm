@@ -393,25 +393,22 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 // = Find actions =
 // ================
 
++ (NSSet*)keyPathsForValuesAffectingCanReplaceAll         { return [NSSet setWithArray:@[ @"performedReplaceAll", @"countOfMatches", @"countOfExcludedMatches" ]]; }
++ (NSSet*)keyPathsForValuesAffectingHasUnsavedChanges     { return [NSSet setWithArray:@[ @"performedReplaceAll", @"performedSaveAll" ]]; }
++ (NSSet*)keyPathsForValuesAffectingReplaceAllButtonTitle { return [NSSet setWithArray:@[ @"canReplaceAll", @"countOfExcludedMatches" ]]; }
+
+- (BOOL)canReplaceAll                { return _windowController.showsResultsOutlineView ? (!_performedReplaceAll && self.countOfExcludedMatches < self.countOfMatches) : YES; }
+- (BOOL)hasUnsavedChanges            { return _performedReplaceAll && !_performedSaveAll; }
+- (NSString*)replaceAllButtonTitle   { return self.countOfExcludedMatches && self.canReplaceAll ? @"Replace Selected" : @"Replace All"; }
+
 - (NSUInteger)countOfMatches         { return _results.countOfLeafs; }
 - (NSUInteger)countOfExcludedMatches { return _results.countOfExcluded; }
 
 - (void)updateActionButtons:(id)sender
 {
-	NSString* replaceAllTitle = @"Replace All";
-	BOOL replaceAllEnabled = !self.windowController.showsResultsOutlineView || !self.performedReplaceAll;
-
-	if(self.windowController.showsResultsOutlineView)
-	{
-		replaceAllEnabled = self.countOfExcludedMatches < self.countOfMatches;
-		if(replaceAllEnabled && self.countOfExcludedMatches)
-			replaceAllTitle = @"Replace Selected";
-	}
-
-	self.windowController.replaceAllButton.title   = replaceAllTitle;
-	self.windowController.replaceAllButton.enabled = replaceAllEnabled;
-
-	[self.windowController setDocumentEdited:self.performedReplaceAll != self.performedSaveAll];
+	self.windowController.replaceAllButton.title   = self.replaceAllButtonTitle;
+	self.windowController.replaceAllButton.enabled = self.canReplaceAll;
+	self.windowController.documentEdited           = self.hasUnsavedChanges;
 }
 
 - (IBAction)countOccurrences:(id)sender   { [self performFindAction:FindActionCountMatches   withWindowController:self.windowController]; }
@@ -487,14 +484,14 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		else if(returnCode == NSAlertSecondButtonReturn) // Cancel
 			;
 
-		if(self.performedReplaceAll == self.performedSaveAll)
+		if(!self.hasUnsavedChanges)
 			callback();
 	});
 }
 
 - (BOOL)windowShouldClose:(id)sender
 {
-	if(self.performedReplaceAll == self.performedSaveAll)
+	if(!self.hasUnsavedChanges)
 		return YES;
 
 	[self showSaveWarningWithCompletionHandler:^{ [_windowController close]; }];
@@ -507,7 +504,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	if(controller.findErrorString != nil)
 		return;
 
-	if(self.performedReplaceAll != self.performedSaveAll)
+	if(self.hasUnsavedChanges)
 		return [self showSaveWarningWithCompletionHandler:^{ [self performFindAction:action withWindowController:controller]; }];
 
 	_findOptions = (controller.regularExpression ? find::regular_expression : find::none) | (controller.ignoreWhitespace ? find::ignore_whitespace : find::none) | (controller.fullWords ? find::full_words : find::none) | (controller.ignoreCase ? find::ignore_case : find::none) | (controller.wrapAround ? find::wrap_around : find::none);
@@ -1156,7 +1153,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	if(copyActions.find(aMenuItem.action) != copyActions.end())
 		return [self.windowController.resultsOutlineView numberOfRows] != 0;
 	else if(aMenuItem.action == @selector(saveAllDocuments:))
-		return self.performedReplaceAll && !self.performedSaveAll;
+		return self.hasUnsavedChanges;
 	else if(aMenuItem.action == @selector(saveDocument:) || aMenuItem.action == @selector(saveDocumentAs:))
 		return NO;
 	else if(aMenuItem.action == @selector(takeLevelToFoldFrom:) && aMenuItem.tag == -1)
