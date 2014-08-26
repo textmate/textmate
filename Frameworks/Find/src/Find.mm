@@ -303,8 +303,8 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 @property (nonatomic) FindWindowController* windowController;
 @property (nonatomic) FFDocumentSearch* documentSearch;
 @property (nonatomic) FFResultNode* results;
-@property (nonatomic, readonly) NSUInteger countOfMatches;
-@property (nonatomic, readonly) NSUInteger countOfExcludedMatches;
+@property (nonatomic) NSUInteger countOfMatches;
+@property (nonatomic) NSUInteger countOfExcludedMatches;
 @property (nonatomic) BOOL closeWindowOnSuccess;
 @property (nonatomic) BOOL performingFolderSearch;
 @property (nonatomic) BOOL performedReplaceAll;
@@ -397,12 +397,9 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 + (NSSet*)keyPathsForValuesAffectingHasUnsavedChanges     { return [NSSet setWithArray:@[ @"performedReplaceAll", @"performedSaveAll" ]]; }
 + (NSSet*)keyPathsForValuesAffectingReplaceAllButtonTitle { return [NSSet setWithArray:@[ @"canReplaceAll", @"countOfExcludedMatches" ]]; }
 
-- (BOOL)canReplaceAll                { return _windowController.showsResultsOutlineView ? (!_performedReplaceAll && self.countOfExcludedMatches < self.countOfMatches) : YES; }
+- (BOOL)canReplaceAll                { return _windowController.showsResultsOutlineView ? (!_performedReplaceAll && _countOfExcludedMatches < _countOfMatches) : YES; }
 - (BOOL)hasUnsavedChanges            { return _performedReplaceAll && !_performedSaveAll; }
-- (NSString*)replaceAllButtonTitle   { return self.countOfExcludedMatches && self.canReplaceAll ? @"Replace Selected" : @"Replace All"; }
-
-- (NSUInteger)countOfMatches         { return _results.countOfLeafs; }
-- (NSUInteger)countOfExcludedMatches { return _results.countOfExcluded; }
+- (NSString*)replaceAllButtonTitle   { return _countOfExcludedMatches && self.canReplaceAll ? @"Replace Selected" : @"Replace All"; }
 
 - (void)updateActionButtons:(id)sender
 {
@@ -701,13 +698,21 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 - (void)clearMatches
 {
-	for(FFResultNode* parent in _results.children)
+	if(_results)
 	{
-		if(document::document_ptr doc = parent.document)
-			doc->remove_all_marks("search");
+		for(FFResultNode* parent in _results.children)
+		{
+			if(document::document_ptr doc = parent.document)
+				doc->remove_all_marks("search");
+		}
+
+		[self unbind:@"countOfMatches"];
+		[self unbind:@"countOfExcludedMatches"];
 	}
 
 	_results = [FFResultNode new];
+	[self bind:@"countOfMatches" toObject:_results withKeyPath:@"countOfLeafs" options:nil];
+	[self bind:@"countOfExcludedMatches" toObject:_results withKeyPath:@"countOfExcluded" options:nil];
 	[_windowController.resultsOutlineView reloadData];
 }
 
