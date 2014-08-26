@@ -814,7 +814,7 @@ static NSButton* OakCreateStopSearchButton ()
 	if(_showReplacementPreviews != flag)
 	{
 		_showReplacementPreviews = flag;
-		[self.resultsOutlineView reloadData];
+		[self.resultsOutlineView reloadDataForRowIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [self.resultsOutlineView numberOfRows])] columnIndexes:[NSIndexSet indexSetWithIndex:1]];
 	}
 }
 
@@ -973,7 +973,7 @@ static NSButton* OakCreateStopSearchButton ()
 		[textField updateIntrinsicContentSizeToEncompassString:textView.string];
 
 	if(textField == self.replaceTextField && self.showReplacementPreviews)
-		[self.resultsOutlineView reloadData];
+		[self.resultsOutlineView reloadDataForRowIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [self.resultsOutlineView numberOfRows])] columnIndexes:[NSIndexSet indexSetWithIndex:1]];
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem*)aMenuItem
