@@ -12,6 +12,7 @@
 #import <OakAppKit/OakFileIconImage.h>
 #import <OakAppKit/OakPasteboard.h>
 #import <ns/ns.h>
+#import <text/tokenize.h>
 #import <text/types.h>
 #import <text/format.h>
 #import <text/utf8.h>
@@ -35,6 +36,26 @@ enum FindActionTag
 	FindActionReplaceAndFind,
 	FindActionReplaceSelected,
 };
+
+static NSAttributedString* PathComponentString (std::string const& path, std::string const& base)
+{
+	std::vector<std::string> components;
+	std::string str = path::relative_to(path, base);
+	for(auto const& component : text::tokenize(str.begin(), str.end(), '/'))
+		components.push_back(component);
+	if(components.front() == "")
+		components.front() = path::display_name("/");
+	components.back() = "";
+
+	return ns::attr_string_t()
+		<< ns::style::line_break(NSLineBreakByTruncatingMiddle)
+		<< [NSFont systemFontOfSize:11]
+		<< [NSColor darkGrayColor]
+		<< text::join(std::vector<std::string>(components.begin(), components.end()), " ▸ ")
+		<< [NSFont boldSystemFontOfSize:11]
+		<< [NSColor blackColor]
+		<< (path::is_absolute(path) ? path::display_name(path) : path);
+}
 
 static NSAttributedString* AttributedStringForMatch (std::string const& text, size_t from, size_t to, size_t n)
 {
@@ -118,9 +139,19 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 @property (nonatomic, readonly) document::document_ptr document;
 @property (nonatomic, readonly) NSString* path;
 @property (nonatomic, readonly) NSString* identifier;
+@property (nonatomic) NSAttributedString* displayPath;
 @end
 
 @implementation FFResultNode
++ (FFResultNode*)resultNodeWithMatch:(FFMatch*)aMatch baseDirectory:(NSString*)base
+{
+	FFResultNode* res = [FFResultNode new];
+	res.match       = aMatch;
+	res.children    = [NSMutableArray array];
+	res.displayPath = PathComponentString(base ? [aMatch match].document->path() : [aMatch match].document->display_name(), to_s(base));
+	return res;
+}
+
 + (FFResultNode*)resultNodeWithMatch:(FFMatch*)aMatch
 {
 	FFResultNode* res = [FFResultNode new];
@@ -723,7 +754,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 		FFResultNode* node = [FFResultNode resultNodeWithMatch:match];
 		if(!parent || parent.document->identifier() != node.document->identifier())
-			[_results addResultNode:(parent = [FFResultNode resultNodeWithMatch:match])];
+			[_results addResultNode:(parent = [FFResultNode resultNodeWithMatch:match baseDirectory:_documentSearch.directory])];
 		[parent addResultNode:node];
 	}
 
@@ -848,8 +879,8 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		{
 			FFFilePathCell* pathCell = (FFFilePathCell*)cell;
 			pathCell.icon = [item icon];
-			pathCell.path = [item path] ?: [NSString stringWithCxxString:item.document->display_name()];
-			pathCell.base = self.searchFolder ?: self.projectFolder;
+			pathCell.path = [item path];
+			pathCell.displayPath = [item displayPath];
 			pathCell.count = [outlineView isItemExpanded:item] ? 0 : item.countOfLeafs;
 		}
 	}
