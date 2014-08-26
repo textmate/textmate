@@ -268,7 +268,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 }
 @end
 
-@interface Find () <NSOutlineViewDataSource, NSOutlineViewDelegate>
+@interface Find () <OakFindServerProtocol, NSOutlineViewDataSource, NSOutlineViewDelegate>
 @property (nonatomic) FindWindowController* windowController;
 @property (nonatomic) FFDocumentSearch* documentSearch;
 @property (nonatomic) FFResultNode* results;
@@ -278,6 +278,16 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 @property (nonatomic) BOOL performingFolderSearch;
 @property (nonatomic) BOOL performedReplaceAll;
 @property (nonatomic) BOOL performedSaveAll;
+
+// =========================
+// = OakFindProtocolServer =
+// =========================
+
+@property (nonatomic) find_operation_t findOperation;
+@property (nonatomic) find::options_t  findOptions;
+
+- (void)didFind:(NSUInteger)aNumber occurrencesOf:(NSString*)aFindString atPosition:(text::pos_t const&)aPosition wrapped:(BOOL)didWrap;
+- (void)didReplace:(NSUInteger)aNumber occurrencesOf:(NSString*)aFindString with:(NSString*)aReplacementString;
 @end
 
 NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
