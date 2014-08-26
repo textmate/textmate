@@ -885,13 +885,13 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	{
 		[cell setEnabled:!self.performedReplaceAll];
 	}
-	else if([[tableColumn identifier] isEqualToString:@"match"] && [cell isHighlighted])
+	else if([[tableColumn identifier] isEqualToString:@"match"] && [cell backgroundStyle] == NSBackgroundStyleDark)
 	{
 		id obj = [cell objectValue];
 		if([obj isKindOfClass:[NSAttributedString class]])
 		{
 			NSMutableAttributedString* str = [obj mutableCopy];
-			[str addAttribute:NSForegroundColorAttributeName value:[NSColor selectedTextColor] range:NSMakeRange(0, [str length])];
+			[str addAttribute:NSForegroundColorAttributeName value:[NSColor alternateSelectedControlTextColor] range:NSMakeRange(0, [str length])];
 			[cell setAttributedStringValue:str];
 		}
 	}
