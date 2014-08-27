@@ -3,7 +3,6 @@
 #import "FFDocumentSearch.h"
 #import "Strings.h"
 #import "attr_string.h"
-#import "FFFilePathCell.h"
 #import <OakFoundation/OakFindProtocol.h>
 #import <OakFoundation/NSArray Additions.h>
 #import <OakFoundation/NSString Additions.h>
@@ -11,6 +10,7 @@
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakFileIconImage.h>
 #import <OakAppKit/OakPasteboard.h>
+#import <OakAppKit/OakUIConstructionFunctions.h>
 #import <ns/ns.h>
 #import <text/tokenize.h>
 #import <text/types.h>
@@ -296,6 +296,36 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 		self.document->add_callback(_callback = new document_callback_t(self));
 
 	return _icon;
+}
+@end
+
+@interface OakAttributedStringTextFieldCell : NSTextFieldCell
+@property (nonatomic) NSAttributedString* monoColoredAttributedString;
+@end
+
+@implementation OakAttributedStringTextFieldCell
+- (void)setBackgroundStyle:(NSBackgroundStyle)style
+{
+	if(_monoColoredAttributedString)
+	{
+		if(style == NSBackgroundStyleDark)
+		{
+			NSMutableAttributedString* str = [_monoColoredAttributedString mutableCopy];
+			[str addAttribute:NSForegroundColorAttributeName value:[NSColor alternateSelectedControlTextColor] range:NSMakeRange(0, [str length])];
+			[super setAttributedStringValue:str];
+		}
+		else
+		{
+			[super setAttributedStringValue:_monoColoredAttributedString];
+		}
+	}
+	[super setBackgroundStyle:style];
+}
+
+- (void)setAttributedStringValue:(NSAttributedString*)str
+{
+	_monoColoredAttributedString = str;
+	[super setAttributedStringValue:str];
 }
 @end
 
@@ -847,61 +877,6 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	return [(item ?: _results).children objectAtIndex:childIndex];
 }
 
-- (id)outlineView:(NSOutlineView*)outlineView objectValueForTableColumn:(NSTableColumn*)tableColumn byItem:(FFResultNode*)item
-{
-	if([self outlineView:outlineView isGroupItem:item])
-		return item;
-	else if([[tableColumn identifier] isEqualToString:@"checkbox"])
-		return @(!item.excluded);
-	else if([[tableColumn identifier] isEqualToString:@"match"])
-		return [item excerptWithReplacement:(item.replacementDone || !item.excluded && self.windowController.showReplacementPreviews) ? self.replaceString : nil];
-	return nil;
-}
-
-- (void)outlineView:(NSOutlineView*)outlineView setObjectValue:(id)objectValue forTableColumn:(NSTableColumn*)tableColumn byItem:(FFResultNode*)item
-{
-	if(![tableColumn.identifier isEqualToString:@"checkbox"])
-		return;
-
-	BOOL exclude = ![objectValue boolValue];
-	if(OakIsAlternateKeyOrMouseEvent())
-			item.parent.excluded = exclude;
-	else	item.excluded = exclude;
-
-	[self updateActionButtons:self];
-	if(OakIsAlternateKeyOrMouseEvent())
-		[outlineView reloadData];
-}
-
-- (void)outlineView:(NSOutlineView*)outlineView willDisplayCell:(id)cell forTableColumn:(NSTableColumn*)tableColumn item:(FFResultNode*)item
-{
-	if([self outlineView:outlineView isGroupItem:item])
-	{
-		if(!tableColumn && [cell isKindOfClass:[FFFilePathCell class]])
-		{
-			FFFilePathCell* pathCell = (FFFilePathCell*)cell;
-			pathCell.icon = [item icon];
-			pathCell.path = [item path];
-			pathCell.displayPath = [item displayPath];
-			pathCell.count = [outlineView isItemExpanded:item] ? 0 : item.countOfLeafs;
-		}
-	}
-	else if([[tableColumn identifier] isEqualToString:@"checkbox"])
-	{
-		[cell setEnabled:!self.performedReplaceAll];
-	}
-	else if([[tableColumn identifier] isEqualToString:@"match"] && [cell backgroundStyle] == NSBackgroundStyleDark)
-	{
-		id obj = [cell objectValue];
-		if([obj isKindOfClass:[NSAttributedString class]])
-		{
-			NSMutableAttributedString* str = [obj mutableCopy];
-			[str addAttribute:NSForegroundColorAttributeName value:[NSColor alternateSelectedControlTextColor] range:NSMakeRange(0, [str length])];
-			[cell setAttributedStringValue:str];
-		}
-	}
-}
-
 - (BOOL)outlineView:(NSOutlineView*)outlineView isGroupItem:(FFResultNode*)item
 {
 	return [outlineView levelForItem:item] == 0;
@@ -912,11 +887,100 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	return [self outlineView:outlineView isGroupItem:item] ? 22 : item.lineSpan * [outlineView rowHeight];
 }
 
-- (NSCell*)outlineView:(NSOutlineView*)outlineView dataCellForTableColumn:(NSTableColumn*)tableColumn item:(FFResultNode*)item
+// ============================
+// = View-based NSOutlineView =
+// ============================
+
+- (void)toggleExcludedCheckbox:(NSButton*)sender
 {
-	if(tableColumn == nil && [self outlineView:outlineView isGroupItem:item])
-		return [FFFilePathCell new];
-	return [tableColumn dataCell];
+	NSInteger row = [_windowController.resultsOutlineView rowForView:sender];
+	if(row != -1)
+	{
+		FFResultNode* item = [_windowController.resultsOutlineView itemAtRow:row];
+
+		BOOL toggleAllInGroup = OakIsAlternateKeyOrMouseEvent();
+		if(toggleAllInGroup)
+			item.parent.excluded = item.excluded;
+
+		if(_windowController.showReplacementPreviews)
+		{
+			NSRange range = NSMakeRange(row, 1);
+			if(toggleAllInGroup)
+				range = NSMakeRange([_windowController.resultsOutlineView rowForItem:item.parent.firstResultNode], item.parent.countOfLeafs);
+			[_windowController.resultsOutlineView reloadDataForRowIndexes:[NSIndexSet indexSetWithIndexesInRange:range] columnIndexes:[NSIndexSet indexSetWithIndex:1]];
+		}
+
+		[self updateActionButtons:self];
+	}
+}
+
+- (NSView*)outlineView:(NSOutlineView*)outlineView viewForTableColumn:(NSTableColumn*)tableColumn item:(FFResultNode*)item
+{
+	NSString* identifier = tableColumn.identifier ?: @"group";
+	id res = [outlineView makeViewWithIdentifier:identifier owner:self];
+
+	if([identifier isEqualToString:@"checkbox"])
+	{
+		NSButton* button = res;
+		if(!button)
+		{
+			res = button = OakCreateCheckBox(nil);
+			button.identifier = identifier;
+			[[button cell] setControlSize:NSSmallControlSize];
+			[button bind:@"enabled" toObject:self withKeyPath:@"performedReplaceAll" options:@{ NSValueTransformerNameBindingOption: @"NSNegateBoolean" }];
+			button.action = @selector(toggleExcludedCheckbox:);
+			button.target = self;
+		}
+		else
+		{
+			[button unbind:NSValueBinding];
+		}
+
+		[button bind:NSValueBinding toObject:item withKeyPath:@"excluded" options:@{ NSValueTransformerNameBindingOption: @"NSNegateBoolean" }];
+		button.state = item.excluded ? NSOffState : NSOnState;
+	}
+	else if([identifier isEqualToString:@"match"])
+	{
+		NSTextField* textField = res;
+		if(!textField)
+		{
+			res = textField = OakCreateLabel(@"");
+			textField.identifier = identifier;
+			[textField setCell:[OakAttributedStringTextFieldCell new]];
+		}
+		[textField.cell setAttributedStringValue:[item excerptWithReplacement:(item.replacementDone || !item.excluded && self.windowController.showReplacementPreviews) ? self.replaceString : nil]];
+	}
+	else
+	{
+		NSTableCellView* cellView = res;
+		if(!cellView)
+		{
+			res = cellView = [NSTableCellView new];
+			cellView.identifier = identifier;
+			NSImageView* imageView = [NSImageView new];
+			NSTextField* textField = OakCreateLabel();
+			textField.alignment = NSLeftTextAlignment;
+			textField.font      = [NSFont controlContentFontOfSize:[NSFont systemFontSizeForControlSize:NSSmallControlSize]];
+
+			NSDictionary* views = @{ @"icon" : imageView, @"text" : textField };
+			for(NSView* child in [views allValues])
+			{
+				[child setTranslatesAutoresizingMaskIntoConstraints:NO];
+				[cellView addSubview:child];
+			}
+
+			[cellView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(6)-[icon(==16)]-(3)-[text]-(6)-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
+			[cellView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[icon(==16)]-(3)-|" options:NSLayoutFormatAlignAllLeading metrics:nil views:views]];
+
+			[imageView bind:NSValueBinding toObject:cellView withKeyPath:@"objectValue.icon" options:nil];
+			[textField bind:NSValueBinding toObject:cellView withKeyPath:@"objectValue.displayPath" options:nil];
+
+			cellView.imageView = imageView;
+			cellView.textField = textField;
+		}
+		cellView.objectValue = item;
+	}
+	return res;
 }
 
 // ======================
