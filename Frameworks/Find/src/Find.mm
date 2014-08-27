@@ -994,15 +994,23 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 			textField.alignment = NSLeftTextAlignment;
 			textField.font      = [NSFont controlContentFontOfSize:[NSFont systemFontSizeForControlSize:NSSmallControlSize]];
 
-			NSDictionary* views = @{ @"icon" : imageView, @"text" : textField };
+			NSButton* remove = [NSButton new];
+			[[remove cell] setControlSize:NSSmallControlSize];
+			remove.bezelStyle = NSRoundRectBezelStyle;
+			remove.buttonType = NSMomentaryPushInButton;
+			remove.image      = [NSImage imageNamed:NSImageNameRemoveTemplate];
+			remove.action     = @selector(takeSearchResultToRemoveFrom:);
+			remove.target     = self;
+
+			NSDictionary* views = @{ @"icon" : imageView, @"text" : textField, @"remove" : remove };
 			for(NSView* child in [views allValues])
 			{
 				[child setTranslatesAutoresizingMaskIntoConstraints:NO];
 				[cellView addSubview:child];
 			}
 
-			[cellView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(6)-[icon(==16)]-(3)-[text]-(6)-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
-			[cellView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[icon(==16)]-(3)-|" options:NSLayoutFormatAlignAllLeading metrics:nil views:views]];
+			[cellView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(6)-[icon(==16)]-(3)-[text]-(4)-[remove(==16)]-(12)-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
+			[cellView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[icon(==16,==remove)]-(3)-|" options:NSLayoutFormatAlignAllLeading metrics:nil views:views]];
 
 			[imageView bind:NSValueBinding toObject:cellView withKeyPath:@"objectValue.icon" options:nil];
 			[textField bind:NSValueBinding toObject:cellView withKeyPath:@"objectValue.displayPath" options:nil];
