@@ -625,7 +625,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 				self.windowController.statusString = [NSString stringWithFormat:MSG_REPLACE_ALL_RESULTS, replaceCount, fileCount];
 				self.performedReplaceAll = YES;
 				[self updateActionButtons:self];
-				[self.windowController.resultsOutlineView reloadData];
+				[_windowController.resultsOutlineView reloadDataForRowIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [_windowController.resultsOutlineView numberOfRows])] columnIndexes:[NSIndexSet indexSetWithIndex:1]];
 			}
 			break;
 
@@ -1196,7 +1196,6 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 - (void)allMatchesSetExclude:(BOOL)exclude
 {
 	_results.excluded = exclude;
-	[_windowController.resultsOutlineView reloadData];
 	[self updateActionButtons:self];
 }
 
