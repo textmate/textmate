@@ -1577,6 +1577,8 @@ namespace
 		{
 			DocumentController* controller = [DocumentController new];
 			controller.documents = make_vector(documents[0]);
+			if(path::is_child(documents[0]->path(), to_s(self.projectPath)))
+				controller.defaultProjectPath = self.projectPath;
 			[controller openAndSelectDocument:documents[0]];
 			[controller showWindow:self];
 			[self closeTabsAtIndexes:indexSet askToSaveChanges:NO createDocumentIfEmpty:YES];
