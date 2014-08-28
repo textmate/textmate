@@ -129,7 +129,7 @@ static void install_auth_tool ()
 
 static void usage (FILE* io)
 {
-	std::string pad(10 - std::min(strlen(getprogname()), size_t(10)), ' ');
+	std::string pad(8 - std::min(strlen(getprogname()), size_t(8)), ' ');
 
 	fprintf(io,
 		"%1$s %2$.1f (" COMPILE_DATE " revision %3$zu)\n"
@@ -146,16 +146,12 @@ static void usage (FILE* io)
 		" -h, --help             Show this information.\n"
 		" -v, --version          Print version information.\n"
 		"\n"
-		"If multiple files are given, a project is created consisting of these\n"
-		"files, -a is then default and -w will be ignored (e.g. \"%1$s *.tex\").\n"
+		"By default %1$s will wait for files to be closed if the command name\n"
+		"has a \"_wait\" suffix (e.g. via a symbolic link) or when used as a\n"
+		"filter like in this examples:\n"
 		"\n"
-		"By default %1$s will not wait for the file to be closed\nexcept when used as filter:\n"
-		" ls *.tex|%1$s|sh%4$s-w implied\n"
-		" %1$s -|cat -n   %4$s-w implied (read from stdin)\n"
-		"\n"
-		"An exception is made if the command is started as something which ends\nwith \"_wait\". "
-		"So to have a command with --wait as default, you can\ncreate a symbolic link like this:\n"
-		" ln -s %1$s %1$s_wait\n"
+		"    ls *.tex|%1$s|sh%4$s-w implied\n"
+		"    %1$s -|cat -n   %4$s-w implied (read from stdin)\n"
 		"\n", getprogname(), AppVersion, AppRevision, pad.c_str()
 	);
 }
