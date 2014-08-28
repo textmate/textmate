@@ -6,7 +6,7 @@
 #include <io/path.h>
 #include <plist/uuid.h>
 
-static double const AppVersion  = 2.7;
+static double const AppVersion  = 2.8;
 static size_t const AppRevision = APP_REVISION;
 
 static char const* socket_path ()
@@ -146,6 +146,10 @@ static void usage (FILE* io)
 		" -h, --help             Show this information.\n"
 		" -v, --version          Print version information.\n"
 		"\n"
+		"Files opened via %1$s are added to the recent menu unless\n"
+		"the file starts with a period, --wait or --no-recent is\n"
+		"specifed, or file is in the system’s temporary directory.\n"
+		"\n"
 		"By default %1$s will wait for files to be closed if the command name\n"
 		"has a \"_wait\" suffix (e.g. via a symbolic link) or when used as a\n"
 		"filter like in this examples:\n"
@@ -176,6 +180,12 @@ static void write_key_pair (int fd, std::string const& key, std::string const& v
 {
 	std::string const str = key + ": " + value + "\r\n";
 	write(fd, str.data(), str.size());
+}
+
+static bool is_temporary_file (std::string path)
+{
+	path = path::resolve(path);
+	return path::is_child(path, path::resolve("/tmp")) || path::is_child(path, path::resolve(path::temp()));
 }
 
 static std::string const kUUIDPrefix = "uuid://";
@@ -410,7 +420,13 @@ int main (int argc, char* argv[])
 			write_key_pair(fd, "display-name",     i < names.size() ? names[i] : "");
 			write_key_pair(fd, "wait",             to_s(shouldWait));
 			write_key_pair(fd, "re-activate",      to_s(shouldWait));
+
+			if(addToRecent == boolean::kUnset && shouldWait != boolean::kEnable && files[i].front() != '.' && !is_temporary_file(files[i]))
+				write_key_pair(fd, "add-to-recents", "yes");
 		}
+
+		if(addToRecent != boolean::kUnset)
+			write_key_pair(fd, "add-to-recents", to_s(addToRecent));
 
 		if(geteuid() == 0 && auth.obtain_right(kAuthRightName))
 			write_key_pair(fd, "authorization", auth);
@@ -418,7 +434,6 @@ int main (int argc, char* argv[])
 		write_key_pair(fd, "selection",        i < lines.size()    ? lines[i] : "");
 		write_key_pair(fd, "file-type",        i < types.size()    ? types[i] : "");
 		write_key_pair(fd, "project-uuid",     i < projects.size() ? projects[i] : defaultProject);
-		write_key_pair(fd, "add-to-recents",   to_s(addToRecent));
 		write_key_pair(fd, "change-directory", to_s(changeDir));
 
 		write(fd, "\r\n", 2);
