@@ -207,6 +207,10 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 	}
 
 	[self updateItems:self];
+
+	// see http://lists.apple.com/archives/accessibility-dev/2014/Aug/msg00024.html
+	if(nil != &NSAccessibilitySharedFocusElementsAttribute)
+		NSAccessibilityPostNotification(_tableView, NSAccessibilitySelectedRowsChangedNotification);
 }
 
 - (void)setItems:(NSArray*)anArray
