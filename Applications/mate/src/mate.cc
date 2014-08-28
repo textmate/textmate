@@ -251,7 +251,6 @@ int main (int argc, char* argv[])
 		{ "name",             required_argument,   0,      'm'   },
 		{ "project",          required_argument,   0,      'p'   },
 		{ "recent",           no_argument,         0,      'r'   },
-		{ "server",           no_argument,         0,      's'   },
 		{ "type",             required_argument,   0,      't'   },
 		{ "uuid",             required_argument,   0,      'u'   },
 		{ "version",          no_argument,         0,      'v'   },
@@ -265,7 +264,6 @@ int main (int argc, char* argv[])
 
 	bool addToRecent = false;
 	bool changeDir   = false;
-	bool server      = false;
 	int shouldWait   = -1, ch;
 	int keepEscapes  = -1;
 
@@ -286,7 +284,6 @@ int main (int argc, char* argv[])
 			case 'm': append(optarg, names);    break;
 			case 'p': append(optarg, projects); break;
 			case 'r': addToRecent = true;       break;
-			case 's': server = true;            break;
 			case 't': append(optarg, types);    break;
 			case 'u': uuid = optarg;            break;
 			case 'v': version();                return EX_OK;
