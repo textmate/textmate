@@ -263,14 +263,14 @@ int main (int argc, char* argv[])
 	std::vector<std::string> files, lines, types, names, projects;
 	oak::uuid_t uuid;
 
-	bool add_to_recent   = false;
-	bool change_dir      = false;
-	bool server          = false;
-	int should_wait      = -1, ch;
-	int preserve_escapes = -1;
+	bool addToRecent = false;
+	bool changeDir   = false;
+	bool server      = false;
+	int shouldWait   = -1, ch;
+	int keepEscapes  = -1;
 
 	if(strlen(getprogname()) > 5 && strcmp(getprogname() + strlen(getprogname()) - 5, "_wait") == 0)
-		should_wait = true;
+		shouldWait = true;
 
 	install_auth_tool();
 
@@ -278,19 +278,19 @@ int main (int argc, char* argv[])
 	{
 		switch(ch)
 		{
-			case 'a': should_wait = false;      break;
-			case 'd': change_dir = true;        break;
-			case 'e': preserve_escapes = boolean(optarg); break;
+			case 'a': shouldWait = false;       break;
+			case 'd': changeDir = true;         break;
+			case 'e': keepEscapes = boolean(optarg); break;
 			case 'h': usage(stdout);            return EX_OK;
 			case 'l': append(optarg, lines);    break;
 			case 'm': append(optarg, names);    break;
 			case 'p': append(optarg, projects); break;
-			case 'r': add_to_recent = true;     break;
+			case 'r': addToRecent = true;       break;
 			case 's': server = true;            break;
 			case 't': append(optarg, types);    break;
 			case 'u': uuid = optarg;            break;
 			case 'v': version();                return EX_OK;
-			case 'w': should_wait = true;       break;
+			case 'w': shouldWait = true;        break;
 			case '?': /* unknown option */      return EX_USAGE;
 			case ':': /* missing option */      return EX_USAGE;
 			default:  usage(stderr);            return EX_USAGE;
@@ -330,7 +330,7 @@ int main (int argc, char* argv[])
 	{
 		if(uuid)
 			files.push_back(kUUIDPrefix + to_s(uuid));
-		else if(should_wait == true || stdinIsAPipe)
+		else if(shouldWait == true || stdinIsAPipe)
 			files.push_back("-");
 	}
 
@@ -370,7 +370,7 @@ int main (int argc, char* argv[])
 				if(len == -1)
 					break;
 
-				if(preserve_escapes != true)
+				if(keepEscapes != true)
 				{
 					size_t oldLen = std::exchange(len, remove_ansi_escapes(buf, buf + len, &state) - buf);
 					didStripEscapes = didStripEscapes || oldLen != len;
@@ -381,17 +381,17 @@ int main (int argc, char* argv[])
 				write(fd, buf, len);
 			}
 
-			if(didStripEscapes && preserve_escapes != false)
+			if(didStripEscapes && keepEscapes != false)
 				fprintf(stderr, "WARNING: Removed ANSI escape codes. Use -e/--preserve-escapes[=0].\n");
 
-			if(stdinIsAPipe && total == 0 && should_wait != true && getenv("TM_DOCUMENT_UUID"))
+			if(stdinIsAPipe && total == 0 && shouldWait != true && getenv("TM_DOCUMENT_UUID"))
 			{
 				write_key_pair(fd, "uuid", getenv("TM_DOCUMENT_UUID"));
 			}
 			else
 			{
 				bool stdoutIsAPipe = isatty(STDOUT_FILENO) == 0;
-				bool wait = should_wait == true || (should_wait != false && stdoutIsAPipe);
+				bool wait = shouldWait == true || (shouldWait != false && stdoutIsAPipe);
 				write_key_pair(fd, "display-name",        i < names.size()      ? names[i] : "untitled (stdin)");
 				write_key_pair(fd, "data-on-close",       wait && stdoutIsAPipe ? "yes" : "no");
 				write_key_pair(fd, "wait",                wait                  ? "yes" : "no");
@@ -405,9 +405,9 @@ int main (int argc, char* argv[])
 		else
 		{
 			write_key_pair(fd, "path",             files[i]);
-			write_key_pair(fd, "display-name",     i < names.size()    ? names[i] : "");
-			write_key_pair(fd, "wait",             should_wait == true ? "yes" : "no");
-			write_key_pair(fd, "re-activate",      should_wait == true ? "yes" : "no");
+			write_key_pair(fd, "display-name",     i < names.size()   ? names[i] : "");
+			write_key_pair(fd, "wait",             shouldWait == true ? "yes" : "no");
+			write_key_pair(fd, "re-activate",      shouldWait == true ? "yes" : "no");
 		}
 
 		if(geteuid() == 0 && auth.obtain_right(kAuthRightName))
@@ -416,8 +416,8 @@ int main (int argc, char* argv[])
 		write_key_pair(fd, "selection",        i < lines.size()    ? lines[i] : "");
 		write_key_pair(fd, "file-type",        i < types.size()    ? types[i] : "");
 		write_key_pair(fd, "project-uuid",     i < projects.size() ? projects[i] : defaultProject);
-		write_key_pair(fd, "add-to-recents",   add_to_recent       ? "yes" : "no");
-		write_key_pair(fd, "change-directory", change_dir          ? "yes" : "no");
+		write_key_pair(fd, "add-to-recents",   addToRecent         ? "yes" : "no");
+		write_key_pair(fd, "change-directory", changeDir           ? "yes" : "no");
 
 		write(fd, "\r\n", 2);
 	}
