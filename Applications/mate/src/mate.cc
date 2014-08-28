@@ -133,17 +133,16 @@ static void usage (FILE* io)
 
 	fprintf(io,
 		"%1$s %2$.1f (" COMPILE_DATE " revision %3$zu)\n"
-		"Usage: %1$s [-awl<number>t<filetype>rdnhv] [file ...]\n"
+		"Usage: %1$s [-wl<number>t<filetype>rdnhv] [file ...]\n"
 		"Options:\n"
-		" -a, --async            Do not wait for file to be closed by TextMate.\n"
-		" -w, --wait             Wait for file to be closed by TextMate.\n"
+		" -w, --[no-]wait        Wait for file to be closed by TextMate.\n"
 		" -l, --line <number>    Place caret on line <number> after loading file.\n"
 		" -t, --type <filetype>  Treat file as having <filetype>.\n"
 		" -m, --name <name>      The display name shown in TextMate.\n"
-		" -r, --recent           Add file to Open Recent menu.\n"
+		" -r, --[no-]recent      Add file to Open Recent menu.\n"
 		" -d, --change-dir       Change TextMate's working directory to that of the file.\n"
 		" -u, --uuid             Reference an already open document using its UUID.\n"
-		" -e, --preserve-escapes Set this if you want ANSI escapes from stdin to be preserved.\n"
+		" -e, --[no-]escapes     Set this if you want ANSI escapes from stdin to be preserved.\n"
 		" -h, --help             Show this information.\n"
 		" -v, --version          Print version information.\n"
 		"\n"
@@ -187,6 +186,15 @@ static std::string const kUUIDPrefix = "uuid://";
 
 namespace
 {
+	enum class boolean {
+		kUnset, kEnable, kDisable
+	};
+
+	std::string to_s (boolean flag)
+	{
+		return flag == boolean::kEnable ? "yes" : "no";
+	}
+
 	enum class escape_state_t {
 		kPlain, kEscape, kANSI
 	};
@@ -231,12 +239,6 @@ _InputIter remove_ansi_escapes (_InputIter it, _InputIter last, escape_state_t* 
 	return dst;
 }
 
-static bool boolean (char const* optarg)
-{
-	static std::string const FalseValues[] = { "0", "NO", "no", "FALSE", "false" };
-	return !optarg || !oak::contains(std::begin(FalseValues), std::end(FalseValues), optarg);
-}
-
 int main (int argc, char* argv[])
 {
 	extern char* optarg;
@@ -245,16 +247,19 @@ int main (int argc, char* argv[])
 	static struct option const longopts[] = {
 		{ "async",            no_argument,         0,      'a'   },
 		{ "change-dir",       no_argument,         0,      'd'   },
-		{ "preserve-escapes", optional_argument,   0,      'e'   },
+		{ "escapes",          no_argument,         0,      'e'   },
+		{ "no-escapes",       no_argument,         0,      'E'   },
 		{ "help",             no_argument,         0,      'h'   },
 		{ "line",             required_argument,   0,      'l'   },
 		{ "name",             required_argument,   0,      'm'   },
 		{ "project",          required_argument,   0,      'p'   },
 		{ "recent",           no_argument,         0,      'r'   },
+		{ "no-recent",        no_argument,         0,      'R'   },
 		{ "type",             required_argument,   0,      't'   },
 		{ "uuid",             required_argument,   0,      'u'   },
 		{ "version",          no_argument,         0,      'v'   },
 		{ "wait",             no_argument,         0,      'w'   },
+		{ "no-wait",          no_argument,         0,      'W'   },
 		{ 0,                  0,                   0,      0     }
 	};
 
@@ -262,32 +267,36 @@ int main (int argc, char* argv[])
 	std::vector<std::string> files, lines, types, names, projects;
 	oak::uuid_t uuid;
 
-	bool addToRecent = false;
-	bool changeDir   = false;
-	int shouldWait   = -1, ch;
-	int keepEscapes  = -1;
+	boolean changeDir   = boolean::kDisable;
+	boolean shouldWait  = boolean::kUnset;
+	boolean addToRecent = boolean::kUnset;
+	boolean keepEscapes = boolean::kUnset;
 
 	if(strlen(getprogname()) > 5 && strcmp(getprogname() + strlen(getprogname()) - 5, "_wait") == 0)
-		shouldWait = true;
+		shouldWait = boolean::kEnable;
 
 	install_auth_tool();
 
-	while((ch = getopt_long(argc, argv, "ade::hl:m:p:rst:u:vw", longopts, NULL)) != -1)
+	int ch;
+	while((ch = getopt_long(argc, argv, "adehl:m:p:rst:u:vw", longopts, NULL)) != -1)
 	{
 		switch(ch)
 		{
-			case 'a': shouldWait = false;       break;
-			case 'd': changeDir = true;         break;
-			case 'e': keepEscapes = boolean(optarg); break;
+			case 'a': shouldWait = boolean::kDisable;  break;
+			case 'd': changeDir = boolean::kEnable;    break;
+			case 'e': keepEscapes = boolean::kEnable;  break;
+			case 'E': keepEscapes = boolean::kDisable; break;
 			case 'h': usage(stdout);            return EX_OK;
 			case 'l': append(optarg, lines);    break;
 			case 'm': append(optarg, names);    break;
 			case 'p': append(optarg, projects); break;
-			case 'r': addToRecent = true;       break;
+			case 'r': addToRecent = boolean::kEnable;  break;
+			case 'R': addToRecent = boolean::kDisable; break;
 			case 't': append(optarg, types);    break;
 			case 'u': uuid = optarg;            break;
 			case 'v': version();                return EX_OK;
-			case 'w': shouldWait = true;        break;
+			case 'w': shouldWait = boolean::kEnable;  break;
+			case 'W': shouldWait = boolean::kDisable; break;
 			case '?': /* unknown option */      return EX_USAGE;
 			case ':': /* missing option */      return EX_USAGE;
 			default:  usage(stderr);            return EX_USAGE;
@@ -327,7 +336,7 @@ int main (int argc, char* argv[])
 	{
 		if(uuid)
 			files.push_back(kUUIDPrefix + to_s(uuid));
-		else if(shouldWait == true || stdinIsAPipe)
+		else if(shouldWait == boolean::kEnable || stdinIsAPipe)
 			files.push_back("-");
 	}
 
@@ -367,7 +376,7 @@ int main (int argc, char* argv[])
 				if(len == -1)
 					break;
 
-				if(keepEscapes != true)
+				if(keepEscapes != boolean::kEnable)
 				{
 					size_t oldLen = std::exchange(len, remove_ansi_escapes(buf, buf + len, &state) - buf);
 					didStripEscapes = didStripEscapes || oldLen != len;
@@ -378,17 +387,17 @@ int main (int argc, char* argv[])
 				write(fd, buf, len);
 			}
 
-			if(didStripEscapes && keepEscapes != false)
-				fprintf(stderr, "WARNING: Removed ANSI escape codes. Use -e/--preserve-escapes[=0].\n");
+			if(didStripEscapes && keepEscapes == boolean::kUnset)
+				fprintf(stderr, "WARNING: Removed ANSI escape codes. Use -e/--[no-]escapes.\n");
 
-			if(stdinIsAPipe && total == 0 && shouldWait != true && getenv("TM_DOCUMENT_UUID"))
+			if(stdinIsAPipe && total == 0 && shouldWait != boolean::kEnable && getenv("TM_DOCUMENT_UUID"))
 			{
 				write_key_pair(fd, "uuid", getenv("TM_DOCUMENT_UUID"));
 			}
 			else
 			{
 				bool stdoutIsAPipe = isatty(STDOUT_FILENO) == 0;
-				bool wait = shouldWait == true || (shouldWait != false && stdoutIsAPipe);
+				bool wait = shouldWait == boolean::kEnable || (shouldWait == boolean::kUnset && stdoutIsAPipe);
 				write_key_pair(fd, "display-name",        i < names.size()      ? names[i] : "untitled (stdin)");
 				write_key_pair(fd, "data-on-close",       wait && stdoutIsAPipe ? "yes" : "no");
 				write_key_pair(fd, "wait",                wait                  ? "yes" : "no");
@@ -402,9 +411,9 @@ int main (int argc, char* argv[])
 		else
 		{
 			write_key_pair(fd, "path",             files[i]);
-			write_key_pair(fd, "display-name",     i < names.size()   ? names[i] : "");
-			write_key_pair(fd, "wait",             shouldWait == true ? "yes" : "no");
-			write_key_pair(fd, "re-activate",      shouldWait == true ? "yes" : "no");
+			write_key_pair(fd, "display-name",     i < names.size() ? names[i] : "");
+			write_key_pair(fd, "wait",             to_s(shouldWait));
+			write_key_pair(fd, "re-activate",      to_s(shouldWait));
 		}
 
 		if(geteuid() == 0 && auth.obtain_right(kAuthRightName))
@@ -413,8 +422,8 @@ int main (int argc, char* argv[])
 		write_key_pair(fd, "selection",        i < lines.size()    ? lines[i] : "");
 		write_key_pair(fd, "file-type",        i < types.size()    ? types[i] : "");
 		write_key_pair(fd, "project-uuid",     i < projects.size() ? projects[i] : defaultProject);
-		write_key_pair(fd, "add-to-recents",   addToRecent         ? "yes" : "no");
-		write_key_pair(fd, "change-directory", changeDir           ? "yes" : "no");
+		write_key_pair(fd, "add-to-recents",   to_s(addToRecent));
+		write_key_pair(fd, "change-directory", to_s(changeDir));
 
 		write(fd, "\r\n", 2);
 	}
