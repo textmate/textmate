@@ -1,6 +1,5 @@
 #import "HTMLOutputWindow.h"
 #import <OakAppKit/OakAppKit.h>
-#import <OakAppKit/OakWindowFrameHelper.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakSystem/process.h>
 #import <command/runner.h>
@@ -20,10 +19,12 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 {
 	if(self = [super init])
 	{
-		self.window         = [[NSWindow alloc] initWithContentRect:NSMakeRect(100, 100, 100, 100) styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask) backing:NSBackingStoreBuffered defer:NO];
+		NSRect rect = [[NSScreen mainScreen] visibleFrame];
+		rect = NSIntegralRect(NSInsetRect(rect, NSWidth(rect) / 3, NSHeight(rect) / 5));
+
+		self.window         = [[NSWindow alloc] initWithContentRect:rect styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask) backing:NSBackingStoreBuffered defer:NO];
 		self.htmlOutputView = [[OakHTMLOutputView alloc] init];
 
-		[self.window setFrameAutosaveName:@"Command Output (HTML)"];
 		[self.window bind:NSTitleBinding toObject:self.htmlOutputView.webView withKeyPath:@"mainFrameTitle" options:nil];
 		[self.window bind:NSDocumentEditedBinding toObject:self.htmlOutputView withKeyPath:@"runningCommand" options:nil];
 		[self.window setContentView:self.htmlOutputView];
@@ -36,8 +37,6 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 		// Register to application activation/deactivation notification so we can tweak our collection behavior
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidActivate:) name:NSApplicationDidBecomeActiveNotification object:nil];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidDeactivate:) name:NSApplicationDidResignActiveNotification object:nil];
-
-		[OakWindowFrameHelper windowFrameHelperWithWindow:self.window];
 	}
 	return self;
 }
@@ -76,6 +75,7 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 	_commandRunner = aRunner;
 
 	self.window.title = [NSString stringWithCxxString:_commandRunner->name()];
+	self.window.frameAutosaveName = [NSString stringWithFormat:@"HTML output for %@", [NSString stringWithCxxString:_commandRunner->uuid()]];
 	[self.htmlOutputView loadRequest:URLRequestForCommandRunner(_commandRunner) environment:_commandRunner->environment() autoScrolls:_commandRunner->auto_scroll_output()];
 	[self showWindow:self];
 }
