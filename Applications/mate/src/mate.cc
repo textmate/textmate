@@ -133,14 +133,13 @@ static void usage (FILE* io)
 
 	fprintf(io,
 		"%1$s %2$.1f (" COMPILE_DATE " revision %3$zu)\n"
-		"Usage: %1$s [-wl<number>t<filetype>rdnhv] [file ...]\n"
+		"Usage: %1$s [-wl<number>t<filetype>mruehv] [file ...]\n"
 		"Options:\n"
 		" -w, --[no-]wait        Wait for file to be closed by TextMate.\n"
 		" -l, --line <number>    Place caret on line <number> after loading file.\n"
 		" -t, --type <filetype>  Treat file as having <filetype>.\n"
 		" -m, --name <name>      The display name shown in TextMate.\n"
 		" -r, --[no-]recent      Add file to Open Recent menu.\n"
-		" -d, --change-dir       Change TextMate's working directory to that of the file.\n"
 		" -u, --uuid             Reference an already open document using its UUID.\n"
 		" -e, --[no-]escapes     Set this if you want ANSI escapes from stdin to be preserved.\n"
 		" -h, --help             Show this information.\n"
