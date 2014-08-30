@@ -24,8 +24,10 @@ static std::string hardware_info (int field, bool integer = false)
 
 static std::string user_uuid ()
 {
+	CFStringRef const kTextMateApplicationIdentifier = CFSTR("com.macromates.TextMate.preview");
+
 	std::string res = NULL_STR;
-	if(CFStringRef str = (CFStringRef)CFPreferencesCopyAppValue(CFSTR("SoftwareUpdateUUID"), kCFPreferencesCurrentApplication))
+	if(CFStringRef str = (CFStringRef)CFPreferencesCopyAppValue(CFSTR("SoftwareUpdateUUID"), kTextMateApplicationIdentifier))
 	{
 		if(CFGetTypeID(str) == CFStringGetTypeID())
 			res = cf::to_s(str);
@@ -35,8 +37,8 @@ static std::string user_uuid ()
 	if(res == NULL_STR)
 	{
 		res = oak::uuid_t().generate();
-		CFPreferencesSetAppValue(CFSTR("SoftwareUpdateUUID"), cf::wrap(res), kCFPreferencesCurrentApplication);
-		CFPreferencesAppSynchronize(kCFPreferencesCurrentApplication);
+		CFPreferencesSetAppValue(CFSTR("SoftwareUpdateUUID"), cf::wrap(res), kTextMateApplicationIdentifier);
+		CFPreferencesAppSynchronize(kTextMateApplicationIdentifier);
 	}
 	return res;
 }
