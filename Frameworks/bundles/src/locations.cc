@@ -12,12 +12,10 @@ namespace bundles
 		{
 			path::join(path::home(), "Library/Application Support/Avian"),
 			path::join(path::home(), "Library/Application Support/Avian/Pristine Copy"),
-			// path::join(path::home(), "Library/Application Support/TextMate"), // FIXME this location is just for testing tmDelta
 			path::join(path::home(), "Library/Application Support/TextMate/Managed"),
 			path::join("/",          "Library/Application Support/Avian"),
 			path::join("/",          "Library/Application Support/Avian/Pristine Copy"),
 			oak::application_t::path("Contents/SharedSupport"),
-			// "/Users/duff/Oak/Avian/Applications/Avian/Avian.app/Contents/SharedSupport"
 		};
 		static std::vector<std::string> res(BundleLocations, BundleLocations + sizeofA(BundleLocations));
 		return res;
