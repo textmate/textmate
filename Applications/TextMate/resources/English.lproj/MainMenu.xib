@@ -909,13 +909,13 @@ CQ
                             <menuItem isSeparatorItem="YES" id="412">
                                 <modifierMask key="keyEquivalentModifierMask" command="YES"/>
                             </menuItem>
-                            <menuItem title="Toggle Case of Character" id="347">
+                            <menuItem title="Toggle Case of Character / Selection" id="347">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="changeCaseOfLetter:" target="-1" id="379"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Toggle Case of Word" id="348">
+                            <menuItem title="Toggle Case of Word / Selection" id="348">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="changeCaseOfWord:" target="-1" id="368"/>
@@ -924,17 +924,17 @@ CQ
                             <menuItem isSeparatorItem="YES" id="361">
                                 <modifierMask key="keyEquivalentModifierMask" command="YES"/>
                             </menuItem>
-                            <menuItem title="Uppercase Word" id="349">
+                            <menuItem title="Uppercase Word / Selection" id="349">
                                 <connections>
                                     <action selector="uppercaseWord:" target="-1" id="369"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Lowercase Word" id="350">
+                            <menuItem title="Lowercase Word / Selection" id="350">
                                 <connections>
                                     <action selector="lowercaseWord:" target="-1" id="370"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Titlecase Line" id="351">
+                            <menuItem title="Titlecase Line / Selection" id="351">
                                 <connections>
                                     <action selector="capitalizeWord:" target="-1" id="371"/>
                                 </connections>
@@ -952,7 +952,7 @@ CQ
                                     <action selector="shiftRight:" target="-1" id="375"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Indent Line" id="356">
+                            <menuItem title="Indent Line / Selection" id="356">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="indent:" target="-1" id="380"/>
