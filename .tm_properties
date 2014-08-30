@@ -9,7 +9,7 @@ excludeDirectoriesInFolderSearch = '{bin/CxxTest,build}'
 # Variables
 TM_ORGANIZATION_NAME = 'MacroMates'
 
-TM_TODO_IGNORE       = '/disabled(-src)?|onig-.*|build|CxxTest/'
+TM_TODO_IGNORE       = '/(build|CxxTest|PlugIns|vendor)/|\.(md|html)$'
 
 TM_CXX_FLAGS         = '$TM_CXX_FLAGS    -I"$CWD/Shared/include" -I"${builddir:-$HOME/build/TextMate}/include"'
 TM_OBJCXX_FLAGS      = '$TM_OBJCXX_FLAGS -I"$CWD/Shared/include" -I"${builddir:-$HOME/build/TextMate}/include"'
