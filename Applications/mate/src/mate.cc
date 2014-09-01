@@ -420,7 +420,7 @@ int main (int argc, char* argv[])
 			write_key_pair(fd, "wait",             to_s(shouldWait));
 			write_key_pair(fd, "re-activate",      to_s(shouldWait));
 
-			if(addToRecent == boolean::kUnset && shouldWait != boolean::kEnable && files[i].front() != '.' && !is_temporary_file(files[i]))
+			if(addToRecent == boolean::kUnset && shouldWait != boolean::kEnable && path::name(files[i]).front() != '.' && !is_temporary_file(files[i]))
 				write_key_pair(fd, "add-to-recents", "yes");
 		}
 
