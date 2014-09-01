@@ -938,6 +938,27 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	}
 }
 
+- (void)delayedReloadItem:(FFResultNode*)item
+{
+	static size_t NestedCall = false;
+	if(!NestedCall)
+	{
+		NestedCall = true;
+		[_windowController.resultsOutlineView reloadData];
+		NestedCall = false;
+	}
+}
+
+- (void)outlineViewItemDidExpandCollapse:(NSNotification*)aNotification
+{
+	NSDictionary* userInfo = [aNotification userInfo];
+	FFResultNode* item = userInfo[@"NSObject"];
+	[self performSelector:@selector(delayedReloadItem:) withObject:item afterDelay:0];
+}
+
+- (void)outlineViewItemDidExpand:(NSNotification*)aNotification   { [self outlineViewItemDidExpandCollapse:aNotification]; }
+- (void)outlineViewItemDidCollapse:(NSNotification*)aNotification { [self outlineViewItemDidExpandCollapse:aNotification]; }
+
 - (NSView*)outlineView:(NSOutlineView*)outlineView viewForTableColumn:(NSTableColumn*)tableColumn item:(FFResultNode*)item
 {
 	NSString* identifier = tableColumn.identifier ?: @"group";
@@ -986,6 +1007,13 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 			textField.alignment = NSLeftTextAlignment;
 			textField.font      = [NSFont controlContentFontOfSize:[NSFont systemFontSizeForControlSize:NSSmallControlSize]];
 
+			NSButton* countOfLeafs = [NSButton new];
+			[[countOfLeafs cell] setHighlightsBy:NSNoCellMask];
+			countOfLeafs.alignment  = NSCenterTextAlignment;
+			countOfLeafs.bezelStyle = NSInlineBezelStyle;
+			countOfLeafs.font       = [NSFont controlContentFontOfSize:[NSFont systemFontSizeForControlSize:NSSmallControlSize]];
+			countOfLeafs.identifier = @"countOfLeafs";
+
 			NSButton* remove = [NSButton new];
 			[[remove cell] setControlSize:NSSmallControlSize];
 			remove.bezelStyle = NSRoundRectBezelStyle;
@@ -994,14 +1022,17 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 			remove.action     = @selector(takeSearchResultToRemoveFrom:);
 			remove.target     = self;
 
-			NSDictionary* views = @{ @"icon" : imageView, @"text" : textField, @"remove" : remove };
+			NSDictionary* views = @{ @"icon" : imageView, @"text" : textField, @"count" : countOfLeafs, @"remove" : remove };
 			for(NSView* child in [views allValues])
 			{
 				[child setTranslatesAutoresizingMaskIntoConstraints:NO];
 				[cellView addSubview:child];
 			}
 
-			[cellView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(6)-[icon(==16)]-(3)-[text]-(4)-[remove(==16)]-(12)-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
+			[textField setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
+			[countOfLeafs setContentCompressionResistancePriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
+
+			[cellView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(6)-[icon(==16)]-(3)-[text]-(4)-[count]-(>=4)-[remove(==16)]-(12)-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
 			[cellView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[icon(==16,==remove)]-(3)-|" options:NSLayoutFormatAlignAllLeading metrics:nil views:views]];
 
 			[imageView bind:NSValueBinding toObject:cellView withKeyPath:@"objectValue.icon" options:nil];
@@ -1010,6 +1041,17 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 			cellView.imageView = imageView;
 			cellView.textField = textField;
 		}
+
+		for(NSButton* view in [cellView subviews])
+		{
+			if([view.identifier isEqualToString:@"countOfLeafs"])
+			{
+				view.title  = [NSString stringWithFormat:@"%lu", item.countOfLeafs];
+				view.hidden = [outlineView isItemExpanded:item];
+				break;
+			}
+		}
+
 		cellView.objectValue = item;
 	}
 	return res;
