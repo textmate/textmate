@@ -134,6 +134,8 @@ namespace ng
 			return actual_replace(from, to, str);
 
 		actual_replace(from + shrinkLeft, to - shrinkRight, str.substr(shrinkLeft, len - shrinkLeft - shrinkRight));
+		if(str.size() != to)
+			wait_for_repair();
 		return from + str.size();
 	}
 
