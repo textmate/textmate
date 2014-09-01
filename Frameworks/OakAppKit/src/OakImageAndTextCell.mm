@@ -2,6 +2,13 @@
 #import "NSImage Additions.h"
 
 @implementation OakImageAndTextCell
+{
+	NSImage* _image;
+}
+
+- (NSImage*)image                  { return _image; }
+- (void)setImage:(NSImage*)anImage { _image = anImage; }
+
 - (id)copyWithZone:(NSZone*)zone
 {
 	OakImageAndTextCell* cell = [super copyWithZone:zone];
