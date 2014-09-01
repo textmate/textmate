@@ -795,7 +795,6 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	for(FFResultNode* item in [_results.children objectsAtIndexes:newItemsIndexes])
 		[self.windowController.resultsOutlineView expandItem:item];
 	[self.windowController.resultsOutlineView endUpdates];
-	[self.windowController.resultsOutlineView sizeLastColumnToFit];
 }
 
 - (void)folderSearchDidFinish:(NSNotification*)aNotification
