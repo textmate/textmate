@@ -3,6 +3,7 @@
 #include <oak/oak.h>
 #include <text/utf8.h>
 #include <text/parse.h>
+#include <text/hexdump.h>
 #include <regexp/format_string.h>
 #include <parse/grammar.h>
 
@@ -132,6 +133,9 @@ namespace ng
 
 		if(shrinkLeft == 0 && shrinkRight == 0)
 			return actual_replace(from, to, str);
+
+		std::string const old = substr(from, to);
+		fprintf(stderr, "replace: %swith:    %sshrink left/right: %zu/%zu\nsubset is valid utf-8: %s\n", text::to_hex(old.begin(), old.end()).c_str(), text::to_hex(str.begin(), str.end()).c_str(), shrinkLeft, shrinkRight, BSTR(utf8::is_valid(str.data() + shrinkLeft, str.data() + str.size() - shrinkRight)));
 
 		actual_replace(from + shrinkLeft, to - shrinkRight, str.substr(shrinkLeft, len - shrinkLeft - shrinkRight));
 		return from + str.size();
