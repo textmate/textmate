@@ -862,7 +862,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		}
 		_windowController.statusString = [NSString stringWithFormat:fmt, [_documentSearch searchString], [NSNumberFormatter localizedStringFromNumber:@(self.countOfMatches) numberStyle:NSNumberFormatterDecimalStyle]];
 
-		[_windowController.resultsOutlineView removeItemsAtIndexes:[NSIndexSet indexSetWithIndex:index] inParent:nil withAnimation:NSTableViewAnimationSlideDown];
+		[_windowController.resultsOutlineView removeItemsAtIndexes:[NSIndexSet indexSetWithIndex:index] inParent:nil withAnimation:NSTableViewAnimationEffectFade|NSTableViewAnimationSlideDown];
 	}
 }
 
