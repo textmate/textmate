@@ -209,7 +209,7 @@ biBpbiB0aGUgY29ybmVyLg</string>
 							<int key="NSCellFlags2">33554432</int>
 							<object class="NSCustomResource" key="NSContents">
 								<string key="NSClassName">NSImage</string>
-								<string key="NSResourceName">Light-off</string>
+								<string key="NSResourceName">NSStatusNone</string>
 							</object>
 							<int key="NSAlign">0</int>
 							<int key="NSScale">2</int>
