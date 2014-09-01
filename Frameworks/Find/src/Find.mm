@@ -379,6 +379,10 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		_windowController.resultsOutlineView.dataSource   = self;
 		_windowController.resultsOutlineView.delegate     = self;
 
+		[_windowController.replaceAllButton bind:@"title" toObject:self withKeyPath:@"replaceAllButtonTitle" options:nil];
+		[_windowController.replaceAllButton bind:@"enabled" toObject:self withKeyPath:@"canReplaceAll" options:nil];
+		[_windowController.window bind:@"documentEdited" toObject:self withKeyPath:@"hasUnsavedChanges" options:nil];
+
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowWillClose:) name:NSWindowWillCloseNotification object:_windowController.window];
 	}
 	return _windowController;
@@ -396,7 +400,6 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 - (void)showFindWindowFor:(NSString*)searchScope
 {
 	self.windowController.searchIn = searchScope;
-	[self updateActionButtons:self];
 	[self.windowController showWindow:self];
 }
 
@@ -430,20 +433,13 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 // = Find actions =
 // ================
 
-+ (NSSet*)keyPathsForValuesAffectingCanReplaceAll         { return [NSSet setWithArray:@[ @"performedReplaceAll", @"countOfMatches", @"countOfExcludedMatches" ]]; }
++ (NSSet*)keyPathsForValuesAffectingCanReplaceAll         { return [NSSet setWithArray:@[ @"performedReplaceAll", @"countOfMatches", @"countOfExcludedMatches", @"windowController.showsResultsOutlineView" ]]; }
 + (NSSet*)keyPathsForValuesAffectingHasUnsavedChanges     { return [NSSet setWithArray:@[ @"performedReplaceAll", @"performedSaveAll" ]]; }
-+ (NSSet*)keyPathsForValuesAffectingReplaceAllButtonTitle { return [NSSet setWithArray:@[ @"canReplaceAll", @"countOfExcludedMatches" ]]; }
++ (NSSet*)keyPathsForValuesAffectingReplaceAllButtonTitle { return [NSSet setWithArray:@[ @"canReplaceAll", @"countOfExcludedMatches", @"windowController.showsResultsOutlineView" ]]; }
 
 - (BOOL)canReplaceAll                { return _windowController.showsResultsOutlineView ? (!_performedReplaceAll && _countOfExcludedMatches < _countOfMatches) : YES; }
 - (BOOL)hasUnsavedChanges            { return _performedReplaceAll && !_performedSaveAll; }
-- (NSString*)replaceAllButtonTitle   { return _countOfExcludedMatches && self.canReplaceAll ? @"Replace Selected" : @"Replace All"; }
-
-- (void)updateActionButtons:(id)sender
-{
-	self.windowController.replaceAllButton.title   = self.replaceAllButtonTitle;
-	self.windowController.replaceAllButton.enabled = self.canReplaceAll;
-	self.windowController.documentEdited           = self.hasUnsavedChanges;
-}
+- (NSString*)replaceAllButtonTitle   { return _windowController.showsResultsOutlineView && _countOfExcludedMatches && self.canReplaceAll ? @"Replace Selected" : @"Replace All"; }
 
 - (IBAction)countOccurrences:(id)sender   { [self performFindAction:FindActionCountMatches   withWindowController:self.windowController]; }
 - (IBAction)findAll:(id)sender            { [self performFindAction:FindActionFindAll        withWindowController:self.windowController]; }
@@ -492,7 +488,6 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	{
 		self.windowController.statusString = [NSString stringWithFormat:@"%lu file%s saved.", fileCount, fileCount == 1 ? "" : "s"];
 		self.performedSaveAll = YES;
-		[self updateActionButtons:self];
 	}
 	else
 	{
@@ -513,7 +508,6 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		{
 			// FIXME Undo replacements
 			self.performedReplaceAll = NO;
-			[self updateActionButtons:self];
 		}
 		else if(returnCode == NSAlertSecondButtonReturn) // Cancel
 			;
@@ -631,7 +625,6 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 				}
 				self.windowController.statusString = [NSString stringWithFormat:MSG_REPLACE_ALL_RESULTS, replaceCount, fileCount];
 				self.performedReplaceAll = YES;
-				[self updateActionButtons:self];
 				[_windowController.resultsOutlineView reloadDataForRowIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [_windowController.resultsOutlineView numberOfRows])] columnIndexes:[NSIndexSet indexSetWithIndex:1]];
 			}
 			break;
@@ -657,7 +650,6 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		[OakPasteboard pasteboardWithName:NSFindPboard].auxiliaryOptionsForCurrent = nil;
 		[NSApp sendAction:@selector(performFindOperation:) to:nil from:self];
 	}
-	[self updateActionButtons:self];
 }
 
 - (NSString*)findString    { return self.windowController.findString    ?: @""; }
@@ -778,8 +770,6 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		self.performingFolderSearch = YES;
 		[_documentSearch start];
 	}
-
-	[self updateActionButtons:self];
 }
 
 - (void)folderSearchDidReceiveResults:(NSNotification*)aNotification
@@ -803,8 +793,6 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	while(last-- != first)
 		[self.windowController.resultsOutlineView expandItem:[self.windowController.resultsOutlineView itemAtRow:last]];
 	[self.windowController.resultsOutlineView sizeLastColumnToFit];
-
-	[self updateActionButtons:self];
 }
 
 - (void)folderSearchDidFinish:(NSNotification*)aNotification
@@ -862,7 +850,6 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 			return;
 
 		[item removeFromParent];
-		[self updateActionButtons:self];
 
 		NSString* fmt = MSG_SHOWING_ZERO_MATCHES_FMT;
 		switch(self.countOfMatches)
@@ -948,8 +935,6 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 				range = NSMakeRange([_windowController.resultsOutlineView rowForItem:item.parent.firstResultNode], item.parent.countOfLeafs);
 			[_windowController.resultsOutlineView reloadDataForRowIndexes:[NSIndexSet indexSetWithIndexesInRange:range] columnIndexes:[NSIndexSet indexSetWithIndex:1]];
 		}
-
-		[self updateActionButtons:self];
 	}
 }
 
@@ -1211,7 +1196,6 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 - (void)allMatchesSetExclude:(BOOL)exclude
 {
 	_results.excluded = exclude;
-	[self updateActionButtons:self];
 }
 
 - (IBAction)checkAll:(id)sender
