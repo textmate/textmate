@@ -139,7 +139,7 @@
 - (BOOL)shouldActivate
 {
 	id firstResponder = [[self window] firstResponder];
-	if(([firstResponder respondsToSelector:@selector(delegate)] && [firstResponder delegate] == self) || fieldEditorWasUp)
+	if(([firstResponder respondsToSelector:@selector(delegate)] && [(NSText*)firstResponder delegate] == self) || fieldEditorWasUp)
 		return YES;
 
 	NSEvent* event = [NSApp currentEvent];
