@@ -132,7 +132,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 	return str;
 }
 
-@interface FFResultNode : NSObject <NSCopying>
+@interface FFResultNode : NSObject
 {
 	document::document_t::callback_t* _callback;
 }
@@ -179,11 +179,6 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 		self.document->remove_callback(_callback);
 		delete _callback;
 	}
-}
-
-- (id)copyWithZone:(NSZone*)zone
-{
-	return self;
 }
 
 - (void)setCountOfLeafs:(NSUInteger)countOfLeafs
