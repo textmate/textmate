@@ -18,21 +18,20 @@
 NSString* const kUserDefaultsFolderOptionsKey     = @"Folder Search Options";
 NSString* const kUserDefaultsFindResultsHeightKey = @"findResultsHeight";
 
-@interface OakClickableStatusBar : NSTextField
-@property (nonatomic) NSString* alternateString;
-@end
-
-@implementation OakClickableStatusBar
-- (void)mouseDown:(NSEvent*)anEvent
+NSButton* OakCreateClickableStatusBar ()
 {
-	if(OakNotEmptyString(self.alternateString))
-	{
-		NSString* old = self.stringValue;
-		self.stringValue = self.alternateString;
-		self.alternateString = old;
-	}
+	NSButton* res = [[NSButton alloc] initWithFrame:NSZeroRect];
+	[res.cell setLineBreakMode:NSLineBreakByTruncatingTail];
+	res.alignment  = NSLeftTextAlignment;
+	res.bordered   = NO;
+	res.buttonType = NSToggleButton;
+	res.font       = [NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]];
+	res.title      = @"";
+
+	[res setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
+	[res setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationVertical];
+	return res;
 }
-@end
 
 @interface OakAutoSizingTextField : NSTextField
 @property (nonatomic) NSSize myIntrinsicContentSize;
@@ -169,7 +168,7 @@ static NSButton* OakCreateStopSearchButton ()
 @property (nonatomic) NSView*                   resultsBottomDivider;
 
 @property (nonatomic) NSProgressIndicator*      progressIndicator;
-@property (nonatomic) OakClickableStatusBar*    statusTextField;
+@property (nonatomic) NSButton*                 statusTextField;
 
 @property (nonatomic, readwrite) NSButton*      findAllButton;
 @property (nonatomic, readwrite) NSButton*      replaceAllButton;
@@ -238,10 +237,7 @@ static NSButton* OakCreateStopSearchButton ()
 		self.resultsBottomDivider      = OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1]);
 
 		self.progressIndicator         = OakCreateProgressIndicator();
-		self.statusTextField           = (OakClickableStatusBar*)OakCreateSmallLabel(@"", [OakClickableStatusBar class]);
-
-		[self.statusTextField setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
-		[self.statusTextField.cell setLineBreakMode:NSLineBreakByTruncatingTail];
+		self.statusTextField           = OakCreateClickableStatusBar();
 
 		self.findAllButton             = OakCreateButton(@"Find All");
 		self.replaceAllButton          = OakCreateButton(@"Replace All");
@@ -464,11 +460,11 @@ static NSButton* OakCreateStopSearchButton ()
 	if(self.showsResultsOutlineView)
 	{
 		CONSTRAINT(@"H:|[results(==resultsTopDivider,==resultsBottomDivider)]|", 0);
-		[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[where]-[resultsTopDivider][results(>=50,==height@490)][resultsBottomDivider]-[status]" options:0 metrics:@{ @"height" : @(self.findResultsHeight) } views:views]];
+		[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[where]-[resultsTopDivider][results(>=50,==height@490)][resultsBottomDivider]-(8)-[status]" options:0 metrics:@{ @"height" : @(self.findResultsHeight) } views:views]];
 	}
 	else
 	{
-		CONSTRAINT(@"V:[where]-[status]", 0);
+		CONSTRAINT(@"V:[where]-(8)-[status]", 0);
 	}
 
 	if(self.isBusy)
@@ -481,7 +477,7 @@ static NSButton* OakCreateStopSearchButton ()
 	}
 
 	CONSTRAINT(@"H:|-[findAll]-[replaceAll]-(>=8)-[replaceAndFind]-[previous]-[next]-|", NSLayoutFormatAlignAllBottom);
-	CONSTRAINT(@"V:[status(==14)]-[findAll]-|", 0);
+	CONSTRAINT(@"V:[status]-(8)-[findAll]-|", 0);
 
 	[self.window.contentView addConstraints:_myConstraints];
 
@@ -840,13 +836,13 @@ static NSButton* OakCreateStopSearchButton ()
 
 - (void)setStatusString:(NSString*)aString
 {
-	self.statusTextField.stringValue = _statusString = aString;
+	self.statusTextField.title = _statusString = OakIsEmptyString(aString) ? @" " : aString;
 	self.alternateStatusString = nil;
 }
 
 - (void)setAlternateStatusString:(NSString*)aString
 {
-	self.statusTextField.alternateString = _alternateStatusString = aString;
+	self.statusTextField.alternateTitle = _alternateStatusString = aString;
 }
 
 - (NSString*)searchFolder
