@@ -774,6 +774,8 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 - (void)folderSearchDidReceiveResults:(NSNotification*)aNotification
 {
+	NSUInteger countOfExistingItems = _results.children.count;
+
 	NSArray* matches = [aNotification userInfo][@"matches"];
 	FFResultNode* parent = nil;
 	for(FFMatch* match in matches)
@@ -787,11 +789,12 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		[parent addResultNode:node];
 	}
 
-	NSInteger first = [self.windowController.resultsOutlineView numberOfRows];
-	[self.windowController.resultsOutlineView reloadData];
-	NSInteger last = [self.windowController.resultsOutlineView numberOfRows];
-	while(last-- != first)
-		[self.windowController.resultsOutlineView expandItem:[self.windowController.resultsOutlineView itemAtRow:last]];
+	NSIndexSet* newItemsIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(countOfExistingItems, _results.children.count - countOfExistingItems)];
+	[self.windowController.resultsOutlineView beginUpdates];
+	[self.windowController.resultsOutlineView insertItemsAtIndexes:newItemsIndexes inParent:nil withAnimation:0];
+	for(FFResultNode* item in [_results.children objectsAtIndexes:newItemsIndexes])
+		[self.windowController.resultsOutlineView expandItem:item];
+	[self.windowController.resultsOutlineView endUpdates];
 	[self.windowController.resultsOutlineView sizeLastColumnToFit];
 }
 
