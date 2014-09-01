@@ -584,8 +584,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 		[clip appendBezierPath:[NSBezierPath bezierPathWithRect:NSOffsetRect(rect, -NSMinX(srcRect), -NSMinY(srcRect))]];
 
 	NSImage* image = [[NSImage alloc] initWithSize:NSMakeSize(std::max<CGFloat>(NSWidth(srcRect), 1), std::max<CGFloat>(NSHeight(srcRect), 1))];
-	[image setFlipped:[self isFlipped]];
-	[image lockFocus];
+	[image lockFocusFlipped:[self isFlipped]];
 	[clip addClip];
 
 	CGContextRef context = (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort];
@@ -595,7 +594,6 @@ static std::string shell_quote (std::vector<std::string> paths)
 	layout->draw(context, srcRect, [self isFlipped], false, ng::ranges_t(), ng::ranges_t(), false);
 
 	[image unlockFocus];
-	[image setFlipped:NO];
 
 	if(outRect)
 		*outRect = srcRect;
