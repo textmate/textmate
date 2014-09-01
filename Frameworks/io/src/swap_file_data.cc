@@ -37,8 +37,18 @@ namespace path
 		{
 			if(errno == ENOTSUP && access(dst.c_str(), F_OK) == 0)
 			{
-				copyfile(dst.c_str(), src.c_str(), NULL, COPYFILE_METADATA);
-				utimes(src.c_str(), NULL);
+				// Skip COPYFILE_METADATA for network drives <rdar://17480649>
+				if(path::is_local(src))
+				{
+					copyfile(dst.c_str(), src.c_str(), NULL, COPYFILE_METADATA);
+					utimes(src.c_str(), NULL);
+				}
+				else
+				{
+					struct stat sbuf;
+					if(stat(src.c_str(), &sbuf) == 0)
+						chmod(dst.c_str(), sbuf.st_mode & (S_IRWXU|S_IRWXG|S_IRWXO));
+				}
 			}
 
 			if(::rename(src.c_str(), dst.c_str()) == 0)
