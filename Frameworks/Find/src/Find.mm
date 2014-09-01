@@ -1032,11 +1032,6 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	return YES;
 }
 
-- (BOOL)outlineView:(NSOutlineView*)outlineView shouldTrackCell:(NSCell*)cell forTableColumn:(NSTableColumn*)tableColumn item:(FFResultNode*)item
-{
-	return YES;
-}
-
 // =============================
 // = Selecting Results Actions =
 // =============================
