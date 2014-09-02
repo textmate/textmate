@@ -1089,10 +1089,9 @@ namespace document
 						D(DBF_Document_WatchFS, bug("changed on disk and we have no local changes, so reverting to that\n"););
 						_document->undo_manager().begin_undo_group(ng::ranges_t(0));
 						_document->_buffer->replace(0, _document->_buffer->size(), yours);
-						_document->_buffer->bump_revision();
+						_document->undo_manager().end_undo_group(ng::ranges_t(0), true);
 						_document->check_modified(_document->_buffer->revision(), _document->_buffer->revision());
 						_document->mark_pristine();
-						_document->undo_manager().end_undo_group(ng::ranges_t(0));
 						_document->broadcast(callback_t::did_change_content);
 					}
 					else
