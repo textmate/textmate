@@ -147,7 +147,7 @@ static void usage (FILE* io)
 		"\n"
 		"Files opened via %1$s are added to the recent menu unless\n"
 		"the file starts with a period, --wait or --no-recent is\n"
-		"specifed, or file is in the system’s temporary directory.\n"
+		"specified, or the file is in the system’s temporary directory.\n"
 		"\n"
 		"By default %1$s will wait for files to be closed if the command name\n"
 		"has a \"_wait\" suffix (e.g. via a symbolic link) or when used as a\n"
