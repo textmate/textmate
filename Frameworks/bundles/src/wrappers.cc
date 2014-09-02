@@ -129,7 +129,7 @@ namespace bundles
 	// = Scope Variables (“shellVariables”) =
 	// ======================================
 
-	static std::vector< std::pair<std::string, std::string> > parse_variables (item_ptr const& item)
+	std::vector< std::pair<std::string, std::string> > shell_variables (item_ptr const& item)
 	{
 		plist::array_t variables;
 		plist::get_key_path(item->plist(), "settings.shellVariables", variables);
@@ -154,7 +154,7 @@ namespace bundles
 		riterate(item, items)
 		{
 			stack.push_back(std::set<std::string>());
-			for(auto pair : parse_variables(*item))
+			for(auto pair : shell_variables(*item))
 			{
 				auto tmp = (*item)->bundle_variables();
 				res[pair.first] = format_string::expand(pair.second, tmp << res);

@@ -22,6 +22,7 @@ namespace bundles
 
 	PUBLIC bool missing_requirement (item_ptr const& item, std::map<std::string, std::string>& environment, required_command_t* failedRequirement);
 
+	PUBLIC std::vector< std::pair<std::string, std::string> > shell_variables (item_ptr const& item);
 	PUBLIC std::map<std::string, std::string> scope_variables (std::map<std::string, std::string> const& base, scope::context_t const& scope = scope::context_t());
 	PUBLIC plist::any_t value_for_setting (std::string const& setting, scope::context_t const& scope, item_ptr* match = NULL);
 
