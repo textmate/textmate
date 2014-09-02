@@ -167,7 +167,9 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 @property (nonatomic) NSButton* selectButton;
 @property (nonatomic) NSButton* editButton;
 @property (nonatomic) NSArray* layoutConstraints;
+@property (nonatomic) NSArray* sourceListLabels;
 
+@property (nonatomic) NSUInteger sourceIndex;
 @property (nonatomic) NSUInteger searchSource;
 @property (nonatomic) NSUInteger bundleItemField;
 
@@ -187,8 +189,9 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 {
 	if((self = [super init]))
 	{
-		_bundleItemField = kBundleItemTitleField;
-		_searchSource    = kSearchSourceActionItems|kSearchSourceMenuItems;
+		_sourceListLabels = @[ @"Actions", @"Settings", @"Other" ];
+		_bundleItemField  = kBundleItemTitleField;
+		_searchSource     = kSearchSourceActionItems|kSearchSourceMenuItems;
 
 		self.window.title = @"Select Bundle Item";
 		[self.window setContentBorderThickness:31 forEdge:NSMinYEdge];
@@ -210,15 +213,6 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 			{ @"Scope Selector", kBundleItemScopeSelectorField },
 		};
 
-		struct { NSString* title; NSUInteger tag; } const sources[] =
-		{
-			{ @"Actions",           kSearchSourceActionItems   },
-			{ @"Settings",          kSearchSourceSettingsItems },
-			{ @"Language Grammars", kSearchSourceGrammarItems  },
-			{ @"Themes",            kSearchSourceThemeItems    },
-			{ @"Menu Items",        kSearchSourceMenuItems     },
-		};
-
 		char key = 0;
 
 		[actionMenu addItemWithTitle:@"Search" action:@selector(nop:) keyEquivalent:@""];
@@ -230,24 +224,13 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		}
 
 		[actionMenu addItem:[NSMenuItem separatorItem]];
-		[actionMenu addItemWithTitle:@"Sources" action:@selector(nop:) keyEquivalent:@""];
-		for(auto&& info : sources)
-		{
-			NSMenuItem* item = [actionMenu addItemWithTitle:info.title action:@selector(takeSearchSourceFrom:) keyEquivalent:@""];
-			[item setIndentationLevel:1];
-			[item setTag:info.tag];
-		}
-
-		[actionMenu addItem:[NSMenuItem separatorItem]];
 		[actionMenu addItemWithTitle:@"Search All Scopes" action:@selector(toggleSearchAllScopes:) keyEquivalent:key < 10 ? [NSString stringWithFormat:@"%c", '0' + (++key % 10)] : @""];
 
 		self.aboveScopeBarDark  = OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]);
 		self.aboveScopeBarLight = OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.797 alpha:1], [NSColor colorWithCalibratedWhite:0.912 alpha:1]);
 
 		self.scopeBar = [OakScopeBarView new];
-		self.scopeBar.labels = @[ @"Actions", @"Settings", @"Other" ];
-		[self.scopeBar.buttons[1] setEnabled:NO];
-		[self.scopeBar.buttons[2] setEnabled:NO];
+		self.scopeBar.labels = _sourceListLabels;
 
 		self.topDivider          = OakCreateHorizontalLine([NSColor darkGrayColor], [NSColor colorWithCalibratedWhite:0.551 alpha:1]),
 		self.bottomDivider       = OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]);
@@ -268,6 +251,8 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 
 		[self setupLayoutConstraints];
 		self.window.defaultButtonCell = self.selectButton.cell;
+
+		[self.scopeBar bind:NSValueBinding toObject:self withKeyPath:@"sourceIndex" options:nil];
 	}
 	return self;
 }
@@ -275,6 +260,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 - (void)dealloc
 {
 	[_keyEquivalentView removeObserver:self forKeyPath:@"recording" context:kRecordingBinding];
+	[_scopeBar unbind:NSValueBinding];
 }
 
 - (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)object change:(NSDictionary*)change context:(void*)context
@@ -348,6 +334,16 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		[self.tableView scrollRowToVisible:0];
 	}
 	[super showWindow:sender];
+}
+
+- (void)setSourceIndex:(NSUInteger)newSourceIndex
+{
+	switch(_sourceIndex = newSourceIndex)
+	{
+		case 0: self.searchSource = kSearchSourceActionItems|kSearchSourceMenuItems;   break;
+		case 1: self.searchSource = kSearchSourceSettingsItems;                        break;
+		case 2: self.searchSource = kSearchSourceGrammarItems|kSearchSourceThemeItems; break;
+	}
 }
 
 - (void)keyDown:(NSEvent*)anEvent
@@ -450,19 +446,6 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 {
 	if([sender respondsToSelector:@selector(tag)])
 		self.bundleItemField = [sender tag];
-}
-
-- (void)takeSearchSourceFrom:(id)sender
-{
-	if([sender respondsToSelector:@selector(tag)])
-	{
-		if(OakIsAlternateKeyOrMouseEvent())
-			self.searchSource = [sender tag];
-		else if(self.searchSource == [sender tag])
-			self.searchSource = kSearchSourceActionItems;
-		else
-			self.searchSource = self.searchSource ^ [sender tag];
-	}
 }
 
 - (void)tableView:(NSTableView*)aTableView willDisplayCell:(OakBundleItemCell*)cell forTableColumn:(NSTableColumn*)aTableColumn row:(NSInteger)rowIndex
@@ -699,8 +682,6 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 {
 	if(aMenuItem.action == @selector(takeBundleItemFieldFrom:))
 		aMenuItem.state = self.bundleItemField == aMenuItem.tag ? NSOnState : NSOffState;
-	else if(aMenuItem.action == @selector(takeSearchSourceFrom:))
-		aMenuItem.state = (self.searchSource & aMenuItem.tag) ? NSOnState : NSOffState;
 	else if(aMenuItem.action == @selector(toggleSearchAllScopes:))
 		aMenuItem.state = self.searchAllScopes ? NSOnState : NSOffState;
 
@@ -756,4 +737,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	[NSApp sendAction:self.editAction to:self.target from:self];
 	[self.window close];
 }
+
+- (IBAction)selectNextTab:(id)sender     { self.sourceIndex = (self.sourceIndex + 1) % self.sourceListLabels.count; }
+- (IBAction)selectPreviousTab:(id)sender { self.sourceIndex = (self.sourceIndex + self.sourceListLabels.count - 1) % self.sourceListLabels.count; }
 @end
