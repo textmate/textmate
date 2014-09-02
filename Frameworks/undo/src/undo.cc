@@ -25,12 +25,13 @@ namespace ng
 		}
 	}
 
-	void undo_manager_t::end_undo_group (ranges_t const& ranges)
+	void undo_manager_t::end_undo_group (ranges_t const& ranges, bool force)
 	{
-		if(--_nesting_count == 0 && _changes)
+		if((--_nesting_count == 0 || force) && _changes)
 		{
 			_records[_index-1].post_selection = ranges;
 			_records[_index-1].post_revision = _buffer.bump_revision();
+			_changes = 0;
 		}
 	}
 

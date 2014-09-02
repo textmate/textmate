@@ -15,7 +15,7 @@ namespace ng
 		bool can_redo () const;
 
 		void begin_undo_group (ranges_t const& ranges);
-		void end_undo_group (ranges_t const& ranges);
+		void end_undo_group (ranges_t const& ranges, bool force = false);
 
 		ranges_t undo ();
 		ranges_t redo ();
