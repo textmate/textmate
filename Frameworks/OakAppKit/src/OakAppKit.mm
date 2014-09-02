@@ -1,5 +1,8 @@
 #import "OakAppKit.h"
 #import <oak/algorithm.h>
+#import <crash/info.h>
+#import <ns/ns.h>
+#import <oak/debug.h>
 
 NSString* const OakCursorDidHideNotification = @"OakCursorDidHideNotification";
 
@@ -44,6 +47,7 @@ BOOL OakIsAlternateKeyOrMouseEvent (NSUInteger flags, NSEvent* anEvent)
 
 void OakShowSheetForWindow (NSWindow* sheet, NSWindow* window, void(^callback)(NSInteger))
 {
+	crash_reporter_info_t info(to_s([NSString stringWithFormat:@"sheet %@, window %@: title ‘%@’, is visible %s, is sheet %s, has sheet %s, delegate %@", sheet, window, window.title, BSTR(window.isVisible), BSTR(window.isSheet), BSTR(window.attachedSheet), window.delegate]));
 	OakSheetCallbackDelegate* delegate = [[OakSheetCallbackDelegate alloc] initWithBlock:callback];
 	[NSApp beginSheet:sheet modalForWindow:window modalDelegate:delegate didEndSelector:@selector(sheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
 }
