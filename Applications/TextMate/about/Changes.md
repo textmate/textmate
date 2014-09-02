@@ -2,6 +2,15 @@ Title: Release Notes
 
 # Changes
 
+## 2014-09-02 ([v2.0-alpha.9563](https://github.com/textmate/textmate/compare/v2.0-alpha.9559...v2.0-alpha.9563))
+
+* Folder search results can be pruned using the new remove button shown per file in the list. You can also see how many bytes were searched by clicking the status bar (after a folder search).
+* The bundle item chooser now use a scope bar for the 3 item types it can show. You can move between sources via ⌘{ and ⌘}. The _Settings_ source currently shows settings from bundle items but long-term it should also show settings set via `.tm_properties` or from the settings window. The _Other_ source is currently language grammars and themes but might become _Styles_ with a more fine-grained view of what rules/themes are responsible for the current context.
+* The commit window is now a document modal sheet with the list of items to commit hidden by default. The intent is that one should select the items to commit in the file browser, here the Go → SCM Status (⇧⌘Y) is highly recommended. *[Ronald Wampler]*
+* Files opened via `mate` are now added to the recent menu by default unless the file is a dot-file (hidden), `--wait` or `--no-recent` is specified, or the file is in the system’s temporary folder. Also cleaned up the command options a bit, e.g. `--async` is now `--no-wait`, run `mate -h` for more info.
+* Improved _Text → Titlecase Line / Selection_: Words with mixed case will not be changed and any prefix/suffix that is not a word, will be ignored so that the actual first/last word gets titlecased.
+* When a key equivalent field has focus (and is not recording), escape will now clear the field.
+
 ## 2014-08-17 ([v2.0-alpha.9559](https://github.com/textmate/textmate/compare/v2.0-alpha.9555...v2.0-alpha.9559))
 
 * The bundle item chooser (⌃⌘T) now include menu items. This also works with key equivalent searching.
