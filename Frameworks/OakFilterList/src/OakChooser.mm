@@ -182,7 +182,7 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 
 	NSUInteger res = OakPerformTableViewActionFromSelector(self.tableView, aCommand, aTextView);
 	if(res == OakMoveAcceptReturn)
-		[self accept:self];
+		[self performDefaultButtonClick:self];
 	else if(res == OakMoveCancelReturn)
 		[self cancel:self];
 	return res != OakMoveNoActionReturn;
@@ -232,6 +232,13 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 // =================
 // = Action Method =
 // =================
+
+- (void)performDefaultButtonClick:(id)sender
+{
+	if(self.window.defaultButtonCell)
+			[self.window.defaultButtonCell performClick:sender];
+	else	[self accept:sender];
+}
 
 - (void)accept:(id)sender
 {

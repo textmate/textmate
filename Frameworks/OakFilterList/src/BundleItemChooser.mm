@@ -332,7 +332,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 {
 	NSUInteger res = OakPerformTableViewActionFromKeyEvent(self.tableView, anEvent);
 	if(res == OakMoveAcceptReturn)
-		[self accept:self];
+		[self performDefaultButtonClick:self];
 	else if(res == OakMoveCancelReturn)
 		[self cancel:self];
 }
@@ -667,7 +667,10 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	// Our super class will ask for updated status text each time selection changes
 	// so we use this to update enabled state for action buttons
 	// FIXME Since ‘canEdit’ depends on ‘editAction’ we must update ‘enabled’ when ‘editAction’ changes.
-	self.editButton.enabled = self.canEdit;
+	self.selectButton.enabled     = self.canAccept;
+	self.editButton.enabled       = self.canEdit;
+	self.window.defaultButtonCell = !self.canAccept && self.canEdit ? self.editButton.cell : self.selectButton.cell;
+	self.tableView.doubleAction   = !self.canAccept && self.canEdit ? @selector(editItem:) : @selector(accept:);
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem*)aMenuItem
@@ -680,6 +683,12 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		aMenuItem.state = self.searchAllScopes ? NSOnState : NSOffState;
 
 	return YES;
+}
+
+- (BOOL)canAccept
+{
+	BundleItemChooserItem* item = self.tableView.selectedRow != -1 ? self.items[self.tableView.selectedRow] : nil;
+	return item.menuItem || item.item && item.item->kind() != bundles::kItemTypeSettings;
 }
 
 - (BOOL)canEdit

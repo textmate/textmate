@@ -23,6 +23,7 @@ PUBLIC @interface OakChooser : NSResponder
 @property (nonatomic) NSTextField*   statusTextField;
 @property (nonatomic) NSTextField*   itemCountTextField;
 
+- (void)performDefaultButtonClick:(id)sender;
 - (void)accept:(id)sender;
 - (void)cancel:(id)sender;
 @end
