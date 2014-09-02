@@ -138,6 +138,8 @@ namespace ng
 		fprintf(stderr, "replace: %swith:    %sshrink left/right: %zu/%zu\nsubset is valid utf-8: %s\n", text::to_hex(old.begin(), old.end()).c_str(), text::to_hex(str.begin(), str.end()).c_str(), shrinkLeft, shrinkRight, BSTR(utf8::is_valid(str.data() + shrinkLeft, str.data() + str.size() - shrinkRight)));
 
 		actual_replace(from + shrinkLeft, to - shrinkRight, str.substr(shrinkLeft, len - shrinkLeft - shrinkRight));
+		if(str.size() != to)
+			wait_for_repair();
 		return from + str.size();
 	}
 
