@@ -134,6 +134,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 }
 
 @interface BundleItemChooserItem : NSObject
++ (instancetype)bundleChooserItemWithItem:(bundles::item_ptr)anItem title:(id)aTitle;
 @property (nonatomic) id name;
 @property (nonatomic) NSString* uuid;
 @property (nonatomic) bundles::item_ptr item;
@@ -143,6 +144,15 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 @implementation BundleItemChooserItem
 - (id)objectForKey:(id)aKey     { return [self valueForKey:aKey]; }
 - (BOOL)isEqual:(id)anotherItem { return [anotherItem isKindOfClass:[BundleItemChooserItem class]] && [self.uuid isEqualToString:((BundleItemChooserItem*)anotherItem).uuid]; }
+
++ (instancetype)bundleChooserItemWithItem:(bundles::item_ptr)anItem title:(id)aTitle
+{
+	BundleItemChooserItem* res = [self new];
+	res.item = anItem;
+	res.uuid = [NSString stringWithCxxString:anItem->uuid()];
+	res.name = aTitle;
+	return res;
+}
 @end
 
 @interface BundleItemChooser () <NSToolbarDelegate>
@@ -462,32 +472,11 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	std::multimap<double, BundleItemChooserItem*> rankedItems;
 	for(auto const& item : relevant_items_in_scope(self.searchAllScopes ? scope::wildcard : self.scope, self.hasSelection, self.searchSource))
 	{
-		std::string const fullName = full_name_with_selection(item, self.hasSelection);
-
-		id title     = [NSString stringWithCxxString:fullName];
 		bool include = filter == NULL_STR || filter.empty();
-		double rank  = rankedItems.size();
-
 		if(!include)
 		{
 			switch(_bundleItemField)
 			{
-				case kBundleItemTitleField:
-				{
-					std::vector< std::pair<size_t, size_t> > ranges;
-					if(double score = oak::rank(filter, fullName, &ranges))
-					{
-						size_t rankIndex = std::find(identifiers.begin(), identifiers.end(), to_s(item->uuid())) - identifiers.begin();
-						if(rankIndex != identifiers.size())
-							score = identifiers.size() - rankIndex;
-
-						title   = CreateAttributedStringWithMarkedUpRanges(fullName, ranges);
-						include = true;
-						rank    = -score;
-					}
-				}
-				break;
-
 				case kBundleItemKeyEquivalentField:
 				{
 					include = key_equivalent(item) == filter;
@@ -515,15 +504,89 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 				}
 				break;
 			}
+
+			if(!include && _bundleItemField != kBundleItemTitleField)
+				continue;
 		}
 
-		if(include)
+		if(item->kind() != bundles::kItemTypeSettings)
 		{
-			BundleItemChooserItem* entry = [BundleItemChooserItem new];
-			entry.name = title;
-			entry.uuid = [NSString stringWithCxxString:item->uuid()];
-			entry.item = item;
-			rankedItems.emplace(rank, entry);
+			std::string const fullName = full_name_with_selection(item, self.hasSelection);
+			id title    = [NSString stringWithCxxString:fullName];
+			double rank = rankedItems.size();
+
+			if(!include && _bundleItemField == kBundleItemTitleField)
+			{
+				std::vector< std::pair<size_t, size_t> > ranges;
+				double score = oak::rank(filter, fullName, &ranges);
+				if(!score)
+					continue;
+
+				size_t rankIndex = std::find(identifiers.begin(), identifiers.end(), to_s(item->uuid())) - identifiers.begin();
+				if(rankIndex != identifiers.size())
+					score = identifiers.size() - rankIndex;
+
+				title = CreateAttributedStringWithMarkedUpRanges(fullName, ranges);
+				rank  = -score;
+			}
+
+			rankedItems.emplace(rank, [BundleItemChooserItem bundleChooserItemWithItem:item title:title]);
+		}
+		else
+		{
+			std::string itemNameSuffix = full_name_with_selection(item, self.hasSelection);
+			std::string::size_type pos = itemNameSuffix.rfind(" — ");
+			if(pos != std::string::npos)
+				itemNameSuffix = itemNameSuffix.substr(pos + strlen(" — ")) + " » " + itemNameSuffix.substr(0, pos);
+
+			plist::dictionary_t settings;
+			if(plist::get_key_path(item->plist(), bundles::kFieldSettingName, settings))
+			{
+				for(auto const& pair : settings)
+				{
+					if(pair.first != "shellVariables")
+					{
+						std::string const fullName = pair.first + " — " + itemNameSuffix;
+						id title    = [NSString stringWithCxxString:fullName];
+						double rank = rankedItems.size();
+
+						if(!include && _bundleItemField == kBundleItemTitleField)
+						{
+							std::vector< std::pair<size_t, size_t> > ranges;
+							double score = oak::rank(filter, fullName, &ranges);
+							if(!score)
+								continue;
+
+							title = CreateAttributedStringWithMarkedUpRanges(fullName, ranges);
+							rank  = -score;
+						}
+
+						rankedItems.emplace(rank, [BundleItemChooserItem bundleChooserItemWithItem:item title:title]);
+					}
+					else
+					{
+						for(auto const& pair : shell_variables(item))
+						{
+							std::string const fullName = pair.first + " — " + itemNameSuffix + " » shellVariables";
+							id title    = [NSString stringWithCxxString:fullName];
+							double rank = rankedItems.size();
+
+							if(!include && _bundleItemField == kBundleItemTitleField)
+							{
+								std::vector< std::pair<size_t, size_t> > ranges;
+								double score = oak::rank(filter, fullName, &ranges);
+								if(!score)
+									continue;
+
+								title = CreateAttributedStringWithMarkedUpRanges(fullName, ranges);
+								rank  = -score;
+							}
+
+							rankedItems.emplace(rank, [BundleItemChooserItem bundleChooserItemWithItem:item title:title]);
+						}
+					}
+				}
+			}
 		}
 	}
 
