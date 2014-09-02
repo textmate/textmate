@@ -226,10 +226,10 @@ static NSString* const kRecordingPlaceholderString = @"…";
 
 - (void)keyDown:(NSEvent*)anEvent
 {
-	static std::set<std::string> const ClearKeys     = { utf8::to_s(NSDeleteCharacter), utf8::to_s(NSDeleteFunctionKey) };
+	static std::set<std::string> const ClearKeys     = { utf8::to_s(NSDeleteCharacter), utf8::to_s(NSDeleteFunctionKey), "\e" };
 	static std::set<std::string> const RecordingKeys = { " " };
 	std::string const keyString = to_s(anEvent);
-	if(ClearKeys.find(keyString) != ClearKeys.end())
+	if(ClearKeys.find(keyString) != ClearKeys.end() && !OakIsEmptyString(self.eventString))
 		[self clearKeyEquivalent:self];
 	else if(RecordingKeys.find(keyString) != RecordingKeys.end())
 		self.recording = YES;
