@@ -5,6 +5,7 @@
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakAppKit/OakKeyEquivalentView.h>
+#import <OakAppKit/OakScopeBarView.h>
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <bundles/bundles.h>
@@ -158,6 +159,9 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 @interface BundleItemChooser () <NSToolbarDelegate>
 @property (nonatomic) OakKeyEquivalentView* keyEquivalentView;
 @property (nonatomic) NSPopUpButton* actionsPopUpButton;
+@property (nonatomic) NSBox* aboveScopeBarDark;
+@property (nonatomic) NSBox* aboveScopeBarLight;
+@property (nonatomic) OakScopeBarView* scopeBar;
 @property (nonatomic) NSBox* topDivider;
 @property (nonatomic) NSBox* bottomDivider;
 @property (nonatomic) NSButton* selectButton;
@@ -237,18 +241,26 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		[actionMenu addItem:[NSMenuItem separatorItem]];
 		[actionMenu addItemWithTitle:@"Search All Scopes" action:@selector(toggleSearchAllScopes:) keyEquivalent:key < 10 ? [NSString stringWithFormat:@"%c", '0' + (++key % 10)] : @""];
 
-		self.topDivider          = OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]);
+		self.aboveScopeBarDark  = OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]);
+		self.aboveScopeBarLight = OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.797 alpha:1], [NSColor colorWithCalibratedWhite:0.912 alpha:1]);
+
+		self.scopeBar = [OakScopeBarView new];
+		self.scopeBar.labels = @[ @"Actions", @"Settings", @"Other" ];
+		[self.scopeBar.buttons[1] setEnabled:NO];
+		[self.scopeBar.buttons[2] setEnabled:NO];
+
+		self.topDivider          = OakCreateHorizontalLine([NSColor darkGrayColor], [NSColor colorWithCalibratedWhite:0.551 alpha:1]),
 		self.bottomDivider       = OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]);
 
-		self.selectButton        = OakCreateButton(@"Select");
+		self.selectButton        = OakCreateButton(@"Select", NSTexturedRoundedBezelStyle);
 		self.selectButton.target = self;
 		self.selectButton.action = @selector(accept:);
 
-		self.editButton          = OakCreateButton(@"Edit");
+		self.editButton          = OakCreateButton(@"Edit", NSTexturedRoundedBezelStyle);
 		self.editButton.target   = self;
 		self.editButton.action   = @selector(editItem:);
 
-		for(NSView* view in @[ self.searchField, self.actionsPopUpButton, self.topDivider, self.scrollView, self.bottomDivider, self.statusTextField, self.editButton, self.selectButton ])
+		for(NSView* view in [self.allViews allValues])
 		{
 			[view setTranslatesAutoresizingMaskIntoConstraints:NO];
 			[self.window.contentView addSubview:view];
@@ -286,11 +298,14 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	}
 }
 
-- (void)setupLayoutConstraints
+- (NSDictionary*)allViews
 {
-	NSDictionary* views = @{
+	return @{
 		@"searchField"        : self.keyEquivalentInput ? self.keyEquivalentView : self.searchField,
 		@"actions"            : self.actionsPopUpButton,
+		@"aboveScopeBarDark"  : self.aboveScopeBarDark,
+		@"aboveScopeBarLight" : self.aboveScopeBarLight,
+		@"scopeBar"           : self.scopeBar,
 		@"topDivider"         : self.topDivider,
 		@"scrollView"         : self.scrollView,
 		@"bottomDivider"      : self.bottomDivider,
@@ -298,12 +313,19 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		@"edit"               : self.editButton,
 		@"select"             : self.selectButton,
 	};
+}
+
+- (void)setupLayoutConstraints
+{
+	NSDictionary* views = self.allViews;
 
 	NSMutableArray* constraints = [NSMutableArray array];
 	[constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[searchField(>=50)]-[actions]-(8)-|"        options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
+	[constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[aboveScopeBarDark(==aboveScopeBarLight)]|"      options:0 metrics:nil views:views]];
+	[constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[scopeBar]-(>=8)-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
 	[constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView(==topDivider,==bottomDivider)]|"     options:0 metrics:nil views:views]];
 	[constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(24)-[status]-[edit]-[select]-|"                options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
-	[constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(8)-[searchField]-(8)-[topDivider][scrollView(>=50)][bottomDivider]-(4)-[select]-(5)-|" options:0 metrics:nil views:views]];
+	[constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(2)-[searchField]-(8)-[aboveScopeBarDark][aboveScopeBarLight]-(3)-[scopeBar]-(4)-[topDivider][scrollView(>=50)][bottomDivider]-(4)-[select]-(5)-|" options:0 metrics:nil views:views]];
 
 	[self.window.contentView addConstraints:constraints];
 	self.layoutConstraints = constraints;
