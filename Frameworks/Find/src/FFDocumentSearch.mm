@@ -53,7 +53,7 @@ OAK_DEBUG_VAR(Find_FolderSearch);
 @implementation FFDocumentSearch
 - (void)start
 {
-	D(DBF_Find_FolderSearch, bug("folder: %s searchString: %s documentIdentifier: %s\n", self.folderOptions.path.c_str(), to_s(self.searchString).c_str(), to_s(self.documentIdentifier).c_str()););
+	D(DBF_Find_FolderSearch, bug("folder ‘%s’, searchString ‘%s’, documentIdentifier ‘%s’\n", [_directory UTF8String], [_searchString UTF8String], [_documentIdentifier UTF8String]););
 	_scanner = std::make_shared<find::scan_path_t>();
 	_scanner->set_path(to_s(_directory));
 	_scanner->set_follow_links(_followLinks);
