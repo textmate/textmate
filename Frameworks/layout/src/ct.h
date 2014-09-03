@@ -7,26 +7,30 @@ namespace ng
 {
 	struct PUBLIC context_t
 	{
-		context_t (CGContextRef context, CGImageRef spellingDot = nil, std::function<CGImageRef(double, double)> foldingDotsFactory = std::function<CGImageRef(double, double)>());
+		context_t (CGContextRef context, std::string const& invisibleMap = NULL_STR, CGImageRef spellingDot = nil, std::function<CGImageRef(double, double)> foldingDotsFactory = std::function<CGImageRef(double, double)>());
 		~context_t ();
 
 		operator CGContextRef () const      { return _context; }
+
+		std::string const& space () const   { return _space; }
+		std::string const& tab () const     { return _tab; }
+		std::string const& newline () const { return _newline; }
+
 		CGImageRef spelling_dot () const    { return _spelling_dot; }
 		CGImageRef folding_dots (double, double) const;
 
 	private:
+		void setup_invisibles_mapping (std::string const& str);
+
 		CGContextRef _context;
+
+		std::string _space   = "·";
+		std::string _tab     = "‣";
+		std::string _newline = "¬";
+
 		CGImageRef _spelling_dot;
 		std::function<CGImageRef(double, double)> _folding_dots_create;
 		mutable std::map<std::pair<double, double>, CGImageRef> _folding_dots_cache;
-	};
-
-	struct invisibles_t
-	{
-		bool enabled        = false;
-		std::string tab     = "‣";
-		std::string space   = "·";
-		std::string newline = "¬";
 	};
 
 } /* ng */
@@ -64,7 +68,7 @@ namespace ct
 	{
 		line_t (std::string const& text, std::map<size_t, scope::scope_t> const& scopes, theme_ptr const& theme, size_t tabSize, ct::metrics_t const& metrics, CGColorRef textColor = NULL);
 
-		void draw_foreground (CGPoint pos, ng::context_t const& context, bool isFlipped, std::vector< std::pair<size_t, size_t> > const& misspelled, ng::invisibles_t const& invisibles, theme_ptr const& theme) const;
+		void draw_foreground (CGPoint pos, ng::context_t const& context, bool isFlipped, std::vector< std::pair<size_t, size_t> > const& misspelled, theme_ptr const& theme) const;
 		void draw_background (CGPoint pos, CGFloat height, ng::context_t const& context, bool isFlipped, CGColorRef currentBackground) const;
 
 		CGFloat width (CGFloat* ascent = NULL, CGFloat* descent = NULL, CGFloat* leading = NULL) const;

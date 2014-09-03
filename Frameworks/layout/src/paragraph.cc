@@ -151,7 +151,7 @@ namespace ng
 		_line.reset();
 	}
 
-	void paragraph_t::node_t::draw_background (theme_ptr const& theme, ng::context_t const& context, bool isFlipped, CGRect visibleRect, ng::invisibles_t const& invisibles, CGColorRef backgroundColor, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor, CGFloat lineHeight) const
+	void paragraph_t::node_t::draw_background (theme_ptr const& theme, ng::context_t const& context, bool isFlipped, CGRect visibleRect, CGColorRef backgroundColor, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor, CGFloat lineHeight) const
 	{
 		if(_line)
 			_line->draw_background(CGPointMake(anchor.x, anchor.y), lineHeight, context, isFlipped, backgroundColor);
@@ -176,19 +176,19 @@ namespace ng
 		}
 	}
 
-	void paragraph_t::node_t::draw_foreground (theme_ptr const& theme, ng::context_t const& context, bool isFlipped, CGRect visibleRect, ng::invisibles_t const& invisibles, ng::buffer_t const& buffer, size_t bufferOffset, std::vector< std::pair<size_t, size_t> > const& misspelled, CGPoint anchor, CGFloat baseline) const
+	void paragraph_t::node_t::draw_foreground (theme_ptr const& theme, ng::context_t const& context, bool isFlipped, CGRect visibleRect, ng::buffer_t const& buffer, size_t bufferOffset, std::vector< std::pair<size_t, size_t> > const& misspelled, CGPoint anchor, CGFloat baseline) const
 	{
 		if(_line)
-			_line->draw_foreground(CGPointMake(anchor.x, anchor.y + baseline), context, isFlipped, misspelled, invisibles, theme);
+			_line->draw_foreground(CGPointMake(anchor.x, anchor.y + baseline), context, isFlipped, misspelled, theme);
 
-		if(invisibles.enabled || _type != kNodeTypeNewline)
+		if(_type != kNodeTypeNewline || context.newline().size())
 		{
 			std::string str = NULL_STR;
 			scope::scope_t scope = buffer.scope(bufferOffset).right;
 			switch(_type)
 			{
 				case kNodeTypeNewline:
-					str = invisibles.newline;
+					str = context.newline();
 					scope.push_scope("deco.invisible.newline");
 				break;
 				case kNodeTypeFolding:
@@ -709,7 +709,7 @@ namespace ng
 		return index;
 	}
 
-	void paragraph_t::draw_background (theme_ptr const& theme, ct::metrics_t const& metrics, ng::context_t const& context, bool isFlipped, CGRect visibleRect, ng::invisibles_t const& invisibles, CGColorRef backgroundColor, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor) const
+	void paragraph_t::draw_background (theme_ptr const& theme, ct::metrics_t const& metrics, ng::context_t const& context, bool isFlipped, CGRect visibleRect, CGColorRef backgroundColor, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor) const
 	{
 		auto lines = softlines(metrics);
 		for(size_t i = 0; i < lines.size(); ++i)
@@ -718,14 +718,14 @@ namespace ng
 			size_t offset = lines[i].offset;
 			foreach(node, _nodes.begin() + lines[i].first, _nodes.begin() + lines[i].last)
 			{
-				node->draw_background(theme, context, isFlipped, visibleRect, invisibles, backgroundColor, buffer, bufferOffset + offset, CGPointMake(anchor.x + x, anchor.y + lines[i].y), lines[i].height);
+				node->draw_background(theme, context, isFlipped, visibleRect, backgroundColor, buffer, bufferOffset + offset, CGPointMake(anchor.x + x, anchor.y + lines[i].y), lines[i].height);
 				x += node->width();
 				offset += node->length();
 			}
 		}
 	}
 
-	void paragraph_t::draw_foreground (theme_ptr const& theme, ct::metrics_t const& metrics, ng::context_t const& context, bool isFlipped, CGRect visibleRect, ng::invisibles_t const& invisibles, ng::buffer_t const& buffer, size_t bufferOffset, ng::ranges_t const& selection, CGPoint anchor) const
+	void paragraph_t::draw_foreground (theme_ptr const& theme, ct::metrics_t const& metrics, ng::context_t const& context, bool isFlipped, CGRect visibleRect, ng::buffer_t const& buffer, size_t bufferOffset, ng::ranges_t const& selection, CGPoint anchor) const
 	{
 		CGContextSetTextMatrix(context, CGAffineTransformMake(1, 0, 0, 1, 0, 0));
 
@@ -757,7 +757,7 @@ namespace ng
 					}
 				}
 
-				node->draw_foreground(theme, context, isFlipped, visibleRect, invisibles, buffer, offset, misspelled, CGPointMake(anchor.x + x, anchor.y + lines[i].y), lines[i].baseline);
+				node->draw_foreground(theme, context, isFlipped, visibleRect, buffer, offset, misspelled, CGPointMake(anchor.x + x, anchor.y + lines[i].y), lines[i].baseline);
 				x += node->width();
 				offset += node->length();
 			}

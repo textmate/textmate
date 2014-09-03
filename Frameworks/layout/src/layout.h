@@ -37,7 +37,6 @@ namespace ng
 
 		void set_theme (theme_ptr const& theme);
 		void set_font (std::string const& fontName, CGFloat fontSize);
-		void set_character_mapping (std::string const& newInvisibles);
 		void set_margin (margin_t const& margin);
 		void set_wrapping (bool softWrap, size_t wrapColumn);
 		void set_scroll_past_end (bool scrollPastEnd);
@@ -66,7 +65,7 @@ namespace ng
 		// ======================
 
 		void update_metrics (CGRect visibleRect);
-		void draw (ng::context_t const& context, CGRect rectangle, bool isFlipped, bool showInvisibles, ng::ranges_t const& selection, ng::ranges_t const& highlightRanges = ng::ranges_t(), bool drawBackground = true);
+		void draw (ng::context_t const& context, CGRect rectangle, bool isFlipped, ng::ranges_t const& selection, ng::ranges_t const& highlightRanges = ng::ranges_t(), bool drawBackground = true);
 		ng::index_t index_at_point (CGPoint point) const;
 		CGRect rect_at_index (ng::index_t const& index, bool bol_as_eol = false) const;
 		CGRect rect_for_range (size_t first, size_t last, bool bol_as_eol = false) const;
@@ -180,7 +179,6 @@ namespace ng
 		size_t             _wrap_column;
 		margin_t           _margin;
 		CGSize             _viewport_size = CGSizeZero;
-		invisibles_t       _invisibles;
 
 		bool               _is_key = false;
 		bool               _draw_caret = false;

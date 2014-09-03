@@ -243,6 +243,7 @@ typedef std::shared_ptr<links_t> links_ptr;
 	buffer_refresh_callback_t* callback;
 
 	int32_t wrapColumn;
+	std::string invisiblesMap;
 
 	BOOL hideCaret;
 	NSTimer* blinkCaretTimer;
@@ -591,7 +592,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 	CGContextTranslateCTM(context, -NSMinX(srcRect), -NSMinY(srcRect));
 
 	NSRectClip(srcRect);
-	layout->draw(context, srcRect, [self isFlipped], false, ng::ranges_t(), ng::ranges_t(), false);
+	layout->draw(context, srcRect, [self isFlipped], ng::ranges_t(), ng::ranges_t(), false);
 
 	[image unlockFocus];
 
@@ -680,8 +681,8 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 		editor = ng::editor_for_document(document);
 		wrapColumn = settings.get(kSettingsWrapColumnKey, wrapColumn);
+		invisiblesMap = settings.get(kSettingsInvisiblesMapKey, "");
 		layout = std::make_shared<ng::layout_t>(document->buffer(), theme, settings.get(kSettingsSoftWrapKey, false), self.scrollPastEnd, wrapColumn, document->folded());
-		layout->set_character_mapping(settings.get(kSettingsInvisiblesMapKey, ""));
 		if(settings.get(kSettingsShowWrapColumnKey, false))
 			layout->set_draw_wrap_column(true);
 
@@ -987,7 +988,7 @@ doScroll:
 		return NULL;
 	};
 
-	layout->draw(ng::context_t(context, [spellingDotImage CGImageForProposedRect:NULL context:[NSGraphicsContext currentContext] hints:nil], foldingDotsFactory), aRect, [self isFlipped], self.showInvisibles, merge(editor->ranges(), [self markedRanges]), liveSearchRanges);
+	layout->draw(ng::context_t(context, _showInvisibles ? invisiblesMap : NULL_STR, [spellingDotImage CGImageForProposedRect:NULL context:[NSGraphicsContext currentContext] hints:nil], foldingDotsFactory), aRect, [self isFlipped], merge(editor->ranges(), [self markedRanges]), liveSearchRanges);
 }
 
 // ===============

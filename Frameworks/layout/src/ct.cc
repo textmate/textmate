@@ -12,10 +12,11 @@ namespace ng
 	// = context_t =
 	// =============
 
-	context_t::context_t (CGContextRef context, CGImageRef spellingDot, std::function<CGImageRef(double, double)> foldingDotsFactory) : _context(context), _spelling_dot(spellingDot), _folding_dots_create(foldingDotsFactory)
+	context_t::context_t (CGContextRef context, std::string const& invisibleMap, CGImageRef spellingDot, std::function<CGImageRef(double, double)> foldingDotsFactory) : _context(context), _spelling_dot(spellingDot), _folding_dots_create(foldingDotsFactory)
 	{
 		if(_spelling_dot)
 			CFRetain(_spelling_dot);
+		setup_invisibles_mapping(invisibleMap == NULL_STR ? "~ ~\t~\n" : invisibleMap);
 	}
 
 	context_t::~context_t ()
@@ -27,6 +28,45 @@ namespace ng
 		{
 			if(pair.second)
 				CFRelease(pair.second);
+		}
+	}
+
+	void context_t::setup_invisibles_mapping (std::string const& str)
+	{
+		enum state_t { kWaiting, kExclude, kSpace, kTab, kNewline } state = kWaiting;
+		for(auto ch : diacritics::make_range(str.data(), str.data() + str.size()))
+		{
+			if(state == kWaiting)
+			{
+				switch(ch)
+				{
+					case '~':  state = kExclude; break;
+					case ' ':  state = kSpace;   break;
+					case '\t': state = kTab;     break;
+					case '\n': state = kNewline; break;
+				}
+			}
+			else
+			{
+				switch(state)
+				{
+					case kExclude:
+					{
+						switch(ch)
+						{
+							case ' ':  _space   = ""; break;
+							case '\t': _tab     = ""; break;
+							case '\n': _newline = ""; break;
+						}
+					}
+					break;
+
+					case kSpace:   _space   = utf8::to_s(ch); break;
+					case kTab:     _tab     = utf8::to_s(ch); break;
+					case kNewline: _newline = utf8::to_s(ch); break;
+				}
+				state = kWaiting;
+			}
 		}
 	}
 
@@ -257,18 +297,15 @@ namespace ct
 		CFRelease(line);
 	}
 
-	void line_t::draw_foreground (CGPoint pos, ng::context_t const& context, bool isFlipped, std::vector< std::pair<size_t, size_t> > const& misspelled, ng::invisibles_t const& invisibles, theme_ptr const& theme) const
+	void line_t::draw_foreground (CGPoint pos, ng::context_t const& context, bool isFlipped, std::vector< std::pair<size_t, size_t> > const& misspelled, theme_ptr const& theme) const
 	{
 		if(!_line)
 			return;
 
-		if(invisibles.enabled)
-		{
-			if(invisibles.tab != "")
-				draw_invisible(_tab_locations, pos, invisibles.tab, theme->styles_for_scope("deco.invisible.tab"), context, isFlipped);
-			if(invisibles.space != "")
-				draw_invisible(_space_locations, pos, invisibles.space, theme->styles_for_scope("deco.invisible.space"), context, isFlipped);
-		}
+		if(context.space() != "")
+			draw_invisible(_space_locations, pos, context.space(), theme->styles_for_scope("deco.invisible.space"), context, isFlipped);
+		if(context.tab() != "")
+			draw_invisible(_tab_locations, pos, context.tab(), theme->styles_for_scope("deco.invisible.tab"), context, isFlipped);
 
 		for(auto const& pair : _underlines) // Draw our own underline since CoreText does an awful job <rdar://5845224>
 		{

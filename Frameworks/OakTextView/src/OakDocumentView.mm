@@ -994,7 +994,7 @@ static std::string const kSearchmarkType = "search";
 {
 	NSEraseRect(aRect);
 	if(![NSGraphicsContext currentContextDrawingToScreen] && layout)
-		layout->draw((CGContextRef)[[NSGraphicsContext currentContext] graphicsPort], aRect, [self isFlipped], /* show invisibles: */ false, /* selection: */ ng::ranges_t(), /* highlight: */ ng::ranges_t(), /* draw background: */ false);
+		layout->draw((CGContextRef)[[NSGraphicsContext currentContext] graphicsPort], aRect, [self isFlipped], /* selection: */ ng::ranges_t(), /* highlight: */ ng::ranges_t(), /* draw background: */ false);
 }
 
 - (void)layoutIfNeeded
