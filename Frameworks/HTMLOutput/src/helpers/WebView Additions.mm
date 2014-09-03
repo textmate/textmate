@@ -85,11 +85,11 @@
 
 	std::string str;
 	if([encoding isEqualToString:@"utf-8"])
-		str = to_s((NSString*)[[NSString alloc] initWithData:[dataSource data] encoding:NSUTF8StringEncoding]);
+		str = to_s([[NSString alloc] initWithData:[dataSource data] encoding:NSUTF8StringEncoding]);
 	else if([encoding isEqualToString:@"utf-16"] || [encoding isEqualToString:@"utf16"])
-		str = to_s((NSString*)[[NSString alloc] initWithData:[dataSource data] encoding:NSUnicodeStringEncoding]);
+		str = to_s([[NSString alloc] initWithData:[dataSource data] encoding:NSUnicodeStringEncoding]);
 	else if([encoding isEqualToString:@"macintosh"])
-		str = to_s((NSString*)[[NSString alloc] initWithData:[dataSource data] encoding:NSMacOSRomanStringEncoding]);
+		str = to_s([[NSString alloc] initWithData:[dataSource data] encoding:NSMacOSRomanStringEncoding]);
 	else
 		return (void)NSRunAlertPanel(@"Unknown Encoding", @"The encoding used for this HTML buffer (“%@”) is unsupported.\nPlease file a bug report stating the encoding name and how you got to it.", @"Continue", nil, nil, [dataSource textEncodingName]);
 

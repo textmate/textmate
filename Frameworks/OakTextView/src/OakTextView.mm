@@ -2248,7 +2248,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	if([sender respondsToSelector:@selector(selectedCell)])
 	{
 		AUTO_REFRESH;
-		editor->insert(to_s((NSString*)[[sender selectedCell] stringValue]));
+		editor->insert(to_s([[sender selectedCell] stringValue]));
 	}
 }
 
