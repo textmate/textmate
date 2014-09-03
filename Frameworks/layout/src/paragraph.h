@@ -9,8 +9,6 @@
 
 namespace ng
 {
-	struct line_t;
-
 	struct PUBLIC line_record_t
 	{
 		line_record_t (size_t line, size_t softline, CGFloat top, CGFloat bottom, CGFloat baseline) : line(line), softline(softline), top(top), bottom(bottom), baseline(baseline) { }
@@ -22,7 +20,9 @@ namespace ng
 		CGFloat baseline;
 	};
 
-	struct PUBLIC paragraph_t
+	struct line_t;
+
+	struct paragraph_t
 	{
 		size_t length () const;
 
@@ -115,7 +115,7 @@ namespace ng
 		bool _dirty = true;
 	};
 
-	PUBLIC std::string to_s (paragraph_t const& paragraph);
+	std::string to_s (paragraph_t const& paragraph);
 
 } /* ng */
 
