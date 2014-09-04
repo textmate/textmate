@@ -469,6 +469,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 - (void)updateItems:(id)sender
 {
 	std::string const filter = to_s(self.keyEquivalentInput ? self.keyEquivalentString : self.filterString);
+	std::set<std::string> previousSettings, previousVariables;
 
 	std::vector<std::string> identifiers;
 	for(NSString* identifier in [[OakAbbreviations abbreviationsForName:@"OakBundleItemChooserBindings"] stringsForAbbreviation:self.filterString])
@@ -551,33 +552,41 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 				{
 					if(pair.first != "shellVariables")
 					{
+						std::vector< std::pair<size_t, size_t> > ranges;
 						std::string const fullName = pair.first + " — " + itemNameSuffix;
-						id title = [NSString stringWithCxxString:fullName];
-
 						if(!include && _bundleItemField == kBundleItemTitleField)
 						{
-							std::vector< std::pair<size_t, size_t> > ranges;
 							if(!oak::rank(filter, fullName, &ranges))
 								continue;
-							title = CreateAttributedStringWithMarkedUpRanges(fullName, ranges);
 						}
+
+						NSMutableAttributedString* title = CreateAttributedStringWithMarkedUpRanges(fullName, ranges);
+						if(!previousSettings.insert(pair.first).second)
+							[title addAttribute:NSStrikethroughStyleAttributeName value:@(NSUnderlineStyleSingle|NSUnderlinePatternSolid) range:NSMakeRange(0, [[NSString stringWithCxxString:pair.first] length])];
 
 						rankedItems.emplace(rankedItems.size(), [BundleItemChooserItem bundleChooserItemWithItem:item title:title]);
 					}
 					else
 					{
-						for(auto const& pair : shell_variables(item))
-						{
-							std::string const fullName = pair.first + " — " + itemNameSuffix + " » shellVariables";
-							id title = [NSString stringWithCxxString:fullName];
+						auto const shellVariables = shell_variables(item);
 
+						bool eclipsed = false;
+						for(auto const& pair : shellVariables)
+							eclipsed = !previousVariables.insert(pair.first).second || eclipsed;
+
+						for(auto const& pair : shellVariables)
+						{
+							std::vector< std::pair<size_t, size_t> > ranges;
+							std::string const fullName = pair.first + " — " + itemNameSuffix + " » shellVariables";
 							if(!include && _bundleItemField == kBundleItemTitleField)
 							{
-								std::vector< std::pair<size_t, size_t> > ranges;
 								if(!oak::rank(filter, fullName, &ranges))
 									continue;
-								title = CreateAttributedStringWithMarkedUpRanges(fullName, ranges);
 							}
+
+							NSMutableAttributedString* title = CreateAttributedStringWithMarkedUpRanges(fullName, ranges);
+							if(eclipsed)
+								[title addAttribute:NSStrikethroughStyleAttributeName value:@(NSUnderlineStyleSingle|NSUnderlinePatternSolid) range:NSMakeRange(0, [[NSString stringWithCxxString:pair.first] length])];
 
 							rankedItems.emplace(rankedItems.size(), [BundleItemChooserItem bundleChooserItemWithItem:item title:title]);
 						}
