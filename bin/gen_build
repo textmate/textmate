@@ -731,7 +731,7 @@ open("#{builddir}/build.ninja", "w") do |io|
 
   COMPILER_INFO.each do |key, value|
     io << "rule #{value[:rule]}\n"
-    io << "  command = '#{value[:compiler]}' $PCH_FLAGS $FLAGS #{value[:flags]} $RAVE_FLAGS -o $out -MMD -MF $out.d -I$builddir/include $in\n"
+    io << "  command = #{value[:compiler]} $PCH_FLAGS $FLAGS #{value[:flags]} $RAVE_FLAGS -o $out -MMD -MF $out.d -I$builddir/include $in\n"
     io << "  depfile = $out.d\n"
     io << "  deps = gcc\n"
     io << "  description = Compile ‘$in’…\n\n"
@@ -742,11 +742,11 @@ open("#{builddir}/build.ninja", "w") do |io|
     ext = source_type(src)
     cc = COMPILER_INFO[ext][:compiler]
 
-    io << "build #{pch_for(src, TARGETS.root)}.gch: #{compiler_for(src)} #{src} | #{cc}\n"
+    io << "build #{pch_for(src, TARGETS.root)}.gch: #{compiler_for(src)} #{src}\n"
     io << "  RAVE_FLAGS = #{type[ext]}\n\n"
 
     if ext =~ /^mm?$/
-      io << "build #{pch_for(src, TARGETS.root)}-no-arc.gch: #{compiler_for(src)} #{src} | #{cc}\n"
+      io << "build #{pch_for(src, TARGETS.root)}-no-arc.gch: #{compiler_for(src)} #{src}\n"
       io << "  RAVE_FLAGS = #{type[ext]} -fno-objc-arc\n\n"
     end
   end
@@ -848,7 +848,7 @@ rule gen_cxx_test
   description = Generate test ‘$out’…
 
 rule link_cxx_test
-  command = '$CXX' -o $out $in $LN_FLAGS $RAVE_FLAGS
+  command = $CXX -o $out $in $LN_FLAGS $RAVE_FLAGS
   description = Link test ‘$out’…
 
 rule gen_oak_test
@@ -856,7 +856,7 @@ rule gen_oak_test
   description = Generate test ‘$out’…
 
 rule link_oak_test
-  command = '$CXX' -o $out $in $LN_FLAGS $RAVE_FLAGS
+  command = $CXX -o $out $in $LN_FLAGS $RAVE_FLAGS
   description = Link test ‘$out’…
 
 rule run_test
@@ -876,11 +876,11 @@ rule link_static
   description = Archive objects ‘$out’…
 
 rule link_dynamic
-  command = '$CXX' -o $out $in $LN_FLAGS $RAVE_FLAGS -dynamiclib -current_version 1.0.1 -compatibility_version 1.0.0
+  command = $CXX -o $out $in $LN_FLAGS $RAVE_FLAGS -dynamiclib -current_version 1.0.1 -compatibility_version 1.0.0
   description = Link dynamic library ‘$out’…
 
 rule link_executable
-  command = '$CXX' -o $out $in $LN_FLAGS $RAVE_FLAGS
+  command = $CXX -o $out $in $LN_FLAGS $RAVE_FLAGS
   description = Link executable ‘$out’…
 
 rule run_executable
