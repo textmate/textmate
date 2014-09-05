@@ -1,7 +1,7 @@
 PLIST_FLAGS = -d'APP_NAME=$APP_NAME' -d'APP_VERSION=$APP_VERSION' -d'APP_REVISION=$APP_REVISION' -d'APP_MIN_OS=$APP_MIN_OS'
 
 FLAGS += -c -pipe -fPIC -gdwarf-2
-FLAGS += -m64 -mmacosx-version-min=$APP_MIN_OS -isysroot "$sdk"
+FLAGS += -m64 -mmacosx-version-min=$APP_MIN_OS
 FLAGS += -funsigned-char
 FLAGS += -D'NULL_STR="\uFFFF"'
 FLAGS += -DREST_API='"$rest_api"'
@@ -20,7 +20,7 @@ OBJCXX_FLAGS += -fvisibility=hidden -std=c++1y -stdlib=libc++ -fobjc-abi-version
 OBJCXX_FLAGS += -fobjc-arc -fobjc-call-cxx-cdtors
 LIBS         += c++
 
-LN_FLAGS += -m64 -mmacosx-version-min=$APP_MIN_OS -isysroot "$sdk"
+LN_FLAGS += -m64 -mmacosx-version-min=$APP_MIN_OS
 LN_FLAGS += -fvisibility=hidden
 LN_FLAGS += -Wl,-dead_strip
 LN_FLAGS += -Wl,-dead_strip_dylibs

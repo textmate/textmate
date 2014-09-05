@@ -71,12 +71,6 @@ Or using [homebrew][]:
 
 	brew install proctools
 
-### OS X 10.10 (Yosemite)
-
-If you are on OS X 10.10 you need to specify sdk manually when running configure.
-
-       sdk='MacOSX10.10' ./configure
-
 
 ## Building from within TextMate
 

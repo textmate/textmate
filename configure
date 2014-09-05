@@ -67,18 +67,9 @@ test -L "${builddir}/include/boost" || error "*** boost not installed."
 # ==================================
 
 xcodedir=/Developer
-sdk="/Developer/SDKs/${sdk:-MacOSX10.8}.sdk"
 
 if which -s xcode-select; then
 	xcodedir=$(xcode-select -print-path)
-	if ! [[ -e "$sdk" ]]; then
-		sdk="$xcodedir/Platforms/MacOSX.platform$sdk"
-	fi
-fi
-
-if ! [[ -e "$sdk" ]]; then
-	sdk=""
-	echo 2>&1 "WARNING: Building without platform-specific SDK."
 fi
 
 # ===============================================
@@ -107,7 +98,7 @@ done
 mkdir -p "$builddir/Frameworks/SoftwareUpdate/fixtures"
 DST=$(cd >/dev/null "$builddir/Frameworks/SoftwareUpdate/fixtures"; pwd) make -C Frameworks/SoftwareUpdate/fixtures
 
-bin/gen_build -o build.ninja -C "$builddir" -dAPP_NAME="$name" -dAPP_REVISION="$rev" -dAPP_VERSION="$ver" -dAPP_MIN_OS="$min_os" -dCC="$CC" -dCXX="$CXX" -dxcodedir="$xcodedir" -didentity="$identity" -drest_api="$rest_api" -dsdk="$sdk" -dbzip2_flag="$bzip2_flag" -dcapnp_prefix="$capnp_prefix" target
+bin/gen_build -o build.ninja -C "$builddir" -dAPP_NAME="$name" -dAPP_REVISION="$rev" -dAPP_VERSION="$ver" -dAPP_MIN_OS="$min_os" -dCC="$CC" -dCXX="$CXX" -dxcodedir="$xcodedir" -didentity="$identity" -drest_api="$rest_api" -dbzip2_flag="$bzip2_flag" -dcapnp_prefix="$capnp_prefix" target
 
 ninja Frameworks/encoding/src/frequencies.capnp.h
 ninja Frameworks/plist/src/cache.capnp.h
