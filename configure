@@ -10,6 +10,8 @@ function error () { printf >&2 "%s\n\nPlease see README.md for build instruction
 : ${identity:=-}
 : ${capnp_prefix:=/usr/local}
 : ${rest_api:=https://api.textmate.org}
+: ${CC:=xcrun clang}
+: ${CXX:=xcrun clang++}
 
 # ========================================================
 # = Application name, version, revision, and required OS =
@@ -19,32 +21,6 @@ name=TextMate
 ver=2.0-alpha.\$APP_REVISION${tag:-+git.$(git rev-parse --short HEAD)}
 rev=$(( $(curl -sf "${rest_api}/releases/nightly/revision")+1 ))
 min_os=10.7
-
-# ===============================================
-# = Find clang via xcrun, MacPorts, or Homebrew =
-# ===============================================
-
-clang_good_enough() {
-	[[ -x "$CC" && -x "$CXX" ]] && "$CC" &>/dev/null -x objective-c -include Foundation/Foundation.h -c -o /dev/null - <<< 'int main () { id str = @("str"); return 0; }'
-}
-test_xcode_clang() {
-	if which -s xcrun; then
-		CC=$(xcrun -find clang)
-		CXX=$(xcrun -find clang++)
-		clang_good_enough && return
-	fi
-	false
-}
-test_local_clang() {
-	for cc in /{opt,usr}/local/bin/clang /usr/bin/clang; do
-		CC="${cc}"
-		CXX="${cc}++"
-		clang_good_enough && return
-	done
-	false
-}
-
-clang_good_enough || test_xcode_clang || test_local_clang || error "$CC is too old to build this project."
 
 # ===============================
 # = Check if boost is installed =
@@ -77,7 +53,7 @@ fi
 
 test -x "${capnp_prefix}/bin/capnp" || error "*** cap’n’proto not installed in ‘${capnp_prefix}’. Set \`capnp_prefix\` if installed elsewhere."
 
-for dep in ninja ragel multimarkdown pgrep pkill "$CC" "$CXX"; do
+for dep in ninja ragel multimarkdown pgrep pkill; do
 	which -s "$dep" || error "*** dependency missing: ‘${dep}’."
 done
 
