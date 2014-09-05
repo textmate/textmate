@@ -912,7 +912,7 @@ rule run_application
   description = Run ‘$in’…
 
 rule sign_executable
-  command = codesign --timestamp=none --deep -fs "$identity" $in && touch $out
+  command = xcrun codesign --timestamp=none --deep -fs "$identity" $in && touch $out
   description = Sign ‘$in’…
 
 rule tbz_archive
@@ -945,13 +945,13 @@ rule dsym
   command = $
     DST=$$(/usr/bin/mktemp -dt dsym); $
     find $in -name rmate -or -type f -perm +0111 -print|while read line; $
-    do dsymutil --flat --out "$$DST/$$(basename "$$line" .dylib).dSYM" "$$line"; $
+    do xcrun dsymutil --flat --out "$$DST/$$(basename "$$line" .dylib).dSYM" "$$line"; $
     done && tar $bzip2_flag -cf $out -C "$$DST" . && rm -rf "$$DST"
   generator = true
   description = Archive dSYM info for ‘$in’…
 
 rule compile_xib
-  command = "$xcodedir/usr/bin/ibtool" --errors --warnings --notices --output-format human-readable-text --compile $out $in
+  command = xcrun ibtool --errors --warnings --notices --output-format human-readable-text --compile $out $in
   description = Compile xib ‘$in’…
 
 rule process_plist
@@ -967,5 +967,5 @@ rule index_help
   description = Index help book ‘$HELP_BOOK’…
 
 rule compile_mom
-  command = "$xcodedir/usr/bin/momc" $in $out
+  command = xcrun momc $in $out
   description = Generate ‘$out’…
