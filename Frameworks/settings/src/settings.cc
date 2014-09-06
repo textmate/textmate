@@ -224,6 +224,19 @@ namespace
 		variables.erase("CWD");
 		return variables;
 	}
+
+	std::vector<setting_info_t> settings_info_for (std::string const& directory, std::string const& path, scope::scope_t const& scope)
+	{
+		std::vector<setting_info_t> res;
+
+		collect(directory, path, scope, [&res](std::string const& key, std::string const& value, section_t const& section, std::string const& name){
+			res.emplace_back(key, section.path, name);
+		});
+
+		res.erase(std::remove_if(res.begin(), res.end(), [](auto const& info) { return info.variable == "CWD" || info.variable == "TM_PROPERTIES_PATH"; }), res.end());
+		std::reverse(res.begin(), res.end());
+		return res;
+	}
 }
 
 void settings_t::set_default_settings_path (std::string const& path)
@@ -256,6 +269,11 @@ std::map<std::string, std::string> variables_for_path (std::map<std::string, std
 	}
 
 	return variables;
+}
+
+std::vector<setting_info_t> settings_info_for_path (std::string const& path, scope::scope_t const& scope, std::string const& directory)
+{
+	return settings_info_for(directory, path, scope);
 }
 
 // ===================================
