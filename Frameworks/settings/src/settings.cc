@@ -85,14 +85,15 @@ namespace
 
 	struct section_t
 	{
-		section_t (path::glob_t const& fileGlob, scope::selector_t const& scopeSelector, std::vector< std::pair<std::string, std::string> > const& variables) : file_glob(fileGlob), scope_selector(scopeSelector), variables(variables) { }
-		section_t (std::vector< std::pair<std::string, std::string> > const& variables) : section_t("", scope::selector_t(), variables) { }
-		section_t (path::glob_t const& fileGlob, std::vector< std::pair<std::string, std::string> > const& variables) : section_t(fileGlob, scope::selector_t(), variables) { has_file_glob = true; }
-		section_t (scope::selector_t const& scopeSelector, std::vector< std::pair<std::string, std::string> > const& variables) : section_t("", scopeSelector, variables) { has_scope_selector = true; }
+		section_t (std::string const& path, path::glob_t const& fileGlob, scope::selector_t const& scopeSelector, std::vector< std::pair<std::string, std::string> > const& variables) : path(path), file_glob(fileGlob), scope_selector(scopeSelector), variables(variables) { }
+		section_t (std::string const& path, std::vector< std::pair<std::string, std::string> > const& variables) : section_t(path, "", scope::selector_t(), variables) { }
+		section_t (std::string const& path, path::glob_t const& fileGlob, std::vector< std::pair<std::string, std::string> > const& variables) : section_t(path, fileGlob, scope::selector_t(), variables) { has_file_glob = true; }
+		section_t (std::string const& path, scope::selector_t const& scopeSelector, std::vector< std::pair<std::string, std::string> > const& variables) : section_t(path, "", scopeSelector, variables) { has_scope_selector = true; }
 
 		bool has_file_glob      = false;
 		bool has_scope_selector = false;
 
+		std::string                                        path;
 		path::glob_t                                       file_glob;
 		scope::selector_t                                  scope_selector;
 		std::vector< std::pair<std::string, std::string> > variables;
@@ -120,15 +121,15 @@ namespace
 
 			if(section.names.empty())
 			{
-				res.emplace_back(variables);
+				res.emplace_back(path, variables);
 			}
 			else
 			{
 				for(auto const& name : section.names)
 				{
 					if(is_scope_selector(name))
-							res.emplace_back(scope::selector_t(name), variables);
-					else	res.emplace_back(path::glob_t(name), variables);
+							res.emplace_back(path, scope::selector_t(name), variables);
+					else	res.emplace_back(path, path::glob_t(name), variables);
 				}
 			}
 		}
