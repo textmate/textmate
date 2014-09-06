@@ -486,6 +486,8 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 	if(NSString* uuid = [[[sender selectedItems] lastObject] objectForKey:@"uuid"])
 		[[BundleEditor sharedInstance] revealBundleItem:bundles::lookup(to_s(uuid))];
+	else if(NSString* path = [[[sender selectedItems] lastObject] objectForKey:@"path"])
+		OakOpenDocuments(@[ path ]);
 }
 
 - (void)editBundleItemWithUUIDString:(NSString*)uuidString

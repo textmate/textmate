@@ -746,7 +746,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 - (BOOL)canEdit
 {
 	BundleItemChooserItem* item = self.tableView.selectedRow != -1 ? self.items[self.tableView.selectedRow] : nil;
-	return item.uuid && self.editAction;
+	return item.uuid && self.editAction || item.path;
 }
 
 - (void)accept:(id)sender
