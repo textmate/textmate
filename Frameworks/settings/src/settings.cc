@@ -166,11 +166,9 @@ namespace
 		}
 	}
 
-	std::map<std::string, std::string> expanded_variables_for (std::string const& directory, std::string const& path, scope::scope_t const& scope, std::map<std::string, std::string> variables)
+	static void collect (std::string const& directory, std::string const& path, scope::scope_t const& scope, std::function<void(std::string const& key, std::string const& value, section_t const& section, std::string const& name)> filter)
 	{
 		D(DBF_Settings, bug("%s, %s, %s\n", directory.c_str(), path.c_str(), to_s(scope).c_str()););
-		for(auto const& pair : global_variables())
-			expand_variable(pair.first, pair.second, variables);
 
 		static std::mutex mutex;
 		std::lock_guard<std::mutex> lock(mutex);
@@ -190,7 +188,7 @@ namespace
 				else if(!section.has_file_glob)
 				{
 					for(auto const& pair : section.variables)
-						expand_variable(pair.first, pair.second, variables);
+						filter(pair.first, pair.second, section, NULL_STR);
 				}
 			}
 		}
@@ -198,7 +196,7 @@ namespace
 		for(auto const& section : orderScopeMatches)
 		{
 			for(auto const& pair : section.second->variables)
-				expand_variable(pair.first, pair.second, variables);
+				filter(pair.first, pair.second, *section.second, to_s(section.second->scope_selector));
 		}
 
 		for(auto const& file : paths(directory))
@@ -208,10 +206,20 @@ namespace
 				if(section.has_file_glob && section.file_glob.does_match(path == NULL_STR ? directory : path))
 				{
 					for(auto const& pair : section.variables)
-						expand_variable(pair.first, pair.second, variables);
+						filter(pair.first, pair.second, section, to_s(section.file_glob));
 				}
 			}
 		}
+	}
+
+	std::map<std::string, std::string> expanded_variables_for (std::string const& directory, std::string const& path, scope::scope_t const& scope, std::map<std::string, std::string> variables)
+	{
+		for(auto const& pair : global_variables())
+			expand_variable(pair.first, pair.second, variables);
+
+		collect(directory, path, scope, [&variables](std::string const& key, std::string const& value, section_t const& section, std::string const& name){
+			expand_variable(key, value, variables);
+		});
 
 		variables.erase("CWD");
 		return variables;
