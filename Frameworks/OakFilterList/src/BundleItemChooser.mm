@@ -9,6 +9,7 @@
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <bundles/bundles.h>
+#import <settings/settings.h>
 #import <text/ranker.h>
 #import <text/case.h>
 #import <text/ctype.h>
@@ -138,6 +139,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 + (instancetype)bundleChooserItemWithItem:(bundles::item_ptr)anItem title:(id)aTitle;
 @property (nonatomic) id name;
 @property (nonatomic) NSString* uuid;
+@property (nonatomic) NSString* path;
 @property (nonatomic) bundles::item_ptr item;
 @property (nonatomic) NSMenuItem* menuItem;
 @end
@@ -657,6 +659,36 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 				entry.menuItem = record.menu_item;
 				rankedItems.emplace(rank, entry);
 			}
+		}
+	}
+
+	if(self.searchSource & kSearchSourceSettingsItems)
+	{
+		for(auto const& info : settings_info_for_path(to_s(self.path), self.searchAllScopes ? scope::wildcard : self.scope.right, to_s(self.directory)))
+		{
+			std::string const base = path::name(info.path);
+			std::string const title = info.variable + " — " + (base == "Default.tmProperties" || base == "Global.tmProperties" ? base : path::with_tilde(info.path)) + (info.section == NULL_STR ? "" : " » " + info.section);
+			std::vector< std::pair<size_t, size_t> > ranges;
+
+			bool include = filter == NULL_STR || filter.empty();
+			double rank  = rankedItems.size();
+
+			if(!include)
+			{
+				if(_bundleItemField != kBundleItemTitleField)
+					continue;
+
+				double score = oak::rank(filter, title, &ranges);
+				if(!score)
+					continue;
+				if(self.searchAllScopes)
+					rank = score;
+			}
+
+			BundleItemChooserItem* item = [BundleItemChooserItem new];
+			item.name = CreateAttributedStringWithMarkedUpRanges(title, ranges);
+			item.path = [NSString stringWithCxxString:info.path];
+			rankedItems.emplace(rankedItems.size(), item);
 		}
 	}
 

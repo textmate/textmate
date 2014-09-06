@@ -1,4 +1,4 @@
 SOURCES       = src/*.mm src/ui/*.mm
 EXPORT        = src/{Oak,File,Symbol,BundleItem}Chooser.h src/OakAbbreviations.h
-LINK         += text bundles document io plist ns OakAppKit OakFoundation OakSystem regexp scope OakFileBrowser
+LINK         += text bundles document io plist ns OakAppKit OakFoundation OakSystem regexp scope settings OakFileBrowser
 FRAMEWORKS    = Cocoa Carbon
