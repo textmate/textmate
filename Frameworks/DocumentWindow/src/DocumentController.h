@@ -7,6 +7,7 @@ PUBLIC @interface DocumentController : NSObject
 @property (nonatomic) NSString*                                  identifier;
 @property (nonatomic) NSString*                                  defaultProjectPath;
 @property (nonatomic, readonly) NSString*                        projectPath; // effectiveProjectPath
+@property (nonatomic, readonly) NSString*                        untitledSavePath;
 
 @property (nonatomic) std::vector<document::document_ptr> const& documents;
 @property (nonatomic) document::document_ptr              const& selectedDocument;
