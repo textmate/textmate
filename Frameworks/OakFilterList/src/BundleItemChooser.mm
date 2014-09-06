@@ -561,8 +561,11 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 						}
 
 						NSMutableAttributedString* title = CreateAttributedStringWithMarkedUpRanges(fullName, ranges);
-						if(!previousSettings.insert(pair.first).second)
-							[title addAttribute:NSStrikethroughStyleAttributeName value:@(NSUnderlineStyleSingle|NSUnderlinePatternSolid) range:NSMakeRange(0, [[NSString stringWithCxxString:pair.first] length])];
+						if(!self.searchAllScopes)
+						{
+							if(!previousSettings.insert(pair.first).second)
+								[title addAttribute:NSStrikethroughStyleAttributeName value:@(NSUnderlineStyleSingle|NSUnderlinePatternSolid) range:NSMakeRange(0, [[NSString stringWithCxxString:pair.first] length])];
+						}
 
 						rankedItems.emplace(rankedItems.size(), [BundleItemChooserItem bundleChooserItemWithItem:item title:title]);
 					}
@@ -571,8 +574,11 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 						auto const shellVariables = shell_variables(item);
 
 						bool eclipsed = false;
-						for(auto const& pair : shellVariables)
-							eclipsed = !previousVariables.insert(pair.first).second || eclipsed;
+						if(!self.searchAllScopes)
+						{
+							for(auto const& pair : shellVariables)
+								eclipsed = !previousVariables.insert(pair.first).second || eclipsed;
+						}
 
 						for(auto const& pair : shellVariables)
 						{
