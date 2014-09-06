@@ -171,8 +171,8 @@ namespace
 		for(auto const& pair : global_variables())
 			expand_variable(pair.first, pair.second, variables);
 
-		static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-		pthread_mutex_lock(&mutex);
+		static std::mutex mutex;
+		std::lock_guard<std::mutex> lock(mutex);
 		sections(NULL_STR); // clear cache if too big
 
 		std::multimap<double, section_t const*> orderScopeMatches;
@@ -211,8 +211,6 @@ namespace
 				}
 			}
 		}
-
-		pthread_mutex_unlock(&mutex);
 
 		variables.erase("CWD");
 		return variables;
