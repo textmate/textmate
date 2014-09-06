@@ -402,6 +402,18 @@ BOOL HasDocumentWindow (NSArray* windows)
 	chooser.scope        = textView ? [textView scopeContext] : scope::wildcard;
 	chooser.hasSelection = [textView hasSelection];
 
+	if(DocumentController* controller = [NSApp targetForAction:@selector(selectedDocument)])
+	{
+		document::document_ptr doc = controller.selectedDocument;
+		chooser.path      = doc ? [NSString stringWithCxxString:doc->path()] : nil;
+		chooser.directory = doc && doc->path() != NULL_STR ? [NSString stringWithCxxString:path::parent(doc->path())] : controller.untitledSavePath;
+	}
+	else
+	{
+		chooser.path      = nil;
+		chooser.directory = nil;
+	}
+
 	[chooser showWindowRelativeToFrame:textView.window ? [textView.window convertRectToScreen:[textView convertRect:[textView visibleRect] toView:nil]] : [[NSScreen mainScreen] visibleFrame]];
 }
 
