@@ -552,12 +552,17 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 				{
 					if(pair.first != "shellVariables")
 					{
+						double rank = rankedItems.size();
+
 						std::vector< std::pair<size_t, size_t> > ranges;
 						std::string const fullName = pair.first + " — " + itemNameSuffix;
 						if(!include && _bundleItemField == kBundleItemTitleField)
 						{
-							if(!oak::rank(filter, fullName, &ranges))
+							double score = oak::rank(filter, fullName, &ranges);
+							if(!score)
 								continue;
+							if(self.searchAllScopes)
+								rank = score;
 						}
 
 						NSMutableAttributedString* title = CreateAttributedStringWithMarkedUpRanges(fullName, ranges);
@@ -567,7 +572,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 								[title addAttribute:NSStrikethroughStyleAttributeName value:@(NSUnderlineStyleSingle|NSUnderlinePatternSolid) range:NSMakeRange(0, [[NSString stringWithCxxString:pair.first] length])];
 						}
 
-						rankedItems.emplace(rankedItems.size(), [BundleItemChooserItem bundleChooserItemWithItem:item title:title]);
+						rankedItems.emplace(rank, [BundleItemChooserItem bundleChooserItemWithItem:item title:title]);
 					}
 					else
 					{
@@ -582,19 +587,24 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 
 						for(auto const& pair : shellVariables)
 						{
+							double rank = rankedItems.size();
+
 							std::vector< std::pair<size_t, size_t> > ranges;
 							std::string const fullName = pair.first + " — " + itemNameSuffix + " » shellVariables";
 							if(!include && _bundleItemField == kBundleItemTitleField)
 							{
-								if(!oak::rank(filter, fullName, &ranges))
+								double score = oak::rank(filter, fullName, &ranges);
+								if(!score)
 									continue;
+								if(self.searchAllScopes)
+									rank = score;
 							}
 
 							NSMutableAttributedString* title = CreateAttributedStringWithMarkedUpRanges(fullName, ranges);
 							if(eclipsed)
 								[title addAttribute:NSStrikethroughStyleAttributeName value:@(NSUnderlineStyleSingle|NSUnderlinePatternSolid) range:NSMakeRange(0, [[NSString stringWithCxxString:pair.first] length])];
 
-							rankedItems.emplace(rankedItems.size(), [BundleItemChooserItem bundleChooserItemWithItem:item title:title]);
+							rankedItems.emplace(rank, [BundleItemChooserItem bundleChooserItemWithItem:item title:title]);
 						}
 					}
 				}
