@@ -23,6 +23,11 @@ void OakShowToolTip (NSString* msg, NSPoint location)
 		}
 
 		[toolTip showAtLocation:location forScreen:screen];
+
+		static __weak OakToolTip* LastToolTip;
+		if(OakToolTip* toolTip = LastToolTip)
+			[toolTip performSelector:@selector(orderOut:) withObject:nil afterDelay:0];
+		LastToolTip = toolTip;
 	}
 }
 
