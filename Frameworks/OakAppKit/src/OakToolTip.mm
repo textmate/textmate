@@ -4,34 +4,7 @@
 
 OAK_DEBUG_VAR(OakToolTip);
 
-void OakShowToolTip (NSString* msg, NSPoint location)
-{
-	if(msg)
-	{
-		OakToolTip* toolTip = [OakToolTip new];
-		[toolTip setStringValue:msg];
-
-		// Find the screen which we are displaying on
-		NSScreen* screen = nil;
-		for(NSScreen* candidate in [NSScreen screens])
-		{
-			if(NSPointInRect(location, [candidate frame]))
-			{
-				screen = candidate;
-				break;
-			}
-		}
-
-		[toolTip showAtLocation:location forScreen:screen];
-
-		static __weak OakToolTip* LastToolTip;
-		if(OakToolTip* toolTip = LastToolTip)
-			[toolTip performSelector:@selector(orderOut:) withObject:nil afterDelay:0];
-		LastToolTip = toolTip;
-	}
-}
-
-@interface OakToolTip ()
+@interface OakToolTip : NSWindow
 {
 	OBJC_WATCH_LEAKS(OakToolTip);
 
@@ -39,8 +12,11 @@ void OakShowToolTip (NSString* msg, NSPoint location)
 
 	NSDate* didOpenAtDate; // ignore mouse moves for the next second
 	NSPoint mousePositionWhenOpened;
-	BOOL enforceMouseThreshold;
 }
+@property (nonatomic) BOOL enforceMouseThreshold;
+- (void)setFont:(NSFont*)aFont;
+- (void)setStringValue:(NSString*)aString;
+- (void)showAtLocation:(NSPoint)aPoint forScreen:(NSScreen*)aScreen;
 @end
 
 @implementation OakToolTip
@@ -78,7 +54,7 @@ void OakShowToolTip (NSString* msg, NSPoint location)
 		[self setContentView:field];
 		[self setFrame:[self frameRectForContentRect:[field frame]] display:NO];
 
-		enforceMouseThreshold = YES;
+		self.enforceMouseThreshold = YES;
 	}
 	return self;
 }
@@ -101,11 +77,6 @@ void OakShowToolTip (NSString* msg, NSPoint location)
 	[field setStringValue:aString];
 }
 
-- (void)setEnforceMouseThreshold:(BOOL)flag
-{
-	enforceMouseThreshold = flag;
-}
-
 - (BOOL)canBecomeKeyWindow
 {
 	return YES;
@@ -113,7 +84,7 @@ void OakShowToolTip (NSString* msg, NSPoint location)
 
 - (BOOL)shouldCloseForMousePosition:(NSPoint)aPoint
 {
-	if(!enforceMouseThreshold)
+	if(!_enforceMouseThreshold)
 		return YES;
 
 	CGFloat ignorePeriod = [[NSUserDefaults standardUserDefaults] floatForKey:@"OakToolTipMouseMoveIgnorePeriod"];
@@ -224,3 +195,34 @@ void OakShowToolTip (NSString* msg, NSPoint location)
 	[NSAnimationContext endGrouping];
 }
 @end
+
+// ==============
+// = Public API =
+// ==============
+
+void OakShowToolTip (NSString* msg, NSPoint location)
+{
+	if(msg)
+	{
+		OakToolTip* toolTip = [OakToolTip new];
+		[toolTip setStringValue:msg];
+
+		// Find the screen which we are displaying on
+		NSScreen* screen = nil;
+		for(NSScreen* candidate in [NSScreen screens])
+		{
+			if(NSPointInRect(location, [candidate frame]))
+			{
+				screen = candidate;
+				break;
+			}
+		}
+
+		[toolTip showAtLocation:location forScreen:screen];
+
+		static __weak OakToolTip* LastToolTip;
+		if(OakToolTip* toolTip = LastToolTip)
+			[toolTip performSelector:@selector(orderOut:) withObject:nil afterDelay:0];
+		LastToolTip = toolTip;
+	}
+}
