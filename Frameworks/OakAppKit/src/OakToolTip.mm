@@ -36,9 +36,6 @@ void OakShowToolTip (NSString* msg, NSPoint location)
 	NSPoint mousePositionWhenOpened;
 	BOOL enforceMouseThreshold;
 }
-@property (nonatomic) NSTimer* animationTimer;
-@property (nonatomic) NSDate* animationStart;
-- (void)stopAnimation:(id)anArgument;
 @end
 
 @implementation OakToolTip
@@ -142,7 +139,6 @@ void OakShowToolTip (NSString* msg, NSPoint location)
 
 - (void)showUntilUserActivityDelayed:(id)sender
 {
-	OakToolTip* retainedSelf = self;
 	[self orderFront:self];
 
 	didOpenAtDate = [NSDate date];
@@ -183,15 +179,13 @@ void OakShowToolTip (NSString* msg, NSPoint location)
 	}
 
 	[keyWindow setAcceptsMouseMovedEvents:didAcceptMouseMovedEvents];
-	[retainedSelf orderOut:nil];
+	[self fadeOut:self];
 }
 
 - (void)showAtLocation:(NSPoint)aPoint forScreen:(NSScreen*)aScreen
 {
 	D(DBF_OakToolTip, bug("%s\n", [NSStringFromPoint(aPoint) UTF8String]););
 	aScreen = aScreen ?: [NSScreen mainScreen];
-
-	[self stopAnimation:self];
 
 	[field sizeToFit];
 	NSRect r = [aScreen visibleFrame];
@@ -207,38 +201,21 @@ void OakShowToolTip (NSString* msg, NSPoint location)
 	[self showUntilUserActivity];
 }
 
-- (void)orderOut:(id)sender
+- (void)fadeOut:(id)sender
 {
-	if(![self isVisible] || self.animationTimer)
-		return;
+	[NSAnimationContext beginGrouping];
 
-	[self stopAnimation:self];
-	self.animationStart = [NSDate date];
-	self.animationTimer = [NSTimer scheduledTimerWithTimeInterval:0.02 target:self selector:@selector(animationTick:) userInfo:nil repeats:YES];
-}
+	[NSAnimationContext currentContext].duration = 0.5;
+	[NSAnimationContext currentContext].completionHandler = ^{
+		[self orderOut:self];
+	};
 
-- (void)animationTick:(id)sender
-{
-	CGFloat alpha = 0.97 * (1 - oak::slow_in_out(1.5 * [[NSDate date] timeIntervalSinceDate:self.animationStart]));
-	if(alpha > 0)
-	{
-		[self setAlphaValue:alpha];
-	}
-	else
-	{
-		[super orderOut:self];
-		[self stopAnimation:self];
-	}
-}
+	CABasicAnimation* anim = [CABasicAnimation animation];
+	anim.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseIn];
+	self.animations = @{ @"alphaValue" : anim };
 
-- (void)stopAnimation:(id)sender
-{
-	if(self.animationTimer)
-	{
-		OakToolTip* retainedSelf = self;
-		[retainedSelf setAlphaValue:0.97];
-		[retainedSelf.animationTimer invalidate];
-		retainedSelf.animationTimer = nil;
-	}
+	[self.animator setAlphaValue:0];
+
+	[NSAnimationContext endGrouping];
 }
 @end
