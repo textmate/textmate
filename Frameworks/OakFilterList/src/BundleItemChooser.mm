@@ -121,18 +121,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		mask |= bundles::kItemTypeTheme;
 	if(sourceMask & kSearchSourceDragCommandItems)
 		mask |= bundles::kItemTypeDragCommand;
-
-	auto allItems = bundles::query(bundles::kFieldAny, NULL_STR, scope, mask, oak::uuid_t(), false);
-	if(sourceMask == kSearchSourceSettingsItems)
-		return allItems;
-
-	std::map<std::string, bundles::item_ptr, text::less_t> sorted;
-	for(auto const& item : allItems)
-		sorted.emplace(full_name_with_selection(item, hasSelection), item);
-
-	std::vector<bundles::item_ptr> res;
-	std::transform(sorted.begin(), sorted.end(), back_inserter(res), [](std::pair<std::string, bundles::item_ptr> const& p){ return p.second; });
-	return res;
+	return bundles::query(bundles::kFieldAny, NULL_STR, scope, mask, oak::uuid_t(), false);
 }
 
 @interface BundleItemChooserItem : NSObject
@@ -147,6 +136,13 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 @implementation BundleItemChooserItem
 - (id)objectForKey:(id)aKey     { return [self valueForKey:aKey]; }
 - (BOOL)isEqual:(id)anotherItem { return [anotherItem isKindOfClass:[BundleItemChooserItem class]] && [self.uuid isEqualToString:((BundleItemChooserItem*)anotherItem).uuid]; }
+
+- (NSComparisonResult)localizedCompare:(BundleItemChooserItem*)rhs
+{
+	NSString* lhsString = [_name isKindOfClass:[NSAttributedString class]]    ? [_name string]    : _name;
+	NSString* rhsString = [rhs.name isKindOfClass:[NSAttributedString class]] ? [rhs.name string] : rhs.name;
+	return !!_menuItem == !!rhs.menuItem ? [lhsString localizedCompare:rhsString] : (_menuItem ? NSOrderedDescending : NSOrderedAscending);
+}
 
 + (instancetype)bundleChooserItemWithItem:(bundles::item_ptr)anItem title:(id)aTitle
 {
@@ -695,7 +691,9 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	NSMutableArray* res = [NSMutableArray array];
 	for(auto const& pair : rankedItems)
 		[res addObject:pair.second];
-	self.items = res;
+
+	BOOL shouldSort = !(self.searchSource & kSearchSourceSettingsItems) && (filter == NULL_STR || filter.empty());
+	self.items = shouldSort ? [res sortedArrayUsingSelector:@selector(localizedCompare:)] : res;
 
 	self.window.title = [NSString stringWithFormat:@"Select Bundle Item (%@)", self.itemCountTextField.stringValue];
 }
