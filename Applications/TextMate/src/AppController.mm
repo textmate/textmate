@@ -473,8 +473,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 	}
 	else if([item action] == @selector(printDocument:))
 	{
-		NSView* webView = [NSApp targetForAction:@selector(print:)];
-		enabled = [webView isKindOfClass:[NSView class]] && [webView conformsToProtocol:@protocol(WebDocumentView)];
+		enabled = [self findPrintableView:[NSApp keyWindow]] != nil;
 	}
 	return enabled;
 }
@@ -504,12 +503,27 @@ BOOL HasDocumentWindow (NSArray* windows)
 	[[NSPageLayout pageLayout] runModal];
 }
 
+- (NSView*)findPrintableView:(NSWindow*)aWindow
+{
+	NSRect rect = [aWindow.contentView frame];
+	for(NSView* view = [aWindow.contentView hitTest:NSMakePoint(NSMidX(rect), NSMidY(rect))]; view; view = [view superview])
+	{
+		if([view acceptsFirstResponder] && [view respondsToSelector:@selector(printDocument:)] || [view conformsToProtocol:@protocol(WebDocumentView)])
+			return view;
+	}
+	return nil;
+}
+
 - (void)printDocument:(id)sender
 {
-	NSView* webView = [NSApp targetForAction:@selector(print:)];
-	if([webView isKindOfClass:[NSView class]] && [webView conformsToProtocol:@protocol(WebDocumentView)])
+	id view = [self findPrintableView:[NSApp keyWindow]];
+	if([view respondsToSelector:@selector(printDocument:)])
 	{
-		NSPrintOperation* printer = [NSPrintOperation printOperationWithView:webView];
+		[view printDocument:sender];
+	}
+	else if([view conformsToProtocol:@protocol(WebDocumentView)])
+	{
+		NSPrintOperation* printer = [NSPrintOperation printOperationWithView:view];
 		[[printer printPanel] setOptions:[[printer printPanel] options] | NSPrintPanelShowsPaperSize | NSPrintPanelShowsOrientation];
 
 		NSPrintInfo* info = [printer printInfo];
@@ -520,7 +534,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 		info.topMargin    = info.paperSize.height - NSMaxY(display);
 		info.bottomMargin = NSMinY(display);
 
-		[printer runOperationModalForWindow:[webView window] delegate:nil didRunSelector:NULL contextInfo:nil];
+		[printer runOperationModalForWindow:[view window] delegate:nil didRunSelector:NULL contextInfo:nil];
 	}
 }
 @end
