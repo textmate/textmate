@@ -109,9 +109,8 @@ void OakAddBundlesToMenu (std::vector<bundles::item_ptr> const& items, bool setK
 				}
 				else
 				{
-					if(pendingSeparator)
+					if(!showBundleHeadings && std::exchange(pendingSeparator, false))
 						[menu addItem:[NSMenuItem separatorItem]];
-					pendingSeparator = false;
 
 					NSMenuItem* menuItem = [menu addItemWithTitle:[NSString stringWithCxxString:item->name()] action:menuAction keyEquivalent:@""];
 					[menuItem setRepresentedObject:[NSString stringWithCxxString:item->uuid()]];
