@@ -138,4 +138,24 @@ extern NSString* const kCommandRunnerURLScheme; // from HTMLOutput.h
 		}
 	}
 }
+
+// ====================
+// = Printing Support =
+// ====================
+
+- (IBAction)printDocument:(id)sender
+{
+	NSPrintOperation* printer = [NSPrintOperation printOperationWithView:self.webView.mainFrame.frameView.documentView];
+	[[printer printPanel] setOptions:[[printer printPanel] options] | NSPrintPanelShowsPaperSize | NSPrintPanelShowsOrientation];
+
+	NSPrintInfo* info = [printer printInfo];
+
+	NSRect display = NSIntersectionRect(info.imageablePageBounds, (NSRect){ NSZeroPoint, info.paperSize });
+	info.leftMargin   = NSMinX(display);
+	info.rightMargin  = info.paperSize.width - NSMaxX(display);
+	info.topMargin    = info.paperSize.height - NSMaxY(display);
+	info.bottomMargin = NSMinY(display);
+
+	[printer runOperationModalForWindow:self.window delegate:nil didRunSelector:NULL contextInfo:nil];
+}
 @end

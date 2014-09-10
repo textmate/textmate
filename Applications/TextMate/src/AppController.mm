@@ -471,10 +471,6 @@ BOOL HasDocumentWindow (NSArray* windows)
 				[item updateTitle:[NSString stringWithCxxString:name_with_selection(bundleItem, [textView hasSelection])]];
 		}
 	}
-	else if([item action] == @selector(printDocument:))
-	{
-		enabled = [self findPrintableView:[NSApp keyWindow]] != nil;
-	}
 	return enabled;
 }
 
@@ -501,40 +497,5 @@ BOOL HasDocumentWindow (NSArray* windows)
 - (IBAction)runPageLayout:(id)sender
 {
 	[[NSPageLayout pageLayout] runModal];
-}
-
-- (NSView*)findPrintableView:(NSWindow*)aWindow
-{
-	NSRect rect = [aWindow.contentView frame];
-	for(NSView* view = [aWindow.contentView hitTest:NSMakePoint(NSMidX(rect), NSMidY(rect))]; view; view = [view superview])
-	{
-		if([view acceptsFirstResponder] && [view respondsToSelector:@selector(printDocument:)] || [view conformsToProtocol:@protocol(WebDocumentView)])
-			return view;
-	}
-	return nil;
-}
-
-- (void)printDocument:(id)sender
-{
-	id view = [self findPrintableView:[NSApp keyWindow]];
-	if([view respondsToSelector:@selector(printDocument:)])
-	{
-		[view printDocument:sender];
-	}
-	else if([view conformsToProtocol:@protocol(WebDocumentView)])
-	{
-		NSPrintOperation* printer = [NSPrintOperation printOperationWithView:view];
-		[[printer printPanel] setOptions:[[printer printPanel] options] | NSPrintPanelShowsPaperSize | NSPrintPanelShowsOrientation];
-
-		NSPrintInfo* info = [printer printInfo];
-
-		NSRect display = NSIntersectionRect(info.imageablePageBounds, (NSRect){ NSZeroPoint, info.paperSize });
-		info.leftMargin   = NSMinX(display);
-		info.rightMargin  = info.paperSize.width - NSMaxX(display);
-		info.topMargin    = info.paperSize.height - NSMaxY(display);
-		info.bottomMargin = NSMinY(display);
-
-		[printer runOperationModalForWindow:[view window] delegate:nil didRunSelector:NULL contextInfo:nil];
-	}
 }
 @end
