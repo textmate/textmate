@@ -130,6 +130,7 @@ OAK_DEBUG_VAR(OakToolTip);
 	BOOL didAcceptMouseMovedEvents = [keyWindow acceptsMouseMovedEvents];
 	[keyWindow setAcceptsMouseMovedEvents:YES];
 
+	BOOL slowFadeOut = NO;
 	while(NSEvent* event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:[NSDate distantFuture] inMode:NSDefaultRunLoopMode dequeue:YES])
 	{
 		[NSApp sendEvent:event];
@@ -144,6 +145,7 @@ OAK_DEBUG_VAR(OakToolTip);
 		if([event type] == NSMouseMoved && [self shouldCloseForMousePosition:[NSEvent mouseLocation]])
 		{
 			D(DBF_OakToolTip, bug("close because mouse was moved\n"););
+			slowFadeOut = YES;
 			break;
 		}
 
@@ -155,7 +157,7 @@ OAK_DEBUG_VAR(OakToolTip);
 	}
 
 	[keyWindow setAcceptsMouseMovedEvents:didAcceptMouseMovedEvents];
-	[self fadeOut:self];
+	[self fadeOutSlowly:slowFadeOut];
 }
 
 - (void)showAtLocation:(NSPoint)aPoint forScreen:(NSScreen*)aScreen
@@ -177,11 +179,11 @@ OAK_DEBUG_VAR(OakToolTip);
 	[self showUntilUserActivity];
 }
 
-- (void)fadeOut:(id)sender
+- (void)fadeOutSlowly:(BOOL)slowly
 {
 	[NSAnimationContext beginGrouping];
 
-	[NSAnimationContext currentContext].duration = 0.5;
+	[NSAnimationContext currentContext].duration = slowly ? 0.5 : 0.25;
 	[NSAnimationContext currentContext].completionHandler = ^{
 		[self orderOut:self];
 	};
