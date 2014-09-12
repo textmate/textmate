@@ -720,7 +720,7 @@ static NSButton* OakCreateStopSearchButton ()
 			viewController.view = OakCreateLabel(@"");
 
 			self.findStringPopver = [NSPopover new];
-			self.findStringPopver.behavior = NSPopoverBehaviorApplicationDefined;
+			self.findStringPopver.behavior = NSPopoverBehaviorTransient;
 			self.findStringPopver.contentViewController = viewController;
 		}
 
