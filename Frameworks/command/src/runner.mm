@@ -84,11 +84,11 @@ static void exhaust_fd_in_queue (dispatch_group_t group, dispatch_queue_t queue,
 	});
 }
 
-static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, int stdinFd, std::map<std::string, std::string> const& env, std::string const& cwd, dispatch_queue_t queue, void(^stdoutHandler)(char const* bytes, size_t len), void(^stderrHandler)(char const* bytes, size_t len), void(^completionHandler)(int status))
+static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, int inputFd, std::map<std::string, std::string> const& env, std::string const& cwd, dispatch_queue_t queue, void(^stdoutHandler)(char const* bytes, size_t len), void(^stderrHandler)(char const* bytes, size_t len), void(^completionHandler)(int status))
 {
 	pid_t pid;
 	int outputFd, errorFd;
-	std::tie(pid, outputFd, errorFd) = my_fork(cmd.c_str(), stdinFd, env, cwd.c_str());
+	std::tie(pid, outputFd, errorFd) = my_fork(cmd.c_str(), inputFd, env, cwd.c_str());
 
 	dispatch_group_t group = dispatch_group_create();
 	exhaust_fd_in_queue(group, queue, outputFd, stdoutHandler);
