@@ -66,7 +66,7 @@ int main (int argc, char* argv[])
 		{
 			NSMutableArray* arg = [NSMutableArray array];
 			for(size_t i = 0; i < argc; ++i)
-				[arg addObject:[NSString stringWithUTF8String:argv[i]]];
+				[arg addObject:@(argv[i])];
 
 			NSDictionary* plist = @{
 				kOakCommitWindowClientPortName : client.portName,
