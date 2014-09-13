@@ -271,11 +271,10 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 
 	if(!utf8::is_valid(prefix.begin(), prefix.end()) && utf8::is_valid(middle.begin(), middle.end()) && utf8::is_valid(suffix.begin(), suffix.end()))
 	{
-		ns::attr_string_t res;
-		res = ns::attr_string_t([NSColor darkGrayColor])
-		    << ns::style::line_break(NSLineBreakByTruncatingTail)
-		    << text::format("%zu-%zu: Range is not valid UTF-8, please contact: http://macromates.com/support", m.first, m.last);
-		return res.get();
+		return ns::attr_string_t()
+			<< [NSColor darkGrayColor] << [NSFont systemFontOfSize:11]
+			<< ns::style::line_break(NSLineBreakByTruncatingTail)
+			<< text::format("%zu-%zu: Range is not valid UTF-8, please contact: http://macromates.com/support", m.first, m.last);
 	}
 
 	return AttributedStringForMatch(prefix + middle + suffix, prefix.size(), prefix.size() + middle.size(), m.line_number);
