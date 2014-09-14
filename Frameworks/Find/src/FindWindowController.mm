@@ -916,6 +916,7 @@ static NSButton* OakCreateStopSearchButton ()
 - (BOOL)canIgnoreWhitespace             { return _regularExpression == NO; }
 
 - (NSString*)globString                 { [self commitEditing]; return _globHistoryList.head; }
+- (void)setGlobString:(NSString*)aGlob  { [_globHistoryList addObject:aGlob]; }
 
 - (void)setProjectFolder:(NSString*)aFolder
 {

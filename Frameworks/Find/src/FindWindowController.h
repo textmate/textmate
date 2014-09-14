@@ -21,7 +21,7 @@ extern NSString* const FFSearchInOpenFiles;
 
 @property (nonatomic) NSString* findString;
 @property (nonatomic) NSString* replaceString;
-@property (nonatomic, readonly) NSString* globString;
+@property (nonatomic) NSString* globString;
 
 @property (nonatomic) BOOL ignoreCase;
 @property (nonatomic) BOOL ignoreWhitespace;
