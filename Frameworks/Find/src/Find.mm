@@ -575,9 +575,11 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 					globs.add_include_glob(controller.searchHiddenFolders ? "{,.}*" : "*", path::kPathItemDirectory);
 					globs.add_include_glob(to_s(controller.globString), path::kPathItemFile);
 
-					folderSearch.directory   = folder;
-					folderSearch.globList    = globs;
-					folderSearch.followLinks = controller.followSymbolicLinks;
+					folderSearch.directory         = folder;
+					folderSearch.globList          = globs;
+					folderSearch.searchFolderLinks = controller.searchFolderLinks;
+					folderSearch.searchFileLinks   = controller.searchFileLinks;
+					folderSearch.searchBinaryFiles = controller.searchBinaryFiles;
 				}
 
 				self.documentSearch = folderSearch;

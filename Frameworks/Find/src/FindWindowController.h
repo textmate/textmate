@@ -29,8 +29,10 @@ extern NSString* const FFSearchInOpenFiles;
 @property (nonatomic) BOOL wrapAround;
 @property (nonatomic) BOOL fullWords; // not implemented
 
-@property (nonatomic) BOOL followSymbolicLinks;
 @property (nonatomic) BOOL searchHiddenFolders;
+@property (nonatomic) BOOL searchFolderLinks;
+@property (nonatomic) BOOL searchFileLinks;
+@property (nonatomic) BOOL searchBinaryFiles;
 
 @property (nonatomic, getter = isBusy) BOOL busy;
 @property (nonatomic) NSString* statusString;

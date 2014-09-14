@@ -255,8 +255,15 @@ static NSButton* OakCreateStopSearchButton ()
 		NSMenu* actionMenu = self.actionsPopUpButton.menu;
 
 		[actionMenu addItemWithTitle:@"Placeholder" action:NULL keyEquivalent:@""];
-		[actionMenu addItemWithTitle:@"Follow Symbolic Links" action:@selector(toggleFollowSymbolicLinks:) keyEquivalent:@""];
-		[actionMenu addItemWithTitle:@"Search Hidden Folders" action:@selector(toggleSearchHiddenFolders:) keyEquivalent:@""];
+
+		[actionMenu addItemWithTitle:@"Search" action:@selector(nop:) keyEquivalent:@""];
+		[actionMenu addItemWithTitle:@"Binary Files" action:@selector(toggleSearchBinaryFiles:) keyEquivalent:@""];
+		[actionMenu addItemWithTitle:@"Hidden Folders" action:@selector(toggleSearchHiddenFolders:) keyEquivalent:@""];
+		[actionMenu addItemWithTitle:@"Symbolic Links to Folders" action:@selector(toggleSearchFolderLinks:) keyEquivalent:@""];
+		[actionMenu addItemWithTitle:@"Symbolic Links to Files" action:@selector(toggleSearchFileLinks:) keyEquivalent:@""];
+		for(NSUInteger i = [actionMenu numberOfItems]-4; i < [actionMenu numberOfItems]; ++i)
+			[[actionMenu itemAtIndex:i] setIndentationLevel:1];
+
 		[actionMenu addItem:[NSMenuItem separatorItem]];
 		NSMenuItem* collapseExpandItem = [actionMenu addItemWithTitle:@"Collapse/Expand Results" action:@selector(takeLevelToFoldFrom:) keyEquivalent:@"1"];
 		collapseExpandItem.keyEquivalentModifierMask = NSAlternateKeyMask|NSCommandKeyMask;
@@ -500,11 +507,11 @@ static NSButton* OakCreateStopSearchButton ()
 	self.ignoreCase = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFindIgnoreCase];
 	self.wrapAround = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFindWrapAround];
 
-	if(NSDictionary* options = [[NSUserDefaults standardUserDefaults] dictionaryForKey:kUserDefaultsFolderOptionsKey])
-	{
-		self.followSymbolicLinks = [[options objectForKey:@"followLinks"] boolValue];
-		self.searchHiddenFolders = [[options objectForKey:@"searchHiddenFolders"] boolValue];
-	}
+	NSDictionary* options = [[NSUserDefaults standardUserDefaults] dictionaryForKey:kUserDefaultsFolderOptionsKey];
+	self.searchHiddenFolders = [[options objectForKey:@"searchHiddenFolders"] boolValue];
+	self.searchFolderLinks   = [[options objectForKey:@"searchFolderLinks"] boolValue];
+	self.searchFileLinks     = ![[options objectForKey:@"skipFileLinks"] boolValue];
+	self.searchBinaryFiles   = [[options objectForKey:@"searchBinaryFiles"] boolValue];
 }
 
 - (void)findClipboardDidChange:(NSNotification*)aNotification
@@ -930,17 +937,27 @@ static NSButton* OakCreateStopSearchButton ()
 
 - (void)updateFolderSearchUserDefaults
 {
-	[[NSUserDefaults standardUserDefaults] setObject:@{
-		@"followLinks"         : @(self.followSymbolicLinks),
-		@"searchHiddenFolders" : @(self.searchHiddenFolders),
-	} forKey:kUserDefaultsFolderOptionsKey];
+	NSMutableDictionary* options = [NSMutableDictionary dictionary];
+
+	if(self.searchHiddenFolders) options[@"searchHiddenFolders"] = @YES;
+	if(self.searchFolderLinks)   options[@"searchFolderLinks"]   = @YES;
+	if(!self.searchFileLinks)    options[@"skipFileLinks"]       = @YES;
+	if(self.searchBinaryFiles)   options[@"searchBinaryFiles"]   = @YES;
+
+	if([options count])
+			[[NSUserDefaults standardUserDefaults] setObject:options forKey:kUserDefaultsFolderOptionsKey];
+	else	[[NSUserDefaults standardUserDefaults] removeObjectForKey:kUserDefaultsFolderOptionsKey];
 }
 
-- (void)setFollowSymbolicLinks:(BOOL)flag { if(_followSymbolicLinks != flag) { _followSymbolicLinks = flag; [self updateFolderSearchUserDefaults]; } }
 - (void)setSearchHiddenFolders:(BOOL)flag { if(_searchHiddenFolders != flag) { _searchHiddenFolders = flag; [self updateFolderSearchUserDefaults]; } }
+- (void)setSearchFolderLinks:(BOOL)flag   { if(_searchFolderLinks != flag)   { _searchFolderLinks   = flag; [self updateFolderSearchUserDefaults]; } }
+- (void)setSearchFileLinks:(BOOL)flag     { if(_searchFileLinks != flag)     { _searchFileLinks     = flag; [self updateFolderSearchUserDefaults]; } }
+- (void)setSearchBinaryFiles:(BOOL)flag   { if(_searchBinaryFiles != flag)   { _searchBinaryFiles   = flag; [self updateFolderSearchUserDefaults]; } }
 
-- (IBAction)toggleFollowSymbolicLinks:(id)sender { self.followSymbolicLinks = !self.followSymbolicLinks; }
 - (IBAction)toggleSearchHiddenFolders:(id)sender { self.searchHiddenFolders = !self.searchHiddenFolders; }
+- (IBAction)toggleSearchFolderLinks:(id)sender   { self.searchFolderLinks   = !self.searchFolderLinks;   }
+- (IBAction)toggleSearchFileLinks:(id)sender     { self.searchFileLinks     = !self.searchFileLinks;     }
+- (IBAction)toggleSearchBinaryFiles:(id)sender   { self.searchBinaryFiles   = !self.searchBinaryFiles;   }
 
 - (BOOL)control:(NSControl*)control textView:(NSTextView*)textView doCommandBySelector:(SEL)command
 {
@@ -976,10 +993,14 @@ static NSButton* OakCreateStopSearchButton ()
 - (BOOL)validateMenuItem:(NSMenuItem*)aMenuItem
 {
 	BOOL res = YES;
-	if(aMenuItem.action == @selector(toggleFollowSymbolicLinks:))
-		[aMenuItem setState:self.followSymbolicLinks ? NSOnState : NSOffState];
-	else if(aMenuItem.action == @selector(toggleSearchHiddenFolders:))
+	if(aMenuItem.action == @selector(toggleSearchHiddenFolders:))
 		[aMenuItem setState:self.searchHiddenFolders ? NSOnState : NSOffState];
+	else if(aMenuItem.action == @selector(toggleSearchFolderLinks:))
+		[aMenuItem setState:self.searchFolderLinks ? NSOnState : NSOffState];
+	else if(aMenuItem.action == @selector(toggleSearchFileLinks:))
+		[aMenuItem setState:self.searchFileLinks ? NSOnState : NSOffState];
+	else if(aMenuItem.action == @selector(toggleSearchBinaryFiles:))
+		[aMenuItem setState:self.searchBinaryFiles ? NSOnState : NSOffState];
 	else if(aMenuItem.action == @selector(goToParentFolder:))
 		res = self.searchFolder != nil;
 	return res;
