@@ -153,6 +153,9 @@ namespace find
 				char const* buf = data->get();
 				size_t len      = data->size();
 
+				if(!_search_binaries && memchr(buf, '\0', len))
+					return;
+
 				for(ssize_t offset = 0; offset < len; )
 				{
 					std::map<std::string, std::string> captures;

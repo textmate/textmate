@@ -39,6 +39,7 @@ namespace find
 		void set_glob_list (path::glob_list_t const& globs) { ASSERT(!is_running()); _glob_list = globs; }
 		void set_follow_links (bool followLinks)            { ASSERT(!is_running()); _follow_links = followLinks; }
 		void set_search_links (bool searchLinks)            { ASSERT(!is_running()); _search_links = searchLinks; }
+		void set_search_binaries (bool searchBinaries)      { ASSERT(!is_running()); _search_binaries = searchBinaries; }
 
 		void start ();
 		void stop ();
@@ -63,6 +64,7 @@ namespace find
 		path::glob_list_t _glob_list = path::glob_list_t("*");
 		bool _follow_links = false;
 		bool _search_links = true;
+		bool _search_binaries = false;
 
 		std::string _current_path;
 		std::vector<match_t> _matches;
