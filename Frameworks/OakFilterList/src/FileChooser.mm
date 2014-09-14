@@ -500,7 +500,9 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	_records.clear();
 	[self addRecordsForDocuments:_openDocuments];
 	settings_t const settings = settings_for_path(NULL_STR, "", to_s(_path));
-	_scanner = std::make_shared<document::scanner_t>(to_s(_path), globs_for_path(to_s(_path)), settings.get(kSettingsFollowSymbolicLinksKey, false), false, false);
+	_scanner = std::make_shared<document::scanner_t>(to_s(_path), globs_for_path(to_s(_path)));
+	_scanner->set_follow_directory_links(settings.get(kSettingsFollowSymbolicLinksKey, false));
+	_scanner->start();
 
 	_pollInterval = 0.01;
 	_pollTimer = [NSTimer scheduledTimerWithTimeInterval:_pollInterval target:self selector:@selector(fetchScannerResults:) userInfo:nil repeats:NO];

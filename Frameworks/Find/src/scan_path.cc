@@ -78,7 +78,12 @@ namespace find
 			return;
 		}
 
-		document::scanner_t scanner(_path, _glob_list, _follow_links, true /* depth first */);
+		document::scanner_t scanner(_path, _glob_list);
+		scanner.set_follow_directory_links(_follow_links);
+		scanner.set_follow_file_links(_search_links);
+		scanner.set_include_untitled(true);
+		scanner.set_depth_first(true);
+		scanner.start();
 
 		bool isRunning = true;
 		while(isRunning && !_should_stop)

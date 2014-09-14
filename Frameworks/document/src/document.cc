@@ -1407,19 +1407,10 @@ namespace document
 		return res;
 	}
 
-	scanner_t::scanner_t (std::string const& path, path::glob_list_t const& glob, bool follow_links, bool depth_first, bool includeUntitled) : path(path), glob(glob), follow_links(follow_links), depth_first(depth_first), is_running_flag(true), should_stop_flag(false)
+	scanner_t::scanner_t (std::string const& path, path::glob_list_t const& glob) : path(path), glob(glob)
 	{
 		D(DBF_Document_Scanner, bug("%s, links %s\n", path.c_str(), BSTR(follow_links)););
-
-		if(includeUntitled)
-		{
-			auto docs = document::documents.all_documents();
-			std::copy_if(docs.begin(), docs.end(), back_inserter(documents), [](document::document_ptr doc){ return doc->path() == NULL_STR; });
-		}
-
-		struct bootstrap_t { static void* main (void* arg) { ((scanner_t*)arg)->thread_main(); return NULL; } };
 		pthread_mutex_init(&mutex, NULL);
-		pthread_create(&thread, NULL, &bootstrap_t::main, this);
 	}
 
 	scanner_t::~scanner_t ()
@@ -1428,6 +1419,21 @@ namespace document
 		stop();
 		wait();
 		pthread_mutex_destroy(&mutex);
+	}
+
+	void scanner_t::start ()
+	{
+		is_running_flag = true;
+
+		if(include_untitled)
+		{
+			auto docs = document::documents.all_documents();
+			std::copy_if(docs.begin(), docs.end(), back_inserter(documents), [](document::document_ptr doc){ return doc->path() == NULL_STR; });
+		}
+
+		struct bootstrap_t { static void* main (void* arg) { ((scanner_t*)arg)->thread_main(); return NULL; } };
+		pthread_mutex_init(&mutex, NULL);
+		pthread_create(&thread, NULL, &bootstrap_t::main, this);
 	}
 
 	std::vector<document_ptr> scanner_t::accept_documents ()
@@ -1506,7 +1512,7 @@ namespace document
 							files.emplace(path, inode_t(buf.st_dev, it->d_ino, path));
 					else	D(DBF_Document_Scanner, bug("skip known path: ‘%s’\n", path.c_str()););
 				}
-				else if(it->d_type == DT_LNK)
+				else if(it->d_type == DT_LNK && (follow_directory_links || follow_file_links))
 				{
 					links.push_back(path); // handle later since link may point to another device plus if link is “local” and will be seen later, we reported the local path rather than this link
 				}
@@ -1522,7 +1528,7 @@ namespace document
 					std::string path = path::resolve(link);
 					if(lstat(path.c_str(), &buf) != -1)
 					{
-						if(S_ISDIR(buf.st_mode) && follow_links && seen_paths.emplace(buf.st_dev, buf.st_ino).second)
+						if(S_ISDIR(buf.st_mode) && follow_directory_links && seen_paths.emplace(buf.st_dev, buf.st_ino).second)
 						{
 							if(glob.exclude(path, path::kPathItemDirectory))
 								continue;
@@ -1530,7 +1536,7 @@ namespace document
 							D(DBF_Document_Scanner, bug("follow link: %s → %s\n", link.c_str(), path.c_str()););
 							dirs.push_back(path);
 						}
-						else if(S_ISREG(buf.st_mode))
+						else if(S_ISREG(buf.st_mode) && follow_file_links)
 						{
 							if(glob.exclude(path, path::kPathItemFile))
 								continue;
