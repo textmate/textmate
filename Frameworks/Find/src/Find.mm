@@ -796,13 +796,8 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	[self.windowController.resultsOutlineView endUpdates];
 }
 
-- (void)folderSearchDidFinish:(NSNotification*)aNotification
+- (void)addResultsToPasteboard:(id)sender
 {
-	self.performingFolderSearch = NO;
-	self.windowController.busy = NO;
-	if(!_documentSearch)
-		return;
-
 	NSMutableArray* documents = [NSMutableArray array];
 	for(FFResultNode* parent in _results.children)
 	{
@@ -813,6 +808,16 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		}];
 	}
 	[OakPasteboard pasteboardWithName:NSFindPboard].auxiliaryOptionsForCurrent = @{ @"documents" : documents };
+}
+
+- (void)folderSearchDidFinish:(NSNotification*)aNotification
+{
+	self.performingFolderSearch = NO;
+	self.windowController.busy = NO;
+	if(!_documentSearch)
+		return;
+
+	[self addResultsToPasteboard:self];
 
 	NSString* fmt = MSG_ZERO_MATCHES_FMT;
 	switch(self.countOfMatches)
@@ -861,6 +866,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		}
 
 		[item removeFromParent];
+		[self addResultsToPasteboard:self];
 
 		NSString* fmt = MSG_SHOWING_ZERO_MATCHES_FMT;
 		switch(self.countOfMatches)
