@@ -7,6 +7,7 @@
 #include <oak/compat.h>
 #include <text/case.h>
 #include <text/utf8.h>
+#include <cf/cf.h>
 
 OAK_DEBUG_VAR(FormatString);
 
@@ -146,8 +147,17 @@ struct expand_visitor : boost::static_visitor<void>
 		return format_string::replace(format_string::replace(src, "\\b\\p{Upper}\\p{^Upper}+?\\b", "${0:/downcase}"), "^([\\W\\d]*)(\\w[-\\w]*)|\\b((?!(?:else|from|over|then|when)\\b)\\w[-\\w]{3,}|\\w[-\\w]*[\\W\\d]*$)", "${1:?$1\\u$2:\\u$0}");
 	}
 
-	static std::string asciify (std::string const& src)
+	static std::string asciify (std::string const& org)
 	{
+		std::string src = org;
+		if(CFMutableStringRef tmp = CFStringCreateMutableCopy(kCFAllocatorDefault, 0, cf::wrap(src)))
+		{
+			CFStringTransform(tmp, NULL, kCFStringTransformStripDiacritics, false);
+			CFStringTransform(tmp, NULL, kCFStringTransformStripCombiningMarks, false);
+			src = cf::to_s(tmp);
+			CFRelease(tmp);
+		}
+
 		iconv_t cd = iconv_open("ASCII//TRANSLIT", "UTF-8");
 		if(cd == (iconv_t)(-1))
 			return src; // error

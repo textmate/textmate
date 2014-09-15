@@ -3,6 +3,7 @@
 void test_format_string ()
 {
 	using format_string::replace;
+	OAK_ASSERT_EQ(replace("Résumé",   ".+", "»${0:/asciify}«"),            "»Resume«");
 	OAK_ASSERT_EQ(replace("æbleGRØD", ".+", "»${0:/upcase}«"),             "»ÆBLEGRØD«");
 	OAK_ASSERT_EQ(replace("æbleGRØD", ".+", "»${0:/downcase}«"),           "»æblegrød«");
 	OAK_ASSERT_EQ(replace("æbleGRØD", ".+", "»${0:/asciify}«"),            "»aebleGROD«");
