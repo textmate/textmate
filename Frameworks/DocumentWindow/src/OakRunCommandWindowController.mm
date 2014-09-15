@@ -4,6 +4,8 @@
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakTextView/OakTextView.h>
 
+static NSString* const kUserDefaultsFilterOutputType = @"filterOutputType";
+
 @interface OakRunCommandWindowController () <NSWindowDelegate>
 @property (nonatomic) NSTextField*         commandLabel;
 @property (nonatomic) NSComboBox*          commandComboBox;
@@ -98,6 +100,8 @@
 		for(size_t i = 0; i < sizeofA(keyViewLoop); ++i)
 			keyViewLoop[i].nextKeyView = keyViewLoop[(i + 1) % sizeofA(keyViewLoop)];
 
+		self.outputType = (output::type)[[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsFilterOutputType];
+
 		self.window.initialFirstResponder = self.commandComboBox;
 		self.window.defaultButtonCell     = self.executeButton.cell;
 	}
@@ -107,6 +111,19 @@
 - (void)takeOutputTypeFrom:(id)sender
 {
 	self.outputType = (output::type)[sender tag];
+}
+
+- (void)setOutputType:(output::type)newOutputType
+{
+	if(_outputType == newOutputType)
+		return;
+
+	_outputType = newOutputType;
+	[self.resultPopUpButton selectItemWithTag:_outputType];
+
+	if(_outputType)
+			[[NSUserDefaults standardUserDefaults] setInteger:_outputType forKey:kUserDefaultsFilterOutputType];
+	else	[[NSUserDefaults standardUserDefaults] removeObjectForKey:kUserDefaultsFilterOutputType];
 }
 
 - (void)commandChanged:(NSNotification*)notification
