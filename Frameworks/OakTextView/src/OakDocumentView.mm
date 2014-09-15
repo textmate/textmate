@@ -507,14 +507,14 @@ private:
 
 - (void)showClipboardHistory:(id)sender
 {
-	OakPasteboardChooser* chooser = [[OakPasteboardChooser alloc] initWithPasteboard:[OakPasteboard pasteboardWithName:NSGeneralPboard]];
+	OakPasteboardChooser* chooser = [OakPasteboardChooser sharedChooserForName:NSGeneralPboard];
 	chooser.action = @selector(paste:);
 	[chooser showWindowRelativeToFrame:[self.window convertRectToScreen:[textView convertRect:[textView visibleRect] toView:nil]]];
 }
 
 - (void)showFindHistory:(id)sender
 {
-	OakPasteboardChooser* chooser = [[OakPasteboardChooser alloc] initWithPasteboard:[OakPasteboard pasteboardWithName:NSFindPboard]];
+	OakPasteboardChooser* chooser = [OakPasteboardChooser sharedChooserForName:NSFindPboard];
 	chooser.action = @selector(findNext:);
 	[chooser showWindowRelativeToFrame:[self.window convertRectToScreen:[textView convertRect:[textView visibleRect] toView:nil]]];
 }

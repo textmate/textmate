@@ -54,13 +54,20 @@
 @property (nonatomic) NSScrollView*         scrollView;
 @property (nonatomic) NSTableView*          tableView;
 @property (nonatomic) BOOL                  didFetchTableViewData;
-@property (nonatomic) OakPasteboardChooser* retainedSelf;
 @end
 
 static void* kOakPasteboardChooserSelectionBinding    = &kOakPasteboardChooserSelectionBinding;
 static void* kOakPasteboardChooserCurrentEntryBinding = &kOakPasteboardChooserCurrentEntryBinding;
 
+static NSMutableDictionary* SharedChoosers;
+
 @implementation OakPasteboardChooser
++ (instancetype)sharedChooserForName:(NSString*)aName
+{
+	SharedChoosers = SharedChoosers ?: [NSMutableDictionary new];
+	return [SharedChoosers objectForKey:aName] ?: [[OakPasteboardChooser alloc] initWithPasteboard:[OakPasteboard pasteboardWithName:aName]];
+}
+
 - (id)initWithPasteboard:(OakPasteboard*)aPasteboard
 {
 	if((self = [super init]))
@@ -189,7 +196,8 @@ static void* kOakPasteboardChooserCurrentEntryBinding = &kOakPasteboardChooserCu
 
 - (void)showWindow:(id)sender
 {
-	self.retainedSelf = self;
+	[SharedChoosers setObject:self forKey:_pasteboard.name];
+
 	[_searchField bind:NSValueBinding toObject:self withKeyPath:@"filterString" options:nil];
 	[_arrayController fetch:self];
 	[self performSelector:@selector(arrayControllerDidFinishInitialFetch:) withObject:nil afterDelay:0];
@@ -225,7 +233,7 @@ static void* kOakPasteboardChooserCurrentEntryBinding = &kOakPasteboardChooserCu
 - (void)windowWillClose:(NSNotification*)aNotification
 {
 	[_searchField unbind:NSValueBinding];
-	[self performSelector:@selector(setRetainedSelf:) withObject:nil afterDelay:0];
+	[SharedChoosers performSelector:@selector(removeObjectForKey:) withObject:_pasteboard.name afterDelay:0];
 }
 
 - (void)close
