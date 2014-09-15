@@ -88,7 +88,6 @@ NSString* const kUserDefaultsDisablePersistentClipboardHistory = @"disablePersis
 @end
 
 @interface OakPasteboard ()
-@property (nonatomic) NSString* name;
 @property (nonatomic) NSInteger changeCount;
 @property (nonatomic) BOOL disableSystemPasteboardUpdating;
 @property (nonatomic) BOOL needsSavePasteboardHistory;
