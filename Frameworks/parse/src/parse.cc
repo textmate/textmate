@@ -14,12 +14,22 @@ namespace
 	{
 		void add (size_t pos, std::string const& scope)
 		{
+			if(tracking)
+				stack.push_back(scope);
+
 			map.emplace(pos, record_t(scope, true));
 		}
 
 		void remove (size_t pos, std::string const& scope, bool endRule = false)
 		{
 			map.emplace_hint(endRule ? map.end() : map.lower_bound(pos), pos, record_t(scope, false));
+
+			if(tracking)
+			{
+				if(!stack.empty() && stack.back() == scope)
+						stack.pop_back();
+				else	fprintf(stderr, "*** unbalanced scope removal: %s, on stack: %s\n", scope.c_str(), text::join(stack, " ").c_str());
+			}
 		}
 
 		scope::scope_t update (scope::scope_t scope, std::map<size_t, scope::scope_t>& out) const
@@ -67,6 +77,9 @@ namespace
 			out.emplace(pos, scope);
 			return scope;
 		}
+
+		size_t tracking = 0;
+		std::vector<std::string> stack;
 
 	private:
 		struct record_t
@@ -227,7 +240,15 @@ namespace parse
 				D(DBF_Parser, bug("re-parse: ‘%.*s’ (range %zu-%zu)\n", (int)(to - from), m.buffer() + from, from, to););
 				auto stack = std::make_shared<parse::stack_t>(rule.get(), scope);
 				stack->anchor = from;
+
+				std::vector<std::string> tmp;
+				tmp.swap(scopes.stack);
+				++scopes.tracking;
 				parse(m.buffer(), m.buffer() + to, stack, scopes, firstLine, from);
+				while(!scopes.stack.empty())
+					scopes.remove(to, scopes.stack.back(), true);
+				--scopes.tracking;
+				tmp.swap(scopes.stack);
 			}
 		}
 	}

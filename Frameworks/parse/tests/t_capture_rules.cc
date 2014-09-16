@@ -8,6 +8,19 @@ void setup_fixtures ()
 	static std::string CaptureTestLanguageGrammar =
 		"{ name           = 'Test';"
 		"  patterns       = ("
+		"    { match = '^leak';"
+		"      name = 'main';"
+		"      captures = {"
+		"        0 = {"
+		"          patterns = ("
+		"            { begin = 'leak';"
+		"              end = '(?=not)possible';"
+		"              name = 'capture';"
+		"            },"
+		"          );"
+		"        };"
+		"      };"
+		"    },"
 		"    { match = '^((?:.{0,20}\\s*)|(.{21,}\\s*))$';"
 		"      captures = {"
 		"        1 = {"
@@ -36,4 +49,5 @@ void test_captures ()
 	OAK_ASSERT_EQ(markup(grammar, "fixup! Lorem ipsum."),                "«test»«fixup»fixup!«/fixup» Lorem ipsum.«/test»");
 	OAK_ASSERT_EQ(markup(grammar, "Lorem ipsum dolor sit amet."),        "«test»«warn»Lorem ipsum dolor sit amet.«/warn»«/test»");
 	OAK_ASSERT_EQ(markup(grammar, "fixup! Lorem ipsum dolor sit amet."), "«test»«fixup»«warn»fixup!«/warn»«/fixup»«warn» Lorem ipsum dolor sit amet.«/warn»«/test»");
+	OAK_ASSERT_EQ(markup(grammar, "leaking"), "«test»«main»«capture»leak«/capture»«/main»ing«/test»");
 }
