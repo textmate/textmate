@@ -140,7 +140,7 @@ private:
 	std::string _font_name;
 	CGFloat _font_size;
 
-	mutable std::map<scope::scope_t, styles_t> _cache;
+	mutable std::map<std::string, styles_t> _cache;
 };
 
 PUBLIC theme_ptr parse_theme (bundles::item_ptr const& themeItem);

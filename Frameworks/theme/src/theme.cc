@@ -377,7 +377,8 @@ styles_t const& theme_t::styles_for_scope (scope::scope_t const& scope) const
 {
 	ASSERT(scope);
 
-	std::map<scope::scope_t, styles_t>::iterator styles = _cache.find(scope);
+	std::string const key = to_s(scope);
+	std::map<std::string, styles_t>::iterator styles = _cache.find(key);
 	if(styles == _cache.end())
 	{
 		std::multimap<double, decomposed_style_t> ordering;
@@ -412,7 +413,7 @@ styles_t const& theme_t::styles_for_scope (scope::scope_t const& scope) const
 		CGColorPtr selection  = OakColorCreateFromThemeColor(base.selection,  _styles->_color_space) ?: CGColorPtr(CGColorCreate(_styles->_color_space, (CGFloat[4]){ 0.5, 0.5, 0.5,   1 }), CGColorRelease);
 
 		styles_t res(foreground, background, caret, selection, font, base.underlined == bool_true, base.misspelled == bool_true);
-		styles = _cache.emplace(scope, res).first;
+		styles = _cache.emplace(key, res).first;
 	}
 	return styles->second;
 }
