@@ -131,10 +131,10 @@ namespace scope
 		old->release();
 	}
 
-	std::string scope_t::back () const
+	std::string const& scope_t::back () const
 	{
 		ASSERT(node);
-		return node->c_str();
+		return node->_atoms;
 	}
 
 	size_t scope_t::size () const
@@ -153,23 +153,23 @@ namespace scope
 	bool scope_t::operator== (scope_t const& rhs) const
 	{
 		auto n1 = node, n2 = rhs.node;
-		while(n1 && n2 && strcmp(n1->c_str(), n2->c_str()) == 0)
+		while(n1 != n2 && n1 && n2 && n1->_atoms == n2->_atoms)
 		{
 			n1 = n1->parent();
 			n2 = n2->parent();
 		}
-		return !n1 && !n2;
+		return n1 == n2;
 	}
 
 	bool scope_t::operator< (scope_t const& rhs) const
 	{
 		auto n1 = node, n2 = rhs.node;
-		while(n1 && n2 && strcmp(n1->c_str(), n2->c_str()) == 0)
+		while(n1 != n2 && n1 && n2 && n1->_atoms == n2->_atoms)
 		{
 			n1 = n1->parent();
 			n2 = n2->parent();
 		}
-		return (!n1 && n2) || (n1 && n2 && strcmp(n1->c_str(), n2->c_str()) < 0);
+		return (!n1 && n2) || (n1 && n2 && n1->_atoms < n2->_atoms);
 	}
 
 	bool scope_t::operator!= (scope_t const& rhs) const   { return !(*this == rhs); }
@@ -185,7 +185,7 @@ namespace scope
 		for(size_t i = lhsSize; i < rhsSize; ++i)
 			n2 = n2->parent();
 
-		while(n1 && n2 && strcmp(n1->c_str(), n2->c_str()) != 0)
+		while(n1 && n2 && n1->_atoms != n2->_atoms)
 		{
 			n1 = n1->parent();
 			n2 = n2->parent();

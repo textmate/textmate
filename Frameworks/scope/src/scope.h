@@ -32,7 +32,7 @@ namespace scope
 
 		void push_scope (std::string const& atom);
 		void pop_scope ();
-		std::string back () const;
+		std::string const& back () const;
 		size_t size () const;
 		bool empty () const;
 
@@ -61,6 +61,7 @@ namespace scope
 
 		private:
 			friend scope_t;
+			friend scope_t shared_prefix (scope_t const& lhs, scope_t const& rhs);
 			std::string _atoms;
 			node_t* _parent;
 			std::atomic_size_t _retain_count;
