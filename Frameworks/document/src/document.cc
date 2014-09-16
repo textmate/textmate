@@ -1409,7 +1409,7 @@ namespace document
 
 	scanner_t::scanner_t (std::string const& path, path::glob_list_t const& glob) : path(path), glob(glob)
 	{
-		D(DBF_Document_Scanner, bug("%s, links %s\n", path.c_str(), BSTR(follow_links)););
+		D(DBF_Document_Scanner, bug("%s\n", path.c_str()););
 		pthread_mutex_init(&mutex, NULL);
 	}
 
