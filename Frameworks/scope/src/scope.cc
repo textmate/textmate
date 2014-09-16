@@ -214,22 +214,32 @@ namespace scope
 		return res;
 	}
 
-	std::string to_s (scope_t const& s)
+	void scope_t::to_s_helper (scope_t::node_t* n, std::string& out) const
+	{
+		if(scope_t::node_t* p = n->parent())
+		{
+			to_s_helper(p, out);
+			out.append(1, ' ');
+		}
+		out.append(n->_atoms);
+	}
+
+	scope_t::operator std::string () const
 	{
 		std::string res = "";
-		for(scope_t tmp = s; !tmp.empty(); tmp.pop_scope())
-		{
-			if(!res.empty())
-				res.append(1, ' ');
-			std::string const str = tmp.back();
-			res.insert(res.end(), str.rbegin(), str.rend());
-		}
-		return std::string(res.rbegin(), res.rend());
+		if(node)
+			to_s_helper(node, res);
+		return res;
+	}
+
+	std::string to_s (scope_t const& s)
+	{
+		return (std::string)s;
 	}
 
 	std::string to_s (context_t const& c)
 	{
-		return c.left == c.right ? text::format("(l/r ‘%s’)", to_s(c.left).c_str()) : text::format("(left ‘%s’, right ‘%s’)", to_s(c.left).c_str(), to_s(c.right).c_str());
+		return c.left == c.right ? to_s(c.left) : to_s(c.left) + "\037" + to_s(c.right);
 	}
 
 	// ============

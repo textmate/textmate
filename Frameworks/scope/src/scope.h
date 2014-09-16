@@ -41,6 +41,7 @@ namespace scope
 		bool operator< (scope_t const& rhs) const;
 
 		explicit operator bool () const;
+		explicit operator std::string () const;
 
 	private:
 		struct node_t
@@ -59,6 +60,7 @@ namespace scope
 			node_t* parent () const { return _parent; }
 
 		private:
+			friend scope_t;
 			std::string _atoms;
 			node_t* _parent;
 			std::atomic_size_t _retain_count;
@@ -66,6 +68,7 @@ namespace scope
 
 		explicit scope_t (node_t* node);
 		void setup (std::string const& str);
+		void to_s_helper (scope_t::node_t* n, std::string& out) const;
 		friend struct scope::types::path_t;
 		friend scope_t shared_prefix (scope_t const& lhs, scope_t const& rhs);
 		node_t* node = nullptr;
