@@ -187,20 +187,35 @@ namespace bundles
 
 	plist::any_t value_for_setting (std::string const& setting, scope::context_t const& scope, item_ptr* match)
 	{
-		static std::map<std::string, item_ptr> cache;
+		struct cache_t : bundles::callback_t
+		{
+			cache_t ()
+			{
+				bundles::add_callback(this);
+			}
 
-		static std::mutex mutex;
-		std::lock_guard<std::mutex> lock(mutex);
+			void bundles_did_change ()
+			{
+				std::lock_guard<std::mutex> lock(mutex);
+				map.clear();
+			}
+
+			std::map<std::string, item_ptr> map;
+			std::mutex mutex;
+		};
+
+		static cache_t cache;
+		std::lock_guard<std::mutex> lock(cache.mutex);
 
 		std::string const key = setting + "\037" + to_s(scope);
-		auto iter = cache.find(key);
-		if(iter == cache.end())
+		auto iter = cache.map.find(key);
+		if(iter == cache.map.end())
 		{
-			if(cache.size() > 1000)
-				cache.clear();
+			if(cache.map.size() > 1000)
+				cache.map.clear();
 
 			auto items = query(kFieldSettingName, setting, scope, kItemTypeSettings);
-			iter = cache.emplace(key, items.empty() ? item_ptr() : items.front()).first;
+			iter = cache.map.emplace(key, items.empty() ? item_ptr() : items.front()).first;
 		}
 
 		plist::any_t res;
