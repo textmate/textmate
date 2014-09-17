@@ -56,6 +56,7 @@ static void OakSetupApplicationWithView (NSResponder* aView, std::string testNam
 		[view setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
 		[view setFrame:NSInsetRect([[window contentView] bounds], 10, 10)];
 		[[window contentView] addSubview:view];
+		[window layoutIfNeeded];
 	}
 
 	[window cascadeTopLeftFromPoint:NSMakePoint(20, 20)];
