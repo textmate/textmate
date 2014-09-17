@@ -2,6 +2,15 @@ Title: Release Notes
 
 # Changes
 
+## 2014-09-17 ([v2.0-alpha.9565](https://github.com/textmate/textmate/compare/v2.0-alpha.9563...v2.0-alpha.9565))
+
+* If you typeset TeX from TextMate (⌘R) and have the resulting PDF show in TextMate’s (HTML) output window (default) you can use ⌘P to bring up the print dialog to print the PDF. This used to work, but presumably broke during the update to 10.9, after which one had to first click the PDF to give it focus, before ⌘P would work.
+* Items from `.tm_properties` are now shown in the bundle item chooser (under settings). Eclipsed settings/variables are shown with an overstrike, although in practice the effective value may be derived from multiple eclipsed ones, e.g. in the case of updating `PATH` to `$HOME/bin:$PATH`. Long-term the expanded and non-expanded values should also be shown in this window.
+* If you hold option (⌥) when using the (new) remove button to prune folder search results then the glob will be extended to exclude the undesired path, so that future searches exclude it by default.
+* Some new folder search options added to the gear menu in the folder search window.
+* The `${«var»:/asciify}` format string/snippet transformation now does a better job at stripping diacritics and combining marks.
+* Fixes and improvements.
+
 ## 2014-09-02 ([v2.0-alpha.9563](https://github.com/textmate/textmate/compare/v2.0-alpha.9559...v2.0-alpha.9563))
 
 * Folder search results can be pruned using the new remove button shown per file in the list. You can also see how many bytes were searched by clicking the status bar (after a folder search).
