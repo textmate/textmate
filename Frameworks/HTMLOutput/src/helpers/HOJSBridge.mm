@@ -16,7 +16,7 @@
 	This class exposes a ‘TextMate’ object to the JavaScript interpreter.
 	The object will have the following methods available:
 
-		system()                 See HOJSShellCommand.mm for information.
+		system()                 See HOJSShellCommand class below for information.
 		log(msg)                 Adds a message to the system console (using NSLog).
 		open(path, options)      Opens a file on disk as a document in the current application.
 		                         options may be either a selection range string or a (line) number.
