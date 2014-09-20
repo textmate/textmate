@@ -328,6 +328,7 @@ layout_metrics_t::raw_layer_t layout_metrics_t::parse_layer (NSDictionary* item)
 }
 - (void)updateLayout;
 - (void)selectTab:(id)sender;
+@property (nonatomic, getter = isExpanded) BOOL expanded;
 @property (nonatomic) OakTimer* slideAroundAnimationTimer;
 @property (nonatomic) BOOL layoutNeedsUpdate;
 @property (nonatomic) BOOL shouldCollapse;

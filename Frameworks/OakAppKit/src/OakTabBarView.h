@@ -7,7 +7,6 @@ PUBLIC extern NSString* const kUserDefaultsDisableTabBarCollapsingKey;
 @protocol OakTabBarViewDelegate, OakTabBarViewDataSource;
 
 PUBLIC @interface OakTabBarView : OakControl
-@property (nonatomic, getter = isExpanded) BOOL expanded;
 @property (nonatomic, weak) id <OakTabBarViewDelegate> delegate;
 @property (nonatomic, weak) id <OakTabBarViewDataSource> dataSource;
 @property (nonatomic, readonly) NSUInteger countOfVisibleTabs;
