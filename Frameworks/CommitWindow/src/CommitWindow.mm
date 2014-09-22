@@ -91,9 +91,9 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 @property (nonatomic) NSScrollView*                      scrollView;
 @property (nonatomic) NSTableView*                       tableView;
 
-@property (nonatomic) NSBox*                             topDivider;
-@property (nonatomic) NSBox*                             middleDivider;
-@property (nonatomic) NSBox*                             bottomDivider;
+@property (nonatomic) NSView*                            topDivider;
+@property (nonatomic) NSView*                            middleDivider;
+@property (nonatomic) NSView*                            bottomDivider;
 
 @property (nonatomic) NSButton*                          showTableButton;
 @property (nonatomic) NSButton*                          commitButton;

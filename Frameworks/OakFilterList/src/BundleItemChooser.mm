@@ -157,11 +157,11 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 @interface BundleItemChooser () <NSToolbarDelegate>
 @property (nonatomic) OakKeyEquivalentView* keyEquivalentView;
 @property (nonatomic) NSPopUpButton* actionsPopUpButton;
-@property (nonatomic) NSBox* aboveScopeBarDark;
-@property (nonatomic) NSBox* aboveScopeBarLight;
+@property (nonatomic) NSView* aboveScopeBarDark;
+@property (nonatomic) NSView* aboveScopeBarLight;
 @property (nonatomic) OakScopeBarView* scopeBar;
-@property (nonatomic) NSBox* topDivider;
-@property (nonatomic) NSBox* bottomDivider;
+@property (nonatomic) NSView* topDivider;
+@property (nonatomic) NSView* bottomDivider;
 @property (nonatomic) NSButton* selectButton;
 @property (nonatomic) NSButton* editButton;
 @property (nonatomic) NSArray* layoutConstraints;
