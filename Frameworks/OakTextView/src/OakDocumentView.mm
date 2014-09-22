@@ -44,8 +44,8 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	GutterView* gutterView;
 	NSColor* gutterDividerColor;
 
-	NSBox* gutterDividerView;
-	NSBox* statusDividerView;
+	OakBackgroundFillView* gutterDividerView;
+	OakBackgroundFillView* statusDividerView;
 
 	NSScrollView* textScrollView;
 	OakTextView* textView;
@@ -410,7 +410,7 @@ private:
 		gutterView.selectionIconPressedColor = [NSColor tmColorWithCGColor:styles.selectionIconsPressed];
 		gutterView.selectionBorderColor      = [NSColor tmColorWithCGColor:styles.selectionBorder];
 		gutterScrollView.backgroundColor     = gutterView.backgroundColor;
-		gutterDividerView.borderColor        = [NSColor tmColorWithCGColor:styles.divider];
+		gutterDividerView.activeBackgroundColor = [NSColor tmColorWithCGColor:styles.divider];
 
 		[gutterView setNeedsDisplay:YES];
 	}

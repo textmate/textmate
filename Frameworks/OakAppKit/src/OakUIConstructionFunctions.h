@@ -1,5 +1,13 @@
 #import <oak/misc.h>
 
+PUBLIC @interface OakBackgroundFillView : NSView
+@property (nonatomic) NSImage* activeBackgroundImage;
+@property (nonatomic) NSImage* inactiveBackgroundImage;
+@property (nonatomic) NSColor* activeBackgroundColor;
+@property (nonatomic) NSColor* inactiveBackgroundColor;
+@property (nonatomic) BOOL active;
+@end
+
 PUBLIC NSFont* OakStatusBarFont ();
 PUBLIC NSFont* OakControlFont ();
 
@@ -13,6 +21,6 @@ PUBLIC NSPopUpButton* OakCreateStatusBarPopUpButton (NSString* initialItemTitle 
 PUBLIC NSComboBox* OakCreateComboBox (NSObject* accessibilityLabel = nil);
 PUBLIC NSImageView* OakCreateDividerImageView ();
 
-PUBLIC NSBox* OakCreateVerticalLine (NSColor* primaryColor, NSColor* secondaryColor = nil);
-PUBLIC NSBox* OakCreateHorizontalLine (NSColor* primaryColor, NSColor* secondaryColor = nil);
+PUBLIC OakBackgroundFillView* OakCreateVerticalLine (NSColor* primaryColor, NSColor* secondaryColor = nil);
+PUBLIC OakBackgroundFillView* OakCreateHorizontalLine (NSColor* primaryColor, NSColor* secondaryColor = nil);
 PUBLIC BOOL OakSetAccessibilityLabel (NSObject* element, NSObject* label);

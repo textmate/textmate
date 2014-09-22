@@ -103,23 +103,13 @@ NSComboBox* OakCreateComboBox (NSObject* accessibilityLabel)
 	return res;
 }
 
-// =============================
-// = NSBox-based Divider Lines =
-// =============================
+// =========================
+// = OakBackgroundFillView =
+// =========================
 
-@interface OakDividerLineView : NSBox
-@property (nonatomic) NSColor* primaryColor;
-@property (nonatomic) NSColor* secondaryColor;
-@property (nonatomic) BOOL     usePrimaryColor;
-@property (nonatomic) NSSize   intrinsicContentSize;
-@end
-
-@implementation OakDividerLineView
+@implementation OakBackgroundFillView
 - (void)viewWillMoveToWindow:(NSWindow*)newWindow
 {
-	if(!self.secondaryColor)
-		return;
-
 	if(self.window)
 	{
 		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidBecomeMainNotification object:self.window];
@@ -136,56 +126,108 @@ NSComboBox* OakCreateComboBox (NSObject* accessibilityLabel)
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidChangeMainOrKey:) name:NSWindowDidResignKeyNotification object:newWindow];
 	}
 
-	self.usePrimaryColor = ([newWindow styleMask] & NSFullScreenWindowMask) || [newWindow isMainWindow] || [newWindow isKeyWindow];
+	self.active = ([newWindow styleMask] & NSFullScreenWindowMask) || [newWindow isMainWindow] || [newWindow isKeyWindow];
 }
 
 - (void)windowDidChangeMainOrKey:(NSNotification*)aNotification
 {
-	self.usePrimaryColor = ([self.window styleMask] & NSFullScreenWindowMask) || [self.window isMainWindow] || [self.window isKeyWindow];
+	self.active = ([self.window styleMask] & NSFullScreenWindowMask) || [self.window isMainWindow] || [self.window isKeyWindow];
 }
 
-- (void)setUsePrimaryColor:(BOOL)flag
+- (void)setActive:(BOOL)flag
 {
-	if(_usePrimaryColor != flag)
-	{
-		_usePrimaryColor = flag;
-		self.borderColor = flag ? self.primaryColor : self.secondaryColor;
-	}
+	if(_active == flag)
+		return;
+	_active = flag;
+	self.needsDisplay = YES;
+}
+
+- (void)setActiveBackgroundImage:(NSImage*)anImage
+{
+	if(_activeBackgroundImage == anImage)
+		return;
+	_activeBackgroundImage = anImage;
+	if(_active)
+		self.needsDisplay = YES;
+}
+
+- (void)setInactiveBackgroundImage:(NSImage*)anImage
+{
+	if(_inactiveBackgroundImage == anImage)
+		return;
+	_inactiveBackgroundImage = anImage;
+	if(!_active)
+		self.needsDisplay = YES;
+}
+
+- (void)setActiveBackgroundColor:(NSColor*)anColor
+{
+	if(_activeBackgroundColor == anColor)
+		return;
+	_activeBackgroundColor = anColor;
+	if(_active)
+		self.needsDisplay = YES;
+}
+
+- (void)setInactiveBackgroundColor:(NSColor*)anColor
+{
+	if(_inactiveBackgroundColor == anColor)
+		return;
+	_inactiveBackgroundColor = anColor;
+	if(!_active)
+		self.needsDisplay = YES;
 }
 
 - (BOOL)isOpaque
 {
-	return YES;
+	return _activeBackgroundColor != nil;
+}
+
+- (NSSize)intrinsicContentSize
+{
+	if(NSImage* image = _activeBackgroundImage ?: _inactiveBackgroundImage)
+			return image.size;
+	else	return NSMakeSize(NSViewNoInstrinsicMetric, NSViewNoInstrinsicMetric);
+}
+
+- (NSColor*)currentColor
+{
+	if(NSImage* image = _active ? _activeBackgroundImage : _inactiveBackgroundImage)
+		return [NSColor colorWithPatternImage:image];
+	return _active ? _activeBackgroundColor : (_inactiveBackgroundColor ?: _activeBackgroundColor);
+}
+
+- (void)drawRect:(NSRect)aRect
+{
+	if(NSColor* color = [self currentColor])
+	{
+		[color set];
+		CGContextRef context = (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort];
+		CGAffineTransform affineTransform = CGContextGetCTM(context);
+		CGContextSetPatternPhase(context, CGSizeMake(affineTransform.tx, affineTransform.ty));
+		NSRectFill(aRect);
+	}
 }
 @end
 
-static OakDividerLineView* OakCreateDividerLineWithColor (NSColor* color, NSColor* secondaryColor)
+OakBackgroundFillView* OakCreateVerticalLine (NSColor* primaryColor, NSColor* secondaryColor)
 {
-	OakDividerLineView* box = [[OakDividerLineView alloc] initWithFrame:NSZeroRect];
-	box.translatesAutoresizingMaskIntoConstraints = NO;
-	box.boxType         = NSBoxCustom;
-	box.borderType      = NSLineBorder;
-	box.borderColor     = color;
-	box.primaryColor    = color;
-	box.secondaryColor  = secondaryColor;
-	box.usePrimaryColor = YES;
-	return box;
+	OakBackgroundFillView* view = [[OakBackgroundFillView alloc] initWithFrame:NSZeroRect];
+	view.activeBackgroundColor   = primaryColor;
+	view.inactiveBackgroundColor = secondaryColor;
+	[view addConstraint:[NSLayoutConstraint constraintWithItem:view attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:1]];
+	view.translatesAutoresizingMaskIntoConstraints = NO;
+	return view;
 }
 
-NSBox* OakCreateVerticalLine (NSColor* primaryColor, NSColor* secondaryColor)
+OakBackgroundFillView* OakCreateHorizontalLine (NSColor* primaryColor, NSColor* secondaryColor)
 {
-	OakDividerLineView* res = OakCreateDividerLineWithColor(primaryColor, secondaryColor);
-	res.intrinsicContentSize = NSMakeSize(1, NSViewNoInstrinsicMetric);
-	[res setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
-	return res;
-}
-
-NSBox* OakCreateHorizontalLine (NSColor* primaryColor, NSColor* secondaryColor)
-{
-	OakDividerLineView* res = OakCreateDividerLineWithColor(primaryColor, secondaryColor);
-	res.intrinsicContentSize = NSMakeSize(NSViewNoInstrinsicMetric, 1);
-	[res setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationVertical];
-	return res;
+	OakBackgroundFillView* view = [[OakBackgroundFillView alloc] initWithFrame:NSZeroRect];
+	view.activeBackgroundColor   = primaryColor;
+	view.inactiveBackgroundColor = secondaryColor;
+	[view addConstraint:[NSLayoutConstraint constraintWithItem:view attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:1]];
+	view.translatesAutoresizingMaskIntoConstraints = NO;
+	return view;
 }
 
 // =============================
@@ -216,7 +258,7 @@ NSBox* OakCreateHorizontalLine (NSColor* primaryColor, NSColor* secondaryColor)
 NSImageView* OakCreateDividerImageView ()
 {
 	NSImageView* res = [[OakDisableAccessibilityImageView alloc] initWithFrame:NSZeroRect];
-	[res setImage:[NSImage imageNamed:@"Divider" inSameBundleAsClass:[OakDividerLineView class]]];
+	[res setImage:[NSImage imageNamed:@"Divider" inSameBundleAsClass:[OakBackgroundFillView class]]];
 	[res setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
 	[res setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationVertical];
 	return res;
