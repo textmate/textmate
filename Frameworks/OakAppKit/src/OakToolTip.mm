@@ -19,6 +19,8 @@ OAK_DEBUG_VAR(OakToolTip);
 - (void)showAtLocation:(NSPoint)aPoint forScreen:(NSScreen*)aScreen;
 @end
 
+static __unsafe_unretained OakToolTip* LastToolTip;
+
 @implementation OakToolTip
 + (void)initialize
 {
@@ -62,6 +64,7 @@ OAK_DEBUG_VAR(OakToolTip);
 - (void)dealloc
 {
 	D(DBF_OakToolTip, bug("\n"););
+	LastToolTip = nil;
 }
 
 - (void)setFont:(NSFont*)aFont
@@ -222,9 +225,8 @@ void OakShowToolTip (NSString* msg, NSPoint location)
 
 		[toolTip showAtLocation:location forScreen:screen];
 
-		static __weak OakToolTip* LastToolTip;
-		if(OakToolTip* toolTip = LastToolTip)
-			[toolTip performSelector:@selector(orderOut:) withObject:nil afterDelay:0];
+		if(OakToolTip* lastToolTip = LastToolTip)
+			[lastToolTip performSelector:@selector(orderOut:) withObject:nil afterDelay:0];
 		LastToolTip = toolTip;
 	}
 }
