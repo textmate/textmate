@@ -1524,10 +1524,11 @@ namespace
 // = OakTabBarViewDataSource =
 // ===========================
 
-- (NSUInteger)numberOfRowsInTabBarView:(OakTabBarView*)aTabBarView                      { return _documents.size(); }
-- (NSString*)tabBarView:(OakTabBarView*)aTabBarView titleForIndex:(NSUInteger)anIndex   { return [NSString stringWithCxxString:_documents[anIndex]->display_name()]; }
-- (NSString*)tabBarView:(OakTabBarView*)aTabBarView pathForIndex:(NSUInteger)anIndex    { return [NSString stringWithCxxString:_documents[anIndex]->path()] ?: @""; }
-- (BOOL)tabBarView:(OakTabBarView*)aTabBarView isEditedAtIndex:(NSUInteger)anIndex      { return _documents[anIndex]->is_modified(); }
+- (NSUInteger)numberOfRowsInTabBarView:(OakTabBarView*)aTabBarView                         { return _documents.size(); }
+- (NSString*)tabBarView:(OakTabBarView*)aTabBarView titleForIndex:(NSUInteger)anIndex      { return [NSString stringWithCxxString:_documents[anIndex]->display_name()]; }
+- (NSString*)tabBarView:(OakTabBarView*)aTabBarView pathForIndex:(NSUInteger)anIndex       { return [NSString stringWithCxxString:_documents[anIndex]->path()] ?: @""; }
+- (NSString*)tabBarView:(OakTabBarView*)aTabBarView identifierForIndex:(NSUInteger)anIndex { return [NSString stringWithCxxString:_documents[anIndex]->identifier()]; }
+- (BOOL)tabBarView:(OakTabBarView*)aTabBarView isEditedAtIndex:(NSUInteger)anIndex         { return _documents[anIndex]->is_modified(); }
 
 // ==============================
 // = OakTabBarView Context Menu =
