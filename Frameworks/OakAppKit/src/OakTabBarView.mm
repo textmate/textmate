@@ -1,898 +1,537 @@
 #import "OakTabBarView.h"
-#import "OakControl Private.h"
-#import "NSColor Additions.h"
+#import "OakTabItemView.h"
+#import "OakRolloverButton.h"
+#import "OakFileIconImage.h"
+#import "OakAppKit.h"
 #import "NSImage Additions.h"
 #import "NSMenuItem Additions.h"
-#import "NSView Additions.h"
-#import "OakFileIconImage.h"
 #import <OakFoundation/OakFoundation.h>
-#import <OakFoundation/NSString Additions.h>
-#import <OakFoundation/NSArray Additions.h>
-#import <oak/oak.h>
-#import <text/format.h>
-#import <regexp/format_string.h>
-#import <ns/ns.h>
-
-OAK_DEBUG_VAR(TabBarView);
+#import <oak/debug.h>
 
 NSString* const kUserDefaultsDisableTabBarCollapsingKey = @"disableTabBarCollapsing";
-NSString* const OakTabBarViewTabType                    = @"OakTabBarViewTabType";
 
-struct value_t
-{
-	value_t (double v = 0);
-	double current (double t) const;
-	double set_time (double t);
-	void set_new_target (double target, double now, double duration = 1);
+static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 
-private:
-	struct record_t { double start, duration, source, target; };
-	std::vector<record_t> records;
-};
-
-value_t::value_t (double v)
-{
-	records.push_back((record_t){ 0, 0, v, v });
-}
-
-double value_t::current (double t) const
-{
-	double target = records.back().target;
-	riterate(it, records)
-		target = it->source + (target - it->source) * oak::slow_in_out((t - it->start) / it->duration);
-	return round(target);
-}
-
-double value_t::set_time (double t)
-{
-	while(records.size() > 1 && records.front().start + records.front().duration < t)
-		records.erase(records.begin());
-	return current(t);
-}
-
-void value_t::set_new_target (double target, double now, double duration)
-{
-	if(records.back().target != target)
-		records.push_back((record_t){ now, duration, records.back().target, target });
-}
-
-namespace tab_bar_requisites
-{
-	uint32_t modified = layer_t::last_requisite << 0,
-	         first    = layer_t::last_requisite << 1,
-	         dragged  = layer_t::last_requisite << 2,
-	         overflow = layer_t::last_requisite << 3;
-
-	uint32_t all      = (modified|first|dragged|overflow);
-};
-
-// ==================
-// = Layout Metrics =
-// ==================
-
-struct layout_metrics_t;
-typedef std::shared_ptr<layout_metrics_t> layout_metrics_ptr;
-
-struct layout_metrics_t
-{
-	double tabSpacing;
-	double firstTabOffset;
-	double minTabSize;
-	double maxTabSize;
-
-	std::vector<layer_t> layers_for (std::string const& layer_id, CGRect const& rect, int tag, NSString* label = nil, NSString* toolTip = nil, uint32_t requisiteFilter = layer_t::no_requisite) const;
-	static layout_metrics_ptr parse (NSDictionary* dict);
-
-private:
-	struct raw_layer_t
-	{
-		raw_layer_t () : has_label(false), has_tool_tip(false) { }
-		layer_t layer;
-		bool has_label;
-		bool has_tool_tip;
-		std::vector<std::string> padding;
-	};
-
-	std::map<std::string, std::vector<raw_layer_t> > layers;
-
-	static id ExpandVariables (id obj, std::map<std::string, std::string> const& someVariables);
-	static void AddItemsForKeyToArray (NSDictionary* dict, NSString* key, std::map<std::string, std::string> const& values, NSMutableArray* array);
-
-	static raw_layer_t parse_layer (NSDictionary* item);
-	static uint32_t parse_requisite (char const* str);
-	static uint32_t requisite_from_string (char const* str);
-};
-
-// ===========================================
-// = Parsing and querying the layout metrics =
-// ===========================================
-
-std::vector<layer_t> layout_metrics_t::layers_for (std::string const& layer_id, CGRect const& rect, int tag, NSString* label, NSString* toolTip, uint32_t requisiteFilter) const
-{
-	std::vector<layer_t> res;
-
-	std::map<std::string, std::vector<raw_layer_t> >::const_iterator l = layers.find(layer_id);
-	if(l == layers.end())
-		return res;
-
-	for(auto const& it : l->second)
-	{
-		if((it.layer.requisite_mask & tab_bar_requisites::all) != layer_t::no_requisite) // layer is testing on OTBV requisite flags
-		{
-			if((it.layer.requisite & tab_bar_requisites::all) != (requisiteFilter & it.layer.requisite_mask))
-				continue;
-		}
-
-		if(it.padding.size() != 4)
-			continue;
-
-		CGFloat values[4] = { };
-		for(size_t i = 0; i < sizeofA(values); ++i)
-		{
-			std::string const& str = it.padding[i];
-			switch(str.empty() ? '\0' : str[0])
-			{
-				case 'W': values[i] = CGRectGetWidth(rect)  + strtod(str.substr(1).c_str(), NULL); break;
-				case 'H': values[i] = CGRectGetHeight(rect) + strtod(str.substr(1).c_str(), NULL); break;
-				default:  values[i] = strtod(str.c_str(), NULL);               break;
-			}
-		}
-
-		res.push_back(it.layer);
-		res.back().requisite      &= ~tab_bar_requisites::all;
-		res.back().requisite_mask &= ~tab_bar_requisites::all;
-
-		if(it.has_label)
-			res.back().text = label;
-		if(it.has_tool_tip)
-			res.back().tool_tip = toolTip;
-		res.back().tag = tag;
-		res.back().rect = CGRectMake(CGRectGetMinX(rect) + values[0], CGRectGetMinY(rect) + values[2], values[1]-values[0] + 1, values[3]-values[2] + 1);
-	}
-	return res;
-}
-
-id layout_metrics_t::ExpandVariables (id obj, std::map<std::string, std::string> const& someVariables)
-{
-	if([obj isKindOfClass:[NSArray class]])
-	{
-		NSMutableArray* array = [NSMutableArray array];
-		for(id item in obj)
-			[array addObject:ExpandVariables(item, someVariables)];
-		obj = array;
-	}
-	else if([obj isKindOfClass:[NSDictionary class]])
-	{
-		NSMutableDictionary* dict = [NSMutableDictionary dictionary];
-		for(NSString* key in obj)
-			[dict setObject:ExpandVariables(obj[key], someVariables) forKey:key];
-		obj = dict;
-	}
-	else if([obj isKindOfClass:[NSString class]])
-	{
-		obj = [NSString stringWithCxxString:format_string::expand([obj UTF8String], someVariables)];
-	}
-	return obj;
-}
-
-void layout_metrics_t::AddItemsForKeyToArray (NSDictionary* dict, NSString* key, std::map<std::string, std::string> const& values, NSMutableArray* array)
-{
-	for(NSDictionary* item in [dict objectForKey:key])
-	{
-		if(NSString* includeKey = [item objectForKey:@"include"])
-		{
-			std::map<std::string, std::string> tmp = values;
-			NSDictionary* values = [item objectForKey:@"values"];
-			for(NSString* key in values)
-				tmp[[key UTF8String]] = format_string::expand([values[key] UTF8String], tmp);
-			AddItemsForKeyToArray(dict, includeKey, tmp, array);
-		}
-		else
-		{
-			[array addObject:ExpandVariables(item, values)];
-		}
-	}
-}
-
-layout_metrics_ptr layout_metrics_t::parse (NSDictionary* dict)
-{
-	layout_metrics_t r;
-
-	r.tabSpacing     = [[dict objectForKey:@"tabSpacing"] floatValue];
-	r.firstTabOffset = [[dict objectForKey:@"firstTabOffset"] floatValue];
-	r.minTabSize     = [[dict objectForKey:@"minTabSize"] floatValue];
-	r.maxTabSize     = [[dict objectForKey:@"maxTabSize"] floatValue] ?: DBL_MAX;
-
-	std::map<std::string, std::string> variables;
-	for(NSString* key in dict)
-	{
-		if([dict[key] isKindOfClass:[NSString class]])
-			variables[[key UTF8String]] = [dict[key] UTF8String];
-	}
-
-	for(NSString* key in dict)
-	{
-		if(![dict[key] isKindOfClass:[NSArray class]])
-			continue;
-
-		NSMutableArray* array = [NSMutableArray array];
-		AddItemsForKeyToArray(dict, key, variables, array);
-		for(NSDictionary* item in array)
-			r.layers[[key UTF8String]].push_back(parse_layer(item));
-	}
-
-	return std::make_shared<layout_metrics_t>(r);
-}
-
-uint32_t layout_metrics_t::requisite_from_string (char const* str)
-{
-	static struct { std::string name; uint32_t value; } mapping[] =
-	{
-		{ "no_requisite",         layer_t::no_requisite       },
-		{ "mouse_inside",         layer_t::mouse_inside       },
-		{ "mouse_down",           layer_t::mouse_down         },
-		{ "mouse_dragged",        layer_t::mouse_dragged      },
-		{ "mouse_clicked",        layer_t::mouse_clicked      },
-		{ "mouse_double_clicked", layer_t::mouse_double_clicked      },
-		{ "control",              layer_t::control            },
-		{ "option",               layer_t::option             },
-		{ "shift",                layer_t::shift              },
-		{ "command",              layer_t::command            },
-		{ "window_key",           layer_t::window_key         },
-		{ "window_main",          layer_t::window_main        },
-		{ "window_main_or_key",   layer_t::window_main_or_key },
-
-		{ "modified",             tab_bar_requisites::modified},
-		{ "first",                tab_bar_requisites::first   },
-		{ "dragged",              tab_bar_requisites::dragged },
-		{ "overflow",             tab_bar_requisites::overflow},
-	};
-
-	for(size_t i = 0; i < sizeofA(mapping); ++i)
-	{
-		if(mapping[i].name == str)
-			return mapping[i].value;
-	}
-	ASSERTF(false, "unknown requisite: %s\n", str);
-	return layer_t::no_requisite;
-}
-
-uint32_t layout_metrics_t::parse_requisite (char const* str)
-{
-	uint32_t res = 0;
-
-	char* mutableStr = strdup(str);
-	char* arr[] = { mutableStr };
-	char* req;
-	while((req = strsep(arr, "|")) && *req)
-		res |= requisite_from_string(req);
-	free(mutableStr);
-	return res;
-}
-
-layout_metrics_t::raw_layer_t layout_metrics_t::parse_layer (NSDictionary* item)
-{
-	raw_layer_t res;
-
-	if(NSString* color = [item objectForKey:@"color"])
-		res.layer.color = [NSColor colorWithString:color];
-	if(NSString* borderColor = [item objectForKey:@"borderColor"])
-		res.layer.borderColor = [NSColor colorWithString:borderColor];
-	if(NSString* cornerRadius = [item objectForKey:@"cornerRadius"])
-		res.layer.cornerRadius = [cornerRadius doubleValue];
-	if(NSString* requisite = [item objectForKey:@"requisite"])
-		res.layer.requisite = parse_requisite([requisite UTF8String]);
-	res.layer.requisite_mask = res.layer.requisite;
-	if(NSString* requisiteMask = [item objectForKey:@"requisiteMask"])
-		res.layer.requisite_mask = parse_requisite([requisiteMask UTF8String]);
-	if(NSString* action = [item objectForKey:@"action"])
-		res.layer.action = NSSelectorFromString(action);
-	if([[item objectForKey:@"preventWindowOrdering"] boolValue])
-		res.layer.prevent_window_ordering = true;
-	if(NSDictionary* textOptions = [item objectForKey:@"text"]) // TODO we probably want to read some text options…
-	{
-		res.has_label = true;
-		if([[textOptions objectForKey:@"shadow"] boolValue])
-			res.layer.text_options = res.layer.text_options | layer_t::shadow;
-	}
-	if([[item objectForKey:@"toolTip"] boolValue])
-		res.has_tool_tip = true;
-	if(NSString* imageName = [item objectForKey:@"image"]) // TODO we probably want to read some image options…
-		res.layer.image = [NSImage imageNamed:imageName inSameBundleAsClass:[OakTabBarView class]];
-
-	for(NSString* pos in [item objectForKey:@"rect"])
-		res.padding.push_back([pos UTF8String]);
-
-	return res;
-}
-
-// ===========================================
-
-@interface OakTabBarView ()
-{
-	OBJC_WATCH_LEAKS(OakTabBarView);
-
-	NSMutableArray* tabTitles;
-	NSMutableArray* tabPaths;
-	NSMutableArray* tabModifiedStates;
-
-	BOOL layoutNeedsUpdate;
-	NSUInteger selectedTab;
-	NSUInteger hiddenTab;
-	NSUInteger previousShowAsLastTab;
-
-	layout_metrics_ptr metrics;
-	std::vector<NSRect> tabRects;
-	std::map<NSUInteger, value_t> tabDropSpacing;
-	OakTimer* slideAroundAnimationTimer;
-}
-- (void)updateLayout;
-- (void)selectTab:(id)sender;
-@property (nonatomic, getter = isExpanded) BOOL expanded;
-@property (nonatomic) OakTimer* slideAroundAnimationTimer;
-@property (nonatomic) BOOL layoutNeedsUpdate;
-@property (nonatomic) BOOL shouldCollapse;
+@interface OakTabItem ()
+@property (nonatomic) OakTabItemView* tabItemView;
+@property (nonatomic) NSRect targetFrame;
 @end
 
-// =================
-// = Accessibility =
-// =================
-
-@interface OakTabFauxUIElement : NSObject
+@implementation OakTabItem
++ (instancetype)tabItemWithTitle:(NSString*)aTitle path:(NSString*)aPath identifier:(NSString*)anIdentifier modified:(BOOL)flag;
 {
-	OBJC_WATCH_LEAKS(OakTabFauxUIElement);
+	OakTabItem* res = [OakTabItem new];
+	res.title      = aTitle;
+	res.path       = aPath;
+	res.identifier = anIdentifier;
+	res.modified   = flag;
+	return res;
 }
-- (id)initWithTabBarView:(OakTabBarView*)tabBarView index:(NSUInteger)index rect:(NSRect)rect title:(NSString*)title toolTip:(NSString*)toolTip modified:(BOOL)modified selected:(BOOL)selected;
-@property (nonatomic, weak) OakTabBarView* tabBarView;
-@property (nonatomic) NSUInteger index;
-@property (nonatomic) NSRect rect;
-@property (nonatomic) NSString* title;
-@property (nonatomic) NSString* toolTip;
-@property (nonatomic) BOOL modified;
-@property (nonatomic) BOOL selected;
-@end
 
-@implementation OakTabFauxUIElement
-- (id)initWithTabBarView:(OakTabBarView*)tabBarView index:(NSUInteger)index rect:(NSRect)rect title:(NSString*)title toolTip:(NSString*)toolTip modified:(BOOL)modified selected:(BOOL)selected
++ (instancetype)tabItemFromPasteboard:(NSPasteboard*)aPasteboard
 {
-	if((self = [super init]))
-	{
-		_tabBarView = tabBarView;
-		_index = index;
-		_rect = rect;
-		_title = title;
-		_toolTip = toolTip;
-		_modified = modified;
-		_selected = selected;
-	}
-	return self;
+	NSDictionary* plist = [aPasteboard propertyListForType:OakTabItemPasteboardType];
+	if(!plist)
+		return nil;
+
+	OakTabItem* res = [OakTabItem new];
+	res.title      = plist[@"title"];
+	res.path       = plist[@"path"];
+	res.identifier = plist[@"identifier"];
+	res.modified   = [plist[@"modified"] boolValue];
+	return res;
+}
+
+- (void)writeToPasteboard:(NSPasteboard*)aPasteboard
+{
+	NSMutableDictionary* dict = [NSMutableDictionary dictionary];
+	if(_title)
+		dict[@"title"] = _title;
+	if(OakNotEmptyString(_path))
+		dict[@"path"] = _path;
+	if(_identifier)
+		dict[@"identifier"] = _identifier;
+	if(_modified)
+		dict[@"modified"] = @(_modified);
+
+	[aPasteboard declareTypes:@[ OakTabItemPasteboardType ] owner:self];
+	[aPasteboard setPropertyList:dict forType:OakTabItemPasteboardType];
+}
+
+- (void)setModified:(BOOL)flag
+{
+	if(_modified == flag)
+		return;
+	_tabItemView.modified = _modified = flag;
+}
+
+- (void)setTitle:(NSString*)aTitle
+{
+	if(_title == aTitle || [_title isEqualToString:aTitle])
+		return;
+	_tabItemView.title = _title = aTitle;
+}
+
+- (void)setPath:(NSString*)aPath
+{
+	if(_path == aPath || [_path isEqualToString:aPath])
+		return;
+	_path = aPath;
+	[_tabItemView setToolTip:OakIsEmptyString(_path) ? _title : [_path stringByAbbreviatingWithTildeInPath]];
 }
 
 - (NSString*)description
 {
-	return [NSString stringWithFormat:@"<%@: parent=%@, title=\"%@\", index=%ld, rect=%@>", [self class], self.tabBarView, self.title, self.index, NSStringFromRect(self.rect)];
-}
-
-- (BOOL)accessibilityIsIgnored
-{
-	return NO;
-}
-
-- (NSArray*)accessibilityAttributeNames
-{
-	static NSArray* attributes = @[
-		// generic
-		NSAccessibilityParentAttribute,
-		NSAccessibilityPositionAttribute,
-		NSAccessibilityRoleAttribute,
-		NSAccessibilityRoleDescriptionAttribute,
-		NSAccessibilitySizeAttribute,
-		NSAccessibilityTopLevelUIElementAttribute,
-		NSAccessibilityWindowAttribute,
-		// radio button
-		NSAccessibilityEnabledAttribute,
-		NSAccessibilityFocusedAttribute,
-		NSAccessibilityTitleAttribute,
-		NSAccessibilityValueAttribute,
-		NSAccessibilityHelpAttribute,
-	];
-	return attributes;
-}
-
-- (id)accessibilityAttributeValue:(NSString*)attribute
-{
-	// generic attributes
-	if([attribute isEqualToString:NSAccessibilityParentAttribute])
-		return self.tabBarView;
-	else if([attribute isEqualToString:NSAccessibilityPositionAttribute] || [attribute isEqualToString:NSAccessibilitySizeAttribute])
-	{
-		NSRect rect = [self screenRect];
-		if([attribute isEqualToString:NSAccessibilityPositionAttribute])
-			return [NSValue valueWithPoint:rect.origin];
-		else
-			return [NSValue valueWithSize:rect.size];
-	}
-	else if([attribute isEqualToString:NSAccessibilityRoleAttribute])
-		return NSAccessibilityRadioButtonRole;
-	else if([attribute isEqualToString:NSAccessibilityRoleDescriptionAttribute])
-		return NSAccessibilityRoleDescription([self accessibilityAttributeValue:NSAccessibilityRoleAttribute], nil);
-	else if([attribute isEqualToString:NSAccessibilityTopLevelUIElementAttribute])
-		return [self.tabBarView accessibilityAttributeValue:NSAccessibilityTopLevelUIElementAttribute];
-	else if([attribute isEqualToString:NSAccessibilityWindowAttribute])
-		return [self.tabBarView accessibilityAttributeValue:NSAccessibilityWindowAttribute];
-	// radio button attributes
-	else if([attribute isEqualToString:NSAccessibilityEnabledAttribute])
-		return [NSNumber numberWithBool:YES];
-	else if([attribute isEqualToString:NSAccessibilityFocusedAttribute])
-		return [NSNumber numberWithBool:NO];
-	else if([attribute isEqualToString:NSAccessibilityTitleAttribute])
-	{
-		NSString* title = self.title;
-		if(self.modified)
-			title = [title stringByAppendingString:@" (modified)"];
-		return title;
-	}
-	else if([attribute isEqualToString:NSAccessibilityValueAttribute])
-		return [NSNumber numberWithBool:self.selected];
-	else if([attribute isEqualToString:NSAccessibilityHelpAttribute])
-		return self.toolTip;
-	else
-		@throw [NSException exceptionWithName:NSAccessibilityException reason:[NSString stringWithFormat:@"Accessibility attribute %@ not supported", attribute] userInfo:nil];
-}
-
-- (BOOL)accessibilityIsAttributeSettable:(NSString*)attribute
-{
-	return NO;
-}
-
-- (void)accessibilitySetValue:(id)value forAttribute:(NSString*)attribute
-{
-	@throw [NSException exceptionWithName:NSAccessibilityException reason:[NSString stringWithFormat:@"Accessibility attribute %@ not settable", attribute] userInfo:nil];
-}
-
-- (NSArray*)accessibilityActionNames
-{
-	static NSArray* actions = nil;
-	if(!actions)
-	{
-		actions = @[
-			NSAccessibilityPressAction,
-			NSAccessibilityShowMenuAction,
-		];
-	}
-	return actions;
-}
-
-- (NSString*)accessibilityActionDescription:(NSString*)action
-{
-	return NSAccessibilityActionDescription(action);
-}
-
-- (void)accessibilityPerformAction:(NSString*)action
-{
-	if([action isEqualToString:NSAccessibilityPressAction])
-	{
-		self.tabBarView.tag = self.index;
-		[self.tabBarView selectTab:self.tabBarView];
-	}
-	else if([action isEqualToString:NSAccessibilityShowMenuAction])
-	{
-		self.tabBarView.tag = self.index;
-		if([self.tabBarView.delegate respondsToSelector:@selector(menuForTabBarView:)])
-			[[self.tabBarView.delegate menuForTabBarView:self.tabBarView] popUpMenuPositioningItem:nil atLocation:self.rect.origin inView:self.tabBarView];
-	}
-	else
-	{
-		@throw [NSException exceptionWithName:NSAccessibilityException reason:[NSString stringWithFormat:@"Accessibility action %@ not supported", action] userInfo:nil];
-	}
-}
-
-- (NSRect)windowRect
-{
-	return [self.tabBarView convertRect:self.rect toView:nil];
-}
-
-- (NSRect)screenRect
-{
-	return [[self.tabBarView window] convertRectToScreen:[self windowRect]];
+	return [NSString stringWithFormat:@"<OakTabItem: %p title: %@>", self, _title];
 }
 @end
 
-// ==========================
+@interface OakTabBarView () <NSDraggingSource, NSDraggingDestination>
+{
+	NSMutableArray* _tabItems;
+
+	NSUInteger _draggedTabIndex;
+	OakTabItem* _draggedTabItem;
+	OakTabItem* _preliminaryTabItem;
+	OakTabItem* _overflowTabItem;
+
+	OakRolloverButton* _addTabButton;
+	NSTrackingArea* _trackingArea;
+	BOOL _animateLayoutChanges;
+
+	NSUInteger _didCloseTabIndex;
+	NSRect _didCloseTabFrame;
+}
+@property (nonatomic) BOOL expanded;
+@property (nonatomic) NSUInteger tag;
+@property (nonatomic) NSPoint mouseDownPos;
+@property (nonatomic) BOOL isMouseInside;
+@end
 
 @implementation OakTabBarView
-@synthesize slideAroundAnimationTimer, layoutNeedsUpdate;
-
-- (id)initWithFrame:(NSRect)aRect
+- (id)initWithFrame:(NSRect)aFrame
 {
-	if(self = [super initWithFrame:aRect])
+	if(self = [super initWithFrame:aFrame])
 	{
-		metrics           = layout_metrics_t::parse([NSDictionary dictionaryWithContentsOfFile:[[NSBundle bundleForClass:[self class]] pathForResource:@"TabBar" ofType:@"plist"]]);
-		hiddenTab         = NSNotFound;
-		tabTitles         = [NSMutableArray new];
-		tabPaths          = [NSMutableArray new];
-		tabModifiedStates = [NSMutableArray new];
+		_tabItems = [NSMutableArray new];
+		_expanded = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableTabBarCollapsingKey];
 
-		[self userDefaultsDidChange:nil];
+		self.activeBackgroundImage   = [NSImage imageNamed:@"AW InactiveTabBG" inSameBundleAsClass:[self class]];
+		self.inactiveBackgroundImage = [NSImage imageNamed:@"IW InactiveTabBG" inSameBundleAsClass:[self class]];
 
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(viewFrameChanged:) name:NSViewFrameDidChangeNotification object:self];
+		_addTabButton = [[OakRolloverButton alloc] initWithFrame:NSZeroRect];
+		OakSetAccessibilityLabel(_addTabButton, @"Create new tab");
+		_addTabButton.action = @selector(_newTab:);
+		_addTabButton.target = self;
+		_addTabButton.translatesAutoresizingMaskIntoConstraints = NO;
+		[self addSubview:_addTabButton];
+
+		OakTabBarStyle* tabStyle = [OakTabBarStyle sharedInstance];
+		[tabStyle setupTabBarView:self];
+		[tabStyle setupNewTabButton:_addTabButton];
+
+		NSDictionary* views = @{ @"add" : _addTabButton };
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(>=120)-[add]-(3)-|" options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[add]|" options:0 metrics:nil views:views]];
+
+		[self registerForDraggedTypes:@[ OakTabItemPasteboardType ]];
+
+		self.wantsLayer = YES;
+
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
-		[self registerForDraggedTypes:@[ OakTabBarViewTabType ]];
 	}
 	return self;
 }
 
 - (void)dealloc
 {
-	[[NSNotificationCenter defaultCenter] removeObserver:self];
+	[[NSNotificationCenter defaultCenter] removeObserver:self name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
 }
 
 - (void)userDefaultsDidChange:(NSNotification*)aNotification
 {
-	self.shouldCollapse = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableTabBarCollapsingKey];
-	self.expanded       = self.shouldCollapse ? [tabTitles count] > 1 : YES;
-}
-
-- (void)viewDidMoveToWindow
-{
-	self.layoutNeedsUpdate = YES;
-	[super viewDidMoveToWindow];
-}
-
-- (std::string const&)layerNameForTabIndex:(NSUInteger)tabIndex
-{
-	static std::string str;
-	str = "tab";
-	if(tabIndex == selectedTab)
-		str += "Selected";
-	return str;
-}
-
-- (uint32_t)filterForTabIndex:(NSUInteger)tabIndex
-{
-	uint32_t filter = 0;
-	if([[tabModifiedStates safeObjectAtIndex:tabIndex] boolValue])
-		filter |= tab_bar_requisites::modified;
-	if(tabIndex == 0)
-		filter |= tab_bar_requisites::first;
-	if(tabIndex >= [self countOfVisibleTabs] - 1 && tabTitles.count > [self countOfVisibleTabs])
-		filter |= tab_bar_requisites::overflow;
-	return filter;
-}
-
-- (double)putDefaultTabWidthsInto:(std::vector<double>&)tabSizes
-{
-	double totalWidth = 0;
-	for(NSUInteger tabIndex = 0; tabIndex < tabTitles.count; ++tabIndex)
-	{
-		double width = WidthOfText([tabTitles safeObjectAtIndex:tabIndex]);
-		for(auto const& it : metrics->layers_for([self layerNameForTabIndex:tabIndex], CGRectZero, tabIndex, @"LabelPlaceholder"))
-		{
-			if(it.text)
-				width -= it.rect.size.width - 1;
-		}
-		width = oak::cap(metrics->minTabSize, width, metrics->maxTabSize);
-		tabSizes.push_back(width);
-		totalWidth += width;
-	}
-	return totalWidth;
-}
-
-- (NSUInteger)countOfVisibleTabs
-{
-	NSRect rect = NSInsetRect([self bounds], metrics->firstTabOffset, 0);
-	NSUInteger maxNumberOfTabs = floor((NSWidth(rect) + metrics->tabSpacing) / (metrics->minTabSize + metrics->tabSpacing));
-	return maxNumberOfTabs;
-}
-
-- (void)updateLayout
-{
-	NSRect rect = [self bounds];
-	tabRects.clear();
-
-	D(DBF_TabBarView, bug("\n"););
-	if(!self.isExpanded)
-		return [self setLayers:metrics->layers_for("backgroundCollapsed", rect, -1)];
-
-	std::vector<layer_t> newLayout, selectedTabLayers;
-	newLayout = metrics->layers_for("background", rect, -1);
-
-	// ==========
-
-	std::vector<double> tabSizes;
-	double totalWidth = [self putDefaultTabWidthsInto:tabSizes];
-
-	rect.origin.x   += 1 * metrics->firstTabOffset;
-	rect.size.width -= 2 * metrics->firstTabOffset;
-
-	size_t numberOfTabs = tabSizes.size();
-	if(NSWidth(rect) < totalWidth + (tabSizes.size()-1)*metrics->tabSpacing)
-	{
-		size_t maxNumberOfTabs = floor((NSWidth(rect) + metrics->tabSpacing) / (metrics->minTabSize + metrics->tabSpacing));
-		if(numberOfTabs > maxNumberOfTabs)
-		{
-			numberOfTabs = maxNumberOfTabs ?: 1;
-			tabSizes.resize(numberOfTabs);
-			totalWidth = 0;
-			for(auto const& it : tabSizes)
-				totalWidth += it;
-		}
-
-		double fat  = totalWidth - (numberOfTabs * metrics->minTabSize);
-		double cut  = totalWidth - (NSWidth(rect) - ((numberOfTabs-1) * metrics->tabSpacing));
-		double keep = fat - cut;
-
-		double aggregatedFat = 0;
-		for(size_t i = 0; i < numberOfTabs; ++i)
-		{
-			double from    = floor(aggregatedFat * keep/fat);
-			aggregatedFat += tabSizes[i] - metrics->minTabSize;
-			double to      = floor(aggregatedFat * keep/fat);
-			tabSizes[i]    = metrics->minTabSize + to - from;
-		}
-	}
-
-	// ==========
-	NSUInteger lastVisibleTab = numberOfTabs > 1 ? numberOfTabs-1 : 0;
-
-	NSUInteger showAsLastTab = lastVisibleTab;
-	if(lastVisibleTab <= selectedTab)
-		showAsLastTab = selectedTab;
-	else if(lastVisibleTab < previousShowAsLastTab)
-		showAsLastTab = previousShowAsLastTab;
-	previousShowAsLastTab = showAsLastTab == lastVisibleTab ? 0 : showAsLastTab;
-
-	for(NSUInteger tabIndex = 0; tabIndex < tabTitles.count; ++tabIndex)
-	{
-		rect.origin.x += tabDropSpacing.find(tabIndex) != tabDropSpacing.end() ? tabDropSpacing[tabIndex].set_time(CFAbsoluteTimeGetCurrent()) : 0;
-		if(tabIndex == hiddenTab || (tabIndex >= lastVisibleTab && tabIndex != showAsLastTab))
-		{
-			tabRects.push_back(NSZeroRect);
-			continue;
-		}
-
-		if(tabIndex == showAsLastTab)
-				rect.size.width = tabSizes.back();
-		else	rect.size.width = tabSizes[tabIndex];
-
-		std::string layer_id  = [self layerNameForTabIndex:tabIndex];
-		NSString* toolTipText = [[tabPaths safeObjectAtIndex:tabIndex] stringByAbbreviatingWithTildeInPath];
-		NSString* title       = [tabTitles safeObjectAtIndex:tabIndex];
-
-		std::vector<layer_t> const& layers = metrics->layers_for(layer_id, rect, tabIndex, title, toolTipText, [self filterForTabIndex:tabIndex]);
-		if(tabIndex == selectedTab)
-				selectedTabLayers.insert(selectedTabLayers.end(), layers.begin(), layers.end());
-		else	newLayout.insert(newLayout.end(), layers.begin(), layers.end());
-
-		tabRects.push_back(rect);
-		rect.origin.x += rect.size.width + metrics->tabSpacing;
-	}
-	newLayout.insert(newLayout.end(), selectedTabLayers.begin(), selectedTabLayers.end());
-	[self setLayers:newLayout];
-}
-
-- (NSSize)intrinsicContentSize
-{
-	return NSMakeSize(NSViewNoInstrinsicMetric, self.isExpanded ? 23 : 1);
-}
-
-- (void)viewFrameChanged:(NSNotification*)aNotification
-{
-	self.layoutNeedsUpdate = YES;
+	self.expanded = _expanded || [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableTabBarCollapsingKey];
 }
 
 - (void)setExpanded:(BOOL)flag
 {
 	if(_expanded == flag)
 		return;
-
 	_expanded = flag;
-	self.layoutNeedsUpdate = YES;
 	[self invalidateIntrinsicContentSize];
 }
 
-- (void)selectTab:(id)sender
+- (NSSize)intrinsicContentSize
 {
-	if(self.tag != selectedTab)
-	{
-		if(self.delegate && [self.delegate respondsToSelector:@selector(tabBarView:shouldSelectIndex:)] && ![self.delegate tabBarView:self shouldSelectIndex:self.tag])
-			return;
-
-		selectedTab = self.tag;
-		self.layoutNeedsUpdate = YES;
-	}
+	return NSMakeSize(NSViewNoInstrinsicMetric, _expanded ? self.activeBackgroundImage.size.height : 2);
 }
 
-- (void)didDoubleClickTab:(id)sender
+- (BOOL)isOpaque
 {
-	if([self.delegate respondsToSelector:@selector(tabBarView:didDoubleClickIndex:)])
-		[self.delegate tabBarView:self didDoubleClickIndex:selectedTab];
+	return YES;
 }
 
-- (void)didDoubleClickTabBar:(id)sender
+- (void)updateTrackingAreas
 {
-	if([self.delegate respondsToSelector:@selector(tabBarViewDidDoubleClick:)])
-		[self.delegate tabBarViewDidDoubleClick:self];
+	[super updateTrackingAreas];
+	if(_trackingArea)
+		[self removeTrackingArea:_trackingArea];
+	NSTrackingAreaOptions options = NSTrackingMouseEnteredAndExited|NSTrackingActiveAlways;
+	if(self.isMouseInside = NSMouseInRect([self convertPoint:[self.window mouseLocationOutsideOfEventStream] fromView:nil], [self visibleRect], [self isFlipped]))
+		options |= NSTrackingAssumeInside;
+	_trackingArea = [[NSTrackingArea alloc] initWithRect:[self bounds] options:options owner:self userInfo:nil];
+	[self addTrackingArea:_trackingArea];
 }
 
-- (void)performClose:(id)sender
+- (void)mouseEntered:(NSEvent*)anEvent
 {
-	D(DBF_TabBarView, bug("\n"););
-	self.tag = selectedTab; // performCloseTab: asks for [sender tag]
-	[NSApp sendAction:@selector(performCloseTab:) to:nil from:self];
+	self.isMouseInside = YES;
 }
 
-- (NSMenu*)overflowTabMenu
+- (void)mouseExited:(NSEvent*)anEvent
 {
-	NSMenu* menu = [NSMenu new];
-	for(NSUInteger i = self.countOfVisibleTabs-1; i < [tabTitles count]; ++i)
-	{
-		NSMenuItem* item = [menu addItemWithTitle:[tabTitles objectAtIndex:i] action:@selector(takeSelectedTabIndexFrom:) keyEquivalent:@""];
-		item.tag     = i;
-		item.toolTip = [[tabPaths objectAtIndex:i] stringByAbbreviatingWithTildeInPath];
-		item.image   = [OakFileIconImage fileIconImageWithPath:[[tabPaths objectAtIndex:i] isEqualTo:@""] ? NULL : [tabPaths objectAtIndex:i] isModified:[[tabModifiedStates objectAtIndex:i] boolValue]];
-		if(i == selectedTab)
-			[item setState:NSOnState];
-		else if([[tabModifiedStates objectAtIndex:i] boolValue])
-			[item setModifiedState:YES];
-	}
-	return menu;
+	self.isMouseInside = NO;
 }
 
-- (void)showOverflowTabMenu:(id)sender
+- (void)setIsMouseInside:(BOOL)flag
 {
-	NSUInteger overflowTab = self.tag;
-	NSRect tabRect = tabRects[overflowTab];
-	NSRect rect;
-	uint32_t state = [self currentState] | layer_t::mouse_inside | layer_t::mouse_clicked;
-	for(auto const& it : metrics->layers_for([self layerNameForTabIndex:overflowTab], tabRect, overflowTab, [tabTitles objectAtIndex:overflowTab], nil, [self filterForTabIndex:overflowTab] | tab_bar_requisites::overflow))
-	{
-		if((state & it.requisite_mask) == it.requisite)
-			rect = it.rect;
-	}
-	rect.origin.y -= 6; //shift menu down slightly to base of tab
-	[[self overflowTabMenu] popUpMenuPositioningItem:nil atLocation:(rect.origin) inView:self];
-	self.layoutNeedsUpdate = YES;
-}
-
-- (NSMenu*)menuForEvent:(NSEvent*)anEvent
-{
-	NSPoint pos = [self convertPoint:[anEvent locationInWindow] fromView:nil];
-	self.tag = [self tagForLayerContainingPoint:pos];
-	if(self.tag != NSNotFound && [self.delegate respondsToSelector:@selector(menuForTabBarView:)])
-		return [self.delegate menuForTabBarView:self];
-	return [super menuForEvent:anEvent];
-}
-
-- (void)setSelectedTab:(NSUInteger)anIndex
-{
-	if(selectedTab == anIndex)
+	if(_isMouseInside == flag)
 		return;
-	selectedTab = anIndex;
-	NSAccessibilityPostNotification(self, NSAccessibilityValueChangedNotification);
-	self.layoutNeedsUpdate = YES;
+	_isMouseInside = flag;
+
+	if(!flag && _didCloseTabIndex)
+	{
+		_didCloseTabIndex = 0;
+		[self animateLayoutUpdate];
+	}
 }
 
-- (void)reloadData
+// ==========
+// = Layout =
+// ==========
+
+- (void)updateCapImageViews
 {
-	if(!self.dataSource)
+	if(OakTabBarStyle.sharedInstance.tabViewSpacing >= 0)
 		return;
 
-	NSMutableArray* titles         = [NSMutableArray array];
-	NSMutableArray* paths          = [NSMutableArray array];
-	NSMutableArray* modifiedStates = [NSMutableArray array];
-
-	NSUInteger count = [self.dataSource numberOfRowsInTabBarView:self];
-	for(NSUInteger i = 0; i < count; ++i)
+	NSUInteger selected = NSNotFound;
+	NSUInteger dragged = NSNotFound;
+	NSMutableArray* items = [NSMutableArray array];
+	for(OakTabItem* tabItem in _tabItems)
 	{
-		[titles addObject:[self.dataSource tabBarView:self titleForIndex:i]];
-		[paths addObject:[self.dataSource tabBarView:self pathForIndex:i]];
-		[modifiedStates addObject:@([self.dataSource tabBarView:self isEditedAtIndex:i])];
-	}
-
-	if(previousShowAsLastTab != 0 && count != tabTitles.count && previousShowAsLastTab < tabTitles.count)
-	{
-		// We use the path as an identifer since this is more unique than the title
-		// Ideally we should introduce a real (unique) identifier, like the document’s UUID
-		NSString* tabIdentifier = tabPaths[previousShowAsLastTab];
-		if(OakIsEmptyString(tabIdentifier))
-				previousShowAsLastTab = [paths indexOfObject:tabTitles[previousShowAsLastTab]];
-		else	previousShowAsLastTab = [paths indexOfObject:tabIdentifier];
-
-		if(previousShowAsLastTab == NSNotFound)
-			previousShowAsLastTab = 0;
-	}
-
-	[tabTitles setArray:titles];
-	[tabPaths setArray:paths];
-	[tabModifiedStates setArray:modifiedStates];
-
-	selectedTab = [tabPaths count] && selectedTab != NSNotFound ? std::min(selectedTab, [tabPaths count]-1) : NSNotFound;
-
-	BOOL shouldBeExpanded = self.shouldCollapse ? [tabTitles count] > 1 : YES;
-	if(shouldBeExpanded != self.isExpanded)
-			self.expanded = shouldBeExpanded;
-	else	self.layoutNeedsUpdate = YES;
-}
-
-// ============
-// = Dragging =
-// ============
-
-- (void)drawRect:(NSRect)aRect
-{
-	if(layoutNeedsUpdate)
-		[self updateLayout];
-	self.layoutNeedsUpdate = NO;
-	[super drawRect:aRect];
-}
-
-- (void)setLayoutNeedsUpdate:(BOOL)flag
-{
-	if(layoutNeedsUpdate == flag)
-		return;
-	if(layoutNeedsUpdate = flag)
-		[self setNeedsDisplay:YES];
-}
-
-- (void)hideTabAtIndex:(NSUInteger)anIndex
-{
-	if(hiddenTab == anIndex)
-		return;
-	hiddenTab = anIndex;
-	self.layoutNeedsUpdate = YES;
-}
-
-- (void)setDropAreaWidth:(CGFloat)aWidth beforeTabAtIndex:(NSUInteger)anIndex animate:(BOOL)flag
-{
-	double t = CFAbsoluteTimeGetCurrent();
-	double duration = flag ? (([[NSApp currentEvent] modifierFlags] & NSShiftKeyMask) == NSShiftKeyMask ? 3 : 0.5) : 0;
-	for(NSUInteger i = 0; i < tabRects.size(); ++i)
-		tabDropSpacing[i].set_new_target(i == anIndex ? aWidth + metrics->tabSpacing : 0, t, duration);
-
-	self.slideAroundAnimationTimer = flag ? (self.slideAroundAnimationTimer ?: [OakTimer scheduledTimerWithTimeInterval:0.02 target:self selector:@selector(updateSlideAroundAnimation:) repeats:YES]) : nil;
-	if(aWidth == 0 && !flag)
-		tabDropSpacing.clear();
-
-	self.layoutNeedsUpdate = YES;
-}
-
-- (void)updateSlideAroundAnimation:(NSTimer*)aTimer
-{
-	self.layoutNeedsUpdate = YES;
-}
-
-- (NSUInteger)dropIndexForMouse:(NSPoint)mousePos
-{
-	NSRect rect = [self bounds];
-	rect.origin.x += metrics->firstTabOffset;
-	NSUInteger tabIndex = 0;
-	for(; tabIndex < tabRects.size(); ++tabIndex)
-	{
-		if(tabIndex == hiddenTab)
+		if(!tabItem.tabItemView)
 			continue;
-		rect.size.width = NSWidth(tabRects[tabIndex]);
-		if(mousePos.x < NSMaxX(rect))
-			break;
-		rect.origin.x += rect.size.width + metrics->tabSpacing;
+
+		if(tabItem.tabItemView.isHidden)
+			dragged = items.count;
+		else if(tabItem.tabItemView.selected)
+			selected = items.count;
+
+		[items addObject:tabItem];
 	}
-	return tabIndex;
+
+	for(NSUInteger i = 0; i < items.count; ++i)
+	{
+		OakTabItem* tabItem = items[i];
+		BOOL leftHidden  = i == dragged || (selected < i && dragged+1 != i) || (selected == NSNotFound && i > 0 && i-1 != dragged);
+		BOOL rightHidden = i == dragged || (i < selected && i+1 != dragged && selected != NSNotFound);
+		if(leftHidden && rightHidden)
+			tabItem.tabItemView.visibleCaps = OakTabItemViewVisibleCapsNone;
+		else if(leftHidden)
+			tabItem.tabItemView.visibleCaps = OakTabItemViewVisibleCapsRight;
+		else if(rightHidden)
+			tabItem.tabItemView.visibleCaps = OakTabItemViewVisibleCapsLeft;
+		else
+			tabItem.tabItemView.visibleCaps = OakTabItemViewVisibleCapsBoth;
+	}
 }
 
-- (void)dragTab:(id)sender
+- (NSUInteger)countOfVisibleTabs
 {
-	NSUInteger draggedTab = self.tag;
-	NSRect tabRect = tabRects[draggedTab];
+	CGFloat const tabSpacing  = OakTabBarStyle.sharedInstance.tabViewSpacing;
+	CGFloat const tabMinWidth = OakTabBarStyle.sharedInstance.minimumTabSize;
 
-	NSImage* image = [[NSImage alloc] initWithSize:tabRect.size];
-	[image lockFocus];
+	CGFloat width = NSMinX(_addTabButton.frame);
 
-	uint32_t state = [self currentState] | layer_t::mouse_inside | layer_t::mouse_down;
-	for(auto const& it : metrics->layers_for([self layerNameForTabIndex:draggedTab], (NSRect){NSZeroPoint, tabRect.size}, draggedTab, [tabTitles objectAtIndex:draggedTab], nil, [self filterForTabIndex:draggedTab] | tab_bar_requisites::dragged))
+	BOOL missingDraggedTab =  _draggedTabItem && !_preliminaryTabItem;
+	BOOL hasSomeonesTab    = !_draggedTabItem &&  _preliminaryTabItem;
+
+	NSUInteger canShowTabs = floor((width + tabSpacing) / (tabMinWidth + tabSpacing));
+	NSUInteger myTabsCount = _tabItems.count + (missingDraggedTab ? 1 : 0) - (hasSomeonesTab ? 1 : 0);
+
+	return MIN(canShowTabs, myTabsCount);
+}
+
+- (void)resizeTabIndexes:(NSIndexSet*)anIndexSet inRect:(NSRect)aRect
+{
+	NSUInteger countOfTabs = [anIndexSet count];
+
+	CGFloat spacing = OakTabBarStyle.sharedInstance.tabViewSpacing;
+	CGFloat width   = NSWidth(aRect) - spacing * (countOfTabs-1);
+
+	for(NSUInteger i = 0, index = [anIndexSet firstIndex]; index != NSNotFound; ++i, (index = [anIndexSet indexGreaterThanIndex:index]))
 	{
-		if((state & it.requisite_mask) == it.requisite)
-			[self drawLayer:it];
+		OakTabItem* tabItem = _tabItems[index];
+
+		CGFloat x1 = round(i * spacing + (i+0) * width / countOfTabs);
+		CGFloat x2 = round(i * spacing + (i+1) * width / countOfTabs);
+		NSRect tabFrame = NSMakeRect(NSMinX(aRect) + x1, NSMinY(aRect), x2 - x1, NSHeight(aRect));
+
+		if(tabItem.tabItemView && NSEqualRects(tabFrame, tabItem.targetFrame))
+			continue;
+
+		if(!tabItem.tabItemView)
+		{
+			tabItem.tabItemView = [[OakTabItemView alloc] initWithFrame:tabFrame title:tabItem.title modified:tabItem.modified];
+			tabItem.tabItemView.selected = tabItem == _selectedTabItem;
+			tabItem.tabItemView.hidden   = tabItem == _preliminaryTabItem;
+			tabItem.tabItemView.toolTip  = OakIsEmptyString(tabItem.path) ? tabItem.title : [tabItem.path stringByAbbreviatingWithTildeInPath];
+			tabItem.tabItemView.closeButton.action = @selector(_performCloseTab:);
+			tabItem.tabItemView.closeButton.target = self;
+			[self addSubview:tabItem.tabItemView];
+
+			if(_animateLayoutChanges && tabItem != _preliminaryTabItem)
+			{
+				tabItem.tabItemView.alphaValue = 0;
+				[[tabItem.tabItemView animator] setAlphaValue:1];
+			}
+		}
+
+		tabItem.targetFrame = tabFrame;
+		[(_animateLayoutChanges ? [tabItem.tabItemView animator] : tabItem.tabItemView) setFrame:tabFrame];
 	}
+}
+
+- (void)resizeTabItemViewFrames
+{
+	if(!_tabItems.count || !_expanded)
+	{
+		for(OakTabItem* tabItem in _tabItems)
+		{
+			if(tabItem.tabItemView)
+				[self removeViewForTabItem:tabItem];
+		}
+		return;
+	}
+
+	CGFloat const tabSpacing  = OakTabBarStyle.sharedInstance.tabViewSpacing;
+	CGFloat const tabMinWidth = OakTabBarStyle.sharedInstance.minimumTabSize;
+	CGFloat const tabMaxWidth = OakTabBarStyle.sharedInstance.maximumTabSize;
+
+	CGFloat width = NSMinX(_addTabButton.frame);
+
+	BOOL missingDraggedTab =  _draggedTabItem && !_preliminaryTabItem;
+	BOOL hasSomeonesTab    = !_draggedTabItem &&  _preliminaryTabItem;
+
+	NSUInteger canShowTabs = floor((width + tabSpacing) / (tabMinWidth + tabSpacing));
+	NSUInteger myTabsCount = _tabItems.count + (missingDraggedTab ? 1 : 0) - (hasSomeonesTab ? 1 : 0);
+	BOOL showOverflowMenu  = canShowTabs < myTabsCount;
+
+	if(showOverflowMenu && hasSomeonesTab)
+		++canShowTabs;
+	else if(showOverflowMenu && missingDraggedTab)
+		--canShowTabs;
+
+	NSUInteger countOfVisibleTabs = MIN(canShowTabs, _tabItems.count);
+
+	OakTabItem* overflowTabItem = nil;
+	if(showOverflowMenu)
+	{
+		overflowTabItem = _overflowTabItem;
+		if(!_preliminaryTabItem && !_draggedTabItem)
+		{
+			NSUInteger selectedIndex = [_tabItems indexOfObject:_selectedTabItem];
+			if(selectedIndex >= countOfVisibleTabs-1)
+				overflowTabItem = _selectedTabItem;
+			else if(!_overflowTabItem || [_tabItems indexOfObject:_overflowTabItem] < countOfVisibleTabs-1)
+				overflowTabItem = _tabItems[countOfVisibleTabs-1];
+		}
+	}
+
+	if(_overflowTabItem && _overflowTabItem != overflowTabItem)
+		_overflowTabItem.tabItemView.showOverflowButton = NO;
+	_overflowTabItem = overflowTabItem;
+
+	NSMutableIndexSet* tabIndexes = [NSMutableIndexSet indexSet];
+	OakTabItem* mustShow[] = { _selectedTabItem, _overflowTabItem, _preliminaryTabItem };
+	for(OakTabItem* tabItem : mustShow)
+	{
+		NSUInteger tabIndex = [_tabItems indexOfObject:tabItem];
+		if(tabIndex != NSNotFound)
+			[tabIndexes addIndex:tabIndex];
+	}
+	for(NSUInteger i = 0; i < _tabItems.count && [tabIndexes count] < countOfVisibleTabs; ++i)
+		[tabIndexes addIndex:i];
+
+	for(NSUInteger i = 0; i < _tabItems.count; ++i)
+	{
+		OakTabItem* tabItem = _tabItems[i];
+		if(tabItem.tabItemView && ![tabIndexes containsIndex:i])
+			[self removeViewForTabItem:tabItem];
+	}
+
+	if(_didCloseTabIndex)
+	{
+		NSRect leftRect, rightRect;
+		NSDivideRect(NSMakeRect(0, 0, width, NSHeight(self.bounds)), &leftRect, &rightRect, NSMinX(_didCloseTabFrame), NSMinXEdge);
+		leftRect.size.width -= tabSpacing;
+
+		NSIndexSet* leftSet = [tabIndexes indexesInRange:NSMakeRange(0, _didCloseTabIndex) options:0 passingTest:^(NSUInteger idx, BOOL* stop){ return YES; }];
+		[self resizeTabIndexes:leftSet inRect:leftRect];
+
+		NSIndexSet* rightSet = [tabIndexes indexesInRange:NSMakeRange(_didCloseTabIndex, [tabIndexes lastIndex]) options:0 passingTest:^(NSUInteger idx, BOOL* stop){ return YES; }];
+		rightRect.size.width = MIN((NSWidth(_didCloseTabFrame) + tabSpacing) * [rightSet count] - tabSpacing, NSWidth(rightRect));
+		[self resizeTabIndexes:rightSet inRect:rightRect];
+	}
+	else
+	{
+		[self resizeTabIndexes:tabIndexes inRect:NSMakeRect(0, 0, MIN((tabMaxWidth + tabSpacing) * [tabIndexes count] - tabSpacing, width), NSHeight(self.bounds))];
+	}
+
+	if(_overflowTabItem)
+	{
+		_overflowTabItem.tabItemView.showOverflowButton = YES;
+		_overflowTabItem.tabItemView.overflowButton.action = @selector(_showOverflowMenu:);
+		_overflowTabItem.tabItemView.overflowButton.target = self;
+	}
+
+	[self updateCapImageViews];
+}
+
+- (void)resizeSubviewsWithOldSize:(NSSize)aSize
+{
+	[super resizeSubviewsWithOldSize:aSize];
+	if(!NSEqualSizes(self.bounds.size, aSize))
+		[self resizeTabItemViewFrames];
+}
+
+- (void)removeViewForTabItem:(OakTabItem*)aTabItem
+{
+	[aTabItem.tabItemView removeFromSuperview];
+	aTabItem.tabItemView = nil;
+	aTabItem.targetFrame = NSZeroRect;
+}
+
+- (void)animateLayoutUpdate
+{
+	static CGFloat const kAnimationDuration = 0.25;
+
+	[NSAnimationContext runAnimationGroup:^(NSAnimationContext* context){
+		context.duration = kAnimationDuration;
+		_animateLayoutChanges = YES;
+		[self resizeTabItemViewFrames];
+		_animateLayoutChanges = NO;
+	} completionHandler:^{
+		[self.window recalculateKeyViewLoop];
+	}];
+}
+
+// =============
+// = Selection =
+// =============
+
+- (OakTabItem*)tabItemForView:(id)aView
+{
+	if([aView isKindOfClass:[NSView class]])
+	{
+		while(aView && ![aView isKindOfClass:[OakTabItemView class]])
+			aView = [aView superview];
+
+		if(aView)
+		{
+			for(OakTabItem* tabItem in _tabItems)
+			{
+				if(tabItem.tabItemView == aView)
+					return tabItem;
+			}
+		}
+	}
+	return nil;
+}
+
+- (void)mouseDown:(NSEvent*)anEvent
+{
+	_mouseDownPos = [[self superview] convertPoint:[anEvent locationInWindow] fromView:nil];
+	if([anEvent clickCount] == 2)
+	{
+		if(OakTabItem* tabItem = [self tabItemForView:[self hitTest:[[self superview] convertPoint:[anEvent locationInWindow] fromView:nil]]])
+		{
+			if([_delegate respondsToSelector:@selector(tabBarView:didDoubleClickIndex:)])
+				[_delegate tabBarView:self didDoubleClickIndex:[_tabItems indexOfObject:tabItem]];
+		}
+		else
+		{
+			if([_delegate respondsToSelector:@selector(tabBarViewDidDoubleClick:)])
+				[_delegate tabBarViewDidDoubleClick:self];
+		}
+	}
+}
+
+- (void)mouseUp:(NSEvent*)anEvent
+{
+	NSPoint mouseCurrentPos = [[self superview] convertPoint:[anEvent locationInWindow] fromView:nil];
+	if(SQ(fabs(_mouseDownPos.x - mouseCurrentPos.x)) + SQ(fabs(_mouseDownPos.y - mouseCurrentPos.y)) >= SQ(1))
+		return; // mouse was moved
+	[self trySelectTabForView:[self hitTest:mouseCurrentPos]];
+}
+
+- (void)trySelectTabForView:(NSView*)aView
+{
+	if(OakTabItem* tabItem = [self tabItemForView:aView])
+	{
+		if([_delegate respondsToSelector:@selector(tabBarView:shouldSelectIndex:)])
+		{
+			NSUInteger tabIndex = [_tabItems indexOfObject:tabItem];
+			if([_delegate tabBarView:self shouldSelectIndex:tabIndex])
+				self.selectedTab = tabIndex;
+		}
+	}
+}
+
+- (void)setSelectedTabItem:(OakTabItem*)aTabItem
+{
+	if(_selectedTabItem == aTabItem)
+		return;
+
+	_selectedTabItem.tabItemView.selected = NO;
+	_selectedTabItem = aTabItem;
+	_selectedTabItem.tabItemView.selected = YES;
+
+	if(aTabItem.tabItemView)
+			[self updateCapImageViews];
+	else	[self resizeTabItemViewFrames];
+
+	NSAccessibilityPostNotification(self, NSAccessibilityValueChangedNotification);
+}
+
+// ===============
+// = Drag’n’drop =
+// ===============
+
+- (void)mouseDragged:(NSEvent*)anEvent
+{
+	NSPoint mouseCurrentPos = [[self superview] convertPoint:[anEvent locationInWindow] fromView:nil];
+	if(SQ(fabs(_mouseDownPos.x - mouseCurrentPos.x)) + SQ(fabs(_mouseDownPos.y - mouseCurrentPos.y)) < SQ(1))
+		return; // we didn't even drag a pixel
+
+	OakTabItem* tabItem = [self tabItemForView:[self hitTest:mouseCurrentPos]];
+	if(!tabItem)
+		return;
+
+	OakTabItemView* view = tabItem.tabItemView;
+	NSRect srcRect = view.frame;
+
+	NSImage* image = [[NSImage alloc] initWithSize:srcRect.size];
+	[image lockFocusFlipped:[self isFlipped]];
+
+	[[NSColor clearColor] set];
+	NSRectFill((NSRect){ NSZeroPoint, image.size });
+
+	CGContextRef context = (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort];
+	CGContextTranslateCTM(context, -NSMinX(srcRect), -NSMinY(srcRect));
+	NSRectClip(NSInsetRect(srcRect, 12, 0));
+	[self displayRectIgnoringOpacity:srcRect inContext:[NSGraphicsContext currentContext]];
 	[image unlockFocus];
 
 	NSImage* dragImage = [[NSImage alloc] initWithSize:image.size];
@@ -900,48 +539,44 @@ layout_metrics_t::raw_layer_t layout_metrics_t::parse_layer (NSDictionary* item)
 	[image drawAtPoint:NSZeroPoint fromRect:NSZeroRect operation:NSCompositeCopy fraction:0.8];
 	[dragImage unlockFocus];
 
+	_draggedTabIndex = [_tabItems indexOfObject:tabItem];
+	_draggedTabItem  = tabItem;
+	[_tabItems removeObject:tabItem];
+	tabItem.tabItemView.hidden = YES;
+
 	NSPasteboard* pboard = [NSPasteboard pasteboardWithName:NSDragPboard];
-	[pboard declareTypes:@[ OakTabBarViewTabType ] owner:self];
-	[pboard setString:[NSString stringWithFormat:@"%lu", draggedTab] forType:OakTabBarViewTabType];
-	[self.delegate setupPasteboard:pboard forTabAtIndex:draggedTab];
+	[tabItem writeToPasteboard:pboard];
 
-	[self hideTabAtIndex:draggedTab];
-	[self setDropAreaWidth:[dragImage size].width beforeTabAtIndex:draggedTab animate:NO];
-	self.mouseTrackingDisabled = YES;
+	if([_delegate respondsToSelector:@selector(setupPasteboard:forTabAtIndex:)])
+		[_delegate setupPasteboard:pboard forTabAtIndex:_draggedTabIndex];
 
-	[self dragImage:dragImage
-                at:tabRect.origin
-            offset:NSZeroSize
-             event:[NSApp currentEvent]
-        pasteboard:[NSPasteboard pasteboardWithName:NSDragPboard]
-            source:self
-         slideBack:YES];
+	[self dragImage:dragImage at:srcRect.origin offset:NSZeroSize event:anEvent pasteboard:pboard source:self slideBack:YES];
 }
 
-- (NSDragOperation)draggingSourceOperationMaskForLocal:(BOOL)isLocal
+- (NSDragOperation)draggingSession:(NSDraggingSession*)session sourceOperationMaskForDraggingContext:(NSDraggingContext)context
 {
-	return isLocal ? (NSDragOperationCopy|NSDragOperationMove|NSDragOperationLink) : (NSDragOperationCopy|NSDragOperationGeneric);
+	return context == NSDraggingContextOutsideApplication ? (NSDragOperationCopy|NSDragOperationGeneric) : (NSDragOperationCopy|NSDragOperationMove|NSDragOperationLink);
 }
 
-- (void)draggedImage:(NSImage*)image endedAt:(NSPoint)point operation:(NSDragOperation)operation
+- (void)draggingSession:(NSDraggingSession*)session endedAtPoint:(NSPoint)screenPoint operation:(NSDragOperation)operation
 {
-	[self hideTabAtIndex:NSNotFound];
-	[self setDropAreaWidth:0 beforeTabAtIndex:NSNotFound animate:NO];
-	self.mouseTrackingDisabled = NO;
+	if(_draggedTabItem)
+	{
+		if(operation != NSDragOperationMove)
+			[_tabItems insertObject:_draggedTabItem atIndex:_draggedTabIndex];
+
+		_draggedTabItem = nil;
+		[self resizeTabItemViewFrames];
+	}
 }
 
-- (BOOL)performDragOperation:(id <NSDraggingInfo>)sender
-{
-	[self hideTabAtIndex:NSNotFound];
-	[self setDropAreaWidth:0 beforeTabAtIndex:NSNotFound animate:NO];
+// ========================
+// = Dragging Destination =
+// ========================
 
-	NSDragOperation mask = [sender draggingSourceOperationMask];
-	NSPoint mousePos = [self convertPoint:[sender draggingLocation] fromView:nil];
-	BOOL success = [self.delegate performTabDropFromTabBar:[sender draggingSource]
-                                                  atIndex:[self dropIndexForMouse:mousePos]
-                                           fromPasteboard:[NSPasteboard pasteboardWithName:NSDragPboard]
-                                                operation:(mask & NSDragOperationMove) ?: (mask & NSDragOperationCopy)];
-	return success;
+- (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender
+{
+	return [self draggingUpdated:sender];
 }
 
 - (NSDragOperation)draggingUpdated:(id <NSDraggingInfo>)sender
@@ -951,18 +586,235 @@ layout_metrics_t::raw_layer_t layout_metrics_t::parse_layer (NSDictionary* item)
 	if(operation == NSDragOperationNone)
 		return operation;
 
-	if([sender draggingSource] == self)
-		[self hideTabAtIndex:operation == NSDragOperationCopy ? NSNotFound : [[[sender draggingPasteboard] stringForType:OakTabBarViewTabType] intValue]];
+	NSUInteger desiredPos = 0;
 
-	NSPoint mousePos = [self convertPoint:[sender draggingLocation] fromView:nil];
-	[self setDropAreaWidth:[[sender draggedImage] size].width beforeTabAtIndex:[self dropIndexForMouse:mousePos] animate:YES];
+	NSPoint pos = [self convertPoint:[sender draggingLocation] fromView:nil];
+	for(NSUInteger i = 0; i < _tabItems.count; ++i)
+	{
+		OakTabItem* tabItem = _tabItems[i];
+		if(tabItem != _preliminaryTabItem && tabItem.tabItemView && NSMidX(tabItem.targetFrame) <= pos.x)
+			desiredPos = i+1;
+	}
+
+	NSUInteger currentPos = [_tabItems indexOfObject:_preliminaryTabItem];
+	if(currentPos != desiredPos)
+	{
+		if(currentPos == NSNotFound)
+				_preliminaryTabItem = _draggedTabItem ?: [OakTabItem tabItemFromPasteboard:[sender draggingPasteboard]];
+		else	[_tabItems removeObjectAtIndex:currentPos];
+
+		[_tabItems insertObject:_preliminaryTabItem atIndex:currentPos < desiredPos ? desiredPos-1 : desiredPos];
+		[self animateLayoutUpdate];
+	}
 
 	return operation;
 }
 
 - (void)draggingExited:(id <NSDraggingInfo>)sender
 {
-	[self setDropAreaWidth:0 beforeTabAtIndex:NSNotFound animate:YES];
+	[self removeViewForTabItem:_preliminaryTabItem];
+	[_tabItems removeObject:_preliminaryTabItem];
+	_preliminaryTabItem = nil;
+
+	_didCloseTabIndex = 0;
+	[self animateLayoutUpdate];
+}
+
+- (BOOL)prepareForDragOperation:(id <NSDraggingInfo>)sender
+{
+	sender.animatesToDestination = YES;
+	return YES;
+}
+
+- (BOOL)performDragOperation:(id <NSDraggingInfo>)sender
+{
+	[sender enumerateDraggingItemsWithOptions:0 forView:self classes:@[ [NSPasteboardItem class] ] searchOptions:nil usingBlock:^(NSDraggingItem* draggingItem, NSInteger idx, BOOL* stop){
+		draggingItem.draggingFrame = _preliminaryTabItem.targetFrame;
+	}];
+
+	NSDragOperation mask = [sender draggingSourceOperationMask];
+	NSUInteger dropIndex = [_tabItems indexOfObject:_preliminaryTabItem];
+	if(_draggedTabItem) // Local drag’n’drop
+	{
+		if(_draggedTabIndex < dropIndex)
+			++dropIndex;
+		else if(_draggedTabIndex == dropIndex)
+			return YES;
+	}
+
+	return [_delegate performTabDropFromTabBar:[sender draggingSource] atIndex:dropIndex fromPasteboard:[sender draggingPasteboard] operation:(mask & NSDragOperationMove) ?: (mask & NSDragOperationCopy)];
+}
+
+- (void)concludeDragOperation:(id <NSDraggingInfo>)sender
+{
+	if(_preliminaryTabItem)
+	{
+		_preliminaryTabItem.tabItemView.hidden = NO;
+		[_preliminaryTabItem.tabItemView updateTrackingAreas];
+		_preliminaryTabItem = nil;
+	}
+
+	_draggedTabItem = nil;
+	[self animateLayoutUpdate];
+}
+
+// ==========================
+// = Private Action Methods =
+// ==========================
+
+- (void)_newTab:(id)sender
+{
+	if([_delegate respondsToSelector:@selector(tabBarViewDidDoubleClick:)])
+		[_delegate tabBarViewDidDoubleClick:self];
+}
+
+- (void)_showOverflowMenu:(id)sender
+{
+	NSMenu* menu = [NSMenu new];
+	for(NSUInteger i = 0; i < _tabItems.count; ++i)
+	{
+		OakTabItem* tabItem = _tabItems[i];
+		if(tabItem.tabItemView && tabItem != _overflowTabItem)
+			continue;
+
+		NSMenuItem* item = [menu addItemWithTitle:tabItem.title action:@selector(takeSelectedTabIndexFrom:) keyEquivalent:@""];
+		item.representedObject = tabItem;
+		item.tag = i;
+
+		if(NSString* path = tabItem.path)
+		{
+			item.image   = [OakFileIconImage fileIconImageWithPath:([path isEqualTo:@""] ? nil : path) isModified:tabItem.modified];
+			item.toolTip = [path stringByAbbreviatingWithTildeInPath];
+		}
+
+		if(tabItem == _overflowTabItem)
+			[item setState:NSOnState];
+		else if(tabItem.modified)
+			[item setModifiedState:YES];
+	}
+	[menu popUpMenuPositioningItem:nil atLocation:NSMakePoint(NSWidth([sender frame]), 0) inView:sender];
+}
+
+- (void)_performCloseTab:(id)sender
+{
+	if(OakTabItem* tabItem = [self tabItemForView:sender])
+	{
+		self.tag = [_tabItems indexOfObject:tabItem]; // performCloseTab: asks for [sender tag]
+
+		BOOL closeOther = OakIsAlternateKeyOrMouseEvent();
+		if(_isMouseInside && [[NSApp currentEvent] type] == NSLeftMouseUp && !closeOther)
+		{
+			_didCloseTabIndex = self.tag;
+			_didCloseTabFrame = tabItem.targetFrame;
+		}
+		else
+		{
+			_didCloseTabIndex = 0;
+		}
+
+		SEL action = (closeOther ? @selector(performCloseOtherTabs:) : @selector(performCloseTab:));
+		if([NSApp keyWindow])
+				[NSApp sendAction:action to:nil from:self];
+		else	[self.window tryToPerform:action with:self];
+	}
+}
+
+// =======
+// = API =
+// =======
+
+- (void)reloadData
+{
+	NSUInteger newCount = [_dataSource numberOfRowsInTabBarView:self];
+	NSUInteger oldCount = _tabItems.count;
+
+	if(newCount != oldCount && _overflowTabItem)
+	{
+		_overflowTabItem.tabItemView.showOverflowButton = NO;
+		_overflowTabItem = nil;
+	}
+
+	NSMutableDictionary* oldTabs = [NSMutableDictionary dictionary];
+	for(OakTabItem* tabItem in _tabItems)
+		oldTabs[tabItem.identifier] = tabItem;
+
+	NSMutableArray* newTabs = [NSMutableArray array];
+	for(NSUInteger i = 0; i < newCount; ++i)
+	{
+		NSString* title      = [_dataSource tabBarView:self titleForIndex:i];
+		NSString* path       = [_dataSource tabBarView:self pathForIndex:i];
+		NSString* identifier = [_dataSource tabBarView:self identifierForIndex:i];
+		BOOL modified        = [_dataSource tabBarView:self isEditedAtIndex:i];
+
+		OakTabItem* tabItem = oldTabs[identifier];
+		if(!tabItem)
+		{
+			tabItem = [OakTabItem tabItemWithTitle:title path:path identifier:identifier modified:modified];
+		}
+		else
+		{
+			tabItem.title    = [_dataSource tabBarView:self titleForIndex:i];
+			tabItem.path     = [_dataSource tabBarView:self pathForIndex:i];
+			tabItem.modified = [_dataSource tabBarView:self isEditedAtIndex:i];
+
+			[oldTabs removeObjectForKey:identifier];
+		}
+		[newTabs addObject:tabItem];
+	}
+
+	for(NSString* key in oldTabs)
+	{
+		OakTabItem* tabItem = oldTabs[key];
+		if(tabItem == _selectedTabItem)
+			_selectedTabItem = nil;
+		[self removeViewForTabItem:tabItem];
+	}
+
+	_tabItems = newTabs;
+
+	if(!_expanded && _tabItems.count > 1)
+	{
+		self.expanded = YES;
+	}
+	else
+	{
+		if(oldCount && newCount && oldCount != newCount)
+				[self animateLayoutUpdate];
+		else	[self resizeTabItemViewFrames];
+	}
+
+	if(!_selectedTabItem && _tabItems.count)
+		self.selectedTabItem = _tabItems.firstObject;
+}
+
+- (void)setSelectedTab:(NSUInteger)anIndex
+{
+	self.selectedTabItem = anIndex < _tabItems.count ? _tabItems[anIndex] : nil;
+}
+
+- (void)performClose:(id)sender
+{
+	self.tag = [_tabItems indexOfObject:_selectedTabItem]; // performCloseTab: asks for [sender tag]
+	[NSApp sendAction:@selector(performCloseTab:) to:nil from:self];
+}
+
+- (NSMenu*)menuForView:(NSView*)aView
+{
+	if([_delegate respondsToSelector:@selector(menuForTabBarView:)])
+	{
+		if(OakTabItem* tabItem = [self tabItemForView:aView])
+		{
+			self.tag = [_tabItems indexOfObject:tabItem];
+			return [_delegate menuForTabBarView:self];
+		}
+	}
+	return nil;
+}
+
+- (NSMenu*)menuForEvent:(NSEvent*)anEvent
+{
+	NSMenu* res = [self menuForView:[self hitTest:[[self superview] convertPoint:[anEvent locationInWindow] fromView:nil]]];
+	return res ?: [super menuForEvent:anEvent];
 }
 
 // =================
@@ -1008,89 +860,21 @@ layout_metrics_t::raw_layer_t layout_metrics_t::parse_layer (NSDictionary* item)
 	if([attribute isEqualToString:NSAccessibilityRoleAttribute])
 		return NSAccessibilityTabGroupRole;
 	// tab group attributes
-	else if([attribute isEqualToString:NSAccessibilityChildrenAttribute] || [attribute isEqualToString:NSAccessibilityContentsAttribute] || [attribute isEqualToString:NSAccessibilityTabsAttribute])
-		return [self accessibilityArrayAttributeValues:attribute index:0 maxCount:[self accessibilityArrayAttributeCount:attribute]];
 	else if([attribute isEqualToString:NSAccessibilityFocusedAttribute])
-		return [NSNumber numberWithBool:NO];
+		return @NO;
+	else if([attribute isEqualToString:NSAccessibilityChildrenAttribute] || [attribute isEqualToString:NSAccessibilityContentsAttribute] || [attribute isEqualToString:NSAccessibilityTabsAttribute])
+	{
+		NSMutableArray* array = [NSMutableArray array];
+		for(OakTabItem* tabItem in _tabItems)
+		{
+			if(tabItem.tabItemView)
+				[array addObject:tabItem.tabItemView];
+		}
+		return array;
+	}
 	else if([attribute isEqualToString:NSAccessibilityValueAttribute])
-		return [self accessibilityChildAtIndex:selectedTab];
+		return _selectedTabItem.tabItemView;
 	else
 		return [super accessibilityAttributeValue:attribute];
 }
-
-- (NSUInteger)accessibilityArrayAttributeCount:(NSString*)attribute
-{
-	if([attribute isEqualToString:NSAccessibilityChildrenAttribute] || [attribute isEqualToString:NSAccessibilityContentsAttribute] || [attribute isEqualToString:NSAccessibilityTabsAttribute])
-		return [self.dataSource numberOfRowsInTabBarView:self];
-	else
-		return [super accessibilityArrayAttributeCount:attribute];
-}
-
-- (NSArray*)accessibilityArrayAttributeValues:(NSString*)attribute index:(NSUInteger)index maxCount:(NSUInteger)maxCount
-{
-	if([attribute isEqualToString:NSAccessibilityChildrenAttribute] || [attribute isEqualToString:NSAccessibilityContentsAttribute] || [attribute isEqualToString:NSAccessibilityTabsAttribute])
-	{
-		NSUInteger count = [self accessibilityArrayAttributeCount:attribute];
-		if(index + maxCount < count)
-			count = index + maxCount;
-		NSMutableArray *children = [NSMutableArray arrayWithCapacity:count - index];
-		for(; index < count; ++index)
-			[children addObject:[self accessibilityChildAtIndex:index]];
-		return children;
-	}
-	else
-	{
-		return [super accessibilityArrayAttributeValues:attribute index:index maxCount:maxCount];
-	}
-}
-
-- (NSUInteger)accessibilityIndexOfChild:(id)child
-{
-	OakTabFauxUIElement *element = (OakTabFauxUIElement*)child;
-	if([child isMemberOfClass:[OakTabFauxUIElement class]] && element.tabBarView == self)
-		return element.index;
-	return NSNotFound;
-}
-
-- (OakTabFauxUIElement*)accessibilityChildAtIndex:(NSUInteger)index
-{
-	NSRect rect = index < tabRects.size() ? tabRects[index] : [self bounds];
-	NSString* title = [tabTitles safeObjectAtIndex:index];
-	NSString* toolTip = [[tabPaths safeObjectAtIndex:index] stringByAbbreviatingWithTildeInPath];
-	BOOL modified = [(NSNumber*)[tabModifiedStates safeObjectAtIndex:index] boolValue];
-	return [[OakTabFauxUIElement alloc] initWithTabBarView:self index:index rect:rect title:title toolTip:toolTip modified:modified selected:selectedTab==index];
-}
-
-- (id)accessibilityHitTest:(NSPoint)point
-{
-	point = [self convertRect:[[self window] convertRectFromScreen:NSMakeRect(point.x, point.y, 0, 0)] fromView:nil].origin;
-	if(!NSPointInRect(point, [self bounds]))
-		return self;
-	iterate(rect, tabRects)
-	{
-		if(NSPointInRect(point, *rect))
-			return [self accessibilityChildAtIndex:rect - tabRects.begin()];
-	}
-	return self;
-}
-@end
-
-// ==================
-// = Tab Bar Colors =
-// ==================
-
-@implementation NSColor (OakTabBarViewColors)
-#define TAB_BAR_COLOR(name, white) \
-  + (NSColor*)tm##name { return [NSColor colorWithCalibratedWhite:white alpha:1]; }
-
-TAB_BAR_COLOR(WindowDividerColor,           0.25);
-TAB_BAR_COLOR(WindowDividerColorInactive,   0.52);
-TAB_BAR_COLOR(TabBarDividerColor,           0.33);
-TAB_BAR_COLOR(TabBarDividerColorInactive,   0.66);
-TAB_BAR_COLOR(TabBarColor,                  0.52);
-TAB_BAR_COLOR(TabBarColorInactive,          0.80);
-TAB_BAR_COLOR(TabBarHighlightColor,         0.66);
-TAB_BAR_COLOR(TabBarHighlightColorInactive, 0.87);
-TAB_BAR_COLOR(TabHoverColor,                0.46);
-TAB_BAR_COLOR(TabHoverColorInactive,        0.60);
 @end
