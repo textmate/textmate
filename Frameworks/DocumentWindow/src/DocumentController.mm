@@ -591,8 +591,8 @@ namespace
 	if(createIfEmptyFlag && newDocuments.empty())
 		newDocuments.push_back(create_untitled_document_in_folder(to_s(self.untitledSavePath)));
 
-	self.selectedTabIndex = newSelectedTabIndex;
 	self.documents        = newDocuments;
+	self.selectedTabIndex = newSelectedTabIndex;
 
 	if(!newDocuments.empty() && newDocuments[newSelectedTabIndex]->identifier() != selectedUUID)
 		[self openAndSelectDocument:newDocuments[newSelectedTabIndex]];
