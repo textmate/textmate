@@ -21,7 +21,6 @@ static NSDictionary* default_settings ()
 {
 	return @{
 		kUserDefaultsHTMLOutputPlacementKey     : @"window",
-		kUserDefaultsDisableTabBarCollapsingKey : @YES,
 		kUserDefaultsFileBrowserPlacementKey    : @"right",
 		kUserDefaultsFoldersOnTopKey            : @YES,
 		kUserDefaultsShowFileExtensionsKey      : @NO,
