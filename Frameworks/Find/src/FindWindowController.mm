@@ -139,7 +139,7 @@ static NSButton* OakCreateStopSearchButton ()
 	return res;
 }
 
-@interface FindWindowController () <NSTextFieldDelegate, NSWindowDelegate, NSMenuDelegate>
+@interface FindWindowController () <NSTextFieldDelegate, NSWindowDelegate, NSMenuDelegate, NSPopoverDelegate>
 @property (nonatomic) NSTextField*              findLabel;
 @property (nonatomic) OakAutoSizingTextField*   findTextField;
 @property (nonatomic) NSButton*                 findHistoryButton;
@@ -714,6 +714,11 @@ static NSButton* OakCreateStopSearchButton ()
 	// if the panel is visible it will automatically be hidden due to the mouse click
 }
 
+- (void)popoverDidClose:(NSNotification*)aNotification
+{
+	self.findErrorString = nil;
+}
+
 - (void)setFindErrorString:(NSString*)aString
 {
 	if(_findErrorString == aString || [_findErrorString isEqualToString:aString])
@@ -729,6 +734,7 @@ static NSButton* OakCreateStopSearchButton ()
 			self.findStringPopver = [NSPopover new];
 			self.findStringPopver.behavior = NSPopoverBehaviorTransient;
 			self.findStringPopver.contentViewController = viewController;
+			self.findStringPopver.delegate = self;
 		}
 
 		NSTextField* textField = (NSTextField*)self.findStringPopver.contentViewController.view;
