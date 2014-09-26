@@ -2,6 +2,10 @@ Title: Release Notes
 
 # Changes
 
+## 2014-09-26 ([v2.0-alpha.9567](https://github.com/textmate/textmate/compare/v2.0-alpha.9565...v2.0-alpha.9567))
+
+* Miscellaneous fixes and a new tab bar view that currently resemble Safari’s (from 10.9) but the groundwork has been done for easier styling to support different themes. The “Show tab for single document” setting in preferences now (when disabled) causes the tab bar to be initially hidden, but once shown, it will stay visible (to avoid content from jumping each time switching between one and two tabs), so I recommend disabling this setting (which is the new default).
+
 ## 2014-09-17 ([v2.0-alpha.9565](https://github.com/textmate/textmate/compare/v2.0-alpha.9563...v2.0-alpha.9565))
 
 * If you typeset TeX from TextMate (⌘R) and have the resulting PDF show in TextMate’s (HTML) output window (default) you can use ⌘P to bring up the print dialog to print the PDF. This used to work, but presumably broke during the update to 10.9, after which one had to first click the PDF to give it focus, before ⌘P would work.
