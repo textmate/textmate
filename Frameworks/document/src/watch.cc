@@ -78,6 +78,17 @@ namespace document
 		return path;
 	}
 
+	static bool paths_share_inode (std::string const& lhs, std::string const& rhs)
+	{
+		if(lhs != rhs && lhs != NULL_STR && rhs != NULL_STR)
+		{
+			struct stat lhsStatBuf, rhsStatBuf;
+			if(stat(lhs.c_str(), &lhsStatBuf) == 0 && stat(rhs.c_str(), &rhsStatBuf) == 0)
+				return lhsStatBuf.st_ino == rhsStatBuf.st_ino && lhsStatBuf.st_dev == rhsStatBuf.st_dev;
+		}
+		return false;
+	}
+
 	// ================
 	// = watch_base_t =
 	// ================
@@ -280,7 +291,9 @@ namespace document
 						if(does_exist && (changed.fflags & (NOTE_DELETE | NOTE_WRITE)) == NOTE_DELETE)
 							flags ^= (NOTE_DELETE | NOTE_WRITE);
 
-						if((flags & NOTE_RENAME) == NOTE_RENAME)
+						// Some programs will rename and create a new file with the old path which we want to report as NOTE_WRITE and do this by checking if a new file is created shortly after the rename.
+						// One caveat is that changing case on a case-insensitive file system will give us two different paths which both exist, so we need to check for that so that we do not mistake it for a rename followed by writing a new file.
+						if((flags & NOTE_RENAME) == NOTE_RENAME && !paths_share_inode(it->second->path, path::for_fd(it->second->fd)))
 						{
 							for(size_t i = 0; i < 100; ++i)
 							{
