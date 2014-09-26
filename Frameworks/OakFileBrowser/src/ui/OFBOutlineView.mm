@@ -172,7 +172,10 @@
 - (void)performEditSelectedRow:(id)sender
 {
 	if([self numberOfSelectedRows] == 1)
+	{
+		[[self window] makeKeyWindow];
 		[self editColumn:0 row:[self selectedRow] withEvent:nil select:YES];
+	}
 }
 
 - (void)keyDown:(NSEvent*)theEvent

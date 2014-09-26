@@ -248,6 +248,7 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 		if(![pendingEditURL isEqual:[[outlineView itemAtRow:i] url]])
 			continue;
 
+		[[outlineView window] makeKeyWindow];
 		[outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:i] byExtendingSelection:NO];
 		[outlineView editColumn:0 row:i withEvent:nil select:YES];
 		self.pendingEditURL = nil;
