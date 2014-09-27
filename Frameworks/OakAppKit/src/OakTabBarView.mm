@@ -116,9 +116,6 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 		_tabItems = [NSMutableArray new];
 		_expanded = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableTabBarCollapsingKey];
 
-		self.activeBackgroundImage   = [NSImage imageNamed:@"AW InactiveTabBG" inSameBundleAsClass:[self class]];
-		self.inactiveBackgroundImage = [NSImage imageNamed:@"IW InactiveTabBG" inSameBundleAsClass:[self class]];
-
 		_addTabButton = [[OakRolloverButton alloc] initWithFrame:NSZeroRect];
 		OakSetAccessibilityLabel(_addTabButton, @"Create new tab");
 		_addTabButton.action = @selector(_newTab:);
