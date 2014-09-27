@@ -711,7 +711,7 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 		self.tag = [_tabItems indexOfObject:tabItem]; // performCloseTab: asks for [sender tag]
 
 		BOOL closeOther = OakIsAlternateKeyOrMouseEvent();
-		if(_isMouseInside && [[NSApp currentEvent] type] == NSLeftMouseUp && !closeOther)
+		if(_isMouseInside && [[NSApp currentEvent] type] == NSLeftMouseUp && !closeOther && tabItem != _overflowTabItem)
 		{
 			_didCloseTabIndex = self.tag;
 			_didCloseTabFrame = tabItem.targetFrame;
