@@ -11,7 +11,6 @@
 @property (nonatomic) CGFloat maximumTabSize;
 
 - (void)setupTabBarView:(OakBackgroundFillView*)aView;
-- (void)setupNewTabButton:(OakRolloverButton*)aButton;
 
 - (void)updateLeftCapView:(OakBackgroundFillView*)aView inSelectedTab:(BOOL)selected;
 - (void)updateRightCapView:(OakBackgroundFillView*)aView inSelectedTab:(BOOL)selected;

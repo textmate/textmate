@@ -57,12 +57,6 @@
 				@"AW_pressed"  : @"TabClose_ModifiedPressed",
 				@"AW_rollover" : @"TabClose_ModifiedRollover",
 			},
-			@"addButton" : @{
-				@"AW_normal"   : @"SafariAWAddTabButton",
-				@"AW_pressed"  : @"SafariAWAddTabButtonPushed",
-				@"AW_rollover" : @"SafariAWAddTabButtonRolloverPlus",
-				@"IW_normal"   : @"SafariIWAddTabButton",
-			},
 			@"overflowButton" : @{
 				@"AW_normal"   : @"TabOverflow",
 				@"AW_pressed"  : @"TabOverflow_Pressed",
@@ -111,11 +105,6 @@
 - (void)setupTabBarView:(OakBackgroundFillView*)aView
 {
 	[self updateView:aView forState:@"tabBar"];
-}
-
-- (void)setupNewTabButton:(OakRolloverButton*)aButton
-{
-	[self updateButton:aButton forState:@"addButton"];
 }
 
 // =================

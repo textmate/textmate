@@ -95,7 +95,7 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 	OakTabItem* _preliminaryTabItem;
 	OakTabItem* _overflowTabItem;
 
-	OakRolloverButton* _addTabButton;
+	NSButton* _addTabButton;
 	NSTrackingArea* _trackingArea;
 	BOOL _animateLayoutChanges;
 
@@ -115,29 +115,39 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 	{
 		_tabItems = [NSMutableArray new];
 		_expanded = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableTabBarCollapsingKey];
-
-		_addTabButton = [[OakRolloverButton alloc] initWithFrame:NSZeroRect];
-		OakSetAccessibilityLabel(_addTabButton, @"Create new tab");
-		_addTabButton.action = @selector(_newTab:);
-		_addTabButton.target = self;
-		_addTabButton.translatesAutoresizingMaskIntoConstraints = NO;
-		[self addSubview:_addTabButton];
+		if(_expanded)
+			[self setupAddTabButton];
 
 		OakTabBarStyle* tabStyle = [OakTabBarStyle sharedInstance];
 		[tabStyle setupTabBarView:self];
-		[tabStyle setupNewTabButton:_addTabButton];
-
-		NSDictionary* views = @{ @"add" : _addTabButton };
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(>=120)-[add]-(3)-|" options:0 metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[add]|" options:0 metrics:nil views:views]];
 
 		[self registerForDraggedTypes:@[ OakTabItemPasteboardType ]];
-
 		self.wantsLayer = YES;
-
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
 	}
 	return self;
+}
+
+- (void)setupAddTabButton
+{
+	if(_addTabButton)
+		return;
+
+	_addTabButton = [[NSButton alloc] initWithFrame:NSZeroRect];
+	OakSetAccessibilityLabel(_addTabButton, @"Create new tab");
+	[[_addTabButton cell] setBackgroundStyle:NSBackgroundStyleRaised];
+	_addTabButton.image      = [NSImage imageNamed:NSImageNameAddTemplate];
+	_addTabButton.bordered   = NO;
+	_addTabButton.buttonType = NSMomentaryChangeButton;
+	_addTabButton.toolTip    = @"Create new tab";
+	_addTabButton.action     = @selector(_newTab:);
+	_addTabButton.target     = self;
+	_addTabButton.translatesAutoresizingMaskIntoConstraints = NO;
+	[self addSubview:_addTabButton];
+
+	NSDictionary* views = @{ @"add" : _addTabButton };
+	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(>=120)-[add(==16)]-(5)-|" options:0 metrics:nil views:views]];
+	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(2)-[add]-(2)-|" options:0 metrics:nil views:views]];
 }
 
 - (void)dealloc
@@ -156,6 +166,8 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 		return;
 	_expanded = flag;
 	[self invalidateIntrinsicContentSize];
+	if(_expanded && !_addTabButton)
+		[self setupAddTabButton];
 }
 
 - (NSSize)intrinsicContentSize
