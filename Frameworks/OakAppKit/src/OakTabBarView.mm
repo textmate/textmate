@@ -95,6 +95,8 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 	OakTabItem* _preliminaryTabItem;
 	OakTabItem* _overflowTabItem;
 
+	NSInteger _tag;
+
 	NSButton* _addTabButton;
 	NSTrackingArea* _trackingArea;
 	BOOL _animateLayoutChanges;
@@ -103,7 +105,6 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 	NSRect _didCloseTabFrame;
 }
 @property (nonatomic) BOOL expanded;
-@property (nonatomic) NSUInteger tag;
 @property (nonatomic) NSPoint mouseDownPos;
 @property (nonatomic) BOOL isMouseInside;
 @end
@@ -671,6 +672,11 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 // = Private Action Methods =
 // ==========================
 
+- (NSInteger)tag
+{
+	return _tag;
+}
+
 - (void)_newTab:(id)sender
 {
 	if([_delegate respondsToSelector:@selector(tabBarViewDidDoubleClick:)])
@@ -708,12 +714,12 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 {
 	if(OakTabItem* tabItem = [self tabItemForView:sender])
 	{
-		self.tag = [_tabItems indexOfObject:tabItem]; // performCloseTab: asks for [sender tag]
+		_tag = [_tabItems indexOfObject:tabItem]; // performCloseTab: asks for [sender tag]
 
 		BOOL closeOther = OakIsAlternateKeyOrMouseEvent();
 		if(_isMouseInside && [[NSApp currentEvent] type] == NSLeftMouseUp && !closeOther && tabItem != _overflowTabItem)
 		{
-			_didCloseTabIndex = self.tag;
+			_didCloseTabIndex = _tag;
 			_didCloseTabFrame = tabItem.targetFrame;
 		}
 		else
@@ -803,7 +809,7 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 
 - (void)performClose:(id)sender
 {
-	self.tag = [_tabItems indexOfObject:_selectedTabItem]; // performCloseTab: asks for [sender tag]
+	_tag = [_tabItems indexOfObject:_selectedTabItem]; // performCloseTab: asks for [sender tag]
 	[NSApp sendAction:@selector(performCloseTab:) to:nil from:self];
 }
 
@@ -813,7 +819,7 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 	{
 		if(OakTabItem* tabItem = [self tabItemForView:aView])
 		{
-			self.tag = [_tabItems indexOfObject:tabItem];
+			_tag = [_tabItems indexOfObject:tabItem];
 			return [_delegate menuForTabBarView:self];
 		}
 	}
