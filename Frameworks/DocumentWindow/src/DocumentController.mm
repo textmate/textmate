@@ -1772,6 +1772,8 @@ namespace
 			if(self.projectPath && !_fileBrowserHistory)
 				self.fileBrowser.url = [NSURL fileURLWithPath:self.projectPath];
 			[self updateFileBrowserStatus:self];
+			if(self.layoutView.tabsAboveDocument)
+				[self.tabBarView expand];
 		}
 
 		if(!makeVisibleFlag && [[self.window firstResponder] isKindOfClass:[NSView class]] && [(NSView*)[self.window firstResponder] isDescendantOf:self.layoutView.fileBrowserView])

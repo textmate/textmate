@@ -11,11 +11,9 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 @interface ProjectLayoutView ()
 @property (nonatomic) NSView* fileBrowserDivider;
 @property (nonatomic) NSView* htmlOutputDivider;
-@property (nonatomic) NSView* fileBrowserTopDivider;
 @property (nonatomic) NSLayoutConstraint* fileBrowserWidthConstraint;
 @property (nonatomic) NSLayoutConstraint* htmlOutputSizeConstraint;
 @property (nonatomic) NSMutableArray* myConstraints;
-@property (nonatomic) BOOL tabsAboveDocument;
 @property (nonatomic) BOOL mouseDownRecursionGuard;
 @end
 
@@ -109,7 +107,6 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 	if(_tabsAboveDocument != flag)
 	{
 		_tabsAboveDocument = flag;
-		_fileBrowserTopDivider = [self replaceView:_fileBrowserTopDivider withView:flag ? OakCreateHorizontalLine([NSColor colorWithString:@"#3F3F3F"], [NSColor colorWithString:@"#878787"]) : nil];
 		[self setNeedsUpdateConstraints:YES];
 	}
 }
@@ -129,7 +126,6 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 		@"documentView"               : _documentView,
 		@"fileBrowserView"            : _fileBrowserView            ?: [NSNull null],
 		@"fileBrowserDivider"         : _fileBrowserDivider         ?: [NSNull null],
-		@"fileBrowserTopDivider"      : _fileBrowserTopDivider      ?: [NSNull null],
 		@"htmlOutputView"             : _htmlOutputView             ?: [NSNull null],
 		@"htmlOutputDivider"          : _htmlOutputDivider          ?: [NSNull null],
 	};
@@ -143,9 +139,9 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 
 	// left + right
 	if(_tabsAboveDocument && _fileBrowserView && _fileBrowserOnRight)
-		CONSTRAINT(@"H:|[tabBarView][fileBrowserDivider]", 0);
+		CONSTRAINT(@"H:|[tabBarView]-(-1)-[fileBrowserDivider]", 0);
 	else if(_tabsAboveDocument && _fileBrowserView)
-		CONSTRAINT(@"H:[fileBrowserDivider][tabBarView]|", 0);
+		CONSTRAINT(@"H:[fileBrowserDivider]-(-1)-[tabBarView]|", 0);
 	else
 		CONSTRAINT(@"H:|[tabBarView]|", 0);
 
@@ -188,44 +184,11 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 		[_myConstraints addObject:self.fileBrowserWidthConstraint];
 
 		// top
+		CONSTRAINT(@"V:|[tabBarView][fileBrowserDivider]", 0);
 		if(_tabsAboveDocument)
-		{
-			CONSTRAINT(@"V:|[fileBrowserTopDivider][fileBrowserView]", 0);
-			CONSTRAINT(@"V:|[fileBrowserTopDivider][fileBrowserDivider]", 0);
-
-			// left
-			if(_fileBrowserOnRight && _htmlOutputView && _htmlOutputOnRight)
-			{
-				CONSTRAINT(@"H:[htmlOutputView][fileBrowserTopDivider]", 0);
-			}
-			else if(_fileBrowserOnRight)
-			{
-				CONSTRAINT(@"H:[documentView][fileBrowserTopDivider]", 0);
-			}
-			else
-			{
-				CONSTRAINT(@"H:|[fileBrowserTopDivider]", 0);
-			}
-
-			// right
-			if(_fileBrowserOnRight)
-			{
-				CONSTRAINT(@"H:[fileBrowserTopDivider]|", 0);
-			}
-			else
-			{
-				CONSTRAINT(@"H:[fileBrowserTopDivider][documentView]", 0);
-			}
-
-			// Setup file browser’s header to match height of tab bar view
-			if(_fileBrowserHeaderView)
-				[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:_fileBrowserHeaderView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:_tabBarView attribute:NSLayoutAttributeHeight multiplier:1 constant:-2]];
-		}
+			CONSTRAINT(@"V:|[fileBrowserView]", 0);
 		else
-		{
 			CONSTRAINT(@"V:|[tabBarView][fileBrowserView]", 0);
-			CONSTRAINT(@"V:|[tabBarView][fileBrowserDivider]", 0);
-		}
 
 		// bottom
 		if(_htmlOutputView && !_htmlOutputOnRight)

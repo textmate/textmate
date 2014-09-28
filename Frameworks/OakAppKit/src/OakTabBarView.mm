@@ -161,6 +161,11 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 	self.expanded = _expanded || [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableTabBarCollapsingKey];
 }
 
+- (void)expand
+{
+	self.expanded = YES;
+}
+
 - (void)setExpanded:(BOOL)flag
 {
 	if(_expanded == flag)

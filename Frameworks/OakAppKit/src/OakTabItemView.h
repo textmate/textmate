@@ -3,7 +3,7 @@
 
 @class OakRolloverButton;
 
-@interface OakTabBarStyle : NSObject
+PUBLIC @interface OakTabBarStyle : NSObject
 + (instancetype)sharedInstance;
 
 @property (nonatomic) CGFloat tabViewSpacing;
