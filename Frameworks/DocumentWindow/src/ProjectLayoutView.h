@@ -10,4 +10,5 @@
 
 @property (nonatomic) NSSize htmlOutputSize;
 @property (nonatomic) BOOL htmlOutputOnRight;
+@property (nonatomic) BOOL tabsAboveDocument;
 @end
