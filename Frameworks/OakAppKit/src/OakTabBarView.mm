@@ -315,7 +315,13 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 
 - (void)resizeTabItemViewFrames
 {
-	if(!_tabItems.count || !_expanded)
+	CGFloat const tabSpacing  = OakTabBarStyle.sharedInstance.tabViewSpacing;
+	CGFloat const tabMinWidth = OakTabBarStyle.sharedInstance.minimumTabSize;
+	CGFloat const tabMaxWidth = OakTabBarStyle.sharedInstance.maximumTabSize;
+
+	CGFloat width = NSMinX(_addTabButton.frame);
+
+	if(!_tabItems.count || !_expanded || width < tabMinWidth)
 	{
 		for(OakTabItem* tabItem in _tabItems)
 		{
@@ -324,12 +330,6 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 		}
 		return;
 	}
-
-	CGFloat const tabSpacing  = OakTabBarStyle.sharedInstance.tabViewSpacing;
-	CGFloat const tabMinWidth = OakTabBarStyle.sharedInstance.minimumTabSize;
-	CGFloat const tabMaxWidth = OakTabBarStyle.sharedInstance.maximumTabSize;
-
-	CGFloat width = NSMinX(_addTabButton.frame);
 
 	BOOL missingDraggedTab =  _draggedTabItem && !_preliminaryTabItem;
 	BOOL hasSomeonesTab    = !_draggedTabItem &&  _preliminaryTabItem;
