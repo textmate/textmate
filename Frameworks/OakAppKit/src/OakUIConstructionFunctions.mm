@@ -113,14 +113,16 @@ NSComboBox* OakCreateComboBox (NSObject* accessibilityLabel)
 	id _inactiveBackgroundValue;
 }
 
-- (instancetype)initWithBackground:(id)activeBackground inactiveBackground:(id)inactiveBackground
+- (void)setupHeaderBackground
 {
-	if(self = [super initWithFrame:NSZeroRect])
-	{
-		_activeBackgroundValue   = activeBackground;
-		_inactiveBackgroundValue = inactiveBackground;
-	}
-	return self;
+	self.activeBackgroundGradient   = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1] endingColor:[NSColor colorWithCalibratedWhite:0.760 alpha:1]];
+	self.inactiveBackgroundGradient = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1] endingColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1]];
+}
+
+- (void)setupStatusBarBackground
+{
+	self.activeBackgroundGradient   = [[NSGradient alloc] initWithColorsAndLocations:[NSColor colorWithCalibratedWhite:1 alpha:0.68], 0.0, [NSColor colorWithCalibratedWhite:1 alpha:0.5], 0.0416, [NSColor colorWithCalibratedWhite:1 alpha:0], 1.0, nil];
+	self.inactiveBackgroundGradient = [[NSGradient alloc] initWithColorsAndLocations:[NSColor colorWithCalibratedWhite:1 alpha:0.68], 0.0, [NSColor colorWithCalibratedWhite:1 alpha:0.5], 0.0416, [NSColor colorWithCalibratedWhite:1 alpha:0], 1.0, nil];
 }
 
 - (void)viewWillMoveToWindow:(NSWindow*)newWindow

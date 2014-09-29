@@ -46,8 +46,9 @@ static NSTextField* OakCreateTextField ()
 @implementation HOStatusBar
 - (id)initWithFrame:(NSRect)frame
 {
-	if(self = [super initWithBackground:[[NSGradient alloc] initWithColorsAndLocations:[NSColor colorWithCalibratedWhite:1 alpha:0.68], 0.0, [NSColor colorWithCalibratedWhite:1 alpha:0.5], 0.0416, [NSColor colorWithCalibratedWhite:1 alpha:0], 1.0, nil] inactiveBackground:[[NSGradient alloc] initWithColorsAndLocations:[NSColor colorWithCalibratedWhite:1 alpha:0.68], 0.0, [NSColor colorWithCalibratedWhite:1 alpha:0.5], 0.0416, [NSColor colorWithCalibratedWhite:1 alpha:0], 1.0, nil]])
+	if(self = [super initWithFrame:frame])
 	{
+		[self setupStatusBarBackground];
 		_indeterminateProgress = YES;
 
 		_divider                  = OakCreateDividerImageView();

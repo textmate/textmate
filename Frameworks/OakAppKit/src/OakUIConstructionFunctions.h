@@ -1,7 +1,8 @@
 #import <oak/misc.h>
 
 PUBLIC @interface OakBackgroundFillView : NSView
-- (instancetype)initWithBackground:(id)activeBackground inactiveBackground:(id)inactiveBackground;
+- (void)setupHeaderBackground;
+- (void)setupStatusBarBackground;
 @property (nonatomic) NSImage* activeBackgroundImage;
 @property (nonatomic) NSImage* inactiveBackgroundImage;
 @property (nonatomic) NSColor* activeBackgroundColor;
