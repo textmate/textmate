@@ -216,6 +216,10 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 			{
 				CONSTRAINT(@"H:[fileBrowserTopDivider][documentView]", 0);
 			}
+
+			// Setup file browser’s header to match height of tab bar view
+			if(_fileBrowserHeaderView)
+				[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:_fileBrowserHeaderView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:_tabBarView attribute:NSLayoutAttributeHeight multiplier:1 constant:-2]];
 		}
 		else
 		{
