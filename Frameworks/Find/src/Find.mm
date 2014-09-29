@@ -49,10 +49,10 @@ static NSAttributedString* PathComponentString (std::string const& path, std::st
 
 	return ns::attr_string_t()
 		<< ns::style::line_break(NSLineBreakByTruncatingMiddle)
-		<< [NSFont systemFontOfSize:11]
+		<< [NSFont controlContentFontOfSize:0]
 		<< [NSColor darkGrayColor]
 		<< text::join(std::vector<std::string>(components.begin(), components.end()), " ▸ ")
-		<< [NSFont boldSystemFontOfSize:11]
+		<< ns::style::bold
 		<< [NSColor blackColor]
 		<< (path::is_absolute(path) ? path::display_name(path) : path);
 }
@@ -74,7 +74,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 	ns::attr_string_t str;
 	str.add(ns::style::line_break(NSLineBreakByTruncatingTail));
 	str.add([NSColor darkGrayColor]);
-	str.add([NSFont systemFontOfSize:11]);
+	str.add([NSFont controlContentFontOfSize:11]);
 
 	str.add(text::pad(++n, 4) + ": ");
 
@@ -93,7 +93,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 
 		if(inMatch)
 		{
-			str.add([NSFont boldSystemFontOfSize:11]);
+			str.add(ns::style::bold);
 			str.add([NSColor blackColor]);
 		}
 
@@ -104,7 +104,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 			inMatch = false;
 
 			str.add([NSColor darkGrayColor]);
-			str.add([NSFont systemFontOfSize:11]);
+			str.add(ns::style::unbold);
 		}
 
 		str.add(tabs_to_em_spaces(text.substr(it, eol-it)));
@@ -115,8 +115,8 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 
 			if(inMatch)
 			{
-				str.add([NSFont systemFontOfSize:11]);
 				str.add([NSColor darkGrayColor]);
+				str.add(ns::style::unbold);
 			}
 
 			if(++eol == to)
@@ -272,7 +272,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 	if(!utf8::is_valid(prefix.begin(), prefix.end()) && utf8::is_valid(middle.begin(), middle.end()) && utf8::is_valid(suffix.begin(), suffix.end()))
 	{
 		return ns::attr_string_t()
-			<< [NSColor darkGrayColor] << [NSFont systemFontOfSize:11]
+			<< [NSColor darkGrayColor] << [NSFont controlContentFontOfSize:11]
 			<< ns::style::line_break(NSLineBreakByTruncatingTail)
 			<< text::format("%zu-%zu: Range is not valid UTF-8, please contact: http://macromates.com/support", m.first, m.last);
 	}
@@ -1023,14 +1023,13 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 			cellView.identifier = identifier;
 			NSImageView* imageView = [NSImageView new];
 			NSTextField* textField = OakCreateLabel();
-			textField.alignment = NSLeftTextAlignment;
-			textField.font      = [NSFont controlContentFontOfSize:[NSFont systemFontSizeForControlSize:NSSmallControlSize]];
+			textField.font = [NSFont controlContentFontOfSize:0];
 
 			NSButton* countOfLeafs = [NSButton new];
 			[[countOfLeafs cell] setHighlightsBy:NSNoCellMask];
 			countOfLeafs.alignment  = NSCenterTextAlignment;
 			countOfLeafs.bezelStyle = NSInlineBezelStyle;
-			countOfLeafs.font       = [NSFont controlContentFontOfSize:[NSFont systemFontSizeForControlSize:NSSmallControlSize]];
+			countOfLeafs.font       = [NSFont labelFontOfSize:0];
 			countOfLeafs.identifier = @"countOfLeafs";
 
 			NSButton* remove = [NSButton new];
@@ -1051,8 +1050,10 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 			[textField setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
 			[countOfLeafs setContentCompressionResistancePriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
 
-			[cellView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(6)-[icon(==16)]-(3)-[text]-(4)-[count]-(>=4)-[remove(==16)]-(12)-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
-			[cellView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[icon(==16,==remove)]-(3)-|" options:NSLayoutFormatAlignAllLeading metrics:nil views:views]];
+			[cellView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(6)-[icon(==16)]-(3)-[text]-(>=8)-[remove(==16)]-(12)-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
+			[cellView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[text]-(4)-[count]"                                        options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
+			[cellView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[count]-(>=4)-[remove]"                                    options:0 metrics:nil views:views]];
+			[cellView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[icon(==16,==remove)]-(3)-|"                               options:0 metrics:nil views:views]];
 
 			[imageView bind:NSValueBinding toObject:cellView withKeyPath:@"objectValue.icon" options:nil];
 			[textField bind:NSValueBinding toObject:cellView withKeyPath:@"objectValue.displayPath" options:nil];
