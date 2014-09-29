@@ -105,6 +105,7 @@
 - (void)setupTabBarView:(OakBackgroundFillView*)aView
 {
 	[self updateView:aView forState:@"tabBar"];
+	[aView setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationVertical];
 }
 
 // =================
