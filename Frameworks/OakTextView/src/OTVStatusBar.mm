@@ -68,7 +68,7 @@ static NSMenuItem* OakCreateIndentMenuItem (NSString* title, SEL action, id targ
 
 - (id)initWithFrame:(NSRect)aRect
 {
-	if(self = [super initWithGradient:[[NSGradient alloc] initWithColorsAndLocations:[NSColor colorWithCalibratedWhite:1 alpha:0.68], 0.0, [NSColor colorWithCalibratedWhite:1 alpha:0.5], 0.0416, [NSColor colorWithCalibratedWhite:1 alpha:0], 1.0, nil] inactiveGradient:[[NSGradient alloc] initWithColorsAndLocations:[NSColor colorWithCalibratedWhite:1 alpha:0.68], 0.0, [NSColor colorWithCalibratedWhite:1 alpha:0.5], 0.0416, [NSColor colorWithCalibratedWhite:1 alpha:0], 1.0, nil]])
+	if(self = [super initWithBackground:[[NSGradient alloc] initWithColorsAndLocations:[NSColor colorWithCalibratedWhite:1 alpha:0.68], 0.0, [NSColor colorWithCalibratedWhite:1 alpha:0.5], 0.0416, [NSColor colorWithCalibratedWhite:1 alpha:0], 1.0, nil] inactiveBackground:[[NSGradient alloc] initWithColorsAndLocations:[NSColor colorWithCalibratedWhite:1 alpha:0.68], 0.0, [NSColor colorWithCalibratedWhite:1 alpha:0.5], 0.0416, [NSColor colorWithCalibratedWhite:1 alpha:0], 1.0, nil]])
 	{
 		self.selectionField               = OakCreateTextField(@"1:1");
 		self.grammarPopUp                 = OakCreateStatusBarPopUpButton(@"", @"Grammar");

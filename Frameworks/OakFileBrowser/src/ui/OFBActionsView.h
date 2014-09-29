@@ -1,6 +1,6 @@
-#import <OakAppKit/OakGradientView.h>
+#import <OakAppKit/OakUIConstructionFunctions.h>
 
-@interface OFBActionsView : OakGradientView
+@interface OFBActionsView : OakBackgroundFillView
 @property (nonatomic) NSButton* createButton;
 @property (nonatomic) NSPopUpButton* actionsPopUpButton;
 @property (nonatomic) NSButton* reloadButton;

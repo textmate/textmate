@@ -37,7 +37,7 @@ static NSPopUpButton* OakCreateFolderPopUpButton ()
 @implementation OFBHeaderView
 - (id)initWithFrame:(NSRect)aRect
 {
-	if(self = [super initWithGradient:[[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1] endingColor:[NSColor colorWithCalibratedWhite:0.760 alpha:1]] inactiveGradient:[[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1] endingColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1]]])
+	if(self = [super initWithBackground:[[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1] endingColor:[NSColor colorWithCalibratedWhite:0.760 alpha:1]] inactiveBackground:[[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1] endingColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1]]])
 	{
 		self.folderPopUpButton       = OakCreateFolderPopUpButton();
 		self.goBackButton            = OakCreateImageButton(NSImageNameGoLeftTemplate);

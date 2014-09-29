@@ -1,6 +1,6 @@
-#import <OakAppKit/OakGradientView.h>
+#import <OakAppKit/OakUIConstructionFunctions.h>
 
-@interface OFBHeaderView : OakGradientView
+@interface OFBHeaderView : OakBackgroundFillView
 @property (nonatomic) NSPopUpButton* folderPopUpButton;
 @property (nonatomic) NSButton* goBackButton;
 @property (nonatomic) NSButton* goForwardButton;
