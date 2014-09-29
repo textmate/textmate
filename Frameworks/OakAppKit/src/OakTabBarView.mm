@@ -173,7 +173,7 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 
 - (NSSize)intrinsicContentSize
 {
-	return NSMakeSize(NSViewNoInstrinsicMetric, _expanded ? self.activeBackgroundImage.size.height : 2);
+	return NSMakeSize(OakTabBarStyle.sharedInstance.minimumTabSize, _expanded ? self.activeBackgroundImage.size.height : 2);
 }
 
 - (BOOL)isOpaque
