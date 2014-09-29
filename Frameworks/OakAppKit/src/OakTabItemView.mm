@@ -223,7 +223,7 @@
 		[self removeConstraints:_myConstraints];
 	_myConstraints = [NSMutableArray new];
 
-	NSDictionary* views = @{ @"left" : _leftCapView, @"right" : _rightCapView, @"title" : _textField, @"close" : _closeButton };
+	NSDictionary* views = @{ @"left" : _leftCapView, @"right" : _rightCapView, @"title" : _textField, @"close" : _closeButton, @"overflow" : (_overflowButton ?: [NSNull null]) };
 	[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[left]-(3)-[close]-(>=3)-[title]-(>=3)-[right]-(0@450)-|" options:0 metrics:nil views:views]];
 	[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[left(==right)]|" options:0 metrics:nil views:views]];
 	[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[close]-(5)-|" options:0 metrics:nil views:views]];
@@ -235,7 +235,6 @@
 
 	if(_overflowButton)
 	{
-		NSDictionary* views = @{ @"left" : _leftCapView, @"right" : _rightCapView, @"title" : _textField, @"close" : _closeButton, @"overflow" : _overflowButton };
 		[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[title]-(>=3)-[overflow]-(3)-[right]" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
 		[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[overflow]-(7)-|" options:0 metrics:nil views:views]];
 	}
