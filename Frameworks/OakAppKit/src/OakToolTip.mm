@@ -51,6 +51,7 @@ static __unsafe_unretained OakToolTip* LastToolTip;
 		[field setBordered:NO];
 		[field setDrawsBackground:NO];
 		[field setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
+		[field setFont:[NSFont toolTipsFontOfSize:0]];
 		[field setStringValue:@"This is a nice little code block"];
 
 		[self setContentView:field];
