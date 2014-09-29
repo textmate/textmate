@@ -1,10 +1,13 @@
 #import <oak/misc.h>
 
 PUBLIC @interface OakBackgroundFillView : NSView
+- (instancetype)initWithBackground:(id)activeBackground inactiveBackground:(id)inactiveBackground;
 @property (nonatomic) NSImage* activeBackgroundImage;
 @property (nonatomic) NSImage* inactiveBackgroundImage;
 @property (nonatomic) NSColor* activeBackgroundColor;
 @property (nonatomic) NSColor* inactiveBackgroundColor;
+@property (nonatomic) NSGradient* activeBackgroundGradient;
+@property (nonatomic) NSGradient* inactiveBackgroundGradient;
 @property (nonatomic) BOOL active;
 @end
 

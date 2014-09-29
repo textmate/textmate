@@ -108,6 +108,21 @@ NSComboBox* OakCreateComboBox (NSObject* accessibilityLabel)
 // =========================
 
 @implementation OakBackgroundFillView
+{
+	id _activeBackgroundValue;
+	id _inactiveBackgroundValue;
+}
+
+- (instancetype)initWithBackground:(id)activeBackground inactiveBackground:(id)inactiveBackground
+{
+	if(self = [super initWithFrame:NSZeroRect])
+	{
+		_activeBackgroundValue   = activeBackground;
+		_inactiveBackgroundValue = inactiveBackground;
+	}
+	return self;
+}
+
 - (void)viewWillMoveToWindow:(NSWindow*)newWindow
 {
 	if(self.window)
@@ -142,69 +157,72 @@ NSComboBox* OakCreateComboBox (NSObject* accessibilityLabel)
 	self.needsDisplay = YES;
 }
 
-- (void)setActiveBackgroundImage:(NSImage*)anImage
+- (void)setActiveBackgroundValue:(id)value
 {
-	if(_activeBackgroundImage == anImage)
+	if(value == _activeBackgroundValue || [value isEqualTo:_activeBackgroundValue])
 		return;
-	_activeBackgroundImage = anImage;
+	_activeBackgroundValue = value;
 	if(_active)
 		self.needsDisplay = YES;
 }
 
-- (void)setInactiveBackgroundImage:(NSImage*)anImage
+- (void)setInactiveBackgroundValue:(id)value
 {
-	if(_inactiveBackgroundImage == anImage)
+	if(value == _inactiveBackgroundValue || [value isEqualTo:_inactiveBackgroundValue])
 		return;
-	_inactiveBackgroundImage = anImage;
+	_inactiveBackgroundValue = value;
 	if(!_active)
 		self.needsDisplay = YES;
 }
 
-- (void)setActiveBackgroundColor:(NSColor*)anColor
-{
-	if(_activeBackgroundColor == anColor)
-		return;
-	_activeBackgroundColor = anColor;
-	if(_active)
-		self.needsDisplay = YES;
-}
+- (void)setActiveBackgroundColor:(NSColor*)aColor             { self.activeBackgroundValue = aColor;    }
+- (void)setActiveBackgroundImage:(NSImage*)anImage            { self.activeBackgroundValue = anImage;   }
+- (void)setActiveBackgroundGradient:(NSGradient*)aGradient    { self.activeBackgroundValue = aGradient; }
+- (void)setInactiveBackgroundColor:(NSColor*)aColor           { self.inactiveBackgroundValue = aColor;    }
+- (void)setInactiveBackgroundImage:(NSImage*)anImage          { self.inactiveBackgroundValue = anImage;   }
+- (void)setInactiveBackgroundGradient:(NSGradient*)aGradient  { self.inactiveBackgroundValue = aGradient; }
 
-- (void)setInactiveBackgroundColor:(NSColor*)anColor
-{
-	if(_inactiveBackgroundColor == anColor)
-		return;
-	_inactiveBackgroundColor = anColor;
-	if(!_active)
-		self.needsDisplay = YES;
-}
+- (NSColor*)activeBackgroundColor          { return [_activeBackgroundValue isKindOfClass:[NSColor class]]      ? _activeBackgroundValue   : nil; }
+- (NSImage*)activeBackgroundImage          { return [_activeBackgroundValue isKindOfClass:[NSImage class]]      ? _activeBackgroundValue   : nil; }
+- (NSGradient*)activeBackgroundGradient    { return [_activeBackgroundValue isKindOfClass:[NSGradient class]]   ? _activeBackgroundValue   : nil; }
+- (NSColor*)inactiveBackgroundColor        { return [_inactiveBackgroundValue isKindOfClass:[NSColor class]]    ? _inactiveBackgroundValue : nil; }
+- (NSImage*)inactiveBackgroundImage        { return [_inactiveBackgroundValue isKindOfClass:[NSImage class]]    ? _inactiveBackgroundValue : nil; }
+- (NSGradient*)inactiveBackgroundGradient  { return [_inactiveBackgroundValue isKindOfClass:[NSGradient class]] ? _inactiveBackgroundValue : nil; }
 
 - (BOOL)isOpaque
 {
-	return _activeBackgroundColor != nil;
+	// When an `NSTextField` with `NSBackgroundStyleRaised` redraws itself in an inactive textured window, it only draws as dimmed if none of its parent views are opaque, so we only return YES here if we fill with a color, as we draw text labels on gradient status bars <rdar://13161778>
+	return self.activeBackgroundColor != nil;
 }
 
 - (NSSize)intrinsicContentSize
 {
-	if(NSImage* image = _activeBackgroundImage ?: _inactiveBackgroundImage)
+	if(NSImage* image = self.activeBackgroundImage ?: self.inactiveBackgroundImage)
 			return image.size;
 	else	return NSMakeSize(NSViewNoInstrinsicMetric, NSViewNoInstrinsicMetric);
 }
 
-- (NSColor*)currentColor
-{
-	if(NSImage* image = _active ? _activeBackgroundImage : _inactiveBackgroundImage)
-		return [NSColor colorWithPatternImage:image];
-	return _active ? _activeBackgroundColor : (_inactiveBackgroundColor ?: _activeBackgroundColor);
-}
-
 - (void)drawRect:(NSRect)aRect
 {
-	if(NSColor* color = [self currentColor])
+	id value = _active || !_inactiveBackgroundValue ? _activeBackgroundValue : _inactiveBackgroundValue;
+	if([value isKindOfClass:[NSGradient class]])
 	{
-		[color set];
+		NSGradient* gradient = value;
+		[gradient drawInRect:self.bounds angle:270];
+	}
+	else if([value isKindOfClass:[NSImage class]])
+	{
+		NSImage* image = value;
+		[[NSColor colorWithPatternImage:image] set];
 		CGContextRef context = (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort];
 		CGAffineTransform affineTransform = CGContextGetCTM(context);
 		CGContextSetPatternPhase(context, CGSizeMake(affineTransform.tx, affineTransform.ty));
+		NSRectFill(aRect);
+	}
+	else if([value isKindOfClass:[NSColor class]])
+	{
+		NSColor* color = value;
+		[color set];
 		NSRectFill(aRect);
 	}
 }
