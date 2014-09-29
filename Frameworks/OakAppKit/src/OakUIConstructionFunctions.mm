@@ -30,7 +30,7 @@ NSTextField* OakCreateSmallLabel (NSString* label, Class cl)
 {
 	NSTextField* res = OakCreateLabel(label, cl);
 	res.alignment = NSLeftTextAlignment;
-	res.font      = [NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]];
+	res.font      = [NSFont labelFontOfSize:0];
 	return res;
 }
 
