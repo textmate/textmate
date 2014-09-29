@@ -8,7 +8,7 @@ NSFont* OakStatusBarFont ()
 
 NSFont* OakControlFont ()
 {
-	return [NSFont controlContentFontOfSize:[NSFont systemFontSizeForControlSize:NSRegularControlSize]];
+	return [NSFont messageFontOfSize:0];
 }
 
 NSTextField* OakCreateLabel (NSString* label, Class cl)
@@ -20,7 +20,7 @@ NSTextField* OakCreateLabel (NSString* label, Class cl)
 	res.bordered        = NO;
 	res.drawsBackground = NO;
 	res.editable        = NO;
-	res.font            = [NSFont controlContentFontOfSize:[NSFont systemFontSize]];
+	res.font            = OakControlFont();
 	res.selectable      = NO;
 	res.stringValue     = label;
 	return res;
@@ -30,7 +30,7 @@ NSTextField* OakCreateSmallLabel (NSString* label, Class cl)
 {
 	NSTextField* res = OakCreateLabel(label, cl);
 	res.alignment = NSLeftTextAlignment;
-	res.font      = [NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]];
+	res.font      = [NSFont messageFontOfSize:11];
 	return res;
 }
 
