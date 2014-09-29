@@ -2,7 +2,6 @@
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <ns/ns.h>
-#import "highlight_ranges.h"
 
 @implementation OakBundleItemCell
 - (id)copyWithZone:(NSZone*)zone
@@ -28,10 +27,6 @@
 	if(OakNotEmptyString(self.attributedTabTrigger.string))
 	{
 		NSMutableAttributedString* attrStr = [self.attributedTabTrigger mutableCopy];
-
-		NSDictionary* highlightAttributes = @{ NSUnderlineStyleAttributeName : @1, NSFontAttributeName : [NSFont boldSystemFontOfSize:[NSFont systemFontSizeForControlSize:NSSmallControlSize]] };
-		HighlightRangesWithAttribute(attrStr, FLMatchingTextAttributeName, highlightAttributes);
-
 		[attrStr appendAttributedString:[[NSAttributedString alloc] initWithString:@"⇥" attributes:nil]];
 		CFTypeRef str = (CFAttributedStringRef)CFBridgingRetain(attrStr);
 
