@@ -25,7 +25,7 @@ NSButton* OakCreateClickableStatusBar ()
 	res.alignment  = NSLeftTextAlignment;
 	res.bordered   = NO;
 	res.buttonType = NSToggleButton;
-	res.font       = [NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]];
+	res.font       = OakStatusBarFont();
 	res.title      = @"";
 
 	[res setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
