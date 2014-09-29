@@ -85,20 +85,12 @@ static NSOutlineView* OakCreateOutlineView (NSScrollView** scrollViewOut, NSObje
 	OakSetAccessibilityLabel(res, accessibilityLabel);
 
 	NSTableColumn* tableColumn = [[NSTableColumn alloc] initWithIdentifier:@"checkbox"];
-	NSButtonCell* dataCell = [NSButtonCell new];
-	dataCell.buttonType    = NSSwitchButton;
-	dataCell.controlSize   = NSSmallControlSize;
-	dataCell.imagePosition = NSImageOnly;
-	dataCell.font          = [NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]];
-	tableColumn.dataCell = dataCell;
 	tableColumn.width    = 50;
 	[res addTableColumn:tableColumn];
 	[res setOutlineTableColumn:tableColumn];
 
 	tableColumn = [[NSTableColumn alloc] initWithIdentifier:@"match"];
 	[tableColumn setEditable:NO];
-	NSTextFieldCell* cell = tableColumn.dataCell;
-	cell.font = [NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]];
 	[res addTableColumn:tableColumn];
 
 	res.rowHeight = 14;
