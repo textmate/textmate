@@ -3,7 +3,7 @@
 
 NSFont* OakStatusBarFont ()
 {
-	return [NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]];
+	return [NSFont messageFontOfSize:11];
 }
 
 NSFont* OakControlFont ()
