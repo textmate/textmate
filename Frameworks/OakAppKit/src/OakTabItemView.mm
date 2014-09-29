@@ -169,7 +169,7 @@
 
 		_textField = OakCreateLabel(aTitle);
 		[_textField setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
-		[_textField setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
+		[_textField setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow+1 forOrientation:NSLayoutConstraintOrientationHorizontal];
 		[self updateTextFieldTitle];
 
 		[self updateStyle];
@@ -230,7 +230,7 @@
 	[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[title]-(5)-|" options:0 metrics:nil views:views]];
 
 	NSLayoutConstraint* centerTitleConstraint = [NSLayoutConstraint constraintWithItem:_textField attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeCenterX multiplier:1 constant:0];
-	centerTitleConstraint.priority = NSLayoutPriorityDefaultLow-1;
+	centerTitleConstraint.priority = NSLayoutPriorityFittingSizeCompression-1;
 	[_myConstraints addObject:centerTitleConstraint];
 
 	if(_overflowButton)
