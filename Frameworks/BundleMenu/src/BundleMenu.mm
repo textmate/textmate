@@ -139,7 +139,7 @@ bundles::item_ptr OakShowMenuForBundleItems (std::vector<bundles::item_ptr> cons
 		return items.front();
 
 	NSMenu* menu = [NSMenu new];
-	[menu setFont:[NSFont menuFontOfSize:[NSFont smallSystemFontSize]]];
+	[menu setFont:[NSFont menuFontOfSize:11]];
 	OakAddBundlesToMenu(items, false, menu, @selector(performBundleItemWithUUIDStringFrom:));
 	[menu update];
 

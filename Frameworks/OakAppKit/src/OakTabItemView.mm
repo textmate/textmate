@@ -294,7 +294,7 @@
 
 	NSDictionary* attrs = @{
 		NSParagraphStyleAttributeName  : parStyle,
-		NSFontAttributeName            : [NSFont boldSystemFontOfSize:[NSFont systemFontSizeForControlSize:NSSmallControlSize]],
+		NSFontAttributeName            : [NSFont boldSystemFontOfSize:11],
 		NSForegroundColorAttributeName : [NSColor colorWithCalibratedWhite:(self.active ? 0.2 : 0.5) alpha:1],
 		NSShadowAttributeName          : shadow,
 	};
