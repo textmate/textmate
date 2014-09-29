@@ -335,6 +335,88 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 }
 @end
 
+@interface OakSearchResultsHeaderCellView : NSTableCellView
+@property (nonatomic) NSString* countOfLeafs;
+@property (nonatomic) NSButton* countOfLeafsButton;
+@property (nonatomic) NSButton* removeButton;
+@end
+
+@implementation OakSearchResultsHeaderCellView
+- (id)initWithOutlineView:(NSOutlineView*)anOutlineView
+{
+	if((self = [super init]))
+	{
+		NSImageView* imageView = [NSImageView new];
+		NSTextField* textField = OakCreateLabel();
+		textField.font = [NSFont controlContentFontOfSize:0];
+
+		NSButton* countOfLeafs = [NSButton new];
+		[[countOfLeafs cell] setHighlightsBy:NSNoCellMask];
+		countOfLeafs.alignment  = NSCenterTextAlignment;
+		countOfLeafs.bezelStyle = NSInlineBezelStyle;
+		countOfLeafs.font       = [NSFont labelFontOfSize:0];
+		countOfLeafs.identifier = @"countOfLeafs";
+
+		NSButton* remove = [NSButton new];
+		[[remove cell] setControlSize:NSSmallControlSize];
+		remove.bezelStyle = NSRoundRectBezelStyle;
+		remove.buttonType = NSMomentaryPushInButton;
+		remove.image      = [NSImage imageNamed:NSImageNameRemoveTemplate];
+
+		NSDictionary* views = @{ @"icon" : imageView, @"text" : textField, @"count" : countOfLeafs, @"remove" : remove };
+		for(NSView* child in [views allValues])
+		{
+			[child setTranslatesAutoresizingMaskIntoConstraints:NO];
+			[self addSubview:child];
+		}
+
+		[textField setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
+		[countOfLeafs setContentCompressionResistancePriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
+
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(6)-[icon(==16)]-(3)-[text]-(>=8)-[remove(==16)]-(12)-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[text]-(4)-[count]"                                        options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[count]-(>=4)-[remove]"                                    options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[icon(==16,==remove)]-(3)-|"                               options:0 metrics:nil views:views]];
+
+		[imageView bind:NSValueBinding toObject:self withKeyPath:@"objectValue.icon" options:nil];
+		[textField bind:NSValueBinding toObject:self withKeyPath:@"objectValue.displayPath" options:nil];
+
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(outlineViewItemDidExpandCollapse:) name:NSOutlineViewItemDidExpandNotification object:anOutlineView];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(outlineViewItemDidExpandCollapse:) name:NSOutlineViewItemDidCollapseNotification object:anOutlineView];
+
+		self.imageView          = imageView;
+		self.textField          = textField;
+		self.countOfLeafsButton = countOfLeafs;
+		self.removeButton       = remove;
+	}
+	return self;
+}
+
+- (void)dealloc
+{
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)setCountOfLeafs:(NSString*)aString
+{
+	_countOfLeafs = aString;
+	_countOfLeafsButton.title  = aString ?: @"0";
+	_countOfLeafsButton.hidden = aString == nil;
+}
+
+- (void)outlineViewItemDidExpandCollapse:(NSNotification*)aNotification
+{
+	NSOutlineView* outlineView = [aNotification object];
+	NSDictionary* userInfo = [aNotification userInfo];
+	FFResultNode* item = userInfo[@"NSObject"];
+	if(item == self.objectValue)
+		_countOfLeafsButton.hidden = [outlineView isItemExpanded:item];
+}
+
+- (void)outlineViewItemDidExpand:(NSNotification*)aNotification   { [self outlineViewItemDidExpandCollapse:aNotification]; }
+- (void)outlineViewItemDidCollapse:(NSNotification*)aNotification { [self outlineViewItemDidExpandCollapse:aNotification]; }
+@end
+
 @interface Find () <OakFindServerProtocol, NSOutlineViewDataSource, NSOutlineViewDelegate>
 @property (nonatomic) FindWindowController* windowController;
 @property (nonatomic) FFDocumentSearch* documentSearch;
@@ -957,27 +1039,6 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	}
 }
 
-- (void)delayedReloadItem:(FFResultNode*)item
-{
-	static size_t NestedCall = false;
-	if(!NestedCall)
-	{
-		NestedCall = true;
-		[_windowController.resultsOutlineView reloadData];
-		NestedCall = false;
-	}
-}
-
-- (void)outlineViewItemDidExpandCollapse:(NSNotification*)aNotification
-{
-	NSDictionary* userInfo = [aNotification userInfo];
-	FFResultNode* item = userInfo[@"NSObject"];
-	[self performSelector:@selector(delayedReloadItem:) withObject:item afterDelay:0];
-}
-
-- (void)outlineViewItemDidExpand:(NSNotification*)aNotification   { [self outlineViewItemDidExpandCollapse:aNotification]; }
-- (void)outlineViewItemDidCollapse:(NSNotification*)aNotification { [self outlineViewItemDidExpandCollapse:aNotification]; }
-
 - (NSView*)outlineView:(NSOutlineView*)outlineView viewForTableColumn:(NSTableColumn*)tableColumn item:(FFResultNode*)item
 {
 	NSString* identifier = tableColumn.identifier ?: @"group";
@@ -1016,63 +1077,18 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	}
 	else
 	{
-		NSTableCellView* cellView = res;
+		OakSearchResultsHeaderCellView* cellView = res;
 		if(!cellView)
 		{
-			res = cellView = [NSTableCellView new];
+			res = cellView = [[OakSearchResultsHeaderCellView alloc] initWithOutlineView:outlineView];
 			cellView.identifier = identifier;
-			NSImageView* imageView = [NSImageView new];
-			NSTextField* textField = OakCreateLabel();
-			textField.font = [NSFont controlContentFontOfSize:0];
-
-			NSButton* countOfLeafs = [NSButton new];
-			[[countOfLeafs cell] setHighlightsBy:NSNoCellMask];
-			countOfLeafs.alignment  = NSCenterTextAlignment;
-			countOfLeafs.bezelStyle = NSInlineBezelStyle;
-			countOfLeafs.font       = [NSFont labelFontOfSize:0];
-			countOfLeafs.identifier = @"countOfLeafs";
-
-			NSButton* remove = [NSButton new];
-			[[remove cell] setControlSize:NSSmallControlSize];
-			remove.bezelStyle = NSRoundRectBezelStyle;
-			remove.buttonType = NSMomentaryPushInButton;
-			remove.image      = [NSImage imageNamed:NSImageNameRemoveTemplate];
-			remove.action     = @selector(takeSearchResultToRemoveFrom:);
-			remove.target     = self;
-
-			NSDictionary* views = @{ @"icon" : imageView, @"text" : textField, @"count" : countOfLeafs, @"remove" : remove };
-			for(NSView* child in [views allValues])
-			{
-				[child setTranslatesAutoresizingMaskIntoConstraints:NO];
-				[cellView addSubview:child];
-			}
-
-			[textField setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
-			[countOfLeafs setContentCompressionResistancePriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
-
-			[cellView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(6)-[icon(==16)]-(3)-[text]-(>=8)-[remove(==16)]-(12)-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
-			[cellView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[text]-(4)-[count]"                                        options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
-			[cellView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[count]-(>=4)-[remove]"                                    options:0 metrics:nil views:views]];
-			[cellView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[icon(==16,==remove)]-(3)-|"                               options:0 metrics:nil views:views]];
-
-			[imageView bind:NSValueBinding toObject:cellView withKeyPath:@"objectValue.icon" options:nil];
-			[textField bind:NSValueBinding toObject:cellView withKeyPath:@"objectValue.displayPath" options:nil];
-
-			cellView.imageView = imageView;
-			cellView.textField = textField;
-		}
-
-		for(NSButton* view in [cellView subviews])
-		{
-			if([view.identifier isEqualToString:@"countOfLeafs"])
-			{
-				view.title  = [NSString stringWithFormat:@"%lu", item.countOfLeafs];
-				view.hidden = [outlineView isItemExpanded:item];
-				break;
-			}
+			cellView.removeButton.action = @selector(takeSearchResultToRemoveFrom:);
+			cellView.removeButton.target = self;
 		}
 
 		cellView.objectValue = item;
+		cellView.countOfLeafsButton.title = [NSString stringWithFormat:@"%lu", item.countOfLeafs];
+		cellView.countOfLeafsButton.hidden = [outlineView isItemExpanded:item];
 	}
 	return res;
 }
