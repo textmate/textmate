@@ -1,6 +1,7 @@
 #import <oak/debug.h>
 
 @class OakFileBrowser;
+@class OakBackgroundFillView;
 
 @protocol OakFileBrowserDelegate
 - (void)fileBrowser:(OakFileBrowser*)aFileBrowser openURLs:(NSArray*)someURLs;
@@ -18,6 +19,7 @@ PUBLIC @interface OakFileBrowser : NSResponder
 @property (nonatomic)           NSArray*      modifiedURLs;
 @property (nonatomic, readonly) NSArray*      selectedURLs;
 
+@property (nonatomic, readonly) OakBackgroundFillView* headerView;
 @property (nonatomic, readonly) NSView*       view;
 @property (nonatomic)           NSDictionary* sessionState;
 

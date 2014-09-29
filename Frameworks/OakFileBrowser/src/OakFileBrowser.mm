@@ -107,11 +107,11 @@ static NSImage* IconImage (NSURL* url, NSSize size = NSMakeSize(16, 16))
 @interface OakFileBrowser () <OFBOutlineViewMenuDelegate, NSMenuDelegate>
 {
 	OBJC_WATCH_LEAKS(OakFileBrowser);
+	OFBHeaderView* _headerView;
 	NSUInteger _historyIndex;
 	NSUndoManager* _localUndoManager;
 }
 @property (nonatomic, readwrite)         OakFileBrowserView* view;
-@property (nonatomic)                    OFBHeaderView* headerView;
 @property (nonatomic)                    OFBOutlineView* outlineView;
 @property (nonatomic)                    OFBActionsView* actionsView;
 
