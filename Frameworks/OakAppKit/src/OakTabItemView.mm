@@ -165,7 +165,6 @@
 		_closeButton = [[OakRolloverButton alloc] initWithFrame:NSZeroRect];
 		OakSetAccessibilityLabel(_closeButton, @"Close tab");
 		_closeButton.disableWindowOrderingForFirstMouse = YES;
-		_closeButton.hidden = YES;
 
 		_textField = OakCreateLabel(aTitle);
 		[_textField setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
@@ -191,6 +190,7 @@
 	[style updateTabItemView:self inSelectedTab:_selected];
 	[style updateCloseButton:_closeButton inSelectedTab:_selected modified:_modified];
 	[style updateOverflowButton:_overflowButton inSelectedTab:_selected];
+	_closeButton.hidden = !_isMouseInside && !_modified;
 }
 
 // =========================================
@@ -321,7 +321,6 @@
 	if(_modified == flag)
 		return;
 	_modified = flag;
-	_closeButton.hidden = !_isMouseInside && !_modified;
 	[self updateStyle];
 }
 
