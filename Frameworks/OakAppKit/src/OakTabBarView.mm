@@ -351,8 +351,7 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 		overflowTabItem = _overflowTabItem;
 		if(!_preliminaryTabItem && !_draggedTabItem)
 		{
-			NSUInteger selectedIndex = [_tabItems indexOfObject:_selectedTabItem];
-			if(selectedIndex >= countOfVisibleTabs-1)
+			if(_selectedTabItem && [_tabItems indexOfObject:_selectedTabItem] >= countOfVisibleTabs-1)
 				overflowTabItem = _selectedTabItem;
 			else if(!_overflowTabItem || [_tabItems indexOfObject:_overflowTabItem] < countOfVisibleTabs-1)
 				overflowTabItem = _tabItems[countOfVisibleTabs-1];
