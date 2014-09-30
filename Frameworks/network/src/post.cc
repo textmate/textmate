@@ -82,6 +82,10 @@ long post_to_server (std::string const& url, std::map<std::string, std::string> 
 
 		curl_easy_cleanup(handle);
 	}
+	else
+	{
+		fprintf(stderr, "*** curl_easy_init failed\n");
+	}
 
 	curl_formfree(formpost);
 	return serverReply;

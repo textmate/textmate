@@ -206,7 +206,10 @@ namespace web
 			socklen_t size = sizeof(client);
 			int fd = accept(server_socket, (sockaddr*)&client, &size);
 			if(fd == -1)
+			{
+				perror("accept");
 				break;
+			}
 
 			request_t const& r = parse_request(fd);
 			if(r.method == request_t::kHead)
