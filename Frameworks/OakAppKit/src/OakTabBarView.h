@@ -39,6 +39,9 @@ PUBLIC @interface OakTabBarView : OakBackgroundFillView
 
 // Methods sent to the delegate which the tab was dragged to
 - (BOOL)performTabDropFromTabBar:(OakTabBarView*)tabBar atIndex:(NSUInteger)droppedIndex fromPasteboard:(NSPasteboard*)aPasteboard operation:(NSDragOperation)operation;
+
+- (void)performCloseTab:(OakTabBarView*)sender;
+- (void)performCloseOtherTabs:(OakTabBarView*)sender;
 @end
 
 @protocol OakTabBarViewDataSource <NSObject>

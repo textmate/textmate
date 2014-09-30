@@ -727,10 +727,10 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 			_didCloseTabIndex = 0;
 		}
 
-		SEL action = (closeOther ? @selector(performCloseOtherTabs:) : @selector(performCloseTab:));
-		if([NSApp keyWindow])
-				[NSApp sendAction:action to:nil from:self];
-		else	[self.window tryToPerform:action with:self];
+		if(closeOther && [_delegate respondsToSelector:@selector(performCloseOtherTabs:)])
+			[_delegate performCloseOtherTabs:self];
+		else if([_delegate respondsToSelector:@selector(performCloseTab:)])
+			[_delegate performCloseTab:self];
 	}
 }
 
