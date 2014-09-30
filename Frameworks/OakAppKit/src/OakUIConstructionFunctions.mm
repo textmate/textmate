@@ -26,14 +26,6 @@ NSTextField* OakCreateLabel (NSString* label, Class cl)
 	return res;
 }
 
-NSTextField* OakCreateSmallLabel (NSString* label, Class cl)
-{
-	NSTextField* res = OakCreateLabel(label, cl);
-	res.alignment = NSLeftTextAlignment;
-	res.font      = [NSFont labelFontOfSize:0];
-	return res;
-}
-
 NSButton* OakCreateCheckBox (NSString* label)
 {
 	NSButton* res = [[NSButton alloc] initWithFrame:NSZeroRect];

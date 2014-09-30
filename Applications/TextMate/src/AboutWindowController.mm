@@ -67,7 +67,9 @@ static NSTextField* OakCreateTextField ()
 		self.licenseLabel     = OakCreateLabel(@"License:");
 		self.licenseTextField = OakCreateTextField();
 		self.licenseTextField.font = [NSFont userFixedPitchFontOfSize:12];
-		self.statusTextField  = OakCreateSmallLabel();
+		self.statusTextField  = OakCreateLabel();
+		self.statusTextField.font      = [NSFont labelFontOfSize:0];
+		self.statusTextField.alignment = NSLeftTextAlignment;
 		self.cancelButton     = OakCreateButton(@"Cancel");
 		self.registerButton   = OakCreateButton(@"Register");
 
