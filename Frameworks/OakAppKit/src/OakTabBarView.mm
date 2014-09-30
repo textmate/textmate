@@ -297,6 +297,7 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 			tabItem.tabItemView.selected = tabItem == _selectedTabItem;
 			tabItem.tabItemView.hidden   = tabItem == _preliminaryTabItem;
 			tabItem.tabItemView.toolTip  = OakIsEmptyString(tabItem.path) ? tabItem.title : [tabItem.path stringByAbbreviatingWithTildeInPath];
+			tabItem.tabItemView.showOverflowButton = tabItem == _overflowTabItem;
 			tabItem.tabItemView.closeButton.action = @selector(_performCloseTab:);
 			tabItem.tabItemView.closeButton.target = self;
 			[self addSubview:tabItem.tabItemView];
@@ -361,6 +362,7 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 	if(_overflowTabItem && _overflowTabItem != overflowTabItem)
 		_overflowTabItem.tabItemView.showOverflowButton = NO;
 	_overflowTabItem = overflowTabItem;
+	_overflowTabItem.tabItemView.showOverflowButton = YES;
 
 	NSMutableIndexSet* tabIndexes = [NSMutableIndexSet indexSet];
 	OakTabItem* mustShow[] = { _selectedTabItem, _overflowTabItem, _preliminaryTabItem };
@@ -400,7 +402,6 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 
 	if(_overflowTabItem)
 	{
-		_overflowTabItem.tabItemView.showOverflowButton = YES;
 		_overflowTabItem.tabItemView.overflowButton.action = @selector(_showOverflowMenu:);
 		_overflowTabItem.tabItemView.overflowButton.target = self;
 	}
