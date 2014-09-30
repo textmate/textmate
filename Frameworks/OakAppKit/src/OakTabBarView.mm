@@ -280,20 +280,15 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 	CGFloat spacing = OakTabBarStyle.sharedInstance.tabViewSpacing;
 	CGFloat width   = NSWidth(aRect) - spacing * (countOfTabs-1);
 
+	CGFloat totalSurplus = 0;
+	CGFloat totalDeficit = 0;
+
 	for(NSUInteger i = 0, index = [anIndexSet firstIndex]; index != NSNotFound; ++i, (index = [anIndexSet indexGreaterThanIndex:index]))
 	{
 		OakTabItem* tabItem = _tabItems[index];
-
-		CGFloat x1 = round(i * spacing + (i+0) * width / countOfTabs);
-		CGFloat x2 = round(i * spacing + (i+1) * width / countOfTabs);
-		NSRect tabFrame = NSMakeRect(NSMinX(aRect) + x1, NSMinY(aRect), x2 - x1, NSHeight(aRect));
-
-		if(tabItem.tabItemView && NSEqualRects(tabFrame, tabItem.targetFrame))
-			continue;
-
 		if(!tabItem.tabItemView)
 		{
-			tabItem.tabItemView = [[OakTabItemView alloc] initWithFrame:tabFrame title:tabItem.title modified:tabItem.modified];
+			tabItem.tabItemView = [[OakTabItemView alloc] initWithFrame:NSZeroRect title:tabItem.title modified:tabItem.modified];
 			tabItem.tabItemView.selected = tabItem == _selectedTabItem;
 			tabItem.tabItemView.hidden   = tabItem == _preliminaryTabItem;
 			tabItem.tabItemView.toolTip  = OakIsEmptyString(tabItem.path) ? tabItem.title : [tabItem.path stringByAbbreviatingWithTildeInPath];
@@ -301,13 +296,68 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 			tabItem.tabItemView.closeButton.action = @selector(_performCloseTab:);
 			tabItem.tabItemView.closeButton.target = self;
 			[self addSubview:tabItem.tabItemView];
+		}
 
+		CGFloat x1 = round((i+0) * width / countOfTabs);
+		CGFloat x2 = round((i+1) * width / countOfTabs);
+
+		CGFloat tabWidth   = x2-x1;
+		CGFloat deltaWidth = tabWidth - tabItem.tabItemView.fittingSize.width;
+
+		if(deltaWidth > 0)
+			totalSurplus += deltaWidth;
+		else if(deltaWidth < 0)
+			totalDeficit -= deltaWidth;
+	}
+
+	CGFloat redistribution = MIN(totalSurplus, totalDeficit);
+	CGFloat currentSurplus = 0;
+	CGFloat currentDeficit = 0;
+
+	CGFloat x = NSMinX(aRect);
+	for(NSUInteger i = 0, index = [anIndexSet firstIndex]; index != NSNotFound; ++i, (index = [anIndexSet indexGreaterThanIndex:index]))
+	{
+		OakTabItem* tabItem = _tabItems[index];
+
+		CGFloat x1 = round((i+0) * width / countOfTabs);
+		CGFloat x2 = round((i+1) * width / countOfTabs);
+
+		CGFloat tabWidth   = x2-x1;
+		CGFloat deltaWidth = tabWidth - tabItem.tabItemView.fittingSize.width;
+
+		if(redistribution > 0)
+		{
+			if(deltaWidth > 0)
+			{
+				CGFloat low = round(redistribution * currentSurplus / totalSurplus);
+				currentSurplus += deltaWidth;
+				CGFloat high = round(redistribution * currentSurplus / totalSurplus);
+				tabWidth -= high - low;
+			}
+			else if(deltaWidth < 0)
+			{
+				CGFloat low = round(redistribution * currentDeficit / totalDeficit);
+				currentDeficit -= deltaWidth;
+				CGFloat high = round(redistribution * currentDeficit / totalDeficit);
+				tabWidth += high - low;
+			}
+		}
+
+		NSRect tabFrame = NSMakeRect(x, NSMinY(aRect), tabWidth, NSHeight(aRect));
+		x += tabWidth + spacing;
+
+		if(NSEqualRects(tabItem.tabItemView.frame, NSZeroRect))
+		{
+			tabItem.tabItemView.frame = tabFrame;
 			if(_animateLayoutChanges && tabItem != _preliminaryTabItem)
 			{
 				tabItem.tabItemView.alphaValue = 0;
 				[[tabItem.tabItemView animator] setAlphaValue:1];
 			}
 		}
+
+		if(NSEqualRects(tabFrame, tabItem.targetFrame))
+			continue;
 
 		tabItem.targetFrame = tabFrame;
 		[(_animateLayoutChanges ? [tabItem.tabItemView animator] : tabItem.tabItemView) setFrame:tabFrame];
