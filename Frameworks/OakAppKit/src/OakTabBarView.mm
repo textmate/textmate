@@ -568,8 +568,8 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 - (void)mouseDragged:(NSEvent*)anEvent
 {
 	NSPoint mouseCurrentPos = [[self superview] convertPoint:[anEvent locationInWindow] fromView:nil];
-	if(SQ(fabs(_mouseDownPos.x - mouseCurrentPos.x)) + SQ(fabs(_mouseDownPos.y - mouseCurrentPos.y)) < SQ(1))
-		return; // we didn't even drag a pixel
+	if(SQ(fabs(_mouseDownPos.x - mouseCurrentPos.x)) + SQ(fabs(_mouseDownPos.y - mouseCurrentPos.y)) < SQ(2.5))
+		return;
 
 	OakTabItem* tabItem = [self tabItemForView:[self hitTest:mouseCurrentPos]];
 	if(!tabItem)
