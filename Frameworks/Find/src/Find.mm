@@ -1052,7 +1052,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 			res = button = OakCreateCheckBox(nil);
 			button.identifier = identifier;
 			[[button cell] setControlSize:NSSmallControlSize];
-			[button bind:@"enabled" toObject:self withKeyPath:@"performedReplaceAll" options:@{ NSValueTransformerNameBindingOption: @"NSNegateBoolean" }];
+			[button bind:@"enabled" toObject:self withKeyPath:@"performedReplaceAll" options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
 			button.action = @selector(toggleExcludedCheckbox:);
 			button.target = self;
 		}
@@ -1061,7 +1061,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 			[button unbind:NSValueBinding];
 		}
 
-		[button bind:NSValueBinding toObject:item withKeyPath:@"excluded" options:@{ NSValueTransformerNameBindingOption: @"NSNegateBoolean" }];
+		[button bind:NSValueBinding toObject:item withKeyPath:@"excluded" options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
 		button.state = item.excluded ? NSOffState : NSOnState;
 	}
 	else if([identifier isEqualToString:@"match"])
