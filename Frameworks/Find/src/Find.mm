@@ -461,7 +461,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		_windowController.resultsOutlineView.delegate     = self;
 
 		[_windowController.replaceAllButton bind:@"title" toObject:self withKeyPath:@"replaceAllButtonTitle" options:nil];
-		[_windowController.replaceAllButton bind:@"enabled" toObject:self withKeyPath:@"canReplaceAll" options:nil];
+		[_windowController.replaceAllButton bind:@"enabled2" toObject:self withKeyPath:@"canReplaceAll" options:nil];
 		[_windowController.window bind:@"documentEdited" toObject:self withKeyPath:@"hasUnsavedChanges" options:nil];
 
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowWillClose:) name:NSWindowWillCloseNotification object:_windowController.window];

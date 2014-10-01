@@ -303,6 +303,13 @@ static NSButton* OakCreateStopSearchButton ()
 		[self.ignoreWhitespaceCheckBox  bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.canIgnoreWhitespace"  options:nil];
 		[self.replaceAndFindButton      bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.folderSearch"         options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
 
+		[self.countButton               bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.findString.length"    options:nil];
+		[self.findAllButton             bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.findString.length"    options:nil];
+		[self.replaceAllButton          bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.findString.length"    options:nil];
+		[self.replaceAndFindButton      bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.findString.length"    options:nil];
+		[self.findPreviousButton        bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.findString.length"    options:nil];
+		[self.findNextButton            bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.findString.length"    options:nil];
+
 		NSView* contentView = self.window.contentView;
 		for(NSView* view in [self.allViews allValues])
 		{
