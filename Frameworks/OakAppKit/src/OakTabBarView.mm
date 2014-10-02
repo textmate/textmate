@@ -584,17 +584,13 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 		return;
 
 	OakTabItemView* view = tabItem.tabItemView;
-	NSRect srcRect = view.frame;
+	NSRect srcRect = [self convertRect:view.contentFrame fromView:view];
 
 	NSImage* image = [[NSImage alloc] initWithSize:srcRect.size];
 	[image lockFocusFlipped:[self isFlipped]];
 
-	[[NSColor clearColor] set];
-	NSRectFill((NSRect){ NSZeroPoint, image.size });
-
 	CGContextRef context = (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort];
 	CGContextTranslateCTM(context, -NSMinX(srcRect), -NSMinY(srcRect));
-	NSRectClip(NSInsetRect(srcRect, 12, 0));
 	[self displayRectIgnoringOpacity:srcRect inContext:[NSGraphicsContext currentContext]];
 	[image unlockFocus];
 
@@ -693,7 +689,7 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 - (BOOL)performDragOperation:(id <NSDraggingInfo>)sender
 {
 	[sender enumerateDraggingItemsWithOptions:0 forView:self classes:@[ [NSPasteboardItem class] ] searchOptions:nil usingBlock:^(NSDraggingItem* draggingItem, NSInteger idx, BOOL* stop){
-		draggingItem.draggingFrame = _preliminaryTabItem.targetFrame;
+		draggingItem.draggingFrame = [self convertRect:_preliminaryTabItem.tabItemView.contentFrame fromView:_preliminaryTabItem.tabItemView];
 	}];
 
 	NSDragOperation mask = [sender draggingSourceOperationMask];

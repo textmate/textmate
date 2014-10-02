@@ -260,6 +260,14 @@
 	_closeButton.hidden = !_isMouseInside && !_modified;
 }
 
+- (NSRect)contentFrame
+{
+	NSRect bounds = NSInsetRect(self.bounds, 0, 2);
+	bounds.origin.x   += _leftCapView.activeBackgroundImage.size.width;
+	bounds.size.width -= _leftCapView.activeBackgroundImage.size.width + _rightCapView.activeBackgroundImage.size.width;
+	return NSIntegralRectWithOptions(bounds, NSAlignAllEdgesInward);
+}
+
 // =========================================
 // = Support dragging from inactive window =
 // =========================================

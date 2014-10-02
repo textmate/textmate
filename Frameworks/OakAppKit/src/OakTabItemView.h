@@ -29,6 +29,7 @@ typedef NS_ENUM(NSUInteger, OakTabItemViewVisibleCaps) {
 };
 
 PUBLIC @interface OakTabItemView : OakBackgroundFillView
+@property (nonatomic, readonly) NSRect contentFrame;
 @property (nonatomic) OakRolloverButton* closeButton;
 @property (nonatomic) OakRolloverButton* overflowButton;
 @property (nonatomic) OakTabItemViewVisibleCaps visibleCaps;
