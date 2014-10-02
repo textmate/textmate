@@ -84,6 +84,8 @@
 - (void)updateButton:(OakRolloverButton*)aButton forState:(NSString*)aState
 {
 	NSDictionary* images = _images[aState];
+	if([images[@"AW_normal"] isTemplate])
+		[[aButton cell] setBackgroundStyle:NSBackgroundStyleRaised];
 	aButton.regularImage  = images[@"AW_normal"];
 	aButton.pressedImage  = images[@"AW_pressed"];
 	aButton.rolloverImage = images[@"AW_rollover"];
