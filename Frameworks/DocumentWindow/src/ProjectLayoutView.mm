@@ -130,51 +130,10 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 		@"htmlOutputDivider"          : _htmlOutputDivider          ?: [NSNull null],
 	};
 
-	// =======================
-	// = Anchor Tab Bar View =
-	// =======================
-
-	// top
-	CONSTRAINT(@"V:|[tabBarView]", 0);
-
-	// left + right
-	if(_tabsAboveDocument && _fileBrowserView && _fileBrowserOnRight)
-		CONSTRAINT(@"H:|[tabBarView]-(-1)-[fileBrowserDivider]", 0);
-	else if(_tabsAboveDocument && _fileBrowserView)
-		CONSTRAINT(@"H:[fileBrowserDivider]-(-1)-[tabBarView]|", 0);
-	else
-		CONSTRAINT(@"H:|[tabBarView]|", 0);
-
-	// ========================
-	// = Anchor Document View =
-	// ========================
-
-	// top
-	CONSTRAINT(@"V:[tabBarView][documentView]", 0);
-
-	// bottom
-	if(_htmlOutputView && !_htmlOutputOnRight)
-		CONSTRAINT(@"V:[documentView][htmlOutputDivider]", 0);
-	else
-		CONSTRAINT(@"V:[documentView]|", 0);
-
-	// left
-	if(_fileBrowserView && !_fileBrowserOnRight)
-		CONSTRAINT(@"H:[fileBrowserDivider][documentView]", 0);
-	else
-		CONSTRAINT(@"H:|[documentView]", 0);
-
-	// right
-	if(_htmlOutputView && _htmlOutputOnRight)
-		CONSTRAINT(@"H:[documentView][htmlOutputDivider]", 0);
-	else if(_fileBrowserView && _fileBrowserOnRight)
-		CONSTRAINT(@"H:[documentView][fileBrowserDivider]", 0);
-	else
-		CONSTRAINT(@"H:[documentView]|", 0);
-
-	// =======================
-	// = Anchor File Browser =
-	// =======================
+	// Tab bar and document
+	CONSTRAINT(@"H:|-(==0@400)-[tabBarView]-(==0@400)-|", 0);
+	CONSTRAINT(@"H:|-(==0@400)-[documentView]-(==0@400)-|", 0);
+	CONSTRAINT(@"V:|[tabBarView][documentView]-(==0@400)-|", 0);
 
 	if(_fileBrowserView)
 	{
@@ -183,43 +142,24 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 		self.fileBrowserWidthConstraint.priority = NSLayoutPriorityDragThatCannotResizeWindow;
 		[_myConstraints addObject:self.fileBrowserWidthConstraint];
 
-		// top
+		if(_fileBrowserOnRight)
+				CONSTRAINT(@"H:[documentView]-(==0@400)-[fileBrowserDivider][fileBrowserView]|", NSLayoutFormatAlignAllBottom);
+		else	CONSTRAINT(@"H:|[fileBrowserView][fileBrowserDivider][documentView]", NSLayoutFormatAlignAllBottom);
+
 		CONSTRAINT(@"V:|[tabBarView][fileBrowserDivider]", 0);
 		if(_tabsAboveDocument)
+		{
 			CONSTRAINT(@"V:|[fileBrowserView]", 0);
+
+			if(_fileBrowserOnRight)
+					CONSTRAINT(@"H:|[tabBarView]-(-1)-[fileBrowserDivider]", 0);
+			else	CONSTRAINT(@"H:[fileBrowserDivider]-(-1)-[tabBarView]|", 0);
+		}
 		else
+		{
 			CONSTRAINT(@"V:|[tabBarView][fileBrowserView]", 0);
-
-		// bottom
-		if(_htmlOutputView && !_htmlOutputOnRight)
-		{
-			CONSTRAINT(@"V:[fileBrowserView][htmlOutputDivider]", 0);
-			CONSTRAINT(@"V:[fileBrowserDivider][htmlOutputDivider]", 0);
 		}
-		else
-		{
-			CONSTRAINT(@"V:[fileBrowserView]|", 0);
-			CONSTRAINT(@"V:[fileBrowserDivider]|", 0);
-		}
-
-		// left
-		if(_fileBrowserOnRight && _htmlOutputView && _htmlOutputOnRight)
-			CONSTRAINT(@"H:[htmlOutputView][fileBrowserDivider][fileBrowserView]", 0);
-		else if(_fileBrowserOnRight)
-			CONSTRAINT(@"H:[documentView][fileBrowserDivider][fileBrowserView]", 0);
-		else
-			CONSTRAINT(@"H:|[fileBrowserView][fileBrowserDivider]", 0);
-
-		// right
-		if(_fileBrowserOnRight)
-			CONSTRAINT(@"H:[fileBrowserView]|", 0);
-		else
-			CONSTRAINT(@"H:[fileBrowserDivider][documentView]", 0);
 	}
-
-	// ===========================
-	// = Anchor HTML Output View =
-	// ===========================
 
 	if(_htmlOutputView)
 	{
@@ -230,25 +170,16 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 
 		if(_htmlOutputOnRight)
 		{
-			// top + bottom
-			CONSTRAINT(@"V:[tabBarView][htmlOutputView]|", 0);
-			CONSTRAINT(@"V:[tabBarView][htmlOutputDivider]|", 0);
-
-			// left + right
-			if(_fileBrowserView && _fileBrowserOnRight)
-				CONSTRAINT(@"H:[documentView][htmlOutputDivider][htmlOutputView][fileBrowserDivider]", 0);
-			else
-				CONSTRAINT(@"H:[documentView][htmlOutputDivider][htmlOutputView]|", 0);
+			CONSTRAINT(@"H:[documentView][htmlOutputDivider][htmlOutputView]-(==0@400)-|", NSLayoutFormatAlignAllTop|NSLayoutFormatAlignAllBottom);
 		}
 		else
 		{
-			// top + bottom
+			CONSTRAINT(@"H:|[htmlOutputView(==htmlOutputDivider)]|", 0);
 			CONSTRAINT(@"V:[documentView][htmlOutputDivider][htmlOutputView]|", 0);
-
-			// left + right
-			CONSTRAINT(@"H:|[htmlOutputView]|", 0);
-			CONSTRAINT(@"H:|[htmlOutputDivider]|", 0);
 		}
+
+		if(_htmlOutputOnRight && _fileBrowserView && _fileBrowserOnRight)
+			CONSTRAINT(@"H:[htmlOutputView][fileBrowserDivider]", 0);
 	}
 
 	[self addConstraints:_myConstraints];
