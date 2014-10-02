@@ -15,64 +15,73 @@
 	return sharedInstance;
 }
 
+- (NSDictionary*)imagesForNames:(NSDictionary*)imageNames
+{
+	NSMutableDictionary* res = [NSMutableDictionary dictionary];
+	for(NSString* state in imageNames)
+	{
+		NSMutableDictionary* dict = [NSMutableDictionary dictionary];
+		for(NSString* key in imageNames[state])
+			dict[key] = [NSImage imageNamed:imageNames[state][key] inSameBundleAsClass:[self class]];
+		res[state] = dict;
+	}
+	return res;
+}
+
+- (NSDictionary*)mavericksImages
+{
+	NSDictionary* imageNames = @{
+		@"tabBar" : @{
+			@"AW_normal"   : @"AW InactiveTabBG",
+			@"IW_normal"   : @"IW InactiveTabBG",
+		},
+		@"tabItemSelected" : @{
+			@"AW_normal"   : @"AW ActiveTabFill",
+			@"IW_normal"   : @"IW ActiveTabFill",
+		},
+		@"leftTabCap" : @{
+			@"AW_normal"   : @"AW InactiveTabLeftCap",
+			@"IW_normal"   : @"IW InactiveTabLeftCap",
+		},
+		@"leftTabCapSelected" : @{
+			@"AW_normal"   : @"AW ActiveTabLeftCap",
+			@"IW_normal"   : @"IW ActiveTabLeftCap",
+		},
+		@"rightTabCap" : @{
+			@"AW_normal"   : @"AW InactiveTabRightCap",
+			@"IW_normal"   : @"IW InactiveTabRightCap",
+		},
+		@"rightTabCapSelected" : @{
+			@"AW_normal"   : @"AW ActiveTabRightCap",
+			@"IW_normal"   : @"IW ActiveTabRightCap",
+		},
+		@"closeButton" : @{
+			@"AW_normal"   : @"AW ActiveTabClose",
+			@"AW_pressed"  : @"AW ActiveTabClosePressed",
+			@"AW_rollover" : @"AW ActiveTabCloseRollover",
+			@"IW_normal"   : @"IW ActiveTabClose",
+			@"IW_pressed"  : @"IW ActiveTabClosePressed",
+			@"IW_rollover" : @"IW ActiveTabCloseRollover",
+		},
+		@"closeButtonModified" : @{
+			@"AW_normal"   : @"TabClose_Modified",
+			@"AW_pressed"  : @"TabClose_ModifiedPressed",
+			@"AW_rollover" : @"TabClose_ModifiedRollover",
+		},
+		@"overflowButton" : @{
+			@"AW_normal"   : @"TabOverflowTemplate",
+		},
+	};
+	return [self imagesForNames:imageNames];
+}
+
 - (id)init
 {
 	if(self = [super init])
 	{
-		NSDictionary* imageNames = @{
-			@"tabBar" : @{
-				@"AW_normal"   : @"AW InactiveTabBG",
-				@"IW_normal"   : @"IW InactiveTabBG",
-			},
-			@"tabItemSelected" : @{
-				@"AW_normal"   : @"AW ActiveTabFill",
-				@"IW_normal"   : @"IW ActiveTabFill",
-			},
-			@"leftTabCap" : @{
-				@"AW_normal"   : @"AW InactiveTabLeftCap",
-				@"IW_normal"   : @"IW InactiveTabLeftCap",
-			},
-			@"leftTabCapSelected" : @{
-				@"AW_normal"   : @"AW ActiveTabLeftCap",
-				@"IW_normal"   : @"IW ActiveTabLeftCap",
-			},
-			@"rightTabCap" : @{
-				@"AW_normal"   : @"AW InactiveTabRightCap",
-				@"IW_normal"   : @"IW InactiveTabRightCap",
-			},
-			@"rightTabCapSelected" : @{
-				@"AW_normal"   : @"AW ActiveTabRightCap",
-				@"IW_normal"   : @"IW ActiveTabRightCap",
-			},
-			@"closeButton" : @{
-				@"AW_normal"   : @"AW ActiveTabClose",
-				@"AW_pressed"  : @"AW ActiveTabClosePressed",
-				@"AW_rollover" : @"AW ActiveTabCloseRollover",
-				@"IW_normal"   : @"IW ActiveTabClose",
-				@"IW_pressed"  : @"IW ActiveTabClosePressed",
-				@"IW_rollover" : @"IW ActiveTabCloseRollover",
-			},
-			@"closeButtonModified" : @{
-				@"AW_normal"   : @"TabClose_Modified",
-				@"AW_pressed"  : @"TabClose_ModifiedPressed",
-				@"AW_rollover" : @"TabClose_ModifiedRollover",
-			},
-			@"overflowButton" : @{
-				@"AW_normal"   : @"TabOverflowTemplate",
-			},
-		};
+		_images = [self mavericksImages];
 
-		NSMutableDictionary* res = [NSMutableDictionary dictionary];
-		for(NSString* state in imageNames)
-		{
-			NSMutableDictionary* dict = [NSMutableDictionary dictionary];
-			for(NSString* key in imageNames[state])
-				dict[key] = [NSImage imageNamed:imageNames[state][key] inSameBundleAsClass:[self class]];
-			res[state] = dict;
-		}
-
-		NSImage* rightCapImage = res[@"rightTabCap"][@"AW_normal"];
-		_images = res;
+		NSImage* rightCapImage = _images[@"rightTabCap"][@"AW_normal"];
 		_tabViewSpacing = rightCapImage ? -rightCapImage.size.width : 0;
 		_minimumTabSize = 120;
 		_maximumTabSize = 250;
