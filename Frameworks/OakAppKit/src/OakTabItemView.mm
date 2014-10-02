@@ -58,8 +58,7 @@
 				@"AW_rollover" : @"TabClose_ModifiedRollover",
 			},
 			@"overflowButton" : @{
-				@"AW_normal"   : @"TabOverflow",
-				@"AW_pressed"  : @"TabOverflow_Pressed",
+				@"AW_normal"   : @"TabOverflowTemplate",
 			},
 		};
 
