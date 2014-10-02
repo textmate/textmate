@@ -1,6 +1,7 @@
 #import "OakTabItemView.h"
 #import "OakRolloverButton.h"
 #import "NSImage Additions.h"
+#import <oak/compat.h>
 
 @interface OakTabBarStyle ()
 {
@@ -75,11 +76,67 @@
 	return [self imagesForNames:imageNames];
 }
 
+- (NSDictionary*)yosemiteImages
+{
+	NSDictionary* imageNames = @{
+		@"tabBar" : @{
+			@"AW_normal"   : @"TabAWBackground",
+			@"IW_normal"   : @"TabIWBackground",
+		},
+		@"tabItemSelected" : @{
+			@"AW_normal"   : @"TabAWBackgroundSelected",
+			@"IW_normal"   : @"TabIWBackgroundSelected",
+		},
+		@"leftTabCap" : @{
+			@"AW_normal"   : @"TabAWDivider",
+			@"IW_normal"   : @"TabIWDivider",
+		},
+		@"leftTabCapSelected" : @{
+			@"AW_normal"   : @"TabAWDivider",
+			@"IW_normal"   : @"TabIWDivider",
+		},
+		@"rightTabCap" : @{
+			@"AW_normal"   : @"TabAWDivider",
+			@"IW_normal"   : @"TabIWDivider",
+		},
+		@"rightTabCapSelected" : @{
+			@"AW_normal"   : @"TabAWDivider",
+			@"IW_normal"   : @"TabIWDivider",
+		},
+		@"closeButton" : @{
+			@"AW_normal"   : @"AW ActiveTabClose",
+			@"AW_pressed"  : @"AW ActiveTabClosePressed",
+			@"AW_rollover" : @"AW ActiveTabCloseRollover",
+			@"IW_normal"   : @"IW ActiveTabClose",
+			@"IW_pressed"  : @"IW ActiveTabClosePressed",
+			@"IW_rollover" : @"IW ActiveTabCloseRollover",
+		},
+		@"closeButtonModified" : @{
+			@"AW_normal"   : @"TabClose_Modified",
+			@"AW_pressed"  : @"TabClose_ModifiedPressed",
+			@"AW_rollover" : @"TabClose_ModifiedRollover",
+		},
+		@"overflowButton" : @{
+			@"AW_normal"   : @"TabOverflowTemplate",
+		},
+	};
+	return [self imagesForNames:imageNames];
+}
+
 - (id)init
 {
 	if(self = [super init])
 	{
-		_images = [self mavericksImages];
+		if(oak::os_major() >= 10 && oak::os_minor() >= 10)
+		{
+			_images = [self yosemiteImages];
+			_leftPadding  = -1;
+			_rightPadding = 5;
+		}
+		else
+		{
+			_images = [self mavericksImages];
+		}
 
 		NSImage* rightCapImage = _images[@"rightTabCap"][@"AW_normal"];
 		_tabViewSpacing = rightCapImage ? -rightCapImage.size.width : 0;
