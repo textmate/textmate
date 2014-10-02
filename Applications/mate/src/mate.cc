@@ -2,6 +2,7 @@
 #include <authorization/authorization.h>
 #include <oak/oak.h>
 #include <text/format.h>
+#include <text/parse.h>
 #include <cf/cf.h>
 #include <io/path.h>
 #include <plist/uuid.h>
@@ -244,10 +245,11 @@ _InputIter remove_ansi_escapes (_InputIter it, _InputIter last, escape_state_t* 
 	return dst;
 }
 
-int main (int argc, char* argv[])
+int main (int argc, char const* argv[])
 {
 	extern char* optarg;
 	extern int optind;
+	extern int optreset;
 
 	static struct option const longopts[] = {
 		{ "async",            no_argument,         0,      'a'   },
@@ -282,30 +284,47 @@ int main (int argc, char* argv[])
 
 	install_auth_tool();
 
-	int ch;
-	while((ch = getopt_long(argc, argv, "adehl:m:p:rst:u:vw", longopts, NULL)) != -1)
+	std::vector<std::string> options = text::split(getenv("MATEOPT") ?: "", " ");
+	char const** flags = new char const*[options.size()+1];
+	for(size_t i = 0; i < options.size(); ++i)
+		flags[i+1] = options[i].c_str();
+
+	struct { int argc; char const** argv; } args[] =
 	{
-		switch(ch)
+		{ (int)options.size()+1, flags }, { argc, argv }
+	};
+
+	for(auto const& arg : args)
+	{
+		optind = 1;
+
+		int ch;
+		while((ch = getopt_long(arg.argc, (char**)arg.argv, "adehl:m:p:rst:u:vw", longopts, NULL)) != -1)
 		{
-			case 'a': shouldWait = boolean::kDisable;  break;
-			case 'd': changeDir = boolean::kEnable;    break;
-			case 'e': keepEscapes = boolean::kEnable;  break;
-			case 'E': keepEscapes = boolean::kDisable; break;
-			case 'h': usage(stdout);            return EX_OK;
-			case 'l': append(optarg, lines);    break;
-			case 'm': append(optarg, names);    break;
-			case 'p': append(optarg, projects); break;
-			case 'r': addToRecent = boolean::kEnable;  break;
-			case 'R': addToRecent = boolean::kDisable; break;
-			case 't': append(optarg, types);    break;
-			case 'u': uuid = optarg;            break;
-			case 'v': version();                return EX_OK;
-			case 'w': shouldWait = boolean::kEnable;  break;
-			case 'W': shouldWait = boolean::kDisable; break;
-			case '?': /* unknown option */      return EX_USAGE;
-			case ':': /* missing option */      return EX_USAGE;
-			default:  usage(stderr);            return EX_USAGE;
+			switch(ch)
+			{
+				case 'a': shouldWait = boolean::kDisable;  break;
+				case 'd': changeDir = boolean::kEnable;    break;
+				case 'e': keepEscapes = boolean::kEnable;  break;
+				case 'E': keepEscapes = boolean::kDisable; break;
+				case 'h': usage(stdout);            return EX_OK;
+				case 'l': append(optarg, lines);    break;
+				case 'm': append(optarg, names);    break;
+				case 'p': append(optarg, projects); break;
+				case 'r': addToRecent = boolean::kEnable;  break;
+				case 'R': addToRecent = boolean::kDisable; break;
+				case 't': append(optarg, types);    break;
+				case 'u': uuid = optarg;            break;
+				case 'v': version();                return EX_OK;
+				case 'w': shouldWait = boolean::kEnable;  break;
+				case 'W': shouldWait = boolean::kDisable; break;
+				case '?': /* unknown option */      return EX_USAGE;
+				case ':': /* missing option */      return EX_USAGE;
+				default:  usage(stderr);            return EX_USAGE;
+			}
 		}
+
+		optreset = 1;
 	}
 
 	argc -= optind;
@@ -313,7 +332,7 @@ int main (int argc, char* argv[])
 
 	for(int i = 0; i < argc; ++i)
 	{
-		char* path = argv[i];
+		char const* path = argv[i];
 		if(path[0] == 0)
 			continue;
 
@@ -321,7 +340,9 @@ int main (int argc, char* argv[])
 		{
 			if(char* cwd = getcwd(NULL, (size_t)-1))
 			{
-				asprintf(&path, "%s/%s", cwd, path);
+				char* tmp;
+				asprintf(&tmp, "%s/%s", cwd, path);
+				path = tmp;
 				free(cwd);
 			}
 			else
