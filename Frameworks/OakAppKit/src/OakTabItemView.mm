@@ -104,12 +104,9 @@
 			@"IW_normal"   : @"TabIWDivider",
 		},
 		@"closeButton" : @{
-			@"AW_normal"   : @"AW ActiveTabClose",
-			@"AW_pressed"  : @"AW ActiveTabClosePressed",
-			@"AW_rollover" : @"AW ActiveTabCloseRollover",
-			@"IW_normal"   : @"IW ActiveTabClose",
-			@"IW_pressed"  : @"IW ActiveTabClosePressed",
-			@"IW_rollover" : @"IW ActiveTabCloseRollover",
+			@"AW_normal"   : @"ThinTabClose",
+			@"AW_pressed"  : @"ThinTabClosePressed",
+			@"AW_rollover" : @"ThinTabCloseRollover",
 		},
 		@"closeButtonModified" : @{
 			@"AW_normal"   : @"TabClose_Modified",
