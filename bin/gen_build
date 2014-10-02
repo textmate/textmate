@@ -946,7 +946,7 @@ rule dsym
     DST=$$(/usr/bin/mktemp -dt dsym); $
     find $in -name rmate -or -type f -perm +0111 -print|while read line; $
     do xcrun dsymutil --flat --out "$$DST/$$(basename "$$line" .dylib).dSYM" "$$line"; $
-    done && tar $bzip2_flag -cf $out -C "$$DST" . && rm -rf "$$DST"
+    done && tar $bzip2_flag -cf $out~ -C "$$DST" . && rm -rf "$$DST" && mv $out~ $out
   generator = true
   description = Archive dSYM info for ‘$in’…
 
