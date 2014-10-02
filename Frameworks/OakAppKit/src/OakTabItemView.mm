@@ -104,17 +104,10 @@
 			@"IW_normal"   : @"TabIWDivider",
 		},
 		@"closeButton" : @{
-			@"AW_normal"   : @"AW ActiveTabClose",
-			@"AW_pressed"  : @"AW ActiveTabClosePressed",
-			@"AW_rollover" : @"AW ActiveTabCloseRollover",
-			@"IW_normal"   : @"IW ActiveTabClose",
-			@"IW_pressed"  : @"IW ActiveTabClosePressed",
-			@"IW_rollover" : @"IW ActiveTabCloseRollover",
+			@"AW_normal"   : @"TabCloseThin",
 		},
 		@"closeButtonModified" : @{
-			@"AW_normal"   : @"TabClose_Modified",
-			@"AW_pressed"  : @"TabClose_ModifiedPressed",
-			@"AW_rollover" : @"TabClose_ModifiedRollover",
+			@"AW_normal"   : @"TabCloseThin_Modified",
 		},
 		@"overflowButton" : @{
 			@"AW_normal"   : @"TabOverflowTemplate",
