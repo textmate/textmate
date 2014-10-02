@@ -106,9 +106,10 @@ if __FILE__ == $PROGRAM_NAME
   abort "No tag specified"        if tag.nil?
 
   if path = ARGV.shift
+    signature = sign_file(path, keyfile, netinfo.password)
     info = base_info.merge({
       'url'       => create_release(path, destination, tag, description, 'application/x-bzip2'),
-      'signature' => sign_file(path, keyfile, netinfo.password),
+      'signature' => signature,
       'signee'    => netinfo.login
     })
     STDOUT << info.to_json
