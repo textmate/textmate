@@ -429,7 +429,7 @@ namespace ng
 			setup_patterns(_buffer, n, startPattern, stopPattern, indentPattern, ignorePattern);
 
 			std::string const line = _buffer.substr(_buffer.begin(n), _buffer.eol(n));
-			size_t res = text::is_blank(line.data(), line.data() + line.size()) ?  1 : 0;
+			size_t res = 0;
 			res += regexp::search(startPattern,  line) ?  2 : 0;
 			res += regexp::search(stopPattern,   line) ?  4 : 0;
 			res += regexp::search(indentPattern, line) ?  8 : 0;
@@ -438,13 +438,14 @@ namespace ng
 			if(res & 6) // if start/stop marker we ignore indent patterns
 				res &= ~24;
 
-			auto type  = (res & 1) ? kLineTypeEmpty : kLineTypeRegular;
+			auto type = kLineTypeRegular;
 			switch(res)
 			{
 				case  2: type = kLineTypeStartMarker;       break;
 				case  4: type = kLineTypeStopMarker;        break;
 				case  8: type = kLineTypeIndentStartMarker; break;
 				case 16: type = kLineTypeIgnoreLine;        break;
+				default: type = text::is_blank(line.data(), line.data() + line.size()) ? kLineTypeEmpty : kLineTypeRegular; break;
 			}
 
 			int indent = indent::leading_whitespace(line.data(), line.data() + line.size(), _buffer.indent().tab_size());
