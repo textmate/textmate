@@ -371,13 +371,15 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 
 - (void)resizeTabItemViewFrames
 {
-	CGFloat const tabSpacing  = OakTabBarStyle.sharedInstance.tabViewSpacing;
-	CGFloat const tabMinWidth = OakTabBarStyle.sharedInstance.minimumTabSize;
-	CGFloat const tabMaxWidth = OakTabBarStyle.sharedInstance.maximumTabSize;
+	CGFloat const leftPadding  = OakTabBarStyle.sharedInstance.leftPadding;
+	CGFloat const rightPadding = OakTabBarStyle.sharedInstance.rightPadding;
+	CGFloat const tabSpacing   = OakTabBarStyle.sharedInstance.tabViewSpacing;
+	CGFloat const tabMinWidth  = OakTabBarStyle.sharedInstance.minimumTabSize;
+	CGFloat const tabMaxWidth  = OakTabBarStyle.sharedInstance.maximumTabSize;
 
-	CGFloat width = NSMinX(_addTabButton.frame);
+	NSRect bounds = NSMakeRect(leftPadding, 0, NSMinX(_addTabButton.frame) - rightPadding - leftPadding, NSHeight(self.bounds));
 
-	if(!_tabItems.count || !_expanded || width < tabMinWidth)
+	if(!_tabItems.count || !_expanded || NSWidth(bounds) < tabMinWidth)
 	{
 		for(OakTabItem* tabItem in _tabItems)
 		{
@@ -390,7 +392,7 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 	BOOL missingDraggedTab =  _draggedTabItem && !_preliminaryTabItem;
 	BOOL hasSomeonesTab    = !_draggedTabItem &&  _preliminaryTabItem;
 
-	NSUInteger canShowTabs = floor((width + tabSpacing) / (tabMinWidth + tabSpacing));
+	NSUInteger canShowTabs = floor((NSWidth(bounds) + tabSpacing) / (tabMinWidth + tabSpacing));
 	NSUInteger myTabsCount = _tabItems.count + (missingDraggedTab ? 1 : 0) - (hasSomeonesTab ? 1 : 0);
 	BOOL showOverflowMenu  = canShowTabs < myTabsCount;
 
@@ -440,7 +442,7 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 	if(_didCloseTabIndex)
 	{
 		NSRect leftRect, rightRect;
-		NSDivideRect(NSMakeRect(0, 0, width, NSHeight(self.bounds)), &leftRect, &rightRect, NSMinX(_didCloseTabFrame), NSMinXEdge);
+		NSDivideRect(bounds, &leftRect, &rightRect, NSMinX(_didCloseTabFrame), NSMinXEdge);
 
 		NSIndexSet* rightSet = [tabIndexes indexesInRange:NSMakeRange(_didCloseTabIndex, [tabIndexes lastIndex]) options:0 passingTest:^(NSUInteger idx, BOOL* stop){ return YES; }];
 		rightRect.size.width = MIN((NSWidth(_didCloseTabFrame) + tabSpacing) * [rightSet count] - tabSpacing, NSWidth(rightRect));
@@ -448,7 +450,8 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 	}
 	else
 	{
-		[self resizeTabIndexes:tabIndexes inRect:NSMakeRect(0, 0, MIN((tabMaxWidth + tabSpacing) * [tabIndexes count] - tabSpacing, width), NSHeight(self.bounds))];
+		bounds.size.width = MIN((tabMaxWidth + tabSpacing) * [tabIndexes count] - tabSpacing, NSWidth(bounds));
+		[self resizeTabIndexes:tabIndexes inRect:bounds];
 	}
 
 	if(_overflowTabItem)

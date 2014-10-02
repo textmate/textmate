@@ -6,6 +6,8 @@
 PUBLIC @interface OakTabBarStyle : NSObject
 + (instancetype)sharedInstance;
 
+@property (nonatomic) CGFloat leftPadding;
+@property (nonatomic) CGFloat rightPadding;
 @property (nonatomic) CGFloat tabViewSpacing;
 @property (nonatomic) CGFloat minimumTabSize;
 @property (nonatomic) CGFloat maximumTabSize;
