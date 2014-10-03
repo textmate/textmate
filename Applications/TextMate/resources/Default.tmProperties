@@ -40,10 +40,10 @@ tabSize          = 2
 softTabs         = true
 tabSize          = 4
 
-[ source.makefile; Makefile ]
+[ source.makefile ]
 softTabs         = false
 
-[ source.ninja; *.ninja ]
+[ source.ninja ]
 softTabs         = true
 
 [ "/System/Library/Frameworks/**/Headers/**/*" ]
