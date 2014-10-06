@@ -2,10 +2,11 @@
 #import "OakEncodingPopUpButton.h"
 #import "NSSavePanel Additions.h"
 #import <OakFoundation/OakStringListTransformer.h>
+#import <settings/settings.h>
 #import <oak/oak.h>
 #import <ns/ns.h>
 
-@interface OakEncodingSaveOptionsViewController : NSViewController
+@interface OakEncodingSaveOptionsViewController : NSViewController <NSOpenSavePanelDelegate>
 {
 	OBJC_WATCH_LEAKS(OakEncodingSaveOptionsViewController);
 	IBOutlet OakEncodingPopUpButton* encodingPopUpButton;
@@ -16,7 +17,6 @@
 @property (nonatomic) NSString* encoding;
 @property (nonatomic) BOOL useByteOrderMark;
 @property (nonatomic, readonly) BOOL canUseByteOrderMark;
-@property (nonatomic, readonly) encoding::type const& encodingOptions;
 @end
 
 @implementation OakEncodingSaveOptionsViewController
@@ -45,15 +45,36 @@
 	[encodingPopUpButton bind:@"encoding" toObject:self withKeyPath:@"encoding" options:nil];
 }
 
-- (BOOL)canUseByteOrderMark { return _encodingOptions.supports_byte_order_mark(_encodingOptions.charset()); }
+- (BOOL)canUseByteOrderMark { return _encodingOptions.supports_byte_order_mark(to_s(self.encoding)); }
 
-- (NSString*)lineEndings    { return [NSString stringWithCxxString:_encodingOptions.newlines()]; }
-- (NSString*)encoding       { return [NSString stringWithCxxString:_encodingOptions.charset()]; }
-- (BOOL)useByteOrderMark    { return _encodingOptions.byte_order_mark(); }
+- (void)updateSettings:(encoding::type const&)encoding
+{
+	self.lineEndings      = [NSString stringWithCxxString:encoding.newlines()];
+	self.encoding         = [NSString stringWithCxxString:encoding.charset()];
+	self.useByteOrderMark = encoding.byte_order_mark();
+}
 
-- (void)setLineEndings:(NSString*)newLineEndings      { _encodingOptions.set_newlines(to_s(newLineEndings)); }
-- (void)setEncoding:(NSString*)newEncoding            { _encodingOptions.set_charset(to_s(newEncoding)); }
-- (void)setUseByteOrderMark:(BOOL)newUseByteOrderMark { _encodingOptions.set_byte_order_mark(newUseByteOrderMark); }
+- (encoding::type)encodingForURL:(NSURL*)anURL
+{
+	encoding::type res = _encodingOptions;
+
+	settings_t const& settings = settings_for_path([[[anURL filePathURL] path] fileSystemRepresentation]);
+	if(res.charset() == kCharsetNoEncoding)
+	{
+		res.set_charset(settings.get(kSettingsEncodingKey, kCharsetUTF8));
+		res.set_byte_order_mark(settings.get(kSettingsUseBOMKey, res.byte_order_mark()));
+	}
+
+	if(res.newlines() == NULL_STR)
+		res.set_newlines(settings.get(kSettingsLineEndingsKey, "\n"));
+
+	return res;
+}
+
+- (void)panel:(NSSavePanel*)sender didChangeToDirectoryURL:(NSURL*)anURL
+{
+	[self updateSettings:[self encodingForURL:[sender URL]]];
+}
 @end
 
 @implementation OakSavePanel
@@ -66,14 +87,18 @@
 	[[aWindow attachedSheet] orderOut:self]; // incase there already is a sheet showing (like “Do you want to save?”)
 
 	NSSavePanel* savePanel = [NSSavePanel savePanel];
+	savePanel.delegate = optionsViewController;
 	[savePanel setTreatsFilePackagesAsDirectories:YES];
 	if(aDirectorySuggestion)
 		[savePanel setDirectoryURL:[NSURL fileURLWithPath:aDirectorySuggestion]];
 	[savePanel setNameFieldStringValue:[aPathSuggestion lastPathComponent]];
 	[savePanel setAccessoryView:optionsViewController.view];
+	[optionsViewController updateSettings:[optionsViewController encodingForURL:[savePanel URL]]];
 	[savePanel beginSheetModalForWindow:aWindow completionHandler:^(NSInteger result) {
+		savePanel.delegate = nil;
 		NSString* path = result == NSOKButton ? [[savePanel.URL filePathURL] path] : nil;
-		aCompletionHandler(path, optionsViewController.encodingOptions);
+		encoding::type encoding(to_s(optionsViewController.lineEndings), to_s(optionsViewController.encoding), optionsViewController.useByteOrderMark);
+		aCompletionHandler(path, encoding);
 	}];
 
 	// Deselect Extension
