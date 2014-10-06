@@ -53,7 +53,7 @@ namespace
 			D(DBF_DocumentController_SaveHelper, bug("\n"););
 			init(context);
 
-			[OakSavePanel showWithPath:DefaultSaveNameForDocument(_document) directory:_self.saveFolder fowWindow:_window encoding:_document->encoding_for_save_as_path(to_s([_self.saveFolder stringByAppendingPathComponent:DefaultSaveNameForDocument(_document)])) completionHandler:^(NSString* path, encoding::type const& encoding){
+			[OakSavePanel showWithPath:DefaultSaveNameForDocument(_document) directory:_self.saveFolder fowWindow:_window encoding:_document->disk_encoding() completionHandler:^(NSString* path, encoding::type const& encoding){
 				D(DBF_DocumentController_SaveHelper, bug("%s\n", to_s(path).c_str()););
 				if(path)
 				{
