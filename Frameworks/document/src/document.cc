@@ -657,9 +657,8 @@ namespace document
 			return;
 		}
 
-		_disk_encoding = encoding.charset();
-		_disk_newlines = encoding.newlines();
-		_disk_bom      = encoding.byte_order_mark();
+		if(path != NULL_STR)
+			set_disk_encoding(encoding);
 
 		if(_file_type == NULL_STR)
 			_file_type = fileType;
