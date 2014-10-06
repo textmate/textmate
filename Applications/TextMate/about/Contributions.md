@@ -30,7 +30,7 @@ generate_credits(File.expand_path('~/Library/Caches/com.macromates.TextMate/gith
   <li class="commit commit-group-item">
     <img class="gravatar" src="<%= userpic %>" height="36" width="36">
     <p class="commit-title">
-      <a href="https://github.com/textmate/textmate/commit/<%= hash %>" class="message"><%= subject %></a>
+      <a href="https://github.com/textmate/textmate/commits/master" class="message"><%= subject %></a>
       <% if body != '' %><span class="hidden-text-expander inline"><a href="javascript:;" class="js-details-target">…</a></span><% end %>
     </p>
     <% if body != '' %><div class="commit-desc"><pre><%= body %></pre></div><% end %>
@@ -39,10 +39,10 @@ generate_credits(File.expand_path('~/Library/Caches/com.macromates.TextMate/gith
         <a href="https://github.com/textmate/textmate/commit/<%= hash %>" class="gobutton">
           <span class="sha"><%= hash[0,10] %><span class="mini-icon mini-icon-arr-right-mini"></span></span>
         </a>
-        <a href="https://github.com/textmate/textmate/tree/<%= hash %>" class="browse-button" title="Browse the code at this point in the history" rel="nofollow">Browse code <span class="mini-icon mini-icon-arr-right"></span></a>
+        <a href="https://github.com/textmate/textmate/tree/master/<%= hash %>" class="browse-button" title="Browse the code at this point in the history" rel="nofollow">Browse code <span class="mini-icon mini-icon-arr-right"></span></a>
       </div>
       <div class="authorship">
-        <span class="author-name"><% if github_user %><a href="http://github.com/<%= github_user %>"><% end %><%= author %><% if github_user %></a><% end %></span>
+        <span class="author-name"><% if github_user %><a href="https://github.com/<%= github_user %>"><% end %><%= author %><% if github_user %></a><% end %></span>
         authored <time class="js-relative-date" datetime="<%= date.strftime('%Y-%m-%dT%H:%M:%S%:z') %>" title="<%= date.strftime('%Y-%m-%d %H:%M:%S') %>"><%= date.strftime('%B %e, %Y') %></time>
       </div>
     </div>
