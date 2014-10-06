@@ -714,9 +714,7 @@ namespace document
 				broadcast(callback_t::did_change_on_disk_status);
 			}
 
-			_disk_encoding = encoding.charset();
-			_disk_bom      = encoding.byte_order_mark();
-			_disk_newlines = encoding.newlines();
+			set_disk_encoding(encoding);
 
 			check_modified(revision(), revision());
 			mark_pristine();
