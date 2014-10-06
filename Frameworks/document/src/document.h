@@ -247,8 +247,6 @@ namespace document
 		void set_indent (text::indent_t const& indent);
 		text::indent_t const& indent () const;
 
-		encoding::type encoding_for_save_as_path (std::string const& path);
-
 		bool recent_tracking () const         { return _recent_tracking && _path != NULL_STR; }
 		void set_recent_tracking (bool flag)  { _recent_tracking = flag; }
 

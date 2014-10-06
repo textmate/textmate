@@ -725,23 +725,6 @@ namespace document
 			_file_watcher = std::make_shared<watch_t>(_path, shared_from_this());
 	}
 
-	encoding::type document_t::encoding_for_save_as_path (std::string const& path)
-	{
-		encoding::type res = disk_encoding();
-
-		settings_t const& settings = settings_for_path(path);
-		if(!is_on_disk() || res.charset() == kCharsetNoEncoding)
-		{
-			res.set_charset(settings.get(kSettingsEncodingKey, kCharsetUTF8));
-			res.set_byte_order_mark(settings.get(kSettingsUseBOMKey, res.byte_order_mark()));
-		}
-
-		if(!is_on_disk() || res.newlines() == NULL_STR)
-			res.set_newlines(settings.get(kSettingsLineEndingsKey, "\n"));
-
-		return res;
-	}
-
 	void document_t::try_save (document::save_callback_ptr callback)
 	{
 		struct save_callback_wrapper_t : file::save_callback_t
@@ -795,7 +778,22 @@ namespace document
 
 		auto sharedPtr = std::make_shared<save_callback_wrapper_t>(shared_from_this(), callback);
 		auto bytes = std::make_shared<io::bytes_t>(content());
-		encoding::type const encoding = encoding_for_save_as_path(_path);
+
+		encoding::type encoding = disk_encoding();
+		if(encoding.charset() == kCharsetNoEncoding || encoding.newlines() == NULL_STR)
+		{
+			settings_t const& settings = settings_for_path(_path);
+
+			if(encoding.charset() == kCharsetNoEncoding)
+			{
+				encoding.set_charset(settings.get(kSettingsEncodingKey, kCharsetUTF8));
+				encoding.set_byte_order_mark(settings.get(kSettingsUseBOMKey, encoding.byte_order_mark()));
+			}
+
+			if(encoding.newlines() == NULL_STR)
+				encoding.set_newlines(settings.get(kSettingsLineEndingsKey, "\n"));
+		}
+
 		file::save(_path, sharedPtr, _authorization, bytes, attributes, _file_type, encoding, std::vector<oak::uuid_t>() /* binary import filters */, std::vector<oak::uuid_t>() /* text import filters */);
 	}
 
