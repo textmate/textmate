@@ -677,7 +677,11 @@ namespace document
 
 			std::map<std::string, std::string>::const_iterator folded = attributes.find("com.macromates.folded");
 			if(folded != attributes.end())
-				_folded = folded->second;
+			{
+				auto crc32 = attributes.find("com.macromates.crc32");
+				if(crc32 != attributes.end() && crc32->second == text::format("%04x", content->crc32()))
+					_folded = folded->second;
+			}
 
 			if(_selection == NULL_STR)
 			{
@@ -767,6 +771,9 @@ namespace document
 
 		_file_watcher.reset();
 
+		auto sharedPtr = std::make_shared<save_callback_wrapper_t>(shared_from_this(), callback);
+		auto bytes = std::make_shared<io::bytes_t>(content());
+
 		std::map<std::string, std::string> attributes;
 		if(volume::settings(_path).extended_attributes())
 		{
@@ -774,10 +781,8 @@ namespace document
 			attributes["com.macromates.visibleIndex"]   = _visible_index ? to_s(_visible_index) : NULL_STR;
 			attributes["com.macromates.bookmarks"]      = marks_as_string();
 			attributes["com.macromates.folded"]         = _folded;
+			attributes["com.macromates.crc32"]          = text::format("%04x", bytes->crc32());
 		}
-
-		auto sharedPtr = std::make_shared<save_callback_wrapper_t>(shared_from_this(), callback);
-		auto bytes = std::make_shared<io::bytes_t>(content());
 
 		encoding::type encoding = disk_encoding();
 		if(encoding.charset() == kCharsetNoEncoding || encoding.newlines() == NULL_STR)
