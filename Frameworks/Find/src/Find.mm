@@ -53,7 +53,6 @@ static NSAttributedString* PathComponentString (std::string const& path, std::st
 		<< [NSColor darkGrayColor]
 		<< text::join(std::vector<std::string>(components.begin(), components.end()), " ▸ ")
 		<< ns::style::bold
-		<< [NSColor blackColor]
 		<< (path::is_absolute(path) ? path::display_name(path) : path);
 }
 
