@@ -320,7 +320,7 @@
 					<object class="NSButton" id="656765749">
 						<reference key="NSNextResponder" ref="1005"/>
 						<int key="NSvFlags">268</int>
-						<string key="NSFrame">{{171, 43}, {251, 18}}</string>
+						<string key="NSFrame">{{171, 43}, {162, 18}}</string>
 						<reference key="NSSuperview" ref="1005"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="884575770"/>
@@ -328,7 +328,7 @@
 						<object class="NSButtonCell" key="NSCell" id="714750391">
 							<int key="NSCellFlags">-2080374784</int>
 							<int key="NSCellFlags2">0</int>
-							<string key="NSContents">Submit crash reports to MacroMates</string>
+							<string key="NSContents">Submit to MacroMates</string>
 							<reference key="NSSupport" ref="996499183"/>
 							<reference key="NSControlView" ref="656765749"/>
 							<int key="NSButtonFlags">1211912448</int>
@@ -350,7 +350,7 @@
 					<object class="NSTextField" id="611776994">
 						<reference key="NSNextResponder" ref="1005"/>
 						<int key="NSvFlags">268</int>
-						<string key="NSFrame">{{80, 44}, {88, 17}}</string>
+						<string key="NSFrame">{{72, 44}, {96, 17}}</string>
 						<reference key="NSSuperview" ref="1005"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="656765749"/>
@@ -358,7 +358,7 @@
 						<object class="NSTextFieldCell" key="NSCell" id="239680402">
 							<int key="NSCellFlags">68157504</int>
 							<int key="NSCellFlags2">272630784</int>
-							<string key="NSContents">Phone Home:</string>
+							<string key="NSContents">Crash Reports:</string>
 							<reference key="NSSupport" ref="996499183"/>
 							<reference key="NSControlView" ref="611776994"/>
 							<reference key="NSBackgroundColor" ref="323758883"/>
