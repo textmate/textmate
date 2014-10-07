@@ -22,6 +22,7 @@ namespace io
 		void resize (size_t size)  { _size = size; }
 
 		void set_string (std::string const& str);
+		int32_t crc32 () const;
 
 	private:
 		char* _bytes;
