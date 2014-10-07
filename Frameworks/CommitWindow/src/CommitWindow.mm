@@ -669,16 +669,12 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 - (NSView*)tableView:(NSTableView*)aTableView viewForTableColumn:(NSTableColumn*)aTableColumn row:(NSInteger)row
 {
 	CWTableCellView* cellView = [aTableView makeViewWithIdentifier:aTableColumn.identifier owner:self];
+
 	if(!cellView)
 	{
-		NSViewController* viewController = [[NSViewController alloc] initWithNibName:@"CWTableCellView" bundle:[NSBundle bundleForClass:[self class]]];
-		cellView = (CWTableCellView*)viewController.view;
+		cellView = [CWTableCellView new];
 		cellView.identifier = aTableColumn.identifier;
 	}
-
-	[cellView.textField bind:NSValueBinding toObject:cellView withKeyPath:@"objectValue.path" options:0];
-	[cellView.commitCheckBox bind:NSValueBinding toObject:cellView withKeyPath:@"objectValue.commit" options:0];
-	[cellView.statusTextField bind:NSValueBinding toObject:cellView withKeyPath:@"objectValue.scmStatus" options:@{ NSValueTransformerNameBindingOption : @"CWStatusStringTransformer" }];
 
 	[cellView.diffButton setAction:@selector(didDoubleClickTableView:)];
 	[cellView.diffButton setTarget:self];
