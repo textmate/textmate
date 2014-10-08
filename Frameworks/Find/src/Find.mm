@@ -44,7 +44,6 @@ enum FindActionTag
 @property (nonatomic) BOOL closeWindowOnSuccess;
 @property (nonatomic) BOOL performingFolderSearch;
 @property (nonatomic) BOOL performedReplaceAll;
-@property (nonatomic) BOOL performedSaveAll;
 
 // =========================
 // = OakFindProtocolServer =
@@ -80,7 +79,6 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 		[_windowController.replaceAllButton bind:@"title" toObject:self withKeyPath:@"replaceAllButtonTitle" options:nil];
 		[_windowController.replaceAllButton bind:@"enabled2" toObject:self withKeyPath:@"canReplaceAll" options:nil];
-		[_windowController.window bind:@"documentEdited" toObject:self withKeyPath:@"hasUnsavedChanges" options:nil];
 
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowWillClose:) name:NSWindowWillCloseNotification object:_windowController.window];
 	}
@@ -133,11 +131,9 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 // ================
 
 + (NSSet*)keyPathsForValuesAffectingCanReplaceAll         { return [NSSet setWithArray:@[ @"performedReplaceAll", @"countOfMatches", @"countOfExcludedMatches", @"windowController.showsResultsOutlineView" ]]; }
-+ (NSSet*)keyPathsForValuesAffectingHasUnsavedChanges     { return [NSSet setWithArray:@[ @"performedReplaceAll", @"performedSaveAll" ]]; }
 + (NSSet*)keyPathsForValuesAffectingReplaceAllButtonTitle { return [NSSet setWithArray:@[ @"canReplaceAll", @"countOfExcludedMatches", @"windowController.showsResultsOutlineView" ]]; }
 
 - (BOOL)canReplaceAll                { return _windowController.showsResultsOutlineView ? (!_performedReplaceAll && _countOfExcludedMatches < _countOfMatches) : YES; }
-- (BOOL)hasUnsavedChanges            { return _performedReplaceAll && !_performedSaveAll; }
 - (NSString*)replaceAllButtonTitle   { return _windowController.showsResultsOutlineView && _countOfExcludedMatches && self.canReplaceAll ? @"Replace Selected" : @"Replace All"; }
 
 - (IBAction)countOccurrences:(id)sender   { [self performFindAction:FindActionCountMatches   withWindowController:self.windowController]; }
@@ -157,82 +153,11 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	}
 }
 
-// These are disabled via menu validation
-- (IBAction)saveDocument:(id)sender   { }
-- (IBAction)saveDocumentAs:(id)sender { }
-
-- (IBAction)saveAllDocuments:(id)sender
-{
-	NSUInteger fileCount = 0;
-	std::vector<document::document_ptr> failedDocs;
-
-	for(FFResultNode* parent in _results.children)
-	{
-		for(FFResultNode* child in parent.children)
-		{
-			if(!child.replacementDone)
-				continue;
-
-			if(document::document_ptr doc = child.document)
-			{
-				if(doc->sync_save(kCFRunLoopDefaultMode))
-						++fileCount;
-				else	failedDocs.push_back(doc);
-			}
-			break;
-		}
-	}
-
-	if(failedDocs.empty())
-	{
-		self.windowController.statusString = [NSString stringWithFormat:@"%lu file%s saved.", fileCount, fileCount == 1 ? "" : "s"];
-		self.performedSaveAll = YES;
-	}
-	else
-	{
-		NSBeep();
-		self.windowController.statusString = [NSString stringWithFormat:@"%zu file%s failed to save.", failedDocs.size(), failedDocs.size() == 1 ? "" : "s"];
-	}
-}
-
-- (void)showSaveWarningWithCompletionHandler:(void(^)())callback
-{
-	NSAlert* alert = [NSAlert tmAlertWithMessageText:@"Do you want to save the changes from your replace operation?" informativeText:@"Your changes will be lost if you don’t save them." buttons:@"Save All", @"Cancel", @"Don’t Save", nil];
-	OakShowAlertForWindow(alert, _windowController.window, ^(NSInteger returnCode){
-		if(returnCode == NSAlertFirstButtonReturn) // Save All
-		{
-			[self saveAllDocuments:self];
-		}
-		else if(returnCode == NSAlertThirdButtonReturn) // Discard
-		{
-			// FIXME Undo replacements
-			self.performedReplaceAll = NO;
-		}
-		else if(returnCode == NSAlertSecondButtonReturn) // Cancel
-			;
-
-		if(!self.hasUnsavedChanges)
-			callback();
-	});
-}
-
-- (BOOL)windowShouldClose:(id)sender
-{
-	if(!self.hasUnsavedChanges)
-		return YES;
-
-	[self showSaveWarningWithCompletionHandler:^{ [_windowController close]; }];
-	return NO;
-}
-
 - (void)performFindAction:(FindActionTag)action withWindowController:(FindWindowController*)controller
 {
 	[controller updateFindErrorString];
 	if(controller.findErrorString != nil)
 		return;
-
-	if(self.hasUnsavedChanges)
-		return [self showSaveWarningWithCompletionHandler:^{ [self performFindAction:action withWindowController:controller]; }];
 
 	_findOptions = (controller.regularExpression ? find::regular_expression : find::none) | (controller.ignoreWhitespace ? find::ignore_whitespace : find::none) | (controller.fullWords ? find::full_words : find::none) | (controller.ignoreCase ? find::ignore_case : find::none) | (controller.wrapAround ? find::wrap_around : find::none);
 	if(action == FindActionFindPrevious)
@@ -460,7 +385,6 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	if(_documentSearch = newSearcher)
 	{
 		self.performedReplaceAll = NO;
-		self.performedSaveAll    = NO;
 
 		self.windowController.busy                    = YES;
 		self.windowController.statusString            = MSG_SEARCHING_FMT;
@@ -690,10 +614,6 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	static std::set<SEL> const copyActions = { @selector(copy:), @selector(copyMatchingParts:), @selector(copyMatchingPartsWithFilename:), @selector(copyEntireLines:), @selector(copyEntireLinesWithFilename:) };
 	if(copyActions.find(aMenuItem.action) != copyActions.end())
 		return [_results countOfLeafs] != 0;
-	else if(aMenuItem.action == @selector(saveAllDocuments:))
-		return self.hasUnsavedChanges;
-	else if(aMenuItem.action == @selector(saveDocument:) || aMenuItem.action == @selector(saveDocumentAs:))
-		return NO;
 	else if(aMenuItem.action == @selector(checkAll:))
 		return self.countOfExcludedMatches > 0;
 	else if(aMenuItem.action == @selector(uncheckAll:) )
