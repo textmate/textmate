@@ -3,17 +3,18 @@ extern NSString* const FFSearchInDocument;
 extern NSString* const FFSearchInSelection;
 extern NSString* const FFSearchInOpenFiles;
 
+@class FFResultsViewController;
+
 @interface FindWindowController : NSWindowController
+@property (nonatomic) FFResultsViewController* resultsViewController;
+
 @property (nonatomic, readonly) NSButton* findAllButton;
 @property (nonatomic, readonly) NSButton* replaceAllButton;
 @property (nonatomic, readonly) NSButton* replaceAndFindButton;
 @property (nonatomic, readonly) NSButton* findPreviousButton;
 @property (nonatomic, readonly) NSButton* findNextButton;
-@property (nonatomic, readonly) NSOutlineView* resultsOutlineView;
 
 @property (nonatomic) BOOL showsResultsOutlineView;
-@property (nonatomic) BOOL disableResultsCheckBoxes;
-@property (nonatomic) BOOL showReplacementPreviews;
 
 @property (nonatomic) NSString* projectFolder;
 @property (nonatomic) NSString* searchIn;
@@ -40,4 +41,7 @@ extern NSString* const FFSearchInOpenFiles;
 
 @property (nonatomic) NSString* findErrorString;
 - (void)updateFindErrorString;
+
+- (IBAction)selectNextResult:(id)sender;
+- (IBAction)selectPreviousResult:(id)sender;
 @end

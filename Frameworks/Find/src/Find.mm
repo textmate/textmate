@@ -1,6 +1,7 @@
 #import "Find.h"
 #import "FFResultNode.h"
 #import "FindWindowController.h"
+#import "FFResultsViewController.h"
 #import "FFDocumentSearch.h"
 #import "Strings.h"
 #import <OakFoundation/OakFindProtocol.h>
@@ -34,119 +35,7 @@ enum FindActionTag
 	FindActionReplaceSelected,
 };
 
-@interface OakAttributedStringTextFieldCell : NSTextFieldCell
-@property (nonatomic) NSAttributedString* monoColoredAttributedString;
-@end
-
-@implementation OakAttributedStringTextFieldCell
-- (void)setBackgroundStyle:(NSBackgroundStyle)style
-{
-	if(_monoColoredAttributedString)
-	{
-		if(style == NSBackgroundStyleDark)
-		{
-			NSMutableAttributedString* str = [_monoColoredAttributedString mutableCopy];
-			[str addAttribute:NSForegroundColorAttributeName value:[NSColor alternateSelectedControlTextColor] range:NSMakeRange(0, [str length])];
-			[super setAttributedStringValue:str];
-		}
-		else
-		{
-			[super setAttributedStringValue:_monoColoredAttributedString];
-		}
-	}
-	[super setBackgroundStyle:style];
-}
-
-- (void)setAttributedStringValue:(NSAttributedString*)str
-{
-	_monoColoredAttributedString = str;
-	[super setAttributedStringValue:str];
-}
-@end
-
-@interface OakSearchResultsHeaderCellView : NSTableCellView
-@property (nonatomic) NSString* countOfLeafs;
-@property (nonatomic) NSButton* countOfLeafsButton;
-@property (nonatomic) NSButton* removeButton;
-@end
-
-@implementation OakSearchResultsHeaderCellView
-- (id)initWithOutlineView:(NSOutlineView*)anOutlineView
-{
-	if((self = [super init]))
-	{
-		NSImageView* imageView = [NSImageView new];
-		NSTextField* textField = OakCreateLabel();
-		textField.font = [NSFont controlContentFontOfSize:0];
-
-		NSButton* countOfLeafs = [NSButton new];
-		[[countOfLeafs cell] setHighlightsBy:NSNoCellMask];
-		countOfLeafs.alignment  = NSCenterTextAlignment;
-		countOfLeafs.bezelStyle = NSInlineBezelStyle;
-		countOfLeafs.font       = [NSFont labelFontOfSize:0];
-		countOfLeafs.identifier = @"countOfLeafs";
-
-		NSButton* remove = [NSButton new];
-		[[remove cell] setControlSize:NSSmallControlSize];
-		remove.bezelStyle = NSRoundRectBezelStyle;
-		remove.buttonType = NSMomentaryPushInButton;
-		remove.image      = [NSImage imageNamed:NSImageNameRemoveTemplate];
-
-		NSDictionary* views = @{ @"icon" : imageView, @"text" : textField, @"count" : countOfLeafs, @"remove" : remove };
-		for(NSView* child in [views allValues])
-		{
-			[child setTranslatesAutoresizingMaskIntoConstraints:NO];
-			[self addSubview:child];
-		}
-
-		[textField setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
-		[countOfLeafs setContentCompressionResistancePriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
-
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(6)-[icon(==16)]-(3)-[text]-(>=8)-[remove(==16)]-(12)-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[text]-(4)-[count]"                                        options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[count]-(>=4)-[remove]"                                    options:0 metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[icon(==16,==remove)]-(3)-|"                               options:0 metrics:nil views:views]];
-
-		[imageView bind:NSValueBinding toObject:self withKeyPath:@"objectValue.icon" options:nil];
-		[textField bind:NSValueBinding toObject:self withKeyPath:@"objectValue.displayPath" options:nil];
-
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(outlineViewItemDidExpandCollapse:) name:NSOutlineViewItemDidExpandNotification object:anOutlineView];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(outlineViewItemDidExpandCollapse:) name:NSOutlineViewItemDidCollapseNotification object:anOutlineView];
-
-		self.imageView          = imageView;
-		self.textField          = textField;
-		self.countOfLeafsButton = countOfLeafs;
-		self.removeButton       = remove;
-	}
-	return self;
-}
-
-- (void)dealloc
-{
-	[[NSNotificationCenter defaultCenter] removeObserver:self];
-}
-
-- (void)setCountOfLeafs:(NSString*)aString
-{
-	_countOfLeafs = aString;
-	_countOfLeafsButton.title  = aString ?: @"0";
-	_countOfLeafsButton.hidden = aString == nil;
-}
-
-- (void)outlineViewItemDidExpandCollapse:(NSNotification*)aNotification
-{
-	NSOutlineView* outlineView = [aNotification object];
-	NSDictionary* userInfo = [aNotification userInfo];
-	FFResultNode* item = userInfo[@"NSObject"];
-	if(item == self.objectValue)
-		_countOfLeafsButton.hidden = [outlineView isItemExpanded:item];
-}
-
-- (void)outlineViewItemDidExpand:(NSNotification*)aNotification   { [self outlineViewItemDidExpandCollapse:aNotification]; }
-- (void)outlineViewItemDidCollapse:(NSNotification*)aNotification { [self outlineViewItemDidExpandCollapse:aNotification]; }
-@end
-
-@interface Find () <OakFindServerProtocol, NSOutlineViewDataSource, NSOutlineViewDelegate>
+@interface Find () <OakFindServerProtocol>
 @property (nonatomic) FindWindowController* windowController;
 @property (nonatomic) FFDocumentSearch* documentSearch;
 @property (nonatomic) FFResultNode* results;
@@ -183,11 +72,11 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	{
 		_windowController = [FindWindowController new];
 		_windowController.nextResponder = self;
-		_windowController.resultsOutlineView.action       = @selector(didSingleClickResultsOutlineView:);
-		_windowController.resultsOutlineView.doubleAction = @selector(didDoubleClickResultsOutlineView:);
-		_windowController.resultsOutlineView.target       = self;
-		_windowController.resultsOutlineView.dataSource   = self;
-		_windowController.resultsOutlineView.delegate     = self;
+
+		_windowController.resultsViewController.selectResultAction      = @selector(didSelectResult:);
+		_windowController.resultsViewController.removeResultAction      = @selector(didRemoveResult:);
+		_windowController.resultsViewController.doubleClickResultAction = @selector(didDoubleClickResult:);
+		_windowController.resultsViewController.target                  = self;
 
 		[_windowController.replaceAllButton bind:@"title" toObject:self withKeyPath:@"replaceAllButtonTitle" options:nil];
 		[_windowController.replaceAllButton bind:@"enabled2" toObject:self withKeyPath:@"canReplaceAll" options:nil];
@@ -437,12 +326,12 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 				}
 				self.windowController.statusString = [NSString stringWithFormat:MSG_REPLACE_ALL_RESULTS, replaceCount, fileCount];
 				self.performedReplaceAll = YES;
-				[_windowController.resultsOutlineView reloadDataForRowIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [_windowController.resultsOutlineView numberOfRows])] columnIndexes:[NSIndexSet indexSetWithIndex:1]];
+				_windowController.resultsViewController.disableCheckBoxes = YES;
 			}
 			break;
 
-			case FindActionFindNext:     [self selectNextResult:self];     break;
-			case FindActionFindPrevious: [self selectPreviousResult:self]; break;
+			case FindActionFindNext:     [self.windowController selectNextResult:self];     break;
+			case FindActionFindPrevious: [self.windowController selectPreviousResult:self]; break;
 		}
 	}
 	else
@@ -551,10 +440,9 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		[self unbind:@"countOfExcludedMatches"];
 	}
 
-	_results = [FFResultNode new];
+	_windowController.resultsViewController.results = _results = [FFResultNode new];;
 	[self bind:@"countOfMatches" toObject:_results withKeyPath:@"countOfLeafs" options:nil];
 	[self bind:@"countOfExcludedMatches" toObject:_results withKeyPath:@"countOfExcluded" options:nil];
-	[_windowController.resultsOutlineView reloadData];
 }
 
 - (void)setDocumentSearch:(FFDocumentSearch*)newSearcher
@@ -571,10 +459,11 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		self.performedReplaceAll = NO;
 		self.performedSaveAll    = NO;
 
-		self.windowController.busy                     = YES;
-		self.windowController.statusString             = MSG_SEARCHING_FMT;
-		self.windowController.showsResultsOutlineView  = YES;
-		self.windowController.disableResultsCheckBoxes = _documentSearch.documentIdentifier != nil;
+		self.windowController.busy                    = YES;
+		self.windowController.statusString            = MSG_SEARCHING_FMT;
+		self.windowController.showsResultsOutlineView = YES;
+
+		self.windowController.resultsViewController.hideCheckBoxes = _documentSearch.documentIdentifier != nil;
 
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(folderSearchDidReceiveResults:) name:FFDocumentSearchDidReceiveResultsNotification object:_documentSearch];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(folderSearchDidFinish:) name:FFDocumentSearchDidFinishNotification object:_documentSearch];
@@ -601,12 +490,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		[parent addResultNode:node];
 	}
 
-	NSIndexSet* newItemsIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(countOfExistingItems, _results.children.count - countOfExistingItems)];
-	[self.windowController.resultsOutlineView beginUpdates];
-	[self.windowController.resultsOutlineView insertItemsAtIndexes:newItemsIndexes inParent:nil withAnimation:0];
-	for(FFResultNode* item in [_results.children objectsAtIndexes:newItemsIndexes])
-		[self.windowController.resultsOutlineView expandItem:item];
-	[self.windowController.resultsOutlineView endUpdates];
+	[_windowController.resultsViewController insertItemsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(countOfExistingItems, _results.children.count - countOfExistingItems)]];
 }
 
 - (void)addResultsToPasteboard:(id)sender
@@ -652,48 +536,6 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	}
 }
 
-- (void)takeSearchResultToRemoveFrom:(id)sender
-{
-	FFResultNode* item;
-
-	NSInteger row = [_windowController.resultsOutlineView rowForView:sender];
-	if(row != -1)
-		item = [_windowController.resultsOutlineView itemAtRow:row];
-	else if([sender respondsToSelector:@selector(objectValue)] && [[sender objectValue] isKindOfClass:[FFResultNode class]])
-		item = [sender objectValue];
-
-	if(item)
-	{
-		NSUInteger index = [item.parent.children indexOfObject:item];
-		if(index == NSNotFound)
-			return;
-
-		if(OakIsAlternateKeyOrMouseEvent())
-		{
-			if(item.document->path() != NULL_STR)
-			{
-				std::string path = path::relative_to(item.document->path(), to_s(_documentSearch.directory));
-				NSString* newGlob = [_windowController.globString stringByAppendingFormat:@"~%@", [NSString stringWithCxxString:path]];
-				_windowController.globString = newGlob;
-			}
-		}
-
-		[item removeFromParent];
-		[self addResultsToPasteboard:self];
-
-		NSString* fmt = MSG_SHOWING_ZERO_MATCHES_FMT;
-		switch(self.countOfMatches)
-		{
-			case 0:  fmt = MSG_SHOWING_ZERO_MATCHES_FMT;     break;
-			case 1:  fmt = MSG_SHOWING_ONE_MATCH_FMT;        break;
-			default: fmt = MSG_SHOWING_MULTIPLE_MATCHES_FMT; break;
-		}
-		_windowController.statusString = [NSString stringWithFormat:fmt, [_documentSearch searchString], [NSNumberFormatter localizedStringFromNumber:@(self.countOfMatches) numberStyle:NSNumberFormatterDecimalStyle]];
-
-		[_windowController.resultsOutlineView removeItemsAtIndexes:[NSIndexSet indexSetWithIndex:index] inParent:nil withAnimation:NSTableViewAnimationEffectFade|NSTableViewAnimationSlideDown];
-	}
-}
-
 - (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)object change:(NSDictionary*)change context:(void*)context
 {
 	if([keyPath isEqualToString:@"currentPath"])
@@ -714,220 +556,56 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	}
 }
 
-// ============================
-// = Outline view data source =
-// ============================
-
-- (NSInteger)outlineView:(NSOutlineView*)outlineView numberOfChildrenOfItem:(FFResultNode*)item
-{
-	return [(item ?: _results).children count];
-}
-
-- (BOOL)outlineView:(NSOutlineView*)outlineView isItemExpandable:(FFResultNode*)item
-{
-	return [self outlineView:outlineView isGroupItem:item];
-}
-
-- (id)outlineView:(NSOutlineView*)outlineView child:(NSInteger)childIndex ofItem:(FFResultNode*)item
-{
-	return [(item ?: _results).children objectAtIndex:childIndex];
-}
-
-- (BOOL)outlineView:(NSOutlineView*)outlineView isGroupItem:(FFResultNode*)item
-{
-	return [outlineView levelForItem:item] == 0;
-}
-
-- (CGFloat)outlineView:(NSOutlineView*)outlineView heightOfRowByItem:(FFResultNode*)item
-{
-	return [self outlineView:outlineView isGroupItem:item] ? 22 : item.lineSpan * [outlineView rowHeight];
-}
-
-// ============================
-// = View-based NSOutlineView =
-// ============================
-
-- (void)toggleExcludedCheckbox:(NSButton*)sender
-{
-	NSInteger row = [_windowController.resultsOutlineView rowForView:sender];
-	if(row != -1)
-	{
-		FFResultNode* item = [_windowController.resultsOutlineView itemAtRow:row];
-
-		BOOL toggleAllInGroup = OakIsAlternateKeyOrMouseEvent();
-		if(toggleAllInGroup)
-			item.parent.excluded = item.excluded;
-
-		if(_windowController.showReplacementPreviews)
-		{
-			NSRange range = NSMakeRange(row, 1);
-			if(toggleAllInGroup)
-				range = NSMakeRange([_windowController.resultsOutlineView rowForItem:item.parent.firstResultNode], item.parent.countOfLeafs);
-			[_windowController.resultsOutlineView reloadDataForRowIndexes:[NSIndexSet indexSetWithIndexesInRange:range] columnIndexes:[NSIndexSet indexSetWithIndex:1]];
-		}
-	}
-}
-
-- (NSView*)outlineView:(NSOutlineView*)outlineView viewForTableColumn:(NSTableColumn*)tableColumn item:(FFResultNode*)item
-{
-	NSString* identifier = tableColumn.identifier ?: @"group";
-	id res = [outlineView makeViewWithIdentifier:identifier owner:self];
-
-	if([identifier isEqualToString:@"checkbox"])
-	{
-		NSButton* button = res;
-		if(!button)
-		{
-			res = button = OakCreateCheckBox(nil);
-			button.identifier = identifier;
-			[[button cell] setControlSize:NSSmallControlSize];
-			[button bind:@"enabled" toObject:self withKeyPath:@"performedReplaceAll" options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
-			button.action = @selector(toggleExcludedCheckbox:);
-			button.target = self;
-		}
-		else
-		{
-			[button unbind:NSValueBinding];
-		}
-
-		[button bind:NSValueBinding toObject:item withKeyPath:@"excluded" options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
-		button.state = item.excluded ? NSOffState : NSOnState;
-	}
-	else if([identifier isEqualToString:@"match"])
-	{
-		NSTextField* textField = res;
-		if(!textField)
-		{
-			res = textField = OakCreateLabel(@"");
-			textField.identifier = identifier;
-			[textField setCell:[OakAttributedStringTextFieldCell new]];
-		}
-		[textField.cell setAttributedStringValue:[item excerptWithReplacement:(item.replacementDone || !item.excluded && self.windowController.showReplacementPreviews) ? self.replaceString : nil]];
-	}
-	else
-	{
-		OakSearchResultsHeaderCellView* cellView = res;
-		if(!cellView)
-		{
-			res = cellView = [[OakSearchResultsHeaderCellView alloc] initWithOutlineView:outlineView];
-			cellView.identifier = identifier;
-			cellView.removeButton.action = @selector(takeSearchResultToRemoveFrom:);
-			cellView.removeButton.target = self;
-		}
-
-		cellView.objectValue = item;
-		cellView.countOfLeafsButton.title = [NSString stringWithFormat:@"%lu", item.countOfLeafs];
-		cellView.countOfLeafsButton.hidden = [outlineView isItemExpanded:item];
-	}
-	return res;
-}
-
-// ======================
-// = Should Select Item =
-// ======================
-
-- (BOOL)outlineView:(NSOutlineView*)outlineView shouldSelectItem:(FFResultNode*)item
-{
-	if([self outlineView:outlineView isGroupItem:item])
-		return NO;
-
-	NSInteger clickedColumn = [outlineView clickedColumn];
-	NSTableColumn* col = clickedColumn != -1 ? [[outlineView tableColumns] objectAtIndex:clickedColumn] : nil;
-	if([[col identifier] isEqualToString:@"checkbox"])
-		return NO;
-
-	return YES;
-}
-
 // =============================
 // = Selecting Results Actions =
 // =============================
 
-- (void)didDoubleClickResultsOutlineView:(id)sender
+- (void)didSelectResult:(FFResultNode*)item
 {
-	NSOutlineView* outlineView = self.windowController.resultsOutlineView;
-	NSInteger clickedColumn = [outlineView clickedColumn];
-	NSTableColumn* col = clickedColumn != -1 ? [[outlineView tableColumns] objectAtIndex:clickedColumn] : nil;
-	if([[col identifier] isEqualToString:@"checkbox"])
-		return;
+	auto doc = item.document;
+	if(!doc->is_open())
+		doc->set_recent_tracking(false);
+	document::show(doc, self.projectIdentifier ? oak::uuid_t(to_s(self.projectIdentifier)) : document::kCollectionAny, [item.match match].range, false);
+}
 
+- (void)didDoubleClickResult:(FFResultNode*)item
+{
 	[self.windowController close];
 }
 
-- (void)openDocumentForSelectedRow:(id)sender
+- (void)didRemoveResult:(FFResultNode*)item
 {
-	NSOutlineView* outlineView = self.windowController.resultsOutlineView;
-	if([outlineView numberOfSelectedRows] == 1)
+	if(OakIsAlternateKeyOrMouseEvent())
 	{
-		NSUInteger selectionIndex  = [[outlineView selectedRowIndexes] firstIndex];
-		FFResultNode* selectedNode = [outlineView itemAtRow:selectionIndex];
-		auto doc = selectedNode.document;
-		if(!doc->is_open())
-			doc->set_recent_tracking(false);
-		document::show(doc, self.projectIdentifier ? oak::uuid_t(to_s(self.projectIdentifier)) : document::kCollectionAny, [selectedNode.match match].range, false);
+		if(item.document->path() != NULL_STR)
+		{
+			std::string path = path::relative_to(item.document->path(), to_s(_documentSearch.directory));
+			NSString* newGlob = [_windowController.globString stringByAppendingFormat:@"~%@", [NSString stringWithCxxString:path]];
+			_windowController.globString = newGlob;
+		}
 	}
-}
 
-- (void)didSingleClickResultsOutlineView:(id)sender
-{
-	[self openDocumentForSelectedRow:self];
-}
+	[self addResultsToPasteboard:self];
 
-- (void)outlineViewSelectionDidChange:(NSNotification*)aNotification
-{
-	if([[NSApp currentEvent] type] != NSLeftMouseUp)
-		[self openDocumentForSelectedRow:self];
-}
-
-// ===========================
-// = Expand/Collapse Results =
-// ===========================
-
-- (BOOL)resultsCollapsed
-{
-	NSUInteger expanded = 0;
-	for(FFResultNode* parent in _results.children)
-		expanded += [_windowController.resultsOutlineView isItemExpanded:parent] ? 1 : 0;
-	return [_results.children count] && 2 * expanded <= [_results.children count];
-}
-
-- (IBAction)takeLevelToFoldFrom:(id)sender
-{
-	if(self.resultsCollapsed)
-			[_windowController.resultsOutlineView expandItem:nil expandChildren:YES];
-	else	[_windowController.resultsOutlineView collapseItem:nil collapseChildren:YES];
-
-	[_windowController.resultsOutlineView setNeedsDisplay:YES];
+	NSString* fmt = MSG_SHOWING_ZERO_MATCHES_FMT;
+	switch(self.countOfMatches)
+	{
+		case 0:  fmt = MSG_SHOWING_ZERO_MATCHES_FMT;     break;
+		case 1:  fmt = MSG_SHOWING_ONE_MATCH_FMT;        break;
+		default: fmt = MSG_SHOWING_MULTIPLE_MATCHES_FMT; break;
+	}
+	_windowController.statusString = [NSString stringWithFormat:fmt, [_documentSearch searchString], [NSNumberFormatter localizedStringFromNumber:@(self.countOfMatches) numberStyle:NSNumberFormatterDecimalStyle]];
 }
 
 // ==================
 // = Go to… Submenu =
 // ==================
 
-- (void)showResultNode:(FFResultNode*)aResultNode
-{
-	if(!aResultNode)
-		return;
-
-	NSOutlineView* outlineView = _windowController.resultsOutlineView;
-	if(![outlineView isItemExpanded:aResultNode.parent])
-		[outlineView expandItem:aResultNode.parent];
-	[outlineView scrollRowToVisible:[outlineView rowForItem:aResultNode.parent]];
-
-	NSInteger row = [outlineView rowForItem:aResultNode];
-	if(row != -1)
-	{
-		[outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-		[outlineView scrollRowToVisible:row];
-		[outlineView.window makeFirstResponder:outlineView];
-	}
-}
-
 - (IBAction)takeSelectedPathFrom:(id)sender
 {
 	FFResultNode* item = [sender representedObject];
 	if([item isKindOfClass:[FFResultNode class]])
-		[self showResultNode:item.firstResultNode];
+		[_windowController.resultsViewController showResultNode:item.firstResultNode];
 }
 
 - (void)updateGoToMenu:(NSMenu*)aMenu
@@ -959,14 +637,8 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 {
 	std::vector<std::string> res;
 
-	NSOutlineView* outlineView = self.windowController.resultsOutlineView;
-	NSIndexSet* selectedRows = [outlineView numberOfSelectedRows] == 0 ? [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [outlineView numberOfRows])] : [outlineView selectedRowIndexes];
-	for(NSUInteger index = [selectedRows firstIndex]; index != NSNotFound; index = [selectedRows indexGreaterThanIndex:index])
+	for(FFResultNode* item in _windowController.resultsViewController.selectedResults)
 	{
-		FFResultNode* item = [outlineView itemAtRow:index];
-		if([item.children count])
-			continue;
-
 		find::match_t const& m = [item.match match];
 		std::string str = m.excerpt;
 
@@ -1010,55 +682,15 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	[self allMatchesSetExclude:YES];
 }
 
-- (IBAction)selectNextResult:(id)sender
-{
-	NSInteger row = [_windowController.resultsOutlineView selectedRow];
-	FFResultNode* item = row == -1 ? nil : [_windowController.resultsOutlineView itemAtRow:row];
-
-	item = item ? (item.next ?: item.parent.next.firstResultNode) : _results.firstResultNode.firstResultNode;
-	if(!item && _windowController.wrapAround)
-		item = _results.firstResultNode.firstResultNode;
-
-	[self showResultNode:item];
-}
-
-- (IBAction)selectPreviousResult:(id)sender
-{
-	NSInteger row = [_windowController.resultsOutlineView selectedRow];
-	FFResultNode* item = row == -1 ? nil : [_windowController.resultsOutlineView itemAtRow:row];
-
-	item = item ? (item.previous ?: item.parent.previous.lastResultNode) : _results.lastResultNode.lastResultNode;
-	if(!item && _windowController.wrapAround)
-		item = _results.lastResultNode.lastResultNode;
-
-	[self showResultNode:item];
-}
-
-- (IBAction)selectNextTab:(id)sender
-{
-	NSInteger row = [_windowController.resultsOutlineView selectedRow];
-	FFResultNode* item = row == -1 ? nil : [_windowController.resultsOutlineView itemAtRow:row];
-	[self showResultNode:item.parent.next.firstResultNode ?: _results.firstResultNode.firstResultNode];
-}
-
-- (IBAction)selectPreviousTab:(id)sender
-{
-	NSInteger row = [_windowController.resultsOutlineView selectedRow];
-	FFResultNode* item = row == -1 ? nil : [_windowController.resultsOutlineView itemAtRow:row];
-	[self showResultNode:item.parent.previous.firstResultNode ?: _results.lastResultNode.firstResultNode];
-}
-
 - (BOOL)validateMenuItem:(NSMenuItem*)aMenuItem
 {
 	static std::set<SEL> const copyActions = { @selector(copy:), @selector(copyMatchingParts:), @selector(copyMatchingPartsWithFilename:), @selector(copyEntireLines:), @selector(copyEntireLinesWithFilename:) };
 	if(copyActions.find(aMenuItem.action) != copyActions.end())
-		return [self.windowController.resultsOutlineView numberOfRows] != 0;
+		return [_results countOfLeafs] != 0;
 	else if(aMenuItem.action == @selector(saveAllDocuments:))
 		return self.hasUnsavedChanges;
 	else if(aMenuItem.action == @selector(saveDocument:) || aMenuItem.action == @selector(saveDocumentAs:))
 		return NO;
-	else if(aMenuItem.action == @selector(takeLevelToFoldFrom:) && aMenuItem.tag == -1)
-		[aMenuItem setTitle:self.resultsCollapsed ? @"Expand Results" : @"Collapse Results"];
 	else if(aMenuItem.action == @selector(checkAll:))
 		return self.countOfExcludedMatches > 0;
 	else if(aMenuItem.action == @selector(uncheckAll:) )
