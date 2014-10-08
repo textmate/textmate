@@ -319,6 +319,8 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 						else
 						{
 							doc->replace(replacements);
+							doc->sync_save(kCFRunLoopDefaultMode);
+							doc->set_content(NULL_STR);
 						}
 
 						replaceCount += replacements.size();
