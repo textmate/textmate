@@ -314,6 +314,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 							doc->undo_manager().begin_undo_group(editor->ranges());
 							editor->perform_replacements(replacements);
 							doc->undo_manager().end_undo_group(editor->ranges());
+							doc->set_revision(doc->buffer().revision());
 						}
 						else
 						{
