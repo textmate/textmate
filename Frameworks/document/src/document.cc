@@ -1159,9 +1159,12 @@ namespace document
 	void document_t::set_content (std::string const& str)
 	{
 		D(DBF_Document, bug("%.*s… (%zu bytes), file type %s\n", std::min<int>(32, str.size()), str.data(), str.size(), _file_type.c_str()););
-		if(_buffer)
-				_buffer->replace(0, _buffer->size(), str);
-		else	_content = std::make_shared<io::bytes_t>(str);
+		if(str == NULL_STR)
+			_content.reset();
+		else if(_buffer)
+			_buffer->replace(0, _buffer->size(), str);
+		else
+			_content = std::make_shared<io::bytes_t>(str);
 	}
 
 	std::string document_t::content () const
