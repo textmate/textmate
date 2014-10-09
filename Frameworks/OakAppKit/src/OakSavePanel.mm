@@ -58,7 +58,7 @@
 {
 	encoding::type res = _encodingOptions;
 
-	settings_t const& settings = settings_for_path([[[anURL filePathURL] path] fileSystemRepresentation]);
+	settings_t const& settings = settings_for_path(to_s([[anURL filePathURL] path]));
 	if(res.charset() == kCharsetNoEncoding)
 	{
 		res.set_charset(settings.get(kSettingsEncodingKey, kCharsetUTF8));
