@@ -2,9 +2,11 @@ Title: Release Notes
 
 # Changes
 
-## 2014-10-02 ([v2.0-alpha.9571](https://github.com/textmate/textmate/compare/v2.0-alpha.9567...v2.0-alpha.9571))
+## 2014-10-10 ([v2.0-alpha.9573](https://github.com/textmate/textmate/compare/v2.0-alpha.9567...v2.0-alpha.9573))
 
+* When replacing after a folder search, files that are not open will have the replacements done “on disk”. There is currently no undo for this action so think twice before making massive replacements to files not under version control.
 * You can now set default options for `mate` via the `MATEFLAGS` environment variable. I didn’t bump the version of `mate` so you need to manually go to Preferences → Terminal and click uninstall/install to update.
+* Miscellaneous fixes and improvements.
 
 ## 2014-09-26 ([v2.0-alpha.9567](https://github.com/textmate/textmate/compare/v2.0-alpha.9565...v2.0-alpha.9567))
 
