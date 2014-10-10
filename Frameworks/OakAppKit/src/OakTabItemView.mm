@@ -114,7 +114,7 @@
 			@"AW_rollover" : @"TabCloseThin_ModifiedRollover",
 		},
 		@"overflowButton" : @{
-			@"AW_normal"   : @"TabOverflowTemplate",
+			@"AW_normal"   : @"TabOverflowThinTemplate",
 		},
 	};
 	return [self imagesForNames:imageNames];
