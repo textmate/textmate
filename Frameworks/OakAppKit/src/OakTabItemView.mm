@@ -105,9 +105,13 @@
 		},
 		@"closeButton" : @{
 			@"AW_normal"   : @"TabCloseThin",
+			@"AW_pressed"  : @"TabCloseThin_Pressed",
+			@"AW_rollover" : @"TabCloseThin_Rollover",
 		},
 		@"closeButtonModified" : @{
 			@"AW_normal"   : @"TabCloseThin_Modified",
+			@"AW_pressed"  : @"TabCloseThin_ModifiedPressed",
+			@"AW_rollover" : @"TabCloseThin_ModifiedRollover",
 		},
 		@"overflowButton" : @{
 			@"AW_normal"   : @"TabOverflowTemplate",
