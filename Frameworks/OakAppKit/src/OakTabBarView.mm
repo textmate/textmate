@@ -134,7 +134,7 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 	if(_addTabButton)
 		return;
 
-	_addTabButton = [[NSButton alloc] initWithFrame:NSZeroRect];
+	_addTabButton = [[NSButton alloc] initWithFrame:NSMakeRect(0, 2, 26, 20)];
 	OakSetAccessibilityLabel(_addTabButton, @"Create new tab");
 	[[_addTabButton cell] setBackgroundStyle:NSBackgroundStyleRaised];
 	_addTabButton.image      = [NSImage imageNamed:NSImageNameAddTemplate];
@@ -143,12 +143,7 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 	_addTabButton.toolTip    = @"Create new tab";
 	_addTabButton.action     = @selector(_newTab:);
 	_addTabButton.target     = self;
-	_addTabButton.translatesAutoresizingMaskIntoConstraints = NO;
 	[self addSubview:_addTabButton];
-
-	NSDictionary* views = @{ @"add" : _addTabButton };
-	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(>=120)-[add(==16)]-(5)-|" options:0 metrics:nil views:views]];
-	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(2)-[add]-(2)-|" options:0 metrics:nil views:views]];
 }
 
 - (void)dealloc
@@ -264,10 +259,12 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 
 - (NSUInteger)countOfVisibleTabs
 {
-	CGFloat const tabSpacing  = OakTabBarStyle.sharedInstance.tabViewSpacing;
-	CGFloat const tabMinWidth = OakTabBarStyle.sharedInstance.minimumTabSize;
+	CGFloat const leftPadding  = OakTabBarStyle.sharedInstance.leftPadding;
+	CGFloat const rightPadding = OakTabBarStyle.sharedInstance.rightPadding;
+	CGFloat const tabSpacing   = OakTabBarStyle.sharedInstance.tabViewSpacing;
+	CGFloat const tabMinWidth  = OakTabBarStyle.sharedInstance.minimumTabSize;
 
-	CGFloat width = NSMinX(_addTabButton.frame);
+	CGFloat width = NSWidth(self.bounds) - NSWidth(_addTabButton.frame) - rightPadding - leftPadding;
 
 	BOOL missingDraggedTab =  _draggedTabItem && !_preliminaryTabItem;
 	BOOL hasSomeonesTab    = !_draggedTabItem &&  _preliminaryTabItem;
@@ -377,7 +374,7 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 	CGFloat const tabMinWidth  = OakTabBarStyle.sharedInstance.minimumTabSize;
 	CGFloat const tabMaxWidth  = OakTabBarStyle.sharedInstance.maximumTabSize;
 
-	NSRect bounds = NSMakeRect(leftPadding, 0, NSMinX(_addTabButton.frame) - rightPadding - leftPadding, NSHeight(self.bounds));
+	NSRect bounds = NSMakeRect(leftPadding, 0, NSWidth(self.bounds) - NSWidth(_addTabButton.frame) - rightPadding - leftPadding, NSHeight(self.bounds));
 
 	if(!_tabItems.count || !_expanded || NSWidth(bounds) < tabMinWidth)
 	{
@@ -461,6 +458,11 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 	}
 
 	[self updateCapImageViews];
+
+	NSUInteger lastTabIndex = [tabIndexes lastIndex];
+	OakTabItem* lastTab = _tabItems[lastTabIndex];
+	NSRect addButtonFrame = NSMakeRect(NSMaxX(lastTab.targetFrame) + rightPadding, 2, NSWidth(_addTabButton.frame), NSHeight(self.bounds)-4);
+	[(_animateLayoutChanges ? [_addTabButton animator] : _addTabButton) setFrame:addButtonFrame];
 }
 
 - (void)resizeSubviewsWithOldSize:(NSSize)aSize

@@ -128,11 +128,11 @@
 		{
 			_images = [self yosemiteImages];
 			_leftPadding  = -1;
-			_rightPadding = 5;
 		}
 		else
 		{
 			_images = [self mavericksImages];
+			_rightPadding = -5;
 		}
 
 		NSImage* rightCapImage = _images[@"rightTabCap"][@"AW_normal"];
