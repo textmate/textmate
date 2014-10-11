@@ -274,7 +274,7 @@ namespace scm
 			if(s == "enable")  return true;  // Don't apply logic, just trust the glob.
 			if(s == "disable") return false;
 			if(s == "local")   return path != "/" && path != path::home() && path::is_local(path);
-			if(s == "rootvol") return path != "/" && path != path::home() && path::is_from_volume(path, "/");
+			if(s == "rootvol") return path != "/" && path != path::home() && path::device(path) == path::device("/");
 		}
 
 		// Default to local only, because traversal can take too long on networked volumes.

@@ -384,51 +384,6 @@ namespace path
 		return (pathIsLocal == kCFBooleanTrue);
 	}
 
-	bool is_from_volume (std::string const& path, std::string const& volume) {
-		CFURLRef url = NULL, targVolume = NULL, pathVolume = NULL;
-		CFTypeRef volid1 = NULL, volid2 = NULL;
-
-		url = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault, (UInt8 const*)path.data(), path.size(), is_directory(path));
-		targVolume = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault, (UInt8 const*)volume.data(), volume.size(), is_directory(volume));
-		if(url) CFURLCopyResourcePropertyForKey(url, kCFURLVolumeURLKey, &pathVolume, NULL);
-
-		if(targVolume) CFURLCopyResourcePropertyForKey(targVolume, kCFURLFileResourceIdentifierKey, &volid1, NULL);
-		if(pathVolume) CFURLCopyResourcePropertyForKey(pathVolume, kCFURLFileResourceIdentifierKey, &volid2, NULL);
-
-		bool ret = volid1 && volid2 && CFEqual(volid1, volid2);
-
-		if(url)        CFRelease(url);
-		if(targVolume) CFRelease(targVolume);
-		if(pathVolume) CFRelease(pathVolume);
-		if(volid1)     CFRelease(volid1);
-		if(volid2)     CFRelease(volid2);
-
-		return ret;
-	}
-
-	bool is_same_volume (std::string const& path1, std::string const& path2) {
-		CFURLRef url1 = NULL, url2 = NULL, vol1 = NULL, vol2 = NULL;
-		CFTypeRef volid1 = NULL, volid2 = NULL;
-
-		url1 = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault, (UInt8 const*)path1.data(), path1.size(), is_directory(path1));
-		url2 = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault, (UInt8 const*)path2.data(), path2.size(), is_directory(path2));
-		if(url1) CFURLCopyResourcePropertyForKey(url1, kCFURLVolumeURLKey, &vol1, NULL);
-		if(url2) CFURLCopyResourcePropertyForKey(url2, kCFURLVolumeURLKey, &vol2, NULL);
-		if(vol1) CFURLCopyResourcePropertyForKey(vol1, kCFURLFileResourceIdentifierKey, &volid1, NULL);
-		if(vol2) CFURLCopyResourcePropertyForKey(vol2, kCFURLFileResourceIdentifierKey, &volid2, NULL);
-
-		bool ret = volid1 && volid2 && CFEqual(volid1, volid2);
-
-		if(url1)   CFRelease(url1);
-		if(url2)   CFRelease(url2);
-		if(vol1)   CFRelease(vol1);
-		if(vol2)   CFRelease(vol2);
-		if(volid1) CFRelease(volid1);
-		if(volid2) CFRelease(volid2);
-
-		return ret;
-	}
-
 	bool is_trashed (std::string const& path)
 	{
 		Boolean res;
