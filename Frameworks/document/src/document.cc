@@ -97,9 +97,9 @@ static void schedule_backup (oak::uuid_t const& docId)
 
 // ==========
 
-static std::multimap<text::range_t, document::document_t::mark_t> parse_marks (std::string const& str)
+static std::multimap<text::range_t, std::string> parse_marks (std::string const& str)
 {
-	std::multimap<text::range_t, document::document_t::mark_t> marks;
+	std::multimap<text::range_t, std::string> marks;
 	if(str != NULL_STR)
 	{
 		plist::any_t const& plist = plist::parse(str);
@@ -504,14 +504,14 @@ namespace document
 
 	static struct mark_tracker_t
 	{
-		typedef std::multimap<text::range_t, document_t::mark_t> marks_t;
+		typedef std::multimap<text::range_t, std::string> marks_t;
 
 		marks_t get (std::string const& path)
 		{
 			if(path == NULL_STR)
 				return marks_t();
 
-			std::map<std::string, marks_t>::const_iterator it = marks.find(path);
+			auto it = marks.find(path);
 			if(it == marks.end())
 				it = marks.emplace(path, parse_marks(path::get_attr(path, "com.macromates.bookmarks"))).first;
 			return it->second;
@@ -520,10 +520,16 @@ namespace document
 		void set (std::string const& path, marks_t const& m)
 		{
 			if(m.empty())
-					marks.erase(path);
+					clear(path);
 			else	marks[path] = m;
 		}
 
+		void clear (std::string const& path)
+		{
+			marks.erase(path);
+		}
+
+	private:
 		std::map<std::string, marks_t> marks;
 
 	} marks;
@@ -1282,16 +1288,16 @@ namespace document
 		if(src != NULL_STR)
 		{
 			_marks = document::marks.get(src);
-			document::marks.set(src, std::multimap<text::range_t, document_t::mark_t>());
+			document::marks.clear(src);
 		}
 
 		_did_load_marks = true;
 	}
 
-	static void copy_marks (ng::buffer_t& buf, std::multimap<text::range_t, document_t::mark_t> const& marks)
+	static void copy_marks (ng::buffer_t& buf, std::multimap<text::range_t, std::string> const& marks)
 	{
 		for(auto const& pair : marks)
-			buf.set_mark(cap(buf, pair.first.from).index, pair.second.type);
+			buf.set_mark(cap(buf, pair.first.from).index, pair.second);
 	}
 
 	void document_t::setup_marks (std::string const& src, ng::buffer_t& buf) const
@@ -1303,15 +1309,15 @@ namespace document
 		else if(src != NULL_STR)
 		{
 			copy_marks(buf, document::marks.get(src));
-			document::marks.set(src, std::multimap<text::range_t, document_t::mark_t>());
+			document::marks.clear(src);
 		}
 	}
 
-	std::multimap<text::range_t, document_t::mark_t> document_t::marks () const
+	std::multimap<text::range_t, std::string> document_t::marks () const
 	{
 		if(_buffer)
 		{
-			std::multimap<text::range_t, document_t::mark_t> res;
+			std::multimap<text::range_t, std::string> res;
 			for(auto const& pair : _buffer->get_marks(0, _buffer->size()))
 				res.emplace(_buffer->convert(pair.first), pair.second);
 			return res;
@@ -1319,11 +1325,11 @@ namespace document
 		return document::marks.get(_path);
 	}
 
-	void document_t::add_mark (text::range_t const& range, mark_t const& mark)
+	void document_t::add_mark (text::range_t const& range, std::string const& mark)
 	{
 		if(_buffer)
 		{
-			_buffer->set_mark(_buffer->convert(range.from), mark.type);
+			_buffer->set_mark(_buffer->convert(range.from), mark);
 		}
 		else
 		{
@@ -1343,12 +1349,12 @@ namespace document
 		{
 			load_marks(_path);
 
-			std::multimap<text::range_t, mark_t> newMarks;
+			std::multimap<text::range_t, std::string> newMarks;
 			if(typeToClear != NULL_STR)
 			{
 				for(auto const& it : _marks)
 				{
-					if(it.second.type != typeToClear)
+					if(it.second != typeToClear)
 						newMarks.insert(it);
 				}
 			}
@@ -1374,7 +1380,7 @@ namespace document
 			load_marks(_path);
 			for(auto const& mark : _marks)
 			{
-				if(mark.second.type == "bookmark")
+				if(mark.second == "bookmark")
 					v.push_back(text::format("'%s'", std::string(mark.first).c_str()));
 			}
 		}

@@ -89,26 +89,15 @@ namespace document
 		// = Controlling marks (bookmarks, warnings, errors, search matches) =
 		// ===================================================================
 
-		struct mark_t
-		{
-			WATCH_LEAKS(document_t::mark_t);
-
-			mark_t (char const* type = "bookmark") : type(type), info("") { }
-			mark_t (std::string const& type, std::string const& info = "") : type(type), info(info) { }
-			bool operator== (mark_t const& rhs) const { return type == rhs.type && info == rhs.info; }
-			bool operator!= (mark_t const& rhs) const { return type != rhs.type || info != rhs.info; }
-			std::string type, info;
-		};
-
-		void add_mark (text::range_t const& range, mark_t const& mark = mark_t());
+		void add_mark (text::range_t const& range, std::string const& mark);
 		void remove_all_marks (std::string const& typeToClear = NULL_STR);
-		std::multimap<text::range_t, mark_t> marks () const;
+		std::multimap<text::range_t, std::string> marks () const;
 
 	private:
 		void load_marks (std::string const& src) const;
 		void setup_marks (std::string const& src, ng::buffer_t& buf) const;
 		std::string marks_as_string () const;
-		mutable std::multimap<text::range_t, mark_t> _marks;
+		mutable std::multimap<text::range_t, std::string> _marks;
 		mutable bool _did_load_marks;
 
 		std::string _selection;
