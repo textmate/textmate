@@ -687,6 +687,10 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 }
 @end
 
+@protocol OakProjectIdentifier
+- (NSString*)identifier;
+@end
+
 @interface OakCommitWindowServer ()
 @property (nonatomic) NSConnection* connection;
 @end
@@ -712,7 +716,23 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 
 - (void)connectFromClientWithOptions:(NSDictionary*)someOptions
 {
+	NSWindow* projectWindow = [NSApp mainWindow];
+	if(NSString* identifier = [someOptions valueForKeyPath:@"environment.TM_PROJECT_UUID"])
+	{
+		for(NSWindow* window in [NSApp orderedWindows])
+		{
+			if([window.delegate respondsToSelector:@selector(identifier)])
+			{
+				if([identifier isEqualToString:[id <OakProjectIdentifier>(window.delegate) identifier]])
+				{
+					projectWindow = window;
+					break;
+				}
+			}
+		}
+	}
+
 	OakCommitWindow* commitWindow = [[OakCommitWindow alloc] initWithOptions:someOptions];
-	[commitWindow beginSheetModalForWindow:[NSApp mainWindow] completionHandler:^(NSInteger returnCode){ }];
+	[commitWindow beginSheetModalForWindow:projectWindow completionHandler:^(NSInteger returnCode){ }];
 }
 @end
