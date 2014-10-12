@@ -975,7 +975,22 @@ namespace
 			if(filterUUID)
 				show_command_error(error, filterUUID);
 
-			[self openAndSelectDocument:document::from_content("TODO Reselect previously open document")];
+			if(!_documents.empty())
+			{
+				// Close the tab that failed to open
+				int i = _selectedTabIndex; // As an optimization, check _selectedTabIndex first.
+				if(_documents[i]->identifier() != doc->identifier())
+				{
+					for(i = 0; i < _documents.size(); i++)
+						if(_documents[i]->identifier() == doc->identifier())
+							break;
+				}
+				if(i < _documents.size())
+					[self closeTabsAtIndexes:[NSIndexSet indexSetWithIndex:i] askToSaveChanges:NO createDocumentIfEmpty:self.fileBrowserVisible];
+			}
+
+			if(_documents.empty())
+				[self close];
 		}
 	}];
 }
