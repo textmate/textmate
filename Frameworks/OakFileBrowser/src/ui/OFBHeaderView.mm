@@ -7,16 +7,11 @@
 static NSButton* OakCreateImageButton (NSString* imageName)
 {
 	NSButton* res = [NSButton new];
-
 	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
 	[res setButtonType:NSMomentaryChangeButton];
-	[res setBezelStyle:NSRecessedBezelStyle];
 	[res setBordered:NO];
-
-	NSImage* image = [[NSImage imageNamed:imageName] copy];
-	[res setImage:image];
+	[res setImage:[NSImage imageNamed:imageName]];
 	[res setImagePosition:NSImageOnly];
-
 	return res;
 }
 
@@ -30,7 +25,6 @@ static NSPopUpButton* OakCreateFolderPopUpButton ()
 	NSPopUpButton* res = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:YES];
 	OFBHeaderViewPopupButtonCell* cell = [[OFBHeaderViewPopupButtonCell alloc] initTextCell:@"" pullsDown:YES];
 	[res setCell:cell];
-	[cell setBezelStyle:NSRecessedBezelStyle];
 	[cell setArrowPosition:NSPopUpArrowAtBottom];
 	[res setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
 	[res setContentHuggingPriority:NSLayoutPriorityFittingSizeCompression forOrientation:NSLayoutConstraintOrientationHorizontal];

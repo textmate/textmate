@@ -6,20 +6,13 @@
 static NSButton* OakCreateImageButton (NSImage* image)
 {
 	NSButton* res = [NSButton new];
-
 	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
 	[res setButtonType:NSMomentaryChangeButton];
-	[res setBezelStyle:NSRecessedBezelStyle];
 	[res setBordered:NO];
-
-	image = [image copy];
-	[image setTemplate:YES];
 	[res setImage:image];
 	[res setImagePosition:NSImageOnly];
-
 	[res setContentHuggingPriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
 	[res setContentHuggingPriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationVertical];
-
 	return res;
 }
 
