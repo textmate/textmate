@@ -723,8 +723,7 @@ private:
 // = GutterView DataSource =
 // =========================
 
-static std::string const kBookmarkType   = "bookmark";
-static std::string const kSearchmarkType = "search";
+static std::string const kBookmarkType = "bookmark";
 
 - (CGFloat)widthForColumnWithIdentifier:(id)columnIdentifier
 {
@@ -749,8 +748,7 @@ static std::string const kSearchmarkType = "search";
 			}
 			else if(rowState == GutterViewRowStateRegular)
 			{
-				if(pair.second == kSearchmarkType)
-					return [self gutterImage:@"search"];
+				return [self gutterImage:[NSString stringWithCxxString:pair.second]];
 			}
 		}
 
