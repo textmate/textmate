@@ -506,31 +506,23 @@ namespace document
 	{
 		typedef std::multimap<text::range_t, std::string> marks_t;
 
-		marks_t get (std::string const& path)
+		marks_t& get (std::string const& path)
 		{
-			if(path == NULL_STR)
-				return marks_t();
-
-			auto it = marks.find(path);
-			if(it == marks.end())
-				it = marks.emplace(path, parse_marks(path::get_attr(path, "com.macromates.bookmarks"))).first;
+			auto it = _marks.find(path);
+			if(it == _marks.end())
+				it = _marks.emplace(path, parse_marks(path::get_attr(path, "com.macromates.bookmarks"))).first;
 			return it->second;
 		}
 
-		void set (std::string const& path, marks_t const& m)
+		void set (std::string const& path, marks_t const& newMarks)
 		{
-			if(m.empty())
-					clear(path);
-			else	marks[path] = m;
-		}
-
-		void clear (std::string const& path)
-		{
-			marks.erase(path);
+			if(newMarks.empty())
+					_marks.erase(path);
+			else	_marks[path] = newMarks;
 		}
 
 	private:
-		std::map<std::string, marks_t> marks;
+		std::map<std::string, marks_t> _marks;
 
 	} marks;
 
@@ -541,8 +533,6 @@ namespace document
 	document_t::~document_t ()
 	{
 		D(DBF_Document, bug("%s\n", display_name().c_str()););
-		if(_path != NULL_STR && _buffer)
-			document::marks.set(_path, marks());
 		documents.remove(_identifier);
 	}
 
@@ -983,6 +973,9 @@ namespace document
 			path::set_attr(_path, "com.macromates.bookmarks",      marks_as_string());
 		}
 
+		if(_path != NULL_STR)
+			document::marks.set(_path, marks());
+
 		if(_backup_path != NULL_STR && access(_backup_path.c_str(), F_OK) == 0)
 			unlink(_backup_path.c_str());
 		_backup_path = NULL_STR;
@@ -1280,62 +1273,29 @@ namespace document
 	// = Marks =
 	// =========
 
-	void document_t::load_marks (std::string const& src) const
-	{
-		if(_did_load_marks)
-			return;
-
-		if(src != NULL_STR)
-		{
-			_marks = document::marks.get(src);
-			document::marks.clear(src);
-		}
-
-		_did_load_marks = true;
-	}
-
-	static void copy_marks (ng::buffer_t& buf, std::multimap<text::range_t, std::string> const& marks)
-	{
-		for(auto const& pair : marks)
-			buf.set_mark(cap(buf, pair.first.from).index, pair.second);
-	}
-
 	void document_t::setup_marks (std::string const& src, ng::buffer_t& buf) const
 	{
-		if(_did_load_marks)
-		{
-			copy_marks(buf, _marks);
-		}
-		else if(src != NULL_STR)
-		{
-			copy_marks(buf, document::marks.get(src));
-			document::marks.clear(src);
-		}
+		for(auto const& pair : document::marks.get(src))
+			buf.set_mark(cap(buf, pair.first.from).index, pair.second);
 	}
 
 	std::multimap<text::range_t, std::string> document_t::marks () const
 	{
-		if(_buffer)
-		{
-			std::multimap<text::range_t, std::string> res;
-			for(auto const& pair : _buffer->get_marks(0, _buffer->size()))
-				res.emplace(_buffer->convert(pair.first), pair.second);
-			return res;
-		}
-		return document::marks.get(_path);
+		if(!_buffer)
+			return document::marks.get(_path);
+
+		std::multimap<text::range_t, std::string> res;
+		for(auto const& pair : _buffer->get_marks(0, _buffer->size()))
+			res.emplace(_buffer->convert(pair.first), pair.second);
+		return res;
 	}
 
 	void document_t::add_mark (text::range_t const& range, std::string const& mark)
 	{
 		if(_buffer)
-		{
 			_buffer->set_mark(_buffer->convert(range.from), mark);
-		}
-		else
-		{
-			load_marks(_path);
-			_marks.emplace(range, mark);
-		}
+		else if(_path != NULL_STR)
+			document::marks.get(_path).emplace(range, mark);
 		broadcast(callback_t::did_change_marks);
 	}
 
@@ -1345,21 +1305,18 @@ namespace document
 		{
 			_buffer->remove_all_marks(typeToClear);
 		}
-		else
+		else if(_path != NULL_STR)
 		{
-			load_marks(_path);
-
 			std::multimap<text::range_t, std::string> newMarks;
 			if(typeToClear != NULL_STR)
 			{
-				for(auto const& it : _marks)
+				for(auto const& it : document::marks.get(_path))
 				{
 					if(it.second != typeToClear)
 						newMarks.insert(it);
 				}
 			}
-
-			_marks.swap(newMarks);
+			document::marks.set(_path, newMarks);
 		}
 		broadcast(callback_t::did_change_marks);
 	}
@@ -1367,22 +1324,10 @@ namespace document
 	std::string document_t::marks_as_string () const
 	{
 		std::vector<std::string> v;
-		if(_buffer)
+		for(auto const& mark : marks())
 		{
-			for(auto const& pair : _buffer->get_marks(0, _buffer->size()))
-			{
-				if(pair.second == "bookmark")
-					v.push_back(text::format("'%s'", std::string(_buffer->convert(pair.first)).c_str()));
-			}
-		}
-		else
-		{
-			load_marks(_path);
-			for(auto const& mark : _marks)
-			{
-				if(mark.second == "bookmark")
-					v.push_back(text::format("'%s'", std::string(mark.first).c_str()));
-			}
+			if(mark.second == "bookmark")
+				v.push_back(text::format("'%s'", std::string(mark.first).c_str()));
 		}
 		return v.empty() ? NULL_STR : "( " + text::join(v, ", ") + " )";
 	}

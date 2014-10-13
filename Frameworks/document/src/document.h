@@ -65,7 +65,7 @@ namespace document
 	{
 		WATCH_LEAKS(document_t);
 
-		document_t () : _did_load_marks(false), _selection(NULL_STR), _folded(NULL_STR), _disable_callbacks(false), _revision(0), _disk_revision(0), _modified(false), _path(NULL_STR), _open_count(0), _has_lru(false), _is_on_disk(false), _recent_tracking(true), _backup_path(NULL_STR), _backup_revision(0), _virtual_path(NULL_STR), _custom_name(NULL_STR), _untitled_count(0), _file_type(NULL_STR), /*_folder(NULL_STR),*/ _disk_encoding(NULL_STR), _disk_newlines(NULL_STR), _disk_bom(false) { }
+		document_t () : _selection(NULL_STR), _folded(NULL_STR), _disable_callbacks(false), _revision(0), _disk_revision(0), _modified(false), _path(NULL_STR), _open_count(0), _has_lru(false), _is_on_disk(false), _recent_tracking(true), _backup_path(NULL_STR), _backup_revision(0), _virtual_path(NULL_STR), _custom_name(NULL_STR), _untitled_count(0), _file_type(NULL_STR), /*_folder(NULL_STR),*/ _disk_encoding(NULL_STR), _disk_newlines(NULL_STR), _disk_bom(false) { }
 		~document_t ();
 
 		bool operator== (document_t const& rhs) const { return _identifier == rhs._identifier; }
@@ -94,11 +94,8 @@ namespace document
 		std::multimap<text::range_t, std::string> marks () const;
 
 	private:
-		void load_marks (std::string const& src) const;
 		void setup_marks (std::string const& src, ng::buffer_t& buf) const;
 		std::string marks_as_string () const;
-		mutable std::multimap<text::range_t, std::string> _marks;
-		mutable bool _did_load_marks;
 
 		std::string _selection;
 		std::string _folded;
