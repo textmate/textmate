@@ -17,12 +17,15 @@ struct GVLineRecord
 - (GVLineRecord)lineFragmentForLine:(NSUInteger)aLine column:(NSUInteger)aColumn;
 @end
 
+typedef NS_ENUM(NSUInteger, GutterViewRowState) {
+	GutterViewRowStateRegular = 0,
+	GutterViewRowStatePressed,
+	GutterViewRowStateRollover
+};
+
 @protocol GutterViewColumnDataSource
-- (NSUInteger)stateForColumnWithIdentifier:(id)columnIdentifier atLine:(NSUInteger)lineNumber;
-- (NSImage*)imageForState:(NSUInteger)aState forColumnWithIdentifier:(id)columnIdentifier;
-@optional
-- (NSImage*)hoverImageForState:(NSUInteger)aState forColumnWithIdentifier:(id)columnIdentifier;
-- (NSImage*)pressedImageForState:(NSUInteger)aState forColumnWithIdentifier:(id)columnIdentifier;
+- (NSImage*)imageForLine:(NSUInteger)aLine inColumnWithIdentifier:(id)columnIdentifier state:(GutterViewRowState)rowState;
+- (CGFloat)widthForColumnWithIdentifier:(id)columnIdentifier;
 @end
 
 @protocol GutterViewColumnDelegate

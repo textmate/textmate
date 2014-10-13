@@ -43,6 +43,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	NSScrollView* gutterScrollView;
 	GutterView* gutterView;
 	NSColor* gutterDividerColor;
+	NSMutableDictionary* gutterImages;
 
 	OakBackgroundFillView* gutterDividerView;
 	OakBackgroundFillView* statusDividerView;
@@ -59,9 +60,6 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	IBOutlet NSPanel* tabSizeSelectorPanel;
 }
 @property (nonatomic, readonly) OTVStatusBar* statusBar;
-@property (nonatomic) NSDictionary* gutterImages;
-@property (nonatomic) NSDictionary* gutterHoverImages;
-@property (nonatomic) NSDictionary* gutterPressedImages;
 @property (nonatomic) SymbolChooser* symbolChooser;
 @property (nonatomic) NSArray* observedKeys;
 - (void)updateStyle;
@@ -223,51 +221,49 @@ private:
 	[self setNeedsUpdateConstraints:YES];
 }
 
+- (CGFloat)lineHeight
+{
+	return ceil([textView.font ascender] - [textView.font descender] + [textView.font leading]);
+}
+
 - (NSImage*)gutterImage:(NSString*)aName
 {
-	if(NSImage* res = [[NSImage imageNamed:aName inSameBundleAsClass:[self class]] copy])
+	id res = gutterImages[aName];
+	if(!res)
 	{
-		// We use capHeight instead of x-height since most fonts have the numbers
-		// extend to this height, so centering around the x-height would look off
-		CGFloat height = [gutterView.lineNumberFont capHeight];
-		CGFloat width = [res size].width * height / [res size].height;
+		gutterImages = gutterImages ?: [NSMutableDictionary new];
 
-		CGFloat scaleFactor = 1;
+		if(NSImage* image = [NSImage imageNamed:aName inSameBundleAsClass:[self class]])
+		{
+			CGFloat imageWidth  = image.size.width;
+			CGFloat imageHeight = image.size.height;
 
-		// Since all images are vector based and don’t contain any spacing to
-		// align it, we need to set the individual scaleFactor per image.
-		if([aName hasPrefix:@"Bookmark"]) scaleFactor = 1.0;
-		if([aName hasPrefix:@"Folding"])  scaleFactor = 1.5;
-		if([aName hasPrefix:@"Search"])   scaleFactor = 1.2;
+			CGFloat viewWidth   = [self widthForColumnWithIdentifier:nil];
+			CGFloat viewHeight  = self.lineHeight;
 
-		[res setSize:NSMakeSize(round(width * scaleFactor), round(height * scaleFactor))];
+			res = image = [image copy];
 
-		return res;
+			if(imageWidth / imageHeight < viewWidth / viewHeight)
+					image.size = NSMakeSize(round(viewHeight * imageWidth / imageHeight), viewHeight);
+			else	image.size = NSMakeSize(viewWidth, round(viewWidth * imageHeight / imageWidth));
+		}
+		else
+		{
+			res = [NSNull null];
+			NSLog(@"%s no image named ‘%@’", sel_getName(_cmd), aName);
+		}
+
+		gutterImages[aName] = res;
 	}
-	NSLog(@"%s no image named ‘%@’", sel_getName(_cmd), aName);
-	return nil;
+	return res == [NSNull null] ? nil : res;
 }
 
 - (void)setFont:(NSFont*)newFont
 {
+	gutterImages = nil; // force image sizes to be recalculated
+
 	textView.font = newFont;
 	gutterView.lineNumberFont = [NSFont fontWithName:[newFont fontName] size:round(0.8 * [newFont pointSize])];
-
-	self.gutterImages = @{
-		kBookmarksColumnIdentifier : @[ [NSNull null], [self gutterImage:@"Bookmark"], [self gutterImage:@"Search Mark"] ],
-		kFoldingsColumnIdentifier  : @[ [NSNull null], [self gutterImage:@"Folding Top"], [self gutterImage:@"Folding Collapsed"], [self gutterImage:@"Folding Bottom"] ],
-	};
-
-	self.gutterHoverImages = @{
-		kBookmarksColumnIdentifier : @[ [self gutterImage:@"Bookmark Hover Add"], [self gutterImage:@"Bookmark Hover Remove"], [self gutterImage:@"Bookmark Hover Add"] ],
-		kFoldingsColumnIdentifier  : @[ [NSNull null], [self gutterImage:@"Folding Top Hover"], [self gutterImage:@"Folding Collapsed Hover"], [self gutterImage:@"Folding Bottom Hover"] ],
-	};
-
-	self.gutterPressedImages = @{
-		kBookmarksColumnIdentifier : @[ [self gutterImage:@"Bookmark"], [self gutterImage:@"Bookmark"], [self gutterImage:@"Bookmark"] ],
-		kFoldingsColumnIdentifier  : @[ [NSNull null], [self gutterImage:@"Folding Top Hover"], [self gutterImage:@"Folding Collapsed Hover"], [self gutterImage:@"Folding Bottom Hover"] ],
-	};
-
 	[gutterView reloadData:self];
 }
 
@@ -727,45 +723,50 @@ private:
 // = GutterView DataSource =
 // =========================
 
-enum bookmark_state_t { kBookmarkNoMark, kBookmarkRegularMark, kBookmarkSearchMark };
-
 static std::string const kBookmarkType   = "bookmark";
 static std::string const kSearchmarkType = "search";
 
-- (NSUInteger)stateForColumnWithIdentifier:(id)columnIdentifier atLine:(NSUInteger)lineNumber
+- (CGFloat)widthForColumnWithIdentifier:(id)columnIdentifier
+{
+	return floor((self.lineHeight-1) / 2) * 2 + 1;
+}
+
+- (NSImage*)imageForLine:(NSUInteger)lineNumber inColumnWithIdentifier:(id)columnIdentifier state:(GutterViewRowState)rowState
 {
 	if([columnIdentifier isEqualToString:kBookmarksColumnIdentifier])
 	{
 		ng::buffer_t const& buf = document->buffer();
-		if(!buf.get_marks(buf.begin(lineNumber), buf.eol(lineNumber), kBookmarkType).empty())
-			return kBookmarkRegularMark;
-		if(!buf.get_marks(buf.begin(lineNumber), buf.eol(lineNumber), kSearchmarkType).empty())
-			return kBookmarkSearchMark;
-		return kBookmarkNoMark;
+		for(auto const& pair : buf.get_marks(buf.begin(lineNumber), buf.eol(lineNumber)))
+		{
+			if(pair.second == kBookmarkType)
+			{
+				switch(rowState)
+				{
+					case GutterViewRowStateRegular:  return [self gutterImage:@"Bookmark"];
+					case GutterViewRowStatePressed:  return [self gutterImage:@"Bookmark"];
+					case GutterViewRowStateRollover: return [self gutterImage:@"Bookmark Hover Remove"];
+				}
+			}
+			else if(rowState == GutterViewRowStateRegular)
+			{
+				if(pair.second == kSearchmarkType)
+					return [self gutterImage:@"Search Mark"];
+			}
+		}
+
+		if(rowState != GutterViewRowStateRegular)
+			return [self gutterImage:@"Bookmark Hover Add"];
 	}
 	else if([columnIdentifier isEqualToString:kFoldingsColumnIdentifier])
 	{
-		return [textView foldingStateForLine:lineNumber];
+		switch([textView foldingStateForLine:lineNumber])
+		{
+			case kFoldingTop:       return [self gutterImage:rowState == GutterViewRowStateRegular ? @"Folding Top"       : @"Folding Top Hover"];
+			case kFoldingCollapsed: return [self gutterImage:rowState == GutterViewRowStateRegular ? @"Folding Collapsed" : @"Folding Collapsed Hover"];
+			case kFoldingBottom:    return [self gutterImage:rowState == GutterViewRowStateRegular ? @"Folding Bottom"    : @"Folding Bottom Hover"];
+		}
 	}
-	return 0;
-}
-
-- (NSImage*)imageForState:(NSUInteger)state forColumnWithIdentifier:(id)identifier
-{
-	NSArray* array = _gutterImages[identifier];
-	return [array safeObjectAtIndex:state];
-}
-
-- (NSImage*)hoverImageForState:(NSUInteger)state forColumnWithIdentifier:(id)identifier
-{
-	NSArray* array = _gutterHoverImages[identifier];
-	return [array safeObjectAtIndex:state];
-}
-
-- (NSImage*)pressedImageForState:(NSUInteger)state forColumnWithIdentifier:(id)identifier
-{
-	NSArray* array = _gutterPressedImages[identifier];
-	return [array safeObjectAtIndex:state];
+	return nil;
 }
 
 // =============================

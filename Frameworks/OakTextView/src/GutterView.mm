@@ -21,8 +21,8 @@ struct data_source_t
 	data_source_t (std::string const& identifier, id datasource, id delegate) : identifier(identifier), datasource(datasource), delegate(delegate) { }
 
 	std::string identifier;
-	__weak id datasource;
-	__weak id delegate;
+	__weak id <GutterViewColumnDataSource> datasource;
+	__weak id <GutterViewColumnDelegate> delegate;
 	CGFloat x0;
 	CGFloat width;
 };
@@ -196,9 +196,7 @@ struct data_source_t
 	}
 	else
 	{
-		NSUInteger n = 1;
-		while(NSImage* img = [[self columnWithIdentifier:identifier]->datasource imageForState:n++ forColumnWithIdentifier:[NSString stringWithCxxString:identifier]])
-			width = std::max(width, [img size].width);
+		width = [[self columnWithIdentifier:identifier]->datasource widthForColumnWithIdentifier:[NSString stringWithCxxString:identifier]];
 	}
 
 	return ceil(width);
@@ -232,16 +230,8 @@ struct data_source_t
 
 - (NSImage*)imageForColumn:(std::string const&)identifier atLine:(NSUInteger)lineNumber hovering:(BOOL)hovering pressed:(BOOL)pressed
 {
-	id datasource    = [self columnWithIdentifier:identifier]->datasource;
-	NSUInteger state = [datasource stateForColumnWithIdentifier:[NSString stringWithCxxString:identifier] atLine:lineNumber];
-	NSImage* image   = nil;
-
-	if(pressed && [datasource respondsToSelector:@selector(pressedImageForState:forColumnWithIdentifier:)])
-		image = [datasource pressedImageForState:state forColumnWithIdentifier:[NSString stringWithCxxString:identifier]];
-	else if(hovering && [datasource respondsToSelector:@selector(hoverImageForState:forColumnWithIdentifier:)])
-		image = [datasource hoverImageForState:state forColumnWithIdentifier:[NSString stringWithCxxString:identifier]];
-
-	return image ?: [datasource imageForState:state forColumnWithIdentifier:[NSString stringWithCxxString:identifier]];
+	data_source_t* column = [self columnWithIdentifier:identifier];
+	return [column->datasource imageForLine:lineNumber inColumnWithIdentifier:[NSString stringWithCxxString:identifier] state:pressed ? GutterViewRowStatePressed : (hovering ? GutterViewRowStateRollover : GutterViewRowStateRegular)];
 }
 
 // ==========
