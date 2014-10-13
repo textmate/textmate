@@ -115,7 +115,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 	FFResultNode* res = [FFResultNode new];
 	res.match       = aMatch;
 	res.children    = [NSMutableArray array];
-	res.displayPath = PathComponentString(base ? [aMatch match].document->path() : [aMatch match].document->display_name(), to_s(base));
+	res.displayPath = PathComponentString(base && to_s(base) != find::kSearchOpenFiles && [aMatch match].document->path() != NULL_STR ? [aMatch match].document->path() : [aMatch match].document->display_name(), to_s(base));
 	return res;
 }
 
