@@ -750,7 +750,7 @@ static std::string const kSearchmarkType = "search";
 			else if(rowState == GutterViewRowStateRegular)
 			{
 				if(pair.second == kSearchmarkType)
-					return [self gutterImage:@"Search Mark"];
+					return [self gutterImage:@"search"];
 			}
 		}
 
