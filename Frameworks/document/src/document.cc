@@ -97,9 +97,9 @@ static void schedule_backup (oak::uuid_t const& docId)
 
 // ==========
 
-static std::multimap<text::range_t, std::string> parse_marks (std::string const& str)
+static std::multimap<text::pos_t, std::string> parse_marks (std::string const& str)
 {
-	std::multimap<text::range_t, std::string> marks;
+	std::multimap<text::pos_t, std::string> marks;
 	if(str != NULL_STR)
 	{
 		plist::any_t const& plist = plist::parse(str);
@@ -504,7 +504,7 @@ namespace document
 
 	static struct mark_tracker_t
 	{
-		typedef std::multimap<text::range_t, std::string> marks_t;
+		typedef std::multimap<text::pos_t, std::string> marks_t;
 
 		marks_t& get (std::string const& path)
 		{
@@ -526,7 +526,7 @@ namespace document
 			std::map<std::string, marks_t> newMarks;
 			for(auto const& pair : _marks)
 			{
-				std::multimap<text::range_t, std::string> tmp;
+				std::multimap<text::pos_t, std::string> tmp;
 				if(typeToClear != NULL_STR)
 				{
 					for(auto const& it : pair.second)
@@ -1303,38 +1303,38 @@ namespace document
 	void document_t::setup_marks (std::string const& src, ng::buffer_t& buf) const
 	{
 		for(auto const& pair : document::marks.get(src))
-			buf.set_mark(cap(buf, pair.first.from).index, pair.second);
+			buf.set_mark(cap(buf, pair.first).index, pair.second);
 	}
 
-	std::multimap<text::range_t, std::string> document_t::marks () const
+	std::multimap<text::pos_t, std::string> document_t::marks () const
 	{
 		if(!_buffer)
 			return document::marks.get(_path);
 
-		std::multimap<text::range_t, std::string> res;
+		std::multimap<text::pos_t, std::string> res;
 		for(auto const& pair : _buffer->get_marks(0, _buffer->size()))
 			res.emplace(_buffer->convert(pair.first), pair.second);
 		return res;
 	}
 
-	void document_t::add_mark (text::range_t const& range, std::string const& mark)
+	void document_t::add_mark (text::pos_t const& pos, std::string const& mark)
 	{
 		if(_buffer)
-			_buffer->set_mark(_buffer->convert(range.from), mark);
+			_buffer->set_mark(_buffer->convert(pos), mark);
 		else if(_path != NULL_STR)
-			document::marks.get(_path).emplace(range, mark);
+			document::marks.get(_path).emplace(pos, mark);
 		broadcast(callback_t::did_change_marks);
 	}
 
-	void document_t::remove_mark (text::range_t const& range, std::string const& mark)
+	void document_t::remove_mark (text::pos_t const& pos, std::string const& mark)
 	{
-		if(range == text::range_t::undefined)
+		if(pos == text::pos_t::undefined)
 			return remove_all_marks(mark);
 
 		if(_buffer)
-			_buffer->remove_mark(_buffer->convert(range.from), mark);
+			_buffer->remove_mark(_buffer->convert(pos), mark);
 		else if(_path != NULL_STR)
-			document::marks.get(_path).erase(range); // FIXME need to check type
+			document::marks.get(_path).erase(pos); // FIXME need to check type
 		broadcast(callback_t::did_change_marks);
 	}
 
@@ -1346,7 +1346,7 @@ namespace document
 		}
 		else if(_path != NULL_STR)
 		{
-			std::multimap<text::range_t, std::string> newMarks;
+			std::multimap<text::pos_t, std::string> newMarks;
 			if(typeToClear != NULL_STR)
 			{
 				for(auto const& it : document::marks.get(_path))

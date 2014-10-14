@@ -409,7 +409,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	for(FFMatch* match in matches)
 	{
 		if(document::document_ptr doc = [match match].document)
-			doc->add_mark([match match].range, "search");
+			doc->add_mark([match match].range.from, "search");
 
 		FFResultNode* node = [FFResultNode resultNodeWithMatch:match];
 		if(!parent || parent.document->identifier() != node.document->identifier())

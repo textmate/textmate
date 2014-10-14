@@ -89,10 +89,10 @@ namespace document
 		// = Controlling marks (bookmarks, warnings, errors, search matches) =
 		// ===================================================================
 
-		void add_mark (text::range_t const& range, std::string const& mark);
-		void remove_mark (text::range_t const& range, std::string const& mark);
+		void add_mark (text::pos_t const& pos, std::string const& mark);
+		void remove_mark (text::pos_t const& pos, std::string const& mark);
 		void remove_all_marks (std::string const& typeToClear = NULL_STR);
-		std::multimap<text::range_t, std::string> marks () const;
+		std::multimap<text::pos_t, std::string> marks () const;
 
 	private:
 		void setup_marks (std::string const& src, ng::buffer_t& buf) const;
