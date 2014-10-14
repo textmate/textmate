@@ -416,6 +416,10 @@ struct socket_observer_t
 				D(DBF_RMateServer, bug("done\n"););
 				if(records.empty() || records.begin()->command == "open") // we treat no command as ‘open’ to bring our application to front
 					open_documents(socket);
+				else if(records.begin()->command == "set-mark")
+					set_mark(socket);
+				else if(records.begin()->command == "clear-mark")
+					clear_mark(socket);
 				else
 					fprintf(stderr, "*** error unsupported command: %s\n", records.begin()->command.c_str());
 				return false;
@@ -589,6 +593,45 @@ struct socket_observer_t
 		if(documents.empty())
 				SetFrontProcess(&(ProcessSerialNumber){ 0, kCurrentProcess });
 		else	document::show(documents);
+	}
+
+	void set_mark (socket_t const& socket)
+	{
+		for(auto& record : records)
+		{
+			auto& args = record.arguments;
+
+			document::document_ptr doc;
+			if(args.find("uuid") != args.end())
+				doc = document::find(args["uuid"]);
+			else if(args.find("path") != args.end())
+				doc = document::create(args["path"]);
+
+			if(doc)
+					doc->add_mark(args["line"], args["mark"]);
+			else	fprintf(stderr, "set-mark: no document\n");
+		}
+	}
+
+	void clear_mark (socket_t const& socket)
+	{
+		for(auto& record : records)
+		{
+			auto& args = record.arguments;
+
+			document::document_ptr doc;
+			if(args.find("uuid") != args.end())
+				doc = document::find(args["uuid"]);
+			else if(args.find("path") != args.end())
+				doc = document::create(args["path"]);
+
+			auto line = args.find("line");
+			auto mark = args.find("mark");
+
+			if(doc)
+					doc->remove_mark(line != args.end() ? line->second : NULL_STR, mark != args.end() ? mark->second : NULL_STR);
+			else	document::remove_marks(mark != args.end() ? mark->second : NULL_STR);
+		}
 	}
 };
 
