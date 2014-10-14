@@ -16,10 +16,17 @@ namespace text
 
 		pos_t (std::string const& str)
 		{
-			size_t pos[3] = { 1, 1, 0 };
-			if(1 == sscanf(str.c_str(), "%zu:%zu+%zu", &pos[0], &pos[1], &pos[2]))
-				sscanf(str.c_str(), "%zu+%zu", &pos[0], &pos[2]);
-			*this = pos_t(pos[0]-1, pos[1]-1, pos[2]);
+			if(str != NULL_STR)
+			{
+				size_t pos[3] = { 1, 1, 0 };
+				if(1 == sscanf(str.c_str(), "%zu:%zu+%zu", &pos[0], &pos[1], &pos[2]))
+					sscanf(str.c_str(), "%zu+%zu", &pos[0], &pos[2]);
+				*this = pos_t(pos[0]-1, pos[1]-1, pos[2]);
+			}
+			else
+			{
+				*this = pos_t::undefined;
+			}
 		}
 
 		pos_t strip_offset () const                  { return pos_t(line, column); }
@@ -51,10 +58,17 @@ namespace text
 
 		range_t (std::string const& str)
 		{
-			std::string::size_type n = str.find_first_of("-x");
-			from     = pos_t(str.substr(0, n));
-			to       = pos_t(str.substr(n == std::string::npos ? 0 : n+1));
-			columnar = n != std::string::npos && str[n] == 'x';
+			if(str != NULL_STR)
+			{
+				std::string::size_type n = str.find_first_of("-x");
+				from     = pos_t(str.substr(0, n));
+				to       = pos_t(str.substr(n == std::string::npos ? 0 : n+1));
+				columnar = n != std::string::npos && str[n] == 'x';
+			}
+			else
+			{
+				*this = range_t::undefined;
+			}
 		}
 
 		pos_t const& min () const                    { return std::min(from, to); }
