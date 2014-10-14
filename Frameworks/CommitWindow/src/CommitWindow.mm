@@ -114,6 +114,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 
 		// send all diffs to a separate window
 		_environment["TM_PROJECT_UUID"] = to_s(oak::uuid_t().generate());
+		_showsTableView = [[NSUserDefaults standardUserDefaults] boolForKey:kOakCommitWindowShowFileList];
 
 		self.documentView = [[OakDocumentView alloc] initWithFrame:NSZeroRect];
 		self.documentView.hideStatusBar     = YES;
@@ -169,8 +170,9 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 		_showTableButton = [[NSButton alloc] initWithFrame:NSZeroRect];
 		_showTableButton.buttonType = NSOnOffButton;
 		_showTableButton.bezelStyle = NSRoundedDisclosureBezelStyle;
-		_showTableButton.title = @"";
-		[_showTableButton bind:NSValueBinding toObject:self withKeyPath:@"showsTableView" options:nil];
+		_showTableButton.title      = @"";
+		_showTableButton.action     = @selector(toggleTableView:);
+		_showTableButton.state      = _showsTableView ? NSOnState : NSOffState;
 
 		_previousCommitMessagesPopUpButton = [NSPopUpButton new];
 		_previousCommitMessagesPopUpButton.bordered   = YES;
@@ -189,6 +191,11 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 			[contentView addSubview:view];
 		}
 
+		if(!_showsTableView)
+		{
+			[_middleDivider removeFromSuperview];
+			[_scrollView removeFromSuperview];
+		}
 		[self updateConstraints];
 
 		[_arrayController addObserver:self forKeyPath:@"arrangedObjects.commit" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:kOakCommitWindowIncludeItemBinding];
@@ -227,21 +234,19 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[previousMessages(>=200)]-(20)-|" options:0 metrics:nil views:views]];
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[documentView(>=400,==topDivider,==bottomDivider)]|" options:0 metrics:nil views:views]];
+	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(12)-[previousMessages]-(12)-[topDivider]" options:0 metrics:nil views:views]];
+	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(20)-[showTableButton]-(>=100)-[cancel]-[commit]-(20)-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
+	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[bottomDivider]-(12)-[cancel]-(12)-|" options:0 metrics:nil views:views]];
 
 	if(self.showsTableView)
 	{
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView(==documentView,==middleDivider)]|" options:0 metrics:nil views:views]];
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(12)-[previousMessages]-(12)-[topDivider][documentView(>=195)][middleDivider][scrollView(==190)][bottomDivider]-(12)-[commit]-(12)-|" options:0 metrics:nil views:views]];
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[topDivider][documentView(>=195)][middleDivider][scrollView(==190)][bottomDivider]" options:0 metrics:nil views:views]];
 	}
 	else
 	{
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(12)-[previousMessages]-(12)-[topDivider][documentView(>=195)][bottomDivider]-(12)-[commit]-(12)-|" options:0 metrics:nil views:views]];
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[topDivider][documentView(>=195)][bottomDivider]" options:0 metrics:nil views:views]];
 	}
-
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(20)-[showTableButton]" options:0 metrics:nil views:views]];
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[cancel]-[commit]-(20)-|" options:0 metrics:nil views:views]];
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[bottomDivider]-(12)-[showTableButton]-(12)-|" options:0 metrics:nil views:views]];
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[bottomDivider]-(12)-[cancel]-(12)-|" options:0 metrics:nil views:views]];
 }
 
 - (void)parseArguments:(NSArray*)args
@@ -319,18 +324,22 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 
 	_showsTableView = flag;
 
-	if(!_showsTableView)
+	[[NSUserDefaults standardUserDefaults] setBool:_showsTableView forKey:kOakCommitWindowShowFileList];
+}
+
+- (void)toggleTableView:(id)sender
+{
+	self.showsTableView = !self.showsTableView;
+
+	if(!self.showsTableView)
 		[self.window makeFirstResponder:self.documentView.textView];
 
 	for(NSView* view in @[ self.middleDivider, self.scrollView ])
 	{
-		if(_showsTableView)
+		if(self.showsTableView)
 				[self.window.contentView addSubview:view];
 		else	[view removeFromSuperview];
 	}
-
-	[[NSUserDefaults standardUserDefaults] setBool:_showsTableView forKey:kOakCommitWindowShowFileList];
-
 	[self updateConstraints];
 }
 
@@ -369,8 +378,6 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 
 	[self.window recalculateKeyViewLoop];
 	[self.window makeFirstResponder:self.documentView];
-
-	self.showsTableView = [[NSUserDefaults standardUserDefaults] boolForKey:kOakCommitWindowShowFileList];
 
 	self.retainedSelf = self;
 
