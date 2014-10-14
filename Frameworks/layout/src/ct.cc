@@ -22,12 +22,12 @@ namespace ng
 	context_t::~context_t ()
 	{
 		if(_spelling_dot)
-			CFRelease(_spelling_dot);
+			CGImageRelease(_spelling_dot);
 
 		for(auto const& pair : _folding_dots_cache)
 		{
 			if(pair.second)
-				CFRelease(pair.second);
+				CGImageRelease(pair.second);
 		}
 	}
 
