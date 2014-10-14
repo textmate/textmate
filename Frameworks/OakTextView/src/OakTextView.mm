@@ -976,15 +976,9 @@ doScroll:
 	{
 		NSRect rect = NSMakeRect(0, 0, width, height);
 		if(CGImageRef img = [pdfImage CGImageForProposedRect:&rect context:[NSGraphicsContext currentContext] hints:nil])
-		{
-			if(CGImageRef res = CGImageMaskCreate(CGImageGetWidth(img), CGImageGetHeight(img), CGImageGetBitsPerComponent(img), CGImageGetBitsPerPixel(img), CGImageGetBytesPerRow(img), CGImageGetDataProvider(img), NULL, false))
-				return res;
-			NSLog(@"Unable to create CGImageMask (%zu × %zu) from CGImage", CGImageGetWidth(img), CGImageGetHeight(img));
-		}
-		else
-		{
-			NSLog(@"Unable to create CGImage (%.1f × %.1f) from %@", width, height, pdfImage);
-		}
+			return CGImageRetain(img);
+
+		NSLog(@"Unable to create CGImage (%.1f × %.1f) from %@", width, height, pdfImage);
 		return NULL;
 	};
 

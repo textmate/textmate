@@ -368,10 +368,8 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 					[transform concat];
 					imageRect.origin.y = 0;
 
-					CGImageRef cgImage = [image CGImageForProposedRect:NULL context:[NSGraphicsContext currentContext] hints:nil];
-					CGImageRef imageMask = CGImageMaskCreate(CGImageGetWidth(cgImage), CGImageGetHeight(cgImage), CGImageGetBitsPerComponent(cgImage), CGImageGetBitsPerPixel(cgImage), CGImageGetBytesPerRow(cgImage), CGImageGetDataProvider(cgImage), NULL, false);
-					CGContextClipToMask((CGContextRef)[[NSGraphicsContext currentContext] graphicsPort], imageRect, imageMask);
-					CFRelease(imageMask);
+					CGImageRef cgImage = [image CGImageForProposedRect:&imageRect context:[NSGraphicsContext currentContext] hints:nil];
+					CGContextClipToMask((CGContextRef)[[NSGraphicsContext currentContext] graphicsPort], imageRect, cgImage);
 
 					NSRectFillUsingOperation(imageRect, NSCompositeSourceOver);
 					[NSGraphicsContext restoreGraphicsState];
