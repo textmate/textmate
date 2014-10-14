@@ -33,6 +33,9 @@ fileType         = 'source.objc++'
 [ attr.untitled ]
 fileType         = 'source.objc++'
 
+[ Applications/**~mate/** ]
+TM_NINJA_TARGET = '${TM_DIRECTORY/^.*\/Applications\/([^\/]+)(\/.*)?$/$1\/run/}'
+
 [ tests/t_*.{cc,mm} ]
 scopeAttributes  = 'attr.test.cxxtest'
 TM_NINJA_TARGET  = '${TM_FILEPATH/^.*?([^\/]*)\/tests\/.*$/$1\/test/}'
