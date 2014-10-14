@@ -1,5 +1,5 @@
 SOURCES      = src/*.mm
 EXPORT       = src/{Preferences,Keys,TerminalPreferences,PreferencesPane}.h
 CP_Resources = resources/* icons/*
-LINK         = MASPreferences MGScopeBar BundlesManager OakAppKit OakFoundation ns file bundles SoftwareUpdate CrashReporter
+LINK         = MASPreferences MGScopeBar BundlesManager OakAppKit OakFoundation ns file bundles SoftwareUpdate CrashReporter version
 FRAMEWORKS   = Cocoa AddressBook

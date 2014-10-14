@@ -7,8 +7,8 @@
 #include <io/path.h>
 #include <plist/uuid.h>
 
-static double const AppVersion  = 2.8;
-static size_t const AppRevision = APP_REVISION;
+static char const* const AppVersion = "2.8";
+static size_t const AppRevision     = APP_REVISION;
 
 static char const* socket_path ()
 {
@@ -133,7 +133,7 @@ static void usage (FILE* io)
 	std::string pad(8 - std::min(strlen(getprogname()), size_t(8)), ' ');
 
 	fprintf(io,
-		"%1$s %2$.1f (" COMPILE_DATE " revision %3$zu)\n"
+		"%1$s %2$s (" COMPILE_DATE " revision %3$zu)\n"
 		"Usage: %1$s [-wl<selection>t<filetype>m<name>rehv] [-u<identifier> | file ...]\n"
 		"Options:\n"
 		" -w, --[no-]wait         Wait for file to be closed by TextMate.\n"
@@ -173,7 +173,7 @@ static void usage (FILE* io)
 
 static void version ()
 {
-	fprintf(stdout, "%1$s %2$.1f (" COMPILE_DATE " revision %3$zu)\n", getprogname(), AppVersion, AppRevision);
+	fprintf(stdout, "%1$s %2$s (" COMPILE_DATE " revision %3$zu)\n", getprogname(), AppVersion, AppRevision);
 }
 
 static void append (std::string const& str, std::vector<std::string>& v)

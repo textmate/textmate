@@ -10,6 +10,7 @@
 #import <io/exec.h>
 #import <ns/ns.h>
 #import <regexp/format_string.h>
+#import <version/version.h>
 #import <bundles/bundles.h>
 #import <oak/compat.h>
 
@@ -311,9 +312,9 @@ static bool uninstall_mate (std::string const& path)
 
 + (void)updateMateIfRequired
 {
-	NSString* oldMate = [[[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsMateInstallPathKey] stringByExpandingTildeInPath];
-	double oldVersion = [[NSUserDefaults standardUserDefaults] doubleForKey:kUserDefaultsMateInstallVersionKey];
-	NSString* newMate = [[NSBundle mainBundle] pathForResource:@"mate" ofType:nil];
+	NSString* oldMate    = [[[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsMateInstallPathKey] stringByExpandingTildeInPath];
+	NSString* oldVersion = [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsMateInstallVersionKey];
+	NSString* newMate    = [[NSBundle mainBundle] pathForResource:@"mate" ofType:nil];
 
 	if(oldMate && newMate)
 	{
@@ -321,8 +322,8 @@ static bool uninstall_mate (std::string const& path)
 			std::string res = io::exec(to_s(newMate), "--version", NULL);
 			if(regexp::match_t const& m = regexp::search("\\Amate ([\\d.]+)", res))
 			{
-				double newVersion = std::stod(m[1]);
-				if(oldVersion < newVersion)
+				NSString* newVersion = [NSString stringWithCxxString:m[1]];
+				if(version::less(to_s(oldVersion), to_s(newVersion)))
 				{
 					if(install_mate(to_s(newMate), to_s(oldMate)))
 						[[NSUserDefaults standardUserDefaults] setDouble:newVersion forKey:kUserDefaultsMateInstallVersionKey];
