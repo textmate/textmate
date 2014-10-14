@@ -111,9 +111,14 @@ static bool rm_path (std::string const& path, AuthorizationRef& auth)
 	return false;
 }
 
+static bool cp_requires_admin (std::string const& dst)
+{
+	return access(dst.c_str(), W_OK) != 0 && (access(dst.c_str(), X_OK) == 0 || access(path::parent(dst).c_str(), W_OK) != 0);
+}
+
 static bool cp_path (std::string const& src, std::string const& dst, AuthorizationRef& auth)
 {
-	if(access(dst.c_str(), W_OK) == 0 || access(dst.c_str(), X_OK) != 0 && access(path::parent(dst).c_str(), W_OK) == 0)
+	if(!cp_requires_admin(dst))
 	{
 		if(copyfile(src.c_str(), dst.c_str(), NULL, COPYFILE_ALL | COPYFILE_NOFOLLOW_SRC) == 0)
 			return true;
@@ -325,8 +330,25 @@ static bool uninstall_mate (std::string const& path)
 				NSString* newVersion = [NSString stringWithCxxString:m[1]];
 				if(version::less(to_s(oldVersion), to_s(newVersion)))
 				{
-					if(install_mate(to_s(newMate), to_s(oldMate)))
-						[[NSUserDefaults standardUserDefaults] setDouble:newVersion forKey:kUserDefaultsMateInstallVersionKey];
+					if(cp_requires_admin(to_s(oldMate)))
+					{
+						dispatch_async(dispatch_get_main_queue(), ^{
+							NSInteger choice = NSRunAlertPanel(@"Update Shell Support", @"Would you like to update the installed version of mate to version %@?", @"Update", @"Cancel", nil, newVersion);
+							if(choice == NSAlertDefaultReturn) // "Update"
+							{
+								if(!install_mate(to_s(newMate), to_s(oldMate)))
+									return;
+							}
+
+							// Avoid asking again by storing the new version number
+							[[NSUserDefaults standardUserDefaults] setObject:newVersion forKey:kUserDefaultsMateInstallVersionKey];
+						});
+					}
+					else
+					{
+						if(install_mate(to_s(newMate), to_s(oldMate)))
+							[[NSUserDefaults standardUserDefaults] setObject:newVersion forKey:kUserDefaultsMateInstallVersionKey];
+					}
 				}
 			}
 		});
