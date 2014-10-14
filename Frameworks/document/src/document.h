@@ -90,6 +90,7 @@ namespace document
 		// ===================================================================
 
 		void add_mark (text::range_t const& range, std::string const& mark);
+		void remove_mark (text::range_t const& range, std::string const& mark);
 		void remove_all_marks (std::string const& typeToClear = NULL_STR);
 		std::multimap<text::range_t, std::string> marks () const;
 
@@ -336,6 +337,8 @@ namespace document
 	PUBLIC document_ptr create (std::string const& path = NULL_STR);
 	PUBLIC document_ptr find (oak::uuid_t const& uuid, bool searchBackups = false);
 	PUBLIC document_ptr from_content (std::string const& content, std::string fileType = NULL_STR);
+
+	PUBLIC void remove_marks (std::string const& typeToClear = NULL_STR);
 
 	// ====================
 	// = Document scanner =

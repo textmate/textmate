@@ -521,10 +521,37 @@ namespace document
 			else	_marks[path] = newMarks;
 		}
 
+		void remove_marks (std::string const& typeToClear)
+		{
+			std::map<std::string, marks_t> newMarks;
+			for(auto const& pair : _marks)
+			{
+				std::multimap<text::range_t, std::string> tmp;
+				if(typeToClear != NULL_STR)
+				{
+					for(auto const& it : pair.second)
+					{
+						if(it.second != typeToClear)
+							tmp.insert(it);
+					}
+				}
+				if(!tmp.empty())
+					newMarks.emplace(pair.first, tmp);
+			}
+			_marks.swap(newMarks);
+		}
+
 	private:
 		std::map<std::string, marks_t> _marks;
 
 	} marks;
+
+	void remove_marks (std::string const& typeToClear)
+	{
+		for(auto document : scanner_t::open_documents())
+			document->remove_all_marks(typeToClear);
+		marks.remove_marks(typeToClear);
+	}
 
 	// ==============
 	// = document_t =
@@ -1296,6 +1323,18 @@ namespace document
 			_buffer->set_mark(_buffer->convert(range.from), mark);
 		else if(_path != NULL_STR)
 			document::marks.get(_path).emplace(range, mark);
+		broadcast(callback_t::did_change_marks);
+	}
+
+	void document_t::remove_mark (text::range_t const& range, std::string const& mark)
+	{
+		if(range == text::range_t::undefined)
+			return remove_all_marks(mark);
+
+		if(_buffer)
+			_buffer->remove_mark(_buffer->convert(range.from), mark);
+		else if(_path != NULL_STR)
+			document::marks.get(_path).erase(range); // FIXME need to check type
 		broadcast(callback_t::did_change_marks);
 	}
 
