@@ -6,8 +6,8 @@
 @property (nonatomic, weak) FFResultNode* parent;
 @property (nonatomic, weak) FFResultNode* next;
 @property (nonatomic, weak) FFResultNode* previous;
-@property (nonatomic) NSUInteger countOfLeafs;
-@property (nonatomic) NSUInteger countOfExcluded;
+@property (nonatomic, readonly) NSUInteger countOfLeafs;
+@property (nonatomic, readonly) NSUInteger countOfExcluded;
 
 + (FFResultNode*)resultNodeWithMatch:(FFMatch*)aMatch baseDirectory:(NSString*)base;
 + (FFResultNode*)resultNodeWithMatch:(FFMatch*)aMatch;

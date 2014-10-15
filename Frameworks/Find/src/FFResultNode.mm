@@ -107,6 +107,8 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 {
 	document::document_t::callback_t* _callback;
 }
+@property (nonatomic, readwrite) NSUInteger countOfLeafs;
+@property (nonatomic, readwrite) NSUInteger countOfExcluded;
 @end
 
 @implementation FFResultNode
