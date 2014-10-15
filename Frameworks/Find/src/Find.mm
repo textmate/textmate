@@ -45,7 +45,6 @@ enum FindActionTag
 @property (nonatomic) NSUInteger countOfExcludedMatches;
 @property (nonatomic) BOOL closeWindowOnSuccess;
 @property (nonatomic) BOOL performingFolderSearch;
-@property (nonatomic) BOOL performedReplaceAll;
 
 // =========================
 // = OakFindProtocolServer =
@@ -132,10 +131,10 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 // = Find actions =
 // ================
 
-+ (NSSet*)keyPathsForValuesAffectingCanReplaceAll         { return [NSSet setWithArray:@[ @"performedReplaceAll", @"countOfMatches", @"countOfExcludedMatches", @"windowController.showsResultsOutlineView" ]]; }
-+ (NSSet*)keyPathsForValuesAffectingReplaceAllButtonTitle { return [NSSet setWithArray:@[ @"canReplaceAll", @"countOfExcludedMatches", @"windowController.showsResultsOutlineView" ]]; }
++ (NSSet*)keyPathsForValuesAffectingCanReplaceAll         { return [NSSet setWithArray:@[ @"countOfMatches", @"countOfExcludedMatches", @"windowController.showsResultsOutlineView" ]]; }
++ (NSSet*)keyPathsForValuesAffectingReplaceAllButtonTitle { return [NSSet setWithArray:@[ @"countOfMatches", @"countOfExcludedMatches", @"windowController.showsResultsOutlineView" ]]; }
 
-- (BOOL)canReplaceAll                { return _windowController.showsResultsOutlineView ? (!_performedReplaceAll && _countOfExcludedMatches < _countOfMatches) : YES; }
+- (BOOL)canReplaceAll                { return _windowController.showsResultsOutlineView ? (_countOfExcludedMatches < _countOfMatches) : YES; }
 - (NSString*)replaceAllButtonTitle   { return _windowController.showsResultsOutlineView && _countOfExcludedMatches && self.canReplaceAll ? @"Replace Selected" : @"Replace All"; }
 
 - (IBAction)countOccurrences:(id)sender   { [self performFindAction:FindActionCountMatches   withWindowController:self.windowController]; }
@@ -256,7 +255,6 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 					}
 				}
 				self.windowController.statusString = [NSString stringWithFormat:MSG_REPLACE_ALL_RESULTS, replaceCount, fileCount];
-				self.performedReplaceAll = YES;
 			}
 			break;
 
@@ -386,8 +384,6 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 	if(_documentSearch = newSearcher)
 	{
-		self.performedReplaceAll = NO;
-
 		self.windowController.busy                    = YES;
 		self.windowController.statusString            = MSG_SEARCHING_FMT;
 		self.windowController.showsResultsOutlineView = YES;
