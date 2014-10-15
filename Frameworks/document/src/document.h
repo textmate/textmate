@@ -94,10 +94,9 @@ namespace document
 		void add_mark (text::pos_t const& pos, std::string const& mark);
 		void remove_mark (text::pos_t const& pos, std::string const& mark);
 		void remove_all_marks (std::string const& typeToClear = NULL_STR);
-		std::multimap<text::pos_t, std::string> marks () const;
 
 	private:
-		void setup_marks (std::string const& src, ng::buffer_t& buf) const;
+		static void setup_marks (std::string const& src, ng::buffer_t& buf);
 		std::string marks_as_string () const;
 
 		std::string _selection;

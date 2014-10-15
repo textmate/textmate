@@ -97,24 +97,6 @@ static void schedule_backup (oak::uuid_t const& docId)
 
 // ==========
 
-static std::multimap<text::pos_t, std::string> parse_marks (std::string const& str)
-{
-	std::multimap<text::pos_t, std::string> marks;
-	if(str != NULL_STR)
-	{
-		plist::any_t const& plist = plist::parse(str);
-		if(plist::array_t const* array = boost::get<plist::array_t>(&plist))
-		{
-			for(auto const& bm : *array)
-			{
-				if(std::string const* str = boost::get<std::string>(&bm))
-					marks.emplace(*str, document::kBookmarkIdentifier);
-			}
-		}
-	}
-	return marks;
-}
-
 namespace document
 {
 	std::string const kBookmarkIdentifier = "bookmark";
@@ -506,45 +488,97 @@ namespace document
 
 	static struct mark_tracker_t
 	{
-		typedef std::multimap<text::pos_t, std::string> marks_t;
-
-		marks_t& get (std::string const& path)
+		void move_to_buffer (std::string const& path, ng::buffer_t& buf)
 		{
-			auto it = _marks.find(path);
-			if(it == _marks.end())
-				it = _marks.emplace(path, parse_marks(path::get_attr(path, "com.macromates.bookmarks"))).first;
-			return it->second;
-		}
-
-		void set (std::string const& path, marks_t const& newMarks)
-		{
-			if(newMarks.empty())
-					_marks.erase(path);
-			else	_marks[path] = newMarks;
-		}
-
-		void remove_marks (std::string const& typeToClear)
-		{
-			std::map<std::string, marks_t> newMarks;
-			for(auto const& pair : _marks)
+			for(auto const& type : marks_for(path))
 			{
-				std::multimap<text::pos_t, std::string> tmp;
-				if(typeToClear != NULL_STR)
-				{
-					for(auto const& it : pair.second)
-					{
-						if(it.second != typeToClear)
-							tmp.insert(it);
-					}
-				}
-				if(!tmp.empty())
-					newMarks.emplace(pair.first, tmp);
+				for(auto const& pos : type.second)
+					buf.set_mark(cap(buf, pos).index, type.first);
 			}
-			_marks.swap(newMarks);
+			_paths.erase(path);
+		}
+
+		void copy_from_buffer (std::string const& path, ng::buffer_t const& buf)
+		{
+			std::map<std::string, std::set<text::pos_t>> marks;
+			for(auto const& pair : buf.get_marks(0, buf.size()))
+				marks[pair.second].insert(buf.convert(pair.first));
+			_paths[path] = marks;
+		}
+
+		void add (std::string const& path, text::pos_t const& pos, std::string const& mark)
+		{
+			marks_for(path)[mark].insert(pos);
+		}
+
+		void remove (std::string const& path, text::pos_t const& pos, std::string const& mark)
+		{
+			marks_for(path)[mark].erase(pos);
+		}
+
+		void remove_all (std::string const& path, std::string const& mark)
+		{
+			auto marks = _paths.find(path);
+			if(marks != _paths.end())
+			{
+				if(mark != NULL_STR)
+						marks->second.erase(mark);
+				else	marks->second.clear();
+			}
+		}
+
+		void remove_all (std::string const& mark)
+		{
+			for(auto& marks : _paths)
+			{
+				if(mark != NULL_STR)
+						marks.second.erase(mark);
+				else	marks.second.clear();
+			}
 		}
 
 	private:
-		std::map<std::string, marks_t> _marks;
+		std::map<std::string, std::set<text::pos_t>>& marks_for (std::string const& path)
+		{
+			auto marks = _paths.find(path);
+			if(marks == _paths.end())
+				marks = _paths.emplace(path, std::map<std::string, std::set<text::pos_t>>{ { kBookmarkIdentifier, load_bookmarks(path) } }).first;
+			return marks->second;
+		}
+
+		static ng::index_t cap (ng::buffer_t const& buf, text::pos_t const& pos)
+		{
+			size_t line = oak::cap<size_t>(0, pos.line,   buf.lines()-1);
+			size_t col  = oak::cap<size_t>(0, pos.column, buf.eol(line) - buf.begin(line));
+			ng::index_t res = buf.sanitize_index(buf.convert(text::pos_t(line, col)));
+			if(pos.offset && res.index < buf.size() && buf[res.index] == "\n")
+				res.carry = pos.offset;
+			return res;
+		}
+
+		static std::set<text::pos_t> load_bookmarks (std::string const& path)
+		{
+			std::set<text::pos_t> res;
+
+			std::string const str = path::get_attr(path, "com.macromates.bookmarks");
+			if(str == NULL_STR)
+				return res;
+
+			plist::any_t const& plist = plist::parse(str);
+			if(plist::array_t const* array = boost::get<plist::array_t>(&plist))
+			{
+				for(auto const& bm : *array)
+				{
+					if(std::string const* str = boost::get<std::string>(&bm))
+						res.insert(*str);
+				}
+			}
+
+			return res;
+		}
+
+		// path → mark type → position of mark
+		std::map<std::string, std::map<std::string, std::set<text::pos_t>>> _paths;
 
 	} marks;
 
@@ -552,7 +586,7 @@ namespace document
 	{
 		for(auto document : scanner_t::open_documents())
 			document->remove_all_marks(typeToClear);
-		marks.remove_marks(typeToClear);
+		marks.remove_all(typeToClear);
 	}
 
 	// ==============
@@ -1003,7 +1037,7 @@ namespace document
 		}
 
 		if(_path != NULL_STR)
-			document::marks.set(_path, marks());
+			document::marks.copy_from_buffer(_path, *_buffer);
 
 		if(_backup_path != NULL_STR && access(_backup_path.c_str(), F_OK) == 0)
 			unlink(_backup_path.c_str());
@@ -1288,35 +1322,13 @@ namespace document
 		set_disk_encoding(reader.encoding());
 	}
 
-	static ng::index_t cap (ng::buffer_t const& buf, text::pos_t const& pos)
-	{
-		size_t line = oak::cap<size_t>(0, pos.line,   buf.lines()-1);
-		size_t col  = oak::cap<size_t>(0, pos.column, buf.eol(line) - buf.begin(line));
-		ng::index_t res = buf.sanitize_index(buf.convert(text::pos_t(line, col)));
-		if(pos.offset && res.index < buf.size() && buf[res.index] == "\n")
-			res.carry = pos.offset;
-		return res;
-	}
-
 	// =========
 	// = Marks =
 	// =========
 
-	void document_t::setup_marks (std::string const& src, ng::buffer_t& buf) const
+	void document_t::setup_marks (std::string const& src, ng::buffer_t& buf)
 	{
-		for(auto const& pair : document::marks.get(src))
-			buf.set_mark(cap(buf, pair.first).index, pair.second);
-	}
-
-	std::multimap<text::pos_t, std::string> document_t::marks () const
-	{
-		if(!_buffer)
-			return document::marks.get(_path);
-
-		std::multimap<text::pos_t, std::string> res;
-		for(auto const& pair : _buffer->get_marks(0, _buffer->size()))
-			res.emplace(_buffer->convert(pair.first), pair.second);
-		return res;
+		document::marks.move_to_buffer(src, buf);
 	}
 
 	void document_t::add_mark (text::pos_t const& pos, std::string const& mark)
@@ -1324,7 +1336,7 @@ namespace document
 		if(_buffer)
 			_buffer->set_mark(_buffer->convert(pos), mark);
 		else if(_path != NULL_STR)
-			document::marks.get(_path).emplace(pos, mark);
+			document::marks.add(_path, pos, mark);
 		broadcast(callback_t::did_change_marks);
 	}
 
@@ -1336,39 +1348,29 @@ namespace document
 		if(_buffer)
 			_buffer->remove_mark(_buffer->convert(pos), mark);
 		else if(_path != NULL_STR)
-			document::marks.get(_path).erase(pos); // FIXME need to check type
+			document::marks.remove(_path, pos, mark);
 		broadcast(callback_t::did_change_marks);
 	}
 
 	void document_t::remove_all_marks (std::string const& typeToClear)
 	{
 		if(_buffer)
-		{
 			_buffer->remove_all_marks(typeToClear);
-		}
 		else if(_path != NULL_STR)
-		{
-			std::multimap<text::pos_t, std::string> newMarks;
-			if(typeToClear != NULL_STR)
-			{
-				for(auto const& it : document::marks.get(_path))
-				{
-					if(it.second != typeToClear)
-						newMarks.insert(it);
-				}
-			}
-			document::marks.set(_path, newMarks);
-		}
+			document::marks.remove_all(_path, typeToClear);
 		broadcast(callback_t::did_change_marks);
 	}
 
 	std::string document_t::marks_as_string () const
 	{
+		if(!_buffer)
+			return NULL_STR;
+
 		std::vector<std::string> v;
-		for(auto const& mark : marks())
+		for(auto const& mark : _buffer->get_marks(0, _buffer->size()))
 		{
 			if(mark.second == kBookmarkIdentifier)
-				v.push_back(text::format("'%s'", std::string(mark.first).c_str()));
+				v.push_back(text::format("'%s'", std::string(_buffer->convert(mark.first)).c_str()));
 		}
 		return v.empty() ? NULL_STR : "( " + text::join(v, ", ") + " )";
 	}
