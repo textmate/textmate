@@ -511,6 +511,11 @@ namespace document
 			marks_for(path)[mark].insert(pos);
 		}
 
+		std::set<text::pos_t> const& get (std::string const& path, std::string const& mark)
+		{
+			return marks_for(path)[mark];
+		}
+
 		void remove (std::string const& path, text::pos_t const& pos, std::string const& mark)
 		{
 			marks_for(path)[mark].erase(pos);
@@ -1312,11 +1317,13 @@ namespace document
 		while(io::bytes_ptr bytes = reader.next())
 			buf.insert(buf.size(), std::string(bytes->begin(), bytes->end()));
 
+		document::marks.move_to_buffer(_path, buf);
 		riterate(pair, replacements)
 		{
 			D(DBF_Document_Replace, bug("replace range %zu-%zu with ‘%s’\n", pair->first.first, pair->first.second, pair->second.c_str()););
 			buf.replace(pair->first.first, pair->first.second, pair->second);
 		}
+		document::marks.copy_from_buffer(_path, buf);
 
 		_content = std::make_shared<io::bytes_t>(buf.substr(0, buf.size()));
 		set_disk_encoding(reader.encoding());
@@ -1363,14 +1370,19 @@ namespace document
 
 	std::string document_t::marks_as_string () const
 	{
-		if(!_buffer)
-			return NULL_STR;
-
 		std::vector<std::string> v;
-		for(auto const& mark : _buffer->get_marks(0, _buffer->size()))
+		if(_buffer)
 		{
-			if(mark.second == kBookmarkIdentifier)
-				v.push_back(text::format("'%s'", std::string(_buffer->convert(mark.first)).c_str()));
+			for(auto const& mark : _buffer->get_marks(0, _buffer->size()))
+			{
+				if(mark.second == kBookmarkIdentifier)
+					v.push_back(text::format("'%s'", std::string(_buffer->convert(mark.first)).c_str()));
+			}
+		}
+		else
+		{
+			for(auto const& mark : document::marks.get(_path, kBookmarkIdentifier))
+				v.push_back(text::format("'%s'", std::string(mark).c_str()));
 		}
 		return v.empty() ? NULL_STR : "( " + text::join(v, ", ") + " )";
 	}
