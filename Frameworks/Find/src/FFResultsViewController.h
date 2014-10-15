@@ -11,7 +11,6 @@
 
 @property (nonatomic) NSOutlineView* outlineView;
 @property (nonatomic) BOOL hideCheckBoxes;
-@property (nonatomic) BOOL disableCheckBoxes;
 
 @property (nonatomic) BOOL showReplacementPreviews;
 @property (nonatomic) NSString* replaceString;

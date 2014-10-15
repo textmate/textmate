@@ -227,7 +227,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 					std::multimap<std::pair<size_t, size_t>, std::string> replacements;
 					for(FFResultNode* child in parent.children)
 					{
-						if(child.excluded || child.replacementDone)
+						if(child.excluded)
 							continue;
 						child.replacementDone = YES;
 						replacements.emplace(std::make_pair([child.match match].first, [child.match match].last), controller.regularExpression ? format_string::expand(replaceString, [child.match match].captures) : replaceString);
@@ -250,13 +250,13 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 							doc->set_content(NULL_STR);
 						}
 
+						parent.ignored = YES;
 						replaceCount += replacements.size();
 						++fileCount;
 					}
 				}
 				self.windowController.statusString = [NSString stringWithFormat:MSG_REPLACE_ALL_RESULTS, replaceCount, fileCount];
 				self.performedReplaceAll = YES;
-				_windowController.resultsViewController.disableCheckBoxes = YES;
 			}
 			break;
 

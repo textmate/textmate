@@ -184,7 +184,6 @@
 - (void)setResults:(FFResultNode*)someResults
 {
 	_results = someResults;
-	self.disableCheckBoxes = NO;
 	[_outlineView reloadData];
 }
 
@@ -431,15 +430,16 @@
 			res = button = OakCreateCheckBox(nil);
 			button.identifier = identifier;
 			[[button cell] setControlSize:NSSmallControlSize];
-			[button bind:@"enabled" toObject:self withKeyPath:@"disableCheckBoxes" options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
 			button.action = @selector(toggleExcludedCheckbox:);
 			button.target = self;
 		}
 		else
 		{
+			[button unbind:NSEnabledBinding];
 			[button unbind:NSValueBinding];
 		}
 
+		[button bind:NSEnabledBinding toObject:item withKeyPath:@"ignored" options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
 		[button bind:NSValueBinding toObject:item withKeyPath:@"excluded" options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
 		button.state = item.excluded ? NSOffState : NSOnState;
 	}
