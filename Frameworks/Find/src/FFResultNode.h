@@ -26,6 +26,7 @@
 @property (nonatomic) NSArray* children;
 @property (nonatomic) BOOL excluded;
 @property (nonatomic) BOOL replacementDone;
+@property (nonatomic) BOOL ignored;
 @property (nonatomic) NSImage* icon;
 
 @property (nonatomic, readonly) document::document_ptr document;

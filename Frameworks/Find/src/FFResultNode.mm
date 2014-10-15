@@ -169,7 +169,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 
 	[(NSMutableArray*)_children addObject:aMatch];
 	self.countOfLeafs    += aMatch.countOfLeafs;
-	self.countOfExcluded += aMatch.countOfExcluded;
+	self.countOfExcluded += aMatch.ignored ? aMatch.countOfLeafs : aMatch.countOfExcluded;
 }
 
 - (void)removeFromParent
@@ -177,7 +177,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 	_next.previous = _previous;
 	_previous.next = _next;
 	[(NSMutableArray*)_parent.children removeObject:self];
-	_parent.countOfExcluded -= _countOfExcluded;
+	_parent.countOfExcluded -= _ignored ? _countOfLeafs : _countOfExcluded;
 	_parent.countOfLeafs    -= _countOfLeafs;
 }
 
@@ -185,18 +185,38 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 {
 	if(_children)
 	{
-		for(FFResultNode* child in _children)
-			child.excluded = flag;
+		if(!_ignored)
+		{
+			for(FFResultNode* child in _children)
+				child.excluded = flag;
+		}
 	}
 	else
 	{
-		self.countOfExcluded = flag ? 1 : 0;
+		if(_ignored)
+				_countOfExcluded = flag ? 1 : 0;
+		else	self.countOfExcluded = flag ? 1 : 0;
 	}
 }
 
 - (BOOL)excluded
 {
 	return _countOfExcluded == (_children ? _countOfLeafs : 1);
+}
+
+- (void)setIgnored:(BOOL)flag
+{
+	if(_ignored == flag)
+		return;
+
+	_ignored = flag;
+	if(_children)
+	{
+		NSUInteger countOfExcluded = 0;
+		for(FFResultNode* child in _children)
+			countOfExcluded += (child.ignored = flag) || child.excluded ? 1 : 0;
+		self.countOfExcluded = countOfExcluded;
+	}
 }
 
 - (FFResultNode*)firstResultNode   { return [_children firstObject]; }
