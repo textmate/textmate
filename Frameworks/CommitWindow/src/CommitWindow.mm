@@ -175,6 +175,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 		_showTableButton.title      = @"";
 		_showTableButton.action     = @selector(toggleTableView:);
 		_showTableButton.state      = _showsTableView ? NSOnState : NSOffState;
+		_showTableButton.enabled    = [[_arrayController arrangedObjects] count] > 0;
 
 		_previousCommitMessagesPopUpButton = [NSPopUpButton new];
 		_previousCommitMessagesPopUpButton.bordered   = YES;
