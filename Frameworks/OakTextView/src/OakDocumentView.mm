@@ -233,7 +233,7 @@ private:
 	{
 		gutterImages = gutterImages ?: [NSMutableDictionary new];
 
-		if(NSImage* image = [NSImage imageNamed:aName inSameBundleAsClass:[self class]])
+		if(NSImage* image = [aName hasPrefix:@"/"] ? [[NSImage alloc] initWithContentsOfFile:aName] : [NSImage imageNamed:aName inSameBundleAsClass:[self class]])
 		{
 			CGFloat imageWidth  = image.size.width;
 			CGFloat imageHeight = image.size.height;
