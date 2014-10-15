@@ -510,6 +510,9 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		}
 	}
 
+	if(document::document_ptr doc = item.document)
+		doc->remove_all_marks(kSearchMarkIdentifier);
+
 	[self addResultsToPasteboard:self];
 
 	NSString* fmt = MSG_SHOWING_ZERO_MATCHES_FMT;
