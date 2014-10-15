@@ -196,7 +196,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 
 - (BOOL)excluded
 {
-	return !_children && _countOfExcluded == 1;
+	return _countOfExcluded == (_children ? _countOfLeafs : 1);
 }
 
 - (FFResultNode*)firstResultNode   { return [_children firstObject]; }
