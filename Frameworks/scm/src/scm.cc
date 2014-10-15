@@ -263,14 +263,18 @@ namespace scm
 			return false;
 
 		settings_t settings = settings_for_path(NULL_STR, "", path);
+		std::string s = settings.get(kSettingsSCMStatusKey, "enableIfLocalDisk");
 
-		std::string s = settings.get(kSettingsSCMStatusKey, "localDisk");
-		if(s == "everyDisk")  return true;  // Don't apply logic, just trust the setting.
-		if(s == "systemDisk") return path != "/" && path != path::home() && path::device(path) == path::device("/");
-
-		// Default to localDisk, because traversal can take too long on networked volumes.
-		if(s == "localDisk" || settings.get(kSettingsSCMStatusKey, true))
-			return path != "/" && path != path::home() && path::is_local(path);
+		if(s == "enable")
+			return true;  // Don't apply logic, just trust the setting.
+		else if(s == "disable")
+			return false;
+		else if(path == "/" || path == path::home())
+			return false;
+		else if(s == "enableIfSystemDisk")
+			return path::device(path) == path::device("/");
+		else if(s == "enableIfLocalDisk" || settings.get(kSettingsSCMStatusKey, true))
+			return path::is_local(path);
 
 		return false;
 	}
