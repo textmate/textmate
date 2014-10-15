@@ -3,35 +3,49 @@
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 
-@interface OakAttributedStringTextFieldCell : NSTextFieldCell
-@property (nonatomic) NSAttributedString* monoColoredAttributedString;
+// =================================
+// = OakSearchResultsMatchCellView =
+// =================================
+
+@interface OakSearchResultsMatchCellView : NSTableCellView
+@property (nonatomic) NSString* replaceString;
+@property (nonatomic) BOOL showReplacementPreviews;
 @end
 
-@implementation OakAttributedStringTextFieldCell
-- (void)setBackgroundStyle:(NSBackgroundStyle)style
+@implementation OakSearchResultsMatchCellView
++ (NSSet*)keyPathsForValuesAffectingExcerptString { return [NSSet setWithArray:@[ @"objectValue", @"objectValue.ignored", @"objectValue.excluded", @"objectValue.replaceString", @"replaceString", @"showReplacementPreviews", @"backgroundStyle" ]]; }
+
+- (id)initWithFrame:(NSRect)aFrame
 {
-	if(_monoColoredAttributedString)
+	if((self = [super initWithFrame:aFrame]))
 	{
-		if(style == NSBackgroundStyleDark)
-		{
-			NSMutableAttributedString* str = [_monoColoredAttributedString mutableCopy];
-			[str addAttribute:NSForegroundColorAttributeName value:[NSColor alternateSelectedControlTextColor] range:NSMakeRange(0, [str length])];
-			[super setAttributedStringValue:str];
-		}
-		else
-		{
-			[super setAttributedStringValue:_monoColoredAttributedString];
-		}
+		NSTextField* textField = OakCreateLabel(@"");
+		[textField setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
+		[self addSubview:textField];
+		[textField bind:NSValueBinding toObject:self withKeyPath:@"excerptString" options:nil];
+
+		self.textField = textField;
 	}
-	[super setBackgroundStyle:style];
+	return self;
 }
 
-- (void)setAttributedStringValue:(NSAttributedString*)str
+- (NSAttributedString*)excerptString
 {
-	_monoColoredAttributedString = str;
-	[super setAttributedStringValue:str];
+	FFResultNode* item = self.objectValue;
+	NSAttributedString* res = [item excerptWithReplacement:item.ignored || item.excluded || !_showReplacementPreviews ? item.replaceString : self.replaceString];
+	if(self.backgroundStyle == NSBackgroundStyleDark)
+	{
+		NSMutableAttributedString* str = [res mutableCopy];
+		[str addAttribute:NSForegroundColorAttributeName value:[NSColor alternateSelectedControlTextColor] range:NSMakeRange(0, [str length])];
+		res = str;
+	}
+	return res;
 }
 @end
+
+// ==================================
+// = OakSearchResultsHeaderCellView =
+// ==================================
 
 @interface OakSearchResultsHeaderCellView : NSTableCellView
 @property (nonatomic) NSString* countOfLeafs;
@@ -114,6 +128,10 @@
 - (void)outlineViewItemDidExpand:(NSNotification*)aNotification   { [self outlineViewItemDidExpandCollapse:aNotification]; }
 - (void)outlineViewItemDidCollapse:(NSNotification*)aNotification { [self outlineViewItemDidExpandCollapse:aNotification]; }
 @end
+
+// ===========================
+// = FFResultsViewController =
+// ===========================
 
 @interface FFResultsViewController () <NSOutlineViewDataSource, NSOutlineViewDelegate>
 {
@@ -210,22 +228,6 @@
 
 	[[_outlineView tableColumnWithIdentifier:@"checkbox"] setHidden:flag];
 	[_outlineView setOutlineTableColumn:[_outlineView tableColumnWithIdentifier:flag ? @"match" : @"checkbox"]];
-}
-
-- (void)setShowReplacementPreviews:(BOOL)flag
-{
-	if(_showReplacementPreviews != flag)
-	{
-		_showReplacementPreviews = flag;
-		[_outlineView reloadDataForRowIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [_outlineView numberOfRows])] columnIndexes:[NSIndexSet indexSetWithIndex:1]];
-	}
-}
-
-- (void)setReplaceString:(NSString*)aString
-{
-	_replaceString = aString;
-	if(_showReplacementPreviews)
-		[_outlineView reloadDataForRowIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [_outlineView numberOfRows])] columnIndexes:[NSIndexSet indexSetWithIndex:1]];
 }
 
 - (void)insertItemsAtIndexes:(NSIndexSet*)anIndexSet
@@ -445,14 +447,15 @@
 	}
 	else if([identifier isEqualToString:@"match"])
 	{
-		NSTextField* textField = res;
-		if(!textField)
+		OakSearchResultsMatchCellView* cellView = res;
+		if(!cellView)
 		{
-			res = textField = OakCreateLabel(@"");
-			textField.identifier = identifier;
-			[textField setCell:[OakAttributedStringTextFieldCell new]];
+			res = cellView = [[OakSearchResultsMatchCellView alloc] initWithFrame:NSZeroRect];
+			[cellView bind:@"replaceString" toObject:self withKeyPath:@"replaceString" options:nil];
+			[cellView bind:@"showReplacementPreviews" toObject:self withKeyPath:@"showReplacementPreviews" options:nil];
+			cellView.identifier = identifier;
 		}
-		[textField.cell setAttributedStringValue:[item excerptWithReplacement:(item.replacementDone || !item.excluded && _showReplacementPreviews) ? self.replaceString : nil]];
+		cellView.objectValue = item;
 	}
 	else
 	{

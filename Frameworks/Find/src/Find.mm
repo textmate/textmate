@@ -228,7 +228,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 					{
 						if(child.excluded)
 							continue;
-						child.replacementDone = YES;
+						child.replaceString = controller.replaceString;
 						replacements.emplace(std::make_pair([child.match match].first, [child.match match].last), controller.regularExpression ? format_string::expand(replaceString, [child.match match].captures) : replaceString);
 					}
 

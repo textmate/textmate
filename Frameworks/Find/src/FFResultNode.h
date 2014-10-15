@@ -23,9 +23,9 @@
 - (NSImage*)icon;
 
 @property (nonatomic) FFMatch* match;
+@property (nonatomic) NSString* replaceString;
 @property (nonatomic) NSArray* children;
 @property (nonatomic) BOOL excluded;
-@property (nonatomic) BOOL replacementDone;
 @property (nonatomic) BOOL ignored;
 @property (nonatomic) NSImage* icon;
 
