@@ -18,6 +18,8 @@
 
 namespace document
 {
+	PUBLIC extern std::string const kBookmarkIdentifier;
+
 	struct watch_t;
 	struct document_t;
 	typedef std::shared_ptr<watch_t>          watch_ptr;

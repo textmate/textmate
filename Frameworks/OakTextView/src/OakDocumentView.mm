@@ -463,7 +463,7 @@ private:
 		size_t lineNumber = sel.last().max().line;
 
 		ng::buffer_t const& buf = document->buffer();
-		[aMenuItem setTitle:buf.get_marks(buf.begin(lineNumber), buf.eol(lineNumber), kBookmarkType).empty() ? @"Set Bookmark" : @"Remove Bookmark"];
+		[aMenuItem setTitle:buf.get_marks(buf.begin(lineNumber), buf.eol(lineNumber), document::kBookmarkIdentifier).empty() ? @"Set Bookmark" : @"Remove Bookmark"];
 	}
 	return YES;
 }
@@ -723,8 +723,6 @@ private:
 // = GutterView DataSource =
 // =========================
 
-static std::string const kBookmarkType = "bookmark";
-
 - (CGFloat)widthForColumnWithIdentifier:(id)columnIdentifier
 {
 	return floor((self.lineHeight-1) / 2) * 2 + 1;
@@ -737,7 +735,7 @@ static std::string const kBookmarkType = "bookmark";
 		ng::buffer_t const& buf = document->buffer();
 		for(auto const& pair : buf.get_marks(buf.begin(lineNumber), buf.eol(lineNumber)))
 		{
-			if(pair.second == kBookmarkType)
+			if(pair.second == document::kBookmarkIdentifier)
 			{
 				switch(rowState)
 				{
@@ -780,7 +778,7 @@ static std::string const kBookmarkType = "bookmark";
 - (void)updateBookmarksMenu:(NSMenu*)aMenu
 {
 	ng::buffer_t& buf = document->buffer();
-	std::map<size_t, std::string> const& marks = buf.get_marks(0, buf.size(), kBookmarkType);
+	std::map<size_t, std::string> const& marks = buf.get_marks(0, buf.size(), document::kBookmarkIdentifier);
 	for(auto const& pair : marks)
 	{
 		size_t n = buf.convert(pair.first).line;
@@ -802,13 +800,13 @@ static std::string const kBookmarkType = "bookmark";
 	if([columnIdentifier isEqualToString:kBookmarksColumnIdentifier])
 	{
 		ng::buffer_t& buf = document->buffer();
-		std::map<size_t, std::string> const& marks = buf.get_marks(buf.begin(lineNumber), buf.eol(lineNumber), kBookmarkType);
+		std::map<size_t, std::string> const& marks = buf.get_marks(buf.begin(lineNumber), buf.eol(lineNumber), document::kBookmarkIdentifier);
 		for(auto const& pair : marks)
 		{
-			if(pair.second == kBookmarkType)
+			if(pair.second == document::kBookmarkIdentifier)
 				return buf.remove_mark(buf.begin(lineNumber) + pair.first, pair.second);
 		}
-		buf.set_mark(buf.begin(lineNumber), kBookmarkType);
+		buf.set_mark(buf.begin(lineNumber), document::kBookmarkIdentifier);
 	}
 	else if([columnIdentifier isEqualToString:kFoldingsColumnIdentifier])
 	{
@@ -829,21 +827,21 @@ static std::string const kBookmarkType = "bookmark";
 	size_t lineNumber = sel.last().max().line;
 
 	std::vector<size_t> toRemove;
-	std::map<size_t, std::string> const& marks = buf.get_marks(buf.begin(lineNumber), buf.eol(lineNumber), kBookmarkType);
+	std::map<size_t, std::string> const& marks = buf.get_marks(buf.begin(lineNumber), buf.eol(lineNumber), document::kBookmarkIdentifier);
 	for(auto const& pair : marks)
 	{
-		if(pair.second == kBookmarkType)
+		if(pair.second == document::kBookmarkIdentifier)
 			toRemove.push_back(buf.begin(lineNumber) + pair.first);
 	}
 
 	if(toRemove.empty())
 	{
-		buf.set_mark(buf.convert(sel.last().max()), kBookmarkType);
+		buf.set_mark(buf.convert(sel.last().max()), document::kBookmarkIdentifier);
 	}
 	else
 	{
 		for(auto const& index : toRemove)
-			buf.remove_mark(index, kBookmarkType);
+			buf.remove_mark(index, document::kBookmarkIdentifier);
 	}
 	[[NSNotificationCenter defaultCenter] postNotificationName:GVColumnDataSourceDidChange object:self];
 }
@@ -853,7 +851,7 @@ static std::string const kBookmarkType = "bookmark";
 	text::selection_t sel([textView.selectionString UTF8String]);
 
 	ng::buffer_t const& buf = document->buffer();
-	std::pair<size_t, std::string> const& pair = buf.next_mark(buf.convert(sel.last().max()), kBookmarkType);
+	std::pair<size_t, std::string> const& pair = buf.next_mark(buf.convert(sel.last().max()), document::kBookmarkIdentifier);
 	if(pair.second != NULL_STR)
 		textView.selectionString = [NSString stringWithCxxString:buf.convert(pair.first)];
 }
@@ -863,14 +861,14 @@ static std::string const kBookmarkType = "bookmark";
 	text::selection_t sel([textView.selectionString UTF8String]);
 
 	ng::buffer_t const& buf = document->buffer();
-	std::pair<size_t, std::string> const& pair = buf.prev_mark(buf.convert(sel.last().max()), kBookmarkType);
+	std::pair<size_t, std::string> const& pair = buf.prev_mark(buf.convert(sel.last().max()), document::kBookmarkIdentifier);
 	if(pair.second != NULL_STR)
 		textView.selectionString = [NSString stringWithCxxString:buf.convert(pair.first)];
 }
 
 - (void)clearAllBookmarks:(id)sender
 {
-	document->buffer().remove_all_marks(kBookmarkType);
+	document->buffer().remove_all_marks(document::kBookmarkIdentifier);
 	[[NSNotificationCenter defaultCenter] postNotificationName:GVColumnDataSourceDidChange object:self];
 }
 

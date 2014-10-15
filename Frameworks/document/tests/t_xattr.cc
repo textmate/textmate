@@ -10,11 +10,11 @@ void test_bookmarks ()
 	document::document_ptr doc = document::create(jail.path("test.txt"));
 	doc->sync_open();
 
-	std::map<size_t, std::string> marks = doc->buffer().get_marks(0, doc->buffer().size(), "bookmark");
+	std::map<size_t, std::string> marks = doc->buffer().get_marks(0, doc->buffer().size(), document::kBookmarkIdentifier);
 	OAK_ASSERT_EQ(marks.size(), 3);
-	OAK_ASSERT_EQ(marks[0], "bookmark");
-	OAK_ASSERT_EQ(marks[3], "bookmark");
-	OAK_ASSERT_EQ(marks[12], "bookmark");
+	OAK_ASSERT_EQ(marks[0], document::kBookmarkIdentifier);
+	OAK_ASSERT_EQ(marks[3], document::kBookmarkIdentifier);
+	OAK_ASSERT_EQ(marks[12], document::kBookmarkIdentifier);
 }
 
 void test_selection ()

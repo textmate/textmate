@@ -108,7 +108,7 @@ static std::multimap<text::pos_t, std::string> parse_marks (std::string const& s
 			for(auto const& bm : *array)
 			{
 				if(std::string const* str = boost::get<std::string>(&bm))
-					marks.emplace(*str, "bookmark");
+					marks.emplace(*str, document::kBookmarkIdentifier);
 			}
 		}
 	}
@@ -117,6 +117,8 @@ static std::multimap<text::pos_t, std::string> parse_marks (std::string const& s
 
 namespace document
 {
+	std::string const kBookmarkIdentifier = "bookmark";
+
 	// ================
 	// = File Watcher =
 	// ================
@@ -1365,7 +1367,7 @@ namespace document
 		std::vector<std::string> v;
 		for(auto const& mark : marks())
 		{
-			if(mark.second == "bookmark")
+			if(mark.second == kBookmarkIdentifier)
 				v.push_back(text::format("'%s'", std::string(mark.first).c_str()));
 		}
 		return v.empty() ? NULL_STR : "( " + text::join(v, ", ") + " )";
