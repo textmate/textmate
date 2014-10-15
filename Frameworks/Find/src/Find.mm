@@ -24,6 +24,8 @@ NSString* const FFSearchInDocument  = @"FFSearchInDocument";
 NSString* const FFSearchInSelection = @"FFSearchInSelection";
 NSString* const FFSearchInOpenFiles = @"FFSearchInOpenFiles";
 
+static std::string const kSearchMarkIdentifier = "search";
+
 enum FindActionTag
 {
 	FindActionFindNext = 1,
@@ -361,7 +363,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		for(FFResultNode* parent in _results.children)
 		{
 			if(document::document_ptr doc = parent.document)
-				doc->remove_all_marks("search");
+				doc->remove_all_marks(kSearchMarkIdentifier);
 		}
 
 		[self unbind:@"countOfMatches"];
@@ -409,7 +411,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	for(FFMatch* match in matches)
 	{
 		if(document::document_ptr doc = [match match].document)
-			doc->add_mark([match match].range.from, "search");
+			doc->add_mark([match match].range.from, kSearchMarkIdentifier);
 
 		FFResultNode* node = [FFResultNode resultNodeWithMatch:match];
 		if(!parent || parent.document->identifier() != node.document->identifier())
