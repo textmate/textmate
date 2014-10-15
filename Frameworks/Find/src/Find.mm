@@ -221,6 +221,9 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 				for(FFResultNode* parent in _results.children)
 				{
+					if(parent.countOfExcluded == parent.countOfLeafs)
+						continue;
+
 					std::multimap<std::pair<size_t, size_t>, std::string> replacements;
 					for(FFResultNode* child in parent.children)
 					{
@@ -229,9 +232,6 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 						child.replacementDone = YES;
 						replacements.emplace(std::make_pair([child.match match].first, [child.match match].last), controller.regularExpression ? format_string::expand(replaceString, [child.match match].captures) : replaceString);
 					}
-
-					if(replacements.empty())
-						continue;
 
 					if(document::document_ptr doc = parent.document)
 					{
