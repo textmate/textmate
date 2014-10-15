@@ -100,6 +100,8 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 @property (nonatomic) NSButton*                          cancelButton;
 
 @property (nonatomic) BOOL                               showsTableView;
+@property (nonatomic) BOOL                               animateConstraints;
+
 @property (nonatomic) OakCommitWindow*                   retainedSelf;
 @end
 
@@ -196,6 +198,8 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 			[_middleDivider removeFromSuperview];
 			[_scrollView removeFromSuperview];
 		}
+
+		_animateConstraints = NO;
 		[self updateConstraints];
 
 		[_arrayController addObserver:self forKeyPath:@"arrangedObjects.commit" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:kOakCommitWindowIncludeItemBinding];
@@ -234,18 +238,45 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[previousMessages(>=200)]-(20)-|" options:0 metrics:nil views:views]];
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[documentView(>=400,==topDivider,==bottomDivider)]|" options:0 metrics:nil views:views]];
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(12)-[previousMessages]-(12)-[topDivider]" options:0 metrics:nil views:views]];
+	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(12)-[previousMessages]-(12)-[topDivider][documentView]" options:0 metrics:nil views:views]];
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(20)-[showTableButton]-(>=100)-[cancel]-[commit]-(20)-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[bottomDivider]-(12)-[cancel]-(12)-|" options:0 metrics:nil views:views]];
 
-	if(self.showsTableView)
+	NSLayoutConstraint* scrollViewHeightConstraint = [NSLayoutConstraint constraintWithItem:_scrollView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:0];
+	NSLayoutConstraint* documentViewHeightConstraint = [NSLayoutConstraint constraintWithItem:_documentView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:NSHeight(_documentView.frame)];
+
+	if(self.showsTableView && [[_arrayController arrangedObjects] count] != 0)
 	{
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView(==documentView,==middleDivider)]|" options:0 metrics:nil views:views]];
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[topDivider][documentView(>=195)][middleDivider][scrollView(==190)][bottomDivider]" options:0 metrics:nil views:views]];
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[documentView(>=195)][middleDivider][scrollView][bottomDivider]" options:0 metrics:nil views:views]];
+
+		if(_animateConstraints)
+		{
+			scrollViewHeightConstraint.animator.constant = [self scrollViewHeight];
+			[contentView addConstraint:scrollViewHeightConstraint];
+			[contentView addConstraint:documentViewHeightConstraint];
+		}
+		else
+		{
+			scrollViewHeightConstraint.constant = [self scrollViewHeight];
+			[contentView addConstraint:scrollViewHeightConstraint];
+		}
 	}
 	else
 	{
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[topDivider][documentView(>=195)][bottomDivider]" options:0 metrics:nil views:views]];
+		if(_animateConstraints)
+		{
+			[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView(==documentView,==middleDivider)]|" options:0 metrics:nil views:views]];
+			[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[documentView][middleDivider][scrollView][bottomDivider]" options:0 metrics:nil views:views]];
+			scrollViewHeightConstraint.constant = [self scrollViewHeight];
+			scrollViewHeightConstraint.animator.constant = 0;
+			[contentView addConstraint:scrollViewHeightConstraint];
+			[contentView addConstraint:documentViewHeightConstraint];
+		}
+		else
+		{
+			[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[topDivider][documentView(>=195)][bottomDivider]" options:0 metrics:nil views:views]];
+		}
 	}
 }
 
@@ -317,6 +348,11 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 	}
 }
 
+- (CGFloat)scrollViewHeight
+{
+	return MIN([[_arrayController arrangedObjects] count], 10) * ([self.tableView rowHeight]+[self.tableView intercellSpacing].height);
+}
+
 - (void)setShowsTableView:(BOOL)flag
 {
 	if(_showsTableView == flag)
@@ -331,16 +367,26 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 {
 	self.showsTableView = !self.showsTableView;
 
-	if(!self.showsTableView)
-		[self.window makeFirstResponder:self.documentView.textView];
-
-	for(NSView* view in @[ self.middleDivider, self.scrollView ])
+	if(self.showsTableView)
 	{
-		if(self.showsTableView)
-				[self.window.contentView addSubview:view];
-		else	[view removeFromSuperview];
+		for(NSView* view in @[ self.middleDivider, self.scrollView ])
+					[self.window.contentView addSubview:view];
 	}
-	[self updateConstraints];
+
+	[NSAnimationContext runAnimationGroup:^(NSAnimationContext* context){
+		context.duration = 0.25;
+		_animateConstraints = YES;
+		[self updateConstraints];
+		_animateConstraints = NO;
+	} completionHandler:^{
+		if(!self.showsTableView)
+		{
+			[self.window makeFirstResponder:self.documentView.textView];
+			[self.middleDivider removeFromSuperview];
+			[self.scrollView removeFromSuperview];
+		}
+		[self updateConstraints];
+	}];
 }
 
 - (void)sheetDidEnd:(id)sheetOrAlert returnCode:(NSInteger)returnCode contextInfo:(void*)unused
