@@ -2,6 +2,10 @@ Title: Release Notes
 
 # Changes
 
+## 2014-10-16 ([v2.0-beta.1](https://github.com/textmate/textmate/compare/v2.0-alpha.9575...v2.0-beta.1))
+
+* Bump version number from alpha to beta.
+
 ## 2014-10-15 ([v2.0-alpha.9575](https://github.com/textmate/textmate/compare/v2.0-alpha.9573...v2.0-alpha.9575))
 
 * You can now set and clear gutter marks via `mate` using the new `--set-mark` and `--clear-mark` options. The name of the mark should be one of the predefined images which currently are: `bookmark`, `error`, `warning`, and `search`. The first one is what is used for bookmarks (and if using it, you are changing the document’s bookmarks). Alternatively one can specify a full path, which should point to the image used for the mark. Ideally this should be in PDF format since the size of the gutter images is not fixed. For an example see the [Git Diff Gutter bundle](https://github.com/textmate/git-diff-gutter.tmbundle) which adds gutter marks for added/modified lines (on save). This bundle can also be installed from _Bundles → Preferences_. Another example is the `TextMate::Executor` support library which now add warning and error badges, see [this commit](https://github.com/textmate/bundle-support.tmbundle/commit/bfd2e332aef8b77ba5c33999eda1dc110595f15e).
