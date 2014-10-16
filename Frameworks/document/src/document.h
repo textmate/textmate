@@ -97,7 +97,7 @@ namespace document
 
 	private:
 		static void setup_marks (std::string const& src, ng::buffer_t& buf);
-		std::string marks_as_string () const;
+		std::string bookmarks_as_string () const;
 
 		std::string _selection;
 		std::string _folded;

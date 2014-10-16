@@ -843,7 +843,7 @@ namespace document
 		{
 			attributes["com.macromates.selectionRange"] = _selection;
 			attributes["com.macromates.visibleIndex"]   = _visible_index ? to_s(_visible_index) : NULL_STR;
-			attributes["com.macromates.bookmarks"]      = marks_as_string();
+			attributes["com.macromates.bookmarks"]      = bookmarks_as_string();
 			attributes["com.macromates.folded"]         = _folded;
 			attributes["com.macromates.crc32"]          = text::format("%04x", bytes->crc32());
 		}
@@ -911,7 +911,7 @@ namespace document
 			path::set_attr(dst, "com.macromates.backup.custom-name",    _custom_name);
 			path::set_attr(dst, "com.macromates.backup.tab-size",       std::to_string(_indent.tab_size()));
 			path::set_attr(dst, "com.macromates.backup.soft-tabs",      _indent.soft_tabs() ? "YES" : "NO");
-			path::set_attr(dst, "com.macromates.bookmarks",             marks_as_string());
+			path::set_attr(dst, "com.macromates.bookmarks",             bookmarks_as_string());
 			path::set_attr(dst, "com.macromates.folded",                NULL_STR);
 			if(is_modified())
 				path::set_attr(dst, "com.macromates.backup.modified", "YES");
@@ -1038,7 +1038,7 @@ namespace document
 			path::set_attr(_path, "com.macromates.selectionRange", _selection);
 			path::set_attr(_path, "com.macromates.visibleRect",    NULL_STR); // clear legacy attribute
 			path::set_attr(_path, "com.macromates.visibleIndex",   _visible_index ? to_s(_visible_index) : NULL_STR);
-			path::set_attr(_path, "com.macromates.bookmarks",      marks_as_string());
+			path::set_attr(_path, "com.macromates.bookmarks",      bookmarks_as_string());
 		}
 
 		if(_path != NULL_STR)
@@ -1368,16 +1368,13 @@ namespace document
 		broadcast(callback_t::did_change_marks);
 	}
 
-	std::string document_t::marks_as_string () const
+	std::string document_t::bookmarks_as_string () const
 	{
 		std::vector<std::string> v;
 		if(_buffer)
 		{
-			for(auto const& mark : _buffer->get_marks(0, _buffer->size()))
-			{
-				if(mark.second == kBookmarkIdentifier)
-					v.push_back(text::format("'%s'", std::string(_buffer->convert(mark.first)).c_str()));
-			}
+			for(auto const& mark : _buffer->get_marks(0, _buffer->size(), kBookmarkIdentifier))
+				v.push_back(text::format("'%s'", std::string(_buffer->convert(mark.first)).c_str()));
 		}
 		else
 		{
