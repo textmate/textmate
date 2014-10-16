@@ -12,7 +12,6 @@
 #import <OakAppKit/OakPasteboard.h>
 #import <OakAppKit/OakSavePanel.h>
 #import <OakAppKit/OakTabBarView.h>
-#import <OakAppKit/OakWindowFrameHelper.h>
 #import <OakFoundation/NSArray Additions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <Preferences/Keys.h>
@@ -58,7 +57,7 @@ static BOOL IsInShouldTerminateEventLoop = NO;
 }
 @end
 
-@interface DocumentController () <NSWindowDelegate, OakTabBarViewDelegate, OakTabBarViewDataSource, OakTextViewDelegate, OakFileBrowserDelegate, OakWindowFrameHelperDelegate, QLPreviewPanelDelegate, QLPreviewPanelDataSource>
+@interface DocumentController () <NSWindowDelegate, OakTabBarViewDelegate, OakTabBarViewDataSource, OakTextViewDelegate, OakFileBrowserDelegate, QLPreviewPanelDelegate, QLPreviewPanelDataSource>
 @property (nonatomic) ProjectLayoutView*          layoutView;
 @property (nonatomic) OakTabBarView*              tabBarView;
 @property (nonatomic) OakDocumentView*            documentView;
@@ -288,7 +287,8 @@ namespace
 		self.layoutView.tabBarView   = self.tabBarView;
 		self.layoutView.documentView = self.documentView;
 
-		self.window = [[NSWindow alloc] initWithContentRect:NSZeroRect styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask|NSTexturedBackgroundWindowMask) backing:NSBackingStoreBuffered defer:NO];
+		NSUInteger windowStyle = (NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask|NSTexturedBackgroundWindowMask);
+		self.window = [[NSWindow alloc] initWithContentRect:[NSWindow contentRectForFrameRect:[self frameRectForNewWindow] styleMask:windowStyle] styleMask:windowStyle backing:NSBackingStoreBuffered defer:NO];
 		self.window.autorecalculatesKeyViewLoop = YES;
 		self.window.collectionBehavior          = NSWindowCollectionBehaviorFullScreenPrimary;
 		self.window.delegate                    = self;
@@ -302,8 +302,6 @@ namespace
 		[self.window.contentView addSubview:self.layoutView];
 		[self.window.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[view]|" options:0 metrics:nil views:@{ @"view" : self.layoutView }]];
 		[self.window.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[view]|" options:0 metrics:nil views:@{ @"view" : self.layoutView }]];
-
-		[OakWindowFrameHelper windowFrameHelperWithWindow:self.window];
 
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidBecomeActiveNotification:) name:NSApplicationDidBecomeActiveNotification object:NSApp];
@@ -324,8 +322,77 @@ namespace
 	self.textView.delegate      = nil;
 }
 
+// ======================================
+// = Find suitable frame for new window =
+// ======================================
+
+- (NSRect)windowFrame
+{
+	NSRect res = [self.window frame];
+	if(self.fileBrowserVisible)
+		res.size.width -= self.fileBrowserWidth;
+	return res;
+}
+
+- (NSRect)cascadedWindowFrame
+{
+	NSRect r = [self windowFrame];
+	r.origin = [self.window cascadeTopLeftFromPoint:NSMakePoint(NSMinX(r), NSMaxY(r))];
+	r.origin.y -= r.size.height;
+	return r;
+}
+
+- (NSRect)frameRectForNewWindow
+{
+	std::map<CGFloat, NSWindow*> ourWindows;
+	for(NSWindow* win in [NSApp windows])
+	{
+		if([win isVisible] && [win isOnActiveSpace] && ![win isZoomed] && (([win styleMask] & NSFullScreenWindowMask)) != NSFullScreenWindowMask && [[win delegate] isKindOfClass:[self class]])
+			ourWindows.emplace(NSMaxY([win frame]), win);
+	}
+
+	if(!ourWindows.empty())
+	{
+		NSRect r = [(DocumentController*)ourWindows.begin()->second.delegate cascadedWindowFrame];
+
+		NSRect scrRect = [[NSScreen mainScreen] visibleFrame];
+		if(NSContainsRect(scrRect, r))
+			return r;
+
+		r.origin.x = 61;
+		r.origin.y = NSMaxY(scrRect) - NSHeight(r);
+
+		BOOL alreadyHasWrappedWindow = NO;
+		for(auto pair : ourWindows)
+		{
+			if(NSEqualPoints([pair.second frame].origin, r.origin))
+				alreadyHasWrappedWindow = YES;
+		}
+
+		if(alreadyHasWrappedWindow)
+		{
+			NSWindow* mainWindow = [NSApp mainWindow];
+			if([[mainWindow delegate] isKindOfClass:[self class]])
+				r = [(DocumentController*)mainWindow.delegate cascadedWindowFrame];
+		}
+
+		return r;
+	}
+
+	if(NSString* rectStr = [[NSUserDefaults standardUserDefaults] stringForKey:@"DocumentControllerWindowFrame"])
+		return NSRectFromString(rectStr);
+
+	NSRect r = [[NSScreen mainScreen] visibleFrame];
+	return r = NSIntegralRect(NSInsetRect(r, NSWidth(r) / 3, NSHeight(r) / 5));
+}
+
+// =========================
+
 - (void)windowWillClose:(NSNotification*)aNotification
 {
+	if((([self.window styleMask] & NSFullScreenWindowMask) != NSFullScreenWindowMask) && !self.window.isZoomed)
+		[[NSUserDefaults standardUserDefaults] setObject:NSStringFromRect([self windowFrame]) forKey:@"DocumentControllerWindowFrame"];
+
 	self.documents          = std::vector<document::document_ptr>();
 	self.selectedDocument   = document::document_ptr();
 	self.window.delegate    = nil;
@@ -2402,6 +2469,8 @@ static NSUInteger DisableSessionSavingCount = 0;
 			[controller.window miniaturize:nil];
 		else if([project[@"fullScreen"] boolValue])
 			[controller.window toggleFullScreen:self];
+		else if([project[@"zoomed"] boolValue])
+			[controller.window zoom:self];
 		res = YES;
 	}
 
@@ -2466,8 +2535,11 @@ static NSUInteger DisableSessionSavingCount = 0;
 		res[@"fileBrowserState"] = history;
 
 	if(([self.window styleMask] & NSFullScreenWindowMask) == NSFullScreenWindowMask)
-			res[@"fullScreen"] = @YES;
-	else	res[@"windowFrame"] = [self.window stringWithSavedFrame];
+		res[@"fullScreen"] = @YES;
+	else if(self.window.isZoomed)
+		res[@"zoomed"] = @YES;
+	else
+		res[@"windowFrame"] = [self.window stringWithSavedFrame];
 
 	res[@"miniaturized"]       = @([self.window isMiniaturized]);
 	res[@"htmlOutputSize"]     = NSStringFromSize(self.htmlOutputSize);
@@ -2513,18 +2585,6 @@ static NSUInteger DisableSessionSavingCount = 0;
 
 	NSDictionary* session = @{ @"projects" : projects };
 	return [session writeToFile:[self sessionPath] atomically:YES];
-}
-
-// ================================
-// = OakWindowFrameHelperDelegate =
-// ================================
-
-- (NSRect)savableWindowFrame
-{
-	NSRect res = [self.window frame];
-	if(self.fileBrowserVisible)
-		res.size.width -= self.fileBrowserWidth;
-	return res;
 }
 
 // ==========
