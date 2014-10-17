@@ -27,20 +27,11 @@ void test_null_string ()
 
 void test_exhaustive ()
 {
-	std::string const numbers[] = { "1", "1.01", "1.1.1", "1.1.2", "1.2", "1.2.1", "1.10", "2", "2.1", "2.1.1", "2.2" };
 	std::vector<std::string> versions;
-
-	for(auto number : numbers)
+	for(std::string number : { "1", "1.01", "1.1.1", "1.1.2", "1.2", "1.2.1", "1.10", "2", "2.1", "2.1.1", "2.2" })
 	{
-		versions.push_back(number + "-alpha");
-		versions.push_back(number + "-alpha.1");
-		versions.push_back(number + "-alpha.2");
-		versions.push_back(number + "-alpha.3+debug");
-		versions.push_back(number + "-beta");
-		versions.push_back(number + "-beta.1");
-		versions.push_back(number + "-beta.2");
-		versions.push_back(number + "-rc.1");
-		versions.push_back(number);
+		for(std::string suffix : { "-alpha", "-alpha.1", "-alpha.2", "-alpha.3+debug", "-beta", "-beta.1", "-beta.2", "-rc.1", "" })
+			versions.push_back(number + suffix);
 	}
 
 	for(size_t i = 0; i < versions.size(); ++i)
