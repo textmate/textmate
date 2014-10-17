@@ -7,7 +7,7 @@
 #include <io/path.h>
 #include <plist/uuid.h>
 
-static char const* const AppVersion = "2.9";
+static char const* const AppVersion = "2.10";
 static size_t const AppRevision     = APP_REVISION;
 
 static char const* socket_path ()
@@ -135,7 +135,7 @@ static void usage (FILE* io)
 	fprintf(io,
 		"%1$s %2$s (" COMPILE_DATE " revision %3$zu)\n"
 		"Usage: %1$s [-wl<selection>t<filetype>m<name>rehv] [-u<identifier> | file ...]\n"
-		"       %1$s -s<mark> -l<line> [-u<identifier> | file ...]\n"
+		"       %1$s [-c<mark>] -s<mark> -l<line> [-u<identifier> | file ...]\n"
 		"       %1$s -c<mark> [-l<line>] [-u<identifier> | file ...]\n"
 		"\n"
 		"Options:\n"
@@ -408,9 +408,33 @@ int main (int argc, char const* argv[])
 	if(len == -1)
 		exit(EX_IOERR);
 
+	if(!clearMarks.empty())
+	{
+		size_t n = setMarks.empty() ? std::max(clearMarks.size(), std::max(files.size(), lines.size())) : clearMarks.size();
+		for(size_t i = 0; i < n; ++i)
+		{
+			write(fd, "clear-mark\r\n", 12);
+
+			write_key_pair(fd, "mark", clearMarks[i % clearMarks.size()]);
+
+			if(!lines.empty() && setMarks.empty())
+				write_key_pair(fd, "line", lines[i % lines.size()]);
+
+			if(!files.empty())
+			{
+				if(files[i % files.size()].find(kUUIDPrefix) == 0)
+						write_key_pair(fd, "uuid", files[i % files.size()].substr(kUUIDPrefix.size()));
+				else	write_key_pair(fd, "path", files[i % files.size()]);
+			}
+
+			write(fd, "\r\n", 2);
+		}
+	}
+
 	if(!setMarks.empty() && !files.empty() && !lines.empty())
 	{
-		for(size_t i = 0; i < std::max(setMarks.size(), std::max(files.size(), lines.size())); ++i)
+		size_t n = std::max(setMarks.size(), std::max(files.size(), lines.size()));
+		for(size_t i = 0; i < n; ++i)
 		{
 			write(fd, "set-mark\r\n", 10);
 
@@ -424,28 +448,8 @@ int main (int argc, char const* argv[])
 			write(fd, "\r\n", 2);
 		}
 	}
-	else if(!clearMarks.empty())
-	{
-		for(size_t i = 0; i < std::max(clearMarks.size(), std::max(files.size(), lines.size())); ++i)
-		{
-			write(fd, "clear-mark\r\n", 12);
 
-			write_key_pair(fd, "mark", clearMarks[i % clearMarks.size()]);
-
-			if(!lines.empty())
-				write_key_pair(fd, "line", lines[i % lines.size()]);
-
-			if(!files.empty())
-			{
-				if(files[i % files.size()].find(kUUIDPrefix) == 0)
-						write_key_pair(fd, "uuid", files[i % files.size()].substr(kUUIDPrefix.size()));
-				else	write_key_pair(fd, "path", files[i % files.size()]);
-			}
-
-			write(fd, "\r\n", 2);
-		}
-	}
-	else
+	if(clearMarks.empty() && setMarks.empty())
 	{
 		for(size_t i = 0; i < files.size(); ++i)
 		{
