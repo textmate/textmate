@@ -12,9 +12,9 @@
 #define MSG_SHOWING_ONE_MATCH_FMT            FFString(@"Showing one result for “%@”.",      @"Status text for one match.")
 #define MSG_SHOWING_MULTIPLE_MATCHES_FMT     FFString(@"Showing %2$@ results for “%1$@”.",  @"Status text for multiple matches.")
 
-#define MSG_SEARCHED_FILES_ONE               FFString(@" (searched one file in %2$.1f seconds)",  @"Find all completion status, one file")
-#define MSG_SEARCHED_FILES_MULTIPLE          FFString(@" (searched %@ files in %.1f seconds)",    @"Find all completion status, multiple files")
-#define MSG_SEARCHED_BYTES                   FFString(@" (searched %@ in %.1f seconds)",          @"Find all completion status, quantity in bytes")
+#define MSG_SEARCHED_FILES_ONE               FFString(@" (searched one file in %2$@ seconds)",  @"Find all completion status, one file")
+#define MSG_SEARCHED_FILES_MULTIPLE          FFString(@" (searched %@ files in %@ seconds)",    @"Find all completion status, multiple files")
+#define MSG_SEARCHED_BYTES                   FFString(@" (searched %@ in %@ seconds)",          @"Find all completion status, quantity in bytes")
 
 #define MSG_SEARCHING_FOLDER_FMT             FFString(@"Searching “%@”…",     @"Find all progress status.")
 #define MSG_SEARCHING_FMT                    FFString(@"Searching…",          @"Find all initial progress status.")
@@ -25,7 +25,7 @@
 #define MSG_FIND_ALL_RESULTS                 FFString(@"Find All Results in “%@” matching “%@”",  @"Find all in files, results list header text.")
 #define MSG_FIND_ALL_RESULTS_OPEN_FILES      FFString(@"Find All Results in Open Documents",      @"Find all in open documents, results list header text.")
 
-#define MSG_REPLACE_ALL_RESULTS              FFString(@"%d replacements made across %d file(s).", @"Replace all, replacement count status text")
+#define MSG_REPLACE_ALL_RESULTS              FFString(@"%@ replacements made across %@ file(s).", @"Replace all, replacement count status text")
 
 #define MSG_WINDOW_TITLE                     FFString(@"Find",       @"Default window title.")
 #define MSG_FIND_IN_FOLDER_WINDOW_TITLE      FFString(@"Find — %@",  @"Find in folder, window title with path.")
