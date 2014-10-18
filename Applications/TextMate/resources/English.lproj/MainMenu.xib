@@ -392,6 +392,15 @@ CA
                                         <menuItem isSeparatorItem="YES" id="801">
                                             <modifierMask key="keyEquivalentModifierMask" command="YES"/>
                                         </menuItem>
+                                        <menuItem title="Show Find History" keyEquivalent="f" id="296">
+                                            <modifierMask key="keyEquivalentModifierMask" control="YES" option="YES" command="YES"/>
+                                            <connections>
+                                                <action selector="showFindHistory:" target="-1" id="298"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="232">
+                                            <modifierMask key="keyEquivalentModifierMask" command="YES"/>
+                                        </menuItem>
                                         <menuItem title="Incremental Search" tag="1" keyEquivalent="s" id="795">
                                             <modifierMask key="keyEquivalentModifierMask" control="YES"/>
                                             <connections>
@@ -405,33 +414,6 @@ CA
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="524"/>
-                                        <menuItem title="Ignore Case" tag="2" keyEquivalent="c" id="525">
-                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
-                                            <connections>
-                                                <action selector="toggleFindOption:" target="-1" id="526"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Regular Expression" tag="8" keyEquivalent="r" id="527">
-                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
-                                            <connections>
-                                                <action selector="toggleFindOption:" target="-1" id="528"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Ignore Whitespace" tag="4" id="530">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="toggleFindOption:" target="-1" id="533"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Wrap Around" tag="128" keyEquivalent="a" id="531">
-                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
-                                            <connections>
-                                                <action selector="toggleFindOption:" target="-1" id="534"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem isSeparatorItem="YES" id="229">
-                                            <modifierMask key="keyEquivalentModifierMask" command="YES"/>
-                                        </menuItem>
                                         <menuItem title="Find Next" keyEquivalent="g" id="230">
                                             <connections>
                                                 <action selector="findNext:" target="-1" id="250"/>
@@ -448,17 +430,53 @@ CA
                                                 <action selector="findAllInSelection:" target="-1" id="620"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem isSeparatorItem="YES" id="232">
-                                            <modifierMask key="keyEquivalentModifierMask" command="YES"/>
-                                        </menuItem>
-                                        <menuItem title="Show History" keyEquivalent="f" id="296">
-                                            <modifierMask key="keyEquivalentModifierMask" control="YES" option="YES" command="YES"/>
-                                            <connections>
-                                                <action selector="showFindHistory:" target="-1" id="298"/>
-                                            </connections>
-                                        </menuItem>
                                         <menuItem isSeparatorItem="YES" id="295">
                                             <modifierMask key="keyEquivalentModifierMask" command="YES"/>
+                                        </menuItem>
+                                        <menuItem title="Find Behavior" id="T2M-AW-koc">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <menu key="submenu" title="Find Behavior" id="5Ig-yv-0s4">
+                                                <items>
+                                                    <menuItem title="Ignore Case" tag="2" keyEquivalent="c" id="2Jq-mE-jBn">
+                                                        <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                                        <connections>
+                                                            <action selector="toggleFindOption:" target="-1" id="fwG-rF-fyy"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem title="Regular Expression" tag="8" keyEquivalent="r" id="Gtp-ae-cAu">
+                                                        <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                                        <connections>
+                                                            <action selector="toggleFindOption:" target="-1" id="Zir-N3-l9E"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem title="Ignore Whitespace" tag="4" id="rFc-HY-Pnw">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="toggleFindOption:" target="-1" id="axy-MV-Juc"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem title="Wrap Around" tag="128" keyEquivalent="a" id="15i-RO-5LZ">
+                                                        <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                                        <connections>
+                                                            <action selector="toggleFindOption:" target="-1" id="KJf-7S-ubt"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                </items>
+                                            </menu>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="229">
+                                            <modifierMask key="keyEquivalentModifierMask" command="YES"/>
+                                        </menuItem>
+                                        <menuItem title="Replace" keyEquivalent="g" id="TGx-q7-7UN">
+                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                            <connections>
+                                                <action selector="replace:" target="-1" id="gEk-mt-IDk"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Replace &amp; Find" id="235">
+                                            <connections>
+                                                <action selector="replaceAndFind:" target="-1" id="246"/>
+                                            </connections>
                                         </menuItem>
                                         <menuItem title="Replace All" keyEquivalent="g" id="233">
                                             <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
@@ -470,18 +488,6 @@ CA
                                             <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
                                             <connections>
                                                 <action selector="replaceAllInSelection:" target="-1" id="244"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Replace &amp; Find" keyEquivalent="g" id="235">
-                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
-                                            <connections>
-                                                <action selector="replaceAndFind:" target="-1" id="246"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Replace" id="TGx-q7-7UN">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="replace:" target="-1" id="gEk-mt-IDk"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="236">
