@@ -329,7 +329,7 @@ namespace
 - (NSRect)windowFrame
 {
 	NSRect res = [self.window frame];
-	if(self.fileBrowserVisible)
+	if(self.fileBrowserVisible && !self.disableFileBrowserWindowResize)
 		res.size.width -= self.fileBrowserWidth;
 	return res;
 }
