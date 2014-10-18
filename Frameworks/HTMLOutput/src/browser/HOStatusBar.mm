@@ -27,7 +27,7 @@ static NSTextField* OakCreateTextField ()
 }
 
 @interface HOStatusBar ()
-@property (nonatomic) NSImageView*         divider;
+@property (nonatomic) NSView*              divider;
 @property (nonatomic) NSButton*            goBackButton;
 @property (nonatomic) NSButton*            goForwardButton;
 @property (nonatomic) NSTextField*         statusTextField;
