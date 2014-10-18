@@ -1,5 +1,4 @@
 #include "bytes.h"
-#include <boost/crc.hpp>
 
 namespace io
 {
@@ -34,7 +33,7 @@ namespace io
 		memcpy(_bytes, str.data(), _size);
 	}
 
-	int32_t bytes_t::crc32 () const
+	uint32_t bytes_t::crc32 () const
 	{
 		boost::crc_32_type result;
 		result.process_bytes(_bytes, _size);

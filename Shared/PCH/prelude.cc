@@ -18,6 +18,7 @@
 #include <memory>
 #include <numeric>
 #include <thread>
+#include <boost/crc.hpp>
 #include <boost/variant.hpp>
 
 #endif /* end of include guard: PRELUDE_CC_PCH_U5CKEP2N */
