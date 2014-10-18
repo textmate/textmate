@@ -35,6 +35,7 @@ enum FindActionTag
 	FindActionReplaceAll,
 	FindActionReplaceAndFind,
 	FindActionReplaceSelected,
+	FindActionReplace,
 };
 
 @interface Find () <OakFindServerProtocol>
@@ -144,6 +145,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 - (IBAction)findPrevious:(id)sender       { [self performFindAction:FindActionFindPrevious   withWindowController:self.windowController]; }
 - (IBAction)replaceAll:(id)sender         { [self performFindAction:FindActionReplaceAll     withWindowController:self.windowController]; }
 - (IBAction)replaceAndFind:(id)sender     { [self performFindAction:FindActionReplaceAndFind withWindowController:self.windowController]; }
+- (IBAction)replace:(id)sender            { [self performFindAction:FindActionReplace        withWindowController:self.windowController]; }
 
 - (IBAction)stopSearch:(id)sender
 {
@@ -277,6 +279,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 			case FindActionCountMatches:   _findOperation = onlySelection ? kFindOperationCountInSelection      : kFindOperationCount;      break;
 			case FindActionReplaceAll:     _findOperation = onlySelection ? kFindOperationReplaceAllInSelection : kFindOperationReplaceAll; break;
 			case FindActionReplaceAndFind: _findOperation = kFindOperationReplaceAndFind;                                                   break;
+			case FindActionReplace:        _findOperation = kFindOperationReplace;                                                          break;
 		}
 
 		self.closeWindowOnSuccess = action == FindActionFindNext && [[NSApp currentEvent] type] == NSKeyDown && to_s([NSApp currentEvent]) == utf8::to_s(NSCarriageReturnCharacter);

@@ -127,6 +127,7 @@ static NSButton* OakCreateStopSearchButton ()
 
 @property (nonatomic, readwrite) NSButton*      findAllButton;
 @property (nonatomic, readwrite) NSButton*      replaceAllButton;
+@property (nonatomic, readwrite) NSButton*      replaceButton;
 @property (nonatomic, readwrite) NSButton*      replaceAndFindButton;
 @property (nonatomic, readwrite) NSButton*      findPreviousButton;
 @property (nonatomic, readwrite) NSButton*      findNextButton;
@@ -192,6 +193,7 @@ static NSButton* OakCreateStopSearchButton ()
 
 		self.findAllButton             = OakCreateButton(@"Find All");
 		self.replaceAllButton          = OakCreateButton(@"Replace All");
+		self.replaceButton             = OakCreateButton(@"Replace");
 		self.replaceAndFindButton      = OakCreateButton(@"Replace & Find");
 		self.findPreviousButton        = OakCreateButton(@"Previous");
 		self.findNextButton            = OakCreateButton(@"Next");
@@ -241,6 +243,7 @@ static NSButton* OakCreateStopSearchButton ()
 		self.countButton.action           = @selector(countOccurrences:);
 		self.findAllButton.action         = @selector(findAll:);
 		self.replaceAllButton.action      = @selector(replaceAll:);
+		self.replaceButton.action         = @selector(replace:);
 		self.replaceAndFindButton.action  = @selector(replaceAndFind:);
 		self.findPreviousButton.action    = @selector(findPrevious:);
 		self.findNextButton.action        = @selector(findNext:);
@@ -260,6 +263,7 @@ static NSButton* OakCreateStopSearchButton ()
 		[self.regularExpressionCheckBox bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.regularExpression"    options:nil];
 		[self.wrapAroundCheckBox        bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.wrapAround"           options:nil];
 		[self.ignoreWhitespaceCheckBox  bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.canIgnoreWhitespace"  options:nil];
+		[self.replaceButton             bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.folderSearch"         options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
 		[self.replaceAndFindButton      bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.folderSearch"         options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
 
 		[self.countButton               bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.findString.length"    options:nil];
@@ -359,6 +363,7 @@ static NSButton* OakCreateStopSearchButton ()
 
 		@"findAll"           : self.findAllButton,
 		@"replaceAll"        : self.replaceAllButton,
+		@"replaceButton"     : self.replaceButton,
 		@"replaceAndFind"    : self.replaceAndFindButton,
 		@"previous"          : self.findPreviousButton,
 		@"next"              : self.findNextButton,
@@ -435,20 +440,20 @@ static NSButton* OakCreateStopSearchButton ()
 		CONSTRAINT(@"H:|-[status]-|", 0);
 	}
 
-	CONSTRAINT(@"H:|-[findAll]-[replaceAll]-(>=8)-[replaceAndFind]-[previous]-[next]-|", NSLayoutFormatAlignAllBottom);
+	CONSTRAINT(@"H:|-[findAll]-[replaceAll]-(>=8)-[replaceButton]-[replaceAndFind]-[previous]-[next]-|", NSLayoutFormatAlignAllBottom);
 	CONSTRAINT(@"V:[status]-(8)-[findAll]-|", 0);
 
 	[self.window.contentView addConstraints:_myConstraints];
 
 	if(self.showsResultsOutlineView)
 	{
-		NSView* keyViewLoop[] = { self.findTextField, self.replaceTextField, self.countButton, self.regularExpressionCheckBox, self.ignoreWhitespaceCheckBox, self.ignoreCaseCheckBox, self.wrapAroundCheckBox, self.wherePopUpButton, self.globTextField, self.actionsPopUpButton, self.resultsViewController.outlineView, self.findAllButton, self.replaceAllButton, self.replaceAndFindButton, self.findPreviousButton, self.findNextButton };
+		NSView* keyViewLoop[] = { self.findTextField, self.replaceTextField, self.countButton, self.regularExpressionCheckBox, self.ignoreWhitespaceCheckBox, self.ignoreCaseCheckBox, self.wrapAroundCheckBox, self.wherePopUpButton, self.globTextField, self.actionsPopUpButton, self.resultsViewController.outlineView, self.findAllButton, self.replaceAllButton, self.replaceButton, self.replaceAndFindButton, self.findPreviousButton, self.findNextButton };
 		for(size_t i = 0; i < sizeofA(keyViewLoop); ++i)
 			keyViewLoop[i].nextKeyView = keyViewLoop[(i + 1) % sizeofA(keyViewLoop)];
 	}
 	else
 	{
-		NSView* keyViewLoop[] = { self.findTextField, self.replaceTextField, self.countButton, self.regularExpressionCheckBox, self.ignoreWhitespaceCheckBox, self.ignoreCaseCheckBox, self.wrapAroundCheckBox, self.wherePopUpButton, self.globTextField, self.actionsPopUpButton, self.findAllButton, self.replaceAllButton, self.replaceAndFindButton, self.findPreviousButton, self.findNextButton };
+		NSView* keyViewLoop[] = { self.findTextField, self.replaceTextField, self.countButton, self.regularExpressionCheckBox, self.ignoreWhitespaceCheckBox, self.ignoreCaseCheckBox, self.wrapAroundCheckBox, self.wherePopUpButton, self.globTextField, self.actionsPopUpButton, self.findAllButton, self.replaceAllButton, self.replaceButton, self.replaceAndFindButton, self.findPreviousButton, self.findNextButton };
 		for(size_t i = 0; i < sizeofA(keyViewLoop); ++i)
 			keyViewLoop[i].nextKeyView = keyViewLoop[(i + 1) % sizeofA(keyViewLoop)];
 	}
