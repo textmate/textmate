@@ -11,9 +11,9 @@ NSFont* OakControlFont ()
 	return [NSFont messageFontOfSize:0];
 }
 
-NSTextField* OakCreateLabel (NSString* label, Class cl)
+NSTextField* OakCreateLabel (NSString* label)
 {
-	NSTextField* res = [[cl alloc] initWithFrame:NSZeroRect];
+	NSTextField* res = [[NSTextField alloc] initWithFrame:NSZeroRect];
 	[[res cell] setWraps:NO];
 	res.alignment       = NSRightTextAlignment;
 	res.bezeled         = NO;

@@ -15,14 +15,14 @@ PUBLIC @interface OakBackgroundFillView : NSView
 PUBLIC NSFont* OakStatusBarFont ();
 PUBLIC NSFont* OakControlFont ();
 
-PUBLIC NSTextField* OakCreateLabel (NSString* label = @"", Class cl = [NSTextField class]);
+PUBLIC NSTextField* OakCreateLabel (NSString* label = @"");
 PUBLIC NSButton* OakCreateCheckBox (NSString* label);
 PUBLIC NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel = NSRoundedBezelStyle);
 PUBLIC NSPopUpButton* OakCreatePopUpButton (BOOL pullsDown = NO, NSString* initialItemTitle = nil, NSObject* accessibilityLabel = nil);
 PUBLIC NSPopUpButton* OakCreateActionPopUpButton (BOOL bordered = NO);
 PUBLIC NSPopUpButton* OakCreateStatusBarPopUpButton (NSString* initialItemTitle = nil, NSObject* accessibilityLabel = nil);
 PUBLIC NSComboBox* OakCreateComboBox (NSObject* accessibilityLabel = nil);
-PUBLIC NSImageView* OakCreateDividerImageView ();
+PUBLIC NSView* OakCreateDividerImageView ();
 
 PUBLIC OakBackgroundFillView* OakCreateVerticalLine (NSColor* primaryColor, NSColor* secondaryColor = nil);
 PUBLIC OakBackgroundFillView* OakCreateHorizontalLine (NSColor* primaryColor, NSColor* secondaryColor = nil);
