@@ -183,12 +183,6 @@ NSComboBox* OakCreateComboBox (NSObject* accessibilityLabel)
 - (NSImage*)inactiveBackgroundImage        { return [_inactiveBackgroundValue isKindOfClass:[NSImage class]]    ? _inactiveBackgroundValue : nil; }
 - (NSGradient*)inactiveBackgroundGradient  { return [_inactiveBackgroundValue isKindOfClass:[NSGradient class]] ? _inactiveBackgroundValue : nil; }
 
-- (BOOL)isOpaque
-{
-	// When an `NSTextField` with `NSBackgroundStyleRaised` redraws itself in an inactive textured window, it only draws as dimmed if none of its parent views are opaque, so we only return YES here if we fill with a color, as we draw text labels on gradient status bars <rdar://13161778>
-	return self.activeBackgroundColor != nil;
-}
-
 - (NSSize)intrinsicContentSize
 {
 	if(NSImage* image = self.activeBackgroundImage ?: self.inactiveBackgroundImage)
@@ -211,7 +205,7 @@ NSComboBox* OakCreateComboBox (NSObject* accessibilityLabel)
 		CGContextRef context = (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort];
 		CGAffineTransform affineTransform = CGContextGetCTM(context);
 		CGContextSetPatternPhase(context, CGSizeMake(affineTransform.tx, affineTransform.ty));
-		NSRectFill(aRect);
+		NSRectFillUsingOperation(aRect, NSCompositeSourceOver);
 	}
 	else if([value isKindOfClass:[NSColor class]])
 	{
