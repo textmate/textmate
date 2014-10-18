@@ -244,7 +244,11 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 						}
 						else
 						{
-							doc->replace(replacements);
+							if(!doc->replace(replacements, [parent.match match].crc32))
+							{
+								[parent.children setValue:nil forKey:@"replaceString"];
+								continue;
+							}
 							doc->sync_save(kCFRunLoopDefaultMode);
 							doc->set_content(NULL_STR);
 						}

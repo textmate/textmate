@@ -85,7 +85,7 @@ namespace document
 		// = Performing replacements (from outside a text view) =
 		// ======================================================
 
-		void replace (std::multimap<std::pair<size_t, size_t>, std::string> const& replacements);
+		bool replace (std::multimap<std::pair<size_t, size_t>, std::string> const& replacements, uint32_t crc32);
 
 		// ===================================================================
 		// = Controlling marks (bookmarks, warnings, errors, search matches) =

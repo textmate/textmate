@@ -1301,21 +1301,28 @@ namespace document
 	// = Replace =
 	// ===========
 
-	void document_t::replace (std::multimap<std::pair<size_t, size_t>, std::string> const& replacements)
+	bool document_t::replace (std::multimap<std::pair<size_t, size_t>, std::string> const& replacements, uint32_t crc32)
 	{
 		ASSERT(!is_open());
 
 		if(replacements.empty())
-			return;
+			return false;
 
 		ASSERT(_path != NULL_STR);
 		ASSERT(!_buffer);
 
 		ng::buffer_t buf;
 
+		boost::crc_32_type check;
 		file_reader_t reader(shared_from_this());
 		while(io::bytes_ptr bytes = reader.next())
+		{
+			check.process_bytes(bytes->get(), bytes->size());
 			buf.insert(buf.size(), std::string(bytes->begin(), bytes->end()));
+		}
+
+		if(crc32 != check.checksum())
+			return false;
 
 		document::marks.move_to_buffer(_path, buf);
 		riterate(pair, replacements)
@@ -1327,6 +1334,8 @@ namespace document
 
 		_content = std::make_shared<io::bytes_t>(buf.substr(0, buf.size()));
 		set_disk_encoding(reader.encoding());
+
+		return true;
 	}
 
 	// =========
