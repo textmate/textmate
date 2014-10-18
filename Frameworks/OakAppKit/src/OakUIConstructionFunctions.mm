@@ -236,37 +236,20 @@ OakBackgroundFillView* OakCreateHorizontalLine (NSColor* primaryColor, NSColor* 
 	return view;
 }
 
-// =============================
-
-@interface OakDisableAccessibilityImageCell : NSImageCell
-@end
-
-@implementation OakDisableAccessibilityImageCell
-- (BOOL)accessibilityIsIgnored
+NSView* OakCreateDividerImageView ()
 {
-	return YES;
-}
-@end
+	OakBackgroundFillView* divider = [[OakBackgroundFillView alloc] initWithFrame:NSZeroRect];
+	divider.activeBackgroundImage = [NSImage imageNamed:@"Divider" inSameBundleAsClass:[OakBackgroundFillView class]];
+	divider.translatesAutoresizingMaskIntoConstraints = NO;
+	[divider setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
 
-@interface OakDisableAccessibilityImageView : NSImageView
-@end
+	NSView* res = [[NSView alloc] initWithFrame:NSZeroRect];
+	[res addSubview:divider];
 
-@implementation OakDisableAccessibilityImageView
-+ (void)initialize
-{
-	if(self == OakDisableAccessibilityImageView.class)
-	{
-		[OakDisableAccessibilityImageView setCellClass:[OakDisableAccessibilityImageCell class]];
-	}
-}
-@end
+	[res addConstraint:[NSLayoutConstraint constraintWithItem:divider attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:res attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
+	[res addConstraint:[NSLayoutConstraint constraintWithItem:divider attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:res attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
+	[res addConstraint:[NSLayoutConstraint constraintWithItem:res attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:divider attribute:NSLayoutAttributeWidth multiplier:1 constant:0]];
 
-NSImageView* OakCreateDividerImageView ()
-{
-	NSImageView* res = [[OakDisableAccessibilityImageView alloc] initWithFrame:NSZeroRect];
-	[res setImage:[NSImage imageNamed:@"Divider" inSameBundleAsClass:[OakBackgroundFillView class]]];
-	[res setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
-	[res setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationVertical];
 	return res;
 }
 
