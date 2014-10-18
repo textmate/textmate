@@ -56,3 +56,16 @@ void test_replace_several ()
 	doc->sync_save();
 	OAK_ASSERT_EQ(path::content(jail.path("test.txt")), "Good\nJazz\nFud\nA new line\n");
 }
+
+void test_replace_content_changed ()
+{
+	test::jail_t jail;
+	uint32_t crc32 = set_content(jail, "test.txt",  "Foo\nBar\n");
+
+	document::document_ptr doc = document::create(jail.path("test.txt"));
+	OAK_ASSERT(!doc->replace({ { { 0, 3 }, "Fud" } }, crc32 ^ 0xDEADBEEF));
+
+	doc->sync_open();
+	OAK_ASSERT_EQ(doc->content(), "Foo\nBar\n");
+	doc->close();
+}
