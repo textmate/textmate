@@ -12,9 +12,9 @@ void test_bookmarks ()
 
 	std::map<size_t, std::string> marks = doc->buffer().get_marks(0, doc->buffer().size(), document::kBookmarkIdentifier);
 	OAK_ASSERT_EQ(marks.size(), 3);
-	OAK_ASSERT_EQ(marks[0], document::kBookmarkIdentifier);
-	OAK_ASSERT_EQ(marks[3], document::kBookmarkIdentifier);
-	OAK_ASSERT_EQ(marks[12], document::kBookmarkIdentifier);
+
+	std::map<size_t, std::string> expecting = { { 0, std::string() }, { 3, std::string() }, { 12, std::string() } };
+	OAK_ASSERT_EQ(marks, expecting);
 }
 
 void test_selection ()

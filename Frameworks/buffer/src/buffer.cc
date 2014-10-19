@@ -325,7 +325,7 @@ namespace ng
 	// = Marks =
 	// =========
 
-	void buffer_t::set_mark (size_t index, std::string const& markType)                                           { return _marks->set(index, markType); }
+	void buffer_t::set_mark (size_t index, std::string const& markType, std::string const& value)                 { return _marks->set(index, markType, value); }
 	void buffer_t::remove_mark (size_t index, std::string const& markType)                                        { return _marks->remove(index, markType); }
 	void buffer_t::remove_all_marks (std::string const& markType)                                                 { return _marks->remove_all(markType); }
 	std::string buffer_t::get_mark (size_t index, std::string const& markType) const                              { return _marks->get(index, markType); }

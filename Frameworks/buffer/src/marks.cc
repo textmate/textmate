@@ -15,9 +15,9 @@ namespace ng
 		}
 	}
 
-	void marks_t::set (size_t index, std::string const& markType)
+	void marks_t::set (size_t index, std::string const& markType, std::string const& value)
 	{
-		_marks[markType].set(index, markType);
+		_marks[markType].set(index, value);
 	}
 
 	void marks_t::remove (size_t index, std::string const& markType)
@@ -77,7 +77,7 @@ namespace ng
 			for(auto const& m : _marks)
 			{
 				foreach(it, m.second.lower_bound(from), m.second.upper_bound(to))
-					res[it->first - from] = it->second;
+					res[it->first - from] = m.first;
 			}
 		}
 		else

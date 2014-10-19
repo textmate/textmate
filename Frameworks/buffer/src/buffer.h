@@ -127,7 +127,7 @@ namespace ng
 		pairs_t& pairs ()              { return *_pairs.get(); }
 		pairs_t const& pairs () const  { return *_pairs.get(); }
 
-		void set_mark (size_t index, std::string const& markType);
+		void set_mark (size_t index, std::string const& markType, std::string const& value = std::string());
 		void remove_mark (size_t index, std::string const& markType);
 		void remove_all_marks (std::string const& markType);
 		std::string get_mark (size_t index, std::string const& markType) const;

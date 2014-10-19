@@ -37,7 +37,7 @@ namespace ng
 
 	struct marks_t : meta_data_t
 	{
-		void set (size_t index, std::string const& markType);
+		void set (size_t index, std::string const& markType, std::string const& value);
 		void remove (size_t index, std::string const& markType);
 		void remove_all (std::string const& markType);
 		std::string get (size_t index, std::string const& markType) const;
