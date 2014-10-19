@@ -800,12 +800,8 @@ private:
 	if([columnIdentifier isEqualToString:kBookmarksColumnIdentifier])
 	{
 		ng::buffer_t& buf = document->buffer();
-		std::map<size_t, std::string> const& marks = buf.get_marks(buf.begin(lineNumber), buf.eol(lineNumber), document::kBookmarkIdentifier);
-		for(auto const& pair : marks)
-		{
-			if(pair.second == document::kBookmarkIdentifier)
-				return buf.remove_mark(buf.begin(lineNumber) + pair.first, pair.second);
-		}
+		for(auto const& pair : buf.get_marks(buf.begin(lineNumber), buf.eol(lineNumber), document::kBookmarkIdentifier))
+			return buf.remove_mark(buf.begin(lineNumber) + pair.first, document::kBookmarkIdentifier);
 		buf.set_mark(buf.begin(lineNumber), document::kBookmarkIdentifier);
 	}
 	else if([columnIdentifier isEqualToString:kFoldingsColumnIdentifier])
@@ -827,12 +823,8 @@ private:
 	size_t lineNumber = sel.last().max().line;
 
 	std::vector<size_t> toRemove;
-	std::map<size_t, std::string> const& marks = buf.get_marks(buf.begin(lineNumber), buf.eol(lineNumber), document::kBookmarkIdentifier);
-	for(auto const& pair : marks)
-	{
-		if(pair.second == document::kBookmarkIdentifier)
-			toRemove.push_back(buf.begin(lineNumber) + pair.first);
-	}
+	for(auto const& pair : buf.get_marks(buf.begin(lineNumber), buf.eol(lineNumber), document::kBookmarkIdentifier))
+		toRemove.push_back(pair.first);
 
 	if(toRemove.empty())
 	{
