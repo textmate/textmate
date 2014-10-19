@@ -131,7 +131,8 @@ namespace ng
 		void remove_mark (size_t index, std::string const& markType);
 		void remove_all_marks (std::string const& markType);
 		std::string get_mark (size_t index, std::string const& markType) const;
-		std::map<size_t, std::string> get_marks (size_t from, size_t to, std::string const& markType = NULL_STR) const;
+		std::multimap<size_t, std::pair<std::string, std::string>> get_marks (size_t from, size_t to) const;
+		std::map<size_t, std::string> get_marks (size_t from, size_t to, std::string const& markType) const;
 		std::pair<size_t, std::string> next_mark (size_t index, std::string const& markType = NULL_STR) const;
 		std::pair<size_t, std::string> prev_mark (size_t index, std::string const& markType = NULL_STR) const;
 

@@ -735,7 +735,7 @@ private:
 		ng::buffer_t const& buf = document->buffer();
 		for(auto const& pair : buf.get_marks(buf.begin(lineNumber), buf.eol(lineNumber)))
 		{
-			if(pair.second == document::kBookmarkIdentifier)
+			if(pair.second.first == document::kBookmarkIdentifier)
 			{
 				switch(rowState)
 				{
@@ -746,7 +746,7 @@ private:
 			}
 			else if(rowState == GutterViewRowStateRegular)
 			{
-				return [self gutterImage:[NSString stringWithCxxString:pair.second]];
+				return [self gutterImage:[NSString stringWithCxxString:pair.second.first]];
 			}
 		}
 

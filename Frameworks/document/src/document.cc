@@ -502,7 +502,7 @@ namespace document
 		{
 			std::map<std::string, std::set<text::pos_t>> marks;
 			for(auto const& pair : buf.get_marks(0, buf.size()))
-				marks[pair.second].insert(buf.convert(pair.first));
+				marks[pair.second.first].insert(buf.convert(pair.first));
 			_paths[path] = marks;
 		}
 
