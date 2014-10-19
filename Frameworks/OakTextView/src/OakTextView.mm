@@ -1773,7 +1773,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 - (BOOL)readSelectionFromPasteboard:(NSPasteboard*)pboard
 {
-	if(NSString* str = [pboard stringForType:[pboard availableTypeFromArray:@[ @"public.plain-text" ]]])
+	if(NSString* str = [pboard stringForType:[pboard availableTypeFromArray:@[ NSStringPboardType ]]])
 	{
 		AUTO_REFRESH;
 		editor->insert(to_s(str));
