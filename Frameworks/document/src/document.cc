@@ -493,25 +493,25 @@ namespace document
 			for(auto const& type : marks_for(path))
 			{
 				for(auto const& pos : type.second)
-					buf.set_mark(cap(buf, pos).index, type.first);
+					buf.set_mark(cap(buf, pos.first).index, type.first, pos.second);
 			}
 			_paths.erase(path);
 		}
 
 		void copy_from_buffer (std::string const& path, ng::buffer_t const& buf)
 		{
-			std::map<std::string, std::set<text::pos_t>> marks;
+			std::map<std::string, std::map<text::pos_t, std::string>> marks;
 			for(auto const& pair : buf.get_marks(0, buf.size()))
-				marks[pair.second.first].insert(buf.convert(pair.first));
+				marks[pair.second.first].emplace(buf.convert(pair.first), pair.second.second);
 			_paths[path] = marks;
 		}
 
-		void add (std::string const& path, text::pos_t const& pos, std::string const& mark)
+		void add (std::string const& path, text::pos_t const& pos, std::string const& mark, std::string const& value)
 		{
-			marks_for(path)[mark].insert(pos);
+			marks_for(path)[mark].emplace(pos, value);
 		}
 
-		std::set<text::pos_t> const& get (std::string const& path, std::string const& mark)
+		std::map<text::pos_t, std::string> const& get (std::string const& path, std::string const& mark)
 		{
 			return marks_for(path)[mark];
 		}
@@ -543,11 +543,11 @@ namespace document
 		}
 
 	private:
-		std::map<std::string, std::set<text::pos_t>>& marks_for (std::string const& path)
+		std::map<std::string, std::map<text::pos_t, std::string>>& marks_for (std::string const& path)
 		{
 			auto marks = _paths.find(path);
 			if(marks == _paths.end())
-				marks = _paths.emplace(path, std::map<std::string, std::set<text::pos_t>>{ { kBookmarkIdentifier, load_bookmarks(path) } }).first;
+				marks = _paths.emplace(path, std::map<std::string, std::map<text::pos_t, std::string>>{ { kBookmarkIdentifier, load_bookmarks(path) } }).first;
 			return marks->second;
 		}
 
@@ -561,9 +561,9 @@ namespace document
 			return res;
 		}
 
-		static std::set<text::pos_t> load_bookmarks (std::string const& path)
+		static std::map<text::pos_t, std::string> load_bookmarks (std::string const& path)
 		{
-			std::set<text::pos_t> res;
+			std::map<text::pos_t, std::string> res;
 
 			std::string const str = path::get_attr(path, "com.macromates.bookmarks");
 			if(str == NULL_STR)
@@ -575,15 +575,15 @@ namespace document
 				for(auto const& bm : *array)
 				{
 					if(std::string const* str = boost::get<std::string>(&bm))
-						res.insert(*str);
+						res.emplace(*str, std::string());
 				}
 			}
 
 			return res;
 		}
 
-		// path → mark type → position of mark
-		std::map<std::string, std::map<std::string, std::set<text::pos_t>>> _paths;
+		// path → mark type → position → mark
+		std::map<std::string, std::map<std::string, std::map<text::pos_t, std::string>>> _paths;
 
 	} marks;
 
@@ -1347,12 +1347,12 @@ namespace document
 		document::marks.move_to_buffer(src, buf);
 	}
 
-	void document_t::add_mark (text::pos_t const& pos, std::string const& mark)
+	void document_t::add_mark (text::pos_t const& pos, std::string const& mark, std::string const& value)
 	{
 		if(_buffer)
-			_buffer->set_mark(_buffer->convert(pos), mark);
+			_buffer->set_mark(_buffer->convert(pos), mark, value);
 		else if(_path != NULL_STR)
-			document::marks.add(_path, pos, mark);
+			document::marks.add(_path, pos, mark, value);
 		broadcast(callback_t::did_change_marks);
 	}
 
@@ -1388,7 +1388,7 @@ namespace document
 		else
 		{
 			for(auto const& mark : document::marks.get(_path, kBookmarkIdentifier))
-				v.push_back(text::format("'%s'", std::string(mark).c_str()));
+				v.push_back(text::format("'%s'", std::string(mark.first).c_str()));
 		}
 		return v.empty() ? NULL_STR : "( " + text::join(v, ", ") + " )";
 	}

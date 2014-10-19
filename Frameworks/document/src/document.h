@@ -91,7 +91,7 @@ namespace document
 		// = Controlling marks (bookmarks, warnings, errors, search matches) =
 		// ===================================================================
 
-		void add_mark (text::pos_t const& pos, std::string const& mark);
+		void add_mark (text::pos_t const& pos, std::string const& mark, std::string const& value = std::string());
 		void remove_mark (text::pos_t const& pos, std::string const& mark);
 		void remove_all_marks (std::string const& typeToClear = NULL_STR);
 
