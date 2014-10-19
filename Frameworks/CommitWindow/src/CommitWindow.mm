@@ -360,6 +360,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 	}
 
 	document::document_ptr commitMessage = document::from_content("", fileType);
+	commitMessage->set_custom_name("Commit Message"); // release ‘untitled’ token
 	commitMessage->set_virtual_path(path::join(_environment["TM_PROJECT_DIRECTORY"], "commit-message.txt"));
 
 	if(NSString* logArgument = [self.options objectForKey:@"--log"])
