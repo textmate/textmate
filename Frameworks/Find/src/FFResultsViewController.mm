@@ -51,6 +51,7 @@
 @property (nonatomic) NSString* countOfLeafs;
 @property (nonatomic) NSButton* countOfLeafsButton;
 @property (nonatomic) NSButton* removeButton;
+@property (nonatomic) BOOL showKeyEquivalent;
 @end
 
 @implementation OakSearchResultsHeaderCellView
@@ -109,6 +110,56 @@
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
+- (void)setShowKeyEquivalent:(BOOL)flag
+{
+	if(_showKeyEquivalent == flag)
+		return;
+	_showKeyEquivalent = flag;
+
+	FFResultNode* item = self.objectValue;
+	if(_showKeyEquivalent)
+	{
+		NSUInteger index = [item.parent.children indexOfObject:item];
+		if(!item || index > 9)
+			return;
+
+		NSRect rect = self.imageView.bounds;
+		NSColor* color = [NSColor grayColor];
+
+		NSImage* image = [[NSImage alloc] initWithSize:rect.size];
+		[image lockFocus];
+
+		CGFloat ptrn[] = { 2, 1 };
+		NSBezierPath* path = [NSBezierPath bezierPathWithRoundedRect:NSIntegralRect(NSInsetRect(rect, 1, 1)) xRadius:2 yRadius:2];
+		[path setLineDash:ptrn count:sizeofA(ptrn) phase:0];
+		[path setLineWidth:1];
+
+		[color set];
+		[path stroke];
+
+		NSMutableParagraphStyle* pStyle = [NSMutableParagraphStyle new];
+		[pStyle setAlignment:NSCenterTextAlignment];
+		NSDictionary* attributes = @{
+			NSFontAttributeName            : [NSFont boldSystemFontOfSize:0],
+			NSForegroundColorAttributeName : color,
+			NSParagraphStyleAttributeName  : pStyle,
+		};
+
+		NSAttributedString* str = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%lu", (index + 1) % 10] attributes:attributes];
+		NSSize size = [str size];
+		rect.origin.y = 0.5 * (NSHeight(rect) - size.height);
+		rect.size.height = size.height;
+		[str drawInRect:NSIntegralRect(rect)];
+
+		[image unlockFocus];
+		[self.imageView setImage:image];
+	}
+	else
+	{
+		self.imageView.image = item.icon;
+	}
+}
+
 - (void)setCountOfLeafs:(NSString*)aString
 {
 	_countOfLeafs = aString;
@@ -138,7 +189,11 @@
 	NSView*        _topDivider;
 	NSScrollView*  _scrollView;
 	NSView*        _bottomDivider;
+
+	__weak id      _eventMonitor;
+	BOOL           _longPressedCommandModifier;
 }
+@property (nonatomic) BOOL showKeyEquivalent;
 @end
 
 @implementation FFResultsViewController
@@ -196,7 +251,35 @@
 		_outlineView.target       = self;
 		_outlineView.action       = @selector(didSingleClick:);
 		_outlineView.doubleAction = @selector(didDoubleClick:);
+
+		_eventMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:NSFlagsChangedMask handler:^NSEvent*(NSEvent* event){
+			NSUInteger modifierFlags = [_outlineView.window isKeyWindow] ? ([event modifierFlags] & (NSShiftKeyMask|NSControlKeyMask|NSAlternateKeyMask|NSCommandKeyMask)) : 0;
+			if(_longPressedCommandModifier)
+			{
+				self.showKeyEquivalent = modifierFlags == NSCommandKeyMask;
+				if(modifierFlags == 0)
+					_longPressedCommandModifier = NO;
+			}
+			else
+			{
+				if(modifierFlags == NSCommandKeyMask)
+						[self performSelector:@selector(delayedLongPressedCommandModifier:) withObject:self afterDelay:0.2];
+				else	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(delayedLongPressedCommandModifier:) object:self];
+			}
+			return event;
+		}];
 	}
+}
+
+- (void)delayedLongPressedCommandModifier:(id)sender
+{
+	_longPressedCommandModifier = YES;
+	self.showKeyEquivalent = YES;
+}
+
+- (void)dealloc
+{
+	[NSEvent removeMonitor:_eventMonitor];
 }
 
 - (void)setResults:(FFResultNode*)someResults
@@ -466,6 +549,7 @@
 			cellView.identifier = identifier;
 			cellView.removeButton.action = @selector(takeSearchResultToRemoveFrom:);
 			cellView.removeButton.target = self;
+			[cellView bind:@"showKeyEquivalent" toObject:self withKeyPath:@"showKeyEquivalent" options:nil];
 		}
 
 		cellView.objectValue = item;
