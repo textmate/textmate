@@ -54,7 +54,7 @@ namespace ng
 
 	std::pair<size_t, std::string> marks_t::prev (size_t index, std::string const& markType) const
 	{
-		std::map< std::string, tree_t>::const_iterator m = _marks.find(markType);
+		std::map<std::string, tree_t>::const_iterator m = _marks.find(markType);
 		if(m == _marks.end())
 			return std::pair<size_t, std::string>(0, NULL_STR);
 
@@ -82,7 +82,7 @@ namespace ng
 		}
 		else
 		{
-			std::map< std::string, tree_t>::const_iterator m = _marks.find(markType);
+			std::map<std::string, tree_t>::const_iterator m = _marks.find(markType);
 			if(m != _marks.end())
 			{
 				foreach(it, m->second.lower_bound(from), m->second.upper_bound(to))
