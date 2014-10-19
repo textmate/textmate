@@ -5,6 +5,7 @@
 #import <settings/settings.h>
 #import <oak/oak.h>
 #import <ns/ns.h>
+#import <crash/info.h>
 
 @interface OakEncodingSaveOptionsViewController : NSViewController <NSOpenSavePanelDelegate>
 {
@@ -17,6 +18,7 @@
 @property (nonatomic) NSString* encoding;
 @property (nonatomic) BOOL useByteOrderMark;
 @property (nonatomic, readonly) BOOL canUseByteOrderMark;
+@property (nonatomic, weak) NSSavePanel* savePanel;
 @end
 
 @implementation OakEncodingSaveOptionsViewController
@@ -30,6 +32,12 @@
 		[OakStringListTransformer createTransformerWithName:@"OakLineEndingsTransformer" andObjectsArray:@[ @"\n", @"\r", @"\r\n" ]];
 		[OakStringListTransformer createTransformerWithName:@"OakLineEndingsListTransformer" andObjectsArray:@[ @"\n", @"\r", @"\r\n" ]];
 	});
+}
+
+- (void)dealloc
+{
+	if(_savePanel.delegate == self)
+		_savePanel.delegate = nil;
 }
 
 - (id)initWithEncodingOptions:(encoding::type const&)someEncodingOptions
@@ -73,6 +81,7 @@
 
 - (void)panel:(NSSavePanel*)sender didChangeToDirectoryURL:(NSURL*)anURL
 {
+	crash_reporter_info_t info("NSSavePanel did change to directory: " + to_s([anURL path]));
 	[self updateSettings:[self encodingForURL:[sender URL]]];
 }
 @end
@@ -87,14 +96,17 @@
 	[[aWindow attachedSheet] orderOut:self]; // incase there already is a sheet showing (like “Do you want to save?”)
 
 	NSSavePanel* savePanel = [NSSavePanel savePanel];
-	savePanel.delegate = optionsViewController;
+	optionsViewController.savePanel = savePanel;
 	[savePanel setTreatsFilePackagesAsDirectories:YES];
 	if(aDirectorySuggestion)
 		[savePanel setDirectoryURL:[NSURL fileURLWithPath:aDirectorySuggestion]];
 	[savePanel setNameFieldStringValue:[aPathSuggestion lastPathComponent]];
 	[savePanel setAccessoryView:optionsViewController.view];
 	[optionsViewController updateSettings:[optionsViewController encodingForURL:[savePanel URL]]];
+	crash_reporter_info_t info("Setup NSSavePanel delegate with path: " + to_s([[savePanel URL] path]));
+	savePanel.delegate = optionsViewController;
 	[savePanel beginSheetModalForWindow:aWindow completionHandler:^(NSInteger result) {
+		crash_reporter_info_t info("Clear NSSavePanel delegate");
 		savePanel.delegate = nil;
 		NSString* path = result == NSOKButton ? [[savePanel.URL filePathURL] path] : nil;
 		encoding::type encoding(to_s(optionsViewController.lineEndings), to_s(optionsViewController.encoding), optionsViewController.useByteOrderMark);
