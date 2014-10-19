@@ -12,6 +12,8 @@
 	IBOutlet NSSearchField* searchField;
 
 	NSString* filterString;
+	NSString* sortColumnIdentifier;
+	BOOL sortAscending;
 
 	std::vector<std::string> categories;
 	std::set<std::string> enabledCategories;
