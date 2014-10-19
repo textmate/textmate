@@ -801,7 +801,7 @@ private:
 	{
 		ng::buffer_t& buf = document->buffer();
 		for(auto const& pair : buf.get_marks(buf.begin(lineNumber), buf.eol(lineNumber), document::kBookmarkIdentifier))
-			return buf.remove_mark(buf.begin(lineNumber) + pair.first, document::kBookmarkIdentifier);
+			return buf.remove_mark(pair.first, document::kBookmarkIdentifier);
 		buf.set_mark(buf.begin(lineNumber), document::kBookmarkIdentifier);
 	}
 	else if([columnIdentifier isEqualToString:kFoldingsColumnIdentifier])

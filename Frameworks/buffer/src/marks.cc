@@ -77,7 +77,7 @@ namespace ng
 			for(auto const& m : _marks)
 			{
 				foreach(it, m.second.lower_bound(from), m.second.upper_bound(to))
-					res[it->first - from] = m.first;
+					res[it->first] = m.first;
 			}
 		}
 		else
@@ -86,7 +86,7 @@ namespace ng
 			if(m != _marks.end())
 			{
 				foreach(it, m->second.lower_bound(from), m->second.upper_bound(to))
-					res[it->first - from] = it->second;
+					res[it->first] = it->second;
 			}
 		}
 		return res;
