@@ -617,8 +617,9 @@ struct socket_observer_t
 			}
 			else if(record.command == "set-mark")
 			{
+				std::string::size_type n = mark.find(':');
 				if(doc)
-						doc->add_mark(line, mark);
+						doc->add_mark(line, n == std::string::npos ? mark : mark.substr(0, n), n == std::string::npos ? std::string() : mark.substr(n+1));
 				else	fprintf(stderr, "set-mark: no document\n");
 			}
 		}
