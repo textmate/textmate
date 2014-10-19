@@ -223,7 +223,7 @@ private:
 
 - (CGFloat)lineHeight
 {
-	return ceil([textView.font ascender] - [textView.font descender] + [textView.font leading]);
+	return round(std::min(1.5 * [textView.font capHeight], [textView.font ascender] - [textView.font descender] + [textView.font leading]));
 }
 
 - (NSImage*)gutterImage:(NSString*)aName
