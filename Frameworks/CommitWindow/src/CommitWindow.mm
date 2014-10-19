@@ -100,6 +100,8 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 @property (nonatomic) NSButton*                          cancelButton;
 
 @property (nonatomic) BOOL                               showsTableView;
+@property (nonatomic) BOOL                               animateConstraints;
+
 @property (nonatomic) OakCommitWindow*                   retainedSelf;
 @end
 
@@ -114,6 +116,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 
 		// send all diffs to a separate window
 		_environment["TM_PROJECT_UUID"] = to_s(oak::uuid_t().generate());
+		_showsTableView = [[NSUserDefaults standardUserDefaults] boolForKey:kOakCommitWindowShowFileList];
 
 		self.documentView = [[OakDocumentView alloc] initWithFrame:NSZeroRect];
 		self.documentView.hideStatusBar     = YES;
@@ -169,8 +172,10 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 		_showTableButton = [[NSButton alloc] initWithFrame:NSZeroRect];
 		_showTableButton.buttonType = NSOnOffButton;
 		_showTableButton.bezelStyle = NSRoundedDisclosureBezelStyle;
-		_showTableButton.title = @"";
-		[_showTableButton bind:NSValueBinding toObject:self withKeyPath:@"showsTableView" options:nil];
+		_showTableButton.title      = @"";
+		_showTableButton.action     = @selector(toggleTableView:);
+		_showTableButton.state      = _showsTableView ? NSOnState : NSOffState;
+		_showTableButton.enabled    = [[_arrayController arrangedObjects] count] > 0;
 
 		_previousCommitMessagesPopUpButton = [NSPopUpButton new];
 		_previousCommitMessagesPopUpButton.bordered   = YES;
@@ -189,6 +194,13 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 			[contentView addSubview:view];
 		}
 
+		if(!_showsTableView)
+		{
+			[_middleDivider removeFromSuperview];
+			[_scrollView removeFromSuperview];
+		}
+
+		_animateConstraints = NO;
 		[self updateConstraints];
 
 		[_arrayController addObserver:self forKeyPath:@"arrangedObjects.commit" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:kOakCommitWindowIncludeItemBinding];
@@ -227,21 +239,46 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[previousMessages(>=200)]-(20)-|" options:0 metrics:nil views:views]];
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[documentView(>=400,==topDivider,==bottomDivider)]|" options:0 metrics:nil views:views]];
+	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(12)-[previousMessages]-(12)-[topDivider][documentView]" options:0 metrics:nil views:views]];
+	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(20)-[showTableButton]-(>=100)-[cancel]-[commit]-(20)-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
+	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[bottomDivider]-(12)-[cancel]-(12)-|" options:0 metrics:nil views:views]];
 
-	if(self.showsTableView)
+	NSLayoutConstraint* scrollViewHeightConstraint = [NSLayoutConstraint constraintWithItem:_scrollView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:0];
+	NSLayoutConstraint* documentViewHeightConstraint = [NSLayoutConstraint constraintWithItem:_documentView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:NSHeight(_documentView.frame)];
+
+	if(self.showsTableView && [[_arrayController arrangedObjects] count] != 0)
 	{
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView(==documentView,==middleDivider)]|" options:0 metrics:nil views:views]];
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(12)-[previousMessages]-(12)-[topDivider][documentView(>=195)][middleDivider][scrollView(==190)][bottomDivider]-(12)-[commit]-(12)-|" options:0 metrics:nil views:views]];
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[documentView(>=195)][middleDivider][scrollView][bottomDivider]" options:0 metrics:nil views:views]];
+
+		if(_animateConstraints)
+		{
+			scrollViewHeightConstraint.animator.constant = [self scrollViewHeight];
+			[contentView addConstraint:scrollViewHeightConstraint];
+			[contentView addConstraint:documentViewHeightConstraint];
+		}
+		else
+		{
+			scrollViewHeightConstraint.constant = [self scrollViewHeight];
+			[contentView addConstraint:scrollViewHeightConstraint];
+		}
 	}
 	else
 	{
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(12)-[previousMessages]-(12)-[topDivider][documentView(>=195)][bottomDivider]-(12)-[commit]-(12)-|" options:0 metrics:nil views:views]];
+		if(_animateConstraints)
+		{
+			[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView(==documentView,==middleDivider)]|" options:0 metrics:nil views:views]];
+			[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[documentView][middleDivider][scrollView][bottomDivider]" options:0 metrics:nil views:views]];
+			scrollViewHeightConstraint.constant = [self scrollViewHeight];
+			scrollViewHeightConstraint.animator.constant = 0;
+			[contentView addConstraint:scrollViewHeightConstraint];
+			[contentView addConstraint:documentViewHeightConstraint];
+		}
+		else
+		{
+			[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[topDivider][documentView(>=195)][bottomDivider]" options:0 metrics:nil views:views]];
+		}
 	}
-
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(20)-[showTableButton]" options:0 metrics:nil views:views]];
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[cancel]-[commit]-(20)-|" options:0 metrics:nil views:views]];
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[bottomDivider]-(12)-[showTableButton]-(12)-|" options:0 metrics:nil views:views]];
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[bottomDivider]-(12)-[cancel]-(12)-|" options:0 metrics:nil views:views]];
 }
 
 - (void)parseArguments:(NSArray*)args
@@ -312,6 +349,11 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 	}
 }
 
+- (CGFloat)scrollViewHeight
+{
+	return MIN([[_arrayController arrangedObjects] count], 10) * ([self.tableView rowHeight]+[self.tableView intercellSpacing].height);
+}
+
 - (void)setShowsTableView:(BOOL)flag
 {
 	if(_showsTableView == flag)
@@ -319,19 +361,33 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 
 	_showsTableView = flag;
 
-	if(!_showsTableView)
-		[self.window makeFirstResponder:self.documentView.textView];
+	[[NSUserDefaults standardUserDefaults] setBool:_showsTableView forKey:kOakCommitWindowShowFileList];
+}
 
-	for(NSView* view in @[ self.middleDivider, self.scrollView ])
+- (void)toggleTableView:(id)sender
+{
+	self.showsTableView = !self.showsTableView;
+
+	if(self.showsTableView)
 	{
-		if(_showsTableView)
-				[self.window.contentView addSubview:view];
-		else	[view removeFromSuperview];
+		for(NSView* view in @[ self.middleDivider, self.scrollView ])
+					[self.window.contentView addSubview:view];
 	}
 
-	[[NSUserDefaults standardUserDefaults] setBool:_showsTableView forKey:kOakCommitWindowShowFileList];
-
-	[self updateConstraints];
+	[NSAnimationContext runAnimationGroup:^(NSAnimationContext* context){
+		context.duration = 0.25;
+		_animateConstraints = YES;
+		[self updateConstraints];
+		_animateConstraints = NO;
+	} completionHandler:^{
+		if(!self.showsTableView)
+		{
+			[self.window makeFirstResponder:self.documentView.textView];
+			[self.middleDivider removeFromSuperview];
+			[self.scrollView removeFromSuperview];
+		}
+		[self updateConstraints];
+	}];
 }
 
 - (void)sheetDidEnd:(id)sheetOrAlert returnCode:(NSInteger)returnCode contextInfo:(void*)unused
@@ -360,6 +416,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 	}
 
 	document::document_ptr commitMessage = document::from_content("", fileType);
+	commitMessage->set_path(path::join(_environment["TM_PROJECT_DIRECTORY"], "untitled.txt"));
 
 	if(NSString* logArgument = [self.options objectForKey:@"--log"])
 		commitMessage->set_content(to_s(logArgument));
@@ -368,8 +425,6 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 
 	[self.window recalculateKeyViewLoop];
 	[self.window makeFirstResponder:self.documentView];
-
-	self.showsTableView = [[NSUserDefaults standardUserDefaults] boolForKey:kOakCommitWindowShowFileList];
 
 	self.retainedSelf = self;
 
@@ -520,7 +575,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 
 		std::transform(diffCmd.begin(), diffCmd.end(), diffCmd.begin(), &path::escape);
 
-		std::string const cmdString = text::format("cd \"${TM_PROJECT_DIRECTORY}\" && %s|\"$TM_MATE\" --async  --name \"---/+++ %s\"", text::join(diffCmd, " ").c_str(), path::display_name(to_s(filePath)).c_str());
+		std::string const cmdString = text::format("cd \"${TM_PROJECT_DIRECTORY}\" && %s|\"$TM_MATE\" --no-wait --name \"---/+++ %s\"", text::join(diffCmd, " ").c_str(), path::display_name(to_s(filePath)).c_str());
 		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 			bool success = io::exec(_environment, "/bin/sh", "-c", cmdString.c_str(), NULL) != NULL_STR;
 			if(!success)
@@ -667,16 +722,12 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 - (NSView*)tableView:(NSTableView*)aTableView viewForTableColumn:(NSTableColumn*)aTableColumn row:(NSInteger)row
 {
 	CWTableCellView* cellView = [aTableView makeViewWithIdentifier:aTableColumn.identifier owner:self];
+
 	if(!cellView)
 	{
-		NSViewController* viewController = [[NSViewController alloc] initWithNibName:@"CWTableCellView" bundle:[NSBundle bundleForClass:[self class]]];
-		cellView = (CWTableCellView*)viewController.view;
+		cellView = [CWTableCellView new];
 		cellView.identifier = aTableColumn.identifier;
 	}
-
-	[cellView.textField bind:NSValueBinding toObject:cellView withKeyPath:@"objectValue.path" options:0];
-	[cellView.commitCheckBox bind:NSValueBinding toObject:cellView withKeyPath:@"objectValue.commit" options:0];
-	[cellView.statusTextField bind:NSValueBinding toObject:cellView withKeyPath:@"objectValue.scmStatus" options:@{ NSValueTransformerNameBindingOption : @"CWStatusStringTransformer" }];
 
 	[cellView.diffButton setAction:@selector(didDoubleClickTableView:)];
 	[cellView.diffButton setTarget:self];

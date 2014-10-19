@@ -28,7 +28,7 @@ tabSize          = 8
 [ text ]
 softWrap         = true
 
-[ .git/COMMIT_EDITMSG ]
+[ text.git-commit ]
 spellChecking    = true
 spellingLanguage = 'en'
 
