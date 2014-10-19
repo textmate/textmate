@@ -744,7 +744,7 @@ private:
 					case GutterViewRowStateRollover: return [self gutterImage:@"Bookmark Hover Remove"];
 				}
 			}
-			else if(rowState == GutterViewRowStateRegular)
+			else if(rowState == GutterViewRowStateRegular || !pair.second.second.empty())
 			{
 				return [self gutterImage:[NSString stringWithCxxString:pair.second.first]];
 			}
@@ -800,9 +800,36 @@ private:
 	if([columnIdentifier isEqualToString:kBookmarksColumnIdentifier])
 	{
 		ng::buffer_t& buf = document->buffer();
-		for(auto const& pair : buf.get_marks(buf.begin(lineNumber), buf.eol(lineNumber), document::kBookmarkIdentifier))
-			return buf.remove_mark(pair.first, document::kBookmarkIdentifier);
-		buf.set_mark(buf.begin(lineNumber), document::kBookmarkIdentifier);
+
+		std::vector<std::string> info;
+		for(auto const& pair : buf.get_marks(buf.begin(lineNumber), buf.eol(lineNumber)))
+		{
+			if(!pair.second.second.empty())
+				info.push_back(pair.second.second);
+		}
+
+		if(info.empty())
+		{
+			for(auto const& pair : buf.get_marks(buf.begin(lineNumber), buf.eol(lineNumber), document::kBookmarkIdentifier))
+				return buf.remove_mark(pair.first, document::kBookmarkIdentifier);
+			buf.set_mark(buf.begin(lineNumber), document::kBookmarkIdentifier);
+		}
+		else
+		{
+			NSViewController* viewController = [NSViewController new];
+			NSTextField* textField = OakCreateLabel([NSString stringWithCxxString:text::join(info, "\n")]);;
+			textField.alignment = NSLeftTextAlignment;
+			[textField sizeToFit];
+			viewController.view = textField;
+
+			NSPopover* popver = [NSPopover new];
+			popver.behavior = NSPopoverBehaviorTransient;
+			popver.contentViewController = viewController;
+
+			GVLineRecord record = [self lineFragmentForLine:lineNumber column:0];
+			NSRect rect = NSMakeRect(0, record.firstY, [self widthForColumnWithIdentifier:columnIdentifier], record.lastY - record.firstY);
+			[popver showRelativeToRect:rect ofView:gutterView preferredEdge:NSMaxXEdge];
+		}
 	}
 	else if([columnIdentifier isEqualToString:kFoldingsColumnIdentifier])
 	{
