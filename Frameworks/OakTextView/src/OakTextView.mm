@@ -2366,6 +2366,9 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 						if(doc)
 						{
+							if(!doc->is_open())
+								doc->set_recent_tracking(false);
+
 							NSString* range = [info objectForKey:(options & find::backwards) ? @"lastMatchRange" : @"firstMatchRange"];
 							document::show(doc, document::kCollectionAny, to_s(range));
 							return;
