@@ -46,8 +46,8 @@ namespace path
 				else
 				{
 					struct stat sbuf;
-					if(stat(src.c_str(), &sbuf) == 0)
-						chmod(dst.c_str(), sbuf.st_mode & (S_IRWXU|S_IRWXG|S_IRWXO));
+					if(stat(dst.c_str(), &sbuf) == 0)
+						chmod(src.c_str(), sbuf.st_mode & (S_IRWXU|S_IRWXG|S_IRWXO));
 				}
 			}
 
