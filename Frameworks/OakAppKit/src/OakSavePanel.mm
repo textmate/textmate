@@ -16,14 +16,11 @@
 @property (nonatomic) NSString* lineEndings;
 @property (nonatomic) NSString* encoding;
 @property (nonatomic) BOOL useByteOrderMark;
-@property (nonatomic, readonly) BOOL canUseByteOrderMark;
+@property (nonatomic) BOOL canUseByteOrderMark;
 @property (nonatomic, weak) NSSavePanel* savePanel;
 @end
 
 @implementation OakEncodingSaveOptionsViewController
-+ (NSSet*)keyPathsForValuesAffectingCanUseByteOrderMark { return [NSSet setWithObject:@"encoding"]; }
-+ (NSSet*)keyPathsForValuesAffectingUseByteOrderMark    { return [NSSet setWithObject:@"encoding"]; }
-
 - (void)dealloc
 {
 	if(_savePanel.delegate == self)
@@ -84,7 +81,14 @@
 	[bomCheckBox bind:NSValueBinding toObject:self withKeyPath:@"useByteOrderMark" options:nil];
 }
 
-- (BOOL)canUseByteOrderMark { return _encodingOptions.supports_byte_order_mark(to_s(self.encoding)); }
+- (void)setEncoding:(NSString*)newEncoding
+{
+	if([_encoding isEqualToString:newEncoding])
+		return;
+	_encoding = newEncoding;
+	self.canUseByteOrderMark = _encodingOptions.supports_byte_order_mark(to_s(newEncoding));
+	self.useByteOrderMark    = _canUseByteOrderMark && to_s(newEncoding) != kCharsetUTF8;
+}
 
 - (void)updateSettings:(encoding::type const&)encoding
 {
