@@ -359,17 +359,25 @@
 	NSMutableParagraphStyle* parStyle = [NSMutableParagraphStyle new];
 	[parStyle setLineBreakMode:NSLineBreakByTruncatingMiddle];
 
-	NSShadow* shadow = [NSShadow new];
-	[shadow setShadowColor:[NSColor colorWithCalibratedWhite:1 alpha:0.5]];
-	[shadow setShadowOffset:NSMakeSize(0, -1)];
-	[shadow setShadowBlurRadius:1];
-
-	NSDictionary* attrs = @{
+	NSMutableDictionary* attrs = @{
 		NSParagraphStyleAttributeName  : parStyle,
-		NSFontAttributeName            : [NSFont boldSystemFontOfSize:11],
-		NSForegroundColorAttributeName : [NSColor colorWithCalibratedWhite:(self.active ? 0.2 : 0.5) alpha:1],
-		NSShadowAttributeName          : shadow,
-	};
+		NSForegroundColorAttributeName : [NSColor colorWithCalibratedWhite:(self.active ? 0.2 : 0.5) alpha:1]
+	}.mutableCopy;
+
+	if(oak::os_major() >= 10 && oak::os_minor() >= 10)
+	{
+		attrs[NSFontAttributeName] = [NSFont systemFontOfSize:11];
+	}
+	else
+	{
+		NSShadow* shadow = [NSShadow new];
+		[shadow setShadowColor:[NSColor colorWithCalibratedWhite:1 alpha:0.5]];
+		[shadow setShadowOffset:NSMakeSize(0, -1)];
+		[shadow setShadowBlurRadius:1];
+
+		attrs[NSFontAttributeName]   = [NSFont boldSystemFontOfSize:11];
+		attrs[NSShadowAttributeName] = shadow;
+	}
 
 	_textField.attributedStringValue = [[NSAttributedString alloc] initWithString:_title attributes:attrs];
 }
