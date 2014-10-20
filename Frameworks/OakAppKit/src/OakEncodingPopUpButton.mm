@@ -158,7 +158,7 @@ namespace // PopulateMenu{Flat,Hierarchical}
 	else	PopulateMenuHierarchical(self.menu, items, self, @selector(selectEncoding:), to_s(self.encoding));
 
 	[self.menu addItem:[NSMenuItem separatorItem]];
-	[[self.menu addItemWithTitle:@"Customize Encodings List…" action:@selector(customizeAvailableEncodings:) keyEquivalent:@""] setTarget:self];
+	[[self.menu addItemWithTitle:@"Customize List…" action:@selector(customizeAvailableEncodings:) keyEquivalent:@""] setTarget:self];
 }
 
 - (id)initWithCoder:(NSCoder*)aCoder
