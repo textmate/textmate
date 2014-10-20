@@ -45,17 +45,18 @@
 	NSPopUpButton* lineEndingsPopUpButton = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO];
 	NSButton* bomCheckBox                 = OakCreateCheckBox(@"Add byte order mark");
 
+	[encodingPopUpButton setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
+
 	OakSetAccessibilityLabel(encodingPopUpButton, @"encoding");
 	OakSetAccessibilityLabel(lineEndingsPopUpButton, @"line endings");
 
-	NSArray* titles = @[ @"LF (recommended)", @"CR (Classic Mac)", @"CRLF (MS-DOS)" ];
+	NSArray* titles = @[ @"LF", @"CR", @"CRLF" ];
 	for(NSUInteger i = 0; i < [titles count]; ++i)
 		[[lineEndingsPopUpButton.menu addItemWithTitle:titles[i] action:nil keyEquivalent:@""] setTag:i];
 
 	NSDictionary* views = @{
 		@"encodingLabel"    : OakCreateLabel(@"Encoding:"),
 		@"encodingPopUp"    : encodingPopUpButton,
-		@"lineEndingsLabel" : OakCreateLabel(@"Line endings:"),
 		@"lineEndingsPopUp" : lineEndingsPopUpButton,
 		@"bomCheckBox"      : bomCheckBox,
 	};
@@ -67,10 +68,9 @@
 		[containerView addSubview:view];
 	}
 
-	[containerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(>=20)-[encodingLabel]-[encodingPopUp]-(>=20)-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
-	[containerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(>=20)-[lineEndingsLabel]-[lineEndingsPopUp]-(>=20)-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
-	[containerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[bomCheckBox]-(>=20)-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
-	[containerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-[encodingPopUp]-[lineEndingsPopUp]-[bomCheckBox]-|" options:NSLayoutFormatAlignAllLeading metrics:nil views:views]];
+	[containerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[encodingLabel]-[encodingPopUp]-[lineEndingsPopUp]-(>=0)-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
+	[containerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[bomCheckBox]-(>=0)-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
+	[containerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(8)-[encodingPopUp]-[bomCheckBox]-(8)-|" options:NSLayoutFormatAlignAllLeading metrics:nil views:views]];
 
 	containerView.frame = (NSRect){ NSZeroPoint, [containerView fittingSize] };
 	self.view = containerView;
