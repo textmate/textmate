@@ -2,6 +2,12 @@ Title: Release Notes
 
 # Changes
 
+## 2014-10-20 (v2.0-beta.3)
+
+* It’s now possible to associate a string value with marks using: `"$TM_MATE" --set-mark «mark»:«value»`. The value is shown if you click the gutter image. You can also use `--clear-mark` together with `--set-mark`. This avoids the potential flash that would show if having to call `mate` twice to update marks.
+* New default gutter image: `note`.
+* See [all changes since v2.0-beta.1](https://github.com/textmate/textmate/compare/v2.0-beta.1...v2.0-beta.3).
+
 ## 2014-10-16 ([v2.0-beta.1](https://github.com/textmate/textmate/compare/v2.0-alpha.9575...v2.0-beta.1))
 
 * Bump version number from alpha to beta.
