@@ -12,6 +12,9 @@ PUBLIC @interface OakTabBarStyle : NSObject
 @property (nonatomic) CGFloat minimumTabSize;
 @property (nonatomic) CGFloat maximumTabSize;
 
+@property (nonatomic) NSDictionary* activeTabTextStyles;
+@property (nonatomic) NSDictionary* inactiveTabTextStyles;
+
 - (void)setupTabBarView:(OakBackgroundFillView*)aView;
 
 - (void)updateLeftCapView:(OakBackgroundFillView*)aView inSelectedTab:(BOOL)selected;

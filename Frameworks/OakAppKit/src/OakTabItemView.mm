@@ -6,6 +6,8 @@
 @interface OakTabBarStyle ()
 {
 	NSDictionary* _images;
+	NSMutableDictionary* _activeTabTextStyles;
+	NSMutableDictionary* _inactiveTabTextStyles;
 }
 @end
 
@@ -124,6 +126,18 @@
 {
 	if(self = [super init])
 	{
+		NSMutableParagraphStyle* parStyle = [NSMutableParagraphStyle new];
+		[parStyle setLineBreakMode:NSLineBreakByTruncatingMiddle];
+
+		_activeTabTextStyles = @{
+			NSParagraphStyleAttributeName  : parStyle,
+			NSFontAttributeName            : [NSFont systemFontOfSize:11],
+			NSForegroundColorAttributeName : [NSColor colorWithCalibratedWhite:0.2 alpha:1],
+		}.mutableCopy;
+
+		_inactiveTabTextStyles = _activeTabTextStyles.mutableCopy;
+		_inactiveTabTextStyles[NSForegroundColorAttributeName] = [NSColor colorWithCalibratedWhite:0.5 alpha:1];
+
 		if(oak::os_major() >= 10 && oak::os_minor() >= 10)
 		{
 			_images = [self yosemiteImages];
@@ -133,6 +147,15 @@
 		{
 			_images = [self mavericksImages];
 			_rightPadding = -5;
+
+			NSShadow* shadow = [NSShadow new];
+			[shadow setShadowColor:[NSColor colorWithCalibratedWhite:1 alpha:0.5]];
+			[shadow setShadowOffset:NSMakeSize(0, -1)];
+			[shadow setShadowBlurRadius:1];
+
+			NSDictionary* fontStyles = @{ NSShadowAttributeName : shadow, NSFontAttributeName : [NSFont boldSystemFontOfSize:11] };
+			[_activeTabTextStyles addEntriesFromDictionary:fontStyles];
+			[_inactiveTabTextStyles addEntriesFromDictionary:fontStyles];
 		}
 
 		NSImage* rightCapImage = _images[@"rightTabCap"][@"AW_normal"];
@@ -356,22 +379,7 @@
 
 - (void)updateTextFieldTitle
 {
-	NSMutableParagraphStyle* parStyle = [NSMutableParagraphStyle new];
-	[parStyle setLineBreakMode:NSLineBreakByTruncatingMiddle];
-
-	NSShadow* shadow = [NSShadow new];
-	[shadow setShadowColor:[NSColor colorWithCalibratedWhite:1 alpha:0.5]];
-	[shadow setShadowOffset:NSMakeSize(0, -1)];
-	[shadow setShadowBlurRadius:1];
-
-	NSDictionary* attrs = @{
-		NSParagraphStyleAttributeName  : parStyle,
-		NSFontAttributeName            : [NSFont boldSystemFontOfSize:11],
-		NSForegroundColorAttributeName : [NSColor colorWithCalibratedWhite:(self.active ? 0.2 : 0.5) alpha:1],
-		NSShadowAttributeName          : shadow,
-	};
-
-	_textField.attributedStringValue = [[NSAttributedString alloc] initWithString:_title attributes:attrs];
+	_textField.attributedStringValue = [[NSAttributedString alloc] initWithString:_title attributes:self.active ? OakTabBarStyle.sharedInstance.activeTabTextStyles : OakTabBarStyle.sharedInstance.inactiveTabTextStyles];
 }
 
 - (void)setActive:(BOOL)flag
