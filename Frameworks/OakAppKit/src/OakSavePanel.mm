@@ -2,6 +2,7 @@
 #import "OakEncodingPopUpButton.h"
 #import "NSSavePanel Additions.h"
 #import <OakFoundation/OakStringListTransformer.h>
+#import <OakAppKit/OakUIConstructionFunctions.h>
 #import <settings/settings.h>
 #import <oak/oak.h>
 #import <ns/ns.h>
@@ -10,8 +11,6 @@
 @interface OakEncodingSaveOptionsViewController : NSViewController <NSOpenSavePanelDelegate>
 {
 	OBJC_WATCH_LEAKS(OakEncodingSaveOptionsViewController);
-	IBOutlet OakEncodingPopUpButton* encodingPopUpButton;
-
 	encoding::type _encodingOptions;
 }
 @property (nonatomic) NSString* lineEndings;
@@ -25,15 +24,6 @@
 + (NSSet*)keyPathsForValuesAffectingCanUseByteOrderMark { return [NSSet setWithObject:@"encoding"]; }
 + (NSSet*)keyPathsForValuesAffectingUseByteOrderMark    { return [NSSet setWithObject:@"encoding"]; }
 
-+ (void)initialize
-{
-	static dispatch_once_t onceToken = 0;
-	dispatch_once(&onceToken, ^{
-		[OakStringListTransformer createTransformerWithName:@"OakLineEndingsTransformer" andObjectsArray:@[ @"\n", @"\r", @"\r\n" ]];
-		[OakStringListTransformer createTransformerWithName:@"OakLineEndingsListTransformer" andObjectsArray:@[ @"\n", @"\r", @"\r\n" ]];
-	});
-}
-
 - (void)dealloc
 {
 	if(_savePanel.delegate == self)
@@ -42,15 +32,56 @@
 
 - (id)initWithEncodingOptions:(encoding::type const&)someEncodingOptions
 {
-	if(self = [super initWithNibName:@"EncodingSaveOptions" bundle:[NSBundle bundleForClass:[self class]]])
+	if(self = [super init])
 		_encodingOptions = someEncodingOptions;
 	return self;
 }
 
 - (void)loadView
 {
-	[super loadView];
+	static dispatch_once_t onceToken = 0;
+	dispatch_once(&onceToken, ^{
+		[OakStringListTransformer createTransformerWithName:@"OakLineEndingsTransformer" andObjectsArray:@[ @"\n", @"\r", @"\r\n" ]];
+	});
+
+	NSPopUpButton* encodingPopUpButton    = [[OakEncodingPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO];
+	NSPopUpButton* lineEndingsPopUpButton = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO];
+	NSButton* bomCheckBox                 = OakCreateCheckBox(@"Add byte order mark");
+
+	OakSetAccessibilityLabel(encodingPopUpButton, @"encoding");
+	OakSetAccessibilityLabel(lineEndingsPopUpButton, @"line endings");
+
+	NSArray* titles = @[ @"LF (recommended)", @"CR (Classic Mac)", @"CRLF (MS-DOS)" ];
+	for(NSUInteger i = 0; i < [titles count]; ++i)
+		[[lineEndingsPopUpButton.menu addItemWithTitle:titles[i] action:nil keyEquivalent:@""] setTag:i];
+
+	NSDictionary* views = @{
+		@"encodingLabel"    : OakCreateLabel(@"Encoding:"),
+		@"encodingPopUp"    : encodingPopUpButton,
+		@"lineEndingsLabel" : OakCreateLabel(@"Line endings:"),
+		@"lineEndingsPopUp" : lineEndingsPopUpButton,
+		@"bomCheckBox"      : bomCheckBox,
+	};
+
+	NSView* containerView = [[NSView alloc] initWithFrame:NSZeroRect];
+	for(NSView* view in [views allValues])
+	{
+		[view setTranslatesAutoresizingMaskIntoConstraints:NO];
+		[containerView addSubview:view];
+	}
+
+	[containerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(>=20)-[encodingLabel]-[encodingPopUp]-(>=20)-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
+	[containerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(>=20)-[lineEndingsLabel]-[lineEndingsPopUp]-(>=20)-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
+	[containerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[bomCheckBox]-(>=20)-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
+	[containerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-[encodingPopUp]-[lineEndingsPopUp]-[bomCheckBox]-|" options:NSLayoutFormatAlignAllLeading metrics:nil views:views]];
+
+	containerView.frame = (NSRect){ NSZeroPoint, [containerView fittingSize] };
+	self.view = containerView;
+
 	[encodingPopUpButton bind:@"encoding" toObject:self withKeyPath:@"encoding" options:nil];
+	[lineEndingsPopUpButton bind:@"selectedTag" toObject:self withKeyPath:@"lineEndings" options:@{ NSValueTransformerNameBindingOption: @"OakLineEndingsTransformer" }];
+	[bomCheckBox bind:NSEnabledBinding toObject:self withKeyPath:@"canUseByteOrderMark" options:nil];
+	[bomCheckBox bind:NSValueBinding toObject:self withKeyPath:@"useByteOrderMark" options:nil];
 }
 
 - (BOOL)canUseByteOrderMark { return _encodingOptions.supports_byte_order_mark(to_s(self.encoding)); }
