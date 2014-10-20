@@ -800,10 +800,16 @@ namespace
 
 + (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication*)sender
 {
+	DocumentController* controller;
+
 	BOOL restoresSession = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableSessionRestoreKey];
 	std::vector<document::document_ptr> documents;
 	for(DocumentController* delegate in SortedControllers())
+	{
 		std::copy_if(delegate.documents.begin(), delegate.documents.end(), back_inserter(documents), [&restoresSession](document::document_ptr const& doc){ return doc->is_modified() && (doc->path() != NULL_STR || !restoresSession); });
+		if(!documents.empty() && !controller)
+			controller = delegate;
+	}
 
 	if(documents.empty())
 	{
@@ -813,7 +819,6 @@ namespace
 
 	IsInShouldTerminateEventLoop = YES;
 
-	DocumentController* controller = [SortedControllers() firstObject];
 	[controller showCloseWarningUIForDocuments:documents completionHandler:^(BOOL canClose){
 		if(canClose)
 			[self saveSessionAndDetachBackups];
