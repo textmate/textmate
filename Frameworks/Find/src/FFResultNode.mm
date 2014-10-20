@@ -106,6 +106,8 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 @interface FFResultNode ()
 {
 	document::document_t::callback_t* _callback;
+	NSAttributedString* _excerpt;
+	NSString* _excerptReplaceString;
 }
 @property (nonatomic, readwrite) NSUInteger countOfLeafs;
 @property (nonatomic, readwrite) NSUInteger countOfExcluded;
@@ -234,6 +236,9 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 
 - (NSAttributedString*)excerptWithReplacement:(NSString*)replacementString
 {
+	if(_excerpt && (replacementString == _excerptReplaceString || [replacementString isEqualToString:_excerptReplaceString]))
+		return _excerpt;
+
 	find::match_t const& m = [_match match];
 
 	size_t from = m.first - m.excerpt_offset;
@@ -254,7 +259,9 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 			<< text::format("%zu-%zu: Range is not valid UTF-8, please contact: http://macromates.com/support", m.first, m.last);
 	}
 
-	return AttributedStringForMatch(prefix + middle + suffix, prefix.size(), prefix.size() + middle.size(), m.line_number);
+	_excerpt = AttributedStringForMatch(prefix + middle + suffix, prefix.size(), prefix.size() + middle.size(), m.line_number);
+	_excerptReplaceString = replacementString;
+	return _excerpt;
 }
 
 - (NSImage*)icon
