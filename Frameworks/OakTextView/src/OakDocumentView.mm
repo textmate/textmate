@@ -732,26 +732,24 @@ private:
 {
 	if([columnIdentifier isEqualToString:kBookmarksColumnIdentifier])
 	{
+		std::map<size_t, std::string> gutterImageName;
+
 		ng::buffer_t const& buf = document->buffer();
 		for(auto const& pair : buf.get_marks(buf.begin(lineNumber), buf.eol(lineNumber)))
 		{
-			if(pair.second.first == document::kBookmarkIdentifier)
-			{
-				switch(rowState)
-				{
-					case GutterViewRowStateRegular:  return [self gutterImage:@"Bookmark"];
-					case GutterViewRowStatePressed:  return [self gutterImage:@"Bookmark"];
-					case GutterViewRowStateRollover: return [self gutterImage:@"Bookmark Hover Remove"];
-				}
-			}
-			else if(rowState == GutterViewRowStateRegular || !pair.second.second.empty())
-			{
-				return [self gutterImage:[NSString stringWithCxxString:pair.second.first]];
-			}
+			if(!pair.second.second.empty())
+				gutterImageName.emplace(0, pair.second.first);
+			else if(pair.second.first == document::kBookmarkIdentifier)
+				gutterImageName.emplace(1, rowState != GutterViewRowStateRegular ? "Bookmark Hover Remove" : "Bookmark");
+			else if(rowState == GutterViewRowStateRegular)
+				gutterImageName.emplace(2, pair.second.first);
 		}
 
 		if(rowState != GutterViewRowStateRegular)
-			return [self gutterImage:@"Bookmark Hover Add"];
+			gutterImageName.emplace(3, "Bookmark Hover Add");
+
+		if(!gutterImageName.empty())
+			return [self gutterImage:[NSString stringWithCxxString:gutterImageName.begin()->second]];
 	}
 	else if([columnIdentifier isEqualToString:kFoldingsColumnIdentifier])
 	{
