@@ -2458,26 +2458,42 @@ static NSUInteger DisableSessionSavingCount = 0;
 	BOOL res = NO;
 	++DisableSessionSavingCount;
 
+	NSWindow* keyWindow;
+
 	NSDictionary* session = [NSDictionary dictionaryWithContentsOfFile:[self sessionPath]];
 	for(NSDictionary* project in session[@"projects"])
 	{
 		DocumentController* controller = [DocumentController new];
 		[controller setupControllerForProject:project skipMissingFiles:NO];
+		if(controller.documents.empty())
+			continue;
+
 		if(NSString* windowFrame = project[@"windowFrame"])
 		{
 			if([windowFrame hasPrefix:@"{"]) // Legacy NSRect
 					[controller.window setFrame:NSRectFromString(windowFrame) display:NO];
 			else	[controller.window setFrameFromString:windowFrame];
 		}
-		[controller showWindow:nil];
+
 		if([project[@"miniaturized"] boolValue])
+		{
 			[controller.window miniaturize:nil];
-		else if([project[@"fullScreen"] boolValue])
-			[controller.window toggleFullScreen:self];
-		else if([project[@"zoomed"] boolValue])
-			[controller.window zoom:self];
+		}
+		else
+		{
+			if([project[@"fullScreen"] boolValue])
+				[controller.window toggleFullScreen:self];
+			else if([project[@"zoomed"] boolValue])
+				[controller.window zoom:self];
+
+			[controller.window orderFront:self];
+			keyWindow = controller.window;
+		}
+
 		res = YES;
 	}
+
+	[keyWindow makeKeyWindow];
 
 	--DisableSessionSavingCount;
 	return res;
