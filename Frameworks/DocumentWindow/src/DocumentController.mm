@@ -1000,7 +1000,7 @@ namespace
 		}
 		[self closeTabsAtIndexes:indexSet askToSaveChanges:YES createDocumentIfEmpty:NO];
 	}
-	else
+	else if(![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableTabAutoCloseKey])
 	{
 		NSInteger excessTabs = _documents.size() - std::max<NSUInteger>(self.tabBarView.countOfVisibleTabs, 8);
 		if(self.tabBarView && excessTabs > 0)

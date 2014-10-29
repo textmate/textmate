@@ -31,6 +31,7 @@ PUBLIC extern NSString* const kUserDefaultsDisableFileBrowserWindowResizeKey;
 PUBLIC extern NSString* const kUserDefaultsAutoRevealFileKey;
 PUBLIC extern NSString* const kUserDefaultsAllowExpandingLinksKey;
 PUBLIC extern NSString* const kUserDefaultsDisableTabReorderingKey;
+PUBLIC extern NSString* const kUserDefaultsDisableTabAutoCloseKey;
 
 // ===========
 // = Bundles =
