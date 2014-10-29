@@ -397,8 +397,8 @@ namespace find
 				{
 					// fprintf(stderr, "match: %d-%d\n", region->beg[0], region->end[0]);
 					res = std::pair<ssize_t, ssize_t>(region->beg[0], region->end[0]);
-					res.first -= (ssize_t)buffer.size();
-					res.second -= (ssize_t)buffer.size();
+					res.first -= buffer_size;
+					res.second -= buffer_size;
 
 					if(captures)
 						*captures = extract_captures(first, region, compiled_pattern);
@@ -409,11 +409,13 @@ namespace find
 
 				onig_region_free(region, 1);
 			}
-			else if(buffer.size() < 5 * SQ(1024))
+			else
 			{
-				buffer.insert(buffer.end(), buf, buf + len);
+				size_t cappedLen = std::min<size_t>(buffer_size + len, 5 * SQ(1024)) - buffer_size;
+				buffer.insert(buffer.end(), buf, buf + cappedLen);
 				if(options & backwards)
-					std::reverse(buffer.end() - len, buffer.end());
+					std::reverse(buffer.end() - cappedLen, buffer.end());
+				buffer_size += len;
 			}
 			return res;
 		}
@@ -422,6 +424,7 @@ namespace find
 		OnigRegex compiled_pattern;
 		options_t options;
 		std::vector<char> buffer;
+		ssize_t buffer_size = 0;
 		int last_beg, last_end;
 		bool did_start_searching;
 	};
