@@ -102,6 +102,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 @property (nonatomic) NSView*                            bottomScrollViewDivider;
 
 @property (nonatomic) NSButton*                          showTableButton;
+@property (nonatomic) NSPopUpButton*                     actionPopUpButton;
 @property (nonatomic) NSButton*                          commitButton;
 @property (nonatomic) NSButton*                          cancelButton;
 
@@ -214,6 +215,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 		@"scrollView"                : self.scrollView ?: [NSNull null],
 		@"bottomScrollViewDivider"   : self.bottomScrollViewDivider ?: [NSNull null],
 		@"showTableButton"           : self.showTableButton,
+		@"action"                    : self.actionPopUpButton ?: [NSNull null],
 		@"cancel"                    : self.cancelButton,
 		@"commit"                    : self.commitButton,
 	};
@@ -237,6 +239,8 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 	{
 		[bottomButtonsConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[cancel]-[commit]-(20)-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
 		[bottomButtonsConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[bottomDocumentViewDivider]-(12)-[showTableButton]-(12)-[topScrollViewDivider]" options:0 metrics:nil views:views]];
+		[bottomButtonsConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[bottomScrollViewDivider]-(12)-[action]" options:0 metrics:nil views:views]];
+		[bottomButtonsConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(20)-[action]" options:0 metrics:nil views:views]];
 		[bottomButtonsConstraints addObject:[NSLayoutConstraint constraintWithItem:_commitButton attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:_bottomScrollViewDivider attribute:NSLayoutAttributeBottom multiplier:1 constant:12]];
 	}
 	else
@@ -260,7 +264,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 	_scrollViewConstraints = nil;
 	_scrollViewHeightConstraint = nil;
 
-	for(NSView* view in @[ _topScrollViewDivider, _scrollView, _bottomScrollViewDivider ])
+	for(NSView* view in @[ _topScrollViewDivider, _scrollView, _bottomScrollViewDivider, _actionPopUpButton ])
 		[view removeFromSuperview];
 
 	[_tableView unbind:NSContentBinding];
@@ -272,6 +276,9 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 	_topScrollViewDivider = nil;
 	_scrollView = nil;
 	_bottomScrollViewDivider = nil;
+
+	_actionPopUpButton.menu.delegate = nil;
+	_actionPopUpButton = nil;
 
 	[self setupBottomButtonsConstraints];
 	[self.window displayIfNeeded];
@@ -310,7 +317,11 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 	_topScrollViewDivider    = OakCreateHorizontalLine([NSColor grayColor]);
 	_bottomScrollViewDivider = OakCreateHorizontalLine([NSColor grayColor]);
 
-	for(NSView* view in @[ _topScrollViewDivider, _scrollView, _bottomScrollViewDivider ])
+	_actionPopUpButton = OakCreateActionPopUpButton(YES);
+	_actionPopUpButton.bezelStyle = NSTexturedRoundedBezelStyle;
+	_actionPopUpButton.menu.delegate = self;
+
+	for(NSView* view in @[ _topScrollViewDivider, _scrollView, _bottomScrollViewDivider, _actionPopUpButton ])
 	{
 		[view setTranslatesAutoresizingMaskIntoConstraints:NO];
 		[contentView addSubview:view];
@@ -366,6 +377,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 		[NSAnimationContext runAnimationGroup:^(NSAnimationContext* context){
 			context.duration = 0.25;
 			_showTableButton.enabled = NO;
+			_actionPopUpButton.hidden = YES;
 			_scrollViewHeightConstraint.animator.constant = 0;
 		} completionHandler:^{
 			[self tearDownTableView];
@@ -736,6 +748,8 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 - (void)menuNeedsUpdate:(NSMenu*)menu
 {
 	[menu removeAllItems];
+	if([_tableView clickedColumn] == -1)
+		[menu addItemWithTitle:@"Dummy" action:NULL keyEquivalent:@""];
 
 	NSInteger row = [_tableView clickedRow];
 	if(row == -1 && [_tableView selectedRow] == -1)
