@@ -1,8 +1,8 @@
 #import "OakSavePanel.h"
 #import "OakEncodingPopUpButton.h"
+#import "OakUIConstructionFunctions.h"
 #import "NSSavePanel Additions.h"
 #import <OakFoundation/OakStringListTransformer.h>
-#import <OakAppKit/OakUIConstructionFunctions.h>
 #import <settings/settings.h>
 #import <oak/oak.h>
 #import <ns/ns.h>
