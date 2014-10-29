@@ -334,6 +334,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 	{
 		[NSAnimationContext runAnimationGroup:^(NSAnimationContext* context){
 			context.duration = 0.25;
+			_showTableButton.enabled = NO;
 			_documentViewHeightConstraint = [NSLayoutConstraint constraintWithItem:_documentView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:NSHeight(_documentView.frame)];
 			[contentView addConstraint:_documentViewHeightConstraint];
 			_scrollViewHeightConstraint.animator.constant = kOakCommitWindowTableViewHeight;
@@ -341,6 +342,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 			[contentView removeConstraint:_documentViewHeightConstraint];
 			_documentViewHeightConstraint = [NSLayoutConstraint constraintWithItem:_documentView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationGreaterThanOrEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:kOakCommitWindowMinimumDocumentViewHeight];
 			[contentView addConstraint:_documentViewHeightConstraint];
+			_showTableButton.enabled = YES;
 		}];
 	}
 	else
@@ -363,9 +365,11 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 	{
 		[NSAnimationContext runAnimationGroup:^(NSAnimationContext* context){
 			context.duration = 0.25;
+			_showTableButton.enabled = NO;
 			_scrollViewHeightConstraint.animator.constant = 0;
 		} completionHandler:^{
 			[self tearDownTableView];
+			_showTableButton.enabled = YES;
 		}];
 	}
 	else
