@@ -131,9 +131,8 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 - (void)showWindow:(id)sender
 {
 	[_window recalculateKeyViewLoop];
+	[_searchField.window makeFirstResponder:_searchField];
 	[_window makeKeyAndOrderFront:self];
-	if(_searchField.window)
-		[_window makeFirstResponder:_searchField];
 }
 
 - (void)showWindowRelativeToFrame:(NSRect)parentFrame
