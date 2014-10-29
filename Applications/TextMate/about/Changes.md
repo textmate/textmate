@@ -2,6 +2,13 @@ Title: Release Notes
 
 # Changes
 
+## 2014-10-29 (v2.0-beta.5)
+
+* Items in the bundle editor now have a context menu with “Show in Finder”. For items with local changes, this item turns into a submenu, showing all the location of the item.
+* Closing stale tabs when the tab bar overflows can be disabled using `defaults write com.macromates.TextMate.preview disableTabAutoClose --bool YES`.
+* Swapped key equivalents of _“New File”_ and _“New Folder”_ actions to make it somewhat consistent with Finder.
+* See [all changes since v2.0-beta.3](https://github.com/textmate/textmate/compare/v2.0-beta.3...v2.0-beta.5).
+
 ## 2014-10-20 (v2.0-beta.3)
 
 * It’s now possible to associate a string value with marks using: `"$TM_MATE" --set-mark «mark»:«value»`. The value is shown if you click the gutter image. You can also use `--clear-mark` together with `--set-mark`. This avoids the potential flash that would show if having to call `mate` twice to update marks.
