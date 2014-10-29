@@ -21,7 +21,6 @@
 #import <OakAppKit/OakOpenWithMenu.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakAppKit/OakZoomingIcon.h>
-#import <OakAppKit/NSView Additions.h>
 #import <OakSystem/application.h>
 #import <bundles/bundles.h>
 #import <document/document.h>
