@@ -130,8 +130,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 		self.documentView.hideStatusBar     = YES;
 		self.documentView.textView.delegate = self;
 
-		_arrayController = [[NSArrayController alloc] init];
-		_arrayController.objectClass = [CWItem class];
+		[self setupArrayController];
 
 		[CWStatusStringTransformer register];
 
@@ -415,8 +414,11 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 		[self.options setObject:actions forKey:@"--action-cmd"];
 }
 
-- (void)populateTableView
+- (void)setupArrayController
 {
+	_arrayController = [[NSArrayController alloc] init];
+	_arrayController.objectClass = [CWItem class];
+
 	auto selectedFiles = _environment.find("TM_SELECTED_FILES");
 	BOOL didSelectFiles = selectedFiles != _environment.end();
 
@@ -425,7 +427,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 	{
 		NSString* status = [statuses objectAtIndex:i];
 		CWItem* item = [CWItem itemWithPath:[self.parameters objectAtIndex:i] andSCMStatus:status commit:([status hasPrefix:@"X"] || ([status hasPrefix:@"?"] && !didSelectFiles)) ? NO : YES];
-		[self.arrayController addObject:item];
+		[_arrayController addObject:item];
 	}
 }
 
