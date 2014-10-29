@@ -17,7 +17,7 @@
 @property (nonatomic) NSString* encoding;
 @property (nonatomic) BOOL useByteOrderMark;
 @property (nonatomic) BOOL canUseByteOrderMark;
-@property (nonatomic, weak) NSSavePanel* savePanel;
+@property (nonatomic) NSSavePanel* savePanel;
 @end
 
 @implementation OakEncodingSaveOptionsViewController
