@@ -532,17 +532,57 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 		[cell setLeaf:!entry->has_children()];
 		[cell setLoaded:YES];
 
+		NSMenu* menu = [NSMenu new];
 		if(bundles::item_ptr item = entry->represented_item())
 		{
 			[cell setImage:[NSImage imageNamed:info_for(item->kind()).file inSameBundleAsClass:[self class]]];
+
+			auto paths = item->paths();
+			if(paths.size() == 1)
+			{
+				[menu addItem:[self createMenuItemForCxxPath:paths.front()]];
+			}
+			else if(paths.size() > 1)
+			{
+				NSMenu* submenu = [NSMenu new];
+				for(std::string const& path : paths)
+				{
+					NSMenuItem* item = [self createMenuItemForCxxPath:path];
+					item.title = [[NSString stringWithCxxString:path] stringByAbbreviatingWithTildeInPath];
+					[submenu addItem:item];
+				}
+
+				NSMenuItem* submenuItem = [menu addItemWithTitle:@"Show in Finder" action:nil keyEquivalent:@""];
+				submenuItem.submenu = submenu;
+			}
 		}
 		else
 		{
 			std::string const& path = entry->represented_path();
 			if(path != NULL_STR)
+			{
 				[cell setImage:[OakFileIconImage fileIconImageWithPath:[NSString stringWithCxxString:path] size:NSMakeSize(16, 16)]];
+				[menu addItem:[self createMenuItemForCxxPath:path]];
+			}
 		}
+		[cell setMenu:menu];
 	}
+}
+
+- (NSMenuItem*)createMenuItemForCxxPath:(std::string const&)path
+{
+	NSMenuItem* item = [[NSMenuItem alloc] initWithTitle:[NSString stringWithFormat:@"Show “%@” in Finder", [NSString stringWithCxxString:path::display_name(path)]] action:@selector(showInFinder:) keyEquivalent:@""];
+	item.target = self;
+	item.representedObject = [NSString stringWithCxxString:path];
+	return item;
+}
+
+- (void)showInFinder:(id)sender
+{
+	if(![sender respondsToSelector:@selector(representedObject)])
+		return;
+	if(NSString* path = [sender representedObject])
+		[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:@[ [NSURL fileURLWithPath:path] ]];
 }
 
 // ====================
