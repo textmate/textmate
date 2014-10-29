@@ -2600,8 +2600,16 @@ static NSUInteger DisableSessionSavingCount = 0;
 	if(DisableSessionSavingCount)
 		return NO;
 
+	NSArray* controllers = SortedControllers();
+	if(controllers.count == 1)
+	{
+		DocumentController* controller = controllers.firstObject;
+		if(!controller.projectPath && !controller.fileBrowserVisible && controller.documents.size() == 1 && is_disposable(controller.selectedDocument))
+			controllers = nil;
+	}
+
 	NSMutableArray* projects = [NSMutableArray array];
-	for(DocumentController* controller in [SortedControllers() reverseObjectEnumerator])
+	for(DocumentController* controller in [controllers reverseObjectEnumerator])
 		[projects addObject:[controller sessionInfoIncludingUntitledDocuments:includeUntitled]];
 
 	NSDictionary* session = @{ @"projects" : projects };
