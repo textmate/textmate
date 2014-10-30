@@ -10,6 +10,7 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 @interface HTMLOutputWindowController ()
 {
 	OBJC_WATCH_LEAKS(HTMLOutputWindowController);
+	BOOL _myNeedsNewWebView;
 }
 @property (nonatomic) HTMLOutputWindowController* retainedSelf;
 @end
@@ -67,6 +68,7 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 
 - (void)close
 {
+	_myNeedsNewWebView = YES;
 	[self.window close];
 }
 
@@ -87,7 +89,7 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 
 - (BOOL)needsNewWebView
 {
-	return _htmlOutputView.needsNewWebView;
+	return _myNeedsNewWebView || _htmlOutputView.needsNewWebView;
 }
 
 - (BOOL)windowShouldClose:(id)sender
