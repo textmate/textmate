@@ -9,8 +9,7 @@
 #include <io/io.h>
 #include <OakSystem/application.h>
 
-static double const AppVersion  = 1.3;
-static size_t const AppRevision = APP_REVISION;
+static double const AppVersion = 1.3;
 
 // example: bl install Apache AppleScript Blogging Bundle\ Development C CSS Diff Git HTML Hyperlink\ Helper JavaScript Mail Make Markdown Math Objective-C PHP Perl Property\ List Ragel Remind Ruby SQL Shell\ Script Source Subversion TODO Text TextMate XML Xcode
 
@@ -41,7 +40,7 @@ extern int optind;
 
 static void usage (FILE* io = stdout)
 {
-	fprintf(io, "%1$s %2$.1f (" COMPILE_DATE " revision %3$zu)\n", getprogname(), AppVersion, AppRevision);
+	fprintf(io, "%1$s %2$.1f (" COMPILE_DATE ")\n", getprogname(), AppVersion);
 	fprintf(io, "Usage: %s list [Cs] [«bundle» ..]\n", getprogname());
 	fprintf(io, "       %s install [Cs] «bundle» ..\n", getprogname());
 	fprintf(io, "       %s uninstall [Cs] «bundle» ..\n", getprogname());
@@ -138,7 +137,7 @@ static std::string short_bundle_info (bundles_db::bundle_ptr bundle, int width)
 
 static void version ()
 {
-	fprintf(stdout, "%1$s %2$.1f (" COMPILE_DATE " revision %3$zu)\n", getprogname(), AppVersion, AppRevision);
+	fprintf(stdout, "%1$s %2$.1f (" COMPILE_DATE ")\n", getprogname(), AppVersion);
 }
 
 int main (int argc, char const* argv[])

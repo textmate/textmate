@@ -921,7 +921,7 @@ rule tbz_archive
   description = Archive ‘$in’…
 
 rule upload
-  command = bin/upload -k$upload_keyfile -d$upload_destination -t'v$APP_VERSION' -m'{"version":"$APP_VERSION","revision":"$APP_REVISION"}' $in > $out~ && mv $out~ $out
+  command = bin/upload -k$upload_keyfile -d$upload_destination -t'v$APP_VERSION' -m'{"version":"$APP_VERSION"}' $in > $out~ && mv $out~ $out
   pool = console
   generator = true
   description = Upload ‘$in’…
@@ -932,7 +932,7 @@ rule deploy
   description = Deploy…
 
 rule bump_revision
-  command = ruby -pe '$$_.gsub!(/(APP_REVISION\s*=\s*)(\d+)/) { newRev = $$2.to_i + 1; STDERR << "r#$$2 → r#{newRev}\n"; "#$$1#{newRev}#$$3" }' $in > $in~ && mv $in~ $in && touch $builddir/bumped
+  command = ruby -pe '$$_.gsub!(/(APP_VERSION\s*=\s*(.*?))(\d+)$$/) { newRev = $$3.to_i + 1; STDERR << "#$$2#$$3 → #$$2#{newRev}\n"; "#$$1#{newRev}" }' $in > $in~ && mv $in~ $in && touch $builddir/bumped
   description = Increment version number…
 
 build $builddir/always_bump_revision: bump_revision $builddir/build.ninja

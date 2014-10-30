@@ -8,7 +8,6 @@
 #include <plist/uuid.h>
 
 static char const* const AppVersion = "2.10";
-static size_t const AppRevision     = APP_REVISION;
 
 static char const* socket_path ()
 {
@@ -133,7 +132,7 @@ static void usage (FILE* io)
 	std::string pad(8 - std::min(strlen(getprogname()), size_t(8)), ' ');
 
 	fprintf(io,
-		"%1$s %2$s (" COMPILE_DATE " revision %3$zu)\n"
+		"%1$s %2$s (" COMPILE_DATE ")\n"
 		"Usage: %1$s [-wl<selection>t<filetype>m<name>rehv] [-u<identifier> | file ...]\n"
 		"       %1$s [-c<mark>] -s<mark> -l<line> [-u<identifier> | file ...]\n"
 		"       %1$s -c<mark> [-l<line>] [-u<identifier> | file ...]\n"
@@ -159,8 +158,8 @@ static void usage (FILE* io)
 		"has a \"_wait\" suffix (e.g. via a symbolic link) or when used as a\n"
 		"filter like in this examples:\n"
 		"\n"
-		"    ls *.tex|%1$s|sh%4$s-w implied\n"
-		"    %1$s -|cat -n   %4$s-w implied (read from stdin)\n"
+		"    ls *.tex|%1$s|sh%3$s-w implied\n"
+		"    %1$s -|cat -n   %3$s-w implied (read from stdin)\n"
 		"\n"
 		"The -l/--line option requires a selection in the following format:\n"
 		"\n"
@@ -172,13 +171,13 @@ static void usage (FILE* io)
 		"    line         = [1-9][0-9]*\n"
 		"    column       = [1-9][0-9]*\n"
 		"    offset       = [1-9][0-9]*\n"
-		"\n", getprogname(), AppVersion, AppRevision, pad.c_str()
+		"\n", getprogname(), AppVersion, pad.c_str()
 	);
 }
 
 static void version ()
 {
-	fprintf(stdout, "%1$s %2$s (" COMPILE_DATE " revision %3$zu)\n", getprogname(), AppVersion, AppRevision);
+	fprintf(stdout, "%1$s %2$s (" COMPILE_DATE ")\n", getprogname(), AppVersion);
 }
 
 static void append (std::string const& str, std::vector<std::string>& v)

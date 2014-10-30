@@ -5,15 +5,14 @@
 #include <plist/plist.h>
 #include <oak/oak.h>
 
-static double const AppVersion  = 1.0;
-static size_t const AppRevision = APP_REVISION;
+static double const AppVersion = 1.0;
 
 extern char* optarg;
 extern int optind;
 
 static void usage (FILE* io = stdout)
 {
-	fprintf(io, "%1$s %2$.1f (" COMPILE_DATE " revision %3$zu)\n", getprogname(), AppVersion, AppRevision);
+	fprintf(io, "%1$s %2$.1f (" COMPILE_DATE ")\n", getprogname(), AppVersion);
 	fprintf(io, "Usage: %s [ptishv] «file» ..\n", getprogname());
 	fprintf(io, "\n");
 	fprintf(io, "Options:\n");
@@ -27,7 +26,7 @@ static void usage (FILE* io = stdout)
 
 static void version ()
 {
-	fprintf(stdout, "%1$s %2$.1f (" COMPILE_DATE " revision %3$zu)\n", getprogname(), AppVersion, AppRevision);
+	fprintf(stdout, "%1$s %2$.1f (" COMPILE_DATE ")\n", getprogname(), AppVersion);
 }
 
 int main (int argc, char const* argv[])

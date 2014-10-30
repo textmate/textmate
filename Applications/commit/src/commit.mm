@@ -1,8 +1,7 @@
 #include <CommitWindow/CommitWindow.h>
 #include <oak/oak.h>
 
-static double const AppVersion  = 1.0;
-static size_t const AppRevision = APP_REVISION;
+static double const AppVersion = 1.0;
 
 @interface OakCommitWindowClient : NSObject <OakCommitWindowClientProtocol>
 @property (nonatomic) NSString*     portName;
@@ -57,7 +56,7 @@ int main (int argc, char* argv[])
 {
 	if(argc == 2 && (strcmp(argv[1], "-v") == 0 || strcmp(argv[1], "--version") == 0))
 	{
-		fprintf(stderr, "%1$s %2$.1f (" COMPILE_DATE " revision %3$zu)\n", getprogname(), AppVersion, AppRevision);
+		fprintf(stderr, "%1$s %2$.1f (" COMPILE_DATE ")\n", getprogname(), AppVersion);
 		return EX_OK;
 	}
 

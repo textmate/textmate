@@ -1,13 +1,12 @@
 #import <OSAKit/OSAKit.h>
 
-static double const AppVersion  = 1.0;
-static size_t const AppRevision = APP_REVISION;
+static double const AppVersion = 1.0;
 
 int main (int argc, char const* argv[])
 {
 	if(argc == 2 && (strcmp(argv[1], "--version") == 0 || strcmp(argv[1], "-v") == 0))
 	{
-		fprintf(stdout, "%1$s %2$.1f (" COMPILE_DATE " revision %3$zu)\n", getprogname(), AppVersion, AppRevision);
+		fprintf(stdout, "%1$s %2$.1f (" COMPILE_DATE ")\n", getprogname(), AppVersion);
 		return EX_OK;
 	}
 

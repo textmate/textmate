@@ -2,23 +2,22 @@
 #include <io/path.h>
 #include <oak/oak.h>
 
-static double const AppVersion  = 1.0;
-static size_t const AppRevision = APP_REVISION;
+static double const AppVersion = 1.0;
 
 static void version ()
 {
-	fprintf(stdout, "%1$s %2$.1f (" COMPILE_DATE " revision %3$zu)\n", getprogname(), AppVersion, AppRevision);
+	fprintf(stdout, "%1$s %2$.1f (" COMPILE_DATE ")\n", getprogname(), AppVersion);
 }
 
 static void usage (FILE* io = stdout)
 {
 	fprintf(io,
-		"%1$s %2$.1f (" COMPILE_DATE " revision %3$zu)\n"
+		"%1$s %2$.1f (" COMPILE_DATE ")\n"
 		"Usage: %1$s [-hv] ...\n"
 		"Options:\n"
 		" -h, --help                Show this information.\n"
 		" -v, --version             Print version information.\n"
-		"\n", getprogname(), AppVersion, AppRevision
+		"\n", getprogname(), AppVersion
 	);
 }
 

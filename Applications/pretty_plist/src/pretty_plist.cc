@@ -1,17 +1,16 @@
 #include <plist/ascii.h>
 
-static double const AppVersion  = 2.1;
-static size_t const AppRevision = APP_REVISION;
+static double const AppVersion = 2.1;
 
 static void version ()
 {
-	fprintf(stdout, "%1$s %2$.1f (" COMPILE_DATE " revision %3$zu)\n", getprogname(), AppVersion, AppRevision);
+	fprintf(stdout, "%1$s %2$.1f (" COMPILE_DATE ")\n", getprogname(), AppVersion);
 }
 
 static void usage (FILE* io)
 {
 	fprintf(io,
-		"%1$s %2$.1f (" COMPILE_DATE " revision %3$zu)\n"
+		"%1$s %2$.1f (" COMPILE_DATE ")\n"
 		"Usage: %1$s [-axhv] file\n"
 		"Description:\n"
 		" Reads a property list and outputs ASCII version to stdout.\n"
@@ -21,7 +20,7 @@ static void usage (FILE* io)
 		" -x, --extended  Output TextMate’s ASCII property list variant.\n"
 		" -h, --help      Show this information.\n"
 		" -v, --version   Print version information.\n"
-		"\n", getprogname(), AppVersion, AppRevision
+		"\n", getprogname(), AppVersion
 	);
 }
 

@@ -1,7 +1,7 @@
 {
 	CFBundleName                         = "${APP_NAME}";
 	CFBundleShortVersionString           = "${APP_VERSION}";                   // shown in About window
-	CFBundleVersion                      = "${APP_REVISION}";                  // shown in About window in parenthesis (but this format is not well-formed)
+	CFBundleVersion                      = "9800";                             // shown in About window in parenthesis (but this format is not well-formed)
 	CFBundleIdentifier                   = "com.macromates.${APP_NAME}.preview";
 
 	CFBundleDevelopmentRegion            = English;

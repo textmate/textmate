@@ -18,8 +18,7 @@ function error () { printf >&2 "%s\n\nPlease see README.md for build instruction
 # ========================================================
 
 name=TextMate
-ver=2.0-beta.\$APP_REVISION${tag:-+git.$(git rev-parse --short HEAD)}
-rev=$(( $(curl -sf "${rest_api}/releases/nightly/revision")+1 ))
+ver=$(curl -sf "${rest_api}/releases/nightly/version")${tag:-+git.$(git rev-parse --short HEAD)}
 min_os=10.7
 
 # ===============================
@@ -64,7 +63,7 @@ done
 mkdir -p "$builddir/Frameworks/SoftwareUpdate/fixtures"
 DST=$(cd >/dev/null "$builddir/Frameworks/SoftwareUpdate/fixtures"; pwd) make -C Frameworks/SoftwareUpdate/fixtures
 
-bin/gen_build -o build.ninja -C "$builddir" -dAPP_NAME="$name" -dAPP_REVISION="$rev" -dAPP_VERSION="$ver" -dAPP_MIN_OS="$min_os" -dCC="$CC" -dCXX="$CXX" -didentity="$identity" -drest_api="$rest_api" -dbzip2_flag="$bzip2_flag" -dcapnp_prefix="$capnp_prefix" target
+bin/gen_build -o build.ninja -C "$builddir" -dAPP_NAME="$name" -dAPP_VERSION="$ver" -dAPP_MIN_OS="$min_os" -dCC="$CC" -dCXX="$CXX" -didentity="$identity" -drest_api="$rest_api" -dbzip2_flag="$bzip2_flag" -dcapnp_prefix="$capnp_prefix" target
 
 ninja Frameworks/encoding/src/frequencies.capnp.h
 ninja Frameworks/plist/src/cache.capnp.h

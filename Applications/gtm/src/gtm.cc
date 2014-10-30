@@ -5,18 +5,17 @@
 #include <oak/oak.h>
 #include <iostream>
 
-static double const AppVersion  = 1.0;
-static size_t const AppRevision = APP_REVISION;
+static double const AppVersion = 1.0;
 
 void version ()
 {
-	fprintf(stdout, "%1$s %2$.1f (" COMPILE_DATE " revision %3$zu)\n", getprogname(), AppVersion, AppRevision);
+	fprintf(stdout, "%1$s %2$.1f (" COMPILE_DATE ")\n", getprogname(), AppVersion);
 }
 
 void usage (FILE* io)
 {
 	fprintf(io,
-		"%1$s %2$.1f (" COMPILE_DATE " revision %3$zu)\n"
+		"%1$s %2$.1f (" COMPILE_DATE ")\n"
 		"Usage: %1$s [-g<selector>td<string>lhv] grammar ...\n"
 		"Options:\n"
 		" -g, --grammar <selector>  Which grammar to use.\n"
@@ -26,7 +25,7 @@ void usage (FILE* io)
 		" -i, --load-index          Load bundle index (standard grammars available).\n"
 		" -h, --help                Show this information.\n"
 		" -v, --version             Print version information.\n"
-		"\n", getprogname(), AppVersion, AppRevision
+		"\n", getprogname(), AppVersion
 	);
 }
 

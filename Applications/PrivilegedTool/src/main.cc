@@ -8,8 +8,7 @@
 
 OAK_DEBUG_VAR(AuthServer);
 
-static double const AppVersion  = 1.2;
-static size_t const AppRevision = APP_REVISION;
+static double const AppVersion = 1.2;
 
 extern char* optarg;
 extern int optind;
@@ -35,13 +34,13 @@ static void reap_children (int theSignal)
 
 static void version ()
 {
-	fprintf(stdout, "%1$s %2$.1f (" COMPILE_DATE " revision %3$zu)\n", getprogname(), AppVersion, AppRevision);
+	fprintf(stdout, "%1$s %2$.1f (" COMPILE_DATE ")\n", getprogname(), AppVersion);
 }
 
 static void usage (FILE* io = stdout)
 {
 	fprintf(io,
-		"%1$s %2$.1f (" COMPILE_DATE " revision %3$zu)\n"
+		"%1$s %2$.1f (" COMPILE_DATE ")\n"
 		"Usage: %1$s [-siuhv]\n"
 		"Description:\n"
 		" Server for authenticated file system operations.\n"
@@ -51,7 +50,7 @@ static void usage (FILE* io = stdout)
 		" -u, --uninstall Uninstall server.\n"
 		" -h, --help      Show this information.\n"
 		" -v, --version   Print version information.\n"
-		"\n", getprogname(), AppVersion, AppRevision
+		"\n", getprogname(), AppVersion
 	);
 }
 
