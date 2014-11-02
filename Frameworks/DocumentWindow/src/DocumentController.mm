@@ -1177,7 +1177,7 @@ namespace
 	NSMutableArray* windows = [NSMutableArray array];
 
 	HTMLOutputWindowController* candidate = self.htmlOutputWindowController;
-	if(candidate && candidate.commandRunner->uuid() == anUUID && !candidate.needsNewWebView)
+	if(candidate && candidate.commandRunner->uuid() == anUUID && !candidate.needsNewWebView && candidate.window.isVisible)
 		[windows addObject:candidate];
 
 	for(NSWindow* window in [NSApp orderedWindows])
