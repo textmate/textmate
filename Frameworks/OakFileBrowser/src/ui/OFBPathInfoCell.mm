@@ -74,7 +74,7 @@ static void DrawSpinner (NSRect cellFrame, BOOL isFlipped, NSColor* color, doubl
 
 - (NSImage*)closeIcon
 {
-	return self.isOpen ? [NSImage imageNamed:@"CloseFile" inSameBundleAsClass:[OFBPathInfoCell class]] : nil;
+	return self.isOpen ? [NSImage imageNamed:@"CloseTemplate" inSameBundleAsClass:[OFBPathInfoCell class]] : nil;
 }
 
 - (NSRect)closeButtonRectInFrame:(NSRect)cellFrame
@@ -122,9 +122,9 @@ static void DrawSpinner (NSRect cellFrame, BOOL isFlipped, NSColor* color, doubl
 	{
 		NSImage* closeIcon = self.closeIcon;
 		if(_mouseDownInCloseButton)
-			closeIcon = [NSImage imageNamed:@"CloseFilePressed" inSameBundleAsClass:[OFBPathInfoCell class]];
+			closeIcon = [NSImage imageNamed:@"ClosePressedTemplate" inSameBundleAsClass:[OFBPathInfoCell class]];
 		else if([self isMouseInCloseButtonInFrame:cellFrame controlView:controlView] && [[controlView window] isKeyWindow])
-			closeIcon = [NSImage imageNamed:@"CloseFileOver" inSameBundleAsClass:[OFBPathInfoCell class]];
+			closeIcon = [NSImage imageNamed:@"CloseRolloverTemplate" inSameBundleAsClass:[OFBPathInfoCell class]];
 
 		NSRect closeButtonRect = [self closeButtonRectInFrame:cellFrame];
 		cellFrame.size.width -= NSMaxX(cellFrame) - NSMinX(closeButtonRect);

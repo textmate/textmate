@@ -76,7 +76,7 @@ static NSString* const kRecordingPlaceholderString = @"…";
 	if(_showClearButton = flag)
 	{
 		Class cl = NSClassFromString(@"OFBPathInfoCell");
-		NSImage* imgNormal = [NSImage imageNamed:@"CloseFile" inSameBundleAsClass:cl];
+		NSImage* imgNormal = [NSImage imageNamed:@"CloseTemplate" inSameBundleAsClass:cl];
 
 		NSSize imgSize = imgNormal.size;
 		CGFloat imgMargin = floor((NSHeight([self bounds]) - imgSize.height) / 2);
@@ -256,9 +256,9 @@ static NSString* const kRecordingPlaceholderString = @"…";
 	if(self.showClearButton)
 	{
 		Class cl = NSClassFromString(@"OFBPathInfoCell");
-		NSImage* imgNormal = [NSImage imageNamed:@"CloseFile"        inSameBundleAsClass:cl];
-		NSImage* imgHover  = [NSImage imageNamed:@"CloseFileOver"    inSameBundleAsClass:cl];
-		NSImage* imgDown   = [NSImage imageNamed:@"CloseFilePressed" inSameBundleAsClass:cl];
+		NSImage* imgNormal = [NSImage imageNamed:@"CloseTemplate"         inSameBundleAsClass:cl];
+		NSImage* imgHover  = [NSImage imageNamed:@"CloseRolloverTemplate" inSameBundleAsClass:cl];
+		NSImage* imgDown   = [NSImage imageNamed:@"ClosePressedTemplate"  inSameBundleAsClass:cl];
 		NSImage* image = self.mouseInClearButton ? (_mouseDown ? imgDown : imgHover) : imgNormal;
 		[image drawAdjustedInRect:_clearButtonRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1];
 	}
