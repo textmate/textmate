@@ -81,7 +81,7 @@ static void DrawSpinner (NSRect cellFrame, BOOL isFlipped, NSColor* color, doubl
 {
 	if(!self.isOpen)
 		return NSZeroRect;
-	return NSMakeRect(NSMaxX(cellFrame) - kCloseButtonRightMargin - self.closeIcon.size.width, NSMaxY(cellFrame) - (cellFrame.size.height + self.closeIcon.size.height) / 2, self.closeIcon.size.width, self.closeIcon.size.height);
+	return NSMakeRect(NSMaxX(cellFrame) - kCloseButtonRightMargin - self.closeIcon.size.width, NSMaxY(cellFrame) - round((cellFrame.size.height + self.closeIcon.size.height) / 2), self.closeIcon.size.width, self.closeIcon.size.height);
 }
 
 - (void)redrawFrame:(OakTimer*)timer
