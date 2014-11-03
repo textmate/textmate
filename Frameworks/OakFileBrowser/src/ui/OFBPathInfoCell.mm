@@ -127,8 +127,21 @@ static void DrawSpinner (NSRect cellFrame, BOOL isFlipped, NSColor* color, doubl
 			closeIcon = [NSImage imageNamed:@"CloseFileOver" inSameBundleAsClass:[OFBPathInfoCell class]];
 
 		NSRect closeButtonRect = [self closeButtonRectInFrame:cellFrame];
-		[closeIcon drawInRect:closeButtonRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1];
 		cellFrame.size.width -= NSMaxX(cellFrame) - NSMinX(closeButtonRect);
+
+		if(closeIcon.isTemplate)
+		{
+			[(self.backgroundStyle == NSBackgroundStyleDark ? [NSColor alternateSelectedControlTextColor] : [NSColor controlTextColor]) set];
+			CGImageRef cgImage = [closeIcon CGImageForProposedRect:&closeButtonRect context:[NSGraphicsContext currentContext] hints:nil];
+			[NSGraphicsContext saveGraphicsState];
+			CGContextClipToMask((CGContextRef)[[NSGraphicsContext currentContext] graphicsPort], closeButtonRect, cgImage);
+			NSRectFillUsingOperation(closeButtonRect, NSCompositeSourceOver);
+			[NSGraphicsContext restoreGraphicsState];
+		}
+		else
+		{
+			[closeIcon drawInRect:closeButtonRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1];
+		}
 	}
 
 	NSFont* unboldFont = self.font;
