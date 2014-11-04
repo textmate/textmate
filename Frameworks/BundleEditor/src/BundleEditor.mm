@@ -535,6 +535,11 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 		NSMenu* menu = [NSMenu new];
 		if(bundles::item_ptr item = entry->represented_item())
 		{
+			if(entry->identifier() == "Menu Actions")
+			{
+				[cell setImage:[NSImage imageNamed:@"MenuItem" inSameBundleAsClass:[self class]]];
+				return;
+			}
 			[cell setImage:[NSImage imageNamed:info_for(item->kind()).file inSameBundleAsClass:[self class]]];
 
 			auto paths = item->paths();
