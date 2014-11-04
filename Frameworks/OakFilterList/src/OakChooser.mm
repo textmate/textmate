@@ -231,11 +231,7 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 
 - (NSArray*)selectedItems
 {
-	NSMutableArray* res = [NSMutableArray array];
-	NSIndexSet* indexes = [_tableView selectedRowIndexes];
-	for(NSUInteger i = [indexes firstIndex]; i != NSNotFound; i = [indexes indexGreaterThanIndex:i])
-		[res addObject:_items[i]];
-	return res;
+	return [_items objectsAtIndexes:[_tableView selectedRowIndexes]];
 }
 
 // =================
