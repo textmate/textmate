@@ -275,6 +275,11 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 	[self addCursorRect:[self htmlOutputResizeRect]  cursor:_htmlOutputOnRight ? [NSCursor resizeLeftRightCursor] : [NSCursor resizeUpDownCursor]];
 }
 
+- (BOOL)mouseDownCanMoveWindow
+{
+	return NO;
+}
+
 - (NSView*)hitTest:(NSPoint)aPoint
 {
 	if(NSMouseInRect([self convertPoint:aPoint fromView:[self superview]], [self fileBrowserResizeRect], [self isFlipped]))
