@@ -245,6 +245,16 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 		for(NSDictionary* item in self.selectedItems)
 			[[OakAbbreviations abbreviationsForName:@"OakFavoriteChooserBindings"] learnAbbreviation:self.filterString forString:[item objectForKey:@"path"]];
 	}
+
+	for(NSDictionary* item in self.selectedItems)
+	{
+		if(NSMutableDictionary* tmp = [[[self sharedProjectStateDB] valueForKey:item[@"path"]] mutableCopy])
+		{
+			tmp[@"lastRecentlyUsed"] = [NSDate date];
+			[[self sharedProjectStateDB] setValue:tmp forKey:item[@"path"]];
+		}
+	}
+
 	[super accept:sender];
 }
 
