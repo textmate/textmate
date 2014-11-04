@@ -26,4 +26,5 @@ PUBLIC NSView* OakCreateDividerImageView ();
 
 PUBLIC OakBackgroundFillView* OakCreateVerticalLine (NSColor* primaryColor, NSColor* secondaryColor = nil);
 PUBLIC OakBackgroundFillView* OakCreateHorizontalLine (NSColor* primaryColor, NSColor* secondaryColor = nil);
+PUBLIC void OakSetupKeyViewLoop (NSArray* views);
 PUBLIC BOOL OakSetAccessibilityLabel (NSObject* element, NSObject* label);

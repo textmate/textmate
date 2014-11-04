@@ -82,9 +82,7 @@ static NSTextField* OakCreateTextField ()
 		self.registerButton.action = @selector(addLicense:);
 		self.cancelButton.action   = @selector(cancelOperation:);
 
-		NSView* keyViewLoop[] = { self.ownerTextField, self.licenseTextField, self.cancelButton, self.registerButton };
-		for(size_t i = 0; i < sizeofA(keyViewLoop); ++i)
-			keyViewLoop[i].nextKeyView = keyViewLoop[(i + 1) % sizeofA(keyViewLoop)];
+		OakSetupKeyViewLoop(@[ self.ownerTextField, self.licenseTextField, self.cancelButton, self.registerButton ]);
 
 		self.window.initialFirstResponder = self.ownerTextField;
 		self.window.defaultButtonCell     = self.registerButton.cell;

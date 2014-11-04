@@ -252,6 +252,12 @@ NSView* OakCreateDividerImageView ()
 	return res;
 }
 
+void OakSetupKeyViewLoop (NSArray* views)
+{
+	for(size_t i = 0; i < views.count; ++i)
+		[views[i] setNextKeyView:views[(i + 1) % views.count]];
+}
+
 BOOL OakSetAccessibilityLabel (NSObject* element, NSObject* label)
 {
 	if(!(element = NSAccessibilityUnignoredDescendant(element)))

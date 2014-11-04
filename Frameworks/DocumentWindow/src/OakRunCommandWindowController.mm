@@ -96,9 +96,7 @@ static NSString* const kUserDefaultsFilterOutputType = @"filterOutputType";
 
 		[self.window.contentView addConstraints:_myConstraints];
 
-		NSView* keyViewLoop[] = { self.commandComboBox, self.resultPopUpButton, self.cancelButton, self.executeButton };
-		for(size_t i = 0; i < sizeofA(keyViewLoop); ++i)
-			keyViewLoop[i].nextKeyView = keyViewLoop[(i + 1) % sizeofA(keyViewLoop)];
+		OakSetupKeyViewLoop(@[ self.commandComboBox, self.resultPopUpButton, self.cancelButton, self.executeButton ]);
 
 		self.outputType = (output::type)[[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsFilterOutputType];
 

@@ -446,17 +446,8 @@ static NSButton* OakCreateStopSearchButton ()
 	[self.window.contentView addConstraints:_myConstraints];
 
 	if(self.showsResultsOutlineView)
-	{
-		NSView* keyViewLoop[] = { self.findTextField, self.replaceTextField, self.countButton, self.regularExpressionCheckBox, self.ignoreWhitespaceCheckBox, self.ignoreCaseCheckBox, self.wrapAroundCheckBox, self.wherePopUpButton, self.globTextField, self.actionsPopUpButton, self.resultsViewController.outlineView, self.findAllButton, self.replaceAllButton, self.replaceButton, self.replaceAndFindButton, self.findPreviousButton, self.findNextButton };
-		for(size_t i = 0; i < sizeofA(keyViewLoop); ++i)
-			keyViewLoop[i].nextKeyView = keyViewLoop[(i + 1) % sizeofA(keyViewLoop)];
-	}
-	else
-	{
-		NSView* keyViewLoop[] = { self.findTextField, self.replaceTextField, self.countButton, self.regularExpressionCheckBox, self.ignoreWhitespaceCheckBox, self.ignoreCaseCheckBox, self.wrapAroundCheckBox, self.wherePopUpButton, self.globTextField, self.actionsPopUpButton, self.findAllButton, self.replaceAllButton, self.replaceButton, self.replaceAndFindButton, self.findPreviousButton, self.findNextButton };
-		for(size_t i = 0; i < sizeofA(keyViewLoop); ++i)
-			keyViewLoop[i].nextKeyView = keyViewLoop[(i + 1) % sizeofA(keyViewLoop)];
-	}
+			OakSetupKeyViewLoop(@[ self.findTextField, self.replaceTextField, self.countButton, self.regularExpressionCheckBox, self.ignoreWhitespaceCheckBox, self.ignoreCaseCheckBox, self.wrapAroundCheckBox, self.wherePopUpButton, self.globTextField, self.actionsPopUpButton, self.resultsViewController.outlineView, self.findAllButton, self.replaceAllButton, self.replaceButton, self.replaceAndFindButton, self.findPreviousButton, self.findNextButton ]);
+	else	OakSetupKeyViewLoop(@[ self.findTextField, self.replaceTextField, self.countButton, self.regularExpressionCheckBox, self.ignoreWhitespaceCheckBox, self.ignoreCaseCheckBox, self.wrapAroundCheckBox, self.wherePopUpButton, self.globTextField, self.actionsPopUpButton, self.findAllButton, self.replaceAllButton, self.replaceButton, self.replaceAndFindButton, self.findPreviousButton, self.findNextButton ]);
 }
 
 - (void)userDefaultsDidChange:(NSNotification*)aNotification
