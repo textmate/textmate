@@ -149,29 +149,12 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 	std::copy(items.begin(), items.end(), back_inserter(favorites));
 }
 
-static NSInteger LRUSort (id lhs, id rhs, void* context)
-{
-	NSDate* lhsDate = lhs[@"value"][@"lastRecentlyUsed"];
-	NSDate* rhsDate = rhs[@"value"][@"lastRecentlyUsed"];
-	NSString* lhsKey = lhs[@"key"];
-	NSString* rhsKey = rhs[@"key"];
-
-	if(lhsDate && rhsDate)
-		return [rhsDate compare:lhsDate];
-	else if(!lhsDate && !rhsDate)
-		return [[lhsKey lastPathComponent] compare:[rhsKey lastPathComponent]];
-	else if(lhsDate)
-		return NSOrderedAscending;
-	else
-		return NSOrderedDescending;
-}
-
 - (void)loadItems:(id)sender
 {
 	if(_sourceIndex == kOakSourceIndexRecentProjects)
 	{
 		std::vector<std::string> paths;
-		for(id pair in [[[self sharedProjectStateDB] allObjects] sortedArrayUsingFunction:&LRUSort context:nullptr])
+		for(id pair in [[[self sharedProjectStateDB] allObjects] sortedArrayUsingDescriptors:@[ [NSSortDescriptor sortDescriptorWithKey:@"value.lastRecentlyUsed" ascending:NO], [NSSortDescriptor sortDescriptorWithKey:@"key.lastPathComponent" ascending:YES selector:@selector(localizedCompare:)] ]])
 		{
 			if(access([pair[@"key"] fileSystemRepresentation], F_OK) == 0)
 				paths.push_back(to_s((NSString*)pair[@"key"]));
