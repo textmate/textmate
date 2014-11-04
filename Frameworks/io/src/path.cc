@@ -968,14 +968,6 @@ namespace path
 		return passwd_entry()->pw_dir;
 	}
 
-	std::string trash (std::string const& forPath)
-	{
-		FSRef res;
-		FSCatalogInfo info;
-		FSGetCatalogInfo(fsref_t(forPath), kFSCatInfoVolume, &info, 0, 0, 0);
-		return FSFindFolder(info.volume, kTrashFolderType, false, &res) == noErr ? to_s(res) : NULL_STR;;
-	}
-
 	static std::string system_directory (int name, std::string const& file, std::string const& content)
 	{
 		std::string str(128, ' ');
