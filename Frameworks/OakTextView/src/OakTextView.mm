@@ -2362,18 +2362,19 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 						// ====================================================
 
 						NSMutableArray* newDocuments = [documents mutableCopy];
-						auto newDocumentMatches = ng::find(document->buffer(), ng::ranges_t(0), findStr, (find::options_t)(options & ~find::backwards));
-						if(newDocumentMatches.empty())
+						auto newFirstMatch = ng::find(document->buffer(), ng::ranges_t(0), findStr, (find::options_t)(options & ~find::backwards));
+						if(newFirstMatch.empty())
 						{
 							[newDocuments removeObjectAtIndex:i];
 						}
 						else
 						{
+							auto newLastMatch = ng::find(document->buffer(), ng::ranges_t(0), findStr, (find::options_t)(options | find::backwards | find::wrap_around));
 							auto to_range = [&](auto it) { return text::range_t(document->buffer().convert(it->first.min().index), document->buffer().convert(it->first.max().index)); };
 							[newDocuments replaceObjectAtIndex:i withObject:@{
 								@"identifier"      : [NSString stringWithCxxString:document->identifier()],
-								@"firstMatchRange" : [NSString stringWithCxxString:to_range(newDocumentMatches.begin())],
-								@"lastMatchRange"  : [NSString stringWithCxxString:to_range(--newDocumentMatches.end())]
+								@"firstMatchRange" : [NSString stringWithCxxString:to_range(newFirstMatch.begin())],
+								@"lastMatchRange"  : [NSString stringWithCxxString:to_range((newLastMatch.empty() ? newFirstMatch : newLastMatch).begin())]
 							}];
 						}
 						[OakPasteboard pasteboardWithName:NSFindPboard].auxiliaryOptionsForCurrent = @{ @"documents" : newDocuments };
