@@ -168,6 +168,11 @@ static NSString* const kRecordingPlaceholderString = @"…";
 	return self.showClearButton && [anEvent type] == NSLeftMouseDown && NSMouseInRect([self convertPoint:[anEvent locationInWindow] fromView:nil], _clearButtonRect, [self isFlipped]);
 }
 
+- (BOOL)isOpaque
+{
+	return YES;
+}
+
 - (BOOL)acceptsFirstMouse:(NSEvent*)anEvent
 {
 	return YES;
