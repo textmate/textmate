@@ -1,7 +1,6 @@
 #import "BundleItemChooser.h"
 #import "OakAbbreviations.h"
 #import "ui/OakBundleItemCell.h"
-#import "ui/TableView.h"
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakAppKit/OakKeyEquivalentView.h>
@@ -266,7 +265,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	if(context == kRecordingBinding)
 	{
 		NSNumber* isRecording = change[NSKeyValueChangeNewKey];
-		[(OakInactiveTableView*)self.tableView setDrawAsHighlighted:![isRecording boolValue]];
+		self.drawTableViewAsHighlighted = ![isRecording boolValue];
 	}
 	else
 	{
@@ -277,7 +276,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 			BOOL oldIsKeyEquivalentView = change[NSKeyValueChangeOldKey] == _keyEquivalentView;
 			BOOL newIsKeyEquivalentView = change[NSKeyValueChangeNewKey] == _keyEquivalentView;
 			if(oldIsKeyEquivalentView != newIsKeyEquivalentView)
-				[(OakInactiveTableView*)self.tableView setDrawAsHighlighted:newIsKeyEquivalentView];
+				self.drawTableViewAsHighlighted = newIsKeyEquivalentView;
 		}
 	}
 }

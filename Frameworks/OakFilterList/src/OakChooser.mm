@@ -160,6 +160,11 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 // = Set wether to render table view as active when search field gain/lose focus =
 // ===============================================================================
 
+- (void)setDrawTableViewAsHighlighted:(BOOL)flag
+{
+	[(OakInactiveTableView*)_tableView setDrawAsHighlighted:flag];
+}
+
 - (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)object change:(NSDictionary*)change context:(void*)context
 {
 	if(context == kFirstResponderBinding)
@@ -167,7 +172,7 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 		BOOL oldIsSearchField = change[NSKeyValueChangeOldKey] == _searchField || change[NSKeyValueChangeOldKey] == _searchField.currentEditor;
 		BOOL newIsSearchField = change[NSKeyValueChangeNewKey] == _searchField || change[NSKeyValueChangeNewKey] == _searchField.currentEditor;
 		if(oldIsSearchField != newIsSearchField)
-			[(OakInactiveTableView*)_tableView setDrawAsHighlighted:newIsSearchField];
+			self.drawTableViewAsHighlighted = newIsSearchField;
 	}
 }
 
