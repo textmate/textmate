@@ -19,7 +19,7 @@
 {
 	if((self = [super initWithFrame:aFrame]))
 	{
-		NSTextField* textField = OakCreateLabel(@"");
+		NSTextField* textField = OakCreateLabel();
 		[textField setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
 		[self addSubview:textField];
 		[textField bind:NSValueBinding toObject:self withKeyPath:@"excerptString" options:nil];
@@ -60,8 +60,7 @@
 	if((self = [super init]))
 	{
 		NSImageView* imageView = [NSImageView new];
-		NSTextField* textField = OakCreateLabel();
-		textField.font = [NSFont controlContentFontOfSize:0];
+		NSTextField* textField = OakCreateLabel(@"", [NSFont controlContentFontOfSize:0]);
 
 		NSButton* countOfLeafs = [NSButton new];
 		[[countOfLeafs cell] setHighlightsBy:NSNoCellMask];

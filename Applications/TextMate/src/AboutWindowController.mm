@@ -62,14 +62,12 @@ static NSTextField* OakCreateTextField ()
 		self.window.title     = @"Add License";
 		self.window.delegate  = self;
 
-		self.ownerLabel       = OakCreateLabel(@"Owner:");
+		self.ownerLabel       = OakCreateLabel(@"Owner:", nil, NSRightTextAlignment);
 		self.ownerTextField   = OakCreateTextField();
-		self.licenseLabel     = OakCreateLabel(@"License:");
+		self.licenseLabel     = OakCreateLabel(@"License:", nil, NSRightTextAlignment);
 		self.licenseTextField = OakCreateTextField();
 		self.licenseTextField.font = [NSFont userFixedPitchFontOfSize:12];
-		self.statusTextField  = OakCreateLabel();
-		self.statusTextField.font      = [NSFont labelFontOfSize:0];
-		self.statusTextField.alignment = NSLeftTextAlignment;
+		self.statusTextField  = OakCreateLabel(@"", [NSFont labelFontOfSize:0]);
 		self.cancelButton     = OakCreateButton(@"Cancel");
 		self.registerButton   = OakCreateButton(@"Register");
 

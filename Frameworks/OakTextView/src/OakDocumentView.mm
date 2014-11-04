@@ -816,7 +816,6 @@ private:
 		{
 			NSViewController* viewController = [NSViewController new];
 			NSTextField* textField = OakCreateLabel([NSString stringWithCxxString:text::join(info, "\n")]);;
-			textField.alignment = NSLeftTextAlignment;
 			[textField sizeToFit];
 			viewController.view = textField;
 

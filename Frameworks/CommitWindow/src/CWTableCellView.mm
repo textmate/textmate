@@ -7,9 +7,7 @@
 {
 	if((self = [super init]))
 	{
-		NSTextField* textField = OakCreateLabel();
-		textField.font = [NSFont controlContentFontOfSize:0];
-		[textField.cell setLineBreakMode: NSLineBreakByTruncatingMiddle];
+		NSTextField* textField = OakCreateLabel(@"", [NSFont controlContentFontOfSize:0]);
 		self.textField = textField;
 
 		NSButton* commitCheckBox = OakCreateCheckBox(@"");

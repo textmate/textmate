@@ -37,9 +37,9 @@ static NSString* const kUserDefaultsFilterOutputType = @"filterOutputType";
 		self.outputType           = output::replace_input;
 		self.myConstraints        = [NSMutableArray new];
 
-		self.commandLabel         = OakCreateLabel(@"Command:");
+		self.commandLabel         = OakCreateLabel(@"Command:", nil, NSRightTextAlignment);
 		self.commandComboBox      = OakCreateComboBox();
-		self.resultLabel          = OakCreateLabel(@"Result:");
+		self.resultLabel          = OakCreateLabel(@"Result:", nil, NSRightTextAlignment);
 		self.resultPopUpButton    = OakCreatePopUpButton();
 		self.executeButton        = OakCreateButton(@"Execute");
 		self.cancelButton         = OakCreateButton(@"Cancel");

@@ -11,16 +11,17 @@ NSFont* OakControlFont ()
 	return [NSFont messageFontOfSize:0];
 }
 
-NSTextField* OakCreateLabel (NSString* label)
+NSTextField* OakCreateLabel (NSString* label, NSFont* font, NSTextAlignment alignment, NSLineBreakMode lineBreakMode)
 {
 	NSTextField* res = [[NSTextField alloc] initWithFrame:NSZeroRect];
 	[[res cell] setWraps:NO];
-	res.alignment       = NSRightTextAlignment;
+	[[res cell] setLineBreakMode:lineBreakMode];
+	res.alignment       = alignment;
 	res.bezeled         = NO;
 	res.bordered        = NO;
 	res.drawsBackground = NO;
 	res.editable        = NO;
-	res.font            = OakControlFont();
+	res.font            = font ?: OakControlFont();
 	res.selectable      = NO;
 	res.stringValue     = label;
 	return res;

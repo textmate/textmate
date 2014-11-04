@@ -15,7 +15,7 @@ PUBLIC @interface OakBackgroundFillView : NSView
 PUBLIC NSFont* OakStatusBarFont ();
 PUBLIC NSFont* OakControlFont ();
 
-PUBLIC NSTextField* OakCreateLabel (NSString* label = @"");
+PUBLIC NSTextField* OakCreateLabel (NSString* label = @"", NSFont* font = nil, NSTextAlignment alignment = NSLeftTextAlignment, NSLineBreakMode lineBreakMode = NSLineBreakByTruncatingMiddle);
 PUBLIC NSButton* OakCreateCheckBox (NSString* label);
 PUBLIC NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel = NSRoundedBezelStyle);
 PUBLIC NSPopUpButton* OakCreatePopUpButton (BOOL pullsDown = NO, NSString* initialItemTitle = nil, NSObject* accessibilityLabel = nil);

@@ -186,15 +186,6 @@ static NSAttributedString* convert_and_highlight (char const* first, char const*
 	return output;
 }
 
-static NSTextField* MyCreateLabel (NSString* label, NSFont* font = nil)
-{
-	NSTextField* res = OakCreateLabel(label);
-	res.alignment = NSLeftTextAlignment;
-	if(font)
-		res.font = font;
-	return res;
-}
-
 static NSTextView* MyCreateTextView ()
 {
 	NSTextView* res = [[NSTextView alloc] initWithFrame:NSZeroRect];
@@ -260,8 +251,8 @@ static NSTextView* MyCreateTextView ()
 
 		self.objectController = [[NSObjectController alloc] initWithContent:self];
 
-		self.title         = MyCreateLabel(@"Unknown Encoding", [NSFont boldSystemFontOfSize:0]);
-		self.explanation   = MyCreateLabel(@"");
+		self.title         = OakCreateLabel(@"Unknown Encoding", [NSFont boldSystemFontOfSize:0]);
+		self.explanation   = OakCreateLabel();
 		self.label         = OakCreateLabel(@"Encoding:");
 		self.popUpButton   = [[OakEncodingPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO];
 		self.scrollView    = [[NSScrollView alloc] initWithFrame:NSZeroRect];
