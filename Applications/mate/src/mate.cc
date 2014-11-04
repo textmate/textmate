@@ -321,7 +321,7 @@ int main (int argc, char const* argv[])
 			switch(ch)
 			{
 				case 'a': shouldWait = boolean::kDisable;  break;
-				case 'c': append(optarg, clearMarks);      break;
+				case 'c': clearMarks.push_back(optarg);    break;
 				case 'd': changeDir = boolean::kEnable;    break;
 				case 'e': keepEscapes = boolean::kEnable;  break;
 				case 'E': keepEscapes = boolean::kDisable; break;
@@ -331,7 +331,7 @@ int main (int argc, char const* argv[])
 				case 'p': append(optarg, projects); break;
 				case 'r': addToRecent = boolean::kEnable;  break;
 				case 'R': addToRecent = boolean::kDisable; break;
-				case 's': append(optarg, setMarks); break;
+				case 's': setMarks.push_back(optarg); break;
 				case 't': append(optarg, types);    break;
 				case 'u': uuid = optarg;            break;
 				case 'v': version();                return EX_OK;
