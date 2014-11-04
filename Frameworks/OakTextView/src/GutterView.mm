@@ -28,15 +28,6 @@ struct data_source_t
 };
 
 @interface GutterView ()
-@property (nonatomic) NSSize size;
-- (CGFloat)widthForColumnWithIdentifier:(std::string const&)identifier;
-- (data_source_t*)columnWithIdentifier:(std::string const&)identifier;
-
-- (void)clearTrackingRects;
-- (void)setupTrackingRects;
-@end
-
-@implementation GutterView
 {
 	std::vector<data_source_t> columnDataSources;
 	NSMutableSet* hiddenColumns;
@@ -46,7 +37,15 @@ struct data_source_t
 	NSPoint mouseDownAtPoint;
 	NSPoint mouseHoveringAtPoint;
 }
+@property (nonatomic) NSSize size;
+- (CGFloat)widthForColumnWithIdentifier:(std::string const&)identifier;
+- (data_source_t*)columnWithIdentifier:(std::string const&)identifier;
 
+- (void)clearTrackingRects;
+- (void)setupTrackingRects;
+@end
+
+@implementation GutterView
 // ==================
 // = Setup/Teardown =
 // ==================
