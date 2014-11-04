@@ -204,12 +204,12 @@ private:
 	else
 	{
 		statusDividerView = OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1], [NSColor colorWithCalibratedWhite:0.750 alpha:1]);
-		[self addSubview:statusDividerView];
 
 		statusBar = [[OTVStatusBar alloc] initWithFrame:NSZeroRect];
 		statusBar.delegate = self;
 		statusBar.target = self;
-		[self addSubview:statusBar];
+
+		OakAddAutoLayoutViewsToSuperview(@[ statusDividerView, statusBar ], self);
 	}
 	[self setNeedsUpdateConstraints:YES];
 }
