@@ -259,6 +259,17 @@ void OakSetupKeyViewLoop (NSArray* views)
 		[views[i] setNextKeyView:views[(i + 1) % views.count]];
 }
 
+void OakAddAutoLayoutViewsToSuperview (NSArray* views, NSView* superview)
+{
+	for(NSView* view in views)
+	{
+		if([view isEqualTo:[NSNull null]])
+			continue;
+		[view setTranslatesAutoresizingMaskIntoConstraints:NO];
+		[superview addSubview:view];
+	}
+}
+
 BOOL OakSetAccessibilityLabel (NSObject* element, NSObject* label)
 {
 	if(!(element = NSAccessibilityUnignoredDescendant(element)))

@@ -96,11 +96,7 @@ static NSTextField* OakCreateTextField ()
 		};
 
 		NSView* contentView = self.window.contentView;
-		for(NSView* view in [views allValues])
-		{
-			[view setTranslatesAutoresizingMaskIntoConstraints:NO];
-			[contentView addSubview:view];
-		}
+		OakAddAutoLayoutViewsToSuperview([views allValues], contentView);
 
 		NSMutableArray* constraints = [NSMutableArray array];
 		CONSTRAINT(@"H:|-[ownerLabel(==licenseLabel)]-[owner(==license)]-|", NSLayoutFormatAlignAllBaseline);

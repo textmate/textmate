@@ -298,8 +298,8 @@ namespace
 		[self.window setAutorecalculatesContentBorderThickness:NO forEdge:NSMaxYEdge];
 		[self.window setAutorecalculatesContentBorderThickness:NO forEdge:NSMinYEdge];
 
-		[self.layoutView setTranslatesAutoresizingMaskIntoConstraints:NO];
-		[self.window.contentView addSubview:self.layoutView];
+		OakAddAutoLayoutViewsToSuperview(@[ self.layoutView ], self.window.contentView);
+
 		[self.window.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[view]|" options:0 metrics:nil views:@{ @"view" : self.layoutView }]];
 		[self.window.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[view]|" options:0 metrics:nil views:@{ @"view" : self.layoutView }]];
 

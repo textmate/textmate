@@ -62,11 +62,7 @@
 	};
 
 	NSView* containerView = [[NSView alloc] initWithFrame:NSZeroRect];
-	for(NSView* view in [views allValues])
-	{
-		[view setTranslatesAutoresizingMaskIntoConstraints:NO];
-		[containerView addSubview:view];
-	}
+	OakAddAutoLayoutViewsToSuperview([views allValues], containerView);
 
 	[containerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[encodingLabel]-[encodingPopUp]-[lineEndingsPopUp]-(>=0)-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
 	[containerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[bomCheckBox]-(>=0)-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];

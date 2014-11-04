@@ -57,12 +57,8 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 		return oldView;
 
 	[oldView removeFromSuperview];
-
 	if(newView)
-	{
-		[newView setTranslatesAutoresizingMaskIntoConstraints:NO];
-		[self addSubview:newView];
-	}
+		OakAddAutoLayoutViewsToSuperview(@[ newView ], self);
 
 	[self setNeedsUpdateConstraints:YES];
 	return newView;

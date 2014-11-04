@@ -43,8 +43,7 @@ static NSButton* OakCreateImageButton (NSImage* image)
 		[self.scmButton.cell       accessibilitySetOverrideValue:self.scmButton.toolTip       forAttribute:NSAccessibilityDescriptionAttribute];
 
 		NSView* wrappedActionsPopUpButton = [NSView new];
-		[wrappedActionsPopUpButton addSubview:self.actionsPopUpButton];
-		[self.actionsPopUpButton setTranslatesAutoresizingMaskIntoConstraints:NO];
+		OakAddAutoLayoutViewsToSuperview(@[ self.actionsPopUpButton ], wrappedActionsPopUpButton);
 		[wrappedActionsPopUpButton addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[popup]|" options:0 metrics:nil views:@{ @"popup" : self.actionsPopUpButton }]];
 		[wrappedActionsPopUpButton addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[popup]|" options:0 metrics:nil views:@{ @"popup" : self.actionsPopUpButton }]];
 
@@ -58,11 +57,7 @@ static NSButton* OakCreateImageButton (NSImage* image)
 			@"scm"       : self.scmButton,
 		};
 
-		for(NSView* view in [views allValues])
-		{
-			[view setTranslatesAutoresizingMaskIntoConstraints:NO];
-			[self addSubview:view];
-		}
+		OakAddAutoLayoutViewsToSuperview([views allValues], self);
 
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-3-[create(==24)]-1-[divider]-5-[actions(==30)]-(>=8)-[reload(==22,==search,==favorites,==scm)][search]-1-[favorites]-2-[scm]-(12)-|" options:0 metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[create(==divider,==actions,==reload,==search,==favorites,==scm)]|"                                                                   options:0 metrics:nil views:views]];

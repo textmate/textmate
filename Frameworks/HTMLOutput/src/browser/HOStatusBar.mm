@@ -76,11 +76,7 @@ static NSTextField* OakCreateTextField ()
 		_spinner.displayedWhenStopped = NO;
 
 		NSArray* views = @[ _divider, _goBackButton, _goForwardButton, _statusTextField, _spinner ];
-		for(NSView* view in views)
-		{
-			[view setTranslatesAutoresizingMaskIntoConstraints:NO];
-			[self addSubview:view];
-		}
+		OakAddAutoLayoutViewsToSuperview(views, self);
 
 		[_progressIndicator setTranslatesAutoresizingMaskIntoConstraints:NO];
 	}

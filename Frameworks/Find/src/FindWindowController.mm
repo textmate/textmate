@@ -276,16 +276,7 @@ static NSButton* OakCreateStopSearchButton ()
 		[self.resultsViewController     bind:@"replaceString"       toObject:_objectController withKeyPath:@"content.replaceString"        options:nil];
 
 		NSView* contentView = self.window.contentView;
-		for(NSView* view in [self.allViews allValues])
-		{
-			if([view isEqualTo:[NSNull null]])
-				continue;
-			[view setTranslatesAutoresizingMaskIntoConstraints:NO];
-			[contentView addSubview:view];
-		}
-
-		for(NSView* view in @[ self.stopSearchButton, self.progressIndicator ])
-			[view setTranslatesAutoresizingMaskIntoConstraints:NO];
+		OakAddAutoLayoutViewsToSuperview([self.allViews allValues], contentView);
 
 		[self updateConstraints];
 
@@ -713,14 +704,8 @@ static NSButton* OakCreateStopSearchButton ()
 
 	NSView* view = self.resultsViewController.view;
 	if(_showsResultsOutlineView = flag)
-	{
-		[view setTranslatesAutoresizingMaskIntoConstraints:NO];
-		[self.window.contentView addSubview:view];
-	}
-	else
-	{
-		[view removeFromSuperview];
-	}
+			OakAddAutoLayoutViewsToSuperview(@[ view ], self.window.contentView);
+	else	[view removeFromSuperview];
 
 	[self updateConstraints];
 
@@ -758,17 +743,16 @@ static NSButton* OakCreateStopSearchButton ()
 	if(_busy == busyFlag)
 		return;
 
+	NSArray* busyViews = @[ self.stopSearchButton, self.progressIndicator ];
 	if(_busy = busyFlag)
 	{
-		[self.window.contentView addSubview:self.stopSearchButton];
-		[self.window.contentView addSubview:self.progressIndicator];
+		OakAddAutoLayoutViewsToSuperview(busyViews, self.window.contentView);
 		[self.progressIndicator startAnimation:self];
 	}
 	else
 	{
-		[self.stopSearchButton removeFromSuperview];
 		[self.progressIndicator stopAnimation:self];
-		[self.progressIndicator removeFromSuperview];
+		[busyViews makeObjectsPerformSelector:@selector(removeFromSuperview)];
 	}
 	[self updateConstraints];
 }

@@ -1,4 +1,5 @@
 #import "OakScopeBarView.h"
+#import "OakUIConstructionFunctions.h"
 
 static NSButton* OakCreateScopeButton (NSString* label, NSUInteger tag, SEL action, id target)
 {
@@ -36,16 +37,11 @@ static NSButton* OakCreateScopeButton (NSString* label, NSUInteger tag, SEL acti
 		[button removeFromSuperview];
 
 	NSMutableArray* buttons = [NSMutableArray new];
+	for(NSInteger i = 0; i < anArray.count; ++i)
+		[buttons addObject:OakCreateScopeButton(anArray[i], i, @selector(takeSelectedIndexFrom:), self)];
 	_buttons = buttons;
 
-	for(NSInteger i = 0; i < anArray.count; ++i)
-	{
-		NSView* button = OakCreateScopeButton(anArray[i], i, @selector(takeSelectedIndexFrom:), self);
-		[buttons addObject:button];
-		[button setTranslatesAutoresizingMaskIntoConstraints:NO];
-		[self addSubview:button];
-	}
-
+	OakAddAutoLayoutViewsToSuperview(_buttons, self);
 	if(_buttons.count)
 		self.selectedIndex = 0;
 

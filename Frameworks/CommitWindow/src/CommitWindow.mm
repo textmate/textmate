@@ -169,13 +169,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 		_bottomDocumentViewDivider = OakCreateHorizontalLine([NSColor grayColor]);
 
 		NSView* contentView = self.window.contentView;
-		for(NSView* view in [self.allViews allValues])
-		{
-			if([view isEqualTo:[NSNull null]])
-				continue;
-			[view setTranslatesAutoresizingMaskIntoConstraints:NO];
-			[contentView addSubview:view];
-		}
+		OakAddAutoLayoutViewsToSuperview([self.allViews allValues], contentView);
 
 		NSDictionary* views = self.allViews;
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[previousMessages(>=200)]-(20)-|" options:0 metrics:nil views:views]];
@@ -321,11 +315,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 	_actionPopUpButton.bezelStyle = NSTexturedRoundedBezelStyle;
 	_actionPopUpButton.menu.delegate = self;
 
-	for(NSView* view in @[ _topScrollViewDivider, _scrollView, _bottomScrollViewDivider, _actionPopUpButton ])
-	{
-		[view setTranslatesAutoresizingMaskIntoConstraints:NO];
-		[contentView addSubview:view];
-	}
+	OakAddAutoLayoutViewsToSuperview(@[ _topScrollViewDivider, _scrollView, _bottomScrollViewDivider, _actionPopUpButton ], contentView);
 
 	NSMutableArray* scrollViewConstraints = [NSMutableArray array];
 	NSDictionary* views = self.allViews;

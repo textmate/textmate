@@ -110,11 +110,7 @@ static NSPopUpButton* OakCreateFolderPopUpButton ()
 			@"bottomDivider" : _bottomDivider,
 		};
 
-		for(NSView* view in [views allValues])
-		{
-			[view setTranslatesAutoresizingMaskIntoConstraints:NO];
-			[self addSubview:view];
-		}
+		OakAddAutoLayoutViewsToSuperview([views allValues], self);
 
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(-3)-[folder(>=75)]-(3)-[divider]-(2)-[back(==22)]-(2)-[forward(==back)]-(3)-|" options:0 metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[bottomDivider]|"                                                                options:0 metrics:nil views:views]];

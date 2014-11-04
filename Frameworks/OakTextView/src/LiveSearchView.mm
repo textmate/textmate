@@ -20,11 +20,7 @@
 			@"textField" : self.textField,
 		};
 
-		for(NSView* view in [views allValues])
-		{
-			[view setTranslatesAutoresizingMaskIntoConstraints:NO];
-			[self addSubview:view];
-		}
+		OakAddAutoLayoutViewsToSuperview([views allValues], self);
 
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[divider]|" options:0 metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[textField]-(8)-|" options:0 metrics:nil views:views]];

@@ -240,11 +240,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		self.editButton.target   = self;
 		self.editButton.action   = @selector(editItem:);
 
-		for(NSView* view in [self.allViews allValues])
-		{
-			[view setTranslatesAutoresizingMaskIntoConstraints:NO];
-			[self.window.contentView addSubview:view];
-		}
+		OakAddAutoLayoutViewsToSuperview([self.allViews allValues], self.window.contentView);
 
 		[self setupLayoutConstraints];
 		self.window.defaultButtonCell = self.selectButton.cell;

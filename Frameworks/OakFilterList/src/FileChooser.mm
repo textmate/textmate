@@ -251,11 +251,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 		};
 
 		NSView* contentView = self.window.contentView;
-		for(NSView* view in [views allValues])
-		{
-			[view setTranslatesAutoresizingMaskIntoConstraints:NO];
-			[contentView addSubview:view];
-		}
+		OakAddAutoLayoutViewsToSuperview([views allValues], contentView);
 
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[searchField(>=50)]-(8)-|"                      options:0 metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[aboveScopeBarDark(==aboveScopeBarLight)]|"          options:0 metrics:nil views:views]];

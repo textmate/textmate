@@ -82,11 +82,7 @@ static NSString* const kUserDefaultsFilterOutputType = @"filterOutputType";
 		};
 
 		NSView* contentView = self.window.contentView;
-		for(NSView* view in [views allValues])
-		{
-			[view setTranslatesAutoresizingMaskIntoConstraints:NO];
-			[contentView addSubview:view];
-		}
+		OakAddAutoLayoutViewsToSuperview([views allValues], contentView);
 
 		CONSTRAINT(@"H:|-[commandLabel]-[command(>=250)]-|", NSLayoutFormatAlignAllBaseline);
 		CONSTRAINT(@"H:|-[resultLabel(==commandLabel)]-[result]-(>=20)-|", NSLayoutFormatAlignAllBaseline);

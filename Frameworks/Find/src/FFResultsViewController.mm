@@ -76,11 +76,7 @@
 		remove.image      = [NSImage imageNamed:NSImageNameRemoveTemplate];
 
 		NSDictionary* views = @{ @"icon" : imageView, @"text" : textField, @"count" : countOfLeafs, @"remove" : remove };
-		for(NSView* child in [views allValues])
-		{
-			[child setTranslatesAutoresizingMaskIntoConstraints:NO];
-			[self addSubview:child];
-		}
+		OakAddAutoLayoutViewsToSuperview([views allValues], self);
 
 		[textField setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
 		[countOfLeafs setContentCompressionResistancePriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
@@ -234,11 +230,7 @@
 		};
 
 		NSView* containerView = [[NSView alloc] initWithFrame:NSZeroRect];
-		for(NSView* view in [views allValues])
-		{
-			[view setTranslatesAutoresizingMaskIntoConstraints:NO];
-			[containerView addSubview:view];
-		}
+		OakAddAutoLayoutViewsToSuperview([views allValues], containerView);
 
 		[containerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[topDivider][scrollView][bottomDivider]|" options:NSLayoutFormatAlignAllLeading|NSLayoutFormatAlignAllTrailing metrics:nil views:views]];
 		[containerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView]|" options:0 metrics:nil views:views]];

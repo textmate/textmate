@@ -279,11 +279,7 @@ static NSTextView* MyCreateTextView ()
 		[contentView setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
 		self.contentView = contentView;
 
-		for(NSView* view in [[self allViews] allValues])
-		{
-			[view setTranslatesAutoresizingMaskIntoConstraints:NO];
-			[contentView addSubview:view];
-		}
+		OakAddAutoLayoutViewsToSuperview([[self allViews] allValues], contentView);
 
 		[self.window.contentView addSubview:contentView];
 		self.window.defaultButtonCell = self.openButton.cell;

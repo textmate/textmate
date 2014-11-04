@@ -115,35 +115,28 @@ private:
 		textScrollView.autohidesScrollers    = YES;
 		textScrollView.borderType            = NSNoBorder;
 		textScrollView.documentView          = textView;
-		[self addSubview:textScrollView];
 
 		gutterView = [[GutterView alloc] initWithFrame:NSZeroRect];
 		gutterView.partnerView = textView;
 		gutterView.delegate    = self;
 		[gutterView insertColumnWithIdentifier:kBookmarksColumnIdentifier atPosition:0 dataSource:self delegate:self];
 		[gutterView insertColumnWithIdentifier:kFoldingsColumnIdentifier atPosition:2 dataSource:self delegate:self];
+		if([[NSUserDefaults standardUserDefaults] boolForKey:@"DocumentView Disable Line Numbers"])
+			[gutterView setVisibility:NO forColumnWithIdentifier:GVLineNumbersColumnIdentifier];
+		[gutterView setTranslatesAutoresizingMaskIntoConstraints:NO];
 
 		gutterScrollView = [[OakDisableAccessibilityScrollView alloc] initWithFrame:NSZeroRect];
 		gutterScrollView.borderType   = NSNoBorder;
 		gutterScrollView.documentView = gutterView;
-		[self addSubview:gutterScrollView];
-
-		if([[NSUserDefaults standardUserDefaults] boolForKey:@"DocumentView Disable Line Numbers"])
-			[gutterView setVisibility:NO forColumnWithIdentifier:GVLineNumbersColumnIdentifier];
 
 		gutterDividerView = OakCreateVerticalLine(nil);
-		[self addSubview:gutterDividerView];
-
 		statusDividerView = OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1], [NSColor colorWithCalibratedWhite:0.750 alpha:1]);
-		[self addSubview:statusDividerView];
 
 		statusBar = [[OTVStatusBar alloc] initWithFrame:NSZeroRect];
 		statusBar.delegate = self;
 		statusBar.target = self;
-		[self addSubview:statusBar];
 
-		for(NSView* view in @[ gutterScrollView, gutterView, gutterDividerView, textScrollView, statusDividerView, statusBar ])
-			[view setTranslatesAutoresizingMaskIntoConstraints:NO];
+		OakAddAutoLayoutViewsToSuperview(@[ gutterScrollView, gutterDividerView, textScrollView, statusDividerView, statusBar ], self);
 
 		document::document_ptr doc = document::from_content("", "text.plain"); // file type is only to avoid potential “no grammar” warnings in console
 		doc->set_custom_name("null document"); // without a name it grabs an ‘untitled’ token
@@ -474,14 +467,12 @@ private:
 
 - (void)addAuxiliaryView:(NSView*)aView atEdge:(NSRectEdge)anEdge
 {
-	[aView setTranslatesAutoresizingMaskIntoConstraints:NO];
-
 	topAuxiliaryViews    = topAuxiliaryViews    ?: [NSMutableArray new];
 	bottomAuxiliaryViews = bottomAuxiliaryViews ?: [NSMutableArray new];
 	if(anEdge == NSMinYEdge)
 			[bottomAuxiliaryViews addObject:aView];
 	else	[topAuxiliaryViews addObject:aView];
-	[self addSubview:aView];
+	OakAddAutoLayoutViewsToSuperview(@[ aView ], self);
 	[self setNeedsUpdateConstraints:YES];
 }
 
@@ -1095,11 +1086,7 @@ private:
 			@"printHeaders" : printHeaders
 		};
 
-		for(NSView* view in [views allValues])
-		{
-			[view setTranslatesAutoresizingMaskIntoConstraints:NO];
-			[contentView addSubview:view];
-		}
+		OakAddAutoLayoutViewsToSuperview([views allValues], contentView);
 
 		NSMutableArray* constraints = [NSMutableArray array];
 		CONSTRAINT(@"H:|-[themesLabel]-[themes]-|",  NSLayoutFormatAlignAllBaseline);

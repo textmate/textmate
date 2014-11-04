@@ -256,11 +256,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 		@"actions"        : _actionsView,
 	};
 
-	for(NSView* view in [views allValues])
-	{
-		[view setTranslatesAutoresizingMaskIntoConstraints:NO];
-		[_view addSubview:view];
-	}
+	OakAddAutoLayoutViewsToSuperview([views allValues], _view);
 
 	[_view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[browser(==header,==actionsDivider,==actions)]|" options:0 metrics:nil views:views]];
 	[_view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[header][browser][actionsDivider][actions]|"     options:NSLayoutFormatAlignAllLeft metrics:nil views:views]];
