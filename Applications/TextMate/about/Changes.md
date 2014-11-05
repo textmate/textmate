@@ -2,6 +2,12 @@ Title: Release Notes
 
 # Changes
 
+## 2014-11-05 (v2.0-beta.5.4)
+
+* Improve stability on Yosemite.
+* The chooser windows (⌘T, ⇧⌘O, etc.) are now view-based and thus a bit more fancy. Consider it work-in-progress.
+* See [all changes since v2.0-beta.5](https://github.com/textmate/textmate/compare/v2.0-beta.5...v2.0-beta.5.4).
+
 ## 2014-10-29 (v2.0-beta.5)
 
 * Items in the bundle editor now have a context menu with “Show in Finder”. For items with local changes, this item turns into a submenu, showing all the location of the item.
