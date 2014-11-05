@@ -8,6 +8,72 @@
 #import <ns/ns.h>
 #import <text/ranker.h>
 
+@interface OakFileTableCellView ()
+@property (nonatomic) NSTextField* folderTextField;
+@end
+
+@implementation OakFileTableCellView
+- (instancetype)initWithCloseButton:(NSButton*)closeButton
+{
+	if((self = [super init]))
+	{
+		NSImageView* imageView = [NSImageView new];
+		[imageView setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
+
+		NSTextField* fileTextField = OakCreateLabel(@"", [NSFont boldSystemFontOfSize:14]);
+		NSTextField* folderTextField = OakCreateLabel(@"", [NSFont controlContentFontOfSize:10]);
+
+		NSDictionary* views = @{ @"icon" : imageView, @"file" : fileTextField, @"folder" : folderTextField, @"close" : closeButton };
+		OakAddAutoLayoutViewsToSuperview([views allValues], self);
+
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(4)-[icon]-(4)-[file]-(4)-[close(==16)]-(8)-|" options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[file][folder]-(4)-|" options:NSLayoutFormatAlignAllLeading|NSLayoutFormatAlignAllTrailing metrics:nil views:views]];
+		[self addConstraint:[NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:imageView attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
+		[self addConstraint:[NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:closeButton attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
+
+		[imageView bind:NSValueBinding toObject:self withKeyPath:@"objectValue.icon" options:nil];
+		[fileTextField bind:NSValueBinding toObject:self withKeyPath:@"objectValue.name" options:nil];
+		[folderTextField bind:NSValueBinding toObject:self withKeyPath:@"objectValue.folder" options:nil];
+
+		self.imageView       = imageView;
+		self.textField       = fileTextField;
+		self.folderTextField = folderTextField;
+	}
+	return self;
+}
+
+- (void)setBackgroundStyle:(NSBackgroundStyle)backgroundStyle
+{
+	[super setBackgroundStyle:backgroundStyle];
+	if(backgroundStyle == NSBackgroundStyleDark)
+	{
+		NSMutableAttributedString* str = [self.textField.attributedStringValue mutableCopy];
+		if(!str)
+			str = [[NSMutableAttributedString alloc] initWithString:self.textField.stringValue attributes:nil];
+
+		NSShadow* shadow = [NSShadow new];
+		[shadow setShadowColor:[NSColor colorWithCalibratedWhite:0 alpha:0.5]];
+		[shadow setShadowOffset:NSMakeSize(0, -1)];
+		[shadow setShadowBlurRadius:1];
+
+		[str addAttributes:@{ NSShadowAttributeName : shadow } range:NSMakeRange(0, str.string.length)];
+		self.textField.attributedStringValue = str;
+
+		self.folderTextField.textColor = [NSColor colorWithCalibratedWhite:0.9 alpha:1];
+	}
+	else
+	{
+		if(NSMutableAttributedString* str = [self.textField.attributedStringValue mutableCopy])
+		{
+			[str removeAttribute:NSShadowAttributeName range:NSMakeRange(0, str.string.length)];
+			self.textField.attributedStringValue = str;
+		}
+
+		self.folderTextField.textColor = [NSColor colorWithCalibratedWhite:0.5 alpha:1];
+	}
+}
+@end
+
 NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string const& in, std::vector< std::pair<size_t, size_t> > const& ranges, size_t offset)
 {
 	NSMutableParagraphStyle* paragraphStyle = [[NSMutableParagraphStyle alloc] init];

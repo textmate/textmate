@@ -59,6 +59,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 		self.window.title = @"Open Favorite";
 		self.window.frameAutosaveName = @"Open Favorite";
 		self.tableView.allowsMultipleSelection = YES;
+		self.tableView.rowHeight = 38;
 
 		OakScopeBarView* scopeBar = [OakScopeBarView new];
 		scopeBar.labels = self.sourceListLabels;
@@ -96,16 +97,9 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 
 - (NSView*)tableView:(NSTableView*)aTableView viewForTableColumn:(NSTableColumn*)aTableColumn row:(NSInteger)row
 {
-	NSString* identifier = aTableColumn.identifier;
-	NSTableCellView* res = [aTableView makeViewWithIdentifier:identifier owner:self];
+	NSTableCellView* res = [aTableView makeViewWithIdentifier:aTableColumn.identifier owner:self];
 	if(!res)
 	{
-		res = [NSTableCellView new];
-		res.identifier = identifier;
-
-		NSImageView* imageView = [NSImageView new];
-		NSTextField* textField = OakCreateLabel(@"", [NSFont controlContentFontOfSize:0]);
-
 		NSButton* removeButton = [NSButton new];
 		[[removeButton cell] setControlSize:NSSmallControlSize];
 		removeButton.bezelStyle = NSRoundRectBezelStyle;
@@ -114,18 +108,10 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 		removeButton.target     = self;
 		removeButton.action     = @selector(takeItemToRemoveFrom:);
 
-		NSDictionary* views = @{ @"icon" : imageView, @"text" : textField, @"remove" : removeButton };
-		OakAddAutoLayoutViewsToSuperview([views allValues], res);
+		res = [[OakFileTableCellView alloc] initWithCloseButton:removeButton];
+		res.identifier = aTableColumn.identifier;
 
-		[res addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(5)-[icon(==16)]-(4)-[text]-[remove(==16)]-(8)-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
-		[res addConstraint:[NSLayoutConstraint constraintWithItem:imageView attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:res attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
-
-		[imageView bind:NSValueBinding toObject:res withKeyPath:@"objectValue.icon" options:nil];
-		[textField bind:NSValueBinding toObject:res withKeyPath:@"objectValue.name" options:nil];
 		[removeButton bind:NSHiddenBinding toObject:res withKeyPath:@"objectValue.isRemoveDisabled" options:nil];
-
-		res.imageView = imageView;
-		res.textField = textField;
 	}
 
 	res.objectValue = self.items[row];
@@ -152,16 +138,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 		for(id pair in [[[self sharedProjectStateDB] allObjects] sortedArrayUsingDescriptors:@[ [NSSortDescriptor sortDescriptorWithKey:@"value.lastRecentlyUsed" ascending:NO], [NSSortDescriptor sortDescriptorWithKey:@"key.lastPathComponent" ascending:YES selector:@selector(localizedCompare:)] ]])
 		{
 			if(access([pair[@"key"] fileSystemRepresentation], F_OK) == 0)
-				paths.push_back(to_s((NSString*)pair[@"key"]));
-		}
-
-		auto parents = path::disambiguate(paths);
-		for(size_t i = 0; i < paths.size(); ++i)
-		{
-			[items addObject:@{
-				@"name" : [NSString stringWithCxxString:path::display_name(paths[i], parents[i])],
-				@"path" : [NSString stringWithCxxString:paths[i]]
-			}];
+				[items addObject:@{ @"path" : pair[@"key"] }];
 		}
 	}
 	else if(_sourceIndex == kOakSourceIndexFavorites)
@@ -179,7 +156,6 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 						if(subentry->d_type == DT_DIR)
 						{
 							[items addObject:@{
-								@"name" : [NSString stringWithCxxString:text::format("%s — %s", subentry->d_name, entry->d_name + 6)],
 								@"path" : [NSString stringWithCxxString:path::join(path, subentry->d_name)],
 								@"isRemoveDisabled" : @YES
 							}];
@@ -189,26 +165,30 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 				else
 				{
 					[items addObject:@{
-						@"name" : [NSString stringWithCxxString:entry->d_name],
 						@"path" : [NSString stringWithCxxString:path],
 						@"link" : [NSString stringWithCxxString:path::join(favoritesPath, entry->d_name)]
 					}];
 				}
 			}
 		}
-		items = [[items sortedArrayUsingDescriptors:@[ [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES selector:@selector(localizedCompare:)] ]] mutableCopy];
 	}
 
 	_originalItems = [NSMutableArray new];
 	for(NSDictionary* item in items)
 	{
+		NSString* path = item[@"path"];
 		NSMutableDictionary* tmp = [item mutableCopy];
 		[tmp addEntriesFromDictionary:@{
-			@"icon" : [OakFileIconImage fileIconImageWithPath:item[@"path"] size:NSMakeSize(16, 16)],
-			@"info" : [item[@"path"] stringByAbbreviatingWithTildeInPath]
+			@"icon"   : [OakFileIconImage fileIconImageWithPath:path size:NSMakeSize(32, 32)],
+			@"name"   : [NSString stringWithCxxString:path::display_name(to_s(path))],
+			@"folder" : [[path stringByDeletingLastPathComponent] stringByAbbreviatingWithTildeInPath],
+			@"info"   : [path stringByAbbreviatingWithTildeInPath]
 		}];
 		[_originalItems addObject:tmp];
 	}
+
+	if(_sourceIndex == kOakSourceIndexFavorites)
+		_originalItems = [[_originalItems sortedArrayUsingDescriptors:@[ [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES selector:@selector(localizedCompare:)] ]] mutableCopy];
 }
 
 - (void)showWindow:(id)sender
