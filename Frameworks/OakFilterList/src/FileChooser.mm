@@ -17,6 +17,10 @@
 #import <oak/algorithm.h>
 #import <oak/duration.h>
 
+@interface NSObject (FileBrowserDelegate)
+- (void)fileBrowser:(id)aFileBrowser closeURL:(NSURL*)anURL;
+@end
+
 static NSString* const kUserDefaultsFileChooserSourceIndexKey = @"fileChooserSourceIndex";
 
 NSUInteger const kFileChooserAllSourceIndex                = 0;
@@ -601,6 +605,8 @@ static path::glob_list_t globs_for_path (std::string const& path)
 		closeButton.regularImage  = [NSImage imageNamed:@"CloseTemplate"         inSameBundleAsClass:cl];
 		closeButton.pressedImage  = [NSImage imageNamed:@"ClosePressedTemplate"  inSameBundleAsClass:cl];
 		closeButton.rolloverImage = [NSImage imageNamed:@"CloseRolloverTemplate" inSameBundleAsClass:cl];
+		closeButton.target        = self;
+		closeButton.action        = @selector(takeItemToCloseFrom:);
 
 		res = [[OakFileTableCellView alloc] initWithCloseButton:closeButton];
 		res.identifier = aTableColumn.identifier;
@@ -668,6 +674,32 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	}
 
 	[super accept:sender];
+}
+
+- (void)takeItemToCloseFrom:(NSButton*)sender
+{
+	NSInteger row = [self.tableView rowForView:sender];
+	if(row != -1)
+	{
+		NSNumber* index = self.items[row];
+		document_record_t const& record = _records[index.unsignedIntValue];
+		if(record.full_path != NULL_STR)
+		{
+			// FIXME We need a proper interface to close documents
+			if(id target = [NSApp targetForAction:@selector(fileBrowser:closeURL:)])
+			{
+				[target fileBrowser:nil closeURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:record.full_path]]];
+
+				std::vector<document::document_ptr> newDocuments;
+				for(auto const& doc : _openDocuments)
+				{
+					if(doc->path() != record.full_path)
+						newDocuments.push_back(doc);
+				}
+				self.openDocuments = newDocuments;
+			}
+		}
+	}
 }
 
 - (IBAction)goToParentFolder:(id)sender
