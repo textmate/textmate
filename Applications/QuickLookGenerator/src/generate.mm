@@ -143,7 +143,7 @@ OSStatus TextMateQuickLookPlugIn_GenerateThumbnailForURL (void* instance, QLThum
 			CGContextSaveGState(bitmapContext);
 			CGContextTranslateCTM(bitmapContext, 0.0, maxSize.height);
 			CGContextScaleCTM(bitmapContext, 1.0, -1.0);
-			[output drawAtPoint:(CGPoint){0.0, 0.0}];
+			[output drawAtPoint:NSZeroPoint];
 			CGContextRestoreGState(bitmapContext);
 			[NSGraphicsContext restoreGraphicsState];
 		}
