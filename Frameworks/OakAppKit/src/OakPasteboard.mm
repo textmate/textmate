@@ -1,6 +1,5 @@
 #import "OakPasteboard.h"
 #import "OakPasteboardSelector.h"
-#import <OakFoundation/NSArray Additions.h>
 #import <crash/info.h>
 #import <ns/ns.h>
 #import <oak/oak.h>

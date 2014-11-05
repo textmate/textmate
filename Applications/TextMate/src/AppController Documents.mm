@@ -3,7 +3,6 @@
 #import "ODBEditorSuite.h"
 #import <Preferences/Keys.h>
 #import <OakAppKit/NSSavePanel Additions.h>
-#import <OakFoundation/NSArray Additions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <ns/ns.h>
 #import <text/decode.h>

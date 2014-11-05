@@ -5,7 +5,6 @@
 #import "FFDocumentSearch.h"
 #import "Strings.h"
 #import <OakFoundation/OakFindProtocol.h>
-#import <OakFoundation/NSArray Additions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/NSAlert Additions.h>
 #import <OakAppKit/OakAppKit.h>

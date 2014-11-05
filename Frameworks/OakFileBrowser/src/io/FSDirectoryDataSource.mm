@@ -1,6 +1,5 @@
 #import "FSDirectoryDataSource.h"
 #import "FSItem.h"
-#import <OakFoundation/NSArray Additions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/OakFileIconImage.h>
 #import <OakAppKit/OakFileManager.h>

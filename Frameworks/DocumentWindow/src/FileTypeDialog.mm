@@ -8,7 +8,6 @@
 #import <ns/ns.h>
 #import <network/network.h>
 #import <OakAppKit/OakAppKit.h>
-#import <OakFoundation/NSArray Additions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <BundlesManager/BundlesManager.h>
 

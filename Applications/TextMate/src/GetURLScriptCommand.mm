@@ -1,5 +1,4 @@
 #import <document/collection.h>
-#import <OakFoundation/NSArray Additions.h>
 #import <io/path.h>
 
 @interface GetURLScriptCommand : NSScriptCommand

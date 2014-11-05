@@ -2,7 +2,6 @@
 #import "add_to_buffer.h"
 #import <OakFoundation/NSString Additions.h>
 #import <oak/debug.h>
-#import <OakFoundation/NSArray Additions.h>
 #import <document/collection.h>
 #import <text/utf8.h>
 #import <ns/ns.h>

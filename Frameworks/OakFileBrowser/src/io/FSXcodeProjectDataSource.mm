@@ -7,7 +7,6 @@
 #import <XcodeEditor/XCBuildConfigurationList.h>
 #import <XcodeEditor/XcodeGroupMember.h>
 #import <XcodeEditor/XcodeSourceFileType.h>
-#import <OakFoundation/NSArray Additions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/OakFileIconImage.h>
 #import <io/path.h>

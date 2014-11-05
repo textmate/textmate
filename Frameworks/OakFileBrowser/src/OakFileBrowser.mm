@@ -12,7 +12,6 @@
 #import <io/io.h>
 #import <oak/oak.h>
 #import <io/entries.h>
-#import <OakFoundation/NSArray Additions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakFileIconImage.h>
