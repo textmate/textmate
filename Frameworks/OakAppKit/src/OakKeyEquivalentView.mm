@@ -1,4 +1,5 @@
 #import "OakKeyEquivalentView.h"
+#import "OakRolloverButton.h"
 #import "OakUIConstructionFunctions.h"
 #import "NSImage Additions.h"
 #import <OakFoundation/OakFoundation.h>
@@ -10,14 +11,12 @@ static NSString* const kRecordingPlaceholderString = @"…";
 
 @interface OakKeyEquivalentView ()
 {
-	NSRect _clearButtonRect;
+	OakRolloverButton* _clearButton;
 	id _eventMonitor;
 	void* _hotkeyToken;
-	BOOL _mouseDown;
 }
 @property (nonatomic) NSString* displayString;
 @property (nonatomic) BOOL showClearButton;
-@property (nonatomic) BOOL mouseInClearButton;
 @end
 
 @implementation OakKeyEquivalentView
@@ -75,24 +74,29 @@ static NSString* const kRecordingPlaceholderString = @"…";
 
 	if(_showClearButton = flag)
 	{
-		Class cl = NSClassFromString(@"OFBPathInfoCell");
-		NSImage* imgNormal = [NSImage imageNamed:@"CloseTemplate" inSameBundleAsClass:cl];
+		if(!_clearButton)
+		{
+			Class cl = NSClassFromString(@"OFBPathInfoCell");
+			_clearButton = [[OakRolloverButton alloc] initWithFrame:NSZeroRect];
+			_clearButton.regularImage  = [NSImage imageNamed:@"CloseTemplate"         inSameBundleAsClass:cl];
+			_clearButton.pressedImage  = [NSImage imageNamed:@"ClosePressedTemplate"  inSameBundleAsClass:cl];
+			_clearButton.rolloverImage = [NSImage imageNamed:@"CloseRolloverTemplate" inSameBundleAsClass:cl];
+			_clearButton.refusesFirstResponder = YES;
+			_clearButton.disableWindowOrderingForFirstMouse = YES;
+			_clearButton.target = self;
+			_clearButton.action = @selector(clearKeyEquivalent:);
 
-		NSSize imgSize = imgNormal.size;
-		CGFloat imgMargin = floor((NSHeight([self bounds]) - imgSize.height) / 2);
-		_clearButtonRect = NSMakeRect(NSWidth([self bounds]) - imgSize.width - imgMargin, imgMargin, imgSize.width, imgSize.height);
-		[self setNeedsDisplayInRect:_clearButtonRect];
-
-		[self addTrackingArea:[[NSTrackingArea alloc] initWithRect:_clearButtonRect options:NSTrackingMouseEnteredAndExited|NSTrackingActiveAlways owner:self userInfo:nil]];
+			NSDictionary* views = @{ @"clear" : _clearButton };
+			OakAddAutoLayoutViewsToSuperview([views allValues], self);
+			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(>=4)-[clear]-(4)-|" options:0 metrics:nil views:views]];
+			[self addConstraint:[NSLayoutConstraint constraintWithItem:_clearButton attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
+		}
+		_clearButton.hidden = NO;
+		[_clearButton updateTrackingAreas];
 	}
 	else
 	{
-		for(NSTrackingArea* trackingArea in self.trackingAreas)
-			[self removeTrackingArea:trackingArea];
-
-		self.mouseInClearButton = NO;
-		[self setNeedsDisplayInRect:_clearButtonRect];
-		_clearButtonRect = NSZeroRect;
+		_clearButton.hidden = YES;
 	}
 }
 
@@ -137,14 +141,6 @@ static NSString* const kRecordingPlaceholderString = @"…";
 	}
 }
 
-- (void)setMouseInClearButton:(BOOL)flag
-{
-	if(_mouseInClearButton == flag)
-		return;
-	_mouseInClearButton = flag;
-	[self setNeedsDisplayInRect:_clearButtonRect];
-}
-
 - (void)setKeyState:(NSUInteger)newState
 {
 	[super setKeyState:newState];
@@ -163,11 +159,6 @@ static NSString* const kRecordingPlaceholderString = @"…";
 	self.eventString = nil;
 }
 
-- (BOOL)isMouseDownInCloseButton:(NSEvent*)anEvent
-{
-	return self.showClearButton && [anEvent type] == NSLeftMouseDown && NSMouseInRect([self convertPoint:[anEvent locationInWindow] fromView:nil], _clearButtonRect, [self isFlipped]);
-}
-
 - (BOOL)isOpaque
 {
 	return YES;
@@ -178,55 +169,19 @@ static NSString* const kRecordingPlaceholderString = @"…";
 	return YES;
 }
 
-- (BOOL)shouldDelayWindowOrderingForEvent:(NSEvent*)anEvent
-{
-	return [self isMouseDownInCloseButton:anEvent];
-}
-
 - (BOOL)acceptsFirstResponder
 {
-	return ![self isMouseDownInCloseButton:[NSApp currentEvent]];
+	return YES;
 }
 
 - (void)mouseDown:(NSEvent*)anEvent
 {
-	if([self isMouseDownInCloseButton:anEvent])
+	if(self.window.isKeyWindow)
 	{
-		[NSApp preventWindowOrdering];
-
-		_mouseDown = YES;
-		[self setNeedsDisplayInRect:_clearButtonRect];
-
-		while(true)
-		{
-			NSPoint mousePos = [self convertPoint:[anEvent locationInWindow] fromView:nil];
-			self.mouseInClearButton = NSMouseInRect(mousePos, _clearButtonRect, [self isFlipped]);
-			if([anEvent type] == NSLeftMouseUp)
-				break;
-			anEvent = [NSApp nextEventMatchingMask:(NSLeftMouseUpMask|NSLeftMouseDraggedMask|NSRightMouseDownMask) untilDate:[NSDate distantFuture] inMode:NSEventTrackingRunLoopMode dequeue:YES];
-		}
-
-		if(self.mouseInClearButton)
-			[self clearKeyEquivalent:self];
-
-		_mouseDown = NO;
-		[self setNeedsDisplayInRect:_clearButtonRect];
+		if(self != self.window.firstResponder)
+			[self.window makeFirstResponder:self];
+		self.recording = YES;
 	}
-	else
-	{
-		if(self == [[self window] firstResponder])
-			self.recording = YES;
-	}
-}
-
-- (void)mouseEntered:(NSEvent*)anEvent
-{
-	self.mouseInClearButton = NSMouseInRect([self convertPoint:[anEvent locationInWindow] fromView:nil], _clearButtonRect, [self isFlipped]);
-}
-
-- (void)mouseExited:(NSEvent*)anEvent
-{
-	self.mouseInClearButton = NSMouseInRect([self convertPoint:[anEvent locationInWindow] fromView:nil], _clearButtonRect, [self isFlipped]);
 }
 
 - (void)keyDown:(NSEvent*)anEvent
@@ -256,17 +211,7 @@ static NSString* const kRecordingPlaceholderString = @"…";
 	};
 
 	NSSize size = [self.displayString sizeWithAttributes:stringAttributes];
-	[self.displayString drawAtPoint:NSMakePoint(NSMidX([self visibleRect]) - size.width / 2, NSMidY([self visibleRect]) - size.height /2 ) withAttributes:stringAttributes];
-
-	if(self.showClearButton)
-	{
-		Class cl = NSClassFromString(@"OFBPathInfoCell");
-		NSImage* imgNormal = [NSImage imageNamed:@"CloseTemplate"         inSameBundleAsClass:cl];
-		NSImage* imgHover  = [NSImage imageNamed:@"CloseRolloverTemplate" inSameBundleAsClass:cl];
-		NSImage* imgDown   = [NSImage imageNamed:@"ClosePressedTemplate"  inSameBundleAsClass:cl];
-		NSImage* image = self.mouseInClearButton ? (_mouseDown ? imgDown : imgHover) : imgNormal;
-		[image drawAdjustedInRect:_clearButtonRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1];
-	}
+	[self.displayString drawAtPoint:NSMakePoint(NSMidX([self visibleRect]) - size.width / 2, NSMidY([self visibleRect]) - size.height / 2) withAttributes:stringAttributes];
 }
 
 - (void)drawFocusRingMask
