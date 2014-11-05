@@ -1,5 +1,4 @@
 #import "OakImageAndTextCell.h"
-#import "NSImage Additions.h"
 
 @implementation OakImageAndTextCell
 {
@@ -62,7 +61,7 @@
 			[[self backgroundColor] set];
 			NSRectFill(imageRect);
 		}
-		[self.image drawAdjustedInRect:imageRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1];
+		[self.image drawInRect:imageRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1 respectFlipped:YES hints:nil];
 	}
 
 	[super drawWithFrame:[self textFrameWithFrame:cellFrame inControlView:controlView] inView:controlView];
