@@ -6,6 +6,7 @@
 #import <OakAppKit/OakSound.h>
 #import <OakFileBrowser/OFBPathInfoCell.h>
 #import <OakFoundation/NSString Additions.h>
+#import <OakFoundation/NSFileManager Additions.h>
 #import <OakSystem/application.h>
 #import <text/ranker.h>
 #import <io/entries.h>
@@ -22,7 +23,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 
 @interface FavoriteChooser ()
 {
-	std::vector<std::pair<std::string, std::string>> favorites;
+	NSMutableArray* _originalItems;
 }
 @property (nonatomic) NSInteger sourceIndex;
 @property (nonatomic) NSArray* sourceListLabels;
@@ -59,10 +60,6 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 		self.window.frameAutosaveName = @"Open Favorite";
 		self.tableView.allowsMultipleSelection = YES;
 
-		NSCell* cell = [OFBPathInfoCell new];
-		cell.lineBreakMode = NSLineBreakByTruncatingMiddle;
-		[[self.tableView tableColumnWithIdentifier:@"name"] setDataCell:cell];
-
 		OakScopeBarView* scopeBar = [OakScopeBarView new];
 		scopeBar.labels = self.sourceListLabels;
 
@@ -97,13 +94,42 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 - (IBAction)selectNextTab:(id)sender     { self.sourceIndex = (self.sourceIndex + 1) % self.sourceListLabels.count; }
 - (IBAction)selectPreviousTab:(id)sender { self.sourceIndex = (self.sourceIndex + self.sourceListLabels.count - 1) % self.sourceListLabels.count; }
 
-- (void)tableView:(NSTableView*)aTableView willDisplayCell:(OFBPathInfoCell*)cell forTableColumn:(NSTableColumn*)aTableColumn row:(NSInteger)rowIndex
+- (NSView*)tableView:(NSTableView*)aTableView viewForTableColumn:(NSTableColumn*)aTableColumn row:(NSInteger)row
 {
-	if(![aTableColumn.identifier isEqualToString:@"name"])
-		return;
+	NSString* identifier = aTableColumn.identifier;
+	NSTableCellView* res = [aTableView makeViewWithIdentifier:identifier owner:self];
+	if(!res)
+	{
+		res = [NSTableCellView new];
+		res.identifier = identifier;
 
-	if([cell respondsToSelector:@selector(setImage:)])
-		[cell setImage:self.items[rowIndex][@"icon"]];
+		NSImageView* imageView = [NSImageView new];
+		NSTextField* textField = OakCreateLabel(@"", [NSFont controlContentFontOfSize:0]);
+
+		NSButton* removeButton = [NSButton new];
+		[[removeButton cell] setControlSize:NSSmallControlSize];
+		removeButton.bezelStyle = NSRoundRectBezelStyle;
+		removeButton.buttonType = NSMomentaryPushInButton;
+		removeButton.image      = [NSImage imageNamed:NSImageNameRemoveTemplate];
+		removeButton.target     = self;
+		removeButton.action     = @selector(takeItemToRemoveFrom:);
+
+		NSDictionary* views = @{ @"icon" : imageView, @"text" : textField, @"remove" : removeButton };
+		OakAddAutoLayoutViewsToSuperview([views allValues], res);
+
+		[res addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(5)-[icon(==16)]-(4)-[text]-[remove(==16)]-(8)-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
+		[res addConstraint:[NSLayoutConstraint constraintWithItem:imageView attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:res attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
+
+		[imageView bind:NSValueBinding toObject:res withKeyPath:@"objectValue.icon" options:nil];
+		[textField bind:NSValueBinding toObject:res withKeyPath:@"objectValue.name" options:nil];
+		[removeButton bind:NSHiddenBinding toObject:res withKeyPath:@"objectValue.isRemoveDisabled" options:nil];
+
+		res.imageView = imageView;
+		res.textField = textField;
+	}
+
+	res.objectValue = self.items[row];
+	return res;
 }
 
 - (void)setSourceIndex:(NSInteger)newIndex
@@ -113,40 +139,13 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 
 	_sourceIndex = newIndex;
 	[self loadItems:self];
+	[self updateItems:self];
 	[[NSUserDefaults standardUserDefaults] setInteger:newIndex forKey:kUserDefaultsOpenProjectSourceIndex];
-}
-
-- (void)scanFavoritesDirectory:(id)sender
-{
-	std::multimap<std::string, std::string, text::less_t> items;
-
-	std::string const favoritesPath = oak::application_t::support("Favorites");
-	for(auto const& entry : path::entries(favoritesPath))
-	{
-		if(entry->d_type == DT_LNK)
-		{
-			std::string const path = path::resolve(path::join(favoritesPath, entry->d_name));
-			if(strncmp("[DIR] ", entry->d_name, 6) == 0)
-			{
-				for(auto const& subentry : path::entries(path))
-				{
-					if(subentry->d_type == DT_DIR)
-						items.emplace(text::format("%s — %s", subentry->d_name, entry->d_name + 6), path::join(path, subentry->d_name));
-				}
-			}
-			else
-			{
-				items.emplace(entry->d_name, path);
-			}
-		}
-	}
-
-	favorites.clear();
-	std::copy(items.begin(), items.end(), back_inserter(favorites));
 }
 
 - (void)loadItems:(id)sender
 {
+	NSMutableArray* items = [NSMutableArray new];
 	if(_sourceIndex == kOakSourceIndexRecentProjects)
 	{
 		std::vector<std::string> paths;
@@ -155,17 +154,61 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 			if(access([pair[@"key"] fileSystemRepresentation], F_OK) == 0)
 				paths.push_back(to_s((NSString*)pair[@"key"]));
 		}
-		auto parents = path::disambiguate(paths);
 
-		favorites.clear();
+		auto parents = path::disambiguate(paths);
 		for(size_t i = 0; i < paths.size(); ++i)
-			favorites.emplace_back(path::display_name(paths[i], parents[i]), paths[i]);
+		{
+			[items addObject:@{
+				@"name" : [NSString stringWithCxxString:path::display_name(paths[i], parents[i])],
+				@"path" : [NSString stringWithCxxString:paths[i]]
+			}];
+		}
 	}
 	else if(_sourceIndex == kOakSourceIndexFavorites)
 	{
-		[self scanFavoritesDirectory:self];
+		std::string const favoritesPath = oak::application_t::support("Favorites");
+		for(auto const& entry : path::entries(favoritesPath))
+		{
+			if(entry->d_type == DT_LNK)
+			{
+				std::string const path = path::resolve(path::join(favoritesPath, entry->d_name));
+				if(strncmp("[DIR] ", entry->d_name, 6) == 0)
+				{
+					for(auto const& subentry : path::entries(path))
+					{
+						if(subentry->d_type == DT_DIR)
+						{
+							[items addObject:@{
+								@"name" : [NSString stringWithCxxString:text::format("%s — %s", subentry->d_name, entry->d_name + 6)],
+								@"path" : [NSString stringWithCxxString:path::join(path, subentry->d_name)],
+								@"isRemoveDisabled" : @YES
+							}];
+						}
+					}
+				}
+				else
+				{
+					[items addObject:@{
+						@"name" : [NSString stringWithCxxString:entry->d_name],
+						@"path" : [NSString stringWithCxxString:path],
+						@"link" : [NSString stringWithCxxString:path::join(favoritesPath, entry->d_name)]
+					}];
+				}
+			}
+		}
+		items = [[items sortedArrayUsingDescriptors:@[ [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES selector:@selector(localizedCompare:)] ]] mutableCopy];
 	}
-	[self updateItems:self];
+
+	_originalItems = [NSMutableArray new];
+	for(NSDictionary* item in items)
+	{
+		NSMutableDictionary* tmp = [item mutableCopy];
+		[tmp addEntriesFromDictionary:@{
+			@"icon" : [OakFileIconImage fileIconImageWithPath:item[@"path"] size:NSMakeSize(16, 16)],
+			@"info" : [item[@"path"] stringByAbbreviatingWithTildeInPath]
+		}];
+		[_originalItems addObject:tmp];
+	}
 }
 
 - (void)showWindow:(id)sender
@@ -174,6 +217,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 	{
 		self.filterString = @"";
 		[self loadItems:self];
+		[self updateItems:self];
 		if([self.tableView numberOfRows])
 			[self.tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
 	}
@@ -182,40 +226,39 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 
 - (void)updateItems:(id)sender
 {
+	NSArray* bindings = [[OakAbbreviations abbreviationsForName:@"OakFavoriteChooserBindings"] stringsForAbbreviation:self.filterString];
 	std::string const filter = to_s(self.filterString);
 
-	std::vector<std::string> bindings;
-	for(NSString* str in [[OakAbbreviations abbreviationsForName:@"OakFavoriteChooserBindings"] stringsForAbbreviation:self.filterString])
-		bindings.push_back(to_s(str));
-
 	std::multimap<double, NSDictionary*> ranked;
-	for(auto const& pair : favorites)
+	for(NSDictionary* __strong item in _originalItems)
 	{
+		NSString* name = item[@"name"];
+
 		double rank = ranked.size();
-		id name = [NSString stringWithCxxString:pair.first];
+		std::vector<std::pair<size_t, size_t>> ranges;
 		if(filter != NULL_STR && filter != "")
 		{
-			std::vector<std::pair<size_t, size_t>> ranges;
-			rank = oak::rank(filter, pair.first, &ranges);
+			rank = oak::rank(filter, to_s(name), &ranges);
 			if(rank <= 0)
 				continue;
 
-			size_t bindingIndex = std::find(bindings.begin(), bindings.end(), pair.second) - bindings.begin();
-			if(bindingIndex != bindings.size())
-					rank = -1.0 * (bindings.size() - bindingIndex);
+			NSUInteger bindingIndex = [bindings indexOfObject:item[@"path"]];
+			if(bindingIndex != NSNotFound)
+					rank = -1.0 * (bindings.count - bindingIndex);
 			else	rank = -rank;
-			name = CreateAttributedStringWithMarkedUpRanges(pair.first, ranges);
 		}
 
-		ranked.emplace(rank, @{
-			@"name" : name,
-			@"info" : [NSString stringWithCxxString:path::with_tilde(pair.second)],
-			@"path" : [NSString stringWithCxxString:pair.second],
-			@"icon" : [OakFileIconImage fileIconImageWithPath:[NSString stringWithCxxString:pair.second] size:NSMakeSize(16, 16)],
-		});
+		if(!ranges.empty())
+		{
+			NSMutableDictionary* tmp = [item mutableCopy];
+			tmp[@"name"] = CreateAttributedStringWithMarkedUpRanges(to_s(name), ranges);
+			item = tmp;
+		}
+
+		ranked.emplace(rank, item);
 	}
 
-	NSMutableArray* res = [NSMutableArray array];
+	NSMutableArray* res = [NSMutableArray new];
 	for(auto const& pair : ranked)
 		[res addObject:pair.second];
 	self.items = res;
@@ -254,27 +297,35 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 	[super accept:sender];
 }
 
+- (void)removeItemsAtIndexes:(NSIndexSet*)anIndexSet
+{
+	NSMutableArray* items = [self.items mutableCopy];
+	anIndexSet = [anIndexSet indexesPassingTest:^BOOL(NSUInteger idx, BOOL* stop){
+		return ![items[idx][@"isRemoveDisabled"] boolValue];
+	}];
+
+	for(NSDictionary* item in [items objectsAtIndexes:anIndexSet])
+	{
+		if(NSString* link = item[@"link"])
+			[[NSFileManager defaultManager] tmTrashItemAtURL:[NSURL fileURLWithPath:link] resultingItemURL:nil error:nil];
+		else if(NSString* path = item[@"path"])
+			[[self sharedProjectStateDB] removeObjectForKey:path];
+	}
+
+	[self loadItems:self]; // update originalItems
+	[super removeItemsAtIndexes:anIndexSet];
+}
+
+- (void)takeItemToRemoveFrom:(NSButton*)sender
+{
+	NSInteger row = [self.tableView rowForView:sender];
+	if(row != -1)
+		[self removeItemsAtIndexes:[NSIndexSet indexSetWithIndex:row]];
+}
+
 - (void)delete:(id)sender
 {
-	NSArray* items = self.selectedItems;
-	if(!items.count)
-		return;
-
-	for(NSDictionary* item in items)
-	{
-		NSString* path = item[@"path"];
-		if(self.sourceIndex == kOakSourceIndexRecentProjects)
-		{
-			KVDB* db = [self sharedProjectStateDB];
-			[db removeObjectForKey:path];
-		}
-		else if(self.sourceIndex == kOakSourceIndexFavorites)
-		{
-			NSLog(@"%s %@", sel_getName(_cmd), path);
-		}
-	}
-	[self loadItems:self];
-	OakPlayUISound(OakSoundDidTrashItemUISound);
+	[self removeItemsAtIndexes:[self.tableView selectedRowIndexes]];
 }
 
 - (void)takeSourceIndexFrom:(id)sender

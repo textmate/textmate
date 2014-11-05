@@ -1,10 +1,11 @@
 #import "BundleItemChooser.h"
 #import "OakAbbreviations.h"
-#import "ui/OakBundleItemCell.h"
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakAppKit/OakKeyEquivalentView.h>
 #import <OakAppKit/OakScopeBarView.h>
+#import <OakAppKit/OakFileIconImage.h>
+#import <OakAppKit/NSImage Additions.h>
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <bundles/bundles.h>
@@ -153,6 +154,116 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 }
 @end
 
+@interface BundleItemTableCellView : NSTableCellView
+@property (nonatomic) NSTextField* shortcutTextField;
+@end
+
+@implementation BundleItemTableCellView
+- (id)init
+{
+	if((self = [super init]))
+	{
+		NSImageView* imageView = [NSImageView new];
+		NSTextField* textField = OakCreateLabel(@"", [NSFont controlContentFontOfSize:0]);
+		NSTextField* shortcutTextField = OakCreateLabel(@"", [NSFont controlContentFontOfSize:0]);
+
+		[shortcutTextField setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
+		[shortcutTextField setContentCompressionResistancePriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
+
+		NSDictionary* views = @{ @"icon" : imageView, @"text" : textField, @"shortcut" : shortcutTextField };
+		OakAddAutoLayoutViewsToSuperview([views allValues], self);
+
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(5)-[icon(==16)]-(4)-[text]-[shortcut]-(8)-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
+		[self addConstraint:[NSLayoutConstraint constraintWithItem:imageView attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
+
+		self.imageView         = imageView;
+		self.textField         = textField;
+		self.shortcutTextField = shortcutTextField;
+	}
+	return self;
+}
+
+- (void)setObjectValue:(BundleItemChooserItem*)bundleItem
+{
+	std::map<bundles::kind_t, NSString*> const map = {
+		{ bundles::kItemTypeCommand,     @"Command"      },
+		{ bundles::kItemTypeDragCommand, @"Drag Command" },
+		{ bundles::kItemTypeSnippet,     @"Snippet"      },
+		{ bundles::kItemTypeSettings,    @"Settings"     },
+		{ bundles::kItemTypeGrammar,     @"Grammar"      },
+		{ bundles::kItemTypeProxy,       @"Proxy"        },
+		{ bundles::kItemTypeTheme,       @"Theme"        },
+		{ bundles::kItemTypeMacro,       @"Macro"        },
+	};
+
+	NSImage* image = nil;
+	if(bundleItem.item)
+	{
+		auto it = map.find(bundleItem.item->kind());
+		if(it != map.end())
+			image = [NSImage imageNamed:it->second inSameBundleAsClass:NSClassFromString(@"BundleEditor")];
+	}
+	else if(bundleItem.menuItem)
+	{
+		image = [NSImage imageNamed:@"MenuItem" inSameBundleAsClass:NSClassFromString(@"BundleEditor")];
+	}
+	else if(bundleItem.path)
+	{
+		image = [OakFileIconImage fileIconImageWithPath:bundleItem.path size:NSMakeSize(16, 16)];
+	}
+
+	self.imageView.image       = image;
+	self.textField.objectValue = bundleItem.name;
+
+	std::string shortcut = NULL_STR;
+	if(bundleItem.item)
+		shortcut = key_equivalent(bundleItem.item);
+	else if(bundleItem.menuItem)
+		shortcut = key_equivalent_for_menu_item(bundleItem.menuItem);
+
+	id str = nil;
+	if(shortcut != NULL_STR)
+	{
+		self.shortcutTextField.font = [NSFont controlContentFontOfSize:0];
+
+		size_t keyStartsAt = 0;
+		std::string const glyphString = ns::glyphs_for_event_string(shortcut, &keyStartsAt);
+		NSString* modifiers = [NSString stringWithCxxString:glyphString.substr(0, keyStartsAt)];
+		NSString* key       = [NSString stringWithCxxString:glyphString.substr(keyStartsAt)];
+
+		NSDictionary* fontAttr = @{ NSFontAttributeName : self.shortcutTextField.font };
+		CGFloat curWidth = std::max<CGFloat>(1, [key sizeWithAttributes:fontAttr].width);
+		CGFloat maxWidth = std::max<CGFloat>(1, [@"⌫" sizeWithAttributes:fontAttr].width);
+
+		if(curWidth < maxWidth)
+		{
+			CGFloat width = std::max<CGFloat>(1, [modifiers sizeWithAttributes:fontAttr].width);
+
+			NSMutableAttributedString* aStr = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@%@\t", modifiers, key] attributes:fontAttr];
+			NSMutableParagraphStyle* pStyle = [NSMutableParagraphStyle new];
+			[pStyle setTabStops:@[ [[NSTextTab alloc] initWithType:NSLeftTabStopType location:width + maxWidth] ]];
+			[aStr addAttributes:@{ NSParagraphStyleAttributeName : pStyle } range:NSMakeRange(0, [aStr length])];
+
+			str = aStr;
+		}
+		else
+		{
+			str = [modifiers stringByAppendingString:key];
+		}
+	}
+	else if(bundleItem.item)
+	{
+		std::string tabTrigger = bundleItem.item->value_for_field(bundles::kFieldTabTrigger);
+		if(tabTrigger != NULL_STR)
+		{
+			str = [NSString stringWithCxxString:tabTrigger + "⇥"];
+			self.shortcutTextField.font = [NSFont controlContentFontOfSize:10];
+		}
+	}
+	self.shortcutTextField.objectValue = str;
+}
+@end
+
 @interface BundleItemChooser () <NSToolbarDelegate>
 @property (nonatomic) OakKeyEquivalentView* keyEquivalentView;
 @property (nonatomic) NSPopUpButton* actionsPopUpButton;
@@ -192,10 +303,6 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 
 		self.window.title = @"Select Bundle Item";
 		[self.window setContentBorderThickness:31 forEdge:NSMinYEdge];
-
-		NSCell* cell = [OakBundleItemCell new];
-		cell.lineBreakMode = NSLineBreakByTruncatingMiddle;
-		[[self.tableView tableColumnWithIdentifier:@"name"] setDataCell:cell];
 
 		self.actionsPopUpButton = OakCreateActionPopUpButton(YES /* bordered */);
 		NSMenu* actionMenu = self.actionsPopUpButton.menu;
@@ -441,22 +548,18 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		self.bundleItemField = [sender tag];
 }
 
-- (void)tableView:(NSTableView*)aTableView willDisplayCell:(OakBundleItemCell*)cell forTableColumn:(NSTableColumn*)aTableColumn row:(NSInteger)rowIndex
+- (NSView*)tableView:(NSTableView*)aTableView viewForTableColumn:(NSTableColumn*)aTableColumn row:(NSInteger)row
 {
-	if(![aTableColumn.identifier isEqualToString:@"name"])
-		return;
+	NSString* identifier = aTableColumn.identifier;
+	NSTableCellView* res = [aTableView makeViewWithIdentifier:identifier owner:self];
+	if(!res)
+	{
+		res = [BundleItemTableCellView new];
+		res.identifier = identifier;
+	}
 
-	BundleItemChooserItem* entry = self.items[rowIndex];
-	if(entry.item)
-	{
-		cell.keyEquivalentString = [NSString stringWithCxxString:key_equivalent(entry.item)];
-		cell.tabTriggerString    = [NSString stringWithCxxString:entry.item->value_for_field(bundles::kFieldTabTrigger)];
-	}
-	else if(entry.menuItem)
-	{
-		cell.keyEquivalentString = [NSString stringWithCxxString:key_equivalent_for_menu_item(entry.menuItem)];
-		cell.tabTriggerString    = nil;
-	}
+	res.objectValue = self.items[row];
+	return res;
 }
 
 - (void)updateItems:(id)sender

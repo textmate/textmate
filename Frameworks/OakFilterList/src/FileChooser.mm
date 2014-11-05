@@ -3,7 +3,9 @@
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakFileIconImage.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
+#import <OakAppKit/OakRolloverButton.h>
 #import <OakAppKit/OakScopeBarView.h>
+#import <OakAppKit/NSImage Additions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakFileBrowser/OFBPathInfoCell.h>
 #import <ns/ns.h>
@@ -224,10 +226,6 @@ static path::glob_list_t globs_for_path (std::string const& path)
 
 		[self.window setContentBorderThickness:57 forEdge:NSMaxYEdge];
 		self.tableView.allowsMultipleSelection = YES;
-
-		NSCell* cell = [OFBPathInfoCell new];
-		cell.lineBreakMode = NSLineBreakByTruncatingMiddle;
-		[[self.tableView tableColumnWithIdentifier:@"name"] setDataCell:cell];
 
 		OakScopeBarView* scopeBar = [OakScopeBarView new];
 		scopeBar.labels = self.sourceListLabels;
@@ -654,37 +652,43 @@ static path::glob_list_t globs_for_path (std::string const& path)
 // = NSTableViewDataSource =
 // =========================
 
-- (id)tableView:(NSTableView*)aTableView objectValueForTableColumn:(NSTableColumn*)aTableColumn row:(NSInteger)rowIndex
+- (NSView*)tableView:(NSTableView*)aTableView viewForTableColumn:(NSTableColumn*)aTableColumn row:(NSInteger)row
 {
-	if([aTableColumn.identifier isEqualToString:@"name"])
+	NSString* identifier = aTableColumn.identifier;
+	NSTableCellView* res = [aTableView makeViewWithIdentifier:identifier owner:self];
+	if(!res)
 	{
-		NSNumber* index = self.items[rowIndex];
-		document_record_t const& record = _records[index.unsignedIntValue];
+		res = [NSTableCellView new];
+		res.identifier = identifier;
 
-		std::string path = record.display;
-		if(record.display_parents)
-		{
-			auto v = text::split(path::parent(record.full_path), "/");
-			v.erase(v.begin(), v.end() - std::min(record.display_parents, v.size()));
-			path += " — " + text::join(v, "/");
-		}
+		NSImageView* imageView = [NSImageView new];
+		NSTextField* textField = OakCreateLabel(@"", [NSFont controlContentFontOfSize:0]);
 
-		NSMutableAttributedString* str = CreateAttributedStringWithMarkedUpRanges(path, record.cover);
-		NSMutableParagraphStyle* pStyle = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
-		[pStyle setLineBreakMode:NSLineBreakByTruncatingMiddle];
-		[str addAttribute:NSParagraphStyleAttributeName value:pStyle range:NSMakeRange(0, str.length)];
-		return str;
+		OakRolloverButton* closeButton = [[OakRolloverButton alloc] initWithFrame:NSZeroRect];
+		OakSetAccessibilityLabel(closeButton, @"Close document");
+		closeButton.identifier = @"close";
+
+		Class cl = NSClassFromString(@"OFBPathInfoCell");
+		closeButton.regularImage =  [NSImage imageNamed:@"CloseTemplate"         inSameBundleAsClass:cl];
+		closeButton.pressedImage =  [NSImage imageNamed:@"ClosePressedTemplate"  inSameBundleAsClass:cl];
+		closeButton.rolloverImage = [NSImage imageNamed:@"CloseRolloverTemplate" inSameBundleAsClass:cl];
+
+		NSDictionary* views = @{ @"icon" : imageView, @"text" : textField, @"close" : closeButton };
+		OakAddAutoLayoutViewsToSuperview([views allValues], res);
+
+		[res addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(5)-[icon(==16)]-(4)-[text]-[close]-(8)-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
+		[res addConstraint:[NSLayoutConstraint constraintWithItem:imageView attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:res attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
+
+		res.imageView = imageView;
+		res.textField = textField;
 	}
-	return nil;
-}
 
-- (void)tableView:(NSTableView*)aTableView willDisplayCell:(OFBPathInfoCell*)cell forTableColumn:(NSTableColumn*)aTableColumn row:(NSInteger)rowIndex
-{
-	if(![aTableColumn.identifier isEqualToString:@"name"])
-		return;
-
-	NSNumber* index = self.items[rowIndex];
+	NSNumber* index = self.items[row];
 	document_record_t& record = _records[index.unsignedIntValue];
+
+	// =================
+	// = Document Icon =
+	// =================
 
 	BOOL isOpen = NO, isModified = NO, isOnDisk = YES;
 	for(document::document_ptr const& doc : _openDocuments)
@@ -697,24 +701,39 @@ static path::glob_list_t globs_for_path (std::string const& path)
 		}
 	}
 
-	cell.objectValue = [self tableView:aTableView objectValueForTableColumn:aTableColumn row:rowIndex];
-	if([cell respondsToSelector:@selector(setImage:)])
+	if(!record.image)
+		record.image = [[OakFileIconImage alloc] initWithSize:NSMakeSize(16, 16)];
+
+	record.image.path     = [NSString stringWithCxxString:record.full_path];
+	record.image.exists   = isOnDisk;
+	record.image.modified = isModified;
+
+	if(_scmInfo && record.full_path != NULL_STR)
+		record.image.scmStatus = _scmInfo->status(record.full_path);
+
+	[res.imageView setImage:record.image];
+
+	for(NSView* view in res.subviews)
 	{
-		if(!record.image)
-			record.image = [[OakFileIconImage alloc] initWithSize:NSMakeSize(16, 16)];
-
-		record.image.path     = [NSString stringWithCxxString:record.full_path];
-		record.image.exists   = isOnDisk;
-		record.image.modified = isModified;
-
-		if(_scmInfo && record.full_path != NULL_STR)
-			record.image.scmStatus = _scmInfo->status(record.full_path);
-
-		[cell setImage:record.image];
+		if([view.identifier isEqualToString:@"close"])
+			view.hidden = !isOpen;
 	}
 
-	if([cell respondsToSelector:@selector(setIsOpen:)])
-		cell.isOpen = isOpen;
+	// =================
+	// = Document Name =
+	// =================
+
+	std::string path = record.display;
+	if(record.display_parents)
+	{
+		auto v = text::split(path::parent(record.full_path), "/");
+		v.erase(v.begin(), v.end() - std::min(record.display_parents, v.size()));
+		path += " — " + text::join(v, "/");
+	}
+
+	[res.textField setAttributedStringValue:CreateAttributedStringWithMarkedUpRanges(path, record.cover)];
+
+	return res;
 }
 
 // =================

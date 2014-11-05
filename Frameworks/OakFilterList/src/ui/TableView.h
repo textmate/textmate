@@ -1,3 +1,3 @@
-@interface OakInactiveTableView : NSTableView
+@interface OakInactiveTableRowView : NSTableRowView
 @property (nonatomic) BOOL drawAsHighlighted;
 @end

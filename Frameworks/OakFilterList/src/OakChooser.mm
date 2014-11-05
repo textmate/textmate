@@ -50,12 +50,8 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 			_searchField.focusRingType = NSFocusRingTypeNone;
 		_searchField.delegate = self;
 
-		NSTableColumn* tableColumn = [[NSTableColumn alloc] initWithIdentifier:@"name"];
-		tableColumn.dataCell = [[NSTextFieldCell alloc] initTextCell:@""];
-		[tableColumn.dataCell setLineBreakMode:NSLineBreakByTruncatingMiddle];
-
-		OakInactiveTableView* tableView = [[OakInactiveTableView alloc] initWithFrame:NSZeroRect];
-		[tableView addTableColumn:tableColumn];
+		NSTableView* tableView = [[NSTableView alloc] initWithFrame:NSZeroRect];
+		[tableView addTableColumn:[[NSTableColumn alloc] initWithIdentifier:@"name"]];
 		tableView.headerView              = nil;
 		tableView.focusRingType           = NSFocusRingTypeNone;
 		tableView.allowsEmptySelection    = NO;
@@ -160,11 +156,6 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 // = Set wether to render table view as active when search field gain/lose focus =
 // ===============================================================================
 
-- (void)setDrawTableViewAsHighlighted:(BOOL)flag
-{
-	[(OakInactiveTableView*)_tableView setDrawAsHighlighted:flag];
-}
-
 - (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)object change:(NSDictionary*)change context:(void*)context
 {
 	if(context == kFirstResponderBinding)
@@ -234,6 +225,17 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 	return [_items objectsAtIndexes:[_tableView selectedRowIndexes]];
 }
 
+- (void)removeItemsAtIndexes:(NSIndexSet*)anIndexSet
+{
+	[_tableView removeRowsAtIndexes:anIndexSet withAnimation:NSTableViewAnimationEffectFade];
+	NSMutableArray* items = [_items mutableCopy];
+	[items removeObjectsAtIndexes:anIndexSet];
+	_items = items;
+
+	if([_tableView numberOfRows] && ![[_tableView selectedRowIndexes] count] && [anIndexSet count])
+		[_tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:MIN([anIndexSet firstIndex], [_tableView numberOfRows]-1)] byExtendingSelection:NO];
+}
+
 // =================
 // = Action Method =
 // =================
@@ -267,9 +269,35 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 	return _items.count;
 }
 
-- (id)tableView:(NSTableView*)aTableView objectValueForTableColumn:(NSTableColumn*)aTableColumn row:(NSInteger)rowIndex
+- (NSTableRowView*)tableView:(NSTableView*)tableView rowViewForRow:(NSInteger)row
 {
-	return [_items[rowIndex] objectForKey:aTableColumn.identifier];
+	return [OakInactiveTableRowView new];
+}
+
+- (void)setDrawTableViewAsHighlighted:(BOOL)flag
+{
+	_drawTableViewAsHighlighted = flag;
+	[_tableView enumerateAvailableRowViewsUsingBlock:^(NSTableRowView* rowView, NSInteger row){
+		[(OakInactiveTableRowView*)rowView setDrawAsHighlighted:flag];
+	}];
+}
+
+- (void)tableView:(NSTableView*)tableView didAddRowView:(NSTableRowView*)rowView forRow:(NSInteger)row
+{
+	[(OakInactiveTableRowView*)rowView setDrawAsHighlighted:_drawTableViewAsHighlighted];
+}
+
+- (NSView*)tableView:(NSTableView*)aTableView viewForTableColumn:(NSTableColumn*)aTableColumn row:(NSInteger)row
+{
+	NSString* identifier = aTableColumn.identifier;
+	NSTextField* res = [aTableView makeViewWithIdentifier:identifier owner:self];
+	if(!res)
+	{
+		res = OakCreateLabel(@"", [NSFont controlContentFontOfSize:0]);
+		res.identifier = identifier;
+	}
+	[res setStringValue:[_items[row] objectForKey:identifier]];
+	return res;
 }
 
 - (void)tableViewSelectionDidChange:(NSNotification*)notification
