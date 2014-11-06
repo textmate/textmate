@@ -152,23 +152,37 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 				std::string const path = path::resolve(path::join(favoritesPath, entry->d_name));
 				if(strncmp("[DIR] ", entry->d_name, 6) == 0)
 				{
+					bool includeSymlinkName = path::name(path) != std::string(entry->d_name + 6);
 					for(auto const& subentry : path::entries(path))
 					{
 						if(subentry->d_type == DT_DIR)
 						{
-							[items addObject:@{
+							NSMutableDictionary* item = [NSMutableDictionary dictionaryWithDictionary:@{
 								@"path" : [NSString stringWithCxxString:path::join(path, subentry->d_name)],
 								@"isRemoveDisabled" : @YES
 							}];
+
+							if(includeSymlinkName)
+								item[@"name"] = [NSString stringWithFormat:@"%s — %s", subentry->d_name, entry->d_name + 6];
+
+							[items addObject:item];
 						}
 					}
 				}
 				else
 				{
-					[items addObject:@{
+					NSMutableDictionary* item = [NSMutableDictionary dictionaryWithDictionary:@{
 						@"path" : [NSString stringWithCxxString:path],
 						@"link" : [NSString stringWithCxxString:path::join(favoritesPath, entry->d_name)]
 					}];
+
+					if(path::name(path) != entry->d_name)
+					{
+						item[@"name"]   = [NSString stringWithCxxString:entry->d_name];
+						item[@"folder"] = [item[@"path"] stringByAbbreviatingWithTildeInPath];
+					}
+
+					[items addObject:item];
 				}
 			}
 		}
@@ -181,8 +195,8 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 		NSMutableDictionary* tmp = [item mutableCopy];
 		[tmp addEntriesFromDictionary:@{
 			@"icon"   : [OakFileIconImage fileIconImageWithPath:path size:NSMakeSize(32, 32)],
-			@"name"   : [NSString stringWithCxxString:path::display_name(to_s(path))],
-			@"folder" : [[path stringByDeletingLastPathComponent] stringByAbbreviatingWithTildeInPath],
+			@"name"   : item[@"name"]   ?: [NSString stringWithCxxString:path::display_name(to_s(path))],
+			@"folder" : item[@"folder"] ?: [[path stringByDeletingLastPathComponent] stringByAbbreviatingWithTildeInPath],
 			@"info"   : [path stringByAbbreviatingWithTildeInPath]
 		}];
 		[_originalItems addObject:tmp];
