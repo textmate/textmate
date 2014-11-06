@@ -156,6 +156,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 						if(subentry->d_type == DT_DIR)
 						{
 							[items addObject:@{
+								@"name" : [NSString stringWithCxxString:text::format("%s — %s", subentry->d_name, entry->d_name + 6)],
 								@"path" : [NSString stringWithCxxString:path::join(path, subentry->d_name)],
 								@"isRemoveDisabled" : @YES
 							}];
@@ -165,6 +166,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 				else
 				{
 					[items addObject:@{
+						@"name" : [NSString stringWithCxxString:entry->d_name],
 						@"path" : [NSString stringWithCxxString:path],
 						@"link" : [NSString stringWithCxxString:path::join(favoritesPath, entry->d_name)]
 					}];
@@ -177,10 +179,13 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 	for(NSDictionary* item in items)
 	{
 		NSString* path = item[@"path"];
+		NSString* name = item[@"name"];
+		if (name == (NSString *)[NSNull null])
+			name = [NSString stringWithCxxString:path::display_name(to_s(path))];
 		NSMutableDictionary* tmp = [item mutableCopy];
 		[tmp addEntriesFromDictionary:@{
 			@"icon"   : [OakFileIconImage fileIconImageWithPath:path size:NSMakeSize(32, 32)],
-			@"name"   : [NSString stringWithCxxString:path::display_name(to_s(path))],
+			@"name"   : name,
 			@"folder" : [[path stringByDeletingLastPathComponent] stringByAbbreviatingWithTildeInPath],
 			@"info"   : [path stringByAbbreviatingWithTildeInPath]
 		}];
