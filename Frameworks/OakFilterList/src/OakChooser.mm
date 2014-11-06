@@ -192,9 +192,7 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 
 - (void)showWindow:(id)sender
 {
-	[_window layoutIfNeeded];
-	[_window recalculateKeyViewLoop];
-	[_searchField.window makeFirstResponder:_searchField];
+	[_window makeFirstResponder:_window.initialFirstResponder];
 	[_window makeKeyAndOrderFront:self];
 }
 

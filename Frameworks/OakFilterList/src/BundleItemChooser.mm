@@ -416,13 +416,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	[self.window.contentView addConstraints:constraints];
 	self.layoutConstraints = constraints;
 
-	// The auto-calculated key-view loop is sometimes wrong, my theory is that it’s because of delayed layout
-	[self performSelector:@selector(delayedRecalculateKeyViewLoop:) withObject:self afterDelay:0];
-}
-
-- (void)delayedRecalculateKeyViewLoop:(id)sender
-{
-	[self.window recalculateKeyViewLoop];
+	OakSetupKeyViewLoop(@[ (self.keyEquivalentInput ? self.keyEquivalentView : self.searchField), self.actionsPopUpButton, self.scopeBar.buttons, self.editButton, self.selectButton ]);
 }
 
 - (void)showWindow:(id)sender
