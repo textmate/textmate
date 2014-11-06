@@ -280,8 +280,7 @@ static NSButton* OakCreateStopSearchButton ()
 
 		[self updateConstraints];
 
-		self.window.initialFirstResponder = self.findTextField;
-		self.window.defaultButtonCell     = self.findNextButton.cell;
+		self.window.defaultButtonCell = self.findNextButton.cell;
 
 		self.searchIn = FFSearchInDocument;
 

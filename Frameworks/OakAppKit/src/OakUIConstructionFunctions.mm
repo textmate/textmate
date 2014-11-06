@@ -273,6 +273,9 @@ void OakSetupKeyViewLoop (NSArray* mixed)
 		for(size_t i = 0; i < views.count; ++i)
 			[views[i] setNextKeyView:views[(i + 1) % views.count]];
 	}
+
+	if(NSView* view = views.firstObject)
+		view.window.initialFirstResponder = view;
 }
 
 void OakAddAutoLayoutViewsToSuperview (NSArray* views, NSView* superview)

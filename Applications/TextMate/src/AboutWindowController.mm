@@ -81,9 +81,7 @@ static NSTextField* OakCreateTextField ()
 		self.cancelButton.action   = @selector(cancelOperation:);
 
 		OakSetupKeyViewLoop(@[ self.ownerTextField, self.licenseTextField, self.cancelButton, self.registerButton ]);
-
-		self.window.initialFirstResponder = self.ownerTextField;
-		self.window.defaultButtonCell     = self.registerButton.cell;
+		self.window.defaultButtonCell = self.registerButton.cell;
 
 		NSDictionary* views = @{
 			@"ownerLabel"   : self.ownerLabel,
