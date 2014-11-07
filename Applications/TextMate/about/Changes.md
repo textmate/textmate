@@ -11,7 +11,7 @@ Title: Release Notes
 ## 2014-10-29 (v2.0-beta.5)
 
 * Items in the bundle editor now have a context menu with “Show in Finder”. For items with local changes, this item turns into a submenu, showing all the location of the item.
-* Closing stale tabs when the tab bar overflows can be disabled using `defaults write com.macromates.TextMate.preview disableTabAutoClose --bool YES`.
+* Closing stale tabs when the tab bar overflows can be disabled using `defaults write com.macromates.TextMate.preview disableTabAutoClose -bool YES`.
 * Swapped key equivalents of _“New File”_ and _“New Folder”_ actions to make it somewhat consistent with Finder.
 * See [all changes since v2.0-beta.3](https://github.com/textmate/textmate/compare/v2.0-beta.3...v2.0-beta.5).
 
@@ -61,7 +61,7 @@ Title: Release Notes
 ## 2014-08-17 ([v2.0-alpha.9559](https://github.com/textmate/textmate/compare/v2.0-alpha.9555...v2.0-alpha.9559))
 
 * The bundle item chooser (⌃⌘T) now include menu items. This also works with key equivalent searching.
-* In the chooser lists (fuzzy file finder, bundle item chooser, and symbol list) it is now possible to make the selection loop around, that is, move from first to last item with arrow up, etc. This is enabled by running: `defaults write com.macromates.TextMate.preview enableLoopFilterList --bool YES` *[Zete Lui]*
+* In the chooser lists (fuzzy file finder, bundle item chooser, and symbol list) it is now possible to make the selection loop around, that is, move from first to last item with arrow up, etc. This is enabled by running: `defaults write com.macromates.TextMate.preview enableLoopFilterList -bool YES` *[Zete Lui]*
 
 ## 2014-07-31 ([v2.0-alpha.9555](https://github.com/textmate/textmate/compare/v2.0-alpha.9551...v2.0-alpha.9555))
 
@@ -290,7 +290,7 @@ Title: Release Notes
 ## 2013-05-02 ([a9419](https://github.com/textmate/textmate/compare/a9417...a9419))
 
 * _Full Screen_ is now assigned to ⌃⌘F to follow Apple’s recommendations. Previously this key was used for _Replace All_ which is now instead ⌃⌘G and _Replace All in Selection_ is ⌃⇧⌘G. This is somewhat consistent with _Replace & Find_ bound to ⌥⌘G.
-* The scope selector used to inject grammar rules can now match against the left scope to make the injected rule rank higher than the rules from the context it gets injected into. *[Joachim Mårtensson]*
+* The scope selector used to inject grammar rules can now match against the left scope to make the injected rule rank higher than the rules from the context it gets injected into. *[Joachim Mårtensson]*
 * Swipe gestures (in file browser and HTML windows) to go back/forward in history is now detected differently. Some users have reported that scrolling up/down in the file browser was sometimes triggering an undesired swipe action, hopefully the new code works better. If not, you can let me know via IRC or the mailing list.
 * The bundles in Preferences → Bundles now show link arrows to go to the bundle’s (GitHub) page where you can find its issue tracker, detailed version history, instructions on how to clone the bundle, and it’s the origin for which you can submit pull requests.
 
@@ -309,7 +309,7 @@ Title: Release Notes
 
 ## 2013-04-10 ([a9411](https://github.com/textmate/textmate/compare/a9407...a9411))
 
-* Improve accessibility of various aspects of TextMate. *[Boris Dušek]*
+* Improve accessibility of various aspects of TextMate. *[Boris Dušek]*
 * Setup document scope `attr.project.lein` for [Leiningen](https://github.com/technomancy/leiningen) projects. *[Dirk Geurs]*
 * Auto-paired characters can now be globally disabled using:
 
@@ -322,7 +322,7 @@ Title: Release Notes
 
 ## 2013-03-26 ([a9405](https://github.com/textmate/textmate/compare/a9403...a9405))
 
-* When using `$` in a scope selector we anchor the match to the content scope’s end. For example `string $` will match `source string attr.scm.git` because the last part (`attr.scm.git`) is not part of the content scope. *[Joachim Mårtensson]*
+* When using `$` in a scope selector we anchor the match to the content scope’s end. For example `string $` will match `source string attr.scm.git` because the last part (`attr.scm.git`) is not part of the content scope. *[Joachim Mårtensson]*
 * Installing bundles from within TextMate should no longer stall/fail on volumes where file system events are not generated. Installing from outside TextMate still require proper events to be generated. If your bundles are stored on a volume that does not generate these events then you will need to delete `~/Library/Caches/com.macromates.TextMate/BundlesIndex.plist` and relaunch TextMate to have it re-index your `Bundles` folders. Normally local file systems do generate file system events but [problems appear to exist](https://github.com/andreyvit/find-fsevents-bugs).
 
 ## 2013-03-21 ([a9403](https://github.com/textmate/textmate/compare/a9401...a9403))
@@ -379,7 +379,7 @@ Title: Release Notes
 ## 2013-03-04 ([a9389](https://github.com/textmate/textmate/compare/r9387...r9389))
 
 * Add “scroll past end” option to the View menu. Enabling this means that the last line of the document is no longer anchored to the bottom but can e.g. be centered in the view port. *[Steven Clukey]*
-* Improve voice over / accessibility support: The editor (with status bar) and file browser are now two distinct groups and all image buttons have descriptive accessibility attributes. *[Boris Dušek]*
+* Improve voice over / accessibility support: The editor (with status bar) and file browser are now two distinct groups and all image buttons have descriptive accessibility attributes. *[Boris Dušek]*
 * Improve heuristic for swipe gestures in HTML views.
 
 ## 2013-02-25 ([a9387](https://github.com/textmate/textmate/compare/r9385...r9387))
@@ -545,7 +545,7 @@ Title: Release Notes
 * When you open files without extension nor identifying content (like a shebang) then they now open as plain text (instead of asking you to pick a type).
 * When you select units, e.g. via the _Edit → Select_ submenu, TextMate does a more intelligent job of making the selection visible, and if only a subset can be shown, it no longer scrolls to the bottom of the selection.
 * Add scope bar to file chooser (⌘T) and do various visual improvements. The _Uncommitted Documents_ source is currently unavailable.
-* Improve speed of rendering styled text. *[Joachim Mårtensson]*
+* Improve speed of rendering styled text. *[Joachim Mårtensson]*
 * If your clipboard data contains `<NUL>` characters then these can now be pasted into TextMate.
 * Default theme has been changed to Twilight, default location for (HTML) command output is set to new window, and the position of the file browser now defaults to the right side. As for the latter, it takes some getting used to, but give it a chance, as it means your text doesn’t “move” depending on wether or not the file browser is visible.
 
@@ -578,7 +578,7 @@ Title: Release Notes
 * If you have “open documents from last session” enabled in preferences then TextMate will no longer ask you to save untitled documents when you quit, as these will be restored next time you launch it, and as they are untitled, no other program can edit them (causing a conflict, as would be the case if the document had a location on disk).
 * If the ‘inode’ of an open file changed (e.g. because of `git stash`/`rebase`) and you opened the file again (e.g. via `mate`) then TextMate would open a new tab, even though the file was already open.
 * Add “Show in Finder” context menu when no items are selected. *[Caleb Land]*
-* Make OakTabBarView and OakPasteboardSelector accessible. *[Boris Dušek]*
+* Make OakTabBarView and OakPasteboardSelector accessible. *[Boris Dušek]*
 * The tab bar will again close excess tabs to keeping it from overflowing.
 * The _Go → Reload_ menu item was disabled unless file browser was active.
 * Other minor fixes and improvements.
@@ -646,7 +646,7 @@ Title: Release Notes
 
 ## 2012-12-24 (a9331)
 
-* When syntax-highlighting a file, do batch redraw instead of line-by-line (should improve perceived performance). *[Joachim Mårtensson]*
+* When syntax-highlighting a file, do batch redraw instead of line-by-line (should improve perceived performance). *[Joachim Mårtensson]*
 * The “Edit Command…” button in error dialogs would often cause a crash.
 * Fix another potential crash, memory leak, and restore 10.7 compatibility.
 
@@ -662,10 +662,10 @@ Title: Release Notes
 
 ## 2012-12-14 (a9325)
 
-* Add support for VoiceOver/accessibility. *[Boris Dušek]*
-* Add support for “Zoom follows the keyboard focus”. *[Boris Dušek]*
+* Add support for VoiceOver/accessibility. *[Boris Dušek]*
+* Add support for “Zoom follows the keyboard focus”. *[Boris Dušek]*
 * Always set the `TM_SOFT_TABS` variable. *[Michael Sheets]*
-* Limit file browser refresh. *[Joachim Mårtensson]*
+* Limit file browser refresh. *[Joachim Mårtensson]*
 
 ## 2012-11-14 (a9323)
 
@@ -1188,7 +1188,7 @@ The source for TextMate 2 is now [available at GitHub][1] under a GPL 3 license.
 * Opening `txmt` URLs with escaped spaces no longer fail *[Gerd Knops]*
 * git: If a folder contains files with mixed status, the folder itself now gets a badge *[Gerd Knops]*
 * SCM badges are now enabled for disk images *[Gerd Knops]*
-* Scope selectors now support anchoring matches by using `^`, `$`, and `>` to anchor to either the first, last, or previous scope element *[Joachim Mårtensson]*
+* Scope selectors now support anchoring matches by using `^`, `$`, and `>` to anchor to either the first, last, or previous scope element *[Joachim Mårtensson]*
 * Subversion support (badges) has been disabled. The `libsvn.a` used was an older version which didn’t support the most recent repository format, and building the latest version gave rise to a few problems. Moving forward, I think subversion support should be re-added by calling the `svn` shell command to obtain status (this is the approach taken for both git and mercurial).
 * Absolute paths in the “Find in Folder” results now use the name of the disk instead of `/` as first element
 * git: Updated driver to work with the new way submodules have their metadata in the super project.
