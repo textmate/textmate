@@ -200,12 +200,13 @@ namespace
 
 		std::string operator() (plist::array_t const& array) const
 		{
+			bool singleLine = (flags & plist::kSingleLine) == plist::kSingleLine;
 			std::string res = "";
 			if(array.empty())
 			{
 				res = " ";
 			}
-			else if(fits_single_line()(array))
+			else if(singleLine || fits_single_line()(array))
 			{
 				size_t wrap = 0;
 				for(auto const& it : array)
@@ -213,7 +214,7 @@ namespace
 					if(!res.empty())
 						res += ", ";
 
-					if(res.size() - wrap > 80)
+					if(!singleLine && res.size() - wrap > 80)
 					{
 						res.back() = '\n';
 						res += indent_string() + '\t';
@@ -225,7 +226,7 @@ namespace
 
 				res = " " + res + " ";
 
-				if(res.find('\n') != std::string::npos)
+				if(!singleLine && res.find('\n') != std::string::npos)
 				{
 					res.back() = '\n';
 					res += indent_string();
@@ -248,16 +249,23 @@ namespace
 
 		std::string operator() (plist::dictionary_t const& dict) const
 		{
+			bool singleLine = (flags & plist::kSingleLine) == plist::kSingleLine;
 			std::string res = "";
 			if(dict.empty())
 			{
 				res = " ";
 			}
-			else if(fits_single_line()(dict))
+			else if(singleLine || fits_single_line()(dict))
 			{
-				std::string const& key = pretty_key(dict.begin()->first, flags);
-				std::string const& value = boost::apply_visitor(pretty(flags, key_compare), dict.begin()->second);
-				res = text::format("%c%s = %s; ", single_line || is_key ? ' ' : '\t', key.c_str(), value.c_str());
+				if(res.empty())
+					res += singleLine || single_line || is_key ? " " : "\t";
+
+				for(auto const& it : dict)
+				{
+					std::string const& key = pretty_key(it.first, flags);
+					std::string const& value = boost::apply_visitor(pretty(flags, key_compare), it.second);
+					res += text::format("%s = %s; ", key.c_str(), value.c_str());
+				}
 			}
 			else
 			{

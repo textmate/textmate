@@ -33,7 +33,7 @@ namespace plist
 	template <typename T> PUBLIC T get (plist::any_t const& from);
 
 	// to_s flags
-	enum { kStandard = 0, kPreferSingleQuotedStrings = 1 };
+	enum { kStandard = 0, kPreferSingleQuotedStrings = 1, kSingleLine = 2 };
 
 } /* plist */
 
