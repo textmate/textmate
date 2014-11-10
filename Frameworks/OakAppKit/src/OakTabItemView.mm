@@ -259,12 +259,7 @@
 		[self updateTextFieldTitle];
 
 		[self updateStyle];
-
-		for(NSView* view in @[ _leftCapView, _rightCapView, _textField, _closeButton ])
-		{
-			view.translatesAutoresizingMaskIntoConstraints = NO;
-			[self addSubview:view];
-		}
+		OakAddAutoLayoutViewsToSuperview(@[ _leftCapView, _rightCapView, _textField, _closeButton ], self);
 	}
 	return self;
 }
@@ -426,8 +421,7 @@
 		[_overflowButton sendActionOn:NSLeftMouseDownMask];
 		[self updateStyle];
 
-		_overflowButton.translatesAutoresizingMaskIntoConstraints = NO;
-		[self addSubview:_overflowButton];
+		OakAddAutoLayoutViewsToSuperview(@[ _overflowButton ], self);
 	}
 	else
 	{
