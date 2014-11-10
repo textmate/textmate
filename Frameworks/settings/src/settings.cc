@@ -237,6 +237,9 @@ namespace
 	{
 		std::vector<setting_info_t> res;
 
+		for(auto const& pair : global_variables())
+			res.emplace_back(pair.first, pair.second, NULL_STR, 0, NULL_STR);
+
 		collect(directory, path, scope, [&res](section_t::assignment_t const& assignment, section_t const& section){
 			res.emplace_back(assignment.key, assignment.value, section.path, assignment.line_number, section.section);
 		});

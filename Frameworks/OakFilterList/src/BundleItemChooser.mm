@@ -203,6 +203,11 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 				image = [NSImage imageNamed:NSImageNameApplicationIcon];
 		else	image = [OakFileIconImage fileIconImageWithPath:path size:NSMakeSize(32, 32)];
 	}
+	else
+	{
+		image = [NSImage imageNamed:@"Variables" inSameBundleAsClass:NSClassFromString(@"VariablesPreferences")];
+	}
+
 	image = [image copy];
 	[image setSize:NSMakeSize(32, 32)];
 
@@ -737,15 +742,16 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		for(auto const& info : settings_info_for_path(to_s(self.path), self.searchAllScopes ? scope::wildcard : self.scope.right, to_s(self.directory)))
 		{
 			std::string const name = info.variable;
-			std::string const path = (path::is_child(info.path, oak::application_t::path()) ? "TextMate.app ▸ " + path::name(info.path) : path::with_tilde(info.path)) + (info.section == NULL_STR ? "" : " ▸ " + info.section);
+			std::string const path = info.path == NULL_STR ? "TextMate.app ▸ Preferences" : (path::is_child(info.path, oak::application_t::path()) ? "TextMate.app ▸ " + path::name(info.path) : path::with_tilde(info.path)) + (info.section == NULL_STR ? "" : " ▸ " + info.section);
 
-			[items addObject:@{
+			NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithDictionary:@{
 				@"name"  : [NSString stringWithCxxString:name],
 				@"value" : [NSString stringWithCxxString:format(info.value)],
 				@"path"  : [NSString stringWithCxxString:path],
 				@"line"  : [NSString stringWithFormat:@"%zu", info.line_number],
-				@"file"  : [NSString stringWithCxxString:info.path]
 			}];
+			OakSetNonEmptyString(dict, @"file", info.path);
+			[items addObject:dict];
 		}
 	}
 
