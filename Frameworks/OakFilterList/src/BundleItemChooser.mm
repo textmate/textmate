@@ -8,11 +8,13 @@
 #import <OakAppKit/NSImage Additions.h>
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
+#import <OakSystem/application.h>
 #import <bundles/bundles.h>
 #import <settings/settings.h>
 #import <text/ranker.h>
 #import <text/case.h>
 #import <text/ctype.h>
+#import <regexp/format_string.h>
 #import <ns/ns.h>
 
 static NSUInteger const kBundleItemTitleField          = 0;
@@ -661,7 +663,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		for(auto const& info : settings_info_for_path(to_s(self.path), self.searchAllScopes ? scope::wildcard : self.scope.right, to_s(self.directory)))
 		{
 			std::string const name = info.variable;
-			std::string const path = (path::name(info.path) == "Default.tmProperties" ? "TextMate.app ▸ Default.tmProperties" : path::with_tilde(info.path)) + (info.section == NULL_STR ? "" : " ▸ " + info.section);
+			std::string const path = (path::is_child(info.path, oak::application_t::path()) ? "TextMate.app ▸ " + path::name(info.path) : path::with_tilde(info.path)) + (info.section == NULL_STR ? "" : " ▸ " + info.section);
 
 			[items addObject:@{
 				@"name" : [NSString stringWithCxxString:name],
