@@ -2056,7 +2056,7 @@ namespace
 	{
 		[aWindow layoutIfNeeded];
 		NSRect frame  = [aWindow frame];
-		NSRect parent = [_window convertRectToScreen:[_textView convertRect:[_textView visibleRect] toView:nil]];
+		NSRect parent = [self.window convertRectToScreen:[_textView convertRect:[_textView visibleRect] toView:nil]];
 
 		frame.origin.x = NSMinX(parent) + round((NSWidth(parent)  - NSWidth(frame))  * 1 / 4);
 		frame.origin.y = NSMinY(parent) + round((NSHeight(parent) - NSHeight(frame)) * 3 / 4);
