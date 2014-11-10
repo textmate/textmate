@@ -756,15 +756,46 @@ static NSButton* OakCreateStopSearchButton ()
 	[self updateConstraints];
 }
 
+- (id)formatStatusString:(NSString*)aString
+{
+	if(OakIsEmptyString(aString))
+		return @" ";
+
+	static NSAttributedString* const lineJoiner = [[NSAttributedString alloc] initWithString:@"¬" attributes:@{ NSForegroundColorAttributeName : [NSColor lightGrayColor] }];
+	static NSAttributedString* const tabJoiner  = [[NSAttributedString alloc] initWithString:@"‣" attributes:@{ NSForegroundColorAttributeName : [NSColor lightGrayColor] }];
+
+	NSMutableAttributedString* res = [[NSMutableAttributedString alloc] init];
+
+	__block bool firstLine = true;
+	[aString enumerateLinesUsingBlock:^(NSString* line, BOOL* stop){
+		if(!std::exchange(firstLine, false))
+			[res appendAttributedString:lineJoiner];
+
+		bool firstTab = true;
+		for(NSString* str in [line componentsSeparatedByString:@"\t"])
+		{
+			if(!std::exchange(firstTab, false))
+				[res appendAttributedString:tabJoiner];
+			[res appendAttributedString:[[NSAttributedString alloc] initWithString:str]];
+		}
+	}];
+
+	NSMutableParagraphStyle* paragraphStyle = [[NSMutableParagraphStyle alloc] init];
+	[paragraphStyle setLineBreakMode:NSLineBreakByTruncatingMiddle];
+	[res addAttributes:@{ NSParagraphStyleAttributeName : paragraphStyle } range:NSMakeRange(0, [[res string] length])];
+
+	return res;
+}
+
 - (void)setStatusString:(NSString*)aString
 {
-	self.statusTextField.title = _statusString = OakIsEmptyString(aString) ? @" " : aString;
+	self.statusTextField.attributedTitle = [self formatStatusString:_statusString = aString];
 	self.alternateStatusString = nil;
 }
 
 - (void)setAlternateStatusString:(NSString*)aString
 {
-	self.statusTextField.alternateTitle = _alternateStatusString = aString;
+	self.statusTextField.attributedAlternateTitle = (_alternateStatusString = aString) ? [self formatStatusString:aString] : nil;
 }
 
 - (NSString*)searchFolder
