@@ -560,6 +560,10 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 			dict[key] = [NSString stringWithCxxString:str];
 	};
 
+	auto format = [](plist::any_t const& plist) -> std::string {
+		return format_string::replace(to_s(plist, plist::kPreferSingleQuotedStrings|plist::kSingleLine), "\\A\\s+|\\s+\\z|(\\s+)", "${1:+ }");
+	};
+
 	NSMutableArray* items = [NSMutableArray new];
 	std::set<std::string> previousSettings, previousVariables;
 
@@ -599,7 +603,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 					{
 						NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithDictionary:@{
 							@"name"     : [NSString stringWithCxxString:pair.first],
-							@"value"    : [NSString stringWithCxxString:to_s(pair.second)],
+							@"value"    : [NSString stringWithCxxString:format(pair.second)],
 							@"path"     : [NSString stringWithCxxString:path + " ▸ " + name],
 							@"uuid"     : uuid,
 							@"eclipsed" : @(!self.searchAllScopes && !previousSettings.insert(pair.first).second)
@@ -622,7 +626,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 						{
 							NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithDictionary:@{
 								@"name"     : [NSString stringWithCxxString:pair.first],
-								@"value"    : [NSString stringWithCxxString:pair.second],
+								@"value"    : [NSString stringWithCxxString:format(pair.second)],
 								@"path"     : [NSString stringWithCxxString:path + " ▸ " + name + " ▸ " + "shellVariables"],
 								@"uuid"     : uuid,
 								@"eclipsed" : @(eclipsed)
