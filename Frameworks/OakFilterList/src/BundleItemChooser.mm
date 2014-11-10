@@ -154,6 +154,8 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	if((self = [super init]))
 	{
 		NSImageView* imageView = [NSImageView new];
+		[imageView setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
+		[imageView setContentCompressionResistancePriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
 		NSTextField* textField = OakCreateLabel(@"", [NSFont controlContentFontOfSize:0]);
 		NSTextField* shortcutTextField = OakCreateLabel(@"", [NSFont controlContentFontOfSize:0]);
 

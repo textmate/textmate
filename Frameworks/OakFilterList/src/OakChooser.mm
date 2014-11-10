@@ -19,6 +19,7 @@
 	{
 		NSImageView* imageView = [NSImageView new];
 		[imageView setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
+		[imageView setContentCompressionResistancePriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
 
 		NSTextField* fileTextField = OakCreateLabel(@"", [NSFont systemFontOfSize:13]);
 		NSTextField* folderTextField = OakCreateLabel(@"", [NSFont controlContentFontOfSize:10]);
