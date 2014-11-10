@@ -45,7 +45,7 @@ namespace encoding
 
 			each_word(first, last, [&](std::string const& word){
 				auto global = _combined.words.find(word);
-				if(global != _combined.words.end() && seen.find(word) == seen.end())
+				if(global != _combined.words.end() && seen.insert(word).second)
 				{
 					auto local = record->second.words.find(word);
 					if(local != record->second.words.end())
@@ -61,8 +61,6 @@ namespace encoding
 					{
 						a = 0;
 					}
-
-					seen.insert(word);
 				}
 				else
 				{

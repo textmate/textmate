@@ -77,11 +77,8 @@ namespace find
 				{
 					for(dfa_node_ptr child : *allChildren[i])
 					{
-						if(seen.find(child.get()) == seen.end())
-						{
+						if(seen.insert(child.get()).second)
 							allChildren.push_back(&child->children);
-							seen.insert(child.get());
-						}
 					}
 				}
 			}

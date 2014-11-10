@@ -112,11 +112,8 @@ static std::vector<bundles_db::bundle_ptr> filtered_bundles (std::vector<bundles
 	{
 		if(matches(bundle->source() ? bundle->source()->identifier() : NULL_STR, sourceNames) && matches(bundle, bundleNames))
 		{
-			if(seen.find(bundle->uuid()) == seen.end())
-			{
-				seen.insert(bundle->uuid());
+			if(seen.insert(bundle->uuid()).second)
 				res.push_back(bundle);
-			}
 		}
 	}
 	return res;

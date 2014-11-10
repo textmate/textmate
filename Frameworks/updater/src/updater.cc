@@ -153,9 +153,8 @@ namespace bundles_db
 			{
 				bundle_t const* current = pending.back();
 				pending.pop_back();
-				if(seen.find(current->uuid()) != seen.end())
+				if(!seen.insert(current->uuid()).second)
 					continue;
-				seen.insert(current->uuid());
 				if(current != this)
 					res.push_back(current);
 

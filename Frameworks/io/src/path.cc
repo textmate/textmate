@@ -304,9 +304,8 @@ namespace path
 		if(p == "/" || !path::is_absolute(p))
 			return p;
 
-		if(seen.find(p) != seen.end())
+		if(!seen.insert(p).second)
 			return p;
-		seen.insert(p);
 
 		std::string resolvedParent = resolveParent ? resolve_links(parent(p), resolveParent, seen) : parent(p);
 		std::string path = path::join(resolvedParent, name(p));
