@@ -22,7 +22,7 @@ static SymbolChooserItem* CreateItem (document::document_ptr const& document, te
 	res.path            = [NSString stringWithCxxString:document->path()];
 	res.identifier      = [NSString stringWithCxxString:document->identifier()];
 	res.selectionString = [NSString stringWithCxxString:pos];
-	res.name            = CreateAttributedStringWithMarkedUpRanges(candidate, ranges);
+	res.name            = CreateAttributedStringWithMarkedUpRanges(candidate, ranges, NSLineBreakByTruncatingTail);
 	res.infoString      = [NSString stringWithCxxString:document->display_name() + ":" + (std::string)pos];
 	return res;
 }

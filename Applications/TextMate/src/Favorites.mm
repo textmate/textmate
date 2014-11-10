@@ -225,7 +225,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 	std::string const filter = to_s(self.filterString);
 
 	std::multimap<double, NSDictionary*> ranked;
-	for(NSDictionary* __strong item in _originalItems)
+	for(NSDictionary* item in _originalItems)
 	{
 		NSString* name = item[@"name"];
 
@@ -243,14 +243,10 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 			else	rank = -rank;
 		}
 
-		if(!ranges.empty())
-		{
-			NSMutableDictionary* tmp = [item mutableCopy];
-			tmp[@"name"] = CreateAttributedStringWithMarkedUpRanges(to_s(name), ranges);
-			item = tmp;
-		}
-
-		ranked.emplace(rank, item);
+		NSMutableDictionary* entry = [item mutableCopy];
+		entry[@"name"]   = CreateAttributedStringWithMarkedUpRanges(to_s(name), ranges, NSLineBreakByTruncatingTail);
+		entry[@"folder"] = CreateAttributedStringWithMarkedUpRanges(to_s((NSString*)item[@"folder"]), { }, NSLineBreakByTruncatingHead);
+		ranked.emplace(rank, entry);
 	}
 
 	NSMutableArray* res = [NSMutableArray new];

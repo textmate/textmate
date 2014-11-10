@@ -645,8 +645,8 @@ static path::glob_list_t globs_for_path (std::string const& path)
 
 	res.objectValue = @{
 		@"icon"            : record.image,
-		@"folder"          : CreateAttributedStringWithMarkedUpRanges(record.prefix, record.cover_prefix),
-		@"name"            : CreateAttributedStringWithMarkedUpRanges(record.name, record.cover_name),
+		@"folder"          : CreateAttributedStringWithMarkedUpRanges(record.prefix, record.cover_prefix, NSLineBreakByTruncatingHead),
+		@"name"            : CreateAttributedStringWithMarkedUpRanges(record.name, record.cover_name, NSLineBreakByTruncatingTail),
 		@"isCloseDisabled" : @(!isOpen),
 	};
 
