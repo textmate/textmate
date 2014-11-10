@@ -480,9 +480,16 @@ BOOL HasDocumentWindow (NSArray* windows)
 	ASSERT([[sender selectedItems] count] == 1);
 
 	if(NSString* uuid = [[[sender selectedItems] lastObject] objectForKey:@"uuid"])
+	{
 		[[BundleEditor sharedInstance] revealBundleItem:bundles::lookup(to_s(uuid))];
+	}
 	else if(NSString* path = [[[sender selectedItems] lastObject] objectForKey:@"path"])
-		OakOpenDocuments(@[ path ]);
+	{
+		document::document_ptr doc = document::create(to_s(path));
+		if(NSString* line = [[[sender selectedItems] lastObject] objectForKey:@"line"])
+			doc->set_selection(to_s(line));
+		document::show(doc);
+	}
 }
 
 - (void)editBundleItemWithUUIDString:(NSString*)uuidString
