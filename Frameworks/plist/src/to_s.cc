@@ -182,12 +182,11 @@ namespace
 
 	struct pretty : boost::static_visitor<std::string>
 	{
-		pretty (int flags, key_less_than_t const& keyCompare, size_t indent = 0, bool single_line = true, bool is_key = false) : flags(flags), key_compare(keyCompare), indent(indent), single_line(single_line), is_key(is_key) { }
+		pretty (int flags, key_less_than_t const& keyCompare, size_t indent = 0, bool is_key = false) : flags(flags), key_compare(keyCompare), indent(indent), is_key(is_key) { }
 
 		int flags;
 		key_less_than_t const& key_compare;
 		size_t indent;
-		bool single_line;
 		bool is_key;
 
 		std::string indent_string () const                           { return std::string(indent, '\t'); }
@@ -221,7 +220,7 @@ namespace
 						wrap = res.size();
 					}
 
-					res += boost::apply_visitor(pretty(flags, key_compare), it);
+					res += boost::apply_visitor(pretty(flags | plist::kSingleLine, key_compare), it);
 				}
 
 				res = " " + res + " ";
@@ -239,7 +238,7 @@ namespace
 					if(!res.empty())
 						res += "\n";
 					res += indent_string() + '\t';
-					res += boost::apply_visitor(pretty(flags, key_compare, indent+1, false), it);
+					res += boost::apply_visitor(pretty(flags, key_compare, indent+1), it);
 					res += ",";
 				}
 				res = "\n" + res + "\n" + indent_string();
@@ -258,12 +257,12 @@ namespace
 			else if(singleLine || fits_single_line()(dict))
 			{
 				if(res.empty())
-					res += singleLine || single_line || is_key ? " " : "\t";
+					res += singleLine || !indent || is_key ? " " : "\t";
 
 				for(auto const& it : dict)
 				{
-					std::string const& key = pretty_key(it.first, flags);
-					std::string const& value = boost::apply_visitor(pretty(flags, key_compare), it.second);
+					std::string const& key = pretty_key(it.first, flags | plist::kSingleLine);
+					std::string const& value = boost::apply_visitor(pretty(flags | plist::kSingleLine, key_compare), it.second);
 					res += text::format("%s = %s; ", key.c_str(), value.c_str());
 				}
 			}
@@ -277,7 +276,7 @@ namespace
 					if(!res.empty())
 						res += indent_string();
 					std::string const& key = pretty_key(it.first, flags);
-					std::string const& value = boost::apply_visitor(pretty(flags, key_compare, indent+1, false, true), it.second);
+					std::string const& value = boost::apply_visitor(pretty(flags, key_compare, indent+1, true), it.second);
 					res += text::format("\t%s = %s;\n", key.c_str(), value.c_str());
 				}
 				res = (is_key ? "\n" + indent_string() : "") + res + indent_string();
