@@ -180,6 +180,8 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 
 - (void)setObjectValue:(BundleItemChooserItem*)bundleItem
 {
+	[super setObjectValue:item];
+
 	std::map<bundles::kind_t, NSString*> const map = {
 		{ bundles::kItemTypeCommand,     @"Command"      },
 		{ bundles::kItemTypeDragCommand, @"Drag Command" },
