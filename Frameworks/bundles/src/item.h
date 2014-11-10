@@ -47,8 +47,9 @@ namespace bundles
 	{
 		std::string const& name () const;
 		void set_name (std::string const& newName);
-		std::string const& full_name () const;
-		void set_full_name (std::string const& newFullName);
+		std::string full_name () const;
+		std::vector<std::string> const& menu_path () const;
+		void set_menu_path (std::vector<std::string> const& newMenuPath);
 		oak::uuid_t const& uuid () const;
 		oak::uuid_t bundle_uuid () const;
 		scope::selector_t const& scope_selector () const;
@@ -111,9 +112,9 @@ namespace bundles
 
 		mutable std::shared_ptr<plist::dictionary_t> _plist;
 		mutable std::mutex _plist_mutex;
-		mutable std::string _full_name;
 		std::vector<required_bundle_t> _required_bundles;
 		std::vector<required_executable_t> _required_executables;
+		std::vector<std::string> _menu_path;
 	};
 
 } /* bundles */

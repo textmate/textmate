@@ -129,7 +129,7 @@ namespace bundles
 		}
 	}
 
-	static void setup_full_name (oak::uuid_t const& menuUUID, std::map< oak::uuid_t, std::vector<oak::uuid_t> > const& menus, std::map<oak::uuid_t, item_ptr> const& items, std::string const& prefix, std::string const& suffix)
+	static void setup_full_name (oak::uuid_t const& menuUUID, std::map< oak::uuid_t, std::vector<oak::uuid_t> > const& menus, std::map<oak::uuid_t, item_ptr> const& items, std::vector<std::string>* prefixStack)
 	{
 		std::map< oak::uuid_t, std::vector<oak::uuid_t> >::const_iterator menu = menus.find(menuUUID);
 		if(menu != menus.end())
@@ -141,8 +141,15 @@ namespace bundles
 					continue;
 
 				if(item->second->kind() == kItemTypeMenu)
-						setup_full_name(item->second->uuid(), menus, items, prefix + item->second->name() + " » ", suffix);
-				else	item->second->set_full_name(prefix + item->second->name() + suffix);
+				{
+					prefixStack->push_back(item->second->name());
+					setup_full_name(item->second->uuid(), menus, items, prefixStack);
+					prefixStack->pop_back();
+				}
+				else
+				{
+					item->second->set_menu_path(*prefixStack);
+				}
 			}
 		}
 	}
@@ -162,8 +169,9 @@ namespace bundles
 				map[item->bundle()].emplace(item->uuid(), item);
 		}
 
+		std::vector<std::string> stack;
 		for(auto const& bundle : map)
-			setup_full_name(bundle.first->uuid(), menus, bundle.second, "", " — " + bundle.first->name());
+			setup_full_name(bundle.first->uuid(), menus, bundle.second, &stack);
 
 		Callbacks(&callback_t::bundles_did_change);
 
@@ -328,6 +336,14 @@ namespace bundles
 	std::string name_with_selection (item_ptr const& item, bool hasSelection)
 	{
 		return format_bundle_item_title(item->name(), hasSelection);
+	}
+
+	std::string menu_path (item_ptr const& item)
+	{
+		std::vector<std::string> path = item->menu_path();
+		if(item->kind() != kItemTypeBundle && item->bundle())
+			path.insert(path.begin(), item->bundle()->name());
+		return text::join(path, " ▸ ");
 	}
 
 	std::string full_name_with_selection (item_ptr const& item, bool hasSelection)

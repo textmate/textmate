@@ -43,7 +43,7 @@ namespace bundles
 	// = item_t =
 	// ==========
 
-	item_t::item_t (oak::uuid_t const& uuid, item_ptr bundleItem, kind_t kind, bool local) : _deleted(false), _disabled(false), _hidden_from_user(false), _local(local), _uuid(uuid), _bundle(bundleItem), _kind(kind), _full_name(NULL_STR)
+	item_t::item_t (oak::uuid_t const& uuid, item_ptr bundleItem, kind_t kind, bool local) : _deleted(false), _disabled(false), _hidden_from_user(false), _local(local), _uuid(uuid), _bundle(bundleItem), _kind(kind)
 	{
 	}
 
@@ -158,19 +158,23 @@ namespace bundles
 	{
 		_fields.erase(_fields.lower_bound(kFieldName), _fields.upper_bound(kFieldName));
 		_fields.emplace(kFieldName, newName);
-		_full_name = NULL_STR; // FIXME should setup a new full name based on menu nesting…
 	}
 
-	std::string const& item_t::full_name () const
+	std::string item_t::full_name () const
 	{
-		if(_full_name == NULL_STR)
-			_full_name = name() + (_kind == kItemTypeBundle || !bundle() ? "" : " — " + bundle()->name());
-		return _full_name;
+		std::vector<std::string> path = _menu_path;
+		path.push_back(name());
+		return text::join(path, " » ") + (_kind == kItemTypeBundle || !bundle() ? "" : " — " + bundle()->name());
 	}
 
-	void item_t::set_full_name (std::string const& newFullName)
+	std::vector<std::string> const& item_t::menu_path () const
 	{
-		_full_name = newFullName;
+		return _menu_path;
+	}
+
+	void item_t::set_menu_path (std::vector<std::string> const& newMenuPath)
+	{
+		_menu_path = newMenuPath;
 	}
 
 	oak::uuid_t const& item_t::uuid () const
