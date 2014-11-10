@@ -76,13 +76,14 @@ namespace
 {
 	struct menu_item_t
 	{
-		std::string title;
+		std::string name;
+		std::string path;
 		NSMenuItem* menu_item;
 	};
 }
 
 template <typename _OutputIter>
-_OutputIter copy_menu_items (NSMenu* menu, _OutputIter out, NSArray* parentNames = @[ @"Main Menu" ])
+_OutputIter copy_menu_items (NSMenu* menu, _OutputIter out, NSArray* parentNames = @[ ])
 {
 	for(NSMenuItem* item in [menu itemArray])
 	{
@@ -97,8 +98,7 @@ _OutputIter copy_menu_items (NSMenu* menu, _OutputIter out, NSArray* parentNames
 							title = [title stringByAppendingString:@" (•)"];
 					else	title = [title stringByAppendingString:@" (✓)"];
 				}
-				title = [title stringByAppendingFormat:@" — %@", [parentNames componentsJoinedByString:@" » "]];
-				*out++ = { to_s(title), item };
+				*out++ = { to_s(title), to_s([parentNames componentsJoinedByString:@" ▸ "]), item };
 			}
 		}
 
@@ -125,7 +125,6 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 }
 
 @interface BundleItemChooserItem : NSObject
-+ (instancetype)bundleChooserItemWithItem:(bundles::item_ptr)anItem title:(id)aTitle;
 @property (nonatomic) id name;
 @property (nonatomic) NSString* uuid;
 @property (nonatomic) NSString* path;
@@ -142,15 +141,6 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	NSString* lhsString = [_name isKindOfClass:[NSAttributedString class]]    ? [_name string]    : _name;
 	NSString* rhsString = [rhs.name isKindOfClass:[NSAttributedString class]] ? [rhs.name string] : rhs.name;
 	return !!_menuItem == !!rhs.menuItem ? [lhsString localizedCompare:rhsString] : (_menuItem ? NSOrderedDescending : NSOrderedAscending);
-}
-
-+ (instancetype)bundleChooserItemWithItem:(bundles::item_ptr)anItem title:(id)aTitle
-{
-	BundleItemChooserItem* res = [self new];
-	res.item = anItem;
-	res.uuid = [NSString stringWithCxxString:anItem->uuid()];
-	res.name = aTitle;
-	return res;
 }
 @end
 
@@ -556,85 +546,43 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	return res;
 }
 
-- (void)updateItems:(id)sender
+- (NSArray*)unfilteredItems
 {
-	std::string const filter = to_s(self.keyEquivalentInput ? self.keyEquivalentString : self.filterString);
+	auto OakSetNonEmptyString = [](NSMutableDictionary* dict, NSString* key, std::string const& str) {
+		if(!str.empty() && str != NULL_STR)
+			dict[key] = [NSString stringWithCxxString:str];
+	};
+
+	NSMutableArray* items = [NSMutableArray new];
 	std::set<std::string> previousSettings, previousVariables;
 
-	std::vector<std::string> identifiers;
-	for(NSString* identifier in [[OakAbbreviations abbreviationsForName:@"OakBundleItemChooserBindings"] stringsForAbbreviation:self.filterString])
-		identifiers.push_back(to_s(identifier));
-
-	std::multimap<double, BundleItemChooserItem*> rankedItems;
 	for(auto const& item : relevant_items_in_scope(self.searchAllScopes ? scope::wildcard : self.scope, self.hasSelection, self.searchSource))
 	{
-		bool include = filter == NULL_STR || filter.empty();
-		if(!include)
-		{
-			switch(_bundleItemField)
-			{
-				case kBundleItemKeyEquivalentField:
-				{
-					include = key_equivalent(item) == filter;
-				}
-				break;
-
-				case kBundleItemTabTriggerField:
-				{
-					std::string const tabTrigger = item->value_for_field(bundles::kFieldTabTrigger);
-					include = tabTrigger.find(filter) != std::string::npos;
-				}
-				break;
-
-				case kBundleItemSemanticClassField:
-				{
-					std::string const semanticClass = item->value_for_field(bundles::kFieldSemanticClass);
-					include = semanticClass.find(filter) != std::string::npos;
-				}
-				break;
-
-				case kBundleItemScopeSelectorField:
-				{
-					std::string const scopeSelector = to_s(item->scope_selector());
-					include = scopeSelector.find(filter) != std::string::npos;
-				}
-				break;
-			}
-
-			if(!include && _bundleItemField != kBundleItemTitleField)
-				continue;
-		}
+		std::string const name = name_with_selection(item, self.hasSelection);
+		std::string const path = menu_path(item);
+		NSString* const uuid   = [NSString stringWithCxxString:item->uuid()];
 
 		if(item->kind() != bundles::kItemTypeSettings)
 		{
-			std::string const fullName = full_name_with_selection(item, self.hasSelection);
-			id title    = [NSString stringWithCxxString:fullName];
-			double rank = rankedItems.size();
+			std::string suffix;
+			if(item->kind() == bundles::kItemTypeGrammar)
+				suffix = " ▸ Language Grammars";
+			else if(item->kind() == bundles::kItemTypeTheme)
+				suffix = " ▸ Themes";
 
-			if(!include && _bundleItemField == kBundleItemTitleField)
-			{
-				std::vector< std::pair<size_t, size_t> > ranges;
-				double score = oak::rank(filter, fullName, &ranges);
-				if(!score)
-					continue;
-
-				size_t rankIndex = std::find(identifiers.begin(), identifiers.end(), to_s(item->uuid())) - identifiers.begin();
-				if(rankIndex != identifiers.size())
-					score = identifiers.size() - rankIndex;
-
-				title = CreateAttributedStringWithMarkedUpRanges(fullName, ranges);
-				rank  = -score;
-			}
-
-			rankedItems.emplace(rank, [BundleItemChooserItem bundleChooserItemWithItem:item title:title]);
+			NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithDictionary:@{
+				@"name" : [NSString stringWithCxxString:name],
+				@"path" : [NSString stringWithCxxString:path + suffix],
+				@"uuid" : uuid
+			}];
+			OakSetNonEmptyString(dict, @"scopeSelector", to_s(item->scope_selector()));
+			OakSetNonEmptyString(dict, @"keyEquivalent", key_equivalent(item));
+			OakSetNonEmptyString(dict, @"tabTrigger",    item->value_for_field(bundles::kFieldTabTrigger));
+			OakSetNonEmptyString(dict, @"semanticClass", item->value_for_field(bundles::kFieldSemanticClass));
+			[items addObject:dict];
 		}
 		else
 		{
-			std::string itemNameSuffix = full_name_with_selection(item, self.hasSelection);
-			std::string::size_type pos = itemNameSuffix.rfind(" — ");
-			if(pos != std::string::npos)
-				itemNameSuffix = itemNameSuffix.substr(pos + strlen(" — ")) + " » " + itemNameSuffix.substr(0, pos);
-
 			plist::dictionary_t settings;
 			if(plist::get_key_path(item->plist(), bundles::kFieldSettingName, settings))
 			{
@@ -642,33 +590,21 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 				{
 					if(pair.first != "shellVariables")
 					{
-						double rank = rankedItems.size();
-
-						std::vector< std::pair<size_t, size_t> > ranges;
-						std::string const fullName = pair.first + " — " + itemNameSuffix;
-						if(!include && _bundleItemField == kBundleItemTitleField)
-						{
-							double score = oak::rank(filter, fullName, &ranges);
-							if(!score)
-								continue;
-							if(self.searchAllScopes)
-								rank = score;
-						}
-
-						NSMutableAttributedString* title = CreateAttributedStringWithMarkedUpRanges(fullName, ranges);
-						if(!self.searchAllScopes)
-						{
-							if(!previousSettings.insert(pair.first).second)
-								[title addAttribute:NSStrikethroughStyleAttributeName value:@(NSUnderlineStyleSingle|NSUnderlinePatternSolid) range:NSMakeRange(0, [[NSString stringWithCxxString:pair.first] length])];
-						}
-
-						rankedItems.emplace(rank, [BundleItemChooserItem bundleChooserItemWithItem:item title:title]);
+						NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithDictionary:@{
+							@"name"     : [NSString stringWithCxxString:pair.first],
+							@"value"    : [NSString stringWithCxxString:to_s(pair.second)],
+							@"path"     : [NSString stringWithCxxString:path + " ▸ " + name],
+							@"uuid"     : uuid,
+							@"eclipsed" : @(!self.searchAllScopes && !previousSettings.insert(pair.first).second)
+						}];
+						OakSetNonEmptyString(dict, @"scopeSelector", to_s(item->scope_selector()));
+						[items addObject:dict];
 					}
 					else
 					{
 						auto const shellVariables = shell_variables(item);
 
-						bool eclipsed = false;
+						BOOL eclipsed = false;
 						if(!self.searchAllScopes)
 						{
 							for(auto const& pair : shellVariables)
@@ -677,24 +613,15 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 
 						for(auto const& pair : shellVariables)
 						{
-							double rank = rankedItems.size();
-
-							std::vector< std::pair<size_t, size_t> > ranges;
-							std::string const fullName = pair.first + " — " + itemNameSuffix + " » shellVariables";
-							if(!include && _bundleItemField == kBundleItemTitleField)
-							{
-								double score = oak::rank(filter, fullName, &ranges);
-								if(!score)
-									continue;
-								if(self.searchAllScopes)
-									rank = score;
-							}
-
-							NSMutableAttributedString* title = CreateAttributedStringWithMarkedUpRanges(fullName, ranges);
-							if(eclipsed)
-								[title addAttribute:NSStrikethroughStyleAttributeName value:@(NSUnderlineStyleSingle|NSUnderlinePatternSolid) range:NSMakeRange(0, [[NSString stringWithCxxString:pair.first] length])];
-
-							rankedItems.emplace(rank, [BundleItemChooserItem bundleChooserItemWithItem:item title:title]);
+							NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithDictionary:@{
+								@"name"     : [NSString stringWithCxxString:pair.first],
+								@"value"    : [NSString stringWithCxxString:pair.second],
+								@"path"     : [NSString stringWithCxxString:path + " ▸ " + name + " ▸ " + "shellVariables"],
+								@"uuid"     : uuid,
+								@"eclipsed" : @(eclipsed)
+							}];
+							OakSetNonEmptyString(dict, @"scopeSelector", to_s(item->scope_selector()));
+							[items addObject:dict];
 						}
 					}
 				}
@@ -708,45 +635,13 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		copy_menu_items([NSApp mainMenu], back_inserter(menuItems));
 		for(auto const& record : menuItems)
 		{
-			id title     = nil;
-			bool include = filter == NULL_STR || filter.empty();
-			double rank  = rankedItems.size();
-
-			if(!include)
-			{
-				switch(_bundleItemField)
-				{
-					case kBundleItemTitleField:
-					{
-						std::vector< std::pair<size_t, size_t> > ranges;
-						if(double score = oak::rank(filter, record.title, &ranges))
-						{
-							size_t rankIndex = std::find(identifiers.begin(), identifiers.end(), to_s(OakMenuItemIdentifier(record.menu_item))) - identifiers.begin();
-							if(rankIndex != identifiers.size())
-								score = identifiers.size() - rankIndex;
-
-							title   = CreateAttributedStringWithMarkedUpRanges(record.title, ranges);
-							include = true;
-							rank    = -score;
-						}
-					}
-					break;
-
-					case kBundleItemKeyEquivalentField:
-					{
-						include = key_equivalent_for_menu_item(record.menu_item) == filter;
-					}
-					break;
-				}
-			}
-
-			if(include)
-			{
-				BundleItemChooserItem* entry = [BundleItemChooserItem new];
-				entry.name     = title ?: [NSString stringWithCxxString:record.title];
-				entry.menuItem = record.menu_item;
-				rankedItems.emplace(rank, entry);
-			}
+			NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithDictionary:@{
+				@"name"     : [NSString stringWithCxxString:record.name],
+				@"path"     : [NSString stringWithCxxString:record.path],
+				@"menuItem" : record.menu_item
+			}];
+			OakSetNonEmptyString(dict, @"keyEquivalent", key_equivalent_for_menu_item(record.menu_item));
+			[items addObject:dict];
 		}
 	}
 
@@ -754,38 +649,96 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	{
 		for(auto const& info : settings_info_for_path(to_s(self.path), self.searchAllScopes ? scope::wildcard : self.scope.right, to_s(self.directory)))
 		{
-			std::string const base = path::name(info.path);
-			std::string const title = info.variable + " — " + (base == "Default.tmProperties" || base == "Global.tmProperties" ? base : path::with_tilde(info.path)) + (info.section == NULL_STR ? "" : " » " + info.section);
-			std::vector< std::pair<size_t, size_t> > ranges;
+			std::string const name = info.variable;
+			std::string const path = (path::name(info.path) == "Default.tmProperties" ? "TextMate.app ▸ Default.tmProperties" : path::with_tilde(info.path)) + (info.section == NULL_STR ? "" : " ▸ " + info.section);
 
-			bool include = filter == NULL_STR || filter.empty();
-			double rank  = rankedItems.size();
+			[items addObject:@{
+				@"name" : [NSString stringWithCxxString:name],
+				@"path" : [NSString stringWithCxxString:path],
+				@"file" : [NSString stringWithCxxString:info.path]
+			}];
+		}
+	}
 
-			if(!include)
+	return items;
+}
+
+- (void)updateItems:(id)sender
+{
+	auto OakContainsString = [](NSString* haystack, NSString* needle) -> BOOL {
+		return haystack && needle && [haystack rangeOfString:needle].location != NSNotFound;
+	};
+
+	NSArray* identifiers = [[OakAbbreviations abbreviationsForName:@"OakBundleItemChooserBindings"] stringsForAbbreviation:self.filterString];
+	NSString* filter = self.keyEquivalentInput ? self.keyEquivalentString : self.filterString;
+
+	NSArray* items = [self unfilteredItems];
+	if(!(self.searchSource & kSearchSourceSettingsItems) && (_bundleItemField != kBundleItemKeyEquivalentField || OakIsEmptyString(filter)))
+		items = [items sortedArrayUsingDescriptors:@[ [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES selector:@selector(localizedCompare:)], [NSSortDescriptor sortDescriptorWithKey:@"path" ascending:YES selector:@selector(localizedCompare:)] ]];
+
+	std::multimap<double, BundleItemChooserItem*> rankedItems;
+	for(NSDictionary* item in items)
+	{
+		std::vector<std::pair<size_t, size_t>> cover;
+		NSString* title = item[@"uuid"] && (self.searchSource & (kSearchSourceActionItems|kSearchSourceMenuItems)) ? [NSString stringWithCxxString:bundles::lookup(to_s((NSString*)item[@"uuid"]))->full_name()] : [NSString stringWithFormat:@"%@ — %@", item[@"name"], item[@"path"]];
+
+		double rank = (items.count - rankedItems.size()) / (double)items.count;
+		if(OakNotEmptyString(filter))
+		{
+			if(_bundleItemField == kBundleItemTitleField && (self.searchSource & (kSearchSourceActionItems|kSearchSourceMenuItems)))
+				rank = oak::rank(to_s(filter), to_s(title), &cover);
+			else if(_bundleItemField == kBundleItemTitleField)
 			{
-				if(_bundleItemField != kBundleItemTitleField)
-					continue;
+				NSRange r = [title rangeOfString:filter options:NSCaseInsensitiveSearch];
+				if(r.location != NSNotFound)
+						cover.emplace_back(to_s([title substringToIndex:r.location]).size(), to_s([title substringToIndex:NSMaxRange(r)]).size());
+				else	rank = 0;
+			}
+			else if(_bundleItemField == kBundleItemKeyEquivalentField)
+				rank = [item[@"keyEquivalent"] isEqualToString:filter] ? rank : 0;
+			else if(_bundleItemField == kBundleItemTabTriggerField)
+				rank = OakContainsString(item[@"tabTrigger"], filter) ? rank : 0;
+			else if(_bundleItemField == kBundleItemSemanticClassField)
+				rank = OakContainsString(item[@"semanticClass"], filter) ? rank : 0;
+			else if(_bundleItemField == kBundleItemScopeSelectorField)
+				rank = OakContainsString(item[@"scopeSelector"], filter) ? rank : 0;
+		}
 
-				double score = oak::rank(filter, title, &ranges);
-				if(!score)
-					continue;
-				if(self.searchAllScopes)
-					rank = score;
+		if(rank > 0)
+		{
+			if(_bundleItemField == kBundleItemTitleField)
+			{
+				NSUInteger i = [identifiers indexOfObject:(item[@"uuid"] ?: OakMenuItemIdentifier(item[@"menuItem"]))];
+				if(i != NSNotFound)
+					rank = 1 + (identifiers.count - i) / identifiers.count;
 			}
 
-			BundleItemChooserItem* item = [BundleItemChooserItem new];
-			item.name = CreateAttributedStringWithMarkedUpRanges(title, ranges);
-			item.path = [NSString stringWithCxxString:info.path];
-			rankedItems.emplace(rankedItems.size(), item);
+			BundleItemChooserItem* entry = [BundleItemChooserItem new];
+			entry.name = CreateAttributedStringWithMarkedUpRanges(to_s(title), cover);
+
+			if([item[@"eclipsed"] boolValue])
+			{
+				NSMutableAttributedString* str = [entry.name mutableCopy];
+				[str addAttribute:NSStrikethroughStyleAttributeName value:@(NSUnderlineStyleSingle|NSUnderlinePatternSolid) range:NSMakeRange(0, [item[@"name"] length])];
+				entry.name = str;
+			}
+
+			entry.uuid = item[@"uuid"];
+			if(NSString* uuid = item[@"uuid"])
+				entry.item = bundles::lookup(to_s(uuid));
+			else if(item[@"menuItem"])
+				entry.menuItem = item[@"menuItem"];
+			else if(item[@"file"])
+				entry.path = item[@"file"];
+
+			rankedItems.emplace(2 - rank, entry);
 		}
 	}
 
 	NSMutableArray* res = [NSMutableArray array];
 	for(auto const& pair : rankedItems)
 		[res addObject:pair.second];
-
-	BOOL shouldSort = !(self.searchSource & kSearchSourceSettingsItems) && (filter == NULL_STR || filter.empty());
-	self.items = shouldSort ? [res sortedArrayUsingSelector:@selector(localizedCompare:)] : res;
+	self.items = res;
 
 	self.window.title = [NSString stringWithFormat:@"Select Bundle Item (%@)", self.itemCountTextField.stringValue];
 }
@@ -841,7 +794,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 
 - (void)accept:(id)sender
 {
-	if(!self.keyEquivalentInput && OakNotEmptyString(self.filterString) && (self.tableView.selectedRow > 0 || [self.filterString length] > 1))
+	if(_bundleItemField == kBundleItemTitleField && OakNotEmptyString(self.filterString) && (self.tableView.selectedRow > 0 || [self.filterString length] > 1))
 	{
 		BundleItemChooserItem* item = self.items[self.tableView.selectedRow];
 		if(item.uuid)
