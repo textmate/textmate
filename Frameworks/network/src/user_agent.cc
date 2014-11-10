@@ -45,7 +45,7 @@ static std::string user_uuid ()
 
 std::string create_agent_info_string ()
 {
-	return text::format("%s/%s/%s %zu.%zu.%zu/%s/%s/%s", oak::application_t::name().c_str(), oak::application_t::revision().c_str(), user_uuid().c_str(),
+	return text::format("%s/%s/%s %zu.%zu.%zu/%s/%s/%s", oak::application_t::name().c_str(), oak::application_t::version().c_str(), user_uuid().c_str(),
 		oak::os_major(), oak::os_minor(), oak::os_patch(),
 		hardware_info(HW_MACHINE).c_str(),
 		hardware_info(HW_MODEL).c_str(),

@@ -183,11 +183,11 @@ namespace oak
 		return path::join(_support_path, relativePath);
 	}
 
-	std::string application_t::revision ()
+	std::string application_t::version ()
 	{
 		if(CFBundleRef mainBundle = CFBundleGetMainBundle())
 		{
-			if(CFTypeRef bundleVersion = CFBundleGetValueForInfoDictionaryKey(mainBundle, CFSTR("CFBundleVersion")))
+			if(CFTypeRef bundleVersion = CFBundleGetValueForInfoDictionaryKey(mainBundle, CFSTR("CFBundleShortVersionString")) ?: CFBundleGetValueForInfoDictionaryKey(mainBundle, CFSTR("CFBundleVersion")))
 			{
 				if(CFGetTypeID(bundleVersion) == CFStringGetTypeID())
 					return cf::to_s((CFStringRef)bundleVersion);

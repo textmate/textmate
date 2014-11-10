@@ -144,7 +144,7 @@ namespace sw_update
 		strftime(date, sizeof(date), "(%F %T)", localtime(&now));
 
 		std::string const dst         = oak::application_t::path();
-		std::string const oldVersion  = oak::application_t::revision();
+		std::string const oldVersion  = oak::application_t::version();
 		std::string const srcContents = path::join(src, "Contents");
 		std::string const dstContents = path::join(dst, "Contents");
 		std::string const backup      = dstContents + "-" + oldVersion + " " + date;

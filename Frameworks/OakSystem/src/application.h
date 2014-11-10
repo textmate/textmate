@@ -16,7 +16,7 @@ namespace oak
 		static void set_path (std::string const& newPath);
 		static void set_support (std::string const& newPath);
 		static std::string support (std::string const& relativePath = ".");
-		static std::string revision ();
+		static std::string version ();
 	private:
 		static void create_pid_file ();
 		static void remove_pid_file ();
