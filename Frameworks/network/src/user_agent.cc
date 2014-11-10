@@ -1,7 +1,7 @@
 #include "user_agent.h"
 #include <OakSystem/application.h>
 #include <text/format.h>
-#include <plist/plist.h>
+#include <plist/uuid.h>
 #include <io/path.h>
 #include <cf/cf.h>
 #include <oak/compat.h>
