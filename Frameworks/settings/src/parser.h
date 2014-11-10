@@ -9,8 +9,9 @@ struct ini_file_t
 
 		struct value_t
 		{
-			value_t (std::string const& name, std::string const& value) : name(name), value(value) { }
+			value_t (std::string const& name, std::string const& value, size_t lineNumber) : name(name), value(value), line_number(lineNumber) { }
 			std::string name, value;
+			size_t line_number;
 		};
 
 		std::vector<std::string> names;
@@ -24,11 +25,11 @@ struct ini_file_t
 		sections.emplace_back(names);
 	}
 
-	void insert_value (std::string const& name, std::string const& value)
+	void insert_value (std::string const& name, std::string const& value, size_t lineNumber)
 	{
 		if(sections.empty())
 			new_section(std::vector<std::string>());
-		sections.back().values.push_back(section_t::value_t(name, value));
+		sections.back().values.emplace_back(name, value, lineNumber);
 	}
 
 	std::string path;

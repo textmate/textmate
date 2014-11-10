@@ -116,7 +116,7 @@ static bool parse_line (char const*& p, char const* pe, ini_file_t& res, int n =
 	if(parse_header(p, pe, header))
 		res.new_section(header);
 	else if(parse_assignment(p, pe, assignment))
-		res.insert_value(assignment.first, assignment.second);
+		res.insert_value(assignment.first, assignment.second, n);
 
 	if(parse_comment(p, pe) && (p == pe || parse_char(p, pe, "\n")))
 		return true;

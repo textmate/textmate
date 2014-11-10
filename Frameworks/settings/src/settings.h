@@ -72,10 +72,12 @@ PUBLIC std::map<std::string, std::string> variables_for_path (std::map<std::stri
 
 struct setting_info_t
 {
-	setting_info_t (std::string const& variable, std::string const& path, std::string const& section) : variable(variable), path(path), section(section) { }
+	setting_info_t (std::string const& variable, std::string const& value, std::string const& path, size_t lineNumber, std::string const& section) : variable(variable), value(value), path(path), line_number(lineNumber), section(section) { }
 
 	std::string variable;
+	std::string value;
 	std::string path;
+	size_t line_number;
 	std::string section;
 };
 
