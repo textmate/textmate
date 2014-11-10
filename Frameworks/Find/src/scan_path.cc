@@ -206,7 +206,7 @@ namespace find
 				size_t offset = 0, bol = 0, lfCount = 0;
 				for(auto const& it : ranges)
 				{
-					while(offset < it.from)
+					while(offset + linefeed_length(text, offset) <= it.from)
 					{
 						if(size_t len = linefeed_length(text, offset))
 						{
@@ -222,7 +222,7 @@ namespace find
 					text::pos_t from(lfCount, it.from - bol);
 					size_t fromLine = bol;
 
-					while(offset < it.to)
+					while(offset + linefeed_length(text, offset) <= it.to)
 					{
 						if(size_t len = linefeed_length(text, offset))
 						{
@@ -237,8 +237,8 @@ namespace find
 
 					text::pos_t to(lfCount, it.to - bol);
 
-					size_t eol = offset;
-					if(bol < offset)
+					size_t eol = it.to;
+					if(bol != eol)
 					{
 						while(eol+1 < text.size() && linefeed_length(text, eol) == 0)
 							++eol;
