@@ -154,7 +154,8 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		OakAddAutoLayoutViewsToSuperview([views allValues], self);
 
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(4)-[icon]-(4)-[name]-(4)-[shortcut]-(8)-|" options:0 metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[name]-(2)-[context]-(5)-|" options:NSLayoutFormatAlignAllLeading|NSLayoutFormatAlignAllTrailing metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[context]-(8)-|" options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[name]-(2)-[context]-(5)-|" options:NSLayoutFormatAlignAllLeading metrics:nil views:views]];
 		[self addConstraint:[NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:imageView attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
 		[self addConstraint:[NSLayoutConstraint constraintWithItem:textField attribute:NSLayoutAttributeBaseline relatedBy:NSLayoutRelationEqual toItem:shortcutTextField attribute:NSLayoutAttributeBaseline multiplier:1 constant:0]];
 
