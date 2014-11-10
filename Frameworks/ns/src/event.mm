@@ -167,6 +167,11 @@ namespace ns
 		std::string key; NSUInteger flags;
 		parse_event_string(eventString, key, flags, true);
 
+		if(utf8::to_ch(key) == NSBackspaceCharacter)
+			key = NSDeleteCharacter;
+		else if(utf8::to_ch(key) == NSNewlineCharacter)
+			key = NSCarriageReturnCharacter;
+
 		std::string modifierString = key.empty() ? "" : string_for(flags);
 		if(startOfKey)
 			*startOfKey = modifierString.size();
