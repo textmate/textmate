@@ -29,6 +29,7 @@ static NSUInteger const kSearchSourceGrammarItems     = (1 << 2);
 static NSUInteger const kSearchSourceThemeItems       = (1 << 3);
 static NSUInteger const kSearchSourceDragCommandItems = (1 << 4);
 static NSUInteger const kSearchSourceMenuItems        = (1 << 5);
+static NSUInteger const kSearchSourceKeyBindingItems  = (1 << 6);
 
 static void* kRecordingBinding = &kRecordingBinding;
 
@@ -319,7 +320,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 
 		_sourceListLabels = @[ @"Actions", @"Settings", @"Other" ];
 		_bundleItemField  = kBundleItemTitleField;
-		_searchSource     = kSearchSourceActionItems|kSearchSourceMenuItems;
+		_searchSource     = kSearchSourceActionItems|kSearchSourceMenuItems|kSearchSourceKeyBindingItems;
 
 		self.window.title = @"Select Bundle Item";
 		[self.window setContentBorderThickness:31 forEdge:NSMinYEdge];
@@ -454,9 +455,9 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 {
 	switch(_sourceIndex = newSourceIndex)
 	{
-		case 0: self.searchSource = kSearchSourceActionItems|kSearchSourceMenuItems;   break;
-		case 1: self.searchSource = kSearchSourceSettingsItems;                        break;
-		case 2: self.searchSource = kSearchSourceGrammarItems|kSearchSourceThemeItems; break;
+		case 0: self.searchSource = kSearchSourceActionItems|kSearchSourceMenuItems|kSearchSourceKeyBindingItems; break;
+		case 1: self.searchSource = kSearchSourceSettingsItems;                                                   break;
+		case 2: self.searchSource = kSearchSourceGrammarItems|kSearchSourceThemeItems;                            break;
 	}
 }
 
@@ -663,6 +664,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		}
 	}
 
+	std::set<std::pair<std::string, std::string>> seen;
 	if(self.searchSource & kSearchSourceMenuItems)
 	{
 		std::vector<menu_item_t> menuItems;
@@ -674,8 +676,59 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 				@"path"     : [NSString stringWithCxxString:record.path],
 				@"menuItem" : record.menu_item
 			}];
-			OakSetNonEmptyString(dict, @"keyEquivalent", key_equivalent_for_menu_item(record.menu_item));
+
+			std::string const keyEquivalent = key_equivalent_for_menu_item(record.menu_item);
+			if(!keyEquivalent.empty())
+				seen.emplace(keyEquivalent, sel_getName(record.menu_item.action));
+
+			OakSetNonEmptyString(dict, @"keyEquivalent", keyEquivalent);
 			[items addObject:dict];
+		}
+	}
+
+	if(self.searchSource & kSearchSourceKeyBindingItems)
+	{
+		static std::string const KeyBindingLocations[] =
+		{
+			oak::application_t::support("KeyBindings.dict"),
+			oak::application_t::path("Contents/Resources/KeyBindings.dict"),
+			path::join(path::home(), "Library/KeyBindings/DefaultKeyBinding.dict"),
+			"/Library/KeyBindings/DefaultKeyBinding.dict",
+			"/System/Library/Frameworks/AppKit.framework/Resources/StandardKeyBinding.dict",
+		};
+
+		std::set<std::string> keysSeen;
+		for(auto const& path : KeyBindingLocations)
+		{
+			for(auto const& pair : plist::load(path))
+			{
+				std::string key = ns::normalize_event_string(pair.first);
+				std::string name, action;
+				if(std::string const* sel = boost::get<std::string>(&pair.second))
+				{
+					if(*sel == "noop:" || !seen.emplace(key, *sel).second || ![NSApp targetForAction:NSSelectorFromString([NSString stringWithCxxString:*sel])])
+						continue;
+
+					action = *sel;
+					name = format_string::replace(*sel, "[a-z](?=[A-Z])", "$0 ");
+					name = format_string::replace(name, "(.+):\\z", "${1:/capitalize}");
+					name = format_string::replace(name, "\\bsub Word\\b", "Sub-word");
+				}
+				else
+				{
+					name = format(pair.second);
+				}
+
+				NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithDictionary:@{
+					@"name"          : [NSString stringWithCxxString:name],
+					@"path"          : [NSString stringWithCxxString:path::with_tilde(path)],
+					@"file"          : [NSString stringWithCxxString:path],
+					@"keyEquivalent" : [NSString stringWithCxxString:key],
+					@"eclipsed"      : @(!keysSeen.insert(key).second)
+				}];
+				OakSetNonEmptyString(dict, @"action", action);
+				[items addObject:dict];
+			}
 		}
 	}
 
@@ -725,7 +778,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 			if(_bundleItemField == kBundleItemTitleField)
 			{
 				std::vector<std::pair<size_t, size_t>> cover;
-				if(self.searchSource & (kSearchSourceActionItems|kSearchSourceMenuItems))
+				if(self.searchSource & (kSearchSourceActionItems|kSearchSourceMenuItems|kSearchSourceKeyBindingItems))
 				{
 					if(rank = oak::rank(to_s(filter), name, &cover))
 							rank += 1;
@@ -771,7 +824,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		{
 			if(_bundleItemField == kBundleItemTitleField)
 			{
-				NSUInteger i = [identifiers indexOfObject:(item[@"uuid"] ?: OakMenuItemIdentifier(item[@"menuItem"]))];
+				NSUInteger i = [identifiers indexOfObject:(item[@"uuid"] ?: item[@"action"] ?: OakMenuItemIdentifier(item[@"menuItem"]))];
 				if(i != NSNotFound)
 					rank = 2 + (identifiers.count - i) / identifiers.count;
 			}
@@ -804,7 +857,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	if(self.tableView.selectedRow != -1)
 	{
 		if(NSDictionary* item = self.items[self.tableView.selectedRow])
-			status = item[@"semanticClass"] ?: item[@"scopeSelector"];
+			status = item[@"semanticClass"] ?: item[@"scopeSelector"] ?: item[@"action"];
 	}
 	self.statusTextField.stringValue = status ?: @"";
 
@@ -830,7 +883,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 - (BOOL)canAccept
 {
 	NSDictionary* item = self.tableView.selectedRow != -1 ? self.items[self.tableView.selectedRow] : nil;
-	return item[@"menuItem"] || item[@"uuid"] && bundles::lookup(to_s((NSString*)item[@"uuid"]))->kind() != bundles::kItemTypeSettings;
+	return item[@"menuItem"] || item[@"action"] || item[@"uuid"] && bundles::lookup(to_s((NSString*)item[@"uuid"]))->kind() != bundles::kItemTypeSettings;
 }
 
 - (BOOL)canEdit
@@ -844,18 +897,32 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	if(_bundleItemField == kBundleItemTitleField && OakNotEmptyString(self.filterString) && (self.tableView.selectedRow > 0 || [self.filterString length] > 1))
 	{
 		NSDictionary* item = self.items[self.tableView.selectedRow];
-		if(NSString* identifier = item[@"uuid"] ?: OakMenuItemIdentifier(item[@"menuItem"]))
+		if(NSString* identifier = item[@"uuid"] ?: item[@"action"] ?: OakMenuItemIdentifier(item[@"menuItem"]))
 			[[OakAbbreviations abbreviationsForName:@"OakBundleItemChooserBindings"] learnAbbreviation:self.filterString forString:identifier];
 	}
 
 	if(self.tableView.selectedRow != -1)
 	{
 		NSDictionary* item = self.items[self.tableView.selectedRow];
+
+		SEL action = NULL;
+		id target = nil, sender = self;
+
 		if(NSMenuItem* menuItem = item[@"menuItem"])
 		{
+			target = menuItem.target;
+			action = menuItem.action;
+			sender = menuItem;
+		}
+		else if(NSString* actionStr = item[@"action"])
+		{
+			action = NSSelectorFromString(actionStr);
+		}
+
+		if(action)
+		{
 			[self.window orderOut:self];
-			if(menuItem.action)
-				[NSApp sendAction:menuItem.action to:menuItem.target from:menuItem];
+			[NSApp sendAction:action to:target from:sender];
 			[self.window close];
 
 			return;
