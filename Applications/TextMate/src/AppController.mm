@@ -483,7 +483,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 	{
 		[[BundleEditor sharedInstance] revealBundleItem:bundles::lookup(to_s(uuid))];
 	}
-	else if(NSString* path = [[[sender selectedItems] lastObject] objectForKey:@"path"])
+	else if(NSString* path = [[[sender selectedItems] lastObject] objectForKey:@"file"])
 	{
 		document::document_ptr doc = document::create(to_s(path));
 		if(NSString* line = [[[sender selectedItems] lastObject] objectForKey:@"line"])
