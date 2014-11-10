@@ -932,13 +932,13 @@ private:
 
 	std::shared_ptr<ng::layout_t> layout;
 	std::vector<CGRect> pageRects;
+
+	BOOL _needsLayout;
 }
 @property (nonatomic) CGFloat pageWidth;
 @property (nonatomic) CGFloat pageHeight;
 @property (nonatomic) CGFloat fontScale;
 @property (nonatomic) NSString* themeUUID;
-
-@property (nonatomic) BOOL needsLayout;
 @end
 
 @implementation OakPrintDocumentView
@@ -978,7 +978,7 @@ private:
 	self.fontScale  = [[[info dictionary] objectForKey:NSPrintScalingFactor] floatValue];
 	self.themeUUID  = [[info dictionary] objectForKey:@"OakPrintThemeUUID"];
 
-	[self layoutIfNeeded];
+	[self updateLayout];
 	[self setFrame:NSMakeRect(0, 0, self.pageWidth, layout->height())];
 
 	range->location = 1;
@@ -1000,9 +1000,9 @@ private:
 		layout->draw((CGContextRef)[[NSGraphicsContext currentContext] graphicsPort], aRect, [self isFlipped], /* selection: */ ng::ranges_t(), /* highlight: */ ng::ranges_t(), /* draw background: */ false);
 }
 
-- (void)layoutIfNeeded
+- (void)updateLayout
 {
-	if(!self.needsLayout)
+	if(!_needsLayout)
 		return;
 
 	pageRects.clear();
@@ -1029,7 +1029,7 @@ private:
 		pageRect.size.height = self.pageHeight;
 	}
 
-	self.needsLayout = NO;
+	_needsLayout = NO;
 }
 
 - (void)setPageWidth:(CGFloat)newPageWidth    { if(_pageWidth  != newPageWidth)  { _needsLayout = YES; _pageWidth  = newPageWidth;  } }
