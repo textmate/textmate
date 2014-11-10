@@ -316,9 +316,14 @@ namespace
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 
+	self.window.delegate        = nil;
 	self.tabBarView.dataSource  = nil;
 	self.tabBarView.delegate    = nil;
 	self.textView.delegate      = nil;
+
+	// When option-clicking to close all windows then
+	// messages are sent to our window after windowWillClose:
+	__autoreleasing __attribute__ ((unused)) NSWindow* delayRelease = self.window;
 }
 
 // ======================================
@@ -394,7 +399,6 @@ namespace
 
 	self.documents          = std::vector<document::document_ptr>();
 	self.selectedDocument   = document::document_ptr();
-	self.window.delegate    = nil;
 	self.fileBrowserVisible = NO; // Make window frame small as we no longer respond to savableWindowFrame
 	self.identifier         = nil; // This removes us from AllControllers and causes a release
 }
