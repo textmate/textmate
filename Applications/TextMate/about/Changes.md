@@ -2,6 +2,11 @@ Title: Release Notes
 
 # Changes
 
+## 2014-11-11 (v2.0-beta.6.1)
+
+* The bundle item chooser (⌃⌘T) now show the value of settings and variables (inline) and includes actions from key binding dictionaries (like `~/Library/KeyBindings/DefaultKeyBinding.dict`).
+* See [all changes since v2.0-beta.5.4](https://github.com/textmate/textmate/compare/v2.0-beta.5.4...v2.0-beta.6.1).
+
 ## 2014-11-05 (v2.0-beta.5.4)
 
 * Improve stability on Yosemite.
