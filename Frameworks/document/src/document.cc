@@ -601,6 +601,7 @@ namespace document
 	document_t::~document_t ()
 	{
 		D(DBF_Document, bug("%s\n", display_name().c_str()););
+		_callbacks(&callback_t::document_will_delete, this);
 		documents.remove(_identifier);
 	}
 

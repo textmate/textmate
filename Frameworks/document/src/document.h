@@ -136,6 +136,7 @@ namespace document
 
 			virtual ~callback_t () { }
 			virtual void handle_document_event (document_ptr document, event_t event) = 0;
+			virtual void document_will_delete (document_t* document) { }
 		};
 
 		void add_callback (callback_t* callback)         { _callbacks.add(callback); }
