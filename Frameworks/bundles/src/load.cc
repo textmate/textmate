@@ -46,10 +46,11 @@ std::pair<std::vector<bundles::item_ptr>, std::map< oak::uuid_t, std::vector<oak
 			std::set<oak::uuid_t> hiddenItems;
 			bool skipEclipsedBundle = false;
 
-			auto const entries = cache.entries(bundlePath, "{info.plist,Commands,DragCommands,Macros,Preferences,Proxies,Snippets,Syntaxes,Themes}");
+			auto const entries = cache.entries(bundlePath, "{[Ii]nfo.plist,Commands,DragCommands,Macros,Preferences,Proxies,Snippets,Syntaxes,Themes}");
 			for(auto const& infoPlistPath : entries)
 			{
-				if(path::name(infoPlistPath) != "info.plist")
+				std::string const name = path::name(infoPlistPath);
+				if(name != "info.plist" && name != "Info.plist")
 					continue;
 
 				oak::uuid_t bundleUUID;
