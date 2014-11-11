@@ -1,0 +1,2 @@
+@interface ApplicationController : NSObject
+@end

@@ -1,4 +1,0 @@
-@interface MyView : NSView
-{
-}
-@end
