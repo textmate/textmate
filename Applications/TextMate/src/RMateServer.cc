@@ -273,21 +273,32 @@ namespace // wrap in anonymous namespace to avoid clashing with other callbacks 
 		WATCH_LEAKS(base_t);
 
 		virtual void save_document (document::document_ptr document)  { }
-		virtual void close_document (document::document_ptr document) { }
+		virtual void close_document (document::document_t* document) { }
+
+		void document_will_delete (document::document_t* document)
+		{
+			close_and_delete(document);
+		}
 
 		void handle_document_event (document::document_ptr document, event_t event)
 		{
 			if(event == did_change_open_status && !document->is_open())
 			{
-				close_document(document);
 				D(DBF_RMateServer, bug("%p\n", this););
-				document->remove_callback(this);
-				delete this;
+				close_and_delete(document.get());
 			}
 			else if(event == did_save)
 			{
 				save_document(document);
 			}
+		}
+
+	private:
+		void close_and_delete (document::document_t* document)
+		{
+			document->remove_callback(this);
+			close_document(document);
+			delete this;
 		}
 	};
 
@@ -319,7 +330,7 @@ namespace // wrap in anonymous namespace to avoid clashing with other callbacks 
 				fprintf(stderr, "*** rmate: callback failed to save ‘%s’\n", document->display_name().c_str());
 		}
 
-		void close_document (document::document_ptr document)
+		void close_document (document::document_t* document)
 		{
 			D(DBF_RMateServer, bug("%s\n", document->path().c_str()););
 			bool res = true;
@@ -384,7 +395,7 @@ namespace // wrap in anonymous namespace to avoid clashing with other callbacks 
 			document->add_callback(new reactivate_callback_t(*this));
 		}
 
-		void close_document (document::document_ptr document)
+		void close_document (document::document_t* document)
 		{
 			D(DBF_RMateServer, bug("%zu → %zu\n", *shared_count, *shared_count - 1););
 			if(--*shared_count == 0)
