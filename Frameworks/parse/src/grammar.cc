@@ -176,8 +176,24 @@ namespace parse
 			else
 			{
 				std::string::size_type fragment = include.find('#');
-				if(rule_ptr grammar = find_grammar(include.substr(0, fragment), base))
-					rule->include = fragment == std::string::npos ? grammar.get() : find_repository_item(grammar.get(), include.substr(fragment+1));
+				std::string use_as_name = include.substr(0, fragment);
+				rule_ptr use_as_base = base;
+
+				// See if this is a `source.lang##rule` include.
+				// The double hashtags resets the base for the include
+				if(fragment != std::string::npos && fragment + 1 < include.size() && include[fragment + 1] == '#')
+				{
+					use_as_base.reset();
+					fragment++;
+				}
+
+				if(rule_ptr grammar = find_grammar(use_as_name, use_as_base))
+				{
+					if (fragment != std::string::npos && fragment + 1 < include.size())
+						rule->include = find_repository_item(grammar.get(), include.substr(fragment+1));
+					else
+						rule->include = grammar.get();
+				}
 			}
 
 			if(!rule->include)
