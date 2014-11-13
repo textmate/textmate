@@ -28,6 +28,7 @@ namespace parse
 		bool operator!= (rule_t const& rhs) const { return rule_id != rhs.rule_id; }
 
 		std::string include_string;
+		std::string include_absolute;
 
 		std::string scope_string;
 		std::string content_scope_string;

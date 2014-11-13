@@ -46,6 +46,7 @@ namespace parse
 			.map("end",                 &rule_t::end_string                               )
 			.map("applyEndPatternLast", &rule_t::apply_end_last                           )
 			.map("include",             &rule_t::include_string                           )
+			.map("include_absolute",    &rule_t::include_absolute                         )
 			.map("patterns",            &rule_t::children,             &convert_array     )
 			.map("captures",            &rule_t::captures,             &convert_dictionary)
 			.map("beginCaptures",       &rule_t::begin_captures,       &convert_dictionary)
@@ -176,7 +177,7 @@ namespace parse
 			else
 			{
 				std::string::size_type fragment = include.find('#');
-				if(rule_ptr grammar = find_grammar(include.substr(0, fragment), base))
+				if(rule_ptr grammar = find_grammar(include.substr(0, fragment), rule->include_absolute == "1" ? rule_ptr() : base))
 					rule->include = fragment == std::string::npos ? grammar.get() : find_repository_item(grammar.get(), include.substr(fragment+1));
 			}
 
