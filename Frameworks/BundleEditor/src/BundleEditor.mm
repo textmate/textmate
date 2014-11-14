@@ -33,10 +33,6 @@ static BundleEditor* SharedInstance;
 - (void)setBundleItem:(bundles::item_ptr const&)aBundleItem;
 @end
 
-@interface NSBrowser (SnowLeopard)
-- (void)setAutohidesScroller:(BOOL)flag;
-@end
-
 namespace
 {
 	static bundles::kind_t const PlistItemKinds[] = { bundles::kItemTypeSettings, bundles::kItemTypeMacro, bundles::kItemTypeTheme };
