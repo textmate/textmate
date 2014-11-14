@@ -325,8 +325,8 @@
 
 	if(_overflowButton)
 	{
-		[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[title]-(>=3)-[overflow]-(3)-[right]" options:0 metrics:nil views:views]];
-		[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[overflow]-(7)-|" options:0 metrics:nil views:views]];
+		[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[title]-(>=3)-[overflow][right]" options:0 metrics:nil views:views]];
+		[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[overflow]|" options:0 metrics:nil views:views]];
 	}
 
 	[self addConstraints:_myConstraints];
