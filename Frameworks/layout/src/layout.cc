@@ -667,7 +667,7 @@ namespace ng
 		auto row = row_for_offset(index.index);
 		size_t res = row->value.index_right_of(index.index, _buffer, row->offset._length);
 		if(res == index.index && res != _buffer.size())
-			res += _buffer[res].size();;
+			res += _buffer[res].size();
 		return res;
 	}
 
@@ -689,7 +689,7 @@ namespace ng
 		auto row = row_for_offset(index.index);
 		size_t res = row->value.index_left_of(index.index, _buffer, row->offset._length);
 		if(res == index.index && res != 0)
-			res -= _buffer[res-1].size();;
+			res -= _buffer[res-1].size();
 		return res;
 	}
 

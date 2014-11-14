@@ -805,7 +805,7 @@ private:
 		else
 		{
 			NSViewController* viewController = [NSViewController new];
-			NSTextField* textField = OakCreateLabel([NSString stringWithCxxString:text::join(info, "\n")]);;
+			NSTextField* textField = OakCreateLabel([NSString stringWithCxxString:text::join(info, "\n")]);
 			[textField sizeToFit];
 			viewController.view = textField;
 

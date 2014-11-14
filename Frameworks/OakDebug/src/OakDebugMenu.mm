@@ -114,7 +114,7 @@ namespace
 
 	// ===================
 
-	std::vector<std::string> sectionNames = OakDebugBaseClass::sectionNames();;
+	std::vector<std::string> sectionNames = OakDebugBaseClass::sectionNames();
 	NSMenu* submenu = nil;
 	for(auto const& it : OakDebugBaseClass::registry())
 	{

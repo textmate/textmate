@@ -680,7 +680,7 @@ namespace ng
 	size_t paragraph_t::index_left_of (size_t index, ng::buffer_t const& buffer, size_t bufferOffset) const
 	{
 		if(index != bufferOffset)
-			index -= buffer[index-1].size();;
+			index -= buffer[index-1].size();
 
 		size_t i = bufferOffset;
 		for(auto const& node : _nodes)

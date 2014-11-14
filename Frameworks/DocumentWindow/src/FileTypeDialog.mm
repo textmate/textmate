@@ -137,7 +137,7 @@ static bool is_installed (oak::uuid_t const& uuid)
 
 	std::map<std::string, std::string> variables;
 	variables["DisplayName"] = path::display_name(to_s(self.path));
-	std::string const ext = path::extensions(to_s(self.path));;
+	std::string const ext = path::extensions(to_s(self.path));
 	if(ext != "")
 	{
 		self.persistentSetting = YES;

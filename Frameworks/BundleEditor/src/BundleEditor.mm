@@ -447,7 +447,7 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 		break;
 
 		case bundles::kItemTypeDragCommand:
-			plist[bundles::kFieldDropExtension] = unwrap_array([bundleItemProperties objectForKey:[NSString stringWithCxxString:bundles::kFieldDropExtension]], @"extension");;
+			plist[bundles::kFieldDropExtension] = unwrap_array([bundleItemProperties objectForKey:[NSString stringWithCxxString:bundles::kFieldDropExtension]], @"extension");
 		break;
 	}
 

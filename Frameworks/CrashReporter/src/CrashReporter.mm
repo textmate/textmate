@@ -33,7 +33,7 @@ static std::string create_gzipped_file (std::string const& path)
 	std::string res = path::temp("gzipped_crash_log");
 	if(gzFile fp = gzopen(res.c_str(), "wb"))
 	{
-		std::string const text = path::content(path);;
+		std::string const text = path::content(path);
 		gzwrite(fp, text.data(), text.size());
 		gzclose(fp);
 	}

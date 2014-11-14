@@ -792,7 +792,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 		NSArray* paths = [pboard propertyListForType:NSFilenamesPboardType];
 		[pboard declareTypes:@[ NSFilenamesPboardType, @"OakFileBrowserOperation" ] owner:nil];
 		[pboard setPropertyList:paths forType:NSFilenamesPboardType];
-		[pboard setString:@"cut" forType:@"OakFileBrowserOperation"];;
+		[pboard setString:@"cut" forType:@"OakFileBrowserOperation"];
 	}
 }
 

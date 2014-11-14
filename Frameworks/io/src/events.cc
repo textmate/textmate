@@ -177,7 +177,7 @@ namespace
 					{
 						if(path.find(path::parent(requestedPath)) == 0)
 						{
-							stream._requested = file_info_t(requestedPath);;
+							stream._requested = file_info_t(requestedPath);
 							if(stream._requested.exists())
 							{
 								if(!stream._requested.is_directory())

@@ -374,7 +374,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		[self unbind:@"countOfExcludedMatches"];
 	}
 
-	_windowController.resultsViewController.results = _results = [FFResultNode new];;
+	_windowController.resultsViewController.results = _results = [FFResultNode new];
 	[self bind:@"countOfMatches" toObject:_results withKeyPath:@"countOfLeafs" options:nil];
 	[self bind:@"countOfExcludedMatches" toObject:_results withKeyPath:@"countOfExcluded" options:nil];
 }
