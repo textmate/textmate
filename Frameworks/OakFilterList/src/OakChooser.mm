@@ -277,9 +277,27 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 
 - (void)setItems:(NSArray*)anArray
 {
+	NSIndexSet* oldSelectedRowIndexes = _tableView.selectedRowIndexes;
+	NSArray* selectedItems;
+	if([oldSelectedRowIndexes count] > 1 || [oldSelectedRowIndexes count] == 1 && [oldSelectedRowIndexes firstIndex] > 0)
+		selectedItems = [_items objectsAtIndexes:oldSelectedRowIndexes];
+
 	_items = anArray;
 	[_tableView reloadData];
-	[_tableView scrollRowToVisible:_tableView.selectedRow == -1 ? 0 : _tableView.selectedRow];
+
+	NSMutableIndexSet* rowIndexes = [NSMutableIndexSet new];
+	for(id item in selectedItems)
+	{
+		NSUInteger row = [_items indexOfObject:item];
+		if(row != NSNotFound)
+			[rowIndexes addIndex:row];
+	}
+
+	if([rowIndexes count] == 0)
+		[rowIndexes addIndex:0];
+
+	[_tableView selectRowIndexes:rowIndexes byExtendingSelection:NO];
+	[_tableView scrollRowToVisible:[rowIndexes firstIndex]];
 
 	[self updateStatusText:self];
 
