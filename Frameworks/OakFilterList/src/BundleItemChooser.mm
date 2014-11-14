@@ -219,31 +219,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	if(NSString* keyEquivalent = item[@"keyEquivalent"])
 	{
 		self.shortcutTextField.font = [NSFont controlContentFontOfSize:0];
-
-		size_t keyStartsAt = 0;
-		std::string const glyphString = ns::glyphs_for_event_string(to_s(keyEquivalent), &keyStartsAt);
-		NSString* modifiers = [NSString stringWithCxxString:glyphString.substr(0, keyStartsAt)];
-		NSString* key       = [NSString stringWithCxxString:glyphString.substr(keyStartsAt)];
-
-		NSDictionary* fontAttr = @{ NSFontAttributeName : self.shortcutTextField.font };
-		CGFloat curWidth = std::max<CGFloat>(1, [key sizeWithAttributes:fontAttr].width);
-		CGFloat maxWidth = std::max<CGFloat>(1, [@"⌫" sizeWithAttributes:fontAttr].width);
-
-		if(curWidth < maxWidth)
-		{
-			CGFloat width = std::max<CGFloat>(1, [modifiers sizeWithAttributes:fontAttr].width);
-
-			NSMutableAttributedString* aStr = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@%@\t", modifiers, key] attributes:fontAttr];
-			NSMutableParagraphStyle* pStyle = [NSMutableParagraphStyle new];
-			[pStyle setTabStops:@[ [[NSTextTab alloc] initWithType:NSLeftTabStopType location:width + maxWidth] ]];
-			[aStr addAttributes:@{ NSParagraphStyleAttributeName : pStyle } range:NSMakeRange(0, [aStr length])];
-
-			str = aStr;
-		}
-		else
-		{
-			str = [modifiers stringByAppendingString:key];
-		}
+		str = OakAttributedStringForEventString(keyEquivalent, self.shortcutTextField.font);
 	}
 	else if(NSString* tabTrigger = item[@"tabTrigger"])
 	{
