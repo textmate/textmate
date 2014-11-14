@@ -7,6 +7,7 @@
 #import <OakAppKit/OakScopeBarView.h>
 #import <OakAppKit/NSImage Additions.h>
 #import <OakFoundation/NSString Additions.h>
+#import <OakFoundation/OakFoundation.h>
 #import <OakFileBrowser/OFBPathInfoCell.h>
 #import <ns/ns.h>
 #import <text/format.h>
@@ -29,50 +30,6 @@ NSUInteger const kFileChooserUncommittedChangesSourceIndex = 2;
 
 namespace
 {
-	struct filter_string_t
-	{
-		std::string string    = NULL_STR;
-		std::string selection = NULL_STR;
-		std::string symbol    = NULL_STR;
-
-		filter_string_t (std::string const& str)
-		{
-			if(str == NULL_STR || str.empty())
-				return;
-
-			if(str.find("*") != std::string::npos)
-			{
-				_is_glob = true;
-				_glob = path::glob_t(str, false, false);
-			}
-			else if(regexp::match_t const& m = regexp::search("(?x)  \\A  (.*?)  (?: :([\\d+:-x\\+]*) | @(.*) )?  \\z", str))
-			{
-				_initialized = true;
-
-				string    = oak::normalize_filter(m[1]);
-				selection = m[2];
-				symbol    = m[3];
-			}
-		}
-
-		bool is_glob () const
-		{
-			return _is_glob;
-		}
-
-		path::glob_t glob () const
-		{
-			return _glob;
-		}
-
-		explicit operator bool () const { return _initialized; }
-
-	private:
-		bool _initialized = false;
-		bool _is_glob = false;
-		path::glob_t _glob = "*";
-	};
-
 	struct document_record_t
 	{
 		document_record_t (document::document_ptr const& doc, std::string const& base)
@@ -175,6 +132,11 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	oak::uuid_t                                   _currentDocument;
 	std::vector<document_record_t>                _records;
 	document::scanner_ptr                         _scanner;
+
+	NSString* _globString;
+	NSString* _filterString;
+	NSString* _selectionString;
+	NSString* _symbolString;
 }
 @property (nonatomic) NSArray* sourceListLabels;
 @property (nonatomic) NSProgressIndicator* progressIndicator;
@@ -340,34 +302,35 @@ static path::glob_list_t globs_for_path (std::string const& path)
 {
 	std::function<bool(document_record_t const*, document_record_t const*)> sortFunctor = [](document_record_t const* lhs, document_record_t const* rhs){ return (lhs->rank < rhs->rank) || ((lhs->rank == rhs->rank) && ((lhs->lru_rank < rhs->lru_rank) || (lhs->lru_rank == rhs->lru_rank && text::less_t()(lhs->name, rhs->name)))); };
 
-	filter_string_t filter(to_s(self.filterString));
-	if(filter.is_glob())
+	if(OakNotEmptyString(_globString))
 	{
+		path::glob_t glob(to_s(_globString), false, false);
 		for(size_t i = first; i < _records.size(); ++i)
 		{
 			auto& record = _records[i];
 			record.cover_prefix.clear();
 			record.cover_name.clear();
-			record.matched = filter.glob().does_match(record.full_path);
+			record.matched = glob.does_match(record.full_path);
 		}
 		sortFunctor = [](document_record_t const* lhs, document_record_t const* rhs){ return text::less_t()(lhs->name, rhs->name); };
 	}
 	else
 	{
+		std::string const filter = to_s(_filterString);
 		path::glob_list_t glob;
 
 		std::vector<std::string> bindings;
-		for(NSString* str in [[OakAbbreviations abbreviationsForName:@"OakFileChooserBindings"] stringsForAbbreviation:[NSString stringWithCxxString:filter.string]])
+		for(NSString* str in [[OakAbbreviations abbreviationsForName:@"OakFileChooserBindings"] stringsForAbbreviation:_filterString])
 			bindings.push_back(to_s(str));
 
 		size_t const count  = _records.size() - first;
 		size_t const stride = 256;
 		dispatch_apply(count / stride, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t n){
 			for(size_t i = n*stride; i < (n+1)*stride; ++i)
-				rank_record(_records[first + i], filter.string, glob, bindings);
+				rank_record(_records[first + i], filter, glob, bindings);
 		});
 	   for(size_t i = count - (count % stride); i < count; ++i)
-			rank_record(_records[first + i], filter.string, glob, bindings);
+			rank_record(_records[first + i], filter, glob, bindings);
 	}
 
 	std::vector<document_record_t const*> include;
@@ -530,6 +493,25 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	_scanner.reset();
 }
 
+- (void)updateFilterString:(NSString*)aString
+{
+	NSString* oldFilter = [(_globString ?: _filterString ?: @"") copy];
+	_globString = _filterString = _selectionString = _symbolString = nil;
+
+	if(regexp::match_t const& m = regexp::search("(?x)  \\A  (.*?)  (?: :([\\d+:-x\\+]*) | @(.*) )?  \\z", to_s(aString)))
+	{
+		if([aString rangeOfString:@"*"].location != NSNotFound)
+				_globString = [NSString stringWithCxxString:m[1]];
+		else	_filterString = [NSString stringWithCxxString:oak::normalize_filter(m[1])];
+
+		_selectionString = [NSString stringWithCxxString:m[2]];
+		_symbolString    = [NSString stringWithCxxString:m[3]];
+	}
+
+	if(![oldFilter isEqualToString:_globString ?: _filterString ?: @""])
+		[super updateFilterString:aString];
+}
+
 - (void)updateItems:(id)sender
 {
 	[self updateRecordsFrom:0];
@@ -580,9 +562,8 @@ static path::glob_list_t globs_for_path (std::string const& path)
 
 		NSMutableDictionary* item = [NSMutableDictionary dictionary];
 		item[@"identifier"] = [NSString stringWithCxxString:record.identifier];
-		filter_string_t filter(to_s(self.filterString));
-		if(filter.selection != NULL_STR)
-			item[@"selectionString"] = [NSString stringWithCxxString:filter.selection];
+		if(OakNotEmptyString(_selectionString))
+			item[@"selectionString"] = _selectionString;
 		if(record.full_path != NULL_STR)
 			item[@"path"] = [NSString stringWithCxxString:record.full_path];
 		[res addObject:item];
@@ -659,10 +640,8 @@ static path::glob_list_t globs_for_path (std::string const& path)
 
 - (void)accept:(id)sender
 {
-	if(self.filterString)
+	if(OakNotEmptyString(_filterString))
 	{
-		filter_string_t filter(to_s(self.filterString));
-
 		NSIndexSet* indexes = [self.tableView selectedRowIndexes];
 		for(NSUInteger i = [indexes firstIndex]; i != NSNotFound; i = [indexes indexGreaterThanIndex:i])
 		{
@@ -670,7 +649,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 			document_record_t const& record = _records[index.unsignedIntValue];
 
 			if(record.full_path != NULL_STR && record.cover_prefix.empty())
-				[[OakAbbreviations abbreviationsForName:@"OakFileChooserBindings"] learnAbbreviation:[NSString stringWithCxxString:filter.string] forString:[NSString stringWithCxxString:record.full_path]];
+				[[OakAbbreviations abbreviationsForName:@"OakFileChooserBindings"] learnAbbreviation:_filterString forString:[NSString stringWithCxxString:record.full_path]];
 		}
 	}
 
