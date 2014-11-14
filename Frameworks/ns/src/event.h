@@ -11,4 +11,6 @@ namespace ns
 
 } /* ns */
 
+PUBLIC NSAttributedString* OakAttributedStringForEventString (NSString* eventString, NSFont* font);
+
 #endif /* end of include guard: NS_EVENT_H_KLE3JJCO */
