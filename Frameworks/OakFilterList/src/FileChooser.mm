@@ -104,7 +104,7 @@ namespace
 		OakFileIconImage* image = nil;
 	};
 
-	inline void rank_record (document_record_t& record, filter_string_t const& filter, path::glob_list_t const& glob, std::vector<std::string> const& bindings)
+	inline void rank_record (document_record_t& record, std::string const& filter, path::glob_list_t const& glob, std::vector<std::string> const& bindings)
 	{
 		record.matched = false;
 		if(glob.exclude(record.full_path))
@@ -114,10 +114,10 @@ namespace
 		record.cover_name.clear();
 
 		double rank = record.is_current ? 0.1 : 3;
-		if(filter && !filter.string.empty())
+		if(!filter.empty() && filter != NULL_STR)
 		{
 			std::vector<std::pair<size_t, size_t>> cover;
-			if(rank = oak::rank(filter.string, record.name, &record.cover_name))
+			if(rank = oak::rank(filter, record.name, &record.cover_name))
 			{
 				rank += 1;
 
@@ -125,7 +125,7 @@ namespace
 				if(it != bindings.end())
 					rank = 2 + (bindings.end() - it) / (double)bindings.size();
 			}
-			else if(rank = oak::rank(filter.string, record.prefix + "/" + record.name, &cover))
+			else if(rank = oak::rank(filter, record.prefix + "/" + record.name, &cover))
 			{
 				for(auto pair : cover)
 				{
@@ -364,10 +364,10 @@ static path::glob_list_t globs_for_path (std::string const& path)
 		size_t const stride = 256;
 		dispatch_apply(count / stride, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t n){
 			for(size_t i = n*stride; i < (n+1)*stride; ++i)
-				rank_record(_records[first + i], filter, glob, bindings);
+				rank_record(_records[first + i], filter.string, glob, bindings);
 		});
 	   for(size_t i = count - (count % stride); i < count; ++i)
-			rank_record(_records[first + i], filter, glob, bindings);
+			rank_record(_records[first + i], filter.string, glob, bindings);
 	}
 
 	std::vector<document_record_t const*> include;
