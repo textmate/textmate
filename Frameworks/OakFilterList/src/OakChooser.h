@@ -28,6 +28,7 @@ PUBLIC @interface OakChooser : NSResponder
 @property (nonatomic) NSTextField*   itemCountTextField;
 
 @property (nonatomic) BOOL drawTableViewAsHighlighted;
+- (void)updateFilterString:(NSString*)aString;
 - (void)removeItemsAtIndexes:(NSIndexSet*)anIndexSet;
 - (void)performDefaultButtonClick:(id)sender;
 - (void)accept:(id)sender;

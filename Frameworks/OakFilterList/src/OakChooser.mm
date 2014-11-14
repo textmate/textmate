@@ -262,17 +262,21 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 	_filterString = [aString copy];
 	_searchField.stringValue = aString ?: @"";
 
+	[self updateFilterString:_filterString];
+
+	// see http://lists.apple.com/archives/accessibility-dev/2014/Aug/msg00024.html
+	if(nil != &NSAccessibilitySharedFocusElementsAttribute)
+		NSAccessibilityPostNotification(_tableView, NSAccessibilitySelectedRowsChangedNotification);
+}
+
+- (void)updateFilterString:(NSString*)aString
+{
 	if([_tableView numberOfRows] != 0)
 	{
 		[_tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
 		[_tableView scrollRowToVisible:0];
 	}
-
 	[self updateItems:self];
-
-	// see http://lists.apple.com/archives/accessibility-dev/2014/Aug/msg00024.html
-	if(nil != &NSAccessibilitySharedFocusElementsAttribute)
-		NSAccessibilityPostNotification(_tableView, NSAccessibilitySelectedRowsChangedNotification);
 }
 
 - (void)setItems:(NSArray*)anArray
