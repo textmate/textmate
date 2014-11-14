@@ -1,6 +1,7 @@
 #import "SymbolChooser.h"
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakFoundation/NSString Additions.h>
+#import <OakFoundation/OakFoundation.h>
 #import <text/ranker.h>
 #import <ns/ns.h>
 
@@ -126,8 +127,7 @@ static SymbolChooserItem* CreateItem (document::document_ptr const& document, te
 	NSMutableArray* res = [NSMutableArray array];
 	if(_document)
 	{
-		std::string filter = to_s(self.filterString);
-		if(filter == NULL_STR || filter == "")
+		if(OakIsEmptyString(self.filterString))
 		{
 			for(auto const& pair : _document->symbols())
 			{
@@ -137,6 +137,8 @@ static SymbolChooserItem* CreateItem (document::document_ptr const& document, te
 		}
 		else
 		{
+			std::string const filter = oak::normalize_filter(to_s(self.filterString));
+
 			std::string sectionName = NULL_STR;
 			std::multimap<double, SymbolChooserItem*> rankedItems;
 			for(auto const& pair : _document->symbols())
