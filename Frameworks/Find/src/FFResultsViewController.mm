@@ -3,6 +3,18 @@
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 
+static FFResultNode* NextNode (FFResultNode* node)
+{
+	NSUInteger index = [node.parent.children indexOfObject:node] + 1;
+	return index < node.parent.children.count ? node.parent.children[index] : nil;
+}
+
+static FFResultNode* PreviousNode (FFResultNode* node)
+{
+	NSUInteger index = [node.parent.children indexOfObject:node];
+	return index > 0 ? node.parent.children[index - 1] : nil;
+}
+
 // =================================
 // = OakSearchResultsMatchCellView =
 // =================================
@@ -340,7 +352,7 @@
 	NSInteger row = [_outlineView selectedRow];
 	FFResultNode* item = row == -1 ? nil : [_outlineView itemAtRow:row];
 
-	item = item ? (item.next ?: item.parent.next.firstResultNode) : _results.firstResultNode.firstResultNode;
+	item = item ? (NextNode(item) ?: NextNode(item.parent).firstResultNode) : _results.firstResultNode.firstResultNode;
 	if(!item && wrapAround)
 		item = _results.firstResultNode.firstResultNode;
 
@@ -352,7 +364,7 @@
 	NSInteger row = [_outlineView selectedRow];
 	FFResultNode* item = row == -1 ? nil : [_outlineView itemAtRow:row];
 
-	item = item ? (item.previous ?: item.parent.previous.lastResultNode) : _results.lastResultNode.lastResultNode;
+	item = item ? (PreviousNode(item) ?: PreviousNode(item.parent).lastResultNode) : _results.lastResultNode.lastResultNode;
 	if(!item && wrapAround)
 		item = _results.lastResultNode.lastResultNode;
 
@@ -370,14 +382,14 @@
 {
 	NSInteger row = [_outlineView selectedRow];
 	FFResultNode* item = row == -1 ? nil : [_outlineView itemAtRow:row];
-	[self showResultNode:item.parent.next.firstResultNode ?: _results.firstResultNode.firstResultNode];
+	[self showResultNode:NextNode(item.parent).firstResultNode ?: _results.firstResultNode.firstResultNode];
 }
 
 - (IBAction)selectPreviousDocument:(id)sender
 {
 	NSInteger row = [_outlineView selectedRow];
 	FFResultNode* item = row == -1 ? nil : [_outlineView itemAtRow:row];
-	[self showResultNode:item.parent.previous.firstResultNode ?: _results.lastResultNode.firstResultNode];
+	[self showResultNode:PreviousNode(item.parent).firstResultNode ?: _results.lastResultNode.firstResultNode];
 }
 
 // ==================

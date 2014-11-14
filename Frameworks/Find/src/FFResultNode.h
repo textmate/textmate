@@ -4,8 +4,6 @@
 
 @interface FFResultNode : NSObject
 @property (nonatomic, weak) FFResultNode* parent;
-@property (nonatomic, weak) FFResultNode* next;
-@property (nonatomic, weak) FFResultNode* previous;
 @property (nonatomic, readonly) NSUInteger countOfLeafs;
 @property (nonatomic, readonly) NSUInteger countOfExcluded;
 

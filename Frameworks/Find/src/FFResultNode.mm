@@ -165,9 +165,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 			self.countOfLeafs -= 1;
 	}
 
-	aMatch.previous      = self.lastResultNode;
-	aMatch.previous.next = aMatch;
-	aMatch.parent        = self;
+	aMatch.parent = self;
 
 	[(NSMutableArray*)_children addObject:aMatch];
 	self.countOfLeafs    += aMatch.countOfLeafs;
@@ -176,8 +174,6 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 
 - (void)removeFromParent
 {
-	_next.previous = _previous;
-	_previous.next = _next;
 	[(NSMutableArray*)_parent.children removeObject:self];
 	_parent.countOfExcluded -= _ignored ? _countOfLeafs : _countOfExcluded;
 	_parent.countOfLeafs    -= _countOfLeafs;
