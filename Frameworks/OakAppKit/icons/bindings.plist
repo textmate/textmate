@@ -4,7 +4,7 @@
 	text                 = ( mail, eml, man, txt, text, utf8, README, INSTALL, LICENSE, AUTHORS, ChangeLog );
 	structured_text      = ( bbcode, mdown, markdown, markdn, md, mmd, rst, rest, etx, etx.txt, textile, t2t );
 	web                  = ( html, htm, shtml, xhtml );
-	template             = ( tmpl, tpl, mtml, erb, rhtml, html.erb, inc, asp, aspx, ascx, cfm, cfml, cfc, yaws, mhtml, autohandler, dhandler, mc, tt, adp, gsp );
+	template             = ( tmpl, tpl, mtml, erb, rhtml, html.erb, inc, asp, aspx, ascx, cfm, cfml, cfc, yaws, mhtml, autohandler, dhandler, mc, tt, adp, gsp, twig );
 	log                  = ( log );
 	angle_brackets_green = ( jsp, php, php3, php4, php5, phpt, phtml, aw, ctp );
 	angle_brackets_brown = ( dist, xml, tld, pt, cpt, dtml, rss, opml, xsl, xslt );
