@@ -337,10 +337,10 @@
 
 - (void)mouseExited:(NSEvent*)anEvent
 {
-	if(!NSEqualRects(mouseHoverRect,  NSZeroRect))
+	if(!NSIsEmptyRect(mouseHoverRect))
 	{
 		[self setNeedsDisplayInRect:mouseHoverRect];
-		mouseHoverRect =  NSZeroRect;
+		mouseHoverRect = NSZeroRect;
 	}
 	[super mouseExited:anEvent];
 }

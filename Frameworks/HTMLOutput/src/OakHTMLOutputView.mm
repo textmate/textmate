@@ -90,7 +90,7 @@ extern NSString* const kCommandRunnerURLScheme; // from HTMLOutput.h
 		}
 	}
 
-	if(!NSEqualRects(self.pendingVisibleRect, NSZeroRect))
+	if(!NSIsEmptyRect(self.pendingVisibleRect))
 		[[[[self.webView mainFrame] frameView] documentView] scrollRectToVisible:self.pendingVisibleRect];
 	self.pendingVisibleRect = NSZeroRect;
 

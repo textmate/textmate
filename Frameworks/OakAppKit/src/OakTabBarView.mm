@@ -348,7 +348,7 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 		NSRect tabFrame = NSMakeRect(x, NSMinY(aRect), tabWidth, NSHeight(aRect));
 		x += tabWidth + spacing;
 
-		if(NSEqualRects(tabItem.tabItemView.frame, NSZeroRect))
+		if(NSIsEmptyRect(tabItem.tabItemView.frame))
 		{
 			tabItem.tabItemView.frame = tabFrame;
 			if(_animateLayoutChanges && tabItem != _preliminaryTabItem)
