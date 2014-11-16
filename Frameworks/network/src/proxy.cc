@@ -1,5 +1,4 @@
 #include "proxy.h"
-#include <plist/plist.h>
 #include <regexp/regexp.h>
 #include <text/encode.h>
 #include <oak/debug.h>
