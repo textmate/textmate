@@ -60,18 +60,16 @@ namespace oak
 
 	uuid_t::operator std::string () const
 	{
-		std::string str(40, ' ');
-		uuid_unparse_upper(data, &str[0]);
-		str.resize(36);
-		return str;
+		uuid_string_t str;
+		uuid_unparse_upper(data, str);
+		return std::string(str);
 	}
 
 	std::string to_s (oak::uuid_t const& uuid)
 	{
-		std::string str(40, ' ');
-		uuid_unparse_upper(uuid.data, &str[0]);
-		str.resize(36);
-		return str;
+		uuid_string_t str;
+		uuid_unparse_upper(uuid.data, str);
+		return std::string(str);
 	}
 
 } /* oak */
