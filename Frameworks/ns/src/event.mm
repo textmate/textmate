@@ -234,12 +234,12 @@ NSAttributedString* OakAttributedStringForEventString (NSString* eventString, NS
 	if(NSGlyphInfo* glyphInfo = [FunctionKeys containsObject:key] ? [NSGlyphInfo glyphInfoWithGlyphName:key forFont:font baseString:key] : nil)
 		[str addAttributes:@{ NSGlyphInfoAttributeName : glyphInfo } range:keyRange];
 
-	CGFloat flagsWidth = ceil(std::max<CGFloat>([[str attributedSubstringFromRange:flagsRange] size].width, 1));
-	CGFloat keyWidth   = ceil(std::max<CGFloat>([[str attributedSubstringFromRange:keyRange] size].width, [@"⌫" sizeWithAttributes:style].width));
+	CGFloat flagsWidth = [[str attributedSubstringFromRange:flagsRange] size].width;
+	CGFloat keyWidth   = [font maximumAdvancement].width;
 
 	NSMutableParagraphStyle* pStyle = [NSMutableParagraphStyle new];
 	[pStyle setAlignment:NSRightTextAlignment];
-	[pStyle setTabStops:@[ [[NSTextTab alloc] initWithType:NSLeftTabStopType location:flagsWidth + keyWidth] ]];
+	[pStyle setTabStops:@[ [[NSTextTab alloc] initWithType:NSLeftTabStopType location:ceil(flagsWidth + keyWidth)] ]];
 	[str addAttributes:@{ NSParagraphStyleAttributeName : pStyle } range:NSMakeRange(0, [str length])];
 
 	return str;
