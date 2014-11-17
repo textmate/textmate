@@ -235,7 +235,7 @@ def sources(target)
         cc  = compiler_for(src)
         dst = build_path("#{base}.o")
         res << "build #{dst}: #{cc} #{esc_path src} | #{pch_for(src, target)}.gch || #{esc_path(headers).join(' ')}\n"
-        res << "  PCH_FLAGS = -D#{target[:name].gsub(/[^A-Za-z_]/, '_')}_EXPORTS -include #{pch_for(src, target)}\n"
+        res << "  PCH_FLAGS = -include #{pch_for(src, target)}\n"
         res << flags_for_target(target)
 
         objects << dst
@@ -249,7 +249,7 @@ def sources(target)
         cc  = compiler_for(dst)
         obj = build_path("#{base}.o")
         res << "build #{obj}: #{cc} #{dst} | #{pch_for(dst, target)}.gch || #{esc_path(headers).join(' ')}\n"
-        res << "  PCH_FLAGS = -D#{target[:name].gsub(/[^A-Za-z_]/, '_')}_EXPORTS -include #{pch_for(dst, target)} -iquote#{esc_path File.dirname(src)}\n"
+        res << "  PCH_FLAGS = -include #{pch_for(dst, target)} -iquote#{esc_path File.dirname(src)}\n"
         res << flags_for_target(target)
 
         objects << obj
@@ -262,7 +262,7 @@ def sources(target)
         cc  = compiler_for(src)
         dst = build_path("#{base}.o")
         res << "build #{dst}: #{cc} #{esc_path src} | #{pch_for(src, target)}.gch || #{esc_path(headers).join(' ')}\n"
-        res << "  PCH_FLAGS = -D#{target[:name].gsub(/[^A-Za-z_]/, '_')}_EXPORTS -include #{pch_for(src, target)}\n"
+        res << "  PCH_FLAGS = -include #{pch_for(src, target)}\n"
         res << flags_for_target(target)
 
         objects << dst

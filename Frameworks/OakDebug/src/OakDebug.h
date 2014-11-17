@@ -5,10 +5,6 @@
 #define PUBLIC __attribute__((__visibility__("default")))
 #endif
 
-#ifdef OakDebug_EXPORTS
-#undef NDEBUG
-#endif
-
 #include "OakAssert.h"
 #include "OakDebugLog.h"
 #include "OakWatchLeaks.h"
