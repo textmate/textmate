@@ -218,9 +218,9 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 	[_window performClose:self];
 }
 
-// ===============================================================================
-// = Set wether to render table view as active when search field gain/lose focus =
-// ===============================================================================
+// ================================================================================
+// = Set whether to render table view as active when search field gain/lose focus =
+// ================================================================================
 
 - (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)object change:(NSDictionary*)change context:(void*)context
 {
