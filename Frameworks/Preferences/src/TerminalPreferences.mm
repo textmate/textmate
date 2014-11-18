@@ -263,7 +263,7 @@ static bool uninstall_mate (std::string const& path)
 			[self setMateInstallPath:dstPath];
 			std::string res = io::exec(to_s(srcPath), "--version", NULL);
 			if(regexp::match_t const& m = regexp::search("\\Amate ([\\d.]+)", res))
-				[[NSUserDefaults standardUserDefaults] setDouble:std::stod(m[1]) forKey:kUserDefaultsMateInstallVersionKey];
+				[[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithCxxString:m[1]] forKey:kUserDefaultsMateInstallVersionKey];
 		}
 	}
 	else
