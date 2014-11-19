@@ -14,7 +14,6 @@
 #import <text/parse.h>
 #import <text/ctype.h>
 #import <text/ranker.h>
-#import <regexp/regexp.h>
 #import <oak/algorithm.h>
 #import <oak/duration.h>
 
@@ -496,17 +495,13 @@ static path::glob_list_t globs_for_path (std::string const& path)
 - (void)updateFilterString:(NSString*)aString
 {
 	NSString* oldFilter = [(_globString ?: _filterString ?: @"") copy];
-	_globString = _filterString = _selectionString = _symbolString = nil;
 
-	if(regexp::match_t const& m = regexp::search("(?x)  \\A  (.*?)  (?: :([\\d+:-x\\+]*) | @(.*) )?  \\z", to_s(aString)))
-	{
-		if([aString rangeOfString:@"*"].location != NSNotFound)
-				_globString = [NSString stringWithCxxString:m[1]];
-		else	_filterString = [NSString stringWithCxxString:oak::normalize_filter(m[1])];
-
-		_selectionString = [NSString stringWithCxxString:m[2]];
-		_symbolString    = [NSString stringWithCxxString:m[3]];
-	}
+	NSRegularExpression* const ptrn = [NSRegularExpression regularExpressionWithPattern:@"\\A(?:(.*?\\*.*?)|(.*?))(?::([\\d+:-x\\+]*)|@(.*))?\\z" options:NSAnchoredSearch error:nil];
+	NSTextCheckingResult* m = aString ? [ptrn firstMatchInString:aString options:NSMatchingAnchored range:NSMakeRange(0, [aString length])] : nil;
+	_globString      = m && [m rangeAtIndex:1].location != NSNotFound ? [aString substringWithRange:[m rangeAtIndex:1]] : nil;
+	_filterString    = m && [m rangeAtIndex:2].location != NSNotFound ? [aString substringWithRange:[m rangeAtIndex:2]] : nil;
+	_selectionString = m && [m rangeAtIndex:3].location != NSNotFound ? [aString substringWithRange:[m rangeAtIndex:3]] : nil;
+	_symbolString    = m && [m rangeAtIndex:4].location != NSNotFound ? [aString substringWithRange:[m rangeAtIndex:4]] : nil;
 
 	if(![oldFilter isEqualToString:_globString ?: _filterString ?: @""])
 		[super updateFilterString:aString];
