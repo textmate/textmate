@@ -129,31 +129,6 @@ namespace bundles
 		}
 	}
 
-	static void setup_full_name (oak::uuid_t const& menuUUID, std::map< oak::uuid_t, std::vector<oak::uuid_t> > const& menus, std::map<oak::uuid_t, item_ptr> const& items, std::vector<std::string>* prefixStack)
-	{
-		std::map< oak::uuid_t, std::vector<oak::uuid_t> >::const_iterator menu = menus.find(menuUUID);
-		if(menu != menus.end())
-		{
-			for(auto const& uuid : menu->second)
-			{
-				std::map<oak::uuid_t, item_ptr>::const_iterator item = items.find(uuid);
-				if(item == items.end())
-					continue;
-
-				if(item->second->kind() == kItemTypeMenu)
-				{
-					prefixStack->push_back(item->second->name());
-					setup_full_name(item->second->uuid(), menus, items, prefixStack);
-					prefixStack->pop_back();
-				}
-				else
-				{
-					item->second->set_menu_path(*prefixStack);
-				}
-			}
-		}
-	}
-
 	bool set_index (std::vector<item_ptr> const& items, std::map< oak::uuid_t, std::vector<oak::uuid_t> > const& menus)
 	{
 		Callbacks(&callback_t::bundles_will_change);
@@ -162,16 +137,22 @@ namespace bundles
 		AllMenus = menus;
 		cache().clear();
 
-		std::map< item_ptr, std::map<oak::uuid_t, item_ptr> > map; // bundle → { item_uuid → bundle_item }
+		std::map<oak::uuid_t, item_ptr> lookupTable;
 		for(auto const& item : items)
 		{
-			if(item->bundle())
-				map[item->bundle()].emplace(item->uuid(), item);
+			if(item_ptr bundle = item->bundle())
+				item->set_parent_menu(bundle->uuid());
+			lookupTable.emplace(item->uuid(), item);
 		}
 
-		std::vector<std::string> stack;
-		for(auto const& bundle : map)
-			setup_full_name(bundle.first->uuid(), menus, bundle.second, &stack);
+		for(auto const& pair : menus)
+		{
+			for(auto const& itemUUID : pair.second)
+			{
+				if(auto item = lookupTable[itemUUID])
+					item->set_parent_menu(pair.first);
+			}
+		}
 
 		Callbacks(&callback_t::bundles_did_change);
 
@@ -338,11 +319,11 @@ namespace bundles
 		return format_bundle_item_title(item->name(), hasSelection);
 	}
 
-	std::string menu_path (item_ptr const& item)
+	std::string menu_path (item_ptr item)
 	{
-		std::vector<std::string> path = item->menu_path();
-		if(item->kind() != kItemTypeBundle && item->bundle())
-			path.insert(path.begin(), item->bundle()->name());
+		std::deque<std::string> path;
+		while(item = lookup(item->parent_menu()))
+			path.push_front(item->name());
 		return text::join(path, " ▸ ");
 	}
 

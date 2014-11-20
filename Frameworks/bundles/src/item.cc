@@ -165,14 +165,14 @@ namespace bundles
 		return name() + (bundle() ? " — " + bundle()->name() : "");
 	}
 
-	std::vector<std::string> const& item_t::menu_path () const
+	oak::uuid_t const& item_t::parent_menu () const
 	{
-		return _menu_path;
+		return _parent_menu;
 	}
 
-	void item_t::set_menu_path (std::vector<std::string> const& newMenuPath)
+	void item_t::set_parent_menu (oak::uuid_t const& newParentMenu)
 	{
-		_menu_path = newMenuPath;
+		_parent_menu = newParentMenu;
 	}
 
 	oak::uuid_t const& item_t::uuid () const
