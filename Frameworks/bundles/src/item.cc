@@ -162,9 +162,7 @@ namespace bundles
 
 	std::string item_t::full_name () const
 	{
-		std::vector<std::string> path = _menu_path;
-		path.push_back(name());
-		return text::join(path, " » ") + (_kind == kItemTypeBundle || !bundle() ? "" : " — " + bundle()->name());
+		return name() + (bundle() ? " — " + bundle()->name() : "");
 	}
 
 	std::vector<std::string> const& item_t::menu_path () const
