@@ -48,7 +48,7 @@ class Targets
     targets.each do |target|
       next if target['SOURCES'].to_a.empty?
       @all << target
-      if linked.include?(target[:name]) || target['BUILD'] == 'lib'
+      if target['EXPORT'] || linked.include?(target[:name]) || target['BUILD'] == 'lib'
         target[:type] = :library
       else
         has_info_plist = target['CP_Resources'].to_a.find { |path| path =~ /\bInfo\.plist$/ }

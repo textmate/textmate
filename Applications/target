@@ -1,4 +1,3 @@
-BUILD         = app
 FLAGS        += -DCOMPILE_DATE=\"`date +%Y-%m-%d`\"
 LN_FLAGS     += -fobjc-link-runtime
 TARGETS       = */target
