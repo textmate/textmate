@@ -346,11 +346,6 @@ namespace bundles
 		return text::join(path, " ▸ ");
 	}
 
-	std::string full_name_with_selection (item_ptr const& item, bool hasSelection)
-	{
-		return format_bundle_item_title(item->full_name(), hasSelection);
-	}
-
 	std::string key_equivalent (item_ptr const& item)
 	{
 		std::string const res = item->value_for_field(kFieldKeyEquivalent);

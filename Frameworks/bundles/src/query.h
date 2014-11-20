@@ -25,7 +25,6 @@ namespace bundles
 	PUBLIC item_ptr lookup (oak::uuid_t const& uuid);
 	PUBLIC std::string name_with_selection (item_ptr const& item, bool hasSelection);
 	PUBLIC std::string menu_path (item_ptr const& item);
-	PUBLIC std::string full_name_with_selection (item_ptr const& item, bool hasSelection);
 	PUBLIC std::string key_equivalent (item_ptr const& item);
 
 } /* bundles */
