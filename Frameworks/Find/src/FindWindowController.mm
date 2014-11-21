@@ -473,6 +473,12 @@ static NSButton* OakCreateStopSearchButton ()
 		NSResponder* firstResponder = [self.window firstResponder];
 		if(![firstResponder isKindOfClass:[NSTextView class]])
 			self.resultsViewController.showReplacementPreviews = firstResponder == self.replaceTextField;
+
+		if([firstResponder isKindOfClass:[NSTextView class]])
+		{
+			NSTextView* textView = (NSTextView*)firstResponder;
+			NSLog(@"Find window first responder frame %@", NSStringFromRect([textView convertRect:textView.bounds toView:nil]));
+		}
 	}
 }
 
