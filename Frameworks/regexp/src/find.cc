@@ -155,7 +155,10 @@ namespace find
 		}
 
 		for(auto const& it : res)
-			out.push_back(it);
+		{
+			if(!it.empty())
+				out.push_back(it);
+		}
 	}
 
 	static bool is_whitespace (uint32_t ch)
@@ -197,19 +200,21 @@ namespace find
 				std::vector<dfa_node_ptr> tmp;
 				for(auto const& colIter : *rowIter)
 				{
-					dfa_node_ptr new_node = node_from_string(colIter, children);
-					for(auto& it : tmp)
+					if(dfa_node_ptr new_node = node_from_string(colIter, children))
 					{
-						if(it->can_merge(new_node))
+						for(auto& it : tmp)
 						{
-							it = it->merge(new_node);
-							new_node.reset();
-							break;
+							if(it->can_merge(new_node))
+							{
+								it = it->merge(new_node);
+								new_node.reset();
+								break;
+							}
 						}
-					}
 
-					if(new_node)
-						tmp.push_back(new_node);
+						if(new_node)
+							tmp.push_back(new_node);
+					}
 				}
 				tmp.swap(children);
 			}
@@ -300,7 +305,7 @@ namespace find
 				children.clear();
 				children.push_back(std::make_shared<dfa_node_t>(*it, tmp));
 			}
-			return children.front();
+			return children.empty() ? dfa_node_ptr() : children.front();
 		}
 	};
 
