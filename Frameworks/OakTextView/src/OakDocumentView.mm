@@ -804,10 +804,19 @@ private:
 		}
 		else
 		{
-			NSViewController* viewController = [NSViewController new];
+			NSView* popoverContainerView = [[NSView alloc] initWithFrame:NSZeroRect];
+
 			NSTextField* textField = OakCreateLabel([NSString stringWithCxxString:text::join(info, "\n")]);
+			[textField setTranslatesAutoresizingMaskIntoConstraints:NO];
 			[textField sizeToFit];
-			viewController.view = textField;
+			[popoverContainerView addSubview:textField];
+
+			NSDictionary* views = NSDictionaryOfVariableBindings(textField);
+			[popoverContainerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(5)-[textField]-(5)-|" options:0 metrics:0 views:views]];
+			[popoverContainerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(10)-[textField]-(10)-|" options:0 metrics:0 views:views]];
+
+			NSViewController* viewController = [NSViewController new];
+			viewController.view = popoverContainerView;
 
 			NSPopover* popver = [NSPopover new];
 			popver.behavior = NSPopoverBehaviorTransient;
