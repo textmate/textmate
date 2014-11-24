@@ -818,13 +818,13 @@ private:
 			NSViewController* viewController = [NSViewController new];
 			viewController.view = popoverContainerView;
 
-			NSPopover* popver = [NSPopover new];
-			popver.behavior = NSPopoverBehaviorTransient;
-			popver.contentViewController = viewController;
+			NSPopover* popover = [NSPopover new];
+			popover.behavior = NSPopoverBehaviorTransient;
+			popover.contentViewController = viewController;
 
 			GVLineRecord record = [self lineFragmentForLine:lineNumber column:0];
 			NSRect rect = NSMakeRect(0, record.firstY, [self widthForColumnWithIdentifier:columnIdentifier], record.lastY - record.firstY);
-			[popver showRelativeToRect:rect ofView:gutterView preferredEdge:NSMaxXEdge];
+			[popover showRelativeToRect:rect ofView:gutterView preferredEdge:NSMaxXEdge];
 		}
 	}
 	else if([columnIdentifier isEqualToString:kFoldingsColumnIdentifier])
