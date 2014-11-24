@@ -804,18 +804,27 @@ private:
 		}
 		else
 		{
-			NSViewController* viewController = [NSViewController new];
-			NSTextField* textField = OakCreateLabel([NSString stringWithCxxString:text::join(info, "\n")]);
-			[textField sizeToFit];
-			viewController.view = textField;
+			NSView* popoverContainerView = [[NSView alloc] initWithFrame:NSZeroRect];
 
-			NSPopover* popver = [NSPopover new];
-			popver.behavior = NSPopoverBehaviorTransient;
-			popver.contentViewController = viewController;
+			NSTextField* textField = OakCreateLabel([NSString stringWithCxxString:text::join(info, "\n")]);
+			[textField setTranslatesAutoresizingMaskIntoConstraints:NO];
+			[textField sizeToFit];
+			[popoverContainerView addSubview:textField];
+
+			NSDictionary* views = NSDictionaryOfVariableBindings(textField);
+			[popoverContainerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(5)-[textField]-(5)-|" options:0 metrics:0 views:views]];
+			[popoverContainerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(10)-[textField]-(10)-|" options:0 metrics:0 views:views]];
+
+			NSViewController* viewController = [NSViewController new];
+			viewController.view = popoverContainerView;
+
+			NSPopover* popover = [NSPopover new];
+			popover.behavior = NSPopoverBehaviorTransient;
+			popover.contentViewController = viewController;
 
 			GVLineRecord record = [self lineFragmentForLine:lineNumber column:0];
 			NSRect rect = NSMakeRect(0, record.firstY, [self widthForColumnWithIdentifier:columnIdentifier], record.lastY - record.firstY);
-			[popver showRelativeToRect:rect ofView:gutterView preferredEdge:NSMaxXEdge];
+			[popover showRelativeToRect:rect ofView:gutterView preferredEdge:NSMaxXEdge];
 		}
 	}
 	else if([columnIdentifier isEqualToString:kFoldingsColumnIdentifier])
