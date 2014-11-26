@@ -10,6 +10,7 @@
 
 @interface OakFileTableCellView ()
 @property (nonatomic) NSTextField* folderTextField;
+@property (nonatomic) NSButton* closeButton;
 @end
 
 @implementation OakFileTableCellView
@@ -39,6 +40,7 @@
 		self.imageView       = imageView;
 		self.textField       = fileTextField;
 		self.folderTextField = folderTextField;
+		self.closeButton     = closeButton;
 	}
 	return self;
 }
