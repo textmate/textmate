@@ -10,6 +10,7 @@
 
 @interface OakFileTableCellView ()
 @property (nonatomic) NSTextField* folderTextField;
+@property (nonatomic) NSButton* closeButton;
 @end
 
 @implementation OakFileTableCellView
@@ -39,6 +40,7 @@
 		self.imageView       = imageView;
 		self.textField       = fileTextField;
 		self.folderTextField = folderTextField;
+		self.closeButton     = closeButton;
 	}
 	return self;
 }
@@ -73,6 +75,16 @@
 		self.folderTextField.textColor   = [NSColor colorWithCalibratedWhite:0.5 alpha:1];
 		self.folderTextField.objectValue = [self valueForKeyPath:@"objectValue.folder"];
 	}
+}
+
+- (id)accessibilityAttributeValue:(NSString*)attribute
+{
+	if ([attribute isEqualToString:NSAccessibilityChildrenAttribute])
+	{
+		return @[self.textField.cell, self.folderTextField.cell, self.closeButton.cell, self.imageView.cell];
+	}
+	else
+		return [super accessibilityAttributeValue:attribute];
 }
 @end
 
