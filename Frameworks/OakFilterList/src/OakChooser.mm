@@ -76,6 +76,16 @@
 		self.folderTextField.objectValue = [self valueForKeyPath:@"objectValue.folder"];
 	}
 }
+
+- (id)accessibilityAttributeValue:(NSString*)attribute
+{
+	if ([attribute isEqualToString:NSAccessibilityChildrenAttribute])
+	{
+		return @[self.textField.cell, self.folderTextField.cell, self.closeButton.cell, self.imageView.cell];
+	}
+	else
+		return [super accessibilityAttributeValue:attribute];
+}
 @end
 
 NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string const& in, std::vector< std::pair<size_t, size_t> > const& ranges, NSLineBreakMode lineBreakMode)
