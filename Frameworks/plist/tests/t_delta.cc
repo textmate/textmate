@@ -83,7 +83,7 @@ void test_delta ()
 	OAK_ASSERT(!plist::equal(oldPlist, newPlist));
 }
 
-void test_delta_settings ()
+void test_delta_settings_changed ()
 {
 	std::string oldPlistString =
 		"{	name = 'Tag Preferences';\n"
@@ -109,6 +109,36 @@ void test_delta_settings ()
 		"	scope = 'meta.tag';\n"
 		"	settings = ( 'smartTypingPairs', 'spellChecking', 'shellVariables' );\n"
 		"	uuid = '73251DBE-EBD2-470F-8148-E6F2EC1A9641';\n"
+		"}\n";
+
+	plist::dictionary_t const oldPlist   = boost::get<plist::dictionary_t>(plist::parse_ascii(oldPlistString));
+	plist::dictionary_t const newPlist   = boost::get<plist::dictionary_t>(plist::parse_ascii(newPlistString));
+	plist::dictionary_t const deltaPlist = boost::get<plist::dictionary_t>(plist::parse_ascii(deltaPlistString));
+
+	std::vector<plist::dictionary_t> plists{ deltaPlist, oldPlist };
+	OAK_ASSERT_EQ(to_s(plist::merge_delta(plists)), to_s(newPlist));
+}
+
+void test_delta_settings_deleted ()
+{
+	std::string oldPlistString =
+		"{	name = 'Unprintable';\n"
+		"	scope = 'deco.unprintable';\n"
+		"	settings = ( 'background', 'fontName', 'fontSize', 'foreground' );\n"
+		"	uuid = '20881CB9-5D12-4D74-8EE6-9ABAA7B408D3';\n"
+		"}\n";
+
+	std::string deltaPlistString =
+		"{	deleted = ( 'settings.fontName', 'settings.fontSize' );\n"
+		"	isDelta = :true;\n"
+		"	uuid = '20881CB9-5D12-4D74-8EE6-9ABAA7B408D3';\n"
+		"}\n";
+
+	std::string newPlistString =
+		"{	name = 'Unprintable';\n"
+		"	scope = 'deco.unprintable';\n"
+		"	settings = ( 'background', 'foreground' );\n"
+		"	uuid = '20881CB9-5D12-4D74-8EE6-9ABAA7B408D3';\n"
 		"}\n";
 
 	plist::dictionary_t const oldPlist   = boost::get<plist::dictionary_t>(plist::parse_ascii(oldPlistString));

@@ -134,9 +134,24 @@ static void erase_key_path (plist::dictionary_t& plist, std::string const& keyPa
 		if(it == current->end())
 			return;
 
-		if(++key != v.end())
-				current = boost::get<plist::dictionary_t>(&it->second);
-		else	current->erase(it);
+		if(++key == v.end())
+			current->erase(it);
+		else if(current = boost::get<plist::dictionary_t>(&it->second))
+			continue;
+		else if(plist::array_t* array = boost::get<plist::array_t>(&it->second))
+		{
+			for(auto it = array->begin(); it != array->end(); ++it)
+			{
+				if(std::string* str = boost::get<std::string>(&(*it)))
+				{
+					if(*str == *key)
+					{
+						array->erase(it);
+						break;
+					}
+				}
+			}
+		}
 	}
 }
 
