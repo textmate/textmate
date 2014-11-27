@@ -537,7 +537,7 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 - (void)mouseUp:(NSEvent*)anEvent
 {
 	NSPoint mouseCurrentPos = [[self superview] convertPoint:[anEvent locationInWindow] fromView:nil];
-	if(SQ(fabs(_mouseDownPos.x - mouseCurrentPos.x)) + SQ(fabs(_mouseDownPos.y - mouseCurrentPos.y)) >= SQ(1))
+	if(SQ(fabs(_mouseDownPos.x - mouseCurrentPos.x)) + SQ(fabs(_mouseDownPos.y - mouseCurrentPos.y)) >= SQ(2.5))
 		return; // mouse was moved
 	[self trySelectTabForView:[self hitTest:mouseCurrentPos]];
 }
