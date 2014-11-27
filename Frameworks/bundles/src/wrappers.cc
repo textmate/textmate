@@ -221,9 +221,15 @@ namespace bundles
 		plist::any_t res;
 		if(item_ptr item = iter->second)
 		{
-			if(match)
-				*match = item;
-			plist::get_key_path(item->plist(), "settings." + setting, res);
+			if(plist::get_key_path(item->plist(), "settings." + setting, res))
+			{
+				if(match)
+					*match = item;
+			}
+			else
+			{
+				fprintf(stderr, "*** missing setting ‘%s’ in %s\n", setting.c_str(), item->full_name().c_str());
+			}
 		}
 		return res;
 	}
