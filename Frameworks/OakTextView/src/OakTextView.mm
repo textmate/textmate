@@ -229,7 +229,7 @@ struct buffer_refresh_callback_t;
 typedef indexed_map_t<OakAccessibleLink*> links_t;
 typedef std::shared_ptr<links_t> links_ptr;
 
-@interface OakTextView () <NSTextInputClient, NSIgnoreMisspelledWords, NSChangeSpelling>
+@interface OakTextView () <NSTextInputClient, NSIgnoreMisspelledWords, NSChangeSpelling, NSTextFieldDelegate>
 {
 	OBJC_WATCH_LEAKS(OakTextView);
 
