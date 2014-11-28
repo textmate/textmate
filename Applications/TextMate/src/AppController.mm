@@ -190,7 +190,6 @@ BOOL HasDocumentWindow (NSArray* windows)
 		rename(src.c_str(), dst.c_str());
 
 	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
-		@"ApplePressAndHoldEnabled" : @NO,
 		@"NSRecentDocumentsLimit"   : @25,
 		@"WebKitDeveloperExtras"    : @YES,
 	}];
