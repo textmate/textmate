@@ -471,8 +471,7 @@ static NSButton* OakCreateStopSearchButton ()
 	if([keyPath isEqualToString:@"firstResponder"])
 	{
 		NSResponder* firstResponder = [self.window firstResponder];
-		if(![firstResponder isKindOfClass:[NSTextView class]])
-			self.resultsViewController.showReplacementPreviews = firstResponder == self.replaceTextField;
+		self.resultsViewController.showReplacementPreviews = firstResponder == self.replaceTextField || firstResponder == self.replaceTextField.currentEditor;
 
 		if([firstResponder isKindOfClass:[NSTextView class]])
 		{
