@@ -182,6 +182,7 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 		_window.nextResponder      = self;
 		_window.level              = NSFloatingWindowLevel;
 		_window.releasedWhenClosed = NO;
+		_window.frameAutosaveName  = NSStringFromClass([self class]);
 
 		[_searchField bind:NSValueBinding toObject:self withKeyPath:@"filterString" options:nil];
 		[_window addObserver:self forKeyPath:@"firstResponder" options:NSKeyValueObservingOptionOld|NSKeyValueObservingOptionNew context:kFirstResponderBinding];
