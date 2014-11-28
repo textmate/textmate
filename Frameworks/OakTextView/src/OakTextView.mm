@@ -1847,34 +1847,29 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	return NO;
 }
 
-- (void)interpretKeyEvents:(NSArray*)someEvents
-{
-	AUTO_REFRESH;
-	if([self hasMarkedText])
-		return [super interpretKeyEvents:someEvents];
-
-	for(NSEvent* event in someEvents)
-	{
-		plist::dictionary_t::const_iterator pair = KeyEventContext->find(to_s(event));
-		if(pair == KeyEventContext->end() && KeyEventContext != &KeyBindings)
-		{
-			KeyEventContext = &KeyBindings;
-			pair = KeyEventContext->find(to_s(event));
-		}
-
-		if(pair == KeyEventContext->end())
-				[super interpretKeyEvents:@[ event ]];
-		else	[self handleKeyBindingAction:pair->second];
-	}
-}
-
 - (void)oldKeyDown:(NSEvent*)anEvent
 {
 	std::vector<bundles::item_ptr> const& items = bundles::query(bundles::kFieldKeyEquivalent, to_s(anEvent), [self scopeContext]);
 	if(bundles::item_ptr item = OakShowMenuForBundleItems(items, [self positionForWindowUnderCaret]))
+	{
 		[self performBundleItem:item];
+	}
 	else if(items.empty())
-		[self interpretKeyEvents:@[ anEvent ]];
+	{
+		if([self hasMarkedText])
+			return [self interpretKeyEvents:@[ anEvent ]];
+
+		plist::dictionary_t::const_iterator pair = KeyEventContext->find(to_s(anEvent));
+		if(pair == KeyEventContext->end() && KeyEventContext != &KeyBindings)
+		{
+			KeyEventContext = &KeyBindings;
+			pair = KeyEventContext->find(to_s(anEvent));
+		}
+
+		if(pair == KeyEventContext->end())
+				[self interpretKeyEvents:@[ anEvent ]];
+		else	[self handleKeyBindingAction:pair->second];
+	}
 
 	[NSCursor setHiddenUntilMouseMoves:YES];
 	[[NSNotificationCenter defaultCenter] postNotificationName:OakCursorDidHideNotification object:nil];
