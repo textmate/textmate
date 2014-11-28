@@ -302,22 +302,13 @@ typedef std::shared_ptr<links_t> links_ptr;
 
 	links_ptr _links;
 }
-+ (NSArray*)dropTypes;
 - (void)ensureSelectionIsInVisibleArea:(id)sender;
-- (NSPoint)positionForWindowUnderCaret;
-- (void)toggleColumnSelection:(id)sender;
-- (void)delete:(id)sender;
 - (void)updateChoiceMenu:(id)sender;
 - (void)resetBlinkCaretTimer;
-- (void)reflectDocumentSize;
 - (void)updateSelection;
 - (void)updateMarkedRanges;
 - (void)redisplayFrom:(size_t)from to:(size_t)to;
-- (void)recordSelector:(SEL)aSelector withArgument:(id)anArgument;
 - (NSImage*)imageForRanges:(ng::ranges_t const&)ranges imageRect:(NSRect*)outRect;
-- (void)highlightRanges:(ng::ranges_t const&)ranges;
-- (NSRange)nsRangeForRange:(ng::range_t const&)range;
-- (ng::range_t)rangeForNSRange:(NSRange)nsRange;
 @property (nonatomic, readonly) ng::ranges_t const& markedRanges;
 @property (nonatomic) NSDate* optionDownDate;
 @property (nonatomic) OakTimer* initiateDragTimer;
