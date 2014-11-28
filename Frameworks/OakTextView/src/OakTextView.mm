@@ -229,7 +229,7 @@ struct buffer_refresh_callback_t;
 typedef indexed_map_t<OakAccessibleLink*> links_t;
 typedef std::shared_ptr<links_t> links_ptr;
 
-@interface OakTextView () <NSIgnoreMisspelledWords, NSChangeSpelling>
+@interface OakTextView () <NSTextInputClient, NSIgnoreMisspelledWords, NSChangeSpelling>
 {
 	OBJC_WATCH_LEAKS(OakTextView);
 
@@ -976,18 +976,9 @@ doScroll:
 	layout->draw(ng::context_t(context, _showInvisibles ? invisiblesMap : NULL_STR, [spellingDotImage CGImageForProposedRect:NULL context:[NSGraphicsContext currentContext] hints:nil], foldingDotsFactory), aRect, [self isFlipped], merge(editor->ranges(), [self markedRanges]), liveSearchRanges);
 }
 
-// ===============
-// = NSTextInput =
-// ===============
-
-- (NSInteger)conversationIdentifier
-{
-	return (NSInteger)self;
-}
-
-// ==================
-// = Accented input =
-// ==================
+// =====================
+// = NSTextInputClient =
+// =====================
 
 - (NSRange)nsRangeForRange:(ng::range_t const&)range
 {
@@ -1011,7 +1002,33 @@ doScroll:
 	return ng::range_t(from, to);
 }
 
-- (void)setMarkedText:(id)aString selectedRange:(NSRange)aRange
+- (ng::ranges_t)rangesForReplacementRange:(NSRange)aRange
+{
+	ng::range_t r = [self rangeForNSRange:aRange];
+	if(editor->ranges().size() == 1)
+		return r;
+
+	size_t adjustLeft = 0, adjustRight = 0;
+	for(auto const& range : editor->ranges())
+	{
+		if(range.min() <= r.max() && r.min() <= range.max())
+		{
+			adjustLeft  = r.min() < range.min() ? range.min().index - r.min().index : 0;
+			adjustRight = range.max() < r.max() ? r.max().index - range.max().index : 0;
+		}
+	}
+
+	ng::ranges_t res;
+	for(auto const& range : editor->ranges())
+	{
+		size_t from = adjustLeft > range.min().index ? 0 : range.min().index - adjustLeft;
+		size_t to   = range.max().index + adjustRight;
+		res.push_back(ng::range_t(document->buffer().sanitize_index(from), document->buffer().sanitize_index(to)));
+	}
+	return res;
+}
+
+- (void)setMarkedText:(id)aString selectedRange:(NSRange)aRange replacementRange:(NSRange)replacementRange
 {
 	D(DBF_OakTextView_TextInput, bug("‘%s’ %s\n", to_s([aString description]).c_str(), [NSStringFromRange(aRange) UTF8String]););
 
@@ -1026,8 +1043,11 @@ doScroll:
 	}
 
 	AUTO_REFRESH;
-	if(!markedRanges.empty())
+	if(replacementRange.location != NSNotFound)
+		editor->set_selections([self rangesForReplacementRange:replacementRange]);
+	else if(!markedRanges.empty())
 		editor->set_selections(markedRanges);
+
 	markedRanges = ng::ranges_t();
 	editor->insert(to_s([aString description]), true);
 	if([aString length] != 0)
@@ -1083,20 +1103,10 @@ doScroll:
 - (void)updateMarkedRanges
 {
 	if(!markedRanges.empty() && pendingMarkedRanges.empty())
-		[[NSTextInputContext currentInputContext] discardMarkedText];
+		[self.inputContext discardMarkedText];
 
 	markedRanges = pendingMarkedRanges;
 	pendingMarkedRanges = ng::ranges_t();
-}
-
-// =====================
-// = Dictionary pop-up =
-// =====================
-
-- (NSString*)string
-{
-	D(DBF_OakTextView_TextInput, bug("\n"););
-	return [NSString stringWithCxxString:editor->as_string()]; // While undocumented (<rdar://4178606>), this is required in Lion to work with the dictionary implementation (⌃⌘D)
 }
 
 - (NSUInteger)characterIndexForPoint:(NSPoint)thePoint
@@ -1108,7 +1118,7 @@ doScroll:
 	return utf16::distance(text.data(), text.data() + index);
 }
 
-- (NSAttributedString*)attributedSubstringFromRange:(NSRange)theRange
+- (NSAttributedString*)attributedSubstringForProposedRange:(NSRange)theRange actualRange:(NSRangePointer)actualRange
 {
 	ng::range_t const& r = [self rangeForNSRange:theRange];
 	size_t from = r.min().index, to = r.max().index;
@@ -1135,14 +1145,21 @@ doScroll:
 				CFRelease(str);
 			}
 		}
+
+		if(actualRange)
+			*actualRange = [self nsRangeForRange:ng::range_t(from, to)];
+
 		return (NSAttributedString*)CFBridgingRelease(res);
 	}
 	return nil;
 }
 
-- (NSRect)firstRectForCharacterRange:(NSRange)theRange
+- (NSRect)firstRectForCharacterRange:(NSRange)theRange actualRange:(NSRangePointer)actualRange
 {
 	ng::range_t const& r = [self rangeForNSRange:theRange];
+	if(actualRange)
+		*actualRange = [self nsRangeForRange:r];
+
 	NSRect rect = [[self window] convertRectToScreen:[self convertRect:layout->rect_at_index(r.min()) toView:nil]];
 	D(DBF_OakTextView_TextInput, bug("%s → %s\n", [NSStringFromRange(theRange) UTF8String], [NSStringFromRect(rect) UTF8String]););
 	return rect;
@@ -1153,6 +1170,11 @@ doScroll:
 	D(DBF_OakTextView_TextInput, bug("%s\n", sel_getName(aSelector)););
 	AUTO_REFRESH;
 	[self tryToPerform:aSelector with:self];
+}
+
+- (NSInteger)windowLevel
+{
+	return self.window.level;
 }
 
 - (BOOL)respondsToSelector:(SEL)aSelector
@@ -1848,7 +1870,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	else if(items.empty())
 	{
 		if([self hasMarkedText])
-			return [self interpretKeyEvents:@[ anEvent ]];
+			return (void)[self.inputContext handleEvent:anEvent];
 
 		plist::dictionary_t::const_iterator pair = KeyEventContext->find(to_s(anEvent));
 		if(pair == KeyEventContext->end() && KeyEventContext != &KeyBindings)
@@ -1858,7 +1880,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 		}
 
 		if(pair == KeyEventContext->end())
-				[self interpretKeyEvents:@[ anEvent ]];
+				[self.inputContext handleEvent:anEvent];
 		else	[self handleKeyBindingAction:pair->second];
 	}
 
@@ -1983,6 +2005,11 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 - (void)insertText:(id)aString
 {
+	[self insertText:aString replacementRange:NSMakeRange(NSNotFound, 0)];
+}
+
+- (void)insertText:(id)aString replacementRange:(NSRange)aRange
+{
 	D(DBF_OakTextView_TextInput, bug("‘%s’, has marked %s\n", [[aString description] UTF8String], BSTR(!markedRanges.empty())););
 
 	AUTO_REFRESH;
@@ -1993,6 +2020,12 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 		markedRanges = ng::ranges_t();
 	}
 	pendingMarkedRanges = ng::ranges_t();
+
+	if(aRange.location != NSNotFound)
+	{
+		editor->set_selections([self rangesForReplacementRange:aRange]);
+		[self delete:nil];
+	}
 
 	if(![aString isKindOfClass:[NSString class]])
 	{
@@ -3594,7 +3627,7 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 
 - (void)mouseDown:(NSEvent*)anEvent
 {
-	if(!layout || [anEvent type] != NSLeftMouseDown || ignoreMouseDown)
+	if([self.inputContext handleEvent:anEvent] || !layout || [anEvent type] != NSLeftMouseDown || ignoreMouseDown)
 		return (void)(ignoreMouseDown = NO);
 
 	if(ng::range_t r = layout->folded_range_at_point([self convertPoint:[anEvent locationInWindow] fromView:nil]))
@@ -3639,7 +3672,7 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 
 - (void)mouseDragged:(NSEvent*)anEvent
 {
-	if(!layout || macroRecordingArray)
+	if([self.inputContext handleEvent:anEvent] || !layout || macroRecordingArray)
 		return;
 
 	NSPoint mouseCurrentPos = [self convertPoint:[anEvent locationInWindow] fromView:nil];
@@ -3676,7 +3709,7 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 
 - (void)mouseUp:(NSEvent*)anEvent
 {
-	if(!layout || macroRecordingArray)
+	if([self.inputContext handleEvent:anEvent] || !layout || macroRecordingArray)
 		return;
 
 	AUTO_REFRESH;

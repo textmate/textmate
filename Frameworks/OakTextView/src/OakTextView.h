@@ -30,7 +30,7 @@ enum OTVFontSmoothing : NSUInteger
 - (std::map<std::string, std::string>)variables;
 @end
 
-PUBLIC @interface OakTextView : OakView <NSTextInput, NSTextFieldDelegate>
+PUBLIC @interface OakTextView : OakView <NSTextFieldDelegate>
 - (void)setDocument:(document::document_ptr const&)aDocument;
 
 #if !defined(MAC_OS_X_VERSION_10_7) || (MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_7)
