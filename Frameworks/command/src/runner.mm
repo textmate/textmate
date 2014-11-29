@@ -140,7 +140,7 @@ namespace command
 		return std::make_shared<runner_t>(command, buffer, selection, environment, pwd, delegate);
 	}
 
-	void runner_t::launch (dispatch_queue_t queue)
+	void runner_t::launch ()
 	{
 		ASSERT(_delegate);
 		ASSERT(_command.command.find("#!") == 0);
@@ -165,6 +165,7 @@ namespace command
 		};
 
 		bool hasHTMLOutput = _command.output == output::new_window && _command.output_format == output_format::html;
+		dispatch_queue_t queue = dispatch_get_main_queue();
 		_process_id = run_command(_dispatch_group, _temp_path, stdinRead, _environment, _directory, queue, hasHTMLOutput ? htmlOutHandler : textOutHandler, stderrHandler, completionHandler);
 
 		if(hasHTMLOutput)
