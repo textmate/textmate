@@ -1683,14 +1683,12 @@ static plist::any_t normalize_potential_dictionary (plist::any_t const& action)
 	return action;
 }
 
-typedef std::multimap<std::string, std::string> action_to_key_t;
-
-static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& actionToKey)
+static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string, std::string> const& actionToKey)
 {
 	for(NSMenuItem* item in [menu itemArray])
 	{
 		SEL action = [item action];
-		action_to_key_t::const_iterator it = actionToKey.find(sel_getName(action));
+		auto it = actionToKey.find(sel_getName(action));
 		if(it != actionToKey.end() && OakIsEmptyString([item keyEquivalent]))
 			[item setKeyEquivalentCxxString:it->second];
 
@@ -1717,7 +1715,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 				KeyBindings.emplace(ns::normalize_event_string(pair.first), normalize_potential_dictionary(pair.second));
 		}
 
-		action_to_key_t actionToKey;
+		std::multimap<std::string, std::string> actionToKey;
 		for(auto const& pair : KeyBindings)
 		{
 			if(std::string const* selector = boost::get<std::string>(&pair.second))
