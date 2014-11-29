@@ -50,7 +50,7 @@ static std::map<std::string, std::string> convert (NSDictionary* dict)
 {
 	std::map<std::string, std::string> res;
 	for(NSString* key in dict)
-		res[[key UTF8String]] = [[dict objectForKey:key] UTF8String];
+		res[to_s(key)] = to_s(dict[key]);
 	return res;
 }
 
@@ -530,7 +530,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 			for(CWItem* item in [_arrayController arrangedObjects])
 			{
 				if(item.commit)
-					[outputArray addObject:[NSString stringWithCxxString:path::escape([item.path UTF8String])]];
+					[outputArray addObject:[NSString stringWithCxxString:path::escape(to_s(item.path))]];
 			}
 			[outputArray addObject:@"\n"];
 			[proxy connectFromServerWithOptions:@{
@@ -612,7 +612,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 - (void)restorePreviousCommitMessage:(id)sender
 {
 	NSString* message = [sender representedObject];
-	document::document_ptr commitMessage = document::from_content([message UTF8String], self.documentView.document->file_type());
+	document::document_ptr commitMessage = document::from_content(to_s(message), self.documentView.document->file_type());
 	[self.documentView setDocument:commitMessage];
 }
 

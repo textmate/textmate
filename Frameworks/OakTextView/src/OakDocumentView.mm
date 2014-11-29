@@ -451,7 +451,7 @@ private:
 	}
 	else if([aMenuItem action] == @selector(toggleCurrentBookmark:))
 	{
-		text::selection_t sel([textView.selectionString UTF8String]);
+		text::selection_t sel(to_s(textView.selectionString));
 		size_t lineNumber = sel.last().max().line;
 
 		ng::buffer_t const& buf = document->buffer();
@@ -578,7 +578,7 @@ private:
 	[symbolMenu removeAllItems];
 
 	ng::buffer_t const& buf = document->buffer();
-	text::selection_t sel([textView.selectionString UTF8String]);
+	text::selection_t sel(to_s(textView.selectionString));
 	size_t i = buf.convert(sel.last().max());
 
 	NSInteger index = 0;
@@ -840,7 +840,7 @@ private:
 {
 	ng::buffer_t& buf = document->buffer();
 
-	text::selection_t sel([textView.selectionString UTF8String]);
+	text::selection_t sel(to_s(textView.selectionString));
 	size_t lineNumber = sel.last().max().line;
 
 	std::vector<size_t> toRemove;
@@ -861,7 +861,7 @@ private:
 
 - (IBAction)goToNextBookmark:(id)sender
 {
-	text::selection_t sel([textView.selectionString UTF8String]);
+	text::selection_t sel(to_s(textView.selectionString));
 
 	ng::buffer_t const& buf = document->buffer();
 	std::pair<size_t, std::string> const& pair = buf.next_mark(buf.convert(sel.last().max()), document::kBookmarkIdentifier);
@@ -871,7 +871,7 @@ private:
 
 - (IBAction)goToPreviousBookmark:(id)sender
 {
-	text::selection_t sel([textView.selectionString UTF8String]);
+	text::selection_t sel(to_s(textView.selectionString));
 
 	ng::buffer_t const& buf = document->buffer();
 	std::pair<size_t, std::string> const& pair = buf.prev_mark(buf.convert(sel.last().max()), document::kBookmarkIdentifier);
