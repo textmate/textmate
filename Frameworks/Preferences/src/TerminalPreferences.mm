@@ -26,7 +26,7 @@ static void CreateHyperLink (NSTextField* textField, NSString* text, NSString* u
 	[attrString beginEditing];
 	[attrString addAttribute:NSLinkAttributeName value:url range:range];
 	[attrString addAttribute:NSForegroundColorAttributeName value:[NSColor blueColor] range:range];
-	[attrString addAttribute:NSUnderlineStyleAttributeName value:@(NSSingleUnderlineStyle) range:range];
+	[attrString addAttribute:NSUnderlineStyleAttributeName value:@(NSUnderlineStyleSingle) range:range];
 	[attrString endEditing];
 
 	[textField setAttributedStringValue:attrString];
