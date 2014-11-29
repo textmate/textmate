@@ -758,8 +758,8 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	for(NSDictionary* item in items)
 	{
 		std::vector<std::pair<size_t, size_t>> cover_path, cover_name;
-		std::string name = to_s((NSString*)item[@"name"]);
-		std::string path = to_s((NSString*)item[@"path"]);
+		std::string name = to_s(item[@"name"]);
+		std::string path = to_s(item[@"path"]);
 
 		double rank = (items.count - rankedItems.size()) / (double)items.count;
 		if(OakNotEmptyString(filter))
@@ -872,7 +872,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 - (BOOL)canAccept
 {
 	NSDictionary* item = self.tableView.selectedRow != -1 ? self.items[self.tableView.selectedRow] : nil;
-	return item[@"menuItem"] || item[@"action"] || item[@"uuid"] && bundles::lookup(to_s((NSString*)item[@"uuid"]))->kind() != bundles::kItemTypeSettings;
+	return item[@"menuItem"] || item[@"action"] || item[@"uuid"] && bundles::lookup(to_s(item[@"uuid"]))->kind() != bundles::kItemTypeSettings;
 }
 
 - (BOOL)canEdit

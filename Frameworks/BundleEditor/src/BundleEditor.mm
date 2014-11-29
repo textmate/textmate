@@ -81,7 +81,7 @@ static plist::array_t unwrap_array (NSArray* array, NSString* key)
 {
 	plist::array_t res;
 	for(NSDictionary* dict in array)
-		res.push_back(to_s((NSString*)[dict objectForKey:key]));
+		res.push_back(to_s([dict objectForKey:key]));
 	return res;
 }
 

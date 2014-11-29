@@ -421,7 +421,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 	for(NSDictionary* item in [sender selectedItems])
 	{
 		if(OakIsAlternateKeyOrMouseEvent())
-				[[BundleEditor sharedInstance] revealBundleItem:bundles::lookup(to_s((NSString*)[item objectForKey:@"uuid"]))];
+				[[BundleEditor sharedInstance] revealBundleItem:bundles::lookup(to_s([item objectForKey:@"uuid"]))];
 		else	[NSApp sendAction:@selector(performBundleItemWithUUIDString:) to:nil from:[item objectForKey:@"uuid"]];
 	}
 }
@@ -464,7 +464,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 	}
 	else if([item action] == @selector(performBundleItemWithUUIDStringFrom:))
 	{
-		if(bundles::item_ptr bundleItem = bundles::lookup(to_s((NSString*)item.representedObject)))
+		if(bundles::item_ptr bundleItem = bundles::lookup(to_s(item.representedObject)))
 		{
 			if(id textView = [NSApp targetForAction:@selector(hasSelection)])
 				[item updateTitle:[NSString stringWithCxxString:name_with_selection(bundleItem, [textView hasSelection])]];

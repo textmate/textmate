@@ -568,7 +568,7 @@ static NSButton* OakCreateStopSearchButton ()
 {
 	std::vector<std::string> paths;
 	for(NSUInteger i = 0; i < [self.recentFolders count]; ++i)
-		paths.push_back(to_s((NSString*)[self.recentFolders objectAtIndex:i]));
+		paths.push_back(to_s([self.recentFolders objectAtIndex:i]));
 	if(NSString* folder = self.searchFolder)
 		paths.push_back(to_s(folder));
 	paths.push_back(to_s(self.projectFolder));

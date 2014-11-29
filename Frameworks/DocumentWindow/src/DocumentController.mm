@@ -946,9 +946,9 @@ namespace
 	std::vector<document::document_ptr> documents;
 	for(id item in items)
 	{
-		std::string const path  = to_s((NSString*)[item objectForKey:@"path"]);
-		std::string const uuid  = to_s((NSString*)[item objectForKey:@"identifier"]);
-		std::string const range = to_s((NSString*)[item objectForKey:@"selectionString"]);
+		std::string const path  = to_s([item objectForKey:@"path"]);
+		std::string const uuid  = to_s([item objectForKey:@"identifier"]);
+		std::string const range = to_s([item objectForKey:@"selectionString"]);
 
 		document::document_ptr doc;
 		if(path == NULL_STR && oak::uuid_t::is_valid(uuid))
@@ -1774,7 +1774,7 @@ namespace
 - (BOOL)performTabDropFromTabBar:(OakTabBarView*)aTabBar atIndex:(NSUInteger)droppedIndex fromPasteboard:(NSPasteboard*)aPasteboard operation:(NSDragOperation)operation
 {
 	NSDictionary* plist = [aPasteboard propertyListForType:OakDocumentPboardType];
-	document::document_ptr srcDocument = document::find(to_s((NSString*)plist[@"document"]));
+	document::document_ptr srcDocument = document::find(to_s(plist[@"document"]));
 	if(!srcDocument)
 		return NO;
 
@@ -1790,7 +1790,7 @@ namespace
 			self.selectedTabIndex = iter - newDocuments.begin();
 	}
 
-	oak::uuid_t srcProjectId = to_s((NSString*)plist[@"collection"]);
+	oak::uuid_t srcProjectId = to_s(plist[@"collection"]);
 	if(operation == NSDragOperationMove && srcProjectId != to_s(self.identifier))
 	{
 		for(DocumentController* delegate in SortedControllers())

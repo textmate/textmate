@@ -127,7 +127,7 @@ static NSTimeInterval const kDefaultPollInterval = 3*60*60;
 					if((bundle->installed() && !bundle->has_update()) || installing.find(bundle->uuid()) != installing.end())
 						continue;
 
-					std::string appVersion = to_s((NSString*)[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"]);
+					std::string appVersion = to_s([[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"]);
 					if(version::less(appVersion, bundle->requires()))
 					{
 						if(!bundle->installed() || bundle == installedBundle)

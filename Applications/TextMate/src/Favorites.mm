@@ -244,7 +244,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 
 		NSMutableDictionary* entry = [item mutableCopy];
 		entry[@"name"]   = CreateAttributedStringWithMarkedUpRanges(to_s(name), ranges, NSLineBreakByTruncatingTail);
-		entry[@"folder"] = CreateAttributedStringWithMarkedUpRanges(to_s((NSString*)item[@"folder"]), { }, NSLineBreakByTruncatingHead);
+		entry[@"folder"] = CreateAttributedStringWithMarkedUpRanges(to_s(item[@"folder"]), { }, NSLineBreakByTruncatingHead);
 		ranked.emplace(rank, entry);
 	}
 

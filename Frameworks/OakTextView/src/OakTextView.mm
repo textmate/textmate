@@ -1277,10 +1277,10 @@ doScroll:
 	if(false) {
 	} else if([attribute isEqualToString:NSAccessibilityValueAttribute]) {
 		AUTO_REFRESH;
-		document->set_content(to_s((NSString*)value));
+		document->set_content(to_s(value));
 	} else if([attribute isEqualToString:NSAccessibilitySelectedTextAttribute]) {
 		AUTO_REFRESH;
-		editor->insert(to_s((NSString*)value));
+		editor->insert(to_s(value));
 	} else if([attribute isEqualToString:NSAccessibilitySelectedTextRangeAttribute]) {
 		[self accessibilitySetValue:@[ value ] forAttribute:NSAccessibilitySelectedTextRangesAttribute];
 	} else if([attribute isEqualToString:NSAccessibilitySelectedTextRangesAttribute]) {
@@ -2175,7 +2175,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 {
 	D(DBF_OakTextView_Spelling, bug("%s\n", [[menuItem representedObject] UTF8String]););
 	AUTO_REFRESH;
-	editor->insert(to_s((NSString*)[menuItem representedObject]));
+	editor->insert(to_s([menuItem representedObject]));
 	if([NSSpellChecker sharedSpellCheckerExists])
 		[[NSSpellChecker sharedSpellChecker] updateSpellingPanelWithMisspelledWord:[menuItem representedObject]];
 }
@@ -2286,7 +2286,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 		{
 			std::map<std::string, std::string> variables;
 			for(NSString* key in [captures allKeys])
-				variables.emplace(to_s(key), to_s((NSString*)captures[key]));
+				variables.emplace(to_s(key), to_s(captures[key]));
 			replacement = format_string::expand(replacement, variables);
 		}
 		editor->insert(replacement, true);
@@ -3084,7 +3084,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 			{
 				oak::uuid_t projectIdentifier = document::kCollectionAny;
 				if([self.window.delegate respondsToSelector:@selector(identifier)]) // FIXME This should be a formal interface
-					projectIdentifier = to_s((NSString*)[self.window.delegate performSelector:@selector(identifier)]);
+					projectIdentifier = to_s([self.window.delegate performSelector:@selector(identifier)]);
 
 				document::show(document::from_content(output, document->file_type()), projectIdentifier);
 			}

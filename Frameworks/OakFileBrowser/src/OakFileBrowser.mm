@@ -830,12 +830,12 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 - (void)executeBundleCommand:(id)sender
 {
-	if(bundles::item_ptr item = bundles::lookup(to_s((NSString*)[sender representedObject])))
+	if(bundles::item_ptr item = bundles::lookup(to_s([sender representedObject])))
 	{
 		std::map<std::string, std::string> map = oak::basic_environment();
 		map << [self variables] << item->bundle_variables();
 		map = bundles::scope_variables(map);
-		map = variables_for_path(map, to_s((NSString*)[self.selectedPaths firstObject]));
+		map = variables_for_path(map, to_s([self.selectedPaths firstObject]));
 		document::run(parse_command(item), ng::buffer_t(), ng::ranges_t(), [self.selectedPaths count] == 1 ? document::create(map["TM_SELECTED_FILE"]) : document::document_ptr(), map);
 	}
 }

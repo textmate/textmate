@@ -190,9 +190,9 @@ static bool is_installed (oak::uuid_t const& uuid)
 			return aCompletionHandler(nil);
 
 		NSDictionary* grammar = self.grammar;
-		std::string scope      = to_s((NSString*)[grammar objectForKey:@"scope"]);
-		oak::uuid_t uuid       = to_s((NSString*)[grammar objectForKey:@"uuid"]);
-		oak::uuid_t bundleUUID = to_s((NSString*)[grammar objectForKey:@"bundleUUID"]);
+		std::string scope      = to_s([grammar objectForKey:@"scope"]);
+		oak::uuid_t uuid       = to_s([grammar objectForKey:@"uuid"]);
+		oak::uuid_t bundleUUID = to_s([grammar objectForKey:@"bundleUUID"]);
 
 		if(is_installed(uuid))
 		{

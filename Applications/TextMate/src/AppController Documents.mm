@@ -85,8 +85,8 @@ OAK_DEBUG_VAR(AppController_Documents);
 			NSArray* keyValue = [part componentsSeparatedByString:@"="];
 			if([keyValue count] == 2)
 			{
-				std::string key = decode::url_part(to_s((NSString*)[keyValue firstObject]));
-				parameters[key] = decode::url_part(to_s((NSString*)[keyValue lastObject]));
+				std::string key = decode::url_part(to_s([keyValue firstObject]));
+				parameters[key] = decode::url_part(to_s([keyValue lastObject]));
 			}
 		}
 

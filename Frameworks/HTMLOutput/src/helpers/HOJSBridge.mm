@@ -99,7 +99,7 @@ OAK_DEBUG_VAR(HTMLOutput_JSBridge);
 	if([options isKindOfClass:[NSNumber class]])
 		range = text::pos_t([options intValue]-1, 0);
 	else if([options isKindOfClass:[NSString class]])
-		range = to_s((NSString*)options);
+		range = to_s(options);
 	document::show(document::create(to_s(path)), document::kCollectionAny, range);
 }
 

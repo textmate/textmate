@@ -32,12 +32,12 @@
 
 - (void)selectNewFileType:(NSMenuItem*)sender
 {
-	settings_t::set(kSettingsFileTypeKey, to_s((NSString*)[sender representedObject]), "attr.untitled");
+	settings_t::set(kSettingsFileTypeKey, to_s([sender representedObject]), "attr.untitled");
 }
 
 - (void)selectUnknownFileType:(NSMenuItem*)sender
 {
-	settings_t::set(kSettingsFileTypeKey, to_s((NSString*)[sender representedObject]), "attr.file.unknown-type");
+	settings_t::set(kSettingsFileTypeKey, to_s([sender representedObject]), "attr.file.unknown-type");
 }
 
 - (void)loadView

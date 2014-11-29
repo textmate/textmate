@@ -563,7 +563,7 @@ private:
 
 - (void)takeGrammarUUIDFrom:(id)sender
 {
-	if(bundles::item_ptr item = bundles::lookup(to_s((NSString*)[sender representedObject])))
+	if(bundles::item_ptr item = bundles::lookup(to_s([sender representedObject])))
 		[textView performBundleItem:item];
 }
 
