@@ -1670,6 +1670,7 @@ doScroll:
 // ============
 
 static plist::dictionary_t KeyBindings;
+static std::set<std::string> LocalBindings;
 
 static plist::any_t normalize_potential_dictionary (plist::any_t const& action)
 {
@@ -1700,19 +1701,23 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 {
 	static dispatch_once_t onceToken = 0;
 	dispatch_once(&onceToken, ^{
-		static std::string const KeyBindingLocations[] =
+		static struct { std::string path; bool local = false; } KeyBindingLocations[] =
 		{
-			oak::application_t::support("KeyBindings.dict"),
-			oak::application_t::path("Contents/Resources/KeyBindings.dict"),
-			path::join(path::home(), "Library/KeyBindings/DefaultKeyBinding.dict"),
-			"/Library/KeyBindings/DefaultKeyBinding.dict",
-			"/System/Library/Frameworks/AppKit.framework/Resources/StandardKeyBinding.dict",
+			{ oak::application_t::support("KeyBindings.dict"), true                            },
+			{ oak::application_t::path("Contents/Resources/KeyBindings.dict"), true            },
+			{ path::join(path::home(), "Library/KeyBindings/DefaultKeyBinding.dict")            },
+			{ "/Library/KeyBindings/DefaultKeyBinding.dict"                                     },
+			{ "/System/Library/Frameworks/AppKit.framework/Resources/StandardKeyBinding.dict"   },
 		};
 
-		for(auto const& path : KeyBindingLocations)
+		for(auto const& info : KeyBindingLocations)
 		{
-			for(auto const& pair : plist::load(path))
+			for(auto const& pair : plist::load(info.path))
+			{
+				if(info.local || boost::get<plist::dictionary_t>(&pair.second))
+					LocalBindings.insert(ns::normalize_event_string(pair.first));
 				KeyBindings.emplace(ns::normalize_event_string(pair.first), normalize_potential_dictionary(pair.second));
+			}
 		}
 
 		std::multimap<std::string, std::string> actionToKey;
@@ -1868,13 +1873,9 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	}
 	else if(items.empty())
 	{
-		if([self hasMarkedText])
-			return (void)[self.inputContext handleEvent:anEvent];
-
-		plist::dictionary_t::const_iterator pair = KeyBindings.find(to_s(anEvent));
-		if(pair == KeyBindings.end())
-				[self.inputContext handleEvent:anEvent];
-		else	[self handleKeyBindingAction:pair->second];
+		if(LocalBindings.find(to_s(anEvent)) != LocalBindings.end())
+				[self handleKeyBindingAction:KeyBindings[to_s(anEvent)]];
+		else	[self.inputContext handleEvent:anEvent];
 	}
 
 	[NSCursor setHiddenUntilMouseMoves:YES];
