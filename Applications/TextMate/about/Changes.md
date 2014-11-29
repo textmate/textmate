@@ -2,6 +2,11 @@ Title: Release Notes
 
 # Changes
 
+## 2014-11-29 (v2.0-beta.6.4)
+
+* TextMate now support the system’s “press and hold” feature to bring up variations of the pressed character (mainly decorated with accents).
+* See [all changes since v2.0-beta.6.1](https://github.com/textmate/textmate/compare/v2.0-beta.6.1...v2.0-beta.6.4).
+
 ## 2014-11-11 (v2.0-beta.6.1)
 
 * The bundle item chooser (⌃⌘T) now show the value of settings and variables (inline) and includes actions from key binding dictionaries (like `~/Library/KeyBindings/DefaultKeyBinding.dict`).
