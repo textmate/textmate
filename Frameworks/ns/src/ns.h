@@ -6,9 +6,11 @@
 #include "to_dictionary.h"
 
 PUBLIC std::string to_s (NSString* aString);
+PUBLIC std::string to_s (NSAttributedString* anAttributedString);
 PUBLIC std::string to_s (NSData* aString);
 PUBLIC std::string to_s (NSError* anError);
 PUBLIC std::string to_s (NSEvent* anEvent, bool preserveNumPadFlag = false);
+PUBLIC std::string to_s (id someObject);
 
 namespace ns
 {

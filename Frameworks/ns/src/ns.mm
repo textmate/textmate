@@ -16,6 +16,11 @@ std::string to_s (NSString* aString)
 	return res;
 }
 
+std::string to_s (NSAttributedString* anAttributedString)
+{
+	return to_s([anAttributedString string]);
+}
+
 std::string to_s (NSData* someData)
 {
 	return someData ? std::string((char const*)[someData bytes], (char const*)[someData bytes] + [someData length]) : NULL_STR;
@@ -24,6 +29,21 @@ std::string to_s (NSData* someData)
 std::string to_s (NSError* anError)
 {
 	return text::format("Error Domain=%s Code=%ld “%s”", [[anError domain] UTF8String], [anError code], [[anError localizedDescription] UTF8String]);
+}
+
+std::string to_s (id someObject)
+{
+	if([someObject isKindOfClass:[NSString class]])
+		return to_s((NSString*)someObject);
+	if([someObject isKindOfClass:[NSAttributedString class]])
+		return to_s((NSAttributedString*)someObject);
+	if([someObject isKindOfClass:[NSData class]])
+		return to_s((NSData*)someObject);
+	if([someObject isKindOfClass:[NSError class]])
+		return to_s((NSError*)someObject);
+	if([someObject isKindOfClass:[NSEvent class]])
+		return to_s((NSEvent*)someObject);
+	return to_s([someObject description]);
 }
 
 static std::string string_for (CGKeyCode key, CGEventFlags flags)
