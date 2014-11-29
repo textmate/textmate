@@ -1670,7 +1670,6 @@ doScroll:
 // ============
 
 static plist::dictionary_t KeyBindings;
-static plist::dictionary_t const* KeyEventContext = &KeyBindings;
 
 static plist::any_t normalize_potential_dictionary (plist::any_t const& action)
 {
@@ -1783,12 +1782,10 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	AUTO_REFRESH;
 	if(std::string const* selector = boost::get<std::string>(&anAction))
 	{
-		KeyEventContext = &KeyBindings;
 		[self doCommandBySelector:NSSelectorFromString([NSString stringWithCxxString:*selector])];
 	}
 	else if(plist::array_t const* actions = boost::get<plist::array_t>(&anAction))
 	{
-		KeyEventContext = &KeyBindings;
 		std::vector<std::string> selectors;
 		for(auto const& it : *actions)
 		{
@@ -1805,7 +1802,18 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	}
 	else if(plist::dictionary_t const* nested = boost::get<plist::dictionary_t>(&anAction))
 	{
-		KeyEventContext = nested;
+		__block id eventMonitor;
+		eventMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:NSKeyDownMask handler:^NSEvent*(NSEvent* event){
+			plist::dictionary_t::const_iterator pair = nested->find(to_s(event));
+			if(pair != nested->end())
+			{
+				[self handleKeyBindingAction:pair->second];
+				event = nil;
+			}
+			[NSEvent removeMonitor:eventMonitor];
+			eventMonitor = nil;
+			return event;
+		}];
 	}
 }
 
@@ -1817,13 +1825,6 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 	D(DBF_OakTextView_TextInput, bug("%s\n", [[anEvent description] UTF8String]););
 	std::string const eventString = to_s(anEvent);
-
-	if(KeyEventContext != &KeyBindings)
-	{
-		plist::dictionary_t::const_iterator pair = KeyEventContext->find(eventString);
-		if(pair != KeyEventContext->end())
-			return [self handleKeyBindingAction:pair->second], YES;
-	}
 
 	std::vector<bundles::item_ptr> const& items = bundles::query(bundles::kFieldKeyEquivalent, eventString, [self scopeContext]);
 	if(!items.empty())
@@ -1852,8 +1853,8 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 	if(SpecialKeys.find(eventString) != SpecialKeys.end())
 	{
-		plist::dictionary_t::const_iterator pair = KeyEventContext->find(eventString);
-		if(pair != KeyEventContext->end())
+		plist::dictionary_t::const_iterator pair = KeyBindings.find(eventString);
+		if(pair != KeyBindings.end())
 			return [self handleKeyBindingAction:pair->second], YES;
 	}
 
@@ -1872,14 +1873,8 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 		if([self hasMarkedText])
 			return (void)[self.inputContext handleEvent:anEvent];
 
-		plist::dictionary_t::const_iterator pair = KeyEventContext->find(to_s(anEvent));
-		if(pair == KeyEventContext->end() && KeyEventContext != &KeyBindings)
-		{
-			KeyEventContext = &KeyBindings;
-			pair = KeyEventContext->find(to_s(anEvent));
-		}
-
-		if(pair == KeyEventContext->end())
+		plist::dictionary_t::const_iterator pair = KeyBindings.find(to_s(anEvent));
+		if(pair == KeyBindings.end())
 				[self.inputContext handleEvent:anEvent];
 		else	[self handleKeyBindingAction:pair->second];
 	}
