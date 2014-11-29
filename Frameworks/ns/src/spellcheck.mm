@@ -44,7 +44,7 @@ namespace ns
 			char const* from = utf16::advance(first, range.location, last);
 			char const* to   = utf16::advance(from,  range.length,   last);
 			*out++ = ns::range_t(offset + from - first, offset + to - first);
-			range = [spellChecker checkSpellingOfString:str startingAt:range.location + range.length language:lang wrap:NO inSpellDocumentWithTag:tag wordCount:NULL];
+			range = [spellChecker checkSpellingOfString:str startingAt:NSMaxRange(range) language:lang wrap:NO inSpellDocumentWithTag:tag wordCount:NULL];
 		}
 		return out;
 	}

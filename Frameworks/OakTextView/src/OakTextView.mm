@@ -1060,7 +1060,7 @@ doScroll:
 		std::string const str = document->buffer().substr(range.min().index, range.max().index);
 		char const* base = str.data();
 		size_t from = utf16::advance(base, aRange.location, base + str.size()) - base;
-		size_t to   = utf16::advance(base, aRange.location + aRange.length, base + str.size()) - base;
+		size_t to   = utf16::advance(base, NSMaxRange(aRange), base + str.size()) - base;
 		sel.push_back(ng::range_t(range.min() + from, range.min() + to));
 	}
 	editor->set_selections(sel);
