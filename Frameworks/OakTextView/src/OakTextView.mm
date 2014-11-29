@@ -1032,16 +1032,6 @@ doScroll:
 {
 	D(DBF_OakTextView_TextInput, bug("‘%s’ %s\n", to_s([aString description]).c_str(), [NSStringFromRange(aRange) UTF8String]););
 
-	if(![aString isKindOfClass:[NSString class]])
-	{
-		if([aString respondsToSelector:@selector(string)])
-			aString = [aString string];
-		else if([aString respondsToSelector:@selector(description)])
-			aString = [aString description];
-		else
-			aString = @"<ERROR>";
-	}
-
 	AUTO_REFRESH;
 	if(replacementRange.location != NSNotFound)
 		editor->set_selections([self rangesForReplacementRange:replacementRange]);
@@ -1049,7 +1039,7 @@ doScroll:
 		editor->set_selections(markedRanges);
 
 	markedRanges = ng::ranges_t();
-	editor->insert(to_s([aString description]), true);
+	editor->insert(to_s(aString), true);
 	if([aString length] != 0)
 		markedRanges = editor->ranges();
 	pendingMarkedRanges = markedRanges;
@@ -2021,19 +2011,10 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 		[self delete:nil];
 	}
 
-	if(![aString isKindOfClass:[NSString class]])
-	{
-		if([aString respondsToSelector:@selector(string)])
-			aString = [aString string];
-		else if([aString respondsToSelector:@selector(description)])
-			aString = [aString description];
-		else
-			aString = @"<ERROR>";
-	}
-
-	[self recordSelector:_cmd withArgument:[aString copy]];
+	std::string const str = to_s(aString);
+	[self recordSelector:_cmd withArgument:[NSString stringWithCxxString:str]];
 	bool autoPairing = !macroRecordingArray && ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableTypingPairsKey];
-	editor->insert_with_pairing([aString UTF8String], [self indentCorrections], autoPairing, to_s([self scopeAttributes]));
+	editor->insert_with_pairing(str, [self indentCorrections], autoPairing, to_s([self scopeAttributes]));
 }
 
 - (IBAction)toggleCurrentFolding:(id)sender
