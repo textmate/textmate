@@ -386,7 +386,7 @@ namespace // wrap in anonymous namespace to avoid clashing with other callbacks 
 		reactivate_callback_t () : shared_count(std::make_shared<size_t>(0))
 		{
 			D(DBF_RMateServer, bug("%p\n", this););
-			GetFrontProcess(&psn);
+			_terminal = [[NSWorkspace sharedWorkspace] frontmostApplication];
 		}
 
 		void watch_document (document::document_ptr document)
@@ -399,12 +399,12 @@ namespace // wrap in anonymous namespace to avoid clashing with other callbacks 
 		{
 			D(DBF_RMateServer, bug("%zu → %zu\n", *shared_count, *shared_count - 1););
 			if(--*shared_count == 0)
-				SetFrontProcess(&psn);
+				[_terminal activateWithOptions:NSApplicationActivateIgnoringOtherApps];
 		}
 
 	private:
 		std::shared_ptr<size_t> shared_count;
-		struct ProcessSerialNumber psn;
+		NSRunningApplication* _terminal;
 	};
 }
 
@@ -611,7 +611,7 @@ struct socket_observer_t
 		}
 
 		if(documents.empty())
-				SetFrontProcess(&(ProcessSerialNumber){ 0, kCurrentProcess });
+				[NSApp activateIgnoringOtherApps:YES];
 		else	document::show(documents);
 	}
 
