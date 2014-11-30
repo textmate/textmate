@@ -549,7 +549,8 @@ namespace path
 		if((mask & flag::stationery_pad) == flag::stationery_pad)
 		{
 			struct { u_int32_t length; FileInfo fileInfo; ExtendedFileInfo extendedInfo; } attrBuf;
-			if(getattrlist(path.c_str(), &(attrlist){ ATTR_BIT_MAP_COUNT, 0, ATTR_CMN_FNDRINFO, 0, 0, 0, 0 }, &attrBuf, sizeof(attrBuf), 0) == 0 && attrBuf.length == sizeof(attrBuf))
+			attrlist list = { ATTR_BIT_MAP_COUNT, 0, ATTR_CMN_FNDRINFO, 0, 0, 0, 0 };
+			if(getattrlist(path.c_str(), &list, &attrBuf, sizeof(attrBuf), 0) == 0 && attrBuf.length == sizeof(attrBuf))
 			{
 				if((ntohs(attrBuf.fileInfo.finderFlags) & kIsStationery) == kIsStationery)
 					res |= flag::stationery_pad;
