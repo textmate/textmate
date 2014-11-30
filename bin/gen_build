@@ -907,7 +907,7 @@ rule run_application
         sleep .2;                    $
       done;                          $
     fi;                              $
-    open $in;                        $
+    open $in --args -disableSessionRestore NO; $
   } &>/dev/null &
   description = Run ‘$in’…
 
