@@ -1,6 +1,7 @@
 #include "application.h"
 #include <io/io.h>
 #include <cf/cf.h>
+#include <text/format.h>
 #include <oak/compat.h>
 #include <oak/datatypes.h>
 #include <oak/debug.h>
@@ -9,11 +10,9 @@ OAK_DEBUG_VAR(Application);
 
 namespace oak
 {
-	static std::string _app_name      = NULL_STR;
-	static std::string _app_path      = NULL_STR;
-	static std::string _full_app_path = NULL_STR;
-	static std::string _pid_path      = NULL_STR;
-	static std::string _support_path  = NULL_STR;
+	static std::string _app_name     = NULL_STR;
+	static std::string _app_path     = NULL_STR;
+	static std::string _support_path = NULL_STR;
 
 	static std::string process_name (pid_t pid)
 	{
@@ -27,10 +26,8 @@ namespace oak
 
 	application_t::application_t (int argc, char const* argv[], bool redirectStdErr)
 	{
-		_app_name      = getenv("OAK_APP_NAME") ?: path::name(argv[0]);
-		_full_app_path = path::join(path::cwd(), argv[0]);
-		_app_path      = _full_app_path;
-		_pid_path      = path::join(path::temp(), (((CFBundleGetMainBundle() && CFBundleGetIdentifier(CFBundleGetMainBundle())) ? cf::to_s(CFBundleGetIdentifier(CFBundleGetMainBundle())) : _app_name) + ".pid"));
+		_app_name = getenv("OAK_APP_NAME") ?: path::name(argv[0]);
+		_app_path = path::join(path::cwd(), argv[0]);
 
 		if(redirectStdErr)
 		{
@@ -47,9 +44,11 @@ namespace oak
 		if(_app_path.size() > appBinary.size() && _app_path.find(appBinary) == _app_path.size() - appBinary.size())
 			_app_path.erase(_app_path.end() - appBinary.size(), _app_path.end());
 
-		std::string content = path::content(_pid_path);
-		if(content == NULL_STR) // Support updating from 2.0-alpha.9553 or earlier
-			content = path::content(support(((CFBundleGetMainBundle() && CFBundleGetIdentifier(CFBundleGetMainBundle())) ? cf::to_s(CFBundleGetIdentifier(CFBundleGetMainBundle())) : _app_name) + ".pid"));
+		// ==================================================================================
+		// = TODO Remove the rest of this function once most users are on beta 6.5 or later =
+		// ==================================================================================
+
+		std::string content = path::content(path::join(path::temp(), (((CFBundleGetMainBundle() && CFBundleGetIdentifier(CFBundleGetMainBundle())) ? cf::to_s(CFBundleGetIdentifier(CFBundleGetMainBundle())) : _app_name) + ".pid")));
 		long pid = content != NULL_STR ? strtol(content.c_str(), NULL, 10) : 0;
 		if(pid != 0 && process_name(pid) == _app_name)
 		{
@@ -96,33 +95,6 @@ namespace oak
 			}
 			close(event_queue);
 		}
-
-		create_pid_file();
-
-		if(getenv("OAK_RELAUNCH"))
-		{
-			D(DBF_Application, bug("bring new instance to front\n"););
-			SetFrontProcess(&(ProcessSerialNumber){ 0, kCurrentProcess });
-			unsetenv("OAK_RELAUNCH");
-		}
-	}
-
-	void application_t::create_pid_file ()
-	{
-		if(path::set_content(_pid_path, std::to_string(getpid())))
-		{
-			atexit(&remove_pid_file);
-		}
-		else
-		{
-			D(DBF_Application, bug("open(\"%s\", O_WRONLY): %s\n", _pid_path.c_str(), strerror(errno)););
-		}
-	}
-
-	void application_t::remove_pid_file ()
-	{
-		D(DBF_Application, bug("unlink %s\n", _pid_path.c_str()););
-		unlink(_pid_path.c_str());
 	}
 
 	std::string application_t::name ()
@@ -196,44 +168,12 @@ namespace oak
 		return "???";
 	}
 
-	static void relaunch_thread (pid_t pid)
-	{
-		oak::set_thread_name("application_t::relaunch");
-
-		int status = 0;
-		if(waitpid(pid, &status, 0) != pid)
-			fprintf(stderr, "*** relaunch failed: no process for pid %d.\n", pid);
-		else if(WIFSIGNALED(status))
-			fprintf(stderr, "*** relaunch failed: process terminated, %s.\n", strsignal(WTERMSIG(status)));
-		else if(!WIFEXITED(status))
-			fprintf(stderr, "*** relaunch failed: process terminated abnormally %d.\n", status);
-		else
-			fprintf(stderr, "*** relaunch failed: process terminated with status %d.\n", status);
-	}
-
 	void application_t::relaunch ()
 	{
-		ASSERT(_full_app_path != NULL_STR);
-		D(DBF_Application, bug("%s\n", _full_app_path.c_str()););
-
-		create_pid_file(); // we create this during startup, but incase there was no support folder it would have failed
-
-		std::map<std::string, std::string> envMap = oak::basic_environment();
-		envMap["OAK_RELAUNCH"] = "QUICK";
-		oak::c_array env(envMap);
-
-		pid_t pid = vfork();
-		if(pid == 0)
-		{
-			char const* argv[] = { _full_app_path.c_str(), "-disableSessionRestore", "0", NULL };
-			execve(argv[0], (char* const*)argv, env);
-			perror("relaunch");
-			_exit(EXIT_FAILURE);
-		}
-		else
-		{
-			std::thread(relaunch_thread, pid).detach();
-		}
+		ASSERT(_app_path != NULL_STR);
+		D(DBF_Application, bug("%s\n", _app_path.c_str()););
+		std::string script = text::format("{ kill %1$d; while ps -xp %1$d; do if (( ++n == 300 )); then exit; fi; sleep .2; done; open '%2$s' --args -disableSessionRestore NO; } &>/dev/null &", getpid(), _app_path.c_str());
+		io::exec("/bin/sh", "-c", script.c_str(), nullptr);
 	}
 
 } /* oak */
