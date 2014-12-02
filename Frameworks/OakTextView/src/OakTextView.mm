@@ -3110,6 +3110,12 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	return res;
 }
 
+- (NSString*)string
+{
+	// This is used by the Emmet plug-in (with no “respondsToSelector:” check)
+	return [NSString stringWithCxxString:editor->as_string()];
+}
+
 // ===================
 // = Macro Recording =
 // ===================
