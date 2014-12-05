@@ -46,6 +46,7 @@ namespace scm
 	PUBLIC void disable ();
 	PUBLIC void enable ();
 	PUBLIC std::string root_for_path (std::string const& path);
+	PUBLIC bool scm_enabled_for_path (std::string const& path);
 	PUBLIC info_ptr info (std::string path);
 	PUBLIC void wait_for_status (info_ptr info);
 

@@ -257,7 +257,7 @@ namespace scm
 		return *res;
 	}
 
-	static bool scm_enabled_for_path (std::string const& path)
+	bool scm_enabled_for_path (std::string const& path)
 	{
 		if(!path::is_absolute(path))
 			return false;
