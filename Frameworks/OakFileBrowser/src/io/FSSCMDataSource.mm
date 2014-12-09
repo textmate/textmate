@@ -79,10 +79,19 @@ _Iter prune_path_children (_Iter it, _Iter last)
 
 + (NSURL*)scmURLWithPath:(NSString*)aPath
 {
-	std::string root = scm::root_for_path([aPath fileSystemRepresentation]);
-	if(root != NULL_STR)
-		return [NSURL URLWithString:[NSString stringWithCxxString:"scm://localhost" + encode::url_part(root, "/") + "/"]];
-	return [NSURL URLWithString:[@"scm://locahost" stringByAppendingString:[aPath stringByAppendingString:@"?status=unversioned"]]];
+	NSURL* url;
+	if(scm::scm_enabled_for_path([aPath fileSystemRepresentation]))
+	{
+		std::string root = scm::root_for_path([aPath fileSystemRepresentation]);
+		if(root != NULL_STR)
+			url = [NSURL URLWithString:[NSString stringWithCxxString:"scm://localhost" + encode::url_part(root, "/") + "/"]];
+		else	url = [NSURL URLWithString:[@"scm://locahost" stringByAppendingString:[aPath stringByAppendingString:@"?status=unversioned"]]];
+	}
+	else
+	{
+		url = [NSURL URLWithString:[@"scm://locahost" stringByAppendingString:[aPath stringByAppendingString:@"?status=disabled"]]];
+	}
+	return url;
 }
 
 + (NSString*)parseSCMURLStatusQuery:(NSURL*)anURL
@@ -147,11 +156,11 @@ _Iter prune_path_children (_Iter it, _Iter last)
 		std::string name = path::display_name(rootPath);
 
 		NSString* status = [FSSCMDataSource parseSCMURLStatusQuery:anURL];
-		if([status isEqualToString:@"unversioned"])
+		if([status isEqualToString:@"unversioned"] || [status isEqualToString:@"disabled"])
 		{
 			self.rootItem             = [FSItem itemWithURL:nil];
 			self.rootItem.icon        = [NSImage imageNamed:NSImageNameFolderSmart];
-			self.rootItem.displayName = [NSString stringWithCxxString:text::format("%s (%s)", name.c_str(), "Unversioned")];
+			self.rootItem.displayName = [NSString stringWithFormat:@"%@ (%@)", [NSString stringWithCxxString:name], status];
 			self.rootItem.children    = nil;
 
 			return self;
