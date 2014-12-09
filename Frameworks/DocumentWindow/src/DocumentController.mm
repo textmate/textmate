@@ -2629,10 +2629,25 @@ static NSUInteger DisableSessionSavingCount = 0;
 	if(self.fileBrowser)
 		res = [self.fileBrowser variables];
 
-	auto const& vars = _documentSCMVariables.empty() ? _projectSCMVariables : _documentSCMVariables;
-	auto scmName = vars.find("TM_SCM_NAME");
-	if(scmName != vars.end())
-		res["TM_SCM_NAME"] = scmName->second;
+	auto const& scmVars = _documentSCMVariables.empty() ? _projectSCMVariables : _documentSCMVariables;
+
+	if(!scmVars.empty())
+	{
+		auto scmName = scmVars.find("TM_SCM_NAME");
+		if(scmName != scmVars.end())
+			res["TM_SCM_NAME"] = scmName->second;
+	}
+	else
+	{
+		for(auto attr : _externalScopeAttributes)
+		{
+			if(regexp::match_t const& m = regexp::search("^attr.scm.(?'TM_SCM_NAME'\\w+)$", attr))
+			{
+				res.insert(m.captures().begin(), m.captures().end());
+				break;
+			}
+		}
+	}
 
 	if(NSString* projectDir = self.projectPath)
 	{
