@@ -2631,11 +2631,8 @@ static NSUInteger DisableSessionSavingCount = 0;
 
 	auto const& vars = _documentSCMVariables.empty() ? _projectSCMVariables : _documentSCMVariables;
 	auto scmName = vars.find("TM_SCM_NAME");
-	auto scmBranch = vars.find("TM_SCM_BRANCH");
 	if(scmName != vars.end())
 		res["TM_SCM_NAME"] = scmName->second;
-	if(scmBranch != vars.end())
-		res["TM_SCM_BRANCH"] = scmBranch->second;
 
 	if(NSString* projectDir = self.projectPath)
 	{
