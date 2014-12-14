@@ -257,28 +257,6 @@ namespace scm
 		return *res;
 	}
 
-	bool scm_enabled_for_path (std::string const& path)
-	{
-		if(!path::is_absolute(path))
-			return false;
-
-		settings_t settings = settings_for_path(NULL_STR, "", path);
-		std::string s = settings.get(kSettingsSCMStatusKey, "enableIfLocalDisk");
-
-		if(s == "enable")
-			return true;  // Don't apply logic, just trust the setting.
-		else if(s == "disable")
-			return false;
-		else if(path == "/" || path == path::home())
-			return false;
-		else if(s == "enableIfSystemDisk")
-			return path::device(path) == path::device("/");
-		else if(s == "enableIfLocalDisk" || settings.get(kSettingsSCMStatusKey, true))
-			return path::is_local(path);
-
-		return false;
-	}
-
 	static shared_info_ptr find_shared_info_for (std::string const& path)
 	{
 		for(std::string cwd = path; cwd != "/"; cwd = path::parent(cwd))
@@ -317,6 +295,28 @@ namespace scm
 				info->schedule_update();
 		}
 		PendingUpdates.clear();
+	}
+
+	bool scm_enabled_for_path (std::string const& path)
+	{
+		if(!path::is_absolute(path))
+			return false;
+
+		settings_t settings = settings_for_path(NULL_STR, "", path);
+		std::string s = settings.get(kSettingsSCMStatusKey, "enableIfLocalDisk");
+
+		if(s == "enable")
+			return true;  // Don't apply logic, just trust the setting.
+		else if(s == "disable")
+			return false;
+		else if(path == "/" || path == path::home())
+			return false;
+		else if(s == "enableIfSystemDisk")
+			return path::device(path) == path::device("/");
+		else if(s == "enableIfLocalDisk" || settings.get(kSettingsSCMStatusKey, true))
+			return path::is_local(path);
+
+		return false;
 	}
 
 	std::string root_for_path (std::string const& path)
