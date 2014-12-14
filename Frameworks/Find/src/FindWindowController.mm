@@ -384,12 +384,12 @@ static NSButton* OakCreateStopSearchButton ()
 
 	NSDictionary* views = self.allViews;
 
-	CONSTRAINT(@"H:|-(>=20,==20@75)-[findLabel]-[find(>=100)]",        0);
-	CONSTRAINT(@"H:[find]-(5)-[findHistory]-[count(==findHistory)]-|", NSLayoutFormatAlignAllTop);
-	CONSTRAINT(@"V:[count(==21)]",                                     NSLayoutFormatAlignAllLeft|NSLayoutFormatAlignAllRight);
-	CONSTRAINT(@"H:|-(>=20,==20@75)-[replaceLabel]-[replace]",         0);
-	CONSTRAINT(@"H:[replace]-(5)-[replaceHistory]",                    NSLayoutFormatAlignAllTop);
-	CONSTRAINT(@"V:|-[find]-[replace]",                                NSLayoutFormatAlignAllLeft|NSLayoutFormatAlignAllRight);
+	CONSTRAINT(@"H:|-(>=20,==20@75)-[findLabel]-[find(>=100)]",                          0);
+	CONSTRAINT(@"H:[find]-(5)-[findHistory(==replaceHistory)]-[count(==findHistory)]-|", NSLayoutFormatAlignAllTop);
+	CONSTRAINT(@"V:[count(==21)]",                                                       NSLayoutFormatAlignAllLeft|NSLayoutFormatAlignAllRight);
+	CONSTRAINT(@"H:|-(>=20,==20@75)-[replaceLabel]-[replace]",                           0);
+	CONSTRAINT(@"H:[replace]-(5)-[replaceHistory]",                                      NSLayoutFormatAlignAllTop);
+	CONSTRAINT(@"V:|-[find]-[replace]",                                                  NSLayoutFormatAlignAllLeft|NSLayoutFormatAlignAllRight);
 
 	[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self.findLabel attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.findTextField attribute:NSLayoutAttributeTop multiplier:1 constant:3]];
 	[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self.replaceLabel attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.replaceTextField attribute:NSLayoutAttributeTop multiplier:1 constant:3]];
