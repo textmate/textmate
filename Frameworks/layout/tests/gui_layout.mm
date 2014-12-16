@@ -36,7 +36,7 @@ static void random_insert (ng::buffer_t& dst, std::string const& src)
 	std::vector<size_t> lengths;
 	for(size_t i = 0; i < src.size(); i += lengths.back())
 	{
-		size_t len = std::min<size_t>((random() % 15) + 15, src.size() - i);
+		size_t len = std::min<size_t>(arc4random_uniform(15) + 15, src.size() - i);
 		while(i + len < src.size() && src[i + len - 1] != ' ')
 			++len;
 		lengths.push_back(len);

@@ -91,7 +91,7 @@ void test_range_tree ()
 {
 	std::set<ssize_t> tmp;
 	while(tmp.size() < 32)
-		tmp.insert((random() & 0xFFFFFF) - 0x7FFFFF);
+		tmp.insert(arc4random_uniform(0xFFFFFF) - 0x7FFFFF);
 
 	std::vector<ssize_t> keys(tmp.begin(), tmp.end());
 	std::random_shuffle(keys.begin(), keys.end());

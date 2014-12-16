@@ -43,7 +43,7 @@ void test_basic ()
 
 	std::set<ssize_t> tmp;
 	while(tmp.size() < 2000)
-		tmp.insert((random() & 0xFFFFFF) - 0x7FFFFF);
+		tmp.insert(arc4random_uniform(0xFFFFFF) - 0x7FFFFF);
 
 	std::vector<ssize_t> keys(tmp.begin(), tmp.end());
 	std::random_shuffle(keys.begin(), keys.end());

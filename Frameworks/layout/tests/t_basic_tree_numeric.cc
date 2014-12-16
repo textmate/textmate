@@ -12,7 +12,7 @@ std::vector<ssize_t> create_keys ()
 {
 	std::set<ssize_t> tmp;
 	while(tmp.size() < kTreeSize)
-		tmp.insert((random() & 0xFFFFFF) - 0x7FFFFF);
+		tmp.insert(arc4random_uniform(0xFFFFFF) - 0x7FFFFF);
 
 	std::vector<ssize_t> res(tmp.begin(), tmp.end());
 	std::random_shuffle(res.begin(), res.end());
@@ -113,7 +113,7 @@ void test_search ()
 	std::set<ssize_t> existingKeys(keys.begin(), keys.end()), nonExistingKeys;
 	while(nonExistingKeys.size() < kTreeSize)
 	{
-		ssize_t key = (random() & 0xFFFFFF) - 0x7FFFFF;
+		ssize_t key = arc4random_uniform(0xFFFFFF) - 0x7FFFFF;
 		if(existingKeys.find(key) == existingKeys.end())
 			nonExistingKeys.insert(key);
 	}

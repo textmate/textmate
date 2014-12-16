@@ -24,12 +24,12 @@ static std::vector<fragment_t> random_ranges (size_t len)
 {
 	oak::basic_tree_t<key_t, size_t> tree;
 	while(tree.aggregated().length < len)
-		tree.insert(tree.end(), std::min<size_t>((random() % 15) + 15, len - tree.aggregated().length), tree.aggregated().length);
+		tree.insert(tree.end(), std::min<size_t>(arc4random_uniform(15) + 15, len - tree.aggregated().length), tree.aggregated().length);
 
 	std::vector<fragment_t> res;
 	while(!tree.empty())
 	{
-		size_t i = random() % tree.size();
+		size_t i = arc4random_uniform(tree.size());
 		auto it = tree.find(i, &comp_nth);
 		res.push_back((fragment_t){ it->offset.length, it->value, it->key.length });
 		tree.erase(it);

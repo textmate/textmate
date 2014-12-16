@@ -29,7 +29,7 @@ static void random_insert (oak::basic_tree_t<annotation_t>& tree, std::string co
 	std::vector<size_t> lengths;
 	for(size_t i = 0; i < buf.size(); i += lengths.back())
 	{
-		size_t len = std::min<size_t>((random() % 15) + 15, buf.size() - i);
+		size_t len = std::min<size_t>(arc4random_uniform(15) + 15, buf.size() - i);
 		while(i + len < buf.size() && buf[i + len - 1] != ' ')
 			++len;
 		lengths.push_back(len);
