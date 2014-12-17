@@ -72,6 +72,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 	res.title      = @"";
 	res.toolTip    = toolTip;
 	OakSetAccessibilityLabel(res, toolTip);
+	[res setContentCompressionResistancePriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
 	return res;
 }
 
