@@ -141,6 +141,18 @@ static void collect_all_paths (std::string const& git, std::map<std::string, scm
 	path::remove(tmpIndex);
 }
 
+std::string show (std::string const& git, std::string const& fileName, std::string const& revision, std::string const& dir)
+{
+	ASSERT_NE(git, NULL_STR);
+
+	std::map<std::string, std::string> env = oak::basic_environment();
+	env["GIT_WORK_TREE"] = dir;
+	env["GIT_DIR"]       = path::join(dir, ".git");
+	std::string rev = revision + ":" + fileName;
+
+	return io::exec(env, git, "show", rev.c_str(), NULL);
+}
+
 namespace
 {
 	struct entry_t
@@ -281,6 +293,15 @@ namespace scm
 			filter(statusMap, entry_t(tmp), wcPath);
 
 			return statusMap;
+		}
+
+		std::string content (std::string const& wcPath, std::string const& fileName, std::string const& revision) const
+		{			
+			if(executable() == NULL_STR)
+				return NULL_STR;
+
+			std::string relPath = fileName.substr(wcPath.length() + 1);
+			return show(executable(), relPath, revision, wcPath);
 		}
 	};
 

@@ -20,6 +20,11 @@ namespace scm
 			D(DBF_SCM_Perforce, bug("%s\n", wcPath.c_str()););
 			return status_map_t();
 		}
+
+		std::string content (std::string const& wcPath, std::string const& fileName, std::string const& revision) const
+		{
+			return NULL_STR;
+		}
 	};
 
 	driver_t* p4_driver () { return new p4_driver_t; }
