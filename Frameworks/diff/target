@@ -1,0 +1,4 @@
+SOURCES      = src/*.cc
+TESTS        = tests/*.cc
+LINK        += text
+EXPORT       = src/*.h
