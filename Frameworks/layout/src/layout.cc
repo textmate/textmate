@@ -633,6 +633,14 @@ namespace ng
 		if(_refresh_counter)
 		{
 			auto row = row_for_offset(index);
+			refresh_row(row, fullRefresh);
+		}
+	}
+
+	void layout_t::refresh_row (layout_t::row_tree_t::iterator row, bool fullRefresh)
+	{
+		if(_refresh_counter)
+		{
 			CGRect lineRefreshRect = full_width(rect_for(row));
 			_dirty_rects.push_back(fullRefresh ? full_height(lineRefreshRect) : lineRefreshRect);
 		}
