@@ -2,7 +2,9 @@
 #define LAYOUT_H_VWUBRBQ1
 
 #include "paragraph.h"
+#include "diff_types.h"
 #include <buffer/buffer.h>
+#include <diff/diff.h>
 #include <selection/selection.h>
 #include <theme/theme.h>
 #include <oak/basic_tree.h>
@@ -69,8 +71,11 @@ namespace ng
 
 		void update_metrics (CGRect visibleRect);
 		void draw (ng::context_t const& context, CGRect rectangle, bool isFlipped, ng::ranges_t const& selection, ng::ranges_t const& highlightRanges = ng::ranges_t(), bool drawBackground = true);
-		ng::index_t index_at_point (CGPoint point) const;
+
+		enum direction_t { up, down, closest };
+		ng::index_t index_at_point (CGPoint point, direction_t direction = closest) const;
 		CGRect rect_at_index (ng::index_t const& index, bool bol_as_eol = false, bool wantsBaseline = false) const;
+
 		CGRect rect_for_range (size_t first, size_t last, bool bol_as_eol = false) const;
 		std::vector<CGRect> rects_for_ranges (ng::ranges_t const& ranges, kRectsIncludeMode mode = kRectsIncludeAll) const;
 
@@ -114,6 +119,14 @@ namespace ng
 
 		line_record_t line_record_for (CGFloat y) const;
 		line_record_t line_record_for (text::pos_t const& pos) const;
+		size_t max_line_for (CGFloat y) const;
+
+		// ================
+		// = Diff support =
+		// ================
+
+		void initiate_diff (std::shared_ptr<ng::buffer_t> diffBuffer);
+		bool diff_enabled () const { return _diff_model ? true : false; }
 
 		// =================
 		// = Debug support =
@@ -149,7 +162,6 @@ namespace ng
 		CGRect full_width (CGRect const& rect) const;
 		CGRect full_height (CGRect const& rect) const;
 		bool effective_soft_wrap (row_tree_t::iterator rowIter) const;
-
 		void set_tab_size (size_t tabSize);
 		void did_insert (size_t first, size_t last);
 		void did_erase (size_t from, size_t to);
@@ -159,15 +171,25 @@ namespace ng
 
 		void update_metrics_for_row (row_tree_t::iterator rowIter);
 		bool update_row (row_tree_t::iterator rowIter);
-
+		index_t cap_in_height (size_t offset, row_tree_t::iterator& rowIter, CGPoint point, buffer_t const& buffer) const;
 		bool repair_folds (size_t from, size_t to);
 		void refresh_line_at_index (size_t index, bool fullRefresh);
 		void refresh_row (row_tree_t::iterator row, bool fullRefresh);
 		void did_fold (size_t from, size_t to);
 
+		void remove_diff_data (size_t from, size_t to, char const* buf, size_t len);
+		void add_diff_data (size_t from, size_t to, char const* buf, size_t len);
+		cached_paragraphs_t remove_old_diff_layout (size_t from, size_t to);
+		bool add_new_diff_layout (size_t from, size_t to, cached_paragraphs_t& paragraps);
+		size_t diff_index (row_tree_t::iterator& row) const;
+		void clear_diff_status (row_tree_t::iterator& row);
+		void did_update_diff_scope (size_t from, size_t to);
+
 		// comparison functions
 		static int row_y_comp (CGFloat y, row_key_t const& offset, row_key_t const& node)       { return y < offset._height ? -1 : (y == offset._height ? 0 : +1); }
 		static int row_offset_comp (size_t i, row_key_t const& offset, row_key_t const& node)   { return i < offset._length ? -1 : (i == offset._length ? 0 : +1); }
+		static int row_key_comp (size_t i, row_key_t const& offset, row_key_t const& node)   { return i < offset._length + node._length ? -1 : (i == offset._length + node._length? 0 : +1); }
+		
 		static int row_softline_comp (size_t softline, row_key_t const& offset, row_key_t const& node)   { return softline < offset._softlines ? -1 : (softline == offset._softlines ? 0 : +1); }
 		static int row_diff_comp (size_t diffIndex, row_key_t const& offset, row_key_t const& node)       { return diffIndex < offset._diff_index + node._diff_index ? -1 : (diffIndex == offset._diff_index + node._diff_index ? 0 : +1); }
 
@@ -203,6 +225,9 @@ namespace ng
 		std::vector<CGRect> _pre_refresh_highlight_interior;
 		std::vector<CGRect> _dirty_rects;
 		size_t _refresh_counter = 0;
+
+		diff_ptr _diff_model;
+		
 	};
 
 } /* ng */

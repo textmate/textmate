@@ -99,7 +99,21 @@ namespace ng
 		_line.reset();
 	}
 
-	void paragraph_t::node_t::layout (CGFloat x, size_t tabSize, theme_ptr const& theme, bool softWrap, size_t wrapColumn, ct::metrics_t const& metrics, ng::buffer_t const& buffer, size_t bufferOffset, std::string const& fillStr)
+	std::string scope_for_line (paragraph_t::diff_status_t diffStatus)
+	{
+		switch(diffStatus)
+		{
+			case paragraph_t::kDiffStatusNone:
+			case paragraph_t::kDiffStatusEqual:
+				return NULL_STR;
+			case paragraph_t::kDiffStatusAdded:
+				return "diff.added.line";
+			case paragraph_t::kDiffStatusRemoved:
+				return "diff.removed.line";
+		}
+	}
+
+	void paragraph_t::node_t::layout (CGFloat x, size_t tabSize, theme_ptr const& theme, bool softWrap, size_t wrapColumn, ct::metrics_t const& metrics, ng::buffer_t const& buffer, size_t bufferOffset, std::string const& fillStr, paragraph_t::diff_status_t diffStatus)
 	{
 		if(_line)
 			return;
@@ -108,7 +122,16 @@ namespace ng
 		{
 			case kNodeTypeText:
 			{
-				_line = std::make_shared<ct::line_t>(buffer.substr(bufferOffset, bufferOffset + _length), buffer.scopes(bufferOffset, bufferOffset + _length), theme, tabSize, metrics, nullptr);
+				auto scopes = buffer.scopes(bufferOffset, bufferOffset + _length);
+				std::string diff_scope = scope_for_line(diffStatus);
+				if(diff_scope != NULL_STR)
+				{
+					for(auto& scope : scopes)
+					{
+						scope.second.push_scope(diff_scope);
+					}
+				}
+				_line = std::make_shared<ct::line_t>(buffer.substr(bufferOffset, bufferOffset + _length), scopes, theme, tabSize, metrics, nullptr);
 			}
 			break;
 
@@ -116,6 +139,10 @@ namespace ng
 			{
 				scope::scope_t scope = buffer.scope(bufferOffset).right;
 				scope.push_scope("deco.unprintable");
+				std::string diff_scope = scope_for_line(diffStatus);
+				if(diff_scope != NULL_STR)
+					scope.push_scope(diff_scope);
+
 				_line = std::make_shared<ct::line_t>(representation_for(utf8::to_ch(buffer.substr(bufferOffset, bufferOffset + _length))), std::map<size_t, scope::scope_t>{ { 0, scope } }, theme, tabSize, metrics, nullptr);
 			}
 			break;
@@ -131,6 +158,10 @@ namespace ng
 				scope::context_t const context = buffer.scope(bufferOffset);
 				scope::scope_t scope = shared_prefix(context.left, context.right);
 				scope.push_scope("deco.indented-wrap");
+				std::string diff_scope = scope_for_line(diffStatus);
+				if(diff_scope != NULL_STR)
+					scope.push_scope(diff_scope);
+
 				_line = std::make_shared<ct::line_t>(fillStr, std::map<size_t, scope::scope_t>{ { 0, scope } }, theme, tabSize, metrics, nullptr);
 			}
 			break;
@@ -152,7 +183,26 @@ namespace ng
 		_line.reset();
 	}
 
-	void paragraph_t::node_t::draw_background (theme_ptr const& theme, ng::context_t const& context, bool isFlipped, CGRect visibleRect, CGColorRef backgroundColor, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor, CGFloat lineHeight) const
+	scope::scope_t add_diff_scope (scope::scope_t& scope, paragraph_t::diff_status_t diffStatus)
+	{
+		switch(diffStatus)
+		{
+			case paragraph_t::kDiffStatusNone:
+			break;
+			case paragraph_t::kDiffStatusAdded:
+				scope.push_scope("diff.added.line");
+			break;
+			case paragraph_t::kDiffStatusRemoved:
+				scope.push_scope("diff.removed.line");
+			break;
+			case paragraph_t::kDiffStatusEqual:
+				scope.push_scope("diff.untouched.line");
+			break;
+		}
+		return scope;
+	}
+
+	void paragraph_t::node_t::draw_background (theme_ptr const& theme, ng::context_t const& context, bool isFlipped, CGRect visibleRect, CGColorRef backgroundColor, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor, CGFloat lineHeight, paragraph_t::diff_status_t diffStatus) const
 	{
 		if(_line)
 			_line->draw_background(CGPointMake(anchor.x, anchor.y), lineHeight, context, isFlipped, backgroundColor);
@@ -372,7 +422,7 @@ namespace ng
 		size_t i = bufferOffset;
 		for(auto& node : _nodes)
 		{
-			node.layout(x, tabSize, theme, softWrap, wrapColumn, metrics, buffer, i, fillStr);
+			node.layout(x, tabSize, theme, softWrap, wrapColumn, metrics, buffer, i, fillStr, _diff_status);
 			x += node.width();
 			i += node.length();
 		}
@@ -540,6 +590,14 @@ namespace ng
 		return lines.back().y + lines.back().height;
 	}
 
+	void paragraph_t::set_diff_status (diff_status_t diffStatus)
+	{
+		if(_diff_status == diffStatus)
+			return;
+		_dirty = true;
+		_diff_status = diffStatus;
+	}
+
 	ng::index_t paragraph_t::index_at_point (CGPoint point, ct::metrics_t const& metrics, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor) const
 	{
 		auto lines = softlines(metrics);
@@ -629,10 +687,10 @@ namespace ng
 		for(size_t i = 0; i < lines.size(); ++i)
 		{
 			if(lines[i].offset <= needle && (i+1 == lines.size() || needle < lines[i+1].offset))
-				return ng::line_record_t(line, lines[i].offset, y, y + lines[i].height, lines[i].baseline);
+				return ng::line_record_t(line, lines[i].offset, y, y + lines[i].height, lines[i].baseline, is_diff_row(), kDiffStatusAdded == _diff_status);
 			y += lines[i].height;
 		}
-		return ng::line_record_t(line, 0, 0, 0, 0);
+		return ng::line_record_t(line, 0, 0, 0, 0, is_diff_row(), kDiffStatusAdded == _diff_status);
 	}
 
 	ng::range_t paragraph_t::folded_range_at_point (CGPoint point, ct::metrics_t const& metrics, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor) const
@@ -730,7 +788,7 @@ namespace ng
 			size_t offset = lines[i].offset;
 			foreach(node, _nodes.begin() + lines[i].first, _nodes.begin() + lines[i].last)
 			{
-				node->draw_background(theme, context, isFlipped, visibleRect, backgroundColor, buffer, bufferOffset + offset, CGPointMake(anchor.x + x, anchor.y + lines[i].y), lines[i].height);
+				node->draw_background(theme, context, isFlipped, visibleRect, backgroundColor, buffer, bufferOffset + offset, CGPointMake(anchor.x + x, anchor.y + lines[i].y), lines[i].height, _diff_status);
 				x += node->width();
 				offset += node->length();
 			}
