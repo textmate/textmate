@@ -37,6 +37,7 @@ namespace oak
 		{
 			node_t () : _left(this), _right(this), _parent(this), _level(0) { }
 			node_t (_KeyT const& key, _ValueT const& value) : _left(null_ptr()), _right(null_ptr()), _parent(null_ptr()), _relative_key(key), _key_offset(key), _value(value) { }
+			node_t (_KeyT const& key, _ValueT&& value) : _left(null_ptr()), _right(null_ptr()), _parent(null_ptr()), _relative_key(key), _key_offset(key), _value(std::move(value)) { }
 
 			static node_t* null_ptr () { static node_t dummy; return &dummy; }
 			bool is_null () const      { return _level == 0; }
@@ -181,6 +182,19 @@ namespace oak
 				return tmp;
 			}
 
+			iterator refresh ()
+			{
+				node_t* temp = _node;
+				_info.offset = temp->_left->key_offset();
+				while(!temp->_parent->is_null())
+				{
+					if(eq(temp, temp->_parent->_right))
+						_info.offset = _info.offset + temp->_parent->_left->key_offset() + temp->_parent->relative_key();
+					temp = temp->_parent;
+				}
+				return *this;
+			}
+
 		private:
 			friend struct basic_tree_t;
 			node_t* _node;
@@ -204,6 +218,7 @@ namespace oak
 
 		iterator insert (iterator const& it, _KeyT const& key)                { return insert(it, key, _ValueT()); }
 		iterator insert (iterator it, _KeyT const& key, _ValueT const& value) { return insert_node(it._node, new node_t(key, value)); }
+		iterator insert (iterator it, _KeyT const& key, _ValueT&& value)      { return insert_node(it._node, new node_t(key, std::move(value))); }
 		void erase (iterator const& it)                                       { if(it != end()) remove_node(it._node); }
 
 		void erase (iterator it, iterator const& last)
