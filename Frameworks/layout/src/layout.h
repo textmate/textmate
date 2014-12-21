@@ -125,16 +125,17 @@ namespace ng
 	private:
 		struct row_key_t
 		{
-			row_key_t (size_t length = 0, CGFloat height = 0, CGFloat width = 0, size_t softlines = 0) : _length(length), _height(height), _width(width), _softlines(softlines) { }
+			row_key_t (size_t length = 0, CGFloat height = 0, CGFloat width = 0, size_t softlines = 0, size_t diffIndex = 0) : _length(length), _height(height), _width(width), _softlines(softlines), _diff_index(diffIndex) { }
 
-			bool operator==     (row_key_t const& rhs) const { return _length == rhs._length && _height == rhs._height && _width == rhs._width && _softlines == rhs._softlines; }
-			row_key_t operator+ (row_key_t const& rhs) const { return row_key_t(_length + rhs._length, _height + rhs._height, std::max(_width, rhs._width), _softlines + rhs._softlines); }
-			row_key_t operator- (row_key_t const& rhs) const { return row_key_t(_length - rhs._length, _height - rhs._height, std::min(_width, rhs._width), _softlines - rhs._softlines); }
+			bool operator==     (row_key_t const& rhs) const { return _length == rhs._length && _height == rhs._height && _width == rhs._width && _softlines == rhs._softlines && _diff_index == rhs._diff_index; }
+			row_key_t operator+ (row_key_t const& rhs) const { return row_key_t(_length + rhs._length, _height + rhs._height, std::max(_width, rhs._width), _softlines + rhs._softlines, _diff_index + rhs._diff_index); }
+			row_key_t operator- (row_key_t const& rhs) const { return row_key_t(_length - rhs._length, _height - rhs._height, std::min(_width, rhs._width), _softlines - rhs._softlines, _diff_index - rhs._diff_index); }
 
 			size_t _length;
 			CGFloat _height;
 			CGFloat _width;
 			size_t _softlines;
+			size_t _diff_index;
 		};
 
 		typedef oak::basic_tree_t<row_key_t, paragraph_t> row_tree_t;
@@ -163,9 +164,11 @@ namespace ng
 		void refresh_line_at_index (size_t index, bool fullRefresh);
 		void did_fold (size_t from, size_t to);
 
+		// comparison functions
 		static int row_y_comp (CGFloat y, row_key_t const& offset, row_key_t const& node)       { return y < offset._height ? -1 : (y == offset._height ? 0 : +1); }
 		static int row_offset_comp (size_t i, row_key_t const& offset, row_key_t const& node)   { return i < offset._length ? -1 : (i == offset._length ? 0 : +1); }
 		static int row_softline_comp (size_t softline, row_key_t const& offset, row_key_t const& node)   { return softline < offset._softlines ? -1 : (softline == offset._softlines ? 0 : +1); }
+		static int row_diff_comp (size_t diffIndex, row_key_t const& offset, row_key_t const& node)       { return diffIndex < offset._diff_index + node._diff_index ? -1 : (diffIndex == offset._diff_index + node._diff_index ? 0 : +1); }
 
 		static std::string row_to_s (row_tree_t::value_type const& info);
 
