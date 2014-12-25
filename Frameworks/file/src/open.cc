@@ -4,6 +4,7 @@
 #include "encoding.h"
 #include "filter.h"
 #include "type.h"
+#include "server.h"
 #include <authorization/constants.h>
 #include <authorization/server.h>
 #include <cf/cf.h>
@@ -13,7 +14,6 @@
 #include <text/trim.h>
 #include <text/utf8.h>
 #include <text/newlines.h>
-#include <oak/server.h>
 #include <oak/debug.h>
 
 OAK_DEBUG_VAR(File_Charset);

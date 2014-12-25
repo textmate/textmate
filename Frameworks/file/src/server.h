@@ -1,7 +1,7 @@
 #ifndef OAK_SERVER_H_Q8M693GB
 #define OAK_SERVER_H_Q8M693GB
 
-#include "oak.h"
+#include <oak/oak.h>
 
 namespace oak
 {
