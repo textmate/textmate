@@ -3,11 +3,6 @@
 
 namespace oak
 {
-	inline void set_thread_name (char const* threadName)
-	{
-		pthread_setname_np(threadName);
-	}
-
 	inline size_t get_gestalt (OSType selector)
 	{
 		SInt32 res;

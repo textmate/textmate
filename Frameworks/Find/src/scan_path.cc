@@ -68,7 +68,7 @@ namespace find
 
 	void scan_path_t::server_run ()
 	{
-		oak::set_thread_name("find::scan_path_t");
+		pthread_setname_np("find::scan_path_t");
 
 		if(_path == kSearchOpenFiles)
 		{

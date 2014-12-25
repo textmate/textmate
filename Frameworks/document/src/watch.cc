@@ -245,7 +245,7 @@ namespace document
 
 	void watch_server_t::server_run ()
 	{
-		oak::set_thread_name("document::watch_server_t");
+		pthread_setname_np("document::watch_server_t");
 
 		event_queue = kqueue();
 

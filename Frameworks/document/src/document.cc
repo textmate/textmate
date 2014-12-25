@@ -1471,7 +1471,7 @@ namespace document
 
 	void scanner_t::thread_main ()
 	{
-		oak::set_thread_name("document::scanner_t");
+		pthread_setname_np("document::scanner_t");
 
 		scan_dir(path);
 		D(DBF_Document_Scanner, bug("running %s → NO\n", BSTR(is_running_flag)););
