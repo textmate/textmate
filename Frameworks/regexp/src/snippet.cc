@@ -1,6 +1,6 @@
 #include "snippet.h"
+#include "dependency_graph.h"
 #include <oak/oak.h>
-#include <oak/dependency_graph.h>
 #include <text/parse.h>
 #include <oak/debug.h>
 
