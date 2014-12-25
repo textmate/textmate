@@ -341,9 +341,7 @@ namespace
 - (NSRect)cascadedWindowFrame
 {
 	NSRect r = [self windowFrame];
-	r.origin = [self.window cascadeTopLeftFromPoint:NSMakePoint(NSMinX(r), NSMaxY(r))];
-	r.origin.y -= r.size.height;
-	return r;
+	return { { NSMinX(r) + 21, NSMinY(r) - 23 }, r.size };
 }
 
 - (NSRect)frameRectForNewWindow
