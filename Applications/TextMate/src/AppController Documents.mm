@@ -70,7 +70,9 @@ OAK_DEBUG_VAR(AppController_Documents);
 - (BOOL)applicationOpenUntitledFile:(NSApplication*)theApplication
 {
 	D(DBF_AppController_Documents, bug("\n"););
-	[self newDocument:self];
+	if([[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsShowFavoritesInsteadOfUntitledKey])
+			[self openFavorites:self];
+	else	[self newDocument:self];
 	return YES;
 }
 
@@ -196,7 +198,8 @@ OAK_DEBUG_VAR(AppController_Documents);
 {
 	D(DBF_AppController_Documents, bug("%s\n", BSTR(flag)););
 	BOOL disableUntitledAtReactivationPrefs = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableNewDocumentAtReactivationKey];
-	return !disableUntitledAtReactivationPrefs;
+	BOOL showFavoritesInsteadPrefs          = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsShowFavoritesInsteadOfUntitledKey];
+	return !disableUntitledAtReactivationPrefs || showFavoritesInsteadPrefs;
 }
 
 // ===========================

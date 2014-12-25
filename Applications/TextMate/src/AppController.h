@@ -31,6 +31,7 @@
 - (IBAction)openDocumentAndActivate:(id)sender;
 
 - (IBAction)runPageLayout:(id)sender;
+- (IBAction)openFavorites:(id)sender;
 @end
 
 @interface AppController (Documents)
