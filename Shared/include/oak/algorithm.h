@@ -43,12 +43,6 @@ namespace oak
 		return out;
 	}
 
-	template <typename _BidirectionalIterator>
-	std::reverse_iterator<_BidirectionalIterator> rev_iter (_BidirectionalIterator it)
-	{
-		return std::reverse_iterator<_BidirectionalIterator>(it);
-	}
-
 	inline double slow_in_out (double t)
 	{
 		if(t < 1.0)
