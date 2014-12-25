@@ -308,6 +308,9 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 - (void)applicationWillBecomeActive:(NSNotification*)aNotification
 {
+	BOOL disableFavoritesAtActivationPrefs = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableFavoritesAtActivationKey];
+	if(!disableFavoritesAtActivationPrefs && !HasDocumentWindow([NSApp orderedWindows]))
+		[self openFavorites:self];
 	scm::enable();
 }
 
