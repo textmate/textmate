@@ -20,6 +20,7 @@
 			@"disableSessionRestore"         : kUserDefaultsDisableSessionRestoreKey,
 			@"disableDocumentAtStartup"      : kUserDefaultsDisableNewDocumentAtStartupKey,
 			@"disableDocumentAtReactivation" : kUserDefaultsDisableNewDocumentAtReactivationKey,
+			@"enableFavoritesAtActivation"  : kUserDefaultsEnableFavoritesAtActivationKey,
 		};
 
 		self.tmProperties = @{

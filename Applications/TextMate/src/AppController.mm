@@ -275,8 +275,14 @@ BOOL HasDocumentWindow (NSArray* windows)
 	D(DBF_AppController, bug("\n"););
 
 	BOOL disableUntitledAtStartupPrefs = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableNewDocumentAtStartupKey];
-	if(!disableUntitledAtStartupPrefs && !HasDocumentWindow([NSApp orderedWindows]))
-		[self newDocument:self];
+	BOOL enableFavoritesAtActivationPrefs = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsEnableFavoritesAtActivationKey];
+	
+	if(!HasDocumentWindow([NSApp orderedWindows]))
+		if(!disableUntitledAtStartupPrefs)
+			[self newDocument:self];
+		else if(enableFavoritesAtActivationPrefs)
+			[self openFavorites:self];
+	
 
 	[self userDefaultsDidChange:nil]; // setup mate/rmate server
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
