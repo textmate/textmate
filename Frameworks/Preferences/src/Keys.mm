@@ -54,7 +54,7 @@ void RegisterDefaults ()
 NSString* const kUserDefaultsDisableSessionRestoreKey            = @"disableSessionRestore";
 NSString* const kUserDefaultsDisableNewDocumentAtStartupKey      = @"disableNewDocumentAtStartup";
 NSString* const kUserDefaultsDisableNewDocumentAtReactivationKey = @"disableNewDocumentAtReactivation";
-NSString* const kUserDefaultsDisableFavoritesAtActivationKey     = @"disableFavoritesAtActivation";
+NSString* const kUserDefaultsEnableFavoritesAtActivationKey     = @"enableFavoritesAtActivation";
 
 // ============
 // = Projects =

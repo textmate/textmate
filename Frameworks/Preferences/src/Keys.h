@@ -13,7 +13,7 @@ PUBLIC void RegisterDefaults ();
 PUBLIC extern NSString* const kUserDefaultsDisableSessionRestoreKey;
 PUBLIC extern NSString* const kUserDefaultsDisableNewDocumentAtStartupKey;
 PUBLIC extern NSString* const kUserDefaultsDisableNewDocumentAtReactivationKey;
-PUBLIC extern NSString* const kUserDefaultsDisableFavoritesAtActivationKey;
+PUBLIC extern NSString* const kUserDefaultsEnableFavoritesAtActivationKey;
 
 // ============
 // = Projects =
