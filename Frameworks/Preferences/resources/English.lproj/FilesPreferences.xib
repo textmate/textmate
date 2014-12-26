@@ -694,10 +694,14 @@
 							<string key="NSLabel">enabled: enableFavoritesAtActivation</string>
 							<string key="NSBinding">enabled</string>
 							<string key="NSKeyPath">enableFavoritesAtActivation</string>
+							<object class="NSDictionary" key="NSOptions">
+								<string key="NS.key.0">NSValueTransformerName</string>
+								<string key="NS.object.0">NSNegateBoolean</string>
+							</object>
 							<int key="NSNibBindingConnectorVersion">2</int>
 						</object>
 					</object>
-					<int key="connectionID">127</int>
+					<int key="connectionID">139</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
@@ -730,10 +734,14 @@
 							<string key="NSLabel">enabled: enableFavoritesAtActivation</string>
 							<string key="NSBinding">enabled</string>
 							<string key="NSKeyPath">enableFavoritesAtActivation</string>
+							<object class="NSDictionary" key="NSOptions">
+								<string key="NS.key.0">NSValueTransformerName</string>
+								<string key="NS.object.0">NSNegateBoolean</string>
+							</object>
 							<int key="NSNibBindingConnectorVersion">2</int>
 						</object>
 					</object>
-					<int key="connectionID">125</int>
+					<int key="connectionID">138</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
@@ -749,7 +757,7 @@
 							<int key="NSNibBindingConnectorVersion">2</int>
 						</object>
 					</object>
-					<int key="connectionID">113</int>
+					<int key="connectionID">134</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
@@ -772,7 +780,7 @@
 							<int key="NSNibBindingConnectorVersion">2</int>
 						</object>
 					</object>
-					<int key="connectionID">115</int>
+					<int key="connectionID">136</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
@@ -785,14 +793,10 @@
 							<string key="NSLabel">value: enableFavoritesAtActivation</string>
 							<string key="NSBinding">value</string>
 							<string key="NSKeyPath">enableFavoritesAtActivation</string>
-							<dictionary key="NSOptions">
-								<boolean value="NO" key="NSConditionallySetsEnabled"/>
-								<string key="NSValueTransformerName">NSNegateBoolean</string>
-							</dictionary>
 							<int key="NSNibBindingConnectorVersion">2</int>
 						</object>
 					</object>
-					<int key="connectionID">123</int>
+					<int key="connectionID">137</int>
 				</object>
 			</array>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -1186,7 +1190,7 @@
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">127</int>
+			<int key="maxID">139</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes"/>
 		<int key="IBDocument.localizationMode">0</int>
