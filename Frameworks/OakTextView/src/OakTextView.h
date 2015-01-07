@@ -53,6 +53,7 @@ PUBLIC @interface OakTextView : OakView
 
 - (GVLineRecord)lineRecordForPosition:(CGFloat)yPos;
 - (GVLineRecord)lineFragmentForLine:(NSUInteger)aLine column:(NSUInteger)aColumn;
+- (NSUInteger)maxLineNumberForPosition:(CGFloat)yPos;
 
 - (BOOL)filterDocumentThroughCommand:(NSString*)commandString input:(input::type)inputUnit output:(output::type)outputUnit;
 

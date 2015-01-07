@@ -3412,20 +3412,27 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	return kFoldingNone;
 }
 
+- (NSUInteger)maxLineNumberForPosition:(CGFloat)yPos
+{
+	if(!layout)
+		return 0;
+	else
+		return layout->max_line_for(yPos);
+}
+
 - (GVLineRecord)lineRecordForPosition:(CGFloat)yPos
 {
 	if(!documentView)
 		return GVLineRecord();
-	auto record = documentView->line_record_for(yPos);
-	return GVLineRecord(record.line, record.softline, record.top, record.bottom, record.baseline);
+	return GVLineRecord(record.line, record.softline, record.top, record.bottom, record.baseline, record.diffRemoved, record.diffAdded);
 }
 
 - (GVLineRecord)lineFragmentForLine:(NSUInteger)aLine column:(NSUInteger)aColumn
 {
 	if(!documentView)
 		return GVLineRecord();
-	auto record = documentView->line_record_for(text::pos_t(aLine, aColumn));
-	return GVLineRecord(record.line, record.softline, record.top, record.bottom, record.baseline);
+	auto record = layout->line_record_for(text::pos_t(aLine, aColumn));
+	return GVLineRecord(record.line, record.softline, record.top, record.bottom, record.baseline, record.diffRemoved, record.diffAdded);
 }
 
 - (BOOL)filterDocumentThroughCommand:(NSString*)commandString input:(input::type)inputUnit output:(output::type)outputUnit

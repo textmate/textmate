@@ -1,20 +1,24 @@
 extern NSString* GVColumnDataSourceDidChange;
 extern NSString* GVLineNumbersColumnIdentifier;
+extern NSString* GVDiffLineNumbersColumnIdentifier;
 
 struct GVLineRecord
 {
-	GVLineRecord (NSUInteger lineNumber = NSNotFound, NSUInteger softlineOffset = 0, CGFloat firstY = 0, CGFloat lastY = 0, CGFloat baseline = 0) : lineNumber(lineNumber), softlineOffset(softlineOffset), firstY(firstY), lastY(lastY), baseline(baseline) { }
+	GVLineRecord (NSUInteger lineNumber = NSNotFound, NSUInteger softlineOffset = 0, CGFloat firstY = 0, CGFloat lastY = 0, CGFloat baseline = 0, BOOL diffRemoved = NO, BOOL diffAdded = NO) : lineNumber(lineNumber), softlineOffset(softlineOffset), firstY(firstY), lastY(lastY), baseline(baseline), diffRemoved(diffRemoved), diffAdded(diffAdded) { }
 
 	NSUInteger lineNumber;
 	NSUInteger softlineOffset;
 	CGFloat firstY;
 	CGFloat lastY;
 	CGFloat baseline;
+	BOOL diffRemoved;
+	BOOL diffAdded;
 };
 
 @protocol GutterViewDelegate
 - (GVLineRecord)lineRecordForPosition:(CGFloat)yPos;
 - (GVLineRecord)lineFragmentForLine:(NSUInteger)aLine column:(NSUInteger)aColumn;
+- (NSUInteger)maxLineNumberForPosition:(CGFloat)yPos;
 @end
 
 typedef NS_ENUM(NSUInteger, GutterViewRowState) {
