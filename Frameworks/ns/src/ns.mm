@@ -107,14 +107,12 @@ std::string to_s (NSEvent* anEvent, bool preserveNumPadFlag)
 	std::string keyString              = NULL_STR;
 	std::string const keyStringNoFlags = string_for(key, 0);
 	CGEventFlags newFlags              = flags & (kCGEventFlagMaskControl|kCGEventFlagMaskCommand);
-	flags &= ~kCGEventFlagMaskControl;
 
 	if(flags & kCGEventFlagMaskNumericPad)
 	{
 		static std::string const numPadKeys = "0123456789=/*-+.,";
 		if(preserveNumPadFlag && numPadKeys.find(keyStringNoFlags) != std::string::npos)
 			newFlags |= kCGEventFlagMaskNumericPad;
-		flags &= ~kCGEventFlagMaskControl;
 	}
 
 	std::string const keyStringCommand = string_for(key, kCGEventFlagMaskCommand);
@@ -169,5 +167,5 @@ std::string to_s (NSEvent* anEvent, bool preserveNumPadFlag)
 		}
 	}
 
-	return string_for(newFlags) + (keyString == NULL_STR ? string_for(key, flags) : keyString);
+	return string_for(newFlags) + (keyString == NULL_STR ? string_for(key, flags & ~kCGEventFlagMaskControl) : keyString);
 }
