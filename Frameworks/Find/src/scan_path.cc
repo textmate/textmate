@@ -240,7 +240,7 @@ namespace find
 					size_t eol = it.to;
 					if(bol != eol)
 					{
-						while(eol+1 < text.size() && linefeed_length(text, eol) == 0)
+						while(eol < text.size() && linefeed_length(text, eol) == 0)
 							++eol;
 					}
 
