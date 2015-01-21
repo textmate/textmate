@@ -115,6 +115,9 @@ namespace file
 		ssize_t len = read(_fd, &buf.front(), buf.size());
 		buf.resize(len < 0 ? 0 : len);
 
+		if(len == 0 && !utf8::is_valid(_spillover.begin(), _spillover.end()))
+			_spillover = "\uFFFD";
+
 		buf.insert(buf.begin(), _spillover.begin(), _spillover.end());
 		_spillover.clear();
 
