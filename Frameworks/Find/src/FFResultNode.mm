@@ -247,7 +247,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 	if(replacementString)
 		middle = m.captures.empty() ? to_s(replacementString) : format_string::expand(to_s(replacementString), m.captures);
 
-	if(!utf8::is_valid(prefix.begin(), prefix.end()) && utf8::is_valid(middle.begin(), middle.end()) && utf8::is_valid(suffix.begin(), suffix.end()))
+	if(!utf8::is_valid(prefix.begin(), prefix.end()) || !utf8::is_valid(middle.begin(), middle.end()) || !utf8::is_valid(suffix.begin(), suffix.end()))
 	{
 		return ns::attr_string_t()
 			<< [NSColor darkGrayColor] << [NSFont controlContentFontOfSize:11]
