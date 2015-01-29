@@ -2016,7 +2016,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	}
 
 	std::string const str = to_s(aString);
-	[self recordSelector:_cmd withArgument:[NSString stringWithCxxString:str]];
+	[self recordSelector:@selector(insertText:) withArgument:[NSString stringWithCxxString:str]];
 	bool autoPairing = !macroRecordingArray && ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableTypingPairsKey];
 	editor->insert_with_pairing(str, [self indentCorrections], autoPairing, to_s([self scopeAttributes]));
 }
