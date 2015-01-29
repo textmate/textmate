@@ -1263,6 +1263,11 @@ namespace document
 				return _reader.encoding();
 			}
 
+			bool is_open () const
+			{
+				return false;
+			}
+
 		private:
 			document_const_ptr _document;
 			file::reader_t _reader;
@@ -1283,6 +1288,11 @@ namespace document
 			encoding::type encoding () const
 			{
 				return _encoding;
+			}
+
+			bool is_open () const
+			{
+				return true;
 			}
 
 		private:
