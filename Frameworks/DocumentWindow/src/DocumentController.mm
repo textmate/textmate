@@ -499,7 +499,11 @@ namespace
 		{
 			settings_t const settings = settings_for_path(doc->virtual_path(), doc->file_type(), path::parent(doc->path()));
 			if(settings.get(kSettingsSaveOnBlurKey, false))
+			{
+				if(doc == _selectedDocument)
+					[_textView updateDocumentMetadata];
 				documentsToSave.push_back(doc);
+			}
 		}
 	}
 
