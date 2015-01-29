@@ -65,6 +65,8 @@ PUBLIC @interface OakTextView : OakView
 - (scope::context_t)scopeContext;
 - (folding_state_t)foldingStateForLine:(NSUInteger)lineNumber;
 
+- (void)updateDocumentMetadata;
+
 - (IBAction)toggleColumnSelection:(id)sender;
 - (IBAction)toggleMacroRecording:(id)sender;
 - (IBAction)toggleFoldingAtLine:(NSUInteger)lineNumber recursive:(BOOL)flag;

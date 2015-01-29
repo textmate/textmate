@@ -629,6 +629,15 @@ static std::string shell_quote (std::vector<std::string> paths)
 	}
 }
 
+- (void)updateDocumentMetadata
+{
+	if(document && layout)
+	{
+		document->set_folded(layout->folded_as_string());
+		document->set_visible_index(layout->index_at_point([self visibleRect].origin));
+	}
+}
+
 - (void)setDocument:(document::document_ptr const&)aDocument
 {
 	if(document && aDocument && *document == *aDocument)
@@ -649,10 +658,9 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 	if(editor)
 	{
-		document->buffer().remove_callback(callback);
-		document->set_folded(layout->folded_as_string());
-		document->set_visible_index(layout->index_at_point([self visibleRect].origin));
+		[self updateDocumentMetadata];
 
+		document->buffer().remove_callback(callback);
 		delete callback;
 		callback = NULL;
 
@@ -768,11 +776,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 	for(auto const& item : bundles::query(bundles::kFieldSemanticClass, "callback.document.will-save", [self scopeContext], bundles::kItemTypeMost, oak::uuid_t(), false))
 		[self performBundleItem:item];
 
-	if(document && layout)
-	{
-		document->set_folded(layout->folded_as_string());
-		document->set_visible_index(layout->index_at_point([self visibleRect].origin));
-	}
+	[self updateDocumentMetadata];
 }
 
 - (void)documentDidSave:(NSNotification*)aNotification
