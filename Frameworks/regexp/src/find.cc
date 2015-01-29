@@ -413,7 +413,7 @@ namespace find
 			}
 			else
 			{
-				size_t cappedLen = std::min<size_t>(buffer_size + len, 5 * SQ(1024)) - buffer_size;
+				size_t cappedLen = std::min<size_t>(buffer_size + len, (options & filesize_limit) ? 5 * SQ(1024) : buffer_size + len) - buffer_size;
 				buffer.insert(buffer.end(), buf, buf + cappedLen);
 				if(options & backwards)
 					std::reverse(buffer.end() - cappedLen, buffer.end());

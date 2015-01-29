@@ -18,6 +18,7 @@ namespace find
 		wrap_around        = (1 << 7),
 		all_matches        = (1 << 8),
 		extend_selection   = (1 << 9),
+		filesize_limit     = (1 << 10),
 	};
 
 	PUBLIC options_t operator| (options_t lhs, options_t rhs);

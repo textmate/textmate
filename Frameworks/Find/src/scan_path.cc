@@ -142,7 +142,7 @@ namespace find
 		boost::crc_32_type crc32;
 		if(document::document_t::reader_ptr reader = document->create_reader())
 		{
-			find::find_t f(_search_string, _options);
+			find::find_t f(_search_string, _options | (reader->is_open() ? find::none : find::filesize_limit));
 			std::vector<range_match_t> ranges;
 
 			ssize_t total = 0;
