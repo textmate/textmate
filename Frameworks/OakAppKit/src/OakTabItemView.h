@@ -6,14 +6,14 @@
 PUBLIC @interface OakTabBarStyle : NSObject
 + (instancetype)sharedInstance;
 
-@property (nonatomic) CGFloat leftPadding;
-@property (nonatomic) CGFloat rightPadding;
-@property (nonatomic) CGFloat tabViewSpacing;
-@property (nonatomic) CGFloat minimumTabSize;
-@property (nonatomic) CGFloat maximumTabSize;
+@property (nonatomic, readonly) CGFloat leftPadding;
+@property (nonatomic, readonly) CGFloat rightPadding;
+@property (nonatomic, readonly) CGFloat tabViewSpacing;
+@property (nonatomic, readonly) CGFloat minimumTabSize;
+@property (nonatomic, readonly) CGFloat maximumTabSize;
 
-@property (nonatomic) NSDictionary* activeTabTextStyles;
-@property (nonatomic) NSDictionary* inactiveTabTextStyles;
+@property (nonatomic, readonly) NSDictionary* activeTabTextStyles;
+@property (nonatomic, readonly) NSDictionary* inactiveTabTextStyles;
 
 - (void)setupTabBarView:(OakBackgroundFillView*)aView;
 
