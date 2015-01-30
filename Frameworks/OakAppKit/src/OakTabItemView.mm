@@ -141,11 +141,13 @@
 		if(oak::os_major() >= 10 && oak::os_minor() >= 10)
 		{
 			_images = [self yosemiteImages];
-			_leftPadding  = -1;
+			_leftPadding  = 0;
+			_rightPadding = 0;
 		}
 		else
 		{
 			_images = [self mavericksImages];
+			_leftPadding  = 0;
 			_rightPadding = -5;
 
 			NSShadow* shadow = [NSShadow new];

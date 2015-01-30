@@ -279,8 +279,8 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 {
 	NSUInteger countOfTabs = [anIndexSet count];
 
-	CGFloat spacing = OakTabBarStyle.sharedInstance.tabViewSpacing;
-	CGFloat width   = NSWidth(aRect) - spacing * (countOfTabs-1);
+	CGFloat const spacing = OakTabBarStyle.sharedInstance.tabViewSpacing;
+	CGFloat width = NSWidth(aRect) - spacing * (countOfTabs-1);
 
 	CGFloat totalSurplus = 0;
 	CGFloat totalDeficit = 0;
