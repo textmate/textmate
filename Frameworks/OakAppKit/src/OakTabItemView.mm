@@ -141,7 +141,7 @@
 		if(oak::os_major() >= 10 && oak::os_minor() >= 10)
 		{
 			_images = [self yosemiteImages];
-			_leftPadding  = -1;
+			_leftPadding  = 0;
 		}
 		else
 		{
