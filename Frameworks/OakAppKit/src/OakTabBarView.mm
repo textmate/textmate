@@ -439,7 +439,7 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 	if(_didCloseTabIndex)
 	{
 		NSRect leftRect, rightRect;
-		NSDivideRect(bounds, &leftRect, &rightRect, NSMinX(_didCloseTabFrame), NSMinXEdge);
+		NSDivideRect(bounds, &leftRect, &rightRect, NSMinX(_didCloseTabFrame) - leftPadding, NSMinXEdge);
 
 		NSIndexSet* rightSet = [tabIndexes indexesInRange:NSMakeRange(_didCloseTabIndex, [tabIndexes lastIndex]) options:0 passingTest:^(NSUInteger idx, BOOL* stop){ return YES; }];
 		rightRect.size.width = MIN((NSWidth(_didCloseTabFrame) + tabSpacing) * [rightSet count] - tabSpacing, NSWidth(rightRect));
