@@ -59,6 +59,12 @@ namespace
 			[[protocol client] URLProtocolDidFinishLoading:protocol];
 		}
 
+		bool has_job (NSInteger key)
+		{
+			std::lock_guard<std::mutex> lock(_lock);
+			return _records.find(key) != _records.end();
+		}
+
 		void start (NSInteger key, NSURLProtocol* protocol)
 		{
 			NSData* data;
@@ -159,7 +165,12 @@ namespace
 - (id)initWithRequest:(NSURLRequest*)anURLRequest cachedResponse:(NSCachedURLResponse*)aCachedURLResponse client:(id <NSURLProtocolClient>)anId
 {
 	if(self = [super initWithRequest:anURLRequest cachedResponse:aCachedURLResponse client:anId])
-		key = [[[[anURLRequest URL] path] lastPathComponent] intValue];
+	{
+		NSString* jobString = [[[anURLRequest URL] path] lastPathComponent];
+		NSScanner* scanner = [NSScanner scannerWithString:jobString];
+		if(![scanner scanInteger:&key] || scanner.scanLocation != [jobString length])
+			key = NSNotFound;
+	}
 	return self;
 }
 
@@ -169,6 +180,15 @@ namespace
 
 - (void)startLoading
 {
+	if(key == NSNotFound || !runners().has_job(key))
+	{
+		NSURLResponse* response = [[NSHTTPURLResponse alloc] initWithURL:[[self request] URL] statusCode:404 HTTPVersion:@"HTTP/1.1" headerFields:nil];
+		[[self client] URLProtocol:self didReceiveResponse:response cacheStoragePolicy:NSURLCacheStorageNotAllowed];
+		[[self client] URLProtocolDidFinishLoading:self];
+		NSLog(@"No command output for ‘%@’", [[self request] URL]);
+		return;
+	}
+
 	NSURLResponse* response = [[NSURLResponse alloc] initWithURL:[[self request] URL] MIMEType:@"text/html" expectedContentLength:-1 textEncodingName:@"utf-8"];
 	[[self client] URLProtocol:self didReceiveResponse:response cacheStoragePolicy:NSURLCacheStorageNotAllowed];
 
