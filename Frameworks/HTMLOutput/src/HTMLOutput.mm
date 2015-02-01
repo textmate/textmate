@@ -11,11 +11,11 @@ namespace
 	{
 		runners_t () : _next_key(0) { }
 
-		int add_process (pid_t processId)
+		NSInteger add_process (pid_t processId)
 		{
 			std::lock_guard<std::mutex> lock(_lock);
 
-			std::vector<int> toDelete;
+			std::vector<NSInteger> toDelete;
 			for(auto const& record : _records)
 			{
 				if(record.second.done && record.second.stop)
@@ -28,7 +28,7 @@ namespace
 			return _records.emplace(_next_key++, (record_t){ processId, std::string(), false, nil, false }).first->first;
 		}
 
-		void output (int key, char const* data, size_t len)
+		void output (NSInteger key, char const* data, size_t len)
 		{
 			NSURLProtocol* protocol;
 
@@ -43,7 +43,7 @@ namespace
 			[[protocol client] URLProtocol:protocol didLoadData:[NSData dataWithBytes:data length:len]];
 		}
 
-		void done (int key)
+		void done (NSInteger key)
 		{
 			NSURLProtocol* protocol;
 
@@ -59,7 +59,7 @@ namespace
 			[[protocol client] URLProtocolDidFinishLoading:protocol];
 		}
 
-		void start (int key, NSURLProtocol* protocol)
+		void start (NSInteger key, NSURLProtocol* protocol)
 		{
 			NSData* data;
 			bool done = false;
@@ -81,7 +81,7 @@ namespace
 				[[protocol client] URLProtocolDidFinishLoading:protocol];
 		}
 
-		void stop (int key)
+		void stop (NSInteger key)
 		{
 			pid_t processId = 0;
 
@@ -108,14 +108,14 @@ namespace
 			bool stop;
 		};
 
-		record_t* find (int key)
+		record_t* find (NSInteger key)
 		{
-			std::map<int, record_t>::iterator it = _records.find(key);
+			std::map<NSInteger, record_t>::iterator it = _records.find(key);
 			return it != _records.end() ? &it->second : NULL;
 		}
 
-		int _next_key;
-		std::map<int, record_t> _records;
+		NSInteger _next_key;
+		std::map<NSInteger, record_t> _records;
 		std::mutex _lock;
 	};
 
@@ -127,21 +127,21 @@ namespace
 
 	struct html_command_callback_t : command::callback_t
 	{
-		html_command_callback_t (command::runner_ptr runner, int key) : _runner(runner), _key(key) { _runner->add_callback(this);       }
-		~html_command_callback_t ()                                                                { _runner->remove_callback(this);    }
+		html_command_callback_t (command::runner_ptr runner, NSInteger key) : _runner(runner), _key(key) { _runner->add_callback(this);       }
+		~html_command_callback_t ()                                                                      { _runner->remove_callback(this);    }
 
-		void output (command::runner_ptr runner, char const* data, size_t len)                     { runners().output(_key, data, len); }
-		void done (command::runner_ptr runner)                                                     { runners().done(_key); delete this; }
+		void output (command::runner_ptr runner, char const* data, size_t len)                           { runners().output(_key, data, len); }
+		void done (command::runner_ptr runner)                                                           { runners().done(_key); delete this; }
 
 	private:
 		command::runner_ptr _runner;
-		int _key;
+		NSInteger _key;
 	};
 }
 
 @interface CommandRunnerURLProtocol : NSURLProtocol
 {
-	int key;
+	NSInteger key;
 }
 @end
 
@@ -191,7 +191,7 @@ namespace
 
 NSURLRequest* URLRequestForCommandRunner (command::runner_ptr aRunner)
 {
-	int key = runners().add_process(aRunner->process_id());
+	NSInteger key = runners().add_process(aRunner->process_id());
 	new html_command_callback_t(aRunner, key);
-	return [NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@://job/%d", kCommandRunnerURLScheme, key]] cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:6000]; // TODO add a description parameter to the URL (based on bundle item name)
+	return [NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@://job/%ld", kCommandRunnerURLScheme, key]] cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:6000]; // TODO add a description parameter to the URL (based on bundle item name)
 }
