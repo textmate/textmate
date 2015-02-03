@@ -2,6 +2,11 @@ Title: Release Notes
 
 # Changes
 
+## 2015-02-03 (v2.0-beta.6.8)
+
+* Various fixes.
+* See [all changes since v2.0-beta.6.7](https://github.com/textmate/textmate/compare/v2.0-beta.6.7...v2.0-beta.6.8)
+
 ## 2015-01-19 (v2.0-beta.6.7)
 
 * You can have the recent projects / favorites list shown on startup and re-activation (instead of having an untitled window created). To enable this behavior run: `defaults write com.macromates.TextMate.preview showFavoritesInsteadOfUntitled -bool YES` *[Anton]*
