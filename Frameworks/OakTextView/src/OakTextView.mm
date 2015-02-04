@@ -782,7 +782,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 - (void)documentDidSave:(NSNotification*)aNotification
 {
 	NSWindow* window = [[aNotification userInfo] objectForKey:@"window"];
-	if(window != self.window)
+	if(window != self.window || document->path() == NULL_STR)
 		return;
 
 	for(auto const& item : bundles::query(bundles::kFieldSemanticClass, "callback.document.did-save", [self scopeContext], bundles::kItemTypeMost, oak::uuid_t(), false))
