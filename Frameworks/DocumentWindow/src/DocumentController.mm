@@ -2641,7 +2641,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 	}
 	else
 	{
-		for(auto attr : _externalScopeAttributes)
+		for(auto const& attr : _externalScopeAttributes)
 		{
 			if(regexp::match_t const& m = regexp::search("^attr.scm.(?'TM_SCM_NAME'\\w+)$", attr))
 			{
