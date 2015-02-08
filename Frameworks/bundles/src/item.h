@@ -47,7 +47,7 @@ namespace bundles
 	{
 		std::string const& name () const;
 		void set_name (std::string const& newName);
-		std::string full_name () const;
+		std::string name_with_bundle () const;
 		oak::uuid_t const& parent_menu () const;
 		void set_parent_menu (oak::uuid_t const& uuid);
 		oak::uuid_t const& uuid () const;

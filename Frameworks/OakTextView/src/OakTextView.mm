@@ -1595,8 +1595,8 @@ doScroll:
 
 - (void)performBundleItem:(bundles::item_ptr)item
 {
-	crash_reporter_info_t info(text::format("%s %s", sel_getName(_cmd), item->full_name().c_str()));
-	// D(DBF_OakTextView_BundleItems, bug("%s\n", anItem->full_name().c_str()););
+	crash_reporter_info_t info(text::format("%s %s", sel_getName(_cmd), item->name_with_bundle().c_str()));
+	// D(DBF_OakTextView_BundleItems, bug("%s\n", anItem->name_with_bundle().c_str()););
 	AUTO_REFRESH;
 	switch(item->kind())
 	{
@@ -3223,7 +3223,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	{
 		for(auto const& item : bundles::drag_commands_for_path(to_s(path), scope))
 		{
-			D(DBF_OakTextView_DragNDrop, bug("handler: %s\n", item->full_name().c_str()););
+			D(DBF_OakTextView_DragNDrop, bug("handler: %s\n", item->name_with_bundle().c_str()););
 			handlerToFiles[item->uuid()].push_back(to_s(path));
 			allHandlers.insert(item);
 		}
@@ -3256,7 +3256,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	}
 	else if(bundles::item_ptr handler = OakShowMenuForBundleItems(std::vector<bundles::item_ptr>(allHandlers.begin(), allHandlers.end()), [self positionForWindowUnderCaret]))
 	{
-		D(DBF_OakTextView_DragNDrop, bug("execute %s\n", handler->full_name().c_str()););
+		D(DBF_OakTextView_DragNDrop, bug("execute %s\n", handler->name_with_bundle().c_str()););
 
 		static struct { NSUInteger qual; std::string name; } const qualNames[] =
 		{

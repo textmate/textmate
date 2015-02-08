@@ -715,7 +715,7 @@ static NSMutableDictionary* DictionaryForPropertyList (plist::dictionary_t const
 
 	item_info_t const& info = info_for(bundleItem->kind());
 
-	[[self window] setTitle:[NSString stringWithCxxString:bundleItem->full_name()]];
+	[[self window] setTitle:[NSString stringWithCxxString:bundleItem->name_with_bundle()]];
 	[[self window] setRepresentedFilename:NSHomeDirectory()];
 	[[[self window] standardWindowButton:NSWindowDocumentIconButton] setImage:[[NSWorkspace sharedWorkspace] iconForFileType:[NSString stringWithCxxString:info.file_type]]];
 
