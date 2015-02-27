@@ -4,6 +4,7 @@
 #import <Preferences/Keys.h>
 #import <oak/misc.h>
 #import <oak/debug.h>
+#import <oak/compat.h>
 
 NSString* const kUserDefaultsFileBrowserWidthKey = @"fileBrowserWidth";
 NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
@@ -135,9 +136,16 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 
 	// left + right
 	if(_tabsAboveDocument && _fileBrowserView && _fileBrowserOnRight)
-		CONSTRAINT(@"H:|[tabBarView]-(-1)-[fileBrowserDivider]", 0);
+	{
+		if(oak::os_major() > 10 || (oak::os_major() == 10 && oak::os_minor() >= 10))
+			CONSTRAINT(@"H:|-(-1)-[tabBarView]-(-1)-[fileBrowserDivider]", 0);
+		else
+			CONSTRAINT(@"H:|[tabBarView]-(-1)-[fileBrowserDivider]", 0);
+	}
 	else if(_tabsAboveDocument && _fileBrowserView)
 		CONSTRAINT(@"H:[fileBrowserDivider]-(-1)-[tabBarView]|", 0);
+	else if(oak::os_major() > 10 || (oak::os_major() == 10 && oak::os_minor() >= 10))
+		CONSTRAINT(@"H:|-(-1)-[tabBarView]|", 0);
 	else
 		CONSTRAINT(@"H:|[tabBarView]|", 0);
 
