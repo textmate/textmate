@@ -138,10 +138,10 @@
 		_inactiveTabTextStyles = _activeTabTextStyles.mutableCopy;
 		_inactiveTabTextStyles[NSForegroundColorAttributeName] = [NSColor colorWithCalibratedWhite:0.5 alpha:1];
 
-		if(oak::os_major() >= 10 && oak::os_minor() >= 10)
+		if(oak::os_major() > 10 || (oak::os_major() == 10 && oak::os_minor() >= 10))
 		{
 			_images = [self yosemiteImages];
-			_leftPadding  = -1;
+			_leftPadding  = 0;
 			_rightPadding = 0;
 		}
 		else
