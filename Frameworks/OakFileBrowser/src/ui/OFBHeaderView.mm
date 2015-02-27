@@ -3,6 +3,7 @@
 #import <OakAppKit/OakTabItemView.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <Preferences/Keys.h>
+#import <oak/compat.h>
 
 static NSButton* OakCreateImageButton (NSString* imageName)
 {
@@ -43,28 +44,46 @@ static NSPopUpButton* OakCreateFolderPopUpButton ()
 {
 	if(self = [super initTextCell:title pullsDown:pullsDown])
 	{
-		NSShadow* shadow = [NSShadow new];
-		[shadow setShadowColor:[NSColor colorWithCalibratedWhite:1 alpha:0.5]];
-		[shadow setShadowOffset:NSMakeSize(0, -1)];
-		[shadow setShadowBlurRadius:1];
-
 		NSMutableParagraphStyle* parStyle = [NSMutableParagraphStyle new];
 		[parStyle setLineBreakMode:NSLineBreakByTruncatingMiddle];
 
-		NSFont* font = [NSFont boldSystemFontOfSize:12];
+		if(oak::os_major() > 10 || (oak::os_major() == 10 && oak::os_minor() >= 10))
+		{
+			NSFont* font = [NSFont systemFontOfSize:12];
 
-		_activeAttributes = @{
-			NSParagraphStyleAttributeName  : parStyle,
-			NSFontAttributeName            : font,
-			NSForegroundColorAttributeName : [NSColor colorWithCalibratedWhite:0.2 alpha:1],
-			NSShadowAttributeName          : shadow,
-		};
-		_inactiveAttributes = @{
-			NSParagraphStyleAttributeName  : parStyle,
-			NSFontAttributeName            : font,
-			NSForegroundColorAttributeName : [NSColor colorWithCalibratedWhite:0.5 alpha:1],
-			NSShadowAttributeName          : shadow,
-		};
+			_activeAttributes = @{
+				NSParagraphStyleAttributeName  : parStyle,
+				NSFontAttributeName            : font,
+				NSForegroundColorAttributeName : [NSColor colorWithCalibratedWhite:0.2 alpha:1]
+			};
+			_inactiveAttributes = @{
+				NSParagraphStyleAttributeName  : parStyle,
+				NSFontAttributeName            : font,
+				NSForegroundColorAttributeName : [NSColor colorWithCalibratedWhite:0.5 alpha:1]
+			};
+		}
+		else
+		{
+			NSShadow* shadow = [NSShadow new];
+			[shadow setShadowColor:[NSColor colorWithCalibratedWhite:1 alpha:0.5]];
+			[shadow setShadowOffset:NSMakeSize(0, -1)];
+			[shadow setShadowBlurRadius:1];
+
+			NSFont* font = [NSFont boldSystemFontOfSize:12];
+
+			_activeAttributes = @{
+				NSParagraphStyleAttributeName  : parStyle,
+				NSFontAttributeName            : font,
+				NSForegroundColorAttributeName : [NSColor colorWithCalibratedWhite:0.2 alpha:1],
+				NSShadowAttributeName          : shadow,
+			};
+			_inactiveAttributes = @{
+				NSParagraphStyleAttributeName  : parStyle,
+				NSFontAttributeName            : font,
+				NSForegroundColorAttributeName : [NSColor colorWithCalibratedWhite:0.5 alpha:1],
+				NSShadowAttributeName          : shadow,
+			};
+		}
 	}
 	return self;
 }
