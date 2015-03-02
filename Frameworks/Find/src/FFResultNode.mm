@@ -1,5 +1,4 @@
 #import "FFResultNode.h"
-#import "FFDocumentSearch.h" // FFMatch
 #import "attr_string.h"
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/OakFileIconImage.h>
@@ -108,26 +107,27 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 	document::document_t::callback_t* _callback;
 	NSAttributedString* _excerpt;
 	NSString* _excerptReplaceString;
+	find::match_t _match;
 }
 @property (nonatomic, readwrite) NSUInteger countOfLeafs;
 @property (nonatomic, readwrite) NSUInteger countOfExcluded;
 @end
 
 @implementation FFResultNode
-+ (FFResultNode*)resultNodeWithMatch:(FFMatch*)aMatch baseDirectory:(NSString*)base
++ (FFResultNode*)resultNodeWithMatch:(find::match_t const&)aMatch baseDirectory:(NSString*)base
 {
 	FFResultNode* res = [FFResultNode new];
-	res.match       = aMatch;
+	res->_match     = aMatch;
 	res.children    = [NSMutableArray array];
-	res.displayPath = PathComponentString(base && to_s(base) != find::kSearchOpenFiles && [aMatch match].document->path() != NULL_STR ? [aMatch match].document->path() : [aMatch match].document->display_name(), to_s(base));
+	res.displayPath = PathComponentString(base && to_s(base) != find::kSearchOpenFiles && aMatch.document->path() != NULL_STR ? aMatch.document->path() : aMatch.document->display_name(), to_s(base));
 	return res;
 }
 
-+ (FFResultNode*)resultNodeWithMatch:(FFMatch*)aMatch
++ (FFResultNode*)resultNodeWithMatch:(find::match_t const&)aMatch
 {
 	FFResultNode* res = [FFResultNode new];
 	res.countOfLeafs = 1;
-	res.match = aMatch;
+	res->_match = aMatch;
 	return res;
 }
 
@@ -219,14 +219,15 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 
 - (FFResultNode*)firstResultNode   { return [_children firstObject]; }
 - (FFResultNode*)lastResultNode    { return [_children lastObject]; }
-- (document::document_ptr)document { return [_match match].document; }
+- (find::match_t const&)match      { return _match; }
+- (document::document_ptr)document { return _match.document; }
 - (NSString*)path                  { return [NSString stringWithCxxString:self.document->path()]; }
 - (NSString*)identifier            { return [NSString stringWithCxxString:self.document->identifier()]; }
 
 - (NSUInteger)lineSpan
 {
-	text::pos_t const from = [_match match].range.from;
-	text::pos_t const to   = [_match match].range.to;
+	text::pos_t const from = _match.range.from;
+	text::pos_t const to   = _match.range.to;
 	return to.line - from.line + (from == to || to.column != 0 ? 1 : 0);
 }
 
@@ -235,7 +236,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 	if(_excerpt && (replacementString == _excerptReplaceString || [replacementString isEqualToString:_excerptReplaceString]))
 		return _excerpt;
 
-	find::match_t const& m = [_match match];
+	find::match_t const& m = _match;
 
 	size_t from = m.first - m.excerpt_offset;
 	size_t to   = m.last  - m.excerpt_offset;
