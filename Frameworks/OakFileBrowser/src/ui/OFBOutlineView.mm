@@ -195,10 +195,10 @@
 	};
 
 	std::string const key = to_s(theEvent);
-	for(size_t i = 0; i < sizeofA(KeyActions); ++i)
+	for(auto const& keyAction : KeyActions)
 	{
-		if(key == KeyActions[i].key)
-			return (void)[NSApp sendAction:KeyActions[i].action to:nil from:self];
+		if(key == keyAction.key)
+			return (void)[NSApp sendAction:keyAction.action to:nil from:self];
 	}
 
 	[super keyDown:theEvent];

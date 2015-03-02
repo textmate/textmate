@@ -18,26 +18,26 @@ void OakPlayUISound (OakSoundIdentifier aSound)
 		{ OakSoundDidCompleteSomethingUISound, "system/burn complete.aif" }
 	};
 
-	for(size_t i = 0; i < sizeofA(sounds); ++i)
+	for(auto sound : sounds)
 	{
-		if(sounds[i].name == aSound)
+		if(sound.name == aSound)
 		{
-			if(!sounds[i].initialized)
+			if(!sound.initialized)
 			{
-				std::string const path_10_6 = path::join("/System/Library/Components/CoreAudio.component/Contents/Resources/SystemSounds", sounds[i].path);
-				std::string const path_10_7 = path::join("/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds", sounds[i].path);
+				std::string const path_10_6 = path::join("/System/Library/Components/CoreAudio.component/Contents/Resources/SystemSounds", sound.path);
+				std::string const path_10_7 = path::join("/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds", sound.path);
 				std::string const path = path::exists(path_10_7) ? path_10_7 : path_10_6;
 
 				if(CFURLRef url = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault, (UInt8 const*)path.data(), path.size(), false))
 				{
-					AudioServicesCreateSystemSoundID(url, &sounds[i].sound);
-					sounds[i].initialized = true;
+					AudioServicesCreateSystemSoundID(url, &sound.sound);
+					sound.initialized = true;
 					CFRelease(url);
 				}
 			}
 
-			if(sounds[i].sound)
-				AudioServicesPlaySystemSound(sounds[i].sound);
+			if(sound.sound)
+				AudioServicesPlaySystemSound(sound.sound);
 
 			break;
 		}

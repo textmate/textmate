@@ -102,25 +102,25 @@ std::vector<theme_t::decomposed_style_t> theme_t::global_styles (scope::scope_t 
 
 	std::vector<decomposed_style_t> res;
 
-	for(size_t i = 0; i < sizeofA(colorKeys); ++i)
+	for(auto const& colorKey : colorKeys)
 	{
 		bundles::item_ptr item;
-		plist::any_t const& value = bundles::value_for_setting(colorKeys[i].name, scope, &item);
+		plist::any_t const& value = bundles::value_for_setting(colorKey.name, scope, &item);
 		if(item)
 		{
 			res.emplace_back(item->scope_selector());
-			res.back().*(colorKeys[i].field) = read_color(plist::get<std::string>(value));
+			res.back().*(colorKey.field) = read_color(plist::get<std::string>(value));
 		}
 	}
 
-	for(size_t i = 0; i < sizeofA(booleanKeys); ++i)
+	for(auto const& booleanKey : booleanKeys)
 	{
 		bundles::item_ptr item;
-		plist::any_t const& value = bundles::value_for_setting(booleanKeys[i].name, scope, &item);
+		plist::any_t const& value = bundles::value_for_setting(booleanKey.name, scope, &item);
 		if(item)
 		{
 			res.emplace_back(item->scope_selector());
-			res.back().*(booleanKeys[i].field) = plist::is_true(value) ? bool_true : bool_false;
+			res.back().*(booleanKey.field) = plist::is_true(value) ? bool_true : bool_false;
 		}
 	}
 

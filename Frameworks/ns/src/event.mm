@@ -42,10 +42,10 @@ static std::string glyph_named (std::string const& name)
 		{ "space",        "␣" }
 	};
 
-	for(size_t i = 0; i != sizeofA(KeyGlyphs); ++i)
+	for(auto const& keyGlyph : KeyGlyphs)
 	{
-		if(name == KeyGlyphs[i].name)
-			return KeyGlyphs[i].glyph;
+		if(name == keyGlyph.name)
+			return keyGlyph.glyph;
 	}
 
 	return "�";
@@ -80,12 +80,14 @@ static std::string glyphs_for_key (std::string const& key, bool numpad = false)
 
 	std::string res = key;
 
-	bool didMatch = false;
 	uint32_t code = utf8::to_ch(key);
-	for(size_t i = 0; i < sizeofA(Keys) && !didMatch; ++i)
+	for(auto const& keyMapping : Keys)
 	{
-		if(didMatch = (code == Keys[i].code))
-			res = glyph_named(Keys[i].name);
+		if(code == keyMapping.code)
+		{
+			res = glyph_named(keyMapping.name);
+			break;
+		}
 	}
 
 	if(code == 0xA0)
@@ -111,8 +113,8 @@ static std::string string_for (NSUInteger flags)
 	};
 
 	std::string res = "";
-	for(size_t i = 0; i < sizeofA(EventFlags); ++i)
-		res += (flags & EventFlags[i].flag) ? EventFlags[i].symbol : "";
+	for(auto const& eventFlag : EventFlags)
+		res += (flags & eventFlag.flag) ? eventFlag.symbol : "";
 	return res;
 }
 

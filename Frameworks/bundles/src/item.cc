@@ -352,16 +352,17 @@ namespace bundles
 				location = path::parent(bundle()->_paths.front());
 			}
 
-			for(size_t i = 0; i < sizeofA(PathFormats) && destPath == NULL_STR; ++i)
+			for(auto const& pathFormat : PathFormats)
 			{
-				if(PathFormats[i].type == _kind)
+				if(pathFormat.type == _kind)
 				{
 					std::string base = name();
 					std::replace(base.begin(), base.end(), '/', ':');
 					std::replace(base.begin(), base.end(), '.', '_');
-					destPath = path::unique(path::join(location, text::format(PathFormats[i].format, base.c_str())));
+					destPath = path::unique(path::join(location, text::format(pathFormat.format, base.c_str())));
 					if(_kind == kItemTypeBundle)
 						destPath = path::join(destPath, "info.plist");
+					break;
 				}
 			}
 		}

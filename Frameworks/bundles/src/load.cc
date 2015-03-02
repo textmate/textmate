@@ -157,12 +157,12 @@ std::pair<std::vector<bundles::item_ptr>, std::map< oak::uuid_t, std::vector<oak
 					{ "Themes",       "*.{plist,tmDelta,tmTheme}",       bundles::kItemTypeTheme       },
 				};
 
-				for(size_t i = 0; i < sizeofA(dirs); ++i)
+				for(auto const& dirInfo : dirs)
 				{
-					if(path::name(dirPath) != dirs[i].name)
+					if(path::name(dirPath) != dirInfo.name)
 						continue;
 
-					for(auto itemPath : cache.entries(dirPath, dirs[i].glob))
+					for(auto itemPath : cache.entries(dirPath, dirInfo.glob))
 					{
 						oak::uuid_t uuid;
 						plist::dictionary_t plist = cache.content(itemPath);
@@ -185,7 +185,7 @@ std::pair<std::vector<bundles::item_ptr>, std::map< oak::uuid_t, std::vector<oak
 						if(uuid == "615998FE-A13B-4199-A670-E5A892A1C43A")
 							continue;
 
-						auto item = std::make_shared<bundles::item_t>(uuid, bundle, dirs[i].kind, local);
+						auto item = std::make_shared<bundles::item_t>(uuid, bundle, dirInfo.kind, local);
 						item->add_path(itemPath);
 
 						bool isDelta = false;

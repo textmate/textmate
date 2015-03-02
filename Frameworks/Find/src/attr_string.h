@@ -138,12 +138,12 @@ namespace ns
 					bool did_handle_style = false;
 
 					// Handle font trait styles
-					for(int i = 0; i < sizeofA(FontTraits); ++i)
+					for(auto fontTrait : FontTraits)
 					{
-						if(style == FontTraits[i].style)
+						if(style == fontTrait.style)
 						{
 							attr             = NSFontAttributeName;
-							value            = [[NSFontManager sharedFontManager] convertFont:[attributes objectForKey:NSFontAttributeName] toHaveTrait:FontTraits[i].trait];
+							value            = [[NSFontManager sharedFontManager] convertFont:[attributes objectForKey:NSFontAttributeName] toHaveTrait:fontTrait.trait];
 							did_handle_style = true;
 						}
 					}

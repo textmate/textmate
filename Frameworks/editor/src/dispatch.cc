@@ -187,10 +187,10 @@ namespace ng
 			{ "noop:",                                              kNop                                          },
 		};
 
-		for(size_t i = 0; i < sizeofA(actions); ++i)
+		for(auto const& action : actions)
 		{
-			if(sel == actions[i].selector)
-				return actions[i].action;
+			if(sel == action.selector)
+				return action.action;
 		}
 		return kNop;
 	}

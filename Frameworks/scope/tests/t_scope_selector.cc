@@ -61,10 +61,10 @@ void test_scope_selector ()
 	};
 
 	double lastRank = 1;
-	for(size_t i = 0; i < sizeofA(matchingSelectors); ++i)
+	for(auto const& selector : matchingSelectors)
 	{
 		double rank;
-		OAK_ASSERT(matchingSelectors[i].does_match(textScope, &rank));
+		OAK_ASSERT(selector.does_match(textScope, &rank));
 		OAK_ASSERT_LT(rank, lastRank);
 		lastRank = rank;
 	}

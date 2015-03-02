@@ -2134,10 +2134,10 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 		{ @"Filter Through Command…", @selector(orderFrontRunCommandWindow:)    },
 	};
 
-	for(size_t i = 0; i < sizeofA(items); i++)
+	for(auto const& item : items)
 	{
-		if(items[i].title)
-				[menu addItemWithTitle:items[i].title action:items[i].action keyEquivalent:@""];
+		if(item.title)
+				[menu addItemWithTitle:item.title action:item.action keyEquivalent:@""];
 		else	[menu addItem:[NSMenuItem separatorItem]];
 	}
 	return menu;
@@ -3258,7 +3258,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	{
 		D(DBF_OakTextView_DragNDrop, bug("execute %s\n", handler->name_with_bundle().c_str()););
 
-		static struct { NSUInteger qual; std::string name; } const qualNames[] =
+		static struct { NSUInteger mask; std::string name; } const qualNames[] =
 		{
 			{ NSShiftKeyMask,     "SHIFT"    },
 			{ NSControlKeyMask,   "CONTROL"  },
@@ -3283,10 +3283,10 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 		NSUInteger state = [NSEvent modifierFlags];
 		std::vector<std::string> flagNames;
-		for(size_t i = 0; i != sizeofA(qualNames); ++i)
+		for(auto const& qualifier : qualNames)
 		{
-			if(state & qualNames[i].qual)
-				flagNames.push_back(qualNames[i].name);
+			if(state & qualifier.mask)
+				flagNames.push_back(qualifier.name);
 		}
 		env["TM_MODIFIER_FLAGS"] = text::join(flagNames, "|");
 

@@ -104,9 +104,9 @@ namespace
 	NSString* totalMemory = [NSString stringWithFormat:@"%@ Total", MiB_t(m.bytes_total).to_s()];
 
 	NSString* titles[] = { usedMemory, freeMemory, totalMemory };
-	for(size_t i = 0; i < sizeofA(titles); ++i)
+	for(NSString* title : titles)
 	{
-		NSMenuItem* item = [aMenu addItemWithTitle:titles[i] action:NULL keyEquivalent:@""];
+		NSMenuItem* item = [aMenu addItemWithTitle:title action:NULL keyEquivalent:@""];
 		[item setEnabled:NO];
 	}
 

@@ -120,8 +120,8 @@ namespace document
 
 		D(DBF_Document_WatchFS,
 			std::string change = "";
-			for(size_t i = 0; i < sizeofA(flagNames); ++i)
-				change += (flags & flagNames[i].flag) ? flagNames[i].name : "";
+			for(auto const& flagName : flagNames)
+				change += (flags & flagName.flag) ? flagName.name : "";
 			bug("(%02x)%s\n", flags, change.c_str());
 		);
 	}

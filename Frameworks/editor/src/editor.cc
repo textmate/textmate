@@ -61,7 +61,7 @@ namespace ng
 
 	static find::options_t convert (std::map<std::string, std::string> const& options)
 	{
-		static struct { std::string key; find::options_t flag; } const map[] =
+		static struct { std::string key; find::options_t flag; } const optionMap[] =
 		{
 			{ "fullWordMatch",       find::full_words         },
 			{ "ignoreCase",          find::ignore_case        },
@@ -71,11 +71,11 @@ namespace ng
 		};
 
 		find::options_t res = find::none;
-		for(size_t i = 0; i < sizeofA(map); ++i)
+		for(auto const& option : optionMap)
 		{
-			std::map<std::string, std::string>::const_iterator it = options.find(map[i].key);
+			std::map<std::string, std::string>::const_iterator it = options.find(option.key);
 			if(it != options.end() && it->second == "1")
-				res = res | map[i].flag;
+				res = res | option.flag;
 		}
 		return res;
 	}

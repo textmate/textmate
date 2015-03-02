@@ -191,8 +191,8 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 	};
 
 	[OakRot13Transformer register];
-	for(size_t i = 0; i != sizeofA(converters); ++i)
-		[OakStringListTransformer createTransformerWithName:converters[i].name andObjectsArray:converters[i].array];
+	for(auto const& converter : converters)
+		[OakStringListTransformer createTransformerWithName:converter.name andObjectsArray:converter.array];
 
 	drawer = [[NSDrawer alloc] initWithContentSize:NSZeroSize preferredEdge:NSMaxXEdge];
 	[drawer setParentWindow:[self window]];
@@ -653,8 +653,8 @@ static NSMutableDictionary* DictionaryForBundleItem (bundles::item_ptr const& aB
 			[res setObject:@2 forKey:@"version"];
 			if(cmd.auto_scroll_output)
 				[res setObject:@YES forKey:@"autoScrollOutput"];
-			for(size_t i = 0; i != sizeofA(popups); ++i)
-				[res setObject:[popups[i].array objectAtIndex:popups[i].index] forKey:popups[i].key];
+			for(auto const& popup : popups)
+				[res setObject:[popup.array objectAtIndex:popup.index] forKey:popup.key];
 		}
 		break;
 

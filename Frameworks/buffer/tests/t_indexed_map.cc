@@ -309,7 +309,7 @@ void test_duplicate ()
 	indexed_map_t<bool> map;
 
 	ssize_t random[] = { 2, 7, 13, 15, 29 };
-	std::random_shuffle(random, random + sizeofA(random));
+	std::random_shuffle(std::begin(random), std::end(random));
 	for(auto i : random)
 		map.set(i, true);
 
@@ -318,7 +318,7 @@ void test_duplicate ()
 	OAK_ASSERT_EQ(values.size(), sizeofA(random));
 	OAK_ASSERT(std::find(values.begin(), values.end(), false) == values.end());
 
-	std::random_shuffle(random, random + sizeofA(random));
+	std::random_shuffle(std::begin(random), std::end(random));
 	for(auto i : random)
 		map.set(i, false);
 
@@ -333,7 +333,7 @@ void test_bind_left_right ()
 	indexed_map_t<bool> map;
 
 	ssize_t random[] = { 2, 7, 13, 15, 29 };
-	std::random_shuffle(random, random + sizeofA(random));
+	std::random_shuffle(std::begin(random), std::end(random));
 	for(auto i : random)
 		map.set(i, true);
 
