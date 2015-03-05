@@ -3,6 +3,7 @@
 #import "OakChoiceMenu.h"
 #import "OakDocumentView.h" // addAuxiliaryView:atEdge: signature
 #import "LiveSearchView.h"
+#import "OTVHUD.h"
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/NSEvent Additions.h>
 #import <OakAppKit/NSColor Additions.h>
@@ -2789,6 +2790,8 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		layout->set_font(fontName, fontSize * _fontScaleFactor / 100);
 		[self scrollIndexToFirstVisible:document->buffer().begin(document->buffer().convert(visibleIndex.index).line)];
 	}
+
+	[OTVHUD showHudForView:self withText:[NSString stringWithFormat:@"%ld%%", _fontScaleFactor]];
 }
 
 - (void)setTabSize:(size_t)newTabSize
