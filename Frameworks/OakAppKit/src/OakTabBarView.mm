@@ -220,6 +220,12 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 // = Layout =
 // ==========
 
+- (CGFloat)leftPadding
+{
+	CGFloat res = OakTabBarStyle.sharedInstance.leftPadding;
+	return _neverHideLeftBorder ? MAX(0, res) : res;
+}
+
 - (void)updateCapImageViews
 {
 	if(OakTabBarStyle.sharedInstance.tabViewSpacing >= 0)
@@ -259,7 +265,7 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 
 - (NSUInteger)countOfVisibleTabs
 {
-	CGFloat const leftPadding  = OakTabBarStyle.sharedInstance.leftPadding;
+	CGFloat const leftPadding  = self.leftPadding;
 	CGFloat const rightPadding = OakTabBarStyle.sharedInstance.rightPadding;
 	CGFloat const tabSpacing   = OakTabBarStyle.sharedInstance.tabViewSpacing;
 	CGFloat const tabMinWidth  = OakTabBarStyle.sharedInstance.minimumTabSize;
@@ -368,7 +374,7 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 
 - (void)resizeTabItemViewFrames
 {
-	CGFloat const leftPadding  = OakTabBarStyle.sharedInstance.leftPadding;
+	CGFloat const leftPadding  = self.leftPadding;
 	CGFloat const rightPadding = OakTabBarStyle.sharedInstance.rightPadding;
 	CGFloat const tabSpacing   = OakTabBarStyle.sharedInstance.tabViewSpacing;
 	CGFloat const tabMinWidth  = OakTabBarStyle.sharedInstance.minimumTabSize;
@@ -491,6 +497,14 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 	} completionHandler:^{
 		[self.window recalculateKeyViewLoop];
 	}];
+}
+
+- (void)setNeverHideLeftBorder:(BOOL)flag
+{
+	if(_neverHideLeftBorder == flag)
+		return;
+	_neverHideLeftBorder = flag;
+	[self resizeTabItemViewFrames];
 }
 
 // =============

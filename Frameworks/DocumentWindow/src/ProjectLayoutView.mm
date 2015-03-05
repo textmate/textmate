@@ -113,6 +113,8 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 
 - (void)updateConstraints
 {
+	_tabBarView.neverHideLeftBorder = _tabsAboveDocument && _fileBrowserView && _fileBrowserOnRight == NO;
+
 	[self removeConstraints:_myConstraints];
 	[_myConstraints removeAllObjects];
 	[super updateConstraints];

@@ -25,6 +25,8 @@ PUBLIC @interface OakTabBarView : OakBackgroundFillView
 @property (nonatomic, readonly) NSArray* tabItems;
 @property (nonatomic) OakTabItem* selectedTabItem;
 - (OakTabItem*)tabItemForView:(id)aView;
+
+@property (nonatomic) BOOL neverHideLeftBorder;
 @end
 
 @protocol OakTabBarViewDelegate <NSObject>
