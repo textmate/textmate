@@ -64,8 +64,8 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 	return newView;
 }
 
-- (void)setTabBarView:(NSView*)aTabBarView           { _tabBarView     = [self replaceView:_tabBarView      withView:aTabBarView];      }
-- (void)setDocumentView:(NSView*)aDocumentView       { _documentView   = [self replaceView:_documentView    withView:aDocumentView];    }
+- (void)setTabBarView:(OakTabBarView*)aTabBarView    { _tabBarView = (OakTabBarView*)[self replaceView:_tabBarView withView:aTabBarView]; }
+- (void)setDocumentView:(NSView*)aDocumentView       { _documentView = [self replaceView:_documentView withView:aDocumentView]; }
 
 - (void)setHtmlOutputView:(NSView*)aHtmlOutputView
 {
