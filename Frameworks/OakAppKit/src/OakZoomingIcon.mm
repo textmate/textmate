@@ -34,10 +34,6 @@
 			[self orderOut:self];
 		};
 
-		CABasicAnimation* anim = [CABasicAnimation animation];
-		anim.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseIn];
-
-		self.animations = @{ @"alphaValue" : anim, @"frame" : anim };
 		[self.animator setAlphaValue:0];
 		[self.animator setFrame:NSInsetRect(aRect, -56, -56) display:YES animate:YES];
 
