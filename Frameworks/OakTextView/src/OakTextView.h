@@ -41,6 +41,7 @@ PUBLIC @interface OakTextView : OakView
 @property (nonatomic) theme_ptr const&                      theme;
 @property (nonatomic) NSCursor*                             ibeamCursor;
 @property (nonatomic) NSFont*                               font;
+@property (nonatomic) NSInteger                             fontScaleFactor;
 @property (nonatomic) BOOL                                  antiAlias;
 @property (nonatomic) OTVFontSmoothing                      fontSmoothing;
 @property (nonatomic) size_t                                tabSize;

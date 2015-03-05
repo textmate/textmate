@@ -737,12 +737,14 @@ static std::string shell_quote (std::vector<std::string> paths)
 {
 	if(self = [super initWithFrame:aRect])
 	{
+		_fontScaleFactor = 100;
+
 		settings_t const& settings = settings_for_path();
 
 		theme          = parse_theme(bundles::lookup(settings.get(kSettingsThemeKey, NULL_STR)));
 		fontName       = settings.get(kSettingsFontNameKey, NULL_STR);
 		fontSize       = settings.get(kSettingsFontSizeKey, 11.0);
-		theme          = theme->copy_with_font_name_and_size(fontName, fontSize);
+		theme          = theme->copy_with_font_name_and_size(fontName, fontSize * _fontScaleFactor / 100);
 
 		_showInvisibles = settings.get(kSettingsShowInvisiblesKey, false);
 		_scrollPastEnd  = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsScrollPastEndKey];
@@ -2760,12 +2762,31 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 {
 	fontName = to_s([newFont fontName]);
 	fontSize = [newFont pointSize];
+	_fontScaleFactor = 100;
 
 	if(layout)
 	{
 		AUTO_REFRESH;
 		ng::index_t visibleIndex = layout->index_at_point([self visibleRect].origin);
-		layout->set_font(fontName, fontSize);
+		layout->set_font(fontName, fontSize * _fontScaleFactor / 100);
+		[self scrollIndexToFirstVisible:document->buffer().begin(document->buffer().convert(visibleIndex.index).line)];
+	}
+}
+
+- (void)setFontScaleFactor:(NSInteger)newFontScaleFactor
+{
+	if(_fontScaleFactor == newFontScaleFactor)
+		return;
+	_fontScaleFactor = newFontScaleFactor;
+
+	if(theme)
+		theme = theme->copy_with_font_name_and_size(fontName, fontSize * _fontScaleFactor / 100);
+
+	if(layout)
+	{
+		AUTO_REFRESH;
+		ng::index_t visibleIndex = layout->index_at_point([self visibleRect].origin);
+		layout->set_font(fontName, fontSize * _fontScaleFactor / 100);
 		[self scrollIndexToFirstVisible:document->buffer().begin(document->buffer().convert(visibleIndex.index).line)];
 	}
 }
