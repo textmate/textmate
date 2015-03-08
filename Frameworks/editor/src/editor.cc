@@ -1343,6 +1343,20 @@ namespace ng
 		std::string const& out = utf8::is_valid(uncheckedOut.begin(), uncheckedOut.end()) ? uncheckedOut : sanitized_utf8(uncheckedOut);
 		ng::range_t inputRange = inputRanges.last();
 
+		if(inputRanges.size() != 1 && format == output_format::text && placement != output::replace_document)
+		{
+			std::vector<std::string> words = text::split(out, "\n");
+			if(words.size() > 1 && words.back().empty())
+				words.pop_back();
+
+			size_t i = 0;
+			std::multimap<range_t, std::string> insertions;
+			for(auto const& range : dissect_columnar(_buffer, inputRanges))
+				insertions.emplace(range, words[i++ % words.size()]);
+			_selections = ng::move(_buffer, replace_helper(_buffer, _snippets, insertions), kSelectionMoveToEndOfSelection);
+			return true;
+		}
+
 		if(inputRange.columnar)
 		{
 			text::pos_t const fromPos = _buffer.convert(inputRange.min().index);
