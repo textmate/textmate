@@ -19,22 +19,27 @@ namespace ng
 		input::type actualUnit = unit == input::selection && range.empty() ? fallbackUnit : unit;
 		*inputWasSelection = actualUnit == input::selection;
 
-		range_t r;
-		switch(actualUnit)
+		ng::ranges_t res = ranges;
+		if(ranges.size() == 1 || unit != input::selection)
 		{
-			case input::character:        r = extend_if_empty(buffer, range, kSelectionExtendRight).last();        break;
-			case input::word:             r = word_at(buffer, range);                                          break;
-			case input::line:             r = extend_if_empty(buffer, range, kSelectionExtendToLineExclLF).last(); break;
-			case input::scope:            r = select_scope(buffer, range, scopeSelector).last();                   break;
-			case input::selection:        r = range;                                                               break;
-			case input::entire_document:  r = extend(buffer, range, kSelectionExtendToAll).last();                 break;
-		};
+			range_t r;
+			switch(actualUnit)
+			{
+				case input::character:        r = extend_if_empty(buffer, range, kSelectionExtendRight).last();        break;
+				case input::word:             r = word_at(buffer, range);                                          break;
+				case input::line:             r = extend_if_empty(buffer, range, kSelectionExtendToLineExclLF).last(); break;
+				case input::scope:            r = select_scope(buffer, range, scopeSelector).last();                   break;
+				case input::selection:        r = range;                                                               break;
+				case input::entire_document:  r = extend(buffer, range, kSelectionExtendToAll).last();                 break;
+			};
+			res = r;
+		}
 
-		if(!r.empty())
+		if(res.size() != 1 && unit == input::selection || !res.last().empty())
 		{
 			std::string str = "";
 			bool first = true;
-			for(auto const& range : dissect_columnar(buffer, r))
+			for(auto const& range : dissect_columnar(buffer, res))
 			{
 				if(!std::exchange(first, false))
 					str += "\n";
@@ -52,14 +57,15 @@ namespace ng
 			close(fd);
 		}
 
-		if(r && actualUnit != input::entire_document)
+		if(res.size() == 1 && !res.last().empty() && actualUnit != input::entire_document)
 		{
-			text::pos_t const& pos = buffer.convert(r.min().index);
+			text::pos_t const& pos = buffer.convert(res.last().min().index);
 			variables.emplace("TM_INPUT_START_LINE",       std::to_string(pos.line + 1));
 			variables.emplace("TM_INPUT_START_LINE_INDEX", std::to_string(pos.column));
-			variables.emplace("TM_INPUT_START_COLUMN",     std::to_string(count_columns(buffer, r.min(), tabSize) + 1));
+			variables.emplace("TM_INPUT_START_COLUMN",     std::to_string(count_columns(buffer, res.last().min(), tabSize) + 1));
 		}
-		return r;
+
+		return res;
 	}
 
 } /* ng */
