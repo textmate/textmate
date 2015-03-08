@@ -26,9 +26,9 @@ namespace ng
 	{
 		completion_command_delegate_t (ng::buffer_t const& buffer, ng::ranges_t const& ranges) : buffer(buffer), ranges(ranges), result(NULL_STR) { }
 
-		ng::range_t write_unit_to_fd (int fd, input::type unit, input::type fallbackUnit, input_format::type format, scope::selector_t const& scopeSelector, std::map<std::string, std::string>& variables, bool* inputWasSelection)
+		ng::ranges_t write_unit_to_fd (int fd, input::type unit, input::type fallbackUnit, input_format::type format, scope::selector_t const& scopeSelector, std::map<std::string, std::string>& variables, bool* inputWasSelection)
 		{
-			return ng::write_unit_to_fd(buffer, ranges.last(), buffer.indent().tab_size(), fd, unit, fallbackUnit, format, scopeSelector, variables, inputWasSelection);
+			return ng::write_unit_to_fd(buffer, ranges, buffer.indent().tab_size(), fd, unit, fallbackUnit, format, scopeSelector, variables, inputWasSelection);
 		}
 
 		bool accept_html_data (command::runner_ptr runner, char const* data, size_t len) { return fprintf(stderr, "html: %.*s", (int)len, data), false; }
@@ -37,7 +37,7 @@ namespace ng
 		void show_tool_tip (std::string const& str) { fprintf(stderr, "tool tip: %s\n", str.c_str()); }
 		void show_error (bundle_command_t const& command, int rc, std::string const& out, std::string const& err) { fprintf(stderr, "error: %s%s\n", out.c_str(), err.c_str()); }
 
-		bool accept_result (std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, ng::range_t inputRange, std::map<std::string, std::string> const& environment)
+		bool accept_result (std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, ng::ranges_t const& inputRanges, std::map<std::string, std::string> const& environment)
 		{
 			if(placement == output::replace_selection && format == output_format::completion_list)
 				result = out;

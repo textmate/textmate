@@ -3090,7 +3090,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	if(io::process_t process = io::spawn(std::vector<std::string>{ "/bin/sh", "-c", to_s(commandString) }, environment))
 	{
 		bool inputWasSelection = false;
-		ng::range_t inputRange = ng::write_unit_to_fd(document->buffer(), editor->ranges().last(), document->buffer().indent().tab_size(), process.in, inputUnit, input::entire_document, input_format::text, scope::selector_t(), environment, &inputWasSelection);
+		ng::ranges_t const inputRanges = ng::write_unit_to_fd(document->buffer(), editor->ranges(), document->buffer().indent().tab_size(), process.in, inputUnit, input::entire_document, input_format::text, scope::selector_t(), environment, &inputWasSelection);
 
 		__block int status = 0;
 		__block std::string output, error;
@@ -3126,7 +3126,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 			else
 			{
 				AUTO_REFRESH;
-				editor->handle_result(output, outputUnit, output_format::text, output_caret::after_output, inputRange, environment);
+				editor->handle_result(output, outputUnit, output_format::text, output_caret::after_output, inputRanges, environment);
 			}
 		}
 

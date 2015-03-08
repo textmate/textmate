@@ -26,16 +26,16 @@ void setup_fixtures ()
 				void show_tool_tip (std::string const& str) { fprintf(stderr, "tool tip: %s\n", str.c_str()); }
 				void show_error (bundle_command_t const& command, int rc, std::string const& out, std::string const& err) { fprintf(stderr, "error: %s%s\n", out.c_str(), err.c_str()); }
 
-				ng::range_t write_unit_to_fd (int fd, input::type unit, input::type fallbackUnit, input_format::type format, scope::selector_t const& scopeSelector, std::map<std::string, std::string>& variables, bool* inputWasSelection)
+				ng::ranges_t write_unit_to_fd (int fd, input::type unit, input::type fallbackUnit, input_format::type format, scope::selector_t const& scopeSelector, std::map<std::string, std::string>& variables, bool* inputWasSelection)
 				{
 					close(fd);
-					return ng::range_t();
+					return { };
 				}
 
-				bool accept_result (std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, ng::range_t inputRange, std::map<std::string, std::string> const& environment)
+				bool accept_result (std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, ng::ranges_t const& inputRanges, std::map<std::string, std::string> const& environment)
 				{
 					if(_document && _document->is_open())
-						return ng::editor_for_document(_document)->handle_result(out, placement, format, outputCaret, inputRange, environment);
+						return ng::editor_for_document(_document)->handle_result(out, placement, format, outputCaret, inputRanges, environment);
 					return false;
 				}
 
