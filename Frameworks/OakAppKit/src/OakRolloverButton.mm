@@ -40,6 +40,12 @@ typedef NS_ENUM(NSUInteger, OakImageState) {
 	return _disableWindowOrderingForFirstMouse;
 }
 
+- (NSMenu*)menuForEvent:(NSEvent*)anEvent
+{
+	// Control-clicks are not sent to superview <rdar://20200363>
+	return [[self superview] menuForEvent:anEvent];
+}
+
 - (void)mouseDown:(NSEvent*)anEvent
 {
 	if(_disableWindowOrderingForFirstMouse)
