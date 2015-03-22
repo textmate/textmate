@@ -556,6 +556,11 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 	[self trySelectTabForView:[self hitTest:mouseCurrentPos]];
 }
 
+- (void)otherMouseUp:(NSEvent*)anEvent
+{
+	[self _performCloseTab:[self hitTest:[[self superview] convertPoint:[anEvent locationInWindow] fromView:nil]]];
+}
+
 - (void)trySelectTabForView:(NSView*)aView
 {
 	if(OakTabItem* tabItem = [self tabItemForView:aView])
