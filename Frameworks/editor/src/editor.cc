@@ -1341,7 +1341,7 @@ namespace ng
 	bool editor_t::handle_result (std::string const& uncheckedOut, output::type placement, output_format::type format, output_caret::type outputCaret, ng::ranges_t const& inputRanges, std::map<std::string, std::string> environment)
 	{
 		std::string const& out = utf8::is_valid(uncheckedOut.begin(), uncheckedOut.end()) ? uncheckedOut : sanitized_utf8(uncheckedOut);
-		ng::range_t inputRange = inputRanges.last();
+		ng::range_t inputRange = inputRanges ? inputRanges.last() : ng::range_t();
 
 		if(inputRanges.size() != 1 && format == output_format::text && placement != output::replace_document)
 		{
