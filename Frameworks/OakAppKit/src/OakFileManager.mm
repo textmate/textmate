@@ -301,6 +301,21 @@ NSString* const OakFileManagerPathKey                      = @"directory";
 	NSNumber* isDirectory = @NO;
 	[srcURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:nil];
 	NSURL* dst = [NSURL fileURLWithPath:[NSString stringWithCxxString:path::unique([[srcURL path] fileSystemRepresentation], " copy")] isDirectory:[isDirectory boolValue]];
+
+	if(![isDirectory boolValue])
+	{
+		NSString* srcPath = [srcURL path];
+
+		NSDateFormatter* formatter = [NSDateFormatter new];
+		formatter.dateFormat = @"yyyy-MM-dd";
+		NSString* todaysDate = [formatter stringFromDate:[NSDate date]];
+
+		NSRegularExpression* regex = [NSRegularExpression regularExpressionWithPattern:@"\\b\\d{4}(-\\d{2}){2}\\b" options:0 error:nullptr];
+		NSString* newPath = [regex stringByReplacingMatchesInString:srcPath options:0 range:NSMakeRange(0, [srcPath length]) withTemplate:todaysDate];
+		if(![srcPath isEqualToString:newPath] && ![[NSFileManager defaultManager] fileExistsAtPath:newPath])
+			dst = [NSURL fileURLWithPath:newPath];
+	}
+
 	if([self doCreateCopy:dst ofURL:srcURL view:view])
 	{
 		[[view undoManager] setActionName:[self expandFormat:@"Duplicate of “%@”" withURL:srcURL]];
