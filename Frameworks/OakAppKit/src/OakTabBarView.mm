@@ -881,7 +881,8 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 - (void)performClose:(id)sender
 {
 	_tag = [_tabItems indexOfObject:_selectedTabItem]; // performCloseTab: asks for [sender tag]
-	[NSApp sendAction:@selector(performCloseTab:) to:nil from:self];
+	if([_delegate respondsToSelector:@selector(performCloseTab:)])
+		[_delegate performCloseTab:self];
 }
 
 - (NSMenu*)menuForView:(NSView*)aView
