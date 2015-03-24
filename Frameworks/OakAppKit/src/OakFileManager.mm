@@ -29,7 +29,7 @@ NSString* OakReplaceDateInString (NSString* srcPath, NSDate* newDate)
 	return instance;
 }
 
-- (void)delsyedPlaySound:(id)aSound
+- (void)delayedPlaySound:(id)aSound
 {
 	OakPlayUISound((OakSoundIdentifier)[aSound intValue]);
 	self.hasUISoundToPlay = NO;
@@ -40,7 +40,7 @@ NSString* OakReplaceDateInString (NSString* srcPath, NSDate* newDate)
 	if(!self.hasUISoundToPlay)
 	{
 		self.hasUISoundToPlay = YES;
-		[self performSelector:@selector(delsyedPlaySound:) withObject:@(aSound) afterDelay:0];
+		[self performSelector:@selector(delayedPlaySound:) withObject:@(aSound) afterDelay:0];
 	}
 }
 
