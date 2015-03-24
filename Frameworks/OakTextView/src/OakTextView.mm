@@ -2751,11 +2751,11 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (void)setTheme:(theme_ptr const&)newTheme
 {
-	theme = newTheme;
+	theme = newTheme->copy_with_font_name_and_size(fontName, fontSize * _fontScaleFactor / 100);
 	if(layout)
 	{
 		AUTO_REFRESH;
-		layout->set_theme(newTheme);
+		layout->set_theme(theme);
 	}
 }
 
