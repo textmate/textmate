@@ -3515,22 +3515,43 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		else	range.last().freehanded = true;
 	}
 
-	if(commandDown && mouseDownClickCount == 1)
+	if(commandDown)
 	{
-		bool didToggle = false;
-		ng::ranges_t newSel;
-		for(auto const& cur : s)
+		if(mouseDownClickCount == 1)
 		{
-			if(cur != range.last())
-					newSel.push_back(cur);
-			else	didToggle = true;
-		}
-		s = newSel;
+			ng::index_t click = range.last().min();
 
-		if(s.empty() || !didToggle)
+			bool didModify = false, pushClick = false;
+			ng::ranges_t newSel;
+			for(auto const& cur : s)
+			{
+				if(cur == range.last())
+					didModify = true;
+				else if(cur.min() <= click && click <= cur.max())
+					pushClick = true;
+				else
+					newSel.push_back(cur);
+			}
+
+			s = newSel;
+			if(pushClick || !didModify || s.empty())
+				s.push_back(range.last());
+		}
+		else
+		{
+			ng::ranges_t newSel;
+			for(auto const& cur : s)
+			{
+				bool overlap = range.last().min() <= cur.min() && cur.max() <= range.last().max();
+				if(!overlap)
+					newSel.push_back(cur);
+			}
+
+			s = newSel;
 			s.push_back(range.last());
+		}
 	}
-	else if(shiftDown || (commandDown && mouseDownClickCount != 1))
+	else if(shiftDown)
 		s.last() = range.last();
 	else
 		s = range.last();
