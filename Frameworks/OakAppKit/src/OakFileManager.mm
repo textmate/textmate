@@ -19,7 +19,7 @@ NSString* const OakFileManagerPathKey                      = @"directory";
 	return instance;
 }
 
-- (void)delsyedPlaySound:(id)aSound
+- (void)delayedPlaySound:(id)aSound
 {
 	OakPlayUISound((OakSoundIdentifier)[aSound intValue]);
 	self.hasUISoundToPlay = NO;
@@ -30,7 +30,7 @@ NSString* const OakFileManagerPathKey                      = @"directory";
 	if(!self.hasUISoundToPlay)
 	{
 		self.hasUISoundToPlay = YES;
-		[self performSelector:@selector(delsyedPlaySound:) withObject:@(aSound) afterDelay:0];
+		[self performSelector:@selector(delayedPlaySound:) withObject:@(aSound) afterDelay:0];
 	}
 }
 
