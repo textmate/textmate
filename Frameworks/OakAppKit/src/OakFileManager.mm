@@ -8,6 +8,16 @@ NSString* const OakFileManagerWillDeleteItemAtPath         = @"OakFileManagerWil
 NSString* const OakFileManagerDidChangeContentsOfDirectory = @"OakFileManagerDidChangeContentsOfDirectory";
 NSString* const OakFileManagerPathKey                      = @"directory";
 
+NSString* OakReplaceDateInString (NSString* srcPath, NSDate* newDate)
+{
+	NSDateFormatter* formatter = [NSDateFormatter new];
+	formatter.dateFormat = @"yyyy-MM-dd";
+	NSString* todaysDate = [formatter stringFromDate:newDate];
+
+	NSRegularExpression* regex = [NSRegularExpression regularExpressionWithPattern:@"\\b\\d{4}(-\\d{2}){2}\\b" options:0 error:nullptr];
+	return [regex stringByReplacingMatchesInString:srcPath options:0 range:NSMakeRange(0, [srcPath length]) withTemplate:todaysDate];
+}
+
 @interface OakFileManager ()
 @property (nonatomic) BOOL hasUISoundToPlay;
 @end
@@ -305,13 +315,7 @@ NSString* const OakFileManagerPathKey                      = @"directory";
 	if(![isDirectory boolValue])
 	{
 		NSString* srcPath = [srcURL path];
-
-		NSDateFormatter* formatter = [NSDateFormatter new];
-		formatter.dateFormat = @"yyyy-MM-dd";
-		NSString* todaysDate = [formatter stringFromDate:[NSDate date]];
-
-		NSRegularExpression* regex = [NSRegularExpression regularExpressionWithPattern:@"\\b\\d{4}(-\\d{2}){2}\\b" options:0 error:nullptr];
-		NSString* newPath = [regex stringByReplacingMatchesInString:srcPath options:0 range:NSMakeRange(0, [srcPath length]) withTemplate:todaysDate];
+		NSString* newPath = OakReplaceDateInString(srcPath);
 		if(![srcPath isEqualToString:newPath] && ![[NSFileManager defaultManager] fileExistsAtPath:newPath])
 			dst = [NSURL fileURLWithPath:newPath];
 	}
