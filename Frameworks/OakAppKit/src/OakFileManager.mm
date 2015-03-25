@@ -14,8 +14,8 @@ NSString* OakReplaceDateInString (NSString* srcPath, NSDate* newDate)
 	formatter.dateFormat = @"yyyy-MM-dd";
 	NSString* todaysDate = [formatter stringFromDate:newDate];
 
-	NSRegularExpression* regex = [NSRegularExpression regularExpressionWithPattern:@"\\b\\d{4}(-\\d{2}){2}\\b" options:0 error:nullptr];
-	return [regex stringByReplacingMatchesInString:srcPath options:0 range:NSMakeRange(0, [srcPath length]) withTemplate:todaysDate];
+	NSRegularExpression* regex = [NSRegularExpression regularExpressionWithPattern:@"(\\b|_)\\d{4}(?:-\\d{2}){2}(\\b|_)" options:0 error:nullptr];
+	return [regex stringByReplacingMatchesInString:srcPath options:0 range:NSMakeRange(0, [srcPath length]) withTemplate:[NSString stringWithFormat:@"$1%@$2", todaysDate]];
 }
 
 @interface OakFileManager ()
