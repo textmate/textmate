@@ -2,6 +2,16 @@ Title: Release Notes
 
 # Changes
 
+## 2015-03-25 (v2.0-beta.7)
+
+* Running a command that takes “selection” as input when there are discontinuous selections will now join the selections with LF and provide it all to the command. Furthermore, the result from the command will be split on LF and replace the respective selections. Most commands are not suited for this, but a useful scenario is enumerating items, for example use _Find All_ or similar to obtain multiple carets/selections, then use _Filter Through Command…_ (⌘|) and run `seq 100` (assuming there are less than 100 carets/selections). Feature prompted by this [mailing list post](http://lists.macromates.com/textmate/2015-February/038465.html).
+* When duplicating an item in the file browser (⌘D) we check if it contains a date string (`YYYY-MM-DD`), and if so, update that to today’s date instead of adding “copy” to the name.
+* When holding down command (⌘) and clicking an existing selection, we now undo that selection. This is useful when creating discontinuous selections with the mouse.
+* Clicking middle mouse button on a tab is now shorthand for closing the tab. *[Koen Punt]*
+* Visual improvements for tabs and file browser on Yosemite. *[Adam Strzelecki]*
+* Increasing and decreasing font size (⌘+ / ⌘-) now shows the current scale factor to make it easy to get back to 100%.
+* See [all changes since v2.0-beta.6.8](https://github.com/textmate/textmate/compare/v2.0-beta.6.8...v2.0-beta.7)
+
 ## 2015-02-03 (v2.0-beta.6.8)
 
 * Various fixes.
