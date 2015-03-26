@@ -89,7 +89,7 @@ static void launch_app (bool disableUntitled)
 	OSStatus err = LSOpenApplication(&appParams, NULL);
 	if(err != noErr)
 	{
-		fprintf(stderr, "Can’t launch TextMate.app (error %d)", (int)err);
+		fprintf(stderr, "Can’t launch TextMate.app (error %d)\n", (int)err);
 		exit(EX_UNAVAILABLE);
 	}
 }
