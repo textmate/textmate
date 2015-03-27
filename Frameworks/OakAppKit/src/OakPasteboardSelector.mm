@@ -298,6 +298,7 @@ static size_t line_count (std::string const& text)
 	{
 		[self setShouldCascadeWindows:NO];
 		[self window];
+		self.window.hasShadow = YES;
 	}
 	return self;
 }
