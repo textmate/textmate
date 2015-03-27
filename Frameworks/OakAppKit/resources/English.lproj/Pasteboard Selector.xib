@@ -41,7 +41,7 @@
 				<int key="NSWindowStyleMask">1</int>
 				<int key="NSWindowBacking">2</int>
 				<string key="NSWindowRect">{{775, 466}, {261, 310}}</string>
-				<int key="NSWTFlags">-529002496</int>
+				<int key="NSWTFlags">-529006592</int>
 				<string key="NSWindowTitle">Pasteboard History</string>
 				<string key="NSWindowClass">OakBorderlessPanel</string>
 				<object class="NSMutableString" key="NSViewClass">
@@ -210,7 +210,7 @@
 					<reference key="NSWindow"/>
 					<reference key="NSNextKeyView" ref="957556160"/>
 				</object>
-				<string key="NSScreenRect">{{0, 0}, {1680, 1028}}</string>
+				<string key="NSScreenRect">{{0, 0}, {2560, 1418}}</string>
 				<string key="NSMinSize">{253, 166}</string>
 				<string key="NSMaxSize">{10000000000000, 10000000000000}</string>
 				<bool key="NSWindowIsRestorable">YES</bool>
