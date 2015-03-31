@@ -112,7 +112,7 @@ For the `TextMate.app` application:
 	ninja TextMate/tbz       # Create a tarball of TextMate.app. Also produce the dsym tarball.
 	ninja TextMate/deploy    # Push a nightly build. Fails without proper credentials :)
 
-Note that `ninja TextMate/clean` only cleans the TextMate build folder (`$builddir/Applications/TextMate`) but all libraries and applications it depends on, are not cleaned.
+Note that `ninja TextMate/clean` only cleans the TextMate build folder (`$builddir/Applications/TextMate`), but all libraries and applications it depends on are not cleaned.
 
 To clean everything run:
 
