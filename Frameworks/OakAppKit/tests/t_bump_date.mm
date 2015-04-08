@@ -3,9 +3,12 @@
 
 void test_bump_date ()
 {
-	NSDate* date = [NSDate dateWithString:@"2015-03-25 00:00:00 +0000"];
+	NSDate* date = [NSDate date];
+	NSDateFormatter* dateFmt = [NSDateFormatter new];
+	dateFmt.dateFormat = @"yyyy-MM-dd";
+	NSString* formatted = [dateFmt stringFromDate:date];
 
-	OAK_ASSERT_EQ(to_s(OakReplaceDateInString(@"2014-03-02 Invoice 37.tex", date)),   "2015-03-25 Invoice 37.tex");
-	OAK_ASSERT_EQ(to_s(OakReplaceDateInString(@"2014-03-02_Invoice 37.tex", date)),   "2015-03-25_Invoice 37.tex");
-	OAK_ASSERT_EQ(to_s(OakReplaceDateInString(@"Invoice 37 (2014-03-02).tex", date)), "Invoice 37 (2015-03-25).tex");
+	OAK_ASSERT_EQ(to_s(OakReplaceDateInString(@"2014-03-02 Invoice 37.tex", date)),   to_s([NSString stringWithFormat:@"%@ Invoice 37.tex", formatted]));
+	OAK_ASSERT_EQ(to_s(OakReplaceDateInString(@"2014-03-02_Invoice 37.tex", date)),   to_s([NSString stringWithFormat:@"%@_Invoice 37.tex", formatted]));
+	OAK_ASSERT_EQ(to_s(OakReplaceDateInString(@"Invoice 37 (2014-03-02).tex", date)), to_s([NSString stringWithFormat:@"Invoice 37 (%@).tex", formatted]));
 }
