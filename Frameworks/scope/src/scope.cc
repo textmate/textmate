@@ -13,7 +13,7 @@ namespace scope
 	// = scope_t::node_t =
 	// ===================
 
-	scope_t::node_t::node_t (std::string const& atoms, node_t* parent) : _atoms(atoms), _parent(parent), _retain_count(1)
+	scope_t::node_t::node_t (std::string const& atoms, node_t* parent) : _atoms(atoms), _parent(parent), _retain_count(1), _hash(std::hash<std::string>()(atoms) ^ (parent ? parent->_hash : 0))
 	{
 	}
 
@@ -174,6 +174,8 @@ namespace scope
 
 	bool scope_t::operator!= (scope_t const& rhs) const   { return !(*this == rhs); }
 	scope_t::operator bool () const                       { return !empty(); }
+
+	size_t scope_t::hash () const { return node ? node->_hash : 0 ; }
 
 	scope_t shared_prefix (scope_t const& lhs, scope_t const& rhs)
 	{
