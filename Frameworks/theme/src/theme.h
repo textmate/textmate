@@ -3,6 +3,7 @@
 
 #include <bundles/bundles.h>
 #include <scope/scope.h>
+#include <sparsehash/dense_hash_map>
 
 typedef std::shared_ptr<struct __CTFont const> CTFontPtr;
 typedef std::shared_ptr<struct CGColor> CGColorPtr;
@@ -11,6 +12,7 @@ struct PUBLIC styles_t
 {
 	styles_t (CGColorPtr foreground, CGColorPtr background, CGColorPtr caret, CGColorPtr selection, CTFontPtr font, bool underlined, bool misspelled) : _foreground(foreground), _background(background), _caret(caret), _selection(selection), _font(font), _underlined(underlined), _misspelled(misspelled) { }
 
+	styles_t () = default;
 	CGColorRef foreground () const { return _foreground.get(); }
 	CGColorRef background () const { return _background.get(); }
 	CGColorRef caret () const      { return _caret.get(); }
@@ -140,7 +142,7 @@ private:
 	std::string _font_name;
 	CGFloat _font_size;
 
-	mutable std::map<std::string, styles_t> _cache;
+	mutable google::dense_hash_map<scope::scope_t, styles_t> _cache;
 };
 
 PUBLIC theme_ptr parse_theme (bundles::item_ptr const& themeItem);

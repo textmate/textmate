@@ -178,6 +178,7 @@ theme_ptr theme_t::copy_with_font_name_and_size (std::string const& fontName, CG
 theme_t::theme_t (bundles::item_ptr const& themeItem, std::string const& fontName, CGFloat fontSize) :_item(themeItem), _font_name(fontName), _font_size(fontSize)
 {
 	_styles = find_shared_styles(themeItem);
+	_cache.set_empty_key(scope::scope_t{});
 }
 
 static CGColorRef OakColorCreateCopySoften (CGColorPtr cgColor, CGFloat factor)
@@ -377,8 +378,7 @@ styles_t const& theme_t::styles_for_scope (scope::scope_t const& scope) const
 {
 	ASSERT(scope);
 
-	std::string const key = to_s(scope);
-	std::map<std::string, styles_t>::iterator styles = _cache.find(key);
+	auto styles = _cache.find(scope);
 	if(styles == _cache.end())
 	{
 		std::multimap<double, decomposed_style_t> ordering;
@@ -413,7 +413,7 @@ styles_t const& theme_t::styles_for_scope (scope::scope_t const& scope) const
 		CGColorPtr selection  = OakColorCreateFromThemeColor(base.selection,  _styles->_color_space) ?: CGColorPtr(CGColorCreate(_styles->_color_space, (CGFloat[4]){ 0.5, 0.5, 0.5,   1 }), CGColorRelease);
 
 		styles_t res(foreground, background, caret, selection, font, base.underlined == bool_true, base.misspelled == bool_true);
-		styles = _cache.emplace(key, res).first;
+		styles = _cache.insert(std::make_pair(scope, res)).first;
 	}
 	return styles->second;
 }
