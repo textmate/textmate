@@ -1,4 +1,5 @@
 #include "info.h"
+#include <boost/thread/tss.hpp>
 #include <oak/debug.h>
 
 /* CrashReporter info */
@@ -58,8 +59,11 @@ namespace
 
 	static stack_t& stack ()
 	{
-		thread_local stack_t stack;
-		return stack;
+		static boost::thread_specific_ptr<stack_t> stackPtr;
+		if(!stackPtr.get())
+			stackPtr.reset(new stack_t);
+
+		return *stackPtr;
 	}
 }
 
