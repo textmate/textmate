@@ -1,6 +1,7 @@
 #include "glob.h"
 #include "parse_glob.h"
 #include "parser_base.h"
+#include "format_string.h"
 #include <oak/oak.h>
 #include <oak/debug.h>
 
@@ -9,6 +10,11 @@ OAK_DEBUG_VAR(Glob_Parser);
 
 namespace path
 {
+	std::string glob_t::escape (std::string const& src)
+	{
+		return format_string::replace(src, "[\\[\\\\?*{~!]", "\\\\$0");
+	}
+
 	void glob_t::setup (std::string const& glob, bool matchDotFiles, bool caseSensitive)
 	{
 		std::string ptrn = convert_glob_to_regexp(glob, matchDotFiles);

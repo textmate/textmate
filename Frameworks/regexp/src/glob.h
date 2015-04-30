@@ -11,6 +11,7 @@ namespace path
 		glob_t (std::string const& glob, bool matchDotFiles = false, bool caseSensitive = true) { setup(glob, matchDotFiles, caseSensitive); }
 
 		bool does_match (std::string const& filename) const;
+		static std::string escape (std::string const& src);
 
 	private:
 		friend std::string to_s (glob_t const& glob);

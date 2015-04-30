@@ -276,3 +276,9 @@ void test_glob_brace_expansion_match ()
 	OAK_ASSERT(path::glob_t("{foo,{bar},baz}.txt").does_match("{bar}.txt"));
 	OAK_ASSERT(path::glob_t("{foo,{bar},baz}.txt").does_match("baz.txt"));
 }
+
+void test_escape_glob ()
+{
+	OAK_ASSERT_EQ(path::glob_t::escape("Movie [2015].mp4~backup"), "Movie \\[2015].mp4\\~backup");
+	OAK_ASSERT_EQ(path::glob_t::escape("Movie {***}.mp4"), "Movie \\{\\*\\*\\*}.mp4");
+}
