@@ -1166,7 +1166,8 @@ doScroll:
 {
 	D(DBF_OakTextView_TextInput, bug("%s\n", sel_getName(aSelector)););
 	AUTO_REFRESH;
-	[self tryToPerform:aSelector with:self];
+	if(![self tryToPerform:aSelector with:self])
+		NSBeep();
 }
 
 - (NSInteger)windowLevel
