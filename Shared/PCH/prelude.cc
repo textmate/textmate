@@ -7,6 +7,7 @@
 #include "prelude-mac.h"
 
 #include <algorithm>
+#include <cstdlib>
 #include <cmath>
 #include <deque>
 #include <functional>
