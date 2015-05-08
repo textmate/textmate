@@ -37,6 +37,22 @@ done
 
 test -L "${builddir}/include/boost" || error "*** boost not installed."
 
+# ===========================================
+# = Check if google sparsehash is installed =
+# ===========================================
+
+if which -s brew && [[ -z "$sparsedir" && ! -d /usr/local/include/sparsehash ]]; then
+	sparsedir=$(brew --prefix google-sparsehash)/include/sparsehash
+fi
+for dir in "${sparsedir:-/usr/include/sparsehash}" /{opt,usr}/local/include/sparsehash/ ; do
+	if [[ ! -L "${builddir}/include/sparsehash" && -d "${dir}" ]]; then
+		mkdir -p "${builddir}/include" && ln -fs "${dir}" "${builddir}/include/sparsehash"
+	fi
+done
+
+test -L "${builddir}/include/sparsehash" || error "*** google sparsehash not installed."
+ 
+ 
 # ===============================================
 # = Check if we can use pbzip2 instead of bzip2 =
 # ===============================================
