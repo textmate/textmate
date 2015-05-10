@@ -9,11 +9,12 @@ typedef std::shared_ptr<struct CGColor> CGColorPtr;
 
 struct PUBLIC styles_t
 {
-	styles_t (CGColorPtr foreground, CGColorPtr background, CGColorPtr caret, CGColorPtr selection, CTFontPtr font, bool underlined, bool misspelled) : _foreground(foreground), _background(background), _caret(caret), _selection(selection), _font(font), _underlined(underlined), _misspelled(misspelled) { }
+	styles_t (CGColorPtr foreground, CGColorPtr background, CGColorPtr highlight, CGColorPtr caret, CGColorPtr selection, CTFontPtr font, bool underlined, bool misspelled) : _foreground(foreground), _background(background), _highlight(highlight), _caret(caret), _selection(selection), _font(font), _underlined(underlined), _misspelled(misspelled) { }
 
 	styles_t () = default;
 	CGColorRef foreground () const { return _foreground.get(); }
 	CGColorRef background () const { return _background.get(); }
+	CGColorRef highlight () const  { return _highlight.get(); }
 	CGColorRef caret () const      { return _caret.get(); }
 	CGColorRef selection () const  { return _selection.get(); }
 	CTFontRef font () const        { return _font.get(); }
@@ -23,6 +24,7 @@ struct PUBLIC styles_t
 private:
 	CGColorPtr _foreground;
 	CGColorPtr _background;
+	CGColorPtr _highlight;
 	CGColorPtr _caret;
 	CGColorPtr _selection;
 	CTFontPtr _font;
@@ -100,6 +102,7 @@ private:
 		CGFloat font_size;
 		color_info_t foreground;
 		color_info_t background;
+		color_info_t highlight;
 		color_info_t caret;
 		color_info_t selection;
 		color_info_t invisibles;
