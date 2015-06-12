@@ -36,6 +36,7 @@ namespace ng
 	PUBLIC ranges_t extend_if_empty (buffer_t const& buffer, ranges_t const& selection, select_unit_type const unit, layout_movement_t const* layout = NULL);
 	PUBLIC ranges_t select_scope (buffer_t const& buffer, ranges_t const& selection, scope::selector_t const& scopeSelector);
 	PUBLIC ranges_t toggle_columnar (ranges_t const& selection);
+	PUBLIC ranges_t deselect_last (ranges_t const& selection);
 	PUBLIC scope::context_t scope (buffer_t const& buffer, ranges_t const& selection, std::string const& extraAttributes = NULL_STR);
 	PUBLIC ranges_t highlight_ranges_for_movement (buffer_t const& buffer, ranges_t const& oldSelection, ranges_t const& newSelection);
 	PUBLIC std::map< range_t, std::map<std::string, std::string> > find (buffer_t const& buffer, ranges_t const& selection, std::string const& searchFor, find::options_t options, ranges_t const& searchRanges = ranges_t(), bool* didWrap = nullptr);

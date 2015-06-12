@@ -71,6 +71,7 @@ namespace ng
 		kSelectParagraph,
 		kSelectWord,
 		kToggleColumnSelection,
+		kDeselectLast,
 
 		kFindNext,
 		kFindPrevious,

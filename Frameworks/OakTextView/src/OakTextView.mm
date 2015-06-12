@@ -303,6 +303,7 @@ typedef std::shared_ptr<links_t> links_ptr;
 
 	links_ptr _links;
 }
+- (void)deselectLast:(id)sender;
 - (void)ensureSelectionIsInVisibleArea:(id)sender;
 - (void)updateChoiceMenu:(id)sender;
 - (void)resetBlinkCaretTimer;
@@ -3914,6 +3915,7 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 - ACTION(selectLine);
 - ACTION(selectParagraph);
 - ACTION(selectWord);
+- ACTION(deselectLast);
 
 // ==========
 // = Delete =

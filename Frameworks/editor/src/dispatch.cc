@@ -110,6 +110,7 @@ namespace ng
 			{ "selectParagraph:",                                   kSelectParagraph                              },
 			{ "selectWord:",                                        kSelectWord                                   },
 			{ "toggleColumnSelection:",                             kToggleColumnSelection                        },
+			{ "deselectLast:",                                      kDeselectLast                                 },
 
 			{ "findNext:",                                          kFindNext                                     },
 			{ "findPrevious:",                                      kFindPrevious                                 },

@@ -926,6 +926,7 @@ namespace ng
 			case kSelectParagraph:                              _selections = ng::extend(_buffer, _selections, kSelectionExtendToParagraph,        layout); break;
 			case kSelectWord:                                   _selections = ng::extend(_buffer, _selections, kSelectionExtendToWord,             layout); break;
 			case kToggleColumnSelection:                        _selections = ng::toggle_columnar(_selections);                                             break;
+			case kDeselectLast:                                 _selections = ng::deselect_last(_selections);                                               break;
 
 			case kFindNext:
 			case kFindPrevious:
