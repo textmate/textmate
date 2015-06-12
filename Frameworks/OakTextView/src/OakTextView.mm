@@ -263,7 +263,6 @@ typedef std::shared_ptr<links_t> links_ptr;
 
 	OakTimer* initiateDragTimer;
 	OakTimer* dragScrollTimer;
-	NSDate* optionDownDate;
 	BOOL showDragCursor;
 	BOOL showColumnSelectionCursor;
 	BOOL ignoreMouseDown;  // set when the mouse down is the same event which caused becomeFirstResponder:
@@ -312,7 +311,9 @@ typedef std::shared_ptr<links_t> links_ptr;
 - (void)redisplayFrom:(size_t)from to:(size_t)to;
 - (NSImage*)imageForRanges:(ng::ranges_t const&)ranges imageRect:(NSRect*)outRect;
 @property (nonatomic, readonly) ng::ranges_t const& markedRanges;
-@property (nonatomic) NSDate* optionDownDate;
+@property (nonatomic) NSDate* lastFlagsChangeDate;
+@property (nonatomic) NSUInteger lastFlags;
+@property (nonatomic) NSUInteger flagsState;
 @property (nonatomic) OakTimer* initiateDragTimer;
 @property (nonatomic) OakTimer* dragScrollTimer;
 @property (nonatomic) BOOL showDragCursor;
@@ -549,7 +550,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 @end
 
 @implementation OakTextView
-@synthesize initiateDragTimer, dragScrollTimer, optionDownDate, showColumnSelectionCursor, showDragCursor, choiceMenu;
+@synthesize initiateDragTimer, dragScrollTimer, showColumnSelectionCursor, showDragCursor, choiceMenu;
 @synthesize markedRanges;
 @synthesize refreshNestCount;
 @synthesize liveSearchString, liveSearchRanges;
@@ -1969,31 +1970,48 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 
 - (void)flagsChanged:(NSEvent*)anEvent
 {
+	typedef NS_ENUM(NSUInteger, OakFlagsState) {
+		OakFlagsStateClear = 0,
+		OakFlagsStateOptionDown,
+		OakFlagsStateShiftDown,
+		OakFlagsStateShiftTapped,
+		OakFlagsStateSecondShiftDown,
+	};
+
 	AUTO_REFRESH;
-	NSInteger modifiers       = [anEvent modifierFlags] & (NSAlternateKeyMask | NSControlKeyMask | NSCommandKeyMask);
-	BOOL isHoldingOption      = modifiers & NSAlternateKeyMask ? YES : NO;
-	BOOL didPressOption       = modifiers == NSAlternateKeyMask;
-	BOOL didReleaseOption     = modifiers == 0 && optionDownDate && [[NSDate date] timeIntervalSinceDate:optionDownDate] < 0.18;
-	BOOL isSelectingWithMouse = ([NSEvent pressedMouseButtons] & 1) && editor->has_selection();
+	NSInteger modifiers  = [anEvent modifierFlags] & (NSAlternateKeyMask | NSControlKeyMask | NSCommandKeyMask | NSShiftKeyMask);
+	BOOL isHoldingOption = modifiers & NSAlternateKeyMask ? YES : NO;
 
-	D(DBF_OakTextView_TextInput, bug("press option %s, release option %s, is selecting with mouse %s\n", BSTR(didPressOption), BSTR(didReleaseOption), BSTR(isSelectingWithMouse)););
 	self.showColumnSelectionCursor = isHoldingOption;
-	self.optionDownDate            = nil;
-
-	if(isSelectingWithMouse)
+	if(([NSEvent pressedMouseButtons] & 1) && editor->has_selection())
 	{
 		if(editor->ranges().last().columnar != isHoldingOption)
 			[self toggleColumnSelection:self];
 	}
 
-	// this checks if the ‘flags changed’ is caused by left/right option — the virtual key codes aren’t documented anywhere and in theory they could correspond to other keys, but worst case user lose the ability to toggle column selection by single-clicking option
-	if([anEvent keyCode] != 58 && [anEvent keyCode] != 61)
-		return;
+	BOOL tapThreshold     = [[NSDate date] timeIntervalSinceDate:_lastFlagsChangeDate] < 0.18;
 
+	BOOL didPressShift    = modifiers == NSShiftKeyMask && _lastFlags == 0;
+	BOOL didReleaseShift  = modifiers == 0 && _lastFlags == NSShiftKeyMask;
+
+	BOOL didPressOption   = (modifiers & ~NSShiftKeyMask) == NSAlternateKeyMask && (_lastFlags & ~NSShiftKeyMask) == 0;
+	BOOL didReleaseOption = (modifiers & ~NSShiftKeyMask) == 0 && (_lastFlags & ~NSShiftKeyMask) == NSAlternateKeyMask;
+
+	OakFlagsState newFlagsState = OakFlagsStateClear;
 	if(didPressOption)
-		self.optionDownDate = [NSDate date];
-	else if(didReleaseOption)
+		newFlagsState = OakFlagsStateOptionDown;
+	else if(didReleaseOption && tapThreshold && _flagsState == OakFlagsStateOptionDown)
 		[self toggleColumnSelection:self];
+	else if(didPressShift)
+		newFlagsState = _flagsState == OakFlagsStateShiftTapped && tapThreshold ? OakFlagsStateSecondShiftDown : OakFlagsStateShiftDown;
+	else if(didReleaseShift && tapThreshold && _flagsState == OakFlagsStateSecondShiftDown)
+		[self deselectLast:self];
+	else if(didReleaseShift && tapThreshold)
+		newFlagsState = OakFlagsStateShiftTapped;
+
+	self.lastFlags           = modifiers;
+	self.lastFlagsChangeDate = [NSDate date];
+	self.flagsState          = newFlagsState;
 }
 
 - (void)insertText:(id)aString
