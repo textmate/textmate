@@ -2956,7 +2956,15 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		[self setNeedsDisplay:YES];
 	}
 
-	auto nextMisspelling = buf.next_misspelling(editor->ranges().last().last.index);
+	ng::index_t caret = editor->ranges().last().last;
+	if(!editor->has_selection())
+	{
+		ng::range_t wordRange = ng::extend(buf, caret, kSelectionExtendToWord).last();
+		if(caret <= wordRange.max())
+			caret = wordRange.min();
+	}
+
+	auto nextMisspelling = buf.next_misspelling(caret.index);
 	if(nextMisspelling.first != nextMisspelling.second)
 	{
 		{
