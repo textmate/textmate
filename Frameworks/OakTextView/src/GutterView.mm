@@ -3,6 +3,7 @@
 #import <OakAppKit/NSImage Additions.h>
 #import <OakAppKit/NSColor Additions.h>
 #import <OakFoundation/NSString Additions.h>
+#import <Preferences/Keys.h>
 #import <text/types.h>
 #import <cf/cf.h>
 #import <cf/cgrect.h>
@@ -38,6 +39,7 @@ struct data_source_t
 	NSPoint mouseHoveringAtPoint;
 }
 @property (nonatomic) NSSize size;
+@property (nonatomic) BOOL antiAlias;
 - (CGFloat)widthForColumnWithIdentifier:(std::string const&)identifier;
 - (data_source_t*)columnWithIdentifier:(std::string const&)identifier;
 
@@ -61,9 +63,17 @@ struct data_source_t
 		mouseDownAtPoint     = NSMakePoint(-1, -1);
 		mouseHoveringAtPoint = NSMakePoint(-1, -1);
 
+		[self userDefaultsDidChange:nil];
+
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cursorDidHide:) name:OakCursorDidHideNotification object:nil];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
 	}
 	return self;
+}
+
+- (void)userDefaultsDidChange:(id)sender
+{
+	self.antiAlias = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableAntiAliasKey];
 }
 
 - (void)updateTrackingAreas
@@ -317,6 +327,9 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 	[self.selectionBorderColor set];
 	for(auto const& rect : borderRects)
 		NSRectFillUsingOperation(NSIntersectionRect(rect, NSIntersectionRect(aRect, self.frame)), NSCompositeSourceOver);
+
+	if(!self.antiAlias)
+		CGContextSetShouldAntialias((CGContextRef)[[NSGraphicsContext currentContext] graphicsPort], false);
 
 	std::pair<NSUInteger, NSUInteger> prevLine(NSNotFound, 0);
 	for(CGFloat y = NSMinY(aRect); y < NSMaxY(aRect); )
