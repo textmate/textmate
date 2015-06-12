@@ -68,7 +68,7 @@ PUBLIC extern NSString* const kUserDefaultsLicenseOwnerKey;
 // = Appearance =
 // ==============
 
-PUBLIC extern NSString* const kUserDefaultsAntiAliasKey;
+PUBLIC extern NSString* const kUserDefaultsDisableAntiAliasKey;
 PUBLIC extern NSString* const kUserDefaultsLineNumbersKey;
 
 // =========

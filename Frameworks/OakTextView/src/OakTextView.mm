@@ -21,6 +21,7 @@
 #import <buffer/indexed_map.h>
 #import <BundleMenu/BundleMenu.h>
 #import <BundlesManager/BundlesManager.h>
+#import <Preferences/Keys.h>
 #import <bundles/bundles.h>
 #import <cf/cf.h>
 #import <command/runner.h>
@@ -53,7 +54,6 @@ int32_t const NSWrapColumnAskUser     = -1;
 
 NSString* const kUserDefaultsWrapColumnPresetsKey  = @"wrapColumnPresets";
 NSString* const kUserDefaultsFontSmoothingKey      = @"fontSmoothing";
-NSString* const kUserDefaultsDisableAntiAliasKey   = @"disableAntiAlias";
 NSString* const kUserDefaultsDisableTypingPairsKey = @"disableTypingPairs";
 NSString* const kUserDefaultsScrollPastEndKey      = @"scrollPastEnd";
 
