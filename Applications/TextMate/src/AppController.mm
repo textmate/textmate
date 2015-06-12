@@ -24,6 +24,7 @@
 #import <io/path.h>
 #import <network/tbz.h>
 #import <ns/ns.h>
+#import <license/license.h>
 #import <oak/debug.h>
 #import <oak/compat.h>
 #import <oak/oak.h>
@@ -148,13 +149,31 @@ BOOL HasDocumentWindow (NSArray* windows)
 	NSDate* warningDate    = [compileDate dateByAddingTimeInterval: 90*kSecondsPerDay];
 	NSDate* expirationDate = [compileDate dateByAddingTimeInterval:180*kSecondsPerDay];
 
+	if([currentDate laterDate:warningDate] == warningDate)
+		return (void)[NSTimer scheduledTimerWithTimeInterval:7 * kSecondsPerDay target:self selector:@selector(checkExpirationDate:) userInfo:nil repeats:NO];
+
+	for(auto owner : license::find_all())
+	{
+		if(license::is_valid(license::decode(license::find(owner)), owner))
+			return;
+	}
+
 	if([currentDate laterDate:expirationDate] == currentDate)
 	{
-		NSInteger choice = NSRunAlertPanel(@"TextMate is Outdated!", @"You can get a new version from https://macromates.com/download.", @"Visit Website", nil, nil);
-		if(choice == NSAlertDefaultReturn) // "Visit Website"
-			[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://macromates.com/download"]];
-		[DocumentController disableSessionSave];
-		[NSApp terminate:self];
+		NSInteger choice = NSRunAlertPanel(@"TextMate is Outdated!", @"You can get a new version from https://macromates.com/download.", @"Visit Website", @"Enter License", nil);
+		if(choice == NSAlertAlternateReturn) // "Enter License"
+		{
+			[[RegistrationWindowController sharedInstance] showWindow:self];
+			[NSTimer scheduledTimerWithTimeInterval:1 * kSecondsPerDay target:self selector:@selector(checkExpirationDate:) userInfo:nil repeats:NO];
+		}
+		else
+		{
+			if(choice == NSAlertDefaultReturn) // "Visit Website"
+				[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://macromates.com/download"]];
+
+			[DocumentController disableSessionSave];
+			[NSApp terminate:self];
+		}
 	}
 	else if([currentDate laterDate:warningDate] == currentDate)
 	{
@@ -164,7 +183,6 @@ BOOL HasDocumentWindow (NSArray* windows)
 		if(choice == NSAlertAlternateReturn) // "Check for Updates"
 			[[SoftwareUpdate sharedInstance] checkForUpdates:self];
 	}
-	[NSTimer scheduledTimerWithTimeInterval:7 * kSecondsPerDay target:self selector:@selector(checkExpirationDate:) userInfo:nil repeats:NO];
 }
 
 - (void)applicationWillFinishLaunching:(NSNotification*)aNotification
