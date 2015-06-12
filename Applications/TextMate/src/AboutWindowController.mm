@@ -20,7 +20,7 @@ static NSData* Digest (NSString* someString)
 // = Registration Window =
 // =======================
 
-@interface RegistrationWindowController : NSWindowController <NSWindowDelegate>
+@interface RegistrationWindowController () <NSWindowDelegate>
 @property (nonatomic) NSTextField*        ownerLabel;
 @property (nonatomic) NSTextField*        ownerTextField;
 @property (nonatomic) NSTextField*        licenseLabel;
@@ -61,6 +61,7 @@ static NSTextField* OakCreateTextField ()
 	{
 		self.window.title     = @"Add License";
 		self.window.delegate  = self;
+		self.window.level     = NSModalPanelWindowLevel;
 
 		self.ownerLabel       = OakCreateLabel(@"Owner:", nil, NSRightTextAlignment);
 		self.ownerTextField   = OakCreateTextField();
