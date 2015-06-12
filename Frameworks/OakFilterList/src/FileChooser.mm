@@ -495,6 +495,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 - (void)updateFilterString:(NSString*)aString
 {
 	NSString* oldFilter = [(_globString ?: _filterString ?: @"") copy];
+	aString = [aString decomposedStringWithCanonicalMapping];
 
 	NSRegularExpression* const ptrn = [NSRegularExpression regularExpressionWithPattern:@"\\A(?:(.*?\\*.*?)|(.*?))(?::([\\d+:-x\\+]*)|@(.*))?\\z" options:NSAnchoredSearch error:nil];
 	NSTextCheckingResult* m = aString ? [ptrn firstMatchInString:aString options:NSMatchingAnchored range:NSMakeRange(0, [aString length])] : nil;

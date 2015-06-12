@@ -221,7 +221,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 - (void)updateItems:(id)sender
 {
 	NSArray* bindings = [[OakAbbreviations abbreviationsForName:@"OakFavoriteChooserBindings"] stringsForAbbreviation:self.filterString];
-	std::string const filter = to_s(self.filterString);
+	std::string const filter = to_s([self.filterString decomposedStringWithCanonicalMapping]);
 
 	std::multimap<double, NSDictionary*> ranked;
 	for(NSDictionary* item in _originalItems)
