@@ -11,6 +11,8 @@
 
 namespace ng
 {
+	find::options_t convert (std::map<std::string, std::string> const& options);
+
 	enum action_t
 	{
 		kMoveBackward,

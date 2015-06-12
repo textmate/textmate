@@ -59,7 +59,7 @@ namespace ng
 		return str;
 	}
 
-	static find::options_t convert (std::map<std::string, std::string> const& options)
+	find::options_t convert (std::map<std::string, std::string> const& options)
 	{
 		static struct { std::string key; find::options_t flag; } const optionMap[] =
 		{
