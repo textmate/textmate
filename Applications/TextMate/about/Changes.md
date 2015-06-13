@@ -2,6 +2,14 @@ Title: Release Notes
 
 # Changes
 
+## 2015-06-13 (v2.0-beta.7.2)
+
+* If you do not want to be told that TextMate is outdated then go to _About TextMate → Registration_ and add your license key.
+* It is now possible to double-tap the shift key (⇧) to either deselect the last discontinuous selection made, e.g. if you use ⌃W to “find and select next” and hit it once too many. Additionally, when there are multiple carets, double-tapping shift will remove all but the first caret.
+* When playing a macro that uses the `findWithOptions:` command and there are no find or replace string (among its arguments), TextMate will now use values from the find/replace clipboards (i.e. current string). This is useful if your macro copies content to the find or replace clipboard.
+* Using _Check Spelling_ (⌘;) would previously find the next misspelled word (to the right of the caret). Now it will start with the word touched by the caret. This way, it is possible to type a word and immediately check it, without first moving to the beginning of the word. Alternatively one can press ⌥F2 to show the context menu for the word at the caret, which includes spelling suggestions, incase the word is misspelled.
+* See [all changes since v2.0-beta.7](https://github.com/textmate/textmate/compare/v2.0-beta.7...v2.0-beta.7.2)
+
 ## 2015-03-25 (v2.0-beta.7)
 
 * Running a command that takes “selection” as input when there are discontinuous selections will now join the selections with LF and provide it all to the command. Furthermore, the result from the command will be split on LF and replace the respective selections. Most commands are not suited for this, but a useful scenario is enumerating items, for example use _Find All_ or similar to obtain multiple carets/selections, then use _Filter Through Command…_ (⌘|) and run `seq 100` (assuming there are less than 100 carets/selections). Feature prompted by this [mailing list post](http://lists.macromates.com/textmate/2015-February/038465.html).
