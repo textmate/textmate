@@ -28,7 +28,7 @@ LN_FLAGS += -rpath @executable_path/../Frameworks
 CXX_FLAGS += -I"$capnp_prefix/include"
 LN_FLAGS  += -L"$capnp_prefix/lib"
 
-LN_FLAGS += -lboost_thread-mt
+LN_FLAGS += /usr/local/lib/libboost_thread-mt.a /usr/local/lib/libboost_system-mt.a
 
 PRELUDE = Shared/PCH/prelude.*
 
