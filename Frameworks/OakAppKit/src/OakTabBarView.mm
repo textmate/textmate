@@ -811,18 +811,25 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 
 - (void)reloadData
 {
+	NSMutableDictionary* oldTabs = [NSMutableDictionary dictionary];
+	for(OakTabItem* tabItem in _tabItems)
+		oldTabs[tabItem.identifier] = tabItem;
+
+	BOOL skipDraggedTab = NO;
+	if(_draggedTabItem)
+	{
+		skipDraggedTab = [oldTabs objectForKey:_draggedTabItem.identifier] != nil;
+		oldTabs[_draggedTabItem.identifier] = _draggedTabItem;
+	}
+
 	NSUInteger newCount = [_dataSource numberOfRowsInTabBarView:self];
-	NSUInteger oldCount = _tabItems.count;
+	NSUInteger oldCount = oldTabs.count;
 
 	if(newCount != oldCount && _overflowTabItem)
 	{
 		_overflowTabItem.tabItemView.showOverflowButton = NO;
 		_overflowTabItem = nil;
 	}
-
-	NSMutableDictionary* oldTabs = [NSMutableDictionary dictionary];
-	for(OakTabItem* tabItem in _tabItems)
-		oldTabs[tabItem.identifier] = tabItem;
 
 	NSMutableArray* newTabs = [NSMutableArray array];
 	for(NSUInteger i = 0; i < newCount; ++i)
@@ -845,7 +852,9 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 
 			[oldTabs removeObjectForKey:identifier];
 		}
-		[newTabs addObject:tabItem];
+
+		if(skipDraggedTab || tabItem != _draggedTabItem)
+			[newTabs addObject:tabItem];
 	}
 
 	for(NSString* key in oldTabs)
