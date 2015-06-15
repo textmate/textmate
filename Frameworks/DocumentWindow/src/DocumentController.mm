@@ -35,7 +35,6 @@
 static NSString* const kUserDefaultsAlwaysFindInDocument = @"alwaysFindInDocument";
 static NSString* const kUserDefaultsDisableFolderStateRestore = @"disableFolderStateRestore";
 static NSString* const kUserDefaultsHideStatusBarKey = @"hideStatusBar";
-static NSString* const OakDocumentPboardType = @"OakDocumentPboardType"; // drag’n’drop of tabs
 static BOOL IsInShouldTerminateEventLoop = NO;
 
 @interface QuickLookNSURLWrapper : NSObject <QLPreviewItem>
@@ -1756,27 +1755,9 @@ namespace
 // = Tab Dragging =
 // ================
 
-- (void)setupPasteboard:(NSPasteboard*)aPasteboard forTabAtIndex:(NSUInteger)draggedTabIndex
+- (BOOL)performDropOfTabItem:(OakTabItem*)tabItem fromTabBar:(OakTabBarView*)sourceTabBar index:(NSUInteger)dragIndex toTabBar:(OakTabBarView*)destTabBar index:(NSUInteger)droppedIndex operation:(NSDragOperation)operation
 {
-	document::document_ptr document = _documents[draggedTabIndex];
-	if(document->path() != NULL_STR)
-	{
-		[aPasteboard addTypes:@[ NSFilenamesPboardType ] owner:nil];
-		[aPasteboard setPropertyList:@[ [NSString stringWithCxxString:document->path()] ] forType:NSFilenamesPboardType];
-	}
-
-	[aPasteboard addTypes:@[ OakDocumentPboardType ] owner:nil];
-	[aPasteboard setPropertyList:@{
-		@"index"       : @(draggedTabIndex),
-		@"document"    : [NSString stringWithCxxString:document->identifier()],
-		@"collection"  : self.identifier,
-	} forType:OakDocumentPboardType];
-}
-
-- (BOOL)performTabDropFromTabBar:(OakTabBarView*)aTabBar atIndex:(NSUInteger)droppedIndex fromPasteboard:(NSPasteboard*)aPasteboard operation:(NSDragOperation)operation
-{
-	NSDictionary* plist = [aPasteboard propertyListForType:OakDocumentPboardType];
-	document::document_ptr srcDocument = document::find(to_s(plist[@"document"]));
+	document::document_ptr srcDocument = document::find(to_s(tabItem.identifier));
 	if(!srcDocument)
 		return NO;
 
@@ -1792,15 +1773,14 @@ namespace
 			self.selectedTabIndex = iter - newDocuments.begin();
 	}
 
-	oak::uuid_t srcProjectId = to_s(plist[@"collection"]);
-	if(operation == NSDragOperationMove && srcProjectId != to_s(self.identifier))
+	if(operation == NSDragOperationMove && sourceTabBar != destTabBar)
 	{
 		for(DocumentController* delegate in SortedControllers())
 		{
-			if(srcProjectId == oak::uuid_t(to_s(delegate.identifier)))
+			if(delegate == sourceTabBar.delegate)
 			{
 				if(delegate.fileBrowserVisible || [delegate documents].size() > 1)
-						[delegate closeTabsAtIndexes:[NSIndexSet indexSetWithIndex:[plist[@"index"] unsignedIntValue]] askToSaveChanges:NO createDocumentIfEmpty:YES];
+						[delegate closeTabsAtIndexes:[NSIndexSet indexSetWithIndex:dragIndex] askToSaveChanges:NO createDocumentIfEmpty:YES];
 				else	[delegate close];
 				return YES;
 			}

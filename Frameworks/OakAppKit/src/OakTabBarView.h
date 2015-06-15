@@ -36,12 +36,8 @@ PUBLIC @interface OakTabBarView : OakBackgroundFillView
 - (void)tabBarViewDidDoubleClick:(OakTabBarView*)aTabBarView;
 - (NSMenu*)menuForTabBarView:(OakTabBarView*)aTabBarView;
 
-// Methods sent to the delegate which the tab was dragged from
-// When called, the delegate should set up the drag pasteboard using -addTypes:owner: with the data it requires
-- (void)setupPasteboard:(NSPasteboard*)aPasteboard forTabAtIndex:(NSUInteger)draggedTabIndex;
-
 // Methods sent to the delegate which the tab was dragged to
-- (BOOL)performTabDropFromTabBar:(OakTabBarView*)tabBar atIndex:(NSUInteger)droppedIndex fromPasteboard:(NSPasteboard*)aPasteboard operation:(NSDragOperation)operation;
+- (BOOL)performDropOfTabItem:(OakTabItem*)tabItem fromTabBar:(OakTabBarView*)sourceTabBar index:(NSUInteger)dragIndex toTabBar:(OakTabBarView*)destTabBar index:(NSUInteger)droppedIndex operation:(NSDragOperation)operation;
 
 - (void)performCloseTab:(OakTabBarView*)sender;
 - (void)performCloseOtherTabs:(OakTabBarView*)sender;
