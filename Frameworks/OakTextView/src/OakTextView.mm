@@ -230,7 +230,7 @@ struct buffer_refresh_callback_t;
 typedef indexed_map_t<OakAccessibleLink*> links_t;
 typedef std::shared_ptr<links_t> links_ptr;
 
-@interface OakTextView () <NSTextInputClient, NSIgnoreMisspelledWords, NSChangeSpelling, NSTextFieldDelegate>
+@interface OakTextView () <NSTextInputClient, NSDraggingSource, NSIgnoreMisspelledWords, NSChangeSpelling, NSTextFieldDelegate>
 {
 	OBJC_WATCH_LEAKS(OakTextView);
 
@@ -3351,9 +3351,9 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 // = Drag Source =
 // ===============
 
-- (NSDragOperation)draggingSourceOperationMaskForLocal:(BOOL)isLocal
+- (NSDragOperation)draggingSession:(NSDraggingSession*)session sourceOperationMaskForDraggingContext:(NSDraggingContext)context
 {
-	return isLocal ? (NSDragOperationCopy|NSDragOperationMove) : (NSDragOperationCopy|NSDragOperationGeneric);
+	return context == NSDraggingContextWithinApplication ? (NSDragOperationCopy|NSDragOperationMove) : (NSDragOperationCopy|NSDragOperationGeneric);
 }
 
 // ====================
@@ -3625,11 +3625,10 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	for(auto const& range : ranges)
 		v.push_back(document->buffer().substr(range.min().index, range.max().index));
 
-	NSPasteboard* pboard = [NSPasteboard pasteboardWithName:NSDragPboard];
-	[pboard declareTypes:@[ NSStringPboardType ] owner:self];
-	[pboard setString:[NSString stringWithCxxString:text::join(v, "\n")] forType:NSStringPboardType];
+	NSDraggingItem* dragItem = [[NSDraggingItem alloc] initWithPasteboardWriter:[NSString stringWithCxxString:text::join(v, "\n")]];
+	[dragItem setDraggingFrame:srcRect contents:image];
+	[self beginDraggingSessionWithItems:@[ dragItem ] event:anEvent source:self];
 
-	[self dragImage:image at:NSMakePoint(NSMinX(srcRect), NSMaxY(srcRect)) offset:NSZeroSize event:anEvent pasteboard:pboard source:self slideBack:YES];
 	self.showDragCursor = NO;
 }
 
