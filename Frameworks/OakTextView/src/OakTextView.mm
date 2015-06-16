@@ -2121,7 +2121,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	{
 		char key = 0;
 		[[NSSpellChecker sharedSpellChecker] updateSpellingPanelWithMisspelledWord:aWord];
-		for(NSString* guess in [[NSSpellChecker sharedSpellChecker] guessesForWord:aWord])
+		for(NSString* guess in [[NSSpellChecker sharedSpellChecker] guessesForWordRange:NSMakeRange(0, [aWord length]) inString:aWord language:[NSString stringWithCxxString:document->buffer().spelling_language()] inSpellDocumentWithTag:document->buffer().spelling_tag()])
 		{
 			item = [menu addItemWithTitle:guess action:@selector(contextMenuPerformCorrectWord:) keyEquivalent:key < 10 ? [NSString stringWithFormat:@"%c", '0' + (++key % 10)] : @""];
 			[item setKeyEquivalentModifierMask:0];
