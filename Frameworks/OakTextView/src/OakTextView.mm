@@ -2190,7 +2190,8 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 
 - (void)showContextMenu:(id)sender
 {
-	[self showMenu:[self contextMenuForRanges:editor->ranges() andOtherActions:YES]];
+	// Since contextMenuForRanges:andOtherActions: may change selection and showMenu: is blocking the event loop, we need to allow for refreshing the display before showing the context menu.
+	[self performSelector:@selector(showMenu:) withObject:[self contextMenuForRanges:editor->ranges() andOtherActions:YES] afterDelay:0];
 }
 
 - (void)contextMenuPerformCorrectWord:(NSMenuItem*)menuItem
