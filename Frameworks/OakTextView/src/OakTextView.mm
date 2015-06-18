@@ -1982,35 +1982,37 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	BOOL isHoldingOption = modifiers & NSAlternateKeyMask ? YES : NO;
 
 	self.showColumnSelectionCursor = isHoldingOption;
-	if(([NSEvent pressedMouseButtons] & 1) && editor->has_selection())
+	if(([NSEvent pressedMouseButtons] & 1))
 	{
-		if(editor->ranges().last().columnar != isHoldingOption)
+		if(editor->has_selection() && editor->ranges().last().columnar != isHoldingOption)
 			[self toggleColumnSelection:self];
 	}
+	else if(modifiers != _lastFlags)
+	{
+		BOOL tapThreshold     = [[NSDate date] timeIntervalSinceDate:_lastFlagsChangeDate] < 0.18;
 
-	BOOL tapThreshold     = [[NSDate date] timeIntervalSinceDate:_lastFlagsChangeDate] < 0.18;
+		BOOL didPressShift    = modifiers == NSShiftKeyMask && _lastFlags == 0;
+		BOOL didReleaseShift  = modifiers == 0 && _lastFlags == NSShiftKeyMask;
 
-	BOOL didPressShift    = modifiers == NSShiftKeyMask && _lastFlags == 0;
-	BOOL didReleaseShift  = modifiers == 0 && _lastFlags == NSShiftKeyMask;
+		BOOL didPressOption   = (modifiers & ~NSShiftKeyMask) == NSAlternateKeyMask && (_lastFlags & ~NSShiftKeyMask) == 0;
+		BOOL didReleaseOption = (modifiers & ~NSShiftKeyMask) == 0 && (_lastFlags & ~NSShiftKeyMask) == NSAlternateKeyMask;
 
-	BOOL didPressOption   = (modifiers & ~NSShiftKeyMask) == NSAlternateKeyMask && (_lastFlags & ~NSShiftKeyMask) == 0;
-	BOOL didReleaseOption = (modifiers & ~NSShiftKeyMask) == 0 && (_lastFlags & ~NSShiftKeyMask) == NSAlternateKeyMask;
+		OakFlagsState newFlagsState = OakFlagsStateClear;
+		if(didPressOption)
+			newFlagsState = OakFlagsStateOptionDown;
+		else if(didReleaseOption && tapThreshold && _flagsState == OakFlagsStateOptionDown)
+			[self toggleColumnSelection:self];
+		else if(didPressShift)
+			newFlagsState = _flagsState == OakFlagsStateShiftTapped && tapThreshold ? OakFlagsStateSecondShiftDown : OakFlagsStateShiftDown;
+		else if(didReleaseShift && tapThreshold && _flagsState == OakFlagsStateSecondShiftDown)
+			[self deselectLast:self];
+		else if(didReleaseShift && tapThreshold)
+			newFlagsState = OakFlagsStateShiftTapped;
 
-	OakFlagsState newFlagsState = OakFlagsStateClear;
-	if(didPressOption)
-		newFlagsState = OakFlagsStateOptionDown;
-	else if(didReleaseOption && tapThreshold && _flagsState == OakFlagsStateOptionDown)
-		[self toggleColumnSelection:self];
-	else if(didPressShift)
-		newFlagsState = _flagsState == OakFlagsStateShiftTapped && tapThreshold ? OakFlagsStateSecondShiftDown : OakFlagsStateShiftDown;
-	else if(didReleaseShift && tapThreshold && _flagsState == OakFlagsStateSecondShiftDown)
-		[self deselectLast:self];
-	else if(didReleaseShift && tapThreshold)
-		newFlagsState = OakFlagsStateShiftTapped;
-
-	self.lastFlags           = modifiers;
-	self.lastFlagsChangeDate = [NSDate date];
-	self.flagsState          = newFlagsState;
+		self.lastFlags           = modifiers;
+		self.lastFlagsChangeDate = [NSDate date];
+		self.flagsState          = newFlagsState;
+	}
 }
 
 - (void)insertText:(id)aString
