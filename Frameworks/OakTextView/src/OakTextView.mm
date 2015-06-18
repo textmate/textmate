@@ -1978,7 +1978,6 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 		OakFlagsStateSecondShiftDown,
 	};
 
-	AUTO_REFRESH;
 	NSInteger modifiers  = [anEvent modifierFlags] & (NSAlternateKeyMask | NSControlKeyMask | NSCommandKeyMask | NSShiftKeyMask);
 	BOOL isHoldingOption = modifiers & NSAlternateKeyMask ? YES : NO;
 
