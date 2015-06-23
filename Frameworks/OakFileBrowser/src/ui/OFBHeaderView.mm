@@ -47,7 +47,7 @@ static NSPopUpButton* OakCreateFolderPopUpButton ()
 		NSMutableParagraphStyle* parStyle = [NSMutableParagraphStyle new];
 		[parStyle setLineBreakMode:NSLineBreakByTruncatingMiddle];
 
-		if(oak::os_major() == 10 && oak::os_minor() >= 10 || oak::os_major() > 10)
+		if(oak::os_tuple() >= std::make_tuple(10, 10, 0))
 		{
 			NSFont* font = [NSFont systemFontOfSize:12];
 

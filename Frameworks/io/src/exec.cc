@@ -15,7 +15,7 @@ namespace io
 {
 	process_t spawn (std::vector<std::string> const& args, std::map<std::string, std::string> const& environment)
 	{
-		short const closeOnExecFlag = (oak::os_major() == 10 && oak::os_minor() == 7) ? 0 : POSIX_SPAWN_CLOEXEC_DEFAULT;
+		short const closeOnExecFlag = (oak::os_tuple() < std::make_tuple(10, 8, 0)) ? 0 : POSIX_SPAWN_CLOEXEC_DEFAULT;
 		process_t res;
 
 		int in, out, err;

@@ -239,7 +239,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	NSTextFieldCell* cell = [OFBPathInfoCell new];
 	cell.lineBreakMode = NSLineBreakByTruncatingMiddle;
 	[cell setEditable:YES];
-	if(_outlineView.renderAsSourceList && (oak::os_major() == 10 && oak::os_minor() >= 10 || oak::os_major() > 10))
+	if(_outlineView.renderAsSourceList && oak::os_tuple() >= std::make_tuple(10, 10, 0))
 		cell.textColor = [NSColor textColor];
 
 	NSTableColumn* tableColumn = [NSTableColumn new];

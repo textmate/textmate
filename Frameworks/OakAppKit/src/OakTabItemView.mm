@@ -139,7 +139,7 @@
 		_inactiveTabTextStyles = _activeTabTextStyles.mutableCopy;
 		_inactiveTabTextStyles[NSForegroundColorAttributeName] = [NSColor colorWithCalibratedWhite:0.5 alpha:1];
 
-		if(oak::os_major() == 10 && oak::os_minor() >= 10 || oak::os_major() > 10)
+		if(oak::os_tuple() >= std::make_tuple(10, 10, 0))
 		{
 			_selectedTabTextStyles = _activeTabTextStyles.mutableCopy;
 			_selectedTabTextStyles[NSForegroundColorAttributeName] = [NSColor blackColor];
