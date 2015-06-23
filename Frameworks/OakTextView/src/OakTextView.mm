@@ -2098,12 +2098,21 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	ng::range_t const wordRange = range.empty() ? ng::extend(buf, range.first, kSelectionExtendToWord).last() : range;
 	std::string const candidate = buf.substr(wordRange.min().index, wordRange.max().index);
 
-	if(candidate.find_first_of(" \n\t") == std::string::npos && ns::is_misspelled(candidate, buf.spelling_language(), buf.spelling_tag()))
+	if(candidate.find_first_of(" \n\t") != std::string::npos)
+		return menu;
+
+	NSString* word = [NSString stringWithCxxString:candidate];
+	if([[NSSpellChecker sharedSpellChecker] hasLearnedWord:word])
+	{
+		NSMenuItem* item = [menu addItemWithTitle:[NSString stringWithFormat:@"Unlearn “%@”", word] action:@selector(contextMenuPerformUnlearnSpelling:) keyEquivalent:@""];
+		[item setRepresentedObject:word];
+		[menu addItem:[NSMenuItem separatorItem]];
+	}
+	else if(ns::is_misspelled(candidate, buf.spelling_language(), buf.spelling_tag()))
 	{
 		AUTO_REFRESH;
 		editor->set_selections(wordRange);
 
-		NSString* word = [NSString stringWithCxxString:candidate];
 		[[NSSpellChecker sharedSpellChecker] updateSpellingPanelWithMisspelledWord:word];
 
 		size_t bol = buf.begin(buf.convert(wordRange.min().index).line);
@@ -2213,6 +2222,15 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 {
 	D(DBF_OakTextView_Spelling, bug("%s\n", [[sender representedObject] UTF8String]););
 	[[NSSpellChecker sharedSpellChecker] learnWord:[sender representedObject]];
+
+	document->buffer().recheck_spelling(0, document->buffer().size());
+	[self setNeedsDisplay:YES];
+}
+
+- (void)contextMenuPerformUnlearnSpelling:(id)sender
+{
+	D(DBF_OakTextView_Spelling, bug("%s\n", [[sender representedObject] UTF8String]););
+	[[NSSpellChecker sharedSpellChecker] unlearnWord:[sender representedObject]];
 
 	document->buffer().recheck_spelling(0, document->buffer().size());
 	[self setNeedsDisplay:YES];
