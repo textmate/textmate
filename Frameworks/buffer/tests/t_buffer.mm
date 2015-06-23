@@ -23,7 +23,8 @@ void setup_fixtures ()
 	bundleIndex.commit();
 
 	NSApplicationLoad();
-	[NSSpellChecker sharedSpellChecker];
+	NSSpellChecker* spellChecker = [NSSpellChecker sharedSpellChecker];
+	spellChecker.automaticallyIdentifiesLanguages = NO;
 }
 
 void benchmark_insert_50_mb ()
