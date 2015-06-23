@@ -2086,61 +2086,59 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	return p;
 }
 
-- (NSMenu*)contextMenuForRanges:(ng::ranges_t const&)someRanges andOtherActions:(BOOL)otherActions
+- (NSMenu*)checkSpellingMenuForRanges:(ng::ranges_t const&)someRanges
 {
 	NSMenu* menu = [[NSMenu alloc] initWithTitle:@""];
-
-	if(someRanges.size() == 1)
-	{
-		ng::buffer_t const& buf = document->buffer();
-
-		ng::range_t const range     = someRanges.first();
-		ng::range_t const wordRange = range.empty() ? ng::extend(buf, range.first, kSelectionExtendToWord).last() : range;
-		std::string const candidate = buf.substr(wordRange.min().index, wordRange.max().index);
-
-		if(candidate.find_first_of(" \n\t") == std::string::npos && ns::is_misspelled(candidate, buf.spelling_language(), buf.spelling_tag()))
-		{
-			AUTO_REFRESH;
-			editor->set_selections(wordRange);
-
-			NSString* word = [NSString stringWithCxxString:candidate];
-			[[NSSpellChecker sharedSpellChecker] updateSpellingPanelWithMisspelledWord:word];
-
-			size_t bol = buf.begin(buf.convert(wordRange.min().index).line);
-			size_t eol = buf.eol(buf.convert(wordRange.max().index).line);
-			std::string const line = buf.substr(bol, eol);
-			NSUInteger location = utf16::distance(line.data(), line.data() + (wordRange.min().index - bol));
-			NSUInteger length   = utf16::distance(line.data() + (wordRange.min().index - bol), line.data() + (wordRange.max().index - bol));
-
-			char key = 0;
-			NSMenuItem* item = nil;
-			for(NSString* guess in [[NSSpellChecker sharedSpellChecker] guessesForWordRange:NSMakeRange(location, length) inString:[NSString stringWithCxxString:line] language:[NSString stringWithCxxString:buf.spelling_language()] inSpellDocumentWithTag:buf.spelling_tag()])
-			{
-				item = [menu addItemWithTitle:guess action:@selector(contextMenuPerformCorrectWord:) keyEquivalent:key < 10 ? [NSString stringWithFormat:@"%c", '0' + (++key % 10)] : @""];
-				[item setKeyEquivalentModifierMask:0];
-				[item setRepresentedObject:guess];
-			}
-
-			if([menu numberOfItems] == 0)
-				[menu addItemWithTitle:@"No Guesses Found" action:nil keyEquivalent:@""];
-
-			[menu addItem:[NSMenuItem separatorItem]];
-			item = [menu addItemWithTitle:@"Ignore Spelling" action:@selector(contextMenuPerformIgnoreSpelling:) keyEquivalent:@"-"];
-			[item setKeyEquivalentModifierMask:0];
-			[item setRepresentedObject:word];
-			item = [menu addItemWithTitle:@"Learn Spelling" action:@selector(contextMenuPerformLearnSpelling:) keyEquivalent:@"="];
-			[item setKeyEquivalentModifierMask:0];
-			[item setRepresentedObject:word];
-			[menu addItem:[NSMenuItem separatorItem]];
-		}
-	}
-
-	if(!otherActions)
-	{
-		[menu addItemWithTitle:@"Find Next" action:@selector(checkSpelling:) keyEquivalent:@";"];
+	if(someRanges.size() != 1)
 		return menu;
+
+	ng::buffer_t const& buf = document->buffer();
+
+	ng::range_t const range     = someRanges.first();
+	ng::range_t const wordRange = range.empty() ? ng::extend(buf, range.first, kSelectionExtendToWord).last() : range;
+	std::string const candidate = buf.substr(wordRange.min().index, wordRange.max().index);
+
+	if(candidate.find_first_of(" \n\t") == std::string::npos && ns::is_misspelled(candidate, buf.spelling_language(), buf.spelling_tag()))
+	{
+		AUTO_REFRESH;
+		editor->set_selections(wordRange);
+
+		NSString* word = [NSString stringWithCxxString:candidate];
+		[[NSSpellChecker sharedSpellChecker] updateSpellingPanelWithMisspelledWord:word];
+
+		size_t bol = buf.begin(buf.convert(wordRange.min().index).line);
+		size_t eol = buf.eol(buf.convert(wordRange.max().index).line);
+		std::string const line = buf.substr(bol, eol);
+		NSUInteger location = utf16::distance(line.data(), line.data() + (wordRange.min().index - bol));
+		NSUInteger length   = utf16::distance(line.data() + (wordRange.min().index - bol), line.data() + (wordRange.max().index - bol));
+
+		char key = 0;
+		NSMenuItem* item = nil;
+		for(NSString* guess in [[NSSpellChecker sharedSpellChecker] guessesForWordRange:NSMakeRange(location, length) inString:[NSString stringWithCxxString:line] language:[NSString stringWithCxxString:buf.spelling_language()] inSpellDocumentWithTag:buf.spelling_tag()])
+		{
+			item = [menu addItemWithTitle:guess action:@selector(contextMenuPerformCorrectWord:) keyEquivalent:key < 10 ? [NSString stringWithFormat:@"%c", '0' + (++key % 10)] : @""];
+			[item setKeyEquivalentModifierMask:0];
+			[item setRepresentedObject:guess];
+		}
+
+		if([menu numberOfItems] == 0)
+			[menu addItemWithTitle:@"No Guesses Found" action:nil keyEquivalent:@""];
+
+		[menu addItem:[NSMenuItem separatorItem]];
+		item = [menu addItemWithTitle:@"Ignore Spelling" action:@selector(contextMenuPerformIgnoreSpelling:) keyEquivalent:@"-"];
+		[item setKeyEquivalentModifierMask:0];
+		[item setRepresentedObject:word];
+		item = [menu addItemWithTitle:@"Learn Spelling" action:@selector(contextMenuPerformLearnSpelling:) keyEquivalent:@"="];
+		[item setKeyEquivalentModifierMask:0];
+		[item setRepresentedObject:word];
+		[menu addItem:[NSMenuItem separatorItem]];
 	}
 
+	return menu;
+}
+
+- (NSMenu*)contextMenuForRanges:(ng::ranges_t const&)someRanges
+{
 	static struct { NSString* title; SEL action; } const items[] =
 	{
 		{ @"Cut",                     @selector(cut:)                           },
@@ -2151,6 +2149,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 		{ @"Filter Through Command…", @selector(orderFrontRunCommandWindow:)    },
 	};
 
+	NSMenu* menu = [self checkSpellingMenuForRanges:someRanges];
 	for(auto const& item : items)
 	{
 		if(item.title)
@@ -2167,7 +2166,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	bool clickInSelection = false;
 	for(auto const& range : editor->ranges())
 		clickInSelection = clickInSelection || range.min() <= index && index <= range.max();
-	return [self contextMenuForRanges:(clickInSelection ? editor->ranges() : index) andOtherActions:YES];
+	return [self contextMenuForRanges:(clickInSelection ? editor->ranges() : index)];
 }
 
 - (void)showMenu:(NSMenu*)aMenu
@@ -2191,8 +2190,8 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 
 - (void)showContextMenu:(id)sender
 {
-	// Since contextMenuForRanges:andOtherActions: may change selection and showMenu: is blocking the event loop, we need to allow for refreshing the display before showing the context menu.
-	[self performSelector:@selector(showMenu:) withObject:[self contextMenuForRanges:editor->ranges() andOtherActions:YES] afterDelay:0];
+	// Since contextMenuForRanges: may change selection and showMenu: is blocking the event loop, we need to allow for refreshing the display before showing the context menu.
+	[self performSelector:@selector(showMenu:) withObject:[self contextMenuForRanges:editor->ranges()] afterDelay:0];
 }
 
 - (void)contextMenuPerformCorrectWord:(NSMenuItem*)menuItem
@@ -2991,7 +2990,9 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		}
 		else
 		{
-			[self showMenu:[self contextMenuForRanges:ng::range_t(nextMisspelling.first, nextMisspelling.second) andOtherActions:NO]];
+			NSMenu* menu = [self checkSpellingMenuForRanges:ng::range_t(nextMisspelling.first, nextMisspelling.second)];
+			[menu addItemWithTitle:@"Find Next" action:@selector(checkSpelling:) keyEquivalent:@";"];
+			[self showMenu:menu];
 		}
 	}
 	else
