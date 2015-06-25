@@ -467,8 +467,15 @@ namespace ng
 
 	ranges_t deselect_last (ranges_t const& selection)
 	{
-		if(selection.size() <= 1)
+		if(selection.empty())
 			return selection;
+
+		if(selection.size() == 1)
+		{
+			range_t r = selection.first();
+			r.freehanded = false;
+			return r;
+		}
 
 		bool singleCaret = true;
 		for(auto const& range : selection)
