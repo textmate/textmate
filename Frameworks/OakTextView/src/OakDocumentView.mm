@@ -22,6 +22,8 @@
 
 OAK_DEBUG_VAR(OakDocumentView);
 
+static NSString* const kUserDefaultsLineNumberScaleFactorKey = @"lineNumberScaleFactor";
+
 static NSString* const kBookmarksColumnIdentifier = @"bookmarks";
 static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 
@@ -252,8 +254,10 @@ private:
 
 - (void)updateGutterViewFont:(id)sender
 {
+	CGFloat const scaleFactor = [[NSUserDefaults standardUserDefaults] floatForKey:kUserDefaultsLineNumberScaleFactorKey] ?: 0.8;
+
 	gutterImages = nil; // force image sizes to be recalculated
-	gutterView.lineNumberFont = [NSFont fontWithName:[textView.font fontName] size:round(0.8 * [textView.font pointSize] * textView.fontScaleFactor / 100)];
+	gutterView.lineNumberFont = [NSFont fontWithName:[textView.font fontName] size:round(scaleFactor * [textView.font pointSize] * textView.fontScaleFactor / 100)];
 	[gutterView reloadData:self];
 }
 
