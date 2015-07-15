@@ -269,8 +269,12 @@ struct expansion_state_t
 {
 	if([cell respondsToSelector:@selector(setImage:)])
 	{
-		if([item.icon respondsToSelector:@selector(setModified:)])
-			item.icon.modified = [_modifiedURLs containsObject:item.url];
+		SEL selector = @selector(setModified:);
+		if([item.icon respondsToSelector:selector])
+		{
+			auto fn = (void(*)(id, SEL, BOOL))[item.icon methodForSelector:selector];
+			fn(item.icon, selector, [_modifiedURLs containsObject:item.url]);
+		}
 		[cell setImage:item.icon];
 	}
 	cell.stringValue       = item.displayName;
