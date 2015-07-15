@@ -17,42 +17,32 @@
 
 OAK_DEBUG_VAR(FileBrowser_DSDirectory);
 
+struct tracking_t;
+
 @interface FSFileItem : FSItem
+{
+	std::unique_ptr<tracking_t> _tracking;
+}
 @property (nonatomic) dev_t device;
 @property (nonatomic) ino_t inode;
+- (void)internalNeedsReload;
 @end
-
-@implementation FSFileItem
-@end
-
-struct item_record_t;
-typedef std::shared_ptr<item_record_t> item_record_ptr;
 
 @interface FSDirectoryDataSource ()
 {
 	OBJC_WATCH_LEAKS(FSDirectoryDataSource);
-	std::map<std::string, item_record_ptr> visibleItems;
 }
 @property (nonatomic) NSUInteger dataSourceOptions;
-- (void)setLastModified:(struct timespec)lastModified forPath:(std::string const&)aPath;
-- (void)internalReloadItem:(FSItem*)anItem requested:(BOOL)flag;
-- (void)lostItems:(NSArray*)someItems;
 @end
 
-struct item_record_t : fs::event_callback_t
+struct tracking_t : fs::event_callback_t
 {
-	item_record_t (FSDirectoryDataSource* dataSource, FSItem* item)
+	tracking_t (FSDirectoryDataSource* dataSource, FSFileItem* item, std::string const& path) : _data_source(dataSource), _item(item), _path(path)
 	{
-		_data_source = dataSource;
-		_item        = (FSFileItem*)item;
-		_path        = to_s([item.url path]);
-		_scm_info    = scm::info(_path);
-
+		_scm_info = scm::info(_path);
 		if(_scm_info)
 		{
 			_scm_info->add_callback(^(scm::info_t const& info){
-				if(!_item.children)
-					return;
 
 				std::set<std::string> pathsShown, pathsDeleted, pathsMissingOnDisk;
 				for(FSFileItem* item in _item.children)
@@ -82,7 +72,7 @@ struct item_record_t : fs::event_callback_t
 				}
 				else
 				{
-					reload(false);
+					[_item internalNeedsReload];
 				}
 			});
 		}
@@ -90,26 +80,33 @@ struct item_record_t : fs::event_callback_t
 		fs::watch(_path, this);
 	}
 
-	~item_record_t ()
+	~tracking_t ()
 	{
 		fs::unwatch(_path, this);
 	}
 
-	void reload (bool reloadWasRequested = false)
-	{
-		internal_reload(reloadWasRequested);
-	}
-
-	void set_last_modified (struct timespec lastModified) { _last_modified = lastModified; }
-	struct timespec last_modified () const                { return _last_modified; }
-
-private:
 	void did_change (std::string const& path, std::string const& observedPath, uint64_t eventId, bool recursive)
 	{
 		if(_path == path)
-			reload(false);
+			[_item internalNeedsReload];
 	}
 
+	__weak FSDirectoryDataSource* _data_source;
+	__weak FSFileItem* _item;
+
+	std::string const _path;
+	scm::info_ptr _scm_info;
+	struct timespec _last_modified = { };
+};
+
+@implementation FSFileItem
+- (void)dealloc
+{
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)loadChildren:(FSDirectoryDataSource*)dataSource completionHandler:(void(^)(NSArray*))block
+{
 	struct fs_item_t
 	{
 		fs_item_t (dev_t device, dirent const* entry, std::string const& path) : device(device), inode(entry->d_fileno), path(path), target(NULL_STR), label(0), is_directory(false), is_link(false), treat_as_directory(false), sort_as_directory(false)
@@ -155,192 +152,155 @@ private:
 		bool sort_as_directory;
 	};
 
-	static void add_item_and_children (FSItem* item, NSMutableArray* array)
+	std::string const dir = [[self.url path] fileSystemRepresentation];
+	if(!_tracking)
 	{
-		[array addObject:item];
-		if(item.leaf)
-			return;
-		for(FSItem* child in item.children)
-			add_item_and_children(child, array);
-	}
-
-	static void async_reload (FSDirectoryDataSource* dataSource, FSItem* rootItem, scm::weak_info_ptr weakSCMInfo, bool reloadWasRequested)
-	{
-		BOOL allowExpandingLinks = [[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsAllowExpandingLinksKey] boolValue];
-
-		std::string const dir = to_s([rootItem.url path]);
-		bool includeHidden = (dataSource.dataSourceOptions & kFSDataSourceOptionIncludeHidden) == kFSDataSourceOptionIncludeHidden;
-
-		path::glob_list_t globs;
-		if(!includeHidden)
-		{
-			settings_t const& settings = settings_for_path(NULL_STR, "", dir);
-
-			globs.add_exclude_glob(settings.get(kSettingsExcludeDirectoriesInBrowserKey), path::kPathItemDirectory);
-			globs.add_exclude_glob(settings.get(kSettingsExcludeDirectoriesKey),          path::kPathItemDirectory);
-			globs.add_exclude_glob(settings.get(kSettingsExcludeFilesInBrowserKey),       path::kPathItemFile);
-			globs.add_exclude_glob(settings.get(kSettingsExcludeFilesKey),                path::kPathItemFile);
-			globs.add_exclude_glob(settings.get(kSettingsExcludeInBrowserKey),            path::kPathItemAny);
-			globs.add_exclude_glob(settings.get(kSettingsExcludeKey),                     path::kPathItemAny);
-
-			globs.add_include_glob(settings.get(kSettingsIncludeDirectoriesInBrowserKey), path::kPathItemDirectory);
-			globs.add_include_glob(settings.get(kSettingsIncludeDirectoriesKey),          path::kPathItemDirectory);
-			globs.add_include_glob(settings.get(kSettingsIncludeFilesInBrowserKey),       path::kPathItemFile);
-			globs.add_include_glob(settings.get(kSettingsIncludeFilesKey),                path::kPathItemFile);
-			globs.add_include_glob(settings.get(kSettingsIncludeInBrowserKey),            path::kPathItemAny);
-			globs.add_include_glob(settings.get(kSettingsIncludeKey),                     path::kPathItemAny);
-		}
-
-		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
-			struct stat buf;
-			if(stat(dir.c_str(), &buf) == 0)
-			{
-				std::vector<fs_item_t> newItems;
-				for(auto entry : path::entries(dir))
-				{
-					std::string const path = path::join(dir, entry->d_name);
-					if(!includeHidden && (globs.exclude(path, entry->d_type == DT_DIR ? path::kPathItemDirectory : path::kPathItemFile) || (path::info(path) & path::flag::hidden)))
-						continue;
-					newItems.emplace_back(buf.st_dev, entry, path);
-				}
-
-				dispatch_async(dispatch_get_main_queue(), ^{
-					std::map< std::pair<dev_t, ino_t>, FSFileItem* > existingItems;
-					for(FSFileItem* item in rootItem.children)
-						existingItems.emplace(std::make_pair(item.device, item.inode), item);
-
-					std::set<std::string> pathsOnDisk;
-					scm::info_ptr scmInfo = weakSCMInfo.lock();
-
-					NSMutableArray* array = [NSMutableArray array];
-					for(auto const& fsItem : newItems)
-					{
-						FSFileItem* item;
-						auto it = existingItems.find(std::make_pair(fsItem.device, fsItem.inode));
-						if(it != existingItems.end())
-						{
-							item = it->second;
-							existingItems.erase(it);
-						}
-						else
-						{
-							item = [FSFileItem new];
-							item.device = fsItem.device;
-							item.inode  = fsItem.inode;
-						}
-
-						OakFileIconImage* image = [[OakFileIconImage alloc] initWithSize:NSMakeSize(16, 16)];
-						image.path      = [NSString stringWithCxxString:fsItem.path];
-						image.directory = fsItem.is_directory || (fsItem.is_link && fsItem.sort_as_directory);
-						image.alias     = fsItem.is_link;
-						if(scmInfo)
-							image.scmStatus = scmInfo->status(fsItem.path);
-
-						item.url          = [NSURL fileURLWithPath:[NSString stringWithCxxString:fsItem.path] isDirectory:fsItem.is_directory];
-						item.displayName  = [NSString stringWithCxxString:path::display_name(fsItem.path)];
-						item.icon         = image;
-						item.labelIndex   = fsItem.label;
-						item.sortAsFolder = fsItem.sort_as_directory;
-						item.leaf         = !fsItem.treat_as_directory;
-						item.link         = fsItem.is_link;
-						item.target       = fsItem.target != NULL_STR ? [NSURL URLWithString:[NSString stringWithCxxString:fsItem.target]] : nil;
-
-						if(allowExpandingLinks && fsItem.is_link && fsItem.sort_as_directory && item.leaf)
-							item.leaf = NO;
-
-						[array addObject:item];
-						pathsOnDisk.insert(fsItem.path);
-					}
-
-					if(scmInfo)
-					{
-						for(auto pair : scmInfo->status())
-						{
-							if(!(pair.second & scm::status::deleted) || dir != path::parent(pair.first) || pathsOnDisk.find(pair.first) != pathsOnDisk.end())
-								continue;
-
-							OakFileIconImage* image = [[OakFileIconImage alloc] initWithSize:NSMakeSize(16, 16)];
-							image.path      = [NSString stringWithCxxString:pair.first];
-							image.exists    = NO;
-							image.scmStatus = pair.second;
-
-							FSFileItem* item = [FSFileItem new];
-							item.url         = [NSURL fileURLWithPath:[NSString stringWithCxxString:pair.first] isDirectory:NO];
-							item.displayName = [NSString stringWithCxxString:path::name(pair.first)];
-							item.icon        = image;
-							item.leaf        = YES;
-
-							[array addObject:item];
-						}
-					}
-
-					NSMutableArray* lostItems = [NSMutableArray array];
-					for(auto const& pair : existingItems)
-						add_item_and_children(pair.second, lostItems);
-					[dataSource lostItems:lostItems];
-					[dataSource setLastModified:buf.st_mtimespec forPath:dir];
-
-					[[NSNotificationCenter defaultCenter] postNotificationName:FSItemDidReloadNotification object:dataSource userInfo:@{ @"item" : rootItem, @"children" : [FSDataSource sortArray:array usingOptions:dataSource.dataSourceOptions], @"recursive" : @YES, @"requested" : @(reloadWasRequested) }];
-				});
-			}
-		});
-	}
-
-	void internal_reload (bool reloadWasRequested)
-	{
-		async_reload(_data_source, _item, _scm_info, reloadWasRequested);
-	}
-
-	__weak FSDirectoryDataSource* _data_source;
-	FSFileItem* _item;
-	std::string _path;
-	struct timespec _last_modified;
-	scm::info_ptr _scm_info;
-};
-
-@implementation FSDirectoryDataSource
-- (id)initWithURL:(NSURL*)anURL options:(NSUInteger)someOptions
-{
-	if((self = [super init]))
-	{
-		self.dataSourceOptions = someOptions;
-		self.rootItem = [FSFileItem itemWithURL:anURL];
-
-		[self internalReloadItem:self.rootItem requested:NO];
+		_tracking.reset(new tracking_t(dataSource, self, dir));
 
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidBecomeActive:) name:NSApplicationDidBecomeActiveNotification object:NSApp];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(fileManagerDidChangeContentsOfDirectory:) name:OakFileManagerDidChangeContentsOfDirectory object:nil];
 	}
-	return self;
+
+	bool allowExpandingLinks = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsAllowExpandingLinksKey];
+	bool includeHidden       = (dataSource.dataSourceOptions & kFSDataSourceOptionIncludeHidden) == kFSDataSourceOptionIncludeHidden;
+
+	path::glob_list_t globs;
+	if(!includeHidden)
+	{
+		settings_t const& settings = settings_for_path(NULL_STR, "", dir);
+
+		globs.add_exclude_glob(settings.get(kSettingsExcludeDirectoriesInBrowserKey), path::kPathItemDirectory);
+		globs.add_exclude_glob(settings.get(kSettingsExcludeDirectoriesKey),          path::kPathItemDirectory);
+		globs.add_exclude_glob(settings.get(kSettingsExcludeFilesInBrowserKey),       path::kPathItemFile);
+		globs.add_exclude_glob(settings.get(kSettingsExcludeFilesKey),                path::kPathItemFile);
+		globs.add_exclude_glob(settings.get(kSettingsExcludeInBrowserKey),            path::kPathItemAny);
+		globs.add_exclude_glob(settings.get(kSettingsExcludeKey),                     path::kPathItemAny);
+
+		globs.add_include_glob(settings.get(kSettingsIncludeDirectoriesInBrowserKey), path::kPathItemDirectory);
+		globs.add_include_glob(settings.get(kSettingsIncludeDirectoriesKey),          path::kPathItemDirectory);
+		globs.add_include_glob(settings.get(kSettingsIncludeFilesInBrowserKey),       path::kPathItemFile);
+		globs.add_include_glob(settings.get(kSettingsIncludeFilesKey),                path::kPathItemFile);
+		globs.add_include_glob(settings.get(kSettingsIncludeInBrowserKey),            path::kPathItemAny);
+		globs.add_include_glob(settings.get(kSettingsIncludeKey),                     path::kPathItemAny);
+	}
+
+	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+		struct stat buf;
+		if(stat(dir.c_str(), &buf) == 0)
+		{
+			std::vector<fs_item_t> newItems;
+			for(auto entry : path::entries(dir))
+			{
+				std::string const path = path::join(dir, entry->d_name);
+				if(!includeHidden && (globs.exclude(path, entry->d_type == DT_DIR ? path::kPathItemDirectory : path::kPathItemFile) || (path::info(path) & path::flag::hidden)))
+					continue;
+				newItems.emplace_back(buf.st_dev, entry, path);
+			}
+
+			dispatch_async(dispatch_get_main_queue(), ^{
+				std::map< std::pair<dev_t, ino_t>, FSFileItem* > existingItems;
+				for(FSFileItem* item in self.children)
+					existingItems.emplace(std::make_pair(item.device, item.inode), item);
+
+				std::set<std::string> pathsOnDisk;
+				scm::info_ptr scmInfo = _tracking ? _tracking->_scm_info : scm::info_ptr();
+
+				NSMutableArray* array = [NSMutableArray array];
+				for(auto const& fsItem : newItems)
+				{
+					FSFileItem* item;
+					auto it = existingItems.find(std::make_pair(fsItem.device, fsItem.inode));
+					if(it != existingItems.end())
+					{
+						item = it->second;
+						existingItems.erase(it);
+					}
+					else
+					{
+						item = [FSFileItem new];
+						item.device = fsItem.device;
+						item.inode  = fsItem.inode;
+					}
+
+					OakFileIconImage* image = [[OakFileIconImage alloc] initWithSize:NSMakeSize(16, 16)];
+					image.path      = [NSString stringWithCxxString:fsItem.path];
+					image.directory = fsItem.is_directory || (fsItem.is_link && fsItem.sort_as_directory);
+					image.alias     = fsItem.is_link;
+					if(scmInfo)
+						image.scmStatus = scmInfo->status(fsItem.path);
+
+					item.url          = [NSURL fileURLWithPath:[NSString stringWithCxxString:fsItem.path] isDirectory:fsItem.is_directory];
+					item.displayName  = [NSString stringWithCxxString:path::display_name(fsItem.path)];
+					item.icon         = image;
+					item.labelIndex   = fsItem.label;
+					item.sortAsFolder = fsItem.sort_as_directory;
+					item.leaf         = !fsItem.treat_as_directory;
+					item.link         = fsItem.is_link;
+					item.target       = fsItem.target != NULL_STR ? [NSURL URLWithString:[NSString stringWithCxxString:fsItem.target]] : nil;
+
+					if(allowExpandingLinks && fsItem.is_link && fsItem.sort_as_directory && item.leaf)
+						item.leaf = NO;
+
+					[array addObject:item];
+					pathsOnDisk.insert(fsItem.path);
+				}
+
+				if(scmInfo)
+				{
+					for(auto pair : scmInfo->status())
+					{
+						if(!(pair.second & scm::status::deleted) || dir != path::parent(pair.first) || pathsOnDisk.find(pair.first) != pathsOnDisk.end())
+							continue;
+
+						OakFileIconImage* image = [[OakFileIconImage alloc] initWithSize:NSMakeSize(16, 16)];
+						image.path      = [NSString stringWithCxxString:pair.first];
+						image.exists    = NO;
+						image.scmStatus = pair.second;
+
+						FSFileItem* item = [FSFileItem new];
+						item.url         = [NSURL fileURLWithPath:[NSString stringWithCxxString:pair.first] isDirectory:NO];
+						item.displayName = [NSString stringWithCxxString:path::name(pair.first)];
+						item.icon        = image;
+						item.leaf        = YES;
+
+						[array addObject:item];
+					}
+				}
+
+				if(_tracking)
+					_tracking->_last_modified = buf.st_mtimespec;
+
+				block([FSDataSource sortArray:array usingOptions:dataSource.dataSourceOptions]);
+			});
+		}
+	});
 }
 
-- (void)dealloc
+- (void)loadChildren:(FSDirectoryDataSource*)dataSource requested:(BOOL)flag
+{
+	[self loadChildren:dataSource completionHandler:^(NSArray* items){
+		[[NSNotificationCenter defaultCenter] postNotificationName:FSItemDidReloadNotification object:dataSource userInfo:@{ @"item" : self, @"children" : items, @"recursive" : @YES, @"requested" : @(flag) }];
+	}];
+}
+
+- (void)unloadChildren:(FSDirectoryDataSource*)dataSource
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
+	_tracking.reset();
+	self.children = nil;
 }
 
 - (void)applicationDidBecomeActive:(NSNotification*)aNotification
 {
-	std::vector<std::pair<std::string, struct timespec>> paths;
-	std::transform(visibleItems.begin(), visibleItems.end(), back_inserter(paths), [](std::pair<std::string, item_record_ptr> const& p){ return std::make_pair(p.first, p.second->last_modified()); });
-	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
-		std::vector<std::string> modified;
-		for(auto pair : paths)
-		{
-			struct stat buf;
-			if(stat(pair.first.c_str(), &buf) == 0 && (buf.st_mtimespec.tv_sec != pair.second.tv_sec || buf.st_mtimespec.tv_nsec != pair.second.tv_nsec))
-				modified.push_back(pair.first);
-		}
+	std::string const dir = [[self.url path] fileSystemRepresentation];
+	struct timespec lastModified = _tracking->_last_modified;
 
-		if(!modified.empty())
+	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+		struct stat buf;
+		if(stat(dir.c_str(), &buf) == 0 && (buf.st_mtimespec.tv_sec != lastModified.tv_sec || buf.st_mtimespec.tv_nsec != lastModified.tv_nsec))
 		{
 			dispatch_async(dispatch_get_main_queue(), ^{
-				for(auto path : modified)
-				{
-					auto it = visibleItems.find(path);
-					if(it != visibleItems.end())
-						it->second->reload(false);
-				}
+				[self internalNeedsReload];
 			});
 		}
 	});
@@ -350,59 +310,41 @@ private:
 {
 	NSDictionary* userInfo = [aNotification userInfo];
 	NSString* dir = userInfo[OakFileManagerPathKey];
-	auto it = visibleItems.find(to_s(dir));
-	if(it != visibleItems.end())
-		it->second->reload(false);
+	if([dir isEqualToString:[self.url path]])
+		[self internalNeedsReload];
 }
 
-- (void)lostItems:(NSArray*)someItems
+- (void)internalNeedsReload
 {
-	for(FSItem* item in someItems)
-		visibleItems.erase(to_s([item.url path]));
+	if(_tracking)
+		[self loadChildren:_tracking->_data_source requested:NO];
 }
+@end
 
-- (void)setLastModified:(struct timespec)lastModified forPath:(std::string const&)aPath
+@implementation FSDirectoryDataSource
+- (id)initWithURL:(NSURL*)anURL options:(NSUInteger)someOptions
 {
-	auto it = visibleItems.find(aPath);
-	if(it != visibleItems.end())
-		it->second->set_last_modified(lastModified);
-}
+	if((self = [super init]))
+	{
+		self.dataSourceOptions = someOptions;
+		self.rootItem = [FSFileItem itemWithURL:anURL];
 
-- (void)internalReloadItem:(FSItem*)anItem requested:(BOOL)flag
-{
-	D(DBF_FileBrowser_DSDirectory, bug("%s %s\n", [[[anItem url] path] UTF8String], BSTR(flag)););
-	std::string const path = to_s([anItem.url path]);
-	auto record = visibleItems.find(path);
-	if(record == visibleItems.end())
-		record = visibleItems.emplace(path, std::make_shared<item_record_t>(self, anItem)).first;
-	record->second->reload(flag);
+		[((FSFileItem*)self.rootItem) loadChildren:self requested:NO];
+	}
+	return self;
 }
 
 - (BOOL)reloadItem:(FSItem*)anItem
 {
 	D(DBF_FileBrowser_DSDirectory, bug("%s\n", [[[anItem url] path] UTF8String]););
-	[self internalReloadItem:anItem requested:YES];
+	[((FSFileItem*)anItem) loadChildren:self requested:YES];
 	return YES;
 }
 
 - (BOOL)unloadItem:(FSItem*)anItem
 {
 	D(DBF_FileBrowser_DSDirectory, bug("%s\n", [[[anItem url] path] UTF8String]););
-	if(visibleItems.find(to_s([anItem.url path])) == visibleItems.end())
-		NSLog(@"%s %@, item not loaded", sel_getName(_cmd), anItem);
-
-	NSMutableArray* children = [NSMutableArray arrayWithObject:anItem];
-	for(NSUInteger i = 0; i < children.count; ++i)
-	{
-		for(FSItem* item in [children[i] children])
-		{
-			if(item.children)
-				[children addObject:item];
-		}
-	}
-
-	[self lostItems:children];
-	anItem.children = nil;
+	[((FSFileItem*)anItem) unloadChildren:self];
 	return YES;
 }
 @end
