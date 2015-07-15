@@ -1,11 +1,11 @@
-#import <OakAppKit/OakFileIconImage.h>
+#import <scm/status.h>
 
 @class FSDataSource;
 
 enum FSItemURLType { FSItemURLTypeUnknown = 0, FSItemURLTypeFile, FSItemURLTypeFolder, FSItemURLTypePackage, FSItemURLTypeAlias, FSItemURLTypeMissing };
 
 @interface FSItem : NSObject
-@property (nonatomic) OakFileIconImage* icon;
+@property (nonatomic) NSImage* icon;
 @property (nonatomic) NSString* displayName;
 @property (nonatomic) NSString* toolTip;
 @property (nonatomic) NSInteger labelIndex;
@@ -13,6 +13,7 @@ enum FSItemURLType { FSItemURLTypeUnknown = 0, FSItemURLTypeFile, FSItemURLTypeF
 @property (nonatomic) FSItemURLType urlType;
 @property (nonatomic) NSURL* target;
 @property (nonatomic) NSArray* children;
+@property (nonatomic) scm::status::type scmStatus;
 @property (nonatomic) BOOL leaf;
 @property (nonatomic) BOOL group;
 @property (nonatomic) BOOL sortAsFolder;

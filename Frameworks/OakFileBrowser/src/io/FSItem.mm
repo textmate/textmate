@@ -53,6 +53,17 @@
 	return [self.url path];
 }
 
+- (scm::status::type)scmStatus
+{
+	return [_icon isKindOfClass:[OakFileIconImage class]] ? ((OakFileIconImage*)_icon).scmStatus : scm::status::unknown;
+}
+
+- (void)setScmStatus:(scm::status::type)newScmStatus
+{
+	if([_icon isKindOfClass:[OakFileIconImage class]])
+		((OakFileIconImage*)_icon).scmStatus = newScmStatus;
+}
+
 - (FSItemURLType)urlType
 {
 	if(_urlType == FSItemURLTypeUnknown && [(self.target ?: self.url) isFileURL])

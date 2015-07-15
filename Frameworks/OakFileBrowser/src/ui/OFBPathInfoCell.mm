@@ -270,8 +270,8 @@ static void DrawSpinner (NSRect cellFrame, BOOL isFlipped, NSColor* color, doubl
 				@(FSItemURLTypeMissing): @"missing",
 			} objectForKey:@(item.urlType)];
 
-			NSString* scmStatus = [NSString stringWithCxxString:scm::status::to_s(item.icon.scmStatus)];
-			if(item.icon.scmStatus == scm::status::unknown)
+			NSString* scmStatus = [NSString stringWithCxxString:scm::status::to_s(item.scmStatus)];
+			if(item.scmStatus == scm::status::unknown)
 				scmStatus = @"not versioned";
 
 			if(type)

@@ -1,6 +1,7 @@
 #import "FSSCMDataSource.h"
 #import "FSItem.h"
 #import <scm/scm.h>
+#import <OakAppKit/OakFileIconImage.h>
 #import <OakFoundation/NSString Additions.h>
 #import <io/path.h>
 #import <text/encode.h>
@@ -35,7 +36,7 @@ static NSArray* convert (std::vector<std::string> const& paths, std::string cons
 		item.leaf        = YES;
 
 		if(hideSCMBadge)
-			item.icon.scmStatus = scm::status::none;
+			item.scmStatus = scm::status::none;
 
 		[res addObject:item];
 	}
