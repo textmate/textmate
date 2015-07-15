@@ -45,7 +45,7 @@
 
 - (NSString*)description
 {
-	return [NSString stringWithFormat:@"FSItem (%p): %@", self, [self.url absoluteString]];
+	return [NSString stringWithFormat:@"FSItem (%p): %@ (%ld children)", self, [self.url absoluteString], [self.children count]];
 }
 
 - (NSString*)path
