@@ -1,17 +1,16 @@
 #import "FSSCMDataSource.h"
 #import "FSItem.h"
 #import <scm/scm.h>
-#import <OakAppKit/OakFileIconImage.h>
 #import <OakFoundation/NSString Additions.h>
 #import <io/path.h>
 #import <text/encode.h>
 #import <text/format.h>
 #import <oak/oak.h>
 
-static OakFileIconImage* SCMFolderIcon ()
+static NSImage* SCMFolderIcon ()
 {
-	OakFileIconImage* res = [[OakFileIconImage alloc] initWithSize:NSMakeSize(16, 16)];
-	res.directory = YES;
+	NSImage* res = [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kGenericFolderIcon)];
+	res.size = NSMakeSize(16, 16);
 	return res;
 }
 
