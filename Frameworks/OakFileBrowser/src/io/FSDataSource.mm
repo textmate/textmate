@@ -47,6 +47,11 @@ FSDataSource* DataSourceForURL (NSURL* anURL, NSUInteger someOptions)
 	return [anArray sortedArrayUsingDescriptors:descriptors];
 }
 
+- (void)reloadItem:(FSItem*)anItem completionHandler:(void(^)(NSArray*))block
+{
+	block(anItem.children);
+}
+
 - (BOOL)reloadItem:(FSItem*)anItem
 {
 	return NO;

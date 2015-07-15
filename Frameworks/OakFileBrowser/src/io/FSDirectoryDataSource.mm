@@ -334,6 +334,11 @@ struct tracking_t : fs::event_callback_t
 	return self;
 }
 
+- (void)reloadItem:(FSItem*)anItem completionHandler:(void(^)(NSArray*))block
+{
+	[((FSFileItem*)anItem) loadChildren:self completionHandler:block];
+}
+
 - (BOOL)reloadItem:(FSItem*)anItem
 {
 	D(DBF_FileBrowser_DSDirectory, bug("%s\n", [[[anItem url] path] UTF8String]););
