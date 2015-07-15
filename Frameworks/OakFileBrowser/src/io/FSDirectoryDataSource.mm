@@ -25,6 +25,7 @@ struct tracking_t;
 }
 @property (nonatomic) dev_t device;
 @property (nonatomic) ino_t inode;
+@property (nonatomic) BOOL missing;
 - (void)internalNeedsReload;
 @end
 
@@ -47,9 +48,9 @@ struct tracking_t : fs::event_callback_t
 				std::set<std::string> pathsShown, pathsDeleted, pathsMissingOnDisk;
 				for(FSFileItem* item in _item.children)
 				{
-					if(!item.icon.exists)
-						pathsMissingOnDisk.insert(to_s(item.icon.path));
-					pathsShown.insert(to_s(item.icon.path));
+					if(item.missing)
+						pathsMissingOnDisk.insert(to_s(item.url.path));
+					pathsShown.insert(to_s(item.url.path));
 				}
 
 				for(auto pair : info.status())
@@ -262,6 +263,7 @@ struct tracking_t : fs::event_callback_t
 						item.displayName = [NSString stringWithCxxString:path::name(pair.first)];
 						item.icon        = image;
 						item.leaf        = YES;
+						item.missing     = YES;
 
 						[array addObject:item];
 					}
