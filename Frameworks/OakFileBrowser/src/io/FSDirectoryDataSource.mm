@@ -121,7 +121,7 @@ struct tracking_t : fs::event_callback_t
 
 				is_link           = true;
 				sort_as_directory = (flags & (path::flag::directory|path::flag::package)) == path::flag::directory;
-				target            = "file://localhost" + encode::url_part(resolved, "/") + ((flags & (path::flag::directory|path::flag::package)) ? "/" : "");
+				target            = to_s([[NSURL fileURLWithPath:[NSString stringWithCxxString:resolved] isDirectory:path::flag::directory|path::flag::package] absoluteString]);
 			}
 			else if(entry->d_type == DT_DIR)
 			{
@@ -130,7 +130,7 @@ struct tracking_t : fs::event_callback_t
 				is_directory       = true;
 				sort_as_directory  = !(flags & path::flag::package);
 				treat_as_directory = !(flags & (path::flag::package|path::flag::hidden_volume));
-				target             = "file://localhost" + encode::url_part(path, "/") + "/";
+				target             = to_s([[NSURL fileURLWithPath:[NSString stringWithCxxString:path] isDirectory:path::flag::directory|path::flag::package] absoluteString]);
 
 				if(path::extension(path) == ".xcodeproj")
 					target = "xcodeproj://localhost" + encode::url_part(path, "/") + "/";
