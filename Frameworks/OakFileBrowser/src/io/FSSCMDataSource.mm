@@ -1,6 +1,7 @@
 #import "FSSCMDataSource.h"
 #import "FSItem.h"
 #import <scm/scm.h>
+#import <OakAppKit/NSImage Additions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <io/path.h>
 #import <text/encode.h>
@@ -216,7 +217,7 @@ _Iter prune_path_children (_Iter it, _Iter last)
 		}
 
 		res = [[FSSCMItem alloc] initWithURL:URLAppend(_url, @"?status=all") dataSource:self selector:@selector(rootItems)];
-		res.icon        = SCMFolderIcon();
+		res.icon        = [NSImage imageNamed:@"SCMTemplate" inSameBundleAsClass:[self class]];
 		res.displayName = name;
 		res.group       = YES;
 	}
@@ -241,7 +242,7 @@ _Iter prune_path_children (_Iter it, _Iter last)
 	else
 	{
 		res             = [FSItem itemWithURL:_url];
-		res.icon        = [NSImage imageNamed:NSImageNameFolderSmart];
+		res.icon        = [NSImage imageNamed:@"SCMTemplate" inSameBundleAsClass:[self class]];
 		res.displayName = [NSString stringWithFormat:@"%@ (%@)", [[NSFileManager defaultManager] displayNameAtPath:[_url path]], type];
 	}
 	return res;
