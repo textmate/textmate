@@ -29,6 +29,20 @@
 @end
 
 @implementation OFBOutlineView
+- (void)expandItem:(id)anItem expandChildren:(BOOL)flag
+{
+	BOOL oldFlag = std::exchange(_recursiveRequest, flag);
+	[super expandItem:anItem expandChildren:flag];
+	_recursiveRequest = oldFlag;
+}
+
+- (void)collapseItem:(id)anItem collapseChildren:(BOOL)flag
+{
+	BOOL oldFlag = std::exchange(_recursiveRequest, flag);
+	[super collapseItem:anItem collapseChildren:flag];
+	_recursiveRequest = oldFlag;
+}
+
 - (void)setRenderAsSourceList:(BOOL)value
 {
 	if(_renderAsSourceList == value)
