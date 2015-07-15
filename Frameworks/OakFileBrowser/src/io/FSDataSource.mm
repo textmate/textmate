@@ -52,11 +52,6 @@ FSDataSource* DataSourceForURL (NSURL* anURL, NSUInteger someOptions)
 	block(anItem.children);
 }
 
-- (BOOL)reloadItem:(FSItem*)anItem
-{
-	return NO;
-}
-
 - (BOOL)unloadItem:(FSItem*)anItem
 {
 	return NO;

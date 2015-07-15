@@ -276,13 +276,6 @@ struct tracking_t : fs::event_callback_t
 	});
 }
 
-- (void)loadChildren:(FSDirectoryDataSource*)dataSource requested:(BOOL)flag
-{
-	[self loadChildren:dataSource completionHandler:^(NSArray* items){
-		[[NSNotificationCenter defaultCenter] postNotificationName:FSItemDidReloadNotification object:dataSource userInfo:@{ @"item" : self, @"children" : items, @"recursive" : @YES, @"requested" : @(flag) }];
-	}];
-}
-
 - (void)unloadChildren:(FSDirectoryDataSource*)dataSource
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -317,7 +310,7 @@ struct tracking_t : fs::event_callback_t
 - (void)internalNeedsReload
 {
 	if(_tracking)
-		[self loadChildren:_tracking->_data_source requested:NO];
+		[[NSNotificationCenter defaultCenter] postNotificationName:FSItemDidReloadNotification object:_tracking->_data_source userInfo:@{ @"item" : self }];
 }
 @end
 
@@ -328,8 +321,6 @@ struct tracking_t : fs::event_callback_t
 	{
 		self.dataSourceOptions = someOptions;
 		self.rootItem = [FSFileItem itemWithURL:anURL];
-
-		[((FSFileItem*)self.rootItem) loadChildren:self requested:NO];
 	}
 	return self;
 }
@@ -337,13 +328,6 @@ struct tracking_t : fs::event_callback_t
 - (void)reloadItem:(FSItem*)anItem completionHandler:(void(^)(NSArray*))block
 {
 	[((FSFileItem*)anItem) loadChildren:self completionHandler:block];
-}
-
-- (BOOL)reloadItem:(FSItem*)anItem
-{
-	D(DBF_FileBrowser_DSDirectory, bug("%s\n", [[[anItem url] path] UTF8String]););
-	[((FSFileItem*)anItem) loadChildren:self requested:YES];
-	return YES;
 }
 
 - (BOOL)unloadItem:(FSItem*)anItem
