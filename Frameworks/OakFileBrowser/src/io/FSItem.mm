@@ -38,6 +38,11 @@
 	return [otherObject isKindOfClass:[self class]] && [self.url isEqual:[otherObject url]];
 }
 
+- (NSUInteger)hash
+{
+	return [self.url hash];
+}
+
 - (NSString*)description
 {
 	return [NSString stringWithFormat:@"FSItem (%p): %@", self, [self.url absoluteString]];
