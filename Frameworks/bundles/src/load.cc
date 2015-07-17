@@ -21,6 +21,18 @@ static std::vector<oak::uuid_t> to_menu (plist::array_t const& uuids, std::strin
 	return res;
 }
 
+static void remove_cycles (oak::uuid_t const& menuUUID, std::map< oak::uuid_t, std::vector<oak::uuid_t> >& menus, std::set<oak::uuid_t> parents = { })
+{
+	auto pair = menus.find(menuUUID);
+	if(pair != menus.end())
+	{
+		parents.insert(menuUUID);
+		pair->second.erase(std::remove_if(pair->second.begin(), pair->second.end(), [&parents](oak::uuid_t const& uuid) { return parents.find(uuid) != parents.end(); }), pair->second.end());
+		for(auto const& uuid : pair->second)
+			remove_cycles(uuid, menus, parents);
+	}
+}
+
 std::pair<std::vector<bundles::item_ptr>, std::map< oak::uuid_t, std::vector<oak::uuid_t>>> create_bundle_index (std::vector<std::string> const& bundlesPaths, plist::cache_t& cache)
 {
 	struct delta_item_t
@@ -123,6 +135,8 @@ std::pair<std::vector<bundles::item_ptr>, std::map< oak::uuid_t, std::vector<oak
 						fprintf(stderr, "*** invalid uuid (\"%s\") in ‘%s’\n", submenuIter.first.c_str(), infoPlistPath.c_str());
 					}
 				}
+
+				remove_cycles(bundleUUID, menus);
 
 				plist::array_t uuids;
 				plist::get_key_path(plist, "mainMenu.excludedItems", uuids);
