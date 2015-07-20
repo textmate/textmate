@@ -368,6 +368,15 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 	if(!alreadyVisible)
 	{
+		for(NSURL* currentURL = ParentForURL(aURL); currentURL; currentURL = ParentForURL(currentURL))
+		{
+			if([currentURL isEqual:_url] || [currentURL isEqual:parentURL])
+			{
+				parentURL = currentURL;
+				break;
+			}
+		}
+
 		BOOL isChild = NO;
 		for(NSURL* currentURL = ParentForURL(aURL); currentURL && !isChild; currentURL = ParentForURL(currentURL))
 		{
