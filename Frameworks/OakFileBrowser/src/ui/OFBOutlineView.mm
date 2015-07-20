@@ -198,8 +198,6 @@
 	{
 		{ "@" + utf8::to_s(NSLeftArrowFunctionKey),  @selector(goBack:)                   },
 		{ "@" + utf8::to_s(NSRightArrowFunctionKey), @selector(goForward:)                },
-		{ utf8::to_s(NSCarriageReturnCharacter),     @selector(performEditSelectedRow:)   },
-		{ utf8::to_s(NSEnterCharacter),              @selector(performEditSelectedRow:)   },
 		{ "@" + utf8::to_s(NSDownArrowFunctionKey),  @selector(performDoubleClick:)       },
 		{ "@o",                                      @selector(performDoubleClick:)       },
 		{ "@d",                                      @selector(duplicateSelectedEntries:) },
