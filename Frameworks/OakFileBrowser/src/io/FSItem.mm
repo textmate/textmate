@@ -60,8 +60,12 @@
 
 - (void)setScmStatus:(scm::status::type)newScmStatus
 {
-	if([_icon isKindOfClass:[OakFileIconImage class]])
-		((OakFileIconImage*)_icon).scmStatus = newScmStatus;
+	if([_icon isKindOfClass:[OakFileIconImage class]] && newScmStatus != self.scmStatus)
+	{
+		OakFileIconImage* icon = [(OakFileIconImage*)_icon copy];
+		icon.scmStatus = newScmStatus;
+		self.icon = icon;
+	}
 }
 
 - (FSItemURLType)urlType
