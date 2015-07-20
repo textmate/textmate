@@ -108,7 +108,7 @@
 
 - (void)showContextMenu:(id)sender
 {
-	if(NSMenu* menu = [self.menuDelegate menuForOutlineView:self])
+	if(NSMenu* menu = [self menuForEvent:[NSApp currentEvent]])
 	{
 		NSInteger row = [self selectedRow] != -1 ? [self selectedRow] : 0;
 		NSRect rect = [self convertRect:[self rectOfRow:row] toView:nil];
@@ -130,19 +130,6 @@
 
 		[NSMenu popUpContextMenu:menu withEvent:fakeEvent forView:self];
 	}
-}
-
-- (NSMenu*)menuForEvent:(NSEvent*)theEvent
-{
-	if(!self.menuDelegate)
-		return [super menuForEvent:theEvent];
-
-	NSInteger row = [self rowAtPoint:[self convertPoint:[theEvent locationInWindow] fromView:nil]];
-	if(row != -1 && [self.delegate respondsToSelector:@selector(outlineView:shouldSelectItem:)] && ![self.delegate outlineView:self shouldSelectItem:[self itemAtRow:row]])
-		row = -1;
-	if(row != -1 && ![self.selectedRowIndexes containsIndex:row])
-		[self selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-	return [self.menuDelegate menuForOutlineView:self];
 }
 
 // =============================

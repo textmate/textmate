@@ -103,7 +103,7 @@ static NSImage* IconImage (NSURL* url, NSSize size = NSMakeSize(16, 16))
 }
 @end
 
-@interface OakFileBrowser () <OFBOutlineViewMenuDelegate, NSMenuDelegate>
+@interface OakFileBrowser () <NSMenuDelegate>
 {
 	OBJC_WATCH_LEAKS(OakFileBrowser);
 	OFBHeaderView* _headerView;
@@ -197,7 +197,9 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	_outlineView.target                   = self;
 	_outlineView.action                   = @selector(didSingleClickOutlineView:);
 	_outlineView.doubleAction             = @selector(didDoubleClickOutlineView:);
-	_outlineView.menuDelegate             = self;
+
+	_outlineView.menu = [NSMenu new];
+	_outlineView.menu.delegate = self;
 
 	if([[[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsFileBrowserStyleKey] lowercaseString] isEqualToString:@"sourcelist"])
 		_outlineView.renderAsSourceList = YES;
@@ -997,13 +999,6 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 		[aMenu addItemWithTitle:@"No available actions" action:@selector(nop:) keyEquivalent:@""];
 }
 
-- (NSMenu*)menuForOutlineView:(NSOutlineView*)anOutlineView
-{
-	NSMenu* menu = [NSMenu new];
-	[self updateMenu:menu];
-	return menu;
-}
-
 - (BOOL)menuHasKeyEquivalent:(NSMenu*)aMenu forEvent:(NSEvent*)anEvent target:(id*)anId action:(SEL*)aSEL
 {
 	static std::string const keys[] = { "@N", "^@n", "@A" };
@@ -1031,7 +1026,8 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 - (void)menuNeedsUpdate:(NSMenu*)aMenu
 {
 	[aMenu removeAllItems];
-	[aMenu addItemWithTitle:@"Dummy" action:NULL keyEquivalent:@""];
+	if(aMenu == _actionsView.actionsPopUpButton.menu)
+		[aMenu addItemWithTitle:@"Dummy" action:NULL keyEquivalent:@""];
 	[self updateMenu:aMenu];
 }
 
