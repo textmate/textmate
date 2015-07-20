@@ -1744,9 +1744,9 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 
 - (id)validRequestorForSendType:(NSString*)sendType returnType:(NSString*)returnType
 {
-	if([sendType isEqual:NSStringPboardType] && [self hasSelection] && !macroRecordingArray)
+	if([sendType isEqualToString:NSStringPboardType] && [self hasSelection] && !macroRecordingArray)
 		return self;
-	if(!sendType && [returnType isEqual:NSStringPboardType] && !macroRecordingArray)
+	if(!sendType && [returnType isEqualToString:NSStringPboardType] && !macroRecordingArray)
 		return self;
 	return [super validRequestorForSendType:sendType returnType:returnType];
 }

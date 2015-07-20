@@ -293,7 +293,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	for(NSUInteger row = visibleRange.location; row < NSMaxRange(visibleRange); ++row)
 	{
 		FSItem* item = [_outlineView itemAtRow:row];
-		if([item.url isEqualTo:aURL])
+		if([item.url isEqual:aURL])
 			return [self iconFrameForEntry:item];
 	}
 	return NSZeroRect;
@@ -305,7 +305,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 - (void)setUrl:(NSURL*)aURL
 {
-	if(_outlineViewDelegate.dataSource && [_url isEqualTo:aURL])
+	if(_outlineViewDelegate.dataSource && [_url isEqual:aURL])
 		return;
 
 	_url = aURL;
@@ -351,7 +351,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 - (void)goToURL:(NSURL*)aURL
 {
 	ASSERT(_historyIndex != NSNotFound);
-	if([_url isEqualTo:aURL])
+	if([_url isEqual:aURL])
 		return;
 
 	if(_historyIndex + 1 < _history.count)
@@ -364,7 +364,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 {
 	BOOL alreadyVisible = NO;
 	for(NSInteger row = 0; !alreadyVisible && row < [_outlineView numberOfRows]; ++row)
-		alreadyVisible = alreadyVisible || [aURL isEqualTo:[[_outlineView itemAtRow:row] url]];
+		alreadyVisible = alreadyVisible || [aURL isEqual:[[_outlineView itemAtRow:row] url]];
 
 	if(!alreadyVisible)
 	{
@@ -1137,7 +1137,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 - (IBAction)goToFavorites:(id)sender
 {
-	if([_url isEqualTo:kURLLocationFavorites] && self.canGoBack)
+	if([_url isEqual:kURLLocationFavorites] && self.canGoBack)
 			[self goBack:sender];
 	else	[self goToURL:kURLLocationFavorites];
 }

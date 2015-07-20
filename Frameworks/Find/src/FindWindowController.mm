@@ -809,14 +809,14 @@ static NSButton* OakCreateStopSearchButton ()
 	{
 		for(NSMenuItem* menuItem in [self.wherePopUpButton.menu itemArray])
 		{
-			if([[menuItem representedObject] isEqualTo:aString])
+			if([[menuItem representedObject] isEqual:aString])
 				[self.wherePopUpButton selectItem:menuItem];
 		}
 		return;
 	}
 
 	_searchIn = aString;
-	self.folderSearch = self.searchFolder != nil || [aString isEqualTo:FFSearchInOpenFiles];
+	self.folderSearch = self.searchFolder != nil || [aString isEqualToString:FFSearchInOpenFiles];
 	self.window.title = [self windowTitleForDocumentDisplayName:nil];
 	if(NSString* folder = self.searchFolder)
 		[self.recentFolders addObject:folder];

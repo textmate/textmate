@@ -28,7 +28,7 @@ static NSButton* OakCreateScopeButton (NSString* label, NSUInteger tag, SEL acti
 @implementation OakScopeBarView
 - (void)setLabels:(NSArray*)anArray
 {
-	if(_labels == anArray || [_labels isEqualTo:anArray])
+	if(_labels == anArray || [_labels isEqualToArray:anArray])
 		return;
 	_labels = anArray;
 
@@ -94,7 +94,7 @@ static NSButton* OakCreateScopeButton (NSString* label, NSUInteger tag, SEL acti
 		{
 			id newValue = @(_selectedIndex);
 			id oldValue = [controller valueForKeyPath:keyPath];
-			if(!oldValue || ![oldValue isEqualTo:newValue])
+			if(!oldValue || ![oldValue isEqual:newValue])
 				[controller setValue:newValue forKeyPath:keyPath];
 		}
 	}

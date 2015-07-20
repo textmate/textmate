@@ -793,7 +793,7 @@ static NSString* const OakTabItemPasteboardType = @"com.macromates.TextMate.tabI
 
 		if(NSString* path = tabItem.path)
 		{
-			item.image   = [OakFileIconImage fileIconImageWithPath:([path isEqualTo:@""] ? nil : path) isModified:tabItem.modified];
+			item.image   = [OakFileIconImage fileIconImageWithPath:(OakIsEmptyString(path) ? nil : path) isModified:tabItem.modified];
 			item.toolTip = [path stringByAbbreviatingWithTildeInPath];
 		}
 

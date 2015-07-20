@@ -49,7 +49,7 @@ static NSString* const kRecordingPlaceholderString = @"…";
 		if(controller && controller != [NSNull null] && keyPath && (id)keyPath != [NSNull null])
 		{
 			id oldValue = [controller valueForKeyPath:keyPath];
-			if(!oldValue || ![oldValue isEqualTo:_eventString])
+			if(!oldValue || ![oldValue isEqual:_eventString])
 				[controller setValue:_eventString forKeyPath:keyPath];
 		}
 	}

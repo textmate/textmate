@@ -153,7 +153,7 @@ NSComboBox* OakCreateComboBox (NSObject* accessibilityLabel)
 
 - (void)setActiveBackgroundValue:(id)value
 {
-	if(value == _activeBackgroundValue || [value isEqualTo:_activeBackgroundValue])
+	if(value == _activeBackgroundValue || [value isEqual:_activeBackgroundValue])
 		return;
 	_activeBackgroundValue = value;
 	if(_active)
@@ -162,7 +162,7 @@ NSComboBox* OakCreateComboBox (NSObject* accessibilityLabel)
 
 - (void)setInactiveBackgroundValue:(id)value
 {
-	if(value == _inactiveBackgroundValue || [value isEqualTo:_inactiveBackgroundValue])
+	if(value == _inactiveBackgroundValue || [value isEqual:_inactiveBackgroundValue])
 		return;
 	_inactiveBackgroundValue = value;
 	if(!_active)
@@ -262,7 +262,7 @@ void OakSetupKeyViewLoop (NSArray* superviews, BOOL setFirstResponder)
 	NSMutableArray* views = [NSMutableArray new];
 	for(NSView* view in superviews)
 	{
-		if([view isEqualTo:[NSNull null]])
+		if([view isEqual:[NSNull null]])
 			continue;
 
 		[views addObject:view];
@@ -292,7 +292,7 @@ void OakAddAutoLayoutViewsToSuperview (NSArray* views, NSView* superview)
 {
 	for(NSView* view in views)
 	{
-		if([view isEqualTo:[NSNull null]])
+		if([view isEqual:[NSNull null]])
 			continue;
 		[view setTranslatesAutoresizingMaskIntoConstraints:NO];
 		[superview addSubview:view];
