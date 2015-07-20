@@ -253,15 +253,26 @@ NSView* OakCreateDividerImageView ()
 	return res;
 }
 
-void OakSetupKeyViewLoop (NSArray* mixed)
+void OakSetupKeyViewLoop (NSArray* mixed, BOOL setFirstResponder)
 {
+	std::set<id> seen;
+	for(id candidate in mixed)
+		seen.insert(candidate);
+
 	NSMutableArray* views = [NSMutableArray new];
 	for(id candidate in mixed)
 	{
 		if([candidate isKindOfClass:[NSView class]])
+		{
 			[views addObject:candidate];
+			NSView* subview = candidate;
+			while((subview = subview.nextKeyView) && [subview isDescendantOf:candidate] && seen.insert(subview).second)
+				[views addObject:subview];
+		}
 		else if([candidate isKindOfClass:[NSArray class]])
+		{
 			[views addObjectsFromArray:candidate];
+		}
 	}
 
 	if(views.count == 1)
@@ -274,8 +285,11 @@ void OakSetupKeyViewLoop (NSArray* mixed)
 			[views[i] setNextKeyView:views[(i + 1) % views.count]];
 	}
 
-	if(NSView* view = views.firstObject)
-		view.window.initialFirstResponder = view;
+	if(setFirstResponder)
+	{
+		if(NSView* view = views.firstObject)
+			view.window.initialFirstResponder = view;
+	}
 }
 
 void OakAddAutoLayoutViewsToSuperview (NSArray* views, NSView* superview)
