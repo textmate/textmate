@@ -588,8 +588,11 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 - (NSArray*)selectedItems
 {
-	NSMutableArray* res = [NSMutableArray array];
 	NSIndexSet* indexSet = [_outlineView selectedRowIndexes];
+	NSInteger clickedRow = [_outlineView clickedRow];
+	indexSet = clickedRow == -1 || [indexSet containsIndex:clickedRow] ? indexSet : [NSIndexSet indexSetWithIndex:clickedRow];
+
+	NSMutableArray* res = [NSMutableArray array];
 	for(NSUInteger index = [indexSet firstIndex]; index != NSNotFound; index = [indexSet indexGreaterThanIndex:index])
 		[res addObject:[_outlineView itemAtRow:index]];
 	return res;
