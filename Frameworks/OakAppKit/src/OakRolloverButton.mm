@@ -53,6 +53,12 @@ typedef NS_ENUM(NSUInteger, OakImageState) {
 	[super mouseDown:anEvent];
 }
 
+- (void)setHidden:(BOOL)flag
+{
+	[super setHidden:flag];
+	self.mouseInside = !flag && NSMouseInRect([self convertPoint:[self.window mouseLocationOutsideOfEventStream] fromView:nil], [self visibleRect], [self isFlipped]);
+}
+
 - (void)setImage:(NSImage*)anImage forState:(OakImageState)imageState
 {
 	if(_images[imageState] == anImage)
