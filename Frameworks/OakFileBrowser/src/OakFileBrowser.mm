@@ -259,6 +259,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	};
 
 	OakAddAutoLayoutViewsToSuperview([views allValues], _view);
+	OakSetupKeyViewLoop(@[ _view, _headerView, _outlineView, _actionsView ], NO);
 
 	[_view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[browser(==header,==actionsDivider,==actions)]|" options:0 metrics:nil views:views]];
 	[_view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[header][browser][actionsDivider][actions]|"     options:NSLayoutFormatAlignAllLeft metrics:nil views:views]];

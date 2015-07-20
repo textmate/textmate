@@ -138,6 +138,7 @@ private:
 		statusBar.target = self;
 
 		OakAddAutoLayoutViewsToSuperview(@[ gutterScrollView, gutterDividerView, textScrollView, statusDividerView, statusBar ], self);
+		OakSetupKeyViewLoop(@[ self, textView, statusBar ], NO);
 
 		document::document_ptr doc = document::from_content("", "text.plain"); // file type is only to avoid potential “no grammar” warnings in console
 		doc->set_custom_name("null document"); // without a name it grabs an ‘untitled’ token
