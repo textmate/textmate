@@ -256,35 +256,9 @@
 
 - (void)textDidEndEditing:(NSNotification *)aNotification
 {
-	int movement = [[[aNotification userInfo] objectForKey:@"NSTextMovement"] intValue];
-	[super textDidEndEditing:aNotification];
-	NSInteger row = [self selectedRow];
-	if(movement == NSReturnTextMovement)
-	{
-		[self abortEditing];
-		[[self window] makeFirstResponder:self];
-	}
-	// else if(movement == NSTabTextMovement)
-	// {
-	// 	[self abortEditing];
-	// 	++row;
-	// 	if(row == [self numberOfRows])
-	// 		row = 0;
-	// 	[self selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-	// 	[self editColumn:0 row:row withEvent:nil select:YES];
-	// }
-	else if(movement == NSBacktabTextMovement)
-	{
-		[self abortEditing];
-		if(row == 0)
-			row = [self numberOfRows];
-		--row;
-		[self selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-		[self editColumn:0 row:row withEvent:nil select:YES];
-	}
-
 	fieldEditorWasUp = YES;
 	[self performSelector:@selector(setFieldEditorWasUp:) withObject:0 afterDelay:0];
+	[super textDidEndEditing:aNotification];
 }
 
 - (void)setFieldEditorWasUp:(id)sender
