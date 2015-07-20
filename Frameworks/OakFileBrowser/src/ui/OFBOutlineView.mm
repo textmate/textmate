@@ -14,7 +14,6 @@
 {
 	OBJC_WATCH_LEAKS(OFBOutlineView);
 
-	BOOL fieldEditorWasUp;
 	NSRect mouseHoverRect;
 
 	NSTableViewSelectionHighlightStyle defaultSelectionHighlightStyle;
@@ -153,7 +152,7 @@
 - (BOOL)shouldActivate
 {
 	id firstResponder = [[self window] firstResponder];
-	if(([firstResponder respondsToSelector:@selector(delegate)] && [(NSText*)firstResponder delegate] == self) || fieldEditorWasUp)
+	if(([firstResponder respondsToSelector:@selector(delegate)] && [(NSText*)firstResponder delegate] == self) || firstResponder == self)
 		return YES;
 
 	NSEvent* event = [NSApp currentEvent];
@@ -250,18 +249,6 @@
 {
 	if([self abortEditing])
 		[[self window] makeFirstResponder:self]; // Restore focus
-}
-
-- (void)textDidEndEditing:(NSNotification *)aNotification
-{
-	fieldEditorWasUp = YES;
-	[self performSelector:@selector(setFieldEditorWasUp:) withObject:0 afterDelay:0];
-	[super textDidEndEditing:aNotification];
-}
-
-- (void)setFieldEditorWasUp:(id)sender
-{
-	fieldEditorWasUp = NO;
 }
 
 // ==================
