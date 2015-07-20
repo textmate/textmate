@@ -42,6 +42,7 @@ static NSButton* OakCreateScopeButton (NSString* label, NSUInteger tag, SEL acti
 	_buttons = buttons;
 
 	OakAddAutoLayoutViewsToSuperview(_buttons, self);
+	OakSetupKeyViewLoop([@[ self ] arrayByAddingObjectsFromArray:_buttons], NO);
 	if(_buttons.count)
 		self.selectedIndex = 0;
 

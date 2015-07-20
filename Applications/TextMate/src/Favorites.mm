@@ -76,7 +76,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 
 		NSView* contentView = self.window.contentView;
 		OakAddAutoLayoutViewsToSuperview([views allValues], contentView);
-		OakSetupKeyViewLoop(@[ self.searchField, scopeBar.buttons ]);
+		OakSetupKeyViewLoop(@[ self.searchField, scopeBar ]);
 
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[searchField(>=50)]-(8)-|"                      options:0 metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[aboveScopeBarDark(==aboveScopeBarLight)]|"          options:0 metrics:nil views:views]];

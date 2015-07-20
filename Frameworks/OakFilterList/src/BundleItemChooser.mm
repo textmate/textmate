@@ -425,7 +425,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	[self.window.contentView addConstraints:constraints];
 	self.layoutConstraints = constraints;
 
-	OakSetupKeyViewLoop(@[ (self.keyEquivalentInput ? self.keyEquivalentView : self.searchField), self.actionsPopUpButton, self.scopeBar.buttons, self.editButton, self.selectButton ]);
+	OakSetupKeyViewLoop(@[ (self.keyEquivalentInput ? self.keyEquivalentView : self.searchField), self.actionsPopUpButton, self.scopeBar, self.editButton, self.selectButton ]);
 }
 
 - (void)showWindow:(id)sender
