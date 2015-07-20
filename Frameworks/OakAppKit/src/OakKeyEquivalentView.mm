@@ -76,7 +76,7 @@ static NSString* const kRecordingPlaceholderString = @"…";
 	{
 		if(!_clearButton)
 		{
-			Class cl = NSClassFromString(@"OFBPathInfoCell");
+			Class cl = NSClassFromString(@"OakFileBrowser");
 			_clearButton = [[OakRolloverButton alloc] initWithFrame:NSZeroRect];
 			_clearButton.regularImage  = [NSImage imageNamed:@"CloseTemplate"         inSameBundleAsClass:cl];
 			_clearButton.pressedImage  = [NSImage imageNamed:@"ClosePressedTemplate"  inSameBundleAsClass:cl];

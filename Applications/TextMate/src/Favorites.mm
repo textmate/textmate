@@ -4,7 +4,6 @@
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakAppKit/OakScopeBarView.h>
 #import <OakAppKit/OakSound.h>
-#import <OakFileBrowser/OFBPathInfoCell.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakFoundation/NSFileManager Additions.h>
 #import <OakSystem/application.h>

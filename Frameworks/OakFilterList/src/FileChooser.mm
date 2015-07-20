@@ -8,7 +8,6 @@
 #import <OakAppKit/NSImage Additions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakFoundation/OakFoundation.h>
-#import <OakFileBrowser/OFBPathInfoCell.h>
 #import <ns/ns.h>
 #import <text/format.h>
 #import <text/parse.h>
@@ -579,7 +578,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 		OakRolloverButton* closeButton = [[OakRolloverButton alloc] initWithFrame:NSZeroRect];
 		OakSetAccessibilityLabel(closeButton, @"Close document");
 
-		Class cl = NSClassFromString(@"OFBPathInfoCell");
+		Class cl = NSClassFromString(@"OakFileBrowser");
 		closeButton.regularImage  = [NSImage imageNamed:@"CloseTemplate"         inSameBundleAsClass:cl];
 		closeButton.pressedImage  = [NSImage imageNamed:@"ClosePressedTemplate"  inSameBundleAsClass:cl];
 		closeButton.rolloverImage = [NSImage imageNamed:@"CloseRolloverTemplate" inSameBundleAsClass:cl];
