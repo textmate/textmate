@@ -106,6 +106,11 @@ struct tracking_t : fs::event_callback_t
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
+- (BOOL)isEqual:(FSFileItem*)otherObject
+{
+	return [super isEqual:otherObject] && otherObject.missing == _missing;
+}
+
 - (void)loadChildren:(FSDirectoryDataSource*)dataSource completionHandler:(void(^)(NSArray*))block
 {
 	struct fs_item_t

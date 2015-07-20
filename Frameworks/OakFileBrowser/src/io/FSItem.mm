@@ -35,7 +35,7 @@
 
 - (BOOL)isEqual:(id)otherObject
 {
-	return [otherObject isKindOfClass:[self class]] && [self.url isEqual:[otherObject url]];
+	return [otherObject isKindOfClass:[self class]] && [self.url isEqual:[otherObject url]] && self.scmStatus == [otherObject scmStatus];
 }
 
 - (NSUInteger)hash
