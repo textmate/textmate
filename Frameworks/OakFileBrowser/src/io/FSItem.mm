@@ -80,6 +80,19 @@ static ino_t inode (std::string const& path)
 	}
 }
 
+- (void)setLabelIndex:(NSInteger)newLabelIndex
+{
+	if(_labelIndex == newLabelIndex)
+		return;
+
+	_labelIndex = newLabelIndex;
+	if([_url isFileURL])
+	{
+		if(!path::set_label_index([self.path fileSystemRepresentation], newLabelIndex))
+			OakRunIOAlertPanel("Failed to change label color for “%s”.", [self.path fileSystemRepresentation]);
+	}
+}
+
 - (BOOL)setNewDisplayName:(NSString*)newDisplayName view:(NSView*)view
 {
 	if(![_url isFileURL] || OakIsEmptyString(newDisplayName))

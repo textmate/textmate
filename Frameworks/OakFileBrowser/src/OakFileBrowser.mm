@@ -770,12 +770,8 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 - (void)changeColor:(OakFinderLabelChooser*)labelChooser
 {
-	NSInteger labelIndex = [labelChooser selectedIndex];
-	for(NSString* aPath in self.selectedPaths)
-	{
-		if(!path::set_label_index([aPath fileSystemRepresentation], labelIndex))
-			OakRunIOAlertPanel("Failed to change label color for “%s”.", [aPath fileSystemRepresentation]);
-	}
+	for(FSItem* item in self.selectedItems)
+		item.labelIndex = [labelChooser selectedIndex];
 }
 
 - (void)addSelectedEntriesToFavorites:(id)sender
