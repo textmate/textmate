@@ -174,10 +174,11 @@
 
 - (void)performEditSelectedRow:(id)sender
 {
-	if([self numberOfSelectedRows] == 1)
+	NSInteger row = self.clickedRow == -1 && [self numberOfSelectedRows] == 1 ? self.selectedRow : self.clickedRow;
+	if(row != -1)
 	{
 		[[self window] makeKeyWindow];
-		[self editColumn:0 row:[self selectedRow] withEvent:nil select:YES];
+		[self editColumn:0 row:row withEvent:nil select:YES];
 	}
 }
 
