@@ -3,17 +3,154 @@
 #import "io/FSDataSource.h"
 #import "io/FSItem.h"
 #import "ui/OFBOutlineView.h"
-#import "ui/OFBPathInfoCell.h"
 #import <OakFoundation/NSString Additions.h>
+#import <OakAppKit/NSColor Additions.h>
+#import <OakAppKit/NSImage Additions.h>
 #import <OakAppKit/OakAppKit.h>
+#import <OakAppKit/OakUIConstructionFunctions.h>
+#import <OakAppKit/OakRolloverButton.h>
+#import <OakAppKit/OakFileIconImage.h>
 #import <ns/ns.h>
 #import <io/path.h>
 #import <text/utf8.h>
 #import <oak/oak.h>
 
-@interface NSCell (FSItemCell)
-- (void)setImage:(NSImage*)anImage;
-- (void)setLabelIndex:(NSInteger)anInteger;
+@interface OakSelectBasenameCell : NSTextFieldCell
+@end
+
+@implementation OakSelectBasenameCell
+- (void)selectWithFrame:(NSRect)aRect inView:(NSView*)aView editor:(NSText*)aText delegate:(id)someDelegate start:(NSInteger)start length:(NSInteger)length
+{
+	NSString* basename = [self.stringValue stringByDeletingPathExtension];
+	[super selectWithFrame:aRect inView:aView editor:aText delegate:someDelegate start:start length:(start == 0 && basename ? MIN(basename.length, length) : length)];
+}
+@end
+
+@interface OakFSItemTableCellView : NSTableCellView <NSTextFieldDelegate>
+@property (nonatomic) NSButton* openButton;
+@property (nonatomic) NSButton* closeButton;
+@property (nonatomic) NSArray* openURLs;
+@property (nonatomic) NSArray* modifiedURLs;
+@property (nonatomic) NSInteger labelIndex;
+@end
+
+@implementation OakFSItemTableCellView
+- (instancetype)initWithOpenButton:(NSButton*)openButton closeButton:(NSButton*)closeButton
+{
+	if((self = [super initWithFrame:NSZeroRect]))
+	{
+		_openButton  = openButton;
+		_closeButton = closeButton;
+
+		[openButton setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
+		[openButton setContentCompressionResistancePriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
+
+		NSTextField* fileTextField = OakCreateLabel(@"", [NSFont controlContentFontOfSize:0]);
+		fileTextField.cell = [[OakSelectBasenameCell alloc] initTextCell:@""];
+		fileTextField.editable = YES;
+		fileTextField.delegate = self;
+
+		NSDictionary* views = @{ @"icon" : openButton, @"file" : fileTextField, @"close" : closeButton };
+		OakAddAutoLayoutViewsToSuperview([views allValues], self);
+
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(4)-[icon]-(4)-[file]-(4@750)-[close(==16)]-(8)-|" options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[file]-(2)-|" options:NSLayoutFormatAlignAllLeading|NSLayoutFormatAlignAllTrailing metrics:nil views:views]];
+		[self addConstraint:[NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:openButton attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
+		[self addConstraint:[NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:closeButton attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
+
+		[openButton bind:NSImageBinding toObject:self withKeyPath:@"objectValue.icon" options:nil];
+		[fileTextField bind:NSValueBinding toObject:self withKeyPath:@"objectValue.displayName" options:nil];
+		[fileTextField bind:NSToolTipBinding toObject:self withKeyPath:@"objectValue.toolTip" options:nil];
+		[self bind:@"labelIndex" toObject:self withKeyPath:@"objectValue.labelIndex" options:nil];
+
+		self.textField = fileTextField;
+	}
+	return self;
+}
+
+- (void)controlTextDidEndEditing:(NSNotification*)aNotification
+{
+	FSItem* item = self.objectValue;
+	if(![item setNewDisplayName:self.textField.stringValue view:self])
+		item.displayName = [NSString stringWithCxxString:path::display_name([item.url.path fileSystemRepresentation])];
+}
+
+- (void)setObjectValue:(FSItem*)item
+{
+	[super setObjectValue:item];
+	self.openURLs = _openURLs;
+	self.modified = [_modifiedURLs containsObject:item.url];
+}
+
+- (void)setLabelIndex:(NSInteger)newLabelIndex
+{
+	if(_labelIndex != newLabelIndex)
+	{
+		_labelIndex = newLabelIndex;
+		[self setNeedsDisplay:YES];
+	}
+}
+
+- (void)setModified:(BOOL)flag
+{
+	FSItem* item  = self.objectValue;
+	NSImage* icon = [item.icon copy];
+
+	SEL setModifiedSelector = @selector(setModified:);
+	if([icon respondsToSelector:setModifiedSelector])
+	{
+		auto fn = (void(*)(id, SEL, BOOL))[icon methodForSelector:setModifiedSelector];
+		fn(icon, setModifiedSelector, flag);
+		item.icon = icon;
+	}
+}
+
+- (void)setOpenURLs:(NSArray*)someURLs
+{
+	_openURLs = someURLs;
+	FSItem* item = self.objectValue;
+	_closeButton.hidden = ![_openURLs containsObject:item.url];
+}
+
+- (void)setModifiedURLs:(NSArray*)someURLs
+{
+	FSItem* item     = self.objectValue;
+	BOOL wasModified = [_modifiedURLs containsObject:item.url];
+	BOOL isModified  = [someURLs containsObject:item.url];
+
+	_modifiedURLs = someURLs;
+	if(wasModified != isModified)
+		self.modified = isModified;
+}
+
+- (void)resetCursorRects
+{
+	[self addCursorRect:self.openButton.frame cursor:[NSCursor pointingHandCursor]];
+}
+
+- (void)drawLabelIndex:(NSUInteger)labelColorIndex inFrame:(NSRect)cellFrame
+{
+	if(labelColorIndex == 0)
+		return;
+	ASSERT(labelColorIndex < 8);
+
+	// color names: Gray, Green, Purple, Blue, Yellow, Red, Orange
+	static NSString* const startCol[] = { @"#CFCFCF", @"#D4EE9C", @"#DDBDEA", @"#ACD0FE", @"#F8F79C", @"#FC999A", @"#F9D194" };
+	static NSString* const stopCol[]  = { @"#A8A8A8", @"#AFDC49", @"#C186D7", @"#5B9CFE", @"#ECDF4A", @"#FC605C", @"#F6AC46" };
+
+	NSRect r = NSIntegralRect(NSInsetRect(cellFrame, 2, 0)), unused;
+	if(self.backgroundStyle == NSBackgroundStyleDark)
+		NSDivideRect(r, &r, &unused, 30, NSMaxXEdge);
+
+	NSGradient* gradient = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithString:startCol[labelColorIndex-1]] endingColor:[NSColor colorWithString:stopCol[labelColorIndex-1]]];
+	NSBezierPath* path = [NSBezierPath bezierPathWithRoundedRect:r xRadius:8 yRadius:8];
+	[gradient drawInBezierPath:path angle:90];
+}
+
+- (void)drawRect:(NSRect)aRect
+{
+	[self drawLabelIndex:_labelIndex inFrame:[self bounds]];
+}
 @end
 
 static NSArray* ConvertURLSetToStringArray (NSSet* aSet)
@@ -265,65 +402,14 @@ struct expansion_state_t
 // = Outline view delegate methods =
 // =================================
 
-- (void)outlineView:(NSOutlineView*)anOutlineView willDisplayCell:(NSCell*)cell forTableColumn:(NSTableColumn*)tableColumn item:(FSItem*)item
-{
-	if([cell respondsToSelector:@selector(setImage:)])
-	{
-		SEL selector = @selector(setModified:);
-		if([item.icon respondsToSelector:selector])
-		{
-			auto fn = (void(*)(id, SEL, BOOL))[item.icon methodForSelector:selector];
-			fn(item.icon, selector, [_modifiedURLs containsObject:item.url]);
-		}
-		[cell setImage:item.icon];
-	}
-	cell.stringValue       = item.displayName;
-	// cell.textColor         = lstat([[item.url path] fileSystemRepresentation], &(struct stat){ 0 }) == 0 ? [NSColor textColor] : [NSColor redColor];
-	// cell.target            = delegate;
-	cell.representedObject = item;
-	if([cell respondsToSelector:@selector(setLabelIndex:)])
-		[cell setLabelIndex:item.labelIndex];
-	if([cell respondsToSelector:@selector(setIsOpen:)])
-		((OFBPathInfoCell*)cell).isOpen = [_openURLs containsObject:item.url];
-	// cell.isLoading         = item.isLoading;
-
-	if([anOutlineView editedRow] != -1 && item == [anOutlineView itemAtRow:[anOutlineView editedRow]])
-	{
-		if(NSString* path = [[item.url filePathURL] path])
-			cell.stringValue = [NSString stringWithCxxString:path::display_name([path fileSystemRepresentation])];
-	}
-}
-
 - (BOOL)outlineView:(NSOutlineView*)anOutlineView shouldSelectItem:(id)item
 {
-	if([self outlineView:anOutlineView isGroupItem:item])
-		return NO;
-
-	NSInteger col = [anOutlineView clickedColumn];
-	NSInteger row = [anOutlineView clickedRow];
-	if(col != -1 && row != -1)
-	{
-		NSCell* cell = [anOutlineView preparedCellAtColumn:col row:row];
-		NSUInteger hit = [cell hitTestForEvent:[NSApp currentEvent] inRect:[anOutlineView frameOfCellAtColumn:col row:row] ofView:anOutlineView];
-		if(hit & (OFBPathInfoCellHitOpenItem | OFBPathInfoCellHitRevealItem | NSCellHitTrackableArea))
-			return NO;
-	}
-	return YES;
-}
-
-- (BOOL)outlineView:(NSOutlineView*)anOutlineView shouldTrackCell:(NSCell*)cell forTableColumn:(NSTableColumn*)tableColumn item:(id)item
-{
-	return YES;
+	return [self outlineView:anOutlineView isGroupItem:item] == NO;
 }
 
 - (BOOL)outlineView:(NSOutlineView*)anOutlineView isGroupItem:(FSItem*)item
 {
 	return [item respondsToSelector:@selector(group)] ? item.group : NO;
-}
-
-- (NSString*)outlineView:(NSOutlineView*)outlineView toolTipForCell:(NSCell*)cell rect:(NSRectPointer)rect tableColumn:(NSTableColumn*)tc item:(FSItem*)item mouseLocation:(NSPoint)mouseLocation
-{
-	return [item respondsToSelector:@selector(toolTip)] ? item.toolTip : nil;
 }
 
 // ===========================
@@ -461,5 +547,42 @@ struct expansion_state_t
 
 	if([_dataSource unloadItem:item])
 		[_outlineView reloadItem:item reloadChildren:YES];
+}
+
+// ===============================
+// = Table cell view constructor =
+// ===============================
+
+- (NSView*)outlineView:(NSOutlineView*)outlineView viewForTableColumn:(NSTableColumn*)tableColumn item:(FSItem*)item
+{
+	NSTableCellView* res = [outlineView makeViewWithIdentifier:tableColumn.identifier owner:self];
+	if(!res)
+	{
+		NSButton* openButton = [[NSButton alloc] initWithFrame:NSZeroRect];
+		openButton.refusesFirstResponder = YES;
+		openButton.buttonType            = NSMomentaryChangeButton;
+		openButton.bordered              = NO;
+		openButton.imagePosition         = NSImageOnly;
+		openButton.target                = _target;
+		openButton.action                = _openItemSelector;
+
+		OakRolloverButton* closeButton = [[OakRolloverButton alloc] initWithFrame:NSZeroRect];
+		OakSetAccessibilityLabel(closeButton, @"Close document");
+
+		closeButton.regularImage  = [NSImage imageNamed:@"CloseTemplate"         inSameBundleAsClass:[self class]];
+		closeButton.pressedImage  = [NSImage imageNamed:@"ClosePressedTemplate"  inSameBundleAsClass:[self class]];
+		closeButton.rolloverImage = [NSImage imageNamed:@"CloseRolloverTemplate" inSameBundleAsClass:[self class]];
+		closeButton.target        = _target;
+		closeButton.action        = _closeItemSelector;
+
+		res = [[OakFSItemTableCellView alloc] initWithOpenButton:openButton closeButton:closeButton];
+		res.identifier = tableColumn.identifier;
+
+		[res bind:@"openURLs" toObject:self withKeyPath:@"openURLs" options:nil];
+		[res bind:@"modifiedURLs" toObject:self withKeyPath:@"modifiedURLs" options:nil];
+	}
+
+	res.objectValue = item;
+	return res;
 }
 @end

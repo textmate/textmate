@@ -1,5 +1,4 @@
 #import "OFBOutlineView.h"
-#import "OFBPathInfoCell.h"
 #import <OakAppKit/NSEvent Additions.h>
 #import <ns/ns.h>
 #import <text/utf8.h>
@@ -13,8 +12,6 @@
 @interface OFBOutlineView ()
 {
 	OBJC_WATCH_LEAKS(OFBOutlineView);
-
-	NSRect mouseHoverRect;
 
 	NSTableViewSelectionHighlightStyle defaultSelectionHighlightStyle;
 	NSTableViewDraggingDestinationFeedbackStyle defaultDraggingDestinationFeedbackStyle;
@@ -142,16 +139,11 @@
 	if([event type] != NSLeftMouseDown)
 		return YES;
 
-	id firstResponder = [[self window] firstResponder];
-	if(([firstResponder respondsToSelector:@selector(delegate)] && [(NSText*)firstResponder delegate] == self) || firstResponder == self)
+	NSView* firstResponder = (NSView*)[[self window] firstResponder];
+	if([firstResponder isKindOfClass:[NSView class]] && [firstResponder isDescendantOf:self])
 		return YES;
 
 	if([event clickCount] != 1 || (event.modifierFlags & NSCommandKeyMask))
-		return NO;
-
-	NSInteger row = [self rowAtPoint:[self convertPoint:[event locationInWindow] fromView:nil]];
-	NSUInteger hit = row == -1 ? 0 : [[self preparedCellAtColumn:0 row:row] hitTestForEvent:event inRect:[self frameOfCellAtColumn:0 row:row] ofView:self];
-	if(hit & (OFBPathInfoCellHitOpenItem | OFBPathInfoCellHitRevealItem | NSCellHitTrackableArea))
 		return NO;
 
 	NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
@@ -230,72 +222,5 @@
 
 	if([NSOutlineView respondsToSelector:@selector(draggedImage:endedAt:operation:)])
 		[super draggedImage:anImage endedAt:aPoint operation:aDragOperation];
-}
-
-// ==================
-// = Mouse Tracking =
-// ==================
-
-- (void)cursorUpdate:(NSEvent*)event
-{
-	if(NSMouseInRect([self convertPoint:[event locationInWindow] fromView:nil], [[event trackingArea] rect], self.isFlipped))
-			[[NSCursor pointingHandCursor] set];
-	else	[super cursorUpdate:event];
-}
-
-- (void)updateTrackingAreas
-{
-	for(NSTrackingArea* trackingArea in self.trackingAreas)
-		[self removeTrackingArea:trackingArea];
-
-	[super updateTrackingAreas];
-
-	NSRange rows = [self rowsInRect:[self visibleRect]];
-	for(NSUInteger row = rows.location; row < NSMaxRange(rows); ++row)
-	{
-		NSRect cellFrame  = [self frameOfCellAtColumn:0 row:row];
-		NSRect imageFrame = [[[[self tableColumns] lastObject] dataCell] imageFrameWithFrame:cellFrame inControlView:self];
-		imageFrame.origin.y    = cellFrame.origin.y;
-		imageFrame.size.height = cellFrame.size.height + self.intercellSpacing.height;
-		[self addTrackingArea:[[NSTrackingArea alloc] initWithRect:imageFrame options:NSTrackingCursorUpdate|NSTrackingActiveInKeyWindow owner:self userInfo:NULL]];
-	}
-
-	[self addTrackingArea:[[NSTrackingArea alloc] initWithRect:[self visibleRect] options:NSTrackingMouseEnteredAndExited|NSTrackingMouseMoved|NSTrackingActiveInKeyWindow owner:self userInfo:NULL]];
-}
-
-// ===============
-// = Mouse Moved =
-// ===============
-
-- (void)mouseMoved:(NSEvent*)theEvent
-{
-	NSRect newHoverRect = NSZeroRect;
-
-	NSPoint mousePos = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-	NSInteger row = [self rowAtPoint:mousePos];
-	if(row != -1)
-	{
-		OFBPathInfoCell* cell = (OFBPathInfoCell*)[self preparedCellAtColumn:0 row:row];
-		NSRect closeButtonRect = [cell closeButtonRectInFrame:[self frameOfCellAtColumn:0 row:row]];
-		if(NSMouseInRect(mousePos, closeButtonRect, self.isFlipped))
-			newHoverRect = closeButtonRect;
-	}
-
-	if(!NSEqualRects(mouseHoverRect, newHoverRect))
-	{
-		[self setNeedsDisplayInRect:mouseHoverRect];
-		[self setNeedsDisplayInRect:newHoverRect];
-		mouseHoverRect = newHoverRect;
-	}
-}
-
-- (void)mouseExited:(NSEvent*)anEvent
-{
-	if(!NSIsEmptyRect(mouseHoverRect))
-	{
-		[self setNeedsDisplayInRect:mouseHoverRect];
-		mouseHoverRect = NSZeroRect;
-	}
-	[super mouseExited:anEvent];
 }
 @end

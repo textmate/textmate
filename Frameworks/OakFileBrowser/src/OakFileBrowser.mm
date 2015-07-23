@@ -2,7 +2,6 @@
 #import "OakFSUtilities.h"
 #import "ui/OFBHeaderView.h"
 #import "ui/OFBOutlineView.h"
-#import "ui/OFBPathInfoCell.h"
 #import "ui/OFBActionsView.h"
 #import "io/FSDataSource.h"
 #import "io/FSSCMDataSource.h"
@@ -136,15 +135,6 @@ static bool is_binary (std::string const& path)
 	return false;
 }
 
-static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anotherSet)
-{
-	NSMutableSet* unionSet = [aSet mutableCopy];
-	[unionSet unionSet:anotherSet];
-	[anotherSet intersectSet:aSet];
-	[unionSet minusSet:anotherSet];
-	return unionSet;
-}
-
 @implementation OakFileBrowser
 - (id)init
 {
@@ -238,20 +228,16 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 	_view = [OakFileBrowserView new];
 
-	NSTextFieldCell* cell = [OFBPathInfoCell new];
-	cell.lineBreakMode = NSLineBreakByTruncatingMiddle;
-	[cell setEditable:YES];
-	if(_outlineView.renderAsSourceList && oak::os_tuple() >= std::make_tuple(10, 10, 0))
-		cell.textColor = [NSColor textColor];
-
 	NSTableColumn* tableColumn = [NSTableColumn new];
-	[tableColumn setDataCell:cell];
 	[_outlineView addTableColumn:tableColumn];
 	[_outlineView setOutlineTableColumn:tableColumn];
 	[_outlineView sizeLastColumnToFit];
 
 	_outlineViewDelegate = [FSOutlineViewDelegate new];
-	_outlineViewDelegate.outlineView = _outlineView;
+	_outlineViewDelegate.outlineView       = _outlineView;
+	_outlineViewDelegate.openItemSelector  = @selector(takeItemToOpenFrom:);
+	_outlineViewDelegate.closeItemSelector = @selector(takeItemToCloseFrom:);
+	_outlineViewDelegate.target            = self;
 
 	NSDictionary* views = @{
 		@"header"         : _headerView,
@@ -543,41 +529,10 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 // = Externally provided item state =
 // ==================================
 
-- (NSArray*)openURLs
-{
-	return _outlineViewDelegate.openURLs;
-}
-
-- (void)setOpenURLs:(NSArray*)newOpenURLs
-{
-	if([_outlineViewDelegate.openURLs isEqualToArray:newOpenURLs])
-		return;
-
-	NSSet* symmetricDifference = SymmetricDifference([NSMutableSet setWithArray:_outlineViewDelegate.openURLs], [NSMutableSet setWithArray:newOpenURLs]);
-
-	// make a note of files in view, with changed open state
-	NSIndexSet* updateRows = [self indexSetforURLs:symmetricDifference];
-	_outlineViewDelegate.openURLs = newOpenURLs;
-	[_outlineView reloadDataForRowIndexes:updateRows columnIndexes:[NSIndexSet indexSetWithIndex:0]];
-}
-
-- (NSArray*)modifiedURLs
-{
-	return _outlineViewDelegate.modifiedURLs;
-}
-
-- (void)setModifiedURLs:(NSArray*)newModifiedURLs
-{
-	if([_outlineViewDelegate.modifiedURLs isEqualToArray:newModifiedURLs])
-		return;
-
-	NSSet* symmetricDifference = SymmetricDifference([NSMutableSet setWithArray:_outlineViewDelegate.modifiedURLs], [NSMutableSet setWithArray:newModifiedURLs]);
-
-	// make a note of files in view, with changed modified state
-	NSIndexSet* updateRows = [self indexSetforURLs:symmetricDifference];
-	_outlineViewDelegate.modifiedURLs = newModifiedURLs;
-	[_outlineView reloadDataForRowIndexes:updateRows columnIndexes:[NSIndexSet indexSetWithIndex:0]];
-}
+- (NSArray*)openURLs                       { return _outlineViewDelegate.openURLs; }
+- (NSArray*)modifiedURLs                   { return _outlineViewDelegate.modifiedURLs; }
+- (void)setOpenURLs:(NSArray*)someURLs     { _outlineViewDelegate.openURLs = someURLs; }
+- (void)setModifiedURLs:(NSArray*)someURLs { _outlineViewDelegate.modifiedURLs = someURLs; }
 
 - (NSIndexSet*)indexSetforURLs:(NSSet*)urls
 {
@@ -1040,10 +995,37 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 // = Action methods =
 // ==================
 
+- (void)takeItemToOpenFrom:(id)sender
+{
+	NSInteger row = [_outlineView rowForView:sender];
+	if(row != -1)
+	{
+		if(FSItem* item = [_outlineView itemAtRow:row])
+		{
+			if([item.url isFileURL] && ([NSEvent modifierFlags] & (NSShiftKeyMask|NSControlKeyMask|NSCommandKeyMask)) == NSCommandKeyMask)
+					[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:@[ item.url ]];
+			else	[self openItems:@[ item ] animate:YES];
+		}
+	}
+}
+
+- (void)takeItemToCloseFrom:(id)sender
+{
+	NSInteger row = [_outlineView rowForView:sender];
+	if(row != -1)
+	{
+		FSItem* item = [_outlineView itemAtRow:row];
+		[_delegate fileBrowser:self closeURL:item.url];
+	}
+}
+
 - (IBAction)didDoubleClickOutlineView:(id)sender
 {
-	NSArray* items = _outlineView.clickedRow != -1 ? @[ [_outlineView itemAtRow:_outlineView.clickedRow] ] : self.selectedItems;
+	[self openItems:_outlineView.clickedRow != -1 ? @[ [_outlineView itemAtRow:_outlineView.clickedRow] ] : self.selectedItems animate:YES];
+}
 
+- (void)openItems:(NSArray*)items animate:(BOOL)animateFlag
+{
 	NSMutableArray* urlsToOpen     = [NSMutableArray array];
 	NSMutableArray* itemsToAnimate = [NSMutableArray array];
 
@@ -1083,7 +1065,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 		}
 	}
 
-	if(![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFileBrowserOpenAnimationDisabled])
+	if(animateFlag && ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFileBrowserOpenAnimationDisabled])
 	{
 		for(FSItem* item in itemsToAnimate)
 			[OakZoomingIcon zoomIcon:item.icon fromRect:[self iconFrameForEntry:item]];
@@ -1095,18 +1077,11 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 - (IBAction)didSingleClickOutlineView:(id)sender
 {
-	NSInteger row = [_outlineView clickedRow];
-	NSInteger col = [_outlineView clickedColumn];
-	col = row != -1 && col == -1 ? 0 : col; // Clicking a row which participates in multi-row selection causes clickedColumn to return -1 <rdar://10382268>
-	NSCell* cell = [_outlineView preparedCellAtColumn:col row:row];
-	NSUInteger hit = [cell hitTestForEvent:[NSApp currentEvent] inRect:[_outlineView frameOfCellAtColumn:col row:row] ofView:_outlineView];
-	FSItem* item = [_outlineView itemAtRow:row];
-	if((hit & OFBPathInfoCellHitRevealItem) && [item.url isFileURL])
-		[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:@[ item.url ]];
-	else if(hit & (OFBPathInfoCellHitOpenItem | OFBPathInfoCellHitRevealItem))
-		[self didDoubleClickOutlineView:sender];
-	else if(hit & OFBPathInfoCellHitCloseButton)
-		[_delegate fileBrowser:self closeURL:item.url];
+	BOOL singleClickShouldOpen = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFileBrowserSingleClickToOpenKey];
+	BOOL noModifiers = !([NSEvent modifierFlags] & (NSShiftKeyMask|NSControlKeyMask|NSCommandKeyMask));
+	FSItem* item = _outlineView.clickedRow != -1 ? [_outlineView itemAtRow:_outlineView.clickedRow] : nil;
+	if(singleClickShouldOpen && noModifiers && item.urlType == FSItemURLTypeFile)
+		[self openItems:@[ item ] animate:NO];
 }
 
 - (IBAction)reload:(id)sender

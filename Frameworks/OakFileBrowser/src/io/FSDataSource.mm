@@ -81,17 +81,6 @@ FSDataSource* DataSourceForURL (NSURL* anURL, NSUInteger someOptions)
 	return [(item ?: self.rootItem).children objectAtIndex:childIndex];
 }
 
-- (id)outlineView:(NSOutlineView*)anOutlineView objectValueForTableColumn:(NSTableColumn*)tableColumn byItem:(FSItem*)item
-{
-	return item;
-}
-
-- (void)outlineView:(NSOutlineView*)anOutlineView setObjectValue:(id)objectValue forTableColumn:(NSTableColumn*)tableColumn byItem:(FSItem*)item
-{
-	if([objectValue isKindOfClass:[NSString class]])
-		[item setNewDisplayName:objectValue view:anOutlineView];
-}
-
 - (BOOL)outlineView:(NSOutlineView*)anOutlineView writeItems:(NSArray*)items toPasteboard:(NSPasteboard*)pboard
 {
 	NSMutableArray* urls  = [NSMutableArray array];
