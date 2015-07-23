@@ -481,6 +481,8 @@ struct expansion_state_t
 			_expansionRequests.erase(state->url);
 			if(_expansionRequests.empty() && (_pendingEditURL || _pendingMakeVisibleURL))
 				[self checkPendingSelectAndEditURLs];
+
+			[_outlineView setNeedsDisplay:YES];
 		}
 	}];
 }
