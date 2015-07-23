@@ -62,14 +62,7 @@ struct tracking_t : fs::event_callback_t
 				if(std::includes(pathsShown.begin(), pathsShown.end(), pathsDeleted.begin(), pathsDeleted.end()) && std::includes(pathsDeleted.begin(), pathsDeleted.end(), pathsMissingOnDisk.begin(), pathsMissingOnDisk.end()))
 				{
 					for(FSFileItem* item in _item.children)
-					{
-						scm::status::type newStatus = info.status(to_s([item.url path]));
-						if(newStatus != item.scmStatus)
-						{
-							item.scmStatus = newStatus;
-							[[NSNotificationCenter defaultCenter] postNotificationName:FSItemDidReloadNotification object:_data_source userInfo:@{ @"item" : item }];
-						}
-					}
+						item.scmStatus = info.status(to_s([item.url path]));
 				}
 				else
 				{
