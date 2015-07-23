@@ -82,7 +82,7 @@ static ino_t inode (std::string const& path)
 
 - (BOOL)setNewDisplayName:(NSString*)newDisplayName view:(NSView*)view
 {
-	if(![_url isFileURL] || OakIsEmptyString(newDisplayName) || [newDisplayName isEqualToString:_displayName])
+	if(![_url isFileURL] || OakIsEmptyString(newDisplayName))
 		return NO;
 
 	std::string src = [[_url path] fileSystemRepresentation];
@@ -90,7 +90,7 @@ static ino_t inode (std::string const& path)
 
 	// “hidden extension” is ignored if Finder is set to show all file extensions, if there are multiple extensions, or if no application is assigned to the extension.
 	std::string const baseName    = path::name(src);
-	std::string const displayName = to_s(_displayName);
+	std::string const displayName = path::display_name(src);
 	bool hiddenExtension = baseName != displayName && (path::info(src) & path::flag::hidden_extension);
 
 	BOOL res = NO;
