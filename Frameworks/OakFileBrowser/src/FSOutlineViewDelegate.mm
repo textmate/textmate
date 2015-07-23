@@ -47,6 +47,8 @@
 
 		NSTextField* fileTextField = OakCreateLabel(@"", [NSFont controlContentFontOfSize:0]);
 		fileTextField.cell = [[OakSelectBasenameCell alloc] initTextCell:@""];
+		[fileTextField.cell setWraps:NO];
+		[fileTextField.cell setLineBreakMode:NSLineBreakByTruncatingMiddle];
 		fileTextField.editable = YES;
 		fileTextField.delegate = self;
 
