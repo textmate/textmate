@@ -231,16 +231,6 @@
 		[super draggedImage:anImage endedAt:aPoint operation:aDragOperation];
 }
 
-// ========================
-// = Field Editor Support =
-// ========================
-
-- (void)cancelOperation:(id)sender
-{
-	if([self abortEditing])
-		[[self window] makeFirstResponder:self]; // Restore focus
-}
-
 // ==================
 // = Mouse Tracking =
 // ==================

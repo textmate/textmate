@@ -358,7 +358,7 @@ struct expansion_state_t
 			{
 				NSLog(@"%s refresh while editing row", sel_getName(_cmd));
 				_pendingEditURL = [[_outlineView itemAtRow:[_outlineView editedRow]] url];
-				[_outlineView cancelOperation:self];
+				[_outlineView abortEditing];
 			}
 
 			[_outlineView beginUpdates];
