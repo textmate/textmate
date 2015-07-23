@@ -432,9 +432,8 @@ struct expansion_state_t
 	++state->requests;
 
 	[_dataSource reloadItem:item completionHandler:^(NSArray* children){
-		// The reason we continue even with no changes is that icon updates (SCM status) are not reflected by `hasChanges`
 		BOOL hasChanges = !item.children || ![item.children isEqualToArray:children];
-		if(!state->stop && ([_outlineView editedRow] == -1 || hasChanges))
+		if(!state->stop && hasChanges)
 		{
 			NSIndexSet* indexSet = [_outlineView selectedRowIndexes];
 			for(NSUInteger index = [indexSet firstIndex]; index != NSNotFound; index = [indexSet indexGreaterThanIndex:index])
