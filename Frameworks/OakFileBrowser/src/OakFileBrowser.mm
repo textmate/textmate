@@ -924,7 +924,11 @@ static bool is_binary (std::string const& path)
 		}
 
 		if(self.canPaste)
-			[aMenu addItemWithTitle:@"Paste" action:@selector(paste:) keyEquivalent:@""];
+		{
+			NSInteger itemCount = [[[NSPasteboard generalPasteboard] propertyListForType:NSFilenamesPboardType] count];
+			NSString* label = itemCount > 1 ? [NSString stringWithFormat:@"%ld Items", itemCount] : @"Item";
+			[aMenu addItemWithTitle:[NSString stringWithFormat:@"Paste %@", label] action:@selector(paste:) keyEquivalent:@""];
+		}
 	}
 
 	if(hasFileSelected)
