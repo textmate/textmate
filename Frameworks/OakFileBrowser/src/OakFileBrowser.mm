@@ -775,26 +775,37 @@ static bool is_binary (std::string const& path)
 	return [_url isFileURL] && [[[NSPasteboard generalPasteboard] availableTypeFromArray:@[ NSFilenamesPboardType ]] isEqualToString:NSFilenamesPboardType];
 }
 
-- (IBAction)paste:(id)sender
+- (void)pasteItemsAndKeepSource:(BOOL)keepSource
 {
 	NSMutableArray* created = [NSMutableArray array];
 	if(NSString* folder = [self directoryForNewItems])
 	{
 		NSPasteboard* pboard = [NSPasteboard generalPasteboard];
-		BOOL cut = [[pboard availableTypeFromArray:@[ @"OakFileBrowserOperation" ]] isEqualToString:@"OakFileBrowserOperation"] && [[pboard stringForType:@"OakFileBrowserOperation"] isEqualToString:@"cut"];
 		for(NSString* path in [pboard availableTypeFromArray:@[ NSFilenamesPboardType ]] ? [pboard propertyListForType:NSFilenamesPboardType] : @[ ])
 		{
 			std::string const dst = path::unique(path::join([folder fileSystemRepresentation], path::name([path fileSystemRepresentation])));
 			NSURL* dstURL = [NSURL fileURLWithPath:[NSString stringWithCxxString:dst]];
-			if(cut)
-					[[OakFileManager sharedInstance] moveItemAtURL:[NSURL fileURLWithPath:path] toURL:dstURL view:_view];
-			else	[[OakFileManager sharedInstance] copyItemAtURL:[NSURL fileURLWithPath:path] toURL:dstURL view:_view];
+			if(keepSource)
+					[[OakFileManager sharedInstance] copyItemAtURL:[NSURL fileURLWithPath:path] toURL:dstURL view:_view];
+			else	[[OakFileManager sharedInstance] moveItemAtURL:[NSURL fileURLWithPath:path] toURL:dstURL view:_view];
 			[created addObject:[NSURL fileURLWithPath:[dstURL path]]]; // recreate to set ‘isDirectory’
 		}
 	}
 
 	if([created count] > 0)
 		[_outlineViewDelegate selectURLs:created expandChildren:NO];
+}
+
+- (IBAction)paste:(id)sender
+{
+	NSPasteboard* pboard = [NSPasteboard generalPasteboard];
+	BOOL cut = [[pboard availableTypeFromArray:@[ @"OakFileBrowserOperation" ]] isEqualToString:@"OakFileBrowserOperation"] && [[pboard stringForType:@"OakFileBrowserOperation"] isEqualToString:@"cut"];
+	[self pasteItemsAndKeepSource:!cut];
+}
+
+- (IBAction)pasteNext:(id)sender
+{
+	[self pasteItemsAndKeepSource:NO];
 }
 
 - (void)executeBundleCommand:(id)sender
@@ -928,6 +939,9 @@ static bool is_binary (std::string const& path)
 			NSInteger itemCount = [[[NSPasteboard generalPasteboard] propertyListForType:NSFilenamesPboardType] count];
 			NSString* label = itemCount > 1 ? [NSString stringWithFormat:@"%ld Items", itemCount] : @"Item";
 			[aMenu addItemWithTitle:[NSString stringWithFormat:@"Paste %@", label] action:@selector(paste:) keyEquivalent:@""];
+
+			NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithFormat:@"Move %@ Here", label] action:@selector(pasteNext:) keyEquivalent:@"v"];
+			[menuItem setKeyEquivalentModifierMask:NSAlternateKeyMask|NSCommandKeyMask];
 		}
 	}
 
@@ -1245,7 +1259,7 @@ static bool is_binary (std::string const& path)
 		res = [self directoryForNewItems] != nil;
 	else if(selectedFiles == 0 && requireSelection.find([item action]) != requireSelection.end())
 		res = NO;
-	else if([item action] == @selector(paste:))
+	else if([item action] == @selector(paste:) || [item action] == @selector(pasteNext:))
 		res = self.canPaste;
 	else if([item action] == @selector(editSelectedEntries:))
 		res = selectedFiles == 1;
