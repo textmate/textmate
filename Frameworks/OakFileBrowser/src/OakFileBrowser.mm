@@ -929,10 +929,7 @@ static bool is_binary (std::string const& path)
 		[aMenu addItem:[NSMenuItem separatorItem]];
 
 		if(hasFileSelected)
-		{
-			[aMenu addItemWithTitle:@"Cut"  action:@selector(cut:)  keyEquivalent:@""];
 			[aMenu addItemWithTitle:@"Copy" action:@selector(copy:) keyEquivalent:@""];
-		}
 
 		if(self.canPaste)
 		{
