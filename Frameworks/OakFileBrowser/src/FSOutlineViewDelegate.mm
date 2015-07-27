@@ -133,16 +133,8 @@
 
 - (void)setModified:(BOOL)flag
 {
-	FSItem* item  = self.objectValue;
-	NSImage* icon = [item.icon copy];
-
-	SEL setModifiedSelector = @selector(setModified:);
-	if([icon respondsToSelector:setModifiedSelector])
-	{
-		auto fn = (void(*)(id, SEL, BOOL))[icon methodForSelector:setModifiedSelector];
-		fn(icon, setModifiedSelector, flag);
-		item.icon = icon;
-	}
+	FSItem* item = self.objectValue;
+	item.modified = flag;
 }
 
 - (void)setOpenURLs:(NSArray*)someURLs

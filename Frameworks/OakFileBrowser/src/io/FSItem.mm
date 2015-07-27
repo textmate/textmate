@@ -80,6 +80,21 @@ static ino_t inode (std::string const& path)
 	}
 }
 
+- (BOOL)isModified
+{
+	return [_icon isKindOfClass:[OakFileIconImage class]] ? ((OakFileIconImage*)_icon).isModified : NO;
+}
+
+- (void)setModified:(BOOL)newState
+{
+	if([_icon isKindOfClass:[OakFileIconImage class]] && newState != self.isModified)
+	{
+		OakFileIconImage* icon = [(OakFileIconImage*)_icon copy];
+		icon.modified = newState;
+		self.icon = icon;
+	}
+}
+
 - (void)setLabelIndex:(NSInteger)newLabelIndex
 {
 	if(_labelIndex == newLabelIndex)
