@@ -1219,7 +1219,10 @@ static bool is_binary (std::string const& path)
 
 - (NSUndoManager*)activeUndoManager
 {
-	return [[_view.window firstResponder] undoManager];
+	NSResponder* firstResponder = [_view.window firstResponder];
+	if(![firstResponder isKindOfClass:[NSView class]] || ![(NSView*)firstResponder isDescendantOf:_view])
+		firstResponder = self;
+	return [firstResponder undoManager];
 }
 
 - (void)undo:(id)sender
