@@ -74,22 +74,36 @@
 
 @interface OakFSItemTableCellView : NSTableCellView <NSTextFieldDelegate>
 @property (nonatomic) NSButton* openButton;
-@property (nonatomic) NSButton* closeButton;
+@property (nonatomic) OakRolloverButton* closeButton;
 @property (nonatomic) OakLabelSwatchView* labelSwatchView;
 @property (nonatomic) NSArray* openURLs;
 @end
 
 @implementation OakFSItemTableCellView
-- (instancetype)initWithOpenButton:(NSButton*)openButton closeButton:(NSButton*)closeButton
+- (instancetype)initWithOpenAction:(SEL)openAction closeAction:(SEL)closeAction target:(id)target
 {
 	if((self = [super initWithFrame:NSZeroRect]))
 	{
-		_openButton  = openButton;
-		_closeButton = closeButton;
+		_openButton = [[NSButton alloc] initWithFrame:NSZeroRect];
+		_openButton.refusesFirstResponder = YES;
+		_openButton.buttonType            = NSMomentaryChangeButton;
+		_openButton.bordered              = NO;
+		_openButton.imagePosition         = NSImageOnly;
+		_openButton.target                = target;
+		_openButton.action                = openAction;
+
+		_closeButton = [[OakRolloverButton alloc] initWithFrame:NSZeroRect];
+		_closeButton.regularImage  = [NSImage imageNamed:@"CloseTemplate"         inSameBundleAsClass:[self class]];
+		_closeButton.pressedImage  = [NSImage imageNamed:@"ClosePressedTemplate"  inSameBundleAsClass:[self class]];
+		_closeButton.rolloverImage = [NSImage imageNamed:@"CloseRolloverTemplate" inSameBundleAsClass:[self class]];
+		_closeButton.target        = target;
+		_closeButton.action        = closeAction;
+		OakSetAccessibilityLabel(_closeButton, @"Close document");
+
 		_labelSwatchView = [[OakLabelSwatchView alloc] initWithFrame:NSZeroRect];
 
-		[openButton setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
-		[openButton setContentCompressionResistancePriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
+		[_openButton setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
+		[_openButton setContentCompressionResistancePriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
 
 		NSTextField* fileTextField = OakCreateLabel(@"", [NSFont controlContentFontOfSize:0]);
 		fileTextField.cell = [[OakSelectBasenameCell alloc] initTextCell:@""];
@@ -98,15 +112,15 @@
 		fileTextField.editable = YES;
 		fileTextField.delegate = self;
 
-		NSDictionary* views = @{ @"icon" : openButton, @"file" : fileTextField, @"labelSwatch" : _labelSwatchView, @"close" : closeButton };
+		NSDictionary* views = @{ @"icon" : _openButton, @"file" : fileTextField, @"labelSwatch" : _labelSwatchView, @"close" : _closeButton };
 		OakAddAutoLayoutViewsToSuperview([views allValues], self);
 
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(4)-[icon]-(4)-[file]-(4@750)-[labelSwatch][close(==16)]-(8)-|" options:0 metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[file]-(2)-|" options:NSLayoutFormatAlignAllLeading|NSLayoutFormatAlignAllTrailing metrics:nil views:views]];
-		for(NSView* view in @[ openButton, closeButton, _labelSwatchView ])
+		for(NSView* view in @[ _openButton, _closeButton, _labelSwatchView ])
 			[self addConstraint:[NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:view attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
 
-		[openButton bind:NSImageBinding toObject:self withKeyPath:@"objectValue.icon" options:nil];
+		[_openButton bind:NSImageBinding toObject:self withKeyPath:@"objectValue.icon" options:nil];
 		[fileTextField bind:NSValueBinding toObject:self withKeyPath:@"objectValue.displayName" options:nil];
 		[fileTextField bind:NSToolTipBinding toObject:self withKeyPath:@"objectValue.toolTip" options:nil];
 		[_labelSwatchView bind:@"labelIndex" toObject:self withKeyPath:@"objectValue.labelIndex" options:nil];
@@ -562,24 +576,7 @@ struct expansion_state_t
 	NSTableCellView* res = [outlineView makeViewWithIdentifier:tableColumn.identifier owner:self];
 	if(!res)
 	{
-		NSButton* openButton = [[NSButton alloc] initWithFrame:NSZeroRect];
-		openButton.refusesFirstResponder = YES;
-		openButton.buttonType            = NSMomentaryChangeButton;
-		openButton.bordered              = NO;
-		openButton.imagePosition         = NSImageOnly;
-		openButton.target                = _target;
-		openButton.action                = _openItemSelector;
-
-		OakRolloverButton* closeButton = [[OakRolloverButton alloc] initWithFrame:NSZeroRect];
-		OakSetAccessibilityLabel(closeButton, @"Close document");
-
-		closeButton.regularImage  = [NSImage imageNamed:@"CloseTemplate"         inSameBundleAsClass:[self class]];
-		closeButton.pressedImage  = [NSImage imageNamed:@"ClosePressedTemplate"  inSameBundleAsClass:[self class]];
-		closeButton.rolloverImage = [NSImage imageNamed:@"CloseRolloverTemplate" inSameBundleAsClass:[self class]];
-		closeButton.target        = _target;
-		closeButton.action        = _closeItemSelector;
-
-		res = [[OakFSItemTableCellView alloc] initWithOpenButton:openButton closeButton:closeButton];
+		res = [[OakFSItemTableCellView alloc] initWithOpenAction:_openItemSelector closeAction:_closeItemSelector target:_target];
 		res.identifier = tableColumn.identifier;
 
 		[res bind:@"openURLs" toObject:self withKeyPath:@"openURLs" options:nil];
