@@ -255,13 +255,16 @@ struct expansion_state_t
 
 	if(_dataSource)
 	{
-		[_selectedURLs minusSet:VisibleURLs(_outlineView, _dataSource.rootItem)];
-		NSIndexSet* indexSet = [_outlineView selectedRowIndexes];
-		for(NSUInteger index = [indexSet firstIndex]; index != NSNotFound; index = [indexSet indexGreaterThanIndex:index])
-			[_selectedURLs addObject:[[_outlineView itemAtRow:index] url]];
+		if(_outlineView)
+		{
+			[_selectedURLs minusSet:VisibleURLs(_outlineView, _dataSource.rootItem)];
+			NSIndexSet* indexSet = [_outlineView selectedRowIndexes];
+			for(NSUInteger index = [indexSet firstIndex]; index != NSNotFound; index = [indexSet indexGreaterThanIndex:index])
+				[_selectedURLs addObject:[[_outlineView itemAtRow:index] url]];
 
-		[_outlineView deselectAll:self];
-		[_outlineView setDataSource:nil];
+			[_outlineView deselectAll:self];
+			[_outlineView setDataSource:nil];
+		}
 		[[NSNotificationCenter defaultCenter] removeObserver:self name:FSItemDidReloadNotification object:_dataSource];
 	}
 
