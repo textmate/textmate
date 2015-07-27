@@ -272,6 +272,9 @@
 	return self;
 }
 
+- (NSString*)toolTip                     { return _textField.toolTip; }
+- (void)setToolTip:(NSString*)newToolTip { _textField.toolTip = newToolTip; }
+
 - (void)updateStyle
 {
 	OakTabBarStyle* style = [OakTabBarStyle sharedInstance];
