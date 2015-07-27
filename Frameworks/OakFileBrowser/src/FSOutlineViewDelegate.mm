@@ -37,10 +37,7 @@
 	ASSERT_LT(newLabelIndex, 8);
 	if(_labelIndex != newLabelIndex)
 	{
-		BOOL shouldShowHide = _labelIndex == 0 || newLabelIndex == 0;
 		_labelIndex = newLabelIndex;
-		if(shouldShowHide)
-			[self invalidateIntrinsicContentSize];
 		[self setNeedsDisplay:YES];
 	}
 }
@@ -68,14 +65,123 @@
 
 - (NSSize)intrinsicContentSize
 {
-	return NSMakeSize(_labelIndex == 0 ? 0 : 14, 10);
+	return NSMakeSize(10, 10);
+}
+@end
+
+@interface OakItemButtonsView : NSView
+@property (nonatomic) NSInteger labelIndex;
+@property (nonatomic) BOOL open;
+
+@property (nonatomic) SEL closeAction;
+@property (nonatomic, weak) id target;
+
+@property (nonatomic) OakLabelSwatchView* labelSwatchView;
+@property (nonatomic) OakRolloverButton* closeButton;
+@property (nonatomic) NSMutableArray* myConstraints;
+@end
+
+@implementation OakItemButtonsView
+- (id)initWithCloseAction:(SEL)closeAction target:(id)target
+{
+	if(self = [super initWithFrame:NSZeroRect])
+	{
+		_closeAction = closeAction;
+		_target      = target;
+
+		[self setContentHuggingPriority:NSLayoutPriorityDefaultHigh forOrientation:NSLayoutConstraintOrientationHorizontal];
+		[self setContentCompressionResistancePriority:NSLayoutPriorityDefaultHigh forOrientation:NSLayoutConstraintOrientationHorizontal];
+	}
+	return self;
+}
+
+- (void)updateConstraints
+{
+	if(_myConstraints)
+		[self removeConstraints:_myConstraints];
+	_myConstraints = [NSMutableArray array];
+
+	if(_labelSwatchView)
+	{
+		NSDictionary* views = @{ @"labelSwatch" : _labelSwatchView };
+		[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:_labelSwatchView attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
+		[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(>=0)-[labelSwatch]-(>=0)-|" options:0 metrics:nil views:views]];
+		[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[labelSwatch]-(24)-|" options:0 metrics:nil views:views]];
+	}
+
+	if(_closeButton)
+	{
+		NSDictionary* views = @{ @"closeButton" : _closeButton };
+		[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:_closeButton attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
+		[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(>=0)-[closeButton]-(>=0)-|" options:0 metrics:nil views:views]];
+		[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[closeButton]-(8)-|" options:0 metrics:nil views:views]];
+		if(!_labelSwatchView)
+			[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[closeButton]" options:0 metrics:nil views:views]];
+	}
+
+	if(!_labelSwatchView && !_closeButton)
+		[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:0]];
+
+	[self addConstraints:_myConstraints];
+	[super updateConstraints];
+}
+
+- (NSInteger)labelIndex
+{
+	return _labelSwatchView ? _labelSwatchView.labelIndex : 0;
+}
+
+- (void)setLabelIndex:(NSInteger)newLabelIndex
+{
+	if(self.labelIndex == newLabelIndex)
+		return;
+
+	if(newLabelIndex == 0)
+	{
+		[_labelSwatchView removeFromSuperview];
+		_labelSwatchView = nil;
+		[self setNeedsUpdateConstraints:YES];
+	}
+	else if(!_labelSwatchView)
+	{
+		_labelSwatchView = [[OakLabelSwatchView alloc] initWithFrame:NSZeroRect];
+		OakAddAutoLayoutViewsToSuperview(@[ _labelSwatchView ], self);
+		[self setNeedsUpdateConstraints:YES];
+	}
+	_labelSwatchView.labelIndex = newLabelIndex;
+}
+
+- (void)setOpen:(BOOL)flag
+{
+	if(_open == flag)
+		return;
+
+	if(!flag)
+	{
+		[_closeButton removeFromSuperview];
+		_closeButton = nil;
+	}
+	else if(!_closeButton)
+	{
+		_closeButton = [[OakRolloverButton alloc] initWithFrame:NSZeroRect];
+		_closeButton.regularImage  = [NSImage imageNamed:@"CloseTemplate"         inSameBundleAsClass:[self class]];
+		_closeButton.pressedImage  = [NSImage imageNamed:@"ClosePressedTemplate"  inSameBundleAsClass:[self class]];
+		_closeButton.rolloverImage = [NSImage imageNamed:@"CloseRolloverTemplate" inSameBundleAsClass:[self class]];
+		_closeButton.target        = _target;
+		_closeButton.action        = _closeAction;
+		OakSetAccessibilityLabel(_closeButton, @"Close document");
+
+		OakAddAutoLayoutViewsToSuperview(@[ _closeButton ], self);
+	}
+
+	_open = flag;
+	[self setNeedsUpdateConstraints:YES];
 }
 @end
 
 @interface OakFSItemTableCellView : NSTableCellView <NSTextFieldDelegate>
 @property (nonatomic) NSButton* openButton;
-@property (nonatomic) OakRolloverButton* closeButton;
-@property (nonatomic) OakLabelSwatchView* labelSwatchView;
+@property (nonatomic) OakItemButtonsView* itemInfoButtons;
 @property (nonatomic) NSArray* openURLs;
 @end
 
@@ -92,18 +198,10 @@
 		_openButton.target                = target;
 		_openButton.action                = openAction;
 
-		_closeButton = [[OakRolloverButton alloc] initWithFrame:NSZeroRect];
-		_closeButton.regularImage  = [NSImage imageNamed:@"CloseTemplate"         inSameBundleAsClass:[self class]];
-		_closeButton.pressedImage  = [NSImage imageNamed:@"ClosePressedTemplate"  inSameBundleAsClass:[self class]];
-		_closeButton.rolloverImage = [NSImage imageNamed:@"CloseRolloverTemplate" inSameBundleAsClass:[self class]];
-		_closeButton.target        = target;
-		_closeButton.action        = closeAction;
-		OakSetAccessibilityLabel(_closeButton, @"Close document");
-
-		_labelSwatchView = [[OakLabelSwatchView alloc] initWithFrame:NSZeroRect];
-
 		[_openButton setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
 		[_openButton setContentCompressionResistancePriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
+
+		_itemInfoButtons = [[OakItemButtonsView alloc] initWithCloseAction:closeAction target:target];
 
 		NSTextField* fileTextField = OakCreateLabel(@"", [NSFont controlContentFontOfSize:0]);
 		fileTextField.cell = [[OakSelectBasenameCell alloc] initTextCell:@""];
@@ -112,18 +210,18 @@
 		fileTextField.editable = YES;
 		fileTextField.delegate = self;
 
-		NSDictionary* views = @{ @"icon" : _openButton, @"file" : fileTextField, @"labelSwatch" : _labelSwatchView, @"close" : _closeButton };
+		NSDictionary* views = @{ @"icon" : _openButton, @"file" : fileTextField, @"itemInfoButtons" : _itemInfoButtons };
 		OakAddAutoLayoutViewsToSuperview([views allValues], self);
 
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(4)-[icon]-(4)-[file]-(4@750)-[labelSwatch][close(==16)]-(8)-|" options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(4)-[icon]-(4)-[file]-(4)-[itemInfoButtons]-(0@750)-|" options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[itemInfoButtons]|" options:0 metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[file]-(2)-|" options:NSLayoutFormatAlignAllLeading|NSLayoutFormatAlignAllTrailing metrics:nil views:views]];
-		for(NSView* view in @[ _openButton, _closeButton, _labelSwatchView ])
-			[self addConstraint:[NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:view attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
+		[self addConstraint:[NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:_openButton attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
 
 		[_openButton bind:NSImageBinding toObject:self withKeyPath:@"objectValue.icon" options:nil];
 		[fileTextField bind:NSValueBinding toObject:self withKeyPath:@"objectValue.displayName" options:nil];
 		[fileTextField bind:NSToolTipBinding toObject:self withKeyPath:@"objectValue.toolTip" options:nil];
-		[_labelSwatchView bind:@"labelIndex" toObject:self withKeyPath:@"objectValue.labelIndex" options:nil];
+		[_itemInfoButtons bind:@"labelIndex" toObject:self withKeyPath:@"objectValue.labelIndex" options:nil];
 
 		self.textField = fileTextField;
 	}
@@ -147,7 +245,7 @@
 {
 	_openURLs = someURLs;
 	FSItem* item = self.objectValue;
-	_closeButton.hidden = ![_openURLs containsObject:item.url];
+	_itemInfoButtons.open = [_openURLs containsObject:item.url];
 }
 
 - (void)resetCursorRects
