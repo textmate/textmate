@@ -77,7 +77,6 @@
 @property (nonatomic) NSButton* closeButton;
 @property (nonatomic) OakLabelSwatchView* labelSwatchView;
 @property (nonatomic) NSArray* openURLs;
-@property (nonatomic) NSArray* modifiedURLs;
 @end
 
 @implementation OakFSItemTableCellView
@@ -128,13 +127,6 @@
 {
 	[super setObjectValue:item];
 	self.openURLs = _openURLs;
-	self.modified = [_modifiedURLs containsObject:item.url];
-}
-
-- (void)setModified:(BOOL)flag
-{
-	FSItem* item = self.objectValue;
-	item.modified = flag;
 }
 
 - (void)setOpenURLs:(NSArray*)someURLs
@@ -142,17 +134,6 @@
 	_openURLs = someURLs;
 	FSItem* item = self.objectValue;
 	_closeButton.hidden = ![_openURLs containsObject:item.url];
-}
-
-- (void)setModifiedURLs:(NSArray*)someURLs
-{
-	FSItem* item     = self.objectValue;
-	BOOL wasModified = [_modifiedURLs containsObject:item.url];
-	BOOL isModified  = [someURLs containsObject:item.url];
-
-	_modifiedURLs = someURLs;
-	if(wasModified != isModified)
-		self.modified = isModified;
 }
 
 - (void)resetCursorRects
@@ -292,6 +273,16 @@ struct expansion_state_t
 		[_outlineView reloadItem:nil reloadChildren:YES];
 		[self reloadItem:_dataSource.rootItem usingState:std::shared_ptr<expansion_state_t>()];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(itemDidReload:) name:FSItemDidReloadNotification object:_dataSource];
+	}
+}
+
+- (void)setModifiedURLs:(NSArray*)newModifiedURLs
+{
+	_modifiedURLs = newModifiedURLs;
+	for(NSInteger i = 0; i < [_outlineView numberOfRows]; ++i)
+	{
+		FSItem* item = [_outlineView itemAtRow:i];
+		item.modified = [_modifiedURLs containsObject:item.url];
 	}
 }
 
@@ -454,6 +445,9 @@ struct expansion_state_t
 				[_outlineView abortEditing];
 			}
 
+			for(FSItem* child in children)
+				child.modified = [_modifiedURLs containsObject:child.url];
+
 			[_outlineView beginUpdates];
 			item.children = children;
 			[_outlineView reloadItem:(item == _dataSource.rootItem ? nil : item) reloadChildren:YES];
@@ -588,7 +582,6 @@ struct expansion_state_t
 		res.identifier = tableColumn.identifier;
 
 		[res bind:@"openURLs" toObject:self withKeyPath:@"openURLs" options:nil];
-		[res bind:@"modifiedURLs" toObject:self withKeyPath:@"modifiedURLs" options:nil];
 	}
 
 	res.objectValue = item;

@@ -225,6 +225,7 @@ struct tracking_t : fs::event_callback_t
 					image.path      = [NSString stringWithCxxString:fsItem.path];
 					image.directory = fsItem.is_directory || (fsItem.is_link && fsItem.sort_as_directory);
 					image.alias     = fsItem.is_link;
+					image.modified  = item.isModified;
 					if(scmInfo)
 						image.scmStatus = scmInfo->status(fsItem.path);
 
