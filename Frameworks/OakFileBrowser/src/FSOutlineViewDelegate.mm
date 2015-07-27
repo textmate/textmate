@@ -182,7 +182,6 @@
 @interface OakFSItemTableCellView : NSTableCellView <NSTextFieldDelegate>
 @property (nonatomic) NSButton* openButton;
 @property (nonatomic) OakItemButtonsView* itemInfoButtons;
-@property (nonatomic) NSArray* openURLs;
 @end
 
 @implementation OakFSItemTableCellView
@@ -222,6 +221,7 @@
 		[fileTextField bind:NSValueBinding toObject:self withKeyPath:@"objectValue.displayName" options:nil];
 		[fileTextField bind:NSToolTipBinding toObject:self withKeyPath:@"objectValue.toolTip" options:nil];
 		[_itemInfoButtons bind:@"labelIndex" toObject:self withKeyPath:@"objectValue.labelIndex" options:nil];
+		[_itemInfoButtons bind:@"open" toObject:self withKeyPath:@"objectValue.open" options:nil];
 
 		self.textField = fileTextField;
 	}
@@ -233,19 +233,6 @@
 	FSItem* item = self.objectValue;
 	if(![item setNewDisplayName:self.textField.stringValue view:self])
 		item.displayName = [NSString stringWithCxxString:path::display_name([item.url.path fileSystemRepresentation])];
-}
-
-- (void)setObjectValue:(FSItem*)item
-{
-	[super setObjectValue:item];
-	self.openURLs = _openURLs;
-}
-
-- (void)setOpenURLs:(NSArray*)someURLs
-{
-	_openURLs = someURLs;
-	FSItem* item = self.objectValue;
-	_itemInfoButtons.open = [_openURLs containsObject:item.url];
 }
 
 - (void)resetCursorRects
@@ -398,6 +385,16 @@ struct expansion_state_t
 	{
 		FSItem* item = [_outlineView itemAtRow:i];
 		item.modified = [_modifiedURLs containsObject:item.url];
+	}
+}
+
+- (void)setOpenURLs:(NSArray*)newOpenURLs
+{
+	_openURLs = newOpenURLs;
+	for(NSInteger i = 0; i < [_outlineView numberOfRows]; ++i)
+	{
+		FSItem* item = [_outlineView itemAtRow:i];
+		item.open = [_openURLs containsObject:item.url];
 	}
 }
 
@@ -559,7 +556,10 @@ struct expansion_state_t
 			}
 
 			for(FSItem* child in children)
+			{
 				child.modified = [_modifiedURLs containsObject:child.url];
+				child.open     = [_openURLs containsObject:child.url];
+			}
 
 			[_outlineView beginUpdates];
 			item.children = children;
@@ -676,8 +676,6 @@ struct expansion_state_t
 	{
 		res = [[OakFSItemTableCellView alloc] initWithOpenAction:_openItemSelector closeAction:_closeItemSelector target:_target];
 		res.identifier = tableColumn.identifier;
-
-		[res bind:@"openURLs" toObject:self withKeyPath:@"openURLs" options:nil];
 	}
 
 	res.objectValue = item;

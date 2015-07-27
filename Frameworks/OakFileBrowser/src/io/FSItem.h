@@ -19,6 +19,7 @@ enum FSItemURLType { FSItemURLTypeUnknown = 0, FSItemURLTypeFile, FSItemURLTypeF
 @property (nonatomic) BOOL sortAsFolder;
 @property (nonatomic) BOOL link;
 @property (nonatomic, getter = isModified) BOOL modified;
+@property (nonatomic, getter = isOpen) BOOL open;
 
 @property (nonatomic, readonly) NSString* path; // legacy
 
