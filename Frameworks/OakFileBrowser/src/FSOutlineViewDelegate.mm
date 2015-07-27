@@ -26,12 +26,58 @@
 }
 @end
 
+@interface OakLabelSwatchView : NSView
+@property (nonatomic) NSInteger labelIndex;
+@property (nonatomic) NSBackgroundStyle backgroundStyle;
+@end
+
+@implementation OakLabelSwatchView
+- (void)setLabelIndex:(NSInteger)newLabelIndex
+{
+	ASSERT_LT(newLabelIndex, 8);
+	if(_labelIndex != newLabelIndex)
+	{
+		BOOL shouldShowHide = _labelIndex == 0 || newLabelIndex == 0;
+		_labelIndex = newLabelIndex;
+		if(shouldShowHide)
+			[self invalidateIntrinsicContentSize];
+		[self setNeedsDisplay:YES];
+	}
+}
+
+- (void)drawRect:(NSRect)aRect
+{
+	if(_labelIndex == 0)
+		return;
+
+	// color names: Gray, Green, Purple, Blue, Yellow, Red, Orange
+	static NSString* const labelColor[]  = { @"#A8A8A8", @"#AFDC49", @"#C186D7", @"#5B9CFE", @"#ECDF4A", @"#FC605C", @"#F6AC46" };
+	[[NSColor colorWithString:labelColor[_labelIndex - 1]] set];
+
+	NSRect r = NSInsetRect(self.bounds, 1, 1);
+	r.size.width = NSHeight(r);
+	NSBezierPath* path = [NSBezierPath bezierPathWithOvalInRect:r];
+	[path fill];
+
+	if(_backgroundStyle == NSBackgroundStyleDark)
+	{
+		[[NSColor whiteColor] set];
+		[path stroke];
+	}
+}
+
+- (NSSize)intrinsicContentSize
+{
+	return NSMakeSize(_labelIndex == 0 ? 0 : 14, 10);
+}
+@end
+
 @interface OakFSItemTableCellView : NSTableCellView <NSTextFieldDelegate>
 @property (nonatomic) NSButton* openButton;
 @property (nonatomic) NSButton* closeButton;
+@property (nonatomic) OakLabelSwatchView* labelSwatchView;
 @property (nonatomic) NSArray* openURLs;
 @property (nonatomic) NSArray* modifiedURLs;
-@property (nonatomic) NSInteger labelIndex;
 @end
 
 @implementation OakFSItemTableCellView
@@ -41,6 +87,7 @@
 	{
 		_openButton  = openButton;
 		_closeButton = closeButton;
+		_labelSwatchView = [[OakLabelSwatchView alloc] initWithFrame:NSZeroRect];
 
 		[openButton setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
 		[openButton setContentCompressionResistancePriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
@@ -52,18 +99,18 @@
 		fileTextField.editable = YES;
 		fileTextField.delegate = self;
 
-		NSDictionary* views = @{ @"icon" : openButton, @"file" : fileTextField, @"close" : closeButton };
+		NSDictionary* views = @{ @"icon" : openButton, @"file" : fileTextField, @"labelSwatch" : _labelSwatchView, @"close" : closeButton };
 		OakAddAutoLayoutViewsToSuperview([views allValues], self);
 
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(4)-[icon]-(4)-[file]-(4@750)-[close(==16)]-(8)-|" options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(4)-[icon]-(4)-[file]-(4@750)-[labelSwatch][close(==16)]-(8)-|" options:0 metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[file]-(2)-|" options:NSLayoutFormatAlignAllLeading|NSLayoutFormatAlignAllTrailing metrics:nil views:views]];
-		[self addConstraint:[NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:openButton attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
-		[self addConstraint:[NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:closeButton attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
+		for(NSView* view in @[ openButton, closeButton, _labelSwatchView ])
+			[self addConstraint:[NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:view attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
 
 		[openButton bind:NSImageBinding toObject:self withKeyPath:@"objectValue.icon" options:nil];
 		[fileTextField bind:NSValueBinding toObject:self withKeyPath:@"objectValue.displayName" options:nil];
 		[fileTextField bind:NSToolTipBinding toObject:self withKeyPath:@"objectValue.toolTip" options:nil];
-		[self bind:@"labelIndex" toObject:self withKeyPath:@"objectValue.labelIndex" options:nil];
+		[_labelSwatchView bind:@"labelIndex" toObject:self withKeyPath:@"objectValue.labelIndex" options:nil];
 
 		self.textField = fileTextField;
 	}
@@ -82,15 +129,6 @@
 	[super setObjectValue:item];
 	self.openURLs = _openURLs;
 	self.modified = [_modifiedURLs containsObject:item.url];
-}
-
-- (void)setLabelIndex:(NSInteger)newLabelIndex
-{
-	if(_labelIndex != newLabelIndex)
-	{
-		_labelIndex = newLabelIndex;
-		[self setNeedsDisplay:YES];
-	}
 }
 
 - (void)setModified:(BOOL)flag
@@ -128,30 +166,6 @@
 - (void)resetCursorRects
 {
 	[self addCursorRect:self.openButton.frame cursor:[NSCursor pointingHandCursor]];
-}
-
-- (void)drawLabelIndex:(NSUInteger)labelColorIndex inFrame:(NSRect)cellFrame
-{
-	if(labelColorIndex == 0)
-		return;
-	ASSERT(labelColorIndex < 8);
-
-	// color names: Gray, Green, Purple, Blue, Yellow, Red, Orange
-	static NSString* const startCol[] = { @"#CFCFCF", @"#D4EE9C", @"#DDBDEA", @"#ACD0FE", @"#F8F79C", @"#FC999A", @"#F9D194" };
-	static NSString* const stopCol[]  = { @"#A8A8A8", @"#AFDC49", @"#C186D7", @"#5B9CFE", @"#ECDF4A", @"#FC605C", @"#F6AC46" };
-
-	NSRect r = NSIntegralRect(NSInsetRect(cellFrame, 2, 0)), unused;
-	if(self.backgroundStyle == NSBackgroundStyleDark)
-		NSDivideRect(r, &r, &unused, 30, NSMaxXEdge);
-
-	NSGradient* gradient = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithString:startCol[labelColorIndex-1]] endingColor:[NSColor colorWithString:stopCol[labelColorIndex-1]]];
-	NSBezierPath* path = [NSBezierPath bezierPathWithRoundedRect:r xRadius:8 yRadius:8];
-	[gradient drawInBezierPath:path angle:90];
-}
-
-- (void)drawRect:(NSRect)aRect
-{
-	[self drawLabelIndex:_labelIndex inFrame:[self bounds]];
 }
 @end
 
