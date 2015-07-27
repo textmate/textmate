@@ -392,9 +392,7 @@ struct expansion_state_t
 		return;
 
 	FSItem* item = [[aNotification userInfo] objectForKey:@"item"];
-	if(item.leaf)
-			[_outlineView reloadItem:item reloadChildren:NO];
-	else	[self reloadItem:item usingState:std::shared_ptr<expansion_state_t>()];
+	[self reloadItem:item usingState:std::shared_ptr<expansion_state_t>()];
 }
 
 // =================================
