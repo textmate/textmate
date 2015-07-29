@@ -551,27 +551,75 @@ struct expansion_state_t
 		BOOL hasChanges = !item.children || ![item.children isEqualToArray:children];
 		if(!state->stop && hasChanges)
 		{
-			NSIndexSet* indexSet = [_outlineView selectedRowIndexes];
-			for(NSUInteger index = [indexSet firstIndex]; index != NSNotFound; index = [indexSet indexGreaterThanIndex:index])
-				[_selectedURLs addObject:[[_outlineView itemAtRow:index] url]];
-
-			if([_outlineView editedRow] != -1)
-			{
-				NSLog(@"%s refresh while editing row", sel_getName(_cmd));
-				_pendingEditURL = [[_outlineView itemAtRow:[_outlineView editedRow]] url];
-				[_outlineView abortEditing];
-			}
-
 			for(FSItem* child in children)
 			{
 				child.modified = [_modifiedURLs containsObject:child.url];
 				child.open     = [_openURLs containsObject:child.url];
 			}
 
-			[_outlineView beginUpdates];
+			NSSet* newItems = [NSSet setWithArray:children];
+
+			id firstResponder = _outlineView.window.firstResponder;
+			if([firstResponder isKindOfClass:[NSView class]] && [(NSView*)firstResponder isDescendantOf:_outlineView] && [firstResponder respondsToSelector:@selector(delegate)] && [[firstResponder delegate] respondsToSelector:@selector(abortEditing)])
+			{
+				NSInteger row = [_outlineView rowForView:firstResponder];
+				if(row != -1 && ![newItems containsObject:[_outlineView itemAtRow:row]])
+				{
+					[[firstResponder delegate] abortEditing];
+					[_outlineView.window makeFirstResponder:_outlineView];
+				}
+			}
+
+			NSIndexSet* removeIndexSet;
+			NSIndexSet* insertIndexSet;
+
+			if(children.count < item.children.count)
+			{
+				NSMutableIndexSet* indexSet = [NSMutableIndexSet new];
+				for(NSInteger i = 0, j = 0; i < item.children.count; ++i)
+				{
+					if(j < children.count && [children[j] isEqual:item.children[i]])
+							++j;
+					else	[indexSet addIndex:i];
+				}
+
+				if(item.children.count - indexSet.count == children.count)
+					removeIndexSet = indexSet;
+			}
+			else if(item.children.count && item.children.count < children.count)
+			{
+				NSMutableIndexSet* indexSet = [NSMutableIndexSet new];
+				for(NSInteger i = 0, j = 0; i < children.count; ++i)
+				{
+					if(j < item.children.count && [item.children[j] isEqual:children[i]])
+							++j;
+					else	[indexSet addIndex:i];
+				}
+
+				if(item.children.count + indexSet.count == children.count)
+					insertIndexSet = indexSet;
+			}
+
+			if(!insertIndexSet && !removeIndexSet)
+			{
+				NSIndexSet* selectedRows = [_outlineView selectedRowIndexes];
+				for(NSUInteger row = [selectedRows firstIndex]; row != NSNotFound; row = [selectedRows indexGreaterThanIndex:row])
+				{
+					FSItem* item = [_outlineView itemAtRow:row];
+					if([newItems containsObject:item])
+						[_selectedURLs addObject:item.url];
+				}
+			}
+
+			FSItem* parentItem = item == _dataSource.rootItem ? nil : item;
+
 			item.children = children;
-			[_outlineView reloadItem:(item == _dataSource.rootItem ? nil : item) reloadChildren:YES];
-			[_outlineView endUpdates];
+			if(removeIndexSet)
+				[_outlineView removeItemsAtIndexes:removeIndexSet inParent:parentItem withAnimation:NSTableViewAnimationSlideDown];
+			else if(insertIndexSet)
+				[_outlineView insertItemsAtIndexes:insertIndexSet inParent:parentItem withAnimation:parentItem ? NSTableViewAnimationSlideDown : NSTableViewAnimationEffectNone];
+			else
+				[_outlineView reloadItem:parentItem reloadChildren:YES];
 
 			for(FSItem* child in children)
 			{
