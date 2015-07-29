@@ -28,7 +28,6 @@
 
 @interface OakLabelSwatchView : NSView
 @property (nonatomic) NSInteger labelIndex;
-@property (nonatomic) NSBackgroundStyle backgroundStyle;
 @end
 
 @implementation OakLabelSwatchView
@@ -40,6 +39,14 @@
 		_labelIndex = newLabelIndex;
 		[self setNeedsDisplay:YES];
 	}
+}
+
+- (BOOL)isSelected
+{
+	NSView* view = self;
+	while(view && ![view isKindOfClass:[NSTableRowView class]])
+		view = [view superview];
+	return [view isKindOfClass:[NSTableRowView class]] && ((NSTableRowView*)view).isSelected;
 }
 
 - (void)drawRect:(NSRect)aRect
@@ -56,7 +63,7 @@
 	NSBezierPath* path = [NSBezierPath bezierPathWithOvalInRect:r];
 	[path fill];
 
-	if(_backgroundStyle == NSBackgroundStyleDark)
+	if(self.isSelected)
 	{
 		[[NSColor whiteColor] set];
 		[path stroke];
