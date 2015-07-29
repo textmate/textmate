@@ -25,7 +25,6 @@ struct tracking_t;
 }
 @property (nonatomic) dev_t device;
 @property (nonatomic) ino_t inode;
-@property (nonatomic) BOOL missing;
 - (void)internalNeedsReload;
 @end
 
@@ -48,7 +47,7 @@ struct tracking_t : fs::event_callback_t
 				std::set<std::string> pathsShown, pathsDeleted, pathsMissingOnDisk;
 				for(FSFileItem* item in _item.children)
 				{
-					if(item.missing)
+					if(item.isMissing)
 						pathsMissingOnDisk.insert(to_s(item.url.path));
 					pathsShown.insert(to_s(item.url.path));
 				}
@@ -97,11 +96,6 @@ struct tracking_t : fs::event_callback_t
 - (void)dealloc
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
-}
-
-- (BOOL)isEqual:(FSFileItem*)otherObject
-{
-	return [super isEqual:otherObject] && otherObject.missing == _missing;
 }
 
 - (void)loadChildren:(FSDirectoryDataSource*)dataSource completionHandler:(void(^)(NSArray*))block
@@ -201,7 +195,7 @@ struct tracking_t : fs::event_callback_t
 				std::map< std::string, FSFileItem* > allItems;
 				for(FSFileItem* item in self.children)
 				{
-					if(!item.missing)
+					if(!item.isMissing)
 						existingItems.emplace(std::make_pair(item.device, item.inode), item);
 					allItems.emplace([[item.url absoluteString] fileSystemRepresentation], item);
 				}

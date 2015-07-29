@@ -47,7 +47,7 @@ static ino_t inode (std::string const& path)
 
 - (BOOL)isEqual:(id)otherObject
 {
-	return [otherObject isKindOfClass:[self class]] && [self.url isEqual:[otherObject url]] && self.scmStatus == [otherObject scmStatus];
+	return [otherObject isKindOfClass:[self class]] && [self.url isEqual:[otherObject url]] && self.scmStatus == [otherObject scmStatus] && self.isMissing == [otherObject isMissing];
 }
 
 - (NSUInteger)hash
@@ -91,6 +91,21 @@ static ino_t inode (std::string const& path)
 	{
 		OakFileIconImage* icon = [(OakFileIconImage*)_icon copy];
 		icon.modified = newState;
+		self.icon = icon;
+	}
+}
+
+- (BOOL)isMissing
+{
+	return [_icon isKindOfClass:[OakFileIconImage class]] ? !((OakFileIconImage*)_icon).exists : NO;
+}
+
+- (void)setMissing:(BOOL)newState
+{
+	if([_icon isKindOfClass:[OakFileIconImage class]] && newState != self.isMissing)
+	{
+		OakFileIconImage* icon = [(OakFileIconImage*)_icon copy];
+		icon.exists = !newState;
 		self.icon = icon;
 	}
 }
