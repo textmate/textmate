@@ -705,11 +705,14 @@ static bool is_binary (std::string const& path)
 		return;
 
 	NSUInteger rowToSelect = [indexSet lastIndex];
-	while(rowToSelect < [_outlineView numberOfRows] && ([indexSet containsIndex:rowToSelect] || ![self canSelectRow:rowToSelect]))
+	NSInteger level = [_outlineView levelForRow:rowToSelect];
+	auto selectable = [&](NSInteger row){ return ![indexSet containsIndex:row] && [self canSelectRow:row] && [_outlineView levelForRow:row] <= level; };
+
+	while(rowToSelect < [_outlineView numberOfRows] && !selectable(rowToSelect))
 		++rowToSelect;
 
 	if(rowToSelect == [_outlineView numberOfRows])
-		do { --rowToSelect; } while(rowToSelect > 0 && ([indexSet containsIndex:rowToSelect]) || ![self canSelectRow:rowToSelect]);
+		do { --rowToSelect; } while(rowToSelect > 0 && !selectable(rowToSelect));
 
 	FSItem* itemToSelect = [indexSet containsIndex:rowToSelect] ? nil : [_outlineView itemAtRow:rowToSelect];
 
