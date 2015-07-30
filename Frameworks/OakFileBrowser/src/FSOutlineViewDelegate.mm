@@ -238,7 +238,7 @@
 - (void)controlTextDidEndEditing:(NSNotification*)aNotification
 {
 	FSItem* item = self.objectValue;
-	if(![item setNewDisplayName:self.textField.stringValue view:self])
+	if(![item setNewDisplayName:self.textField.stringValue view:self.enclosingScrollView.documentView ?: self])
 		item.displayName = [NSString stringWithCxxString:path::display_name([item.url.path fileSystemRepresentation])];
 }
 
