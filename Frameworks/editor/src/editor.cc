@@ -1346,9 +1346,7 @@ namespace ng
 
 		if(inputRanges.size() > 1 && format == output_format::text && placement != output::replace_document)
 		{
-			std::vector<std::string> words = text::split(out, "\n");
-			if(words.size() > 1 && words.back().empty())
-				words.pop_back();
+			std::vector<std::string> const words = text::split(out, "\n");
 
 			size_t i = 0;
 			std::multimap<range_t, std::string> insertions;
