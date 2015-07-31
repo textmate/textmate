@@ -15,14 +15,17 @@ namespace ng
 
 	ng::ranges_t write_unit_to_fd (buffer_t const& buffer, ranges_t const& ranges, size_t tabSize, int fd, input::type unit, input::type fallbackUnit, input_format::type format, scope::selector_t const& scopeSelector, std::map<std::string, std::string>& variables, bool* inputWasSelection) // TODO Move write_unit_to_fd to command framework.
 	{
-		ng::range_t const& range = ranges.last();
-		input::type actualUnit = unit == input::selection && range.empty() ? fallbackUnit : unit;
+		bool noSelection = true;
+		for(auto const& range : ranges)
+			noSelection = noSelection && range.empty();
+
+		input::type actualUnit = unit == input::selection && noSelection ? fallbackUnit : unit;
 		*inputWasSelection = actualUnit == input::selection;
 
 		ng::ranges_t res = ranges;
 		if(ranges.size() == 1 || unit != input::selection)
 		{
-			range_t r;
+			range_t r, range = ranges.last();
 			switch(actualUnit)
 			{
 				case input::character:        r = extend_if_empty(buffer, range, kSelectionExtendRight).last();        break;
