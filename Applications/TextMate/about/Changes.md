@@ -2,6 +2,13 @@ Title: Release Notes
 
 # Changes
 
+## 2015-07-31 (v2.0-beta.7.7)
+
+* You can now use ⌥⌘V in the file browser to “move” the item on the clipboard to the current folder. This makes it possibly to copy files from Finder and “move” to the location in TextMate’s file browser and thus the old way of moving files via keyboard (⌘X + ⌘V) is deprecated and will be removed.
+* Improved support for multiple carets/selections and commands, for example fallback units are now respected when there are multiple carets (and none have a selection).
+* The file browser is now view-based (instead of cell-based). The main “feature” is that renaming an item should no longer be involuntarily aborted (when there are disk changes), though there are also some minor interaction changes and more animations plus labels are rendered closer to how Finder has shown them since 10.9.
+* See [all changes since v2.0-beta.7.6](https://github.com/textmate/textmate/compare/v2.0-beta.7.6...v2.0-beta.7.7)
+
 ## 2015-07-17 (v2.0-beta.7.6)
 
 * Double-tapping shift will now also leave “freehanded mode”.
