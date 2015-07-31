@@ -22,23 +22,24 @@ namespace ng
 		input::type actualUnit = unit == input::selection && noSelection ? fallbackUnit : unit;
 		*inputWasSelection = actualUnit == input::selection;
 
-		ng::ranges_t res = ranges;
-		if(ranges.size() == 1 || unit != input::selection)
+		ng::ranges_t res;
+		for(auto range : ranges)
 		{
-			range_t r, range = ranges.last();
 			switch(actualUnit)
 			{
-				case input::character:        r = extend_if_empty(buffer, range, kSelectionExtendRight).last();        break;
-				case input::word:             r = word_at(buffer, range);                                          break;
-				case input::line:             r = extend_if_empty(buffer, range, kSelectionExtendToLineExclLF).last(); break;
-				case input::scope:            r = select_scope(buffer, range, scopeSelector).last();                   break;
-				case input::selection:        r = range;                                                               break;
-				case input::entire_document:  r = extend(buffer, range, kSelectionExtendToAll).last();                 break;
+				case input::character:        range = extend_if_empty(buffer, range, kSelectionExtendRight).last();        break;
+				case input::word:             range = word_at(buffer, range);                                              break;
+				case input::line:             range = extend_if_empty(buffer, range, kSelectionExtendToLineExclLF).last(); break;
+				case input::scope:            range = select_scope(buffer, range, scopeSelector).last();                   break;
+				case input::entire_document:  range = extend(buffer, range, kSelectionExtendToAll).last();                 break;
 			};
-			res = r;
+			res.push_back(range);
 		}
 
-		if(res.size() != 1 && unit == input::selection || !res.last().empty())
+		if(res.size() != 1 && actualUnit != input::entire_document)
+			res = sanitize(buffer, res);
+
+		if(res.size() != 1 || !res.last().empty())
 		{
 			std::string str = "";
 			bool first = true;
