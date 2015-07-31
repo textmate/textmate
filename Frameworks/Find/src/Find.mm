@@ -177,6 +177,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 				[self clearMatches];
 
 				FFDocumentSearch* folderSearch = [FFDocumentSearch new];
+				folderSearch.searchBinaryFiles = YES;
 				folderSearch.searchString = controller.findString;
 				folderSearch.options      = _findOptions;
 
