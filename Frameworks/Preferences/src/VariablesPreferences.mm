@@ -8,8 +8,6 @@
 @end
 
 @implementation VariablesPreferences
-@synthesize canRemove;
-
 - (NSString*)identifier            { return @"Variables"; }
 - (NSImage*)toolbarItemImage       { return [NSImage imageNamed:@"Variables" inSameBundleAsClass:[self class]]; }
 - (NSString*)toolbarItemLabel      { return @"Variables"; }

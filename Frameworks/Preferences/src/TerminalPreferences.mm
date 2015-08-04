@@ -153,8 +153,6 @@ static bool uninstall_mate (std::string const& path)
 }
 
 @implementation TerminalPreferences
-@synthesize installIndicaitorImage;
-
 - (id)init
 {
 	if(self = [super initWithNibName:@"TerminalPreferences" label:@"Terminal" image:[NSImage imageNamed:@"Terminal" inSameBundleAsClass:[self class]]])

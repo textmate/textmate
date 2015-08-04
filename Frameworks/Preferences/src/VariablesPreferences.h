@@ -3,7 +3,6 @@
 @interface VariablesPreferences : NSViewController <MASPreferencesViewController>
 {
 	IBOutlet NSTableView* variablesTableView;
-	BOOL canRemove;
 }
 @property (nonatomic, readonly) NSString* identifier;
 @property (nonatomic, readonly) NSImage*  toolbarItemImage;

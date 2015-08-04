@@ -7,7 +7,6 @@ PUBLIC @interface TerminalPreferences : PreferencesPane
 	IBOutlet NSTextField* installSummaryText;
 	IBOutlet NSPopUpButton* installPathPopUp;
 	IBOutlet NSButton* installButton;
-	NSImage* installIndicaitorImage;
 	IBOutlet NSTextField* rmateSummaryText;
 
 	std::string statusTextFormat;
