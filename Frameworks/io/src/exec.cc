@@ -4,7 +4,6 @@
 #include <text/format.h>
 #include <oak/datatypes.h>
 #include <oak/debug/OakDebugLog.h>
-#include <oak/compat.h>
 #include <crash/info.h>
 
 OAK_DEBUG_VAR(IO_Exec);
@@ -15,7 +14,6 @@ namespace io
 {
 	process_t spawn (std::vector<std::string> const& args, std::map<std::string, std::string> const& environment)
 	{
-		short const closeOnExecFlag = (oak::os_tuple() < std::make_tuple(10, 8, 0)) ? 0 : POSIX_SPAWN_CLOEXEC_DEFAULT;
 		process_t res;
 
 		int in, out, err;
@@ -34,7 +32,7 @@ namespace io
 
 			posix_spawnattr_t flags;
 			OAK_CHECK(posix_spawnattr_init(&flags));
-			OAK_CHECK(posix_spawnattr_setflags(&flags, POSIX_SPAWN_SETSIGDEF|closeOnExecFlag));
+			OAK_CHECK(posix_spawnattr_setflags(&flags, POSIX_SPAWN_SETSIGDEF|POSIX_SPAWN_CLOEXEC_DEFAULT));
 
 			char* argv[args.size() + 1];
 			std::transform(args.begin(), args.end(), &argv[0], [](std::string const& str){ return (char*)str.c_str(); });
