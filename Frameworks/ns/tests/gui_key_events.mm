@@ -3,20 +3,15 @@
 #import <test/cocoa.h>
 
 @interface MyEventView : NSView
-{
-	NSString* keyString;
-}
 @property (nonatomic) NSString* keyString;
 @end
 
 @implementation MyEventView
-@synthesize keyString;
-
 - (id)initWithFrame:(NSRect)aRect
 {
 	if((self = [super initWithFrame:aRect]))
 	{
-		self.keyString = @"Press some keys.";
+		_keyString = @"Press some keys.";
 	}
 	return self;
 }
@@ -46,8 +41,8 @@
 - (void)drawRect:(NSRect)aRect
 {
 	NSEraseRect(aRect);
-	NSSize size = [keyString sizeWithAttributes:[self stringAttributes]];
-	[keyString drawAtPoint:NSMakePoint(NSMidX([self visibleRect]) - size.width / 2, NSMidY([self visibleRect]) - size.height /2 ) withAttributes:[self stringAttributes]];
+	NSSize size = [_keyString sizeWithAttributes:[self stringAttributes]];
+	[_keyString drawAtPoint:NSMakePoint(NSMidX([self visibleRect]) - size.width / 2, NSMidY([self visibleRect]) - size.height /2 ) withAttributes:[self stringAttributes]];
 }
 @end
 

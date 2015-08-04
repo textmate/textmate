@@ -18,17 +18,12 @@ static size_t line_count (std::string const& text)
 }
 
 @interface OakPasteboardSelectorMultiLineCell : NSCell
-{
-	size_t maxLines;
-}
 @property (nonatomic) size_t maxLines;
 + (id)cellWithMaxLines:(size_t)maxLines;
 - (CGFloat)rowHeightForText:(NSString*)text;
 @end
 
 @implementation OakPasteboardSelectorMultiLineCell
-@synthesize maxLines;
-
 + (id)cellWithMaxLines:(size_t)maxLines;
 {
 	OakPasteboardSelectorMultiLineCell* cell = [[self class] new];
@@ -91,7 +86,7 @@ static size_t line_count (std::string const& text)
 
 - (size_t)lineCountForText:(NSString*)text
 {
-	return oak::cap<size_t>(1, line_count(to_s(text)), maxLines);
+	return oak::cap<size_t>(1, line_count(to_s(text)), _maxLines);
 }
 
 - (void)drawWithFrame:(NSRect)frame inView:(NSView*)controlView

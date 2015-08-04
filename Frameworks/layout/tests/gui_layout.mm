@@ -21,13 +21,10 @@ typedef std::shared_ptr<ng::layout_t> layout_ptr;
 @interface MyView : NSView
 {
 	ng::buffer_t buffer;
-	ng::ranges_t selection;
 	layout_ptr layout;
-
-	NSDate* optionDownDate;
 }
 @property (nonatomic) NSDate* optionDownDate;
-@property (nonatomic) ng::ranges_t const& selection;
+@property (nonatomic) ng::ranges_t selection;
 - (void)updateFrameSize;
 @end
 
@@ -91,8 +88,6 @@ private:
 #define AUTO_REFRESH refresh_t dummy(self, *layout)
 
 @implementation MyView
-@synthesize optionDownDate, selection;
-
 - (BOOL)isFlipped { return YES; }
 
 - (void)updateFrameSize
@@ -124,7 +119,7 @@ private:
 
 		self.autoresizingMask = 0;
 
-		selection = ng::ranges_t(0);
+		_selection = ng::ranges_t(0);
 
 		static buffer_refresh_callback_t cb(self);
 		buffer.add_callback(&cb);
@@ -177,9 +172,9 @@ private:
 	if(![self window])
 		return;
 
-	layout->begin_refresh_cycle(selection);
+	layout->begin_refresh_cycle(_selection);
 	random_insert(buffer, path::content(__FILE__));
-	layout->end_refresh_cycle(selection, [self visibleRect]);
+	layout->end_refresh_cycle(_selection, [self visibleRect]);
 
 	[self updateFrameSize];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(viewFrameDidChange:) name:NSViewFrameDidChangeNotification object:[self enclosingScrollView]];
@@ -187,7 +182,7 @@ private:
 
 - (void)drawRect:(NSRect)aRect
 {
-	layout->draw((CGContextRef)[[NSGraphicsContext currentContext] graphicsPort], aRect, [self isFlipped], selection);
+	layout->draw((CGContextRef)[[NSGraphicsContext currentContext] graphicsPort], aRect, [self isFlipped], _selection);
 }
 
 - (ng::ranges_t const&)replaceSelection:(ng::ranges_t const&)someRanges withString:(std::string const&)aString
@@ -212,7 +207,7 @@ private:
 
 - (void)insertText:(id)someText
 {
-	selection = [self replaceSelection:selection withString:[someText UTF8String]];
+	_selection = [self replaceSelection:_selection withString:[someText UTF8String]];
 }
 
 - (void)flagsChanged:(NSEvent*)anEvent
@@ -223,14 +218,14 @@ private:
 
 	NSInteger modifiers   = [anEvent modifierFlags] & (NSAlternateKeyMask | NSControlKeyMask | NSCommandKeyMask);
 	BOOL didPressOption   = modifiers == NSAlternateKeyMask;
-	BOOL didReleaseOption = modifiers == 0 && optionDownDate && [[NSDate date] timeIntervalSinceDate:optionDownDate] < 0.18;
+	BOOL didReleaseOption = modifiers == 0 && _optionDownDate && [[NSDate date] timeIntervalSinceDate:_optionDownDate] < 0.18;
 
 	self.optionDownDate = didPressOption ? [NSDate date] : nil;
 
 	if(didReleaseOption)
 	{
 		AUTO_REFRESH;
-		selection = toggle_columnar(selection);
+		_selection = toggle_columnar(_selection);
 	}
 }
 
@@ -247,119 +242,119 @@ private:
 	std::string const key = to_s(anEvent);
 
 	if(key == kLeftArrowKeyCode)
-		selection = ng::move(buffer, selection, kSelectionMoveLeft, layout.get());
+		_selection = ng::move(buffer, _selection, kSelectionMoveLeft, layout.get());
 	else if(key == kRightArrowKeyCode)
-		selection = ng::move(buffer, selection, kSelectionMoveRight, layout.get());
+		_selection = ng::move(buffer, _selection, kSelectionMoveRight, layout.get());
 	else if(key == kUpArrowKeyCode)
-		selection = ng::move(buffer, selection, kSelectionMoveUp, layout.get());
+		_selection = ng::move(buffer, _selection, kSelectionMoveUp, layout.get());
 	else if(key == kDownArrowKeyCode)
-		selection = ng::move(buffer, selection, kSelectionMoveDown, layout.get());
+		_selection = ng::move(buffer, _selection, kSelectionMoveDown, layout.get());
 
 	else if(key == "@" + kLeftArrowKeyCode || key == "^a")
-		selection = ng::move(buffer, selection, kSelectionMoveToBeginOfSoftLine, layout.get());
+		_selection = ng::move(buffer, _selection, kSelectionMoveToBeginOfSoftLine, layout.get());
 	else if(key == "@" + kRightArrowKeyCode || key == "^e")
-		selection = ng::move(buffer, selection, kSelectionMoveToEndOfSoftLine, layout.get());
+		_selection = ng::move(buffer, _selection, kSelectionMoveToEndOfSoftLine, layout.get());
 	else if(key == "@" + kUpArrowKeyCode)
-		selection = ng::move(buffer, selection, kSelectionMoveToBeginOfDocument, layout.get());
+		_selection = ng::move(buffer, _selection, kSelectionMoveToBeginOfDocument, layout.get());
 	else if(key == "@" + kDownArrowKeyCode)
-		selection = ng::move(buffer, selection, kSelectionMoveToEndOfDocument, layout.get());
+		_selection = ng::move(buffer, _selection, kSelectionMoveToEndOfDocument, layout.get());
 
 	else if(key == "~" + kLeftArrowKeyCode)
-		selection = ng::move(buffer, selection, kSelectionMoveToBeginOfWord, layout.get());
+		_selection = ng::move(buffer, _selection, kSelectionMoveToBeginOfWord, layout.get());
 	else if(key == "~" + kRightArrowKeyCode)
-		selection = ng::move(buffer, selection, kSelectionMoveToEndOfWord, layout.get());
+		_selection = ng::move(buffer, _selection, kSelectionMoveToEndOfWord, layout.get());
 	else if(key == "~" + kUpArrowKeyCode)
-		selection = ng::move(buffer, selection, kSelectionMoveToBeginOfColumn, layout.get());
+		_selection = ng::move(buffer, _selection, kSelectionMoveToBeginOfColumn, layout.get());
 	else if(key == "~" + kDownArrowKeyCode)
-		selection = ng::move(buffer, selection, kSelectionMoveToEndOfColumn, layout.get());
+		_selection = ng::move(buffer, _selection, kSelectionMoveToEndOfColumn, layout.get());
 
 	else if(key == "^" + kLeftArrowKeyCode)
-		selection = ng::move(buffer, selection, kSelectionMoveToBeginOfSubWord, layout.get());
+		_selection = ng::move(buffer, _selection, kSelectionMoveToBeginOfSubWord, layout.get());
 	else if(key == "^" + kRightArrowKeyCode)
-		selection = ng::move(buffer, selection, kSelectionMoveToEndOfSubWord, layout.get());
+		_selection = ng::move(buffer, _selection, kSelectionMoveToEndOfSubWord, layout.get());
 	else if(key == "^" + kUpArrowKeyCode)
-		selection = ng::move(buffer, selection, kSelectionMoveToBeginOfParagraph, layout.get());
+		_selection = ng::move(buffer, _selection, kSelectionMoveToBeginOfParagraph, layout.get());
 	else if(key == "^" + kDownArrowKeyCode)
-		selection = ng::move(buffer, selection, kSelectionMoveToEndOfParagraph, layout.get());
+		_selection = ng::move(buffer, _selection, kSelectionMoveToEndOfParagraph, layout.get());
 
 	else if(key == "$" + kLeftArrowKeyCode)
-		selection = ng::extend(buffer, selection, kSelectionExtendLeft, layout.get());
+		_selection = ng::extend(buffer, _selection, kSelectionExtendLeft, layout.get());
 	else if(key == "$" + kRightArrowKeyCode)
-		selection = ng::extend(buffer, selection, kSelectionExtendRight, layout.get());
+		_selection = ng::extend(buffer, _selection, kSelectionExtendRight, layout.get());
 	else if(key == "$" + kUpArrowKeyCode)
-		selection = ng::extend(buffer, selection, kSelectionExtendUp, layout.get());
+		_selection = ng::extend(buffer, _selection, kSelectionExtendUp, layout.get());
 	else if(key == "$" + kDownArrowKeyCode)
-		selection = ng::extend(buffer, selection, kSelectionExtendDown, layout.get());
+		_selection = ng::extend(buffer, _selection, kSelectionExtendDown, layout.get());
 
 	else if(key == "~$" + kLeftArrowKeyCode)
-		selection = ng::extend(buffer, selection, kSelectionExtendToBeginOfWord, layout.get());
+		_selection = ng::extend(buffer, _selection, kSelectionExtendToBeginOfWord, layout.get());
 	else if(key == "~$" + kRightArrowKeyCode)
-		selection = ng::extend(buffer, selection, kSelectionExtendToEndOfWord, layout.get());
+		_selection = ng::extend(buffer, _selection, kSelectionExtendToEndOfWord, layout.get());
 	else if(key == "~$" + kUpArrowKeyCode)
-		selection = ng::extend(buffer, selection, kSelectionExtendToBeginOfColumn, layout.get());
+		_selection = ng::extend(buffer, _selection, kSelectionExtendToBeginOfColumn, layout.get());
 	else if(key == "~$" + kDownArrowKeyCode)
-		selection = ng::extend(buffer, selection, kSelectionExtendToEndOfColumn, layout.get());
+		_selection = ng::extend(buffer, _selection, kSelectionExtendToEndOfColumn, layout.get());
 
 	else if(key == "^$" + kLeftArrowKeyCode)
-		selection = ng::extend(buffer, selection, kSelectionExtendToBeginOfSubWord, layout.get());
+		_selection = ng::extend(buffer, _selection, kSelectionExtendToBeginOfSubWord, layout.get());
 	else if(key == "^$" + kRightArrowKeyCode)
-		selection = ng::extend(buffer, selection, kSelectionExtendToEndOfSubWord, layout.get());
+		_selection = ng::extend(buffer, _selection, kSelectionExtendToEndOfSubWord, layout.get());
 	else if(key == "^$" + kUpArrowKeyCode)
-		selection = ng::extend(buffer, selection, kSelectionExtendToBeginOfParagraph, layout.get());
+		_selection = ng::extend(buffer, _selection, kSelectionExtendToBeginOfParagraph, layout.get());
 	else if(key == "^$" + kDownArrowKeyCode)
-		selection = ng::extend(buffer, selection, kSelectionExtendToEndOfParagraph, layout.get());
+		_selection = ng::extend(buffer, _selection, kSelectionExtendToEndOfParagraph, layout.get());
 
 	else if(key == "$@" + kLeftArrowKeyCode)
-		selection = ng::extend(buffer, selection, kSelectionExtendToBeginOfSoftLine, layout.get());
+		_selection = ng::extend(buffer, _selection, kSelectionExtendToBeginOfSoftLine, layout.get());
 	else if(key == "$@" + kRightArrowKeyCode)
-		selection = ng::extend(buffer, selection, kSelectionExtendToEndOfSoftLine, layout.get());
+		_selection = ng::extend(buffer, _selection, kSelectionExtendToEndOfSoftLine, layout.get());
 	else if(key == "$@" + kUpArrowKeyCode)
-		selection = ng::extend(buffer, selection, kSelectionExtendToBeginOfDocument, layout.get());
+		_selection = ng::extend(buffer, _selection, kSelectionExtendToBeginOfDocument, layout.get());
 	else if(key == "$@" + kDownArrowKeyCode)
-		selection = ng::extend(buffer, selection, kSelectionExtendToEndOfDocument, layout.get());
+		_selection = ng::extend(buffer, _selection, kSelectionExtendToEndOfDocument, layout.get());
 
 	else if(key == "^w")
-		selection = ng::extend(buffer, selection, kSelectionExtendToWord, layout.get());
+		_selection = ng::extend(buffer, _selection, kSelectionExtendToWord, layout.get());
 	else if(key == "^~b")
-		selection = ng::extend(buffer, selection, kSelectionExtendToScope, layout.get());
+		_selection = ng::extend(buffer, _selection, kSelectionExtendToScope, layout.get());
 	else if(key == "^l")
-		selection = ng::extend(buffer, selection, kSelectionExtendToSoftLine, layout.get());
+		_selection = ng::extend(buffer, _selection, kSelectionExtendToSoftLine, layout.get());
 	else if(key == "@L")
-		selection = ng::extend(buffer, selection, kSelectionExtendToLine, layout.get());
+		_selection = ng::extend(buffer, _selection, kSelectionExtendToLine, layout.get());
 	else if(key == "@a")
-		selection = ng::extend(buffer, selection, kSelectionExtendToAll, layout.get());
+		_selection = ng::extend(buffer, _selection, kSelectionExtendToAll, layout.get());
 
 	else if(key == kDeleteForwardKeyCode)
-		selection = [self replaceSelection:ng::extend_if_empty(buffer, selection, kSelectionExtendLeft, layout.get()) withString:""];
+		_selection = [self replaceSelection:ng::extend_if_empty(buffer, _selection, kSelectionExtendLeft, layout.get()) withString:""];
 	else if((key == kDeleteBackwardKeyCode || key == "^d"))
-		selection = [self replaceSelection:ng::extend_if_empty(buffer, selection, kSelectionExtendRight, layout.get()) withString:""];
+		_selection = [self replaceSelection:ng::extend_if_empty(buffer, _selection, kSelectionExtendRight, layout.get()) withString:""];
 
 	else if(key == "~" + kDeleteForwardKeyCode)
-		selection = [self replaceSelection:ng::extend_if_empty(buffer, selection, kSelectionExtendToBeginOfWord, layout.get()) withString:""];
+		_selection = [self replaceSelection:ng::extend_if_empty(buffer, _selection, kSelectionExtendToBeginOfWord, layout.get()) withString:""];
 	else if(key == "~" + kDeleteBackwardKeyCode)
-		selection = [self replaceSelection:ng::extend_if_empty(buffer, selection, kSelectionExtendToEndOfWord, layout.get()) withString:""];
+		_selection = [self replaceSelection:ng::extend_if_empty(buffer, _selection, kSelectionExtendToEndOfWord, layout.get()) withString:""];
 	else if(key == "^" + kDeleteForwardKeyCode)
-		selection = [self replaceSelection:ng::extend_if_empty(buffer, selection, kSelectionExtendToBeginOfSubWord, layout.get()) withString:""];
+		_selection = [self replaceSelection:ng::extend_if_empty(buffer, _selection, kSelectionExtendToBeginOfSubWord, layout.get()) withString:""];
 	else if(key == "^" + kDeleteBackwardKeyCode)
-		selection = [self replaceSelection:ng::extend_if_empty(buffer, selection, kSelectionExtendToEndOfSubWord, layout.get()) withString:""];
+		_selection = [self replaceSelection:ng::extend_if_empty(buffer, _selection, kSelectionExtendToEndOfSubWord, layout.get()) withString:""];
 	else if(key == "@" + kDeleteForwardKeyCode)
-		selection = [self replaceSelection:ng::extend_if_empty(buffer, selection, kSelectionExtendToBeginOfSoftLine, layout.get()) withString:""];
+		_selection = [self replaceSelection:ng::extend_if_empty(buffer, _selection, kSelectionExtendToBeginOfSoftLine, layout.get()) withString:""];
 	else if(key == "@" + kDeleteBackwardKeyCode)
-		selection = [self replaceSelection:ng::extend_if_empty(buffer, selection, kSelectionExtendToEndOfSoftLine, layout.get()) withString:""];
+		_selection = [self replaceSelection:ng::extend_if_empty(buffer, _selection, kSelectionExtendToEndOfSoftLine, layout.get()) withString:""];
 
 	else if(key == "\r")
-		selection = [self replaceSelection:selection withString:"\n"];
+		_selection = [self replaceSelection:_selection withString:"\n"];
 	else if(key == "\t")
-		selection = [self replaceSelection:selection withString:"\t"];
+		_selection = [self replaceSelection:_selection withString:"\t"];
 
 	else if(key == utf8::to_s(NSF1FunctionKey))
-		layout->toggle_fold_at_line(buffer.convert(selection.last().last.index).line, false);
+		layout->toggle_fold_at_line(buffer.convert(_selection.last().last.index).line, false);
 	else if(key == utf8::to_s(NSF2FunctionKey))
-		selection = ng::select_scope(buffer, selection, "string");
+		_selection = ng::select_scope(buffer, _selection, "string");
 	else if(key == "^p")
-		fprintf(stderr, "%s\n", to_s(ng::scope(buffer, selection)).c_str());
+		fprintf(stderr, "%s\n", to_s(ng::scope(buffer, _selection)).c_str());
 	else if(key == "^s")
-		fprintf(stderr, "%s\n", to_s(selection).c_str());
+		fprintf(stderr, "%s\n", to_s(_selection).c_str());
 	else
 		[self interpretKeyEvents:@[ anEvent ]];
 }
@@ -379,11 +374,11 @@ private:
 		index.carry = 0;
 
 	if(shiftDown)
-		selection.last() = ng::range_t(selection.last().first, index, optionDown, false);
+		_selection.last() = ng::range_t(_selection.last().first, index, optionDown, false);
 	else if(commandDown)
-		selection.push_back(ng::range_t(index, index, false, optionDown));
+		_selection.push_back(ng::range_t(index, index, false, optionDown));
 	else
-		selection = ng::range_t(index, index, false, optionDown);
+		_selection = ng::range_t(index, index, false, optionDown);
 }
 
 - (void)rightMouseDown:(NSEvent*)anEvent
