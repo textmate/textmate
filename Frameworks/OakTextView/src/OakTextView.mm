@@ -3298,7 +3298,6 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 			io::exhaust_fd(process.err, &error);
 		});
 		dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
-		dispatch_release(group);
 
 		if(res = WIFEXITED(status) && WEXITSTATUS(status) == 0)
 		{

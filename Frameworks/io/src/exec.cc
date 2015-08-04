@@ -121,10 +121,7 @@ namespace io
 		});
 
 		dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
-		dispatch_release(group);
-
 		D(DBF_IO_Exec, if(!error.empty()) bug("error from command: “%s”\n", error.c_str()););
-
 		return success ? output : NULL_STR;
 	}
 

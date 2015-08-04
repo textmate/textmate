@@ -28,7 +28,6 @@ std::string merge (std::string const& oldContent, std::string const& myContent, 
 				perror("waitpid");
 		});
 		dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
-		dispatch_release(group);
 
 		if(conflict)
 			*conflict = WIFEXITED(status) && WEXITSTATUS(status) != 0;

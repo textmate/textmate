@@ -430,7 +430,6 @@ namespace ng
 							perror("waitpid");
 					});
 					dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
-					dispatch_release(group);
 				}
 
 				unlink(scriptPath.c_str());

@@ -62,10 +62,7 @@ private:
 		~track_fds_t ()
 		{
 			for(auto pair : _records)
-			{
 				dispatch_source_cancel(pair.second->source);
-				dispatch_release(pair.second->source);
-			}
 			_records.clear();
 		}
 
@@ -91,7 +88,6 @@ private:
 			if(pair != _records.end())
 			{
 				dispatch_source_cancel(pair->second->source);
-				dispatch_release(pair->second->source);
 				_records.erase(pair);
 			}
 		}

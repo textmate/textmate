@@ -219,8 +219,6 @@ OAK_DEBUG_VAR(HTMLOutput_JSShellCommand);
 					}
 				}
 			}
-
-			dispatch_release(group);
 		}
 	}
 	return self;

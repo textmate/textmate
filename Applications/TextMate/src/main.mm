@@ -60,11 +60,7 @@ int main (int argc, char const* argv[])
 	}
 
 	try {
-		int res = NSApplicationMain(argc, argv);
-		dispatch_release(sigUsr1Src);
-		dispatch_release(sigIntSrc);
-		dispatch_release(sigTermSrc);
-		return res;
+		return NSApplicationMain(argc, argv);
 	}
 	catch(std::exception const& e) {
 		crash_reporter_info_t info(text::format("C++ Exception: %s", e.what()));

@@ -27,10 +27,7 @@ namespace network
 	tbz_t::~tbz_t ()
 	{
 		if(_group)
-		{
 			dispatch_group_wait(_group, DISPATCH_TIME_FOREVER);
-			dispatch_release(_group);
-		}
 	}
 
 	bool tbz_t::wait_for_tbz (std::string* output, std::string* error)

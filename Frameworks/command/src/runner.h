@@ -48,7 +48,6 @@ namespace command
 	{
 		runner_t () = delete;
 		runner_t (bundle_command_t const& command, ng::buffer_api_t const& buffer, ng::ranges_t const& selection, std::map<std::string, std::string> const& environment, std::string const& pwd, delegate_ptr delegate);
-		~runner_t ();
 
 		void launch ();
 		void wait ();

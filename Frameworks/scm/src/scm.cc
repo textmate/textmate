@@ -397,7 +397,6 @@ namespace scm
 			dispatch_semaphore_signal(semaphore);
 		});
 		dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
-		dispatch_release(semaphore);
 		info->pop_callback();
 	}
 
