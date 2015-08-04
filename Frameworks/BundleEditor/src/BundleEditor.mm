@@ -123,8 +123,6 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 }
 
 @implementation BundleEditor
-@synthesize sharedPropertiesViewController, extraPropertiesViewController, bundleItemProperties;
-
 + (BundleEditor*)sharedInstance
 {
 	return SharedInstance ?: [self new];
@@ -393,13 +391,13 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 	if(!bundleItem || !bundleItemContent)
 		return YES;
 
-	[sharedPropertiesViewController commitEditing];
-	[extraPropertiesViewController commitEditing];
+	[_sharedPropertiesViewController commitEditing];
+	[_extraPropertiesViewController commitEditing];
 
 	if(!propertiesChanged && !bundleItemContent->is_modified())
 		return YES;
 
-	plist::dictionary_t plist = plist::convert((__bridge CFPropertyListRef)bundleItemProperties);
+	plist::dictionary_t plist = plist::convert((__bridge CFPropertyListRef)_bundleItemProperties);
 
 	std::string const& content = bundleItemContent->content();
 	item_info_t const& info = info_for(bundleItem->kind());
@@ -445,11 +443,11 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 	switch(info.kind)
 	{
 		case bundles::kItemTypeGrammar:
-			plist[bundles::kFieldGrammarExtension] = unwrap_array([bundleItemProperties objectForKey:[NSString stringWithCxxString:bundles::kFieldGrammarExtension]], @"extension");
+			plist[bundles::kFieldGrammarExtension] = unwrap_array([_bundleItemProperties objectForKey:[NSString stringWithCxxString:bundles::kFieldGrammarExtension]], @"extension");
 		break;
 
 		case bundles::kItemTypeDragCommand:
-			plist[bundles::kFieldDropExtension] = unwrap_array([bundleItemProperties objectForKey:[NSString stringWithCxxString:bundles::kFieldDropExtension]], @"extension");
+			plist[bundles::kFieldDropExtension] = unwrap_array([_bundleItemProperties objectForKey:[NSString stringWithCxxString:bundles::kFieldDropExtension]], @"extension");
 		break;
 	}
 
@@ -664,8 +662,8 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 {
 	static std::string const BindingKeys[] = { bundles::kFieldIsDisabled, bundles::kFieldName, bundles::kFieldKeyEquivalent, bundles::kFieldTabTrigger, bundles::kFieldScopeSelector, bundles::kFieldSemanticClass, bundles::kFieldContentMatch, bundles::kFieldHideFromUser, bundles::kFieldDropExtension, bundles::kFieldGrammarExtension, bundles::kFieldGrammarFirstLineMatch, bundles::kFieldGrammarScope, bundles::kFieldGrammarInjectionSelector, "beforeRunningCommand", "input", "inputFormat", "outputLocation", "outputFormat", "outputCaret", "autoScrollOutput", "contactName", "contactEmailRot13", "description", "disableAutoIndent", "useGlobalClipboard", "author", "comment" };
 
-	NSMutableDictionary* oldProperties = bundleItemProperties;
-	bundleItemProperties = someProperties;
+	NSMutableDictionary* oldProperties = _bundleItemProperties;
+	_bundleItemProperties = someProperties;
 	for(auto const& str : BindingKeys)
 	{
 		NSString* key = [NSString stringWithCxxString:str];
@@ -803,21 +801,21 @@ static NSMutableDictionary* DictionaryForPropertyList (plist::dictionary_t const
 	bundleItemContent->add_callback(documentCallback);
 	[documentView setDocument:bundleItemContent];
 
-	self.sharedPropertiesViewController = [[PropertiesViewController alloc] initWithName:@"SharedProperties"];
-	self.extraPropertiesViewController  = nil;
-	[sharedPropertiesViewController setProperties:bundleItemProperties];
+	_sharedPropertiesViewController = [[PropertiesViewController alloc] initWithName:@"SharedProperties"];
+	_extraPropertiesViewController  = nil;
+	[_sharedPropertiesViewController setProperties:_bundleItemProperties];
 
 	if(info.kind == bundles::kItemTypeBundle)
-		self.sharedPropertiesViewController = nil;
+		_sharedPropertiesViewController = nil;
 
-	NSView* sharedView = [sharedPropertiesViewController view];
+	NSView* sharedView = [_sharedPropertiesViewController view];
 	if(info.view_controller)
 	{
-		self.extraPropertiesViewController = [[PropertiesViewController alloc] initWithName:info.view_controller];
-		[extraPropertiesViewController setProperties:bundleItemProperties];
-		NSView* extraView = [extraPropertiesViewController view];
+		_extraPropertiesViewController = [[PropertiesViewController alloc] initWithName:info.view_controller];
+		[_extraPropertiesViewController setProperties:_bundleItemProperties];
+		NSView* extraView = [_extraPropertiesViewController view];
 
-		CGFloat delta = extraPropertiesViewController.indent - sharedPropertiesViewController.indent;
+		CGFloat delta = _extraPropertiesViewController.indent - _sharedPropertiesViewController.indent;
 		if(delta > 0)
 				[sharedView setFrame:NSOffsetRect(sharedView.frame, delta, 0)];
 		else	[extraView setFrame:NSOffsetRect(extraView.frame, -delta, 0)];

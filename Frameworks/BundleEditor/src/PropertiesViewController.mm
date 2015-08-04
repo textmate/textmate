@@ -2,13 +2,11 @@
 #import <OakAppKit/OakKeyEquivalentView.h>
 
 @implementation PropertiesViewController
-@synthesize properties;
-
 - (id)initWithName:(NSString*)aName
 {
 	if((self = [super initWithNibName:aName bundle:[NSBundle bundleForClass:[self class]]]))
 	{
-		properties = [NSMutableDictionary new];
+		_properties = [NSMutableDictionary new];
 	}
 	return self;
 }
@@ -21,7 +19,7 @@
 - (NSDictionary*)properties
 {
 	[objectController commitEditing];
-	return properties;
+	return _properties;
 }
 
 - (void)loadView

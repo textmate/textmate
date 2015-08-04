@@ -5,7 +5,6 @@
 	IBOutlet NSObjectController* objectController;
 	IBOutlet NSView* alignmentView;
 	IBOutlet OakKeyEquivalentView* keyEquivalentView;
-	NSMutableDictionary* properties;
 }
 - (id)initWithName:(NSString*)aName;
 @property (nonatomic) NSMutableDictionary* properties;

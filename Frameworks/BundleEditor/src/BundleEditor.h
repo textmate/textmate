@@ -12,9 +12,6 @@ PUBLIC @interface BundleEditor : NSWindowController <NSBrowserDelegate>
 	IBOutlet OakDocumentView* documentView;
 	NSDrawer* drawer;
 
-	PropertiesViewController* sharedPropertiesViewController;
-	PropertiesViewController* extraPropertiesViewController;
-
 	be::entry_ptr bundles;
 	std::map<bundles::item_ptr, plist::dictionary_t> changes;
 
@@ -22,7 +19,6 @@ PUBLIC @interface BundleEditor : NSWindowController <NSBrowserDelegate>
 
 	bundles::item_ptr bundleItem;
 	document::document_ptr bundleItemContent;
-	NSMutableDictionary* bundleItemProperties;
 
 	document::document_t::callback_t* documentCallback;
 }
