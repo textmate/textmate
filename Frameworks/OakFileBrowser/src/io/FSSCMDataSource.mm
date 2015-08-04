@@ -111,7 +111,7 @@ static NSArray* convert (std::map<std::string, scm::status::type> const& pathsMa
 		_url     = anURL;
 		_options = someOptions;
 		_scmInfo = scm::info([[anURL path] fileSystemRepresentation]);
-		_items   = [NSMapTable mapTableWithKeyOptions:NSPointerFunctionsStrongMemory valueOptions:NSPointerFunctionsZeroingWeakMemory];
+		_items   = [NSMapTable strongToWeakObjectsMapTable];
 
 		NSArray* query = [[anURL query] componentsSeparatedByString:@"="];
 		self.rootItem = [self itemOfType:[query lastObject] ?: @"all"];
