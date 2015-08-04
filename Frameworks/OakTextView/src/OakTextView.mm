@@ -434,10 +434,6 @@ private:
 	NSInteger mouseDownModifierFlags;
 	NSInteger mouseDownClickCount;
 
-	OakTimer* initiateDragTimer;
-	OakTimer* dragScrollTimer;
-	BOOL showDragCursor;
-	BOOL showColumnSelectionCursor;
 	BOOL ignoreMouseDown;  // set when the mouse down is the same event which caused becomeFirstResponder:
 	BOOL delayMouseDown; // set when mouseUp: should process lastMouseDownEvent
 
@@ -446,7 +442,6 @@ private:
 	// ===============
 
 	ng::index_t dropPosition;
-	ng::ranges_t markedRanges;
 	ng::ranges_t pendingMarkedRanges;
 
 	NSString* selectionString;
@@ -458,15 +453,12 @@ private:
 	// = Incremental Search =
 	// ======================
 
-	NSString* liveSearchString;
 	ng::ranges_t liveSearchAnchor;
-	ng::ranges_t liveSearchRanges;
 
 	// ===================
 	// = Snippet Choices =
 	// ===================
 
-	OakChoiceMenu* choiceMenu;
 	std::vector<std::string> choiceVector;
 
 	// =================
@@ -482,7 +474,7 @@ private:
 - (void)updateMarkedRanges;
 - (void)redisplayFrom:(size_t)from to:(size_t)to;
 - (NSImage*)imageForRanges:(ng::ranges_t const&)ranges imageRect:(NSRect*)outRect;
-@property (nonatomic, readonly) ng::ranges_t const& markedRanges;
+@property (nonatomic, readonly) ng::ranges_t markedRanges;
 @property (nonatomic) NSDate* lastFlagsChangeDate;
 @property (nonatomic) NSUInteger lastFlags;
 @property (nonatomic) OakFlagsState flagsState;
@@ -493,7 +485,7 @@ private:
 @property (nonatomic) OakChoiceMenu* choiceMenu;
 @property (nonatomic) LiveSearchView* liveSearchView;
 @property (nonatomic, copy) NSString* liveSearchString;
-@property (nonatomic) ng::ranges_t const& liveSearchRanges;
+@property (nonatomic) ng::ranges_t liveSearchRanges;
 @property (nonatomic, readonly) links_ptr links;
 @property (nonatomic) NSDictionary* matchCaptures; // Captures from last regexp match
 @property (nonatomic) BOOL needsEnsureSelectionIsInVisibleArea;
@@ -694,10 +686,6 @@ static std::string shell_quote (std::vector<std::string> paths)
 @end
 
 @implementation OakTextView
-@synthesize initiateDragTimer, dragScrollTimer, showColumnSelectionCursor, showDragCursor, choiceMenu;
-@synthesize markedRanges;
-@synthesize liveSearchString, liveSearchRanges;
-
 // =================================
 // = OakTextView Delegate Wrappers =
 // =================================
@@ -1049,17 +1037,17 @@ doScroll:
 
 	if(!choiceVector.empty())
 	{
-		choiceMenu = [OakChoiceMenu new];
-		choiceMenu.choices = (__bridge NSArray*)((CFArrayRef)cf::wrap(choiceVector));
+		_choiceMenu = [OakChoiceMenu new];
+		_choiceMenu.choices = (__bridge NSArray*)((CFArrayRef)cf::wrap(choiceVector));
 
 		std::string const& currentChoice = documentView->placeholder_content();
 		for(size_t i = choiceVector.size(); i-- > 0; )
 		{
 			if(choiceVector[i] == currentChoice)
-				choiceMenu.choiceIndex = i;
+				_choiceMenu.choiceIndex = i;
 		}
 
-		[choiceMenu showAtTopLeftPoint:[self positionForWindowUnderCaret] forView:self];
+		[_choiceMenu showAtTopLeftPoint:[self positionForWindowUnderCaret] forView:self];
 	}
 }
 
@@ -1123,7 +1111,7 @@ doScroll:
 		return NULL;
 	};
 
-	documentView->draw(ng::context_t(context, _showInvisibles ? documentView->invisibles_map : NULL_STR, [spellingDotImage CGImageForProposedRect:NULL context:[NSGraphicsContext currentContext] hints:nil], foldingDotsFactory), aRect, [self isFlipped], merge(documentView->ranges(), [self markedRanges]), liveSearchRanges);
+	documentView->draw(ng::context_t(context, _showInvisibles ? documentView->invisibles_map : NULL_STR, [spellingDotImage CGImageForProposedRect:NULL context:[NSGraphicsContext currentContext] hints:nil], foldingDotsFactory), aRect, [self isFlipped], merge(documentView->ranges(), [self markedRanges]), _liveSearchRanges);
 }
 
 // =====================
@@ -1187,14 +1175,14 @@ doScroll:
 	AUTO_REFRESH;
 	if(replacementRange.location != NSNotFound)
 		documentView->set_ranges([self rangesForReplacementRange:replacementRange]);
-	else if(!markedRanges.empty())
-		documentView->set_ranges(markedRanges);
+	else if(!_markedRanges.empty())
+		documentView->set_ranges(_markedRanges);
 
-	markedRanges = ng::ranges_t();
+	_markedRanges = ng::ranges_t();
 	documentView->insert(to_s(aString), true);
 	if([aString length] != 0)
-		markedRanges = documentView->ranges();
-	pendingMarkedRanges = markedRanges;
+		_markedRanges = documentView->ranges();
+	pendingMarkedRanges = _markedRanges;
 
 	ng::ranges_t sel;
 	for(auto const& range : documentView->ranges())
@@ -1220,23 +1208,23 @@ doScroll:
 
 - (NSRange)markedRange
 {
-	D(DBF_OakTextView_TextInput, bug("%s\n", to_s(markedRanges).c_str()););
-	if(!documentView || markedRanges.empty())
+	D(DBF_OakTextView_TextInput, bug("%s\n", to_s(_markedRanges).c_str()););
+	if(!documentView || _markedRanges.empty())
 		return NSMakeRange(NSNotFound, 0);
-	return [self nsRangeForRange:markedRanges.last()];
+	return [self nsRangeForRange:_markedRanges.last()];
 }
 
 - (void)unmarkText
 {
 	D(DBF_OakTextView_TextInput, bug("\n"););
 	AUTO_REFRESH;
-	markedRanges = pendingMarkedRanges = ng::ranges_t();
+	_markedRanges = pendingMarkedRanges = ng::ranges_t();
 }
 
 - (BOOL)hasMarkedText
 {
-	D(DBF_OakTextView_TextInput, bug("%s\n", BSTR(!markedRanges.empty())););
-	return !markedRanges.empty();
+	D(DBF_OakTextView_TextInput, bug("%s\n", BSTR(!_markedRanges.empty())););
+	return !_markedRanges.empty();
 }
 
 - (NSArray*)validAttributesForMarkedText
@@ -1247,10 +1235,10 @@ doScroll:
 
 - (void)updateMarkedRanges
 {
-	if(!markedRanges.empty() && pendingMarkedRanges.empty())
+	if(!_markedRanges.empty() && pendingMarkedRanges.empty())
 		[self.inputContext discardMarkedText];
 
-	markedRanges = pendingMarkedRanges;
+	_markedRanges = pendingMarkedRanges;
 	pendingMarkedRanges = ng::ranges_t();
 }
 
@@ -2050,14 +2038,14 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 - (void)realKeyDown:(NSEvent*)anEvent
 {
 	AUTO_REFRESH;
-	if(!choiceMenu)
+	if(!_choiceMenu)
 		return [self oldKeyDown:anEvent];
 
 	ng::range_t oldSelection;
 	std::string oldContent = documentView->placeholder_content(&oldSelection);
 	std::string oldPrefix  = oldSelection ? oldContent.substr(0, oldSelection.min().index) : "";
 
-	NSUInteger event = [choiceMenu didHandleKeyEvent:anEvent];
+	NSUInteger event = [_choiceMenu didHandleKeyEvent:anEvent];
 	if(event == OakChoiceMenuKeyUnused)
 	{
 		[self oldKeyDown:anEvent];
@@ -2068,7 +2056,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 
 		std::vector<std::string> newChoices = documentView->choices();
 		newChoices.erase(std::remove_if(newChoices.begin(), newChoices.end(), [&newPrefix](std::string const& str) { return str.find(newPrefix) != 0; }), newChoices.end());
-		choiceMenu.choices = (__bridge NSArray*)((CFArrayRef)cf::wrap(newChoices));
+		_choiceMenu.choices = (__bridge NSArray*)((CFArrayRef)cf::wrap(newChoices));
 
 		bool didEdit   = oldPrefix != newPrefix;
 		bool didDelete = didEdit && oldPrefix.find(newPrefix) == 0;
@@ -2091,18 +2079,18 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 				}
 			}
 
-			choiceMenu.choiceIndex = choiceIndex;
+			_choiceMenu.choiceIndex = choiceIndex;
 			if(choiceIndex != NSNotFound && newContent != newChoices[choiceIndex])
 				documentView->set_placeholder_content(newChoices[choiceIndex], newPrefix.size());
 		}
 		else if(oldContent != newContent)
 		{
-			choiceMenu.choiceIndex = NSNotFound;
+			_choiceMenu.choiceIndex = NSNotFound;
 		}
 	}
 	else if(event == OakChoiceMenuKeyMovement)
 	{
-		std::string const choice = to_s(choiceMenu.selectedChoice);
+		std::string const choice = to_s(_choiceMenu.selectedChoice);
 		if(choice != NULL_STR && choice != oldContent)
 			documentView->set_placeholder_content(choice, choice.find(oldPrefix) == 0 ? oldPrefix.size() : 0);
 	}
@@ -2166,14 +2154,14 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 
 - (void)insertText:(id)aString replacementRange:(NSRange)aRange
 {
-	D(DBF_OakTextView_TextInput, bug("‘%s’, has marked %s\n", [[aString description] UTF8String], BSTR(!markedRanges.empty())););
+	D(DBF_OakTextView_TextInput, bug("‘%s’, has marked %s\n", [[aString description] UTF8String], BSTR(!_markedRanges.empty())););
 
 	AUTO_REFRESH;
-	if(!markedRanges.empty())
+	if(!_markedRanges.empty())
 	{
-		documentView->set_ranges(markedRanges);
+		documentView->set_ranges(_markedRanges);
 		[self delete:nil];
-		markedRanges = ng::ranges_t();
+		_markedRanges = ng::ranges_t();
 	}
 	pendingMarkedRanges = ng::ranges_t();
 
@@ -2639,21 +2627,21 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 		[docView removeAuxiliaryView:self.liveSearchView];
 		[[self window] makeFirstResponder:self];
 		self.liveSearchView = nil;
-		liveSearchRanges = ng::ranges_t();
+		_liveSearchRanges = ng::ranges_t();
 	}
 }
 
-- (void)setLiveSearchRanges:(ng::ranges_t const&)ranges
+- (void)setLiveSearchRanges:(ng::ranges_t)ranges
 {
 	AUTO_REFRESH;
 
-	ng::ranges_t const oldRanges = ng::move(*documentView, liveSearchRanges, kSelectionMoveToBeginOfSelection);
-	liveSearchRanges = ranges;
-	if(!liveSearchRanges.empty())
+	ng::ranges_t const oldRanges = ng::move(*documentView, _liveSearchRanges, kSelectionMoveToBeginOfSelection);
+	_liveSearchRanges = ranges;
+	if(!_liveSearchRanges.empty())
 	{
-		documentView->set_ranges(liveSearchRanges);
-		if(oldRanges != ng::move(*documentView, liveSearchRanges, kSelectionMoveToBeginOfSelection))
-			[self highlightRanges:liveSearchRanges];
+		documentView->set_ranges(_liveSearchRanges);
+		if(oldRanges != ng::move(*documentView, _liveSearchRanges, kSelectionMoveToBeginOfSelection))
+			[self highlightRanges:_liveSearchRanges];
 	}
 	else if(!oldRanges.empty())
 	{
@@ -2678,7 +2666,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	self.liveSearchString = [searchField string];
 
 	ng::ranges_t res;
-	for(auto const& pair : ng::find(*documentView, liveSearchAnchor, to_s(liveSearchString), find::ignore_case|find::ignore_whitespace|find::wrap_around))
+	for(auto const& pair : ng::find(*documentView, liveSearchAnchor, to_s(_liveSearchString), find::ignore_case|find::ignore_whitespace|find::wrap_around))
 		res.push_back(pair.first);
 	[self setLiveSearchRanges:res];
 }
@@ -2709,7 +2697,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	if(self.liveSearchView)
 	{
 		ng::ranges_t tmp;
-		for(auto const& pair : ng::find(*documentView, ng::move(*documentView, liveSearchRanges.empty() ? liveSearchAnchor : liveSearchRanges, kSelectionMoveToEndOfSelection), to_s(liveSearchString), self.incrementalSearchOptions))
+		for(auto const& pair : ng::find(*documentView, ng::move(*documentView, _liveSearchRanges.empty() ? liveSearchAnchor : _liveSearchRanges, kSelectionMoveToEndOfSelection), to_s(_liveSearchString), self.incrementalSearchOptions))
 			tmp.push_back(pair.first);
 		[self setLiveSearchRanges:tmp];
 		if(!tmp.empty())
@@ -2726,7 +2714,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	if(self.liveSearchView)
 	{
 		ng::ranges_t tmp;
-		for(auto const& pair : ng::find(*documentView, ng::move(*documentView, liveSearchRanges.empty() ? liveSearchAnchor : liveSearchRanges, kSelectionMoveToBeginOfSelection), to_s(liveSearchString), find::backwards|self.incrementalSearchOptions))
+		for(auto const& pair : ng::find(*documentView, ng::move(*documentView, _liveSearchRanges.empty() ? liveSearchAnchor : _liveSearchRanges, kSelectionMoveToBeginOfSelection), to_s(_liveSearchString), find::backwards|self.incrementalSearchOptions))
 			tmp.push_back(pair.first);
 		[self setLiveSearchRanges:tmp];
 		if(!tmp.empty())
@@ -2891,10 +2879,10 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (void)setShowColumnSelectionCursor:(BOOL)flag
 {
-	D(DBF_OakTextView_TextInput, bug("%s → %s\n", BSTR(showColumnSelectionCursor), BSTR(flag)););
-	if(flag != showColumnSelectionCursor)
+	D(DBF_OakTextView_TextInput, bug("%s → %s\n", BSTR(_showColumnSelectionCursor), BSTR(flag)););
+	if(flag != _showColumnSelectionCursor)
 	{
-		showColumnSelectionCursor = flag;
+		_showColumnSelectionCursor = flag;
 		[[self window] invalidateCursorRectsForView:self];
 	}
 }
@@ -3650,15 +3638,15 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (void)resetCursorRects
 {
-	D(DBF_OakTextView_MouseEvents, bug("drag: %s, column selection: %s\n", BSTR(showDragCursor), BSTR(showColumnSelectionCursor)););
-	[self addCursorRect:[self visibleRect] cursor:showDragCursor ? [NSCursor arrowCursor] : (showColumnSelectionCursor ? [NSCursor crosshairCursor] : [self ibeamCursor])];
+	D(DBF_OakTextView_MouseEvents, bug("drag: %s, column selection: %s\n", BSTR(_showDragCursor), BSTR(_showColumnSelectionCursor)););
+	[self addCursorRect:[self visibleRect] cursor:_showDragCursor ? [NSCursor arrowCursor] : (_showColumnSelectionCursor ? [NSCursor crosshairCursor] : [self ibeamCursor])];
 }
 
 - (void)setShowDragCursor:(BOOL)flag
 {
-	if(flag != showDragCursor)
+	if(flag != _showDragCursor)
 	{
-		showDragCursor = flag;
+		_showDragCursor = flag;
 		[[self window] invalidateCursorRectsForView:self];
 	}
 }
@@ -3935,11 +3923,11 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 		return; // we didn't even drag a pixel
 
 	delayMouseDown = NO;
-	if(showDragCursor)
+	if(_showDragCursor)
 	{
 		[self startDragForEvent:anEvent];
 	}
-	else if(initiateDragTimer) // delayed reaction to mouseDown
+	else if(_initiateDragTimer) // delayed reaction to mouseDown
 	{
 		self.initiateDragTimer = nil;
 
@@ -3948,7 +3936,7 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 	}
 	else
 	{
-		if(!dragScrollTimer && [self autoscroll:[NSApp currentEvent]] == YES)
+		if(!_dragScrollTimer && [self autoscroll:[NSApp currentEvent]] == YES)
 			self.dragScrollTimer = [OakTimer scheduledTimerWithTimeInterval:(1.0/25.0) target:self selector:@selector(dragScrollTimerFired:) repeats:YES];
 
 		AUTO_REFRESH;
@@ -3997,7 +3985,7 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 	}
 	else
 	{
-		self.showColumnSelectionCursor = showDragCursor = NO;
+		self.showColumnSelectionCursor = _showDragCursor = NO;
 		[[self window] invalidateCursorRectsForView:self];
 	}
 

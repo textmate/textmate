@@ -9,20 +9,23 @@ NSUInteger const OakChoiceMenuKeyCancel   = 3;
 NSUInteger const OakChoiceMenuKeyMovement = 4;
 
 @interface OakChoiceMenu () <NSTableViewDelegate>
+{
+	NSTableView* tableView;
+	NSUInteger keyAction;
+	NSPoint topLeftPosition;
+}
 @property (nonatomic) NSWindow* window;
 @end
 
 enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMoveUp, kActionMoveDown, kActionPageUp, kActionPageDown, kActionMoveToBeginning, kActionMoveToEnd };
 
 @implementation OakChoiceMenu
-@synthesize choices, choiceIndex, window;
-
 - (id)init
 {
 	if((self = [super init]))
 	{
-		self.choices = [NSArray array];
-		choiceIndex = NSNotFound;
+		_choices = [NSArray array];
+		_choiceIndex = NSNotFound;
 	}
 	return self;
 }
@@ -40,80 +43,80 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 
 	NSTextField* textField = OakCreateLabel(@"", [NSFont controlContentFontOfSize:0]);
 	CGFloat width = 60;
-	for(NSInteger i = 0; i < MIN(choices.count, 256); ++i)
+	for(NSInteger i = 0; i < MIN(_choices.count, 256); ++i)
 	{
-		textField.stringValue = choices[i];
+		textField.stringValue = _choices[i];
 		[textField sizeToFit];
 		width = std::max(width, kTableViewPadding + NSWidth(textField.frame));
 	}
 
-	if([choices count] > 10)
+	if([_choices count] > 10)
 		width += kScrollBarWidth;
 
-	CGFloat height = std::min<NSUInteger>([choices count], 10) * ([tableView rowHeight]+[tableView intercellSpacing].height);
-	NSRect frame   = { { NSMinX(window.frame), NSMaxY(window.frame) - height }, { std::min<CGFloat>(ceil(width), 400), height } };
-	[window setFrame:frame display:YES];
+	CGFloat height = std::min<NSUInteger>([_choices count], 10) * ([tableView rowHeight]+[tableView intercellSpacing].height);
+	NSRect frame   = { { NSMinX(_window.frame), NSMaxY(_window.frame) - height }, { std::min<CGFloat>(ceil(width), 400), height } };
+	[_window setFrame:frame display:YES];
 }
 
 - (void)setWindow:(NSWindow*)aWindow
 {
-	if(aWindow == window)
+	if(aWindow == _window)
 		return;
 
-	[[window parentWindow] removeChildWindow:window];
-	window = aWindow;
+	[[_window parentWindow] removeChildWindow:_window];
+	_window = aWindow;
 }
 
 - (void)viewBoundsDidChange:(NSNotification*)aNotification
 {
 	NSView* aView = [[aNotification object] documentView];
-	[window setFrameTopLeftPoint:[[aView window] convertRectToScreen:[aView convertRect:(NSRect){ topLeftPosition, NSZeroSize } fromView:nil]].origin];
+	[_window setFrameTopLeftPoint:[[aView window] convertRectToScreen:[aView convertRect:(NSRect){ topLeftPosition, NSZeroSize } fromView:nil]].origin];
 }
 
 - (NSString*)selectedChoice
 {
-	return choiceIndex == NSNotFound ? nil : [choices objectAtIndex:choiceIndex];
+	return _choiceIndex == NSNotFound ? nil : [_choices objectAtIndex:_choiceIndex];
 }
 
 - (void)setChoices:(NSArray*)newChoices
 {
-	if([choices isEqualToArray:newChoices])
+	if([_choices isEqualToArray:newChoices])
 		return;
 
 	id oldSelection = self.selectedChoice;
 	self.choiceIndex = NSNotFound;
-	choices = newChoices;
+	_choices = newChoices;
 	[tableView reloadData];
-	self.choiceIndex = [choices indexOfObject:oldSelection];
+	self.choiceIndex = [_choices indexOfObject:oldSelection];
 
 	[self sizeToFit];
 }
 
 - (void)setChoiceIndex:(NSUInteger)newIndex
 {
-	if(choiceIndex != newIndex)
+	if(_choiceIndex != newIndex)
 	{
-		choiceIndex = newIndex;
-		if(choiceIndex == NSNotFound)
+		_choiceIndex = newIndex;
+		if(_choiceIndex == NSNotFound)
 		{
 			[tableView deselectAll:self];
 		}
 		else
 		{
-			[tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:choiceIndex] byExtendingSelection:NO];
-			[tableView scrollRectToVisible:[tableView rectOfRow:choiceIndex]];
+			[tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:_choiceIndex] byExtendingSelection:NO];
+			[tableView scrollRectToVisible:[tableView rectOfRow:_choiceIndex]];
 		}
 	}
 }
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView*)aTableView
 {
-	return [choices count];
+	return [_choices count];
 }
 
 - (id)tableView:(NSTableView*)aTableView objectValueForTableColumn:(NSTableColumn*)aTableColumn row:(NSInteger)rowIndex
 {
-	return [choices objectAtIndex:rowIndex];
+	return [_choices objectAtIndex:rowIndex];
 }
 
 - (NSView*)tableView:(NSTableView*)aTableView viewForTableColumn:(NSTableColumn*)aTableColumn row:(NSInteger)row
@@ -130,14 +133,14 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 
 - (void)showAtTopLeftPoint:(NSPoint)aPoint forView:(NSView*)aView
 {
-	window = [[NSPanel alloc] initWithContentRect:NSMakeRect(aPoint.x, aPoint.y, 0, 0) styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:NO];
-	[window setReleasedWhenClosed:NO];
-	[window setOpaque:NO];
-	window.alphaValue         = 0.97;
-	window.backgroundColor    = [NSColor colorWithCalibratedRed:1.00 green:0.96 blue:0.76 alpha:1];
-	window.hasShadow          = YES;
-	window.level              = NSStatusWindowLevel;
-	window.ignoresMouseEvents = YES;
+	_window = [[NSPanel alloc] initWithContentRect:NSMakeRect(aPoint.x, aPoint.y, 0, 0) styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:NO];
+	[_window setReleasedWhenClosed:NO];
+	[_window setOpaque:NO];
+	_window.alphaValue         = 0.97;
+	_window.backgroundColor    = [NSColor colorWithCalibratedRed:1.00 green:0.96 blue:0.76 alpha:1];
+	_window.hasShadow          = YES;
+	_window.level              = NSStatusWindowLevel;
+	_window.ignoresMouseEvents = YES;
 
 	tableView = [[NSTableView alloc] initWithFrame:NSZeroRect];
 	[tableView addTableColumn:[[NSTableColumn alloc] initWithIdentifier:@"mainColumn"]];
@@ -158,29 +161,29 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 	scrollView.documentView          = tableView;
 	scrollView.autoresizingMask      = NSViewWidthSizable|NSViewHeightSizable;
 
-	[window setContentView:scrollView];
+	[_window setContentView:scrollView];
 
-	if(choiceIndex != NSNotFound)
-		[tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:choiceIndex] byExtendingSelection:NO];
+	if(_choiceIndex != NSNotFound)
+		[tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:_choiceIndex] byExtendingSelection:NO];
 
 	[self sizeToFit];
 
 	topLeftPosition = [aView convertRect:[[aView window] convertRectFromScreen:(NSRect){ aPoint, NSZeroSize }] toView:nil].origin;
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(viewBoundsDidChange:) name:NSViewBoundsDidChangeNotification object:[[aView enclosingScrollView] contentView]];
-	[[aView window] addChildWindow:window ordered:NSWindowAbove];
+	[[aView window] addChildWindow:_window ordered:NSWindowAbove];
 
-	[window orderFront:self];
+	[_window orderFront:self];
 }
 
 - (BOOL)isVisible
 {
-	return [window isVisible];
+	return [_window isVisible];
 }
 
 - (NSUInteger)didHandleKeyEvent:(NSEvent*)anEvent
 {
 	NSUInteger res = OakChoiceMenuKeyUnused;
-	if(!window)
+	if(!_window)
 		return res;
 
 	keyAction = kActionNop;
@@ -205,7 +208,7 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 	}
 
 	if(res == OakChoiceMenuKeyMovement)
-		self.choiceIndex = oak::cap<NSInteger>(0, (choiceIndex == NSNotFound ? (offset > 0 ? -1 : [choices count]) : choiceIndex) + offset, [choices count] - 1);
+		self.choiceIndex = oak::cap<NSInteger>(0, (_choiceIndex == NSNotFound ? (offset > 0 ? -1 : [_choices count]) : _choiceIndex) + offset, [_choices count] - 1);
 
 	return res;
 }
