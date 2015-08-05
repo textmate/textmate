@@ -235,6 +235,15 @@
 	return self;
 }
 
+- (void)dealloc
+{
+	[_openButton unbind:NSImageBinding];
+	[self.textField unbind:NSValueBinding];
+	[self.textField unbind:NSToolTipBinding];
+	[_itemInfoButtons unbind:@"labelIndex"];
+	[_itemInfoButtons unbind:@"open"];
+}
+
 - (void)controlTextDidEndEditing:(NSNotification*)aNotification
 {
 	FSItem* item = self.objectValue;
