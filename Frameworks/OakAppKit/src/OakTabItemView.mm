@@ -1,7 +1,6 @@
 #import "OakTabItemView.h"
 #import "OakRolloverButton.h"
 #import "NSImage Additions.h"
-#import <oak/compat.h>
 
 @interface OakTabBarStyle ()
 {
@@ -139,7 +138,7 @@
 		_inactiveTabTextStyles = _activeTabTextStyles.mutableCopy;
 		_inactiveTabTextStyles[NSForegroundColorAttributeName] = [NSColor colorWithCalibratedWhite:0.5 alpha:1];
 
-		if(oak::os_tuple() >= std::make_tuple(10, 10, 0))
+		if([[NSProcessInfo processInfo] respondsToSelector:@selector(isOperatingSystemAtLeastVersion:)] && [[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:{ 10, 10, 0 }])
 		{
 			_selectedTabTextStyles = _activeTabTextStyles.mutableCopy;
 			_selectedTabTextStyles[NSForegroundColorAttributeName] = [NSColor blackColor];
