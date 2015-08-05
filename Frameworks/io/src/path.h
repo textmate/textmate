@@ -65,7 +65,6 @@ namespace path
 	PUBLIC bool is_directory (std::string const& path);
 	PUBLIC bool is_executable (std::string const& path);
 	PUBLIC bool is_local (std::string const& path);
-	PUBLIC bool is_trashed (std::string const& path);
 
 	PUBLIC std::string for_fd (int fd);
 

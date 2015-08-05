@@ -400,12 +400,6 @@ namespace path
 		return (pathIsLocal == kCFBooleanTrue);
 	}
 
-	bool is_trashed (std::string const& path)
-	{
-		Boolean res;
-		return DetermineIfPathIsEnclosedByFolder(kOnAppropriateDisk, kTrashFolderType, (UInt8 const*)path.c_str(), false, &res) == noErr ? res : false;
-	}
-
 	CFIndex label_index (std::string const& path)
 	{
 		CFIndex res = 0;
