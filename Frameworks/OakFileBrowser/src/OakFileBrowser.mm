@@ -354,26 +354,26 @@ static bool is_binary (std::string const& path)
 
 	if(!alreadyVisible)
 	{
+		BOOL isChild = NO;
 		for(NSURL* currentURL = ParentForURL(aURL); currentURL; currentURL = ParentForURL(currentURL))
 		{
 			if([currentURL isEqual:_url] || [currentURL isEqual:parentURL])
 			{
 				parentURL = currentURL;
+				isChild = YES;
 				break;
 			}
 		}
 
-		BOOL isChild = NO;
-		for(NSURL* currentURL = ParentForURL(aURL); currentURL && !isChild; currentURL = ParentForURL(currentURL))
+		if(isChild)
 		{
-			if([parentURL isEqual:currentURL])
-				isChild = YES;
-
-			if([currentURL isFileURL] && (path::info([[currentURL path] fileSystemRepresentation]) & path::flag::package))
+			for(NSURL* currentURL = ParentForURL(aURL); currentURL; currentURL = ParentForURL(currentURL))
 			{
-				parentURL = currentURL;
-				isChild = YES;
-				break;
+				if([currentURL isFileURL] && (path::info([[currentURL path] fileSystemRepresentation]) & path::flag::package))
+				{
+					parentURL = currentURL;
+					break;
+				}
 			}
 		}
 		[self goToURL:isChild ? parentURL : ParentForURL(aURL)];
