@@ -28,6 +28,8 @@ namespace path
 	std::string resource (std::string const& path, ResType theType, ResID theID)
 	{
 		std::string res = NULL_STR;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 		if(ResFileRefNum ref = FSOpenResFile(fsref_t(path), fsRdPerm))
 		{
 			if(Handle handle = Get1Resource(theType, theID))
@@ -39,6 +41,7 @@ namespace path
 			}
 			CloseResFile(ref);
 		}
+#pragma clang diagnostic pop
 		return res;
 	}
 
