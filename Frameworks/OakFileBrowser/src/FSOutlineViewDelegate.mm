@@ -158,6 +158,16 @@
 	_labelSwatchView.labelIndex = newLabelIndex;
 }
 
+- (void)setNilValueForKey:(NSString*)aKey
+{
+	if([aKey isEqualToString:@"labelIndex"])
+		[self setValue:@0 forKey:aKey];
+	else if([aKey isEqualToString:@"open"])
+		[self setValue:@NO forKey:aKey];
+	else
+		[super setNilValueForKey:aKey];
+}
+
 - (void)setOpen:(BOOL)flag
 {
 	if(_open == flag)
