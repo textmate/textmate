@@ -2,11 +2,14 @@
 #include "fsref.h"
 #include "path.h"
 #include <cf/cf.h>
+#include <crash/info.h>
 
 namespace path
 {
 	bool is_text_clipping (std::string const& path)
 	{
+		crash_reporter_info_t info("Path: " + path);
+
 		bool res = false;
 		if(extension(path) == "textClipping")
 		{
