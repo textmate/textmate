@@ -3579,20 +3579,18 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		{
 			ng::index_t click = range.last().min();
 
-			bool didModify = false, pushClick = false;
+			bool didModify = false;
 			ng::ranges_t newSel;
 			for(auto const& cur : s)
 			{
-				if(cur == range.last())
+				if(cur.min() <= click && click <= cur.max())
 					didModify = true;
-				else if(cur.min() <= click && click <= cur.max())
-					pushClick = true;
 				else
 					newSel.push_back(cur);
 			}
 
 			s = newSel;
-			if(pushClick || !didModify || s.empty())
+			if(!didModify || s.empty())
 				s.push_back(range.last());
 		}
 		else
