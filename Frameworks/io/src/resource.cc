@@ -15,7 +15,7 @@ namespace path
 		{
 			res = true;
 		}
-		else if(CFURLRef url = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, cf::wrap(path), kCFURLPOSIXPathStyle, false))
+		else if(CFURLRef url = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault, (UInt8 const*)path.data(), path.size(), false))
 		{
 			LSItemInfoRecord info;
 			if(noErr == LSCopyItemInfoForURL(url, kLSRequestTypeCreator, &info))

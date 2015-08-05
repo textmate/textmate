@@ -526,7 +526,7 @@ namespace path
 				res |= flag::hidden_volume;
 		}
 
-		if(CFURLRef url = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, cf::wrap(path), kCFURLPOSIXPathStyle, false))
+		if(CFURLRef url = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault, (UInt8 const*)path.data(), path.size(), false))
 		{
 			LSItemInfoRecord itemInfo;
 			if(LSCopyItemInfoForURL(url, kLSRequestBasicFlagsOnly, &itemInfo) == noErr)
@@ -601,7 +601,7 @@ namespace path
 		if(path.find("/Volumes/") == 0 || path.find("/home/") == 0)
 			return res;
 
-		if(CFURLRef url = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, cf::wrap(path), kCFURLPOSIXPathStyle, false))
+		if(CFURLRef url = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault, (UInt8 const*)path.data(), path.size(), false))
 		{
 			CFStringRef displayName;
 			if(LSCopyDisplayNameForURL(url, &displayName) == noErr)
