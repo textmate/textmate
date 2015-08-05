@@ -1040,6 +1040,8 @@ doScroll:
 - (void)setMarkedText:(id)aString selectedRange:(NSRange)aRange replacementRange:(NSRange)replacementRange
 {
 	D(DBF_OakTextView_TextInput, bug("‘%s’ %s\n", to_s([aString description]).c_str(), [NSStringFromRange(aRange) UTF8String]););
+	if(!editor)
+		return;
 
 	AUTO_REFRESH;
 	if(replacementRange.location != NSNotFound)
@@ -1067,6 +1069,9 @@ doScroll:
 
 - (NSRange)selectedRange
 {
+	if(!editor)
+		return { NSNotFound, 0 };
+
 	NSRange res = [self nsRangeForRange:editor->ranges().last()];
 	D(DBF_OakTextView_TextInput, bug("%s\n", [NSStringFromRange(res) UTF8String]););
 	return res;
@@ -1075,7 +1080,7 @@ doScroll:
 - (NSRange)markedRange
 {
 	D(DBF_OakTextView_TextInput, bug("%s\n", to_s(markedRanges).c_str()););
-	if(markedRanges.empty())
+	if(!editor || markedRanges.empty())
 		return NSMakeRange(NSNotFound, 0);
 	return [self nsRangeForRange:markedRanges.last()];
 }
@@ -1110,6 +1115,9 @@ doScroll:
 
 - (NSUInteger)characterIndexForPoint:(NSPoint)thePoint
 {
+	if(!editor)
+		return NSNotFound;
+
 	NSPoint p = [self convertPoint:[[self window] convertRectFromScreen:(NSRect){ thePoint, NSZeroSize }].origin fromView:nil];
 	std::string const text = editor->as_string();
 	size_t index = layout->index_at_point(p).index;
@@ -1119,6 +1127,9 @@ doScroll:
 
 - (NSAttributedString*)attributedSubstringForProposedRange:(NSRange)theRange actualRange:(NSRangePointer)actualRange
 {
+	if(!editor)
+		return nil;
+
 	ng::range_t const& r = [self rangeForNSRange:theRange];
 	size_t from = r.min().index, to = r.max().index;
 
@@ -1155,6 +1166,9 @@ doScroll:
 
 - (NSRect)firstRectForCharacterRange:(NSRange)theRange actualRange:(NSRangePointer)actualRange
 {
+	if(!editor)
+		return NSZeroRect;
+
 	ng::range_t const& r = [self rangeForNSRange:theRange];
 	if(actualRange)
 		*actualRange = [self nsRangeForRange:r];
