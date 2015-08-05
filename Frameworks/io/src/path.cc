@@ -285,16 +285,33 @@ namespace path
 	// = Requires stat’ing and more =
 	// ==============================
 
-	static std::string resolve_alias (std::string const& path)
+	static std::string resolve_alias (std::string path)
 	{
-		fsref_t ref(path);
-		Boolean aliasFlag = FALSE, dummy;
-		OSErr err = FSIsAliasFile(ref, &aliasFlag, &dummy);
-		if(err == noErr && aliasFlag == TRUE)
+		if(CFURLRef url = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault, (UInt8 const*)path.data(), path.size(), false))
 		{
-			OSErr err = FSResolveAliasFile(ref, TRUE, &dummy, &dummy);
-			if(err == noErr)
-				return ref.path();
+			CFBooleanRef isAlias = nil;
+			if(CFURLCopyResourcePropertyForKey(url, kCFURLIsAliasFileKey, &isAlias, nullptr))
+			{
+				if(CFBooleanGetValue(isAlias))
+				{
+					if(CFDataRef bookmark = CFURLCreateBookmarkDataFromFile(kCFAllocatorDefault, url, nullptr))
+					{
+						Boolean isStale = false;
+						if(CFURLRef resolvedURL = CFURLCreateByResolvingBookmarkData(kCFAllocatorDefault, bookmark, 0, nullptr, nullptr, &isStale, nullptr))
+						{
+							if(CFStringRef resolvedPath = CFURLCopyFileSystemPath(resolvedURL, kCFURLPOSIXPathStyle))
+							{
+								path = cf::to_s(resolvedPath);
+								CFRelease(resolvedPath);
+							}
+							CFRelease(resolvedURL);
+						}
+						CFRelease(bookmark);
+					}
+				}
+				CFRelease(isAlias);
+			}
+			CFRelease(url);
 		}
 		return path;
 	}
