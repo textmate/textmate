@@ -29,7 +29,6 @@
 #import <text/tokenize.h>
 #import <text/utf8.h>
 #import <ns/ns.h>
-#import <oak/compat.h>
 #import <kvdb/kvdb.h>
 
 static NSString* const kUserDefaultsAlwaysFindInDocument = @"alwaysFindInDocument";

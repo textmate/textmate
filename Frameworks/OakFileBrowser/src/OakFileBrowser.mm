@@ -28,7 +28,6 @@
 #import <regexp/format_string.h>
 #import <regexp/glob.h>
 #import <settings/settings.h>
-#import <oak/compat.h>
 
 OAK_DEBUG_VAR(FileBrowser_Controller);
 

@@ -1,7 +1,6 @@
 #include "tbz.h"
 #include <text/format.h>
 #include <text/trim.h>
-#include <oak/compat.h>
 
 namespace network
 {

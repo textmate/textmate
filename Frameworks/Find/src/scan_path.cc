@@ -1,7 +1,6 @@
 #include "scan_path.h"
 #include <text/utf8.h>
 #include <io/entries.h>
-#include <oak/compat.h>
 
 OAK_DEBUG_VAR(Find_Scan_Path);
 

@@ -3,7 +3,6 @@
 #include <oak/debug.h>
 #include <io/io.h>
 #include <oak/oak.h>
-#include <oak/compat.h>
 
 OAK_DEBUG_VAR(Document_WatchFS);
 
