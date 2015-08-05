@@ -3224,7 +3224,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	D(DBF_OakTextView_Macros, bug("%s\n", BSTR(flag)););
 	if(macroRecordingArray)
 	{
-		D(DBF_OakTextView_Macros, bug("%s\n", to_s(plist::convert((__bridge CFDictionaryRef)macroRecordingArray)).c_str()););
+		D(DBF_OakTextView_Macros, bug("%s\n", to_s(plist::convert((__bridge CFPropertyListRef)macroRecordingArray)).c_str()););
 		[[NSUserDefaults standardUserDefaults] setObject:[macroRecordingArray copy] forKey:@"OakMacroManagerScratchMacro"];
 		macroRecordingArray = nil;
 	}
@@ -3236,7 +3236,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (IBAction)playScratchMacro:(id)anArgument
 {
-	D(DBF_OakTextView_Macros, bug("%s\n", to_s(plist::convert((__bridge CFDictionaryRef)[[NSUserDefaults standardUserDefaults] arrayForKey:@"OakMacroManagerScratchMacro"])).c_str()););
+	D(DBF_OakTextView_Macros, bug("%s\n", to_s(plist::convert((__bridge CFPropertyListRef)[[NSUserDefaults standardUserDefaults] arrayForKey:@"OakMacroManagerScratchMacro"])).c_str()););
 	AUTO_REFRESH;
 	if(NSArray* scratchMacro = [[NSUserDefaults standardUserDefaults] arrayForKey:@"OakMacroManagerScratchMacro"])
 			editor->macro_dispatch(plist::convert((__bridge CFDictionaryRef)@{ @"commands" : scratchMacro }), [self variables]);
