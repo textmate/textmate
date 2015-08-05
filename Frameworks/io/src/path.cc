@@ -515,35 +515,39 @@ namespace path
 				res |= flag::hidden_volume;
 		}
 
-		LSItemInfoRecord itemInfo;
-		if(LSCopyItemInfoForRef(fsref_t(path), kLSRequestBasicFlagsOnly, &itemInfo) == noErr)
+		if(CFURLRef url = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, cf::wrap(path), kCFURLPOSIXPathStyle, false))
 		{
-			OptionBits flags = itemInfo.flags;
-
-			if(flags & kLSItemInfoIsInvisible)
-				res |= flag::hidden_finder;
-			if(flags & kLSItemInfoIsVolume)
-				res |= flag::volume_finder;
-			if(flags & kLSItemInfoExtensionIsHidden)
-				res |= flag::hidden_extension;
-
-			if(flags & kLSItemInfoIsSymlink)
-				res |= flag::symlink_finder;
-
-			if(!(res & (flag::symlink_bsd|flag::symlink_finder)))
+			LSItemInfoRecord itemInfo;
+			if(LSCopyItemInfoForURL(url, kLSRequestBasicFlagsOnly, &itemInfo) == noErr)
 			{
-				if(flags & kLSItemInfoIsAliasFile) // this is true also for symbolic links
-					res |= flag::alias;
-			}
+				OptionBits flags = itemInfo.flags;
 
-			if(flags & kLSItemInfoIsPlainFile)
-				res |= flag::file_finder;
-			if(flags & kLSItemInfoIsContainer)
-				res |= flag::directory_finder;
-			if(flags & kLSItemInfoIsPackage)
-				res |= flag::package;
-			if(flags & kLSItemInfoIsApplication)
-				res |= flag::application;
+				if(flags & kLSItemInfoIsInvisible)
+					res |= flag::hidden_finder;
+				if(flags & kLSItemInfoIsVolume)
+					res |= flag::volume_finder;
+				if(flags & kLSItemInfoExtensionIsHidden)
+					res |= flag::hidden_extension;
+
+				if(flags & kLSItemInfoIsSymlink)
+					res |= flag::symlink_finder;
+
+				if(!(res & (flag::symlink_bsd|flag::symlink_finder)))
+				{
+					if(flags & kLSItemInfoIsAliasFile) // this is true also for symbolic links
+						res |= flag::alias;
+				}
+
+				if(flags & kLSItemInfoIsPlainFile)
+					res |= flag::file_finder;
+				if(flags & kLSItemInfoIsContainer)
+					res |= flag::directory_finder;
+				if(flags & kLSItemInfoIsPackage)
+					res |= flag::package;
+				if(flags & kLSItemInfoIsApplication)
+					res |= flag::application;
+			}
+			CFRelease(url);
 		}
 
 		if((mask & flag::stationery_pad) == flag::stationery_pad)
@@ -582,14 +586,21 @@ namespace path
 
 	std::string system_display_name (std::string const& path)
 	{
-		CFStringRef displayName;
-		if(path.find("/Volumes/") != 0 && path.find("/home/") != 0 && LSCopyDisplayNameForRef(fsref_t(path), &displayName) == noErr)
-		{
-			std::string const& res = cf::to_s(displayName);
-			CFRelease(displayName);
+		std::string res = name(path);
+		if(path.find("/Volumes/") == 0 || path.find("/home/") == 0)
 			return res;
+
+		if(CFURLRef url = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, cf::wrap(path), kCFURLPOSIXPathStyle, false))
+		{
+			CFStringRef displayName;
+			if(LSCopyDisplayNameForURL(url, &displayName) == noErr)
+			{
+				res = cf::to_s(displayName);
+				CFRelease(displayName);
+			}
+			CFRelease(url);
 		}
-		return name(path);
+		return res;
 	}
 
 	std::string display_name (std::string const& p, size_t n)
