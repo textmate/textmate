@@ -230,6 +230,14 @@ struct buffer_refresh_callback_t;
 typedef indexed_map_t<OakAccessibleLink*> links_t;
 typedef std::shared_ptr<links_t> links_ptr;
 
+typedef NS_ENUM(NSUInteger, OakFlagsState) {
+	OakFlagsStateClear = 0,
+	OakFlagsStateOptionDown,
+	OakFlagsStateShiftDown,
+	OakFlagsStateShiftTapped,
+	OakFlagsStateSecondShiftDown,
+};
+
 @interface OakTextView () <NSTextInputClient, NSDraggingSource, NSIgnoreMisspelledWords, NSChangeSpelling, NSTextFieldDelegate>
 {
 	OBJC_WATCH_LEAKS(OakTextView);
@@ -313,7 +321,7 @@ typedef std::shared_ptr<links_t> links_ptr;
 @property (nonatomic, readonly) ng::ranges_t const& markedRanges;
 @property (nonatomic) NSDate* lastFlagsChangeDate;
 @property (nonatomic) NSUInteger lastFlags;
-@property (nonatomic) NSUInteger flagsState;
+@property (nonatomic) OakFlagsState flagsState;
 @property (nonatomic) OakTimer* initiateDragTimer;
 @property (nonatomic) OakTimer* dragScrollTimer;
 @property (nonatomic) BOOL showDragCursor;
@@ -1984,14 +1992,6 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 
 - (void)flagsChanged:(NSEvent*)anEvent
 {
-	typedef NS_ENUM(NSUInteger, OakFlagsState) {
-		OakFlagsStateClear = 0,
-		OakFlagsStateOptionDown,
-		OakFlagsStateShiftDown,
-		OakFlagsStateShiftTapped,
-		OakFlagsStateSecondShiftDown,
-	};
-
 	NSInteger modifiers  = [anEvent modifierFlags] & (NSAlternateKeyMask | NSControlKeyMask | NSCommandKeyMask | NSShiftKeyMask);
 	BOOL isHoldingOption = modifiers & NSAlternateKeyMask ? YES : NO;
 
