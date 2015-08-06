@@ -1,3 +1,2 @@
 SOURCES       = src/*.cc
 EXPORT        = src/*.h
-LN_FLAGS     += /usr/local/lib/libboost_thread-mt.a /usr/local/lib/libboost_system-mt.a
