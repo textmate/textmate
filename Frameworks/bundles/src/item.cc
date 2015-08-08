@@ -315,7 +315,7 @@ namespace bundles
 		return res;
 	}
 
-	bool item_t::save (bool useDeltaIfNonLocal)
+	static std::string path_for_kind (std::string const& folder, std::string name, kind_t kind)
 	{
 		static struct path_format_t { kind_t type; char const* format; } const PathFormats[] =
 		{
@@ -330,6 +330,25 @@ namespace bundles
 			{ kItemTypeTheme,          "Themes/%s.tmTheme"             },
 		};
 
+		for(auto const& pathFormat : PathFormats)
+		{
+			if(pathFormat.type == kind)
+			{
+				std::replace(name.begin(), name.end(), '/', ':');
+				std::replace(name.begin(), name.end(), '.', '_');
+
+				std::string path = path::unique(path::join(folder, text::format(pathFormat.format, name.c_str())));
+				if(kind == kItemTypeBundle)
+					path = path::join(path, "info.plist");
+
+				return path;
+			}
+		}
+		return NULL_STR;
+	}
+
+	bool item_t::save (bool useDeltaIfNonLocal)
+	{
 		std::string destPath = NULL_STR;
 		if(_local)
 		{
@@ -351,20 +370,7 @@ namespace bundles
 				}
 				location = path::parent(bundle()->_paths.front());
 			}
-
-			for(auto const& pathFormat : PathFormats)
-			{
-				if(pathFormat.type == _kind)
-				{
-					std::string base = name();
-					std::replace(base.begin(), base.end(), '/', ':');
-					std::replace(base.begin(), base.end(), '.', '_');
-					destPath = path::unique(path::join(location, text::format(pathFormat.format, base.c_str())));
-					if(_kind == kItemTypeBundle)
-						destPath = path::join(destPath, "info.plist");
-					break;
-				}
-			}
+			destPath = path_for_kind(location, name(), _kind);
 		}
 
 		plist::dictionary_t newPlist = erase_false_values(plist());
