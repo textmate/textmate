@@ -1,4 +1,5 @@
 #import "OakChoiceMenu.h"
+#import <OakAppKit/OakUIConstructionFunctions.h>
 #import <oak/algorithm.h>
 
 NSUInteger const OakChoiceMenuKeyUnused   = 0;
@@ -7,7 +8,7 @@ NSUInteger const OakChoiceMenuKeyTab      = 2;
 NSUInteger const OakChoiceMenuKeyCancel   = 3;
 NSUInteger const OakChoiceMenuKeyMovement = 4;
 
-@interface OakChoiceMenu ()
+@interface OakChoiceMenu () <NSTableViewDelegate>
 @property (nonatomic) NSWindow* window;
 @end
 
@@ -37,9 +38,14 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 	CGFloat const kTableViewPadding = 4;
 	CGFloat const kScrollBarWidth   = 15;
 
+	NSTextField* textField = OakCreateLabel(@"", [NSFont controlContentFontOfSize:0]);
 	CGFloat width = 60;
-	for(NSInteger i = 0; i < tableView.numberOfRows; ++i)
-		width = std::max(width, kTableViewPadding + [[tableView preparedCellAtColumn:0 row:i] cellSizeForBounds:NSMakeRect(0, 0, CGFLOAT_MAX, tableView.rowHeight)].width);
+	for(NSInteger i = 0; i < MIN(choices.count, 256); ++i)
+	{
+		textField.stringValue = choices[i];
+		[textField sizeToFit];
+		width = std::max(width, kTableViewPadding + NSWidth(textField.frame));
+	}
 
 	if([choices count] > 10)
 		width += kScrollBarWidth;
@@ -110,6 +116,18 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 	return [choices objectAtIndex:rowIndex];
 }
 
+- (NSView*)tableView:(NSTableView*)aTableView viewForTableColumn:(NSTableColumn*)aTableColumn row:(NSInteger)row
+{
+	NSString* identifier = aTableColumn.identifier;
+	NSTextField* res = [aTableView makeViewWithIdentifier:identifier owner:self];
+	if(!res)
+	{
+		res = OakCreateLabel(@"", [NSFont controlContentFontOfSize:0]);
+		res.identifier = identifier;
+	}
+	return res;
+}
+
 - (void)showAtTopLeftPoint:(NSPoint)aPoint forView:(NSView*)aView
 {
 	window = [[NSPanel alloc] initWithContentRect:NSMakeRect(aPoint.x, aPoint.y, 0, 0) styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:NO];
@@ -129,7 +147,7 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 	tableView.usesAlternatingRowBackgroundColors = YES;
 	tableView.allowsMultipleSelection            = YES;
 	tableView.dataSource                         = self;
-	// tableView.delegate                           = self;
+	tableView.delegate                           = self;
 	[tableView reloadData];
 
 	NSScrollView* scrollView         = [[NSScrollView alloc] initWithFrame:NSZeroRect];
