@@ -190,7 +190,7 @@ namespace bundles
 	// = Query Functions =
 	// ===================
 
-	static void search (std::string const& field, std::string const& value, scope::context_t const& scope, int kind, oak::uuid_t const& bundle, bool includeDisabledItems, std::multimap<double, item_ptr>& ordered);
+	static void search (std::string const& field, std::string const& value, scope::context_t const& scope, int kind, oak::uuid_t const& bundle, bool includeDisabledItems, bool resolveProxyItems, std::multimap<double, item_ptr>& ordered);
 
 	static void resolve_proxy (item_ptr item, scope::context_t const& scope, int kind, oak::uuid_t const& bundle, bool includeDisabledItems, std::multimap<double, item_ptr>& ordered)
 	{
@@ -200,14 +200,14 @@ namespace bundles
 			for(auto const& aClass : text::split(actionClass, "||"))
 			{
 				size_t oldSize = ordered.size();
-				search(kFieldSemanticClass, text::trim(aClass), scope, kind, bundle, includeDisabledItems, ordered);
+				search(kFieldSemanticClass, text::trim(aClass), scope, kind, bundle, includeDisabledItems, true, ordered);
 				if(ordered.size() != oldSize)
 					break;
 			}
 		}
 	}
 
-	static void cache_search (std::string const& field, std::string const& value, scope::context_t const& scope, int kind, oak::uuid_t const& bundle, bool includeDisabledItems, std::multimap<double, item_ptr>& ordered)
+	static void cache_search (std::string const& field, std::string const& value, scope::context_t const& scope, int kind, oak::uuid_t const& bundle, bool includeDisabledItems, bool resolveProxyItems, std::multimap<double, item_ptr>& ordered)
 	{
 		std::lock_guard<std::recursive_mutex> lock(cache().mutex());
 		std::multimap<std::string, item_ptr> const& values = cache().fetch(field);
@@ -216,14 +216,14 @@ namespace bundles
 			double rank = 1.0;
 			if(pair->second->does_match(field, value, scope, kind, bundle, &rank))
 			{
-				if(pair->second->kind() == kItemTypeProxy)
+				if(pair->second->kind() == kItemTypeProxy && resolveProxyItems)
 						resolve_proxy(pair->second, scope, kind, bundle, includeDisabledItems, ordered);
 				else	ordered.emplace(rank, pair->second);
 			}
 		}
 	}
 
-	static void linear_search (std::string const& field, std::string const& value, scope::context_t const& scope, int kind, oak::uuid_t const& bundle, bool includeDisabledItems, std::multimap<double, item_ptr>& ordered)
+	static void linear_search (std::string const& field, std::string const& value, scope::context_t const& scope, int kind, oak::uuid_t const& bundle, bool includeDisabledItems, bool resolveProxyItems, std::multimap<double, item_ptr>& ordered)
 	{
 		for(auto const& item : AllItems)
 		{
@@ -233,25 +233,25 @@ namespace bundles
 			double rank = 1.0;
 			if(item->does_match(field, value, scope, kind, bundle, &rank))
 			{
-				if(item->kind() == kItemTypeProxy)
+				if(item->kind() == kItemTypeProxy && resolveProxyItems)
 						resolve_proxy(item, scope, kind, bundle, includeDisabledItems, ordered);
 				else	ordered.emplace(rank, item);
 			}
 		}
 	}
 
-	static void search (std::string const& field, std::string const& value, scope::context_t const& scope, int kind, oak::uuid_t const& bundle, bool includeDisabledItems, std::multimap<double, item_ptr>& ordered)
+	static void search (std::string const& field, std::string const& value, scope::context_t const& scope, int kind, oak::uuid_t const& bundle, bool includeDisabledItems, bool resolveProxyItems, std::multimap<double, item_ptr>& ordered)
 	{
 		static auto const CachedFields = new std::set<std::string>{ kFieldKeyEquivalent, kFieldTabTrigger, kFieldSemanticClass, kFieldGrammarScope, kFieldSettingName };
 		if(!includeDisabledItems && !bundle && CachedFields->find(field) != CachedFields->end())
-				cache_search(field, value, scope, kind, bundle, includeDisabledItems, ordered);
-		else	linear_search(field, value, scope, kind, bundle, includeDisabledItems, ordered);
+				cache_search(field, value, scope, kind, bundle, includeDisabledItems, resolveProxyItems, ordered);
+		else	linear_search(field, value, scope, kind, bundle, includeDisabledItems, resolveProxyItems, ordered);
 	}
 
-	std::vector<item_ptr> query (std::string const& field, std::string const& value, scope::context_t const& scope, int kind, oak::uuid_t const& bundle, bool filter, bool includeDisabledItems)
+	std::vector<item_ptr> query (std::string const& field, std::string const& value, scope::context_t const& scope, int kind, oak::uuid_t const& bundle, bool filter, bool includeDisabledItems, bool resolveProxyItems)
 	{
 		std::multimap<double, item_ptr> ordered;
-		search(field, value, scope, kind, bundle, includeDisabledItems, ordered);
+		search(field, value, scope, kind, bundle, includeDisabledItems, resolveProxyItems, ordered);
 
 		std::vector<item_ptr> res;
 		for(std::multimap<double, item_ptr>::reverse_iterator it = ordered.rbegin(); it != ordered.rend() && (!filter || it->first == ordered.rbegin()->first); ++it)
