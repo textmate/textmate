@@ -410,6 +410,14 @@ namespace bundles
 		return true;
 	}
 
+	bool item_t::save_to (std::string const& folder)
+	{
+		std::string const path = _kind == kItemTypeBundle ? path::join(folder, "info.plist") : path_for_kind(folder, name(), _kind);
+		if(!plist::save(path, erase_false_values(plist()), plist::kPlistFormatXML))
+			return fprintf(stderr, "failed to save ‘%s’\n", path.c_str()), false;
+		return true;
+	}
+
 	bool item_t::move_to_trash ()
 	{
 		bool res = true;

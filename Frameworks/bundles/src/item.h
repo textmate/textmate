@@ -71,6 +71,7 @@ namespace bundles
 		std::string const& value_for_field (std::string const& field) const;
 
 		bool save (bool useDeltaIfNonLocal = true);
+		bool save_to (std::string const& folder);
 		bool move_to_trash ();
 
 		item_t (oak::uuid_t const& uuid, item_ptr bundleItem, kind_t kind, bool local = false);
