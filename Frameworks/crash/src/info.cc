@@ -1,6 +1,6 @@
 #include "info.h"
-#include <boost/thread/tss.hpp>
 #include <oak/debug.h>
+#include <oak/tls_ptr.h>
 
 /* CrashReporter info */
 char const* __crashreporter_info__ = nullptr;
@@ -59,10 +59,7 @@ namespace
 
 	static stack_t& stack ()
 	{
-		static boost::thread_specific_ptr<stack_t> stackPtr;
-		if(!stackPtr.get())
-			stackPtr.reset(new stack_t);
-
+		static oak::tls_ptr_t<stack_t> stackPtr;
 		return *stackPtr;
 	}
 }
