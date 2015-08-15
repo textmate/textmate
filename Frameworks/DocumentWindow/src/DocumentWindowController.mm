@@ -1535,6 +1535,8 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 		self.documentView.document = _selectedDocument;
 		[[self class] scheduleSessionBackup:self];
+		if(_selectedDocument.diffEnabled)
+			[self diff:nil];
 	}
 	else
 	{
@@ -2277,6 +2279,18 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	}
 
 	return active;
+}
+
+// ========
+// = Diff =
+// ========
+
+- (IBAction)diff:(id)sender
+{
+
+	if(!_selectedDocument)
+		return;
+	[_selectedDocument diffAgainstSCMWithProjectPath:self.projectPath];
 }
 
 // =============

@@ -48,7 +48,7 @@ PUBLIC @interface OakTextView : OakView
 @property (nonatomic, readonly) BOOL                        hasSelection;
 @property (nonatomic) NSString*                             selectionString;
 @property (nonatomic, readonly) NSString*                   symbol;
-
+@property (nonatomic, readonly) BOOL                        isDiffActive;
 @property (nonatomic, getter = isRecordingMacro) BOOL       recordingMacro;
 
 - (GVLineRecord)lineRecordForPosition:(CGFloat)yPos;

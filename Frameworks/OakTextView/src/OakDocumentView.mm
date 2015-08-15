@@ -289,6 +289,12 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	{
 		_statusBar.softTabs = self.document.softTabs;
 	}
+	else if([aKeyPath isEqualToString:@"diffBuffer"])
+	{
+		BOOL isVisibleFlag = [gutterView visibilityForColumnWithIdentifier:GVLineNumbersColumnIdentifier];
+		[gutterView setVisibility:(isVisibleFlag && self.document.diffEnabled) forColumnWithIdentifier:GVDiffLineNumbersColumnIdentifier];
+		[_textView setNeedsDisplay:YES];
+	}
 }
 
 - (void)dealloc
@@ -303,7 +309,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 
 - (void)setDocument:(OakDocument*)aDocument
 {
-	NSArray* const documentKeys = @[ @"fileType", @"tabSize", @"softTabs" ];
+	NSArray* const documentKeys = @[ @"fileType", @"tabSize", @"softTabs", @"diffBuffer" ];
 
 	OakDocument* oldDocument = self.document;
 	if(oldDocument)
@@ -383,7 +389,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	D(DBF_OakDocumentView, bug("show line numbers %s\n", BSTR([gutterView visibilityForColumnWithIdentifier:GVLineNumbersColumnIdentifier])););
 	BOOL isVisibleFlag = ![gutterView visibilityForColumnWithIdentifier:GVLineNumbersColumnIdentifier];
 	[gutterView setVisibility:isVisibleFlag forColumnWithIdentifier:GVLineNumbersColumnIdentifier];
-	[gutterView setVisibility:(isVisibleFlag && [textView isDiffActive]) forColumnWithIdentifier:GVDiffLineNumbersColumnIdentifier];
+	[gutterView setVisibility:(isVisibleFlag && self.document.diffEnabled) forColumnWithIdentifier:GVDiffLineNumbersColumnIdentifier];
 	if(isVisibleFlag)
 			[[NSUserDefaults standardUserDefaults] removeObjectForKey:@"DocumentView Disable Line Numbers"];
 	else	[[NSUserDefaults standardUserDefaults] setObject:@YES forKey:@"DocumentView Disable Line Numbers"];
@@ -680,9 +686,9 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 // = GutterView Delegate Proxy =
 // =============================
 
-- (GVLineRecord)lineRecordForPosition:(CGFloat)yPos                              { return [textView lineRecordForPosition:yPos];               }
-- (GVLineRecord)lineFragmentForLine:(NSUInteger)aLine column:(NSUInteger)aColumn { return [textView lineFragmentForLine:aLine column:aColumn]; }
-- (NSUInteger)maxLineNumberForPosition:(CGFloat)yPos { return [textView maxLineNumberForPosition:yPos]; };
+- (GVLineRecord)lineRecordForPosition:(CGFloat)yPos                              { return [_textView lineRecordForPosition:yPos];               }
+- (GVLineRecord)lineFragmentForLine:(NSUInteger)aLine column:(NSUInteger)aColumn { return [_textView lineFragmentForLine:aLine column:aColumn]; }
+- (NSUInteger)maxLineNumberForPosition:(CGFloat)yPos { return [_textView maxLineNumberForPosition:yPos]; };
 
 // =========================
 // = GutterView DataSource =

@@ -276,6 +276,30 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	return variables;
 }
 
+- (void)diffAgainstSCMWithProjectPath:(NSString*)projectPath;
+{
+	std::string docDirectory = self.path ? path::parent(to_s(self.path)) : to_s(projectPath);
+	auto uuid = self.identifier;
+	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+		std::string fileContents = scm::info(docDirectory)->content(to_s(self.path), "HEAD");
+		if(fileContents == NULL_STR)
+			return;
+		__block std::unique_ptr<ng::buffer_t> buffer = std::make_unique<ng::buffer_t>();
+		buffer->insert(0, fileContents);
+		buffer->set_grammar(bundles::lookup(_buffer->grammar()->uuid()));
+		buffer->indent() = _buffer->indent();
+
+		dispatch_async(dispatch_get_main_queue(), ^{
+			if(uuid == self.identifier)
+			{
+				OakDocumentEditor* documentEditor = self.documentEditors.firstObject;
+				[documentEditor initiateDiff: std::move(buffer)];
+			}
+		});
+	});
+	
+}
+
 - (void)updateSpellingSettings:(BOOL)updateSpelling andIndentSettings:(BOOL)updateIndent
 {
 	if(!_buffer)
@@ -1105,7 +1129,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	_callback = new callback_t(self);
 
 	_buffer = std::make_unique<ng::buffer_t>();
-	_buffer->add_callback(_callback);
+	_buffer->add_callback(_callback);	
 }
 
 - (void)deleteBuffer

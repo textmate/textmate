@@ -186,29 +186,46 @@ namespace diff
 		auto b = lone_elements_in_range(cache.line_position_to_id_B, condemned, lowB, highB);
 		auto b_to_a = intersectMaps(b, a);
 
-		// patience sort
-		std::map<size_t, diff::position_t> backpointer;
+		struct position_index_t
+		{
+			diff::position_t position;
+			size_t parent_idx;
+			position_index_t(size_t a, size_t b, size_t i) : position(a, b), parent_idx(i) {}
+		};
+		std::vector<position_index_t> backpointer;
+		backpointer.reserve(b_to_a.size());
+		/* patience sort */
 		std::vector<diff::position_t> topOfPiles;
-		// use SIZE_MAX as backpointer to leftmost values
-		// values increase with index increase except for first
+		// topOfPiles use SIZE_MAX as backpointer to leftmost values, in first slot
+		// values increase with index increase (patience sorted) except for first
+		// use b_pos member to store index into backpointer vector
 		topOfPiles.emplace_back(SIZE_MAX, SIZE_MAX);
+		size_t running_index = 0;
 		for(auto it : b_to_a)
 		{
-			auto insert_at = std::upper_bound(topOfPiles.begin()+1, topOfPiles.end(), it.second.first, [](size_t const key, diff::position_t const& position){ return key < position.a_pos;});
+			auto a_pos = it.second.first;
+			auto insert_at = std::upper_bound(topOfPiles.begin()+1, topOfPiles.end(), a_pos, [](size_t const key, diff::position_t const& item){ return key < item.a_pos;});
 
 			if(insert_at == topOfPiles.end())
-				insert_at = topOfPiles.insert(insert_at, diff::position_t{it.second.first, it.first});
+				insert_at = topOfPiles.insert(insert_at, {a_pos, running_index});
 			else
-				*insert_at = diff::position_t{it.second.first, it.first};
-			backpointer[it.first]=*(--insert_at);
+				*insert_at = {a_pos, running_index};
+			backpointer.emplace_back(a_pos, it.first, (--insert_at)->b_pos);
+			++running_index;
 		}
 
-		// using topOfPiles as result vector
-		auto& item = topOfPiles.back();
-		size_t index = topOfPiles.size() - 1;
-		while(item.b_pos != SIZE_MAX)
-			item = backpointer[(topOfPiles[--index] = item).b_pos];
-		topOfPiles.resize(topOfPiles.size() - 1);
+		/* Find longest common subsequence */
+		auto res_idx = topOfPiles.size() - 1;
+		// index to 'same' in backpointer
+		auto index = topOfPiles.back().b_pos;
+		// reuse topOfPiles as result vector
+		topOfPiles.resize(res_idx);
+		while(index != SIZE_MAX)
+		{
+			auto item = backpointer[index];
+			topOfPiles[--res_idx] = item.position;
+			index = item.parent_idx;
+		}
 		return topOfPiles;
 	}
 

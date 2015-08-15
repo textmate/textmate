@@ -452,6 +452,9 @@ struct document_view_t : ng::buffer_api_t
 	ng::range_t folded_range_at_point (CGPoint point) const { return _layout->folded_range_at_point(point); }
 	ng::line_record_t line_record_for (CGFloat y) const { return _layout->line_record_for(y); }
 	ng::line_record_t line_record_for (text::pos_t const& pos) const { return _layout->line_record_for(pos); }
+	size_t max_line_for (CGFloat y) const { return _layout->max_line_for(y); }
+
+	bool diff_enabled () const { return _layout->diff_enabled(); }
 
 private:
 	OakDocument* _document;
@@ -1133,6 +1136,7 @@ doScroll:
 		[_choiceMenu showAtTopLeftPoint:[self positionForWindowUnderCaret] forView:self];
 	}
 }
+- (BOOL)isDiffActive { return !documentView ? FALSE : documentView->diff_enabled(); }
 
 // ======================
 // = Generic view stuff =
@@ -3414,16 +3418,14 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (NSUInteger)maxLineNumberForPosition:(CGFloat)yPos
 {
-	if(!layout)
-		return 0;
-	else
-		return layout->max_line_for(yPos);
+	return !documentView ? 0 : documentView->max_line_for(yPos);
 }
 
 - (GVLineRecord)lineRecordForPosition:(CGFloat)yPos
 {
 	if(!documentView)
 		return GVLineRecord();
+	auto record = documentView->line_record_for(yPos);
 	return GVLineRecord(record.line, record.softline, record.top, record.bottom, record.baseline, record.diffRemoved, record.diffAdded);
 }
 
@@ -3431,7 +3433,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 {
 	if(!documentView)
 		return GVLineRecord();
-	auto record = layout->line_record_for(text::pos_t(aLine, aColumn));
+	auto record = documentView->line_record_for(text::pos_t(aLine, aColumn));
 	return GVLineRecord(record.line, record.softline, record.top, record.bottom, record.baseline, record.diffRemoved, record.diffAdded);
 }
 

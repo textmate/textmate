@@ -181,4 +181,10 @@ static int32_t const NSWrapColumnWindowWidth = 0;
 {
 	return _editor->handle_result(string, place, format, caret, ranges, environment);
 }
+
+- (void)initiateDiff:(std::unique_ptr<ng::buffer_t>)diffBuffer
+{	
+	if(_layout)
+		_layout->initiate_diff(std::move(diffBuffer));
+}
 @end
