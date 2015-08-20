@@ -1,4 +1,5 @@
 #include "meta_data.h"
+#include <text/parse.h>
 #include <oak/oak.h>
 
 namespace ng
@@ -86,6 +87,22 @@ namespace ng
 		std::map<std::string, tree_t>::const_iterator m = _marks.find(markType);
 		if(m != _marks.end())
 			std::copy(m->second.lower_bound(from), m->second.upper_bound(to), std::inserter(res, res.end()));
+		return res;
+	}
+
+	std::vector<buffer_t::marks_data_t> marks_t::get_range_with_data (size_t from, size_t to) const
+	{
+		static auto const recordSeparator = std::string(1, '\n');
+
+		ASSERT_LE(from, to);
+		std::vector<buffer_t::marks_data_t> res;
+		for(auto const& m : _marks)
+		{
+			foreach(it, m.second.lower_bound(from), m.second.upper_bound(to)) {
+				auto data = it->second.empty() ? std::vector<std::string>() : text::split(it->second, recordSeparator);
+				res.push_back(std::make_pair(m.first, data));
+			}
+		}
 		return res;
 	}
 

@@ -65,6 +65,8 @@ namespace ng
 	{
 		WATCH_LEAKS(ng::buffer_t);
 
+		typedef std::pair<std::string, std::vector<std::string>> marks_data_t;
+
 		buffer_t (char const* str = NULL);
 		buffer_t (buffer_t const& rhs) = delete;
 		buffer_t& operator= (buffer_t const& rhs) = delete;
@@ -133,6 +135,7 @@ namespace ng
 		std::string get_mark (size_t index, std::string const& markType) const;
 		std::multimap<size_t, std::pair<std::string, std::string>> get_marks (size_t from, size_t to) const;
 		std::map<size_t, std::string> get_marks (size_t from, size_t to, std::string const& markType) const;
+		std::vector<marks_data_t> get_marks_with_data (size_t from, size_t to) const;
 		std::pair<size_t, std::string> next_mark (size_t index, std::string const& markType = NULL_STR) const;
 		std::pair<size_t, std::string> prev_mark (size_t index, std::string const& markType = NULL_STR) const;
 
