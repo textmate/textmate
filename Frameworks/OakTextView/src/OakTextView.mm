@@ -57,6 +57,8 @@ NSString* const kUserDefaultsFontSmoothingKey      = @"fontSmoothing";
 NSString* const kUserDefaultsDisableTypingPairsKey = @"disableTypingPairs";
 NSString* const kUserDefaultsScrollPastEndKey      = @"scrollPastEnd";
 
+NSString* const OakTVInlineMarksDidChange = @"OakTVInlineMarksDidChange";
+
 struct buffer_refresh_callback_t;
 
 @interface OakAccessibleLink : NSObject
@@ -770,6 +772,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentWillSave:) name:@"OakDocumentNotificationWillSave" object:nil];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentDidSave:) name:@"OakDocumentNotificationDidSave" object:nil];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(inlineMarksDidChange:) name:OakTVInlineMarksDidChange object:nil];
 	}
 	return self;
 }
@@ -800,6 +803,11 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 	for(auto const& item : bundles::query(bundles::kFieldSemanticClass, "callback.document.did-save", [self scopeContext], bundles::kItemTypeMost, oak::uuid_t(), false))
 		[self performBundleItem:item];
+}
+
+- (void)inlineMarksDidChange:(NSNotification*)aNotification
+{
+	[self setNeedsDisplay:YES];
 }
 
 - (void)reflectDocumentSize

@@ -725,6 +725,20 @@ namespace ng
 		}
 	}
 
+	void paragraph_t::draw_mark_background (ct::metrics_t const& metrics, ng::context_t const& context, CGRect visibleRect, CGColorRef backgroundColor, CGFloat anchorY) const
+	{
+		for(auto const& line : softlines(metrics))
+		{
+			CGRect rect;
+			rect.origin.x = visibleRect.origin.x;
+			rect.origin.y = anchorY + line.y;
+			rect.size.width = visibleRect.size.width;
+			rect.size.height = line.height;
+
+			render::fill_rect(context, backgroundColor, rect);
+		}
+	}
+
 	void paragraph_t::draw_foreground (theme_ptr const& theme, ct::metrics_t const& metrics, ng::context_t const& context, bool isFlipped, CGRect visibleRect, ng::buffer_t const& buffer, size_t bufferOffset, ng::ranges_t const& selection, CGPoint anchor) const
 	{
 		CGContextSetTextMatrix(context, CGAffineTransformMake(1, 0, 0, 1, 0, 0));

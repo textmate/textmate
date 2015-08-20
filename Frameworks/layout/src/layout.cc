@@ -786,6 +786,7 @@ namespace ng
 
 	void layout_t::draw (ng::context_t const& context, CGRect visibleRect, bool isFlipped, ng::ranges_t const& selection, ng::ranges_t const& highlightRanges, bool drawBackground)
 	{
+		static std::string const kInlineMarkBaseIdentifier = "mark.inline.";
 		update_metrics(visibleRect);
 
 		CGContextSetTextMatrix(context, CGAffineTransformMake(1, 0, 0, 1, 0, 0));
@@ -804,7 +805,22 @@ namespace ng
 		if(drawBackground)
 		{
 			foreach(row, firstY, _rows.lower_bound(yMax, &row_y_comp))
-				row->value.draw_background(_theme, *_metrics, context, isFlipped, visibleRect, background, _buffer, row->offset._length, CGPointMake(_margin.left, _margin.top + row->offset._height));
+			{
+				auto anchor = CGPointMake(_margin.left, _margin.top + row->offset._height);
+				auto from = _buffer.begin(row->offset._softlines);
+				auto to = _buffer.eol(row->offset._softlines);
+				auto marks = _buffer.get_marks(from, to);
+
+				if(!marks.empty())
+				{
+					auto lastMarkType = marks.rbegin()->second.first;
+					auto style = _theme->styles_for_scope(kInlineMarkBaseIdentifier + lastMarkType);
+
+					row->value.draw_mark_background(*_metrics, context, visibleRect, style.highlight(), anchor.y);
+				}
+				else
+					row->value.draw_background(_theme, *_metrics, context, isFlipped, visibleRect, background, _buffer, row->offset._length, anchor);
+			}
 		}
 
 		base_colors_t const& baseColors = get_base_colors(_theme->is_dark());

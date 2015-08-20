@@ -1,5 +1,6 @@
 #import "OakDocumentView.h"
 #import "GutterView.h"
+#import "OakTextView.h"
 #import "OTVStatusBar.h"
 #import <document/document.h>
 #import <file/type.h>
@@ -75,6 +76,7 @@ struct document_view_callback_t : document::document_t::callback_t
 		if(event == did_change_marks)
 		{
 			[[NSNotificationCenter defaultCenter] postNotificationName:GVColumnDataSourceDidChange object:self];
+			[[NSNotificationCenter defaultCenter] postNotificationName:OakTVInlineMarksDidChange object:self];
 		}
 		else if(event == did_change_file_type)
 		{
