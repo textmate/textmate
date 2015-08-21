@@ -45,6 +45,7 @@ PUBLIC @interface OakTextView : OakView
 @property (nonatomic) NSInteger                             fontScaleFactor;
 @property (nonatomic) BOOL                                  antiAlias;
 @property (nonatomic) OTVFontSmoothing                      fontSmoothing;
+@property (nonatomic) BOOL                                  showInlineMarks;
 @property (nonatomic) size_t                                tabSize;
 @property (nonatomic) BOOL                                  showInvisibles;
 @property (nonatomic) BOOL                                  softWrap;

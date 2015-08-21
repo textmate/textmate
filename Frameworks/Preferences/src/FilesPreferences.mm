@@ -20,6 +20,7 @@
 			@"disableSessionRestore"         : kUserDefaultsDisableSessionRestoreKey,
 			@"disableDocumentAtStartup"      : kUserDefaultsDisableNewDocumentAtStartupKey,
 			@"disableDocumentAtReactivation" : kUserDefaultsDisableNewDocumentAtReactivationKey,
+			@"showInlineMarks"               : kUserDefaultsShowInlineMarksKey,
 		};
 
 		self.tmProperties = @{

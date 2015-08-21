@@ -9,6 +9,7 @@
 #include <text/utf8.h>
 #include <text/ctype.h>
 #include <oak/debug.h>
+#include <iterator>
 
 OAK_DEBUG_VAR(Layout);
 
@@ -784,7 +785,7 @@ namespace ng
 
 	}
 
-	void layout_t::draw (ng::context_t const& context, CGRect visibleRect, bool isFlipped, ng::ranges_t const& selection, ng::ranges_t const& highlightRanges, bool drawBackground)
+	void layout_t::draw (ng::context_t const& context, CGRect visibleRect, bool isFlipped, ng::ranges_t const& selection, bool drawInlineMarks, ng::ranges_t const& highlightRanges, bool drawBackground)
 	{
 		static std::string const kInlineMarkBaseIdentifier = "mark.inline.";
 		update_metrics(visibleRect);
@@ -848,7 +849,29 @@ namespace ng
 		}
 
 		foreach(row, firstY, _rows.lower_bound(yMax, &row_y_comp))
-			row->value.draw_foreground(_theme, *_metrics, context, isFlipped, visibleRect, _buffer, row->offset._length, selection, CGPointMake(_margin.left, _margin.top + row->offset._height));
+		{
+			auto anchor = CGPointMake(_margin.left, _margin.top + row->offset._height);
+			row->value.draw_foreground(_theme, *_metrics, context, isFlipped, visibleRect, _buffer, row->offset._length, selection, anchor);
+
+			if(drawInlineMarks)
+			{
+				auto from = _buffer.begin(row->offset._softlines);
+				auto to = _buffer.eol(row->offset._softlines);
+				auto marks = _buffer.get_marks_with_data(from, to);
+				auto allEmpty = std::all_of(marks.begin(), marks.end(), [](const auto& mark) { return mark.second.empty(); });
+
+				if (!allEmpty)
+				{
+					auto nextRow = std::next(row);
+					auto nextLineWidth = nextRow != _rows.end() ? nextRow->value.width() : CGFLOAT_MAX;
+
+					auto lastMarkType = marks.rbegin()->first;
+					auto style = _theme->styles_for_scope(kInlineMarkBaseIdentifier + lastMarkType);
+
+					row->value.draw_mark_foreground(style, *_metrics, context, isFlipped, _viewport_size.width, marks, anchor.y, _margin.right, nextLineWidth);
+				}
+			}
+		}
 
 		if(_draw_caret && !_drop_marker)
 		{

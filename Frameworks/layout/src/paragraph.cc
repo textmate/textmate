@@ -51,7 +51,7 @@ namespace ng
 			return NULL_STR;
 		}
 
-		static void draw_line (CGPoint pos, std::string const& text, CGColorRef color, CTFontRef font, CGContextRef context, bool isFlipped)
+		static CTLineRef string_to_line (std::string const& text, CGColorRef color, CTFontRef font)
 		{
 			ASSERT(utf8::is_valid(text.begin(), text.end()));
 			if(CFMutableAttributedStringRef str = CFAttributedStringCreateMutable(kCFAllocatorDefault, 0))
@@ -60,18 +60,26 @@ namespace ng
 				CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTFontAttributeName, font);
 				CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTForegroundColorAttributeName, color);
 
-				if(CTLineRef line = CTLineCreateWithAttributedString(str))
-				{
-					CGContextSaveGState(context);
-					if(isFlipped)
-						CGContextConcatCTM(context, CGAffineTransformMake(1, 0, 0, -1, 0, 2 * pos.y));
-					CGContextSetTextPosition(context, pos.x, pos.y);
-					CTLineDraw(line, context);
-					CGContextRestoreGState(context);
-
-					CFRelease(line);
-				}
+				auto line = CTLineCreateWithAttributedString(str);
 				CFRelease(str);
+				return line;
+			}
+
+			return nullptr;
+		}
+
+		static void draw_line (CGPoint pos, std::string const& text, CGColorRef color, CTFontRef font, CGContextRef context, bool isFlipped)
+		{
+			if(CTLineRef line = string_to_line(text, color, font))
+			{
+				CGContextSaveGState(context);
+				if(isFlipped)
+					CGContextConcatCTM(context, CGAffineTransformMake(1, 0, 0, -1, 0, 2 * pos.y));
+				CGContextSetTextPosition(context, pos.x, pos.y);
+				CTLineDraw(line, context);
+				CGContextRestoreGState(context);
+
+				CFRelease(line);
 			}
 		}
 	}
@@ -776,6 +784,68 @@ namespace ng
 				offset += node->length();
 			}
 		}
+	}
+
+	void paragraph_t::draw_mark_foreground (styles_t const& style, ct::metrics_t const& metrics, ng::context_t const& context, bool isFlipped, CGFloat visibleWidth, std::vector<std::pair<std::string, std::vector<std::string>>> const& marks, CGFloat anchorY, CGFloat leftMargin, CGFloat nextLineWidth) const
+	{
+		std::vector<CTLineRef> ctLines;
+
+		for(auto const& pair : marks)
+		{
+			ctLines.reserve(ctLines.capacity() + pair.second.size());
+
+			for(auto const& str : pair.second)
+			{
+				auto line = string_to_line(str, style.foreground(), style.font());
+				if(line)
+					ctLines.push_back(line);
+			}
+		}
+
+		auto widestMark = std::max_element(ctLines.begin(), ctLines.end(), [](auto a, auto b) {
+			return CTLineGetTypographicBounds(a, NULL, NULL, NULL) < CTLineGetTypographicBounds(b, NULL, NULL, NULL);
+		});
+
+		auto markWidth = CTLineGetTypographicBounds(*widestMark, NULL, NULL, NULL);
+		auto rightMargin = leftMargin / 4;
+
+		auto lines = softlines(metrics, false);
+		auto line = lines.back();
+		auto node = _nodes.begin() + line.first;
+
+		auto markX = visibleWidth - markWidth - rightMargin;
+		auto markPos = CGPointMake(markX, anchorY + line.y + line.baseline);
+		auto lineWidth = lines.size() == 1 ? width() : node->width();
+
+		auto nextLineEndX = leftMargin + nextLineWidth;
+
+		CGRect markBackgroundRect;
+		markBackgroundRect.origin.x = markPos.x - leftMargin;
+
+		if(lineWidth + leftMargin > markPos.x - leftMargin && markBackgroundRect.origin.x > nextLineEndX)
+			markPos.y += line.height;
+
+		markBackgroundRect.origin.y = markPos.y - 4;
+		markBackgroundRect.size.width = markWidth + leftMargin + rightMargin;
+		markBackgroundRect.size.height = line.height;
+
+		CGContextSetTextMatrix(context, CGAffineTransformMake(1, 0, 0, 1, 0, 0));
+		CGContextSaveGState(context);
+
+		if(isFlipped)
+			CGContextConcatCTM(context, CGAffineTransformMake(1, 0, 0, -1, 0, 2 * markPos.y));
+
+		for(auto& ctLine : ctLines)
+		{
+			render::fill_rect(context, style.background(), markBackgroundRect);
+			CGContextSetTextPosition(context, markPos.x, markPos.y);
+			CTLineDraw(ctLine, context);
+			CFRelease(ctLine);
+			markPos.y -= line.height;
+			markBackgroundRect.origin.y -= line.height;
+		}
+
+		CGContextRestoreGState(context);
 	}
 
 	// ========

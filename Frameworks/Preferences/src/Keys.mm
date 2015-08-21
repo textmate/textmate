@@ -54,6 +54,7 @@ NSString* const kUserDefaultsDisableSessionRestoreKey            = @"disableSess
 NSString* const kUserDefaultsDisableNewDocumentAtStartupKey      = @"disableNewDocumentAtStartup";
 NSString* const kUserDefaultsDisableNewDocumentAtReactivationKey = @"disableNewDocumentAtReactivation";
 NSString* const kUserDefaultsShowFavoritesInsteadOfUntitledKey   = @"showFavoritesInsteadOfUntitled";
+NSString* const kUserDefaultsShowInlineMarksKey                  = @"showInlineMarks";
 
 // ============
 // = Projects =

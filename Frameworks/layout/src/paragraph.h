@@ -35,6 +35,7 @@ namespace ng
 		void draw_background (theme_ptr const& theme, ct::metrics_t const& metrics, ng::context_t const& context, bool isFlipped, CGRect visibleRect, CGColorRef backgroundColor, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor) const;
 		void draw_mark_background (ct::metrics_t const& metrics, ng::context_t const& context, CGRect visibleRect, CGColorRef backgroundColor, CGFloat anchorY) const;
 		void draw_foreground (theme_ptr const& theme, ct::metrics_t const& metrics, ng::context_t const& context, bool isFlipped, CGRect visibleRect, ng::buffer_t const& buffer, size_t bufferOffset, ng::ranges_t const& selection, CGPoint anchor) const;
+		void draw_mark_foreground (styles_t const& style, ct::metrics_t const& metrics, ng::context_t const& context, bool isFlipped, CGFloat visibleWidth, std::vector<std::pair<std::string, std::vector<std::string>>> const& marks, CGFloat anchorY, CGFloat margin, CGFloat nextLineWidth) const;
 
 		ng::index_t index_at_point (CGPoint point, ct::metrics_t const& metrics, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor) const;
 		CGRect rect_at_index (ng::index_t const& index, ct::metrics_t const& metrics, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor, bool bol_as_eol = false) const;
