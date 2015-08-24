@@ -15,7 +15,7 @@ namespace cf
 		operator CFStringRef () const { return string.get(); }
 		CFStringRef get () const { return string.get(); }
 	private:
-		std::shared_ptr<__CFString const> string;
+		std::shared_ptr<std::remove_pointer<CFStringRef>::type> string;
 	};
 
 	inline cf::string_t wrap (std::string const& str) { return cf::string_t(str); }
@@ -29,7 +29,7 @@ namespace cf
 		operator CFNumberRef () const { return number.get(); }
 		CFNumberRef get () const { return number.get(); }
 	private:
-		std::shared_ptr<__CFNumber const> number;
+		std::shared_ptr<std::remove_pointer<CFNumberRef>::type> number;
 	};
 
 	inline cf::number_t wrap (int32_t number) { return cf::number_t(number); }
@@ -47,7 +47,7 @@ namespace cf
 		operator CFArrayRef () const { return array.get(); }
 		CFArrayRef get () const { return array.get(); }
 	private:
-		std::shared_ptr<__CFArray const> array;
+		std::shared_ptr<std::remove_pointer<CFArrayRef>::type> array;
 	};
 
 	template <typename T> cf::array_t wrap (std::vector<T> const& v) { return cf::array_t(v); }
@@ -65,7 +65,7 @@ namespace cf
 		operator CFDictionaryRef () const { return dictionary.get(); }
 		CFDictionaryRef get () const { return dictionary.get(); }
 	private:
-		std::shared_ptr<__CFDictionary const> dictionary;
+		std::shared_ptr<std::remove_pointer<CFDictionaryRef>::type> dictionary;
 	};
 
 	template <typename K, typename V> cf::dictionary_t wrap (std::map<K, V> const& map) { return cf::dictionary_t(map); }
@@ -83,7 +83,7 @@ namespace cf
 		operator CFSetRef () const { return set.get(); }
 		CFSetRef get () const { return set.get(); }
 	private:
-		std::shared_ptr<__CFSet const> set;
+		std::shared_ptr<std::remove_pointer<CFSetRef>::type> set;
 	};
 
 	template <typename T> cf::set_t wrap (std::set<T> const& v) { return cf::set_t(v); }

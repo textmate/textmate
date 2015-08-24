@@ -4,8 +4,8 @@
 #include <bundles/bundles.h>
 #include <scope/scope.h>
 
-typedef std::shared_ptr<struct __CTFont const> CTFontPtr;
-typedef std::shared_ptr<struct CGColor> CGColorPtr;
+typedef std::shared_ptr<std::remove_pointer<CTFontRef>::type> CTFontPtr;
+typedef std::shared_ptr<std::remove_pointer<CGColorRef>::type> CGColorPtr;
 
 struct PUBLIC styles_t
 {
