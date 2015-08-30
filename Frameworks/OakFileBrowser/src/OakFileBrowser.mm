@@ -28,6 +28,7 @@
 #import <regexp/format_string.h>
 #import <regexp/glob.h>
 #import <settings/settings.h>
+#import <crash/info.h>
 
 OAK_DEBUG_VAR(FileBrowser_Controller);
 
@@ -530,7 +531,7 @@ static bool is_binary (std::string const& path)
 
 - (NSArray*)openURLs                       { return _outlineViewDelegate.openURLs; }
 - (NSArray*)modifiedURLs                   { return _outlineViewDelegate.modifiedURLs; }
-- (void)setOpenURLs:(NSArray*)someURLs     { _outlineViewDelegate.openURLs = someURLs; }
+- (void)setOpenURLs:(NSArray*)someURLs     { crash_reporter_info_t crashInfo(text::format("%lu open urls, delegate %p", [someURLs count], _outlineViewDelegate)); _outlineViewDelegate.openURLs = someURLs; }
 - (void)setModifiedURLs:(NSArray*)someURLs { _outlineViewDelegate.modifiedURLs = someURLs; }
 
 // ===============================
