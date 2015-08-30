@@ -2,6 +2,7 @@
 // Ciarán Walsh, 2008
 // Visit http://github.com/ciaran/attr_string/tree/master for the latest version
 
+#import <OakFoundation/NSString Additions.h>
 #import <oak/misc.h>
 #import <stack>
 
@@ -119,7 +120,7 @@ namespace ns
 			for(std::vector<attr_t>::const_iterator it = _attributes.begin(); it != _attributes.end(); ++it)
 			{
 				if(last_pos < it->pos)
-					[result appendAttributedString:[[NSAttributedString alloc] initWithString:@(_string.substr(last_pos, it->pos - last_pos).c_str()) attributes:attributes]];
+					[result appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:_string.substr(last_pos, it->pos - last_pos)] attributes:attributes]];
 				last_pos = it->pos;
 
 				NSString* attr = it->attr;
@@ -198,7 +199,7 @@ namespace ns
 			}
 
 			if(last_pos < _string.length())
-				[result appendAttributedString:[[NSAttributedString alloc] initWithString:@(_string.substr(last_pos, _string.length() - last_pos).c_str()) attributes:attributes]];
+				[result appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:_string.substr(last_pos, _string.length() - last_pos)] attributes:attributes]];
 
 			return result;
 		}
