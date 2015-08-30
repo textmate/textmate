@@ -1913,6 +1913,8 @@ namespace
 		if(document->path() != NULL_STR && document->is_modified())
 			[modifiedURLs addObject:[NSURL fileURLWithPath:[NSString stringWithCxxString:document->path()]]];
 	}
+
+	crash_reporter_info_t crashInfo(text::format("%lu open urls, file browser %p", [openURLs count], self.fileBrowser));
 	self.fileBrowser.openURLs     = openURLs;
 	self.fileBrowser.modifiedURLs = modifiedURLs;
 }
