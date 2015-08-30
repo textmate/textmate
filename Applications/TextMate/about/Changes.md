@@ -2,6 +2,11 @@ Title: Release Notes
 
 # Changes
 
+## 2015-08-30 (v2.0-beta.7.9)
+
+* You can now export a bundle (merging potential delta files) by right-clicking the bundle in the bundle editor and selecting _Export Bundle…_.
+* See [all changes since v2.0-beta.7.7](https://github.com/textmate/textmate/compare/v2.0-beta.7.7...v2.0-beta.7.9)
+
 ## 2015-07-31 (v2.0-beta.7.7)
 
 * You can now use ⌥⌘V in the file browser to “move” the item on the clipboard to the current folder. This makes it possibly to copy files from Finder and “move” to the location in TextMate’s file browser and thus the old way of moving files via keyboard (⌘X + ⌘V) is deprecated and will be removed.
