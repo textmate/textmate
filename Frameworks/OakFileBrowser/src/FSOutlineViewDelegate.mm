@@ -548,13 +548,9 @@ struct expansion_state_t
 	return [self outlineView:anOutlineView isGroupItem:item] == NO;
 }
 
-- (BOOL)outlineView:(NSOutlineView*)anOutlineView isGroupItem:(FSItem*)item
+- (BOOL)outlineView:(NSOutlineView*)anOutlineView isGroupItem:(id)item
 {
-	crash_reporter_info_t crashInfo_1(text::format("item %p", item));
-	crash_reporter_info_t crashInfo_2(text::format("%s", [[[item class] description] UTF8String]));
-	crash_reporter_info_t crashInfo_3(text::format("%s", [[item description] UTF8String]));
-	crash_reporter_info_t crashInfo_4(text::format("has group method %s", BSTR([item respondsToSelector:@selector(group)])));
-	return [item respondsToSelector:@selector(group)] ? item.group : NO;
+	return NO;
 }
 
 // ===========================
