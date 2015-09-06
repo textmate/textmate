@@ -1024,7 +1024,7 @@ static bool is_binary (std::string const& path)
 
 - (IBAction)didDoubleClickOutlineView:(id)sender
 {
-	[self openItems:_outlineView.clickedRow != -1 ? @[ [_outlineView itemAtRow:_outlineView.clickedRow] ] : self.selectedItems animate:YES];
+	[self openItems:self.selectedItems animate:YES];
 }
 
 - (void)openItems:(NSArray*)items animate:(BOOL)animateFlag
