@@ -603,11 +603,13 @@ struct expansion_state_t
 				}
 
 				if(item.children.count - indexSet.count == children.count)
+				{
 					removeIndexSet = indexSet;
 
-				NSMutableArray* newChildren = [item.children mutableCopy];
-				[newChildren removeObjectsAtIndexes:removeIndexSet];
-				children = newChildren;
+					NSMutableArray* newChildren = [item.children mutableCopy];
+					[newChildren removeObjectsAtIndexes:removeIndexSet];
+					children = newChildren;
+				}
 			}
 			else if(item.children.count && item.children.count < children.count)
 			{
@@ -620,11 +622,13 @@ struct expansion_state_t
 				}
 
 				if(item.children.count + indexSet.count == children.count)
+				{
 					insertIndexSet = indexSet;
 
-				NSMutableArray* newChildren = [item.children mutableCopy];
-				[newChildren insertObjects:[children objectsAtIndexes:insertIndexSet] atIndexes:insertIndexSet];
-				children = newChildren;
+					NSMutableArray* newChildren = [item.children mutableCopy];
+					[newChildren insertObjects:[children objectsAtIndexes:insertIndexSet] atIndexes:insertIndexSet];
+					children = newChildren;
+				}
 			}
 
 			if(!insertIndexSet && !removeIndexSet)
