@@ -2,7 +2,6 @@
 #include <io/io.h>
 #include <cf/cf.h>
 #include <text/format.h>
-#include <oak/compat.h>
 #include <oak/datatypes.h>
 #include <oak/debug.h>
 
@@ -13,16 +12,6 @@ namespace oak
 	static std::string _app_name     = NULL_STR;
 	static std::string _app_path     = NULL_STR;
 	static std::string _support_path = NULL_STR;
-
-	static std::string process_name (pid_t pid)
-	{
-		struct kinfo_proc procInfo;
-		size_t length = sizeof(procInfo);
-		int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PID, pid };
-		if(sysctl(mib, 4, &procInfo, &length, NULL, 0) == 0 && length > 0)
-			return procInfo.kp_proc.p_comm;
-		return NULL_STR;
-	}
 
 	application_t::application_t (int argc, char const* argv[], bool redirectStdErr)
 	{
@@ -43,58 +32,6 @@ namespace oak
 		std::string const appBinary = path::join("Contents/MacOS", _app_name);
 		if(_app_path.size() > appBinary.size() && _app_path.find(appBinary) == _app_path.size() - appBinary.size())
 			_app_path.erase(_app_path.end() - appBinary.size(), _app_path.end());
-
-		// ==================================================================================
-		// = TODO Remove the rest of this function once most users are on beta 6.5 or later =
-		// ==================================================================================
-
-		std::string content = path::content(path::join(path::temp(), (((CFBundleGetMainBundle() && CFBundleGetIdentifier(CFBundleGetMainBundle())) ? cf::to_s(CFBundleGetIdentifier(CFBundleGetMainBundle())) : _app_name) + ".pid")));
-		long pid = content != NULL_STR ? strtol(content.c_str(), NULL, 10) : 0;
-		if(pid != 0 && process_name(pid) == _app_name)
-		{
-			int event_queue = kqueue();
-
-			struct kevent changeList = { (uintptr_t)pid, EVFILT_PROC, EV_ADD | EV_ENABLE | EV_ONESHOT, NOTE_EXIT, 0, NULL };
-			int res = kevent(event_queue, &changeList, 1, NULL /* event list */, 0 /* number of events */, NULL);
-			if(res == -1 && errno == ESRCH)
-			{
-				D(DBF_Application, bug("old instance no longer running\n"););
-			}
-			else if(res == 0)
-			{
-				if(char const* relaunch = getenv("OAK_RELAUNCH"))
-				{
-					D(DBF_Application, bug("%s is already running (pid %ld), OAK_RELAUNCH = %s\n", _app_name.c_str(), pid, relaunch););
-					kill(pid, strcmp(relaunch, "QUICK") == 0 ? SIGTERM : SIGINT);
-
-					struct kevent changed;
-					struct timespec timeout = { 30, 0 };
-					if(kevent(event_queue, NULL /* change list */, 0 /* number of changes */, &changed /* event list */, 1 /* number of events */, &timeout) == 1)
-					{
-						D(DBF_Application, bug("other instance terminated\n"););
-						ASSERTF((pid_t)changed.ident == pid, "pid %d, changed %d", pid, (pid_t)changed.ident);
-						CFPreferencesAppSynchronize(kCFPreferencesCurrentApplication);
-					}
-					else
-					{
-						D(DBF_Application, bug("timeout expired, terminate\n"););
-						exit(EXIT_FAILURE);
-					}
-				}
-				else
-				{
-					D(DBF_Application, bug("%s is already running (pid %ld), OAK_RELAUNCH = NO\n", name().c_str(), pid););
-					ProcessSerialNumber psn;
-					if(noErr == GetProcessForPID(pid, &psn))
-					{
-						SetFrontProcess(&psn);
-						exit(EXIT_SUCCESS);
-					}
-					// procNotFound
-				}
-			}
-			close(event_queue);
-		}
 	}
 
 	std::string application_t::name ()

@@ -17,7 +17,7 @@ namespace bundles
 			path::join("/",          "Library/Application Support/Avian/Pristine Copy"),
 			oak::application_t::path("Contents/SharedSupport"),
 		};
-		static std::vector<std::string> res(BundleLocations, BundleLocations + sizeofA(BundleLocations));
+		static std::vector<std::string> res(std::begin(BundleLocations), std::end(BundleLocations));
 		return res;
 	}
 

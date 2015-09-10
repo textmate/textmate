@@ -1,5 +1,4 @@
 #import "OFBOutlineView.h"
-#import "OFBPathInfoCell.h"
 #import <OakAppKit/NSEvent Additions.h>
 #import <ns/ns.h>
 #import <text/utf8.h>
@@ -14,9 +13,6 @@
 {
 	OBJC_WATCH_LEAKS(OFBOutlineView);
 
-	BOOL fieldEditorWasUp;
-	NSRect mouseHoverRect;
-
 	NSTableViewSelectionHighlightStyle defaultSelectionHighlightStyle;
 	NSTableViewDraggingDestinationFeedbackStyle defaultDraggingDestinationFeedbackStyle;
 	CGFloat defaultRowHeight;
@@ -29,6 +25,20 @@
 @end
 
 @implementation OFBOutlineView
+- (void)expandItem:(id)anItem expandChildren:(BOOL)flag
+{
+	BOOL oldFlag = std::exchange(_recursiveRequest, flag);
+	[super expandItem:anItem expandChildren:flag];
+	_recursiveRequest = oldFlag;
+}
+
+- (void)collapseItem:(id)anItem collapseChildren:(BOOL)flag
+{
+	BOOL oldFlag = std::exchange(_recursiveRequest, flag);
+	[super collapseItem:anItem collapseChildren:flag];
+	_recursiveRequest = oldFlag;
+}
+
 - (void)setRenderAsSourceList:(BOOL)value
 {
 	if(_renderAsSourceList == value)
@@ -95,7 +105,7 @@
 
 - (void)showContextMenu:(id)sender
 {
-	if(NSMenu* menu = [self.menuDelegate menuForOutlineView:self])
+	if(NSMenu* menu = [self menuForEvent:[NSApp currentEvent]])
 	{
 		NSInteger row = [self selectedRow] != -1 ? [self selectedRow] : 0;
 		NSRect rect = [self convertRect:[self rectOfRow:row] toView:nil];
@@ -119,40 +129,25 @@
 	}
 }
 
-- (NSMenu*)menuForEvent:(NSEvent*)theEvent
-{
-	if(!self.menuDelegate)
-		return [super menuForEvent:theEvent];
-
-	int row = [self rowAtPoint:[self convertPoint:[theEvent locationInWindow] fromView:nil]];
-	if(row == -1)
-		[self selectRowIndexes:[NSIndexSet indexSet] byExtendingSelection:NO];
-	else if(![self.selectedRowIndexes containsIndex:row])
-		[self selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-	return [self.menuDelegate menuForOutlineView:self];
-}
-
 // =============================
 // = Accepting First Responder =
 // =============================
 
 - (BOOL)shouldActivate
 {
-	id firstResponder = [[self window] firstResponder];
-	if(([firstResponder respondsToSelector:@selector(delegate)] && [(NSText*)firstResponder delegate] == self) || fieldEditorWasUp)
-		return YES;
-
 	NSEvent* event = [NSApp currentEvent];
 	if([event type] != NSLeftMouseDown)
 		return YES;
 
-	NSInteger row = [self rowAtPoint:[self convertPoint:[event locationInWindow] fromView:nil]];
-	NSUInteger hit = row == -1 ? 0 : [[self preparedCellAtColumn:0 row:row] hitTestForEvent:event inRect:[self frameOfCellAtColumn:0 row:row] ofView:self];
-	if(hit & (OFBPathInfoCellHitOpenItem | OFBPathInfoCellHitRevealItem | NSCellHitTrackableArea))
+	NSView* firstResponder = (NSView*)[[self window] firstResponder];
+	if([firstResponder isKindOfClass:[NSView class]] && [firstResponder isDescendantOf:self])
+		return YES;
+
+	if([event clickCount] != 1 || (event.modifierFlags & NSCommandKeyMask))
 		return NO;
 
 	NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
-	return [self isRowSelected:[self rowAtPoint:p]] && !(event.modifierFlags & NSCommandKeyMask);
+	return [self isRowSelected:[self rowAtPoint:p]];
 }
 
 - (BOOL)acceptsFirstResponder
@@ -171,10 +166,11 @@
 
 - (void)performEditSelectedRow:(id)sender
 {
-	if([self numberOfSelectedRows] == 1)
+	NSInteger row = self.clickedRow == -1 && [self numberOfSelectedRows] == 1 ? self.selectedRow : self.clickedRow;
+	if(row != -1)
 	{
 		[[self window] makeKeyWindow];
-		[self editColumn:0 row:[self selectedRow] withEvent:nil select:YES];
+		[self editColumn:0 row:row withEvent:nil select:YES];
 	}
 }
 
@@ -184,8 +180,6 @@
 	{
 		{ "@" + utf8::to_s(NSLeftArrowFunctionKey),  @selector(goBack:)                   },
 		{ "@" + utf8::to_s(NSRightArrowFunctionKey), @selector(goForward:)                },
-		{ utf8::to_s(NSCarriageReturnCharacter),     @selector(performEditSelectedRow:)   },
-		{ utf8::to_s(NSEnterCharacter),              @selector(performEditSelectedRow:)   },
 		{ "@" + utf8::to_s(NSDownArrowFunctionKey),  @selector(performDoubleClick:)       },
 		{ "@o",                                      @selector(performDoubleClick:)       },
 		{ "@d",                                      @selector(duplicateSelectedEntries:) },
@@ -195,10 +189,10 @@
 	};
 
 	std::string const key = to_s(theEvent);
-	for(size_t i = 0; i < sizeofA(KeyActions); ++i)
+	for(auto const& keyAction : KeyActions)
 	{
-		if(key == KeyActions[i].key)
-			return (void)[NSApp sendAction:KeyActions[i].action to:nil from:self];
+		if(key == keyAction.key)
+			return (void)[NSApp sendAction:keyAction.action to:nil from:self];
 	}
 
 	[super keyDown:theEvent];
@@ -228,120 +222,5 @@
 
 	if([NSOutlineView respondsToSelector:@selector(draggedImage:endedAt:operation:)])
 		[super draggedImage:anImage endedAt:aPoint operation:aDragOperation];
-}
-
-// ========================
-// = Field Editor Support =
-// ========================
-
-- (void)cancelOperation:(id)sender
-{
-	if([self abortEditing])
-		[[self window] makeFirstResponder:self]; // Restore focus
-}
-
-- (void)textDidEndEditing:(NSNotification *)aNotification
-{
-	int movement = [[[aNotification userInfo] objectForKey:@"NSTextMovement"] intValue];
-	[super textDidEndEditing:aNotification];
-	NSInteger row = [self selectedRow];
-	if(movement == NSReturnTextMovement)
-	{
-		[self abortEditing];
-		[[self window] makeFirstResponder:self];
-	}
-	// else if(movement == NSTabTextMovement)
-	// {
-	// 	[self abortEditing];
-	// 	++row;
-	// 	if(row == [self numberOfRows])
-	// 		row = 0;
-	// 	[self selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-	// 	[self editColumn:0 row:row withEvent:nil select:YES];
-	// }
-	else if(movement == NSBacktabTextMovement)
-	{
-		[self abortEditing];
-		if(row == 0)
-			row = [self numberOfRows];
-		--row;
-		[self selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-		[self editColumn:0 row:row withEvent:nil select:YES];
-	}
-
-	fieldEditorWasUp = YES;
-	[self performSelector:@selector(setFieldEditorWasUp:) withObject:0 afterDelay:0];
-}
-
-- (void)setFieldEditorWasUp:(id)sender
-{
-	fieldEditorWasUp = NO;
-}
-
-// ==================
-// = Mouse Tracking =
-// ==================
-
-- (void)cursorUpdate:(NSEvent*)event
-{
-	if(NSMouseInRect([self convertPoint:[event locationInWindow] fromView:nil], [[event trackingArea] rect], self.isFlipped))
-			[[NSCursor pointingHandCursor] set];
-	else	[super cursorUpdate:event];
-}
-
-- (void)updateTrackingAreas
-{
-	for(NSTrackingArea* trackingArea in self.trackingAreas)
-		[self removeTrackingArea:trackingArea];
-
-	[super updateTrackingAreas];
-
-	NSRange rows = [self rowsInRect:[self visibleRect]];
-	for(NSUInteger row = rows.location; row < NSMaxRange(rows); ++row)
-	{
-		NSRect cellFrame  = [self frameOfCellAtColumn:0 row:row];
-		NSRect imageFrame = [[[[self tableColumns] lastObject] dataCell] imageFrameWithFrame:cellFrame inControlView:self];
-		imageFrame.origin.y    = cellFrame.origin.y;
-		imageFrame.size.height = cellFrame.size.height + self.intercellSpacing.height;
-		[self addTrackingArea:[[NSTrackingArea alloc] initWithRect:imageFrame options:NSTrackingCursorUpdate|NSTrackingActiveInKeyWindow owner:self userInfo:NULL]];
-	}
-
-	[self addTrackingArea:[[NSTrackingArea alloc] initWithRect:[self visibleRect] options:NSTrackingMouseEnteredAndExited|NSTrackingMouseMoved|NSTrackingActiveInKeyWindow owner:self userInfo:NULL]];
-}
-
-// ===============
-// = Mouse Moved =
-// ===============
-
-- (void)mouseMoved:(NSEvent*)theEvent
-{
-	NSRect newHoverRect = NSZeroRect;
-
-	NSPoint mousePos = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-	NSInteger row = [self rowAtPoint:mousePos];
-	if(row != -1)
-	{
-		OFBPathInfoCell* cell = (OFBPathInfoCell*)[self preparedCellAtColumn:0 row:row];
-		NSRect closeButtonRect = [cell closeButtonRectInFrame:[self frameOfCellAtColumn:0 row:row]];
-		if(NSMouseInRect(mousePos, closeButtonRect, self.isFlipped))
-			newHoverRect = closeButtonRect;
-	}
-
-	if(!NSEqualRects(mouseHoverRect, newHoverRect))
-	{
-		[self setNeedsDisplayInRect:mouseHoverRect];
-		[self setNeedsDisplayInRect:newHoverRect];
-		mouseHoverRect = newHoverRect;
-	}
-}
-
-- (void)mouseExited:(NSEvent*)anEvent
-{
-	if(!NSIsEmptyRect(mouseHoverRect))
-	{
-		[self setNeedsDisplayInRect:mouseHoverRect];
-		mouseHoverRect = NSZeroRect;
-	}
-	[super mouseExited:anEvent];
 }
 @end

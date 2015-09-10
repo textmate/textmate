@@ -11,6 +11,8 @@
 
 namespace ng
 {
+	find::options_t convert (std::map<std::string, std::string> const& options);
+
 	enum action_t
 	{
 		kMoveBackward,
@@ -69,6 +71,7 @@ namespace ng
 		kSelectParagraph,
 		kSelectWord,
 		kToggleColumnSelection,
+		kDeselectLast,
 
 		kFindNext,
 		kFindPrevious,
@@ -198,7 +201,7 @@ namespace ng
 		void sanitize_selection ();
 
 		void perform_replacements (std::multimap<std::pair<size_t, size_t>, std::string> const& replacements);
-		bool handle_result (std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, ng::range_t input_range, std::map<std::string, std::string> environment);
+		bool handle_result (std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, ng::ranges_t const& inputRanges, std::map<std::string, std::string> environment);
 
 		void clear_snippets ();
 

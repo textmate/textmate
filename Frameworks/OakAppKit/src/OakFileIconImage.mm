@@ -225,9 +225,9 @@ enum {
 		struct stat buf;
 		if(lstat(path.c_str(), &buf) == 0)
 		{
-			_exists    = YES;
-			_directory = S_ISDIR(buf.st_mode);
-			_alias     = S_ISLNK(buf.st_mode);
+			_exists    = !(_needsSetupMask & kNeedExists)    ? _exists    : YES;
+			_directory = !(_needsSetupMask & kNeedDirectory) ? _directory : S_ISDIR(buf.st_mode);
+			_alias     = !(_needsSetupMask & kNeedAlias)     ? _alias     : S_ISLNK(buf.st_mode);
 		}
 		_needsSetupMask &= ~(kNeedExists|kNeedDirectory|kNeedAlias);
 	}
@@ -307,7 +307,7 @@ enum {
 - (id)copyWithZone:(NSZone*)zone
 {
 	OakFileIconImage* copy = [super copyWithZone:zone];
-	copy->_fileIconImageRep = _fileIconImageRep;
+	copy->_fileIconImageRep = [[copy representations] firstObject];
 	return copy;
 }
 

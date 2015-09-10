@@ -117,7 +117,7 @@ namespace command
 	void fix_shebang (std::string* command)
 	{
 		if(command->substr(0, 2) != "#!")
-			command->insert(0, "#!/usr/bin/env bash\n[[ -f \"${TM_SUPPORT_PATH}/lib/bash_init.sh\" ]] && . \"${TM_SUPPORT_PATH}/lib/bash_init.sh\"\n\n");
+			command->insert(0, "#!/bin/bash\n[[ -f \"${TM_SUPPORT_PATH}/lib/bash_init.sh\" ]] && . \"${TM_SUPPORT_PATH}/lib/bash_init.sh\"\n\n");
 	}
 
 	// ==================
@@ -150,7 +150,7 @@ namespace command
 
 		int stdinRead, stdinWrite;
 		std::tie(stdinRead, stdinWrite) = io::create_pipe();
-		_input_range = _command.input == input::nothing ? (close(stdinWrite), ng::range_t()) : _delegate->write_unit_to_fd(stdinWrite, _command.input, _command.input_fallback, _command.input_format, _command.scope_selector, _environment, &_input_was_selection);
+		_input_ranges = _command.input == input::nothing ? (close(stdinWrite), ng::ranges_t()) : _delegate->write_unit_to_fd(stdinWrite, _command.input, _command.input_fallback, _command.input_format, _command.scope_selector, _environment, &_input_was_selection);
 
 		auto textOutHandler = ^(char const* bytes, size_t len) { _out.insert(_out.end(), bytes, bytes + len); };
 		auto htmlOutHandler = ^(char const* bytes, size_t len) { send_html_data(bytes, len); };
@@ -312,7 +312,7 @@ namespace command
 					outputCaret = output_caret::after_output;
 			}
 
-			if(!_input_range)
+			if(!_input_ranges)
 			{
 				switch(placement)
 				{
@@ -324,7 +324,7 @@ namespace command
 			if(format == output_format::snippet && _command.disable_output_auto_indent)
 				format = output_format::snippet_no_auto_indent;
 
-			_delegate->accept_result(_out, placement, format, outputCaret, _input_range, _environment);
+			_delegate->accept_result(_out, placement, format, outputCaret, _input_ranges, _environment);
 		}
 		else if(_did_send_html)
 		{

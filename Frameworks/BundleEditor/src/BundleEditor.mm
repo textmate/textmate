@@ -191,8 +191,8 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 	};
 
 	[OakRot13Transformer register];
-	for(size_t i = 0; i != sizeofA(converters); ++i)
-		[OakStringListTransformer createTransformerWithName:converters[i].name andObjectsArray:converters[i].array];
+	for(auto const& converter : converters)
+		[OakStringListTransformer createTransformerWithName:converter.name andObjectsArray:converter.array];
 
 	drawer = [[NSDrawer alloc] initWithContentSize:NSZeroSize preferredEdge:NSMaxXEdge];
 	[drawer setParentWindow:[self window]];
@@ -538,6 +538,13 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 			}
 			[cell setImage:[NSImage imageNamed:info_for(item->kind()).file inSameBundleAsClass:[self class]]];
 
+			if(item->kind() == bundles::kItemTypeBundle)
+			{
+				NSMenuItem* menuItem = [menu addItemWithTitle:@"Export Bundle…" action:@selector(exportBundle:) keyEquivalent:@""];
+				menuItem.target = self;
+				menuItem.representedObject = [NSString stringWithCxxString:item->uuid()];
+			}
+
 			auto paths = item->paths();
 			if(paths.size() == 1)
 			{
@@ -576,6 +583,43 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 	item.target = self;
 	item.representedObject = [NSString stringWithCxxString:path];
 	return item;
+}
+
+- (void)exportBundle:(id)sender
+{
+	oak::uuid_t const uuid = to_s((NSString*)[sender representedObject]);
+	if(bundles::item_ptr bundle = bundles::lookup(uuid))
+	{
+		std::string name = bundle->name();
+		std::replace(name.begin(), name.end(), '/', ':');
+		std::replace(name.begin(), name.end(), '.', '_');
+
+		NSSavePanel* savePanel = [NSSavePanel savePanel];
+		[savePanel setNameFieldStringValue:[NSString stringWithCxxString:name + ".tmbundle"]];
+		[savePanel beginSheetModalForWindow:self.window completionHandler:^(NSInteger result) {
+			if(result == NSOKButton)
+			{
+				NSString* path = [[savePanel.URL filePathURL] path];
+				if([[NSFileManager defaultManager] fileExistsAtPath:path])
+				{
+					NSError* error;
+					if(![[NSFileManager defaultManager] removeItemAtPath:path error:&error])
+					{
+						[self.window presentError:error];
+						return;
+					}
+				}
+
+				std::string const dest = to_s(path);
+				bool res = true;
+				for(auto const& item : bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, ~(bundles::kItemTypeMenu|bundles::kItemTypeMenuItemSeparator), uuid, false, true, false))
+					res = res && item->save_to(dest);
+
+				if(!res)
+					NSRunAlertPanel(@"Failed to Save Bundle", @"Unknown error while saving bundle as “%@”.", @"OK", nil, nil, [path stringByAbbreviatingWithTildeInPath]);
+			}
+		}];
+	}
 }
 
 - (void)showInFinder:(id)sender
@@ -653,8 +697,8 @@ static NSMutableDictionary* DictionaryForBundleItem (bundles::item_ptr const& aB
 			[res setObject:@2 forKey:@"version"];
 			if(cmd.auto_scroll_output)
 				[res setObject:@YES forKey:@"autoScrollOutput"];
-			for(size_t i = 0; i != sizeofA(popups); ++i)
-				[res setObject:[popups[i].array objectAtIndex:popups[i].index] forKey:popups[i].key];
+			for(auto const& popup : popups)
+				[res setObject:[popup.array objectAtIndex:popup.index] forKey:popup.key];
 		}
 		break;
 
@@ -715,7 +759,7 @@ static NSMutableDictionary* DictionaryForPropertyList (plist::dictionary_t const
 
 	item_info_t const& info = info_for(bundleItem->kind());
 
-	[[self window] setTitle:[NSString stringWithCxxString:bundleItem->full_name()]];
+	[[self window] setTitle:[NSString stringWithCxxString:bundleItem->name_with_bundle()]];
 	[[self window] setRepresentedFilename:NSHomeDirectory()];
 	[[[self window] standardWindowButton:NSWindowDocumentIconButton] setImage:[[NSWorkspace sharedWorkspace] iconForFileType:[NSString stringWithCxxString:info.file_type]]];
 

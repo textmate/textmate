@@ -3,6 +3,7 @@
 #include <settings/settings.h>
 #include <bundles/bundles.h>
 #include <regexp/regexp.h>
+#include <regexp/glob.h>
 #include <cf/cf.h>
 #include <oak/debug.h>
 
@@ -133,7 +134,7 @@ namespace file
 		{
 			std::string const name = path::name(path);
 			std::string const ext  = path::extensions(name);
-			settings_t::set(kSettingsFileTypeKey, fileType, NULL_STR, ext.empty() || ext == name ? name : "*." + ext.substr(1));
+			settings_t::set(kSettingsFileTypeKey, fileType, NULL_STR, ext.empty() || ext == name ? path::glob_t::escape(name) : "*" + path::glob_t::escape(ext));
 		}
 	}
 

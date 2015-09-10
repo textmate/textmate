@@ -4,7 +4,6 @@
 #include "regexp.h"
 
 #include <oak/oak.h>
-#include <oak/compat.h>
 #include <text/case.h>
 #include <text/utf8.h>
 #include <cf/cf.h>

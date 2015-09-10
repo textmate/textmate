@@ -1,17 +1,17 @@
 #import "FSSCMDataSource.h"
 #import "FSItem.h"
 #import <scm/scm.h>
+#import <OakAppKit/NSImage Additions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <io/path.h>
 #import <text/encode.h>
-#import <text/ctype.h>
 #import <text/format.h>
 #import <oak/oak.h>
 
-static OakFileIconImage* SCMFolderIcon ()
+static NSImage* SCMFolderIcon ()
 {
-	OakFileIconImage* res = [[OakFileIconImage alloc] initWithSize:NSMakeSize(16, 16)];
-	res.directory = YES;
+	NSImage* res = [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kGenericFolderIcon)];
+	res.size = NSMakeSize(16, 16);
 	return res;
 }
 
@@ -20,63 +20,73 @@ static NSURL* URLAppend (NSURL* base, NSString* relativePath)
 	return [NSURL URLWithString:[[NSURL URLWithString:relativePath relativeToURL:base] absoluteString]];
 }
 
-static NSArray* convert (std::vector<std::string> const& paths, std::string const& wcPath, NSUInteger options, bool hideSCMBadge = false)
+static NSArray* convert (std::map<std::string, scm::status::type> const& pathsMap, std::string const& wcPath, NSArray* oldItems, bool hideSCMBadge = false)
 {
+	NSMutableDictionary* cache = [NSMutableDictionary new];
+	for(FSItem* item in oldItems)
+		cache[item.url] = item;
+
+	std::vector<std::string> paths;
+	std::transform(pathsMap.begin(), pathsMap.end(), back_inserter(paths), [](std::pair<std::string, scm::status::type> const& p){ return p.first; });
+
 	auto parents = path::disambiguate(paths);
 	auto parent = parents.begin();
 
 	NSMutableArray* res = [NSMutableArray array];
-	for(auto const& path : paths)
+	for(auto const& pair : pathsMap)
 	{
-		FSItem* item = [FSItem itemWithURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:path]]];
-		item.displayName = [NSString stringWithCxxString:path::display_name(path, *parent++)];
-		item.target      = [NSURL fileURLWithPath:[NSString stringWithCxxString:path]];
-		item.labelIndex  = path::label_index(path);
-		item.toolTip     = [NSString stringWithCxxString:path::relative_to(path, wcPath)];
-		item.leaf        = YES;
+		NSURL* url = [NSURL fileURLWithPath:[NSString stringWithCxxString:pair.first]];
+		FSItem* item = cache[url];
+		if(!item)
+			item = [FSItem itemWithURL:url];
 
-		if(hideSCMBadge)
-			item.icon.scmStatus = scm::status::none;
+		item.displayName = [NSString stringWithCxxString:path::display_name(pair.first, *parent++)];
+		item.target      = url;
+		item.labelIndex  = path::label_index(pair.first);
+		item.toolTip     = [NSString stringWithCxxString:path::relative_to(pair.first, wcPath)];
+		item.leaf        = YES;
+		item.scmStatus   = hideSCMBadge ? scm::status::none : pair.second;
+		item.missing     = pair.second == scm::status::deleted;
 
 		[res addObject:item];
 	}
-	return [FSDataSource sortArray:res usingOptions:options];
+	return res;
 }
 
-template <typename _Iter>
-_Iter prune_path_parents (_Iter it, _Iter last)
+@interface FSSCMItem : FSItem
+@property (nonatomic, weak) FSDataSource* dataSource;
+@property (nonatomic) SEL selector;
+@end
+
+@implementation FSSCMItem
+- (id)initWithURL:(NSURL*)anURL dataSource:(FSDataSource*)aDataSource selector:(SEL)aSelector
 {
-	_Iter out = it;
-	std::sort(it, last);
-	std::reverse(it, last);
-	for(std::string child = NULL_STR; it != last; child = *it++)
+	if((self = [super initWithURL:anURL]))
 	{
-		if(!path::is_child(child, *it))
-			*out++ = *it;
+		_dataSource = aDataSource;
+		_selector   = aSelector;
 	}
-	return out;
+	return self;
 }
 
-template <typename _Iter>
-_Iter prune_path_children (_Iter it, _Iter last)
+- (void)loadChildren:(FSDataSource*)dataSource completionHandler:(void(^)(NSArray*))block
 {
-	_Iter out = it;
-	std::sort(it, last);
-	for(std::string parent = NULL_STR; it != last; ++it)
-	{
-		if(!path::is_child(*it, parent))
-			*out++ = parent = *it;
-	}
-	return out;
+	auto fn = (NSArray*(*)(id, SEL, NSArray*))[_dataSource methodForSelector:_selector];
+	block(fn(_dataSource, _selector, self.children));
 }
+@end
 
-@implementation FSSCMDataSource
+@interface FSSCMDataSource ()
 {
 	OBJC_WATCH_LEAKS(FSSCMDataSource);
-	NSUInteger options;
-	scm::info_ptr scmInfo;
+	NSURL* _url;
+	NSUInteger _options;
+	scm::info_ptr _scmInfo;
+	NSMapTable* _items;
 }
+@end
 
+@implementation FSSCMDataSource
 + (NSURL*)scmURLWithPath:(NSString*)aPath
 {
 	NSURL* url;
@@ -94,112 +104,22 @@ _Iter prune_path_children (_Iter it, _Iter last)
 	return url;
 }
 
-+ (NSString*)parseSCMURLStatusQuery:(NSURL*)anURL
-{
-	NSArray* query = [[anURL query] componentsSeparatedByString:@"="];
-	return [query lastObject] ?: @"all";
-}
-
-- (NSArray*)repositoryStatus
-{
-	std::vector<std::string> unstagedPaths, untrackedPaths;
-
-	for(auto pair : scmInfo->status())
-	{
-		if(pair.second & (scm::status::modified|scm::status::added|scm::status::deleted|scm::status::conflicted|scm::status::unversioned))
-		{
-			if(pair.second & scm::status::unversioned)
-					untrackedPaths.push_back(pair.first);
-			else	unstagedPaths.push_back(pair.first);
-		}
-	}
-
-	if(!scmInfo->tracks_directories())
-	{
-		unstagedPaths.erase(prune_path_parents(unstagedPaths.begin(), unstagedPaths.end()), unstagedPaths.end());
-		untrackedPaths.erase(prune_path_children(untrackedPaths.begin(), untrackedPaths.end()), untrackedPaths.end());
-	}
-
-	std::sort(unstagedPaths.begin(), unstagedPaths.end(), text::less_t());
-	std::sort(untrackedPaths.begin(), untrackedPaths.end(), text::less_t());
-
-	FSItem* unstagedItem = [FSItem itemWithURL:URLAppend(self.rootItem.url, @"?status=unstaged")];
-	unstagedItem.icon        = SCMFolderIcon();
-	unstagedItem.displayName = @"Uncommitted Changes";
-	unstagedItem.group       = YES;
-	unstagedItem.children    = convert(unstagedPaths, scmInfo->root_path(), options);
-
-	FSItem* untrackedItem = [FSItem itemWithURL:URLAppend(self.rootItem.url, @"?status=untracked")];
-	untrackedItem.icon        = SCMFolderIcon();
-	untrackedItem.displayName = @"Untracked Items";
-	untrackedItem.group       = YES;
-	untrackedItem.children    = convert(untrackedPaths, scmInfo->root_path(), options, true);
-
-	NSMutableArray* children = [NSMutableArray array];
-	[children addObject:unstagedItem];
-	[children addObject:untrackedItem];
-	return children;
-}
-
-- (void)postReloadNotification
-{
-	[[NSNotificationCenter defaultCenter] postNotificationName:FSItemDidReloadNotification object:self userInfo:@{ @"item" : self.rootItem, @"children" : [FSDataSource sortArray:[self repositoryStatus] usingOptions:options], @"recursive" : @YES }];
-}
-
 - (id)initWithURL:(NSURL*)anURL options:(NSUInteger)someOptions
 {
 	if((self = [super init]))
 	{
-		options = someOptions;
+		_url     = anURL;
+		_options = someOptions;
+		_scmInfo = scm::info([[anURL path] fileSystemRepresentation]);
+		_items   = [NSMapTable mapTableWithKeyOptions:NSPointerFunctionsStrongMemory valueOptions:NSPointerFunctionsZeroingWeakMemory];
 
-		std::string const rootPath = [[anURL path] fileSystemRepresentation];
-		std::string name = path::display_name(rootPath);
+		NSArray* query = [[anURL query] componentsSeparatedByString:@"="];
+		self.rootItem = [self itemOfType:[query lastObject] ?: @"all"];
 
-		NSString* status = [FSSCMDataSource parseSCMURLStatusQuery:anURL];
-		if([status isEqualToString:@"unversioned"] || [status isEqualToString:@"disabled"])
+		if(_scmInfo)
 		{
-			self.rootItem             = [FSItem itemWithURL:nil];
-			self.rootItem.icon        = [NSImage imageNamed:NSImageNameFolderSmart];
-			self.rootItem.displayName = [NSString stringWithFormat:@"%@ (%@)", [NSString stringWithCxxString:name], status];
-			self.rootItem.children    = nil;
-
-			return self;
-		}
-
-		if(scmInfo = scm::info(rootPath))
-		{
-			if(!scmInfo->dry())
-			{
-				auto const& vars = scmInfo->scm_variables();
-				auto const branch = vars.find("TM_SCM_BRANCH");
-				if(branch != vars.end())
-					name = text::format("%s (%s)", path::display_name(scmInfo->root_path()).c_str(), branch->second.c_str());
-			}
-
-			if([status isEqualToString:@"all"])
-			{
-				self.rootItem             = [FSItem itemWithURL:anURL];
-				self.rootItem.icon        = [NSImage imageNamed:NSImageNameFolderSmart];
-				self.rootItem.displayName = [NSString stringWithCxxString:name];
-				self.rootItem.children    = [self repositoryStatus];
-			}
-			else
-			{
-				name = path::display_name(rootPath);
-				for(FSItem* item in [self repositoryStatus])
-				{
-					if([[FSSCMDataSource parseSCMURLStatusQuery:item.url] isEqualToString:status])
-					{
-						self.rootItem             = [FSItem itemWithURL:anURL];
-						self.rootItem.icon        = [NSImage imageNamed:NSImageNameFolderSmart];
-						self.rootItem.displayName = [NSString stringWithFormat:@"%@ (%@)", [NSString stringWithCxxString:name], item.displayName];
-						self.rootItem.children    = item.children;
-					}
-				}
-			}
-
 			__weak FSSCMDataSource* weakSelf = self;
-			scmInfo->add_callback(^(scm::info_t const&){
+			_scmInfo->add_callback(^(scm::info_t const&){
 				[weakSelf postReloadNotification];
 			});
 		}
@@ -207,8 +127,145 @@ _Iter prune_path_children (_Iter it, _Iter last)
 	return self;
 }
 
+- (void)postReloadNotification
+{
+	for(id key in _items)
+	{
+		if(FSItem* item = [_items objectForKey:key])
+		{
+			if(item.children)
+				[[NSNotificationCenter defaultCenter] postNotificationName:FSItemDidReloadNotification object:self userInfo:@{ @"item" : item }];
+		}
+	}
+}
+
 - (NSArray*)expandedURLs
 {
-	return @[ URLAppend(self.rootItem.url, @"?status=unstaged"), URLAppend(self.rootItem.url, @"?status=untracked") ];
+	return @[ URLAppend(_url, @"?status=unstaged"), URLAppend(_url, @"?status=untracked") ];
+}
+
+- (NSArray*)unstagedItems:(NSArray*)oldItems
+{
+	std::map<std::string, scm::status::type> unstagedPaths;
+	for(auto pair : _scmInfo->status())
+	{
+		if(pair.second & (scm::status::modified|scm::status::added|scm::status::deleted|scm::status::conflicted|scm::status::unversioned))
+		{
+			if(!(pair.second & scm::status::unversioned))
+				unstagedPaths.insert(pair);
+		}
+	}
+
+	if(!_scmInfo->tracks_directories())
+	{
+		std::vector<std::string> parents;
+
+		std::string child = NULL_STR;
+		for(auto it = unstagedPaths.rbegin(); it != unstagedPaths.rend(); ++it)
+		{
+			if(path::is_child(child, it->first))
+					parents.push_back(it->first);
+			else	child = it->first;
+		}
+
+		for(auto const& path : parents)
+			unstagedPaths.erase(path);
+	}
+
+	return [FSDataSource sortArray:convert(unstagedPaths, _scmInfo->root_path(), oldItems) usingOptions:_options];
+}
+
+- (NSArray*)untrackedItems:(NSArray*)oldItems
+{
+	std::map<std::string, scm::status::type> untrackedPaths;
+	for(auto pair : _scmInfo->status())
+	{
+		if(pair.second & (scm::status::modified|scm::status::added|scm::status::deleted|scm::status::conflicted|scm::status::unversioned))
+		{
+			if(pair.second & scm::status::unversioned)
+				untrackedPaths.insert(pair);
+		}
+	}
+
+	if(!_scmInfo->tracks_directories())
+	{
+		std::vector<std::string> children;
+
+		std::string parent = NULL_STR;
+		for(auto const& pair : untrackedPaths)
+		{
+			if(path::is_child(pair.first, parent))
+					children.push_back(pair.first);
+			else	parent = pair.first;
+		}
+
+		for(auto const& path : children)
+			untrackedPaths.erase(path);
+	}
+
+	return [FSDataSource sortArray:convert(untrackedPaths, _scmInfo->root_path(), oldItems, true) usingOptions:_options];
+}
+
+- (NSArray*)rootItems:(NSArray*)oldItems
+{
+	return @[ [self itemOfType:@"unstaged"], [self itemOfType:@"untracked"] ];
+}
+
+- (FSItem*)itemOfType:(NSString*)type
+{
+	FSItem* res = nil;
+	if([type isEqualToString:@"all"])
+	{
+		NSString* name = [[NSFileManager defaultManager] displayNameAtPath:[_url path]];
+		if(!_scmInfo->dry())
+		{
+			auto const vars   = _scmInfo->scm_variables();
+			auto const branch = vars.find("TM_SCM_BRANCH");
+			if(branch != vars.end())
+				name = [NSString stringWithFormat:@"%@ (%@)", name, [NSString stringWithCxxString:branch->second]];
+		}
+
+		res = [[FSSCMItem alloc] initWithURL:URLAppend(_url, @"?status=all") dataSource:self selector:@selector(rootItems:)];
+		res.icon        = [NSImage imageNamed:@"SCMTemplate" inSameBundleAsClass:[self class]];
+		res.displayName = name;
+		res.group       = YES;
+	}
+	else if([type isEqualToString:@"unstaged"])
+	{
+		res = [[FSSCMItem alloc] initWithURL:URLAppend(_url, @"?status=unstaged") dataSource:self selector:@selector(unstagedItems:)];
+		res.icon        = SCMFolderIcon();
+		res.displayName = @"Uncommitted Changes";
+		res.group       = YES;
+
+		[_items setObject:res forKey:res.url];
+	}
+	else if([type isEqualToString:@"untracked"])
+	{
+		res = [[FSSCMItem alloc] initWithURL:URLAppend(_url, @"?status=untracked") dataSource:self selector:@selector(untrackedItems:)];
+		res.icon        = SCMFolderIcon();
+		res.displayName = @"Untracked Items";
+		res.group       = YES;
+
+		[_items setObject:res forKey:res.url];
+	}
+	else
+	{
+		res             = [FSItem itemWithURL:_url];
+		res.icon        = [NSImage imageNamed:@"SCMTemplate" inSameBundleAsClass:[self class]];
+		res.displayName = [NSString stringWithFormat:@"%@ (%@)", [[NSFileManager defaultManager] displayNameAtPath:[_url path]], type];
+	}
+	return res;
+}
+
+- (void)reloadItem:(FSItem*)anItem completionHandler:(void(^)(NSArray*))block
+{
+	if([anItem respondsToSelector:@selector(loadChildren:completionHandler:)])
+		[(FSSCMItem*)anItem loadChildren:self completionHandler:block];
+}
+
+- (BOOL)unloadItem:(FSItem*)anItem
+{
+	anItem.children = nil;
+	return YES;
 }
 @end

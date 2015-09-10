@@ -25,6 +25,7 @@ To bootstrap the build you need to run `./configure` (in the root of the source 
 * `builddir` — location of built files. Defaults to `~/build/TextMate`.
 * `identity` — for Apple’s `codesign`. Defaults to ad-hoc signing, which does not use an identity at all.
 * `boostdir` — location of boost includes. By default it will search various locations including MacPorts and Homebrew.
+* `sparsedir` — location of sparsehash includes. By default it will search various locations including MacPorts and Homebrew.
 * `CC` and `CXX` — C and C++ compiler.
 
 In the simplest case you would run:
@@ -43,13 +44,14 @@ To build the source the following must first be installed on your system:
  * [ninja][]         — build system similar to `make`
  * [ragel][]         — state machine compiler
  * [boost][]         — portable C++ source libraries
+ * [sparsehash][]    — A cache friendly hash_map
  * [multimarkdown][] — marked-up plain text compiler
  * [mercurial][]     — distributed SCM system
  * [Cap’n Proto][capnp] — serialization library
 
 You need to manually install [Cap’n Proto][capnp] if you're not using [homebrew][]. To install the other dependencies via [MacPorts][] run:
 
-	sudo port install ninja ragel boost multimarkdown mercurial
+	sudo port install ninja ragel boost multimarkdown mercurial sparsehash
 
 If `port` fails with a build error then likely you need to agree (system-wide) to Apple’s Xcode license:
 
@@ -57,7 +59,7 @@ If `port` fails with a build error then likely you need to agree (system-wide) t
 
 To install using [homebrew][] run:
 
-	brew install ragel boost multimarkdown hg ninja capnp
+	brew install ragel boost multimarkdown hg ninja capnp google-sparsehash
 
 In practice `hg` ([mercurial][]) is only required for the SCM library’s tests so you can skip this dependency if you don’t mind a failing test.
 
@@ -112,7 +114,7 @@ For the `TextMate.app` application:
 	ninja TextMate/tbz       # Create a tarball of TextMate.app. Also produce the dsym tarball.
 	ninja TextMate/deploy    # Push a nightly build. Fails without proper credentials :)
 
-Note that `ninja TextMate/clean` only cleans the TextMate build folder (`$builddir/Applications/TextMate`) but all libraries and applications it depends on, are not cleaned.
+Note that `ninja TextMate/clean` only cleans the TextMate build folder (`$builddir/Applications/TextMate`), but all libraries and applications it depends on are not cleaned.
 
 To clean everything run:
 
@@ -135,5 +137,6 @@ TextMate is a trademark of Allan Odgaard.
 [homebrew]:      http://brew.sh/
 [NinjaBundle]:   https://github.com/textmate/ninja.tmbundle
 [CxxTest]:       https://github.com/textmate/cxxtest.tmbundle
+[sparsehash]:    https://code.google.com/p/sparsehash/
 [#textmate]:     irc://irc.freenode.net/#textmate
 [freenode.net]:  http://freenode.net/

@@ -35,6 +35,7 @@ namespace scope
 		std::string const& back () const;
 		size_t size () const;
 		bool empty () const;
+		size_t hash () const;
 
 		bool operator== (scope_t const& rhs) const;
 		bool operator!= (scope_t const& rhs) const;
@@ -65,6 +66,7 @@ namespace scope
 			std::string _atoms;
 			node_t* _parent;
 			std::atomic_size_t _retain_count;
+			size_t _hash;
 		};
 
 		explicit scope_t (node_t* node);
@@ -117,5 +119,13 @@ namespace scope
 	PUBLIC std::string to_s (selector_t const& s);
 
 } /* scope */
+
+template<> struct std::hash<scope::scope_t>
+{
+	size_t operator() (scope::scope_t const& scope) const
+	{
+		return scope.hash();
+	}
+};
 
 #endif /* end of include guard: SCOPE_SELECTOR_H_WZ1A8GIC */

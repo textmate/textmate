@@ -8,7 +8,6 @@
 #import <OakAppKit/NSImage Additions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakFoundation/OakFoundation.h>
-#import <OakFileBrowser/OFBPathInfoCell.h>
 #import <ns/ns.h>
 #import <text/format.h>
 #import <text/parse.h>
@@ -185,7 +184,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 
 		NSView* contentView = self.window.contentView;
 		OakAddAutoLayoutViewsToSuperview([views allValues], contentView);
-		OakSetupKeyViewLoop(@[ self.searchField, scopeBar.buttons ]);
+		OakSetupKeyViewLoop(@[ self.searchField, scopeBar ]);
 
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[searchField(>=50)]-(8)-|"                      options:0 metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[aboveScopeBarDark(==aboveScopeBarLight)]|"          options:0 metrics:nil views:views]];
@@ -495,6 +494,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 - (void)updateFilterString:(NSString*)aString
 {
 	NSString* oldFilter = [(_globString ?: _filterString ?: @"") copy];
+	aString = [aString decomposedStringWithCanonicalMapping];
 
 	NSRegularExpression* const ptrn = [NSRegularExpression regularExpressionWithPattern:@"\\A(?:(.*?\\*.*?)|(.*?))(?::([\\d+:-x\\+]*)|@(.*))?\\z" options:NSAnchoredSearch error:nil];
 	NSTextCheckingResult* m = aString ? [ptrn firstMatchInString:aString options:NSMatchingAnchored range:NSMakeRange(0, [aString length])] : nil;
@@ -578,7 +578,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 		OakRolloverButton* closeButton = [[OakRolloverButton alloc] initWithFrame:NSZeroRect];
 		OakSetAccessibilityLabel(closeButton, @"Close document");
 
-		Class cl = NSClassFromString(@"OFBPathInfoCell");
+		Class cl = NSClassFromString(@"OakFileBrowser");
 		closeButton.regularImage  = [NSImage imageNamed:@"CloseTemplate"         inSameBundleAsClass:cl];
 		closeButton.pressedImage  = [NSImage imageNamed:@"ClosePressedTemplate"  inSameBundleAsClass:cl];
 		closeButton.rolloverImage = [NSImage imageNamed:@"CloseRolloverTemplate" inSameBundleAsClass:cl];

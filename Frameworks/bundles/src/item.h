@@ -47,7 +47,7 @@ namespace bundles
 	{
 		std::string const& name () const;
 		void set_name (std::string const& newName);
-		std::string full_name () const;
+		std::string name_with_bundle () const;
 		oak::uuid_t const& parent_menu () const;
 		void set_parent_menu (oak::uuid_t const& uuid);
 		oak::uuid_t const& uuid () const;
@@ -71,6 +71,7 @@ namespace bundles
 		std::string const& value_for_field (std::string const& field) const;
 
 		bool save (bool useDeltaIfNonLocal = true);
+		bool save_to (std::string const& folder);
 		bool move_to_trash ();
 
 		item_t (oak::uuid_t const& uuid, item_ptr bundleItem, kind_t kind, bool local = false);

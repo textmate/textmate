@@ -69,14 +69,14 @@ plist::dictionary_t convert_command_from_v1 (plist::dictionary_t plist)
 	std::string oldOutput;
 	if(plist::get_key_path(plist, "output", oldOutput))
 	{
-		for(size_t i = 0; i < sizeofA(conversionMap); ++i)
+		for(auto const& mapping : conversionMap)
 		{
-			if(oldOutput == conversionMap[i].oldOutput)
+			if(oldOutput == mapping.oldOutput)
 			{
-				plist["outputLocation"] = conversionMap[i].output;
-				plist["outputFormat"]   = conversionMap[i].format;
-				if(conversionMap[i].caret != NULL_STR)
-					plist["outputCaret"] = conversionMap[i].caret;
+				plist["outputLocation"] = mapping.output;
+				plist["outputFormat"]   = mapping.format;
+				if(mapping.caret != NULL_STR)
+					plist["outputCaret"] = mapping.caret;
 
 				std::string input;
 				if(oldOutput == "afterSelectedText" && plist::get_key_path(plist, "input", input) && input != "selection")

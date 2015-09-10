@@ -49,7 +49,7 @@ static NSString* const kRecordingPlaceholderString = @"…";
 		if(controller && controller != [NSNull null] && keyPath && (id)keyPath != [NSNull null])
 		{
 			id oldValue = [controller valueForKeyPath:keyPath];
-			if(!oldValue || ![oldValue isEqualTo:_eventString])
+			if(!oldValue || ![oldValue isEqual:_eventString])
 				[controller setValue:_eventString forKeyPath:keyPath];
 		}
 	}
@@ -76,7 +76,7 @@ static NSString* const kRecordingPlaceholderString = @"…";
 	{
 		if(!_clearButton)
 		{
-			Class cl = NSClassFromString(@"OFBPathInfoCell");
+			Class cl = NSClassFromString(@"OakFileBrowser");
 			_clearButton = [[OakRolloverButton alloc] initWithFrame:NSZeroRect];
 			_clearButton.regularImage  = [NSImage imageNamed:@"CloseTemplate"         inSameBundleAsClass:cl];
 			_clearButton.pressedImage  = [NSImage imageNamed:@"ClosePressedTemplate"  inSameBundleAsClass:cl];

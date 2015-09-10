@@ -130,9 +130,9 @@ static std::string pretty_key (std::string const& key, int flags)
 
 		bool local_should_quote = true;
 		struct range_t { char first; char last; } const ranges[] = { { 'a', 'z' }, { 'A', 'Z' }, { '_', '_' } };
-		for(size_t i = 0; i < sizeofA(ranges); ++i)
+		for(auto const& range : ranges)
 		{
-			if(ranges[i].first <= val && val <= ranges[i].last)
+			if(range.first <= val && val <= range.last)
 				local_should_quote = false;
 		}
 

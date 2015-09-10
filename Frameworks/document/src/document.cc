@@ -23,7 +23,6 @@
 #include <text/hexdump.h>
 #include <text/tokenize.h>
 #include <oak/duration.h>
-#include <oak/compat.h>
 #include <io/entries.h>
 #include <io/resource.h>
 #include <scm/scm.h>

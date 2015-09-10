@@ -15,3 +15,6 @@ PUBLIC @interface OakFileManager : NSObject
 - (void)moveItemAtURL:(NSURL*)srcURL toURL:(NSURL*)dstURL view:(NSView*)view;
 - (void)trashItemAtURL:(NSURL*)anURL view:(NSView*)view;
 @end
+
+// Only used in tests so not made public (exported)
+NSString* OakReplaceDateInString (NSString* srcPath, NSDate* newDate = [NSDate date]);

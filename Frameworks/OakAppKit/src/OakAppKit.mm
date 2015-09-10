@@ -19,7 +19,7 @@ void OakRunIOAlertPanel (char const* format, ...)
 
 BOOL OakIsAlternateKeyOrMouseEvent (NSUInteger flags, NSEvent* anEvent)
 {
-	return ([anEvent type] == NSLeftMouseUp || [anEvent type] == NSKeyDown) && (([anEvent modifierFlags] & flags) == flags);
+	return ([anEvent type] == NSLeftMouseUp || [anEvent type] == NSOtherMouseUp || [anEvent type] == NSKeyDown) && (([anEvent modifierFlags] & flags) == flags);
 }
 
 @interface OakSheetCallbackDelegate : NSObject
@@ -94,7 +94,7 @@ NSUInteger const OakMoveNoActionReturn = 3;
 
 		NSInteger row = [_tableView selectedRow] + anOffset;
 		NSInteger numberOfRows = [_tableView numberOfRows];
-		if(abs(anOffset) == 1 && numberOfRows && [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsEnableLoopFilterList])
+		if(std::abs(anOffset) == 1 && numberOfRows && [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsEnableLoopFilterList])
 				row = (row + numberOfRows) % numberOfRows;
 		else	row = oak::cap((NSInteger)0, row, numberOfRows - 1);
 

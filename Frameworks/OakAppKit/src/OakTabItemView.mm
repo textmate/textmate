@@ -1,12 +1,12 @@
 #import "OakTabItemView.h"
 #import "OakRolloverButton.h"
 #import "NSImage Additions.h"
-#import <oak/compat.h>
 
 @interface OakTabBarStyle ()
 {
 	NSDictionary* _images;
 	NSMutableDictionary* _activeTabTextStyles;
+	NSMutableDictionary* _selectedTabTextStyles;
 	NSMutableDictionary* _inactiveTabTextStyles;
 }
 @end
@@ -138,14 +138,19 @@
 		_inactiveTabTextStyles = _activeTabTextStyles.mutableCopy;
 		_inactiveTabTextStyles[NSForegroundColorAttributeName] = [NSColor colorWithCalibratedWhite:0.5 alpha:1];
 
-		if(oak::os_major() >= 10 && oak::os_minor() >= 10)
+		if([[NSProcessInfo processInfo] respondsToSelector:@selector(isOperatingSystemAtLeastVersion:)] && [[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:{ 10, 10, 0 }])
 		{
+			_selectedTabTextStyles = _activeTabTextStyles.mutableCopy;
+			_selectedTabTextStyles[NSForegroundColorAttributeName] = [NSColor blackColor];
+
 			_images = [self yosemiteImages];
 			_leftPadding  = -1;
 			_rightPadding = 0;
 		}
 		else
 		{
+			_selectedTabTextStyles = _activeTabTextStyles.copy;
+
 			_images = [self mavericksImages];
 			_leftPadding  = 0;
 			_rightPadding = -5;
@@ -266,6 +271,9 @@
 	return self;
 }
 
+- (NSString*)toolTip                     { return _textField.toolTip; }
+- (void)setToolTip:(NSString*)newToolTip { _textField.toolTip = newToolTip; }
+
 - (void)updateStyle
 {
 	OakTabBarStyle* style = [OakTabBarStyle sharedInstance];
@@ -303,6 +311,12 @@
 - (BOOL)shouldDelayWindowOrderingForEvent:(NSEvent*)anEvent
 {
 	return YES;
+}
+
+- (NSMenu*)menuForEvent:(NSEvent*)anEvent
+{
+	// Control-clicks are not sent to superview <rdar://20200363>
+	return [[self superview] menuForEvent:anEvent];
 }
 
 // =========================================
@@ -376,7 +390,7 @@
 
 - (void)updateTextFieldTitle
 {
-	_textField.attributedStringValue = [[NSAttributedString alloc] initWithString:_title attributes:self.active ? OakTabBarStyle.sharedInstance.activeTabTextStyles : OakTabBarStyle.sharedInstance.inactiveTabTextStyles];
+	_textField.attributedStringValue = [[NSAttributedString alloc] initWithString:_title attributes:self.active ? (self.selected ? OakTabBarStyle.sharedInstance.selectedTabTextStyles : OakTabBarStyle.sharedInstance.activeTabTextStyles) : OakTabBarStyle.sharedInstance.inactiveTabTextStyles];
 }
 
 - (void)setActive:(BOOL)flag
@@ -407,6 +421,7 @@
 		return;
 	_selected = flag;
 	[self updateStyle];
+	[self updateTextFieldTitle];
 }
 
 - (void)setShowOverflowButton:(BOOL)flag

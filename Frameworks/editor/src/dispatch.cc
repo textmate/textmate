@@ -110,6 +110,7 @@ namespace ng
 			{ "selectParagraph:",                                   kSelectParagraph                              },
 			{ "selectWord:",                                        kSelectWord                                   },
 			{ "toggleColumnSelection:",                             kToggleColumnSelection                        },
+			{ "deselectLast:",                                      kDeselectLast                                 },
 
 			{ "findNext:",                                          kFindNext                                     },
 			{ "findPrevious:",                                      kFindPrevious                                 },
@@ -187,10 +188,10 @@ namespace ng
 			{ "noop:",                                              kNop                                          },
 		};
 
-		for(size_t i = 0; i < sizeofA(actions); ++i)
+		for(auto const& action : actions)
 		{
-			if(sel == actions[i].selector)
-				return actions[i].action;
+			if(sel == action.selector)
+				return action.action;
 		}
 		return kNop;
 	}
@@ -211,9 +212,19 @@ namespace ng
 		plist::get_key_path(args, "replaceString", replaceWith);
 
 		if(searchFor != NULL_STR)
+		{
 			find_clipboard()->push_back(searchFor);
+		}
+		else if(clipboard_t::entry_ptr searchEntry = find_clipboard()->current())
+		{
+			searchFor = searchEntry->content();
+			options |= convert(searchEntry->options());
+		}
+
 		if(replaceWith != NULL_STR)
 			replace_clipboard()->push_back(replaceWith);
+		else if(clipboard_t::entry_ptr replaceEntry = replace_clipboard()->current())
+			replaceWith = replaceEntry->content();
 
 		std::string where;
 		bool searchOnlySelection = plist::get_key_path(args, "replaceAllScope", where) && where == "selection";

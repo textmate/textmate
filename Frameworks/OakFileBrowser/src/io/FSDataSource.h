@@ -6,7 +6,7 @@ extern NSString* const FSItemDidReloadNotification;
 + (NSArray*)sortArray:(NSArray*)anArray usingOptions:(NSUInteger)someOptions;
 
 @property (nonatomic) FSItem* rootItem;
-- (BOOL)reloadItem:(FSItem*)anItem; // Returns YES if reload happens in the background. An FSItemDidReloadNotification is posted when reload has completed.
+- (void)reloadItem:(FSItem*)anItem completionHandler:(void(^)(NSArray*))block;
 - (BOOL)unloadItem:(FSItem*)anItem;
 - (NSArray*)expandedURLs;
 @end

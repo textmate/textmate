@@ -22,11 +22,11 @@ namespace command
 	{
 		virtual ~delegate_t () { }
 
-		virtual ng::range_t write_unit_to_fd (int fd, input::type unit, input::type fallbackUnit, input_format::type format, scope::selector_t const& scopeSelector, std::map<std::string, std::string>& variables, bool* inputWasSelection) = 0;
+		virtual ng::ranges_t write_unit_to_fd (int fd, input::type unit, input::type fallbackUnit, input_format::type format, scope::selector_t const& scopeSelector, std::map<std::string, std::string>& variables, bool* inputWasSelection) = 0;
 
 		virtual bool accept_html_data (runner_ptr runner, char const* data, size_t len) { return true; }
 		virtual void discard_html () { }
-		virtual bool accept_result (std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, ng::range_t inputRange, std::map<std::string, std::string> const& environment) = 0;
+		virtual bool accept_result (std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, ng::ranges_t const& inputRanges, std::map<std::string, std::string> const& environment) = 0;
 
 		virtual void show_document (std::string const& str) = 0;
 		virtual void show_tool_tip (std::string const& str) = 0;
@@ -76,7 +76,7 @@ namespace command
 		std::string _directory;
 		delegate_ptr _delegate;
 
-		ng::range_t _input_range;     // used when output replaces input
+		ng::ranges_t _input_ranges;   // used when output replaces input
 		bool _input_was_selection;    // used with ‘exit_insert_snippet’ and when ‘output_caret == heuristic’
 		bool _did_send_html = false;
 		bool _did_detach;

@@ -228,7 +228,7 @@ namespace bundles
 			}
 			else
 			{
-				fprintf(stderr, "*** missing setting ‘%s’ in %s\n", setting.c_str(), item->full_name().c_str());
+				fprintf(stderr, "*** missing setting ‘%s’ in %s\n", setting.c_str(), item->name_with_bundle().c_str());
 			}
 		}
 		return res;

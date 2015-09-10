@@ -47,9 +47,9 @@ FSDataSource* DataSourceForURL (NSURL* anURL, NSUInteger someOptions)
 	return [anArray sortedArrayUsingDescriptors:descriptors];
 }
 
-- (BOOL)reloadItem:(FSItem*)anItem
+- (void)reloadItem:(FSItem*)anItem completionHandler:(void(^)(NSArray*))block
 {
-	return NO;
+	block(anItem.children);
 }
 
 - (BOOL)unloadItem:(FSItem*)anItem
@@ -79,64 +79,6 @@ FSDataSource* DataSourceForURL (NSURL* anURL, NSUInteger someOptions)
 - (id)outlineView:(NSOutlineView*)anOutlineView child:(NSInteger)childIndex ofItem:(FSItem*)item
 {
 	return [(item ?: self.rootItem).children objectAtIndex:childIndex];
-}
-
-- (id)outlineView:(NSOutlineView*)anOutlineView objectValueForTableColumn:(NSTableColumn*)tableColumn byItem:(FSItem*)item
-{
-	return item;
-}
-
-static ino_t inode (std::string const& path)
-{
-	struct stat buf;
-	if(lstat(path.c_str(), &buf) == 0)
-		return buf.st_ino;
-	return 0;
-}
-
-- (void)outlineView:(NSOutlineView*)anOutlineView setObjectValue:(id)objectValue forTableColumn:(NSTableColumn*)tableColumn byItem:(FSItem*)item
-{
-	if(![item.url isFileURL] || [item.displayName isEqualToString:objectValue] || [objectValue length] == 0)
-		return;
-
-	std::string src = [[item.url path] fileSystemRepresentation];
-	std::string dst = path::join(path::parent(src), [[objectValue stringByReplacingOccurrencesOfString:@"/" withString:@":"] fileSystemRepresentation]);
-
-	// “hidden extension” is ignored if Finder is set to show all file extensions, if there are multiple extensions, or if no application is assigned to the extension.
-	std::string const baseName    = path::name(src);
-	std::string const displayName = to_s(item.displayName);
-	bool hiddenExtension = baseName != displayName && (path::info(src) & path::flag::hidden_extension);
-
-	if(src == dst && hiddenExtension)
-	{
-		NSURL* dstURL = [NSURL fileURLWithPath:[NSString stringWithCxxString:dst]];
-		NSError* error;
-		if(![dstURL setResourceValue:@NO forKey:NSURLHasHiddenExtensionKey error:&error])
-			NSLog(@"%s %@", sel_getName(_cmd), error);
-
-		return;
-	}
-
-	if(hiddenExtension)
-		dst += path::extension(src);
-
-	if(src != dst)
-	{
-		if(path::exists(dst) && inode(src) != inode(dst))
-		{
-			errno = EEXIST;
-			OakRunIOAlertPanel("Failed to rename the file at “%s”.", path::name(src).c_str());
-		}
-		else
-		{
-			NSURL* dstURL = [NSURL fileURLWithPath:[NSString stringWithCxxString:dst]];
-			if([[OakFileManager sharedInstance] renameItemAtURL:item.url toURL:dstURL view:anOutlineView])
-			{
-				item.url         = dstURL;
-				item.displayName = [NSString stringWithCxxString:path::display_name(dst)];
-			}
-		}
-	}
 }
 
 - (BOOL)outlineView:(NSOutlineView*)anOutlineView writeItems:(NSArray*)items toPasteboard:(NSPasteboard*)pboard

@@ -54,19 +54,16 @@ namespace
 
 		std::string excludes () const
 		{
-			if(!this || _type != kExclude)
-				return { };
+			if(_type != kExclude)
+				return std::string();
 
-			std::string const left  = _left->to_regexp(true);
-			std::string const right = _right->excludes();
+			std::string const left  = _left  ? _left->to_regexp(true) : std::string();
+			std::string const right = _right ? _right->excludes()     : std::string();
 			return right.empty() ? left : right + "|" + left;
 		}
 
 		std::string to_regexp (bool matchDotFiles) const
 		{
-			if(!this)
-				return { };
-
 			std::string res;
 			switch(_type)
 			{
@@ -83,7 +80,7 @@ namespace
 
 				case kCharClass:    res = "[" + _text + "]";                                                break;
 				case kOptional:     res = ".";                                                              break;
-				case kGroup:        res = "(?:" + _left->to_regexp(matchDotFiles) + ")";                    break;
+				case kGroup:        res = _left ? "(?:" + _left->to_regexp(matchDotFiles) + ")" : "";       break;
 				case kOr:           res = (_left ? _left->to_regexp(matchDotFiles) + "|" : std::string());  break;
 				case kAny:          res = matchDotFiles ? "[^/]*" : "(?:(?!\\.)|(?<!^|/))[^/]*";            break;
 				case kAnyRecursive: res = matchDotFiles ? "(?:.*" + _text + ")?" : "(?:(?:(?!\\.)|(?<!^|/))[^/]*(?:/(?!\\.)[^/]*)*" + _text + ")?"; break;

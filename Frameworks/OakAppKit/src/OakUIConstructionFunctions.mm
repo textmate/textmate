@@ -153,7 +153,7 @@ NSComboBox* OakCreateComboBox (NSObject* accessibilityLabel)
 
 - (void)setActiveBackgroundValue:(id)value
 {
-	if(value == _activeBackgroundValue || [value isEqualTo:_activeBackgroundValue])
+	if(value == _activeBackgroundValue || [value isEqual:_activeBackgroundValue])
 		return;
 	_activeBackgroundValue = value;
 	if(_active)
@@ -162,7 +162,7 @@ NSComboBox* OakCreateComboBox (NSObject* accessibilityLabel)
 
 - (void)setInactiveBackgroundValue:(id)value
 {
-	if(value == _inactiveBackgroundValue || [value isEqualTo:_inactiveBackgroundValue])
+	if(value == _inactiveBackgroundValue || [value isEqual:_inactiveBackgroundValue])
 		return;
 	_inactiveBackgroundValue = value;
 	if(!_active)
@@ -253,15 +253,22 @@ NSView* OakCreateDividerImageView ()
 	return res;
 }
 
-void OakSetupKeyViewLoop (NSArray* mixed)
+void OakSetupKeyViewLoop (NSArray* superviews, BOOL setFirstResponder)
 {
+	std::set<id> seen;
+	for(NSView* candidate in superviews)
+		seen.insert(candidate);
+
 	NSMutableArray* views = [NSMutableArray new];
-	for(id candidate in mixed)
+	for(NSView* view in superviews)
 	{
-		if([candidate isKindOfClass:[NSView class]])
-			[views addObject:candidate];
-		else if([candidate isKindOfClass:[NSArray class]])
-			[views addObjectsFromArray:candidate];
+		if([view isEqual:[NSNull null]])
+			continue;
+
+		[views addObject:view];
+		NSView* subview = view;
+		while((subview = subview.nextKeyView) && [subview isDescendantOf:view] && seen.insert(subview).second)
+			[views addObject:subview];
 	}
 
 	if(views.count == 1)
@@ -274,15 +281,18 @@ void OakSetupKeyViewLoop (NSArray* mixed)
 			[views[i] setNextKeyView:views[(i + 1) % views.count]];
 	}
 
-	if(NSView* view = views.firstObject)
-		view.window.initialFirstResponder = view;
+	if(setFirstResponder)
+	{
+		if(NSView* view = views.firstObject)
+			view.window.initialFirstResponder = view;
+	}
 }
 
 void OakAddAutoLayoutViewsToSuperview (NSArray* views, NSView* superview)
 {
 	for(NSView* view in views)
 	{
-		if([view isEqualTo:[NSNull null]])
+		if([view isEqual:[NSNull null]])
 			continue;
 		[view setTranslatesAutoresizingMaskIntoConstraints:NO];
 		[superview addSubview:view];

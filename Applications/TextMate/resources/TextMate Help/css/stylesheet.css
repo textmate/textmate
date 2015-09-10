@@ -1,5 +1,6 @@
 body {
-	font: 12px "Lucida Grande", sans-serif;
+	font-size: 12px;
+	font-family: -apple-system, HelveticaNeue, LucidaGrande, sans-serif;;
 }
 
 pre {

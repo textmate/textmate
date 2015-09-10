@@ -169,7 +169,7 @@ bool parse_context_t::parse_variable_complex (bool(parse_context_t::*parse_conte
 					std::string option;
 					if(parse_until("/}", option))
 					{
-						static struct { std::string option; uint8_t change; } const options[] =
+						static struct { std::string name; uint8_t change; } const optionsMap[] =
 						{
 							{ "upcase",      transform::kUpcase     },
 							{ "downcase",    transform::kDowncase   },
@@ -177,10 +177,10 @@ bool parse_context_t::parse_variable_complex (bool(parse_context_t::*parse_conte
 							{ "asciify",     transform::kAsciify    },
 						};
 
-						for(size_t i = 0; i < sizeofA(options); ++i)
+						for(auto const& optionMap : optionsMap)
 						{
-							if(option == options[i].option)
-								res.change |= options[i].change;
+							if(option == optionMap.name)
+								res.change |= optionMap.change;
 						}
 					}
 					else

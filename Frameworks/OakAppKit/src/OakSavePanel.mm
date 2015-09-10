@@ -72,7 +72,7 @@
 	self.view = containerView;
 
 	[encodingPopUpButton bind:@"encoding" toObject:self withKeyPath:@"encoding" options:nil];
-	[lineEndingsPopUpButton bind:@"selectedTag" toObject:self withKeyPath:@"lineEndings" options:@{ NSValueTransformerNameBindingOption: @"OakLineEndingsTransformer" }];
+	[lineEndingsPopUpButton bind:NSSelectedTagBinding toObject:self withKeyPath:@"lineEndings" options:@{ NSValueTransformerNameBindingOption: @"OakLineEndingsTransformer" }];
 	[bomCheckBox bind:NSEnabledBinding toObject:self withKeyPath:@"canUseByteOrderMark" options:nil];
 	[bomCheckBox bind:NSValueBinding toObject:self withKeyPath:@"useByteOrderMark" options:nil];
 }

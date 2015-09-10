@@ -10,9 +10,9 @@
 
 NSString* const kUserDefaultsDisableTabBarCollapsingKey = @"disableTabBarCollapsing";
 
-static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
+static NSString* const OakTabItemPasteboardType = @"com.macromates.TextMate.tabItem";
 
-@interface OakTabItem ()
+@interface OakTabItem () <NSPasteboardWriting>
 @property (nonatomic) OakTabItemView* tabItemView;
 @property (nonatomic) NSRect targetFrame;
 @end
@@ -28,9 +28,9 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 	return res;
 }
 
-+ (instancetype)tabItemFromPasteboard:(NSPasteboard*)aPasteboard
++ (instancetype)tabItemFromPasteboardItem:(NSPasteboardItem*)pasteboardItem
 {
-	NSDictionary* plist = [aPasteboard propertyListForType:OakTabItemPasteboardType];
+	NSDictionary* plist = [pasteboardItem propertyListForType:OakTabItemPasteboardType];
 	if(!plist)
 		return nil;
 
@@ -42,8 +42,21 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 	return res;
 }
 
-- (void)writeToPasteboard:(NSPasteboard*)aPasteboard
+- (NSArray*)writableTypesForPasteboard:(NSPasteboard*)aPasteboard
 {
+	return OakIsEmptyString(_path) ? @[ OakTabItemPasteboardType ] : @[ OakTabItemPasteboardType, (NSString*)kUTTypeFileURL ];
+}
+
+- (NSPasteboardWritingOptions)writingOptionsForType:(NSString*)aType pasteboard:(NSPasteboard*)aPasteboard
+{
+	return 0;
+}
+
+- (id)pasteboardPropertyListForType:(NSString*)aType
+{
+	if([aType isEqualToString:(NSString*)kUTTypeFileURL])
+		return [[NSURL fileURLWithPath:_path] absoluteString];
+
 	NSMutableDictionary* dict = [NSMutableDictionary dictionary];
 	if(_title)
 		dict[@"title"] = _title;
@@ -53,9 +66,7 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 		dict[@"identifier"] = _identifier;
 	if(_modified)
 		dict[@"modified"] = @(_modified);
-
-	[aPasteboard declareTypes:@[ OakTabItemPasteboardType ] owner:self];
-	[aPasteboard setPropertyList:dict forType:OakTabItemPasteboardType];
+	return dict;
 }
 
 - (void)setModified:(BOOL)flag
@@ -86,11 +97,10 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 }
 @end
 
-@interface OakTabBarView () <NSDraggingSource, NSDraggingDestination>
+@interface OakTabBarView () <NSDraggingSource/*, NSDraggingDestination*/>
 {
 	NSMutableArray* _tabItems;
 
-	NSUInteger _draggedTabIndex;
 	OakTabItem* _draggedTabItem;
 	OakTabItem* _preliminaryTabItem;
 	OakTabItem* _overflowTabItem;
@@ -104,6 +114,7 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 	NSUInteger _didCloseTabIndex;
 	NSRect _didCloseTabFrame;
 }
+@property (nonatomic) NSUInteger draggedTabIndex;
 @property (nonatomic) BOOL expanded;
 @property (nonatomic) NSPoint mouseDownPos;
 @property (nonatomic) BOOL isMouseInside;
@@ -220,6 +231,12 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 // = Layout =
 // ==========
 
+- (CGFloat)leftPadding
+{
+	CGFloat res = OakTabBarStyle.sharedInstance.leftPadding;
+	return _neverHideLeftBorder ? MAX(0, res) : res;
+}
+
 - (void)updateCapImageViews
 {
 	if(OakTabBarStyle.sharedInstance.tabViewSpacing >= 0)
@@ -259,7 +276,7 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 
 - (NSUInteger)countOfVisibleTabs
 {
-	CGFloat const leftPadding  = OakTabBarStyle.sharedInstance.leftPadding;
+	CGFloat const leftPadding  = self.leftPadding;
 	CGFloat const rightPadding = OakTabBarStyle.sharedInstance.rightPadding;
 	CGFloat const tabSpacing   = OakTabBarStyle.sharedInstance.tabViewSpacing;
 	CGFloat const tabMinWidth  = OakTabBarStyle.sharedInstance.minimumTabSize;
@@ -368,7 +385,7 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 
 - (void)resizeTabItemViewFrames
 {
-	CGFloat const leftPadding  = OakTabBarStyle.sharedInstance.leftPadding;
+	CGFloat const leftPadding  = self.leftPadding;
 	CGFloat const rightPadding = OakTabBarStyle.sharedInstance.rightPadding;
 	CGFloat const tabSpacing   = OakTabBarStyle.sharedInstance.tabViewSpacing;
 	CGFloat const tabMinWidth  = OakTabBarStyle.sharedInstance.minimumTabSize;
@@ -493,6 +510,14 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 	}];
 }
 
+- (void)setNeverHideLeftBorder:(BOOL)flag
+{
+	if(_neverHideLeftBorder == flag)
+		return;
+	_neverHideLeftBorder = flag;
+	[self resizeTabItemViewFrames];
+}
+
 // =============
 // = Selection =
 // =============
@@ -540,6 +565,11 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 	if(SQ(fabs(_mouseDownPos.x - mouseCurrentPos.x)) + SQ(fabs(_mouseDownPos.y - mouseCurrentPos.y)) >= SQ(2.5))
 		return; // mouse was moved
 	[self trySelectTabForView:[self hitTest:mouseCurrentPos]];
+}
+
+- (void)otherMouseUp:(NSEvent*)anEvent
+{
+	[self _performCloseTab:[self hitTest:[[self superview] convertPoint:[anEvent locationInWindow] fromView:nil]]];
 }
 
 - (void)trySelectTabForView:(NSView*)aView
@@ -606,13 +636,9 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 	[_tabItems removeObject:tabItem];
 	tabItem.tabItemView.hidden = YES;
 
-	NSPasteboard* pboard = [NSPasteboard pasteboardWithName:NSDragPboard];
-	[tabItem writeToPasteboard:pboard];
-
-	if([_delegate respondsToSelector:@selector(setupPasteboard:forTabAtIndex:)])
-		[_delegate setupPasteboard:pboard forTabAtIndex:_draggedTabIndex];
-
-	[self dragImage:dragImage at:srcRect.origin offset:NSZeroSize event:anEvent pasteboard:pboard source:self slideBack:YES];
+	NSDraggingItem* dragItem = [[NSDraggingItem alloc] initWithPasteboardWriter:tabItem];
+	[dragItem setDraggingFrame:srcRect contents:dragImage];
+	[self beginDraggingSessionWithItems:@[ dragItem ] event:anEvent source:self];
 }
 
 - (NSDragOperation)draggingSession:(NSDraggingSession*)session sourceOperationMaskForDraggingContext:(NSDraggingContext)context
@@ -662,8 +688,22 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 	if(currentPos != desiredPos)
 	{
 		if(currentPos == NSNotFound)
-				_preliminaryTabItem = _draggedTabItem ?: [OakTabItem tabItemFromPasteboard:[sender draggingPasteboard]];
-		else	[_tabItems removeObjectAtIndex:currentPos];
+		{
+			if(_draggedTabItem)
+			{
+				_preliminaryTabItem = _draggedTabItem;
+			}
+			else
+			{
+				[sender enumerateDraggingItemsWithOptions:0 forView:self classes:@[ [NSPasteboardItem class] ] searchOptions:nil usingBlock:^(NSDraggingItem* draggingItem, NSInteger idx, BOOL* stop){
+					_preliminaryTabItem = [OakTabItem tabItemFromPasteboardItem:draggingItem.item];
+				}];
+			}
+		}
+		else
+		{
+			[_tabItems removeObjectAtIndex:currentPos];
+		}
 
 		[_tabItems insertObject:_preliminaryTabItem atIndex:currentPos < desiredPos ? desiredPos-1 : desiredPos];
 		[self animateLayoutUpdate];
@@ -690,8 +730,10 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 
 - (BOOL)performDragOperation:(id <NSDraggingInfo>)sender
 {
+	__block OakTabItem* tabItem = nil;
 	[sender enumerateDraggingItemsWithOptions:0 forView:self classes:@[ [NSPasteboardItem class] ] searchOptions:nil usingBlock:^(NSDraggingItem* draggingItem, NSInteger idx, BOOL* stop){
 		draggingItem.draggingFrame = [self convertRect:_preliminaryTabItem.tabItemView.contentFrame fromView:_preliminaryTabItem.tabItemView];
+		tabItem = [OakTabItem tabItemFromPasteboardItem:draggingItem.item];
 	}];
 
 	NSDragOperation mask = [sender draggingSourceOperationMask];
@@ -704,7 +746,8 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 			return YES;
 	}
 
-	return [_delegate performTabDropFromTabBar:[sender draggingSource] atIndex:dropIndex fromPasteboard:[sender draggingPasteboard] operation:(mask & NSDragOperationMove) ?: (mask & NSDragOperationCopy)];
+	OakTabBarView* sourceTabBar = [sender draggingSource];
+	return [_delegate performDropOfTabItem:tabItem fromTabBar:sourceTabBar index:sourceTabBar.draggedTabIndex toTabBar:self index:dropIndex operation:(mask & NSDragOperationMove) ?: (mask & NSDragOperationCopy)];
 }
 
 - (void)concludeDragOperation:(id <NSDraggingInfo>)sender
@@ -750,7 +793,7 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 
 		if(NSString* path = tabItem.path)
 		{
-			item.image   = [OakFileIconImage fileIconImageWithPath:([path isEqualTo:@""] ? nil : path) isModified:tabItem.modified];
+			item.image   = [OakFileIconImage fileIconImageWithPath:(OakIsEmptyString(path) ? nil : path) isModified:tabItem.modified];
 			item.toolTip = [path stringByAbbreviatingWithTildeInPath];
 		}
 
@@ -769,7 +812,7 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 		_tag = [_tabItems indexOfObject:tabItem]; // performCloseTab: asks for [sender tag]
 
 		BOOL closeOther = OakIsAlternateKeyOrMouseEvent();
-		if(_isMouseInside && [[NSApp currentEvent] type] == NSLeftMouseUp && !closeOther && tabItem != _overflowTabItem)
+		if(_isMouseInside && ([[NSApp currentEvent] type] == NSLeftMouseUp || [[NSApp currentEvent] type] == NSOtherMouseUp) && !closeOther && tabItem != _overflowTabItem)
 		{
 			_didCloseTabIndex = _tag;
 			_didCloseTabFrame = tabItem.targetFrame;
@@ -792,18 +835,25 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 
 - (void)reloadData
 {
+	NSMutableDictionary* oldTabs = [NSMutableDictionary dictionary];
+	for(OakTabItem* tabItem in _tabItems)
+		oldTabs[tabItem.identifier] = tabItem;
+
+	BOOL skipDraggedTab = NO;
+	if(_draggedTabItem)
+	{
+		skipDraggedTab = [oldTabs objectForKey:_draggedTabItem.identifier] != nil;
+		oldTabs[_draggedTabItem.identifier] = _draggedTabItem;
+	}
+
 	NSUInteger newCount = [_dataSource numberOfRowsInTabBarView:self];
-	NSUInteger oldCount = _tabItems.count;
+	NSUInteger oldCount = oldTabs.count;
 
 	if(newCount != oldCount && _overflowTabItem)
 	{
 		_overflowTabItem.tabItemView.showOverflowButton = NO;
 		_overflowTabItem = nil;
 	}
-
-	NSMutableDictionary* oldTabs = [NSMutableDictionary dictionary];
-	for(OakTabItem* tabItem in _tabItems)
-		oldTabs[tabItem.identifier] = tabItem;
 
 	NSMutableArray* newTabs = [NSMutableArray array];
 	for(NSUInteger i = 0; i < newCount; ++i)
@@ -826,7 +876,9 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 
 			[oldTabs removeObjectForKey:identifier];
 		}
-		[newTabs addObject:tabItem];
+
+		if(skipDraggedTab || tabItem != _draggedTabItem)
+			[newTabs addObject:tabItem];
 	}
 
 	for(NSString* key in oldTabs)
@@ -862,7 +914,8 @@ static NSString* const OakTabItemPasteboardType = @"OakTabItemPasteboardType";
 - (void)performClose:(id)sender
 {
 	_tag = [_tabItems indexOfObject:_selectedTabItem]; // performCloseTab: asks for [sender tag]
-	[NSApp sendAction:@selector(performCloseTab:) to:nil from:self];
+	if([_delegate respondsToSelector:@selector(performCloseTab:)])
+		[_delegate performCloseTab:self];
 }
 
 - (NSMenu*)menuForView:(NSView*)aView

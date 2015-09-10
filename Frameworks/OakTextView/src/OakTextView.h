@@ -9,7 +9,6 @@
 PUBLIC extern int32_t const NSWrapColumnWindowWidth;
 PUBLIC extern int32_t const NSWrapColumnAskUser;
 PUBLIC extern NSString* const kUserDefaultsWrapColumnPresetsKey;
-PUBLIC extern NSString* const kUserDefaultsDisableAntiAliasKey;
 
 namespace bundles { struct item_t; typedef std::shared_ptr<item_t> item_ptr; }
 
@@ -41,6 +40,7 @@ PUBLIC @interface OakTextView : OakView
 @property (nonatomic) theme_ptr const&                      theme;
 @property (nonatomic) NSCursor*                             ibeamCursor;
 @property (nonatomic) NSFont*                               font;
+@property (nonatomic) NSInteger                             fontScaleFactor;
 @property (nonatomic) BOOL                                  antiAlias;
 @property (nonatomic) OTVFontSmoothing                      fontSmoothing;
 @property (nonatomic) size_t                                tabSize;

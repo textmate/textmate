@@ -2,7 +2,6 @@
 #define TRACK_PATHS_H_38DE4GVD
 
 #include <io/path.h>
-#include <oak/compat.h>
 
 struct track_paths_t
 {

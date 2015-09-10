@@ -78,7 +78,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		_windowController.resultsViewController.doubleClickResultAction = @selector(didDoubleClickResult:);
 		_windowController.resultsViewController.target                  = self;
 
-		[_windowController.replaceAllButton bind:@"title" toObject:self withKeyPath:@"replaceAllButtonTitle" options:nil];
+		[_windowController.replaceAllButton bind:NSTitleBinding toObject:self withKeyPath:@"replaceAllButtonTitle" options:nil];
 		[_windowController.replaceAllButton bind:@"enabled2" toObject:self withKeyPath:@"canReplaceAll" options:nil];
 
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowWillClose:) name:NSWindowWillCloseNotification object:_windowController.window];
@@ -177,6 +177,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 				[self clearMatches];
 
 				FFDocumentSearch* folderSearch = [FFDocumentSearch new];
+				folderSearch.searchBinaryFiles = YES;
 				folderSearch.searchString = controller.findString;
 				folderSearch.options      = _findOptions;
 
@@ -230,7 +231,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 						if(child.excluded)
 							continue;
 						child.replaceString = controller.replaceString;
-						replacements.emplace(std::make_pair([child.match match].first, [child.match match].last), controller.regularExpression ? format_string::expand(replaceString, [child.match match].captures) : replaceString);
+						replacements.emplace(std::make_pair(child.match.first, child.match.last), controller.regularExpression ? format_string::expand(replaceString, child.match.captures) : replaceString);
 					}
 
 					if(document::document_ptr doc = parent.document)
@@ -245,7 +246,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 						}
 						else
 						{
-							if(!doc->replace(replacements, [parent.match match].crc32))
+							if(!doc->replace(replacements, parent.match.crc32))
 							{
 								[parent.children setValue:nil forKey:@"replaceString"];
 								continue;
@@ -412,12 +413,13 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	FFResultNode* parent = nil;
 	for(FFMatch* match in matches)
 	{
-		if(document::document_ptr doc = [match match].document)
-			doc->add_mark([match match].range.from, kSearchMarkIdentifier);
+		find::match_t const& m = [match match];
+		if(document::document_ptr doc = m.document)
+			doc->add_mark(m.range.from, kSearchMarkIdentifier);
 
-		FFResultNode* node = [FFResultNode resultNodeWithMatch:match];
+		FFResultNode* node = [FFResultNode resultNodeWithMatch:m];
 		if(!parent || parent.document->identifier() != node.document->identifier())
-			[_results addResultNode:(parent = [FFResultNode resultNodeWithMatch:match baseDirectory:_documentSearch.directory])];
+			[_results addResultNode:(parent = [FFResultNode resultNodeWithMatch:m baseDirectory:_documentSearch.directory])];
 		[parent addResultNode:node];
 	}
 
@@ -431,8 +433,8 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	{
 		[documents addObject:@{
 			@"identifier"      : [NSString stringWithCxxString:parent.firstResultNode.document->identifier()],
-			@"firstMatchRange" : [NSString stringWithCxxString:[parent.firstResultNode.match match].range],
-			@"lastMatchRange"  : [NSString stringWithCxxString:[parent.lastResultNode.match match].range],
+			@"firstMatchRange" : [NSString stringWithCxxString:parent.firstResultNode.match.range],
+			@"lastMatchRange"  : [NSString stringWithCxxString:parent.lastResultNode.match.range],
 		}];
 	}
 	[OakPasteboard pasteboardWithName:NSFindPboard].auxiliaryOptionsForCurrent = @{ @"documents" : documents };
@@ -513,7 +515,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	auto doc = item.document;
 	if(!doc->is_open())
 		doc->set_recent_tracking(false);
-	document::show(doc, self.projectIdentifier ? oak::uuid_t(to_s(self.projectIdentifier)) : document::kCollectionAny, [item.match match].range, false);
+	document::show(doc, self.projectIdentifier ? oak::uuid_t(to_s(self.projectIdentifier)) : document::kCollectionAny, item.match.range, false);
 }
 
 - (void)didDoubleClickResult:(FFResultNode*)item
@@ -590,7 +592,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 	for(FFResultNode* item in _windowController.resultsViewController.selectedResults)
 	{
-		find::match_t const& m = [item.match match];
+		find::match_t const& m = item.match;
 		std::string str = m.excerpt;
 
 		if(!entireLines)

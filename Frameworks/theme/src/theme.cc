@@ -102,25 +102,25 @@ std::vector<theme_t::decomposed_style_t> theme_t::global_styles (scope::scope_t 
 
 	std::vector<decomposed_style_t> res;
 
-	for(size_t i = 0; i < sizeofA(colorKeys); ++i)
+	for(auto const& colorKey : colorKeys)
 	{
 		bundles::item_ptr item;
-		plist::any_t const& value = bundles::value_for_setting(colorKeys[i].name, scope, &item);
+		plist::any_t const& value = bundles::value_for_setting(colorKey.name, scope, &item);
 		if(item)
 		{
 			res.emplace_back(item->scope_selector());
-			res.back().*(colorKeys[i].field) = read_color(plist::get<std::string>(value));
+			res.back().*(colorKey.field) = read_color(plist::get<std::string>(value));
 		}
 	}
 
-	for(size_t i = 0; i < sizeofA(booleanKeys); ++i)
+	for(auto const& booleanKey : booleanKeys)
 	{
 		bundles::item_ptr item;
-		plist::any_t const& value = bundles::value_for_setting(booleanKeys[i].name, scope, &item);
+		plist::any_t const& value = bundles::value_for_setting(booleanKey.name, scope, &item);
 		if(item)
 		{
 			res.emplace_back(item->scope_selector());
-			res.back().*(booleanKeys[i].field) = plist::is_true(value) ? bool_true : bool_false;
+			res.back().*(booleanKey.field) = plist::is_true(value) ? bool_true : bool_false;
 		}
 	}
 
@@ -178,6 +178,7 @@ theme_ptr theme_t::copy_with_font_name_and_size (std::string const& fontName, CG
 theme_t::theme_t (bundles::item_ptr const& themeItem, std::string const& fontName, CGFloat fontSize) :_item(themeItem), _font_name(fontName), _font_size(fontSize)
 {
 	_styles = find_shared_styles(themeItem);
+	_cache.set_empty_key(scope::scope_t{});
 }
 
 static CGColorRef OakColorCreateCopySoften (CGColorPtr cgColor, CGFloat factor)
@@ -377,8 +378,7 @@ styles_t const& theme_t::styles_for_scope (scope::scope_t const& scope) const
 {
 	ASSERT(scope);
 
-	std::string const key = to_s(scope);
-	std::map<std::string, styles_t>::iterator styles = _cache.find(key);
+	auto styles = _cache.find(scope);
 	if(styles == _cache.end())
 	{
 		std::multimap<double, decomposed_style_t> ordering;
@@ -413,7 +413,7 @@ styles_t const& theme_t::styles_for_scope (scope::scope_t const& scope) const
 		CGColorPtr selection  = OakColorCreateFromThemeColor(base.selection,  _styles->_color_space) ?: CGColorPtr(CGColorCreate(_styles->_color_space, (CGFloat[4]){ 0.5, 0.5, 0.5,   1 }), CGColorRelease);
 
 		styles_t res(foreground, background, caret, selection, font, base.underlined == bool_true, base.misspelled == bool_true);
-		styles = _cache.emplace(key, res).first;
+		styles = _cache.insert(std::make_pair(scope, res)).first;
 	}
 	return styles->second;
 }

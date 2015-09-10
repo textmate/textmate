@@ -19,10 +19,10 @@ static scm::status::type parse_status_flag (char flag)
 		{ scm::status::deleted,     '!' }, // missing on disk
 	};
 
-	for(size_t i = 0; i < sizeofA(StatusLetterConversionMap); ++i)
+	for(auto const& status : StatusLetterConversionMap)
 	{
-		if(flag == StatusLetterConversionMap[i].flag)
-			return StatusLetterConversionMap[i].constant;
+		if(flag == status.flag)
+			return status.constant;
 	}
 
 	ASSERT_EQ(flag, '\0'); // we use ‘flag’ in the assertion to output the unrecognized status flag

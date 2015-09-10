@@ -43,28 +43,46 @@ static NSPopUpButton* OakCreateFolderPopUpButton ()
 {
 	if(self = [super initTextCell:title pullsDown:pullsDown])
 	{
-		NSShadow* shadow = [NSShadow new];
-		[shadow setShadowColor:[NSColor colorWithCalibratedWhite:1 alpha:0.5]];
-		[shadow setShadowOffset:NSMakeSize(0, -1)];
-		[shadow setShadowBlurRadius:1];
-
 		NSMutableParagraphStyle* parStyle = [NSMutableParagraphStyle new];
 		[parStyle setLineBreakMode:NSLineBreakByTruncatingMiddle];
 
-		NSFont* font = [NSFont boldSystemFontOfSize:12];
+		if([[NSProcessInfo processInfo] respondsToSelector:@selector(isOperatingSystemAtLeastVersion:)] && [[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:{ 10, 10, 0 }])
+		{
+			NSFont* font = [NSFont systemFontOfSize:12];
 
-		_activeAttributes = @{
-			NSParagraphStyleAttributeName  : parStyle,
-			NSFontAttributeName            : font,
-			NSForegroundColorAttributeName : [NSColor colorWithCalibratedWhite:0.2 alpha:1],
-			NSShadowAttributeName          : shadow,
-		};
-		_inactiveAttributes = @{
-			NSParagraphStyleAttributeName  : parStyle,
-			NSFontAttributeName            : font,
-			NSForegroundColorAttributeName : [NSColor colorWithCalibratedWhite:0.5 alpha:1],
-			NSShadowAttributeName          : shadow,
-		};
+			_activeAttributes = @{
+				NSParagraphStyleAttributeName  : parStyle,
+				NSFontAttributeName            : font,
+				NSForegroundColorAttributeName : [NSColor colorWithCalibratedWhite:0.2 alpha:1]
+			};
+			_inactiveAttributes = @{
+				NSParagraphStyleAttributeName  : parStyle,
+				NSFontAttributeName            : font,
+				NSForegroundColorAttributeName : [NSColor colorWithCalibratedWhite:0.5 alpha:1]
+			};
+		}
+		else
+		{
+			NSShadow* shadow = [NSShadow new];
+			[shadow setShadowColor:[NSColor colorWithCalibratedWhite:1 alpha:0.5]];
+			[shadow setShadowOffset:NSMakeSize(0, -1)];
+			[shadow setShadowBlurRadius:1];
+
+			NSFont* font = [NSFont boldSystemFontOfSize:12];
+
+			_activeAttributes = @{
+				NSParagraphStyleAttributeName  : parStyle,
+				NSFontAttributeName            : font,
+				NSForegroundColorAttributeName : [NSColor colorWithCalibratedWhite:0.2 alpha:1],
+				NSShadowAttributeName          : shadow,
+			};
+			_inactiveAttributes = @{
+				NSParagraphStyleAttributeName  : parStyle,
+				NSFontAttributeName            : font,
+				NSForegroundColorAttributeName : [NSColor colorWithCalibratedWhite:0.5 alpha:1],
+				NSShadowAttributeName          : shadow,
+			};
+		}
 	}
 	return self;
 }
@@ -111,6 +129,7 @@ static NSPopUpButton* OakCreateFolderPopUpButton ()
 		};
 
 		OakAddAutoLayoutViewsToSuperview([views allValues], self);
+		OakSetupKeyViewLoop(@[ self, _folderPopUpButton, _goBackButton, _goForwardButton ], NO);
 
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(-3)-[folder(>=75)]-(3)-[divider]-(2)-[back(==22)]-(2)-[forward(==back)]-(3)-|" options:0 metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[bottomDivider]|"                                                                options:0 metrics:nil views:views]];

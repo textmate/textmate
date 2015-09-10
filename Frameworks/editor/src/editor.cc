@@ -59,9 +59,9 @@ namespace ng
 		return str;
 	}
 
-	static find::options_t convert (std::map<std::string, std::string> const& options)
+	find::options_t convert (std::map<std::string, std::string> const& options)
 	{
-		static struct { std::string key; find::options_t flag; } const map[] =
+		static struct { std::string key; find::options_t flag; } const optionMap[] =
 		{
 			{ "fullWordMatch",       find::full_words         },
 			{ "ignoreCase",          find::ignore_case        },
@@ -71,11 +71,11 @@ namespace ng
 		};
 
 		find::options_t res = find::none;
-		for(size_t i = 0; i < sizeofA(map); ++i)
+		for(auto const& option : optionMap)
 		{
-			std::map<std::string, std::string>::const_iterator it = options.find(map[i].key);
+			std::map<std::string, std::string>::const_iterator it = options.find(option.key);
 			if(it != options.end() && it->second == "1")
-				res = res | map[i].flag;
+				res = res | option.flag;
 		}
 		return res;
 	}
@@ -926,6 +926,7 @@ namespace ng
 			case kSelectParagraph:                              _selections = ng::extend(_buffer, _selections, kSelectionExtendToParagraph,        layout); break;
 			case kSelectWord:                                   _selections = ng::extend(_buffer, _selections, kSelectionExtendToWord,             layout); break;
 			case kToggleColumnSelection:                        _selections = ng::toggle_columnar(_selections);                                             break;
+			case kDeselectLast:                                 _selections = ng::deselect_last(_selections);                                               break;
 
 			case kFindNext:
 			case kFindPrevious:
@@ -1338,33 +1339,50 @@ namespace ng
 		_selections = this->replace(replacements, true);
 	}
 
-	bool editor_t::handle_result (std::string const& uncheckedOut, output::type placement, output_format::type format, output_caret::type outputCaret, ng::range_t input_range, std::map<std::string, std::string> environment)
+	bool editor_t::handle_result (std::string const& uncheckedOut, output::type placement, output_format::type format, output_caret::type outputCaret, ng::ranges_t const& inputRanges, std::map<std::string, std::string> environment)
 	{
 		std::string const& out = utf8::is_valid(uncheckedOut.begin(), uncheckedOut.end()) ? uncheckedOut : sanitized_utf8(uncheckedOut);
+		ng::range_t inputRange = inputRanges ? inputRanges.last() : ng::range_t();
 
-		if(input_range.columnar)
+		if(inputRanges.size() > 1 && format == output_format::text && placement != output::replace_document)
 		{
-			text::pos_t const fromPos = _buffer.convert(input_range.min().index);
-			text::pos_t const toPos   = _buffer.convert(input_range.max().index);
+			std::vector<std::string> words = text::split(out, "\n");
+			if(words.size() == 2 && words.back().empty())
+				words.pop_back();
 
-			size_t fromCol = visual_distance(_buffer, _buffer.begin(fromPos.line), input_range.min());
-			size_t toCol   = visual_distance(_buffer, _buffer.begin(toPos.line), input_range.max());
+			size_t i = 0;
+			std::multimap<range_t, std::string> insertions;
+			for(auto const& range : dissect_columnar(_buffer, inputRanges))
+				insertions.emplace(range, words[i++ % words.size()]);
+			_selections = replace_helper(_buffer, _snippets, insertions);
+			if(outputCaret != output_caret::select_output)
+				_selections = ng::move(_buffer, _selections, kSelectionMoveToEndOfSelection);
+			return true;
+		}
+
+		if(inputRange.columnar)
+		{
+			text::pos_t const fromPos = _buffer.convert(inputRange.min().index);
+			text::pos_t const toPos   = _buffer.convert(inputRange.max().index);
+
+			size_t fromCol = visual_distance(_buffer, _buffer.begin(fromPos.line), inputRange.min());
+			size_t toCol   = visual_distance(_buffer, _buffer.begin(toPos.line), inputRange.max());
 
 			if(toCol < fromCol)
 			{
 				std::swap(fromCol, toCol);
-				input_range.first = visual_advance(_buffer, _buffer.begin(fromPos.line), fromCol);
-				input_range.last  = visual_advance(_buffer, _buffer.begin(toPos.line), toCol);
+				inputRange.first = visual_advance(_buffer, _buffer.begin(fromPos.line), fromCol);
+				inputRange.last  = visual_advance(_buffer, _buffer.begin(toPos.line), toCol);
 			}
 		}
 
 		range_t range;
 		switch(placement)
 		{
-			case output::replace_input:     range = input_range;                break;
+			case output::replace_input:     range = inputRange;                 break;
 			case output::replace_document:  range = range_t(0, _buffer.size()); break;
 			case output::at_caret:          range = _selections.last().last;    break;
-			case output::after_input:       range = input_range.max();          break;
+			case output::after_input:       range = inputRange.max();           break;
 			case output::replace_selection: range = _selections.last();         break;
 		}
 

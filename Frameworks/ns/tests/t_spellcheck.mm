@@ -4,7 +4,8 @@
 void setup ()
 {
 	NSApplicationLoad();
-	[NSSpellChecker sharedSpellChecker];
+	NSSpellChecker* spellChecker = [NSSpellChecker sharedSpellChecker];
+	spellChecker.automaticallyIdentifiesLanguages = NO;
 }
 
 void test_spellcheck ()

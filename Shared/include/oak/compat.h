@@ -13,6 +13,8 @@ namespace oak
 	inline size_t os_minor () { return get_gestalt(gestaltSystemVersionMinor); }
 	inline size_t os_patch () { return get_gestalt(gestaltSystemVersionBugFix); }
 
+	inline std::tuple<size_t, size_t, size_t> os_tuple () { return { os_major(), os_minor(), os_patch() }; }
+
 	inline OSStatus execute_with_privileges (AuthorizationRef authorization, std::string const& pathToTool, AuthorizationFlags options, char* const* arguments, FILE** communicationsPipe)
 	{
 #pragma clang diagnostic push

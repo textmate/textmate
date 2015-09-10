@@ -2,6 +2,53 @@ Title: Release Notes
 
 # Changes
 
+## 2015-08-30 (v2.0-beta.7.9)
+
+* You can now export a bundle (merging potential delta files) by right-clicking the bundle in the bundle editor and selecting _Export Bundle…_.
+* See [all changes since v2.0-beta.7.7](https://github.com/textmate/textmate/compare/v2.0-beta.7.7...v2.0-beta.7.9)
+
+## 2015-07-31 (v2.0-beta.7.7)
+
+* You can now use ⌥⌘V in the file browser to “move” the item on the clipboard to the current folder. This makes it possibly to copy files from Finder and “move” to the location in TextMate’s file browser and thus the old way of moving files via keyboard (⌘X + ⌘V) is deprecated and will be removed.
+* Improved support for multiple carets/selections and commands, for example fallback units are now respected when there are multiple carets (and none have a selection).
+* The file browser is now view-based (instead of cell-based). The main “feature” is that renaming an item should no longer be involuntarily aborted (when there are disk changes), though there are also some minor interaction changes and more animations plus labels are rendered closer to how Finder has shown them since 10.9.
+* See [all changes since v2.0-beta.7.6](https://github.com/textmate/textmate/compare/v2.0-beta.7.6...v2.0-beta.7.7)
+
+## 2015-07-17 (v2.0-beta.7.6)
+
+* Double-tapping shift will now also leave “freehanded mode”.
+* Fix a bunch of file browser issues. There is still more work to be done here, for example renaming an item can still be aborted, but should be much rarer, and all other known issues should have been fixed (so pending work falls into the improvements category). If you have feedback about the file browser (issues, suggestions), now is the time to bring it up!
+* See [all changes since v2.0-beta.7.5](https://github.com/textmate/textmate/compare/v2.0-beta.7.5...v2.0-beta.7.6)
+
+## 2015-06-25 (v2.0-beta.7.5)
+
+* Support spell checking being “automatic by language”. This is set via the spelling panel.
+* The line number scale factor can be set via the `lineNumberScaleFactor` user defaults key. It defaults to 0.8. If you want line numbers to be same size as main text, run the following in a terminal: `defaults write com.macromates.TextMate.preview lineNumberScaleFactor -float 1`.
+* See [all changes since v2.0-beta.7.2](https://github.com/textmate/textmate/compare/v2.0-beta.7.2...v2.0-beta.7.5)
+
+## 2015-06-13 (v2.0-beta.7.2)
+
+* If you do not want to be told that TextMate is outdated then go to _About TextMate → Registration_ and add your license key.
+* It is now possible to double-tap the shift key (⇧) to either deselect the last discontinuous selection made, e.g. if you use ⌃W to “find and select next” and hit it once too many. Additionally, when there are multiple carets, double-tapping shift will remove all but the first caret.
+* When playing a macro that uses the `findWithOptions:` command and there are no find or replace string (among its arguments), TextMate will now use values from the find/replace clipboards (i.e. current string). This is useful if your macro copies content to the find or replace clipboard.
+* Using _Check Spelling_ (⌘;) would previously find the next misspelled word (to the right of the caret). Now it will start with the word touched by the caret. This way, it is possible to type a word and immediately check it, without first moving to the beginning of the word. Alternatively one can press ⌥F2 to show the context menu for the word at the caret, which includes spelling suggestions, incase the word is misspelled.
+* See [all changes since v2.0-beta.7](https://github.com/textmate/textmate/compare/v2.0-beta.7...v2.0-beta.7.2)
+
+## 2015-03-25 (v2.0-beta.7)
+
+* Running a command that takes “selection” as input when there are discontinuous selections will now join the selections with LF and provide it all to the command. Furthermore, the result from the command will be split on LF and replace the respective selections. Most commands are not suited for this, but a useful scenario is enumerating items, for example use _Find All_ or similar to obtain multiple carets/selections, then use _Filter Through Command…_ (⌘|) and run `seq 100` (assuming there are less than 100 carets/selections). Feature prompted by this [mailing list post](http://lists.macromates.com/textmate/2015-February/038465.html).
+* When duplicating an item in the file browser (⌘D) we check if it contains a date string (`YYYY-MM-DD`), and if so, update that to today’s date instead of adding “copy” to the name.
+* When holding down command (⌘) and clicking an existing selection, we now undo that selection. This is useful when creating discontinuous selections with the mouse.
+* Clicking middle mouse button on a tab is now shorthand for closing the tab. *[Koen Punt]*
+* Visual improvements for tabs and file browser on Yosemite. *[Adam Strzelecki]*
+* Increasing and decreasing font size (⌘+ / ⌘-) now shows the current scale factor to make it easy to get back to 100%.
+* See [all changes since v2.0-beta.6.8](https://github.com/textmate/textmate/compare/v2.0-beta.6.8...v2.0-beta.7)
+
+## 2015-02-03 (v2.0-beta.6.8)
+
+* Various fixes.
+* See [all changes since v2.0-beta.6.7](https://github.com/textmate/textmate/compare/v2.0-beta.6.7...v2.0-beta.6.8)
+
 ## 2015-01-19 (v2.0-beta.6.7)
 
 * You can have the recent projects / favorites list shown on startup and re-activation (instead of having an untitled window created). To enable this behavior run: `defaults write com.macromates.TextMate.preview showFavoritesInsteadOfUntitled -bool YES` *[Anton]*

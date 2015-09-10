@@ -425,7 +425,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	[self.window.contentView addConstraints:constraints];
 	self.layoutConstraints = constraints;
 
-	OakSetupKeyViewLoop(@[ (self.keyEquivalentInput ? self.keyEquivalentView : self.searchField), self.actionsPopUpButton, self.scopeBar.buttons, self.editButton, self.selectButton ]);
+	OakSetupKeyViewLoop(@[ (self.keyEquivalentInput ? self.keyEquivalentView : self.searchField), self.actionsPopUpButton, self.scopeBar, self.editButton, self.selectButton ]);
 }
 
 - (void)showWindow:(id)sender
@@ -694,13 +694,16 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 				std::string name, action;
 				if(std::string const* sel = boost::get<std::string>(&pair.second))
 				{
-					if(*sel == "noop:" || !seen.emplace(key, *sel).second || ![NSApp targetForAction:NSSelectorFromString([NSString stringWithCxxString:*sel])])
+					if(*sel == "noop:" || !seen.emplace(key, *sel).second)
 						continue;
 
 					action = *sel;
 					name = format_string::replace(*sel, "[a-z](?=[A-Z])", "$0 ");
 					name = format_string::replace(name, "(.+):\\z", "${1:/capitalize}");
 					name = format_string::replace(name, "\\bsub Word\\b", "Sub-word");
+
+					if(![NSApp targetForAction:NSSelectorFromString([NSString stringWithCxxString:*sel])])
+						name += " (unknown action)";
 				}
 				else
 				{

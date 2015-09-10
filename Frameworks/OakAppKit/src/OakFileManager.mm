@@ -8,6 +8,16 @@ NSString* const OakFileManagerWillDeleteItemAtPath         = @"OakFileManagerWil
 NSString* const OakFileManagerDidChangeContentsOfDirectory = @"OakFileManagerDidChangeContentsOfDirectory";
 NSString* const OakFileManagerPathKey                      = @"directory";
 
+NSString* OakReplaceDateInString (NSString* srcPath, NSDate* newDate)
+{
+	NSDateFormatter* formatter = [NSDateFormatter new];
+	formatter.dateFormat = @"yyyy-MM-dd";
+	NSString* todaysDate = [formatter stringFromDate:newDate];
+
+	NSRegularExpression* regex = [NSRegularExpression regularExpressionWithPattern:@"(\\b|_)\\d{4}(?:-\\d{2}){2}(\\b|_)" options:0 error:nullptr];
+	return [regex stringByReplacingMatchesInString:srcPath options:0 range:NSMakeRange(0, [srcPath length]) withTemplate:[NSString stringWithFormat:@"$1%@$2", todaysDate]];
+}
+
 @interface OakFileManager ()
 @property (nonatomic) BOOL hasUISoundToPlay;
 @end
@@ -19,7 +29,7 @@ NSString* const OakFileManagerPathKey                      = @"directory";
 	return instance;
 }
 
-- (void)delsyedPlaySound:(id)aSound
+- (void)delayedPlaySound:(id)aSound
 {
 	OakPlayUISound((OakSoundIdentifier)[aSound intValue]);
 	self.hasUISoundToPlay = NO;
@@ -30,7 +40,7 @@ NSString* const OakFileManagerPathKey                      = @"directory";
 	if(!self.hasUISoundToPlay)
 	{
 		self.hasUISoundToPlay = YES;
-		[self performSelector:@selector(delsyedPlaySound:) withObject:@(aSound) afterDelay:0];
+		[self performSelector:@selector(delayedPlaySound:) withObject:@(aSound) afterDelay:0];
 	}
 }
 
@@ -301,6 +311,15 @@ NSString* const OakFileManagerPathKey                      = @"directory";
 	NSNumber* isDirectory = @NO;
 	[srcURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:nil];
 	NSURL* dst = [NSURL fileURLWithPath:[NSString stringWithCxxString:path::unique([[srcURL path] fileSystemRepresentation], " copy")] isDirectory:[isDirectory boolValue]];
+
+	if(![isDirectory boolValue])
+	{
+		NSString* srcPath = [srcURL path];
+		NSString* newPath = OakReplaceDateInString(srcPath);
+		if(![srcPath isEqualToString:newPath] && ![[NSFileManager defaultManager] fileExistsAtPath:newPath])
+			dst = [NSURL fileURLWithPath:newPath];
+	}
+
 	if([self doCreateCopy:dst ofURL:srcURL view:view])
 	{
 		[[view undoManager] setActionName:[self expandFormat:@"Duplicate of “%@”" withURL:srcURL]];

@@ -72,8 +72,8 @@ static std::string string_for (CGEventFlags flags)
 	};
 
 	std::string res = "";
-	for(size_t i = 0; i < sizeofA(EventFlags); ++i)
-		res += (flags & EventFlags[i].flag) ? EventFlags[i].symbol : "";
+	for(auto const& eventFlag : EventFlags)
+		res += (flags & eventFlag.flag) ? eventFlag.symbol : "";
 	return res;
 }
 

@@ -465,6 +465,33 @@ namespace ng
 		return res;
 	}
 
+	ranges_t deselect_last (ranges_t const& selection)
+	{
+		if(selection.empty())
+			return selection;
+
+		if(selection.size() == 1)
+		{
+			range_t r = selection.first();
+			r.freehanded = false;
+			return r;
+		}
+
+		bool singleCaret = true;
+		for(auto const& range : selection)
+			singleCaret = singleCaret && range.empty();
+
+		if(singleCaret)
+			return selection.first();
+
+		ranges_t res;
+		auto last = --selection.end();
+		for(auto range = selection.begin(); range != last; ++range)
+			res.push_back(*range);
+
+		return res;
+	}
+
 	// =================
 	// = Move Caret(s) =
 	// =================

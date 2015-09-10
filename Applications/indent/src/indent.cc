@@ -76,7 +76,7 @@ int main (int argc, char const* argv[])
 		files.push_back("/Users/duff/Desktop/indent-test.html");
 
 	plist::dictionary_t plist = plist::load(patterns);
-	static std::map<indent::pattern_type, std::string> const map =
+	static std::map<std::string, indent::pattern_type> const map =
 	{
 		{ "increaseIndentPattern", indent::pattern_type::kIncrease     },
 		{ "decreaseIndentPattern", indent::pattern_type::kDecrease     },

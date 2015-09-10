@@ -21,6 +21,18 @@ static std::vector<oak::uuid_t> to_menu (plist::array_t const& uuids, std::strin
 	return res;
 }
 
+static void remove_cycles (oak::uuid_t const& menuUUID, std::map< oak::uuid_t, std::vector<oak::uuid_t> >& menus, std::set<oak::uuid_t> parents = { })
+{
+	auto pair = menus.find(menuUUID);
+	if(pair != menus.end())
+	{
+		parents.insert(menuUUID);
+		pair->second.erase(std::remove_if(pair->second.begin(), pair->second.end(), [&parents](oak::uuid_t const& uuid) { return parents.find(uuid) != parents.end(); }), pair->second.end());
+		for(auto const& uuid : pair->second)
+			remove_cycles(uuid, menus, parents);
+	}
+}
+
 std::pair<std::vector<bundles::item_ptr>, std::map< oak::uuid_t, std::vector<oak::uuid_t>>> create_bundle_index (std::vector<std::string> const& bundlesPaths, plist::cache_t& cache)
 {
 	struct delta_item_t
@@ -124,6 +136,8 @@ std::pair<std::vector<bundles::item_ptr>, std::map< oak::uuid_t, std::vector<oak
 					}
 				}
 
+				remove_cycles(bundleUUID, menus);
+
 				plist::array_t uuids;
 				plist::get_key_path(plist, "mainMenu.excludedItems", uuids);
 				for(auto const& uuid : uuids)
@@ -157,12 +171,12 @@ std::pair<std::vector<bundles::item_ptr>, std::map< oak::uuid_t, std::vector<oak
 					{ "Themes",       "*.{plist,tmDelta,tmTheme}",       bundles::kItemTypeTheme       },
 				};
 
-				for(size_t i = 0; i < sizeofA(dirs); ++i)
+				for(auto const& dirInfo : dirs)
 				{
-					if(path::name(dirPath) != dirs[i].name)
+					if(path::name(dirPath) != dirInfo.name)
 						continue;
 
-					for(auto itemPath : cache.entries(dirPath, dirs[i].glob))
+					for(auto itemPath : cache.entries(dirPath, dirInfo.glob))
 					{
 						oak::uuid_t uuid;
 						plist::dictionary_t plist = cache.content(itemPath);
@@ -185,7 +199,7 @@ std::pair<std::vector<bundles::item_ptr>, std::map< oak::uuid_t, std::vector<oak
 						if(uuid == "615998FE-A13B-4199-A670-E5A892A1C43A")
 							continue;
 
-						auto item = std::make_shared<bundles::item_t>(uuid, bundle, dirs[i].kind, local);
+						auto item = std::make_shared<bundles::item_t>(uuid, bundle, dirInfo.kind, local);
 						item->add_path(itemPath);
 
 						bool isDelta = false;

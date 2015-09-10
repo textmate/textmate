@@ -64,19 +64,31 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 	return newView;
 }
 
-- (void)setTabBarView:(NSView*)aTabBarView           { _tabBarView     = [self replaceView:_tabBarView      withView:aTabBarView];      }
-- (void)setDocumentView:(NSView*)aDocumentView       { _documentView   = [self replaceView:_documentView    withView:aDocumentView];    }
+- (void)updateKeyViewLoop
+{
+	OakSetupKeyViewLoop(@[
+		_tabBarView      ?: [NSNull null],
+		_documentView    ?: [NSNull null],
+		_htmlOutputView  ?: [NSNull null],
+		_fileBrowserView ?: [NSNull null],
+	], NO);
+}
+
+- (void)setTabBarView:(OakTabBarView*)aTabBarView    { _tabBarView = (OakTabBarView*)[self replaceView:_tabBarView withView:aTabBarView]; [self updateKeyViewLoop]; }
+- (void)setDocumentView:(NSView*)aDocumentView       { _documentView = [self replaceView:_documentView withView:aDocumentView]; [self updateKeyViewLoop]; }
 
 - (void)setHtmlOutputView:(NSView*)aHtmlOutputView
 {
 	_htmlOutputDivider = [self replaceView:_htmlOutputDivider withView:(aHtmlOutputView ? (_htmlOutputOnRight ? OakCreateVerticalLine([NSColor controlShadowColor]) : OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1])) : nil)];
 	_htmlOutputView    = [self replaceView:_htmlOutputView withView:aHtmlOutputView];
+	[self updateKeyViewLoop];
 }
 
 - (void)setFileBrowserView:(NSView*)aFileBrowserView
 {
 	_fileBrowserDivider = [self replaceView:_fileBrowserDivider withView:aFileBrowserView ? OakCreateVerticalLine([NSColor controlShadowColor]) : nil];
 	_fileBrowserView    = [self replaceView:_fileBrowserView withView:aFileBrowserView];
+	[self updateKeyViewLoop];
 }
 
 - (void)setFileBrowserOnRight:(BOOL)flag
@@ -113,6 +125,8 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 
 - (void)updateConstraints
 {
+	_tabBarView.neverHideLeftBorder = _tabsAboveDocument && _fileBrowserView && _fileBrowserOnRight == NO;
+
 	[self removeConstraints:_myConstraints];
 	[_myConstraints removeAllObjects];
 	[super updateConstraints];

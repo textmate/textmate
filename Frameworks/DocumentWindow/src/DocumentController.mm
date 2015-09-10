@@ -29,13 +29,11 @@
 #import <text/tokenize.h>
 #import <text/utf8.h>
 #import <ns/ns.h>
-#import <oak/compat.h>
 #import <kvdb/kvdb.h>
 
 static NSString* const kUserDefaultsAlwaysFindInDocument = @"alwaysFindInDocument";
 static NSString* const kUserDefaultsDisableFolderStateRestore = @"disableFolderStateRestore";
 static NSString* const kUserDefaultsHideStatusBarKey = @"hideStatusBar";
-static NSString* const OakDocumentPboardType = @"OakDocumentPboardType"; // drag’n’drop of tabs
 static BOOL IsInShouldTerminateEventLoop = NO;
 
 @interface QuickLookNSURLWrapper : NSObject <QLPreviewItem>
@@ -288,16 +286,17 @@ namespace
 
 		NSUInteger windowStyle = (NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask|NSTexturedBackgroundWindowMask);
 		self.window = [[NSWindow alloc] initWithContentRect:[NSWindow contentRectForFrameRect:[self frameRectForNewWindow] styleMask:windowStyle] styleMask:windowStyle backing:NSBackingStoreBuffered defer:NO];
-		self.window.autorecalculatesKeyViewLoop = YES;
-		self.window.collectionBehavior          = NSWindowCollectionBehaviorFullScreenPrimary;
-		self.window.delegate                    = self;
-		self.window.releasedWhenClosed          = NO;
+		self.window.collectionBehavior = NSWindowCollectionBehaviorFullScreenPrimary;
+		self.window.delegate           = self;
+		self.window.releasedWhenClosed = NO;
 		[self.window setContentBorderThickness:0 forEdge:NSMaxYEdge]; // top border
 		[self.window setContentBorderThickness:0 forEdge:NSMinYEdge]; // bottom border
 		[self.window setAutorecalculatesContentBorderThickness:NO forEdge:NSMaxYEdge];
 		[self.window setAutorecalculatesContentBorderThickness:NO forEdge:NSMinYEdge];
 
 		OakAddAutoLayoutViewsToSuperview(@[ self.layoutView ], self.window.contentView);
+		OakSetupKeyViewLoop(@[ self.layoutView ], NO);
+		self.window.initialFirstResponder = self.textView;
 
 		[self.window.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[view]|" options:0 metrics:nil views:@{ @"view" : self.layoutView }]];
 		[self.window.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[view]|" options:0 metrics:nil views:@{ @"view" : self.layoutView }]];
@@ -1756,27 +1755,9 @@ namespace
 // = Tab Dragging =
 // ================
 
-- (void)setupPasteboard:(NSPasteboard*)aPasteboard forTabAtIndex:(NSUInteger)draggedTabIndex
+- (BOOL)performDropOfTabItem:(OakTabItem*)tabItem fromTabBar:(OakTabBarView*)sourceTabBar index:(NSUInteger)dragIndex toTabBar:(OakTabBarView*)destTabBar index:(NSUInteger)droppedIndex operation:(NSDragOperation)operation
 {
-	document::document_ptr document = _documents[draggedTabIndex];
-	if(document->path() != NULL_STR)
-	{
-		[aPasteboard addTypes:@[ NSFilenamesPboardType ] owner:nil];
-		[aPasteboard setPropertyList:@[ [NSString stringWithCxxString:document->path()] ] forType:NSFilenamesPboardType];
-	}
-
-	[aPasteboard addTypes:@[ OakDocumentPboardType ] owner:nil];
-	[aPasteboard setPropertyList:@{
-		@"index"       : @(draggedTabIndex),
-		@"document"    : [NSString stringWithCxxString:document->identifier()],
-		@"collection"  : self.identifier,
-	} forType:OakDocumentPboardType];
-}
-
-- (BOOL)performTabDropFromTabBar:(OakTabBarView*)aTabBar atIndex:(NSUInteger)droppedIndex fromPasteboard:(NSPasteboard*)aPasteboard operation:(NSDragOperation)operation
-{
-	NSDictionary* plist = [aPasteboard propertyListForType:OakDocumentPboardType];
-	document::document_ptr srcDocument = document::find(to_s(plist[@"document"]));
+	document::document_ptr srcDocument = document::find(to_s(tabItem.identifier));
 	if(!srcDocument)
 		return NO;
 
@@ -1792,15 +1773,14 @@ namespace
 			self.selectedTabIndex = iter - newDocuments.begin();
 	}
 
-	oak::uuid_t srcProjectId = to_s(plist[@"collection"]);
-	if(operation == NSDragOperationMove && srcProjectId != to_s(self.identifier))
+	if(operation == NSDragOperationMove && sourceTabBar != destTabBar)
 	{
 		for(DocumentController* delegate in SortedControllers())
 		{
-			if(srcProjectId == oak::uuid_t(to_s(delegate.identifier)))
+			if(delegate == sourceTabBar.delegate)
 			{
 				if(delegate.fileBrowserVisible || [delegate documents].size() > 1)
-						[delegate closeTabsAtIndexes:[NSIndexSet indexSetWithIndex:[plist[@"index"] unsignedIntValue]] askToSaveChanges:NO createDocumentIfEmpty:YES];
+						[delegate closeTabsAtIndexes:[NSIndexSet indexSetWithIndex:dragIndex] askToSaveChanges:NO createDocumentIfEmpty:YES];
 				else	[delegate close];
 				return YES;
 			}
@@ -2641,7 +2621,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 	}
 	else
 	{
-		for(auto attr : _externalScopeAttributes)
+		for(auto const& attr : _externalScopeAttributes)
 		{
 			if(regexp::match_t const& m = regexp::search("^attr.scm.(?'TM_SCM_NAME'\\w+)$", attr))
 			{

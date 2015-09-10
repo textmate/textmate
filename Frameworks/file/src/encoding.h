@@ -27,13 +27,13 @@ namespace encoding
 			{ std::string("\uFEFF",           3), kCharsetUTF8    }
 		};
 
-		for(size_t i = 0; i < sizeofA(BOMTests); ++i)
+		for(auto const& test : BOMTests)
 		{
-			if(oak::has_prefix(first, last, BOMTests[i].bom.begin(), BOMTests[i].bom.end()))
+			if(oak::has_prefix(first, last, test.bom.begin(), test.bom.end()))
 			{
 				if(bomSize)
-					*bomSize = BOMTests[i].bom.size();
-				return BOMTests[i].encoding;
+					*bomSize = test.bom.size();
+				return test.encoding;
 			}
 		}
 		return kCharsetNoEncoding;

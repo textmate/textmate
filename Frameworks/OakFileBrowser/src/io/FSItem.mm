@@ -1,9 +1,21 @@
 #import "FSItem.h"
+#import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/OakFileIconImage.h>
+#import <OakAppKit/OakFileManager.h>
+#import <OakAppKit/IOAlertPanel.h>
+#import <ns/ns.h>
 #import <io/path.h>
 #import <oak/oak.h>
 #import <oak/debug.h>
+
+static ino_t inode (std::string const& path)
+{
+	struct stat buf;
+	if(lstat(path.c_str(), &buf) == 0)
+		return buf.st_ino;
+	return 0;
+}
 
 @implementation FSItem { OBJC_WATCH_LEAKS(FSItem); }
 - (FSItem*)initWithURL:(NSURL*)anURL
@@ -35,17 +47,128 @@
 
 - (BOOL)isEqual:(id)otherObject
 {
-	return [otherObject isKindOfClass:[self class]] && [self.url isEqual:[otherObject url]];
+	return [otherObject isKindOfClass:[self class]] && [self.url isEqual:[otherObject url]] && self.scmStatus == [otherObject scmStatus] && self.isMissing == [otherObject isMissing];
+}
+
+- (NSUInteger)hash
+{
+	return [self.url hash];
 }
 
 - (NSString*)description
 {
-	return [NSString stringWithFormat:@"FSItem (%p): %@", self, [self.url absoluteString]];
+	return [NSString stringWithFormat:@"FSItem (%p): %@ (%ld children)", self, [self.url absoluteString], [self.children count]];
 }
 
 - (NSString*)path
 {
 	return [self.url path];
+}
+
+- (scm::status::type)scmStatus
+{
+	return [_icon isKindOfClass:[OakFileIconImage class]] ? ((OakFileIconImage*)_icon).scmStatus : scm::status::unknown;
+}
+
+- (void)setScmStatus:(scm::status::type)newScmStatus
+{
+	if([_icon isKindOfClass:[OakFileIconImage class]] && newScmStatus != self.scmStatus)
+	{
+		OakFileIconImage* icon = [(OakFileIconImage*)_icon copy];
+		icon.scmStatus = newScmStatus;
+		self.icon = icon;
+	}
+}
+
+- (BOOL)isModified
+{
+	return [_icon isKindOfClass:[OakFileIconImage class]] ? ((OakFileIconImage*)_icon).isModified : NO;
+}
+
+- (void)setModified:(BOOL)newState
+{
+	if([_icon isKindOfClass:[OakFileIconImage class]] && newState != self.isModified)
+	{
+		OakFileIconImage* icon = [(OakFileIconImage*)_icon copy];
+		icon.modified = newState;
+		self.icon = icon;
+	}
+}
+
+- (BOOL)isMissing
+{
+	return [_icon isKindOfClass:[OakFileIconImage class]] ? !((OakFileIconImage*)_icon).exists : NO;
+}
+
+- (void)setMissing:(BOOL)newState
+{
+	if([_icon isKindOfClass:[OakFileIconImage class]] && newState != self.isMissing)
+	{
+		OakFileIconImage* icon = [(OakFileIconImage*)_icon copy];
+		icon.exists = !newState;
+		self.icon = icon;
+	}
+}
+
+- (void)setLabelIndex:(NSInteger)newLabelIndex
+{
+	if(_labelIndex == newLabelIndex)
+		return;
+
+	_labelIndex = newLabelIndex;
+	if([_url isFileURL])
+	{
+		if(!path::set_label_index([self.path fileSystemRepresentation], newLabelIndex))
+			OakRunIOAlertPanel("Failed to change label color for “%s”.", [self.path fileSystemRepresentation]);
+	}
+}
+
+- (BOOL)setNewDisplayName:(NSString*)newDisplayName view:(NSView*)view
+{
+	if(![_url isFileURL] || OakIsEmptyString(newDisplayName))
+		return NO;
+
+	std::string src = [[_url path] fileSystemRepresentation];
+	std::string dst = path::join(path::parent(src), [[newDisplayName stringByReplacingOccurrencesOfString:@"/" withString:@":"] fileSystemRepresentation]);
+
+	// “hidden extension” is ignored if Finder is set to show all file extensions, if there are multiple extensions, or if no application is assigned to the extension.
+	std::string const baseName    = path::name(src);
+	std::string const displayName = path::display_name(src);
+	bool hiddenExtension = baseName != displayName && (path::info(src) & path::flag::hidden_extension);
+
+	BOOL res = NO;
+	if(src == dst && hiddenExtension)
+	{
+		NSURL* dstURL = [NSURL fileURLWithPath:[NSString stringWithCxxString:dst]];
+		NSError* error;
+		if(!(res = [dstURL setResourceValue:@NO forKey:NSURLHasHiddenExtensionKey error:&error]))
+			NSLog(@"error: failed to show extension for %@: %@", _url, error);
+	}
+	else
+	{
+		if(hiddenExtension)
+			dst += path::extension(src);
+
+		if(src != dst)
+		{
+			// ‘dst’ is allowed to exist on case-insensitive file systems (Foo.txt → foo.txt)
+			if(path::exists(dst) && inode(src) != inode(dst))
+			{
+				errno = EEXIST;
+				OakRunIOAlertPanel("Failed to rename the file at “%s”.", path::name(src).c_str());
+			}
+			else
+			{
+				NSURL* dstURL = [NSURL fileURLWithPath:[NSString stringWithCxxString:dst]];
+				if(res = [[OakFileManager sharedInstance] renameItemAtURL:_url toURL:dstURL view:view])
+				{
+					self.url         = dstURL;
+					self.displayName = [NSString stringWithCxxString:path::display_name(dst)];
+				}
+			}
+		}
+	}
+	return res;
 }
 
 - (FSItemURLType)urlType
