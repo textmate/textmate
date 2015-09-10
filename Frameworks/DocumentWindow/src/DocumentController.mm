@@ -1402,6 +1402,9 @@ namespace
 		if(customAttributes != NULL_STR)
 			_documentScopeAttributes.push_back(customAttributes);
 
+		self.documentSCMStatus    = scm::status::unknown;
+		self.documentSCMVariables = std::map<std::string, std::string>();
+
 		if(_documentSCMInfo = scm::info(docDirectory))
 		{
 			__weak DocumentController* weakSelf = self;
@@ -1409,11 +1412,6 @@ namespace
 				weakSelf.documentSCMStatus    = info.status(to_s(weakSelf.documentPath));
 				weakSelf.documentSCMVariables = info.scm_variables();
 			});
-		}
-		else
-		{
-			self.documentSCMStatus    = scm::status::unknown;
-			self.documentSCMVariables = std::map<std::string, std::string>();
 		}
 
 		[self updateExternalAttributes];
