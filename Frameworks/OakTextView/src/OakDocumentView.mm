@@ -669,15 +669,23 @@ private:
 		[bundleItemsPopUp selectItem:selectedItem];
 }
 
+- (NSUInteger)tabSize
+{
+	return textView.tabSize;
+}
+
+- (void)setTabSize:(NSUInteger)newTabSize
+{
+	textView.tabSize = newTabSize;
+	settings_t::set(kSettingsTabSizeKey, (size_t)newTabSize, document->file_type());
+}
+
 - (IBAction)takeTabSizeFrom:(id)sender
 {
 	D(DBF_OakDocumentView, bug("\n"););
 	ASSERT([sender respondsToSelector:@selector(tag)]);
 	if([sender tag] > 0)
-	{
-		textView.tabSize = [sender tag];
-		settings_t::set(kSettingsTabSizeKey, (size_t)[sender tag], document->file_type());
-	}
+		self.tabSize = [sender tag];
 }
 
 - (IBAction)setIndentWithSpaces:(id)sender
