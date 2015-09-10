@@ -154,15 +154,15 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
-						<string key="label">displayPatternValue1: textView.tabSize</string>
+						<string key="label">displayPatternValue1: tabSize</string>
 						<reference key="source" ref="891015346"/>
 						<reference key="destination" ref="1072191032"/>
 						<object class="NSNibBindingConnector" key="connector">
 							<reference key="NSSource" ref="891015346"/>
 							<reference key="NSDestination" ref="1072191032"/>
-							<string key="NSLabel">displayPatternValue1: textView.tabSize</string>
+							<string key="NSLabel">displayPatternValue1: tabSize</string>
 							<string key="NSBinding">displayPatternValue1</string>
-							<string key="NSKeyPath">textView.tabSize</string>
+							<string key="NSKeyPath">tabSize</string>
 							<object class="NSDictionary" key="NSOptions">
 								<string key="NS.key.0">NSDisplayPattern</string>
 								<string key="NS.object.0">Tab Size: %{value1}@</string>
@@ -170,23 +170,23 @@
 							<int key="NSNibBindingConnectorVersion">2</int>
 						</object>
 					</object>
-					<int key="connectionID">23</int>
+					<int key="connectionID">26</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
-						<string key="label">value: textView.tabSize</string>
+						<string key="label">value: tabSize</string>
 						<reference key="source" ref="885016321"/>
 						<reference key="destination" ref="1072191032"/>
 						<object class="NSNibBindingConnector" key="connector">
 							<reference key="NSSource" ref="885016321"/>
 							<reference key="NSDestination" ref="1072191032"/>
-							<string key="NSLabel">value: textView.tabSize</string>
+							<string key="NSLabel">value: tabSize</string>
 							<string key="NSBinding">value</string>
-							<string key="NSKeyPath">textView.tabSize</string>
+							<string key="NSKeyPath">tabSize</string>
 							<int key="NSNibBindingConnectorVersion">2</int>
 						</object>
 					</object>
-					<int key="connectionID">24</int>
+					<int key="connectionID">28</int>
 				</object>
 			</array>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -284,7 +284,7 @@
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">25</int>
+			<int key="maxID">28</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes"/>
 		<int key="IBDocument.localizationMode">0</int>
