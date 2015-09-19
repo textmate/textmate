@@ -16,7 +16,11 @@ static void ShowLoadErrorForURL (WebFrame* frame, NSURL* url, NSError* error)
 	[frame loadHTMLString:errorMsg baseURL:[NSURL fileURLWithPath:NSTemporaryDirectory()]];
 }
 
+#if !defined(MAC_OS_X_VERSION_10_11) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_11)
 @interface HOBrowserView ()
+#else
+@interface HOBrowserView () <WebPolicyDelegate, WebUIDelegate, WebResourceLoadDelegate>
+#endif
 @property (nonatomic, readwrite) WebView* webView;
 @property (nonatomic, readwrite) HOStatusBar* statusBar;
 @property (nonatomic) HOWebViewDelegateHelper* webViewDelegateHelper;

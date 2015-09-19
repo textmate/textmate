@@ -242,7 +242,11 @@ static NSTextField* OakCreateTextField ()
 
 // ============================
 
+#if !defined(MAC_OS_X_VERSION_10_11) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_11)
 @interface AboutWindowController () <NSWindowDelegate, NSToolbarDelegate>
+#else
+@interface AboutWindowController () <NSWindowDelegate, NSToolbarDelegate, WebFrameLoadDelegate, WebPolicyDelegate>
+#endif
 @property (nonatomic) NSToolbar* toolbar;
 @property (nonatomic) WebView* webView;
 @property (nonatomic) NSString* selectedPage;

@@ -45,7 +45,11 @@
 }
 @end
 
+#if !defined(MAC_OS_X_VERSION_10_11) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_11)
 @interface OakPasteboardChooser () <NSWindowDelegate, NSTextFieldDelegate, NSTableViewDelegate>
+#else
+@interface OakPasteboardChooser () <NSWindowDelegate, NSTextFieldDelegate, NSTableViewDelegate, NSSearchFieldDelegate>
+#endif
 @property (nonatomic) OakPasteboard*        pasteboard;
 @property (nonatomic) NSArrayController*    arrayController;
 @property (nonatomic) NSWindow*             window;

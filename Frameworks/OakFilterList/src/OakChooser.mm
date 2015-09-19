@@ -108,7 +108,11 @@ NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string
 	return res;
 }
 
+#if !defined(MAC_OS_X_VERSION_10_11) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_11)
 @interface OakChooser () <NSWindowDelegate, NSTextFieldDelegate, NSTableViewDataSource, NSTableViewDelegate>
+#else
+@interface OakChooser () <NSWindowDelegate, NSTextFieldDelegate, NSTableViewDataSource, NSTableViewDelegate, NSSearchFieldDelegate>
+#endif
 @end
 
 static void* kFirstResponderBinding = &kFirstResponderBinding;
