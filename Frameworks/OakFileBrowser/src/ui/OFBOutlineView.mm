@@ -19,7 +19,7 @@
 	NSSize defaultIntercellSpacing;
 	NSColor* defaultBackgroundColor;
 }
-@property (nonatomic) NSArray* draggedItems;
+@property (nonatomic) NSArray* draggedOFBItems;
 
 - (void)performDoubleClick:(id)sender;
 @end
@@ -210,15 +210,15 @@
 		if(id item = [self itemAtRow:index])
 			[items addObject:item];
 	}
-	self.draggedItems = items;
+	self.draggedOFBItems = items;
 	return [super dragImageForRowsWithIndexes:anIndexSet tableColumns:anArray event:anEvent offset:aPointPointer];
 }
 
 - (void)draggedImage:(NSImage*)anImage endedAt:(NSPoint)aPoint operation:(NSDragOperation)aDragOperation
 {
-	if(self.draggedItems && [self.dataSource respondsToSelector:@selector(outlineView:draggedItems:endedWithOperation:)])
-		[(id <FSDataSourceDragSource>)self.dataSource outlineView:self draggedItems:self.draggedItems endedWithOperation:aDragOperation];
-	self.draggedItems = nil;
+	if(self.draggedOFBItems && [self.dataSource respondsToSelector:@selector(outlineView:draggedItems:endedWithOperation:)])
+		[(id <FSDataSourceDragSource>)self.dataSource outlineView:self draggedItems:self.draggedOFBItems endedWithOperation:aDragOperation];
+	self.draggedOFBItems = nil;
 
 	if([NSOutlineView respondsToSelector:@selector(draggedImage:endedAt:operation:)])
 		[super draggedImage:anImage endedAt:aPoint operation:aDragOperation];
