@@ -44,7 +44,7 @@ OAK_DEBUG_VAR(HTMLOutput_WebViewDelegate);
 	NSOpenPanel* panel = [NSOpenPanel openPanel];
 	[panel setDirectoryURL:[NSURL fileURLWithPath:NSHomeDirectory()]];
 	if([panel runModal] == NSOKButton)
-		[resultListener chooseFilename:[[[[panel URLs] objectAtIndex:0] fileURL] path]];
+		[resultListener chooseFilename:[[[panel URLs] objectAtIndex:0] path]];
 }
 
 - (WebView*)webView:(WebView*)sender createWebViewWithRequest:(NSURLRequest*)request
