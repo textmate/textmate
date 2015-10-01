@@ -48,10 +48,11 @@ To build the source the following must first be installed on your system:
  * [multimarkdown][] — marked-up plain text compiler
  * [mercurial][]     — distributed SCM system
  * [Cap’n Proto][capnp] — serialization library
+ * [LibreSSL][libressl] - OpenBSD fork of OpenSSL
 
 You need to manually install [Cap’n Proto][capnp] if you're not using [homebrew][]. To install the other dependencies via [MacPorts][] run:
 
-	sudo port install ninja ragel boost multimarkdown mercurial sparsehash
+	sudo port install ninja ragel boost multimarkdown mercurial sparsehash libressl
 
 If `port` fails with a build error then likely you need to agree (system-wide) to Apple’s Xcode license:
 
@@ -59,7 +60,7 @@ If `port` fails with a build error then likely you need to agree (system-wide) t
 
 To install using [homebrew][] run:
 
-	brew install ragel boost multimarkdown hg ninja capnp google-sparsehash
+	brew install ragel boost multimarkdown hg ninja capnp google-sparsehash libressl
 
 In practice `hg` ([mercurial][]) is only required for the SCM library’s tests so you can skip this dependency if you don’t mind a failing test.
 
@@ -132,6 +133,7 @@ TextMate is a trademark of Allan Odgaard.
 [ragel]:         http://www.complang.org/ragel/
 [mercurial]:     http://mercurial.selenic.com/
 [capnp]:         http://kentonv.github.io/capnproto/
+[libressl]:      http://www.libressl.org
 [clang 3.2]:     http://clang.llvm.org/
 [MacPorts]:      http://www.macports.org/
 [homebrew]:      http://brew.sh/
