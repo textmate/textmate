@@ -53,6 +53,20 @@ done
 
 test -L "${builddir}/include/sparsehash" || error "*** google sparsehash not installed."
 
+# ===========================================
+# = Check if non-system openssl is intalled =
+# ===========================================
+
+if which -s brew && [[ -z "$libressl_prefix" && ! -d "${libressl_prefix}/include/openssl" ]]; then
+	libressl_prefix=$(brew --prefix libressl)
+        test -d "${libressl_prefix}/include/" || error "*** openssl headers not found."
+fi
+
+if which -s port && [[ -z "$libressl_prefix" && ! -d "${libressl_prefix}/include/openssl" ]]; then
+        libressl_prefix=/opt/local/
+        test -d "${libressl_prefix}/include/openssl" || error "*** openssl headers not found."
+fi
+
 # ===============================================
 # = Check if we can use pbzip2 instead of bzip2 =
 # ===============================================
@@ -79,7 +93,7 @@ done
 mkdir -p "$builddir/Frameworks/SoftwareUpdate/fixtures"
 DST=$(cd >/dev/null "$builddir/Frameworks/SoftwareUpdate/fixtures"; pwd) make -C Frameworks/SoftwareUpdate/fixtures
 
-bin/gen_build -o build.ninja -C "$builddir" -dAPP_NAME="$name" -dAPP_VERSION="$ver" -dAPP_MIN_OS="$min_os" -dCC="$CC" -dCXX="$CXX" -didentity="$identity" -drest_api="$rest_api" -dbzip2_flag="$bzip2_flag" -dcapnp_prefix="$capnp_prefix" target
+bin/gen_build -o build.ninja -C "$builddir" -dAPP_NAME="$name" -dAPP_VERSION="$ver" -dAPP_MIN_OS="$min_os" -dCC="$CC" -dCXX="$CXX" -didentity="$identity" -drest_api="$rest_api" -dbzip2_flag="$bzip2_flag" -dcapnp_prefix="$capnp_prefix" -dlibressl_prefix="$libressl_prefix" target
 
 ninja Frameworks/encoding/src/frequencies.capnp.h
 ninja Frameworks/plist/src/cache.capnp.h
