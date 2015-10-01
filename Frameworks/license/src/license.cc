@@ -5,12 +5,6 @@
 #include <text/tokenize.h>
 #include <text/case.h>
 #include <text/format.h>
-
-#ifdef DEPRECATED_IN_MAC_OS_X_VERSION_10_7_AND_LATER
-#undef DEPRECATED_IN_MAC_OS_X_VERSION_10_7_AND_LATER
-#define DEPRECATED_IN_MAC_OS_X_VERSION_10_7_AND_LATER
-#endif
-
 #include <openssl/bio.h>
 #include <openssl/pem.h>
 #include <openssl/rsa.h>
