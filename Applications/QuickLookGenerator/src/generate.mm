@@ -55,27 +55,15 @@ static std::string URLtoString (CFURLRef url)
 	return filePath;
 }
 
-// =========================
-// = QLGenerator interface =
-// =========================
-
-OSStatus TextMateQuickLookPlugIn_GenerateThumbnailForURL (void* instance, QLThumbnailRequestRef request, CFURLRef url, CFStringRef contentTypeUTI, CFDictionaryRef options, CGSize maxSize)
+static std::string setup_buffer (CFURLRef url, ng::buffer_t& buffer, size_t maxSize = 20480, size_t maxLines = SIZE_T_MAX)
 {
-	initialize(QLThumbnailRequestGetGeneratorBundle(request));
-
-	// Load file
-	ng::buffer_t buffer;
 	std::string filePath = URLtoString(url);
-	std::string fileContents = file::read_utf8(filePath, nullptr, 1024); // 1Kb should be more than enough
+	std::string fileContents = file::read_utf8(filePath, nullptr, maxSize);
 
-	// Trim to 50 lines, since we don't need more
-	size_t maxLines = 50;
-	fileContents.erase(std::find_if(fileContents.begin(), fileContents.end(), [&maxLines](char ch) { return ch == '\n' && --maxLines == 0; }), fileContents.end());
+	if(maxLines != SIZE_T_MAX)
+		fileContents.erase(std::find_if(fileContents.begin(), fileContents.end(), [&maxLines](char ch) { return ch == '\n' && --maxLines == 0; }), fileContents.end());
+
 	buffer.insert(0, fileContents);
-
-	// Check if cancelled
-	if(QLThumbnailRequestIsCancelled(request))
-		return noErr;
 
 	// Apply appropriate grammar
 	std::string fileType = file::type(filePath, std::make_shared<io::bytes_t>(fileContents.data(), fileContents.size(), false));
@@ -88,21 +76,25 @@ OSStatus TextMateQuickLookPlugIn_GenerateThumbnailForURL (void* instance, QLThum
 		}
 	}
 
-	// Check if cancelled
-	if(QLThumbnailRequestIsCancelled(request))
-		return noErr;
+	return fileType;
+}
 
-	// Apply appropriate theme
-	theme_ptr theme = parse_theme(bundles::lookup(kMacClassicThemeUUID));
+static NSAttributedString* create_attributed_string (ng::buffer_t& buffer, std::string const& themeUUID, std::string const& fontName, size_t fontSize, theme_ptr* themeOut = nullptr)
+{
+	if(themeUUID == NULL_STR || fontName == NULL_STR || fontSize == 0)
+		return nil;
+
+	bundles::item_ptr themeItem = bundles::lookup(themeUUID);
+	if(!themeItem)
+		return nil;
+
+	theme_ptr theme = parse_theme(themeItem);
 	if(!theme)
-		return noErr;
+		return nil;
 
-	NSFont* font = [NSFont userFixedPitchFontOfSize:4];
-	theme = theme->copy_with_font_name_and_size(to_s([font fontName]), [font pointSize]);
-
-	// Check if cancelled
-	if(QLThumbnailRequestIsCancelled(request))
-		return noErr;
+	theme = theme->copy_with_font_name_and_size(fontName, fontSize);
+	if(themeOut)
+		*themeOut = theme;
 
 	// Perform syntax highlighting
 	buffer.wait_for_repair();
@@ -119,13 +111,35 @@ OSStatus TextMateQuickLookPlugIn_GenerateThumbnailForURL (void* instance, QLThum
 
 		[output appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:buffer.substr(from, to)] attributes:@{
 			NSForegroundColorAttributeName : [NSColor tmColorWithCGColor:styles.foreground()],
-			NSBackgroundColorAttributeName : [NSColor whiteColor],
-			NSFontAttributeName            : font,
+			NSBackgroundColorAttributeName : [NSColor tmColorWithCGColor:styles.background()],
+			NSFontAttributeName            : (__bridge NSFont*)styles.font(),
 			NSUnderlineStyleAttributeName  : @(styles.underlined() ? NSUnderlineStyleSingle : NSUnderlineStyleNone),
 		}]];
 
 		from = to;
 	}
+
+	return output;
+}
+
+// =========================
+// = QLGenerator interface =
+// =========================
+
+OSStatus TextMateQuickLookPlugIn_GenerateThumbnailForURL (void* instance, QLThumbnailRequestRef request, CFURLRef url, CFStringRef contentTypeUTI, CFDictionaryRef options, CGSize maxSize)
+{
+	initialize(QLThumbnailRequestGetGeneratorBundle(request));
+
+	// Load file
+	ng::buffer_t buffer;
+	setup_buffer(url, buffer, 1024, 50);
+
+	// Check if cancelled
+	if(QLThumbnailRequestIsCancelled(request))
+		return noErr;
+
+	NSFont* font = [NSFont userFixedPitchFontOfSize:4];
+	NSAttributedString* output = create_attributed_string(buffer, kMacClassicThemeUUID, to_s([font fontName]), [font pointSize]);
 
 	// Check if cancelled
 	if(QLThumbnailRequestIsCancelled(request))
@@ -164,25 +178,9 @@ OSStatus TextMateQuickLookPlugIn_GeneratePreviewForURL (void* instance, QLPrevie
 
 	// Load file
 	ng::buffer_t buffer;
-	std::string filePath = URLtoString(url);
-	std::string fileContents = file::read_utf8(filePath, nullptr, 20480);
-	buffer.insert(0, fileContents);
+	std::string fileType = setup_buffer(url, buffer);
 
-	// Check if cancelled
-	if(QLPreviewRequestIsCancelled(request))
-		return noErr;
-
-	// Apply appropriate grammar
-	std::string fileType = file::type(filePath, std::make_shared<io::bytes_t>(fileContents.data(), fileContents.size(), false));
-	if(fileType != NULL_STR)
-	{
-		for(auto item : bundles::query(bundles::kFieldGrammarScope, fileType, scope::wildcard, bundles::kItemTypeGrammar))
-		{
-			buffer.set_grammar(item);
-			break;
-		}
-	}
-	else
+	if(fileType == NULL_STR)
 	{
 		// We don't know the type, let the system handle it
 		NSData* data = [NSData dataWithContentsOfURL:(__bridge NSURL*)url];
@@ -194,49 +192,14 @@ OSStatus TextMateQuickLookPlugIn_GeneratePreviewForURL (void* instance, QLPrevie
 	if(QLPreviewRequestIsCancelled(request))
 		return noErr;
 
-	// Apply appropriate theme
-	settings_t const settings = settings_for_path(filePath, fileType);
-	std::string themeUUID = settings.get(kSettingsThemeKey, NULL_STR);
-	bundles::item_ptr themeItem = themeUUID != NULL_STR ? bundles::lookup(themeUUID) : bundles::item_ptr();
-	theme_ptr theme = themeItem ? parse_theme(themeItem) : theme_ptr();
-	if(theme) theme = theme->copy_with_font_name_and_size(settings.get(kSettingsFontNameKey, NULL_STR), settings.get(kSettingsFontSizeKey, 11));
-
-	if(!theme)
+	settings_t const settings = settings_for_path(URLtoString(url), fileType);
+	theme_ptr theme;
+	NSAttributedString* output = create_attributed_string(buffer, settings.get(kSettingsThemeKey, NULL_STR), settings.get(kSettingsFontNameKey, NULL_STR), settings.get(kSettingsFontSizeKey, 11), &theme);
+	if(!output)
 	{
 		NSData* data = [NSData dataWithContentsOfURL:(__bridge NSURL*)url];
 		QLPreviewRequestSetDataRepresentation(request, (__bridge CFDataRef)data, kUTTypePlainText, nil);
 		return noErr;
-	}
-
-	// Check if cancelled
-	if(QLPreviewRequestIsCancelled(request))
-		return noErr;
-
-	// Perform syntax highlighting
-	buffer.wait_for_repair();
-	std::map<size_t, scope::scope_t> scopes = buffer.scopes(0, buffer.size());
-
-	// Check if cancelled
-	if(QLPreviewRequestIsCancelled(request))
-		return noErr;
-
-	// Construct RTF output
-	NSMutableAttributedString* output = (__bridge_transfer NSMutableAttributedString*)CFAttributedStringCreateMutable(kCFAllocatorDefault, buffer.size());
-	size_t from = 0;
-	for(auto pair = scopes.begin(); pair != scopes.end(); )
-	{
-		styles_t styles = theme->styles_for_scope(pair->second);
-
-		size_t to = ++pair != scopes.end() ? pair->first : buffer.size();
-
-		[output appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:buffer.substr(from, to)] attributes:@{
-			NSForegroundColorAttributeName : [NSColor tmColorWithCGColor:styles.foreground()],
-			NSBackgroundColorAttributeName : [NSColor tmColorWithCGColor:styles.background()],
-			NSFontAttributeName            : (__bridge NSFont*)styles.font(),
-			NSUnderlineStyleAttributeName  : @(styles.underlined() ? NSUnderlineStyleSingle : NSUnderlineStyleNone),
-		}]];
-
-		from = to;
 	}
 
 	// Check if cancelled
