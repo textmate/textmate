@@ -3724,6 +3724,7 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 
 	if(ng::range_t r = layout->folded_range_at_point([self convertPoint:[anEvent locationInWindow] fromView:nil]))
 	{
+		AUTO_REFRESH;
 		layout->unfold(r.min().index, r.max().index);
 		return;
 	}
