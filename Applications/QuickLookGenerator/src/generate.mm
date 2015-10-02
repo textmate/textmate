@@ -1,3 +1,4 @@
+#import <OSAKit/OSAKit.h>
 #import "plugin.h"
 #import <buffer/buffer.h>
 #import <bundles/bundles.h>
@@ -58,7 +59,22 @@ static std::string URLtoString (CFURLRef url)
 static std::string setup_buffer (CFURLRef url, ng::buffer_t& buffer, size_t maxSize = 20480, size_t maxLines = SIZE_T_MAX)
 {
 	std::string filePath = URLtoString(url);
-	std::string fileContents = file::read_utf8(filePath, nullptr, maxSize);
+
+	std::string fileContents = NULL_STR;
+	if(path::extension(filePath) == ".scpt")
+	{
+		@autoreleasepool {
+			NSDictionary* err = nil;
+			if(OSAScript* script = [[OSAScript alloc] initWithContentsOfURL:(__bridge NSURL*)url error:&err])
+			{
+				fileContents = [[script source] UTF8String] ?: NULL_STR;
+				std::replace(fileContents.begin(), fileContents.end(), '\r', '\n');
+			}
+		}
+	}
+
+	if(fileContents == NULL_STR)
+		fileContents = file::read_utf8(filePath, nullptr, maxSize);
 
 	if(maxLines != SIZE_T_MAX)
 		fileContents.erase(std::find_if(fileContents.begin(), fileContents.end(), [&maxLines](char ch) { return ch == '\n' && --maxLines == 0; }), fileContents.end());
