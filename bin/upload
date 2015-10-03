@@ -59,7 +59,7 @@ def create_release(path, repository, tag, description, content_type)
     end
 
     if url = github['upload_url']
-      url.sub!(/\{\?name\}/, '')
+      url.sub!(/\{\?.*?\}/, '')
       upload_url = "|curl -nH'Content-Type: #{content_type}' --data-binary @'#{path}' '#{url}?name=#{basename}'"
       open(upload_url) do |io|
         res = JSON.parse(io.read)
