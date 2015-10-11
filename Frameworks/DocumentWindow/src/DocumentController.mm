@@ -1308,6 +1308,7 @@ namespace
 		{ "attr.project.maven",   "pom.xml",        "build"   },
 		{ "attr.project.scons",   "SConstruct",     "build"   },
 		{ "attr.project.lein",    "project.clj",    "build"   },
+		{ "attr.project.cargo",   "Cargo.toml",     "build"   },
 		{ "attr.project.vagrant", "Vagrantfile",    "vagrant" },
 		{ "attr.project.jekyll",  "_config.yml",    "jekyll"  },
 		{ "attr.test.rspec",      ".rspec",         "test"    },
