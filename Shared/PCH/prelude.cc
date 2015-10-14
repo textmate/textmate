@@ -22,10 +22,6 @@
 #include <thread>
 #include <boost/crc.hpp>
 #include <boost/variant.hpp>
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wunused-local-typedef"
 #include <sparsehash/dense_hash_map>
-#pragma clang diagnostic pop
 
 #endif /* end of include guard: PRELUDE_CC_PCH_U5CKEP2N */
