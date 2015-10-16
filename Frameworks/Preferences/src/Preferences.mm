@@ -77,7 +77,7 @@ OAK_DEBUG_VAR(Preferences);
 	int i = 0;
 	for(NSViewController <MASPreferencesViewController>* viewController in _viewControllers)
 	{
-		NSMenuItem* item = [aMenu addItemWithTitle:viewController.toolbarItemLabel action:@selector(takeSelectedViewControllerIndexFrom:) keyEquivalent:i < 10 ? [NSString stringWithFormat:@"%c", '0' + ((i+1) % 10)] : @""];
+		NSMenuItem* item = [aMenu addItemWithTitle:viewController.toolbarItemLabel action:@selector(takeSelectedViewControllerIndexFrom:) keyEquivalent:i < 9 ? [NSString stringWithFormat:@"%c", '1' + i] : @""];
 		item.tag = i;
 		item.target = self;
 		if([viewController.identifier isEqualToString:selectedIdentifier])
