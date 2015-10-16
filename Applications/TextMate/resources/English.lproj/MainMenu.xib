@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="6250" systemVersion="13F34" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="8191" systemVersion="14F27" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment version="1070" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="6250"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="8191"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="NSApplication">
@@ -561,6 +561,11 @@ CA
                                         <menuItem title="Smaller" keyEquivalent="-" id="588">
                                             <connections>
                                                 <action selector="makeTextSmaller:" target="-1" id="591"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Default Size" keyEquivalent="0" id="ElB-cz-USa">
+                                            <connections>
+                                                <action selector="makeTextStandardSize:" target="-1" id="l3C-ht-skj"/>
                                             </connections>
                                         </menuItem>
                                     </items>
