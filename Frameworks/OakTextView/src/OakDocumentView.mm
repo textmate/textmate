@@ -277,6 +277,12 @@ private:
 	}
 }
 
+- (IBAction)makeTextStandardSize:(id)sender
+{
+	textView.fontScaleFactor = 100;
+	[self updateGutterViewFont:self];
+}
+
 - (void)changeFont:(id)sender
 {
 	if(NSFont* newFont = [sender convertFont:textView.font ?: [NSFont userFixedPitchFontOfSize:0]])
