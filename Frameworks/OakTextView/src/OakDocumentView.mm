@@ -630,6 +630,9 @@ private:
 
 - (void)showBundlesMenu:(id)sender
 {
+	if(!self.statusBar)
+		return NSBeep();
+
 	[NSApp sendAction:_cmd to:self.statusBar from:self];
 }
 
