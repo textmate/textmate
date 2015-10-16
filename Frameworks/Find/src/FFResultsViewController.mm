@@ -127,7 +127,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 	if(_showKeyEquivalent)
 	{
 		NSUInteger index = [item.parent.children indexOfObject:item];
-		if(!item || index > 9)
+		if(!item || index > 8)
 			return;
 
 		NSRect rect = self.imageView.bounds;
