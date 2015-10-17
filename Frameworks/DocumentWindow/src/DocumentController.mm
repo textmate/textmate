@@ -220,7 +220,12 @@ namespace
 		std::transform(newDocuments.begin(), newDocuments.end(), inserter(uuids, uuids.end()), [](document::document_ptr const& doc){ return doc->identifier(); });
 
 		std::copy_if(oldDocuments.begin(), oldDocuments.begin() + splitAt, back_inserter(out), [&uuids](document::document_ptr const& doc){ return uuids.find(doc->identifier()) == uuids.end(); });
-		std::copy(newDocuments.begin(), newDocuments.end(), back_inserter(out));
+		uuids.clear();
+		for(auto const& doc : newDocuments)
+		{
+			if(uuids.insert(doc->identifier()).second)
+				out.push_back(doc);
+		}
 		std::copy_if(oldDocuments.begin() + splitAt, oldDocuments.end(), back_inserter(out), [&uuids](document::document_ptr const& doc){ return uuids.find(doc->identifier()) == uuids.end(); });
 
 		auto iter = std::find(out.begin(), out.end(), newDocuments.front());
