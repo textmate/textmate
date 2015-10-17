@@ -468,7 +468,23 @@ struct expansion_state_t
 		NSRect rowRect     = [_outlineView rectOfRow:i];
 		NSRect visibleRect = [_outlineView visibleRect];
 		if(NSMinY(rowRect) < NSMinY(visibleRect) || NSMaxY(rowRect) > NSMaxY(visibleRect))
-			[_outlineView scrollPoint:NSMakePoint(NSMinX(rowRect), round(NSMidY(rowRect) - NSHeight(visibleRect)/2))];
+		{
+			if(NSEqualRects(rowRect, NSIntersectionRect(rowRect, [_outlineView bounds])))
+			{
+				[_outlineView scrollPoint:NSMakePoint(NSMinX(rowRect), round(NSMidY(rowRect) - NSHeight(visibleRect)/2))];
+			}
+			else
+			{
+				NSDate* timeoutDate = [NSDate dateWithTimeIntervalSinceNow:1];
+				__weak __block id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:NSViewFrameDidChangeNotification object:_outlineView queue:nil usingBlock:^(NSNotification*){
+					BOOL canMakeVisible = NSEqualRects(rowRect, NSIntersectionRect(rowRect, [_outlineView bounds]));
+					if(canMakeVisible)
+						[_outlineView scrollPoint:NSMakePoint(NSMinX(rowRect), round(NSMidY(rowRect) - NSHeight(visibleRect)/2))];
+					if(canMakeVisible || [timeoutDate compare:[NSDate date]] == NSOrderedAscending)
+						[[NSNotificationCenter defaultCenter] removeObserver:observerId];
+				}];
+			}
+		}
 
 		_pendingMakeVisibleURL = nil;
 	}
