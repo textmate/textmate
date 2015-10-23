@@ -2,6 +2,14 @@ Title: Release Notes
 
 # Changes
 
+## 2015-10-23 (v2.0-beta.8.1)
+
+* Add _View → Font → Default Size_ menu action bound to ⌘0 which works for both text and HTML output.. The _Last Tab_ action has been moved to ⌘9.
+* TextMate’s QuickLook plug-in can now show compiled AppleScript files.
+* New project scope for Cargo (Rust) projects (`attr.project.cargo`).
+* Miscellaneous fixes.
+* See [all changes since v2.0-beta.8](https://github.com/textmate/textmate/compare/v2.0-beta.8...v2.0-beta.8.1)
+
 ## 2015-09-16 (v2.0-beta.8)
 
 * You can now export a bundle (merging potential delta files) by right-clicking the bundle in the bundle editor and selecting _Export Bundle…_.
