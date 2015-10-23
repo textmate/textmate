@@ -289,6 +289,7 @@ struct tracking_t : fs::event_callback_t
 						item.icon        = image;
 						item.leaf        = YES;
 						item.missing     = YES;
+						item.target      = nil;
 
 						[array addObject:item];
 					}
