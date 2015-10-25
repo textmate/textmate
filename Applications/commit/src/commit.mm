@@ -33,7 +33,12 @@ static double const AppVersion = 1.0;
 		fprintf(stderr, "%s", [err UTF8String]);
 
 	if(NSString* out = someOptions[kOakCommitWindowStandardOutput])
+	{
 		fprintf(stdout, "%s", [out UTF8String]);
+
+		if([someOptions[kOakCommitWindowContinue] boolValue])
+			fprintf(stdout, "TM_SCM_COMMIT_CONTINUE=1\n");
+	}
 
 	_returnCode = [someOptions[kOakCommitWindowReturnCode] intValue];
 

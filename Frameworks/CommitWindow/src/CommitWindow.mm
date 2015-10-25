@@ -83,6 +83,9 @@ static CGFloat const kOakCommitWindowTableViewHeight = 190;
 static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBinding;
 
 @interface OakCommitWindow : NSWindowController <NSWindowDelegate, NSTableViewDelegate, NSMenuDelegate, OakTextViewDelegate>
+{
+	__weak id _eventMonitor;
+}
 @property (nonatomic) NSMutableDictionary*               options;
 @property (nonatomic) NSMutableArray*                    parameters;
 @property (nonatomic) std::map<std::string, std::string> environment;
@@ -105,12 +108,15 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 @property (nonatomic) NSPopUpButton*                     actionPopUpButton;
 @property (nonatomic) NSButton*                          commitButton;
 @property (nonatomic) NSButton*                          cancelButton;
+@property (nonatomic) NSString*                          commitButtonCurrentBaseTitle;
 
 @property (nonatomic) BOOL                               showsTableView;
 @property (nonatomic) NSArray*                           scrollViewConstraints;
 @property (nonatomic) NSArray*                           bottomButtonsConstraints;
 
 @property (nonatomic) OakCommitWindow*                   retainedSelf;
+
+@property (nonatomic, readonly) BOOL                     rebaseInProgress;
 @end
 
 @implementation OakCommitWindow
@@ -189,6 +195,30 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 		}
 
 		[_arrayController addObserver:self forKeyPath:@"arrangedObjects.commit" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:kOakCommitWindowIncludeItemBinding];
+
+
+		if(self.rebaseInProgress)
+		{
+			_eventMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:NSFlagsChangedMask handler:^NSEvent*(NSEvent* event){
+				if(![self.window isKeyWindow])
+					return event;
+
+				if([event modifierFlags] & NSAlternateKeyMask)
+				{
+					self.commitButton.keyEquivalentModifierMask |= NSAlternateKeyMask;
+					self.commitButton.title = self.commitButtonCurrentBaseTitle;
+					self.commitButton.action = @selector(performCommit:);
+				}
+				else
+				{
+					self.commitButton.keyEquivalentModifierMask &= ~NSAlternateKeyMask;
+					self.commitButton.title = [self buildCommitButtonSuffix];
+					self.commitButton.action = @selector(performCommitAndContinue:);
+				}
+
+				return event;
+			}];
+		}
 	}
 	return self;
 }
@@ -196,6 +226,9 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 - (void)dealloc
 {
 	[self.arrayController removeObserver:self forKeyPath:@"arrangedObjects.commit"];
+
+	if(self.rebaseInProgress)
+		[NSEvent removeMonitor:_eventMonitor];
 }
 
 - (NSDictionary*)allViews
@@ -215,6 +248,14 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 	};
 
 	return views;
+}
+
+- (NSString*)buildCommitButtonSuffix
+{
+	if(self.rebaseInProgress)
+		return [self.commitButtonCurrentBaseTitle stringByAppendingString:@" & Continue"];
+	else
+		return self.commitButtonCurrentBaseTitle;
 }
 
 - (void)setupBottomButtonsConstraints
@@ -397,7 +438,9 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 
 	while(arg = [enumerator nextObject])
 	{
-		if([optionKeys containsObject:arg])
+		if([arg isEqualToString:@"--rebase-in-progress"])
+			_rebaseInProgress = YES;
+		else if([optionKeys containsObject:arg])
 		{
 			if(NSString* value = [enumerator nextObject])
 			{
@@ -447,7 +490,8 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 			if(item.commit)
 				totalFilesToCommit += 1;
 		}
-		self.commitButton.title = totalFilesToCommit == 1 ? [NSString stringWithFormat:@"Commit %lu File", totalFilesToCommit] : [NSString stringWithFormat:@"Commit %lu Files", totalFilesToCommit];
+		self.commitButtonCurrentBaseTitle = totalFilesToCommit == 1 ? [NSString stringWithFormat:@"Commit %lu File", totalFilesToCommit] : [NSString stringWithFormat:@"Commit %lu Files", totalFilesToCommit];
+		self.commitButton.title = [self buildCommitButtonSuffix];
 	}
 }
 
@@ -514,6 +558,11 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 
 - (void)sendCommitMessageToClient:(BOOL)success
 {
+	[self sendCommitMessageToClient:success andContinue:NO];
+}
+
+- (void)sendCommitMessageToClient:(BOOL)success andContinue:(BOOL)continueFlag
+{
 	if(!self.clientPortName) // Reply already sent
 		return;
 
@@ -536,6 +585,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 			[proxy connectFromServerWithOptions:@{
 				kOakCommitWindowStandardOutput : [outputArray componentsJoinedByString:@" "],
 				kOakCommitWindowReturnCode     : @0,
+				kOakCommitWindowContinue       : @(continueFlag),
 			}];
 		}
 		else
@@ -673,6 +723,12 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 - (void)performCommit:(id)sender
 {
 	[self sendCommitMessageToClient:YES];
+	[NSApp endSheet:self.window returnCode:NSRunStoppedResponse];
+}
+
+- (void)performCommitAndContinue:(id)sender
+{
+	[self sendCommitMessageToClient:YES andContinue:YES];
 	[NSApp endSheet:self.window returnCode:NSRunStoppedResponse];
 }
 
