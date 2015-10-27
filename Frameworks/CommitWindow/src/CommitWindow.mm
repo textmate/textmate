@@ -117,6 +117,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 @property (nonatomic) OakCommitWindow*                   retainedSelf;
 
 @property (nonatomic, readonly) BOOL                     rebaseInProgress;
+@property (nonatomic, readonly) BOOL                     amend;
 @end
 
 @implementation OakCommitWindow
@@ -146,7 +147,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 		self.window.releasedWhenClosed = NO;
 		self.window.frameAutosaveName  = @"Commit Window";
 
-		_commitButton = OakCreateButton(@"Commit", NSRoundedBezelStyle);
+		_commitButton = OakCreateButton([self commitTitle], NSRoundedBezelStyle);
 		_commitButton.action                    = @selector(performCommit:);
 		_commitButton.keyEquivalent             = @"\r";
 		_commitButton.keyEquivalentModifierMask = NSCommandKeyMask;
@@ -229,6 +230,11 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 
 	if(self.rebaseInProgress)
 		[NSEvent removeMonitor:_eventMonitor];
+}
+
+- (NSString*)commitTitle
+{
+	return self.amend ? @"Amend" : @"Commit";
 }
 
 - (NSDictionary*)allViews
@@ -440,6 +446,8 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 	{
 		if([arg isEqualToString:@"--rebase-in-progress"])
 			_rebaseInProgress = YES;
+		else if([arg isEqualToString:@"--amend"])
+			_amend = YES;
 		else if([optionKeys containsObject:arg])
 		{
 			if(NSString* value = [enumerator nextObject])
@@ -490,7 +498,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 			if(item.commit)
 				totalFilesToCommit += 1;
 		}
-		self.commitButtonCurrentBaseTitle = totalFilesToCommit == 1 ? [NSString stringWithFormat:@"Commit %lu File", totalFilesToCommit] : [NSString stringWithFormat:@"Commit %lu Files", totalFilesToCommit];
+		self.commitButtonCurrentBaseTitle = [NSString stringWithFormat:@"%@ %lu File%s", [self commitTitle], totalFilesToCommit, totalFilesToCommit == 1 ? "" : "s"];
 		self.commitButton.title = [self buildCommitButtonSuffix];
 	}
 }
