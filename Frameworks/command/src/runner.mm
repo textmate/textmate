@@ -19,8 +19,23 @@ static std::tuple<pid_t, int, int> my_fork (char const* cmd, int inputRead, std:
 {
 	for(auto const& pair : environment)
 	{
-		if(pair.first.size() + pair.second.size() + 2 >= ARG_MAX)
-			fprintf(stderr, "*** variable exceeds ARG_MAX: %s\n", pair.first.c_str());
+		if(pair.first.size() + pair.second.size() + 2 < ARG_MAX)
+			continue;
+
+		std::map<std::string, std::string> newEnv;
+		for(auto const& pair : environment)
+		{
+			if(pair.first.size() + pair.second.size() + 2 < ARG_MAX)
+			{
+				newEnv.insert(pair);
+			}
+			else
+			{
+				newEnv.emplace(pair.first, "(truncated)");
+				fprintf(stderr, "*** variable exceeds ARG_MAX: %s\n", pair.first.c_str());
+			}
+		}
+		return my_fork(cmd, inputRead, newEnv, workingDir);
 	}
 
 	int outputRead, outputWrite, errorRead, errorWrite;
