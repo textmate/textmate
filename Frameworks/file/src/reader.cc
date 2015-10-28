@@ -93,6 +93,12 @@ namespace file
 			}
 		}
 
+		if(bomSize != 0)
+		{
+			_encoding.set_charset(charset);
+			_encoding.set_byte_order_mark(true);
+		}
+
 		lseek(_fd, bomSize, SEEK_SET);
 		fcntl(_fd, F_NOCACHE, 1);
 	}
