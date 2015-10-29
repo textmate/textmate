@@ -108,7 +108,10 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 @property (nonatomic) NSPopUpButton*                     actionPopUpButton;
 @property (nonatomic) NSButton*                          commitButton;
 @property (nonatomic) NSButton*                          cancelButton;
-@property (nonatomic) NSString*                          commitButtonCurrentBaseTitle;
+
+@property (nonatomic) NSString*                          commitButtonPrefix;
+@property (nonatomic) NSUInteger                         filesToCommitCount;
+@property (nonatomic) BOOL                               showContinueSuffix;
 
 @property (nonatomic) BOOL                               showsTableView;
 @property (nonatomic) NSArray*                           scrollViewConstraints;
@@ -117,7 +120,6 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 @property (nonatomic) OakCommitWindow*                   retainedSelf;
 
 @property (nonatomic, readonly) BOOL                     showContinueButton;
-@property (nonatomic, readonly) BOOL                     amend;
 @end
 
 @implementation OakCommitWindow
@@ -125,6 +127,8 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 {
 	if((self = [super init]))
 	{
+		_commitButtonPrefix = @"Commit";
+
 		self.clientPortName = someOptions[kOakCommitWindowClientPortName];
 		[self parseArguments:someOptions[kOakCommitWindowArguments]];
 		self.environment = convert(someOptions[kOakCommitWindowEnvironment]);
@@ -147,7 +151,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 		self.window.releasedWhenClosed = NO;
 		self.window.frameAutosaveName  = @"Commit Window";
 
-		_commitButton = OakCreateButton([self commitTitle], NSRoundedBezelStyle);
+		_commitButton = OakCreateButton([self commitButtonTitle], NSRoundedBezelStyle);
 		_commitButton.action                    = @selector(performCommit:);
 		_commitButton.keyEquivalent             = @"\r";
 		_commitButton.keyEquivalentModifierMask = NSCommandKeyMask;
@@ -197,7 +201,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 
 		[_arrayController addObserver:self forKeyPath:@"arrangedObjects.commit" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:kOakCommitWindowIncludeItemBinding];
 
-		if(self.showContinueButton)
+		if(self.showContinueSuffix)
 		{
 			__weak auto wealf = self;
 			_eventMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:NSFlagsChangedMask handler:^NSEvent*(NSEvent* event){
@@ -207,15 +211,16 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 				if([event modifierFlags] & NSAlternateKeyMask)
 				{
 					wealf.commitButton.keyEquivalentModifierMask |= NSAlternateKeyMask;
-					wealf.commitButton.title = wealf.commitButtonCurrentBaseTitle;
 					wealf.commitButton.action = @selector(performCommit:);
+					wealf.showContinueSuffix = NO;
 				}
 				else
 				{
 					wealf.commitButton.keyEquivalentModifierMask &= ~NSAlternateKeyMask;
-					wealf.commitButton.title = [wealf buildCommitButtonSuffix];
 					wealf.commitButton.action = @selector(performCommitAndContinue:);
+					wealf.showContinueSuffix = YES;
 				}
+				wealf.commitButton.title = [wealf commitButtonTitle];
 
 				return event;
 			}];
@@ -232,9 +237,9 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 		[NSEvent removeMonitor:_eventMonitor];
 }
 
-- (NSString*)commitTitle
+- (NSString*)commitButtonTitle
 {
-	return self.amend ? @"Amend" : @"Commit";
+	return [NSString stringWithFormat:@"%@ %lu Item%s%@", _commitButtonPrefix, _filesToCommitCount, _filesToCommitCount == 1 ? "" : "s", _showContinueSuffix ? @" & Continue" : @""];
 }
 
 - (NSDictionary*)allViews
@@ -254,11 +259,6 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 	};
 
 	return views;
-}
-
-- (NSString*)buildCommitButtonSuffix
-{
-	return self.showContinueButton ? [self.commitButtonCurrentBaseTitle stringByAppendingString:@" & Continue"] : self.commitButtonCurrentBaseTitle;
 }
 
 - (void)setupBottomButtonsConstraints
@@ -442,9 +442,9 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 	while(arg = [enumerator nextObject])
 	{
 		if([arg isEqualToString:@"--show-continue-button"])
-			_showContinueButton = YES;
-		else if([arg isEqualToString:@"--amend"])
-			_amend = YES;
+			_showContinueSuffix = YES;
+		else if([arg isEqualToString:@"--commit-button-title"])
+			_commitButtonPrefix = [enumerator nextObject];
 		else if([optionKeys containsObject:arg])
 		{
 			if(NSString* value = [enumerator nextObject])
@@ -489,14 +489,13 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 {
 	if(context == kOakCommitWindowIncludeItemBinding)
 	{
-		NSUInteger totalFilesToCommit = 0;
+		_filesToCommitCount = 0;
 		for(CWItem* item in [_arrayController arrangedObjects])
 		{
 			if(item.commit)
-				totalFilesToCommit += 1;
+				_filesToCommitCount += 1;
 		}
-		self.commitButtonCurrentBaseTitle = [NSString stringWithFormat:@"%@ %lu File%s", [self commitTitle], totalFilesToCommit, totalFilesToCommit == 1 ? "" : "s"];
-		self.commitButton.title = [self buildCommitButtonSuffix];
+		self.commitButton.title = [self commitButtonTitle];
 	}
 }
 
