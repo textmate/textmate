@@ -116,7 +116,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 
 @property (nonatomic) OakCommitWindow*                   retainedSelf;
 
-@property (nonatomic, readonly) BOOL                     rebaseInProgress;
+@property (nonatomic, readonly) BOOL                     showContinueButton;
 @property (nonatomic, readonly) BOOL                     amend;
 @end
 
@@ -197,7 +197,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 
 		[_arrayController addObserver:self forKeyPath:@"arrangedObjects.commit" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:kOakCommitWindowIncludeItemBinding];
 
-		if(self.rebaseInProgress)
+		if(self.showContinueButton)
 		{
 			__weak auto wealf = self;
 			_eventMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:NSFlagsChangedMask handler:^NSEvent*(NSEvent* event){
@@ -258,7 +258,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 
 - (NSString*)buildCommitButtonSuffix
 {
-	return self.rebaseInProgress ? [self.commitButtonCurrentBaseTitle stringByAppendingString:@" & Continue"] : self.commitButtonCurrentBaseTitle;
+	return self.showContinueButton ? [self.commitButtonCurrentBaseTitle stringByAppendingString:@" & Continue"] : self.commitButtonCurrentBaseTitle;
 }
 
 - (void)setupBottomButtonsConstraints
@@ -441,8 +441,8 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 
 	while(arg = [enumerator nextObject])
 	{
-		if([arg isEqualToString:@"--rebase-in-progress"])
-			_rebaseInProgress = YES;
+		if([arg isEqualToString:@"--show-continue-button"])
+			_showContinueButton = YES;
 		else if([arg isEqualToString:@"--amend"])
 			_amend = YES;
 		else if([optionKeys containsObject:arg])
