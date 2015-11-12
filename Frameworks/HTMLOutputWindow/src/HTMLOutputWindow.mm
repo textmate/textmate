@@ -32,23 +32,9 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 		[self.window setReleasedWhenClosed:NO];
 		[self.window setAutorecalculatesContentBorderThickness:NO forEdge:NSMinYEdge];
 		[self.window setContentBorderThickness:25 forEdge:NSMinYEdge];
-		[self.window setCollectionBehavior:NSWindowCollectionBehaviorMoveToActiveSpace|NSWindowCollectionBehaviorFullScreenAuxiliary];
-
-		// Register to application activation/deactivation notification so we can tweak our collection behavior
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidActivate:) name:NSApplicationDidBecomeActiveNotification object:nil];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidDeactivate:) name:NSApplicationDidResignActiveNotification object:nil];
+		[self.window setCollectionBehavior:NSWindowCollectionBehaviorFullScreenAuxiliary];
 	}
 	return self;
-}
-
-- (void)applicationDidActivate:(NSNotification*)notification
-{
-	self.window.collectionBehavior |= NSWindowCollectionBehaviorMoveToActiveSpace;
-}
-
-- (void)applicationDidDeactivate:(NSNotification*)notification
-{
-	self.window.collectionBehavior &= ~NSWindowCollectionBehaviorMoveToActiveSpace;
 }
 
 + (HTMLOutputWindowController*)HTMLOutputWindowWithRunner:(command::runner_ptr const&)aRunner
@@ -62,7 +48,10 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 - (void)showWindow:(id)sender
 {
 	self.retainedSelf = self;
+	if([self.window isVisible] && ![self.window isOnActiveSpace])
+		self.window.collectionBehavior |= NSWindowCollectionBehaviorMoveToActiveSpace;
 	[self.window makeKeyAndOrderFront:nil];
+	self.window.collectionBehavior &= ~NSWindowCollectionBehaviorMoveToActiveSpace;
 }
 
 - (void)close
@@ -117,7 +106,6 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 - (void)dealloc
 {
 	D(DBF_HTMLOutputWindow, bug("\n"););
-	[[NSNotificationCenter defaultCenter] removeObserver:self];
 	self.window.delegate = nil;
 }
 
