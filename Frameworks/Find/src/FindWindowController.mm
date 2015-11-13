@@ -312,12 +312,16 @@ static NSButton* OakCreateStopSearchButton ()
 
 - (void)applicationDidActivate:(NSNotification*)notification
 {
-	self.window.collectionBehavior |= NSWindowCollectionBehaviorMoveToActiveSpace;
+	dispatch_async(dispatch_get_main_queue(), ^{
+		self.window.collectionBehavior |= NSWindowCollectionBehaviorMoveToActiveSpace;
+	});
 }
 
 - (void)applicationDidDeactivate:(NSNotification*)notification
 {
-	self.window.collectionBehavior &= ~NSWindowCollectionBehaviorMoveToActiveSpace;
+	dispatch_async(dispatch_get_main_queue(), ^{
+		self.window.collectionBehavior &= ~NSWindowCollectionBehaviorMoveToActiveSpace;
+	});
 }
 
 - (void)menuNeedsUpdate:(NSMenu*)aMenu
