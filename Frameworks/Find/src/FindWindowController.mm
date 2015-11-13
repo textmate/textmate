@@ -160,7 +160,7 @@ static NSButton* OakCreateStopSearchButton ()
 		self.window.title              = [self windowTitleForDocumentDisplayName:nil];
 		self.window.frameAutosaveName  = @"Find";
 		self.window.hidesOnDeactivate  = NO;
-		self.window.collectionBehavior = NSWindowCollectionBehaviorFullScreenAuxiliary;
+		self.window.collectionBehavior = NSWindowCollectionBehaviorMoveToActiveSpace|NSWindowCollectionBehaviorFullScreenAuxiliary;
 		self.window.delegate           = self;
 		self.window.restorable         = NO;
 
@@ -295,6 +295,10 @@ static NSButton* OakCreateStopSearchButton ()
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(replaceClipboardDidChange:) name:OakPasteboardDidChangeNotification object:[OakPasteboard pasteboardWithName:OakReplacePboard]];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textViewWillPerformFindOperation:) name:@"OakTextViewWillPerformFindOperation" object:nil];
 
+		// Register to application activation/deactivation notification so we can tweak our collection behavior
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidActivate:) name:NSApplicationDidBecomeActiveNotification object:nil];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidDeactivate:) name:NSApplicationDidResignActiveNotification object:nil];
+
 		[self.window addObserver:self forKeyPath:@"firstResponder" options:0 context:NULL];
 	}
 	return self;
@@ -304,6 +308,16 @@ static NSButton* OakCreateStopSearchButton ()
 {
 	[self.window removeObserver:self forKeyPath:@"firstResponder"];
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)applicationDidActivate:(NSNotification*)notification
+{
+	self.window.collectionBehavior |= NSWindowCollectionBehaviorMoveToActiveSpace;
+}
+
+- (void)applicationDidDeactivate:(NSNotification*)notification
+{
+	self.window.collectionBehavior &= ~NSWindowCollectionBehaviorMoveToActiveSpace;
 }
 
 - (void)menuNeedsUpdate:(NSMenu*)aMenu
@@ -476,15 +490,10 @@ static NSButton* OakCreateStopSearchButton ()
 			self.statusString = @"";
 	}
 
-	if([self isWindowLoaded] && [self.window isVisible] && ![self.window isOnActiveSpace])
-		self.window.collectionBehavior |= NSWindowCollectionBehaviorMoveToActiveSpace;
-
 	BOOL isVisibleAndKey = [self isWindowLoaded] && [self.window isVisible] && [self.window isKeyWindow];
 	[super showWindow:sender];
 	if(!isVisibleAndKey || ![[self.window firstResponder] isKindOfClass:[NSTextView class]])
 		[self.window makeFirstResponder:self.findTextField];
-
-	self.window.collectionBehavior &= ~NSWindowCollectionBehaviorMoveToActiveSpace;
 }
 
 - (BOOL)commitEditing
