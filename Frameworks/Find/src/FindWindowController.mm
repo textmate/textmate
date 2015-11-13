@@ -312,12 +312,18 @@ static NSButton* OakCreateStopSearchButton ()
 
 - (void)applicationDidActivate:(NSNotification*)notification
 {
-	self.window.collectionBehavior |= NSWindowCollectionBehaviorMoveToActiveSpace;
+	// Starting with 10.11 behavior must be changed after current event loop cycle <rdar://23587833>
+	dispatch_async(dispatch_get_main_queue(), ^{
+		self.window.collectionBehavior |= NSWindowCollectionBehaviorMoveToActiveSpace;
+	});
 }
 
 - (void)applicationDidDeactivate:(NSNotification*)notification
 {
-	self.window.collectionBehavior &= ~NSWindowCollectionBehaviorMoveToActiveSpace;
+	// Starting with 10.11 behavior must be changed after current event loop cycle <rdar://23587833>
+	dispatch_async(dispatch_get_main_queue(), ^{
+		self.window.collectionBehavior &= ~NSWindowCollectionBehaviorMoveToActiveSpace;
+	});
 }
 
 - (void)menuNeedsUpdate:(NSMenu*)aMenu

@@ -43,12 +43,18 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 
 - (void)applicationDidActivate:(NSNotification*)notification
 {
-	self.window.collectionBehavior |= NSWindowCollectionBehaviorMoveToActiveSpace;
+	// Starting with 10.11 behavior must be changed after current event loop cycle <rdar://23587833>
+	dispatch_async(dispatch_get_main_queue(), ^{
+		self.window.collectionBehavior |= NSWindowCollectionBehaviorMoveToActiveSpace;
+	});
 }
 
 - (void)applicationDidDeactivate:(NSNotification*)notification
 {
-	self.window.collectionBehavior &= ~NSWindowCollectionBehaviorMoveToActiveSpace;
+	// Starting with 10.11 behavior must be changed after current event loop cycle <rdar://23587833>
+	dispatch_async(dispatch_get_main_queue(), ^{
+		self.window.collectionBehavior &= ~NSWindowCollectionBehaviorMoveToActiveSpace;
+	});
 }
 
 + (HTMLOutputWindowController*)HTMLOutputWindowWithRunner:(command::runner_ptr const&)aRunner
