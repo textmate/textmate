@@ -271,9 +271,9 @@ static NSTextField* OakCreateTextField ()
 			{
 				dispatch_async(dispatch_get_main_queue(), ^{
 					[[AboutWindowController sharedInstance] showChangesWindow:self];
+					[[NSUserDefaults standardUserDefaults] setObject:currentDigest forKey:kUserDefaultsReleaseNotesDigestKey];
 				});
 			}
-			[[NSUserDefaults standardUserDefaults] setObject:currentDigest forKey:kUserDefaultsReleaseNotesDigestKey];
 		}
 	});
 }
