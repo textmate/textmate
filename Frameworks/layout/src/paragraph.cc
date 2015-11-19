@@ -577,7 +577,7 @@ namespace ng
 		return bufferOffset + length();
 	}
 
-	CGRect paragraph_t::rect_at_index (ng::index_t const& index, ct::metrics_t const& metrics, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor, bool bol_as_eol) const
+	CGRect paragraph_t::rect_at_index (ng::index_t const& index, ct::metrics_t const& metrics, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor, bool bol_as_eol, bool wantsBaseline) const
 	{
 		size_t needle = index.index - bufferOffset;
 		CGFloat caretOffset = index.carry * metrics.column_width();
@@ -588,24 +588,26 @@ namespace ng
 			if(lines[i].offset <= needle && (i+1 == lines.size() || needle < lines[i+1].offset || (bol_as_eol && needle == lines[i+1].offset)))
 			{
 				CGFloat x = lines[i].x, y = lines[i].y;
+				CGFloat height = wantsBaseline ? lines[i].baseline : lines[i].height;
 				size_t offset = lines[i].offset;
 				foreach(node, _nodes.begin() + lines[i].first, _nodes.begin() + lines[i].last)
 				{
 					if(offset <= needle && needle < offset + node->length())
 					{
 						if(node->type() == kNodeTypeText && node->line())
-							return CGRectMake(anchor.x + x + node->line()->offset_for_index(needle - offset) + caretOffset, anchor.y + y, metrics.column_width(), lines[i].height);
-						return CGRectMake(anchor.x + x + (needle - offset) * node->width() / node->length() + caretOffset, anchor.y + y, 1, lines[i].height);
+							return CGRectMake(anchor.x + x + node->line()->offset_for_index(needle - offset) + caretOffset, anchor.y + y, metrics.column_width(), height);
+						return CGRectMake(anchor.x + x + (needle - offset) * node->width() / node->length() + caretOffset, anchor.y + y, 1, height);
 					}
 
 					x += node->width();
 					offset += node->length();
 				}
-				return CGRectMake(anchor.x + x + caretOffset, anchor.y + y, 1, lines[i].height);
+				return CGRectMake(anchor.x + x + caretOffset, anchor.y + y, 1, height);
 			}
 		}
 
-		return CGRectMake(anchor.x + caretOffset, anchor.y, 1, lines.back().height);
+		CGFloat height = wantsBaseline ? lines.back().baseline : lines.back().height;
+		return CGRectMake(anchor.x + caretOffset, anchor.y, 1, height);
 	}
 
 	ng::line_record_t paragraph_t::line_record_for (size_t line, size_t pos, ct::metrics_t const& metrics, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor) const

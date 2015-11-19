@@ -250,14 +250,14 @@ namespace ng
 	// = Measurements =
 	// ================
 
-	CGRect layout_t::rect_at_index (ng::index_t const& index, bool bol_as_eol) const
+	CGRect layout_t::rect_at_index (ng::index_t const& index, bool bol_as_eol, bool wantsBaseline) const
 	{
 		ASSERT_LE(index.index, _buffer.size());
 
 		auto row = row_for_offset(index.index);
 		if(bol_as_eol && index.index == row->offset._length && row != _rows.begin())
 			--row;
-		return row->value.rect_at_index(index, *_metrics, _buffer, row->offset._length, CGPointMake(_margin.left, _margin.top + row->offset._height), bol_as_eol);
+		return row->value.rect_at_index(index, *_metrics, _buffer, row->offset._length, CGPointMake(_margin.left, _margin.top + row->offset._height), bol_as_eol, wantsBaseline);
 	}
 
 	CGRect layout_t::rect_for_range (size_t first, size_t last, bool bol_as_eol) const
