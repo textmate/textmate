@@ -3717,6 +3717,33 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 	return scope;
 }
 
+- (void)quickLookWithEvent:(NSEvent*)anEvent
+{
+	ng::index_t index = layout->index_at_point([self convertPoint:[anEvent locationInWindow] fromView:nil]);
+	ng::range_t range = ng::extend(document->buffer(), index, kSelectionExtendToWord).first();
+
+	if([self isPointInSelection:[self convertPoint:[anEvent locationInWindow] fromView:nil]] && editor->ranges().size() == 1)
+		range = editor->ranges().first();
+
+	NSRect rect = layout->rect_at_index(range.min(), false, true);
+	NSPoint pos = NSMakePoint(NSMinX(rect), NSMaxY(rect));
+
+	NSAttributedString* str = [self attributedSubstringForProposedRange:[self nsRangeForRange:range] actualRange:nullptr];
+	[self showDefinitionForAttributedString:str atPoint:pos];
+}
+
+- (void)pressureChangeWithEvent:(NSEvent*)anEvent
+{
+	id forceClickFlag = [[NSUserDefaults standardUserDefaults] objectForKey:@"com.apple.trackpad.forceClick"];
+	if(forceClickFlag && ![forceClickFlag boolValue])
+		return;
+
+	static NSInteger oldStage = 0;
+	if(oldStage < anEvent.stage && anEvent.stage == 2)
+		[self quickLookWithEvent:anEvent];
+	oldStage = anEvent.stage;
+}
+
 - (void)mouseDown:(NSEvent*)anEvent
 {
 	if([self.inputContext handleEvent:anEvent] || !layout || [anEvent type] != NSLeftMouseDown || ignoreMouseDown)
