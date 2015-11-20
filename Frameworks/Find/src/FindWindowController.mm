@@ -157,7 +157,6 @@ static NSButton* OakCreateStopSearchButton ()
 	{
 		self.resultsViewController     = [FFResultsViewController new];
 
-		self.window.title              = [self windowTitleForDocumentDisplayName:nil];
 		self.window.frameAutosaveName  = @"Find";
 		self.window.hidesOnDeactivate  = NO;
 		self.window.collectionBehavior = NSWindowCollectionBehaviorMoveToActiveSpace|NSWindowCollectionBehaviorFullScreenAuxiliary;
@@ -200,6 +199,7 @@ static NSButton* OakCreateStopSearchButton ()
 		self.findNextButton            = OakCreateButton(@"Next");
 		self.stopSearchButton          = OakCreateStopSearchButton();
 
+		[self updateWindowTitle];
 		[self updateSearchInPopUpMenu];
 
 		// =============================
@@ -482,9 +482,9 @@ static NSButton* OakCreateStopSearchButton ()
 	}
 }
 
-- (NSString*)windowTitleForDocumentDisplayName:(NSString*)aString
+- (void)updateWindowTitle
 {
-	return self.searchFolder ? [NSString localizedStringWithFormat:MSG_FIND_IN_FOLDER_WINDOW_TITLE, [self.searchFolder stringByAbbreviatingWithTildeInPath]] : MSG_WINDOW_TITLE;
+	self.window.title = self.searchFolder ? [NSString localizedStringWithFormat:MSG_FIND_IN_FOLDER_WINDOW_TITLE, [self.searchFolder stringByAbbreviatingWithTildeInPath]] : MSG_WINDOW_TITLE;
 }
 
 - (void)showWindow:(id)sender
@@ -823,9 +823,9 @@ static NSButton* OakCreateStopSearchButton ()
 
 	_searchIn = aString;
 	self.folderSearch = self.searchFolder != nil || [aString isEqualToString:FFSearchInOpenFiles];
-	self.window.title = [self windowTitleForDocumentDisplayName:nil];
 	if(NSString* folder = self.searchFolder)
 		[self.recentFolders addObject:folder];
+	[self updateWindowTitle];
 	[self updateSearchInPopUpMenu];
 }
 
