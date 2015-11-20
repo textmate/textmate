@@ -145,5 +145,4 @@ OAK_DEBUG_VAR(HTMLOutput_WebViewDelegate);
 + (BOOL)canInitWithRequest:(NSURLRequest*)request                                                                                                 { return [[[request URL] scheme] isEqualToString:@"tm-file"]; }
 + (NSURLRequest*)canonicalRequestForRequest:(NSURLRequest*)request                                                                                { return request; }
 + (BOOL)requestIsCacheEquivalent:(NSURLRequest*)a toRequest:(NSURLRequest*)b                                                                      { return NO; }
-- (id)initWithRequest:(NSURLRequest*)anURLRequest cachedResponse:(NSCachedURLResponse*)aCachedURLResponse client:(id <NSURLProtocolClient>)anId   { return nil; }
 @end
