@@ -571,7 +571,7 @@ static bool is_binary (std::string const& path)
 
 + (void)initialize
 {
-	[[NSApplication sharedApplication] registerServicesMenuSendTypes:@[ NSFilenamesPboardType, NSURLPboardType ] returnTypes:nil];
+	[[NSApplication sharedApplication] registerServicesMenuSendTypes:@[ NSFilenamesPboardType, NSURLPboardType ] returnTypes:@[ ]];
 }
 
 - (id)validRequestorForSendType:(NSString*)sendType returnType:(NSString*)returnType

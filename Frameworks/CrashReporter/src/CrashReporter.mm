@@ -96,7 +96,7 @@ static std::string create_gzipped_file (std::string const& path)
 		if(NSDictionary* userInfo = [aNotification userInfo])
 		{
 			if(NSUserNotification* notification = userInfo[NSApplicationLaunchUserNotificationKey])
-				[self userNotificationCenter:nil didActivateNotification:notification];
+				[self userNotificationCenter:[NSUserNotificationCenter defaultUserNotificationCenter] didActivateNotification:notification];
 		}
 	}
 }

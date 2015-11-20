@@ -375,7 +375,7 @@ static NSTextField* OakCreateTextField ()
 
 - (void)selectPageAtRelativeOffset:(NSInteger)offset
 {
-	NSArray* allPages = [self toolbarSelectableItemIdentifiers:nil];
+	NSArray* allPages = [self toolbarSelectableItemIdentifiers:self.toolbar];
 	NSUInteger index = [allPages indexOfObject:self.selectedPage];
 	if(index != NSNotFound)
 		self.selectedPage = allPages[(index + allPages.count + offset) % allPages.count];

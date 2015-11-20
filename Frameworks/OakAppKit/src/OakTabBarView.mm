@@ -695,7 +695,7 @@ static NSString* const OakTabItemPasteboardType = @"com.macromates.TextMate.tabI
 			}
 			else
 			{
-				[sender enumerateDraggingItemsWithOptions:0 forView:self classes:@[ [NSPasteboardItem class] ] searchOptions:nil usingBlock:^(NSDraggingItem* draggingItem, NSInteger idx, BOOL* stop){
+				[sender enumerateDraggingItemsWithOptions:0 forView:self classes:@[ [NSPasteboardItem class] ] searchOptions:@{ } usingBlock:^(NSDraggingItem* draggingItem, NSInteger idx, BOOL* stop){
 					_preliminaryTabItem = [OakTabItem tabItemFromPasteboardItem:draggingItem.item];
 				}];
 			}
@@ -731,7 +731,7 @@ static NSString* const OakTabItemPasteboardType = @"com.macromates.TextMate.tabI
 - (BOOL)performDragOperation:(id <NSDraggingInfo>)sender
 {
 	__block OakTabItem* tabItem = nil;
-	[sender enumerateDraggingItemsWithOptions:0 forView:self classes:@[ [NSPasteboardItem class] ] searchOptions:nil usingBlock:^(NSDraggingItem* draggingItem, NSInteger idx, BOOL* stop){
+	[sender enumerateDraggingItemsWithOptions:0 forView:self classes:@[ [NSPasteboardItem class] ] searchOptions:@{ } usingBlock:^(NSDraggingItem* draggingItem, NSInteger idx, BOOL* stop){
 		draggingItem.draggingFrame = [self convertRect:_preliminaryTabItem.tabItemView.contentFrame fromView:_preliminaryTabItem.tabItemView];
 		tabItem = [OakTabItem tabItemFromPasteboardItem:draggingItem.item];
 	}];

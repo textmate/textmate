@@ -98,7 +98,7 @@ struct data_source_t
 
 - (void)windowDidResignKey:(NSNotification*)notification
 {
-	[self mouseExited:nil];
+	[self mouseExited:[NSApp currentEvent]];
 }
 
 - (void)dealloc
