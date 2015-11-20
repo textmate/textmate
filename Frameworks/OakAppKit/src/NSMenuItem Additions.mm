@@ -19,15 +19,20 @@
 
 // Methods to override in subclass
 
-- (id)init
-{
-	return [self initWithAttributedString:nil];
-}
-
-- (id)initWithAttributedString:(NSAttributedString*)attributedString
+- (instancetype)init
 {
 	if(self = [super init])
-		contents = attributedString ? [attributedString mutableCopy] : [[NSMutableAttributedString alloc] init];
+		contents = [[NSMutableAttributedString alloc] init];
+	return self;
+}
+
+- (instancetype)initWithAttributedString:(NSAttributedString*)anAttributedString
+{
+	if(self = [self init])
+	{
+		if(anAttributedString)
+			[contents setAttributedString:anAttributedString];
+	}
 	return self;
 }
 
