@@ -307,7 +307,7 @@ enum {
 - (id)copyWithZone:(NSZone*)zone
 {
 	OakFileIconImage* copy = [super copyWithZone:zone];
-	copy->_fileIconImageRep = [[copy representations] firstObject];
+	copy->_fileIconImageRep = (OakFileIconImageRep*)[[copy representations] firstObject];
 	return copy;
 }
 
