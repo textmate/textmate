@@ -2,6 +2,12 @@ Title: Release Notes
 
 # Changes
 
+## 2015-12-06 (v2.0-beta.8.4)
+
+* TextMate now supports Force Click to look up words. This requires setting “Look up & data detectors” to “Force Click with one finger” in System Preferences → Trackpad.
+* Clicking the file browser with the mouse now always moves focus to the file browser. See [commit message](https://github.com/textmate/textmate/commit/78da1357fd2d9354546378e320b9e37cf8759fd1) for further explanation.
+* See [all changes since v2.0-beta.8.1](https://github.com/textmate/textmate/compare/v2.0-beta.8.1...v2.0-beta.8.4)
+
 ## 2015-10-23 (v2.0-beta.8.1)
 
 * Add _View → Font → Default Size_ menu action bound to ⌘0 which works for both text and HTML output.. The _Last Tab_ action has been moved to ⌘9.
