@@ -129,32 +129,6 @@
 	}
 }
 
-// =============================
-// = Accepting First Responder =
-// =============================
-
-- (BOOL)shouldActivate
-{
-	NSEvent* event = [NSApp currentEvent];
-	if([event type] != NSLeftMouseDown)
-		return YES;
-
-	NSView* firstResponder = (NSView*)[[self window] firstResponder];
-	if([firstResponder isKindOfClass:[NSView class]] && [firstResponder isDescendantOf:self])
-		return YES;
-
-	if([event clickCount] != 1 || (event.modifierFlags & NSCommandKeyMask))
-		return NO;
-
-	NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
-	return [self isRowSelected:[self rowAtPoint:p]];
-}
-
-- (BOOL)acceptsFirstResponder
-{
-	return [self shouldActivate] && [super acceptsFirstResponder];
-}
-
 // ===========================
 // = Key Down Implementation =
 // ===========================
