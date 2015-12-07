@@ -32,6 +32,11 @@
 	<string>${APP_MIN_OS}</string>
 	<key>NSAppleScriptEnabled</key>
 	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 	<key>NSContactsUsageDescription</key>
 	<string>Your email address is used as an identifier for crash report submission. It can be changed in Preferences.
 
