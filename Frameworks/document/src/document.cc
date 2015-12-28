@@ -700,7 +700,7 @@ namespace document
 		}
 
 		settings_t const settings = settings_for_path(virtual_path(), file_type(), path::parent(_path), document_variables());
-		_buffer->set_spelling_language(settings.get(kSettingsSpellingLanguageKey, "en"));
+		_buffer->set_spelling_language(settings.get(kSettingsSpellingLanguageKey, ""));
 		_buffer->set_live_spelling(settings.get(kSettingsSpellCheckingKey, false));
 
 		D(DBF_Document, bug("done\n"););
