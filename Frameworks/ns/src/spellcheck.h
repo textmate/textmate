@@ -30,9 +30,9 @@ namespace ns
 		std::shared_ptr<helper_t> _helper;
 	};
 
-	PUBLIC std::vector<ns::range_t> spellcheck (char const* first, char const* last, std::string const& language = "en", spelling_tag_t const& tag = spelling_tag_t());
-	PUBLIC bool is_misspelled (char const* first, char const* last, std::string const& language = "en", spelling_tag_t const& tag = spelling_tag_t());
-	inline bool is_misspelled (std::string const& str, std::string const& language = "en", spelling_tag_t const& tag = spelling_tag_t()) { return is_misspelled(str.data(), str.data() + str.size(), language, tag); }
+	PUBLIC std::vector<ns::range_t> spellcheck (char const* first, char const* last, std::string const& language = "", spelling_tag_t const& tag = spelling_tag_t());
+	PUBLIC bool is_misspelled (char const* first, char const* last, std::string const& language = "", spelling_tag_t const& tag = spelling_tag_t());
+	inline bool is_misspelled (std::string const& str, std::string const& language = "", spelling_tag_t const& tag = spelling_tag_t()) { return is_misspelled(str.data(), str.data() + str.size(), language, tag); }
 
 } /* ns */
 
