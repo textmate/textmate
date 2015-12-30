@@ -930,6 +930,7 @@ namespace ng
 			case kSelectionExtendToAll:                return range_t(move(buffer, min, kSelectionMoveToBeginOfDocument,          layout), move(buffer, max, kSelectionMoveToEndOfDocument,  layout), false, false, true);
 
 			case kSelectionExtendToWord:
+			case kSelectionExtendToWordOrTypingPair:
 			{
 				size_t from = min.index, to = max.index;
 				size_t bol = buffer.begin(buffer.convert(from).line);
@@ -941,6 +942,42 @@ namespace ng
 				std::string outerRightType = to == eol   ? kCharacterClassUnknown : character_class(buffer, to);
 
 				bool extendLeft = false, extendRight = false;
+
+				if(unit == kSelectionExtendToWordOrTypingPair && from == to)
+				{
+					std::string didMatch;
+					auto pairs = character_pairs(buffer.scope(from), "highlightPairs");
+					if(auto m = first_match(buffer, from, pairs, &does_match_right))
+					{
+						if(m.matched_opener)
+						{
+							size_t endOfTypingPair = end_of_typing_pair(buffer, from + m.match.size(), true);
+							if(endOfTypingPair != from + m.match.size() && does_match_left(m.counterpart_ptrn, buffer, endOfTypingPair, &didMatch))
+								return range_t(from, endOfTypingPair, false, false, false);
+						}
+						else
+						{
+							size_t beginOfTypingPair = begin_of_typing_pair(buffer, to, true);
+							if(beginOfTypingPair != to)
+								return range_t(beginOfTypingPair, to + m.match.size(), false, false, false);
+						}
+					}
+					else if(auto m = first_match(buffer, from, pairs, &does_match_left))
+					{
+						if(m.matched_opener)
+						{
+							size_t endOfTypingPair = end_of_typing_pair(buffer, from, true);
+							if(endOfTypingPair != from && does_match_left(m.counterpart_ptrn, buffer, endOfTypingPair, &didMatch))
+								return range_t(from - m.match.size(), endOfTypingPair, false, false, false);
+						}
+						else
+						{
+							size_t beginOfTypingPair = begin_of_typing_pair(buffer, to - m.match.size(), true);
+							if(beginOfTypingPair != to - m.match.size())
+								return range_t(beginOfTypingPair, to, false, false, false);
+						}
+					}
+				}
 
 				if(from == to) // no existing selection
 				{
