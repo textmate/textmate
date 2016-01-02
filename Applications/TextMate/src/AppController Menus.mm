@@ -105,6 +105,10 @@ static NSString* NameForLocaleIdentifier (NSString* languageCode)
 	for(NSString* lang in [spellChecker availableLanguages])
 		ordered.emplace(to_s(NameForLocaleIdentifier(lang)), lang);
 
+	NSString* systemSpellingLanguage = [spellChecker automaticallyIdentifiesLanguages] ? @"Automatic by Language" : NameForLocaleIdentifier([spellChecker language]);
+	NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithFormat:@"System (%@)", systemSpellingLanguage] action:@selector(takeSpellingLanguageFrom:) keyEquivalent:@""];
+	menuItem.representedObject = @"";
+
 	for(auto const& it : ordered)
 	{
 		D(DBF_AppController_Menus, bug("Add Item: %s\n", it.first.c_str()););
