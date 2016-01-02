@@ -97,6 +97,17 @@ OAK_DEBUG_VAR(AppController_Menus);
 		ordered.emplace(to_s(str ?: lang), lang);
 	}
 
+	NSString* systemSpellingLanguage;
+	if ([spellChecker automaticallyIdentifiesLanguages])
+		systemSpellingLanguage = @"Automatic by Language";
+	else
+	{
+		systemSpellingLanguage = (NSString*)CFBridgingRelease(CFLocaleCopyDisplayNameForPropertyValue(CFLocaleGetSystem(), kCFLocaleIdentifier, (__bridge CFStringRef)[spellChecker language]));
+	}
+	NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithFormat:@"System (%@)", systemSpellingLanguage] action:@selector(takeSpellingLanguageFrom:) keyEquivalent:@""];
+	D(DBF_AppController_Menus, bug("Represented Object: "" (System)\n"););
+	menuItem.representedObject = @"";
+
 	for(auto const& it : ordered)
 	{
 		D(DBF_AppController_Menus, bug("Add Item: %s\n", it.first.c_str()););
