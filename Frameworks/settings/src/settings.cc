@@ -293,7 +293,7 @@ std::vector<setting_info_t> settings_info_for_path (std::string const& path, sco
 
 static std::string quote_string (std::string const& src)
 {
-	if(src.find_first_of("'\n\\ ") == std::string::npos)
+	if(src.length() && src.find_first_of("'\n\\ ") == std::string::npos)
 		return src;
 
 	std::string res = "'";
