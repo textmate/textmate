@@ -1,0 +1,10 @@
+language: objective-c
+before_install:
+  - brew update
+  # boost and hg are already installed
+  # update boost just to be sure
+  - brew outdated boost || brew upgrade boost
+  - brew install ragel multimarkdown ninja capnp google-sparsehash libressl
+install: ./configure
+script: ninja TextMate
+osx_image: xcode7.2
