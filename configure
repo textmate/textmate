@@ -93,7 +93,7 @@ done
 mkdir -p "$builddir/Frameworks/SoftwareUpdate/fixtures"
 DST=$(cd >/dev/null "$builddir/Frameworks/SoftwareUpdate/fixtures"; pwd) make -C Frameworks/SoftwareUpdate/fixtures
 
-bin/gen_build -o build.ninja -C "$builddir" -dAPP_NAME="$name" -dAPP_VERSION="$ver" -dAPP_MIN_OS="$min_os" -dCC="$CC" -dCXX="$CXX" -didentity="$identity" -drest_api="$rest_api" -dbzip2_flag="$bzip2_flag" -dcapnp_prefix="$capnp_prefix" -dlibressl_prefix="$libressl_prefix" target
+bin/gen_build -o build.ninja -C "$builddir" -dAPP_NAME="$name" -dAPP_VERSION="$ver" -dAPP_MIN_OS="$min_os" -dCC="$CC" -dCXX="$CXX" -didentity="$identity" -drest_api="$rest_api" -dbzip2_flag="$bzip2_flag" -dtest_flags="$test" -dcapnp_prefix="$capnp_prefix" -dlibressl_prefix="$libressl_prefix" target
 
 ninja Frameworks/encoding/src/frequencies.capnp.h
 ninja Frameworks/plist/src/cache.capnp.h

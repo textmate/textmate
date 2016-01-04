@@ -860,11 +860,11 @@ rule link_oak_test
   description = Link test ‘$out’…
 
 rule run_test
-  command = $in && touch $out
+  command = $in $test_flags && touch $out
   description = Run test ‘$in’…
 
 rule always_run_test
-  command = $in
+  command = $in $test_flags
   description = Run test ‘$in’…
 
 rule skip_test

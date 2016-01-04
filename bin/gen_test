@@ -139,7 +139,8 @@ static void write_usage (FILE* io)
   fprintf(io, "Usage: %s [-b|--benchmark] [-m|--measure] [-r|--repeat] [-v|--verbose] [-h|--help] [-V|--version]\n", getprogname());
   fprintf(io, "Options:\n");
   fprintf(io, " -b/--benchmark   Run benchmarks instead of tests.\n");
-  fprintf(io, " -m/--measure     Measure time of each test. This disables concurrency.\n");
+  fprintf(io, " -m/--measure     Measure time of each test.\n");
+  fprintf(io, " -p/--parallel    Run tests in parallel.\n");
   fprintf(io, " -r/--repeat <n>  Number of times to repeat each test/benchmark.\n");
   fprintf(io, " -v/--verbose     Be verbose.\n");
   fprintf(io, " -h/--help        Show this help.\n");
@@ -152,6 +153,7 @@ int main (int argc, char const* argv[])
   {
     { "benchmark", no_argument,       0, 'b' },
     { "measure",   no_argument,       0, 'm' },
+    { "parallel",  no_argument,       0, 'p' },
     { "repeat",    required_argument, 0, 'r' },
     { "verbose",   no_argument,       0, 'v' },
     { "help",      no_argument,       0, 'h' },
@@ -160,18 +162,20 @@ int main (int argc, char const* argv[])
   };
 
   bool measure        = false;
+  bool parallel       = false;
   bool run_benchmarks = false;
   bool verbose        = false;
   size_t repeat       = 1;
 
   unsigned int ch;
-  while((ch = getopt_long(argc, (char* const*)argv, "bmr:vhV", options, NULL)) != -1)
+  while((ch = getopt_long(argc, (char* const*)argv, "bmpr:vhV", options, NULL)) != -1)
   {
     extern char* optarg;
     switch(ch)
     {
       case 'b': run_benchmarks = true;         break;
       case 'm': measure        = true;         break;
+      case 'p': parallel       = true;         break;
       case 'r': repeat         = atoi(optarg); break;
       case 'v': verbose        = true;         break;
       case 'h': write_usage(stdout);           return 0;
@@ -221,16 +225,16 @@ int main (int argc, char const* argv[])
   if(!run_benchmarks)
   {
     dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-      if(measure)
-      {
-        for(auto test : tests)
-          test.execute(measure, repeat);
-      }
-      else
+      if(parallel)
       {
         dispatch_apply(tests.size(), dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t n){
           tests[n].execute(measure, repeat);
         });
+      }
+      else
+      {
+        for(auto test : tests)
+          test.execute(measure, repeat);
       }
     });
   }
