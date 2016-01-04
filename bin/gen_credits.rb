@@ -89,6 +89,7 @@ class GitHubLookup
     end
 
     user = YAML.load(response.body)
+    return nil if user.nil?
     # save result to k/v store
     return @db[emailhash] = user['user']['login']
   end
