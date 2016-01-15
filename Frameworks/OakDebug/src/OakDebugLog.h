@@ -44,7 +44,7 @@ struct PUBLIC OakDebugBaseClass
 
 #define OAK_DEBUG(expr)
 #define OAK_DEBUG_VAR(name) ;
-#define bug
+#define bug(format, args...)
 #define D(flag, code) ;
 
 #endif
