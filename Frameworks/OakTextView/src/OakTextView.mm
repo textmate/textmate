@@ -3728,8 +3728,11 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 	NSRect rect = layout->rect_at_index(range.min(), false, true);
 	NSPoint pos = NSMakePoint(NSMinX(rect), NSMaxY(rect));
 
-	NSAttributedString* str = [self attributedSubstringForProposedRange:[self nsRangeForRange:range] actualRange:nullptr];
-	[self showDefinitionForAttributedString:str atPoint:pos];
+	NSRange nsRange = [self nsRangeForRange:range];
+	if (nsRange.length > 0) {
+		NSAttributedString* str = [self attributedSubstringForProposedRange:nsRange actualRange:nullptr];
+		[self showDefinitionForAttributedString:str atPoint:pos];
+	}
 }
 
 - (void)pressureChangeWithEvent:(NSEvent*)anEvent
