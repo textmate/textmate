@@ -87,7 +87,7 @@ struct document_view_callback_t : document::document_t::callback_t
 			self.statusBar.softTabs = document->buffer().indent().soft_tabs();
 		}
 
-		if(document->recent_tracking() && document->path() != NULL_STR)
+		if(document->recent_tracking() && path::exists(document->path()))
 		{
 			if(event == did_save || event == did_change_path || (event == did_change_open_status && document->is_open()))
 				[[NSDocumentController sharedDocumentController] noteNewRecentDocumentURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:document->path()]]];
