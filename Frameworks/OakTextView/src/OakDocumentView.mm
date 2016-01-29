@@ -928,6 +928,20 @@ private:
 	[[NSNotificationCenter defaultCenter] postNotificationName:GVColumnDataSourceDidChange object:self];
 }
 
+// ========================
+// = Jump To Mark Actions =
+// ========================
+
+- (IBAction)jumpToNextMark:(id)sender
+{
+	[self goToNextMarkOfType:nil];
+}
+
+- (IBAction)jumpToPreviousMark:(id)sender
+{
+	[self goToPreviousMarkOfType:nil];
+}
+
 // =================
 // = Accessibility =
 // =================

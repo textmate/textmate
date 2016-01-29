@@ -836,6 +836,17 @@ CA
                                 <menu key="submenu" title="Go to Bookmark" id="595"/>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="439"/>
+                            <menuItem title="Jump To Next Mark" keyEquivalent="&gt;" id="gGW-Hn-MX6">
+                                <connections>
+                                    <action selector="jumpToNextMark:" target="-1" id="999"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Jump To Previous Mark" keyEquivalent="&lt;" id="5Mq-52-EUe">
+                                <connections>
+                                    <action selector="jumpToPreviousMark:" target="-1" id="998"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="HcX-yL-1Rc"/>
                             <menuItem title="Scroll" id="429">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Scroll" id="430">
