@@ -44,7 +44,9 @@ namespace ng
 		std::multimap<size_t, std::pair<std::string, std::string>> get_range (size_t from, size_t to) const;
 		std::map<size_t, std::string> get_range (size_t from, size_t to, std::string const& markType) const;
 
+		std::pair<size_t, std::string> next (size_t index) const;
 		std::pair<size_t, std::string> next (size_t index, std::string const& markType) const;
+		std::pair<size_t, std::string> prev (size_t index) const;
 		std::pair<size_t, std::string> prev (size_t index, std::string const& markType) const;
 
 	private:

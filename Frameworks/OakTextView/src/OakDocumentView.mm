@@ -918,6 +918,30 @@ private:
 	[[NSNotificationCenter defaultCenter] postNotificationName:GVColumnDataSourceDidChange object:self];
 }
 
+// ========================
+// = Jump To Mark Actions =
+// ========================
+
+- (IBAction)jumpToNextMark:(id)sender
+{
+	text::selection_t sel(to_s(textView.selectionString));
+
+	ng::buffer_t const& buf = document->buffer();
+	std::pair<size_t, std::string> const& pair = buf.next_mark(buf.convert(sel.last().max()));
+	if(pair.second != NULL_STR)
+		textView.selectionString = [NSString stringWithCxxString:buf.convert(pair.first)];
+}
+
+- (IBAction)jumpToPreviousMark:(id)sender
+{
+	text::selection_t sel(to_s(textView.selectionString));
+
+	ng::buffer_t const& buf = document->buffer();
+	std::pair<size_t, std::string> const& pair = buf.prev_mark(buf.convert(sel.last().max()));
+	if(pair.second != NULL_STR)
+		textView.selectionString = [NSString stringWithCxxString:buf.convert(pair.first)];
+}
+
 // =================
 // = Accessibility =
 // =================

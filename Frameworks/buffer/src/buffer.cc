@@ -332,7 +332,9 @@ namespace ng
 	std::multimap<size_t, std::pair<std::string, std::string>> buffer_t::get_marks (size_t from, size_t to) const { return _marks->get_range(from, to); }
 	std::map<size_t, std::string> buffer_t::get_marks (size_t from, size_t to, std::string const& markType) const { return _marks->get_range(from, to, markType); }
 	std::pair<size_t, std::string> buffer_t::next_mark (size_t index, std::string const& markType) const          { return _marks->next(index, markType); }
+	std::pair<size_t, std::string> buffer_t::next_mark (size_t index) const                                       { return _marks->next(index); }
 	std::pair<size_t, std::string> buffer_t::prev_mark (size_t index, std::string const& markType) const          { return _marks->prev(index, markType); }
+	std::pair<size_t, std::string> buffer_t::prev_mark (size_t index) const                                       { return _marks->prev(index); }
 
 	// ========
 	// = to_s =

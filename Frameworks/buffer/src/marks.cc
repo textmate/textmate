@@ -37,6 +37,33 @@ namespace ng
 		return _marks.find(markType)->second.find(index)->second;
 	}
 
+	std::pair<size_t, std::string> marks_t::next (size_t index) const
+	{
+		std::vector<std::pair<size_t, std::string>> candidates;
+		for(auto const& m : _marks)
+		{
+			if(m.second.size() == 1)
+			{
+				candidates.push_back(*m.second.begin());
+			}
+			else
+			{
+				auto it = m.second.upper_bound(index);
+				candidates.push_back(*(it == m.second.end() ? m.second.begin() : it));
+			}
+		}
+
+		if(candidates.empty())
+			return std::make_pair(0, NULL_STR);
+		else if(candidates.size() == 1)
+			return candidates.front();
+
+		std::sort(candidates.begin(), candidates.end());
+		auto it = std::upper_bound(candidates.begin(), candidates.end(), index, [](size_t index, std::pair<size_t, std::string> const& mark){ return mark.first > index; });
+
+		return *(it == candidates.end() ? candidates.begin() : it);
+	}
+
 	std::pair<size_t, std::string> marks_t::next (size_t index, std::string const& markType) const
 	{
 		std::map<std::string, tree_t>::const_iterator m = _marks.find(markType);
@@ -50,6 +77,33 @@ namespace ng
 
 		tree_t::iterator it = m->second.upper_bound(index);
 		return *(it == m->second.end() ? m->second.begin() : it);
+	}
+
+	std::pair<size_t, std::string> marks_t::prev (size_t index) const
+	{
+		std::vector<std::pair<size_t, std::string>> candidates;
+		for(auto const& m : _marks)
+		{
+			if(m.second.size() == 1)
+			{
+				candidates.push_back(*m.second.begin());
+			}
+			else
+			{
+				auto it = m.second.lower_bound(index);
+				candidates.push_back(*(--(it == m.second.begin() ? m.second.end() : it)));
+			}
+		}
+
+		if(candidates.empty())
+			return std::make_pair(0, NULL_STR);
+		else if(candidates.size() == 1)
+			return candidates.front();
+
+		std::sort(candidates.begin(), candidates.end());
+		auto it = std::lower_bound(candidates.begin(), candidates.end(), index, [](std::pair<size_t, std::string> const& mark, size_t index){ return mark.first < index; });
+
+		return *(--(it == candidates.begin() ? candidates.end() : it));
 	}
 
 	std::pair<size_t, std::string> marks_t::prev (size_t index, std::string const& markType) const
