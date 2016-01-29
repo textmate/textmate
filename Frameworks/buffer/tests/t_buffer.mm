@@ -108,6 +108,7 @@ void test_spelling ()
 {
 	ng::buffer_t buf;
 	buf.set_grammar(TestGrammarItem);
+	buf.set_spelling_language("en");
 	buf.set_live_spelling(true);
 	buf.insert(0, "myfo god\nthat ibs nice\nlamere check\n");
 	buf.bump_revision();
@@ -125,6 +126,7 @@ void test_spelling_2 ()
 {
 	ng::buffer_t buf;
 	buf.set_grammar(TestGrammarItem);
+	buf.set_spelling_language("en");
 	buf.set_live_spelling(true);
 	buf.insert(0, "it mq xy");
 	buf.bump_revision();
