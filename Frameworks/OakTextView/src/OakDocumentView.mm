@@ -479,6 +479,16 @@ private:
 		ng::buffer_t const& buf = document->buffer();
 		[aMenuItem setTitle:buf.get_marks(buf.begin(lineNumber), buf.eol(lineNumber), document::kBookmarkIdentifier).empty() ? @"Set Bookmark" : @"Remove Bookmark"];
 	}
+	else if([aMenuItem action] == @selector(goToNextBookmark:) || [aMenuItem action] == @selector(goToPreviousBookmark:))
+	{
+		auto const& buf = document->buffer();
+		return buf.get_marks(0, buf.size(), document::kBookmarkIdentifier).empty() ? NO : YES;
+	}
+	else if([aMenuItem action] == @selector(jumpToNextMark:) || [aMenuItem action] == @selector(jumpToPreviousMark:))
+	{
+		auto const& buf = document->buffer();
+		return buf.get_marks(0, buf.size()).empty() ? NO : YES;
+	}
 	return YES;
 }
 
