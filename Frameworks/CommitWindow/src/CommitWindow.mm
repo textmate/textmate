@@ -384,6 +384,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 			[contentView addConstraint:_documentViewHeightConstraint];
 			_scrollViewHeightConstraint.animator.constant = kOakCommitWindowTableViewHeight;
 		} completionHandler:^{
+			[self.window displayIfNeeded];
 			[contentView removeConstraint:_documentViewHeightConstraint];
 			_documentViewHeightConstraint = [NSLayoutConstraint constraintWithItem:_documentView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationGreaterThanOrEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:kOakCommitWindowMinimumDocumentViewHeight];
 			[contentView addConstraint:_documentViewHeightConstraint];
