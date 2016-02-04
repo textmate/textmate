@@ -15,6 +15,19 @@
 
 OAK_DEBUG_VAR(AppController_Menus);
 
+static NSString* NameForLocaleIdentifier (NSString* languageCode)
+{
+	NSString* localLanguage = nil;
+	if(CFLocaleRef locale = CFLocaleCreate(kCFAllocatorDefault, (__bridge CFStringRef)languageCode))
+	{
+		localLanguage = [(NSString*)CFBridgingRelease(CFLocaleCopyDisplayNameForPropertyValue(locale, kCFLocaleIdentifier, (__bridge CFStringRef)languageCode)) capitalizedString];
+		CFRelease(locale);
+	}
+
+	NSString* systemLangauge = [(NSString*)CFBridgingRelease(CFLocaleCopyDisplayNameForPropertyValue(CFLocaleGetSystem(), kCFLocaleIdentifier, (__bridge CFStringRef)languageCode)) capitalizedString];
+	return localLanguage ?: systemLangauge ?: languageCode;
+}
+
 @implementation AppController (BundlesMenu)
 - (void)performBundleItemWithUUIDStringFrom:(id)anArgument
 {
@@ -90,12 +103,7 @@ OAK_DEBUG_VAR(AppController_Menus);
 
 	NSSpellChecker* spellChecker = [NSSpellChecker sharedSpellChecker];
 	for(NSString* lang in [spellChecker availableLanguages])
-	{
-		D(DBF_AppController_Menus, bug("%s\n", [lang UTF8String]););
-		NSString* str = (NSString*)CFBridgingRelease(CFLocaleCopyDisplayNameForPropertyValue(CFLocaleGetSystem(), kCFLocaleIdentifier, (__bridge CFStringRef)lang));
-		D(DBF_AppController_Menus, bug("→ %s\n", [(str ?: lang) UTF8String]););
-		ordered.emplace(to_s(str ?: lang), lang);
-	}
+		ordered.emplace(to_s(NameForLocaleIdentifier(lang)), lang);
 
 	for(auto const& it : ordered)
 	{
