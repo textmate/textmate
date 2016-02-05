@@ -1,6 +1,7 @@
 #import "AppController.h"
 #import <oak/oak.h>
 #import <text/ctype.h>
+#import <text/parse.h>
 #import <bundles/bundles.h>
 #import <command/parser.h>
 #import <cf/cf.h>
@@ -73,15 +74,24 @@ static NSString* NameForLocaleIdentifier (NSString* languageCode)
 	D(DBF_AppController_Menus, bug("\n"););
 	[aMenu removeAllItems];
 
-	std::multimap<std::string, bundles::item_ptr, text::less_t> ordered;
+	std::map<std::string, std::multimap<std::string, bundles::item_ptr, text::less_t>> ordered;
 	for(auto const& item : bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeTheme))
-		ordered.emplace(item->name(), item);
-
-	for(auto const& pair : ordered)
 	{
-		NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithCxxString:pair.first] action:@selector(takeThemeUUIDFrom:) keyEquivalent:@""];
-		[menuItem setKeyEquivalentCxxString:key_equivalent(pair.second)];
-		[menuItem setRepresentedObject:[NSString stringWithCxxString:pair.second->uuid()]];
+		auto semanticClass = text::split(item->value_for_field(bundles::kFieldSemanticClass), ".");
+		std::string themeClass = semanticClass.size() > 2 && semanticClass.front() == "theme" ? semanticClass[1] : "unspecified";
+		ordered[themeClass].emplace(item->name(), item);
+	}
+
+	for(auto const& themeClasses : ordered)
+	{
+		[aMenu addItemWithTitle:[[NSString stringWithCxxString:themeClasses.first] capitalizedString] action:@selector(nop:) keyEquivalent:@""];
+		for(auto const& pair : themeClasses.second)
+		{
+			NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithCxxString:pair.first] action:@selector(takeThemeUUIDFrom:) keyEquivalent:@""];
+			[menuItem setKeyEquivalentCxxString:key_equivalent(pair.second)];
+			[menuItem setRepresentedObject:[NSString stringWithCxxString:pair.second->uuid()]];
+			[menuItem setIndentationLevel:1];
+		}
 	}
 
 	if(ordered.empty())
