@@ -43,7 +43,7 @@ static NSString* NameForLocaleIdentifier (NSString* languageCode)
 - (void)bundlesMenuNeedsUpdate:(NSMenu*)aMenu
 {
 	D(DBF_AppController_Menus, bug("\n"););
-	for(int i = aMenu.numberOfItems; i--; )
+	for(NSInteger i = aMenu.numberOfItems; i--; )
 	{
 		if([[aMenu itemAtIndex:i] isSeparatorItem])
 			break;
@@ -92,7 +92,7 @@ static NSString* NameForLocaleIdentifier (NSString* languageCode)
 {
 	D(DBF_AppController_Menus, bug("\n"););
 
-	for(int i = aMenu.numberOfItems; i--; )
+	for(NSInteger i = aMenu.numberOfItems; i--; )
 	{
 		NSMenuItem* item = [aMenu itemAtIndex:i];
 		if([item action] == @selector(takeSpellingLanguageFrom:))

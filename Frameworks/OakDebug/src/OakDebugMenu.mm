@@ -90,7 +90,7 @@ namespace
 
 + (void)menuNeedsUpdate:(NSMenu*)aMenu
 {
-	for(int i = [aMenu numberOfItems]; i-- > 0; )
+	for(NSInteger i = aMenu.numberOfItems; i-- > 0; )
 		[aMenu removeItemAtIndex:i];
 
 	// ===================
