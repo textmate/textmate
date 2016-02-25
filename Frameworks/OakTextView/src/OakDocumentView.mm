@@ -869,6 +869,26 @@ private:
 // = Bookmark Actions =
 // ====================
 
+- (void)goToNextMarkOfType:(NSString*)markType
+{
+	text::selection_t sel(to_s(textView.selectionString));
+
+	ng::buffer_t const& buf = document->buffer();
+	std::pair<size_t, std::string> const& pair = buf.next_mark(buf.convert(sel.last().max()), to_s(markType));
+	if(pair.second != NULL_STR)
+		textView.selectionString = [NSString stringWithCxxString:buf.convert(pair.first)];
+}
+
+- (IBAction)goToPreviousMarkOfType:(NSString*)markType
+{
+	text::selection_t sel(to_s(textView.selectionString));
+
+	ng::buffer_t const& buf = document->buffer();
+	std::pair<size_t, std::string> const& pair = buf.prev_mark(buf.convert(sel.last().max()), to_s(markType));
+	if(pair.second != NULL_STR)
+		textView.selectionString = [NSString stringWithCxxString:buf.convert(pair.first)];
+}
+
 - (IBAction)toggleCurrentBookmark:(id)sender
 {
 	ng::buffer_t& buf = document->buffer();
@@ -894,22 +914,12 @@ private:
 
 - (IBAction)goToNextBookmark:(id)sender
 {
-	text::selection_t sel(to_s(textView.selectionString));
-
-	ng::buffer_t const& buf = document->buffer();
-	std::pair<size_t, std::string> const& pair = buf.next_mark(buf.convert(sel.last().max()), document::kBookmarkIdentifier);
-	if(pair.second != NULL_STR)
-		textView.selectionString = [NSString stringWithCxxString:buf.convert(pair.first)];
+	[self goToNextMarkOfType:[NSString stringWithCxxString:document::kBookmarkIdentifier]];
 }
 
 - (IBAction)goToPreviousBookmark:(id)sender
 {
-	text::selection_t sel(to_s(textView.selectionString));
-
-	ng::buffer_t const& buf = document->buffer();
-	std::pair<size_t, std::string> const& pair = buf.prev_mark(buf.convert(sel.last().max()), document::kBookmarkIdentifier);
-	if(pair.second != NULL_STR)
-		textView.selectionString = [NSString stringWithCxxString:buf.convert(pair.first)];
+	[self goToPreviousMarkOfType:[NSString stringWithCxxString:document::kBookmarkIdentifier]];
 }
 
 - (void)clearAllBookmarks:(id)sender
