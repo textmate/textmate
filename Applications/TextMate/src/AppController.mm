@@ -213,6 +213,8 @@ BOOL HasDocumentWindow (NSArray* windows)
 	}];
 	RegisterDefaults();
 
+	[[TMPlugInController sharedInstance] loadAllPlugIns:nil];
+
 	std::string dest = path::join(path::home(), "Library/Application Support/TextMate/Managed");
 	if(!path::exists(dest))
 	{
@@ -254,7 +256,6 @@ BOOL HasDocumentWindow (NSArray* windows)
 		}
 	}
 	[[BundlesManager sharedInstance] loadBundlesIndex];
-	[[TMPlugInController sharedInstance] loadAllPlugIns:nil];
 
 	if(BOOL restoreSession = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableSessionRestoreKey])
 	{
