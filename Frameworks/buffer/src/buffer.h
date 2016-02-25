@@ -133,8 +133,10 @@ namespace ng
 		std::string get_mark (size_t index, std::string const& markType) const;
 		std::multimap<size_t, std::pair<std::string, std::string>> get_marks (size_t from, size_t to) const;
 		std::map<size_t, std::string> get_marks (size_t from, size_t to, std::string const& markType) const;
-		std::pair<size_t, std::string> next_mark (size_t index, std::string const& markType = NULL_STR) const;
-		std::pair<size_t, std::string> prev_mark (size_t index, std::string const& markType = NULL_STR) const;
+		std::pair<size_t, std::string> next_mark (size_t index, std::string const& markType) const;
+		std::pair<size_t, std::string> next_mark (size_t index) const;
+		std::pair<size_t, std::string> prev_mark (size_t index, std::string const& markType) const;
+		std::pair<size_t, std::string> prev_mark (size_t index) const;
 
 		void wait_for_repair ();
 
