@@ -2,6 +2,14 @@ Title: Release Notes
 
 # Changes
 
+## 2016-03-05 (v2.0-beta.9)
+
+* The Themes sub-menu will group themes based on second element in their semantic class, if the first element is `theme`. The managed themes all indicate light and dark in their semantic class.
+* Added Jump to Next/Previous Mark menu items to the Navigate menu. This includes marks such as warnings and errors shown in the gutter (unlike next/previous bookmark which would not visit these marks) *[Ronald Wampler]*
+* The Spelling sub-menu now has an option to follow the spelling panel’s language selection (and will show the current value of the spelling panel). Using “Automatic by Language” currently require setting TextMate to follow the spelling panel’s value and then selecting this option in the spelling panel. *[Adam Strzelecki]*
+* Dictionary lookup could crash when used on an empty string. *[Vincent Bénony]*
+* See [all changes since v2.0-beta.8.4](https://github.com/textmate/textmate/compare/v2.0-beta.8.4...v2.0-beta.9)
+
 ## 2015-12-06 (v2.0-beta.8.4)
 
 * TextMate now supports Force Click to look up words. This requires setting “Look up & data detectors” to “Force Click with one finger” in System Preferences → Trackpad.
