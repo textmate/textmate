@@ -25,7 +25,7 @@ min_os=10.7
 # = Check if boost is installed =
 # ===============================
 
-if which -s brew && [[ -z "$boostdir" && ! -d /usr/local/include/boost ]]; then
+if which brew && [[ -z "$boostdir" && ! -d /usr/local/include/boost ]]; then
 	boostdir=$(brew --prefix boost)/include/boost
 fi
 
@@ -41,7 +41,7 @@ test -L "${builddir}/include/boost" || error "*** boost not installed."
 # = Check if google sparsehash is installed =
 # ===========================================
 
-if which -s brew && [[ -z "$sparsedir" && ! -d /usr/local/include/sparsehash ]]; then
+if which brew && [[ -z "$sparsedir" && ! -d /usr/local/include/sparsehash ]]; then
 	sparsedir=$(brew --prefix google-sparsehash)/include/sparsehash
 fi
 
@@ -57,12 +57,12 @@ test -L "${builddir}/include/sparsehash" || error "*** google sparsehash not ins
 # = Check if non-system openssl is intalled =
 # ===========================================
 
-if which -s brew && [[ -z "$libressl_prefix" && ! -d "${libressl_prefix}/include/openssl" ]]; then
+if which brew && [[ -z "$libressl_prefix" && ! -d "${libressl_prefix}/include/openssl" ]]; then
 	libressl_prefix=$(brew --prefix libressl)
         test -d "${libressl_prefix}/include/" || error "*** openssl headers not found."
 fi
 
-if which -s port && [[ -z "$libressl_prefix" && ! -d "${libressl_prefix}/include/openssl" ]]; then
+if which port && [[ -z "$libressl_prefix" && ! -d "${libressl_prefix}/include/openssl" ]]; then
         libressl_prefix=/opt/local/
         test -d "${libressl_prefix}/include/openssl" || error "*** openssl headers not found."
 fi
@@ -72,7 +72,7 @@ fi
 # ===============================================
 
 bzip2_flag="-j"
-if which -s pbzip2; then
+if which pbzip2; then
 	bzip2_flag="--use-compress-prog=pbzip2"
 fi
 
@@ -80,10 +80,10 @@ fi
 # = Check various dependencies =
 # ==============================
 
-test -x "${capnp_prefix}/bin/capnp" || error "*** cap’n’proto not installed in ‘${capnp_prefix}’. Set \`capnp_prefix\` if installed elsewhere."
+test -x "${capnp_prefix}/bin/capnp" || error "*** capânâproto not installed in â${capnp_prefix}â. Set \`capnp_prefix\` if installed elsewhere."
 
 for dep in ninja ragel multimarkdown pgrep pkill; do
-	which -s "$dep" || error "*** dependency missing: ‘${dep}’."
+	which "$dep" || error "*** dependency missing: â${dep}â."
 done
 
 # =====================================
