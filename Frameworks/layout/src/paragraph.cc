@@ -6,7 +6,7 @@
 #include <text/utf8.h>
 #include <regexp/format_string.h>
 
-static double const kFoldingDotsRatio = 16.0 / 10.0; // FIXME Folding dots ratio should be obtained from the image and given to layout_t
+static double const kFoldingDotsRatio = 20.0 / 10.0; // FIXME Folding dots ratio should be obtained from the image and given to layout_t
 
 namespace ng
 {
