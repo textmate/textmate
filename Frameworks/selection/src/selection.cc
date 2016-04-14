@@ -197,6 +197,7 @@ namespace ng
 				{
 					left_anchored_regexp = "\\G" + plain.substr(1, plain.size()-2);
 					right_anchored_regexp = plain.substr(1, plain.size()-2) + "\\G";
+					unanchored_regexp = plain.substr(1, plain.size()-2);
 					is_regexp = true;
 				}
 			}
@@ -204,6 +205,7 @@ namespace ng
 			std::string plain;
 			regexp::pattern_t left_anchored_regexp;
 			regexp::pattern_t right_anchored_regexp;
+			regexp::pattern_t unanchored_regexp;
 			bool is_regexp = false;
 		};
 
@@ -289,6 +291,18 @@ namespace ng
 			return true;
 		}
 		return ptrn.is_regexp && does_match(ptrn.left_anchored_regexp, buffer, index, buffer.eol(buffer.convert(index).line), didMatch);
+	}
+
+	static bool does_match_range (pattern_t const& ptrn, buffer_t const& buffer, size_t from, size_t to)
+	{
+		if(!ptrn.is_regexp)
+		{
+			return to - from == ptrn.plain.size() && ptrn.plain == buffer.substr(from, to);
+		}
+
+		std::string text = buffer.substr(from, to);
+		auto m = regexp::search(ptrn.unanchored_regexp, text.data(), text.data() + text.size(), nullptr, nullptr, ONIG_OPTION_FIND_NOT_EMPTY);
+		return m && m.begin() == from && m.end() == to;
 	}
 
 	static enclosed_range_t find_enclosed_range (buffer_t const& buffer, size_t index, std::vector<std::pair<pattern_t, pattern_t>> const& pairs)
@@ -402,6 +416,27 @@ namespace ng
 		}
 
 		return orgCaret;
+	}
+
+	static range_t range_of_typing_pair (buffer_t const& buffer, size_t from, size_t to)
+	{
+		auto pairs = character_pairs(buffer.scope(from), "highlightPairs");
+
+		auto m = first_match(buffer, from, pairs, &does_match_right);
+		if(m && m.matched_opener)
+		{
+			to = end_of_typing_pair(buffer, from + m.match.size(), true);
+			return range_t(from, to, false, false, true);
+		}
+
+		m = first_match(buffer, from, pairs, &does_match_left);
+		if(m && !m.matched_opener)
+		{
+			from = begin_of_typing_pair(buffer, to - m.match.size(), true);
+			return range_t(from, to, false, false, true);
+		}
+		
+		return range_t();
 	}
 
 	// ====================
@@ -942,6 +977,14 @@ namespace ng
 				std::string outerRightType = to == eol   ? kCharacterClassUnknown : character_class(buffer, to);
 
 				bool extendLeft = false, extendRight = false;
+				bool typingPair = (unit == kSelectionExtendToWordOrTypingPair);
+
+				if(typingPair)
+				{
+					auto pairRange = range_of_typing_pair(buffer, from, to);
+					if(!pairRange.empty())
+						return pairRange;
+				}
 
 				if(unit == kSelectionExtendToWordOrTypingPair && from == to)
 				{
@@ -1008,6 +1051,22 @@ namespace ng
 				{
 					while(to < eol && character_class(buffer, to) == outerRightType)
 						to += buffer[to].size();
+				}
+
+				if(typingPair)
+				{
+					// if the new selection is a left or right typing pair, extend the selection to the whole typing pair
+					auto pairs = character_pairs(buffer.scope(from), "highlightPairs");
+					for(auto const& pair : pairs)
+					{
+						range_t pairRange;
+						if(does_match_range(pair.first, buffer, from, to))
+							pairRange = range_of_typing_pair(buffer, from, from);
+						else if(does_match_range(pair.second, buffer, from, to))
+							pairRange = range_of_typing_pair(buffer, to, to);
+						if (!pairRange.empty())
+							return pairRange;
+					}
 				}
 
 				return range_t(from, to, range.columnar, false, true);

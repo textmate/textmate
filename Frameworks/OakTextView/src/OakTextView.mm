@@ -3621,7 +3621,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	ng::ranges_t range(ng::range_t(mouseDownIndex, layout->index_at_point(mouseCurrentPos)));
 	switch(mouseDownClickCount)
 	{
-		case 2: range = ng::extend(document->buffer(), range, kSelectionExtendToWord); break;
+		case 2: range = ng::extend(document->buffer(), range, kSelectionExtendToWordOrTypingPair); break;
 		case 3: range = ng::extend(document->buffer(), range, kSelectionExtendToLine); break;
 	}
 
