@@ -435,8 +435,13 @@ namespace ng
 			res += regexp::search(indentPattern, line) ?  8 : 0;
 			res += regexp::search(ignorePattern, line) ? 16 : 0;
 
+			int indent = indent::leading_whitespace(line.data(), line.data() + line.size(), _buffer.indent().tab_size());
 			if(res & 6) // if start/stop marker we ignore indent patterns
+			{
+				if(res & 16) // if line is ignored then don’t allow it to terminate an indented block
+					indent = INT_MAX;
 				res &= ~24;
+			}
 
 			auto type = kLineTypeRegular;
 			switch(res)
@@ -448,7 +453,6 @@ namespace ng
 				default: type = text::is_blank(line.data(), line.data() + line.size()) ? kLineTypeEmpty : kLineTypeRegular; break;
 			}
 
-			int indent = indent::leading_whitespace(line.data(), line.data() + line.size(), _buffer.indent().tab_size());
 			it = _levels.insert(it, bol, value_t(indent, type));
 		}
 		return it->value;
