@@ -2,6 +2,12 @@ Title: Release Notes
 
 # Changes
 
+## 2016-04-19 (v2.0-beta.9.1)
+
+* You can now double click parentheses, braces etc. to select the contents. *[Brian T. Kelley]*
+* The Jump to Next/Previous Mark shortcuts have been changed to F3/⇧F3 so as to not conflict with some keyboard layouts.
+* See [all changes since v2.0-beta.9](https://github.com/textmate/textmate/compare/v2.0-beta.9...v2.0-beta.9.1)
+
 ## 2016-03-05 (v2.0-beta.9)
 
 * The Themes sub-menu will group themes based on second element in their semantic class, if the first element is `theme`. The managed themes all indicate light and dark in their semantic class.
