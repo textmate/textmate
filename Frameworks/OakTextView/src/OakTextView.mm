@@ -2690,7 +2690,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	else if([aMenuItem action] == @selector(copy:))
 		[aMenuItem setTitle:@"Copy"];
 
-	static auto const RequiresSelection = new std::set<SEL>{ @selector(cut:), @selector(copy:), @selector(delete:), @selector(copySelectionToFindPboard:) };
+	static auto const RequiresSelection = new std::set<SEL>{ @selector(cut:), @selector(copy:), @selector(delete:), @selector(copySelectionToFindPboard:), @selector(copySelectionToReplacePboard:), @selector(centerSelectionInVisibleArea:) };
 	if(RequiresSelection->find([aMenuItem action]) != RequiresSelection->end())
 		return [self hasSelection];
 	else if([aMenuItem action] == @selector(toggleMacroRecording:))
