@@ -804,12 +804,12 @@ CA
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <menu key="submenu" title="Navigate" id="422">
                         <items>
-                            <menuItem title="Go to Line…" keyEquivalent="l" id="389">
+                            <menuItem title="Jump to Line…" keyEquivalent="l" id="389">
                                 <connections>
                                     <action selector="orderFrontGoToLinePanel:" target="-1" id="390"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Go to Symbol…" keyEquivalent="T" id="556">
+                            <menuItem title="Jump to Symbol…" keyEquivalent="T" id="556">
                                 <connections>
                                     <action selector="showSymbolChooser:" target="-1" id="557"/>
                                 </connections>
@@ -825,21 +825,21 @@ CA
                                     <action selector="toggleCurrentBookmark:" target="-1" id="426"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Next Bookmark" keyEquivalent="" id="424">
+                            <menuItem title="Jump to Next Bookmark" keyEquivalent="" id="424">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="goToNextBookmark:" target="-1" id="427"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Previous Bookmark" keyEquivalent="" id="425">
+                            <menuItem title="Jump to Previous Bookmark" keyEquivalent="" id="425">
                                 <modifierMask key="keyEquivalentModifierMask" shift="YES"/>
                                 <connections>
                                     <action selector="goToPreviousBookmark:" target="-1" id="428"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Go to Bookmark" id="594">
+                            <menuItem title="Jump to Bookmark" id="594">
                                 <modifierMask key="keyEquivalentModifierMask"/>
-                                <menu key="submenu" title="Go to Bookmark" id="595"/>
+                                <menu key="submenu" title="Jump to Bookmark" id="595"/>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="439"/>
                             <menuItem title="Jump To Next Mark" keyEquivalent="" id="gGW-Hn-MX6">
@@ -1198,7 +1198,7 @@ CQ
                 <outlet property="bundlesMenuItem" destination="265" id="794"/>
             </connections>
         </menu>
-        <window title="Go to Line" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" frameAutosaveName="Go to Line" animationBehavior="default" id="391" userLabel="GoToLine" customClass="NSPanel">
+        <window title="Jump to Line" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" frameAutosaveName="Jump to Line" animationBehavior="default" id="391" userLabel="GoToLine" customClass="NSPanel">
             <windowStyleMask key="styleMask" titled="YES" closable="YES"/>
             <windowCollectionBehavior key="collectionBehavior" moveToActiveSpace="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>

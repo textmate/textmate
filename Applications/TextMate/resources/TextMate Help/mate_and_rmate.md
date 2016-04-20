@@ -130,7 +130,7 @@ Which selects all occurrences of `pos` for replacement:
 
 You get the idea.
 
-The best news about these new Selection Strings is that they aren't just for `mate`.  You can also use them in the _Go to Line_ (⌘L) and _Go to File_ (⌘T) dialogs.  For that latter, you just tack a colon (`:`) onto the end of the name matching string then follow it up with a Selection String.
+The best news about these new Selection Strings is that they aren't just for `mate`.  You can also use them in the _Jump to Line_ (⌘L) and _Go to File_ (⌘T) dialogs.  For that latter, you just tack a colon (`:`) onto the end of the name matching string then follow it up with a Selection String.
 
 This means that you could respond to a warning message like the following:
 
@@ -190,7 +190,7 @@ You should see the content you typed on the server.  Magic!
 
 If you try to edit a file you don't have permission to change on the server, `rmate` will refuse the edit and warn you:
 
-    $ rmate /etc/crontab 
+    $ rmate /etc/crontab
     File /etc/crontab is not writable! Use -f/--force to open anyway.
 
 You can either use the `-f` option to force the open in read-only mode or use `sudo` to get the needed permissions.  Remember that `rmate` is a Ruby script, so RVM users will probably need to use `rvmsudo` to keep the same Ruby selected:
