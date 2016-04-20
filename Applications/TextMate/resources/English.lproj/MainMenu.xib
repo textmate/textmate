@@ -506,11 +506,6 @@ CA
                                         <menuItem isSeparatorItem="YES" id="239">
                                             <modifierMask key="keyEquivalentModifierMask" command="YES"/>
                                         </menuItem>
-                                        <menuItem title="Jump to Selection" keyEquivalent="j" id="240">
-                                            <connections>
-                                                <action selector="centerSelectionInVisibleArea:" target="-1" id="252"/>
-                                            </connections>
-                                        </menuItem>
                                     </items>
                                 </menu>
                             </menuItem>
@@ -817,6 +812,11 @@ CA
                             <menuItem title="Go to Symbol…" keyEquivalent="T" id="556">
                                 <connections>
                                     <action selector="showSymbolChooser:" target="-1" id="557"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Jump to Selection" keyEquivalent="j" id="xcx-ye-h1c">
+                                <connections>
+                                    <action selector="centerSelectionInVisibleArea:" target="-1" id="KRn-Bg-XZK"/>
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="851"/>
