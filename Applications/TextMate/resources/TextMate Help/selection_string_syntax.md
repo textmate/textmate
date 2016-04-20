@@ -11,7 +11,7 @@ title: Selection String Syntax
 	column       = [1-9][0-9]*
 	offset       = [1-9][0-9]*
 
-This can be used with `mate -l`, _Go to Line…_, and the ⌘T dialog (by putting `:«selection string»` after the file name) — as for the latter, if a string on the find clipboard has this format, it will be the default value in ⌘T, this is useful if you have a line in Terminal like:
+This can be used with `mate -l`, _Jump to Line…_, and the ⌘T dialog (by putting `:«selection string»` after the file name) — as for the latter, if a string on the find clipboard has this format, it will be the default value in ⌘T, this is useful if you have a line in Terminal like:
 
 	main.cc:32: warning: no return statement.
 

@@ -39,7 +39,7 @@ static SymbolChooserItem* CreateItem (document::document_ptr const& document, te
 {
 	if((self = [super init]))
 	{
-		self.window.title = @"Go to Symbol";
+		self.window.title = @"Jump to Symbol";
 
 		NSDictionary* views = @{
 			@"searchField"        : self.searchField,
@@ -91,7 +91,7 @@ static SymbolChooserItem* CreateItem (document::document_ptr const& document, te
 	if((_document = aDocument) && _document->try_open(std::make_shared<callback_t>(self)))
 		[self updateItems:self];
 
-	self.window.title = _document ? [NSString stringWithFormat:@"Go to Symbol — %@", [NSString stringWithCxxString:_document->display_name()]] : @"Go to Symbol";
+	self.window.title = _document ? [NSString stringWithFormat:@"Jump to Symbol — %@", [NSString stringWithCxxString:_document->display_name()]] : @"Jump to Symbol";
 }
 
 - (void)setSelectionString:(NSString*)aString
