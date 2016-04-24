@@ -56,10 +56,12 @@ namespace ng
 		void set_is_key (bool isKey);
 		void set_draw_caret (bool drawCaret);
 		void set_draw_wrap_column (bool drawWrapColumn);
+       void set_draw_indent_guide(bool drawIndentGuide);
 		void set_drop_marker (ng::index_t dropMarkerIndex);
 		void set_viewport_size (CGSize size);
 
 		bool draw_wrap_column () const          { return _draw_wrap_column; }
+		bool draw_indent_guide() const			 { return _draw_indent_guide; }
 		bool scroll_past_end () const           { return _scroll_past_end; }
 
 		// ======================
@@ -176,6 +178,7 @@ namespace ng
 		bool               _wrapping;
 		bool               _scroll_past_end;
 		bool               _draw_wrap_column = false;
+       bool                _draw_indent_guide = false;
 		size_t             _wrap_column;
 		margin_t           _margin;
 		CGSize             _viewport_size = CGSizeZero;

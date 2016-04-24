@@ -252,6 +252,7 @@ typedef NS_ENUM(NSUInteger, OakFlagsState) {
 	buffer_refresh_callback_t* callback;
 
 	int32_t wrapColumn;
+	int32_t showIndentGuide;
 	std::string invisiblesMap;
 
 	BOOL hideCaret;
@@ -691,10 +692,15 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 		editor = ng::editor_for_document(document);
 		wrapColumn = settings.get(kSettingsWrapColumnKey, wrapColumn);
+       showIndentGuide = settings.get(kSettingsShowIndentGuideKey, true);
 		invisiblesMap = settings.get(kSettingsInvisiblesMapKey, "");
 		layout = std::make_shared<ng::layout_t>(document->buffer(), theme, settings.get(kSettingsSoftWrapKey, false), self.scrollPastEnd, wrapColumn, document->folded());
 		if(settings.get(kSettingsShowWrapColumnKey, false))
 			layout->set_draw_wrap_column(true);
+       
+       if (settings.get(kSettingsShowIndentGuideKey, false)) {
+           layout->set_draw_indent_guide(true);
+       }
 
 		BOOL hasFocus = (self.keyState & (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask)) == (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask);
 		layout->set_is_key(hasFocus);
@@ -2700,6 +2706,8 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		[aMenuItem setTitle:self.scrollPastEnd ? @"Disallow Scroll Past End" : @"Allow Scroll Past End"];
 	else if([aMenuItem action] == @selector(toggleShowWrapColumn:))
 		[aMenuItem setTitle:(layout && layout->draw_wrap_column()) ? @"Hide Wrap Column" : @"Show Wrap Column"];
+	else if ([aMenuItem action] == @selector(toggleShowIndentGuide:))
+		[aMenuItem setTitle:(layout && layout->draw_indent_guide()) ? @"Hide Indent Guide" : @"Show Indent Guide"];
 	else if([aMenuItem action] == @selector(toggleContinuousSpellChecking:))
 		[aMenuItem setState:document->buffer().live_spelling() ? NSOnState : NSOffState];
 	else if([aMenuItem action] == @selector(takeSpellingLanguageFrom:))
@@ -2853,6 +2861,17 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	}
 }
 
+// TODO get indent guides working
+- (void)setIndentGuide:(BOOL)flag
+{
+    if (showIndentGuide == flag) {
+        return;
+    }
+    showIndentGuide = flag;
+    settings_t::set(kSettingsShowIndentGuideKey, (bool)flag, document->file_type());
+    [self setNeedsDisplay: YES];
+}
+
 - (void)setShowInvisibles:(BOOL)flag
 {
 	if(_showInvisibles == flag)
@@ -2975,6 +2994,17 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		bool flag = !layout->draw_wrap_column();
 		layout->set_draw_wrap_column(flag);
 		settings_t::set(kSettingsShowWrapColumnKey, flag);
+	}
+}
+
+-(IBAction)toggleShowIndentGuide:(id)sender
+{
+	if (layout)
+	{
+		AUTO_REFRESH;
+		bool flag = !layout->draw_indent_guide();
+		layout->set_draw_indent_guide(flag);
+		settings_t::set(kSettingsShowIndentGuideKey, flag);
 	}
 }
 

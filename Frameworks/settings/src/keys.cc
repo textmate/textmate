@@ -15,6 +15,7 @@ std::string const kSettingsFontSizeKey                    = "fontSize";
 std::string const kSettingsSoftWrapKey                    = "softWrap";
 std::string const kSettingsWrapColumnKey                  = "wrapColumn";
 std::string const kSettingsShowWrapColumnKey              = "showWrapColumn";
+std::string const kSettingsShowIndentGuideKey             = "showIndentGuide";
 std::string const kSettingsShowInvisiblesKey              = "showInvisibles";
 std::string const kSettingsInvisiblesMapKey               = "invisiblesMap";
 
