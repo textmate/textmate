@@ -609,6 +609,12 @@ CA
                                     <action selector="toggleShowWrapColumn:" target="-1" id="780"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="Show Indent Guides" id="Q2r-JB-8MH">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="toggleShowIndentGuides:" target="-1" id="cTw-JA-xlP"/>
+                                </connections>
+                            </menuItem>
                             <menuItem title="Wrap Column" id="501">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Wrap Column" id="502">

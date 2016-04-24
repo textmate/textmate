@@ -696,6 +696,9 @@ static std::string shell_quote (std::vector<std::string> paths)
 		if(settings.get(kSettingsShowWrapColumnKey, false))
 			layout->set_draw_wrap_column(true);
 
+		if(settings.get(kSettingsShowIndentGuidesKey, false))
+			layout->set_draw_indent_guides(true);
+
 		BOOL hasFocus = (self.keyState & (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask)) == (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask);
 		layout->set_is_key(hasFocus);
 
@@ -2700,6 +2703,8 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		[aMenuItem setTitle:self.scrollPastEnd ? @"Disallow Scroll Past End" : @"Allow Scroll Past End"];
 	else if([aMenuItem action] == @selector(toggleShowWrapColumn:))
 		[aMenuItem setTitle:(layout && layout->draw_wrap_column()) ? @"Hide Wrap Column" : @"Show Wrap Column"];
+	else if([aMenuItem action] == @selector(toggleShowIndentGuides:))
+		[aMenuItem setTitle:(layout && layout->draw_indent_guides()) ? @"Hide Indent Guides" : @"Show Indent Guides"];
 	else if([aMenuItem action] == @selector(toggleContinuousSpellChecking:))
 		[aMenuItem setState:document->buffer().live_spelling() ? NSOnState : NSOffState];
 	else if([aMenuItem action] == @selector(takeSpellingLanguageFrom:))
@@ -2975,6 +2980,17 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		bool flag = !layout->draw_wrap_column();
 		layout->set_draw_wrap_column(flag);
 		settings_t::set(kSettingsShowWrapColumnKey, flag);
+	}
+}
+
+-(IBAction)toggleShowIndentGuides:(id)sender
+{
+	if(layout)
+	{
+		AUTO_REFRESH;
+		bool flag = !layout->draw_indent_guides();
+		layout->set_draw_indent_guides(flag);
+		settings_t::set(kSettingsShowIndentGuidesKey, flag);
 	}
 }
 
