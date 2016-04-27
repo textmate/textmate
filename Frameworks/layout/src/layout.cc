@@ -159,6 +159,13 @@ namespace ng
 		_draw_wrap_column = drawWrapColumn;
 		_dirty_rects.push_back(OakRectMake(0, 0, width(), height()));
 	}
+    
+//    draw indent guides according to tab widths on/off
+    void layout_t::set_draw_indent_guide(bool drawIndentGuide)
+    {
+       _draw_indent_guide = drawIndentGuide;
+       _dirty_rects.push_back(OakRectMake(0, 0, width(), height()));
+    }
 
 	void layout_t::set_drop_marker (ng::index_t dropMarkerIndex)
 	{
@@ -758,6 +765,7 @@ namespace ng
 			CGColorRef marked_text_border     = nil;
 			CGColorRef margin_indicator       = nil;
 			CGColorRef drop_marker            = nil;
+			CGColorRef indent_guide				 = nil;
 		};
 
 		base_colors_t const& get_base_colors (bool darkTheme)
@@ -771,12 +779,16 @@ namespace ng
 				dark.marked_text_border       = CGColorRetain(CGColorGetConstantColor(kCGColorWhite));
 				dark.margin_indicator         = CGColorCreateGenericGray(0.50, 0.50);
 				dark.drop_marker              = CGColorCreateGenericGray(0.50, 0.50);
+//                works for most darks, including very black backgrounds
+                dark.indent_guide             = CGColorCreateGenericGray(1.0, 0.06);
 
 				bright.marked_text_foreground = CGColorRetain(CGColorGetConstantColor(kCGColorBlack));
 				bright.marked_text_background = CGColorRetain(CGColorGetConstantColor(kCGColorWhite));
 				bright.marked_text_border     = CGColorRetain(CGColorGetConstantColor(kCGColorBlack));
 				bright.margin_indicator       = CGColorCreateGenericGray(0.25, 0.50);
 				bright.drop_marker            = CGColorCreateGenericGray(0.25, 0.50);
+//                works for most light schemes, including very white backgrounds
+                bright.indent_guide				= CGColorCreateGenericGray(0.0, 0.04);
 			});
 
 			return darkTheme ? dark : bright;
@@ -806,10 +818,19 @@ namespace ng
 			foreach(row, firstY, _rows.lower_bound(yMax, &row_y_comp))
 				row->value.draw_background(_theme, *_metrics, context, isFlipped, visibleRect, background, _buffer, row->offset._length, CGPointMake(_margin.left, _margin.top + row->offset._height));
 		}
-
+	
 		base_colors_t const& baseColors = get_base_colors(_theme->is_dark());
 		if(_draw_wrap_column)
 			render::fill_rect(context, baseColors.margin_indicator, OakRectMake(_margin.left + _metrics->column_width() * effective_wrap_column(), CGRectGetMinY(visibleRect), 1, CGRectGetHeight(visibleRect)));
+
+       //       draw indent guides
+       if (_draw_indent_guide) {
+           size_t x = _margin.left + _metrics->column_width() * _tab_size;
+           for (size_t i = 0; i < (_margin.left + _metrics->column_width() * effective_wrap_column()); i += _tab_size) {
+               render::fill_rect(context, baseColors.indent_guide, OakRectMake(x, CGRectGetMinY(visibleRect), 1, CGRectGetHeight(visibleRect)));
+               x = _margin.left + _metrics->column_width() * i;
+           }
+       }
 
 		for(auto const& range : selection)
 		{
