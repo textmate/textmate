@@ -1002,7 +1002,6 @@ private:
 {
 	document::document_ptr document;
 	NSString* fontName;
-	CGFloat fontSize;
 
 	std::shared_ptr<ng::layout_t> layout;
 	std::vector<CGRect> pageRects;
@@ -1013,16 +1012,16 @@ private:
 @property (nonatomic) CGFloat pageHeight;
 @property (nonatomic) CGFloat fontScale;
 @property (nonatomic) NSString* themeUUID;
+@property (nonatomic) CGFloat fontSize;
 @end
 
 @implementation OakPrintDocumentView
-- (id)initWithDocument:(document::document_ptr const&)aDocument fontName:(NSString*)aFontName fontSize:(CGFloat)aFontSize
+- (id)initWithDocument:(document::document_ptr const&)aDocument fontName:(NSString*)aFontName
 {
 	if(self = [self initWithFrame:NSZeroRect])
 	{
 		document = aDocument;
 		fontName = aFontName;
-		fontSize = aFontSize;
 	}
 	return self;
 }
@@ -1050,6 +1049,7 @@ private:
 	self.pageWidth  = floor(info.paperSize.width - info.leftMargin - info.rightMargin);
 	self.pageHeight = floor(info.paperSize.height - info.topMargin - info.bottomMargin);
 	self.fontScale  = [[[info dictionary] objectForKey:NSPrintScalingFactor] floatValue];
+	self.fontSize   = [[[info dictionary] objectForKey:@"OakPrintFontSize"] floatValue];
 	self.themeUUID  = [[info dictionary] objectForKey:@"OakPrintThemeUUID"];
 
 	[self updateLayout];
@@ -1082,7 +1082,7 @@ private:
 	pageRects.clear();
 
 	theme_ptr theme = parse_theme(bundles::lookup(to_s(self.themeUUID)));
-	theme = theme->copy_with_font_name_and_size(to_s(fontName), fontSize * self.fontScale);
+	theme = theme->copy_with_font_name_and_size(to_s(fontName), _fontSize * self.fontScale);
 	layout = std::make_shared<ng::layout_t>(document->buffer(), theme, /* softWrap: */ true);
 	layout->set_viewport_size(CGSizeMake(self.pageWidth, self.pageHeight));
 	layout->update_metrics(CGRectMake(0, 0, CGFLOAT_MAX, CGFLOAT_MAX));
@@ -1109,6 +1109,7 @@ private:
 - (void)setPageWidth:(CGFloat)newPageWidth    { if(_pageWidth  != newPageWidth)  { _needsLayout = YES; _pageWidth  = newPageWidth;  } }
 - (void)setPageHeight:(CGFloat)newPageHeight  { if(_pageHeight != newPageHeight) { _needsLayout = YES; _pageHeight = newPageHeight; } }
 - (void)setFontScale:(CGFloat)newFontScale    { if(_fontScale  != newFontScale)  { _needsLayout = YES; _fontScale  = newFontScale;  } }
+- (void)setFontSize:(CGFloat)newFontSize      { if(_fontSize   != newFontSize)   { _needsLayout = YES; _fontSize   = newFontSize;   } }
 - (void)setThemeUUID:(NSString*)newThemeUUID  { if(![_themeUUID isEqualToString:newThemeUUID]) { _needsLayout = YES; _themeUUID  = newThemeUUID; } }
 @end
 
@@ -1130,9 +1131,11 @@ private:
 		NSView* contentView = [[NSView alloc] initWithFrame:NSZeroRect];
 		[contentView setTranslatesAutoresizingMaskIntoConstraints:NO];
 
-		NSTextField* themesLabel = OakCreateLabel(@"Theme:");
-		NSPopUpButton* themes    = OakCreatePopUpButton();
-		NSButton* printHeaders   = OakCreateCheckBox(@"Print header and footer");
+		NSTextField* themesLabel    = OakCreateLabel(@"Theme:");
+		NSPopUpButton* themes       = OakCreatePopUpButton();
+		NSTextField* fontSizesLabel = OakCreateLabel(@"Font Size:");
+		NSPopUpButton* fontSizes    = OakCreatePopUpButton();
+		NSButton* printHeaders      = OakCreateCheckBox(@"Print header and footer");
 
 		NSMenu* themesMenu = themes.menu;
 		[themesMenu removeAllItems];
@@ -1150,21 +1153,31 @@ private:
 		if(ordered.empty())
 			[themesMenu addItemWithTitle:@"No Themes Loaded" action:@selector(nop:) keyEquivalent:@""];
 
+		NSMenu* fontSizesMenu = fontSizes.menu;
+		[fontSizesMenu removeAllItems];
+		for(NSInteger size = 4; size < 23; ++size)
+			[fontSizesMenu addItemWithTitle:@(size).stringValue action:NULL keyEquivalent:@""];
+
 		[themes bind:NSSelectedIndexBinding toObject:self withKeyPath:@"themeIndex" options:nil];
+		[fontSizes bind:NSSelectedValueBinding toObject:self withKeyPath:@"printFontSize" options:nil];
 		[printHeaders bind:NSValueBinding toObject:self withKeyPath:@"printHeaderAndFooter" options:nil];
 
 		NSDictionary* views = @{
-			@"themesLabel"  : themesLabel,
-			@"themes"       : themes,
-			@"printHeaders" : printHeaders
+			@"themesLabel"    : themesLabel,
+			@"themes"         : themes,
+			@"fontSizesLabel" : fontSizesLabel,
+			@"fontSizes"      : fontSizes,
+			@"printHeaders"   : printHeaders
 		};
 
 		OakAddAutoLayoutViewsToSuperview([views allValues], contentView);
 
 		NSMutableArray* constraints = [NSMutableArray array];
-		CONSTRAINT(@"H:|-[themesLabel]-[themes]-|",  NSLayoutFormatAlignAllBaseline);
-		CONSTRAINT(@"H:[printHeaders]-|",            0);
-		CONSTRAINT(@"V:|-[themes]-[printHeaders]-|", NSLayoutFormatAlignAllLeft);
+		CONSTRAINT(@"H:|-(>=4)-[themesLabel]-[themes]-(>=4)-|",        NSLayoutFormatAlignAllBaseline);
+		CONSTRAINT(@"H:|-(>=4)-[fontSizesLabel]-[fontSizes]-(>=4)-|",  NSLayoutFormatAlignAllBaseline);
+		CONSTRAINT(@"H:[printHeaders]-(>=4)-|",                        0);
+		CONSTRAINT(@"V:|-[themes]-[fontSizes]",                        NSLayoutFormatAlignAllLeft|NSLayoutFormatAlignAllRight);
+		CONSTRAINT(@"V:[fontSizes]-[printHeaders]-|",                  NSLayoutFormatAlignAllLeft);
 		[contentView addConstraints:constraints];
 
 		contentView.frame = (NSRect){ NSZeroPoint, [contentView fittingSize] };
@@ -1177,6 +1190,7 @@ private:
 {
 	[super setRepresentedObject:printInfo];
 	[self setThemeIndex:[self themeIndex]];
+	[self setPrintFontSize:[self printFontSize]];
 	[self setPrintHeaderAndFooter:[self printHeaderAndFooter]];
 }
 
@@ -1216,9 +1230,21 @@ private:
 	return [[[[self representedObject] dictionary] objectForKey:NSPrintHeaderAndFooter] boolValue];
 }
 
+- (void)setPrintFontSize:(NSNumber*)size
+{
+	NSPrintInfo* info = [self representedObject];
+	[[info dictionary] setObject:size forKey:@"OakPrintFontSize"];
+	[[NSUserDefaults standardUserDefaults] setObject:size forKey:@"OakPrintFontSize"];
+}
+
+- (NSNumber*)printFontSize
+{
+	return [[[self representedObject] dictionary] objectForKey:@"OakPrintFontSize"];
+}
+
 - (NSSet*)keyPathsForValuesAffectingPreview
 {
-	return [NSSet setWithObjects:@"themeIndex", @"printHeaderAndFooter", nil];
+	return [NSSet setWithObjects:@"themeIndex", @"printFontSize", @"printHeaderAndFooter", nil];
 }
 
 - (NSArray*)localizedSummaryItems
@@ -1237,16 +1263,18 @@ private:
 {
 	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
 		@"OakPrintThemeUUID"       : @"71D40D9D-AE48-11D9-920A-000D93589AF6",
+		@"OakPrintFontSize"        : @(11),
 		@"OakPrintHeaderAndFooter" : @NO,
 	}];
 }
 
 - (void)printDocument:(id)sender
 {
-	NSPrintOperation* printer = [NSPrintOperation printOperationWithView:[[OakPrintDocumentView alloc] initWithDocument:document fontName:textView.font.fontName fontSize:11]];
+	NSPrintOperation* printer = [NSPrintOperation printOperationWithView:[[OakPrintDocumentView alloc] initWithDocument:document fontName:textView.font.fontName]];
 
 	NSMutableDictionary* info = [[printer printInfo] dictionary];
 	info[@"OakPrintThemeUUID"]   = [[NSUserDefaults standardUserDefaults] objectForKey:@"OakPrintThemeUUID"];
+	info[@"OakPrintFontSize"]    = [[NSUserDefaults standardUserDefaults] objectForKey:@"OakPrintFontSize"];
 	info[NSPrintHeaderAndFooter] = [[NSUserDefaults standardUserDefaults] objectForKey:@"OakPrintHeaderAndFooter"];
 
 	[[printer printInfo] setVerticallyCentered:NO];
