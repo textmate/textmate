@@ -1132,7 +1132,7 @@ private:
 
 		NSTextField* themesLabel 		= OakCreateLabel(@"Theme:");
 		NSPopUpButton* themes    		= OakCreatePopUpButton();
-		NSTextField* fontSizesLabel 	= OakCreateLabel(@"FontSize:");
+		NSTextField* fontSizesLabel 	= OakCreateLabel(@"Font size:");
 		NSPopUpButton* fontSizes 		= OakCreatePopUpButton();
 		NSButton* printHeaders   		= OakCreateCheckBox(@"Print header and footer");
 
