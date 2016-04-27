@@ -1128,6 +1128,7 @@ private:
 	if((self = [super init]))
 	{
 		NSView* contentView = [[NSView alloc] initWithFrame:NSZeroRect];
+		[contentView setTranslatesAutoresizingMaskIntoConstraints:NO];
 
 		NSTextField* themesLabel = OakCreateLabel(@"Theme:");
 		NSPopUpButton* themes    = OakCreatePopUpButton();
