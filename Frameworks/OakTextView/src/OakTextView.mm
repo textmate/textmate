@@ -2685,38 +2685,39 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	objc_setAssociatedObject(aMenuItem, kOakMenuItemTitle, title, OBJC_ASSOCIATION_RETAIN);
 	[aMenuItem updateTitle:[NSString stringWithCxxString:format_string::replace(to_s(title), "\\b(\\w+) / (Selection)\\b", [self hasSelection] ? "$2" : "$1")]];
 
-	if([aMenuItem action] == @selector(cut:))
+	SEL action = [aMenuItem action];
+	if(action == @selector(cut:))
 		[aMenuItem setTitle:@"Cut"];
-	else if([aMenuItem action] == @selector(copy:))
+	else if(action == @selector(copy:))
 		[aMenuItem setTitle:@"Copy"];
 
 	static auto const RequiresSelection = new std::set<SEL>{ @selector(cut:), @selector(copy:), @selector(delete:), @selector(copySelectionToFindPboard:), @selector(copySelectionToReplacePboard:), @selector(centerSelectionInVisibleArea:) };
-	if(RequiresSelection->find([aMenuItem action]) != RequiresSelection->end())
+	if(RequiresSelection->find(action) != RequiresSelection->end())
 		return [self hasSelection];
-	else if([aMenuItem action] == @selector(toggleMacroRecording:))
+	else if(action == @selector(toggleMacroRecording:))
 		[aMenuItem setTitle:self.isMacroRecording ? @"Stop Recording" : @"Start Recording"];
-	else if([aMenuItem action] == @selector(toggleShowInvisibles:))
+	else if(action == @selector(toggleShowInvisibles:))
 		[aMenuItem setTitle:self.showInvisibles ? @"Hide Invisible Characters" : @"Show Invisible Characters"];
-	else if([aMenuItem action] == @selector(toggleSoftWrap:))
+	else if(action == @selector(toggleSoftWrap:))
 		[aMenuItem setTitle:self.softWrap ? @"Disable Soft Wrap" : @"Enable Soft Wrap"];
-	else if([aMenuItem action] == @selector(toggleScrollPastEnd:))
+	else if(action == @selector(toggleScrollPastEnd:))
 		[aMenuItem setTitle:self.scrollPastEnd ? @"Disallow Scroll Past End" : @"Allow Scroll Past End"];
-	else if([aMenuItem action] == @selector(toggleShowWrapColumn:))
+	else if(action == @selector(toggleShowWrapColumn:))
 		[aMenuItem setTitle:(layout && layout->draw_wrap_column()) ? @"Hide Wrap Column" : @"Show Wrap Column"];
-	else if([aMenuItem action] == @selector(toggleShowIndentGuides:))
+	else if(action == @selector(toggleShowIndentGuides:))
 		[aMenuItem setTitle:(layout && layout->draw_indent_guides()) ? @"Hide Indent Guides" : @"Show Indent Guides"];
-	else if([aMenuItem action] == @selector(toggleContinuousSpellChecking:))
+	else if(action == @selector(toggleContinuousSpellChecking:))
 		[aMenuItem setState:document->buffer().live_spelling() ? NSOnState : NSOffState];
-	else if([aMenuItem action] == @selector(takeSpellingLanguageFrom:))
+	else if(action == @selector(takeSpellingLanguageFrom:))
 		[aMenuItem setState:[[NSString stringWithCxxString:document->buffer().spelling_language()] isEqualToString:[aMenuItem representedObject]] ? NSOnState : NSOffState];
-	else if([aMenuItem action] == @selector(takeWrapColumnFrom:))
+	else if(action == @selector(takeWrapColumnFrom:))
 		[aMenuItem setState:wrapColumn == [aMenuItem tag] ? NSOnState : NSOffState];
-	else if([aMenuItem action] == @selector(undo:))
+	else if(action == @selector(undo:))
 	{
 		[aMenuItem setTitle:@"Undo"];
 		return document->undo_manager().can_undo();
 	}
-	else if([aMenuItem action] == @selector(redo:))
+	else if(action == @selector(redo:))
 	{
 		[aMenuItem setTitle:@"Redo"];
 		return document->undo_manager().can_redo();

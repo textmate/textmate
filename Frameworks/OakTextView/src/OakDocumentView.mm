@@ -445,13 +445,14 @@ private:
 
 - (BOOL)validateMenuItem:(NSMenuItem*)aMenuItem
 {
-	if([aMenuItem action] == @selector(toggleLineNumbers:))
+	SEL action = [aMenuItem action];
+	if(action == @selector(toggleLineNumbers:))
 		[aMenuItem setTitle:[gutterView visibilityForColumnWithIdentifier:GVLineNumbersColumnIdentifier] ? @"Hide Line Numbers" : @"Show Line Numbers"];
-	else if([aMenuItem action] == @selector(takeThemeUUIDFrom:))
+	else if(action == @selector(takeThemeUUIDFrom:))
 		[aMenuItem setState:[textView theme]->uuid() == [[aMenuItem representedObject] UTF8String] ? NSOnState : NSOffState];
-	else if([aMenuItem action] == @selector(takeTabSizeFrom:))
+	else if(action == @selector(takeTabSizeFrom:))
 		[aMenuItem setState:textView.tabSize == [aMenuItem tag] ? NSOnState : NSOffState];
-	else if([aMenuItem action] == @selector(showTabSizeSelectorPanel:))
+	else if(action == @selector(showTabSizeSelectorPanel:))
 	{
 		static NSInteger const predefined[] = { 2, 3, 4, 8 };
 		if(oak::contains(std::begin(predefined), std::end(predefined), textView.tabSize))
@@ -465,11 +466,11 @@ private:
 			[aMenuItem setState:NSOnState];
 		}
 	}
-	else if([aMenuItem action] == @selector(setIndentWithTabs:))
+	else if(action == @selector(setIndentWithTabs:))
 		[aMenuItem setState:textView.softTabs ? NSOffState : NSOnState];
-	else if([aMenuItem action] == @selector(setIndentWithSpaces:))
+	else if(action == @selector(setIndentWithSpaces:))
 		[aMenuItem setState:textView.softTabs ? NSOnState : NSOffState];
-	else if([aMenuItem action] == @selector(takeGrammarUUIDFrom:))
+	else if(action == @selector(takeGrammarUUIDFrom:))
 	{
 		NSString* uuidString = [aMenuItem representedObject];
 		if(bundles::item_ptr bundleItem = bundles::lookup(to_s(uuidString)))
@@ -478,7 +479,7 @@ private:
 			[aMenuItem setState:selectedGrammar ? NSOnState : NSOffState];
 		}
 	}
-	else if([aMenuItem action] == @selector(toggleCurrentBookmark:))
+	else if(action == @selector(toggleCurrentBookmark:))
 	{
 		text::selection_t sel(to_s(textView.selectionString));
 		size_t lineNumber = sel.last().max().line;
@@ -486,12 +487,12 @@ private:
 		ng::buffer_t const& buf = document->buffer();
 		[aMenuItem setTitle:buf.get_marks(buf.begin(lineNumber), buf.eol(lineNumber), document::kBookmarkIdentifier).empty() ? @"Set Bookmark" : @"Remove Bookmark"];
 	}
-	else if([aMenuItem action] == @selector(goToNextBookmark:) || [aMenuItem action] == @selector(goToPreviousBookmark:))
+	else if(action == @selector(goToNextBookmark:) || action == @selector(goToPreviousBookmark:))
 	{
 		auto const& buf = document->buffer();
 		return buf.get_marks(0, buf.size(), document::kBookmarkIdentifier).empty() ? NO : YES;
 	}
-	else if([aMenuItem action] == @selector(jumpToNextMark:) || [aMenuItem action] == @selector(jumpToPreviousMark:))
+	else if(action == @selector(jumpToNextMark:) || action == @selector(jumpToPreviousMark:))
 	{
 		auto const& buf = document->buffer();
 		return buf.get_marks(0, buf.size()).empty() ? NO : YES;

@@ -1237,28 +1237,29 @@ static bool is_binary (std::string const& path)
 	for(FSItem* item in self.selectedItems)
 		selectedFiles += [item.url isFileURL] && lstat([[item.url path] fileSystemRepresentation], &buf) == 0 ? 1 : 0;
 
-	if([item action] == @selector(goToParentFolder:))
+	SEL action = [item action];
+	if(action == @selector(goToParentFolder:))
 		res = ParentForURL(_url) != nil;
-	else if([item action] == @selector(goBack:))
+	else if(action == @selector(goBack:))
 		res = self.canGoBack;
-	else if([item action] == @selector(goForward:))
+	else if(action == @selector(goForward:))
 		res = self.canGoForward;
-	else if([item action] == @selector(newFolder:))
+	else if(action == @selector(newFolder:))
 		res = [self directoryForNewItems] != nil;
-	else if(selectedFiles == 0 && requireSelection.find([item action]) != requireSelection.end())
+	else if(selectedFiles == 0 && requireSelection.find(action) != requireSelection.end())
 		res = NO;
-	else if([item action] == @selector(paste:) || [item action] == @selector(pasteNext:))
+	else if(action == @selector(paste:) || action == @selector(pasteNext:))
 		res = self.canPaste;
-	else if([item action] == @selector(editSelectedEntries:))
+	else if(action == @selector(editSelectedEntries:))
 		res = selectedFiles == 1;
-	else if([item action] == @selector(toggleShowInvisibles:))
+	else if(action == @selector(toggleShowInvisibles:))
 		[item setTitle:self.showExcludedItems ? @"Hide Invisible Files" : @"Show Invisible Files"];
-	else if([item action] == @selector(undo:))
+	else if(action == @selector(undo:))
 	{
 		[item setTitle:[self.activeUndoManager undoMenuItemTitle]];
 		res = [self.activeUndoManager canUndo];
 	}
-	else if([item action] == @selector(redo:))
+	else if(action == @selector(redo:))
 	{
 		[item setTitle:[self.activeUndoManager redoMenuItemTitle]];
 		res = [self.activeUndoManager canRedo];
@@ -1278,7 +1279,7 @@ static bool is_binary (std::string const& path)
 
 	for(auto info : menuTitles)
 	{
-		if(info.action == [item action])
+		if(info.action == action)
 		{
 			NSString* items = @"";
 			if(res)
