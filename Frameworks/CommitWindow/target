@@ -1,4 +1,4 @@
 SOURCES      = src/*.mm
 EXPORT       = src/CommitWindow.h
-LINK        += OakAppKit OakFoundation OakTextView bundles document io ns text
+LINK        += OakAppKit OakFoundation OakTextView bundles document io ns plist text
 FRAMEWORKS   = Cocoa

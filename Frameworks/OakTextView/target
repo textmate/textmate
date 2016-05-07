@@ -1,5 +1,5 @@
 SOURCES      = src/*.{cc,mm}
 EXPORT       = src/OakDocumentView.h src/GutterView.h src/OakTextView.h
 CP_Resources = resources/*
-LINK        += layout text bundles editor document theme ns plist OakAppKit OakFoundation OakSystem regexp scope settings BundleMenu OakFilterList BundlesManager
+LINK        += BundleMenu BundlesManager OakAppKit OakFilterList OakFoundation OakSystem Preferences buffer bundles cf command crash document editor file io layout ns plist text theme
 FRAMEWORKS   = Cocoa

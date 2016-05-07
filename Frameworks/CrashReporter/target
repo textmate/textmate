@@ -1,5 +1,5 @@
 SOURCES       = src/*.{mm,cc}
 EXPORT        = src/CrashReporter.h
-LINK         += ns io plist network OakFoundation
+LINK         += OakFoundation io network ns plist text
 FRAMEWORKS    = Foundation AddressBook
 LIBS         += z

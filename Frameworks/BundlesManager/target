@@ -1,4 +1,4 @@
 SOURCES      = src/*.{cc,mm}
-LINK        += io ns text plist regexp bundles updater version OakFoundation
+LINK        += OakFoundation bundles io ns regexp text updater version
 EXPORT       = src/BundlesManager.h
 FRAMEWORKS   = Foundation

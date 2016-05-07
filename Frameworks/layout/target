@@ -1,5 +1,5 @@
 SOURCES      = src/*.cc
 EXPORT       = src/{layout,paragraph,ct}.h
-LINK        += text buffer selection bundles theme cf ns
+LINK        += OakFoundation buffer bundles cf crash io ns plist regexp selection text theme
 TESTS        = tests/t_*.cc
 TEST_SOURCES = tests/gui_*.mm

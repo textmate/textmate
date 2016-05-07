@@ -1,2 +1,2 @@
 SOURCES    = src/*.cc
-LINK      += bundles parse
+LINK      += parse

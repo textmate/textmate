@@ -1,5 +1,5 @@
 SOURCES       = src/**/*.{cc,mm}
 EXPORT        = src/OakFileBrowser.h
 CP_Resources  = resources/* gfx/**/*.png
-LINK         += text cf document editor io regexp settings ns plist OakAppKit OakFoundation scm OakSystem Preferences XcodeEditor
+LINK         += OakAppKit OakFoundation OakSystem Preferences XcodeEditor bundles cf document io ns plist regexp scm settings text
 FRAMEWORKS    = Cocoa Carbon SystemConfiguration

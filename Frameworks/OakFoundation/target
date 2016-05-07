@@ -1,4 +1,4 @@
 SOURCES      = src/*.mm
-LINK        += text io regexp
+LINK        += io text
 EXPORT       = src/*.h
 FRAMEWORKS   = Cocoa

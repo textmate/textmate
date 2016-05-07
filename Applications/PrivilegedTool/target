@@ -1,2 +1,2 @@
 SOURCES      = src/*.cc
-LINK        += authorization
+LINK        += authorization io text

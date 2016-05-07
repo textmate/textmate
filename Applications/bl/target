@@ -1,2 +1,2 @@
 SOURCES      = src/*.cc
-LINK        += text io updater regexp
+LINK        += OakSystem io regexp text updater
