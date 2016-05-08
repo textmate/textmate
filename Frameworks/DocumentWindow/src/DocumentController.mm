@@ -2671,7 +2671,15 @@ static NSUInteger DisableSessionSavingCount = 0;
 		static void bring_to_front (DocumentController* aController)
 		{
 			[aController showWindow:nil];
-			[NSApp activateIgnoringOtherApps:YES];
+			if(![NSApp isActive])
+			{
+				__weak __block id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:NSApplicationDidBecomeActiveNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
+					// If our window is not on the active desktop but another one is, the system gives focus to the wrong window.
+					[aController showWindow:nil];
+					[[NSNotificationCenter defaultCenter] removeObserver:observerId];
+				}];
+				[NSApp activateIgnoringOtherApps:YES];
+			}
 		}
 
 		static DocumentController* find_or_create_controller (std::vector<document::document_ptr> const& documents, oak::uuid_t const& projectUUID)
