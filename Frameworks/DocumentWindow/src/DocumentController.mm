@@ -2670,20 +2670,8 @@ static NSUInteger DisableSessionSavingCount = 0;
 	private:
 		static void bring_to_front (DocumentController* aController)
 		{
-			if([NSApp isHidden])
-			{
-				__weak __block id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:NSApplicationDidUnhideNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
-					[aController showWindow:nil];
-					[NSApp activateIgnoringOtherApps:YES];
-					[[NSNotificationCenter defaultCenter] removeObserver:observerId];
-				}];
-				[NSApp unhideWithoutActivation];
-			}
-			else
-			{
-				[aController showWindow:nil];
-				[NSApp activateIgnoringOtherApps:YES];
-			}
+			[aController showWindow:nil];
+			[NSApp activateIgnoringOtherApps:YES];
 		}
 
 		static DocumentController* find_or_create_controller (std::vector<document::document_ptr> const& documents, oak::uuid_t const& projectUUID)
