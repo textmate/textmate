@@ -2695,9 +2695,8 @@ static NSUInteger DisableSessionSavingCount = 0;
 				if(DocumentController* res = AllControllers()[[NSString stringWithCxxString:projectUUID]])
 					return res;
 
-				DocumentController* res = [DocumentController new];
-				res.identifier = [NSString stringWithCxxString:projectUUID];
-				return res;
+				if(projectUUID == "00000000-0000-0000-0000-000000000000")
+					return [DocumentController new];
 			}
 
 			// =========================================
