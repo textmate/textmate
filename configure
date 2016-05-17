@@ -59,12 +59,12 @@ test -L "${builddir}/include/sparsehash" || error "*** google sparsehash not ins
 
 if which -s brew && [[ -z "$libressl_prefix" && ! -d "${libressl_prefix}/include/openssl" ]]; then
 	libressl_prefix=$(brew --prefix libressl)
-        test -d "${libressl_prefix}/include/" || error "*** openssl headers not found."
+	test -d "${libressl_prefix}/include/" || error "*** openssl headers not found."
 fi
 
 if which -s port && [[ -z "$libressl_prefix" && ! -d "${libressl_prefix}/include/openssl" ]]; then
-        libressl_prefix=/opt/local/
-        test -d "${libressl_prefix}/include/openssl" || error "*** openssl headers not found."
+	libressl_prefix=/opt/local/
+	test -d "${libressl_prefix}/include/openssl" || error "*** openssl headers not found."
 fi
 
 # ===============================================
