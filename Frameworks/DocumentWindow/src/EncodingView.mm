@@ -217,7 +217,7 @@ static NSTextView* MyCreateTextView ()
 }
 @end
 
-@interface EncodingWindowController () <NSWindowDelegate>
+@interface EncodingWindowController () <NSWindowDelegate, NSTextViewDelegate>
 {
 	OBJC_WATCH_LEAKS(EncodingWindowController);
 	char const* first;
@@ -270,6 +270,7 @@ static NSTextView* MyCreateTextView ()
 		self.scrollView.documentView          = self.textView;
 
 		self.textView.editable          = NO;
+		self.textView.delegate          = self;
 		self.openButton.action          = @selector(performOpenDocument:);
 		self.cancelButton.action        = @selector(performCancelOperation:);
 		self.cancelButton.keyEquivalent = @"\e";
@@ -292,6 +293,14 @@ static NSTextView* MyCreateTextView ()
 		[self updateTextView];
 	}
 	return self;
+}
+
+- (BOOL)textView:(NSTextView*)aTextView doCommandBySelector:(SEL)aSelector
+{
+	BOOL res = aSelector == @selector(insertNewline:) && !aTextView.editable && self.window.defaultButtonCell;
+	if(res)
+		[self.window.defaultButtonCell performClick:self];
+	return res;
 }
 
 - (NSDictionary*)allViews
