@@ -1,5 +1,6 @@
 #include "scan_path.h"
 #include <text/utf8.h>
+#include <text/newlines.h>
 #include <io/entries.h>
 
 OAK_DEBUG_VAR(Find_Scan_Path);
@@ -115,16 +116,6 @@ namespace find
 		pthread_mutex_unlock(&_mutex);
 	}
 
-	static size_t linefeed_length (std::string const& str, size_t offset)
-	{
-		if(str[offset] == '\n')
-			return 1;
-		else if(str[offset] == '\r')
-			return offset+1 < str.size() && str[offset+1] == '\n' ? 2 : 1;
-		else
-			return 0;
-	}
-
 	void scan_path_t::scan_document (document::document_ptr const& document)
 	{
 		struct range_match_t
@@ -202,51 +193,43 @@ namespace find
 
 				std::vector<match_t> results;
 
-				size_t offset = 0, bol = 0, lfCount = 0;
+				std::string newlines = text::estimate_line_endings(std::begin(text), std::end(text));
+				newlines = newlines == kMIX ? kLF : newlines;
+
+				size_t bol = 0, nextLine = bol, lfCount = 0;
 				for(auto const& it : ranges)
 				{
-					while(offset + linefeed_length(text, offset) <= it.from)
+					while(true)
 					{
-						if(size_t len = linefeed_length(text, offset))
-						{
-							bol = (offset += len);
-							++lfCount;
-						}
-						else
-						{
-							++offset;
-						}
+						nextLine = text.find(newlines, bol);
+						if(nextLine == std::string::npos || it.from < nextLine + newlines.size())
+							break;
+						bol = nextLine + newlines.size();
+						++lfCount;
 					}
 
 					text::pos_t from(lfCount, it.from - bol);
 					size_t fromLine = bol;
 
-					while(offset + linefeed_length(text, offset) <= it.to)
+					while(true)
 					{
-						if(size_t len = linefeed_length(text, offset))
-						{
-							bol = (offset += len);
-							++lfCount;
-						}
-						else
-						{
-							++offset;
-						}
+						nextLine = text.find(newlines, bol);
+						if(nextLine == std::string::npos || it.to < nextLine + newlines.size())
+							break;
+						bol = nextLine + newlines.size();
+						++lfCount;
 					}
 
 					text::pos_t to(lfCount, it.to - bol);
 
-					size_t eol = it.to;
-					if(bol != eol)
-					{
-						while(eol < text.size() && linefeed_length(text, eol) == 0)
-							++eol;
-					}
+					size_t eol = bol == it.to ? bol : text.find(newlines, bol);
+					eol = eol != std::string::npos ? eol : text.size();
 
 					match_t res(document, crc32.checksum(), it.from, it.to, text::range_t(from, to), it.captures);
 					res.excerpt        = text.substr(fromLine, eol - fromLine);
 					res.excerpt_offset = fromLine;
 					res.line_number    = from.line;
+					res.newlines       = newlines;
 					results.push_back(res);
 				}
 
