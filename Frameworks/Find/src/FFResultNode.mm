@@ -32,10 +32,21 @@ static void append (ns::attr_string_t& dst, std::string const& src, size_t from,
 	size_t begin = from;
 	for(size_t i = from; i != to; ++i)
 	{
-		if(src[i] == '\t')
+		if(src[i] == '\t' || src[i] == '\r')
 		{
 			dst.add(src.substr(begin, i-begin));
-			dst.add("\u2003");
+			if(src[i] == '\t')
+			{
+				dst.add("\u2003");
+			}
+			else if(src[i] == '\r')
+			{
+				dst.add(ns::attr_string_t()
+					<< [NSFont controlContentFontOfSize:11]
+					<< [NSColor lightGrayColor]
+					<< "<CR>"
+				);
+			}
 			begin = i+1;
 		}
 	}
