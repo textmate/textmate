@@ -17,17 +17,40 @@ namespace text
 	template <typename _InputIter>
 	std::string estimate_line_endings (_InputIter const& first, _InputIter const& last)
 	{
-		size_t cr_count = std::count(first, last, '\r');
-		size_t lf_count = std::count(first, last, '\n');
+		size_t const kEnoughSamples = 50;
 
-		if(cr_count == 0)
-			return kLF;
-		else if(lf_count == 0)
-			return kCR;
-		else if(lf_count == cr_count)
+		size_t lf_count = 0, cr_count = 0, crlf_count = 0;
+		bool prevWasCR = false;
+
+		for(auto it = first; it != last; ++it)
+		{
+			if(*it == '\n')
+			{
+				if(prevWasCR)
+				{
+					if(++crlf_count == kEnoughSamples)
+						break;
+					prevWasCR = false;
+				}
+				else
+				{
+					if(++lf_count == kEnoughSamples)
+						break;
+				}
+			}
+			else
+			{
+				if(prevWasCR && (++cr_count == kEnoughSamples))
+					break;
+				prevWasCR = *it == '\r';
+			}
+		}
+
+		if(lf_count == 0 && cr_count == 0 && crlf_count > 0)
 			return kCRLF;
-		else
-			return kLF;
+		else if(lf_count == 0 && crlf_count == 0 && cr_count > 0)
+			return kCR;
+		return kLF;
 	}
 
 	template <typename _InputIter>
