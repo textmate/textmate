@@ -27,16 +27,19 @@ static NSAttributedString* PathComponentString (std::string const& path, std::st
 		<< (path::is_absolute(path) ? path::display_name(path) : path);
 }
 
-static std::string tabs_to_em_spaces (std::string const& str)
+static void append (ns::attr_string_t& dst, std::string const& src, size_t from, size_t to)
 {
-	std::string res;
-	for(char const& ch : str)
+	size_t begin = from;
+	for(size_t i = from; i != to; ++i)
 	{
-		if(ch == '\t')
-				res += "\u2003";
-		else	res += ch;
+		if(src[i] == '\t')
+		{
+			dst.add(src.substr(begin, i-begin));
+			dst.add("\u2003");
+			begin = i+1;
+		}
 	}
-	return res;
+	dst.add(src.substr(begin, to-begin));
 }
 
 static NSAttributedString* AttributedStringForMatch (std::string const& text, size_t from, size_t to, size_t n)
@@ -56,7 +59,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 
 		if(oak::cap(it, from, eol) == from)
 		{
-			str.add(tabs_to_em_spaces(text.substr(it, from-it)));
+			append(str, text, it, from);
 			it = from;
 			inMatch = true;
 		}
@@ -69,7 +72,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 
 		if(inMatch && oak::cap(it, to, eol) == to)
 		{
-			str.add(tabs_to_em_spaces(text.substr(it, to-it)));
+			append(str, text, it, to);
 			it = to;
 			inMatch = false;
 
@@ -77,7 +80,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 			str.add(ns::style::unbold);
 		}
 
-		str.add(tabs_to_em_spaces(text.substr(it, eol-it)));
+		append(str, text, it, eol);
 
 		if(eol != last)
 		{
