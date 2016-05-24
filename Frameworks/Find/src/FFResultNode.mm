@@ -53,7 +53,7 @@ static void append (ns::attr_string_t& dst, std::string const& src, size_t from,
 	dst.add(src.substr(begin, to-begin));
 }
 
-static NSAttributedString* AttributedStringForMatch (std::string const& text, size_t from, size_t to, size_t n)
+static NSAttributedString* AttributedStringForMatch (std::string const& text, size_t from, size_t to, size_t n, std::string const& newlines)
 {
 	ns::attr_string_t str;
 	str.add(ns::style::line_break(NSLineBreakByTruncatingTail));
@@ -66,7 +66,8 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 	size_t last = text.size();
 	for(size_t it = 0; it != last; )
 	{
-		size_t eol = std::find(text.begin() + it, text.end(), '\n') - text.begin();
+		size_t eol = text.find(newlines, it);
+		eol = eol != std::string::npos ? eol : last;
 
 		if(oak::cap(it, from, eol) == from)
 		{
@@ -103,7 +104,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 				str.add(ns::style::unbold);
 			}
 
-			if(++eol == to)
+			if((eol += newlines.size()) == to)
 				inMatch = false;
 
 			if(eol != last)
@@ -270,7 +271,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 			<< text::format("%zu-%zu: Range is not valid UTF-8, please contact: http://macromates.com/support", m.first, m.last);
 	}
 
-	_excerpt = AttributedStringForMatch(prefix + middle + suffix, prefix.size(), prefix.size() + middle.size(), m.line_number);
+	_excerpt = AttributedStringForMatch(prefix + middle + suffix, prefix.size(), prefix.size() + middle.size(), m.line_number, m.newlines);
 	_excerptReplaceString = replacementString;
 	return _excerpt;
 }

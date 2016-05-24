@@ -25,6 +25,7 @@ namespace find
 		std::string excerpt;
 		size_t excerpt_offset = 0;
 		size_t line_number = 0;
+		std::string newlines = "\n";
 	};
 
 	struct scan_path_t
