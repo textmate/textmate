@@ -36,12 +36,14 @@ namespace text
 		_InputIter out = first;
 		while(first != last)
 		{
-			bool isCR = *first == '\r';
-			if(out != first || isCR)
-				*out = isCR ? '\n' : *first;
-			if(++first != last && isCR && *first == '\n')
-				++first;
-			++out;
+			auto it = std::search(first, last, lineFeeds.begin(), lineFeeds.end());
+			out = std::copy(first, it, out);
+			first = it;
+			if(first != last)
+			{
+				*out++ = '\n';
+				std::advance(first, lineFeeds.size());
+			}
 		}
 		return out;
 	}
