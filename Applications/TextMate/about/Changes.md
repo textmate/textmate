@@ -2,11 +2,16 @@ Title: Release Notes
 
 # Changes
 
-## 2016-04-19 (v2.0-beta.9.1)
+## 2016-05-25 (v2.0-beta.9.2)
 
 * You can now double click parentheses, braces etc. to select the contents. *[Brian T. Kelley]*
+* Optionally draw a horizontal line for every tab stop (View → Show Indent Guides). *[Josh Bernitt]*
+* Font size can now be selected in the print dialog. *[Per Persson]*
+* It was previously possible to open a document in a new project by supplying a project UUID not in use, e.g.: `mate --project $(uuidgen) file.txt`. Now only a zero-UUID will trigger this behavior, e.g.: `mate --project $(uuidgen|tr -C $'\n-' 0) file.txt`.
+* Heuristic to detect line endings has been changed: If a file contains any LF character (not part of CRLF sequence) then the file is treated as LF delimited. This only affect files with mixed line terminators.
+* Searching files on disk (Find in Folder) and selecting results from files with mixed line terminators could in rare situations bring you to the wrong line in the document. This should now be fixed.
 * The Jump to Next/Previous Mark shortcuts have been changed to F3/⇧F3 so as to not conflict with some keyboard layouts.
-* See [all changes since v2.0-beta.9](https://github.com/textmate/textmate/compare/v2.0-beta.9...v2.0-beta.9.1)
+* See [all changes since v2.0-beta.9](https://github.com/textmate/textmate/compare/v2.0-beta.9...v2.0-beta.9.2)
 
 ## 2016-03-05 (v2.0-beta.9)
 
