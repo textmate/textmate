@@ -5,7 +5,7 @@ Title: Release Notes
 ## 2016-05-25 (v2.0-beta.9.2)
 
 * You can now double click parentheses, braces etc. to select the contents. *[Brian T. Kelley]*
-* Optionally draw a horizontal line for every tab stop (View → Show Indent Guides). *[Josh Bernitt]*
+* Optionally draw a vertical line for every tab stop (View → Show Indent Guides). *[Josh Bernitt]*
 * Font size can now be selected in the print dialog. *[Per Persson]*
 * It was previously possible to open a document in a new project by supplying a project UUID not in use, e.g.: `mate --project $(uuidgen) file.txt`. Now only a zero-UUID will trigger this behavior, e.g.: `mate --project $(uuidgen|tr -C $'\n-' 0) file.txt`.
 * Heuristic to detect line terminators has been changed: If a file contains any LF character (not part of a CRLF sequence) then the file is treated as LF delimited. This only affect files with mixed line terminators.
