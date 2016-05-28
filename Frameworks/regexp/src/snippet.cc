@@ -193,7 +193,7 @@ namespace snippet
 			if(dirty.find(node) != dirty.end())
 			{
 				foreach(mirror, mirrors.lower_bound(node), mirrors.upper_bound(node))
-					updated.push_back(std::make_pair(mirror->second->range, std::string()));
+					updated.emplace_back(mirror->second->range, std::string());
 			}
 		}
 
@@ -312,8 +312,8 @@ namespace snippet
 			for(auto const& it : s.replace(local, replacement))
 			{
 				if(it.first.from < local.from)
-						prepend.push_back(std::make_pair(it.first + offsets.back(), it.second));
-				else	res.push_back(std::make_pair(it.first + offsets.back(), it.second));
+						prepend.emplace_back(it.first + offsets.back(), it.second);
+				else	res.emplace_back(it.first + offsets.back(), it.second);
 			}
 			res.insert(res.begin(), prepend.begin(), prepend.end());
 

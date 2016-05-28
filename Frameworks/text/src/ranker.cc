@@ -162,7 +162,7 @@ static double calculate_rank (std::string const& lhs, std::string const& rhs, st
 		} while(len < bestJLength && !foundCapital);
 
 		if(out)
-			out->push_back(std::make_pair(bestJIndex, bestJIndex + len));
+			out->emplace_back(bestJIndex, bestJIndex + len);
 
 		++substrings;
 	}
@@ -213,7 +213,7 @@ namespace oak
 		else if(filter == candidate)
 		{
 			if(out)
-				out->push_back(std::make_pair(0, filter.size()));
+				out->emplace_back(0, filter.size());
 			return 1;
 		}
 		return calculate_rank(filter, candidate, out);

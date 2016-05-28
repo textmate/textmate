@@ -33,7 +33,7 @@ std::vector< std::pair<ssize_t, size_t> > expected (value_pair(&array)[N])
 {
 	std::vector< std::pair<ssize_t, size_t> > res;
 	for(auto const& pair : array)
-		res.push_back(std::make_pair(pair.first, pair.second));
+		res.emplace_back(pair.first, pair.second);
 	return res;
 }
 

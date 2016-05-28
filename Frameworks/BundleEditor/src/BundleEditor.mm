@@ -373,7 +373,7 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 				be::entry_ptr entry = stack.back().first[stack.back().second];
 				if(entry->has_children())
 				{
-					stack.push_back(std::make_pair(entry->children(), -1));
+					stack.emplace_back(entry->children(), -1);
 				}
 				else if(entry->represented_item() == anItem)
 				{

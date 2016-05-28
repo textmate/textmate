@@ -754,7 +754,7 @@ namespace ng
 								intersects = intersects || !(to + offset < range.min().index || range.max().index < from + offset);
 
 							if(!intersects)
-								misspelled.push_back(std::make_pair(from, to));
+								misspelled.emplace_back(from, to);
 						}
 					}
 				}

@@ -39,7 +39,7 @@ namespace ng
 					int32_t const* from = value->size() == 2 ? boost::get<int32_t>(&(*value)[0]) : NULL;
 					int32_t const* to   = value->size() == 2 ? boost::get<int32_t>(&(*value)[1]) : NULL;
 					if(from && *from < _buffer.size() && to && *to <= _buffer.size())
-							newFoldings.push_back(std::make_pair(*from, *to));
+							newFoldings.emplace_back(*from, *to);
 					else	validRanges = false;
 				}
 			}
@@ -117,7 +117,7 @@ namespace ng
 	void folds_t::fold (size_t from, size_t to)
 	{
 		std::vector< std::pair<size_t, size_t> > newFoldings = _folded;
-		newFoldings.push_back(std::make_pair(from, to));
+		newFoldings.emplace_back(from, to);
 		set_folded(newFoldings);
 	}
 
@@ -243,11 +243,11 @@ namespace ng
 		{
 			ssize_t foldFrom = pair.first, foldTo = pair.second;
 			if(to <= foldFrom)
-				newFoldings.push_back(std::make_pair(foldFrom + delta, foldTo + delta));
+				newFoldings.emplace_back(foldFrom + delta, foldTo + delta);
 			else if(foldFrom <= from && to <= foldTo && delta != foldFrom - foldTo)
-				newFoldings.push_back(std::make_pair(foldFrom, foldTo + delta));
+				newFoldings.emplace_back(foldFrom, foldTo + delta);
 			else if(foldTo <= from)
-				newFoldings.push_back(std::make_pair(foldFrom, foldTo));
+				newFoldings.emplace_back(foldFrom, foldTo);
 		}
 		set_folded(newFoldings);
 
@@ -312,17 +312,17 @@ namespace ng
 			while(!indentStack.empty() && !info.empty_line && !info.ignore_line && info.indent <= indentStack.back().second)
 			{
 				if(indentStack.back().first < _buffer.eol(n-1))
-					res.push_back(std::make_pair(indentStack.back().first, _buffer.eol(n-1)));
+					res.emplace_back(indentStack.back().first, _buffer.eol(n-1));
 				indentStack.pop_back();
 			}
 
 			if(info.start_marker)
 			{
-				regularStack.push_back(std::make_pair(_buffer.eol(n), info.indent));
+				regularStack.emplace_back(_buffer.eol(n), info.indent);
 			}
 			else if(info.indent_start_marker)
 			{
-				indentStack.push_back(std::make_pair(_buffer.eol(n), info.indent));
+				indentStack.emplace_back(_buffer.eol(n), info.indent);
 			}
 			else if(info.stop_marker)
 			{
@@ -333,7 +333,7 @@ namespace ng
 						size_t last = _buffer.begin(n);
 						while(last < _buffer.size() && (_buffer[last] == "\t" || _buffer[last] == " "))
 							++last;
-						res.push_back(std::make_pair(regularStack[i-1].first, last));
+						res.emplace_back(regularStack[i-1].first, last);
 						regularStack.resize(i-1);
 						break;
 					}
@@ -342,7 +342,7 @@ namespace ng
 		}
 
 		for(size_t i = indentStack.size(); i > 0; --i)
-			res.push_back(std::make_pair(indentStack[i-1].first, _buffer.size()));
+			res.emplace_back(indentStack[i-1].first, _buffer.size());
 
 		std::sort(res.begin(), res.end());
 

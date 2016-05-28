@@ -62,7 +62,7 @@ namespace ng
 			if(enabled.find(scope) != enabled.end())
 			{
 				if(ranges.empty() || ranges.back().second != i)
-						ranges.push_back(std::make_pair(i, j));
+						ranges.emplace_back(i, j);
 				else	ranges.back().second = j;
 			}
 		}

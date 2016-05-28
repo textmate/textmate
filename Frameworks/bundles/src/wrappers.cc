@@ -140,7 +140,7 @@ namespace bundles
 			bool disabled;
 			std::string key, value;
 			if(!(plist::get_key_path(it, "disabled", disabled) && disabled) && plist::get_key_path(it, "name", key) && plist::get_key_path(it, "value", value))
-				res.push_back(std::make_pair(key, value));
+				res.emplace_back(key, value);
 		}
 		return res;
 	}

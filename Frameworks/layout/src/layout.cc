@@ -420,7 +420,7 @@ namespace ng
 		for(auto const& pair : _folds->folded())
 		{
 			if(pair.second && ++nestCount == 1)
-				foldedRanges.push_back(std::make_pair(pair.first, pair.first));
+				foldedRanges.emplace_back(pair.first, pair.first);
 			else if(!pair.second && --nestCount == 0)
 				foldedRanges.back().second = pair.first;
 		}

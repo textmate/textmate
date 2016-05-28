@@ -117,7 +117,7 @@ namespace ng
 			return { };
 
 		for(ssize_t i = 0; i < commandResult.size(); ++i)
-			tmp.push_back(std::make_pair(-commandResult.size() + i, commandResult[i]));
+			tmp.emplace_back(-commandResult.size() + i, commandResult[i]);
 
 		// =============================
 		// = Collect Words from Buffer =
@@ -141,7 +141,7 @@ namespace ng
 			for(size_t i = 0; i < completions->size(); ++i)
 			{
 				if(std::string const* word = boost::get<std::string>(&(*completions)[i]))
-					tmp.push_back(std::make_pair(SSIZE_MAX - completions->size() + i, *word));
+					tmp.emplace_back(SSIZE_MAX - completions->size() + i, *word);
 			}
 		}
 

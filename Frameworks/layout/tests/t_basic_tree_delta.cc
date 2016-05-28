@@ -43,7 +43,7 @@ static void random_insert (oak::basic_tree_t<annotation_t>& tree, std::string co
 	std::vector< std::pair<size_t, size_t> > insertRanges;
 	for(size_t index : ordering)
 	{
-		insertRanges.push_back(std::make_pair(srcOffsets[index], lengths[index]));
+		insertRanges.emplace_back(srcOffsets[index], lengths[index]);
 		for(size_t i = index + 1; i < srcOffsets.size(); ++i)
 			srcOffsets[i] += lengths[index];
 	}

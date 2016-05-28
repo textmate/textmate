@@ -17,7 +17,7 @@ namespace ng
 
 		std::vector< std::pair<ng::range_t, std::string> > res;
 		for(auto const& pair : stack.replace(snippet::range_t(from - anchor, to - anchor), replacement))
-			res.push_back(std::make_pair(ng::range_t(pair.first.from.offset + anchor, pair.first.to.offset + anchor), pair.second));
+			res.emplace_back(ng::range_t(pair.first.from.offset + anchor, pair.first.to.offset + anchor), pair.second);
 		return res;
 	}
 

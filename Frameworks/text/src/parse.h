@@ -25,7 +25,7 @@ namespace text
 
 		std::vector< std::pair<_InputIter, _InputIter> > res;
 		for(size_t i = 1; i < lines.size(); ++i)
-			res.push_back(std::make_pair(lines[i-1], lines[i]));
+			res.emplace_back(lines[i-1], lines[i]);
 		return res;
 	}
 
