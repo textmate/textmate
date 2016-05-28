@@ -66,13 +66,13 @@ namespace ng
 
 	bool folds_t::has_start_marker (size_t n) const
 	{
-		auto type = info_for(n).type;
-		return type == kLineTypeStartMarker || type == kLineTypeIndentStartMarker;
+		auto info = info_for(n);
+		return info.start_marker || info.indent_start_marker;
 	}
 
 	bool folds_t::has_stop_marker (size_t n) const
 	{
-		return info_for(n).type == kLineTypeStopMarker;
+		return info_for(n).stop_marker;
 	}
 
 	indexed_map_t<bool> const& folds_t::folded () const
@@ -309,34 +309,35 @@ namespace ng
 		{
 			value_t info = info_for(n);
 
-			while(!indentStack.empty() && info.type != kLineTypeEmpty && info.type != kLineTypeIgnoreLine && info.indent <= indentStack.back().second)
+			while(!indentStack.empty() && !info.empty_line && !info.ignore_line && info.indent <= indentStack.back().second)
 			{
 				if(indentStack.back().first < _buffer.eol(n-1))
 					res.push_back(std::make_pair(indentStack.back().first, _buffer.eol(n-1)));
 				indentStack.pop_back();
 			}
 
-			switch(info.type)
+			if(info.start_marker)
 			{
-				case kLineTypeStartMarker:       regularStack.push_back(std::make_pair(_buffer.eol(n), info.indent)); break;
-				case kLineTypeIndentStartMarker: indentStack.push_back(std::make_pair(_buffer.eol(n), info.indent));  break;
-
-				case kLineTypeStopMarker:
+				regularStack.push_back(std::make_pair(_buffer.eol(n), info.indent));
+			}
+			else if(info.indent_start_marker)
+			{
+				indentStack.push_back(std::make_pair(_buffer.eol(n), info.indent));
+			}
+			else if(info.stop_marker)
+			{
+				for(size_t i = regularStack.size(); i > 0; --i)
 				{
-					for(size_t i = regularStack.size(); i > 0; --i)
+					if(regularStack[i-1].second == info.indent)
 					{
-						if(regularStack[i-1].second == info.indent)
-						{
-							size_t last = _buffer.begin(n);
-							while(last < _buffer.size() && (_buffer[last] == "\t" || _buffer[last] == " "))
-								++last;
-							res.push_back(std::make_pair(regularStack[i-1].first, last));
-							regularStack.resize(i-1);
-							break;
-						}
+						size_t last = _buffer.begin(n);
+						while(last < _buffer.size() && (_buffer[last] == "\t" || _buffer[last] == " "))
+							++last;
+						res.push_back(std::make_pair(regularStack[i-1].first, last));
+						regularStack.resize(i-1);
+						break;
 					}
 				}
-				break;
 			}
 		}
 
@@ -429,31 +430,19 @@ namespace ng
 			setup_patterns(_buffer, n, startPattern, stopPattern, indentPattern, ignorePattern);
 
 			std::string const line = _buffer.substr(_buffer.begin(n), _buffer.eol(n));
-			size_t res = 0;
-			res += regexp::search(startPattern,  line) ?  2 : 0;
-			res += regexp::search(stopPattern,   line) ?  4 : 0;
-			res += regexp::search(indentPattern, line) ?  8 : 0;
-			res += regexp::search(ignorePattern, line) ? 16 : 0;
 
-			int indent = indent::leading_whitespace(line.data(), line.data() + line.size(), _buffer.indent().tab_size());
-			if(res & 6) // if start/stop marker we ignore indent patterns
-			{
-				if(res & 16) // if line is ignored then don’t allow it to terminate an indented block
-					indent = INT_MAX;
-				res &= ~24;
-			}
+			value_t info;
+			info.start_marker        = !!regexp::search(startPattern,  line);
+			info.stop_marker         = !!regexp::search(stopPattern,   line);
+			info.indent_start_marker = !!regexp::search(indentPattern, line);
+			info.ignore_line         = !!regexp::search(ignorePattern, line);
+			info.empty_line          = text::is_blank(line.data(), line.data() + line.size());
+			info.indent              = indent::leading_whitespace(line.data(), line.data() + line.size(), _buffer.indent().tab_size());
 
-			auto type = kLineTypeRegular;
-			switch(res)
-			{
-				case  2: type = kLineTypeStartMarker;       break;
-				case  4: type = kLineTypeStopMarker;        break;
-				case  8: type = kLineTypeIndentStartMarker; break;
-				case 16: type = kLineTypeIgnoreLine;        break;
-				default: type = text::is_blank(line.data(), line.data() + line.size()) ? kLineTypeEmpty : kLineTypeRegular; break;
-			}
+			if(info.start_marker || info.stop_marker)
+				info.indent_start_marker = false;
 
-			it = _levels.insert(it, bol, value_t(indent, type));
+			it = _levels.insert(it, bol, info);
 		}
 		return it->value;
 	}

@@ -32,14 +32,15 @@ namespace ng
 		bool integrity () const;
 
 	private:
-		enum line_type_t { kLineTypeRegular, kLineTypeEmpty, kLineTypeIgnoreLine, kLineTypeStartMarker, kLineTypeStopMarker, kLineTypeIndentStartMarker };
-
 		struct value_t
 		{
-			value_t (int indent = 0, line_type_t type = kLineTypeRegular) : indent(indent), type(type) { }
+			int indent = 0;
 
-			int indent;
-			line_type_t type;
+			bool start_marker : 1;
+			bool stop_marker : 1;
+			bool indent_start_marker : 1;
+			bool ignore_line : 1;
+			bool empty_line : 1;
 		};
 
 		static int key_comp (size_t key, size_t offset, size_t node)                              { return key < offset + node ? -1 : (key == offset + node ? 0 : +1); }
