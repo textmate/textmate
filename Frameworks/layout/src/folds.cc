@@ -305,6 +305,7 @@ namespace ng
 
 		std::vector< std::pair<size_t, int> > regularStack;
 		std::vector< std::pair<size_t, int> > indentStack;
+		size_t emptyLineCount = 0;
 		for(size_t n = 0; n < _buffer.lines(); ++n)
 		{
 			value_t info = info_for(n);
@@ -312,9 +313,11 @@ namespace ng
 			while(!indentStack.empty() && !info.empty_line && !info.ignore_line && info.indent <= indentStack.back().second)
 			{
 				if(indentStack.back().first < _buffer.eol(n-1))
-					res.emplace_back(indentStack.back().first, _buffer.eol(n-1));
+					res.emplace_back(indentStack.back().first, _buffer.eol(n-1 - emptyLineCount));
 				indentStack.pop_back();
 			}
+
+			emptyLineCount = info.empty_line && !info.indent_start_marker ? emptyLineCount+1 : 0;
 
 			if(info.start_marker)
 			{
