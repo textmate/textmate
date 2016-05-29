@@ -55,7 +55,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 		_sourceIndex      = NSNotFound;
 		_sourceListLabels = @[ @"Recent Projects", @"Favorites" ];
 
-		self.window.title = @"Open Favorite";
+		self.window.title = @"Recent Projects";
 		self.tableView.allowsMultipleSelection = YES;
 		self.tableView.rowHeight = 38;
 
