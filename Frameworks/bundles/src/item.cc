@@ -4,6 +4,8 @@
 #include <plist/delta.h>
 #include <io/path.h>
 #include <text/format.h>
+#include <text/parse.h>
+#include <text/trim.h>
 #include <regexp/format_string.h>
 
 namespace bundles
@@ -86,7 +88,17 @@ namespace bundles
 			else if(stringKeys.find(pair.first) != stringKeys.end())
 			{
 				if(std::string const* str = boost::get<std::string>(&pair.second))
-					_fields.emplace(pair.first, *str);
+				{
+					if(pair.first == kFieldSemanticClass)
+					{
+						for(std::string const& value : text::split(*str, ","))
+							_fields.emplace(pair.first, text::trim(value));
+					}
+					else
+					{
+						_fields.emplace(pair.first, *str);
+					}
+				}
 			}
 			else if(arrayKeys.find(pair.first) != arrayKeys.end())
 			{
