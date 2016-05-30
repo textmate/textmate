@@ -2,6 +2,13 @@ Title: Release Notes
 
 # Changes
 
+## 2016-05-30 (v2.0-beta.9.3)
+
+* Folding indented blocks no longer include trailing empty lines.
+* Bundle items can now use `callback.document.did-open` as semantic class to run when a document is loaded (e.g. to set initial gutter marks).
+* Monochrome gutter images should be suffixed with “Template” to be drawn as using the color of the current theme. Without this prefix, they are drawn as regular images.
+* See [all changes since v2.0-beta.9.2](https://github.com/textmate/textmate/compare/v2.0-beta.9.2...v2.0-beta.9.3)
+
 ## 2016-05-25 (v2.0-beta.9.2)
 
 * You can now double click parentheses, braces etc. to select the contents. *[Brian T. Kelley]*
