@@ -773,13 +773,13 @@ private:
 			if(!pair.second.second.empty())
 				gutterImageName.emplace(0, pair.second.first);
 			else if(pair.second.first == document::kBookmarkIdentifier)
-				gutterImageName.emplace(1, rowState != GutterViewRowStateRegular ? "Bookmark Hover Remove" : "Bookmark");
+				gutterImageName.emplace(1, rowState != GutterViewRowStateRegular ? "Bookmark Hover Remove Template" : "Bookmark Template");
 			else if(rowState == GutterViewRowStateRegular)
 				gutterImageName.emplace(2, pair.second.first);
 		}
 
 		if(rowState != GutterViewRowStateRegular)
-			gutterImageName.emplace(3, "Bookmark Hover Add");
+			gutterImageName.emplace(3, "Bookmark Hover Add Template");
 
 		if(!gutterImageName.empty())
 			return [self gutterImage:[NSString stringWithCxxString:gutterImageName.begin()->second]];
@@ -788,9 +788,9 @@ private:
 	{
 		switch([textView foldingStateForLine:lineNumber])
 		{
-			case kFoldingTop:       return [self gutterImage:rowState == GutterViewRowStateRegular ? @"Folding Top"       : @"Folding Top Hover"];
-			case kFoldingCollapsed: return [self gutterImage:rowState == GutterViewRowStateRegular ? @"Folding Collapsed" : @"Folding Collapsed Hover"];
-			case kFoldingBottom:    return [self gutterImage:rowState == GutterViewRowStateRegular ? @"Folding Bottom"    : @"Folding Bottom Hover"];
+			case kFoldingTop:       return [self gutterImage:rowState == GutterViewRowStateRegular ? @"Folding Top Template"       : @"Folding Top Hover Template"];
+			case kFoldingCollapsed: return [self gutterImage:rowState == GutterViewRowStateRegular ? @"Folding Collapsed Template" : @"Folding Collapsed Hover Template"];
+			case kFoldingBottom:    return [self gutterImage:rowState == GutterViewRowStateRegular ? @"Folding Bottom Template"    : @"Folding Bottom Hover Template"];
 		}
 	}
 	return nil;
