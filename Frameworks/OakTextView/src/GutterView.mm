@@ -372,19 +372,26 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 					CGFloat y = round(center - ([image size].height / 2));
 					NSRect imageRect = NSMakeRect(NSMinX(columnRect) + x, NSMinY(columnRect) + y, [image size].width, [image size].height);
 
-					[NSGraphicsContext saveGraphicsState];
+					if(image.isTemplate)
+					{
+						[NSGraphicsContext saveGraphicsState];
 
-					NSAffineTransform* transform = [NSAffineTransform transform];
-					[transform translateXBy:0 yBy:NSMaxY(imageRect)];
-					[transform scaleXBy:1 yBy:-1];
-					[transform concat];
-					imageRect.origin.y = 0;
+						NSAffineTransform* transform = [NSAffineTransform transform];
+						[transform translateXBy:0 yBy:NSMaxY(imageRect)];
+						[transform scaleXBy:1 yBy:-1];
+						[transform concat];
+						imageRect.origin.y = 0;
 
-					CGImageRef cgImage = [image CGImageForProposedRect:&imageRect context:[NSGraphicsContext currentContext] hints:nil];
-					CGContextClipToMask((CGContextRef)[[NSGraphicsContext currentContext] graphicsPort], imageRect, cgImage);
+						CGImageRef cgImage = [image CGImageForProposedRect:&imageRect context:[NSGraphicsContext currentContext] hints:nil];
+						CGContextClipToMask((CGContextRef)[[NSGraphicsContext currentContext] graphicsPort], imageRect, cgImage);
 
-					NSRectFillUsingOperation(imageRect, NSCompositeSourceOver);
-					[NSGraphicsContext restoreGraphicsState];
+						NSRectFillUsingOperation(imageRect, NSCompositeSourceOver);
+						[NSGraphicsContext restoreGraphicsState];
+					}
+					else
+					{
+						[image drawInRect:imageRect];
+					}
 				}
 			}
 		}
