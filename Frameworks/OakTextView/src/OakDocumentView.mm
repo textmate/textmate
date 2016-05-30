@@ -228,7 +228,14 @@ private:
 	{
 		gutterImages = gutterImages ?: [NSMutableDictionary new];
 
-		if(NSImage* image = [aName hasPrefix:@"/"] ? [[NSImage alloc] initWithContentsOfFile:aName] : [NSImage imageNamed:aName inSameBundleAsClass:[self class]])
+		NSImage* image = [aName hasPrefix:@"/"] ? [[NSImage alloc] initWithContentsOfFile:aName] : [NSImage imageNamed:aName inSameBundleAsClass:[self class]];
+		if(!image && ![aName hasPrefix:@"/"] && ![aName hasSuffix:@" Template"])
+			image = [NSImage imageNamed:[aName stringByAppendingString:@" Template"] inSameBundleAsClass:[self class]];
+
+		if([aName hasPrefix:@"/"] && [[aName stringByDeletingPathExtension] hasSuffix:@" Template"])
+			[image setTemplate:YES];
+
+		if(image)
 		{
 			CGFloat imageWidth  = image.size.width;
 			CGFloat imageHeight = image.size.height;
