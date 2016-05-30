@@ -1042,6 +1042,12 @@ namespace
 // = Document I/O =
 // ================
 
+- (void)didOpenDocuemntInTextView:(OakTextView*)textView
+{
+	for(auto const& item : bundles::query(bundles::kFieldSemanticClass, "callback.document.did-open", [textView scopeContext], bundles::kItemTypeMost, oak::uuid_t(), false))
+		[textView performBundleItem:item];
+}
+
 - (void)openAndSelectDocument:(document::document_ptr const&)aDocument
 {
 	document::document_ptr doc = aDocument;
@@ -1050,6 +1056,7 @@ namespace
 		{
 			[self makeTextViewFirstResponder:self];
 			[self setSelectedDocument:doc];
+			[self performSelector:@selector(didOpenDocuemntInTextView:) withObject:self.documentView.textView afterDelay:0];
 		}
 		else
 		{
