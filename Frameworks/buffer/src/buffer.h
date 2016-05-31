@@ -59,7 +59,6 @@ namespace ng
 	struct spelling_t;
 	struct symbols_t;
 	struct marks_t;
-	struct lines_t;
 
 	struct PUBLIC buffer_t
 	{
