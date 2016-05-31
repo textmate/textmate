@@ -585,7 +585,10 @@ namespace ng
 
 				for(size_t n = line-1; n > 0; --n)
 				{
-					std::string const& line = buffer.substr(buffer.begin(n), buffer.end(n));
+					size_t eol = buffer.eol(n);
+					if(plist::is_true(bundles::value_for_setting("excludeFromParagraphSelection", buffer.scope(eol))))
+						return buffer.begin(n+1);
+					std::string const& line = buffer.substr(buffer.begin(n), eol);
 					if(text::is_blank(line.data(), line.data() + line.size()))
 						return buffer.begin(n+1);
 				}
@@ -597,7 +600,10 @@ namespace ng
 			{
 				for(size_t n = line+1; n < buffer.lines(); ++n)
 				{
-					std::string const& line = buffer.substr(buffer.begin(n), buffer.end(n));
+					size_t eol = buffer.eol(n);
+					if(plist::is_true(bundles::value_for_setting("excludeFromParagraphSelection", buffer.scope(eol))))
+						return buffer.begin(n);
+					std::string const& line = buffer.substr(buffer.begin(n), eol);
 					if(text::is_blank(line.data(), line.data() + line.size()))
 						return buffer.begin(n);
 				}
