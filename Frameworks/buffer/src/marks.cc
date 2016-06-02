@@ -27,7 +27,9 @@ namespace ng
 
 	void marks_t::remove_all (std::string const& markType)
 	{
-		_marks.erase(markType);
+		if(!markType.empty() && markType.back() == '/')
+				oak::erase_descendent_keys(_marks, markType);
+		else	_marks.erase(markType);
 	}
 
 	std::string marks_t::get (size_t index, std::string const& markType) const

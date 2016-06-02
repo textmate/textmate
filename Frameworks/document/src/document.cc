@@ -524,24 +524,26 @@ namespace document
 		{
 			auto marks = _paths.find(path);
 			if(marks != _paths.end())
-			{
-				if(mark != NULL_STR)
-						marks->second.erase(mark);
-				else	marks->second.clear();
-			}
+				remove_all(marks->second, mark);
 		}
 
 		void remove_all (std::string const& mark)
 		{
 			for(auto& marks : _paths)
-			{
-				if(mark != NULL_STR)
-						marks.second.erase(mark);
-				else	marks.second.clear();
-			}
+				remove_all(marks.second, mark);
 		}
 
 	private:
+		void remove_all (std::map<std::string, std::map<text::pos_t, std::string>>& marks, std::string const& mark)
+		{
+			if(mark == NULL_STR)
+				marks.clear();
+			else if(!mark.empty() && mark.back() == '/')
+				oak::erase_descendent_keys(marks, mark);
+			else
+				marks.erase(mark);
+		}
+
 		std::map<std::string, std::map<text::pos_t, std::string>>& marks_for (std::string const& path)
 		{
 			auto marks = _paths.find(path);
