@@ -43,6 +43,16 @@ namespace oak
 		return out;
 	}
 
+	template <typename _Map>
+	void erase_descendent_keys (_Map& map, std::string const& path)
+	{
+		auto from = map.upper_bound(path);
+		auto to = from;
+		while(to != map.end() && oak::has_prefix(to->first.begin(), to->first.end(), path.begin(), path.end()))
+			++to;
+		map.erase(from, to);
+	}
+
 	inline double slow_in_out (double t)
 	{
 		if(t < 1.0)
