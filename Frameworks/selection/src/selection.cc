@@ -158,27 +158,27 @@ namespace ng
 		return res;
 	}
 
-	static index_t cap (buffer_t const& buf, text::pos_t const& pos)
+	static index_t cap (buffer_t const& buffer, text::pos_t const& pos)
 	{
-		size_t line = oak::cap<size_t>(0, pos.line,   buf.lines()-1);
-		size_t col  = oak::cap<size_t>(0, pos.column, buf.eol(line) - buf.begin(line));
-		index_t res = buf.sanitize_index(buf.convert(text::pos_t(line, col)));
-		if(pos.offset && res.index < buf.size() && buf[res.index] == "\n")
+		size_t line = oak::cap<size_t>(0, pos.line,   buffer.lines()-1);
+		size_t col  = oak::cap<size_t>(0, pos.column, buffer.eol(line) - buffer.begin(line));
+		index_t res = buffer.sanitize_index(buffer.convert(text::pos_t(line, col)));
+		if(pos.offset && res.index < buffer.size() && buffer[res.index] == "\n")
 			res.carry = pos.offset;
 		return res;
 	}
 
-	static range_t cap (buffer_t const& buf, text::range_t const& range)
+	static range_t cap (buffer_t const& buffer, text::range_t const& range)
 	{
-		return range_t(cap(buf, range.from), cap(buf, range.to), range.columnar, false, true);
+		return range_t(cap(buffer, range.from), cap(buffer, range.to), range.columnar, false, true);
 	}
 
-	ranges_t convert (buffer_t const& buf, text::selection_t const& sel)
+	ranges_t convert (buffer_t const& buffer, text::selection_t const& sel)
 	{
 		ranges_t res;
 		for(auto const& range : sel)
-			res.push_back(cap(buf, range));
-		return sanitize(buf, res);
+			res.push_back(cap(buffer, range));
+		return sanitize(buffer, res);
 	}
 
 	// =======================
