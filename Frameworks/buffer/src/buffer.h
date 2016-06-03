@@ -74,9 +74,7 @@ namespace ng
 		size_t revision () const               { return _revision; }
 		size_t next_revision () const          { return _next_revision; }
 		size_t bump_revision ()                { set_revision(_next_revision++); return _revision; }
-		void set_revision (size_t newRevision) { ASSERT_LT(newRevision, _next_revision); _revision = newRevision; initiate_repair(20); }
 
-		char at (size_t i) const;
 		std::string operator[] (size_t i) const;
 		std::string substr (size_t from, size_t to) const;
 
@@ -148,6 +146,10 @@ namespace ng
 		void remove_callback (callback_t* callback)  { _callbacks.remove(callback); }
 
 	private:
+		friend struct undo_manager_t;
+		void set_revision (size_t newRevision) { ASSERT_LT(newRevision, _next_revision); _revision = newRevision; initiate_repair(20); }
+		char at (size_t i) const;
+
 		void did_parse (size_t first, size_t last)
 		{
 			for(auto const& hook : _meta_data)
