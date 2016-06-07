@@ -91,7 +91,7 @@ namespace ng
 			res = r.post_selection;
 			rev = r.post_revision;
 
-			if(_index < _records.size()-1 && res == _records[_index].pre_selection && should_merge(r, _records[_index]))
+			if(res == _records[_index].pre_selection && should_merge(r, _records[_index]))
 				res = ranges_t();
 		}
 		_buffer.set_revision(rev);
