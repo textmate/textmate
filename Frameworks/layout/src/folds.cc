@@ -377,27 +377,24 @@ namespace ng
 
 	static void setup_patterns (ng::buffer_t const& buffer, size_t line, regexp::pattern_t& startPattern, regexp::pattern_t& stopPattern, regexp::pattern_t& indentPattern, regexp::pattern_t& ignorePattern)
 	{
-		plist::any_t ptrn;
+		struct { regexp::pattern_t& regexp; std::string setting; } mapping[] =
+		{
+			{ startPattern,  "foldingStartMarker"         },
+			{ stopPattern,   "foldingStopMarker"          },
+			{ indentPattern, "foldingIndentedBlockStart"  },
+			{ ignorePattern, "foldingIndentedBlockIgnore" },
+		};
 
-		bundles::item_ptr didFindPatterns;
 		scope::context_t scope(buffer.scope(buffer.begin(line), false).right, buffer.scope(buffer.end(line), false).left);
-		ptrn = bundles::value_for_setting("foldingStartMarker", scope, &didFindPatterns);
-		if(std::string const* str = boost::get<std::string>(&ptrn))
-			startPattern = *str;
+		for(auto info : mapping)
+		{
+			plist::any_t ptrn = bundles::value_for_setting(info.setting, scope);
+			if(std::string const* str = boost::get<std::string>(&ptrn))
+				info.regexp = *str;
+		}
 
-		ptrn = bundles::value_for_setting("foldingStopMarker", scope, &didFindPatterns);
-		if(std::string const* str = boost::get<std::string>(&ptrn))
-			stopPattern = *str;
-
-		ptrn = bundles::value_for_setting("foldingIndentedBlockStart", scope, &didFindPatterns);
-		if(std::string const* str = boost::get<std::string>(&ptrn))
-			indentPattern = *str;
-
-		ptrn = bundles::value_for_setting("foldingIndentedBlockIgnore", scope, &didFindPatterns);
-		if(std::string const* str = boost::get<std::string>(&ptrn))
-			ignorePattern = *str;
-
-		if(!didFindPatterns) // legacy — this has bad performance
+		// legacy — this has bad performance
+		if(!startPattern && !stopPattern && !indentPattern && !ignorePattern)
 		{
 			for(auto const& item : bundles::query(bundles::kFieldGrammarScope, to_s(buffer.scope(0, false).left), scope::wildcard, bundles::kItemTypeGrammar))
 			{
