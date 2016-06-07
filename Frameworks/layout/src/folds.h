@@ -29,7 +29,6 @@ namespace ng
 
 		void will_replace (size_t from, size_t to, std::string const& str);
 		void did_parse (size_t from, size_t to);
-		bool integrity () const;
 
 	private:
 		struct value_t
@@ -57,7 +56,7 @@ namespace ng
 
 		buffer_t& _buffer;
 
-		mutable oak::basic_tree_t<size_t, value_t> _levels;
+		mutable indexed_map_t<value_t> _levels;
 		std::vector< std::pair<size_t, size_t> > _folded;
 		indexed_map_t<bool> _legacy;
 	};

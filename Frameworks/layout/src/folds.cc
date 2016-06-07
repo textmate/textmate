@@ -251,48 +251,16 @@ namespace ng
 		}
 		set_folded(newFoldings);
 
-		size_t bol = _buffer.begin(_buffer.convert(from).line);
-		size_t end = _buffer.begin(_buffer.convert(to).line);
-		auto first = _levels.lower_bound(bol, &key_comp);
-		auto last  = _levels.upper_bound(end, &key_comp);
-		if(last != _levels.end())
-		{
-			ssize_t eraseFrom = first->offset;
-			ssize_t eraseTo   = last->offset;
-			ssize_t diff = (eraseTo - eraseFrom) + str.size() - (to - from);
-			last->key += diff;
-			_levels.update_key(last);
-		}
-		_levels.erase(first, last);
+		_levels.replace(from, to, str.size());
+		_levels.remove(_buffer.begin(_buffer.convert(from).line));
+		_levels.remove(_buffer.begin(_buffer.convert(to).line));
 	}
 
 	void folds_t::did_parse (size_t from, size_t to)
 	{
-		size_t bol = _buffer.begin(_buffer.convert(from).line);
-		size_t end = _buffer.begin(_buffer.convert(to).line);
-		auto first = _levels.lower_bound(bol, &key_comp);
-		auto last  = _levels.upper_bound(end, &key_comp);
-		if(last != _levels.end())
-		{
-			last->key += last->offset - first->offset;
-			_levels.update_key(last);
-		}
-		_levels.erase(first, last);
-	}
-
-	bool folds_t::integrity () const
-	{
-		for(auto const& info : _levels)
-		{
-			size_t pos = info.offset + info.key;
-			if(_buffer.size() < pos || _buffer.convert(pos).column != 0)
-			{
-				size_t n = _buffer.convert(pos).line;
-				fprintf(stderr, "%zu) pos: %zu, line %zu-%zu\n", n+1, pos, _buffer.begin(n), _buffer.eol(n));
-				return false;
-			}
-		}
-		return true;
+		auto fromIter = _levels.lower_bound(_buffer.begin(_buffer.convert(from).line));
+		auto toIter   = _levels.lower_bound(_buffer.begin(_buffer.convert(to).line));
+		_levels.remove(fromIter, toIter != _levels.end() ? ++toIter : toIter);
 	}
 
 	// ============
@@ -410,41 +378,28 @@ namespace ng
 	folds_t::value_t folds_t::info_for (size_t n) const
 	{
 		size_t bol = _buffer.begin(n);
-		auto it = _levels.lower_bound(bol, &key_comp);
-		if(it == _levels.end() || it->offset + it->key != bol)
-		{
-			if(it != _levels.end())
-			{
-				bol -= it->offset;
-				it->key -= bol;
-				_levels.update_key(it);
-			}
-			else if(it != _levels.begin())
-			{
-				auto tmp = it;
-				--tmp;
-				bol -= tmp->offset + tmp->key;
-			}
+		auto it = _levels.find(bol);
+		if(it != _levels.end())
+			return it->second;
 
-			regexp::pattern_t startPattern, stopPattern, indentPattern, ignorePattern;
-			setup_patterns(_buffer, n, startPattern, stopPattern, indentPattern, ignorePattern);
+		regexp::pattern_t startPattern, stopPattern, indentPattern, ignorePattern;
+		setup_patterns(_buffer, n, startPattern, stopPattern, indentPattern, ignorePattern);
 
-			std::string const line = _buffer.substr(_buffer.begin(n), _buffer.eol(n));
+		std::string const line = _buffer.substr(bol, _buffer.eol(n));
 
-			value_t info;
-			info.start_marker        = !!regexp::search(startPattern,  line);
-			info.stop_marker         = !!regexp::search(stopPattern,   line);
-			info.indent_start_marker = !!regexp::search(indentPattern, line);
-			info.ignore_line         = !!regexp::search(ignorePattern, line);
-			info.empty_line          = text::is_blank(line.data(), line.data() + line.size());
-			info.indent              = indent::leading_whitespace(line.data(), line.data() + line.size(), _buffer.indent().tab_size());
+		value_t info;
+		info.start_marker        = !!regexp::search(startPattern,  line);
+		info.stop_marker         = !!regexp::search(stopPattern,   line);
+		info.indent_start_marker = !!regexp::search(indentPattern, line);
+		info.ignore_line         = !!regexp::search(ignorePattern, line);
+		info.empty_line          = text::is_blank(line.data(), line.data() + line.size());
+		info.indent              = indent::leading_whitespace(line.data(), line.data() + line.size(), _buffer.indent().tab_size());
 
-			if(info.start_marker || info.stop_marker)
-				info.indent_start_marker = false;
+		if(info.start_marker || info.stop_marker)
+			info.indent_start_marker = false;
 
-			it = _levels.insert(it, bol, info);
-		}
-		return it->value;
+		_levels.set(bol, info);
+		return info;
 	}
 
 } /* ng */
