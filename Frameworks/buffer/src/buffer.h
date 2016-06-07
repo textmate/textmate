@@ -97,7 +97,7 @@ namespace ng
 
 		size_t sanitize_index (size_t i) const;
 
-		size_t convert (text::pos_t const& p) const  { return begin(p.line) + p.column;                                         }
+		size_t convert (text::pos_t const& p) const  { size_t n = std::min(p.line, lines()-1); return std::min(begin(n) + p.column, eol(n)); }
 		text::pos_t convert (size_t i) const         { return text::pos_t(_hardlines.lower_bound(i).index(), i - begin(_hardlines.lower_bound(i).index())); }
 
 		text::indent_t& indent ()                         { return _indent; }
