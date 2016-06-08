@@ -90,10 +90,11 @@ _OutputIter copy_menu_items (NSMenu* menu, _OutputIter out, NSArray* parentNames
 {
 	for(NSMenuItem* item in [menu itemArray])
 	{
-		if([item action] == @selector(performBundleItemWithUUIDStringFrom:) || [item action] == @selector(takeThemeUUIDFrom:))
+		SEL action = [item action];
+		if(action == @selector(performBundleItemWithUUIDStringFrom:) || action == @selector(takeThemeUUIDFrom:))
 			continue;
 
-		if(id target = [NSApp targetForAction:[item action]])
+		if(id target = [NSApp targetForAction:action])
 		{
 			if(![target respondsToSelector:@selector(validateMenuItem:)] || [target validateMenuItem:item])
 			{

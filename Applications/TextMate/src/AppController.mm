@@ -463,8 +463,9 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 - (BOOL)validateMenuItem:(NSMenuItem*)item
 {
+	SEL action = [item action];
 	BOOL enabled = YES;
-	if([item action] == @selector(toggleFindOption:))
+	if(action == @selector(toggleFindOption:))
 	{
 		BOOL active = NO;
 		if(OakPasteboardEntry* entry = [[OakPasteboard pasteboardWithName:NSFindPboard] current])
@@ -484,11 +485,11 @@ BOOL HasDocumentWindow (NSArray* windows)
 			enabled = NO;
 		}
 	}
-	else if([item action] == @selector(orderFrontGoToLinePanel:))
+	else if(action == @selector(orderFrontGoToLinePanel:))
 	{
 		enabled = [NSApp targetForAction:@selector(setSelectionString:)] != nil;
 	}
-	else if([item action] == @selector(performBundleItemWithUUIDStringFrom:))
+	else if(action == @selector(performBundleItemWithUUIDStringFrom:))
 	{
 		if(bundles::item_ptr bundleItem = bundles::lookup(to_s(item.representedObject)))
 		{

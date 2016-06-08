@@ -699,9 +699,10 @@ static path::glob_list_t globs_for_path (std::string const& path)
 - (BOOL)validateMenuItem:(NSMenuItem*)item
 {
 	BOOL activate = YES;
-	if([item action] == @selector(goToParentFolder:))
+	SEL action = [item action];
+	if(action == @selector(goToParentFolder:))
 		activate = _sourceIndex == kFileChooserAllSourceIndex && to_s(_path) != path::parent(to_s(_path));
-	else if([item action] == @selector(takeSourceIndexFrom:))
+	else if(action == @selector(takeSourceIndexFrom:))
 		[item setState:[item tag] == self.sourceIndex ? NSOnState : NSOffState];
 	return activate;
 }
