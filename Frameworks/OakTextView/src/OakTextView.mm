@@ -247,6 +247,30 @@ struct document_view_t
 	}
 
 	// ==========
+	// = Buffer =
+	// ==========
+
+	size_t size () const { return document->buffer().size(); }
+	std::string substr (size_t from, size_t to) const { return document->buffer().substr(from, to); }
+	size_t begin (size_t n) const { return document->buffer().begin(n); }
+	size_t eol (size_t n) const { return document->buffer().eol(n); }
+	size_t sanitize_index (size_t i) const { return document->buffer().sanitize_index(i); }
+	size_t convert (text::pos_t const& p) const { return document->buffer().convert(p); }
+	text::pos_t convert (size_t i) const { return document->buffer().convert(i); }
+	text::indent_t const& indent () const { return document->buffer().indent(); }
+	std::map<size_t, scope::scope_t> scopes (size_t from, size_t to) const { return document->buffer().scopes(from, to); }
+	void set_live_spelling (bool flag) { document->buffer().set_live_spelling(flag); }
+	bool live_spelling () const { return document->buffer().live_spelling(); }
+	void set_spelling_language (std::string const& lang) { document->buffer().set_spelling_language(lang); }
+	std::string const& spelling_language () const { return document->buffer().spelling_language(); }
+	std::map<size_t, bool> misspellings (size_t from, size_t to) const { return document->buffer().misspellings(from, to); }
+	std::pair<size_t, size_t> next_misspelling (size_t from) const { return document->buffer().next_misspelling(from); }
+	ns::spelling_tag_t spelling_tag () const { return document->buffer().spelling_tag(); }
+	void recheck_spelling (size_t from, size_t to) { document->buffer().recheck_spelling(from, to); }
+	void add_callback (ng::callback_t* callback) { document->buffer().add_callback(callback); }
+	void remove_callback (ng::callback_t* callback) { document->buffer().remove_callback(callback); }
+
+	// ==========
 	// = Editor =
 	// ==========
 
@@ -711,7 +735,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 - (void)scrollIndexToFirstVisible:(ng::index_t const&)visibleIndex
 {
-	if(documentView && visibleIndex && visibleIndex.index < document->buffer().size())
+	if(documentView && visibleIndex && visibleIndex.index < documentView->size())
 	{
 		documentView->update_metrics(CGRectMake(0, CGRectGetMinY(documentView->rect_at_index(visibleIndex)), CGFLOAT_MAX, NSHeight([self visibleRect])));
 		[self reflectDocumentSize];
@@ -758,7 +782,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 	{
 		[self updateDocumentMetadata];
 
-		document->buffer().remove_callback(callback);
+		documentView->remove_callback(callback);
 		delete callback;
 		callback = NULL;
 
@@ -819,11 +843,11 @@ static std::string shell_quote (std::vector<std::string> paths)
 		[self reflectDocumentSize];
 		[self updateSelection];
 
-		if(visibleIndex && visibleIndex.index < document->buffer().size())
+		if(visibleIndex && visibleIndex.index < documentView->size())
 				[self scrollIndexToFirstVisible:visibleIndex];
 		else	[self ensureSelectionIsInVisibleArea:self];
 
-		document->buffer().add_callback(callback);
+		documentView->add_callback(callback);
 
 		[self resetBlinkCaretTimer];
 		[self setNeedsDisplay:YES];
@@ -1091,7 +1115,7 @@ doScroll:
 	//     similar to basic_tree_t for conversion between UTF-8 and UTF-16 indexes.
 	//     Currently poor performance for large documents (O(N)) would then get to O(log(N))
 	//     Also currently copy of whole text is created here, which is not optimal
-	std::string const text = document->buffer().substr(0, range.max().index);
+	std::string const text = documentView->substr(0, range.max().index);
 	char const* base = text.data();
 	NSUInteger location = utf16::distance(base, base + range.min().index);
 	NSUInteger length   = utf16::distance(base + range.min().index, base + range.max().index);
@@ -1128,7 +1152,7 @@ doScroll:
 	{
 		size_t from = adjustLeft > range.min().index ? 0 : range.min().index - adjustLeft;
 		size_t to   = range.max().index + adjustRight;
-		res.push_back(ng::range_t(document->buffer().sanitize_index(from), document->buffer().sanitize_index(to)));
+		res.push_back(ng::range_t(documentView->sanitize_index(from), documentView->sanitize_index(to)));
 	}
 	return res;
 }
@@ -1154,7 +1178,7 @@ doScroll:
 	ng::ranges_t sel;
 	for(auto const& range : documentView->ranges())
 	{
-		std::string const str = document->buffer().substr(range.min().index, range.max().index);
+		std::string const str = documentView->substr(range.min().index, range.max().index);
 		char const* base = str.data();
 		size_t from = utf16::advance(base, aRange.location, base + str.size()) - base;
 		size_t to   = utf16::advance(base, NSMaxRange(aRange), base + str.size()) - base;
@@ -1231,7 +1255,7 @@ doScroll:
 
 	if(CFMutableAttributedStringRef res = CFAttributedStringCreateMutable(kCFAllocatorDefault, 0))
 	{
-		std::map<size_t, scope::scope_t> scopes = document->buffer().scopes(from, to);
+		std::map<size_t, scope::scope_t> scopes = documentView->scopes(from, to);
 		for(auto pair = scopes.begin(); pair != scopes.end(); )
 		{
 			styles_t const& styles = theme->styles_for_scope(pair->second);
@@ -1241,7 +1265,7 @@ doScroll:
 
 			if(CFMutableAttributedStringRef str = CFAttributedStringCreateMutable(kCFAllocatorDefault, 0))
 			{
-				CFAttributedStringReplaceString(str, CFRangeMake(0, 0), cf::wrap(document->buffer().substr(i, j)));
+				CFAttributedStringReplaceString(str, CFRangeMake(0, 0), cf::wrap(documentView->substr(i, j)));
 				CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTFontAttributeName, styles.font());
 				CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTForegroundColorAttributeName, styles.foreground());
 				if(styles.underlined())
@@ -1335,7 +1359,6 @@ doScroll:
 {
 	D(DBF_OakTextView_Accessibility, bug("%s\n", to_s(attribute).c_str()););
 	id ret = nil;
-	ng::buffer_t const& buffer = document->buffer();
 
 	if(false) {
 	} else if([attribute isEqualToString:NSAccessibilityRoleAttribute]) {
@@ -1345,10 +1368,10 @@ doScroll:
 	} else if([attribute isEqualToString:NSAccessibilityInsertionPointLineNumberAttribute]) {
 		ret = [NSNumber numberWithUnsignedLong:documentView->softline_for_index(documentView->ranges().last().min())];
 	} else if([attribute isEqualToString:NSAccessibilityNumberOfCharactersAttribute]) {
-		ret = [NSNumber numberWithUnsignedInteger:[self nsRangeForRange:ng::range_t(0, buffer.size())].length];
+		ret = [NSNumber numberWithUnsignedInteger:[self nsRangeForRange:ng::range_t(0, documentView->size())].length];
 	} else if([attribute isEqualToString:NSAccessibilitySelectedTextAttribute]) {
 		ng::range_t const selection = documentView->ranges().last();
-		std::string const text = buffer.substr(selection.min().index, selection.max().index);
+		std::string const text = documentView->substr(selection.min().index, selection.max().index);
 		ret = [NSString stringWithCxxString:text];
 	} else if([attribute isEqualToString:NSAccessibilitySelectedTextRangeAttribute]) {
 		ret = [NSValue valueWithRange:[self nsRangeForRange:documentView->ranges().last()]];
@@ -1505,13 +1528,13 @@ doScroll:
 		point = [[self window] convertRectFromScreen:(NSRect){ point, NSZeroSize }].origin;
 		point = [self convertPoint:point fromView:nil];
 		size_t index = documentView->index_at_point(point).index;
-		index = document->buffer().sanitize_index(index);
+		index = documentView->sanitize_index(index);
 		size_t const length = document->buffer()[index].length();
 		ret = [NSValue valueWithRange:[self nsRangeForRange:ng::range_t(index, index + length)]];
 	} else if([attribute isEqualToString:NSAccessibilityRangeForIndexParameterizedAttribute]) {
 		size_t index = [((NSNumber*)parameter) unsignedLongValue];
 		index = [self rangeForNSRange:NSMakeRange(index, 0)].min().index;
-		index = document->buffer().sanitize_index(index);
+		index = documentView->sanitize_index(index);
 		size_t const length = document->buffer()[index].length();
 		ret = [NSValue valueWithRange:[self nsRangeForRange:ng::range_t(index, index + length)]];
 	} else if([attribute isEqualToString:NSAccessibilityBoundsForRangeParameterizedAttribute]) {
@@ -1530,7 +1553,7 @@ doScroll:
 		NSMutableAttributedString* res = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithCxxString:text]];
 
 		// Add style
-		std::map<size_t, scope::scope_t> scopes = document->buffer().scopes(from, to);
+		std::map<size_t, scope::scope_t> scopes = documentView->scopes(from, to);
 		NSRange runRange = NSMakeRange(0, 0);
 		for(auto pair = scopes.begin(); pair != scopes.end(); )
 		{
@@ -1582,7 +1605,7 @@ doScroll:
 		});
 
 		// Add misspellings
-		std::map<size_t, bool> misspellings = document->buffer().misspellings(from, to);
+		std::map<size_t, bool> misspellings = documentView->misspellings(from, to);
 		auto pair = misspellings.begin();
 		auto const end = misspellings.end();
 		ASSERT((pair == end) || pair->second);
@@ -1613,7 +1636,7 @@ doScroll:
 		}
 
 		// Add text language
-		NSString* lang = [NSString stringWithCxxString:document->buffer().spelling_language()];
+		NSString* lang = [NSString stringWithCxxString:documentView->spelling_language()];
 		[res addAttribute:@"AXNaturalLanguageText" value:lang range:NSMakeRange(0, [res length])];
 
 		return res;
@@ -1644,8 +1667,7 @@ doScroll:
 	{
 		links_ptr links(new links_t());
 		scope::selector_t linkSelector = "markup.underline.link";
-		ng::buffer_t const& buffer = document->buffer();
-		std::map<size_t, scope::scope_t> scopes = buffer.scopes(0, buffer.size());
+		std::map<size_t, scope::scope_t> scopes = documentView->scopes(0, documentView->size());
 		for(auto pair = scopes.begin(); pair != scopes.end(); )
 		{
 			if(!linkSelector.does_match(pair->second))
@@ -1654,8 +1676,8 @@ doScroll:
 				continue;
 			}
 			size_t i = pair->first;
-			size_t j = ++pair != scopes.end() ? pair->first : buffer.size();
-			NSString* title = [NSString stringWithCxxString:buffer.substr(i, j)];
+			size_t j = ++pair != scopes.end() ? pair->first : documentView->size();
+			NSString* title = [NSString stringWithCxxString:documentView->substr(i, j)];
 			NSRect frame = NSRectFromCGRect(documentView->rect_for_range(i, j));
 			ng::range_t range(i, j);
 			OakAccessibleLink* link = [[OakAccessibleLink alloc] initWithTextView:self range:range title:title URL:nil frame:frame];
@@ -1869,7 +1891,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 		std::vector<std::string> v;
 		ng::ranges_t const ranges = ng::dissect_columnar(document->buffer(), documentView->ranges());
 		for(auto const& range : ranges)
-			v.push_back(document->buffer().substr(range.min().index, range.max().index));
+			v.push_back(documentView->substr(range.min().index, range.max().index));
 
 		[pboard declareTypes:@[ NSStringPboardType ] owner:nil];
 		res = [pboard setString:[NSString stringWithCxxString:text::join(v, "\n")] forType:NSStringPboardType];
@@ -2156,7 +2178,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	}
 	else
 	{
-		size_t line = document->buffer().convert(documentView->ranges().last().first.index).line;
+		size_t line = documentView->convert(documentView->ranges().last().first.index).line;
 		documentView->toggle_fold_at_line(line, false);
 	}
 	[[NSNotificationCenter defaultCenter] postNotificationName:GVColumnDataSourceDidChange object:[[self enclosingScrollView] superview]];
@@ -2194,11 +2216,9 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	if(someRanges.size() != 1)
 		return menu;
 
-	ng::buffer_t const& buf = document->buffer();
-
 	ng::range_t const range     = someRanges.first();
-	ng::range_t const wordRange = range.empty() ? ng::extend(buf, range.first, kSelectionExtendToWord).last() : range;
-	std::string const candidate = buf.substr(wordRange.min().index, wordRange.max().index);
+	ng::range_t const wordRange = range.empty() ? ng::extend(document->buffer(), range.first, kSelectionExtendToWord).last() : range;
+	std::string const candidate = documentView->substr(wordRange.min().index, wordRange.max().index);
 
 	if(candidate.find_first_of(" \n\t") != std::string::npos)
 		return menu;
@@ -2210,22 +2230,22 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 		[item setRepresentedObject:word];
 		[menu addItem:[NSMenuItem separatorItem]];
 	}
-	else if(ns::is_misspelled(candidate, buf.spelling_language(), buf.spelling_tag()))
+	else if(ns::is_misspelled(candidate, documentView->spelling_language(), documentView->spelling_tag()))
 	{
 		AUTO_REFRESH;
 		documentView->set_selections(wordRange);
 
 		[[NSSpellChecker sharedSpellChecker] updateSpellingPanelWithMisspelledWord:word];
 
-		size_t bol = buf.begin(buf.convert(wordRange.min().index).line);
-		size_t eol = buf.eol(buf.convert(wordRange.max().index).line);
-		std::string const line = buf.substr(bol, eol);
+		size_t bol = documentView->begin(documentView->convert(wordRange.min().index).line);
+		size_t eol = documentView->eol(documentView->convert(wordRange.max().index).line);
+		std::string const line = documentView->substr(bol, eol);
 		NSUInteger location = utf16::distance(line.data(), line.data() + (wordRange.min().index - bol));
 		NSUInteger length   = utf16::distance(line.data() + (wordRange.min().index - bol), line.data() + (wordRange.max().index - bol));
 
 		char key = 0;
 		NSMenuItem* item = nil;
-		for(NSString* guess in [[NSSpellChecker sharedSpellChecker] guessesForWordRange:NSMakeRange(location, length) inString:[NSString stringWithCxxString:line] language:[NSString stringWithCxxString:buf.spelling_language()] inSpellDocumentWithTag:buf.spelling_tag()])
+		for(NSString* guess in [[NSSpellChecker sharedSpellChecker] guessesForWordRange:NSMakeRange(location, length) inString:[NSString stringWithCxxString:line] language:[NSString stringWithCxxString:documentView->spelling_language()] inSpellDocumentWithTag:documentView->spelling_tag()])
 		{
 			item = [menu addItemWithTitle:guess action:@selector(contextMenuPerformCorrectWord:) keyEquivalent:key < 10 ? [NSString stringWithFormat:@"%c", '0' + (++key % 10)] : @""];
 			[item setKeyEquivalentModifierMask:0];
@@ -2325,7 +2345,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	D(DBF_OakTextView_Spelling, bug("%s\n", [[sender representedObject] UTF8String]););
 	[[NSSpellChecker sharedSpellChecker] learnWord:[sender representedObject]];
 
-	document->buffer().recheck_spelling(0, document->buffer().size());
+	documentView->recheck_spelling(0, documentView->size());
 	[self setNeedsDisplay:YES];
 }
 
@@ -2334,7 +2354,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	D(DBF_OakTextView_Spelling, bug("%s\n", [[sender representedObject] UTF8String]););
 	[[NSSpellChecker sharedSpellChecker] unlearnWord:[sender representedObject]];
 
-	document->buffer().recheck_spelling(0, document->buffer().size());
+	documentView->recheck_spelling(0, documentView->size());
 	[self setNeedsDisplay:YES];
 }
 
@@ -2349,8 +2369,8 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	D(DBF_OakTextView_Spelling, bug("%s → %s\n", [[sender description] UTF8String], [word UTF8String]););
 	if(word)
 	{
-		[[NSSpellChecker sharedSpellChecker] ignoreWord:word inSpellDocumentWithTag:document->buffer().spelling_tag()];
-		document->buffer().recheck_spelling(0, document->buffer().size());
+		[[NSSpellChecker sharedSpellChecker] ignoreWord:word inSpellDocumentWithTag:documentView->spelling_tag()];
+		documentView->recheck_spelling(0, documentView->size());
 		[self setNeedsDisplay:YES];
 	}
 }
@@ -2488,7 +2508,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 						else
 						{
 							auto newLastMatch = ng::find(document->buffer(), ng::ranges_t(0), findStr, (find::options_t)(options | find::backwards | find::wrap_around));
-							auto to_range = [&](auto it) { return text::range_t(document->buffer().convert(it->first.min().index), document->buffer().convert(it->first.max().index)); };
+							auto to_range = [&](auto it) { return text::range_t(documentView->convert(it->first.min().index), documentView->convert(it->first.max().index)); };
 							[newDocuments replaceObjectAtIndex:i withObject:@{
 								@"identifier"      : [NSString stringWithCxxString:document->identifier()],
 								@"firstMatchRange" : [NSString stringWithCxxString:to_range(newFirstMatch.begin())],
@@ -2521,7 +2541,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 
 			if(isCounting)
 			{
-				[aFindServer didFind:res.size() occurrencesOf:aFindServer.findString atPosition:res.size() == 1 ? document->buffer().convert(res.last().min().index) : text::pos_t::undefined wrapped:NO];
+				[aFindServer didFind:res.size() occurrencesOf:aFindServer.findString atPosition:res.size() == 1 ? documentView->convert(res.last().min().index) : text::pos_t::undefined wrapped:NO];
 			}
 			else
 			{
@@ -2549,7 +2569,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 				}
 
 				[self highlightRanges:newSelection];
-				[aFindServer didFind:newSelection.size() occurrencesOf:aFindServer.findString atPosition:res.size() == 1 ? document->buffer().convert(res.last().min().index) : text::pos_t::undefined wrapped:didWrap];
+				[aFindServer didFind:newSelection.size() occurrencesOf:aFindServer.findString atPosition:res.size() == 1 ? documentView->convert(res.last().min().index) : text::pos_t::undefined wrapped:didWrap];
 			}
 		}
 		break;
@@ -2791,9 +2811,9 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	else if([aMenuItem action] == @selector(toggleShowIndentGuides:))
 		[aMenuItem setTitle:(documentView && documentView->draw_indent_guides()) ? @"Hide Indent Guides" : @"Show Indent Guides"];
 	else if([aMenuItem action] == @selector(toggleContinuousSpellChecking:))
-		[aMenuItem setState:document->buffer().live_spelling() ? NSOnState : NSOffState];
+		[aMenuItem setState:documentView->live_spelling() ? NSOnState : NSOffState];
 	else if([aMenuItem action] == @selector(takeSpellingLanguageFrom:))
-		[aMenuItem setState:[[NSString stringWithCxxString:document->buffer().spelling_language()] isEqualToString:[aMenuItem representedObject]] ? NSOnState : NSOffState];
+		[aMenuItem setState:[[NSString stringWithCxxString:documentView->spelling_language()] isEqualToString:[aMenuItem representedObject]] ? NSOnState : NSOffState];
 	else if([aMenuItem action] == @selector(takeWrapColumnFrom:))
 		[aMenuItem setState:wrapColumn == [aMenuItem tag] ? NSOnState : NSOffState];
 	else if([aMenuItem action] == @selector(undo:))
@@ -2908,7 +2928,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		AUTO_REFRESH;
 		ng::index_t visibleIndex = documentView->index_at_point([self visibleRect].origin);
 		documentView->set_font(fontName, fontSize * _fontScaleFactor / 100);
-		[self scrollIndexToFirstVisible:document->buffer().begin(document->buffer().convert(visibleIndex.index).line)];
+		[self scrollIndexToFirstVisible:documentView->begin(documentView->convert(visibleIndex.index).line)];
 	}
 }
 
@@ -2926,7 +2946,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		AUTO_REFRESH;
 		ng::index_t visibleIndex = documentView->index_at_point([self visibleRect].origin);
 		documentView->set_font(fontName, fontSize * _fontScaleFactor / 100);
-		[self scrollIndexToFirstVisible:document->buffer().begin(document->buffer().convert(visibleIndex.index).line)];
+		[self scrollIndexToFirstVisible:documentView->begin(documentView->convert(visibleIndex.index).line)];
 	}
 
 	[OTVHUD showHudForView:self withText:[NSString stringWithFormat:@"%ld%%", _fontScaleFactor]];
@@ -2973,7 +2993,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	AUTO_REFRESH;
 	ng::index_t visibleIndex = documentView->index_at_point([self visibleRect].origin);
 	documentView->set_wrapping(flag, wrapColumn);
-	[self scrollIndexToFirstVisible:document->buffer().begin(document->buffer().convert(visibleIndex.index).line)];
+	[self scrollIndexToFirstVisible:documentView->begin(documentView->convert(visibleIndex.index).line)];
 	settings_t::set(kSettingsSoftWrapKey, (bool)flag, document->file_type());
 }
 
@@ -3082,14 +3102,13 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 - (void)checkSpelling:(id)sender
 {
 	NSSpellChecker* speller = [NSSpellChecker sharedSpellChecker];
-	ng::buffer_t& buf = document->buffer();
 
-	NSString* lang = [NSString stringWithCxxString:buf.spelling_language()];
+	NSString* lang = [NSString stringWithCxxString:documentView->spelling_language()];
 	if([[speller spellingPanel] isVisible])
 	{
 		if(![[speller language] isEqualToString:lang])
 		{
-			buf.set_spelling_language(to_s([speller language]));
+			documentView->set_spelling_language(to_s([speller language]));
 			[self setNeedsDisplay:YES];
 		}
 	}
@@ -3098,28 +3117,28 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		[speller setLanguage:lang];
 	}
 
-	if(!buf.live_spelling())
+	if(!documentView->live_spelling())
 	{
-		buf.set_live_spelling(true);
+		documentView->set_live_spelling(true);
 		[self setNeedsDisplay:YES];
 	}
 
 	ng::index_t caret = documentView->ranges().last().last;
 	if(!documentView->has_selection())
 	{
-		ng::range_t wordRange = ng::extend(buf, caret, kSelectionExtendToWord).last();
+		ng::range_t wordRange = ng::extend(document->buffer(), caret, kSelectionExtendToWord).last();
 		if(caret <= wordRange.max())
 			caret = wordRange.min();
 	}
 
-	auto nextMisspelling = buf.next_misspelling(caret.index);
+	auto nextMisspelling = documentView->next_misspelling(caret.index);
 	if(nextMisspelling.first != nextMisspelling.second)
 	{
 		if([[speller spellingPanel] isVisible])
 		{
 			AUTO_REFRESH;
 			documentView->set_selections(ng::range_t(nextMisspelling.first, nextMisspelling.second));
-			[speller updateSpellingPanelWithMisspelledWord:[NSString stringWithCxxString:buf.substr(nextMisspelling.first, nextMisspelling.second)]];
+			[speller updateSpellingPanelWithMisspelledWord:[NSString stringWithCxxString:documentView->substr(nextMisspelling.first, nextMisspelling.second)]];
 		}
 		else
 		{
@@ -3136,8 +3155,8 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (void)toggleContinuousSpellChecking:(id)sender
 {
-	bool flag = !document->buffer().live_spelling();
-	document->buffer().set_live_spelling(flag);
+	bool flag = !documentView->live_spelling();
+	documentView->set_live_spelling(flag);
 	settings_t::set(kSettingsSpellCheckingKey, flag, document->file_type(), document->path());
 
 	[self setNeedsDisplay:YES];
@@ -3147,7 +3166,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 {
 	NSString* lang = (NSString*)[sender representedObject];
 	[[NSSpellChecker sharedSpellChecker] setLanguage:lang];
-	document->buffer().set_spelling_language(to_s(lang));
+	documentView->set_spelling_language(to_s(lang));
 	settings_t::set(kSettingsSpellingLanguageKey, to_s(lang), "", document->path());
 	if(document->path() != NULL_STR)
 		settings_t::set(kSettingsSpellingLanguageKey, to_s(lang), NULL_STR, path::join(path::parent(document->path()), "**"));
@@ -3194,8 +3213,8 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	text::selection_t ranges, withoutCarry;
 	for(auto const& range : documentView->ranges())
 	{
-		text::pos_t from = document->buffer().convert(range.first.index);
-		text::pos_t to   = document->buffer().convert(range.last.index);
+		text::pos_t from = documentView->convert(range.first.index);
+		text::pos_t to   = documentView->convert(range.last.index);
 		if(!range.freehanded && !range.columnar)
 			withoutCarry.push_back(text::range_t(from, to, range.columnar));
 		from.offset = range.first.carry;
@@ -3249,7 +3268,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	if(io::process_t process = io::spawn(std::vector<std::string>{ "/bin/sh", "-c", to_s(commandString) }, environment))
 	{
 		bool inputWasSelection = false;
-		ng::ranges_t const inputRanges = ng::write_unit_to_fd(document->buffer(), documentView->ranges(), document->buffer().indent().tab_size(), process.in, inputUnit, input::entire_document, input_format::text, scope::selector_t(), environment, &inputWasSelection);
+		ng::ranges_t const inputRanges = ng::write_unit_to_fd(document->buffer(), documentView->ranges(), documentView->indent().tab_size(), process.in, inputUnit, input::entire_document, input_format::text, scope::selector_t(), environment, &inputWasSelection);
 
 		__block int status = 0;
 		__block std::string output, error;
@@ -3752,7 +3771,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 	std::vector<std::string> v;
 	for(auto const& range : ranges)
-		v.push_back(document->buffer().substr(range.min().index, range.max().index));
+		v.push_back(documentView->substr(range.min().index, range.max().index));
 
 	NSDraggingItem* dragItem = [[NSDraggingItem alloc] initWithPasteboardWriter:[NSString stringWithCxxString:text::join(v, "\n")]];
 	[dragItem setDraggingFrame:srcRect contents:image];
