@@ -242,8 +242,8 @@ struct document_view_t
 {
 	document_view_t (document::document_ptr const& document, theme_ptr const& theme, bool softWrap, bool wrapColumn, bool scrollPastEnd) : document(document)
 	{
-		editor = ng::editor_for_document(document);
-		layout = std::make_shared<ng::layout_t>(document->buffer(), theme, softWrap, scrollPastEnd, wrapColumn, document->folded());
+		_editor = ng::editor_for_document(document);
+		_layout = std::make_shared<ng::layout_t>(document->buffer(), theme, softWrap, scrollPastEnd, wrapColumn, document->folded());
 	}
 
 	// ==========
@@ -288,82 +288,83 @@ struct document_view_t
 	// = Editor =
 	// ==========
 
-	ng::editor_delegate_t* delegate () const { return editor->delegate(); }
-	void set_delegate (ng::editor_delegate_t* delegate) { editor->set_delegate(delegate); }
-	void perform (ng::action_t action, ng::indent_correction_t indentCorrections = ng::kIndentCorrectAlways, std::string const& scopeAttributes = NULL_STR) { editor->perform(action, layout.get(), indentCorrections, scopeAttributes); }
-	bool disallow_tab_expansion () const { return editor->disallow_tab_expansion(); }
-	void insert (std::string const& str, bool selectInsertion = false) { editor->insert(str, selectInsertion); }
-	void insert_with_pairing (std::string const& str, ng::indent_correction_t indentCorrections, bool autoPairing, std::string const& scopeAttributes = NULL_STR) { editor->insert_with_pairing(str, indentCorrections, autoPairing, scopeAttributes); }
-	void move_selection_to (ng::index_t const& index, bool selectInsertion = true) { editor->move_selection_to(index, selectInsertion); }
-	ng::ranges_t replace_all (std::string const& searchFor, std::string const& replaceWith, find::options_t options = find::none, bool searchOnlySelection = false) { return editor->replace_all(searchFor, replaceWith, options, searchOnlySelection); }
-	void delete_tab_trigger (std::string const& str) { editor->delete_tab_trigger(str); }
-	void macro_dispatch (plist::dictionary_t const& args, std::map<std::string, std::string> const& variables) { editor->macro_dispatch(args, variables); }
-	void snippet_dispatch (plist::dictionary_t const& args, std::map<std::string, std::string> const& variables) { editor->snippet_dispatch(args, variables); }
-	scope::context_t scope (std::string const& scopeAttributes) const { return editor->scope(scopeAttributes); }
-	std::map<std::string, std::string> editor_variables (std::string const& scopeAttributes) const { return editor->editor_variables(scopeAttributes); }
-	std::vector<std::string> const& choices () const { return editor->choices(); }
-	std::string placeholder_content (ng::range_t* placeholderSelection = NULL) const { return editor->placeholder_content(placeholderSelection); }
-	void set_placeholder_content (std::string const& str, size_t selectFrom) { editor->set_placeholder_content(str, selectFrom); }
-	ng::ranges_t ranges () const { return editor->ranges(); }
-	void set_selections (ng::ranges_t const& r) { editor->set_selections(r); }
-	bool has_selection () const { return editor->has_selection(); }
-	std::string as_string (size_t from = 0, size_t to = SIZE_T_MAX) const { return editor->as_string(from, to); }
-	bool handle_result (std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, ng::ranges_t const& inputRanges, std::map<std::string, std::string> environment) { return editor->handle_result(out, placement, format, outputCaret, inputRanges, environment); }
-	void clear_snippets () { editor->clear_snippets(); }
-	void set_clipboard (clipboard_ptr cb) { editor->set_clipboard(cb); }
-	void set_find_clipboard (clipboard_ptr cb) { editor->set_find_clipboard(cb); }
-	void set_replace_clipboard (clipboard_ptr cb) { editor->set_replace_clipboard(cb); }
+	ng::editor_delegate_t* delegate () const { return _editor->delegate(); }
+	void set_delegate (ng::editor_delegate_t* delegate) { _editor->set_delegate(delegate); }
+	void perform (ng::action_t action, ng::indent_correction_t indentCorrections = ng::kIndentCorrectAlways, std::string const& scopeAttributes = NULL_STR) { _editor->perform(action, _layout.get(), indentCorrections, scopeAttributes); }
+	bool disallow_tab_expansion () const { return _editor->disallow_tab_expansion(); }
+	void insert (std::string const& str, bool selectInsertion = false) { _editor->insert(str, selectInsertion); }
+	void insert_with_pairing (std::string const& str, ng::indent_correction_t indentCorrections, bool autoPairing, std::string const& scopeAttributes = NULL_STR) { _editor->insert_with_pairing(str, indentCorrections, autoPairing, scopeAttributes); }
+	void move_selection_to (ng::index_t const& index, bool selectInsertion = true) { _editor->move_selection_to(index, selectInsertion); }
+	ng::ranges_t replace_all (std::string const& searchFor, std::string const& replaceWith, find::options_t options = find::none, bool searchOnlySelection = false) { return _editor->replace_all(searchFor, replaceWith, options, searchOnlySelection); }
+	void delete_tab_trigger (std::string const& str) { _editor->delete_tab_trigger(str); }
+	void macro_dispatch (plist::dictionary_t const& args, std::map<std::string, std::string> const& variables) { _editor->macro_dispatch(args, variables); }
+	void snippet_dispatch (plist::dictionary_t const& args, std::map<std::string, std::string> const& variables) { _editor->snippet_dispatch(args, variables); }
+	scope::context_t scope (std::string const& scopeAttributes) const { return _editor->scope(scopeAttributes); }
+	std::map<std::string, std::string> editor_variables (std::string const& scopeAttributes) const { return _editor->editor_variables(scopeAttributes); }
+	std::vector<std::string> const& choices () const { return _editor->choices(); }
+	std::string placeholder_content (ng::range_t* placeholderSelection = NULL) const { return _editor->placeholder_content(placeholderSelection); }
+	void set_placeholder_content (std::string const& str, size_t selectFrom) { _editor->set_placeholder_content(str, selectFrom); }
+	ng::ranges_t ranges () const { return _editor->ranges(); }
+	void set_selections (ng::ranges_t const& r) { _editor->set_selections(r); }
+	bool has_selection () const { return _editor->has_selection(); }
+	std::string as_string (size_t from = 0, size_t to = SIZE_T_MAX) const { return _editor->as_string(from, to); }
+	bool handle_result (std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, ng::ranges_t const& inputRanges, std::map<std::string, std::string> environment) { return _editor->handle_result(out, placement, format, outputCaret, inputRanges, environment); }
+	void clear_snippets () { _editor->clear_snippets(); }
+	void set_clipboard (clipboard_ptr cb) { _editor->set_clipboard(cb); }
+	void set_find_clipboard (clipboard_ptr cb) { _editor->set_find_clipboard(cb); }
+	void set_replace_clipboard (clipboard_ptr cb) { _editor->set_replace_clipboard(cb); }
 
 	// ==========
 	// = Layout =
 	// ==========
 
-	void set_theme (theme_ptr const& theme) { layout->set_theme(theme); }
-	void set_font (std::string const& fontName, CGFloat fontSize) { layout->set_font(fontName, fontSize); }
-	void set_wrapping (bool softWrap, size_t wrapColumn) { layout->set_wrapping(softWrap, wrapColumn); }
-	void set_scroll_past_end (bool scrollPastEnd) { layout->set_scroll_past_end(scrollPastEnd); }
-	ng::layout_t::margin_t const& margin () const { return layout->margin(); }
-	bool wrapping () const { return layout->wrapping(); }
-	void set_is_key (bool isKey) { layout->set_is_key(isKey); }
-	void set_draw_caret (bool drawCaret) { layout->set_draw_caret(drawCaret); }
-	void set_draw_wrap_column (bool drawWrapColumn) { layout->set_draw_wrap_column(drawWrapColumn); }
-	void set_draw_indent_guides (bool drawIndentGuides) { layout->set_draw_indent_guides(drawIndentGuides); }
-	void set_drop_marker (ng::index_t dropMarkerIndex) { layout->set_drop_marker(dropMarkerIndex); }
-	void set_viewport_size (CGSize size) { layout->set_viewport_size(size); }
-	bool draw_wrap_column () const { return layout->draw_wrap_column(); }
-	bool draw_indent_guides () const { return layout->draw_indent_guides(); }
-	void update_metrics (CGRect visibleRect) { layout->update_metrics(visibleRect); }
-	void draw (ng::context_t const& context, CGRect rectangle, bool isFlipped, ng::ranges_t const& selection, ng::ranges_t const& highlightRanges = ng::ranges_t(), bool drawBackground = true) { layout->draw(context, rectangle, isFlipped, selection, highlightRanges, drawBackground); }
-	ng::index_t index_at_point (CGPoint point) const { return layout->index_at_point(point); }
-	CGRect rect_at_index (ng::index_t const& index, bool bol_as_eol = false, bool wantsBaseline = false) const { return layout->rect_at_index(index, bol_as_eol, wantsBaseline); }
-	CGRect rect_for_range (size_t first, size_t last, bool bol_as_eol = false) const { return layout->rect_for_range(first, last, bol_as_eol); }
-	std::vector<CGRect> rects_for_ranges (ng::ranges_t const& ranges, kRectsIncludeMode mode = kRectsIncludeAll) const { return layout->rects_for_ranges(ranges, mode); }
-	CGFloat width () const { return layout->width(); }
-	CGFloat height () const { return layout->height(); }
-	void begin_refresh_cycle (ng::ranges_t const& selection, ng::ranges_t const& highlightRanges = ng::ranges_t()) { layout->begin_refresh_cycle(selection, highlightRanges); }
-	std::vector<CGRect> end_refresh_cycle (ng::ranges_t const& selection, CGRect visibleRect, ng::ranges_t const& highlightRanges = ng::ranges_t()) { return layout->end_refresh_cycle(selection, visibleRect, highlightRanges); }
-	void did_update_scopes (size_t from, size_t to) { layout->did_update_scopes(from, to); }
-	ng::index_t index_below (ng::index_t const& index) const { return layout->index_below(index); }
-	size_t softline_for_index (ng::index_t const& index) const { return layout->softline_for_index(index); }
-	ng::range_t range_for_softline (size_t softline) const { return layout->range_for_softline(softline); }
-	bool is_line_folded (size_t n) const { return layout->is_line_folded(n); }
-	bool is_line_fold_start_marker (size_t n) const { return layout->is_line_fold_start_marker(n); }
-	bool is_line_fold_stop_marker (size_t n) const { return layout->is_line_fold_stop_marker(n); }
-	void fold (size_t from, size_t to) { layout->fold(from, to); }
-	void unfold (size_t from, size_t to) { layout->unfold(from, to); }
-	void remove_enclosing_folds (size_t from, size_t to) { layout->remove_enclosing_folds(from, to); }
-	void toggle_fold_at_line (size_t n, bool recursive) { layout->toggle_fold_at_line(n, recursive); }
-	void toggle_all_folds_at_level (size_t level) { layout->toggle_all_folds_at_level(level); }
-	std::string folded_as_string () const { return layout->folded_as_string(); }
-	ng::range_t folded_range_at_point (CGPoint point) const { return layout->folded_range_at_point(point); }
-	ng::line_record_t line_record_for (CGFloat y) const { return layout->line_record_for(y); }
-	ng::line_record_t line_record_for (text::pos_t const& pos) const { return layout->line_record_for(pos); }
+	void set_theme (theme_ptr const& theme) { _layout->set_theme(theme); }
+	void set_font (std::string const& fontName, CGFloat fontSize) { _layout->set_font(fontName, fontSize); }
+	void set_wrapping (bool softWrap, size_t wrapColumn) { _layout->set_wrapping(softWrap, wrapColumn); }
+	void set_scroll_past_end (bool scrollPastEnd) { _layout->set_scroll_past_end(scrollPastEnd); }
+	ng::layout_t::margin_t const& margin () const { return _layout->margin(); }
+	bool wrapping () const { return _layout->wrapping(); }
+	void set_is_key (bool isKey) { _layout->set_is_key(isKey); }
+	void set_draw_caret (bool drawCaret) { _layout->set_draw_caret(drawCaret); }
+	void set_draw_wrap_column (bool drawWrapColumn) { _layout->set_draw_wrap_column(drawWrapColumn); }
+	void set_draw_indent_guides (bool drawIndentGuides) { _layout->set_draw_indent_guides(drawIndentGuides); }
+	void set_drop_marker (ng::index_t dropMarkerIndex) { _layout->set_drop_marker(dropMarkerIndex); }
+	void set_viewport_size (CGSize size) { _layout->set_viewport_size(size); }
+	bool draw_wrap_column () const { return _layout->draw_wrap_column(); }
+	bool draw_indent_guides () const { return _layout->draw_indent_guides(); }
+	void update_metrics (CGRect visibleRect) { _layout->update_metrics(visibleRect); }
+	void draw (ng::context_t const& context, CGRect rectangle, bool isFlipped, ng::ranges_t const& selection, ng::ranges_t const& highlightRanges = ng::ranges_t(), bool drawBackground = true) { _layout->draw(context, rectangle, isFlipped, selection, highlightRanges, drawBackground); }
+	ng::index_t index_at_point (CGPoint point) const { return _layout->index_at_point(point); }
+	CGRect rect_at_index (ng::index_t const& index, bool bol_as_eol = false, bool wantsBaseline = false) const { return _layout->rect_at_index(index, bol_as_eol, wantsBaseline); }
+	CGRect rect_for_range (size_t first, size_t last, bool bol_as_eol = false) const { return _layout->rect_for_range(first, last, bol_as_eol); }
+	std::vector<CGRect> rects_for_ranges (ng::ranges_t const& ranges, kRectsIncludeMode mode = kRectsIncludeAll) const { return _layout->rects_for_ranges(ranges, mode); }
+	CGFloat width () const { return _layout->width(); }
+	CGFloat height () const { return _layout->height(); }
+	void begin_refresh_cycle (ng::ranges_t const& selection, ng::ranges_t const& highlightRanges = ng::ranges_t()) { _layout->begin_refresh_cycle(selection, highlightRanges); }
+	std::vector<CGRect> end_refresh_cycle (ng::ranges_t const& selection, CGRect visibleRect, ng::ranges_t const& highlightRanges = ng::ranges_t()) { return _layout->end_refresh_cycle(selection, visibleRect, highlightRanges); }
+	void did_update_scopes (size_t from, size_t to) { _layout->did_update_scopes(from, to); }
+	ng::index_t index_below (ng::index_t const& index) const { return _layout->index_below(index); }
+	size_t softline_for_index (ng::index_t const& index) const { return _layout->softline_for_index(index); }
+	ng::range_t range_for_softline (size_t softline) const { return _layout->range_for_softline(softline); }
+	bool is_line_folded (size_t n) const { return _layout->is_line_folded(n); }
+	bool is_line_fold_start_marker (size_t n) const { return _layout->is_line_fold_start_marker(n); }
+	bool is_line_fold_stop_marker (size_t n) const { return _layout->is_line_fold_stop_marker(n); }
+	void fold (size_t from, size_t to) { _layout->fold(from, to); }
+	void unfold (size_t from, size_t to) { _layout->unfold(from, to); }
+	void remove_enclosing_folds (size_t from, size_t to) { _layout->remove_enclosing_folds(from, to); }
+	void toggle_fold_at_line (size_t n, bool recursive) { _layout->toggle_fold_at_line(n, recursive); }
+	void toggle_all_folds_at_level (size_t level) { _layout->toggle_all_folds_at_level(level); }
+	std::string folded_as_string () const { return _layout->folded_as_string(); }
+	ng::range_t folded_range_at_point (CGPoint point) const { return _layout->folded_range_at_point(point); }
+	ng::line_record_t line_record_for (CGFloat y) const { return _layout->line_record_for(y); }
+	ng::line_record_t line_record_for (text::pos_t const& pos) const { return _layout->line_record_for(pos); }
 
 	// ==========
 
 	document::document_ptr document;
-	ng::editor_ptr editor;
-	std::shared_ptr<ng::layout_t> layout;
+private:
+	ng::editor_ptr _editor;
+	std::shared_ptr<ng::layout_t> _layout;
 };
 
 @interface OakTextView () <NSTextInputClient, NSDraggingSource, NSIgnoreMisspelledWords, NSChangeSpelling, NSTextFieldDelegate>
