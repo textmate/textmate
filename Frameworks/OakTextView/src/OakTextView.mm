@@ -463,25 +463,25 @@ struct document_view_t
 @property (nonatomic) BOOL needsEnsureSelectionIsInVisibleArea;
 @end
 
-static std::vector<bundles::item_ptr> items_for_tab_expansion (ng::buffer_t const& buffer, ng::ranges_t const& ranges, std::string const& scopeAttributes, ng::range_t* range)
+static std::vector<bundles::item_ptr> items_for_tab_expansion (std::shared_ptr<document_view_t> const& documentView, ng::ranges_t const& ranges, std::string const& scopeAttributes, ng::range_t* range)
 {
 	size_t caret = ranges.last().min().index;
-	size_t line  = buffer.convert(caret).line;
-	size_t bol   = buffer.begin(line);
+	size_t line  = documentView->convert(caret).line;
+	size_t bol   = documentView->begin(line);
 
 	bool lastWasWordChar           = false;
 	std::string lastCharacterClass = ng::kCharacterClassUnknown;
 
-	scope::scope_t const rightScope = ng::scope(buffer, ng::ranges_t(caret), scopeAttributes).right;
-	for(size_t i = bol; i < caret; i += buffer[i].size())
+	scope::scope_t const rightScope = ng::scope(documentView->document->buffer(), ng::ranges_t(caret), scopeAttributes).right;
+	for(size_t i = bol; i < caret; i += (*documentView)[i].size())
 	{
 		// we don’t use text::is_word_char because that function treats underscores as word characters, which is undesired, see <issue://157>.
-		bool isWordChar = CFCharacterSetIsLongCharacterMember(CFCharacterSetGetPredefined(kCFCharacterSetAlphaNumeric), utf8::to_ch(buffer[i]));
-		std::string characterClass = ng::character_class(buffer, i);
+		bool isWordChar = CFCharacterSetIsLongCharacterMember(CFCharacterSetGetPredefined(kCFCharacterSetAlphaNumeric), utf8::to_ch((*documentView)[i]));
+		std::string characterClass = ng::character_class(documentView->document->buffer(), i);
 
 		if(i == bol || lastWasWordChar != isWordChar || lastCharacterClass != characterClass || !isWordChar)
 		{
-			std::vector<bundles::item_ptr> const& items = bundles::query(bundles::kFieldTabTrigger, buffer.substr(i, caret), scope::context_t(ng::scope(buffer, ng::ranges_t(i), scopeAttributes).left, rightScope));
+			std::vector<bundles::item_ptr> const& items = bundles::query(bundles::kFieldTabTrigger, documentView->substr(i, caret), scope::context_t(ng::scope(documentView->document->buffer(), ng::ranges_t(i), scopeAttributes).left, rightScope));
 			if(!items.empty())
 			{
 				if(range)
@@ -2774,7 +2774,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 
 	AUTO_REFRESH;
 	ng::range_t range;
-	std::vector<bundles::item_ptr> const& items = items_for_tab_expansion(document->buffer(), documentView->ranges(), to_s([self scopeAttributes]), &range);
+	std::vector<bundles::item_ptr> const& items = items_for_tab_expansion(documentView, documentView->ranges(), to_s([self scopeAttributes]), &range);
 	if(bundles::item_ptr item = OakShowMenuForBundleItems(items, [self positionForWindowUnderCaret]))
 	{
 		[self recordSelector:@selector(deleteTabTrigger:) withArgument:[NSString stringWithCxxString:documentView->as_string(range.first.index, range.last.index)]];
