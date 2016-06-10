@@ -251,6 +251,7 @@ struct document_view_t
 	// ==========
 
 	size_t size () const { return document->buffer().size(); }
+	std::string operator[] (size_t i) const { return document->buffer()[i]; }
 	std::string substr (size_t from, size_t to) const { return document->buffer().substr(from, to); }
 	size_t begin (size_t n) const { return document->buffer().begin(n); }
 	size_t eol (size_t n) const { return document->buffer().eol(n); }
@@ -1540,13 +1541,13 @@ doScroll:
 		point = [self convertPoint:point fromView:nil];
 		size_t index = documentView->index_at_point(point).index;
 		index = documentView->sanitize_index(index);
-		size_t const length = document->buffer()[index].length();
+		size_t const length = (*documentView)[index].length();
 		ret = [NSValue valueWithRange:[self nsRangeForRange:ng::range_t(index, index + length)]];
 	} else if([attribute isEqualToString:NSAccessibilityRangeForIndexParameterizedAttribute]) {
 		size_t index = [((NSNumber*)parameter) unsignedLongValue];
 		index = [self rangeForNSRange:NSMakeRange(index, 0)].min().index;
 		index = documentView->sanitize_index(index);
-		size_t const length = document->buffer()[index].length();
+		size_t const length = (*documentView)[index].length();
 		ret = [NSValue valueWithRange:[self nsRangeForRange:ng::range_t(index, index + length)]];
 	} else if([attribute isEqualToString:NSAccessibilityBoundsForRangeParameterizedAttribute]) {
 		ng::range_t range = [self rangeForNSRange:[((NSValue*)parameter) rangeValue]];
