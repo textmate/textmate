@@ -3,7 +3,9 @@
 #include <text/case.h>
 #include <text/format.h>
 #include <text/tokenize.h>
+#include <text/trim.h>
 #include <io/path.h>
+#include <io/exec.h>
 #include <oak/oak.h>
 
 namespace scm
@@ -36,7 +38,18 @@ namespace scm
 		for(auto const& path : candidates)
 		{
 			if(path::is_executable(path))
+			{
+				if(path == "/usr/bin/git")
+				{
+					std::string const xcodePath = io::exec("/usr/bin/xcode-select", "-p");
+					if(!path::is_directory(text::trim(xcodePath, "\n")))
+					{
+						fprintf(stderr, "*** ignore ‘%s’ because it appears to be a shim and Xcode is not installed\n", path.c_str());
+						continue;
+					}
+				}
 				return path;
+			}
 		}
 
 		return NULL_STR;
