@@ -259,6 +259,7 @@ struct document_view_t
 	size_t convert (text::pos_t const& p) const { return document->buffer().convert(p); }
 	text::pos_t convert (size_t i) const { return document->buffer().convert(i); }
 	text::indent_t const& indent () const { return document->buffer().indent(); }
+	void set_indent (text::indent_t const& indent) { document->set_indent(indent); }
 	std::map<size_t, scope::scope_t> scopes (size_t from, size_t to) const { return document->buffer().scopes(from, to); }
 	void set_live_spelling (bool flag) { document->buffer().set_live_spelling(flag); }
 	bool live_spelling () const { return document->buffer().live_spelling(); }
@@ -2899,8 +2900,8 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (theme_ptr const&)theme     { return theme; }
 - (NSFont*)font               { return [NSFont fontWithName:[NSString stringWithCxxString:fontName] size:fontSize]; }
-- (size_t)tabSize             { return document ? document->indent().tab_size() : 2; }
-- (BOOL)softTabs              { return document ? document->indent().soft_tabs() : NO; }
+- (size_t)tabSize             { return documentView ? documentView->indent().tab_size() : 2; }
+- (BOOL)softTabs              { return documentView ? documentView->indent().soft_tabs() : NO; }
 - (BOOL)softWrap              { return documentView && documentView->wrapping(); }
 
 - (ng::indent_correction_t)indentCorrections
@@ -2967,11 +2968,11 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 - (void)setTabSize:(size_t)newTabSize
 {
 	AUTO_REFRESH;
-	if(document)
+	if(documentView)
 	{
-		text::indent_t tmp = document->indent();
+		text::indent_t tmp = documentView->indent();
 		tmp.set_tab_size(newTabSize);
-		document->set_indent(tmp);
+		documentView->set_indent(tmp);
 	}
 }
 
@@ -3013,9 +3014,9 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 {
 	if(flag != self.softTabs)
 	{
-		text::indent_t tmp = document->indent();
+		text::indent_t tmp = documentView->indent();
 		tmp.set_soft_tabs(flag);
-		document->set_indent(tmp);
+		documentView->set_indent(tmp);
 	}
 }
 
