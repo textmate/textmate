@@ -473,7 +473,7 @@ static std::vector<bundles::item_ptr> items_for_tab_expansion (ng::buffer_t cons
 	{
 		// we don’t use text::is_word_char because that function treats underscores as word characters, which is undesired, see <issue://157>.
 		bool isWordChar = CFCharacterSetIsLongCharacterMember(CFCharacterSetGetPredefined(kCFCharacterSetAlphaNumeric), utf8::to_ch(buffer[i]));
-		std::string characterClass = character_class(buffer, i);
+		std::string characterClass = ng::character_class(buffer, i);
 
 		if(i == bol || lastWasWordChar != isWordChar || lastCharacterClass != characterClass || !isWordChar)
 		{
@@ -778,7 +778,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 	{
 		if(document->selection() != NULL_STR)
 		{
-			ng::ranges_t ranges = convert(document->buffer(), document->selection());
+			ng::ranges_t ranges = ng::convert(document->buffer(), document->selection());
 			documentView->set_selections(ranges);
 			for(auto const& range : ranges)
 				documentView->remove_enclosing_folds(range.min().index, range.max().index);
@@ -846,7 +846,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 		ng::index_t visibleIndex = document->visible_index();
 		if(document->selection() != NULL_STR)
 		{
-			ng::ranges_t ranges = convert(document->buffer(), document->selection());
+			ng::ranges_t ranges = ng::convert(document->buffer(), document->selection());
 			documentView->set_selections(ranges);
 			for(auto const& range : ranges)
 				documentView->remove_enclosing_folds(range.min().index, range.max().index);
@@ -3072,7 +3072,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	}
 }
 
-- (BOOL)hasMultiLineSelection { return multiline(document->buffer(), documentView->ranges()); }
+- (BOOL)hasMultiLineSelection { return ng::multiline(document->buffer(), documentView->ranges()); }
 
 - (IBAction)toggleShowInvisibles:(id)sender
 {
@@ -3209,7 +3209,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		return;
 
 	AUTO_REFRESH;
-	ng::ranges_t ranges = convert(document->buffer(), to_s(aSelectionString));
+	ng::ranges_t ranges = ng::convert(document->buffer(), to_s(aSelectionString));
 	documentView->set_selections(ranges);
 	for(auto const& range : ranges)
 		documentView->remove_enclosing_folds(range.min().index, range.max().index);
