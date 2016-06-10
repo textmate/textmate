@@ -393,14 +393,14 @@ struct refresh_helper_t
 {
 	typedef std::shared_ptr<ng::layout_t> layout_ptr;
 
-	refresh_helper_t (OakTextView* self, document::document_ptr document, ng::editor_ptr editor, layout_ptr theLayout) : _self(self), _document(document), _editor(editor), _layout(theLayout)
+	refresh_helper_t (OakTextView* self, std::unique_ptr<document_view_t> const& documentView) : _self(self), _document(documentView->document), _editor(documentView->editor), _layout(documentView->layout)
 	{
 		if(++_self.refreshNestCount == 1)
 		{
 			_document->sync_open();
 
-			_revision  = document->buffer().revision();
-			_selection = editor->ranges();
+			_revision  = _document->buffer().revision();
+			_selection = _editor->ranges();
 			_document->undo_manager().begin_undo_group(_editor->ranges());
 			if(layout_ptr layout = _layout.lock())
 				layout->begin_refresh_cycle(merge(_editor->ranges(), [_self markedRanges]), [_self liveSearchRanges]);
@@ -487,7 +487,7 @@ private:
 	std::weak_ptr<ng::layout_t> _layout;
 };
 
-#define AUTO_REFRESH refresh_helper_t _dummy(self, document, documentView->editor, documentView->layout)
+#define AUTO_REFRESH refresh_helper_t _dummy(self, documentView)
 
 struct buffer_refresh_callback_t : ng::callback_t
 {
