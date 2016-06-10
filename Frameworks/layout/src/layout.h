@@ -61,7 +61,7 @@ namespace ng
 		void set_viewport_size (CGSize size);
 
 		bool draw_wrap_column () const          { return _draw_wrap_column; }
-		bool draw_indent_guides() const         { return _draw_indent_guides; }
+		bool draw_indent_guides () const        { return _draw_indent_guides; }
 		bool scroll_past_end () const           { return _scroll_past_end; }
 
 		// ======================
