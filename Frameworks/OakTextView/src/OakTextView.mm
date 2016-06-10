@@ -251,6 +251,7 @@ struct document_view_t
 	// ==========
 
 	size_t size () const { return document->buffer().size(); }
+	size_t revision () const { return document->buffer().revision(); }
 	std::string operator[] (size_t i) const { return document->buffer()[i]; }
 	std::string substr (size_t from, size_t to) const { return document->buffer().substr(from, to); }
 	size_t begin (size_t n) const { return document->buffer().begin(n); }
@@ -339,6 +340,8 @@ struct document_view_t
 	std::vector<CGRect> rects_for_ranges (ng::ranges_t const& ranges, kRectsIncludeMode mode = kRectsIncludeAll) const { return layout->rects_for_ranges(ranges, mode); }
 	CGFloat width () const { return layout->width(); }
 	CGFloat height () const { return layout->height(); }
+	void begin_refresh_cycle (ng::ranges_t const& selection, ng::ranges_t const& highlightRanges = ng::ranges_t()) { layout->begin_refresh_cycle(selection, highlightRanges); }
+	std::vector<CGRect> end_refresh_cycle (ng::ranges_t const& selection, CGRect visibleRect, ng::ranges_t const& highlightRanges = ng::ranges_t()) { return layout->end_refresh_cycle(selection, visibleRect, highlightRanges); }
 	void did_update_scopes (size_t from, size_t to) { layout->did_update_scopes(from, to); }
 	ng::index_t index_below (ng::index_t const& index) const { return layout->index_below(index); }
 	size_t softline_for_index (ng::index_t const& index) const { return layout->softline_for_index(index); }
@@ -371,7 +374,7 @@ struct document_view_t
 	theme_ptr theme;
 	std::string fontName;
 	CGFloat fontSize;
-	std::unique_ptr<document_view_t> documentView;
+	std::shared_ptr<document_view_t> documentView;
 	NSUInteger refreshNestCount;
 	buffer_refresh_callback_t* callback;
 
@@ -503,19 +506,16 @@ static ng::ranges_t merge (ng::ranges_t lhs, ng::ranges_t const& rhs)
 
 struct refresh_helper_t
 {
-	typedef std::shared_ptr<ng::layout_t> layout_ptr;
-
-	refresh_helper_t (OakTextView* self, std::unique_ptr<document_view_t> const& documentView) : _self(self), _document(documentView->document), _editor(documentView->editor), _layout(documentView->layout)
+	refresh_helper_t (OakTextView* self, std::shared_ptr<document_view_t> const& documentView) : _self(self), _document(documentView->document), _document_view(documentView)
 	{
 		if(++_self.refreshNestCount == 1)
 		{
 			_document->sync_open();
 
-			_revision  = _document->buffer().revision();
-			_selection = _editor->ranges();
-			_document->undo_manager().begin_undo_group(_editor->ranges());
-			if(layout_ptr layout = _layout.lock())
-				layout->begin_refresh_cycle(merge(_editor->ranges(), [_self markedRanges]), [_self liveSearchRanges]);
+			_revision  = documentView->revision();
+			_selection = documentView->ranges();
+			documentView->begin_undo_group(_selection);
+			documentView->begin_refresh_cycle(merge(_selection, [_self markedRanges]), [_self liveSearchRanges]);
 		}
 	}
 
@@ -535,12 +535,12 @@ struct refresh_helper_t
 	{
 		if(--_self.refreshNestCount == 0)
 		{
-			_document->undo_manager().end_undo_group(_editor->ranges());
-			if(layout_ptr layout = _layout.lock())
+			if(auto documentView = _document_view.lock())
 			{
-				if(_revision == _document->buffer().revision())
+				documentView->end_undo_group(documentView->ranges());
+				if(_revision == documentView->revision())
 				{
-					for(auto const& range : ng::highlight_ranges_for_movement(_document->buffer(), _selection, _editor->ranges()))
+					for(auto const& range : ng::highlight_ranges_for_movement(_document->buffer(), _selection, documentView->ranges()))
 					{
 						NSRect imageRect;
 						NSImage* image = [_self imageForRanges:range imageRect:&imageRect];
@@ -549,16 +549,16 @@ struct refresh_helper_t
 					}
 				}
 
-				if(_revision != _document->buffer().revision() || _selection != _editor->ranges())
+				if(_revision != documentView->revision() || _selection != documentView->ranges())
 				{
 					[_self updateMarkedRanges];
 					[_self updateSelection];
 				}
 
-				auto damagedRects = layout->end_refresh_cycle(merge(_editor->ranges(), [_self markedRanges]), [_self visibleRect], [_self liveSearchRanges]);
+				auto damagedRects = documentView->end_refresh_cycle(merge(documentView->ranges(), [_self markedRanges]), [_self visibleRect], [_self liveSearchRanges]);
 
 				NSRect r = [[_self enclosingScrollView] documentVisibleRect];
-				NSSize newSize = NSMakeSize(std::max(NSWidth(r), layout->width()), std::max(NSHeight(r), layout->height()));
+				NSSize newSize = NSMakeSize(std::max(NSWidth(r), documentView->width()), std::max(NSHeight(r), documentView->height()));
 				if(!NSEqualSizes([_self frame].size, newSize))
 					[_self setFrameSize:newSize];
 
@@ -575,10 +575,10 @@ struct refresh_helper_t
 					}
 				}
 
-				if(_revision != _document->buffer().revision() || _selection != _editor->ranges() || _self.needsEnsureSelectionIsInVisibleArea)
+				if(_revision != documentView->revision() || _selection != documentView->ranges() || _self.needsEnsureSelectionIsInVisibleArea)
 				{
-					if(_revision != _document->buffer().revision()) // FIXME document_t needs to skip work in set_revision if nothing changed.
-						_document->set_revision(_document->buffer().revision());
+					if(_revision != documentView->revision()) // FIXME document_t needs to skip work in set_revision if nothing changed.
+						_document->set_revision(documentView->revision());
 
 					[_self ensureSelectionIsInVisibleArea:nil];
 					[_self resetBlinkCaretTimer];
@@ -593,10 +593,9 @@ struct refresh_helper_t
 private:
 	OakTextView* _self;
 	document::document_ptr _document;
+	std::weak_ptr<document_view_t> _document_view;
 	size_t _revision;
-	ng::editor_ptr _editor;
 	ng::ranges_t _selection;
-	std::weak_ptr<ng::layout_t> _layout;
 };
 
 #define AUTO_REFRESH refresh_helper_t _dummy(self, documentView)
@@ -814,7 +813,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 		wrapColumn = settings.get(kSettingsWrapColumnKey, wrapColumn);
 		invisiblesMap = settings.get(kSettingsInvisiblesMapKey, "");
-		documentView = std::make_unique<document_view_t>(document, theme, settings.get(kSettingsSoftWrapKey, false), wrapColumn, self.scrollPastEnd);
+		documentView = std::make_shared<document_view_t>(document, theme, settings.get(kSettingsSoftWrapKey, false), wrapColumn, self.scrollPastEnd);
 		if(settings.get(kSettingsShowWrapColumnKey, false))
 			documentView->set_draw_wrap_column(true);
 
