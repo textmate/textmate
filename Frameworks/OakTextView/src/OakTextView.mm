@@ -289,7 +289,7 @@ struct document_view_t
 
 	ng::editor_delegate_t* delegate () const { return editor->delegate(); }
 	void set_delegate (ng::editor_delegate_t* delegate) { editor->set_delegate(delegate); }
-	void perform (ng::action_t action, ng::layout_t const* layout = NULL, ng::indent_correction_t indentCorrections = ng::kIndentCorrectAlways, std::string const& scopeAttributes = NULL_STR) { editor->perform(action, layout, indentCorrections, scopeAttributes); }
+	void perform (ng::action_t action, ng::indent_correction_t indentCorrections = ng::kIndentCorrectAlways, std::string const& scopeAttributes = NULL_STR) { editor->perform(action, layout.get(), indentCorrections, scopeAttributes); }
 	bool disallow_tab_expansion () const { return editor->disallow_tab_expansion(); }
 	void insert (std::string const& str, bool selectInsertion = false) { editor->insert(str, selectInsertion); }
 	void insert_with_pairing (std::string const& str, ng::indent_correction_t indentCorrections, bool autoPairing, std::string const& scopeAttributes = NULL_STR) { editor->insert_with_pairing(str, indentCorrections, autoPairing, scopeAttributes); }
@@ -2105,7 +2105,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 
 		if(event != OakChoiceMenuKeyCancel)
 		{
-			documentView->perform(ng::kInsertTab, documentView->layout.get(), [self indentCorrections], to_s([self scopeAttributes]));
+			documentView->perform(ng::kInsertTab, [self indentCorrections], to_s([self scopeAttributes]));
 			choiceVector.clear();
 		}
 	}
@@ -2791,7 +2791,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	if(![self expandTabTrigger:sender])
 	{
 		[self recordSelector:_cmd withArgument:nil];
-		documentView->perform(ng::kInsertTab, documentView->layout.get(), [self indentCorrections], to_s([self scopeAttributes]));
+		documentView->perform(ng::kInsertTab, [self indentCorrections], to_s([self scopeAttributes]));
 	}
 }
 
@@ -4020,7 +4020,7 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 	AUTO_REFRESH;
 	[self recordSelector:aSelector withArgument:nil];
 	try {
-		documentView->perform(anAction, documentView->layout.get(), [self indentCorrections], to_s([self scopeAttributes]));
+		documentView->perform(anAction, [self indentCorrections], to_s([self scopeAttributes]));
 
 		static std::set<ng::action_t> const SilentActions = { ng::kCopy, ng::kCopySelectionToFindPboard, ng::kCopySelectionToReplacePboard, ng::kCopySelectionToYankPboard, ng::kAppendSelectionToYankPboard, ng::kPrependSelectionToYankPboard, ng::kSetMark, ng::kNop };
 		if(SilentActions.find(anAction) == SilentActions.end())
