@@ -270,6 +270,17 @@ struct document_view_t
 	void add_callback (ng::callback_t* callback) { document->buffer().add_callback(callback); }
 	void remove_callback (ng::callback_t* callback) { document->buffer().remove_callback(callback); }
 
+	// ================
+	// = Undo Manager =
+	// ================
+
+	bool can_undo () const { return document->undo_manager().can_undo(); }
+	bool can_redo () const { return document->undo_manager().can_redo(); }
+	void begin_undo_group (ng::ranges_t const& ranges) { document->undo_manager().begin_undo_group(ranges); }
+	void end_undo_group (ng::ranges_t const& ranges, bool force = false) { document->undo_manager().end_undo_group(ranges, force); }
+	ng::ranges_t undo () { return document->undo_manager().undo(); }
+	ng::ranges_t redo () { return document->undo_manager().redo(); }
+
 	// ==========
 	// = Editor =
 	// ==========
@@ -2740,19 +2751,19 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 - (void)undo:(id)anArgument // MACRO?
 {
 	AUTO_REFRESH;
-	if(!document->undo_manager().can_undo())
+	if(!documentView->can_undo())
 		return;
 	documentView->clear_snippets();
-	documentView->set_selections(document->undo_manager().undo());
+	documentView->set_selections(documentView->undo());
 }
 
 - (void)redo:(id)anArgument // MACRO?
 {
 	AUTO_REFRESH;
-	if(!document->undo_manager().can_redo())
+	if(!documentView->can_redo())
 		return;
 	documentView->clear_snippets();
-	documentView->set_selections(document->undo_manager().redo());
+	documentView->set_selections(documentView->redo());
 }
 
 - (BOOL)expandTabTrigger:(id)sender
@@ -2819,12 +2830,12 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	else if([aMenuItem action] == @selector(undo:))
 	{
 		[aMenuItem setTitle:@"Undo"];
-		return document->undo_manager().can_undo();
+		return documentView->can_undo();
 	}
 	else if([aMenuItem action] == @selector(redo:))
 	{
 		[aMenuItem setTitle:@"Redo"];
-		return document->undo_manager().can_redo();
+		return documentView->can_redo();
 	}
 	return YES;
 }
