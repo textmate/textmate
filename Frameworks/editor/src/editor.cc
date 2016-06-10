@@ -519,7 +519,7 @@ namespace ng
 
 		if(fragments > 1 && selections.size() == 1)
 		{
-			ASSERT(fragments == std::count(str.begin(), str.end(), '\n') + 1);
+			ASSERT_EQ(fragments, std::count(str.begin(), str.end(), '\n') + 1);
 			if(columnar)
 			{
 				index_t caret = dissect_columnar(buffer, selections).last().min();
