@@ -48,7 +48,6 @@ PUBLIC @interface OakTextView : OakView
 @property (nonatomic) BOOL                                  softWrap;
 @property (nonatomic) BOOL                                  scrollPastEnd;
 @property (nonatomic) BOOL                                  softTabs;
-@property (nonatomic, readonly) ng::indent_correction_t     indentCorrections;
 
 @property (nonatomic, readonly) BOOL                        hasMultiLineSelection;
 @property (nonatomic, readonly) BOOL                        hasSelection;
