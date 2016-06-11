@@ -263,7 +263,7 @@ struct document_view_t : ng::buffer_api_t
 	size_t size () const { return _document->buffer().size(); }
 	size_t revision () const { return _document->buffer().revision(); }
 	std::string operator[] (size_t i) const { return _document->buffer()[i]; }
-	std::string substr (size_t from, size_t to) const { return _document->buffer().substr(from, to); }
+	std::string substr (size_t from = 0, size_t to = SIZE_T_MAX) const { return _document->buffer().substr(from, to != SIZE_T_MAX ? to : size()); }
 	std::string xml_substr (size_t from = 0, size_t to = SIZE_T_MAX) const { return _document->buffer().xml_substr(from, to); }
 	size_t begin (size_t n) const { return _document->buffer().begin(n); }
 	size_t eol (size_t n) const { return _document->buffer().eol(n); }
@@ -320,7 +320,6 @@ struct document_view_t : ng::buffer_api_t
 	ng::ranges_t ranges () const { return _editor->ranges(); }
 	void set_selections (ng::ranges_t const& r) { _editor->set_selections(r); }
 	bool has_selection () const { return _editor->has_selection(); }
-	std::string as_string (size_t from = 0, size_t to = SIZE_T_MAX) const { return _editor->as_string(from, to); }
 	bool handle_result (std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, ng::ranges_t const& inputRanges, std::map<std::string, std::string> environment) { return _editor->handle_result(out, placement, format, outputCaret, inputRanges, environment); }
 	void clear_snippets () { _editor->clear_snippets(); }
 	void set_clipboard (clipboard_ptr cb) { _editor->set_clipboard(cb); }
@@ -1148,7 +1147,7 @@ doScroll:
 
 - (ng::range_t)rangeForNSRange:(NSRange)nsRange
 {
-	std::string const text = documentView->as_string();
+	std::string const text = documentView->substr();
 	char const* base = text.data();
 	ng::index_t from = utf16::advance(base, nsRange.location, base + text.size()) - base;
 	ng::index_t to   = utf16::advance(base + from.index, nsRange.length, base + text.size()) - base;
@@ -1263,7 +1262,7 @@ doScroll:
 		return NSNotFound;
 
 	NSPoint p = [self convertPoint:[[self window] convertRectFromScreen:(NSRect){ thePoint, NSZeroSize }].origin fromView:nil];
-	std::string const text = documentView->as_string();
+	std::string const text = documentView->substr();
 	size_t index = documentView->index_at_point(p).index;
 	D(DBF_OakTextView_TextInput, bug("%s → %zu\n", [NSStringFromPoint(thePoint) UTF8String], index););
 	return utf16::distance(text.data(), text.data() + index);
@@ -1388,7 +1387,7 @@ doScroll:
 	} else if([attribute isEqualToString:NSAccessibilityRoleAttribute]) {
 		ret = NSAccessibilityTextAreaRole;
 	} else if([attribute isEqualToString:NSAccessibilityValueAttribute]) {
-		ret = [NSString stringWithCxxString:documentView->as_string()];
+		ret = [NSString stringWithCxxString:documentView->substr()];
 	} else if([attribute isEqualToString:NSAccessibilityInsertionPointLineNumberAttribute]) {
 		ret = [NSNumber numberWithUnsignedLong:documentView->softline_for_index(documentView->ranges().last().min())];
 	} else if([attribute isEqualToString:NSAccessibilityNumberOfCharactersAttribute]) {
@@ -1546,7 +1545,7 @@ doScroll:
 		ret = [NSValue valueWithRange:[self nsRangeForRange:range]];
 	} else if([attribute isEqualToString:NSAccessibilityStringForRangeParameterizedAttribute]) {
 		ng::range_t range = [self rangeForNSRange:[((NSValue*)parameter) rangeValue]];
-		ret = [NSString stringWithCxxString:documentView->as_string(range.min().index, range.max().index)];
+		ret = [NSString stringWithCxxString:documentView->substr(range.min().index, range.max().index)];
 	} else if([attribute isEqualToString:NSAccessibilityRangeForPositionParameterizedAttribute]) {
 		NSPoint point = [((NSValue*)parameter) pointValue];
 		point = [[self window] convertRectFromScreen:(NSRect){ point, NSZeroSize }].origin;
@@ -1573,7 +1572,7 @@ doScroll:
 		NSRange aRange = [((NSValue *)parameter) rangeValue];
 		ng::range_t const range = [self rangeForNSRange:aRange];
 		size_t const from = range.min().index, to = range.max().index;
-		std::string const text = documentView->as_string(from, to);
+		std::string const text = documentView->substr(from, to);
 		NSMutableAttributedString* res = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithCxxString:text]];
 
 		// Add style
@@ -2789,8 +2788,8 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	std::vector<bundles::item_ptr> const& items = items_for_tab_expansion(documentView, documentView->ranges(), to_s([self scopeAttributes]), &range);
 	if(bundles::item_ptr item = OakShowMenuForBundleItems(items, [self positionForWindowUnderCaret]))
 	{
-		[self recordSelector:@selector(deleteTabTrigger:) withArgument:[NSString stringWithCxxString:documentView->as_string(range.first.index, range.last.index)]];
-		documentView->delete_tab_trigger(documentView->as_string(range.first.index, range.last.index));
+		[self recordSelector:@selector(deleteTabTrigger:) withArgument:[NSString stringWithCxxString:documentView->substr(range.first.index, range.last.index)]];
+		documentView->delete_tab_trigger(documentView->substr(range.first.index, range.last.index));
 		[self performBundleItem:item];
 	}
 	return !items.empty();
@@ -3350,7 +3349,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 - (NSString*)string
 {
 	// This is used by the Emmet plug-in (with no “respondsToSelector:” check)
-	return [NSString stringWithCxxString:documentView->as_string()];
+	return [NSString stringWithCxxString:documentView->substr()];
 }
 
 // ===================
