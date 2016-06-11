@@ -543,18 +543,6 @@ struct refresh_helper_t
 		}
 	}
 
-	static NSView* find_gutter_view (NSView* view)
-	{
-		for(NSView* candidate in [view subviews])
-		{
-			if([candidate isKindOfClass:NSClassFromString(@"GutterView")])
-				return candidate;
-			else if(NSView* res = find_gutter_view(candidate))
-				return res;
-		}
-		return nil;
-	}
-
 	~refresh_helper_t ()
 	{
 		if(auto documentView = _document_view.lock())
@@ -613,6 +601,18 @@ struct refresh_helper_t
 	}
 
 private:
+	static NSView* find_gutter_view (NSView* view)
+	{
+		for(NSView* candidate in [view subviews])
+		{
+			if([candidate isKindOfClass:NSClassFromString(@"GutterView")])
+				return candidate;
+			else if(NSView* res = find_gutter_view(candidate))
+				return res;
+		}
+		return nil;
+	}
+
 	OakTextView* _self;
 	document::document_ptr _document;
 	std::weak_ptr<document_view_t> _document_view;
