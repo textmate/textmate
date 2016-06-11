@@ -242,7 +242,7 @@ struct document_view_t : ng::buffer_api_t
 {
 	document_view_t (document::document_ptr const& document, theme_ptr const& theme, bool softWrap, bool wrapColumn, bool scrollPastEnd) : _document(document)
 	{
-		_editor = ng::editor_for_document(document);
+		_editor = ng::editor_for_document(_document);
 		_layout = std::make_unique<ng::layout_t>(_document->buffer(), theme, softWrap, scrollPastEnd, wrapColumn, _document->folded());
 	}
 
