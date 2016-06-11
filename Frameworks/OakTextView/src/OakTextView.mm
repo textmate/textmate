@@ -466,7 +466,6 @@ private:
 
 	links_ptr _links;
 }
-- (void)deselectLast:(id)sender;
 - (void)ensureSelectionIsInVisibleArea:(id)sender;
 - (void)updateChoiceMenu:(id)sender;
 - (void)resetBlinkCaretTimer;
