@@ -390,7 +390,6 @@ private:
 	NSUInteger refreshNestCount;
 	buffer_refresh_callback_t* callback;
 
-	int32_t wrapColumn;
 	std::string invisiblesMap;
 
 	BOOL hideCaret;
@@ -823,9 +822,8 @@ static std::string shell_quote (std::vector<std::string> paths)
 	{
 		settings_t const settings = settings_for_path(document->virtual_path(), document->file_type() + " " + to_s(self.scopeAttributes), path::parent(document->path()));
 
-		wrapColumn = settings.get(kSettingsWrapColumnKey, wrapColumn);
 		invisiblesMap = settings.get(kSettingsInvisiblesMapKey, "");
-		documentView = std::make_shared<document_view_t>(document, theme, settings.get(kSettingsSoftWrapKey, false), wrapColumn, self.scrollPastEnd);
+		documentView = std::make_shared<document_view_t>(document, theme, settings.get(kSettingsSoftWrapKey, false), settings.get(kSettingsWrapColumnKey, NSWrapColumnWindowWidth), self.scrollPastEnd);
 		if(settings.get(kSettingsShowWrapColumnKey, false))
 			documentView->set_draw_wrap_column(true);
 
@@ -2839,7 +2837,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	else if([aMenuItem action] == @selector(takeSpellingLanguageFrom:))
 		[aMenuItem setState:[[NSString stringWithCxxString:documentView->spelling_language()] isEqualToString:[aMenuItem representedObject]] ? NSOnState : NSOffState];
 	else if([aMenuItem action] == @selector(takeWrapColumnFrom:))
-		[aMenuItem setState:wrapColumn == [aMenuItem tag] ? NSOnState : NSOffState];
+		[aMenuItem setState:(documentView && documentView->wrap_column() == [aMenuItem tag]) ? NSOnState : NSOffState];
 	else if([aMenuItem action] == @selector(undo:))
 	{
 		[aMenuItem setTitle:@"Undo"];
@@ -3016,7 +3014,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 	AUTO_REFRESH;
 	ng::index_t visibleIndex = documentView->index_at_point([self visibleRect].origin);
-	documentView->set_wrapping(flag, wrapColumn);
+	documentView->set_wrapping(flag, documentView->wrap_column());
 	[self scrollIndexToFirstVisible:documentView->begin(documentView->convert(visibleIndex.index).line)];
 	settings_t::set(kSettingsSoftWrapKey, (bool)flag, document->file_type());
 }
@@ -3033,41 +3031,36 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (void)setWrapColumn:(NSInteger)newWrapColumn
 {
-	if(wrapColumn == newWrapColumn)
+	if(!documentView || documentView->wrap_column() == newWrapColumn)
 		return;
 
-	wrapColumn = newWrapColumn;
-	settings_t::set(kSettingsWrapColumnKey, wrapColumn);
-
-	if(wrapColumn != NSWrapColumnWindowWidth)
+	if(newWrapColumn != NSWrapColumnWindowWidth)
 	{
 		NSInteger const kWrapColumnPresetsHistorySize = 5;
 
 		NSMutableArray* presets = [[[NSUserDefaults standardUserDefaults] arrayForKey:kUserDefaultsWrapColumnPresetsKey] mutableCopy];
-		[presets removeObject:@(wrapColumn)];
-		[presets addObject:@(wrapColumn)];
+		[presets removeObject:@(newWrapColumn)];
+		[presets addObject:@(newWrapColumn)];
 		if(presets.count > kWrapColumnPresetsHistorySize)
 			[presets removeObjectsInRange:NSMakeRange(0, presets.count - kWrapColumnPresetsHistorySize)];
 		[[NSUserDefaults standardUserDefaults] setObject:presets forKey:kUserDefaultsWrapColumnPresetsKey];
 	}
 
-	if(documentView)
-	{
-		AUTO_REFRESH;
-		documentView->set_wrapping(self.softWrap, wrapColumn);
-	}
+	AUTO_REFRESH;
+	documentView->set_wrapping(self.softWrap, newWrapColumn);
+	settings_t::set(kSettingsWrapColumnKey, (int32_t)newWrapColumn);
 }
 
 - (void)takeWrapColumnFrom:(id)sender
 {
 	ASSERT([sender respondsToSelector:@selector(tag)]);
-	if(wrapColumn == [sender tag])
+	if(!documentView || documentView->wrap_column() == [sender tag])
 		return;
 
 	if([sender tag] == NSWrapColumnAskUser)
 	{
 		NSTextField* textField = [[NSTextField alloc] initWithFrame:NSZeroRect];
-		[textField setIntegerValue:wrapColumn == NSWrapColumnWindowWidth ? 80 : wrapColumn];
+		[textField setIntegerValue:documentView->wrap_column() == NSWrapColumnWindowWidth ? 80 : documentView->wrap_column()];
 		[textField sizeToFit];
 		[textField setFrameSize:NSMakeSize(200, NSHeight([textField frame]))];
 
