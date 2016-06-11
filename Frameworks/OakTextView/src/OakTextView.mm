@@ -241,7 +241,11 @@ struct document_view_t : ng::buffer_api_t
 	document_view_t (document::document_ptr const& document, theme_ptr const& theme, std::string const& scopeAttributes, bool scrollPastEnd) : _document(document)
 	{
 		_document->sync_open();
+
 		_editor = ng::editor_for_document(_document);
+		_editor->set_clipboard(get_clipboard(NSGeneralPboard));
+		_editor->set_find_clipboard(get_clipboard(NSFindPboard));
+		_editor->set_replace_clipboard(get_clipboard(OakReplacePboard));
 
 		settings_t const settings = settings_for_path(_document->virtual_path(), _document->file_type() + " " + scopeAttributes, path::parent(_document->path()));
 		invisibles_map = settings.get(kSettingsInvisiblesMapKey, "");
@@ -260,7 +264,7 @@ struct document_view_t : ng::buffer_api_t
 	~document_view_t ()
 	{
 		if(nest_count != 0)
-			end_undo_group(ranges());
+			end_undo_group();
 		_document->close();
 	}
 
@@ -312,8 +316,8 @@ struct document_view_t : ng::buffer_api_t
 
 	bool can_undo () const { return _document->undo_manager().can_undo(); }
 	bool can_redo () const { return _document->undo_manager().can_redo(); }
-	void begin_undo_group (ng::ranges_t const& ranges) { _document->undo_manager().begin_undo_group(ranges); }
-	void end_undo_group (ng::ranges_t const& ranges, bool force = false) { _document->undo_manager().end_undo_group(ranges, force); }
+	void begin_undo_group () { _document->undo_manager().begin_undo_group(ranges()); }
+	void end_undo_group () { _document->undo_manager().end_undo_group(ranges()); }
 	void undo () { _editor->clear_snippets(); set_ranges(_document->undo_manager().undo()); }
 	void redo () { _editor->clear_snippets(); set_ranges(_document->undo_manager().redo()); }
 
@@ -332,7 +336,6 @@ struct document_view_t : ng::buffer_api_t
 	void delete_tab_trigger (std::string const& str) { _editor->delete_tab_trigger(str); }
 	void macro_dispatch (plist::dictionary_t const& args, std::map<std::string, std::string> const& variables) { _editor->macro_dispatch(args, variables); }
 	void snippet_dispatch (plist::dictionary_t const& args, std::map<std::string, std::string> const& variables) { _editor->snippet_dispatch(args, variables); }
-	scope::context_t scope (std::string const& scopeAttributes) const { return _editor->scope(scopeAttributes); }
 	std::vector<std::string> const& choices () const { return _editor->choices(); }
 	std::string placeholder_content (ng::range_t* placeholderSelection = NULL) const { return _editor->placeholder_content(placeholderSelection); }
 	void set_placeholder_content (std::string const& str, size_t selectFrom) { _editor->set_placeholder_content(str, selectFrom); }
@@ -340,9 +343,6 @@ struct document_view_t : ng::buffer_api_t
 	void set_ranges (ng::ranges_t const& r) { _editor->set_selections(r); }
 	bool has_selection () const { return _editor->has_selection(); }
 	bool handle_result (std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, ng::ranges_t const& inputRanges, std::map<std::string, std::string> environment) { return _editor->handle_result(out, placement, format, outputCaret, inputRanges, environment); }
-	void set_clipboard (clipboard_ptr cb) { _editor->set_clipboard(cb); }
-	void set_find_clipboard (clipboard_ptr cb) { _editor->set_find_clipboard(cb); }
-	void set_replace_clipboard (clipboard_ptr cb) { _editor->set_replace_clipboard(cb); }
 
 	// ==========
 	// = Layout =
@@ -535,7 +535,7 @@ struct refresh_helper_t
 		{
 			_revision  = documentView->revision();
 			_selection = documentView->ranges();
-			documentView->begin_undo_group(_selection);
+			documentView->begin_undo_group();
 			documentView->begin_refresh_cycle(merge(_selection, [_self markedRanges]), [_self liveSearchRanges]);
 		}
 	}
@@ -546,7 +546,7 @@ struct refresh_helper_t
 		{
 			if(--documentView->nest_count == 0)
 			{
-				documentView->end_undo_group(documentView->ranges());
+				documentView->end_undo_group();
 				if(_revision == documentView->revision())
 				{
 					for(auto const& range : ng::highlight_ranges_for_movement(*documentView, _selection, documentView->ranges()))
@@ -838,10 +838,6 @@ static std::string shell_quote (std::vector<std::string> paths)
 		};
 
 		documentView->set_delegate(new textview_delegate_t(self));
-
-		documentView->set_clipboard(get_clipboard(NSGeneralPboard));
-		documentView->set_find_clipboard(get_clipboard(NSFindPboard));
-		documentView->set_replace_clipboard(get_clipboard(OakReplacePboard));
 
 		ng::index_t visibleIndex = document->visible_index();
 		if(document->selection() != NULL_STR)
@@ -3180,7 +3176,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (scope::context_t)scopeContext
 {
-	return documentView->scope(to_s([self scopeAttributes]));
+	return ng::scope(*documentView, documentView->ranges(), to_s([self scopeAttributes]));
 }
 
 - (NSString*)scopeAsString // Used by https://github.com/emmetio/Emmet.tmplugin
