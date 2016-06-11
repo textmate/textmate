@@ -242,8 +242,14 @@ struct document_view_t : ng::buffer_api_t
 {
 	document_view_t (document::document_ptr const& document, theme_ptr const& theme, bool softWrap, bool wrapColumn, bool scrollPastEnd) : _document(document)
 	{
+		_document->sync_open();
 		_editor = ng::editor_for_document(_document);
 		_layout = std::make_unique<ng::layout_t>(_document->buffer(), theme, softWrap, scrollPastEnd, wrapColumn, _document->folded());
+	}
+
+	~document_view_t ()
+	{
+		_document->close();
 	}
 
 	std::map<std::string, std::string> variables (std::string const& scopeAttributes) const
@@ -521,8 +527,6 @@ struct refresh_helper_t
 	{
 		if(++_self.refreshNestCount == 1)
 		{
-			_document->sync_open();
-
 			_revision  = documentView->revision();
 			_selection = documentView->ranges();
 			documentView->begin_undo_group(_selection);
@@ -596,8 +600,6 @@ struct refresh_helper_t
 					[_self updateChoiceMenu:nil];
 				}
 			}
-
-			_document->close();
 		}
 	}
 
