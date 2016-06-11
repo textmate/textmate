@@ -46,7 +46,8 @@ namespace ng
 		CGFloat font_size () const              { return _theme->font_size(); }
 		size_t tab_size () const                { return _tab_size; }
 		margin_t const& margin () const         { return _margin; }
-		bool wrapping () const                  { return _wrapping; }
+		bool soft_wrap () const                 { return _wrapping; }
+		size_t wrap_column () const             { return _wrap_column; }
 		size_t effective_wrap_column () const;
 
 		// ======================

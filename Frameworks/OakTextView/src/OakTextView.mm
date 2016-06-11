@@ -335,7 +335,8 @@ struct document_view_t : ng::buffer_api_t
 	void set_wrapping (bool softWrap, size_t wrapColumn) { _layout->set_wrapping(softWrap, wrapColumn); }
 	void set_scroll_past_end (bool scrollPastEnd) { _layout->set_scroll_past_end(scrollPastEnd); }
 	ng::layout_t::margin_t const& margin () const { return _layout->margin(); }
-	bool wrapping () const { return _layout->wrapping(); }
+	bool soft_wrap () const { return _layout->soft_wrap(); }
+	size_t wrap_column () const { return _layout->wrap_column(); }
 	void set_is_key (bool isKey) { _layout->set_is_key(isKey); }
 	void set_draw_caret (bool drawCaret) { _layout->set_draw_caret(drawCaret); }
 	void set_draw_wrap_column (bool drawWrapColumn) { _layout->set_draw_wrap_column(drawWrapColumn); }
@@ -2912,7 +2913,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 - (NSFont*)font               { return [NSFont fontWithName:[NSString stringWithCxxString:fontName] size:fontSize]; }
 - (size_t)tabSize             { return documentView ? documentView->indent().tab_size() : 2; }
 - (BOOL)softTabs              { return documentView ? documentView->indent().soft_tabs() : NO; }
-- (BOOL)softWrap              { return documentView && documentView->wrapping(); }
+- (BOOL)softWrap              { return documentView && documentView->soft_wrap(); }
 
 - (ng::indent_correction_t)indentCorrections
 {
@@ -3010,7 +3011,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (void)setSoftWrap:(BOOL)flag
 {
-	if(!documentView || documentView->wrapping() == flag)
+	if(!documentView || documentView->soft_wrap() == flag)
 		return;
 
 	AUTO_REFRESH;
