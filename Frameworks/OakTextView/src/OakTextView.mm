@@ -57,8 +57,6 @@ NSString* const kUserDefaultsFontSmoothingKey      = @"fontSmoothing";
 NSString* const kUserDefaultsDisableTypingPairsKey = @"disableTypingPairs";
 NSString* const kUserDefaultsScrollPastEndKey      = @"scrollPastEnd";
 
-struct buffer_refresh_callback_t;
-
 @interface OakAccessibleLink : NSObject
 - (id)initWithTextView:(OakTextView*)textView range:(ng::range_t)range title:(NSString*)title URL:(NSString*)URL frame:(NSRect)frame;
 @property (nonatomic, weak) OakTextView* textView;
@@ -407,7 +405,7 @@ private:
 	CGFloat fontSize;
 	std::shared_ptr<document_view_t> documentView;
 	NSUInteger refreshNestCount;
-	buffer_refresh_callback_t* callback;
+	ng::callback_t* callback;
 
 	BOOL hideCaret;
 	NSTimer* blinkCaretTimer;
@@ -623,25 +621,6 @@ private:
 
 #define AUTO_REFRESH refresh_helper_t _dummy(self, document, documentView)
 
-struct buffer_refresh_callback_t : ng::callback_t
-{
-	buffer_refresh_callback_t (OakTextView* textView) : textView(textView) { }
-	void did_parse (size_t from, size_t to);
-	void did_replace (size_t from, size_t to, std::string const& str);
-private:
-	__weak OakTextView* textView;
-};
-
-void buffer_refresh_callback_t::did_parse (size_t from, size_t to)
-{
-	[textView redisplayFrom:from to:to];
-}
-
-void buffer_refresh_callback_t::did_replace (size_t, size_t, std::string const&)
-{
-	NSAccessibilityPostNotification(textView, NSAccessibilityValueChangedNotification);
-}
-
 static std::string shell_quote (std::vector<std::string> paths)
 {
 	std::transform(paths.begin(), paths.end(), paths.begin(), &path::escape);
@@ -836,6 +815,16 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 		BOOL hasFocus = (self.keyState & (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask)) == (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask);
 		documentView->set_draw_as_key(hasFocus);
+
+		struct buffer_refresh_callback_t : ng::callback_t
+		{
+			buffer_refresh_callback_t (OakTextView* textView) : textView(textView) { }
+			void did_parse (size_t from, size_t to)                                { [textView redisplayFrom:from to:to]; }
+			void did_replace (size_t from, size_t to, std::string const& str)      { NSAccessibilityPostNotification(textView, NSAccessibilityValueChangedNotification); }
+
+		private:
+			__weak OakTextView* textView;
+		};
 
 		callback = new buffer_refresh_callback_t(self);
 
