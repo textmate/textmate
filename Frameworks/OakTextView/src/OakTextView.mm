@@ -507,7 +507,7 @@ static ng::ranges_t merge (ng::ranges_t lhs, ng::ranges_t const& rhs)
 
 struct refresh_helper_t
 {
-	refresh_helper_t (OakTextView* self, std::shared_ptr<document_view_t> const& documentView) : _self(self), _document(documentView->document), _document_view(documentView)
+	refresh_helper_t (OakTextView* self, document::document_ptr const& document, std::shared_ptr<document_view_t> const& documentView) : _self(self), _document(document), _document_view(documentView)
 	{
 		if(++_self.refreshNestCount == 1)
 		{
@@ -599,7 +599,7 @@ private:
 	ng::ranges_t _selection;
 };
 
-#define AUTO_REFRESH refresh_helper_t _dummy(self, documentView)
+#define AUTO_REFRESH refresh_helper_t _dummy(self, document, documentView)
 
 struct buffer_refresh_callback_t : ng::callback_t
 {
