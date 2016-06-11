@@ -374,7 +374,6 @@ struct document_view_t : ng::buffer_api_t
 	void begin_refresh_cycle (ng::ranges_t const& selection, ng::ranges_t const& highlightRanges = ng::ranges_t()) { _layout->begin_refresh_cycle(selection, highlightRanges); }
 	std::vector<CGRect> end_refresh_cycle (ng::ranges_t const& selection, CGRect visibleRect, ng::ranges_t const& highlightRanges = ng::ranges_t()) { return _layout->end_refresh_cycle(selection, visibleRect, highlightRanges); }
 	void did_update_scopes (size_t from, size_t to) { _layout->did_update_scopes(from, to); }
-	ng::index_t index_below (ng::index_t const& index) const { return _layout->index_below(index); }
 	size_t softline_for_index (ng::index_t const& index) const { return _layout->softline_for_index(index); }
 	ng::range_t range_for_softline (size_t softline) const { return _layout->range_for_softline(softline); }
 	bool is_line_folded (size_t n) const { return _layout->is_line_folded(n); }
@@ -1396,11 +1395,10 @@ doScroll:
 		ret = nsRanges;
 	} else if([attribute isEqualToString:NSAccessibilityVisibleCharacterRangeAttribute]) {
 		NSRect visibleRect = [self visibleRect];
-		CGPoint startPoint = NSMakePoint(NSMinX(visibleRect), NSMaxY(visibleRect));
-		CGPoint   endPoint = NSMakePoint(NSMinX(visibleRect), NSMinY(visibleRect));
+		CGPoint startPoint = NSMakePoint(NSMinX(visibleRect), NSMinY(visibleRect));
+		CGPoint   endPoint = NSMakePoint(NSMaxX(visibleRect), NSMaxY(visibleRect));
 		ng::range_t visibleRange(documentView->index_at_point(startPoint), documentView->index_at_point(endPoint));
-		visibleRange = visibleRange.sorted();
-		visibleRange.last = documentView->index_below(visibleRange.last);
+		visibleRange = ng::extend(*documentView, visibleRange, kSelectionExtendToEndOfSoftLine).last();
 		return [NSValue valueWithRange:[self nsRangeForRange:visibleRange]];
 	} else if([attribute isEqualToString:NSAccessibilityChildrenAttribute]) {
 		NSMutableArray* links = [NSMutableArray array];
