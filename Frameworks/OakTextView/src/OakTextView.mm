@@ -240,56 +240,56 @@ typedef NS_ENUM(NSUInteger, OakFlagsState) {
 
 struct document_view_t : ng::buffer_api_t
 {
-	document_view_t (document::document_ptr const& document, theme_ptr const& theme, bool softWrap, bool wrapColumn, bool scrollPastEnd) : document(document)
+	document_view_t (document::document_ptr const& document, theme_ptr const& theme, bool softWrap, bool wrapColumn, bool scrollPastEnd) : _document(document)
 	{
 		_editor = ng::editor_for_document(document);
-		_layout = std::make_shared<ng::layout_t>(document->buffer(), theme, softWrap, scrollPastEnd, wrapColumn, document->folded());
+		_layout = std::make_shared<ng::layout_t>(_document->buffer(), theme, softWrap, scrollPastEnd, wrapColumn, _document->folded());
 	}
 
 	// ==========
 	// = Buffer =
 	// ==========
 
-	iterator begin () const { return document->buffer().begin(); }
-	iterator end () const { return document->buffer().end(); }
+	iterator begin () const { return _document->buffer().begin(); }
+	iterator end () const { return _document->buffer().end(); }
 
-	size_t size () const { return document->buffer().size(); }
-	size_t revision () const { return document->buffer().revision(); }
-	std::string operator[] (size_t i) const { return document->buffer()[i]; }
-	std::string substr (size_t from, size_t to) const { return document->buffer().substr(from, to); }
-	std::string xml_substr (size_t from = 0, size_t to = SIZE_T_MAX) const { return document->buffer().xml_substr(from, to); }
-	size_t begin (size_t n) const { return document->buffer().begin(n); }
-	size_t eol (size_t n) const { return document->buffer().eol(n); }
-	size_t end (size_t n) const { return document->buffer().end(n); }
-	size_t lines () const { return document->buffer().lines(); }
-	size_t sanitize_index (size_t i) const { return document->buffer().sanitize_index(i); }
-	size_t convert (text::pos_t const& p) const { return document->buffer().convert(p); }
-	text::pos_t convert (size_t i) const { return document->buffer().convert(i); }
-	text::indent_t const& indent () const { return document->buffer().indent(); }
-	void set_indent (text::indent_t const& indent) { document->set_indent(indent); }
-	scope::context_t scope (size_t i, bool includeDynamic = true) const { return document->buffer().scope(i, includeDynamic); }
-	std::map<size_t, scope::scope_t> scopes (size_t from, size_t to) const { return document->buffer().scopes(from, to); }
-	void set_live_spelling (bool flag) { document->buffer().set_live_spelling(flag); }
-	bool live_spelling () const { return document->buffer().live_spelling(); }
-	void set_spelling_language (std::string const& lang) { document->buffer().set_spelling_language(lang); }
-	std::string const& spelling_language () const { return document->buffer().spelling_language(); }
-	std::map<size_t, bool> misspellings (size_t from, size_t to) const { return document->buffer().misspellings(from, to); }
-	std::pair<size_t, size_t> next_misspelling (size_t from) const { return document->buffer().next_misspelling(from); }
-	ns::spelling_tag_t spelling_tag () const { return document->buffer().spelling_tag(); }
-	void recheck_spelling (size_t from, size_t to) { document->buffer().recheck_spelling(from, to); }
-	void add_callback (ng::callback_t* callback) { document->buffer().add_callback(callback); }
-	void remove_callback (ng::callback_t* callback) { document->buffer().remove_callback(callback); }
+	size_t size () const { return _document->buffer().size(); }
+	size_t revision () const { return _document->buffer().revision(); }
+	std::string operator[] (size_t i) const { return _document->buffer()[i]; }
+	std::string substr (size_t from, size_t to) const { return _document->buffer().substr(from, to); }
+	std::string xml_substr (size_t from = 0, size_t to = SIZE_T_MAX) const { return _document->buffer().xml_substr(from, to); }
+	size_t begin (size_t n) const { return _document->buffer().begin(n); }
+	size_t eol (size_t n) const { return _document->buffer().eol(n); }
+	size_t end (size_t n) const { return _document->buffer().end(n); }
+	size_t lines () const { return _document->buffer().lines(); }
+	size_t sanitize_index (size_t i) const { return _document->buffer().sanitize_index(i); }
+	size_t convert (text::pos_t const& p) const { return _document->buffer().convert(p); }
+	text::pos_t convert (size_t i) const { return _document->buffer().convert(i); }
+	text::indent_t const& indent () const { return _document->buffer().indent(); }
+	void set_indent (text::indent_t const& indent) { _document->set_indent(indent); }
+	scope::context_t scope (size_t i, bool includeDynamic = true) const { return _document->buffer().scope(i, includeDynamic); }
+	std::map<size_t, scope::scope_t> scopes (size_t from, size_t to) const { return _document->buffer().scopes(from, to); }
+	void set_live_spelling (bool flag) { _document->buffer().set_live_spelling(flag); }
+	bool live_spelling () const { return _document->buffer().live_spelling(); }
+	void set_spelling_language (std::string const& lang) { _document->buffer().set_spelling_language(lang); }
+	std::string const& spelling_language () const { return _document->buffer().spelling_language(); }
+	std::map<size_t, bool> misspellings (size_t from, size_t to) const { return _document->buffer().misspellings(from, to); }
+	std::pair<size_t, size_t> next_misspelling (size_t from) const { return _document->buffer().next_misspelling(from); }
+	ns::spelling_tag_t spelling_tag () const { return _document->buffer().spelling_tag(); }
+	void recheck_spelling (size_t from, size_t to) { _document->buffer().recheck_spelling(from, to); }
+	void add_callback (ng::callback_t* callback) { _document->buffer().add_callback(callback); }
+	void remove_callback (ng::callback_t* callback) { _document->buffer().remove_callback(callback); }
 
 	// ================
 	// = Undo Manager =
 	// ================
 
-	bool can_undo () const { return document->undo_manager().can_undo(); }
-	bool can_redo () const { return document->undo_manager().can_redo(); }
-	void begin_undo_group (ng::ranges_t const& ranges) { document->undo_manager().begin_undo_group(ranges); }
-	void end_undo_group (ng::ranges_t const& ranges, bool force = false) { document->undo_manager().end_undo_group(ranges, force); }
-	ng::ranges_t undo () { return document->undo_manager().undo(); }
-	ng::ranges_t redo () { return document->undo_manager().redo(); }
+	bool can_undo () const { return _document->undo_manager().can_undo(); }
+	bool can_redo () const { return _document->undo_manager().can_redo(); }
+	void begin_undo_group (ng::ranges_t const& ranges) { _document->undo_manager().begin_undo_group(ranges); }
+	void end_undo_group (ng::ranges_t const& ranges, bool force = false) { _document->undo_manager().end_undo_group(ranges, force); }
+	ng::ranges_t undo () { return _document->undo_manager().undo(); }
+	ng::ranges_t redo () { return _document->undo_manager().redo(); }
 
 	// ==========
 	// = Editor =
@@ -366,10 +366,8 @@ struct document_view_t : ng::buffer_api_t
 	ng::line_record_t line_record_for (CGFloat y) const { return _layout->line_record_for(y); }
 	ng::line_record_t line_record_for (text::pos_t const& pos) const { return _layout->line_record_for(pos); }
 
-	// ==========
-
-	document::document_ptr document;
 private:
+	document::document_ptr _document;
 	ng::editor_ptr _editor;
 	std::shared_ptr<ng::layout_t> _layout;
 };
