@@ -134,7 +134,7 @@ void delegate_t::show_error (bundle_command_t const& command, int rc, std::strin
 // = Public API =
 // ==============
 
-void run_impl (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, document::document_ptr document, std::map<std::string, std::string> baseEnv, std::string const& pwd)
+void run_impl (bundle_command_t const& command, ng::buffer_api_t const& buffer, ng::ranges_t const& selection, document::document_ptr document, std::map<std::string, std::string> baseEnv, std::string const& pwd)
 {
 	DocumentController* controller = [DocumentController controllerForDocument:document];
 	if(controller && command.output == output::new_window && command.output_format == output_format::html)

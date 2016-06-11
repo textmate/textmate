@@ -42,12 +42,12 @@ namespace command
 		virtual void done (runner_ptr runner)                                 { }
 	};
 
-	PUBLIC runner_ptr runner (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, std::map<std::string, std::string> const& environment, delegate_ptr delegate, std::string const& pwd = NULL_STR);
+	PUBLIC runner_ptr runner (bundle_command_t const& command, ng::buffer_api_t const& buffer, ng::ranges_t const& selection, std::map<std::string, std::string> const& environment, delegate_ptr delegate, std::string const& pwd = NULL_STR);
 
 	struct PUBLIC runner_t : std::enable_shared_from_this<runner_t>
 	{
 		runner_t () = delete;
-		runner_t (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, std::map<std::string, std::string> const& environment, std::string const& pwd, delegate_ptr delegate);
+		runner_t (bundle_command_t const& command, ng::buffer_api_t const& buffer, ng::ranges_t const& selection, std::map<std::string, std::string> const& environment, std::string const& pwd, delegate_ptr delegate);
 		~runner_t ();
 
 		void launch ();

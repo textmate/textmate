@@ -11,7 +11,7 @@
 
 namespace ng
 {
-	static size_t count_columns (buffer_t const& buffer, index_t caret)
+	static size_t count_columns (buffer_api_t const& buffer, index_t caret)
 	{
 		size_t const tabSize = buffer.indent().tab_size();
 		std::string const str = buffer.substr(buffer.begin(buffer.convert(caret.index).line), caret.index);
@@ -21,7 +21,7 @@ namespace ng
 		return len + caret.carry;
 	}
 
-	static index_t at_column (buffer_t const& buffer, size_t line, size_t column)
+	static index_t at_column (buffer_api_t const& buffer, size_t line, size_t column)
 	{
 		size_t const tabSize = buffer.indent().tab_size();
 		size_t caret = buffer.begin(line), len = 0;
@@ -45,7 +45,7 @@ namespace ng
 	std::string const kCharacterClassOther   = "other";
 	std::string const kCharacterClassUnknown = "unknown";
 
-	std::string character_class (buffer_t const& buffer, size_t index)
+	std::string character_class (buffer_api_t const& buffer, size_t index)
 	{
 		bundles::item_ptr match;
 		plist::any_t value = bundles::value_for_setting("characterClass", buffer.scope(index), &match);
@@ -64,26 +64,26 @@ namespace ng
 		return kCharacterClassOther;
 	}
 
-	static bool is_part_of_word (buffer_t const& buffer, size_t index)
+	static bool is_part_of_word (buffer_api_t const& buffer, size_t index)
 	{
 		return character_class(buffer, index) != kCharacterClassSpace && character_class(buffer, index) != kCharacterClassOther;
 	}
 
-	static size_t extend_scope_left (buffer_t const& buffer, size_t caret, scope::scope_t const& scope)
+	static size_t extend_scope_left (buffer_api_t const& buffer, size_t caret, scope::scope_t const& scope)
 	{
 		while(caret && buffer.scope(caret).left.has_prefix(scope))
 			caret -= buffer[caret-1].size();
 		return caret;
 	}
 
-	static size_t extend_scope_right (buffer_t const& buffer, size_t caret, scope::scope_t const& scope)
+	static size_t extend_scope_right (buffer_api_t const& buffer, size_t caret, scope::scope_t const& scope)
 	{
 		while(caret < buffer.size() && buffer.scope(caret).right.has_prefix(scope))
 			caret += buffer[caret].size();
 		return caret;
 	}
 
-	ranges_t sanitize (buffer_t const& buffer, ranges_t const& selection)
+	ranges_t sanitize (buffer_api_t const& buffer, ranges_t const& selection)
 	{
 		/* This function will transform the selection so that
 		   all indexes are on proper multi-byte boundaries and
@@ -158,7 +158,7 @@ namespace ng
 		return res;
 	}
 
-	static index_t cap (buffer_t const& buffer, text::pos_t const& pos)
+	static index_t cap (buffer_api_t const& buffer, text::pos_t const& pos)
 	{
 		size_t line = oak::cap<size_t>(0, pos.line,   buffer.lines()-1);
 		size_t col  = oak::cap<size_t>(0, pos.column, buffer.eol(line) - buffer.begin(line));
@@ -168,12 +168,12 @@ namespace ng
 		return res;
 	}
 
-	static range_t cap (buffer_t const& buffer, text::range_t const& range)
+	static range_t cap (buffer_api_t const& buffer, text::range_t const& range)
 	{
 		return range_t(cap(buffer, range.from), cap(buffer, range.to), range.columnar, false, true);
 	}
 
-	ranges_t convert (buffer_t const& buffer, text::selection_t const& sel)
+	ranges_t convert (buffer_api_t const& buffer, text::selection_t const& sel)
 	{
 		ranges_t res;
 		for(auto const& range : sel)
@@ -256,7 +256,7 @@ namespace ng
 		return res;
 	}
 
-	static bool does_match (regexp::pattern_t const& ptrn, buffer_t const& buffer, size_t from, size_t to, std::string* didMatch)
+	static bool does_match (regexp::pattern_t const& ptrn, buffer_api_t const& buffer, size_t from, size_t to, std::string* didMatch)
 	{
 		if(ptrn)
 		{
@@ -271,7 +271,7 @@ namespace ng
 		return false;
 	}
 
-	static bool does_match_left (pattern_t const& ptrn, buffer_t const& buffer, size_t index, std::string* didMatch)
+	static bool does_match_left (pattern_t const& ptrn, buffer_api_t const& buffer, size_t index, std::string* didMatch)
 	{
 		if(!ptrn.is_regexp && ptrn.plain.size() <= index && ptrn.plain == buffer.substr(index - ptrn.plain.size(), index))
 		{
@@ -281,7 +281,7 @@ namespace ng
 		return ptrn.is_regexp && does_match(ptrn.right_anchored_regexp, buffer, index, buffer.begin(buffer.convert(index).line), didMatch);
 	}
 
-	static bool does_match_right (pattern_t const& ptrn, buffer_t const& buffer, size_t index, std::string* didMatch)
+	static bool does_match_right (pattern_t const& ptrn, buffer_api_t const& buffer, size_t index, std::string* didMatch)
 	{
 		if(!ptrn.is_regexp && index + ptrn.plain.size() <= buffer.size() && ptrn.plain == buffer.substr(index, index + ptrn.plain.size()))
 		{
@@ -291,7 +291,7 @@ namespace ng
 		return ptrn.is_regexp && does_match(ptrn.left_anchored_regexp, buffer, index, buffer.eol(buffer.convert(index).line), didMatch);
 	}
 
-	static enclosed_range_t find_enclosed_range (buffer_t const& buffer, size_t index, std::vector<std::pair<pattern_t, pattern_t>> const& pairs)
+	static enclosed_range_t find_enclosed_range (buffer_api_t const& buffer, size_t index, std::vector<std::pair<pattern_t, pattern_t>> const& pairs)
 	{
 		std::vector<enclosed_range_t> records(pairs.begin(), pairs.end());
 
@@ -339,7 +339,7 @@ namespace ng
 		return enclosed_range_t();
 	}
 
-	static match_t first_match (buffer_t const& buffer, size_t index, std::vector<std::pair<pattern_t, pattern_t>> const& pairs, bool(*matcher)(pattern_t const&, buffer_t const&, size_t, std::string*))
+	static match_t first_match (buffer_api_t const& buffer, size_t index, std::vector<std::pair<pattern_t, pattern_t>> const& pairs, bool(*matcher)(pattern_t const&, buffer_api_t const&, size_t, std::string*))
 	{
 		std::string didMatch;
 		for(auto const& pair : pairs)
@@ -352,7 +352,7 @@ namespace ng
 		return match_t();
 	}
 
-	static size_t begin_of_typing_pair (buffer_t const& buffer, size_t caret, bool moveToBefore)
+	static size_t begin_of_typing_pair (buffer_api_t const& buffer, size_t caret, bool moveToBefore)
 	{
 		size_t orgCaret = caret;
 		auto pairs = character_pairs(buffer.scope(caret), "highlightPairs");
@@ -378,7 +378,7 @@ namespace ng
 		return orgCaret;
 	}
 
-	static size_t end_of_typing_pair (buffer_t const& buffer, size_t caret, bool moveToAfter)
+	static size_t end_of_typing_pair (buffer_api_t const& buffer, size_t caret, bool moveToAfter)
 	{
 		size_t orgCaret = caret;
 		auto pairs = character_pairs(buffer.scope(caret), "highlightPairs");
@@ -408,7 +408,7 @@ namespace ng
 	// = Columnar Support =
 	// ====================
 
-	bool not_empty (buffer_t const& buffer, ranges_t const& selection)
+	bool not_empty (buffer_api_t const& buffer, ranges_t const& selection)
 	{
 		bool isEmpty = true;
 		for(auto const& range : selection)
@@ -416,7 +416,7 @@ namespace ng
 		return !isEmpty;
 	}
 
-	bool multiline (buffer_t const& buffer, ranges_t const& selection)
+	bool multiline (buffer_api_t const& buffer, ranges_t const& selection)
 	{
 		bool isMultiline = false;
 		for(auto const& range : selection)
@@ -424,7 +424,7 @@ namespace ng
 		return isMultiline;
 	}
 
-	ranges_t dissect_columnar (buffer_t const& buffer, ranges_t const& selection)
+	ranges_t dissect_columnar (buffer_api_t const& buffer, ranges_t const& selection)
 	{
 		ranges_t res;
 		for(auto const& range : selection)
@@ -496,7 +496,7 @@ namespace ng
 	// = Move Caret(s) =
 	// =================
 
-	static bool all_spaces (buffer_t const& buffer, size_t from, size_t to)
+	static bool all_spaces (buffer_api_t const& buffer, size_t from, size_t to)
 	{
 		bool allSpaces = true;
 		while(from < to && allSpaces)
@@ -504,7 +504,7 @@ namespace ng
 		return allSpaces;
 	}
 
-	static bool all_whitespace (buffer_t const& buffer, size_t from, size_t to)
+	static bool all_whitespace (buffer_api_t const& buffer, size_t from, size_t to)
 	{
 		bool res = true;
 		static std::string const whitespaceChars[] = { " ", "\t", "\n" };
@@ -513,7 +513,7 @@ namespace ng
 		return res;
 	}
 
-	static size_t end_of_leading_indent (buffer_t const& buffer, size_t line)
+	static size_t end_of_leading_indent (buffer_api_t const& buffer, size_t line)
 	{
 		size_t bol = buffer.begin(line);
 		size_t eol = buffer.eol(line);
@@ -522,7 +522,7 @@ namespace ng
 		return bol;
 	}
 
-	static index_t move (buffer_t const& buffer, index_t const& index, move_unit_type unit, layout_movement_t const* layout)
+	static index_t move (buffer_api_t const& buffer, index_t const& index, move_unit_type unit, layout_movement_t const* layout)
 	{
 		size_t const caret = index.index;
 		size_t const line  = buffer.convert(caret).line;
@@ -792,7 +792,7 @@ namespace ng
 		return index;
 	}
 
-	ranges_t move (buffer_t const& buffer, ranges_t const& selection, move_unit_type const orgUnit, layout_movement_t const* layout)
+	ranges_t move (buffer_api_t const& buffer, ranges_t const& selection, move_unit_type const orgUnit, layout_movement_t const* layout)
 	{
 		static std::set<move_unit_type> const leftward  = { kSelectionMoveLeft,  kSelectionMoveFreehandedLeft, kSelectionMoveToBeginOfLine, kSelectionMoveToBeginOfParagraph, kSelectionMoveToBeginOfTypingPair, kSelectionMoveToBeginOfSoftLine, kSelectionMoveToBeginOfSubWord, kSelectionMoveToBeginOfWord };
 		static std::set<move_unit_type> const rightward = { kSelectionMoveRight, kSelectionMoveFreehandedRight, kSelectionMoveToEndOfLine, kSelectionMoveToEndOfParagraph, kSelectionMoveToEndOfTypingPair, kSelectionMoveToEndOfSoftLine, kSelectionMoveToEndOfSubWord, kSelectionMoveToEndOfWord            };
@@ -871,7 +871,7 @@ namespace ng
 	// = Extend Selection =
 	// ====================
 
-	static range_t extend (buffer_t const& buffer, range_t const& range, select_unit_type unit, layout_movement_t const* layout)
+	static range_t extend (buffer_api_t const& buffer, range_t const& range, select_unit_type unit, layout_movement_t const* layout)
 	{
 		index_t first      = range.first;
 		index_t last       = range.last;
@@ -1097,7 +1097,7 @@ namespace ng
 		return range;
 	}
 
-	ranges_t extend (buffer_t const& buffer, ranges_t const& selection, select_unit_type const unit, layout_movement_t const* layout)
+	ranges_t extend (buffer_api_t const& buffer, ranges_t const& selection, select_unit_type const unit, layout_movement_t const* layout)
 	{
 		static std::set<select_unit_type> const splittingUnits = { kSelectionExtendToWord, kSelectionExtendToTypingPair, kSelectionExtendToScope, kSelectionExtendToEndOfSoftLine, kSelectionExtendToEndOfIndentedLine, kSelectionExtendToEndOfLine, kSelectionExtendToEndOfParagraph, kSelectionExtendToBeginOfTypingPair, kSelectionExtendToEndOfTypingPair };
 		bool isColumnar    = selection.size() == 1 && selection.last().columnar;
@@ -1109,7 +1109,7 @@ namespace ng
 		return sanitize(buffer, res);
 	}
 
-	ranges_t extend_if_empty (buffer_t const& buffer, ranges_t const& selection, select_unit_type const unit, layout_movement_t const* layout)
+	ranges_t extend_if_empty (buffer_api_t const& buffer, ranges_t const& selection, select_unit_type const unit, layout_movement_t const* layout)
 	{
 		ranges_t res;
 		for(auto const& range : selection)
@@ -1138,26 +1138,26 @@ namespace ng
 	// = Select Scope =
 	// ================
 
-	static size_t extend_scope_left (buffer_t const& buffer, size_t caret, scope::selector_t const& scopeSelector)
+	static size_t extend_scope_left (buffer_api_t const& buffer, size_t caret, scope::selector_t const& scopeSelector)
 	{
 		while(caret && scopeSelector.does_match(buffer.scope(caret).left))
 			caret -= buffer[caret-1].size();
 		return caret;
 	}
 
-	static size_t extend_scope_right (buffer_t const& buffer, size_t caret, scope::selector_t const& scopeSelector)
+	static size_t extend_scope_right (buffer_api_t const& buffer, size_t caret, scope::selector_t const& scopeSelector)
 	{
 		while(caret < buffer.size() && scopeSelector.does_match(buffer.scope(caret).right))
 			caret += buffer[caret].size();
 		return caret;
 	}
 
-	static range_t select_scope (buffer_t const& buffer, range_t const& range, scope::selector_t const& scopeSelector)
+	static range_t select_scope (buffer_api_t const& buffer, range_t const& range, scope::selector_t const& scopeSelector)
 	{
 		return range_t(extend_scope_left(buffer, range.min().index, scopeSelector), extend_scope_right(buffer, range.max().index, scopeSelector));
 	}
 
-	ranges_t select_scope (buffer_t const& buffer, ranges_t const& selection, scope::selector_t const& scopeSelector)
+	ranges_t select_scope (buffer_api_t const& buffer, ranges_t const& selection, scope::selector_t const& scopeSelector)
 	{
 		ranges_t res;
 		for(auto const& range : selection)
@@ -1169,7 +1169,7 @@ namespace ng
 	// = Obtain Scope =
 	// ================
 
-	scope::context_t scope (buffer_t const& buffer, ranges_t const& selection, std::string const& extraAttributes)
+	scope::context_t scope (buffer_api_t const& buffer, ranges_t const& selection, std::string const& extraAttributes)
 	{
 		scope::context_t res;
 		if(selection.size() == 1)
@@ -1238,7 +1238,7 @@ namespace ng
 	// = Highlight Ranges =
 	// ====================
 
-	ranges_t highlight_ranges_for_movement (buffer_t const& buffer, ranges_t const& oldSelection, ranges_t const& newSelection)
+	ranges_t highlight_ranges_for_movement (buffer_api_t const& buffer, ranges_t const& oldSelection, ranges_t const& newSelection)
 	{
 		ranges_t res;
 		if(oldSelection.size() != newSelection.size())
@@ -1293,7 +1293,7 @@ namespace ng
 		return ranges.empty();
 	}
 
-	std::map< range_t, std::map<std::string, std::string> > find_all (buffer_t const& buffer, std::string const& searchFor, find::options_t options, ranges_t const& searchRanges)
+	std::map< range_t, std::map<std::string, std::string> > find_all (buffer_api_t const& buffer, std::string const& searchFor, find::options_t options, ranges_t const& searchRanges)
 	{
 		std::map< range_t, std::map<std::string, std::string> > res;
 		if(searchFor == NULL_STR || searchFor == "")
@@ -1338,7 +1338,7 @@ namespace ng
 		return res;
 	}
 
-	static std::map< range_t, std::map<std::string, std::string> > regexp_find (buffer_t const& buffer, std::string const& searchFor, find::options_t options, ng::range_t const& range)
+	static std::map< range_t, std::map<std::string, std::string> > regexp_find (buffer_api_t const& buffer, std::string const& searchFor, find::options_t options, ng::range_t const& range)
 	{
 		size_t first = (options & find::backwards) ? range.min().index : range.max().index;
 		size_t last  = (options & find::backwards) ?                 0 :     buffer.size();
@@ -1374,7 +1374,7 @@ namespace ng
 		return res;
 	}
 
-	std::map< range_t, std::map<std::string, std::string> > find (buffer_t const& buffer, ranges_t const& selection, std::string const& searchFor, find::options_t options, ranges_t const& searchRanges, bool* didWrap)
+	std::map< range_t, std::map<std::string, std::string> > find (buffer_api_t const& buffer, ranges_t const& selection, std::string const& searchFor, find::options_t options, ranges_t const& searchRanges, bool* didWrap)
 	{
 		auto setDidWrap = [&didWrap](bool flag){ if(didWrap != nullptr) *didWrap = flag; };
 		setDidWrap(false);
@@ -1494,7 +1494,7 @@ namespace ng
 	// = All Words =
 	// =============
 
-	range_t word_at (buffer_t const& buffer, range_t const& range)
+	range_t word_at (buffer_api_t const& buffer, range_t const& range)
 	{
 		if(range.empty())
 		{
@@ -1511,7 +1511,7 @@ namespace ng
 		return extend(buffer, range, kSelectionExtendToWord).last();
 	}
 
-	ranges_t all_words (buffer_t const& buffer)
+	ranges_t all_words (buffer_api_t const& buffer)
 	{
 		ranges_t res;
 
@@ -1540,7 +1540,7 @@ namespace ng
 	// = to/from string =
 	// ==================
 
-	ranges_t from_string (buffer_t const& buffer, std::string const& str)
+	ranges_t from_string (buffer_api_t const& buffer, std::string const& str)
 	{
 		ranges_t res;
 		for(auto const& range : text::selection_t(str))
@@ -1548,7 +1548,7 @@ namespace ng
 		return res;
 	}
 
-	std::string to_s (buffer_t const& buffer, ranges_t const& ranges)
+	std::string to_s (buffer_api_t const& buffer, ranges_t const& ranges)
 	{
 		text::selection_t res;
 		for(auto const& range : ranges)
