@@ -246,6 +246,13 @@ struct document_view_t : ng::buffer_api_t
 		_layout = std::make_unique<ng::layout_t>(_document->buffer(), theme, softWrap, scrollPastEnd, wrapColumn, _document->folded());
 	}
 
+	std::map<std::string, std::string> variables (std::string const& scopeAttributes) const
+	{
+		std::map<std::string, std::string> res = _document->document_variables();
+		res << _editor->editor_variables(scopeAttributes);
+		return res;
+	}
+
 	// ==========
 	// = Buffer =
 	// ==========
@@ -307,7 +314,6 @@ struct document_view_t : ng::buffer_api_t
 	void macro_dispatch (plist::dictionary_t const& args, std::map<std::string, std::string> const& variables) { _editor->macro_dispatch(args, variables); }
 	void snippet_dispatch (plist::dictionary_t const& args, std::map<std::string, std::string> const& variables) { _editor->snippet_dispatch(args, variables); }
 	scope::context_t scope (std::string const& scopeAttributes) const { return _editor->scope(scopeAttributes); }
-	std::map<std::string, std::string> editor_variables (std::string const& scopeAttributes) const { return _editor->editor_variables(scopeAttributes); }
 	std::vector<std::string> const& choices () const { return _editor->choices(); }
 	std::string placeholder_content (ng::range_t* placeholderSelection = NULL) const { return _editor->placeholder_content(placeholderSelection); }
 	void set_placeholder_content (std::string const& str, size_t selectFrom) { _editor->set_placeholder_content(str, selectFrom); }
@@ -1726,7 +1732,7 @@ doScroll:
 - (std::map<std::string, std::string>)variablesForBundleItem:(bundles::item_ptr const&)item
 {
 	std::map<std::string, std::string> res = oak::basic_environment();
-	res << document->document_variables() << documentView->editor_variables(to_s([self scopeAttributes]));
+	res << documentView->variables(to_s([self scopeAttributes]));
 	if(item)
 		res << item->bundle_variables();
 
