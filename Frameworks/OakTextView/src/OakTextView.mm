@@ -3578,9 +3578,6 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 {
 	D(DBF_OakTextView_DragNDrop, bug("\n"););
 	ASSERT(dropPosition);
-	AUTO_REFRESH;
-	ng::index_t pos = dropPosition;
-	documentView->set_drop_marker(dropPosition = ng::index_t());
 
 	BOOL res = YES;
 	NSPasteboard* pboard  = [info draggingPasteboard];
@@ -3590,6 +3587,11 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	BOOL shouldLink       = ([info draggingSource] != self) && ([info draggingSourceOperationMask] == NSDragOperationLink);
 
 	D(DBF_OakTextView_DragNDrop, bug("local %s, should move %s, type %s, all types %s\n", BSTR([info draggingSource] == self), BSTR(shouldMove), [type UTF8String], [[types description] UTF8String]););
+	crash_reporter_info_t crashInfo(text::format("local %s, should move %s, type %s, all types %s\n", BSTR([info draggingSource] == self), BSTR(shouldMove), [type UTF8String], [[types description] UTF8String]));
+
+	AUTO_REFRESH;
+	ng::index_t pos = dropPosition;
+	documentView->set_drop_marker(dropPosition = ng::index_t());
 
 	NSArray* files = [pboard availableTypeFromArray:@[ NSFilenamesPboardType ]] ? [pboard propertyListForType:NSFilenamesPboardType] : nil;
 	if(shouldLink && files)
