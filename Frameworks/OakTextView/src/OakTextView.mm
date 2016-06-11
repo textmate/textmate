@@ -259,6 +259,8 @@ struct document_view_t : ng::buffer_api_t
 
 	~document_view_t ()
 	{
+		if(nest_count != 0)
+			end_undo_group(ranges());
 		_document->close();
 	}
 
@@ -269,6 +271,7 @@ struct document_view_t : ng::buffer_api_t
 		return res;
 	}
 
+	size_t nest_count = 0;
 	std::string invisibles_map;
 
 	// ==========
@@ -404,7 +407,6 @@ private:
 	std::string fontName;
 	CGFloat fontSize;
 	std::shared_ptr<document_view_t> documentView;
-	NSUInteger refreshNestCount;
 	ng::callback_t* callback;
 
 	BOOL hideCaret;
@@ -479,7 +481,6 @@ private:
 @property (nonatomic) BOOL showDragCursor;
 @property (nonatomic) BOOL showColumnSelectionCursor;
 @property (nonatomic) OakChoiceMenu* choiceMenu;
-@property (nonatomic) NSUInteger refreshNestCount;
 @property (nonatomic) LiveSearchView* liveSearchView;
 @property (nonatomic, copy) NSString* liveSearchString;
 @property (nonatomic) ng::ranges_t const& liveSearchRanges;
@@ -533,7 +534,7 @@ struct refresh_helper_t
 {
 	refresh_helper_t (OakTextView* self, document::document_ptr const& document, std::shared_ptr<document_view_t> const& documentView) : _self(self), _document(document), _document_view(documentView)
 	{
-		if(++_self.refreshNestCount == 1)
+		if(++documentView->nest_count == 1)
 		{
 			_revision  = documentView->revision();
 			_selection = documentView->ranges();
@@ -556,9 +557,9 @@ struct refresh_helper_t
 
 	~refresh_helper_t ()
 	{
-		if(--_self.refreshNestCount == 0)
+		if(auto documentView = _document_view.lock())
 		{
-			if(auto documentView = _document_view.lock())
+			if(--documentView->nest_count == 0)
 			{
 				documentView->end_undo_group(documentView->ranges());
 				if(_revision == documentView->revision())
@@ -685,7 +686,6 @@ static std::string shell_quote (std::vector<std::string> paths)
 @implementation OakTextView
 @synthesize initiateDragTimer, dragScrollTimer, showColumnSelectionCursor, showDragCursor, choiceMenu;
 @synthesize markedRanges;
-@synthesize refreshNestCount;
 @synthesize liveSearchString, liveSearchRanges;
 
 // =================================
