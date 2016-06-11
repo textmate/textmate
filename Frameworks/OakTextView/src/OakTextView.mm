@@ -480,16 +480,16 @@ static std::vector<bundles::item_ptr> items_for_tab_expansion (std::shared_ptr<d
 	bool lastWasWordChar           = false;
 	std::string lastCharacterClass = ng::kCharacterClassUnknown;
 
-	scope::scope_t const rightScope = ng::scope(documentView->document->buffer(), ng::ranges_t(caret), scopeAttributes).right;
+	scope::scope_t const rightScope = ng::scope(*documentView, ng::ranges_t(caret), scopeAttributes).right;
 	for(size_t i = bol; i < caret; i += (*documentView)[i].size())
 	{
 		// we don’t use text::is_word_char because that function treats underscores as word characters, which is undesired, see <issue://157>.
 		bool isWordChar = CFCharacterSetIsLongCharacterMember(CFCharacterSetGetPredefined(kCFCharacterSetAlphaNumeric), utf8::to_ch((*documentView)[i]));
-		std::string characterClass = ng::character_class(documentView->document->buffer(), i);
+		std::string characterClass = ng::character_class(*documentView, i);
 
 		if(i == bol || lastWasWordChar != isWordChar || lastCharacterClass != characterClass || !isWordChar)
 		{
-			std::vector<bundles::item_ptr> const& items = bundles::query(bundles::kFieldTabTrigger, documentView->substr(i, caret), scope::context_t(ng::scope(documentView->document->buffer(), ng::ranges_t(i), scopeAttributes).left, rightScope));
+			std::vector<bundles::item_ptr> const& items = bundles::query(bundles::kFieldTabTrigger, documentView->substr(i, caret), scope::context_t(ng::scope(*documentView, ng::ranges_t(i), scopeAttributes).left, rightScope));
 			if(!items.empty())
 			{
 				if(range)
@@ -548,7 +548,7 @@ struct refresh_helper_t
 				documentView->end_undo_group(documentView->ranges());
 				if(_revision == documentView->revision())
 				{
-					for(auto const& range : ng::highlight_ranges_for_movement(_document->buffer(), _selection, documentView->ranges()))
+					for(auto const& range : ng::highlight_ranges_for_movement(*documentView, _selection, documentView->ranges()))
 					{
 						NSRect imageRect;
 						NSImage* image = [_self imageForRanges:range imageRect:&imageRect];
@@ -786,7 +786,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 	{
 		if(document->selection() != NULL_STR)
 		{
-			ng::ranges_t ranges = ng::convert(document->buffer(), document->selection());
+			ng::ranges_t ranges = ng::convert(*documentView, document->selection());
 			documentView->set_selections(ranges);
 			for(auto const& range : ranges)
 				documentView->remove_enclosing_folds(range.min().index, range.max().index);
@@ -854,7 +854,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 		ng::index_t visibleIndex = document->visible_index();
 		if(document->selection() != NULL_STR)
 		{
-			ng::ranges_t ranges = ng::convert(document->buffer(), document->selection());
+			ng::ranges_t ranges = ng::convert(*documentView, document->selection());
 			documentView->set_selections(ranges);
 			for(auto const& range : ranges)
 				documentView->remove_enclosing_folds(range.min().index, range.max().index);
@@ -1334,7 +1334,7 @@ doScroll:
 - (BOOL)respondsToSelector:(SEL)aSelector
 {
 	// Do not handle cancelOperation: (as complete:) when caret is not on a word (instead give next responder a chance)
-	if(aSelector == @selector(cancelOperation:) && ng::word_at(document->buffer(), documentView->ranges().last()).empty())
+	if(aSelector == @selector(cancelOperation:) && ng::word_at(*documentView, documentView->ranges().last()).empty())
 		return NO;
 	return [super respondsToSelector:aSelector];
 }
@@ -1777,14 +1777,14 @@ doScroll:
 					if(success)
 					{
 						AUTO_REFRESH;
-						document::run(command, document->buffer(), documentView->ranges(), document, [self variablesForBundleItem:item]);
+						document::run(command, *documentView, documentView->ranges(), document, [self variablesForBundleItem:item]);
 					}
 				}];
 			}
 			else
 			{
 				command.pre_exec = pre_exec::nop;
-				document::run(command, document->buffer(), documentView->ranges(), document, [self variablesForBundleItem:item]);
+				document::run(command, *documentView, documentView->ranges(), document, [self variablesForBundleItem:item]);
 			}
 		}
 		break;
@@ -1909,7 +1909,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	if([self hasSelection] && [types containsObject:NSStringPboardType])
 	{
 		std::vector<std::string> v;
-		ng::ranges_t const ranges = ng::dissect_columnar(document->buffer(), documentView->ranges());
+		ng::ranges_t const ranges = ng::dissect_columnar(*documentView, documentView->ranges());
 		for(auto const& range : ranges)
 			v.push_back(documentView->substr(range.min().index, range.max().index));
 
@@ -2237,7 +2237,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 		return menu;
 
 	ng::range_t const range     = someRanges.first();
-	ng::range_t const wordRange = range.empty() ? ng::extend(document->buffer(), range.first, kSelectionExtendToWord).last() : range;
+	ng::range_t const wordRange = range.empty() ? ng::extend(*documentView, range.first, kSelectionExtendToWord).last() : range;
 	std::string const candidate = documentView->substr(wordRange.min().index, wordRange.max().index);
 
 	if(candidate.find_first_of(" \n\t") != std::string::npos)
@@ -2497,14 +2497,14 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 				options &= ~find::wrap_around;
 
 			bool didWrap = false;
-			auto allMatches = ng::find(document->buffer(), documentView->ranges(), findStr, options, onlyInSelection ? documentView->ranges() : ng::ranges_t(), &didWrap);
+			auto allMatches = ng::find(*documentView, documentView->ranges(), findStr, options, onlyInSelection ? documentView->ranges() : ng::ranges_t(), &didWrap);
 
 			ng::ranges_t res;
 			std::transform(allMatches.begin(), allMatches.end(), std::back_inserter(res), [](auto const& p){ return p.first; });
 			if(onlyInSelection && res.sorted() == documentView->ranges().sorted())
 			{
 				res = ng::ranges_t();
-				allMatches = ng::find(document->buffer(), documentView->ranges(), findStr, options, ng::ranges_t());
+				allMatches = ng::find(*documentView, documentView->ranges(), findStr, options, ng::ranges_t());
 				std::transform(allMatches.begin(), allMatches.end(), std::back_inserter(res), [](auto const& p){ return p.first; });
 			}
 
@@ -2520,14 +2520,14 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 						// ====================================================
 
 						NSMutableArray* newDocuments = [documents mutableCopy];
-						auto newFirstMatch = ng::find(document->buffer(), ng::ranges_t(0), findStr, (find::options_t)(options & ~find::backwards));
+						auto newFirstMatch = ng::find(*documentView, ng::ranges_t(0), findStr, (find::options_t)(options & ~find::backwards));
 						if(newFirstMatch.empty())
 						{
 							[newDocuments removeObjectAtIndex:i];
 						}
 						else
 						{
-							auto newLastMatch = ng::find(document->buffer(), ng::ranges_t(0), findStr, (find::options_t)(options | find::backwards | find::wrap_around));
+							auto newLastMatch = ng::find(*documentView, ng::ranges_t(0), findStr, (find::options_t)(options | find::backwards | find::wrap_around));
 							auto to_range = [&](auto it) { return text::range_t(documentView->convert(it->first.min().index), documentView->convert(it->first.max().index)); };
 							[newDocuments replaceObjectAtIndex:i withObject:@{
 								@"identifier"      : [NSString stringWithCxxString:document->identifier()],
@@ -2647,12 +2647,12 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 {
 	AUTO_REFRESH;
 
-	ng::ranges_t const oldRanges = ng::move(document->buffer(), liveSearchRanges, kSelectionMoveToBeginOfSelection);
+	ng::ranges_t const oldRanges = ng::move(*documentView, liveSearchRanges, kSelectionMoveToBeginOfSelection);
 	liveSearchRanges = ranges;
 	if(!liveSearchRanges.empty())
 	{
 		documentView->set_selections(liveSearchRanges);
-		if(oldRanges != ng::move(document->buffer(), liveSearchRanges, kSelectionMoveToBeginOfSelection))
+		if(oldRanges != ng::move(*documentView, liveSearchRanges, kSelectionMoveToBeginOfSelection))
 			[self highlightRanges:liveSearchRanges];
 	}
 	else if(!oldRanges.empty())
@@ -2678,7 +2678,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	self.liveSearchString = [searchField string];
 
 	ng::ranges_t res;
-	for(auto const& pair : ng::find(document->buffer(), liveSearchAnchor, to_s(liveSearchString), find::ignore_case|find::ignore_whitespace|find::wrap_around))
+	for(auto const& pair : ng::find(*documentView, liveSearchAnchor, to_s(liveSearchString), find::ignore_case|find::ignore_whitespace|find::wrap_around))
 		res.push_back(pair.first);
 	[self setLiveSearchRanges:res];
 }
@@ -2709,11 +2709,11 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	if(self.liveSearchView)
 	{
 		ng::ranges_t tmp;
-		for(auto const& pair : ng::find(document->buffer(), ng::move(document->buffer(), liveSearchRanges.empty() ? liveSearchAnchor : liveSearchRanges, kSelectionMoveToEndOfSelection), to_s(liveSearchString), self.incrementalSearchOptions))
+		for(auto const& pair : ng::find(*documentView, ng::move(*documentView, liveSearchRanges.empty() ? liveSearchAnchor : liveSearchRanges, kSelectionMoveToEndOfSelection), to_s(liveSearchString), self.incrementalSearchOptions))
 			tmp.push_back(pair.first);
 		[self setLiveSearchRanges:tmp];
 		if(!tmp.empty())
-			liveSearchAnchor = ng::move(document->buffer(), tmp, kSelectionMoveToBeginOfSelection);
+			liveSearchAnchor = ng::move(*documentView, tmp, kSelectionMoveToBeginOfSelection);
 	}
 	else
 	{
@@ -2726,11 +2726,11 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	if(self.liveSearchView)
 	{
 		ng::ranges_t tmp;
-		for(auto const& pair : ng::find(document->buffer(), ng::move(document->buffer(), liveSearchRanges.empty() ? liveSearchAnchor : liveSearchRanges, kSelectionMoveToBeginOfSelection), to_s(liveSearchString), find::backwards|self.incrementalSearchOptions))
+		for(auto const& pair : ng::find(*documentView, ng::move(*documentView, liveSearchRanges.empty() ? liveSearchAnchor : liveSearchRanges, kSelectionMoveToBeginOfSelection), to_s(liveSearchString), find::backwards|self.incrementalSearchOptions))
 			tmp.push_back(pair.first);
 		[self setLiveSearchRanges:tmp];
 		if(!tmp.empty())
-			liveSearchAnchor = ng::move(document->buffer(), tmp, kSelectionMoveToBeginOfSelection);
+			liveSearchAnchor = ng::move(*documentView, tmp, kSelectionMoveToBeginOfSelection);
 	}
 	else
 	{
@@ -3080,7 +3080,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	}
 }
 
-- (BOOL)hasMultiLineSelection { return ng::multiline(document->buffer(), documentView->ranges()); }
+- (BOOL)hasMultiLineSelection { return ng::multiline(*documentView, documentView->ranges()); }
 
 - (IBAction)toggleShowInvisibles:(id)sender
 {
@@ -3146,7 +3146,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	ng::index_t caret = documentView->ranges().last().last;
 	if(!documentView->has_selection())
 	{
-		ng::range_t wordRange = ng::extend(document->buffer(), caret, kSelectionExtendToWord).last();
+		ng::range_t wordRange = ng::extend(*documentView, caret, kSelectionExtendToWord).last();
 		if(caret <= wordRange.max())
 			caret = wordRange.min();
 	}
@@ -3217,7 +3217,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		return;
 
 	AUTO_REFRESH;
-	ng::ranges_t ranges = ng::convert(document->buffer(), to_s(aSelectionString));
+	ng::ranges_t ranges = ng::convert(*documentView, to_s(aSelectionString));
 	documentView->set_selections(ranges);
 	for(auto const& range : ranges)
 		documentView->remove_enclosing_folds(range.min().index, range.max().index);
@@ -3288,7 +3288,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	if(io::process_t process = io::spawn(std::vector<std::string>{ "/bin/sh", "-c", to_s(commandString) }, environment))
 	{
 		bool inputWasSelection = false;
-		ng::ranges_t const inputRanges = ng::write_unit_to_fd(document->buffer(), documentView->ranges(), documentView->indent().tab_size(), process.in, inputUnit, input::entire_document, input_format::text, scope::selector_t(), environment, &inputWasSelection);
+		ng::ranges_t const inputRanges = ng::write_unit_to_fd(*documentView, documentView->ranges(), documentView->indent().tab_size(), process.in, inputUnit, input::entire_document, input_format::text, scope::selector_t(), environment, &inputWasSelection);
 
 		__block int status = 0;
 		__block std::string output, error;
@@ -3513,7 +3513,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		env["TM_MODIFIER_FLAGS"] = text::join(flagNames, "|");
 
 		AUTO_REFRESH;
-		document::run(parse_drag_command(handler), document->buffer(), documentView->ranges(), document, env, pwd);
+		document::run(parse_drag_command(handler), *documentView, documentView->ranges(), document, env, pwd);
 	}
 }
 
@@ -3702,8 +3702,8 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 	switch(mouseDownClickCount)
 	{
-		case 2: range = ng::extend(document->buffer(), range, kSelectionExtendToWordOrTypingPair); break;
-		case 3: range = ng::extend(document->buffer(), range, kSelectionExtendToLine); break;
+		case 2: range = ng::extend(*documentView, range, kSelectionExtendToWordOrTypingPair); break;
+		case 3: range = ng::extend(*documentView, range, kSelectionExtendToLine); break;
 	}
 
 	if(optionDown)
@@ -3761,8 +3761,8 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	ng::ranges_t range(ng::range_t(mouseDownIndex, documentView->index_at_point(mouseCurrentPos)));
 	switch(mouseDownClickCount)
 	{
-		case 2: range = ng::extend(document->buffer(), range, kSelectionExtendToWord); break;
-		case 3: range = ng::extend(document->buffer(), range, kSelectionExtendToLine); break;
+		case 2: range = ng::extend(*documentView, range, kSelectionExtendToWord); break;
+		case 3: range = ng::extend(*documentView, range, kSelectionExtendToLine); break;
 	}
 
 	NSUInteger currentModifierFlags = [anEvent modifierFlags];
@@ -3781,7 +3781,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	ASSERT(documentView);
 
 	NSRect srcRect;
-	ng::ranges_t const ranges = ng::dissect_columnar(document->buffer(), documentView->ranges());
+	ng::ranges_t const ranges = ng::dissect_columnar(*documentView, documentView->ranges());
 	NSImage* srcImage = [self imageForRanges:ranges imageRect:&srcRect];
 
 	NSImage* image = [[NSImage alloc] initWithSize:srcImage.size];
@@ -3860,7 +3860,7 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 - (void)quickLookWithEvent:(NSEvent*)anEvent
 {
 	ng::index_t index = documentView->index_at_point([self convertPoint:[anEvent locationInWindow] fromView:nil]);
-	ng::range_t range = ng::extend(document->buffer(), index, kSelectionExtendToWord).first();
+	ng::range_t range = ng::extend(*documentView, index, kSelectionExtendToWord).first();
 
 	if([self isPointInSelection:[self convertPoint:[anEvent locationInWindow] fromView:nil]] && documentView->ranges().size() == 1)
 		range = documentView->ranges().first();
@@ -3905,7 +3905,7 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 		return;
 	}
 
-	std::vector<bundles::item_ptr> const& items = bundles::query(bundles::kFieldSemanticClass, "callback.mouse-click", add_modifiers_to_scope(ng::scope(document->buffer(), documentView->index_at_point([self convertPoint:[anEvent locationInWindow] fromView:nil]), to_s([self scopeAttributes])), [anEvent modifierFlags]));
+	std::vector<bundles::item_ptr> const& items = bundles::query(bundles::kFieldSemanticClass, "callback.mouse-click", add_modifiers_to_scope(ng::scope(*documentView, documentView->index_at_point([self convertPoint:[anEvent locationInWindow] fromView:nil]), to_s([self scopeAttributes])), [anEvent modifierFlags]));
 	if(!items.empty())
 	{
 		if(bundles::item_ptr item = OakShowMenuForBundleItems(items, [self positionForWindowUnderCaret]))
