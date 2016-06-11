@@ -60,7 +60,29 @@ namespace ng
 	struct symbols_t;
 	struct marks_t;
 
-	struct PUBLIC buffer_t
+	struct PUBLIC buffer_api_t
+	{
+		typedef detail::storage_t::iterator iterator;
+
+		virtual iterator begin () const = 0;
+		virtual iterator end () const = 0;
+
+		virtual size_t size () const = 0;
+		virtual std::string operator[] (size_t i) const = 0;
+		virtual std::string substr (size_t from, size_t to) const = 0;
+		virtual size_t begin (size_t n) const = 0;
+		virtual size_t eol (size_t n) const = 0;
+		virtual size_t end (size_t n) const = 0;
+		virtual size_t lines () const = 0;
+		virtual size_t sanitize_index (size_t i) const = 0;
+		virtual size_t convert (text::pos_t const& p) const = 0;
+		virtual text::pos_t convert (size_t i) const = 0;
+		virtual text::indent_t const& indent () const = 0;
+		virtual scope::context_t scope (size_t i, bool includeDynamic = true) const = 0;
+		virtual std::map<size_t, scope::scope_t> scopes (size_t from, size_t to) const = 0;
+	};
+
+	struct PUBLIC buffer_t : buffer_api_t
 	{
 		WATCH_LEAKS(ng::buffer_t);
 
@@ -84,8 +106,6 @@ namespace ng
 
 		size_t insert (size_t i, std::string const& str)   { return replace(i, i, str);    }
 		size_t erase (size_t from, size_t to)              { return replace(from, to, ""); }
-
-		typedef detail::storage_t::iterator iterator;
 
 		iterator begin () const                      { return _storage.begin(); }
 		iterator end () const                        { return _storage.end();   }
