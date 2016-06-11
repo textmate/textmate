@@ -238,7 +238,7 @@ typedef NS_ENUM(NSUInteger, OakFlagsState) {
 	OakFlagsStateSecondShiftDown,
 };
 
-struct document_view_t
+struct document_view_t : ng::buffer_api_t
 {
 	document_view_t (document::document_ptr const& document, theme_ptr const& theme, bool softWrap, bool wrapColumn, bool scrollPastEnd) : document(document)
 	{
@@ -250,17 +250,24 @@ struct document_view_t
 	// = Buffer =
 	// ==========
 
+	iterator begin () const { return document->buffer().begin(); }
+	iterator end () const { return document->buffer().end(); }
+
 	size_t size () const { return document->buffer().size(); }
 	size_t revision () const { return document->buffer().revision(); }
 	std::string operator[] (size_t i) const { return document->buffer()[i]; }
 	std::string substr (size_t from, size_t to) const { return document->buffer().substr(from, to); }
+	std::string xml_substr (size_t from = 0, size_t to = SIZE_T_MAX) const { return document->buffer().xml_substr(from, to); }
 	size_t begin (size_t n) const { return document->buffer().begin(n); }
 	size_t eol (size_t n) const { return document->buffer().eol(n); }
+	size_t end (size_t n) const { return document->buffer().end(n); }
+	size_t lines () const { return document->buffer().lines(); }
 	size_t sanitize_index (size_t i) const { return document->buffer().sanitize_index(i); }
 	size_t convert (text::pos_t const& p) const { return document->buffer().convert(p); }
 	text::pos_t convert (size_t i) const { return document->buffer().convert(i); }
 	text::indent_t const& indent () const { return document->buffer().indent(); }
 	void set_indent (text::indent_t const& indent) { document->set_indent(indent); }
+	scope::context_t scope (size_t i, bool includeDynamic = true) const { return document->buffer().scope(i, includeDynamic); }
 	std::map<size_t, scope::scope_t> scopes (size_t from, size_t to) const { return document->buffer().scopes(from, to); }
 	void set_live_spelling (bool flag) { document->buffer().set_live_spelling(flag); }
 	bool live_spelling () const { return document->buffer().live_spelling(); }
