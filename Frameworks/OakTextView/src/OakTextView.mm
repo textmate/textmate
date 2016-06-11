@@ -240,11 +240,23 @@ typedef NS_ENUM(NSUInteger, OakFlagsState) {
 
 struct document_view_t : ng::buffer_api_t
 {
-	document_view_t (document::document_ptr const& document, theme_ptr const& theme, bool softWrap, bool wrapColumn, bool scrollPastEnd) : _document(document)
+	document_view_t (document::document_ptr const& document, theme_ptr const& theme, std::string const& scopeAttributes, bool scrollPastEnd) : _document(document)
 	{
 		_document->sync_open();
 		_editor = ng::editor_for_document(_document);
+
+		settings_t const settings = settings_for_path(_document->virtual_path(), _document->file_type() + " " + scopeAttributes, path::parent(_document->path()));
+		invisibles_map = settings.get(kSettingsInvisiblesMapKey, "");
+
+		bool softWrap     = settings.get(kSettingsSoftWrapKey, false);
+		size_t wrapColumn = settings.get(kSettingsWrapColumnKey, NSWrapColumnWindowWidth);
 		_layout = std::make_unique<ng::layout_t>(_document->buffer(), theme, softWrap, scrollPastEnd, wrapColumn, _document->folded());
+
+		if(settings.get(kSettingsShowWrapColumnKey, false))
+			set_draw_wrap_column(true);
+
+		if(settings.get(kSettingsShowIndentGuidesKey, false))
+			set_draw_indent_guides(true);
 	}
 
 	~document_view_t ()
@@ -258,6 +270,8 @@ struct document_view_t : ng::buffer_api_t
 		res << _editor->editor_variables(scopeAttributes);
 		return res;
 	}
+
+	std::string invisibles_map;
 
 	// ==========
 	// = Buffer =
@@ -395,8 +409,6 @@ private:
 	std::shared_ptr<document_view_t> documentView;
 	NSUInteger refreshNestCount;
 	buffer_refresh_callback_t* callback;
-
-	std::string invisiblesMap;
 
 	BOOL hideCaret;
 	NSTimer* blinkCaretTimer;
@@ -822,15 +834,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 	if(document = aDocument)
 	{
-		settings_t const settings = settings_for_path(document->virtual_path(), document->file_type() + " " + to_s(self.scopeAttributes), path::parent(document->path()));
-
-		invisiblesMap = settings.get(kSettingsInvisiblesMapKey, "");
-		documentView = std::make_shared<document_view_t>(document, theme, settings.get(kSettingsSoftWrapKey, false), settings.get(kSettingsWrapColumnKey, NSWrapColumnWindowWidth), self.scrollPastEnd);
-		if(settings.get(kSettingsShowWrapColumnKey, false))
-			documentView->set_draw_wrap_column(true);
-
-		if(settings.get(kSettingsShowIndentGuidesKey, false))
-			documentView->set_draw_indent_guides(true);
+		documentView = std::make_shared<document_view_t>(document, theme, to_s(self.scopeAttributes), self.scrollPastEnd);
 
 		BOOL hasFocus = (self.keyState & (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask)) == (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask);
 		documentView->set_is_key(hasFocus);
@@ -1126,7 +1130,7 @@ doScroll:
 		return NULL;
 	};
 
-	documentView->draw(ng::context_t(context, _showInvisibles ? invisiblesMap : NULL_STR, [spellingDotImage CGImageForProposedRect:NULL context:[NSGraphicsContext currentContext] hints:nil], foldingDotsFactory), aRect, [self isFlipped], merge(documentView->ranges(), [self markedRanges]), liveSearchRanges);
+	documentView->draw(ng::context_t(context, _showInvisibles ? documentView->invisibles_map : NULL_STR, [spellingDotImage CGImageForProposedRect:NULL context:[NSGraphicsContext currentContext] hints:nil], foldingDotsFactory), aRect, [self isFlipped], merge(documentView->ranges(), [self markedRanges]), liveSearchRanges);
 }
 
 // =====================
