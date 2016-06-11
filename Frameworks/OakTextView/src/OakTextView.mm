@@ -278,14 +278,12 @@ struct document_view_t : ng::buffer_api_t
 	// = Buffer =
 	// ==========
 
-	iterator begin () const { return _document->buffer().begin(); }
-	iterator end () const { return _document->buffer().end(); }
-
 	size_t size () const { return _document->buffer().size(); }
 	size_t revision () const { return _document->buffer().revision(); }
 	std::string operator[] (size_t i) const { return _document->buffer()[i]; }
 	std::string substr (size_t from = 0, size_t to = SIZE_T_MAX) const { return _document->buffer().substr(from, to != SIZE_T_MAX ? to : size()); }
 	std::string xml_substr (size_t from = 0, size_t to = SIZE_T_MAX) const { return _document->buffer().xml_substr(from, to); }
+	void visit_data (std::function<void(char const*, size_t)> const& f) const { return _document->buffer().visit_data(f); }
 	size_t begin (size_t n) const { return _document->buffer().begin(n); }
 	size_t eol (size_t n) const { return _document->buffer().eol(n); }
 	size_t end (size_t n) const { return _document->buffer().end(n); }

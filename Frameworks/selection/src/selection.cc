@@ -1303,11 +1303,7 @@ namespace ng
 		find::find_t f(searchFor, (find::options_t)(options & ~find::backwards));
 
 		ssize_t total = 0;
-		for(auto const& memory : buffer)
-		{
-			char const* buf = memory.data();
-			size_t len      = memory.size();
-
+		buffer.visit_data([&](char const* buf, size_t len){
 			for(ssize_t offset = 0; offset < len; )
 			{
 				std::map<std::string, std::string> captures;
@@ -1322,7 +1318,7 @@ namespace ng
 				offset += m.second;
 			}
 			total += len;
-		}
+		});
 
 		std::map<std::string, std::string> captures;
 		std::pair<ssize_t, ssize_t> m = f.match(NULL, 0, &captures);

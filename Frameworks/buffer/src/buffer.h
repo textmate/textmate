@@ -62,15 +62,11 @@ namespace ng
 
 	struct PUBLIC buffer_api_t
 	{
-		typedef detail::storage_t::iterator iterator;
-
-		virtual iterator begin () const = 0;
-		virtual iterator end () const = 0;
-
 		virtual size_t size () const = 0;
 		virtual std::string operator[] (size_t i) const = 0;
 		virtual std::string substr (size_t from, size_t to) const = 0;
 		virtual std::string xml_substr (size_t from = 0, size_t to = SIZE_T_MAX) const = 0;
+		virtual void visit_data (std::function<void(char const*, size_t)> const& f) const = 0;
 		virtual size_t begin (size_t n) const = 0;
 		virtual size_t eol (size_t n) const = 0;
 		virtual size_t end (size_t n) const = 0;
@@ -101,6 +97,7 @@ namespace ng
 		std::string operator[] (size_t i) const;
 		std::string substr (size_t from, size_t to) const;
 		std::string xml_substr (size_t from = 0, size_t to = SIZE_T_MAX) const;
+		void visit_data (std::function<void(char const*, size_t)> const& f) const;
 
 		bool operator== (buffer_t const& rhs) const;
 
@@ -108,9 +105,6 @@ namespace ng
 
 		size_t insert (size_t i, std::string const& str)   { return replace(i, i, str);    }
 		size_t erase (size_t from, size_t to)              { return replace(from, to, ""); }
-
-		iterator begin () const                      { return _storage.begin(); }
-		iterator end () const                        { return _storage.end();   }
 
 		size_t begin (size_t n) const                { ASSERT_LT(n, lines()); return n   ==       0 ?      0 : _hardlines.nth(n-1)->first + 1; }
 		size_t eol (size_t n) const                  { ASSERT_LT(n, lines()); return n+1 == lines() ? size() : _hardlines.nth(n)->first;       }
