@@ -315,8 +315,8 @@ struct document_view_t : ng::buffer_api_t
 	bool can_redo () const { return _document->undo_manager().can_redo(); }
 	void begin_undo_group (ng::ranges_t const& ranges) { _document->undo_manager().begin_undo_group(ranges); }
 	void end_undo_group (ng::ranges_t const& ranges, bool force = false) { _document->undo_manager().end_undo_group(ranges, force); }
-	ng::ranges_t undo () { return _document->undo_manager().undo(); }
-	ng::ranges_t redo () { return _document->undo_manager().redo(); }
+	void undo () { _editor->clear_snippets(); set_ranges(_document->undo_manager().undo()); }
+	void redo () { _editor->clear_snippets(); set_ranges(_document->undo_manager().redo()); }
 
 	// ==========
 	// = Editor =
@@ -341,7 +341,6 @@ struct document_view_t : ng::buffer_api_t
 	void set_ranges (ng::ranges_t const& r) { _editor->set_selections(r); }
 	bool has_selection () const { return _editor->has_selection(); }
 	bool handle_result (std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, ng::ranges_t const& inputRanges, std::map<std::string, std::string> environment) { return _editor->handle_result(out, placement, format, outputCaret, inputRanges, environment); }
-	void clear_snippets () { _editor->clear_snippets(); }
 	void set_clipboard (clipboard_ptr cb) { _editor->set_clipboard(cb); }
 	void set_find_clipboard (clipboard_ptr cb) { _editor->set_find_clipboard(cb); }
 	void set_replace_clipboard (clipboard_ptr cb) { _editor->set_replace_clipboard(cb); }
@@ -2769,8 +2768,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	AUTO_REFRESH;
 	if(!documentView->can_undo())
 		return;
-	documentView->clear_snippets();
-	documentView->set_ranges(documentView->undo());
+	documentView->undo();
 }
 
 - (void)redo:(id)anArgument // MACRO?
@@ -2778,8 +2776,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	AUTO_REFRESH;
 	if(!documentView->can_redo())
 		return;
-	documentView->clear_snippets();
-	documentView->set_ranges(documentView->redo());
+	documentView->redo();
 }
 
 - (BOOL)expandTabTrigger:(id)sender
