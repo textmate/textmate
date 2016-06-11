@@ -278,6 +278,16 @@ struct document_view_t : ng::buffer_api_t
 	size_t nest_count = 0;
 	std::string invisibles_map;
 
+	// ============
+	// = Document =
+	// ============
+
+	oak::uuid_t identifier () const                 { return _document->identifier(); }
+	std::string path () const                       { return _document->path(); }
+	std::string virtual_path () const               { return _document->virtual_path(); }
+	std::string file_type () const                  { return _document->file_type(); }
+	void set_file_type (std::string const& newType) { _document->set_file_type(newType); }
+
 	// ==========
 	// = Buffer =
 	// ==========
@@ -915,7 +925,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 - (void)documentDidSave:(NSNotification*)aNotification
 {
 	NSWindow* window = [[aNotification userInfo] objectForKey:@"window"];
-	if(window != self.window || document->path() == NULL_STR)
+	if(window != self.window || documentView->path() == NULL_STR)
 		return;
 
 	for(auto const& item : bundles::query(bundles::kFieldSemanticClass, "callback.document.did-save", [self scopeContext], bundles::kItemTypeMost, oak::uuid_t(), false))
@@ -1729,7 +1739,7 @@ doScroll:
 		res << [self.delegate variables];
 
 	res = bundles::scope_variables(res, [self scopeContext]);
-	res = variables_for_path(res, document->virtual_path(), [self scopeContext].right, path::parent(document->path()));
+	res = variables_for_path(res, documentView->virtual_path(), [self scopeContext].right, path::parent(documentView->path()));
 	return res;
 }
 
@@ -1785,8 +1795,8 @@ doScroll:
 
 		case bundles::kItemTypeGrammar:
 		{
-			document->set_file_type(item->value_for_field(bundles::kFieldGrammarScope));
-			file::set_type(document->virtual_path(), item->value_for_field(bundles::kFieldGrammarScope));
+			documentView->set_file_type(item->value_for_field(bundles::kFieldGrammarScope));
+			file::set_type(documentView->virtual_path(), item->value_for_field(bundles::kFieldGrammarScope));
 		}
 		break;
 	}
@@ -2500,7 +2510,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 				for(NSUInteger i = 0; i < [documents count]; ++i)
 				{
 					NSString* uuid = [[documents objectAtIndex:i] objectForKey:@"identifier"];
-					if(uuid && oak::uuid_t(to_s(uuid)) == document->identifier())
+					if(uuid && oak::uuid_t(to_s(uuid)) == documentView->identifier())
 					{
 						// ====================================================
 						// = Update our document’s matches on Find pasteboard =
@@ -2517,7 +2527,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 							auto newLastMatch = ng::find(*documentView, ng::ranges_t(0), findStr, (find::options_t)(options | find::backwards | find::wrap_around));
 							auto to_range = [&](auto it) { return text::range_t(documentView->convert(it->first.min().index), documentView->convert(it->first.max().index)); };
 							[newDocuments replaceObjectAtIndex:i withObject:@{
-								@"identifier"      : [NSString stringWithCxxString:document->identifier()],
+								@"identifier"      : [NSString stringWithCxxString:documentView->identifier()],
 								@"firstMatchRange" : [NSString stringWithCxxString:to_range(newFirstMatch.begin())],
 								@"lastMatchRange"  : [NSString stringWithCxxString:to_range((newLastMatch.empty() ? newFirstMatch : newLastMatch).begin())]
 							}];
@@ -2973,7 +2983,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	if(_showInvisibles == flag)
 		return;
 	_showInvisibles = flag;
-	settings_t::set(kSettingsShowInvisiblesKey, (bool)flag, document->file_type());
+	settings_t::set(kSettingsShowInvisiblesKey, (bool)flag, documentView->file_type());
 	[self setNeedsDisplay:YES];
 }
 
@@ -2999,7 +3009,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	ng::index_t visibleIndex = documentView->index_at_point([self visibleRect].origin);
 	documentView->set_wrapping(flag, documentView->wrap_column());
 	[self scrollIndexToFirstVisible:documentView->begin(documentView->convert(visibleIndex.index).line)];
-	settings_t::set(kSettingsSoftWrapKey, (bool)flag, document->file_type());
+	settings_t::set(kSettingsSoftWrapKey, (bool)flag, documentView->file_type());
 }
 
 - (void)setSoftTabs:(BOOL)flag
@@ -3157,7 +3167,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 {
 	bool flag = !documentView->live_spelling();
 	documentView->set_live_spelling(flag);
-	settings_t::set(kSettingsSpellCheckingKey, flag, document->file_type(), document->path());
+	settings_t::set(kSettingsSpellCheckingKey, flag, documentView->file_type(), documentView->path());
 
 	[self setNeedsDisplay:YES];
 }
@@ -3167,9 +3177,9 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	NSString* lang = (NSString*)[sender representedObject];
 	[[NSSpellChecker sharedSpellChecker] setLanguage:lang];
 	documentView->set_spelling_language(to_s(lang));
-	settings_t::set(kSettingsSpellingLanguageKey, to_s(lang), "", document->path());
-	if(document->path() != NULL_STR)
-		settings_t::set(kSettingsSpellingLanguageKey, to_s(lang), NULL_STR, path::join(path::parent(document->path()), "**"));
+	settings_t::set(kSettingsSpellingLanguageKey, to_s(lang), "", documentView->path());
+	if(documentView->path() != NULL_STR)
+		settings_t::set(kSettingsSpellingLanguageKey, to_s(lang), NULL_STR, path::join(path::parent(documentView->path()), "**"));
 
 	[self setNeedsDisplay:YES];
 }
@@ -3299,7 +3309,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 				if([self.window.delegate respondsToSelector:@selector(identifier)]) // FIXME This should be a formal interface
 					projectIdentifier = to_s([self.window.delegate performSelector:@selector(identifier)]);
 
-				document::show(document::from_content(output, document->file_type()), projectIdentifier);
+				document::show(document::from_content(output, documentView->file_type()), projectIdentifier);
 			}
 			else
 			{
