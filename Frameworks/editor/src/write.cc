@@ -47,7 +47,7 @@ namespace ng
 			{
 				if(!std::exchange(first, false))
 					str += "\n";
-				str += format == input_format::xml ? to_xml(buffer, range.min().index, range.max().index) : buffer.substr(range.min().index, range.max().index);
+				str += format == input_format::xml ? buffer.xml_substr(range.min().index, range.max().index) : buffer.substr(range.min().index, range.max().index);
 			}
 
 			dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{

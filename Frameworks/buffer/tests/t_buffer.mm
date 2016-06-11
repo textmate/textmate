@@ -100,8 +100,8 @@ void test_xml_markup ()
 	ng::buffer_t buf;
 	buf.insert(0, "Hello <World> & Fun");
 
-	OAK_ASSERT_EQ(to_xml(buf), "<text>Hello &lt;World> &amp; Fun</text>");
-	OAK_ASSERT_EQ(to_xml(buf, 6, 13), "<text>&lt;World></text>");
+	OAK_ASSERT_EQ(buf.xml_substr(), "<text>Hello &lt;World> &amp; Fun</text>");
+	OAK_ASSERT_EQ(buf.xml_substr(6, 13), "<text>&lt;World></text>");
 }
 
 void test_spelling ()

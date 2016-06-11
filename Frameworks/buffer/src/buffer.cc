@@ -361,14 +361,14 @@ namespace ng
 		return res + xml_difference(lastScope, scope::scope_t(), "«", "»");
 	}
 
-	std::string to_xml (buffer_t const& buf, size_t from, size_t to)
+	std::string buffer_t::xml_substr (size_t from, size_t to) const
 	{
-		to = to != SIZE_T_MAX ? to : buf.size();
+		to = to != SIZE_T_MAX ? to : size();
 		std::string res = "";
 
-		auto first = buf._scopes.upper_bound(from);
-		auto last  = buf._scopes.lower_bound(to);
-		if(first != buf._scopes.begin())
+		auto first = _scopes.upper_bound(from);
+		auto last  = _scopes.lower_bound(to);
+		if(first != _scopes.begin())
 			--first;
 
 		scope::scope_t lastScope;
@@ -378,7 +378,7 @@ namespace ng
 			size_t pos = std::max<ssize_t>(from, it->first);
 			lastScope = it->second;
 			++it;
-			res.append(format_string::replace(buf.substr(pos, it == last ? to : it->first), "(<)|&", "&${1:?lt:amp};"));
+			res.append(format_string::replace(substr(pos, it == last ? to : it->first), "(<)|&", "&${1:?lt:amp};"));
 		}
 		return res + xml_difference(lastScope, scope::scope_t(), "<", ">");
 	}

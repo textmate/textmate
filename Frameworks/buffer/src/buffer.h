@@ -70,6 +70,7 @@ namespace ng
 		virtual size_t size () const = 0;
 		virtual std::string operator[] (size_t i) const = 0;
 		virtual std::string substr (size_t from, size_t to) const = 0;
+		virtual std::string xml_substr (size_t from = 0, size_t to = SIZE_T_MAX) const = 0;
 		virtual size_t begin (size_t n) const = 0;
 		virtual size_t eol (size_t n) const = 0;
 		virtual size_t end (size_t n) const = 0;
@@ -99,6 +100,7 @@ namespace ng
 
 		std::string operator[] (size_t i) const;
 		std::string substr (size_t from, size_t to) const;
+		std::string xml_substr (size_t from = 0, size_t to = SIZE_T_MAX) const;
 
 		bool operator== (buffer_t const& rhs) const;
 
@@ -206,7 +208,6 @@ namespace ng
 
 		uint32_t code_point (size_t& i, size_t& len) const;
 		friend std::string to_s (buffer_t const& buf, size_t first, size_t last);
-		friend std::string to_xml (buffer_t const& buf, size_t first, size_t last);
 
 		text::indent_t _indent;
 		void initiate_repair (size_t limit_redraw = 0, size_t super_from = -1);
@@ -242,7 +243,6 @@ namespace ng
 	};
 
 	PUBLIC std::string to_s (buffer_t const& buf, size_t first = 0, size_t last = SIZE_T_MAX);
-	PUBLIC std::string to_xml (buffer_t const& buf, size_t first = 0, size_t last = SIZE_T_MAX);
 
 } /* ng */
 
