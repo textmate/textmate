@@ -327,9 +327,12 @@ namespace ng
 						std::swap(r1, r2);
 					}
 
-					res.push_back(OakRectMake(r1.origin.x, r1.origin.y, content_width() - r1.origin.x + _margin.left, r1.size.height));
-					res.push_back(OakRectMake(_margin.left, CGRectGetMaxY(r1), content_width(), CGRectGetMinY(r2) - CGRectGetMaxY(r1)));
-					res.push_back(OakRectMake(_margin.left, r2.origin.y, r2.origin.x - _margin.left, r2.size.height));
+					CGFloat firstLineX = r1.origin.x == _margin.left ? 0 : r1.origin.x;
+					CGFloat lastLineX  = r2.origin.x == _margin.left ? _margin.left : 0;
+					CGFloat totalWidth = _margin.left + content_width() + _margin.right;
+					res.push_back(OakRectMake(firstLineX, r1.origin.y, totalWidth - firstLineX, r1.size.height));
+					res.push_back(OakRectMake(0, CGRectGetMaxY(r1), totalWidth, CGRectGetMinY(r2) - CGRectGetMaxY(r1)));
+					res.push_back(OakRectMake(lastLineX, r2.origin.y, r2.origin.x - lastLineX, r2.size.height));
 				}
 			}
 		}
