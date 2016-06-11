@@ -338,7 +338,7 @@ struct document_view_t : ng::buffer_api_t
 	std::string placeholder_content (ng::range_t* placeholderSelection = NULL) const { return _editor->placeholder_content(placeholderSelection); }
 	void set_placeholder_content (std::string const& str, size_t selectFrom) { _editor->set_placeholder_content(str, selectFrom); }
 	ng::ranges_t ranges () const { return _editor->ranges(); }
-	void set_selections (ng::ranges_t const& r) { _editor->set_selections(r); }
+	void set_ranges (ng::ranges_t const& r) { _editor->set_selections(r); }
 	bool has_selection () const { return _editor->has_selection(); }
 	bool handle_result (std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, ng::ranges_t const& inputRanges, std::map<std::string, std::string> environment) { return _editor->handle_result(out, placement, format, outputCaret, inputRanges, environment); }
 	void clear_snippets () { _editor->clear_snippets(); }
@@ -357,12 +357,12 @@ struct document_view_t : ng::buffer_api_t
 	ng::layout_t::margin_t const& margin () const { return _layout->margin(); }
 	bool soft_wrap () const { return _layout->soft_wrap(); }
 	size_t wrap_column () const { return _layout->wrap_column(); }
-	void set_is_key (bool isKey) { _layout->set_is_key(isKey); }
+	void set_draw_as_key (bool isKey) { _layout->set_is_key(isKey); }
 	void set_draw_caret (bool drawCaret) { _layout->set_draw_caret(drawCaret); }
 	void set_draw_wrap_column (bool drawWrapColumn) { _layout->set_draw_wrap_column(drawWrapColumn); }
 	void set_draw_indent_guides (bool drawIndentGuides) { _layout->set_draw_indent_guides(drawIndentGuides); }
 	void set_drop_marker (ng::index_t dropMarkerIndex) { _layout->set_drop_marker(dropMarkerIndex); }
-	void set_viewport_size (CGSize size) { _layout->set_viewport_size(size); }
+	void set_viewport (CGRect rect) { _layout->set_viewport_size(rect.size); }
 	bool draw_wrap_column () const { return _layout->draw_wrap_column(); }
 	bool draw_indent_guides () const { return _layout->draw_indent_guides(); }
 	void update_metrics (CGRect visibleRect) { _layout->update_metrics(visibleRect); }
@@ -803,7 +803,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 		if(document->selection() != NULL_STR)
 		{
 			ng::ranges_t ranges = ng::convert(*documentView, document->selection());
-			documentView->set_selections(ranges);
+			documentView->set_ranges(ranges);
 			for(auto const& range : ranges)
 				documentView->remove_enclosing_folds(range.min().index, range.max().index);
 
@@ -836,7 +836,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 		documentView = std::make_shared<document_view_t>(document, theme, to_s(self.scopeAttributes), self.scrollPastEnd);
 
 		BOOL hasFocus = (self.keyState & (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask)) == (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask);
-		documentView->set_is_key(hasFocus);
+		documentView->set_draw_as_key(hasFocus);
 
 		callback = new buffer_refresh_callback_t(self);
 
@@ -862,7 +862,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 		if(document->selection() != NULL_STR)
 		{
 			ng::ranges_t ranges = ng::convert(*documentView, document->selection());
-			documentView->set_selections(ranges);
+			documentView->set_ranges(ranges);
 			for(auto const& range : ranges)
 				documentView->remove_enclosing_folds(range.min().index, range.max().index);
 		}
@@ -946,7 +946,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 	if(document && documentView && [self enclosingScrollView])
 	{
 		NSRect r = [[self enclosingScrollView] documentVisibleRect];
-		documentView->set_viewport_size(r.size);
+		documentView->set_viewport(r);
 		NSSize newSize = NSMakeSize(std::max(NSWidth(r), documentView->width()), std::max(NSHeight(r), documentView->height()));
 		if(!NSEqualSizes([self frame].size, newSize))
 			[self setFrameSize:newSize];
@@ -1192,9 +1192,9 @@ doScroll:
 
 	AUTO_REFRESH;
 	if(replacementRange.location != NSNotFound)
-		documentView->set_selections([self rangesForReplacementRange:replacementRange]);
+		documentView->set_ranges([self rangesForReplacementRange:replacementRange]);
 	else if(!markedRanges.empty())
-		documentView->set_selections(markedRanges);
+		documentView->set_ranges(markedRanges);
 
 	markedRanges = ng::ranges_t();
 	documentView->insert(to_s(aString), true);
@@ -1211,7 +1211,7 @@ doScroll:
 		size_t to   = utf16::advance(base, NSMaxRange(aRange), base + str.size()) - base;
 		sel.push_back(ng::range_t(range.min() + from, range.min() + to));
 	}
-	documentView->set_selections(sel);
+	documentView->set_ranges(sel);
 }
 
 - (NSRange)selectedRange
@@ -1459,7 +1459,7 @@ doScroll:
 		for(NSValue* nsRangeValue in nsRanges)
 			ranges.push_back([self rangeForNSRange:[nsRangeValue rangeValue]]);
 		AUTO_REFRESH;
-		documentView->set_selections(ranges);
+		documentView->set_ranges(ranges);
 	} else {
 		[super accessibilitySetValue:value forAttribute:attribute];
 	}
@@ -2178,7 +2178,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	AUTO_REFRESH;
 	if(!markedRanges.empty())
 	{
-		documentView->set_selections(markedRanges);
+		documentView->set_ranges(markedRanges);
 		[self delete:nil];
 		markedRanges = ng::ranges_t();
 	}
@@ -2186,7 +2186,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 
 	if(aRange.location != NSNotFound)
 	{
-		documentView->set_selections([self rangesForReplacementRange:aRange]);
+		documentView->set_ranges([self rangesForReplacementRange:aRange]);
 		[self delete:nil];
 	}
 
@@ -2260,7 +2260,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	else if(ns::is_misspelled(candidate, documentView->spelling_language(), documentView->spelling_tag()))
 	{
 		AUTO_REFRESH;
-		documentView->set_selections(wordRange);
+		documentView->set_ranges(wordRange);
 
 		[[NSSpellChecker sharedSpellChecker] updateSpellingPanelWithMisspelledWord:word];
 
@@ -2585,7 +2585,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 
 				if(!res.empty())
 				{
-					documentView->set_selections(res);
+					documentView->set_ranges(res);
 					if(res.size() == 1 && (options & find::regular_expression))
 					{
 						NSMutableDictionary* captures = [NSMutableDictionary dictionary];
@@ -2658,7 +2658,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	liveSearchRanges = ranges;
 	if(!liveSearchRanges.empty())
 	{
-		documentView->set_selections(liveSearchRanges);
+		documentView->set_ranges(liveSearchRanges);
 		if(oldRanges != ng::move(*documentView, liveSearchRanges, kSelectionMoveToBeginOfSelection))
 			[self highlightRanges:liveSearchRanges];
 	}
@@ -2770,7 +2770,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	if(!documentView->can_undo())
 		return;
 	documentView->clear_snippets();
-	documentView->set_selections(documentView->undo());
+	documentView->set_ranges(documentView->undo());
 }
 
 - (void)redo:(id)anArgument // MACRO?
@@ -2779,7 +2779,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	if(!documentView->can_redo())
 		return;
 	documentView->clear_snippets();
-	documentView->set_selections(documentView->redo());
+	documentView->set_ranges(documentView->redo());
 }
 
 - (BOOL)expandTabTrigger:(id)sender
@@ -3159,7 +3159,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		if([[speller spellingPanel] isVisible])
 		{
 			AUTO_REFRESH;
-			documentView->set_selections(ng::range_t(nextMisspelling.first, nextMisspelling.second));
+			documentView->set_ranges(ng::range_t(nextMisspelling.first, nextMisspelling.second));
 			[speller updateSpellingPanelWithMisspelledWord:[NSString stringWithCxxString:documentView->substr(nextMisspelling.first, nextMisspelling.second)]];
 		}
 		else
@@ -3220,7 +3220,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 	AUTO_REFRESH;
 	ng::ranges_t ranges = ng::convert(*documentView, to_s(aSelectionString));
-	documentView->set_selections(ranges);
+	documentView->set_ranges(ranges);
 	for(auto const& range : ranges)
 		documentView->remove_enclosing_folds(range.min().index, range.max().index);
 }
@@ -3610,7 +3610,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		for(NSString* path in files)
 			paths.push_back(to_s(path));
 
-		documentView->set_selections(ng::range_t(pos));
+		documentView->set_ranges(ng::range_t(pos));
 		documentView->insert(text::join(paths, "\n"));
 	}
 	else if(NSString* text = [pboard stringForType:[pboard availableTypeFromArray:@[ @"public.plain-text" ]]] ?: [pboard stringForType:NSStringPboardType])
@@ -3626,13 +3626,13 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 			str.erase(text::convert_line_endings(str.begin(), str.end(), text::estimate_line_endings(str.begin(), str.end())), str.end());
 			str.erase(utf8::remove_malformed(str.begin(), str.end()), str.end());
 
-			documentView->set_selections(ng::range_t(pos));
+			documentView->set_ranges(ng::range_t(pos));
 			documentView->insert(str);
 		}
 	}
 	else if(files)
 	{
-		documentView->set_selections(ng::range_t(pos));
+		documentView->set_ranges(ng::range_t(pos));
 		[self performSelector:@selector(dropFiles:) withObject:files afterDelay:0.05]; // we use “afterDelay” so that slow commands won’t trigger a timeout of the drop event
 	}
 	else
@@ -3754,7 +3754,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	else
 		s = range.last();
 
-	documentView->set_selections(s);
+	documentView->set_ranges(s);
 }
 
 - (void)actOnMouseDragged:(NSEvent*)anEvent
@@ -3773,7 +3773,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 	ng::ranges_t s = documentView->ranges();
 	s.last() = range.last();
-	documentView->set_selections(s);
+	documentView->set_ranges(s);
 
 	[self autoscroll:anEvent];
 }
@@ -3913,7 +3913,7 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 		if(bundles::item_ptr item = OakShowMenuForBundleItems(items, [self positionForWindowUnderCaret]))
 		{
 			AUTO_REFRESH;
-			documentView->set_selections(ng::range_t(documentView->index_at_point([self convertPoint:[anEvent locationInWindow] fromView:nil]).index));
+			documentView->set_ranges(ng::range_t(documentView->index_at_point([self convertPoint:[anEvent locationInWindow] fromView:nil]).index));
 			[self performBundleItem:item];
 		}
 		return;
@@ -4013,7 +4013,7 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 	{
 		AUTO_REFRESH;
 		documentView->set_draw_caret(doesHaveFocus);
-		documentView->set_is_key(doesHaveFocus);
+		documentView->set_draw_as_key(doesHaveFocus);
 		hideCaret = !doesHaveFocus;
 	}
 
