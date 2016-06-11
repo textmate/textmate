@@ -243,7 +243,7 @@ struct document_view_t : ng::buffer_api_t
 	document_view_t (document::document_ptr const& document, theme_ptr const& theme, bool softWrap, bool wrapColumn, bool scrollPastEnd) : _document(document)
 	{
 		_editor = ng::editor_for_document(document);
-		_layout = std::make_shared<ng::layout_t>(_document->buffer(), theme, softWrap, scrollPastEnd, wrapColumn, _document->folded());
+		_layout = std::make_unique<ng::layout_t>(_document->buffer(), theme, softWrap, scrollPastEnd, wrapColumn, _document->folded());
 	}
 
 	// ==========
@@ -369,7 +369,7 @@ struct document_view_t : ng::buffer_api_t
 private:
 	document::document_ptr _document;
 	ng::editor_ptr _editor;
-	std::shared_ptr<ng::layout_t> _layout;
+	std::unique_ptr<ng::layout_t> _layout;
 };
 
 @interface OakTextView () <NSTextInputClient, NSDraggingSource, NSIgnoreMisspelledWords, NSChangeSpelling, NSTextFieldDelegate>
