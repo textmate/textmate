@@ -293,7 +293,7 @@ struct document_view_t : ng::buffer_api_t
 	size_t sanitize_index (size_t i) const { return _document->buffer().sanitize_index(i); }
 	size_t convert (text::pos_t const& p) const { return _document->buffer().convert(p); }
 	text::pos_t convert (size_t i) const { return _document->buffer().convert(i); }
-	text::indent_t const& indent () const { return _document->buffer().indent(); }
+	text::indent_t indent () const { return _document->buffer().indent(); }
 	void set_indent (text::indent_t const& indent) { _document->set_indent(indent); }
 	scope::context_t scope (size_t i, bool includeDynamic = true) const { return _document->buffer().scope(i, includeDynamic); }
 	std::map<size_t, scope::scope_t> scopes (size_t from, size_t to) const { return _document->buffer().scopes(from, to); }

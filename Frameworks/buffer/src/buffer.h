@@ -78,7 +78,7 @@ namespace ng
 		virtual size_t sanitize_index (size_t i) const = 0;
 		virtual size_t convert (text::pos_t const& p) const = 0;
 		virtual text::pos_t convert (size_t i) const = 0;
-		virtual text::indent_t const& indent () const = 0;
+		virtual text::indent_t indent () const = 0;
 		virtual scope::context_t scope (size_t i, bool includeDynamic = true) const = 0;
 		virtual std::map<size_t, scope::scope_t> scopes (size_t from, size_t to) const = 0;
 	};
@@ -123,7 +123,7 @@ namespace ng
 		text::pos_t convert (size_t i) const         { return text::pos_t(_hardlines.lower_bound(i).index(), i - begin(_hardlines.lower_bound(i).index())); }
 
 		text::indent_t& indent ()                         { return _indent; }
-		text::indent_t const& indent () const             { return _indent; }
+		text::indent_t indent () const                    { return _indent; }
 
 		bool set_grammar (bundles::item_ptr const& grammarItem);
 		parse::grammar_ptr grammar () const { return _grammar; }
