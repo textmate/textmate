@@ -1326,7 +1326,7 @@ namespace document
 		ng::buffer_t buf;
 
 		boost::crc_32_type check;
-		file_reader_t reader(shared_from_this());
+		file::reader_t reader(path());
 		while(io::bytes_ptr bytes = reader.next())
 		{
 			check.process_bytes(bytes->get(), bytes->size());
