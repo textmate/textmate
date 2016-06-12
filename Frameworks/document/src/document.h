@@ -77,10 +77,6 @@ namespace document
 		// = Doing one-pass reading of file (find in arbitrary files) =
 		// ============================================================
 
-		struct reader_t { virtual io::bytes_ptr next () = 0; virtual encoding::type encoding () const = 0; virtual bool is_open () const = 0; virtual ~reader_t () { } };
-		typedef std::shared_ptr<reader_t> reader_ptr;
-		reader_ptr create_reader () const;
-
 		void enumerate_bytes_using_block (void(^block)(char const* bytes, size_t len, bool* stop));
 
 		// ======================================================
