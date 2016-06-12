@@ -129,115 +129,103 @@ namespace find
 		D(DBF_Find_Scan_Path, bug("%s (%s)\n", document->path().c_str(), document->display_name().c_str()););
 		update_current_path(document->path());
 
-		boost::crc_32_type crc32;
-		if(document::document_t::reader_ptr reader = document->create_reader())
-		{
-			find::find_t f(_search_string, _options | (reader->is_open() ? find::none : find::filesize_limit));
-			std::vector<range_match_t> ranges;
-
-			ssize_t total = 0;
-			while(io::bytes_ptr const& data = reader->next())
+		__block find::find_t f(_search_string, _options | (document->is_open() ? find::none : find::filesize_limit));
+		__block std::vector<range_match_t> ranges;
+		__block boost::crc_32_type crc32;
+		__block ssize_t total = 0;
+		document->enumerate_bytes_using_block(^(char const* buf, size_t len, bool* stop){
+			if(_should_stop || !_search_binaries && memchr(buf, '\0', len))
 			{
-				if(_should_stop)
-					return;
-
-				char const* buf = data->get();
-				size_t len      = data->size();
-
-				if(!_search_binaries && memchr(buf, '\0', len))
-					return;
-
-				for(ssize_t offset = 0; offset < len; )
-				{
-					std::map<std::string, std::string> captures;
-					std::pair<ssize_t, ssize_t> const& m = f.match(buf + offset, len - offset, &captures);
-					if(m.first <= m.second)
-						ranges.push_back(range_match_t(total + offset + m.first, total + offset + m.second, captures));
-					ASSERT_NE(m.second, 0); ASSERT_LE(m.second, len - offset);
-					offset += m.second;
-				}
-
-				crc32.process_bytes(buf, len);
-				total += len;
-			}
-
-			std::map<std::string, std::string> captures;
-			std::pair<ssize_t, ssize_t> m = f.match(NULL, 0, &captures);
-			while(m.first <= m.second)
-			{
-				ranges.push_back(range_match_t(total + m.first, total + m.second, captures));
-				captures.clear();
-				m = f.match(NULL, 0, &captures);
-			}
-
-			_scanned_byte_count += total;
-			++_scanned_file_count;
-			if(ranges.empty())
+				*stop = true;
 				return;
-
-			if(document::document_t::reader_ptr reader = document->create_reader())
-			{
-				std::string text;
-				while(io::bytes_ptr const& data = reader->next())
-				{
-					if(_should_stop)
-						return;
-					text.insert(text.end(), data->get(), data->get() + data->size());
-				}
-
-				// Document has changed, should probably re-scan
-				boost::crc_32_type doubleCheck;
-				doubleCheck.process_bytes(text.data(), text.size());
-				if(crc32.checksum() != doubleCheck.checksum())
-					return;
-
-				std::vector<match_t> results;
-
-				std::string newlines = text::estimate_line_endings(std::begin(text), std::end(text));
-				newlines = newlines == kMIX ? kLF : newlines;
-
-				size_t bol = 0, nextLine = bol, lfCount = 0;
-				for(auto const& it : ranges)
-				{
-					while(true)
-					{
-						nextLine = text.find(newlines, bol);
-						if(nextLine == std::string::npos || it.from < nextLine + newlines.size())
-							break;
-						bol = nextLine + newlines.size();
-						++lfCount;
-					}
-
-					text::pos_t from(lfCount, it.from - bol);
-					size_t fromLine = bol;
-
-					while(true)
-					{
-						nextLine = text.find(newlines, bol);
-						if(nextLine == std::string::npos || it.to < nextLine + newlines.size())
-							break;
-						bol = nextLine + newlines.size();
-						++lfCount;
-					}
-
-					text::pos_t to(lfCount, it.to - bol);
-
-					size_t eol = bol == it.to ? bol : text.find(newlines, bol);
-					eol = eol != std::string::npos ? eol : text.size();
-
-					match_t res(document, crc32.checksum(), it.from, it.to, text::range_t(from, to), it.captures);
-					res.excerpt        = text.substr(fromLine, eol - fromLine);
-					res.excerpt_offset = fromLine;
-					res.line_number    = from.line;
-					res.newlines       = newlines;
-					results.push_back(res);
-				}
-
-				pthread_mutex_lock(&_mutex);
-				_matches.insert(_matches.end(), results.begin(), results.end());
-				pthread_mutex_unlock(&_mutex);
 			}
+
+			for(ssize_t offset = 0; offset < len; )
+			{
+				std::map<std::string, std::string> captures;
+				std::pair<ssize_t, ssize_t> const& m = f.match(buf + offset, len - offset, &captures);
+				if(m.first <= m.second)
+					ranges.push_back(range_match_t(total + offset + m.first, total + offset + m.second, captures));
+				ASSERT_NE(m.second, 0); ASSERT_LE(m.second, len - offset);
+				offset += m.second;
+			}
+
+			crc32.process_bytes(buf, len);
+			total += len;
+		});
+
+		std::map<std::string, std::string> captures;
+		std::pair<ssize_t, ssize_t> m = f.match(NULL, 0, &captures);
+		while(m.first <= m.second)
+		{
+			ranges.push_back(range_match_t(total + m.first, total + m.second, captures));
+			captures.clear();
+			m = f.match(NULL, 0, &captures);
 		}
+
+		_scanned_byte_count += total;
+		++_scanned_file_count;
+		if(ranges.empty())
+			return;
+
+		__block std::string text;
+		document->enumerate_bytes_using_block(^(char const* buf, size_t len, bool* stop){
+			if(*stop = _should_stop)
+				return;
+			text.insert(text.end(), buf, buf + len);
+		});
+
+		// Document has changed, should probably re-scan
+		boost::crc_32_type doubleCheck;
+		doubleCheck.process_bytes(text.data(), text.size());
+		if(crc32.checksum() != doubleCheck.checksum())
+			return;
+
+		std::vector<match_t> results;
+
+		std::string newlines = text::estimate_line_endings(std::begin(text), std::end(text));
+		newlines = newlines == kMIX ? kLF : newlines;
+
+		size_t bol = 0, nextLine = bol, lfCount = 0;
+		for(auto const& it : ranges)
+		{
+			while(true)
+			{
+				nextLine = text.find(newlines, bol);
+				if(nextLine == std::string::npos || it.from < nextLine + newlines.size())
+					break;
+				bol = nextLine + newlines.size();
+				++lfCount;
+			}
+
+			text::pos_t from(lfCount, it.from - bol);
+			size_t fromLine = bol;
+
+			while(true)
+			{
+				nextLine = text.find(newlines, bol);
+				if(nextLine == std::string::npos || it.to < nextLine + newlines.size())
+					break;
+				bol = nextLine + newlines.size();
+				++lfCount;
+			}
+
+			text::pos_t to(lfCount, it.to - bol);
+
+			size_t eol = bol == it.to ? bol : text.find(newlines, bol);
+			eol = eol != std::string::npos ? eol : text.size();
+
+			match_t res(document, crc32.checksum(), it.from, it.to, text::range_t(from, to), it.captures);
+			res.excerpt        = text.substr(fromLine, eol - fromLine);
+			res.excerpt_offset = fromLine;
+			res.line_number    = from.line;
+			res.newlines       = newlines;
+			results.push_back(res);
+		}
+
+		pthread_mutex_lock(&_mutex);
+		_matches.insert(_matches.end(), results.begin(), results.end());
+		pthread_mutex_unlock(&_mutex);
 	}
 
 } /* find */
