@@ -81,6 +81,8 @@ namespace document
 		typedef std::shared_ptr<reader_t> reader_ptr;
 		reader_ptr create_reader () const;
 
+		void enumerate_bytes_using_block (void(^block)(char const* bytes, size_t len, bool* stop));
+
 		// ======================================================
 		// = Performing replacements (from outside a text view) =
 		// ======================================================

@@ -1309,6 +1309,26 @@ namespace document
 		return std::make_shared<file_reader_t>(shared_from_this());
 	}
 
+	void document_t::enumerate_bytes_using_block (void(^block)(char const* bytes, size_t len, bool* stop))
+	{
+		bool stop = false;
+		if(is_open())
+		{
+			std::string const& buffer = content();
+			block(buffer.data(), buffer.size(), &stop);
+		}
+		else
+		{
+			file::reader_t reader(path());
+			while(io::bytes_ptr const& data = reader.next())
+			{
+				block(data->get(), data->size(), &stop);
+				if(stop)
+					break;
+			}
+		}
+	}
+
 	// ===========
 	// = Replace =
 	// ===========
