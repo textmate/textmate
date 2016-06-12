@@ -67,7 +67,7 @@ namespace document
 	{
 		WATCH_LEAKS(document_t);
 
-		document_t () : _selection(NULL_STR), _folded(NULL_STR), _disable_callbacks(false), _revision(0), _disk_revision(0), _modified(false), _path(NULL_STR), _open_count(0), _has_lru(false), _is_on_disk(false), _recent_tracking(true), _backup_path(NULL_STR), _backup_revision(0), _virtual_path(NULL_STR), _custom_name(NULL_STR), _untitled_count(0), _file_type(NULL_STR), /*_folder(NULL_STR),*/ _disk_encoding(NULL_STR), _disk_newlines(NULL_STR), _disk_bom(false) { }
+		document_t () : _selection(NULL_STR), _folded(NULL_STR), _disable_callbacks(false), _revision(0), _disk_revision(0), _modified(false), _path(NULL_STR), _open_count(0), _is_on_disk(false), _recent_tracking(true), _backup_path(NULL_STR), _backup_revision(0), _virtual_path(NULL_STR), _custom_name(NULL_STR), _untitled_count(0), _file_type(NULL_STR), /*_folder(NULL_STR),*/ _disk_encoding(NULL_STR), _disk_newlines(NULL_STR), _disk_bom(false) { }
 		~document_t ();
 
 		bool operator== (document_t const& rhs) const { return _identifier == rhs._identifier; }
@@ -210,7 +210,7 @@ namespace document
 
 		void show ();
 		void hide ();
-		oak::date_t const& lru () const;
+		oak::date_t lru () const;
 
 		void try_save (document::save_callback_ptr callback);
 		bool sync_save (CFStringRef runLoopMode = kCFRunLoopDefaultMode);
@@ -295,8 +295,6 @@ namespace document
 
 		std::string _path;                    // does not imply there actually is a file
 		size_t _open_count;                   // document open in some window/tab
-		mutable oak::date_t _lru;             // last time document was shown
-		mutable bool _has_lru;
 		bool _is_on_disk;
 		bool _recent_tracking;
 		bool _sticky = false;

@@ -1059,24 +1059,17 @@ namespace document
 
 	void document_t::show ()
 	{
-		_has_lru = true;
-		document::lru.set(_path, _lru = oak::date_t::now());
+		document::lru.set(_path, oak::date_t::now());
 	}
 
 	void document_t::hide ()
 	{
-		_has_lru = true;
-		document::lru.set(_path, _lru = oak::date_t::now());
+		document::lru.set(_path, oak::date_t::now());
 	}
 
-	oak::date_t const& document_t::lru () const
+	oak::date_t document_t::lru () const
 	{
-		if(!_has_lru)
-		{
-			_has_lru = true;
-			_lru = document::lru.get(_path);
-		}
-		return _lru;
+		return document::lru.get(_path);
 	}
 
 	void document_t::watch_callback (int flags, std::string const& newPath, bool async)
