@@ -24,7 +24,6 @@ namespace document
 	struct document_t;
 	typedef std::shared_ptr<watch_t>          watch_ptr;
 	typedef std::shared_ptr<document_t>       document_ptr;
-	typedef std::shared_ptr<document_t const> document_const_ptr;
 	typedef std::weak_ptr<document_t>         document_weak_ptr;
 
 	struct PUBLIC open_callback_t : file::open_callback_t
@@ -241,10 +240,7 @@ namespace document
 		void set_sticky (bool flag)           { _sticky = flag; }
 
 		ng::buffer_t& buffer ()               { ASSERT(_buffer); return *_buffer; }
-		ng::buffer_t const& buffer () const   { ASSERT(_buffer); return *_buffer; }
-
-		ng::undo_manager_t& undo_manager ()               { ASSERT(_undo_manager); return *_undo_manager; }
-		ng::undo_manager_t const& undo_manager () const   { ASSERT(_undo_manager); return *_undo_manager; }
+		ng::undo_manager_t& undo_manager ()   { ASSERT(_undo_manager); return *_undo_manager; }
 
 		std::string content () const;
 		void set_content (std::string const& str);
