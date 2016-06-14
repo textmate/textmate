@@ -20,7 +20,7 @@ OBJCXX_FLAGS += -fobjc-arc -fobjc-call-cxx-cdtors
 LIBS         += c++
 
 LN_FLAGS += -m64 -mmacosx-version-min=$APP_MIN_OS
-LN_FLAGS += -fvisibility=hidden
+LN_FLAGS += -fvisibility=hidden -stdlib=libc++
 LN_FLAGS += -Wl,-dead_strip
 LN_FLAGS += -Wl,-dead_strip_dylibs
 LN_FLAGS += -rpath @executable_path/../Frameworks
