@@ -1,6 +1,6 @@
 SOURCES      = src/*.cc
 TESTS        = tests/*.cc
 LINK        += text cf io plist OakSystem regexp
-LIBS         = curl crypto
+LIBS         = curl
 EXPORT       = src/{constants,download{,_tbz},filter_*,key_chain,network,post,proxy,tbz}.h
 FRAMEWORKS   = SystemConfiguration Security
