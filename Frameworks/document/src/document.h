@@ -66,7 +66,7 @@ namespace document
 	{
 		WATCH_LEAKS(document_t);
 
-		document_t () : _selection(NULL_STR), _folded(NULL_STR), _disable_callbacks(false), _revision(0), _disk_revision(0), _modified(false), _path(NULL_STR), _open_count(0), _is_on_disk(false), _recent_tracking(true), _backup_path(NULL_STR), _backup_revision(0), _virtual_path(NULL_STR), _custom_name(NULL_STR), _untitled_count(0), _file_type(NULL_STR), /*_folder(NULL_STR),*/ _disk_encoding(NULL_STR), _disk_newlines(NULL_STR), _disk_bom(false) { }
+		document_t () : _selection(NULL_STR), _folded(NULL_STR), _revision(0), _disk_revision(0), _modified(false), _path(NULL_STR), _open_count(0), _is_on_disk(false), _recent_tracking(true), _backup_path(NULL_STR), _backup_revision(0), _virtual_path(NULL_STR), _custom_name(NULL_STR), _untitled_count(0), _file_type(NULL_STR), /*_folder(NULL_STR),*/ _disk_encoding(NULL_STR), _disk_newlines(NULL_STR), _disk_bom(false) { }
 		~document_t ();
 
 		bool operator== (document_t const& rhs) const { return _identifier == rhs._identifier; }
@@ -142,18 +142,12 @@ namespace document
 	private:
 		void check_modified (ssize_t diskRev, ssize_t rev);
 
-		void broadcast (callback_t::event_t event, bool cascade = true)
+		void broadcast (callback_t::event_t event)
 		{
-			if(_disable_callbacks)
-				return;
-
-			_disable_callbacks = !cascade;
 			_callbacks(&callback_t::handle_document_event, shared_from_this(), event);
-			_disable_callbacks = false;
 		}
 
 		oak::callbacks_t<callback_t> _callbacks;
-		bool _disable_callbacks;
 
 		// ===================
 		// = For OakTextView =
