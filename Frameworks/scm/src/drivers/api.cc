@@ -41,7 +41,7 @@ namespace scm
 			{
 				if(path == "/usr/bin/git")
 				{
-					std::string const xcodePath = io::exec("/usr/bin/xcode-select", "-p");
+					std::string const xcodePath = io::exec("/usr/bin/xcode-select", "-p", NULL);
 					if(!path::is_directory(text::trim(xcodePath, "\n")))
 					{
 						fprintf(stderr, "*** ignore ‘%s’ because it appears to be a shim and Xcode is not installed\n", path.c_str());
