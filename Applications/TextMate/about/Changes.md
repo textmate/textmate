@@ -2,6 +2,15 @@ Title: Release Notes
 
 # Changes
 
+## 2016-06-16 (v2.0-beta.9.5)
+
+* Improve folder search performance for large documents with few newlines and lots of matches.
+* `mate`: If the «mark» argument given to `--clear-mark` has a trailing slash then all marks with this prefix will be removed.
+* The *Jump to Selection* menu item has been moved to the Navigate menu and items in this menu are now using consistent naming. *[Ronald Wampler]*
+* Normally paragraph selection, as implicitly used by actions like *Reformat Paragraph*, will select lines up/down until there is an empty line. You can now indicate that a line should be a paragraph break by setting the `excludeFromParagraphSelection` scoped setting to `true`. The Source bundle sets it to `true` for the `comment.line` scope so that one can run “paragraph actions” on text with comments above/below and no separating empty line. *[Adam Strzelecki]*
+* If `git` is found in `/usr/bin` then we check if Xcode is installed (by calling `/usr/bin/xcode-select -p`) and if not, we ignore git. This is because `/usr/bin/git` is a shim that prompts the user to install Xcode, which has lead to some user confusion. Note though that we do not call `git` unless we actually find a `.git` folder in your project.
+* See [all changes since v2.0-beta.9.3](https://github.com/textmate/textmate/compare/v2.0-beta.9.3...v2.0-beta.9.5)
+
 ## 2016-05-30 (v2.0-beta.9.3)
 
 * Folding indented blocks no longer include trailing empty lines.
