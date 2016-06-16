@@ -2513,7 +2513,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 	{
 		document::document_ptr doc;
 		NSString* identifier = info[@"identifier"];
-		if(!identifier || !(doc = document::find(to_s(identifier), true)))
+		if(!identifier || !(doc = document::find(to_s(identifier))))
 		{
 			NSString* path = info[@"path"];
 			if(path && skipMissing && access([path fileSystemRepresentation], F_OK) != 0)

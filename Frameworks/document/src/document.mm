@@ -239,7 +239,7 @@ namespace document
 			return res;
 		}
 
-		document_ptr find (oak::uuid_t const& uuid, bool searchBackups)
+		document_ptr find (oak::uuid_t const& uuid)
 		{
 			std::lock_guard<std::mutex> lock(_lock);
 			D(DBF_Document_Tracker, bug("%s\n", to_s(uuid).c_str()););
@@ -382,7 +382,7 @@ namespace document
 
 	document_ptr create (std::string const& rawPath)                    { std::string const path = path::resolve(rawPath); return path::is_text_clipping(path) ? from_content(path::resource(path, typeUTF8Text, 256)) : documents.create(path, inode_t(path)); }
 	document_ptr create (std::string const& path, inode_t const& inode) { return documents.create(path, inode); }
-	document_ptr find (oak::uuid_t const& uuid, bool searchBackups)     { return documents.find(uuid, searchBackups); }
+	document_ptr find (oak::uuid_t const& uuid)                         { return documents.find(uuid); }
 
 	document_ptr from_content (std::string const& content, std::string fileType)
 	{
