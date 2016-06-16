@@ -265,6 +265,8 @@ struct document_view_t : ng::buffer_api_t
 	{
 		if(nest_count != 0)
 			end_undo_group();
+		_layout.reset();
+		_editor.reset();
 		_document->close();
 	}
 
