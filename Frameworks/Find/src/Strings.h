@@ -12,9 +12,9 @@
 #define MSG_SHOWING_ONE_MATCH_FMT            FFString(@"Showing one result for “%@”.",      @"Status text for one match.")
 #define MSG_SHOWING_MULTIPLE_MATCHES_FMT     FFString(@"Showing %2$@ results for “%1$@”.",  @"Status text for multiple matches.")
 
-#define MSG_SEARCHED_FILES_ONE               FFString(@" (searched one file in %2$@ seconds)",  @"Find all completion status, one file")
-#define MSG_SEARCHED_FILES_MULTIPLE          FFString(@" (searched %@ files in %@ seconds)",    @"Find all completion status, multiple files")
-#define MSG_SEARCHED_BYTES                   FFString(@" (searched %@ in %@ seconds)",          @"Find all completion status, quantity in bytes")
+#define MSG_SEARCHED_FILES_ONE               FFString(@" (searched one file in %@ seconds)",     @"Find all completion status, one file")
+#define MSG_SEARCHED_FILES_MULTIPLE          FFString(@" (searched %2$@ files in %1$@ seconds)", @"Find all completion status, multiple files")
+#define MSG_SEARCHED_BYTES                   FFString(@" (searched %2$@ in %1$@ seconds)",       @"Find all completion status, quantity in bytes")
 
 #define MSG_SEARCHING_FOLDER_FMT             FFString(@"Searching “%@”…",     @"Find all progress status.")
 #define MSG_SEARCHING_FMT                    FFString(@"Searching…",          @"Find all initial progress status.")
