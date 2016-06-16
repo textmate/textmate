@@ -186,34 +186,36 @@ namespace find
 		std::string newlines = text::estimate_line_endings(std::begin(text), std::end(text));
 		newlines = newlines == kMIX ? kLF : newlines;
 
-		size_t bol = 0, nextLine = bol, lfCount = 0;
+		size_t bol = 0, lfCount = 0;
+		size_t nextLine = text.find(newlines, bol);
+
 		for(auto const& it : ranges)
 		{
-			while(true)
+			while(nextLine != std::string::npos && nextLine + newlines.size() <= it.from)
 			{
-				nextLine = text.find(newlines, bol);
-				if(nextLine == std::string::npos || it.from < nextLine + newlines.size())
-					break;
 				bol = nextLine + newlines.size();
+				nextLine = text.find(newlines, bol);
 				++lfCount;
 			}
 
 			text::pos_t from(lfCount, it.from - bol);
 			size_t fromLine = bol;
 
-			while(true)
+			while(nextLine != std::string::npos && nextLine + newlines.size() <= it.to)
 			{
-				nextLine = text.find(newlines, bol);
-				if(nextLine == std::string::npos || it.to < nextLine + newlines.size())
-					break;
 				bol = nextLine + newlines.size();
+				nextLine = text.find(newlines, bol);
 				++lfCount;
 			}
 
 			text::pos_t to(lfCount, it.to - bol);
+			size_t eol = bol == it.to ? bol : (nextLine != std::string::npos ? nextLine : text.size());
 
-			size_t eol = bol == it.to ? bol : text.find(newlines, bol);
-			eol = eol != std::string::npos ? eol : text.size();
+			if(it.from - fromLine > 200)
+				fromLine = utf8::find_safe_end(text.begin(), text.begin() + it.from - ((it.from - fromLine) % 150)) - text.begin();
+
+			if(eol - fromLine > 500)
+				eol = utf8::find_safe_end(text.begin(), text.begin() + std::max<size_t>(fromLine + 500, it.to)) - text.begin();
 
 			match_t res(document, crc32.checksum(), it.from, it.to, text::range_t(from, to), it.captures);
 			res.excerpt        = text.substr(fromLine, eol - fromLine);
