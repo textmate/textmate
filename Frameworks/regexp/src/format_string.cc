@@ -164,7 +164,7 @@ struct expand_visitor : boost::static_visitor<void>
 		char const* first = src.data();
 		char const* last  = first + src.size();
 
-		std::string buffer(256, ' ');
+		std::string buffer(256, '\0');
 		size_t buffer_contains = 0;
 
 		while(first != last)

@@ -116,7 +116,7 @@ namespace file
 		if(_fd == -1)
 			return io::bytes_ptr();
 
-		std::string buf(8192, ' ');
+		std::string buf(8192, '\0');
 
 		ssize_t len = read(_fd, &buf.front(), buf.size());
 		buf.resize(len < 0 ? 0 : len);

@@ -11,7 +11,7 @@ std::string to_s (NSString* aString)
 		return NULL_STR;
 
 	NSData* data = [aString dataUsingEncoding:NSUTF8StringEncoding];
-	std::string res([data length], ' ');
+	std::string res([data length], '\0');
 	memcpy(&res[0], [data bytes], [data length]);
 	return res;
 }

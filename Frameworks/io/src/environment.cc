@@ -47,7 +47,7 @@ namespace oak
 		int mib[2] = { CTL_USER, USER_CS_PATH };
 		size_t len = 0;
 		sysctl(mib, 2, NULL, &len, NULL, 0);
-		std::string path(len, 0);
+		std::string path(len, '\0');
 		sysctl(mib, 2, &path[0], &len, NULL, 0);
 		path.pop_back();
 

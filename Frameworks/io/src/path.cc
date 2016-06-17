@@ -996,7 +996,7 @@ namespace path
 
 	static std::string system_directory (int name, std::string const& file, std::string const& content)
 	{
-		std::string str(128, ' ');
+		std::string str(128, '\0');
 		size_t len = confstr(name, &str[0], str.size());
 		if(0 < len && len < 128) // if length is 128 the path was truncated and unusable
 				str.resize(len - 1);

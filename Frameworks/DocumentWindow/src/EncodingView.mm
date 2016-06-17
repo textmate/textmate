@@ -102,7 +102,7 @@ static NSAttributedString* convert_and_highlight (char const* first, char const*
 	if(cd == (iconv_t)(-1))
 		return nil;
 
-	std::string dst(std::distance(first, last), ' ');
+	std::string dst(std::distance(first, last), '\0');
 	size_t copied = 0;
 
 	bool couldConvert = true;

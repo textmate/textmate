@@ -9,7 +9,7 @@ namespace cf
 
 		CFIndex byteCount;
 		CFStringGetBytes(aString, CFRangeMake(0, CFStringGetLength(aString)), kCFStringEncodingUTF8, 0, false, NULL, 0, &byteCount);
-		std::string res(byteCount, ' ');
+		std::string res(byteCount, '\0');
 		CFStringGetBytes(aString, CFRangeMake(0, CFStringGetLength(aString)), kCFStringEncodingUTF8, 0, false, (UInt8*)&res[0], byteCount, NULL);
 		return res;
 	}

@@ -36,7 +36,7 @@ namespace encoding
 		if(cd == (iconv_t)(-1))
 			return res;
 
-		std::string buffer(1024, ' ');
+		std::string buffer(1024, '\0');
 		size_t buffer_contains = 0;
 
 		char const* first = content->begin();
