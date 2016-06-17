@@ -797,7 +797,7 @@ static NSMutableDictionary* DictionaryForPropertyList (plist::dictionary_t const
 	}
 
 	bundleItemContent = bundleItemContent ?: document::from_content("");
-	bundleItemContent->set_custom_name("«bundle item»");
+	bundleItemContent->set_custom_name(bundleItem->name());
 	bundleItemContent->add_callback(documentCallback);
 	[documentView setDocument:bundleItemContent];
 
