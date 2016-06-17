@@ -10,9 +10,11 @@ std::string to_s (NSString* aString)
 	if(!aString)
 		return NULL_STR;
 
-	NSData* data = [aString dataUsingEncoding:NSUTF8StringEncoding];
-	std::string res([data length], '\0');
-	memcpy(&res[0], [data bytes], [data length]);
+	CFRange range = CFRangeMake(0, CFStringGetLength((CFStringRef)aString));
+	CFIndex byteCount;
+	CFStringGetBytes((CFStringRef)aString, range, kCFStringEncodingUTF8, 0, false, NULL, 0, &byteCount);
+	std::string res(byteCount, '\0');
+	CFStringGetBytes((CFStringRef)aString, range, kCFStringEncodingUTF8, 0, false, (UInt8*)&res[0], byteCount, NULL);
 	return res;
 }
 
