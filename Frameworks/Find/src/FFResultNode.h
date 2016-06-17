@@ -10,6 +10,7 @@
 + (FFResultNode*)resultNodeWithMatch:(find::match_t const&)aMatch;
 
 - (void)addResultNode:(FFResultNode*)aMatch;
+- (void)addResultNodes:(NSArray<FFResultNode*>*)someMatches;
 - (void)removeFromParent;
 
 - (FFResultNode*)firstResultNode;

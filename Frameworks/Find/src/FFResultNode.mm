@@ -173,6 +173,11 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 
 - (void)addResultNode:(FFResultNode*)aMatch
 {
+	[self addResultNodes:@[ aMatch ]];
+}
+
+- (void)addResultNodes:(NSArray<FFResultNode*>*)someMatches
+{
 	if(!_children)
 	{
 		_children = [NSMutableArray array];
@@ -180,11 +185,19 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 			self.countOfLeafs -= 1;
 	}
 
-	aMatch.parent = self;
+	NSUInteger countOfLeafs    = self.countOfLeafs;
+	NSUInteger countOfExcluded = self.countOfExcluded;
 
-	[(NSMutableArray*)_children addObject:aMatch];
-	self.countOfLeafs    += aMatch.countOfLeafs;
-	self.countOfExcluded += aMatch.ignored ? aMatch.countOfLeafs : aMatch.countOfExcluded;
+	for(FFResultNode* match in someMatches)
+	{
+		match.parent = self;
+		countOfLeafs    += match.countOfLeafs;
+		countOfExcluded += match.ignored ? match.countOfLeafs : match.countOfExcluded;
+	}
+
+	[(NSMutableArray*)_children addObjectsFromArray:someMatches];
+	self.countOfLeafs    = countOfLeafs;
+	self.countOfExcluded = countOfExcluded;
 }
 
 - (void)removeFromParent
