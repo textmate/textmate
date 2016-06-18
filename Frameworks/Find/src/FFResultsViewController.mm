@@ -548,7 +548,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		}
 
 		cellView.objectValue = item;
-		cellView.countOfLeafsButton.title = [NSString stringWithFormat:@"%lu", item.countOfLeafs];
+		cellView.countOfLeafsButton.title = [NSNumberFormatter localizedStringFromNumber:@(item.countOfLeafs) numberStyle:NSNumberFormatterDecimalStyle];
 		cellView.countOfLeafsButton.hidden = [outlineView isItemExpanded:item];
 	}
 	return res;
