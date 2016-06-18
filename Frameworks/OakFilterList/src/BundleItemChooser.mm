@@ -688,6 +688,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		std::set<std::string> keysSeen;
 		for(auto const& path : KeyBindingLocations)
 		{
+			std::string displayPath = path::is_child(path, oak::application_t::path()) ? "TextMate.app ▸ " + path::name(path) : path::with_tilde(path);
 			for(auto const& pair : plist::load(path))
 			{
 				std::string key = ns::normalize_event_string(pair.first);
@@ -712,7 +713,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 
 				NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithDictionary:@{
 					@"name"          : [NSString stringWithCxxString:name],
-					@"path"          : [NSString stringWithCxxString:path::with_tilde(path)],
+					@"path"          : [NSString stringWithCxxString:displayPath],
 					@"file"          : [NSString stringWithCxxString:path],
 					@"keyEquivalent" : [NSString stringWithCxxString:key],
 					@"eclipsed"      : @(!keysSeen.insert(key).second)
