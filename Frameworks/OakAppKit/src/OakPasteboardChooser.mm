@@ -323,14 +323,32 @@ static NSMutableDictionary* SharedChoosers;
 	}
 }
 
+- (NSArray*)selectedEntriesPreservingOne
+{
+	NSFetchRequest* request = [[NSFetchRequest alloc] init];
+	request.entity    = [NSEntityDescription entityForName:@"PasteboardEntry" inManagedObjectContext:_pasteboard.managedObjectContext];
+	request.predicate = [NSPredicate predicateWithFormat:@"pasteboard == %@", _pasteboard];
+	NSUInteger countOfAllEntries = [_pasteboard.managedObjectContext countForFetchRequest:request error:nullptr];
+
+	NSArray* entries = [_arrayController selectedObjects];
+	if([entries count] == countOfAllEntries)
+	{
+		NSMutableArray* tmp = [entries mutableCopy];
+		[tmp removeObject:_pasteboard.currentEntry];
+		entries = tmp;
+	}
+
+	return entries;
+}
+
 - (void)deleteForward:(id)sender
 {
-	[_arrayController remove:sender];
+	[_arrayController removeObjects:[self selectedEntriesPreservingOne]];
 }
 
 - (void)deleteBackward:(id)sender
 {
-	NSArray* entries = [_arrayController selectedObjects];
+	NSArray* entries = [self selectedEntriesPreservingOne];
 	[_arrayController selectPrevious:self];
 	[_arrayController removeObjects:entries];
 }
