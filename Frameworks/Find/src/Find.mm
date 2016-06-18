@@ -416,7 +416,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 			doc->add_mark(m.range.from, kSearchMarkIdentifier);
 
 		FFResultNode* node = [FFResultNode resultNodeWithMatch:m];
-		if(!parent || parent.document->identifier() != node.document->identifier())
+		if(!parent || *parent.document != *node.document)
 			[_results addResultNode:(parent = [FFResultNode resultNodeWithMatch:m baseDirectory:_documentSearch.directory])];
 		[parent addResultNode:node];
 	}
