@@ -374,8 +374,6 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	}
 
 	_windowController.resultsViewController.results = _results = [FFResultNode new];
-	[self bind:@"countOfMatches" toObject:_results withKeyPath:@"countOfLeafs" options:nil];
-	[self bind:@"countOfExcludedMatches" toObject:_results withKeyPath:@"countOfExcluded" options:nil];
 }
 
 - (void)setDocumentSearch:(FFDocumentSearch*)newSearcher
@@ -446,6 +444,9 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	self.windowController.busy = NO;
 	if(!_documentSearch)
 		return;
+
+	[self bind:@"countOfMatches" toObject:_results withKeyPath:@"countOfLeafs" options:nil];
+	[self bind:@"countOfExcludedMatches" toObject:_results withKeyPath:@"countOfExcluded" options:nil];
 
 	[self addResultsToPasteboard:self];
 
