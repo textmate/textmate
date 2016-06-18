@@ -137,7 +137,7 @@ static NSMutableDictionary* SharedChoosers;
 		_arrayController.sortDescriptors              = @[ [NSSortDescriptor sortDescriptorWithKey:@"date" ascending:NO] ];
 
 		NSButton* deleteButton   = OakCreateButton(@"Delete", NSTexturedRoundedBezelStyle);
-		NSButton* clearAllButton = OakCreateButton(@"Clear All", NSTexturedRoundedBezelStyle);
+		NSButton* clearAllButton = OakCreateButton(@"Clear History", NSTexturedRoundedBezelStyle);
 		NSButton* actionButton   = OakCreateButton(actionName, NSTexturedRoundedBezelStyle);
 
 		deleteButton.action   = @selector(deleteForward:);
