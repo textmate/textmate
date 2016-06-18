@@ -60,7 +60,6 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 // ==================================
 
 @interface OakSearchResultsHeaderCellView : NSTableCellView
-@property (nonatomic) NSString* countOfLeafs;
 @property (nonatomic) NSButton* countOfLeafsButton;
 @property (nonatomic) NSButton* removeButton;
 @property (nonatomic) BOOL showKeyEquivalent;
@@ -165,13 +164,6 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 	{
 		self.imageView.image = item.icon;
 	}
-}
-
-- (void)setCountOfLeafs:(NSString*)aString
-{
-	_countOfLeafs = aString;
-	_countOfLeafsButton.title  = aString ?: @"0";
-	_countOfLeafsButton.hidden = aString == nil;
 }
 
 - (void)outlineViewItemDidExpandCollapse:(NSNotification*)aNotification
