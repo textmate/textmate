@@ -174,8 +174,6 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		{
 			case FindActionFindAll:
 			{
-				[self clearMatches];
-
 				FFDocumentSearch* folderSearch = [FFDocumentSearch new];
 				folderSearch.searchBinaryFiles = YES;
 				folderSearch.searchString = controller.findString;
@@ -382,6 +380,8 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 - (void)setDocumentSearch:(FFDocumentSearch*)newSearcher
 {
+	[self clearMatches];
+
 	if(_documentSearch)
 	{
 		[_documentSearch removeObserver:self forKeyPath:@"currentPath"];
