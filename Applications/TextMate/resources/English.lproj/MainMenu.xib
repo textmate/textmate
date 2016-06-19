@@ -1040,9 +1040,6 @@ CQ
                                     <action selector="goToRelatedFile:" target="-1" id="305"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Go to Tab" id="383">
-                                <menu key="submenu" title="Go to Tab" id="384"/>
-                            </menuItem>
                             <menuItem isSeparatorItem="YES" id="440"/>
                             <menuItem title="Back" id="545">
                                 <modifierMask key="keyEquivalentModifierMask"/>
@@ -1159,6 +1156,9 @@ CQ
                                     <action selector="selectPreviousTab:" target="-1" id="337"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="Select Tab" id="383" userLabel="Select Tab">
+                                <menu key="submenu" title="Select Tab" id="384"/>
+                            </menuItem>
                             <menuItem isSeparatorItem="YES" id="333">
                                 <modifierMask key="keyEquivalentModifierMask" command="YES"/>
                             </menuItem>
@@ -1260,7 +1260,7 @@ DQ
         </window>
         <customObject id="581" customClass="OakSubmenuController">
             <connections>
-                <outlet property="goToMenu" destination="384" id="593"/>
+                <outlet property="selectTabMenu" destination="384" id="593"/>
                 <outlet property="marksMenu" destination="595" id="597"/>
             </connections>
         </customObject>

@@ -682,7 +682,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	self.path = [_path stringByDeletingLastPathComponent];
 }
 
-- (void)updateGoToMenu:(NSMenu*)aMenu
+- (void)updateSelectTabMenu:(NSMenu*)aMenu
 {
 	if(self.window.isKeyWindow)
 	{

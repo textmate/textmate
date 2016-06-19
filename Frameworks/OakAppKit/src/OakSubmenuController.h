@@ -2,7 +2,7 @@
 
 @interface OakSubmenuController : NSObject <NSMenuDelegate>
 {
-	IBOutlet NSMenu* goToMenu;
+	IBOutlet NSMenu* selectTabMenu;
 	IBOutlet NSMenu* marksMenu;
 }
 @end
