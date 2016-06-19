@@ -892,6 +892,13 @@ CA
                                 </menu>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="804"/>
+                            <menuItem title="Go to Related File" keyEquivalent="" id="303">
+                                <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                <connections>
+                                    <action selector="goToRelatedFile:" target="-1" id="305"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="8Tf-mh-Vpb"/>
                             <menuItem title="Move Focus to File Browser" id="803">
                                 <string key="keyEquivalent" base64-UTF8="YES">
 CQ
@@ -1034,13 +1041,6 @@ CQ
                 <menuItem title="Go" id="299">
                     <menu key="submenu" title="Go" id="300">
                         <items>
-                            <menuItem title="Go to Related File" keyEquivalent="" id="303">
-                                <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
-                                <connections>
-                                    <action selector="goToRelatedFile:" target="-1" id="305"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem isSeparatorItem="YES" id="440"/>
                             <menuItem title="Back" id="545">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
