@@ -190,7 +190,7 @@ static bool is_binary (std::string const& path)
 	_outlineView.menu = [NSMenu new];
 	_outlineView.menu.delegate = self;
 
-	if([[[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsFileBrowserStyleKey] lowercaseString] isEqualToString:@"sourcelist"])
+	if([[[[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsFileBrowserStyleKey] lowercaseString] isEqualToString:@"sourcelist"])
 		_outlineView.renderAsSourceList = YES;
 
 	[_outlineView setDraggingSourceOperationMask:NSDragOperationCopy|NSDragOperationMove|NSDragOperationLink forLocal:YES];

@@ -313,7 +313,7 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 
 + (BOOL)saveContext
 {
-	if([[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsDisablePersistentClipboardHistory] boolValue])
+	if([[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisablePersistentClipboardHistory])
 		return YES;
 
 	BOOL res = YES;
@@ -461,7 +461,7 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 {
 	if(_needsSavePasteboardHistory == flag)
 		return;
-	if([[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsDisablePersistentClipboardHistory] boolValue])
+	if([[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisablePersistentClipboardHistory])
 		return;
 
 	_needsSavePasteboardHistory = flag;

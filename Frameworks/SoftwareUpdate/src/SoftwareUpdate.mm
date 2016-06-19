@@ -93,7 +93,7 @@ static SoftwareUpdate* SharedInstance;
 
 	struct statfs sfsb;
 	BOOL readOnlyFileSystem = statfs(oak::application_t::path().c_str(), &sfsb) != 0 || (sfsb.f_flags & MNT_RDONLY);
-	BOOL disablePolling = [[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsDisableSoftwareUpdatesKey] boolValue];
+	BOOL disablePolling = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableSoftwareUpdatesKey];
 	D(DBF_SoftwareUpdate_Check, bug("download visible %s, disable polling %s, read only file system %s → %s\n", BSTR(self.downloadWindow), BSTR(disablePolling), BSTR(readOnlyFileSystem), BSTR(!self.downloadWindow && !disablePolling && !readOnlyFileSystem)););
 	if(_downloadWindow.isWorking || disablePolling || readOnlyFileSystem)
 		return;
@@ -121,7 +121,7 @@ static SoftwareUpdate* SharedInstance;
 	if(_downloadWindow.isWorking)
 		return;
 
-	NSURL* url = [self.channels objectForKey:[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsSoftwareUpdateChannelKey]];
+	NSURL* url = [self.channels objectForKey:[[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsSoftwareUpdateChannelKey]];
 	[self checkVersionAtURL:url inBackground:YES allowRedownload:NO];
 }
 
@@ -130,7 +130,7 @@ static SoftwareUpdate* SharedInstance;
 	D(DBF_SoftwareUpdate_Check, bug("\n"););
 
 	BOOL isShiftDown = OakIsAlternateKeyOrMouseEvent(NSShiftKeyMask);
-	NSURL* url = [self.channels objectForKey:OakIsAlternateKeyOrMouseEvent(NSAlternateKeyMask) ? kSoftwareUpdateChannelNightly : [[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsSoftwareUpdateChannelKey]];
+	NSURL* url = [self.channels objectForKey:OakIsAlternateKeyOrMouseEvent(NSAlternateKeyMask) ? kSoftwareUpdateChannelNightly : [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsSoftwareUpdateChannelKey]];
 	[self checkVersionAtURL:url inBackground:NO allowRedownload:isShiftDown];
 }
 
