@@ -125,6 +125,11 @@
                                     <action selector="openFavorites:" target="-1" id="610"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="Quick Open…" keyEquivalent="t" id="301" userLabel="Quick Open…">
+                                <connections>
+                                    <action selector="goToFile:" target="-1" id="302"/>
+                                </connections>
+                            </menuItem>
                             <menuItem title="Open Recent" id="124">
                                 <menu key="submenu" title="Open Recent" systemMenu="recentDocuments" id="125">
                                     <items>
@@ -1029,11 +1034,6 @@ CQ
                 <menuItem title="Go" id="299">
                     <menu key="submenu" title="Go" id="300">
                         <items>
-                            <menuItem title="Go to File…" keyEquivalent="t" id="301">
-                                <connections>
-                                    <action selector="goToFile:" target="-1" id="302"/>
-                                </connections>
-                            </menuItem>
                             <menuItem title="Go to Related File" keyEquivalent="" id="303">
                                 <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                 <connections>
@@ -1260,8 +1260,8 @@ DQ
         </window>
         <customObject id="581" customClass="OakSubmenuController">
             <connections>
-                <outlet property="selectTabMenu" destination="384" id="593"/>
                 <outlet property="marksMenu" destination="595" id="597"/>
+                <outlet property="selectTabMenu" destination="384" id="593"/>
             </connections>
         </customObject>
         <customObject id="711" customClass="NSFontManager"/>
