@@ -1038,8 +1038,8 @@ CQ
                         </items>
                     </menu>
                 </menuItem>
-                <menuItem title="Go" id="299">
-                    <menu key="submenu" title="Go" id="300">
+                <menuItem title="File Browser" id="299">
+                    <menu key="submenu" title="File Browser" id="300">
                         <items>
                             <menuItem title="Back" id="545">
                                 <modifierMask key="keyEquivalentModifierMask"/>
