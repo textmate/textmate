@@ -125,6 +125,11 @@
                                     <action selector="openFavorites:" target="-1" id="610"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="Quick Open…" keyEquivalent="t" id="301" userLabel="Quick Open…">
+                                <connections>
+                                    <action selector="goToFile:" target="-1" id="302"/>
+                                </connections>
+                            </menuItem>
                             <menuItem title="Open Recent" id="124">
                                 <menu key="submenu" title="Open Recent" systemMenu="recentDocuments" id="125">
                                     <items>
@@ -887,6 +892,13 @@ CA
                                 </menu>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="804"/>
+                            <menuItem title="Go to Related File" keyEquivalent="" id="303">
+                                <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                <connections>
+                                    <action selector="goToRelatedFile:" target="-1" id="305"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="8Tf-mh-Vpb"/>
                             <menuItem title="Move Focus to File Browser" id="803">
                                 <string key="keyEquivalent" base64-UTF8="YES">
 CQ
@@ -1026,24 +1038,9 @@ CQ
                         </items>
                     </menu>
                 </menuItem>
-                <menuItem title="Go" id="299">
-                    <menu key="submenu" title="Go" id="300">
+                <menuItem title="File Browser" id="299">
+                    <menu key="submenu" title="File Browser" id="300">
                         <items>
-                            <menuItem title="Go to File…" keyEquivalent="t" id="301">
-                                <connections>
-                                    <action selector="goToFile:" target="-1" id="302"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Go to Related File" keyEquivalent="" id="303">
-                                <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
-                                <connections>
-                                    <action selector="goToRelatedFile:" target="-1" id="305"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Go to Tab" id="383">
-                                <menu key="submenu" title="Go to Tab" id="384"/>
-                            </menuItem>
-                            <menuItem isSeparatorItem="YES" id="440"/>
                             <menuItem title="Back" id="545">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
@@ -1159,6 +1156,9 @@ CQ
                                     <action selector="selectPreviousTab:" target="-1" id="337"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="Select Tab" id="383" userLabel="Select Tab">
+                                <menu key="submenu" title="Select Tab" id="384"/>
+                            </menuItem>
                             <menuItem isSeparatorItem="YES" id="333">
                                 <modifierMask key="keyEquivalentModifierMask" command="YES"/>
                             </menuItem>
@@ -1260,8 +1260,8 @@ DQ
         </window>
         <customObject id="581" customClass="OakSubmenuController">
             <connections>
-                <outlet property="goToMenu" destination="384" id="593"/>
                 <outlet property="marksMenu" destination="595" id="597"/>
+                <outlet property="selectTabMenu" destination="384" id="593"/>
             </connections>
         </customObject>
         <customObject id="711" customClass="NSFontManager"/>

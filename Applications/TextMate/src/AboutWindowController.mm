@@ -426,7 +426,7 @@ static NSTextField* OakCreateTextField ()
 
 // ====================
 
-- (void)updateGoToMenu:(NSMenu*)aMenu
+- (void)updateSelectTabMenu:(NSMenu*)aMenu
 {
 	if(![[self window] isKeyWindow])
 	{

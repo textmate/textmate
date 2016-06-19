@@ -550,9 +550,9 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	_windowController.statusString = [NSString stringWithFormat:fmt, [_documentSearch searchString], [NSNumberFormatter localizedStringFromNumber:@(self.countOfMatches) numberStyle:NSNumberFormatterDecimalStyle]];
 }
 
-// ==================
-// = Go to… Submenu =
-// ==================
+// =======================
+// = Select Tab… Submenu =
+// =======================
 
 - (IBAction)takeSelectedPathFrom:(id)sender
 {
@@ -561,7 +561,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		[_windowController.resultsViewController showResultNode:item.firstResultNode];
 }
 
-- (void)updateGoToMenu:(NSMenu*)aMenu
+- (void)updateSelectTabMenu:(NSMenu*)aMenu
 {
 	if(self.countOfMatches == 0)
 	{

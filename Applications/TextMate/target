@@ -1,5 +1,5 @@
 SOURCES              = src/*.{cc,mm}
-CP_Resources         = resources/* icons/*.icns about/* @PrivilegedTool @mate @tm_query @commit
+CP_Resources         = resources/* icons/*.icns about/* @PrivilegedTool @mate @tm_query @commit @gtm
 CP_SharedSupport     = support/*
 CP_PlugIns           = @Dialog @Dialog2
 CP_Library/QuickLook = @TextMateQL

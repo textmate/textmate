@@ -233,7 +233,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 		case kFileChooserOpenDocumentsSourceIndex:      src = @"Open Documents";                               break;
 		case kFileChooserUncommittedChangesSourceIndex: src = @"Uncommitted Documents";                        break;
 	}
-	self.window.title = [NSString stringWithFormat:@"Go to File — %@", src];
+	self.window.title = [NSString stringWithFormat:@"Quick Open — %@", src];
 }
 
 - (oak::uuid_t const&)currentDocument                       { return _currentDocument; }
@@ -682,7 +682,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	self.path = [_path stringByDeletingLastPathComponent];
 }
 
-- (void)updateGoToMenu:(NSMenu*)aMenu
+- (void)updateSelectTabMenu:(NSMenu*)aMenu
 {
 	if(self.window.isKeyWindow)
 	{
