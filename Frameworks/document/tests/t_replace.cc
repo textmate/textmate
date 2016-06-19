@@ -1,4 +1,5 @@
 #include <document/document.h>
+#include <test/jail.h>
 
 static uint32_t set_content (test::jail_t& jail, std::string const& file, std::string const& content)
 {

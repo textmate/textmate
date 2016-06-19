@@ -1,4 +1,5 @@
 #include <document/document.h>
+#include <test/jail.h>
 
 void test_grammar_picking ()
 {
