@@ -1224,7 +1224,7 @@ static bool is_binary (std::string const& path)
 - (BOOL)validateMenuItem:(NSMenuItem*)item
 {
 	BOOL res = YES;
-	static std::set<SEL> const requireSelection{ @selector(didDoubleClickOutlineView:), @selector(editSelectedEntries:), @selector(duplicateSelectedEntries:), @selector(cut:), @selector(copy:), @selector(delete:) };
+	static std::set<SEL> const requireSelection{ @selector(didDoubleClickOutlineView:), @selector(editSelectedEntries:), @selector(duplicateSelectedEntries:), @selector(cut:), @selector(copy:), @selector(delete:), @selector(deselectAll:) };
 
 	NSUInteger selectedFiles = 0;
 	struct stat buf;
