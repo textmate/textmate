@@ -906,12 +906,6 @@ static bool is_binary (std::string const& path)
 		}
 	}
 
-	if([selectedItems count])
-	{
-		[aMenu addItem:[NSMenuItem separatorItem]];
-		[aMenu addItemWithTitle:@"Select None" action:@selector(deselectAll:) keyEquivalent:@"A"];
-	}
-
 	if(hasFileSelected || self.canPaste)
 	{
 		[aMenu addItem:[NSMenuItem separatorItem]];

@@ -1065,6 +1065,11 @@ CQ
                                     <action selector="revealFileInProject:" target="-1" id="756"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="Select None" keyEquivalent="A" id="85Q-AB-VLJ">
+                                <connections>
+                                    <action selector="deselectAll:" target="-1" id="t4D-M9-2cV"/>
+                                </connections>
+                            </menuItem>
                             <menuItem isSeparatorItem="YES" id="7OY-PJ-MZQ"/>
                             <menuItem title="Project Folder" keyEquivalent="P" id="771">
                                 <connections>
