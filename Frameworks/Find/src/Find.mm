@@ -409,8 +409,6 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 	NSArray* matches = [aNotification userInfo][@"matches"];
 	FFResultNode* parent = nil;
-	NSMutableArray* parents = [NSMutableArray array];
-	NSMutableArray* nodes = [NSMutableArray array];
 	for(FFMatch* match in matches)
 	{
 		find::match_t const& m = [match match];
@@ -419,18 +417,9 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 		FFResultNode* node = [FFResultNode resultNodeWithMatch:m];
 		if(!parent || *parent.document != *node.document)
-		{
-			[parent addResultNodes:nodes];
-			[nodes removeAllObjects];
-
-			parent = [FFResultNode resultNodeWithMatch:m baseDirectory:_documentSearch.directory];
-			[parents addObject:parent];
-		}
-		[nodes addObject:node];
+			[_results addResultNode:(parent = [FFResultNode resultNodeWithMatch:m baseDirectory:_documentSearch.directory])];
+		[parent addResultNode:node];
 	}
-
-	[parent addResultNodes:nodes];
-	[_results addResultNodes:parents];
 
 	[_windowController.resultsViewController insertItemsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(countOfExistingItems, _results.children.count - countOfExistingItems)]];
 }
