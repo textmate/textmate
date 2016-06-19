@@ -2262,10 +2262,10 @@ namespace
 }
 
 // ===========================
-// = Go to Tab Menu Delegate =
+// = Select Tab Menu Delegate =
 // ===========================
 
-- (void)updateGoToMenu:(NSMenu*)aMenu
+- (void)updateSelectTabMenu:(NSMenu*)aMenu
 {
 	if(![self.window isKeyWindow])
 	{

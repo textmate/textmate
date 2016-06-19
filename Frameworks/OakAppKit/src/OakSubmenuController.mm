@@ -25,7 +25,7 @@ OAK_DEBUG_VAR(OakSubmenuController);
 @implementation OakSubmenuController
 - (void)awakeFromNib
 {
-	[goToMenu setDelegate:self];
+	[selectTabMenu setDelegate:self];
 	[marksMenu setDelegate:self];
 }
 
@@ -40,14 +40,14 @@ OAK_DEBUG_VAR(OakSubmenuController);
 
 - (void)menuNeedsUpdate:(NSMenu*)aMenu
 {
-	[self updateMenu:aMenu withSelector:aMenu == goToMenu ? @selector(updateGoToMenu:) : @selector(updateBookmarksMenu:)];
+	[self updateMenu:aMenu withSelector:aMenu == selectTabMenu ? @selector(updateSelectTabMenu:) : @selector(updateBookmarksMenu:)];
 }
 
 - (BOOL)menuHasKeyEquivalent:(NSMenu*)aMenu forEvent:(NSEvent*)anEvent target:(id*)anId action:(SEL*)aSEL
 {
 	D(DBF_OakSubmenuController, bug("%s %s\n", to_s(anEvent).c_str(), [[aMenu description] UTF8String]););
 
-	if(aMenu != goToMenu)
+	if(aMenu != selectTabMenu)
 		return NO;
 
 	std::string const eventString = to_s(anEvent);
@@ -55,7 +55,7 @@ OAK_DEBUG_VAR(OakSubmenuController);
 		return NO;
 
 	NSMenu* dummy = [NSMenu new];
-	[self updateMenu:dummy withSelector:@selector(updateGoToMenu:)];
+	[self updateMenu:dummy withSelector:@selector(updateSelectTabMenu:)];
 	for(NSMenuItem* item in [dummy itemArray])
 	{
 		if(eventString == ns::create_event_string(item.keyEquivalent, item.keyEquivalentModifierMask))
