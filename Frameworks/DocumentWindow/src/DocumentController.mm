@@ -2307,6 +2307,11 @@ namespace
 
 - (BOOL)validateMenuItem:(NSMenuItem*)menuItem
 {
+	static std::set<SEL> const delegateToFileBrowser = {
+		@selector(newFolder:), @selector(goBack:), @selector(goForward:),
+		@selector(reload:), @selector(deselectAll:)
+	};
+
 	BOOL active = YES;
 	if([menuItem action] == @selector(toggleFileBrowser:))
 		[menuItem setTitle:self.fileBrowserVisible ? @"Hide File Browser" : @"Show File Browser"];
@@ -2317,7 +2322,7 @@ namespace
 	}
 	else if([menuItem action] == @selector(newDocumentInDirectory:))
 		active = self.fileBrowserVisible && [self.fileBrowser directoryForNewItems] != nil;
-	else if([menuItem action] == @selector(newFolder:) || [menuItem action] == @selector(goBack:) || [menuItem action] == @selector(goForward:))
+	else if(delegateToFileBrowser.find([menuItem action]) != delegateToFileBrowser.end())
 		active = self.fileBrowserVisible && [self.fileBrowser validateMenuItem:menuItem];
 	else if([menuItem action] == @selector(moveDocumentToNewWindow:))
 		active = _documents.size() > 1;
@@ -2332,8 +2337,6 @@ namespace
 		active = self.projectPath != nil;
 	else if([menuItem action] == @selector(goToParentFolder:))
 		active = [self.window firstResponder] != self.textView;
-	else if([menuItem action] == @selector(reload:) || [menuItem action] == @selector(deselectAll:))
-		active = self.fileBrowserVisible;
 	else if([menuItem action] == @selector(moveFocus:))
 		[menuItem setTitle:self.window.firstResponder == self.textView ? @"Move Focus to File Browser" : @"Move Focus to Document"];
 	else if([menuItem action] == @selector(takeProjectPathFrom:))
