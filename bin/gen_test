@@ -233,7 +233,7 @@ int main (int argc, char const* argv[])
       }
       else
       {
-        for(auto test : tests)
+        for(auto& test : tests)
           test.execute(measure, repeat);
       }
     });
@@ -253,7 +253,7 @@ int main (int argc, char const* argv[])
 
     if(run_benchmarks)
     {
-      for(auto benchmark : benchmarks)
+      for(auto& benchmark : benchmarks)
       {
         benchmark.execute(true, repeat);
         if(!benchmark.message.empty())
