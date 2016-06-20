@@ -99,6 +99,8 @@ namespace ng
 		std::string xml_substr (size_t from = 0, size_t to = SIZE_T_MAX) const;
 		void visit_data (std::function<void(char const*, size_t)> const& f) const;
 
+		detail::storage_t const& storage () const { return _storage; }
+
 		bool operator== (buffer_t const& rhs) const;
 
 		size_t replace (size_t from, size_t to, std::string const& str);
