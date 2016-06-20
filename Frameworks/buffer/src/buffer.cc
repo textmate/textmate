@@ -112,7 +112,7 @@ namespace ng
 
 	bool buffer_t::operator== (buffer_t const& rhs) const
 	{
-		return size() == rhs.size() && substr(0, size()) == rhs.substr(0, rhs.size());
+		return _storage == rhs._storage;
 	}
 
 	size_t buffer_t::replace (size_t from, size_t to, std::string const& str)
