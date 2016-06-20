@@ -23,7 +23,7 @@ namespace ng
 				}
 
 				~helper_t ()                         { free(_bytes); }
-				char* bytes ()                       { return _bytes; }
+				char const* bytes () const           { return _bytes; }
 				size_t size () const                 { return _size; }
 				size_t available () const            { return malloc_size(_bytes) - _size; }
 
