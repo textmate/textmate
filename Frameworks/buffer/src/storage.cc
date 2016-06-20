@@ -70,7 +70,7 @@ namespace ng
 			{
 				auto tmp = it;
 				--tmp;
-				if(tmp->key == tmp->value.size() && length <= tmp->value.free())
+				if(tmp->key == tmp->value.size() && length <= tmp->value.available())
 				{
 					tmp->value.insert(tmp->key, data, data + length);
 					tmp->key += length;

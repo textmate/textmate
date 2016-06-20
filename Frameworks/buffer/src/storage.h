@@ -16,10 +16,10 @@ namespace ng
 			struct helper_t
 			{
 				helper_t (size_t size) : _size(size) { _bytes = (char*)malloc(size + 15); }
-				~helper_t ()                         { ::free(_bytes); }
+				~helper_t ()                         { free(_bytes); }
 				char* bytes ()                       { return _bytes; }
 				size_t size () const                 { return _size; }
-				size_t free () const                 { return malloc_size(_bytes) - _size; }
+				size_t available () const            { return malloc_size(_bytes) - _size; }
 				void grow (size_t amount)            { _size += amount; }
 
 			private:
@@ -37,7 +37,7 @@ namespace ng
 			memory_t subset (size_t from)                     { return memory_t(_helper, _offset + from); }
 			char const* bytes () const                        { return _helper->bytes() + _offset; }
 			size_t size () const                              { return _helper->size() - _offset; }
-			size_t free () const                              { return _helper->free(); }
+			size_t available () const                         { return _helper->available(); }
 
 			template <typename _InputIter>
 			void insert (size_t pos, _InputIter first, _InputIter last);
