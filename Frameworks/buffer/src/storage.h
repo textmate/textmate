@@ -20,7 +20,13 @@ namespace ng
 				char* bytes ()                       { return _bytes; }
 				size_t size () const                 { return _size; }
 				size_t available () const            { return malloc_size(_bytes) - _size; }
-				void grow (size_t amount)            { _size += amount; }
+
+				template <typename _InputIter>
+				void append (_InputIter first, _InputIter last)
+				{
+					std::copy(first, last, _bytes + _size);
+					_size += std::distance(first, last);
+				}
 
 			private:
 				char* _bytes;

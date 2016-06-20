@@ -20,8 +20,8 @@ namespace ng
 		void memory_t::insert (size_t pos, _InputIter first, _InputIter last)
 		{
 			ASSERT_EQ(_offset + pos, _helper->size());
-			std::copy(first, last, _helper->bytes() + _offset + pos);
-			_helper->grow(std::distance(first, last));
+			ASSERT_LE(std::distance(first, last), _helper->available());
+			_helper->append(first, last);
 		}
 
 		// =============
