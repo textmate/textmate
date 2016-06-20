@@ -10,8 +10,10 @@ namespace oak
 	struct basic_tree_t
 	{
 		basic_tree_t ()                                   { }
+		basic_tree_t (basic_tree_t&& rhs)                 { _root = rhs._root; _size = rhs._size; rhs._root = node_t::null_ptr(); rhs._size = 0; }
 		basic_tree_t (basic_tree_t const& rhs)            { _root = clone_node(rhs._root); _size = rhs._size; }
 		~basic_tree_t ()                                  { clear(); }
+		basic_tree_t& operator= (basic_tree_t&& rhs)      { _root = rhs._root; _size = rhs._size; rhs._root = node_t::null_ptr(); rhs._size = 0; return *this; }
 		basic_tree_t& operator= (basic_tree_t const& rhs) { _root = clone_node(rhs._root); _size = rhs._size; return *this; }
 
 		struct value_type
