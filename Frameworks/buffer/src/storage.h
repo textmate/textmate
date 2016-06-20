@@ -15,7 +15,13 @@ namespace ng
 
 			struct helper_t
 			{
-				helper_t (size_t size) : _size(size) { _bytes = (char*)malloc(size + 15); }
+				template <typename _InputIter>
+				helper_t (_InputIter first, _InputIter last)
+				{
+					_bytes = (char*)malloc(std::distance(first, last) + 15);
+					append(first, last);
+				}
+
 				~helper_t ()                         { free(_bytes); }
 				char* bytes ()                       { return _bytes; }
 				size_t size () const                 { return _size; }
@@ -30,7 +36,7 @@ namespace ng
 
 			private:
 				char* _bytes;
-				size_t _size;
+				size_t _size = 0;
 			};
 
 			typedef std::shared_ptr<helper_t> helper_ptr;
