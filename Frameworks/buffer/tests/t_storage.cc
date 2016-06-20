@@ -133,6 +133,26 @@ void test_bracket_operator ()
 		OAK_ASSERT_EQ(storage[i], buffer[i]);
 }
 
+void test_equality_operator ()
+{
+	std::string const buffer = "All composite phenomena are impermanent - All contaminated things and events are unsatisfactory - All phenomena are empty and selfless - Nirvana is true peace.";
+	ng::detail::storage_t lhs, rhs;
+
+	for(auto range : reverse(random_ranges(buffer.size())))
+		lhs.insert(range.dst, buffer.data() + range.src, range.len);
+	for(auto range : reverse(random_ranges(buffer.size())))
+		rhs.insert(range.dst, buffer.data() + range.src, range.len);
+
+	OAK_ASSERT_EQ(lhs, rhs);
+	OAK_ASSERT_EQ(rhs, lhs);
+
+	lhs.erase(lhs.size()-1, lhs.size());
+	lhs.insert(lhs.size(), "!", 1);
+
+	OAK_ASSERT_NE(lhs, rhs);
+	OAK_ASSERT_NE(rhs, lhs);
+}
+
 void test_random_insert ()
 {
 	std::string const buffer = create_buffer();

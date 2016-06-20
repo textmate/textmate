@@ -101,6 +101,40 @@ namespace ng
 			return it->value.bytes()[i - it->offset];
 		}
 
+		bool storage_t::operator== (storage_t const& rhs) const
+		{
+			if(size() != rhs.size())
+				return false;
+
+			auto lhsIter = _tree.begin(), lhsEnd = _tree.end();
+			auto rhsIter = rhs._tree.begin(), rhsEnd = rhs._tree.end();
+
+			size_t lhsOffset = 0, rhsOffset = 0;
+			while(lhsIter != lhsEnd && rhsIter != rhsEnd)
+			{
+				size_t size = std::min(lhsIter->key - lhsOffset, rhsIter->key - rhsOffset);
+				if(!std::equal(lhsIter->value.bytes() + lhsOffset, lhsIter->value.bytes() + lhsOffset + size, rhsIter->value.bytes() + rhsOffset))
+					return false;
+
+				lhsOffset += size;
+				rhsOffset += size;
+
+				if(lhsOffset == lhsIter->key)
+				{
+					lhsOffset = 0;
+					++lhsIter;
+				}
+
+				if(rhsOffset == rhsIter->key)
+				{
+					rhsOffset = 0;
+					++rhsIter;
+				}
+			}
+
+			return lhsIter == lhsEnd && rhsIter == rhsEnd;
+		}
+
 		std::string storage_t::substr (size_t first, size_t last) const
 		{
 			ASSERT_LE(first, last); ASSERT_LE(last, size());
