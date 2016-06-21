@@ -5,6 +5,8 @@
 #include "event.h"
 #include "to_dictionary.h"
 
+PUBLIC NSString* to_ns (std::string const& str);
+
 PUBLIC std::string to_s (NSString* aString);
 PUBLIC std::string to_s (NSAttributedString* anAttributedString);
 PUBLIC std::string to_s (NSData* aString);

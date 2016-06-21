@@ -1,9 +1,15 @@
 #import "ns.h"
+#import <OakFoundation/NSString Additions.h>
 #import <oak/oak.h>
 #import <oak/debug.h>
 #import <text/utf8.h>
 
 OAK_DEBUG_VAR(NSEvent);
+
+NSString* to_ns (std::string const& str)
+{
+	return [NSString stringWithCxxString:str];
+}
 
 std::string to_s (NSString* aString)
 {
