@@ -2,3 +2,4 @@ TESTS        = tests/*.cc
 SOURCES      = src/*.cc
 EXPORT       = src/*.h
 FRAMEWORKS   = CoreFoundation
+LIBS         = iconv
