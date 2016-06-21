@@ -16,7 +16,7 @@ PUBLIC extern std::string const kCharsetUnknown;
 namespace encoding
 {
 	template <typename _InputIter>
-	std::string charset_from_bom (_InputIter const& first, _InputIter const& last, size_t* bomSize = nullptr)
+	std::string charset_from_bom (_InputIter const& first, _InputIter const& last)
 	{
 		static struct UTFBOMTests { std::string bom; std::string encoding; } const BOMTests[] =
 		{
@@ -30,11 +30,7 @@ namespace encoding
 		for(auto const& test : BOMTests)
 		{
 			if(oak::has_prefix(first, last, test.bom.begin(), test.bom.end()))
-			{
-				if(bomSize)
-					*bomSize = test.bom.size();
-				return test.encoding;
-			}
+				return test.encoding + "//BOM";
 		}
 		return kCharsetNoEncoding;
 	}
