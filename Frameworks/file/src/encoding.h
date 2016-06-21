@@ -44,22 +44,17 @@ namespace encoding
 	struct PUBLIC type
 	{
 		type () { }
-		type (std::string const& newlines, std::string const& charset, bool byte_order_mark = false) : _newlines(newlines), _charset(charset), _byte_order_mark(byte_order_mark) { }
+		type (std::string const& newlines, std::string const& charset) : _newlines(newlines), _charset(charset) { }
 
 		std::string const& newlines () const { return _newlines; }
 		std::string const& charset () const  { return _charset; }
-		bool byte_order_mark () const        { return _byte_order_mark && supports_byte_order_mark(_charset); }
 
 		void set_newlines (std::string const& newlines) { _newlines = newlines; }
-		void set_charset (std::string const& charset)   { _charset = charset; _byte_order_mark = charset != kCharsetUTF8 && supports_byte_order_mark(charset); }
-		void set_byte_order_mark (bool flag)            { _byte_order_mark = flag; }
-
-		static bool supports_byte_order_mark (std::string const& charset);
+		void set_charset (std::string const& charset)   { _charset = charset; }
 
 	private:
 		std::string _newlines = NULL_STR;
 		std::string _charset  = kCharsetNoEncoding;
-		bool _byte_order_mark = false;
 	};
 
 } /* encoding */
