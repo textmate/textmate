@@ -110,8 +110,20 @@ namespace // PopulateMenu{Flat,Hierarchical}
 @implementation OakEncodingPopUpButton
 + (void)initialize
 {
-	NSArray* encodings = @[ @"WINDOWS-1252", @"MACROMAN", @"ISO-8859-1", @"UTF-8", @"UTF-16LE", @"UTF-16BE", @"SHIFT_JIS", @"GB18030" ];
+	NSArray* encodings = @[ @"WINDOWS-1252", @"MACROMAN", @"ISO-8859-1", @"UTF-8", @"UTF-16LE//BOM", @"UTF-16BE//BOM", @"SHIFT_JIS", @"GB18030" ];
 	[[NSUserDefaults standardUserDefaults] registerDefaults:@{ kUserDefaultsAvailableEncodingsKey : encodings }];
+
+	NSArray* legacy = [[NSUserDefaults standardUserDefaults] arrayForKey:kUserDefaultsAvailableEncodingsKey];
+	if([legacy containsObject:@"UTF-16BE"] && ![legacy containsObject:@"UTF-16BE//BOM"])
+	{
+		NSMutableArray* updatedList = [NSMutableArray array];
+		for(NSString* charset in legacy)
+		{
+			BOOL legacyName = ([charset hasPrefix:@"UTF-16"] || [charset hasPrefix:@"UTF-32"]) && ![charset hasSuffix:@"//BOM"];
+			[updatedList addObject:legacyName ? [charset stringByAppendingString:@"//BOM"] : charset];
+		}
+		[[NSUserDefaults standardUserDefaults] setObject:updatedList forKey:kUserDefaultsAvailableEncodingsKey];
+	}
 }
 
 - (void)updateAvailableEncodings
