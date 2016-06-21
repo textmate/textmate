@@ -5,63 +5,6 @@
 #include <io/path.h>
 #include <settings/settings.h>
 
-static void grow (char*& outBuf, size_t& outBufSize, std::string& dst, size_t copied)
-{
-	dst.resize((dst.size() * 3 + 1) / 2);
-	outBuf     = &dst.front() + copied;
-	outBufSize = dst.size() - copied;
-}
-
-static size_t convert (iconv_t cd, char const* src, size_t len, std::string& dst)
-{
-	char* outBuf      = &dst.front();
-	size_t outBufSize = dst.size();
-
-	char* inBuf       = (char*)src;
-	size_t inBufSize  = len;
-
-	while(inBufSize)
-	{
-		size_t rc = iconv(cd, &inBuf, &inBufSize, &outBuf, &outBufSize);
-		if(rc == (size_t)-1)
-		{
-			if(errno == EILSEQ)
-			{
-				++inBuf;
-				--inBufSize;
-
-				while(iconv(cd, nullptr, nullptr, &outBuf, &outBufSize) == (size_t)-1 && errno == E2BIG)
-					grow(outBuf, outBufSize, dst, outBuf - &dst.front());
-
-				static char const kReplacementChar[]     = "\uFFFD";
-				static char const kReplacementCharLength = strlen(kReplacementChar);
-				while(outBufSize < kReplacementCharLength)
-					grow(outBuf, outBufSize, dst, outBuf - &dst.front());
-
-				memcpy(outBuf, kReplacementChar, kReplacementCharLength);
-				outBuf += kReplacementCharLength;
-				outBufSize -= kReplacementCharLength;
-			}
-			else if(errno == E2BIG)
-			{
-				grow(outBuf, outBufSize, dst, outBuf - &dst.front());
-			}
-			else if(errno == EINVAL)
-			{
-				// Incomplete multibyte sequence
-				break;
-			}
-			else
-			{
-				fprintf(stderr, "iconv: %s after %zu bytes, %zu bytes left (unexpected)\n", strerror(errno), inBuf - src, inBufSize);
-				break;
-			}
-		}
-	}
-	dst.resize(outBuf - &dst.front());
-	return inBuf - src;
-}
-
 namespace file
 {
 	reader_t::reader_t (std::string const& path) : _path(path)
@@ -86,11 +29,8 @@ namespace file
 		if(charset != kCharsetNoEncoding && charset != kCharsetUTF8)
 		{
 			set_charset(charset);
-			if(_cd == (iconv_t)-1)
-			{
-				io_error("iconv_open");
+			if(!_transcode)
 				return;
-			}
 		}
 
 		if(bomSize != 0)
@@ -105,8 +45,6 @@ namespace file
 
 	reader_t::~reader_t ()
 	{
-		if(_cd != (iconv_t)(-1))
-			iconv_close(_cd);
 		if(_fd != -1)
 			close(_fd);
 	}
@@ -134,7 +72,7 @@ namespace file
 			return io::bytes_ptr();
 		}
 
-		if(_cd == (iconv_t)(-1))
+		if(!_transcode)
 		{
 			auto first = buf.begin(), last = utf8::find_safe_end(buf.begin(), buf.end());
 			if(utf8::is_valid(first, last))
@@ -148,14 +86,14 @@ namespace file
 			if(charset != NULL_STR)
 				set_charset(charset.substr(0, charset.find(';')));
 
-			if(_cd == (iconv_t)-1)
+			if(!_transcode)
 			{
 				charset = settings_for_path(_path, "attr.file.unknown-encoding " + file::path_attributes(_path)).get(kSettingsEncodingKey, kCharsetUnknown);
 				if(charset != kCharsetUnknown && charset != kCharsetUTF8)
 					set_charset(charset);
 			}
 
-			if(_cd == (iconv_t)-1)
+			if(!_transcode)
 			{
 				charset = "ISO-8859-1";
 
@@ -173,25 +111,17 @@ namespace file
 				set_charset(charset);
 			}
 
-			if(_cd == (iconv_t)-1)
+			if(!_transcode)
 			{
-				io_error("iconv_open");
+				fprintf(stderr, "unable to create text::transcode_t\n");
 				return io::bytes_ptr();
 			}
 		}
 
-		std::string dst(buf.size(), ' ');
-		size_t consumed = convert(_cd, buf.data(), buf.size(), dst);
-
-		if(len == 0 && consumed == 0 && !buf.empty())
-		{
-			fprintf(stderr, "error decoding ‘%s’ from %s: unable to continue decoding with %zu byte(s) left\n", _path.c_str(), _encoding.charset().c_str(), buf.size());
-
-			dst = "\uFFFD";
-			consumed = 1;
-		}
-
-		_spillover = std::string(buf.begin() + consumed, buf.end());
+		std::string dst;
+		if(buf.empty())
+				(*_transcode)(back_inserter(dst));
+		else	(*_transcode)(buf.data(), buf.data() + buf.size(), back_inserter(dst));
 		return std::make_shared<io::bytes_t>(dst);
 	}
 
@@ -207,9 +137,10 @@ namespace file
 
 	void reader_t::set_charset (std::string const& charset)
 	{
-		_cd = iconv_open(kCharsetUTF8.c_str(), charset.c_str());
-		if(_cd != (iconv_t)-1)
-			_encoding.set_charset(charset);
+		_transcode = std::make_unique<text::transcode_t>(charset, kCharsetUTF8);
+		if(*_transcode)
+				_encoding.set_charset(charset);
+		else	_transcode.reset();
 	}
 
 	encoding::type reader_t::encoding () const

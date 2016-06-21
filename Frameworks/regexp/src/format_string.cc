@@ -6,6 +6,7 @@
 #include <oak/oak.h>
 #include <text/case.h>
 #include <text/utf8.h>
+#include <text/transcode.h>
 #include <cf/cf.h>
 
 OAK_DEBUG_VAR(FormatString);
@@ -157,35 +158,12 @@ struct expand_visitor : boost::static_visitor<void>
 			CFRelease(tmp);
 		}
 
-		iconv_t cd = iconv_open("ASCII//TRANSLIT", "UTF-8");
-		if(cd == (iconv_t)(-1))
+		text::transcode_t transcode("UTF-8", "ASCII//TRANSLIT");
+		if(!transcode)
 			return src; // error
 
-		char const* first = src.data();
-		char const* last  = first + src.size();
-
-		std::string buffer(256, '\0');
-		size_t buffer_contains = 0;
-
-		while(first != last)
-		{
-			if(buffer.size() - buffer_contains < 256)
-				buffer.resize(buffer.size() * 2);
-
-			char* dst      = &buffer[buffer_contains];
-			size_t dstSize = buffer.size() - buffer_contains;
-			size_t srcSize = last - first;
-
-			size_t rc = iconv(cd, (char**)&first, &srcSize, &dst, &dstSize);
-			if(rc == (size_t)(-1) && errno != E2BIG && (errno != EINVAL || buffer.size() - buffer_contains - dstSize == 0))
-				return src; // error
-
-			buffer_contains += buffer.size() - buffer_contains - dstSize;
-		}
-
-		iconv_close(cd);
-
-		buffer.resize(buffer_contains);
+		std::string buffer;
+		transcode(transcode(src.data(), src.data() + src.size(), back_inserter(buffer)));
 		return buffer;
 	}
 

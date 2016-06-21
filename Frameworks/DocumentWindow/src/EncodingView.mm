@@ -4,68 +4,10 @@
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <text/hexdump.h>
 #import <text/utf8.h>
+#import <text/transcode.h>
 #import <oak/oak.h>
 #import <oak/debug.h>
 #import <ns/ns.h>
-
-static void grow (char*& outBuf, size_t& outBufSize, std::string& dst, size_t& copied)
-{
-	dst.resize((dst.size() * 3 + 1) / 2);
-	outBuf     = &dst.front() + copied;
-	outBufSize = dst.size() - copied;
-}
-
-static bool convert_range (iconv_t cd, char const* src, size_t from, size_t to, std::string& dst, size_t& copied)
-{
-	char* outBuf      = &dst.front() + copied;
-	size_t outBufSize = dst.size() - copied;
-
-	char* inBuf       = (char*)src + from;
-	size_t inBufSize  = to - from;
-
-	bool res = true;
-	while(inBufSize)
-	{
-		size_t prevOutBufSize = outBufSize;
-		size_t rc = iconv(cd, &inBuf, &inBufSize, &outBuf, &outBufSize);
-		copied += prevOutBufSize - outBufSize;
-
-		if(rc == (size_t)-1)
-		{
-			if(errno == EINVAL || errno == EILSEQ)
-			{
-				res = false;
-
-				++inBuf;
-				--inBufSize;
-
-				while(iconv(cd, nullptr, nullptr, &outBuf, &outBufSize) == (size_t)-1 && errno == E2BIG)
-					grow(outBuf, outBufSize, dst, copied);
-
-				static char const kReplacementChar[]     = "\uFFFD";
-				static char const kReplacementCharLength = strlen(kReplacementChar);
-				if(outBufSize < kReplacementCharLength)
-					grow(outBuf, outBufSize, dst, copied);
-
-				memcpy(outBuf, kReplacementChar, kReplacementCharLength);
-				outBuf += kReplacementCharLength;
-				outBufSize -= kReplacementCharLength;
-				copied += kReplacementCharLength;
-			}
-			else if(errno == E2BIG)
-			{
-				grow(outBuf, outBufSize, dst, copied);
-			}
-			else
-			{
-				res = false;
-				fprintf(stderr, "iconv: %s after %zu bytes, %zu bytes left (unexpected)\n", strerror(errno), copied, inBufSize);
-				break;
-			}
-		}
-	}
-	return res;
-}
 
 template <typename _InputIter>
 size_t newline_size (_InputIter first, _InputIter const& last)
@@ -98,29 +40,24 @@ static NSAttributedString* convert_and_highlight (char const* first, char const*
 		}
 	}
 
-	iconv_t cd = iconv_open(encodeTo.c_str(), encodeFrom.c_str());
-	if(cd == (iconv_t)(-1))
+	text::transcode_t transcode(encodeFrom, encodeTo);
+	if(!transcode)
 		return nil;
 
-	std::string dst(std::distance(first, last), '\0');
-	size_t copied = 0;
+	std::string dst;
 
-	bool couldConvert = true;
 	std::set<size_t> decodedOffsets;
 	size_t from = 0;
 	for(size_t to : offsets)
 	{
-		couldConvert = convert_range(cd, first, from, to, dst, copied) && couldConvert;
-		decodedOffsets.insert(copied);
+		transcode(first + from, first + to, back_inserter(dst));
+		decodedOffsets.insert(dst.size());
 		from = to;
 	}
-	couldConvert = convert_range(cd, first, from, std::distance(first, last), dst, copied) && couldConvert;
-	dst.resize(copied);
+	transcode(transcode(first + from, last, back_inserter(dst)));
 
 	if(success)
-		*success = couldConvert;
-
-	iconv_close(cd);
+		*success = transcode.invalid_count() == 0;
 
 	NSMutableAttributedString* output = [[NSMutableAttributedString alloc] init];
 

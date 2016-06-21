@@ -3,6 +3,7 @@
 
 #include "bytes.h"
 #include "encoding.h"
+#include <text/transcode.h>
 
 namespace file
 {
@@ -19,7 +20,7 @@ namespace file
 
 		std::string _path;
 		int _fd;
-		iconv_t _cd = (iconv_t)-1;
+		std::unique_ptr<text::transcode_t> _transcode;
 		std::string _spillover;
 		encoding::type _encoding;
 	};

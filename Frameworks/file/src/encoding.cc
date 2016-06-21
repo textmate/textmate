@@ -3,6 +3,7 @@
 #include <plist/plist.h>
 #include <io/path.h>
 #include <text/utf8.h>
+#include <text/transcode.h>
 #include <cf/cf.h>
 #include <oak/oak.h>
 #include <oak/debug.h>
@@ -32,39 +33,12 @@ namespace encoding
 		if(from == to)
 			return to == kCharsetUTF8 && !utf8::is_valid(content->begin(), content->end()) ? res : content;
 
-		iconv_t cd = iconv_open(to.c_str(), from.c_str());
-		if(cd == (iconv_t)(-1))
-			return res;
-
-		std::string buffer(1024, '\0');
-		size_t buffer_contains = 0;
-
-		char const* first = content->begin();
-		char const* last  = content->end();
-		while(first != last)
+		if(auto transcode = text::transcode_t(from, to))
 		{
-			if(buffer.size() - buffer_contains < 256)
-				buffer.resize(buffer.size() * 2);
-
-			char* dst      = &buffer[buffer_contains];
-			size_t dstSize = buffer.size() - buffer_contains;
-			size_t srcSize = last - first;
-
-			size_t rc = iconv(cd, (char**)&first, &srcSize, &dst, &dstSize);
-			if(rc == (size_t)(-1) && errno != E2BIG && (errno != EINVAL || buffer.size() - buffer_contains - dstSize == 0))
-				break;
-			D(DBF_File_Charset, bug("did decode %zu bytes\n", buffer.size() - buffer_contains - dstSize););
-
-			buffer_contains += buffer.size() - buffer_contains - dstSize;
-		}
-
-		iconv_close(cd);
-
-		if(first == last)
-		{
-			ASSERT(to != kCharsetUTF8 || utf8::is_valid(buffer.begin(), buffer.end()));
-			buffer.resize(buffer_contains);
-			res = std::make_shared<io::bytes_t>(buffer);
+			std::string buffer;
+			transcode(transcode(content->begin(), content->end(), back_inserter(buffer)));
+			if(transcode.invalid_count() == 0)
+				res = std::make_shared<io::bytes_t>(buffer);
 		}
 
 		return res;
