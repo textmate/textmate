@@ -20,6 +20,9 @@ namespace text
 		int hex = 4, cols = 16;
 		for(int row = 0; it != last; ++row)
 		{
+			if(row != 0)
+				*out++ = '\n';
+
 			std::vector<char> number, ascii;
 			for(int i = 0; i < cols && it != last; ++i, ++it)
 			{
@@ -34,7 +37,6 @@ namespace text
 			std::copy(ascii.begin(), ascii.end(), v.begin() + (hex + 1 + 3*cols));
 
 			out = std::copy(v.begin(), v.end(), out);
-			*out++ = '\n';
 		}
 		return out;
 	}

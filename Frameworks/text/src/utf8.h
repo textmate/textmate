@@ -150,7 +150,7 @@ namespace utf8
 // 					fprintf(stderr, "%zu / %zu\n", seen, len);
 // 					std::vector<char> v;
 // 					text::hex_dump(first, it + 1, back_inserter(v));
-// 					fprintf(stderr, "%.*s", (int)v.size(), &v[0]);
+// 					fprintf(stderr, "%.*s\n", (int)v.size(), &v[0]);
 // 				}
 // #endif
 			}

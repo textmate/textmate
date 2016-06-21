@@ -164,7 +164,7 @@ namespace ct
 				if(!utf8::is_valid(text.begin() + i, text.begin() + j))
 				{
 					crash_reporter_info_t info(text::format("text size: %zu, line is valid utf-8: %s, %zu scope(s): %zu-%zu", text.size(), BSTR(utf8::is_valid(text.begin(), text.end())), scopes.size(), scopes.empty() ? 0 : scopes.begin()->first, scopes.empty() ? 0 : (--scopes.end())->first));
-					info << text::format("range %zu-%zu is not UTF-8:\n%s", i, j, text::to_hex(text.begin() + i, text.begin() + j).c_str());
+					info << text::format("range %zu-%zu is not UTF-8:\n%s\n", i, j, text::to_hex(text.begin() + i, text.begin() + j).c_str());
 					abort();
 				}
 
