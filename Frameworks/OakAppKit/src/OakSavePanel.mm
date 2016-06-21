@@ -15,8 +15,6 @@
 }
 @property (nonatomic) NSString* lineEndings;
 @property (nonatomic) NSString* encoding;
-@property (nonatomic) BOOL useByteOrderMark;
-@property (nonatomic) BOOL canUseByteOrderMark;
 @property (nonatomic) NSSavePanel* savePanel;
 @end
 
@@ -43,7 +41,6 @@
 
 	NSPopUpButton* encodingPopUpButton    = [[OakEncodingPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO];
 	NSPopUpButton* lineEndingsPopUpButton = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO];
-	NSButton* bomCheckBox                 = OakCreateCheckBox(@"Add byte order mark");
 
 	[encodingPopUpButton setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
 
@@ -58,39 +55,25 @@
 		@"encodingLabel"    : OakCreateLabel(@"Encoding:"),
 		@"encodingPopUp"    : encodingPopUpButton,
 		@"lineEndingsPopUp" : lineEndingsPopUpButton,
-		@"bomCheckBox"      : bomCheckBox,
 	};
 
 	NSView* containerView = [[NSView alloc] initWithFrame:NSZeroRect];
 	OakAddAutoLayoutViewsToSuperview([views allValues], containerView);
 
 	[containerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[encodingLabel]-[encodingPopUp]-[lineEndingsPopUp]-(>=0)-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
-	[containerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[bomCheckBox]-(>=0)-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
-	[containerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(8)-[encodingPopUp]-[bomCheckBox]-(8)-|" options:NSLayoutFormatAlignAllLeading metrics:nil views:views]];
+	[containerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(8)-[encodingPopUp]-(8)-|" options:NSLayoutFormatAlignAllLeading metrics:nil views:views]];
 
 	containerView.frame = (NSRect){ NSZeroPoint, [containerView fittingSize] };
 	self.view = containerView;
 
 	[encodingPopUpButton bind:@"encoding" toObject:self withKeyPath:@"encoding" options:nil];
 	[lineEndingsPopUpButton bind:NSSelectedTagBinding toObject:self withKeyPath:@"lineEndings" options:@{ NSValueTransformerNameBindingOption: @"OakLineEndingsTransformer" }];
-	[bomCheckBox bind:NSEnabledBinding toObject:self withKeyPath:@"canUseByteOrderMark" options:nil];
-	[bomCheckBox bind:NSValueBinding toObject:self withKeyPath:@"useByteOrderMark" options:nil];
-}
-
-- (void)setEncoding:(NSString*)newEncoding
-{
-	if([_encoding isEqualToString:newEncoding])
-		return;
-	_encoding = newEncoding;
-	self.canUseByteOrderMark = _encodingOptions.supports_byte_order_mark(to_s(newEncoding));
-	self.useByteOrderMark    = _canUseByteOrderMark && to_s(newEncoding) != kCharsetUTF8;
 }
 
 - (void)updateSettings:(encoding::type const&)encoding
 {
 	self.lineEndings      = [NSString stringWithCxxString:encoding.newlines()];
 	self.encoding         = [NSString stringWithCxxString:encoding.charset()];
-	self.useByteOrderMark = encoding.byte_order_mark();
 }
 
 - (encoding::type)encodingForURL:(NSURL*)anURL
@@ -99,10 +82,7 @@
 
 	settings_t const& settings = settings_for_path(to_s([[anURL filePathURL] path]));
 	if(res.charset() == kCharsetNoEncoding)
-	{
 		res.set_charset(settings.get(kSettingsEncodingKey, kCharsetUTF8));
-		res.set_byte_order_mark(settings.get(kSettingsUseBOMKey, res.byte_order_mark()));
-	}
 
 	if(res.newlines() == NULL_STR)
 		res.set_newlines(settings.get(kSettingsLineEndingsKey, "\n"));
@@ -140,7 +120,7 @@
 		crash_reporter_info_t info("Clear NSSavePanel delegate");
 		savePanel.delegate = nil;
 		NSString* path = result == NSOKButton ? [[savePanel.URL filePathURL] path] : nil;
-		encoding::type encoding(to_s(optionsViewController.lineEndings), to_s(optionsViewController.encoding), optionsViewController.useByteOrderMark);
+		encoding::type encoding(to_s(optionsViewController.lineEndings), to_s(optionsViewController.encoding));
 		aCompletionHandler(path, encoding);
 	}];
 
