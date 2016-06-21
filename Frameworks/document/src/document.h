@@ -66,7 +66,7 @@ namespace document
 	{
 		WATCH_LEAKS(document_t);
 
-		document_t () : _selection(NULL_STR), _folded(NULL_STR), _revision(0), _disk_revision(0), _modified(false), _path(NULL_STR), _open_count(0), _is_on_disk(false), _recent_tracking(true), _backup_path(NULL_STR), _backup_revision(0), _virtual_path(NULL_STR), _custom_name(NULL_STR), _untitled_count(0), _file_type(NULL_STR), /*_folder(NULL_STR),*/ _disk_encoding(NULL_STR), _disk_newlines(NULL_STR), _disk_bom(false) { }
+		document_t () : _selection(NULL_STR), _folded(NULL_STR), _revision(0), _disk_revision(0), _modified(false), _path(NULL_STR), _open_count(0), _is_on_disk(false), _recent_tracking(true), _backup_path(NULL_STR), _backup_revision(0), _virtual_path(NULL_STR), _custom_name(NULL_STR), _untitled_count(0), _file_type(NULL_STR), /*_folder(NULL_STR),*/ _disk_encoding(NULL_STR), _disk_newlines(NULL_STR) { }
 		~document_t ();
 
 		bool operator== (document_t const& rhs) const { return _identifier == rhs._identifier; }
@@ -221,8 +221,8 @@ namespace document
 		std::string backup_path () const;
 		std::string display_name () const;
 
-		void set_disk_encoding (encoding::type const& encoding) { _disk_newlines = encoding.newlines(); _disk_encoding = encoding.charset(); _disk_bom = encoding.byte_order_mark(); }
-		encoding::type disk_encoding () const                   { return encoding::type(_disk_newlines, _disk_encoding, _disk_bom); }
+		void set_disk_encoding (encoding::type const& encoding) { _disk_newlines = encoding.newlines(); _disk_encoding = encoding.charset(); }
+		encoding::type disk_encoding () const                   { return encoding::type(_disk_newlines, _disk_encoding); }
 
 		void set_indent (text::indent_t const& indent);
 		text::indent_t const& indent () const;
@@ -312,7 +312,6 @@ namespace document
 
 		std::string _disk_encoding;
 		std::string _disk_newlines;
-		bool _disk_bom;
 
 		text::indent_t _indent;
 

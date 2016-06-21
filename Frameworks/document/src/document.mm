@@ -269,7 +269,6 @@ namespace document
 					res->_inode          = inode_t(res->_path);
 					res->_file_type      = path::get_attr(path, "com.macromates.backup.file-type");
 					res->_disk_encoding  = path::get_attr(path, "com.macromates.backup.encoding");
-					res->_disk_bom       = path::get_attr(path, "com.macromates.backup.bom") == "YES";
 					res->_disk_newlines  = path::get_attr(path, "com.macromates.backup.newlines");
 					res->_untitled_count = atoi(path::get_attr(path, "com.macromates.backup.untitled-count").c_str());
 					res->_custom_name    = path::get_attr(path, "com.macromates.backup.custom-name");
@@ -856,10 +855,7 @@ namespace document
 			settings_t const& settings = settings_for_path(_path);
 
 			if(encoding.charset() == kCharsetNoEncoding)
-			{
 				encoding.set_charset(settings.get(kSettingsEncodingKey, kCharsetUTF8));
-				encoding.set_byte_order_mark(settings.get(kSettingsUseBOMKey, encoding.byte_order_mark()));
-			}
 
 			if(encoding.newlines() == NULL_STR)
 				encoding.set_newlines(settings.get(kSettingsLineEndingsKey, "\n"));
@@ -907,7 +903,6 @@ namespace document
 			path::set_attr(dst, "com.macromates.visibleIndex",          _visible_index ? to_s(_visible_index) : NULL_STR);
 			path::set_attr(dst, "com.macromates.backup.file-type",      _file_type);
 			path::set_attr(dst, "com.macromates.backup.encoding",       _disk_encoding);
-			path::set_attr(dst, "com.macromates.backup.bom",            _disk_bom ? "YES" : "NO");
 			path::set_attr(dst, "com.macromates.backup.newlines",       _disk_newlines);
 			path::set_attr(dst, "com.macromates.backup.untitled-count", std::to_string(_untitled_count));
 			path::set_attr(dst, "com.macromates.backup.custom-name",    _custom_name);
@@ -985,7 +980,7 @@ namespace document
 			if(_backup_path != NULL_STR)
 			{
 				bool modified = _modified;
-				post_load(_path, std::make_shared<io::bytes_t>(path::content(_backup_path)), path::attributes(_backup_path), _file_type, encoding::type(_disk_newlines, _disk_encoding, _disk_bom));
+				post_load(_path, std::make_shared<io::bytes_t>(path::content(_backup_path)), path::attributes(_backup_path), _file_type, encoding::type(_disk_newlines, _disk_encoding));
 				if(modified)
 					set_revision(buffer().bump_revision());
 				return true;
