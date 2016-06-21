@@ -24,22 +24,15 @@ namespace file
 			return;
 		}
 
-		size_t bomSize = 0;
-		std::string charset = encoding::charset_from_bom(std::begin(buf), std::begin(buf) + len, &bomSize);
-		if(charset != kCharsetNoEncoding && charset != kCharsetUTF8)
+		std::string charset = encoding::charset_from_bom(std::begin(buf), std::begin(buf) + len);
+		if(charset != kCharsetNoEncoding)
 		{
 			set_charset(charset);
 			if(!_transcode)
 				return;
 		}
 
-		if(bomSize != 0)
-		{
-			_encoding.set_charset(charset);
-			_encoding.set_byte_order_mark(true);
-		}
-
-		lseek(_fd, bomSize, SEEK_SET);
+		lseek(_fd, 0, SEEK_SET);
 		fcntl(_fd, F_NOCACHE, 1);
 	}
 

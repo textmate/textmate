@@ -300,14 +300,6 @@ namespace
 					else
 					{
 						io::bytes_ptr encodedContent = _content;
-
-						if(_encoding.byte_order_mark())
-						{
-							std::string tmp("\uFEFF");
-							tmp.insert(tmp.end(), encodedContent->begin(), encodedContent->end());
-							encodedContent->set_string(tmp);
-						}
-
 						if(encodedContent = encoding::convert(_content, kCharsetUTF8, _encoding.charset()))
 								_content = encodedContent;
 						else	_next_state = kStateSelectEncoding;

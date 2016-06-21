@@ -33,7 +33,6 @@ struct stall_t : file::open_callback_t
 
 	void show_content (std::string const& path, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, std::string const& fileType, encoding::type const& encoding, std::vector<oak::uuid_t> const& binaryImportFilters, std::vector<oak::uuid_t> const& textImportFilters)
 	{
-		_bom        = encoding.byte_order_mark();
 		_encoding   = encoding.charset();
 		_file_type  = fileType;
 		_line_feeds = encoding.newlines();
@@ -50,7 +49,6 @@ struct stall_t : file::open_callback_t
 
 	bool _error = false;
 	dispatch_semaphore_t _semaphore;
-	bool _bom = false;
 	std::string _encoding;
 	std::string _file_type;
 	std::string _line_feeds = NULL_STR;

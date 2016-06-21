@@ -221,24 +221,12 @@ static bool not_ascii (char ch)
 	return !(0x20 <= ch && ch < 0x80 || ch && strchr("\t\n\f\r\e", ch));
 }
 
-static io::bytes_ptr remove_bom (io::bytes_ptr content)
-{
-	if(content)
-	{
-		ASSERT_GE(content->size(), 3); ASSERT_EQ(std::string(content->get(), content->get() + 3), "\uFEFF");
-		memmove(content->get(), content->get()+3, content->size()-3);
-		content->resize(content->size()-3);
-	}
-	return content;
-}
-
-static io::bytes_ptr convert (io::bytes_ptr content, std::string const& from, std::string const& to, bool bom = false)
+static io::bytes_ptr convert (io::bytes_ptr content, std::string const& from, std::string const& to)
 {
 	if(from == kCharsetUnknown)
 		return io::bytes_ptr();
 
-	content = encoding::convert(content, from, to);
-	return bom ? remove_bom(content) : content;
+	return encoding::convert(content, from, to);
 }
 
 // ===================================
@@ -359,10 +347,7 @@ namespace
 						{
 							std::string const charset = encoding::charset_from_bom(first, last);
 							if(charset != kCharsetNoEncoding)
-							{
 								_encoding.set_charset(charset);
-								_encoding.set_byte_order_mark(true);
-							}
 						}
 						break;
 
@@ -408,7 +393,7 @@ namespace
 					_state      = kStateIdle;
 					_next_state = kStateEstimateLineFeeds;
 
-					if(io::bytes_ptr decodedContent = convert(_content, _encoding.charset() == kCharsetNoEncoding ? kCharsetASCII : _encoding.charset(), kCharsetUTF8, _encoding.byte_order_mark()))
+					if(io::bytes_ptr decodedContent = convert(_content, _encoding.charset() == kCharsetNoEncoding ? kCharsetASCII : _encoding.charset(), kCharsetUTF8))
 							_content = decodedContent;
 					else	_next_state = kStateEstimateEncoding;
 
