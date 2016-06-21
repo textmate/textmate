@@ -737,7 +737,7 @@ namespace document
 		setup_buffer();
 		if(content)
 		{
-			_buffer->insert(0, std::string(content->begin(), content->end()));
+			_buffer->insert(0, content->get(), content->size());
 			setup_marks(path, *_buffer);
 
 			std::map<std::string, std::string>::const_iterator folded = attributes.find("com.macromates.folded");

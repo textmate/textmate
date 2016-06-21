@@ -55,7 +55,7 @@ void test_subset_replace ()
 {
 	struct callback_t : ng::callback_t
 	{
-		void will_replace (size_t from, size_t to, std::string const& str) { actual.push_back(str); }
+		void will_replace (size_t from, size_t to, char const* buf, size_t len) { actual.emplace_back(buf, len); }
 		std::vector<std::string> actual;
 	};
 

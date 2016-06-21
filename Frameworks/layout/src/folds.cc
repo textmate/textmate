@@ -235,10 +235,10 @@ namespace ng
 	// = Buffer Callback =
 	// ===================
 
-	void folds_t::will_replace (size_t from, size_t to, std::string const& str)
+	void folds_t::will_replace (size_t from, size_t to, char const* buf, size_t len)
 	{
 		std::vector< std::pair<size_t, size_t> > newFoldings;
-		ssize_t delta = str.size() - (to - from);
+		ssize_t delta = len - (to - from);
 		for(auto const& pair : _folded)
 		{
 			ssize_t foldFrom = pair.first, foldTo = pair.second;
@@ -251,7 +251,7 @@ namespace ng
 		}
 		set_folded(newFoldings);
 
-		_levels.replace(from, to, str.size());
+		_levels.replace(from, to, len);
 		_levels.remove(_buffer.begin(_buffer.convert(from).line));
 		_levels.remove(_buffer.begin(_buffer.convert(to).line));
 	}

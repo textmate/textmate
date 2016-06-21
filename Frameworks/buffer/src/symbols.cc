@@ -95,7 +95,7 @@ namespace
 
 namespace ng
 {
-	void symbols_t::replace (buffer_t* buffer, size_t from, size_t to, std::string const& str) { _symbols.replace(from, to, str.size()); }
+	void symbols_t::replace (buffer_t* buffer, size_t from, size_t to, char const* buf, size_t len) { _symbols.replace(from, to, len); }
 
 	void symbols_t::did_parse (buffer_t const* buffer, size_t from, size_t to)
 	{

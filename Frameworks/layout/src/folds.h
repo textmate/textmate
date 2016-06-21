@@ -27,7 +27,7 @@ namespace ng
 		std::pair<size_t, size_t> toggle_at_line (size_t n, bool recursive);
 		std::vector< std::pair<size_t, size_t> > toggle_all_at_level (size_t level);
 
-		void will_replace (size_t from, size_t to, std::string const& str);
+		void will_replace (size_t from, size_t to, char const* buf, size_t len);
 		void did_parse (size_t from, size_t to);
 
 	private:

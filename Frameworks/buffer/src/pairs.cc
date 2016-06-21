@@ -9,7 +9,7 @@ namespace ng
 	{
 	}
 
-	void pairs_t::replace (buffer_t* buffer, size_t from, size_t to, std::string const& str)
+	void pairs_t::replace (buffer_t* buffer, size_t from, size_t to, char const* buf, size_t len)
 	{
 		if(from < to)
 		{
@@ -34,7 +34,7 @@ namespace ng
 					_pairs.remove(index);
 			}
 		}
-		_pairs.replace(from, to, str.size());
+		_pairs.replace(from, to, len);
 	}
 
 	void pairs_t::add_pair (size_t firstIndex, size_t lastIndex)

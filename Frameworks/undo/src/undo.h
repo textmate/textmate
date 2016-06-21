@@ -21,13 +21,13 @@ namespace ng
 		ranges_t redo ();
 
 	private:
-		void will_replace (size_t from, size_t to, std::string const& str);
+		void will_replace (size_t from, size_t to, char const* buf, size_t len);
 
 		struct buffer_callback_t : callback_t
 		{
 			buffer_callback_t (undo_manager_t& undo_manager) : undo_manager(undo_manager) { }
 
-			void will_replace (size_t from, size_t to, std::string const& str) { undo_manager.will_replace(from, to, str); }
+			void will_replace (size_t from, size_t to, char const* buf, size_t len) { undo_manager.will_replace(from, to, buf, len); }
 		private:
 			undo_manager_t& undo_manager;
 		};

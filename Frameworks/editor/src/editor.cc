@@ -190,7 +190,7 @@ namespace ng
 			return sel;
 		}
 
-		void will_replace (size_t from, size_t to, std::string const& str)
+		void will_replace (size_t from, size_t to, char const* buf, size_t len)
 		{
 			for(auto& mark : _marks)
 			{
@@ -199,19 +199,19 @@ namespace ng
 				{
 					if(mark.type == mark_t::kUnpairedMark || index != from && index != to)
 					{
-						index = from + str.size() - std::min(to - index, str.size());
+						index = from + len - std::min(to - index, len);
 					}
 					else
 					{
 						index = from;
 						if(mark.type == mark_t::kEndMark)
-							index += str.size();
+							index += len;
 					}
 				}
 				else if(from < index)
 				{
 					ASSERT_LT(to, index);
-					index = index + str.size() - (to - from);
+					index = index + len - (to - from);
 				}
 			}
 		}
@@ -648,7 +648,7 @@ namespace ng
 			_buffer.add_callback(this);
 		}
 
-		void will_replace (size_t from, size_t to, std::string const& str)
+		void will_replace (size_t from, size_t to, char const* buf, size_t len)
 		{
 			text::pos_t pos = _buffer.convert(from);
 

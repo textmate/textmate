@@ -115,64 +115,63 @@ namespace ng
 		return _storage == rhs._storage;
 	}
 
-	size_t buffer_t::replace (size_t from, size_t to, std::string const& str)
+	size_t buffer_t::replace (size_t from, size_t to, char const* buf, size_t len)
 	{
 		size_t shrinkLeft  = 0;
 		size_t shrinkRight = 0;
-		size_t len = str.size();
 
-		while(from + shrinkLeft < to && shrinkLeft < len && _storage[from + shrinkLeft] == str[shrinkLeft])
+		while(from + shrinkLeft < to && shrinkLeft < len && _storage[from + shrinkLeft] == buf[shrinkLeft])
 			++shrinkLeft;
 
 		if(shrinkLeft < len)
 		{
-			while(shrinkLeft && utf8::multibyte<char>::partial(str[shrinkLeft]) && !utf8::multibyte<char>::is_start(str[shrinkLeft]))
+			while(shrinkLeft && utf8::multibyte<char>::partial(buf[shrinkLeft]) && !utf8::multibyte<char>::is_start(buf[shrinkLeft]))
 				--shrinkLeft;
 		}
 
-		while(from + shrinkLeft < to - shrinkRight && len - shrinkLeft - shrinkRight && _storage[to - shrinkRight - 1] == str[len - shrinkRight - 1])
+		while(from + shrinkLeft < to - shrinkRight && len - shrinkLeft - shrinkRight && _storage[to - shrinkRight - 1] == buf[len - shrinkRight - 1])
 			++shrinkRight;
 
-		while(shrinkRight && utf8::multibyte<char>::partial(str[len - shrinkRight]) && !utf8::multibyte<char>::is_start(str[len - shrinkRight]))
+		while(shrinkRight && utf8::multibyte<char>::partial(buf[len - shrinkRight]) && !utf8::multibyte<char>::is_start(buf[len - shrinkRight]))
 			--shrinkRight;
 
 		if(shrinkLeft == 0 && shrinkRight == 0)
-			return actual_replace(from, to, str);
+			return actual_replace(from, to, buf, len);
 
-		actual_replace(from + shrinkLeft, to - shrinkRight, str.substr(shrinkLeft, len - shrinkLeft - shrinkRight));
-		return from + str.size();
+		actual_replace(from + shrinkLeft, to - shrinkRight, buf + shrinkLeft, len - shrinkLeft - shrinkRight);
+		return from + len;
 	}
 
-	size_t buffer_t::actual_replace (size_t from, size_t to, std::string const& str)
+	size_t buffer_t::actual_replace (size_t from, size_t to, char const* buf, size_t len)
 	{
 		ASSERT_LE(from, to); ASSERT_LE(to, size());
-		_callbacks(&callback_t::will_replace, from, to, str);
+		_callbacks(&callback_t::will_replace, from, to, buf, len);
 
 		_storage.erase(from, to);
-		_storage.insert(from, str.data(), str.size());
+		_storage.insert(from, buf, len);
 
-		_dirty.replace(from, to, str.size(), false);
+		_dirty.replace(from, to, len, false);
 		_dirty.set(from, true);
 
-		_hardlines.replace(from, to, str.size());
+		_hardlines.replace(from, to, len);
 		auto scopeIter = _scopes.upper_bound(to);
 		scope::scope_t preserveScope = scopeIter != _scopes.begin() && from < (--scopeIter)->first && scopeIter->first <= to ? scopeIter->second : scope::scope_t();
-		_scopes.replace(from, to, str.size());
+		_scopes.replace(from, to, len);
 		if(preserveScope)
-			_scopes.set(from + str.size(), preserveScope);
-		_parser_states.replace(from, to, str.size(), false);
+			_scopes.set(from + len, preserveScope);
+		_parser_states.replace(from, to, len, false);
 
-		for(size_t i = 0; i < str.size(); ++i)
+		for(size_t i = 0; i < len; ++i)
 		{
-			if(str[i] == '\n')
+			if(buf[i] == '\n')
 				_hardlines.set(from + i, true);
 		}
 
 		for(auto const& hook : _meta_data)
-			hook->replace(this, from, to, str);
+			hook->replace(this, from, to, buf, len);
 
-		_callbacks(&callback_t::did_replace, from, to, str);
-		return from + str.size();
+		_callbacks(&callback_t::did_replace, from, to, buf, len);
+		return from + len;
 	}
 
 	bool buffer_t::set_grammar (bundles::item_ptr const& grammarItem)

@@ -42,7 +42,7 @@ namespace ng
 		struct parser_callback_t : ng::callback_t
 		{
 			parser_callback_t (layout_t& layout) : layout(layout) { }
-			void did_replace (size_t from, size_t to, std::string const& str) { layout.did_erase(from, to); layout.did_insert(from, from + str.size()); }
+			void did_replace (size_t from, size_t to, char const* buf, size_t len) { layout.did_erase(from, to); layout.did_insert(from, from + len); }
 
 		private:
 			layout_t& layout;

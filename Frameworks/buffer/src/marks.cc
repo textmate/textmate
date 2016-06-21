@@ -3,15 +3,15 @@
 
 namespace ng
 {
-	void marks_t::replace (buffer_t* buffer, size_t from, size_t to, std::string const& str)
+	void marks_t::replace (buffer_t* buffer, size_t from, size_t to, char const* buf, size_t len)
 	{
 		for(auto& m : _marks)
 		{
 			tree_t::iterator it = m.second.upper_bound(to);
 			std::string preserveMark = it != m.second.begin() && from < (--it)->first && it->first <= to ? it->second : NULL_STR;
-			m.second.replace(from, to, str.size(), false);
+			m.second.replace(from, to, len, false);
 			if(preserveMark != NULL_STR)
-				m.second.set(from + str.size(), preserveMark);
+				m.second.set(from + len, preserveMark);
 		}
 	}
 

@@ -21,8 +21,8 @@ namespace ng
 	struct PUBLIC meta_data_t
 	{
 		virtual ~meta_data_t ()               { }
-		virtual void replace (buffer_t* buffer, size_t from, size_t to, std::string const& str) { }
-		virtual void did_parse (buffer_t const* buffer, size_t from, size_t to)                 { }
+		virtual void replace (buffer_t* buffer, size_t from, size_t to, char const* buf, size_t len) { }
+		virtual void did_parse (buffer_t const* buffer, size_t from, size_t to)                      { }
 	};
 
 	struct PUBLIC pairs_t : meta_data_t
@@ -36,7 +36,7 @@ namespace ng
 		size_t counterpart (size_t index) const;
 
 	private:
-		void replace (buffer_t* buffer, size_t from, size_t to, std::string const& str);
+		void replace (buffer_t* buffer, size_t from, size_t to, char const* buf, size_t len);
 		using meta_data_t::did_parse;
 
 		bool is_paired (size_t index) const;
@@ -50,10 +50,10 @@ namespace ng
 	{
 		WATCH_LEAKS(ng::callback_t);
 
-		virtual ~callback_t ()                                                     { }
-		virtual void did_parse (size_t from, size_t to)                            { }
-		virtual void will_replace (size_t from, size_t to, std::string const& str) { }
-		virtual void did_replace (size_t from, size_t to, std::string const& str)  { }
+		virtual ~callback_t ()                                                          { }
+		virtual void did_parse (size_t from, size_t to)                                 { }
+		virtual void will_replace (size_t from, size_t to, char const* buf, size_t len) { }
+		virtual void did_replace (size_t from, size_t to, char const* buf, size_t len)  { }
 	};
 
 	struct spelling_t;
@@ -103,10 +103,12 @@ namespace ng
 
 		bool operator== (buffer_t const& rhs) const;
 
-		size_t replace (size_t from, size_t to, std::string const& str);
+		size_t replace (size_t from, size_t to, char const* buf, size_t len);
 
-		size_t insert (size_t i, std::string const& str)   { return replace(i, i, str);    }
-		size_t erase (size_t from, size_t to)              { return replace(from, to, ""); }
+		size_t replace (size_t from, size_t to, std::string const& str) { return replace(from, to, str.data(), str.size()); }
+		size_t insert (size_t i, char const* buf, size_t len)           { return replace(i, i, buf, len); }
+		size_t insert (size_t i, std::string const& str)                { return replace(i, i, str.data(), str.size()); }
+		size_t erase (size_t from, size_t to)                           { return replace(from, to, nullptr, 0); }
 
 		size_t begin (size_t n) const                { ASSERT_LT(n, lines()); return n   ==       0 ?      0 : _hardlines.nth(n-1)->first + 1; }
 		size_t eol (size_t n) const                  { ASSERT_LT(n, lines()); return n+1 == lines() ? size() : _hardlines.nth(n)->first;       }
@@ -200,7 +202,7 @@ namespace ng
 		void add_meta_data (meta_data_t* hook)      { if(hook) _meta_data.push_back(hook); }
 		void remove_meta_data (meta_data_t* hook)   { if(hook) _meta_data.erase(std::find(_meta_data.begin(), _meta_data.end(), hook)); }
 
-		size_t actual_replace (size_t from, size_t to, std::string const& str);
+		size_t actual_replace (size_t from, size_t to, char const* buf, size_t len);
 
 		uint32_t code_point (size_t& i, size_t& len) const;
 		friend std::string to_s (buffer_t const& buf, size_t first, size_t last);

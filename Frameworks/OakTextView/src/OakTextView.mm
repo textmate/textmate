@@ -829,7 +829,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 		{
 			buffer_refresh_callback_t (OakTextView* textView) : textView(textView) { }
 			void did_parse (size_t from, size_t to)                                { [textView redisplayFrom:from to:to]; }
-			void did_replace (size_t from, size_t to, std::string const& str)      { NSAccessibilityPostNotification(textView, NSAccessibilityValueChangedNotification); }
+			void did_replace (size_t from, size_t to, char const* buf, size_t len) { NSAccessibilityPostNotification(textView, NSAccessibilityValueChangedNotification); }
 
 		private:
 			__weak OakTextView* textView;
