@@ -951,7 +951,7 @@ rule dsym
   description = Archive dSYM info for ‘$in’…
 
 rule compile_xib
-  command = xcrun ibtool --errors --warnings --notices --output-format human-readable-text --compile $out $in
+  command = xcrun ibtool --errors --warnings --notices --output-format human-readable-text --minimum-deployment-target $APP_MIN_OS --compile $out $in
   description = Compile xib ‘$in’…
 
 rule process_plist
