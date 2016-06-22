@@ -143,6 +143,9 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 - (void)checkExpirationDate:(id)sender
 {
+	if(oak::os_tuple() < std::make_tuple(10, 8, 0))
+		return;
+
 	NSTimeInterval const kSecondsPerDay = 24*60*60;
 
 	NSDate* currentDate    = [NSDate date];
