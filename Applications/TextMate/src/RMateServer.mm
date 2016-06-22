@@ -39,12 +39,11 @@ struct socket_callback_t
 {
 	WATCH_LEAKS(socket_callback_t);
 
-	template <typename F>
-	socket_callback_t (F f, socket_t const& fd)
+	socket_callback_t (std::function<bool(socket_t const&)> const& f, socket_t const& fd)
 	{
 		D(DBF_RMateServer, bug("%p, %d\n", this, (int)fd););
 
-		helper = std::make_shared<helper_t<F>>(f, fd, this);
+		helper = std::make_shared<helper_t>(f, fd, this);
 
 		CFSocketContext const context = { 0, helper.get(), NULL, NULL, NULL };
 		if(socket = CFSocketCreateWithNative(kCFAllocatorDefault, fd, kCFSocketReadCallBack, callback, &context))
@@ -79,30 +78,22 @@ struct socket_callback_t
 
 	static void callback (CFSocketRef s, CFSocketCallBackType callbackType, CFDataRef address, void const* data, void* info)
 	{
-		(*(helper_base_t*)info)();
+		(*(helper_t*)info)();
 	}
 
 private:
-	struct helper_base_t
+	struct helper_t
 	{
-		WATCH_LEAKS(helper_base_t);
-
-		virtual ~helper_base_t () { }
-		virtual void operator() () = 0;
-	};
-
-	template <typename F>
-	struct helper_t : helper_base_t
-	{
-		helper_t (F f, socket_t const& socket, socket_callback_t* parent) : f(f), socket(socket), parent(parent) { }
+		helper_t (std::function<bool(socket_t const&)> const& f, socket_t const& socket, socket_callback_t* parent) : f(f), socket(socket), parent(parent) { }
 		void operator() () { if(!f(socket)) delete parent; }
+
 	private:
-		F f;
+		std::function<bool(socket_t const&)> f;
 		socket_t socket;
 		socket_callback_t* parent;
 	};
 
-	std::shared_ptr<helper_base_t> helper;
+	std::shared_ptr<helper_t> helper;
 	CFSocketRef socket;
 	CFRunLoopSourceRef run_loop_source;
 };
