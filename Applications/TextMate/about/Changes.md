@@ -2,6 +2,15 @@ Title: Release Notes
 
 # Changes
 
+Requirement for TextMate will be **10.8** starting with next build.
+
+## 2016-06-22 (v2.0-beta.10)
+
+* The “Add byte order mark” checkbox has been removed from the save panel and so has the `useBOM` setting. Instead byte order mark (BOM) is now part of the encoding name, so via the save panel you need to select “Unicode — UTF-8 (BOM)” to include a BOM or set `encoding = "UTF-8//BOM"` in `.tm_properties`. For UTF-16/32 you also need to append `//BOM` to the encoding name (if you set this via `.tm_properties`).
+* You can change the font used for line numbers by setting `lineNumberFontName` via the `defaults` command. *[Mike Meyer]*
+* More menu changes, most notable the “Go” menu is now “File Browser” and its contents has been revised. The “Go to File…” item (often referred to as ⌘T) is now “File → Quick Open…”. *[Ronald Wampler]*
+* See [all changes since v2.0-beta.9.5](https://github.com/textmate/textmate/compare/v2.0-beta.9.5...v2.0-beta.10)
+
 ## 2016-06-16 (v2.0-beta.9.5)
 
 * Improve folder search performance for large documents with few newlines and lots of matches.
