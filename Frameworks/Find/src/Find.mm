@@ -197,8 +197,11 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 					globs.add_exclude_glob(settings.get(kSettingsExcludeDirectoriesKey,               NULL_STR), path::kPathItemDirectory);
 					globs.add_exclude_glob(settings.get(kSettingsExcludeFilesInFolderSearchKey,       NULL_STR), path::kPathItemFile);
 					globs.add_exclude_glob(settings.get(kSettingsExcludeFilesKey,                     NULL_STR), path::kPathItemFile);
-					for(auto key : { kSettingsExcludeInFolderSearchKey, kSettingsExcludeKey, kSettingsBinaryKey })
-						globs.add_exclude_glob(settings.get(key, NULL_STR));
+					globs.add_exclude_glob(settings.get(kSettingsExcludeInFolderSearchKey,            NULL_STR));
+					globs.add_exclude_glob(settings.get(kSettingsExcludeKey,                          NULL_STR));
+					if(!controller.searchBinaryFiles)
+						globs.add_exclude_glob(settings.get(kSettingsBinaryKey, NULL_STR));
+
 					globs.add_include_glob(controller.searchHiddenFolders ? "{,.}*" : "*", path::kPathItemDirectory);
 					globs.add_include_glob(to_s(controller.globString), path::kPathItemFile);
 
