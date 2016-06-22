@@ -20,9 +20,9 @@ namespace ng
 
 	struct PUBLIC meta_data_t
 	{
-		virtual ~meta_data_t ()               { }
-		virtual void replace (buffer_t* buffer, size_t from, size_t to, char const* buf, size_t len) { }
-		virtual void did_parse (buffer_t const* buffer, size_t from, size_t to)                      { }
+		virtual ~meta_data_t ()                                                     { }
+		virtual void replace (buffer_t* buffer, size_t from, size_t to, size_t len) { }
+		virtual void did_parse (buffer_t const* buffer, size_t from, size_t to)     { }
 	};
 
 	struct PUBLIC pairs_t : meta_data_t
@@ -36,7 +36,7 @@ namespace ng
 		size_t counterpart (size_t index) const;
 
 	private:
-		void replace (buffer_t* buffer, size_t from, size_t to, char const* buf, size_t len);
+		void replace (buffer_t* buffer, size_t from, size_t to, size_t len);
 		using meta_data_t::did_parse;
 
 		bool is_paired (size_t index) const;

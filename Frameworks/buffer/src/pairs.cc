@@ -9,7 +9,7 @@ namespace ng
 	{
 	}
 
-	void pairs_t::replace (buffer_t* buffer, size_t from, size_t to, char const* buf, size_t len)
+	void pairs_t::replace (buffer_t* buffer, size_t from, size_t to, size_t len)
 	{
 		if(from < to)
 		{

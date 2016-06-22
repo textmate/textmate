@@ -15,7 +15,7 @@ namespace ng
 		void recheck (buffer_t const* buffer, size_t from, size_t to);
 
 	private:
-		void replace (buffer_t* buffer, size_t from, size_t to, char const* buf, size_t len);
+		void replace (buffer_t* buffer, size_t from, size_t to, size_t len);
 		void did_parse (buffer_t const* buffer, size_t from, size_t to);
 
 		typedef indexed_map_t<bool> tree_t;
@@ -28,7 +28,7 @@ namespace ng
 		std::string symbol_at (buffer_t const* buffer, size_t i) const;
 
 	private:
-		void replace (buffer_t* buffer, size_t from, size_t to, char const* buf, size_t len);
+		void replace (buffer_t* buffer, size_t from, size_t to, size_t len);
 		void did_parse (buffer_t const* buffer, size_t from, size_t to);
 
 		typedef indexed_map_t<std::string> tree_t;
@@ -48,7 +48,7 @@ namespace ng
 		std::pair<size_t, std::string> prev (size_t index, std::string const& markType) const;
 
 	private:
-		void replace (buffer_t* buffer, size_t from, size_t to, char const* buf, size_t len);
+		void replace (buffer_t* buffer, size_t from, size_t to, size_t len);
 		using meta_data_t::did_parse;
 
 		typedef indexed_map_t<std::string> tree_t;

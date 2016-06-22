@@ -170,7 +170,7 @@ namespace ng
 		}
 
 		for(auto const& hook : _meta_data)
-			hook->replace(this, from, to, buf, len);
+			hook->replace(this, from, to, len);
 
 		_callbacks(&callback_t::did_replace, from, to, buf, len);
 		return from + len;

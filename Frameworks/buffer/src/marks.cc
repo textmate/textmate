@@ -3,7 +3,7 @@
 
 namespace ng
 {
-	void marks_t::replace (buffer_t* buffer, size_t from, size_t to, char const* buf, size_t len)
+	void marks_t::replace (buffer_t* buffer, size_t from, size_t to, size_t len)
 	{
 		for(auto& m : _marks)
 		{

@@ -94,7 +94,7 @@ namespace ng
 		}
 	}
 
-	void spelling_t::replace (buffer_t* buffer, size_t from, size_t to, char const* buf, size_t len)
+	void spelling_t::replace (buffer_t* buffer, size_t from, size_t to, size_t len)
 	{
 		// TODO We need to keep a list of dirty ranges to minimize work done in did_parse — these ranges should be extended to “surrounding words”, e.g. if user inserts space into “sho‸rtcut” we need to re-check “sho” even though it is not included in the changed range.
 		_misspellings.replace(from, to, len);
