@@ -64,17 +64,6 @@ To install using [homebrew][] run:
 
 In practice `hg` ([mercurial][]) is only required for the SCM library’s tests so you can skip this dependency if you don’t mind a failing test.
 
-### OS X 10.7 (Lion)
-
-If you are on OS X 10.7 you need `pgrep` and `pkill` (used by the “relaunch” build targets). To install using [MacPorts][]:
-
-	sudo port install proctools
-
-Or using [homebrew][]:
-
-	brew install proctools
-
-
 ## Building from within TextMate
 
 You should install the [Ninja][NinjaBundle] and [CxxTest][] bundles. Both can be installed via _Preferences_ → _Bundles_.
