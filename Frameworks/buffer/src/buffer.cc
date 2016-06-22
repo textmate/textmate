@@ -11,15 +11,17 @@ OAK_DEBUG_VAR(Buffer_Parsing);
 
 namespace ng
 {
-	buffer_t::buffer_t (char const* str) : _grammar_callback(*this), _revision(0), _next_revision(1), _spelling_language("")
+	buffer_t::buffer_t () : _grammar_callback(*this), _revision(0), _next_revision(1), _spelling_language("")
 	{
 		_meta_data.push_back((_symbols = std::make_shared<symbols_t>()).get());
 		_meta_data.push_back((_marks = std::make_shared<marks_t>()).get());
 		_meta_data.push_back((_pairs = std::make_shared<pairs_t>()).get());
 		_scopes.set(-1, "text");
+	}
 
-		if(str)
-			insert(0, str);
+	buffer_t::buffer_t (char const* str) : buffer_t()
+	{
+		insert(0, str, strlen(str));
 	}
 
 	buffer_t::~buffer_t ()

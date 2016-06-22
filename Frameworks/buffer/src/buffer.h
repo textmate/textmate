@@ -83,7 +83,8 @@ namespace ng
 	{
 		WATCH_LEAKS(ng::buffer_t);
 
-		buffer_t (char const* str = NULL);
+		buffer_t ();
+		buffer_t (char const* str);
 		buffer_t (buffer_t const& rhs) = delete;
 		buffer_t& operator= (buffer_t const& rhs) = delete;
 		~buffer_t ();
