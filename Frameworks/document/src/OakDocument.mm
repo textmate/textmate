@@ -450,7 +450,7 @@ private:
 	if(_buffer && OakNotEmptyString(_folded))
 	{
 		boost::crc_32_type crc32;
-		_buffer->visit_data([&crc32](char const* bytes, size_t len){
+		_buffer->visit_data([&crc32](char const* bytes, size_t offset, size_t len, bool*){
 			crc32.process_bytes(bytes, len);
 		});
 
@@ -517,7 +517,7 @@ private:
 		if(fd == -1)
 			return NO;
 
-		_buffer->visit_data([fd](char const* bytes, size_t len){
+		_buffer->visit_data([fd](char const* bytes, size_t offset, size_t len, bool*){
 			write(fd, bytes, len);
 		});
 
@@ -670,10 +670,8 @@ private:
 		if(_buffer)
 		{
 			content = std::make_shared<io::bytes_t>(_buffer->size());
-			size_t offset = 0;
-			_buffer->visit_data([&](char const* bytes, size_t len){
+			_buffer->visit_data([&](char const* bytes, size_t offset, size_t len, bool*){
 				memcpy(content->get() + offset, bytes, len);
-				offset += len;
 			});
 			[self deleteBuffer];
 		}
@@ -717,10 +715,8 @@ private:
 		self.observeFileSystem = NO;
 
 		io::bytes_ptr content = std::make_shared<io::bytes_t>(_buffer->size());
-		size_t offset = 0;
-		_buffer->visit_data([&](char const* bytes, size_t len){
+		_buffer->visit_data([&](char const* bytes, size_t offset, size_t len, bool*){
 			memcpy(content->get() + offset, bytes, len);
-			offset += len;
 		});
 
 		std::map<std::string, std::string> attributes;
@@ -859,10 +855,9 @@ private:
 	BOOL stop = NO;
 	if(_buffer)
 	{
-		NSUInteger offset = 0;
-		_buffer->visit_data([&](char const* bytes, size_t len){
+		_buffer->visit_data([&](char const* bytes, size_t offset, size_t len, bool* tmp){
 			block(bytes, NSMakeRange(offset, len), &stop);
-			offset += len;
+			*tmp = stop;
 		});
 	}
 	else if(_path)
@@ -884,7 +879,7 @@ private:
 		return nil;
 
 	NSMutableString* str = [NSMutableString string];
-	_buffer->visit_data([str](char const* bytes, size_t len){
+	_buffer->visit_data([str](char const* bytes, size_t offset, size_t len, bool*){
 		[str appendString:[NSString stringWithUTF8String:bytes length:len]];
 	});
 	return str;

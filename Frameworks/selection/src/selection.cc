@@ -1303,7 +1303,7 @@ namespace ng
 		find::find_t f(searchFor, (find::options_t)(options & ~find::backwards));
 
 		ssize_t total = 0;
-		buffer.visit_data([&](char const* buf, size_t len){
+		buffer.visit_data([&](char const* buf, size_t, size_t len, bool*){
 			for(ssize_t offset = 0; offset < len; )
 			{
 				std::map<std::string, std::string> captures;

@@ -106,10 +106,18 @@ namespace ng
 		return _storage.substr(from, to);
 	}
 
-	void buffer_t::visit_data (std::function<void(char const*, size_t)> const& f) const
+	bool buffer_t::visit_data (std::function<void(char const*, size_t, size_t, bool*)> const& f) const
 	{
+		size_t offset = 0;
 		for(auto const& memory : _storage)
-			f(memory.data(), memory.size());
+		{
+			bool stop = false;
+			f(memory.data(), offset, memory.size(), &stop);
+			if(stop)
+				return true;
+			offset += memory.size();
+		}
+		return false;
 	}
 
 	bool buffer_t::operator== (buffer_t const& rhs) const
