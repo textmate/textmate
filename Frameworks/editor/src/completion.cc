@@ -6,6 +6,7 @@
 #include <text/tokenize.h>
 #include <bundles/bundles.h>
 #include <command/runner.h>
+#include <settings/settings.h>
 
 template <typename _OutputIter>
 _OutputIter words_with_prefix_and_suffix (ng::buffer_t const& buffer, std::string const& prefix, std::string const& suffix, std::string const& excludeWord, _OutputIter out)

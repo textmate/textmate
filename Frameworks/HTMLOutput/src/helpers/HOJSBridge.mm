@@ -6,6 +6,7 @@
 #import <text/utf8.h>
 #import <ns/ns.h>
 #import <cf/run_loop.h>
+#import <io/exec.h>
 
 @interface HOJSShellCommand : NSObject
 - (id)initShellCommand:(NSString*)aCommand withEnvironment:(const std::map<std::string, std::string>&)someEnvironment andExitHandler:(id)aHandler;

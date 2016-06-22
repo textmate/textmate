@@ -17,6 +17,8 @@
 #import <text/decode.h>
 #import <cf/cf.h>
 #import <ns/ns.h>
+#import <io/environment.h>
+#import <settings/settings.h>
 #import <oak/debug.h>
 
 OAK_DEBUG_VAR(BundleEditor);

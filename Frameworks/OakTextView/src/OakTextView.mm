@@ -36,6 +36,7 @@
 #import <text/trim.h>
 #import <text/utf16.h>
 #import <text/utf8.h>
+#import <settings/settings.h>
 #import <oak/debug.h>
 #import <editor/write.h>
 #import <io/exec.h>

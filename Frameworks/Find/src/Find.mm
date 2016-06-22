@@ -16,6 +16,7 @@
 #import <regexp/format_string.h>
 #import <editor/editor.h>
 #import <document/collection.h>
+#import <settings/settings.h>
 
 OAK_DEBUG_VAR(Find_Base);
 

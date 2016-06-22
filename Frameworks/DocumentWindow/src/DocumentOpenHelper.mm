@@ -4,6 +4,7 @@
 #import <OakAppKit/OakAppKit.h>
 #import <OakFoundation/NSString Additions.h>
 #import <encoding/encoding.h>
+#import <settings/settings.h>
 #import <ns/ns.h>
 #import <text/parse.h>
 #import <oak/debug.h>

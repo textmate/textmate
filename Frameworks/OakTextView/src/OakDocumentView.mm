@@ -8,6 +8,7 @@
 #import <ns/ns.h>
 #import <oak/debug.h>
 #import <bundles/bundles.h>
+#import <settings/settings.h>
 #import <OakFilterList/SymbolChooser.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/OakAppKit.h>

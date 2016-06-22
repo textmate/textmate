@@ -25,6 +25,7 @@
 #import <network/tbz.h>
 #import <ns/ns.h>
 #import <license/license.h>
+#import <settings/settings.h>
 #import <oak/debug.h>
 #import <oak/compat.h>
 #import <oak/oak.h>
