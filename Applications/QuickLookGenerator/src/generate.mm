@@ -13,7 +13,6 @@
 #import <scope/scope.h>
 #import <settings/settings.h>
 #import <theme/theme.h>
-#import <OakAppKit/NSColor Additions.h>
 #import <OakFoundation/NSString Additions.h>
 
 OAK_EXTERN_C_BEGIN
@@ -126,8 +125,8 @@ static NSAttributedString* create_attributed_string (ng::buffer_t& buffer, std::
 		size_t to = ++pair != scopes.end() ? pair->first : buffer.size();
 
 		[output appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:buffer.substr(from, to)] attributes:@{
-			NSForegroundColorAttributeName : [NSColor tmColorWithCGColor:styles.foreground()],
-			NSBackgroundColorAttributeName : [NSColor tmColorWithCGColor:styles.background()],
+			NSForegroundColorAttributeName : [NSColor colorWithCGColor:styles.foreground()],
+			NSBackgroundColorAttributeName : [NSColor colorWithCGColor:styles.background()],
 			NSFontAttributeName            : (__bridge NSFont*)styles.font(),
 			NSUnderlineStyleAttributeName  : @(styles.underlined() ? NSUnderlineStyleSingle : NSUnderlineStyleNone),
 		}]];
@@ -224,7 +223,7 @@ OSStatus TextMateQuickLookPlugIn_GeneratePreviewForURL (void* instance, QLPrevie
 
 	NSData* outputData = [output RTFFromRange:NSMakeRange(0, [output length]) documentAttributes:@{
 		NSDocumentTypeDocumentAttribute : [NSString stringWithCxxString:fileType],
-		NSBackgroundColorDocumentAttribute : theme ? [NSColor tmColorWithCGColor:theme->background(fileType)] : [NSColor whiteColor],
+		NSBackgroundColorDocumentAttribute : theme ? [NSColor colorWithCGColor:theme->background(fileType)] : [NSColor whiteColor],
 	}];
 
 	QLPreviewRequestSetDataRepresentation(request, (__bridge CFDataRef)outputData, kUTTypeRTF, nil);

@@ -6,7 +6,6 @@
 #import "OTVHUD.h"
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/NSEvent Additions.h>
-#import <OakAppKit/NSColor Additions.h>
 #import <OakAppKit/NSImage Additions.h>
 #import <OakAppKit/NSMenuItem Additions.h>
 #import <OakAppKit/OakPasteboard.h>

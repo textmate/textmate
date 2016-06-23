@@ -17,27 +17,4 @@
 
 	return nil;
 }
-
-+ (NSColor*)tmColorWithCGColor:(CGColorRef)aColor
-{
-	ASSERT(aColor != nullptr);
-	if([self respondsToSelector:@selector(colorWithCGColor:)])
-		return [self colorWithCGColor:aColor];
-	return [NSColor colorWithColorSpace:[[NSColorSpace alloc] initWithCGColorSpace:CGColorGetColorSpace(aColor)] components:CGColorGetComponents(aColor) count:CGColorGetNumberOfComponents(aColor)];
-}
-
-- (CGColorRef)tmCGColor
-{
-	if([self respondsToSelector:@selector(CGColor)])
-		return [self CGColor];
-
-	NSColor* rgbColor = [self colorUsingColorSpaceName:NSCalibratedRGBColorSpace];
-	CGFloat rgba[4];
-	[rgbColor getRed:&rgba[0] green:&rgba[1] blue:&rgba[2] alpha:&rgba[3]];
-	CGColorSpaceRef colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
-	CGColorRef res = CGColorCreate(colorSpace, rgba);
-	CGColorSpaceRelease(colorSpace);
-	__autoreleasing __attribute__ ((unused)) id dummy = CFBridgingRelease(res);
-	return res;
-}
 @end
