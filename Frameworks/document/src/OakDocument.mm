@@ -14,6 +14,7 @@
 #import <text/newlines.h>
 #import <text/utf8.h>
 #import <io/entries.h>
+#import <io/intermediate.h>
 #import <file/type.h>
 #import <file/open.h>
 #import <file/save.h>
@@ -513,15 +514,19 @@ private:
 		if(!_backupPath)
 			self.backupPath = [self createAndReturnBackupPath];
 
-		int fd = open([_backupPath fileSystemRepresentation], O_CREAT|O_TRUNC|O_WRONLY|O_CLOEXEC, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH);
+		path::intermediate_t dest(to_s(self.backupPath));
+		int fd = open(dest, O_CREAT|O_TRUNC|O_WRONLY|O_CLOEXEC, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH);
 		if(fd == -1)
 			return NO;
 
-		_buffer->visit_data([fd](char const* bytes, size_t offset, size_t len, bool*){
-			write(fd, bytes, len);
+		bool error = _buffer->visit_data([fd](char const* bytes, size_t offset, size_t len, bool* stop){
+			*stop = write(fd, bytes, len) != len;
 		});
 
 		close(fd);
+
+		if(error || !dest.commit())
+			return unlink(dest), NO;
 
 		auto attr = [self extendedAttributeds];
 
