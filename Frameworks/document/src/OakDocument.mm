@@ -618,6 +618,9 @@ private:
 
 	[self snapshot];
 	self.observeFileSystem = YES;
+
+	if(!_recentTrackingDisabled && _path && !_virtualPath)
+		[[NSDocumentController sharedDocumentController] noteNewRecentDocumentURL:[NSURL fileURLWithPath:_path]];
 }
 
 - (BOOL)tryOpenUsingCallback:(document::open_callback_ptr)callback forDocument:(document::document_ptr)document
@@ -708,6 +711,9 @@ private:
 
 		[self snapshot];
 		[self removeBackup];
+
+		if(!_recentTrackingDisabled && _path && !_virtualPath)
+			[[NSDocumentController sharedDocumentController] noteNewRecentDocumentURL:[NSURL fileURLWithPath:_path]];
 		[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentDidSaveNotification object:self];
 	}
 	self.observeFileSystem = self.isOpen;
