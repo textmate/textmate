@@ -44,6 +44,8 @@ enum FindActionTag
 @property (nonatomic) FFResultNode* results;
 @property (nonatomic) NSUInteger countOfMatches;
 @property (nonatomic) NSUInteger countOfExcludedMatches;
+@property (nonatomic) NSUInteger countOfReadOnlyMatches;
+@property (nonatomic) NSUInteger countOfExcludedReadOnlyMatches;
 @property (nonatomic) BOOL closeWindowOnSuccess;
 @property (nonatomic) BOOL performingFolderSearch;
 
@@ -132,11 +134,11 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 // = Find actions =
 // ================
 
-+ (NSSet*)keyPathsForValuesAffectingCanReplaceAll         { return [NSSet setWithArray:@[ @"countOfMatches", @"countOfExcludedMatches", @"windowController.showsResultsOutlineView" ]]; }
-+ (NSSet*)keyPathsForValuesAffectingReplaceAllButtonTitle { return [NSSet setWithArray:@[ @"countOfMatches", @"countOfExcludedMatches", @"windowController.showsResultsOutlineView" ]]; }
++ (NSSet*)keyPathsForValuesAffectingCanReplaceAll         { return [NSSet setWithArray:@[ @"countOfMatches", @"countOfExcludedMatches", @"countOfReadOnlyMatches", @"countOfExcludedReadOnlyMatches", @"windowController.showsResultsOutlineView" ]]; }
++ (NSSet*)keyPathsForValuesAffectingReplaceAllButtonTitle { return [NSSet setWithArray:@[ @"countOfMatches", @"countOfExcludedMatches", @"countOfReadOnlyMatches", @"countOfExcludedReadOnlyMatches", @"windowController.showsResultsOutlineView" ]]; }
 
-- (BOOL)canReplaceAll                { return _windowController.showsResultsOutlineView ? (_countOfExcludedMatches < _countOfMatches) : YES; }
-- (NSString*)replaceAllButtonTitle   { return _windowController.showsResultsOutlineView && _countOfExcludedMatches && self.canReplaceAll ? @"Replace Selected" : @"Replace All"; }
+- (BOOL)canReplaceAll                { return _windowController.showsResultsOutlineView ? (_countOfExcludedMatches - _countOfExcludedReadOnlyMatches < _countOfMatches - _countOfReadOnlyMatches) : YES; }
+- (NSString*)replaceAllButtonTitle   { return _windowController.showsResultsOutlineView && (_countOfExcludedMatches || _countOfReadOnlyMatches && _countOfReadOnlyMatches != _countOfMatches) ? @"Replace Selected" : @"Replace All"; }
 
 - (IBAction)countOccurrences:(id)sender   { [self performFindAction:FindActionCountMatches   withWindowController:self.windowController]; }
 - (IBAction)findAll:(id)sender            { [self performFindAction:FindActionFindAll        withWindowController:self.windowController]; }
@@ -375,6 +377,8 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 		[self unbind:@"countOfMatches"];
 		[self unbind:@"countOfExcludedMatches"];
+		[self unbind:@"countOfReadOnlyMatches"];
+		[self unbind:@"countOfExcludedReadOnlyMatches"];
 	}
 
 	_windowController.resultsViewController.results = _results = [FFResultNode new];
@@ -451,6 +455,8 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 	[self bind:@"countOfMatches" toObject:_results withKeyPath:@"countOfLeafs" options:nil];
 	[self bind:@"countOfExcludedMatches" toObject:_results withKeyPath:@"countOfExcluded" options:nil];
+	[self bind:@"countOfReadOnlyMatches" toObject:_results withKeyPath:@"countOfReadOnly" options:nil];
+	[self bind:@"countOfExcludedReadOnlyMatches" toObject:_results withKeyPath:@"countOfExcludedReadOnly" options:nil];
 
 	[self addResultsToPasteboard:self];
 
@@ -646,9 +652,9 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	if(copyActions.find(aMenuItem.action) != copyActions.end())
 		return [_results countOfLeafs] != 0;
 	else if(aMenuItem.action == @selector(checkAll:))
-		return self.countOfExcludedMatches > 0;
+		return _countOfExcludedMatches > _countOfExcludedReadOnlyMatches;
 	else if(aMenuItem.action == @selector(uncheckAll:) )
-		return self.countOfExcludedMatches < self.countOfMatches;
+		return _countOfExcludedMatches - _countOfExcludedReadOnlyMatches < _countOfMatches - _countOfReadOnlyMatches;
 	return YES;
 }
 @end
