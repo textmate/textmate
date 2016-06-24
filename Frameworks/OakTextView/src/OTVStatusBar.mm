@@ -7,6 +7,7 @@
 #import <OakFoundation/NSString Additions.h>
 #import <bundles/bundles.h>
 #import <text/ctype.h>
+#import <ns/ns.h>
 
 static NSTextField* OakCreateTextField (NSString* label)
 {
@@ -267,6 +268,16 @@ static NSMenuItem* OakCreateIndentMenuItem (NSString* title, SEL action, id targ
 	_symbolName = newSymbolName;
 	[self.symbolPopUp.menu removeAllItems];
 	[self.symbolPopUp addItemWithTitle:newSymbolName ?: @"Symbols"];
+}
+
+- (void)setFileType:(NSString*)newFileType
+{
+	if(_fileType == newFileType)
+		return;
+
+	_fileType = newFileType;
+	for(auto const& item : bundles::query(bundles::kFieldGrammarScope, to_s(newFileType)))
+		self.grammarName = [NSString stringWithCxxString:item->name()];
 }
 
 - (void)setRecordingTimer:(NSTimer*)aTimer

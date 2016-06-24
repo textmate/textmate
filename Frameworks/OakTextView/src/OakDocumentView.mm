@@ -77,8 +77,7 @@ struct document_view_callback_t : document::document_t::callback_t
 		}
 		else if(event == did_change_file_type)
 		{
-			for(auto const& item : bundles::query(bundles::kFieldGrammarScope, document->file_type()))
-				self.statusBar.grammarName = [NSString stringWithCxxString:item->name()];
+			self.statusBar.fileType = [NSString stringWithCxxString:document->file_type()];
 		}
 		else if(event == did_change_indent_settings)
 		{
@@ -359,8 +358,7 @@ private:
 		document->add_callback(callback);
 		document->show();
 
-		for(auto const& item : bundles::query(bundles::kFieldGrammarScope, document->file_type()))
-			_statusBar.grammarName = [NSString stringWithCxxString:item->name()];
+		_statusBar.fileType = [NSString stringWithCxxString:document->file_type()];
 		_statusBar.tabSize  = document->buffer().indent().tab_size();
 		_statusBar.softTabs = document->buffer().indent().soft_tabs();
 	}
