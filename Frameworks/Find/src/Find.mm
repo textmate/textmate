@@ -257,7 +257,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 							doc->set_content(NULL_STR);
 						}
 
-						parent.ignored = YES;
+						parent.readOnly = YES;
 						replaceCount += replacements.size();
 						++fileCount;
 					}

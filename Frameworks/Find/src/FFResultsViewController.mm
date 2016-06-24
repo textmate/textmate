@@ -25,7 +25,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 @end
 
 @implementation OakSearchResultsMatchCellView
-+ (NSSet*)keyPathsForValuesAffectingExcerptString { return [NSSet setWithArray:@[ @"objectValue", @"objectValue.ignored", @"objectValue.excluded", @"objectValue.replaceString", @"replaceString", @"showReplacementPreviews", @"backgroundStyle" ]]; }
++ (NSSet*)keyPathsForValuesAffectingExcerptString { return [NSSet setWithArray:@[ @"objectValue", @"objectValue.readOnly", @"objectValue.excluded", @"objectValue.replaceString", @"replaceString", @"showReplacementPreviews", @"backgroundStyle" ]]; }
 
 - (id)initWithFrame:(NSRect)aFrame
 {
@@ -44,7 +44,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 - (NSAttributedString*)excerptString
 {
 	FFResultNode* item = self.objectValue;
-	NSAttributedString* res = [item excerptWithReplacement:item.ignored || item.excluded || !_showReplacementPreviews ? item.replaceString : self.replaceString];
+	NSAttributedString* res = [item excerptWithReplacement:item.isReadOnly || item.excluded || !_showReplacementPreviews ? item.replaceString : self.replaceString];
 	if(self.backgroundStyle == NSBackgroundStyleDark)
 	{
 		NSMutableAttributedString* str = [res mutableCopy];
@@ -519,7 +519,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 			[button unbind:NSValueBinding];
 		}
 
-		[button bind:NSEnabledBinding toObject:item withKeyPath:@"ignored" options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
+		[button bind:NSEnabledBinding toObject:item withKeyPath:@"readOnly" options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
 		[button bind:NSValueBinding toObject:item withKeyPath:@"excluded" options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
 		button.state = item.excluded ? NSOffState : NSOnState;
 	}
