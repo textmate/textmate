@@ -1008,9 +1008,7 @@ private:
 
 	if((flags & NOTE_RENAME) == NOTE_RENAME)
 	{
-		self.observeFileSystem = NO;
 		self.path = newPath;
-		self.observeFileSystem = YES;
 	}
 	else if((flags & NOTE_DELETE) == NOTE_DELETE)
 	{
