@@ -58,28 +58,6 @@ _InputIter first_n_lines (_InputIter const& first, _InputIter const& last, size_
 	return eol;
 }
 
-static std::string file_type_from_bytes (io::bytes_ptr const& bytes)
-{
-	if(!bytes)
-		return NULL_STR;
-
-	std::multimap<ssize_t, bundles::item_ptr> ordering;
-	for(auto const& item : bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeGrammar))
-	{
-		for(auto const& pattern : item->values_for_field(bundles::kFieldGrammarFirstLineMatch))
-		{
-			char const* first = bytes->begin();
-			char const* last  = bytes->end();
-			if(pattern.find("(?m)") == std::string::npos)
-				last = first_n_lines(first, last, lines_matched_by_regexp(pattern));
-
-			if(regexp::match_t const& m = regexp::search(pattern, first, last))
-				ordering.emplace(-m.end(), item);
-		}
-	}
-	return ordering.empty() ? NULL_STR : file_type_from_grammars(std::vector<bundles::item_ptr>(1, ordering.begin()->second));
-}
-
 static bool unknown_file_type (std::string const& fileType)
 {
 	return fileType == NULL_STR || bundles::query(bundles::kFieldGrammarScope, fileType, scope::wildcard, bundles::kItemTypeGrammar).empty();
@@ -100,7 +78,7 @@ static std::string find_file_type (std::string const& path, io::bytes_ptr const&
 
 	// check if a grammar recognize the content (e.g. #!/usr/bin/ruby → Ruby)
 	if(unknown_file_type(res) && bytes)
-		res = file_type_from_bytes(bytes);
+		res = file::type_from_bytes(bytes);
 
 	// check if a grammar recognize the path extension (.git/config → Git Config)
 	if(unknown_file_type(res) && effectivePath != NULL_STR)
@@ -123,6 +101,28 @@ static std::string find_file_type (std::string const& path, io::bytes_ptr const&
 
 namespace file
 {
+	std::string type_from_bytes (io::bytes_ptr const& bytes)
+	{
+		if(!bytes)
+			return NULL_STR;
+
+		std::multimap<ssize_t, bundles::item_ptr> ordering;
+		for(auto const& item : bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeGrammar))
+		{
+			for(auto const& pattern : item->values_for_field(bundles::kFieldGrammarFirstLineMatch))
+			{
+				char const* first = bytes->begin();
+				char const* last  = bytes->end();
+				if(pattern.find("(?m)") == std::string::npos)
+					last = first_n_lines(first, last, lines_matched_by_regexp(pattern));
+
+				if(regexp::match_t const& m = regexp::search(pattern, first, last))
+					ordering.emplace(-m.end(), item);
+			}
+		}
+		return ordering.empty() ? NULL_STR : file_type_from_grammars(std::vector<bundles::item_ptr>(1, ordering.begin()->second));
+	}
+
 	std::string type (std::string const& path, io::bytes_ptr const& bytes, std::string const& virtualPath)
 	{
 		return find_file_type(path, bytes, virtualPath);
