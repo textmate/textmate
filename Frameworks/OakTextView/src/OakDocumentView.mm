@@ -369,7 +369,7 @@ private:
 
 	if(_symbolChooser)
 	{
-		_symbolChooser.document        = document;
+		_symbolChooser.document        = document->document();
 		_symbolChooser.selectionString = _textView.selectionString;
 	}
 
@@ -554,7 +554,7 @@ private:
 		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowWillCloseNotification object:_symbolChooser.window];
 
 		_symbolChooser.target   = nil;
-		_symbolChooser.document = document::document_ptr();
+		_symbolChooser.document = nil;
 	}
 
 	if(_symbolChooser = aSymbolChooser)
@@ -562,7 +562,7 @@ private:
 		_symbolChooser.target          = self;
 		_symbolChooser.action          = @selector(symbolChooserDidSelectItems:);
 		_symbolChooser.filterString    = @"";
-		_symbolChooser.document        = document;
+		_symbolChooser.document        = document->document();
 		_symbolChooser.selectionString = _textView.selectionString;
 
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(symbolChooserWillClose:) name:NSWindowWillCloseNotification object:_symbolChooser.window];

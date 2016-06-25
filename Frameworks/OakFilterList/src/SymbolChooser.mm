@@ -17,14 +17,14 @@
 - (id)objectForKey:(id)key { return [self valueForKey:key]; }
 @end
 
-static SymbolChooserItem* CreateItem (document::document_ptr const& document, text::pos_t const& pos, std::string const& candidate, std::vector< std::pair<size_t, size_t> > const& ranges)
+static SymbolChooserItem* CreateItem (OakDocument* document, text::pos_t const& pos, NSString* symbol, std::vector< std::pair<size_t, size_t> > const& ranges)
 {
 	SymbolChooserItem* res = [SymbolChooserItem new];
-	res.path            = [NSString stringWithCxxString:document->path()];
-	res.identifier      = [NSString stringWithCxxString:document->identifier()];
+	res.path            = document.path;
+	res.identifier      = document.identifier.UUIDString;
 	res.selectionString = [NSString stringWithCxxString:pos];
-	res.name            = CreateAttributedStringWithMarkedUpRanges(candidate, ranges, NSLineBreakByTruncatingTail);
-	res.infoString      = [NSString stringWithCxxString:document->display_name() + ":" + (std::string)pos];
+	res.name            = CreateAttributedStringWithMarkedUpRanges(to_s(symbol), ranges, NSLineBreakByTruncatingTail);
+	res.infoString      = [document.displayName stringByAppendingFormat:@":%@", res.selectionString];
 	return res;
 }
 
@@ -63,35 +63,15 @@ static SymbolChooserItem* CreateItem (document::document_ptr const& document, te
 
 - (void)windowWillClose:(NSNotification*)aNotification
 {
-	[self setDocument:document::document_ptr()];
+	[self setDocument:nil];
 }
 
-- (void)setDocument:(document::document_ptr)aDocument
+- (void)setDocument:(OakDocument*)aDocument
 {
-	struct callback_t : document::open_callback_t
-	{
-		callback_t (SymbolChooser* self) : _self(self) { }
-
-		void show_error (std::string const& path, document::document_ptr document, std::string const& message, oak::uuid_t const& filter)
-		{
-			fprintf(stderr, "%s: %s\n", path.c_str(), message.c_str());
-		}
-
-		void show_document (std::string const& path, document::document_ptr document)
-		{
-			[_self updateItems:_self];
-		}
-
-	private:
-		SymbolChooser* _self;
-	};
-
-	if(_document)
-		_document->close();
-	if((_document = aDocument) && _document->try_open(std::make_shared<callback_t>(self)))
+	if(_document = aDocument)
 		[self updateItems:self];
-
-	self.window.title = _document ? [NSString stringWithFormat:@"Jump to Symbol — %@", [NSString stringWithCxxString:_document->display_name()]] : @"Jump to Symbol";
+	NSString* title = @"Jump to Symbol";
+	self.window.title = _document ? [title stringByAppendingFormat:@" — %@", _document.displayName] : title;
 }
 
 - (void)setSelectionString:(NSString*)aString
@@ -129,31 +109,30 @@ static SymbolChooserItem* CreateItem (document::document_ptr const& document, te
 	{
 		if(OakIsEmptyString(self.filterString))
 		{
-			for(auto const& pair : _document->symbols())
-			{
-				if(pair.second != "-")
-					[res addObject:CreateItem(_document, pair.first, pair.second, std::vector< std::pair<size_t, size_t> >())];
-			}
+			[_document enumerateSymbolsUsingBlock:^(text::pos_t const& pos, NSString* symbol){
+				if(![symbol isEqualToString:@"-"])
+					[res addObject:CreateItem(_document, pos, symbol, std::vector< std::pair<size_t, size_t> >())];
+			}];
 		}
 		else
 		{
 			std::string const filter = oak::normalize_filter(to_s(self.filterString));
 
-			std::string sectionName = NULL_STR;
-			std::multimap<double, SymbolChooserItem*> rankedItems;
-			for(auto const& pair : _document->symbols())
-			{
-				if(pair.second == "-")
-					continue;
+			__block NSString* sectionName = nil;
+			__block std::multimap<double, SymbolChooserItem*> rankedItems;
 
-				bool indented = pair.second.find("\u2003") == 0;
+			[_document enumerateSymbolsUsingBlock:^(text::pos_t const& pos, NSString* symbol){
+				if([symbol isEqualToString:@"-"])
+					return;
+
+				BOOL indented = [symbol hasPrefix:@"\u2003"];
 				if(!indented)
-					sectionName = pair.second;
+					sectionName = symbol;
 
 				std::vector< std::pair<size_t, size_t> > ranges;
-				if(double rank = oak::rank(filter, pair.second, &ranges))
-					rankedItems.emplace(1 - rank, CreateItem(_document, pair.first, indented && sectionName != NULL_STR ? (pair.second + " — " + sectionName) : pair.second, ranges));
-			}
+				if(double rank = oak::rank(filter, to_s(symbol), &ranges))
+					rankedItems.emplace(1 - rank, CreateItem(_document, pos, indented && sectionName ? [NSString stringWithFormat:@"%@ — %@", symbol, sectionName] : symbol, ranges));
+			}];
 
 			for(auto const& pair : rankedItems)
 				[res addObject:pair.second];
