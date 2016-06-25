@@ -21,7 +21,6 @@
 @property (nonatomic) NSString* themeUUID;
 @property (nonatomic) NSString* fontName;
 @property (nonatomic) CGFloat fontSize;
-@property (nonatomic) CGFloat fontScale;
 @property (nonatomic) CGFloat pageWidth;
 @property (nonatomic) CGFloat pageHeight;
 @property (nonatomic) BOOL needsLayout;
@@ -77,7 +76,6 @@
 
 	self.pageWidth  = floor(info.paperSize.width - info.leftMargin - info.rightMargin);
 	self.pageHeight = floor(info.paperSize.height - info.topMargin - info.bottomMargin);
-	self.fontScale  = [[[info dictionary] objectForKey:NSPrintScalingFactor] floatValue];
 	self.fontSize   = [[[info dictionary] objectForKey:@"OakPrintFontSize"] floatValue];
 	self.themeUUID  = [[info dictionary] objectForKey:@"OakPrintThemeUUID"];
 
@@ -111,7 +109,7 @@
 	pageRects.clear();
 
 	theme_ptr theme = parse_theme(bundles::lookup(to_s(self.themeUUID)));
-	theme = theme->copy_with_font_name_and_size(to_s(_fontName), _fontSize * self.fontScale);
+	theme = theme->copy_with_font_name_and_size(to_s(_fontName), _fontSize);
 	layout = std::make_unique<ng::layout_t>([_document buffer], theme, /* softWrap: */ true);
 	layout->set_viewport_size(CGSizeMake(self.pageWidth, self.pageHeight));
 	layout->update_metrics(CGRectMake(0, 0, CGFLOAT_MAX, CGFLOAT_MAX));
@@ -137,7 +135,6 @@
 
 - (void)setPageWidth:(CGFloat)newPageWidth    { if(_pageWidth  != newPageWidth)  { _needsLayout = YES; _pageWidth  = newPageWidth;  } }
 - (void)setPageHeight:(CGFloat)newPageHeight  { if(_pageHeight != newPageHeight) { _needsLayout = YES; _pageHeight = newPageHeight; } }
-- (void)setFontScale:(CGFloat)newFontScale    { if(_fontScale  != newFontScale)  { _needsLayout = YES; _fontScale  = newFontScale;  } }
 - (void)setFontSize:(CGFloat)newFontSize      { if(_fontSize   != newFontSize)   { _needsLayout = YES; _fontSize   = newFontSize;   } }
 - (void)setThemeUUID:(NSString*)newThemeUUID  { if(![_themeUUID isEqualToString:newThemeUUID]) { _needsLayout = YES; _themeUUID  = newThemeUUID; } }
 @end

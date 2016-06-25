@@ -1262,7 +1262,7 @@ private:
 	info[NSPrintHeaderAndFooter] = [[NSUserDefaults standardUserDefaults] objectForKey:@"OakPrintHeaderAndFooter"];
 
 	[[printer printInfo] setVerticallyCentered:NO];
-	[[printer printPanel] setOptions:[[printer printPanel] options] | NSPrintPanelShowsPaperSize | NSPrintPanelShowsOrientation | NSPrintPanelShowsScaling];
+	[[printer printPanel] setOptions:[[printer printPanel] options] | NSPrintPanelShowsPaperSize | NSPrintPanelShowsOrientation];
 	[[printer printPanel] addAccessoryController:[OakDocumentPrintOptionsViewController new]];
 
 	[printer runOperationModalForWindow:aWindow delegate:nil didRunSelector:NULL contextInfo:nil];
