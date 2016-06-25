@@ -53,4 +53,6 @@ PUBLIC @interface OakDocument : NSObject
 // Read from .tm_properties so will update if we change fileType
 @property (nonatomic) NSUInteger tabSize;
 @property (nonatomic) BOOL softTabs;
+
+- (void)runPrintOperationModalForWindow:(NSWindow*)aWindow fontName:(NSString*)aFontName;
 @end

@@ -1,6 +1,7 @@
 #import "OakDocument Private.h"
 #import "EncodingView.h"
 #import "FileTypeDialog.h"
+#import "Printing.h"
 #import "watch.h"
 #import "merge.h"
 #import "document.h" // {open,save}_callback_ptr + kBookmarkIdentifier
@@ -1249,5 +1250,21 @@ private:
 	document::marks.copy_from_buffer(to_s(_path), *_buffer);
 
 	return YES;
+}
+
+- (void)runPrintOperationModalForWindow:(NSWindow*)aWindow fontName:(NSString*)aFontName
+{
+	NSPrintOperation* printer = [NSPrintOperation printOperationWithView:[[OakDocumentPrintableView alloc] initWithDocument:self fontName:aFontName]];
+
+	NSMutableDictionary* info = [[printer printInfo] dictionary];
+	info[@"OakPrintThemeUUID"]   = [[NSUserDefaults standardUserDefaults] objectForKey:@"OakPrintThemeUUID"];
+	info[@"OakPrintFontSize"]    = [[NSUserDefaults standardUserDefaults] objectForKey:@"OakPrintFontSize"];
+	info[NSPrintHeaderAndFooter] = [[NSUserDefaults standardUserDefaults] objectForKey:@"OakPrintHeaderAndFooter"];
+
+	[[printer printInfo] setVerticallyCentered:NO];
+	[[printer printPanel] setOptions:[[printer printPanel] options] | NSPrintPanelShowsPaperSize | NSPrintPanelShowsOrientation | NSPrintPanelShowsScaling];
+	[[printer printPanel] addAccessoryController:[OakDocumentPrintOptionsViewController new]];
+
+	[printer runOperationModalForWindow:aWindow delegate:nil didRunSelector:NULL contextInfo:nil];
 }
 @end
