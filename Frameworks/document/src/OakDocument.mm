@@ -864,6 +864,16 @@ private:
 - (ng::buffer_t&)buffer                               { return *_buffer; }
 - (ng::undo_manager_t&)undoManager                    { return *_undoManager; }
 
+- (void)enumerateSymbolsUsingBlock:(void(^)(text::pos_t const& pos, NSString* symbol))block
+{
+	if(self.isOpen && _buffer)
+	{
+		_buffer->wait_for_repair();
+		for(auto const& pair : _buffer->symbols())
+			block(_buffer->convert(pair.first), to_ns(pair.second));
+	}
+}
+
 - (void)enumerateByteRangesUsingBlock:(void(^)(char const* bytes, NSRange byteRange, BOOL* stop))block
 {
 	BOOL stop = NO;

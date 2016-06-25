@@ -38,6 +38,7 @@ PUBLIC @interface OakDocument : NSObject
 - (NSString*)stringifyMarksOfType:(NSString*)aMark;
 + (void)removeAllMarksOfType:(NSString*)aMark;
 
+- (void)enumerateSymbolsUsingBlock:(void(^)(text::pos_t const& pos, NSString* symbol))block;
 - (void)enumerateByteRangesUsingBlock:(void(^)(char const* bytes, NSRange byteRange, BOOL* stop))block;
 @property (nonatomic) NSString* content;
 
