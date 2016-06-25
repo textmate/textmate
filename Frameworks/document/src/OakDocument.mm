@@ -1,9 +1,12 @@
 #import "OakDocument Private.h"
+#import "EncodingView.h"
+#import "FileTypeDialog.h"
 #import "watch.h"
 #import "merge.h"
 #import "document.h" // {open,save}_callback_ptr + kBookmarkIdentifier
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
+#import <OakAppKit/OakAppKit.h>
 #import <cf/run_loop.h>
 #import <ns/ns.h>
 #import <settings/settings.h>
@@ -562,11 +565,118 @@ private:
 // = Load Document =
 // =================
 
+- (void)loadModalForWindow:(NSWindow*)aWindow completionHandler:(void(^)(BOOL success, NSString* errorMessage, oak::uuid_t const& filterUUID))block
+{
+	if(++self.openCount != 1)
+		return block(YES, nil, oak::uuid_t());
+
+	if(_backupPath)
+	{
+		ASSERT(!_buffer);
+
+		BOOL isModified = self.isDocumentEdited;
+		std::string const path = to_s(_backupPath);
+		[self didLoadContent:std::make_shared<io::bytes_t>(path::content(path)) attributes:path::attributes(path) fileType:_fileType encoding:encoding::type(to_s(_diskNewlines), to_s(_diskEncoding))];
+
+		if(isModified)
+		{
+			_snapshot.reset();
+			self.savedRevision = _revision-1;
+		}
+
+		return block(YES, nil, oak::uuid_t());
+	}
+
+	struct callback_t : file::open_callback_t
+	{
+		callback_t (OakDocument* self, NSWindow* window, void(^block)(BOOL success, NSString* errorMessage, oak::uuid_t const& filterUUID)) : _self(self), _window(window), _block(block) { }
+
+		void select_charset (std::string const& path, io::bytes_ptr content, file::open_context_ptr context)
+		{
+			[_window.attachedSheet orderOut:_self];
+
+			EncodingWindowController* controller = [[EncodingWindowController alloc] initWithFirst:content->begin() last:content->end()];
+			controller.displayName = _self.displayName;
+
+			__block encoding::classifier_t db;
+			static std::string const kEncodingFrequenciesPath = path::join(path::home(), "Library/Caches/com.macromates.TextMate/EncodingFrequencies.binary");
+			db.load(kEncodingFrequenciesPath);
+
+			std::multimap<double, std::string> probabilities;
+			for(auto const& charset : db.charsets())
+				probabilities.emplace(1 - db.probability(content->begin(), content->end(), charset), charset);
+			if(!probabilities.empty() && probabilities.begin()->first < 1)
+				controller.encoding = [NSString stringWithCxxString:probabilities.begin()->second];
+
+			[controller.window layoutIfNeeded];
+			OakShowSheetForWindow(controller.window, _window, ^(NSInteger returnCode){
+				if(returnCode != NSRunAbortedResponse)
+				{
+					context->set_charset(to_s(controller.encoding));
+					if(controller.trainClassifier)
+					{
+						db.learn(content->begin(), content->end(), to_s(controller.encoding));
+						db.save(kEncodingFrequenciesPath);
+					}
+				}
+			});
+		}
+
+		void select_file_type (std::string const& path, io::bytes_ptr content, file::open_context_ptr context)
+		{
+			if(path == NULL_STR)
+			{
+				context->set_file_type("text.plain");
+			}
+			else
+			{
+				[_window.attachedSheet orderOut:_self];
+
+				FileTypeDialog* controller = [[FileTypeDialog alloc] initWithPath:[NSString stringWithCxxString:path] first:(content ? content->begin() : NULL) last:(content ? content->end() : NULL)];
+				[controller beginSheetModalForWindow:_window completionHandler:^(NSString* fileType){
+					if(fileType)
+						context->set_file_type(to_s(fileType));
+				}];
+			}
+		}
+
+		void show_error (std::string const& path, std::string const& message, oak::uuid_t const& filter)
+		{
+			[_self didLoadContent:io::bytes_ptr() attributes:{ } fileType:nil encoding:{ }];
+			_block(NO, to_ns(message), filter);
+		}
+
+		void show_content (std::string const& path, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, std::string const& fileType, encoding::type const& encoding, std::vector<oak::uuid_t> const& binaryImportFilters, std::vector<oak::uuid_t> const& textImportFilters)
+		{
+			[_self didLoadContent:content attributes:attributes fileType:to_ns(fileType) encoding:encoding];
+			_block(YES, nil, oak::uuid_t());
+		}
+
+	private:
+		OakDocument* _self;
+		NSWindow* _window;
+		void(^_block)(BOOL success, NSString* errorMessage, oak::uuid_t const& filterUUID);
+	};
+
+	io::bytes_ptr content;
+	if(_buffer)
+	{
+		content = std::make_shared<io::bytes_t>(_buffer->size());
+		_buffer->visit_data([&](char const* bytes, size_t offset, size_t len, bool*){
+			memcpy(content->get() + offset, bytes, len);
+		});
+		[self deleteBuffer];
+	}
+
+	auto cb = std::make_shared<callback_t>(self, aWindow, block);
+	file::open(to_s(_path), _authorization, cb, content, to_s(_virtualPath));
+}
+
 - (void)didLoadContent:(io::bytes_ptr)content attributes:(std::map<std::string, std::string> const&)attributes fileType:(NSString*)fileType encoding:(encoding::type)encoding
 {
 	if(!content) // Loading failed
 	{
-		self.openCount = 0;
+		--self.openCount;
 		return;
 	}
 
@@ -624,79 +734,6 @@ private:
 
 	if(!_recentTrackingDisabled && _path && !_virtualPath)
 		[[NSDocumentController sharedDocumentController] noteNewRecentDocumentURL:[NSURL fileURLWithPath:_path]];
-}
-
-- (BOOL)tryOpenUsingCallback:(document::open_callback_ptr)callback forDocument:(document::document_ptr)document
-{
-	if(++self.openCount == 1)
-	{
-		if(_backupPath)
-		{
-			ASSERT(!_buffer);
-
-			BOOL isModified = self.isDocumentEdited;
-			std::string const path = to_s(_backupPath);
-			[self didLoadContent:std::make_shared<io::bytes_t>(path::content(path)) attributes:path::attributes(path) fileType:_fileType encoding:encoding::type(to_s(_diskNewlines), to_s(_diskEncoding))];
-
-			if(isModified)
-			{
-				_snapshot.reset();
-				self.savedRevision = _revision-1;
-			}
-
-			return YES;
-		}
-
-		struct callback_t : file::open_callback_t
-		{
-			callback_t (OakDocument* document, document::document_ptr cppDocument, std::string const& fileType, document::open_callback_ptr callback) : _document(document), _cppDocument(cppDocument), _file_type(fileType), _callbacks(1, callback) { }
-
-			void select_charset (std::string const& path, io::bytes_ptr content, file::open_context_ptr context)    { _callbacks.front()->select_charset(path, content, context); }
-			void select_line_feeds (std::string const& path, io::bytes_ptr content, file::open_context_ptr context) { _callbacks.front()->select_line_feeds(path, content, context); }
-			void select_file_type (std::string const& path, io::bytes_ptr content, file::open_context_ptr context)  { if(_file_type != NULL_STR) context->set_file_type(_file_type); else _callbacks.front()->select_file_type(path, content, context); }
-			void add_callback (document::open_callback_ptr callback)                                                { _callbacks.push_back(callback); }
-
-			void show_content (std::string const& path, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, std::string const& fileType, encoding::type const& encoding, std::vector<oak::uuid_t> const& binaryImportFilters, std::vector<oak::uuid_t> const& textImportFilters)
-			{
-				[_document didLoadContent:content attributes:attributes fileType:to_ns(fileType) encoding:encoding];
-				for(auto const& cb : _callbacks)
-					cb->show_document(path, _cppDocument);
-			}
-
-			void show_error (std::string const& path, std::string const& message, oak::uuid_t const& filter)
-			{
-				[_document didLoadContent:io::bytes_ptr() attributes:{ } fileType:nil encoding:{ }];
-				for(auto const& cb : _callbacks)
-					cb->show_error(path, _cppDocument, message, filter);
-			}
-
-		private:
-			OakDocument* _document;
-			document::document_ptr _cppDocument;
-			std::string _file_type;
-			std::vector<document::open_callback_ptr> _callbacks;
-		};
-
-		io::bytes_ptr content;
-		if(_buffer)
-		{
-			content = std::make_shared<io::bytes_t>(_buffer->size());
-			_buffer->visit_data([&](char const* bytes, size_t offset, size_t len, bool*){
-				memcpy(content->get() + offset, bytes, len);
-			});
-			[self deleteBuffer];
-		}
-
-		auto cb = std::make_shared<callback_t>(self, document, to_s(_fileType), callback);
-		file::open(to_s(_path), _authorization, cb, content, to_s(_virtualPath));
-		return NO;
-	}
-	else
-	{
-		// TODO If we haev a callback_t instance then cb->add_callback(callback);
-	}
-
-	return YES;
 }
 
 // =================

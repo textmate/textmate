@@ -26,6 +26,5 @@ namespace document
 - (BOOL)saveBackup:(id)sender;
 - (BOOL)performReplacements:(std::multimap<std::pair<size_t, size_t>, std::string> const&)someReplacements checksum:(uint32_t)crc32;
 
-- (BOOL)tryOpenUsingCallback:(document::open_callback_ptr)callback forDocument:(document::document_ptr)document;
 - (void)trySaveUsingCallback:(document::save_callback_ptr)callback forDocument:(document::document_ptr)document;
 @end

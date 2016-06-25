@@ -508,20 +508,18 @@ namespace document
 
 	void document_t::sync_open (CFStringRef runLoopMode)
 	{
-		struct stall_t : document::open_callback_t
-		{
-			stall_t (CFStringRef runLoopMode) : _run_loop(runLoopMode) { }
-			void show_document (std::string const& path, document_ptr document)                                                     { _run_loop.stop(); }
-			void show_error (std::string const& path, document_ptr document, std::string const& message, oak::uuid_t const& filter) { _run_loop.stop(); }
-			void wait () { _run_loop.start(); }
+		observer(); // Create OakDocumentObserver if it does not already exist
 
-		private:
-			cf::run_loop_t _run_loop;
-		};
+		__block bool didStop = false;
 
-		auto cb = std::make_shared<stall_t>(runLoopMode);
-		if(!try_open(cb))
-			cb->wait();
+		auto runLoop = std::make_shared<cf::run_loop_t>(runLoopMode);
+		[_document loadModalForWindow:nil completionHandler:^(BOOL success, NSString* errorMessage, oak::uuid_t const& filterUUID){
+			didStop = true;
+			runLoop->stop();
+		}];
+
+		if(!didStop)
+			runLoop->start();
 	}
 
 	bool document_t::sync_save (CFStringRef runLoopMode)
@@ -581,12 +579,6 @@ namespace document
 			block(bytes, range.length, &shouldStop);
 			*stop = shouldStop;
 		}];
-	}
-
-	bool document_t::try_open (document::open_callback_ptr callback)
-	{
-		observer(); // Create OakDocumentObserver if it does not already exist
-		return [_document tryOpenUsingCallback:callback forDocument:shared_from_this()];
 	}
 
 	void document_t::try_save (document::save_callback_ptr callback)

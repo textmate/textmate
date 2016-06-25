@@ -1,9 +1,9 @@
 #import "DocumentController.h"
 #import "ProjectLayoutView.h"
-#import "DocumentOpenHelper.h"
 #import "DocumentSaveHelper.h"
 #import "DocumentCommand.h" // show_command_error
 #import "OakRunCommandWindowController.h"
+#import <document/OakDocument.h>
 #import <OakAppKit/NSAlert Additions.h>
 #import <OakAppKit/NSMenuItem Additions.h>
 #import <OakAppKit/OakAppKit.h>
@@ -1052,17 +1052,18 @@ namespace
 - (void)openAndSelectDocument:(document::document_ptr const&)aDocument
 {
 	document::document_ptr doc = aDocument;
-	[[DocumentOpenHelper new] tryOpenDocument:doc forWindow:self.window completionHandler:^(std::string const& error, oak::uuid_t const& filterUUID){
-		if(error == NULL_STR)
+	[doc->document() loadModalForWindow:self.window completionHandler:^(BOOL success, NSString* errorMessage, oak::uuid_t const& filterUUID){
+		if(success)
 		{
 			[self makeTextViewFirstResponder:self];
 			[self setSelectedDocument:doc];
 			[self performSelector:@selector(didOpenDocuemntInTextView:) withObject:self.documentView.textView afterDelay:0];
+			[doc->document() close];
 		}
 		else
 		{
 			if(filterUUID)
-				show_command_error(error, filterUUID);
+				show_command_error(to_s(errorMessage), filterUUID);
 
 			// Close the tab that failed to open
 			for(size_t i = 0; i < _documents.size(); ++i)

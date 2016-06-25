@@ -144,7 +144,6 @@ namespace document
 		void enumerate_bytes_using_block (void(^block)(char const* bytes, size_t len, bool* stop));
 		bool replace (std::multimap<std::pair<size_t, size_t>, std::string> const& replacements, uint32_t crc32);
 
-		bool try_open (document::open_callback_ptr callback);
 		void try_save (document::save_callback_ptr callback);
 		void close ();
 

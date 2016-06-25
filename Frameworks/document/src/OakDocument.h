@@ -21,6 +21,7 @@ PUBLIC @interface OakDocument : NSObject
 @property (nonatomic) NSString* diskEncoding;
 @property (nonatomic) NSString* diskNewlines;
 
+- (void)loadModalForWindow:(NSWindow*)aWindow completionHandler:(void(^)(BOOL success, NSString* errorMessage, oak::uuid_t const& filterUUID))block;
 - (void)close;
 
 @property (nonatomic) osx::authorization_t authorization;
