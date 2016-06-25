@@ -853,16 +853,39 @@ private:
 	{
 		callback_t (OakDocument* self) : _self(self) { }
 
+		void will_replace (size_t from, size_t to, char const* buf, size_t len)
+		{
+			ng::buffer_t const& buffer = [_self buffer];
+			_editing_first_line = from == oak::cap(buffer.begin(0), from, buffer.eol(0));
+			_file_type = _editing_first_line ? file_type(buffer) : NULL_STR;
+		}
+
 		void did_replace (size_t from, size_t to, char const* buf, size_t len)
 		{
 			_size += len - (to - from);
 			_self.bufferEmpty = _size == 0;
+
+			if(_editing_first_line)
+			{
+				std::string const newFileType = file_type([_self buffer]);
+				if(newFileType != NULL_STR && newFileType != _file_type)
+					_self.fileType = to_ns(newFileType);
+			}
+
 			[_self scheduleBackup];
 		}
 
 	private:
+		static std::string file_type (ng::buffer_t const& buffer)
+		{
+			return file::type_from_bytes(std::make_shared<io::bytes_t>(buffer.substr(buffer.begin(0), std::min<size_t>(buffer.eol(0), 2048))));
+		}
+
 		size_t _size = 0;
 		OakDocument* _self;
+
+		bool _editing_first_line;
+		std::string _file_type;
 	};
 
 	_callback = new callback_t(self);
