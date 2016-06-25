@@ -78,6 +78,8 @@ namespace document
 		bool operator== (document_t const& rhs) const { return this == &rhs || identifier() == rhs.identifier(); }
 		bool operator!= (document_t const& rhs) const { return this != &rhs && identifier() != rhs.identifier(); }
 
+		OakDocument* document ()      { observer(); return _document; }
+
 		// Only in document_t
 		bool sticky () const          { return _sticky; }
 		void set_sticky (bool flag)   { _sticky = flag; }
