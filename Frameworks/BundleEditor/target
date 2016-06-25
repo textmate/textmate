@@ -1,5 +1,5 @@
 SOURCES      = src/*.{cc,mm}
-LINK        += BundlesManager OakAppKit OakFoundation OakTextView bundles cf command document io ns plist text
+LINK        += BundlesManager OakAppKit OakFoundation OakTextView bundles cf command document io ns plist settings text
 EXPORT       = src/BundleEditor.h
 CP_Resources = resources/* templates/*.plist gfx/**/*.png
 FRAMEWORKS   = Cocoa AddressBook

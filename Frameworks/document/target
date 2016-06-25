@@ -2,5 +2,5 @@ TESTS       = tests/t_*.cc
 SOURCES     = src/*.{mm,cc}
 CP_Resources = resources/*
 EXPORT      = src/OakDocument.h src/document.h src/collection.h
-LINK       += BundlesManager OakAppKit OakSystem authorization buffer bundles cf command crash encoding file io network plist regexp scm scope selection settings text undo
+LINK       += BundlesManager OakAppKit OakFoundation OakSystem authorization buffer bundles cf command crash encoding file io network ns plist regexp scope selection settings text undo updater
 FRAMEWORKS  = ApplicationServices
