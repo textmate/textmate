@@ -583,18 +583,6 @@ namespace document
 		}];
 	}
 
-	std::map<text::pos_t, std::string> document_t::symbols ()
-	{
-		std::map<text::pos_t, std::string> res;
-		if(is_open())
-		{
-			buffer().wait_for_repair();
-			for(auto const& pair : buffer().symbols())
-				res.emplace(buffer().convert(pair.first), pair.second);
-		}
-		return res;
-	}
-
 	bool document_t::try_open (document::open_callback_ptr callback)
 	{
 		observer(); // Create OakDocumentObserver if it does not already exist

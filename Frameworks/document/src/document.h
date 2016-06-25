@@ -142,7 +142,6 @@ namespace document
 		void detach_backup ();
 
 		void enumerate_bytes_using_block (void(^block)(char const* bytes, size_t len, bool* stop));
-		std::map<text::pos_t, std::string> symbols ();
 		bool replace (std::multimap<std::pair<size_t, size_t>, std::string> const& replacements, uint32_t crc32);
 
 		bool try_open (document::open_callback_ptr callback);
