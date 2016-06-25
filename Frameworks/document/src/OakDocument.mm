@@ -1140,7 +1140,6 @@ private:
 			}
 		}
 
-		void select_line_feeds (std::string const& path, io::bytes_ptr content, file::open_context_ptr context) { context->set_line_feeds(to_s(_self.diskNewlines)); }
 		void select_file_type (std::string const& path, io::bytes_ptr content, file::open_context_ptr context)  { context->set_file_type(to_s(_self.fileType)); }
 		void show_error (std::string const& path, std::string const& message, oak::uuid_t const& filter)        { fprintf(stderr, "%s: %s\n", path.c_str(), message.c_str()); }
 

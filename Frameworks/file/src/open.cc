@@ -245,11 +245,6 @@ namespace file
 	{
 	}
 
-	void open_callback_t::select_line_feeds (std::string const& path, io::bytes_ptr content, open_context_ptr context)
-	{
-		context->set_line_feeds(kLF);
-	}
-
 	void open_callback_t::select_file_type (std::string const& path, io::bytes_ptr content, open_context_ptr context)
 	{
 		context->set_file_type(kFileTypePlainText);
@@ -407,9 +402,7 @@ namespace
 					_next_state = kStateHarmonizeLineFeeds;
 
 					_encoding.set_newlines(text::estimate_line_endings(_content->begin(), _content->end()));
-					if(_encoding.newlines() != kMIX)
-							proceed();
-					else	_callback->select_line_feeds(_path, _content, shared_from_this());
+					proceed();
 				}
 				break;
 

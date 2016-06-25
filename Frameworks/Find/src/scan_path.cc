@@ -183,8 +183,7 @@ namespace find
 
 		std::vector<match_t> results;
 
-		std::string newlines = text::estimate_line_endings(std::begin(text), std::end(text));
-		newlines = newlines == kMIX ? kLF : newlines;
+		std::string const newlines = text::estimate_line_endings(std::begin(text), std::end(text));
 
 		size_t bol = 0, lfCount = 0;
 		size_t nextLine = text.find(newlines, bol);

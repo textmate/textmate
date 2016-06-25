@@ -6,7 +6,6 @@
 PUBLIC extern std::string const kLF;
 PUBLIC extern std::string const kCR;
 PUBLIC extern std::string const kCRLF;
-PUBLIC extern std::string const kMIX;
 
 namespace text
 {
