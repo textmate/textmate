@@ -468,8 +468,11 @@ private:
 
 - (void)scheduleBackup
 {
-	[_backupTimer invalidate];
-	_backupTimer = [NSTimer scheduledTimerWithTimeInterval:2 target:self selector:@selector(backupTimerDidFire:) userInfo:nil repeats:NO];
+	if(_keepBackupFile)
+	{
+		[_backupTimer invalidate];
+		_backupTimer = [NSTimer scheduledTimerWithTimeInterval:2 target:self selector:@selector(backupTimerDidFire:) userInfo:nil repeats:NO];
+	}
 }
 
 - (void)backupTimerDidFire:(NSTimer*)aTimer

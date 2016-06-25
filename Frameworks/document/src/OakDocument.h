@@ -30,6 +30,7 @@ PUBLIC @interface OakDocument : NSObject
 @property (nonatomic, getter = isInViewingMode)            BOOL inViewingMode;
 @property (nonatomic, getter = isDocumentEdited, readonly) BOOL documentEdited;
 @property (nonatomic, getter = isRecentTrackingDisabled)   BOOL recentTrackingDisabled;
+@property (nonatomic)                                      BOOL keepBackupFile;
 
 - (void)setMarkOfType:(NSString*)aMark atPosition:(text::pos_t const&)aPos content:(NSString*)value;
 - (void)removeMarkOfType:(NSString*)aMark atPosition:(text::pos_t const&)aPos;
