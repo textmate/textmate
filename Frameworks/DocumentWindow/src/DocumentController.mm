@@ -983,8 +983,8 @@ namespace
 		tabsToClose = [self disposableDocument];
 	}
 
-	[self insertDocuments:documents atIndex:_selectedTabIndex + 1 selecting:documents.front() andClosing:tabsToClose];
-	[self openAndSelectDocument:documents.front()];
+	[self insertDocuments:documents atIndex:_selectedTabIndex + 1 selecting:documents.back() andClosing:tabsToClose];
+	[self openAndSelectDocument:documents.back()];
 
 	if(self.tabBarView && ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableTabAutoCloseKey])
 	{
@@ -2743,7 +2743,8 @@ static NSUInteger DisableSessionSavingCount = 0;
 		static DocumentController* controller_with_documents (std::vector<document::document_ptr> const& documents, oak::uuid_t const& projectUUID = document::kCollectionAny)
 		{
 			DocumentController* controller = find_or_create_controller(documents, projectUUID);
-			[controller insertDocuments:documents atIndex:controller.selectedTabIndex + 1 selecting:documents.front() andClosing:[controller disposableDocument]];
+			auto documentToSelect = controller.documents.size() <= [controller disposableDocument].size() ? documents.front() : documents.back();
+			[controller insertDocuments:documents atIndex:controller.selectedTabIndex + 1 selecting:documentToSelect andClosing:[controller disposableDocument]];
 			return controller;
 		}
 
