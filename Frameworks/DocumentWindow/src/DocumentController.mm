@@ -201,38 +201,6 @@ namespace
 		return doc && !doc->is_modified() && !doc->is_on_disk() && doc->path() == NULL_STR && doc->buffer().empty();
 	}
 
-	static size_t merge_documents_splitting_at (std::vector<document::document_ptr> const& oldDocuments, std::vector<document::document_ptr> const& newDocuments, size_t splitAt, std::vector<document::document_ptr>& out, bool disableTabReordering = false)
-	{
-		if(newDocuments.empty())
-		{
-			std::copy(oldDocuments.begin(), oldDocuments.end(), back_inserter(out));
-			return std::min(splitAt, out.size());
-		}
-
-		splitAt = std::min(splitAt, oldDocuments.size());
-		if(disableTabReordering)
-		{
-			auto iter = std::find(oldDocuments.begin(), oldDocuments.end(), newDocuments.front());
-			if(iter != oldDocuments.end())
-				splitAt = iter - oldDocuments.begin();
-		}
-
-		std::set<oak::uuid_t> uuids;
-		std::transform(newDocuments.begin(), newDocuments.end(), inserter(uuids, uuids.end()), [](document::document_ptr const& doc){ return doc->identifier(); });
-
-		std::copy_if(oldDocuments.begin(), oldDocuments.begin() + splitAt, back_inserter(out), [&uuids](document::document_ptr const& doc){ return uuids.find(doc->identifier()) == uuids.end(); });
-		uuids.clear();
-		for(auto const& doc : newDocuments)
-		{
-			if(uuids.insert(doc->identifier()).second)
-				out.push_back(doc);
-		}
-		std::copy_if(oldDocuments.begin() + splitAt, oldDocuments.end(), back_inserter(out), [&uuids](document::document_ptr const& doc){ return uuids.find(doc->identifier()) == uuids.end(); });
-
-		auto iter = std::find(out.begin(), out.end(), newDocuments.front());
-		return iter - out.begin();
-	}
-
 	static document::document_ptr create_untitled_document_in_folder (std::string const& suggestedFolder)
 	{
 		auto doc = document::from_content("", settings_for_path(NULL_STR, file::path_attributes(NULL_STR), suggestedFolder).get(kSettingsFileTypeKey, "text.plain"));
@@ -895,18 +863,12 @@ namespace
 			auto const settings = settings_for_path(doc->virtual_path(), doc->file_type(), path::parent(doc->path()));
 			doc->set_indent(text::indent_t(std::max(1, settings.get(kSettingsTabSizeKey, 4)), SIZE_T_MAX, settings.get(kSettingsSoftTabsKey, false)));
 
+			[self insertDocuments:{ doc } atIndex:_selectedTabIndex + 1 selecting:doc andClosing:[self disposableDocument]];
+
+			// Using openAndSelectDocument: will move focus to OakTextView
 			doc->sync_open();
 			[self setSelectedDocument:doc];
 			doc->close();
-
-			size_t selectedIndex = _selectedTabIndex;
-			std::vector<document::document_ptr> documents = _documents;
-			if(is_disposable(documents[selectedIndex]))
-					documents[selectedIndex] = doc;
-			else	documents.insert(documents.begin() + ++selectedIndex, doc);
-
-			self.documents        = documents;
-			self.selectedTabIndex = selectedIndex;
 
 			[self.fileBrowser editURL:url];
 		}
@@ -940,9 +902,44 @@ namespace
 	}
 }
 
-- (BOOL)disableTabReordering
+- (std::set<oak::uuid_t>)disposableDocument
 {
-	return [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableTabReorderingKey];
+	if(_selectedTabIndex < _documents.size() && is_disposable(_documents[_selectedTabIndex]))
+		return { _documents[_selectedTabIndex]->identifier() };
+	return { };
+}
+
+- (void)insertDocuments:(std::vector<document::document_ptr> const&)documents atIndex:(NSInteger)index selecting:(document::document_ptr const&)selectDocument andClosing:(std::set<oak::uuid_t> const&)closeDocuments
+{
+	std::set<oak::uuid_t> oldUUIDs, newUUIDs;
+	std::transform(_documents.begin(), _documents.end(), inserter(oldUUIDs, oldUUIDs.end()), [](auto const& doc){ return doc->identifier(); });
+	std::transform(documents.begin(), documents.end(), inserter(newUUIDs, newUUIDs.end()), [](auto const& doc){ return doc->identifier(); });
+
+	BOOL shouldReorder = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableTabReorderingKey];
+	std::vector<document::document_ptr> newDocuments;
+	for(NSUInteger i = 0; i <= _documents.size(); ++i)
+	{
+		if(i == MIN(index, _documents.size()))
+		{
+			for(NSUInteger j = 0; j < documents.size(); ++j)
+			{
+				if(shouldReorder || oldUUIDs.find(documents[j]->identifier()) == oldUUIDs.end())
+					newDocuments.push_back(documents[j]);
+			}
+		}
+
+		if(i == _documents.size())
+			break;
+		else if(shouldReorder && newUUIDs.find(_documents[i]->identifier()) != newUUIDs.end())
+			continue;
+		else if(closeDocuments.find(_documents[i]->identifier()) != closeDocuments.end())
+			continue;
+
+		newDocuments.push_back(_documents[i]);
+	}
+
+	self.documents        = newDocuments;
+	self.selectedTabIndex = std::find_if(newDocuments.begin(), newDocuments.end(), [&selectDocument](auto const& doc){ return *doc == *selectDocument; }) - newDocuments.begin();
 }
 
 - (void)openItems:(NSArray*)items closingOtherTabs:(BOOL)closeOtherTabsFlag
@@ -972,61 +969,41 @@ namespace
 	if(documents.empty())
 		return;
 
-	std::vector<document::document_ptr> oldDocuments = _documents;
-	NSUInteger split = _selectedTabIndex;
-
-	std::set<oak::uuid_t> oldUUIDs, newUUIDs, actualNewUUIDs;
-	std::transform(oldDocuments.begin(), oldDocuments.end(), inserter(oldUUIDs, oldUUIDs.end()), [](document::document_ptr const& doc){ return doc->identifier(); });
-	std::transform(documents.begin(), documents.end(), inserter(newUUIDs, newUUIDs.end()), [](document::document_ptr const& doc){ return doc->identifier(); });
-	std::set_difference(newUUIDs.begin(), newUUIDs.end(), oldUUIDs.begin(), oldUUIDs.end(), inserter(actualNewUUIDs, actualNewUUIDs.end()));
-
-	if(!actualNewUUIDs.empty() && !oldDocuments.empty() && is_disposable(oldDocuments[split]))
-			oldDocuments.erase(oldDocuments.begin() + split);
-	else	++split;
-
-	std::vector<document::document_ptr> newDocuments;
-	split = merge_documents_splitting_at(oldDocuments, documents, split, newDocuments, [self disableTabReordering]);
-
-	self.documents        = newDocuments;
-	self.selectedTabIndex = split;
-
-	if(!newDocuments.empty())
-		[self openAndSelectDocument:newDocuments[split]];
-
+	std::set<oak::uuid_t> tabsToClose;
 	if(closeOtherTabsFlag)
 	{
-		std::set<oak::uuid_t> uuids;
-		std::transform(documents.begin(), documents.end(), inserter(uuids, uuids.end()), [](document::document_ptr const& doc){ return doc->identifier(); });
-
-		NSMutableIndexSet* indexSet = [NSMutableIndexSet indexSet];
-		for(size_t i = 0; i < newDocuments.size(); ++i)
+		for(auto const& doc : _documents)
 		{
-			document::document_ptr doc = newDocuments[i];
-			if(!doc->is_modified() && uuids.find(doc->identifier()) == uuids.end() && !_documents[i]->sticky())
-				[indexSet addIndex:i];
+			if(!doc->is_modified() && !doc->sticky())
+				tabsToClose.insert(doc->identifier());
 		}
-		[self closeTabsAtIndexes:indexSet askToSaveChanges:YES createDocumentIfEmpty:NO];
 	}
-	else if(![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableTabAutoCloseKey])
+	else
+	{
+		tabsToClose = [self disposableDocument];
+	}
+
+	[self insertDocuments:documents atIndex:_selectedTabIndex + 1 selecting:documents.front() andClosing:tabsToClose];
+	[self openAndSelectDocument:documents.front()];
+
+	if(self.tabBarView && ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableTabAutoCloseKey])
 	{
 		NSInteger excessTabs = _documents.size() - std::max<NSUInteger>(self.tabBarView.countOfVisibleTabs, 8);
-		if(self.tabBarView && excessTabs > 0)
+		if(excessTabs > 0)
 		{
-			std::set<oak::uuid_t> uuids;
-			std::transform(documents.begin(), documents.end(), inserter(uuids, uuids.end()), [](document::document_ptr const& doc){ return doc->identifier(); });
-
 			std::multimap<oak::date_t, size_t> ranked;
-			for(size_t i = 0; i < newDocuments.size(); ++i)
-			{
-				document::document_ptr doc = newDocuments[i];
-				if(!doc->is_modified() && doc->is_on_disk() && uuids.find(doc->identifier()) == uuids.end() && !doc->sticky())
-					ranked.emplace(doc->lru(), i);
-			}
+			for(size_t i = 0; i < _documents.size(); ++i)
+				ranked.emplace(_documents[i]->lru(), i);
+
+			std::set<oak::uuid_t> newUUIDs;
+			std::transform(documents.begin(), documents.end(), inserter(newUUIDs, newUUIDs.end()), [](auto const& doc){ return doc->identifier(); });
 
 			NSMutableIndexSet* indexSet = [NSMutableIndexSet indexSet];
 			for(auto const& pair : ranked)
 			{
-				[indexSet addIndex:pair.second];
+				document::document_ptr doc = _documents[pair.second];
+				if(!doc->is_modified() && !doc->sticky() && doc->is_on_disk() && newUUIDs.find(doc->identifier()) == newUUIDs.end())
+					[indexSet addIndex:pair.second];
 				if([indexSet count] == excessTabs)
 					break;
 			}
@@ -1108,15 +1085,14 @@ namespace
 			{
 				 // FIXME check if paths[0] already exists (overwrite)
 
-				std::vector<document::document_ptr> documents, newDocuments;
+				std::vector<document::document_ptr> documents = { _selectedDocument };
 				std::transform(paths.begin() + 1, paths.end(), back_inserter(documents), [&encoding](std::string const& path) -> document::document_ptr {
 					document::document_ptr doc = document::create(path);
 					doc->set_disk_encoding(encoding);
 					return doc;
 				});
 
-				merge_documents_splitting_at(_documents, documents, _selectedTabIndex + 1, newDocuments);
-				self.documents = newDocuments;
+				[self insertDocuments:documents atIndex:_selectedTabIndex selecting:documents.front() andClosing:{ }];
 			}
 
 			[DocumentSaveHelper trySaveDocument:_selectedDocument forWindow:self.window defaultDirectory:nil completionHandler:nil];
@@ -1644,14 +1620,8 @@ namespace
 	if(NSIndexSet* indexSet = [self tryObtainIndexSetFrom:sender])
 	{
 		document::document_ptr doc = create_untitled_document_in_folder(to_s(self.untitledSavePath));
-		doc->sync_open();
-		[self setSelectedDocument:doc];
-		doc->close();
-
-		std::vector<document::document_ptr> newDocuments;
-		size_t pos = merge_documents_splitting_at(_documents, { doc }, [indexSet firstIndex], newDocuments);
-		self.documents        = newDocuments;
-		self.selectedTabIndex = pos;
+		[self insertDocuments:{ doc } atIndex:[indexSet firstIndex] selecting:doc andClosing:{ }];
+		[self openAndSelectDocument:doc];
 	}
 }
 
@@ -1771,17 +1741,7 @@ namespace
 	if(!srcDocument)
 		return NO;
 
-	std::vector<document::document_ptr> newDocuments;
-	merge_documents_splitting_at(_documents, { srcDocument }, droppedIndex, newDocuments);
-	self.documents = newDocuments;
-
-	if(_selectedDocument)
-	{
-		oak::uuid_t selectedUUID = _selectedDocument->identifier();
-		auto iter = std::find_if(newDocuments.begin(), newDocuments.end(), [&selectedUUID](document::document_ptr const& doc){ return doc->identifier() == selectedUUID; });
-		if(iter != newDocuments.end())
-			self.selectedTabIndex = iter - newDocuments.begin();
-	}
+	[self insertDocuments:{ srcDocument } atIndex:droppedIndex selecting:_selectedDocument andClosing:{ }];
 
 	if(operation == NSDragOperationMove && sourceTabBar != destTabBar)
 	{
@@ -2783,24 +2743,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 		static DocumentController* controller_with_documents (std::vector<document::document_ptr> const& documents, oak::uuid_t const& projectUUID = document::kCollectionAny)
 		{
 			DocumentController* controller = find_or_create_controller(documents, projectUUID);
-			if(controller.documents.empty())
-			{
-				controller.documents = documents;
-			}
-			else
-			{
-				std::vector<document::document_ptr> oldDocuments = controller.documents;
-				NSUInteger split = controller.selectedTabIndex;
-
-				if(is_disposable(oldDocuments[split]))
-						oldDocuments.erase(oldDocuments.begin() + split);
-				else	++split;
-
-				std::vector<document::document_ptr> newDocuments;
-				split = merge_documents_splitting_at(oldDocuments, documents, split, newDocuments, [controller disableTabReordering]);
-				controller.documents = newDocuments;
-				controller.selectedTabIndex = split;
-			}
+			[controller insertDocuments:documents atIndex:controller.selectedTabIndex + 1 selecting:documents.front() andClosing:[controller disposableDocument]];
 			return controller;
 		}
 
