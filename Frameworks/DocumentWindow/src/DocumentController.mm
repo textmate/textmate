@@ -233,11 +233,6 @@ namespace
 		return iter - out.begin();
 	}
 
-	static std::vector<document::document_ptr> make_vector (document::document_ptr const& document)
-	{
-		return std::vector<document::document_ptr>(1, document);
-	}
-
 	static document::document_ptr create_untitled_document_in_folder (std::string const& suggestedFolder)
 	{
 		auto doc = document::from_content("", settings_for_path(NULL_STR, file::path_attributes(NULL_STR), suggestedFolder).get(kSettingsFileTypeKey, "text.plain"));
@@ -398,7 +393,7 @@ namespace
 	if((([self.window styleMask] & NSFullScreenWindowMask) != NSFullScreenWindowMask) && !self.window.isZoomed)
 		[[NSUserDefaults standardUserDefaults] setObject:NSStringFromRect([self windowFrame]) forKey:@"DocumentControllerWindowFrame"];
 
-	self.documents          = std::vector<document::document_ptr>();
+	self.documents          = { };
 	self.selectedDocument   = document::document_ptr();
 	self.fileBrowserVisible = NO; // Make window frame small as we no longer respond to savableWindowFrame
 	self.identifier         = nil; // This removes us from AllControllers and causes a release
@@ -409,7 +404,7 @@ namespace
 	if(_documents.empty())
 	{
 		document::document_ptr defaultDocument = create_untitled_document_in_folder(to_s(self.untitledSavePath));
-		self.documents = make_vector(defaultDocument);
+		self.documents = { defaultDocument };
 		[self openAndSelectDocument:defaultDocument];
 	}
 	[self.window makeKeyAndOrderFront:sender];
@@ -1654,7 +1649,7 @@ namespace
 		doc->close();
 
 		std::vector<document::document_ptr> newDocuments;
-		size_t pos = merge_documents_splitting_at(_documents, make_vector(doc), [indexSet firstIndex], newDocuments);
+		size_t pos = merge_documents_splitting_at(_documents, { doc }, [indexSet firstIndex], newDocuments);
 		self.documents        = newDocuments;
 		self.selectedTabIndex = pos;
 	}
@@ -1677,7 +1672,7 @@ namespace
 		if(documents.size() == 1)
 		{
 			DocumentController* controller = [DocumentController new];
-			controller.documents = make_vector(documents[0]);
+			controller.documents = { documents[0] };
 			if(path::is_child(documents[0]->path(), to_s(self.projectPath)))
 				controller.defaultProjectPath = self.projectPath;
 			[controller openAndSelectDocument:documents[0]];
@@ -1777,7 +1772,7 @@ namespace
 		return NO;
 
 	std::vector<document::document_ptr> newDocuments;
-	merge_documents_splitting_at(_documents, make_vector(srcDocument), droppedIndex, newDocuments);
+	merge_documents_splitting_at(_documents, { srcDocument }, droppedIndex, newDocuments);
 	self.documents = newDocuments;
 
 	if(_selectedDocument)
@@ -2848,10 +2843,10 @@ static NSUInteger DisableSessionSavingCount = 0;
 			{
 				controller.defaultProjectPath = [NSString stringWithCxxString:folder];
 				controller.fileBrowserVisible = YES;
-				controller.documents          = make_vector(create_untitled_document_in_folder(folder));
+				controller.documents          = { create_untitled_document_in_folder(folder) };
 				controller.fileBrowser.url    = [NSURL fileURLWithPath:[NSString stringWithCxxString:folder]];
 
-				[controller openAndSelectDocument:[controller documents][controller.selectedTabIndex]];
+				[controller openAndSelectDocument:controller.documents[controller.selectedTabIndex]];
 			}
 			bring_to_front(controller);
 		}
@@ -2868,7 +2863,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 			if(range != text::range_t::undefined)
 				document->set_selection(range);
 
-			DocumentController* controller = controller_with_documents(make_vector(document), collection);
+			DocumentController* controller = controller_with_documents({ document }, collection);
 			if(bringToFront)
 				bring_to_front(controller);
 			else if(![controller.window isVisible])
