@@ -6,10 +6,11 @@
 #include <text/hexdump.h>
 #include <crash/info.h>
 
-bool        g_need_kern_noascii = true;
-unsigned    g_double_width_unicode = 0x2500;
+bool        g_need_kern_noascii = false;
+unsigned    g_double_width_unicode;
 CGFloat     g_kern_noascii_pt;
 CFNumberRef g_cfNum;
+void read_userdefaults();
 
 namespace ng
 {
@@ -120,6 +121,8 @@ namespace ct
 			_x_height   = CTFontGetXHeight(font);
 			_cap_height = CTFontGetCapHeight(font);
 
+			read_userdefaults();
+			fprintf(stderr, "read from userdefaults, g_need_kern_noascii:%d  g_double_width_unicode:0x%X\n", g_need_kern_noascii, g_double_width_unicode);
 			if (g_need_kern_noascii) {
 				CGFloat _column_width1=0, _column_width2=0;
 				if(CFMutableAttributedStringRef str = CFAttributedStringCreateMutable(kCFAllocatorDefault, 0))

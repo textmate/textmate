@@ -211,6 +211,8 @@ BOOL HasDocumentWindow (NSArray* windows)
 	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
 		@"NSRecentDocumentsLimit"   : @25,
 		@"WebKitDeveloperExtras"    : @YES,
+		@"g_need_kern_noascii"      : @NO,
+		@"g_double_width_unicode"   : @9472,
 	}];
 	RegisterDefaults();
 
