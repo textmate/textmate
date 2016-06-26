@@ -6,6 +6,11 @@
 #include <text/hexdump.h>
 #include <crash/info.h>
 
+bool        g_need_kern_noascii = true;
+unsigned    g_double_width_unicode = 0x2500;
+CGFloat     g_kern_noascii_pt;
+CFNumberRef g_cfNum;
+
 namespace ng
 {
 	// =============
@@ -115,6 +120,36 @@ namespace ct
 			_x_height   = CTFontGetXHeight(font);
 			_cap_height = CTFontGetCapHeight(font);
 
+			if (g_need_kern_noascii) {
+				CGFloat _column_width1=0, _column_width2=0;
+				if(CFMutableAttributedStringRef str = CFAttributedStringCreateMutable(kCFAllocatorDefault, 0))
+				{
+					CFAttributedStringReplaceString(str, CFRangeMake(0, 0), CFSTR("mm"));
+					CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTFontAttributeName, font);
+					if(CTLineRef line = CTLineCreateWithAttributedString(str))
+					{
+						_column_width1 = CTLineGetTypographicBounds(line, NULL, NULL, NULL);
+						CFRelease(line);
+					}
+					CFAttributedStringReplaceString(str, CFRangeMake(0, CFAttributedStringGetLength(str)), CFSTR("一"));
+					CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTFontAttributeName, font);
+					if(CTLineRef line = CTLineCreateWithAttributedString(str))
+					{
+						_column_width2 = CTLineGetTypographicBounds(line, NULL, NULL, NULL);
+						CFRelease(line);
+					}
+					CFRelease(str);
+				}
+				if(_column_width1 > 0 && _column_width2 > 0 && (g_kern_noascii_pt = _column_width1 - _column_width2) > 0)
+				{
+					g_cfNum = CFNumberCreate(NULL, kCFNumberCGFloatType, &g_kern_noascii_pt);
+				}else{
+					g_kern_noascii_pt = 0;
+				}
+				fprintf(stderr, "mm width:%f, 一 width:%f,   set  g_kern_noascii_pt: %f,   g_double_width_unicode: 0x%X\n",
+					_column_width1, _column_width2, g_kern_noascii_pt, g_double_width_unicode);
+			}
+
 			if(CFMutableAttributedStringRef str = CFAttributedStringCreateMutable(kCFAllocatorDefault, 0))
 			{
 				CFAttributedStringReplaceString(str, CFRangeMake(0, 0), CFSTR("n"));
@@ -175,6 +210,21 @@ namespace ct
 						CFAttributedStringReplaceString(str, CFRangeMake(0, 0), cfStr);
 						CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTFontAttributeName, styles.font());
 						CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTForegroundColorAttributeName, textColor ?: styles.foreground());
+						if(g_need_kern_noascii && g_kern_noascii_pt > 0)
+						{
+							// FIXME
+							// performance (set attribute each character)
+							// emoji character (width bigger than double ascii width)
+							// which unicode range graph need set kern-attribute
+							for(unsigned int i = 0; i < CFStringGetLength(cfStr); ++i)
+							{
+								unsigned int chr = CFStringGetCharacterAtIndex(cfStr, i);
+								if (chr > g_double_width_unicode)
+								{
+									CFAttributedStringSetAttribute(str, CFRangeMake(i, 1), kCTKernAttributeName, g_cfNum);
+								}
+							}
+						}
 						if(styles.underlined())
 							_underlines.emplace_back(CFRangeMake(CFAttributedStringGetLength(toDraw), CFAttributedStringGetLength(str)), CGColorPtr(CGColorRetain(styles.foreground()), CGColorRelease));
 						_backgrounds.emplace_back(CFRangeMake(CFAttributedStringGetLength(toDraw), CFAttributedStringGetLength(str)), CGColorPtr(CGColorRetain(styles.background()), CGColorRelease));
