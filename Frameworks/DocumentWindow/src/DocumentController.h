@@ -9,8 +9,8 @@ PUBLIC @interface DocumentController : NSObject
 @property (nonatomic, readonly) NSString*                        projectPath; // effectiveProjectPath
 @property (nonatomic, readonly) NSString*                        untitledSavePath;
 
-@property (nonatomic) std::vector<document::document_ptr> const& documents;
-@property (nonatomic) document::document_ptr              const& selectedDocument;
+@property (nonatomic) std::vector<document::document_ptr>        documents;
+@property (nonatomic) document::document_ptr                     selectedDocument;
 @property (nonatomic) NSUInteger                                 selectedTabIndex;
 
 @property (nonatomic) BOOL                                       fileBrowserVisible;

@@ -251,9 +251,7 @@ namespace
 {
 	OBJC_WATCH_LEAKS(DocumentController);
 
-	std::vector<document::document_ptr>    _documents;
 	std::map<oak::uuid_t, tracking_info_t> _trackedDocuments;
-	document::document_ptr                 _selectedDocument;
 	command::runner_ptr                    _runner;
 
 	scm::info_ptr                          _projectSCMInfo;
@@ -816,7 +814,8 @@ namespace
 	std::vector<document::document_ptr> documents;
 	for(DocumentController* delegate in SortedControllers())
 	{
-		std::copy_if(delegate.documents.begin(), delegate.documents.end(), back_inserter(documents), [&restoresSession](document::document_ptr const& doc){ return doc->is_modified() && (doc->path() != NULL_STR || !restoresSession); });
+		auto delegateDocuments = delegate.documents; // Returns by-value so each result is unique
+		std::copy_if(delegateDocuments.begin(), delegateDocuments.end(), back_inserter(documents), [&restoresSession](document::document_ptr const& doc){ return doc->is_modified() && (doc->path() != NULL_STR || !restoresSession); });
 		if(!documents.empty() && !controller)
 			controller = delegate;
 	}
@@ -931,7 +930,10 @@ namespace
 	for(DocumentController* delegate in SortedControllers())
 	{
 		if(delegate != self && ![delegate.window isMiniaturized])
-			documents.insert(documents.end(), delegate.documents.begin(), delegate.documents.end());
+		{
+			auto delegateDocuments = delegate.documents; // Returns by-value so each result is unique
+			documents.insert(documents.end(), delegateDocuments.begin(), delegateDocuments.end());
+		}
 	}
 
 	self.documents = documents;
@@ -1535,7 +1537,7 @@ namespace
 // = Properties =
 // ==============
 
-- (void)setDocuments:(std::vector<document::document_ptr> const&)newDocuments
+- (void)setDocuments:(std::vector<document::document_ptr>)newDocuments
 {
 	for(auto document : newDocuments)
 		[self trackDocument:document];
@@ -1551,7 +1553,7 @@ namespace
 	[[self class] scheduleSessionBackup:self];
 }
 
-- (void)setSelectedDocument:(document::document_ptr const&)newSelectedDocument
+- (void)setSelectedDocument:(document::document_ptr)newSelectedDocument
 {
 	ASSERT(!newSelectedDocument || newSelectedDocument->is_open());
 	if(_selectedDocument == newSelectedDocument)
