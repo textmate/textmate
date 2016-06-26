@@ -125,6 +125,7 @@ namespace ct
 			fprintf(stderr, "read from userdefaults, g_need_kern_noascii:%d  g_double_width_unicode:0x%X\n", g_need_kern_noascii, g_double_width_unicode);
 			if (g_need_kern_noascii) {
 				CGFloat _column_width1=0, _column_width2=0;
+				try{
 				if(CFMutableAttributedStringRef str = CFAttributedStringCreateMutable(kCFAllocatorDefault, 0))
 				{
 					CFAttributedStringReplaceString(str, CFRangeMake(0, 0), CFSTR("mm"));
@@ -148,6 +149,9 @@ namespace ct
 					g_cfNum = CFNumberCreate(NULL, kCFNumberCGFloatType, &g_kern_noascii_pt);
 				}else{
 					g_kern_noascii_pt = 0;
+				}
+				} catch(...) {
+					fprintf(stderr, "catched exception 1.  %f  %f\n", _column_width1, _column_width2);
 				}
 				fprintf(stderr, "mm width:%f, 一 width:%f,   set  g_kern_noascii_pt: %f,   g_double_width_unicode: 0x%X\n",
 					_column_width1, _column_width2, g_kern_noascii_pt, g_double_width_unicode);
@@ -219,13 +223,29 @@ namespace ct
 							// performance (set attribute each character)
 							// emoji character (width bigger than double ascii width)
 							// which unicode range graph need set kern-attribute
-							for(unsigned int i = 0; i < CFStringGetLength(cfStr); ++i)
+							unsigned int i = 0, begin, end, len;
+							try{
+							len = CFStringGetLength(cfStr);
+							while(i < len)
 							{
-								unsigned int chr = CFStringGetCharacterAtIndex(cfStr, i);
-								if (chr > g_double_width_unicode)
-								{
-									CFAttributedStringSetAttribute(str, CFRangeMake(i, 1), kCTKernAttributeName, g_cfNum);
-								}
+								unsigned int chr;
+								do {
+									chr = CFStringGetCharacterAtIndex(cfStr, i);
+									if(chr >= g_double_width_unicode) break;
+									++i;
+								} while(i < len);
+								if (i >= len) break;
+								begin = i;
+								do {
+									chr = CFStringGetCharacterAtIndex(cfStr, i);
+									if(chr < g_double_width_unicode) break;
+									++i;
+								} while(i < len);
+								end = i;
+								CFAttributedStringSetAttribute(str, CFRangeMake(begin, end-begin), kCTKernAttributeName, g_cfNum);
+							}
+							} catch(...) {
+								fprintf(stderr, "catched exception 2. %d  %d %d %d\n", i, len, begin, end);
 							}
 						}
 						if(styles.underlined())
