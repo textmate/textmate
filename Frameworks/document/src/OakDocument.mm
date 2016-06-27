@@ -833,7 +833,7 @@ private:
 	if(_path && _buffer)
 	{
 		document::marks.copy_from_buffer(to_s(_path), *_buffer);
-		if(!self.isDocumentEdited && volume::settings(to_s(_path)).extended_attributes())
+		if(_onDisk && !self.isDocumentEdited && volume::settings(to_s(_path)).extended_attributes())
 			path::set_attributes(to_s(_path), [self extendedAttributeds]);
 	}
 
