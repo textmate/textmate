@@ -1,6 +1,5 @@
 #import "OakDocument Private.h"
 #import "EncodingView.h"
-#import "FileTypeDialog.h"
 #import "Printing.h"
 #import "watch.h"
 #import "merge.h"
@@ -580,7 +579,7 @@ private:
 
 		BOOL isModified = self.isDocumentEdited;
 		std::string const path = to_s(_backupPath);
-		[self didLoadContent:std::make_shared<io::bytes_t>(path::content(path)) attributes:path::attributes(path) fileType:_fileType encoding:encoding::type(to_s(_diskNewlines), to_s(_diskEncoding))];
+		[self didLoadContent:std::make_shared<io::bytes_t>(path::content(path)) attributes:path::attributes(path) encoding:encoding::type(to_s(_diskNewlines), to_s(_diskEncoding))];
 
 		if(isModified)
 		{
@@ -626,33 +625,16 @@ private:
 			});
 		}
 
-		void select_file_type (std::string const& path, io::bytes_ptr content, file::open_context_ptr context)
-		{
-			if(path == NULL_STR)
-			{
-				context->set_file_type("text.plain");
-			}
-			else
-			{
-				[_window.attachedSheet orderOut:_self];
-
-				FileTypeDialog* controller = [[FileTypeDialog alloc] initWithPath:[NSString stringWithCxxString:path] first:(content ? content->begin() : NULL) last:(content ? content->end() : NULL)];
-				[controller beginSheetModalForWindow:_window completionHandler:^(NSString* fileType){
-					if(fileType)
-						context->set_file_type(to_s(fileType));
-				}];
-			}
-		}
-
 		void show_error (std::string const& path, std::string const& message, oak::uuid_t const& filter)
 		{
-			[_self didLoadContent:io::bytes_ptr() attributes:{ } fileType:nil encoding:{ }];
+			[_self didLoadContent:io::bytes_ptr() attributes:{ } encoding:{ }];
 			_block(NO, to_ns(message), filter);
 		}
 
-		void show_content (std::string const& path, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, std::string const& fileType, encoding::type const& encoding, std::vector<oak::uuid_t> const& binaryImportFilters, std::vector<oak::uuid_t> const& textImportFilters)
+		void show_content (std::string const& path, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, encoding::type const& encoding, std::vector<oak::uuid_t> const& binaryImportFilters, std::vector<oak::uuid_t> const& textImportFilters)
 		{
-			[_self didLoadContent:content attributes:attributes fileType:to_ns(fileType) encoding:encoding];
+			_self.fileType = _self.fileType ?: to_ns(file::type(path, content, to_s(_self.virtualPath))) ?: @"text.plain";
+			[_self didLoadContent:content attributes:attributes encoding:encoding];
 			_block(YES, nil, oak::uuid_t());
 		}
 
@@ -673,10 +655,10 @@ private:
 	}
 
 	auto cb = std::make_shared<callback_t>(self, aWindow, block);
-	file::open(to_s(_path), _authorization, cb, content, to_s(_virtualPath));
+	file::open(to_s(_path), _authorization, cb, content);
 }
 
-- (void)didLoadContent:(io::bytes_ptr)content attributes:(std::map<std::string, std::string> const&)attributes fileType:(NSString*)fileType encoding:(encoding::type)encoding
+- (void)didLoadContent:(io::bytes_ptr)content attributes:(std::map<std::string, std::string> const&)attributes encoding:(encoding::type)encoding
 {
 	if(!content) // Loading failed
 	{
@@ -712,15 +694,8 @@ private:
 		}
 	}
 
-	if(_fileType)
-	{
-		[self setBufferGrammarForCurrentFileType];
-		[self updateSpellingSettings:YES andIndentSettings:YES];
-	}
-	else
-	{
-		self.fileType = fileType;
-	}
+	[self setBufferGrammarForCurrentFileType];
+	[self updateSpellingSettings:YES andIndentSettings:YES];
 
 	_undoManager = std::make_unique<ng::undo_manager_t>(*_buffer);
 	_buffer->set_async_parsing(true);
@@ -1169,10 +1144,9 @@ private:
 			}
 		}
 
-		void select_file_type (std::string const& path, io::bytes_ptr content, file::open_context_ptr context)  { context->set_file_type(to_s(_self.fileType)); }
 		void show_error (std::string const& path, std::string const& message, oak::uuid_t const& filter)        { fprintf(stderr, "%s: %s\n", path.c_str(), message.c_str()); }
 
-		void show_content (std::string const& path, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, std::string const& fileType, encoding::type const& encoding, std::vector<oak::uuid_t> const& binaryImportFilters, std::vector<oak::uuid_t> const& textImportFilters)
+		void show_content (std::string const& path, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, encoding::type const& encoding, std::vector<oak::uuid_t> const& binaryImportFilters, std::vector<oak::uuid_t> const& textImportFilters)
 		{
 			if(!_self.isOpen)
 				return;
