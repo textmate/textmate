@@ -5,6 +5,7 @@
 PUBLIC extern NSString* OakDocumentContentDidChangeNotification;
 PUBLIC extern NSString* OakDocumentMarksDidChangeNotification;
 PUBLIC extern NSString* OakDocumentDidSaveNotification;
+PUBLIC extern NSString* OakDocumentWillCloseNotification;
 
 PUBLIC @interface OakDocument : NSObject
 + (instancetype)documentWithPath:(NSString*)aPath;

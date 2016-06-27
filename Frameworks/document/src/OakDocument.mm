@@ -143,6 +143,7 @@ namespace document
 NSString* OakDocumentContentDidChangeNotification = @"OakDocumentContentDidChangeNotification";
 NSString* OakDocumentMarksDidChangeNotification   = @"OakDocumentMarksDidChangeNotification";
 NSString* OakDocumentDidSaveNotification          = @"OakDocumentDidSaveNotification";
+NSString* OakDocumentWillCloseNotification        = @"OakDocumentWillCloseNotification";
 
 static NSString* FileExtensionForGrammar (parse::grammar_ptr grammar)
 {
@@ -824,6 +825,8 @@ private:
 {
 	if(--self.openCount != 0)
 		return;
+
+	[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentWillCloseNotification object:self];
 
 	if(_path && _buffer)
 	{
