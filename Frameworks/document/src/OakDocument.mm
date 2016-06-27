@@ -319,7 +319,8 @@ private:
 {
 	if(self = [self init])
 	{
-		_path = aPath;
+		_path   = aPath;
+		_onDisk = access([_path fileSystemRepresentation], F_OK) == 0;
 	}
 	return self;
 }
@@ -355,6 +356,7 @@ private:
 			_backupPath     = to_ns(path);
 
 			_path           = to_ns(path::resolve(path::get_attr(path, "com.macromates.backup.path")));
+			_onDisk         = access([_path fileSystemRepresentation], F_OK) == 0;
 			_fileType       = to_ns(path::get_attr(path, "com.macromates.backup.file-type"));
 			_diskEncoding   = to_ns(path::get_attr(path, "com.macromates.backup.encoding"));
 			_diskNewlines   = to_ns(path::get_attr(path, "com.macromates.backup.newlines"));
