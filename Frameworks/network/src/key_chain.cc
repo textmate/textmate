@@ -71,49 +71,6 @@ void key_chain_t::key_t::cleanup () const
 // = Key Chain =
 // =============
 
-void key_chain_t::load (std::string const& path)
-{
-	keys.clear();
-
-	plist::dictionary_t identities;
-	if(plist::get_key_path(plist::load(path), "identities", identities))
-	{
-		for(auto const& identity : identities)
-		{
-			std::string name, keyData;
-			if(plist::get_key_path(identity.second, "name", name) && plist::get_key_path(identity.second, "key", keyData))
-			{
-				keys.push_back(std::make_shared<key_t>(identity.first, name, keyData));
-			}
-			else
-			{
-				fprintf(stderr, "no name/key in entry:\n%s", to_s(identity.second).c_str());
-			}
-		}
-	}
-	else
-	{
-		fprintf(stderr, "no identities in ‘%s’\n", path.c_str());
-	}
-}
-
-void key_chain_t::save (std::string const& path) const
-{
-	plist::dictionary_t identities;
-	for(auto const& key : keys)
-	{
-		plist::dictionary_t entry;
-		entry.emplace("name", key->name());
-		entry.emplace("key",  key->_key_data);
-		identities.emplace(key->identity(), entry);
-	}
-
-	plist::dictionary_t plist;
-	plist.emplace("identities", identities);
-
-	plist::save(path, plist);
-}
-
 void key_chain_t::add (key_t const& key)
 {
 	keys.push_back(std::make_shared<key_t>(key.identity(), key.name(), key._key_data));

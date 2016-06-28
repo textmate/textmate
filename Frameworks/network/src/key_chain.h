@@ -37,9 +37,6 @@ struct PUBLIC key_chain_t
 
 	typedef std::shared_ptr<key_t> key_ptr;
 
-	void load (std::string const& path);
-	void save (std::string const& path) const;
-
 	void add (key_t const& key);
 	key_ptr find (std::string const& identity) const;
 
