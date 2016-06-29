@@ -1,25 +1,21 @@
-#import <updater/updater.h>
+#import "Bundle.h"
 #import <bundles/item.h>
 
 PUBLIC extern NSString* const kUserDefaultsDisableBundleUpdatesKey;
 PUBLIC extern NSString* const kUserDefaultsLastBundleUpdateCheckKey;
-PUBLIC extern NSString* const BundlesManagerBundlesDidChangeNotification;
 
 PUBLIC @interface BundlesManager : NSObject
 @property (nonatomic) BOOL autoUpdateBundles;
 
-@property (nonatomic, readonly) NSString* activityText;
-@property (nonatomic, readonly) BOOL      isBusy;
+@property (nonatomic) NSString* activityText;
+@property (nonatomic) BOOL      isBusy;
 @property (nonatomic, readonly) BOOL      determinateProgress;
 @property (nonatomic, readonly) CGFloat   progress;
-@property (nonatomic, readonly) NSDate*   lastUpdateCheck;
 
-- (NSUInteger)numberOfBundles;
-- (bundles_db::bundle_ptr const&)bundleAtIndex:(NSUInteger)anIndex;
-- (NSCellStateValue)installStateForBundle:(bundles_db::bundle_ptr const&)aBundle;
+@property (nonatomic, readonly) NSArray<Bundle*>* bundles;
 
-- (void)installBundle:(bundles_db::bundle_ptr const&)aBundle completionHandler:(void(^)(BOOL))callback;
-- (void)uninstallBundle:(bundles_db::bundle_ptr const&)aBundle;
+- (void)installBundles:(NSArray<Bundle*>*)someBundles completionHandler:(void(^)(NSArray<Bundle*>*))callback;
+- (void)uninstallBundle:(Bundle*)aBundle;
 
 + (BundlesManager*)sharedInstance;
 - (void)loadBundlesIndex;

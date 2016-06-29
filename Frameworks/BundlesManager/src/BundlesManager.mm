@@ -3,13 +3,16 @@
 #import "InstallBundleItems.h"
 #import <OakFoundation/NSDate Additions.h>
 #import <OakFoundation/NSString Additions.h>
+#import <network/network.h>
+#import <network/download_tbz.h>
 #import <bundles/locations.h>
 #import <bundles/query.h> // set_index
-#import <version/version.h>
 #import <regexp/format_string.h>
 #import <text/ctype.h>
+#import <text/decode.h>
 #import <ns/ns.h>
 #import <io/path.h>
+#import <io/entries.h>
 #import <io/events.h>
 #import <oak/debug.h>
 
@@ -19,31 +22,46 @@ OAK_DEBUG_VAR(BundlesManager_FSEvents);
 NSString* const kUserDefaultsDisableBundleUpdatesKey       = @"disableBundleUpdates";
 NSString* const kUserDefaultsLastBundleUpdateCheckKey      = @"lastBundleUpdateCheck";
 NSString* const kUserDefaultsBundleUpdateFrequencyKey      = @"bundleUpdateFrequency";
-NSString* const BundlesManagerBundlesDidChangeNotification = @"BundlesManagerBundlesDidChangeNotification";
 
-static std::string const kInstallDirectory = NULL_STR;
 static NSTimeInterval const kDefaultPollInterval = 3*60*60;
+static char const* kBundleAttributeUpdated = "org.textmate.bundle.updated";
+
+static NSString* SafeBasename (NSString* name)
+{
+	return [[name stringByReplacingOccurrencesOfString:@"/" withString:@":"] stringByReplacingOccurrencesOfString:@"." withString:@"_"];
+}
+
+static NSString* CacheFileForDownload (NSURL* url, NSDate* date)
+{
+	NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
+	dateFormatter.dateFormat = @"yyyy-MM-dd";
+
+	NSString* name = [url.pathComponents lastObject];
+	NSString* folder = [[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) firstObject] stringByAppendingPathComponent:@"com.macromates.TextMate/Bundles"];
+	return [folder stringByAppendingPathComponent:[[SafeBasename([name stringByDeletingPathExtension]) stringByAppendingFormat:@" (%@)", [dateFormatter stringFromDate:date]] stringByAppendingPathExtension:[name pathExtension]]];
+}
 
 @interface BundlesManager ()
 {
-	std::vector<bundles_db::source_ptr> sourceList;
-	std::vector<bundles_db::bundle_ptr> bundlesIndex;
-	std::set<oak::uuid_t> installing;
-
 	std::vector<std::string> bundlesPaths;
 	std::string bundlesIndexPath;
 	std::set<std::string> watchList;
 	plist::cache_t cache;
 }
-@property (nonatomic) NSString* activityText;
-@property (nonatomic) BOOL      isBusy;
 @property (nonatomic) BOOL      determinateProgress;
 @property (nonatomic) CGFloat   progress;
-@property (nonatomic) NSDate*   lastUpdateCheck;
 @property (nonatomic) NSTimer*  updateTimer;
 
 @property (nonatomic) BOOL      needsCreateBundlesIndex;
 @property (nonatomic) BOOL      needsSaveBundlesIndex;
+
+@property (nonatomic) NSArray<Bundle*>* bundles;
+@property (nonatomic, readonly) key_chain_t keyChain;
+
+@property (nonatomic) NSString* installDirectory;
+@property (nonatomic) NSString* localIndexPath;
+@property (nonatomic) NSString* remoteIndexPath;
+@property (nonatomic) NSURL*    remoteIndexURL;
 @end
 
 @implementation BundlesManager
@@ -53,17 +71,14 @@ static NSTimeInterval const kDefaultPollInterval = 3*60*60;
 	return instance;
 }
 
-- (NSTimeInterval)updateFrequency
-{
-	return [[NSUserDefaults standardUserDefaults] floatForKey:kUserDefaultsBundleUpdateFrequencyKey] ?: kDefaultPollInterval;
-}
-
 - (id)init
 {
 	if(self = [super init])
 	{
-		sourceList   = bundles_db::sources();
-		bundlesIndex = bundles_db::index(kInstallDirectory);
+		_installDirectory = [[NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES) firstObject] stringByAppendingPathComponent:@"TextMate/Managed"];
+		_localIndexPath   = [_installDirectory stringByAppendingPathComponent:@"LocalIndex.plist"];
+		_remoteIndexPath  = [_installDirectory stringByAppendingPathComponent:@"Cache/org.textmate.updates.default"];
+		_remoteIndexURL   = [NSURL URLWithString:@REST_API "/bundles"];
 
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:NSApp];
 	}
@@ -82,104 +97,36 @@ static NSTimeInterval const kDefaultPollInterval = 3*60*60;
 	if(_autoUpdateBundles == flag)
 		return;
 
+	[_updateTimer invalidate];
+	_updateTimer = nil;
+
 	_autoUpdateBundles = flag;
-	[self setupUpdateTimer];
-}
+	if(_autoUpdateBundles)
+	{
+		NSDate* lastCheck = [[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsLastBundleUpdateCheckKey] ?: [NSDate distantPast];
+		if(![[NSFileManager defaultManager] fileExistsAtPath:_remoteIndexPath])
+			lastCheck = [NSDate distantPast];
 
-- (void)setupUpdateTimer
-{
-	[self.updateTimer invalidate];
-	self.updateTimer = nil;
-	if(!_autoUpdateBundles)
-		return;
+		CGFloat updateFrequency = [[NSUserDefaults standardUserDefaults] floatForKey:kUserDefaultsBundleUpdateFrequencyKey] ?: kDefaultPollInterval;
+		NSDate* nextCheck = [lastCheck dateByAddingTimeInterval:updateFrequency];
+		nextCheck = [nextCheck laterDate:[[NSDate date] dateByAddingTimeInterval:5]];
 
-	NSDate* lastCheck = [[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsLastBundleUpdateCheckKey] ?: [NSDate distantPast];
-	NSDate* nextCheck = [lastCheck dateByAddingTimeInterval:self.updateFrequency];
-	NSTimeInterval checkAfterSeconds = std::max<NSTimeInterval>(1, [nextCheck timeIntervalSinceNow]);
-	D(DBF_BundlesManager, bug("perform next check in %.1f hours\n", checkAfterSeconds/60/60););
-	self.updateTimer = [NSTimer scheduledTimerWithTimeInterval:checkAfterSeconds target:self selector:@selector(didFireUpdateTimer:) userInfo:nil repeats:NO];
+		_updateTimer = [[NSTimer alloc] initWithFireDate:nextCheck interval:updateFrequency target:self selector:@selector(didFireUpdateTimer:) userInfo:nil repeats:YES];
+		[[NSRunLoop currentRunLoop] addTimer:_updateTimer forMode:NSDefaultRunLoopMode];
+	}
 }
 
 - (void)didFireUpdateTimer:(NSTimer*)aTimer
 {
-	self.isBusy = YES;
+	if([[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableBundleUpdatesKey])
+		return;
 
-	std::vector<bundles_db::source_ptr> sources;
-	for(auto source : sourceList)
-	{
-		if(!source->disabled())
-			sources.push_back(source);
-	}
-
-	self.activityText = @"Updating sources…";
-	[self updateSources:sources completionHandler:^(std::vector<bundles_db::source_ptr> failedSources){
-		std::vector<bundles_db::bundle_ptr> outdatedBundles;
-		if(![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableBundleUpdatesKey])
-		{
-			for(auto installedBundle : bundlesIndex)
-			{
-				if(!installedBundle->has_update())
-					continue;
-
-				std::vector<bundles_db::bundle_ptr> tmp;
-				for(auto bundle : bundles_db::dependencies(bundlesIndex, installedBundle, false, false))
-				{
-					if((bundle->installed() && !bundle->has_update()) || installing.find(bundle->uuid()) != installing.end())
-						continue;
-
-					std::string appVersion = to_s([[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"]);
-					if(version::less(appVersion, bundle->requires()))
-					{
-						if(!bundle->installed() || bundle == installedBundle)
-						{
-							fprintf(stderr, "*** skip updating %s bundle: requires TextMate %s\n", installedBundle->name().c_str(), bundle->requires().c_str());
-							tmp.clear();
-							break;
-						}
-						else
-						{
-							fprintf(stderr, "*** skip updating %s bundle: requires TextMate %s (while updating %s bundle)\n", bundle->name().c_str(), installedBundle->name().c_str(), bundle->requires().c_str());
-						}
-					}
-					else
-					{
-						tmp.push_back(bundle);
-					}
-				}
-
-				for(auto bundle : tmp)
-				{
-					if(!bundle->installed())
-						bundle->set_dependency(true);
-					outdatedBundles.push_back(bundle);
-				}
-			}
-		}
-
-		self.activityText = @"Updating bundles…";
-		[self installBundles:outdatedBundles completionHandler:^(std::vector<bundles_db::bundle_ptr> failedBundles){
-			NSDate* lastCheck = [NSDate date];
-			if(failedSources.empty() && failedBundles.empty())
-			{
-				self.activityText = nil;
-			}
-			else
-			{
-				self.activityText = @"Error updating bundles, will retry later.";
-				lastCheck = [lastCheck dateByAddingTimeInterval:30*60-self.updateFrequency]; // retry in 30 minutes
-
-				for(auto source : failedSources)
-					fprintf(stderr, "*** error downloading ‘%s’\n", source->url().c_str());
-				for(auto bundle : failedBundles)
-					fprintf(stderr, "*** error updating %s bundle\n", bundle->name().c_str());
-			}
-
-			self.isBusy = NO;
-
-			[[NSUserDefaults standardUserDefaults] setObject:lastCheck forKey:kUserDefaultsLastBundleUpdateCheckKey];
-			[self setupUpdateTimer];
-		}];
+	NSSet* oldRecommendations = [NSSet setWithArray:[self.bundles filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isRecommended == YES"]]];
+	[self updateRemoteIndexWithCompletionHandler:^{
+		NSArray* bundles = [self.bundles filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"(hasUpdate == YES && isCompatible == YES) || (isInstalled == NO && (isMandatory == YES || (isRecommended == YES && isCompatible == YES && !(SELF IN %@))))", oldRecommendations]];
+		[self installBundles:bundles completionHandler:^(NSArray<Bundle*>*){ }];
 	}];
+	[[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:kUserDefaultsLastBundleUpdateCheckKey];
 }
 
 - (void)installBundleItemsAtPaths:(NSArray*)somePaths
@@ -237,119 +184,84 @@ static NSTimeInterval const kDefaultPollInterval = 3*60*60;
 	return NO;
 }
 
-- (void)installBundles:(std::vector<bundles_db::bundle_ptr> const&)bundlesReference completionHandler:(void(^)(std::vector<bundles_db::bundle_ptr> failedBundles))callback
+- (void)installBundles:(NSArray<Bundle*>*)someBundles completionHandler:(void(^)(NSArray<Bundle*>*))callback
 {
-	__block std::vector<bundles_db::bundle_ptr> failedBundles;
-	if(bundlesReference.empty())
+	NSMutableSet* bundlesToInstall = [NSMutableSet set];
+
+	NSMutableArray* queue = [someBundles mutableCopy];
+	while(Bundle* bundle = [queue lastObject])
 	{
-		callback(failedBundles);
-		return;
+		[bundlesToInstall addObject:bundle];
+		NSArray* dependencies = [bundle.dependencies filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isInstalled == NO && !(SELF IN %@)", bundlesToInstall]];
+		[dependencies enumerateObjectsUsingBlock:^(Bundle* bundle, NSUInteger, BOOL*){ bundle.dependency = YES; }];
+		[queue replaceObjectsInRange:NSMakeRange(queue.count-1, 1) withObjectsFromArray:dependencies];
 	}
 
-	auto bundles = bundlesReference;
-	for(auto bundle : bundles)
-		installing.insert(bundle->uuid());
+	if([bundlesToInstall count] == 0)
+		return callback(nil);
 
-	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
-		dispatch_apply(bundles.size(), dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^(size_t i){
-			D(DBF_BundlesManager, bug("Updating ‘%s’…\n", bundles[i]->name().c_str()););
-			if(!bundles_db::update(bundles[i]))
-				failedBundles.push_back(bundles[i]);
+	key_chain_t const keyChain = [self keyChain];
+	NSArray* bundles = [bundlesToInstall allObjects];
+	__block std::vector<std::string> res(bundles.count);
+
+	dispatch_group_t group = dispatch_group_create();
+	dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+		dispatch_apply(bundles.count, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t i){
+			Bundle* bundle = bundles[i];
+			NSString* archive = CacheFileForDownload(bundle.downloadURL, bundle.downloadLastUpdated);
+
+			double progress = 0;
+			std::string error = NULL_STR;
+			std::string const src = network::download_tbz(to_s(bundle.downloadURL), keyChain, to_s(archive), error, &progress, 0, 1);
+			std::string const dst = to_s(bundle.path ?: [[[_installDirectory stringByAppendingPathComponent:@"Bundles"] stringByAppendingPathComponent:SafeBasename(bundle.name)] stringByAppendingPathExtension:@"tmbundle"]);
+
+			if(src == NULL_STR)
+				fprintf(stderr, "*** error downloading ‘%s’: %s\n", to_s(bundle.downloadURL).c_str(), error.c_str());
+			else if(path::exists(dst) && !path::remove(dst))
+				fprintf(stderr, "*** unable to remove old bundle ‘%s’\n", dst.c_str());
+			else if(!path::make_dir(path::parent(dst)))
+				fprintf(stderr, "*** destination directoy doesn’t exist ‘%s’\n", path::parent(dst).c_str());
+			else if(path::move(src, dst))
+				res[i] = dst;
 		});
+	});
 
-		dispatch_async(dispatch_get_main_queue(), ^{
-			for(auto bundle : bundles)
-			{
-				[self reloadPath:[NSString stringWithCxxString:bundle->path()] recursive:YES];
-				installing.erase(bundle->uuid());
-			}
+	dispatch_group_notify(group, dispatch_get_main_queue(), ^{
+		for(NSUInteger i = 0; i < bundles.count; ++i)
+		{
+			if(res[i] == NULL_STR)
+				continue;
 
-			callback(failedBundles);
-			[[NSNotificationCenter defaultCenter] postNotificationName:BundlesManagerBundlesDidChangeNotification object:self];
-			bundles_db::save_index(bundlesIndex, kInstallDirectory);
-		});
+			Bundle* bundle = bundles[i];
+			bundle.installed   = YES;
+			bundle.path        = to_ns(res[i]);
+			bundle.lastUpdated = bundle.downloadLastUpdated;
+
+			path::set_attr(res[i], kBundleAttributeUpdated, to_s(bundle.downloadLastUpdated));
+			[self reloadPath:bundle.path recursive:YES];
+		}
+
+		[self createBundlesIndex:self];
+		[self saveLocalIndex];
+
+		callback(bundles);
 	});
 }
 
-- (void)updateSources:(std::vector<bundles_db::source_ptr> const&)sourcesReference completionHandler:(void(^)(std::vector<bundles_db::source_ptr> failedSources))callback
+- (void)uninstallBundle:(Bundle*)bundle
 {
-	D(DBF_BundlesManager, bug("\n"););
-	__block std::vector<bundles_db::source_ptr> failedSources;
-	if(sourcesReference.empty())
-	{
-		callback(failedSources);
+	bundle.installed = NO;
+	if(!bundle.path || ![[NSFileManager defaultManager] removeItemAtPath:bundle.path error:nil])
 		return;
-	}
 
-	auto sources = sourcesReference;
-	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
-		dispatch_apply(sources.size(), dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^(size_t i){
-			D(DBF_BundlesManager, bug("Updating ‘%s’…\n", sources[i]->url().c_str()););
-			bundles_db::update(sources[i]);
-		});
+	[self erasePath:bundle.path];
 
-		dispatch_async(dispatch_get_main_queue(), ^{
-			bundlesIndex = bundles_db::index(kInstallDirectory);
-			// trigger reload for table view in Preferences → Bundles
-			[[NSNotificationCenter defaultCenter] postNotificationName:BundlesManagerBundlesDidChangeNotification object:self];
-			callback(failedSources);
-		});
-	});
-}
+	bundle.path        = nil;
+	bundle.lastUpdated = nil;
 
-- (void)installBundle:(bundles_db::bundle_ptr const&)aBundle completionHandler:(void(^)(BOOL))callback
-{
-	std::vector<bundles_db::bundle_ptr> bundles;
-	for(auto bundle : bundles_db::dependencies(bundlesIndex, aBundle, true, false))
-	{
-		if(installing.find(bundle->uuid()) == installing.end())
-		{
-			if(bundle != aBundle && !bundle->installed())
-				bundle->set_dependency(true);
-			bundles.push_back(bundle);
-			installing.insert(bundle->uuid());
-		}
-	}
+	// TODO Remove bundle’s dependencies
 
-	NSString* bundleName = [NSString stringWithCxxString:aBundle->name()];
-	self.activityText = [NSString stringWithFormat:@"Installing ‘%@’…", bundleName];
-	self.isBusy       = YES;
-	[self installBundles:bundles completionHandler:^(std::vector<bundles_db::bundle_ptr> failedBundles){
-		self.activityText = [NSString stringWithFormat:@"Installed ‘%@’.", bundleName];
-		self.isBusy       = NO;
-		if(callback)
-		{
-			[self createBundlesIndex:self];
-			callback(failedBundles.empty());
-		}
-	}];
-}
-
-- (void)uninstallBundle:(bundles_db::bundle_ptr const&)aBundle
-{
-	bundles_db::uninstall(aBundle);
-	[self erasePath:[NSString stringWithCxxString:aBundle->path()]];
-	bundles_db::save_index(bundlesIndex, kInstallDirectory);
-	self.activityText = [NSString stringWithFormat:@"Uninstalled ‘%@’.", [NSString stringWithCxxString:aBundle->name()]];
-}
-
-- (NSCellStateValue)installStateForBundle:(bundles_db::bundle_ptr const&)aBundle
-{
-	if(aBundle->installed())
-		return NSOnState;
-	else if(installing.find(aBundle->uuid()) != installing.end())
-		return NSMixedState;
-	return NSOffState;
-}
-
-- (NSUInteger)numberOfBundles
-{
-	return bundlesIndex.size();
-}
-
-- (bundles_db::bundle_ptr const&)bundleAtIndex:(NSUInteger)anIndex
-{
-	return bundlesIndex[anIndex];
+	[self saveLocalIndex];
 }
 
 // ===============================================
@@ -537,5 +449,263 @@ namespace
 
 	_needsCreateBundlesIndex = YES;
 	[self createBundlesIndex:self];
+}
+
+namespace
+{
+	static NSArray<Bundle*>* BundlesFromIndex (NSString* remoteIndexPath, NSString* localIndexPath, NSString* installDir, NSDictionary<NSUUID*, Bundle*>* cache = nil)
+	{
+		NSMutableDictionary* res = [NSMutableDictionary dictionary];
+
+		// =====================
+		// = Load Remote Index =
+		// =====================
+
+		NSMutableDictionary* dependencies   = [NSMutableDictionary dictionary];
+		NSMutableDictionary* bundlesByScope = [NSMutableDictionary dictionary];
+
+		for(NSDictionary* item in [[NSDictionary dictionaryWithContentsOfFile:remoteIndexPath] objectForKey:@"bundles"])
+		{
+			NSUUID* identifier = [[NSUUID alloc] initWithUUIDString:item[@"uuid"]];
+			Bundle* bundle = cache[identifier] ?: [[Bundle alloc] initWithIdentifier:identifier];
+
+			bundle.name              = item[@"name"];
+			bundle.minimumAppVersion = item[@"requires"];
+			bundle.category          = item[@"category"];
+			bundle.htmlURL           = [NSURL URLWithString:item[@"html_url"]];
+			bundle.contactName       = item[@"contactName"];
+			bundle.contactEmail      = to_ns(decode::rot13(to_s(item[@"contactEmailRot13"])));
+			bundle.summary           = item[@"description"];
+			bundle.recommended       = [item[@"isDefault"] boolValue];
+			bundle.mandatory         = [item[@"isMandatory"] boolValue];
+
+			NSDictionary* version = [item[@"versions"] firstObject];
+			bundle.downloadURL         = [NSURL URLWithString:version[@"url"]];
+			bundle.downloadLastUpdated = version[@"updated"];
+			bundle.downloadSize        = [version[@"size"] intValue];
+
+			NSMutableArray* grammars = [NSMutableArray array];
+			for(NSDictionary* info in item[@"grammars"])
+			{
+				BundleGrammar* grammar = [[BundleGrammar alloc] init];
+				grammar.bundle         = bundle;
+				grammar.name           = info[@"name"];
+				grammar.identifier     = [[NSUUID alloc] initWithUUIDString:info[@"uuid"]];
+				grammar.fileType       = info[@"scope"];
+				grammar.firstLineMatch = info[@"firstLineMatch"];
+				grammar.filePatterns   = info[@"fileTypes"];
+				[grammars addObject:grammar];
+
+				bundlesByScope[grammar.fileType] = bundle;
+			}
+			bundle.grammars = [grammars copy];
+			res[bundle.identifier] = bundle;
+
+			if([item[@"dependencies"] count])
+				dependencies[bundle.identifier] = item[@"dependencies"];
+		}
+
+		// ======================
+		// = Setup Dependencies =
+		// ======================
+
+		for(NSUUID* uuid in dependencies)
+		{
+			Bundle* bundle = res[uuid];
+
+			NSMutableArray* array = [NSMutableArray array];
+			for(NSDictionary* info in dependencies[uuid])
+			{
+				if(NSString* scope = info[@"grammar"])
+				{
+					if(Bundle* otherBundle = bundlesByScope[scope])
+							[array addObject:otherBundle];
+					else	NSLog(@"%@: No bundle provides ‘%@’.", bundle.name, scope);
+				}
+				else if(NSString* uuid = info[@"uuid"])
+				{
+					if(Bundle* otherBundle = [res objectForKey:[[NSUUID alloc] initWithUUIDString:uuid]])
+							[array addObject:otherBundle];
+					else	NSLog(@"%@: Required bundle not found ‘%@’ (%@).", bundle.name, info[@"name"], uuid);
+				}
+			}
+
+			bundle.dependencies = [array copy];
+		}
+
+		// ====================
+		// = Load Local Index =
+		// ====================
+
+		for(NSDictionary* item in [[NSDictionary dictionaryWithContentsOfFile:localIndexPath] objectForKey:@"bundles"])
+		{
+			NSUUID* identifier = [[NSUUID alloc] initWithUUIDString:item[@"uuid"]];
+			Bundle* bundle = res[identifier] ?: [[Bundle alloc] initWithIdentifier:identifier];
+
+			bundle.installed   = YES;
+			bundle.path        = [installDir stringByAppendingPathComponent:item[@"path"]];
+			bundle.category    = item[@"category"] ?: bundle.category ?: @"Discontinued";
+			bundle.lastUpdated = item[@"updated"];
+			bundle.dependency  = [item[@"isDependency"] boolValue];
+
+			res[bundle.identifier] = bundle;
+		}
+
+		// ========================
+		// = Load Bundles on Disk =
+		// ========================
+
+		NSMutableDictionary* bundlesByPath = [NSMutableDictionary dictionary];
+		for(Bundle* bundle in [res allValues])
+		{
+			if(bundle.path)
+				bundlesByPath[bundle.path] = bundle;
+		}
+
+		NSString* bundlesDir = [installDir stringByAppendingPathComponent:@"Bundles"];
+		for(auto const& entry : path::entries(to_s(bundlesDir), "*.tm[Bb]undle"))
+		{
+			NSString* bundlePath = [bundlesDir stringByAppendingPathComponent:to_ns(entry->d_name)];
+			if(Bundle* bundle = [bundlesByPath objectForKey:bundlePath])
+			{
+				[bundlesByPath removeObjectForKey:bundlePath];
+				if(bundle.downloadURL) // We have category, description etc. from remote index
+					continue;
+			}
+
+			if(NSDictionary* info = [NSDictionary dictionaryWithContentsOfFile:[bundlePath stringByAppendingPathComponent:@"info.plist"]])
+			{
+				NSUUID* identifier = [[NSUUID alloc] initWithUUIDString:info[@"uuid"]];
+				Bundle* bundle = res[identifier] ?: [[Bundle alloc] initWithIdentifier:identifier];
+
+				bundle.installed    = YES;
+				bundle.path         = bundlePath;
+				bundle.category     = bundle.category     ?: @"Orphaned";
+				bundle.name         = bundle.name         ?: info[@"name"];
+				bundle.contactName  = bundle.contactName  ?: info[@"contactName"];
+				bundle.contactEmail = bundle.contactEmail ?: to_ns(decode::rot13(to_s(info[@"contactEmailRot13"])));
+				bundle.summary      = bundle.summary      ?: info[@"description"];
+
+				NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
+				dateFormatter.dateFormat = @"yyyy-MM-dd HH:mm:ss ZZZZZ";
+				if(NSString* str = to_ns(path::get_attr(to_s(bundlePath), kBundleAttributeUpdated)))
+					bundle.lastUpdated = [dateFormatter dateFromString:str];
+
+				res[bundle.identifier] = bundle;
+
+				NSLog(@"Found: ‘%@’ missing in local index.", bundle.name);
+			}
+		}
+
+		for(Bundle* bundle in [bundlesByPath allValues])
+		{
+			bundle.installed = NO;
+			NSLog(@"Missing: ‘%@’ not on disk.", bundle.name);
+		}
+
+		return [[res allValues] sortedArrayUsingDescriptors:@[ [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES selector:@selector(localizedCompare:)] ]];
+	}
+
+	static std::tuple<std::string, std::string> conditional_download (std::string const& url, key_chain_t const& keyChain, std::string const& etag)
+	{
+		network::check_signature_t validator(keyChain, kHTTPSigneeHeader, kHTTPSignatureHeader);
+		network::save_t archiver(false);
+		etag_t collect_etag;
+
+		std::string error = NULL_STR;
+		long res = network::download(network::request_t(url, &validator, &archiver, &collect_etag, NULL).set_entity_tag(etag), &error);
+		if(res == 200)
+			return { archiver.path, collect_etag.etag };
+		else if(res == 304) // Not modified
+			path::remove(archiver.path);
+		else if(res != 0)
+			fprintf(stderr, "*** %s(‘%s’): got ‘%ld’ from server (expected 200)\n", __FUNCTION__, url.c_str(), res);
+		else
+			fprintf(stderr, "*** %s(‘%s’): %s\n", __FUNCTION__, url.c_str(), error.c_str());
+
+		return { NULL_STR, NULL_STR };
+	}
+}
+
+- (key_chain_t)keyChain
+{
+	key_chain_t res;
+	for(NSDictionary* key in [[NSDictionary dictionaryWithContentsOfFile:_remoteIndexPath] objectForKey:@"keys"])
+		res.add(key_chain_t::key_t(to_s(key[@"identity"]), to_s(key[@"name"]), to_s(key[@"publicKey"])));
+
+	res.add(key_chain_t::key_t("org.textmate.duff",    "Allan Odgaard",  "-----BEGIN PUBLIC KEY-----\nMIIBtjCCASsGByqGSM44BAEwggEeAoGBAPIE9PpXPK3y2eBDJ0dnR/D8xR1TiT9m\n8DnPXYqkxwlqmjSShmJEmxYycnbliv2JpojYF4ikBUPJPuerlZfOvUBC99ERAgz7\nN1HYHfzFIxVo1oTKWurFJ1OOOsfg8AQDBDHnKpS1VnwVoDuvO05gK8jjQs9E5LcH\ne/opThzSrI7/AhUAy02E9H7EOwRyRNLofdtPxpa10o0CgYBKDfcBscidAoH4pkHR\nIOEGTCYl3G2Pd1yrblCp0nCCUEBCnvmrWVSXUTVa2/AyOZUTN9uZSC/Kq9XYgqwj\nhgzqa8h/a8yD+ao4q8WovwGeb6Iso3WlPl8waz6EAPR/nlUTnJ4jzr9t6iSH9owS\nvAmWrgeboia0CI2AH++liCDvigOBhAACgYAFWO66xFvmF2tVIB+4E7CwhrSi2uIk\ndeBrpmNcZZ+AVFy1RXJelNe/cZ1aXBYskn/57xigklpkfHR6DGqpEbm6KC/47Jfy\ny5GEx+F/eBWEePi90XnLinytjmXRmS2FNqX6D15XNG1xJfjociA8bzC7s4gfeTUd\nlpQkBq2z71yitA==\n-----END PUBLIC KEY-----\n"));
+	res.add(key_chain_t::key_t("org.textmate.msheets", "Michael Sheets", "-----BEGIN PUBLIC KEY-----\nMIIDOzCCAi4GByqGSM44BAEwggIhAoIBAQDfYsqBc18uL7yYb/bDrrEtVTBG8tML\nmMtNFyU8XhlVKWdQJwBGG/fV2Wjc0hVYSeTWv3VueITZbuuVZEePXlem6Dki1DEL\nsMNeDvE/l0MKHXi1+sr1cht7QvuTi/c1UK4I6QNWDJWi7KmqJg3quLCwJfMef1x5\n/qgLUln5cU6+pAj43Vp62bzHJBjAnrC432yD7F4Mxu4oV/PEm5QC6pU7RcvUwAox\np7m7c8+CxX7Aq4dH6Jd8Jt6XuYIktlfcFivvvF60CvxhABDBdGMra4roO0wlJmID\n91oQ3PLxFBsDmbluPJlkmTp4YetsF8/Zd9P3WwBQUArtNdiqKZIQ4uHXAhUAvNZ5\ntZkzuUiblIxZKmOCBN/JeMsCggEBAK9jUiC98+hwY5XcDQjDSLPE4uvv+dHZ29Bx\n8KevX+qzd6shIhp6urvyBXrM+h8l7iB6Jh4Wm3WhqKMBjquRqyGogQDGxJr7QBVk\nQSOiyaKDT4Ue/Nhg1MFsrt3PtS1/nscZ6GGWswrCfQ1t4m/wXDasUSfz2smae+Jd\nZ6UGBzWQMRawyU/O/LX0PlJkBOMHopecAUcxHc2G02P2QwAMKPavwksQ4tWCJvIr\n7ZELfCcVQtG2UnpTRWqLZQaVwSYMHoNK9/reu099sdv9CQ+trH2Q5LlBXJmHloFK\nafiuQPjTmaJVf/piiQ79xJB6VmwoEpOJJG4NYNt7f+I7YCk07xwDggEFAAKCAQA5\nSBwWJouMKUI6Hi0EZ4/Yh98qQmItx4uWTYFdjcUVVYCKK7GIuXu67rfkbCJUrvT9\nID1vw2eyTmbuW2TPuRDsxUcB7WRyyLekl67vpUgMgLBLgYMXQf6RF4HM2tW7UWg7\noNQHkZKWbhDgXdumKzKf/qZPB/LT2Yndv/zqkQ+YXIu08j0RGkxJaAjB7nEv1XGq\nL2VJf8aEi+MnihAtMPCHcW34qswqO1kOCbOWNShlfWHGjKlfdsPYv87RcalHNqps\nk1r60kyEkeZvKGM+FDT80N7cafX286v8n9L4IvvnLr/FDOH4XXzEjXB9Vr5Ffvj1\ndxNPRmDZOo6JNKA8Uvki\n-----END PUBLIC KEY-----\n"));
+
+	return res;
+}
+
+- (NSArray<Bundle*>*)bundles
+{
+	if(!_bundles)
+		_bundles = [self bundlesByLoadingIndex];
+	return _bundles;
+}
+
+- (NSArray<Bundle*>*)bundlesByLoadingIndex
+{
+	NSMutableDictionary* previousBundles = [NSMutableDictionary dictionary];
+	for(Bundle* bundle : _bundles)
+		previousBundles[bundle.identifier] = bundle;
+	return BundlesFromIndex(_remoteIndexPath, _localIndexPath, _installDirectory, previousBundles);
+}
+
+- (void)updateRemoteIndexWithCompletionHandler:(void(^)())callback
+{
+	std::string const path = to_s(_remoteIndexPath);
+	std::string const url  = to_s(_remoteIndexURL);
+
+	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+		std::string temp, etag;
+		std::tie(temp, etag) = conditional_download(url, self.keyChain, path::get_attr(path, "org.w3.http.etag"));
+		path::set_attr(path, "last-check", to_s(oak::date_t::now()));
+
+		if(temp != NULL_STR)
+		{
+			if(path::swap_and_unlink(temp, path))
+			{
+				path::set_attr(path, "org.w3.http.etag", etag);
+				dispatch_async(dispatch_get_main_queue(), ^{
+					self.bundles = [self bundlesByLoadingIndex];
+					callback();
+				});
+			}
+			else
+			{
+				fprintf(stderr, "*** swap_and_unlink(‘%s’ → ‘%s’): %s\n", temp.c_str(), path.c_str(), strerror(errno));
+			}
+		}
+	});
+}
+
+- (void)saveLocalIndex
+{
+	if(!_bundles)
+		return;
+
+	NSMutableArray* bundles = [NSMutableArray array];
+	for(Bundle* bundle : [_bundles filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isInstalled == YES && path != NULL"]])
+	{
+		NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithDictionary:@{
+			@"uuid"     : [bundle.identifier UUIDString],
+			@"path"     : [bundle.path stringByReplacingOccurrencesOfString:[_installDirectory stringByAppendingString:@"/"] withString:@""],
+		}];
+
+		if(bundle.lastUpdated)
+			dict[@"updated"]  = bundle.lastUpdated;
+		if(bundle.isDependency)
+			dict[@"isDependency"] = @YES;
+		if(bundle.category)
+			dict[@"category"] = bundle.category;
+
+		[bundles addObject:dict];
+	}
+
+	NSDictionary* plist = @{ @"bundles" : bundles };
+	[plist writeToFile:_localIndexPath atomically:YES];
 }
 @end
