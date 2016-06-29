@@ -1,5 +1,5 @@
 SOURCES      = src/*.mm
 EXPORT       = src/{Preferences,Keys,TerminalPreferences,PreferencesPane}.h
 CP_Resources = resources/* icons/*
-LINK         = BundlesManager CrashReporter MASPreferences MGScopeBar OakAppKit OakFoundation SoftwareUpdate bundles io ns regexp settings text updater version
+LINK         = BundlesManager CrashReporter MASPreferences MGScopeBar OakAppKit OakFoundation SoftwareUpdate bundles io ns regexp settings text version
 FRAMEWORKS   = Cocoa AddressBook

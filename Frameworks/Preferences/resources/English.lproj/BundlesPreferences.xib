@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="9059" systemVersion="14F1021" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="10117" systemVersion="15F34" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment version="1080" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="9059"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="10117"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="BundlesPreferences">
             <connections>
                 <outlet property="activityTextField" destination="16" id="28"/>
+                <outlet property="arrayController" destination="Ia6-Ek-fpN" id="4Bz-k4-IBN"/>
                 <outlet property="bundlesTableView" destination="6" id="12"/>
                 <outlet property="categoriesScopeBar" destination="33" id="35"/>
                 <outlet property="searchField" destination="Lpz-eY-Nrt" id="4Om-x4-VOA"/>
@@ -51,6 +52,9 @@
                                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                             <font key="font" metaFont="smallSystem"/>
                                         </buttonCell>
+                                        <connections>
+                                            <binding destination="Ia6-Ek-fpN" name="value" keyPath="arrangedObjects.installedCellState" id="UzC-Gb-Xco"/>
+                                        </connections>
                                     </tableColumn>
                                     <tableColumn identifier="name" editable="NO" width="110" minWidth="40" maxWidth="1000" id="9">
                                         <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Bundle">
@@ -64,6 +68,13 @@
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                         </textFieldCell>
                                         <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
+                                        <connections>
+                                            <binding destination="Ia6-Ek-fpN" name="value" keyPath="arrangedObjects.name" id="hjB-uE-lrY">
+                                                <dictionary key="options">
+                                                    <bool key="NSConditionallySetsEditable" value="YES"/>
+                                                </dictionary>
+                                            </binding>
+                                        </connections>
                                     </tableColumn>
                                     <tableColumn identifier="link" width="16" minWidth="16" maxWidth="16" id="48">
                                         <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left">
@@ -86,12 +97,16 @@
                                             <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                             <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
                                         </tableHeaderCell>
-                                        <textFieldCell key="dataCell" controlSize="small" lineBreakMode="truncatingTail" selectable="YES" editable="YES" alignment="left" title="Text Cell" id="30">
+                                        <textFieldCell key="dataCell" controlSize="small" lineBreakMode="truncatingTail" selectable="YES" editable="YES" alignment="right" title="Text Cell" id="30">
+                                            <dateFormatter key="formatter" dateStyle="medium" doesRelativeDateFormatting="YES" id="MUP-7W-bNf"/>
                                             <font key="font" metaFont="smallSystem"/>
                                             <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                         </textFieldCell>
                                         <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
+                                        <connections>
+                                            <binding destination="Ia6-Ek-fpN" name="value" keyPath="arrangedObjects.downloadLastUpdated" id="tAJ-Hv-bKz"/>
+                                        </connections>
                                     </tableColumn>
                                     <tableColumn identifier="description" width="191" minWidth="10" maxWidth="3.4028234663852886e+38" id="31">
                                         <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Description">
@@ -105,10 +120,13 @@
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                         </textFieldCell>
                                         <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
+                                        <connections>
+                                            <binding destination="Ia6-Ek-fpN" name="value" keyPath="arrangedObjects.textSummary" id="rGo-yn-U8q"/>
+                                        </connections>
                                     </tableColumn>
                                 </tableColumns>
                                 <connections>
-                                    <outlet property="dataSource" destination="-2" id="13"/>
+                                    <binding destination="Ia6-Ek-fpN" name="content" keyPath="arrangedObjects" id="F1H-LM-ntF"/>
                                     <outlet property="delegate" destination="-2" id="14"/>
                                 </connections>
                             </tableView>
@@ -172,6 +190,11 @@
                 <action selector="filterStringDidChange:" target="-2" id="opP-sc-4g1"/>
             </connections>
         </searchField>
+        <arrayController id="Ia6-Ek-fpN">
+            <connections>
+                <binding destination="-2" name="contentArray" keyPath="bundlesManager.bundles" id="IJk-5R-o35"/>
+            </connections>
+        </arrayController>
     </objects>
     <resources>
         <image name="NSFollowLinkFreestandingTemplate" width="14" height="14"/>
