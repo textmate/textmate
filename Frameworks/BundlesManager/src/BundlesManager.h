@@ -5,8 +5,6 @@ PUBLIC extern NSString* const kUserDefaultsDisableBundleUpdatesKey;
 PUBLIC extern NSString* const kUserDefaultsLastBundleUpdateCheckKey;
 
 PUBLIC @interface BundlesManager : NSObject
-@property (nonatomic) BOOL autoUpdateBundles;
-
 @property (nonatomic) NSString* activityText;
 @property (nonatomic) BOOL      isBusy;
 @property (nonatomic, readonly) BOOL      determinateProgress;

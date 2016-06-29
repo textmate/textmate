@@ -48,6 +48,8 @@ static NSString* CacheFileForDownload (NSURL* url, NSDate* date)
 	std::set<std::string> watchList;
 	plist::cache_t cache;
 }
+@property (nonatomic) BOOL      autoUpdateBundles;
+
 @property (nonatomic) BOOL      determinateProgress;
 @property (nonatomic) CGFloat   progress;
 @property (nonatomic) NSTimer*  updateTimer;
@@ -80,9 +82,16 @@ static NSString* CacheFileForDownload (NSURL* url, NSDate* date)
 		_remoteIndexPath  = [_installDirectory stringByAppendingPathComponent:@"Cache/org.textmate.updates.default"];
 		_remoteIndexURL   = [NSURL URLWithString:@REST_API "/bundles"];
 
+		[self userDefaultsDidChange:nil];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:NSApp];
 	}
 	return self;
+}
+
+- (void)userDefaultsDidChange:(id)sender
+{
+	self.autoUpdateBundles = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableBundleUpdatesKey];
 }
 
 - (void)applicationWillTerminate:(NSNotification*)aNotification
@@ -118,9 +127,6 @@ static NSString* CacheFileForDownload (NSURL* url, NSDate* date)
 
 - (void)didFireUpdateTimer:(NSTimer*)aTimer
 {
-	if([[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableBundleUpdatesKey])
-		return;
-
 	NSSet* oldRecommendations = [NSSet setWithArray:[self.bundles filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isRecommended == YES"]]];
 	[self updateRemoteIndexWithCompletionHandler:^{
 		NSArray* bundles = [self.bundles filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"(hasUpdate == YES && isCompatible == YES) || (isInstalled == NO && (isMandatory == YES || (isRecommended == YES && isCompatible == YES && !(SELF IN %@))))", oldRecommendations]];
