@@ -7,6 +7,8 @@ PUBLIC extern NSString* OakDocumentMarksDidChangeNotification;
 PUBLIC extern NSString* OakDocumentDidSaveNotification;
 PUBLIC extern NSString* OakDocumentWillCloseNotification;
 
+@class BundleGrammar;
+
 PUBLIC @interface OakDocument : NSObject
 + (instancetype)documentWithPath:(NSString*)aPath;
 + (instancetype)documentWithData:(NSData*)someData fileType:(NSString*)aFileType customName:(NSString*)aName;
@@ -43,6 +45,8 @@ PUBLIC @interface OakDocument : NSObject
 - (void)enumerateSymbolsUsingBlock:(void(^)(text::pos_t const& pos, NSString* symbol))block;
 - (void)enumerateByteRangesUsingBlock:(void(^)(char const* bytes, NSRange byteRange, BOOL* stop))block;
 @property (nonatomic) NSString* content;
+
+- (NSArray<BundleGrammar*>*)proposedGrammars;
 
 @property (nonatomic, readonly) BOOL canUndo;
 @property (nonatomic, readonly) BOOL canRedo;
