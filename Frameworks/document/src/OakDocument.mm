@@ -634,7 +634,20 @@ private:
 
 		void show_content (std::string const& path, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, encoding::type const& encoding, std::vector<oak::uuid_t> const& binaryImportFilters, std::vector<oak::uuid_t> const& textImportFilters)
 		{
-			_self.fileType = _self.fileType ?: to_ns(file::type(path, content, to_s(_self.virtualPath))) ?: @"text.plain";
+			NSString* docPath = _self.virtualPath ?: _self.path;
+
+			// Check if user has an explicit binding for this path (e.g. *.md → Markdown)
+			if(!_self.fileType && docPath)
+				_self.fileType = to_ns(settings_for_path(to_s(docPath)).get(kSettingsFileTypeKey, NULL_STR));
+
+			// Check if a grammar recognizes the content (e.g. #!/usr/bin/ruby → Ruby)
+			if(!_self.fileType)
+				_self.fileType = to_ns(file::type_from_bytes(content));
+
+			// Check if a grammar recognizes the path extension (.git/config → Git Config)
+			if(!_self.fileType && docPath)
+				_self.fileType = to_ns(file::type_from_path(to_s(docPath)));
+
 			[_self didLoadContent:content attributes:attributes encoding:encoding];
 			_block(YES, nil, oak::uuid_t());
 		}
