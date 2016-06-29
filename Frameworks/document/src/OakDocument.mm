@@ -289,7 +289,7 @@ private:
 		variables["TM_DIRECTORY"] = path::parent(to_s(_path));
 	}
 
-	settings_t const settings = settings_for_path(to_s(_virtualPath), to_s(_fileType), path::parent(to_s(_path)), variables);
+	settings_t const settings = settings_for_path(to_s(_virtualPath ?: _path), to_s(_fileType), path::parent(to_s(_path)), variables);
 	if(updateSpelling)
 	{
 		self.spellingLanguage = to_ns(settings.get(kSettingsSpellingLanguageKey, ""));
