@@ -1029,6 +1029,13 @@ namespace
 	[doc->document() loadModalForWindow:self.window completionHandler:^(BOOL success, NSString* errorMessage, oak::uuid_t const& filterUUID){
 		if(success)
 		{
+			OakDocument* document = doc->document();
+			if(!document.fileType)
+			{
+				std::string const docAttributes = document.path ? "attr.file.unknown-type" : "attr.untitled";
+				document.fileType = to_ns(settings_for_path(to_s(document.virtualPath ?: document.path), docAttributes, to_s(self.projectPath)).get(kSettingsFileTypeKey, "text.plain"));
+			}
+
 			[self makeTextViewFirstResponder:self];
 			[self setSelectedDocument:doc];
 			[self performSelector:@selector(didOpenDocuemntInTextView:) withObject:self.documentView.textView afterDelay:0];
