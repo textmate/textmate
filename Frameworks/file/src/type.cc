@@ -24,11 +24,6 @@ static std::string file_type_from_grammars (std::vector<bundles::item_ptr> const
 	return NULL_STR;
 }
 
-static std::string file_type_from_path (std::string const& path)
-{
-	return path != NULL_STR ? file_type_from_grammars(bundles::grammars_for_path(path)) : NULL_STR;
-}
-
 static size_t lines_matched_by_regexp (std::string const& pattern)
 {
 	size_t newlines = 1;
@@ -82,7 +77,7 @@ static std::string find_file_type (std::string const& path, io::bytes_ptr const&
 
 	// check if a grammar recognize the path extension (.git/config → Git Config)
 	if(unknown_file_type(res) && effectivePath != NULL_STR)
-		res = file_type_from_path(effectivePath);
+		res = file::type_from_path(effectivePath);
 
 	// check if there is a setting for untitled files (pathAttributes include ‘attr.untitled’)
 	if(unknown_file_type(res) && effectivePath == NULL_STR)
@@ -121,6 +116,11 @@ namespace file
 			}
 		}
 		return ordering.empty() ? NULL_STR : file_type_from_grammars(std::vector<bundles::item_ptr>(1, ordering.begin()->second));
+	}
+
+	std::string type_from_path (std::string const& path)
+	{
+		return path != NULL_STR ? file_type_from_grammars(bundles::grammars_for_path(path)) : NULL_STR;
 	}
 
 	std::string type (std::string const& path, io::bytes_ptr const& bytes, std::string const& virtualPath)
