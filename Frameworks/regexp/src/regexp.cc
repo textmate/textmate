@@ -6,6 +6,21 @@
 
 namespace regexp
 {
+	std::string escape (std::string ptrn)
+	{
+		char const* const specialChars = "[]{}()|*.\\?+^$#";
+
+		auto last = ptrn.size();
+		while(last > 0)
+		{
+			last = ptrn.find_last_of(specialChars, last-1);
+			if(last == std::string::npos)
+				break;
+			ptrn.insert(last, "\\");
+		}
+		return ptrn;
+	}
+
 	// =============
 	// = pattern_t =
 	// =============
