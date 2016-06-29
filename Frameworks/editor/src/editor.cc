@@ -342,6 +342,11 @@ namespace ng
 			if(fragments > 1)      _options["fragments"] = std::to_string(fragments);
 			if(columnar)           _options["columnar"]  = "1";
 		}
+
+		my_clipboard_entry_t (std::string const& content, std::map<std::string, std::string> const& options = { }) : clipboard_t::entry_t(content), _options(options)
+		{
+		}
+
 		std::map<std::string, std::string> const& options () const { return _options; }
 	private:
 		std::map<std::string, std::string> _options;
@@ -1051,7 +1056,30 @@ namespace ng
 
 			case kCut:                                          clipboard()->push_back(copy(_buffer, _selections)); _selections = apply(_buffer, _selections, _snippets, &transform::null); break;
 			case kCopy:                                         clipboard()->push_back(copy(_buffer, _selections));                                                                         break;
-			case kCopySelectionToFindPboard:                    find_clipboard()->push_back(copy(_buffer, dissect_columnar(_buffer, _selections).first()));                                                                    break;
+
+			case kCopySelectionToFindPboard:
+			{
+				std::set<std::string> set;
+				for(auto const& range : dissect_columnar(_buffer, _selections))
+				{
+					if(!range.empty())
+						set.insert(_buffer.substr(range.min().index, range.max().index));
+				}
+
+				if(set.size() > 1)
+				{
+					std::string regexp;
+					for(std::string const& str : set)
+						regexp.append("|" + regexp::escape(str));
+					find_clipboard()->push_back(std::make_shared<my_clipboard_entry_t>(regexp.substr(1), std::map<std::string, std::string>{ { "regularExpression", "1" } }));
+				}
+				else if(!set.empty())
+				{
+					find_clipboard()->push_back(std::make_shared<my_clipboard_entry_t>(*set.begin()));
+				}
+			}
+			break;
+
 			case kCopySelectionToReplacePboard:                 replace_clipboard()->push_back(copy(_buffer, dissect_columnar(_buffer, _selections).first()));                                                                 break;
 			case kPaste:                                        _selections = paste(_buffer, _selections, _snippets, clipboard()->current());                                               break;
 			case kPastePrevious:                                _selections = paste(_buffer, _selections, _snippets, clipboard()->previous());                                              break;
