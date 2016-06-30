@@ -64,7 +64,7 @@ ng::ranges_t delegate_t::write_unit_to_fd (int fd, input::type unit, input::type
 	bool isOpen = _document->is_open();
 	if(!isOpen)
 		_document->sync_open();
-	ng::ranges_t const res = ng::write_unit_to_fd(_document->buffer(), ng::editor_for_document(_document)->ranges(), _document->buffer().indent().tab_size(), fd, unit, fallbackUnit, format, scopeSelector, variables, inputWasSelection);
+	ng::ranges_t const res = ng::write_unit_to_fd(_document->buffer(), ng::editor_for_document(_document)->ranges(), _document->indent().tab_size(), fd, unit, fallbackUnit, format, scopeSelector, variables, inputWasSelection);
 	if(!isOpen)
 		_document->close();
 	return res;

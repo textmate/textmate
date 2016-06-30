@@ -81,8 +81,8 @@ struct document_view_callback_t : document::document_t::callback_t
 		}
 		else if(event == did_change_indent_settings)
 		{
-			self.statusBar.tabSize  = document->buffer().indent().tab_size();
-			self.statusBar.softTabs = document->buffer().indent().soft_tabs();
+			self.statusBar.tabSize  = document->indent().tab_size();
+			self.statusBar.softTabs = document->indent().soft_tabs();
 		}
 	}
 private:
@@ -359,8 +359,8 @@ private:
 		document->show();
 
 		_statusBar.fileType = [NSString stringWithCxxString:document->file_type()];
-		_statusBar.tabSize  = document->buffer().indent().tab_size();
-		_statusBar.softTabs = document->buffer().indent().soft_tabs();
+		_statusBar.tabSize  = document->indent().tab_size();
+		_statusBar.softTabs = document->indent().soft_tabs();
 	}
 
 	[_textView setDocument:document];
