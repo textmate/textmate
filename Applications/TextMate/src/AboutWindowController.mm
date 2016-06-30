@@ -267,13 +267,11 @@ static NSTextField* OakCreateTextField ()
 		{
 			NSData* lastDigest    = [[NSUserDefaults standardUserDefaults] dataForKey:kUserDefaultsReleaseNotesDigestKey];
 			NSData* currentDigest = Digest(releaseNotes);
-			if(lastDigest && ![lastDigest isEqualToData:currentDigest])
-			{
-				dispatch_async(dispatch_get_main_queue(), ^{
+			dispatch_async(dispatch_get_main_queue(), ^{
+				if(lastDigest && ![lastDigest isEqualToData:currentDigest])
 					[[AboutWindowController sharedInstance] showChangesWindow:self];
-					[[NSUserDefaults standardUserDefaults] setObject:currentDigest forKey:kUserDefaultsReleaseNotesDigestKey];
-				});
-			}
+				[[NSUserDefaults standardUserDefaults] setObject:currentDigest forKey:kUserDefaultsReleaseNotesDigestKey];
+			});
 		}
 	});
 }
