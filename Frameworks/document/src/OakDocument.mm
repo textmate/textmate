@@ -187,6 +187,8 @@ static NSString* FileExtensionForGrammar (parse::grammar_ptr grammar)
 @property (nonatomic) BOOL observeFileSystem;
 @property (nonatomic) BOOL needsImportDocumentChanges;
 
+@property (nonatomic) NSArray<void(^)(BOOL, NSString*, oak::uuid_t const&)>* loadCompletionHandlers;
+
 // These are also exposed in ‘OakDocument Private.h’
 @property (nonatomic) NSInteger   revision;
 @property (nonatomic) NSInteger   savedRevision;
@@ -572,7 +574,12 @@ private:
 - (void)loadModalForWindow:(NSWindow*)aWindow completionHandler:(void(^)(BOOL success, NSString* errorMessage, oak::uuid_t const& filterUUID))block
 {
 	if(++self.openCount != 1)
-		return block(YES, nil, oak::uuid_t());
+	{
+		if(!_loadCompletionHandlers)
+				block(YES, nil, oak::uuid_t());
+		else	_loadCompletionHandlers = [_loadCompletionHandlers arrayByAddingObject:block];
+		return;
+	}
 
 	if(_backupPath)
 	{
@@ -668,7 +675,13 @@ private:
 		[self deleteBuffer];
 	}
 
-	auto cb = std::make_shared<callback_t>(self, aWindow, block);
+	self.loadCompletionHandlers = @[ block ];
+	auto cb = std::make_shared<callback_t>(self, aWindow, ^(BOOL success, NSString* errorMessage, oak::uuid_t const& filterUUID){
+		auto blocks = self.loadCompletionHandlers;
+		self.loadCompletionHandlers = nil;
+		for(void(^f)(BOOL, NSString*, oak::uuid_t const&) in blocks)
+			f(success, errorMessage, filterUUID);
+	});
 	file::open(to_s(_path), _authorization, cb, content);
 }
 
