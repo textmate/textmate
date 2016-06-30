@@ -931,8 +931,7 @@ private:
 
 - (void)clearAllBookmarks:(id)sender
 {
-	document->buffer().remove_all_marks(document::kBookmarkIdentifier);
-	[[NSNotificationCenter defaultCenter] postNotificationName:GVColumnDataSourceDidChange object:self];
+	document->remove_all_marks(document::kBookmarkIdentifier);
 }
 
 // ========================
