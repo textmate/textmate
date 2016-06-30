@@ -929,8 +929,8 @@ private:
 - (void)setTabSize:(NSUInteger)value                  { if(_buffer) _buffer->indent().set_tab_size(value); }
 - (void)setSoftTabs:(BOOL)value                       { if(_buffer) _buffer->indent().set_soft_tabs(value); }
 
-- (ng::buffer_t&)buffer                               { return *_buffer; }
-- (ng::undo_manager_t&)undoManager                    { return *_undoManager; }
+- (ng::buffer_t&)buffer                               { ASSERT(_buffer); return *_buffer; }
+- (ng::undo_manager_t&)undoManager                    { ASSERT(_undoManager); return *_undoManager; }
 
 - (NSArray<BundleGrammar*>*)proposedGrammars
 {
