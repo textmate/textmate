@@ -2,6 +2,7 @@
 #import "ProjectLayoutView.h"
 #import "DocumentSaveHelper.h"
 #import "DocumentCommand.h" // show_command_error
+#import "SelectGrammarViewController.h"
 #import "OakRunCommandWindowController.h"
 #import <document/OakDocument.h>
 #import <OakAppKit/NSAlert Additions.h>
@@ -21,6 +22,8 @@
 #import <OakSystem/application.h>
 #import <OakSystem/process.h>
 #import <Find/Find.h>
+#import <BundlesManager/BundlesManager.h>
+#import <network/network.h>
 #import <crash/info.h>
 #import <file/path_info.h>
 #import <io/entries.h>
@@ -35,6 +38,8 @@
 static NSString* const kUserDefaultsAlwaysFindInDocument = @"alwaysFindInDocument";
 static NSString* const kUserDefaultsDisableFolderStateRestore = @"disableFolderStateRestore";
 static NSString* const kUserDefaultsHideStatusBarKey = @"hideStatusBar";
+static NSString* const kUserDefaultsDisableBundleSuggestionsKey = @"disableBundleSuggestions";
+static NSString* const kUserDefaultsGrammarsToNeverSuggestKey = @"grammarsToNeverSuggest";
 static BOOL IsInShouldTerminateEventLoop = NO;
 
 @interface QuickLookNSURLWrapper : NSObject <QLPreviewItem>
@@ -80,6 +85,7 @@ static BOOL IsInShouldTerminateEventLoop = NO;
 @property (nonatomic) scm::status::type           documentSCMStatus;
 
 @property (nonatomic) NSArray*                    urlArrayForQuickLook;
+@property (nonatomic) NSArray<Bundle*>*           bundlesAlreadySuggested;
 
 + (void)scheduleSessionBackup:(id)sender;
 
@@ -1030,8 +1036,48 @@ namespace
 		if(success)
 		{
 			OakDocument* document = doc->document();
-			if(!document.fileType)
+			BOOL showBundleSuggestions = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableBundleSuggestionsKey];
+			if(!document.fileType && showBundleSuggestions && network::can_reach_host([[[NSURL URLWithString:@(REST_API)] host] UTF8String]))
 			{
+				NSArray<BundleGrammar*>* grammars = document.proposedGrammars;
+				if(NSArray* excludedGrammars = [[NSUserDefaults standardUserDefaults] arrayForKey:kUserDefaultsGrammarsToNeverSuggestKey])
+					grammars = [grammars filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"!(identifier.UUIDString IN %@)", excludedGrammars]];
+				if(_bundlesAlreadySuggested)
+					grammars = [grammars filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"!(bundle IN %@)", _bundlesAlreadySuggested]];
+
+				if([grammars count])
+				{
+					self.bundlesAlreadySuggested = [(_bundlesAlreadySuggested ?: @[ ]) arrayByAddingObject:[grammars firstObject].bundle];
+
+					SelectGrammarViewController* installer = [[SelectGrammarViewController alloc] init];
+					installer.documentDisplayName = document.path || document.customName ? document.displayName : nil;
+
+					__weak __block id documentCloseObserver = [[NSNotificationCenter defaultCenter] addObserverForName:OakDocumentWillCloseNotification object:document queue:nil usingBlock:^(NSNotification*){
+						[installer dismiss];
+						[[NSNotificationCenter defaultCenter] removeObserver:documentCloseObserver];
+					}];
+
+					[installer showGrammars:grammars forView:_documentView completionHandler:^(SelectGrammarResponse response, BundleGrammar* grammar){
+						if(response == SelectGrammarResponseInstall && grammar.bundle.isInstalled)
+						{
+							for(document::document_ptr cppDoc : _documents)
+							{
+								OakDocument* doc = cppDoc->document();
+								if([doc isEqual:document] || [[doc proposedGrammars] containsObject:grammar])
+									doc.fileType = grammar.fileType;
+							}
+						}
+						else if(response == SelectGrammarResponseNever)
+						{
+							NSArray* excludedGrammars = [[NSUserDefaults standardUserDefaults] arrayForKey:kUserDefaultsGrammarsToNeverSuggestKey] ?: @[ ];
+							[[NSUserDefaults standardUserDefaults] setObject:[excludedGrammars arrayByAddingObject:grammar.identifier.UUIDString] forKey:kUserDefaultsGrammarsToNeverSuggestKey];
+						}
+
+						if(id observer = documentCloseObserver)
+							[[NSNotificationCenter defaultCenter] removeObserver:observer];
+					}];
+				}
+
 				std::string const docAttributes = document.path ? "attr.file.unknown-type" : "attr.untitled";
 				document.fileType = to_ns(settings_for_path(to_s(document.virtualPath ?: document.path), docAttributes, to_s(self.projectPath)).get(kSettingsFileTypeKey, "text.plain"));
 			}
