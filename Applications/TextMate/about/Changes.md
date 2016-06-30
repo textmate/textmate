@@ -2,7 +2,12 @@ Title: Release Notes
 
 # Changes
 
-Requirement for TextMate will be **10.8** starting with next build.
+## 2016-06-30 (v2.0-beta.11)
+
+* Inserting type identifiable information on first line of a document will now change the document’s type to match. For example in a new plain text document you can use `py⇥`, `rb⇥`, `pl⇥` or similar (at the top) to insert a “shebang” line, and now TextMate will update the document’s type to reflect it.
+* Copying multiple selections to the find clipboard (⌘E) will construct a regular expression that matches any of the items copied. For example if you select both “foo” and “bar” then using ⌘E will put `foo|bar` on the find clipboard.
+* When opening a file with unknown type we no longer present a sheet forcing you to select what type to use. Instead, if the type of the document can be handled by a remote bundle, we suggest installing this bundle using a non-modal dialog above your document. Here you can hold down option (⌥) to change the “Not Now” button to “Never”.
+* See [all changes since v2.0-beta.10](https://github.com/textmate/textmate/compare/v2.0-beta.10...v2.0-beta.11)
 
 ## 2016-06-22 (v2.0-beta.10)
 
