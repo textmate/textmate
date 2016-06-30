@@ -2871,7 +2871,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	documentView->set_draw_caret(hideCaret);
 	hideCaret = !hideCaret;
 
-	// The column selection cursor may get stuck if e.g. using ⌥F2 to bring up a menu: We see the initial “option down” but newer the “option release” that would normally reset the column selection cursor state.
+	// The column selection cursor may get stuck if e.g. using ⌥F2 to bring up a menu: We see the initial “option down” but never the “option release” that would normally reset the column selection cursor state.
 	if(([NSEvent modifierFlags] & NSAlternateKeyMask) == 0)
 		self.showColumnSelectionCursor = NO;
 }

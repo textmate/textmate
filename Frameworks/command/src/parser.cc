@@ -113,7 +113,7 @@ static void setup_fields (plist::dictionary_t const& plist, bundle_command_t& re
 	parse(plist, "outputLocation",       &res.output,         "replaceInput", "replaceDocument", "atCaret", "afterInput", "newWindow", "toolTip", "discard", "replaceSelection");
 	parse(plist, "outputCaret",          &res.output_caret,   "afterOutput", "selectOutput", "interpolateByChar", "interpolateByLine", "heuristic");
 	parse(plist, "outputReuse",          &res.output_reuse,   "reuseAvailable", "reuseNone", "reuseBusy", "reuseBusyAutoAbort");
-	parse(plist, "autoRefresh",          &res.auto_refresh,   "newer", "onDocumentChange", "onDocumentSave");
+	parse(plist, "autoRefresh",          &res.auto_refresh,   "never", "onDocumentChange", "onDocumentSave");
 
 	plist::get_key_path(plist, "autoScrollOutput", res.auto_scroll_output);
 	plist::get_key_path(plist, "disableOutputAutoIndent", res.disable_output_auto_indent);
