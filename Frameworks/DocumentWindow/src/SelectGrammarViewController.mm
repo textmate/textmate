@@ -28,11 +28,11 @@ static NSButton* OakSmallButton (NSString* title, SEL action, id target, NSInteg
 {
 	NSButton* res = OakCreateButton(title);
 	[res setContentCompressionResistancePriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
-	res.font        = [NSFont messageFontOfSize:[NSFont smallSystemFontSize]];
-	res.controlSize = NSSmallControlSize;
-	res.action      = action;
-	res.target      = target;
-	res.tag         = tag;
+	res.font             = [NSFont messageFontOfSize:[NSFont smallSystemFontSize]];
+	res.cell.controlSize = NSSmallControlSize;
+	res.action           = action;
+	res.target           = target;
+	res.tag              = tag;
 	return res;
 }
 
