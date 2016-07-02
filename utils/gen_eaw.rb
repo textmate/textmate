@@ -19,7 +19,7 @@ end
 
 fixed, start, stop = [ ], [ ], [ ]
 open(fn_EastAsianWidth) do |io|
-  io.grep(/^([0-9A-F]+)(?:..([0-9A-F]+))?;[A-Za-z]*W/) do
+  io.grep(/^([0-9A-F]+)(?:..([0-9A-F]+))?;[A-Za-z]*(?:W|F)/) do
     if $2
       start << "0x#$1"
       stop << "0x#$2"
@@ -123,14 +123,14 @@ def array_split_reduce_putstr( origin_array )
 end
 
 a1 = arrays_merge_expand_flatten(fixed, start, stop)
-puts "East Asian Width count: #{a1.size}"
+puts "// East Asian Width count: #{a1.size}"
 array_split_reduce_putstr(a1)
 
 puts '--------------------------------------------------------------'
-puts "Emoji count: #{emoji_array.size}"
+puts "// Emoji count: #{emoji_array.size}"
 array_split_reduce_putstr(emoji_array)
 
 puts '--------------------------------------------------------------'
 a2 = a1 - emoji_array
-puts "East Asian Width(#{a1.size}) - emoji(#{emoji_array.size}) = count: #{a2.size}  (#{(a1&emoji_array).size})"
+puts "// East Asian Width(#{a1.size}) - emoji(#{emoji_array.size}) = count: #{a2.size}  (#{(a1&emoji_array).size})"
 array_split_reduce_putstr(a2)
