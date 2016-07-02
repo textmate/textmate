@@ -230,14 +230,14 @@ namespace ct
 								unsigned int chr;
 								do {
 									chr = CFStringGetCharacterAtIndex(cfStr, i);
-									if(text::is_east_asian_width(chr)) break;
+									if(chr > 255 && text::is_east_asian_width_minus_emoji(chr)) break;
 									++i;
 								} while(i < len);
 								if (i >= len) break;
 								begin = i;
 								do {
 									chr = CFStringGetCharacterAtIndex(cfStr, i);
-									if(!text::is_east_asian_width(chr)) break;
+									if(chr <= 255 || !text::is_east_asian_width_minus_emoji(chr)) break;
 									++i;
 								} while(i < len);
 								end = i;
