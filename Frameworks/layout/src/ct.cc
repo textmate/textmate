@@ -1,13 +1,13 @@
 #include "ct.h"
 #include "render.h"
 #include <cf/cf.h>
+#include <text/ctype.h>
 #include <text/utf8.h>
 #include <text/utf16.h>
 #include <text/hexdump.h>
 #include <crash/info.h>
 
 bool        g_need_kern_noascii = false;
-unsigned    g_double_width_unicode;
 CGFloat     g_kern_noascii_pt;
 CFNumberRef g_cfNum;
 void read_userdefaults();
@@ -122,7 +122,7 @@ namespace ct
 			_cap_height = CTFontGetCapHeight(font);
 
 			read_userdefaults();
-			fprintf(stderr, "read from userdefaults, g_need_kern_noascii:%d  g_double_width_unicode:0x%X\n", g_need_kern_noascii, g_double_width_unicode);
+			fprintf(stderr, "read from userdefaults, g_need_kern_noascii:%d\n", g_need_kern_noascii);
 			if (g_need_kern_noascii) {
 				CGFloat _column_width1=0, _column_width2=0;
 				try{
@@ -153,8 +153,8 @@ namespace ct
 				} catch(...) {
 					fprintf(stderr, "catched exception 1.  %f  %f\n", _column_width1, _column_width2);
 				}
-				fprintf(stderr, "mm width:%f, 一 width:%f,   set  g_kern_noascii_pt: %f,   g_double_width_unicode: 0x%X\n",
-					_column_width1, _column_width2, g_kern_noascii_pt, g_double_width_unicode);
+				fprintf(stderr, "mm width:%f, 一 width:%f,   set  g_kern_noascii_pt: %f\n",
+					_column_width1, _column_width2, g_kern_noascii_pt);
 			}
 
 			if(CFMutableAttributedStringRef str = CFAttributedStringCreateMutable(kCFAllocatorDefault, 0))
@@ -222,7 +222,6 @@ namespace ct
 							// FIXME
 							// performance (set attribute each character)
 							// emoji character (width bigger than double ascii width)
-							// which unicode range graph need set kern-attribute
 							unsigned int i = 0, begin, end, len;
 							try{
 							len = CFStringGetLength(cfStr);
@@ -231,14 +230,14 @@ namespace ct
 								unsigned int chr;
 								do {
 									chr = CFStringGetCharacterAtIndex(cfStr, i);
-									if(chr >= g_double_width_unicode) break;
+									if(text::is_east_asian_width(chr)) break;
 									++i;
 								} while(i < len);
 								if (i >= len) break;
 								begin = i;
 								do {
 									chr = CFStringGetCharacterAtIndex(cfStr, i);
-									if(chr < g_double_width_unicode) break;
+									if(!text::is_east_asian_width(chr)) break;
 									++i;
 								} while(i < len);
 								end = i;
