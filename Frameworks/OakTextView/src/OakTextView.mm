@@ -1961,8 +1961,11 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 
 - (BOOL)performKeyEquivalent:(NSEvent*)anEvent
 {
-	BOOL hasFocus = (self.keyState & (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask)) == (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask);
-	if(!hasFocus && ([[[self window] firstResponder] isKindOfClass:[self class]] || [[[self window] firstResponder] isKindOfClass:NSClassFromString(@"OakKeyEquivalentView")]))
+	BOOL hasKey = (self.keyState & (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask)) == (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask);
+	BOOL otherTextViewHasKey = [self.window.firstResponder isKindOfClass:[self class]];
+	BOOL recordingShortcut = [self.window.firstResponder isKindOfClass:NSClassFromString(@"OakKeyEquivalentView")];
+	BOOL noCommandFlag = (anEvent.modifierFlags & NSCommandKeyMask) != NSCommandKeyMask;
+	if(!hasKey && (otherTextViewHasKey || recordingShortcut || noCommandFlag))
 		return NO;
 
 	D(DBF_OakTextView_TextInput, bug("%s\n", [[anEvent description] UTF8String]););
