@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="9059" systemVersion="14F1021" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="10117" systemVersion="15F34" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment version="1080" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="9059"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="10117"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="SoftwareUpdatePreferences">
@@ -11,13 +11,13 @@
             </connections>
         </customObject>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
-        <customObject id="-3" userLabel="Application"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <customView id="1">
-            <rect key="frame" x="0.0" y="0.0" width="480" height="216"/>
+            <rect key="frame" x="0.0" y="0.0" width="480" height="201"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
             <subviews>
                 <button id="5">
-                    <rect key="frame" x="171" y="178" width="87" height="18"/>
+                    <rect key="frame" x="171" y="163" width="87" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Watch for:" bezelStyle="regularSquare" imagePosition="left" alignment="left" state="on" inset="2" id="6">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -40,21 +40,6 @@
                     </buttonCell>
                     <connections>
                         <binding destination="-2" name="value" keyPath="askBeforeDownloading" id="61"/>
-                    </connections>
-                </button>
-                <button id="45">
-                    <rect key="frame" x="171" y="158" width="164" height="18"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <buttonCell key="cell" type="check" title="Keep bundles updated" bezelStyle="regularSquare" imagePosition="left" alignment="left" state="on" inset="2" id="46">
-                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                        <font key="font" metaFont="system"/>
-                    </buttonCell>
-                    <connections>
-                        <binding destination="-2" name="value" keyPath="disableBundleUpdates" id="63">
-                            <dictionary key="options">
-                                <string key="NSValueTransformerName">NSNegateBoolean</string>
-                            </dictionary>
-                        </binding>
                     </connections>
                 </button>
                 <textField verticalHuggingPriority="750" id="15">
@@ -90,12 +75,12 @@
                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                     <connections>
+                        <binding destination="-2" name="value" keyPath="contactInfo" id="66"/>
                         <binding destination="-2" name="enabled" keyPath="disableCrashReports" id="72">
                             <dictionary key="options">
                                 <string key="NSValueTransformerName">NSNegateBoolean</string>
                             </dictionary>
                         </binding>
-                        <binding destination="-2" name="value" keyPath="contactInfo" id="66"/>
                     </connections>
                 </textField>
                 <textField verticalHuggingPriority="750" id="25">
@@ -108,7 +93,7 @@
                     </textFieldCell>
                 </textField>
                 <popUpButton verticalHuggingPriority="750" id="37">
-                    <rect key="frame" x="259" y="174" width="148" height="22"/>
+                    <rect key="frame" x="259" y="159" width="148" height="22"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <popUpButtonCell key="cell" type="push" title="Normal Releases" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="40" id="38">
                         <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
@@ -134,7 +119,7 @@
                     </connections>
                 </popUpButton>
                 <textField verticalHuggingPriority="750" id="47">
-                    <rect key="frame" x="56" y="179" width="112" height="17"/>
+                    <rect key="frame" x="56" y="164" width="112" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Software Update:" id="48">
                         <font key="font" metaFont="system"/>
@@ -194,6 +179,7 @@
                     <font key="titleFont" metaFont="system"/>
                 </box>
             </subviews>
+            <point key="canvasLocation" x="581" y="432.5"/>
         </customView>
     </objects>
 </document>
