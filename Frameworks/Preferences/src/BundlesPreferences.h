@@ -7,7 +7,6 @@
 {
 	IBOutlet MGScopeBar* categoriesScopeBar;
 	IBOutlet NSTableView* bundlesTableView;
-	IBOutlet NSTextField* activityTextField;
 	IBOutlet NSSearchField* searchField;
 	IBOutlet NSArrayController* arrayController;
 }
