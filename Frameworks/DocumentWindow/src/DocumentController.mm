@@ -1795,7 +1795,7 @@ namespace
 	if(!srcDocument)
 		return NO;
 
-	[self insertDocuments:{ srcDocument } atIndex:droppedIndex selecting:_selectedDocument andClosing:{ }];
+	[self insertDocuments:{ srcDocument } atIndex:droppedIndex selecting:_selectedDocument andClosing:{ srcDocument->identifier() }];
 
 	if(operation == NSDragOperationMove && sourceTabBar != destTabBar)
 	{
