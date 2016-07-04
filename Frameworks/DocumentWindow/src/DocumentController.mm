@@ -920,6 +920,7 @@ namespace
 	std::set<oak::uuid_t> oldUUIDs, newUUIDs;
 	std::transform(_documents.begin(), _documents.end(), inserter(oldUUIDs, oldUUIDs.end()), [](auto const& doc){ return doc->identifier(); });
 	std::transform(documents.begin(), documents.end(), inserter(newUUIDs, newUUIDs.end()), [](auto const& doc){ return doc->identifier(); });
+	std::for_each(closeDocuments.begin(), closeDocuments.end(), [&oldUUIDs](auto const& uuid){ oldUUIDs.erase(uuid); });
 
 	BOOL shouldReorder = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableTabReorderingKey];
 	std::vector<document::document_ptr> newDocuments;
