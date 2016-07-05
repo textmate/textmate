@@ -400,7 +400,11 @@ styles_t const& theme_t::styles_for_scope (scope::scope_t const& scope) const
 		for(auto const& it : ordering)
 			base += it.second;
 
-		CTFontPtr font(CTFontCreateWithName(cf::wrap(base.font_name), base.font_size, NULL), CFRelease);
+		CTFontPtr font;
+		if(base.font_name != NULL_STR)
+				font.reset(CTFontCreateWithName(cf::wrap(base.font_name), base.font_size, NULL), CFRelease);
+		else	font.reset(CTFontCreateUIFontForLanguage(kCTFontUserFixedPitchFontType, base.font_size, NULL), CFRelease);
+
 		if(CTFontSymbolicTraits traits = (base.bold == bool_true ? kCTFontBoldTrait : 0) + (base.italic == bool_true ? kCTFontItalicTrait : 0))
 		{
 			if(CTFontRef newFont = CTFontCreateCopyWithSymbolicTraits(font.get(), base.font_size, NULL, traits, kCTFontBoldTrait | kCTFontItalicTrait))

@@ -61,7 +61,7 @@ typedef std::shared_ptr<theme_t> theme_ptr;
 
 struct PUBLIC theme_t
 {
-	theme_t (bundles::item_ptr const& themeItem, std::string const& fontName = "Menlo-Regular", CGFloat fontSize = 12);
+	theme_t (bundles::item_ptr const& themeItem, std::string const& fontName = NULL_STR, CGFloat fontSize = 12);
 
 	theme_ptr copy_with_font_name_and_size (std::string const& fontName, CGFloat fontSize);
 
