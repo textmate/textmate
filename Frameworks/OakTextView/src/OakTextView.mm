@@ -238,7 +238,7 @@ typedef NS_ENUM(NSUInteger, OakFlagsState) {
 
 struct document_view_t : ng::buffer_api_t
 {
-	document_view_t (document::document_ptr const& document, theme_ptr const& theme, std::string const& fontName, CGFloat fontSize, std::string const& scopeAttributes, bool scrollPastEnd) : _document(document)
+	document_view_t (document::document_ptr const& document, std::string const& fontName, CGFloat fontSize, std::string const& scopeAttributes, bool scrollPastEnd) : _document(document)
 	{
 		_document->sync_open();
 
@@ -252,6 +252,8 @@ struct document_view_t : ng::buffer_api_t
 
 		bool softWrap     = settings.get(kSettingsSoftWrapKey, false);
 		size_t wrapColumn = settings.get(kSettingsWrapColumnKey, NSWrapColumnWindowWidth);
+
+		theme_ptr theme = parse_theme(bundles::lookup(settings.get(kSettingsThemeKey, NULL_STR)));
 		_layout = std::make_unique<ng::layout_t>(_document->buffer(), theme, fontName, fontSize, softWrap, scrollPastEnd, wrapColumn, _document->folded());
 
 		if(settings.get(kSettingsShowWrapColumnKey, false))
@@ -360,6 +362,7 @@ struct document_view_t : ng::buffer_api_t
 	// = Layout =
 	// ==========
 
+	theme_ptr theme () const { return _layout->theme(); }
 	void set_theme (theme_ptr const& theme) { _layout->set_theme(theme); }
 	void set_font (std::string const& fontName, CGFloat fontSize) { _layout->set_font(fontName, fontSize); }
 	void set_wrapping (bool softWrap, size_t wrapColumn) { _layout->set_wrapping(softWrap, wrapColumn); }
@@ -412,7 +415,6 @@ private:
 	OBJC_WATCH_LEAKS(OakTextView);
 
 	document::document_ptr document;
-	theme_ptr _theme;
 	std::shared_ptr<document_view_t> documentView;
 	ng::callback_t* callback;
 
@@ -806,7 +808,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 	if(document = aDocument)
 	{
-		documentView = std::make_shared<document_view_t>(document, self.theme, to_s(self.font.fontName), self.font.pointSize * _fontScaleFactor / 100, to_s(self.scopeAttributes), self.scrollPastEnd);
+		documentView = std::make_shared<document_view_t>(document, to_s(self.font.fontName), self.font.pointSize * _fontScaleFactor / 100, to_s(self.scopeAttributes), self.scrollPastEnd);
 
 		BOOL hasFocus = (self.keyState & (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask)) == (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask);
 		documentView->set_draw_as_key(hasFocus);
@@ -869,7 +871,6 @@ static std::string shell_quote (std::vector<std::string> paths)
 		_fontScaleFactor = 100;
 
 		settings_t const& settings = settings_for_path();
-		_theme = parse_theme(bundles::lookup(settings.get(kSettingsThemeKey, NULL_STR)));
 
 		NSString* fontName = [NSString stringWithCxxString:settings.get(kSettingsFontNameKey, NULL_STR)];
 		CGFloat fontSize = settings.get(kSettingsFontSizeKey, 11.0);
@@ -2900,7 +2901,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 // = Public API =
 // ==============
 
-- (theme_ptr)theme            { return _theme; }
+- (theme_ptr)theme            { return documentView ? documentView->theme() : theme_ptr(); }
 - (size_t)tabSize             { return documentView ? documentView->indent().tab_size() : 2; }
 - (BOOL)softTabs              { return documentView ? documentView->indent().soft_tabs() : NO; }
 - (BOOL)softWrap              { return documentView && documentView->soft_wrap(); }
@@ -2923,12 +2924,11 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (void)setTheme:(theme_ptr)newTheme
 {
-	_theme = newTheme;
-	if(documentView)
-	{
-		AUTO_REFRESH;
-		documentView->set_theme(newTheme);
-	}
+	if(!documentView)
+		return;
+
+	AUTO_REFRESH;
+	documentView->set_theme(newTheme);
 }
 
 - (void)setFont:(NSFont*)newFont
