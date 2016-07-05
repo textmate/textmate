@@ -921,7 +921,7 @@ rule tbz_archive
   description = Archive ‘$in’…
 
 rule upload
-  command = bin/upload -k$upload_keyfile -d$upload_destination -t'v$APP_VERSION' -m'{"version":"$APP_VERSION","required_os":"$APP_MIN_OS"}' $in > $out~ && mv $out~ $out
+  command = bin/upload -k$upload_keyfile -d$upload_destination -t'v$APP_VERSION' -m'{"version":"$APP_VERSION","depends":"os (>= $APP_MIN_OS), app (>= 2.0-alpha)"}' $in > $out~ && mv $out~ $out
   pool = console
   generator = true
   description = Upload ‘$in’…
