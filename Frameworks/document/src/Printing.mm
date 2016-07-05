@@ -109,8 +109,7 @@
 	pageRects.clear();
 
 	theme_ptr theme = parse_theme(bundles::lookup(to_s(self.themeUUID)));
-	theme = theme->copy_with_font_name_and_size(to_s(_fontName), _fontSize);
-	layout = std::make_unique<ng::layout_t>([_document buffer], theme, /* softWrap: */ true);
+	layout = std::make_unique<ng::layout_t>([_document buffer], theme, to_s(_fontName), _fontSize, /* softWrap: */ true);
 	layout->set_viewport_size(CGSizeMake(self.pageWidth, self.pageHeight));
 	layout->update_metrics(CGRectMake(0, 0, CGFLOAT_MAX, CGFLOAT_MAX));
 

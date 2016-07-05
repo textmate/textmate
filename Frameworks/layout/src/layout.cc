@@ -37,7 +37,7 @@ namespace ng
 	// = layout_t =
 	// ============
 
-	layout_t::layout_t (ng::buffer_t& buffer, theme_ptr const& theme, bool softWrap, bool scrollPastEnd, size_t wrapColumn, std::string const& folded, ng::layout_t::margin_t const& margin) : _folds(std::make_shared<folds_t>(buffer)), _buffer(buffer), _theme(theme), _tab_size(buffer.indent().tab_size()), _wrapping(softWrap), _scroll_past_end(scrollPastEnd), _wrap_column(wrapColumn), _margin(margin)
+	layout_t::layout_t (ng::buffer_t& buffer, theme_ptr const& theme, std::string const& fontName, CGFloat fontSize, bool softWrap, bool scrollPastEnd, size_t wrapColumn, std::string const& folded, ng::layout_t::margin_t const& margin) : _folds(std::make_shared<folds_t>(buffer)), _buffer(buffer), _tab_size(buffer.indent().tab_size()), _wrapping(softWrap), _scroll_past_end(scrollPastEnd), _wrap_column(wrapColumn), _margin(margin)
 	{
 		struct parser_callback_t : ng::callback_t
 		{
@@ -48,6 +48,7 @@ namespace ng
 			layout_t& layout;
 		};
 
+		_theme = theme->copy_with_font_name_and_size(fontName, fontSize);
 		setup_font_metrics();
 
 		_rows.insert(_rows.end(), row_key_t(0, default_line_height()));
@@ -85,7 +86,7 @@ namespace ng
 
 	void layout_t::set_theme (theme_ptr const& theme)
 	{
-		_theme = theme;
+		_theme = _theme ? theme->copy_with_font_name_and_size(_theme->font_name(), _theme->font_size()) : theme;
 		clear_text_widths();
 	}
 

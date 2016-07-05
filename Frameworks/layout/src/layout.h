@@ -24,7 +24,7 @@ namespace ng
 			size_t left, top, right, bottom;
 		};
 
-		layout_t (ng::buffer_t& buffer, theme_ptr const& theme, bool softWrap = false, bool scrollPastEnd = false, size_t wrapColumn = 0, std::string const& folded = NULL_STR, margin_t const& margin = margin_t(8));
+		layout_t (ng::buffer_t& buffer, theme_ptr const& theme, std::string const& fontName, CGFloat fontSize, bool softWrap = false, bool scrollPastEnd = false, size_t wrapColumn = 0, std::string const& folded = NULL_STR, margin_t const& margin = margin_t(8));
 		~layout_t ();
 
 		// _buffer_callback is managed with new/delete so can’t be copied

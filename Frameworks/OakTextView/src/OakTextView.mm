@@ -238,7 +238,7 @@ typedef NS_ENUM(NSUInteger, OakFlagsState) {
 
 struct document_view_t : ng::buffer_api_t
 {
-	document_view_t (document::document_ptr const& document, theme_ptr const& theme, std::string const& scopeAttributes, bool scrollPastEnd) : _document(document)
+	document_view_t (document::document_ptr const& document, theme_ptr const& theme, std::string const& fontName, CGFloat fontSize, std::string const& scopeAttributes, bool scrollPastEnd) : _document(document)
 	{
 		_document->sync_open();
 
@@ -252,7 +252,7 @@ struct document_view_t : ng::buffer_api_t
 
 		bool softWrap     = settings.get(kSettingsSoftWrapKey, false);
 		size_t wrapColumn = settings.get(kSettingsWrapColumnKey, NSWrapColumnWindowWidth);
-		_layout = std::make_unique<ng::layout_t>(_document->buffer(), theme, softWrap, scrollPastEnd, wrapColumn, _document->folded());
+		_layout = std::make_unique<ng::layout_t>(_document->buffer(), theme, fontName, fontSize, softWrap, scrollPastEnd, wrapColumn, _document->folded());
 
 		if(settings.get(kSettingsShowWrapColumnKey, false))
 			set_draw_wrap_column(true);
@@ -808,7 +808,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 	if(document = aDocument)
 	{
-		documentView = std::make_shared<document_view_t>(document, theme, to_s(self.scopeAttributes), self.scrollPastEnd);
+		documentView = std::make_shared<document_view_t>(document, theme, fontName, fontSize * _fontScaleFactor / 100, to_s(self.scopeAttributes), self.scrollPastEnd);
 
 		BOOL hasFocus = (self.keyState & (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask)) == (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask);
 		documentView->set_draw_as_key(hasFocus);
