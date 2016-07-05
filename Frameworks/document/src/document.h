@@ -32,17 +32,6 @@ namespace document
 	typedef std::shared_ptr<document_t>       document_ptr;
 	typedef std::weak_ptr<document_t>         document_weak_ptr;
 
-	struct PUBLIC open_callback_t : file::open_callback_t
-	{
-		virtual ~open_callback_t () { }
-		virtual void show_content (std::string const& path, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, encoding::type const& encoding, std::vector<oak::uuid_t> const& binaryImportFilters, std::vector<oak::uuid_t> const& textImportFilters) { }
-		virtual void show_document (std::string const& path, document_ptr document) = 0;
-		virtual void show_error (std::string const& path, document_ptr document, std::string const& message, oak::uuid_t const& filter) = 0;
-		virtual void show_error (std::string const& path, std::string const& message, oak::uuid_t const& filter) { }
-	};
-
-	typedef std::shared_ptr<open_callback_t> open_callback_ptr;
-
 	struct PUBLIC save_callback_t : file::save_callback_t
 	{
 		virtual ~save_callback_t () { }

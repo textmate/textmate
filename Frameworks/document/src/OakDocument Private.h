@@ -2,11 +2,9 @@
 
 namespace document
 {
-	struct open_callback_t;
 	struct save_callback_t;
 	struct document_t;
 
-	typedef std::shared_ptr<open_callback_t> open_callback_ptr;
 	typedef std::shared_ptr<save_callback_t> save_callback_ptr;
 	typedef std::shared_ptr<document_t> document_ptr;
 
