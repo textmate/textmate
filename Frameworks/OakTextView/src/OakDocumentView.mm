@@ -384,10 +384,9 @@ private:
 
 - (void)updateStyle
 {
-	if(document && [_textView theme])
+	theme_ptr theme = _textView.theme;
+	if(theme && document)
 	{
-		auto theme = [_textView theme];
-
 		[[self window] setOpaque:!theme->is_transparent() && !theme->gutter_styles().is_transparent()];
 		[textScrollView setBackgroundColor:[NSColor colorWithCGColor:theme->background(document->file_type())]];
 
@@ -440,7 +439,7 @@ private:
 	if([aMenuItem action] == @selector(toggleLineNumbers:))
 		[aMenuItem setTitle:[gutterView visibilityForColumnWithIdentifier:GVLineNumbersColumnIdentifier] ? @"Hide Line Numbers" : @"Show Line Numbers"];
 	else if([aMenuItem action] == @selector(takeThemeUUIDFrom:))
-		[aMenuItem setState:[_textView theme]->uuid() == [[aMenuItem representedObject] UTF8String] ? NSOnState : NSOffState];
+		[aMenuItem setState:_textView.theme && _textView.theme->uuid() == [[aMenuItem representedObject] UTF8String] ? NSOnState : NSOffState];
 	else if([aMenuItem action] == @selector(takeTabSizeFrom:))
 		[aMenuItem setState:_textView.tabSize == [aMenuItem tag] ? NSOnState : NSOffState];
 	else if([aMenuItem action] == @selector(showTabSizeSelectorPanel:))
@@ -738,7 +737,7 @@ private:
 {
 	if(bundles::item_ptr const& themeItem = bundles::lookup(to_s(themeUUID)))
 	{
-		[_textView setTheme:parse_theme(themeItem)];
+		_textView.theme = parse_theme(themeItem);
 		settings_t::set(kSettingsThemeKey, to_s(themeUUID));
 		[self updateStyle];
 	}

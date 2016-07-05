@@ -33,7 +33,7 @@ PUBLIC @interface OakTextView : OakView
 - (void)setDocument:(document::document_ptr const&)aDocument;
 
 @property (nonatomic, weak) id <OakTextViewDelegate>        delegate;
-@property (nonatomic) theme_ptr const&                      theme;
+@property (nonatomic) theme_ptr                             theme;
 @property (nonatomic) NSCursor*                             ibeamCursor;
 @property (nonatomic) NSFont*                               font;
 @property (nonatomic) NSInteger                             fontScaleFactor;

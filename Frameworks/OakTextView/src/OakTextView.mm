@@ -412,7 +412,7 @@ private:
 	OBJC_WATCH_LEAKS(OakTextView);
 
 	document::document_ptr document;
-	theme_ptr theme;
+	theme_ptr _theme;
 	std::shared_ptr<document_view_t> documentView;
 	ng::callback_t* callback;
 
@@ -806,7 +806,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 	if(document = aDocument)
 	{
-		documentView = std::make_shared<document_view_t>(document, theme, to_s(self.font.fontName), self.font.pointSize * _fontScaleFactor / 100, to_s(self.scopeAttributes), self.scrollPastEnd);
+		documentView = std::make_shared<document_view_t>(document, self.theme, to_s(self.font.fontName), self.font.pointSize * _fontScaleFactor / 100, to_s(self.scopeAttributes), self.scrollPastEnd);
 
 		BOOL hasFocus = (self.keyState & (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask)) == (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask);
 		documentView->set_draw_as_key(hasFocus);
@@ -869,7 +869,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 		_fontScaleFactor = 100;
 
 		settings_t const& settings = settings_for_path();
-		theme = parse_theme(bundles::lookup(settings.get(kSettingsThemeKey, NULL_STR)));
+		_theme = parse_theme(bundles::lookup(settings.get(kSettingsThemeKey, NULL_STR)));
 
 		NSString* fontName = [NSString stringWithCxxString:settings.get(kSettingsFontNameKey, NULL_STR)];
 		CGFloat fontSize = settings.get(kSettingsFontSizeKey, 11.0);
@@ -1073,13 +1073,13 @@ doScroll:
 
 - (void)drawRect:(NSRect)aRect
 {
-	if(!documentView || !theme)
+	if(!documentView || !self.theme)
 	{
 		NSEraseRect(aRect);
 		return;
 	}
 
-	if(theme->is_transparent())
+	if(self.theme->is_transparent())
 	{
 		[[NSColor clearColor] set];
 		NSRectFill(aRect);
@@ -1093,8 +1093,8 @@ doScroll:
 	switch(self.fontSmoothing)
 	{
 		case OTVFontSmoothingDisabled:             disableFontSmoothing = YES;                                                         break;
-		case OTVFontSmoothingDisabledForDark:      disableFontSmoothing = theme->is_dark();                                            break;
-		case OTVFontSmoothingDisabledForDarkHiDPI: disableFontSmoothing = theme->is_dark() && [[self window] backingScaleFactor] == 2; break;
+		case OTVFontSmoothingDisabledForDark:      disableFontSmoothing = self.theme->is_dark();                                            break;
+		case OTVFontSmoothingDisabledForDarkHiDPI: disableFontSmoothing = self.theme->is_dark() && [[self window] backingScaleFactor] == 2; break;
 	}
 
 	if(disableFontSmoothing)
@@ -1256,7 +1256,7 @@ doScroll:
 
 - (NSAttributedString*)attributedSubstringForProposedRange:(NSRange)theRange actualRange:(NSRangePointer)actualRange
 {
-	if(!documentView || !theme)
+	if(!documentView || !self.theme)
 		return nil;
 
 	ng::range_t const& r = [self rangeForNSRange:theRange];
@@ -1267,7 +1267,7 @@ doScroll:
 		std::map<size_t, scope::scope_t> scopes = documentView->scopes(from, to);
 		for(auto pair = scopes.begin(); pair != scopes.end(); )
 		{
-			styles_t const& styles = theme->styles_for_scope(pair->second);
+			styles_t const& styles = self.theme->styles_for_scope(pair->second);
 
 			size_t i = from + pair->first;
 			size_t j = ++pair != scopes.end() ? from + pair->first : to;
@@ -1518,7 +1518,7 @@ doScroll:
 {
 	D(DBF_OakTextView_Accessibility, bug("%s(%s)\n", to_s(attribute).c_str(), to_s([parameter description]).c_str()););
 	id ret = nil;
-	if(!documentView || !theme)
+	if(!documentView || !self.theme)
 		return ret;
 
 	if(false) {
@@ -1568,7 +1568,7 @@ doScroll:
 		NSRange runRange = NSMakeRange(0, 0);
 		for(auto pair = scopes.begin(); pair != scopes.end(); )
 		{
-			styles_t const& styles = theme->styles_for_scope(pair->second);
+			styles_t const& styles = self.theme->styles_for_scope(pair->second);
 
 			size_t i = pair->first;
 			size_t j = ++pair != scopes.end() ? pair->first : to - from;
@@ -1719,14 +1719,14 @@ doScroll:
 - (std::map<std::string, std::string>)variablesForBundleItem:(bundles::item_ptr const&)item
 {
 	std::map<std::string, std::string> res = oak::basic_environment();
-	if(!documentView || !theme)
+	if(!documentView || !self.theme)
 		return res;
 
 	res << documentView->variables(to_s([self scopeAttributes]));
 	if(item)
 		res << item->bundle_variables();
 
-	if(auto themeItem = bundles::lookup(theme->uuid()))
+	if(auto themeItem = bundles::lookup(self.theme->uuid()))
 	{
 		if(!themeItem->paths().empty())
 			res["TM_CURRENT_THEME_PATH"] = themeItem->paths().back();
@@ -2900,7 +2900,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 // = Public API =
 // ==============
 
-- (theme_ptr const&)theme     { return theme; }
+- (theme_ptr)theme            { return _theme; }
 - (size_t)tabSize             { return documentView ? documentView->indent().tab_size() : 2; }
 - (BOOL)softTabs              { return documentView ? documentView->indent().soft_tabs() : NO; }
 - (BOOL)softWrap              { return documentView && documentView->soft_wrap(); }
@@ -2921,13 +2921,13 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	return ng::kIndentCorrectAlways;
 }
 
-- (void)setTheme:(theme_ptr const&)newTheme
+- (void)setTheme:(theme_ptr)newTheme
 {
-	theme = newTheme;
+	_theme = newTheme;
 	if(documentView)
 	{
 		AUTO_REFRESH;
-		documentView->set_theme(theme);
+		documentView->set_theme(newTheme);
 	}
 }
 
