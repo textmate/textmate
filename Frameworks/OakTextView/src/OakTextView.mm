@@ -875,7 +875,6 @@ static std::string shell_quote (std::vector<std::string> paths)
 		theme          = parse_theme(bundles::lookup(settings.get(kSettingsThemeKey, NULL_STR)));
 		fontName       = settings.get(kSettingsFontNameKey, NULL_STR);
 		fontSize       = settings.get(kSettingsFontSizeKey, 11.0);
-		theme          = theme->copy_with_font_name_and_size(fontName, fontSize * _fontScaleFactor / 100);
 
 		_showInvisibles = settings.get(kSettingsShowInvisiblesKey, false);
 		_scrollPastEnd  = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsScrollPastEndKey];
@@ -2917,7 +2916,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (void)setTheme:(theme_ptr const&)newTheme
 {
-	theme = newTheme->copy_with_font_name_and_size(fontName, fontSize * _fontScaleFactor / 100);
+	theme = newTheme;
 	if(documentView)
 	{
 		AUTO_REFRESH;
@@ -2945,9 +2944,6 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	if(_fontScaleFactor == newFontScaleFactor)
 		return;
 	_fontScaleFactor = newFontScaleFactor;
-
-	if(theme)
-		theme = theme->copy_with_font_name_and_size(fontName, fontSize * _fontScaleFactor / 100);
 
 	if(documentView)
 	{
