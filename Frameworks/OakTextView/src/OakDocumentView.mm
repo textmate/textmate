@@ -306,10 +306,13 @@ private:
 		[_statusBar setSelectionString:str];
 		_symbolChooser.selectionString = str;
 
-		ng::buffer_t const& buf = document->buffer();
-		text::selection_t sel(to_s(str));
-		size_t i = buf.convert(sel.last().max());
-		_statusBar.symbolName = [NSString stringWithCxxString:buf.symbol_at(i)];
+		if(document)
+		{
+			ng::buffer_t const& buf = document->buffer();
+			text::selection_t sel(to_s(str));
+			size_t i = buf.convert(sel.last().max());
+			_statusBar.symbolName = [NSString stringWithCxxString:buf.symbol_at(i)];
+		}
 	}
 	else if([aKeyPath isEqualToString:@"tabSize"])
 	{

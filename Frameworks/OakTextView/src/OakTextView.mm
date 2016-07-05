@@ -1369,6 +1369,8 @@ doScroll:
 {
 	D(DBF_OakTextView_Accessibility, bug("%s\n", to_s(attribute).c_str()););
 	id ret = nil;
+	if(!documentView)
+		return ret;
 
 	if(false) {
 	} else if([attribute isEqualToString:NSAccessibilityRoleAttribute]) {
@@ -1426,6 +1428,9 @@ doScroll:
 - (void)accessibilitySetValue:(id)value forAttribute:(NSString*)attribute
 {
 	D(DBF_OakTextView_Accessibility, bug("%s <- %s\n", to_s(attribute).c_str(), to_s([value description]).c_str()););
+	if(!documentView)
+		return;
+
 	if(false) {
 	} else if([attribute isEqualToString:NSAccessibilityValueAttribute]) {
 		AUTO_REFRESH;
@@ -1660,6 +1665,9 @@ doScroll:
 
 - (id)accessibilityHitTest:(NSPoint)screenPoint
 {
+	if(!documentView)
+		return self;
+
 	NSPoint point = [self convertRect:[self.window convertRectFromScreen:NSMakeRect(screenPoint.x, screenPoint.y, 0, 0)] fromView:nil].origin;
 	ng::index_t index = documentView->index_at_point(point);
 	const links_ptr links = self.links;
@@ -1702,6 +1710,9 @@ doScroll:
 
 - (void)updateZoom:(id)sender
 {
+	if(!documentView)
+		return;
+
 	size_t const index = documentView->ranges().last().min().index;
 	NSRect selectedRect = documentView->rect_at_index(index, false);
 	selectedRect = [self convertRect:selectedRect toView:nil];
@@ -3181,7 +3192,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (scope::context_t)scopeContext
 {
-	return ng::scope(*documentView, documentView->ranges(), to_s([self scopeAttributes]));
+	return documentView ? ng::scope(*documentView, documentView->ranges(), to_s([self scopeAttributes])) : scope::context_t();
 }
 
 - (NSString*)scopeAsString // Used by https://github.com/emmetio/Emmet.tmplugin
@@ -3201,11 +3212,14 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	if(isUpdatingSelection)
 		return;
 
-	AUTO_REFRESH;
-	ng::ranges_t ranges = ng::convert(*documentView, to_s(aSelectionString));
-	documentView->set_ranges(ranges);
-	for(auto const& range : ranges)
-		documentView->remove_enclosing_folds(range.min().index, range.max().index);
+	if(documentView)
+	{
+		AUTO_REFRESH;
+		ng::ranges_t ranges = ng::convert(*documentView, to_s(aSelectionString));
+		documentView->set_ranges(ranges);
+		for(auto const& range : ranges)
+			documentView->remove_enclosing_folds(range.min().index, range.max().index);
+	}
 }
 
 - (NSString*)selectionString
