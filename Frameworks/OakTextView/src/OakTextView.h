@@ -32,11 +32,7 @@ enum OTVFontSmoothing : NSUInteger
 PUBLIC @interface OakTextView : OakView
 - (void)setDocument:(document::document_ptr const&)aDocument;
 
-#if !defined(MAC_OS_X_VERSION_10_7) || (MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_7)
-@property (nonatomic, assign) id <OakTextViewDelegate>      delegate; // BundleEditor is delegate and an NSWindowController subclass
-#else
 @property (nonatomic, weak) id <OakTextViewDelegate>        delegate;
-#endif
 @property (nonatomic) theme_ptr const&                      theme;
 @property (nonatomic) NSCursor*                             ibeamCursor;
 @property (nonatomic) NSFont*                               font;
