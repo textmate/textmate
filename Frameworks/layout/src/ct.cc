@@ -115,17 +115,10 @@ namespace ct
 			_x_height   = CTFontGetXHeight(font);
 			_cap_height = CTFontGetCapHeight(font);
 
-			if(CFMutableAttributedStringRef str = CFAttributedStringCreateMutable(kCFAllocatorDefault, 0))
-			{
-				CFAttributedStringReplaceString(str, CFRangeMake(0, 0), CFSTR("n"));
-				CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTFontAttributeName, font);
-				if(CTLineRef line = CTLineCreateWithAttributedString(str))
-				{
-					_column_width = CTLineGetTypographicBounds(line, NULL, NULL, NULL);
-					CFRelease(line);
-				}
-				CFRelease(str);
-			}
+			CGGlyph emGlyph;
+			if(CTFontGetGlyphsForCharacters(font, (UniChar const*)u"m", &emGlyph, 1))
+				_column_width = CTFontGetAdvancesForGlyphs(font, kCTFontHorizontalOrientation, &emGlyph, nullptr, 1);
+
 			CFRelease(font);
 		}
 	}
