@@ -869,10 +869,15 @@ static std::string shell_quote (std::vector<std::string> paths)
 		_fontScaleFactor = 100;
 
 		settings_t const& settings = settings_for_path();
+		theme = parse_theme(bundles::lookup(settings.get(kSettingsThemeKey, NULL_STR)));
 
-		theme          = parse_theme(bundles::lookup(settings.get(kSettingsThemeKey, NULL_STR)));
+		NSString* fontName = [NSString stringWithCxxString:settings.get(kSettingsFontNameKey, NULL_STR)];
+		CGFloat fontSize = settings.get(kSettingsFontSizeKey, 11.0);
+		if(fontName)
+			_font = [NSFont fontWithName:fontName size:fontSize];
+		if(!_font || ![_font.fontName isEqualToString:fontName])
+			_font = [NSFont userFixedPitchFontOfSize:fontSize];
 
-		_font           = [NSFont fontWithName:[NSString stringWithCxxString:settings.get(kSettingsFontNameKey, NULL_STR)] size:settings.get(kSettingsFontSizeKey, 11.0)];
 		_showInvisibles = settings.get(kSettingsShowInvisiblesKey, false);
 		_scrollPastEnd  = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsScrollPastEndKey];
 		_antiAlias      = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableAntiAliasKey];
