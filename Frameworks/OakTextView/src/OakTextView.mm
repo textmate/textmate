@@ -1256,7 +1256,7 @@ doScroll:
 
 - (NSAttributedString*)attributedSubstringForProposedRange:(NSRange)theRange actualRange:(NSRangePointer)actualRange
 {
-	if(!documentView)
+	if(!documentView || !theme)
 		return nil;
 
 	ng::range_t const& r = [self rangeForNSRange:theRange];
@@ -1518,6 +1518,9 @@ doScroll:
 {
 	D(DBF_OakTextView_Accessibility, bug("%s(%s)\n", to_s(attribute).c_str(), to_s([parameter description]).c_str()););
 	id ret = nil;
+	if(!documentView || !theme)
+		return ret;
+
 	if(false) {
 	} else if([attribute isEqualToString:NSAccessibilityLineForIndexParameterizedAttribute]) {
 		size_t index = [((NSNumber*)parameter) unsignedLongValue];
@@ -1716,11 +1719,14 @@ doScroll:
 - (std::map<std::string, std::string>)variablesForBundleItem:(bundles::item_ptr const&)item
 {
 	std::map<std::string, std::string> res = oak::basic_environment();
+	if(!documentView || !theme)
+		return res;
+
 	res << documentView->variables(to_s([self scopeAttributes]));
 	if(item)
 		res << item->bundle_variables();
 
-	if(auto themeItem = (theme ? bundles::lookup(theme->uuid()) : bundles::item_ptr()))
+	if(auto themeItem = bundles::lookup(theme->uuid()))
 	{
 		if(!themeItem->paths().empty())
 			res["TM_CURRENT_THEME_PATH"] = themeItem->paths().back();
