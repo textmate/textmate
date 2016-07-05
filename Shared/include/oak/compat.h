@@ -3,6 +3,8 @@
 
 namespace oak
 {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 	inline size_t get_gestalt (OSType selector)
 	{
 		SInt32 res;
@@ -15,12 +17,9 @@ namespace oak
 
 	inline OSStatus execute_with_privileges (AuthorizationRef authorization, std::string const& pathToTool, AuthorizationFlags options, char* const* arguments, FILE** communicationsPipe)
 	{
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 		return AuthorizationExecuteWithPrivileges(authorization, pathToTool.c_str(), options, arguments, communicationsPipe);
-#pragma clang diagnostic pop
 	}
-
+#pragma clang diagnostic pop
 } /* oak */
 
 #endif /* end of include guard: COMPAT_H_RD1Z6YZA */
