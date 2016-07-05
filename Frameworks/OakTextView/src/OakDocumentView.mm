@@ -283,9 +283,11 @@ private:
 
 - (void)changeFont:(id)sender
 {
-	if(NSFont* newFont = [sender convertFont:_textView.font ?: [NSFont userFixedPitchFontOfSize:0]])
+	NSFont* defaultFont = [NSFont userFixedPitchFontOfSize:0];
+	if(NSFont* newFont = [sender convertFont:_textView.font ?: defaultFont])
 	{
-		settings_t::set(kSettingsFontNameKey, to_s([newFont fontName]));
+		std::string fontName = [newFont.fontName isEqualToString:defaultFont.fontName] ? NULL_STR : to_s(newFont.fontName);
+		settings_t::set(kSettingsFontNameKey, fontName);
 		settings_t::set(kSettingsFontSizeKey, [newFont pointSize]);
 		_textView.font = newFont;
 		[self updateGutterViewFont:self];
