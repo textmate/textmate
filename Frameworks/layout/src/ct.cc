@@ -1,10 +1,16 @@
 #include "ct.h"
 #include "render.h"
 #include <cf/cf.h>
+#include <text/ctype.h>
 #include <text/utf8.h>
 #include <text/utf16.h>
 #include <text/hexdump.h>
 #include <crash/info.h>
+
+bool        g_need_kern_noascii = false;
+CGFloat     g_kern_noascii_pt;
+CFNumberRef g_cfNum;
+void read_userdefaults();
 
 namespace ng
 {
@@ -115,6 +121,42 @@ namespace ct
 			_x_height   = CTFontGetXHeight(font);
 			_cap_height = CTFontGetCapHeight(font);
 
+			read_userdefaults();
+			fprintf(stderr, "read from userdefaults, g_need_kern_noascii:%d\n", g_need_kern_noascii);
+			if (g_need_kern_noascii) {
+				CGFloat _column_width1=0, _column_width2=0;
+				try{
+				if(CFMutableAttributedStringRef str = CFAttributedStringCreateMutable(kCFAllocatorDefault, 0))
+				{
+					CFAttributedStringReplaceString(str, CFRangeMake(0, 0), CFSTR("mm"));
+					CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTFontAttributeName, font);
+					if(CTLineRef line = CTLineCreateWithAttributedString(str))
+					{
+						_column_width1 = CTLineGetTypographicBounds(line, NULL, NULL, NULL);
+						CFRelease(line);
+					}
+					CFAttributedStringReplaceString(str, CFRangeMake(0, CFAttributedStringGetLength(str)), CFSTR("一"));
+					CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTFontAttributeName, font);
+					if(CTLineRef line = CTLineCreateWithAttributedString(str))
+					{
+						_column_width2 = CTLineGetTypographicBounds(line, NULL, NULL, NULL);
+						CFRelease(line);
+					}
+					CFRelease(str);
+				}
+				if(_column_width1 > 0 && _column_width2 > 0 && (g_kern_noascii_pt = _column_width1 - _column_width2) > 0)
+				{
+					g_cfNum = CFNumberCreate(NULL, kCFNumberCGFloatType, &g_kern_noascii_pt);
+				}else{
+					g_kern_noascii_pt = 0;
+				}
+				} catch(...) {
+					fprintf(stderr, "catched exception 1.  %f  %f\n", _column_width1, _column_width2);
+				}
+				fprintf(stderr, "mm width:%f, 一 width:%f,   set  g_kern_noascii_pt: %f\n",
+					_column_width1, _column_width2, g_kern_noascii_pt);
+			}
+
 			if(CFMutableAttributedStringRef str = CFAttributedStringCreateMutable(kCFAllocatorDefault, 0))
 			{
 				CFAttributedStringReplaceString(str, CFRangeMake(0, 0), CFSTR("n"));
@@ -175,6 +217,36 @@ namespace ct
 						CFAttributedStringReplaceString(str, CFRangeMake(0, 0), cfStr);
 						CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTFontAttributeName, styles.font());
 						CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTForegroundColorAttributeName, textColor ?: styles.foreground());
+						if(g_need_kern_noascii && g_kern_noascii_pt > 0)
+						{
+							// FIXME
+							// performance (set attribute each character)
+							// emoji character (width bigger than double ascii width)
+							unsigned int i = 0, begin, end, len;
+							try{
+							len = CFStringGetLength(cfStr);
+							while(i < len)
+							{
+								unsigned int chr;
+								do {
+									chr = CFStringGetCharacterAtIndex(cfStr, i);
+									if(chr > 255 && text::is_east_asian_width_minus_emoji(chr)) break;
+									++i;
+								} while(i < len);
+								if (i >= len) break;
+								begin = i;
+								do {
+									chr = CFStringGetCharacterAtIndex(cfStr, i);
+									if(chr <= 255 || !text::is_east_asian_width_minus_emoji(chr)) break;
+									++i;
+								} while(i < len);
+								end = i;
+								CFAttributedStringSetAttribute(str, CFRangeMake(begin, end-begin), kCTKernAttributeName, g_cfNum);
+							}
+							} catch(...) {
+								fprintf(stderr, "catched exception 2. %d  %d %d %d\n", i, len, begin, end);
+							}
+						}
 						if(styles.underlined())
 							_underlines.emplace_back(CFRangeMake(CFAttributedStringGetLength(toDraw), CFAttributedStringGetLength(str)), CGColorPtr(CGColorRetain(styles.foreground()), CGColorRelease));
 						_backgrounds.emplace_back(CFRangeMake(CFAttributedStringGetLength(toDraw), CFAttributedStringGetLength(str)), CGColorPtr(CGColorRetain(styles.background()), CGColorRelease));

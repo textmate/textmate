@@ -33,6 +33,8 @@ namespace text
 
 	PUBLIC bool is_east_asian_width (uint32_t ch);
 
+	PUBLIC bool is_east_asian_width_minus_emoji (uint32_t ch);
+
 	struct less_t
 	{
 		bool operator() (std::string const& lhs, std::string const& rhs) const
