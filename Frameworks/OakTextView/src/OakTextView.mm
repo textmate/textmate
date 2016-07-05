@@ -413,8 +413,6 @@ private:
 
 	document::document_ptr document;
 	theme_ptr theme;
-	std::string fontName;
-	CGFloat fontSize;
 	std::shared_ptr<document_view_t> documentView;
 	ng::callback_t* callback;
 
@@ -808,7 +806,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 	if(document = aDocument)
 	{
-		documentView = std::make_shared<document_view_t>(document, theme, fontName, fontSize * _fontScaleFactor / 100, to_s(self.scopeAttributes), self.scrollPastEnd);
+		documentView = std::make_shared<document_view_t>(document, theme, to_s(self.font.fontName), self.font.pointSize * _fontScaleFactor / 100, to_s(self.scopeAttributes), self.scrollPastEnd);
 
 		BOOL hasFocus = (self.keyState & (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask)) == (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask);
 		documentView->set_draw_as_key(hasFocus);
@@ -873,9 +871,8 @@ static std::string shell_quote (std::vector<std::string> paths)
 		settings_t const& settings = settings_for_path();
 
 		theme          = parse_theme(bundles::lookup(settings.get(kSettingsThemeKey, NULL_STR)));
-		fontName       = settings.get(kSettingsFontNameKey, NULL_STR);
-		fontSize       = settings.get(kSettingsFontSizeKey, 11.0);
 
+		_font           = [NSFont fontWithName:[NSString stringWithCxxString:settings.get(kSettingsFontNameKey, NULL_STR)] size:settings.get(kSettingsFontSizeKey, 11.0)];
 		_showInvisibles = settings.get(kSettingsShowInvisiblesKey, false);
 		_scrollPastEnd  = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsScrollPastEndKey];
 		_antiAlias      = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableAntiAliasKey];
@@ -2893,7 +2890,6 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 // ==============
 
 - (theme_ptr const&)theme     { return theme; }
-- (NSFont*)font               { return [NSFont fontWithName:[NSString stringWithCxxString:fontName] size:fontSize]; }
 - (size_t)tabSize             { return documentView ? documentView->indent().tab_size() : 2; }
 - (BOOL)softTabs              { return documentView ? documentView->indent().soft_tabs() : NO; }
 - (BOOL)softWrap              { return documentView && documentView->soft_wrap(); }
@@ -2926,15 +2922,14 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (void)setFont:(NSFont*)newFont
 {
-	fontName = to_s([newFont fontName]);
-	fontSize = [newFont pointSize];
+	_font = newFont;
 	_fontScaleFactor = 100;
 
 	if(documentView)
 	{
 		AUTO_REFRESH;
 		ng::index_t visibleIndex = documentView->index_at_point([self visibleRect].origin);
-		documentView->set_font(fontName, fontSize * _fontScaleFactor / 100);
+		documentView->set_font(to_s(self.font.fontName), self.font.pointSize * _fontScaleFactor / 100);
 		[self scrollIndexToFirstVisible:documentView->begin(documentView->convert(visibleIndex.index).line)];
 	}
 }
@@ -2949,7 +2944,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	{
 		AUTO_REFRESH;
 		ng::index_t visibleIndex = documentView->index_at_point([self visibleRect].origin);
-		documentView->set_font(fontName, fontSize * _fontScaleFactor / 100);
+		documentView->set_font(to_s(self.font.fontName), self.font.pointSize * _fontScaleFactor / 100);
 		[self scrollIndexToFirstVisible:documentView->begin(documentView->convert(visibleIndex.index).line)];
 	}
 
