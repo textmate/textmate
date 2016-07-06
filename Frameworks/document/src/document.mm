@@ -478,6 +478,7 @@ namespace document
 	encoding::type document_t::disk_encoding () const  { return encoding::type(to_s(_document.diskNewlines), to_s(_document.diskEncoding)); }
 	std::string document_t::file_type () const         { return to_s(_document.fileType); }
 	ssize_t document_t::revision () const              { return _document.revision; }
+	settings_t document_t::settings (std::string const& dir, std::string const& attrs) const { return [_document settingsForDirectory:to_ns(dir) attributes:to_ns(attrs)]; }
 	std::string document_t::content () const           { return to_s(_document.content); }
 	bool document_t::is_open () const                  { return _document.isOpen; }
 	bool document_t::is_modified () const              { return _document.isDocumentEdited; }

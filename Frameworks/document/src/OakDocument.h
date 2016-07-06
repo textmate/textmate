@@ -1,6 +1,7 @@
 #import <text/types.h>
 #import <authorization/authorization.h>
 #import <undo/undo.h> // ng::buffer_t and ng::undo_manager_t types
+#import <settings/settings.h>
 
 PUBLIC extern NSString* OakDocumentContentDidChangeNotification;
 PUBLIC extern NSString* OakDocumentMarksDidChangeNotification;
@@ -48,6 +49,8 @@ PUBLIC @interface OakDocument : NSObject
 @property (nonatomic, getter = isDocumentEdited, readonly) BOOL documentEdited;
 @property (nonatomic, getter = isRecentTrackingDisabled)   BOOL recentTrackingDisabled;
 @property (nonatomic)                                      BOOL keepBackupFile;
+
+- (settings_t)settingsForDirectory:(NSString*)aDirectory attributes:(NSString*)extraAttributes;
 
 - (void)setMarkOfType:(NSString*)aMark atPosition:(text::pos_t const&)aPos content:(NSString*)value;
 - (void)removeMarkOfType:(NSString*)aMark atPosition:(text::pos_t const&)aPos;

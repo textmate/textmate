@@ -27,6 +27,7 @@
 #import <file/open.h>
 #import <file/save.h>
 #import <file/reader.h>
+#import <file/path_info.h>
 #import <encoding/encoding.h>
 
 namespace document
@@ -1154,6 +1155,33 @@ private:
 		ASSERT_EQ(_openCount, 0);
 		[self deleteBuffer];
 	}
+}
+
+- (settings_t)settingsForDirectory:(NSString*)aDirectory attributes:(NSString*)extraAttributes
+{
+	std::map<std::string, std::string> variables = {
+		{ "TM_DISPLAYNAME",   to_s(self.displayName)           },
+		{ "TM_DOCUMENT_UUID", to_s(self.identifier.UUIDString) },
+	};
+
+	if(_path)
+	{
+		variables["TM_FILEPATH"]  = to_s(_path);
+		variables["TM_FILENAME"]  = path::name(to_s(_path));
+		variables["TM_DIRECTORY"] = path::parent(to_s(_path));
+	}
+
+	std::string path = to_s(_virtualPath ?: _path);
+	std::string dir  = aDirectory ? to_s(aDirectory) : (path != NULL_STR ? path::parent(path) : path::home());
+
+	std::vector<std::string> attr;
+	if(_fileType || _path)
+		attr.push_back(_fileType ? to_s(_fileType) : "attr.file.unknown-type");
+	attr.push_back(file::path_attributes(path));
+	if(extraAttributes)
+		attr.push_back(to_s(extraAttributes));
+
+	return settings_for_path(path, text::join(attr, " "), dir, variables);;
 }
 
 // =========

@@ -13,6 +13,7 @@
 #include <file/encoding.h>
 #include <scope/scope.h>
 #include <regexp/glob.h>
+#include <settings/settings.h>
 #include <oak/debug.h>
 #include <objc/objc.h>
 
@@ -85,6 +86,7 @@ namespace document
 		encoding::type disk_encoding () const;
 		std::string file_type () const;
 		ssize_t revision () const;
+		settings_t settings (std::string const& projectFolder = NULL_STR, std::string const& extraAttributes = NULL_STR) const;
 		std::string content () const;
 		bool is_open () const;
 		bool is_modified () const;
