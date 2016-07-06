@@ -2,6 +2,42 @@ Title: Release Notes
 
 # Changes
 
+## 2016-07-06 (v2.0-beta.11.5)
+
+* The precedence of targeted settings (`.tm_properties`) has been changed, probably easiest to explain with an example, as there are 3 different “types” of ways to target a document:
+
+		# .tm_properties
+		setting = «value» # 1. Untargeted
+		
+		[ text ]
+		setting = «value» # 2a. Scope selector match
+		
+		[ text.plain ]    # 2b. More specific scope selector match
+		setting = «value»
+		
+		[ *.txt ]
+		setting = «value» # 3. File type match
+
+	After the change, settings in the most local `.tm_properties` file will always take precedence over anything in a parent folder. So if you put: `tabSize = 4` in `/path/to/project` then **all** your project files will use a tab size of four (regardless of their type and more global settings). Within a `.tm_properties` file the settings are ranked in the order shown in the example above, i.e. a file type specific match will win over a scope selector match, and if there are multiple scope selectors, the one which is most specific will win, finally the untargeted settings will apply.
+
+	It is worth mentioning though that all settings are actually evaluated, this is mainly useful for variables, for example we can do:
+
+		# .tm_properties
+		Foo = "This is $Foo"
+		
+		[ text ]
+		Foo = "a text file"
+		
+		[ source ]
+		Foo = "source code"
+	
+	If you press ⌃R on a line containing `echo $foo` it should show either _“This is a text file”_ or _“This is source code”_.
+	
+	Hint: To see the value of all settings for your current document you can either press ⌃R on a line containing `"$TM_QUERY"` or you can use _Bundles → Select Bundle Item…_ (⌃⌘T) and switch to _Settings_ (⌘}). The latter will show how the settings are ordered.
+
+* Fixed: Document settings targeted at file types (e.g. `[ *.md ]`) would not work (since 2.0-beta.11).
+* See [all changes since v2.0-beta.11.4](https://github.com/textmate/textmate/compare/v2.0-beta.11.4...v2.0-beta.11.5)
+
 ## 2016-07-06 (v2.0-beta.11.4)
 
 * Theme can now be changed per document type or folder by setting `theme` to the desired theme’s UUID in `.tm_properties` in the appropriate section, e.g. `[ *.md ]` or `[ build/** ]`.
