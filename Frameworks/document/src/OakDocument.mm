@@ -782,7 +782,7 @@ private:
 
 		encoding::type encoding = encoding::type(to_s(_diskNewlines), to_s(_diskEncoding));
 
-		settings_t const settings = settings_for_path(to_s(_path));
+		settings_t const settings = settings_for_path(to_s(_virtualPath ?: _path));
 		if(encoding.charset() == kCharsetNoEncoding)
 			encoding.set_charset(settings.get(kSettingsEncodingKey, kCharsetUTF8));
 		if(encoding.newlines() == NULL_STR)
