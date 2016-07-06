@@ -87,6 +87,7 @@ namespace document
 		oak::uuid_t identifier () const;
 		std::string path () const;
 		std::string virtual_path () const;
+		std::string logical_path () const { return virtual_path() == NULL_STR ? path() : virtual_path(); }
 		std::string custom_name () const;
 		std::string backup_path () const;
 		std::string display_name () const;

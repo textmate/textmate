@@ -469,7 +469,7 @@ namespace
 	{
 		if(doc->is_modified() && doc->path() != NULL_STR)
 		{
-			settings_t const settings = settings_for_path(doc->virtual_path(), doc->file_type(), path::parent(doc->path()));
+			settings_t const settings = settings_for_path(doc->logical_path(), doc->file_type(), path::parent(doc->path()));
 			if(settings.get(kSettingsSaveOnBlurKey, false))
 			{
 				if(doc == _selectedDocument)
@@ -866,7 +866,7 @@ namespace
 		{
 			document::document_ptr doc = document::create(to_s([url path]));
 			doc->set_file_type(fileType);
-			auto const settings = settings_for_path(doc->virtual_path(), doc->file_type(), path::parent(doc->path()));
+			auto const settings = settings_for_path(doc->logical_path(), doc->file_type(), path::parent(doc->path()));
 			doc->set_indent(text::indent_t(std::max(1, settings.get(kSettingsTabSizeKey, 4)), SIZE_T_MAX, settings.get(kSettingsSoftTabsKey, false)));
 
 			[self insertDocuments:{ doc } atIndex:_selectedTabIndex + 1 selecting:doc andClosing:[self disposableDocument]];
@@ -1322,7 +1322,7 @@ namespace
 			map["projectDirectory"] = to_s(self.projectPath);
 
 		std::string docDirectory = _selectedDocument->path() != NULL_STR ? path::parent(_selectedDocument->path()) : to_s(self.untitledSavePath);
-		settings_t const settings = settings_for_path(_selectedDocument->virtual_path(), _selectedDocument->file_type() + " " + to_s(self.scopeAttributes), docDirectory, map);
+		settings_t const settings = settings_for_path(_selectedDocument->logical_path(), _selectedDocument->file_type() + " " + to_s(self.scopeAttributes), docDirectory, map);
 		self.window.title = [NSString stringWithCxxString:settings.get(kSettingsWindowTitleKey, to_s(self.documentDisplayName))];
 	}
 	else
@@ -2233,7 +2233,7 @@ namespace
 	if(self.projectPath)
 		map["projectDirectory"] = to_s(self.projectPath);
 
-	settings_t const settings = settings_for_path(_selectedDocument->virtual_path(), _selectedDocument->file_type() + " " + to_s(self.scopeAttributes), path::parent(documentPath), map);
+	settings_t const settings = settings_for_path(_selectedDocument->logical_path(), _selectedDocument->file_type() + " " + to_s(self.scopeAttributes), path::parent(documentPath), map);
 	std::string const customCandidate = settings.get(kSettingsRelatedFilePathKey, NULL_STR);
 
 	if(customCandidate != NULL_STR && customCandidate != documentPath && (std::find_if(_documents.begin(), _documents.end(), [&customCandidate](document::document_ptr const& doc){ return customCandidate == doc->path(); }) != _documents.end() || path::exists(customCandidate)))
