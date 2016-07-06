@@ -173,7 +173,7 @@ namespace
 				switch(event)
 				{
 					case did_change_path:
-						[_self setDocumentPath:[NSString stringWithCxxString:document->path()]];
+						[_self setDocumentPath:[NSString stringWithCxxString:document->logical_path()]];
 						[_self setDocumentDisplayName:[NSString stringWithCxxString:document->display_name()]];
 						if(!_self.projectPath)
 							_self.projectPath = [NSString stringWithCxxString:path::parent(document->path())];
@@ -1608,7 +1608,7 @@ namespace
 		}
 
 		self.projectPath         = projectPath;
-		self.documentPath        = [NSString stringWithCxxString:_selectedDocument->path()];
+		self.documentPath        = [NSString stringWithCxxString:_selectedDocument->logical_path()];
 		self.documentDisplayName = [NSString stringWithCxxString:_selectedDocument->display_name()];
 		self.documentIsModified  = _selectedDocument->is_modified();
 		self.documentIsOnDisk    = _selectedDocument->is_on_disk();
