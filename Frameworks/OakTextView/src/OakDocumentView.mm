@@ -725,7 +725,7 @@ private:
 - (IBAction)showTabSizeSelectorPanel:(id)sender
 {
 	if(!tabSizeSelectorPanel)
-		[NSBundle loadNibNamed:@"TabSizeSetting" owner:self];
+		[[NSBundle bundleForClass:[self class]] loadNibNamed:@"TabSizeSetting" owner:self topLevelObjects:NULL];
 	[tabSizeSelectorPanel makeKeyAndOrderFront:self];
 }
 
