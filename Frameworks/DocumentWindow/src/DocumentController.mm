@@ -1356,11 +1356,11 @@ namespace
 	};
 
 	_externalScopeAttributes.clear();
-	if(!_documentPath && !_projectPath)
+	if(!_selectedDocument && !_projectPath)
 		return;
 
 	std::string const projectDir   = to_s(_projectPath ?: NSHomeDirectory());
-	std::string const documentPath = _documentPath ? to_s(_documentPath) : path::join(projectDir, "dummy");
+	std::string const documentPath = _selectedDocument ? _selectedDocument->path() : path::join(projectDir, "dummy");
 
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
 
@@ -1395,7 +1395,7 @@ namespace
 
 		dispatch_async(dispatch_get_main_queue(), ^{
 			std::string const currentProjectDir   = to_s(_projectPath ?: NSHomeDirectory());
-			std::string const currentDocumentPath = _documentPath ? to_s(_documentPath) : path::join(projectDir, "dummy");
+			std::string const currentDocumentPath = _selectedDocument ? _selectedDocument->path() : path::join(projectDir, "dummy");
 			if(projectDir == currentProjectDir && currentDocumentPath == currentDocumentPath)
 				_externalScopeAttributes = res;
 		});
