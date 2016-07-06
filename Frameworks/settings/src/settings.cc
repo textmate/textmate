@@ -182,9 +182,10 @@ namespace
 		std::lock_guard<std::mutex> lock(mutex);
 		sections(NULL_STR); // clear cache if too big
 
-		std::multimap<double, section_t const*> orderScopeMatches;
 		for(auto const& file : paths(directory))
 		{
+			std::multimap<double, section_t const*> orderScopeMatches;
+
 			for(auto const& section : sections(file))
 			{
 				if(section.has_scope_selector)
@@ -199,16 +200,13 @@ namespace
 						filter(assignment, section);
 				}
 			}
-		}
 
-		for(auto const& section : orderScopeMatches)
-		{
-			for(auto const& assignment : section.second->variables)
-				filter(assignment, *section.second);
-		}
+			for(auto const& section : orderScopeMatches)
+			{
+				for(auto const& assignment : section.second->variables)
+					filter(assignment, *section.second);
+			}
 
-		for(auto const& file : paths(directory))
-		{
 			for(auto const& section : sections(file))
 			{
 				if(section.has_file_glob && section.file_glob.does_match(path == NULL_STR ? directory : path))

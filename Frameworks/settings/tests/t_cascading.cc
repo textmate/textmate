@@ -15,13 +15,13 @@ void test_scope_selector_ranking ()
 	OAK_ASSERT_EQ(settings_for_path(jail.path("file"),         "text.markup.html").get("mySetting"), "4");
 
 	OAK_ASSERT_EQ(settings_for_path(jail.path("foo/file")                        ).get("mySetting"), "5");
-	OAK_ASSERT_EQ(settings_for_path(jail.path("foo/file"),                 "text").get("mySetting"), "2");
+	OAK_ASSERT_EQ(settings_for_path(jail.path("foo/file"),                 "text").get("mySetting"), "5");
 	OAK_ASSERT_EQ(settings_for_path(jail.path("foo/file"),          "text.markup").get("mySetting"), "6");
-	OAK_ASSERT_EQ(settings_for_path(jail.path("foo/file"),     "text.markup.html").get("mySetting"), "4");
+	OAK_ASSERT_EQ(settings_for_path(jail.path("foo/file"),     "text.markup.html").get("mySetting"), "6");
 
 	OAK_ASSERT_EQ(settings_for_path(jail.path("foo/bar/file")                    ).get("mySetting"), "5");
 	OAK_ASSERT_EQ(settings_for_path(jail.path("foo/bar/file"),             "text").get("mySetting"), "7");
-	OAK_ASSERT_EQ(settings_for_path(jail.path("foo/bar/file"),      "text.markup").get("mySetting"), "6");
+	OAK_ASSERT_EQ(settings_for_path(jail.path("foo/bar/file"),      "text.markup").get("mySetting"), "7");
 	OAK_ASSERT_EQ(settings_for_path(jail.path("foo/bar/file"), "text.markup.html").get("mySetting"), "8");
 }
 
