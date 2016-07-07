@@ -98,20 +98,6 @@
                                     <action selector="newDocumentInTab:" target="-1" id="769"/>
                                 </connections>
                             </menuItem>
-                            <menuItem isSeparatorItem="YES" id="826">
-                                <modifierMask key="keyEquivalentModifierMask" command="YES"/>
-                            </menuItem>
-                            <menuItem title="New File" keyEquivalent="n" id="822">
-                                <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
-                                <connections>
-                                    <action selector="newDocumentInDirectory:" target="-1" id="827"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="New Folder" keyEquivalent="N" id="824">
-                                <connections>
-                                    <action selector="newFolder:" target="-1" id="828"/>
-                                </connections>
-                            </menuItem>
                             <menuItem isSeparatorItem="YES" id="815">
                                 <modifierMask key="keyEquivalentModifierMask" command="YES"/>
                             </menuItem>
@@ -1041,6 +1027,18 @@ CQ
                 <menuItem title="File Browser" id="299">
                     <menu key="submenu" title="File Browser" id="300">
                         <items>
+                            <menuItem title="New File" keyEquivalent="n" id="r4w-vL-lA3">
+                                <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
+                                <connections>
+                                    <action selector="newDocumentInDirectory:" target="-1" id="I1u-Nf-mT9"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="New Folder" keyEquivalent="N" id="bCZ-ZE-Qf6">
+                                <connections>
+                                    <action selector="newFolder:" target="-1" id="57g-WW-zkF"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="9XB-r6-afz"/>
                             <menuItem title="Back" id="545">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
