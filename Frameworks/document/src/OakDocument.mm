@@ -291,7 +291,7 @@ private:
 		variables["TM_DIRECTORY"] = path::parent(to_s(_path));
 	}
 
-	settings_t const settings = settings_for_path(to_s(_virtualPath ?: _path), to_s(_fileType), path::parent(to_s(_path)), variables);
+	settings_t const settings = settings_for_path(to_s(_virtualPath ?: _path), to_s(_fileType), to_s(_directory ?: [_path stringByDeletingLastPathComponent]), variables);
 	if(updateSpelling)
 	{
 		self.spellingLanguage = to_ns(settings.get(kSettingsSpellingLanguageKey, ""));
@@ -645,7 +645,7 @@ private:
 
 			// Check if user has an explicit binding for this path (e.g. *.md → Markdown)
 			if(!_self.fileType && docPath)
-				_self.fileType = to_ns(settings_for_path(to_s(docPath)).get(kSettingsFileTypeKey, NULL_STR));
+				_self.fileType = to_ns(settings_for_path(to_s(docPath), scope::scope_t(), to_s(_self.directory ?: [_self.path stringByDeletingLastPathComponent])).get(kSettingsFileTypeKey, NULL_STR));
 
 			// Check if a grammar recognizes the content (e.g. #!/usr/bin/ruby → Ruby)
 			if(!_self.fileType)
@@ -782,7 +782,7 @@ private:
 
 		encoding::type encoding = encoding::type(to_s(_diskNewlines), to_s(_diskEncoding));
 
-		settings_t const settings = settings_for_path(to_s(_virtualPath ?: _path));
+		settings_t const settings = settings_for_path(to_s(_virtualPath ?: _path), to_s(_fileType), to_s(_directory ?: [_path stringByDeletingLastPathComponent]));
 		if(encoding.charset() == kCharsetNoEncoding)
 			encoding.set_charset(settings.get(kSettingsEncodingKey, kCharsetUTF8));
 		if(encoding.newlines() == NULL_STR)

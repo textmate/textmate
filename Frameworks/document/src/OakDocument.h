@@ -16,6 +16,7 @@ PUBLIC @interface OakDocument : NSObject
 
 @property (nonatomic) NSUUID* identifier;
 @property (nonatomic) NSString* path;
+@property (nonatomic) NSString* directory;    // Where to find settings for untitled documents
 @property (nonatomic) NSString* virtualPath;  // Used for file type detection and settings (rmate)
 @property (nonatomic) NSString* customName;
 @property (nonatomic, readonly) NSString* displayName;
