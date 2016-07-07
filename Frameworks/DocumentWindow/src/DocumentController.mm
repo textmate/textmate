@@ -2514,6 +2514,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 		self.htmlOutputSize = NSSizeFromString(htmlOutputSize);
 
 	self.defaultProjectPath = project[@"projectPath"];
+	self.projectPath        = project[@"projectPath"];
 	self.fileBrowserHistory = project[@"fileBrowserState"];
 	self.fileBrowserVisible = [project[@"fileBrowserVisible"] boolValue];
 
