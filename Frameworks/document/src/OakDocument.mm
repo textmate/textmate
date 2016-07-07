@@ -368,10 +368,10 @@ private:
 			if(path::get_attr(path, "com.macromates.backup.modified") == "YES")
 				_savedRevision = _revision-1;
 
-			break;
+			return self;
 		}
 	}
-	return self;
+	return nil;
 }
 
 + (instancetype)documentWithPath:(NSString*)aPath
