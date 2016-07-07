@@ -209,10 +209,7 @@ namespace
 
 	static document::document_ptr create_untitled_document_in_folder (std::string const& suggestedFolder)
 	{
-		auto doc = document::from_content("", settings_for_path(NULL_STR, file::path_attributes(NULL_STR), suggestedFolder).get(kSettingsFileTypeKey, "text.plain"));
-		auto const settings = settings_for_path(NULL_STR, doc->file_type(), suggestedFolder);
-		doc->set_indent(text::indent_t(std::max(1, settings.get(kSettingsTabSizeKey, 4)), SIZE_T_MAX, settings.get(kSettingsSoftTabsKey, false)));
-		return doc;
+		return document::create();
 	}
 }
 
@@ -866,8 +863,6 @@ namespace
 		{
 			document::document_ptr doc = document::create(to_s([url path]));
 			doc->set_file_type(fileType);
-			auto const settings = settings_for_path(doc->logical_path(), doc->file_type(), path::parent(doc->path()));
-			doc->set_indent(text::indent_t(std::max(1, settings.get(kSettingsTabSizeKey, 4)), SIZE_T_MAX, settings.get(kSettingsSoftTabsKey, false)));
 
 			[self insertDocuments:{ doc } atIndex:_selectedTabIndex + 1 selecting:doc andClosing:[self disposableDocument]];
 
