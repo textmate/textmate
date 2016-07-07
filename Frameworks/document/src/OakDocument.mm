@@ -442,8 +442,11 @@ private:
 		return;
 
 	_fileType = newType;
-	[self setBufferGrammarForCurrentFileType];
-	[self updateSpellingSettings:YES andIndentSettings:YES];
+	if(self.isOpen)
+	{
+		[self setBufferGrammarForCurrentFileType];
+		[self updateSpellingSettings:YES andIndentSettings:YES];
+	}
 }
 
 - (std::map<std::string, std::string>)extendedAttributeds
