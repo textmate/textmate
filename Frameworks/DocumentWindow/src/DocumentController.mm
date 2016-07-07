@@ -1033,6 +1033,8 @@ namespace
 - (void)openAndSelectDocument:(document::document_ptr const&)aDocument
 {
 	document::document_ptr doc = aDocument;
+	OakDocument* document = doc->document();
+	document.directory = [document.path stringByDeletingLastPathComponent] ?: self.projectPath;
 	[doc->document() loadModalForWindow:self.window completionHandler:^(BOOL success, NSString* errorMessage, oak::uuid_t const& filterUUID){
 		if(success)
 		{
