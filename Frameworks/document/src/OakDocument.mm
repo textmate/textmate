@@ -737,7 +737,7 @@ private:
 // = Save Document =
 // =================
 
-- (void)didSaveContent:(io::bytes_ptr)content atPath:(NSString*)aPath withEncoding:(encoding::type)encoding success:(BOOL)success
+- (void)didSaveAtPath:(NSString*)aPath withEncoding:(encoding::type)encoding success:(BOOL)success
 {
 	if(success)
 	{
@@ -794,7 +794,7 @@ private:
 			void did_save (std::string const& path, io::bytes_ptr content, encoding::type const& encoding, bool success, std::string const& message, oak::uuid_t const& filter)
 			{
 				if(_close_document)
-					[_document didSaveContent:content atPath:to_ns(path) withEncoding:encoding success:success];
+					[_document didSaveAtPath:to_ns(path) withEncoding:encoding success:success];
 				_callback->did_save_document(_cppDocument, path, success, message, filter);
 				if(_close_document)
 					[_document close];
