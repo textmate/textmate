@@ -824,7 +824,7 @@ private:
 			++self.openCount;
 
 		auto cb = std::make_shared<callback_t>(self, document, callback, closeDocument);
-		file::save(to_s(_path), cb, _authorization, content, attributes, to_s(_fileType), encoding, std::vector<oak::uuid_t>() /* binary import filters */, std::vector<oak::uuid_t>() /* text import filters */);
+		file::save(to_s(_path), cb, _authorization, content, attributes, encoding, std::vector<oak::uuid_t>() /* binary import filters */, std::vector<oak::uuid_t>() /* text import filters */);
 	}
 }
 

@@ -19,7 +19,7 @@ namespace
 {
 	struct file_context_t : file::save_context_t
 	{
-		file_context_t (file::save_callback_ptr callback, std::string const& path, osx::authorization_t authorization, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, std::string const& fileType, encoding::type const& encoding, std::vector<oak::uuid_t> const& binaryImportFilters, std::vector<oak::uuid_t> const& textImportFilters) : _state(kStateIdle), _next_state(kStateStart), _make_writable(false), _saved(false), _callback(callback), _path(path), _authorization(authorization), _content(content), _attributes(attributes), _file_type(fileType), _path_attributes(NULL_STR), _encoding(encoding), _error(NULL_STR), _binary_import_filters(binaryImportFilters), _text_import_filters(textImportFilters) { }
+		file_context_t (file::save_callback_ptr callback, std::string const& path, osx::authorization_t authorization, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, encoding::type const& encoding, std::vector<oak::uuid_t> const& binaryImportFilters, std::vector<oak::uuid_t> const& textImportFilters) : _state(kStateIdle), _next_state(kStateStart), _make_writable(false), _saved(false), _callback(callback), _path(path), _authorization(authorization), _content(content), _attributes(attributes), _path_attributes(NULL_STR), _encoding(encoding), _error(NULL_STR), _binary_import_filters(binaryImportFilters), _text_import_filters(textImportFilters) { }
 
 		~file_context_t ()
 		{
@@ -84,7 +84,6 @@ namespace
 		io::bytes_ptr                        _content;
 		std::map<std::string, std::string>   _attributes;
 
-		std::string                          _file_type;
 		std::string                          _path_attributes;
 		encoding::type                       _encoding;
 
@@ -408,9 +407,9 @@ namespace file
 	// if(storeEncoding || hasEncoding)
 	// 	path::set_attr(path, "com.apple.TextEncoding", storeEncoding ? encoding : NULL_STR);
 
-	void save (std::string const& path, save_callback_ptr cb, osx::authorization_t auth, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, std::string const& fileType, encoding::type const& encoding, std::vector<oak::uuid_t> const& binaryImportFilters, std::vector<oak::uuid_t> const& textImportFilters)
+	void save (std::string const& path, save_callback_ptr cb, osx::authorization_t auth, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, encoding::type const& encoding, std::vector<oak::uuid_t> const& binaryImportFilters, std::vector<oak::uuid_t> const& textImportFilters)
 	{
-		auto context = std::make_shared<file_context_t>(cb, path, auth, content, attributes, fileType, encoding, binaryImportFilters, textImportFilters);
+		auto context = std::make_shared<file_context_t>(cb, path, auth, content, attributes, encoding, binaryImportFilters, textImportFilters);
 		context->proceed();
 	}
 

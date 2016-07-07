@@ -54,7 +54,7 @@ void test_save ()
 	std::string content = "// a comment\n";
 
 	auto cb = std::make_shared<stall_t>(&success);
-	file::save(path, cb, osx::authorization_t(), io::bytes_ptr(new io::bytes_t(content)), std::map<std::string, std::string>(), NULL_STR /* file type */, encoding::type("\n", "UTF-8"), std::vector<oak::uuid_t>() /* binary import filters */, std::vector<oak::uuid_t>() /* text import filters */);
+	file::save(path, cb, osx::authorization_t(), io::bytes_ptr(new io::bytes_t(content)), std::map<std::string, std::string>(), encoding::type("\n", "UTF-8"), std::vector<oak::uuid_t>() /* binary import filters */, std::vector<oak::uuid_t>() /* text import filters */);
 	cb->wait();
 
 	OAK_ASSERT_EQ(success, true);
@@ -70,7 +70,7 @@ void test_save_untitled ()
 	std::string content = "// a comment\n";
 
 	auto cb = std::make_shared<stall_t>(&success, path);
-	file::save(NULL_STR, cb, osx::authorization_t(), io::bytes_ptr(new io::bytes_t(content)), std::map<std::string, std::string>(), NULL_STR /* file type */, encoding::type("\n", "UTF-8"), std::vector<oak::uuid_t>() /* binary import filters */, std::vector<oak::uuid_t>() /* text import filters */);
+	file::save(NULL_STR, cb, osx::authorization_t(), io::bytes_ptr(new io::bytes_t(content)), std::map<std::string, std::string>(), encoding::type("\n", "UTF-8"), std::vector<oak::uuid_t>() /* binary import filters */, std::vector<oak::uuid_t>() /* text import filters */);
 	cb->wait();
 
 	OAK_ASSERT_EQ(success, true);
@@ -85,7 +85,7 @@ void test_save_untitled_failure ()
 	std::string content = "// a comment\n";
 
 	auto cb = std::make_shared<stall_t>(&success);
-	file::save(NULL_STR, cb, osx::authorization_t(), io::bytes_ptr(new io::bytes_t(content)), std::map<std::string, std::string>(), NULL_STR /* file type */, encoding::type("\n", "UTF-8"), std::vector<oak::uuid_t>() /* binary import filters */, std::vector<oak::uuid_t>() /* text import filters */);
+	file::save(NULL_STR, cb, osx::authorization_t(), io::bytes_ptr(new io::bytes_t(content)), std::map<std::string, std::string>(), encoding::type("\n", "UTF-8"), std::vector<oak::uuid_t>() /* binary import filters */, std::vector<oak::uuid_t>() /* text import filters */);
 	cb->wait();
 
 	OAK_ASSERT_EQ(success, false);
@@ -100,7 +100,7 @@ void test_save_translit ()
 	std::string content = "Æblegrød…\n";
 
 	auto cb = std::make_shared<stall_t>(&success, path, "ASCII//TRANSLIT");
-	file::save(path, cb, osx::authorization_t(), io::bytes_ptr(new io::bytes_t(content)), std::map<std::string, std::string>(), NULL_STR /* file type */, encoding::type("\n", "ASCII"), std::vector<oak::uuid_t>() /* binary import filters */, std::vector<oak::uuid_t>() /* text import filters */);
+	file::save(path, cb, osx::authorization_t(), io::bytes_ptr(new io::bytes_t(content)), std::map<std::string, std::string>(), encoding::type("\n", "ASCII"), std::vector<oak::uuid_t>() /* binary import filters */, std::vector<oak::uuid_t>() /* text import filters */);
 	cb->wait();
 
 	OAK_ASSERT_EQ(success, true);
@@ -116,7 +116,7 @@ void test_save_encoding_failure ()
 	std::string content = "Æblegrød…\n";
 
 	auto cb = std::make_shared<stall_t>(&success, path);
-	file::save(path, cb, osx::authorization_t(), io::bytes_ptr(new io::bytes_t(content)), std::map<std::string, std::string>(), NULL_STR /* file type */, encoding::type("\n", "ASCII"), std::vector<oak::uuid_t>() /* binary import filters */, std::vector<oak::uuid_t>() /* text import filters */);
+	file::save(path, cb, osx::authorization_t(), io::bytes_ptr(new io::bytes_t(content)), std::map<std::string, std::string>(), encoding::type("\n", "ASCII"), std::vector<oak::uuid_t>() /* binary import filters */, std::vector<oak::uuid_t>() /* text import filters */);
 	cb->wait();
 
 	OAK_ASSERT_EQ(success, false);
@@ -129,7 +129,7 @@ void test_export_filter ()
 
 	bool didSave = false;
 	auto cb = std::make_shared<stall_t>(&didSave);
-	file::save(jail.path("file.sha1"), cb, osx::authorization_t(), io::bytes_ptr(new io::bytes_t(content)), std::map<std::string, std::string>(), NULL_STR /* file type */, encoding::type("\n", "UTF-8"), std::vector<oak::uuid_t>() /* binary import filters */, std::vector<oak::uuid_t>() /* text import filters */);
+	file::save(jail.path("file.sha1"), cb, osx::authorization_t(), io::bytes_ptr(new io::bytes_t(content)), std::map<std::string, std::string>(), encoding::type("\n", "UTF-8"), std::vector<oak::uuid_t>() /* binary import filters */, std::vector<oak::uuid_t>() /* text import filters */);
 	cb->wait();
 
 	OAK_ASSERT(didSave);
