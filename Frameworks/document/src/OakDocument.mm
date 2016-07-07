@@ -147,23 +147,11 @@ NSString* OakDocumentWillCloseNotification        = @"OakDocumentWillCloseNotifi
 
 static NSString* FileExtensionForGrammar (parse::grammar_ptr grammar)
 {
-	if(!grammar)
-		return nil;
-
-	bundles::item_ptr grammarItem = bundles::lookup(grammar->uuid());
-	if(!grammarItem)
-		return nil;
-
-	plist::array_t fileTypes;
-	if(!plist::get_key_path(grammarItem->plist(), "fileTypes", fileTypes))
-		return nil;
-
-	for(auto const& type : fileTypes)
+	if(grammar)
 	{
-		if(std::string const* ext = boost::get<std::string>(&type))
-			return to_ns(*ext);
+		if(bundles::item_ptr grammarItem = bundles::lookup(grammar->uuid()))
+			return to_ns(grammarItem->value_for_field(bundles::kFieldGrammarExtension));
 	}
-
 	return nil;
 }
 
