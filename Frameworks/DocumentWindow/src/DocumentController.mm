@@ -2532,6 +2532,8 @@ static NSUInteger DisableSessionSavingCount = 0;
 				continue;
 
 			doc = document::create(to_s(path));
+			if(NSString* fileType = info[@"fileType"])
+				doc->set_file_type(to_s(fileType));
 			if(NSString* displayName = info[@"displayName"])
 				doc->set_custom_name(to_s(displayName));
 			if([info[@"sticky"] boolValue])
@@ -2590,6 +2592,8 @@ static NSUInteger DisableSessionSavingCount = 0;
 		}
 		if(document->path() != NULL_STR)
 			doc[@"path"] = [NSString stringWithCxxString:document->path()];
+		if(document->file_type() != NULL_STR) // TODO Only necessary when document.isBufferEmpty
+			doc[@"fileType"] = [NSString stringWithCxxString:document->file_type()];
 		if(document->display_name() != NULL_STR)
 			doc[@"displayName"] = [NSString stringWithCxxString:document->display_name()];
 		if(document == self.selectedDocument)
