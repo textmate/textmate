@@ -206,11 +206,6 @@ namespace
 	{
 		return doc && !doc->is_modified() && !doc->is_on_disk() && doc->path() == NULL_STR && doc->buffer().empty();
 	}
-
-	static document::document_ptr create_untitled_document_in_folder (std::string const& suggestedFolder)
-	{
-		return document::create();
-	}
 }
 
 @implementation DocumentController
@@ -374,7 +369,7 @@ namespace
 {
 	if(_documents.empty())
 	{
-		document::document_ptr defaultDocument = create_untitled_document_in_folder(to_s(self.untitledSavePath));
+		document::document_ptr defaultDocument = document::create();
 		self.documents = { defaultDocument };
 		[self openAndSelectDocument:defaultDocument];
 	}
@@ -630,7 +625,7 @@ namespace
 	crashInfo << text::format("keep %zu documents open, new selected index at %zu, create untitled %s", newDocuments.size(), newSelectedTabIndex, BSTR((createIfEmptyFlag && newDocuments.empty())));
 
 	if(createIfEmptyFlag && newDocuments.empty())
-		newDocuments.push_back(create_untitled_document_in_folder(to_s(self.untitledSavePath)));
+		newDocuments.push_back(document::create());
 
 	self.documents        = newDocuments;
 	self.selectedTabIndex = newSelectedTabIndex;
@@ -1670,7 +1665,7 @@ namespace
 {
 	if(NSIndexSet* indexSet = [self tryObtainIndexSetFrom:sender])
 	{
-		document::document_ptr doc = create_untitled_document_in_folder(to_s(self.untitledSavePath));
+		document::document_ptr doc = document::create();
 		[self insertDocuments:{ doc } atIndex:[indexSet firstIndex] selecting:doc andClosing:{ }];
 		[self openAndSelectDocument:doc];
 	}
@@ -2535,7 +2530,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 			if(path && skipMissing && access([path fileSystemRepresentation], F_OK) != 0)
 				continue;
 
-			doc = path ? document::create(to_s(path)) : create_untitled_document_in_folder(to_s(self.untitledSavePath));
+			doc = document::create(to_s(path));
 			if(NSString* displayName = info[@"displayName"])
 				doc->set_custom_name(to_s(displayName));
 			if([info[@"sticky"] boolValue])
@@ -2550,7 +2545,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 	}
 
 	if(documents.empty())
-		documents.push_back(create_untitled_document_in_folder(to_s(self.untitledSavePath)));
+		documents.push_back(document::create());
 
 	self.documents        = documents;
 	self.selectedTabIndex = selectedTabIndex;
@@ -2838,7 +2833,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 			{
 				controller.defaultProjectPath = [NSString stringWithCxxString:folder];
 				controller.fileBrowserVisible = YES;
-				controller.documents          = { create_untitled_document_in_folder(folder) };
+				controller.documents          = { document::create() };
 				controller.fileBrowser.url    = [NSURL fileURLWithPath:[NSString stringWithCxxString:folder]];
 
 				[controller openAndSelectDocument:controller.documents[controller.selectedTabIndex]];
