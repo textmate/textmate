@@ -106,12 +106,7 @@
                                     <action selector="openDocument:" target="-1" id="277"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Recent Projects…" keyEquivalent="O" id="609">
-                                <connections>
-                                    <action selector="openFavorites:" target="-1" id="610"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Quick Open…" keyEquivalent="t" id="301" userLabel="Quick Open…">
+                            <menuItem title="Open Quickly…" keyEquivalent="t" id="301" userLabel="Quick Open…">
                                 <connections>
                                     <action selector="goToFile:" target="-1" id="302"/>
                                 </connections>
@@ -126,6 +121,11 @@
                                         </menuItem>
                                     </items>
                                 </menu>
+                            </menuItem>
+                            <menuItem title="Open Recent Project…" keyEquivalent="O" id="609">
+                                <connections>
+                                    <action selector="openFavorites:" target="-1" id="610"/>
+                                </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="79">
                                 <modifierMask key="keyEquivalentModifierMask" command="YES"/>
