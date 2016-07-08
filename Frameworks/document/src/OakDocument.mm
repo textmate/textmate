@@ -142,6 +142,7 @@ namespace document
 
 NSString* OakDocumentContentDidChangeNotification = @"OakDocumentContentDidChangeNotification";
 NSString* OakDocumentMarksDidChangeNotification   = @"OakDocumentMarksDidChangeNotification";
+NSString* OakDocumentWillSaveNotification         = @"OakDocumentWillSaveNotification";
 NSString* OakDocumentDidSaveNotification          = @"OakDocumentDidSaveNotification";
 NSString* OakDocumentWillCloseNotification        = @"OakDocumentWillCloseNotification";
 
@@ -756,6 +757,11 @@ private:
 // = Save Document =
 // =================
 
+- (void)postDidSaveNotification:(id)sender
+{
+	[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentDidSaveNotification object:self];
+}
+
 - (void)didSaveAtPath:(NSString*)aPath withEncoding:(encoding::type)encoding success:(BOOL)success
 {
 	if(success)
@@ -770,7 +776,13 @@ private:
 
 		if(!_recentTrackingDisabled && _path && !_virtualPath)
 			[[NSDocumentController sharedDocumentController] noteNewRecentDocumentURL:[NSURL fileURLWithPath:_path]];
-		[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentDidSaveNotification object:self];
+
+		// This method is indirectly being called from a block executed in the main
+		// queue, as saving is running in a background queue. We need to get out of that
+		// block before posting the “did save” notification as while we are in this
+		// block, new blocks won’t be executed in the main queue, which we might rely
+		// on when running a local event loop (for executing commands).
+		[self performSelector:@selector(postDidSaveNotification:) withObject:self afterDelay:0];
 	}
 	self.observeFileSystem = self.isOpen;
 }
@@ -779,6 +791,7 @@ private:
 {
 	if(_buffer && _path)
 	{
+		[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentWillSaveNotification object:self];
 		self.observeFileSystem = NO;
 
 		io::bytes_ptr content = std::make_shared<io::bytes_t>(_buffer->size());

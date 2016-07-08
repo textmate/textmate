@@ -4,6 +4,7 @@
 
 PUBLIC extern NSString* OakDocumentContentDidChangeNotification;
 PUBLIC extern NSString* OakDocumentMarksDidChangeNotification;
+PUBLIC extern NSString* OakDocumentWillSaveNotification;
 PUBLIC extern NSString* OakDocumentDidSaveNotification;
 PUBLIC extern NSString* OakDocumentWillCloseNotification;
 

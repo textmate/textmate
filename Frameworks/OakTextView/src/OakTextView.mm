@@ -25,6 +25,7 @@
 #import <cf/cf.h>
 #import <command/runner.h>
 #import <document/collection.h>
+#import <document/OakDocument.h>
 #import <file/type.h>
 #import <layout/layout.h>
 #import <ns/ns.h>
@@ -792,6 +793,9 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 	if(documentView)
 	{
+		[[NSNotificationCenter defaultCenter] removeObserver:self name:OakDocumentWillSaveNotification object:document->document()];
+		[[NSNotificationCenter defaultCenter] removeObserver:self name:OakDocumentDidSaveNotification object:document->document()];
+
 		[self updateDocumentMetadata];
 
 		documentView->remove_callback(callback);
@@ -858,6 +862,10 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 		documentView->add_callback(callback);
 
+		// TODO Pre and post save actions should be handled by OakDocument once we have OakDocumentEditor
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentWillSave:) name:OakDocumentWillSaveNotification object:document->document()];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentDidSave:) name:OakDocumentDidSaveNotification object:document->document()];
+
 		[self resetBlinkCaretTimer];
 		[self setNeedsDisplay:YES];
 		_links.reset();
@@ -890,8 +898,6 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 		[self registerForDraggedTypes:[[self class] dropTypes]];
 
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentWillSave:) name:@"OakDocumentNotificationWillSave" object:nil];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentDidSave:) name:@"OakDocumentNotificationDidSave" object:nil];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
 	}
 	return self;
@@ -905,10 +911,6 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 - (void)documentWillSave:(NSNotification*)aNotification
 {
-	NSWindow* window = [[aNotification userInfo] objectForKey:@"window"];
-	if(window != self.window)
-		return;
-
 	for(auto const& item : bundles::query(bundles::kFieldSemanticClass, "callback.document.will-save", [self scopeContext], bundles::kItemTypeMost, oak::uuid_t(), false))
 		[self performBundleItem:item];
 
@@ -917,10 +919,6 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 - (void)documentDidSave:(NSNotification*)aNotification
 {
-	NSWindow* window = [[aNotification userInfo] objectForKey:@"window"];
-	if(window != self.window || documentView->path() == NULL_STR)
-		return;
-
 	for(auto const& item : bundles::query(bundles::kFieldSemanticClass, "callback.document.did-save", [self scopeContext], bundles::kItemTypeMost, oak::uuid_t(), false))
 		[self performBundleItem:item];
 }
