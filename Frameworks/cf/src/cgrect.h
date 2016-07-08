@@ -4,19 +4,6 @@
 #include <oak/oak.h>
 #include <oak/debug.h>
 
-struct CGRectLessThan
-{
-	bool operator() (CGRect const& lhs, CGRect const& rhs) const
-	{
-		return
-			lhs.origin.y    < rhs.origin.y    || lhs.origin.y    == rhs.origin.y    && (
-			lhs.size.height < rhs.size.height || lhs.size.height == rhs.size.height && (
-			lhs.origin.x    < rhs.origin.x    || lhs.origin.x    == rhs.origin.x    && (
-			lhs.size.width  < rhs.size.width  || lhs.size.width  == rhs.size.width  && (
-		false))));
-	}
-};
-
 template <typename _OutputIter>
 _OutputIter OakRectDifference (CGRect const& r, CGRect s, _OutputIter out)
 {
