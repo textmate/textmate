@@ -401,6 +401,37 @@ private:
 	return _untitledCount == 1 ? @"untitled" : [NSString stringWithFormat:@"untitled %lu", _untitledCount];
 }
 
+- (NSString*)displayNameWithExtension:(BOOL)flag
+{
+	NSString* res = [self.displayName stringByReplacingOccurrencesOfString:@"/" withString:@":"];
+	if(!flag)
+		return res;
+
+	if(_customName && OakNotEmptyString([res pathExtension]))
+		return res;
+
+	if(_path)
+		return [_path lastPathComponent];
+
+	if(_buffer && _buffer->grammar())
+	{
+		if(bundles::item_ptr item = bundles::lookup(_buffer->grammar()->uuid()))
+		{
+			if(NSString* ext = to_ns(item->value_for_field(bundles::kFieldGrammarExtension)))
+				return [res stringByAppendingPathExtension:ext];
+		}
+	}
+	else if(_fileType)
+	{
+		for(auto const& item : bundles::query(bundles::kFieldGrammarScope, to_s(_fileType)))
+		{
+			if(NSString* ext = to_ns(item->value_for_field(bundles::kFieldGrammarExtension)))
+				return [res stringByAppendingPathExtension:ext];
+		}
+	}
+	return res;
+}
+
 - (void)setPath:(NSString*)newPath
 {
 	NSString* path = to_ns(path::resolve(to_s(newPath)));

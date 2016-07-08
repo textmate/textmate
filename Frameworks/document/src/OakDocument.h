@@ -25,6 +25,8 @@ PUBLIC @interface OakDocument : NSObject
 @property (nonatomic) NSString* diskEncoding;
 @property (nonatomic) NSString* diskNewlines;
 
+- (NSString*)displayNameWithExtension:(BOOL)flag;
+
 - (void)loadModalForWindow:(NSWindow*)aWindow completionHandler:(void(^)(BOOL success, NSString* errorMessage, oak::uuid_t const& filterUUID))block;
 - (void)close;
 
