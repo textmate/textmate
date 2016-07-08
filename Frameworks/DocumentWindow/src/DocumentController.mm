@@ -1352,7 +1352,7 @@ namespace
 		return;
 
 	std::string const projectDir   = to_s(_projectPath ?: NSHomeDirectory());
-	std::string const documentPath = _selectedDocument ? _selectedDocument->path() : path::join(projectDir, "dummy");
+	std::string const documentPath = _selectedDocument && _selectedDocument->path() != NULL_STR ? _selectedDocument->path() : path::join(projectDir, "dummy");
 
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
 
