@@ -1,7 +1,6 @@
 #ifndef CF_H_HHFWBJSW
 #define CF_H_HHFWBJSW
 
-#include "image.h"
 #include <oak/oak.h>
 
 namespace cf
