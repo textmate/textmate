@@ -230,6 +230,11 @@ private:
 	return [NSSet setWithObjects:@"onDisk", @"revision", @"savedRevision", @"bufferEmpty", nil];
 }
 
+- (NSString*)description
+{
+	return [NSString stringWithFormat:@"<%@: %@>", [self class], self.displayName];
+}
+
 // ==================
 // = Helper Methods =
 // ==================
