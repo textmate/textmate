@@ -1226,7 +1226,10 @@ private:
 			}
 		}
 
-		void show_error (std::string const& path, std::string const& message, oak::uuid_t const& filter)        { fprintf(stderr, "%s: %s\n", path.c_str(), message.c_str()); }
+		void show_error (std::string const& path, std::string const& message, oak::uuid_t const& filter)
+		{
+			fprintf(stderr, "%s: %s\n", path.c_str(), message.c_str());
+		}
 
 		void show_content (std::string const& path, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, encoding::type const& encoding, std::vector<oak::uuid_t> const& binaryImportFilters, std::vector<oak::uuid_t> const& textImportFilters)
 		{
