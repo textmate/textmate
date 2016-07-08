@@ -145,16 +145,6 @@ NSString* OakDocumentMarksDidChangeNotification   = @"OakDocumentMarksDidChangeN
 NSString* OakDocumentDidSaveNotification          = @"OakDocumentDidSaveNotification";
 NSString* OakDocumentWillCloseNotification        = @"OakDocumentWillCloseNotification";
 
-static NSString* FileExtensionForGrammar (parse::grammar_ptr grammar)
-{
-	if(grammar)
-	{
-		if(bundles::item_ptr grammarItem = bundles::lookup(grammar->uuid()))
-			return to_ns(grammarItem->value_for_field(bundles::kFieldGrammarExtension));
-	}
-	return nil;
-}
-
 @interface OakDocument ()
 {
 	OBJC_WATCH_LEAKS(OakDocument);
@@ -527,14 +517,7 @@ private:
 	if(![[NSFileManager defaultManager] createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nullptr])
 		return nil;
 
-	path = [path stringByAppendingPathComponent:[self.displayName stringByReplacingOccurrencesOfString:@"/" withString:@":"]];
-
-	if(_buffer && (!_path || _customName && OakIsEmptyString([_customName pathExtension])))
-	{
-		if(NSString* ext = FileExtensionForGrammar(_buffer->grammar()))
-			path = [path stringByAppendingPathExtension:ext];
-	}
-
+	path = [path stringByAppendingPathComponent:[self displayNameWithExtension:YES]];
 	return to_ns(path::unique(to_s(path)));
 }
 
