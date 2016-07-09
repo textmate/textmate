@@ -51,9 +51,10 @@ namespace ng
 				size_t bufferRev = revision();
 				auto bufferRef   = parser_reference();
 
+				CFRunLoopRef runLoop = CFRunLoopGetCurrent();
 				dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 					result_t result = handle_request(grammarRef, state, line, { from, to }, batch_start, limit_redraw);
-					dispatch_async(dispatch_get_main_queue(), ^{
+					CFRunLoopPerformBlock(runLoop, kCFRunLoopCommonModes, ^{
 						if(bufferRef.lock())
 						{
 							if(bufferRev == revision())
@@ -61,6 +62,7 @@ namespace ng
 							else	initiate_repair();
 						}
 					});
+					CFRunLoopWakeUp(runLoop);
 				});
 			}
 			else

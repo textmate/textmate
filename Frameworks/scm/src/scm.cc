@@ -37,7 +37,7 @@ namespace scm
 		friend void enable ();
 
 		void schedule_update ();
-		static void async_update (shared_info_weak_ptr weakThis);
+		static void async_update (shared_info_weak_ptr weakThis, CFRunLoopRef currentRunLoop);
 		void fs_did_change (std::set<std::string> const& changedPaths);
 
 		void update (std::map<std::string, std::string> const& variables, std::map<std::string, scm::status::type> const& status, fs::snapshot_t const& fsSnapshot);
@@ -186,7 +186,7 @@ namespace scm
 	// = Update Status =
 	// =================
 
-	void shared_info_t::async_update (shared_info_weak_ptr weakThis)
+	void shared_info_t::async_update (shared_info_weak_ptr weakThis, CFRunLoopRef currentRunLoop)
 	{
 		if(shared_info_ptr info = weakThis.lock())
 		{
@@ -195,19 +195,21 @@ namespace scm
 				auto const status    = info->_driver->status(info->_root_path);
 				auto const variables = info->_driver->variables(info->_root_path);
 				auto const snapshot  = info->_driver->may_touch_filesystem() ? fs::snapshot_t(info->_root_path) : fs::snapshot_t();
-				dispatch_async(dispatch_get_main_queue(), ^{
+				CFRunLoopPerformBlock(currentRunLoop, kCFRunLoopCommonModes, ^{
 					if(shared_info_ptr info = weakThis.lock())
 						info->update(variables, status, snapshot);
 				});
+				CFRunLoopWakeUp(currentRunLoop);
 			}
 
-			dispatch_async(dispatch_get_main_queue(), ^{
+			CFRunLoopPerformBlock(currentRunLoop, kCFRunLoopCommonModes, ^{
 				if(shared_info_ptr info = weakThis.lock())
 				{
 					info->_pending_update  = false;
 					info->_no_check_before = dispatch_time(DISPATCH_TIME_NOW, 3 * NSEC_PER_SEC);
 				}
 			});
+			CFRunLoopWakeUp(currentRunLoop);
 		}
 	}
 
@@ -223,10 +225,11 @@ namespace scm
 			return;
 		_pending_update = true;
 
+		CFRunLoopRef currentRunLoop = CFRunLoopGetCurrent();
 		shared_info_weak_ptr weakThis = shared_from_this();
 		static dispatch_queue_t queue = dispatch_queue_create("org.textmate.scm.status", DISPATCH_QUEUE_SERIAL);
 		dispatch_after(_no_check_before, queue, ^{
-			async_update(weakThis);
+			async_update(weakThis, currentRunLoop);
 		});
 	}
 
@@ -375,14 +378,17 @@ namespace scm
 
 		if(performBackgroundDriverSearch)
 		{
+			CFRunLoopRef currentRunLoop = CFRunLoopGetCurrent();
+
 			weak_info_ptr weakInfo = res;
 			dispatch_async(cache_access_queue(), ^{
 				if(shared_info_ptr sharedInfo = find_shared_info_for(path))
 				{
-					dispatch_async(dispatch_get_main_queue(), ^{
+					CFRunLoopPerformBlock(currentRunLoop, kCFRunLoopCommonModes, ^{
 						if(info_ptr info = weakInfo.lock())
 							info->set_shared_info(sharedInfo);
 					});
+					CFRunLoopWakeUp(currentRunLoop);
 				}
 			});
 		}
@@ -392,11 +398,17 @@ namespace scm
 
 	void wait_for_status (info_ptr info)
 	{
-		dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+		__block bool shouldWait = true;
+		CFRunLoopRef runLoop = CFRunLoopGetCurrent();
+
 		info->add_callback(^(scm::info_t const& unused){
-			dispatch_semaphore_signal(semaphore);
+			shouldWait = false;
+			CFRunLoopStop(runLoop);
 		});
-		dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
+
+		while(shouldWait)
+			CFRunLoopRun();
+
 		info->pop_callback();
 	}
 
