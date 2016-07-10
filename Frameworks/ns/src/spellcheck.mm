@@ -9,11 +9,22 @@ namespace ns
 	{
 		if(!_did_setup)
 		{
-			// This should only be called from spellcheck() which runs on the main queue
-			ASSERT(dispatch_get_current_queue() == dispatch_get_main_queue());
-
-			_tag = [NSSpellChecker uniqueSpellDocumentTag];
-			_did_setup = true;
+			if(CFRunLoopGetCurrent() != CFRunLoopGetMain())
+			{
+				dispatch_semaphore_t sem = dispatch_semaphore_create(0);
+				CFRunLoopPerformBlock(CFRunLoopGetMain(), kCFRunLoopCommonModes, ^{
+					_tag = [NSSpellChecker uniqueSpellDocumentTag];
+					_did_setup = true;
+				   dispatch_semaphore_signal(sem);
+				});
+				CFRunLoopWakeUp(CFRunLoopGetMain());
+				dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
+			}
+			else
+			{
+				_tag = [NSSpellChecker uniqueSpellDocumentTag];
+				_did_setup = true;
+			}
 		}
 		return _tag;
 	}
@@ -23,7 +34,7 @@ namespace ns
 		if(_did_setup)
 		{
 			NSInteger tag = _tag;
-			dispatch_async(dispatch_get_main_queue(), ^{
+			CFRunLoopPerformBlock(CFRunLoopGetMain(), kCFRunLoopCommonModes, ^{
 				@autoreleasepool {
 					[[NSSpellChecker sharedSpellChecker] closeSpellDocumentWithTag:tag];
 				}
@@ -51,26 +62,19 @@ namespace ns
 
 	std::vector<ns::range_t> spellcheck (char const* first, char const* last, std::string const& language, spelling_tag_t const& tag)
 	{
-		__block std::vector<ns::range_t> res;
-		void(^block)() = ^{
-			@autoreleasepool {
-				size_t offset = 0;
-				for(char const* it = first; it != last; )
-				{
-					char const* eol = std::find(it, last, '\n');
-					spellcheck(it, eol, language, tag, offset, back_inserter(res));
-					while(eol != last && *eol == '\n')
-						++eol;
-					offset += eol - it;
-					it = eol;
-				}
+		std::vector<ns::range_t> res;
+		@autoreleasepool {
+			size_t offset = 0;
+			for(char const* it = first; it != last; )
+			{
+				char const* eol = std::find(it, last, '\n');
+				spellcheck(it, eol, language, tag, offset, back_inserter(res));
+				while(eol != last && *eol == '\n')
+					++eol;
+				offset += eol - it;
+				it = eol;
 			}
-		};
-
-		if(dispatch_get_current_queue() != dispatch_get_main_queue())
-				dispatch_sync(dispatch_get_main_queue(), block);
-		else	block();
-
+		}
 		return res;
 	}
 
