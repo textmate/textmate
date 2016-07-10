@@ -239,6 +239,8 @@ int main (int argc, char const* argv[])
     });
   }
 
+  __block bool hasMoreTests = true;
+
   dispatch_group_notify(group, dispatch_get_main_queue(), ^{
     std::vector<function_t> failed;
     std::copy_if(tests.begin(), tests.end(), back_inserter(failed), [](function_t const& t){ return !t.message.empty(); });
@@ -270,9 +272,12 @@ int main (int argc, char const* argv[])
     {
       fprintf(stdout, "%s: %zu %s passed\n", getprogname(), tests.size(), tests.size() == 1 ? "test" : "tests");
     }
-    exit(0);
+    hasMoreTests = false;
+    CFRunLoopStop(CFRunLoopGetMain());
   });
 
-  dispatch_main();
+  while(hasMoreTests)
+    CFRunLoopRun();
+
   return 0;
 }

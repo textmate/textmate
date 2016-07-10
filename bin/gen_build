@@ -856,7 +856,7 @@ rule gen_oak_test
   description = Generate test ‘$out’…
 
 rule link_oak_test
-  command = $CXX -o $out $in $LN_FLAGS $RAVE_FLAGS
+  command = $CXX -o $out $in $LN_FLAGS $RAVE_FLAGS -framework CoreFoundation
   description = Link test ‘$out’…
 
 rule run_test
