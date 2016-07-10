@@ -582,6 +582,18 @@ private:
 // = Load Document =
 // =================
 
+- (void)updateRecentDocumentMenu
+{
+	if(_recentTrackingDisabled || !_path || _virtualPath)
+		return;
+
+	NSURL* url = [NSURL fileURLWithPath:_path];
+	CFRunLoopPerformBlock(CFRunLoopGetMain(), kCFRunLoopCommonModes, ^{
+		// This is not thread-safe so we ensure that we are on the main thread
+		[[NSDocumentController sharedDocumentController] noteNewRecentDocumentURL:url];
+	});
+}
+
 - (void)loadModalForWindow:(NSWindow*)aWindow completionHandler:(void(^)(BOOL success, NSString* errorMessage, oak::uuid_t const& filterUUID))block
 {
 	if(++self.openCount != 1)
@@ -747,10 +759,8 @@ private:
 	self.diskNewlines   = to_ns(encoding.newlines());
 
 	[self snapshot];
+	[self updateRecentDocumentMenu];
 	self.observeFileSystem = YES;
-
-	if(!_recentTrackingDisabled && _path && !_virtualPath)
-		[[NSDocumentController sharedDocumentController] noteNewRecentDocumentURL:[NSURL fileURLWithPath:_path]];
 }
 
 // =================
@@ -768,9 +778,7 @@ private:
 
 		[self snapshot];
 		[self removeBackup];
-
-		if(!_recentTrackingDisabled && _path && !_virtualPath)
-			[[NSDocumentController sharedDocumentController] noteNewRecentDocumentURL:[NSURL fileURLWithPath:_path]];
+		[self updateRecentDocumentMenu];
 
 		[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentDidSaveNotification object:self];
 	}
