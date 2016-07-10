@@ -27,7 +27,7 @@ struct delegate_t : command::delegate_t
 	output_format::type format;
 	output_caret::type caret;
 
-	delegate_t () : out(""), err(""), html(""), rc(0), placement(as_str(output::discard)) { }
+	delegate_t () : out(""), err(""), html(""), rc(-42), placement(as_str(output::discard)) { }
 
 	ng::ranges_t write_unit_to_fd (int fd, input::type unit, input::type fallbackUnit, input_format::type format, scope::selector_t const& scopeSelector, std::map<std::string, std::string>& variables, bool* inputWasSelection)
 	{
@@ -37,6 +37,7 @@ struct delegate_t : command::delegate_t
 
 	bool accept_html_data (command::runner_ptr runner, char const* data, size_t len)
 	{
+		rc = 0;
 		return html.insert(html.end(), data, data + len), true;
 	}
 
@@ -46,6 +47,7 @@ struct delegate_t : command::delegate_t
 		this->placement = as_str(placement);
 		this->format    = format;
 		this->caret     = outputCaret;
+		this->rc        = 0;
 
 		fprintf(stderr, "output: ‘%s’\n", out.c_str());
 		return true;
@@ -55,12 +57,14 @@ struct delegate_t : command::delegate_t
 	{
 		out       = str;
 		placement = as_str(output::new_window);
+		rc        = 0;
 	}
 
 	void show_tool_tip (std::string const& str)
 	{
 		out       = str;
 		placement = as_str(output::tool_tip);
+		rc        = 0;
 	}
 
 	void show_error (bundle_command_t const& command, int rc, std::string const& out, std::string const& err)
