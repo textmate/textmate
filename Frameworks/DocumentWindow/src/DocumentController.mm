@@ -1025,8 +1025,8 @@ namespace
 	document::document_ptr doc = aDocument;
 	OakDocument* document = doc->document();
 	document.directory = [document.path stringByDeletingLastPathComponent] ?: self.projectPath;
-	[doc->document() loadModalForWindow:self.window completionHandler:^(BOOL success, NSString* errorMessage, oak::uuid_t const& filterUUID){
-		if(success)
+	[doc->document() loadModalForWindow:self.window completionHandler:^(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID){
+		if(result == OakDocumentIOResultSuccess)
 		{
 			OakDocument* document = doc->document();
 			BOOL showBundleSuggestions = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableBundleSuggestionsKey];

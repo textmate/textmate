@@ -166,7 +166,7 @@ NSString* OakDocumentWillCloseNotification        = @"OakDocumentWillCloseNotifi
 @property (nonatomic) BOOL observeFileSystem;
 @property (nonatomic) BOOL needsImportDocumentChanges;
 
-@property (nonatomic) NSArray<void(^)(BOOL, NSString*, oak::uuid_t const&)>* loadCompletionHandlers;
+@property (nonatomic) NSArray<void(^)(OakDocumentIOResult, NSString*, oak::uuid_t const&)>* loadCompletionHandlers;
 
 // These are also exposed in ‘OakDocument Private.h’
 @property (nonatomic) NSInteger   revision;
@@ -594,12 +594,12 @@ private:
 	});
 }
 
-- (void)loadModalForWindow:(NSWindow*)aWindow completionHandler:(void(^)(BOOL success, NSString* errorMessage, oak::uuid_t const& filterUUID))block
+- (void)loadModalForWindow:(NSWindow*)aWindow completionHandler:(void(^)(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID))block
 {
 	if(++self.openCount != 1)
 	{
 		if(!_loadCompletionHandlers)
-				block(YES, nil, oak::uuid_t());
+				block(OakDocumentIOResultSuccess, nil, oak::uuid_t());
 		else	_loadCompletionHandlers = [_loadCompletionHandlers arrayByAddingObject:block];
 		return;
 	}
@@ -618,12 +618,12 @@ private:
 			self.savedRevision = _revision-1;
 		}
 
-		return block(YES, nil, oak::uuid_t());
+		return block(OakDocumentIOResultSuccess, nil, oak::uuid_t());
 	}
 
 	struct callback_t : file::open_callback_t
 	{
-		callback_t (OakDocument* self, NSWindow* window, void(^block)(BOOL success, NSString* errorMessage, oak::uuid_t const& filterUUID)) : _self(self), _window(window), _block(block) { }
+		callback_t (OakDocument* self, NSWindow* window, void(^block)(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID)) : _self(self), _window(window), _block(block) { }
 
 		void select_charset (std::string const& path, io::bytes_ptr content, file::open_context_ptr context)
 		{
@@ -659,7 +659,7 @@ private:
 		void show_error (std::string const& path, std::string const& message, oak::uuid_t const& filter)
 		{
 			[_self didLoadContent:io::bytes_ptr() attributes:{ } encoding:{ }];
-			_block(NO, to_ns(message), filter);
+			_block(OakDocumentIOResultFailure, to_ns(message), filter);
 		}
 
 		void show_content (std::string const& path, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, encoding::type const& encoding, std::vector<oak::uuid_t> const& binaryImportFilters, std::vector<oak::uuid_t> const& textImportFilters)
@@ -679,13 +679,13 @@ private:
 				_self.fileType = to_ns(file::type_from_path(to_s(docPath)));
 
 			[_self didLoadContent:content attributes:attributes encoding:encoding];
-			_block(YES, nil, oak::uuid_t());
+			_block(OakDocumentIOResultSuccess, nil, oak::uuid_t());
 		}
 
 	private:
 		OakDocument* _self;
 		NSWindow* _window;
-		void(^_block)(BOOL success, NSString* errorMessage, oak::uuid_t const& filterUUID);
+		void(^_block)(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID);
 	};
 
 	io::bytes_ptr content;
@@ -699,11 +699,11 @@ private:
 	}
 
 	self.loadCompletionHandlers = @[ block ];
-	auto cb = std::make_shared<callback_t>(self, aWindow, ^(BOOL success, NSString* errorMessage, oak::uuid_t const& filterUUID){
+	auto cb = std::make_shared<callback_t>(self, aWindow, ^(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID){
 		auto blocks = self.loadCompletionHandlers;
 		self.loadCompletionHandlers = nil;
-		for(void(^f)(BOOL, NSString*, oak::uuid_t const&) in blocks)
-			f(success, errorMessage, filterUUID);
+		for(void(^f)(OakDocumentIOResult, NSString*, oak::uuid_t const&) in blocks)
+			f(result, errorMessage, filterUUID);
 	});
 	file::open(to_s(_path), _authorization, cb, content);
 }

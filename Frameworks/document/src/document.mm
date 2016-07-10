@@ -513,7 +513,7 @@ namespace document
 		__block bool didStop = false;
 
 		auto runLoop = std::make_shared<cf::run_loop_t>(runLoopMode);
-		[_document loadModalForWindow:nil completionHandler:^(BOOL success, NSString* errorMessage, oak::uuid_t const& filterUUID){
+		[_document loadModalForWindow:nil completionHandler:^(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID){
 			didStop = true;
 			runLoop->stop();
 		}];
