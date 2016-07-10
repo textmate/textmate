@@ -16,6 +16,7 @@
 #import <regexp/format_string.h>
 #import <editor/editor.h>
 #import <document/collection.h>
+#import <document/OakDocument.h>
 #import <settings/settings.h>
 
 OAK_DEBUG_VAR(Find_Base);
@@ -255,8 +256,12 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 								[parent.children setValue:nil forKey:@"replaceString"];
 								continue;
 							}
-							doc->sync_save(kCFRunLoopDefaultMode);
-							doc->set_content(NULL_STR);
+
+							[doc->document() saveModalForWindow:self.windowController.window completionHandler:^(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID){
+								// TODO Indicate failure when result != OakDocumentIOResultSuccess
+								if(!doc->is_open()) // Ensure document is still closed
+									doc->set_content(NULL_STR);
+							}];
 						}
 
 						parent.readOnly = YES;
