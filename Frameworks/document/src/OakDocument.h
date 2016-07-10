@@ -7,6 +7,7 @@ PUBLIC extern NSString* OakDocumentMarksDidChangeNotification;
 PUBLIC extern NSString* OakDocumentWillSaveNotification;
 PUBLIC extern NSString* OakDocumentDidSaveNotification;
 PUBLIC extern NSString* OakDocumentWillCloseNotification;
+PUBLIC extern NSString* OakDocumentWillShowAlertNotification;
 
 typedef NS_ENUM(NSInteger, OakDocumentIOResult) {
 	OakDocumentIOResultSuccess = 0,
@@ -36,6 +37,7 @@ PUBLIC @interface OakDocument : NSObject
 - (NSString*)displayNameWithExtension:(BOOL)flag;
 
 - (void)loadModalForWindow:(NSWindow*)aWindow completionHandler:(void(^)(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID))block;
+- (void)saveModalForWindow:(NSWindow*)aWindow completionHandler:(void(^)(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID))block;
 - (void)close;
 
 @property (nonatomic) osx::authorization_t authorization;
