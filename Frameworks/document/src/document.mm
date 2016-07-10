@@ -572,11 +572,6 @@ namespace document
 		}];
 	}
 
-	void document_t::try_save (document::save_callback_ptr callback)
-	{
-		[_document trySaveUsingCallback:callback forDocument:shared_from_this()];
-	}
-
 	void document_t::close ()
 	{
 		[_document close];

@@ -2,10 +2,7 @@
 
 namespace document
 {
-	struct save_callback_t;
 	struct document_t;
-
-	typedef std::shared_ptr<save_callback_t> save_callback_ptr;
 	typedef std::shared_ptr<document_t> document_ptr;
 
 } /* document */
@@ -23,6 +20,4 @@ namespace document
 
 - (BOOL)saveBackup:(id)sender;
 - (BOOL)performReplacements:(std::multimap<std::pair<size_t, size_t>, std::string> const&)someReplacements checksum:(uint32_t)crc32;
-
-- (void)trySaveUsingCallback:(document::save_callback_ptr)callback forDocument:(document::document_ptr)document;
 @end

@@ -3,7 +3,7 @@
 #import "Printing.h"
 #import "watch.h"
 #import "merge.h"
-#import "document.h" // {open,save}_callback_ptr + kBookmarkIdentifier
+#import "document.h" // kBookmarkIdentifier
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/OakAppKit.h>
@@ -789,67 +789,6 @@ private:
 		[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentDidSaveNotification object:self];
 	}
 	self.observeFileSystem = self.isOpen;
-}
-
-- (void)trySaveUsingCallback:(document::save_callback_ptr)callback forDocument:(document::document_ptr)document
-{
-	if(_buffer && _path)
-	{
-		[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentWillSaveNotification object:self];
-		self.observeFileSystem = NO;
-
-		io::bytes_ptr content = std::make_shared<io::bytes_t>(_buffer->size());
-		_buffer->visit_data([&](char const* bytes, size_t offset, size_t len, bool*){
-			memcpy(content->get() + offset, bytes, len);
-		});
-
-		std::map<std::string, std::string> attributes;
-		if(volume::settings(to_s(_path)).extended_attributes())
-			attributes = [self extendedAttributeds];
-
-		encoding::type encoding = encoding::type(to_s(_diskNewlines), to_s(_diskEncoding));
-
-		settings_t const settings = settings_for_path(to_s(_virtualPath ?: _path), to_s(_fileType), to_s(_directory ?: [_path stringByDeletingLastPathComponent]));
-		if(encoding.charset() == kCharsetNoEncoding)
-			encoding.set_charset(settings.get(kSettingsEncodingKey, kCharsetUTF8));
-		if(encoding.newlines() == NULL_STR)
-			encoding.set_newlines(settings.get(kSettingsLineEndingsKey, kLF));
-
-		struct callback_t : file::save_callback_t
-		{
-			callback_t (OakDocument* document, document::document_ptr cppdocument, document::save_callback_ptr callback, bool closeDocument) : _document(document), _cppDocument(cppdocument), _callback(callback), _close_document(closeDocument)
-			{
-			}
-
-			void select_path (std::string const& path, io::bytes_ptr content, file::save_context_ptr context)                                     { _callback->select_path(path, content, context); }
-			void select_make_writable (std::string const& path, io::bytes_ptr content, file::save_context_ptr context)                            { _callback->select_make_writable(path, content, context); }
-			void select_create_parent (std::string const& path, io::bytes_ptr content, file::save_context_ptr context)                            { _callback->select_create_parent(path, content, context); }
-			void obtain_authorization (std::string const& path, io::bytes_ptr content, osx::authorization_t auth, file::save_context_ptr context) { _callback->obtain_authorization(path, content, auth, context); }
-			void select_charset (std::string const& path, io::bytes_ptr content, std::string const& charset, file::save_context_ptr context)      { _callback->select_charset(path, content, charset, context); }
-
-			void did_save (std::string const& path, io::bytes_ptr content, encoding::type const& encoding, bool success, std::string const& message, oak::uuid_t const& filter)
-			{
-				if(_close_document)
-					[_document didSaveAtPath:to_ns(path) withEncoding:encoding success:success];
-				_callback->did_save_document(_cppDocument, path, success, message, filter);
-				if(_close_document)
-					[_document close];
-			}
-
-		private:
-			OakDocument* _document;
-			document::document_ptr _cppDocument;
-			document::save_callback_ptr _callback;
-			bool _close_document;
-		};
-
-		BOOL closeDocument = self.isOpen;
-		if(closeDocument)
-			++self.openCount;
-
-		auto cb = std::make_shared<callback_t>(self, document, callback, closeDocument);
-		file::save(to_s(_path), cb, _authorization, content, attributes, encoding, std::vector<oak::uuid_t>() /* binary import filters */, std::vector<oak::uuid_t>() /* text import filters */);
-	}
 }
 
 - (void)saveModalForWindow:(NSWindow*)aWindow completionHandler:(void(^)(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID))block

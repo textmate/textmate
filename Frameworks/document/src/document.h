@@ -32,15 +32,6 @@ namespace document
 	typedef std::shared_ptr<document_t>       document_ptr;
 	typedef std::weak_ptr<document_t>         document_weak_ptr;
 
-	struct PUBLIC save_callback_t : file::save_callback_t
-	{
-		virtual ~save_callback_t () { }
-		virtual void did_save_document (document_ptr document, std::string const& path, bool success, std::string const& message, oak::uuid_t const& filter) = 0;
-		virtual void did_save (std::string const& path, io::bytes_ptr content, encoding::type const& encoding, bool success, std::string const& message, oak::uuid_t const& filter) { }
-	};
-
-	typedef std::shared_ptr<save_callback_t> save_callback_ptr;
-
 	struct inode_t
 	{
 		inode_t () { }
@@ -134,7 +125,6 @@ namespace document
 		void enumerate_bytes_using_block (void(^block)(char const* bytes, size_t len, bool* stop));
 		bool replace (std::multimap<std::pair<size_t, size_t>, std::string> const& replacements, uint32_t crc32);
 
-		void try_save (document::save_callback_ptr callback);
 		void close ();
 
 		// ===================
