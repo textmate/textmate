@@ -64,6 +64,13 @@ To install using [homebrew][] run:
 
 In practice `hg` ([mercurial][]) is only required for the SCM library’s tests so you can skip this dependency if you don’t mind a failing test.
 
+If you want to avoid the libressl linker warnings about being built for different deployment target then run `brew edit libressl` and make the following change:
+
+	-    system "./configure", *args
+	+    system "env", "LDFLAGS=-mmacosx-version-min=10.8", "CFLAGS=-mmacosx-version-min=10.8", "./configure", *args
+
+Afterward you must rebuild using: `brew reinstall --build-from-source libressl`
+
 ## Building from within TextMate
 
 You should install the [Ninja][NinjaBundle] and [CxxTest][] bundles. Both can be installed via _Preferences_ → _Bundles_.
