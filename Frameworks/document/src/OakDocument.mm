@@ -757,11 +757,6 @@ private:
 // = Save Document =
 // =================
 
-- (void)postDidSaveNotification:(id)sender
-{
-	[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentDidSaveNotification object:self];
-}
-
 - (void)didSaveAtPath:(NSString*)aPath withEncoding:(encoding::type)encoding success:(BOOL)success
 {
 	if(success)
@@ -777,12 +772,7 @@ private:
 		if(!_recentTrackingDisabled && _path && !_virtualPath)
 			[[NSDocumentController sharedDocumentController] noteNewRecentDocumentURL:[NSURL fileURLWithPath:_path]];
 
-		// This method is indirectly being called from a block executed in the main
-		// queue, as saving is running in a background queue. We need to get out of that
-		// block before posting the “did save” notification as while we are in this
-		// block, new blocks won’t be executed in the main queue, which we might rely
-		// on when running a local event loop (for executing commands).
-		[self performSelector:@selector(postDidSaveNotification:) withObject:self afterDelay:0];
+		[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentDidSaveNotification object:self];
 	}
 	self.observeFileSystem = self.isOpen;
 }
