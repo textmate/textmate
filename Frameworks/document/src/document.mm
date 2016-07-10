@@ -524,27 +524,18 @@ namespace document
 
 	bool document_t::sync_save (CFStringRef runLoopMode)
 	{
-		struct stall_t : save_callback_t
-		{
-			stall_t (bool& res, CFStringRef runLoopMode) : _res(res), _run_loop(runLoopMode) { }
+		__block bool res = false;
+		__block bool didStop = false;
 
-			void did_save_document (document_ptr document, std::string const& path, bool success, std::string const& message, oak::uuid_t const& filter)
-			{
-				_res = success;
-				_run_loop.stop();
-			}
+		auto runLoop = std::make_shared<cf::run_loop_t>(runLoopMode);
+		[_document saveModalForWindow:nil completionHandler:^(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID){
+			res = result == OakDocumentIOResultSuccess;
+			didStop = true;
+			runLoop->stop();
+		}];
 
-			void wait () { _run_loop.start(); }
-
-		private:
-			bool& _res;
-			cf::run_loop_t _run_loop;
-		};
-
-		bool res = false;
-		auto cb = std::make_shared<stall_t>(res, runLoopMode);
-		try_save(cb);
-		cb->wait();
+		if(!didStop)
+			runLoop->start();
 
 		return res;
 	}
