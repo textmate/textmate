@@ -1113,7 +1113,7 @@ namespace
 	else
 	{
 		NSString* const suggestedFolder  = self.untitledSavePath;
-		NSString* const suggestedName    = DefaultSaveNameForDocument(_selectedDocument);
+		NSString* const suggestedName    = [_selectedDocument->document() displayNameWithExtension:YES];
 		[OakSavePanel showWithPath:suggestedName directory:suggestedFolder fowWindow:self.window encoding:_selectedDocument->disk_encoding() completionHandler:^(NSString* path, encoding::type const& encoding){
 			if(!path)
 				return;
@@ -1153,7 +1153,7 @@ namespace
 
 	std::string const documentPath   = _selectedDocument->path();
 	NSString* const suggestedFolder  = [NSString stringWithCxxString:path::parent(documentPath)] ?: self.untitledSavePath;
-	NSString* const suggestedName    = [NSString stringWithCxxString:path::name(documentPath)]   ?: DefaultSaveNameForDocument(_selectedDocument);
+	NSString* const suggestedName    = [NSString stringWithCxxString:path::name(documentPath)]   ?: [_selectedDocument->document() displayNameWithExtension:YES];
 	[OakSavePanel showWithPath:suggestedName directory:suggestedFolder fowWindow:self.window encoding:_selectedDocument->disk_encoding() completionHandler:^(NSString* path, encoding::type const& encoding){
 		if(!path)
 			return;
