@@ -1,6 +1,5 @@
 #import "DocumentController.h"
 #import "ProjectLayoutView.h"
-#import "DocumentSaveHelper.h"
 #import "DocumentCommand.h" // show_command_error
 #import "SelectGrammarViewController.h"
 #import "OakRunCommandWindowController.h"
@@ -429,34 +428,11 @@ namespace
 
 - (void)applicationDidResignActiveNotification:(NSNotification*)aNotification
 {
-	struct save_callback_t : document::save_callback_t, std::enable_shared_from_this<save_callback_t>
-	{
-		save_callback_t (std::vector<document::document_ptr> documents) : _documents(documents) { }
+	static BOOL IsSaving = NO;
+	if(std::exchange(IsSaving, YES))
+		return;
 
-		void select_path (std::string const& path, io::bytes_ptr content, file::save_context_ptr context)          { }
-		void select_make_writable (std::string const& path, io::bytes_ptr content, file::save_context_ptr context) { }
-		void select_create_parent (std::string const& path, io::bytes_ptr content, file::save_context_ptr context) { }
-		void obtain_authorization (std::string const& path, io::bytes_ptr content, osx::authorization_t auth, file::save_context_ptr context) { }
-		void select_charset (std::string const& path, io::bytes_ptr content, std::string const& charset, file::save_context_ptr context)      { }
-
-		void did_save_document (document::document_ptr document, std::string const& path, bool success, std::string const& message, oak::uuid_t const& filter)
-		{
-			++_current;
-			save_next();
-		}
-
-		void save_next ()
-		{
-			if(_current < _documents.size())
-				_documents[_current]->try_save(shared_from_this());
-		}
-
-	private:
-		std::vector<document::document_ptr> _documents;
-		size_t _current = 0;
-	};
-
-	std::vector<document::document_ptr> documentsToSave;
+	NSMutableArray* documentsToSave = [NSMutableArray array];
 	for(auto doc : _documents)
 	{
 		if(doc->is_modified() && doc->path() != NULL_STR)
@@ -466,16 +442,16 @@ namespace
 			{
 				if(doc == _selectedDocument)
 					[_textView updateDocumentMetadata];
-				documentsToSave.push_back(doc);
+				[documentsToSave addObject:doc->document()];
 			}
 		}
 	}
 
-	auto callback = std::make_shared<save_callback_t>(documentsToSave);
-	callback->save_next();
-
-	if(!_documents.empty())
-		[self.textView performSelector:@selector(applicationDidResignActiveNotification:) withObject:aNotification];
+	[self saveDocumentsUsingEnumerator:[documentsToSave objectEnumerator] completionHandler:^(OakDocumentIOResult result){
+		if(!_documents.empty())
+			[self.textView performSelector:@selector(applicationDidResignActiveNotification:) withObject:aNotification];
+		IsSaving = NO;
+	}];
 }
 
 // =================
@@ -533,7 +509,10 @@ namespace
 		}
 	}
 
-	std::vector<document::document_ptr> documentsToSave(someDocuments);
+	NSMutableArray* documentsToSave = [NSMutableArray array];
+	for(auto document : someDocuments)
+		[documentsToSave addObject:document->document()];
+
 	auto block = ^(NSInteger returnCode)
 	{
 		switch(returnCode)
@@ -543,8 +522,8 @@ namespace
 				if(std::exchange(IsInShouldTerminateEventLoop, NO))
 					[NSApp replyToApplicationShouldTerminate:NO];
 
-				[DocumentSaveHelper trySaveDocuments:documentsToSave forWindow:self.window defaultDirectory:self.untitledSavePath completionHandler:^(BOOL success){
-					callback(success);
+				[self saveDocumentsUsingEnumerator:[documentsToSave objectEnumerator] completionHandler:^(OakDocumentIOResult result){
+					callback(result == OakDocumentIOResultSuccess);
 				}];
 			}
 			break;
@@ -1108,7 +1087,7 @@ namespace
 
 	if(_selectedDocument->path() != NULL_STR)
 	{
-		[DocumentSaveHelper trySaveDocument:_selectedDocument forWindow:self.window defaultDirectory:nil completionHandler:nil];
+		[self saveDocumentsUsingEnumerator:@[ _selectedDocument->document() ].objectEnumerator completionHandler:nil];
 	}
 	else
 	{
@@ -1141,7 +1120,7 @@ namespace
 				[self insertDocuments:documents atIndex:_selectedTabIndex selecting:documents.front() andClosing:{ }];
 			}
 
-			[DocumentSaveHelper trySaveDocument:_selectedDocument forWindow:self.window defaultDirectory:nil completionHandler:nil];
+			[self saveDocumentsUsingEnumerator:@[ _selectedDocument->document() ].objectEnumerator completionHandler:nil];
 		}];
 	}
 }
@@ -1159,30 +1138,78 @@ namespace
 			return;
 		_selectedDocument->set_path(to_s(path));
 		_selectedDocument->set_disk_encoding(encoding);
-		[DocumentSaveHelper trySaveDocument:_selectedDocument forWindow:self.window defaultDirectory:nil completionHandler:nil];
+		[self saveDocumentsUsingEnumerator:@[ _selectedDocument->document() ].objectEnumerator completionHandler:nil];
 	}];
+}
+
+- (void)saveDocumentsUsingEnumerator:(NSEnumerator*)anEnumerator completionHandler:(void(^)(OakDocumentIOResult result))callback
+{
+	if(OakDocument* document = [anEnumerator nextObject])
+	{
+		id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:OakDocumentWillShowAlertNotification object:document queue:nil usingBlock:^(NSNotification*){
+			for(size_t i = 0; i < _documents.size(); ++i)
+			{
+				if(document.isOpen && _documents[i]->document() == document)
+				{
+					self.selectedTabIndex = i;
+					[self setSelectedDocument:_documents[i]];
+
+					if(NSApp.isActive && (self.window.isMiniaturized || !self.window.isKeyWindow))
+						[self.window makeKeyAndOrderFront:self];
+
+					break;
+				}
+			}
+		}];
+
+		[document saveModalForWindow:self.window completionHandler:^(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID){
+			[[NSNotificationCenter defaultCenter] removeObserver:observerId];
+			if(result == OakDocumentIOResultSuccess)
+			{
+				[self saveDocumentsUsingEnumerator:anEnumerator completionHandler:callback];
+			}
+			else
+			{
+				if(result == OakDocumentIOResultFailure)
+				{
+					[self.window.attachedSheet orderOut:self];
+					if(filterUUID)
+							show_command_error(to_s(errorMessage), filterUUID, self.window);
+					else	[[NSAlert tmAlertWithMessageText:[NSString stringWithFormat:@"The document “%@” could not be saved.", document.displayName] informativeText:(errorMessage ?: @"Please check Console output for reason.") buttons:@"OK", nil] beginSheetModalForWindow:self.window modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+				}
+
+				if(callback)
+					callback(result);
+			}
+		}];
+	}
+	else
+	{
+		if(callback)
+			callback(OakDocumentIOResultSuccess);
+	}
 }
 
 - (IBAction)saveAllDocuments:(id)sender
 {
-	std::vector<document::document_ptr> documentsToSave;
+	NSMutableArray* documentsToSave = [NSMutableArray array];
 	for(auto document : _documents)
 	{
 		if(document->is_modified())
-			documentsToSave.push_back(document);
+			[documentsToSave addObject:document->document()];
 	}
-	[DocumentSaveHelper trySaveDocuments:documentsToSave forWindow:self.window defaultDirectory:self.untitledSavePath completionHandler:nil];
+	[self saveDocumentsUsingEnumerator:[documentsToSave objectEnumerator] completionHandler:nil];
 }
 
 - (void)bundleItemPreExec:(pre_exec::type)preExec completionHandler:(void(^)(BOOL success))callback
 {
-	std::vector<document::document_ptr> documentsToSave;
+	NSMutableArray* documentsToSave = [NSMutableArray array];
 	switch(preExec)
 	{
 		case pre_exec::save_document:
 		{
 			if(_selectedDocument && (_selectedDocument->is_modified() || !_selectedDocument->is_on_disk()))
-				documentsToSave.push_back(_selectedDocument);
+				[documentsToSave addObject:_selectedDocument->document()];
 		}
 		break;
 
@@ -1191,22 +1218,15 @@ namespace
 			for(auto document : _documents)
 			{
 				if(document->is_modified() && document->path() != NULL_STR)
-					documentsToSave.push_back(document);
+					[documentsToSave addObject:document->document()];
 			}
 		}
 		break;
 	}
 
-	if(!documentsToSave.empty())
-	{
-		[DocumentSaveHelper trySaveDocuments:documentsToSave forWindow:self.window defaultDirectory:self.untitledSavePath completionHandler:^(BOOL success){
-			callback(success);
-		}];
-	}
-	else
-	{
-		callback(YES);
-	}
+	[self saveDocumentsUsingEnumerator:[documentsToSave objectEnumerator] completionHandler:^(OakDocumentIOResult result){
+		callback(result == OakDocumentIOResultSuccess);
+	}];
 }
 
 - (NSArray*)outputWindowsForCommandUUID:(oak::uuid_t const&)anUUID
