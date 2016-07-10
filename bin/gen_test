@@ -138,31 +138,32 @@ static void write_usage (FILE* io)
   write_version(io);
   fprintf(io, "Usage: %s [-b|--benchmark] [-m|--measure] [-r|--repeat] [-v|--verbose] [-h|--help] [-V|--version]\n", getprogname());
   fprintf(io, "Options:\n");
-  fprintf(io, " -b/--benchmark   Run benchmarks instead of tests.\n");
-  fprintf(io, " -m/--measure     Measure time of each test.\n");
-  fprintf(io, " -p/--parallel    Run tests in parallel.\n");
-  fprintf(io, " -r/--repeat <n>  Number of times to repeat each test/benchmark.\n");
-  fprintf(io, " -v/--verbose     Be verbose.\n");
-  fprintf(io, " -h/--help        Show this help.\n");
-  fprintf(io, " -V/--version     Show version number.\n");
+  fprintf(io, " -b/--benchmark      Run benchmarks instead of tests.\n");
+  fprintf(io, " -m/--measure        Measure time of each test.\n");
+  fprintf(io, " -p/--[no-]parallel  Run tests in parallel (default).\n");
+  fprintf(io, " -r/--repeat <n>     Number of times to repeat each test/benchmark.\n");
+  fprintf(io, " -v/--verbose        Be verbose.\n");
+  fprintf(io, " -h/--help           Show this help.\n");
+  fprintf(io, " -V/--version        Show version number.\n");
 }
 
 int main (int argc, char const* argv[])
 {
   static struct option const options[] =
   {
-    { "benchmark", no_argument,       0, 'b' },
-    { "measure",   no_argument,       0, 'm' },
-    { "parallel",  no_argument,       0, 'p' },
-    { "repeat",    required_argument, 0, 'r' },
-    { "verbose",   no_argument,       0, 'v' },
-    { "help",      no_argument,       0, 'h' },
-    { "version",   no_argument,       0, 'V' },
-    { 0,           0,                 0,   0 }
+    { "benchmark",   no_argument,       0, 'b' },
+    { "measure",     no_argument,       0, 'm' },
+    { "parallel",    no_argument,       0, 'p' },
+    { "no-parallel", no_argument,       0, 'P' },
+    { "repeat",      required_argument, 0, 'r' },
+    { "verbose",     no_argument,       0, 'v' },
+    { "help",        no_argument,       0, 'h' },
+    { "version",     no_argument,       0, 'V' },
+    { 0,             0,                 0,   0 }
   };
 
   bool measure        = false;
-  bool parallel       = false;
+  bool parallel       = true;
   bool run_benchmarks = false;
   bool verbose        = false;
   size_t repeat       = 1;
@@ -176,6 +177,7 @@ int main (int argc, char const* argv[])
       case 'b': run_benchmarks = true;         break;
       case 'm': measure        = true;         break;
       case 'p': parallel       = true;         break;
+      case 'P': parallel       = false;        break;
       case 'r': repeat         = atoi(optarg); break;
       case 'v': verbose        = true;         break;
       case 'h': write_usage(stdout);           return 0;
