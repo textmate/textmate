@@ -39,7 +39,6 @@ static NSString* const kUserDefaultsDisableFolderStateRestore = @"disableFolderS
 static NSString* const kUserDefaultsHideStatusBarKey = @"hideStatusBar";
 static NSString* const kUserDefaultsDisableBundleSuggestionsKey = @"disableBundleSuggestions";
 static NSString* const kUserDefaultsGrammarsToNeverSuggestKey = @"grammarsToNeverSuggest";
-static BOOL IsInShouldTerminateEventLoop = NO;
 
 @interface QuickLookNSURLWrapper : NSObject <QLPreviewItem>
 @property (nonatomic) NSURL* url;
@@ -519,9 +518,6 @@ namespace
 		{
 			case NSAlertFirstButtonReturn: /* "Save" */
 			{
-				if(std::exchange(IsInShouldTerminateEventLoop, NO))
-					[NSApp replyToApplicationShouldTerminate:NO];
-
 				[self saveDocumentsUsingEnumerator:[documentsToSave objectEnumerator] completionHandler:^(OakDocumentIOResult result){
 					callback(result == OakDocumentIOResultSuccess);
 				}];
@@ -766,16 +762,10 @@ namespace
 		return NSTerminateNow;
 	}
 
-	IsInShouldTerminateEventLoop = YES;
-
 	[controller showCloseWarningUIForDocuments:documents completionHandler:^(BOOL canClose){
 		if(canClose)
 			[self saveSessionAndDetachBackups];
-
-		if(std::exchange(IsInShouldTerminateEventLoop, NO))
-			[NSApp replyToApplicationShouldTerminate:canClose];
-		else if(canClose)
-			[NSApp terminate:self];
+		[NSApp replyToApplicationShouldTerminate:canClose];
 	}];
 
 	return NSTerminateLater;
