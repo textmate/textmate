@@ -81,17 +81,21 @@ static std::tuple<pid_t, int, int> my_fork (char const* cmd, int inputRead, std:
 	return { pid, outputRead, errorRead };
 }
 
-static void exhaust_fd_in_queue (dispatch_group_t group, dispatch_queue_t queue, int fd, void(^handler)(char const* bytes, size_t len))
+static void exhaust_fd_in_queue (dispatch_group_t group, int fd, CFRunLoopRef runLoop, void(^handler)(char const* bytes, size_t len))
 {
 	dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 		char buf[8192];
 		ssize_t len = 0;
 		while((len = read(fd, buf, sizeof(buf))) > 0)
 		{
+			dispatch_semaphore_t sem = dispatch_semaphore_create(0);
 			char const* bytes = buf;
-			dispatch_sync(queue, ^{
+			CFRunLoopPerformBlock(runLoop, kCFRunLoopCommonModes, ^{
 				handler(bytes, len);
+				dispatch_semaphore_signal(sem);
 			});
+			CFRunLoopWakeUp(runLoop);
+			dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
 		}
 		if(len == -1)
 			perror("read");
@@ -99,15 +103,15 @@ static void exhaust_fd_in_queue (dispatch_group_t group, dispatch_queue_t queue,
 	});
 }
 
-static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, int inputFd, std::map<std::string, std::string> const& env, std::string const& cwd, dispatch_queue_t queue, void(^stdoutHandler)(char const* bytes, size_t len), void(^stderrHandler)(char const* bytes, size_t len), void(^completionHandler)(int status))
+static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, int inputFd, std::map<std::string, std::string> const& env, std::string const& cwd, CFRunLoopRef runLoop, void(^stdoutHandler)(char const* bytes, size_t len), void(^stderrHandler)(char const* bytes, size_t len), void(^completionHandler)(int status))
 {
 	pid_t pid;
 	int outputFd, errorFd;
 	std::tie(pid, outputFd, errorFd) = my_fork(cmd.c_str(), inputFd, env, cwd.c_str());
 
 	dispatch_group_t group = dispatch_group_create();
-	exhaust_fd_in_queue(group, queue, outputFd, stdoutHandler);
-	exhaust_fd_in_queue(group, queue, errorFd, stderrHandler);
+	exhaust_fd_in_queue(group, outputFd, runLoop, stdoutHandler);
+	exhaust_fd_in_queue(group, errorFd, runLoop, stderrHandler);
 
 	__block int status = 0;
 	dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -116,8 +120,11 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 	});
 
 	dispatch_group_enter(rootGroup);
-	dispatch_group_notify(group, queue, ^{
-		completionHandler(status);
+	dispatch_group_notify(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+		CFRunLoopPerformBlock(runLoop, kCFRunLoopCommonModes, ^{
+			completionHandler(status);
+		});
+		CFRunLoopWakeUp(runLoop);
 		dispatch_group_leave(rootGroup);
 	});
 
@@ -172,8 +179,7 @@ namespace command
 		};
 
 		bool hasHTMLOutput = _command.output == output::new_window && _command.output_format == output_format::html;
-		dispatch_queue_t queue = dispatch_get_main_queue();
-		_process_id = run_command(_dispatch_group, _temp_path, stdinRead, _environment, _directory, queue, hasHTMLOutput ? htmlOutHandler : textOutHandler, stderrHandler, completionHandler);
+		_process_id = run_command(_dispatch_group, _temp_path, stdinRead, _environment, _directory, CFRunLoopGetCurrent(), hasHTMLOutput ? htmlOutHandler : textOutHandler, stderrHandler, completionHandler);
 
 		if(hasHTMLOutput)
 		{
@@ -194,7 +200,9 @@ namespace command
 		NSMutableArray* queuedEvents = [NSMutableArray array];
 		while(_process_id != -1 && !_did_detach)
 		{
-			if(NSEvent* event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:[NSDate distantFuture] inMode:NSDefaultRunLoopMode dequeue:YES])
+			// We use CFRunLoopRunInMode() to handle dispatch queues and nextEventMatchingMask:… to catcn ⌃C
+			CFRunLoopRunInMode(kCFRunLoopDefaultMode, 5, true);
+			if(NSEvent* event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:nil inMode:NSDefaultRunLoopMode dequeue:YES])
 			{
 				static NSEventType const events[] = { NSLeftMouseDown, NSLeftMouseUp, NSRightMouseDown, NSRightMouseUp, NSOtherMouseDown, NSOtherMouseUp, NSLeftMouseDragged, NSRightMouseDragged, NSOtherMouseDragged, NSKeyDown, NSKeyUp, NSFlagsChanged };
 				if(!oak::contains(std::begin(events), std::end(events), [event type]))
@@ -215,10 +223,6 @@ namespace command
 					[queuedEvents addObject:event];
 				}
 			}
-			else
-			{
-				break;
-			}
 		}
 
 		for(NSEvent* event in queuedEvents)
@@ -227,8 +231,26 @@ namespace command
 
 	void runner_t::wait_for_command ()
 	{
-		ASSERT(dispatch_get_main_queue() != dispatch_get_current_queue());
-		dispatch_group_wait(_dispatch_group, DISPATCH_TIME_FOREVER);
+		if(_process_id == -1)
+			return;
+
+		if(_did_detach)
+		{
+			__block bool shouldWait = true;
+			CFRunLoopRef runLoop = CFRunLoopGetCurrent();
+
+			dispatch_group_notify(_dispatch_group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+				shouldWait = false;
+				CFRunLoopStop(runLoop);
+			});
+
+			while(shouldWait)
+				CFRunLoopRun();
+		}
+		else
+		{
+			wait();
+		}
 	}
 
 	void runner_t::did_exit (int status)

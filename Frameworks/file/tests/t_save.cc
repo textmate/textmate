@@ -7,7 +7,7 @@ struct stall_t : file::save_callback_t
 {
 	stall_t (bool* success = NULL, std::string const& path = NULL_STR, std::string const& encoding = NULL_STR) : _success(success), _path(path), _encoding(encoding)
 	{
-	   _semaphore = dispatch_semaphore_create(0);
+		_run_loop = CFRunLoopGetCurrent();
 	}
 
 	void select_path (std::string const& path, io::bytes_ptr content, file::save_context_ptr context)
@@ -26,16 +26,22 @@ struct stall_t : file::save_callback_t
 	{
 		if(_success)
 			*_success = success;
-	   dispatch_semaphore_signal(_semaphore);
+		_should_wait = false;
+		CFRunLoopStop(_run_loop);
 	}
 
-	void wait () { OAK_ASSERT(dispatch_get_current_queue() != dispatch_get_main_queue()); dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER); }
+	void wait ()
+	{
+		while(_should_wait)
+			CFRunLoopRun();
+	}
 
 private:
 	bool* _success;
 	std::string _path;
 	std::string _encoding;
-	dispatch_semaphore_t _semaphore;
+	CFRunLoopRef _run_loop;
+	bool _should_wait = true;
 };
 
 static std::string sha1 (std::string const& src)
