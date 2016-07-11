@@ -457,12 +457,8 @@ namespace
 // = Close Methods =
 // =================
 
-- (void)showCloseWarningUIForDocuments:(NSArray<OakDocument*>*)someDocuments completionHandler:(void(^)(BOOL canClose))callback
++ (NSAlert*)saveAlertForDocuments:(NSArray<OakDocument*>*)someDocuments
 {
-	if(!someDocuments.count)
-		return callback(YES);
-
-	[[self.window attachedSheet] orderOut:self];
 	NSAlert* alert = [[NSAlert alloc] init];
 	[alert setAlertStyle:NSWarningAlertStyle];
 	[alert addButtons:@"Save", @"Cancel", @"Don’t Save", nil];
@@ -480,8 +476,14 @@ namespace
 		[alert setMessageText:@"Do you want to save documents with changes?"];
 		[alert setInformativeText:body];
 	}
+	return alert;
+}
 
-	bool windowModal = true;
+- (void)showCloseWarningUIForDocuments:(NSArray<OakDocument*>*)someDocuments completionHandler:(void(^)(BOOL canClose))callback
+{
+	if(!someDocuments.count)
+		return callback(YES);
+
 	if(someDocuments.count == 1)
 	{
 		for(size_t i = 0; i < _documents.size(); ++i)
@@ -494,20 +496,9 @@ namespace
 			}
 		}
 	}
-	else
-	{
-		std::set<oak::uuid_t> uuids;
-		std::transform(_documents.begin(), _documents.end(), inserter(uuids, uuids.end()), [](document::document_ptr const& doc){ return doc->identifier(); });
 
-		for(OakDocument* document in someDocuments)
-		{
-			if(uuids.find(to_s(document.identifier.UUIDString)) == uuids.end())
-				windowModal = false;
-		}
-	}
-
-	auto block = ^(NSInteger returnCode)
-	{
+	NSAlert* alert = [DocumentController saveAlertForDocuments:someDocuments];
+	OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){
 		switch(returnCode)
 		{
 			case NSAlertFirstButtonReturn: /* "Save" */
@@ -530,11 +521,7 @@ namespace
 			}
 			break;
 		}
-	};
-
-	if(windowModal)
-			OakShowAlertForWindow(alert, self.window, block);
-	else	block([alert runModal]);
+	});
 }
 
 - (void)closeTabsAtIndexes:(NSIndexSet*)anIndexSet askToSaveChanges:(BOOL)askToSaveFlag createDocumentIfEmpty:(BOOL)createIfEmptyFlag
@@ -744,35 +731,84 @@ namespace
 	}
 }
 
+- (NSArray<OakDocument*>*)documentsNeedingSaving
+{
+	BOOL restoresSession = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableSessionRestoreKey];
+
+	NSMutableArray<OakDocument*>* res = [NSMutableArray array];
+	for(auto doc : _documents)
+	{
+		if(doc->is_modified() && (doc->path() != NULL_STR || !restoresSession))
+			[res addObject:doc->document()];
+	}
+	return res.count ? res : nil;
+}
+
++ (void)saveControllersUsingEnumerator:(NSEnumerator*)anEnumerator completionHandler:(void(^)(OakDocumentIOResult result))callback
+{
+	if(DocumentController* controller = [anEnumerator nextObject])
+	{
+		[controller saveDocumentsUsingEnumerator:[controller.documentsNeedingSaving objectEnumerator] completionHandler:^(OakDocumentIOResult result){
+			if(result == OakDocumentIOResultSuccess)
+				[self saveControllersUsingEnumerator:anEnumerator completionHandler:callback];
+			else if(callback)
+				callback(result);
+		}];
+	}
+	else if(callback)
+	{
+		callback(OakDocumentIOResultSuccess);
+	}
+}
+
 + (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication*)sender
 {
-	DocumentController* controller;
-
-	BOOL restoresSession = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableSessionRestoreKey];
-	NSMutableArray<OakDocument*>* documentsToSave = [NSMutableArray array];
-	for(DocumentController* delegate in SortedControllers())
+	NSMutableArray<DocumentController*>* controllers = [NSMutableArray array];
+	NSMutableArray<OakDocument*>* documents = [NSMutableArray array];
+	for(DocumentController* controller in SortedControllers())
 	{
-		for(auto doc : delegate.documents)
+		if(NSArray* newDocs = controller.documentsNeedingSaving)
 		{
-			if(doc->is_modified() && (doc->path() != NULL_STR || !restoresSession))
-				[documentsToSave addObject:doc->document()];
+			[controllers addObject:controller];
+			[documents addObjectsFromArray:newDocs];
 		}
-		if(documentsToSave.count && !controller)
-			controller = delegate;
 	}
 
-	if(!documentsToSave.count)
+	if(controllers.count == 0)
 	{
 		[self saveSessionAndDetachBackups];
 		return NSTerminateNow;
 	}
+	else if(controllers.count == 1)
+	{
+		DocumentController* controller = controllers.firstObject;
+		[controller showCloseWarningUIForDocuments:controller.documentsNeedingSaving completionHandler:^(BOOL canClose){
+			if(canClose)
+				[self saveSessionAndDetachBackups];
+			[NSApp replyToApplicationShouldTerminate:canClose];
+		}];
+	}
+	else
+	{
+		switch([[DocumentController saveAlertForDocuments:documents] runModal])
+		{
+			case NSAlertFirstButtonReturn: /* "Save" */
+			{
+				[self saveControllersUsingEnumerator:[controllers objectEnumerator] completionHandler:^(OakDocumentIOResult result){
+					if(result == OakDocumentIOResultSuccess)
+						[self saveSessionAndDetachBackups];
+					[NSApp replyToApplicationShouldTerminate:result == OakDocumentIOResultSuccess];
+				}];
+			}
+			break;
 
-	[controller showCloseWarningUIForDocuments:documentsToSave completionHandler:^(BOOL canClose){
-		if(canClose)
-			[self saveSessionAndDetachBackups];
-		[NSApp replyToApplicationShouldTerminate:canClose];
-	}];
+			case NSAlertSecondButtonReturn: /* "Cancel" */
+				return NSTerminateCancel;
 
+			case NSAlertThirdButtonReturn: /* "Don't Save" */
+				return NSTerminateNow;
+		}
+	}
 	return NSTerminateLater;
 }
 
