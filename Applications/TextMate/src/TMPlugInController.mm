@@ -11,6 +11,7 @@ OAK_DEBUG_VAR(PlugInController);
 
 static TMPlugInController* SharedInstance;
 static NSInteger const kPlugInAPIVersion = 2;
+static NSString* const kUserDefaultsDisabledPlugInsKey = @"disabledPlugIns";
 
 @interface TMPlugInController ()
 @property (nonatomic) NSMutableDictionary* loadedPlugIns;
@@ -31,6 +32,13 @@ static id CreateInstanceOfPlugInClass (Class cl, TMPlugInController* controller)
 + (TMPlugInController*)sharedInstance
 {
 	return SharedInstance ?: [TMPlugInController new];
+}
+
++ (void)initialize
+{
+	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
+		kUserDefaultsDisabledPlugInsKey : @[ @"io.emmet.EmmetTextmate" ]
+	}];
 }
 
 - (id)init
@@ -57,6 +65,10 @@ static id CreateInstanceOfPlugInClass (Class cl, TMPlugInController* controller)
 	{
 		NSString* identifier = [bundle objectForInfoDictionaryKey:@"CFBundleIdentifier"];
 		NSString* name = [bundle objectForInfoDictionaryKey:@"CFBundleName"];
+
+		NSArray* blacklist = [[NSUserDefaults standardUserDefaults] arrayForKey:kUserDefaultsDisabledPlugInsKey];
+		if([blacklist containsObject:identifier])
+			return;
 
 		if(![self.loadedPlugIns objectForKey:identifier])
 		{
