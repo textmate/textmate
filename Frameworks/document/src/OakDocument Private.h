@@ -1,12 +1,5 @@
 #import "OakDocument.h"
 
-namespace document
-{
-	struct document_t;
-	typedef std::shared_ptr<document_t> document_ptr;
-
-} /* document */
-
 @interface OakDocument (Private)
 @property (nonatomic) NSInteger   revision;
 @property (nonatomic) NSInteger   savedRevision;
