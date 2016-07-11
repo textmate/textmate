@@ -457,43 +457,41 @@ namespace
 // = Close Methods =
 // =================
 
-- (void)showCloseWarningUIForDocuments:(std::vector<document::document_ptr> const&)someDocuments completionHandler:(void(^)(BOOL canClose))callback
+- (void)showCloseWarningUIForDocuments:(NSArray<OakDocument*>*)someDocuments completionHandler:(void(^)(BOOL canClose))callback
 {
-	if(someDocuments.empty())
+	if(!someDocuments.count)
 		return callback(YES);
 
 	[[self.window attachedSheet] orderOut:self];
 	NSAlert* alert = [[NSAlert alloc] init];
 	[alert setAlertStyle:NSWarningAlertStyle];
 	[alert addButtons:@"Save", @"Cancel", @"Don’t Save", nil];
-	if(someDocuments.size() == 1)
+	if(someDocuments.count == 1)
 	{
-		document::document_ptr document = someDocuments.front();
-		[alert setMessageText:[NSString stringWithCxxString:text::format("Do you want to save the changes you made in the document “%s”?", document->display_name().c_str())]];
+		OakDocument* document = someDocuments.firstObject;
+		[alert setMessageText:[NSString stringWithFormat:@"Do you want to save the changes you made in the document “%@”?", document.displayName]];
 		[alert setInformativeText:@"Your changes will be lost if you don’t save them."];
 	}
 	else
 	{
-		std::string body = "";
-		for(auto document : someDocuments)
-			body += text::format("• “%s”\n", document->display_name().c_str());
+		NSString* body = @"";
+		for(OakDocument* document in someDocuments)
+			body = [body stringByAppendingFormat:@"• “%@”\n", document.displayName];
 		[alert setMessageText:@"Do you want to save documents with changes?"];
-		[alert setInformativeText:[NSString stringWithCxxString:body]];
+		[alert setInformativeText:body];
 	}
 
 	bool windowModal = true;
-	if(someDocuments.size() == 1)
+	if(someDocuments.count == 1)
 	{
-		NSUInteger index = 0;
-		for(auto document : _documents)
+		for(size_t i = 0; i < _documents.size(); ++i)
 		{
-			if(*document == *someDocuments.front())
+			if(someDocuments.firstObject == _documents[i]->document())
 			{
-				self.selectedTabIndex = index;
-				[self openAndSelectDocument:document];
+				self.selectedTabIndex = i;
+				[self openAndSelectDocument:_documents[i]];
 				break;
 			}
-			++index;
 		}
 	}
 	else
@@ -501,16 +499,12 @@ namespace
 		std::set<oak::uuid_t> uuids;
 		std::transform(_documents.begin(), _documents.end(), inserter(uuids, uuids.end()), [](document::document_ptr const& doc){ return doc->identifier(); });
 
-		for(auto document : someDocuments)
+		for(OakDocument* document in someDocuments)
 		{
-			if(uuids.find(document->identifier()) == uuids.end())
+			if(uuids.find(to_s(document.identifier.UUIDString)) == uuids.end())
 				windowModal = false;
 		}
 	}
-
-	NSMutableArray* documentsToSave = [NSMutableArray array];
-	for(auto document : someDocuments)
-		[documentsToSave addObject:document->document()];
 
 	auto block = ^(NSInteger returnCode)
 	{
@@ -518,7 +512,7 @@ namespace
 		{
 			case NSAlertFirstButtonReturn: /* "Save" */
 			{
-				[self saveDocumentsUsingEnumerator:[documentsToSave objectEnumerator] completionHandler:^(OakDocumentIOResult result){
+				[self saveDocumentsUsingEnumerator:[someDocuments objectEnumerator] completionHandler:^(OakDocumentIOResult result){
 					callback(result == OakDocumentIOResultSuccess);
 				}];
 			}
@@ -557,12 +551,16 @@ namespace
 
 	if(askToSaveFlag)
 	{
-		std::vector<document::document_ptr> documents;
-		std::copy_if(documentsToClose.begin(), documentsToClose.end(), back_inserter(documents), [](document::document_ptr const& doc){ return doc->is_modified(); });
-
-		if(!documents.empty())
+		NSMutableArray<OakDocument*>* documentsToSave = [NSMutableArray array];
+		for(auto doc : documentsToClose)
 		{
-			[self showCloseWarningUIForDocuments:documents completionHandler:^(BOOL canClose){
+			if(doc->is_modified())
+				[documentsToSave addObject:doc->document()];
+		}
+
+		if(documentsToSave.count)
+		{
+			[self showCloseWarningUIForDocuments:documentsToSave completionHandler:^(BOOL canClose){
 				if(canClose)
 				{
 					[self closeTabsAtIndexes:anIndexSet askToSaveChanges:NO createDocumentIfEmpty:createIfEmptyFlag];
@@ -681,16 +679,20 @@ namespace
 		return NO;
 	}
 
-	std::vector<document::document_ptr> documents;
-	std::copy_if(_documents.begin(), _documents.end(), back_inserter(documents), [](document::document_ptr const& doc){ return doc->is_modified(); });
+	NSMutableArray<OakDocument*>* documentsToSave = [NSMutableArray array];
+	for(auto doc : _documents)
+	{
+		if(doc->is_modified())
+			[documentsToSave addObject:doc->document()];
+	}
 
-	if(documents.empty())
+	if(!documentsToSave.count)
 	{
 		[self saveProjectState];
 		return YES;
 	}
 
-	[self showCloseWarningUIForDocuments:documents completionHandler:^(BOOL canClose){
+	[self showCloseWarningUIForDocuments:documentsToSave completionHandler:^(BOOL canClose){
 		if(canClose)
 		{
 			[self saveProjectState];
@@ -747,22 +749,25 @@ namespace
 	DocumentController* controller;
 
 	BOOL restoresSession = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableSessionRestoreKey];
-	std::vector<document::document_ptr> documents;
+	NSMutableArray<OakDocument*>* documentsToSave = [NSMutableArray array];
 	for(DocumentController* delegate in SortedControllers())
 	{
-		auto delegateDocuments = delegate.documents; // Returns by-value so each result is unique
-		std::copy_if(delegateDocuments.begin(), delegateDocuments.end(), back_inserter(documents), [&restoresSession](document::document_ptr const& doc){ return doc->is_modified() && (doc->path() != NULL_STR || !restoresSession); });
-		if(!documents.empty() && !controller)
+		for(auto doc : delegate.documents)
+		{
+			if(doc->is_modified() && (doc->path() != NULL_STR || !restoresSession))
+				[documentsToSave addObject:doc->document()];
+		}
+		if(documentsToSave.count && !controller)
 			controller = delegate;
 	}
 
-	if(documents.empty())
+	if(!documentsToSave.count)
 	{
 		[self saveSessionAndDetachBackups];
 		return NSTerminateNow;
 	}
 
-	[controller showCloseWarningUIForDocuments:documents completionHandler:^(BOOL canClose){
+	[controller showCloseWarningUIForDocuments:documentsToSave completionHandler:^(BOOL canClose){
 		if(canClose)
 			[self saveSessionAndDetachBackups];
 		[NSApp replyToApplicationShouldTerminate:canClose];
