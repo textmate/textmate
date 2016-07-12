@@ -458,8 +458,8 @@ namespace document
 
 	document_t::~document_t ()
 	{
-		documents.remove(identifier());
 		_observer = nil;
+		documents.remove(identifier());
 	}
 
 	OakDocumentObserver* document_t::observer ()
@@ -576,6 +576,8 @@ namespace document
 	void document_t::close ()
 	{
 		[_document close];
+		if(!_document.isOpen)
+			_observer = nil;
 	}
 
 	void document_t::add_mark (text::pos_t const& pos, std::string const& mark, std::string const& value)
