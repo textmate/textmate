@@ -23,6 +23,7 @@ OAK_DEBUG_VAR(Document);
 	OakDocument* _document;
 	document::document_t* _cppDocument;
 }
+@property (nonatomic, readonly) BOOL hasCallbacks;
 @end
 
 namespace document
@@ -326,6 +327,11 @@ static std::map<std::string, document::document_t::callback_t::event_t> const Ob
 	_callbacks.remove(callback);
 }
 
+- (BOOL)hasCallbacks
+{
+	return _callbacks.begin() != _callbacks.end();
+}
+
 - (void)breadcast:(document::document_t::callback_t::event_t)event
 {
 	if(auto document = _cppDocument/*.lock()*/)
@@ -458,8 +464,8 @@ namespace document
 
 	document_t::~document_t ()
 	{
-		documents.remove(identifier());
 		_observer = nil;
+		documents.remove(identifier());
 	}
 
 	OakDocumentObserver* document_t::observer ()
@@ -576,6 +582,8 @@ namespace document
 	void document_t::close ()
 	{
 		[_document close];
+		if(!_document.isOpen && !_observer.hasCallbacks)
+			_observer = nil;
 	}
 
 	void document_t::add_mark (text::pos_t const& pos, std::string const& mark, std::string const& value)
@@ -600,7 +608,9 @@ namespace document
 
 	void document_t::remove_callback (callback_t* callback)
 	{
-		[observer() removeCallback:callback];
+		[_observer removeCallback:callback];
+		if(!_document.isOpen && !_observer.hasCallbacks)
+			_observer = nil;
 	}
 
 	// ===========
