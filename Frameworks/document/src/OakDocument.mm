@@ -170,6 +170,7 @@ NSString* OakDocumentWillShowAlertNotification    = @"OakDocumentWillShowAlertNo
 @property (nonatomic) NSInteger backupRevision;
 @property (nonatomic) BOOL observeFileSystem;
 @property (nonatomic) BOOL needsImportDocumentChanges;
+@property (nonatomic, readonly) BOOL shouldSniffFileType;
 
 @property (nonatomic) NSArray<void(^)(OakDocumentIOResult, NSString*, oak::uuid_t const&)>* loadCompletionHandlers;
 
@@ -994,8 +995,8 @@ private:
 		void will_replace (size_t from, size_t to, char const* buf, size_t len)
 		{
 			ng::buffer_t const& buffer = [_self buffer];
-			_editing_first_line = from == oak::cap(buffer.begin(0), from, buffer.eol(0));
-			_file_type = _editing_first_line ? file_type(buffer) : NULL_STR;
+			_should_sniff_file_type = from == oak::cap(buffer.begin(0), from, buffer.eol(0)) && _self.shouldSniffFileType;
+			_file_type = _should_sniff_file_type ? file_type(buffer) : NULL_STR;
 		}
 
 		void did_replace (size_t from, size_t to, char const* buf, size_t len)
@@ -1003,7 +1004,7 @@ private:
 			_size += len - (to - from);
 			_self.bufferEmpty = _size == 0;
 
-			if(_editing_first_line)
+			if(_should_sniff_file_type)
 			{
 				std::string const newFileType = file_type([_self buffer]);
 				if(newFileType != NULL_STR && newFileType != _file_type)
@@ -1022,7 +1023,7 @@ private:
 		size_t _size = 0;
 		OakDocument* _self;
 
-		bool _editing_first_line;
+		bool _should_sniff_file_type;
 		std::string _file_type;
 	};
 
@@ -1045,6 +1046,7 @@ private:
 
 - (BOOL)isOpen                                        { return _openCount != 0; }
 - (BOOL)isDocumentEdited                              { return _revision != _savedRevision && (_onDisk || !_bufferEmpty); }
+- (BOOL)shouldSniffFileType                           { return settings_for_path(to_s(_virtualPath ?: _path), scope::scope_t(), to_s(_directory ?: [_path stringByDeletingLastPathComponent])).get(kSettingsFileTypeKey, NULL_STR) == NULL_STR; }
 
 - (BOOL)canUndo                                       { return _undoManager && _undoManager->can_undo(); }
 - (BOOL)canRedo                                       { return _undoManager && _undoManager->can_redo(); }
