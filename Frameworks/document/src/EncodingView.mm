@@ -181,7 +181,7 @@ static NSTextView* MyCreateTextView ()
 	if(self = [super initWithWindow:[[NSWindow alloc] initWithContentRect:NSZeroRect styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask) backing:NSBackingStoreBuffered defer:NO]])
 	{
 		first = firstPointer;
-		last  = lastPointer;
+		last  = std::min(firstPointer + 256*1024, lastPointer);
 
 		_encoding        = @"ISO-8859-1";
 		_displayName     = @"untitled";
