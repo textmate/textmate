@@ -1,5 +1,6 @@
 #import "EncodingView.h"
 #import <OakFoundation/NSString Additions.h>
+#import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakEncodingPopUpButton.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <text/hexdump.h>
@@ -230,6 +231,12 @@ static NSTextView* MyCreateTextView ()
 		[self updateTextView];
 	}
 	return self;
+}
+
+- (void)beginSheetModalForWindow:(NSWindow*)aWindow completionHandler:(void(^)(NSModalResponse))callback
+{
+	[self.window layoutIfNeeded];
+	OakShowSheetForWindow(self.window, aWindow, callback);
 }
 
 - (BOOL)textView:(NSTextView*)aTextView doCommandBySelector:(SEL)aSelector

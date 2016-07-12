@@ -648,10 +648,9 @@ private:
 			if(!probabilities.empty() && probabilities.begin()->first < 1)
 				controller.encoding = [NSString stringWithCxxString:probabilities.begin()->second];
 
-			[controller.window layoutIfNeeded];
 			[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentWillShowAlertNotification object:_self];
-			OakShowSheetForWindow(controller.window, _window, ^(NSInteger returnCode){
-				if(returnCode != NSRunAbortedResponse)
+			[controller beginSheetModalForWindow:_window completionHandler:^(NSModalResponse response){
+				if(response != NSModalResponseAbort)
 				{
 					context->set_charset(to_s(controller.encoding));
 					if(controller.trainClassifier)
@@ -660,7 +659,7 @@ private:
 						db.save(kEncodingFrequenciesPath);
 					}
 				}
-			});
+			}];
 		}
 
 		void show_error (std::string const& path, std::string const& message, oak::uuid_t const& filter)
