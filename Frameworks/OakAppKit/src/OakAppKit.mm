@@ -60,6 +60,12 @@ void OakShowSheetForWindow (NSWindow* sheet, NSWindow* window, void(^callback)(N
 
 void OakShowAlertForWindow (NSAlert* alert, NSWindow* window, void(^callback)(NSInteger))
 {
+	if(window && [alert respondsToSelector:@selector(beginSheetModalForWindow:completionHandler:)])
+	{
+		[alert beginSheetModalForWindow:window completionHandler:callback];
+		return;
+	}
+
 	OakSheetCallbackDelegate* delegate = [[OakSheetCallbackDelegate alloc] initWithBlock:callback];
 	if(window.attachedSheet)
 	{
