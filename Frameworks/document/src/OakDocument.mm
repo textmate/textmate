@@ -905,7 +905,7 @@ private:
 						return;
 
 					[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentWillShowAlertNotification object:_document];
-					NSAlert* alert = [NSAlert tmAlertWithMessageText:[NSString stringWithFormat:@"Unable to save “%@” using “%@” as encoding.", _document.displayName, to_ns(charset)] informativeText:@"Please choose another encoding:" buttons:@"Retry", @"Cancel", nil];
+					NSAlert* alert = [NSAlert tmAlertWithMessageText:[NSString stringWithFormat:@"Unable to save “%@” using “%@” as encoding.", _document.displayName, to_ns(charset)] informativeText:@"Please choose another encoding:" buttons:@"Save", @"Cancel", nil];
 					OakEncodingPopUpButton* encodingPopUp = [OakEncodingPopUpButton new];
 					[alert setAccessoryView:encodingPopUp];
 					OakShowAlertForWindow(alert, _window, ^(NSInteger returnCode){
