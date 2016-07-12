@@ -162,6 +162,13 @@ static id CreateInstanceOfPlugInClass (Class cl, TMPlugInController* controller)
 		return;
 	}
 
+	NSArray* blacklist = [[NSUserDefaults standardUserDefaults] arrayForKey:kUserDefaultsDisabledPlugInsKey];
+	if([blacklist containsObject:[plugInBundle objectForInfoDictionaryKey:@"CFBundleIdentifier"]])
+	{
+		NSRunAlertPanel(@"Cannot Install Plug-in", @"The %@ plug-in should not be used with this version of TextMate because of stability problems.", @"Continue", nil, nil, plugInName);
+		return;
+	}
+
 	if([fm fileExistsAtPath:dst])
 	{
 		NSString* newVersion = [[NSBundle bundleWithPath:src] objectForInfoDictionaryKey:@"CFBundleShortVersionString"] ?: [[NSBundle bundleWithPath:src] objectForInfoDictionaryKey:@"CFBundleVersion"];
