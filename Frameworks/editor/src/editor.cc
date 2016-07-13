@@ -322,7 +322,7 @@ namespace ng
 		setup();
 	}
 
-	editor_t::editor_t (document::document_ptr document) : _buffer(document->buffer()), _document(document)
+	editor_t::editor_t (document::document_ptr document) : _buffer(document->buffer())
 	{
 		ASSERT(document->is_open());
 		setup();

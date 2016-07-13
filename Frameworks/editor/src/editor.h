@@ -300,7 +300,6 @@ namespace ng
 		bool _extend_yank_clipboard = false;
 
 		editor_delegate_t* _delegate = NULL;
-		document::document_ptr _document;
 	};
 
 	typedef std::shared_ptr<editor_t> editor_ptr;
