@@ -1,4 +1,4 @@
-#import "OakPasteboardWrapper.h"
+#import "clipboard.h"
 #import <OakAppKit/OakPasteboard.h>
 #import <OakFoundation/NSString Additions.h>
 #import <plist/plist.h>

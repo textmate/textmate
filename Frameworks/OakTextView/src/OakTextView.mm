@@ -1,5 +1,4 @@
 #import "OakTextView.h"
-#import "OakPasteboardWrapper.h"
 #import "OakChoiceMenu.h"
 #import "OakDocumentView.h" // addAuxiliaryView:atEdge: signature
 #import "LiveSearchView.h"
@@ -16,6 +15,7 @@
 #import <OakFoundation/OakFindProtocol.h>
 #import <OakFoundation/OakTimer.h>
 #import <OakSystem/application.h>
+#import <OakDocument/clipboard.h>
 #import <crash/info.h>
 #import <buffer/indexed_map.h>
 #import <BundleMenu/BundleMenu.h>

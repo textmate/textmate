@@ -1,0 +1,3 @@
+SOURCES     = src/*.mm
+EXPORT      = src/clipboard.h
+LINK       += OakAppKit OakFoundation cf editor ns plist
