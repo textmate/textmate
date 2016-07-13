@@ -261,12 +261,12 @@ namespace ng
 		}
 	}
 
-	void editor_t::execute_dispatch (plist::dictionary_t const& plist, std::map<std::string, std::string> const& variables)
+	void editor_t::execute_dispatch (plist::dictionary_t const& plist, std::map<std::string, std::string> const& variables, document::document_ptr const& document)
 	{
-		document::run(parse_command(convert_command_from_v1(plist)), _buffer, _selections, _document, variables);
+		document::run(parse_command(convert_command_from_v1(plist)), _buffer, _selections, document, variables);
 	}
 
-	void editor_t::macro_dispatch (plist::dictionary_t const& plist, std::map<std::string, std::string> const& variables)
+	void editor_t::macro_dispatch (plist::dictionary_t const& plist, std::map<std::string, std::string> const& variables, document::document_ptr const& document)
 	{
 		plist::array_t commands;
 		if(!plist::get_key_path(plist, "commands", commands))
@@ -305,7 +305,7 @@ namespace ng
 				}
 				else if(sel == "playMacroWithOptions:" && plist::get_key_path(dict, "argument", args))
 				{
-					macro_dispatch(args, variables);
+					macro_dispatch(args, variables, document);
 				}
 				else if(sel == "insertSnippetWithOptions:" && plist::get_key_path(dict, "argument", args))
 				{
@@ -313,7 +313,7 @@ namespace ng
 				}
 				else if(sel == "executeCommandWithOptions:" && plist::get_key_path(dict, "argument", args))
 				{
-					execute_dispatch(args, variables);
+					execute_dispatch(args, variables, document);
 				}
 				else
 				{
