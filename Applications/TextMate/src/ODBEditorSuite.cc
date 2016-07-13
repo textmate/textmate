@@ -1,4 +1,5 @@
 #include "ODBEditorSuite.h"
+#include <cf/cf.h>
 #include <document/collection.h>
 #include <oak/debug.h>
 #include <text/hexdump.h>
@@ -23,11 +24,24 @@ struct ae_record_t
 
 	std::string path () const
 	{
-		UInt8 buf[PATH_MAX];
-		std::string const& fsref = data();
-		if(noErr == FSRefMakePath((FSRef const*)&fsref[0], buf, sizeof(buf)))
-			return std::string((char*)buf);
-		return NULL_STR;
+		std::string res = NULL_STR;
+		AEDesc fileUrlDesc;
+		if(noErr == AECoerceDesc(&value, typeFileURL, &fileUrlDesc))
+		{
+			std::string buf(AEGetDescDataSize(&fileUrlDesc), '\0');
+			AEGetDescData(&fileUrlDesc, &buf[0], buf.size());
+			if(CFURLRef url = CFURLCreateWithBytes(kCFAllocatorDefault, (UInt8*)buf.data(), buf.size(), kCFStringEncodingUTF8, NULL))
+			{
+				if(CFStringRef path = CFURLCopyFileSystemPath(url, kCFURLPOSIXPathStyle))
+				{
+					res = cf::to_s(path);
+					CFRelease(path);
+				}
+				CFRelease(url);
+			}
+			AEDisposeDesc(&fileUrlDesc);
+		}
+		return res;
 	}
 
 	ae_record_ptr record_at_index (size_t i, DescType type = typeWildCard)
@@ -79,8 +93,7 @@ namespace odb // wrap in namespace to avoid clashing with other callbacks named 
 		{
 			D(DBF_ODBEditorSuite, int c = htonl(eventId); bug("‘%.4s’\n", (char*)&c););
 
-			FSRef fsRef;
-			if(noErr == FSPathMakeRef((UInt8 const*)path.c_str(), &fsRef, NULL))
+			if(CFURLRef url = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault, (UInt8*)path.data(), path.size(), false))
 			{
 				AEAddressDesc target;
 				std::string const& senderData = sender->data();
@@ -90,7 +103,10 @@ namespace odb // wrap in namespace to avoid clashing with other callbacks named 
 				AppleEvent event;
 				AECreateAppleEvent(kODBEditorSuite, eventId, &target, kAutoGenerateReturnID, kAnyTransactionID, &event);
 
-				AEPutParamPtr(&event, keyDirectObject, typeFSRef, &fsRef, sizeof(fsRef));
+				std::string urlString = cf::to_s(CFURLGetString(url));
+				AEPutParamPtr(&event, keyDirectObject, typeFileURL, urlString.data(), urlString.size());
+				CFRelease(url);
+
 				if(token != NULL_STR)
 					AEPutParamPtr(&event, keySenderToken, typeWildCard, token.data(), token.size());
 
