@@ -209,7 +209,7 @@ namespace
 
 			for(auto const& section : sections(file))
 			{
-				if(section.has_file_glob && section.file_glob.does_match(path == NULL_STR ? directory : path))
+				if(section.has_file_glob && section.file_glob.does_match(path == NULL_STR ? directory + "/" : path))
 				{
 					for(auto const& assignment : section.variables)
 						filter(assignment, section);

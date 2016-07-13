@@ -25,7 +25,7 @@ void test_sections ()
 void test_sections_with_only_directory ()
 {
 	test::jail_t jail;
-	jail.set_content(".tm_properties", "testSetting = parent\n[ folder ]\ntestSetting = child\n");
+	jail.set_content(".tm_properties", "testSetting = parent\n[ folder/** ]\ntestSetting = child\n");
 	OAK_ASSERT_EQ(settings_for_path(NULL_STR, "", jail.path()).get("testSetting"), "parent");
 	OAK_ASSERT_EQ(settings_for_path(NULL_STR, "", jail.path("folder")).get("testSetting"), "child");
 }
