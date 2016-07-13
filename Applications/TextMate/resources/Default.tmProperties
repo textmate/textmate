@@ -21,7 +21,7 @@ TM_SCM_COMMIT_WINDOW = "$CWD/commit"
 [ attr.untitled ]
 fileType         = text.plain
 
-[ "/usr/include/{**/,}*" ]
+[ "/usr/include/**" ]
 tabSize          = 8
 
 [ text ]
@@ -45,7 +45,7 @@ softTabs         = false
 [ source.ninja ]
 softTabs         = true
 
-[ "/System/Library/Frameworks/**/Headers/**/*" ]
+[ "/System/Library/Frameworks/**/Headers/**" ]
 encoding         = "MACROMAN"
 
 [ "hg-editor-*.txt" ]
