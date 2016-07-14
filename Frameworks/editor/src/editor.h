@@ -181,10 +181,10 @@ namespace ng
 		ranges_t replace_all (std::string const& searchFor, std::string const& replaceWith, find::options_t options = find::none, bool searchOnlySelection = false);
 		void delete_tab_trigger (std::string const& str);
 
-		void macro_dispatch (plist::dictionary_t const& args, std::map<std::string, std::string> const& variables, document::document_ptr const& document = document::document_ptr());
+		void macro_dispatch (plist::dictionary_t const& args, std::map<std::string, std::string> const& variables, std::function<void(bundle_command_t const&, ng::buffer_api_t const&, ng::ranges_t const&, std::map<std::string, std::string> const&)> const& runner);
 		void find_dispatch (plist::dictionary_t const& args);
 		void snippet_dispatch (plist::dictionary_t const& args, std::map<std::string, std::string> const& variables);
-		void execute_dispatch (plist::dictionary_t const& args, std::map<std::string, std::string> const& variables, document::document_ptr const& document = document::document_ptr());
+		void execute_dispatch (plist::dictionary_t const& args, std::map<std::string, std::string> const& variables, std::function<void(bundle_command_t const&, ng::buffer_api_t const&, ng::ranges_t const&, std::map<std::string, std::string> const&)> const& runner);
 
 		scope::context_t scope (std::string const& scopeAttributes) const;
 		std::map<std::string, std::string> editor_variables (std::string const& scopeAttributes) const;

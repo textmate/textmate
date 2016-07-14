@@ -11,7 +11,9 @@ void test_insert ()
 
 	ng::buffer_t buf;
 	ng::editor_t editor(buf);
-	editor.macro_dispatch(boost::get<plist::dictionary_t>(plist::parse(plistSrc)), std::map<std::string, std::string>());
+	editor.macro_dispatch(boost::get<plist::dictionary_t>(plist::parse(plistSrc)), std::map<std::string, std::string>(), [](bundle_command_t const& cmd, ng::buffer_api_t const& buf, ng::ranges_t const& sel, std::map<std::string, std::string> const& env){
+		document::run(cmd, buf, sel, document::document_ptr(), env);
+	});
 	OAK_ASSERT_EQ(editor.as_string(), "Test");
 }
 
@@ -34,7 +36,9 @@ void test_snippet ()
 
 	ng::buffer_t buf;
 	ng::editor_t editor(buf);
-	editor.macro_dispatch(boost::get<plist::dictionary_t>(plist::parse(plistSrc)), std::map<std::string, std::string>());
+	editor.macro_dispatch(boost::get<plist::dictionary_t>(plist::parse(plistSrc)), std::map<std::string, std::string>(), [](bundle_command_t const& cmd, ng::buffer_api_t const& buf, ng::ranges_t const& sel, std::map<std::string, std::string> const& env){
+		document::run(cmd, buf, sel, document::document_ptr(), env);
+	});
 	OAK_ASSERT_EQ(editor.as_string(), "2010-01-25");
 }
 
@@ -54,6 +58,8 @@ void test_command ()
 	ng::buffer_t buf;
 	ng::editor_t editor(buf);
 	editor.insert("to be replaced");
-	editor.macro_dispatch(boost::get<plist::dictionary_t>(plist::parse(plistSrc)), std::map<std::string, std::string>());
+	editor.macro_dispatch(boost::get<plist::dictionary_t>(plist::parse(plistSrc)), std::map<std::string, std::string>(), [](bundle_command_t const& cmd, ng::buffer_api_t const& buf, ng::ranges_t const& sel, std::map<std::string, std::string> const& env){
+		document::run(cmd, buf, sel, document::document_ptr(), env);
+	});
 	// OAK_ASSERT_EQ(editor.as_string(), "Hello\n");
 }
