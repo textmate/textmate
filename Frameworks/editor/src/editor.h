@@ -302,10 +302,6 @@ namespace ng
 		editor_delegate_t* _delegate = NULL;
 	};
 
-	typedef std::shared_ptr<editor_t> editor_ptr;
-
-	PUBLIC editor_ptr editor_for_document (document::document_ptr document);
-
 } /* ng */
 
 #endif /* end of include guard: EDITOR_H_GWYNAZT0 */

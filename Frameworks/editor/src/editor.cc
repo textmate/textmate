@@ -16,43 +16,6 @@
 
 namespace ng
 {
-	static std::map<oak::uuid_t, editor_ptr>& editors ()
-	{
-		static std::map<oak::uuid_t, editor_ptr> editors;
-		return editors;
-	}
-
-	editor_ptr editor_for_document (document::document_ptr document)
-	{
-		static struct document_close_callback_t : document::document_t::callback_t
-		{
-			WATCH_LEAKS(document_close_callback_t);
-			document_close_callback_t () { }
-			void handle_document_event (document::document_ptr document, event_t event)
-			{
-				if(event == did_change_open_status && !document->is_open())
-				{
-					document->remove_callback(this);
-					editors().erase(document->identifier());
-				}
-				else if(event == did_change_content)
-				{
-					for(auto pair : editors())
-						pair.second->sanitize_selection();
-				}
-			}
-
-		} callback;
-
-		std::map<oak::uuid_t, editor_ptr>::iterator editor = editors().find(document->identifier());
-		if(editor == editors().end())
-		{
-			document->add_callback(&callback);
-			editor = editors().emplace(document->identifier(), std::make_shared<editor_t>(document)).first;
-		}
-		return editor->second;
-	}
-
 	static std::string sanitized_utf8 (std::string str)
 	{
 		str.erase(utf8::remove_malformed(str.begin(), str.end()), str.end());
