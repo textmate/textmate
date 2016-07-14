@@ -243,10 +243,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 					{
 						if(doc->is_open())
 						{
-							ng::editor_ptr editor = ng::editor_for_document(doc);
-							doc->undo_manager().begin_undo_group(editor->ranges());
-							editor->perform_replacements(replacements);
-							doc->undo_manager().end_undo_group(editor->ranges());
+							doc->replace(replacements, parent.match.crc32);
 							doc->set_revision(doc->buffer().revision());
 						}
 						else

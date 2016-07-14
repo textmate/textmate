@@ -15,7 +15,7 @@
 #import <OakFoundation/OakFindProtocol.h>
 #import <OakFoundation/OakTimer.h>
 #import <OakSystem/application.h>
-#import <OakDocument/clipboard.h>
+#import <OakDocument/OakDocumentEditor.h>
 #import <crash/info.h>
 #import <buffer/indexed_map.h>
 #import <BundleMenu/BundleMenu.h>
@@ -241,36 +241,22 @@ struct document_view_t : ng::buffer_api_t
 {
 	document_view_t (document::document_ptr const& document, std::string const& fontName, CGFloat fontSize, std::string const& scopeAttributes, bool scrollPastEnd) : _document(document)
 	{
-		_document->sync_open();
+		NSFont* font = [NSFont fontWithName:to_ns(fontName) size:fontSize];
+		_document_editor = [OakDocumentEditor documentEditorWithDocument:document->document() font:font];
 
-		_editor = ng::editor_for_document(_document);
-		_editor->set_clipboard(get_clipboard(NSGeneralPboard));
-		_editor->set_find_clipboard(get_clipboard(NSFindPboard));
-		_editor->set_replace_clipboard(get_clipboard(OakReplacePboard));
+		_editor = &[_document_editor editor];
+		_layout = &[_document_editor layout];
 
-		settings_t const settings = settings_for_path(_document->logical_path(), _document->file_type() + " " + scopeAttributes, path::parent(_document->path()));
+		set_scroll_past_end(scrollPastEnd);
+
+		settings_t const settings = settings_for_path(logical_path(), file_type() + " " + scopeAttributes, path::parent(path()));
 		invisibles_map = settings.get(kSettingsInvisiblesMapKey, "");
-
-		bool softWrap     = settings.get(kSettingsSoftWrapKey, false);
-		size_t wrapColumn = settings.get(kSettingsWrapColumnKey, NSWrapColumnWindowWidth);
-
-		theme_ptr theme = parse_theme(bundles::lookup(settings.get(kSettingsThemeKey, NULL_STR)));
-		_layout = std::make_unique<ng::layout_t>(_document->buffer(), theme, fontName, fontSize, softWrap, scrollPastEnd, wrapColumn, _document->folded());
-
-		if(settings.get(kSettingsShowWrapColumnKey, false))
-			set_draw_wrap_column(true);
-
-		if(settings.get(kSettingsShowIndentGuidesKey, false))
-			set_draw_indent_guides(true);
 	}
 
 	~document_view_t ()
 	{
 		if(nest_count != 0)
 			end_undo_group();
-		_layout.reset();
-		_editor.reset();
-		_document->close();
 	}
 
 	std::map<std::string, std::string> variables (std::string const& scopeAttributes) const
@@ -343,7 +329,7 @@ struct document_view_t : ng::buffer_api_t
 
 	ng::editor_delegate_t* delegate () const { return _editor->delegate(); }
 	void set_delegate (ng::editor_delegate_t* delegate) { _editor->set_delegate(delegate); }
-	void perform (ng::action_t action, ng::indent_correction_t indentCorrections = ng::kIndentCorrectAlways, std::string const& scopeAttributes = NULL_STR) { _editor->perform(action, _layout.get(), indentCorrections, scopeAttributes); }
+	void perform (ng::action_t action, ng::indent_correction_t indentCorrections = ng::kIndentCorrectAlways, std::string const& scopeAttributes = NULL_STR) { _editor->perform(action, _layout, indentCorrections, scopeAttributes); }
 	bool disallow_tab_expansion () const { return _editor->disallow_tab_expansion(); }
 	void insert (std::string const& str, bool selectInsertion = false) { _editor->insert(str, selectInsertion); }
 	void insert_with_pairing (std::string const& str, ng::indent_correction_t indentCorrections, bool autoPairing, std::string const& scopeAttributes = NULL_STR) { _editor->insert_with_pairing(str, indentCorrections, autoPairing, scopeAttributes); }
@@ -408,8 +394,9 @@ struct document_view_t : ng::buffer_api_t
 
 private:
 	document::document_ptr _document;
-	ng::editor_ptr _editor;
-	std::unique_ptr<ng::layout_t> _layout;
+	OakDocumentEditor* _document_editor;
+	ng::editor_t* _editor;
+	ng::layout_t* _layout;
 };
 
 @interface OakTextView () <NSTextInputClient, NSDraggingSource, NSIgnoreMisspelledWords, NSChangeSpelling, NSTextFieldDelegate>

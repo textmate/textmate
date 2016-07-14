@@ -14,6 +14,7 @@
 #import <oak/oak.h>
 #import <bundles/bundles.h>
 #import <document/collection.h>
+#import <document/OakDocument.h>
 #import <editor/editor.h>
 #import <editor/write.h>
 #import <io/path.h>
@@ -98,13 +99,13 @@ bool delegate_t::accept_result (std::string const& out, output::type placement, 
 	bool res;
 	if(_document && _document->is_open())
 	{
-		res = ng::editor_for_document(_document)->handle_result(out, placement, format, outputCaret, inputRanges, environment);
+		res = [_document->document() handleOutput:out placement:placement format:format caret:outputCaret inputRanges:inputRanges environment:environment];
 	}
 	else
 	{
 		document::document_ptr doc = document::create();
 		doc->sync_open();
-		res = ng::editor_for_document(doc)->handle_result(out, placement, format, outputCaret, ng::range_t(0) /* inputRanges */, environment);
+		res = [_document->document() handleOutput:out placement:placement format:format caret:outputCaret inputRanges:ng::range_t(0) environment:environment];
 		document::show(doc);
 		doc->close();
 	}
