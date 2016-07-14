@@ -431,6 +431,8 @@ namespace document
 			std::vector<std::string>& paths = plist["paths"];
 			riterate(item, sorted)
 			{
+				if(!item->second.empty() && item->second.front() != '/')
+					continue;
 				paths.push_back(item->second);
 				if(paths.size() == 50)
 					break;
@@ -562,9 +564,9 @@ namespace document
 		return map;
 	}
 
-	void document_t::show ()              { document::lru.set(path(), oak::date_t::now()); }
-	void document_t::hide ()              { document::lru.set(path(), oak::date_t::now()); }
-	oak::date_t document_t::lru () const  { return document::lru.get(path()); }
+	void document_t::show ()              { document::lru.set(path() == NULL_STR ? std::string(identifier()) : path(), oak::date_t::now()); }
+	void document_t::hide ()              { document::lru.set(path() == NULL_STR ? std::string(identifier()) : path(), oak::date_t::now()); }
+	oak::date_t document_t::lru () const  { return document::lru.get(path() == NULL_STR ? std::string(identifier()) : path()); }
 
 	bool document_t::backup ()            { return [_document saveBackup:nil]; }
 	void document_t::detach_backup ()     { _document.backupPath = nil; }
