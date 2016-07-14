@@ -925,7 +925,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 - (void)reflectDocumentSize
 {
-	if(document && documentView && [self enclosingScrollView])
+	if(documentView && [self enclosingScrollView])
 	{
 		NSRect r = [[self enclosingScrollView] documentVisibleRect];
 		documentView->set_viewport(r);
@@ -937,7 +937,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 - (void)resizeWithOldSuperviewSize:(NSSize)oldBoundsSize
 {
-	if(document && documentView)
+	if(documentView)
 			[self reflectDocumentSize];
 	else	[super resizeWithOldSuperviewSize:oldBoundsSize];
 }
@@ -3250,7 +3250,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (folding_state_t)foldingStateForLine:(NSUInteger)lineNumber
 {
-	if(document)
+	if(documentView)
 	{
 		if(documentView->is_line_folded(lineNumber))
 			return kFoldingCollapsed;
