@@ -318,7 +318,7 @@ struct document_view_t : ng::buffer_api_t
 	bool can_undo () const { return _document->undo_manager().can_undo(); }
 	bool can_redo () const { return _document->undo_manager().can_redo(); }
 	void begin_undo_group () { _document->undo_manager().begin_undo_group(ranges()); }
-	void end_undo_group () { _document->undo_manager().end_undo_group(ranges()); }
+	void end_undo_group () { _document->undo_manager().end_undo_group(ranges()); _document->set_revision(_document->buffer().revision()); }
 	void undo () { _editor->clear_snippets(); set_ranges(_document->undo_manager().undo()); }
 	void redo () { _editor->clear_snippets(); set_ranges(_document->undo_manager().redo()); }
 
@@ -578,9 +578,6 @@ struct refresh_helper_t
 
 				if(_revision != documentView->revision() || _selection != documentView->ranges() || _self.needsEnsureSelectionIsInVisibleArea)
 				{
-					if(_revision != documentView->revision()) // FIXME document_t needs to skip work in set_revision if nothing changed.
-						_document->set_revision(documentView->revision());
-
 					[_self ensureSelectionIsInVisibleArea:nil];
 					[_self resetBlinkCaretTimer];
 					[_self updateChoiceMenu:nil];

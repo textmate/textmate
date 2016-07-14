@@ -244,7 +244,6 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 						if(doc->is_open())
 						{
 							doc->replace(replacements, parent.match.crc32);
-							doc->set_revision(doc->buffer().revision());
 						}
 						else
 						{
