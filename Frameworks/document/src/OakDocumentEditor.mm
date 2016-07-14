@@ -1,4 +1,5 @@
 #import "OakDocumentEditor.h"
+#import "OakDocument Private.h"
 #import "clipboard.h"
 #import <OakAppKit/OakPasteboard.h>
 #import <settings/settings.h>
@@ -6,16 +7,8 @@
 #import <editor/editor.h>
 #import <layout/layout.h>
 
+// Defined in OakTextView.h
 static int32_t const NSWrapColumnWindowWidth = 0;
-
-// #import <document/OakDocument Private.h>
-@interface OakDocument (Private)
-@property (nonatomic) NSString*   folded;
-@property (nonatomic) NSString*   selection;
-@property (nonatomic) ng::index_t visibleIndex;
-- (ng::buffer_t&)buffer;
-- (ng::undo_manager_t&)undoManager;
-@end
 
 @interface OakDocumentEditor ()
 {
