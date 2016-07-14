@@ -155,6 +155,8 @@ NSString* OakDocumentWillShowAlertNotification    = @"OakDocumentWillShowAlertNo
 {
 	OBJC_WATCH_LEAKS(OakDocument);
 
+	NSHashTable* _documentEditors;
+
 	std::unique_ptr<ng::buffer_t> _buffer;
 	std::unique_ptr<ng::detail::storage_t> _snapshot;
 	ng::callback_t* _callback;
@@ -302,6 +304,8 @@ private:
 	if(self = [super init])
 	{
 		_identifier = [NSUUID UUID];
+		_documentEditors = [NSHashTable weakObjectsHashTable];
+
 		DocumentContainer.add(self);
 	}
 	return self;
@@ -1228,6 +1232,37 @@ private:
 	return to_ns(v.empty() ? NULL_STR : "( " + text::join(v, ", ") + " )");
 }
 
+// ===============================
+// = DocumentEditor Registration =
+// ===============================
+
+- (void)registerDocumentEditor:(id <OakDocumentEditorProtocol>)anEditor
+{
+	[_documentEditors addObject:anEditor];
+}
+
+- (void)unregisterDocumentEditor:(id <OakDocumentEditorProtocol>)anEditor
+{
+	[_documentEditors removeObject:anEditor];
+}
+
+- (NSArray<id <OakDocumentEditorProtocol>>*)documentEditors
+{
+	NSMutableArray* res = [NSMutableArray array];
+	for(id <OakDocumentEditorProtocol> editor in _documentEditors)
+	{
+		if(editor)
+			[res addObject:editor];
+	}
+	return res;
+}
+
+- (BOOL)handleOutput:(std::string const&)string placement:(output::type)place format:(output_format::type)format caret:(output_caret::type)caret inputRanges:(ng::ranges_t const&)ranges environment:(std::map<std::string, std::string> const&)environment
+{
+	id <OakDocumentEditorProtocol> documentEditor = self.documentEditors.firstObject;
+	return [documentEditor handleOutput:string placement:place format:format caret:caret inputRanges:ranges environment:environment];
+}
+
 // =======================
 // = Observe File System =
 // =======================
@@ -1417,7 +1452,13 @@ private:
 
 - (BOOL)performReplacements:(std::multimap<std::pair<size_t, size_t>, std::string> const&)someReplacements checksum:(uint32_t)crc32
 {
-	ASSERT_EQ(_openCount, 0);
+	if(self.isOpen)
+	{
+		id <OakDocumentEditorProtocol> documentEditor = self.documentEditors.firstObject;
+		[documentEditor performReplacements:someReplacements];
+		return YES;
+	}
+
 	ASSERT(_path);
 	ASSERT(!_buffer);
 

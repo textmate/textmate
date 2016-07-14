@@ -1,6 +1,12 @@
 #import <text/types.h>
 #import <authorization/authorization.h>
 #import <undo/undo.h> // ng::buffer_t and ng::undo_manager_t types
+#import <command/parser.h>
+
+@protocol OakDocumentEditorProtocol
+- (void)performReplacements:(std::multimap<std::pair<size_t, size_t>, std::string> const&)someReplacements;
+- (BOOL)handleOutput:(std::string const&)string placement:(output::type)place format:(output_format::type)format caret:(output_caret::type)caret inputRanges:(ng::ranges_t const&)ranges environment:(std::map<std::string, std::string> const&)environment;
+@end
 
 PUBLIC extern NSString* OakDocumentContentDidChangeNotification;
 PUBLIC extern NSString* OakDocumentMarksDidChangeNotification;
@@ -73,4 +79,11 @@ PUBLIC @interface OakDocument : NSObject
 @property (nonatomic) BOOL softTabs;
 
 - (void)runPrintOperationModalForWindow:(NSWindow*)aWindow fontName:(NSString*)aFontName;
+
+- (void)registerDocumentEditor:(id <OakDocumentEditorProtocol>)anEditor;
+- (void)unregisterDocumentEditor:(id <OakDocumentEditorProtocol>)anEditor;
+@property (nonatomic, readonly) NSArray<id <OakDocumentEditorProtocol>>* documentEditors;
+
+// Sent to the first OakDocumentEditorProtocol instance
+- (BOOL)handleOutput:(std::string const&)string placement:(output::type)place format:(output_format::type)format caret:(output_caret::type)caret inputRanges:(ng::ranges_t const&)ranges environment:(std::map<std::string, std::string> const&)environment;
 @end
