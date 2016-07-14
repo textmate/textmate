@@ -15,7 +15,6 @@
 #import <OakFoundation/OakFindProtocol.h>
 #import <OakFoundation/OakTimer.h>
 #import <OakSystem/application.h>
-#import <OakDocument/OakDocumentEditor.h>
 #import <crash/info.h>
 #import <buffer/indexed_map.h>
 #import <BundleMenu/BundleMenu.h>
@@ -25,7 +24,7 @@
 #import <cf/cf.h>
 #import <command/runner.h>
 #import <document/collection.h>
-#import <document/OakDocument.h>
+#import <document/OakDocumentEditor.h>
 #import <file/type.h>
 #import <layout/layout.h>
 #import <ns/ns.h>

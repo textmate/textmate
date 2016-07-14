@@ -1,5 +1,5 @@
 TESTS       = tests/t_*.cc
 SOURCES     = src/*.{mm,cc}
-EXPORT      = src/OakDocument.h src/document.h src/collection.h
-LINK       += BundlesManager OakAppKit OakFoundation OakSystem authorization buffer bundles cf command crash encoding file io layout network ns plist regexp scope selection settings text theme undo
+EXPORT      = src/OakDocument.h src/OakDocumentEditor.h src/document.h src/collection.h
+LINK       += BundlesManager OakAppKit OakFoundation OakSystem authorization buffer bundles cf command crash editor encoding file io layout network ns plist regexp scope selection settings text theme undo
 FRAMEWORKS  = ApplicationServices
