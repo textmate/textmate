@@ -602,6 +602,8 @@ private:
 
 - (void)loadModalForWindow:(NSWindow*)aWindow completionHandler:(void(^)(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID))block
 {
+	block = block ?: ^(OakDocumentIOResult, NSString*, oak::uuid_t const&){ };
+
 	if(++self.openCount != 1)
 	{
 		if(!_loadCompletionHandlers)
