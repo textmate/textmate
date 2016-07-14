@@ -16,10 +16,6 @@ void setup_fixtures ()
 		{
 			struct delegate_t : command::delegate_t
 			{
-				delegate_t (document::document_ptr document) : _document(document)
-				{
-				}
-
 				bool accept_html_data (command::runner_ptr runner, char const* data, size_t len) { return fprintf(stderr, "html: %.*s", (int)len, data), false; }
 
 				void show_document (std::string const& str) { fprintf(stderr, "document: %s\n", str.c_str()); }
@@ -34,16 +30,12 @@ void setup_fixtures ()
 
 				bool accept_result (std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, ng::ranges_t const& inputRanges, std::map<std::string, std::string> const& environment)
 				{
-					if(_document && _document->is_open())
-						return ng::editor_for_document(_document)->handle_result(out, placement, format, outputCaret, inputRanges, environment);
+					// We do not have any document editor
 					return false;
 				}
-
-			private:
-				document::document_ptr _document;
 			};
 
-			command::runner_ptr runner = command::runner(command, buffer, selection, baseEnv, command::delegate_ptr((command::delegate_t*)new delegate_t(document)));
+			command::runner_ptr runner = command::runner(command, buffer, selection, baseEnv, command::delegate_ptr((command::delegate_t*)new delegate_t));
 			runner->launch();
 			runner->wait_for_command();
 		}
