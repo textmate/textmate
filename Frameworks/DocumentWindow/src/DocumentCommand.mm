@@ -24,7 +24,7 @@ namespace
 {
 	struct delegate_t : command::delegate_t
 	{
-		delegate_t (DocumentController* controller, document::document_ptr document) : _controller(controller), _document(document), _did_open_html_window(false)
+		delegate_t (DocumentController* controller, ng::buffer_api_t const& buffer, ng::ranges_t const& selection, document::document_ptr document) : _controller(controller), _buffer(buffer), _selection(selection), _document(document), _did_open_html_window(false)
 		{
 			if(_controller)
 				_collection = to_s(_controller.identifier);
@@ -42,6 +42,8 @@ namespace
 
 	private:
 		DocumentController* _controller;
+		ng::buffer_api_t const& _buffer;
+		ng::ranges_t _selection;
 		document::document_ptr _document;
 		oak::uuid_t _collection;
 		bool _did_open_html_window;
@@ -63,7 +65,7 @@ ng::ranges_t delegate_t::write_unit_to_fd (int fd, input::type unit, input::type
 	bool isOpen = _document->is_open();
 	if(!isOpen)
 		_document->sync_open();
-	ng::ranges_t const res = ng::write_unit_to_fd(_document->buffer(), ng::editor_for_document(_document)->ranges(), _document->indent().tab_size(), fd, unit, fallbackUnit, format, scopeSelector, variables, inputWasSelection);
+	ng::ranges_t const res = ng::write_unit_to_fd(_buffer, _selection, _document->indent().tab_size(), fd, unit, fallbackUnit, format, scopeSelector, variables, inputWasSelection);
 	if(!isOpen)
 		_document->close();
 	return res;
@@ -204,7 +206,7 @@ void run_impl (bundle_command_t const& command, ng::buffer_api_t const& buffer, 
 		}
 	}
 
-	command::runner_ptr runner = command::runner(command, buffer, selection, baseEnv, std::make_shared<delegate_t>(controller, document), pwd);
+	command::runner_ptr runner = command::runner(command, buffer, selection, baseEnv, std::make_shared<delegate_t>(controller, buffer, selection, document), pwd);
 	runner->launch();
 	runner->wait();
 }
