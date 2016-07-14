@@ -266,11 +266,8 @@ private:
 	_snapshot = std::make_unique<ng::detail::storage_t>(_buffer->storage());
 }
 
-- (void)updateSpellingSettings:(BOOL)updateSpelling andIndentSettings:(BOOL)updateIndent
+- (std::map<std::string, std::string>)variables
 {
-	if(!_buffer)
-		return;
-
 	std::map<std::string, std::string> variables = {
 		{ "TM_DISPLAYNAME",   to_s(self.displayName)           },
 		{ "TM_DOCUMENT_UUID", to_s(self.identifier.UUIDString) },
@@ -283,7 +280,15 @@ private:
 		variables["TM_DIRECTORY"] = path::parent(to_s(_path));
 	}
 
-	settings_t const settings = settings_for_path(to_s(_virtualPath ?: _path), to_s(_fileType), to_s(_directory ?: [_path stringByDeletingLastPathComponent]), variables);
+	return variables;
+}
+
+- (void)updateSpellingSettings:(BOOL)updateSpelling andIndentSettings:(BOOL)updateIndent
+{
+	if(!_buffer)
+		return;
+
+	settings_t const settings = settings_for_path(to_s(_virtualPath ?: _path), to_s(_fileType), to_s(_directory ?: [_path stringByDeletingLastPathComponent]), self.variables);
 	if(updateSpelling)
 	{
 		self.spellingLanguage = to_ns(settings.get(kSettingsSpellingLanguageKey, ""));

@@ -66,6 +66,7 @@ PUBLIC @interface OakDocument : NSObject
 @property (nonatomic) NSString* content;
 
 - (NSArray<BundleGrammar*>*)proposedGrammars;
+- (std::map<std::string, std::string>)variables;
 
 @property (nonatomic, readonly) BOOL canUndo;
 @property (nonatomic, readonly) BOOL canRedo;

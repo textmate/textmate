@@ -550,18 +550,7 @@ namespace document
 
 	std::map<std::string, std::string> document_t::document_variables () const
 	{
-		std::map<std::string, std::string> map = {
-			{ "TM_DISPLAYNAME",    display_name()     },
-			{ "TM_DOCUMENT_UUID",  to_s(identifier()) },
-		};
-
-		if(path() != NULL_STR)
-		{
-			map["TM_FILEPATH"]  = path();
-			map["TM_FILENAME"]  = path::name(path());
-			map["TM_DIRECTORY"] = path::parent(path());
-		}
-		return map;
+		return _document.variables;
 	}
 
 	void document_t::show ()              { document::lru.set(path() == NULL_STR ? std::string(identifier()) : path(), oak::date_t::now()); }
