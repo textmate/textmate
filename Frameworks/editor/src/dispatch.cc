@@ -2,7 +2,6 @@
 #include "transform.h"
 #include "clipboard.h"
 #include <command/parser.h>
-#include <document/collection.h>
 
 namespace
 {

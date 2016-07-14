@@ -6,7 +6,6 @@
 #include <oak/callbacks.h>
 #include <regexp/find.h>
 #include <command/parser.h>
-#include <document/document.h>
 #include <layout/layout.h>
 
 namespace ng
@@ -166,7 +165,6 @@ namespace ng
 	{
 		editor_t ();
 		editor_t (buffer_t& buffer);
-		editor_t (document::document_ptr document);
 
 		editor_delegate_t* delegate () const            { return _delegate; }
 		void set_delegate (editor_delegate_t* delegate) { _delegate = delegate; }

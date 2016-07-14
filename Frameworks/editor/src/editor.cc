@@ -285,12 +285,6 @@ namespace ng
 		setup();
 	}
 
-	editor_t::editor_t (document::document_ptr document) : _buffer(document->buffer())
-	{
-		ASSERT(document->is_open());
-		setup();
-	}
-
 	void editor_t::sanitize_selection ()
 	{
 		_selections = ng::sanitize(_buffer, _selections);
