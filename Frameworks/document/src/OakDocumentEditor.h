@@ -11,6 +11,7 @@ PUBLIC @interface OakDocumentEditor : NSObject <OakDocumentEditorProtocol>
 + (instancetype)documentEditorWithDocument:(OakDocument*)aDocument font:(NSFont*)font;
 - (instancetype)initWithDocument:(OakDocument*)aDocument font:(NSFont*)font;
 @property (nonatomic, readonly) OakDocument* document;
+@property (nonatomic) ng::ranges_t selection;
 - (ng::editor_t&)editor;
 - (ng::layout_t&)layout;
 

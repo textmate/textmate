@@ -76,6 +76,17 @@ static int32_t const NSWrapColumnWindowWidth = 0;
 - (ng::editor_t&)editor { return *_editor; }
 - (ng::layout_t&)layout { return *_layout; }
 
+- (ng::ranges_t)selection
+{
+	return _editor->ranges();
+}
+
+- (void)setSelection:(ng::ranges_t)newSelection
+{
+	_editor->clear_snippets();
+	_editor->set_selections(newSelection);
+}
+
 - (void)performReplacements:(std::multimap<std::pair<size_t, size_t>, std::string> const&)someReplacements
 {
 	[_document undoManager].begin_undo_group(_editor->ranges());
