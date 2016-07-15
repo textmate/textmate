@@ -8,7 +8,7 @@ namespace ng
 
 } /* ng */
 
-PUBLIC @interface OakDocumentEditor : NSObject <OakDocumentEditorProtocol>
+PUBLIC @interface OakDocumentEditor : NSObject
 + (instancetype)documentEditorWithDocument:(OakDocument*)aDocument font:(NSFont*)font;
 - (instancetype)initWithDocument:(OakDocument*)aDocument font:(NSFont*)font;
 @property (nonatomic, readonly) OakDocument* document;

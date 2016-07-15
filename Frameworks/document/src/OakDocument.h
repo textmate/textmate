@@ -3,12 +3,6 @@
 #import <selection/types.h>
 #import <command/parser.h>
 
-@protocol OakDocumentEditorProtocol
-@property (nonatomic) ng::ranges_t selection;
-- (void)performReplacements:(std::multimap<std::pair<size_t, size_t>, std::string> const&)someReplacements;
-- (BOOL)handleOutput:(std::string const&)string placement:(output::type)place format:(output_format::type)format caret:(output_caret::type)caret inputRanges:(ng::ranges_t const&)ranges environment:(std::map<std::string, std::string> const&)environment;
-@end
-
 PUBLIC extern NSString* OakDocumentContentDidChangeNotification;
 PUBLIC extern NSString* OakDocumentMarksDidChangeNotification;
 PUBLIC extern NSString* OakDocumentWillSaveNotification;
@@ -24,6 +18,7 @@ typedef NS_ENUM(NSInteger, OakDocumentIOResult) {
 };
 
 @class BundleGrammar;
+@class OakDocumentEditor;
 
 PUBLIC @interface OakDocument : NSObject
 + (instancetype)documentWithPath:(NSString*)aPath;
@@ -86,10 +81,10 @@ PUBLIC @interface OakDocument : NSObject
 
 - (void)runPrintOperationModalForWindow:(NSWindow*)aWindow fontName:(NSString*)aFontName;
 
-- (void)registerDocumentEditor:(id <OakDocumentEditorProtocol>)anEditor;
-- (void)unregisterDocumentEditor:(id <OakDocumentEditorProtocol>)anEditor;
-@property (nonatomic, readonly) NSArray<id <OakDocumentEditorProtocol>>* documentEditors;
+- (void)registerDocumentEditor:(OakDocumentEditor*)anEditor;
+- (void)unregisterDocumentEditor:(OakDocumentEditor*)anEditor;
+@property (nonatomic, readonly) NSArray<OakDocumentEditor*>* documentEditors;
 
-// Sent to the first OakDocumentEditorProtocol instance
+// Sent to the first OakDocumentEditor instance
 - (BOOL)handleOutput:(std::string const&)string placement:(output::type)place format:(output_format::type)format caret:(output_caret::type)caret inputRanges:(ng::ranges_t const&)ranges environment:(std::map<std::string, std::string> const&)environment;
 @end

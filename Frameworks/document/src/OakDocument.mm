@@ -1,4 +1,5 @@
 #import "OakDocument Private.h"
+#import "OakDocumentEditor.h"
 #import "EncodingView.h"
 #import "Printing.h"
 #import "watch.h"
@@ -1065,13 +1066,13 @@ private:
 
 - (void)beginUndoGrouping
 {
-	if(id <OakDocumentEditorProtocol> editor = self.documentEditors.firstObject)
+	if(OakDocumentEditor* editor = self.documentEditors.firstObject)
 		_undoManager->begin_undo_group(editor.selection);
 }
 
 - (void)endUndoGrouping
 {
-	if(id <OakDocumentEditorProtocol> editor = self.documentEditors.firstObject)
+	if(OakDocumentEditor* editor = self.documentEditors.firstObject)
 	{
 		_undoManager->end_undo_group(editor.selection);
 		self.revision = _buffer->revision();
@@ -1081,14 +1082,14 @@ private:
 - (void)undo
 {
 	ng::ranges_t sel = _undoManager->undo();
-	for(id <OakDocumentEditorProtocol> editor in self.documentEditors)
+	for(OakDocumentEditor* editor in self.documentEditors)
 		editor.selection = sel;
 }
 
 - (void)redo
 {
 	ng::ranges_t sel = _undoManager->redo();
-	for(id <OakDocumentEditorProtocol> editor in self.documentEditors)
+	for(OakDocumentEditor* editor in self.documentEditors)
 		editor.selection = sel;
 }
 
@@ -1270,20 +1271,20 @@ private:
 // = DocumentEditor Registration =
 // ===============================
 
-- (void)registerDocumentEditor:(id <OakDocumentEditorProtocol>)anEditor
+- (void)registerDocumentEditor:(OakDocumentEditor*)anEditor
 {
 	[_documentEditors addObject:anEditor];
 }
 
-- (void)unregisterDocumentEditor:(id <OakDocumentEditorProtocol>)anEditor
+- (void)unregisterDocumentEditor:(OakDocumentEditor*)anEditor
 {
 	[_documentEditors removeObject:anEditor];
 }
 
-- (NSArray<id <OakDocumentEditorProtocol>>*)documentEditors
+- (NSArray<OakDocumentEditor*>*)documentEditors
 {
 	NSMutableArray* res = [NSMutableArray array];
-	for(id <OakDocumentEditorProtocol> editor in _documentEditors)
+	for(OakDocumentEditor* editor in _documentEditors)
 	{
 		if(editor)
 			[res addObject:editor];
@@ -1293,7 +1294,7 @@ private:
 
 - (BOOL)handleOutput:(std::string const&)string placement:(output::type)place format:(output_format::type)format caret:(output_caret::type)caret inputRanges:(ng::ranges_t const&)ranges environment:(std::map<std::string, std::string> const&)environment
 {
-	id <OakDocumentEditorProtocol> documentEditor = self.documentEditors.firstObject;
+	OakDocumentEditor* documentEditor = self.documentEditors.firstObject;
 	return [documentEditor handleOutput:string placement:place format:format caret:caret inputRanges:ranges environment:environment];
 }
 
@@ -1485,7 +1486,7 @@ private:
 {
 	if(self.isOpen)
 	{
-		id <OakDocumentEditorProtocol> documentEditor = self.documentEditors.firstObject;
+		OakDocumentEditor* documentEditor = self.documentEditors.firstObject;
 		[documentEditor performReplacements:someReplacements];
 		return YES;
 	}
