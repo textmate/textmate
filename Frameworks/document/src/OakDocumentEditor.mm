@@ -61,12 +61,14 @@ static int32_t const NSWrapColumnWindowWidth = 0;
 			_layout->set_draw_indent_guides(true);
 
 		[_document registerDocumentEditor:self];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentContentDidChange:) name:OakDocumentContentDidChangeNotification object:_document];
 	}
 	return self;
 }
 
 - (void)dealloc
 {
+	[[NSNotificationCenter defaultCenter] removeObserver:self name:OakDocumentContentDidChangeNotification object:_document];
 	_layout.reset();
 	_editor.reset();
 	[_document close];
@@ -85,6 +87,11 @@ static int32_t const NSWrapColumnWindowWidth = 0;
 {
 	_editor->clear_snippets();
 	_editor->set_selections(newSelection);
+}
+
+- (void)documentContentDidChange:(NSNotification*)aNotification
+{
+	_editor->sanitize_selection();
 }
 
 - (void)performReplacements:(std::multimap<std::pair<size_t, size_t>, std::string> const&)someReplacements
