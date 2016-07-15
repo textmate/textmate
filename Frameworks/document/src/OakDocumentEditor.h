@@ -2,6 +2,7 @@
 
 namespace ng
 {
+	struct buffer_t;
 	struct editor_t;
 	struct layout_t;
 
@@ -12,6 +13,7 @@ PUBLIC @interface OakDocumentEditor : NSObject <OakDocumentEditorProtocol>
 - (instancetype)initWithDocument:(OakDocument*)aDocument font:(NSFont*)font;
 @property (nonatomic, readonly) OakDocument* document;
 @property (nonatomic) ng::ranges_t selection;
+- (ng::buffer_t&)buffer;
 - (ng::editor_t&)editor;
 - (ng::layout_t&)layout;
 

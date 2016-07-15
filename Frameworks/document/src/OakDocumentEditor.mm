@@ -75,6 +75,7 @@ static int32_t const NSWrapColumnWindowWidth = 0;
 	[_document unregisterDocumentEditor:self];
 }
 
+- (ng::buffer_t&)buffer { return [_document buffer]; }
 - (ng::editor_t&)editor { return *_editor; }
 - (ng::layout_t&)layout { return *_layout; }
 
