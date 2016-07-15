@@ -482,6 +482,9 @@ private:
 
 - (std::map<std::string, std::string>)extendedAttributeds
 {
+	for(OakDocumentEditor* editor in self.documentEditors)
+		[editor documentWillSave:self];
+
 	std::map<std::string, std::string> res = {
 		{ "com.macromates.bookmarks",      to_s([self stringifyMarksOfType:to_ns(document::kBookmarkIdentifier)]) },
 		{ "com.macromates.selectionRange", to_s(_selection) },

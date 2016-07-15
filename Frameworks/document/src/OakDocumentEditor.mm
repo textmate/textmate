@@ -69,6 +69,7 @@ static int32_t const NSWrapColumnWindowWidth = 0;
 - (void)dealloc
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self name:OakDocumentContentDidChangeNotification object:_document];
+	_document.folded = to_ns(_layout->folded_as_string());
 	_layout.reset();
 	_editor.reset();
 	[_document close];
@@ -88,6 +89,11 @@ static int32_t const NSWrapColumnWindowWidth = 0;
 {
 	_editor->clear_snippets();
 	_editor->set_selections(newSelection);
+}
+
+- (void)documentWillSave:(OakDocument*)aDocument
+{
+	aDocument.folded = to_ns(_layout->folded_as_string());
 }
 
 - (void)documentContentDidChange:(NSNotification*)aNotification

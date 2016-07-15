@@ -749,10 +749,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 - (void)updateDocumentMetadata
 {
 	if(document && documentView)
-	{
-		document->set_folded(documentView->folded_as_string());
 		document->set_visible_index(documentView->index_at_point([self visibleRect].origin));
-	}
 }
 
 - (void)setDocument:(document::document_ptr const&)aDocument
