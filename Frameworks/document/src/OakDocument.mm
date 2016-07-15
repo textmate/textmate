@@ -1063,6 +1063,35 @@ private:
 - (BOOL)canUndo                                       { return _undoManager && _undoManager->can_undo(); }
 - (BOOL)canRedo                                       { return _undoManager && _undoManager->can_redo(); }
 
+- (void)beginUndoGrouping
+{
+	if(id <OakDocumentEditorProtocol> editor = self.documentEditors.firstObject)
+		_undoManager->begin_undo_group(editor.selection);
+}
+
+- (void)endUndoGrouping
+{
+	if(id <OakDocumentEditorProtocol> editor = self.documentEditors.firstObject)
+	{
+		_undoManager->end_undo_group(editor.selection);
+		self.revision = _buffer->revision();
+	}
+}
+
+- (void)undo
+{
+	ng::ranges_t sel = _undoManager->undo();
+	for(id <OakDocumentEditorProtocol> editor in self.documentEditors)
+		editor.selection = sel;
+}
+
+- (void)redo
+{
+	ng::ranges_t sel = _undoManager->redo();
+	for(id <OakDocumentEditorProtocol> editor in self.documentEditors)
+		editor.selection = sel;
+}
+
 // We currently store these in buffer_t
 - (BOOL)isContinuousSpellCheckingEnabled              { return _buffer && _buffer->live_spelling(); }
 - (NSString*)spellingLanguage                         { return _buffer ? to_ns(_buffer->spelling_language()) : nil; }
@@ -1390,7 +1419,6 @@ private:
 				return;
 
 			ng::buffer_t& buffer = [_self buffer];
-			ng::undo_manager_t& undoManager = [_self undoManager];
 
 			std::string const yours = std::string(content->begin(), content->end());
 			std::string const mine  = buffer.substr(0, buffer.size());
@@ -1401,11 +1429,10 @@ private:
 			}
 			else if(!_self.isDocumentEdited)
 			{
-				undoManager.begin_undo_group(ng::ranges_t(0));
+				[_self beginUndoGrouping];
 				buffer.replace(0, buffer.size(), yours);
-				undoManager.end_undo_group(ng::ranges_t(0), true); // This bumps the revision
+				[_self endUndoGrouping];
 
-				_self.revision      = buffer.revision();
 				_self.savedRevision = _self.revision;
 				[_self snapshot];
 				[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentContentDidChangeNotification object:_self];
@@ -1420,11 +1447,10 @@ private:
 
 				if(utf8::is_valid(merged.begin(), merged.end()))
 				{
-					undoManager.begin_undo_group(ng::ranges_t(0));
+					[_self beginUndoGrouping];
 					buffer.replace(0, buffer.size(), merged);
-					undoManager.end_undo_group(ng::ranges_t(0), true); // This bumps the revision
+					[_self endUndoGrouping];
 
-					_self.revision      = buffer.revision();
 					_self.savedRevision = merged == yours ? _self.revision : -1;
 					[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentContentDidChangeNotification object:_self];
 				}

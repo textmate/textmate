@@ -89,10 +89,9 @@ static int32_t const NSWrapColumnWindowWidth = 0;
 
 - (void)performReplacements:(std::multimap<std::pair<size_t, size_t>, std::string> const&)someReplacements
 {
-	[_document undoManager].begin_undo_group(_editor->ranges());
+	[_document beginUndoGrouping];
 	_editor->perform_replacements(someReplacements);
-	[_document undoManager].end_undo_group(_editor->ranges());
-	_document.revision = [_document buffer].revision();
+	[_document endUndoGrouping];
 }
 
 - (BOOL)handleOutput:(std::string const&)string placement:(output::type)place format:(output_format::type)format caret:(output_caret::type)caret inputRanges:(ng::ranges_t const&)ranges environment:(std::map<std::string, std::string> const&)environment

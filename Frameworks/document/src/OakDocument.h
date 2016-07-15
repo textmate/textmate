@@ -71,6 +71,10 @@ PUBLIC @interface OakDocument : NSObject
 
 @property (nonatomic, readonly) BOOL canUndo;
 @property (nonatomic, readonly) BOOL canRedo;
+- (void)beginUndoGrouping;
+- (void)endUndoGrouping;
+- (void)undo;
+- (void)redo;
 
 // Read from .tm_properties so will update if we change fileType
 @property (nonatomic, getter = isContinuousSpellCheckingEnabled) BOOL continuousSpellCheckingEnabled;
