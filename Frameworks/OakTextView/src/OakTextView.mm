@@ -3207,20 +3207,22 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (void)updateSelection
 {
-	text::selection_t ranges, withoutCarry;
+	text::selection_t withoutCarry;
 	for(auto const& range : documentView->ranges())
 	{
 		text::pos_t from = documentView->convert(range.first.index);
 		text::pos_t to   = documentView->convert(range.last.index);
-		if(!range.freehanded && !range.columnar)
-			withoutCarry.push_back(text::range_t(from, to, range.columnar));
-		from.offset = range.first.carry;
-		to.offset   = range.last.carry;
 		if(range.freehanded || range.columnar)
+		{
+			from.offset = range.first.carry;
+			to.offset   = range.last.carry;
 			withoutCarry.push_back(text::range_t(from, to, range.columnar));
-		ranges.push_back(text::range_t(from, to, range.columnar));
+		}
+		else
+		{
+			withoutCarry.push_back(text::range_t(from, to, range.columnar));
+		}
 	}
-	document->set_selection(ranges);
 
 	isUpdatingSelection = YES;
 	[self setSelectionString:[NSString stringWithCxxString:withoutCarry]];
