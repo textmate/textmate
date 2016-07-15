@@ -521,7 +521,7 @@ static ng::ranges_t merge (ng::ranges_t lhs, ng::ranges_t const& rhs)
 
 struct refresh_helper_t
 {
-	refresh_helper_t (OakTextView* self, document::document_ptr const& document, std::shared_ptr<document_view_t> const& documentView) : _self(self), _document(document), _document_view(documentView)
+	refresh_helper_t (OakTextView* self, std::shared_ptr<document_view_t> const& documentView) : _self(self), _document_view(documentView)
 	{
 		if(++documentView->nest_count == 1)
 		{
@@ -600,13 +600,12 @@ private:
 	}
 
 	OakTextView* _self;
-	document::document_ptr _document;
 	std::weak_ptr<document_view_t> _document_view;
 	size_t _revision;
 	ng::ranges_t _selection;
 };
 
-#define AUTO_REFRESH refresh_helper_t _dummy(self, document, documentView)
+#define AUTO_REFRESH refresh_helper_t _dummy(self, documentView)
 
 static std::string shell_quote (std::vector<std::string> paths)
 {
