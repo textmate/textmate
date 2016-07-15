@@ -1,6 +1,6 @@
 #import <text/types.h>
 #import <authorization/authorization.h>
-#import <undo/undo.h> // ng::buffer_t and ng::undo_manager_t types
+#import <selection/types.h>
 #import <command/parser.h>
 
 @protocol OakDocumentEditorProtocol

@@ -1,4 +1,5 @@
 #import "OakDocument.h"
+#import <undo/undo.h> // ng::buffer_t and ng::undo_manager_t types
 
 @interface OakDocument (Private)
 @property (nonatomic) NSInteger   revision;
