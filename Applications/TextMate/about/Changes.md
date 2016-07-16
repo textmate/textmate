@@ -2,6 +2,16 @@ Title: Release Notes
 
 # Changes
 
+## 2016-07-16 (v2.0-beta.11.10)
+
+* When we lookup settings for untitled documents we compare the file pattern of targeted settings to the project (or target) folder including a trailing slash, that way, a file created in `folder` will be targeted by a `folder/**` file pattern.
+* The release version of the Emmet TextMate plug-in crashes on launch and has done so for years, so it is now blacklisted by default. There is a new version linked to from [this GitHub issue](https://github.com/emmetio/Emmet.tmplugin/issues/10) which does work. If you are using that version, you can clear TextMate’s blacklist by running this in a termina:
+
+		defaults write com.macromates.TextMate.preview disabledPlugIns -array
+
+* TextMate no longer uses `FSRef` types for the ODBEditor protocol. This protocol is used by sftp browsers and similar to offer an “Open in TextMate”. If you see any issues with third party software using “Open in TextMate” then please let us know, preferably by using [the mailing list](http://lists.macromates.com/listinfo/textmate).  *[Ronald Wampler]*
+* See [all changes since v2.0-beta.11.5](https://github.com/textmate/textmate/compare/v2.0-beta.11.5...v2.0-beta.11.10)
+
 ## 2016-07-06 (v2.0-beta.11.5)
 
 * The precedence of targeted settings (`.tm_properties`) has been changed, probably easiest to explain with an example, as there are 3 different “types” of ways to target a document:
