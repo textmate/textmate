@@ -8,6 +8,7 @@
 #include <text/ctype.h>
 #include <text/types.h>
 #include <text/tokenize.h>
+#include <crash/info.h>
 
 namespace ng
 {
@@ -47,6 +48,8 @@ namespace ng
 
 	std::string character_class (buffer_api_t const& buffer, size_t index)
 	{
+		crash_reporter_info_t crashInfo(text::format("find word at %zu in buffer of size %zu", index, buffer.size()));
+
 		bundles::item_ptr match;
 		plist::any_t value = bundles::value_for_setting("characterClass", buffer.scope(index), &match);
 		if(match)
