@@ -3596,6 +3596,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		D(DBF_OakTextView_DragNDrop, bug("plain text: %s\n", [text UTF8String]););
 		if(shouldMove)
 		{
+			crashInfo << text::format("buffer size: %zu", documentView->size()) << ", move selection (" << to_s(documentView->ranges()) << ") to " << to_s(pos);
 			documentView->move_selection_to(pos);
 		}
 		else
