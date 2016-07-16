@@ -831,11 +831,6 @@ private:
 	{
 		self.observeFileSystem = NO;
 
-		io::bytes_ptr content = std::make_shared<io::bytes_t>(_buffer->size());
-		_buffer->visit_data([&](char const* bytes, size_t offset, size_t len, bool*){
-			memcpy(content->get() + offset, bytes, len);
-		});
-
 		std::map<std::string, std::string> attributes;
 		if(volume::settings(to_s(_path)).extended_attributes())
 			attributes = [self extendedAttributeds];
@@ -962,6 +957,12 @@ private:
 		});
 
 		[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentWillSaveNotification object:self];
+
+		io::bytes_ptr content = std::make_shared<io::bytes_t>(_buffer->size());
+		_buffer->visit_data([&](char const* bytes, size_t offset, size_t len, bool*){
+			memcpy(content->get() + offset, bytes, len);
+		});
+
 		file::save(to_s(_path), cb, _authorization, content, attributes, encoding, std::vector<oak::uuid_t>() /* binary import filters */, std::vector<oak::uuid_t>() /* text import filters */);
 	}
 	else
