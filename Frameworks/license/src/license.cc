@@ -8,6 +8,7 @@
 #include <openssl/bio.h>
 #include <openssl/pem.h>
 #include <openssl/rsa.h>
+#include <crash/info.h>
 
 extern std::vector<size_t> const& revoked_serials () WEAK_IMPORT_ATTRIBUTE;
 
@@ -38,13 +39,15 @@ namespace
 
 	static std::string ssl_decode (std::string const& src, std::string const& publicKey)
 	{
+		crash_reporter_info_t info(text::format("key size %zu, cipher size %zu", publicKey.size(), src.size()));
+
 		std::string res = NULL_STR;
-		if(BIO* bio = BIO_new_mem_buf((char*)publicKey.data(), publicKey.size()))
+		if(BIO* bio = BIO_new_mem_buf((void*)publicKey.data(), publicKey.size()))
 		{
-			RSA* rsa_key = 0;
+			RSA* rsa_key = nullptr;
 			if(PEM_read_bio_RSA_PUBKEY(bio, &rsa_key, NULL, NULL))
 			{
-				std::string dst(src.size(), ' ');
+				std::string dst(src.size(), '\0');
 				if(RSA_size(rsa_key) == (int)src.size())
 				{
 					int len = RSA_public_decrypt(src.size(), (unsigned char*)src.data(), (unsigned char*)&dst[0], rsa_key, RSA_PKCS1_PADDING);

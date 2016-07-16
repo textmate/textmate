@@ -1,6 +1,6 @@
 SOURCES      = src/*.cc
 EXPORT       = src/{license,keychain}.h
-LINK        += text cf
+LINK        += crash text cf
 CXX_FLAGS   += -I"$libressl_prefix/include"
 LN_FLAGS    += -Wl,-U,__Z15revoked_serialsv
 LN_FLAGS    += "$libressl_prefix"/lib/libcrypto.a
