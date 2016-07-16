@@ -6,7 +6,6 @@
 #import <settings/settings.h>
 #import <oak/oak.h>
 #import <ns/ns.h>
-#import <crash/info.h>
 
 @interface OakEncodingSaveOptionsViewController : NSViewController <NSOpenSavePanelDelegate>
 {
@@ -92,7 +91,6 @@
 
 - (void)panel:(NSSavePanel*)sender didChangeToDirectoryURL:(NSURL*)anURL
 {
-	crash_reporter_info_t info("NSSavePanel did change to directory: " + to_s([anURL path]));
 	[self updateSettings:[self encodingForURL:[sender URL]]];
 }
 @end
@@ -114,10 +112,8 @@
 	[savePanel setNameFieldStringValue:[aPathSuggestion lastPathComponent]];
 	[savePanel setAccessoryView:optionsViewController.view];
 	[optionsViewController updateSettings:[optionsViewController encodingForURL:[savePanel URL]]];
-	crash_reporter_info_t info("Setup NSSavePanel delegate with path: " + to_s([[savePanel URL] path]));
 	savePanel.delegate = optionsViewController;
 	[savePanel beginSheetModalForWindow:aWindow completionHandler:^(NSInteger result) {
-		crash_reporter_info_t info("Clear NSSavePanel delegate");
 		savePanel.delegate = nil;
 		NSString* path = result == NSOKButton ? [[savePanel.URL filePathURL] path] : nil;
 		encoding::type encoding(to_s(optionsViewController.lineEndings), to_s(optionsViewController.encoding));

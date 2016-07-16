@@ -23,7 +23,6 @@
 #import <Find/Find.h>
 #import <BundlesManager/BundlesManager.h>
 #import <network/network.h>
-#import <crash/info.h>
 #import <file/path_info.h>
 #import <io/entries.h>
 #import <scm/scm.h>
@@ -529,9 +528,6 @@ namespace
 	if([anIndexSet count] == 0 || _documents.empty())
 		return;
 
-	crash_reporter_info_t crashInfo(text::format("close %lu documents with %zu open and index of selected being %zu.", [anIndexSet count], _documents.size(), _selectedTabIndex));
-	crashInfo << to_s([anIndexSet description]);
-
 	std::vector<document::document_ptr> documentsToClose;
 	for(NSUInteger index = [anIndexSet firstIndex]; index != NSNotFound; index = [anIndexSet indexGreaterThanIndex:index])
 		documentsToClose.push_back(_documents[index]);
@@ -581,8 +577,6 @@ namespace
 		if(selectedUUID == uuid)
 			newSelectedTabIndex = newDocuments.empty() ? 0 : newDocuments.size() - 1;
 	}
-
-	crashInfo << text::format("keep %zu documents open, new selected index at %zu, create untitled %s", newDocuments.size(), newSelectedTabIndex, BSTR((createIfEmptyFlag && newDocuments.empty())));
 
 	if(createIfEmptyFlag && newDocuments.empty())
 		newDocuments.push_back(document::create());

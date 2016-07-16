@@ -10,7 +10,6 @@
 #include <cf/run_loop.h>
 #include <ns/ns.h>
 #include <oak/debug.h>
-#include <crash/info.h>
 
 OAK_DEBUG_VAR(Document_Scanner);
 OAK_DEBUG_VAR(Document_LRU);
