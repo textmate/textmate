@@ -82,12 +82,6 @@ struct data_source_t
 	[self setupTrackingRects];
 }
 
-- (void)removeFromSuperview
-{
-	D(DBF_GutterView, bug("\n"););
-	self.partnerView = nil;
-}
-
 - (void)viewDidMoveToWindow
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidResignKeyNotification object:nil];

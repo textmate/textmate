@@ -330,7 +330,6 @@ private:
 
 - (void)dealloc
 {
-	gutterView.partnerView = nil;
 	gutterView.delegate    = nil;
 	_statusBar.delegate    = nil;
 

@@ -33,7 +33,7 @@ typedef NS_ENUM(NSUInteger, GutterViewRowState) {
 @end
 
 @interface GutterView : NSView
-@property (nonatomic) IBOutlet NSView* partnerView;
+@property (nonatomic, weak) IBOutlet NSView* partnerView;
 @property (nonatomic) NSFont* lineNumberFont;
 @property (nonatomic, weak) id <GutterViewDelegate> delegate;
 @property (nonatomic) NSColor* foregroundColor;
