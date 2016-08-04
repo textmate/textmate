@@ -335,9 +335,16 @@ private:
 		self.fileType   = aFileType;
 
 		[self createBuffer];
-		[someData enumerateByteRangesUsingBlock:^(void const* buf, NSRange range, BOOL*){
-			_buffer->insert(range.location, (char const*)buf, range.length);
-		}];
+		if([someData respondsToSelector:@selector(enumerateByteRangesUsingBlock:)])
+		{
+			[someData enumerateByteRangesUsingBlock:^(void const* buf, NSRange range, BOOL*){
+				_buffer->insert(range.location, (char const*)buf, range.length);
+			}];
+		}
+		else
+		{
+			_buffer->insert(0, (char const*)[someData bytes], [someData length]);
+		}
 	}
 	return self;
 }
