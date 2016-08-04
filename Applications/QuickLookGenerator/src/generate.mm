@@ -209,7 +209,8 @@ OSStatus TextMateQuickLookPlugIn_GeneratePreviewForURL (void* instance, QLPrevie
 
 	settings_t const settings = settings_for_path(URLtoString(url), fileType);
 	theme_ptr theme;
-	NSAttributedString* output = create_attributed_string(buffer, settings.get(kSettingsThemeKey, NULL_STR), settings.get(kSettingsFontNameKey, NULL_STR), settings.get(kSettingsFontSizeKey, 11), &theme);
+	NSFont* font = [NSFont userFixedPitchFontOfSize:0];
+	NSAttributedString* output = create_attributed_string(buffer, settings.get(kSettingsThemeKey, NULL_STR), settings.get(kSettingsFontNameKey, to_s([font fontName])), settings.get(kSettingsFontSizeKey, [font pointSize]), &theme);
 	if(!output)
 	{
 		NSData* data = [NSData dataWithContentsOfURL:(__bridge NSURL*)url];
