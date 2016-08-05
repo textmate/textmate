@@ -342,13 +342,15 @@ namespace
 					_next_state = kStateNotifyCallback;
 
 					auto retainedSelf = std::static_pointer_cast<file_context_t>(shared_from_this());
+					CFRunLoopRef runLoop = CFRunLoopGetCurrent();
 					dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 						std::string error = write_to_path(_path, _content, _attributes, _authorization);
-						dispatch_async(dispatch_get_main_queue(), ^{
+						CFRunLoopPerformBlock(runLoop, kCFRunLoopCommonModes, ^{
 							_saved = error == NULL_STR;
 							_error = error;
 							retainedSelf->proceed();
 						});
+						CFRunLoopWakeUp(runLoop);
 					});
 				}
 				break;
