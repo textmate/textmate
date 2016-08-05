@@ -38,9 +38,10 @@ namespace oak
 	template <typename T, typename ARG, typename RESULT>
 	void server_t<T, ARG, RESULT>::send_request (size_t clientKey, ARG const request)
 	{
+		CFRunLoopRef runLoop = CFRunLoopGetCurrent();
 		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 			RESULT const result = T::handle_request(request);
-			dispatch_async(dispatch_get_main_queue(), ^{
+			CFRunLoopPerformBlock(runLoop, kCFRunLoopCommonModes, ^{
 				typename std::map<size_t, T*>::iterator client = client_to_callback.find(clientKey);
 				if(client != client_to_callback.end())
 				{
@@ -48,6 +49,7 @@ namespace oak
 					obj->handle_reply(result);
 				}
 			});
+			CFRunLoopWakeUp(runLoop);
 		});
 	}
 

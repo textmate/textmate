@@ -2,12 +2,12 @@
 #include <io/path.h>
 #include <text/hexdump.h>
 #include <test/jail.h>
+#include <cf/run_loop.h>
 
 struct stall_t : file::open_callback_t
 {
 	stall_t (std::string const& encoding = NULL_STR) : _encoding(encoding)
 	{
-	   _semaphore = dispatch_semaphore_create(0);
 	}
 
 	void select_charset (std::string const& path, io::bytes_ptr content, file::open_context_ptr context)
@@ -22,7 +22,7 @@ struct stall_t : file::open_callback_t
 	{
 		_error = true;
 
-	   dispatch_semaphore_signal(_semaphore);
+		_run_loop.stop();
 	}
 
 	void show_content (std::string const& path, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, encoding::type const& encoding, std::vector<oak::uuid_t> const& binaryImportFilters, std::vector<oak::uuid_t> const& textImportFilters)
@@ -31,17 +31,16 @@ struct stall_t : file::open_callback_t
 		_line_feeds = encoding.newlines();
 		_content    = content;
 
-	   dispatch_semaphore_signal(_semaphore);
+		_run_loop.stop();
 	}
 
 	void wait ()
 	{
-		OAK_ASSERT(dispatch_get_current_queue() != dispatch_get_main_queue());
-		dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER);
+		_run_loop.start();
 	}
 
 	bool _error = false;
-	dispatch_semaphore_t _semaphore;
+	cf::run_loop_t _run_loop;
 	std::string _encoding;
 	std::string _line_feeds = NULL_STR;
 	io::bytes_ptr _content;
