@@ -264,6 +264,8 @@ namespace ng
 		auto row = row_for_offset(index.index);
 		if(bol_as_eol && index.index == row->offset._length && row != _rows.begin())
 			--row;
+
+		row->value.layout(_theme, effective_soft_wrap(row), effective_wrap_column(), *_metrics, CGRectZero, _buffer, row->offset._length);
 		return row->value.rect_at_index(index, *_metrics, _buffer, row->offset._length, CGPointMake(_margin.left, _margin.top + row->offset._height), bol_as_eol, wantsBaseline);
 	}
 
