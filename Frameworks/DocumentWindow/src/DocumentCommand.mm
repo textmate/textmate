@@ -105,7 +105,7 @@ bool delegate_t::accept_result (std::string const& out, output::type placement, 
 	{
 		document::document_ptr doc = document::create();
 		doc->sync_open();
-		res = [_document->document() handleOutput:out placement:placement format:format caret:outputCaret inputRanges:ng::range_t(0) environment:environment];
+		res = [doc->document() handleOutput:out placement:placement format:format caret:outputCaret inputRanges:ng::range_t(0) environment:environment];
 		document::show(doc);
 		doc->close();
 	}
