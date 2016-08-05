@@ -201,7 +201,7 @@ namespace
 
 	static bool is_disposable (document::document_ptr const& doc)
 	{
-		return doc && !doc->is_modified() && !doc->is_on_disk() && doc->path() == NULL_STR && doc->buffer().empty();
+		return doc && !doc->is_modified() && !doc->is_on_disk() && doc->path() == NULL_STR && doc->is_open() && doc->buffer().empty();
 	}
 }
 

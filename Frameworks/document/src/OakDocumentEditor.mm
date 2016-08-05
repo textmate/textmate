@@ -93,6 +93,9 @@ static int32_t const NSWrapColumnWindowWidth = 0;
 
 - (void)documentWillSave:(OakDocument*)aDocument
 {
+	if(!_layout || !_editor)
+		return;
+
 	text::selection_t ranges;
 	for(auto const& range : _editor->ranges())
 	{
