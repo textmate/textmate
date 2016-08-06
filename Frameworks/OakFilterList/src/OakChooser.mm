@@ -333,6 +333,7 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 	NSMutableArray* items = [_items mutableCopy];
 	[items removeObjectsAtIndexes:anIndexSet];
 	_items = items;
+	_itemCountTextField.stringValue = [NSString stringWithFormat:@"%@ item%s", [NSNumberFormatter localizedStringFromNumber:@(_items.count) numberStyle:NSNumberFormatterDecimalStyle], _items.count == 1 ? "" : "s"];
 
 	if([_tableView numberOfRows] && ![[_tableView selectedRowIndexes] count] && [anIndexSet count])
 		[_tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:MIN([anIndexSet firstIndex], [_tableView numberOfRows]-1)] byExtendingSelection:NO];
