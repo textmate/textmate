@@ -265,7 +265,7 @@ namespace ng
 		if(bol_as_eol && index.index == row->offset._length && row != _rows.begin())
 			--row;
 
-		row->value.layout(_theme, effective_soft_wrap(row), effective_wrap_column(), *_metrics, CGRectZero, _buffer, row->offset._length);
+		const_cast<layout_t*>(this)->update_metrics_for_row(row);
 		return row->value.rect_at_index(index, *_metrics, _buffer, row->offset._length, CGPointMake(_margin.left, _margin.top + row->offset._height), bol_as_eol, wantsBaseline);
 	}
 
@@ -395,6 +395,19 @@ namespace ng
 		return oldHeight != rowIter->key._height;
 	}
 
+	void layout_t::update_metrics_for_row (row_tree_t::iterator rowIter)
+	{
+		if(rowIter->value.layout(_theme, effective_soft_wrap(rowIter), effective_wrap_column(), *_metrics, CGRectZero, _buffer, rowIter->offset._length))
+		{
+			bool didUpdateHeight = update_row(rowIter);
+			if(_refresh_counter)
+			{
+				CGRect lineRect = full_width(rect_for(rowIter));
+				_dirty_rects.push_back(full_width(didUpdateHeight ? full_height(lineRect) : lineRect));
+			}
+		}
+	}
+
 	void layout_t::update_metrics (CGRect visibleRect)
 	{
 		CGFloat const yMin = CGRectGetMinY(visibleRect) - _margin.top;
@@ -405,17 +418,7 @@ namespace ng
 			--firstY;
 
 		foreach(row, firstY, _rows.lower_bound(yMax, &row_y_comp))
-		{
-			if(row->value.layout(_theme, effective_soft_wrap(row), effective_wrap_column(), *_metrics, visibleRect, _buffer, row->offset._length))
-			{
-				bool didUpdateHeight = update_row(row);
-				if(_refresh_counter)
-				{
-					CGRect lineRect = full_width(rect_for(row));
-					_dirty_rects.push_back(full_width(didUpdateHeight ? full_height(lineRect) : lineRect));
-				}
-			}
-		}
+			update_metrics_for_row(row);
 	}
 
 	bool layout_t::repair_folds (size_t from, size_t to)

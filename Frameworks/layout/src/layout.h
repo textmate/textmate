@@ -156,6 +156,7 @@ namespace ng
 		void setup_font_metrics ();
 		void clear_text_widths ();
 
+		void update_metrics_for_row (row_tree_t::iterator rowIter);
 		bool update_row (row_tree_t::iterator rowIter);
 
 		bool repair_folds (size_t from, size_t to);
