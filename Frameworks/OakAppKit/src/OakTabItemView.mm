@@ -2,6 +2,10 @@
 #import "OakRolloverButton.h"
 #import "NSImage Additions.h"
 
+static NSString* kUserDefaultsTabItemMinWidthKey       = @"tabItemMinWidth";
+static NSString* kUserDefaultsTabItemMaxWidthKey       = @"tabItemMaxWidth";
+static NSString* kUserDefaultsTabItemLineBreakStyleKey = @"tabItemLineBreakStyle";
+
 @interface OakTabBarStyle ()
 {
 	NSDictionary* _images;
@@ -16,6 +20,15 @@
 {
 	static id sharedInstance = [self new];
 	return sharedInstance;
+}
+
++ (void)initialize
+{
+	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
+		kUserDefaultsTabItemMinWidthKey       : @(120),
+		kUserDefaultsTabItemMaxWidthKey       : @(250),
+		kUserDefaultsTabItemLineBreakStyleKey : @(NSLineBreakByTruncatingMiddle),
+	}];
 }
 
 - (NSDictionary*)imagesForNames:(NSDictionary*)imageNames
@@ -127,7 +140,7 @@
 	if(self = [super init])
 	{
 		NSMutableParagraphStyle* parStyle = [NSMutableParagraphStyle new];
-		[parStyle setLineBreakMode:NSLineBreakByTruncatingMiddle];
+		[parStyle setLineBreakMode:(NSLineBreakMode)[[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsTabItemLineBreakStyleKey]];
 
 		_activeTabTextStyles = @{
 			NSParagraphStyleAttributeName  : parStyle,
@@ -167,8 +180,8 @@
 
 		NSImage* rightCapImage = _images[@"rightTabCap"][@"AW_normal"];
 		_tabViewSpacing = rightCapImage ? -rightCapImage.size.width : 0;
-		_minimumTabSize = 120;
-		_maximumTabSize = 250;
+		_minimumTabSize = [[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsTabItemMinWidthKey];
+		_maximumTabSize = [[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsTabItemMaxWidthKey];
 	}
 	return self;
 }
