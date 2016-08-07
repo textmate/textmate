@@ -39,7 +39,7 @@ namespace scm
 		{
 			if(path::is_executable(path))
 			{
-				if(path == "/usr/bin/git")
+				if(path == "/usr/bin/git" || path == "/usr/bin/svn")
 				{
 					std::string const xcodePath = io::exec("/usr/bin/xcode-select", "-p", NULL);
 					if(!path::is_directory(text::trim(xcodePath, "\n")))
