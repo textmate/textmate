@@ -2,6 +2,21 @@ Title: Release Notes
 
 # Changes
 
+## 2016-08-07 (v2.0-beta.11.17)
+
+* You can change the min/max width of tab items by using the `tabItemMinWidth` and `tabItemMaxWidth` user defaults keys. Default minimum width is 120 and maximum width is 250.
+
+	How to truncate the file names can also be set with `tabItemLineBreakStyle` which is an integer from [NSParagraphStyle.h](file:///Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks/AppKit.framework/Versions/C/Headers/NSParagraphStyle.h) which currently has the following options (default is `NSLineBreakByTruncatingMiddle`):
+
+	    NSLineBreakByWordWrapping     = 0 // Wrap at word boundaries, default
+	    NSLineBreakByCharWrapping     = 1 // Wrap at character boundaries
+	    NSLineBreakByClipping         = 2 // Simply clip
+	    NSLineBreakByTruncatingHead   = 3 // Truncate at head of line: "...wxyz"
+	    NSLineBreakByTruncatingTail   = 4 // Truncate at tail of line: "abcd..."
+	    NSLineBreakByTruncatingMiddle = 5 // Truncate middle of line:  "ab...yz"
+
+* See [all changes since v2.0-beta.11.10](https://github.com/textmate/textmate/compare/v2.0-beta.11.10...v2.0-beta.11.17)
+
 ## 2016-07-16 (v2.0-beta.11.10)
 
 * When we lookup settings for untitled documents we compare the file pattern of targeted settings to the project (or target) folder including a trailing slash, that way, a file created in `folder` will be targeted by a `folder/**` file pattern.
