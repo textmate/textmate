@@ -1028,7 +1028,7 @@ namespace
 {
 	document::document_ptr doc = aDocument;
 	OakDocument* document = doc->document();
-	document.directory = [document.path stringByDeletingLastPathComponent] ?: self.projectPath;
+	document.directory = [document.path stringByDeletingLastPathComponent] ?: self.projectPath ?: self.defaultProjectPath;
 	[doc->document() loadModalForWindow:self.window completionHandler:^(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID){
 		if(result == OakDocumentIOResultSuccess)
 		{
