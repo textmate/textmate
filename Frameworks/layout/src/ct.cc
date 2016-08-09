@@ -116,7 +116,7 @@ namespace ct
 			_cap_height = CTFontGetCapHeight(font);
 
 			CGGlyph emGlyph;
-			if(CTFontGetGlyphsForCharacters(font, (UniChar const*)u"m", &emGlyph, 1))
+			if(CTFontGetGlyphsForCharacters(font, (UniChar const*)u"n", &emGlyph, 1))
 				_column_width = CTFontGetAdvancesForGlyphs(font, kCTFontHorizontalOrientation, &emGlyph, nullptr, 1);
 
 			CFRelease(font);
