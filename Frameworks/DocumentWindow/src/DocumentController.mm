@@ -922,10 +922,14 @@ namespace
 	{
 		if(i == MIN(index, _documents.size()))
 		{
+			std::set<oak::uuid_t> didInsert;
 			for(NSUInteger j = 0; j < documents.size(); ++j)
 			{
-				if(shouldReorder || oldUUIDs.find(documents[j]->identifier()) == oldUUIDs.end())
+				if(didInsert.find(documents[j]->identifier()) == didInsert.end() && (shouldReorder || oldUUIDs.find(documents[j]->identifier()) == oldUUIDs.end()))
+				{
 					newDocuments.push_back(documents[j]);
+					didInsert.insert(documents[j]->identifier());
+				}
 			}
 		}
 
