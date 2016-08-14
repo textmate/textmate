@@ -864,7 +864,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 		CGFloat fontSize = settings.get(kSettingsFontSizeKey, 11.0);
 		if(fontName)
 			_font = [NSFont fontWithName:fontName size:fontSize];
-		if(!_font || ![_font.fontName isEqualToString:fontName])
+		if(!_font)
 			_font = [NSFont userFixedPitchFontOfSize:fontSize];
 
 		_showInvisibles = settings.get(kSettingsShowInvisiblesKey, false);
