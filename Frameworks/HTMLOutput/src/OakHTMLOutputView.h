@@ -6,5 +6,5 @@ PUBLIC @interface OakHTMLOutputView : HOBrowserView
 - (void)stopLoading;
 - (void)loadHTMLString:(NSString*)someHTML;
 
-@property (nonatomic, readonly) BOOL runningCommand;
+@property (nonatomic, getter = isRunningCommand, readonly) BOOL runningCommand;
 @end

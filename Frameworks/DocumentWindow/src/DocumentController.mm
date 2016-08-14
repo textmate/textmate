@@ -2070,7 +2070,7 @@ namespace
 - (void)setCommandRunner:(command::runner_ptr const&)aRunner
 {
 	_runner = aRunner;
-	if(self.htmlOutputInWindow || self.htmlOutputView.runningCommand)
+	if(self.htmlOutputInWindow || self.htmlOutputView.isRunningCommand)
 	{
 		HTMLOutputWindowController* target = nil;
 

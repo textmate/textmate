@@ -87,7 +87,7 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 
 - (BOOL)running
 {
-	return self.htmlOutputView.runningCommand;
+	return self.htmlOutputView.isRunningCommand;
 }
 
 - (BOOL)needsNewWebView
