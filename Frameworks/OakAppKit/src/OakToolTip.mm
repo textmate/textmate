@@ -19,7 +19,7 @@ OAK_DEBUG_VAR(OakToolTip);
 - (void)showAtLocation:(NSPoint)aPoint forScreen:(NSScreen*)aScreen;
 @end
 
-static __unsafe_unretained OakToolTip* LastToolTip;
+static __weak OakToolTip* LastToolTip;
 
 @implementation OakToolTip
 + (void)initialize
@@ -60,12 +60,6 @@ static __unsafe_unretained OakToolTip* LastToolTip;
 		self.enforceMouseThreshold = YES;
 	}
 	return self;
-}
-
-- (void)dealloc
-{
-	D(DBF_OakToolTip, bug("\n"););
-	LastToolTip = nil;
 }
 
 - (void)setFont:(NSFont*)aFont
@@ -221,9 +215,7 @@ void OakShowToolTip (NSString* msg, NSPoint location)
 		}
 
 		[toolTip showAtLocation:location forScreen:screen];
-
-		if(OakToolTip* lastToolTip = LastToolTip)
-			[lastToolTip performSelector:@selector(orderOut:) withObject:nil afterDelay:0];
+		[LastToolTip performSelector:@selector(orderOut:) withObject:nil afterDelay:0];
 		LastToolTip = toolTip;
 	}
 }
