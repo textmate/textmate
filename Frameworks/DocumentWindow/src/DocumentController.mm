@@ -19,7 +19,6 @@
 #import <HTMLOutputWindow/HTMLOutputWindow.h>
 #import <OakFilterList/FileChooser.h>
 #import <OakSystem/application.h>
-#import <OakSystem/process.h>
 #import <Find/Find.h>
 #import <BundlesManager/BundlesManager.h>
 #import <network/network.h>
@@ -652,7 +651,7 @@ namespace
 		OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){
 			if(returnCode == NSAlertDefaultReturn) /* "Stop" */
 			{
-				oak::kill_process_group_in_background(_runner->process_id());
+				[_htmlOutputView stopLoading];
 				_runner.reset();
 				[sender performSelector:@selector(performClose:) withObject:self afterDelay:0];
 			}
@@ -1290,7 +1289,7 @@ namespace
 			auto sheetResponseHandler = ^(NSInteger returnCode){
 				if(returnCode == NSAlertDefaultReturn) /* "Stop" */
 				{
-					oak::kill_process_group_in_background(candidate.commandRunner->process_id());
+					[candidate.htmlOutputView stopLoading];
 					dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 						candidate.commandRunner->wait_for_command(); // Must not be called in main queue
 						dispatch_async(dispatch_get_main_queue(), ^{
