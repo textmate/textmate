@@ -9,118 +9,32 @@ namespace
 {
 	struct runners_t
 	{
-		runners_t () : _next_key(0) { }
-
-		NSInteger add_process (pid_t processId)
+		NSInteger add_process (pid_t processId, NSFileHandle* fileHandle)
 		{
 			std::lock_guard<std::mutex> lock(_lock);
-
-			std::vector<NSInteger> toDelete;
-			for(auto const& record : _records)
-			{
-				if(record.second.done && record.second.stop)
-					toDelete.push_back(record.first);
-			}
-
-			for(auto const& key : toDelete)
-				_records.erase(key);
-
-			return _records.emplace(_next_key++, (record_t){ processId, std::string(), false, nil, false }).first->first;
+			return _records.emplace(++_next_key, (record_t){ processId, fileHandle }).first->first;
 		}
 
-		void output (NSInteger key, char const* data, size_t len)
-		{
-			NSURLProtocol* protocol;
-
-			_lock.lock();
-			if(record_t* record = find(key))
-			{
-				if(!(protocol = record->protocol))
-					record->buffer.insert(record->buffer.end(), data, data + len);
-			}
-			_lock.unlock();
-
-			[[protocol client] URLProtocol:protocol didLoadData:[NSData dataWithBytes:data length:len]];
-		}
-
-		void done (NSInteger key)
-		{
-			NSURLProtocol* protocol;
-
-			_lock.lock();
-			if(record_t* record = find(key))
-			{
-				record->process_id = 0;
-				record->done       = true;
-				protocol = record->protocol;
-			}
-			_lock.unlock();
-
-			[[protocol client] URLProtocolDidFinishLoading:protocol];
-		}
-
-		bool has_job (NSInteger key)
+		std::pair<pid_t, NSFileHandle*> remove_process (NSInteger key)
 		{
 			std::lock_guard<std::mutex> lock(_lock);
-			return _records.find(key) != _records.end();
-		}
+			auto iter = _records.find(key);
+			if(iter == _records.end())
+				return { };
 
-		void start (NSInteger key, NSURLProtocol* protocol)
-		{
-			NSData* data;
-			bool done = false;
-
-			_lock.lock();
-			if(record_t* record = find(key))
-			{
-				record->protocol = protocol;
-				if(!record->buffer.empty())
-					data = [NSData dataWithBytes:record->buffer.data() length:record->buffer.size()];
-				record->buffer.clear();
-				done = record->done;
-			}
-			_lock.unlock();
-
-			if(data)
-				[[protocol client] URLProtocol:protocol didLoadData:data];
-			if(done)
-				[[protocol client] URLProtocolDidFinishLoading:protocol];
-		}
-
-		void stop (NSInteger key)
-		{
-			pid_t processId = 0;
-
-			_lock.lock();
-			if(record_t* record = find(key))
-			{
-				record->protocol = NULL;
-				record->stop     = true;
-				processId = record->process_id;
-			}
-			_lock.unlock();
-
-			if(processId)
-				oak::kill_process_group_in_background(processId);
+			auto res = std::make_pair(iter->second.process_id, iter->second.file_handle);
+			_records.erase(iter);
+			return res;
 		}
 
 	private:
 		struct record_t
 		{
 			pid_t process_id;
-			std::string buffer;
-			bool done;
-			NSURLProtocol* protocol;
-			bool stop;
+			NSFileHandle* file_handle;
 		};
 
-		record_t* find (NSInteger key)
-		{
-			std::map<NSInteger, record_t>::iterator it = _records.find(key);
-			return it != _records.end() ? &it->second : NULL;
-		}
-
-		NSInteger _next_key;
+		NSInteger _next_key = 0;
 		std::map<NSInteger, record_t> _records;
 		std::mutex _lock;
 	};
@@ -130,25 +44,11 @@ namespace
 		static runners_t runners;
 		return runners;
 	}
-
-	struct html_command_callback_t : command::callback_t
-	{
-		html_command_callback_t (command::runner_ptr runner, NSInteger key) : _runner(runner), _key(key) { _runner->add_callback(this);       }
-		~html_command_callback_t ()                                                                      { _runner->remove_callback(this);    }
-
-		void output (command::runner_ptr runner, char const* data, size_t len)                           { runners().output(_key, data, len); }
-		void done (command::runner_ptr runner)                                                           { runners().done(_key); delete this; }
-
-	private:
-		command::runner_ptr _runner;
-		NSInteger _key;
-	};
 }
 
 @interface CommandRunnerURLProtocol : NSURLProtocol
-{
-	NSInteger key;
-}
+@property (nonatomic) pid_t processId;
+@property (nonatomic) NSFileHandle* fileHandle;
 @end
 
 @implementation CommandRunnerURLProtocol
@@ -166,10 +66,11 @@ namespace
 {
 	if(self = [super initWithRequest:anURLRequest cachedResponse:aCachedURLResponse client:anId])
 	{
+		NSInteger key;
 		NSString* jobString = [[[anURLRequest URL] path] lastPathComponent];
 		NSScanner* scanner = [NSScanner scannerWithString:jobString];
-		if(![scanner scanInteger:&key] || scanner.scanLocation != [jobString length])
-			key = NSNotFound;
+		if([scanner scanInteger:&key] && scanner.scanLocation == [jobString length])
+			std::tie(_processId, _fileHandle) = runners().remove_process(key);
 	}
 	return self;
 }
@@ -180,7 +81,7 @@ namespace
 
 - (void)startLoading
 {
-	if(key == NSNotFound || !runners().has_job(key))
+	if(!_fileHandle)
 	{
 		NSURLResponse* response = [[NSHTTPURLResponse alloc] initWithURL:[[self request] URL] statusCode:404 HTTPVersion:@"HTTP/1.1" headerFields:nil];
 		[[self client] URLProtocol:self didReceiveResponse:response cacheStoragePolicy:NSURLCacheStorageNotAllowed];
@@ -196,12 +97,28 @@ namespace
 	static std::string const dummy("<!--" + std::string(1017, ' ') + "-->");
 	[[self client] URLProtocol:self didLoadData:[NSData dataWithBytes:dummy.data() length:dummy.size()]];
 
-	runners().start(key, self);
+	NSFileHandle* fh = _fileHandle;
+	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+		char buf[8192];
+		int len;
+		while((len = read(fh.fileDescriptor, buf, sizeof(buf))) > 0)
+		{
+			NSData* data = [NSData dataWithBytesNoCopy:buf length:len freeWhenDone:NO];
+			[[self client] URLProtocol:self didLoadData:data];
+		}
+
+		if(len == -1)
+			perror("read");
+
+		[fh closeFile];
+		[[self client] URLProtocolDidFinishLoading:self];
+	});
 }
 
 - (void)stopLoading
 {
-	runners().stop(key);
+	[_fileHandle closeFile];
+	oak::kill_process_group_in_background(_processId);
 }
 @end
 
@@ -211,7 +128,35 @@ namespace
 
 NSURLRequest* URLRequestForCommandRunner (command::runner_ptr aRunner)
 {
-	NSInteger key = runners().add_process(aRunner->process_id());
-	new html_command_callback_t(aRunner, key);
+	struct filehandle_callback_t : command::callback_t
+	{
+		filehandle_callback_t (command::runner_ptr runner, NSFileHandle* fileHandle) : _runner(runner), _fileHandle(fileHandle) { _runner->add_callback(this); }
+		~filehandle_callback_t ()                                                                                               { _runner->remove_callback(this); }
+
+		void output (command::runner_ptr runner, char const* data, size_t len)
+		{
+			ssize_t bytesWritten = write(_fileHandle.fileDescriptor, data, len);
+			if(bytesWritten == -1)
+			{
+				perror("write");
+				delete this;
+			}
+		}
+
+		void done (command::runner_ptr runner)
+		{
+			[_fileHandle closeFile];
+			delete this;
+		}
+
+	private:
+		command::runner_ptr _runner;
+		NSFileHandle* _fileHandle;
+	};
+
+	NSPipe* pipe = [NSPipe pipe];
+	new filehandle_callback_t(aRunner, pipe.fileHandleForWriting);
+
+	NSInteger key = runners().add_process(aRunner->process_id(), pipe.fileHandleForReading);
 	return [NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@://job/%ld", kCommandRunnerURLScheme, key]] cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:6000]; // TODO add a description parameter to the URL (based on bundle item name)
 }
