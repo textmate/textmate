@@ -5,50 +5,7 @@
 
 NSString* const kCommandRunnerURLScheme = @"x-txmt-command";
 
-namespace
-{
-	struct runners_t
-	{
-		NSInteger add_process (pid_t processId, NSFileHandle* fileHandle)
-		{
-			std::lock_guard<std::mutex> lock(_lock);
-			return _records.emplace(++_next_key, (record_t){ processId, fileHandle }).first->first;
-		}
-
-		std::pair<pid_t, NSFileHandle*> remove_process (NSInteger key)
-		{
-			std::lock_guard<std::mutex> lock(_lock);
-			auto iter = _records.find(key);
-			if(iter == _records.end())
-				return { };
-
-			auto res = std::make_pair(iter->second.process_id, iter->second.file_handle);
-			_records.erase(iter);
-			return res;
-		}
-
-	private:
-		struct record_t
-		{
-			pid_t process_id;
-			NSFileHandle* file_handle;
-		};
-
-		NSInteger _next_key = 0;
-		std::map<NSInteger, record_t> _records;
-		std::mutex _lock;
-	};
-
-	runners_t& runners ()
-	{
-		static runners_t runners;
-		return runners;
-	}
-}
-
 @interface CommandRunnerURLProtocol : NSURLProtocol
-@property (nonatomic) pid_t processId;
-@property (nonatomic) NSFileHandle* fileHandle;
 @end
 
 @implementation CommandRunnerURLProtocol
@@ -62,26 +19,14 @@ namespace
 + (NSURLRequest*)canonicalRequestForRequest:(NSURLRequest*)request           { return request; }
 + (BOOL)requestIsCacheEquivalent:(NSURLRequest*)a toRequest:(NSURLRequest*)b { return NO; }
 
-- (id)initWithRequest:(NSURLRequest*)anURLRequest cachedResponse:(NSCachedURLResponse*)aCachedURLResponse client:(id <NSURLProtocolClient>)anId
-{
-	if(self = [super initWithRequest:anURLRequest cachedResponse:aCachedURLResponse client:anId])
-	{
-		NSInteger key;
-		NSString* jobString = [[[anURLRequest URL] path] lastPathComponent];
-		NSScanner* scanner = [NSScanner scannerWithString:jobString];
-		if([scanner scanInteger:&key] && scanner.scanLocation == [jobString length])
-			std::tie(_processId, _fileHandle) = runners().remove_process(key);
-	}
-	return self;
-}
-
 // =============================================
 // = These methods might be called in a thread =
 // =============================================
 
 - (void)startLoading
 {
-	if(!_fileHandle)
+	NSFileHandle* fileHandle = [NSURLProtocol propertyForKey:@"fileHandle" inRequest:self.request];
+	if(!fileHandle)
 	{
 		NSURLResponse* response = [[NSHTTPURLResponse alloc] initWithURL:[[self request] URL] statusCode:404 HTTPVersion:@"HTTP/1.1" headerFields:nil];
 		[[self client] URLProtocol:self didReceiveResponse:response cacheStoragePolicy:NSURLCacheStorageNotAllowed];
@@ -97,11 +42,10 @@ namespace
 	static std::string const dummy("<!--" + std::string(1017, ' ') + "-->");
 	[[self client] URLProtocol:self didLoadData:[NSData dataWithBytes:dummy.data() length:dummy.size()]];
 
-	NSFileHandle* fh = _fileHandle;
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 		char buf[8192];
 		int len;
-		while((len = read(fh.fileDescriptor, buf, sizeof(buf))) > 0)
+		while((len = read(fileHandle.fileDescriptor, buf, sizeof(buf))) > 0)
 		{
 			NSData* data = [NSData dataWithBytesNoCopy:buf length:len freeWhenDone:NO];
 			[[self client] URLProtocol:self didLoadData:data];
@@ -110,15 +54,16 @@ namespace
 		if(len == -1)
 			perror("read");
 
-		[fh closeFile];
+		[fileHandle closeFile];
 		[[self client] URLProtocolDidFinishLoading:self];
 	});
 }
 
 - (void)stopLoading
 {
-	[_fileHandle closeFile];
-	oak::kill_process_group_in_background(_processId);
+	[[NSURLProtocol propertyForKey:@"fileHandle" inRequest:self.request] closeFile];
+	if(pid_t pid = [[NSURLProtocol propertyForKey:@"processIdentifier" inRequest:self.request] intValue])
+		oak::kill_process_group_in_background(pid);
 }
 @end
 
@@ -157,6 +102,11 @@ NSURLRequest* URLRequestForCommandRunner (command::runner_ptr aRunner)
 	NSPipe* pipe = [NSPipe pipe];
 	new filehandle_callback_t(aRunner, pipe.fileHandleForWriting);
 
-	NSInteger key = runners().add_process(aRunner->process_id(), pipe.fileHandleForReading);
-	return [NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@://job/%ld", kCommandRunnerURLScheme, key]] cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:6000]; // TODO add a description parameter to the URL (based on bundle item name)
+	static NSInteger LastKey = 0;
+
+	NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@://job/%ld", kCommandRunnerURLScheme, ++LastKey]] cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:6000];
+	[NSURLProtocol setProperty:pipe.fileHandleForReading forKey:@"fileHandle" inRequest:request];
+	[NSURLProtocol setProperty:@(aRunner->process_id()) forKey:@"processIdentifier" inRequest:request];
+	// TODO Add a description (based on bundle item name)
+	return request;
 }
