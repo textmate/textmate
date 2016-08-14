@@ -107,12 +107,6 @@ static __weak OakToolTip* LastToolTip;
 
 - (void)showUntilUserActivity
 {
-	// since we run a lcoal event loop we wish to ensure that this is not done in the middle of something that can’t handle such thing, e.g. our call stack could be something like lock_buffer() → do_edit_operation() → show_tool_tip() → [here]. Additionally by using performSelector:withObject:afterDelay: we keep ‘self’ retained while the tool tip is up.
-	[self performSelector:@selector(showUntilUserActivityDelayed:) withObject:self afterDelay:0];
-}
-
-- (void)showUntilUserActivityDelayed:(id)sender
-{
 	[self orderFront:self];
 
 	didOpenAtDate = [NSDate date];
@@ -128,34 +122,15 @@ static __weak OakToolTip* LastToolTip;
 	BOOL didAcceptMouseMovedEvents = [keyWindow acceptsMouseMovedEvents];
 	[keyWindow setAcceptsMouseMovedEvents:YES];
 
-	BOOL slowFadeOut = NO;
-	while(NSEvent* event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:[NSDate distantFuture] inMode:NSDefaultRunLoopMode dequeue:YES])
-	{
-		[NSApp sendEvent:event];
+	__weak __block id eventMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:(NSLeftMouseDownMask|NSRightMouseDownMask|NSMouseMovedMask|NSKeyDownMask|NSScrollWheelMask|NSOtherMouseDownMask) handler:^NSEvent*(NSEvent* event){
+		if([event type] == NSMouseMoved && ![self shouldCloseForMousePosition:[NSEvent mouseLocation]])
+			return event;
 
-		static std::set<NSEventType> const orderOutEvents = { NSLeftMouseDown, NSRightMouseDown, NSOtherMouseDown, NSKeyDown, NSScrollWheel };
-		if(orderOutEvents.find([event type]) != orderOutEvents.end())
-		{
-			D(DBF_OakToolTip, bug("close because of key/mouse down event\n"););
-			break;
-		}
-
-		if([event type] == NSMouseMoved && [self shouldCloseForMousePosition:[NSEvent mouseLocation]])
-		{
-			D(DBF_OakToolTip, bug("close because mouse was moved\n"););
-			slowFadeOut = YES;
-			break;
-		}
-
-		if(keyWindow != [NSApp keyWindow] || ![NSApp isActive])
-		{
-			D(DBF_OakToolTip, bug("close because focus lost (%s → %s) / app gone inactive (%s)\\\\n", [[keyWindow description] UTF8String], [[[NSApp keyWindow] description] UTF8String], BSTR(![NSApp isActive])););
-			break;
-		}
-	}
-
-	[keyWindow setAcceptsMouseMovedEvents:didAcceptMouseMovedEvents];
-	[self fadeOutSlowly:slowFadeOut];
+		[keyWindow setAcceptsMouseMovedEvents:didAcceptMouseMovedEvents];
+		[self fadeOutSlowly:[event type] == NSMouseMoved];
+		[NSEvent removeMonitor:eventMonitor];
+		return event;
+	}];
 }
 
 - (void)showAtLocation:(NSPoint)aPoint forScreen:(NSScreen*)aScreen
