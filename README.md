@@ -30,12 +30,12 @@ To bootstrap the build you need to run `./configure` (in the root of the source 
 
 In the simplest case you would run:
 
-	git clone https://github.com/textmate/textmate.git
+	brew install ragel boost multimarkdown hg ninja capnp google-sparsehash libressl
+	git clone --recursive https://github.com/textmate/textmate.git
 	cd textmate
-	git submodule update --init
 	./configure && ninja
 
-Please note that if you downloaded the source code (rather than cloned via git) you likely miss the submodules and the build will therefore fail.
+Please note that if you downloaded the source code zipball/tarball (rather than cloned via git) you miss the submodules and the build will therefore fail.
 
 ## Prerequisites
 
@@ -50,7 +50,11 @@ To build the source the following must first be installed on your system:
  * [Cap’n Proto][capnp] — serialization library
  * [LibreSSL][libressl] - OpenBSD fork of OpenSSL
 
-You need to manually install [Cap’n Proto][capnp] if you're not using [homebrew][]. To install the other dependencies via [MacPorts][] run:
+To install these dependencies using [Homebrew][] run:
+
+	brew install ragel boost multimarkdown hg ninja capnp google-sparsehash libressl
+
+You need to manually install [Cap’n Proto][capnp] if you're not using [Homebrew][]. To install the other dependencies via [MacPorts][] run:
 
 	sudo port install ninja ragel boost multimarkdown mercurial sparsehash libressl
 
@@ -58,13 +62,10 @@ If `port` fails with a build error then likely you need to agree (system-wide) t
 
 	sudo xcodebuild -license
 
-To install using [homebrew][] run:
-
-	brew install ragel boost multimarkdown hg ninja capnp google-sparsehash libressl
-
 In practice `hg` ([mercurial][]) is only required for the SCM library’s tests so you can skip this dependency if you don’t mind a failing test.
 
-If you want to avoid the libressl linker warnings about being built for different deployment target then run `brew edit libressl` and make the following change:
+If you want to avoid the libressl linker warnings about being built for different deployment tar
+et then run `brew edit libressl` and make the following change:
 
 	-    system "./configure", *args
 	+    system "env", "LDFLAGS=-mmacosx-version-min=10.8", "CFLAGS=-mmacosx-version-min=10.8", "./configure", *args
@@ -132,7 +133,7 @@ TextMate is a trademark of Allan Odgaard.
 [libressl]:      http://www.libressl.org
 [clang 3.2]:     http://clang.llvm.org/
 [MacPorts]:      http://www.macports.org/
-[homebrew]:      http://brew.sh/
+[Homebrew]:      http://brew.sh/
 [NinjaBundle]:   https://github.com/textmate/ninja.tmbundle
 [CxxTest]:       https://github.com/textmate/cxxtest.tmbundle
 [sparsehash]:    https://code.google.com/p/sparsehash/
