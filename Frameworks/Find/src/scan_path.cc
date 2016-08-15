@@ -183,44 +183,44 @@ namespace find
 
 		std::vector<match_t> results;
 
-		std::string const newlines = text::estimate_line_endings(std::begin(text), std::end(text));
+		std::string const crlf = text::estimate_line_endings(std::begin(text), std::end(text));
 
-		size_t bol = 0, lfCount = 0;
-		size_t nextLine = text.find(newlines, bol);
+		size_t bol = 0, crlfCount = 0;
+		size_t eol = text.find(crlf, bol);
 
 		for(auto const& it : ranges)
 		{
-			while(nextLine != std::string::npos && nextLine + newlines.size() <= it.from)
+			while(eol != std::string::npos && eol + crlf.size() <= it.from)
 			{
-				bol = nextLine + newlines.size();
-				nextLine = text.find(newlines, bol);
-				++lfCount;
+				bol = eol + crlf.size();
+				eol = text.find(crlf, bol);
+				++crlfCount;
 			}
 
-			text::pos_t from(lfCount, it.from - bol);
-			size_t fromLine = bol;
+			text::pos_t from(crlfCount, it.from - bol);
+			size_t fromOffset = bol;
 
-			while(nextLine != std::string::npos && nextLine + newlines.size() <= it.to)
+			while(eol != std::string::npos && eol + crlf.size() <= it.to)
 			{
-				bol = nextLine + newlines.size();
-				nextLine = text.find(newlines, bol);
-				++lfCount;
+				bol = eol + crlf.size();
+				eol = text.find(crlf, bol);
+				++crlfCount;
 			}
 
-			text::pos_t to(lfCount, it.to - bol);
-			size_t eol = bol == it.to ? bol : (nextLine != std::string::npos ? nextLine : text.size());
+			text::pos_t to(crlfCount, it.to - bol);
+			size_t toOffset = bol == it.to ? bol : (eol != std::string::npos ? eol : text.size());
 
-			if(it.from - fromLine > 200)
-				fromLine = utf8::find_safe_end(text.begin(), text.begin() + it.from - ((it.from - fromLine) % 150)) - text.begin();
+			if(it.from - fromOffset > 200)
+				fromOffset = utf8::find_safe_end(text.begin(), text.begin() + it.from - ((it.from - fromOffset) % 150)) - text.begin();
 
-			if(eol - fromLine > 500)
-				eol = utf8::find_safe_end(text.begin(), text.begin() + std::max<size_t>(fromLine + 500, it.to)) - text.begin();
+			if(toOffset - fromOffset > 500)
+				toOffset = utf8::find_safe_end(text.begin(), text.begin() + std::max<size_t>(fromOffset + 500, it.to)) - text.begin();
 
 			match_t res(document, crc32.checksum(), it.from, it.to, text::range_t(from, to), it.captures);
-			res.excerpt        = text.substr(fromLine, eol - fromLine);
-			res.excerpt_offset = fromLine;
+			res.excerpt        = text.substr(fromOffset, toOffset - fromOffset);
+			res.excerpt_offset = fromOffset;
 			res.line_number    = from.line;
-			res.newlines       = newlines;
+			res.newlines       = crlf;
 			results.push_back(res);
 		}
 
