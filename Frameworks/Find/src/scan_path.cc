@@ -208,7 +208,7 @@ namespace find
 			}
 
 			text::pos_t to(crlfCount, it.to - bol);
-			size_t toOffset = bol == it.to ? bol : (eol != std::string::npos ? eol : text.size());
+			size_t toOffset = bol == it.to ? bol : (eol != std::string::npos ? (it.to <= eol ? eol : eol + crlf.size()) : text.size());
 
 			if(it.from - fromOffset > 200)
 				fromOffset = utf8::find_safe_end(text.begin(), text.begin() + it.from - ((it.from - fromOffset) % 150)) - text.begin();
