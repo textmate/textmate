@@ -216,6 +216,9 @@ namespace find
 			if(toOffset - fromOffset > 500)
 				toOffset = utf8::find_safe_end(text.begin(), text.begin() + std::max<size_t>(fromOffset + 500, it.to)) - text.begin();
 
+			ASSERT_LE(fromOffset, it.from);
+			ASSERT_LE(it.to, toOffset);
+
 			match_t res(document, crc32.checksum(), it.from, it.to, text::range_t(from, to), it.captures);
 			res.excerpt        = text.substr(fromOffset, toOffset - fromOffset);
 			res.excerpt_offset = fromOffset;

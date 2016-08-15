@@ -250,9 +250,12 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 		return _excerpt;
 
 	find::match_t const& m = _match;
-
 	size_t from = m.first - m.excerpt_offset;
 	size_t to   = m.last  - m.excerpt_offset;
+
+	ASSERT_LE(m.first, m.last);
+	ASSERT_LE(from, m.excerpt.size());
+	ASSERT_LE(to, m.excerpt.size());
 
 	std::string prefix = m.excerpt.substr(0, from);
 	std::string middle = m.excerpt.substr(from, to - from);
