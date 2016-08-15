@@ -217,3 +217,77 @@ void test_file_crlf ()
 	OAK_ASSERT_EQ(matches[2].range.min().line, 2);
 	OAK_ASSERT_EQ(matches[3].range.min().line, 3);
 }
+
+void test_excerpt_lf ()
+{
+	test::jail_t jail;
+	jail.set_content("match", "line 1\nline 2\nline 3\nline 4\n");
+
+	scan_path_t scanner;
+	scanner.set_path(jail.path());
+	std::vector<match_t> matches;
+
+	scanner.set_search_string("line 1");
+	run_scanner(scanner);
+	matches = scanner.accept_matches();
+	OAK_ASSERT_EQ(matches.size(), 1);
+	OAK_ASSERT_EQ(matches[0].excerpt, "line 1");
+
+	scanner.set_search_string("line 1\n");
+	run_scanner(scanner);
+	matches = scanner.accept_matches();
+	OAK_ASSERT_EQ(matches.size(), 1);
+	OAK_ASSERT_EQ(matches[0].excerpt, "line 1\n");
+
+	scanner.set_search_string("line 1\nline");
+	run_scanner(scanner);
+	matches = scanner.accept_matches();
+	OAK_ASSERT_EQ(matches.size(), 1);
+	OAK_ASSERT_EQ(matches[0].excerpt, "line 1\nline 2");
+
+	scanner.set_search_string("line 1\nline 2\n");
+	run_scanner(scanner);
+	matches = scanner.accept_matches();
+	OAK_ASSERT_EQ(matches.size(), 1);
+	OAK_ASSERT_EQ(matches[0].excerpt, "line 1\nline 2\n");
+}
+
+void test_excerpt_crlf ()
+{
+	test::jail_t jail;
+	jail.set_content("match", "line 1\r\nline 2\r\nline 3\r\nline 4\r\n");
+
+	scan_path_t scanner;
+	scanner.set_path(jail.path());
+	std::vector<match_t> matches;
+
+	scanner.set_search_string("line 1");
+	run_scanner(scanner);
+	matches = scanner.accept_matches();
+	OAK_ASSERT_EQ(matches.size(), 1);
+	OAK_ASSERT_EQ(matches[0].excerpt, "line 1");
+
+	scanner.set_search_string("line 1\r");
+	run_scanner(scanner);
+	matches = scanner.accept_matches();
+	OAK_ASSERT_EQ(matches.size(), 1);
+	OAK_ASSERT_EQ(matches[0].excerpt, "line 1\r\n");
+
+	scanner.set_search_string("line 1\r\n");
+	run_scanner(scanner);
+	matches = scanner.accept_matches();
+	OAK_ASSERT_EQ(matches.size(), 1);
+	OAK_ASSERT_EQ(matches[0].excerpt, "line 1\r\n");
+
+	scanner.set_search_string("line 1\r\nline");
+	run_scanner(scanner);
+	matches = scanner.accept_matches();
+	OAK_ASSERT_EQ(matches.size(), 1);
+	OAK_ASSERT_EQ(matches[0].excerpt, "line 1\r\nline 2");
+
+	scanner.set_search_string("line 1\r\nline 2\r");
+	run_scanner(scanner);
+	matches = scanner.accept_matches();
+	OAK_ASSERT_EQ(matches.size(), 1);
+	OAK_ASSERT_EQ(matches[0].excerpt, "line 1\r\nline 2\r\n");
+}
