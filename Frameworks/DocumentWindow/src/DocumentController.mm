@@ -143,7 +143,7 @@ namespace
 				// TODO Add kqueue watching of documents
 			}
 
-			if(!_did_open && _document->is_open())
+			if(!_did_open && _document->is_open() && !_document->document().isLoading)
 			{
 				_document->sync_open();
 				_did_open = true;

@@ -620,6 +620,11 @@ private:
 	});
 }
 
+- (BOOL)isLoading
+{
+	return _loadCompletionHandlers != nil;
+}
+
 - (void)loadModalForWindow:(NSWindow*)aWindow completionHandler:(void(^)(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID))block
 {
 	block = block ?: ^(OakDocumentIOResult, NSString*, oak::uuid_t const&){ };
