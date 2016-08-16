@@ -101,16 +101,13 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 	if(!self.running)
 		return YES;
 
-	NSAlert* alert = [NSAlert alertWithMessageText:@"Stop task before closing?" defaultButton:@"Stop Task" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"The job that the task is performing will not be completed."];
-	OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){
-		D(DBF_HTMLOutputWindow, bug("close %s\n", BSTR(returnCode == NSAlertDefaultReturn)););
-		if(returnCode == NSAlertDefaultReturn) /* "Stop" */
+	[_htmlOutputView stopLoadingWithUserInteraction:YES completionHandler:^(BOOL didStop){
+		if(didStop)
 		{
 			[self.window orderOut:self];
-			[self.htmlOutputView stopLoading];
 			[self.window close];
 		}
-	});
+	}];
 	return NO;
 }
 

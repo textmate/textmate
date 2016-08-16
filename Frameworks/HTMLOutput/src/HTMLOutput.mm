@@ -1,4 +1,5 @@
 #import "HTMLOutput.h"
+#import <ns/ns.h>
 #import <OakSystem/process.h>
 #import <command/runner.h>
 #import <oak/debug.h>
@@ -107,6 +108,6 @@ NSURLRequest* URLRequestForCommandRunner (command::runner_ptr aRunner)
 	NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@://job/%ld", kCommandRunnerURLScheme, ++LastKey]] cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:6000];
 	[NSURLProtocol setProperty:pipe.fileHandleForReading forKey:@"fileHandle" inRequest:request];
 	[NSURLProtocol setProperty:@(aRunner->process_id()) forKey:@"processIdentifier" inRequest:request];
-	// TODO Add a description (based on bundle item name)
+	[NSURLProtocol setProperty:to_ns(aRunner->name()) forKey:@"processName" inRequest:request];
 	return request;
 }
