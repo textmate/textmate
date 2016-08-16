@@ -60,7 +60,7 @@ static std::tuple<pid_t, int, int> my_fork (char const* cmd, int inputRead, std:
 				continue;
 
 			if(close(fd) == -1)
-				perror("error closing fd after fork:");
+				perror("runner_t: close");
 		}
 
 		for(int fd : oldOutErr) close(fd);
@@ -71,7 +71,7 @@ static std::tuple<pid_t, int, int> my_fork (char const* cmd, int inputRead, std:
 
 		char* argv[] = { (char*)cmd, NULL };
 		execve(argv[0], argv, env);
-		perror("interpreter failed");
+		perror("runner_t: execve");
 		_exit(EXIT_FAILURE);
 	}
 
@@ -98,7 +98,7 @@ static void exhaust_fd_in_queue (dispatch_group_t group, int fd, CFRunLoopRef ru
 			dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
 		}
 		if(len == -1)
-			perror("read");
+			perror("runner_t: read");
 		close(fd);
 	});
 }
@@ -116,7 +116,7 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 	__block int status = 0;
 	dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 		if(waitpid(pid, &status, 0) != pid)
-			perror("waitpid");
+			perror("runner_t: waitpid");
 	});
 
 	dispatch_group_enter(rootGroup);

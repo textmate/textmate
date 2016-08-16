@@ -49,7 +49,7 @@ static bool mv_path (std::string const& src, std::string const& dst, Authorizati
 	{
 		if(run_auth_command(auth, "/bin/mv", src.c_str(), dst.c_str(), NULL))
 			return true;
-		perror(("/bin/mv " + src + " " + dst).c_str());
+		perror(("sw_update: /bin/mv " + src + " " + dst).c_str());
 	}
 	return false;
 }
@@ -62,11 +62,11 @@ static bool rm_file (std::string const& path, AuthorizationRef& auth)
 	{
 		if(run_auth_command(auth, "/bin/rm", path.c_str(), NULL))
 			return true;
-		perror(("/bin/rm " + path).c_str());
+		perror(("sw_update: /bin/rm " + path).c_str());
 	}
 	else
 	{
-		perror(("unlink " + path).c_str());
+		perror(("sw_update: unlink " + path).c_str());
 	}
 	return false;
 }
@@ -94,11 +94,11 @@ static bool rm_dir (std::string const& path, AuthorizationRef& auth)
 	{
 		if(run_auth_command(auth, "/bin/rmdir", path.c_str(), NULL))
 			return true;
-		perror(("/bin/rmdir " + path).c_str());
+		perror(("sw_update: /bin/rmdir " + path).c_str());
 	}
 	else
 	{
-		perror(("rmdir " + path).c_str());
+		perror(("sw_update: rmdir " + path).c_str());
 	}
 	return false;
 }

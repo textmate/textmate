@@ -40,7 +40,7 @@ namespace io
 
 			rc = posix_spawn(&res.pid, argv[0], &fileActions, &flags, argv, oak::c_array(environment));
 			if(rc != 0)
-				perror(text::format("posix_spawn(\"%s\")", argv[0]).c_str());
+				perror(text::format("io::spawn: posix_spawn(\"%s\")", argv[0]).c_str());
 
 			OAK_CHECK(posix_spawnattr_destroy(&flags));
 			OAK_CHECK(posix_spawn_file_actions_destroy(&fileActions));
@@ -109,7 +109,7 @@ namespace io
 		dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 			int status = 0;
 			if(waitpid(process.pid, &status, 0) != process.pid)
-				perror("waitpid");
+				perror("io::vexec: waitpid");
 			else if(!WIFEXITED(status))
 				fprintf(stderr, "*** abnormal exit (%d) from ‘%s’\n", status, text::join(command, " ").c_str());
 			else if(WEXITSTATUS(status) != 0)

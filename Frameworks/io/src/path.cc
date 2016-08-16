@@ -799,11 +799,11 @@ namespace path
 							if(fgetxattr(fd, mem + i, &value.front(), value.size(), 0, 0) == size)
 								res.emplace(mem + i, value);
 							else
-								perror(("fgetxattr(" + path + ", " + (mem+i) + ")").c_str());
+								perror(("path::attributes: fgetxattr(" + path + ", " + (mem+i) + ")").c_str());
 						}
 						else if(size == -1)
 						{
-							perror(("fgetxattr(" + path + ", " + (mem+i) + ")").c_str());
+							perror(("path::attributes: fgetxattr(" + path + ", " + (mem+i) + ")").c_str());
 						}
 						i += strlen(mem + i) + 1;
 					}
@@ -811,13 +811,13 @@ namespace path
 			}
 			else if(listSize == -1)
 			{
-				perror(("flistxattr(" + path + ")").c_str());
+				perror(("path::attributes: flistxattr(" + path + ")").c_str());
 			}
 			close(fd);
 		}
 		else
 		{
-			perror(("open(" + path + ")").c_str());
+			perror(("path::attributes: open(" + path + ")").c_str());
 		}
 		return res;
 	}
@@ -845,14 +845,14 @@ namespace path
 					// fremovexattr() on AFP for non-existing attributes gives us EINVAL
 					// fsetxattr() on Samba saving to ext4 via virtual machine gives us ENOENT
 					// sshfs with ‘-o noappledouble’ will return ENOATTR or EPERM
-					perror((pair.second == NULL_STR ? text::format("fremovexattr(%d, \"%s\")", fd, pair.first.c_str()) : text::format("fsetxattr(%d, %s, \"%s\")", fd, pair.first.c_str(), pair.second.c_str())).c_str());
+					perror((pair.second == NULL_STR ? text::format("path::set_attributes: fremovexattr(%d, \"%s\")", fd, pair.first.c_str()) : text::format("path::set_attributes: fsetxattr(%d, %s, \"%s\")", fd, pair.first.c_str(), pair.second.c_str())).c_str());
 				}
 			}
 			close(fd);
 		}
 		else
 		{
-			perror("open");
+			perror("path::set_attributes: open");
 		}
 		return res;
 	}
@@ -904,7 +904,7 @@ namespace path
 		{
 			make_dir(parent(path));
 			if(mkdir(path.c_str(), S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IWGRP|S_IXGRP|S_IROTH|S_IWOTH|S_IXOTH) == -1)
-				perror(text::format("mkdir(“%s”)", path.c_str()).c_str());
+				perror(text::format("path::make_dir: mkdir(“%s”)", path.c_str()).c_str());
 		}
 		return exists(path) && info(resolve(path)) & flag::directory;
 	}
@@ -1014,7 +1014,7 @@ namespace path
 				fchmod(fd, S_IRWXU);
 				if(write(fd, content.data(), content.size()) != content.size())
 				{
-					perror("write");
+					perror("path::system_directory: write");
 					unlink(str.c_str());
 					str = NULL_STR;
 				}

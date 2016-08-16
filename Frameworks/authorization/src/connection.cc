@@ -93,7 +93,7 @@ connection_t& connection_t::operator>> (std::string& res)
 		ssize_t len = read(_socket, &res[0] + i, size - i);
 		if(len == -1)
 		{
-			perror("read");
+			perror("connection_t: read");
 			abort();
 		}
 		i += len;

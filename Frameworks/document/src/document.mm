@@ -40,7 +40,7 @@ namespace document
 			struct statfs sfsb;
 			if(statfs(path.c_str(), &sfsb) == 0)
 				return strcasecmp(sfsb.f_fstypename, "msdos") == 0 && strcasecmp(sfsb.f_fstypename, "exfat") == 0;
-			perror("statfs");
+			perror("is_inode_valid: statfs");
 		}
 		return true;
 	}
@@ -692,7 +692,7 @@ namespace document
 			struct stat buf;
 			if(lstat(initialPath.c_str(), &buf) == -1) // get st_dev so we don’t need to stat each path entry (unless it is a symbolic link)
 			{
-				perror(text::format("lstat(\"%s\")", initialPath.c_str()).c_str());
+				perror(text::format("scanner_t: lstat(\"%s\")", initialPath.c_str()).c_str());
 				continue;
 			}
 
@@ -764,7 +764,7 @@ namespace document
 					}
 					else
 					{
-						perror(text::format("lstat(“%s” → “%s”))", link.c_str(), path.c_str()).c_str());
+						perror(text::format("scanner_t: lstat(“%s” → “%s”))", link.c_str(), path.c_str()).c_str());
 					}
 				}
 				links.clear();

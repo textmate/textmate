@@ -188,7 +188,7 @@ OAK_DEBUG_VAR(HTMLOutput_JSShellCommand);
 			dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 				int result = 0;
 				if(waitpid(process.pid, &result, 0) != process.pid)
-					perror("waitpid");
+					perror("HOJSShellCommand: waitpid");
 				process.pid = -1;
 				dispatch_sync(queue, ^{
 					self.status = WIFEXITED(result) ? WEXITSTATUS(result) : -1;

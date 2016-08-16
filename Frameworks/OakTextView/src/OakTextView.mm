@@ -3275,7 +3275,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		dispatch_group_t group = dispatch_group_create();
 		dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 			if(waitpid(process.pid, &status, 0) != process.pid)
-				perror("waitpid");
+				perror("filterDocumentThroughCommand: waitpid");
 		});
 		dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 			io::exhaust_fd(process.out, &output);

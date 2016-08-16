@@ -52,7 +52,7 @@ namespace ng
 
 			dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 				if(write(fd, str.data(), str.size()) == -1)
-					perror("write");
+					perror("ng::write_unit_to_fd: write");
 				close(fd);
 			});
 		}

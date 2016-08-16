@@ -389,7 +389,7 @@ namespace ng
 					});
 					dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 						if(waitpid(process.pid, &status, 0) != process.pid)
-							perror("waitpid");
+							perror("editor_t::snippet: waitpid");
 					});
 					dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
 					dispatch_release(group);

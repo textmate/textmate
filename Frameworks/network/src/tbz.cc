@@ -18,7 +18,7 @@ namespace network
 				});
 				dispatch_group_async(_group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 					if(waitpid(_process.pid, &_status, 0) != _process.pid)
-						perror("waitpid");
+						perror("tbz_t: waitpid");
 				});
 			}
 		}

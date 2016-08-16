@@ -194,7 +194,7 @@ namespace web
 	{
 		server_socket = create_socket(port);
 		if(server_socket == -1)
-			perror("*** error");
+			perror("setup_server");
 		return server_socket != -1;
 	}
 
@@ -207,7 +207,7 @@ namespace web
 			int fd = accept(server_socket, (sockaddr*)&client, &size);
 			if(fd == -1)
 			{
-				perror("accept");
+				perror("run_server: accept");
 				break;
 			}
 

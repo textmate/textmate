@@ -25,7 +25,7 @@ std::string merge (std::string const& oldContent, std::string const& myContent, 
 		});
 		dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 			if(waitpid(process.pid, &status, 0) != process.pid)
-				perror("waitpid");
+				perror("merge: waitpid");
 		});
 		dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
 		dispatch_release(group);

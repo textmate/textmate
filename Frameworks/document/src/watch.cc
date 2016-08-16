@@ -253,7 +253,7 @@ namespace document
 		EV_SET(&changeList, read_from_master_pipe, EVFILT_READ, EV_ADD | EV_ENABLE | EV_CLEAR, 0, 0, (void*)0);
 		int n = kevent(event_queue, &changeList, 1 /* number of changes */, NULL /* event list */, 0 /* number of events */, &timeout);
 		if(n == -1)
-			perror("watch server, error monitoring pipe");
+			perror("watch_server_t: kevent");
 
 		struct kevent changed;
 		while(kevent(event_queue, NULL /* change list */, 0 /* number of changes */, &changed /* event list */, 1 /* number of events */, NULL) == 1)

@@ -12,7 +12,7 @@ namespace io
 		}
 		else
 		{
-			perror("pipe");
+			perror("io::create_pipe: pipe");
 		}
 		return { pipes[0], pipes[1] };
 	}

@@ -46,7 +46,7 @@ namespace path
 					}
 					else
 					{
-						perror(text::format("lstat(“%s/%s”)", path.c_str(), entries[i]->d_name).c_str());
+						perror(text::format("path::entries: lstat(“%s/%s”)", path.c_str(), entries[i]->d_name).c_str());
 					}
 				}
 			}
@@ -54,7 +54,7 @@ namespace path
 		}
 		else
 		{
-			perror(text::format("scandir(\"%s\")", path.c_str()).c_str());
+			perror(text::format("path::entries: scandir(\"%s\")", path.c_str()).c_str());
 		}
 	}
 

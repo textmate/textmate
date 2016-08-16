@@ -102,14 +102,14 @@ connection_t connect_to_auth_server (osx::authorization_t const& auth, bool retr
 			}
 			else
 			{
-				perror("connect()");
+				perror("auth_server: connect");
 			}
 
 			close(fd);
 		}
 		else
 		{
-			perror("socket()");
+			perror("auth_server: socket");
 		}
 	}
 	return connection_t();
