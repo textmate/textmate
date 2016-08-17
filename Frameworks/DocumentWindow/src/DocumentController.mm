@@ -1391,6 +1391,7 @@ namespace
 		{ "attr.project.scons",   "SConstruct",     "build"   },
 		{ "attr.project.lein",    "project.clj",    "build"   },
 		{ "attr.project.cargo",   "Cargo.toml",     "build"   },
+		{ "attr.project.swift",   "Package.swift",  "build"   },
 		{ "attr.project.vagrant", "Vagrantfile",    "vagrant" },
 		{ "attr.project.jekyll",  "_config.yml",    "jekyll"  },
 		{ "attr.test.rspec",      ".rspec",         "test"    },
