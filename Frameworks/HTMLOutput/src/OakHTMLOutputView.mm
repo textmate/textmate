@@ -11,16 +11,13 @@ extern NSString* const kCommandRunnerURLScheme; // from HTMLOutput.h
 {
 	OBJC_WATCH_LEAKS(OakHTMLOutputView);
 }
-@property (nonatomic) BOOL runningCommand;
+@property (nonatomic, getter = isRunningCommand, readwrite) BOOL runningCommand;
 @property (nonatomic) HOAutoScroll* autoScrollHelper;
 @property (nonatomic) std::map<std::string, std::string> environment;
 @property (nonatomic) NSRect pendingVisibleRect;
 @end
 
 @implementation OakHTMLOutputView
-
-@dynamic webView, needsNewWebView;
-
 - (void)loadRequest:(NSURLRequest*)aRequest environment:(std::map<std::string, std::string> const&)anEnvironment autoScrolls:(BOOL)flag
 {
 	if(flag)
