@@ -2,6 +2,20 @@ Title: Release Notes
 
 # Changes
 
+## 2016-08-18 (v2.0-beta.12.3)
+
+I normally do not mention fixes in the release notes but since this is a regular release primarily meant to address some reported issues, I am making an exemption.
+
+* New: Projects with a `Package.swift` file now get the `attr.project.swift` scope. *[Ronald Wampler]*
+* Fixed: Use en-space instead of em-space for estimating how many columns fits the screen (relevant when soft wrapping text using a proportional width font).
+* Fixed: Specifying the same file multiple times via `mate` would cause an issue with the tab bar.
+* Fixed: If a font was specified in `.tm_properties` and wasn’t using the canonical name (e.g. spaces were inserted), TextMate would ignore it.
+* Fixed: Doing a folder search for a CR character would throw an exception if any file was CRLF delimited.
+* Fixed: Using the indented line movement actions when there was a column selection would not split the column selection into multiple carets (one per line).
+* Fixed: Documents that caused the encoding dialog to show could cause TextMate to freeze.
+* Fixed: Commands with tool tip output would sometimes cause the insertion point to temporarily stop blinking.
+* See [all changes since v2.0-beta.12](https://github.com/textmate/textmate/compare/v2.0-beta.12...v2.0-beta.12.3)
+
 ## 2016-08-08 (v2.0-beta.12)
 
 * Inserting type identifiable information on first line of a document will now change the document’s type to match. For example in a new plain text document you can use `py⇥`, `rb⇥`, `pl⇥`, `php⇥` or similar (at the top) to insert a “shebang” line, and now TextMate will update the document’s type to reflect it.
