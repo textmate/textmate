@@ -3400,7 +3400,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 {
 	return @[ NSColorPboardType, NSFilenamesPboardType,
 		@"WebURLsWithTitlesPboardType", (NSString*)kUTTypeURL, @"public.url-name", NSURLPboardType,
-		@"public.plain-text" ];
+		NSStringPboardType ];
 }
 
 - (void)setDropMarkAtPoint:(NSPoint)aPoint
@@ -3591,7 +3591,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		documentView->set_ranges(ng::range_t(pos));
 		documentView->insert(text::join(paths, "\n"));
 	}
-	else if(NSString* text = [pboard stringForType:[pboard availableTypeFromArray:@[ @"public.plain-text" ]]] ?: [pboard stringForType:NSStringPboardType])
+	else if(NSString* text = [pboard stringForType:[pboard availableTypeFromArray:@[ NSStringPboardType ]]])
 	{
 		D(DBF_OakTextView_DragNDrop, bug("plain text: %s\n", [text UTF8String]););
 		if(shouldMove)
