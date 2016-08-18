@@ -1502,7 +1502,7 @@ private:
 {
 	if(self.isOpen)
 	{
-		OakDocumentEditor* documentEditor = self.documentEditors.firstObject;
+		OakDocumentEditor* documentEditor = self.documentEditors.firstObject ?: [OakDocumentEditor documentEditorWithDocument:self font:nil];
 		[documentEditor performReplacements:someReplacements];
 		return YES;
 	}
