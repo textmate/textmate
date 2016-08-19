@@ -7,7 +7,31 @@
 
 OAK_DEBUG_VAR(HTMLOutput_WebViewDelegate);
 
+static NSString* const kUserDefaultsDefaultURLProtocolKey = @"defaultURLProtocol";
+
+static BOOL IsProtocolRelativeURL (NSURL* url)
+{
+	if([url.scheme isEqualToString:@"x-txmt-command"] && ![url.host isEqualToString:@"job"])
+		return YES;
+
+	if([url.scheme isEqualToString:@"file"] && url.host)
+	{
+		// If host has a dot and does not exist on disk then treat as protocol-relative URL
+		if([url.host containsString:@"."] && ![[NSFileManager defaultManager] fileExistsAtPath:[@"/" stringByAppendingPathComponent:url.host]])
+			return YES;
+	}
+
+	return NO;
+}
+
 @implementation HOWebViewDelegateHelper
++ (void)initialize
+{
+	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
+		kUserDefaultsDefaultURLProtocolKey : @"https",
+	}];
+}
+
 // =====================
 // = WebViewUIDelegate =
 // =====================
@@ -101,6 +125,13 @@ OAK_DEBUG_VAR(HTMLOutput_WebViewDelegate);
 	{
 		NSString* fragment = [[request URL] fragment];
 		request = [NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"file://localhost%@%s%@", [[[request URL] path] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], fragment ? "#" : "", fragment ?: @""]]];
+	}
+
+	if(IsProtocolRelativeURL([request URL]) && [NSURLComponents class]) // MAC_OS_X_VERSION_10_9
+	{
+		NSURLComponents* components = [NSURLComponents componentsWithURL:[request URL] resolvingAgainstBaseURL:YES];
+		components.scheme = [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsDefaultURLProtocolKey];
+		request = [NSURLRequest requestWithURL:components.URL];
 	}
 
 	if([[request URL] isFileURL])
