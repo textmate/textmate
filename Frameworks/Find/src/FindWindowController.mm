@@ -252,7 +252,7 @@ static NSButton* OakCreateStopSearchButton ()
 
 		self.objectController = [[NSObjectController alloc] initWithContent:self];
 		self.globHistoryList  = [[OakHistoryList alloc] initWithName:@"Find in Folder Globs.default" stackSize:10 defaultItems:@"*", @"*.txt", @"*.{c,h}", nil];
-		self.recentFolders    = [[OakHistoryList alloc] initWithName:@"findRecentPlaces" stackSize:6];
+		self.recentFolders    = [[OakHistoryList alloc] initWithName:@"findRecentPlaces" stackSize:21];
 
 		[self.findTextField             bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.findString"           options:@{ NSContinuouslyUpdatesValueBindingOption: @YES }];
 		[self.replaceTextField          bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.replaceString"        options:@{ NSContinuouslyUpdatesValueBindingOption: @YES }];
