@@ -62,13 +62,15 @@ static NSMutableArray* FoldersAtPath (NSString* folder)
 	NSString* folder = [parentItem representedObject];
 	if([parentItem parentItem] == nil) // root menu, show parent folders
 	{
+		BOOL hasSubfolders = [FoldersAtPath(folder) count];
 		for(NSString* path = folder; true; path = [path stringByDeletingLastPathComponent])
 		{
 			NSMenuItem* menuItem = [aMenu addItemWithTitle:[[NSFileManager defaultManager] displayNameAtPath:path] action:parentItem.action keyEquivalent:@""];
 			[menuItem setTarget:parentItem.target];
 			[menuItem setRepresentedObject:path];
 			[menuItem setIconForFile:path];
-			[self addFolderSubmenuToMenuItem:menuItem];
+			if(std::exchange(hasSubfolders, YES))
+				[self addFolderSubmenuToMenuItem:menuItem];
 
 			if([path isEqualToString:@"/"])
 				break;
