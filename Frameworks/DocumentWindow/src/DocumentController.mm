@@ -1038,7 +1038,7 @@ namespace
 		{
 			OakDocument* document = doc->document();
 			BOOL showBundleSuggestions = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableBundleSuggestionsKey];
-			if(!document.fileType && showBundleSuggestions && network::can_reach_host([[[NSURL URLWithString:@(REST_API)] host] UTF8String]))
+			if(!document.fileType && showBundleSuggestions)
 			{
 				NSArray<BundleGrammar*>* grammars = document.proposedGrammars;
 				if(NSArray* excludedGrammars = [[NSUserDefaults standardUserDefaults] arrayForKey:kUserDefaultsGrammarsToNeverSuggestKey])
@@ -1046,7 +1046,7 @@ namespace
 				if(_bundlesAlreadySuggested)
 					grammars = [grammars filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"!(bundle IN %@)", _bundlesAlreadySuggested]];
 
-				if([grammars count])
+				if([grammars count] && network::can_reach_host([[[NSURL URLWithString:@(REST_API)] host] UTF8String]))
 				{
 					self.bundlesAlreadySuggested = [(_bundlesAlreadySuggested ?: @[ ]) arrayByAddingObject:[grammars firstObject].bundle];
 
