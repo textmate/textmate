@@ -1,7 +1,6 @@
 #import "HTMLOutputWindow.h"
 #import <OakAppKit/OakAppKit.h>
 #import <OakFoundation/NSString Additions.h>
-#import <OakSystem/process.h>
 #import <command/runner.h>
 #import <oak/debug.h>
 
@@ -108,7 +107,7 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 		if(returnCode == NSAlertDefaultReturn) /* "Stop" */
 		{
 			[self.window orderOut:self];
-			oak::kill_process_group_in_background(_commandRunner->process_id());
+			[self.htmlOutputView stopLoading];
 			[self.window close];
 		}
 	});
