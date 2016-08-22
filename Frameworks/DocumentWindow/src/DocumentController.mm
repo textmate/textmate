@@ -459,12 +459,12 @@ namespace
 {
 	NSAlert* alert = [[NSAlert alloc] init];
 	[alert setAlertStyle:NSWarningAlertStyle];
-	[alert addButtons:@"Save", @"Cancel", @"Don’t Save", nil];
 	if(someDocuments.count == 1)
 	{
 		OakDocument* document = someDocuments.firstObject;
 		[alert setMessageText:[NSString stringWithFormat:@"Do you want to save the changes you made in the document “%@”?", document.displayName]];
 		[alert setInformativeText:@"Your changes will be lost if you don’t save them."];
+		[alert addButtons:@"Save", @"Cancel", @"Don’t Save", nil];
 	}
 	else
 	{
@@ -473,6 +473,7 @@ namespace
 			body = [body stringByAppendingFormat:@"• “%@”\n", document.displayName];
 		[alert setMessageText:@"Do you want to save documents with changes?"];
 		[alert setInformativeText:body];
+		[alert addButtons:@"Save All", @"Cancel", @"Don’t Save", nil];
 	}
 	return alert;
 }
