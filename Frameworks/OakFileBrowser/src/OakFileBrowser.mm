@@ -556,13 +556,8 @@ static bool is_binary (std::string const& path)
 
 - (NSArray*)selectedPaths
 {
-	NSMutableArray* res = [NSMutableArray array];
-	for(FSItem* item in self.selectedItems)
-	{
-		if([item.url isFileURL])
-			[res addObject:[item.url path]];
-	}
-	return res;
+	NSArray* fileURLItems = [self.selectedItems filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"url.isFileURL == YES"]];
+	return [fileURLItems valueForKeyPath:@"url.path"];
 }
 
 // ============
