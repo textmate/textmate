@@ -350,6 +350,9 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 
 - (void)revealBundleItem:(bundles::item_ptr const&)anItem
 {
+	if(!anItem)
+		return;
+
 	[self showWindow:self];
 	[self setBundleItem:anItem];
 
