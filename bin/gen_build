@@ -708,7 +708,7 @@ open("#{builddir}/build.ninja", "w") do |io|
   end
   user_variables.sort! { |lhs, rhs| lhs[0] <=> rhs[0] }
 
-  tmp = variables.dup.concat(user_variables) 
+  tmp = variables.dup.concat(user_variables)
   width = tmp.map { |arr| arr[0].length }.max { |lhs, rhs| lhs <=> rhs }
 
   variables.each { |arr| io << format("%-#{width}s = %s\n", *arr) }
@@ -894,21 +894,21 @@ rule debug_executable
 
 rule run_application
   command = {                        $
-    if pgrep >/dev/null "$appname"; then $
-      if [[ -x "$$DIALOG" && $$("$$DIALOG" < /dev/null alert --title "Relaunch $appname?" --body "Would you like to quit $appname and start the newly built version?" --button1 Relaunch --button2 Cancel|pl) != *"buttonClicked = 0"* ]]; $
+    if pgrep "$appname"; then        $
+      if [[ -x "$$DIALOG" && $$("$$DIALOG" alert --title "Relaunch $appname?" --body "Would you like to quit $appname and start the newly built version?" --button1 Relaunch --button2 Cancel|pl) != *"buttonClicked = 0"* ]]; $
         then exit;                   $
       fi;                            $
       pkill "$appname";              $
-      while pgrep >/dev/null "$appname"; do $
+      while pgrep "$appname"; do     $
         if (( ++n == 10 )); then     $
-          test -x "$$DIALOG" && "$$DIALOG" </dev/null alert --title "Relaunch Timed Out" --body "Unable to exit $appname." --button1 OK; $
+          test -x "$$DIALOG" && "$$DIALOG" alert --title "Relaunch Timed Out" --body "Unable to exit $appname." --button1 OK; $
           exit;                      $
         fi;                          $
         sleep .2;                    $
       done;                          $
     fi;                              $
     open $in --args -disableSessionRestore NO; $
-  } &>/dev/null &
+  } </dev/null &>/dev/null &
   description = Run ‘$in’…
 
 rule sign_executable
