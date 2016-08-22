@@ -199,7 +199,7 @@ OAK_DEBUG_VAR(AppController_Documents);
 	D(DBF_AppController_Documents, bug("%s\n", BSTR(flag)););
 	BOOL disableUntitledAtReactivationPrefs = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableNewDocumentAtReactivationKey];
 	BOOL showFavoritesInsteadPrefs          = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsShowFavoritesInsteadOfUntitledKey];
-	return !disableUntitledAtReactivationPrefs || showFavoritesInsteadPrefs;
+	return flag || !disableUntitledAtReactivationPrefs || showFavoritesInsteadPrefs;
 }
 
 // ===========================
