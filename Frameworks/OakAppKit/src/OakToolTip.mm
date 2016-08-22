@@ -35,6 +35,12 @@ static __weak OakToolTip* LastToolTip;
 	D(DBF_OakToolTip, bug("\n"););
 	if(self = [super initWithContentRect:NSZeroRect styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:NO])
 	{
+		NSFont* defaultFont = [NSFont toolTipsFontOfSize:0];
+		NSFontDescriptor* descriptor = [defaultFont.fontDescriptor fontDescriptorByAddingAttributes:@{
+			NSFontFeatureSettingsAttribute: @[ @{ NSFontFeatureTypeIdentifierKey : @(kNumberSpacingType), NSFontFeatureSelectorIdentifierKey : @(kMonospacedNumbersSelector) } ]
+		}];
+		defaultFont = [NSFont fontWithDescriptor:descriptor size:0];
+
 		[self setReleasedWhenClosed:NO];
 		[self setAlphaValue:0.97];
 		[self setOpaque:NO];
@@ -51,7 +57,7 @@ static __weak OakToolTip* LastToolTip;
 		[field setBordered:NO];
 		[field setDrawsBackground:NO];
 		[field setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
-		[field setFont:[NSFont toolTipsFontOfSize:0]];
+		[field setFont:defaultFont];
 		[field setStringValue:@"This is a nice little code block"];
 
 		[self setContentView:field];
