@@ -125,10 +125,11 @@ static NSAttributedString* create_attributed_string (ng::buffer_t& buffer, std::
 		size_t to = ++pair != scopes.end() ? pair->first : buffer.size();
 
 		[output appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:buffer.substr(from, to)] attributes:@{
-			NSForegroundColorAttributeName : [NSColor colorWithCGColor:styles.foreground()],
-			NSBackgroundColorAttributeName : [NSColor colorWithCGColor:styles.background()],
-			NSFontAttributeName            : (__bridge NSFont*)styles.font(),
-			NSUnderlineStyleAttributeName  : @(styles.underlined() ? NSUnderlineStyleSingle : NSUnderlineStyleNone),
+			NSForegroundColorAttributeName    : [NSColor colorWithCGColor:styles.foreground()],
+			NSBackgroundColorAttributeName    : [NSColor colorWithCGColor:styles.background()],
+			NSFontAttributeName               : (__bridge NSFont*)styles.font(),
+			NSUnderlineStyleAttributeName     : @(styles.underlined() ? NSUnderlineStyleSingle : NSUnderlineStyleNone),
+			NSStrikethroughStyleAttributeName : @(styles.strikethrough() ? NSUnderlineStyleSingle : NSUnderlineStyleNone),
 		}]];
 
 		from = to;

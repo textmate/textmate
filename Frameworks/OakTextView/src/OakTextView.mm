@@ -1258,6 +1258,8 @@ doScroll:
 				CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTForegroundColorAttributeName, styles.foreground());
 				if(styles.underlined())
 					CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTUnderlineStyleAttributeName, cf::wrap(kCTUnderlineStyleSingle|kCTUnderlinePatternSolid));
+				if(styles.strikethrough())
+					CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), (CFStringRef)NSStrikethroughStyleAttributeName, cf::wrap(kCTUnderlineStyleSingle|kCTUnderlinePatternSolid));
 				CFAttributedStringReplaceAttributedString(res, CFRangeMake(CFAttributedStringGetLength(res), 0), str);
 
 				CFRelease(str);
@@ -1573,6 +1575,8 @@ doScroll:
 			}];
 			if(styles.underlined())
 				attributes[NSAccessibilityUnderlineTextAttribute] = @(NSUnderlineStyleSingle | NSUnderlinePatternSolid); // TODO is this always so?
+			if(styles.strikethrough())
+				attributes[NSAccessibilityStrikethroughTextAttribute] = @YES;
 
 			[res setAttributes:attributes range:runRange];
 		}

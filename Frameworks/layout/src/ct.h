@@ -86,8 +86,10 @@ namespace ct
 		CTLinePtr _line;
 		std::vector< std::pair<CFRange, CGColorPtr> > _backgrounds;
 		std::vector< std::pair<CFRange, CGColorPtr> > _underlines;
+		std::vector< std::pair<CFRange, CGColorPtr> > _strikethroughs;
 		std::vector<size_t> _tab_locations;
 		std::vector<size_t> _space_locations;
+		CGFloat _x_height; // For centering strikethrough line
 	};
 
 } /* ct */

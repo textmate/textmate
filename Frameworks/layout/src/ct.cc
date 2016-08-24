@@ -170,6 +170,8 @@ namespace ct
 						CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTForegroundColorAttributeName, textColor ?: styles.foreground());
 						if(styles.underlined())
 							_underlines.emplace_back(CFRangeMake(CFAttributedStringGetLength(toDraw), CFAttributedStringGetLength(str)), CGColorPtr(CGColorRetain(styles.foreground()), CGColorRelease));
+						if(styles.strikethrough())
+							_strikethroughs.emplace_back(CFRangeMake(CFAttributedStringGetLength(toDraw), CFAttributedStringGetLength(str)), CGColorPtr(CGColorRetain(styles.foreground()), CGColorRelease));
 						_backgrounds.emplace_back(CFRangeMake(CFAttributedStringGetLength(toDraw), CFAttributedStringGetLength(str)), CGColorPtr(CGColorRetain(styles.background()), CGColorRelease));
 						CFAttributedStringReplaceAttributedString(toDraw, CFRangeMake(CFAttributedStringGetLength(toDraw), 0), str);
 						CFRelease(str);
@@ -183,6 +185,7 @@ namespace ct
 			}
 
 			_line.reset(CTLineCreateWithAttributedString(toDraw), CFRelease);
+			_x_height = metrics.x_height();
 			CGFloat tabWidth = tabSize * metrics.column_width();
 			CGFloat standardTabWidths = 0;
 			CGFloat newTabWidths = 0;
@@ -305,6 +308,13 @@ namespace ct
 			CGFloat x1 = round(pos.x + CTLineGetOffsetForStringIndex(_line.get(), pair.first.location, NULL));
 			CGFloat x2 = round(pos.x + CTLineGetOffsetForStringIndex(_line.get(), pair.first.location + pair.first.length, NULL));
 			render::fill_rect(context, pair.second.get(), CGRectMake(x1, pos.y + 1, x2 - x1, 1));
+		}
+
+		for(auto const& pair : _strikethroughs)
+		{
+			CGFloat x1 = round(pos.x + CTLineGetOffsetForStringIndex(_line.get(), pair.first.location, NULL));
+			CGFloat x2 = round(pos.x + CTLineGetOffsetForStringIndex(_line.get(), pair.first.location + pair.first.length, NULL));
+			render::fill_rect(context, pair.second.get(), CGRectMake(x1, round(pos.y - (_x_height+1)/2), x2 - x1, 1));
 		}
 
 		for(auto const& pair : misspelled)
