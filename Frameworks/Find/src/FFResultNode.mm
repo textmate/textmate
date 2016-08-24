@@ -272,6 +272,11 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 	std::string middle = m.excerpt.substr(from, to - from);
 	std::string suffix = m.excerpt.substr(to);
 
+	if(m.truncate_head)
+		prefix.insert(0, "…");
+	if(m.truncate_tail)
+		suffix.insert(suffix.size(), "…");
+
 	if(replacementString)
 		middle = m.captures.empty() ? to_s(replacementString) : format_string::expand(to_s(replacementString), m.captures);
 

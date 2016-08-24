@@ -210,9 +210,11 @@ namespace find
 			text::pos_t to(crlfCount, it.to - bol);
 			size_t toOffset = bol == it.to ? bol : (eol != std::string::npos ? (it.to <= eol ? eol : eol + crlf.size()) : text.size());
 
+			size_t orgFromOffset = fromOffset;
 			if(it.from - fromOffset > 200)
 				fromOffset = utf8::find_safe_end(text.begin(), text.begin() + it.from - ((it.from - fromOffset) % 150)) - text.begin();
 
+			size_t orgToOffset = toOffset;
 			if(toOffset - fromOffset > 500)
 				toOffset = utf8::find_safe_end(text.begin(), text.begin() + std::max<size_t>(fromOffset + 500, it.to)) - text.begin();
 
@@ -222,6 +224,8 @@ namespace find
 			match_t res(document, crc32.checksum(), it.from, it.to, text::range_t(from, to), it.captures);
 			res.excerpt        = text.substr(fromOffset, toOffset - fromOffset);
 			res.excerpt_offset = fromOffset;
+			res.truncate_head  = orgFromOffset < fromOffset;
+			res.truncate_tail  = toOffset < orgToOffset;
 			res.line_number    = from.line;
 			res.newlines       = crlf;
 			results.push_back(res);

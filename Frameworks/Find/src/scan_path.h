@@ -26,6 +26,8 @@ namespace find
 		size_t excerpt_offset = 0;
 		size_t line_number = 0;
 		std::string newlines = "\n";
+		bool truncate_head = false;
+		bool truncate_tail = false;
 	};
 
 	struct scan_path_t
