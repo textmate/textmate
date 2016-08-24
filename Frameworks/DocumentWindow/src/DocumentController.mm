@@ -703,6 +703,17 @@ namespace
 		[self.window makeFirstResponder:oldFirstResponder];
 }
 
+- (void)fileBrowserDidDuplicateAtURLs:(NSNotification*)aNotification
+{
+	NSDictionary* userInfo = [aNotification userInfo];
+	NSDictionary* urls = userInfo[OakFileBrowserURLMapKey];
+	for(NSURL* url in urls)
+	{
+		if([url.path isEqualToString:self.documentPath])
+			[self openItems:@[ @{ @"path" : [urls[url] path] } ] closingOtherTabs:NO];
+	}
+}
+
 + (void)saveSessionAndDetachBackups
 {
 	BOOL restoresSession = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableSessionRestoreKey];
@@ -1906,6 +1917,8 @@ namespace
 			[self updateFileBrowserStatus:self];
 			if(self.layoutView.tabsAboveDocument)
 				[self.tabBarView expand];
+
+			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(fileBrowserDidDuplicateAtURLs:) name:OakFileBrowserDidDuplicateURLs object:_fileBrowser];
 		}
 
 		if(!makeVisibleFlag && [[self.window firstResponder] isKindOfClass:[NSView class]] && [(NSView*)[self.window firstResponder] isDescendantOf:self.layoutView.fileBrowserView])
