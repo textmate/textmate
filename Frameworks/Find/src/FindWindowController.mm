@@ -788,7 +788,7 @@ static NSButton* OakCreateStopSearchButton ()
 
 	NSMutableParagraphStyle* paragraphStyle = [[NSMutableParagraphStyle alloc] init];
 	[paragraphStyle setLineBreakMode:NSLineBreakByTruncatingMiddle];
-	[res addAttributes:@{ NSParagraphStyleAttributeName : paragraphStyle } range:NSMakeRange(0, [[res string] length])];
+	[res addAttributes:@{ NSParagraphStyleAttributeName : paragraphStyle, NSForegroundColorAttributeName : [NSColor textColor] } range:NSMakeRange(0, [[res string] length])];
 
 	return res;
 }
