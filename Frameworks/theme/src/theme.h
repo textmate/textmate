@@ -9,7 +9,7 @@ typedef std::shared_ptr<std::remove_pointer<CGColorRef>::type> CGColorPtr;
 
 struct PUBLIC styles_t
 {
-	styles_t (CGColorPtr foreground, CGColorPtr background, CGColorPtr caret, CGColorPtr selection, CTFontPtr font, bool underlined, bool misspelled) : _foreground(foreground), _background(background), _caret(caret), _selection(selection), _font(font), _underlined(underlined), _misspelled(misspelled) { }
+	styles_t (CGColorPtr foreground, CGColorPtr background, CGColorPtr caret, CGColorPtr selection, CTFontPtr font, bool underlined, bool strikethrough, bool misspelled) : _foreground(foreground), _background(background), _caret(caret), _selection(selection), _font(font), _underlined(underlined), _strikethrough(strikethrough), _misspelled(misspelled) { }
 
 	styles_t () = default;
 	CGColorRef foreground () const { return _foreground.get(); }
@@ -18,6 +18,7 @@ struct PUBLIC styles_t
 	CGColorRef selection () const  { return _selection.get(); }
 	CTFontRef font () const        { return _font.get(); }
 	bool underlined () const       { return _underlined; }
+	bool strikethrough () const    { return _strikethrough; }
 	bool misspelled () const       { return _misspelled; }
 
 private:
@@ -27,6 +28,7 @@ private:
 	CGColorPtr _selection;
 	CTFontPtr _font;
 	bool _underlined;
+	bool _strikethrough;
 	bool _misspelled;
 };
 
@@ -91,7 +93,7 @@ private:
 
 	struct decomposed_style_t
 	{
-		decomposed_style_t (scope::selector_t const& scopeSelector = scope::selector_t(), std::string const& fontName = NULL_STR, CGFloat fontSize = -1) : scope_selector(scopeSelector), font_name(fontName), font_size(fontSize), bold(bool_unset), italic(bool_unset), underlined(bool_unset), misspelled(bool_unset) { }
+		decomposed_style_t (scope::selector_t const& scopeSelector = scope::selector_t(), std::string const& fontName = NULL_STR, CGFloat fontSize = -1) : scope_selector(scopeSelector), font_name(fontName), font_size(fontSize), bold(bool_unset), italic(bool_unset), underlined(bool_unset), strikethrough(bool_unset), misspelled(bool_unset) { }
 		decomposed_style_t& operator+= (decomposed_style_t const& rhs);
 
 		scope::selector_t scope_selector;
@@ -106,6 +108,7 @@ private:
 		bool_t bold;
 		bool_t italic;
 		bool_t underlined;
+		bool_t strikethrough;
 		bool_t misspelled;
 	};
 	static std::vector<decomposed_style_t> global_styles (scope::scope_t const& scope);
