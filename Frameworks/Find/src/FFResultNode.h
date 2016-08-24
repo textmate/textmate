@@ -18,7 +18,7 @@
 - (FFResultNode*)lastResultNode;
 
 - (NSUInteger)lineSpan;
-- (NSAttributedString*)excerptWithReplacement:(NSString*)replacementString;
+- (NSAttributedString*)excerptWithReplacement:(NSString*)replacementString font:(NSFont*)font;
 - (NSImage*)icon;
 
 @property (nonatomic) NSString* replaceString;

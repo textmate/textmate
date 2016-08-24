@@ -8,7 +8,7 @@
 #import <text/utf8.h>
 #import <regexp/format_string.h>
 
-static NSAttributedString* PathComponentString (std::string const& path, std::string const& base)
+static NSAttributedString* PathComponentString (std::string const& path, std::string const& base, NSFont* font)
 {
 	std::vector<std::string> components;
 	std::string str = path::relative_to(path, base);
@@ -20,14 +20,14 @@ static NSAttributedString* PathComponentString (std::string const& path, std::st
 
 	return ns::attr_string_t()
 		<< ns::style::line_break(NSLineBreakByTruncatingMiddle)
-		<< [NSFont controlContentFontOfSize:0]
+		<< font
 		<< [NSColor darkGrayColor]
 		<< text::join(std::vector<std::string>(components.begin(), components.end()), " ▸ ")
 		<< ns::style::bold
 		<< (path::is_absolute(path) ? path::display_name(path) : path);
 }
 
-static void append (ns::attr_string_t& dst, std::string const& src, size_t from, size_t to)
+static void append (ns::attr_string_t& dst, std::string const& src, size_t from, size_t to, NSFont* font)
 {
 	size_t begin = from;
 	for(size_t i = from; i != to; ++i)
@@ -42,7 +42,7 @@ static void append (ns::attr_string_t& dst, std::string const& src, size_t from,
 			else if(src[i] == '\r')
 			{
 				dst.add(ns::attr_string_t()
-					<< [NSFont controlContentFontOfSize:11]
+					<< font
 					<< [NSColor lightGrayColor]
 					<< "<CR>"
 				);
@@ -53,12 +53,12 @@ static void append (ns::attr_string_t& dst, std::string const& src, size_t from,
 	dst.add(src.substr(begin, to-begin));
 }
 
-static NSAttributedString* AttributedStringForMatch (std::string const& text, size_t from, size_t to, size_t n, std::string const& newlines)
+static NSAttributedString* AttributedStringForMatch (std::string const& text, size_t from, size_t to, size_t n, std::string const& newlines, NSFont* font)
 {
 	ns::attr_string_t str;
 	str.add(ns::style::line_break(NSLineBreakByTruncatingTail));
 	str.add([NSColor darkGrayColor]);
-	str.add([NSFont controlContentFontOfSize:11]);
+	str.add(font);
 
 	str.add(text::pad(++n, 4) + ": ");
 
@@ -71,7 +71,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 
 		if(oak::cap(it, from, eol) == from)
 		{
-			append(str, text, it, from);
+			append(str, text, it, from, font);
 			it = from;
 			inMatch = true;
 		}
@@ -84,7 +84,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 
 		if(inMatch && oak::cap(it, to, eol) == to)
 		{
-			append(str, text, it, to);
+			append(str, text, it, to, font);
 			it = to;
 			inMatch = false;
 
@@ -92,7 +92,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 			str.add(ns::style::unbold);
 		}
 
-		append(str, text, it, eol);
+		append(str, text, it, eol, font);
 
 		if(eol != last)
 		{
@@ -131,20 +131,25 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 @end
 
 @implementation FFResultNode
+- (instancetype)initWithMatch:(find::match_t const&)aMatch
+{
+	if(self = [super init])
+		_match = aMatch;
+	return self;
+}
+
 + (FFResultNode*)resultNodeWithMatch:(find::match_t const&)aMatch baseDirectory:(NSString*)base
 {
-	FFResultNode* res = [FFResultNode new];
-	res->_match     = aMatch;
+	FFResultNode* res = [[FFResultNode alloc] initWithMatch:aMatch];
 	res.children    = [NSMutableArray array];
-	res.displayPath = PathComponentString(base && to_s(base) != find::kSearchOpenFiles && aMatch.document->path() != NULL_STR ? aMatch.document->path() : aMatch.document->display_name(), to_s(base));
+	res.displayPath = PathComponentString(base && to_s(base) != find::kSearchOpenFiles && aMatch.document->path() != NULL_STR ? aMatch.document->path() : aMatch.document->display_name(), to_s(base), [NSFont controlContentFontOfSize:0]);
 	return res;
 }
 
 + (FFResultNode*)resultNodeWithMatch:(find::match_t const&)aMatch
 {
-	FFResultNode* res = [FFResultNode new];
+	FFResultNode* res = [[FFResultNode alloc] initWithMatch:aMatch];
 	res.countOfLeafs = 1;
-	res->_match = aMatch;
 	return res;
 }
 
@@ -244,7 +249,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 	return to.line - from.line + (from == to || to.column != 0 ? 1 : 0);
 }
 
-- (NSAttributedString*)excerptWithReplacement:(NSString*)replacementString
+- (NSAttributedString*)excerptWithReplacement:(NSString*)replacementString font:(NSFont*)font
 {
 	if(_excerpt && (replacementString == _excerptReplaceString || [replacementString isEqualToString:_excerptReplaceString]))
 		return _excerpt;
@@ -267,12 +272,12 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 	if(!utf8::is_valid(prefix.begin(), prefix.end()) || !utf8::is_valid(middle.begin(), middle.end()) || !utf8::is_valid(suffix.begin(), suffix.end()))
 	{
 		return ns::attr_string_t()
-			<< [NSColor darkGrayColor] << [NSFont controlContentFontOfSize:11]
+			<< [NSColor darkGrayColor] << font
 			<< ns::style::line_break(NSLineBreakByTruncatingTail)
 			<< text::format("%zu-%zu: Range is not valid UTF-8, please contact: http://macromates.com/support", m.first, m.last);
 	}
 
-	_excerpt = AttributedStringForMatch(prefix + middle + suffix, prefix.size(), prefix.size() + middle.size(), m.line_number, m.newlines);
+	_excerpt = AttributedStringForMatch(prefix + middle + suffix, prefix.size(), prefix.size() + middle.size(), m.line_number, m.newlines, font);
 	_excerptReplaceString = replacementString;
 	return _excerpt;
 }

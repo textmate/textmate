@@ -3,6 +3,9 @@
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 
+static NSString* const kUserDefaultsSearchResultsFontNameKey = @"searchResultsFontName";
+static NSString* const kUserDefaultsSearchResultsFontSizeKey = @"searchResultsFontSize";
+
 static FFResultNode* NextNode (FFResultNode* node)
 {
 	NSUInteger index = [node.parent.children indexOfObject:node] + 1;
@@ -27,11 +30,11 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 @implementation OakSearchResultsMatchCellView
 + (NSSet*)keyPathsForValuesAffectingExcerptString { return [NSSet setWithArray:@[ @"objectValue", @"objectValue.readOnly", @"objectValue.excluded", @"objectValue.replaceString", @"replaceString", @"showReplacementPreviews", @"backgroundStyle" ]]; }
 
-- (id)initWithFrame:(NSRect)aFrame
+- (id)initWithFrame:(NSRect)aFrame font:(NSFont*)font
 {
 	if((self = [super initWithFrame:aFrame]))
 	{
-		NSTextField* textField = OakCreateLabel();
+		NSTextField* textField = OakCreateLabel(@"", font);
 		[textField setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
 		[self addSubview:textField];
 		[textField bind:NSValueBinding toObject:self withKeyPath:@"excerptString" options:nil];
@@ -44,7 +47,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 - (NSAttributedString*)excerptString
 {
 	FFResultNode* item = self.objectValue;
-	NSAttributedString* res = [item excerptWithReplacement:item.isReadOnly || item.excluded || !_showReplacementPreviews ? item.replaceString : self.replaceString];
+	NSAttributedString* res = [item excerptWithReplacement:(item.isReadOnly || item.excluded || !_showReplacementPreviews ? item.replaceString : self.replaceString) font:self.textField.font];
 	if(self.backgroundStyle == NSBackgroundStyleDark)
 	{
 		NSMutableAttributedString* str = [res mutableCopy];
@@ -188,6 +191,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 	NSView*        _topDivider;
 	NSScrollView*  _scrollView;
 	NSView*        _bottomDivider;
+	NSFont*        _searchResultsFont;
 
 	__weak id      _eventMonitor;
 	BOOL           _longPressedCommandModifier;
@@ -200,6 +204,14 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 {
 	if(!_scrollView)
 	{
+		NSString* fontName = [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsSearchResultsFontNameKey];
+		CGFloat fontSize   = [[NSUserDefaults standardUserDefaults] floatForKey:kUserDefaultsSearchResultsFontSizeKey] ?: 11.0;
+		_searchResultsFont = (fontName ? [NSFont fontWithName:fontName size:fontSize] : [NSFont controlContentFontOfSize:fontSize]);
+
+		NSTextField* label = OakCreateLabel(@"m", _searchResultsFont);
+		[label sizeToFit];
+		CGFloat lineHeight = std::max(NSHeight(label.frame), ceil(_searchResultsFont.ascender) + ceil(fabs(_searchResultsFont.descender)) + ceil(_searchResultsFont.leading));
+
 		_topDivider    = OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1]);
 		_bottomDivider = OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1]);
 
@@ -210,7 +222,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		_outlineView.autoresizesOutlineColumn           = NO;
 		_outlineView.usesAlternatingRowBackgroundColors = YES;
 		_outlineView.headerView                         = nil;
-		_outlineView.rowHeight                          = 14;
+		_outlineView.rowHeight                          = std::max(lineHeight, 14.0);
 
 		NSTableColumn* tableColumn = [[NSTableColumn alloc] initWithIdentifier:@"checkbox"];
 		tableColumn.width = 50;
@@ -528,7 +540,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		OakSearchResultsMatchCellView* cellView = res;
 		if(!cellView)
 		{
-			res = cellView = [[OakSearchResultsMatchCellView alloc] initWithFrame:NSZeroRect];
+			res = cellView = [[OakSearchResultsMatchCellView alloc] initWithFrame:NSZeroRect font:_searchResultsFont];
 			[cellView bind:@"replaceString" toObject:self withKeyPath:@"replaceString" options:nil];
 			[cellView bind:@"showReplacementPreviews" toObject:self withKeyPath:@"showReplacementPreviews" options:nil];
 			cellView.identifier = identifier;
