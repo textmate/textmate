@@ -65,18 +65,14 @@ theme_t::decomposed_style_t theme_t::shared_styles_t::parse_styles (plist::dicti
 	std::string fontStyle;
 	if(plist::get_key_path(plist, "settings.fontStyle", fontStyle))
 	{
-		if(fontStyle.find("plain") != std::string::npos)
-		{
-			res.bold       = bool_false;
-			res.italic     = bool_false;
-			res.underlined = bool_false;
-		}
-		else
-		{
-			res.bold       = fontStyle.find("bold")      != std::string::npos ? bool_true : bool_unset;
-			res.italic     = fontStyle.find("italic")    != std::string::npos ? bool_true : bool_unset;
-			res.underlined = fontStyle.find("underline") != std::string::npos ? bool_true : bool_unset;
-		}
+		bool hasPlain     = fontStyle.find("plain")     != std::string::npos;
+		bool hasBold      = fontStyle.find("bold")      != std::string::npos;
+		bool hasItalic    = fontStyle.find("italic")    != std::string::npos;
+		bool hasUnderline = fontStyle.find("underline") != std::string::npos;
+
+		res.bold       =  hasBold      ? bool_true : (hasPlain ? bool_false : bool_unset);
+		res.italic     =  hasItalic    ? bool_true : (hasPlain ? bool_false : bool_unset);
+		res.underlined =  hasUnderline ? bool_true : (hasPlain ? bool_false : bool_unset);
 	}
 	return res;
 }
