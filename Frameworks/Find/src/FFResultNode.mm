@@ -58,9 +58,15 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 	ns::attr_string_t str;
 	str.add(ns::style::line_break(NSLineBreakByTruncatingTail));
 	str.add([NSColor darkGrayColor]);
-	str.add(font);
 
+	// Ensure monospaced digits for the line number prefix
+	NSFontDescriptor* descriptor = [font.fontDescriptor fontDescriptorByAddingAttributes:@{
+		NSFontFeatureSettingsAttribute: @[ @{ NSFontFeatureTypeIdentifierKey : @(kNumberSpacingType), NSFontFeatureSelectorIdentifierKey : @(kMonospacedNumbersSelector) } ]
+	}];
+
+	str.add([NSFont fontWithDescriptor:descriptor size:0]);
 	str.add(text::pad(++n, 4) + ": ");
+	str.add(font);
 
 	bool inMatch = false;
 	size_t last = text.size();
