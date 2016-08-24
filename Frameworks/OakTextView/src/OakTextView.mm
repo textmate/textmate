@@ -238,10 +238,9 @@ typedef NS_ENUM(NSUInteger, OakFlagsState) {
 
 struct document_view_t : ng::buffer_api_t
 {
-	document_view_t (document::document_ptr const& document, std::string const& fontName, CGFloat fontSize, std::string const& scopeAttributes, bool scrollPastEnd) : _document(document)
+	document_view_t (document::document_ptr const& document, std::string const& scopeAttributes, bool scrollPastEnd, NSInteger fontScaleFactor = 100) : _document(document)
 	{
-		NSFont* font = [NSFont fontWithName:to_ns(fontName) size:fontSize];
-		_document_editor = [OakDocumentEditor documentEditorWithDocument:document->document() font:font];
+		_document_editor = [OakDocumentEditor documentEditorWithDocument:document->document() fontScaleFactor:fontScaleFactor];
 
 		_editor = &[_document_editor editor];
 		_layout = &[_document_editor layout];
@@ -257,6 +256,12 @@ struct document_view_t : ng::buffer_api_t
 		if(nest_count != 0)
 			end_undo_group();
 	}
+
+	NSFont* font () const                         { return _document_editor.font; }
+	void set_font (NSFont* newFont)               { _document_editor.font = newFont; }
+
+	NSInteger font_scale_factor () const          { return _document_editor.fontScaleFactor; }
+	void set_font_scale_factor (NSInteger scale)  { _document_editor.fontScaleFactor = scale; }
 
 	std::map<std::string, std::string> variables (std::string const& scopeAttributes) const
 	{
@@ -351,7 +356,6 @@ struct document_view_t : ng::buffer_api_t
 
 	theme_ptr theme () const { return _layout->theme(); }
 	void set_theme (theme_ptr const& theme) { _layout->set_theme(theme); }
-	void set_font (std::string const& fontName, CGFloat fontSize) { _layout->set_font(fontName, fontSize); }
 	void set_wrapping (bool softWrap, size_t wrapColumn) { _layout->set_wrapping(softWrap, wrapColumn); }
 	void set_scroll_past_end (bool scrollPastEnd) { _layout->set_scroll_past_end(scrollPastEnd); }
 	ng::layout_t::margin_t const& margin () const { return _layout->margin(); }
@@ -770,8 +774,11 @@ static std::string shell_quote (std::vector<std::string> paths)
 		return;
 	}
 
+	NSInteger fontScaleFactor = 100;
 	if(documentView)
 	{
+		fontScaleFactor = documentView->font_scale_factor();
+
 		[[NSNotificationCenter defaultCenter] removeObserver:self name:OakDocumentWillSaveNotification object:document->document()];
 		[[NSNotificationCenter defaultCenter] removeObserver:self name:OakDocumentDidSaveNotification object:document->document()];
 
@@ -792,7 +799,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 	if(document = aDocument)
 	{
-		documentView = std::make_shared<document_view_t>(document, to_s(self.font.fontName), self.font.pointSize * _fontScaleFactor / 100, to_s(self.scopeAttributes), self.scrollPastEnd);
+		documentView = std::make_shared<document_view_t>(document, to_s(self.scopeAttributes), self.scrollPastEnd, fontScaleFactor);
 
 		BOOL hasFocus = (self.keyState & (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask)) == (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask);
 		documentView->set_draw_as_key(hasFocus);
@@ -849,6 +856,9 @@ static std::string shell_quote (std::vector<std::string> paths)
 		[self setNeedsDisplay:YES];
 		_links.reset();
 		NSAccessibilityPostNotification(self, NSAccessibilityValueChangedNotification);
+
+		if(hasFocus)
+			[[NSFontManager sharedFontManager] setSelectedFont:self.font isMultiple:NO];
 	}
 }
 
@@ -856,16 +866,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 {
 	if(self = [super initWithFrame:aRect])
 	{
-		_fontScaleFactor = 100;
-
 		settings_t const& settings = settings_for_path();
-
-		NSString* fontName = [NSString stringWithCxxString:settings.get(kSettingsFontNameKey, NULL_STR)];
-		CGFloat fontSize = settings.get(kSettingsFontSizeKey, 11.0);
-		if(fontName)
-			_font = [NSFont fontWithName:fontName size:fontSize];
-		if(!_font)
-			_font = [NSFont userFixedPitchFontOfSize:fontSize];
 
 		_showInvisibles = settings.get(kSettingsShowInvisiblesKey, false);
 		_scrollPastEnd  = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsScrollPastEndKey];
@@ -2895,6 +2896,8 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 // ==============
 
 - (theme_ptr)theme            { return documentView ? documentView->theme() : theme_ptr(); }
+- (NSFont*)font               { return documentView ? documentView->font() : [NSFont userFixedPitchFontOfSize:0]; }
+- (NSInteger)fontScaleFactor  { return documentView ? documentView->font_scale_factor() : 100; }
 - (size_t)tabSize             { return documentView ? documentView->indent().tab_size() : 2; }
 - (BOOL)softTabs              { return documentView ? documentView->indent().soft_tabs() : NO; }
 - (BOOL)softWrap              { return documentView && documentView->soft_wrap(); }
@@ -2926,33 +2929,26 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (void)setFont:(NSFont*)newFont
 {
-	_font = newFont;
-	_fontScaleFactor = 100;
-
 	if(documentView)
 	{
 		AUTO_REFRESH;
 		ng::index_t visibleIndex = documentView->index_at_point([self visibleRect].origin);
-		documentView->set_font(to_s(self.font.fontName), self.font.pointSize * _fontScaleFactor / 100);
+		documentView->set_font(newFont);
 		[self scrollIndexToFirstVisible:documentView->begin(documentView->convert(visibleIndex.index).line)];
 	}
 }
 
 - (void)setFontScaleFactor:(NSInteger)newFontScaleFactor
 {
-	if(_fontScaleFactor == newFontScaleFactor)
-		return;
-	_fontScaleFactor = newFontScaleFactor;
-
 	if(documentView)
 	{
 		AUTO_REFRESH;
 		ng::index_t visibleIndex = documentView->index_at_point([self visibleRect].origin);
-		documentView->set_font(to_s(self.font.fontName), self.font.pointSize * _fontScaleFactor / 100);
+		documentView->set_font_scale_factor(newFontScaleFactor);
 		[self scrollIndexToFirstVisible:documentView->begin(documentView->convert(visibleIndex.index).line)];
 	}
 
-	[OTVHUD showHudForView:self withText:[NSString stringWithFormat:@"%ld%%", _fontScaleFactor]];
+	[OTVHUD showHudForView:self withText:[NSString stringWithFormat:@"%ld%%", newFontScaleFactor]];
 }
 
 - (void)setTabSize:(size_t)newTabSize

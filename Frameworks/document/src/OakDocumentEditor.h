@@ -9,13 +9,16 @@ namespace ng
 } /* ng */
 
 PUBLIC @interface OakDocumentEditor : NSObject
-+ (instancetype)documentEditorWithDocument:(OakDocument*)aDocument font:(NSFont*)font;
-- (instancetype)initWithDocument:(OakDocument*)aDocument font:(NSFont*)font;
++ (instancetype)documentEditorWithDocument:(OakDocument*)aDocument fontScaleFactor:(NSInteger)scale;
+- (instancetype)initWithDocument:(OakDocument*)aDocument fontScaleFactor:(NSInteger)scale;
 @property (nonatomic, readonly) OakDocument* document;
 @property (nonatomic) ng::ranges_t selection;
 - (ng::buffer_t&)buffer;
 - (ng::editor_t&)editor;
 - (ng::layout_t&)layout;
+
+@property (nonatomic) NSFont* font;
+@property (nonatomic) NSInteger fontScaleFactor;
 
 - (void)documentWillSave:(OakDocument*)aDocument;
 - (void)performReplacements:(std::multimap<std::pair<size_t, size_t>, std::string> const&)someReplacements;
