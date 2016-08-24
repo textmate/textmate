@@ -3,6 +3,9 @@
 @class OakFileBrowser;
 @class OakBackgroundFillView;
 
+extern PUBLIC NSString* OakFileBrowserDidDuplicateURLs;
+extern PUBLIC NSString* OakFileBrowserURLMapKey;
+
 @protocol OakFileBrowserDelegate
 - (void)fileBrowser:(OakFileBrowser*)aFileBrowser openURLs:(NSArray*)someURLs;
 - (void)fileBrowser:(OakFileBrowser*)aFileBrowser closeURL:(NSURL*)anURL;

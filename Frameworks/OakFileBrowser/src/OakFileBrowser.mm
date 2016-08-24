@@ -31,6 +31,9 @@
 
 OAK_DEBUG_VAR(FileBrowser_Controller);
 
+NSString* OakFileBrowserDidDuplicateURLs = @"OakFileBrowserDidDuplicateURLs";
+NSString* OakFileBrowserURLMapKey        = @"OakFileBrowserURLMapKey";
+
 static NSString* DisplayName (NSURL* url, size_t numberOfParents = 0)
 {
 	NSString* res = nil;
@@ -589,20 +592,22 @@ static bool is_binary (std::string const& path)
 
 - (void)duplicateSelectedEntries:(id)sender
 {
-	NSMutableArray* duplicatedURLs = [NSMutableArray array];
+	NSMutableDictionary* duplicatedURLs = [NSMutableDictionary dictionary];
 	for(NSURL* url in self.selectedURLs)
 	{
 		if([url isFileURL])
 		{
 			if(NSURL* res = [[OakFileManager sharedInstance] createDuplicateOfURL:url view:_view])
-				[duplicatedURLs addObject:res];
+				duplicatedURLs[url] = res;
 		}
 	}
 
 	if([duplicatedURLs count] == 1)
-		[_outlineViewDelegate editURL:[duplicatedURLs lastObject]];
+		[_outlineViewDelegate editURL:[[duplicatedURLs allValues] lastObject]];
 	else if([duplicatedURLs count] > 1)
-		[_outlineViewDelegate selectURLs:duplicatedURLs expandChildren:NO];
+		[_outlineViewDelegate selectURLs:[duplicatedURLs allValues] expandChildren:NO];
+
+	[[NSNotificationCenter defaultCenter] postNotificationName:OakFileBrowserDidDuplicateURLs object:self userInfo:@{ OakFileBrowserURLMapKey : duplicatedURLs }];
 }
 
 - (void)revealSelectedItem:(id)sender
