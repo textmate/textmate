@@ -264,6 +264,11 @@ struct document_view_t : ng::buffer_api_t
 	NSInteger font_scale_factor () const          { return _document_editor.fontScaleFactor; }
 	void set_font_scale_factor (NSInteger scale)  { _document_editor.fontScaleFactor = scale; }
 
+	void set_command_runner (std::function<void(bundle_command_t const&, ng::buffer_api_t const&, ng::ranges_t const&, std::map<std::string, std::string> const&)> const& runner)
+	{
+		_command_runner = runner;
+	}
+
 	std::map<std::string, std::string> variables (std::string const& scopeAttributes) const
 	{
 		std::map<std::string, std::string> res = _document->document_variables();
@@ -341,7 +346,7 @@ struct document_view_t : ng::buffer_api_t
 	void move_selection_to (ng::index_t const& index, bool selectInsertion = true) { _editor->move_selection_to(index, selectInsertion); }
 	ng::ranges_t replace_all (std::string const& searchFor, std::string const& replaceWith, find::options_t options = find::none, bool searchOnlySelection = false) { return _editor->replace_all(searchFor, replaceWith, options, searchOnlySelection); }
 	void delete_tab_trigger (std::string const& str) { _editor->delete_tab_trigger(str); }
-	void macro_dispatch (plist::dictionary_t const& args, std::map<std::string, std::string> const& variables) { _editor->macro_dispatch(args, variables, [this](bundle_command_t const& cmd, ng::buffer_api_t const& buf, ng::ranges_t const& sel, std::map<std::string, std::string> const& vars){ document::run(cmd, buf, sel, _document, vars); }); }
+	void macro_dispatch (plist::dictionary_t const& args, std::map<std::string, std::string> const& variables) { _editor->macro_dispatch(args, variables, _command_runner); }
 	void snippet_dispatch (plist::dictionary_t const& args, std::map<std::string, std::string> const& variables) { _editor->snippet_dispatch(args, variables); }
 	std::vector<std::string> const& choices () const { return _editor->choices(); }
 	std::string placeholder_content (ng::range_t* placeholderSelection = NULL) const { return _editor->placeholder_content(placeholderSelection); }
@@ -399,6 +404,7 @@ struct document_view_t : ng::buffer_api_t
 private:
 	document::document_ptr _document;
 	OakDocumentEditor* _document_editor;
+	std::function<void(bundle_command_t const&, ng::buffer_api_t const&, ng::ranges_t const&, std::map<std::string, std::string> const&)> _command_runner;
 	ng::editor_t* _editor;
 	ng::layout_t* _layout;
 };
@@ -803,6 +809,9 @@ static std::string shell_quote (std::vector<std::string> paths)
 	if(document = aDocument)
 	{
 		documentView = std::make_shared<document_view_t>(document, to_s(self.scopeAttributes), self.scrollPastEnd, fontScaleFactor);
+		documentView->set_command_runner([self](bundle_command_t const& cmd, ng::buffer_api_t const& buffer, ng::ranges_t const& selection, std::map<std::string, std::string> const& variables){
+			[self executeBundleCommand:cmd buffer:buffer selection:selection variables:variables];
+		});
 
 		BOOL hasFocus = (self.keyState & (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask)) == (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask);
 		documentView->set_draw_as_key(hasFocus);
