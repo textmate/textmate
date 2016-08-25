@@ -3435,7 +3435,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 			{ NSCommandKeyMask,   "COMMAND"  }
 		};
 
-		auto env = [self variablesForBundleItem:handler];
+		auto env = handler->bundle_variables();
 		auto const pwd = format_string::expand("${TM_DIRECTORY:-${TM_PROJECT_DIRECTORY:-$TMPDIR}}", env);
 
 		std::vector<std::string> files, paths = handlerToFiles[handler->uuid()];
@@ -3459,8 +3459,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		}
 		env["TM_MODIFIER_FLAGS"] = text::join(flagNames, "|");
 
-		AUTO_REFRESH;
-		document::run(parse_drag_command(handler), *documentView, documentView->ranges(), document, env, pwd);
+		[self executeBundleCommand:parse_drag_command(handler) variables:env];
 	}
 }
 
