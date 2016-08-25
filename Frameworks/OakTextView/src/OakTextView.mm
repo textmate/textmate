@@ -3594,7 +3594,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	else if(NSString* text = [pboard stringForType:[pboard availableTypeFromArray:@[ NSStringPboardType ]]])
 	{
 		D(DBF_OakTextView_DragNDrop, bug("plain text: %s\n", [text UTF8String]););
-		if(shouldMove)
+		if(shouldMove && documentView->has_selection())
 		{
 			crashInfo << text::format("buffer size: %zu, move selection (%s) to %s", documentView->size(), to_s(documentView->ranges()).c_str(), to_s(pos).c_str());
 			documentView->move_selection_to(pos);
