@@ -3575,7 +3575,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	BOOL shouldLink       = ([info draggingSource] != self) && ([info draggingSourceOperationMask] == NSDragOperationLink);
 
 	D(DBF_OakTextView_DragNDrop, bug("local %s, should move %s, type %s, all types %s\n", BSTR([info draggingSource] == self), BSTR(shouldMove), [type UTF8String], [[types description] UTF8String]););
-	crash_reporter_info_t crashInfo(text::format("local %s, should move %s, type %s, all types %s\n", BSTR([info draggingSource] == self), BSTR(shouldMove), [type UTF8String], [[types description] UTF8String]));
+	crash_reporter_info_t crashInfo(text::format("local %s, should move %s, type %s, all types %s", BSTR([info draggingSource] == self), BSTR(shouldMove), [type UTF8String], [[types description] UTF8String]));
 
 	AUTO_REFRESH;
 	ng::index_t pos = dropPosition;
@@ -3596,8 +3596,9 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		D(DBF_OakTextView_DragNDrop, bug("plain text: %s\n", [text UTF8String]););
 		if(shouldMove)
 		{
-			crashInfo << text::format("buffer size: %zu", documentView->size()) << ", move selection (" << to_s(documentView->ranges()) << ") to " << to_s(pos);
+			crashInfo << text::format("buffer size: %zu, move selection (%s) to %s", documentView->size(), to_s(documentView->ranges()).c_str(), to_s(pos).c_str());
 			documentView->move_selection_to(pos);
+			crashInfo << text::format("new selection %s", to_s(documentView->ranges()).c_str());
 		}
 		else
 		{
