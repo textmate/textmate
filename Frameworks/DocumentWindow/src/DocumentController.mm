@@ -646,7 +646,7 @@ namespace
 
 - (BOOL)windowShouldClose:(id)sender
 {
-	if(!self.htmlOutputInWindow && _runner && _runner->running())
+	if(!self.htmlOutputInWindow && _htmlOutputView.isRunningCommand)
 	{
 		[_htmlOutputView stopLoadingWithUserInteraction:YES completionHandler:^(BOOL didStop){
 			if(didStop)
