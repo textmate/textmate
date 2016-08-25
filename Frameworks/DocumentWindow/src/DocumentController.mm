@@ -1,6 +1,5 @@
 #import "DocumentController.h"
 #import "ProjectLayoutView.h"
-#import "DocumentCommand.h" // show_command_error
 #import "SelectGrammarViewController.h"
 #import "OakRunCommandWindowController.h"
 #import <document/collection.h>
@@ -23,6 +22,7 @@
 #import <OakSystem/application.h>
 #import <Find/Find.h>
 #import <BundlesManager/BundlesManager.h>
+#import <BundleEditor/BundleEditor.h>
 #import <network/network.h>
 #import <file/path_info.h>
 #import <io/entries.h>
@@ -39,6 +39,26 @@ static NSString* const kUserDefaultsDisableFolderStateRestore = @"disableFolderS
 static NSString* const kUserDefaultsHideStatusBarKey = @"hideStatusBar";
 static NSString* const kUserDefaultsDisableBundleSuggestionsKey = @"disableBundleSuggestions";
 static NSString* const kUserDefaultsGrammarsToNeverSuggestKey = @"grammarsToNeverSuggest";
+
+static void show_command_error (std::string const& message, oak::uuid_t const& uuid, NSWindow* window = nil, std::string commandName = NULL_STR)
+{
+	bundles::item_ptr bundleItem = bundles::lookup(uuid);
+	if(commandName == NULL_STR)
+		commandName = bundleItem ? bundleItem->name() : "(unknown)";
+
+	NSAlert* alert = [[NSAlert alloc] init];
+	[alert setAlertStyle:NSCriticalAlertStyle];
+	[alert setMessageText:[NSString stringWithCxxString:text::format("Failure running “%.*s”.", (int)commandName.size(), commandName.data())]];
+	[alert setInformativeText:[NSString stringWithCxxString:message] ?: @"No output"];
+	[alert addButtonWithTitle:@"OK"];
+	if(bundleItem)
+		[alert addButtonWithTitle:@"Edit Command"];
+
+	OakShowAlertForWindow(alert, window, ^(NSInteger button){
+		if(button == NSAlertSecondButtonReturn)
+			[[BundleEditor sharedInstance] revealBundleItem:bundleItem];
+	});
+}
 
 @interface QuickLookNSURLWrapper : NSObject <QLPreviewItem>
 @property (nonatomic) NSURL* url;
