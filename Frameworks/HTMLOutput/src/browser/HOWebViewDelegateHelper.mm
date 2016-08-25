@@ -11,7 +11,7 @@ static NSString* const kUserDefaultsDefaultURLProtocolKey = @"defaultURLProtocol
 
 static BOOL IsProtocolRelativeURL (NSURL* url)
 {
-	if([url.scheme isEqualToString:@"x-txmt-command"] && ![url.host isEqualToString:@"job"])
+	if([url.scheme hasPrefix:@"x-txmt"] && ![url.host isEqualToString:@"job"])
 		return YES;
 
 	if([url.scheme isEqualToString:@"file"] && url.host)
