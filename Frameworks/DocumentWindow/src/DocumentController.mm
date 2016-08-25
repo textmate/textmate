@@ -3,6 +3,7 @@
 #import "DocumentCommand.h" // show_command_error
 #import "SelectGrammarViewController.h"
 #import "OakRunCommandWindowController.h"
+#import <document/collection.h>
 #import <document/OakDocument.h>
 #import <OakAppKit/NSAlert Additions.h>
 #import <OakAppKit/NSMenuItem Additions.h>
@@ -16,6 +17,7 @@
 #import <Preferences/Keys.h>
 #import <OakTextView/OakDocumentView.h>
 #import <OakFileBrowser/OakFileBrowser.h>
+#import <OakCommand/OakCommand.h>
 #import <HTMLOutputWindow/HTMLOutputWindow.h>
 #import <OakFilterList/FileChooser.h>
 #import <OakSystem/application.h>
@@ -1267,6 +1269,11 @@ namespace
 	}];
 }
 
+- (void)saveAllEditedDocuments:(BOOL)includeAllFlag completionHandler:(void(^)(BOOL didSave))handler
+{
+	[self bundleItemPreExec:(includeAllFlag ? pre_exec::save_project : pre_exec::save_document) completionHandler:handler];
+}
+
 - (OakHTMLOutputView*)htmlOutputView:(BOOL)createFlag forIdentifier:(NSUUID*)identifier
 {
 	// if createFlag == YES then return (potential new) OakHTMLOutputView where isRunningCommand == NO.
@@ -1322,6 +1329,33 @@ namespace
 		}
 	}
 	callback(YES);
+}
+
+- (void)updateEnvironment:(std::map<std::string, std::string>&)res forCommand:(OakCommand*)aCommand
+{
+	for(auto const& pair : [self variables])
+		res[pair.first] = pair.second;
+
+	if(aCommand.firstResponder == _fileBrowser)
+	{
+		NSURL* fileURL = [[_fileBrowser.selectedURLs filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isFileURL == YES"]] firstObject];
+		res = bundles::scope_variables(res);
+		res = variables_for_path(res, to_s(fileURL.path));
+	}
+	else if(aCommand.firstResponder != _textView)
+	{
+		if([aCommand.firstResponder respondsToSelector:@selector(updateEnvironment:)])
+			[(id)aCommand.firstResponder updateEnvironment:res];
+	}
+	else // OakTextView
+	{
+		[_textView updateEnvironment:res];
+	}
+}
+
+- (void)showDocument:(document::document_ptr)aDocument
+{
+	document::show(aDocument, to_s(self.identifier));
 }
 
 // ================

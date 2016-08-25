@@ -3,6 +3,7 @@
 #import "OakDocumentView.h" // addAuxiliaryView:atEdge: signature
 #import "LiveSearchView.h"
 #import "OTVHUD.h"
+#import <OakCommand/OakCommand.h>
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/NSEvent Additions.h>
 #import <OakAppKit/NSImage Additions.h>
@@ -4210,4 +4211,31 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 - ACTION(moveSelectionDown);
 - ACTION(moveSelectionLeft);
 - ACTION(moveSelectionRight);
+
+- (void)updateEnvironment:(std::map<std::string, std::string>&)res
+{
+	if(!documentView || !self.theme)
+		return;
+
+	res << documentView->variables(to_s([self scopeAttributes]));
+	if(auto themeItem = bundles::lookup(self.theme->uuid()))
+	{
+		if(!themeItem->paths().empty())
+			res["TM_CURRENT_THEME_PATH"] = themeItem->paths().back();
+	}
+
+	res = bundles::scope_variables(res, [self scopeContext]);
+	res = variables_for_path(res, documentView->logical_path(), [self scopeContext].right, path::parent(documentView->path()));
+}
+
+- (void)showToolTip:(NSString*)aToolTip
+{
+	OakShowToolTip(aToolTip, [self positionForWindowUnderCaret]);
+}
+
+- (BOOL)presentError:(NSError*)anError
+{
+	[self.window presentError:anError modalForWindow:self.window delegate:nil didPresentSelector:NULL contextInfo:nullptr];
+	return NO;
+}
 @end
