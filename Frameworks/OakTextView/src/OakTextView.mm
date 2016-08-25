@@ -4212,6 +4212,56 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 - ACTION(moveSelectionLeft);
 - ACTION(moveSelectionRight);
 
+// ===============
+// = Run Command =
+// ===============
+
+- (void)executeBundleCommand:(bundle_command_t const&)aBundleCommand variables:(std::map<std::string, std::string> const&)initialVariables
+{
+	[self executeBundleCommand:aBundleCommand buffer:*documentView selection:documentView->ranges() variables:initialVariables];
+}
+
+- (void)executeBundleCommand:(bundle_command_t const&)aBundleCommand buffer:(ng::buffer_api_t const&)buffer selection:(ng::ranges_t const&)selection variables:(std::map<std::string, std::string> const&)initialVariables
+{
+	int stdinRead, stdinWrite;
+	std::tie(stdinRead, stdinWrite) = io::create_pipe();
+
+	std::map<std::string, std::string> variables = initialVariables;
+	bool inputWasSelection = false;
+	ng::ranges_t const inputRanges = ng::write_unit_to_fd(buffer, selection, buffer.indent().tab_size(), stdinWrite, aBundleCommand.input, aBundleCommand.input_fallback, aBundleCommand.input_format, aBundleCommand.scope_selector, variables, &inputWasSelection);
+
+	OakCommand* command = [[OakCommand alloc] initWithBundleCommand:aBundleCommand];
+	command.firstResponder = self;
+	[command executeWithInput:[[NSFileHandle alloc] initWithFileDescriptor:stdinRead closeOnDealloc:YES] variables:variables completionHandler:^(std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, std::map<std::string, std::string> const& environment){
+		if(outputCaret == output_caret::heuristic)
+		{
+			if(aBundleCommand.input == input::selection && inputWasSelection)
+				outputCaret = output_caret::select_output;
+			else if(aBundleCommand.input == input::selection && (aBundleCommand.input_fallback == input::line || aBundleCommand.input_fallback == input::word || aBundleCommand.input_fallback == input::scope))
+				outputCaret = output_caret::interpolate_by_char;
+			else if(aBundleCommand.input == input::selection && (aBundleCommand.input_fallback == input::entire_document))
+				outputCaret = output_caret::interpolate_by_line;
+			else
+				outputCaret = output_caret::after_output;
+		}
+
+		if(!inputRanges)
+		{
+			switch(placement)
+			{
+				case output::after_input:   placement = output::at_caret;          break;
+				case output::replace_input: placement = output::replace_selection; break;
+			}
+		}
+
+		AUTO_REFRESH;
+		documentView->handle_result(out, placement, format, outputCaret, inputRanges, environment);
+	}];
+
+	if(command.isAsyncCommand == NO)
+		[command waitUntilExit];
+}
+
 - (void)updateEnvironment:(std::map<std::string, std::string>&)res
 {
 	if(!documentView || !self.theme)
