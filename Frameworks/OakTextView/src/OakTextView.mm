@@ -3278,64 +3278,16 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (BOOL)filterDocumentThroughCommand:(NSString*)commandString input:(input::type)inputUnit output:(output::type)outputUnit
 {
-	BOOL res = NO;
-
-	auto environment = [self variables];
-	if(io::process_t process = io::spawn(std::vector<std::string>{ "/bin/sh", "-c", to_s(commandString) }, environment))
-	{
-		bool inputWasSelection = false;
-		ng::ranges_t const inputRanges = ng::write_unit_to_fd(*documentView, documentView->ranges(), documentView->indent().tab_size(), process.in, inputUnit, input::entire_document, input_format::text, scope::selector_t(), environment, &inputWasSelection);
-
-		__block int status = 0;
-		__block std::string output, error;
-
-		dispatch_group_t group = dispatch_group_create();
-		dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-			if(waitpid(process.pid, &status, 0) != process.pid)
-				perror("filterDocumentThroughCommand: waitpid");
-		});
-		dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-			io::exhaust_fd(process.out, &output);
-		});
-		dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-			io::exhaust_fd(process.err, &error);
-		});
-		dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
-
-		if(res = WIFEXITED(status) && WEXITSTATUS(status) == 0)
-		{
-			if(outputUnit == output::tool_tip)
-			{
-				OakShowToolTip([NSString stringWithCxxString:text::trim(output)], [self positionForWindowUnderCaret]);
-			}
-			else if(outputUnit == output::new_window)
-			{
-				oak::uuid_t projectIdentifier = document::kCollectionAny;
-				if([self.window.delegate respondsToSelector:@selector(identifier)]) // FIXME This should be a formal interface
-					projectIdentifier = to_s([self.window.delegate performSelector:@selector(identifier)]);
-
-				document::show(document::from_content(output, documentView->file_type()), projectIdentifier);
-			}
-			else
-			{
-				AUTO_REFRESH;
-				documentView->handle_result(output, outputUnit, output_format::text, output_caret::after_output, inputRanges, environment);
-			}
-		}
-
-		error = text::trim(error);
-		if(error.empty() && !res)
-		{
-			if(WIFEXITED(status))
-				error = text::format("Failed executing ‘%s’.\nCommand returned non-zero status code: %d.", [commandString UTF8String], WEXITSTATUS(status));
-			else
-				error = text::format("Failed executing ‘%s’.\nAbnormal exit: %d.", [commandString UTF8String], status);
-		}
-
-		if(!error.empty())
-			OakShowToolTip([NSString stringWithCxxString:error], [self positionForWindowUnderCaret]);
-	}
-	return res;
+	bundle_command_t command = {
+		.command        = "#!/bin/sh\n" + to_s(commandString),
+		.name           = "Filter Through Command",
+		.uuid           = oak::uuid_t().generate(),
+		.input          = inputUnit,
+		.input_fallback = input::entire_document,
+		.output         = outputUnit,
+	};
+	[self executeBundleCommand:command variables:{ }];
+	return YES;
 }
 
 - (NSString*)string
