@@ -122,7 +122,6 @@ static void setup_fields (plist::dictionary_t const& plist, bundle_command_t& re
 bundle_command_t parse_command (plist::dictionary_t const& plist)
 {
 	bundle_command_t res = { };
-	res.input_fallback = input::entire_document;
 	setup_fields(plist, res);
 	return res;
 }

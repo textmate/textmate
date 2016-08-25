@@ -46,26 +46,26 @@ inline char const* to_s (output_caret::type const& caret)
 
 struct PUBLIC bundle_command_t
 {
-	std::string name;
+	std::string name = NULL_STR;
 	oak::uuid_t uuid;
 	scope::selector_t scope_selector;
 	std::string command;
 
-	pre_exec::type pre_exec;
+	pre_exec::type pre_exec           = pre_exec::nop;
 
-	input::type input;
-	input::type input_fallback;
-	input_format::type input_format;
+	input::type input                 = input::selection;
+	input::type input_fallback        = input::entire_document;
+	input_format::type input_format   = input_format::text;
 
-	output::type output;
-	output_format::type output_format;
-	output_caret::type output_caret;
-	output_reuse::type output_reuse;
+	output::type output               = output::replace_input;
+	output_format::type output_format = output_format::text;
+	output_caret::type output_caret   = output_caret::after_output;
+	output_reuse::type output_reuse   = output_reuse::reuse_available;
 
-	auto_refresh::type auto_refresh;
+	auto_refresh::type auto_refresh   = auto_refresh::never;
 
-	bool auto_scroll_output;
-	bool disable_output_auto_indent;
+	bool auto_scroll_output           = false;
+	bool disable_output_auto_indent   = false;
 };
 
 PUBLIC bundle_command_t parse_command (bundles::item_ptr bundleItem);
