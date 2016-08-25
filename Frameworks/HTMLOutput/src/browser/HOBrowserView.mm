@@ -26,14 +26,6 @@ static void ShowLoadErrorForURL (WebFrame* frame, NSURL* url, NSError* error)
 @end
 
 @implementation HOBrowserView
-
-@dynamic needsNewWebView;
-
-+ (BOOL)requiresConstraintBasedLayout
-{
-	return YES;
-}
-
 - (NSSize)intrinsicContentSize
 {
 	return NSMakeSize(NSViewNoInstrinsicMetric, NSViewNoInstrinsicMetric);

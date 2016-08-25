@@ -7,8 +7,4 @@ PUBLIC @interface OakHTMLOutputView : HOBrowserView
 - (void)loadHTMLString:(NSString*)someHTML;
 
 @property (nonatomic, getter = isRunningCommand, readonly) BOOL runningCommand;
-
-// Read-only access to the webview is given to allow reading page title, etc.
-@property (nonatomic, readonly) WebView* webView;
-@property (nonatomic, readonly) BOOL needsNewWebView;
 @end

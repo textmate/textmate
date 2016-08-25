@@ -18,9 +18,6 @@ extern NSString* const kCommandRunnerURLScheme; // from HTMLOutput.h
 @end
 
 @implementation OakHTMLOutputView
-
-@dynamic webView, needsNewWebView;
-
 - (void)loadRequest:(NSURLRequest*)aRequest environment:(std::map<std::string, std::string> const&)anEnvironment autoScrolls:(BOOL)flag
 {
 	if(flag)
