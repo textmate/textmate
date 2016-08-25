@@ -1267,52 +1267,57 @@ namespace
 	}];
 }
 
-- (NSArray*)outputWindowsForCommandUUID:(oak::uuid_t const&)anUUID
+- (OakHTMLOutputView*)htmlOutputView:(BOOL)createFlag forIdentifier:(NSUUID*)identifier
 {
-	NSMutableArray* windows = [NSMutableArray array];
+	// if createFlag == YES then return (potential new) OakHTMLOutputView where isRunningCommand == NO.
+	// If createFlag == NO and there is non-busy OakHTMLOutputView with commandIdentifier == identifier then return it
+	// otherwise return busy OakHTMLOutputView with commandIdentifier == identifier or nil.
 
-	HTMLOutputWindowController* candidate = self.htmlOutputWindowController;
-	if(candidate && candidate.commandRunner->uuid() == anUUID && !candidate.needsNewWebView && candidate.window.isVisible)
-		[windows addObject:candidate];
-
-	for(NSWindow* window in [NSApp orderedWindows])
+	if(!self.htmlOutputInWindow)
 	{
-		HTMLOutputWindowController* candidate = [window delegate];
-		if(candidate != self.htmlOutputWindowController && ![window isMiniaturized] && [window isVisible] && [candidate isKindOfClass:[HTMLOutputWindowController class]])
+		BOOL nonExistingOrNonBusy   = !self.htmlOutputView || !self.htmlOutputView.isRunningCommand;
+		BOOL existsForOurIdentifier = self.htmlOutputView && [self.htmlOutputView.commandIdentifier isEqual:identifier];
+		if(createFlag ? nonExistingOrNonBusy : existsForOurIdentifier)
 		{
-			if(candidate && candidate.commandRunner->uuid() == anUUID && !candidate.needsNewWebView)
-				[windows addObject:candidate];
+			self.htmlOutputVisible = YES;
+			return self.htmlOutputView;
 		}
 	}
 
-	return windows;
+	NSMutableArray <OakHTMLOutputView*>* htmlOutputViews = [NSMutableArray array];
+	if(self.htmlOutputWindowController)
+		[htmlOutputViews addObject:self.htmlOutputWindowController.htmlOutputView];
+
+	for(NSWindow* window in [NSApp orderedWindows])
+	{
+		if([window isVisible] && ![window isMiniaturized] && [window.delegate isKindOfClass:[HTMLOutputWindowController class]])
+			[htmlOutputViews addObject:[(HTMLOutputWindowController*)window.delegate htmlOutputView]];
+	}
+
+	NSArray* allHTMLViews = [htmlOutputViews filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"needsNewWebView == NO AND commandIdentifier == %@", identifier]];
+	NSArray* nonBusyViews = [allHTMLViews filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isRunningCommand == NO"]];
+
+	if(OakHTMLOutputView* view = [nonBusyViews firstObject])
+	{
+		return view;
+	}
+	else if(createFlag)
+	{
+		self.htmlOutputWindowController = [[HTMLOutputWindowController alloc] initWithIdentifier:identifier];
+		return self.htmlOutputWindowController.htmlOutputView;
+	}
+	return [allHTMLViews firstObject];
 }
 
 - (void)bundleItemReuseOutputForCommand:(bundle_command_t const&)aCommand completionHandler:(void(^)(BOOL success))callback
 {
 	if(aCommand.output_reuse == output_reuse::reuse_busy || aCommand.output_reuse == output_reuse::abort_and_reuse_busy)
 	{
-		NSArray* windows = [self outputWindowsForCommandUUID:aCommand.uuid];
-		if([windows count] && [windows indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL* stop){ return (BOOL)!((HTMLOutputWindowController*)obj).running; }] == NSNotFound)
+		OakHTMLOutputView* view = [self htmlOutputView:NO forIdentifier:[[NSUUID alloc] initWithUUIDString:to_ns(aCommand.uuid)]];
+		if(view && view.isRunningCommand)
 		{
-			HTMLOutputWindowController* candidate = [windows firstObject];
-
 			BOOL askUser = aCommand.output_reuse != output_reuse::abort_and_reuse_busy;
-			[candidate.htmlOutputView stopLoadingWithUserInteraction:askUser completionHandler:^(BOOL didStop){
-				if(didStop)
-				{
-					dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-						candidate.commandRunner->wait_for_command(); // Must not be called in main queue
-						dispatch_async(dispatch_get_main_queue(), ^{
-							callback(YES);
-						});
-					});
-				}
-				else
-				{
-					callback(NO);
-				}
-			}];
+			[view stopLoadingWithUserInteraction:askUser completionHandler:callback];
 			return;
 		}
 	}
@@ -2074,29 +2079,12 @@ namespace
 - (void)setCommandRunner:(command::runner_ptr const&)aRunner
 {
 	_runner = aRunner;
-	if(self.htmlOutputInWindow || self.htmlOutputView.isRunningCommand)
+	if(OakHTMLOutputView* view = [self htmlOutputView:YES forIdentifier:[[NSUUID alloc] initWithUUIDString:to_ns(_runner->uuid())]])
 	{
-		HTMLOutputWindowController* target = nil;
-
-		if(_runner->output_reuse() != output_reuse::reuse_none)
-		{
-			NSArray* windows = [self outputWindowsForCommandUUID:_runner->uuid()];
-			NSUInteger index = [windows indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL* stop){ return (BOOL)!((HTMLOutputWindowController*)obj).running; }];
-			if(index != NSNotFound)
-				target = windows[index];
-		}
-
-		if(!target)
-			target = [[HTMLOutputWindowController alloc] initWithIdentifier:[[NSUUID alloc] initWithUUIDString:to_ns(aRunner->uuid())]];
-
-		target.commandRunner = _runner;
-		self.htmlOutputWindowController = target;
-	}
-	else
-	{
-		self.htmlOutputVisible = YES;
-		[self.window makeFirstResponder:self.htmlOutputView.webView];
-		[self.htmlOutputView loadRequest:URLRequestForCommandRunner(_runner) environment:_runner->environment() autoScrolls:_runner->auto_scroll_output()];
+		if([view.window.delegate respondsToSelector:@selector(showWindow:)])
+			[view.window.delegate performSelector:@selector(showWindow:) withObject:self];
+		[view.window makeFirstResponder:view.webView];
+		[view loadRequest:URLRequestForCommandRunner(_runner) environment:_runner->environment() autoScrolls:_runner->auto_scroll_output()];
 	}
 }
 
