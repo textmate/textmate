@@ -85,15 +85,8 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 
 - (void)setCommandRunner:(command::runner_ptr)aRunner
 {
-	_commandRunner = aRunner;
-
-	[self.htmlOutputView loadRequest:URLRequestForCommandRunner(_commandRunner) environment:_commandRunner->environment() autoScrolls:_commandRunner->auto_scroll_output()];
+	[self.htmlOutputView loadRequest:URLRequestForCommandRunner(aRunner) environment:aRunner->environment() autoScrolls:aRunner->auto_scroll_output()];
 	[self showWindow:self];
-}
-
-- (BOOL)running
-{
-	return self.htmlOutputView.isRunningCommand;
 }
 
 - (BOOL)needsNewWebView
@@ -104,7 +97,7 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 - (BOOL)windowShouldClose:(id)sender
 {
 	D(DBF_HTMLOutputWindow, bug("\n"););
-	if(!self.running)
+	if(!_htmlOutputView.isRunningCommand)
 		return YES;
 
 	[_htmlOutputView stopLoadingWithUserInteraction:YES completionHandler:^(BOOL didStop){
