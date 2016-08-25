@@ -277,7 +277,7 @@ namespace command
 		output_caret::type outputCaret = _command.output_caret;
 
 		int rc = WIFEXITED(status) ? WEXITSTATUS(status) : (WIFSIGNALED(status) ? 0 : -1);
-		enum { exit_discard = 200, exit_replace_text, exit_replace_document, exit_insert_text, exit_insert_snippet, exit_show_html, exit_show_tool_tip, exit_create_new_document, exit_last };
+		enum { exit_discard = 200, exit_replace_text, exit_replace_document, exit_insert_text, exit_insert_snippet, exit_show_html, exit_show_tool_tip, exit_create_new_document, exit_insert_snippet_no_indent, exit_last };
 		switch(rc)
 		{
 			case exit_discard:             placement = output::discard;                                            break;
@@ -285,6 +285,7 @@ namespace command
 			case exit_replace_document:    placement = output::replace_document;  format = output_format::text;    outputCaret = output_caret::interpolate_by_line;   break;
 			case exit_insert_text:         placement = output::after_input;       format = output_format::text;    outputCaret = output_caret::after_output;          break;
 			case exit_insert_snippet:
+			case exit_insert_snippet_no_indent:
 			{
 				if(_command.input == input::selection)
 					placement = output::replace_input;
@@ -350,7 +351,7 @@ namespace command
 				}
 			}
 
-			if(format == output_format::snippet && _command.disable_output_auto_indent)
+			if(format == output_format::snippet && (_command.disable_output_auto_indent || rc == exit_insert_snippet_no_indent))
 				format = output_format::snippet_no_auto_indent;
 
 			_delegate->accept_result(_out, placement, format, outputCaret, _input_ranges, _environment);
