@@ -2,6 +2,21 @@ Title: Release Notes
 
 # Changes
 
+## 2016-08-25 (v2.0-beta.12.5)
+
+* When duplicating files in the file browser, we now open the new file if the duplicated file was the selected tab.
+* Introduce `exit_insert_snippet_no_indent` to change a command’s output to a snippet but without adding indent.
+* It is now possible to use protocol-relative URLs (like `//apple.com`) in HTML output. By default we redirect these to `https` (even though they are technically loaded via the `file:` protocol). The default protocol can be changed via the `defaultURLProtocol` defaults key.
+* When setting `fontStyle` in a theme it is now possible to use `plain` with the other styles to reset all but the listed styles. E.g. `plain bold` to disable potential italic and underline.
+* A theme can now set `strikethrough` in `fontStyle` to get strikethrough text.
+* The `fontName` and `fontSize` settings in `.tm_properties` can now be set in a file type section to use different fonts for different file types or locations.
+* The search results font can be changed using the `searchResultsFontName` and `searchResultsFontSize` keys, e.g.:
+
+		defaults write com.macromates.TextMate.preview searchResultsFontName Menlo
+		defaults write com.macromates.TextMate.preview searchResultsFontSize -float 12
+
+* See [all changes since v2.0-beta.12.4](https://github.com/textmate/textmate/compare/v2.0-beta.12.4...v2.0-beta.12.5)
+
 ## 2016-08-18 (v2.0-beta.12.4)
 
 I normally do not mention fixes in the release notes but since this is a regular release primarily meant to address some reported issues, I am making an exemption.
