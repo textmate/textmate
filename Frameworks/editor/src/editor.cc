@@ -750,7 +750,7 @@ namespace ng
 			if(!range.empty())
 				sel.push_back(range);
 		}
-		_selections = tmp.empty() ? tmp : sel;
+		_selections = sel.empty() ? tmp : sel;
 	}
 
 	void editor_t::snippet (std::string const& str, std::map<std::string, std::string> const& variables, bool disableIndent)
