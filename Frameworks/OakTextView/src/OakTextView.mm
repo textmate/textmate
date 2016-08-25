@@ -1777,21 +1777,7 @@ doScroll:
 
 			auto command = parse_command(item);
 			command.name = name_with_selection(item, self.hasSelection);
-			if([self.delegate respondsToSelector:@selector(bundleItemPreExec:completionHandler:)])
-			{
-				[self.delegate bundleItemPreExec:command.pre_exec completionHandler:^(BOOL success){
-					if(success)
-					{
-						AUTO_REFRESH;
-						document::run(command, *documentView, documentView->ranges(), document, [self variablesForBundleItem:item]);
-					}
-				}];
-			}
-			else
-			{
-				command.pre_exec = pre_exec::nop;
-				document::run(command, *documentView, documentView->ranges(), document, [self variablesForBundleItem:item]);
-			}
+			[self executeBundleCommand:command variables:item->bundle_variables()];
 		}
 		break;
 
