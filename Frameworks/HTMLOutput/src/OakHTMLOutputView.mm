@@ -3,6 +3,7 @@
 #import "helpers/HOAutoScroll.h"
 #import "helpers/HOJSBridge.h"
 #import <OakFoundation/NSString Additions.h>
+#import <OakAppKit/OakAppKit.h>
 #import <oak/debug.h>
 
 extern NSString* const kCommandRunnerURLScheme; // from HTMLOutput.h
@@ -31,9 +32,27 @@ extern NSString* const kCommandRunnerURLScheme; // from HTMLOutput.h
 	[self.webView.mainFrame loadRequest:aRequest];
 }
 
-- (void)stopLoading
+- (void)stopLoadingWithUserInteraction:(BOOL)askUserFlag completionHandler:(void(^)(BOOL didStop))handler
 {
-	[self.webView.mainFrame stopLoading];
+	NSURLRequest* request = self.webView.mainFrame.dataSource.initialRequest;
+	if(askUserFlag && self.webView.mainFrame.dataSource.isLoading && [NSURLProtocol propertyForKey:@"processIdentifier" inRequest:request])
+	{
+		NSString* commandName = [NSURLProtocol propertyForKey:@"processName" inRequest:request];
+
+		NSAlert* alert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Stop “%@”?", commandName] defaultButton:@"Stop" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"The job that the task is performing will not be completed."];
+		OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){
+			if(returnCode == NSAlertDefaultReturn) /* "Stop" */
+				[self.webView.mainFrame stopLoading];
+			if(handler)
+				handler(returnCode == NSAlertDefaultReturn);
+		});
+	}
+	else
+	{
+		[self.webView.mainFrame stopLoading];
+		if(handler)
+			handler(YES);
+	}
 }
 
 - (void)loadHTMLString:(NSString*)someHTML

@@ -648,15 +648,13 @@ namespace
 {
 	if(!self.htmlOutputInWindow && _runner && _runner->running())
 	{
-		NSAlert* alert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Stop “%@”?", [NSString stringWithCxxString:_runner->name()]] defaultButton:@"Stop" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"The job that the task is performing will not be completed."];
-		OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){
-			if(returnCode == NSAlertDefaultReturn) /* "Stop" */
+		[_htmlOutputView stopLoadingWithUserInteraction:YES completionHandler:^(BOOL didStop){
+			if(didStop)
 			{
-				[_htmlOutputView stopLoading];
 				_runner.reset();
 				[sender performSelector:@selector(performClose:) withObject:self afterDelay:0];
 			}
-		});
+		}];
 		return NO;
 	}
 
@@ -1298,10 +1296,11 @@ namespace
 		if([windows count] && [windows indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL* stop){ return (BOOL)!((HTMLOutputWindowController*)obj).running; }] == NSNotFound)
 		{
 			HTMLOutputWindowController* candidate = [windows firstObject];
-			auto sheetResponseHandler = ^(NSInteger returnCode){
-				if(returnCode == NSAlertDefaultReturn) /* "Stop" */
+
+			BOOL askUser = aCommand.output_reuse != output_reuse::abort_and_reuse_busy;
+			[candidate.htmlOutputView stopLoadingWithUserInteraction:askUser completionHandler:^(BOOL didStop){
+				if(didStop)
 				{
-					[candidate.htmlOutputView stopLoading];
 					dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 						candidate.commandRunner->wait_for_command(); // Must not be called in main queue
 						dispatch_async(dispatch_get_main_queue(), ^{
@@ -1313,17 +1312,7 @@ namespace
 				{
 					callback(NO);
 				}
-			};
-
-			if(aCommand.output_reuse == output_reuse::reuse_busy)
-			{
-				NSAlert* alert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Stop “%@”?", [NSString stringWithCxxString:aCommand.name]] defaultButton:@"Stop" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"The job that the task is performing will not be completed."];
-				OakShowAlertForWindow(alert, candidate.window, sheetResponseHandler);
-			}
-			else // output_reuse::abort_and_reuse_busy
-			{
-				sheetResponseHandler(NSAlertDefaultReturn);
-			}
+			}];
 			return;
 		}
 	}
