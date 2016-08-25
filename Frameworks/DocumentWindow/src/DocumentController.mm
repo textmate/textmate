@@ -2087,7 +2087,7 @@ namespace
 		}
 
 		if(!target)
-			target = [HTMLOutputWindowController new];
+			target = [[HTMLOutputWindowController alloc] initWithIdentifier:[[NSUUID alloc] initWithUUIDString:to_ns(aRunner->uuid())]];
 
 		target.commandRunner = _runner;
 		self.htmlOutputWindowController = target;

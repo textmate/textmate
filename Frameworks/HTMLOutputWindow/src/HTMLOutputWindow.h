@@ -7,8 +7,9 @@ PUBLIC @interface HTMLOutputWindowController : NSObject <NSWindowDelegate>
 @property (nonatomic) command::runner_ptr commandRunner;
 @property (nonatomic, readonly) BOOL running;
 @property (nonatomic, readonly) BOOL needsNewWebView;
-+ (HTMLOutputWindowController*)HTMLOutputWindowWithRunner:(command::runner_ptr const&)aRunner;
++ (instancetype)HTMLOutputWindowWithRunner:(command::runner_ptr const&)aRunner;
 
+- (instancetype)initWithIdentifier:(NSUUID*)anIdentifier;
 - (void)showWindow:(id)sender;
 - (void)close;
 @end

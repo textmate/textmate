@@ -2,6 +2,7 @@
 #import <OakAppKit/OakAppKit.h>
 #import <OakFoundation/NSString Additions.h>
 #import <command/runner.h>
+#import <ns/ns.h>
 #import <oak/debug.h>
 
 OAK_DEBUG_VAR(HTMLOutputWindow);
@@ -14,7 +15,7 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 @end
 
 @implementation HTMLOutputWindowController
-- (id)init
+- (instancetype)init
 {
 	if(self = [super init])
 	{
@@ -40,6 +41,13 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 	return self;
 }
 
+- (instancetype)initWithIdentifier:(NSUUID*)anIdentifier
+{
+	if(self = [self init])
+		self.window.frameAutosaveName = [NSString stringWithFormat:@"HTML output for %@", anIdentifier.UUIDString];
+	return self;
+}
+
 - (void)applicationDidActivate:(NSNotification*)notification
 {
 	// Starting with 10.11 behavior must be changed after current event loop cycle <rdar://23587833>
@@ -59,7 +67,7 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 + (HTMLOutputWindowController*)HTMLOutputWindowWithRunner:(command::runner_ptr const&)aRunner
 {
 	D(DBF_HTMLOutputWindow, bug("%s\n", to_s(aRunner->uuid()).c_str()););
-	HTMLOutputWindowController* res = [[self alloc] init];
+	HTMLOutputWindowController* res = [[self alloc] initWithIdentifier:[[NSUUID alloc] initWithUUIDString:to_ns(aRunner->uuid())]];
 	[res setCommandRunner:aRunner];
 	return res;
 }
@@ -79,7 +87,6 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 {
 	_commandRunner = aRunner;
 
-	self.window.frameAutosaveName = [NSString stringWithFormat:@"HTML output for %@", [NSString stringWithCxxString:_commandRunner->uuid()]];
 	[self.htmlOutputView loadRequest:URLRequestForCommandRunner(_commandRunner) environment:_commandRunner->environment() autoScrolls:_commandRunner->auto_scroll_output()];
 	[self showWindow:self];
 }
