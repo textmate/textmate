@@ -120,6 +120,7 @@ NSURLRequest* URLRequestForCommandRunner (command::runner_ptr aRunner)
 	NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@://job/%ld", kCommandRunnerURLScheme, ++LastKey]] cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:6000];
 	[NSURLProtocol setProperty:pipe.fileHandleForReading forKey:@"fileHandle" inRequest:request];
 	[NSURLProtocol setProperty:@(aRunner->process_id()) forKey:@"processIdentifier" inRequest:request];
+	[NSURLProtocol setProperty:[[NSUUID alloc] initWithUUIDString:to_ns(aRunner->uuid())] forKey:@"commandIdentifier" inRequest:request];
 	[NSURLProtocol setProperty:to_ns(aRunner->name()) forKey:@"processName" inRequest:request];
 	return request;
 }

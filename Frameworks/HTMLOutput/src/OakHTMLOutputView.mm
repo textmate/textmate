@@ -28,6 +28,7 @@ extern NSString* const kCommandRunnerURLScheme; // from HTMLOutput.h
 	}
 
 	self.environment = anEnvironment;
+	self.commandIdentifier = [NSURLProtocol propertyForKey:@"commandIdentifier" inRequest:aRequest];
 	self.runningCommand = [[[aRequest URL] scheme] isEqualToString:kCommandRunnerURLScheme];
 	[self.webView.mainFrame loadRequest:aRequest];
 }

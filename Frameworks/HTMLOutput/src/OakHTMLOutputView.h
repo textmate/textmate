@@ -6,5 +6,6 @@ PUBLIC @interface OakHTMLOutputView : HOBrowserView
 - (void)stopLoadingWithUserInteraction:(BOOL)askUserFlag completionHandler:(void(^)(BOOL didStop))handler;
 - (void)loadHTMLString:(NSString*)someHTML;
 
+@property (nonatomic) NSUUID* commandIdentifier; // UUID from initial load request
 @property (nonatomic, getter = isRunningCommand, readonly) BOOL runningCommand;
 @end

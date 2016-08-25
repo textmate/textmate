@@ -7,6 +7,7 @@ extern NSString* const kCommandRunnerURLScheme;
 - (void)stopLoadingWithUserInteraction:(BOOL)askUserFlag completionHandler:(void(^)(BOOL didStop))handler;
 - (void)loadHTMLString:(NSString*)someHTML;
 
+@property (nonatomic) NSUUID* commandIdentifier; // UUID from initial load request
 @property (nonatomic, getter = isRunningCommand, readonly) BOOL runningCommand;
 
 // Read-only access to the webview is given to allow reading page title, etc.
