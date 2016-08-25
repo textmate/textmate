@@ -7,8 +7,6 @@
 #import <OakAppKit/OakAppKit.h>
 #import <oak/debug.h>
 
-extern NSString* const kCommandRunnerURLScheme; // from HTMLOutput.h
-
 @interface OakHTMLOutputView ()
 {
 	OBJC_WATCH_LEAKS(OakHTMLOutputView);
@@ -35,7 +33,7 @@ extern NSString* const kCommandRunnerURLScheme; // from HTMLOutput.h
 
 	self.environment = anEnvironment;
 	self.commandIdentifier = [NSURLProtocol propertyForKey:@"commandIdentifier" inRequest:aRequest];
-	self.runningCommand = [[[aRequest URL] scheme] isEqualToString:kCommandRunnerURLScheme];
+	self.runningCommand = self.commandIdentifier != nil;
 
 	[self willChangeValueForKey:@"mainFrameTitle"];
 	[self.webView.mainFrame loadRequest:aRequest];
@@ -89,14 +87,13 @@ extern NSString* const kCommandRunnerURLScheme; // from HTMLOutput.h
 - (void)webView:(WebView*)sender didStartProvisionalLoadForFrame:(WebFrame*)frame
 {
 	self.statusBar.isBusy = YES;
-	if(NSString* scheme = [[[[[self.webView mainFrame] provisionalDataSource] request] URL] scheme])
-		[self setUpdatesProgress:![scheme isEqualToString:kCommandRunnerURLScheme]];
+	[self setUpdatesProgress:!self.isRunningCommand];
 }
 
 - (void)webView:(WebView*)sender didClearWindowObject:(WebScriptObject*)windowScriptObject forFrame:(WebFrame*)frame
 {
 	NSString* scheme = [[[[[self.webView mainFrame] dataSource] request] URL] scheme];
-	if([@[ kCommandRunnerURLScheme, @"tm-file", @"file" ] containsObject:scheme])
+	if(self.isRunningCommand || [@[ @"tm-file", @"file" ] containsObject:scheme])
 	{
 		HOJSBridge* bridge = [HOJSBridge new];
 		[bridge setDelegate:self.statusBar];
