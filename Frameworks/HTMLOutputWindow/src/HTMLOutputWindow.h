@@ -5,7 +5,6 @@ PUBLIC @interface HTMLOutputWindowController : NSObject <NSWindowDelegate>
 @property (nonatomic) NSWindow* window;
 @property (nonatomic) OakHTMLOutputView* htmlOutputView;
 @property (nonatomic, readonly) BOOL needsNewWebView;
-+ (instancetype)HTMLOutputWindowWithRunner:(command::runner_ptr const&)aRunner;
 
 - (instancetype)initWithIdentifier:(NSUUID*)anIdentifier;
 - (void)showWindow:(id)sender;

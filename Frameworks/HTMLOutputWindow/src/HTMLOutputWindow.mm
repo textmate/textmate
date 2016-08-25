@@ -64,14 +64,6 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 	});
 }
 
-+ (HTMLOutputWindowController*)HTMLOutputWindowWithRunner:(command::runner_ptr const&)aRunner
-{
-	D(DBF_HTMLOutputWindow, bug("%s\n", to_s(aRunner->uuid()).c_str()););
-	HTMLOutputWindowController* res = [[self alloc] initWithIdentifier:[[NSUUID alloc] initWithUUIDString:to_ns(aRunner->uuid())]];
-	[res setCommandRunner:aRunner];
-	return res;
-}
-
 - (void)showWindow:(id)sender
 {
 	self.retainedSelf = self;
@@ -81,12 +73,6 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 - (void)close
 {
 	[self.window close];
-}
-
-- (void)setCommandRunner:(command::runner_ptr)aRunner
-{
-	[self.htmlOutputView loadRequest:URLRequestForCommandRunner(aRunner) environment:aRunner->environment() autoScrolls:aRunner->auto_scroll_output()];
-	[self showWindow:self];
 }
 
 - (BOOL)needsNewWebView

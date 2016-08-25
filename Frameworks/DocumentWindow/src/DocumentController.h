@@ -44,7 +44,6 @@ PUBLIC @interface DocumentController : NSObject
 
 - (NSPoint)positionForWindowUnderCaret;
 - (void)performBundleItem:(bundles::item_ptr const&)anItem;
-- (void)setCommandRunner:(command::runner_ptr const&)aRunner;
 - (IBAction)toggleHTMLOutput:(id)sender;
 
 - (IBAction)moveFocus:(id)sender;

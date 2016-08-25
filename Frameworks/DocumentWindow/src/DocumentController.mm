@@ -211,7 +211,6 @@ namespace
 	OBJC_WATCH_LEAKS(DocumentController);
 
 	std::map<oak::uuid_t, tracking_info_t> _trackedDocuments;
-	command::runner_ptr                    _runner;
 
 	scm::info_ptr                          _projectSCMInfo;
 	std::map<std::string, std::string>     _projectSCMVariables;
@@ -652,10 +651,7 @@ namespace
 	{
 		[_htmlOutputView stopLoadingWithUserInteraction:YES completionHandler:^(BOOL didStop){
 			if(didStop)
-			{
-				_runner.reset();
 				[sender performSelector:@selector(performClose:) withObject:self afterDelay:0];
-			}
 		}];
 		return NO;
 	}
@@ -2108,18 +2104,6 @@ namespace
 	if(self.htmlOutputVisible && self.htmlOutputInWindow && ![self.htmlOutputWindowController.window isKeyWindow])
 			[self.htmlOutputWindowController showWindow:self];
 	else	self.htmlOutputVisible = !self.htmlOutputVisible;
-}
-
-- (void)setCommandRunner:(command::runner_ptr const&)aRunner
-{
-	_runner = aRunner;
-	if(OakHTMLOutputView* view = [self htmlOutputView:YES forIdentifier:[[NSUUID alloc] initWithUUIDString:to_ns(_runner->uuid())]])
-	{
-		if([view.window.delegate respondsToSelector:@selector(showWindow:)])
-			[view.window.delegate performSelector:@selector(showWindow:) withObject:self];
-		[view.window makeFirstResponder:view.webView];
-		[view loadRequest:URLRequestForCommandRunner(_runner) environment:_runner->environment() autoScrolls:_runner->auto_scroll_output()];
-	}
 }
 
 // =============================
