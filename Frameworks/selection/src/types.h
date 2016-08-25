@@ -32,7 +32,7 @@ namespace ng
 		index_t const& min () const                { return first < last ? first : last;  }
 		index_t const& max () const                { return first < last ? last  : first; }
 		range_t sorted () const                    { return range_t(min(), max(), columnar, freehanded, unanchored, color); }
-		bool empty () const                        { return freehanded ? first == last : first.index == last.index; }
+		bool empty () const                        { return !last || (freehanded ? first == last : first.index == last.index); }
 		explicit operator bool () const            { return first ? true : false; }
 		bool operator== (range_t const& tmp) const { auto lhs = normalized(), rhs = tmp.normalized(); return lhs.first == rhs.first && lhs.last == rhs.last && lhs.columnar == rhs.columnar && lhs.freehanded == rhs.freehanded; }
 		bool operator!= (range_t const& tmp) const { auto lhs = normalized(), rhs = tmp.normalized(); return lhs.first != rhs.first || lhs.last != rhs.last || lhs.columnar != rhs.columnar || lhs.freehanded != rhs.freehanded; }
