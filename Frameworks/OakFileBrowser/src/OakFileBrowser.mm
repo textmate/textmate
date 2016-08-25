@@ -20,9 +20,8 @@
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakAppKit/OakZoomingIcon.h>
 #import <OakSystem/application.h>
+#import <OakCommand/OakCommand.h>
 #import <bundles/bundles.h>
-#import <document/document.h>
-#import <document/collection.h>
 #import <ns/ns.h>
 #import <text/ctype.h>
 #import <regexp/format_string.h>
@@ -800,11 +799,10 @@ static bool is_binary (std::string const& path)
 {
 	if(bundles::item_ptr item = bundles::lookup(to_s([sender representedObject])))
 	{
-		std::map<std::string, std::string> map = oak::basic_environment();
-		map << [self variables] << item->bundle_variables();
-		map = bundles::scope_variables(map);
-		map = variables_for_path(map, to_s([self.selectedPaths firstObject]));
-		document::run(parse_command(item), ng::buffer_t(), ng::ranges_t(), [self.selectedPaths count] == 1 ? document::create(map["TM_SELECTED_FILE"]) : document::document_ptr(), map);
+		// TODO For commands that have ‘input = document’ we should provide the document
+		OakCommand* command = [[OakCommand alloc] initWithBundleCommand:parse_command(item)];
+		command.firstResponder = self;
+		[command executeWithInput:nil variables:item->bundle_variables() completionHandler:nil];
 	}
 }
 

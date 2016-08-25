@@ -11,6 +11,7 @@
 #import <OakAppKit/OakToolTip.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakSystem/application.h>
+#import <OakCommand/OakCommand.h>
 #import <plist/uuid.h>
 #import <HTMLOutputWindow/HTMLOutputWindow.h>
 
@@ -46,11 +47,9 @@ OAK_DEBUG_VAR(AppController_Commands);
 
 			case bundles::kItemTypeCommand:
 			{
-				std::map<std::string, std::string> map = oak::basic_environment();
-				map << item->bundle_variables();
-				map = bundles::scope_variables(map);
-				map = variables_for_path(map);
-				document::run(parse_command(item), ng::buffer_t(), ng::ranges_t(), document::document_ptr(), map);
+				OakCommand* command = [[OakCommand alloc] initWithBundleCommand:parse_command(item)];
+				command.firstResponder = NSApp;
+				[command executeWithInput:nil variables:item->bundle_variables() completionHandler:nil];
 			}
 			break;
 
