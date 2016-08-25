@@ -86,8 +86,6 @@ PUBLIC @interface DocumentController : NSObject
 - (IBAction)goToSCMDataSource:(id)sender;
 - (IBAction)orderFrontGoToFolder:(id)sender;
 
-// Used by DocumentCommand.mm
+// Used by AppController
 + (instancetype)controllerForDocument:(document::document_ptr const&)aDocument;
-- (void)bundleItemPreExec:(pre_exec::type)preExec completionHandler:(void(^)(BOOL success))callback;
-- (void)bundleItemReuseOutputForCommand:(bundle_command_t const&)aCommand completionHandler:(void(^)(BOOL success))callback;
 @end

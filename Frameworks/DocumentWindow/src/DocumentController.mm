@@ -1257,37 +1257,26 @@ namespace
 	[self saveDocumentsUsingEnumerator:[documentsToSave objectEnumerator] completionHandler:nil];
 }
 
-- (void)bundleItemPreExec:(pre_exec::type)preExec completionHandler:(void(^)(BOOL success))callback
+- (void)saveAllEditedDocuments:(BOOL)includeAllFlag completionHandler:(void(^)(BOOL didSave))callback
 {
 	NSMutableArray* documentsToSave = [NSMutableArray array];
-	switch(preExec)
+	if(includeAllFlag)
 	{
-		case pre_exec::save_document:
+		for(auto document : _documents)
 		{
-			if(_selectedDocument && (_selectedDocument->is_modified() || !_selectedDocument->is_on_disk()))
-				[documentsToSave addObject:_selectedDocument->document()];
+			if(document->is_modified() && document->path() != NULL_STR)
+				[documentsToSave addObject:document->document()];
 		}
-		break;
-
-		case pre_exec::save_project:
-		{
-			for(auto document : _documents)
-			{
-				if(document->is_modified() && document->path() != NULL_STR)
-					[documentsToSave addObject:document->document()];
-			}
-		}
-		break;
+	}
+	else
+	{
+		if(_selectedDocument && (_selectedDocument->is_modified() || !_selectedDocument->is_on_disk()))
+			[documentsToSave addObject:_selectedDocument->document()];
 	}
 
 	[self saveDocumentsUsingEnumerator:[documentsToSave objectEnumerator] completionHandler:^(OakDocumentIOResult result){
 		callback(result == OakDocumentIOResultSuccess);
 	}];
-}
-
-- (void)saveAllEditedDocuments:(BOOL)includeAllFlag completionHandler:(void(^)(BOOL didSave))handler
-{
-	[self bundleItemPreExec:(includeAllFlag ? pre_exec::save_project : pre_exec::save_document) completionHandler:handler];
 }
 
 - (OakHTMLOutputView*)htmlOutputView:(BOOL)createFlag forIdentifier:(NSUUID*)identifier
@@ -1330,21 +1319,6 @@ namespace
 		return self.htmlOutputWindowController.htmlOutputView;
 	}
 	return [allHTMLViews firstObject];
-}
-
-- (void)bundleItemReuseOutputForCommand:(bundle_command_t const&)aCommand completionHandler:(void(^)(BOOL success))callback
-{
-	if(aCommand.output_reuse == output_reuse::reuse_busy || aCommand.output_reuse == output_reuse::abort_and_reuse_busy)
-	{
-		OakHTMLOutputView* view = [self htmlOutputView:NO forIdentifier:[[NSUUID alloc] initWithUUIDString:to_ns(aCommand.uuid)]];
-		if(view && view.isRunningCommand)
-		{
-			BOOL askUser = aCommand.output_reuse != output_reuse::abort_and_reuse_busy;
-			[view stopLoadingWithUserInteraction:askUser completionHandler:callback];
-			return;
-		}
-	}
-	callback(YES);
 }
 
 - (void)updateEnvironment:(std::map<std::string, std::string>&)res forCommand:(OakCommand*)aCommand
