@@ -277,7 +277,7 @@ namespace command
 		output_caret::type outputCaret = _command.output_caret;
 
 		int rc = WIFEXITED(status) ? WEXITSTATUS(status) : (WIFSIGNALED(status) ? 0 : -1);
-		enum { exit_discard = 200, exit_replace_text, exit_replace_document, exit_insert_text, exit_insert_snippet, exit_show_html, exit_show_tool_tip, exit_create_new_document };
+		enum { exit_discard = 200, exit_replace_text, exit_replace_document, exit_insert_text, exit_insert_snippet, exit_show_html, exit_show_tool_tip, exit_create_new_document, exit_last };
 		switch(rc)
 		{
 			case exit_discard:             placement = output::discard;                                            break;
@@ -301,7 +301,7 @@ namespace command
 		}
 
 		D(DBF_Command_Runner, bug("placement %d, format %d\n", placement, format););
-		if(rc != 0 && !_user_abort && !(200 <= rc && rc <= 207))
+		if(rc != 0 && !_user_abort && !(200 <= rc && rc < exit_last))
 		{
 			_delegate->show_error(_command, rc, _out, _err);
 		}
