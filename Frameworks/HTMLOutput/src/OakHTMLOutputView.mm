@@ -2,6 +2,7 @@
 #import "browser/HOStatusBar.h"
 #import "helpers/HOAutoScroll.h"
 #import "helpers/HOJSBridge.h"
+#import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/OakAppKit.h>
 #import <oak/debug.h>
@@ -19,6 +20,11 @@ extern NSString* const kCommandRunnerURLScheme; // from HTMLOutput.h
 @end
 
 @implementation OakHTMLOutputView
++ (NSSet*)keyPathsForValuesAffectingMainFrameTitle
+{
+	return [NSSet setWithObjects:@"webView.mainFrameTitle", nil];
+}
+
 - (void)loadRequest:(NSURLRequest*)aRequest environment:(std::map<std::string, std::string> const&)anEnvironment autoScrolls:(BOOL)flag
 {
 	if(flag)
@@ -30,7 +36,10 @@ extern NSString* const kCommandRunnerURLScheme; // from HTMLOutput.h
 	self.environment = anEnvironment;
 	self.commandIdentifier = [NSURLProtocol propertyForKey:@"commandIdentifier" inRequest:aRequest];
 	self.runningCommand = [[[aRequest URL] scheme] isEqualToString:kCommandRunnerURLScheme];
+
+	[self willChangeValueForKey:@"mainFrameTitle"];
 	[self.webView.mainFrame loadRequest:aRequest];
+	[self didChangeValueForKey:@"mainFrameTitle"];
 }
 
 - (void)stopLoadingWithUserInteraction:(BOOL)askUserFlag completionHandler:(void(^)(BOOL didStop))handler
@@ -60,6 +69,17 @@ extern NSString* const kCommandRunnerURLScheme; // from HTMLOutput.h
 {
 	self.pendingVisibleRect = [[[[self.webView mainFrame] frameView] documentView] visibleRect];
 	[[self.webView mainFrame] loadHTMLString:someHTML baseURL:[NSURL fileURLWithPath:NSHomeDirectory()]];
+}
+
+- (NSString*)mainFrameTitle
+{
+	if(OakIsEmptyString(self.webView.mainFrameTitle))
+	{
+		WebFrame* frame = self.webView.mainFrame;
+		if(NSURLRequest* request = (frame.provisionalDataSource ?: frame.dataSource).initialRequest)
+			return [NSURLProtocol propertyForKey:@"processName" inRequest:request] ?: @"";
+	}
+	return self.webView.mainFrameTitle;
 }
 
 // =======================

@@ -24,7 +24,7 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 		self.window         = [[NSWindow alloc] initWithContentRect:rect styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask) backing:NSBackingStoreBuffered defer:NO];
 		self.htmlOutputView = [[OakHTMLOutputView alloc] init];
 
-		[self.window bind:NSTitleBinding toObject:self.htmlOutputView.webView withKeyPath:@"mainFrameTitle" options:nil];
+		[self.window bind:NSTitleBinding toObject:self.htmlOutputView withKeyPath:@"mainFrameTitle" options:nil];
 		[self.window bind:NSDocumentEditedBinding toObject:self.htmlOutputView withKeyPath:@"runningCommand" options:nil];
 		[self.window setContentView:self.htmlOutputView];
 		[self.window setDelegate:self];
@@ -79,7 +79,6 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 {
 	_commandRunner = aRunner;
 
-	self.window.title = [NSString stringWithCxxString:_commandRunner->name()];
 	self.window.frameAutosaveName = [NSString stringWithFormat:@"HTML output for %@", [NSString stringWithCxxString:_commandRunner->uuid()]];
 	[self.htmlOutputView loadRequest:URLRequestForCommandRunner(_commandRunner) environment:_commandRunner->environment() autoScrolls:_commandRunner->auto_scroll_output()];
 	[self showWindow:self];
