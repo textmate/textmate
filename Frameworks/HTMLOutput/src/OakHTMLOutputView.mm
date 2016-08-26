@@ -43,23 +43,43 @@
 - (void)stopLoadingWithUserInteraction:(BOOL)askUserFlag completionHandler:(void(^)(BOOL didStop))handler
 {
 	NSURLRequest* request = self.webView.mainFrame.dataSource.initialRequest;
-	if(askUserFlag && self.webView.mainFrame.dataSource.isLoading && [NSURLProtocol propertyForKey:@"processIdentifier" inRequest:request])
+	if(id command = [NSURLProtocol propertyForKey:@"command" inRequest:request])
 	{
-		NSString* commandName = [NSURLProtocol propertyForKey:@"processName" inRequest:request];
+		NSAlert* alert = askUserFlag ? [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Stop “%@”?", [NSURLProtocol propertyForKey:@"processName" inRequest:request]] defaultButton:@"Stop" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"The job that the task is performing will not be completed."] : nil;
 
-		NSAlert* alert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Stop “%@”?", commandName] defaultButton:@"Stop" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"The job that the task is performing will not be completed."];
-		OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){
-			if(returnCode == NSAlertDefaultReturn) /* "Stop" */
-				[self.webView.mainFrame stopLoading];
-			if(handler)
-				handler(returnCode == NSAlertDefaultReturn);
-		});
+		__weak __block id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:@"OakCommandDidTerminateNotification" object:command queue:nil usingBlock:^(NSNotification* notification){
+			if(alert)
+			{
+				if([self.window respondsToSelector:@selector(endSheet:returnCode:)]) // MAC_OS_X_VERSION_10_9
+						[self.window endSheet:alert.window returnCode:NSAlertDefaultReturn];
+				else	[NSApp endSheet:alert.window returnCode:NSAlertDefaultReturn];
+			}
+			handler(YES);
+			[[NSNotificationCenter defaultCenter] removeObserver:observerId];
+		}];
+
+		if(alert)
+		{
+			OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){
+				if(returnCode == NSAlertDefaultReturn) /* "Stop" */
+				{
+					[self.webView.mainFrame stopLoading];
+				}
+				else
+				{
+					handler(NO);
+					[[NSNotificationCenter defaultCenter] removeObserver:observerId];
+				}
+			});
+		}
+		else
+		{
+			[self.webView.mainFrame stopLoading];
+		}
 	}
 	else
 	{
-		[self.webView.mainFrame stopLoading];
-		if(handler)
-			handler(YES);
+		handler(YES);
 	}
 }
 
