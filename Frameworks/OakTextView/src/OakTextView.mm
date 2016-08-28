@@ -781,6 +781,8 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 		[[NSNotificationCenter defaultCenter] removeObserver:self name:OakDocumentWillSaveNotification object:document->document()];
 		[[NSNotificationCenter defaultCenter] removeObserver:self name:OakDocumentDidSaveNotification object:document->document()];
+		[[NSNotificationCenter defaultCenter] removeObserver:self name:OakDocumentWillReloadNotification object:document->document()];
+		[[NSNotificationCenter defaultCenter] removeObserver:self name:OakDocumentDidReloadNotification object:document->document()];
 
 		[self updateDocumentMetadata];
 
@@ -851,6 +853,8 @@ static std::string shell_quote (std::vector<std::string> paths)
 		// TODO Pre and post save actions should be handled by OakDocument once we have OakDocumentEditor
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentWillSave:) name:OakDocumentWillSaveNotification object:document->document()];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentDidSave:) name:OakDocumentDidSaveNotification object:document->document()];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentWillReload:) name:OakDocumentWillReloadNotification object:document->document()];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentDidReload:) name:OakDocumentDidReloadNotification object:document->document()];
 
 		[self resetBlinkCaretTimer];
 		[self setNeedsDisplay:YES];
@@ -900,6 +904,18 @@ static std::string shell_quote (std::vector<std::string> paths)
 - (void)documentDidSave:(NSNotification*)aNotification
 {
 	for(auto const& item : bundles::query(bundles::kFieldSemanticClass, "callback.document.did-save", [self scopeContext], bundles::kItemTypeMost, oak::uuid_t(), false))
+		[self performBundleItem:item];
+}
+
+- (void)documentWillReload:(NSNotification*)aNotification
+{
+	for(auto const& item : bundles::query(bundles::kFieldSemanticClass, "callback.document.will-reload", [self scopeContext], bundles::kItemTypeMost, oak::uuid_t(), false))
+		[self performBundleItem:item];
+}
+
+- (void)documentDidReload:(NSNotification*)aNotification
+{
+	for(auto const& item : bundles::query(bundles::kFieldSemanticClass, "callback.document.did-reload", [self scopeContext], bundles::kItemTypeMost, oak::uuid_t(), false))
 		[self performBundleItem:item];
 }
 
