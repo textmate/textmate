@@ -52,6 +52,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 	{
 		NSMutableAttributedString* str = [res mutableCopy];
 		[str addAttribute:NSForegroundColorAttributeName value:[NSColor alternateSelectedControlTextColor] range:NSMakeRange(0, [str length])];
+		[str removeAttribute:NSBackgroundColorAttributeName range:NSMakeRange(0, [str length])];
 		res = str;
 	}
 	return res;
