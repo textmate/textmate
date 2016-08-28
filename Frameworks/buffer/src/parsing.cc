@@ -85,18 +85,16 @@ namespace ng
 		}
 
 		_dirty.remove(_dirty.lower_bound(range.first), atEOF ? _dirty.end() : _dirty.lower_bound(range.second));
-		bool next_line_needs_update = false;
 		if((_parser_states.find(range.second) == _parser_states.end() || !parse::equal(parserState, (_parser_states.find(range.second)->second))))
 		{
 			_parser_states.set(range.second, parserState);
 			if(!atEOF)
-			{
-				next_line_needs_update = true;
 				_dirty.set(range.second, true);
-			}
 		}
 
 		_parser_reference.reset();
+
+		bool next_line_needs_update = !_dirty.empty() && _dirty.begin()->first == range.second;
 		if(!next_line_needs_update || limit_redraw == 0)
 		{
 			did_parse(batch_start, range.second);
