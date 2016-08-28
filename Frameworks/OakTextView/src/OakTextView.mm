@@ -416,7 +416,7 @@ private:
 {
 	OBJC_WATCH_LEAKS(OakTextView);
 
-	document::document_ptr _cppDocument;
+	OakDocument* _document;
 	std::shared_ptr<document_view_t> documentView;
 	ng::callback_t* callback;
 
@@ -762,17 +762,17 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 - (void)updateDocumentMetadata
 {
-	if(_cppDocument && documentView)
-		_cppDocument->document().visibleIndex = documentView->index_at_point([self visibleRect].origin);
+	if(_document && documentView)
+		_document.visibleIndex = documentView->index_at_point([self visibleRect].origin);
 }
 
 - (void)setDocument:(document::document_ptr const&)aDocument
 {
-	if(_cppDocument && aDocument && *_cppDocument == *aDocument)
+	if(aDocument && [_document isEqual:aDocument->document()])
 	{
-		if(_cppDocument->document().selection)
+		if(_document.selection)
 		{
-			ng::ranges_t ranges = ng::convert(*documentView, to_s(_cppDocument->document().selection));
+			ng::ranges_t ranges = ng::convert(*documentView, to_s(_document.selection));
 			documentView->set_ranges(ranges);
 			for(auto const& range : ranges)
 				documentView->remove_enclosing_folds(range.min().index, range.max().index);
@@ -789,10 +789,10 @@ static std::string shell_quote (std::vector<std::string> paths)
 	{
 		fontScaleFactor = documentView->font_scale_factor();
 
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:OakDocumentWillSaveNotification object:_cppDocument->document()];
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:OakDocumentDidSaveNotification object:_cppDocument->document()];
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:OakDocumentWillReloadNotification object:_cppDocument->document()];
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:OakDocumentDidReloadNotification object:_cppDocument->document()];
+		[[NSNotificationCenter defaultCenter] removeObserver:self name:OakDocumentWillSaveNotification object:_document];
+		[[NSNotificationCenter defaultCenter] removeObserver:self name:OakDocumentDidSaveNotification object:_document];
+		[[NSNotificationCenter defaultCenter] removeObserver:self name:OakDocumentWillReloadNotification object:_document];
+		[[NSNotificationCenter defaultCenter] removeObserver:self name:OakDocumentDidReloadNotification object:_document];
 
 		[self updateDocumentMetadata];
 
@@ -809,9 +809,9 @@ static std::string shell_quote (std::vector<std::string> paths)
 		documentView.reset();
 	}
 
-	if(_cppDocument = aDocument)
+	if(_document = aDocument ? aDocument->document() : nil)
 	{
-		documentView = std::make_shared<document_view_t>(_cppDocument->document(), to_s(self.scopeAttributes), self.scrollPastEnd, fontScaleFactor);
+		documentView = std::make_shared<document_view_t>(_document, to_s(self.scopeAttributes), self.scrollPastEnd, fontScaleFactor);
 		documentView->set_command_runner([self](bundle_command_t const& cmd, ng::buffer_api_t const& buffer, ng::ranges_t const& selection, std::map<std::string, std::string> const& variables){
 			[self executeBundleCommand:cmd buffer:buffer selection:selection variables:variables];
 		});
@@ -845,10 +845,10 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 		documentView->set_delegate(new textview_delegate_t(self));
 
-		ng::index_t visibleIndex = _cppDocument->document().visibleIndex;
-		if(_cppDocument->document().selection)
+		ng::index_t visibleIndex = _document.visibleIndex;
+		if(_document.selection)
 		{
-			ng::ranges_t ranges = ng::convert(*documentView, to_s(_cppDocument->document().selection));
+			ng::ranges_t ranges = ng::convert(*documentView, to_s(_document.selection));
 			documentView->set_ranges(ranges);
 			for(auto const& range : ranges)
 				documentView->remove_enclosing_folds(range.min().index, range.max().index);
@@ -864,10 +864,10 @@ static std::string shell_quote (std::vector<std::string> paths)
 		documentView->add_callback(callback);
 
 		// TODO Pre and post save actions should be handled by OakDocument once we have OakDocumentEditor
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentWillSave:) name:OakDocumentWillSaveNotification object:_cppDocument->document()];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentDidSave:) name:OakDocumentDidSaveNotification object:_cppDocument->document()];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentWillReload:) name:OakDocumentWillReloadNotification object:_cppDocument->document()];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentDidReload:) name:OakDocumentDidReloadNotification object:_cppDocument->document()];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentWillSave:) name:OakDocumentWillSaveNotification object:_document];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentDidSave:) name:OakDocumentDidSaveNotification object:_document];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentWillReload:) name:OakDocumentWillReloadNotification object:_document];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentDidReload:) name:OakDocumentDidReloadNotification object:_document];
 
 		[self resetBlinkCaretTimer];
 		[self setNeedsDisplay:YES];
@@ -1444,7 +1444,7 @@ doScroll:
 	if(false) {
 	} else if([attribute isEqualToString:NSAccessibilityValueAttribute]) {
 		AUTO_REFRESH;
-		_cppDocument->document().content = value;
+		_document.content = value;
 	} else if([attribute isEqualToString:NSAccessibilitySelectedTextAttribute]) {
 		AUTO_REFRESH;
 		documentView->insert(to_s(value));
