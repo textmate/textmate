@@ -76,7 +76,7 @@ static bool mk_dir (std::string const& path, AuthorizationRef& auth)
 	{
 		if(access(path::parent(path).c_str(), W_OK) == 0)
 		{
-			if(mkdir(path.c_str(), S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IWGRP|S_IXGRP|S_IROTH|S_IWOTH|S_IXOTH) == 0)
+			if(mkdir(path.c_str(), S_IRWXU|S_IRWXG|S_IRWXO) == 0)
 				return true;
 			perrorf("TerminalPreferences: mkdir(\"%s\")", path.c_str());
 		}

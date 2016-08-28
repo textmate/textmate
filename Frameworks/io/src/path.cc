@@ -905,7 +905,7 @@ namespace path
 		if(path != NULL_STR && !exists(path))
 		{
 			make_dir(parent(path));
-			if(mkdir(path.c_str(), S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IWGRP|S_IXGRP|S_IROTH|S_IWOTH|S_IXOTH) == -1)
+			if(mkdir(path.c_str(), S_IRWXU|S_IRWXG|S_IRWXO) == -1)
 				perrorf("path::make_dir: mkdir(\"%s\")", path.c_str());
 		}
 		return exists(path) && info(resolve(path)) & flag::directory;

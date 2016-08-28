@@ -113,7 +113,7 @@ namespace network
 		if(CURL* handle = curl_easy_init())
 		{
 			std::string tbzDestination = path::cache("dl_archive_contents");
-			mkdir(tbzDestination.c_str(), S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IWGRP|S_IXGRP|S_IROTH|S_IWOTH|S_IXOTH);
+			mkdir(tbzDestination.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
 			tbz_t tbz(tbzDestination);
 
 			std::string tmpPath = path::temp("dl_bytes");
