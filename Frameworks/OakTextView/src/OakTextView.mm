@@ -239,9 +239,9 @@ typedef NS_ENUM(NSUInteger, OakFlagsState) {
 
 struct document_view_t : ng::buffer_api_t
 {
-	document_view_t (document::document_ptr const& document, std::string const& scopeAttributes, bool scrollPastEnd, NSInteger fontScaleFactor = 100) : _document(document)
+	document_view_t (OakDocument* document, std::string const& scopeAttributes, bool scrollPastEnd, NSInteger fontScaleFactor = 100) : _document(document)
 	{
-		_document_editor = [OakDocumentEditor documentEditorWithDocument:document->document() fontScaleFactor:fontScaleFactor];
+		_document_editor = [OakDocumentEditor documentEditorWithDocument:document fontScaleFactor:fontScaleFactor];
 
 		_editor = &[_document_editor editor];
 		_layout = &[_document_editor layout];
@@ -271,7 +271,7 @@ struct document_view_t : ng::buffer_api_t
 
 	std::map<std::string, std::string> variables (std::string const& scopeAttributes) const
 	{
-		std::map<std::string, std::string> res = _document->document_variables();
+		std::map<std::string, std::string> res = _document.variables;
 		res << _editor->editor_variables(scopeAttributes);
 		return res;
 	}
@@ -283,55 +283,58 @@ struct document_view_t : ng::buffer_api_t
 	// = Document =
 	// ============
 
-	oak::uuid_t identifier () const                 { return _document->identifier(); }
-	std::string path () const                       { return _document->path(); }
-	std::string virtual_path () const               { return _document->virtual_path(); }
-	std::string logical_path () const               { return _document->logical_path(); }
-	std::string file_type () const                  { return _document->file_type(); }
-	void set_file_type (std::string const& newType) { _document->set_file_type(newType); }
+	oak::uuid_t identifier () const                 { return to_s(_document.identifier.UUIDString); }
+	std::string path () const                       { return to_s(_document.path); }
+	std::string virtual_path () const               { return to_s(_document.virtualPath); }
+	std::string logical_path () const               { return to_s(_document.virtualPath ?: _document.path); }
+	std::string file_type () const                  { return to_s(_document.fileType); }
+	void set_file_type (std::string const& newType) { _document.fileType = to_ns(newType); }
 
 	// ==========
 	// = Buffer =
 	// ==========
 
-	size_t size () const { return _document->buffer().size(); }
-	size_t revision () const { return _document->buffer().revision(); }
-	std::string operator[] (size_t i) const { return _document->buffer()[i]; }
-	std::string substr (size_t from = 0, size_t to = SIZE_T_MAX) const { return _document->buffer().substr(from, to != SIZE_T_MAX ? to : size()); }
-	std::string xml_substr (size_t from = 0, size_t to = SIZE_T_MAX) const { return _document->buffer().xml_substr(from, to); }
-	bool visit_data (std::function<void(char const*, size_t, size_t, bool*)> const& f) const { return _document->buffer().visit_data(f); }
-	size_t begin (size_t n) const { return _document->buffer().begin(n); }
-	size_t eol (size_t n) const { return _document->buffer().eol(n); }
-	size_t end (size_t n) const { return _document->buffer().end(n); }
-	size_t lines () const { return _document->buffer().lines(); }
-	size_t sanitize_index (size_t i) const { return _document->buffer().sanitize_index(i); }
-	size_t convert (text::pos_t const& p) const { return _document->buffer().convert(p); }
-	text::pos_t convert (size_t i) const { return _document->buffer().convert(i); }
-	text::indent_t indent () const { return _document->buffer().indent(); }
-	void set_indent (text::indent_t const& indent) { _document->set_indent(indent); }
-	scope::context_t scope (size_t i, bool includeDynamic = true) const { return _document->buffer().scope(i, includeDynamic); }
-	std::map<size_t, scope::scope_t> scopes (size_t from, size_t to) const { return _document->buffer().scopes(from, to); }
-	void set_live_spelling (bool flag) { _document->buffer().set_live_spelling(flag); }
-	bool live_spelling () const { return _document->buffer().live_spelling(); }
-	void set_spelling_language (std::string const& lang) { _document->buffer().set_spelling_language(lang); }
-	std::string const& spelling_language () const { return _document->buffer().spelling_language(); }
-	std::map<size_t, bool> misspellings (size_t from, size_t to) const { return _document->buffer().misspellings(from, to); }
-	std::pair<size_t, size_t> next_misspelling (size_t from) const { return _document->buffer().next_misspelling(from); }
-	ns::spelling_tag_t spelling_tag () const { return _document->buffer().spelling_tag(); }
-	void recheck_spelling (size_t from, size_t to) { _document->buffer().recheck_spelling(from, to); }
-	void add_callback (ng::callback_t* callback) { _document->buffer().add_callback(callback); }
-	void remove_callback (ng::callback_t* callback) { _document->buffer().remove_callback(callback); }
+	size_t size () const { return [_document_editor buffer].size(); }
+	size_t revision () const { return [_document_editor buffer].revision(); }
+	std::string operator[] (size_t i) const { return [_document_editor buffer][i]; }
+	std::string substr (size_t from = 0, size_t to = SIZE_T_MAX) const { return [_document_editor buffer].substr(from, to != SIZE_T_MAX ? to : size()); }
+	std::string xml_substr (size_t from = 0, size_t to = SIZE_T_MAX) const { return [_document_editor buffer].xml_substr(from, to); }
+	bool visit_data (std::function<void(char const*, size_t, size_t, bool*)> const& f) const { return [_document_editor buffer].visit_data(f); }
+	size_t begin (size_t n) const { return [_document_editor buffer].begin(n); }
+	size_t eol (size_t n) const { return [_document_editor buffer].eol(n); }
+	size_t end (size_t n) const { return [_document_editor buffer].end(n); }
+	size_t lines () const { return [_document_editor buffer].lines(); }
+	size_t sanitize_index (size_t i) const { return [_document_editor buffer].sanitize_index(i); }
+	size_t convert (text::pos_t const& p) const { return [_document_editor buffer].convert(p); }
+	text::pos_t convert (size_t i) const { return [_document_editor buffer].convert(i); }
+	void set_tab_size (size_t i) { _document.tabSize = i; }
+	size_t tab_size () const { return _document.tabSize; }
+	void set_soft_tabs (bool flag) { _document.softTabs = flag; }
+	bool soft_tabs () const { return _document.softTabs; }
+	text::indent_t indent () const { return text::indent_t(tab_size(), SIZE_T_MAX, soft_tabs()); }
+	scope::context_t scope (size_t i, bool includeDynamic = true) const { return [_document_editor buffer].scope(i, includeDynamic); }
+	std::map<size_t, scope::scope_t> scopes (size_t from, size_t to) const { return [_document_editor buffer].scopes(from, to); }
+	void set_live_spelling (bool flag) { [_document_editor buffer].set_live_spelling(flag); }
+	bool live_spelling () const { return [_document_editor buffer].live_spelling(); }
+	void set_spelling_language (std::string const& lang) { [_document_editor buffer].set_spelling_language(lang); }
+	std::string const& spelling_language () const { return [_document_editor buffer].spelling_language(); }
+	std::map<size_t, bool> misspellings (size_t from, size_t to) const { return [_document_editor buffer].misspellings(from, to); }
+	std::pair<size_t, size_t> next_misspelling (size_t from) const { return [_document_editor buffer].next_misspelling(from); }
+	ns::spelling_tag_t spelling_tag () const { return [_document_editor buffer].spelling_tag(); }
+	void recheck_spelling (size_t from, size_t to) { [_document_editor buffer].recheck_spelling(from, to); }
+	void add_callback (ng::callback_t* callback) { [_document_editor buffer].add_callback(callback); }
+	void remove_callback (ng::callback_t* callback) { [_document_editor buffer].remove_callback(callback); }
 
 	// ================
 	// = Undo Manager =
 	// ================
 
-	bool can_undo () const { return _document->undo_manager().can_undo(); }
-	bool can_redo () const { return _document->undo_manager().can_redo(); }
-	void begin_undo_group () { _document->undo_manager().begin_undo_group(ranges()); }
-	void end_undo_group () { _document->undo_manager().end_undo_group(ranges()); _document->set_revision(_document->buffer().revision()); }
-	void undo () { _editor->clear_snippets(); set_ranges(_document->undo_manager().undo()); }
-	void redo () { _editor->clear_snippets(); set_ranges(_document->undo_manager().redo()); }
+	bool can_undo () const { return _document.canUndo; }
+	bool can_redo () const { return _document.canRedo; }
+	void begin_undo_group () { [_document beginUndoGrouping]; }
+	void end_undo_group () { [_document endUndoGrouping]; }
+	void undo () { [_document undo]; }
+	void redo () { [_document redo]; }
 
 	// ==========
 	// = Editor =
@@ -402,7 +405,7 @@ struct document_view_t : ng::buffer_api_t
 	ng::line_record_t line_record_for (text::pos_t const& pos) const { return _layout->line_record_for(pos); }
 
 private:
-	document::document_ptr _document;
+	OakDocument* _document;
 	OakDocumentEditor* _document_editor;
 	std::function<void(bundle_command_t const&, ng::buffer_api_t const&, ng::ranges_t const&, std::map<std::string, std::string> const&)> _command_runner;
 	ng::editor_t* _editor;
@@ -808,7 +811,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 	if(document = aDocument)
 	{
-		documentView = std::make_shared<document_view_t>(document, to_s(self.scopeAttributes), self.scrollPastEnd, fontScaleFactor);
+		documentView = std::make_shared<document_view_t>(document->document(), to_s(self.scopeAttributes), self.scrollPastEnd, fontScaleFactor);
 		documentView->set_command_runner([self](bundle_command_t const& cmd, ng::buffer_api_t const& buffer, ng::ranges_t const& selection, std::map<std::string, std::string> const& variables){
 			[self executeBundleCommand:cmd buffer:buffer selection:selection variables:variables];
 		});
@@ -2910,8 +2913,8 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 - (theme_ptr)theme            { return documentView ? documentView->theme() : theme_ptr(); }
 - (NSFont*)font               { return documentView ? documentView->font() : [NSFont userFixedPitchFontOfSize:0]; }
 - (NSInteger)fontScaleFactor  { return documentView ? documentView->font_scale_factor() : 100; }
-- (size_t)tabSize             { return documentView ? documentView->indent().tab_size() : 2; }
-- (BOOL)softTabs              { return documentView ? documentView->indent().soft_tabs() : NO; }
+- (size_t)tabSize             { return documentView ? documentView->tab_size() : 2; }
+- (BOOL)softTabs              { return documentView ? documentView->soft_tabs() : NO; }
 - (BOOL)softWrap              { return documentView && documentView->soft_wrap(); }
 
 - (ng::indent_correction_t)indentCorrections
@@ -2965,13 +2968,10 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (void)setTabSize:(size_t)newTabSize
 {
+	if(!documentView || documentView->tab_size() == newTabSize)
+		return;
 	AUTO_REFRESH;
-	if(documentView)
-	{
-		text::indent_t tmp = documentView->indent();
-		tmp.set_tab_size(newTabSize);
-		documentView->set_indent(tmp);
-	}
+	documentView->set_tab_size(newTabSize);
 }
 
 - (void)setShowInvisibles:(BOOL)flag
@@ -3010,12 +3010,9 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (void)setSoftTabs:(BOOL)flag
 {
-	if(flag != self.softTabs)
-	{
-		text::indent_t tmp = documentView->indent();
-		tmp.set_soft_tabs(flag);
-		documentView->set_indent(tmp);
-	}
+	if(!documentView || documentView->soft_tabs() == flag)
+		return;
+	documentView->set_soft_tabs(flag);
 }
 
 - (void)setWrapColumn:(NSInteger)newWrapColumn
