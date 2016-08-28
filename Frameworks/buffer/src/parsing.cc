@@ -58,8 +58,16 @@ namespace ng
 						if(bufferRef.lock())
 						{
 							if(bufferRev == revision())
-									update_scopes(limit_redraw, batch_start, { from, to }, result.scopes, result.state);
-							else	initiate_repair();
+							{
+								update_scopes(limit_redraw, batch_start, { from, to }, result.scopes, result.state);
+							}
+							else
+							{
+								// We didn’t inform anyone about the previous lines parsed
+								if(batch_start != from)
+									did_parse(std::min(batch_start, size()), std::min(from, size()));
+								initiate_repair();
+							}
 						}
 					});
 					CFRunLoopWakeUp(runLoop);
