@@ -94,6 +94,12 @@ namespace ng
 				typename oak::basic_tree_t<size_t, memory_t>::iterator _base;
 			};
 
+			storage_t ()                                { }
+			storage_t (storage_t const& rhs)            { _tree = rhs._tree; }
+			storage_t (storage_t&& rhs)                 { _tree.swap(rhs._tree); }
+			storage_t& operator= (storage_t const& rhs) { _tree = rhs._tree; return *this; }
+			storage_t& operator= (storage_t&& rhs)      { _tree.swap(rhs._tree); return *this; }
+
 			bool operator== (storage_t const& rhs) const;
 			bool operator!= (storage_t const& rhs) const { return !(*this == rhs); }
 
