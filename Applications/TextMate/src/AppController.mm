@@ -277,7 +277,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 		if(restoreSession)
 		{
-			path::set_content(prematureTerminationDuringRestore, "");
+			close(open(prematureTerminationDuringRestore.c_str(), O_CREAT|O_TRUNC|O_WRONLY|O_CLOEXEC));
 			[DocumentController restoreSession];
 		}
 		unlink(prematureTerminationDuringRestore.c_str());

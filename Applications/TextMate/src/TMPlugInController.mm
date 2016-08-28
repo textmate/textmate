@@ -89,7 +89,7 @@ static id CreateInstanceOfPlugInClass (Class cl, TMPlugInController* controller)
 						return;
 				}
 
-				path::set_content(crashedDuringPlugInLoad, "");
+				close(open(crashedDuringPlugInLoad.c_str(), O_CREAT|O_TRUNC|O_WRONLY|O_CLOEXEC));
 
 				if([bundle load])
 				{
