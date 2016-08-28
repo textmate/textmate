@@ -8,6 +8,63 @@
 #import <text/utf8.h>
 #import <regexp/format_string.h>
 
+namespace
+{
+	struct string_builder_t
+	{
+		string_builder_t (NSLineBreakMode mode = NSLineBreakByTruncatingTail)
+		{
+			NSMutableParagraphStyle* paragraph = [NSMutableParagraphStyle new];
+			[paragraph setLineBreakMode:mode];
+
+			_string = [[NSMutableAttributedString alloc] init];
+			_attributes.push_back(@{ NSParagraphStyleAttributeName : paragraph });
+			_font_traits.push_back(0);
+		}
+
+		void push_style (NSDictionary* newAttributes, NSFontTraitMask newTraits = 0)
+		{
+			NSMutableDictionary* dict = [_attributes.back() mutableCopy];
+			[dict addEntriesFromDictionary:newAttributes];
+			_attributes.push_back(dict);
+			_font_traits.push_back(_font_traits.back() | newTraits);
+		}
+
+		void pop_style ()
+		{
+			_attributes.pop_back();
+			_font_traits.pop_back();
+		}
+
+		void append (NSString* str, NSFontTraitMask fontTraits)
+		{
+			append(str, nil, fontTraits);
+		}
+
+		void append (NSString* str, NSDictionary* attrs = nil, NSFontTraitMask fontTraits = 0)
+		{
+			push_style(attrs, fontTraits);
+
+			NSMutableAttributedString* aStr = [[NSMutableAttributedString alloc] initWithString:str attributes:_attributes.back()];
+			[aStr applyFontTraits:_font_traits.back() range:NSMakeRange(0, str.length)];
+			[_string appendAttributedString:aStr];
+
+			pop_style();
+		}
+
+		NSAttributedString* attributed_string () const
+		{
+			return _string;
+		}
+
+	private:
+		NSMutableAttributedString* _string;
+		std::vector<NSDictionary*> _attributes;
+		std::vector<NSFontTraitMask> _font_traits;
+	};
+
+}
+
 static NSAttributedString* PathComponentString (std::string const& path, std::string const& base, NSFont* font)
 {
 	std::vector<std::string> components;
