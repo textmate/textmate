@@ -682,7 +682,7 @@ namespace
 			}
 			else
 			{
-				fprintf(stderr, "*** swap_and_unlink(‘%s’ → ‘%s’): %s\n", temp.c_str(), path.c_str(), strerror(errno));
+				perrorf("BundlesManager: swap_and_unlink(\"%s\", \"%s\")", temp.c_str(), path.c_str());
 			}
 		}
 	});

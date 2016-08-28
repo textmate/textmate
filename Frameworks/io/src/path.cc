@@ -341,7 +341,7 @@ namespace path
 				else
 				{
 					std::string errStr = len == -1 ? strerror(errno) : text::format("Result outside allowed range %zd", len);
-					fprintf(stderr, "*** readlink(‘%s’) failed: %s\n", path.c_str(), errStr.c_str());
+					fprintf(stderr, "readlink(\"%s\"): %s\n", path.c_str(), errStr.c_str());
 				}
 			}
 			else if(S_ISREG(buf.st_mode))
@@ -799,11 +799,11 @@ namespace path
 							if(fgetxattr(fd, mem + i, &value.front(), value.size(), 0, 0) == size)
 								res.emplace(mem + i, value);
 							else
-								perror(("path::attributes: fgetxattr(" + path + ", " + (mem+i) + ")").c_str());
+								perrorf("path::attributes: fgetxattr(\"%s\", \"%s\")", path.c_str(), mem + i);
 						}
 						else if(size == -1)
 						{
-							perror(("path::attributes: fgetxattr(" + path + ", " + (mem+i) + ")").c_str());
+							perrorf("path::attributes: fgetxattr(\"%s\", \"%s\")", path.c_str(), mem + i);
 						}
 						i += strlen(mem + i) + 1;
 					}
@@ -811,13 +811,13 @@ namespace path
 			}
 			else if(listSize == -1)
 			{
-				perror(("path::attributes: flistxattr(" + path + ")").c_str());
+				perrorf("path::attributes: flistxattr(\"%s\")", path.c_str());
 			}
 			close(fd);
 		}
 		else
 		{
-			perror(("path::attributes: open(" + path + ")").c_str());
+			perrorf("path::attributes: open(\"%s\")", path.c_str());
 		}
 		return res;
 	}
@@ -845,14 +845,16 @@ namespace path
 					// fremovexattr() on AFP for non-existing attributes gives us EINVAL
 					// fsetxattr() on Samba saving to ext4 via virtual machine gives us ENOENT
 					// sshfs with ‘-o noappledouble’ will return ENOATTR or EPERM
-					perror((pair.second == NULL_STR ? text::format("path::set_attributes: fremovexattr(%d, \"%s\")", fd, pair.first.c_str()) : text::format("path::set_attributes: fsetxattr(%d, %s, \"%s\")", fd, pair.first.c_str(), pair.second.c_str())).c_str());
+					if(pair.second == NULL_STR)
+							perrorf("path::set_attributes: fremovexattr(\"%s\", \"%s\")", path.c_str(), pair.first.c_str());
+					else	perrorf("path::set_attributes: fsetxattr(\"%s\", \"%s\", \"%s\")", path.c_str(), pair.first.c_str(), pair.second.c_str());
 				}
 			}
 			close(fd);
 		}
 		else
 		{
-			perror("path::set_attributes: open");
+			perrorf("path::set_attributes: open(\"%s\")", path.c_str());
 		}
 		return res;
 	}
@@ -904,7 +906,7 @@ namespace path
 		{
 			make_dir(parent(path));
 			if(mkdir(path.c_str(), S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IWGRP|S_IXGRP|S_IROTH|S_IWOTH|S_IXOTH) == -1)
-				perror(text::format("path::make_dir: mkdir(“%s”)", path.c_str()).c_str());
+				perrorf("path::make_dir: mkdir(\"%s\")", path.c_str());
 		}
 		return exists(path) && info(resolve(path)) & flag::directory;
 	}

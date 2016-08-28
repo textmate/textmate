@@ -81,7 +81,7 @@ namespace bundles_db
 		{
 			if(path::swap_and_unlink(path, source->path()))
 					path::set_attr(source->path(), "org.w3.http.etag", etag);
-			else	fprintf(stderr, "*** swap_and_unlink(‘%s’ → ‘%s’): %s\n", path.c_str(), source->path().c_str(), strerror(errno));
+			else	perrorf("bundles_db: swap_and_unlink(\"%s\", \"%s\")", path.c_str(), source->path().c_str());
 		}
 		else if(etag == NULL_STR)
 		{
@@ -467,7 +467,7 @@ namespace bundles_db
 
 				if(rename(dst.c_str(), trash.c_str()) != 0)
 				{
-					fprintf(stderr, "unable to rename old bundle ‘%s’ → ‘%s’: %s\n", dst.c_str(), trash.c_str(), strerror(errno));
+					perrorf("bundles_db: rename(\"%s\", \"%s\")", dst.c_str(), trash.c_str());
 					return false;
 				}
 			}

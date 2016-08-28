@@ -27,8 +27,17 @@ static int create_socket (int port)
 		{
 			if(listen(sock, SOMAXCONN) != -1)
 				return sock;
+			perror("create_socket: listen");
+		}
+		else
+		{
+			perror("create_socket: bind");
 		}
 		close(sock);
+	}
+	else
+	{
+		perror("create_socket: socket");
 	}
 	return -1;
 }
@@ -193,8 +202,6 @@ namespace web
 	static bool setup_server (int port = 80)
 	{
 		server_socket = create_socket(port);
-		if(server_socket == -1)
-			perror("setup_server");
 		return server_socket != -1;
 	}
 

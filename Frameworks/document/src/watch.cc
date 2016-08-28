@@ -234,11 +234,11 @@ namespace document
 			EV_SET(&changeList, info.fd, EVFILT_VNODE, EV_ADD | EV_ENABLE | EV_CLEAR, NOTE_DELETE | NOTE_WRITE | NOTE_RENAME | NOTE_ATTRIB, 0, (void*)client_id);
 			int n = kevent(event_queue, &changeList, 1 /* number of changes */, NULL /* event list */, 0 /* number of events */, &timeout);
 			if(n == -1)
-				fprintf(stderr, "error observing path, kevent(\"%s\"): %s\n", info.path_watched.c_str(), strerror(errno));
+				perrorf("watch_server_t: kevent(\"%s\")", info.path_watched.c_str());
 		}
 		else
 		{
-			fprintf(stderr, "error observing path, open(\"%s\"): %s\n", info.path_watched.c_str(), strerror(errno));
+			perrorf("watch_server_t: open(\"%s\")", info.path_watched.c_str());
 		}
 	}
 

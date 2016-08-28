@@ -40,7 +40,7 @@ namespace io
 
 			rc = posix_spawn(&res.pid, argv[0], &fileActions, &flags, argv, oak::c_array(environment));
 			if(rc != 0)
-				perror(text::format("io::spawn: posix_spawn(\"%s\")", argv[0]).c_str());
+				perrorf("io::spawn: posix_spawn(\"%s\")", argv[0]);
 
 			OAK_CHECK(posix_spawnattr_destroy(&flags));
 			OAK_CHECK(posix_spawn_file_actions_destroy(&fileActions));

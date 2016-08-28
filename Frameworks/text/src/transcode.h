@@ -32,7 +32,7 @@ namespace text
 
 			_handle = iconv_open(toCharset.c_str(), fromCharset.c_str());
 			if(_handle == (iconv_t)-1)
-				perror("transcode_t: iconv_open");
+				perrorf("transcode_t: iconv_open(\"%s\", \"%s\")", toCharset.c_str(), fromCharset.c_str());
 		}
 
 		~transcode_t ()

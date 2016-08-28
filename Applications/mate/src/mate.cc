@@ -540,7 +540,7 @@ int main (int argc, char const* argv[])
 	{
 		if(len == -1)
 		{
-			perror("read()");
+			perror("read");
 			break;
 		}
 

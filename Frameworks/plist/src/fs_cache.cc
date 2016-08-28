@@ -21,7 +21,7 @@ static std::string read_link (std::string const& path)
 	else
 	{
 		std::string errStr = len == -1 ? strerror(errno) : text::format("Result outside allowed range %zd", len);
-		fprintf(stderr, "*** readlink(‘%s’) failed: %s\n", path.c_str(), errStr.c_str());
+		fprintf(stderr, "readlink(\"%s\"): %s\n", path.c_str(), errStr.c_str());
 	}
 	return NULL_STR;
 }

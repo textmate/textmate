@@ -13,7 +13,7 @@ namespace path
 		ASSERT_EQ(access(src.c_str(), F_OK), 0);
 		if(access(dst.c_str(), F_OK) != 0 && !path::make_dir(path::parent(dst)))
 		{
-			perror(text::format("swap_and_unlink: mkdir_p(\"%s\")", path::parent(dst).c_str()).c_str());
+			perrorf("swap_and_unlink: mkdir_p(\"%s\")", path::parent(dst).c_str());
 			return false;
 		}
 
@@ -21,14 +21,14 @@ namespace path
 		{
 			bool res = unlink(src.c_str()) == 0;
 			if(!res)
-				perror(text::format("swap_and_unlink: unlink(\"%s\")", src.c_str()).c_str());
+				perrorf("swap_and_unlink: unlink(\"%s\")", src.c_str());
 			return res;
 		}
 
 		if(errno != ENOTSUP && errno != ENOENT && errno != EXDEV)
 		{
 			// ExpanDrive returns EFAULT
-			fprintf(stderr, "warning: exchangedata(“%s”, “%s”) failed with “%s”, treating as “%s”.\n", src.c_str(), dst.c_str(), strerror(errno), strerror(ENOTSUP));
+			perrorf("warning: exchangedata(\"%s\", \"%s\")", src.c_str(), dst.c_str());
 			errno = ENOTSUP;
 		}
 
@@ -53,7 +53,7 @@ namespace path
 
 			if(::rename(src.c_str(), dst.c_str()) == 0)
 				return true;
-			perror(text::format("swap_and_unlink: rename(\"%s\", \"%s\")", src.c_str(), dst.c_str()).c_str());
+			perrorf("swap_and_unlink: rename(\"%s\", \"%s\")", src.c_str(), dst.c_str());
 			D(DBF_IO_Swap_File_Data, bug("rename() failed: %s\n", strerror(errno)););
 		}
 
@@ -64,10 +64,10 @@ namespace path
 			{
 				bool res = unlink(src.c_str()) == 0;
 				if(!res)
-					perror(text::format("swap_and_unlink: unlink(\"%s\")", src.c_str()).c_str());
+					perrorf("swap_and_unlink: unlink(\"%s\")", src.c_str());
 				return res;
 			}
-			perror(text::format("swap_and_unlink: copyfile(\"%s\", \"%s\", NULL, COPYFILE_DATA|COPYFILE_MOVE)", src.c_str(), dst.c_str()).c_str());
+			perrorf("swap_and_unlink: copyfile(\"%s\", \"%s\", NULL, COPYFILE_DATA|COPYFILE_MOVE)", src.c_str(), dst.c_str());
 			D(DBF_IO_Swap_File_Data, bug("copyfile() failed: %s\n", strerror(errno)););
 		}
 

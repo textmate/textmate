@@ -47,7 +47,7 @@ static void launch_control (char const* command, std::string const& argument)
 	if(pid == 0)
 	{
 		execl("/bin/launchctl", "/bin/launchctl", command, argument.c_str(), NULL);
-		perror("/bin/launchctl failed");
+		perror("execl(\"/bin/launchctl\")");
 		_exit(EXIT_FAILURE);
 	}
 
