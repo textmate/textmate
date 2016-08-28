@@ -598,6 +598,21 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 // = Copy Find Results =
 // =====================
 
+- (void)copyReplacements:(id)sender
+{
+	NSMutableArray* array = [NSMutableArray array];
+
+	std::string const replacementString = to_s(_windowController.replaceString);
+	for(FFResultNode* item in _windowController.resultsViewController.selectedResults)
+	{
+		auto const& captures = item.match.captures;
+		[array addObject:captures.empty() ? _windowController.replaceString : to_ns(format_string::expand(replacementString, captures))];
+	}
+
+	[[NSPasteboard generalPasteboard] declareTypes:@[ NSStringPboardType ] owner:nil];
+	[[NSPasteboard generalPasteboard] setString:[array componentsJoinedByString:@"\n"] forType:NSStringPboardType];
+}
+
 - (void)copyEntireLines:(BOOL)entireLines withFilename:(BOOL)withFilename
 {
 	std::vector<std::string> res;
@@ -649,7 +664,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 - (BOOL)validateMenuItem:(NSMenuItem*)aMenuItem
 {
-	static std::set<SEL> const copyActions = { @selector(copy:), @selector(copyMatchingParts:), @selector(copyMatchingPartsWithFilename:), @selector(copyEntireLines:), @selector(copyEntireLinesWithFilename:) };
+	static std::set<SEL> const copyActions = { @selector(copy:), @selector(copyReplacements:), @selector(copyMatchingParts:), @selector(copyMatchingPartsWithFilename:), @selector(copyEntireLines:), @selector(copyEntireLinesWithFilename:) };
 	if(copyActions.find(aMenuItem.action) != copyActions.end())
 		return [_results countOfLeafs] != 0;
 	else if(aMenuItem.action == @selector(checkAll:))

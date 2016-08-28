@@ -232,6 +232,7 @@ static NSButton* OakCreateStopSearchButton ()
 		[actionMenu addItemWithTitle:@"Copy Matching Parts With Filenames" action:@selector(copyMatchingPartsWithFilename:) keyEquivalent:@""];
 		[actionMenu addItemWithTitle:@"Copy Entire Lines"                  action:@selector(copyEntireLines:)               keyEquivalent:@""];
 		[actionMenu addItemWithTitle:@"Copy Entire Lines With Filenames"   action:@selector(copyEntireLinesWithFilename:)   keyEquivalent:@""];
+		[actionMenu addItemWithTitle:@"Copy Replacements"                  action:@selector(copyReplacements:)              keyEquivalent:@""];
 
 		[actionMenu addItem:[NSMenuItem separatorItem]];
 		[actionMenu addItemWithTitle:@"Check All" action:@selector(checkAll:) keyEquivalent:@""];
