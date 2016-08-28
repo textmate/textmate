@@ -210,7 +210,7 @@ namespace ng
 
 		text::indent_t _indent;
 		void initiate_repair (size_t limit_redraw = 0, size_t super_from = -1);
-		void update_scopes (size_t limit_redraw, size_t const& super_range,std::pair<size_t, size_t> const& range, std::map<size_t, scope::scope_t> const& newScopes, parse::stack_ptr parserState);
+		void update_scopes (size_t limit_redraw, size_t super_range, std::pair<size_t, size_t> const& range, std::map<size_t, scope::scope_t> const& newScopes, parse::stack_ptr parserState);
 
 		std::shared_ptr<bool> _parser_reference;
 		bool _async_parsing = false;

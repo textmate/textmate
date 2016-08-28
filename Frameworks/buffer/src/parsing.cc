@@ -72,7 +72,7 @@ namespace ng
 		}
 	}
 
-	void buffer_t::update_scopes (size_t limit_redraw, size_t const& batch_start, std::pair<size_t, size_t> const& range, std::map<size_t, scope::scope_t> const& newScopes, parse::stack_ptr parserState)
+	void buffer_t::update_scopes (size_t limit_redraw, size_t batch_start, std::pair<size_t, size_t> const& range, std::map<size_t, scope::scope_t> const& newScopes, parse::stack_ptr parserState)
 	{
 		bool atEOF = convert(range.first).line+1 == lines();
 		D(DBF_Buffer_Parsing, bug("did parse %zu-%zu (revision %zu), at EOL %s\n", range.first, range.second, revision(), BSTR(atEOF)););
