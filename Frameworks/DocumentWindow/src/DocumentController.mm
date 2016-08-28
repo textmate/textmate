@@ -213,12 +213,12 @@ namespace
 
 	scm::info_ptr                          _projectSCMInfo;
 	std::map<std::string, std::string>     _projectSCMVariables;
-	std::vector<std::string>               _projectScopeAttributes;
-	std::vector<std::string>               _externalScopeAttributes;
+	std::vector<std::string>               _projectScopeAttributes;  // kSettingsScopeAttributesKey
+	std::vector<std::string>               _externalScopeAttributes; // attr.scm.git, attr.project.ninja
 
 	scm::info_ptr                          _documentSCMInfo;
 	std::map<std::string, std::string>     _documentSCMVariables;
-	std::vector<std::string>               _documentScopeAttributes;
+	std::vector<std::string>               _documentScopeAttributes; // attr.os-version, attr.untitled / attr.rev-path + kSettingsScopeAttributesKey
 }
 
 + (KVDB*)sharedProjectStateDB
