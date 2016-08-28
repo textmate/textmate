@@ -1,5 +1,4 @@
 #import "FFResultNode.h"
-#import "attr_string.h"
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/OakFileIconImage.h>
 #import <ns/ns.h>
@@ -75,55 +74,52 @@ static NSAttributedString* PathComponentString (std::string const& path, std::st
 		components.front() = path::display_name("/");
 	components.back() = "";
 
-	return ns::attr_string_t()
-		<< ns::style::line_break(NSLineBreakByTruncatingMiddle)
-		<< font
-		<< [NSColor darkGrayColor]
-		<< text::join(std::vector<std::string>(components.begin(), components.end()), " ▸ ")
-		<< ns::style::bold
-		<< (path::is_absolute(path) ? path::display_name(path) : path);
+	string_builder_t builder(NSLineBreakByTruncatingMiddle);
+	builder.push_style(@{
+		NSFontAttributeName            : font,
+		NSForegroundColorAttributeName : [NSColor darkGrayColor]
+	});
+	builder.append(to_ns(text::join(std::vector<std::string>(components.begin(), components.end()), " ▸ ")));
+	builder.append(to_ns((path::is_absolute(path) ? path::display_name(path) : path)), NSBoldFontMask);
+	return builder.attributed_string();
 }
 
-static void append (ns::attr_string_t& dst, std::string const& src, size_t from, size_t to, NSFont* font)
+static void append (string_builder_t& dst, std::string const& src, size_t from, size_t to)
 {
 	size_t begin = from;
 	for(size_t i = from; i != to; ++i)
 	{
 		if(src[i] == '\t' || src[i] == '\r')
 		{
-			dst.add(src.substr(begin, i-begin));
+			dst.append(to_ns(src.substr(begin, i-begin)));
 			if(src[i] == '\t')
-			{
-				dst.add("\u2003");
-			}
+				dst.append(@"\u2003");
 			else if(src[i] == '\r')
-			{
-				dst.add(ns::attr_string_t()
-					<< font
-					<< [NSColor lightGrayColor]
-					<< "<CR>"
-				);
-			}
+				dst.append(@"<CR>", @{ NSForegroundColorAttributeName : [NSColor lightGrayColor] });
 			begin = i+1;
 		}
 	}
-	dst.add(src.substr(begin, to-begin));
+	dst.append(to_ns(src.substr(begin, to-begin)));
 }
 
 static NSAttributedString* AttributedStringForMatch (std::string const& text, size_t from, size_t to, size_t n, std::string const& newlines, NSFont* font)
 {
-	ns::attr_string_t str;
-	str.add(ns::style::line_break(NSLineBreakByTruncatingTail));
-	str.add([NSColor darkGrayColor]);
+	NSFontTraitMask matchFontTraits = NSBoldFontMask;
+	NSDictionary* matchAttributes = @{
+		NSForegroundColorAttributeName : [NSColor blackColor],
+	};
+
+	string_builder_t builder(NSLineBreakByTruncatingTail);
+	builder.push_style(@{
+		NSFontAttributeName            : font,
+		NSForegroundColorAttributeName : [NSColor darkGrayColor]
+	});
 
 	// Ensure monospaced digits for the line number prefix
 	NSFontDescriptor* descriptor = [font.fontDescriptor fontDescriptorByAddingAttributes:@{
 		NSFontFeatureSettingsAttribute: @[ @{ NSFontFeatureTypeIdentifierKey : @(kNumberSpacingType), NSFontFeatureSelectorIdentifierKey : @(kMonospacedNumbersSelector) } ]
 	}];
-
-	str.add([NSFont fontWithDescriptor:descriptor size:0]);
-	str.add(text::pad(++n, 4) + ": ");
-	str.add(font);
+	builder.append(to_ns(text::pad(++n, 4) + ": "), @{ NSFontAttributeName : [NSFont fontWithDescriptor:descriptor size:0] });
 
 	bool inMatch = false;
 	size_t last = text.size();
@@ -134,50 +130,50 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 
 		if(oak::cap(it, from, eol) == from)
 		{
-			append(str, text, it, from, font);
+			append(builder, text, it, from);
 			it = from;
-			inMatch = true;
-		}
 
-		if(inMatch)
-		{
-			str.add(ns::style::bold);
-			str.add([NSColor blackColor]);
+			if(!inMatch)
+				builder.push_style(matchAttributes, matchFontTraits);
+			inMatch = true;
 		}
 
 		if(inMatch && oak::cap(it, to, eol) == to)
 		{
-			append(str, text, it, to, font);
+			append(builder, text, it, to);
 			it = to;
-			inMatch = false;
 
-			str.add([NSColor darkGrayColor]);
-			str.add(ns::style::unbold);
+			builder.pop_style();
+			inMatch = false;
 		}
 
-		append(str, text, it, eol, font);
+		append(builder, text, it, eol);
 
 		if(eol != last)
 		{
-			str.add("¬");
-
-			if(inMatch)
-			{
-				str.add([NSColor darkGrayColor]);
-				str.add(ns::style::unbold);
-			}
+			builder.append(@"¬");
 
 			if((eol += newlines.size()) == to)
+			{
+				builder.pop_style();
 				inMatch = false;
+			}
 
 			if(eol != last)
-				str.add("\n" + text::pad(++n, 4) + ": ");
+			{
+				if(inMatch)
+					builder.pop_style();
+				builder.append(@"\n");
+				builder.append(to_ns(text::pad(++n, 4) + ": "), @{ NSFontAttributeName : [NSFont fontWithDescriptor:descriptor size:0] });
+				if(inMatch)
+					builder.push_style(matchAttributes, matchFontTraits);
+			}
 		}
 
 		it = eol;
 	}
 
-	return str;
+	return builder.attributed_string();
 }
 
 @interface FFResultNode ()
@@ -339,10 +335,12 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 
 	if(!utf8::is_valid(prefix.begin(), prefix.end()) || !utf8::is_valid(middle.begin(), middle.end()) || !utf8::is_valid(suffix.begin(), suffix.end()))
 	{
-		return ns::attr_string_t()
-			<< [NSColor darkGrayColor] << font
-			<< ns::style::line_break(NSLineBreakByTruncatingTail)
-			<< text::format("%zu-%zu: Range is not valid UTF-8, please contact: http://macromates.com/support", m.first, m.last);
+		string_builder_t builder(NSLineBreakByTruncatingTail);
+		builder.append(to_ns(text::format("%zu-%zu: Range is not valid UTF-8, please contact: http://macromates.com/support", m.first, m.last)), @{
+			NSFontAttributeName            : font,
+			NSForegroundColorAttributeName : [NSColor darkGrayColor]
+		});
+		return builder.attributed_string();
 	}
 
 	_excerpt = AttributedStringForMatch(prefix + middle + suffix, prefix.size(), prefix.size() + middle.size(), m.line_number, m.newlines, font);
