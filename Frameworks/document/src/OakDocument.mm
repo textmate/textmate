@@ -184,8 +184,6 @@ NSString* OakDocumentWillShowAlertNotification    = @"OakDocumentWillShowAlertNo
 @property (nonatomic) NSInteger   savedRevision;
 @property (nonatomic) NSString*   backupPath;
 @property (nonatomic) NSString*   folded;
-@property (nonatomic) NSString*   selection;
-@property (nonatomic) ng::index_t visibleIndex;
 @end
 
 static struct document_container_t

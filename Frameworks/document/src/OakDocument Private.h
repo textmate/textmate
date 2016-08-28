@@ -6,8 +6,6 @@
 @property (nonatomic) NSInteger   savedRevision;
 @property (nonatomic) NSString*   backupPath;
 @property (nonatomic) NSString*   folded;
-@property (nonatomic) NSString*   selection;
-@property (nonatomic) ng::index_t visibleIndex;
 
 - (ng::buffer_t&)buffer;
 - (ng::undo_manager_t&)undoManager;

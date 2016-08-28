@@ -54,6 +54,10 @@ PUBLIC @interface OakDocument : NSObject
 @property (nonatomic, getter = isRecentTrackingDisabled)   BOOL recentTrackingDisabled;
 @property (nonatomic)                                      BOOL keepBackupFile;
 
+// Storage for OakTextView
+@property (nonatomic) NSString* selection;
+@property (nonatomic) ng::index_t visibleIndex;
+
 - (void)setMarkOfType:(NSString*)aMark atPosition:(text::pos_t const&)aPos content:(NSString*)value;
 - (void)removeMarkOfType:(NSString*)aMark atPosition:(text::pos_t const&)aPos;
 - (void)removeAllMarksOfType:(NSString*)aMark;
