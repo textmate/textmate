@@ -147,6 +147,8 @@ namespace document
 
 NSString* OakDocumentContentDidChangeNotification = @"OakDocumentContentDidChangeNotification";
 NSString* OakDocumentMarksDidChangeNotification   = @"OakDocumentMarksDidChangeNotification";
+NSString* OakDocumentWillReloadNotification       = @"OakDocumentWillReloadNotification";
+NSString* OakDocumentDidReloadNotification        = @"OakDocumentDidReloadNotification";
 NSString* OakDocumentWillSaveNotification         = @"OakDocumentWillSaveNotification";
 NSString* OakDocumentDidSaveNotification          = @"OakDocumentDidSaveNotification";
 NSString* OakDocumentWillCloseNotification        = @"OakDocumentWillCloseNotification";
@@ -1446,12 +1448,14 @@ private:
 			}
 			else if(!_self.isDocumentEdited)
 			{
+				[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentWillReloadNotification object:_self];
 				[_self beginUndoGrouping];
 				buffer.replace(0, buffer.size(), yours);
 				[_self endUndoGrouping];
 
 				_self.savedRevision = _self.revision;
 				[_self snapshot];
+				[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentDidReloadNotification object:_self];
 				[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentContentDidChangeNotification object:_self];
 			}
 			else if(_self->_snapshot)
@@ -1464,11 +1468,13 @@ private:
 
 				if(utf8::is_valid(merged.begin(), merged.end()))
 				{
+					[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentWillReloadNotification object:_self];
 					[_self beginUndoGrouping];
 					buffer.replace(0, buffer.size(), merged);
 					[_self endUndoGrouping];
 
 					_self.savedRevision = merged == yours ? _self.revision : -1;
+					[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentDidReloadNotification object:_self];
 					[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentContentDidChangeNotification object:_self];
 				}
 			}
