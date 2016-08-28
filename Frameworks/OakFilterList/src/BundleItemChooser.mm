@@ -601,7 +601,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 			OakSetNonEmptyString(dict, @"scopeSelector", to_s(item->scope_selector()));
 			OakSetNonEmptyString(dict, @"keyEquivalent", key_equivalent(item));
 			OakSetNonEmptyString(dict, @"tabTrigger",    item->value_for_field(bundles::kFieldTabTrigger));
-			OakSetNonEmptyString(dict, @"semanticClass", item->value_for_field(bundles::kFieldSemanticClass));
+			OakSetNonEmptyString(dict, @"semanticClass", text::join(item->values_for_field(bundles::kFieldSemanticClass), ", "));
 			[items addObject:dict];
 		}
 		else
