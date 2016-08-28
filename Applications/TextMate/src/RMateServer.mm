@@ -176,9 +176,9 @@ namespace
 			struct sockaddr_in6 iaddr = { sizeof(sockaddr_in6), AF_INET6, htons(_port) };
 			iaddr.sin6_addr = listenForRemoteClients ? in6addr_any : in6addr_loopback;
 			if(-1 == bind(fd, (sockaddr*)&iaddr, sizeof(iaddr)))
-				fprintf(stderr, "bind(): %s\n", strerror(errno));
+				perror("rmate: bind");
 			if(-1 == listen(fd, SOMAXCONN))
-				fprintf(stderr, "listen(): %s\n", strerror(errno));
+				perror("rmate: listen");
 
 			_callback = std::make_shared<socket_callback_t>(&rmate_connection_handler_t, fd);
 		}
@@ -650,7 +650,7 @@ static bool rmate_connection_handler_t (socket_t const& socket)
 	std::string welcome = "220 " + sys_info(KERN_HOSTNAME) + " RMATE TextMate (" + sys_info(KERN_OSTYPE) + " " + sys_info(KERN_OSRELEASE) + ")\n";
 	ssize_t len = write(newFd, welcome.data(), welcome.size());
 	if(len == -1)
-		fprintf(stderr, "error writing: %s\n", strerror(errno));
+		perror("rmate: write");
 
 	new socket_callback_t(socket_observer_t(), newFd);
 	return true;
