@@ -151,6 +151,7 @@ static NSString* kUserDefaultsTabItemLineBreakStyleKey = @"tabItemLineBreakStyle
 		_inactiveTabTextStyles = _activeTabTextStyles.mutableCopy;
 		_inactiveTabTextStyles[NSForegroundColorAttributeName] = [NSColor colorWithCalibratedWhite:0.5 alpha:1];
 
+		// MAC_OS_X_VERSION_10_10
 		if([[NSProcessInfo processInfo] respondsToSelector:@selector(isOperatingSystemAtLeastVersion:)] && [[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:{ 10, 10, 0 }])
 		{
 			_selectedTabTextStyles = _activeTabTextStyles.mutableCopy;

@@ -60,7 +60,7 @@ void OakShowSheetForWindow (NSWindow* sheet, NSWindow* window, void(^callback)(N
 
 void OakShowAlertForWindow (NSAlert* alert, NSWindow* window, void(^callback)(NSInteger))
 {
-	if(window && [alert respondsToSelector:@selector(beginSheetModalForWindow:completionHandler:)])
+	if(window && [alert respondsToSelector:@selector(beginSheetModalForWindow:completionHandler:)]) // MAC_OS_X_VERSION_10_9
 	{
 		[alert beginSheetModalForWindow:window completionHandler:callback];
 		return;

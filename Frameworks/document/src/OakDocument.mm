@@ -337,7 +337,7 @@ private:
 		self.fileType   = aFileType;
 
 		[self createBuffer];
-		if([someData respondsToSelector:@selector(enumerateByteRangesUsingBlock:)])
+		if([someData respondsToSelector:@selector(enumerateByteRangesUsingBlock:)]) // MAC_OS_X_VERSION_10_9
 		{
 			[someData enumerateByteRangesUsingBlock:^(void const* buf, NSRange range, BOOL*){
 				_buffer->insert(range.location, (char const*)buf, range.length);
