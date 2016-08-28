@@ -14,7 +14,7 @@ namespace ng
 		std::map<size_t, scope::scope_t> scopes;
 	};
 
-	result_t handle_request (parse::grammar_ptr grammar, parse::stack_ptr state, std::string const& line, std::pair<size_t, size_t> range, size_t batch_start, size_t limit_redraw)
+	result_t handle_request (parse::grammar_ptr grammar, parse::stack_ptr state, std::string const& line, std::pair<size_t, size_t> range)
 	{
 		std::lock_guard<std::mutex> lock(grammar->mutex());
 
@@ -53,7 +53,7 @@ namespace ng
 
 				CFRunLoopRef runLoop = CFRunLoopGetCurrent();
 				dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-					result_t result = handle_request(grammarRef, state, line, { from, to }, batch_start, limit_redraw);
+					result_t result = handle_request(grammarRef, state, line, { from, to });
 					CFRunLoopPerformBlock(runLoop, kCFRunLoopCommonModes, ^{
 						if(bufferRef.lock())
 						{
