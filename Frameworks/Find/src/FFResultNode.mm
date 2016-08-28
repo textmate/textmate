@@ -15,6 +15,8 @@ namespace
 		{
 			NSMutableParagraphStyle* paragraph = [NSMutableParagraphStyle new];
 			[paragraph setLineBreakMode:mode];
+			if([paragraph respondsToSelector:@selector(setAllowsDefaultTighteningForTruncation:)]) // MAC_OS_X_VERSION_10_11
+				[paragraph setAllowsDefaultTighteningForTruncation:NO];
 
 			_string = [[NSMutableAttributedString alloc] init];
 			_attributes.push_back(@{ NSParagraphStyleAttributeName : paragraph });
