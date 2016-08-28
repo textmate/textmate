@@ -909,21 +909,6 @@ namespace path
 		return exists(path) && info(resolve(path)) & flag::directory;
 	}
 
-	void touch_tree (std::string const& basePath)
-	{
-		lutimes(basePath.c_str(), NULL);
-
-		for(auto const& entry : path::entries(basePath))
-		{
-			std::string path = path::join(basePath, entry->d_name);
-			int type = entry->d_type;
-			if(type == DT_DIR)
-				touch_tree(path);
-			if(type == DT_LNK || type == DT_REG)
-				lutimes(path.c_str(), NULL);
-		}
-	}
-
 	// ===============
 	// = Global Info =
 	// ===============
