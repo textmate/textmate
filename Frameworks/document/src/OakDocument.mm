@@ -23,7 +23,6 @@
 #import <text/newlines.h>
 #import <text/utf8.h>
 #import <io/entries.h>
-#import <io/intermediate.h>
 #import <file/type.h>
 #import <file/open.h>
 #import <file/save.h>
@@ -563,19 +562,23 @@ private:
 		if(!_backupPath)
 			self.backupPath = [self createAndReturnBackupPath];
 
-		path::intermediate_t dest(to_s(self.backupPath));
-		int fd = open(dest, O_CREAT|O_TRUNC|O_WRONLY|O_CLOEXEC, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH);
+		std::string const temp = path::temp("backup");
+		int fd = open(temp.c_str(), O_CREAT|O_TRUNC|O_WRONLY|O_CLOEXEC, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH);
 		if(fd == -1)
+		{
+			perrorf("saveBackup: open(\"%s\")", temp.c_str());
 			return NO;
+		}
 
 		bool error = _buffer->visit_data([fd](char const* bytes, size_t offset, size_t len, bool* stop){
-			*stop = write(fd, bytes, len) != len;
+			if(*stop = write(fd, bytes, len) != len)
+				perrorf("saveBackup: write");
 		});
 
 		close(fd);
 
-		if(error || !dest.commit())
-			return unlink(dest), NO;
+		if(error)
+			return unlink(temp.c_str()), NO;
 
 		auto attr = [self extendedAttributeds];
 
@@ -590,10 +593,12 @@ private:
 		attr["com.macromates.backup.tab-size"]       = std::to_string(self.tabSize);
 		attr["com.macromates.backup.soft-tabs"]      = self.softTabs ? "YES" : NULL_STR;
 
-		path::set_attributes(to_s(_backupPath), attr);
+		path::set_attributes(temp, attr);
+
+		if(!path::rename_or_copy(temp, to_s(self.backupPath)))
+			return NO;
 
 		self.backupRevision = _revision;
-
 		return YES;
 	}
 	else if(_backupPath)
