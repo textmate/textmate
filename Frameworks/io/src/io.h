@@ -3,7 +3,6 @@
 
 #import "path.h"
 #import "move_path.h"
-#import "swap_file_data.h"
 #import "socket.h"
 #import "pipe.h"
 #import "exec.h"
