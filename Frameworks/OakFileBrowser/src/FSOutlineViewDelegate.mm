@@ -15,6 +15,55 @@
 #import <text/utf8.h>
 #import <oak/oak.h>
 
+@interface FSItemWrapper : NSObject <NSCopying>
+@property (nonatomic) NSString* displayName;
+@property (nonatomic) NSString* editingName;
+@end
+
+@implementation FSItemWrapper
+- (id)initWithDisplayName:(NSString*)display editingName:(NSString*)editing
+{
+	if((self = [super init]))
+	{
+		_displayName = display;
+		_editingName = editing;
+	}
+	return self;
+}
+
+- (id)copyWithZone:(NSZone*)aZone
+{
+	return self;
+}
+@end
+
+@interface FSItemFormatter : NSFormatter
+@end
+
+@implementation FSItemFormatter
+- (NSString*)stringForObjectValue:(id)aValue
+{
+	if([aValue isKindOfClass:[FSItemWrapper class]])
+		return ((FSItemWrapper*)aValue).displayName;
+	else if([aValue isKindOfClass:[NSString class]])
+		return aValue;
+	return [aValue description];
+}
+
+- (NSString*)editingStringForObjectValue:(id)aValue
+{
+	if([aValue isKindOfClass:[FSItemWrapper class]])
+		return ((FSItemWrapper*)aValue).editingName;
+	return [super editingStringForObjectValue:aValue];
+}
+
+- (BOOL)getObjectValue:(id*)valueRef forString:(NSString*)aString errorDescription:(NSString**)errorRef
+{
+	*valueRef = [[FSItemWrapper alloc] initWithDisplayName:aString editingName:aString];
+	return YES;
+}
+@end
+
 @interface OakSelectBasenameCell : NSTextFieldCell
 @end
 
@@ -225,6 +274,7 @@
 		[fileTextField.cell setLineBreakMode:NSLineBreakByTruncatingMiddle];
 		fileTextField.editable = YES;
 		fileTextField.delegate = self;
+		fileTextField.formatter = [[FSItemFormatter alloc] init];
 
 		NSDictionary* views = @{ @"icon" : _openButton, @"file" : fileTextField, @"itemInfoButtons" : _itemInfoButtons };
 		OakAddAutoLayoutViewsToSuperview([views allValues], self);
@@ -235,7 +285,6 @@
 		[self addConstraint:[NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:_openButton attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
 
 		[_openButton bind:NSImageBinding toObject:self withKeyPath:@"objectValue.icon" options:nil];
-		[fileTextField bind:NSValueBinding toObject:self withKeyPath:@"objectValue.displayName" options:nil];
 		[fileTextField bind:NSToolTipBinding toObject:self withKeyPath:@"objectValue.toolTip" options:nil];
 		[_itemInfoButtons bind:@"labelIndex" toObject:self withKeyPath:@"objectValue.labelIndex" options:nil];
 		[_itemInfoButtons bind:@"open" toObject:self withKeyPath:@"objectValue.open" options:nil];
@@ -254,11 +303,29 @@
 	[_itemInfoButtons unbind:@"open"];
 }
 
+- (void)updateTextFieldWithFSItem:(FSItem*)anItem
+{
+	NSString* editingName = [[anItem.url.path lastPathComponent] stringByReplacingOccurrencesOfString:@":" withString:@"/"];
+	self.textField.objectValue = [[FSItemWrapper alloc] initWithDisplayName:anItem.displayName editingName:editingName];
+}
+
+- (void)setObjectValue:(id)someObject
+{
+	[super setObjectValue:someObject];
+	if([someObject isKindOfClass:[FSItem class]])
+		[self updateTextFieldWithFSItem:someObject];
+}
+
 - (void)controlTextDidEndEditing:(NSNotification*)aNotification
 {
-	FSItem* item = self.objectValue;
-	if(![item setNewDisplayName:self.textField.stringValue view:self.enclosingScrollView.documentView ?: self])
-		item.displayName = [NSString stringWithCxxString:path::display_name([item.url.path fileSystemRepresentation])];
+	if([self.textField.objectValue isKindOfClass:[FSItemWrapper class]])
+	{
+		NSString* newName = ((FSItemWrapper*)self.textField.objectValue).editingName;
+
+		FSItem* item = self.objectValue;
+		[item renameToName:newName view:self.enclosingScrollView.documentView ?: self];
+		[self updateTextFieldWithFSItem:item];
+	}
 }
 
 - (void)resetCursorRects
