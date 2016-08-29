@@ -11,7 +11,7 @@ You can send pull requests via GitHub. Patches should:
 5. Rebase your branch against the upstream’s master. We don’t want to pull redundant merge commits.
 6. **Be clear about what license applies to your patch:** The files within this repository are under the [GPL 3][] (or later) but (as the original creator) we are still allowed to create non-free derivatives. However, if patches are given to us under GPL then those cannot make it into any non-free derivatives we may later wish to create. So to make it easier for us (and avoid any legal issues) we prefer if patches are released as public domain.
 
-There is both the [textmate-dev][] mailing list and [#textmate][] IRC channel at [freenode.net][] where this project can be discussed.
+There is the [textmate][] mailing list and [#textmate][] IRC channel at [freenode.net][] where this project can be discussed.
 
 ## GitHub Workflow
 
@@ -70,7 +70,6 @@ After this, re-apply your change and commit. If the change is non-trivial it is 
 	property of File’s Owner.
 
 [GPL 3]:          http://www.gnu.org/copyleft/gpl.html
-[textmate-dev]:   http://lists.macromates.com/listinfo/textmate-dev
-[textmate users]: http://lists.macromates.com/listinfo/textmate
+[textmate]:       http://lists.macromates.com/listinfo/textmate
 [#textmate]:      irc://irc.freenode.net/#textmate
 [freenode.net]:   http://freenode.net/
