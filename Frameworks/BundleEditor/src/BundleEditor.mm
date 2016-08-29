@@ -25,6 +25,8 @@ OAK_DEBUG_VAR(BundleEditor);
 
 static BundleEditor* SharedInstance;
 
+@class OakCommand;
+
 @interface BundleEditor () <OakTextViewDelegate>
 - (void)didChangeBundleItems;
 - (void)didChangeModifiedState;
@@ -889,5 +891,14 @@ static NSString* DescriptionForChanges (std::map<bundles::item_ptr, plist::dicti
 		}
 	});
 	return NO;
+}
+
+// ====================
+// = Running Commands =
+// ====================
+
+- (void)updateEnvironment:(std::map<std::string, std::string>&)res forCommand:(OakCommand*)aCommand
+{
+	[documentView.textView updateEnvironment:res];
 }
 @end
