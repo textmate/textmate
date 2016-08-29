@@ -342,7 +342,7 @@ static std::map<std::string, document::document_t::callback_t::event_t> const Ob
 
 - (void)documentDidSave:(NSNotification*)aNotification
 {
-	_cppDocument->_inode = document::documents.update_document(_cppDocument->identifier()); 
+	_cppDocument->_inode = document::documents.update_document(_cppDocument->identifier());
 	[self breadcast:document::document_t::callback_t::did_save];
 }
 
@@ -358,7 +358,7 @@ static std::map<std::string, document::document_t::callback_t::event_t> const Ob
 		[self breadcast:iter->second];
 
 	if([keyPath isEqualToString:@"path"])
-		_cppDocument->_inode = document::documents.update_document(_cppDocument->identifier()); 
+		_cppDocument->_inode = document::documents.update_document(_cppDocument->identifier());
 }
 @end
 

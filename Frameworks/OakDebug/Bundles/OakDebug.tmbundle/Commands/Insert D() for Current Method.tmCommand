@@ -15,9 +15,9 @@ proto_re = /
             ^\s*                # Start of the line and optional space
             [+-]\s*             # a plus or minus for method specifier
             \([^)]+\)           # the return type in brackets
-            ((?:\n|[^@{])*)     
-            (?m:[\s;]*)         
-            \{                  
+            ((?:\n|[^@{])*)
+            (?m:[\s;]*)
+            \{
           /x
 
 invocation_line = previous_lines[-1]

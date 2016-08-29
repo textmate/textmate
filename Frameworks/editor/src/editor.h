@@ -253,7 +253,7 @@ namespace ng
 			void advance ()                                                    { if(++_index >= _suggestions.size()) _index = 0;  }
 			void recede ()                                                     { if(--_index < 0) _index = _suggestions.size()-1; }
 
-      private:
+		private:
 			size_t _revision = 0;
 			ng::ranges_t _ranges;
 

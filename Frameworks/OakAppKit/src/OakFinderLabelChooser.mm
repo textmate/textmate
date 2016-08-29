@@ -211,9 +211,9 @@ static CGFloat const LabelNameHeight = 15;
 	for(NSInteger i = 0; i < 8; i++)
 	{
 		NSTrackingArea* trackingArea = [[NSTrackingArea alloc] initWithRect:NSInsetRect([self rectForSwatchAtIndex:i], -SwatchMargin, -SwatchMargin)
-                                                                  options:NSTrackingMouseEnteredAndExited|NSTrackingActiveInKeyWindow
-                                                                    owner:self
-                                                                 userInfo:@{ @"index" : @(i) }];
+		                                                            options:NSTrackingMouseEnteredAndExited|NSTrackingActiveInKeyWindow
+		                                                              owner:self
+		                                                           userInfo:@{ @"index" : @(i) }];
 		[self addTrackingArea:trackingArea];
 	}
 }

@@ -102,7 +102,7 @@ int install_tool (std::string const& toolPath)
 	path::remove(kAuthToolPath);
 	if(!path::copy(toolPath, kAuthToolPath))
 		return EX_IOERR;
-   chown(kAuthToolPath, 0, 0);
+	chown(kAuthToolPath, 0, 0);
 	if(path::exists(kAuthPlistPath))
 		launch_control("unload", kAuthPlistPath);
 	if(!path::set_content(kAuthPlistPath, plist_content()))

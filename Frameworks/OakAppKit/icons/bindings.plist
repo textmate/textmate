@@ -1,6 +1,6 @@
 {
 	blank                = (  );
-	
+
 	text                 = ( mail, eml, man, txt, text, utf8, README, INSTALL, LICENSE, AUTHORS, ChangeLog );
 	structured_text      = ( bbcode, mdown, markdown, markdn, md, mmd, rst, rest, etx, etx.txt, textile, t2t );
 	web                  = ( html, htm, shtml, xhtml );
@@ -22,7 +22,7 @@
 	header               = ( h, hh, hpp, "h++" );
 	latex                = ( lhs, tex, sty, cls );
 	latex_alt            = ( bib, rd, snw, rnw );
-	
+
 	grey                 = ( diff, patch, csv, tsv, sh, bash, zsh, bashrc, bash_profile, bash_login, profile, bash_logout );
 	charcoal             = ( commit_editmsg, git-rebase-todo, svn-commit.tmp, svn-commit.2.tmp, portfile, gemspec, gemfile, erbsql, sql.erb );
 	blue                 = ( groovy, gvy, gradle, java, bsh );

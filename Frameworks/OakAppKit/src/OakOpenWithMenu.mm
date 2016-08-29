@@ -136,9 +136,9 @@ static NSArray* ApplicationURLsForPaths (NSSet* paths)
 	for(NSString* filePath in filePaths)
 		[fileURLs addObject:[NSURL fileURLWithPath:filePath]];
 	[[NSWorkspace sharedWorkspace] openURLs:fileURLs
-                   withAppBundleIdentifier:[[NSBundle bundleWithPath:applicationURL.path] bundleIdentifier]
-                                   options:0
-            additionalEventParamDescriptor:NULL
-                         launchIdentifiers:NULL];
+	                withAppBundleIdentifier:[[NSBundle bundleWithPath:applicationURL.path] bundleIdentifier]
+	                                options:0
+	         additionalEventParamDescriptor:NULL
+	                      launchIdentifiers:NULL];
 }
 @end
