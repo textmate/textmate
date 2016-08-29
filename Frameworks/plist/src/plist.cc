@@ -1,5 +1,5 @@
 #include "plist.h"
-#include <io/intermediate.h>
+#include <io/path.h>
 #include <oak/oak.h>
 #include <cf/cf.h>
 
@@ -205,18 +205,14 @@ namespace plist
 		bool res = false;
 		if(CFPropertyListRef cfPlist = create_cf_property_list(plist))
 		{
-			path::intermediate_t dest(path);
-			std::string const& str = dest;
-			if(CFURLRef url = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault, (UInt8 const*)str.data(), str.size(), false))
+			std::string const temp = path::temp("save_plist");
+			if(CFURLRef url = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault, (UInt8 const*)temp.data(), temp.size(), false))
 			{
 				if(CFWriteStreamRef writeStream = CFWriteStreamCreateWithFile(kCFAllocatorDefault, url))
 				{
-					CFStringRef error = NULL;
 					if(CFWriteStreamOpen(writeStream))
 					{
-						CFPropertyListWriteToStream(cfPlist, writeStream, format == kPlistFormatBinary ? kCFPropertyListBinaryFormat_v1_0 : kCFPropertyListXMLFormat_v1_0, &error);
-						if(error == NULL)
-							res = dest.commit();
+						res = CFPropertyListWriteToStream(cfPlist, writeStream, format == kPlistFormatBinary ? kCFPropertyListBinaryFormat_v1_0 : kCFPropertyListXMLFormat_v1_0, nullptr) != 0;
 						CFWriteStreamClose(writeStream);
 					}
 					CFRelease(writeStream);
@@ -224,8 +220,13 @@ namespace plist
 				CFRelease(url);
 			}
 			CFRelease(cfPlist);
+
+			if(res && path::rename_or_copy(temp, path))
+				return true;
+
+			unlink(temp.c_str());
 		}
-		return res;
+		return false;
 	}
 
 	// =========
