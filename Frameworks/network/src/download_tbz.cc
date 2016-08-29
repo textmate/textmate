@@ -5,7 +5,6 @@
 #include "proxy.h"
 #include "tbz.h"
 #include <io/path.h>
-#include <io/swap_file_data.h>
 #include <io/move_path.h>
 #include <text/case.h>
 #include <text/decode.h>
@@ -177,19 +176,12 @@ namespace network
 			bool goodSignature = false;
 			if(serverReply == 200)
 			{
-				if(data.verify_signature.receive_end(error))
+				if(goodSignature = data.verify_signature.receive_end(error))
 				{
-					goodSignature = true;
-					if(path::swap_and_unlink(tmpPath, destination))
-					{
-						path::set_attr(destination, kHTTPEntityTagAttribute, data.etag);
-						path::set_attr(destination, kHTTPSigneeHeader,       data.verify_signature.signee());
-						path::set_attr(destination, kHTTPSignatureHeader,    data.verify_signature.signature());
-					}
-					else
-					{
-						fprintf(stderr, "error with swap_and_unlink: %s → %s\n", tmpPath.c_str(), destination.c_str());
-					}
+					path::set_attr(tmpPath, kHTTPEntityTagAttribute, data.etag);
+					path::set_attr(tmpPath, kHTTPSigneeHeader,       data.verify_signature.signee());
+					path::set_attr(tmpPath, kHTTPSignatureHeader,    data.verify_signature.signature());
+					path::rename_or_copy(tmpPath, destination);
 				}
 			}
 			else if(serverReply == 304)
@@ -217,7 +209,8 @@ namespace network
 				error = text::format("Unexpected server reply (%ld).", serverReply);
 			}
 
-			unlink(tmpPath.c_str());
+			if(!goodSignature) // If not, tmpPath has been moved to destination
+				unlink(tmpPath.c_str());
 
 			if(tbz.wait_for_tbz())
 			{

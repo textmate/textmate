@@ -2,7 +2,6 @@
 #include "download.h"
 #include <io/path.h>
 #include <io/move_path.h>
-#include <io/swap_file_data.h>
 #include <io/entries.h>
 #include <network/download_tbz.h>
 #include <plist/ascii.h>
@@ -79,9 +78,8 @@ namespace bundles_db
 		std::string path = download_etag(source->url(), source->key_chain(), &etag, progress, min, max);
 		if(path != NULL_STR)
 		{
-			if(path::swap_and_unlink(path, source->path()))
-					path::set_attr(source->path(), "org.w3.http.etag", etag);
-			else	perrorf("bundles_db: swap_and_unlink(\"%s\", \"%s\")", path.c_str(), source->path().c_str());
+			path::set_attr(path, "org.w3.http.etag", etag);
+			path::rename_or_copy(path, source->path());
 		}
 		else if(etag == NULL_STR)
 		{

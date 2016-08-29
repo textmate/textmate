@@ -668,23 +668,19 @@ namespace
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 		std::string temp, etag;
 		std::tie(temp, etag) = conditional_download(url, self.keyChain, path::get_attr(path, "org.w3.http.etag"));
-		path::set_attr(path, "last-check", to_s(oak::date_t::now()));
 
 		if(temp != NULL_STR)
 		{
-			if(path::swap_and_unlink(temp, path))
+			path::set_attr(temp, "org.w3.http.etag", etag);
+			if(path::rename_or_copy(temp, path))
 			{
-				path::set_attr(path, "org.w3.http.etag", etag);
 				dispatch_async(dispatch_get_main_queue(), ^{
 					self.bundles = [self bundlesByLoadingIndex];
 					callback();
 				});
 			}
-			else
-			{
-				perrorf("BundlesManager: swap_and_unlink(\"%s\", \"%s\")", temp.c_str(), path.c_str());
-			}
 		}
+		path::set_attr(path, "last-check", to_s(oak::date_t::now()));
 	});
 }
 
