@@ -911,6 +911,30 @@ namespace path
 		return exists(path) && info(resolve(path)) & flag::directory;
 	}
 
+	bool rename_or_copy (std::string const& cppSrc, std::string const& cppDst, bool createParent)
+	{
+		char const* const src = cppSrc.c_str();
+		char const* const dst = cppDst.c_str();
+
+		if(createParent && !make_dir(parent(cppDst)))
+			return false;
+
+		if(::rename(src, dst) == 0)
+			return true;
+
+		if(errno == EXDEV)
+		{
+			if(copyfile(src, dst, NULL, COPYFILE_ALL | COPYFILE_MOVE | COPYFILE_UNLINK) == 0)
+				return true;
+			perrorf("copyfile(\"%s\", \"%s\", NULL, COPYFILE_ALL | COPYFILE_MOVE | COPYFILE_UNLINK)", src, dst);
+		}
+		else
+		{
+			perrorf("rename(\"%s\", \"%s\")", src, dst);
+		}
+		return false;
+	}
+
 	// ===============
 	// = Global Info =
 	// ===============
