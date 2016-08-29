@@ -126,15 +126,15 @@ namespace
 				error = text::format("open(\"%s\"): %s", (char const*)dest, strerror(errno));
 			else if(write(fd, bytes->get(), bytes->size()) != bytes->size())
 			{
+				error = text::format("write: %s", strerror(errno));
 				close(fd);
-				error = text::format("write(): %s", strerror(errno));
 			}
 			else if(close(fd) != 0)
-				error = text::format("close(): %s", strerror(errno));
-			else if(!dest.commit())
-				error = text::format("Atomic save: %s", strerror(errno));
+				error = text::format("close: %s", strerror(errno));
+			else if(!dest.commit(&error))
+				;
 			else if(!path::set_attributes(path, attributes))
-				error = text::format("Setting extended attributes: %s", strerror(errno));
+				error = text::format("Setting extended attributes");
 		}
 		else if(status == kFileTestWritableByRoot || status == kFileTestNotWritable)
 		{

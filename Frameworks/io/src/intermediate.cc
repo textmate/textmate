@@ -1,17 +1,36 @@
 #include "intermediate.h"
 #include "path.h"
+#include <text/format.h>
 #include <oak/debug.h>
 
 OAK_DEBUG_VAR(IO_Intermediate);
 OAK_DEBUG_VAR(IO_Swap_File_Data);
 
-static bool swap_and_unlink (std::string const& src, std::string const& dst)
+__attribute__ ((format (printf, 1, 2))) static std::string format_error (char const* format, ...)
+{
+	char* err = strerror(errno);
+	char* msg = nullptr;
+
+	va_list ap;
+	va_start(ap, format);
+	vasprintf(&msg, format, ap);
+	va_end(ap);
+
+	char* res = nullptr;
+	asprintf(&res, "%s: %s\n", msg, err);
+	std::string str(res);
+	free(res);
+
+	return str;
+}
+
+static bool swap_and_unlink (std::string const& src, std::string const& dst, std::string& errorMsg)
 {
 	D(DBF_IO_Swap_File_Data, bug("%s → %s\n", src.c_str(), dst.c_str()););
 	ASSERT_EQ(access(src.c_str(), F_OK), 0);
 	if(access(dst.c_str(), F_OK) != 0 && !path::make_dir(path::parent(dst)))
 	{
-		perrorf("swap_and_unlink: mkdir_p(\"%s\")", path::parent(dst).c_str());
+		errorMsg = format_error("mkdir_p(\"%s\")", path::parent(dst).c_str());
 		return false;
 	}
 
@@ -19,14 +38,14 @@ static bool swap_and_unlink (std::string const& src, std::string const& dst)
 	{
 		bool res = unlink(src.c_str()) == 0;
 		if(!res)
-			perrorf("swap_and_unlink: unlink(\"%s\")", src.c_str());
+			errorMsg = format_error("unlink(\"%s\")", src.c_str());
 		return res;
 	}
 
 	if(errno != ENOTSUP && errno != ENOENT && errno != EXDEV)
 	{
 		// ExpanDrive returns EFAULT
-		perrorf("warning: exchangedata(\"%s\", \"%s\")", src.c_str(), dst.c_str());
+		perrorf("exchangedata(\"%s\", \"%s\")", src.c_str(), dst.c_str());
 		errno = ENOTSUP;
 	}
 
@@ -51,7 +70,7 @@ static bool swap_and_unlink (std::string const& src, std::string const& dst)
 
 		if(::rename(src.c_str(), dst.c_str()) == 0)
 			return true;
-		perrorf("swap_and_unlink: rename(\"%s\", \"%s\")", src.c_str(), dst.c_str());
+		errorMsg = format_error("rename(\"%s\", \"%s\")", src.c_str(), dst.c_str());
 		D(DBF_IO_Swap_File_Data, bug("rename() failed: %s\n", strerror(errno)););
 	}
 
@@ -62,10 +81,10 @@ static bool swap_and_unlink (std::string const& src, std::string const& dst)
 		{
 			bool res = unlink(src.c_str()) == 0;
 			if(!res)
-				perrorf("swap_and_unlink: unlink(\"%s\")", src.c_str());
+				errorMsg = format_error("unlink(\"%s\")", src.c_str());
 			return res;
 		}
-		perrorf("swap_and_unlink: copyfile(\"%s\", \"%s\", NULL, COPYFILE_DATA|COPYFILE_MOVE)", src.c_str(), dst.c_str());
+		errorMsg = format_error("copyfile(\"%s\", \"%s\", NULL, COPYFILE_DATA|COPYFILE_MOVE)", src.c_str(), dst.c_str());
 		D(DBF_IO_Swap_File_Data, bug("copyfile() failed: %s\n", strerror(errno)););
 	}
 
@@ -90,10 +109,11 @@ namespace path
 		D(DBF_IO_Intermediate, bug("%s → %s → %s\n", dest.c_str(), _resolved.c_str(), _intermediate.c_str()););
 	}
 
-	bool intermediate_t::commit () const
+	bool intermediate_t::commit (std::string* errorMsg) const
 	{
 		D(DBF_IO_Intermediate, bug("%s ⇔ %s (swap: %s)\n", _resolved.c_str(), _intermediate.c_str(), BSTR(_intermediate != _resolved)););
-		return _intermediate == _resolved ? true : swap_and_unlink(_intermediate, _resolved);
+		std::string unused;
+		return _intermediate == _resolved ? true : swap_and_unlink(_intermediate, _resolved, errorMsg ? *errorMsg : unused);
 	}
 
 } /* path */

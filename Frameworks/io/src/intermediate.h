@@ -8,7 +8,7 @@ namespace path
 	struct PUBLIC intermediate_t
 	{
 		intermediate_t (std::string const& dest);
-		bool commit () const;
+		bool commit (std::string* errorMsg = nullptr) const;
 
 		operator std::string const& () const { return _intermediate; }
 		operator char const* () const        { return _intermediate.c_str(); }
