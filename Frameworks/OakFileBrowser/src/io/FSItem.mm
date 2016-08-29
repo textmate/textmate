@@ -123,6 +123,35 @@ static ino_t inode (std::string const& path)
 	}
 }
 
+- (BOOL)renameToName:(NSString*)newBasename view:(NSView*)view
+{
+	if(!_url.isFileURL || OakIsEmptyString(newBasename))
+		return NO;
+
+	std::string src = [_url.path fileSystemRepresentation];
+	std::string dst = path::join(path::parent(src), [[newBasename stringByReplacingOccurrencesOfString:@"/" withString:@":"] fileSystemRepresentation]);
+	if(src == dst)
+		return NO;
+
+	// ‘dst’ is only allowed to exist on case-insensitive file systems (Foo.txt → foo.txt)
+	if(!path::exists(dst) || inode(src) == inode(dst))
+	{
+		NSURL* dstURL = [NSURL fileURLWithPath:to_ns(dst)];
+		if([[OakFileManager sharedInstance] renameItemAtURL:_url toURL:dstURL view:view])
+		{
+			self.url         = dstURL;
+			self.displayName = to_ns(path::display_name(dst));
+			return YES;
+		}
+	}
+	else
+	{
+		errno = EEXIST;
+		OakRunIOAlertPanel("Failed to rename the file at “%s”.", path::name(src).c_str());
+	}
+	return NO;
+}
+
 - (BOOL)setNewDisplayName:(NSString*)newDisplayName view:(NSView*)view
 {
 	if(![_url isFileURL] || OakIsEmptyString(newDisplayName))

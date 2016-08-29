@@ -26,5 +26,6 @@ enum FSItemURLType { FSItemURLTypeUnknown = 0, FSItemURLTypeFile, FSItemURLTypeF
 
 + (FSItem*)itemWithURL:(NSURL*)anURL;
 - (FSItem*)initWithURL:(NSURL*)anURL;
+- (BOOL)renameToName:(NSString*)newBasename view:(NSView*)view;
 - (BOOL)setNewDisplayName:(NSString*)newDisplayName view:(NSView*)view;
 @end
