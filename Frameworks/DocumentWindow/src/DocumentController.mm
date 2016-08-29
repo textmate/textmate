@@ -169,6 +169,8 @@ namespace
 				_document->sync_open();
 				_did_open = true;
 			}
+
+			_document->document().keepBackupFile = YES;
 		}
 
 		bool untrack ()
