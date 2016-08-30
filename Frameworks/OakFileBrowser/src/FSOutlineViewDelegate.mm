@@ -43,10 +43,15 @@
 @implementation FSItemFormatter
 - (NSString*)stringForObjectValue:(id)aValue
 {
+	// If the table view is set to render as source list
+	// then we may receive an attributed string as value
+
 	if([aValue isKindOfClass:[FSItemWrapper class]])
 		return ((FSItemWrapper*)aValue).displayName;
 	else if([aValue isKindOfClass:[NSString class]])
 		return aValue;
+	else if([aValue isKindOfClass:[NSAttributedString class]])
+		return ((NSAttributedString*)aValue).string;
 	return [NSString stringWithFormat:@"Unexpected value type: %@", [aValue class]];
 }
 
