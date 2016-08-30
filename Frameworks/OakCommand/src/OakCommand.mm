@@ -556,16 +556,16 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 		if([responder respondsToSelector:action])
 			return responder;
 
-		if(responder == NSApp.keyWindow || responder == NSApp.mainWindow || responder == NSApp)
+		if([responder isKindOfClass:[NSWindow class]] || responder == NSApp)
 		{
 			if([[responder performSelector:@selector(delegate)] respondsToSelector:action])
 				return [responder performSelector:@selector(delegate)];
 		}
 
-		if(responder == NSApp.mainWindow)
-			responder = NSApp;
-		else if(responder == NSApp.keyWindow)
+		if(responder == NSApp.keyWindow && NSApp.mainWindow && NSApp.mainWindow != NSApp.keyWindow)
 			responder = NSApp.mainWindow.firstResponder ?: NSApp.mainWindow;
+		else if([responder isKindOfClass:[NSWindow class]])
+			responder = NSApp;
 		else
 			responder = responder.nextResponder;
 	}
