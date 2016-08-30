@@ -3847,7 +3847,15 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 		return;
 	}
 
-	std::vector<bundles::item_ptr> const& items = bundles::query(bundles::kFieldSemanticClass, "callback.mouse-click", add_modifiers_to_scope(ng::scope(*documentView, documentView->index_at_point([self convertPoint:[anEvent locationInWindow] fromView:nil]), to_s([self scopeAttributes])), [anEvent modifierFlags]));
+	std::string callbackName;
+	switch(([anEvent clickCount]-1) % 3)
+	{
+		case 0: callbackName = "callback.single-click"; break;
+		case 1: callbackName = "callback.double-click"; break;
+		case 2: callbackName = "callback.triple-click"; break;
+	}
+
+	std::vector<bundles::item_ptr> const& items = bundles::query(bundles::kFieldSemanticClass, callbackName, add_modifiers_to_scope(ng::scope(*documentView, documentView->index_at_point([self convertPoint:[anEvent locationInWindow] fromView:nil]), to_s([self scopeAttributes])), [anEvent modifierFlags]));
 	if(!items.empty())
 	{
 		if(bundles::item_ptr item = OakShowMenuForBundleItems(items, [self positionForWindowUnderCaret]))
