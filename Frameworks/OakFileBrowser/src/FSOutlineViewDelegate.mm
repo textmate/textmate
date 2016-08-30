@@ -31,9 +31,30 @@
 	return self;
 }
 
-- (id)copyWithZone:(NSZone*)aZone
+- (id)copyWithZone:(NSZone*)aZone { return self; }
+- (NSUInteger)hash                { return [_editingName hash]; }
+- (BOOL)isEqual:(id)otherObject   { return [otherObject isKindOfClass:[self class]] && [_editingName isEqual:[otherObject editingName]] && [_displayName isEqual:[otherObject displayName]]; }
+@end
+
+@interface FSItem (FSItemWrapper)
+- (FSItemWrapper*)wrappedValue;
+@end
+
+@implementation FSItem (FSItemWrapper)
++ (NSSet*)keyPathsForValuesAffectingWrappedValue
 {
-	return self;
+	return [NSSet setWithObjects:@"displayName", @"url", nil];
+}
+
+- (FSItemWrapper*)wrappedValue
+{
+	NSString* editingName = [[self.url.path lastPathComponent] stringByReplacingOccurrencesOfString:@":" withString:@"/"];
+	return [[FSItemWrapper alloc] initWithDisplayName:self.displayName editingName:editingName];
+}
+
+- (void)setWrappedValue:(FSItemWrapper*)wrappedValue
+{
+	// Because ‘wrappedValue’ is bound to our text field then we receive updates when user edtis the text field
 }
 @end
 
@@ -64,7 +85,9 @@
 
 - (BOOL)getObjectValue:(id*)valueRef forString:(NSString*)aString errorDescription:(NSString**)errorRef
 {
-	*valueRef = [[FSItemWrapper alloc] initWithDisplayName:aString editingName:aString];
+	// Here we lose the displayName but I have no idea how to preserve it.
+	// If user aborts editing they are left with pristine editingName.
+	*valueRef = aString;
 	return YES;
 }
 @end
@@ -290,6 +313,7 @@
 		[self addConstraint:[NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:_openButton attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
 
 		[_openButton bind:NSImageBinding toObject:self withKeyPath:@"objectValue.icon" options:nil];
+		[fileTextField bind:NSValueBinding toObject:self withKeyPath:@"objectValue.wrappedValue" options:nil];
 		[fileTextField bind:NSToolTipBinding toObject:self withKeyPath:@"objectValue.toolTip" options:nil];
 		[_itemInfoButtons bind:@"labelIndex" toObject:self withKeyPath:@"objectValue.labelIndex" options:nil];
 		[_itemInfoButtons bind:@"open" toObject:self withKeyPath:@"objectValue.open" options:nil];
@@ -308,29 +332,9 @@
 	[_itemInfoButtons unbind:@"open"];
 }
 
-- (void)updateTextFieldWithFSItem:(FSItem*)anItem
-{
-	NSString* editingName = [[anItem.url.path lastPathComponent] stringByReplacingOccurrencesOfString:@":" withString:@"/"];
-	self.textField.objectValue = [[FSItemWrapper alloc] initWithDisplayName:anItem.displayName editingName:editingName];
-}
-
-- (void)setObjectValue:(id)someObject
-{
-	[super setObjectValue:someObject];
-	if([someObject isKindOfClass:[FSItem class]])
-		[self updateTextFieldWithFSItem:someObject];
-}
-
 - (void)controlTextDidEndEditing:(NSNotification*)aNotification
 {
-	if([self.textField.objectValue isKindOfClass:[FSItemWrapper class]])
-	{
-		NSString* newName = ((FSItemWrapper*)self.textField.objectValue).editingName;
-
-		FSItem* item = self.objectValue;
-		[item renameToName:newName view:self.enclosingScrollView.documentView ?: self];
-		[self updateTextFieldWithFSItem:item];
-	}
+	[(FSItem*)self.objectValue renameToName:self.textField.stringValue view:self.enclosingScrollView.documentView ?: self];
 }
 
 - (void)resetCursorRects
