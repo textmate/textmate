@@ -47,7 +47,7 @@
 		return ((FSItemWrapper*)aValue).displayName;
 	else if([aValue isKindOfClass:[NSString class]])
 		return aValue;
-	return [aValue description];
+	return [NSString stringWithFormat:@"Unexpected value type: %@", [aValue class]];
 }
 
 - (NSString*)editingStringForObjectValue:(id)aValue
