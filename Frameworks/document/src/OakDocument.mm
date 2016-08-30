@@ -1087,17 +1087,21 @@ private:
 
 - (void)beginUndoGrouping
 {
+	ASSERT(_buffer);
+
 	if(OakDocumentEditor* editor = self.documentEditors.firstObject)
-		_undoManager->begin_undo_group(editor.selection);
+			_undoManager->begin_undo_group(editor.selection);
+	else	_undoManager->begin_undo_group(ng::convert(*_buffer, to_s(_selection)));
 }
 
 - (void)endUndoGrouping
 {
+	ASSERT(_buffer);
+
 	if(OakDocumentEditor* editor = self.documentEditors.firstObject)
-	{
-		_undoManager->end_undo_group(editor.selection);
-		self.revision = _buffer->revision();
-	}
+			_undoManager->end_undo_group(editor.selection);
+	else	_undoManager->end_undo_group(ng::convert(*_buffer, to_s(_selection)));
+	self.revision = _buffer->revision();
 }
 
 - (void)undo
