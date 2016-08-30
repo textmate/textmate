@@ -2,6 +2,12 @@ Title: Release Notes
 
 # Changes
 
+## 2016-08-30 (v2.0-beta.12.6)
+
+* Add `callback.document.will/did-reload` which is triggered when the document is reloaded due to external changes. This is relevant for commands that update the gutter based on document content.
+* Add _Copy Replacements_ to the Find dialog’s action menu. After a regular expression search this can be used to copy all matches, but transformed by the replacement (format) string. For example search for `obj->(\w+)\(` and put `$1` in the _Replace_ field before selecting _Copy Replacements_ and you’ll get a list of just the member function name itself copied to the clipboard.
+* See [all changes since v2.0-beta.12.5](https://github.com/textmate/textmate/compare/v2.0-beta.12.5...v2.0-beta.12.6)
+
 ## 2016-08-25 (v2.0-beta.12.5)
 
 * When duplicating files in the file browser, we now open the new file if the duplicated file was the selected tab.
