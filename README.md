@@ -28,18 +28,26 @@ To bootstrap the build you need to run `./configure` (in the root of the source 
 * `sparsedir` — location of sparsehash includes. By default it will search various locations including MacPorts and Homebrew.
 * `CC` and `CXX` — C and C++ compiler.
 
-In the simplest case you would run:
+In the simplest case (assuming [Homebrew][] is installed) you would run:
 
-	git clone https://github.com/textmate/textmate.git
+	brew install ragel boost multimarkdown hg ninja capnp google-sparsehash libressl
+	git clone --recursive https://github.com/textmate/textmate.git
 	cd textmate
-	git submodule update --init
 	./configure && ninja
 
-Please note that if you downloaded the source code (rather than cloned via git) you likely miss the submodules and the build will therefore fail.
+If you're using [MacPorts][] then instead run this line to install dependencies:
+
+	sudo port install ninja ragel boost multimarkdown mercurial sparsehash libressl
+
+Unless you’re using [Homebrew][] then [Cap’n Proto][capnp] must be manually installed. Feel free to submit a PR to update `configure`.
+
+If `port` fails with a build error then likely you need to agree (system-wide) to Apple’s Xcode license:
+
+	sudo xcodebuild -license
 
 ## Prerequisites
 
-To build the source the following must first be installed on your system:
+Building TextMate has the following dependencies:
 
  * [ninja][]         — build system similar to `make`
  * [ragel][]         — state machine compiler
@@ -50,21 +58,10 @@ To build the source the following must first be installed on your system:
  * [Cap’n Proto][capnp] — serialization library
  * [LibreSSL][libressl] - OpenBSD fork of OpenSSL
 
-You need to manually install [Cap’n Proto][capnp] if you're not using [homebrew][]. To install the other dependencies via [MacPorts][] run:
-
-	sudo port install ninja ragel boost multimarkdown mercurial sparsehash libressl
-
-If `port` fails with a build error then likely you need to agree (system-wide) to Apple’s Xcode license:
-
-	sudo xcodebuild -license
-
-To install using [homebrew][] run:
-
-	brew install ragel boost multimarkdown hg ninja capnp google-sparsehash libressl
-
 In practice `hg` ([mercurial][]) is only required for the SCM library’s tests so you can skip this dependency if you don’t mind a failing test.
 
-If you want to avoid the libressl linker warnings about being built for different deployment target then run `brew edit libressl` and make the following change:
+If you want to avoid the libressl linker warnings about being built for different deployment tar
+et then run `brew edit libressl` and make the following change:
 
 	-    system "./configure", *args
 	+    system "env", "LDFLAGS=-mmacosx-version-min=10.8", "CFLAGS=-mmacosx-version-min=10.8", "./configure", *args
@@ -73,7 +70,7 @@ Afterward you must rebuild using: `brew reinstall --build-from-source libressl`
 
 ## Building from within TextMate
 
-You should install the [Ninja][NinjaBundle] and [CxxTest][] bundles. Both can be installed via _Preferences_ → _Bundles_.
+You should install the [Ninja][NinjaBundle] bundle which can be installed via _Preferences_ → _Bundles_.
 
 After this you can press ⌘B to build from within TextMate. In case you haven't already you also need to set up the `PATH` variable either in _Preferences_ → _Variables_ or `~/.tm_properties` so it can find `ninja` and related tools; an example could be `$PATH:/opt/local/bin`.
 
@@ -92,7 +89,6 @@ For each output there are a few symbolic targets you can build. While the exampl
 For the `io` library:
 
 	ninja io                 # Build the io library and run tests.
-	ninja io/coerce          # Build the io library and skip tests.
 	ninja io/clean           # Remove the build folder for the io library.
 	ninja io/headers         # Copy exported headers to $builddir/include.
 
@@ -130,11 +126,9 @@ TextMate is a trademark of Allan Odgaard.
 [mercurial]:     http://mercurial.selenic.com/
 [capnp]:         http://kentonv.github.io/capnproto/
 [libressl]:      http://www.libressl.org
-[clang 3.2]:     http://clang.llvm.org/
 [MacPorts]:      http://www.macports.org/
-[homebrew]:      http://brew.sh/
+[Homebrew]:      http://brew.sh/
 [NinjaBundle]:   https://github.com/textmate/ninja.tmbundle
-[CxxTest]:       https://github.com/textmate/cxxtest.tmbundle
 [sparsehash]:    https://code.google.com/p/sparsehash/
 [#textmate]:     irc://irc.freenode.net/#textmate
 [freenode.net]:  http://freenode.net/
