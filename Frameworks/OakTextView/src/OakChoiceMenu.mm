@@ -26,6 +26,7 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 	{
 		_choices = [NSArray array];
 		_choiceIndex = NSNotFound;
+		_font = [NSFont controlContentFontOfSize:0];
 	}
 	return self;
 }
@@ -41,7 +42,7 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 	CGFloat const kTableViewPadding = 4;
 	CGFloat const kScrollBarWidth   = 15;
 
-	NSTextField* textField = OakCreateLabel(@"", [NSFont controlContentFontOfSize:0]);
+	NSTextField* textField = OakCreateLabel(@"", self.font);
 	CGFloat width = 60;
 	for(NSInteger i = 0; i < MIN(_choices.count, 256); ++i)
 	{
@@ -125,7 +126,9 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 	NSTextField* res = [aTableView makeViewWithIdentifier:identifier owner:self];
 	if(!res)
 	{
-		res = OakCreateLabel(@"", [NSFont controlContentFontOfSize:0]);
+		res = OakCreateLabel(@"", self.font);
+		[res sizeToFit];
+		aTableView.rowHeight = NSHeight(res.frame);
 		res.identifier = identifier;
 	}
 	return res;
