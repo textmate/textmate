@@ -1,4 +1,5 @@
 #include <test/bundle_index.h>
+#include <file/type.h>
 
 void setup_fixtures ()
 {
@@ -30,9 +31,7 @@ void setup_fixtures ()
 void test_file_type ()
 {
 	std::string path = "/tmp/utf32-be.txt";
-	std::vector<bundles::item_ptr> items = bundles::grammars_for_path(path);
-	OAK_ASSERT_EQ(items.size(), 1);
-	OAK_ASSERT_EQ(items[0]->name(), "Plain Text");
+	OAK_ASSERT_EQ(file::type_from_path(path), "text.plain");
 }
 
 void test_scope_query ()

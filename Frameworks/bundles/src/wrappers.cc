@@ -250,18 +250,4 @@ namespace bundles
 		return query(kFieldDropExtension, "*", scope, kItemTypeDragCommand);
 	}
 
-	std::vector<item_ptr> grammars_for_path (std::string const& path)
-	{
-		std::multimap<ssize_t, item_ptr> ordering;
-		for(auto const& item : query(kFieldAny, NULL_STR, scope::wildcard, kItemTypeGrammar))
-		{
-			for(auto const& ext : item->values_for_field(kFieldGrammarExtension))
-			{
-				if(ssize_t rank = path::rank(path, ext))
-					ordering.emplace(rank, item);
-			}
-		}
-		return ordering.empty() ? std::vector<item_ptr>() : std::vector<item_ptr>(1, ordering.begin()->second);
-	}
-
 } /* bundles */

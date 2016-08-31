@@ -53,6 +53,20 @@ _InputIter first_n_lines (_InputIter const& first, _InputIter const& last, size_
 	return eol;
 }
 
+static std::vector<bundles::item_ptr> grammars_for_path (std::string const& path)
+{
+	std::multimap<ssize_t, bundles::item_ptr> ordering;
+	for(auto const& item : bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeGrammar))
+	{
+		for(auto const& ext : item->values_for_field(bundles::kFieldGrammarExtension))
+		{
+			if(ssize_t rank = path::rank(path, ext))
+				ordering.emplace(rank, item);
+		}
+	}
+	return ordering.empty() ? std::vector<bundles::item_ptr>() : std::vector<bundles::item_ptr>{ ordering.begin()->second };
+}
+
 static bool unknown_file_type (std::string const& fileType)
 {
 	return fileType == NULL_STR || bundles::query(bundles::kFieldGrammarScope, fileType, scope::wildcard, bundles::kItemTypeGrammar).empty();
@@ -120,7 +134,7 @@ namespace file
 
 	std::string type_from_path (std::string const& path)
 	{
-		return path != NULL_STR ? file_type_from_grammars(bundles::grammars_for_path(path)) : NULL_STR;
+		return path != NULL_STR ? file_type_from_grammars(grammars_for_path(path)) : NULL_STR;
 	}
 
 	std::string type (std::string const& path, io::bytes_ptr const& bytes, std::string const& virtualPath)
