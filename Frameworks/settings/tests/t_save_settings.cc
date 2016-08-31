@@ -15,9 +15,23 @@ void test_save_settings ()
 	settings_t::set("testKey_5", "other",              "", "*.txt");
 	settings_t::set("testKey_5", "set",                "", "*.md");
 
+	settings_t::set("fileType", "source.ruby",       NULL_STR, "*.rb");
+	settings_t::set("fileType", "source.rspec",      NULL_STR, "*_spec.rb");
+	settings_t::set("fileType", "text.plain",        NULL_STR, "*.txt");
+	settings_t::set("fileType", "source.cmake",      NULL_STR, "CMakeLists.txt");
+	settings_t::set("fileType", "source.config",     NULL_STR, "*.config");
+	settings_t::set("fileType", "source.git-config", NULL_STR, ".config");
+
 	// ==================
 	// = Setup Complete =
 	// ==================
+
+	OAK_ASSERT_EQ(settings_for_path("/path/to/foo.rb"         ).get("fileType", "unset"), "source.ruby");
+	OAK_ASSERT_EQ(settings_for_path("/path/to/foo_spec.rb"    ).get("fileType", "unset"), "source.rspec");
+	OAK_ASSERT_EQ(settings_for_path("/path/to/foo.txt"        ).get("fileType", "unset"), "text.plain");
+	OAK_ASSERT_EQ(settings_for_path("/path/to/CMakeLists.txt" ).get("fileType", "unset"), "source.cmake");
+	OAK_ASSERT_EQ(settings_for_path("/path/to/foo.config"     ).get("fileType", "unset"), "source.config");
+	OAK_ASSERT_EQ(settings_for_path("/path/git/.config"       ).get("fileType", "unset"), "source.git-config");
 
 	OAK_ASSERT_EQ(settings_for_path(                                ).get("testKey_1", "unset"),   "set");
 	OAK_ASSERT_EQ(settings_for_path("/tmp/dummy.md"                 ).get("testKey_1", "unset"),   "set");
