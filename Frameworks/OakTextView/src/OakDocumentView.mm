@@ -256,28 +256,28 @@ private:
 	NSString* lineNumberFontName = [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsLineNumberFontNameKey] ?: [_textView.font fontName];
 
 	gutterImages = nil; // force image sizes to be recalculated
-	gutterView.lineNumberFont = [NSFont fontWithName:lineNumberFontName size:round(scaleFactor * [_textView.font pointSize] * _textView.fontScaleFactor / 100)];
+	gutterView.lineNumberFont = [NSFont fontWithName:lineNumberFontName size:round(scaleFactor * [_textView.font pointSize] * _textView.fontScaleFactor)];
 	[gutterView reloadData:self];
 }
 
 - (IBAction)makeTextLarger:(id)sender
 {
-	_textView.fontScaleFactor += 10;
+	_textView.fontScaleFactor += 0.1;
 	[self updateGutterViewFont:self];
 }
 
 - (IBAction)makeTextSmaller:(id)sender
 {
-	if(_textView.fontScaleFactor > 10)
+	if(_textView.fontScaleFactor > 0.1)
 	{
-		_textView.fontScaleFactor -= 10;
+		_textView.fontScaleFactor -= 0.1;
 		[self updateGutterViewFont:self];
 	}
 }
 
 - (IBAction)makeTextStandardSize:(id)sender
 {
-	_textView.fontScaleFactor = 100;
+	_textView.fontScaleFactor = 1;
 	[self updateGutterViewFont:self];
 }
 
