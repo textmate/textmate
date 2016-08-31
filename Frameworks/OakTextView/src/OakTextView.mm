@@ -285,6 +285,7 @@ struct document_view_t : ng::buffer_api_t
 
 	oak::uuid_t identifier () const                 { return to_s(_document.identifier.UUIDString); }
 	std::string path () const                       { return to_s(_document.path); }
+	std::string directory () const                  { return to_s(_document.directory); }
 	std::string virtual_path () const               { return to_s(_document.virtualPath); }
 	std::string logical_path () const               { return to_s(_document.virtualPath ?: _document.path); }
 	std::string file_type () const                  { return to_s(_document.fileType); }
@@ -3429,7 +3430,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		};
 
 		auto env = handler->bundle_variables();
-		auto const pwd = format_string::expand("${TM_DIRECTORY:-${TM_PROJECT_DIRECTORY:-$TMPDIR}}", env);
+		auto const pwd = documentView->path() != NULL_STR ? path::parent(documentView->path()) : documentView->directory();
 
 		std::vector<std::string> files, paths = handlerToFiles[handler->uuid()];
 		std::transform(paths.begin(), paths.end(), back_inserter(files), [&pwd](std::string const& path){ return path::relative_to(path, pwd); });
