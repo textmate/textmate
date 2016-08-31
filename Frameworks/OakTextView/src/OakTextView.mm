@@ -1047,6 +1047,7 @@ doScroll:
 	if(!choiceVector.empty())
 	{
 		_choiceMenu = [OakChoiceMenu new];
+		_choiceMenu.font = [NSFont fontWithName:self.font.fontName size:self.font.pointSize * documentView->font_scale_factor() / 100];
 		_choiceMenu.choices = (__bridge NSArray*)((CFArrayRef)cf::wrap(choiceVector));
 
 		std::string const& currentChoice = documentView->placeholder_content();

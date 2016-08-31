@@ -8,6 +8,7 @@ extern NSUInteger const OakChoiceMenuKeyMovement;
 @property (nonatomic) NSArray* choices;
 @property (nonatomic) NSUInteger choiceIndex;
 @property (nonatomic, readonly) NSString* selectedChoice;
+@property (nonatomic) NSFont* font;
 - (void)showAtTopLeftPoint:(NSPoint)aPoint forView:(NSView*)aView;
 - (BOOL)isVisible;
 - (NSUInteger)didHandleKeyEvent:(NSEvent*)anEvent;
