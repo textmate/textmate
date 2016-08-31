@@ -239,7 +239,7 @@ typedef NS_ENUM(NSUInteger, OakFlagsState) {
 
 struct document_view_t : ng::buffer_api_t
 {
-	document_view_t (OakDocument* document, std::string const& scopeAttributes, bool scrollPastEnd, NSInteger fontScaleFactor = 100) : _document(document)
+	document_view_t (OakDocument* document, std::string const& scopeAttributes, bool scrollPastEnd, NSInteger fontScaleFactor = 1) : _document(document)
 	{
 		_document_editor = [OakDocumentEditor documentEditorWithDocument:document fontScaleFactor:fontScaleFactor];
 
@@ -261,8 +261,8 @@ struct document_view_t : ng::buffer_api_t
 	NSFont* font () const                         { return _document_editor.font; }
 	void set_font (NSFont* newFont)               { _document_editor.font = newFont; }
 
-	NSInteger font_scale_factor () const          { return _document_editor.fontScaleFactor; }
-	void set_font_scale_factor (NSInteger scale)  { _document_editor.fontScaleFactor = scale; }
+	CGFloat font_scale_factor () const            { return _document_editor.fontScaleFactor; }
+	void set_font_scale_factor (CGFloat scale)    { _document_editor.fontScaleFactor = scale; }
 
 	void set_command_runner (std::function<void(bundle_command_t const&, ng::buffer_api_t const&, ng::ranges_t const&, std::map<std::string, std::string> const&)> const& runner)
 	{
@@ -785,7 +785,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 		return;
 	}
 
-	NSInteger fontScaleFactor = 100;
+	CGFloat fontScaleFactor = 1;
 	if(documentView)
 	{
 		fontScaleFactor = documentView->font_scale_factor();
@@ -1048,7 +1048,7 @@ doScroll:
 	if(!choiceVector.empty())
 	{
 		_choiceMenu = [OakChoiceMenu new];
-		_choiceMenu.font = [NSFont fontWithName:self.font.fontName size:self.font.pointSize * documentView->font_scale_factor() / 100];
+		_choiceMenu.font = [NSFont fontWithName:self.font.fontName size:self.font.pointSize * documentView->font_scale_factor()];
 		_choiceMenu.choices = (__bridge NSArray*)((CFArrayRef)cf::wrap(choiceVector));
 
 		std::string const& currentChoice = documentView->placeholder_content();
@@ -2914,7 +2914,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (theme_ptr)theme            { return documentView ? documentView->theme() : theme_ptr(); }
 - (NSFont*)font               { return documentView ? documentView->font() : [NSFont userFixedPitchFontOfSize:0]; }
-- (NSInteger)fontScaleFactor  { return documentView ? documentView->font_scale_factor() : 100; }
+- (CGFloat)fontScaleFactor    { return documentView ? documentView->font_scale_factor() : 1; }
 - (size_t)tabSize             { return documentView ? documentView->tab_size() : 2; }
 - (BOOL)softTabs              { return documentView ? documentView->soft_tabs() : NO; }
 - (BOOL)softWrap              { return documentView && documentView->soft_wrap(); }
@@ -2955,7 +2955,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	}
 }
 
-- (void)setFontScaleFactor:(NSInteger)newFontScaleFactor
+- (void)setFontScaleFactor:(CGFloat)newFontScaleFactor
 {
 	if(documentView)
 	{
@@ -2965,7 +2965,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		[self scrollIndexToFirstVisible:documentView->begin(documentView->convert(visibleIndex.index).line)];
 	}
 
-	[OTVHUD showHudForView:self withText:[NSString stringWithFormat:@"%ld%%", newFontScaleFactor]];
+	[OTVHUD showHudForView:self withText:[NSString stringWithFormat:@"%.f%%", newFontScaleFactor * 100]];
 }
 
 - (void)setTabSize:(size_t)newTabSize

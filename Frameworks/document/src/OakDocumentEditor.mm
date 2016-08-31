@@ -23,12 +23,12 @@ static int32_t const NSWrapColumnWindowWidth = 0;
 // ====================================
 
 @implementation OakDocumentEditor
-+ (instancetype)documentEditorWithDocument:(OakDocument*)aDocument fontScaleFactor:(NSInteger)scale
++ (instancetype)documentEditorWithDocument:(OakDocument*)aDocument fontScaleFactor:(CGFloat)scale
 {
 	return [[OakDocumentEditor alloc] initWithDocument:aDocument fontScaleFactor:scale];
 }
 
-- (instancetype)initWithDocument:(OakDocument*)aDocument fontScaleFactor:(NSInteger)scale
+- (instancetype)initWithDocument:(OakDocument*)aDocument fontScaleFactor:(CGFloat)scale
 {
 	if(self = [self init])
 	{
@@ -57,7 +57,7 @@ static int32_t const NSWrapColumnWindowWidth = 0;
 		size_t wrapColumn = settings.get(kSettingsWrapColumnKey, NSWrapColumnWindowWidth);
 
 		theme_ptr theme = parse_theme(bundles::lookup(settings.get(kSettingsThemeKey, NULL_STR)));
-		_layout = std::make_unique<ng::layout_t>([_document buffer], theme, to_s(_font.fontName), _font.pointSize * _fontScaleFactor / 100, softWrap, scrollPastEnd, wrapColumn, to_s(_document.folded));
+		_layout = std::make_unique<ng::layout_t>([_document buffer], theme, to_s(_font.fontName), _font.pointSize * _fontScaleFactor, softWrap, scrollPastEnd, wrapColumn, to_s(_document.folded));
 
 		if(settings.get(kSettingsShowWrapColumnKey, false))
 			_layout->set_draw_wrap_column(true);
@@ -88,13 +88,13 @@ static int32_t const NSWrapColumnWindowWidth = 0;
 - (void)setFont:(NSFont*)newFont
 {
 	_font = newFont;
-	_layout->set_font(to_s(_font.fontName), _font.pointSize * _fontScaleFactor / 100);
+	_layout->set_font(to_s(_font.fontName), _font.pointSize * _fontScaleFactor);
 }
 
-- (void)setFontScaleFactor:(NSInteger)scale
+- (void)setFontScaleFactor:(CGFloat)scale
 {
 	_fontScaleFactor = scale;
-	_layout->set_font(to_s(_font.fontName), _font.pointSize * _fontScaleFactor / 100);
+	_layout->set_font(to_s(_font.fontName), _font.pointSize * _fontScaleFactor);
 }
 
 - (ng::ranges_t)selection
