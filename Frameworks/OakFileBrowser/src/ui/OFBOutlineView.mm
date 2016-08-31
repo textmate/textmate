@@ -193,8 +193,5 @@
 	if(self.draggedOFBItems && [self.dataSource respondsToSelector:@selector(outlineView:draggedItems:endedWithOperation:)])
 		[(id <FSDataSourceDragSource>)self.dataSource outlineView:self draggedItems:self.draggedOFBItems endedWithOperation:aDragOperation];
 	self.draggedOFBItems = nil;
-
-	if([NSOutlineView respondsToSelector:@selector(draggedImage:endedAt:operation:)])
-		[super draggedImage:anImage endedAt:aPoint operation:aDragOperation];
 }
 @end
