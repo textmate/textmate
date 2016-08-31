@@ -61,7 +61,7 @@ static std::vector<bundles::item_ptr> grammars_for_path (std::string const& path
 		for(auto const& ext : item->values_for_field(bundles::kFieldGrammarExtension))
 		{
 			if(ssize_t rank = path::rank(path, ext))
-				ordering.emplace(rank, item);
+				ordering.emplace(-rank, item);
 		}
 	}
 	return ordering.empty() ? std::vector<bundles::item_ptr>() : std::vector<bundles::item_ptr>{ ordering.begin()->second };

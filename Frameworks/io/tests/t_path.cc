@@ -64,11 +64,23 @@ void test_dot_in_basename ()
 
 void test_rank ()
 {
-	OAK_ASSERT_EQ(path::rank("foo.css.php", "hp"),          0);
-	OAK_ASSERT_NE(path::rank("foo.css.php", "php"),        0);
-	OAK_ASSERT_EQ(path::rank("foo.css.php", "gphp"),        0);
-	OAK_ASSERT_NE(path::rank("foo.css.php", "css.php"),    0);
-	OAK_ASSERT_LT(path::rank("foo.css.php", "css.php"),  path::rank("foo.css.php", "php"));
+	OAK_ASSERT_EQ(path::rank("foo.css.php", "hp"),       0);
+	OAK_ASSERT_GT(path::rank("foo.css.php", "php"),      0);
+	OAK_ASSERT_EQ(path::rank("foo.css.php", "gphp"),     0);
+	OAK_ASSERT_GT(path::rank("foo.css.php", "css.php"),  0);
+	OAK_ASSERT_GT(path::rank("foo.css.php", "css.php"),  path::rank("foo.css.php", "php"));
+
+	OAK_ASSERT_GT(path::rank("foo_spec.rb", "rb"),       0);
+	OAK_ASSERT_GT(path::rank("foo_spec.rb", "spec.rb"),  0);
+	OAK_ASSERT_GT(path::rank("foo_spec.rb", "spec.rb"),  path::rank("foo_spec.rb", "rb"));
+
+	OAK_ASSERT_GT(path::rank("CMakeLists.txt", "txt"),             0);
+	OAK_ASSERT_GT(path::rank("CMakeLists.txt", "CMakeLists.txt"),  0);
+	OAK_ASSERT_GT(path::rank("CMakeLists.txt", "CMakeLists.txt"),  path::rank("CMakeLists.txt", "txt"));
+
+	OAK_ASSERT_GT(path::rank("/CMakeLists.txt", "txt"),            0);
+	OAK_ASSERT_GT(path::rank("/CMakeLists.txt", "CMakeLists.txt"), 0);
+	OAK_ASSERT_GT(path::rank("/CMakeLists.txt", "CMakeLists.txt"), path::rank("/CMakeLists.txt", "txt"));
 }
 
 void test_relative_to ()

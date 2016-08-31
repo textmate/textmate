@@ -203,14 +203,18 @@ namespace path
 
 	size_t rank (std::string const& path, std::string const& ext)
 	{
-		size_t rank = 0;
-		if(path.rfind(ext) == path.size() - ext.size())
+		if(path.size() >= ext.size() && path.compare(path.size() - ext.size(), ext.size(), ext) == 0)
 		{
+			if(path.size() == ext.size())
+				return ext.size();
+
 			char ch = path[path.size() - ext.size() - 1];
-			if(ch == '.' || ch == '/' || ch == '_')
-				rank = std::max(path.size() - ext.size(), rank);
+			if(ch == '.' || ch == '_')
+				return ext.size() + 1;
+			else if(ch == '/')
+				return ext.size();
 		}
-		return rank;
+		return 0;
 	}
 
 	std::string join (std::string const& base, std::string const& path)
