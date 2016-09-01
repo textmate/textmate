@@ -743,8 +743,30 @@ static NSMutableDictionary* DictionaryForPropertyList (plist::dictionary_t const
 	return bundleItem;
 }
 
-- (BOOL)window:(NSWindow*)aWindow shouldDragDocumentWithEvent:(NSEvent*)anEvent from:(NSPoint)dragImageLocation withPasteboard:(NSPasteboard*)aPasteboard { return NO; }
-- (BOOL)window:(NSWindow*)aWindow shouldPopUpDocumentPathMenu:(NSMenu*)aMenu                                                                              { return NO; }
+- (BOOL)window:(NSWindow*)aWindow shouldDragDocumentWithEvent:(NSEvent*)anEvent from:(NSPoint)dragImageLocation withPasteboard:(NSPasteboard*)aPasteboard
+{
+	return bundleItem && bundleItem->paths().size() == 1;
+}
+
+- (BOOL)window:(NSWindow*)aWindow shouldPopUpDocumentPathMenu:(NSMenu*)menu
+{
+	if(!bundleItem)
+		return NO;
+
+	auto const& paths = bundleItem->paths();
+	if(paths.size() == 1)
+		return YES;
+
+	[menu removeAllItems];
+	for(std::string const& path : paths)
+	{
+		NSMenuItem* item = [self createMenuItemForCxxPath:path];
+		item.title = [[NSString stringWithCxxString:path] stringByAbbreviatingWithTildeInPath];
+		item.state = NSOffState;
+		[menu addItem:item];
+	}
+	return YES;
+}
 
 - (void)setBundleItem:(bundles::item_ptr const&)aBundleItem
 {
@@ -765,8 +787,17 @@ static NSMutableDictionary* DictionaryForPropertyList (plist::dictionary_t const
 	item_info_t const& info = info_for(bundleItem->kind());
 
 	[[self window] setTitle:[NSString stringWithCxxString:bundleItem->name_with_bundle()]];
-	[[self window] setRepresentedFilename:NSHomeDirectory()];
-	[[[self window] standardWindowButton:NSWindowDocumentIconButton] setImage:[[NSWorkspace sharedWorkspace] iconForFileType:[NSString stringWithCxxString:info.file_type]]];
+
+	auto const& paths = bundleItem->paths();
+	if(paths.size() == 1)
+	{
+		self.window.representedURL = [NSURL fileURLWithPath:[NSString stringWithCxxString:paths.front()]];
+	}
+	else
+	{
+		self.window.representedFilename = NSHomeDirectory();
+		[self.window standardWindowButton:NSWindowDocumentIconButton].image = [[NSWorkspace sharedWorkspace] iconForFileType:[NSString stringWithCxxString:info.file_type]];
+	}
 
 	plist::dictionary_t const& plist = it != changes.end() ? it->second : bundleItem->plist();
 	if(info.plist_key == NULL_STR)
