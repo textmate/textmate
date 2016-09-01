@@ -120,7 +120,7 @@ The source for TextMate is released under the GNU General Public License as publ
 TextMate is a trademark of Allan Odgaard.
 
 [boost]:         http://www.boost.org/
-[ninja]:         http://martine.github.com/ninja/
+[ninja]:         https://ninja-build.org/
 [multimarkdown]: http://fletcherpenney.net/multimarkdown/
 [ragel]:         http://www.complang.org/ragel/
 [mercurial]:     http://mercurial.selenic.com/
