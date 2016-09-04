@@ -417,7 +417,6 @@ private:
 {
 	OBJC_WATCH_LEAKS(OakTextView);
 
-	OakDocument* _document;
 	std::shared_ptr<document_view_t> documentView;
 	ng::callback_t* callback;
 
@@ -767,9 +766,9 @@ static std::string shell_quote (std::vector<std::string> paths)
 		_document.visibleIndex = documentView->index_at_point([self visibleRect].origin);
 }
 
-- (void)setDocument:(document::document_ptr const&)aDocument
+- (void)setDocument:(OakDocument*)aDocument
 {
-	if(aDocument && [_document isEqual:aDocument->document()])
+	if(aDocument && [_document isEqual:aDocument])
 	{
 		if(_document.selection)
 		{
@@ -810,7 +809,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 		documentView.reset();
 	}
 
-	if(_document = aDocument ? aDocument->document() : nil)
+	if(_document = aDocument)
 	{
 		documentView = std::make_shared<document_view_t>(_document, to_s(self.scopeAttributes), self.scrollPastEnd, fontScaleFactor);
 		documentView->set_command_runner([self](bundle_command_t const& cmd, ng::buffer_api_t const& buffer, ng::ranges_t const& selection, std::map<std::string, std::string> const& variables){
@@ -904,7 +903,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 - (void)dealloc
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
-	[self setDocument:document::document_ptr()];
+	[self setDocument:nil];
 }
 
 - (void)documentWillSave:(NSNotification*)aNotification

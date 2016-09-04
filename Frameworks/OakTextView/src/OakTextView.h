@@ -3,7 +3,7 @@
 #import <editor/editor.h>
 #import <buffer/buffer.h>
 #import <theme/theme.h>
-#import <document/document.h>
+#import <document/OakDocument.h>
 #import <oak/debug.h>
 
 PUBLIC extern int32_t const NSWrapColumnWindowWidth;
@@ -29,7 +29,7 @@ enum OTVFontSmoothing : NSUInteger
 @end
 
 PUBLIC @interface OakTextView : OakView
-- (void)setDocument:(document::document_ptr const&)aDocument;
+@property (nonatomic) OakDocument* document;
 
 @property (nonatomic, weak) id <OakTextViewDelegate>        delegate;
 @property (nonatomic) theme_ptr                             theme;

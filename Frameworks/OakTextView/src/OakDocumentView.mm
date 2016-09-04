@@ -367,7 +367,7 @@ private:
 		_statusBar.softTabs = document->indent().soft_tabs();
 	}
 
-	[_textView setDocument:document];
+	[_textView setDocument:document ? document->document() : nil];
 	[gutterView reloadData:self];
 	[self updateStyle];
 
