@@ -568,6 +568,10 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 				NSMenuItem* submenuItem = [menu addItemWithTitle:@"Show in Finder" action:nil keyEquivalent:@""];
 				submenuItem.submenu = submenu;
 			}
+
+			NSMenuItem* menuItem = [menu addItemWithTitle:@"Copy UUID" action:@selector(copyUUID:) keyEquivalent:@""];
+			menuItem.target = self;
+			menuItem.representedObject = [NSString stringWithCxxString:item->uuid()];
 		}
 		else
 		{
@@ -588,6 +592,12 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 	item.target = self;
 	item.representedObject = [NSString stringWithCxxString:path];
 	return item;
+}
+
+- (void)copyUUID:(NSMenuItem*)sender
+{
+	[[NSPasteboard generalPasteboard] declareTypes:@[ NSStringPboardType ] owner:nil];
+	[[NSPasteboard generalPasteboard] setString:[sender representedObject] forType:NSStringPboardType];
 }
 
 - (void)exportBundle:(id)sender
