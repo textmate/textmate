@@ -144,12 +144,33 @@ namespace file
 
 	void set_type (std::string const& path, std::string const& fileType)
 	{
-		if(path != NULL_STR && fileType != NULL_STR)
+		if(path == NULL_STR || fileType == NULL_STR)
+			return;
+
+		std::multimap<ssize_t, std::string> ordering;
+
+		std::string const name = path::name(path);
+		std::string const ext  = path::extensions(name);
+		if(!ext.empty())
+			ordering.emplace(-ext.size(), (name.size() > ext.size() ? "*" : "") + path::glob_t::escape(ext));
+
+		for(auto const& item : bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeGrammar))
 		{
-			std::string const name = path::name(path);
-			std::string const ext  = path::extensions(name);
-			settings_t::set(kSettingsFileTypeKey, fileType, NULL_STR, ext.empty() || ext == name ? path::glob_t::escape(name) : "*" + path::glob_t::escape(ext));
+			for(std::string const& suffix : item->values_for_field(bundles::kFieldGrammarExtension))
+			{
+				std::string::size_type n = path.size() - suffix.size();
+				if(path.size() < suffix.size() || path.compare(n, suffix.size(), suffix) != 0 || (n && !strchr("._/", path[n-1])))
+					continue;
+
+				if(n && strchr("._", path[n-1]))
+					--n;
+
+				ordering.emplace(-(path.size() - n), (n && path[n-1] != '/' ? "*" : "") + path::glob_t::escape(path.substr(n)));
+			}
 		}
+
+		std::string const glob = ordering.empty() ? name : ordering.begin()->second;
+		settings_t::set(kSettingsFileTypeKey, fileType, NULL_STR, glob);
 	}
 
 } /* file */
