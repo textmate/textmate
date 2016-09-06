@@ -71,7 +71,7 @@ void OakShowPopOutAnimation (NSRect viewRect, NSImage* anImage)
 		shapeLayer = [CAShapeLayer layer];
 		shapeLayer.frame = self.bounds;
 		shapeLayer.fillColor = [[NSColor yellowColor] CGColor];
-		shapeLayer.strokeColor = [[NSColor colorWithWhite:0 alpha:0.1] CGColor];
+		shapeLayer.strokeColor = [[NSColor colorWithCalibratedWhite:0 alpha:0.1] CGColor];
 		shapeLayer.lineWidth = 0.5;
 		shapeLayer.path = CGPathCreateWithRoundedRect(CGRectInset([self bounds], 0.25, 0.25), kRectXRadius, kRectYRadius, NULL);
 		shapeLayer.shadowOpacity = 0.25;
