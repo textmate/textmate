@@ -653,6 +653,9 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 // =====================
 
 @interface OakFileHandleURLProtocol : NSURLProtocol
+{
+	BOOL _stop;
+}
 @end
 
 @implementation OakFileHandleURLProtocol
@@ -694,11 +697,13 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 		int len;
 		char buf[8192];
-		while((len = read(fileHandle.fileDescriptor, buf, sizeof(buf))) > 0)
+		__block BOOL keepRunning = YES;
+		while(keepRunning && (len = read(fileHandle.fileDescriptor, buf, sizeof(buf))) > 0)
 		{
 			NSData* data = [NSData dataWithBytes:buf length:len];
 			dispatch_sync(dispatch_get_main_queue(), ^{
-				[self.client URLProtocol:self didLoadData:data];
+				if(keepRunning = !_stop)
+					[self.client URLProtocol:self didLoadData:data];
 			});
 		}
 
@@ -712,7 +717,7 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 
 - (void)stopLoading
 {
-	[[NSURLProtocol propertyForKey:@"fileHandle" inRequest:self.request] closeFile];
+	_stop = YES;
 	if(pid_t pid = [[NSURLProtocol propertyForKey:@"processIdentifier" inRequest:self.request] intValue])
 		oak::kill_process_group_in_background(pid);
 }
