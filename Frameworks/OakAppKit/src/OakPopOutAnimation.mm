@@ -65,6 +65,13 @@ void OakShowPopOutAnimation (NSRect viewRect, NSImage* anImage)
 {
 	if(self = [super initWithFrame:aRect])
 	{
+		CGPathRef path;
+		NSRect rect = CGRectInset([self bounds], 0.25, 0.25);
+		BOOL rectToSmallToBeRounded = NSWidth(rect) < 2 * kRectXRadius || NSHeight(rect) < 2 * kRectYRadius;
+		if(rectToSmallToBeRounded || CGPathCreateWithRoundedRect == NULL) // MAC_OS_X_VERSION_10_9
+				path = CGPathCreateWithRect(rect, NULL);
+		else	path = CGPathCreateWithRoundedRect(rect, kRectXRadius, kRectYRadius, NULL);
+
 		[self setWantsLayer:YES];
 		self.layer.masksToBounds = NO;
 
@@ -73,7 +80,7 @@ void OakShowPopOutAnimation (NSRect viewRect, NSImage* anImage)
 		shapeLayer.fillColor = [[NSColor yellowColor] CGColor];
 		shapeLayer.strokeColor = [[NSColor colorWithCalibratedWhite:0 alpha:0.1] CGColor];
 		shapeLayer.lineWidth = 0.5;
-		shapeLayer.path = CGPathCreateWithRoundedRect(CGRectInset([self bounds], 0.25, 0.25), kRectXRadius, kRectYRadius, NULL);
+		shapeLayer.path = path;
 		shapeLayer.shadowOpacity = 0.25;
 		shapeLayer.shadowRadius = kShadowRadius;
 		shapeLayer.shadowOffset = CGSizeMake(0, -1);
