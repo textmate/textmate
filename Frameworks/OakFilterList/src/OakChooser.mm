@@ -242,7 +242,7 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 		BOOL oldIsSearchField = change[NSKeyValueChangeOldKey] == _searchField || change[NSKeyValueChangeOldKey] == _searchField.currentEditor;
 		BOOL newIsSearchField = change[NSKeyValueChangeNewKey] == _searchField || change[NSKeyValueChangeNewKey] == _searchField.currentEditor;
 		if(oldIsSearchField != newIsSearchField)
-			self.drawTableViewAsHighlighted = newIsSearchField;
+			self.drawTableViewAsHighlighted = newIsSearchField && self.tableView.refusesFirstResponder;
 	}
 }
 
