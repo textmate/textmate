@@ -132,15 +132,15 @@ NSUInteger const OakMoveNoActionReturn = 3;
 - (void)moveDown:(id)sender                             { [self moveSelectedRowByOffset:+1 extendingSelection:NO];  }
 - (void)moveUpAndModifySelection:(id)sender             { [self moveSelectedRowByOffset:-1 extendingSelection:YES]; }
 - (void)moveDownAndModifySelection:(id)sender           { [self moveSelectedRowByOffset:+1 extendingSelection:YES]; }
-- (void)movePageUp:(id)sender                           { [self moveSelectedRowByOffset:-[self visibleRows] extendingSelection:NO]; }
-- (void)movePageDown:(id)sender                         { [self moveSelectedRowByOffset:+[self visibleRows] extendingSelection:NO]; }
+- (void)pageUp:(id)sender                               { [self moveSelectedRowByOffset:-[self visibleRows] extendingSelection:NO]; }
+- (void)pageDown:(id)sender                             { [self moveSelectedRowByOffset:+[self visibleRows] extendingSelection:NO]; }
+- (void)pageUpAndModifySelection:(id)sender             { [self moveSelectedRowByOffset:-[self visibleRows] extendingSelection:YES]; }
+- (void)pageDownAndModifySelection:(id)sender           { [self moveSelectedRowByOffset:+[self visibleRows] extendingSelection:YES]; }
 - (void)moveToBeginningOfDocument:(id)sender            { [self moveSelectedRowByOffset:-(INT_MAX >> 1) extendingSelection:NO]; }
 - (void)moveToEndOfDocument:(id)sender                  { [self moveSelectedRowByOffset:+(INT_MAX >> 1) extendingSelection:NO]; }
 
-- (void)pageUp:(id)sender                               { [self movePageUp:sender]; }
-- (void)pageDown:(id)sender                             { [self movePageDown:sender]; }
-- (void)scrollPageUp:(id)sender                         { [self movePageUp:sender]; }
-- (void)scrollPageDown:(id)sender                       { [self movePageDown:sender]; }
+- (void)scrollPageUp:(id)sender                         { [self pageUp:sender]; }
+- (void)scrollPageDown:(id)sender                       { [self pageDown:sender]; }
 - (void)scrollToBeginningOfDocument:(id)sender          { [self moveToBeginningOfDocument:sender]; }
 - (void)scrollToEndOfDocument:(id)sender                { [self moveToEndOfDocument:sender]; }
 
