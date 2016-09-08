@@ -46,7 +46,6 @@ static __weak OakToolTip* LastToolTip;
 		[self setBackgroundColor:[NSColor colorWithCalibratedRed:1.00 green:0.96 blue:0.76 alpha:1]];
 		[self setHasShadow:YES];
 		[self setLevel:NSStatusWindowLevel];
-		[self setIgnoresMouseEvents:YES];
 
 		field = [[NSTextField alloc] initWithFrame:NSZeroRect];
 		[field setEditable:NO];
@@ -77,11 +76,6 @@ static __weak OakToolTip* LastToolTip;
 	D(DBF_OakToolTip, bug("%s\n", [aString UTF8String]););
 	ASSERT(aString != nil);
 	[field setStringValue:aString];
-}
-
-- (BOOL)canBecomeKeyWindow
-{
-	return YES;
 }
 
 - (BOOL)shouldCloseForMousePosition:(NSPoint)aPoint
@@ -116,21 +110,10 @@ static __weak OakToolTip* LastToolTip;
 	didOpenAtDate = [NSDate date];
 	mousePositionWhenOpened = NSZeroPoint;
 
-	NSWindow* keyWindow = [NSApp keyWindow];
-	if(!keyWindow)
-	{
-		keyWindow = self;
-		[self makeKeyWindow];
-	}
-
-	BOOL didAcceptMouseMovedEvents = [keyWindow acceptsMouseMovedEvents];
-	[keyWindow setAcceptsMouseMovedEvents:YES];
-
 	__weak __block id eventMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:(NSLeftMouseDownMask|NSRightMouseDownMask|NSMouseMovedMask|NSKeyDownMask|NSScrollWheelMask|NSOtherMouseDownMask) handler:^NSEvent*(NSEvent* event){
 		if([event type] == NSMouseMoved && ![self shouldCloseForMousePosition:[NSEvent mouseLocation]])
 			return event;
 
-		[keyWindow setAcceptsMouseMovedEvents:didAcceptMouseMovedEvents];
 		[self fadeOutSlowly:[event type] == NSMouseMoved];
 		[NSEvent removeMonitor:eventMonitor];
 		return event;
