@@ -445,11 +445,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 - (void)bundleItemChooserDidSelectItems:(id)sender
 {
 	for(NSDictionary* item in [sender selectedItems])
-	{
-		if(OakIsAlternateKeyOrMouseEvent())
-				[[BundleEditor sharedInstance] revealBundleItem:bundles::lookup(to_s([item objectForKey:@"uuid"]))];
-		else	[NSApp sendAction:@selector(performBundleItemWithUUIDString:) to:nil from:[item objectForKey:@"uuid"]];
-	}
+		[NSApp sendAction:@selector(performBundleItemWithUUIDString:) to:nil from:[item objectForKey:@"uuid"]];
 }
 
 // ===========================

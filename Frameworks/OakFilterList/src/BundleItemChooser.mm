@@ -887,6 +887,9 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 
 - (void)accept:(id)sender
 {
+	if(self.canEdit && OakIsAlternateKeyOrMouseEvent())
+		return [self editItem:sender];
+
 	if(_bundleItemField == kBundleItemTitleField && OakNotEmptyString(self.filterString) && (self.tableView.selectedRow > 0 || [self.filterString length] > 1))
 	{
 		NSDictionary* item = self.items[self.tableView.selectedRow];
