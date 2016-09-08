@@ -22,20 +22,21 @@ static double const  kFadeDuration = 0.50;
 }
 @property (nonatomic) NSImage*  contentImage;
 @property (nonatomic) NSWindow* retainedWindow;
+- (id)initWithFrame:(NSRect)aRect popOutRect:(NSRect)popOutRect;
 - (void)startAnimation:(id)sender;
 @end
 
-void OakShowPopOutAnimation (NSRect viewRect, NSImage* anImage)
+void OakShowPopOutAnimation (NSRect popOutRect, NSImage* anImage)
 {
-	if(viewRect.size.width == 0 || viewRect.size.height == 0)
+	if(popOutRect.size.width == 0 || popOutRect.size.height == 0)
 		return;
 
-	viewRect = NSInsetRect(viewRect, -kExtendWidth, -kExtendHeight);
-	NSRect windowRect = viewRect;
-	CGFloat extraWidth = ceil((kMaxScale - 1) * (viewRect.size.width + 4 * kShadowRadius)/2);
-	CGFloat extraHeight = ceil((kMaxScale - 1) * (viewRect.size.height + 4 * kShadowRadius)/2);
-	windowRect.origin.x -= extraWidth; viewRect.origin.x = extraWidth;
-	windowRect.origin.y -= extraHeight; viewRect.origin.y = extraHeight;
+	popOutRect = NSInsetRect(popOutRect, -kExtendWidth, -kExtendHeight);
+	NSRect windowRect = popOutRect;
+	CGFloat extraWidth = ceil((kMaxScale - 1) * (popOutRect.size.width + 4 * kShadowRadius)/2);
+	CGFloat extraHeight = ceil((kMaxScale - 1) * (popOutRect.size.height + 4 * kShadowRadius)/2);
+	windowRect.origin.x -= extraWidth; popOutRect.origin.x = extraWidth;
+	windowRect.origin.y -= extraHeight; popOutRect.origin.y = extraHeight;
 	windowRect.size.width += 2 * extraWidth;
 	windowRect.size.height += 2 * extraHeight;
 
@@ -48,7 +49,7 @@ void OakShowPopOutAnimation (NSRect viewRect, NSImage* anImage)
 	[window setReleasedWhenClosed:NO];
 	[[window contentView] setWantsLayer:YES];
 
-	OakPopOutView* aView = [[OakPopOutView alloc] initWithFrame:viewRect];
+	OakPopOutView* aView = [[OakPopOutView alloc] initWithFrame:[window contentView].bounds popOutRect:popOutRect];
 	[aView setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
 	aView.contentImage = anImage;
 	aView.retainedWindow = window;
@@ -61,22 +62,23 @@ void OakShowPopOutAnimation (NSRect viewRect, NSImage* anImage)
 }
 
 @implementation OakPopOutView
-- (id)initWithFrame:(NSRect)aRect
+- (id)initWithFrame:(NSRect)aRect popOutRect:(NSRect)popOutRect
 {
 	if(self = [super initWithFrame:aRect])
 	{
 		CGPathRef path;
-		NSRect rect = CGRectInset([self bounds], 0.25, 0.25);
-		BOOL rectToSmallToBeRounded = NSWidth(rect) < 2 * kRectXRadius || NSHeight(rect) < 2 * kRectYRadius;
-		if(rectToSmallToBeRounded || CGPathCreateWithRoundedRect == NULL) // MAC_OS_X_VERSION_10_9
-				path = CGPathCreateWithRect(rect, NULL);
-		else	path = CGPathCreateWithRoundedRect(rect, kRectXRadius, kRectYRadius, NULL);
+		NSRect shapeRect = popOutRect;
+		shapeRect.origin = CGPointZero;
+		shapeRect = CGRectInset(shapeRect, 0.25, 0.25);
+		BOOL rectTooSmallToBeRounded = NSWidth(shapeRect) < 2 * kRectXRadius || NSHeight(shapeRect) < 2 * kRectYRadius;
+		if(rectTooSmallToBeRounded || CGPathCreateWithRoundedRect == NULL) // MAC_OS_X_VERSION_10_9
+				path = CGPathCreateWithRect(shapeRect, NULL);
+		else	path = CGPathCreateWithRoundedRect(shapeRect, kRectXRadius, kRectYRadius, NULL);
 
 		[self setWantsLayer:YES];
-		self.layer.masksToBounds = NO;
 
 		shapeLayer = [CAShapeLayer layer];
-		shapeLayer.frame = self.bounds;
+		shapeLayer.frame = popOutRect;
 		shapeLayer.fillColor = [[NSColor yellowColor] CGColor];
 		shapeLayer.strokeColor = [[NSColor colorWithCalibratedWhite:0 alpha:0.1] CGColor];
 		shapeLayer.lineWidth = 0.5;
