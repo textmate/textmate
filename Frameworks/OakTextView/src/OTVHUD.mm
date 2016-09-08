@@ -88,14 +88,6 @@
 	[NSAnimationContext endGrouping];
 }
 
-static __unsafe_unretained OTVHUD* LastHUD;
-
-- (void)dealloc
-{
-	if(self == LastHUD)
-		LastHUD = nil;
-}
-
 - (void)showWindow:(id)sender
 {
 	++_requestID;
@@ -113,6 +105,8 @@ static __unsafe_unretained OTVHUD* LastHUD;
 
 + (OTVHUD*)showHudForView:(NSView*)aView withText:(NSString*)someText
 {
+	static __weak OTVHUD* LastHUD;
+
 	OTVHUD* res = LastHUD;
 	if(!res || res.lastView != aView)
 		LastHUD = res = [[OTVHUD alloc] initWithView:aView];
