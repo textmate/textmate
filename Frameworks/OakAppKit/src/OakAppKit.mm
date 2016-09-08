@@ -113,16 +113,13 @@ NSUInteger const OakMoveNoActionReturn = 3;
 {
 	if([_tableView numberOfRows])
 	{
-		if(_tableView.allowsMultipleSelection == NO)
-			extend = NO;
-
 		NSInteger row = [_tableView selectedRow] + anOffset;
 		NSInteger numberOfRows = [_tableView numberOfRows];
 		if(std::abs(anOffset) == 1 && numberOfRows && [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsEnableLoopFilterList])
 				row = (row + numberOfRows) % numberOfRows;
 		else	row = oak::cap((NSInteger)0, row, numberOfRows - 1);
 
-		[_tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:extend];
+		[_tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:extend && _tableView.allowsMultipleSelection];
 		[_tableView scrollRowToVisible:row];
 
 		self.returnCode = OakMoveMoveReturn;

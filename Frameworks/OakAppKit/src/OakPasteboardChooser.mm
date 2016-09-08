@@ -393,10 +393,8 @@ static NSMutableDictionary* SharedChoosers;
 {
 	if([_tableView numberOfRows])
 	{
-		if(_tableView.allowsMultipleSelection == NO)
-			extend = NO;
 		NSInteger row = oak::cap((NSInteger)0, [_tableView selectedRow] + anOffset, [_tableView numberOfRows] - 1);
-		[_tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:extend];
+		[_tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:extend && _tableView.allowsMultipleSelection];
 		[_tableView scrollRowToVisible:row];
 	}
 }
