@@ -126,7 +126,6 @@ static NSMutableDictionary* SharedChoosers;
 		_window.autorecalculatesKeyViewLoop = YES;
 		_window.delegate                    = self;
 		_window.level                       = NSFloatingWindowLevel;
-		_window.releasedWhenClosed          = NO;
 		_window.title                       = windowTitle;
 
 		_arrayController = [[NSArrayController alloc] init];

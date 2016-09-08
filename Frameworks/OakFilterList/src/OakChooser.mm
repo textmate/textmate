@@ -182,11 +182,10 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 		[_window setContentBorderThickness:23 forEdge:NSMinYEdge];
 		[[_window standardWindowButton:NSWindowMiniaturizeButton] setHidden:YES];
 		[[_window standardWindowButton:NSWindowZoomButton] setHidden:YES];
-		_window.delegate           = self;
-		_window.nextResponder      = self;
-		_window.level              = NSFloatingWindowLevel;
-		_window.releasedWhenClosed = NO;
-		_window.frameAutosaveName  = NSStringFromClass([self class]);
+		_window.delegate          = self;
+		_window.nextResponder     = self;
+		_window.level             = NSFloatingWindowLevel;
+		_window.frameAutosaveName = NSStringFromClass([self class]);
 
 		[_searchField bind:NSValueBinding toObject:self withKeyPath:@"filterString" options:nil];
 		[_window addObserver:self forKeyPath:@"firstResponder" options:NSKeyValueObservingOptionOld|NSKeyValueObservingOptionNew context:kFirstResponderBinding];

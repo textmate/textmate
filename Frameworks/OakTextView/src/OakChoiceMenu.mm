@@ -137,8 +137,7 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 - (void)showAtTopLeftPoint:(NSPoint)aPoint forView:(NSView*)aView
 {
 	_window = [[NSPanel alloc] initWithContentRect:NSMakeRect(aPoint.x, aPoint.y, 0, 0) styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:NO];
-	[_window setReleasedWhenClosed:NO];
-	[_window setOpaque:NO];
+	_window.opaque             = NO;
 	_window.alphaValue         = 0.97;
 	_window.backgroundColor    = [NSColor colorWithCalibratedRed:1.00 green:0.96 blue:0.76 alpha:1];
 	_window.hasShadow          = YES;
