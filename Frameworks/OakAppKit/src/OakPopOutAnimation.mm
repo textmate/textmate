@@ -20,8 +20,7 @@ static double const  kFadeDuration = 0.50;
 	CALayer* imageLayer;
 	CAShapeLayer* shapeLayer;
 }
-@property (nonatomic) NSImage*  contentImage;
-@property (nonatomic) NSWindow* retainedWindow;
+@property (nonatomic) NSImage* contentImage;
 - (id)initWithFrame:(NSRect)aRect popOutRect:(NSRect)popOutRect;
 - (void)startAnimation:(id)sender;
 @end
@@ -41,18 +40,17 @@ void OakShowPopOutAnimation (NSRect popOutRect, NSImage* anImage)
 	windowRect.size.height += 2 * extraHeight;
 
 	NSWindow* window = [[NSWindow alloc] initWithContentRect:windowRect styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:NO];
+	CFRetain((CFTypeRef)window); // isReleasedWhenClosed == YES
 	[window setBackgroundColor:[NSColor clearColor]];
 	[window setExcludedFromWindowsMenu:YES];
 	[window setIgnoresMouseEvents:YES];
 	[window setLevel:NSStatusWindowLevel];
 	[window setOpaque:NO];
-	[window setReleasedWhenClosed:NO];
 	[[window contentView] setWantsLayer:YES];
 
 	OakPopOutView* aView = [[OakPopOutView alloc] initWithFrame:[window contentView].bounds popOutRect:popOutRect];
 	[aView setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
 	aView.contentImage = anImage;
-	aView.retainedWindow = window;
 	[[window contentView] addSubview:aView];
 
 	[window setFrame:[window frameRectForContentRect:windowRect] display:YES];
@@ -140,7 +138,6 @@ void OakShowPopOutAnimation (NSRect popOutRect, NSImage* anImage)
 - (void)animationDidStop:(CAAnimation*)theAnimation finished:(BOOL)flag
 {
 	[shapeLayer removeAllAnimations]; // Releases the animation which holds a strong reference to its delegate (us)
-	[[self window] orderOut:self];
-	self.retainedWindow = nil;
+	[[self window] close];
 }
 @end
