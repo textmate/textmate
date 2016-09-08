@@ -147,9 +147,8 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 		[CWStatusStringTransformer register];
 
 		self.window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 600, 350) styleMask:NSTitledWindowMask|NSResizableWindowMask backing:NSBackingStoreBuffered defer:NO];
-		self.window.delegate           = self;
-		self.window.releasedWhenClosed = NO;
-		self.window.frameAutosaveName  = @"Commit Window";
+		self.window.delegate          = self;
+		self.window.frameAutosaveName = @"Commit Window";
 
 		_commitButton = OakCreateButton([self commitButtonTitle], NSRoundedBezelStyle);
 		_commitButton.action                    = @selector(performCommit:);

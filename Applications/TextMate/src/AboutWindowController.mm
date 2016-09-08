@@ -301,7 +301,6 @@ static NSTextField* OakCreateTextField ()
 		[win setFrameAutosaveName:@"BundlesReleaseNotes"];
 		[win setDelegate:self];
 		[win setAutorecalculatesKeyViewLoop:YES];
-		[win setReleasedWhenClosed:NO];
 
 		self.webView = [[WebView alloc] initWithFrame:[contentView bounds]];
 		self.webView.translatesAutoresizingMaskIntoConstraints = NO;
