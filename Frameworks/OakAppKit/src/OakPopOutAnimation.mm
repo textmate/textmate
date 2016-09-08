@@ -139,6 +139,7 @@ void OakShowPopOutAnimation (NSRect popOutRect, NSImage* anImage)
 
 - (void)animationDidStop:(CAAnimation*)theAnimation finished:(BOOL)flag
 {
+	[shapeLayer removeAllAnimations]; // Releases the animation which holds a strong reference to its delegate (us)
 	[[self window] orderOut:self];
 	self.retainedWindow = nil;
 }
