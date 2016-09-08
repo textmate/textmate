@@ -177,7 +177,7 @@ void OakShowToolTip (NSString* msg, NSPoint location)
 		}
 
 		[toolTip showAtLocation:location forScreen:screen];
-		[LastToolTip performSelector:@selector(orderOut:) withObject:nil afterDelay:0];
+		[LastToolTip close];
 		LastToolTip = toolTip;
 	}
 }
