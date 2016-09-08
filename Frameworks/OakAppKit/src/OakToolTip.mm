@@ -4,7 +4,7 @@
 
 OAK_DEBUG_VAR(OakToolTip);
 
-@interface OakToolTip : NSWindow
+@interface OakToolTip : NSPanel
 {
 	OBJC_WATCH_LEAKS(OakToolTip);
 
@@ -41,13 +41,11 @@ static __weak OakToolTip* LastToolTip;
 		}];
 		defaultFont = [NSFont fontWithDescriptor:descriptor size:0];
 
-		[self setReleasedWhenClosed:NO];
 		[self setAlphaValue:0.97];
 		[self setOpaque:NO];
 		[self setBackgroundColor:[NSColor colorWithCalibratedRed:1.00 green:0.96 blue:0.76 alpha:1]];
 		[self setHasShadow:YES];
 		[self setLevel:NSStatusWindowLevel];
-		[self setHidesOnDeactivate:YES];
 		[self setIgnoresMouseEvents:YES];
 
 		field = [[NSTextField alloc] initWithFrame:NSZeroRect];
