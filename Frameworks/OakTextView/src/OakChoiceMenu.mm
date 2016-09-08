@@ -217,28 +217,35 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 
 - (void)doCommandBySelector:(SEL)aSelector
 {
-	if([self respondsToSelector:aSelector])
-		[super doCommandBySelector:aSelector];
+	static std::map<SEL, NSUInteger> const map = {
+		{ @selector(insertNewline:),                               kActionReturn          },
+		{ @selector(insertNewlineIgnoringFieldEditor:),            kActionReturn          },
+		{ @selector(insertTab:),                                   kActionTab             },
+		{ @selector(cancelOperation:),                             kActionCancel          },
+		{ @selector(moveUp:),                                      kActionMoveUp          },
+		{ @selector(moveDown:),                                    kActionMoveDown        },
+		{ @selector(moveUpAndModifySelection:),                    kActionMoveUp          },
+		{ @selector(moveDownAndModifySelection:),                  kActionMoveDown        },
+		{ @selector(pageUp:),                                      kActionPageUp          },
+		{ @selector(pageDown:),                                    kActionPageDown        },
+		{ @selector(pageUpAndModifySelection:),                    kActionPageUp          },
+		{ @selector(pageDownAndModifySelection:),                  kActionPageDown        },
+		{ @selector(moveToBeginningOfDocument:),                   kActionMoveToBeginning },
+		{ @selector(moveToEndOfDocument:),                         kActionMoveToEnd       },
+		{ @selector(moveToBeginningOfDocumentAndModifySelection:), kActionMoveToBeginning },
+		{ @selector(moveToEndOfDocumentAndModifySelection:),       kActionMoveToEnd       },
+		{ @selector(scrollPageUp:),                                kActionPageUp          },
+		{ @selector(scrollPageDown:),                              kActionPageDown        },
+		{ @selector(scrollToBeginningOfDocument:),                 kActionMoveToBeginning },
+		{ @selector(scrollToEndOfDocument:),                       kActionMoveToEnd       },
+	};
+
+	auto it = map.find(aSelector);
+	if(it != map.end())
+		keyAction = it->second;
 }
 
-- (void)insertText:(id)aString                 { }
-
-- (void)insertNewline:(id)sender               { keyAction = kActionReturn;           }
-- (void)insertTab:(id)sender                   { keyAction = kActionTab;              }
-- (void)cancelOperation:(id)sender             { keyAction = kActionCancel;           }
-
-- (void)moveUp:(id)sender                      { keyAction = kActionMoveUp;           }
-- (void)moveDown:(id)sender                    { keyAction = kActionMoveDown;         }
-
-- (void)movePageUp:(id)sender                  { keyAction = kActionPageUp;           }
-- (void)movePageDown:(id)sender                { keyAction = kActionPageDown;         }
-- (void)pageUp:(id)sender                      { keyAction = kActionPageUp;           }
-- (void)pageDown:(id)sender                    { keyAction = kActionPageDown;         }
-- (void)scrollPageUp:(id)sender                { keyAction = kActionPageUp;           }
-- (void)scrollPageDown:(id)sender              { keyAction = kActionPageDown;         }
-
-- (void)moveToBeginningOfDocument:(id)sender   { keyAction = kActionMoveToBeginning;  }
-- (void)moveToEndOfDocument:(id)sender         { keyAction = kActionMoveToEnd;        }
-- (void)scrollToBeginningOfDocument:(id)sender { keyAction = kActionMoveToBeginning;  }
-- (void)scrollToEndOfDocument:(id)sender       { keyAction = kActionMoveToEnd;        }
+- (void)insertText:(id)aString
+{
+}
 @end
