@@ -258,6 +258,7 @@
 	else if(!_closeButton)
 	{
 		_closeButton = [[OakRolloverButton alloc] initWithFrame:NSZeroRect];
+		_closeButton.refusesFirstResponder = YES;
 		_closeButton.regularImage  = [NSImage imageNamed:@"CloseTemplate"         inSameBundleAsClass:[self class]];
 		_closeButton.pressedImage  = [NSImage imageNamed:@"ClosePressedTemplate"  inSameBundleAsClass:[self class]];
 		_closeButton.rolloverImage = [NSImage imageNamed:@"CloseRolloverTemplate" inSameBundleAsClass:[self class]];
