@@ -5,6 +5,7 @@
 */
 
 #import "OakPasteboardSelector.h"
+#import <OakAppKit/OakAppKit.h>
 #import <ns/ns.h>
 #import <oak/oak.h>
 #import <oak/debug.h>
@@ -219,7 +220,7 @@ static size_t line_count (std::string const& text)
 		[tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:MIN(selectedRow, [entries count]-1)] byExtendingSelection:NO];
 }
 
-- (void)insertNewline:(id)sender
+- (void)accept:(id)sender
 {
 	shouldSendAction = entries.count > 0 ? YES : NO;
 	shouldClose = YES;
@@ -230,34 +231,26 @@ static size_t line_count (std::string const& text)
 	shouldClose = YES;
 }
 
+- (void)doCommandBySelector:(SEL)aSelector
+{
+	if([self respondsToSelector:aSelector])
+	{
+		[super doCommandBySelector:aSelector];
+	}
+	else
+	{
+		NSUInteger res = OakPerformTableViewActionFromSelector(tableView, aSelector);
+		if(res == OakMoveAcceptReturn)
+			[self accept:self];
+		else if(res == OakMoveCancelReturn)
+			[self cancel:self];
+	}
+}
+
 - (void)keyDown:(NSEvent*)anEvent
 {
 	[self interpretKeyEvents:@[ anEvent ]];
 }
-
-- (void)moveSelectedRowByOffset:(NSInteger)anOffset
-{
-	if(tableView.numberOfRows > 0)
-	{
-		NSInteger row = oak::cap<NSInteger>(0, tableView.selectedRow + anOffset, tableView.numberOfRows - 1);
-		[tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-		[tableView scrollRowToVisible:row];
-	}
-}
-
-- (int)visibleRows                             { return (int)floor(NSHeight([tableView visibleRect]) / ([tableView rowHeight]+[tableView intercellSpacing].height)) - 1; }
-
-- (void)moveUp:(id)sender                      { [self moveSelectedRowByOffset:-1]; }
-- (void)moveDown:(id)sender                    { [self moveSelectedRowByOffset:+1];}
-- (void)movePageUp:(id)sender                  { [self moveSelectedRowByOffset:-[self visibleRows]]; }
-- (void)movePageDown:(id)sender                { [self moveSelectedRowByOffset:+[self visibleRows]]; }
-- (void)scrollToBeginningOfDocument:(id)sender { [self moveSelectedRowByOffset:-(INT_MAX >> 1)]; }
-- (void)scrollToEndOfDocument:(id)sender       { [self moveSelectedRowByOffset:+(INT_MAX >> 1)]; }
-
-- (void)pageUp:(id)sender                      { [self movePageUp:sender]; }
-- (void)pageDown:(id)sender                    { [self movePageDown:sender]; }
-- (void)scrollPageUp:(id)sender                { [self movePageUp:sender]; }
-- (void)scrollPageDown:(id)sender              { [self movePageDown:sender]; }
 
 - (void)didDoubleClickInTableView:(id)aTableView
 {
