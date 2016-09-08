@@ -371,6 +371,22 @@ static NSMutableDictionary* SharedChoosers;
 		[fieldEditor setSelectedRange:NSMakeRange([[fieldEditor string] length], 0)];
 }
 
+- (void)doCommandBySelector:(SEL)aSelector
+{
+	if([self respondsToSelector:aSelector])
+	{
+		[super doCommandBySelector:aSelector];
+	}
+	else
+	{
+		NSUInteger res = OakPerformTableViewActionFromSelector(_tableView, aSelector);
+		if(res == OakMoveAcceptReturn)
+			[self accept:self];
+		else if(res == OakMoveCancelReturn)
+			[self cancel:self];
+	}
+}
+
 - (void)keyDown:(NSEvent*)anEvent
 {
 	[self interpretKeyEvents:@[ anEvent ]];
@@ -382,41 +398,15 @@ static NSMutableDictionary* SharedChoosers;
 
 - (BOOL)control:(NSControl*)aControl textView:(NSTextView*)aTextView doCommandBySelector:(SEL)aCommand
 {
-	static auto const forward = new std::set<SEL>{ @selector(moveUp:), @selector(moveDown:), @selector(moveUpAndModifySelection:), @selector(moveDownAndModifySelection:), @selector(pageUp:), @selector(pageDown:), @selector(movePageUp:), @selector(movePageDown:), @selector(scrollPageUp:), @selector(scrollPageDown:), @selector(moveToBeginningOfDocument:), @selector(moveToEndOfDocument:), @selector(scrollToBeginningOfDocument:), @selector(scrollToEndOfDocument:), @selector(insertNewline:), @selector(insertNewlineIgnoringFieldEditor:), @selector(cancelOperation:) };
-	if(forward->find(aCommand) != forward->end() && [self respondsToSelector:aCommand])
-		return [NSApp sendAction:aCommand to:self from:aControl];
-	return NO;
+	static auto const forward = new std::set<SEL>{ @selector(moveUp:), @selector(moveDown:), @selector(moveUpAndModifySelection:), @selector(moveDownAndModifySelection:), @selector(pageUp:), @selector(pageDown:), @selector(pageUpAndModifySelection:), @selector(pageDownAndModifySelection:), @selector(scrollPageUp:), @selector(scrollPageDown:), @selector(moveToBeginningOfDocument:), @selector(moveToEndOfDocument:), @selector(scrollToBeginningOfDocument:), @selector(scrollToEndOfDocument:), @selector(insertNewline:), @selector(insertNewlineIgnoringFieldEditor:), @selector(cancelOperation:) };
+	if(forward->find(aCommand) == forward->end())
+		return NO;
+
+	NSUInteger res = OakPerformTableViewActionFromSelector(_tableView, aCommand);
+	if(res == OakMoveAcceptReturn)
+		[self accept:aControl];
+	else if(res == OakMoveCancelReturn)
+		[self cancel:aControl];
+	return YES;
 }
-
-- (void)moveSelectedRowByOffset:(NSInteger)anOffset extendingSelection:(BOOL)extend
-{
-	if([_tableView numberOfRows])
-	{
-		NSInteger row = oak::cap((NSInteger)0, [_tableView selectedRow] + anOffset, [_tableView numberOfRows] - 1);
-		[_tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:extend && _tableView.allowsMultipleSelection];
-		[_tableView scrollRowToVisible:row];
-	}
-}
-
-- (int)visibleRows                                      { return (int)floor(NSHeight([_tableView visibleRect]) / ([_tableView rowHeight]+[_tableView intercellSpacing].height)) - 1; }
-
-- (void)moveUp:(id)sender                               { [self moveSelectedRowByOffset:-1 extendingSelection:NO]; }
-- (void)moveDown:(id)sender                             { [self moveSelectedRowByOffset:+1 extendingSelection:NO]; }
-- (void)moveUpAndModifySelection:(id)sender             { [self moveSelectedRowByOffset:-1 extendingSelection:YES];}
-- (void)moveDownAndModifySelection:(id)sender           { [self moveSelectedRowByOffset:+1 extendingSelection:YES];}
-- (void)movePageUp:(id)sender                           { [self moveSelectedRowByOffset:-[self visibleRows] extendingSelection:NO]; }
-- (void)movePageDown:(id)sender                         { [self moveSelectedRowByOffset:+[self visibleRows] extendingSelection:NO]; }
-- (void)moveToBeginningOfDocument:(id)sender            { [self moveSelectedRowByOffset:-(INT_MAX >> 1) extendingSelection:NO]; }
-- (void)moveToEndOfDocument:(id)sender                  { [self moveSelectedRowByOffset:+(INT_MAX >> 1) extendingSelection:NO]; }
-
-- (void)pageUp:(id)sender                               { [self movePageUp:sender]; }
-- (void)pageDown:(id)sender                             { [self movePageDown:sender]; }
-- (void)scrollPageUp:(id)sender                         { [self movePageUp:sender]; }
-- (void)scrollPageDown:(id)sender                       { [self movePageDown:sender]; }
-- (void)scrollToBeginningOfDocument:(id)sender          { [self moveToBeginningOfDocument:sender]; }
-- (void)scrollToEndOfDocument:(id)sender                { [self moveToEndOfDocument:sender]; }
-
-- (IBAction)insertNewline:(id)sender                    { [NSApp sendAction:@selector(accept:) to:nil from:sender]; }
-- (IBAction)insertNewlineIgnoringFieldEditor:(id)sender { [NSApp sendAction:@selector(accept:) to:nil from:sender]; }
-- (IBAction)cancelOperation:(id)sender                  { [NSApp sendAction:@selector(cancel:) to:nil from:sender]; }
 @end
