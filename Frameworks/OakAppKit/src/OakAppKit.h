@@ -13,7 +13,7 @@ PUBLIC extern NSUInteger const OakMoveCancelReturn;
 PUBLIC extern NSUInteger const OakMoveNoActionReturn;
 
 PUBLIC NSUInteger OakPerformTableViewActionFromKeyEvent (NSTableView* tableView, NSEvent* event);
-PUBLIC NSUInteger OakPerformTableViewActionFromSelector (NSTableView* tableView, SEL selector, NSTextView* textView);
+PUBLIC NSUInteger OakPerformTableViewActionFromSelector (NSTableView* tableView, SEL selector);
 
 #if !defined(MAC_OS_X_VERSION_10_10) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_10)
 PUBLIC extern NSString *const *const pNSAccessibilitySharedFocusElementsAttribute;

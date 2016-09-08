@@ -255,7 +255,7 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 	if(aCommand == @selector(deleteToBeginningOfLine:) && [aTextView.window tryToPerform:@selector(delete:) with:aTextView])
 		return YES;
 
-	NSUInteger res = OakPerformTableViewActionFromSelector(self.tableView, aCommand, aTextView);
+	NSUInteger res = OakPerformTableViewActionFromSelector(self.tableView, aCommand);
 	if(res == OakMoveAcceptReturn)
 		[self performDefaultButtonClick:self];
 	else if(res == OakMoveCancelReturn)

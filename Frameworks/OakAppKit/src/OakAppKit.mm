@@ -161,7 +161,7 @@ NSUInteger OakPerformTableViewActionFromKeyEvent (NSTableView* tableView, NSEven
 	return helper.returnCode;
 }
 
-NSUInteger OakPerformTableViewActionFromSelector (NSTableView* tableView, SEL selector, NSTextView* textView)
+NSUInteger OakPerformTableViewActionFromSelector (NSTableView* tableView, SEL selector)
 {
 	OakTableViewActionHelper* helper = [OakTableViewActionHelper tableViewActionHelperWithTableView:tableView];
 	[helper doCommandBySelector:selector];
