@@ -286,7 +286,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 	[super accept:sender];
 }
 
-- (void)removeItemsAtIndexes:(NSIndexSet*)anIndexSet
+- (NSUInteger)removeItemsAtIndexes:(NSIndexSet*)anIndexSet
 {
 	NSMutableArray* items = [self.items mutableCopy];
 	anIndexSet = [anIndexSet indexesPassingTest:^BOOL(NSUInteger idx, BOOL* stop){
@@ -302,7 +302,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 	}
 
 	[self loadItems:self]; // update originalItems
-	[super removeItemsAtIndexes:anIndexSet];
+	return [super removeItemsAtIndexes:anIndexSet];
 }
 
 - (void)takeItemToRemoveFrom:(NSButton*)sender

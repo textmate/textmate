@@ -326,7 +326,7 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 	return [_items objectsAtIndexes:[_tableView selectedRowIndexes]];
 }
 
-- (void)removeItemsAtIndexes:(NSIndexSet*)anIndexSet
+- (NSUInteger)removeItemsAtIndexes:(NSIndexSet*)anIndexSet
 {
 	[_tableView removeRowsAtIndexes:anIndexSet withAnimation:NSTableViewAnimationEffectFade];
 	NSMutableArray* items = [_items mutableCopy];
@@ -336,6 +336,8 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 
 	if([_tableView numberOfRows] && ![[_tableView selectedRowIndexes] count] && [anIndexSet count])
 		[_tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:MIN([anIndexSet firstIndex], [_tableView numberOfRows]-1)] byExtendingSelection:NO];
+
+	return anIndexSet.count;
 }
 
 // =================

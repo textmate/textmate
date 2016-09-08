@@ -29,7 +29,7 @@ PUBLIC @interface OakChooser : NSResponder
 
 @property (nonatomic) BOOL drawTableViewAsHighlighted;
 - (void)updateFilterString:(NSString*)aString;
-- (void)removeItemsAtIndexes:(NSIndexSet*)anIndexSet;
+- (NSUInteger)removeItemsAtIndexes:(NSIndexSet*)anIndexSet;
 - (void)performDefaultButtonClick:(id)sender;
 - (void)accept:(id)sender;
 - (void)cancel:(id)sender;
