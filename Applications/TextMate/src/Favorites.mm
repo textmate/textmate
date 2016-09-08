@@ -101,6 +101,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 	{
 		NSButton* removeButton = [NSButton new];
 		[[removeButton cell] setControlSize:NSSmallControlSize];
+		removeButton.refusesFirstResponder = YES;
 		removeButton.bezelStyle = NSRoundRectBezelStyle;
 		removeButton.buttonType = NSMomentaryPushInButton;
 		removeButton.image      = [NSImage imageNamed:NSImageNameRemoveTemplate];
