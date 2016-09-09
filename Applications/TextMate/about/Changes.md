@@ -2,6 +2,11 @@ Title: Release Notes
 
 # Changes
 
+## 2016-09-09 (v2.0-beta.12.11)
+
+* Minor tweaks and fixes incl. two recently introduced crash bugs.
+* See [all changes since v2.0-beta.12.8](https://github.com/textmate/textmate/compare/v2.0-beta.12.8...v2.0-beta.12.11)
+
 ## 2016-08-30 (v2.0-beta.12.8)
 
 * The `callback.mouse-click` “semantic class” has been changed to `callback.single-click` and there is now also `callback.double-click` and `callback.triple-click`.
