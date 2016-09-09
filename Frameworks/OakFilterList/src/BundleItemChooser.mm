@@ -291,6 +291,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 @property (nonatomic) NSString* keyEquivalentString;
 @property (nonatomic) BOOL keyEquivalentInput;
 @property (nonatomic) BOOL searchAllScopes;
+@property (nonatomic) id eventMonitor;
 @end
 
 @implementation BundleItemChooser
@@ -357,19 +358,41 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		self.editButton.action   = @selector(editItem:);
 
 		OakAddAutoLayoutViewsToSuperview([self.allViews allValues], self.window.contentView);
-
 		[self setupLayoutConstraints];
-		self.window.defaultButtonCell = self.selectButton.cell;
 
 		[self.scopeBar bind:NSValueBinding toObject:self withKeyPath:@"sourceIndex" options:nil];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidChangeKeyStatus:) name:NSWindowDidBecomeKeyNotification object:self.window];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidChangeKeyStatus:) name:NSWindowDidResignKeyNotification object:self.window];
 	}
 	return self;
 }
 
 - (void)dealloc
 {
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
 	[_keyEquivalentView removeObserver:self forKeyPath:@"recording" context:kRecordingBinding];
 	[_scopeBar unbind:NSValueBinding];
+}
+
+- (void)windowDidChangeKeyStatus:(NSNotification*)aNotification
+{
+	auto updateDefaultButton = ^NSEvent*(NSEvent* event){
+		BOOL isKeyWindow = NSApp.keyWindow == self.window;
+		BOOL optionDown  = ([event modifierFlags] & NSDeviceIndependentModifierFlagsMask) == NSAlternateKeyMask;
+		self.window.defaultButtonCell = self.canEdit && (!self.canAccept || (optionDown && isKeyWindow)) ? self.editButton.cell : self.selectButton.cell;
+		return event;
+	};
+
+	updateDefaultButton([NSApp currentEvent]);
+	if(NSApp.keyWindow == self.window)
+	{
+		_eventMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:NSFlagsChangedMask handler:updateDefaultButton];
+	}
+	else if(_eventMonitor)
+	{
+		[NSEvent removeMonitor:_eventMonitor];
+		_eventMonitor = nil;
+	}
 }
 
 - (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)object change:(NSDictionary*)change context:(void*)context
@@ -887,9 +910,6 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 
 - (void)accept:(id)sender
 {
-	if(self.canEdit && OakIsAlternateKeyOrMouseEvent())
-		return [self editItem:sender];
-
 	if(_bundleItemField == kBundleItemTitleField && OakNotEmptyString(self.filterString) && (self.tableView.selectedRow > 0 || [self.filterString length] > 1))
 	{
 		NSDictionary* item = self.items[self.tableView.selectedRow];
