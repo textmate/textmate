@@ -91,13 +91,10 @@ static std::string create_gzipped_file (std::string const& path)
 
 - (void)applicationDidFinishLaunching:(NSNotification*)aNotification
 {
-	if(NSClassFromString(@"NSUserNotification"))
+	if(NSDictionary* userInfo = [aNotification userInfo])
 	{
-		if(NSDictionary* userInfo = [aNotification userInfo])
-		{
-			if(NSUserNotification* notification = userInfo[NSApplicationLaunchUserNotificationKey])
-				[self userNotificationCenter:[NSUserNotificationCenter defaultUserNotificationCenter] didActivateNotification:notification];
-		}
+		if(NSUserNotification* notification = userInfo[NSApplicationLaunchUserNotificationKey])
+			[self userNotificationCenter:[NSUserNotificationCenter defaultUserNotificationCenter] didActivateNotification:notification];
 	}
 }
 
@@ -151,20 +148,17 @@ static std::string create_gzipped_file (std::string const& path)
 				{
 					didSend.insert(report);
 
-					if(NSClassFromString(@"NSUserNotification"))
+					auto location = response.find("location");
+					if(location != response.end())
 					{
-						auto location = response.find("location");
-						if(location != response.end())
-						{
-							NSString* path = [NSString stringWithCxxString:report];
-							NSString* url  = [NSString stringWithCxxString:location->second];
+						NSString* path = [NSString stringWithCxxString:report];
+						NSString* url  = [NSString stringWithCxxString:location->second];
 
-							NSUserNotification* notification = [NSUserNotification new];
-							notification.title           = @"Crash Report Sent";
-							notification.informativeText = @"Diagnostic information has been sent to MacroMates.com regarding your last crash.";
-							notification.userInfo        = @{ @"path" : path, @"url" : url };
-							[[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
-						}
+						NSUserNotification* notification = [NSUserNotification new];
+						notification.title           = @"Crash Report Sent";
+						notification.informativeText = @"Diagnostic information has been sent to MacroMates.com regarding your last crash.";
+						notification.userInfo        = @{ @"path" : path, @"url" : url };
+						[[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
 					}
 				}
 
