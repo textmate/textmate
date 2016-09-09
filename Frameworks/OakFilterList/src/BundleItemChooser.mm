@@ -349,13 +349,17 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		self.topDivider          = OakCreateHorizontalLine([NSColor darkGrayColor], [NSColor colorWithCalibratedWhite:0.551 alpha:1]),
 		self.bottomDivider       = OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]);
 
-		self.selectButton        = OakCreateButton(@"Select", NSTexturedRoundedBezelStyle);
-		self.selectButton.target = self;
-		self.selectButton.action = @selector(accept:);
+		self.selectButton                  = OakCreateButton(@"Select");
+		self.selectButton.font             = [NSFont messageFontOfSize:[NSFont smallSystemFontSize]];
+		self.selectButton.cell.controlSize = NSSmallControlSize;
+		self.selectButton.target           = self;
+		self.selectButton.action           = @selector(accept:);
 
-		self.editButton          = OakCreateButton(@"Edit", NSTexturedRoundedBezelStyle);
-		self.editButton.target   = self;
-		self.editButton.action   = @selector(editItem:);
+		self.editButton                  = OakCreateButton(@"Edit");
+		self.editButton.font             = [NSFont messageFontOfSize:[NSFont smallSystemFontSize]];
+		self.editButton.cell.controlSize = NSSmallControlSize;
+		self.editButton.target           = self;
+		self.editButton.action           = @selector(editItem:);
 
 		OakAddAutoLayoutViewsToSuperview([self.allViews allValues], self.window.contentView);
 		[self setupLayoutConstraints];
