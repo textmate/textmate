@@ -527,7 +527,6 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 			[self saveCommitMessage:commitMessage];
 	}
 
-	[self.documentView setDocument:document::document_ptr()];
 	[self sendCommitMessageToClient:NO];
 	[self.window orderOut:self];
 }
