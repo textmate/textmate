@@ -109,7 +109,9 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 	NSFontTraitMask matchFontTraits = NSBoldFontMask;
 	NSDictionary* matchAttributes = @{
 		NSForegroundColorAttributeName : [NSColor blackColor],
-		NSBackgroundColorAttributeName : [NSColor colorWithCalibratedWhite:0.9 alpha:1]
+		NSBackgroundColorAttributeName : [NSColor colorWithCalibratedRed:0.92 green:0.86 blue:0.48 alpha:0.5],
+		NSUnderlineStyleAttributeName : @(NSUnderlineStyleSingle),
+		NSUnderlineColorAttributeName : [NSColor colorWithCalibratedRed:0.89 green:0.72 blue:0.0 alpha:1.0],
 	};
 
 	string_builder_t builder(NSLineBreakByTruncatingTail);

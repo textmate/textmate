@@ -51,8 +51,13 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 	if(self.backgroundStyle == NSBackgroundStyleDark)
 	{
 		NSMutableAttributedString* str = [res mutableCopy];
+		[str enumerateAttributesInRange:NSMakeRange(0, str.length) options:NSAttributedStringEnumerationLongestEffectiveRangeNotRequired usingBlock:^(NSDictionary* attrs, NSRange range, BOOL *stop){
+			if(attrs[NSBackgroundColorAttributeName] != nil)
+				[str addAttribute:NSBackgroundColorAttributeName value:[NSColor colorWithCalibratedWhite:1.0 alpha:0.30] range:range];
+			if(attrs[NSUnderlineColorAttributeName] != nil)
+				[str addAttribute:NSUnderlineColorAttributeName value:[NSColor whiteColor] range:range];
+		}];
 		[str addAttribute:NSForegroundColorAttributeName value:[NSColor alternateSelectedControlTextColor] range:NSMakeRange(0, [str length])];
-		[str removeAttribute:NSBackgroundColorAttributeName range:NSMakeRange(0, [str length])];
 		res = str;
 	}
 	return res;
