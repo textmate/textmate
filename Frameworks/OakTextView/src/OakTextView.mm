@@ -2596,6 +2596,15 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 					}
 				}
 
+				// If wrap_around is enabled but the only result is already selected, highlight it again.
+				if(newSelection.empty() && (options & find::wrap_around) && alreadySelected.size() == 1)
+				{
+					auto selection = *alreadySelected.begin();
+					auto tmp = ng::find_all(*documentView, findStr, options, { selection });
+					if(tmp.size() == 1 && tmp.begin()->first.sorted() == selection)
+						newSelection.push_back(selection);
+				}
+
 				[self highlightRanges:newSelection];
 				[aFindServer didFind:newSelection.size() occurrencesOf:aFindServer.findString atPosition:res.size() == 1 ? documentView->convert(res.last().min().index) : text::pos_t::undefined wrapped:didWrap];
 			}
