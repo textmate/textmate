@@ -144,7 +144,7 @@
                         <font key="font" metaFont="system"/>
                     </buttonCell>
                     <connections>
-                        <action selector="performSoftwareUpdateCheck:" target="-2" id="73"/>
+                        <action selector="performSoftwareUpdateCheck:" target="-1" id="YEG-1P-UwS"/>
                         <binding destination="-2" name="enabled" keyPath="isChecking" id="77">
                             <dictionary key="options">
                                 <string key="NSValueTransformerName">NSNegateBoolean</string>

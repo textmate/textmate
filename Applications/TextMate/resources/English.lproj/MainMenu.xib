@@ -42,6 +42,12 @@
                                     <action selector="showPreferences:" target="-1" id="226"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="Check for Updates" id="FqE-nm-YPL">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="performSoftwareUpdateCheck:" target="-1" id="OD0-oc-shG"/>
+                                </connections>
+                            </menuItem>
                             <menuItem isSeparatorItem="YES" id="143">
                                 <modifierMask key="keyEquivalentModifierMask" command="YES"/>
                             </menuItem>

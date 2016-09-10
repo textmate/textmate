@@ -44,11 +44,6 @@
 	return self;
 }
 
-- (IBAction)performSoftwareUpdateCheck:(id)sender
-{
-	[[SoftwareUpdate sharedInstance] checkForUpdates:self];
-}
-
 - (NSString*)lastCheck
 {
 	return _isChecking ? @"Checking…" : (_errorString ?: (_lastPollString ?: @"Never"));

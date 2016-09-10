@@ -386,6 +386,11 @@ BOOL HasDocumentWindow (NSArray* windows)
 	[NSApp sendAction:@selector(selectAndCenter:) to:nil from:[goToLineTextField stringValue]];
 }
 
+- (IBAction)performSoftwareUpdateCheck:(id)sender
+{
+	[[SoftwareUpdate sharedInstance] checkForUpdates:self];
+}
+
 - (IBAction)showPreferences:(id)sender
 {
 	D(DBF_AppController, bug("\n"););
