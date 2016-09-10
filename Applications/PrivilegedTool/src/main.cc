@@ -174,7 +174,7 @@ int main (int argc, char const* argv[])
 	if(geteuid() != 0)
 	{
 		fprintf(stderr, "auth_server: must run as root\n");
-		abort();
+		return EX_NOPERM;
 	}
 
 	if(install)
