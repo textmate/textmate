@@ -10,7 +10,7 @@ struct setup_t
 	setup_t (std::string const& cmd)
 	{
 		static std::string const git = scm::find_executable("git", "TM_GIT");
-		std::string const script = text::format("{ cd '%1$s' && '%2$s' init && '%2$s' config user.email 'test@example.com' && '%2$s' config user.name 'Test Test' && touch .dummy && '%2$s' add .dummy && '%2$s' commit .dummy -mGetHead && %3$s ; } >/dev/null", jail.path().c_str(), git.c_str(), cmd.c_str());
+		std::string const script = text::format("{ cd '%1$s' && '%2$s' init && '%2$s' config user.email 'test@example.com' && '%2$s' config user.name 'Test Test' && '%2$s' config commit.gpgsign false && touch .dummy && '%2$s' add .dummy && '%2$s' commit .dummy -mGetHead && %3$s ; } >/dev/null", jail.path().c_str(), git.c_str(), cmd.c_str());
 		if(io::exec("/bin/sh", "-c", script.c_str(), nullptr) != NULL_STR)
 		{
 			if(info = scm::info(jail.path()))
