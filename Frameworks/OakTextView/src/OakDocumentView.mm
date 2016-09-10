@@ -51,7 +51,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	OakBackgroundFillView* statusDividerView;
 
 	NSScrollView* textScrollView;
-	document::document_ptr document;
+	document::document_ptr cppDocument;
 	document::document_t::callback_t* callback;
 
 	NSMutableArray* topAuxiliaryViews;
@@ -306,9 +306,9 @@ private:
 		[_statusBar setSelectionString:str];
 		_symbolChooser.selectionString = str;
 
-		if(document)
+		if(cppDocument)
 		{
-			ng::buffer_t const& buf = document->buffer();
+			ng::buffer_t const& buf = cppDocument->buffer();
 			text::selection_t sel(to_s(str));
 			size_t i = buf.convert(sel.last().max());
 			_statusBar.symbolName = [NSString stringWithCxxString:buf.symbol_at(i)];
@@ -345,35 +345,35 @@ private:
 
 - (document::document_ptr const&)document
 {
-	return document;
+	return cppDocument;
 }
 
 - (void)setDocument:(document::document_ptr const&)aDocument
 {
-	document::document_ptr oldDocument = document;
+	document::document_ptr oldDocument = cppDocument;
 	if(oldDocument)
 		oldDocument->remove_callback(callback);
 
 	if(aDocument)
 		aDocument->sync_open();
 
-	if(document = aDocument)
+	if(cppDocument = aDocument)
 	{
-		document->add_callback(callback);
-		document->show();
+		cppDocument->add_callback(callback);
+		cppDocument->show();
 
-		_statusBar.fileType = [NSString stringWithCxxString:document->file_type()];
-		_statusBar.tabSize  = document->indent().tab_size();
-		_statusBar.softTabs = document->indent().soft_tabs();
+		_statusBar.fileType = [NSString stringWithCxxString:cppDocument->file_type()];
+		_statusBar.tabSize  = cppDocument->indent().tab_size();
+		_statusBar.softTabs = cppDocument->indent().soft_tabs();
 	}
 
-	[_textView setDocument:document ? document->document() : nil];
+	[_textView setDocument:cppDocument ? cppDocument->document() : nil];
 	[gutterView reloadData:self];
 	[self updateStyle];
 
 	if(_symbolChooser)
 	{
-		_symbolChooser.document        = document->document();
+		_symbolChooser.document        = cppDocument->document();
 		_symbolChooser.selectionString = _textView.selectionString;
 	}
 
@@ -387,10 +387,10 @@ private:
 - (void)updateStyle
 {
 	theme_ptr theme = _textView.theme;
-	if(theme && document)
+	if(theme && cppDocument)
 	{
 		[[self window] setOpaque:!theme->is_transparent() && !theme->gutter_styles().is_transparent()];
-		[textScrollView setBackgroundColor:[NSColor colorWithCGColor:theme->background(document->file_type())]];
+		[textScrollView setBackgroundColor:[NSColor colorWithCGColor:theme->background(cppDocument->file_type())]];
 
 		if(theme->is_dark())
 		{
@@ -467,7 +467,7 @@ private:
 		NSString* uuidString = [aMenuItem representedObject];
 		if(bundles::item_ptr bundleItem = bundles::lookup(to_s(uuidString)))
 		{
-			bool selectedGrammar = document && document->file_type() == bundleItem->value_for_field(bundles::kFieldGrammarScope);
+			bool selectedGrammar = cppDocument && cppDocument->file_type() == bundleItem->value_for_field(bundles::kFieldGrammarScope);
 			[aMenuItem setState:selectedGrammar ? NSOnState : NSOffState];
 		}
 	}
@@ -476,17 +476,17 @@ private:
 		text::selection_t sel(to_s(_textView.selectionString));
 		size_t lineNumber = sel.last().max().line;
 
-		ng::buffer_t const& buf = document->buffer();
+		ng::buffer_t const& buf = cppDocument->buffer();
 		[aMenuItem setTitle:buf.get_marks(buf.begin(lineNumber), buf.eol(lineNumber), document::kBookmarkIdentifier).empty() ? @"Set Bookmark" : @"Remove Bookmark"];
 	}
 	else if([aMenuItem action] == @selector(goToNextBookmark:) || [aMenuItem action] == @selector(goToPreviousBookmark:))
 	{
-		auto const& buf = document->buffer();
+		auto const& buf = cppDocument->buffer();
 		return buf.get_marks(0, buf.size(), document::kBookmarkIdentifier).empty() ? NO : YES;
 	}
 	else if([aMenuItem action] == @selector(jumpToNextMark:) || [aMenuItem action] == @selector(jumpToPreviousMark:))
 	{
-		auto const& buf = document->buffer();
+		auto const& buf = cppDocument->buffer();
 		return buf.get_marks(0, buf.size()).empty() ? NO : YES;
 	}
 	return YES;
@@ -565,7 +565,7 @@ private:
 		_symbolChooser.target          = self;
 		_symbolChooser.action          = @selector(symbolChooserDidSelectItems:);
 		_symbolChooser.filterString    = @"";
-		_symbolChooser.document        = document->document();
+		_symbolChooser.document        = cppDocument->document();
 		_symbolChooser.selectionString = _textView.selectionString;
 
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(symbolChooserWillClose:) name:NSWindowWillCloseNotification object:_symbolChooser.window];
@@ -609,7 +609,7 @@ private:
 	NSMenu* symbolMenu = symbolPopUp.menu;
 	[symbolMenu removeAllItems];
 
-	ng::buffer_t const& buf = document->buffer();
+	ng::buffer_t const& buf = cppDocument->buffer();
 	text::selection_t sel(to_s(_textView.selectionString));
 	size_t i = buf.convert(sel.last().max());
 
@@ -665,7 +665,7 @@ private:
 	for(auto pair : ordered)
 	{
 		bool selectedGrammar = false;
-		for(auto item : bundles::query(bundles::kFieldGrammarScope, document->file_type(), scope::wildcard, bundles::kItemTypeGrammar, pair.second->uuid(), true, true))
+		for(auto item : bundles::query(bundles::kFieldGrammarScope, cppDocument->file_type(), scope::wildcard, bundles::kItemTypeGrammar, pair.second->uuid(), true, true))
 			selectedGrammar = true;
 		if(!selectedGrammar && pair.second->hidden_from_user() || pair.second->menu().empty())
 			continue;
@@ -696,7 +696,7 @@ private:
 - (void)setTabSize:(NSUInteger)newTabSize
 {
 	_textView.tabSize = newTabSize;
-	settings_t::set(kSettingsTabSizeKey, (size_t)newTabSize, document->file_type());
+	settings_t::set(kSettingsTabSizeKey, (size_t)newTabSize, cppDocument->file_type());
 }
 
 - (IBAction)takeTabSizeFrom:(id)sender
@@ -711,14 +711,14 @@ private:
 {
 	D(DBF_OakDocumentView, bug("\n"););
 	_textView.softTabs = YES;
-	settings_t::set(kSettingsSoftTabsKey, true, document->file_type());
+	settings_t::set(kSettingsSoftTabsKey, true, cppDocument->file_type());
 }
 
 - (IBAction)setIndentWithTabs:(id)sender
 {
 	D(DBF_OakDocumentView, bug("\n"););
 	_textView.softTabs = NO;
-	settings_t::set(kSettingsSoftTabsKey, false, document->file_type());
+	settings_t::set(kSettingsSoftTabsKey, false, cppDocument->file_type());
 }
 
 - (IBAction)showTabSizeSelectorPanel:(id)sender
@@ -767,7 +767,7 @@ private:
 	{
 		std::map<size_t, std::string> gutterImageName;
 
-		ng::buffer_t const& buf = document->buffer();
+		ng::buffer_t const& buf = cppDocument->buffer();
 		for(auto const& pair : buf.get_marks(buf.begin(lineNumber), buf.eol(lineNumber)))
 		{
 			if(!pair.second.second.empty())
@@ -808,7 +808,7 @@ private:
 
 - (void)updateBookmarksMenu:(NSMenu*)aMenu
 {
-	ng::buffer_t& buf = document->buffer();
+	ng::buffer_t& buf = cppDocument->buffer();
 	std::map<size_t, std::string> const& marks = buf.get_marks(0, buf.size(), document::kBookmarkIdentifier);
 	for(auto const& pair : marks)
 	{
@@ -830,7 +830,7 @@ private:
 {
 	if([columnIdentifier isEqualToString:kBookmarksColumnIdentifier])
 	{
-		ng::buffer_t& buf = document->buffer();
+		ng::buffer_t& buf = cppDocument->buffer();
 
 		std::vector<std::string> info;
 		for(auto const& pair : buf.get_marks(buf.begin(lineNumber), buf.eol(lineNumber)))
@@ -883,7 +883,7 @@ private:
 {
 	text::selection_t sel(to_s(_textView.selectionString));
 
-	ng::buffer_t const& buf = document->buffer();
+	ng::buffer_t const& buf = cppDocument->buffer();
 	std::pair<size_t, std::string> const& pair = buf.next_mark(buf.convert(sel.last().max()), to_s(markType));
 	if(pair.second != NULL_STR)
 		_textView.selectionString = [NSString stringWithCxxString:buf.convert(pair.first)];
@@ -893,7 +893,7 @@ private:
 {
 	text::selection_t sel(to_s(_textView.selectionString));
 
-	ng::buffer_t const& buf = document->buffer();
+	ng::buffer_t const& buf = cppDocument->buffer();
 	std::pair<size_t, std::string> const& pair = buf.prev_mark(buf.convert(sel.last().max()), to_s(markType));
 	if(pair.second != NULL_STR)
 		_textView.selectionString = [NSString stringWithCxxString:buf.convert(pair.first)];
@@ -901,7 +901,7 @@ private:
 
 - (IBAction)toggleCurrentBookmark:(id)sender
 {
-	ng::buffer_t& buf = document->buffer();
+	ng::buffer_t& buf = cppDocument->buffer();
 
 	text::selection_t sel(to_s(_textView.selectionString));
 	size_t lineNumber = sel.last().max().line;
@@ -934,7 +934,7 @@ private:
 
 - (void)clearAllBookmarks:(id)sender
 {
-	document->remove_all_marks(document::kBookmarkIdentifier);
+	cppDocument->remove_all_marks(document::kBookmarkIdentifier);
 }
 
 // ========================
@@ -998,6 +998,6 @@ private:
 
 - (void)printDocument:(id)sender
 {
-	[document->document() runPrintOperationModalForWindow:self.window fontName:_textView.font.fontName];
+	[cppDocument->document() runPrintOperationModalForWindow:self.window fontName:_textView.font.fontName];
 }
 @end
