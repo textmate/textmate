@@ -362,9 +362,9 @@ private:
 		cppDocument->add_callback(callback);
 		cppDocument->show();
 
-		_statusBar.fileType = [NSString stringWithCxxString:cppDocument->file_type()];
-		_statusBar.tabSize  = cppDocument->indent().tab_size();
-		_statusBar.softTabs = cppDocument->indent().soft_tabs();
+		_statusBar.fileType = cppDocument->document().fileType;
+		_statusBar.tabSize  = cppDocument->document().tabSize;
+		_statusBar.softTabs = cppDocument->document().softTabs;
 	}
 
 	[_textView setDocument:cppDocument ? cppDocument->document() : nil];
@@ -390,7 +390,7 @@ private:
 	if(theme && cppDocument)
 	{
 		[[self window] setOpaque:!theme->is_transparent() && !theme->gutter_styles().is_transparent()];
-		[textScrollView setBackgroundColor:[NSColor colorWithCGColor:theme->background(cppDocument->file_type())]];
+		[textScrollView setBackgroundColor:[NSColor colorWithCGColor:theme->background(to_s(cppDocument->document().fileType))]];
 
 		if(theme->is_dark())
 		{
@@ -467,7 +467,7 @@ private:
 		NSString* uuidString = [aMenuItem representedObject];
 		if(bundles::item_ptr bundleItem = bundles::lookup(to_s(uuidString)))
 		{
-			bool selectedGrammar = cppDocument && cppDocument->file_type() == bundleItem->value_for_field(bundles::kFieldGrammarScope);
+			bool selectedGrammar = cppDocument && to_s(cppDocument->document().fileType) == bundleItem->value_for_field(bundles::kFieldGrammarScope);
 			[aMenuItem setState:selectedGrammar ? NSOnState : NSOffState];
 		}
 	}
@@ -665,7 +665,7 @@ private:
 	for(auto pair : ordered)
 	{
 		bool selectedGrammar = false;
-		for(auto item : bundles::query(bundles::kFieldGrammarScope, cppDocument->file_type(), scope::wildcard, bundles::kItemTypeGrammar, pair.second->uuid(), true, true))
+		for(auto item : bundles::query(bundles::kFieldGrammarScope, to_s(cppDocument->document().fileType), scope::wildcard, bundles::kItemTypeGrammar, pair.second->uuid(), true, true))
 			selectedGrammar = true;
 		if(!selectedGrammar && pair.second->hidden_from_user() || pair.second->menu().empty())
 			continue;
@@ -696,7 +696,7 @@ private:
 - (void)setTabSize:(NSUInteger)newTabSize
 {
 	_textView.tabSize = newTabSize;
-	settings_t::set(kSettingsTabSizeKey, (size_t)newTabSize, cppDocument->file_type());
+	settings_t::set(kSettingsTabSizeKey, (size_t)newTabSize, to_s(cppDocument->document().fileType));
 }
 
 - (IBAction)takeTabSizeFrom:(id)sender
@@ -711,14 +711,14 @@ private:
 {
 	D(DBF_OakDocumentView, bug("\n"););
 	_textView.softTabs = YES;
-	settings_t::set(kSettingsSoftTabsKey, true, cppDocument->file_type());
+	settings_t::set(kSettingsSoftTabsKey, true, to_s(cppDocument->document().fileType));
 }
 
 - (IBAction)setIndentWithTabs:(id)sender
 {
 	D(DBF_OakDocumentView, bug("\n"););
 	_textView.softTabs = NO;
-	settings_t::set(kSettingsSoftTabsKey, false, cppDocument->file_type());
+	settings_t::set(kSettingsSoftTabsKey, false, to_s(cppDocument->document().fileType));
 }
 
 - (IBAction)showTabSizeSelectorPanel:(id)sender
