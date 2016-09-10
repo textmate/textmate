@@ -609,34 +609,30 @@ private:
 	NSMenu* symbolMenu = symbolPopUp.menu;
 	[symbolMenu removeAllItems];
 
-	ng::buffer_t const& buf = cppDocument->buffer();
 	text::selection_t sel(to_s(_textView.selectionString));
-	size_t i = buf.convert(sel.last().max());
+	text::pos_t caret = sel.last().max();
 
-	NSInteger index = 0;
-	for(auto pair : buf.symbols())
-	{
-		if(pair.second == "-")
+	__block NSInteger index = 0;
+	[cppDocument->document() enumerateSymbolsUsingBlock:^(text::pos_t const& pos, NSString* symbol){
+		if([symbol isEqualToString:@"-"])
 		{
 			[symbolMenu addItem:[NSMenuItem separatorItem]];
 		}
 		else
 		{
-			std::string const emSpace = " ";
+			NSUInteger indent = 0;
+			while(indent < symbol.length && [symbol characterAtIndex:indent] == 0x2003) // Em-space
+				++indent;
 
-			std::string::size_type offset = 0;
-			while(pair.second.find(emSpace, offset) == offset)
-				offset += emSpace.size();
-
-			NSMenuItem* item = [symbolMenu addItemWithTitle:[NSString stringWithCxxString:pair.second.substr(offset)] action:@selector(goToSymbol:) keyEquivalent:@""];
-			[item setIndentationLevel:offset / emSpace.size()];
+			NSMenuItem* item = [symbolMenu addItemWithTitle:[symbol substringFromIndex:indent] action:@selector(goToSymbol:) keyEquivalent:@""];
+			[item setIndentationLevel:indent];
 			[item setTarget:self];
-			[item setRepresentedObject:[NSString stringWithCxxString:buf.convert(pair.first)]];
+			[item setRepresentedObject:to_ns(pos)];
 		}
 
-		if(pair.first <= i)
+		if(pos <= caret)
 			++index;
-	}
+	}];
 
 	if(symbolMenu.numberOfItems == 0)
 		[symbolMenu addItemWithTitle:@"No symbols to show for current document." action:@selector(nop:) keyEquivalent:@""];
