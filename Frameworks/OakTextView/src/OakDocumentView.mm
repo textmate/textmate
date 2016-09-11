@@ -134,7 +134,7 @@ private:
 		doc->set_custom_name("null document"); // without a name it grabs an ‘untitled’ token
 		[self setDocument:doc];
 
-		self.observedKeys = @[ @"selectionString", @"tabSize", @"softTabs", @"isMacroRecording"];
+		self.observedKeys = @[ @"selectionString", @"symbol", @"tabSize", @"softTabs", @"isMacroRecording"];
 		for(NSString* keyPath in self.observedKeys)
 			[_textView addObserver:self forKeyPath:keyPath options:NSKeyValueObservingOptionInitial context:NULL];
 	}
@@ -305,14 +305,10 @@ private:
 		[gutterView setHighlightedRange:to_s(str ?: @"1")];
 		[_statusBar setSelectionString:str];
 		_symbolChooser.selectionString = str;
-
-		if(cppDocument)
-		{
-			ng::buffer_t const& buf = cppDocument->buffer();
-			text::selection_t sel(to_s(str));
-			size_t i = buf.convert(sel.last().max());
-			_statusBar.symbolName = [NSString stringWithCxxString:buf.symbol_at(i)];
-		}
+	}
+	else if([aKeyPath isEqualToString:@"symbol"])
+	{
+		_statusBar.symbolName = _textView.symbol;
 	}
 	else if([aKeyPath isEqualToString:@"tabSize"])
 	{

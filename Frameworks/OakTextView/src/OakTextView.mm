@@ -276,6 +276,12 @@ struct document_view_t : ng::buffer_api_t
 		return res;
 	}
 
+	std::string symbol () const
+	{
+		ng::buffer_t const& buf = [_document_editor buffer];
+		return buf.symbol_at(ranges().last().first.index);
+	}
+
 	size_t nest_count = 0;
 	std::string invisibles_map;
 
@@ -472,6 +478,7 @@ private:
 - (void)updateChoiceMenu:(id)sender;
 - (void)resetBlinkCaretTimer;
 - (void)updateSelection;
+- (void)updateSymbol;
 - (void)updateMarkedRanges;
 - (void)redisplayFrom:(size_t)from to:(size_t)to;
 - (NSImage*)imageForRanges:(ng::ranges_t const&)ranges imageRect:(NSRect*)outRect;
@@ -490,6 +497,7 @@ private:
 @property (nonatomic, readonly) links_ptr links;
 @property (nonatomic) NSDictionary* matchCaptures; // Captures from last regexp match
 @property (nonatomic) BOOL needsEnsureSelectionIsInVisibleArea;
+@property (nonatomic, readwrite) NSString* symbol;
 @end
 
 static std::vector<bundles::item_ptr> items_for_tab_expansion (std::shared_ptr<document_view_t> const& documentView, ng::ranges_t const& ranges, std::string const& scopeAttributes, ng::range_t* range)
@@ -568,6 +576,7 @@ struct refresh_helper_t
 				{
 					[_self updateMarkedRanges];
 					[_self updateSelection];
+					[_self updateSymbol];
 				}
 
 				auto damagedRects = documentView->end_refresh_cycle(merge(documentView->ranges(), [_self markedRanges]), [_self visibleRect], [_self liveSearchRanges]);
@@ -779,6 +788,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 			[self ensureSelectionIsInVisibleArea:self];
 			[self updateSelection];
+			[self updateSymbol];
 		}
 		[self resetBlinkCaretTimer];
 		return;
@@ -856,6 +866,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 		[self reflectDocumentSize];
 		[self updateSelection];
+		[self updateSymbol];
 
 		if(visibleIndex && visibleIndex.index < documentView->size())
 				[self scrollIndexToFirstVisible:visibleIndex];
@@ -3246,6 +3257,13 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	isUpdatingSelection = YES;
 	[self setSelectionString:[NSString stringWithCxxString:withoutCarry]];
 	isUpdatingSelection = NO;
+}
+
+- (void)updateSymbol
+{
+	NSString* newSymbol = to_ns(documentView->symbol());
+	if(![_symbol isEqualToString:newSymbol])
+		self.symbol = newSymbol;
 }
 
 - (folding_state_t)foldingStateForLine:(NSUInteger)lineNumber

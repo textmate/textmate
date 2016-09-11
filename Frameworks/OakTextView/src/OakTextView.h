@@ -47,6 +47,7 @@ PUBLIC @interface OakTextView : OakView
 @property (nonatomic, readonly) BOOL                        hasMultiLineSelection;
 @property (nonatomic, readonly) BOOL                        hasSelection;
 @property (nonatomic) NSString*                             selectionString;
+@property (nonatomic, readonly) NSString*                   symbol;
 
 @property (nonatomic) BOOL                                  isMacroRecording;
 
