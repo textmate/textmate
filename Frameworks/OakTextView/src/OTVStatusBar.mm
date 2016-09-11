@@ -306,10 +306,10 @@ static NSMenuItem* OakCreateIndentMenuItem (NSString* title, SEL action, id targ
 
 - (void)updateTabSettings
 {
-	self.tabSizePopUp.title = [NSString stringWithFormat:@"%@:\u2003%d", _softTabs ? @"Soft Tabs" : @"Tab Size", _tabSize];
+	self.tabSizePopUp.title = [NSString stringWithFormat:@"%@:\u2003%lu", _softTabs ? @"Soft Tabs" : @"Tab Size", _tabSize];
 }
 
-- (void)setTabSize:(int32_t)size
+- (void)setTabSize:(NSUInteger)size
 {
 	_tabSize = size;
 	[self updateTabSettings];

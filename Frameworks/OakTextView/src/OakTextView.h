@@ -38,7 +38,7 @@ PUBLIC @interface OakTextView : OakView
 @property (nonatomic) CGFloat                               fontScaleFactor;
 @property (nonatomic) BOOL                                  antiAlias;
 @property (nonatomic) OTVFontSmoothing                      fontSmoothing;
-@property (nonatomic) size_t                                tabSize;
+@property (nonatomic) NSUInteger                            tabSize;
 @property (nonatomic) BOOL                                  showInvisibles;
 @property (nonatomic) BOOL                                  softWrap;
 @property (nonatomic) BOOL                                  scrollPastEnd;
