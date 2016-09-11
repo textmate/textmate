@@ -75,15 +75,6 @@ struct document_view_callback_t : document::document_t::callback_t
 		{
 			[[NSNotificationCenter defaultCenter] postNotificationName:GVColumnDataSourceDidChange object:self];
 		}
-		else if(event == did_change_file_type)
-		{
-			self.statusBar.fileType = [NSString stringWithCxxString:document->file_type()];
-		}
-		else if(event == did_change_indent_settings)
-		{
-			self.statusBar.tabSize  = document->indent().tab_size();
-			self.statusBar.softTabs = document->indent().soft_tabs();
-		}
 	}
 private:
 	__weak OakDocumentView* self;
@@ -134,7 +125,7 @@ private:
 		doc->set_custom_name("null document"); // without a name it grabs an ‘untitled’ token
 		[self setDocument:doc];
 
-		self.observedKeys = @[ @"selectionString", @"symbol", @"tabSize", @"softTabs", @"isMacroRecording"];
+		self.observedKeys = @[ @"selectionString", @"symbol", @"isMacroRecording"];
 		for(NSString* keyPath in self.observedKeys)
 			[_textView addObserver:self forKeyPath:keyPath options:NSKeyValueObservingOptionInitial context:NULL];
 	}
@@ -296,9 +287,6 @@ private:
 
 - (void)observeValueForKeyPath:(NSString*)aKeyPath ofObject:(id)observableController change:(NSDictionary*)changeDictionary context:(void*)userData
 {
-	if(observableController != _textView || ![self.observedKeys containsObject:aKeyPath])
-		return;
-
 	if([aKeyPath isEqualToString:@"selectionString"])
 	{
 		NSString* str = [_textView valueForKey:@"selectionString"];
@@ -310,17 +298,21 @@ private:
 	{
 		_statusBar.symbolName = _textView.symbol;
 	}
+	else if([aKeyPath isEqualToString:@"isMacroRecording"])
+	{
+		_statusBar.isMacroRecording = _textView.isMacroRecording;
+	}
+	else if([aKeyPath isEqualToString:@"fileType"])
+	{
+		_statusBar.fileType = cppDocument->document().fileType;
+	}
 	else if([aKeyPath isEqualToString:@"tabSize"])
 	{
-		_statusBar.tabSize = _textView.tabSize;
+		_statusBar.tabSize = cppDocument->document().tabSize;
 	}
 	else if([aKeyPath isEqualToString:@"softTabs"])
 	{
-		_statusBar.softTabs = _textView.softTabs;
-	}
-	else
-	{
-		[_statusBar setValue:[_textView valueForKey:aKeyPath] forKey:aKeyPath];
+		_statusBar.softTabs = cppDocument->document().softTabs;
 	}
 }
 
@@ -346,9 +338,16 @@ private:
 
 - (void)setDocument:(document::document_ptr const&)aDocument
 {
+	NSArray* const documentKeys = @[ @"fileType", @"tabSize", @"softTabs" ];
+
 	document::document_ptr oldDocument = cppDocument;
 	if(oldDocument)
+	{
+		for(NSString* key in documentKeys)
+			[oldDocument->document() removeObserver:self forKeyPath:key];
+
 		oldDocument->remove_callback(callback);
+	}
 
 	if(aDocument)
 		aDocument->sync_open();
@@ -358,9 +357,8 @@ private:
 		cppDocument->add_callback(callback);
 		cppDocument->show();
 
-		_statusBar.fileType = cppDocument->document().fileType;
-		_statusBar.tabSize  = cppDocument->document().tabSize;
-		_statusBar.softTabs = cppDocument->document().softTabs;
+		for(NSString* key in documentKeys)
+			[cppDocument->document() addObserver:self forKeyPath:key options:NSKeyValueObservingOptionInitial context:nullptr];
 	}
 
 	[_textView setDocument:cppDocument ? cppDocument->document() : nil];
