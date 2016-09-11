@@ -659,7 +659,9 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 - (void)restorePreviousCommitMessage:(id)sender
 {
 	NSString* message = [sender representedObject];
-	self.documentView.document = [OakDocument documentWithString:message fileType:self.documentView.document.fileType customName:@"Commit Message"];
+	OakDocument* commitMessage = [OakDocument documentWithString:message fileType:self.documentView.document.fileType customName:@"Commit Message"];
+	commitMessage.virtualPath = to_ns(path::join(_environment["TM_PROJECT_DIRECTORY"], "commit-message.txt"));
+	self.documentView.document = commitMessage;
 }
 
 - (void)clearPreviousCommitMessages:(id)sender
