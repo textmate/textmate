@@ -718,7 +718,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 		[self.document enumerateBookmarksAtLine:lineNumber block:^(text::pos_t const& pos, NSString* type, NSString* payload){
 			if(payload.length != 0)
 				gutterImageName.emplace(0, type);
-			else if([type isEqualToString:to_ns(document::kBookmarkIdentifier)])
+			else if([type isEqualToString:OakDocumentBookmarkIdentifier])
 				gutterImageName.emplace(1, rowState != GutterViewRowStateRegular ? @"Bookmark Hover Remove Template" : @"Bookmark Template");
 			else if(rowState == GutterViewRowStateRegular)
 				gutterImageName.emplace(2, type);
@@ -780,15 +780,15 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 		[self.document enumerateBookmarksAtLine:lineNumber block:^(text::pos_t const& pos, NSString* type, NSString* payload){
 			if(payload.length != 0)
 				[content addObject:payload];
-			else if([type isEqualToString:to_ns(document::kBookmarkIdentifier)])
+			else if([type isEqualToString:OakDocumentBookmarkIdentifier])
 				bookmarks.push_back(pos);
 		}];
 
 		if(content.count == 0)
 		{
 			if(bookmarks.empty())
-					[self.document setMarkOfType:to_ns(document::kBookmarkIdentifier) atPosition:text::pos_t(lineNumber, 0) content:nil];
-			else	[self.document removeMarkOfType:to_ns(document::kBookmarkIdentifier) atPosition:bookmarks.front()];
+					[self.document setMarkOfType:OakDocumentBookmarkIdentifier atPosition:text::pos_t(lineNumber, 0) content:nil];
+			else	[self.document removeMarkOfType:OakDocumentBookmarkIdentifier atPosition:bookmarks.front()];
 		}
 		else
 		{
@@ -822,7 +822,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 
 - (void)clearAllBookmarks:(id)sender
 {
-	[self.document removeAllMarksOfType:to_ns(document::kBookmarkIdentifier)];
+	[self.document removeAllMarksOfType:OakDocumentBookmarkIdentifier];
 }
 
 - (void)documentMarksDidChange:(NSNotification*)aNotification

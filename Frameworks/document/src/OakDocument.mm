@@ -4,7 +4,6 @@
 #import "Printing.h"
 #import "watch.h"
 #import "merge.h"
-#import "document.h" // kBookmarkIdentifier
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/OakAppKit.h>
@@ -98,7 +97,7 @@ namespace document
 		{
 			auto marks = _paths.find(path);
 			if(marks == _paths.end())
-				marks = _paths.emplace(path, std::map<std::string, std::map<text::pos_t, std::string>>{ { kBookmarkIdentifier, load_bookmarks(path) } }).first;
+				marks = _paths.emplace(path, std::map<std::string, std::map<text::pos_t, std::string>>{ { to_s(OakDocumentBookmarkIdentifier), load_bookmarks(path) } }).first;
 			return marks->second;
 		}
 
@@ -152,6 +151,7 @@ NSString* OakDocumentWillSaveNotification         = @"OakDocumentWillSaveNotific
 NSString* OakDocumentDidSaveNotification          = @"OakDocumentDidSaveNotification";
 NSString* OakDocumentWillCloseNotification        = @"OakDocumentWillCloseNotification";
 NSString* OakDocumentWillShowAlertNotification    = @"OakDocumentWillShowAlertNotification";
+NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 
 @interface OakDocument ()
 {
@@ -497,7 +497,7 @@ private:
 		[editor documentWillSave:self];
 
 	std::map<std::string, std::string> res = {
-		{ "com.macromates.bookmarks",      to_s([self stringifyMarksOfType:to_ns(document::kBookmarkIdentifier)]) },
+		{ "com.macromates.bookmarks",      to_s([self stringifyMarksOfType:OakDocumentBookmarkIdentifier]) },
 		{ "com.macromates.selectionRange", to_s(_selection) },
 		{ "com.macromates.visibleIndex",   _visibleIndex ? to_s(_visibleIndex) : NULL_STR },
 		{ "com.macromates.crc32",          NULL_STR },
@@ -1183,7 +1183,7 @@ private:
 {
 	if(self.isOpen && _buffer)
 	{
-		for(auto const& pair : _buffer->get_marks(0, _buffer->size(), document::kBookmarkIdentifier))
+		for(auto const& pair : _buffer->get_marks(0, _buffer->size(), to_s(OakDocumentBookmarkIdentifier)))
 		{
 			text::pos_t pos = _buffer->convert(pair.first);
 			block(pos, to_ns(_buffer->substr(_buffer->begin(pos.line), _buffer->eol(pos.line))));

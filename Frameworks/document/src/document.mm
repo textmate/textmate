@@ -27,8 +27,6 @@ OAK_DEBUG_VAR(Document);
 
 namespace document
 {
-	std::string const kBookmarkIdentifier = "bookmark";
-
 	// ====================
 	// = Document Tracker =
 	// ====================

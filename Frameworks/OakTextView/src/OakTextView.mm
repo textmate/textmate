@@ -314,17 +314,17 @@ struct document_view_t : ng::buffer_api_t
 		size_t n = buf.convert(ranges().last().max().index).line;
 
 		std::vector<size_t> toRemove;
-		for(auto const& pair : buf.get_marks(buf.begin(n), buf.eol(n), document::kBookmarkIdentifier))
+		for(auto const& pair : buf.get_marks(buf.begin(n), buf.eol(n), to_s(OakDocumentBookmarkIdentifier)))
 			toRemove.push_back(pair.first);
 
 		if(toRemove.empty())
 		{
-			buf.set_mark(ranges().last().max().index, document::kBookmarkIdentifier);
+			buf.set_mark(ranges().last().max().index, to_s(OakDocumentBookmarkIdentifier));
 		}
 		else
 		{
 			for(auto const& index : toRemove)
-				buf.remove_mark(index, document::kBookmarkIdentifier);
+				buf.remove_mark(index, to_s(OakDocumentBookmarkIdentifier));
 		}
 		[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentMarksDidChangeNotification object:_document];
 	}
@@ -2841,7 +2841,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	if(!documentView)
 		return;
 	AUTO_REFRESH;
-	documentView->jump_to_next_bookmark(document::kBookmarkIdentifier);
+	documentView->jump_to_next_bookmark(to_s(OakDocumentBookmarkIdentifier));
 }
 
 - (IBAction)goToPreviousBookmark:(id)sender
@@ -2849,7 +2849,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	if(!documentView)
 		return;
 	AUTO_REFRESH;
-	documentView->jump_to_previous_bookmark(document::kBookmarkIdentifier);
+	documentView->jump_to_previous_bookmark(to_s(OakDocumentBookmarkIdentifier));
 }
 
 - (IBAction)jumpToNextMark:(id)sender
@@ -2965,9 +2965,9 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		return documentView->can_redo();
 	}
 	else if([aMenuItem action] == @selector(toggleCurrentBookmark:))
-		[aMenuItem setTitle:documentView && documentView->current_line_has_marks(document::kBookmarkIdentifier) ? @"Remove Bookmark" : @"Set Bookmark"];
+		[aMenuItem setTitle:documentView && documentView->current_line_has_marks(to_s(OakDocumentBookmarkIdentifier)) ? @"Remove Bookmark" : @"Set Bookmark"];
 	else if([aMenuItem action] == @selector(goToNextBookmark:) || [aMenuItem action] == @selector(goToPreviousBookmark:))
-		return documentView && documentView->has_marks(document::kBookmarkIdentifier);
+		return documentView && documentView->has_marks(to_s(OakDocumentBookmarkIdentifier));
 	else if([aMenuItem action] == @selector(jumpToNextMark:) || [aMenuItem action] == @selector(jumpToPreviousMark:))
 		return documentView && documentView->has_marks();
 	return YES;

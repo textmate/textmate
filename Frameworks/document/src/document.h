@@ -26,8 +26,6 @@ typedef struct objc_object OakDocumentObserver;
 
 namespace document
 {
-	PUBLIC extern std::string const kBookmarkIdentifier;
-
 	struct document_t;
 	typedef std::shared_ptr<document_t>       document_ptr;
 	typedef std::weak_ptr<document_t>         document_weak_ptr;

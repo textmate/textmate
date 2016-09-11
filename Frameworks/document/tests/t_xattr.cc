@@ -1,6 +1,8 @@
 #include <test/jail.h>
 #include <document/document.h>
 
+static std::string const kBookmarkIdentifier = "bookmark";
+
 void test_bookmarks ()
 {
 	test::jail_t jail;
@@ -10,7 +12,7 @@ void test_bookmarks ()
 	document::document_ptr doc = document::create(jail.path("test.txt"));
 	doc->sync_open();
 
-	std::map<size_t, std::string> marks = doc->buffer().get_marks(0, doc->buffer().size(), document::kBookmarkIdentifier);
+	std::map<size_t, std::string> marks = doc->buffer().get_marks(0, doc->buffer().size(), kBookmarkIdentifier);
 	OAK_ASSERT_EQ(marks.size(), 3);
 
 	std::map<size_t, std::string> expecting = { { 0, std::string() }, { 3, std::string() }, { 12, std::string() } };

@@ -11,6 +11,7 @@ PUBLIC extern NSString* OakDocumentWillSaveNotification;
 PUBLIC extern NSString* OakDocumentDidSaveNotification;
 PUBLIC extern NSString* OakDocumentWillCloseNotification;
 PUBLIC extern NSString* OakDocumentWillShowAlertNotification;
+PUBLIC extern NSString* OakDocumentBookmarkIdentifier;
 
 typedef NS_ENUM(NSInteger, OakDocumentIOResult) {
 	OakDocumentIOResultSuccess = 0,
