@@ -369,7 +369,7 @@ private:
 
 	if(_symbolChooser)
 	{
-		_symbolChooser.document        = cppDocument->document();
+		_symbolChooser.document        = cppDocument ? cppDocument->document() : nil;
 		_symbolChooser.selectionString = _textView.selectionString;
 	}
 
