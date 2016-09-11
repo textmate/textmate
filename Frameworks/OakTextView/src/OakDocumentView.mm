@@ -330,8 +330,6 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 
 	if(cppDocument = aDocument)
 	{
-		cppDocument->show();
-
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentMarksDidChange:) name:OakDocumentMarksDidChangeNotification object:cppDocument->document()];
 		for(NSString* key in documentKeys)
 			[cppDocument->document() addObserver:self forKeyPath:key options:NSKeyValueObservingOptionInitial context:nullptr];
@@ -348,10 +346,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	}
 
 	if(oldDocument)
-	{
-		oldDocument->hide();
 		oldDocument->close();
-	}
 }
 
 - (void)updateStyle

@@ -1660,6 +1660,11 @@ namespace
 		return;
 	}
 
+	if(_selectedDocument)
+		_selectedDocument->hide();
+	if(newSelectedDocument)
+		newSelectedDocument->show();
+
 	[self trackDocument:newSelectedDocument];
 	[self untrackDocument:_selectedDocument];
 
