@@ -32,21 +32,25 @@ static size_t line_count (std::string const& text)
 	return cell;
 }
 
-- (NSDictionary*)textAttributes;
+- (NSDictionary*)textAttributes
 {
 	static NSMutableParagraphStyle* const style = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
 	[style setLineBreakMode:NSLineBreakByTruncatingTail];
 	if([self isHighlighted])
 	{
-		static NSDictionary* const highlightedAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:
-			[NSColor alternateSelectedControlTextColor], NSForegroundColorAttributeName,
-			style, NSParagraphStyleAttributeName,
-			nil];
+		static NSDictionary* const highlightedAttributes = @{
+			NSForegroundColorAttributeName : [NSColor alternateSelectedControlTextColor],
+			NSParagraphStyleAttributeName  : style,
+			NSFontAttributeName            : [NSFont controlContentFontOfSize:0],
+		};
 		return highlightedAttributes;
 	}
 	else
 	{
-		static NSDictionary* const attributes = [[NSDictionary alloc] initWithObjectsAndKeys:style, NSParagraphStyleAttributeName, nil];
+		static NSDictionary* const attributes = @{
+			NSParagraphStyleAttributeName : style,
+			NSFontAttributeName           : [NSFont controlContentFontOfSize:0],
+		};
 		return attributes;
 	}
 }
@@ -94,20 +98,23 @@ static size_t line_count (std::string const& text)
 {
 	NSArray* lines        = [[self objectValue] componentsSeparatedByString:@"\n"];
 	NSArray* clippedLines = [lines subarrayWithRange:NSMakeRange(0, [self lineCountForText:[self objectValue]])];
-	NSRect rowFrame       = frame;
+	NSRect rowFrame       = NSInsetRect(frame, 2, 1);
 	rowFrame.size.height  = [[lines objectAtIndex:0] sizeWithAttributes:[self textAttributes]].height;
 	for(size_t index = 0; index < [clippedLines count]; ++index)
 	{
 		if(index == [clippedLines count] - 1 && [clippedLines count] < [lines count])
 		{
 			NSString* moreLinesText           = [NSString stringWithFormat:@"%lu more line%s", [lines count] - [clippedLines count], ([lines count] - [clippedLines count]) != 1 ? "s" : ""];
-			NSDictionary* moreLinesAttributes = @{ NSForegroundColorAttributeName : ([self isHighlighted] ? [NSColor darkGrayColor] : [NSColor lightGrayColor]) };
+			NSDictionary* moreLinesAttributes = @{
+				NSForegroundColorAttributeName : ([self isHighlighted] ? [NSColor whiteColor] : [NSColor lightGrayColor]),
+				NSFontAttributeName            : [NSFont controlContentFontOfSize:[NSFont systemFontSizeForControlSize:NSSmallControlSize]],
+			};
 			NSAttributedString* moreLines     = [[NSAttributedString alloc] initWithString:moreLinesText attributes:moreLinesAttributes];
 			NSSize size             = [moreLines size];
 			NSRect moreLinesRect    = rowFrame;
-			moreLinesRect.origin.x += frame.size.width - size.width;
+			moreLinesRect.origin.x += frame.size.width - size.width - 4;
 			moreLinesRect.size      = size;
-			rowFrame.size.width    -= size.width + 5;
+			rowFrame.size.width    -= size.width + 9;
 			[moreLines drawInRect:moreLinesRect];
 		}
 		[[clippedLines objectAtIndex:index] drawInRect:rowFrame withAttributes:[self textAttributes]];
@@ -117,7 +124,7 @@ static size_t line_count (std::string const& text)
 
 - (CGFloat)rowHeightForText:(NSString*)text;
 {
-	return [self lineCountForText:text] * [@"n" sizeWithAttributes:[self textAttributes]].height;
+	return 2 + [self lineCountForText:text] * [@"n" sizeWithAttributes:[self textAttributes]].height;
 }
 @end
 
