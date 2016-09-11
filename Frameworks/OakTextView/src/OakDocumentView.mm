@@ -52,7 +52,6 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 
 	NSScrollView* textScrollView;
 	document::document_ptr cppDocument;
-	document::document_t::callback_t* callback;
 
 	NSMutableArray* topAuxiliaryViews;
 	NSMutableArray* bottomAuxiliaryViews;
@@ -65,29 +64,12 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 - (void)updateStyle;
 @end
 
-struct document_view_callback_t : document::document_t::callback_t
-{
-	WATCH_LEAKS(document_view_callback_t);
-	document_view_callback_t (OakDocumentView* self) : self(self) { }
-	void handle_document_event (document::document_ptr document, event_t event)
-	{
-		if(event == did_change_marks)
-		{
-			[[NSNotificationCenter defaultCenter] postNotificationName:GVColumnDataSourceDidChange object:self];
-		}
-	}
-private:
-	__weak OakDocumentView* self;
-};
-
 @implementation OakDocumentView
 - (id)initWithFrame:(NSRect)aRect
 {
 	D(DBF_OakDocumentView, bug("%s\n", [NSStringFromRect(aRect) UTF8String]););
 	if(self = [super initWithFrame:aRect])
 	{
-		callback = new document_view_callback_t(self);
-
 		_textView = [[OakTextView alloc] initWithFrame:NSZeroRect];
 		_textView.autoresizingMask = NSViewWidthSizable|NSViewHeightSizable;
 
@@ -323,8 +305,6 @@ private:
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 
 	[self setDocument:document::document_ptr()];
-	delete callback;
-
 	self.symbolChooser = nil;
 }
 
@@ -342,8 +322,7 @@ private:
 	{
 		for(NSString* key in documentKeys)
 			[oldDocument->document() removeObserver:self forKeyPath:key];
-
-		oldDocument->remove_callback(callback);
+		[[NSNotificationCenter defaultCenter] removeObserver:self name:OakDocumentMarksDidChangeNotification object:oldDocument->document()];
 	}
 
 	if(aDocument)
@@ -351,9 +330,9 @@ private:
 
 	if(cppDocument = aDocument)
 	{
-		cppDocument->add_callback(callback);
 		cppDocument->show();
 
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentMarksDidChange:) name:OakDocumentMarksDidChangeNotification object:cppDocument->document()];
 		for(NSString* key in documentKeys)
 			[cppDocument->document() addObserver:self forKeyPath:key options:NSKeyValueObservingOptionInitial context:nullptr];
 	}
@@ -844,6 +823,11 @@ private:
 - (void)clearAllBookmarks:(id)sender
 {
 	[cppDocument->document() removeAllMarksOfType:to_ns(document::kBookmarkIdentifier)];
+}
+
+- (void)documentMarksDidChange:(NSNotification*)aNotification
+{
+	[[NSNotificationCenter defaultCenter] postNotificationName:GVColumnDataSourceDidChange object:self];
 }
 
 // =================
