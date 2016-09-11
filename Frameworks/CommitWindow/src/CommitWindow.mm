@@ -7,8 +7,10 @@
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakTextView/OakDocumentView.h>
+#import <document/OakDocument.h>
 #import <bundles/bundles.h>
 #import <io/io.h>
+#import <regexp/format_string.h>
 #import <text/trim.h>
 #import <text/tokenize.h>
 #import <text/parse.h>

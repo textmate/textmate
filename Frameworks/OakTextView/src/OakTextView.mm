@@ -38,6 +38,7 @@
 #import <text/utf8.h>
 #import <settings/settings.h>
 #import <oak/debug.h>
+#import <editor/editor.h>
 #import <editor/write.h>
 #import <io/exec.h>
 

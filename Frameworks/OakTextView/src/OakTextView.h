@@ -1,14 +1,14 @@
 #import "GutterView.h"
 #import <OakAppKit/OakView.h>
-#import <editor/editor.h>
-#import <buffer/buffer.h>
 #import <theme/theme.h>
-#import <document/OakDocument.h>
+#import <command/parser.h>
 #import <oak/debug.h>
 
 PUBLIC extern int32_t const NSWrapColumnWindowWidth;
 PUBLIC extern int32_t const NSWrapColumnAskUser;
 PUBLIC extern NSString* const kUserDefaultsWrapColumnPresetsKey;
+
+@class OakDocument;
 
 namespace bundles { struct item_t; typedef std::shared_ptr<item_t> item_ptr; }
 

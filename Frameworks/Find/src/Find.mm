@@ -14,7 +14,6 @@
 #import <text/types.h>
 #import <text/utf8.h>
 #import <regexp/format_string.h>
-#import <editor/editor.h>
 #import <document/collection.h>
 #import <document/OakDocument.h>
 #import <settings/settings.h>

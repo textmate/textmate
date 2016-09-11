@@ -3,7 +3,6 @@
 
 #include "download.h" // filter_t
 #include <io/io.h>
-#include <OakSystem/application.h>
 #include <text/format.h>
 
 namespace network

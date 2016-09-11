@@ -1,5 +1,4 @@
 #include "runner.h"
-#include <OakSystem/application.h>
 #include <OakSystem/process.h>
 #include <OakFoundation/NSString Additions.h>
 #include <io/path.h>

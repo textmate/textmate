@@ -1,4 +1,4 @@
 TESTS        = tests/*.cc
 SOURCES      = src/*.{cc,rl}
 EXPORT       = src/{settings,volume,keys}.h
-LINK        += OakSystem cf io plist regexp scope text
+LINK        += cf io plist regexp scope text

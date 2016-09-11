@@ -1,5 +1,4 @@
 #include "collection.h"
-#include <OakSystem/application.h>
 #include <plist/plist.h>
 #include <regexp/format_string.h>
 #include <text/format.h>

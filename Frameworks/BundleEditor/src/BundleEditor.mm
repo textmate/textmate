@@ -15,6 +15,7 @@
 #import <command/runner.h> // fix_shebang
 #import <plist/ascii.h>
 #import <plist/delta.h>
+#import <regexp/format_string.h>
 #import <text/decode.h>
 #import <cf/cf.h>
 #import <ns/ns.h>

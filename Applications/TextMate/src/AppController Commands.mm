@@ -4,13 +4,11 @@
 #import <command/parser.h>
 #import <command/runner.h>
 #import <document/collection.h>
-#import <editor/editor.h>
 #import <ns/ns.h>
 #import <settings/settings.h>
 #import <OakAppKit/NSAlert Additions.h>
 #import <OakAppKit/OakToolTip.h>
 #import <OakFoundation/NSString Additions.h>
-#import <OakSystem/application.h>
 #import <OakCommand/OakCommand.h>
 #import <plist/uuid.h>
 #import <HTMLOutputWindow/HTMLOutputWindow.h>
