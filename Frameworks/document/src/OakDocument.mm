@@ -1186,6 +1186,15 @@ private:
 	}
 }
 
+- (void)enumerateBookmarksAtLine:(NSUInteger)line block:(void(^)(text::pos_t const& pos, NSString* type, NSString* payload))block
+{
+	if(self.isOpen && _buffer)
+	{
+		for(auto const& pair : _buffer->get_marks(_buffer->begin(line), _buffer->eol(line)))
+			block(_buffer->convert(pair.first), to_ns(pair.second.first), to_ns(pair.second.second));
+	}
+}
+
 - (void)enumerateByteRangesUsingBlock:(void(^)(char const* bytes, NSRange byteRange, BOOL* stop))block
 {
 	BOOL stop = NO;
