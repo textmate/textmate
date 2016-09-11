@@ -1253,12 +1253,12 @@ private:
 {
 	if(_buffer)
 	{
-		_buffer->set_mark(_buffer->convert(aPos), to_s(aMark), to_s(value));
+		_buffer->set_mark(_buffer->convert(aPos), to_s(aMark), to_s(value ?: @""));
 		[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentMarksDidChangeNotification object:self];
 	}
 	else if(_path)
 	{
-		document::marks.add(to_s(_path), aPos, to_s(aMark), to_s(value));
+		document::marks.add(to_s(_path), aPos, to_s(aMark), to_s(value ?: @""));
 	}
 }
 
