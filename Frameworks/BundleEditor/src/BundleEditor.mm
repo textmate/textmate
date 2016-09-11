@@ -28,6 +28,21 @@ static BundleEditor* SharedInstance;
 @class OakCommand;
 
 @interface BundleEditor () <OakTextViewDelegate>
+{
+	IBOutlet NSBrowser* browser;
+	IBOutlet OakDocumentView* documentView;
+	NSDrawer* drawer;
+
+	be::entry_ptr bundles;
+	std::map<bundles::item_ptr, plist::dictionary_t> changes;
+
+	BOOL propertiesChanged;
+
+	bundles::item_ptr bundleItem;
+	document::document_ptr bundleItemContent;
+
+	document::document_t::callback_t* documentCallback;
+}
 - (void)didChangeBundleItems;
 - (void)didChangeModifiedState;
 @property (nonatomic) PropertiesViewController* sharedPropertiesViewController;
