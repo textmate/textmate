@@ -326,6 +326,7 @@ struct document_view_t : ng::buffer_api_t
 			for(auto const& index : toRemove)
 				buf.remove_mark(index, document::kBookmarkIdentifier);
 		}
+		[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentMarksDidChangeNotification object:_document];
 	}
 
 	size_t nest_count = 0;
@@ -2833,7 +2834,6 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	if(!documentView)
 		return;
 	documentView->toggle_current_bookmark();
-	[[NSNotificationCenter defaultCenter] postNotificationName:GVColumnDataSourceDidChange object:[[self enclosingScrollView] superview]];
 }
 
 - (IBAction)goToNextBookmark:(id)sender
