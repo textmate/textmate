@@ -25,6 +25,7 @@ typedef NS_ENUM(NSInteger, OakDocumentIOResult) {
 PUBLIC @interface OakDocument : NSObject
 + (instancetype)documentWithPath:(NSString*)aPath;
 + (instancetype)documentWithData:(NSData*)someData fileType:(NSString*)aFileType customName:(NSString*)aName;
++ (instancetype)documentWithString:(NSString*)content fileType:(NSString*)aFileType customName:(NSString*)aName;
 + (instancetype)documentWithIdentifier:(NSUUID*)anIdentifier;
 
 @property (nonatomic) NSUUID* identifier;
