@@ -326,7 +326,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	}
 
 	if(aDocument)
-		aDocument->sync_open();
+		[aDocument->document() loadModalForWindow:self.window completionHandler:nullptr];
 
 	if(cppDocument = aDocument)
 	{
@@ -346,7 +346,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	}
 
 	if(oldDocument)
-		oldDocument->close();
+		[oldDocument->document() close];
 }
 
 - (void)updateStyle
