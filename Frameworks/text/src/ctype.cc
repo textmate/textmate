@@ -1,6 +1,8 @@
 #include "ctype.h"
 #include <oak/oak.h>
 #include <oak/debug.h>
+#include <crash/info.h>
+#include <text/format.h>
 
 static CFCharacterSetRef create_character_set ()
 {
@@ -21,6 +23,8 @@ namespace text
 	bool is_east_asian_width (uint32_t ch)
 	{
 		static CFCharacterSetRef const cfset = create_character_set();
+		crash_reporter_info_t info(text::format("CFCharacterSetIsLongCharacterMember: %x", ch));
+		info << text::format("CFCharacterSetRef retain count: %ld", CFGetRetainCount(cfset));
 		return CFCharacterSetIsLongCharacterMember(cfset, ch);
 	}
 
