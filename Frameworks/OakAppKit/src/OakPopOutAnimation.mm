@@ -7,9 +7,11 @@ static CGFloat const kRectXRadius   = 2;
 static CGFloat const kRectYRadius   = 2;
 static CGFloat const kMaxScale      = 1.3;
 static CGFloat const kShadowRadius  = 2;
-static double const  kGrowDuration  = 0.05;
-static double const  kPauseDuration = 0.25;
-static double const  kFadeDuration  = 0.35;
+
+static double const  kGrowStartTime  = 0.00;
+static double const  kGrowFinishTime = 0.10;
+static double const  kFadeStartTime  = 0.35;
+static double const  kFadeFinishTime = 0.70;
 
 #if !defined(MAC_OS_X_VERSION_10_12) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_12)
 @interface OakPopOutView : NSView
@@ -110,22 +112,23 @@ void OakShowPopOutAnimation (NSRect popOutRect, NSImage* anImage)
 	static dispatch_once_t onceToken = 0;
 	dispatch_once(&onceToken, ^{
 		CABasicAnimation* grow = [CABasicAnimation animationWithKeyPath:@"transform.scale"];
-		grow.duration = kGrowDuration;
+		grow.beginTime = kGrowStartTime;
+		grow.duration = (kGrowFinishTime-kGrowStartTime)/2;
 		grow.fromValue = @1;
 		grow.toValue = @(kMaxScale);
 		grow.autoreverses = YES;
 		grow.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseIn];
 
 		CABasicAnimation* fade = [CABasicAnimation animationWithKeyPath:@"opacity"];
-		fade.beginTime = 2 * kGrowDuration + kPauseDuration;
-		fade.duration = kFadeDuration;
+		fade.beginTime = kFadeStartTime;
+		fade.duration = kFadeFinishTime-kFadeStartTime;
 		fade.fromValue = @1;
 		fade.toValue = @0;
 		fade.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
 
 		animationGroup = [CAAnimationGroup new];
 		animationGroup.animations = @[grow, fade];
-		animationGroup.duration = 2 * kGrowDuration + kPauseDuration + kFadeDuration;
+		animationGroup.duration = kFadeFinishTime;
 		animationGroup.fillMode = kCAFillModeForwards;
 		animationGroup.removedOnCompletion = NO;
 	});
