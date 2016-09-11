@@ -282,6 +282,53 @@ struct document_view_t : ng::buffer_api_t
 		return buf.symbol_at(ranges().last().first.index);
 	}
 
+	bool has_marks (std::string const& type = NULL_STR) const
+	{
+		ng::buffer_t const& buf = [_document_editor buffer];
+		return type == NULL_STR ? !buf.get_marks(0, buf.size()).empty() : !buf.get_marks(0, buf.size(), type).empty();
+	}
+
+	bool current_line_has_marks (std::string const& type) const
+	{
+		ng::buffer_t const& buf = [_document_editor buffer];
+		size_t n = buf.convert(ranges().last().max().index).line;
+		return !buf.get_marks(buf.begin(n), buf.eol(n), type).empty();
+	}
+
+	void jump_to_next_bookmark (std::string const& type = NULL_STR)
+	{
+		std::pair<size_t, std::string> const& pair = [_document_editor buffer].next_mark(ranges().last().max().index, type);
+		if(pair.second != NULL_STR)
+			set_ranges(ng::index_t(pair.first));
+	}
+
+	void jump_to_previous_bookmark (std::string const& type = NULL_STR)
+	{
+		std::pair<size_t, std::string> const& pair = [_document_editor buffer].prev_mark(ranges().last().max().index, type);
+		if(pair.second != NULL_STR)
+			set_ranges(ng::index_t(pair.first));
+	}
+
+	void toggle_current_bookmark ()
+	{
+		ng::buffer_t& buf = [_document_editor buffer];
+		size_t n = buf.convert(ranges().last().max().index).line;
+
+		std::vector<size_t> toRemove;
+		for(auto const& pair : buf.get_marks(buf.begin(n), buf.eol(n), document::kBookmarkIdentifier))
+			toRemove.push_back(pair.first);
+
+		if(toRemove.empty())
+		{
+			buf.set_mark(ranges().last().max().index, document::kBookmarkIdentifier);
+		}
+		else
+		{
+			for(auto const& index : toRemove)
+				buf.remove_mark(index, document::kBookmarkIdentifier);
+		}
+	}
+
 	size_t nest_count = 0;
 	std::string invisibles_map;
 
@@ -2778,6 +2825,52 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 - (IBAction)replaceAll:(id)sender                     { [self recordSelector:_cmd andPerform:kFindOperationReplaceAll            withOptions:find::all_matches]; }
 - (IBAction)replaceAllInSelection:(id)sender          { [self recordSelector:_cmd andPerform:kFindOperationReplaceAllInSelection withOptions:find::all_matches]; }
 
+// ============================
+// = Bookmark Related Actions =
+// ============================
+
+- (IBAction)toggleCurrentBookmark:(id)sender
+{
+	if(!documentView)
+		return;
+	documentView->toggle_current_bookmark();
+	[[NSNotificationCenter defaultCenter] postNotificationName:GVColumnDataSourceDidChange object:[[self enclosingScrollView] superview]];
+}
+
+- (IBAction)goToNextBookmark:(id)sender
+{
+	if(!documentView)
+		return;
+	AUTO_REFRESH;
+	documentView->jump_to_next_bookmark(document::kBookmarkIdentifier);
+}
+
+- (IBAction)goToPreviousBookmark:(id)sender
+{
+	if(!documentView)
+		return;
+	AUTO_REFRESH;
+	documentView->jump_to_previous_bookmark(document::kBookmarkIdentifier);
+}
+
+- (IBAction)jumpToNextMark:(id)sender
+{
+	if(!documentView)
+		return;
+	AUTO_REFRESH;
+	documentView->jump_to_next_bookmark();
+}
+
+- (IBAction)jumpToPreviousMark:(id)sender
+{
+	if(!documentView)
+		return;
+	AUTO_REFRESH;
+	documentView->jump_to_previous_bookmark();
+}
+
+// ============================
+
 - (void)insertSnippetWithOptions:(NSDictionary*)someOptions // For Dialog popup
 {
 	AUTO_REFRESH;
@@ -2872,6 +2965,12 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		[aMenuItem setTitle:@"Redo"];
 		return documentView->can_redo();
 	}
+	else if([aMenuItem action] == @selector(toggleCurrentBookmark:))
+		[aMenuItem setTitle:documentView && documentView->current_line_has_marks(document::kBookmarkIdentifier) ? @"Remove Bookmark" : @"Set Bookmark"];
+	else if([aMenuItem action] == @selector(goToNextBookmark:) || [aMenuItem action] == @selector(goToPreviousBookmark:))
+		return documentView && documentView->has_marks(document::kBookmarkIdentifier);
+	else if([aMenuItem action] == @selector(jumpToNextMark:) || [aMenuItem action] == @selector(jumpToPreviousMark:))
+		return documentView && documentView->has_marks();
 	return YES;
 }
 

@@ -467,24 +467,6 @@ private:
 			[aMenuItem setState:selectedGrammar ? NSOnState : NSOffState];
 		}
 	}
-	else if([aMenuItem action] == @selector(toggleCurrentBookmark:))
-	{
-		text::selection_t sel(to_s(_textView.selectionString));
-		size_t lineNumber = sel.last().max().line;
-
-		ng::buffer_t const& buf = cppDocument->buffer();
-		[aMenuItem setTitle:buf.get_marks(buf.begin(lineNumber), buf.eol(lineNumber), document::kBookmarkIdentifier).empty() ? @"Set Bookmark" : @"Remove Bookmark"];
-	}
-	else if([aMenuItem action] == @selector(goToNextBookmark:) || [aMenuItem action] == @selector(goToPreviousBookmark:))
-	{
-		auto const& buf = cppDocument->buffer();
-		return buf.get_marks(0, buf.size(), document::kBookmarkIdentifier).empty() ? NO : YES;
-	}
-	else if([aMenuItem action] == @selector(jumpToNextMark:) || [aMenuItem action] == @selector(jumpToPreviousMark:))
-	{
-		auto const& buf = cppDocument->buffer();
-		return buf.get_marks(0, buf.size()).empty() ? NO : YES;
-	}
 	return YES;
 }
 
@@ -867,80 +849,9 @@ private:
 	}
 }
 
-// ====================
-// = Bookmark Actions =
-// ====================
-
-- (void)goToNextMarkOfType:(NSString*)markType
-{
-	text::selection_t sel(to_s(_textView.selectionString));
-
-	ng::buffer_t const& buf = cppDocument->buffer();
-	std::pair<size_t, std::string> const& pair = buf.next_mark(buf.convert(sel.last().max()), to_s(markType));
-	if(pair.second != NULL_STR)
-		_textView.selectionString = [NSString stringWithCxxString:buf.convert(pair.first)];
-}
-
-- (IBAction)goToPreviousMarkOfType:(NSString*)markType
-{
-	text::selection_t sel(to_s(_textView.selectionString));
-
-	ng::buffer_t const& buf = cppDocument->buffer();
-	std::pair<size_t, std::string> const& pair = buf.prev_mark(buf.convert(sel.last().max()), to_s(markType));
-	if(pair.second != NULL_STR)
-		_textView.selectionString = [NSString stringWithCxxString:buf.convert(pair.first)];
-}
-
-- (IBAction)toggleCurrentBookmark:(id)sender
-{
-	ng::buffer_t& buf = cppDocument->buffer();
-
-	text::selection_t sel(to_s(_textView.selectionString));
-	size_t lineNumber = sel.last().max().line;
-
-	std::vector<size_t> toRemove;
-	for(auto const& pair : buf.get_marks(buf.begin(lineNumber), buf.eol(lineNumber), document::kBookmarkIdentifier))
-		toRemove.push_back(pair.first);
-
-	if(toRemove.empty())
-	{
-		buf.set_mark(buf.convert(sel.last().max()), document::kBookmarkIdentifier);
-	}
-	else
-	{
-		for(auto const& index : toRemove)
-			buf.remove_mark(index, document::kBookmarkIdentifier);
-	}
-	[[NSNotificationCenter defaultCenter] postNotificationName:GVColumnDataSourceDidChange object:self];
-}
-
-- (IBAction)goToNextBookmark:(id)sender
-{
-	[self goToNextMarkOfType:[NSString stringWithCxxString:document::kBookmarkIdentifier]];
-}
-
-- (IBAction)goToPreviousBookmark:(id)sender
-{
-	[self goToPreviousMarkOfType:[NSString stringWithCxxString:document::kBookmarkIdentifier]];
-}
-
 - (void)clearAllBookmarks:(id)sender
 {
-	cppDocument->remove_all_marks(document::kBookmarkIdentifier);
-}
-
-// ========================
-// = Jump To Mark Actions =
-// ========================
-
-- (IBAction)jumpToNextMark:(id)sender
-{
-	[self goToNextMarkOfType:nil];
-}
-
-- (IBAction)jumpToPreviousMark:(id)sender
-{
-	[self goToPreviousMarkOfType:nil];
+	[cppDocument->document() removeAllMarksOfType:to_ns(document::kBookmarkIdentifier)];
 }
 
 // =================
