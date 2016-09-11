@@ -1174,6 +1174,18 @@ private:
 	}
 }
 
+- (void)enumerateBookmarksUsingBlock:(void(^)(text::pos_t const& pos, NSString* excerpt))block
+{
+	if(self.isOpen && _buffer)
+	{
+		for(auto const& pair : _buffer->get_marks(0, _buffer->size(), document::kBookmarkIdentifier))
+		{
+			text::pos_t pos = _buffer->convert(pair.first);
+			block(pos, to_ns(_buffer->substr(_buffer->begin(pos.line), _buffer->eol(pos.line))));
+		}
+	}
+}
+
 - (void)enumerateByteRangesUsingBlock:(void(^)(char const* bytes, NSRange byteRange, BOOL* stop))block
 {
 	BOOL stop = NO;
