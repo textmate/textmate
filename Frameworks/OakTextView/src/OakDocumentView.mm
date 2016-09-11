@@ -739,24 +739,22 @@ private:
 {
 	if([columnIdentifier isEqualToString:kBookmarksColumnIdentifier])
 	{
-		std::map<size_t, std::string> gutterImageName;
+		__block std::map<size_t, NSString*> gutterImageName;
 
-		ng::buffer_t const& buf = cppDocument->buffer();
-		for(auto const& pair : buf.get_marks(buf.begin(lineNumber), buf.eol(lineNumber)))
-		{
-			if(!pair.second.second.empty())
-				gutterImageName.emplace(0, pair.second.first);
-			else if(pair.second.first == document::kBookmarkIdentifier)
-				gutterImageName.emplace(1, rowState != GutterViewRowStateRegular ? "Bookmark Hover Remove Template" : "Bookmark Template");
+		[cppDocument->document() enumerateBookmarksAtLine:lineNumber block:^(text::pos_t const& pos, NSString* type, NSString* payload){
+			if(payload.length != 0)
+				gutterImageName.emplace(0, type);
+			else if([type isEqualToString:to_ns(document::kBookmarkIdentifier)])
+				gutterImageName.emplace(1, rowState != GutterViewRowStateRegular ? @"Bookmark Hover Remove Template" : @"Bookmark Template");
 			else if(rowState == GutterViewRowStateRegular)
-				gutterImageName.emplace(2, pair.second.first);
-		}
+				gutterImageName.emplace(2, type);
+		}];
 
 		if(rowState != GutterViewRowStateRegular)
-			gutterImageName.emplace(3, "Bookmark Hover Add Template");
+			gutterImageName.emplace(3, @"Bookmark Hover Add Template");
 
 		if(!gutterImageName.empty())
-			return [self gutterImage:[NSString stringWithCxxString:gutterImageName.begin()->second]];
+			return [self gutterImage:gutterImageName.begin()->second];
 	}
 	else if([columnIdentifier isEqualToString:kFoldingsColumnIdentifier])
 	{
@@ -802,26 +800,27 @@ private:
 {
 	if([columnIdentifier isEqualToString:kBookmarksColumnIdentifier])
 	{
-		ng::buffer_t& buf = cppDocument->buffer();
+		__block std::vector<text::pos_t> bookmarks;
+		__block NSMutableArray* content = [NSMutableArray array];
 
-		std::vector<std::string> info;
-		for(auto const& pair : buf.get_marks(buf.begin(lineNumber), buf.eol(lineNumber)))
-		{
-			if(!pair.second.second.empty())
-				info.push_back(pair.second.second);
-		}
+		[cppDocument->document() enumerateBookmarksAtLine:lineNumber block:^(text::pos_t const& pos, NSString* type, NSString* payload){
+			if(payload.length != 0)
+				[content addObject:payload];
+			else if([type isEqualToString:to_ns(document::kBookmarkIdentifier)])
+				bookmarks.push_back(pos);
+		}];
 
-		if(info.empty())
+		if(content.count == 0)
 		{
-			for(auto const& pair : buf.get_marks(buf.begin(lineNumber), buf.eol(lineNumber), document::kBookmarkIdentifier))
-				return buf.remove_mark(pair.first, document::kBookmarkIdentifier);
-			buf.set_mark(buf.begin(lineNumber), document::kBookmarkIdentifier);
+			if(bookmarks.empty())
+					[cppDocument->document() setMarkOfType:to_ns(document::kBookmarkIdentifier) atPosition:text::pos_t(lineNumber, 0) content:nil];
+			else	[cppDocument->document() removeMarkOfType:to_ns(document::kBookmarkIdentifier) atPosition:bookmarks.front()];
 		}
 		else
 		{
 			NSView* popoverContainerView = [[NSView alloc] initWithFrame:NSZeroRect];
 
-			NSTextField* textField = OakCreateLabel([NSString stringWithCxxString:text::join(info, "\n")]);
+			NSTextField* textField = OakCreateLabel([content componentsJoinedByString:@"\n"]);
 			OakAddAutoLayoutViewsToSuperview(@[ textField ], popoverContainerView);
 
 			NSDictionary* views = NSDictionaryOfVariableBindings(textField);
