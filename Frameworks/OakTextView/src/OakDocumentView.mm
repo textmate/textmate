@@ -105,7 +105,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 
 		document::document_ptr doc = document::from_content("", "text.plain"); // file type is only to avoid potential “no grammar” warnings in console
 		doc->set_custom_name("null document"); // without a name it grabs an ‘untitled’ token
-		[self setDocument:doc];
+		[self setCppDocument:doc];
 
 		self.observedKeys = @[ @"selectionString", @"symbol", @"recordingMacro"];
 		for(NSString* keyPath in self.observedKeys)
@@ -304,16 +304,16 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 		[_textView removeObserver:self forKeyPath:keyPath];
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 
-	[self setDocument:document::document_ptr()];
+	[self setCppDocument:document::document_ptr()];
 	self.symbolChooser = nil;
 }
 
-- (document::document_ptr const&)document
+- (document::document_ptr const&)cppDocument
 {
 	return cppDocument;
 }
 
-- (void)setDocument:(document::document_ptr const&)aDocument
+- (void)setCppDocument:(document::document_ptr const&)aDocument
 {
 	NSArray* const documentKeys = @[ @"fileType", @"tabSize", @"softTabs" ];
 

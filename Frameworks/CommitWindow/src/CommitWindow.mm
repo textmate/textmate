@@ -520,9 +520,9 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 
 - (void)sheetDidEnd:(id)sheetOrAlert returnCode:(NSInteger)returnCode contextInfo:(void*)unused
 {
-	if(self.documentView.document)
+	if(self.documentView.cppDocument)
 	{
-		NSString* commitMessage = [NSString stringWithCxxString:self.documentView.document->content()];
+		NSString* commitMessage = [NSString stringWithCxxString:self.documentView.cppDocument->content()];
 		if([[commitMessage stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length] > 0)
 			[self saveCommitMessage:commitMessage];
 	}
@@ -549,7 +549,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 	if(NSString* logArgument = [self.options objectForKey:@"--log"])
 		commitMessage->set_content(to_s(logArgument));
 
-	[self.documentView setDocument:commitMessage];
+	[self.documentView setCppDocument:commitMessage];
 
 	[self.window recalculateKeyViewLoop];
 	[self.window makeFirstResponder:self.documentView];
@@ -575,7 +575,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 
 		if(success)
 		{
-			NSString* commitMessage = [NSString stringWithCxxString:self.documentView.document->content()];
+			NSString* commitMessage = [NSString stringWithCxxString:self.documentView.cppDocument->content()];
 
 			NSMutableArray* outputArray = [NSMutableArray array];
 			[outputArray addObject:[NSString stringWithFormat:@" -m '%@' ", [commitMessage stringByReplacingOccurrencesOfString:@"'" withString:@"'\"'\"'"]]];
@@ -665,8 +665,8 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 - (void)restorePreviousCommitMessage:(id)sender
 {
 	NSString* message = [sender representedObject];
-	document::document_ptr commitMessage = document::from_content(to_s(message), self.documentView.document->file_type());
-	[self.documentView setDocument:commitMessage];
+	document::document_ptr commitMessage = document::from_content(to_s(message), self.documentView.cppDocument->file_type());
+	[self.documentView setCppDocument:commitMessage];
 }
 
 - (void)clearPreviousCommitMessages:(id)sender

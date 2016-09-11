@@ -1656,7 +1656,7 @@ namespace
 	ASSERT(!newSelectedDocument || newSelectedDocument->is_open());
 	if(_selectedDocument == newSelectedDocument)
 	{
-		[self.documentView setDocument:_selectedDocument];
+		[self.documentView setCppDocument:_selectedDocument];
 		return;
 	}
 
@@ -1691,7 +1691,7 @@ namespace
 		self.documentIsModified  = _selectedDocument->is_modified();
 		self.documentIsOnDisk    = _selectedDocument->is_on_disk();
 
-		[self.documentView setDocument:_selectedDocument];
+		[self.documentView setCppDocument:_selectedDocument];
 		[[self class] scheduleSessionBackup:self];
 	}
 	else

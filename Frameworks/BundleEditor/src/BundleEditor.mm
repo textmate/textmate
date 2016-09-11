@@ -845,7 +845,7 @@ static NSMutableDictionary* DictionaryForPropertyList (plist::dictionary_t const
 	bundleItemContent = bundleItemContent ?: document::from_content("");
 	bundleItemContent->set_custom_name(bundleItem->name());
 	bundleItemContent->add_callback(documentCallback);
-	[documentView setDocument:bundleItemContent];
+	[documentView setCppDocument:bundleItemContent];
 
 	_sharedPropertiesViewController = [[PropertiesViewController alloc] initWithName:@"SharedProperties"];
 	_extraPropertiesViewController  = nil;
