@@ -155,11 +155,11 @@
 		{ "@" + utf8::to_s(NSLeftArrowFunctionKey),  @selector(goBack:)                   },
 		{ "@" + utf8::to_s(NSRightArrowFunctionKey), @selector(goForward:)                },
 		{ "@" + utf8::to_s(NSDownArrowFunctionKey),  @selector(performDoubleClick:)       },
+		{ "~" + utf8::to_s(NSF2FunctionKey),         @selector(showContextMenu:)          },
 		{ "@o",                                      @selector(performDoubleClick:)       },
 		{ "@d",                                      @selector(duplicateSelectedEntries:) },
 		{ "@G",                                      @selector(orderFrontGoToFolder:)     },
 		{ " ",                                       @selector(toggleQuickLookPreview:)   },
-		{ "~\uF705",                                 @selector(showContextMenu:)          },
 	};
 
 	std::string const key = to_s(theEvent);
