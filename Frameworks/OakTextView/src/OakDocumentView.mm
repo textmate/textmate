@@ -1,7 +1,7 @@
 #import "OakDocumentView.h"
 #import "GutterView.h"
 #import "OTVStatusBar.h"
-#import <document/document.h>
+#import <document/OakDocument.h>
 #import <file/type.h>
 #import <text/ctype.h>
 #import <text/parse.h>
@@ -51,7 +51,6 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	OakBackgroundFillView* statusDividerView;
 
 	NSScrollView* textScrollView;
-	document::document_ptr cppDocument;
 
 	NSMutableArray* topAuxiliaryViews;
 	NSMutableArray* bottomAuxiliaryViews;
@@ -103,9 +102,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 		OakAddAutoLayoutViewsToSuperview(@[ gutterScrollView, gutterDividerView, textScrollView, statusDividerView, _statusBar ], self);
 		OakSetupKeyViewLoop(@[ self, _textView, _statusBar ], NO);
 
-		document::document_ptr doc = document::from_content("", "text.plain"); // file type is only to avoid potential “no grammar” warnings in console
-		doc->set_custom_name("null document"); // without a name it grabs an ‘untitled’ token
-		[self setCppDocument:doc];
+		self.document = [OakDocument documentWithString:@"" fileType:@"text.plain" customName:@"placeholder"];
 
 		self.observedKeys = @[ @"selectionString", @"symbol", @"recordingMacro"];
 		for(NSString* keyPath in self.observedKeys)
@@ -304,21 +301,11 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 		[_textView removeObserver:self forKeyPath:keyPath];
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 
-	[self setCppDocument:document::document_ptr()];
+	self.document = nil;
 	self.symbolChooser = nil;
 }
 
-- (OakDocument*)document
-{
-	return cppDocument ? cppDocument->document() : nil;
-}
-
-- (document::document_ptr const&)cppDocument
-{
-	return cppDocument;
-}
-
-- (void)setCppDocument:(document::document_ptr const&)aDocument
+- (void)setDocument:(OakDocument*)aDocument
 {
 	NSArray* const documentKeys = @[ @"fileType", @"tabSize", @"softTabs" ];
 
@@ -331,9 +318,9 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	}
 
 	if(aDocument)
-		[aDocument->document() loadModalForWindow:self.window completionHandler:nullptr];
+		[aDocument loadModalForWindow:self.window completionHandler:nullptr];
 
-	if(cppDocument = aDocument)
+	if(_document = aDocument)
 	{
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentMarksDidChange:) name:OakDocumentMarksDidChangeNotification object:self.document];
 		for(NSString* key in documentKeys)
@@ -356,8 +343,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 
 - (void)updateStyle
 {
-	theme_ptr theme = _textView.theme;
-	if(theme && cppDocument)
+	if(theme_ptr theme = _textView.theme)
 	{
 		[[self window] setOpaque:!theme->is_transparent() && !theme->gutter_styles().is_transparent()];
 		[textScrollView setBackgroundColor:[NSColor colorWithCGColor:theme->background(to_s(self.document.fileType))]];

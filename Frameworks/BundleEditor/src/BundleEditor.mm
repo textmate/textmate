@@ -10,6 +10,7 @@
 #import <OakAppKit/OakSound.h>
 #import <OakAppKit/OakFileIconImage.h>
 #import <OakTextView/OakDocumentView.h>
+#import <document/document.h>
 #import <BundlesManager/BundlesManager.h>
 #import <command/runner.h> // fix_shebang
 #import <plist/ascii.h>
@@ -860,7 +861,7 @@ static NSMutableDictionary* DictionaryForPropertyList (plist::dictionary_t const
 	bundleItemContent = bundleItemContent ?: document::from_content("");
 	bundleItemContent->set_custom_name(bundleItem->name());
 	bundleItemContent->add_callback(documentCallback);
-	[documentView setCppDocument:bundleItemContent];
+	documentView.document = bundleItemContent->document();
 
 	_sharedPropertiesViewController = [[PropertiesViewController alloc] initWithName:@"SharedProperties"];
 	_extraPropertiesViewController  = nil;

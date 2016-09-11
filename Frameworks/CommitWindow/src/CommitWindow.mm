@@ -8,7 +8,6 @@
 #import <OakFoundation/NSString Additions.h>
 #import <OakTextView/OakDocumentView.h>
 #import <bundles/bundles.h>
-#import <document/document.h>
 #import <io/io.h>
 #import <text/trim.h>
 #import <text/tokenize.h>
@@ -520,9 +519,8 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 
 - (void)sheetDidEnd:(id)sheetOrAlert returnCode:(NSInteger)returnCode contextInfo:(void*)unused
 {
-	if(self.documentView.cppDocument)
+	if(NSString* commitMessage = self.documentView.document.content)
 	{
-		NSString* commitMessage = [NSString stringWithCxxString:self.documentView.cppDocument->content()];
 		if([[commitMessage stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length] > 0)
 			[self saveCommitMessage:commitMessage];
 	}
@@ -542,14 +540,10 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 			fileType = item->value_for_field(bundles::kFieldGrammarScope);
 	}
 
-	document::document_ptr commitMessage = document::from_content("", fileType);
-	commitMessage->set_custom_name("Commit Message"); // release ‘untitled’ token
-	commitMessage->set_virtual_path(path::join(_environment["TM_PROJECT_DIRECTORY"], "commit-message.txt"));
-
-	if(NSString* logArgument = [self.options objectForKey:@"--log"])
-		commitMessage->set_content(to_s(logArgument));
-
-	[self.documentView setCppDocument:commitMessage];
+	NSString* message = self.options[@"--log"] ?: @"";
+	OakDocument* commitMessage = [OakDocument documentWithString:message fileType:to_ns(fileType) customName:@"Commit Message"];
+	commitMessage.virtualPath = to_ns(path::join(_environment["TM_PROJECT_DIRECTORY"], "commit-message.txt"));
+	self.documentView.document = commitMessage;
 
 	[self.window recalculateKeyViewLoop];
 	[self.window makeFirstResponder:self.documentView];
@@ -575,7 +569,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 
 		if(success)
 		{
-			NSString* commitMessage = [NSString stringWithCxxString:self.documentView.cppDocument->content()];
+			NSString* commitMessage = self.documentView.document.content;
 
 			NSMutableArray* outputArray = [NSMutableArray array];
 			[outputArray addObject:[NSString stringWithFormat:@" -m '%@' ", [commitMessage stringByReplacingOccurrencesOfString:@"'" withString:@"'\"'\"'"]]];
@@ -665,8 +659,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 - (void)restorePreviousCommitMessage:(id)sender
 {
 	NSString* message = [sender representedObject];
-	document::document_ptr commitMessage = document::from_content(to_s(message), self.documentView.cppDocument->file_type());
-	[self.documentView setCppDocument:commitMessage];
+	self.documentView.document = [OakDocument documentWithString:message fileType:self.documentView.document.fileType customName:@"Commit Message"];
 }
 
 - (void)clearPreviousCommitMessages:(id)sender
