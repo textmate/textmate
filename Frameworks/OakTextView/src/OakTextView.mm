@@ -2937,7 +2937,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	if(RequiresSelection->find([aMenuItem action]) != RequiresSelection->end())
 		return [self hasSelection];
 	else if([aMenuItem action] == @selector(toggleMacroRecording:))
-		[aMenuItem setTitle:self.isMacroRecording ? @"Stop Recording" : @"Start Recording"];
+		[aMenuItem setTitle:self.isRecordingMacro ? @"Stop Recording" : @"Start Recording"];
 	else if([aMenuItem action] == @selector(toggleShowInvisibles:))
 		[aMenuItem setTitle:self.showInvisibles ? @"Hide Invisible Characters" : @"Show Invisible Characters"];
 	else if([aMenuItem action] == @selector(toggleSoftWrap:))
@@ -3418,12 +3418,12 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 // = Macro Recording =
 // ===================
 
-- (BOOL)isMacroRecording                    { return macroRecordingArray != nil; }
-- (IBAction)toggleMacroRecording:(id)sender { self.isMacroRecording = !self.isMacroRecording; }
+- (BOOL)isRecordingMacro                    { return macroRecordingArray != nil; }
+- (IBAction)toggleMacroRecording:(id)sender { self.recordingMacro = !self.isRecordingMacro; }
 
-- (void)setIsMacroRecording:(BOOL)flag
+- (void)setRecordingMacro:(BOOL)flag
 {
-	if(self.isMacroRecording == flag)
+	if(self.isRecordingMacro == flag)
 		return;
 
 	D(DBF_OakTextView_Macros, bug("%s\n", BSTR(flag)););
@@ -3969,7 +3969,7 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 	{
 		NSInteger choice = NSRunAlertPanel(@"You are recording a macro", @"While recording macros it is not possible to select text or reposition the caret using your mouse.", @"Continue", @"Stop Recording", nil);
 		if(choice == NSAlertAlternateReturn) // "Stop Macro Recording"
-			self.isMacroRecording = NO;
+			self.recordingMacro = NO;
 		return;
 	}
 

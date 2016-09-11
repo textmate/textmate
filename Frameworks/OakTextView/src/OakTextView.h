@@ -49,7 +49,7 @@ PUBLIC @interface OakTextView : OakView
 @property (nonatomic) NSString*                             selectionString;
 @property (nonatomic, readonly) NSString*                   symbol;
 
-@property (nonatomic) BOOL                                  isMacroRecording;
+@property (nonatomic, getter = isRecordingMacro) BOOL       recordingMacro;
 
 - (GVLineRecord)lineRecordForPosition:(CGFloat)yPos;
 - (GVLineRecord)lineFragmentForLine:(NSUInteger)aLine column:(NSUInteger)aColumn;

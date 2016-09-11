@@ -125,7 +125,7 @@ private:
 		doc->set_custom_name("null document"); // without a name it grabs an ‘untitled’ token
 		[self setDocument:doc];
 
-		self.observedKeys = @[ @"selectionString", @"symbol", @"isMacroRecording"];
+		self.observedKeys = @[ @"selectionString", @"symbol", @"recordingMacro"];
 		for(NSString* keyPath in self.observedKeys)
 			[_textView addObserver:self forKeyPath:keyPath options:NSKeyValueObservingOptionInitial context:NULL];
 	}
@@ -298,9 +298,9 @@ private:
 	{
 		_statusBar.symbolName = _textView.symbol;
 	}
-	else if([aKeyPath isEqualToString:@"isMacroRecording"])
+	else if([aKeyPath isEqualToString:@"recordingMacro"])
 	{
-		_statusBar.isMacroRecording = _textView.isMacroRecording;
+		_statusBar.recordingMacro = _textView.isRecordingMacro;
 	}
 	else if([aKeyPath isEqualToString:@"fileType"])
 	{

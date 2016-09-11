@@ -11,7 +11,7 @@
 @property (nonatomic) NSString* grammarName;
 @property (nonatomic) NSString* symbolName;
 @property (nonatomic) NSString* fileType; // This will update grammarName
-@property (nonatomic) BOOL isMacroRecording;
+@property (nonatomic, getter = isRecordingMacro) BOOL recordingMacro;
 @property (nonatomic) BOOL softTabs;
 @property (nonatomic) int32_t tabSize;
 
