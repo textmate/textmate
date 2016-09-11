@@ -286,15 +286,15 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	}
 	else if([aKeyPath isEqualToString:@"fileType"])
 	{
-		_statusBar.fileType = cppDocument->document().fileType;
+		_statusBar.fileType = self.document.fileType;
 	}
 	else if([aKeyPath isEqualToString:@"tabSize"])
 	{
-		_statusBar.tabSize = cppDocument->document().tabSize;
+		_statusBar.tabSize = self.document.tabSize;
 	}
 	else if([aKeyPath isEqualToString:@"softTabs"])
 	{
-		_statusBar.softTabs = cppDocument->document().softTabs;
+		_statusBar.softTabs = self.document.softTabs;
 	}
 }
 
@@ -308,6 +308,11 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	self.symbolChooser = nil;
 }
 
+- (OakDocument*)document
+{
+	return cppDocument ? cppDocument->document() : nil;
+}
+
 - (document::document_ptr const&)cppDocument
 {
 	return cppDocument;
@@ -317,12 +322,12 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 {
 	NSArray* const documentKeys = @[ @"fileType", @"tabSize", @"softTabs" ];
 
-	document::document_ptr oldDocument = cppDocument;
+	OakDocument* oldDocument = self.document;
 	if(oldDocument)
 	{
 		for(NSString* key in documentKeys)
-			[oldDocument->document() removeObserver:self forKeyPath:key];
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:OakDocumentMarksDidChangeNotification object:oldDocument->document()];
+			[oldDocument removeObserver:self forKeyPath:key];
+		[[NSNotificationCenter defaultCenter] removeObserver:self name:OakDocumentMarksDidChangeNotification object:oldDocument];
 	}
 
 	if(aDocument)
@@ -330,23 +335,23 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 
 	if(cppDocument = aDocument)
 	{
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentMarksDidChange:) name:OakDocumentMarksDidChangeNotification object:cppDocument->document()];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentMarksDidChange:) name:OakDocumentMarksDidChangeNotification object:self.document];
 		for(NSString* key in documentKeys)
-			[cppDocument->document() addObserver:self forKeyPath:key options:NSKeyValueObservingOptionInitial context:nullptr];
+			[self.document addObserver:self forKeyPath:key options:NSKeyValueObservingOptionInitial context:nullptr];
 	}
 
-	[_textView setDocument:cppDocument ? cppDocument->document() : nil];
+	[_textView setDocument:self.document];
 	[gutterView reloadData:self];
 	[self updateStyle];
 
 	if(_symbolChooser)
 	{
-		_symbolChooser.document        = cppDocument ? cppDocument->document() : nil;
+		_symbolChooser.document        = self.document;
 		_symbolChooser.selectionString = _textView.selectionString;
 	}
 
 	if(oldDocument)
-		[oldDocument->document() close];
+		[oldDocument close];
 }
 
 - (void)updateStyle
@@ -355,7 +360,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	if(theme && cppDocument)
 	{
 		[[self window] setOpaque:!theme->is_transparent() && !theme->gutter_styles().is_transparent()];
-		[textScrollView setBackgroundColor:[NSColor colorWithCGColor:theme->background(to_s(cppDocument->document().fileType))]];
+		[textScrollView setBackgroundColor:[NSColor colorWithCGColor:theme->background(to_s(self.document.fileType))]];
 
 		if(theme->is_dark())
 		{
@@ -432,7 +437,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 		NSString* uuidString = [aMenuItem representedObject];
 		if(bundles::item_ptr bundleItem = bundles::lookup(to_s(uuidString)))
 		{
-			bool selectedGrammar = cppDocument && to_s(cppDocument->document().fileType) == bundleItem->value_for_field(bundles::kFieldGrammarScope);
+			bool selectedGrammar = to_s(self.document.fileType) == bundleItem->value_for_field(bundles::kFieldGrammarScope);
 			[aMenuItem setState:selectedGrammar ? NSOnState : NSOffState];
 		}
 	}
@@ -512,7 +517,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 		_symbolChooser.target          = self;
 		_symbolChooser.action          = @selector(symbolChooserDidSelectItems:);
 		_symbolChooser.filterString    = @"";
-		_symbolChooser.document        = cppDocument->document();
+		_symbolChooser.document        = self.document;
 		_symbolChooser.selectionString = _textView.selectionString;
 
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(symbolChooserWillClose:) name:NSWindowWillCloseNotification object:_symbolChooser.window];
@@ -560,7 +565,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	text::pos_t caret = sel.last().max();
 
 	__block NSInteger index = 0;
-	[cppDocument->document() enumerateSymbolsUsingBlock:^(text::pos_t const& pos, NSString* symbol){
+	[self.document enumerateSymbolsUsingBlock:^(text::pos_t const& pos, NSString* symbol){
 		if([symbol isEqualToString:@"-"])
 		{
 			[symbolMenu addItem:[NSMenuItem separatorItem]];
@@ -608,7 +613,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	for(auto pair : ordered)
 	{
 		bool selectedGrammar = false;
-		for(auto item : bundles::query(bundles::kFieldGrammarScope, to_s(cppDocument->document().fileType), scope::wildcard, bundles::kItemTypeGrammar, pair.second->uuid(), true, true))
+		for(auto item : bundles::query(bundles::kFieldGrammarScope, to_s(self.document.fileType), scope::wildcard, bundles::kItemTypeGrammar, pair.second->uuid(), true, true))
 			selectedGrammar = true;
 		if(!selectedGrammar && pair.second->hidden_from_user() || pair.second->menu().empty())
 			continue;
@@ -639,7 +644,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 - (void)setTabSize:(NSUInteger)newTabSize
 {
 	_textView.tabSize = newTabSize;
-	settings_t::set(kSettingsTabSizeKey, (size_t)newTabSize, to_s(cppDocument->document().fileType));
+	settings_t::set(kSettingsTabSizeKey, (size_t)newTabSize, to_s(self.document.fileType));
 }
 
 - (IBAction)takeTabSizeFrom:(id)sender
@@ -654,14 +659,14 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 {
 	D(DBF_OakDocumentView, bug("\n"););
 	_textView.softTabs = YES;
-	settings_t::set(kSettingsSoftTabsKey, true, to_s(cppDocument->document().fileType));
+	settings_t::set(kSettingsSoftTabsKey, true, to_s(self.document.fileType));
 }
 
 - (IBAction)setIndentWithTabs:(id)sender
 {
 	D(DBF_OakDocumentView, bug("\n"););
 	_textView.softTabs = NO;
-	settings_t::set(kSettingsSoftTabsKey, false, to_s(cppDocument->document().fileType));
+	settings_t::set(kSettingsSoftTabsKey, false, to_s(self.document.fileType));
 }
 
 - (IBAction)showTabSizeSelectorPanel:(id)sender
@@ -710,7 +715,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	{
 		__block std::map<size_t, NSString*> gutterImageName;
 
-		[cppDocument->document() enumerateBookmarksAtLine:lineNumber block:^(text::pos_t const& pos, NSString* type, NSString* payload){
+		[self.document enumerateBookmarksAtLine:lineNumber block:^(text::pos_t const& pos, NSString* type, NSString* payload){
 			if(payload.length != 0)
 				gutterImageName.emplace(0, type);
 			else if([type isEqualToString:to_ns(document::kBookmarkIdentifier)])
@@ -749,7 +754,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 
 - (void)updateBookmarksMenu:(NSMenu*)aMenu
 {
-	[cppDocument->document() enumerateBookmarksUsingBlock:^(text::pos_t const& pos, NSString* excerpt){
+	[self.document enumerateBookmarksUsingBlock:^(text::pos_t const& pos, NSString* excerpt){
 		NSString* prefix = to_ns(text::pad(pos.line+1, 4) + ": ");
 		NSMenuItem* item = [aMenu addItemWithTitle:[prefix stringByAppendingString:excerpt] action:@selector(takeBookmarkFrom:) keyEquivalent:@""];
 		[item setRepresentedObject:to_ns(pos)];
@@ -772,7 +777,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 		__block std::vector<text::pos_t> bookmarks;
 		__block NSMutableArray* content = [NSMutableArray array];
 
-		[cppDocument->document() enumerateBookmarksAtLine:lineNumber block:^(text::pos_t const& pos, NSString* type, NSString* payload){
+		[self.document enumerateBookmarksAtLine:lineNumber block:^(text::pos_t const& pos, NSString* type, NSString* payload){
 			if(payload.length != 0)
 				[content addObject:payload];
 			else if([type isEqualToString:to_ns(document::kBookmarkIdentifier)])
@@ -782,8 +787,8 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 		if(content.count == 0)
 		{
 			if(bookmarks.empty())
-					[cppDocument->document() setMarkOfType:to_ns(document::kBookmarkIdentifier) atPosition:text::pos_t(lineNumber, 0) content:nil];
-			else	[cppDocument->document() removeMarkOfType:to_ns(document::kBookmarkIdentifier) atPosition:bookmarks.front()];
+					[self.document setMarkOfType:to_ns(document::kBookmarkIdentifier) atPosition:text::pos_t(lineNumber, 0) content:nil];
+			else	[self.document removeMarkOfType:to_ns(document::kBookmarkIdentifier) atPosition:bookmarks.front()];
 		}
 		else
 		{
@@ -817,7 +822,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 
 - (void)clearAllBookmarks:(id)sender
 {
-	[cppDocument->document() removeAllMarksOfType:to_ns(document::kBookmarkIdentifier)];
+	[self.document removeAllMarksOfType:to_ns(document::kBookmarkIdentifier)];
 }
 
 - (void)documentMarksDidChange:(NSNotification*)aNotification
@@ -872,6 +877,6 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 
 - (void)printDocument:(id)sender
 {
-	[cppDocument->document() runPrintOperationModalForWindow:self.window fontName:_textView.font.fontName];
+	[self.document runPrintOperationModalForWindow:self.window fontName:_textView.font.fontName];
 }
 @end
