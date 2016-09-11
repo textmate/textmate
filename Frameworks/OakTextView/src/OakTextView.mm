@@ -284,8 +284,7 @@ struct document_view_t : ng::buffer_api_t
 
 	bool has_marks (std::string const& type = NULL_STR) const
 	{
-		ng::buffer_t const& buf = [_document_editor buffer];
-		return type == NULL_STR ? !buf.get_marks(0, buf.size()).empty() : !buf.get_marks(0, buf.size(), type).empty();
+		return [_document_editor buffer].prev_mark(SIZE_T_MAX, type).second != NULL_STR;
 	}
 
 	bool current_line_has_marks (std::string const& type) const
