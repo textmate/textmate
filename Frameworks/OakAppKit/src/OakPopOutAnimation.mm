@@ -1,14 +1,15 @@
 #import "OakPopOutAnimation.h"
 #import <oak/debug.h>
 
-static CGFloat const kExtendWidth  = 4;
-static CGFloat const kExtendHeight = 1;
-static CGFloat const kRectXRadius  = 2;
-static CGFloat const kRectYRadius  = 2;
-static CGFloat const kMaxScale     = 1.5;
-static CGFloat const kShadowRadius = 2;
-static double const  kGrowDuration = 0.05;
-static double const  kFadeDuration = 0.50;
+static CGFloat const kExtendWidth   = 4;
+static CGFloat const kExtendHeight  = 1;
+static CGFloat const kRectXRadius   = 2;
+static CGFloat const kRectYRadius   = 2;
+static CGFloat const kMaxScale      = 1.3;
+static CGFloat const kShadowRadius  = 2;
+static double const  kGrowDuration  = 0.05;
+static double const  kPauseDuration = 0.25;
+static double const  kFadeDuration  = 0.35;
 
 #if !defined(MAC_OS_X_VERSION_10_12) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_12)
 @interface OakPopOutView : NSView
@@ -116,7 +117,7 @@ void OakShowPopOutAnimation (NSRect popOutRect, NSImage* anImage)
 		grow.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseIn];
 
 		CABasicAnimation* fade = [CABasicAnimation animationWithKeyPath:@"opacity"];
-		fade.beginTime = 2 * kGrowDuration;
+		fade.beginTime = 2 * kGrowDuration + kPauseDuration;
 		fade.duration = kFadeDuration;
 		fade.fromValue = @1;
 		fade.toValue = @0;
@@ -124,7 +125,7 @@ void OakShowPopOutAnimation (NSRect popOutRect, NSImage* anImage)
 
 		animationGroup = [CAAnimationGroup new];
 		animationGroup.animations = @[grow, fade];
-		animationGroup.duration = 2 * kGrowDuration + kFadeDuration;
+		animationGroup.duration = 2 * kGrowDuration + kPauseDuration + kFadeDuration;
 		animationGroup.fillMode = kCAFillModeForwards;
 		animationGroup.removedOnCompletion = NO;
 	});
