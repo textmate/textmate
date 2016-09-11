@@ -318,9 +318,6 @@ private:
 
 - (void)dealloc
 {
-	gutterView.delegate    = nil;
-	_statusBar.delegate    = nil;
-
 	for(NSString* keyPath in self.observedKeys)
 		[_textView removeObserver:self forKeyPath:keyPath];
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
