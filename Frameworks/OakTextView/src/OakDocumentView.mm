@@ -782,18 +782,16 @@ private:
 
 - (void)updateBookmarksMenu:(NSMenu*)aMenu
 {
-	ng::buffer_t& buf = cppDocument->buffer();
-	std::map<size_t, std::string> const& marks = buf.get_marks(0, buf.size(), document::kBookmarkIdentifier);
-	for(auto const& pair : marks)
-	{
-		size_t n = buf.convert(pair.first).line;
-		NSMenuItem* item = [aMenu addItemWithTitle:[NSString stringWithCxxString:text::pad(n+1, 4) + ": " + buf.substr(buf.begin(n), buf.eol(n))] action:@selector(takeBookmarkFrom:) keyEquivalent:@""];
-		[item setRepresentedObject:[NSString stringWithCxxString:buf.convert(pair.first)]];
-	}
+	[cppDocument->document() enumerateBookmarksUsingBlock:^(text::pos_t const& pos, NSString* excerpt){
+		NSString* prefix = to_ns(text::pad(pos.line+1, 4) + ": ");
+		NSMenuItem* item = [aMenu addItemWithTitle:[prefix stringByAppendingString:excerpt] action:@selector(takeBookmarkFrom:) keyEquivalent:@""];
+		[item setRepresentedObject:to_ns(pos)];
+	}];
 
-	if(!marks.empty())
+	BOOL hasBookmarks = aMenu.numberOfItems;
+	if(hasBookmarks)
 		[aMenu addItem:[NSMenuItem separatorItem]];
-	[aMenu addItemWithTitle:@"Clear Bookmarks" action:marks.empty() ? NULL : @selector(clearAllBookmarks:) keyEquivalent:@""];
+	[aMenu addItemWithTitle:@"Clear Bookmarks" action:hasBookmarks ? @selector(clearAllBookmarks:) : @selector(nop:) keyEquivalent:@""];
 }
 
 // =======================
