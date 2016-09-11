@@ -80,6 +80,9 @@ namespace ng
 			candidates.push_back(*(--(it == m->second.begin() ? m->second.end() : it)));
 		}
 
+		if(candidates.empty())
+			return std::make_pair(0, NULL_STR);
+
 		std::sort(candidates.begin(), candidates.end());
 		auto it = std::lower_bound(candidates.begin(), candidates.end(), index, [](std::pair<size_t, std::string> const& mark, size_t index){ return mark.first < index; });
 
