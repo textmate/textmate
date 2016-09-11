@@ -1,6 +1,7 @@
 #import "OakChooser.h"
 #import "ui/TableView.h"
 #import "ui/SearchField.h"
+#import <OakAppKit/NSColor Additions.h>
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakFoundation/OakFoundation.h>
@@ -45,16 +46,15 @@
 	return self;
 }
 
-- (NSAttributedString*)addShadowColor:(NSColor*)shadowColor toString:(id)aString
+- (NSAttributedString*)selectedStringForString:(id)aString
 {
 	NSMutableAttributedString* str = [aString isKindOfClass:[NSString class]] ? [[NSMutableAttributedString alloc] initWithString:aString attributes:nil] : [aString mutableCopy];
-
-	NSShadow* shadow = [NSShadow new];
-	[shadow setShadowColor:shadowColor];
-	[shadow setShadowOffset:NSMakeSize(0, -1)];
-	[shadow setShadowBlurRadius:1];
-
-	[str addAttributes:@{ NSShadowAttributeName : shadow } range:NSMakeRange(0, str.string.length)];
+	[str enumerateAttributesInRange:NSMakeRange(0, str.length) options:NSAttributedStringEnumerationLongestEffectiveRangeNotRequired usingBlock:^(NSDictionary* attrs, NSRange range, BOOL *stop){
+		if(attrs[NSBackgroundColorAttributeName] != nil)
+			[str addAttribute:NSBackgroundColorAttributeName value:[NSColor tmMatchedTextSelectedBackgroundColor] range:range];
+		if(attrs[NSUnderlineColorAttributeName] != nil)
+			[str addAttribute:NSUnderlineColorAttributeName value:[NSColor tmMatchedTextSelectedUnderlineColor] range:range];
+	}];
 	return str;
 }
 
@@ -63,14 +63,12 @@
 	[super setBackgroundStyle:backgroundStyle];
 	if(backgroundStyle == NSBackgroundStyleDark)
 	{
-		self.textField.font              = [NSFont boldSystemFontOfSize:13];
-		self.textField.objectValue       = [self addShadowColor:[NSColor colorWithCalibratedWhite:0.0 alpha:0.5] toString:[self valueForKeyPath:@"objectValue.name"]];
+		self.textField.objectValue       = [self selectedStringForString:[self valueForKeyPath:@"objectValue.name"]];
 		self.folderTextField.textColor   = [NSColor colorWithCalibratedWhite:0.9 alpha:1];
-		self.folderTextField.objectValue = [self addShadowColor:[NSColor colorWithCalibratedWhite:0.5 alpha:0.5] toString:[self valueForKeyPath:@"objectValue.folder"]];
+		self.folderTextField.objectValue = [self selectedStringForString:[self valueForKeyPath:@"objectValue.folder"]];
 	}
 	else
 	{
-		self.textField.font              = [NSFont systemFontOfSize:13];
 		self.textField.objectValue       = [self valueForKeyPath:@"objectValue.name"];
 		self.folderTextField.textColor   = [NSColor colorWithCalibratedWhite:0.5 alpha:1];
 		self.folderTextField.objectValue = [self valueForKeyPath:@"objectValue.folder"];
@@ -91,7 +89,12 @@ NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string
 	[paragraphStyle setLineBreakMode:lineBreakMode];
 
 	NSDictionary* baseAttributes      = @{ NSParagraphStyleAttributeName : paragraphStyle };
-	NSDictionary* highlightAttributes = @{ NSParagraphStyleAttributeName : paragraphStyle, NSUnderlineStyleAttributeName : @1 };
+	NSDictionary* highlightAttributes = @{
+		NSParagraphStyleAttributeName  : paragraphStyle,
+		NSBackgroundColorAttributeName : [NSColor tmMatchedTextBackgroundColor],
+		NSUnderlineStyleAttributeName  : @(NSUnderlineStyleSingle),
+		NSUnderlineColorAttributeName  : [NSColor tmMatchedTextUnderlineColor],
+	};
 
 	NSMutableAttributedString* res = [[NSMutableAttributedString alloc] init];
 

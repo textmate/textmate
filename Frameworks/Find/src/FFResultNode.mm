@@ -1,5 +1,6 @@
 #import "FFResultNode.h"
 #import <OakFoundation/NSString Additions.h>
+#import <OakAppKit/NSColor Additions.h>
 #import <OakAppKit/OakFileIconImage.h>
 #import <ns/ns.h>
 #import <text/tokenize.h>
@@ -109,9 +110,9 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 	NSFontTraitMask matchFontTraits = NSBoldFontMask;
 	NSDictionary* matchAttributes = @{
 		NSForegroundColorAttributeName : [NSColor blackColor],
-		NSBackgroundColorAttributeName : [NSColor colorWithCalibratedRed:0.92 green:0.86 blue:0.48 alpha:0.5],
+		NSBackgroundColorAttributeName : [NSColor tmMatchedTextBackgroundColor],
 		NSUnderlineStyleAttributeName  : @(NSUnderlineStyleSingle),
-		NSUnderlineColorAttributeName  : [NSColor colorWithCalibratedRed:0.89 green:0.72 blue:0.0 alpha:1.0],
+		NSUnderlineColorAttributeName  : [NSColor tmMatchedTextUnderlineColor],
 	};
 
 	string_builder_t builder(NSLineBreakByTruncatingTail);

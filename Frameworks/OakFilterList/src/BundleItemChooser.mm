@@ -5,6 +5,7 @@
 #import <OakAppKit/OakKeyEquivalentView.h>
 #import <OakAppKit/OakScopeBarView.h>
 #import <OakAppKit/OakFileIconImage.h>
+#import <OakAppKit/NSColor Additions.h>
 #import <OakAppKit/NSImage Additions.h>
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
@@ -230,16 +231,15 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 }
 
 // FIXME Copy/paste from OakChooser.mm (OakFileTableCellView)
-- (NSAttributedString*)addShadowColor:(NSColor*)shadowColor toString:(id)aString
+- (NSAttributedString*)selectedStringForString:(id)aString
 {
 	NSMutableAttributedString* str = [aString isKindOfClass:[NSString class]] ? [[NSMutableAttributedString alloc] initWithString:aString attributes:nil] : [aString mutableCopy];
-
-	NSShadow* shadow = [NSShadow new];
-	[shadow setShadowColor:shadowColor];
-	[shadow setShadowOffset:NSMakeSize(0, -1)];
-	[shadow setShadowBlurRadius:1];
-
-	[str addAttributes:@{ NSShadowAttributeName : shadow } range:NSMakeRange(0, str.string.length)];
+	[str enumerateAttributesInRange:NSMakeRange(0, str.length) options:NSAttributedStringEnumerationLongestEffectiveRangeNotRequired usingBlock:^(NSDictionary* attrs, NSRange range, BOOL *stop){
+		if(attrs[NSBackgroundColorAttributeName] != nil)
+			[str addAttribute:NSBackgroundColorAttributeName value:[NSColor tmMatchedTextSelectedBackgroundColor] range:range];
+		if(attrs[NSUnderlineColorAttributeName] != nil)
+			[str addAttribute:NSUnderlineColorAttributeName value:[NSColor tmMatchedTextSelectedUnderlineColor] range:range];
+	}];
 	return str;
 }
 
@@ -249,14 +249,12 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	[super setBackgroundStyle:backgroundStyle];
 	if(backgroundStyle == NSBackgroundStyleDark)
 	{
-		self.textField.font               = [NSFont boldSystemFontOfSize:13];
-		self.textField.objectValue        = [self addShadowColor:[NSColor colorWithCalibratedWhite:0.0 alpha:0.5] toString:[self valueForKeyPath:@"objectValue.name"]];
+		self.textField.objectValue        = [self selectedStringForString:[self valueForKeyPath:@"objectValue.name"]];
 		self.contextTextField.textColor   = [NSColor colorWithCalibratedWhite:0.9 alpha:1];
-		self.contextTextField.objectValue = [self addShadowColor:[NSColor colorWithCalibratedWhite:0.5 alpha:0.5] toString:[self valueForKeyPath:@"objectValue.path"]];
+		self.contextTextField.objectValue = [self selectedStringForString:[self valueForKeyPath:@"objectValue.path"]];
 	}
 	else
 	{
-		self.textField.font               = [NSFont systemFontOfSize:13];
 		self.textField.objectValue        = [self valueForKeyPath:@"objectValue.name"];
 		self.contextTextField.textColor   = [NSColor colorWithCalibratedWhite:0.5 alpha:1];
 		self.contextTextField.objectValue = [self valueForKeyPath:@"objectValue.path"];

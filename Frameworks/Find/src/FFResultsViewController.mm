@@ -2,6 +2,7 @@
 #import "FFResultNode.h"
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
+#import <OakAppKit/NSColor Additions.h>
 
 static NSString* const kUserDefaultsSearchResultsFontNameKey = @"searchResultsFontName";
 static NSString* const kUserDefaultsSearchResultsFontSizeKey = @"searchResultsFontSize";
@@ -53,9 +54,9 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		NSMutableAttributedString* str = [res mutableCopy];
 		[str enumerateAttributesInRange:NSMakeRange(0, str.length) options:NSAttributedStringEnumerationLongestEffectiveRangeNotRequired usingBlock:^(NSDictionary* attrs, NSRange range, BOOL* stop){
 			if(attrs[NSBackgroundColorAttributeName] != nil)
-				[str addAttribute:NSBackgroundColorAttributeName value:[NSColor colorWithCalibratedWhite:1.0 alpha:0.30] range:range];
+				[str addAttribute:NSBackgroundColorAttributeName value:[NSColor tmMatchedTextSelectedBackgroundColor] range:range];
 			if(attrs[NSUnderlineColorAttributeName] != nil)
-				[str addAttribute:NSUnderlineColorAttributeName value:[NSColor whiteColor] range:range];
+				[str addAttribute:NSUnderlineColorAttributeName value:[NSColor tmMatchedTextSelectedUnderlineColor] range:range];
 		}];
 		[str addAttribute:NSForegroundColorAttributeName value:[NSColor alternateSelectedControlTextColor] range:NSMakeRange(0, [str length])];
 		res = str;
