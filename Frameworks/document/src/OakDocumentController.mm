@@ -79,6 +79,11 @@ namespace
 	std::map<oak::uuid_t, record_ptr> _documents_by_uuid;
 	std::map<std::string, record_ptr> _documents_by_path;
 	std::map<inode_t, record_ptr>     _documents_by_inode;
+
+	NSMutableDictionary* _rankedPaths;
+	NSMutableDictionary* _rankedUUIDs;
+	NSUInteger _lastLRURank;
+	NSTimer* _saveRankedPathsTimer;
 }
 @end
 
@@ -168,6 +173,64 @@ namespace
 			[res addObject:doc];
 	}
 	return res;
+}
+
+// ======================
+// = Last Recently Used =
+// ======================
+
+- (void)setupRankedPaths
+{
+	if(_rankedPaths)
+		return;
+
+	_rankedPaths = [NSMutableDictionary dictionary];
+	_rankedUUIDs = [NSMutableDictionary dictionary];
+
+	NSArray* paths = [[NSUserDefaults standardUserDefaults] arrayForKey:@"LRUDocumentPaths"];
+	if(!paths)
+	{
+		// Support paths written by 2.0-beta.12.11 and earlier
+		NSDictionary* dictionary = [[NSUserDefaults standardUserDefaults] dictionaryForKey:@"LRUDocumentPaths"];
+		paths = [[dictionary[@"paths"] reverseObjectEnumerator] allObjects];
+	}
+
+	for(NSString* path in paths)
+		_rankedPaths[path] = @(++_lastLRURank);
+}
+
+- (void)saveRankedPathsTimerDidFire:(NSTimer*)aTimer
+{
+	_saveRankedPathsTimer = nil;
+
+	std::map<NSInteger, NSString*> ordered;
+	for(NSString* path in _rankedPaths)
+		ordered.emplace(-[_rankedPaths[path] intValue], path);
+	NSMutableArray* array = [NSMutableArray array];
+	for(auto const& pair : ordered)
+	{
+		[array addObject:pair.second];
+		if(array.count == 50)
+			break;
+	}
+	[[NSUserDefaults standardUserDefaults] setObject:array forKey:@"LRUDocumentPaths"];
+}
+
+- (NSInteger)lruRankForDocument:(OakDocument*)aDocument
+{
+	[self setupRankedPaths];
+	return aDocument.path ? [_rankedPaths[aDocument.path] intValue] : [_rankedUUIDs[aDocument.identifier] intValue];
+}
+
+- (void)didTouchDocument:(OakDocument*)aDocument
+{
+	[self setupRankedPaths];
+	if(aDocument.path)
+			_rankedPaths[aDocument.path] = @(++_lastLRURank);
+	else	_rankedUUIDs[aDocument.identifier] = @(++_lastLRURank);
+
+	[_saveRankedPathsTimer invalidate];
+	_saveRankedPathsTimer = [NSTimer scheduledTimerWithTimeInterval:2 target:self selector:@selector(saveRankedPathsTimerDidFire:) userInfo:nil repeats:NO];
 }
 
 // ===================================================

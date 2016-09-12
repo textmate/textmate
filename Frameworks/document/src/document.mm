@@ -1,5 +1,6 @@
 #include "document.h"
 #include "OakDocument Private.h"
+#include "OakDocumentController.h"
 #include "collection.h"
 #include <io/io.h>
 #include <io/entries.h>
@@ -362,88 +363,6 @@ static std::map<std::string, document::document_t::callback_t::event_t> const Ob
 
 namespace document
 {
-	// ===============
-	// = LRU Tracker =
-	// ===============
-
-	static struct lru_tracker_t
-	{
-		lru_tracker_t () : did_load(false) { }
-
-		oak::date_t get (std::string const& path) const
-		{
-			if(path == NULL_STR)
-				return oak::date_t();
-
-			load();
-			std::map<std::string, oak::date_t>::const_iterator it = map.find(path);
-			D(DBF_Document_LRU, bug("%s → %s\n", path.c_str(), it != map.end() ? to_s(it->second).c_str() : "not found"););
-			return it == map.end() ? oak::date_t() : it->second;
-		}
-
-		void set (std::string const& path, oak::date_t const& date)
-		{
-			if(path == NULL_STR)
-				return;
-
-			D(DBF_Document_LRU, bug("%s → %s\n", path.c_str(), to_s(date).c_str()););
-			load();
-			map[path] = date;
-			save();
-		}
-
-	private:
-		void load () const
-		{
-			if(did_load)
-				return;
-			did_load = true;
-
-			if(CFPropertyListRef cfPlist = CFPreferencesCopyAppValue(CFSTR("LRUDocumentPaths"), kCFPreferencesCurrentApplication))
-			{
-				plist::dictionary_t const& plist = plist::convert(cfPlist);
-				D(DBF_Document_LRU, bug("%s\n", to_s(plist).c_str()););
-				CFRelease(cfPlist);
-
-				plist::array_t paths;
-				if(plist::get_key_path(plist, "paths", paths))
-				{
-					oak::date_t t = oak::date_t::now();
-					for(auto const& path : paths)
-					{
-						if(std::string const* str = boost::get<std::string>(&path))
-							map.emplace(*str, t - (1.0 + map.size()));
-					}
-				}
-			}
-		}
-
-		void save () const
-		{
-			std::map<oak::date_t, std::string> sorted;
-			for(auto const& item : map)
-				sorted.emplace(item.second, item.first);
-
-			std::map< std::string, std::vector<std::string> > plist;
-			std::vector<std::string>& paths = plist["paths"];
-			riterate(item, sorted)
-			{
-				if(!item->second.empty() && item->second.front() != '/')
-					continue;
-				paths.push_back(item->second);
-				if(paths.size() == 50)
-					break;
-			}
-
-			D(DBF_Document_LRU, bug("%s\n", text::join(paths, ", ").c_str()););
-			CFPreferencesSetAppValue(CFSTR("LRUDocumentPaths"), cf::wrap(plist), kCFPreferencesCurrentApplication);
-		}
-
-		mutable std::map<std::string, oak::date_t> map;
-		mutable bool did_load;
-
-	} lru;
-
 	// =========
 	// = Marks =
 	// =========
@@ -550,9 +469,9 @@ namespace document
 		return _document.variables;
 	}
 
-	void document_t::show ()              { document::lru.set(path() == NULL_STR ? std::string(identifier()) : path(), oak::date_t::now()); }
-	void document_t::hide ()              { document::lru.set(path() == NULL_STR ? std::string(identifier()) : path(), oak::date_t::now()); }
-	oak::date_t document_t::lru () const  { return document::lru.get(path() == NULL_STR ? std::string(identifier()) : path()); }
+	void document_t::show ()              { [OakDocumentController.sharedInstance didTouchDocument:_document]; }
+	void document_t::hide ()              { [OakDocumentController.sharedInstance didTouchDocument:_document]; }
+	oak::date_t document_t::lru () const  { return (double)[OakDocumentController.sharedInstance lruRankForDocument:_document]; }
 
 	bool document_t::backup ()            { return [_document saveBackup:nil]; }
 	void document_t::detach_backup ()     { _document.backupPath = nil; }
