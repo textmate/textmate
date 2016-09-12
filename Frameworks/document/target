@@ -1,4 +1,4 @@
-TESTS       = tests/t_*.cc
+TESTS       = tests/t_*.{mm,cc}
 SOURCES     = src/*.{mm,cc}
 EXPORT      = src/OakDocument.h src/OakDocumentEditor.h src/document.h src/collection.h
 LINK       += BundlesManager OakAppKit OakFoundation OakSystem authorization buffer cf command editor encoding file io layout ns plist regexp scope selection settings text theme undo
