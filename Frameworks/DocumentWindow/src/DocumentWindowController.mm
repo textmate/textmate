@@ -1,4 +1,4 @@
-#import "DocumentController.h"
+#import "DocumentWindowController.h"
 #import "ProjectLayoutView.h"
 #import "SelectGrammarViewController.h"
 #import "OakRunCommandWindowController.h"

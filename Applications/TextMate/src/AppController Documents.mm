@@ -1,5 +1,5 @@
 #import "AppController.h"
-#import <DocumentWindow/DocumentController.h>
+#import <DocumentWindow/DocumentWindowController.h>
 #import "ODBEditorSuite.h"
 #import <Preferences/Keys.h>
 #import <OakAppKit/NSSavePanel Additions.h>

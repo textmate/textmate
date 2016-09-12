@@ -1,6 +1,6 @@
 #import <oak/debug.h>
 #import <OakSystem/application.h>
-#import <DocumentWindow/DocumentController.h>
+#import <DocumentWindow/DocumentWindowController.h>
 #import <io/path.h>
 #import <text/format.h>
 #import <crash/info.h>

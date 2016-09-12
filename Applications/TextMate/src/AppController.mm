@@ -6,7 +6,7 @@
 #import <BundleEditor/BundleEditor.h>
 #import <BundlesManager/BundlesManager.h>
 #import <CrashReporter/CrashReporter.h>
-#import <DocumentWindow/DocumentController.h>
+#import <DocumentWindow/DocumentWindowController.h>
 #import <Find/Find.h>
 #import <CommitWindow/CommitWindow.h>
 #import <OakAppKit/NSMenuItem Additions.h>

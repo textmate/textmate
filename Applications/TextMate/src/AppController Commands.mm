@@ -1,5 +1,5 @@
 #import "AppController.h"
-#import <DocumentWindow/DocumentController.h>
+#import <DocumentWindow/DocumentWindowController.h>
 #import <bundles/bundles.h>
 #import <command/parser.h>
 #import <command/runner.h>
