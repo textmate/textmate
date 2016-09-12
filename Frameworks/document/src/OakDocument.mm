@@ -402,6 +402,7 @@ private:
 
 - (void)dealloc
 {
+	[self deleteBuffer];
 	[self removeBackup];
 }
 
@@ -1014,7 +1015,6 @@ private:
 	self.revision = _savedRevision; // Clears isDocumentEdited
 	[self removeBackup];
 
-	_undoManager.reset();
 	[self deleteBuffer];
 }
 
@@ -1060,7 +1060,7 @@ private:
 		}
 
 		size_t _size = 0;
-		OakDocument* _self;
+		__weak OakDocument* _self;
 
 		bool _should_sniff_file_type;
 		std::string _file_type;
@@ -1074,6 +1074,7 @@ private:
 
 - (void)deleteBuffer
 {
+	_undoManager.reset();
 	if(!_buffer)
 		return;
 
