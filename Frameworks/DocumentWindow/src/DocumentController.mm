@@ -233,6 +233,7 @@ namespace
 	OBJC_WATCH_LEAKS(DocumentController);
 
 	std::map<oak::uuid_t, tracking_info_t> _trackedDocuments;
+	NSMutableSet<NSUUID*>*                 _stickyDocumentIdentifiers;
 
 	scm::info_ptr                          _projectSCMInfo;
 	std::map<std::string, std::string>     _projectSCMVariables;
@@ -638,7 +639,7 @@ namespace
 	NSMutableIndexSet* allTabs = [NSMutableIndexSet indexSetWithIndexesInRange:NSMakeRange(0, _documents.size())];
 	for(size_t i = 0; i < _documents.size(); ++i)
 	{
-		if(_documents[i]->is_modified() && _documents[i]->path() == NULL_STR || _documents[i]->sticky())
+		if(_documents[i]->is_modified() && _documents[i]->path() == NULL_STR || [self isDocumentSticky:_documents[i]])
 			[allTabs removeIndex:i];
 	}
 	[self closeTabsAtIndexes:allTabs askToSaveChanges:YES createDocumentIfEmpty:YES];
@@ -651,7 +652,7 @@ namespace
 	NSMutableIndexSet* otherTabs = [NSMutableIndexSet indexSet];
 	for(size_t i = 0; i < _documents.size(); ++i)
 	{
-		if(i != tabIndex && (!_documents[i]->is_modified() || _documents[i]->path() != NULL_STR) && !_documents[i]->sticky())
+		if(i != tabIndex && (!_documents[i]->is_modified() || _documents[i]->path() != NULL_STR) && ![self isDocumentSticky:_documents[i]])
 			[otherTabs addIndex:i];
 	}
 	[self closeTabsAtIndexes:otherTabs askToSaveChanges:YES createDocumentIfEmpty:YES];
@@ -864,6 +865,21 @@ namespace
 	}
 }
 
+- (BOOL)isDocumentSticky:(document::document_ptr)aDocument
+{
+	return [_stickyDocumentIdentifiers containsObject:aDocument->document().identifier];
+}
+
+- (void)setDocument:(document::document_ptr)aDocument sticky:(BOOL)stickyFlag
+{
+	if(stickyFlag)
+		_stickyDocumentIdentifiers = _stickyDocumentIdentifiers ?: [NSMutableSet set];
+
+	if(stickyFlag)
+			[_stickyDocumentIdentifiers addObject:aDocument->document().identifier];
+	else	[_stickyDocumentIdentifiers removeObject:aDocument->document().identifier];
+}
+
 // ====================
 // = Create Documents =
 // ====================
@@ -1011,7 +1027,7 @@ namespace
 	{
 		for(auto const& doc : _documents)
 		{
-			if(!doc->is_modified() && !doc->sticky())
+			if(!doc->is_modified() && ![self isDocumentSticky:doc])
 				tabsToClose.insert(doc->identifier());
 		}
 	}
@@ -1039,7 +1055,7 @@ namespace
 			for(auto const& pair : ranked)
 			{
 				document::document_ptr doc = _documents[pair.second];
-				if(!doc->is_modified() && !doc->sticky() && doc->is_on_disk() && newUUIDs.find(doc->identifier()) == newUUIDs.end())
+				if(!doc->is_modified() && ![self isDocumentSticky:doc] && doc->is_on_disk() && newUUIDs.find(doc->identifier()) == newUUIDs.end())
 					[indexSet addIndex:pair.second];
 				if([indexSet count] == excessTabs)
 					break;
@@ -1796,7 +1812,7 @@ namespace
 	{
 		std::vector<document::document_ptr> documents;
 		for(NSUInteger index = [indexSet firstIndex]; index != NSNotFound; index = [indexSet indexGreaterThanIndex:index])
-			_documents[index]->set_sticky(!_documents[index]->sticky());
+			[self setDocument:_documents[index] sticky:![self isDocumentSticky:_documents[index]]];
 	}
 }
 
@@ -1818,7 +1834,7 @@ namespace
 
 	for(size_t i = 0; i < _documents.size(); ++i)
 	{
-		if(_documents[i]->sticky())
+		if([self isDocumentSticky:_documents[i]])
 		{
 			[otherTabs removeIndex:i];
 			[rightSideTabs removeIndex:i];
@@ -2423,7 +2439,7 @@ namespace
 		{
 			active = [indexSet count] != 0;
 			if(active && [menuItem action] == @selector(toggleSticky:))
-				[menuItem setState:_documents[[indexSet firstIndex]]->sticky() ? NSOnState : NSOffState];
+				[menuItem setState:[self isDocumentSticky:_documents[indexSet.firstIndex]] ? NSOnState : NSOffState];
 		}
 	}
 
@@ -2602,7 +2618,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 			if(NSString* displayName = info[@"displayName"])
 				doc->set_custom_name(to_s(displayName));
 			if([info[@"sticky"] boolValue])
-				doc->set_sticky(true);
+				[self setDocument:doc sticky:YES];
 		}
 
 		doc->set_recent_tracking(false);
@@ -2663,7 +2679,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 			doc[@"displayName"] = [NSString stringWithCxxString:document->display_name()];
 		if(document == self.selectedDocument)
 			doc[@"selected"] = @YES;
-		if(document->sticky())
+		if([self isDocumentSticky:document])
 			doc[@"sticky"] = @YES;
 		[docs addObject:doc];
 	}

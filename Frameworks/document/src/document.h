@@ -58,10 +58,6 @@ namespace document
 
 		OakDocument* document ()      { observer(); return _document; }
 
-		// Only in document_t
-		bool sticky () const          { return _sticky; }
-		void set_sticky (bool flag)   { _sticky = flag; }
-
 		void sync_open (CFStringRef runLoopMode = kCFRunLoopDefaultMode);
 		bool sync_save (CFStringRef runLoopMode = kCFRunLoopDefaultMode);
 
@@ -168,7 +164,6 @@ namespace document
 	private:
 		OakDocument* _document;
 		OakDocumentObserver* _observer;
-		bool _sticky = false;
 
 		OakDocumentObserver* observer ();
 	};
