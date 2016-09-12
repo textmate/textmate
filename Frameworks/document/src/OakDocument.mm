@@ -446,6 +446,8 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 		if(NSString* fileType = [self sniffFileType])
 			self.fileType = fileType;
 	}
+
+	[OakDocumentController.sharedInstance update:self];
 }
 
 - (void)setFileType:(NSString*)newType
@@ -940,6 +942,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 			++self.openCount;
 
 		auto cb = std::make_shared<callback_t>(self, aWindow, ^(OakDocumentIOResult result, NSString* path, encoding::type const& encoding, NSString* errorMessage, oak::uuid_t const& filterUUID){
+			[OakDocumentController.sharedInstance update:self];
 			if(closeDocument)
 				[self didSaveAtPath:path withEncoding:encoding success:result == OakDocumentIOResultSuccess];
 			if(block)
@@ -1360,11 +1363,13 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	else if((flags & NOTE_DELETE) == NOTE_DELETE)
 	{
 		self.onDisk = access([_path fileSystemRepresentation], F_OK) == 0;
+		[OakDocumentController.sharedInstance update:self];
 	}
 	else if((flags & NOTE_WRITE) == NOTE_WRITE || (flags & NOTE_CREATE) == NOTE_CREATE)
 	{
 		self.onDisk = access([_path fileSystemRepresentation], F_OK) == 0;
 		self.needsImportDocumentChanges = YES;
+		[OakDocumentController.sharedInstance update:self];
 	}
 }
 
