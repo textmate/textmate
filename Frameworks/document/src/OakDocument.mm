@@ -321,7 +321,7 @@ private:
 	if(self = [self init])
 	{
 		_path   = aPath;
-		_onDisk = access([_path fileSystemRepresentation], F_OK) == 0;
+		_onDisk = _path && access([_path fileSystemRepresentation], F_OK) == 0;
 	}
 	return self;
 }
