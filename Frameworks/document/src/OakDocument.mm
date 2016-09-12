@@ -1,4 +1,5 @@
 #import "OakDocument Private.h"
+#import "OakDocumentController.h"
 #import "OakDocumentEditor.h"
 #import "EncodingView.h"
 #import "Printing.h"
@@ -185,44 +186,6 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 @property (nonatomic) NSString*   folded;
 @end
 
-static struct document_container_t
-{
-	void add (OakDocument* document)
-	{
-		std::lock_guard<std::mutex> lock(_lock);
-		[_documents addObject:document];
-	}
-
-	void set_untitled_count (OakDocument* document)
-	{
-		std::lock_guard<std::mutex> lock(_lock);
-
-		std::set<NSUInteger> reserved;
-		for(OakDocument* document in _documents)
-		{
-			if(!document.path && !document.customName)
-				reserved.insert(document.untitledCount);
-		}
-
-		NSUInteger available = 1;
-		while(reserved.find(available) != reserved.end())
-			++available;
-		document.untitledCount = available;
-	}
-
-	void remove_all_marks (NSString* mark)
-	{
-		std::lock_guard<std::mutex> lock(_lock);
-		for(OakDocument* document : _documents)
-			[document removeAllMarksOfType:mark];
-	}
-
-private:
-	std::mutex _lock;
-	NSHashTable* _documents = [NSHashTable weakObjectsHashTable];
-
-} DocumentContainer;
-
 @implementation OakDocument
 + (NSSet*)keyPathsForValuesAffectingDisplayName
 {
@@ -310,8 +273,6 @@ private:
 	{
 		_identifier = [NSUUID UUID];
 		_documentEditors = [NSHashTable weakObjectsHashTable];
-
-		DocumentContainer.add(self);
 	}
 	return self;
 }
@@ -382,12 +343,14 @@ private:
 
 + (instancetype)documentWithPath:(NSString*)aPath
 {
-	return [[OakDocument alloc] initWithPath:aPath];
+	return [OakDocumentController.sharedInstance documentWithPath:aPath];
 }
 
 + (instancetype)documentWithData:(NSData*)someData fileType:(NSString*)aFileType customName:(NSString*)aName
 {
-	return [[OakDocument alloc] initWithData:someData fileType:aFileType customName:aName];
+	OakDocument* res = [[OakDocument alloc] initWithData:someData fileType:aFileType customName:aName];
+	[OakDocumentController.sharedInstance register:res];
+	return res;
 }
 
 + (instancetype)documentWithString:(NSString*)content fileType:(NSString*)aFileType customName:(NSString*)aName
@@ -397,11 +360,17 @@ private:
 
 + (instancetype)documentWithIdentifier:(NSUUID*)anIdentifier
 {
-	return [[OakDocument alloc] initWithIdentifier:anIdentifier];
+	OakDocument* res;
+	if(res = [OakDocumentController.sharedInstance findDocumentWithIdentifier:anIdentifier])
+		return res;
+	if(res = [[OakDocument alloc] initWithIdentifier:anIdentifier])
+		[OakDocumentController.sharedInstance register:res];
+	return res;
 }
 
 - (void)dealloc
 {
+	[OakDocumentController.sharedInstance unregister:self];
 	[self deleteBuffer];
 	[self removeBackup];
 }
@@ -420,7 +389,7 @@ private:
 		return [[NSFileManager defaultManager] displayNameAtPath:_path];
 
 	if(self.untitledCount == 0)
-		DocumentContainer.set_untitled_count(self);
+		self.untitledCount = [OakDocumentController.sharedInstance firstAvailableUntitledCount];
 
 	return _untitledCount == 1 ? @"untitled" : [NSString stringWithFormat:@"untitled %lu", _untitledCount];
 }
@@ -1299,7 +1268,8 @@ private:
 
 + (void)removeAllMarksOfType:(NSString*)aMark
 {
-	DocumentContainer.remove_all_marks(aMark);
+	for(OakDocument* document in [OakDocumentController.sharedInstance documents])
+		[document removeAllMarksOfType:aMark];
 	document::marks.remove_all(to_s(aMark));
 }
 
