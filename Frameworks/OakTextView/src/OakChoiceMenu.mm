@@ -43,6 +43,8 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 	CGFloat const kScrollBarWidth   = 15;
 
 	NSTextField* textField = OakCreateLabel(@"", self.font, NSLeftTextAlignment, NSLineBreakByTruncatingTail);
+	tableView.rowHeight = NSHeight(textField.frame);
+
 	CGFloat width = 60;
 	for(NSInteger i = 0; i < MIN(_choices.count, 256); ++i)
 	{
@@ -127,8 +129,6 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 	if(!res)
 	{
 		res = OakCreateLabel(@"", self.font, NSLeftTextAlignment, NSLineBreakByTruncatingTail);
-		[res sizeToFit];
-		aTableView.rowHeight = NSHeight(res.frame);
 		res.identifier = identifier;
 	}
 	return res;
