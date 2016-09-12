@@ -14,7 +14,7 @@ OAK_DEBUG_VAR(AppController_Documents);
 - (void)newDocument:(id)sender
 {
 	D(DBF_AppController_Documents, bug("\n"););
-	[[DocumentController new] showWindow:self];
+	[[DocumentWindowController new] showWindow:self];
 }
 
 - (void)newFileBrowser:(id)sender
@@ -23,7 +23,7 @@ OAK_DEBUG_VAR(AppController_Documents);
 	NSString* urlString = [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsInitialFileBrowserURLKey];
 	NSURL* url          = urlString ? [NSURL URLWithString:urlString] : nil;
 
-	DocumentController* controller = [DocumentController new];
+	DocumentWindowController* controller = [DocumentWindowController new];
 	controller.defaultProjectPath = [url isFileURL] ? [url path] : NSHomeDirectory();
 	controller.fileBrowserVisible = YES;
 	[controller showWindow:self];
@@ -209,6 +209,6 @@ OAK_DEBUG_VAR(AppController_Documents);
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication*)sender
 {
 	D(DBF_AppController_Documents, bug("%s\n", [NSApp windows].description.UTF8String););
-	return [DocumentController applicationShouldTerminate:sender];
+	return [DocumentWindowController applicationShouldTerminate:sender];
 }
 @end

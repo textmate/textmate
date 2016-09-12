@@ -78,7 +78,7 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 }
 @end
 
-@interface DocumentController () <NSWindowDelegate, OakTabBarViewDelegate, OakTabBarViewDataSource, OakTextViewDelegate, OakFileBrowserDelegate, QLPreviewPanelDelegate, QLPreviewPanelDataSource>
+@interface DocumentWindowController () <NSWindowDelegate, OakTabBarViewDelegate, OakTabBarViewDataSource, OakTextViewDelegate, OakFileBrowserDelegate, QLPreviewPanelDelegate, QLPreviewPanelDataSource>
 @property (nonatomic) ProjectLayoutView*          layoutView;
 @property (nonatomic) OakTabBarView*              tabBarView;
 @property (nonatomic) OakDocumentView*            documentView;
@@ -138,7 +138,7 @@ namespace
 			{
 				if([window isMiniaturized] == [flag boolValue] && [window.delegate respondsToSelector:@selector(identifier)])
 				{
-					DocumentController* delegate = (DocumentController*)window.delegate;
+					DocumentWindowController* delegate = (DocumentWindowController*)window.delegate;
 					if(id controller = AllControllers()[delegate.identifier])
 						[res addObject:controller];
 				}
@@ -153,7 +153,7 @@ namespace
 
 	struct tracking_info_t : document::document_t::callback_t
 	{
-		tracking_info_t (DocumentController* self, document::document_ptr const& document) : _self(self), _document(document) { }
+		tracking_info_t (DocumentWindowController* self, document::document_ptr const& document) : _self(self), _document(document) { }
 		~tracking_info_t () { ASSERT_EQ(_open_count, 0); }
 
 		void track ()
@@ -216,7 +216,7 @@ namespace
 		}
 
 	private:
-		__weak DocumentController* _self;
+		__weak DocumentWindowController* _self;
 		document::document_ptr _document;
 		size_t _open_count = 0;
 		bool _did_open = false;
@@ -228,9 +228,9 @@ namespace
 	}
 }
 
-@implementation DocumentController
+@implementation DocumentWindowController
 {
-	OBJC_WATCH_LEAKS(DocumentController);
+	OBJC_WATCH_LEAKS(DocumentWindowController);
 
 	std::map<oak::uuid_t, tracking_info_t> _trackedDocuments;
 	NSMutableSet<NSUUID*>*                 _stickyDocumentIdentifiers;
@@ -339,7 +339,7 @@ namespace
 
 	if(!ourWindows.empty())
 	{
-		NSRect r = [(DocumentController*)ourWindows.begin()->second.delegate cascadedWindowFrame];
+		NSRect r = [(DocumentWindowController*)ourWindows.begin()->second.delegate cascadedWindowFrame];
 
 		NSRect scrRect = [[NSScreen mainScreen] visibleFrame];
 		if(NSContainsRect(scrRect, r))
@@ -359,7 +359,7 @@ namespace
 		{
 			NSWindow* mainWindow = [NSApp mainWindow];
 			if([[mainWindow delegate] isKindOfClass:[self class]])
-				r = [(DocumentController*)mainWindow.delegate cascadedWindowFrame];
+				r = [(DocumentWindowController*)mainWindow.delegate cascadedWindowFrame];
 		}
 
 		return r;
@@ -523,7 +523,7 @@ namespace
 		}
 	}
 
-	NSAlert* alert = [DocumentController saveAlertForDocuments:someDocuments];
+	NSAlert* alert = [DocumentWindowController saveAlertForDocuments:someDocuments];
 	OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){
 		switch(returnCode)
 		{
@@ -668,7 +668,7 @@ namespace
 - (void)saveProjectState
 {
 	if(self.treatAsProjectWindow)
-		[[DocumentController sharedProjectStateDB] setValue:[self sessionInfoIncludingUntitledDocuments:NO] forKey:self.projectPath];
+		[[DocumentWindowController sharedProjectStateDB] setValue:[self sessionInfoIncludingUntitledDocuments:NO] forKey:self.projectPath];
 }
 
 - (BOOL)windowShouldClose:(id)sender
@@ -739,8 +739,8 @@ namespace
 + (void)saveSessionAndDetachBackups
 {
 	BOOL restoresSession = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableSessionRestoreKey];
-	[DocumentController saveSessionIncludingUntitledDocuments:restoresSession];
-	for(DocumentController* controller in [SortedControllers() reverseObjectEnumerator])
+	[DocumentWindowController saveSessionIncludingUntitledDocuments:restoresSession];
+	for(DocumentWindowController* controller in [SortedControllers() reverseObjectEnumerator])
 	{
 		[controller saveProjectState];
 
@@ -773,7 +773,7 @@ namespace
 
 + (void)saveControllersUsingEnumerator:(NSEnumerator*)anEnumerator completionHandler:(void(^)(OakDocumentIOResult result))callback
 {
-	if(DocumentController* controller = [anEnumerator nextObject])
+	if(DocumentWindowController* controller = [anEnumerator nextObject])
 	{
 		[controller saveDocumentsUsingEnumerator:[controller.documentsNeedingSaving objectEnumerator] completionHandler:^(OakDocumentIOResult result){
 			if(result == OakDocumentIOResultSuccess)
@@ -790,9 +790,9 @@ namespace
 
 + (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication*)sender
 {
-	NSMutableArray<DocumentController*>* controllers = [NSMutableArray array];
+	NSMutableArray<DocumentWindowController*>* controllers = [NSMutableArray array];
 	NSMutableArray<OakDocument*>* documents = [NSMutableArray array];
-	for(DocumentController* controller in SortedControllers())
+	for(DocumentWindowController* controller in SortedControllers())
 	{
 		if(NSArray* newDocs = controller.documentsNeedingSaving)
 		{
@@ -808,7 +808,7 @@ namespace
 	}
 	else if(controllers.count == 1)
 	{
-		DocumentController* controller = controllers.firstObject;
+		DocumentWindowController* controller = controllers.firstObject;
 		[controller showCloseWarningUIForDocuments:controller.documentsNeedingSaving completionHandler:^(BOOL canClose){
 			if(canClose)
 				[self saveSessionAndDetachBackups];
@@ -817,7 +817,7 @@ namespace
 	}
 	else
 	{
-		switch([[DocumentController saveAlertForDocuments:documents] runModal])
+		switch([[DocumentWindowController saveAlertForDocuments:documents] runModal])
 		{
 			case NSAlertFirstButtonReturn: /* "Save" */
 			{
@@ -932,7 +932,7 @@ namespace
 - (IBAction)mergeAllWindows:(id)sender
 {
 	std::vector<document::document_ptr> documents = _documents;
-	for(DocumentController* delegate in SortedControllers())
+	for(DocumentWindowController* delegate in SortedControllers())
 	{
 		if(delegate != self && ![delegate.window isMiniaturized])
 		{
@@ -943,7 +943,7 @@ namespace
 
 	self.documents = documents;
 
-	for(DocumentController* delegate in SortedControllers())
+	for(DocumentWindowController* delegate in SortedControllers())
 	{
 		if(delegate != self && ![delegate.window isMiniaturized])
 			[delegate.window close];
@@ -1505,7 +1505,7 @@ namespace
 		_projectPath = newProjectPath;
 		if(_projectSCMInfo = scm::info(to_s(_projectPath)))
 		{
-			__weak DocumentController* weakSelf = self;
+			__weak DocumentWindowController* weakSelf = self;
 			_projectSCMInfo->add_callback(^(scm::info_t const& info){
 				weakSelf.projectSCMVariables = info.scm_variables();
 			});
@@ -1544,7 +1544,7 @@ namespace
 
 		if(_documentSCMInfo = scm::info(docDirectory))
 		{
-			__weak DocumentController* weakSelf = self;
+			__weak DocumentWindowController* weakSelf = self;
 			_documentSCMInfo->add_callback(^(scm::info_t const& info){
 				weakSelf.documentSCMStatus    = info.status(to_s(weakSelf.documentPath));
 				weakSelf.documentSCMVariables = info.scm_variables();
@@ -1795,7 +1795,7 @@ namespace
 
 		if(documents.size() == 1)
 		{
-			DocumentController* controller = [DocumentController new];
+			DocumentWindowController* controller = [DocumentWindowController new];
 			controller.documents = { documents[0] };
 			if(path::is_child(documents[0]->path(), to_s(self.projectPath)))
 				controller.defaultProjectPath = self.projectPath;
@@ -1899,7 +1899,7 @@ namespace
 
 	if(operation == NSDragOperationMove && sourceTabBar != destTabBar)
 	{
-		for(DocumentController* delegate in SortedControllers())
+		for(DocumentWindowController* delegate in SortedControllers())
 		{
 			if(delegate == sourceTabBar.delegate)
 			{
@@ -2551,7 +2551,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 	NSDictionary* session = [NSDictionary dictionaryWithContentsOfFile:[self sessionPath]];
 	for(NSDictionary* project in session[@"projects"])
 	{
-		DocumentController* controller = [DocumentController new];
+		DocumentWindowController* controller = [DocumentWindowController new];
 		[controller setupControllerForProject:project skipMissingFiles:NO];
 		if(controller.documents.empty())
 			continue;
@@ -2696,13 +2696,13 @@ static NSUInteger DisableSessionSavingCount = 0;
 	NSArray* controllers = SortedControllers();
 	if(controllers.count == 1)
 	{
-		DocumentController* controller = controllers.firstObject;
+		DocumentWindowController* controller = controllers.firstObject;
 		if(!controller.projectPath && !controller.fileBrowserVisible && controller.documents.size() == 1 && is_disposable(controller.selectedDocument))
 			controllers = nil;
 	}
 
 	NSMutableArray* projects = [NSMutableArray array];
-	for(DocumentController* controller in [controllers reverseObjectEnumerator])
+	for(DocumentWindowController* controller in [controllers reverseObjectEnumerator])
 		[projects addObject:[controller sessionInfoIncludingUntitledDocuments:includeUntitled]];
 
 	NSDictionary* session = @{ @"projects" : projects };
@@ -2753,7 +2753,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 	if(!aDocument)
 		return nil;
 
-	for(DocumentController* delegate in SortedControllers())
+	for(DocumentWindowController* delegate in SortedControllers())
 	{
 		if(delegate.fileBrowserVisible && aDocument->path() != NULL_STR && aDocument->path().find(to_s(delegate.projectPath)) == 0)
 			return delegate;
@@ -2772,7 +2772,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 	static struct proxy_t : document::ui_proxy_t
 	{
 	private:
-		static void bring_to_front (DocumentController* aController)
+		static void bring_to_front (DocumentWindowController* aController)
 		{
 			[aController showWindow:nil];
 			if(![NSApp isActive])
@@ -2786,7 +2786,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 			}
 		}
 
-		static DocumentController* find_or_create_controller (std::vector<document::document_ptr> const& documents, oak::uuid_t const& projectUUID)
+		static DocumentWindowController* find_or_create_controller (std::vector<document::document_ptr> const& documents, oak::uuid_t const& projectUUID)
 		{
 			ASSERT(!documents.empty());
 
@@ -2796,11 +2796,11 @@ static NSUInteger DisableSessionSavingCount = 0;
 
 			if(projectUUID != document::kCollectionAny)
 			{
-				if(DocumentController* res = AllControllers()[[NSString stringWithCxxString:projectUUID]])
+				if(DocumentWindowController* res = AllControllers()[[NSString stringWithCxxString:projectUUID]])
 					return res;
 
 				if(projectUUID == "00000000-0000-0000-0000-000000000000")
-					return [DocumentController new];
+					return [DocumentWindowController new];
 			}
 
 			// =========================================
@@ -2810,7 +2810,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 			std::set<oak::uuid_t> uuids;
 			std::transform(documents.begin(), documents.end(), inserter(uuids, uuids.end()), [](document::document_ptr const& doc){ return doc->identifier(); });
 
-			for(DocumentController* candidate in SortedControllers())
+			for(DocumentWindowController* candidate in SortedControllers())
 			{
 				for(auto document : candidate.documents)
 				{
@@ -2829,8 +2829,8 @@ static NSUInteger DisableSessionSavingCount = 0;
 			std::set<std::string> parents;
 			std::transform(documentsWithPath.begin(), documentsWithPath.end(), inserter(parents, parents.end()), [](document::document_ptr const& doc){ return path::parent(doc->path()); });
 
-			std::map<size_t, DocumentController*> candidates;
-			for(DocumentController* candidate in SortedControllers())
+			std::map<size_t, DocumentWindowController*> candidates;
+			for(DocumentWindowController* candidate in SortedControllers())
 			{
 				if(candidate.projectPath)
 				{
@@ -2850,7 +2850,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 			// = Use frontmost window if a “scratch” window =
 			// ==============================================
 
-			if(DocumentController* candidate = [SortedControllers() firstObject])
+			if(DocumentWindowController* candidate = [SortedControllers() firstObject])
 			{
 				if(!candidate.fileBrowserVisible && candidate.documents.size() == 1 && is_disposable(candidate.selectedDocument))
 					return candidate;
@@ -2860,7 +2860,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 			// = Give up and create a new window =
 			// ===================================
 
-			DocumentController* res = [DocumentController new];
+			DocumentWindowController* res = [DocumentWindowController new];
 
 			if(!parents.empty()) // setup project folder for new window
 			{
@@ -2872,9 +2872,9 @@ static NSUInteger DisableSessionSavingCount = 0;
 			return res;
 		}
 
-		static DocumentController* controller_with_documents (std::vector<document::document_ptr> const& documents, oak::uuid_t const& projectUUID = document::kCollectionAny)
+		static DocumentWindowController* controller_with_documents (std::vector<document::document_ptr> const& documents, oak::uuid_t const& projectUUID = document::kCollectionAny)
 		{
-			DocumentController* controller = find_or_create_controller(documents, projectUUID);
+			DocumentWindowController* controller = find_or_create_controller(documents, projectUUID);
 			auto documentToSelect = controller.documents.size() <= [controller disposableDocument].size() ? documents.front() : documents.back();
 			[controller insertDocuments:documents atIndex:controller.selectedTabIndex + 1 selecting:documentToSelect andClosing:[controller disposableDocument]];
 			return controller;
@@ -2886,14 +2886,14 @@ static NSUInteger DisableSessionSavingCount = 0;
 			std::string const folder = path::resolve(path);
 			[[NSDocumentController sharedDocumentController] noteNewRecentDocumentURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:folder]]];
 
-			for(DocumentController* candidate in SortedControllers())
+			for(DocumentWindowController* candidate in SortedControllers())
 			{
 				if(folder == to_s(candidate.projectPath ?: candidate.defaultProjectPath))
 					return bring_to_front(candidate);
 			}
 
-			DocumentController* controller = nil;
-			for(DocumentController* candidate in SortedControllers())
+			DocumentWindowController* controller = nil;
+			for(DocumentWindowController* candidate in SortedControllers())
 			{
 				if(!candidate.fileBrowserVisible && candidate.documents.size() == 1 && is_disposable(candidate.selectedDocument))
 				{
@@ -2903,13 +2903,13 @@ static NSUInteger DisableSessionSavingCount = 0;
 			}
 
 			if(!controller)
-				controller = [DocumentController new];
+				controller = [DocumentWindowController new];
 			else if(controller.selectedDocument)
 				[controller selectedDocument]->set_custom_name("not untitled"); // release potential untitled token used
 
 			NSDictionary* project;
 			if(![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableFolderStateRestore])
-				project = [[DocumentController sharedProjectStateDB] valueForKey:[NSString stringWithCxxString:folder]];
+				project = [[DocumentWindowController sharedProjectStateDB] valueForKey:[NSString stringWithCxxString:folder]];
 
 			if(project && [project[@"documents"] count])
 			{
@@ -2929,7 +2929,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 
 		void show_documents (std::vector<document::document_ptr> const& documents) const
 		{
-			DocumentController* controller = controller_with_documents(documents);
+			DocumentWindowController* controller = controller_with_documents(documents);
 			bring_to_front(controller);
 			[controller openAndSelectDocument:[controller documents][controller.selectedTabIndex]];
 		}
@@ -2939,7 +2939,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 			if(range != text::range_t::undefined)
 				document->set_selection(range);
 
-			DocumentController* controller = controller_with_documents({ document }, collection);
+			DocumentWindowController* controller = controller_with_documents({ document }, collection);
 			if(bringToFront)
 				bring_to_front(controller);
 			else if(![controller.window isVisible])

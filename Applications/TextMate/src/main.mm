@@ -20,7 +20,7 @@ static void sig_int_handler (void* unused)
 static void sig_term_handler (void* unused)
 {
 	fprintf(stderr, "%s received SIGTERM: Quick shutdown.\n", getprogname());
-	[DocumentController saveSessionIncludingUntitledDocuments:YES];
+	[DocumentWindowController saveSessionIncludingUntitledDocuments:YES];
 	[[NSNotificationCenter defaultCenter] postNotificationName:NSApplicationWillTerminateNotification object:NSApp];
 	[NSApp stop:nil];
 	[NSApp postEvent:[NSEvent otherEventWithType:NSApplicationDefined location:NSZeroPoint modifierFlags:0 timestamp:0 windowNumber:0 context:NULL subtype:0 data1:0 data2:0] atStart:NO];

@@ -1,7 +1,7 @@
 #import <document/document.h>
 #import <command/runner.h>
 
-PUBLIC @interface DocumentController : NSObject
+PUBLIC @interface DocumentWindowController : NSObject
 @property (nonatomic) NSWindow*                                  window;
 
 @property (nonatomic) NSString*                                  identifier;

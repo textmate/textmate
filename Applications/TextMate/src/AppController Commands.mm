@@ -37,7 +37,7 @@ OAK_DEBUG_VAR(AppController_Commands);
 				// TODO set language according to snippet’s scope selector
 				doc->sync_open();
 				document::show(doc); // If we call show() with a document that isn’t open then it will be loaded in the background, and show() will return before this has completed, meaning the next line may not target our new document.
-				[[DocumentController controllerForDocument:doc] performBundleItem:item];
+				[[DocumentWindowController controllerForDocument:doc] performBundleItem:item];
 				doc->close();
 				// TODO mark document as “not modified”
 			}

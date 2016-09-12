@@ -75,7 +75,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 {
 	for(NSWindow* window in windows)
 	{
-		if([window.delegate isKindOfClass:[DocumentController class]])
+		if([window.delegate isKindOfClass:[DocumentWindowController class]])
 			return YES;
 	}
 	return NO;
@@ -172,7 +172,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 			if(choice == NSAlertDefaultReturn) // "Visit Website"
 				[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://macromates.com/download"]];
 
-			[DocumentController disableSessionSave];
+			[DocumentWindowController disableSessionSave];
 			[NSApp terminate:self];
 		}
 	}
@@ -278,7 +278,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 		if(restoreSession)
 		{
 			close(open(prematureTerminationDuringRestore.c_str(), O_CREAT|O_TRUNC|O_WRONLY|O_CLOEXEC));
-			[DocumentController restoreSession];
+			[DocumentWindowController restoreSession];
 		}
 		unlink(prematureTerminationDuringRestore.c_str());
 	}
@@ -432,7 +432,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 	chooser.scope        = textView ? [textView scopeContext] : scope::wildcard;
 	chooser.hasSelection = [textView hasSelection];
 
-	if(DocumentController* controller = [NSApp targetForAction:@selector(selectedDocument)])
+	if(DocumentWindowController* controller = [NSApp targetForAction:@selector(selectedDocument)])
 	{
 		document::document_ptr doc = controller.selectedDocument;
 		chooser.path      = doc ? [NSString stringWithCxxString:doc->path()] : nil;
