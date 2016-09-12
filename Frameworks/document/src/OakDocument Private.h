@@ -2,6 +2,9 @@
 #import <undo/undo.h> // ng::buffer_t and ng::undo_manager_t types
 
 @interface OakDocument (Private)
+- (instancetype)initWithPath:(NSString*)aPath;
+
+@property (nonatomic) NSUInteger  untitledCount;
 @property (nonatomic) NSInteger   revision;
 @property (nonatomic) NSInteger   savedRevision;
 @property (nonatomic) NSString*   backupPath;

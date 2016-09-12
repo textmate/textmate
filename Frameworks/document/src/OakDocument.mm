@@ -392,7 +392,7 @@ private:
 
 + (instancetype)documentWithString:(NSString*)content fileType:(NSString*)aFileType customName:(NSString*)aName
 {
-	return [[OakDocument alloc] initWithData:[content dataUsingEncoding:NSUTF8StringEncoding] fileType:aFileType customName:aName];
+	return [OakDocument documentWithData:[content dataUsingEncoding:NSUTF8StringEncoding] fileType:aFileType customName:aName];
 }
 
 + (instancetype)documentWithIdentifier:(NSUUID*)anIdentifier
