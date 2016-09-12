@@ -10,6 +10,7 @@ namespace ng
 
 	struct result_t
 	{
+		WATCH_LEAKS(parser::result_t);
 		parse::stack_ptr state;
 		std::map<size_t, scope::scope_t> scopes;
 	};
