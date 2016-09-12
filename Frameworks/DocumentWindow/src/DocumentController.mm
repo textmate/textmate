@@ -512,8 +512,11 @@ namespace
 		{
 			if(someDocuments.firstObject == _documents[i]->document())
 			{
-				self.selectedTabIndex = i;
-				[self openAndSelectDocument:_documents[i]];
+				if(_selectedDocument != _documents[i])
+				{
+					self.selectedTabIndex = i;
+					[self openAndSelectDocument:_documents[i]];
+				}
 				break;
 			}
 		}
@@ -1209,8 +1212,11 @@ namespace
 			{
 				if(document.isOpen && _documents[i]->document() == document)
 				{
-					self.selectedTabIndex = i;
-					[self setSelectedDocument:_documents[i]];
+					if(_selectedDocument != _documents[i])
+					{
+						self.selectedTabIndex = i;
+						[self setSelectedDocument:_documents[i]];
+					}
 
 					if(NSApp.isActive && (self.window.isMiniaturized || !self.window.isKeyWindow))
 						[self.window makeKeyAndOrderFront:self];
