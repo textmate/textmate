@@ -471,7 +471,7 @@ namespace document
 
 	void document_t::show ()              { [OakDocumentController.sharedInstance didTouchDocument:_document]; }
 	void document_t::hide ()              { [OakDocumentController.sharedInstance didTouchDocument:_document]; }
-	oak::date_t document_t::lru () const  { return (double)[OakDocumentController.sharedInstance lruRankForDocument:_document]; }
+	NSInteger document_t::lru () const    { return [OakDocumentController.sharedInstance lruRankForDocument:_document]; }
 
 	bool document_t::backup ()            { return [_document saveBackup:nil]; }
 	void document_t::detach_backup ()     { _document.backupPath = nil; }

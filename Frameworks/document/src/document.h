@@ -22,6 +22,7 @@
 #else
 typedef struct objc_object OakDocument;
 typedef struct objc_object OakDocumentObserver;
+#include <objc/NSObjCRuntime.h> // NSInteger
 #endif
 
 namespace document
@@ -63,7 +64,7 @@ namespace document
 
 		void show ();
 		void hide ();
-		oak::date_t lru () const;
+		NSInteger lru () const;
 
 		// ===================
 		// = Simple Wrappers =

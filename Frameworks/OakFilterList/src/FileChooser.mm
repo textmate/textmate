@@ -36,7 +36,7 @@ namespace
 			full_path = doc->path();
 			prefix    = full_path == NULL_STR ? "" : path::relative_to(path::parent(full_path), base);
 			name      = full_path == NULL_STR ? doc->display_name() : path::name(full_path);
-			lru_rank  = -doc->lru().value();
+			lru_rank  = doc->lru();
 
 			if(prefix.empty() && full_path != NULL_STR)
 				prefix = ".";
@@ -49,7 +49,7 @@ namespace
 		std::string full_path;
 		std::string prefix;
 		std::string name;
-		double lru_rank;
+		NSInteger lru_rank;
 
 		bool matched    = true;
 		bool is_current = false;
@@ -299,7 +299,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 
 - (void)updateRecordsFrom:(NSUInteger)first
 {
-	std::function<bool(document_record_t const*, document_record_t const*)> sortFunctor = [](document_record_t const* lhs, document_record_t const* rhs){ return (lhs->rank < rhs->rank) || ((lhs->rank == rhs->rank) && ((lhs->lru_rank < rhs->lru_rank) || (lhs->lru_rank == rhs->lru_rank && text::less_t()(lhs->name, rhs->name)))); };
+	std::function<bool(document_record_t const*, document_record_t const*)> sortFunctor = [](document_record_t const* lhs, document_record_t const* rhs){ return (lhs->rank < rhs->rank) || ((lhs->rank == rhs->rank) && ((lhs->lru_rank > rhs->lru_rank) || (lhs->lru_rank == rhs->lru_rank && text::less_t()(lhs->name, rhs->name)))); };
 
 	if(OakNotEmptyString(_globString))
 	{

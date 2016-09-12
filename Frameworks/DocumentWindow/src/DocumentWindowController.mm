@@ -1044,7 +1044,7 @@ namespace
 		NSInteger excessTabs = _documents.size() - std::max<NSUInteger>(self.tabBarView.countOfVisibleTabs, 8);
 		if(excessTabs > 0)
 		{
-			std::multimap<oak::date_t, size_t> ranked;
+			std::multimap<NSInteger, size_t> ranked;
 			for(size_t i = 0; i < _documents.size(); ++i)
 				ranked.emplace(_documents[i]->lru(), i);
 
