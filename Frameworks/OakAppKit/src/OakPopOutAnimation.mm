@@ -28,10 +28,19 @@ static double const  kFadeFinishTime = 0.70;
 - (void)startAnimation:(id)sender;
 @end
 
-void OakShowPopOutAnimation (NSRect popOutRect, NSImage* anImage)
+void OakShowPopOutAnimation (NSRect popOutRect, NSImage* anImage, BOOL hidePrevious)
 {
 	if(popOutRect.size.width == 0 || popOutRect.size.height == 0)
 		return;
+	
+	static NSMutableSet<NSWindow*>* previousWindows = [NSMutableSet set];
+	
+	if(hidePrevious)
+	{
+		for(NSWindow* window in previousWindows)
+			[window close];
+		[previousWindows removeAllObjects];
+	}
 
 	popOutRect = NSInsetRect(popOutRect, -kExtendWidth, -kExtendHeight);
 	NSRect windowRect = popOutRect;
@@ -58,6 +67,7 @@ void OakShowPopOutAnimation (NSRect popOutRect, NSImage* anImage)
 
 	[window setFrame:[window frameRectForContentRect:windowRect] display:YES];
 	[window orderFront:nil];
+	[previousWindows addObject:window];
 
 	[aView startAnimation:nil];
 }

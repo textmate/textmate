@@ -790,12 +790,14 @@ static std::string shell_quote (std::vector<std::string> paths)
 		documentView->remove_enclosing_folds(range.min().index, range.max().index);
 	[self ensureSelectionIsInVisibleArea:self];
 
+	BOOL firstRange = YES;
 	for(auto const& range : ranges)
 	{
 		NSRect imageRect;
 		NSImage* image = [self imageForRanges:range imageRect:&imageRect];
 		imageRect = [[self window] convertRectToScreen:[self convertRect:imageRect toView:nil]];
-		OakShowPopOutAnimation(imageRect, image);
+		OakShowPopOutAnimation(imageRect, image, firstRange);
+		firstRange = NO;
 	}
 }
 
