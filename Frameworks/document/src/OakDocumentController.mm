@@ -192,10 +192,10 @@ namespace
 	{
 		// Support paths written by 2.0-beta.12.11 and earlier
 		NSDictionary* dictionary = [[NSUserDefaults standardUserDefaults] dictionaryForKey:@"LRUDocumentPaths"];
-		paths = [[dictionary[@"paths"] reverseObjectEnumerator] allObjects];
+		paths = dictionary[@"paths"];
 	}
 
-	for(NSString* path in paths)
+	for(NSString* path in [paths reverseObjectEnumerator])
 		_rankedPaths[path] = @(++_lastLRURank);
 }
 
