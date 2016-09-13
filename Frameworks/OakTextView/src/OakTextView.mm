@@ -546,6 +546,7 @@ private:
 @property (nonatomic) NSDictionary* matchCaptures; // Captures from last regexp match
 @property (nonatomic) BOOL needsEnsureSelectionIsInVisibleArea;
 @property (nonatomic, readwrite) NSString* symbol;
+@property (nonatomic) scm::status::type scmStatus;
 @end
 
 static std::vector<bundles::item_ptr> items_for_tab_expansion (std::shared_ptr<document_view_t> const& documentView, ng::ranges_t const& ranges, std::string const& scopeAttributes, ng::range_t* range)
@@ -956,14 +957,33 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 		[self registerForDraggedTypes:[[self class] dropTypes]];
 
+		[self bind:@"scmStatus" toObject:self withKeyPath:@"document.scmStatus" options:nil];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
 	}
 	return self;
 }
 
+- (void)setScmStatus:(scm::status::type)newStatus
+{
+	if(_scmStatus == newStatus)
+		return;
+
+	_scmStatus = newStatus;
+	for(auto const& item : bundles::query(bundles::kFieldSemanticClass, "callback.document.did-change-scm-status", [self scopeContext], bundles::kItemTypeMost, oak::uuid_t(), false))
+		[self performBundleItem:item];
+}
+
+- (void)setNilValueForKey:(NSString*)key
+{
+	// scmStatus can be nil because we bind to self.document.scmStatus
+	if(![key isEqualToString:@"scmStatus"])
+		[super setNilValueForKey:key];
+}
+
 - (void)dealloc
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
+	[self unbind:@"scmStatus"];
 	[self setDocument:nil];
 }
 
