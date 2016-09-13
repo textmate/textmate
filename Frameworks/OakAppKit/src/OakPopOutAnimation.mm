@@ -53,6 +53,12 @@ void OakShowPopOutAnimation (NSRect popOutRect, NSImage* anImage)
 
 	OakPopOutView* aView = [[OakPopOutView alloc] initWithFrame:[window contentView].bounds popOutRect:popOutRect];
 	[aView setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
+
+	[anImage lockFocus];
+	[[NSColor blackColor] set];
+	NSRectFillUsingOperation((NSRect){ NSZeroPoint, [anImage size]}, NSCompositeSourceAtop);
+	[anImage unlockFocus];
+
 	aView.contentImage = anImage;
 	[[window contentView] addSubview:aView];
 
