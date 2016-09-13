@@ -32,14 +32,15 @@ void OakShowPopOutAnimation (NSRect popOutRect, NSImage* anImage, BOOL hidePrevi
 {
 	if(popOutRect.size.width == 0 || popOutRect.size.height == 0)
 		return;
-	
-	static NSMutableSet<NSWindow*>* previousWindows = [NSMutableSet set];
-	
+
+	static NSMutableSet<OakPopOutView*>* previousViews = [NSMutableSet set];
+
 	if(hidePrevious)
 	{
-		for(NSWindow* window in previousWindows)
-			[window close];
-		[previousWindows removeAllObjects];
+		CAAnimation* dummy = nullptr;
+		for(OakPopOutView* view in previousViews)
+			[view animationDidStop:dummy finished:YES];
+		[previousViews removeAllObjects];
 	}
 
 	popOutRect = NSInsetRect(popOutRect, -kExtendWidth, -kExtendHeight);
@@ -67,7 +68,7 @@ void OakShowPopOutAnimation (NSRect popOutRect, NSImage* anImage, BOOL hidePrevi
 
 	[window setFrame:[window frameRectForContentRect:windowRect] display:YES];
 	[window orderFront:nil];
-	[previousWindows addObject:window];
+	[previousViews addObject:aView];
 
 	[aView startAnimation:nil];
 }
