@@ -177,6 +177,11 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 @property (nonatomic) BOOL needsImportDocumentChanges;
 @property (nonatomic, readonly) BOOL shouldSniffFileType;
 
+@property (nonatomic) BOOL                               observeSCMStatus;
+@property (nonatomic) scm::info_ptr                      scmInfo;
+@property (nonatomic) std::map<std::string, std::string> scmVariables;
+@property (nonatomic, readwrite) scm::status::type       scmStatus;
+
 @property (nonatomic) NSArray<void(^)(OakDocumentIOResult, NSString*, oak::uuid_t const&)>* loadCompletionHandlers;
 
 // These are also exposed in ‘OakDocument Private.h’
@@ -371,6 +376,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 - (void)dealloc
 {
 	[OakDocumentController.sharedInstance unregister:self];
+	self.observeSCMStatus = NO;
 	[self deleteBuffer];
 	[self removeBackup];
 }
@@ -438,6 +444,12 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	{
 		self.observeFileSystem = NO;
 		self.observeFileSystem = YES;
+	}
+
+	if(_observeSCMStatus)
+	{
+		self.observeSCMStatus = NO;
+		self.observeSCMStatus = YES;
 	}
 
 	if(self.isOpen)
@@ -1321,6 +1333,46 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 {
 	OakDocumentEditor* documentEditor = self.documentEditors.firstObject;
 	return [documentEditor handleOutput:string placement:place format:format caret:caret inputRanges:ranges environment:environment];
+}
+
+// ============
+// = SCM Info =
+// ============
+
+- (void)setObserveSCMStatus:(BOOL)flag
+{
+	if(_observeSCMStatus == flag)
+		return;
+	_observeSCMStatus = flag;
+
+	if(flag)
+	{
+		if(_scmInfo = scm::info(path::parent(to_s(self.path))))
+		{
+			_scmStatus    = _scmInfo->status(to_s(self.path));
+			_scmVariables = _scmInfo->scm_variables();
+
+			// We must postpone potential self.scmStatus = «status» when our callstack
+			// is bind:toObject:withKeyPath:options: → scmStatus → setObserveSCMStatus:
+			dispatch_async(dispatch_get_main_queue(), ^{
+				__weak OakDocument* weakSelf = self;
+				_scmInfo->add_callback(^(scm::info_t const& info){
+					weakSelf.scmStatus    = info.status(to_s(weakSelf.path));
+					weakSelf.scmVariables = info.scm_variables();
+				});
+			});
+		}
+	}
+	else if(_scmInfo)
+	{
+		_scmInfo->pop_callback();
+	}
+}
+
+- (scm::status::type)scmStatus
+{
+	self.observeSCMStatus = YES;
+	return _scmStatus;
 }
 
 // =======================

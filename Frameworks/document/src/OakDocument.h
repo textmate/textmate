@@ -2,6 +2,7 @@
 #import <authorization/authorization.h>
 #import <selection/types.h>
 #import <command/parser.h>
+#import <scm/scm.h>
 
 PUBLIC extern NSString* OakDocumentContentDidChangeNotification;
 PUBLIC extern NSString* OakDocumentMarksDidChangeNotification;
@@ -39,6 +40,7 @@ PUBLIC @interface OakDocument : NSObject
 @property (nonatomic) NSString* fileType;     // Lazy: Depends on path and firstLine
 @property (nonatomic) NSString* diskEncoding;
 @property (nonatomic) NSString* diskNewlines;
+@property (nonatomic, readonly) scm::status::type scmStatus;
 
 - (NSString*)displayNameWithExtension:(BOOL)flag;
 
