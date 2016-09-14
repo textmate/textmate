@@ -33,6 +33,7 @@ namespace path
 				add_include_glob(glob);
 		}
 
+		void add_glob (std::string const& glob, size_t itemType = kPathItemAny);
 		void add_include_glob (std::string const& glob, size_t itemType = kPathItemAny);
 		void add_exclude_glob (std::string const& glob, size_t itemType = kPathItemAny);
 

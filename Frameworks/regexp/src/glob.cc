@@ -47,16 +47,20 @@ namespace path
 	// = glob_list_t =
 	// ===============
 
-	void glob_list_t::add_include_glob (std::string const& glob, size_t itemType)
+	void glob_list_t::add_glob (std::string const& glob, size_t itemType)
 	{
 		if(glob != NULL_STR)
-			_globs.emplace_back(glob_t(glob, false), itemType);
+			_globs.emplace_back(glob_t(glob, itemType & kPathItemExclude), itemType);
+	}
+
+	void glob_list_t::add_include_glob (std::string const& glob, size_t itemType)
+	{
+		add_glob(glob, itemType);
 	}
 
 	void glob_list_t::add_exclude_glob (std::string const& glob, size_t itemType)
 	{
-		if(glob != NULL_STR)
-			_globs.emplace_back(glob_t(glob, true), itemType | kPathItemExclude);
+		add_glob(glob, itemType | kPathItemExclude);
 	}
 
 	bool glob_list_t::include (std::string const& path, size_t itemType, bool defaultResult) const
