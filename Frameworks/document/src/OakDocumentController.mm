@@ -2,6 +2,19 @@
 #import "OakDocument Private.h"
 #import <plist/uuid.h>
 #import <ns/ns.h>
+#import <io/entries.h>
+#import <text/ctype.h>
+#import <regexp/glob.h>
+
+NSString* kSearchFollowDirectoryLinksKey  = @"FollowDirectoryLinks";
+NSString* kSearchFollowFileLinksKey       = @"FollowFileLinks";
+NSString* kSearchDepthFirstSearchKey      = @"DepthFirstSearch";
+NSString* kSearchExcludeDirectoryGlobsKey = @"ExcludeDirectoryGlobs";
+NSString* kSearchExcludeFileGlobsKey      = @"ExcludeFileGlobs";
+NSString* kSearchExcludeGlobsKey          = @"ExcludeGlobs";
+NSString* kSearchDirectoryGlobsKey        = @"DirectoryGlobs";
+NSString* kSearchFileGlobsKey             = @"FileGlobs";
+NSString* kSearchGlobsKey                 = @"Globs";
 
 namespace
 {
@@ -231,6 +244,120 @@ namespace
 
 	[_saveRankedPathsTimer invalidate];
 	_saveRankedPathsTimer = [NSTimer scheduledTimerWithTimeInterval:2 target:self selector:@selector(saveRankedPathsTimerDidFire:) userInfo:nil repeats:NO];
+}
+
+// ======================
+// = Directory Scanning =
+// ======================
+
+- (void)enumerateDocumentsAtPath:(NSString*)aDirectory options:(NSDictionary*)someOptions usingBlock:(void(^)(OakDocument* document, BOOL* stop))block
+{
+	BOOL followDirectoryLinks = [someOptions[kSearchFollowDirectoryLinksKey] boolValue];
+	BOOL followFileLinks      = [someOptions[kSearchFollowFileLinksKey] boolValue] || !someOptions[kSearchFollowFileLinksKey];
+	BOOL depthFirst           = [someOptions[kSearchDepthFirstSearchKey] boolValue];
+
+	static std::vector<std::pair<NSString*, size_t>> const map = {
+		{ kSearchExcludeDirectoryGlobsKey, path::kPathItemDirectory | path::kPathItemExclude },
+		{ kSearchExcludeFileGlobsKey,      path::kPathItemFile      | path::kPathItemExclude },
+		{ kSearchExcludeGlobsKey,          path::kPathItemAny       | path::kPathItemExclude },
+		{ kSearchDirectoryGlobsKey,        path::kPathItemDirectory                          },
+		{ kSearchFileGlobsKey,             path::kPathItemFile                               },
+		{ kSearchGlobsKey,                 path::kPathItemAny                                },
+	};
+
+	path::glob_list_t globs;
+	for(auto const& pair : map)
+	{
+		for(NSString* glob in someOptions[pair.first])
+			globs.add_glob(to_s(glob), pair.second);
+	}
+
+	std::set<std::pair<dev_t, ino_t>> didScan;
+	std::deque<std::string> dirs = { to_s(aDirectory) };
+	std::vector<std::string> links;
+
+	BOOL stop = NO;
+	while(stop == NO && !dirs.empty())
+	{
+		std::string dir = dirs.front();
+		dirs.pop_front();
+
+		struct stat buf;
+		if(lstat(dir.c_str(), &buf) == -1) // get st_dev so we don’t need to stat each path entry (unless it is a symbolic link)
+		{
+			perrorf("OakDocumentController: lstat(\"%s\")", dir.c_str());
+			continue;
+		}
+
+		ASSERT(S_ISDIR(buf.st_mode) || S_ISLNK(buf.st_mode));
+
+		std::vector<std::string> newDirs;
+		std::set<std::string, text::less_t> files;
+		for(auto const& it : path::entries(dir))
+		{
+			std::string const& path = path::join(dir, it->d_name);
+			if(it->d_type == DT_DIR)
+			{
+				if(globs.exclude(path, path::kPathItemDirectory))
+					continue;
+
+				if(didScan.emplace(buf.st_dev, it->d_ino).second)
+					newDirs.push_back(path);
+			}
+			else if(it->d_type == DT_REG)
+			{
+				if(globs.exclude(path, path::kPathItemFile))
+					continue;
+
+				if(didScan.emplace(buf.st_dev, it->d_ino).second)
+					files.emplace(path);
+			}
+			else if(it->d_type == DT_LNK && (followDirectoryLinks || followFileLinks))
+			{
+				links.push_back(path); // handle later since link may point to another device plus if link is “local” and will be seen later, we reported the local path rather than this link
+			}
+		}
+
+		std::sort(newDirs.begin(), newDirs.end(), text::less_t());
+		dirs.insert(depthFirst ? dirs.begin() : dirs.end(), newDirs.begin(), newDirs.end());
+
+		if(dirs.empty())
+		{
+			for(auto const& link : links)
+			{
+				std::string const path = path::resolve(link);
+				if(lstat(path.c_str(), &buf) != -1)
+				{
+					if(S_ISDIR(buf.st_mode) && followDirectoryLinks && didScan.emplace(buf.st_dev, buf.st_ino).second)
+					{
+						if(globs.exclude(path, path::kPathItemDirectory))
+							continue;
+						dirs.push_back(path);
+					}
+					else if(S_ISREG(buf.st_mode) && followFileLinks)
+					{
+						if(globs.exclude(path, path::kPathItemFile))
+							continue;
+
+						if(didScan.emplace(buf.st_dev, buf.st_ino).second)
+							files.emplace(path);
+					}
+				}
+				else
+				{
+					perrorf("OakDocumentController: path::resolve(\"%s\") → lstat(\"%s\")", link.c_str(), path.c_str());
+				}
+			}
+			links.clear();
+		}
+
+		for(auto const& file : files)
+		{
+			block([OakDocument documentWithPath:to_ns(file)], &stop);
+			if(stop)
+				break;
+		}
+	}
 }
 
 // ===================================================
