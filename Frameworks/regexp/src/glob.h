@@ -19,7 +19,11 @@ namespace path
 		regexp::pattern_t _compiled;
 	};
 
-	enum kPathItemType { kPathItemAny, kPathItemFile, kPathItemDirectory };
+	static size_t const kPathItemAny         = 0x0000;
+	static size_t const kPathItemFile        = 0x0001;
+	static size_t const kPathItemDirectory   = 0x0002;
+	static size_t const kPathItemMask        = 0x007F;
+	static size_t const kPathItemExclude     = 0x0080;
 
 	struct PUBLIC glob_list_t
 	{
@@ -29,20 +33,19 @@ namespace path
 				add_include_glob(glob);
 		}
 
-		void add_include_glob (std::string const& glob, kPathItemType itemType = kPathItemAny);
-		void add_exclude_glob (std::string const& glob, kPathItemType itemType = kPathItemAny);
+		void add_include_glob (std::string const& glob, size_t itemType = kPathItemAny);
+		void add_exclude_glob (std::string const& glob, size_t itemType = kPathItemAny);
 
-		bool include (std::string const& path, kPathItemType itemType = kPathItemAny, bool defaultResult = false) const;
-		bool exclude (std::string const& path, kPathItemType itemType = kPathItemAny, bool defaultResult = true) const;
+		bool include (std::string const& path, size_t itemType = kPathItemAny, bool defaultResult = false) const;
+		bool exclude (std::string const& path, size_t itemType = kPathItemAny, bool defaultResult = true) const;
 
 	private:
 		struct record_t
 		{
-			record_t (bool negate, glob_t const& glob, kPathItemType itemType) : negate(negate), glob(glob), item_type(itemType) { }
+			record_t (glob_t const& glob, size_t itemType) : glob(glob), item_type(itemType) { }
 
-			bool negate;
 			glob_t glob;
-			kPathItemType item_type;
+			size_t item_type;
 		};
 
 		std::vector<record_t> _globs;

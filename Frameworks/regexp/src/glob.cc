@@ -47,32 +47,32 @@ namespace path
 	// = glob_list_t =
 	// ===============
 
-	void glob_list_t::add_include_glob (std::string const& glob, kPathItemType itemType)
+	void glob_list_t::add_include_glob (std::string const& glob, size_t itemType)
 	{
 		if(glob != NULL_STR)
-			_globs.emplace_back(false, glob_t(glob, false), itemType);
+			_globs.emplace_back(glob_t(glob, false), itemType);
 	}
 
-	void glob_list_t::add_exclude_glob (std::string const& glob, kPathItemType itemType)
+	void glob_list_t::add_exclude_glob (std::string const& glob, size_t itemType)
 	{
 		if(glob != NULL_STR)
-			_globs.emplace_back(true, glob_t(glob, true), itemType);
+			_globs.emplace_back(glob_t(glob, true), itemType | kPathItemExclude);
 	}
 
-	bool glob_list_t::include (std::string const& path, kPathItemType itemType, bool defaultResult) const
+	bool glob_list_t::include (std::string const& path, size_t itemType, bool defaultResult) const
 	{
 		return !exclude(path, itemType, !defaultResult);
 	}
 
-	bool glob_list_t::exclude (std::string const& path, kPathItemType itemType, bool defaultResult) const
+	bool glob_list_t::exclude (std::string const& path, size_t itemType, bool defaultResult) const
 	{
 		if(_globs.empty())
 			return false;
 
 		for(auto record : _globs)
 		{
-			if((itemType == kPathItemAny || record.item_type == kPathItemAny || itemType == record.item_type) && record.glob.does_match(path))
-				return record.negate;
+			if((itemType == kPathItemAny || (record.item_type & kPathItemMask) == kPathItemAny || (record.item_type & kPathItemMask) == itemType) && record.glob.does_match(path))
+				return record.item_type & kPathItemExclude;
 		}
 		return defaultResult;
 	}
