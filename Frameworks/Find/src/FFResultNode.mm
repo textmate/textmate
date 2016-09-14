@@ -349,7 +349,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 		return builder.attributed_string();
 	}
 
-	_excerpt = AttributedStringForMatch(prefix + middle + suffix, prefix.size(), prefix.size() + middle.size(), m.line_number, m.newlines, font);
+	_excerpt = AttributedStringForMatch(prefix + middle + suffix, prefix.size(), prefix.size() + middle.size(), m.line_number(), m.newlines, font);
 	_excerptReplaceString = replacementString;
 	return _excerpt;
 }

@@ -226,7 +226,6 @@ namespace find
 			res.excerpt_offset = fromOffset;
 			res.truncate_head  = orgFromOffset < fromOffset;
 			res.truncate_tail  = toOffset < orgToOffset;
-			res.line_number    = from.line;
 			res.newlines       = crlf;
 			results.push_back(res);
 		}

@@ -627,7 +627,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 			str.erase(str.size()-1);
 
 		if(withFilename)
-			str = text::format("%s:%lu\t", [item.path UTF8String], m.line_number + 1) + str;
+			str = text::format("%s:%lu\t", [item.path UTF8String], m.line_number() + 1) + str;
 
 		res.push_back(str);
 	}

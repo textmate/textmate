@@ -32,7 +32,7 @@ NSString* const FFDocumentSearchDidFinishNotification         = @"FFDocumentSear
 
 - (NSString*)description
 {
-	return [NSString stringWithFormat:@"Match in ‘%@’ at line %zu: %@", [NSString stringWithCxxString:match.document->display_name()], match.line_number, [NSString stringWithCxxString:match.excerpt]];
+	return [NSString stringWithFormat:@"Match in ‘%@’ at line %zu: %@", [NSString stringWithCxxString:match.document->display_name()], match.line_number(), [NSString stringWithCxxString:match.excerpt]];
 }
 @end
 
