@@ -103,25 +103,38 @@ namespace
 	}
 }
 
-static path::glob_list_t globs_for_path (std::string const& path)
+static NSDictionary* globs_for_path (std::string const& path)
 {
+	static std::map<std::string, NSString*> const map = {
+		{ kSettingsExcludeDirectoriesInFileChooserKey, kSearchExcludeDirectoryGlobsKey },
+		{ kSettingsExcludeDirectoriesKey,              kSearchExcludeDirectoryGlobsKey },
+		{ kSettingsExcludeFilesInFileChooserKey,       kSearchExcludeFileGlobsKey      },
+		{ kSettingsExcludeFilesKey,                    kSearchExcludeFileGlobsKey      },
+		{ kSettingsExcludeInFileChooserKey,            kSearchExcludeGlobsKey          },
+		{ kSettingsExcludeKey,                         kSearchExcludeGlobsKey          },
+		{ kSettingsBinaryKey,                          kSearchExcludeGlobsKey          },
+		{ kSettingsIncludeDirectoriesKey,              kSearchDirectoryGlobsKey        },
+		{ kSettingsIncludeFilesInFileChooserKey,       kSearchFileGlobsKey             },
+		{ kSettingsIncludeFilesKey,                    kSearchFileGlobsKey             },
+		{ kSettingsIncludeInFileChooserKey,            kSearchGlobsKey                 },
+		{ kSettingsIncludeKey,                         kSearchGlobsKey                 },
+	};
+
+	NSDictionary* res = @{
+		kSearchExcludeDirectoryGlobsKey : [NSMutableArray array],
+		kSearchExcludeFileGlobsKey      : [NSMutableArray array],
+		kSearchExcludeGlobsKey          : [NSMutableArray array],
+		kSearchDirectoryGlobsKey        : [NSMutableArray array],
+		kSearchFileGlobsKey             : [NSMutableArray array],
+		kSearchGlobsKey                 : [NSMutableArray array],
+	};
+
 	settings_t const settings = settings_for_path(NULL_STR, "", path);
-	path::glob_list_t res;
-
-	res.add_exclude_glob(settings.get(kSettingsExcludeDirectoriesInFileChooserKey), path::kPathItemDirectory);
-	res.add_exclude_glob(settings.get(kSettingsExcludeDirectoriesKey),              path::kPathItemDirectory);
-	res.add_exclude_glob(settings.get(kSettingsExcludeFilesInFileChooserKey),       path::kPathItemFile);
-	res.add_exclude_glob(settings.get(kSettingsExcludeFilesKey),                    path::kPathItemFile);
-	res.add_exclude_glob(settings.get(kSettingsExcludeInFileChooserKey),            path::kPathItemAny);
-	res.add_exclude_glob(settings.get(kSettingsExcludeKey),                         path::kPathItemAny);
-	res.add_exclude_glob(settings.get(kSettingsBinaryKey),                          path::kPathItemAny);
-
-	res.add_include_glob(settings.get(kSettingsIncludeDirectoriesKey),              path::kPathItemDirectory);
-	res.add_include_glob(settings.get(kSettingsIncludeFilesInFileChooserKey),       path::kPathItemFile);
-	res.add_include_glob(settings.get(kSettingsIncludeFilesKey),                    path::kPathItemFile);
-	res.add_include_glob(settings.get(kSettingsIncludeInFileChooserKey),            path::kPathItemAny);
-	res.add_include_glob(settings.get(kSettingsIncludeKey),                         path::kPathItemAny);
-
+	for(auto const& pair : map)
+	{
+		if(NSString* glob = to_ns(settings.get(pair.first)))
+			[res[pair.second] addObject:glob];
+	}
 	return res;
 }
 
@@ -132,12 +145,16 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	NSDictionary<NSUUID*, OakDocument*>*          _openDocumentsMap;
 	NSUUID*                                       _currentDocument;
 	std::vector<document_record_t>                _records;
-	document::scanner_ptr                         _scanner;
 
 	NSString* _globString;
 	NSString* _filterString;
 	NSString* _selectionString;
 	NSString* _symbolString;
+
+	BOOL _searching;
+	NSString* _searchPath;
+	NSUInteger _lastSearchToken;
+	NSMutableArray<OakDocument*>* _searchResults;
 }
 @property (nonatomic) NSArray* sourceListLabels;
 @property (nonatomic) NSProgressIndicator* progressIndicator;
@@ -159,6 +176,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	if((self = [super init]))
 	{
 		_sourceListLabels = @[ @"All", @"Open Documents", @"Uncommitted Documents" ];
+		_searchResults = [NSMutableArray array];
 
 		[self.window setContentBorderThickness:57 forEdge:NSMaxYEdge];
 		self.tableView.allowsMultipleSelection = YES;
@@ -409,9 +427,32 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	_records.clear();
 	[self addRecordsForDocuments:_openDocuments];
 	settings_t const settings = settings_for_path(NULL_STR, "", to_s(_path));
-	_scanner = std::make_shared<document::scanner_t>(to_s(_path), globs_for_path(to_s(_path)));
-	_scanner->set_follow_directory_links(settings.get(kSettingsFollowSymbolicLinksKey, false));
-	_scanner->start();
+	NSMutableDictionary* options = [globs_for_path(to_s(_path)) mutableCopy];
+	options[kSearchFollowDirectoryLinksKey] = @(settings.get(kSettingsFollowSymbolicLinksKey, false));
+
+	size_t searchToken = ++_lastSearchToken;
+	_searching = YES;
+	@synchronized(_searchResults) {
+		[_searchResults removeAllObjects];
+	}
+
+	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+		[OakDocumentController.sharedInstance enumerateDocumentsAtPath:_path options:options usingBlock:^(OakDocument* document, BOOL* stop){
+			@synchronized(_searchResults) {
+				if(searchToken == _lastSearchToken)
+						[_searchResults addObject:document];
+				else	*stop = YES;
+			}
+		}];
+
+		dispatch_async(dispatch_get_main_queue(), ^{
+			if(searchToken == _lastSearchToken)
+			{
+				_searching = NO;
+				[self fetchScannerResults:nil];
+			}
+		});
+	});
 
 	_pollInterval = 0.01;
 	_pollTimer = [NSTimer scheduledTimerWithTimeInterval:_pollInterval target:self selector:@selector(fetchScannerResults:) userInfo:nil repeats:NO];
@@ -478,14 +519,14 @@ static path::glob_list_t globs_for_path (std::string const& path)
 
 - (void)fetchScannerResults:(NSTimer*)aTimer
 {
-	bool isRunning = _scanner->is_running();
+	@synchronized(_searchResults) {
+		if(_searchResults.count || !_searching)
+			_searchPath = _searching ? [_searchResults.lastObject.path stringByDeletingLastPathComponent] : nil;
+		[self addRecordsForDocuments:_searchResults];
+		[_searchResults removeAllObjects];
+	}
 
-	NSMutableArray* documents = [NSMutableArray array];
-	for(document::document_ptr cppDocument : _scanner->accept_documents())
-		[documents addObject:cppDocument->document()];
-	[self addRecordsForDocuments:documents];
-
-	if(isRunning)
+	if(_searching)
 	{
 		_pollInterval = std::min(_pollInterval * 2, 0.32);
 		_pollTimer = [NSTimer scheduledTimerWithTimeInterval:_pollInterval target:self selector:@selector(fetchScannerResults:) userInfo:nil repeats:NO];
@@ -499,10 +540,13 @@ static path::glob_list_t globs_for_path (std::string const& path)
 
 - (void)shutdownScanner
 {
+	if(_searching)
+		++_lastSearchToken;
+	_searching = NO;
+
 	[_progressIndicator stopAnimation:self];
 	[_pollTimer invalidate];
 	_pollTimer = nil;
-	_scanner.reset();
 }
 
 - (void)updateFilterString:(NSString*)aString
@@ -528,9 +572,9 @@ static path::glob_list_t globs_for_path (std::string const& path)
 
 - (void)updateStatusText:(id)sender
 {
-	if(_scanner)
+	if(_searching)
 	{
-		std::string path = path::relative_to(_scanner->get_current_path(), to_s(_path));
+		std::string path = path::relative_to(to_s(_searchPath), to_s(_path));
 		[self.statusTextField.cell setLineBreakMode:NSLineBreakByTruncatingMiddle];
 		self.statusTextField.stringValue = [NSString stringWithFormat:@"Searching “%@”…", [NSString stringWithCxxString:path]];
 	}
