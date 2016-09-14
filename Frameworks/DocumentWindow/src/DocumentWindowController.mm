@@ -2204,15 +2204,19 @@ namespace
 
 - (IBAction)goToFile:(id)sender
 {
+	NSMutableArray* openDocuments = [NSMutableArray array];
+	for(document::document_ptr cppDocument : _documents)
+		[openDocuments addObject:cppDocument->document()];
+
 	FileChooser* fc = [FileChooser sharedInstance];
 
-	fc.path             = nil; // Disable folder scanning when updating openCppDocuments/currentDocument
-	fc.filterString     = @"";
-	fc.openCppDocuments = _documents;
-	fc.currentDocument  = _selectedDocument ? _selectedDocument->identifier() : oak::uuid_t();
-	fc.target           = self;
-	fc.action           = @selector(fileChooserDidSelectItems:);
-	fc.path             = self.projectPath ?: self.untitledSavePath ?: NSHomeDirectory();
+	fc.path            = nil; // Disable folder scanning when updating openDocuments and currentDocument
+	fc.filterString    = @"";
+	fc.openDocuments   = openDocuments;
+	fc.currentDocument = _selectedDocument ? [[NSUUID alloc] initWithUUIDString:to_ns(_selectedDocument->identifier())] : nil;
+	fc.target          = self;
+	fc.action          = @selector(fileChooserDidSelectItems:);
+	fc.path            = self.projectPath ?: self.untitledSavePath ?: NSHomeDirectory();
 
 	if(OakPasteboardEntry* entry = [[OakPasteboard pasteboardWithName:NSFindPboard] current])
 	{

@@ -10,7 +10,9 @@
 #import <OakFoundation/OakFoundation.h>
 #import <document/OakDocument.h>
 #import <document/OakDocumentController.h>
+#import <scm/scm.h>
 #import <ns/ns.h>
+#import <regexp/glob.h>
 #import <text/format.h>
 #import <text/parse.h>
 #import <text/ctype.h>
@@ -140,11 +142,9 @@ static NSDictionary* globs_for_path (std::string const& path)
 
 @interface FileChooser ()
 {
-	scm::info_ptr                                 _scmInfo;
-	NSArray<OakDocument*>*                        _openDocuments;
-	NSDictionary<NSUUID*, OakDocument*>*          _openDocumentsMap;
-	NSUUID*                                       _currentDocument;
-	std::vector<document_record_t>                _records;
+	scm::info_ptr                        _scmInfo;
+	NSDictionary<NSUUID*, OakDocument*>* _openDocumentsMap;
+	std::vector<document_record_t>       _records;
 
 	NSString* _globString;
 	NSString* _filterString;
@@ -257,22 +257,19 @@ static NSDictionary* globs_for_path (std::string const& path)
 	self.window.title = src ?: @"Open Quickly";
 }
 
-- (void)setCurrentDocument:(oak::uuid_t const&)identifier
+- (void)setCurrentDocument:(NSUUID*)identifier
 {
-	_currentDocument = [[NSUUID alloc] initWithUUIDString:to_ns(identifier)];
+	if(_currentDocument == identifier || [_currentDocument isEqual:identifier])
+		return;
+	_currentDocument = identifier;
 	[self reload];
-}
-
-- (void)setOpenCppDocuments:(std::vector<document::document_ptr> const&)newDocuments
-{
-	NSMutableArray* array = [NSMutableArray array];
-	for(document::document_ptr cppDocument : newDocuments)
-		[array addObject:cppDocument->document()];
-	self.openDocuments = array;
 }
 
 - (void)setOpenDocuments:(NSArray<OakDocument*>*)newDocuments
 {
+	if(_openDocuments == newDocuments || [_openDocuments isEqualToArray:newDocuments])
+		return;
+
 	NSMutableDictionary* dict = [NSMutableDictionary dictionary];
 	for(OakDocument* doc in newDocuments)
 		dict[doc.identifier] = doc;
