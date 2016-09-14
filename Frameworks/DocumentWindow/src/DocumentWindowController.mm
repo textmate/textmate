@@ -2206,12 +2206,12 @@ namespace
 {
 	FileChooser* fc = [FileChooser sharedInstance];
 
-	fc.filterString    = @"";
-	fc.openDocuments   = _documents;
-	fc.currentDocument = _selectedDocument ? _selectedDocument->identifier() : oak::uuid_t();
-	fc.target          = self;
-	fc.action          = @selector(fileChooserDidSelectItems:);
-	fc.path            = self.projectPath ?: self.untitledSavePath ?: NSHomeDirectory();
+	fc.filterString     = @"";
+	fc.openCppDocuments = _documents;
+	fc.currentDocument  = _selectedDocument ? _selectedDocument->identifier() : oak::uuid_t();
+	fc.target           = self;
+	fc.action           = @selector(fileChooserDidSelectItems:);
+	fc.path             = self.projectPath ?: self.untitledSavePath ?: NSHomeDirectory();
 
 	if(OakPasteboardEntry* entry = [[OakPasteboard pasteboardWithName:NSFindPboard] current])
 	{

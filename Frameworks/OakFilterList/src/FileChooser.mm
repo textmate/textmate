@@ -240,12 +240,12 @@ static path::glob_list_t globs_for_path (std::string const& path)
 - (oak::uuid_t const&)currentDocument                       { return _currentDocument; }
 - (void)setCurrentDocument:(oak::uuid_t const&)newDocument  { _currentDocument = newDocument; [self reload]; }
 
-- (std::vector<document::document_ptr> const&)openDocuments
+- (std::vector<document::document_ptr> const&)openCppDocuments
 {
 	return _openDocuments;
 }
 
-- (void)setOpenDocuments:(std::vector<document::document_ptr> const&)newDocuments
+- (void)setOpenCppDocuments:(std::vector<document::document_ptr> const&)newDocuments
 {
 	_openDocuments = newDocuments;
 	_openDocumentsMap.clear();
@@ -672,7 +672,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 					if(doc->path() != record.full_path)
 						newDocuments.push_back(doc);
 				}
-				self.openDocuments = newDocuments;
+				self.openCppDocuments = newDocuments;
 			}
 		}
 	}
