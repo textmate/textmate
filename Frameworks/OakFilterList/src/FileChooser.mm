@@ -8,6 +8,8 @@
 #import <OakAppKit/NSImage Additions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakFoundation/OakFoundation.h>
+#import <document/OakDocument.h>
+#import <document/OakDocumentController.h>
 #import <ns/ns.h>
 #import <text/format.h>
 #import <text/parse.h>
@@ -31,21 +33,21 @@ namespace
 {
 	struct document_record_t
 	{
-		document_record_t (document::document_ptr const& doc, std::string const& base)
+		document_record_t (OakDocument* doc, std::string const& base)
 		{
-			full_path = doc->path();
+			full_path = to_s(doc.path);
 			prefix    = full_path == NULL_STR ? "" : path::relative_to(path::parent(full_path), base);
-			name      = full_path == NULL_STR ? doc->display_name() : path::name(full_path);
-			lru_rank  = doc->lru();
+			name      = full_path == NULL_STR ? to_s(doc.displayName) : path::name(full_path);
+			lru_rank  = [OakDocumentController.sharedInstance lruRankForDocument:doc];
 
 			if(prefix.empty() && full_path != NULL_STR)
 				prefix = ".";
 
 			if(full_path == NULL_STR)
-				identifier = doc->identifier();
+				identifier = doc.identifier;
 		}
 
-		oak::uuid_t identifier;
+		NSUUID* identifier;
 		std::string full_path;
 		std::string prefix;
 		std::string name;
@@ -126,9 +128,9 @@ static path::glob_list_t globs_for_path (std::string const& path)
 @interface FileChooser ()
 {
 	scm::info_ptr                                 _scmInfo;
-	std::vector<document::document_ptr>           _openDocuments;
-	std::map<oak::uuid_t, document::document_ptr> _openDocumentsMap;
-	oak::uuid_t                                   _currentDocument;
+	NSArray<OakDocument*>*                        _openDocuments;
+	NSDictionary<NSUUID*, OakDocument*>*          _openDocumentsMap;
+	NSUUID*                                       _currentDocument;
 	std::vector<document_record_t>                _records;
 	document::scanner_ptr                         _scanner;
 
@@ -218,8 +220,8 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	[self shutdownScanner];
 
 	_scmInfo.reset();
-	_openDocuments.clear();
-	_openDocumentsMap.clear();
+	_openDocuments = nil;
+	_openDocumentsMap = nil;
 	_records.clear();
 
 	self.items = @[ ];
@@ -237,19 +239,28 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	self.window.title = src ?: @"Open Quickly";
 }
 
-- (oak::uuid_t const&)currentDocument                       { return _currentDocument; }
-- (void)setCurrentDocument:(oak::uuid_t const&)newDocument  { _currentDocument = newDocument; [self reload]; }
-
-- (std::vector<document::document_ptr> const&)openCppDocuments
+- (void)setCurrentDocument:(oak::uuid_t const&)identifier
 {
-	return _openDocuments;
+	_currentDocument = [[NSUUID alloc] initWithUUIDString:to_ns(identifier)];
+	[self reload];
 }
 
 - (void)setOpenCppDocuments:(std::vector<document::document_ptr> const&)newDocuments
 {
-	_openDocuments = newDocuments;
-	_openDocumentsMap.clear();
-	std::transform(_openDocuments.begin(), _openDocuments.end(), inserter(_openDocumentsMap, _openDocumentsMap.end()), [](document::document_ptr const& doc){ return std::make_pair(doc->identifier(), doc); });
+	NSMutableArray* array = [NSMutableArray array];
+	for(document::document_ptr cppDocument : newDocuments)
+		[array addObject:cppDocument->document()];
+	self.openDocuments = array;
+}
+
+- (void)setOpenDocuments:(NSArray<OakDocument*>*)newDocuments
+{
+	NSMutableDictionary* dict = [NSMutableDictionary dictionary];
+	for(OakDocument* doc in newDocuments)
+		dict[doc.identifier] = doc;
+
+	_openDocuments    = newDocuments;
+	_openDocumentsMap = dict;
 	[self reload];
 }
 
@@ -273,22 +284,21 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	}
 }
 
-- (void)addRecordsForDocuments:(std::vector<document::document_ptr> const&)documents
+- (void)addRecordsForDocuments:(NSArray<OakDocument*>*)documents
 {
 	std::string const path = to_s(_path);
-	std::set<std::string> openPaths;
-	std::transform(_openDocuments.begin(), _openDocuments.end(), inserter(openPaths, openPaths.end()), [](document::document_ptr const& doc){ return doc->path(); });
+	NSSet<NSString*>* openPaths = [NSSet setWithArray:[[_openDocuments filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"path != NULL"]] valueForKey:@"path"]];
 
 	bool insertAll = _records.empty();
 
 	NSUInteger firstDirty = _records.size();
 	NSUInteger index      = _records.size();
-	for(auto doc : documents)
+	for(OakDocument* doc in documents)
 	{
-		if(insertAll || (_openDocumentsMap.find(doc->identifier()) == _openDocumentsMap.end() && openPaths.find(doc->path()) == openPaths.end()))
+		if(insertAll || (!_openDocumentsMap[doc.identifier] && ![openPaths containsObject:doc.path]))
 		{
 			document_record_t record(doc, path);
-			record.is_current     = doc->identifier() == _currentDocument;
+			record.is_current     = [doc.identifier isEqual:_currentDocument];
 			record.tableview_item = @(index++);
 			_records.push_back(record);
 		}
@@ -406,7 +416,6 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	_pollInterval = 0.01;
 	_pollTimer = [NSTimer scheduledTimerWithTimeInterval:_pollInterval target:self selector:@selector(fetchScannerResults:) userInfo:nil repeats:NO];
 	[_progressIndicator startAnimation:self];
-
 	[self updateWindowTitle];
 }
 
@@ -453,13 +462,13 @@ static path::glob_list_t globs_for_path (std::string const& path)
 
 - (void)reloadSCMStatus
 {
-	std::vector<document::document_ptr> scmStatus;
+	NSMutableArray<OakDocument*>* scmStatus = [NSMutableArray array];
 	if([self obtainSCMInfo])
 	{
 		for(auto pair : _scmInfo->status())
 		{
 			if(pair.second & (scm::status::modified|scm::status::added|scm::status::deleted|scm::status::conflicted))
-				scmStatus.push_back(document::create(pair.first));
+				[scmStatus addObject:[OakDocument documentWithPath:to_ns(pair.first)]];
 		}
 	}
 
@@ -470,7 +479,11 @@ static path::glob_list_t globs_for_path (std::string const& path)
 - (void)fetchScannerResults:(NSTimer*)aTimer
 {
 	bool isRunning = _scanner->is_running();
-	[self addRecordsForDocuments:_scanner->accept_documents()];
+
+	NSMutableArray* documents = [NSMutableArray array];
+	for(document::document_ptr cppDocument : _scanner->accept_documents())
+		[documents addObject:cppDocument->document()];
+	[self addRecordsForDocuments:documents];
 
 	if(isRunning)
 	{
@@ -557,7 +570,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 		document_record_t const& record = _records[index.unsignedIntValue];
 
 		NSMutableDictionary* item = [NSMutableDictionary dictionary];
-		item[@"identifier"] = [NSString stringWithCxxString:record.identifier];
+		item[@"identifier"] = record.identifier.UUIDString;
 		if(OakNotEmptyString(_selectionString))
 			item[@"selectionString"] = _selectionString;
 		if(record.full_path != NULL_STR)
@@ -600,13 +613,13 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	// =================
 
 	BOOL isOpen = NO, isModified = NO, isOnDisk = YES;
-	for(document::document_ptr const& doc : _openDocuments)
+	for(OakDocument* doc in _openDocuments)
 	{
-		if(doc->path() != NULL_STR ? doc->path() == record.full_path : doc->identifier() == record.identifier)
+		if(doc.path ? to_s(doc.path) == record.full_path : [doc.identifier isEqual:record.identifier])
 		{
 			isOpen     = YES;
-			isModified = doc->is_modified();
-			isOnDisk   = doc->is_on_disk();
+			isModified = doc.isDocumentEdited;
+			isOnDisk   = doc.isOnDisk;
 		}
 	}
 
@@ -666,13 +679,13 @@ static path::glob_list_t globs_for_path (std::string const& path)
 			{
 				[target fileBrowser:nil closeURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:record.full_path]]];
 
-				std::vector<document::document_ptr> newDocuments;
-				for(auto const& doc : _openDocuments)
+				NSMutableArray<OakDocument*>* newDocuments = [NSMutableArray array];
+				for(OakDocument* doc in _openDocuments)
 				{
-					if(doc->path() != record.full_path)
-						newDocuments.push_back(doc);
+					if(to_s(doc.path) != record.full_path)
+						[newDocuments addObject:doc];
 				}
-				self.openCppDocuments = newDocuments;
+				self.openDocuments = newDocuments;
 			}
 		}
 	}

@@ -8,8 +8,8 @@ extern NSUInteger const kFileChooserUncommittedChangesSourceIndex;
 
 PUBLIC @interface FileChooser : OakChooser
 @property (nonatomic) NSString* path;
-@property (nonatomic) std::vector<document::document_ptr> const& openCppDocuments;
-@property (nonatomic) oak::uuid_t const& currentDocument;
+- (void)setOpenCppDocuments:(std::vector<document::document_ptr> const&)newDocuments;
+- (void)setCurrentDocument:(oak::uuid_t const&)identifier;
 @property (nonatomic) NSUInteger sourceIndex;
 
 + (instancetype)sharedInstance;
