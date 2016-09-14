@@ -19,6 +19,7 @@ namespace document
 
 	private:
 		// used for book-keeping in master thread
+		std::mutex _lock;
 		std::map<size_t, watch_base_t*> clients;
 		size_t next_client_id;
 
@@ -162,6 +163,7 @@ namespace document
 	size_t watch_server_t::add (std::string const& path, watch_base_t* callback)
 	{
 		D(DBF_Document_WatchFS, bug("%zu: %s — %p\n", next_client_id, path.c_str(), callback););
+		std::lock_guard<std::mutex> lock(_lock);
 		clients.emplace(next_client_id, callback);
 		struct { size_t client_id; std::string* path; } packet = { next_client_id, new std::string(path) };
 		write(write_to_server_pipe, &packet, sizeof(packet));
@@ -171,6 +173,7 @@ namespace document
 	void watch_server_t::remove (size_t client_id)
 	{
 		D(DBF_Document_WatchFS, bug("%zu\n", client_id););
+		std::lock_guard<std::mutex> lock(_lock);
 		clients.erase(clients.find(client_id));
 		struct { size_t client_id; std::string* path; } packet = { client_id, NULL };
 		write(write_to_server_pipe, &packet, sizeof(packet));
