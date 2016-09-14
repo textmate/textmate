@@ -235,7 +235,7 @@ static NSDictionary* globs_for_path (std::string const& path)
 
 - (void)windowWillClose:(NSNotification*)aNotification
 {
-	[self shutdownScanner];
+	[self stopSearch];
 
 	_scmInfo.reset();
 	_openDocuments = nil;
@@ -415,48 +415,10 @@ static NSDictionary* globs_for_path (std::string const& path)
 	_scmInfo.reset();
 	[self obtainSCMInfo];
 
-	if(_sourceIndex == kFileChooserUncommittedChangesSourceIndex)
+	if(_sourceIndex == kFileChooserAllSourceIndex)
+		[self startSearch:_path];
+	else if(_sourceIndex == kFileChooserUncommittedChangesSourceIndex)
 		[self reloadSCMStatus];
-	if(_sourceIndex != kFileChooserAllSourceIndex)
-		return;
-
-	[self shutdownScanner];
-
-	self.items = @[ ];
-
-	_records.clear();
-	[self addRecordsForDocuments:_openDocuments];
-	settings_t const settings = settings_for_path(NULL_STR, "", to_s(_path));
-	NSMutableDictionary* options = [globs_for_path(to_s(_path)) mutableCopy];
-	options[kSearchFollowDirectoryLinksKey] = @(settings.get(kSettingsFollowSymbolicLinksKey, false));
-
-	size_t searchToken = ++_lastSearchToken;
-	_searching = YES;
-	@synchronized(_searchResults) {
-		[_searchResults removeAllObjects];
-	}
-
-	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-		[OakDocumentController.sharedInstance enumerateDocumentsAtPath:_path options:options usingBlock:^(OakDocument* document, BOOL* stop){
-			@synchronized(_searchResults) {
-				if(searchToken == _lastSearchToken)
-						[_searchResults addObject:document];
-				else	*stop = YES;
-			}
-		}];
-
-		dispatch_async(dispatch_get_main_queue(), ^{
-			if(searchToken == _lastSearchToken)
-			{
-				_searching = NO;
-				[self fetchScannerResults:nil];
-			}
-		});
-	});
-
-	_pollInterval = 0.01;
-	_pollTimer = [NSTimer scheduledTimerWithTimeInterval:_pollInterval target:self selector:@selector(fetchScannerResults:) userInfo:nil repeats:NO];
-	[_progressIndicator startAnimation:self];
 	[self updateWindowTitle];
 }
 
@@ -477,15 +439,13 @@ static NSDictionary* globs_for_path (std::string const& path)
 	{
 		case kFileChooserAllSourceIndex:
 		{
-			NSString* path = _path;
-			_path = nil;
-			self.path = path;
+			[self startSearch:_path];
 		}
 		break;
 
 		case kFileChooserOpenDocumentsSourceIndex:
 		{
-			[self shutdownScanner];
+			[self stopSearch];
 
 			_records.clear();
 			[self addRecordsForDocuments:_openDocuments];
@@ -494,7 +454,7 @@ static NSDictionary* globs_for_path (std::string const& path)
 
 		case kFileChooserUncommittedChangesSourceIndex:
 		{
-			[self shutdownScanner];
+			[self stopSearch];
 			[self reloadSCMStatus];
 		}
 		break;
@@ -517,7 +477,53 @@ static NSDictionary* globs_for_path (std::string const& path)
 	[self addRecordsForDocuments:scmStatus];
 }
 
-- (void)fetchScannerResults:(NSTimer*)aTimer
+- (void)startSearch:(NSString*)path
+{
+	if(_searching)
+		[self stopSearch];
+
+	self.items = @[ ];
+	_records.clear();
+
+	if(!path)
+		return;
+
+	[self addRecordsForDocuments:_openDocuments];
+
+	settings_t const settings = settings_for_path(NULL_STR, "", to_s(path));
+	NSMutableDictionary* options = [globs_for_path(to_s(path)) mutableCopy];
+	options[kSearchFollowDirectoryLinksKey] = @(settings.get(kSettingsFollowSymbolicLinksKey, false));
+
+	size_t searchToken = _lastSearchToken;
+	_searching = YES;
+	@synchronized(_searchResults) {
+		[_searchResults removeAllObjects];
+	}
+
+	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+		[OakDocumentController.sharedInstance enumerateDocumentsAtPath:path options:options usingBlock:^(OakDocument* document, BOOL* stop){
+			@synchronized(_searchResults) {
+				if(searchToken == _lastSearchToken)
+						[_searchResults addObject:document];
+				else	*stop = YES;
+			}
+		}];
+
+		dispatch_async(dispatch_get_main_queue(), ^{
+			if(searchToken == _lastSearchToken)
+			{
+				_searching = NO;
+				[self handleSearchResults:nil];
+			}
+		});
+	});
+
+	_pollInterval = 0.01;
+	_pollTimer = [NSTimer scheduledTimerWithTimeInterval:_pollInterval target:self selector:@selector(handleSearchResults:) userInfo:nil repeats:NO];
+	[_progressIndicator startAnimation:self];
+}
+
+- (void)handleSearchResults:(NSTimer*)aTimer
 {
 	@synchronized(_searchResults) {
 		if(_searchResults.count || !_searching)
@@ -529,20 +535,19 @@ static NSDictionary* globs_for_path (std::string const& path)
 	if(_searching)
 	{
 		_pollInterval = std::min(_pollInterval * 2, 0.32);
-		_pollTimer = [NSTimer scheduledTimerWithTimeInterval:_pollInterval target:self selector:@selector(fetchScannerResults:) userInfo:nil repeats:NO];
+		_pollTimer = [NSTimer scheduledTimerWithTimeInterval:_pollInterval target:self selector:@selector(handleSearchResults:) userInfo:nil repeats:NO];
 	}
 	else
 	{
-		[self shutdownScanner];
+		[self stopSearch];
 		[self updateStatusText:self];
 	}
 }
 
-- (void)shutdownScanner
+- (void)stopSearch
 {
-	if(_searching)
+	if(std::exchange(_searching, NO))
 		++_lastSearchToken;
-	_searching = NO;
 
 	[_progressIndicator stopAnimation:self];
 	[_pollTimer invalidate];
