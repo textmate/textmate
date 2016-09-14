@@ -2206,6 +2206,7 @@ namespace
 {
 	FileChooser* fc = [FileChooser sharedInstance];
 
+	fc.path             = nil; // Disable folder scanning when updating openCppDocuments/currentDocument
 	fc.filterString     = @"";
 	fc.openCppDocuments = _documents;
 	fc.currentDocument  = _selectedDocument ? _selectedDocument->identifier() : oak::uuid_t();
