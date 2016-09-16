@@ -2,6 +2,7 @@
 #import <authorization/authorization.h>
 #import <selection/types.h>
 #import <command/parser.h>
+#import <regexp/find.h> // find::options_t
 #import <scm/scm.h>
 
 PUBLIC extern NSString* OakDocumentContentDidChangeNotification;
@@ -22,7 +23,23 @@ typedef NS_ENUM(NSInteger, OakDocumentIOResult) {
 };
 
 @class BundleGrammar;
+@class OakDocument;
 @class OakDocumentEditor;
+
+@interface OakDocumentMatch : NSObject
+@property (nonatomic) OakDocument* document;
+@property (nonatomic) uint32_t checksum;
+@property (nonatomic) NSUInteger first;
+@property (nonatomic) NSUInteger last;
+@property (nonatomic) text::range_t range;
+@property (nonatomic, readonly) NSUInteger lineNumber;
+@property (nonatomic) std::map<std::string, std::string> captures;
+@property (nonatomic) NSString* excerpt;
+@property (nonatomic) NSUInteger excerptOffset;
+@property (nonatomic) NSString* newlines;
+@property (nonatomic) BOOL headTruncated;
+@property (nonatomic) BOOL tailTruncated;
+@end
 
 PUBLIC @interface OakDocument : NSObject
 + (instancetype)documentWithPath:(NSString*)aPath;
@@ -72,6 +89,8 @@ PUBLIC @interface OakDocument : NSObject
 - (void)enumerateBookmarksUsingBlock:(void(^)(text::pos_t const& pos, NSString* excerpt))block;
 - (void)enumerateBookmarksAtLine:(NSUInteger)line block:(void(^)(text::pos_t const& pos, NSString* type, NSString* payload))block;
 - (void)enumerateByteRangesUsingBlock:(void(^)(char const* bytes, NSRange byteRange, BOOL* stop))block;
+- (NSArray<OakDocumentMatch*>*)matchesForString:(NSString*)searchString options:(find::options_t)options;
+- (NSArray<OakDocumentMatch*>*)matchesForString:(NSString*)searchString options:(find::options_t)options bufferSize:(NSUInteger*)bufferSize;
 @property (nonatomic) NSString* content;
 
 - (NSArray<BundleGrammar*>*)proposedGrammars;

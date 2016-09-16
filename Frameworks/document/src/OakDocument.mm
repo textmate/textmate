@@ -140,6 +140,22 @@ namespace document
 
 } /* document */
 
+// ===================================
+// = OakDocumentMatch Implementation =
+// ===================================
+
+@implementation OakDocumentMatch
+- (NSUInteger)lineNumber
+{
+	return _range.from.line;
+}
+
+- (NSString*)description
+{
+	return [NSString stringWithFormat:@"<%@:%ld:%@>", _document.displayName, self.lineNumber, _excerpt];
+}
+@end
+
 // ==============================
 // = OakDocument Implementation =
 // ==============================
@@ -1233,6 +1249,133 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 		ASSERT_EQ(_openCount, 0);
 		[self deleteBuffer];
 	}
+}
+
+// ======================
+// = Search in Document =
+// ======================
+
+- (NSArray<OakDocumentMatch*>*)matchesForString:(NSString*)searchString options:(find::options_t)options
+{
+	return [self matchesForString:searchString options:options bufferSize:nullptr];
+}
+
+- (NSArray<OakDocumentMatch*>*)matchesForString:(NSString*)searchString options:(find::options_t)options bufferSize:(NSUInteger*)bufferSize
+{
+	struct range_match_t
+	{
+		range_match_t (ssize_t from, ssize_t to, std::map<std::string, std::string> const& captures) : from(from), to(to), captures(captures) { }
+
+		ssize_t from, to;
+		std::map<std::string, std::string> captures;
+	};
+
+	__block find::find_t f(to_s(searchString), options | (self.isOpen ? find::none : find::filesize_limit));
+	__block std::vector<range_match_t> ranges;
+	__block boost::crc_32_type crc32;
+	__block size_t total = 0;
+	[self enumerateByteRangesUsingBlock:^(char const* bytes, NSRange byteRange, BOOL* stop){
+		if(memchr(bytes, '\0', byteRange.length)) // searchBinaryFiles == NO
+		{
+			*stop = YES;
+			return;
+		}
+
+		for(ssize_t offset = 0; offset < byteRange.length; )
+		{
+			std::map<std::string, std::string> captures;
+			std::pair<ssize_t, ssize_t> const& m = f.match(bytes + offset, byteRange.length - offset, &captures);
+			if(m.first <= m.second)
+				ranges.emplace_back(byteRange.location + offset + m.first, byteRange.location + offset + m.second, captures);
+			ASSERT_NE(m.second, 0); ASSERT_LE(m.second, byteRange.length - offset);
+			offset += m.second;
+		}
+
+		crc32.process_bytes(bytes, byteRange.length);
+		total = NSMaxRange(byteRange);
+	}];
+
+	if(bufferSize)
+		*bufferSize = total;
+
+	std::map<std::string, std::string> captures;
+	std::pair<ssize_t, ssize_t> m = f.match(nullptr, 0, &captures);
+	while(m.first <= m.second)
+	{
+		ranges.emplace_back(total + m.first, total + m.second, captures);
+		captures.clear();
+		m = f.match(nullptr, 0, &captures);
+	}
+
+	if(ranges.empty())
+		return nil;
+
+	__block std::string text;
+	[self enumerateByteRangesUsingBlock:^(char const* bytes, NSRange byteRange, BOOL* stop){
+		text.insert(text.end(), bytes, bytes + byteRange.length);
+	}];
+
+	// Document has changed, should probably re-scan
+	boost::crc_32_type doubleCheck;
+	doubleCheck.process_bytes(text.data(), text.size());
+	if(crc32.checksum() != doubleCheck.checksum())
+		return nil;
+
+	std::string const crlf = text::estimate_line_endings(std::begin(text), std::end(text));
+
+	size_t bol = 0, crlfCount = 0;
+	size_t eol = text.find(crlf, bol);
+
+	NSMutableArray<OakDocumentMatch*>* results = [NSMutableArray array];
+	for(auto const& range : ranges)
+	{
+		while(eol != std::string::npos && eol + crlf.size() <= range.from)
+		{
+			bol = eol + crlf.size();
+			eol = text.find(crlf, bol);
+			++crlfCount;
+		}
+
+		text::pos_t from(crlfCount, range.from - bol);
+		size_t fromOffset = bol;
+
+		while(eol != std::string::npos && eol + crlf.size() <= range.to)
+		{
+			bol = eol + crlf.size();
+			eol = text.find(crlf, bol);
+			++crlfCount;
+		}
+
+		text::pos_t to(crlfCount, range.to - bol);
+		size_t toOffset = bol == range.to ? bol : (eol != std::string::npos ? (range.to <= eol ? eol : eol + crlf.size()) : text.size());
+
+		size_t orgFromOffset = fromOffset;
+		if(range.from - fromOffset > 200)
+			fromOffset = utf8::find_safe_end(text.begin(), text.begin() + range.from - ((range.from - fromOffset) % 150)) - text.begin();
+
+		size_t orgToOffset = toOffset;
+		if(toOffset - fromOffset > 500)
+			toOffset = utf8::find_safe_end(text.begin(), text.begin() + std::max<size_t>(fromOffset + 500, range.to)) - text.begin();
+
+		ASSERT_LE(fromOffset, range.from);
+		ASSERT_LE(range.to, toOffset);
+
+		OakDocumentMatch* match = [OakDocumentMatch new];
+		match.document      = self;
+		match.checksum      = crc32.checksum();
+		match.first         = range.from;
+		match.last          = range.to;
+		match.captures      = range.captures;
+		match.range         = text::range_t(from, to);
+		match.excerpt       = to_ns(text.substr(fromOffset, toOffset - fromOffset));
+		match.excerptOffset = fromOffset;
+		match.newlines      = to_ns(crlf);
+		match.headTruncated = orgFromOffset < fromOffset;
+		match.tailTruncated = toOffset < orgToOffset;
+		[results addObject:match];
+	}
+
+	return results;
 }
 
 // =========
