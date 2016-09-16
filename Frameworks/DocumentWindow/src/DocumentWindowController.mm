@@ -1536,9 +1536,12 @@ namespace
 
 		std::string docDirectory = _documentPath ? path::parent(to_s(_documentPath)) : to_s(self.projectPath);
 
-		std::string const customAttributes = settings_for_path(to_s(_documentPath), text::join(_documentScopeAttributes, " "), docDirectory).get(kSettingsScopeAttributesKey, NULL_STR);
-		if(customAttributes != NULL_STR)
-			_documentScopeAttributes.push_back(customAttributes);
+		if(_selectedDocument)
+		{
+			std::string const customAttributes = settings_for_path(to_s(_documentPath), _selectedDocument->file_type() + " " + text::join(_documentScopeAttributes, " "), docDirectory).get(kSettingsScopeAttributesKey, NULL_STR);
+			if(customAttributes != NULL_STR)
+				_documentScopeAttributes.push_back(customAttributes);
+		}
 
 		self.documentSCMStatus    = scm::status::unknown;
 		self.documentSCMVariables = std::map<std::string, std::string>();
