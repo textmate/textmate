@@ -30,6 +30,5 @@
 @property (nonatomic, readonly) find::match_t const& match;
 @property (nonatomic, readonly) document::document_ptr document;
 @property (nonatomic, readonly) NSString* path;
-@property (nonatomic, readonly) NSString* identifier;
 @property (nonatomic) NSAttributedString* displayPath;
 @end

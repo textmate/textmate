@@ -305,7 +305,6 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 - (find::match_t const&)match      { return _match; }
 - (document::document_ptr)document { return _match.document; }
 - (NSString*)path                  { return [NSString stringWithCxxString:self.document->path()]; }
-- (NSString*)identifier            { return [NSString stringWithCxxString:self.document->identifier()]; }
 
 - (NSUInteger)lineSpan
 {
