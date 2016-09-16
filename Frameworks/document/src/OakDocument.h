@@ -53,6 +53,7 @@ PUBLIC @interface OakDocument : NSObject
 @property (nonatomic) NSString* virtualPath;  // Used for file type detection and settings (rmate)
 @property (nonatomic) NSString* customName;
 @property (nonatomic, readonly) NSString* displayName;
+@property (nonatomic, readonly) NSImage* icon;
 
 @property (nonatomic) NSString* fileType;     // Lazy: Depends on path and firstLine
 @property (nonatomic) NSString* diskEncoding;

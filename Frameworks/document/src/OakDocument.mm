@@ -11,6 +11,7 @@
 #import <OakAppKit/OakEncodingPopUpButton.h>
 #import <OakAppKit/OakSavePanel.h>
 #import <OakAppKit/NSAlert Additions.h>
+#import <OakAppKit/OakFileIconImage.h>
 #import <BundlesManager/BundlesManager.h>
 #import <authorization/constants.h>
 #import <cf/run_loop.h>
@@ -175,6 +176,8 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	OBJC_WATCH_LEAKS(OakDocument);
 
 	NSHashTable* _documentEditors;
+	scm::status::type _scmStatus;
+	OakFileIconImage* _icon;
 
 	std::unique_ptr<ng::buffer_t> _buffer;
 	std::unique_ptr<ng::detail::storage_t> _snapshot;
@@ -208,6 +211,11 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 @end
 
 @implementation OakDocument
++ (NSSet*)keyPathsForValuesAffectingIcon
+{
+	return [NSSet setWithObjects:@"path", @"virtualPath", @"documentEdited", @"scmStatus", nil];
+}
+
 + (NSSet*)keyPathsForValuesAffectingDisplayName
 {
 	return [NSSet setWithObjects:@"path", @"customName", @"untitledCount", nil];
@@ -454,6 +462,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 		return;
 
 	_path = path;
+	_icon = nil;
 	self.customName = nil;
 
 	if(_observeFileSystem)
@@ -1084,6 +1093,24 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	_snapshot.reset();
 }
 
+- (NSImage*)icon
+{
+	// Required because we have no setModified:
+	if(_icon && _icon.isModified != self.isDocumentEdited)
+		_icon = nil;
+
+	if(!_icon)
+	{
+		self.observeSCMStatus = YES;
+
+		_icon = [[OakFileIconImage alloc] initWithSize:NSMakeSize(16, 16)];
+		_icon.path      = _virtualPath ?: _path;
+		_icon.scmStatus = _scmStatus;
+		_icon.modified  = self.isDocumentEdited;
+	}
+	return _icon;
+}
+
 - (BOOL)isOpen                                        { return _openCount != 0; }
 - (BOOL)isDocumentEdited                              { return _revision != _savedRevision && (_onDisk || !_bufferEmpty); }
 - (BOOL)shouldSniffFileType                           { return settings_for_path(to_s(_virtualPath ?: _path), scope::scope_t(), to_s(_directory ?: [_path stringByDeletingLastPathComponent])).get(kSettingsFileTypeKey, NULL_STR) == NULL_STR; }
@@ -1523,6 +1550,14 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 {
 	self.observeSCMStatus = YES;
 	return _scmStatus;
+}
+
+- (void)setScmStatus:(scm::status::type)newStatus
+{
+	if(_scmStatus == newStatus)
+		return;
+	_scmStatus = newStatus;
+	_icon = nil;
 }
 
 // =======================
