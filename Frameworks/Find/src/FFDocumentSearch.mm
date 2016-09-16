@@ -1,7 +1,6 @@
 #import "FFDocumentSearch.h"
 #import "scan_path.h"
 #import <OakFoundation/NSString Additions.h>
-#import <OakFoundation/OakTimer.h>
 #import <ns/ns.h>
 #import <oak/oak.h>
 
@@ -41,7 +40,7 @@ NSString* const FFDocumentSearchDidFinishNotification         = @"FFDocumentSear
 	OBJC_WATCH_LEAKS(FFDocumentSearch);
 
 	scan_path_ptr  _scanner;
-	OakTimer*      _scannerProbeTimer;
+	NSTimer*       _scannerProbeTimer;
 	NSDate*        _searchStartDate;
 	NSTimeInterval _searchDuration;
 }
@@ -64,7 +63,7 @@ OAK_DEBUG_VAR(Find_FolderSearch);
 	_scanner->set_options(_options);
 
 	_searchStartDate   = [NSDate new];
-	_scannerProbeTimer = [OakTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(updateMatches:) userInfo:NULL repeats:YES];
+	_scannerProbeTimer = [NSTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(updateMatches:) userInfo:NULL repeats:YES];
 
 	if(self.documentIdentifier)
 	{
@@ -128,15 +127,5 @@ OAK_DEBUG_VAR(Find_FolderSearch);
 		[self updateMatches:nil];
 		[[NSNotificationCenter defaultCenter] postNotificationName:FFDocumentSearchDidFinishNotification object:self];
 	}
-}
-
-// ==================
-// = Setup/Teardown =
-// ==================
-
-- (void)dealloc
-{
-	D(DBF_Find_FolderSearch, bug("\n"););
-	[self stop];
 }
 @end

@@ -393,6 +393,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		[_documentSearch removeObserver:self forKeyPath:@"currentPath"];
 		[[NSNotificationCenter defaultCenter] removeObserver:self name:FFDocumentSearchDidReceiveResultsNotification object:_documentSearch];
 		[[NSNotificationCenter defaultCenter] removeObserver:self name:FFDocumentSearchDidFinishNotification object:_documentSearch];
+		[_documentSearch stop];
 	}
 
 	if(_documentSearch = newSearcher)
