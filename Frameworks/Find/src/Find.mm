@@ -25,7 +25,7 @@ NSString* const FFSearchInDocument  = @"FFSearchInDocument";
 NSString* const FFSearchInSelection = @"FFSearchInSelection";
 NSString* const FFSearchInOpenFiles = @"FFSearchInOpenFiles";
 
-static std::string const kSearchMarkIdentifier = "search";
+static NSString* const kSearchMarkIdentifier = @"search";
 
 enum FindActionTag
 {
@@ -358,7 +358,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	if(_results)
 	{
 		for(FFResultNode* parent in _results.children)
-			[parent.document removeAllMarksOfType:to_ns(kSearchMarkIdentifier)];
+			[parent.document removeAllMarksOfType:kSearchMarkIdentifier];
 
 		[self unbind:@"countOfMatches"];
 		[self unbind:@"countOfExcludedMatches"];
@@ -405,7 +405,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	FFResultNode* parent = nil;
 	for(OakDocumentMatch* match in matches)
 	{
-		[match.document setMarkOfType:to_ns(kSearchMarkIdentifier) atPosition:match.range.from content:nil];
+		[match.document setMarkOfType:kSearchMarkIdentifier atPosition:match.range.from content:nil];
 
 		FFResultNode* node = [FFResultNode resultNodeWithMatch:match];
 		if(!parent || ![parent.document isEqual:node.document])
@@ -470,7 +470,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 	__weak __block id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:OakPasteboardDidChangeNotification object:[OakPasteboard pasteboardWithName:NSFindPboard] queue:nil usingBlock:^(NSNotification*){
 		for(FFResultNode* parent in _results.children)
-			[parent.document removeAllMarksOfType:to_ns(kSearchMarkIdentifier)];
+			[parent.document removeAllMarksOfType:kSearchMarkIdentifier];
 		[[NSNotificationCenter defaultCenter] removeObserver:observerId];
 	}];
 }
@@ -524,7 +524,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		}
 	}
 
-	[item.document removeAllMarksOfType:to_ns(kSearchMarkIdentifier)];
+	[item.document removeAllMarksOfType:kSearchMarkIdentifier];
 	[self addResultsToPasteboard:self];
 
 	NSString* fmt = MSG_SHOWING_ZERO_MATCHES_FMT;
