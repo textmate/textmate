@@ -12,7 +12,6 @@
 #include <file/save.h>
 #include <file/encoding.h>
 #include <scope/scope.h>
-#include <regexp/glob.h>
 #include <oak/debug.h>
 #include <objc/objc.h>
 
@@ -174,55 +173,6 @@ namespace document
 	PUBLIC document_ptr from_content (std::string const& content, std::string fileType = NULL_STR);
 
 	PUBLIC void remove_marks (std::string const& typeToClear = NULL_STR);
-
-	// ====================
-	// = Document scanner =
-	// ====================
-
-	struct PUBLIC scanner_t
-	{
-		WATCH_LEAKS(scanner_t);
-
-		scanner_t (std::string const& path, path::glob_list_t const& glob);
-		~scanner_t ();
-
-		void set_follow_directory_links (bool flag) { follow_directory_links = flag; }
-		void set_follow_file_links (bool flag)      { follow_file_links = flag; }
-		void set_include_untitled (bool flag)       { include_untitled = flag; }
-		void set_depth_first (bool flag)            { depth_first = flag; }
-
-		void start ();
-		void stop ()             { should_stop_flag = true; }
-		bool is_running () const { return is_running_flag; }
-		void wait () const       { pthread_join(thread, NULL); }
-
-		static std::vector<document_ptr> open_documents ();
-
-		std::vector<document_ptr> accept_documents ();
-		std::string get_current_path () const;
-
-	private:
-		std::string path;
-		path::glob_list_t glob;
-		bool follow_directory_links = false;
-		bool follow_file_links      = true;
-		bool include_untitled       = false;
-		bool depth_first            = false;
-
-		pthread_t thread;
-		mutable pthread_mutex_t mutex;
-		volatile bool is_running_flag  = false;
-		volatile bool should_stop_flag = false;
-
-		void thread_main ();
-		void scan_dir (std::string const& dir);
-
-		std::string current_path;
-		std::vector<document_ptr> documents;
-		std::set< std::pair<dev_t, ino_t> > seen_paths;
-	};
-
-	typedef std::shared_ptr<scanner_t> scanner_ptr;
 
 } /* document */
 
