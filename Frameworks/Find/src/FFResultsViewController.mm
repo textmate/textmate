@@ -19,6 +19,34 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 	return index > 0 ? node.parent.children[index - 1] : nil;
 }
 
+// ================================
+// = OakSearchResultsCheckboxView =
+// ================================
+
+@interface OakSearchResultsCheckboxView : NSTableCellView
+@property (nonatomic) NSButton* button;
+@end
+
+@implementation OakSearchResultsCheckboxView
+- (id)initWithFrame:(NSRect)aFrame
+{
+	NSButton* button = OakCreateCheckBox(nil);
+	[[button cell] setControlSize:NSSmallControlSize];
+	[button sizeToFit];
+	[button setAutoresizingMask:NSViewMinXMargin|NSViewMaxXMargin|NSViewMinYMargin|NSViewMaxYMargin];
+
+	if((self = [super initWithFrame:button.frame]))
+	{
+		_button = button;
+		[self addSubview:_button];
+
+		[_button bind:NSEnabledBinding toObject:self withKeyPath:@"objectValue.readOnly" options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
+		[_button bind:NSValueBinding toObject:self withKeyPath:@"objectValue.excluded" options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
+	}
+	return self;
+}
+@end
+
 // =================================
 // = OakSearchResultsMatchCellView =
 // =================================
@@ -523,24 +551,15 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 
 	if([identifier isEqualToString:@"checkbox"])
 	{
-		NSButton* button = res;
-		if(!button)
+		OakSearchResultsCheckboxView* cellView = res;
+		if(!cellView)
 		{
-			res = button = OakCreateCheckBox(nil);
-			button.identifier = identifier;
-			[[button cell] setControlSize:NSSmallControlSize];
-			button.action = @selector(toggleExcludedCheckbox:);
-			button.target = self;
+			res = cellView = [[OakSearchResultsCheckboxView alloc] initWithFrame:NSZeroRect];
+			cellView.identifier = identifier;
+			cellView.button.action = @selector(toggleExcludedCheckbox:);
+			cellView.button.target = self;
 		}
-		else
-		{
-			[button unbind:NSEnabledBinding];
-			[button unbind:NSValueBinding];
-		}
-
-		[button bind:NSEnabledBinding toObject:item withKeyPath:@"readOnly" options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
-		[button bind:NSValueBinding toObject:item withKeyPath:@"excluded" options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
-		button.state = item.excluded ? NSOffState : NSOnState;
+		cellView.objectValue = item;
 	}
 	else if([identifier isEqualToString:@"match"])
 	{
