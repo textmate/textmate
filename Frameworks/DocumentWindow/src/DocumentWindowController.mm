@@ -30,6 +30,7 @@
 #import <text/parse.h>
 #import <text/tokenize.h>
 #import <text/utf8.h>
+#import <regexp/glob.h>
 #import <settings/settings.h>
 #import <ns/ns.h>
 #import <kvdb/kvdb.h>
