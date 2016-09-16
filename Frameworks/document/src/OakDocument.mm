@@ -338,36 +338,26 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	return self;
 }
 
-- (instancetype)initWithIdentifier:(NSUUID*)anIdentifier
+- (instancetype)initWithBackupPath:(NSString*)backupPath
 {
-	std::string const dir = to_s([[NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES) firstObject] stringByAppendingPathComponent:@"TextMate/Session"]);
-	for(auto dirEntry : path::entries(dir))
+	if(self = [self init])
 	{
-		std::string const path = path::join(dir, dirEntry->d_name);
-		std::string const uuid = path::get_attr(path, "com.macromates.backup.identifier");
-		if(uuid == NULL_STR || ![anIdentifier isEqual:[[NSUUID alloc] initWithUUIDString:to_ns(uuid)]])
-			continue;
+		std::string const path = to_s(backupPath);
+		_identifier     = [[NSUUID alloc] initWithUUIDString:to_ns(path::get_attr(path, "com.macromates.backup.identifier"))];
+		_backupPath     = backupPath;
 
-		if(self = [self init])
-		{
-			_identifier     = anIdentifier;
-			_backupPath     = to_ns(path);
+		_path           = to_ns(path::resolve(path::get_attr(path, "com.macromates.backup.path")));
+		_onDisk         = access([_path fileSystemRepresentation], F_OK) == 0;
+		_fileType       = to_ns(path::get_attr(path, "com.macromates.backup.file-type"));
+		_diskEncoding   = to_ns(path::get_attr(path, "com.macromates.backup.encoding"));
+		_diskNewlines   = to_ns(path::get_attr(path, "com.macromates.backup.newlines"));
+		_customName     = to_ns(path::get_attr(path, "com.macromates.backup.custom-name"));
+		_untitledCount  = atoi(path::get_attr(path, "com.macromates.backup.untitled-count").c_str());
 
-			_path           = to_ns(path::resolve(path::get_attr(path, "com.macromates.backup.path")));
-			_onDisk         = access([_path fileSystemRepresentation], F_OK) == 0;
-			_fileType       = to_ns(path::get_attr(path, "com.macromates.backup.file-type"));
-			_diskEncoding   = to_ns(path::get_attr(path, "com.macromates.backup.encoding"));
-			_diskNewlines   = to_ns(path::get_attr(path, "com.macromates.backup.newlines"));
-			_customName     = to_ns(path::get_attr(path, "com.macromates.backup.custom-name"));
-			_untitledCount  = atoi(path::get_attr(path, "com.macromates.backup.untitled-count").c_str());
-
-			if(path::get_attr(path, "com.macromates.backup.modified") == "YES")
-				_savedRevision = _revision-1;
-
-			return self;
-		}
+		if(path::get_attr(path, "com.macromates.backup.modified") == "YES")
+			_savedRevision = _revision-1;
 	}
-	return nil;
+	return self;
 }
 
 + (instancetype)documentWithPath:(NSString*)aPath
@@ -389,12 +379,24 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 
 + (instancetype)documentWithIdentifier:(NSUUID*)anIdentifier
 {
-	OakDocument* res;
-	if(res = [OakDocumentController.sharedInstance findDocumentWithIdentifier:anIdentifier])
+	if(OakDocument* res = [OakDocumentController.sharedInstance findDocumentWithIdentifier:anIdentifier])
 		return res;
-	if(res = [[OakDocument alloc] initWithIdentifier:anIdentifier])
-		[OakDocumentController.sharedInstance register:res];
-	return res;
+
+	std::string const dir = to_s([[NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES) firstObject] stringByAppendingPathComponent:@"TextMate/Session"]);
+	for(auto dirEntry : path::entries(dir))
+	{
+		std::string const path = path::join(dir, dirEntry->d_name);
+		std::string const uuid = path::get_attr(path, "com.macromates.backup.identifier");
+		if(uuid != NULL_STR && [anIdentifier isEqual:[[NSUUID alloc] initWithUUIDString:to_ns(uuid)]])
+		{
+			if(OakDocument* res = [[OakDocument alloc] initWithBackupPath:to_ns(path)])
+			{
+				[OakDocumentController.sharedInstance register:res];
+				return res;
+			}
+		}
+	}
+	return nil;
 }
 
 - (void)dealloc
