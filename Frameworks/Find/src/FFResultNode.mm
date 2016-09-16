@@ -184,6 +184,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 
 @interface FFResultNode ()
 {
+	OBJC_WATCH_LEAKS(FFResultNode);
 	document::document_t::callback_t* _callback;
 	NSAttributedString* _excerpt;
 	NSString* _excerptReplaceString;
