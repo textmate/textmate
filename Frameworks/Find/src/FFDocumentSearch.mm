@@ -9,34 +9,6 @@
 NSString* const FFDocumentSearchDidReceiveResultsNotification = @"FFDocumentSearchDidReceiveResultsNotification";
 NSString* const FFDocumentSearchDidFinishNotification         = @"FFDocumentSearchDidFinishNotification";
 
-@interface FFMatch ()
-{
-	OBJC_WATCH_LEAKS(FFMatch);
-	find::match_t match;
-}
-@end
-
-@implementation FFMatch
-- (id)initWithMatch:(find::match_t const&)aMatch;
-{
-	if(self = [self init])
-	{
-		match = aMatch;
-	}
-	return self;
-}
-
-- (find::match_t const&)match
-{
-	return match;
-}
-
-- (NSString*)description
-{
-	return [NSString stringWithFormat:@"Match in ‘%@’ at line %zu: %@", [NSString stringWithCxxString:match.document->display_name()], match.line_number(), [NSString stringWithCxxString:match.excerpt]];
-}
-@end
-
 @interface FFDocumentSearch ()
 {
 	OBJC_WATCH_LEAKS(FFDocumentSearch);
@@ -51,7 +23,7 @@ NSString* const FFDocumentSearchDidFinishNotification         = @"FFDocumentSear
 	NSTimer*       _scannerProbeTimer;
 	NSTimeInterval _searchDuration;
 
-	NSMutableArray<FFMatch*>* _matches;
+	NSMutableArray<OakDocumentMatch*>* _matches;
 }
 @property (nonatomic, readwrite) NSString* currentPath;
 @end
@@ -94,22 +66,6 @@ static NSDictionary* GlobOptionsForPath (std::string const& path, NSString* glob
 	return res;
 }
 
-static NSArray<FFMatch*>* ConvertMatches (NSArray<OakDocumentMatch*>* matches)
-{
-	NSMutableArray<FFMatch*>* res = [NSMutableArray array];
-	for(OakDocumentMatch* match in matches)
-	{
-		find::match_t m(std::make_shared<document::document_t>(match.document), match.checksum, match.first, match.last, match.range, match.captures);
-		m.excerpt        = to_s(match.excerpt);
-		m.excerpt_offset = match.excerptOffset;
-		m.truncate_head  = match.headTruncated;
-		m.truncate_tail  = match.tailTruncated;
-		m.newlines       = to_s(match.newlines);
-		[res addObject:[[FFMatch alloc] initWithMatch:m]];
-	}
-	return res;
-}
-
 @implementation FFDocumentSearch
 - (void)start
 {
@@ -121,7 +77,7 @@ static NSArray<FFMatch*>* ConvertMatches (NSArray<OakDocumentMatch*>* matches)
 	{
 		if(OakDocument* document = [OakDocumentController.sharedInstance findDocumentWithIdentifier:[[NSUUID alloc] initWithUUIDString:_documentIdentifier]])
 		{
-			[_matches setArray:ConvertMatches([document matchesForString:_searchString options:_options])];
+			[_matches setArray:[document matchesForString:_searchString options:_options]];
 			[self updateMatches:nil];
 			[[NSNotificationCenter defaultCenter] postNotificationName:FFDocumentSearchDidFinishNotification object:self];
 		}
@@ -148,7 +104,7 @@ static NSArray<FFMatch*>* ConvertMatches (NSArray<OakDocumentMatch*>* matches)
 
 				_lastDocumentPath = document.path;
 				NSUInteger bufferSize = 0;
-				NSArray* newMatches = ConvertMatches([document matchesForString:_searchString options:_options bufferSize:&bufferSize]);
+				NSArray* newMatches = [document matchesForString:_searchString options:_options bufferSize:&bufferSize];
 				_scannedByteCount += bufferSize;
 				_scannedFileCount += 1;
 

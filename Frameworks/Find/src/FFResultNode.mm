@@ -1,7 +1,9 @@
 #import "FFResultNode.h"
+#import "scan_path.h"
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/NSColor Additions.h>
 #import <OakAppKit/OakFileIconImage.h>
+#import <document/OakDocument.h>
 #import <ns/ns.h>
 #import <text/tokenize.h>
 #import <text/format.h>
@@ -185,11 +187,10 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 @interface FFResultNode ()
 {
 	OBJC_WATCH_LEAKS(FFResultNode);
-	document::document_t::callback_t* _callback;
 	NSAttributedString* _excerpt;
 	NSString* _excerptReplaceString;
-	find::match_t _match;
 }
+@property (nonatomic, readwrite) OakDocumentMatch* match;
 @property (nonatomic, readwrite) NSUInteger countOfLeafs;
 @property (nonatomic, readwrite) NSUInteger countOfExcluded;
 @property (nonatomic, readwrite) NSUInteger countOfReadOnly;
@@ -197,35 +198,26 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 @end
 
 @implementation FFResultNode
-- (instancetype)initWithMatch:(find::match_t const&)aMatch
+- (instancetype)initWithMatch:(OakDocumentMatch*)aMatch
 {
 	if(self = [super init])
 		_match = aMatch;
 	return self;
 }
 
-+ (FFResultNode*)resultNodeWithMatch:(find::match_t const&)aMatch baseDirectory:(NSString*)base
++ (FFResultNode*)resultNodeWithMatch:(OakDocumentMatch*)aMatch baseDirectory:(NSString*)base
 {
 	FFResultNode* res = [[FFResultNode alloc] initWithMatch:aMatch];
 	res.children    = [NSMutableArray array];
-	res.displayPath = PathComponentString(base && to_s(base) != find::kSearchOpenFiles && aMatch.document->path() != NULL_STR ? aMatch.document->path() : aMatch.document->display_name(), to_s(base), [NSFont controlContentFontOfSize:0]);
+	res.displayPath = PathComponentString(to_s(base && to_s(base) != find::kSearchOpenFiles && aMatch.document.path ? aMatch.document.path : aMatch.document.displayName), to_s(base), [NSFont controlContentFontOfSize:0]);
 	return res;
 }
 
-+ (FFResultNode*)resultNodeWithMatch:(find::match_t const&)aMatch
++ (FFResultNode*)resultNodeWithMatch:(OakDocumentMatch*)aMatch
 {
 	FFResultNode* res = [[FFResultNode alloc] initWithMatch:aMatch];
 	res.countOfLeafs = 1;
 	return res;
-}
-
-- (void)dealloc
-{
-	if(_callback)
-	{
-		self.document->remove_callback(_callback);
-		delete _callback;
-	}
 }
 
 - (void)setCountOfLeafs:(NSUInteger)count             { if(_countOfLeafs            != count) { _parent.countOfLeafs            += count - _countOfLeafs;            _countOfLeafs            = count; } }
@@ -303,9 +295,8 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 
 - (FFResultNode*)firstResultNode   { return [_children firstObject]; }
 - (FFResultNode*)lastResultNode    { return [_children lastObject]; }
-- (find::match_t const&)match      { return _match; }
-- (document::document_ptr)document { return _match.document; }
-- (NSString*)path                  { return [NSString stringWithCxxString:self.document->path()]; }
+- (OakDocument*)document           { return _match.document; }
+- (NSString*)path                  { return _match.document.path; }
 
 - (NSUInteger)lineSpan
 {
@@ -319,21 +310,22 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 	if(_excerpt && (replacementString == _excerptReplaceString || [replacementString isEqualToString:_excerptReplaceString]))
 		return _excerpt;
 
-	find::match_t const& m = _match;
-	size_t from = m.first - m.excerpt_offset;
-	size_t to   = m.last  - m.excerpt_offset;
+	OakDocumentMatch* m = _match;
+	size_t from = m.first - m.excerptOffset;
+	size_t to   = m.last  - m.excerptOffset;
 
+	std::string const excerpt = to_s(m.excerpt);
 	ASSERT_LE(m.first, m.last);
-	ASSERT_LE(from, m.excerpt.size());
-	ASSERT_LE(to, m.excerpt.size());
+	ASSERT_LE(from, excerpt.size());
+	ASSERT_LE(to, excerpt.size());
 
-	std::string prefix = m.excerpt.substr(0, from);
-	std::string middle = m.excerpt.substr(from, to - from);
-	std::string suffix = m.excerpt.substr(to);
+	std::string prefix = excerpt.substr(0, from);
+	std::string middle = excerpt.substr(from, to - from);
+	std::string suffix = excerpt.substr(to);
 
-	if(m.truncate_head)
+	if(m.headTruncated)
 		prefix.insert(0, "…");
-	if(m.truncate_tail)
+	if(m.tailTruncated)
 		suffix.insert(suffix.size(), "…");
 
 	if(replacementString)
@@ -349,32 +341,8 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 		return builder.attributed_string();
 	}
 
-	_excerpt = AttributedStringForMatch(prefix + middle + suffix, prefix.size(), prefix.size() + middle.size(), m.line_number(), m.newlines, font);
+	_excerpt = AttributedStringForMatch(prefix + middle + suffix, prefix.size(), prefix.size() + middle.size(), m.lineNumber, to_s(m.newlines), font);
 	_excerptReplaceString = replacementString;
 	return _excerpt;
-}
-
-- (NSImage*)icon
-{
-	struct document_callback_t : document::document_t::callback_t
-	{
-		WATCH_LEAKS(document_callback_t);
-		document_callback_t (FFResultNode* self) : _self(self) {}
-		void handle_document_event (document::document_ptr document, event_t event)
-		{
-			if(event == did_change_modified_status)
-				_self.icon = nil;
-		}
-
-	private:
-		__weak FFResultNode* _self;
-	};
-
-	if(!_icon)
-		_icon = [OakFileIconImage fileIconImageWithPath:self.path isModified:self.document->is_modified()];
-	if(!_callback)
-		self.document->add_callback(_callback = new document_callback_t(self));
-
-	return _icon;
 }
 @end

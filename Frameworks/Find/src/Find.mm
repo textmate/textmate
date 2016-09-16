@@ -4,6 +4,7 @@
 #import "FFResultsViewController.h"
 #import "FFDocumentSearch.h"
 #import "Strings.h"
+#import "scan_path.h"
 #import <OakFoundation/OakFindProtocol.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/NSAlert Additions.h>
@@ -225,24 +226,24 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 						replacements.emplace(std::make_pair(child.match.first, child.match.last), controller.regularExpression ? format_string::expand(replaceString, child.match.captures) : replaceString);
 					}
 
-					if(document::document_ptr doc = parent.document)
+					if(OakDocument* doc = parent.document)
 					{
-						if(doc->is_open())
+						if(doc.isOpen)
 						{
-							doc->replace(replacements, parent.match.crc32);
+							[doc performReplacements:replacements checksum:parent.match.checksum];
 						}
 						else
 						{
-							if(!doc->replace(replacements, parent.match.crc32))
+							if(![doc performReplacements:replacements checksum:parent.match.checksum])
 							{
 								[parent.children setValue:nil forKey:@"replaceString"];
 								continue;
 							}
 
-							[doc->document() saveModalForWindow:self.windowController.window completionHandler:^(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID){
+							[doc saveModalForWindow:self.windowController.window completionHandler:^(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID){
 								// TODO Indicate failure when result != OakDocumentIOResultSuccess
-								if(!doc->is_open()) // Ensure document is still closed
-									doc->set_content(NULL_STR);
+								if(!doc.isOpen) // Ensure document is still closed
+									doc.content = nil;
 							}];
 						}
 
@@ -357,10 +358,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	if(_results)
 	{
 		for(FFResultNode* parent in _results.children)
-		{
-			if(document::document_ptr doc = parent.document)
-				doc->remove_all_marks(kSearchMarkIdentifier);
-		}
+			[parent.document removeAllMarksOfType:to_ns(kSearchMarkIdentifier)];
 
 		[self unbind:@"countOfMatches"];
 		[self unbind:@"countOfExcludedMatches"];
@@ -405,15 +403,13 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 	NSArray* matches = [aNotification userInfo][@"matches"];
 	FFResultNode* parent = nil;
-	for(FFMatch* match in matches)
+	for(OakDocumentMatch* match in matches)
 	{
-		find::match_t const& m = [match match];
-		if(document::document_ptr doc = m.document)
-			doc->add_mark(m.range.from, kSearchMarkIdentifier);
+		[match.document setMarkOfType:to_ns(kSearchMarkIdentifier) atPosition:match.range.from content:nil];
 
-		FFResultNode* node = [FFResultNode resultNodeWithMatch:m];
-		if(!parent || *parent.document != *node.document)
-			[_results addResultNode:(parent = [FFResultNode resultNodeWithMatch:m baseDirectory:_documentSearch.directory])];
+		FFResultNode* node = [FFResultNode resultNodeWithMatch:match];
+		if(!parent || ![parent.document isEqual:node.document])
+			[_results addResultNode:(parent = [FFResultNode resultNodeWithMatch:match baseDirectory:_documentSearch.directory])];
 		[parent addResultNode:node];
 	}
 
@@ -426,7 +422,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	for(FFResultNode* parent in _results.children)
 	{
 		[documents addObject:@{
-			@"identifier"      : [NSString stringWithCxxString:parent.firstResultNode.document->identifier()],
+			@"identifier"      : parent.firstResultNode.document.identifier.UUIDString,
 			@"firstMatchRange" : [NSString stringWithCxxString:parent.firstResultNode.match.range],
 			@"lastMatchRange"  : [NSString stringWithCxxString:parent.lastResultNode.match.range],
 		}];
@@ -473,14 +469,8 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	}
 
 	__weak __block id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:OakPasteboardDidChangeNotification object:[OakPasteboard pasteboardWithName:NSFindPboard] queue:nil usingBlock:^(NSNotification*){
-		if(_results)
-		{
-			for(FFResultNode* parent in _results.children)
-			{
-				if(document::document_ptr doc = parent.document)
-					doc->remove_all_marks(kSearchMarkIdentifier);
-			}
-		}
+		for(FFResultNode* parent in _results.children)
+			[parent.document removeAllMarksOfType:to_ns(kSearchMarkIdentifier)];
 		[[NSNotificationCenter defaultCenter] removeObserver:observerId];
 	}];
 }
@@ -511,10 +501,10 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 - (void)didSelectResult:(FFResultNode*)item
 {
-	auto doc = item.document;
-	if(!doc->is_open())
-		doc->set_recent_tracking(false);
-	document::show(doc, self.projectIdentifier ? oak::uuid_t(to_s(self.projectIdentifier)) : document::kCollectionAny, item.match.range, false);
+	OakDocument* doc = item.document;
+	if(!doc.isOpen)
+		doc.recentTrackingDisabled = YES;
+	document::show(document::find(to_s(doc.identifier.UUIDString)), self.projectIdentifier ? oak::uuid_t(to_s(self.projectIdentifier)) : document::kCollectionAny, item.match.range, false);
 }
 
 - (void)didDoubleClickResult:(FFResultNode*)item
@@ -526,17 +516,15 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 {
 	if(OakIsAlternateKeyOrMouseEvent())
 	{
-		if(item.document->path() != NULL_STR)
+		if(item.document.path)
 		{
-			std::string path = path::relative_to(item.document->path(), to_s(_documentSearch.directory));
+			std::string path = path::relative_to(to_s(item.document.path), to_s(_documentSearch.directory));
 			NSString* newGlob = [_windowController.globString stringByAppendingFormat:@"~%@", [NSString stringWithCxxString:path]];
 			_windowController.globString = newGlob;
 		}
 	}
 
-	if(document::document_ptr doc = item.document)
-		doc->remove_all_marks(kSearchMarkIdentifier);
-
+	[item.document removeAllMarksOfType:to_ns(kSearchMarkIdentifier)];
 	[self addResultsToPasteboard:self];
 
 	NSString* fmt = MSG_SHOWING_ZERO_MATCHES_FMT;
@@ -571,10 +559,10 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		char key = 0;
 		for(FFResultNode* parent in _results.children)
 		{
-			if(document::document_ptr doc = parent.document)
+			if(OakDocument* doc = parent.document)
 			{
-				NSMenuItem* item = [aMenu addItemWithTitle:[NSString stringWithCxxString:doc->path() == NULL_STR ? doc->display_name() : path::relative_to(doc->path(), to_s(self.searchFolder))] action:@selector(takeSelectedPathFrom:) keyEquivalent:key < 9 ? [NSString stringWithFormat:@"%c", '0' + (++key % 10)] : @""];
-				[item setImage:parent.icon];
+				NSMenuItem* item = [aMenu addItemWithTitle:(doc.path ? to_ns(path::relative_to(to_s(doc.path), to_s(self.searchFolder))) : doc.displayName) action:@selector(takeSelectedPathFrom:) keyEquivalent:key < 9 ? [NSString stringWithFormat:@"%c", '0' + (++key % 10)] : @""];
+				[item setImage:parent.document.icon];
 				[item setRepresentedObject:parent];
 			}
 		}
@@ -606,16 +594,16 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 	for(FFResultNode* item in _windowController.resultsViewController.selectedResults)
 	{
-		find::match_t const& m = item.match;
-		std::string str = m.excerpt;
+		OakDocumentMatch* m = item.match;
+		std::string str = to_s(m.excerpt);
 
 		if(!entireLines)
-			str = str.substr(m.first - m.excerpt_offset, m.last - m.first);
+			str = str.substr(m.first - m.excerptOffset, m.last - m.first);
 		else if(str.size() && str.back() == '\n')
 			str.erase(str.size()-1);
 
 		if(withFilename)
-			str = text::format("%s:%lu\t", [item.path UTF8String], m.line_number() + 1) + str;
+			str = text::format("%s:%lu\t", [item.path UTF8String], m.lineNumber + 1) + str;
 
 		res.push_back(str);
 	}

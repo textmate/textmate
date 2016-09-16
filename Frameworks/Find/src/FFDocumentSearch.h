@@ -1,14 +1,7 @@
-#import "scan_path.h"
-#import <text/types.h>
-#import <oak/duration.h>
+#import <regexp/find.h>
 
 extern NSString* const FFDocumentSearchDidReceiveResultsNotification;
 extern NSString* const FFDocumentSearchDidFinishNotification;
-
-// This is an Obj-C wrapper around match_t so that we can put it in an NSArray
-@interface FFMatch : NSObject
-- (find::match_t const&)match;
-@end
 
 @interface FFDocumentSearch : NSObject
 // Set up the search with these options

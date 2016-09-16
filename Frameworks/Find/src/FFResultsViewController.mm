@@ -1,5 +1,6 @@
 #import "FFResultsViewController.h"
 #import "FFResultNode.h"
+#import <document/OakDocument.h>
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakAppKit/NSColor Additions.h>
@@ -135,7 +136,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[count]-(>=4)-[remove]"                                    options:0 metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[icon(==16,==remove)]-(3)-|"                               options:0 metrics:nil views:views]];
 
-		[imageView bind:NSValueBinding toObject:self withKeyPath:@"objectValue.icon" options:nil];
+		[imageView bind:NSValueBinding toObject:self withKeyPath:@"objectValue.document.icon" options:nil];
 		[textField bind:NSValueBinding toObject:self withKeyPath:@"objectValue.displayPath" options:nil];
 
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(outlineViewItemDidExpandCollapse:) name:NSOutlineViewItemDidExpandNotification object:anOutlineView];
@@ -200,7 +201,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 	}
 	else
 	{
-		self.imageView.image = item.icon;
+		self.imageView.image = item.document.icon;
 	}
 }
 
