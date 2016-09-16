@@ -1203,19 +1203,26 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 
 - (void)enumerateByteRangesUsingBlock:(void(^)(char const* bytes, NSRange byteRange, BOOL* stop))block
 {
-	BOOL stop = NO;
 	if(_buffer)
 	{
-		_buffer->visit_data([&](char const* bytes, size_t offset, size_t len, bool* tmp){
-			block(bytes, NSMakeRange(offset, len), &stop);
-			*tmp = stop;
-		});
+		auto handler = ^{
+			_buffer->visit_data([block](char const* bytes, size_t offset, size_t len, bool* tmp){
+				BOOL stop = NO;
+				block(bytes, NSMakeRange(offset, len), &stop);
+				*tmp = stop;
+			});
+		};
+
+		if([NSThread isMainThread])
+				handler();
+		else	dispatch_sync(dispatch_get_main_queue(), handler);
 	}
 	else if(_path)
 	{
 		file::reader_t reader(to_s(_path));
 		io::bytes_ptr bytes;
 		size_t offset = 0;
+		BOOL stop = NO;
 		while(!stop && (bytes = reader.next()))
 		{
 			block(bytes->get(), NSMakeRange(offset, bytes->size()), &stop);
