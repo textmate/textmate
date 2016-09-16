@@ -23,7 +23,8 @@ extern NSString* const FFDocumentSearchDidFinishNotification;
 @property (nonatomic) BOOL searchFolderLinks;
 @property (nonatomic) BOOL searchFileLinks;
 @property (nonatomic) BOOL searchBinaryFiles;
-@property (nonatomic) path::glob_list_t globList;
+@property (nonatomic) BOOL searchHiddenFolders;
+@property (nonatomic) NSString* glob;
 
 // Start the search, observing the currentPath, and prematurely stop it if desired.
 - (void)start;

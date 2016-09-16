@@ -1,6 +1,8 @@
 #import "FFDocumentSearch.h"
-#import "scan_path.h"
 #import <OakFoundation/NSString Additions.h>
+#import <document/OakDocumentController.h>
+#import <document/OakDocument.h>
+#import <settings/settings.h>
 #import <ns/ns.h>
 #import <oak/oak.h>
 
@@ -39,52 +41,136 @@ NSString* const FFDocumentSearchDidFinishNotification         = @"FFDocumentSear
 {
 	OBJC_WATCH_LEAKS(FFDocumentSearch);
 
-	scan_path_ptr  _scanner;
+	BOOL           _searching;
+	NSUInteger     _lastSearchToken;
+	NSString*      _lastDocumentPath;
+
+	NSUInteger     _scannedFileCount;
+	NSUInteger     _scannedByteCount;
+
 	NSTimer*       _scannerProbeTimer;
-	NSDate*        _searchStartDate;
 	NSTimeInterval _searchDuration;
+
+	NSMutableArray<FFMatch*>* _matches;
 }
 @property (nonatomic, readwrite) NSString* currentPath;
 @end
 
 OAK_DEBUG_VAR(Find_FolderSearch);
 
+static NSDictionary* GlobOptionsForPath (std::string const& path, NSString* glob, BOOL searchBinaryFiles, BOOL searchHiddenFolders)
+{
+	static std::map<std::string, NSString*> const map = {
+		{ kSettingsExcludeDirectoriesInFolderSearchKey, kSearchExcludeDirectoryGlobsKey },
+		{ kSettingsExcludeDirectoriesKey,               kSearchExcludeDirectoryGlobsKey },
+		{ kSettingsExcludeFilesInFolderSearchKey,       kSearchExcludeFileGlobsKey      },
+		{ kSettingsExcludeFilesKey,                     kSearchExcludeFileGlobsKey      },
+		{ kSettingsExcludeInFolderSearchKey,            kSearchExcludeGlobsKey          },
+		{ kSettingsExcludeKey,                          kSearchExcludeGlobsKey          },
+	};
+
+	NSDictionary* res = @{
+		kSearchExcludeDirectoryGlobsKey : [NSMutableArray array],
+		kSearchExcludeFileGlobsKey      : [NSMutableArray array],
+		kSearchExcludeGlobsKey          : [NSMutableArray array],
+		kSearchDirectoryGlobsKey        : [NSMutableArray arrayWithObject:searchHiddenFolders ? @"{,.}*" : @"*"],
+		kSearchFileGlobsKey             : [NSMutableArray arrayWithArray:glob ? @[ glob ] : @[ ]],
+		kSearchGlobsKey                 : [NSMutableArray array],
+	};
+
+	settings_t const settings = settings_for_path(NULL_STR, "", path);
+	for(auto const& pair : map)
+	{
+		if(NSString* glob = to_ns(settings.get(pair.first)))
+			[res[pair.second] addObject:glob];
+	}
+
+	if(!searchBinaryFiles)
+	{
+		if(NSString* glob = to_ns(settings.get(kSettingsBinaryKey)))
+			[res[kSearchExcludeFileGlobsKey] addObject:glob];
+	}
+
+	return res;
+}
+
+static NSArray<FFMatch*>* ConvertMatches (NSArray<OakDocumentMatch*>* matches)
+{
+	NSMutableArray<FFMatch*>* res = [NSMutableArray array];
+	for(OakDocumentMatch* match in matches)
+	{
+		find::match_t m(std::make_shared<document::document_t>(match.document), match.checksum, match.first, match.last, match.range, match.captures);
+		m.excerpt        = to_s(match.excerpt);
+		m.excerpt_offset = match.excerptOffset;
+		m.truncate_head  = match.headTruncated;
+		m.truncate_tail  = match.tailTruncated;
+		m.newlines       = to_s(match.newlines);
+		[res addObject:[[FFMatch alloc] initWithMatch:m]];
+	}
+	return res;
+}
+
 @implementation FFDocumentSearch
 - (void)start
 {
 	D(DBF_Find_FolderSearch, bug("folder ‘%s’, searchString ‘%s’, documentIdentifier ‘%s’\n", [_directory UTF8String], [_searchString UTF8String], [_documentIdentifier UTF8String]););
-	_scanner = std::make_shared<find::scan_path_t>();
-	_scanner->set_path(to_s(_directory));
-	_scanner->set_follow_links(_searchFolderLinks);
-	_scanner->set_search_links(_searchFileLinks);
-	_scanner->set_search_binaries(_searchBinaryFiles);
-	_scanner->set_glob_list(_globList);
-	_scanner->set_search_string(to_s(_searchString));
-	_scanner->set_options(_options);
-
-	_searchStartDate   = [NSDate new];
-	_scannerProbeTimer = [NSTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(updateMatches:) userInfo:NULL repeats:YES];
+	[self stop];
+	_matches = [NSMutableArray array];
 
 	if(self.documentIdentifier)
 	{
-		if(document::document_ptr doc = document::find(to_s(self.documentIdentifier)))
-			_scanner->scan_document(doc);
-		[self stop];
+		if(OakDocument* document = [OakDocumentController.sharedInstance findDocumentWithIdentifier:[[NSUUID alloc] initWithUUIDString:_documentIdentifier]])
+		{
+			[_matches setArray:ConvertMatches([document matchesForString:_searchString options:_options])];
+			[self updateMatches:nil];
+			[[NSNotificationCenter defaultCenter] postNotificationName:FFDocumentSearchDidFinishNotification object:self];
+		}
 	}
 	else
 	{
-		_scanner->start();
+		if(_searching)
+			++_lastSearchToken;
+
+		_searching         = YES;
+		_scannerProbeTimer = [NSTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(updateMatches:) userInfo:NULL repeats:NO];
+
+		NSUInteger searchToken = _lastSearchToken;
+		NSDate* searchStartDate = [NSDate date];
+
+		NSMutableDictionary* options = [GlobOptionsForPath(to_s(_directory), _glob, _searchBinaryFiles, _searchHiddenFolders) mutableCopy];
+		options[kSearchFollowFileLinksKey]      = @(_searchFileLinks);
+		options[kSearchFollowDirectoryLinksKey] = @(_searchFolderLinks);
+
+		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+			[OakDocumentController.sharedInstance enumerateDocumentsAtPath:_directory options:options usingBlock:^(OakDocument* document, BOOL* stop){
+				if(*stop = searchToken != _lastSearchToken)
+					return;
+
+				_lastDocumentPath = document.path;
+				NSUInteger bufferSize = 0;
+				NSArray* newMatches = ConvertMatches([document matchesForString:_searchString options:_options bufferSize:&bufferSize]);
+				_scannedByteCount += bufferSize;
+				_scannedFileCount += 1;
+
+				if(newMatches.count)
+				{
+					@synchronized(self) {
+						[_matches addObjectsFromArray:newMatches];
+					}
+				}
+			}];
+
+			dispatch_async(dispatch_get_main_queue(), ^{
+				if(searchToken == _lastSearchToken)
+				{
+					_searching = NO;
+					_searchDuration = [[NSDate date] timeIntervalSinceDate:searchStartDate];
+					[self updateMatches:nil];
+					[[NSNotificationCenter defaultCenter] postNotificationName:FFDocumentSearchDidFinishNotification object:self];
+				}
+			});
+		});
 	}
-}
-
-- (NSUInteger)scannedFileCount
-{
-	return _scanner->scanned_file_count();
-}
-
-- (NSUInteger)scannedByteCount
-{
-	return _scanner->scanned_byte_count();
 }
 
 // ===================
@@ -95,37 +181,31 @@ OAK_DEBUG_VAR(Find_FolderSearch);
 {
 	D(DBF_Find_FolderSearch, bug("\n"););
 
-	BOOL scannerIsStopped = !_scanner->is_running();
-
-	std::vector<find::match_t> const& matches = _scanner->accept_matches();
-	if(!matches.empty())
-	{
-		NSMutableArray* newMatches = [NSMutableArray array];
-		for(auto const& match : matches)
-			[newMatches addObject:[[FFMatch alloc] initWithMatch:match]];
-		[[NSNotificationCenter defaultCenter] postNotificationName:FFDocumentSearchDidReceiveResultsNotification object:self userInfo:@{ @"matches" : newMatches }];
+	self.currentPath = [_lastDocumentPath stringByDeletingLastPathComponent];
+	@synchronized(self) {
+		if(_matches.count)
+		{
+			[[NSNotificationCenter defaultCenter] postNotificationName:FFDocumentSearchDidReceiveResultsNotification object:self userInfo:@{ @"matches" : _matches }];
+			[_matches removeAllObjects];
+		}
 	}
 
-	self.currentPath = [NSString stringWithCxxString:_scanner->current_path()];
-
-	if(scannerIsStopped)
-		[self stop];
+	if(_searching)
+			_scannerProbeTimer = [NSTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(updateMatches:) userInfo:NULL repeats:NO];
+	else	[self stop];
 }
 
 - (void)stop
 {
 	D(DBF_Find_FolderSearch, bug("\n"););
-	if(_scanner)
-		_scanner->stop();
+	if(std::exchange(_searching, NO))
+		++_lastSearchToken;
 
-	_searchDuration = [[NSDate date] timeIntervalSinceDate:_searchStartDate];
+	[_scannerProbeTimer invalidate];
+	_scannerProbeTimer = nil;
 
-	if(_scannerProbeTimer)
-	{
-		[_scannerProbeTimer invalidate];
-		_scannerProbeTimer = nil;
-		[self updateMatches:nil];
-		[[NSNotificationCenter defaultCenter] postNotificationName:FFDocumentSearchDidFinishNotification object:self];
+	@synchronized(self) {
+		[_matches removeAllObjects];
 	}
 }
 @end

@@ -154,6 +154,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	if(_performingFolderSearch)
 	{
 		[_documentSearch stop];
+		[self folderSearchDidFinish:nil];
 		self.windowController.statusString = @"Stopped.";
 	}
 }
@@ -192,26 +193,12 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 				}
 				else
 				{
-					auto const settings = settings_for_path(NULL_STR, "", to_s(folder));
-
-					path::glob_list_t globs;
-					globs.add_exclude_glob(settings.get(kSettingsExcludeDirectoriesInFolderSearchKey, NULL_STR), path::kPathItemDirectory);
-					globs.add_exclude_glob(settings.get(kSettingsExcludeDirectoriesKey,               NULL_STR), path::kPathItemDirectory);
-					globs.add_exclude_glob(settings.get(kSettingsExcludeFilesInFolderSearchKey,       NULL_STR), path::kPathItemFile);
-					globs.add_exclude_glob(settings.get(kSettingsExcludeFilesKey,                     NULL_STR), path::kPathItemFile);
-					globs.add_exclude_glob(settings.get(kSettingsExcludeInFolderSearchKey,            NULL_STR));
-					globs.add_exclude_glob(settings.get(kSettingsExcludeKey,                          NULL_STR));
-					if(!controller.searchBinaryFiles)
-						globs.add_exclude_glob(settings.get(kSettingsBinaryKey, NULL_STR));
-
-					globs.add_include_glob(controller.searchHiddenFolders ? "{,.}*" : "*", path::kPathItemDirectory);
-					globs.add_include_glob(to_s(controller.globString), path::kPathItemFile);
-
-					folderSearch.directory         = folder;
-					folderSearch.globList          = globs;
-					folderSearch.searchFolderLinks = controller.searchFolderLinks;
-					folderSearch.searchFileLinks   = controller.searchFileLinks;
-					folderSearch.searchBinaryFiles = controller.searchBinaryFiles;
+					folderSearch.directory           = folder;
+					folderSearch.glob                = controller.globString;
+					folderSearch.searchFolderLinks   = controller.searchFolderLinks;
+					folderSearch.searchFileLinks     = controller.searchFileLinks;
+					folderSearch.searchHiddenFolders = controller.searchHiddenFolders;
+					folderSearch.searchBinaryFiles   = controller.searchBinaryFiles;
 				}
 
 				self.documentSearch = folderSearch;
