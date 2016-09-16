@@ -551,6 +551,9 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 
 - (void)removeBackup
 {
+	[_backupTimer invalidate];
+	_backupTimer = nil;
+
 	if(_backupPath)
 	{
 		[[NSFileManager defaultManager] removeItemAtPath:_backupPath error:nullptr];
