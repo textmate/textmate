@@ -24,10 +24,13 @@ namespace oak_debug
 
 #define OWL_PASTE(x, y)    x##y
 #define _WATCH_LEAKS(suffix, type) \
+	_Pragma("clang diagnostic push") \
+	_Pragma("clang diagnostic ignored \"-Wfunction-def-in-objc-container\"") \
 	struct OWL_PASTE(watch_leaks_, suffix) : oak_debug::watch_leaks_t \
 	{ \
 		OWL_PASTE(watch_leaks_, suffix) () : watch_leaks_t( #type ) {} \
-	} _instance_counter_helper;
+	} _instance_counter_helper; \
+	_Pragma("clang diagnostic pop")
 
 #define WATCH_LEAKS(type)     _WATCH_LEAKS(__LINE__, type)
 #define OBJC_WATCH_LEAKS(type) _WATCH_LEAKS(type, type)
