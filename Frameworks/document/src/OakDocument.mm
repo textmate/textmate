@@ -29,6 +29,7 @@
 #import <file/save.h>
 #import <file/reader.h>
 #import <encoding/encoding.h>
+#import <scm/OakSourceControlManager.h>
 
 namespace document
 {
@@ -177,6 +178,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 
 	NSHashTable* _documentEditors;
 	scm::status::type _scmStatus;
+	id _scmObserver;
 	OakFileIconImage* _icon;
 
 	std::unique_ptr<ng::buffer_t> _buffer;
@@ -198,7 +200,6 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 @property (nonatomic, readonly) BOOL shouldSniffFileType;
 
 @property (nonatomic) BOOL                               observeSCMStatus;
-@property (nonatomic) scm::info_ptr                      scmInfo;
 @property (nonatomic) std::map<std::string, std::string> scmVariables;
 @property (nonatomic, readwrite) scm::status::type       scmStatus;
 
@@ -1535,25 +1536,16 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 
 	if(flag)
 	{
-		if(_scmInfo = scm::info(path::parent(to_s(self.path))))
-		{
-			_scmStatus    = _scmInfo->status(to_s(self.path));
-			_scmVariables = _scmInfo->scm_variables();
-
-			// We must postpone potential self.scmStatus = «status» when our callstack
-			// is bind:toObject:withKeyPath:options: → scmStatus → setObserveSCMStatus:
-			dispatch_async(dispatch_get_main_queue(), ^{
-				__weak OakDocument* weakSelf = self;
-				_scmInfo->add_callback(^(scm::info_t const& info){
-					weakSelf.scmStatus    = info.status(to_s(weakSelf.path));
-					weakSelf.scmVariables = info.scm_variables();
-				});
-			});
-		}
+		__weak OakDocument* weakSelf = self;
+		_scmStatus = [OakSourceControlManager.sharedInstance statusForFile:_path];
+		_scmObserver = [OakSourceControlManager.sharedInstance addObserverForPath:_path handler:^(NSString* path, scm::status::type scmStatus){
+			weakSelf.scmStatus = scmStatus;
+		}];
 	}
-	else if(_scmInfo)
+	else if(_scmObserver)
 	{
-		_scmInfo->pop_callback();
+		[OakSourceControlManager.sharedInstance removeObserver:_scmObserver];
+		_scmObserver = nil;
 	}
 }
 
