@@ -3,7 +3,7 @@
 #import <selection/types.h>
 #import <command/parser.h>
 #import <regexp/find.h> // find::options_t
-#import <scm/scm.h>
+#import <scm/status.h>
 
 PUBLIC extern NSString* OakDocumentContentDidChangeNotification;
 PUBLIC extern NSString* OakDocumentMarksDidChangeNotification;
