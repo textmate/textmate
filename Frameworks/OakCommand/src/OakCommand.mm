@@ -688,12 +688,6 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 	NSURLResponse* response = [[NSURLResponse alloc] initWithURL:self.request.URL MIMEType:@"text/html" expectedContentLength:-1 textEncodingName:@"utf-8"];
 	[self.client URLProtocol:self didReceiveResponse:response cacheStoragePolicy:NSURLCacheStorageNotAllowed];
 
-	// WebView seems to stall until it has received at least 1024 bytes
-	dispatch_sync(dispatch_get_main_queue(), ^{
-		static std::string const dummy("<!--" + std::string(1017, ' ') + "-->");
-		[self.client URLProtocol:self didLoadData:[NSData dataWithBytes:dummy.data() length:dummy.size()]];
-	});
-
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 		int len;
 		char buf[8192];

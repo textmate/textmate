@@ -93,6 +93,6 @@
 	else
 		return (void)NSRunAlertPanel(@"Unknown Encoding", @"The encoding used for this HTML buffer (“%@”) is unsupported.\nPlease file a bug report stating the encoding name and how you got to it.", @"Continue", nil, nil, [dataSource textEncodingName]);
 
-	document::show(document::from_content(str.find("<!--" + std::string(1017, ' ') + "-->") == 0 ? str.substr(1024) : str, "text.html.basic"));
+	document::show(document::from_content(str, "text.html.basic"));
 }
 @end
