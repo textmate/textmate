@@ -11,7 +11,7 @@ extern NSString* const FFDocumentSearchDidFinishNotification;
 // Either directory _or_ a documentIdentifier should be provided
 // If a documentIdentifier is set only that document will be searched.
 @property (nonatomic) NSString* directory;
-@property (nonatomic) NSString* documentIdentifier;
+@property (nonatomic) NSUUID* documentIdentifier;
 
 @property (nonatomic) BOOL searchFolderLinks;
 @property (nonatomic) BOOL searchFileLinks;

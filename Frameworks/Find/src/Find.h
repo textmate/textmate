@@ -12,7 +12,7 @@ PUBLIC extern NSString* const FFSearchInOpenFiles;
 PUBLIC @interface Find : NSResponder
 @property (nonatomic, copy) NSString* projectFolder;
 @property (nonatomic, copy) NSString* projectIdentifier;
-@property (nonatomic, copy) NSString* documentIdentifier;
+@property (nonatomic) NSUUID* documentIdentifier;
 
 @property (nonatomic, readonly) BOOL      isVisible;
 @property (nonatomic, readonly) NSString* searchFolder;

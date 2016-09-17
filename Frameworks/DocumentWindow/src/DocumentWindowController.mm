@@ -2151,9 +2151,9 @@ namespace
 	}
 }
 
-- (NSString*)selectedDocumentUUID
+- (NSUUID*)selectedDocumentUUID
 {
-	return _selectedDocument ? [NSString stringWithCxxString:_selectedDocument->identifier()] : nil;
+	return _selectedDocument ? _selectedDocument->document().identifier : nil;
 }
 
 - (IBAction)orderFrontFindPanel:(id)sender
@@ -2217,7 +2217,7 @@ namespace
 	fc.path            = nil; // Disable folder scanning when updating openDocuments and currentDocument
 	fc.filterString    = @"";
 	fc.openDocuments   = openDocuments;
-	fc.currentDocument = _selectedDocument ? [[NSUUID alloc] initWithUUIDString:to_ns(_selectedDocument->identifier())] : nil;
+	fc.currentDocument = self.selectedDocumentUUID;
 	fc.target          = self;
 	fc.action          = @selector(fileChooserDidSelectItems:);
 	fc.path            = self.projectPath ?: self.untitledSavePath ?: NSHomeDirectory();

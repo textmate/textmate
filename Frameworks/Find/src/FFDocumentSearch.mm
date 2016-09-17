@@ -69,13 +69,13 @@ static NSDictionary* GlobOptionsForPath (std::string const& path, NSString* glob
 @implementation FFDocumentSearch
 - (void)start
 {
-	D(DBF_Find_FolderSearch, bug("folder ‘%s’, searchString ‘%s’, documentIdentifier ‘%s’\n", [_directory UTF8String], [_searchString UTF8String], [_documentIdentifier UTF8String]););
+	D(DBF_Find_FolderSearch, bug("folder ‘%s’, searchString ‘%s’, documentIdentifier ‘%s’\n", [_directory UTF8String], [_searchString UTF8String], [_documentIdentifier.UUIDString UTF8String]););
 	[self stop];
 	_matches = [NSMutableArray array];
 
 	if(self.documentIdentifier)
 	{
-		if(OakDocument* document = [OakDocumentController.sharedInstance findDocumentWithIdentifier:[[NSUUID alloc] initWithUUIDString:_documentIdentifier]])
+		if(OakDocument* document = [OakDocumentController.sharedInstance findDocumentWithIdentifier:self.documentIdentifier])
 		{
 			[_matches setArray:[document matchesForString:_searchString options:_options]];
 			[self updateMatches:nil];
