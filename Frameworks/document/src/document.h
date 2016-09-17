@@ -28,23 +28,6 @@ namespace document
 {
 	struct document_t;
 	typedef std::shared_ptr<document_t>       document_ptr;
-	typedef std::weak_ptr<document_t>         document_weak_ptr;
-
-	struct inode_t
-	{
-		inode_t () { }
-		inode_t (dev_t device, ino_t inode, std::string const& path);
-		inode_t (std::string const& path);
-
-		operator bool () const { return valid; }
-		bool operator== (inode_t const& rhs) const { return valid == rhs.valid && inode == rhs.inode && device == rhs.device; }
-		bool operator!= (inode_t const& rhs) const { return valid != rhs.valid || inode != rhs.inode || device != rhs.device; }
-		bool operator< (inode_t const& rhs) const;
-
-		dev_t device = 0;
-		ino_t inode  = 0;
-		bool valid   = false;
-	};
 
 	struct PUBLIC document_t : std::enable_shared_from_this<document_t>
 	{
@@ -154,12 +137,6 @@ namespace document
 
 		void add_callback (callback_t* callback);
 		void remove_callback (callback_t* callback);
-
-		// ==========
-		// = Legacy =
-		// ==========
-
-		inode_t _inode;
 
 	private:
 		OakDocument* _document;

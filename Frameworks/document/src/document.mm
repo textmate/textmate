@@ -28,245 +28,26 @@ OAK_DEBUG_VAR(Document);
 
 namespace document
 {
-	// ====================
-	// = Document Tracker =
-	// ====================
-
-	static bool is_inode_valid (ino_t inode, std::string const& path)
+	document_ptr create (std::string const& rawPath)
 	{
-		if(inode == 999999999) // Zero-length files on FAT file systems share this magic value
-		{
-			struct statfs sfsb;
-			if(statfs(path.c_str(), &sfsb) == 0)
-				return strcasecmp(sfsb.f_fstypename, "msdos") == 0 && strcasecmp(sfsb.f_fstypename, "exfat") == 0;
-			perrorf("is_inode_valid: statfs(\"%s\")", path.c_str());
-		}
-		return true;
+		std::string const path = path::resolve(rawPath);
+		if(path::is_text_clipping(path))
+			return from_content(path::resource(path, typeUTF8Text, 256));
+		return std::make_shared<document_t>([OakDocument documentWithPath:to_ns(path)]);
 	}
 
-	inode_t::inode_t (dev_t device, ino_t inode, std::string const& path) : device(device), inode(inode), valid(true)
+	document_ptr find (oak::uuid_t const& uuid)
 	{
-		if(!is_inode_valid(inode, path))
-		{
-			device = 0;
-			inode  = 0;
-			valid  = false;
-		}
+		if(OakDocument* document = [OakDocument documentWithIdentifier:[[NSUUID alloc] initWithUUIDBytes:uuid.data]])
+			return std::make_shared<document_t>(document);
+		return document_ptr();
 	}
-
-	inode_t::inode_t (std::string const& path)
-	{
-		struct stat buf;
-		if(lstat(path.c_str(), &buf) == 0)
-		{
-			if(is_inode_valid(buf.st_ino, path))
-			{
-				device = buf.st_dev;
-				inode  = buf.st_ino;
-				valid  = true;
-			}
-		}
-	}
-
-	bool inode_t::operator< (inode_t const& rhs) const
-	{
-		return std::make_tuple(valid ? 1 : 0, inode, device) < std::make_tuple(rhs.valid ? 1 : 0, rhs.inode, rhs.device);
-	}
-
-	static struct document_tracker_t
-	{
-		std::vector<document_ptr> all_documents ()
-		{
-			std::lock_guard<std::mutex> lock(_lock);
-
-			std::vector<document_ptr> res;
-			for(auto pair : _documents_by_uuid)
-			{
-				if(document_ptr doc = pair.second->document.lock())
-					res.push_back(doc);
-			}
-			return res;
-		}
-
-		void add (document_ptr doc)
-		{
-			std::lock_guard<std::mutex> lock(_lock);
-			add_no_lock(doc);
-		}
-
-		document_ptr create (std::string const& path, inode_t const& inode)
-		{
-			std::lock_guard<std::mutex> lock(_lock);
-			D(DBF_Document_Tracker, bug("%s (%llu, %d)\n", path.c_str(), inode.inode, inode.device););
-
-			auto pathIter = _documents_by_path.find(path);
-			if(pathIter != _documents_by_path.end())
-			{
-				D(DBF_Document_Tracker, bug("re-use document with same path\n"););
-				if(document_ptr res = pathIter->second->document.lock())
-				{
-					if(pathIter->second->inode != inode)
-					{
-						// TODO If inode has changed, we should check document content against the disk
-						D(DBF_Document_Tracker, bug("update inode %llu → %llu\n", pathIter->second->inode.inode, inode.inode););
-						remove_no_lock(res->identifier());
-						res->_inode = inode;
-						add_no_lock(res);
-					}
-					return res;
-				}
-				ASSERT(false);
-			}
-
-			auto inodeIter = _documents_by_inode.find(inode);
-			if(inodeIter != _documents_by_inode.end())
-			{
-				D(DBF_Document_Tracker, bug("re-use document with different path ‘%s’\n", inodeIter->second->path.c_str()););
-				// TODO If the old path no longer exist, we should update document’s path
-				if(document_ptr res = inodeIter->second->document.lock())
-					return res;
-				ASSERT(false);
-			}
-
-			D(DBF_Document_Tracker, bug("nothing found, create new document\n"););
-			document_ptr res = std::make_shared<document_t>([OakDocument documentWithPath:to_ns(path)]);
-			res->_inode = inode;
-
-			add_no_lock(res);
-			return res;
-		}
-
-		document_ptr find (oak::uuid_t const& uuid)
-		{
-			std::lock_guard<std::mutex> lock(_lock);
-			D(DBF_Document_Tracker, bug("%s\n", to_s(uuid).c_str()););
-
-			auto uuidIter = _documents_by_uuid.find(uuid);
-			if(uuidIter != _documents_by_uuid.end())
-			{
-				D(DBF_Document_Tracker, bug("re-use document with path ‘%s’\n", uuidIter->second->path.c_str()););
-				if(document_ptr res = uuidIter->second->document.lock())
-					return res;
-				ASSERT(false);
-			}
-
-			if(OakDocument* document = [OakDocument documentWithIdentifier:[[NSUUID alloc] initWithUUIDBytes:uuid.data]])
-			{
-				document_ptr res = std::make_shared<document_t>(document);
-				res->_inode = inode_t(to_s(document.path));
-				add_no_lock(res);
-				return res;
-			}
-
-			D(DBF_Document_Tracker, bug("nothing found\n"););
-			return document_ptr();
-		}
-
-		inode_t update_document (oak::uuid_t const& uuid)
-		{
-			std::lock_guard<std::mutex> lock(_lock);
-			D(DBF_Document_Tracker, bug("%s\n", to_s(uuid).c_str()););
-
-			auto it = _documents_by_uuid.find(uuid);
-			if(it != _documents_by_uuid.end())
-			{
-				if(document_ptr doc = it->second->document.lock())
-				{
-					inode_t newInode(doc->path());
-					if(doc->path() != it->second->path || newInode != it->second->inode)
-					{
-						D(DBF_Document_Tracker, bug("path ‘%s’ → ‘%s’\n", it->second->path.c_str(), doc->path().c_str()););
-						D(DBF_Document_Tracker, bug("inode (%llu, %d) → (%llu, %d)\n", it->second->inode.inode, it->second->inode.device, newInode.inode, newInode.device););
-						remove_no_lock(uuid);
-						doc->_inode = newInode;
-						add_no_lock(doc);
-					}
-					return newInode;
-				}
-				D(DBF_Document_Tracker, bug("weak reference expired\n"););
-				ASSERT(false);
-			}
-			D(DBF_Document_Tracker, bug("uuid not found\n"););
-			ASSERT(it != _documents_by_uuid.end());
-			return inode_t();
-		}
-
-		void remove (oak::uuid_t const& uuid)
-		{
-			std::lock_guard<std::mutex> lock(_lock);
-			D(DBF_Document_Tracker, bug("%s\n", to_s(uuid).c_str()););
-
-			remove_no_lock(uuid);
-		}
-
-	private:
-		struct record_t
-		{
-			oak::uuid_t uuid;
-			std::string path;
-			inode_t inode;
-			document_weak_ptr document;
-		};
-
-		typedef std::shared_ptr<record_t> record_ptr;
-
-		std::mutex                        _lock;
-		std::map<oak::uuid_t, record_ptr> _documents_by_uuid;
-		std::map<std::string, record_ptr> _documents_by_path;
-		std::map<inode_t, record_ptr>     _documents_by_inode;
-
-		void add_no_lock (document_ptr doc)
-		{
-			auto r = std::make_shared<record_t>();
-			r->uuid     = doc->identifier();
-			r->path     = doc->path();
-			r->inode    = doc->_inode;
-			r->document = doc;
-
-			ASSERT(_documents_by_uuid.find(r->uuid) == _documents_by_uuid.end());
-			_documents_by_uuid.emplace(r->uuid, r);
-
-			if(r->path != NULL_STR)
-			{
-				ASSERT(_documents_by_path.find(r->path) == _documents_by_path.end());
-				_documents_by_path.emplace(r->path, r);
-			}
-
-			if(r->inode)
-			{
-				ASSERT(_documents_by_inode.find(r->inode) == _documents_by_inode.end());
-				_documents_by_inode.emplace(r->inode, r);
-			}
-		}
-
-		void remove_no_lock (oak::uuid_t const& uuid)
-		{
-			auto it = _documents_by_uuid.find(uuid);
-			if(it != _documents_by_uuid.end())
-			{
-				if(it->second->inode)
-					_documents_by_inode.erase(it->second->inode);
-				if(it->second->path != NULL_STR)
-					_documents_by_path.erase(it->second->path);
-				_documents_by_uuid.erase(it);
-			}
-			ASSERT(it != _documents_by_uuid.end());
-		}
-
-	} documents;
-
-	document_ptr create (std::string const& rawPath)                    { std::string const path = path::resolve(rawPath); return path::is_text_clipping(path) ? from_content(path::resource(path, typeUTF8Text, 256)) : documents.create(path, inode_t(path)); }
-	document_ptr create (std::string const& path, inode_t const& inode) { return documents.create(path, inode); }
-	document_ptr find (oak::uuid_t const& uuid)                         { return documents.find(uuid); }
 
 	document_ptr from_content (std::string const& content, std::string fileType)
 	{
 		D(DBF_Document, bug("%s\n", fileType.c_str()););
-
 		NSData* data = content != NULL_STR ? [NSData dataWithBytesNoCopy:(void*)content.data() length:content.size() freeWhenDone:NO] : nil;
-		document_ptr res = std::make_shared<document_t>([OakDocument documentWithData:data fileType:to_ns(fileType) customName:nil]);
-		documents.add(res);
-		return res;
+		return std::make_shared<document_t>([OakDocument documentWithData:data fileType:to_ns(fileType) customName:nil]);
 	}
 
 } /* document */
@@ -341,7 +122,6 @@ static std::map<std::string, document::document_t::callback_t::event_t> const Ob
 
 - (void)documentDidSave:(NSNotification*)aNotification
 {
-	_cppDocument->_inode = document::documents.update_document(_cppDocument->identifier());
 	[self breadcast:document::document_t::callback_t::did_save];
 }
 
@@ -355,9 +135,6 @@ static std::map<std::string, document::document_t::callback_t::event_t> const Ob
 	auto iter = ObservedKeys.find(to_s(keyPath));
 	if(iter != ObservedKeys.end())
 		[self breadcast:iter->second];
-
-	if([keyPath isEqualToString:@"path"])
-		_cppDocument->_inode = document::documents.update_document(_cppDocument->identifier());
 }
 @end
 
@@ -383,7 +160,6 @@ namespace document
 	document_t::~document_t ()
 	{
 		_observer = nil;
-		documents.remove(identifier());
 	}
 
 	OakDocumentObserver* document_t::observer ()
