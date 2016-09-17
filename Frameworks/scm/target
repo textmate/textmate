@@ -1,6 +1,6 @@
-SOURCES      = src/**/*.cc
+SOURCES      = src/**/*.{cc,mm}
 TESTS        = tests/t_*.cc
 CP_Resources = resources/*
-EXPORT       = src/{scm,status}.h
-LINK        += text cf io settings regexp
-FRAMEWORKS   = Carbon Security
+EXPORT       = src/{scm,status}.h src/OakSourceControlManager.h
+LINK        += text cf io ns settings regexp
+FRAMEWORKS   = Foundation
