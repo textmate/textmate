@@ -1,4 +1,5 @@
 #import "FFDocumentSearch.h"
+#import "scan_path.h"
 #import <OakFoundation/NSString Additions.h>
 #import <document/OakDocumentController.h>
 #import <document/OakDocument.h>
@@ -82,6 +83,15 @@ static NSDictionary* GlobOptionsForPath (std::string const& path, NSString* glob
 			[self updateMatches:nil];
 			[[NSNotificationCenter defaultCenter] postNotificationName:FFDocumentSearchDidFinishNotification object:self];
 		}
+	}
+	else if([_directory isEqualToString:to_ns(find::kSearchOpenFiles)])
+	{
+		for(OakDocument* document in [OakDocumentController.sharedInstance openDocuments])
+		{
+			[_matches setArray:[document matchesForString:_searchString options:_options]];
+			[self updateMatches:nil];
+		}
+		[[NSNotificationCenter defaultCenter] postNotificationName:FFDocumentSearchDidFinishNotification object:self];
 	}
 	else
 	{
