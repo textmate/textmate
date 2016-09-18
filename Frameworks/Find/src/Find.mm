@@ -502,7 +502,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 - (void)didSelectResult:(FFResultNode*)item
 {
 	OakDocument* doc = item.document;
-	if(!doc.isLoaded)
+	if(!doc.isOpen)
 		doc.recentTrackingDisabled = YES;
 	document::show(document::find(to_s(doc.identifier.UUIDString)), self.projectIdentifier ? oak::uuid_t(to_s(self.projectIdentifier)) : document::kCollectionAny, item.match.range, false);
 }

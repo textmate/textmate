@@ -26,6 +26,7 @@
 #import <command/runner.h>
 #import <document/collection.h>
 #import <document/OakDocumentEditor.h>
+#import <document/OakDocumentController.h>
 #import <file/type.h>
 #import <layout/layout.h>
 #import <ns/ns.h>
@@ -2629,19 +2630,19 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 						// ====================================================
 
 						NSDictionary* info = [documents objectAtIndex:(i + ((options & find::backwards) ? [documents count] - 1 : 1)) % [documents count]];
-						document::document_ptr doc;
-						if(NSString* path = [info objectForKey:@"path"])
-							doc = document::create(to_s(path));
-						else if(NSString* identifier = [info objectForKey:@"identifier"])
-							doc = document::find(to_s(identifier));
+						OakDocument* doc;
+						if(NSString* path = info[@"path"])
+							doc = [OakDocumentController.sharedInstance documentWithPath:path];
+						else if(NSString* identifier = info[@"identifier"])
+							doc = [OakDocumentController.sharedInstance findDocumentWithIdentifier:[[NSUUID alloc] initWithUUIDString:identifier]];
 
 						if(doc)
 						{
-							if(!doc->is_loaded())
-								doc->set_recent_tracking(false);
+							if(!doc.isOpen)
+								doc.recentTrackingDisabled = YES;
 
 							NSString* range = [info objectForKey:(options & find::backwards) ? @"lastMatchRange" : @"firstMatchRange"];
-							document::show(doc, document::kCollectionAny, to_s(range));
+							document::show(document::find(to_s(doc.identifier.UUIDString)), document::kCollectionAny, to_s(range));
 							return;
 						}
 					}
