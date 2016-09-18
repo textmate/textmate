@@ -20,6 +20,19 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 	return index > 0 ? node.parent.children[index - 1] : nil;
 }
 
+@interface FFResultsViewController () <NSOutlineViewDataSource, NSOutlineViewDelegate>
+{
+	NSView*        _topDivider;
+	NSScrollView*  _scrollView;
+	NSView*        _bottomDivider;
+	NSFont*        _searchResultsFont;
+
+	__weak id      _eventMonitor;
+	BOOL           _longPressedCommandModifier;
+}
+@property (nonatomic) BOOL showKeyEquivalent;
+@end
+
 // ================================
 // = OakSearchResultsCheckboxView =
 // ================================
@@ -53,6 +66,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 // =================================
 
 @interface OakSearchResultsMatchCellView : NSTableCellView
+@property (nonatomic) FFResultsViewController* viewController;
 @property (nonatomic) NSString* replaceString;
 @property (nonatomic) BOOL showReplacementPreviews;
 @end
@@ -60,10 +74,12 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 @implementation OakSearchResultsMatchCellView
 + (NSSet*)keyPathsForValuesAffectingExcerptString { return [NSSet setWithArray:@[ @"objectValue", @"objectValue.readOnly", @"objectValue.excluded", @"objectValue.replaceString", @"replaceString", @"showReplacementPreviews", @"backgroundStyle" ]]; }
 
-- (id)initWithFrame:(NSRect)aFrame font:(NSFont*)font
+- (id)initWithViewController:(FFResultsViewController*)viewController font:(NSFont*)font
 {
-	if((self = [super initWithFrame:aFrame]))
+	if((self = [super initWithFrame:NSZeroRect]))
 	{
+		_viewController = viewController;
+
 		NSTextField* textField = OakCreateLabel(@"", font);
 		[textField setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
 		[self addSubview:textField];
@@ -72,6 +88,29 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		self.textField = textField;
 	}
 	return self;
+}
+
+- (void)viewWillMoveToSuperview:(NSView*)aView
+{
+	if(aView)
+	{
+		[_viewController addObserver:self forKeyPath:@"replaceString" options:NSKeyValueObservingOptionInitial context:nullptr];
+		[_viewController addObserver:self forKeyPath:@"showReplacementPreviews" options:NSKeyValueObservingOptionInitial context:nullptr];
+	}
+	else
+	{
+		[_viewController removeObserver:self forKeyPath:@"showReplacementPreviews"];
+		[_viewController removeObserver:self forKeyPath:@"replaceString"];
+	}
+	[super viewWillMoveToSuperview:aView];
+}
+
+- (void)observeValueForKeyPath:(NSString*)aKeyPath ofObject:(id)anObject change:(NSDictionary*)someChange context:(void*)context
+{
+	NSArray* myKeys = @[ @"replaceString", @"showReplacementPreviews" ];
+	if(![myKeys containsObject:aKeyPath])
+		return [super observeValueForKeyPath:aKeyPath ofObject:anObject change:someChange context:context];
+	[self setValue:[anObject valueForKey:aKeyPath] forKey:aKeyPath];
 }
 
 - (NSAttributedString*)excerptString
@@ -99,16 +138,19 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 // ==================================
 
 @interface OakSearchResultsHeaderCellView : NSTableCellView
+@property (nonatomic) FFResultsViewController* viewController;
 @property (nonatomic) NSButton* countOfLeafsButton;
 @property (nonatomic) NSButton* removeButton;
 @property (nonatomic) BOOL showKeyEquivalent;
 @end
 
 @implementation OakSearchResultsHeaderCellView
-- (id)initWithOutlineView:(NSOutlineView*)anOutlineView
+- (id)initWithViewController:(FFResultsViewController*)viewController
 {
 	if((self = [super init]))
 	{
+		_viewController = viewController;
+
 		NSImageView* imageView = [NSImageView new];
 		NSTextField* textField = OakCreateLabel(@"", [NSFont controlContentFontOfSize:0]);
 
@@ -139,8 +181,8 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		[imageView bind:NSValueBinding toObject:self withKeyPath:@"objectValue.document.icon" options:nil];
 		[textField bind:NSValueBinding toObject:self withKeyPath:@"objectValue.displayPath" options:nil];
 
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(outlineViewItemDidExpandCollapse:) name:NSOutlineViewItemDidExpandNotification object:anOutlineView];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(outlineViewItemDidExpandCollapse:) name:NSOutlineViewItemDidCollapseNotification object:anOutlineView];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(outlineViewItemDidExpandCollapse:) name:NSOutlineViewItemDidExpandNotification object:_viewController.outlineView];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(outlineViewItemDidExpandCollapse:) name:NSOutlineViewItemDidCollapseNotification object:_viewController.outlineView];
 
 		self.imageView          = imageView;
 		self.textField          = textField;
@@ -153,6 +195,21 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 - (void)dealloc
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)viewWillMoveToSuperview:(NSView*)aView
+{
+	if(aView)
+			[_viewController addObserver:self forKeyPath:@"showKeyEquivalent" options:NSKeyValueObservingOptionInitial context:nullptr];
+	else	[_viewController removeObserver:self forKeyPath:@"showKeyEquivalent"];
+	[super viewWillMoveToSuperview:aView];
+}
+
+- (void)observeValueForKeyPath:(NSString*)aKeyPath ofObject:(id)anObject change:(NSDictionary*)someChange context:(void*)context
+{
+	if(![aKeyPath isEqualToString:@"showKeyEquivalent"])
+		return [super observeValueForKeyPath:aKeyPath ofObject:anObject change:someChange context:context];
+	[self setValue:[anObject valueForKey:aKeyPath] forKey:aKeyPath];
 }
 
 - (void)setShowKeyEquivalent:(BOOL)flag
@@ -221,19 +278,6 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 // ===========================
 // = FFResultsViewController =
 // ===========================
-
-@interface FFResultsViewController () <NSOutlineViewDataSource, NSOutlineViewDelegate>
-{
-	NSView*        _topDivider;
-	NSScrollView*  _scrollView;
-	NSView*        _bottomDivider;
-	NSFont*        _searchResultsFont;
-
-	__weak id      _eventMonitor;
-	BOOL           _longPressedCommandModifier;
-}
-@property (nonatomic) BOOL showKeyEquivalent;
-@end
 
 @implementation FFResultsViewController
 - (void)loadView
@@ -567,9 +611,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		OakSearchResultsMatchCellView* cellView = res;
 		if(!cellView)
 		{
-			res = cellView = [[OakSearchResultsMatchCellView alloc] initWithFrame:NSZeroRect font:_searchResultsFont];
-			[cellView bind:@"replaceString" toObject:self withKeyPath:@"replaceString" options:nil];
-			[cellView bind:@"showReplacementPreviews" toObject:self withKeyPath:@"showReplacementPreviews" options:nil];
+			res = cellView = [[OakSearchResultsMatchCellView alloc] initWithViewController:self font:_searchResultsFont];
 			cellView.identifier = identifier;
 		}
 		cellView.objectValue = item;
@@ -579,11 +621,10 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		OakSearchResultsHeaderCellView* cellView = res;
 		if(!cellView)
 		{
-			res = cellView = [[OakSearchResultsHeaderCellView alloc] initWithOutlineView:outlineView];
+			res = cellView = [[OakSearchResultsHeaderCellView alloc] initWithViewController:self];
 			cellView.identifier = identifier;
 			cellView.removeButton.action = @selector(takeSearchResultToRemoveFrom:);
 			cellView.removeButton.target = self;
-			[cellView bind:@"showKeyEquivalent" toObject:self withKeyPath:@"showKeyEquivalent" options:nil];
 		}
 
 		cellView.objectValue = item;
