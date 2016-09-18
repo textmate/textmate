@@ -252,7 +252,7 @@ static NSString* const OakTabItemPasteboardType = @"com.macromates.TextMate.tabI
 
 		if(tabItem.tabItemView.isHidden)
 			dragged = items.count;
-		else if(tabItem.tabItemView.selected)
+		else if(tabItem.tabItemView.isSelected)
 			selected = items.count;
 
 		[items addObject:tabItem];
@@ -307,7 +307,7 @@ static NSString* const OakTabItemPasteboardType = @"com.macromates.TextMate.tabI
 		OakTabItem* tabItem = _tabItems[index];
 		if(!tabItem.tabItemView)
 		{
-			tabItem.tabItemView = [[OakTabItemView alloc] initWithFrame:NSZeroRect title:tabItem.title modified:tabItem.modified];
+			tabItem.tabItemView = [[OakTabItemView alloc] initWithFrame:NSZeroRect title:tabItem.title modified:tabItem.isModified];
 			tabItem.tabItemView.selected = tabItem == _selectedTabItem;
 			tabItem.tabItemView.hidden   = tabItem == _preliminaryTabItem;
 			tabItem.tabItemView.toolTip  = OakIsEmptyString(tabItem.path) ? tabItem.title : [tabItem.path stringByAbbreviatingWithTildeInPath];
@@ -793,13 +793,13 @@ static NSString* const OakTabItemPasteboardType = @"com.macromates.TextMate.tabI
 
 		if(NSString* path = tabItem.path)
 		{
-			item.image   = [OakFileIconImage fileIconImageWithPath:(OakIsEmptyString(path) ? nil : path) isModified:tabItem.modified];
+			item.image   = [OakFileIconImage fileIconImageWithPath:(OakIsEmptyString(path) ? nil : path) isModified:tabItem.isModified];
 			item.toolTip = [path stringByAbbreviatingWithTildeInPath];
 		}
 
 		if(tabItem == _overflowTabItem)
 			[item setState:NSOnState];
-		else if(tabItem.modified)
+		else if(tabItem.isModified)
 			[item setModifiedState:YES];
 	}
 	[menu popUpMenuPositioningItem:nil atLocation:NSMakePoint(NSWidth([sender frame]), 0) inView:sender];

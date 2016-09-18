@@ -256,7 +256,7 @@ static NSString* kUserDefaultsTabItemLineBreakStyleKey = @"tabItemLineBreakStyle
 @property (nonatomic) NSTextField* textField;
 @property (nonatomic) NSMutableArray* myConstraints;
 @property (nonatomic) NSTrackingArea* trackingArea;
-@property (nonatomic) BOOL isMouseInside;
+@property (nonatomic, getter = isMouseInside) BOOL mouseInside;
 @end
 
 @implementation OakTabItemView
@@ -296,7 +296,7 @@ static NSString* kUserDefaultsTabItemLineBreakStyleKey = @"tabItemLineBreakStyle
 	[style updateTabItemView:self inSelectedTab:_selected];
 	[style updateCloseButton:_closeButton inSelectedTab:_selected modified:_modified];
 	[style updateOverflowButton:_overflowButton inSelectedTab:_selected];
-	_closeButton.hidden = !_isMouseInside && !_modified;
+	_closeButton.hidden = !_mouseInside && !_modified;
 }
 
 - (NSRect)contentFrame
@@ -375,7 +375,7 @@ static NSString* kUserDefaultsTabItemLineBreakStyleKey = @"tabItemLineBreakStyle
 	if(_trackingArea)
 		[self removeTrackingArea:_trackingArea];
 	NSTrackingAreaOptions options = NSTrackingMouseEnteredAndExited|NSTrackingActiveAlways;
-	if(self.isMouseInside = NSMouseInRect([self convertPoint:[self.window mouseLocationOutsideOfEventStream] fromView:nil], [self visibleRect], [self isFlipped]))
+	if(self.mouseInside = NSMouseInRect([self convertPoint:[self.window mouseLocationOutsideOfEventStream] fromView:nil], [self visibleRect], [self isFlipped]))
 		options |= NSTrackingAssumeInside;
 
 	CGFloat x1 = 0.5 * _leftCapView.activeBackgroundImage.size.width;
@@ -386,20 +386,20 @@ static NSString* kUserDefaultsTabItemLineBreakStyleKey = @"tabItemLineBreakStyle
 
 - (void)mouseEntered:(NSEvent*)anEvent
 {
-	self.isMouseInside = YES;
+	self.mouseInside = YES;
 }
 
 - (void)mouseExited:(NSEvent*)anEvent
 {
-	self.isMouseInside = NO;
+	self.mouseInside = NO;
 }
 
-- (void)setIsMouseInside:(BOOL)flag
+- (void)setMouseInside:(BOOL)flag
 {
-	if(_isMouseInside == flag)
+	if(_mouseInside == flag)
 		return;
-	_isMouseInside = flag;
-	_closeButton.hidden = !_isMouseInside && !_modified;
+	_mouseInside = flag;
+	_closeButton.hidden = !_mouseInside && !_modified;
 }
 
 - (void)updateTextFieldTitle

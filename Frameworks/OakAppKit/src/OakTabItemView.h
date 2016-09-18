@@ -38,8 +38,8 @@ PUBLIC @interface OakTabItemView : OakBackgroundFillView
 @property (nonatomic) OakRolloverButton* overflowButton;
 @property (nonatomic) OakTabItemViewVisibleCaps visibleCaps;
 @property (nonatomic) NSString* title;
-@property (nonatomic) BOOL modified;
-@property (nonatomic) BOOL selected;
+@property (nonatomic, getter = isModified) BOOL modified;
+@property (nonatomic, getter = isSelected) BOOL selected;
 @property (nonatomic) BOOL showOverflowButton;
 - (id)initWithFrame:(NSRect)aRect title:(NSString*)aTitle modified:(BOOL)modified;
 @end

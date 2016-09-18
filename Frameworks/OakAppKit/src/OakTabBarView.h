@@ -8,7 +8,7 @@ PUBLIC @interface OakTabItem : NSObject
 @property (nonatomic) NSString* title;
 @property (nonatomic) NSString* path;
 @property (nonatomic) NSString* identifier;
-@property (nonatomic) BOOL modified;
+@property (nonatomic, getter = isModified) BOOL modified;
 @end
 
 @protocol OakTabBarViewDelegate, OakTabBarViewDataSource;
