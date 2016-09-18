@@ -203,6 +203,16 @@ namespace
 	}];
 }
 
+- (NSArray<OakDocument*>*)untitledDocumentsInDirectory:(NSString*)aDirectory
+{
+	NSArray<OakDocument*>* array = [self.documents filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"path == NULL AND directory BEGINSWITH %@", aDirectory]];
+	return [array sortedArrayUsingComparator:^NSComparisonResult(OakDocument* lhs, OakDocument* rhs){
+		if(lhs.untitledCount != rhs.untitledCount)
+			return lhs.untitledCount < rhs.untitledCount ? NSOrderedAscending : NSOrderedDescending;
+		return [lhs.displayName localizedCompare:rhs.displayName];
+	}];
+}
+
 // ======================
 // = Last Recently Used =
 // ======================
@@ -267,6 +277,14 @@ namespace
 
 - (void)enumerateDocumentsAtPath:(NSString*)aDirectory options:(NSDictionary*)someOptions usingBlock:(void(^)(OakDocument* document, BOOL* stop))block
 {
+	BOOL stop = NO;
+	for(OakDocument* document in [self untitledDocumentsInDirectory:aDirectory])
+	{
+		block(document, &stop);
+		if(stop)
+			return;
+	}
+
 	BOOL followDirectoryLinks = [someOptions[kSearchFollowDirectoryLinksKey] boolValue];
 	BOOL followFileLinks      = [someOptions[kSearchFollowFileLinksKey] boolValue] || !someOptions[kSearchFollowFileLinksKey];
 	BOOL depthFirst           = [someOptions[kSearchDepthFirstSearchKey] boolValue];
@@ -291,7 +309,6 @@ namespace
 	std::deque<std::string> dirs = { to_s(aDirectory) };
 	std::vector<std::string> links;
 
-	BOOL stop = NO;
 	while(stop == NO && !dirs.empty())
 	{
 		std::string dir = dirs.front();
