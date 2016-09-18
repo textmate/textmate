@@ -1,5 +1,4 @@
 #import "OakKeyEquivalentView.h"
-#import "OakRolloverButton.h"
 #import "OakUIConstructionFunctions.h"
 #import "NSImage Additions.h"
 #import <OakFoundation/OakFoundation.h>
@@ -76,11 +75,7 @@ static NSString* const kRecordingPlaceholderString = @"…";
 	{
 		if(!_clearButton)
 		{
-			Class cl = NSClassFromString(@"OakFileBrowser");
-			_clearButton = [[OakRolloverButton alloc] initWithFrame:NSZeroRect];
-			_clearButton.regularImage  = [NSImage imageNamed:@"CloseTemplate"         inSameBundleAsClass:cl];
-			_clearButton.pressedImage  = [NSImage imageNamed:@"ClosePressedTemplate"  inSameBundleAsClass:cl];
-			_clearButton.rolloverImage = [NSImage imageNamed:@"CloseRolloverTemplate" inSameBundleAsClass:cl];
+			_clearButton = OakCreateCloseButton(@"Remove key equivalent");
 			_clearButton.refusesFirstResponder = YES;
 			_clearButton.disableWindowOrderingForFirstMouse = YES;
 			_clearButton.target = self;

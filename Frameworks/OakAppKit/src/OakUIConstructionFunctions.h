@@ -1,3 +1,4 @@
+#import "OakRolloverButton.h"
 #import <oak/misc.h>
 
 PUBLIC @interface OakBackgroundFillView : NSView
@@ -22,6 +23,7 @@ PUBLIC NSPopUpButton* OakCreatePopUpButton (BOOL pullsDown = NO, NSString* initi
 PUBLIC NSPopUpButton* OakCreateActionPopUpButton (BOOL bordered = NO);
 PUBLIC NSPopUpButton* OakCreateStatusBarPopUpButton (NSString* initialItemTitle = nil, NSObject* accessibilityLabel = nil);
 PUBLIC NSComboBox* OakCreateComboBox (NSObject* accessibilityLabel = nil);
+PUBLIC OakRolloverButton* OakCreateCloseButton (NSString* accessibilityLabel = @"Close document");
 PUBLIC NSView* OakCreateDividerImageView ();
 
 PUBLIC OakBackgroundFillView* OakCreateVerticalLine (NSColor* primaryColor, NSColor* secondaryColor = nil);

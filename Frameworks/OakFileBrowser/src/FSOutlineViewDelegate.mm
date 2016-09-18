@@ -8,7 +8,6 @@
 #import <OakAppKit/NSImage Additions.h>
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
-#import <OakAppKit/OakRolloverButton.h>
 #import <OakAppKit/OakFileIconImage.h>
 #import <ns/ns.h>
 #import <io/path.h>
@@ -161,7 +160,7 @@
 @property (nonatomic, weak) id target;
 
 @property (nonatomic) OakLabelSwatchView* labelSwatchView;
-@property (nonatomic) OakRolloverButton* closeButton;
+@property (nonatomic) NSButton* closeButton;
 @property (nonatomic) NSMutableArray* myConstraints;
 @end
 
@@ -257,14 +256,10 @@
 	}
 	else if(!_closeButton)
 	{
-		_closeButton = [[OakRolloverButton alloc] initWithFrame:NSZeroRect];
+		_closeButton = OakCreateCloseButton();
 		_closeButton.refusesFirstResponder = YES;
-		_closeButton.regularImage  = [NSImage imageNamed:@"CloseTemplate"         inSameBundleAsClass:[self class]];
-		_closeButton.pressedImage  = [NSImage imageNamed:@"ClosePressedTemplate"  inSameBundleAsClass:[self class]];
-		_closeButton.rolloverImage = [NSImage imageNamed:@"CloseRolloverTemplate" inSameBundleAsClass:[self class]];
-		_closeButton.target        = _target;
-		_closeButton.action        = _closeAction;
-		OakSetAccessibilityLabel(_closeButton, @"Close document");
+		_closeButton.target = _target;
+		_closeButton.action = _closeAction;
 
 		OakAddAutoLayoutViewsToSuperview(@[ _closeButton ], self);
 	}

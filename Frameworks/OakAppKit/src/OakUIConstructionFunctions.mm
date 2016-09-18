@@ -95,6 +95,17 @@ NSComboBox* OakCreateComboBox (NSObject* accessibilityLabel)
 	return res;
 }
 
+OakRolloverButton* OakCreateCloseButton (NSString* accessibilityLabel)
+{
+	OakRolloverButton* closeButton = [[OakRolloverButton alloc] initWithFrame:NSZeroRect];
+	closeButton.regularImage  = [NSImage imageNamed:@"CloseTemplate"         inSameBundleAsClass:[OakRolloverButton class]];
+	closeButton.pressedImage  = [NSImage imageNamed:@"ClosePressedTemplate"  inSameBundleAsClass:[OakRolloverButton class]];
+	closeButton.rolloverImage = [NSImage imageNamed:@"CloseRolloverTemplate" inSameBundleAsClass:[OakRolloverButton class]];
+
+	OakSetAccessibilityLabel(closeButton, accessibilityLabel);
+	return closeButton;
+}
+
 // =========================
 // = OakBackgroundFillView =
 // =========================

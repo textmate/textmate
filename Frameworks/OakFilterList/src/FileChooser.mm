@@ -3,7 +3,6 @@
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakFileIconImage.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
-#import <OakAppKit/OakRolloverButton.h>
 #import <OakAppKit/OakScopeBarView.h>
 #import <OakAppKit/NSImage Additions.h>
 #import <OakFoundation/NSString Additions.h>
@@ -635,15 +634,9 @@ static NSDictionary* globs_for_path (std::string const& path)
 	NSTableCellView* res = [aTableView makeViewWithIdentifier:aTableColumn.identifier owner:self];
 	if(!res)
 	{
-		OakRolloverButton* closeButton = [[OakRolloverButton alloc] initWithFrame:NSZeroRect];
-		OakSetAccessibilityLabel(closeButton, @"Close document");
-
-		Class cl = NSClassFromString(@"OakFileBrowser");
-		closeButton.regularImage  = [NSImage imageNamed:@"CloseTemplate"         inSameBundleAsClass:cl];
-		closeButton.pressedImage  = [NSImage imageNamed:@"ClosePressedTemplate"  inSameBundleAsClass:cl];
-		closeButton.rolloverImage = [NSImage imageNamed:@"CloseRolloverTemplate" inSameBundleAsClass:cl];
-		closeButton.target        = self;
-		closeButton.action        = @selector(takeItemToCloseFrom:);
+		NSButton* closeButton = OakCreateCloseButton();
+		closeButton.target = self;
+		closeButton.action = @selector(takeItemToCloseFrom:);
 
 		res = [[OakFileTableCellView alloc] initWithCloseButton:closeButton];
 		res.identifier = aTableColumn.identifier;
