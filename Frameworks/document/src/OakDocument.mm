@@ -190,6 +190,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 }
 @property (nonatomic) NSUInteger untitledCount;
 @property (nonatomic) NSUInteger openCount;
+@property (nonatomic, getter = isLoaded, readwrite) BOOL loaded;
 @property (nonatomic, getter = isBufferEmpty) BOOL bufferEmpty;
 @property (nonatomic) NSInteger backupRevision;
 @property (nonatomic) BOOL observeFileSystem;
@@ -221,7 +222,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	return [NSSet setWithObjects:@"path", @"customName", @"untitledCount", nil];
 }
 
-+ (NSSet*)keyPathsForValuesAffectingLoaded
++ (NSSet*)keyPathsForValuesAffectingOpen
 {
 	return [NSSet setWithObjects:@"openCount", nil];
 }
@@ -644,6 +645,9 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	});
 }
 
+- (void)open   { ++self.openCount; }
+- (BOOL)isOpen { return self.openCount != 0; }
+
 - (BOOL)isLoading
 {
 	return _loadCompletionHandlers != nil;
@@ -653,7 +657,8 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 {
 	block = block ?: ^(OakDocumentIOResult, NSString*, oak::uuid_t const&){ };
 
-	if(++self.openCount != 1)
+	[self open];
+	if(self.isLoaded)
 	{
 		if(!_loadCompletionHandlers)
 				block(OakDocumentIOResultSuccess, nil, oak::uuid_t());
@@ -769,7 +774,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 {
 	if(!content) // Loading failed
 	{
-		--self.openCount;
+		[self close];
 		return;
 	}
 
@@ -814,6 +819,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	self.revision       = _buffer->revision();
 	self.diskEncoding   = to_ns(encoding.charset());
 	self.diskNewlines   = to_ns(encoding.newlines());
+	self.loaded         = YES;
 
 	[self snapshot];
 	[self updateRecentDocumentMenu];
@@ -981,7 +987,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 
 		BOOL closeDocument = self.isLoaded;
 		if(closeDocument)
-			++self.openCount;
+			[self open];
 
 		auto cb = std::make_shared<callback_t>(self, aWindow, ^(OakDocumentIOResult result, NSString* path, encoding::type const& encoding, NSString* errorMessage, oak::uuid_t const& filterUUID){
 			[OakDocumentController.sharedInstance update:self];
@@ -1030,6 +1036,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	[self removeBackup];
 
 	[self deleteBuffer];
+	self.loaded = NO;
 }
 
 // ==========================
@@ -1116,7 +1123,6 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	return _icon;
 }
 
-- (BOOL)isLoaded                                      { return _openCount != 0; }
 - (BOOL)isDocumentEdited                              { return _revision != _savedRevision && (_onDisk || !_bufferEmpty); }
 - (BOOL)shouldSniffFileType                           { return settings_for_path(to_s(_virtualPath ?: _path), scope::scope_t(), to_s(_directory ?: [_path stringByDeletingLastPathComponent])).get(kSettingsFileTypeKey, NULL_STR) == NULL_STR; }
 
