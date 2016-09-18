@@ -214,7 +214,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 @implementation OakDocument
 + (NSSet*)keyPathsForValuesAffectingIcon
 {
-	return [NSSet setWithObjects:@"path", @"virtualPath", @"documentEdited", @"scmStatus", nil];
+	return [NSSet setWithObjects:@"path", @"onDisk", @"virtualPath", @"documentEdited", @"scmStatus", nil];
 }
 
 + (NSSet*)keyPathsForValuesAffectingDisplayName
@@ -1120,6 +1120,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 		_icon.path      = _virtualPath ?: _path;
 		_icon.scmStatus = _scmStatus;
 		_icon.modified  = self.isDocumentEdited;
+		_icon.exists    = self.isOnDisk;
 	}
 	return _icon;
 }
