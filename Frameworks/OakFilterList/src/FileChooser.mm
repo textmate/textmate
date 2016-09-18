@@ -159,7 +159,6 @@ static NSDictionary* globs_for_path (std::string const& path)
 @property (nonatomic) NSArray* sourceListLabels;
 @property (nonatomic) NSProgressIndicator* progressIndicator;
 
-@property (nonatomic) BOOL     polling;
 @property (nonatomic) NSTimer* pollTimer;
 @property (nonatomic) CGFloat  pollInterval;
 @end
