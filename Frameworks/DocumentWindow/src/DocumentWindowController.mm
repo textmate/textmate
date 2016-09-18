@@ -165,25 +165,15 @@ namespace
 				// TODO Add kqueue watching of documents
 			}
 
-			if(!_did_load && _document->is_loaded() && !_document->document().isLoading)
-			{
-				_document->sync_load();
-				_did_load = true;
-			}
-
 			_document->document().keepBackupFile = YES;
+			[_document->document() open];
 		}
 
 		bool untrack ()
 		{
-			if(_open_count == 1)
+			if(--_open_count == 0)
 				_document->remove_callback(this);
-
-			if(--_open_count == 0 && _did_load)
-			{
-				_document->close();
-				_did_load = false;
-			}
+			[_document->document() close];
 			return _open_count == 0;
 		}
 
@@ -220,7 +210,6 @@ namespace
 		__weak DocumentWindowController* _self;
 		document::document_ptr _document;
 		size_t _open_count = 0;
-		bool _did_load = false;
 	};
 
 	static bool is_disposable (document::document_ptr const& doc)
