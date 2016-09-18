@@ -1069,8 +1069,6 @@ namespace
 - (void)openAndSelectDocument:(document::document_ptr const&)aDocument
 {
 	document::document_ptr doc = aDocument;
-	OakDocument* document = doc->document();
-	document.directory = [document.path stringByDeletingLastPathComponent] ?: self.projectPath ?: self.defaultProjectPath;
 	[doc->document() loadModalForWindow:self.window completionHandler:^(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID){
 		if(result == OakDocumentIOResultSuccess)
 		{
@@ -1653,7 +1651,14 @@ namespace
 - (void)setDocuments:(std::vector<document::document_ptr>)newDocuments
 {
 	for(auto document : newDocuments)
+	{
 		[self trackDocument:document];
+
+		// Avoid resetting directory when tearing off a tab (unless moved to new project)
+		if(!document->document().path && (self.projectPath || !document->document().directory))
+			document->document().directory = self.projectPath ?: self.defaultProjectPath;
+	}
+
 	for(auto document : _documents)
 		[self untrackDocument:document];
 
