@@ -41,7 +41,7 @@ namespace document
 
 		OakDocument* document ()      { observer(); return _document; }
 
-		void sync_open (CFStringRef runLoopMode = kCFRunLoopDefaultMode);
+		void sync_load (CFStringRef runLoopMode = kCFRunLoopDefaultMode);
 		bool sync_save (CFStringRef runLoopMode = kCFRunLoopDefaultMode);
 
 		void show ();
@@ -63,7 +63,7 @@ namespace document
 		std::string file_type () const;
 		ssize_t revision () const;
 		std::string content () const;
-		bool is_open () const;
+		bool is_loaded () const;
 		bool is_modified () const;
 		bool is_on_disk () const;
 		text::indent_t indent () const;
@@ -120,7 +120,7 @@ namespace document
 			{
 				did_save,
 
-				did_change_open_status,
+				did_change_load_status,
 				did_change_modified_status,
 				did_change_on_disk_status,
 				did_change_path,

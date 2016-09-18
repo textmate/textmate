@@ -2637,7 +2637,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 
 						if(doc)
 						{
-							if(!doc->is_open())
+							if(!doc->is_loaded())
 								doc->set_recent_tracking(false);
 
 							NSString* range = [info objectForKey:(options & find::backwards) ? @"lastMatchRange" : @"firstMatchRange"];

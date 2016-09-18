@@ -10,7 +10,7 @@ void test_bookmarks ()
 	path::set_attr(jail.path("test.txt"), "com.macromates.bookmarks", "( '1:1', '1:8', '4:2' )");
 
 	document::document_ptr doc = document::create(jail.path("test.txt"));
-	doc->sync_open();
+	doc->sync_load();
 
 	std::map<size_t, std::string> marks = doc->buffer().get_marks(0, doc->buffer().size(), kBookmarkIdentifier);
 	OAK_ASSERT_EQ(marks.size(), 3);
@@ -26,7 +26,7 @@ void test_selection ()
 	path::set_attr(jail.path("test.txt"), "com.macromates.selectionRange", "2:2&3:1");
 
 	document::document_ptr doc = document::create(jail.path("test.txt"));
-	doc->sync_open();
+	doc->sync_load();
 
 	OAK_ASSERT_EQ(doc->selection(), "2:2&3:1");
 

@@ -20,7 +20,7 @@ void test_replace_single_line ()
 	replacements.insert(std::make_pair(std::make_pair(12, 17), "charum"));
 	replacements.insert(std::make_pair(std::make_pair(28, 39), "abetarda"));
 	doc->replace(replacements, crc32);
-	doc->sync_open();
+	doc->sync_load();
 	OAK_ASSERT_EQ(doc->content(), "Lorem ipsum charum sit amet, abetarda adipisicing elit.");
 	doc->close();
 }
@@ -34,7 +34,7 @@ void test_replace_multiple_lines ()
 	std::multimap<std::pair<size_t, size_t>, std::string> replacements;
 	replacements.insert(std::make_pair(std::make_pair(4, 7), "Jazz"));
 	doc->replace(replacements, crc32);
-	doc->sync_open();
+	doc->sync_load();
 	OAK_ASSERT_EQ(doc->content(), "Foo\nJazz\nFud\n");
 	doc->close();
 }
@@ -66,7 +66,7 @@ void test_replace_content_changed ()
 	document::document_ptr doc = document::create(jail.path("test.txt"));
 	OAK_ASSERT(!doc->replace({ { { 0, 3 }, "Fud" } }, crc32 ^ 0xDEADBEEF));
 
-	doc->sync_open();
+	doc->sync_load();
 	OAK_ASSERT_EQ(doc->content(), "Foo\nBar\n");
 	doc->close();
 }

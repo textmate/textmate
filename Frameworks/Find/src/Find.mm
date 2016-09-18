@@ -228,7 +228,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 					if(OakDocument* doc = parent.document)
 					{
-						if(doc.isOpen)
+						if(doc.isLoaded)
 						{
 							[doc performReplacements:replacements checksum:parent.match.checksum];
 						}
@@ -242,7 +242,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 							[doc saveModalForWindow:self.windowController.window completionHandler:^(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID){
 								// TODO Indicate failure when result != OakDocumentIOResultSuccess
-								if(!doc.isOpen) // Ensure document is still closed
+								if(!doc.isLoaded) // Ensure document is still closed
 									doc.content = nil;
 							}];
 						}
@@ -502,7 +502,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 - (void)didSelectResult:(FFResultNode*)item
 {
 	OakDocument* doc = item.document;
-	if(!doc.isOpen)
+	if(!doc.isLoaded)
 		doc.recentTrackingDisabled = YES;
 	document::show(document::find(to_s(doc.identifier.UUIDString)), self.projectIdentifier ? oak::uuid_t(to_s(self.projectIdentifier)) : document::kCollectionAny, item.match.range, false);
 }

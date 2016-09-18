@@ -32,7 +32,7 @@ static int32_t const NSWrapColumnWindowWidth = 0;
 {
 	if(self = [self init])
 	{
-		ASSERT(aDocument.isOpen);
+		ASSERT(aDocument.isLoaded);
 
 		// TODO Get from somewhere else (settings?)
 		bool scrollPastEnd = false;

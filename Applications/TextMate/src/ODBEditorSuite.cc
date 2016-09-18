@@ -76,12 +76,12 @@ namespace odb // wrap in namespace to avoid clashing with other callbacks named 
 
 		void handle_document_event (document::document_ptr document, event_t event)
 		{
-			if(event == did_change_open_status && !document->is_open())
+			if(event == did_change_load_status && !document->is_loaded())
 				send_event(kAEClosedFile);
 			else if(event == did_save)
 				send_event(kAEModifiedFile);
 
-			if(event == did_change_open_status && !document->is_open())
+			if(event == did_change_load_status && !document->is_loaded())
 			{
 				document->remove_callback(this);
 				delete this;

@@ -273,7 +273,7 @@ namespace // wrap in anonymous namespace to avoid clashing with other callbacks 
 
 		void handle_document_event (document::document_ptr document, event_t event)
 		{
-			if(event == did_change_open_status && !document->is_open())
+			if(event == did_change_load_status && !document->is_loaded())
 			{
 				D(DBF_RMateServer, bug("%p\n", this););
 				close_and_delete(document.get());

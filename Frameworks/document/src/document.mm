@@ -61,7 +61,7 @@ static std::map<std::string, document::document_t::callback_t::event_t> const Ob
 	{ "path",             document::document_t::callback_t::did_change_path             },
 	{ "onDisk",           document::document_t::callback_t::did_change_on_disk_status   },
 	{ "fileType",         document::document_t::callback_t::did_change_file_type        },
-	{ "open",             document::document_t::callback_t::did_change_open_status      },
+	{ "loaded",           document::document_t::callback_t::did_change_load_status      },
 	{ "documentEdited",   document::document_t::callback_t::did_change_modified_status  },
 	{ "tabSize",          document::document_t::callback_t::did_change_indent_settings, },
 	{ "softTabs",         document::document_t::callback_t::did_change_indent_settings, },
@@ -179,7 +179,7 @@ namespace document
 	std::string document_t::file_type () const         { return to_s(_document.fileType); }
 	ssize_t document_t::revision () const              { return _document.revision; }
 	std::string document_t::content () const           { return to_s(_document.content); }
-	bool document_t::is_open () const                  { return _document.isOpen; }
+	bool document_t::is_loaded () const                { return _document.isLoaded; }
 	bool document_t::is_modified () const              { return _document.isDocumentEdited; }
 	bool document_t::is_on_disk () const               { return _document.isOnDisk; }
 	text::indent_t document_t::indent () const         { return text::indent_t(_document.tabSize, SIZE_T_MAX, _document.softTabs); }
@@ -206,7 +206,7 @@ namespace document
 	ng::buffer_t& document_t::buffer ()                                      { return [_document buffer]; }
 	ng::undo_manager_t& document_t::undo_manager ()                          { return [_document undoManager]; }
 
-	void document_t::sync_open (CFStringRef runLoopMode)
+	void document_t::sync_load (CFStringRef runLoopMode)
 	{
 		observer(); // Create OakDocumentObserver if it does not already exist
 
@@ -264,7 +264,7 @@ namespace document
 	void document_t::close ()
 	{
 		[_document close];
-		if(!_document.isOpen && !_observer.hasCallbacks)
+		if(!_document.isLoaded && !_observer.hasCallbacks)
 			_observer = nil;
 	}
 
@@ -291,7 +291,7 @@ namespace document
 	void document_t::remove_callback (callback_t* callback)
 	{
 		[_observer removeCallback:callback];
-		if(!_document.isOpen && !_observer.hasCallbacks)
+		if(!_document.isLoaded && !_observer.hasCallbacks)
 			_observer = nil;
 	}
 

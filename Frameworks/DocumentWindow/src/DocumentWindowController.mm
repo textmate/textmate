@@ -165,10 +165,10 @@ namespace
 				// TODO Add kqueue watching of documents
 			}
 
-			if(!_did_open && _document->is_open() && !_document->document().isLoading)
+			if(!_did_load && _document->is_loaded() && !_document->document().isLoading)
 			{
-				_document->sync_open();
-				_did_open = true;
+				_document->sync_load();
+				_did_load = true;
 			}
 
 			_document->document().keepBackupFile = YES;
@@ -179,10 +179,10 @@ namespace
 			if(_open_count == 1)
 				_document->remove_callback(this);
 
-			if(--_open_count == 0 && _did_open)
+			if(--_open_count == 0 && _did_load)
 			{
 				_document->close();
-				_did_open = false;
+				_did_load = false;
 			}
 			return _open_count == 0;
 		}
@@ -220,12 +220,12 @@ namespace
 		__weak DocumentWindowController* _self;
 		document::document_ptr _document;
 		size_t _open_count = 0;
-		bool _did_open = false;
+		bool _did_load = false;
 	};
 
 	static bool is_disposable (document::document_ptr const& doc)
 	{
-		return doc && !doc->is_modified() && !doc->is_on_disk() && doc->path() == NULL_STR && doc->is_open() && doc->buffer().empty();
+		return doc && !doc->is_modified() && !doc->is_on_disk() && doc->path() == NULL_STR && doc->is_loaded() && doc->buffer().empty();
 	}
 }
 
@@ -915,7 +915,7 @@ namespace
 			[self insertDocuments:{ doc } atIndex:_selectedTabIndex + 1 selecting:doc andClosing:[self disposableDocument]];
 
 			// Using openAndSelectDocument: will move focus to OakTextView
-			doc->sync_open();
+			doc->sync_load();
 			[self setSelectedDocument:doc];
 			doc->close();
 
@@ -1227,7 +1227,7 @@ namespace
 		id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:OakDocumentWillShowAlertNotification object:document queue:nil usingBlock:^(NSNotification*){
 			for(size_t i = 0; i < _documents.size(); ++i)
 			{
-				if(document.isOpen && _documents[i]->document() == document)
+				if(document.isLoaded && _documents[i]->document() == document)
 				{
 					if(_selectedDocument != _documents[i])
 					{
@@ -1679,7 +1679,7 @@ namespace
 
 - (void)setSelectedDocument:(document::document_ptr)newSelectedDocument
 {
-	ASSERT(!newSelectedDocument || newSelectedDocument->is_open());
+	ASSERT(!newSelectedDocument || newSelectedDocument->is_loaded());
 	if(_selectedDocument == newSelectedDocument)
 	{
 		self.documentView.document = _selectedDocument->document();
@@ -2677,7 +2677,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 		if(document->is_modified() || document->path() == NULL_STR)
 		{
 			doc[@"identifier"] = [NSString stringWithCxxString:document->identifier()];
-			if(document->is_open())
+			if(document->is_loaded())
 				document->backup();
 		}
 		if(document->path() != NULL_STR)
