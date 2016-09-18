@@ -465,6 +465,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 		return;
 
 	_path = path;
+	_directory = nil;
 	_icon = nil;
 	self.customName = nil;
 
