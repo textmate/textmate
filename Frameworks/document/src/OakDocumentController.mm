@@ -188,6 +188,11 @@ namespace
 	return res;
 }
 
+- (NSArray<OakDocument*>*)openDocuments
+{
+	return [self.documents filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isOpen == YES"]];
+}
+
 // ======================
 // = Last Recently Used =
 // ======================

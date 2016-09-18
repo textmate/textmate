@@ -18,6 +18,7 @@ PUBLIC @interface OakDocumentController : NSObject
 - (OakDocument*)documentWithPath:(NSString*)aPath;
 - (OakDocument*)findDocumentWithIdentifier:(NSUUID*)anUUID;
 - (NSArray<OakDocument*>*)documents;
+- (NSArray<OakDocument*>*)openDocuments;
 
 - (NSInteger)lruRankForDocument:(OakDocument*)aDocument;
 - (void)didTouchDocument:(OakDocument*)aDocument;
