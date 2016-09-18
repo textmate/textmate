@@ -190,7 +190,17 @@ namespace
 
 - (NSArray<OakDocument*>*)openDocuments
 {
-	return [self.documents filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isOpen == YES"]];
+	NSArray<OakDocument*>* array = [self.documents filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isOpen == YES"]];
+	return [array sortedArrayUsingComparator:^NSComparisonResult(OakDocument* lhs, OakDocument* rhs){
+		if(!lhs.path && !rhs.path)
+			return lhs.untitledCount < rhs.untitledCount ? NSOrderedAscending : (lhs.untitledCount > rhs.untitledCount ? NSOrderedDescending : NSOrderedSame);
+		else if(lhs.path && rhs.path)
+			return [lhs.path localizedCompare:rhs.path];
+		else if(lhs.path)
+			return NSOrderedDescending;
+		else
+			return NSOrderedAscending;
+	}];
 }
 
 // ======================
