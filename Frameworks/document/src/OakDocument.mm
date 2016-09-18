@@ -281,7 +281,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	if(!_buffer)
 		return;
 
-	settings_t const settings = settings_for_path(to_s(_virtualPath ?: _path), to_s(_fileType), to_s(_directory ?: [_path stringByDeletingLastPathComponent]), self.variables);
+	settings_t const settings = settings_for_path(to_s(_virtualPath ?: _path), to_s(_fileType), to_s([_path stringByDeletingLastPathComponent] ?: _directory), self.variables);
 	if(updateSpelling)
 	{
 		self.spellingLanguage = to_ns(settings.get(kSettingsSpellingLanguageKey, ""));
@@ -879,7 +879,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 
 		encoding::type encoding = encoding::type(to_s(_diskNewlines), to_s(_diskEncoding));
 
-		settings_t const settings = settings_for_path(to_s(_path), to_s(_fileType), to_s(_directory ?: [_path stringByDeletingLastPathComponent]));
+		settings_t const settings = settings_for_path(to_s(_path), to_s(_fileType), to_s([_path stringByDeletingLastPathComponent] ?: _directory));
 		if(encoding.charset() == kCharsetNoEncoding)
 			encoding.set_charset(settings.get(kSettingsEncodingKey, kCharsetUTF8));
 		if(encoding.newlines() == NULL_STR)
@@ -1124,7 +1124,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 }
 
 - (BOOL)isDocumentEdited                              { return _revision != _savedRevision && (_onDisk || !_bufferEmpty); }
-- (BOOL)shouldSniffFileType                           { return settings_for_path(to_s(_virtualPath ?: _path), scope::scope_t(), to_s(_directory ?: [_path stringByDeletingLastPathComponent])).get(kSettingsFileTypeKey, NULL_STR) == NULL_STR; }
+- (BOOL)shouldSniffFileType                           { return settings_for_path(to_s(_virtualPath ?: _path), scope::scope_t(), to_s([_path stringByDeletingLastPathComponent] ?: _directory)).get(kSettingsFileTypeKey, NULL_STR) == NULL_STR; }
 
 - (BOOL)canUndo                                       { return _undoManager && _undoManager->can_undo(); }
 - (BOOL)canRedo                                       { return _undoManager && _undoManager->can_redo(); }
