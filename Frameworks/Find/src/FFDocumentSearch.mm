@@ -89,7 +89,7 @@ static NSDictionary* GlobOptionsForPath (std::string const& path, NSString* glob
 			++_lastSearchToken;
 
 		_searching    = YES;
-		_pollInterval = 0.03;
+		_pollInterval = 0.2;
 		_pollTimer    = [NSTimer scheduledTimerWithTimeInterval:_pollInterval target:self selector:@selector(updateMatches:) userInfo:NULL repeats:NO];
 
 		NSUInteger searchToken = _lastSearchToken;
