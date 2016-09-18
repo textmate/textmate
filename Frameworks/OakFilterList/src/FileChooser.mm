@@ -515,9 +515,9 @@ static NSDictionary* globs_for_path (std::string const& path)
 		});
 	});
 
-	_pollInterval = 0.01;
+	_pollInterval = 0.02;
 	_pollTimer = [NSTimer scheduledTimerWithTimeInterval:_pollInterval target:self selector:@selector(handleSearchResults:) userInfo:nil repeats:NO];
-	[_progressIndicator startAnimation:self];
+	[_progressIndicator performSelector:@selector(startAnimation:) withObject:self afterDelay:0.2];
 }
 
 - (void)handleSearchResults:(NSTimer*)aTimer
@@ -546,6 +546,7 @@ static NSDictionary* globs_for_path (std::string const& path)
 	if(std::exchange(_searching, NO))
 		++_lastSearchToken;
 
+	[NSObject cancelPreviousPerformRequestsWithTarget:_progressIndicator selector:@selector(startAnimation:) object:self];
 	[_progressIndicator stopAnimation:self];
 	[_pollTimer invalidate];
 	_pollTimer = nil;
