@@ -293,6 +293,8 @@ namespace format_string
 
 	std::string expand (std::string const& format, std::map<std::string, std::string> const& variables)
 	{
+		if(format.find_first_of("$(\\") == std::string::npos)
+			return format;
 		return format_string_t(format).expand(variables);
 	}
 
