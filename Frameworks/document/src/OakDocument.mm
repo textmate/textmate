@@ -234,7 +234,8 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 
 - (NSString*)description
 {
-	return [NSString stringWithFormat:@"<%@: %@>", [self class], self.displayName];
+	NSString* displayName = _path || !_directory ? self.displayName : [self.displayName stringByAppendingFormat:@" (%@)", _directory];
+	return [NSString stringWithFormat:@"<%@: %@>", [self class], displayName];
 }
 
 // ==================
