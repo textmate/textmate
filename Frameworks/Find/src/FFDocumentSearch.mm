@@ -20,7 +20,8 @@ NSString* const FFDocumentSearchDidFinishNotification         = @"FFDocumentSear
 	NSUInteger     _scannedFileCount;
 	NSUInteger     _scannedByteCount;
 
-	NSTimer*       _scannerProbeTimer;
+	NSTimer*       _pollTimer;
+	CGFloat        _pollInterval;
 	NSTimeInterval _searchDuration;
 
 	NSMutableArray<OakDocumentMatch*>* _matches;
@@ -87,8 +88,9 @@ static NSDictionary* GlobOptionsForPath (std::string const& path, NSString* glob
 		if(_searching)
 			++_lastSearchToken;
 
-		_searching         = YES;
-		_scannerProbeTimer = [NSTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(updateMatches:) userInfo:NULL repeats:NO];
+		_searching    = YES;
+		_pollInterval = 0.03;
+		_pollTimer    = [NSTimer scheduledTimerWithTimeInterval:_pollInterval target:self selector:@selector(updateMatches:) userInfo:NULL repeats:NO];
 
 		NSUInteger searchToken = _lastSearchToken;
 		NSDate* searchStartDate = [NSDate date];
@@ -147,7 +149,7 @@ static NSDictionary* GlobOptionsForPath (std::string const& path, NSString* glob
 	}
 
 	if(_searching)
-			_scannerProbeTimer = [NSTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(updateMatches:) userInfo:NULL repeats:NO];
+			_pollTimer = [NSTimer scheduledTimerWithTimeInterval:_pollInterval target:self selector:@selector(updateMatches:) userInfo:NULL repeats:NO];
 	else	[self stop];
 }
 
@@ -157,8 +159,8 @@ static NSDictionary* GlobOptionsForPath (std::string const& path, NSString* glob
 	if(std::exchange(_searching, NO))
 		++_lastSearchToken;
 
-	[_scannerProbeTimer invalidate];
-	_scannerProbeTimer = nil;
+	[_pollTimer invalidate];
+	_pollTimer = nil;
 
 	@synchronized(self) {
 		[_matches removeAllObjects];
