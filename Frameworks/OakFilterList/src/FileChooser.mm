@@ -305,15 +305,12 @@ static NSDictionary* globs_for_path (std::string const& path)
 
 - (void)showWindow:(id)sender
 {
-	if(_path && !_scmInfo)
-		[self obtainSCMInfo];
 	[super showWindow:sender];
 }
 
 - (void)windowWillClose:(NSNotification*)aNotification
 {
 	[self stopSearch];
-
 	_scmInfo.reset();
 	_records = nil;
 
@@ -406,15 +403,6 @@ static NSDictionary* globs_for_path (std::string const& path)
 	self.items = [array sortedArrayUsingSelector:compareSelector];
 }
 
-- (void)updateSCMStatus
-{
-	if(!_scmInfo)
-		return;
-
-	if(_sourceIndex == kFileChooserUncommittedChangesSourceIndex)
-		[self reloadSCMStatus];
-}
-
 // ========
 // = Path =
 // ========
@@ -424,9 +412,7 @@ static NSDictionary* globs_for_path (std::string const& path)
 	if(_path == aString || [_path isEqualToString:aString])
 		return;
 	_path = aString;
-
 	_scmInfo.reset();
-	[self obtainSCMInfo];
 
 	if(_sourceIndex == kFileChooserAllSourceIndex)
 		[self startSearch:_path];
@@ -435,19 +421,11 @@ static NSDictionary* globs_for_path (std::string const& path)
 	[self updateWindowTitle];
 }
 
-- (scm::info_ptr)obtainSCMInfo
-{
-	if(!_scmInfo && (_scmInfo = scm::info(to_s(_path))))
-	{
-		_scmInfo->add_callback(^(scm::info_t const& info){
-			[self updateSCMStatus];
-		});
-	}
-	return _scmInfo;
-}
-
 - (void)reload
 {
+	[self stopSearch];
+	_scmInfo.reset();
+
 	switch(_sourceIndex)
 	{
 		case kFileChooserAllSourceIndex:
@@ -458,8 +436,6 @@ static NSDictionary* globs_for_path (std::string const& path)
 
 		case kFileChooserOpenDocumentsSourceIndex:
 		{
-			[self stopSearch];
-
 			_records = [NSMutableArray array];
 			[self addRecordsForDocuments:[OakDocumentController.sharedInstance openDocuments]];
 		}
@@ -467,7 +443,6 @@ static NSDictionary* globs_for_path (std::string const& path)
 
 		case kFileChooserUncommittedChangesSourceIndex:
 		{
-			[self stopSearch];
 			[self reloadSCMStatus];
 		}
 		break;
@@ -476,18 +451,25 @@ static NSDictionary* globs_for_path (std::string const& path)
 
 - (void)reloadSCMStatus
 {
-	NSMutableArray<OakDocument*>* scmStatus = [NSMutableArray array];
-	if([self obtainSCMInfo])
+	if(!_scmInfo && (_scmInfo = scm::info(to_s(_path))))
 	{
+		_scmInfo->add_callback(^(scm::info_t const& info){
+			if(_sourceIndex == kFileChooserUncommittedChangesSourceIndex)
+				[self reloadSCMStatus];
+		});
+	}
+
+	_records = [NSMutableArray array];
+	if(_scmInfo)
+	{
+		NSMutableArray<OakDocument*>* scmStatus = [NSMutableArray array];
 		for(auto pair : _scmInfo->status())
 		{
 			if(pair.second & (scm::status::modified|scm::status::added|scm::status::deleted|scm::status::conflicted))
 				[scmStatus addObject:[OakDocument documentWithPath:to_ns(pair.first)]];
 		}
+		[self addRecordsForDocuments:scmStatus];
 	}
-
-	_records = [NSMutableArray array];
-	[self addRecordsForDocuments:scmStatus];
 }
 
 - (void)startSearch:(NSString*)path
