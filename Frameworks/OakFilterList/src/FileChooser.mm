@@ -30,11 +30,27 @@ NSUInteger const kFileChooserOpenDocumentsSourceIndex      = 1;
 NSUInteger const kFileChooserUncommittedChangesSourceIndex = 2;
 
 @interface FileChooserItem : NSObject
+{
+	std::string _path;
+	std::string _directory;
+	std::string _file;
+	NSInteger _lruRank;
+
+	BOOL _isCurrent;
+	double _rank;
+
+	std::vector<std::pair<size_t, size_t>> _coverDirectory;
+	std::vector<std::pair<size_t, size_t>> _coverFile;
+
+	NSAttributedString* _name;
+	NSAttributedString* _folder;
+}
 @property (nonatomic) OakDocument* document;
 @property (nonatomic, readonly) NSImage* icon;
-@property (nonatomic) NSAttributedString* name;
-@property (nonatomic) NSAttributedString* folder;
+@property (nonatomic, readonly) NSAttributedString* name;
+@property (nonatomic, readonly) NSAttributedString* folder;
 @property (nonatomic, getter = isCloseDisabled, readonly) BOOL closeDisabled;
+@property (nonatomic, getter = isMatched) BOOL matched;
 @end
 
 @implementation FileChooserItem
@@ -59,78 +75,114 @@ NSUInteger const kFileChooserUncommittedChangesSourceIndex = 2;
 {
 	return !_document.open || !_document.path;
 }
-@end
 
-namespace
+- (instancetype)initWithDocument:(OakDocument*)aDocument base:(std::string const&)base isCurrent:(BOOL)isCurrent
 {
-	struct document_record_t
+	if(self = [super init])
 	{
-		document_record_t (OakDocument* doc, std::string const& base)
-		{
-			document  = doc;
-			full_path = to_s(doc.path);
-			prefix    = full_path == NULL_STR ? "" : path::relative_to(path::parent(full_path), base);
-			name      = full_path == NULL_STR ? to_s(doc.displayName) : path::name(full_path);
-			lru_rank  = [OakDocumentController.sharedInstance lruRankForDocument:doc];
+		_document  = aDocument;
+		_path      = to_s(_document.path);
+		_directory = _document.path ? path::relative_to(path::parent(_path), base) : "";
+		_file      = _document.path ? path::name(_path) : to_s(_document.displayName);
+		_lruRank   = [OakDocumentController.sharedInstance lruRankForDocument:_document];
+		_isCurrent = isCurrent;
 
-			if(prefix.empty() && full_path != NULL_STR)
-				prefix = ".";
-		}
+		if(_directory.empty() && _document.path)
+			_directory = ".";
+	}
+	return self;
+}
 
-		OakDocument* document;
-		std::string full_path;
-		std::string prefix;
-		std::string name;
-		NSInteger lru_rank;
+- (void)reset
+{
+	_matched = NO;
+	_name    = nil;
+	_folder  = nil;
+	_rank    = 0;
+	_coverDirectory.clear();
+	_coverFile.clear();
+}
 
-		bool matched    = true;
-		bool is_current = false;
-		double rank     = 0;
+- (void)updateRankUsingFilter:(std::string const&)filter glob:(path::glob_list_t const&)glob bindings:(std::vector<std::string> const&)bindings
+{
+	[self reset];
+	if(glob.exclude(_path))
+		return;
 
-		std::vector<std::pair<size_t, size_t>> cover_prefix, cover_name;
-		NSNumber* tableview_item = nil;
-	};
-
-	inline void rank_record (document_record_t& record, std::string const& filter, path::glob_list_t const& glob, std::vector<std::string> const& bindings)
+	double rank = _isCurrent ? 0.1 : 3;
+	if(!filter.empty() && filter != NULL_STR)
 	{
-		record.matched = false;
-		if(glob.exclude(record.full_path))
-			return;
-
-		record.cover_prefix.clear();
-		record.cover_name.clear();
-
-		double rank = record.is_current ? 0.1 : 3;
-		if(!filter.empty() && filter != NULL_STR)
+		std::vector<std::pair<size_t, size_t>> cover;
+		if(rank = oak::rank(filter, _file, &_coverFile))
 		{
-			std::vector<std::pair<size_t, size_t>> cover;
-			if(rank = oak::rank(filter, record.name, &record.cover_name))
-			{
-				rank += 1;
+			rank += 1;
 
-				auto it = std::find(bindings.begin(), bindings.end(), record.full_path);
-				if(it != bindings.end())
-					rank = 2 + (bindings.end() - it) / (double)bindings.size();
-			}
-			else if(rank = oak::rank(filter, record.prefix + "/" + record.name, &cover))
-			{
-				for(auto pair : cover)
-				{
-					if(pair.first < record.prefix.size())
-						record.cover_prefix.emplace_back(pair.first, std::min(pair.second, record.prefix.size()));
-					if(record.prefix.size() + 1 < pair.second)
-						record.cover_name.emplace_back(std::max(pair.first, record.prefix.size() + 1) - record.prefix.size() - 1, pair.second - record.prefix.size() - 1);
-				}
-			}
+			auto it = std::find(bindings.begin(), bindings.end(), _path);
+			if(it != bindings.end())
+				rank = 2 + (bindings.end() - it) / (double)bindings.size();
 		}
-
-		if(rank)
+		else if(rank = oak::rank(filter, _directory + "/" + _file, &cover))
 		{
-			record.matched = true;
-			record.rank = 3 - rank;
+			for(auto pair : cover)
+			{
+				if(pair.first < _directory.size())
+					_coverDirectory.emplace_back(pair.first, std::min(pair.second, _directory.size()));
+				if(_directory.size() + 1 < pair.second)
+					_coverFile.emplace_back(std::max(pair.first, _directory.size() + 1) - _directory.size() - 1, pair.second - _directory.size() - 1);
+			}
 		}
 	}
+
+	if(rank)
+	{
+		_matched = YES;
+		_rank = 3 - rank;
+	}
 }
+
+- (void)updateRankUsingGlob:(path::glob_t const&)glob
+{
+	[self reset];
+	_matched = glob.does_match(_path);
+}
+
+- (NSAttributedString*)name
+{
+	if(!_name)
+		_name = CreateAttributedStringWithMarkedUpRanges(_file, _coverFile, NSLineBreakByTruncatingTail);
+	return _name;
+}
+
+- (NSAttributedString*)folder
+{
+	if(!_folder)
+		_folder = CreateAttributedStringWithMarkedUpRanges(_directory, _coverDirectory, NSLineBreakByTruncatingHead);
+	return _folder;
+}
+
+- (BOOL)isDirectoryMatched
+{
+	return _coverDirectory.empty();
+}
+
+- (NSComparisonResult)rankCompare:(FileChooserItem*)otherItem
+{
+	if(_rank < otherItem->_rank)
+		return NSOrderedAscending;
+	else if(_rank > otherItem->_rank)
+		return NSOrderedDescending;
+	else if(_lruRank > otherItem->_lruRank)
+		return NSOrderedAscending;
+	else if(_lruRank < otherItem->_lruRank)
+		return NSOrderedDescending;
+	return [self compare:otherItem];
+}
+
+- (NSComparisonResult)compare:(FileChooserItem*)otherItem
+{
+	return [to_ns(_file) localizedCompare:to_ns(otherItem->_file)];
+}
+@end
 
 static NSDictionary* globs_for_path (std::string const& path)
 {
@@ -169,8 +221,8 @@ static NSDictionary* globs_for_path (std::string const& path)
 
 @interface FileChooser ()
 {
-	scm::info_ptr                  _scmInfo;
-	std::vector<document_record_t> _records;
+	scm::info_ptr                     _scmInfo;
+	NSMutableArray<FileChooserItem*>* _records;
 
 	NSString* _globString;
 	NSString* _filterString;
@@ -263,7 +315,7 @@ static NSDictionary* globs_for_path (std::string const& path)
 	[self stopSearch];
 
 	_scmInfo.reset();
-	_records.clear();
+	_records = nil;
 
 	self.items = @[ ];
 }
@@ -312,37 +364,26 @@ static NSDictionary* globs_for_path (std::string const& path)
 {
 	std::string const path = to_s(_path);
 
-	NSUInteger firstDirty = _records.size();
-	NSUInteger index      = _records.size();
+	NSUInteger firstDirty = _records.count;
 	for(OakDocument* doc in documents)
-	{
-		document_record_t record(doc, path);
-		record.is_current     = [doc.identifier isEqual:_currentDocument];
-		record.tableview_item = @(index++);
-		_records.push_back(record);
-	}
+		[_records addObject:[[FileChooserItem alloc] initWithDocument:doc base:path isCurrent:[doc.identifier isEqual:_currentDocument]]];
 
 	[self updateRecordsFrom:firstDirty];
 }
 
 - (void)updateRecordsFrom:(NSUInteger)first
 {
-	std::function<bool(document_record_t const*, document_record_t const*)> sortFunctor = [](document_record_t const* lhs, document_record_t const* rhs){ return (lhs->rank < rhs->rank) || ((lhs->rank == rhs->rank) && ((lhs->lru_rank > rhs->lru_rank) || (lhs->lru_rank == rhs->lru_rank && text::less_t()(lhs->name, rhs->name)))); };
-
+	SEL compareSelector = @selector(compare:);
 	if(OakNotEmptyString(_globString))
 	{
 		path::glob_t glob(to_s(_globString), false, false);
-		for(size_t i = first; i < _records.size(); ++i)
-		{
-			auto& record = _records[i];
-			record.cover_prefix.clear();
-			record.cover_name.clear();
-			record.matched = glob.does_match(record.full_path);
-		}
-		sortFunctor = [](document_record_t const* lhs, document_record_t const* rhs){ return text::less_t()(lhs->name, rhs->name); };
+		for(NSUInteger i = first; i < _records.count; ++i)
+			[_records[i] updateRankUsingGlob:glob];
 	}
 	else
 	{
+		compareSelector = @selector(rankCompare:);
+
 		std::string const filter = to_s(_filterString);
 		path::glob_list_t glob;
 
@@ -350,28 +391,19 @@ static NSDictionary* globs_for_path (std::string const& path)
 		for(NSString* str in [[OakAbbreviations abbreviationsForName:@"OakFileChooserBindings"] stringsForAbbreviation:_filterString])
 			bindings.push_back(to_s(str));
 
-		size_t const count  = _records.size() - first;
+		size_t const count  = _records.count - first;
 		size_t const stride = 256;
 		dispatch_apply(count / stride, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t n){
 			for(size_t i = n*stride; i < (n+1)*stride; ++i)
-				rank_record(_records[first + i], filter, glob, bindings);
+				[_records[first + i] updateRankUsingFilter:filter glob:glob bindings:bindings];
 		});
+
 	   for(size_t i = count - (count % stride); i < count; ++i)
-			rank_record(_records[first + i], filter, glob, bindings);
+			[_records[first + i] updateRankUsingFilter:filter glob:glob bindings:bindings];
 	}
 
-	std::vector<document_record_t const*> include;
-	for(auto const& record : _records)
-	{
-		if(record.matched)
-			include.push_back(&record);
-	}
-	std::sort(include.begin(), include.end(), sortFunctor);
-
-	NSMutableArray* array = [NSMutableArray arrayWithCapacity:include.size()];
-	for(auto record : include)
-		[array addObject:record->tableview_item];
-	self.items = array;
+	NSArray* array = [_records filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isMatched == YES"]];
+	self.items = [array sortedArrayUsingSelector:compareSelector];
 }
 
 - (void)updateSCMStatus
@@ -428,7 +460,7 @@ static NSDictionary* globs_for_path (std::string const& path)
 		{
 			[self stopSearch];
 
-			_records.clear();
+			_records = [NSMutableArray array];
 			[self addRecordsForDocuments:[OakDocumentController.sharedInstance openDocuments]];
 		}
 		break;
@@ -454,7 +486,7 @@ static NSDictionary* globs_for_path (std::string const& path)
 		}
 	}
 
-	_records.clear();
+	_records = [NSMutableArray array];
 	[self addRecordsForDocuments:scmStatus];
 }
 
@@ -464,7 +496,7 @@ static NSDictionary* globs_for_path (std::string const& path)
 		[self stopSearch];
 
 	self.items = @[ ];
-	_records.clear();
+	_records = [NSMutableArray array];
 
 	if(!path)
 		return;
@@ -569,23 +601,22 @@ static NSDictionary* globs_for_path (std::string const& path)
 	}
 	else
 	{
-		NSNumber* index = self.items[self.tableView.selectedRow];
-		document_record_t const& record = _records[index.unsignedIntValue];
+		FileChooserItem* record = self.items[self.tableView.selectedRow];
 
-		std::string path = record.full_path;
-		if(path != NULL_STR)
+		NSString* path = record.document.path;
+		if(path)
 		{
-			if(path.find(to_s(self.path)) == 0)
-					path = path::relative_to(path, to_s(self.path));
-			else	path = path::with_tilde(path);
+			if([path hasPrefix:self.path])
+					path = to_ns(path::relative_to(to_s(path), to_s(self.path)));
+			else	path = [path stringByAbbreviatingWithTildeInPath];
 		}
 		else // untitled file
 		{
-			path = record.name;
+			path = record.document.displayName;
 		}
 
 		[self.statusTextField.cell setLineBreakMode:NSLineBreakByTruncatingHead];
-		self.statusTextField.stringValue = [NSString stringWithCxxString:path];
+		self.statusTextField.stringValue = path;
 	}
 }
 
@@ -595,14 +626,13 @@ static NSDictionary* globs_for_path (std::string const& path)
 	NSIndexSet* indexes = [self.tableView selectedRowIndexes];
 	for(NSUInteger i = [indexes firstIndex]; i != NSNotFound; i = [indexes indexGreaterThanIndex:i])
 	{
-		NSNumber* index = self.items[i];
-		document_record_t const& record = _records[index.unsignedIntValue];
+		FileChooserItem* record = self.items[i];
 
 		NSMutableDictionary* item = [NSMutableDictionary dictionary];
 		if(OakNotEmptyString(_selectionString))
 			item[@"selectionString"] = _selectionString;
-		if(record.full_path != NULL_STR)
-				item[@"path"] = [NSString stringWithCxxString:record.full_path];
+		if(record.document.path)
+				item[@"path"] = record.document.path;
 		else	item[@"identifier"] = record.document.identifier.UUIDString;
 		[res addObject:item];
 	}
@@ -628,15 +658,7 @@ static NSDictionary* globs_for_path (std::string const& path)
 		[closeButton bind:NSHiddenBinding toObject:res withKeyPath:@"objectValue.closeDisabled" options:nil];
 	}
 
-	NSNumber* index = self.items[row];
-	document_record_t& record = _records[index.unsignedIntValue];
-
-	FileChooserItem* item = [[FileChooserItem alloc] init];
-	item.document = record.document;
-	item.name     = CreateAttributedStringWithMarkedUpRanges(record.name, record.cover_name, NSLineBreakByTruncatingTail);
-	item.folder   = CreateAttributedStringWithMarkedUpRanges(record.prefix, record.cover_prefix, NSLineBreakByTruncatingHead);
-
-	res.objectValue = item;
+	res.objectValue = self.items[row];
 	return res;
 }
 
@@ -651,11 +673,9 @@ static NSDictionary* globs_for_path (std::string const& path)
 		NSIndexSet* indexes = [self.tableView selectedRowIndexes];
 		for(NSUInteger i = [indexes firstIndex]; i != NSNotFound; i = [indexes indexGreaterThanIndex:i])
 		{
-			NSNumber* index = self.items[i];
-			document_record_t const& record = _records[index.unsignedIntValue];
-
-			if(record.full_path != NULL_STR && record.cover_prefix.empty())
-				[[OakAbbreviations abbreviationsForName:@"OakFileChooserBindings"] learnAbbreviation:_filterString forString:[NSString stringWithCxxString:record.full_path]];
+			FileChooserItem* item = self.items[i];
+			if(!item.isDirectoryMatched && item.document.path)
+				[[OakAbbreviations abbreviationsForName:@"OakFileChooserBindings"] learnAbbreviation:_filterString forString:item.document.path];
 		}
 	}
 
@@ -667,13 +687,12 @@ static NSDictionary* globs_for_path (std::string const& path)
 	NSInteger row = [self.tableView rowForView:sender];
 	if(row != -1)
 	{
-		NSNumber* index = self.items[row];
-		document_record_t const& record = _records[index.unsignedIntValue];
-		if(record.full_path != NULL_STR)
+		FileChooserItem* item = self.items[row];
+		if(item.document.path)
 		{
 			// FIXME We need a proper interface to close documents
 			if(id target = [NSApp targetForAction:@selector(fileBrowser:closeURL:)])
-				[target fileBrowser:nil closeURL:[NSURL fileURLWithPath:record.document.path]];
+				[target fileBrowser:nil closeURL:[NSURL fileURLWithPath:item.document.path]];
 		}
 	}
 }
