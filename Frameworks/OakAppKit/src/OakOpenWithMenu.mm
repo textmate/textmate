@@ -76,6 +76,9 @@ static NSArray* ApplicationURLsForPaths (NSSet* paths)
 	return [res count] == 0 ? nil : res;
 }
 
+@interface OakOpenWithMenu () <NSMenuDelegate>
+@end
+
 @implementation OakOpenWithMenu
 + (id)sharedInstance
 {
