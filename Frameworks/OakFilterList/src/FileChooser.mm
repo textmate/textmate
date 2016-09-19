@@ -29,6 +29,38 @@ NSUInteger const kFileChooserAllSourceIndex                = 0;
 NSUInteger const kFileChooserOpenDocumentsSourceIndex      = 1;
 NSUInteger const kFileChooserUncommittedChangesSourceIndex = 2;
 
+@interface FileChooserItem : NSObject
+@property (nonatomic) OakDocument* document;
+@property (nonatomic, readonly) NSImage* icon;
+@property (nonatomic) NSAttributedString* name;
+@property (nonatomic) NSAttributedString* folder;
+@property (nonatomic, getter = isCloseDisabled, readonly) BOOL closeDisabled;
+@end
+
+@implementation FileChooserItem
++ (NSSet*)keyPathsForValuesAffectingIcon
+{
+	return [NSSet setWithObjects:@"document.icon", nil];
+}
+
++ (NSSet*)keyPathsForValuesAffectingCloseDisabled
+{
+	return [NSSet setWithObjects:@"document.open", @"document.path", nil];
+}
+
+- (NSImage*)icon
+{
+	NSImage* image = [_document.icon copy];
+	[image setSize:NSMakeSize(32, 32)];
+	return image;
+}
+
+- (BOOL)isCloseDisabled
+{
+	return !_document.open || !_document.path;
+}
+@end
+
 namespace
 {
 	struct document_record_t
@@ -603,21 +635,18 @@ static NSDictionary* globs_for_path (std::string const& path)
 		res = [[OakFileTableCellView alloc] initWithCloseButton:closeButton];
 		res.identifier = aTableColumn.identifier;
 
-		[closeButton bind:NSHiddenBinding toObject:res withKeyPath:@"objectValue.isCloseDisabled" options:nil];
+		[closeButton bind:NSHiddenBinding toObject:res withKeyPath:@"objectValue.closeDisabled" options:nil];
 	}
 
 	NSNumber* index = self.items[row];
 	document_record_t& record = _records[index.unsignedIntValue];
-	NSImage* image = [record.document.icon copy];
-	[image setSize:NSMakeSize(32, 32)];
 
-	res.objectValue = @{
-		@"icon"            : image,
-		@"folder"          : CreateAttributedStringWithMarkedUpRanges(record.prefix, record.cover_prefix, NSLineBreakByTruncatingHead),
-		@"name"            : CreateAttributedStringWithMarkedUpRanges(record.name, record.cover_name, NSLineBreakByTruncatingTail),
-		@"isCloseDisabled" : @(!record.document.isOpen || !record.document.path),
-	};
+	FileChooserItem* item = [[FileChooserItem alloc] init];
+	item.document = record.document;
+	item.name     = CreateAttributedStringWithMarkedUpRanges(record.name, record.cover_name, NSLineBreakByTruncatingTail);
+	item.folder   = CreateAttributedStringWithMarkedUpRanges(record.prefix, record.cover_prefix, NSLineBreakByTruncatingHead);
 
+	res.objectValue = item;
 	return res;
 }
 
