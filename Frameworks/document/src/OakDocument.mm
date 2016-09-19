@@ -362,6 +362,26 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	return self;
 }
 
+- (BOOL)tryLoadBackup
+{
+	if(self.isLoaded || !_backupPath)
+		return NO;
+
+	ASSERT(!_buffer);
+
+	BOOL isModified = self.isDocumentEdited;
+	std::string const path = to_s(_backupPath);
+	[self didLoadContent:std::make_shared<io::bytes_t>(path::content(path)) attributes:path::attributes(path) encoding:encoding::type(to_s(_diskNewlines), to_s(_diskEncoding))];
+
+	if(isModified)
+	{
+		_snapshot.reset();
+		self.savedRevision = _revision-1;
+	}
+
+	return YES;
+}
+
 + (instancetype)documentWithPath:(NSString*)aPath
 {
 	return [OakDocumentController.sharedInstance documentWithPath:aPath];
@@ -668,22 +688,8 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 		return;
 	}
 
-	if(_backupPath)
-	{
-		ASSERT(!_buffer);
-
-		BOOL isModified = self.isDocumentEdited;
-		std::string const path = to_s(_backupPath);
-		[self didLoadContent:std::make_shared<io::bytes_t>(path::content(path)) attributes:path::attributes(path) encoding:encoding::type(to_s(_diskNewlines), to_s(_diskEncoding))];
-
-		if(isModified)
-		{
-			_snapshot.reset();
-			self.savedRevision = _revision-1;
-		}
-
+	if([self tryLoadBackup])
 		return block(OakDocumentIOResultSuccess, nil, oak::uuid_t());
-	}
 
 	struct callback_t : file::open_callback_t
 	{
@@ -852,21 +858,10 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 
 - (void)saveModalForWindow:(NSWindow*)aWindow completionHandler:(void(^)(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID))block
 {
-	if(!self.isLoaded && self.isDocumentEdited && _backupPath)
+	if(self.isDocumentEdited && [self tryLoadBackup])
 	{
-		[self loadModalForWindow:aWindow completionHandler:^(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID){
-			if(result == OakDocumentIOResultSuccess)
-			{
-				[self saveModalForWindow:aWindow completionHandler:^(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID){
-					block(result, errorMessage, filterUUID);
-					[self close];
-				}];
-			}
-			else
-			{
-				NSString* errorMessage = [NSString stringWithFormat:@"Cannot save ‘%@’: Failed to restore backup ‘%@’.", self.displayName, [_backupPath stringByAbbreviatingWithTildeInPath]];
-				block(OakDocumentIOResultFailure, errorMessage, oak::uuid_t());
-			}
+		[self saveModalForWindow:aWindow completionHandler:^(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID){
+			block(result, errorMessage, filterUUID);
 		}];
 		return;
 	}
@@ -1244,9 +1239,10 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 
 - (void)enumerateByteRangesUsingBlock:(void(^)(char const* bytes, NSRange byteRange, BOOL* stop))block
 {
-	if(_buffer)
+	if(_buffer || (_backupPath && !self.isLoaded))
 	{
 		auto handler = ^{
+			[self tryLoadBackup];
 			_buffer->visit_data([block](char const* bytes, size_t offset, size_t len, bool* tmp){
 				BOOL stop = NO;
 				block(bytes, NSMakeRange(offset, len), &stop);
@@ -1274,6 +1270,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 
 - (NSString*)content
 {
+	[self tryLoadBackup];
 	if(!_buffer)
 		return nil;
 
@@ -1766,6 +1763,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 
 - (BOOL)performReplacements:(std::multimap<std::pair<size_t, size_t>, std::string> const&)someReplacements checksum:(uint32_t)crc32
 {
+	[self tryLoadBackup];
 	if(self.isLoaded)
 	{
 		OakDocumentEditor* documentEditor = self.documentEditors.firstObject ?: [OakDocumentEditor documentEditorWithDocument:self fontScaleFactor:1];
