@@ -43,6 +43,8 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 	CGFloat const kScrollBarWidth   = 15;
 
 	NSTextField* textField = OakCreateLabel(@"", self.font, NSLeftTextAlignment, NSLineBreakByTruncatingTail);
+	if(_choices.count == 0)
+		[textField sizeToFit];
 
 	CGFloat width = 60;
 	for(NSInteger i = 0; i < MIN(_choices.count, 256); ++i)
