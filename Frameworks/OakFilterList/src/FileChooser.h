@@ -8,7 +8,6 @@ extern NSUInteger const kFileChooserUncommittedChangesSourceIndex;
 
 PUBLIC @interface FileChooser : OakChooser
 @property (nonatomic) NSString* path;
-@property (nonatomic) NSArray<OakDocument*>* openDocuments;
 @property (nonatomic) NSUUID* currentDocument;
 @property (nonatomic) NSUInteger sourceIndex;
 

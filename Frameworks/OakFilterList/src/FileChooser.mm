@@ -263,7 +263,6 @@ static NSDictionary* globs_for_path (std::string const& path)
 	[self stopSearch];
 
 	_scmInfo.reset();
-	_openDocuments = nil;
 	_records.clear();
 
 	self.items = @[ ];
@@ -286,15 +285,6 @@ static NSDictionary* globs_for_path (std::string const& path)
 	if(_currentDocument == identifier || [_currentDocument isEqual:identifier])
 		return;
 	_currentDocument = identifier;
-	[self reload];
-}
-
-- (void)setOpenDocuments:(NSArray<OakDocument*>*)newDocuments
-{
-	if(_openDocuments == newDocuments || [_openDocuments isEqualToArray:newDocuments])
-		return;
-
-	_openDocuments = newDocuments;
 	[self reload];
 }
 
