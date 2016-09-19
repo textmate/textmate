@@ -1,7 +1,6 @@
 #import "FileChooser.h"
 #import "OakAbbreviations.h"
 #import <OakAppKit/OakAppKit.h>
-#import <OakAppKit/OakFileIconImage.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakAppKit/OakScopeBarView.h>
 #import <OakAppKit/NSImage Additions.h>
@@ -36,6 +35,7 @@ namespace
 	{
 		document_record_t (OakDocument* doc, std::string const& base)
 		{
+			document  = doc;
 			full_path = to_s(doc.path);
 			prefix    = full_path == NULL_STR ? "" : path::relative_to(path::parent(full_path), base);
 			name      = full_path == NULL_STR ? to_s(doc.displayName) : path::name(full_path);
@@ -43,12 +43,9 @@ namespace
 
 			if(prefix.empty() && full_path != NULL_STR)
 				prefix = ".";
-
-			if(full_path == NULL_STR)
-				identifier = doc.identifier;
 		}
 
-		NSUUID* identifier;
+		OakDocument* document;
 		std::string full_path;
 		std::string prefix;
 		std::string name;
@@ -60,7 +57,6 @@ namespace
 
 		std::vector<std::pair<size_t, size_t>> cover_prefix, cover_name;
 		NSNumber* tableview_item = nil;
-		OakFileIconImage* image = nil;
 	};
 
 	inline void rank_record (document_record_t& record, std::string const& filter, path::glob_list_t const& glob, std::vector<std::string> const& bindings)
@@ -141,9 +137,8 @@ static NSDictionary* globs_for_path (std::string const& path)
 
 @interface FileChooser ()
 {
-	scm::info_ptr                        _scmInfo;
-	NSDictionary<NSUUID*, OakDocument*>* _openDocumentsMap;
-	std::vector<document_record_t>       _records;
+	scm::info_ptr                  _scmInfo;
+	std::vector<document_record_t> _records;
 
 	NSString* _globString;
 	NSString* _filterString;
@@ -237,7 +232,6 @@ static NSDictionary* globs_for_path (std::string const& path)
 
 	_scmInfo.reset();
 	_openDocuments = nil;
-	_openDocumentsMap = nil;
 	_records.clear();
 
 	self.items = @[ ];
@@ -268,12 +262,7 @@ static NSDictionary* globs_for_path (std::string const& path)
 	if(_openDocuments == newDocuments || [_openDocuments isEqualToArray:newDocuments])
 		return;
 
-	NSMutableDictionary* dict = [NSMutableDictionary dictionary];
-	for(OakDocument* doc in newDocuments)
-		dict[doc.identifier] = doc;
-
-	_openDocuments    = newDocuments;
-	_openDocumentsMap = dict;
+	_openDocuments = newDocuments;
 	[self reload];
 }
 
@@ -300,21 +289,15 @@ static NSDictionary* globs_for_path (std::string const& path)
 - (void)addRecordsForDocuments:(NSArray<OakDocument*>*)documents
 {
 	std::string const path = to_s(_path);
-	NSSet<NSString*>* openPaths = [NSSet setWithArray:[[_openDocuments filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"path != NULL"]] valueForKey:@"path"]];
-
-	bool insertAll = _records.empty();
 
 	NSUInteger firstDirty = _records.size();
 	NSUInteger index      = _records.size();
 	for(OakDocument* doc in documents)
 	{
-		if(insertAll || (!_openDocumentsMap[doc.identifier] && ![openPaths containsObject:doc.path]))
-		{
-			document_record_t record(doc, path);
-			record.is_current     = [doc.identifier isEqual:_currentDocument];
-			record.tableview_item = @(index++);
-			_records.push_back(record);
-		}
+		document_record_t record(doc, path);
+		record.is_current     = [doc.identifier isEqual:_currentDocument];
+		record.tableview_item = @(index++);
+		_records.push_back(record);
 	}
 
 	[self updateRecordsFrom:firstDirty];
@@ -375,26 +358,7 @@ static NSDictionary* globs_for_path (std::string const& path)
 		return;
 
 	if(_sourceIndex == kFileChooserUncommittedChangesSourceIndex)
-	{
 		[self reloadSCMStatus];
-		return;
-	}
-
-	NSRange visibleRange = [self.tableView rowsInRect:[self.tableView visibleRect]];
-	for(NSUInteger row = visibleRange.location; row < NSMaxRange(visibleRange); ++row)
-	{
-		NSNumber* index = self.items[row];
-		document_record_t const& record = _records[index.unsignedIntValue];
-		if(record.full_path != NULL_STR)
-		{
-			scm::status::type scmStatus = _scmInfo->status(record.full_path);
-			if(record.image.scmStatus != scmStatus)
-			{
-				record.image.scmStatus = scmStatus;
-				[self.tableView setNeedsDisplayInRect:[self.tableView rectOfRow:row]];
-			}
-		}
-	}
 }
 
 // ========
@@ -443,7 +407,7 @@ static NSDictionary* globs_for_path (std::string const& path)
 			[self stopSearch];
 
 			_records.clear();
-			[self addRecordsForDocuments:_openDocuments];
+			[self addRecordsForDocuments:[OakDocumentController.sharedInstance openDocuments]];
 		}
 		break;
 
@@ -482,8 +446,6 @@ static NSDictionary* globs_for_path (std::string const& path)
 
 	if(!path)
 		return;
-
-	[self addRecordsForDocuments:_openDocuments];
 
 	settings_t const settings = settings_for_path(NULL_STR, "", to_s(path));
 	NSMutableDictionary* options = [globs_for_path(to_s(path)) mutableCopy];
@@ -615,11 +577,11 @@ static NSDictionary* globs_for_path (std::string const& path)
 		document_record_t const& record = _records[index.unsignedIntValue];
 
 		NSMutableDictionary* item = [NSMutableDictionary dictionary];
-		item[@"identifier"] = record.identifier.UUIDString;
 		if(OakNotEmptyString(_selectionString))
 			item[@"selectionString"] = _selectionString;
 		if(record.full_path != NULL_STR)
-			item[@"path"] = [NSString stringWithCxxString:record.full_path];
+				item[@"path"] = [NSString stringWithCxxString:record.full_path];
+		else	item[@"identifier"] = record.document.identifier.UUIDString;
 		[res addObject:item];
 	}
 	return res;
@@ -646,37 +608,14 @@ static NSDictionary* globs_for_path (std::string const& path)
 
 	NSNumber* index = self.items[row];
 	document_record_t& record = _records[index.unsignedIntValue];
-
-	// =================
-	// = Document Icon =
-	// =================
-
-	BOOL isOpen = NO, isModified = NO, isOnDisk = YES;
-	for(OakDocument* doc in _openDocuments)
-	{
-		if(doc.path ? to_s(doc.path) == record.full_path : [doc.identifier isEqual:record.identifier])
-		{
-			isOpen     = YES;
-			isModified = doc.isDocumentEdited;
-			isOnDisk   = doc.isOnDisk;
-		}
-	}
-
-	if(!record.image)
-		record.image = [[OakFileIconImage alloc] initWithSize:NSMakeSize(32, 32)];
-
-	record.image.path     = [NSString stringWithCxxString:record.full_path];
-	record.image.exists   = isOnDisk;
-	record.image.modified = isModified;
-
-	if(_scmInfo && record.full_path != NULL_STR)
-		record.image.scmStatus = _scmInfo->status(record.full_path);
+	NSImage* image = [record.document.icon copy];
+	[image setSize:NSMakeSize(32, 32)];
 
 	res.objectValue = @{
-		@"icon"            : record.image,
+		@"icon"            : image,
 		@"folder"          : CreateAttributedStringWithMarkedUpRanges(record.prefix, record.cover_prefix, NSLineBreakByTruncatingHead),
 		@"name"            : CreateAttributedStringWithMarkedUpRanges(record.name, record.cover_name, NSLineBreakByTruncatingTail),
-		@"isCloseDisabled" : @(!isOpen),
+		@"isCloseDisabled" : @(!record.document.isOpen || !record.document.path),
 	};
 
 	return res;
@@ -715,17 +654,7 @@ static NSDictionary* globs_for_path (std::string const& path)
 		{
 			// FIXME We need a proper interface to close documents
 			if(id target = [NSApp targetForAction:@selector(fileBrowser:closeURL:)])
-			{
-				[target fileBrowser:nil closeURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:record.full_path]]];
-
-				NSMutableArray<OakDocument*>* newDocuments = [NSMutableArray array];
-				for(OakDocument* doc in _openDocuments)
-				{
-					if(to_s(doc.path) != record.full_path)
-						[newDocuments addObject:doc];
-				}
-				self.openDocuments = newDocuments;
-			}
+				[target fileBrowser:nil closeURL:[NSURL fileURLWithPath:record.document.path]];
 		}
 	}
 }
