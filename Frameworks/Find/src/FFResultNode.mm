@@ -2,7 +2,6 @@
 #import "scan_path.h"
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/NSColor Additions.h>
-#import <OakAppKit/OakFileIconImage.h>
 #import <document/OakDocument.h>
 #import <ns/ns.h>
 #import <text/tokenize.h>

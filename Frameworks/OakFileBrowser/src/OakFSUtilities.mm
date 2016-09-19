@@ -1,7 +1,6 @@
 #import "OakFSUtilities.h"
 #import <io/io.h>
 #import <OakFoundation/NSString Additions.h>
-#import <OakAppKit/OakFileIconImage.h>
 
 NSURL* kURLLocationComputer;
 NSURL* kURLLocationHome;

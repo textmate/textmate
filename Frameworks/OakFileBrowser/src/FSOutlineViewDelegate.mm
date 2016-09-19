@@ -8,7 +8,6 @@
 #import <OakAppKit/NSImage Additions.h>
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
-#import <OakAppKit/OakFileIconImage.h>
 #import <ns/ns.h>
 #import <io/path.h>
 #import <text/utf8.h>
