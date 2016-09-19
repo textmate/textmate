@@ -51,7 +51,7 @@ static NSTextField* OakCreateTextField ()
 @implementation RegistrationWindowController
 + (instancetype)sharedInstance
 {
-	static RegistrationWindowController* sharedInstance = [RegistrationWindowController new];
+	static RegistrationWindowController* sharedInstance = [self new];
 	return sharedInstance;
 }
 
@@ -253,10 +253,10 @@ static NSTextField* OakCreateTextField ()
 @end
 
 @implementation AboutWindowController
-+ (AboutWindowController*)sharedInstance
++ (instancetype)sharedInstance
 {
-	static AboutWindowController* instance = [AboutWindowController new];
-	return instance;
+	static AboutWindowController* sharedInstance = [self new];
+	return sharedInstance;
 }
 
 + (void)showChangesIfUpdated

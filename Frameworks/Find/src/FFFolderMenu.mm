@@ -36,10 +36,10 @@ static NSMutableArray* FoldersAtPath (NSString* folder)
 }
 
 @implementation FFFolderMenu
-+ (FFFolderMenu*)sharedInstance
++ (instancetype)sharedInstance
 {
-	static FFFolderMenu* instance = [FFFolderMenu new];
-	return instance;
+	static FFFolderMenu* sharedInstance = [self new];
+	return sharedInstance;
 }
 
 + (void)addFolderSubmenuToMenuItem:(NSMenuItem*)aMenuItem

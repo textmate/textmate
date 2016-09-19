@@ -8,7 +8,7 @@ PUBLIC @interface OakPasteboardSelector : NSWindowController
 	IBOutlet NSTableView* tableView;
 	OakPasteboardSelectorTableViewHelper* tableViewHelper;
 }
-+ (OakPasteboardSelector*)sharedInstance;
++ (instancetype)sharedInstance;
 - (void)setIndex:(unsigned)index;
 - (void)setEntries:(NSArray*)entries;
 

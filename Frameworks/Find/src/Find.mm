@@ -64,10 +64,10 @@ enum FindActionTag
 NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 @implementation Find
-+ (Find*)sharedInstance
++ (instancetype)sharedInstance
 {
-	static Find* instance = [Find new];
-	return instance;
+	static Find* sharedInstance = [self new];
+	return sharedInstance;
 }
 
 - (FindWindowController*)windowController

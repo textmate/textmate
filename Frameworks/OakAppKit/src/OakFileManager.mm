@@ -23,10 +23,10 @@ NSString* OakReplaceDateInString (NSString* srcPath, NSDate* newDate)
 @end
 
 @implementation OakFileManager
-+ (OakFileManager*)sharedInstance
++ (instancetype)sharedInstance
 {
-	static OakFileManager* instance = [OakFileManager new];
-	return instance;
+	static OakFileManager* sharedInstance = [self new];
+	return sharedInstance;
 }
 
 - (void)delayedPlaySound:(id)aSound

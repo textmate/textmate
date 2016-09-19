@@ -49,10 +49,10 @@ static std::string create_gzipped_file (std::string const& path)
 @end
 
 @implementation CrashReporter
-+ (CrashReporter*)sharedInstance
++ (instancetype)sharedInstance
 {
-	static CrashReporter* instance = [CrashReporter new];
-	return instance;
+	static CrashReporter* sharedInstance = [self new];
+	return sharedInstance;
 }
 
 - (void)setupUserDefaultsContact:(id)sender

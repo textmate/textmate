@@ -5,7 +5,7 @@ PUBLIC extern NSString* const OakFileManagerDidChangeContentsOfDirectory;
 PUBLIC extern NSString* const OakFileManagerPathKey;
 
 PUBLIC @interface OakFileManager : NSObject
-+ (OakFileManager*)sharedInstance;
++ (instancetype)sharedInstance;
 - (NSURL*)createUntitledDirectoryAtURL:(NSURL*)anURL view:(NSView*)view;
 - (BOOL)createFileAtURL:(NSURL*)anURL view:(NSView*)view;
 - (NSURL*)createDuplicateOfURL:(NSURL*)srcURL view:(NSView*)view;

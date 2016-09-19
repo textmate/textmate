@@ -18,7 +18,7 @@ static NSString* kUserDefaultsTabItemLineBreakStyleKey = @"tabItemLineBreakStyle
 @implementation OakTabBarStyle
 + (instancetype)sharedInstance
 {
-	static id sharedInstance = [self new];
+	static OakTabBarStyle* sharedInstance = [self new];
 	return sharedInstance;
 }
 

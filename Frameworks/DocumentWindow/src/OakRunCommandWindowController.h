@@ -1,3 +1,3 @@
 @interface OakRunCommandWindowController : NSWindowController
-+ (OakRunCommandWindowController*)sharedInstance;
++ (instancetype)sharedInstance;
 @end

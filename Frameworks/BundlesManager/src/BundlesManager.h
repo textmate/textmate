@@ -15,7 +15,7 @@ PUBLIC @interface BundlesManager : NSObject
 - (void)installBundles:(NSArray<Bundle*>*)someBundles completionHandler:(void(^)(NSArray<Bundle*>*))callback;
 - (void)uninstallBundle:(Bundle*)aBundle;
 
-+ (BundlesManager*)sharedInstance;
++ (instancetype)sharedInstance;
 - (void)loadBundlesIndex;
 - (void)installBundleItemsAtPaths:(NSArray*)somePaths;
 - (BOOL)findBundleForInstall:(bundles::item_ptr*)res;

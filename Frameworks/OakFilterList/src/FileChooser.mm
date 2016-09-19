@@ -192,7 +192,7 @@ static NSDictionary* globs_for_path (std::string const& path)
 @implementation FileChooser
 + (instancetype)sharedInstance
 {
-	static id sharedInstance = [self new];
+	static FileChooser* sharedInstance = [self new];
 	return sharedInstance;
 }
 

@@ -32,7 +32,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 @implementation FavoriteChooser
 + (instancetype)sharedInstance
 {
-	static id sharedInstance = [self new];
+	static FavoriteChooser* sharedInstance = [self new];
 	return sharedInstance;
 }
 

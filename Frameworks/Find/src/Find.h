@@ -17,7 +17,7 @@ PUBLIC @interface Find : NSResponder
 @property (nonatomic, readonly) BOOL      isVisible;
 @property (nonatomic, readonly) NSString* searchFolder;
 
-+ (Find*)sharedInstance;
++ (instancetype)sharedInstance;
 
 - (void)showFindWindowFor:(NSString*)searchScope;
 - (IBAction)showFolderSelectionPanel:(id)sender;

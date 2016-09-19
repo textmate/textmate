@@ -9,7 +9,6 @@
 
 OAK_DEBUG_VAR(PlugInController);
 
-static TMPlugInController* SharedInstance;
 static NSInteger const kPlugInAPIVersion = 2;
 static NSString* const kUserDefaultsDisabledPlugInsKey = @"disabledPlugIns";
 
@@ -29,9 +28,10 @@ static id CreateInstanceOfPlugInClass (Class cl, TMPlugInController* controller)
 }
 
 @implementation TMPlugInController
-+ (TMPlugInController*)sharedInstance
++ (instancetype)sharedInstance
 {
-	return SharedInstance ?: [TMPlugInController new];
+	static TMPlugInController* sharedInstance = [self new];
+	return sharedInstance;
 }
 
 + (void)initialize
@@ -43,15 +43,12 @@ static id CreateInstanceOfPlugInClass (Class cl, TMPlugInController* controller)
 
 - (id)init
 {
-	if(SharedInstance)
-	{
-	}
-	else if(self = SharedInstance = [super init])
+	if(self = [super init])
 	{
 		D(DBF_PlugInController, bug("\n"););
 		self.loadedPlugIns = [NSMutableDictionary dictionary];
 	}
-	return SharedInstance;
+	return self;
 }
 
 - (CGFloat)version

@@ -67,10 +67,10 @@ static NSString* CacheFileForDownload (NSURL* url, NSDate* date)
 @end
 
 @implementation BundlesManager
-+ (BundlesManager*)sharedInstance
++ (instancetype)sharedInstance
 {
-	static BundlesManager* instance = [BundlesManager new];
-	return instance;
+	static BundlesManager* sharedInstance = [self new];
+	return sharedInstance;
 }
 
 - (id)init

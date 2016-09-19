@@ -103,7 +103,7 @@ namespace
 @implementation OakDocumentController
 + (instancetype)sharedInstance
 {
-	static OakDocumentController* sharedInstance = [OakDocumentController new];
+	static OakDocumentController* sharedInstance = [self new];
 	return sharedInstance;
 }
 

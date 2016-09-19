@@ -1,7 +1,7 @@
 #include <bundles/bundles.h>
 
 PUBLIC @interface BundleEditor : NSWindowController <NSBrowserDelegate>
-+ (BundleEditor*)sharedInstance;
++ (instancetype)sharedInstance;
 - (void)revealBundleItem:(bundles::item_ptr const&)anItem;
 - (IBAction)browserSelectionDidChange:(id)sender;
 @end

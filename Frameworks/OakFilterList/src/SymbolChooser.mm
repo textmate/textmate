@@ -31,7 +31,7 @@ static SymbolChooserItem* CreateItem (OakDocument* document, text::pos_t const& 
 @implementation SymbolChooser
 + (instancetype)sharedInstance
 {
-	static id sharedInstance = [self new];
+	static SymbolChooser* sharedInstance = [self new];
 	return sharedInstance;
 }
 

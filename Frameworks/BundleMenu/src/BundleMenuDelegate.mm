@@ -13,10 +13,10 @@ OAK_DEBUG_VAR(BundleMenu);
 @end
 
 @implementation BundleMenuDelegate
-+ (BundleMenuDelegate*)sharedInstance
++ (instancetype)sharedInstance
 {
-	static BundleMenuDelegate* instance = [BundleMenuDelegate new];
-	return instance;
+	static BundleMenuDelegate* sharedInstance = [self new];
+	return sharedInstance;
 }
 
 - (BOOL)menuHasKeyEquivalent:(NSMenu*)aMenu forEvent:(NSEvent*)theEvent target:(id*)aTarget action:(SEL*)anAction

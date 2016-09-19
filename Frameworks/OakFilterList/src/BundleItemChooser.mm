@@ -295,7 +295,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 @implementation BundleItemChooser
 + (instancetype)sharedInstance
 {
-	static id sharedInstance = [self new];
+	static BundleItemChooser* sharedInstance = [self new];
 	return sharedInstance;
 }
 

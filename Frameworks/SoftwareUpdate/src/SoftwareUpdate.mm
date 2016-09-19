@@ -46,8 +46,6 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 - (void)checkVersionAtURL:(NSURL*)anURL inBackground:(BOOL)backgroundFlag allowRedownload:(BOOL)redownloadFlag;
 @end
 
-static SoftwareUpdate* SharedInstance;
-
 @implementation SoftwareUpdate
 {
 	key_chain_t keyChain;
@@ -57,9 +55,10 @@ static SoftwareUpdate* SharedInstance;
 	CGFloat secondsLeft;
 }
 
-+ (SoftwareUpdate*)sharedInstance
++ (instancetype)sharedInstance
 {
-	return SharedInstance ?: [self new];
+	static SoftwareUpdate* sharedInstance = [self new];
+	return sharedInstance;
 }
 
 + (void)initialize
@@ -71,10 +70,7 @@ static SoftwareUpdate* SharedInstance;
 
 - (id)init
 {
-	if(SharedInstance)
-	{
-	}
-	else if(self = SharedInstance = [super init])
+	if(self = [super init])
 	{
 		D(DBF_SoftwareUpdate_Check, bug("\n"););
 		pollInterval = 60*60;
@@ -82,7 +78,7 @@ static SoftwareUpdate* SharedInstance;
 		[[[NSWorkspace sharedWorkspace] notificationCenter] addObserver:self selector:@selector(scheduleVersionCheck:) name:NSWorkspaceDidWakeNotification object:[NSWorkspace sharedWorkspace]];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
 	}
-	return SharedInstance;
+	return self;
 }
 
 - (void)scheduleVersionCheck:(id)sender

@@ -25,8 +25,6 @@
 
 OAK_DEBUG_VAR(BundleEditor);
 
-static BundleEditor* SharedInstance;
-
 @class OakCommand;
 
 @interface BundleEditor () <OakTextViewDelegate>
@@ -142,17 +140,15 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 }
 
 @implementation BundleEditor
-+ (BundleEditor*)sharedInstance
++ (instancetype)sharedInstance
 {
-	return SharedInstance ?: [self new];
+	static BundleEditor* sharedInstance = [self new];
+	return sharedInstance;
 }
 
 - (id)init
 {
-	if(SharedInstance)
-	{
-	}
-	else if(self = SharedInstance = [super initWithWindowNibName:@"BundleEditor"])
+	if(self = [super initWithWindowNibName:@"BundleEditor"])
 	{
 		D(DBF_BundleEditor, bug("\n"););
 
@@ -187,7 +183,7 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 
 		documentCallback = new document_callback_t(self);
 	}
-	return SharedInstance;
+	return self;
 }
 
 - (void)dealloc

@@ -80,10 +80,10 @@ static NSArray* ApplicationURLsForPaths (NSSet* paths)
 @end
 
 @implementation OakOpenWithMenu
-+ (id)sharedInstance
++ (instancetype)sharedInstance
 {
-	static OakOpenWithMenu* instance = [OakOpenWithMenu new];
-	return instance;
+	static OakOpenWithMenu* sharedInstance = [self new];
+	return sharedInstance;
 }
 
 + (void)addOpenWithMenuForPaths:(NSSet*)paths toMenuItem:(NSMenuItem*)item

@@ -281,10 +281,10 @@ static size_t line_count (std::string const& text)
 @end
 
 @implementation OakPasteboardSelector
-+ (OakPasteboardSelector*)sharedInstance
++ (instancetype)sharedInstance
 {
-	static OakPasteboardSelector* instance = [OakPasteboardSelector new];
-	return instance;
+	static OakPasteboardSelector* sharedInstance = [self new];
+	return sharedInstance;
 }
 
 - (id)init

@@ -18,6 +18,6 @@ PUBLIC @interface SoftwareUpdate : NSObject <DownloadWindowControllerDelegate>
 
 - (void)setSignee:(key_chain_t::key_t const&)aSignee;
 
-+ (SoftwareUpdate*)sharedInstance;
++ (instancetype)sharedInstance;
 - (IBAction)checkForUpdates:(id)sender;
 @end

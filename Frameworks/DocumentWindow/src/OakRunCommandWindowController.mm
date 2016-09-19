@@ -24,10 +24,10 @@ static NSString* const kUserDefaultsFilterOutputType = @"filterOutputType";
 #endif
 
 @implementation OakRunCommandWindowController
-+ (OakRunCommandWindowController*)sharedInstance
++ (instancetype)sharedInstance
 {
-	static OakRunCommandWindowController* instance = [OakRunCommandWindowController new];
-	return instance;
+	static OakRunCommandWindowController* sharedInstance = [self new];
+	return sharedInstance;
 }
 
 - (id)init
