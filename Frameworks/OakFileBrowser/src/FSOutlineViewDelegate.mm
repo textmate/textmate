@@ -30,9 +30,10 @@
 	return self;
 }
 
-- (id)copyWithZone:(NSZone*)aZone { return self; }
+- (id)copyWithZone:(NSZone*)aZone { return [[FSItemWrapper alloc] initWithDisplayName:_displayName editingName:_editingName]; }
 - (NSUInteger)hash                { return [_editingName hash]; }
 - (BOOL)isEqual:(id)otherObject   { return [otherObject isKindOfClass:[self class]] && [_editingName isEqual:[otherObject editingName]] && [_displayName isEqual:[otherObject displayName]]; }
+- (NSString*)description          { return [NSString stringWithFormat:@"<%@: %@ (%@)>", self.class, _displayName, _editingName]; }
 @end
 
 @interface FSItem (FSItemWrapper)
@@ -58,6 +59,7 @@
 @end
 
 @interface FSItemFormatter : NSFormatter
+@property (nonatomic) FSItemWrapper* originalValue;
 @end
 
 @implementation FSItemFormatter
@@ -78,15 +80,24 @@
 - (NSString*)editingStringForObjectValue:(id)aValue
 {
 	if([aValue isKindOfClass:[FSItemWrapper class]])
-		return ((FSItemWrapper*)aValue).editingName;
+	{
+		_originalValue = [aValue copy];
+		return _originalValue.editingName;
+	}
 	return [super editingStringForObjectValue:aValue];
 }
 
 - (BOOL)getObjectValue:(id*)valueRef forString:(NSString*)aString errorDescription:(NSString**)errorRef
 {
-	// Here we lose the displayName but I have no idea how to preserve it.
-	// If user aborts editing they are left with pristine editingName.
-	*valueRef = aString;
+	if(_originalValue) // This is nil when rendering as source list
+	{
+		_originalValue.editingName = [aString copy];
+		*valueRef = _originalValue;
+	}
+	else
+	{
+		*valueRef = aString;
+	}
 	return YES;
 }
 @end
@@ -330,7 +341,16 @@
 
 - (void)controlTextDidEndEditing:(NSNotification*)aNotification
 {
-	[(FSItem*)self.objectValue renameToName:self.textField.stringValue view:self.enclosingScrollView.documentView ?: self];
+	NSString* newName = self.textField.stringValue;
+	if([self.textField.objectValue isKindOfClass:[FSItemWrapper class]])
+		newName = ((FSItemWrapper*)self.textField.objectValue).editingName;
+
+	FSItem* item = (FSItem*)self.objectValue;
+	if(OakNotEmptyString(newName))
+		[item renameToName:newName view:self.enclosingScrollView.documentView ?: self];
+
+	// Update NSTextField’s objectValue to new name
+	item.wrappedValue = item.wrappedValue;
 }
 
 - (void)resetCursorRects
