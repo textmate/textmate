@@ -2624,6 +2624,9 @@ static NSUInteger DisableSessionSavingCount = 0;
 				[self setDocument:doc sticky:YES];
 		}
 
+		if(doc->path() == NULL_STR)
+			doc->show(); // Add to LRU-list
+
 		doc->set_recent_tracking(false);
 		documents.push_back(doc);
 
