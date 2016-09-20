@@ -410,7 +410,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 		}
 		else
 		{
-			[aMenuItem setTitle:[NSString stringWithFormat:@"Other (%zd)…", _textView.tabSize]];
+			[aMenuItem setDynamicTitle:[NSString stringWithFormat:@"Other (%zd)…", _textView.tabSize]];
 			[aMenuItem setState:NSOnState];
 		}
 	}

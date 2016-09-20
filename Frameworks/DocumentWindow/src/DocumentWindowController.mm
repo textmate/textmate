@@ -2415,7 +2415,7 @@ namespace
 	else if([menuItem action] == @selector(revealFileInProject:) || [menuItem action] == @selector(revealFileInProjectByExpandingAncestors:))
 	{
 		active = _selectedDocument && _selectedDocument->path() != NULL_STR;
-		[menuItem setTitle:active ? [NSString stringWithFormat:@"Select “%@”", [NSString stringWithCxxString:_selectedDocument->display_name()]] : @"Select Document"];
+		[menuItem setDynamicTitle:active ? [NSString stringWithFormat:@"Select “%@”", [NSString stringWithCxxString:_selectedDocument->display_name()]] : @"Select Document"];
 	}
 	else if([menuItem action] == @selector(goToProjectFolder:))
 		active = self.projectPath != nil;

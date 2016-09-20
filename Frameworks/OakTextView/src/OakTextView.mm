@@ -2953,9 +2953,9 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	[aMenuItem updateTitle:[NSString stringWithCxxString:format_string::replace(to_s(title), "\\b(\\w+) / (Selection)\\b", [self hasSelection] ? "$2" : "$1")]];
 
 	if([aMenuItem action] == @selector(cut:))
-		[aMenuItem setTitle:@"Cut"];
+		[aMenuItem setDynamicTitle:@"Cut"];
 	else if([aMenuItem action] == @selector(copy:))
-		[aMenuItem setTitle:@"Copy"];
+		[aMenuItem setDynamicTitle:@"Copy"];
 
 	static auto const RequiresSelection = new std::set<SEL>{ @selector(cut:), @selector(copy:), @selector(delete:), @selector(copySelectionToFindPboard:) };
 	if(RequiresSelection->find([aMenuItem action]) != RequiresSelection->end())

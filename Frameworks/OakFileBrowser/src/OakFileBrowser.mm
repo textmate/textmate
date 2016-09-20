@@ -19,6 +19,7 @@
 #import <OakAppKit/OakOpenWithMenu.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakAppKit/OakZoomingIcon.h>
+#import <OakAppKit/NSMenuItem Additions.h>
 #import <OakSystem/application.h>
 #import <OakCommand/OakCommand.h>
 #import <bundles/bundles.h>
@@ -1286,7 +1287,7 @@ static bool is_binary (std::string const& path)
 					default: items = [NSString stringWithFormat:@" %ld Items", selectedFiles]; break;
 				}
 			}
-			[item setTitle:[NSString stringWithFormat:info.format, items]];
+			[item setDynamicTitle:[NSString stringWithFormat:info.format, items]];
 		}
 	}
 
