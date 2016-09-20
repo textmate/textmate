@@ -2150,13 +2150,30 @@ namespace
 	return _selectedDocument ? _selectedDocument->document().identifier : nil;
 }
 
+- (Find*)prepareAndReturnFindPanel
+{
+	Find* find = [Find sharedInstance];
+	find.documentIdentifier = self.selectedDocumentUUID;
+	find.projectFolder      = self.projectPath ?: self.untitledSavePath ?: NSHomeDirectory();
+	find.projectIdentifier  = self.identifier;
+
+	NSArray* items;
+	if(self.fileBrowserVisible)
+	{
+		items = [[self.fileBrowser.selectedURLs filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isFileURL == YES"]] valueForKey:@"path"];
+		if(items.count == 0)
+			items = @[ self.fileBrowser.path ];
+	}
+	find.fileBrowserItems = items.count ? items : nil;
+
+	return find;
+}
+
 - (IBAction)orderFrontFindPanel:(id)sender
 {
 	Find* find              = [Find sharedInstance];
 	BOOL didOwnDialog       = [find.projectIdentifier isEqualToString:self.identifier];
-	find.documentIdentifier = self.selectedDocumentUUID;
-	find.projectFolder      = self.projectPath ?: self.untitledSavePath ?: NSHomeDirectory();
-	find.projectIdentifier  = self.identifier;
+	[self prepareAndReturnFindPanel];
 
 	NSInteger mode = [sender respondsToSelector:@selector(tag)] ? [sender tag] : find_tags::in_document;
 	if(mode == find_tags::in_document && ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsAlwaysFindInDocument] && [self.window isKeyWindow] && self.textView.hasMultiLineSelection)
@@ -2164,29 +2181,29 @@ namespace
 
 	switch(mode)
 	{
-		case find_tags::in_document:  return [find showFindWindowFor:FFSearchInDocument];
-		case find_tags::in_selection: return [find showFindWindowFor:FFSearchInSelection];
-		case find_tags::in_folder:    return [find showFolderSelectionPanel:self];
+		case find_tags::in_document:  find.searchTarget = FFSearchTargetDocument;  break;
+		case find_tags::in_selection: find.searchTarget = FFSearchTargetSelection; break;
+		case find_tags::in_folder:    return [find showFolderSelectionPanel:self]; break;
 
 		case find_tags::in_project:
 		{
-			BOOL fileBrowserHasFocus = [self.window.firstResponder respondsToSelector:@selector(isDescendantOf:)] && [(NSView*)self.window.firstResponder isDescendantOf:self.fileBrowser.view];
-			NSString* searchFolder = fileBrowserHasFocus ? self.untitledSavePath : find.projectFolder;
-			if(find.isVisible && find.searchFolder && didOwnDialog) // don’t reset search folder, as the user may have picked “Other…” and simply wants the results brought to front
-				searchFolder = find.searchFolder;
-			[find showFindWindowFor:searchFolder];
+			// Only reset search target if the dialog is not already showing potential search results from “Other…”
+			if(!find.isVisible || !didOwnDialog || find.searchTarget == FFSearchTargetDocument || find.searchTarget == FFSearchTargetSelection)
+			{
+				BOOL fileBrowserHasFocus = [self.window.firstResponder respondsToSelector:@selector(isDescendantOf:)] && [(NSView*)self.window.firstResponder isDescendantOf:self.fileBrowser.view];
+				find.searchTarget = fileBrowserHasFocus ? FFSearchTargetFileBrowserItems : FFSearchTargetProject;
+			}
 		}
 		break;
 	}
+	[find showWindow:self];
 }
 
 - (IBAction)orderFrontFindPanelForFileBrowser:(id)sender
 {
-	Find* find              = [Find sharedInstance];
-	find.documentIdentifier = self.selectedDocumentUUID;
-	find.projectFolder      = self.projectPath ?: self.untitledSavePath ?: NSHomeDirectory();
-	find.projectIdentifier  = self.identifier;
-	[find showFindWindowFor:self.untitledSavePath];
+	Find* find = [self prepareAndReturnFindPanel];
+	find.searchTarget = FFSearchTargetFileBrowserItems;
+	[find showWindow:self];
 }
 
 - (IBAction)orderFrontRunCommandWindow:(id)sender

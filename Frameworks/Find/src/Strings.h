@@ -27,5 +27,6 @@
 
 #define MSG_REPLACE_ALL_RESULTS              FFString(@"%@ replacements made across %@ file(s).", @"Replace all, replacement count status text")
 
-#define MSG_WINDOW_TITLE                     FFString(@"Find",       @"Default window title.")
-#define MSG_FIND_IN_FOLDER_WINDOW_TITLE      FFString(@"Find — %@",  @"Find in folder, window title with path.")
+#define MSG_WINDOW_TITLE                     FFString(@"Find",              @"Default window title.")
+#define MSG_FIND_IN_OPEN_FILES_WINDOW_TITLE  FFString(@"Find — Open Files", @"Find in folder, window title for searching open files.")
+#define MSG_FIND_IN_FOLDER_WINDOW_TITLE      FFString(@"Find — %@",         @"Find in folder, window title with path.")

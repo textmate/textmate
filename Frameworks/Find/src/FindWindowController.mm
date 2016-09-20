@@ -1,6 +1,7 @@
 #import "FindWindowController.h"
 #import "FFResultsViewController.h"
 #import "FFFolderMenu.h"
+#import "CommonAncestor.h"
 #import "Strings.h"
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/NSAlert Additions.h>
@@ -140,20 +141,23 @@ static NSButton* OakCreateStopSearchButton ()
 @property (nonatomic) OakHistoryList*           recentFolders;
 @property (nonatomic) NSMutableArray*           myConstraints;
 
-@property (nonatomic) BOOL                      folderSearch;
 @property (nonatomic, readonly) BOOL            canIgnoreWhitespace;
 @property (nonatomic) CGFloat                   findResultsHeight;
 @end
 
 @implementation FindWindowController
-+ (NSSet*)keyPathsForValuesAffectingCanIgnoreWhitespace { return [NSSet setWithObject:@"regularExpression"]; }
-+ (NSSet*)keyPathsForValuesAffectingIgnoreWhitespace    { return [NSSet setWithObject:@"regularExpression"]; }
++ (NSSet*)keyPathsForValuesAffectingCanIgnoreWhitespace  { return [NSSet setWithObject:@"regularExpression"]; }
++ (NSSet*)keyPathsForValuesAffectingIgnoreWhitespace     { return [NSSet setWithObject:@"regularExpression"]; }
++ (NSSet*)keyPathsForValuesAffectingCanEditGlob          { return [NSSet setWithObject:@"searchTarget"]; }
++ (NSSet*)keyPathsForValuesAffectingCanReplaceInDocument { return [NSSet setWithObject:@"searchTarget"]; }
 
 - (id)init
 {
 	NSRect r = [[NSScreen mainScreen] visibleFrame];
 	if((self = [super initWithWindow:[[NSPanel alloc] initWithContentRect:NSMakeRect(NSMidX(r)-100, NSMidY(r)+100, 200, 200) styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask) backing:NSBackingStoreBuffered defer:NO]]))
 	{
+		_projectFolder = NSHomeDirectory();
+
 		self.resultsViewController     = [FFResultsViewController new];
 
 		self.window.frameAutosaveName  = @"Find";
@@ -258,14 +262,14 @@ static NSButton* OakCreateStopSearchButton ()
 		[self.replaceTextField          bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.replaceString"        options:@{ NSContinuouslyUpdatesValueBindingOption: @YES }];
 		[self.globTextField             bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.globHistoryList.head" options:nil];
 		[self.globTextField             bind:NSContentValuesBinding toObject:_objectController withKeyPath:@"content.globHistoryList.list" options:nil];
-		[self.globTextField             bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.folderSearch"         options:nil];
+		[self.globTextField             bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.canEditGlob"          options:nil];
 		[self.ignoreCaseCheckBox        bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.ignoreCase"           options:nil];
 		[self.ignoreWhitespaceCheckBox  bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.ignoreWhitespace"     options:nil];
 		[self.regularExpressionCheckBox bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.regularExpression"    options:nil];
 		[self.wrapAroundCheckBox        bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.wrapAround"           options:nil];
 		[self.ignoreWhitespaceCheckBox  bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.canIgnoreWhitespace"  options:nil];
-		[self.replaceButton             bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.folderSearch"         options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
-		[self.replaceAndFindButton      bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.folderSearch"         options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
+		[self.replaceButton             bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.canReplaceInDocument" options:nil];
+		[self.replaceAndFindButton      bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.canReplaceInDocument" options:nil];
 
 		[self.countButton               bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.findString.length"    options:nil];
 		[self.findAllButton             bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.findString.length"    options:nil];
@@ -282,8 +286,6 @@ static NSButton* OakCreateStopSearchButton ()
 		[self updateConstraints];
 
 		self.window.defaultButtonCell = self.findNextButton.cell;
-
-		self.searchIn = FFSearchInDocument;
 
 		// setup find/replace strings/options
 		[self userDefaultsDidChange:nil];
@@ -484,18 +486,16 @@ static NSButton* OakCreateStopSearchButton ()
 
 - (void)updateWindowTitle
 {
-	self.window.title = self.searchFolder ? [NSString localizedStringWithFormat:MSG_FIND_IN_FOLDER_WINDOW_TITLE, [self.searchFolder stringByAbbreviatingWithTildeInPath]] : MSG_WINDOW_TITLE;
+	if(NSString* folder = self.searchFolder)
+		self.window.title = [NSString localizedStringWithFormat:MSG_FIND_IN_FOLDER_WINDOW_TITLE, [folder stringByAbbreviatingWithTildeInPath]];
+	else if(_searchTarget == FFSearchTargetOpenFiles)
+		self.window.title = MSG_FIND_IN_OPEN_FILES_WINDOW_TITLE;
+	else
+		self.window.title = MSG_WINDOW_TITLE;
 }
 
 - (void)showWindow:(id)sender
 {
-	if([self isWindowLoaded] && ![self.window isVisible])
-	{
-		self.showsResultsOutlineView = self.folderSearch;
-		if(!self.folderSearch)
-			self.statusString = @"";
-	}
-
 	BOOL isVisibleAndKey = [self isWindowLoaded] && [self.window isVisible] && [self.window isKeyWindow];
 	[super showWindow:sender];
 	if(!isVisibleAndKey || ![[self.window firstResponder] isKindOfClass:[NSTextView class]])
@@ -582,34 +582,39 @@ static NSButton* OakCreateStopSearchButton ()
 
 - (void)updateSearchInPopUpMenu
 {
-	NSMenu* whereMenu = self.wherePopUpButton.menu;
+	NSMenu* whereMenu = _wherePopUpButton.menu;
 	[whereMenu removeAllItems];
-	[[whereMenu addItemWithTitle:@"Document" action:@selector(orderFrontFindPanel:) keyEquivalent:@"f"] setTag:1];
-	[[whereMenu itemAtIndex:0] setRepresentedObject:FFSearchInDocument];
-	[[whereMenu addItemWithTitle:@"Selection" action:@selector(takeSearchInFrom:) keyEquivalent:@""] setRepresentedObject:FFSearchInSelection];
+
+	NSMenuItem* documentItem    = [whereMenu addItemWithTitle:@"Document"           action:@selector(takeSearchTargetFrom:) keyEquivalent:@"f"];
+	NSMenuItem* selectionItem   = [whereMenu addItemWithTitle:@"Selection"          action:@selector(takeSearchTargetFrom:) keyEquivalent:@""];
 	[whereMenu addItem:[NSMenuItem separatorItem]];
-	[[whereMenu addItemWithTitle:@"Open Files" action:@selector(takeSearchInFrom:) keyEquivalent:@""] setRepresentedObject:FFSearchInOpenFiles];
-	[[whereMenu addItemWithTitle:@"Project Folder" action:@selector(orderFrontFindPanel:) keyEquivalent:@"F"] setTag:3];
-	[whereMenu addItemWithTitle:@"Other Folder…" action:@selector(showFolderSelectionPanel:) keyEquivalent:@""];
+	NSMenuItem* openFilesItem   = [whereMenu addItemWithTitle:@"Open Files"         action:@selector(takeSearchTargetFrom:) keyEquivalent:@""];
+	NSMenuItem* projectItem     = [whereMenu addItemWithTitle:@"Project Folder"     action:@selector(takeSearchTargetFrom:) keyEquivalent:@"F"];
+	NSMenuItem* fileBrowserItem = [whereMenu addItemWithTitle:@"File Browser Items" action:@selector(takeSearchTargetFrom:) keyEquivalent:@""];
+	NSMenuItem* otherItem       = [whereMenu addItemWithTitle:@"Other Folder…"      action:@selector(showFolderSelectionPanel:) keyEquivalent:@""];
+	[whereMenu addItem:[NSMenuItem separatorItem]];
+	NSMenuItem* folderItem      = [whereMenu addItemWithTitle:@"«Last Folder»"      action:@selector(takeSearchTargetFrom:) keyEquivalent:@""];
+	[whereMenu addItem:[NSMenuItem separatorItem]];
 
-	if([self.searchIn isEqualToString:FFSearchInDocument])
-		[self.wherePopUpButton selectItemAtIndex:0];
-	else if([self.searchIn isEqualToString:FFSearchInSelection])
-		[self.wherePopUpButton selectItemAtIndex:1];
-	else if([self.searchIn isEqualToString:FFSearchInOpenFiles])
-		[self.wherePopUpButton selectItemAtIndex:3];
+	documentItem.tag    = FFSearchTargetDocument;
+	selectionItem.tag   = FFSearchTargetSelection;
+	openFilesItem.tag   = FFSearchTargetOpenFiles;
+	projectItem.tag     = FFSearchTargetProject;
+	fileBrowserItem.tag = FFSearchTargetFileBrowserItems;
+	otherItem.tag       = FFSearchTargetOther;
 
-	if(NSString* folder = self.searchFolder ?: self.projectFolder)
+	NSString* lastFolder = self.searchFolder ?: self.projectFolder;
+	if(lastFolder)
 	{
-		[whereMenu addItem:[NSMenuItem separatorItem]];
-		NSMenuItem* folderMenuItem = [whereMenu addItemWithTitle:[self displayNameForFolder:folder] action:@selector(takeSearchInFrom:) keyEquivalent:@""];
-		[folderMenuItem setIconForFile:folder];
-		[folderMenuItem setRepresentedObject:folder];
-		[FFFolderMenu addFolderSubmenuToMenuItem:folderMenuItem];
-
-		if(self.searchFolder)
-			[self.wherePopUpButton selectItem:folderMenuItem];
+		[folderItem setTitle:[self displayNameForFolder:lastFolder]];
+		[folderItem setIconForFile:lastFolder];
+		[folderItem setRepresentedObject:lastFolder];
+		[FFFolderMenu addFolderSubmenuToMenuItem:folderItem];
 	}
+
+	if(_searchTarget == FFSearchTargetProject || _searchTarget == FFSearchTargetOther || (_searchTarget == FFSearchTargetFileBrowserItems && _fileBrowserItems.count == 1))
+			[_wherePopUpButton selectItem:folderItem];
+	else	[_wherePopUpButton selectItemWithTag:_searchTarget];
 
 	// =================
 	// = Recent Places =
@@ -621,20 +626,42 @@ static NSButton* OakCreateStopSearchButton ()
 	for(NSUInteger i = 0; i < [self.recentFolders count]; ++i)
 	{
 		NSString* path = [self.recentFolders objectAtIndex:i];
-		if([path isEqualToString:self.searchFolder] || [path isEqualToString:self.projectFolder])
+		if([path isEqualToString:lastFolder] || [path isEqualToString:self.projectFolder])
 			continue;
 		if(![[NSFileManager defaultManager] fileExistsAtPath:path])
 			continue;
 
-		NSMenuItem* recentItem = [whereMenu addItemWithTitle:[self displayNameForFolder:path] action:@selector(takeSearchInFrom:) keyEquivalent:@""];
+		NSMenuItem* recentItem = [whereMenu addItemWithTitle:[self displayNameForFolder:path] action:@selector(takeSearchTargetFrom:) keyEquivalent:@""];
 		[recentItem setIconForFile:path];
 		[recentItem setRepresentedObject:path];
 	}
 }
 
-- (void)takeSearchInFrom:(NSMenuItem*)menuItem
+- (void)setSearchTarget:(FFSearchTarget)newTarget
 {
-	self.searchIn = [menuItem representedObject];
+	_searchTarget = newTarget;
+
+	BOOL isFolderSearch = _searchTarget != FFSearchTargetDocument && _searchTarget != FFSearchTargetSelection;
+	self.showsResultsOutlineView = isFolderSearch;
+
+	if(_searchTarget == FFSearchTargetOther)
+		[self.recentFolders addObject:self.otherFolder];
+
+	[self updateSearchInPopUpMenu];
+	[self updateWindowTitle];
+}
+
+- (void)takeSearchTargetFrom:(NSMenuItem*)menuItem
+{
+	if(NSString* folder = menuItem.representedObject)
+	{
+		self.otherFolder = folder;
+		self.searchTarget = FFSearchTargetOther;
+	}
+	else
+	{
+		self.searchTarget = FFSearchTarget(menuItem.tag);
+	}
 }
 
 // ==============================
@@ -813,42 +840,27 @@ static NSButton* OakCreateStopSearchButton ()
 
 - (NSString*)searchFolder
 {
-	return [@[ FFSearchInDocument, FFSearchInSelection, FFSearchInOpenFiles ] containsObject:self.searchIn] ? nil : self.searchIn;
-}
-
-- (void)setSearchIn:(NSString*)aString
-{
-	if(_searchIn == aString || [_searchIn isEqualToString:aString])
-	{
-		for(NSMenuItem* menuItem in [self.wherePopUpButton.menu itemArray])
-		{
-			if([[menuItem representedObject] isEqual:aString])
-				[self.wherePopUpButton selectItem:menuItem];
-		}
-		return;
-	}
-
-	_searchIn = aString;
-	self.folderSearch = self.searchFolder != nil || [aString isEqualToString:FFSearchInOpenFiles];
-	if(NSString* folder = self.searchFolder)
-		[self.recentFolders addObject:folder];
-	[self updateWindowTitle];
-	[self updateSearchInPopUpMenu];
+	if(_searchTarget == FFSearchTargetProject)
+		return self.projectFolder;
+	else if(_searchTarget == FFSearchTargetFileBrowserItems && _fileBrowserItems.count == 1)
+		return _fileBrowserItems.firstObject;
+	else if(_searchTarget == FFSearchTargetOther)
+		return self.otherFolder;
+	return nil;
 }
 
 - (IBAction)goToParentFolder:(id)sender
 {
-	if(NSString* parent = [self.searchFolder stringByDeletingLastPathComponent])
-		self.searchIn = parent;
-}
-
-- (void)setFolderSearch:(BOOL)flag
-{
-	if(_folderSearch == flag)
-		return;
-
-	_folderSearch = flag;
-	self.showsResultsOutlineView = flag;
+	if(_searchTarget == FFSearchTargetFileBrowserItems)
+	{
+		self.otherFolder = CommonAncestor(_fileBrowserItems);
+		self.searchTarget = FFSearchTargetOther;
+	}
+	else if(NSString* parent = [self.searchFolder stringByDeletingLastPathComponent])
+	{
+		self.otherFolder = parent;
+		self.searchTarget = FFSearchTargetOther;
+	}
 }
 
 - (void)setFindString:(NSString*)aString
@@ -880,6 +892,9 @@ static NSButton* OakCreateStopSearchButton ()
 - (void)setWrapAround:(BOOL)flag        { if(_wrapAround != flag) [[NSUserDefaults standardUserDefaults] setObject:@(_wrapAround = flag) forKey:kUserDefaultsFindWrapAround]; }
 - (BOOL)ignoreWhitespace                { return _ignoreWhitespace && self.canIgnoreWhitespace; }
 - (BOOL)canIgnoreWhitespace             { return _regularExpression == NO; }
+
+- (BOOL)canEditGlob                     { return _searchTarget != FFSearchTargetDocument && _searchTarget != FFSearchTargetSelection; }
+- (BOOL)canReplaceInDocument            { return _searchTarget == FFSearchTargetDocument || _searchTarget == FFSearchTargetSelection; }
 
 - (NSString*)globString                 { [self commitEditing]; return _globHistoryList.head; }
 - (void)setGlobString:(NSString*)aGlob  { [_globHistoryList addObject:aGlob]; }
@@ -964,7 +979,7 @@ static NSButton* OakCreateStopSearchButton ()
 	else if(aMenuItem.action == @selector(toggleSearchBinaryFiles:))
 		[aMenuItem setState:self.searchBinaryFiles ? NSOnState : NSOffState];
 	else if(aMenuItem.action == @selector(goToParentFolder:))
-		res = self.searchFolder != nil;
+		res = self.searchFolder != nil || _searchTarget == FFSearchTargetFileBrowserItems && CommonAncestor(_fileBrowserItems);
 	return res;
 }
 @end

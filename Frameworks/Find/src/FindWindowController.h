@@ -13,8 +13,11 @@
 
 @property (nonatomic) BOOL showsResultsOutlineView;
 
+@property (nonatomic) FFSearchTarget searchTarget;
 @property (nonatomic) NSString* projectFolder;
-@property (nonatomic) NSString* searchIn;
+@property (nonatomic) NSArray*  fileBrowserItems;
+@property (nonatomic) NSString* otherFolder;
+
 @property (nonatomic, readonly) NSString* searchFolder;
 
 @property (nonatomic) NSString* findString;

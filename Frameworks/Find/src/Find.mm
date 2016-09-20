@@ -23,10 +23,6 @@
 
 OAK_DEBUG_VAR(Find_Base);
 
-NSString* const FFSearchInDocument  = @"FFSearchInDocument";
-NSString* const FFSearchInSelection = @"FFSearchInSelection";
-NSString* const FFSearchInOpenFiles = @"FFSearchInOpenFiles";
-
 static NSString* const kSearchMarkIdentifier = @"search";
 
 enum FindActionTag
@@ -101,9 +97,8 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 // = Actions for displaying the panel =
 // ====================================
 
-- (void)showFindWindowFor:(NSString*)searchScope
+- (void)showWindow:(id)sender
 {
-	self.windowController.searchIn = searchScope;
 	[self.windowController showWindow:self];
 }
 
@@ -119,16 +114,23 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	{
 		[openPanel beginSheetModalForWindow:self.windowController.window completionHandler:^(NSInteger result) {
 			if(result == NSOKButton)
-				[self showFindWindowFor:[[[[openPanel URLs] lastObject] filePathURL] path]];
+			{
+				self.windowController.otherFolder = [[[[openPanel URLs] lastObject] filePathURL] path];
+				self.windowController.searchTarget = FFSearchTargetOther;
+			}
 			else if([self isVisible]) // Reset selected item in pop-up button
-				self.windowController.searchIn = self.windowController.searchIn;
+				self.windowController.searchTarget = self.windowController.searchTarget;
 		}];
 	}
 	else
 	{
 		[openPanel beginWithCompletionHandler:^(NSInteger result) {
 			if(result == NSOKButton)
-				[self showFindWindowFor:[[[[openPanel URLs] lastObject] filePathURL] path]];
+			{
+				self.windowController.otherFolder = [[[[openPanel URLs] lastObject] filePathURL] path];
+				self.windowController.searchTarget = FFSearchTargetOther;
+				[self showWindow:self];
+			}
 		}];
 	}
 }
@@ -174,14 +176,14 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	else if(action == FindActionCountMatches || action == FindActionFindAll || action == FindActionReplaceAll)
 		_findOptions |= find::all_matches;
 
-	NSString* folder = controller.searchFolder;
-	if(folder || [controller.searchIn isEqualToString:FFSearchInOpenFiles] || (action == FindActionFindAll && [controller.searchIn isEqualToString:FFSearchInDocument] && self.documentIdentifier))
+	FFSearchTarget searchTarget = controller.searchTarget;
+	if(searchTarget != FFSearchTargetSelection && (searchTarget != FFSearchTargetDocument || action == FindActionFindAll && self.documentIdentifier))
 	{
 		switch(action)
 		{
 			case FindActionFindAll:
 			{
-				if(self.documentIdentifier && [controller.searchIn isEqualToString:FFSearchInDocument])
+				if(searchTarget == FFSearchTargetDocument && self.documentIdentifier)
 				{
 					if(OakDocument* document = [OakDocumentController.sharedInstance findDocumentWithIdentifier:self.documentIdentifier])
 					{
@@ -192,7 +194,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 						[self folderSearchDidFinish:nil];
 					}
 				}
-				else if([controller.searchIn isEqualToString:FFSearchInOpenFiles])
+				else if(searchTarget == FFSearchTargetOpenFiles)
 				{
 					self.documentSearch = nil;
 					self.windowController.showsResultsOutlineView              = YES;
@@ -203,11 +205,13 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 				}
 				else
 				{
+					NSArray* paths = searchTarget == FFSearchTargetFileBrowserItems ? self.fileBrowserItems : @[ self.projectFolder ];
+
 					FFDocumentSearch* folderSearch = [FFDocumentSearch new];
 					folderSearch.searchBinaryFiles   = YES;
 					folderSearch.searchString        = controller.findString;
 					folderSearch.options             = _findOptions;
-					folderSearch.paths               = @[ folder ];
+					folderSearch.paths               = paths;
 					folderSearch.glob                = controller.globString;
 					folderSearch.searchFolderLinks   = controller.searchFolderLinks;
 					folderSearch.searchFileLinks     = controller.searchFileLinks;
@@ -275,7 +279,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	}
 	else
 	{
-		bool onlySelection = [controller.searchIn isEqualToString:FFSearchInSelection];
+		bool onlySelection = searchTarget == FFSearchTargetSelection;
 		switch(action)
 		{
 			case FindActionFindNext:
@@ -333,10 +337,14 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 // = Accessors =
 // =============
 
-- (void)setProjectFolder:(NSString*)folder { self.windowController.projectFolder = folder; }
-- (NSString*)projectFolder                 { return self.windowController.projectFolder; }
-- (NSString*)searchFolder                  { return self.windowController.searchFolder; }
-- (BOOL)isVisible                          { return self.windowController.window.isVisible; }
+- (void)setSearchTarget:(FFSearchTarget)newTarget { self.windowController.searchTarget = newTarget; }
+- (FFSearchTarget)searchTarget                    { return self.windowController.searchTarget; }
+- (void)setProjectFolder:(NSString*)folder        { self.windowController.projectFolder = folder; }
+- (NSString*)projectFolder                        { return self.windowController.projectFolder; }
+- (void)setFileBrowserItems:(NSArray*)items       { self.windowController.fileBrowserItems = items; }
+- (NSArray*)fileBrowserItems                      { return self.windowController.fileBrowserItems; }
+- (NSString*)searchFolder                         { return self.windowController.searchFolder; }
+- (BOOL)isVisible                                 { return self.windowController.window.isVisible; }
 
 // ===========
 // = Options =
