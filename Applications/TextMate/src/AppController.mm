@@ -94,7 +94,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 		_currentResponderIsOakTextView = flag;
 
 		NSMenu* mainMenu = [NSApp mainMenu];
-		NSMenu* goMenu   = [[mainMenu itemWithTitle:@"Go"] submenu];
+		NSMenu* goMenu   = [[mainMenu itemWithTitle:@"File Browser"] submenu];
 		NSMenu* textMenu = [[mainMenu itemWithTitle:@"Text"] submenu];
 
 		NSMenuItem* backMenuItem       = [goMenu itemWithTitle:@"Back"];
