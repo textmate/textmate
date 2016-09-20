@@ -759,7 +759,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 {
 	NSRect srcRect = NSZeroRect, visibleRect = [self visibleRect];
 	for(auto const& range : ranges)
-		srcRect = NSUnionRect(srcRect, NSIntersectionRect(visibleRect, documentView->rect_for_range(range.min().index, range.max().index)));
+		srcRect = NSUnionRect(srcRect, NSIntersectionRect(visibleRect, documentView->rect_for_range(range.min().index, range.max().index, true)));
 
 	NSBezierPath* clip = [NSBezierPath bezierPath];
 	for(auto const& rect : documentView->rects_for_ranges(ranges))
