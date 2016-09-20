@@ -59,7 +59,7 @@ static NSMutableArray* FoldersAtPath (NSString* folder)
 	if([aMenu numberOfItems] != 0 || !parentItem)
 		return;
 
-	NSString* folder = [parentItem representedObject];
+	NSString* folder = [parentItem representedObject] ?: NSHomeDirectory();
 	if([parentItem parentItem] == nil) // root menu, show parent folders
 	{
 		BOOL hasSubfolders = [FoldersAtPath(folder) count];
