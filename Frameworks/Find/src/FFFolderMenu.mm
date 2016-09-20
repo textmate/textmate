@@ -1,6 +1,7 @@
 #import "FFFolderMenu.h"
 #import <OakAppKit/NSMenuItem Additions.h>
 #import <OakAppKit/NSMenu Additions.h>
+#import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <io/io.h>
 #import <io/entries.h>
@@ -63,7 +64,7 @@ static NSMutableArray* FoldersAtPath (NSString* folder)
 	if([parentItem parentItem] == nil) // root menu, show parent folders
 	{
 		BOOL hasSubfolders = [FoldersAtPath(folder) count];
-		for(NSString* path = folder; true; path = [path stringByDeletingLastPathComponent])
+		for(NSString* path = folder; OakNotEmptyString(path); path = [path stringByDeletingLastPathComponent])
 		{
 			NSMenuItem* menuItem = [aMenu addItemWithTitle:[[NSFileManager defaultManager] displayNameAtPath:path] action:parentItem.action keyEquivalent:@""];
 			[menuItem setTarget:parentItem.target];
