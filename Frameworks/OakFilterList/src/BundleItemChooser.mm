@@ -110,7 +110,14 @@ _OutputIter copy_menu_items (NSMenu* menu, _OutputIter out, NSArray* parentNames
 		}
 
 		if(NSMenu* submenu = [item submenu])
+		{
+			if(submenu.delegate && [submenu.delegate respondsToSelector:@selector(menuNeedsUpdate:)])
+			{
+				if([@[ @"Spelling" ] containsObject:submenu.title])
+					[submenu.delegate menuNeedsUpdate:submenu];
+			}
 			out = copy_menu_items(submenu, out, [parentNames arrayByAddingObject:[item title]]);
+		}
 	}
 	return out;
 }
