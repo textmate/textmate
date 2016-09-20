@@ -562,7 +562,8 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 			if(OakDocument* doc = parent.document)
 			{
 				NSMenuItem* item = [aMenu addItemWithTitle:(doc.path ? to_ns(path::relative_to(to_s(doc.path), to_s(self.searchFolder))) : doc.displayName) action:@selector(takeSelectedPathFrom:) keyEquivalent:key < 9 ? [NSString stringWithFormat:@"%c", '0' + (++key % 10)] : @""];
-				[item setImage:parent.document.icon];
+				if(aMenu.propertiesToUpdate & NSMenuPropertyItemImage)
+					[item setImage:parent.document.icon];
 				[item setRepresentedObject:parent];
 			}
 		}

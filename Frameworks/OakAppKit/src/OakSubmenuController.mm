@@ -18,6 +18,16 @@ OAK_DEBUG_VAR(OakSubmenuController);
 }
 @end
 
+@interface OakKeyEquivalentMenu : NSMenu
+@end
+
+@implementation OakKeyEquivalentMenu
+- (NSMenuProperties)propertiesToUpdate
+{
+	return NSMenuPropertyItemKeyEquivalent;
+}
+@end
+
 @interface OakSubmenuController ()
 @property (nonatomic) OakProxyMenuItem* proxyMenuItem;
 @end
@@ -54,7 +64,7 @@ OAK_DEBUG_VAR(OakSubmenuController);
 	if(eventString < "@1" || "@9" < eventString)
 		return NO;
 
-	NSMenu* dummy = [NSMenu new];
+	NSMenu* dummy = [OakKeyEquivalentMenu new];
 	[self updateMenu:dummy withSelector:@selector(updateSelectTabMenu:)];
 	for(NSMenuItem* item in [dummy itemArray])
 	{
