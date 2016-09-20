@@ -3,6 +3,7 @@
 #import "FindWindowController.h"
 #import "FFResultsViewController.h"
 #import "FFDocumentSearch.h"
+#import "CommonAncestor.h"
 #import "Strings.h"
 #import "scan_path.h"
 #import <OakFoundation/OakFindProtocol.h>
@@ -206,7 +207,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 					folderSearch.searchBinaryFiles   = YES;
 					folderSearch.searchString        = controller.findString;
 					folderSearch.options             = _findOptions;
-					folderSearch.directory           = folder;
+					folderSearch.paths               = @[ folder ];
 					folderSearch.glob                = controller.globString;
 					folderSearch.searchFolderLinks   = controller.searchFolderLinks;
 					folderSearch.searchFileLinks     = controller.searchFileLinks;
@@ -422,7 +423,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 		FFResultNode* node = [FFResultNode resultNodeWithMatch:match];
 		if(!parent || ![parent.document isEqual:node.document])
-			[_results addResultNode:(parent = [FFResultNode resultNodeWithMatch:match baseDirectory:_documentSearch.directory])];
+			[_results addResultNode:(parent = [FFResultNode resultNodeWithMatch:match baseDirectory:CommonAncestor(_documentSearch.paths)])];
 		[parent addResultNode:node];
 	}
 
@@ -537,7 +538,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	{
 		if(item.document.path)
 		{
-			std::string path = path::relative_to(to_s(item.document.path), to_s(_documentSearch.directory));
+			std::string path = path::relative_to(to_s(item.document.path), to_s(CommonAncestor(_documentSearch.paths)));
 			NSString* newGlob = [_windowController.globString stringByAppendingFormat:@"~%@", [NSString stringWithCxxString:path]];
 			_windowController.globString = newGlob;
 		}

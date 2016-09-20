@@ -8,7 +8,7 @@ extern NSString* const FFDocumentSearchDidFinishNotification;
 @property (nonatomic, copy) NSString* searchString;
 @property (nonatomic) find::options_t options;
 
-@property (nonatomic) NSString* directory;
+@property (nonatomic) NSArray* paths;
 
 @property (nonatomic) BOOL searchFolderLinks;
 @property (nonatomic) BOOL searchFileLinks;

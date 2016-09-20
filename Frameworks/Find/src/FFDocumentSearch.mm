@@ -1,4 +1,5 @@
 #import "FFDocumentSearch.h"
+#import "CommonAncestor.h"
 #import <OakFoundation/NSString Additions.h>
 #import <document/OakDocumentController.h>
 #import <document/OakDocument.h>
@@ -70,7 +71,7 @@ static NSDictionary* GlobOptionsForPath (std::string const& path, NSString* glob
 @implementation FFDocumentSearch
 - (void)start
 {
-	D(DBF_Find_FolderSearch, bug("folder ‘%s’, searchString ‘%s’\n", [_directory UTF8String], [_searchString UTF8String]););
+	D(DBF_Find_FolderSearch, bug("folders %s, searchString ‘%s’\n", [[_paths description] UTF8String], [_searchString UTF8String]););
 	[self stop];
 	_matches = [NSMutableArray array];
 
@@ -84,12 +85,12 @@ static NSDictionary* GlobOptionsForPath (std::string const& path, NSString* glob
 	NSUInteger searchToken = _lastSearchToken;
 	NSDate* searchStartDate = [NSDate date];
 
-	NSMutableDictionary* options = [GlobOptionsForPath(to_s(_directory), _glob, _searchBinaryFiles, _searchHiddenFolders) mutableCopy];
+	NSMutableDictionary* options = [GlobOptionsForPath(to_s(CommonAncestor(_paths)), _glob, _searchBinaryFiles, _searchHiddenFolders) mutableCopy];
 	options[kSearchFollowFileLinksKey]      = @(_searchFileLinks);
 	options[kSearchFollowDirectoryLinksKey] = @(_searchFolderLinks);
 
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-		[OakDocumentController.sharedInstance enumerateDocumentsAtPath:_directory options:options usingBlock:^(OakDocument* document, BOOL* stop){
+		[OakDocumentController.sharedInstance enumerateDocumentsAtPaths:_paths options:options usingBlock:^(OakDocument* document, BOOL* stop){
 			if(*stop = searchToken != _lastSearchToken)
 				return;
 
