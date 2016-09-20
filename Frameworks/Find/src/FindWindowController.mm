@@ -623,6 +623,8 @@ static NSButton* OakCreateStopSearchButton ()
 		NSString* path = [self.recentFolders objectAtIndex:i];
 		if([path isEqualToString:self.searchFolder] || [path isEqualToString:self.projectFolder])
 			continue;
+		if(![[NSFileManager defaultManager] fileExistsAtPath:path])
+			continue;
 
 		NSMenuItem* recentItem = [whereMenu addItemWithTitle:[self displayNameForFolder:path] action:@selector(takeSearchInFrom:) keyEquivalent:@""];
 		[recentItem setIconForFile:path];
