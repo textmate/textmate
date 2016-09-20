@@ -1,7 +1,4 @@
-// Also defined in Find.h
-extern NSString* const FFSearchInDocument;
-extern NSString* const FFSearchInSelection;
-extern NSString* const FFSearchInOpenFiles;
+#import "Find.h"
 
 @class FFResultsViewController;
 
