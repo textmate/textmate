@@ -1,5 +1,4 @@
 #import "FFDocumentSearch.h"
-#import "scan_path.h"
 #import <OakFoundation/NSString Additions.h>
 #import <document/OakDocumentController.h>
 #import <document/OakDocument.h>
@@ -71,74 +70,53 @@ static NSDictionary* GlobOptionsForPath (std::string const& path, NSString* glob
 @implementation FFDocumentSearch
 - (void)start
 {
-	D(DBF_Find_FolderSearch, bug("folder ‘%s’, searchString ‘%s’, documentIdentifier ‘%s’\n", [_directory UTF8String], [_searchString UTF8String], [_documentIdentifier.UUIDString UTF8String]););
+	D(DBF_Find_FolderSearch, bug("folder ‘%s’, searchString ‘%s’\n", [_directory UTF8String], [_searchString UTF8String]););
 	[self stop];
 	_matches = [NSMutableArray array];
 
-	if(self.documentIdentifier)
-	{
-		if(OakDocument* document = [OakDocumentController.sharedInstance findDocumentWithIdentifier:self.documentIdentifier])
-		{
-			[_matches setArray:[document matchesForString:_searchString options:_options]];
-			[self updateMatches:nil];
-			[[NSNotificationCenter defaultCenter] postNotificationName:FFDocumentSearchDidFinishNotification object:self];
-		}
-	}
-	else if([_directory isEqualToString:to_ns(find::kSearchOpenFiles)])
-	{
-		for(OakDocument* document in [OakDocumentController.sharedInstance openDocuments])
-		{
-			[_matches setArray:[document matchesForString:_searchString options:_options]];
-			[self updateMatches:nil];
-		}
-		[[NSNotificationCenter defaultCenter] postNotificationName:FFDocumentSearchDidFinishNotification object:self];
-	}
-	else
-	{
-		if(_searching)
-			++_lastSearchToken;
+	if(_searching)
+		++_lastSearchToken;
 
-		_searching    = YES;
-		_pollInterval = 0.2;
-		_pollTimer    = [NSTimer scheduledTimerWithTimeInterval:_pollInterval target:self selector:@selector(updateMatches:) userInfo:NULL repeats:NO];
+	_searching    = YES;
+	_pollInterval = 0.2;
+	_pollTimer    = [NSTimer scheduledTimerWithTimeInterval:_pollInterval target:self selector:@selector(updateMatches:) userInfo:NULL repeats:NO];
 
-		NSUInteger searchToken = _lastSearchToken;
-		NSDate* searchStartDate = [NSDate date];
+	NSUInteger searchToken = _lastSearchToken;
+	NSDate* searchStartDate = [NSDate date];
 
-		NSMutableDictionary* options = [GlobOptionsForPath(to_s(_directory), _glob, _searchBinaryFiles, _searchHiddenFolders) mutableCopy];
-		options[kSearchFollowFileLinksKey]      = @(_searchFileLinks);
-		options[kSearchFollowDirectoryLinksKey] = @(_searchFolderLinks);
+	NSMutableDictionary* options = [GlobOptionsForPath(to_s(_directory), _glob, _searchBinaryFiles, _searchHiddenFolders) mutableCopy];
+	options[kSearchFollowFileLinksKey]      = @(_searchFileLinks);
+	options[kSearchFollowDirectoryLinksKey] = @(_searchFolderLinks);
 
-		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-			[OakDocumentController.sharedInstance enumerateDocumentsAtPath:_directory options:options usingBlock:^(OakDocument* document, BOOL* stop){
-				if(*stop = searchToken != _lastSearchToken)
-					return;
+	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+		[OakDocumentController.sharedInstance enumerateDocumentsAtPath:_directory options:options usingBlock:^(OakDocument* document, BOOL* stop){
+			if(*stop = searchToken != _lastSearchToken)
+				return;
 
-				_lastDocumentPath = document.path;
-				NSUInteger bufferSize = 0;
-				NSArray* newMatches = [document matchesForString:_searchString options:_options bufferSize:&bufferSize];
-				_scannedByteCount += bufferSize;
-				_scannedFileCount += 1;
+			_lastDocumentPath = document.path;
+			NSUInteger bufferSize = 0;
+			NSArray* newMatches = [document matchesForString:_searchString options:_options bufferSize:&bufferSize];
+			_scannedByteCount += bufferSize;
+			_scannedFileCount += 1;
 
-				if(newMatches.count)
-				{
-					@synchronized(self) {
-						[_matches addObjectsFromArray:newMatches];
-					}
+			if(newMatches.count)
+			{
+				@synchronized(self) {
+					[_matches addObjectsFromArray:newMatches];
 				}
-			}];
+			}
+		}];
 
-			dispatch_async(dispatch_get_main_queue(), ^{
-				if(searchToken == _lastSearchToken)
-				{
-					_searching = NO;
-					_searchDuration = [[NSDate date] timeIntervalSinceDate:searchStartDate];
-					[self updateMatches:nil];
-					[[NSNotificationCenter defaultCenter] postNotificationName:FFDocumentSearchDidFinishNotification object:self];
-				}
-			});
+		dispatch_async(dispatch_get_main_queue(), ^{
+			if(searchToken == _lastSearchToken)
+			{
+				_searching = NO;
+				_searchDuration = [[NSDate date] timeIntervalSinceDate:searchStartDate];
+				[self updateMatches:nil];
+				[[NSNotificationCenter defaultCenter] postNotificationName:FFDocumentSearchDidFinishNotification object:self];
+			}
 		});
-	}
+	});
 }
 
 // ===================

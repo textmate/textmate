@@ -8,10 +8,7 @@ extern NSString* const FFDocumentSearchDidFinishNotification;
 @property (nonatomic, copy) NSString* searchString;
 @property (nonatomic) find::options_t options;
 
-// Either directory _or_ a documentIdentifier should be provided
-// If a documentIdentifier is set only that document will be searched.
 @property (nonatomic) NSString* directory;
-@property (nonatomic) NSUUID* documentIdentifier;
 
 @property (nonatomic) BOOL searchFolderLinks;
 @property (nonatomic) BOOL searchFileLinks;

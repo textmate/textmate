@@ -17,6 +17,7 @@
 #import <regexp/format_string.h>
 #import <document/collection.h>
 #import <document/OakDocument.h>
+#import <document/OakDocumentController.h>
 #import <settings/settings.h>
 
 OAK_DEBUG_VAR(Find_Base);
@@ -179,30 +180,41 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		{
 			case FindActionFindAll:
 			{
-				FFDocumentSearch* folderSearch = [FFDocumentSearch new];
-				folderSearch.searchBinaryFiles = YES;
-				folderSearch.searchString = controller.findString;
-				folderSearch.options      = _findOptions;
-
 				if(self.documentIdentifier && [controller.searchIn isEqualToString:FFSearchInDocument])
 				{
-					folderSearch.documentIdentifier = self.documentIdentifier;
+					if(OakDocument* document = [OakDocumentController.sharedInstance findDocumentWithIdentifier:self.documentIdentifier])
+					{
+						self.documentSearch = nil;
+						self.windowController.showsResultsOutlineView              = YES;
+						self.windowController.resultsViewController.hideCheckBoxes = YES;
+						[self acceptMatches:[document matchesForString:controller.findString options:_findOptions]];
+						[self folderSearchDidFinish:nil];
+					}
 				}
 				else if([controller.searchIn isEqualToString:FFSearchInOpenFiles])
 				{
-					folderSearch.directory = [NSString stringWithCxxString:find::kSearchOpenFiles];
+					self.documentSearch = nil;
+					self.windowController.showsResultsOutlineView              = YES;
+					self.windowController.resultsViewController.hideCheckBoxes = NO;
+					for(OakDocument* document in [OakDocumentController.sharedInstance openDocuments])
+						[self acceptMatches:[document matchesForString:controller.findString options:_findOptions]];
+					[self folderSearchDidFinish:nil];
 				}
 				else
 				{
+					FFDocumentSearch* folderSearch = [FFDocumentSearch new];
+					folderSearch.searchBinaryFiles   = YES;
+					folderSearch.searchString        = controller.findString;
+					folderSearch.options             = _findOptions;
 					folderSearch.directory           = folder;
 					folderSearch.glob                = controller.globString;
 					folderSearch.searchFolderLinks   = controller.searchFolderLinks;
 					folderSearch.searchFileLinks     = controller.searchFileLinks;
 					folderSearch.searchHiddenFolders = controller.searchHiddenFolders;
 					folderSearch.searchBinaryFiles   = controller.searchBinaryFiles;
-				}
 
-				self.documentSearch = folderSearch;
+					self.documentSearch = folderSearch;
+				}
 			}
 			break;
 
@@ -389,8 +401,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		self.windowController.busy                    = YES;
 		self.windowController.statusString            = MSG_SEARCHING_FMT;
 		self.windowController.showsResultsOutlineView = YES;
-
-		self.windowController.resultsViewController.hideCheckBoxes = _documentSearch.documentIdentifier != nil;
+		self.windowController.resultsViewController.hideCheckBoxes = NO;
 
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(folderSearchDidReceiveResults:) name:FFDocumentSearchDidReceiveResultsNotification object:_documentSearch];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(folderSearchDidFinish:) name:FFDocumentSearchDidFinishNotification object:_documentSearch];
@@ -400,11 +411,10 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	}
 }
 
-- (void)folderSearchDidReceiveResults:(NSNotification*)aNotification
+- (void)acceptMatches:(NSArray<OakDocumentMatch*>*)matches
 {
 	NSUInteger countOfExistingItems = _results.children.count;
 
-	NSArray* matches = [aNotification userInfo][@"matches"];
 	FFResultNode* parent = nil;
 	for(OakDocumentMatch* match in matches)
 	{
@@ -417,6 +427,11 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	}
 
 	[_windowController.resultsViewController insertItemsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(countOfExistingItems, _results.children.count - countOfExistingItems)]];
+}
+
+- (void)folderSearchDidReceiveResults:(NSNotification*)aNotification
+{
+	[self acceptMatches:[aNotification userInfo][@"matches"]];
 }
 
 - (void)addResultsToPasteboard:(id)sender
@@ -437,7 +452,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 {
 	self.performingFolderSearch = NO;
 	self.windowController.busy = NO;
-	if(!_documentSearch)
+	if(!_results)
 		return;
 
 	[self bind:@"countOfMatches" toObject:_results withKeyPath:@"countOfLeafs" options:nil];
@@ -455,12 +470,9 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		default: fmt = MSG_MULTIPLE_MATCHES_FMT; break;
 	}
 
-	NSString* msg = [NSString stringWithFormat:fmt, [_documentSearch searchString], [NSNumberFormatter localizedStringFromNumber:@(self.countOfMatches) numberStyle:NSNumberFormatterDecimalStyle]];
-	if(_documentSearch.documentIdentifier)
-	{
-		self.windowController.statusString = msg;
-	}
-	else
+	NSString* searchString = [_documentSearch searchString] ?: self.windowController.findString;
+	NSString* msg = [NSString stringWithFormat:fmt, searchString, [NSNumberFormatter localizedStringFromNumber:@(self.countOfMatches) numberStyle:NSNumberFormatterDecimalStyle]];
+	if(_documentSearch)
 	{
 		NSNumberFormatter* formatter = [NSNumberFormatter new];
 		formatter.numberStyle = NSNumberFormatterDecimalStyle;
@@ -469,6 +481,10 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 		self.windowController.statusString          = [msg stringByAppendingFormat:([_documentSearch scannedFileCount] == 1 ? MSG_SEARCHED_FILES_ONE : MSG_SEARCHED_FILES_MULTIPLE), seconds, [NSNumberFormatter localizedStringFromNumber:@([_documentSearch scannedFileCount]) numberStyle:NSNumberFormatterDecimalStyle]];
 		self.windowController.alternateStatusString = [msg stringByAppendingFormat:MSG_SEARCHED_BYTES, seconds, [NSString stringWithCxxString:text::format_size([_documentSearch scannedByteCount])]];
+	}
+	else
+	{
+		self.windowController.statusString = msg;
 	}
 
 	__weak __block id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:OakPasteboardDidChangeNotification object:[OakPasteboard pasteboardWithName:NSFindPboard] queue:nil usingBlock:^(NSNotification*){
