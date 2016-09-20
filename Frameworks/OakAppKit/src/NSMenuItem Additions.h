@@ -6,4 +6,5 @@
 - (void)setInactiveKeyEquivalentCxxString:(std::string const&)aKeyEquivalent;
 - (void)setTabTriggerCxxString:(std::string const&)aTabTrigger;
 - (void)setModifiedState:(BOOL)flag;
+- (void)setDynamicTitle:(NSString*)title;
 @end

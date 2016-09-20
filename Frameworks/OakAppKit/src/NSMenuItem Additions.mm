@@ -207,4 +207,24 @@ static char const* kOakMenuItemTabTrigger    = "OakMenuItemTabTrigger";
 		[self setMixedStateImage:image];
 	[self setState:flag ? NSMixedState : NSOffState];
 }
+
+- (void)setDynamicTitle:(NSString*)plainTitle
+{
+	if(self.userKeyEquivalent && ![self.userKeyEquivalent isEqualToString:@""])
+	{
+		NSString* title = plainTitle;
+		plainTitle = self.title;
+
+		if([title isEqualToString:plainTitle])
+		{
+			self.attributedTitle = nil;
+		}
+		else
+		{
+			NSFont* font = self.menu.font ?: [NSFont menuFontOfSize:0];
+			self.attributedTitle = [[NSAttributedString alloc] initWithString:title attributes:@{ NSFontAttributeName : font }];
+		}
+	}
+	self.title = plainTitle;
+}
 @end
