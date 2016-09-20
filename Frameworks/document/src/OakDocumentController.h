@@ -24,6 +24,7 @@ PUBLIC @interface OakDocumentController : NSObject
 - (void)didTouchDocument:(OakDocument*)aDocument;
 
 - (void)enumerateDocumentsAtPath:(NSString*)aDirectory options:(NSDictionary*)someOptions usingBlock:(void(^)(OakDocument* document, BOOL* stop))block;
+- (void)enumerateDocumentsAtPaths:(NSArray*)items options:(NSDictionary*)someOptions usingBlock:(void(^)(OakDocument* document, BOOL* stop))block;
 
 // For use by OakDocument
 - (void)register:(OakDocument*)aDocument;

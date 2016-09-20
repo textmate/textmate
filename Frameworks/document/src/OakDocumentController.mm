@@ -275,15 +275,14 @@ namespace
 // = Directory Scanning =
 // ======================
 
-- (void)enumerateDocumentsAtPath:(NSString*)aDirectory options:(NSDictionary*)someOptions usingBlock:(void(^)(OakDocument* document, BOOL* stop))block
+- (void)enumerateDocumentsAtPath:(NSString*)aDirectory options:(NSDictionary*)someOptions usingBlock:(void(^)(OakDocument* document, BOOL* stop))block;
+{
+	[self enumerateDocumentsAtPaths:@[ aDirectory ] options:someOptions usingBlock:block];
+}
+
+- (void)enumerateDocumentsAtPaths:(NSArray*)items options:(NSDictionary*)someOptions usingBlock:(void(^)(OakDocument* document, BOOL* stop))block
 {
 	BOOL stop = NO;
-	for(OakDocument* document in [self untitledDocumentsInDirectory:aDirectory])
-	{
-		block(document, &stop);
-		if(stop)
-			return;
-	}
 
 	BOOL followDirectoryLinks = [someOptions[kSearchFollowDirectoryLinksKey] boolValue];
 	BOOL followFileLinks      = [someOptions[kSearchFollowFileLinksKey] boolValue] || !someOptions[kSearchFollowFileLinksKey];
@@ -306,8 +305,44 @@ namespace
 	}
 
 	std::set<std::pair<dev_t, ino_t>> didScan;
-	std::deque<std::string> dirs = { to_s(aDirectory) };
+	std::deque<std::string> dirs;
 	std::vector<std::string> links;
+
+	for(NSString* item in items)
+	{
+		struct stat buf;
+		if(lstat([item fileSystemRepresentation], &buf) != -1)
+		{
+			if(S_ISDIR(buf.st_mode) && didScan.emplace(buf.st_dev, buf.st_ino).second)
+				dirs.push_back(to_s(item));
+			else if(S_ISLNK(buf.st_mode))
+				links.push_back(to_s(item));
+			else if(S_ISREG(buf.st_mode) && didScan.emplace(buf.st_dev, buf.st_ino).second)
+			{
+				block([OakDocument documentWithPath:item], &stop);
+				if(stop)
+					break;
+			}
+		}
+		else
+		{
+			perrorf("OakDocumentController: lstat(\"%s\")", [item fileSystemRepresentation]);
+		}
+	}
+
+	NSMutableSet<NSUUID*>* didSee = [NSMutableSet set];
+	for(std::string const& dir : dirs)
+	{
+		for(OakDocument* document in [self untitledDocumentsInDirectory:to_ns(dir)])
+		{
+			if([didSee containsObject:document.identifier])
+				continue;
+			[didSee addObject:document.identifier];
+			block(document, &stop);
+			if(stop)
+				return;
+		}
+	}
 
 	while(stop == NO && !dirs.empty())
 	{
