@@ -364,6 +364,9 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		[self unbind:@"countOfExcludedMatches"];
 		[self unbind:@"countOfReadOnlyMatches"];
 		[self unbind:@"countOfExcludedReadOnlyMatches"];
+
+		// Update UI dependent on “count of matches”
+		self.countOfMatches = self.countOfExcludedMatches = self.countOfReadOnlyMatches = self.countOfExcludedReadOnlyMatches = 0;
 	}
 
 	_windowController.resultsViewController.results = _results = [FFResultNode new];
