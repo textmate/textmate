@@ -1,5 +1,4 @@
 #import "FFResultNode.h"
-#import "scan_path.h"
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/NSColor Additions.h>
 #import <document/OakDocument.h>
@@ -208,7 +207,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 {
 	FFResultNode* res = [[FFResultNode alloc] initWithMatch:aMatch];
 	res.children    = [NSMutableArray array];
-	res.displayPath = PathComponentString(to_s(base && to_s(base) != find::kSearchOpenFiles && aMatch.document.path ? aMatch.document.path : aMatch.document.displayName), to_s(base), [NSFont controlContentFontOfSize:0]);
+	res.displayPath = PathComponentString(to_s(base && aMatch.document.path ? aMatch.document.path : aMatch.document.displayName), to_s(base), [NSFont controlContentFontOfSize:0]);
 	return res;
 }
 

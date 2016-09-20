@@ -5,7 +5,6 @@
 #import "FFDocumentSearch.h"
 #import "CommonAncestor.h"
 #import "Strings.h"
-#import "scan_path.h"
 #import <OakFoundation/OakFindProtocol.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/NSAlert Additions.h>
