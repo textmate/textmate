@@ -645,6 +645,8 @@ namespace
 		if(i != tabIndex && (!_documents[i]->is_modified() || _documents[i]->path() != NULL_STR) && ![self isDocumentSticky:_documents[i]])
 			[otherTabs addIndex:i];
 	}
+
+	NSLog(@"[%@ performCloseOtherTabs:%@] except %ld, %@", [self class], [sender class], tabIndex, otherTabs);
 	[self closeTabsAtIndexes:otherTabs askToSaveChanges:YES createDocumentIfEmpty:YES];
 }
 
