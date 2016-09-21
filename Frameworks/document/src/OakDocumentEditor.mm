@@ -12,6 +12,7 @@ static int32_t const NSWrapColumnWindowWidth = 0;
 
 @interface OakDocumentEditor ()
 {
+	ng::callback_t* _buffer_callback;
 	NSInteger _changeGroupLevel;
 	std::unique_ptr<ng::editor_t> _editor;
 	std::unique_ptr<ng::layout_t> _layout;
@@ -68,6 +69,22 @@ static int32_t const NSWrapColumnWindowWidth = 0;
 
 		[_document registerDocumentEditor:self];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentContentDidChange:) name:OakDocumentContentDidChangeNotification object:_document];
+
+		struct callback_t : ng::callback_t
+		{
+			callback_t (OakDocumentEditor* self) : _self(self) { }
+
+			void did_replace (size_t from, size_t to, char const* buf, size_t len)
+			{
+				[_self didChangeBuffer];
+			}
+
+		private:
+			__weak OakDocumentEditor* _self;
+		};
+
+		_buffer_callback = new callback_t(self);
+		self.buffer.add_callback(_buffer_callback);
 	}
 	return self;
 }
@@ -79,10 +96,17 @@ static int32_t const NSWrapColumnWindowWidth = 0;
 
 	[[NSNotificationCenter defaultCenter] removeObserver:self name:OakDocumentContentDidChangeNotification object:_document];
 	[self documentWillSave:_document];
+	self.buffer.remove_callback(_buffer_callback);
 	_layout.reset();
 	_editor.reset();
 	[_document close];
 	[_document unregisterDocumentEditor:self];
+}
+
+- (void)didChangeBuffer
+{
+	if(_changeGroupLevel == 0)
+		_editor->sanitize_selection();
 }
 
 - (ng::buffer_t&)buffer { return [_document buffer]; }
