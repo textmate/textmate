@@ -644,7 +644,8 @@ static NSButton* OakCreateStopSearchButton ()
 	BOOL isFolderSearch = _searchTarget != FFSearchTargetDocument && _searchTarget != FFSearchTargetSelection;
 	self.showsResultsOutlineView = isFolderSearch;
 
-	if(_searchTarget == FFSearchTargetOther)
+	BOOL isDirectory = NO;
+	if(_searchTarget == FFSearchTargetOther && [[NSFileManager defaultManager] fileExistsAtPath:self.otherFolder isDirectory:&isDirectory] && isDirectory)
 		[self.recentFolders addObject:self.otherFolder];
 
 	[self updateSearchInPopUpMenu];
