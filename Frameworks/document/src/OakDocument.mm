@@ -1315,7 +1315,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 		std::map<std::string, std::string> captures;
 	};
 
-	__block find::find_t f(to_s(searchString), options | (self.isLoaded ? find::none : find::filesize_limit));
+	__block find::find_t f(to_s(searchString), options | (self.isLoaded == NO && (options & find::regular_expression) ? find::filesize_limit : find::none));
 	__block std::vector<range_match_t> ranges;
 	__block boost::crc_32_type crc32;
 	__block size_t total = 0;
