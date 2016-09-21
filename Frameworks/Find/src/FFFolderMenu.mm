@@ -13,6 +13,9 @@ static NSMutableArray* FoldersAtPath (NSString* folder)
 {
 	ASSERT(folder && [folder length] > 0);
 	NSMutableArray* res = [NSMutableArray array];
+	BOOL isDirectory = NO;
+	if(![[NSFileManager defaultManager] fileExistsAtPath:folder isDirectory:&isDirectory] || isDirectory == NO)
+		return res;
 
 	std::string const startPath = to_s(folder);
 	for(auto entry : path::entries(startPath, "*"))
