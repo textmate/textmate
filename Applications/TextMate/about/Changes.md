@@ -2,6 +2,13 @@ Title: Release Notes
 
 # Changes
 
+## 2016-09-21 (v2.0-beta.12.13)
+
+* The search dialog now has a _“File Browser Items”_ in its pop-up. This refers to the selected items in the file browser, which can be files and folders (everything selected will be searched). If there is no selection, it will use the file browser’s location.
+* Speaking of file browser, searching _“Open Files”_ now also work after session restore (where previously non-loaded tabs would be skipped).
+* New `callback.document.did-change-scm-status` which is used by the SCM Gutter command to trigger after a commit/revert.
+* See [all changes since v2.0-beta.12.11](https://github.com/textmate/textmate/compare/v2.0-beta.12.11...v2.0-beta.12.13)
+
 ## 2016-09-09 (v2.0-beta.12.11)
 
 * Minor tweaks and fixes incl. two recently introduced crash bugs.
