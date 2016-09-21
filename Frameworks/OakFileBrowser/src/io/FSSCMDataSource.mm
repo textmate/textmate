@@ -94,8 +94,8 @@ static NSArray* convert (std::map<std::string, scm::status::type> const& pathsMa
 	{
 		std::string root = scm::root_for_path([aPath fileSystemRepresentation]);
 		if(root != NULL_STR)
-			url = [NSURL URLWithString:[NSString stringWithCxxString:"scm://localhost" + encode::url_part(root, "/") + "/"]];
-		else	url = [NSURL URLWithString:[@"scm://locahost" stringByAppendingString:[aPath stringByAppendingString:@"?status=unversioned"]]];
+				url = [NSURL URLWithString:[NSString stringWithCxxString:"scm://localhost" + encode::url_part(root, "/") + "/"]];
+		else	url = [NSURL URLWithString:[@"scm://locahost" stringByAppendingString:[[aPath stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding] stringByAppendingString:@"?status=unversioned"]]];
 	}
 	else
 	{
