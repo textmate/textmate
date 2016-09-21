@@ -204,7 +204,13 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 				}
 				else
 				{
-					NSArray* paths = searchTarget == FFSearchTargetFileBrowserItems ? self.fileBrowserItems : @[ self.projectFolder ];
+					NSArray* paths;
+					if(searchTarget == FFSearchTargetProject)
+						paths = @[ self.projectFolder ];
+					else if(searchTarget == FFSearchTargetFileBrowserItems)
+						paths = self.fileBrowserItems;
+					else // searchTarget == FFSearchTargetOther
+						paths = @[ _windowController.otherFolder ];
 
 					FFDocumentSearch* folderSearch = [FFDocumentSearch new];
 					folderSearch.searchBinaryFiles   = YES;
