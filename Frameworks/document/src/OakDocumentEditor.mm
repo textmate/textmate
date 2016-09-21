@@ -12,6 +12,7 @@ static int32_t const NSWrapColumnWindowWidth = 0;
 
 @interface OakDocumentEditor ()
 {
+	NSInteger _changeGroupLevel;
 	std::unique_ptr<ng::editor_t> _editor;
 	std::unique_ptr<ng::layout_t> _layout;
 }
@@ -73,6 +74,9 @@ static int32_t const NSWrapColumnWindowWidth = 0;
 
 - (void)dealloc
 {
+	if(_changeGroupLevel != 0)
+		[_document endUndoGrouping];
+
 	[[NSNotificationCenter defaultCenter] removeObserver:self name:OakDocumentContentDidChangeNotification object:_document];
 	[self documentWillSave:_document];
 	_layout.reset();
@@ -84,6 +88,20 @@ static int32_t const NSWrapColumnWindowWidth = 0;
 - (ng::buffer_t&)buffer { return [_document buffer]; }
 - (ng::editor_t&)editor { return *_editor; }
 - (ng::layout_t&)layout { return *_layout; }
+
+- (BOOL)beginChangeGrouping
+{
+	if(++_changeGroupLevel == 1)
+		[_document beginUndoGrouping];
+	return _changeGroupLevel == 1;
+}
+
+- (BOOL)endChangeGrouping
+{
+	if(--_changeGroupLevel == 0)
+		[_document endUndoGrouping];
+	return _changeGroupLevel == 0;
+}
 
 - (void)setFont:(NSFont*)newFont
 {

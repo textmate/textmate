@@ -254,11 +254,8 @@ struct document_view_t : ng::buffer_api_t
 		invisibles_map = settings.get(kSettingsInvisiblesMapKey, "");
 	}
 
-	~document_view_t ()
-	{
-		if(nest_count != 0)
-			end_undo_group();
-	}
+	bool begin_change_grouping ()                 { return [_document_editor beginChangeGrouping]; }
+	bool end_change_grouping ()                   { return [_document_editor endChangeGrouping]; }
 
 	NSFont* font () const                         { return _document_editor.font; }
 	void set_font (NSFont* newFont)               { _document_editor.font = newFont; }
@@ -331,7 +328,6 @@ struct document_view_t : ng::buffer_api_t
 		[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentMarksDidChangeNotification object:_document];
 	}
 
-	size_t nest_count = 0;
 	std::string invisibles_map;
 
 	// ============
@@ -387,8 +383,6 @@ struct document_view_t : ng::buffer_api_t
 
 	bool can_undo () const { return _document.canUndo; }
 	bool can_redo () const { return _document.canRedo; }
-	void begin_undo_group () { [_document beginUndoGrouping]; }
-	void end_undo_group () { [_document endUndoGrouping]; }
 	void undo () { [_document undo]; }
 	void redo () { [_document redo]; }
 
@@ -595,11 +589,10 @@ struct refresh_helper_t
 {
 	refresh_helper_t (OakTextView* self, std::shared_ptr<document_view_t> const& documentView) : _self(self), _document_view(documentView)
 	{
-		if(++documentView->nest_count == 1)
+		if(documentView->begin_change_grouping())
 		{
 			_revision  = documentView->revision();
 			_selection = documentView->ranges();
-			documentView->begin_undo_group();
 			documentView->begin_refresh_cycle(merge(_selection, [_self markedRanges]), [_self liveSearchRanges]);
 		}
 	}
@@ -608,9 +601,8 @@ struct refresh_helper_t
 	{
 		if(auto documentView = _document_view.lock())
 		{
-			if(--documentView->nest_count == 0)
+			if(documentView->end_change_grouping())
 			{
-				documentView->end_undo_group();
 				if(_revision == documentView->revision())
 				{
 					for(auto const& range : ng::highlight_ranges_for_movement(*documentView, _selection, documentView->ranges()))
