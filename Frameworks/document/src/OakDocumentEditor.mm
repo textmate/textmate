@@ -68,7 +68,6 @@ static int32_t const NSWrapColumnWindowWidth = 0;
 			_layout->set_draw_indent_guides(true);
 
 		[_document registerDocumentEditor:self];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentContentDidChange:) name:OakDocumentContentDidChangeNotification object:_document];
 
 		struct callback_t : ng::callback_t
 		{
@@ -94,7 +93,6 @@ static int32_t const NSWrapColumnWindowWidth = 0;
 	if(_changeGroupLevel != 0)
 		[_document endUndoGrouping];
 
-	[[NSNotificationCenter defaultCenter] removeObserver:self name:OakDocumentContentDidChangeNotification object:_document];
 	[self documentWillSave:_document];
 	self.buffer.remove_callback(_buffer_callback);
 	_layout.reset();
@@ -166,11 +164,6 @@ static int32_t const NSWrapColumnWindowWidth = 0;
 	}
 	aDocument.selection = to_ns(ranges);
 	aDocument.folded = to_ns(_layout->folded_as_string());
-}
-
-- (void)documentContentDidChange:(NSNotification*)aNotification
-{
-	_editor->sanitize_selection();
 }
 
 - (void)performReplacements:(std::multimap<std::pair<size_t, size_t>, std::string> const&)someReplacements
