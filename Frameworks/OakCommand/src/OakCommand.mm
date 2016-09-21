@@ -692,11 +692,20 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 		int len;
 		char buf[8192];
 		__block BOOL keepRunning = YES;
-		while(keepRunning && (len = read(fileHandle.fileDescriptor, buf, sizeof(buf))) > 0)
-		{
-			NSData* data = [NSData dataWithBytes:buf length:len];
+		@try {
+			while(keepRunning && (len = read(fileHandle.fileDescriptor, buf, sizeof(buf))) > 0)
+			{
+				NSData* data = [NSData dataWithBytes:buf length:len];
+				dispatch_sync(dispatch_get_main_queue(), ^{
+					if(keepRunning = !_stop)
+						[self.client URLProtocol:self didLoadData:data];
+				});
+			}
+		}
+		@catch(NSException* e) {
+			NSData* data = [[NSString stringWithFormat:@"<p>Exception thrown while reading data: %@.</p>", e.reason] dataUsingEncoding:NSUTF8StringEncoding];
 			dispatch_sync(dispatch_get_main_queue(), ^{
-				if(keepRunning = !_stop)
+				if(!_stop)
 					[self.client URLProtocol:self didLoadData:data];
 			});
 		}
