@@ -609,7 +609,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 - (void)saveCommitMessage:(NSString*)aCommitMessage
 {
 	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
-	NSMutableArray* messages = [[defaults arrayForKey:kOakCommitWindowCommitMessages] mutableCopy];
+	NSMutableArray* messages = [[defaults stringArrayForKey:kOakCommitWindowCommitMessages] mutableCopy];
 	if(messages)
 	{
 		NSUInteger currentIndex = [messages indexOfObject:aCommitMessage];
@@ -635,7 +635,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 	[menu removeAllItems];
 	[menu addItemWithTitle:@"Previous Commit Messages" action:NULL keyEquivalent:@""];
 
-	if(NSArray* commitMessages = [[NSUserDefaults standardUserDefaults] arrayForKey:kOakCommitWindowCommitMessages])
+	if(NSArray* commitMessages = [[NSUserDefaults standardUserDefaults] stringArrayForKey:kOakCommitWindowCommitMessages])
 	{
 		[commitMessages enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(NSString* message, NSUInteger idx, BOOL* stop){
 			NSString* title = message;

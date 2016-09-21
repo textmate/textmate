@@ -107,7 +107,7 @@ static std::string create_gzipped_file (std::string const& path)
 
 		// has sent: reports we already posted
 		std::set<std::string> hasSent;
-		for(NSString* path in [[NSUserDefaults standardUserDefaults] arrayForKey:kUserDefaultsCrashReportsSent])
+		for(NSString* path in [[NSUserDefaults standardUserDefaults] stringArrayForKey:kUserDefaultsCrashReportsSent])
 			hasSent.insert([path fileSystemRepresentation]);
 
 		// can send: all reports from the last week

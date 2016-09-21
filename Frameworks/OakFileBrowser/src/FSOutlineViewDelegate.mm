@@ -427,7 +427,7 @@ struct expansion_state_t
 {
 	if((self = [super init]))
 	{
-		_expandedURLs = ConvertStringArrayToURLSet([[NSUserDefaults standardUserDefaults] arrayForKey:@"ExpandedURLs"]);
+		_expandedURLs = ConvertStringArrayToURLSet([[NSUserDefaults standardUserDefaults] stringArrayForKey:@"ExpandedURLs"]);
 		_selectedURLs = [NSMutableSet new];
 
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:NSApp];
@@ -448,7 +448,7 @@ struct expansion_state_t
 	static BOOL mergeWithUserDefaults = NO;
 	[_expandedURLs intersectSet:VisibleURLs(_outlineView, _dataSource.rootItem)];
 	if(mergeWithUserDefaults)
-		[_expandedURLs unionSet:ConvertStringArrayToURLSet([[NSUserDefaults standardUserDefaults] arrayForKey:@"ExpandedURLs"])];
+		[_expandedURLs unionSet:ConvertStringArrayToURLSet([[NSUserDefaults standardUserDefaults] stringArrayForKey:@"ExpandedURLs"])];
 	[[NSUserDefaults standardUserDefaults] setObject:ConvertURLSetToStringArray(_expandedURLs) forKey:@"ExpandedURLs"];
 	mergeWithUserDefaults = YES;
 }

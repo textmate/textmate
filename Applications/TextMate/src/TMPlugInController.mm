@@ -63,7 +63,7 @@ static id CreateInstanceOfPlugInClass (Class cl, TMPlugInController* controller)
 		NSString* identifier = [bundle objectForInfoDictionaryKey:@"CFBundleIdentifier"];
 		NSString* name = [bundle objectForInfoDictionaryKey:@"CFBundleName"];
 
-		NSArray* blacklist = [[NSUserDefaults standardUserDefaults] arrayForKey:kUserDefaultsDisabledPlugInsKey];
+		NSArray* blacklist = [[NSUserDefaults standardUserDefaults] stringArrayForKey:kUserDefaultsDisabledPlugInsKey];
 		if([blacklist containsObject:identifier])
 			return;
 
@@ -159,7 +159,7 @@ static id CreateInstanceOfPlugInClass (Class cl, TMPlugInController* controller)
 		return;
 	}
 
-	NSArray* blacklist = [[NSUserDefaults standardUserDefaults] arrayForKey:kUserDefaultsDisabledPlugInsKey];
+	NSArray* blacklist = [[NSUserDefaults standardUserDefaults] stringArrayForKey:kUserDefaultsDisabledPlugInsKey];
 	if([blacklist containsObject:[plugInBundle objectForInfoDictionaryKey:@"CFBundleIdentifier"]])
 	{
 		NSRunAlertPanel(@"Cannot Install Plug-in", @"The %@ plug-in should not be used with this version of TextMate because of stability problems.", @"Continue", nil, nil, plugInName);

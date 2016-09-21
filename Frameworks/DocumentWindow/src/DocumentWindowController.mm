@@ -1077,7 +1077,7 @@ namespace
 			if(!document.fileType && showBundleSuggestions)
 			{
 				NSArray<BundleGrammar*>* grammars = document.proposedGrammars;
-				if(NSArray* excludedGrammars = [[NSUserDefaults standardUserDefaults] arrayForKey:kUserDefaultsGrammarsToNeverSuggestKey])
+				if(NSArray* excludedGrammars = [[NSUserDefaults standardUserDefaults] stringArrayForKey:kUserDefaultsGrammarsToNeverSuggestKey])
 					grammars = [grammars filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"!(identifier.UUIDString IN %@)", excludedGrammars]];
 				if(_bundlesAlreadySuggested)
 					grammars = [grammars filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"!(bundle IN %@)", _bundlesAlreadySuggested]];
@@ -1106,7 +1106,7 @@ namespace
 						}
 						else if(response == SelectGrammarResponseNever)
 						{
-							NSArray* excludedGrammars = [[NSUserDefaults standardUserDefaults] arrayForKey:kUserDefaultsGrammarsToNeverSuggestKey] ?: @[ ];
+							NSArray* excludedGrammars = [[NSUserDefaults standardUserDefaults] stringArrayForKey:kUserDefaultsGrammarsToNeverSuggestKey] ?: @[ ];
 							[[NSUserDefaults standardUserDefaults] setObject:[excludedGrammars arrayByAddingObject:grammar.identifier.UUIDString] forKey:kUserDefaultsGrammarsToNeverSuggestKey];
 						}
 

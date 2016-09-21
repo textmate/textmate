@@ -113,7 +113,7 @@ namespace // PopulateMenu{Flat,Hierarchical}
 	NSArray* encodings = @[ @"WINDOWS-1252", @"MACROMAN", @"ISO-8859-1", @"UTF-8", @"UTF-16LE//BOM", @"UTF-16BE//BOM", @"SHIFT_JIS", @"GB18030" ];
 	[[NSUserDefaults standardUserDefaults] registerDefaults:@{ kUserDefaultsAvailableEncodingsKey : encodings }];
 
-	NSArray* legacy = [[NSUserDefaults standardUserDefaults] arrayForKey:kUserDefaultsAvailableEncodingsKey];
+	NSArray* legacy = [[NSUserDefaults standardUserDefaults] stringArrayForKey:kUserDefaultsAvailableEncodingsKey];
 	if([legacy containsObject:@"UTF-16BE"] && ![legacy containsObject:@"UTF-16BE//BOM"])
 	{
 		NSMutableArray* updatedList = [NSMutableArray array];
@@ -129,7 +129,7 @@ namespace // PopulateMenu{Flat,Hierarchical}
 - (void)updateAvailableEncodings
 {
 	NSMutableArray* encodings = [NSMutableArray array];
-	for(NSString* str in [[NSUserDefaults standardUserDefaults] arrayForKey:kUserDefaultsAvailableEncodingsKey])
+	for(NSString* str in [[NSUserDefaults standardUserDefaults] stringArrayForKey:kUserDefaultsAvailableEncodingsKey])
 		[encodings addObject:str];
 
 	if(self.encoding && ![encodings containsObject:self.encoding])
@@ -280,7 +280,7 @@ namespace // PopulateMenu{Flat,Hierarchical}
 	if(self = [super initWithWindowNibName:@"CustomizeEncodings"])
 	{
 		std::set<std::string> enabledEncodings;
-		for(NSString* encoding in [[NSUserDefaults standardUserDefaults] arrayForKey:kUserDefaultsAvailableEncodingsKey])
+		for(NSString* encoding in [[NSUserDefaults standardUserDefaults] stringArrayForKey:kUserDefaultsAvailableEncodingsKey])
 			enabledEncodings.insert(to_s(encoding));
 
 		encodings = [NSMutableArray new];
