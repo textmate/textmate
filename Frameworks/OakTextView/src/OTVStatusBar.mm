@@ -58,11 +58,6 @@ static NSMenuItem* OakCreateIndentMenuItem (NSString* title, SEL action, id targ
 @end
 
 @implementation OTVStatusBar
-+ (BOOL)requiresConstraintBasedLayout
-{
-	return YES;
-}
-
 - (id)initWithFrame:(NSRect)aRect
 {
 	if(self = [super initWithFrame:aRect])

@@ -111,11 +111,6 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	return self;
 }
 
-+ (BOOL)requiresConstraintBasedLayout
-{
-	return YES;
-}
-
 - (void)updateConstraints
 {
 	[self removeConstraints:[self constraints]];
