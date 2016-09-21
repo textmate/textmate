@@ -635,7 +635,7 @@ namespace
 	[self closeTabsAtIndexes:allTabs askToSaveChanges:YES createDocumentIfEmpty:YES];
 }
 
-- (IBAction)performCloseOtherTabs:(id)sender
+- (IBAction)performCloseOtherTabsXYZ:(id)sender
 {
 	NSUInteger tabIndex = [sender isKindOfClass:[OakTabBarView class]] ? [sender tag] : _selectedTabIndex;
 
@@ -2443,7 +2443,7 @@ namespace
 		[menuItem setTitle:self.window.firstResponder == self.textView ? @"Move Focus to File Browser" : @"Move Focus to Document"];
 	else if([menuItem action] == @selector(takeProjectPathFrom:))
 		[menuItem setState:[self.defaultProjectPath isEqualToString:[menuItem representedObject]] ? NSOnState : NSOffState];
-	else if([menuItem action] == @selector(performCloseOtherTabs:))
+	else if([menuItem action] == @selector(performCloseOtherTabsXYZ:))
 		active = _documents.size() > 1;
 	else if([menuItem action] == @selector(performCloseTabsToTheRight:))
 		active = _selectedTabIndex + 1 < _documents.size();

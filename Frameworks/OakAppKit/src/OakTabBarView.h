@@ -39,7 +39,7 @@ PUBLIC @interface OakTabBarView : OakBackgroundFillView
 - (BOOL)performDropOfTabItem:(OakTabItem*)tabItem fromTabBar:(OakTabBarView*)sourceTabBar index:(NSUInteger)dragIndex toTabBar:(OakTabBarView*)destTabBar index:(NSUInteger)droppedIndex operation:(NSDragOperation)operation;
 
 - (void)performCloseTab:(OakTabBarView*)sender;
-- (void)performCloseOtherTabs:(OakTabBarView*)sender;
+- (void)performCloseOtherTabsXYZ:(OakTabBarView*)sender;
 @end
 
 @protocol OakTabBarViewDataSource <NSObject>

@@ -822,8 +822,8 @@ static NSString* const OakTabItemPasteboardType = @"com.macromates.TextMate.tabI
 			_didCloseTabIndex = 0;
 		}
 
-		if(closeOther && [_delegate respondsToSelector:@selector(performCloseOtherTabs:)])
-			[_delegate performCloseOtherTabs:self];
+		if(closeOther && [_delegate respondsToSelector:@selector(performCloseOtherTabsXYZ:)])
+			[_delegate performCloseOtherTabsXYZ:self];
 		else if([_delegate respondsToSelector:@selector(performCloseTab:)])
 			[_delegate performCloseTab:self];
 	}

@@ -156,7 +156,7 @@
                             <menuItem title="Close Other Tabs" keyEquivalent="w" id="818">
                                 <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
                                 <connections>
-                                    <action selector="performCloseOtherTabs:" target="-1" id="819"/>
+                                    <action selector="performCloseOtherTabsXYZ:" target="-1" id="819"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Close Tabs to the Right" id="853">
