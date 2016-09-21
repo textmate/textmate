@@ -1676,7 +1676,7 @@ namespace
 	ASSERT(!newSelectedDocument || newSelectedDocument->is_loaded());
 	if(_selectedDocument == newSelectedDocument)
 	{
-		self.documentView.document = _selectedDocument->document();
+		self.documentView.document = _selectedDocument ? _selectedDocument->document() : nil;
 		return;
 	}
 
