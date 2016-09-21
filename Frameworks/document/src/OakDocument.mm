@@ -682,9 +682,12 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	[self open];
 	if(self.isLoaded)
 	{
-		if(!_loadCompletionHandlers)
-				block(OakDocumentIOResultSuccess, nil, oak::uuid_t());
-		else	_loadCompletionHandlers = [_loadCompletionHandlers arrayByAddingObject:block];
+		block(OakDocumentIOResultSuccess, nil, oak::uuid_t());
+		return;
+	}
+	else if(self.isLoading)
+	{
+		_loadCompletionHandlers = [_loadCompletionHandlers arrayByAddingObject:block];
 		return;
 	}
 
