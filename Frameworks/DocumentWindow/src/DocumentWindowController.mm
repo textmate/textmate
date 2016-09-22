@@ -4,6 +4,7 @@
 #import "OakRunCommandWindowController.h"
 #import <document/collection.h>
 #import <document/OakDocument.h>
+#import <document/OakDocumentController.h>
 #import <OakAppKit/NSAlert Additions.h>
 #import <OakAppKit/NSMenuItem Additions.h>
 #import <OakAppKit/OakAppKit.h>
@@ -2969,5 +2970,25 @@ static NSUInteger DisableSessionSavingCount = 0;
 	} proxy;
 
 	document::set_ui_proxy(&proxy);
+}
+@end
+
+@implementation OakDocumentController (OakDocumentWindowControllerCategory)
+- (void)showDocument:(OakDocument*)aDocument andSelect:(text::range_t const&)selection inProject:(NSUUID*)identifier bringToFront:(BOOL)bringToFront
+{
+	document::show(std::make_shared<document::document_t>(aDocument), identifier ? oak::uuid_t(to_s(identifier.UUIDString)) : document::kCollectionAny, selection, bringToFront);
+}
+
+- (void)showDocuments:(NSArray<OakDocument*>*)someDocument
+{
+	std::vector<document::document_ptr> documents;
+	for(OakDocument* document in someDocument)
+		documents.push_back(std::make_shared<document::document_t>(document));
+	document::show(documents);
+}
+
+- (void)showFileBrowserAtPath:(NSString*)aPath
+{
+	document::show_browser(to_s(aPath));
 }
 @end
