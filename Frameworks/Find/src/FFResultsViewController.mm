@@ -31,6 +31,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 	BOOL           _longPressedCommandModifier;
 }
 @property (nonatomic) BOOL showKeyEquivalent;
+@property (nonatomic) FFResultNode* selectedResult;
 @end
 
 // ================================
@@ -480,11 +481,13 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 // = Helper Methods =
 // ==================
 
-- (FFResultNode*)selectedResult
+- (void)setSelectedResult:(FFResultNode*)newSelection
 {
-	if([_outlineView numberOfSelectedRows] == 1)
-		return [_outlineView itemAtRow:[[_outlineView selectedRowIndexes] firstIndex]];
-	return nil;
+	if(_selectedResult == newSelection)
+		return;
+	_selectedResult = newSelection;
+	if(_selectedResult && _selectResultAction)
+		[NSApp sendAction:_selectResultAction to:_target from:_selectedResult];
 }
 
 - (BOOL)isCollapsed
@@ -539,8 +542,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 
 - (void)didSingleClick:(id)sender
 {
-	if(_selectResultAction && self.selectedResult)
-		[NSApp sendAction:_selectResultAction to:_target from:self.selectedResult];
+	self.selectedResult = _outlineView.numberOfSelectedRows == 1 ? [_outlineView itemAtRow:_outlineView.selectedRowIndexes.firstIndex] : nil;
 }
 
 - (void)didDoubleClick:(id)sender
@@ -551,8 +553,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 
 - (void)outlineViewSelectionDidChange:(NSNotification*)aNotification
 {
-	if(_selectResultAction && [[NSApp currentEvent] type] != NSLeftMouseUp && self.selectedResult)
-		[NSApp sendAction:_selectResultAction to:_target from:self.selectedResult];
+	self.selectedResult = _outlineView.numberOfSelectedRows == 1 ? [_outlineView itemAtRow:_outlineView.selectedRowIndexes.firstIndex] : nil;
 }
 
 - (BOOL)outlineView:(NSOutlineView*)outlineView shouldSelectItem:(FFResultNode*)item
