@@ -29,7 +29,6 @@ PUBLIC @interface DocumentWindowController : NSObject
 + (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication*)sender;
 
 - (void)showWindow:(id)sender;
-- (void)openAndSelectDocument:(document::document_ptr const&)aDocument;
 - (void)close;
 
 - (IBAction)newFolder:(id)sender;
