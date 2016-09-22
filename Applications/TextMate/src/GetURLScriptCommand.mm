@@ -1,6 +1,3 @@
-#import <document/collection.h>
-#import <io/path.h>
-
 @interface GetURLScriptCommand : NSScriptCommand
 @end
 
