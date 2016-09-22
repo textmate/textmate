@@ -34,12 +34,12 @@
 
 OAK_DEBUG_VAR(AppController);
 
-void OakOpenDocuments (NSArray* paths)
+void OakOpenDocuments (NSArray* paths, BOOL treatFilePackageAsFolder)
 {
 	std::vector<document::document_ptr> documents;
 	NSMutableArray* itemsToInstall = [NSMutableArray array];
 	NSMutableArray* plugInsToInstall = [NSMutableArray array];
-	BOOL enableInstallHandler = ([NSEvent modifierFlags] & NSAlternateKeyMask) == 0;
+	BOOL enableInstallHandler = treatFilePackageAsFolder == NO && ([NSEvent modifierFlags] & NSAlternateKeyMask) == 0;
 	for(NSString* path in paths)
 	{
 		static auto const tmItemExtensions = new std::set<std::string>{ "tmbundle", "tmcommand", "tmdragcommand", "tmlanguage", "tmmacro", "tmpreferences", "tmsnippet", "tmtheme" };
@@ -417,7 +417,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 	NSMutableArray* paths = [NSMutableArray array];
 	for(id item in [sender selectedItems])
 		[paths addObject:[item objectForKey:@"path"]];
-	OakOpenDocuments(paths);
+	OakOpenDocuments(paths, YES);
 }
 
 // =======================

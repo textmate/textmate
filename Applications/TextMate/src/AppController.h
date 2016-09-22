@@ -41,4 +41,4 @@
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication*)sender;
 @end
 
-void OakOpenDocuments (NSArray* paths);
+void OakOpenDocuments (NSArray* paths, BOOL treatFilePackageAsFolder = NO);
