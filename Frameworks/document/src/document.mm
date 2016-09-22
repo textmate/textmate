@@ -177,7 +177,6 @@ namespace document
 	std::string document_t::display_name () const      { return to_s(_document.displayName); }
 	encoding::type document_t::disk_encoding () const  { return encoding::type(to_s(_document.diskNewlines), to_s(_document.diskEncoding)); }
 	std::string document_t::file_type () const         { return to_s(_document.fileType); }
-	ssize_t document_t::revision () const              { return _document.revision; }
 	std::string document_t::content () const           { return to_s(_document.content); }
 	bool document_t::is_loaded () const                { return _document.isLoaded; }
 	bool document_t::is_modified () const              { return _document.isDocumentEdited; }
@@ -193,9 +192,7 @@ namespace document
 	void document_t::set_virtual_path (std::string const& virtualPath)       { _document.virtualPath = to_ns(virtualPath); }
 	void document_t::set_custom_name (std::string const& newCustomName)      { _document.customName = to_ns(newCustomName); }
 	void document_t::set_file_type (std::string const& newFileType)          { _document.fileType = to_ns(newFileType); }
-	void document_t::set_revision (ssize_t rev)                              { _document.revision = rev; }
 	void document_t::set_content (std::string const& str)                    { _document.content = to_ns(str); }
-	void document_t::set_disk_revision (ssize_t rev)                         { _document.savedRevision = rev; }
 	void document_t::set_disk_encoding (encoding::type const& encoding)      { _document.diskNewlines = to_ns(encoding.newlines()); _document.diskEncoding = to_ns(encoding.charset()); }
 	void document_t::set_indent (text::indent_t const& indent)               { _document.tabSize = indent.tab_size(); _document.softTabs = indent.soft_tabs(); }
 	void document_t::set_recent_tracking (bool flag)                         { _document.recentTrackingDisabled = !flag; }

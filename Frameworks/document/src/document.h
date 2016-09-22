@@ -61,7 +61,6 @@ namespace document
 		std::string display_name () const;
 		encoding::type disk_encoding () const;
 		std::string file_type () const;
-		ssize_t revision () const;
 		std::string content () const;
 		bool is_loaded () const;
 		bool is_modified () const;
@@ -77,9 +76,7 @@ namespace document
 		void set_virtual_path (std::string const& virtualPath);
 		void set_custom_name (std::string const& newCustomName);
 		void set_file_type (std::string const& newFileType);
-		void set_revision (ssize_t rev);
 		void set_content (std::string const& str);
-		void set_disk_revision (ssize_t rev);
 		void set_disk_encoding (encoding::type const& encoding);
 		void set_indent (text::indent_t const& indent);
 		void set_recent_tracking (bool flag);

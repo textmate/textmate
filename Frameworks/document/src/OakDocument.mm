@@ -192,6 +192,8 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 @property (nonatomic) NSUInteger openCount;
 @property (nonatomic, getter = isLoaded, readwrite) BOOL loaded;
 @property (nonatomic, getter = isBufferEmpty) BOOL bufferEmpty;
+@property (nonatomic) NSInteger revision;
+@property (nonatomic) NSInteger savedRevision;
 @property (nonatomic) NSInteger backupRevision;
 @property (nonatomic) BOOL observeFileSystem;
 @property (nonatomic) BOOL needsImportDocumentChanges;
@@ -205,10 +207,8 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 @property (nonatomic) NSArray<void(^)(OakDocumentIOResult, NSString*, oak::uuid_t const&)>* loadCompletionHandlers;
 
 // These are also exposed in ‘OakDocument Private.h’
-@property (nonatomic) NSInteger   revision;
-@property (nonatomic) NSInteger   savedRevision;
-@property (nonatomic) NSString*   backupPath;
-@property (nonatomic) NSString*   folded;
+@property (nonatomic) NSString* backupPath;
+@property (nonatomic) NSString* folded;
 @end
 
 @implementation OakDocument

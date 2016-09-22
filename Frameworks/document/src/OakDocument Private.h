@@ -5,8 +5,6 @@
 - (instancetype)initWithPath:(NSString*)aPath;
 
 @property (nonatomic) NSUInteger  untitledCount;
-@property (nonatomic) NSInteger   revision;
-@property (nonatomic) NSInteger   savedRevision;
 @property (nonatomic) NSString*   backupPath;
 @property (nonatomic) NSString*   folded;
 
