@@ -855,9 +855,8 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 		self.onDisk        = YES;
 		self.diskEncoding  = to_ns(encoding.charset());
 		self.diskNewlines  = to_ns(encoding.newlines());
-		self.savedRevision = _revision;
 
-		[self snapshot];
+		[self markDocumentSaved];
 		[self removeBackup];
 		[self updateRecentDocumentMenu];
 
@@ -1130,6 +1129,12 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 		_icon.exists    = self.isOnDisk;
 	}
 	return _icon;
+}
+
+- (void)markDocumentSaved
+{
+	self.savedRevision = _revision;
+	[self snapshot];
 }
 
 - (BOOL)isDocumentEdited                              { return _revision != _savedRevision && (_onDisk || !_bufferEmpty); }
@@ -1714,7 +1719,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 
 			if(yours == mine)
 			{
-				_self.savedRevision = _self.revision;
+				[_self markDocumentSaved];
 			}
 			else if(!_self.isDocumentEdited)
 			{
@@ -1723,8 +1728,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 				buffer.replace(0, buffer.size(), yours);
 				[_self endUndoGrouping];
 
-				_self.savedRevision = _self.revision;
-				[_self snapshot];
+				[_self markDocumentSaved];
 				[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentDidReloadNotification object:_self];
 				[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentContentDidChangeNotification object:_self];
 			}

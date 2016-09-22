@@ -68,6 +68,8 @@ PUBLIC @interface OakDocument : NSObject
 - (void)open; // This is currently implicit in loadModalForWindow:completionHandler:
 - (void)close;
 
+- (void)markDocumentSaved;
+
 @property (nonatomic) osx::authorization_t authorization;
 
 @property (nonatomic, getter = isOnDisk)                   BOOL onDisk;
