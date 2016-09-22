@@ -24,7 +24,6 @@
 #import <bundles/bundles.h>
 #import <cf/cf.h>
 #import <command/runner.h>
-#import <document/collection.h>
 #import <document/OakDocumentEditor.h>
 #import <document/OakDocumentController.h>
 #import <file/type.h>
@@ -2634,7 +2633,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 								doc.recentTrackingDisabled = YES;
 
 							NSString* range = [info objectForKey:(options & find::backwards) ? @"lastMatchRange" : @"firstMatchRange"];
-							document::show(document::find(to_s(doc.identifier.UUIDString)), document::kCollectionAny, to_s(range));
+							[OakDocumentController.sharedInstance showDocument:doc andSelect:to_s(range) inProject:nil bringToFront:YES];
 							return;
 						}
 					}

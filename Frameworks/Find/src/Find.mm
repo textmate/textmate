@@ -15,7 +15,6 @@
 #import <text/types.h>
 #import <text/utf8.h>
 #import <regexp/format_string.h>
-#import <document/collection.h>
 #import <document/OakDocument.h>
 #import <document/OakDocumentController.h>
 #import <settings/settings.h>
@@ -538,7 +537,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	OakDocument* doc = item.document;
 	if(!doc.isOpen)
 		doc.recentTrackingDisabled = YES;
-	document::show(document::find(to_s(doc.identifier.UUIDString)), self.projectIdentifier ? oak::uuid_t(to_s(self.projectIdentifier)) : document::kCollectionAny, item.match.range, false);
+	[OakDocumentController.sharedInstance showDocument:doc andSelect:item.match.range inProject:[[NSUUID alloc] initWithUUIDString:self.projectIdentifier] bringToFront:NO];
 }
 
 - (void)didDoubleClickResult:(FFResultNode*)item
