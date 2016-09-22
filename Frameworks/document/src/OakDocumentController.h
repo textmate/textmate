@@ -15,6 +15,7 @@ PUBLIC extern NSString* kSearchGlobsKey;
 PUBLIC @interface OakDocumentController : NSObject
 + (instancetype)sharedInstance;
 
+- (OakDocument*)untitledDocument;
 - (OakDocument*)documentWithPath:(NSString*)aPath;
 - (OakDocument*)findDocumentWithIdentifier:(NSUUID*)anUUID;
 - (NSArray<OakDocument*>*)documents;

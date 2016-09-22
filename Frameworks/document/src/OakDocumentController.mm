@@ -107,6 +107,11 @@ namespace
 	return sharedInstance;
 }
 
+- (OakDocument*)untitledDocument
+{
+	return [self documentWithPath:nil];
+}
+
 - (OakDocument*)documentWithPath:(NSString*)aPath
 {
 	std::lock_guard<std::mutex> lock(_lock);
