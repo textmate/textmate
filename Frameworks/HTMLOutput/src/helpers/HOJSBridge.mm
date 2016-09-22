@@ -2,7 +2,8 @@
 #import "add_to_buffer.h"
 #import <OakFoundation/NSString Additions.h>
 #import <oak/debug.h>
-#import <document/collection.h>
+#import <document/OakDocument.h>
+#import <document/OakDocumentController.h>
 #import <text/utf8.h>
 #import <ns/ns.h>
 #import <cf/run_loop.h>
@@ -101,7 +102,8 @@ OAK_DEBUG_VAR(HTMLOutput_JSBridge);
 		range = text::pos_t([options intValue]-1, 0);
 	else if([options isKindOfClass:[NSString class]])
 		range = to_s(options);
-	document::show(document::create(to_s(path)), document::kCollectionAny, range);
+	if(OakDocument* doc = [OakDocumentController.sharedInstance documentWithPath:path])
+		[OakDocumentController.sharedInstance showDocument:doc andSelect:range inProject:nil bringToFront:YES];
 }
 
 - (id)system:(NSString*)aCommand handler:(id)aHandler

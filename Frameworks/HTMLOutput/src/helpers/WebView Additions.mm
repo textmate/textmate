@@ -2,7 +2,8 @@
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/OakFindProtocol.h>
 #import <OakFoundation/NSString Additions.h>
-#import <document/collection.h>
+#import <document/OakDocument.h>
+#import <document/OakDocumentController.h>
 #import <ns/ns.h>
 
 @interface WebView (OakFindNextPrevious)
@@ -83,16 +84,17 @@
 	if(OakIsEmptyString(encoding))
 		encoding = @"utf-8";
 
-	std::string str;
+	NSString* str;
 	if([encoding isEqualToString:@"utf-8"])
-		str = to_s([[NSString alloc] initWithData:[dataSource data] encoding:NSUTF8StringEncoding]);
+		str = [[NSString alloc] initWithData:[dataSource data] encoding:NSUTF8StringEncoding];
 	else if([encoding isEqualToString:@"utf-16"] || [encoding isEqualToString:@"utf16"])
-		str = to_s([[NSString alloc] initWithData:[dataSource data] encoding:NSUnicodeStringEncoding]);
+		str = [[NSString alloc] initWithData:[dataSource data] encoding:NSUnicodeStringEncoding];
 	else if([encoding isEqualToString:@"macintosh"])
-		str = to_s([[NSString alloc] initWithData:[dataSource data] encoding:NSMacOSRomanStringEncoding]);
+		str = [[NSString alloc] initWithData:[dataSource data] encoding:NSMacOSRomanStringEncoding];
 	else
 		return (void)NSRunAlertPanel(@"Unknown Encoding", @"The encoding used for this HTML buffer (“%@”) is unsupported.\nPlease file a bug report stating the encoding name and how you got to it.", @"Continue", nil, nil, [dataSource textEncodingName]);
 
-	document::show(document::from_content(str, "text.html.basic"));
+	OakDocument* doc = [OakDocument documentWithString:str fileType:@"text.html.basic" customName:nil];
+	[OakDocumentController.sharedInstance showDocument:doc inProject:nil bringToFront:YES];
 }
 @end
