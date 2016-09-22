@@ -1,6 +1,6 @@
 #import "OakCommand.h"
-#import <document/collection.h> // document::show()
-#import <document/document.h>
+#import <document/OakDocument.h>
+#import <document/OakDocumentController.h>
 #import <oak/datatypes.h>
 #import <cf/cf.h>
 #import <ns/ns.h>
@@ -31,7 +31,7 @@ static NSString* const kOakFileHandleURLScheme = @"x-txmt-filehandle";
 - (void)discardHTMLOutputView:(OakHTMLOutputView*)htmlOutputView;
 
 - (void)showToolTip:(NSString*)aToolTip;
-- (void)showDocument:(document::document_ptr)aDocument;
+- (void)showDocument:(OakDocument*)aDocument;
 
 // Missing requirements and execution failure.
 - (BOOL)presentError:(NSError*)anError;
@@ -396,7 +396,7 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 		{
 			if(format == output_format::text)
 			{
-				[self showDocument:document::from_content(err + out)];
+				[self showDocument:[OakDocument documentWithString:to_ns(err + out) fileType:nil customName:nil]];
 			}
 			else if(format == output_format::html)
 			{
@@ -422,7 +422,7 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 			if(handler)
 				handler(out, placement, format, outputCaret, _environment);
 			else if(out.size() || err.size())
-				[self showDocument:document::from_content(err + out)];
+				[self showDocument:[OakDocument documentWithString:to_ns(err + out) fileType:nil customName:nil]];
 		}
 		else if(_htmlOutputView)
 		{
@@ -633,11 +633,11 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 	OakShowToolTip(aToolTip, [NSEvent mouseLocation]);
 }
 
-- (void)showDocument:(document::document_ptr)aDocument
+- (void)showDocument:(OakDocument*)aDocument
 {
 	if(id target = [self targetForAction:_cmd])
 		return [target showDocument:aDocument];
-	document::show(aDocument, document::kCollectionAny);
+	[OakDocumentController.sharedInstance showDocument:aDocument];
 }
 
 - (BOOL)presentError:(NSError*)anError

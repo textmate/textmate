@@ -1356,9 +1356,9 @@ namespace
 	}
 }
 
-- (void)showDocument:(document::document_ptr)aDocument
+- (void)showDocument:(OakDocument*)aDocument
 {
-	document::show(aDocument, to_s(self.identifier));
+	[OakDocumentController.sharedInstance showDocument:aDocument inProject:[[NSUUID alloc] initWithUUIDString:self.identifier] bringToFront:YES];
 }
 
 // ================
