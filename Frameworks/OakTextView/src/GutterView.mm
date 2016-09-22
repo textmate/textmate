@@ -6,6 +6,7 @@
 #import <text/types.h>
 #import <cf/cf.h>
 #import <cf/cgrect.h>
+#import <crash/info.h>
 #import <oak/debug.h>
 #import <oak/oak.h>
 
@@ -55,6 +56,12 @@ struct data_source_t
 {
 	if(self = [super initWithFrame:frame])
 	{
+		id fontName = [[NSUserDefaults standardUserDefaults] objectForKey:@"NSFixedPitchFont"];
+		id fontSize = [[NSUserDefaults standardUserDefaults] objectForKey:@"NSFixedPitchFontSize"];
+		crash_reporter_info_t info(text::format("User has font name override %s, size %s", BSTR(fontName), BSTR(fontSize)));
+		if(fontName) info << "font name: " << [[fontName description] UTF8String];
+		if(fontSize) info << "font size: " << [[fontSize description] UTF8String];
+
 		hiddenColumns       = [NSMutableSet new];
 		self.lineNumberFont = [NSFont userFixedPitchFontOfSize:12];
 		[self insertColumnWithIdentifier:GVLineNumbersColumnIdentifier atPosition:0 dataSource:nil delegate:nil];
