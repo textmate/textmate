@@ -22,6 +22,7 @@
 
 OAK_DEBUG_VAR(Find_Base);
 
+static NSString* const kUserDefaultsKeepSearchResultsOnDoubleClick = @"keepSearchResultsOnDoubleClick";
 static NSString* const kSearchMarkIdentifier = @"search";
 
 enum FindActionTag
@@ -542,6 +543,8 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 - (void)didDoubleClickResult:(FFResultNode*)item
 {
+	if([[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsKeepSearchResultsOnDoubleClick] boolValue])
+		return;
 	[self.windowController close];
 }
 
