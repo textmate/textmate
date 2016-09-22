@@ -1,6 +1,8 @@
 #include "ODBEditorSuite.h"
 #include <cf/cf.h>
-#include <document/collection.h>
+#include <document/OakDocument.h>
+#include <document/OakDocumentController.h>
+#include <ns/ns.h>
 #include <oak/debug.h>
 #include <text/hexdump.h>
 #include <oak/oak.h>
@@ -66,30 +68,30 @@ private:
 
 namespace odb // wrap in namespace to avoid clashing with other callbacks named the same
 {
-	struct save_close_callback_t : document::document_t::callback_t
+	struct save_close_callback_t
 	{
 		WATCH_LEAKS(save_close_callback_t);
 
-		save_close_callback_t (std::string const& path, std::string const& token, ae_record_ptr const& sender) : path(path), token(token), sender(sender)
+		save_close_callback_t (OakDocument* document, std::string path, std::string token, ae_record_ptr sender)
 		{
+			_save_observer = [[NSNotificationCenter defaultCenter] addObserverForName:OakDocumentDidSaveNotification object:document queue:nil usingBlock:^(NSNotification*){
+				send_event(kAEModifiedFile, path, token, sender);
+			}];
+
+			_close_observer = [[NSNotificationCenter defaultCenter] addObserverForName:OakDocumentWillCloseNotification object:document queue:nil usingBlock:^(NSNotification*){
+				send_event(kAEClosedFile, path, token, sender);
+				delete this;
+			}];
 		}
 
-		void handle_document_event (document::document_ptr document, event_t event)
+		~save_close_callback_t ()
 		{
-			if(event == did_change_load_status && !document->is_loaded())
-				send_event(kAEClosedFile);
-			else if(event == did_save)
-				send_event(kAEModifiedFile);
-
-			if(event == did_change_load_status && !document->is_loaded())
-			{
-				document->remove_callback(this);
-				delete this;
-			}
+			[[NSNotificationCenter defaultCenter] removeObserver:_save_observer];
+			[[NSNotificationCenter defaultCenter] removeObserver:_close_observer];
 		}
 
 	private:
-		void send_event (AEEventID eventId) const
+		static void send_event (AEEventID eventId, std::string const& path, std::string const& token, ae_record_ptr sender)
 		{
 			D(DBF_ODBEditorSuite, int c = htonl(eventId); bug("‘%.4s’\n", (char*)&c););
 
@@ -119,9 +121,8 @@ namespace odb // wrap in namespace to avoid clashing with other callbacks named 
 			}
 		}
 
-		std::string path;
-		std::string token;
-		ae_record_ptr sender;
+		id _save_observer;
+		id _close_observer;
 	};
 }
 
@@ -162,15 +163,16 @@ bool DidHandleODBEditorEvent (AppleEvent const* event)
 
 	if(sender || positions || displayNames)
 	{
-		std::vector<document::document_ptr> documents;
+		NSMutableArray<OakDocument*>* documents = [NSMutableArray array];
 		for(size_t i = 0; i < files->array_size(); ++i)
 		{
 			ae_record_ptr file = files->record_at_index(i, typeFSRef);
-			documents.push_back(document::create(file->path()));
-			documents.back()->set_recent_tracking(false);
+			OakDocument* doc = [OakDocumentController.sharedInstance documentWithPath:to_ns(file->path())];
+			[documents addObject:doc];
+			doc.recentTrackingDisabled = YES;
 
 			if(displayNames && i < displayNames->array_size())
-				documents.back()->set_custom_name(displayNames->record_at_index(i, typeUTF8Text)->data());
+				doc.customName = to_ns(displayNames->record_at_index(i, typeUTF8Text)->data());
 
 			if(positions && i < positions->array_size())
 			{
@@ -179,20 +181,20 @@ bool DidHandleODBEditorEvent (AppleEvent const* event)
 				{
 					PBX_SelectionRange& sel = *(PBX_SelectionRange*)&v[0];
 					if(sel.lineNum >= 0)
-						documents.back()->set_selection(text::pos_t(sel.lineNum, 0));
+						doc.selection = to_ns(text::pos_t(sel.lineNum, 0));
 				}
 			}
 
 			if(sender)
 			{
 				std::string token = (tokens && i < tokens->array_size()) ? tokens->record_at_index(i)->data() : NULL_STR;
-				documents.back()->add_callback(new odb::save_close_callback_t(file->path(), token, sender));
+				new odb::save_close_callback_t(doc, file->path(), token, sender);
 
 				D(DBF_ODBEditorSuite, int c = htonl(sender->type()); bug("server: ‘%.*s’ (‘%.4s’), token: ‘%s’\n", (int)sender->data().size(), sender->data().data(), (char*)&c, token != NULL_STR ? token.c_str() : "(none)"););
 			}
 		}
 
-		document::show(documents);
+		[OakDocumentController.sharedInstance showDocuments:documents];
 
 		return true;
 	}
