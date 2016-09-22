@@ -610,7 +610,7 @@ struct refresh_helper_t
 						NSRect imageRect;
 						NSImage* image = [_self imageForRanges:range imageRect:&imageRect];
 						imageRect = [[_self window] convertRectToScreen:[_self convertRect:imageRect toView:nil]];
-						OakShowPopOutAnimation(imageRect, image);
+						OakShowPopOutAnimation(_self, imageRect, image);
 					}
 				}
 
@@ -790,7 +790,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 		NSRect imageRect;
 		NSImage* image = [self imageForRanges:range imageRect:&imageRect];
 		imageRect = [[self window] convertRectToScreen:[self convertRect:imageRect toView:nil]];
-		OakShowPopOutAnimation(imageRect, image, firstRange);
+		OakShowPopOutAnimation(self, imageRect, image, firstRange);
 		firstRange = NO;
 	}
 }

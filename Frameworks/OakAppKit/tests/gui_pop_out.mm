@@ -18,7 +18,7 @@
 - (void)mouseDown:(NSEvent*)anEvent
 {
 	NSRect p = [[self window] convertRectToScreen:(NSRect){ [anEvent locationInWindow], NSMakeSize(48, 48) }];
-	OakShowPopOutAnimation(p, [NSImage imageNamed:NSImageNameComputer]);
+	OakShowPopOutAnimation(nil, p, [NSImage imageNamed:NSImageNameComputer]);
 }
 @end
 

@@ -28,7 +28,7 @@ static double const  kFadeFinishTime = 0.70;
 - (void)startAnimation:(id)sender;
 @end
 
-void OakShowPopOutAnimation (NSRect popOutRect, NSImage* anImage, BOOL hidePrevious)
+void OakShowPopOutAnimation (NSView* parentView, NSRect popOutRect, NSImage* anImage, BOOL hidePrevious)
 {
 	if(popOutRect.size.width == 0 || popOutRect.size.height == 0)
 		return;
@@ -57,7 +57,6 @@ void OakShowPopOutAnimation (NSRect popOutRect, NSImage* anImage, BOOL hidePrevi
 	[window setBackgroundColor:[NSColor clearColor]];
 	[window setExcludedFromWindowsMenu:YES];
 	[window setIgnoresMouseEvents:YES];
-	[window setLevel:NSStatusWindowLevel];
 	[window setOpaque:NO];
 	[[window contentView] setWantsLayer:YES];
 
@@ -72,7 +71,11 @@ void OakShowPopOutAnimation (NSRect popOutRect, NSImage* anImage, BOOL hidePrevi
 	aView.contentImage = anImage;
 	[[window contentView] addSubview:aView];
 
+	if(NSScrollView* scrollView = parentView.enclosingScrollView)
+		[[NSNotificationCenter defaultCenter] addObserver:aView selector:@selector(parentViewBoundsDidChange:) name:NSViewBoundsDidChangeNotification object:scrollView.contentView];
+
 	[window setFrame:[window frameRectForContentRect:windowRect] display:YES];
+	[parentView.window addChildWindow:window ordered:NSWindowAbove];
 	[window orderFront:nil];
 	[previousViews addObject:aView];
 
@@ -160,5 +163,16 @@ void OakShowPopOutAnimation (NSRect popOutRect, NSImage* anImage, BOOL hidePrevi
 {
 	[shapeLayer removeAllAnimations]; // Releases the animation which holds a strong reference to its delegate (us)
 	[[self window] close];
+}
+
+- (void)parentViewBoundsDidChange:(NSNotification*)notification
+{
+	[shapeLayer removeAllAnimations]; // Releases the animation which holds a strong reference to its delegate (us)
+	[[self window] close];
+}
+
+- (void)dealloc
+{
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 @end
