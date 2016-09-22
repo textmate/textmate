@@ -10,7 +10,8 @@
 #import <OakAppKit/OakSound.h>
 #import <OakAppKit/OakFileIconImage.h>
 #import <OakTextView/OakDocumentView.h>
-#import <document/document.h>
+#import <document/OakDocument.h>
+#import <document/OakDocumentController.h>
 #import <BundlesManager/BundlesManager.h>
 #import <command/runner.h> // fix_shebang
 #import <plist/ascii.h>
@@ -39,9 +40,7 @@ OAK_DEBUG_VAR(BundleEditor);
 	BOOL propertiesChanged;
 
 	bundles::item_ptr bundleItem;
-	document::document_ptr bundleItemContent;
-
-	document::document_t::callback_t* documentCallback;
+	OakDocument* bundleItemContent;
 }
 - (void)didChangeBundleItems;
 - (void)didChangeModifiedState;
@@ -162,35 +161,8 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 
 		static callback_t cb(self);
 		bundles::add_callback(&cb);
-
-		struct document_callback_t : document::document_t::callback_t
-		{
-			document_callback_t (BundleEditor* self) : _self(self) { }
-
-			void handle_document_event (document::document_ptr document, event_t event)
-			{
-				switch(event)
-				{
-					case did_change_modified_status:
-						[_self didChangeModifiedState];
-					break;
-				}
-			}
-
-		private:
-			BundleEditor* _self;
-		};
-
-		documentCallback = new document_callback_t(self);
 	}
 	return self;
-}
-
-- (void)dealloc
-{
-	if(bundleItemContent)
-		bundleItemContent->remove_callback(documentCallback);
-	delete documentCallback;
 }
 
 - (void)windowDidLoad
@@ -261,7 +233,7 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 
 - (void)didChangeModifiedState
 {
-	[self setDocumentEdited:bundleItem && (changes.find(bundleItem) != changes.end() || propertiesChanged || (bundleItemContent && bundleItemContent->is_modified()))];
+	[self setDocumentEdited:bundleItem && (changes.find(bundleItem) != changes.end() || propertiesChanged || bundleItemContent.isDocumentEdited)];
 }
 
 // ==================
@@ -412,12 +384,12 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 	[_sharedPropertiesViewController commitEditing];
 	[_extraPropertiesViewController commitEditing];
 
-	if(!propertiesChanged && !bundleItemContent->is_modified())
+	if(!propertiesChanged && bundleItemContent.isDocumentEdited == NO)
 		return YES;
 
 	plist::dictionary_t plist = plist::convert((__bridge CFPropertyListRef)_bundleItemProperties);
 
-	std::string const& content = bundleItemContent->content();
+	std::string const content = to_s(bundleItemContent.content);
 	item_info_t const& info = info_for(bundleItem->kind());
 
 	plist::any_t parsedContent;
@@ -474,7 +446,7 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 	else	changes[bundleItem] = plist;
 
 	propertiesChanged = NO;
-	bundleItemContent->set_disk_revision(bundleItemContent->revision());
+	[bundleItemContent markDocumentSaved];
 
 	[self didChangeModifiedState];
 	return YES;
@@ -682,7 +654,8 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 
 - (void)observeValueForKeyPath:(NSString*)aKeyPath ofObject:(id)anObject change:(NSDictionary*)someChange context:(void*)context
 {
-	propertiesChanged = YES;
+	if(![aKeyPath isEqualToString:@"documentEdited"])
+		propertiesChanged = YES;
 	[self didChangeModifiedState];
 }
 
@@ -799,10 +772,10 @@ static NSMutableDictionary* DictionaryForPropertyList (plist::dictionary_t const
 	[self commitEditing];
 
 	if(bundleItemContent)
-		bundleItemContent->remove_callback(documentCallback);
+		[bundleItemContent removeObserver:self forKeyPath:@"documentEdited"];
 
 	bundleItem        = aBundleItem;
-	bundleItemContent = document::document_ptr();
+	bundleItemContent = nil;
 
 	std::map<bundles::item_ptr, plist::dictionary_t>::const_iterator it = changes.find(bundleItem);
 	self.bundleItemProperties = it != changes.end() ? DictionaryForPropertyList(it->second, bundleItem) : DictionaryForBundleItem(bundleItem);
@@ -810,6 +783,7 @@ static NSMutableDictionary* DictionaryForPropertyList (plist::dictionary_t const
 	item_info_t const& info = info_for(bundleItem->kind());
 
 	[[self window] setTitle:[NSString stringWithCxxString:bundleItem->name_with_bundle()]];
+	NSString* bundleItemTitle = [NSString stringWithCxxString:bundleItem->name()];
 
 	auto const& paths = bundleItem->paths();
 	if(paths.size() == 1)
@@ -837,12 +811,12 @@ static NSMutableDictionary* DictionaryForPropertyList (plist::dictionary_t const
 			if(plist.find(key) != plist.end())
 				plistSubset[key] = plist.find(key)->second;
 		}
-		bundleItemContent = document::from_content(to_s(plistSubset, plist::kPreferSingleQuotedStrings, PlistKeySortOrder()), info.grammar);
+		bundleItemContent = [OakDocument documentWithString:to_ns(to_s(plistSubset, plist::kPreferSingleQuotedStrings, PlistKeySortOrder())) fileType:to_ns(info.grammar) customName:bundleItemTitle];
 	}
 	else if(oak::contains(std::begin(PlistItemKinds), std::end(PlistItemKinds), info.kind))
 	{
 		if(plist.find(info.plist_key) != plist.end())
-			bundleItemContent = document::from_content(to_s(plist.find(info.plist_key)->second, plist::kPreferSingleQuotedStrings, PlistKeySortOrder()), info.grammar);
+			bundleItemContent = [OakDocument documentWithString:to_ns(to_s(plist.find(info.plist_key)->second, plist::kPreferSingleQuotedStrings, PlistKeySortOrder())) fileType:to_ns(info.grammar) customName:bundleItemTitle];
 	}
 	else
 	{
@@ -851,14 +825,13 @@ static NSMutableDictionary* DictionaryForPropertyList (plist::dictionary_t const
 		{
 			if(info.kind == bundles::kItemTypeCommand || info.kind == bundles::kItemTypeDragCommand)
 				command::fix_shebang(&str);
-			bundleItemContent = document::from_content(str, info.grammar);
+			bundleItemContent = [OakDocument documentWithString:to_ns(str) fileType:to_ns(info.grammar) customName:bundleItemTitle];
 		}
 	}
 
-	bundleItemContent = bundleItemContent ?: document::from_content("");
-	bundleItemContent->set_custom_name(bundleItem->name());
-	bundleItemContent->add_callback(documentCallback);
-	documentView.document = bundleItemContent->document();
+	bundleItemContent = bundleItemContent ?: [OakDocument documentWithString:@"" fileType:nil customName:bundleItemTitle];
+	documentView.document = bundleItemContent;
+	[bundleItemContent addObserver:self forKeyPath:@"documentEdited" options:0 context:nullptr];
 
 	_sharedPropertiesViewController = [[PropertiesViewController alloc] initWithName:@"SharedProperties"];
 	_extraPropertiesViewController  = nil;
