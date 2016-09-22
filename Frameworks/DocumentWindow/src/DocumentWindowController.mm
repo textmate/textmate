@@ -2768,19 +2768,19 @@ static NSUInteger DisableSessionSavingCount = 0;
 	return res;
 }
 
-+ (instancetype)controllerForDocument:(document::document_ptr const&)aDocument
++ (instancetype)controllerForDocument:(OakDocument*)aDocument
 {
 	if(!aDocument)
 		return nil;
 
 	for(DocumentWindowController* delegate in SortedControllers())
 	{
-		if(delegate.fileBrowserVisible && aDocument->path() != NULL_STR && aDocument->path().find(to_s(delegate.projectPath)) == 0)
+		if(delegate.fileBrowserVisible && aDocument.path && [aDocument.path hasPrefix:delegate.projectPath])
 			return delegate;
 
 		for(auto document : delegate.documents)
 		{
-			if(*document == *aDocument)
+			if([aDocument isEqual:document->document()])
 				return delegate;
 		}
 	}

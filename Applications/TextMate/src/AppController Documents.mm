@@ -6,7 +6,8 @@
 #import <OakFoundation/NSString Additions.h>
 #import <ns/ns.h>
 #import <text/decode.h>
-#import <document/collection.h>
+#import <document/OakDocument.h>
+#import <document/OakDocumentController.h>
 
 OAK_DEBUG_VAR(AppController_Documents);
 
@@ -103,6 +104,7 @@ OAK_DEBUG_VAR(AppController_Documents);
 		if(line != parameters.end())
 			range = text::pos_t(atoi(line->second.c_str())-1, col-1);
 
+		NSUUID* projectUUID = project != parameters.end() ? [[NSUUID alloc] initWithUUIDString:to_ns(project->second)] : nil;
 		if(url != parameters.end())
 		{
 			static std::string const kTildeURLPrefixes[] = { "file://localhost/~/", "file:///~/", "file://~/" };
@@ -128,13 +130,13 @@ OAK_DEBUG_VAR(AppController_Documents);
 
 			if(path::is_directory(path))
 			{
-				document::show_browser(path);
+				[OakDocumentController.sharedInstance showFileBrowserAtPath:to_ns(path)];
 			}
 			else if(path::exists(path))
 			{
-				document::document_ptr doc = document::create(path);
-				doc->set_recent_tracking(false);
-				document::show(doc, project != parameters.end() ? oak::uuid_t(project->second) : document::kCollectionAny, range);
+				OakDocument* doc = [OakDocumentController.sharedInstance documentWithPath:to_ns(path)];
+				doc.recentTrackingDisabled = YES;
+				[OakDocumentController.sharedInstance showDocument:doc andSelect:range inProject:projectUUID bringToFront:YES];
 			}
 			else
 			{
@@ -143,10 +145,10 @@ OAK_DEBUG_VAR(AppController_Documents);
 		}
 		else if(uuid != parameters.end())
 		{
-			if(document::document_ptr doc = document::find(uuid->second))
+			if(OakDocument* doc = [OakDocumentController.sharedInstance findDocumentWithIdentifier:[[NSUUID alloc] initWithUUIDString:to_ns(uuid->second)]])
 			{
-				doc->set_recent_tracking(false);
-				document::show(doc, project != parameters.end() ? oak::uuid_t(project->second) : document::kCollectionAny, range);
+				doc.recentTrackingDisabled = YES;
+				[OakDocumentController.sharedInstance showDocument:doc andSelect:range inProject:projectUUID bringToFront:YES];
 			}
 			else
 			{

@@ -19,7 +19,8 @@
 #import <Preferences/Preferences.h>
 #import <Preferences/TerminalPreferences.h>
 #import <SoftwareUpdate/SoftwareUpdate.h>
-#import <document/collection.h>
+#import <document/OakDocument.h>
+#import <document/OakDocumentController.h>
 #import <bundles/query.h>
 #import <io/path.h>
 #import <network/tbz.h>
@@ -36,29 +37,31 @@ OAK_DEBUG_VAR(AppController);
 
 void OakOpenDocuments (NSArray* paths, BOOL treatFilePackageAsFolder)
 {
-	std::vector<document::document_ptr> documents;
+	NSArray* const bundleExtensions = @[ @"tmbundle", @"tmcommand", @"tmdragcommand", @"tmlanguage", @"tmmacro", @"tmpreferences", @"tmsnippet", @"tmtheme" ];
+
+	NSMutableArray<OakDocument*>* documents = [NSMutableArray array];
 	NSMutableArray* itemsToInstall = [NSMutableArray array];
 	NSMutableArray* plugInsToInstall = [NSMutableArray array];
 	BOOL enableInstallHandler = treatFilePackageAsFolder == NO && ([NSEvent modifierFlags] & NSAlternateKeyMask) == 0;
 	for(NSString* path in paths)
 	{
-		static auto const tmItemExtensions = new std::set<std::string>{ "tmbundle", "tmcommand", "tmdragcommand", "tmlanguage", "tmmacro", "tmpreferences", "tmsnippet", "tmtheme" };
-		std::string const pathExt = to_s([[path pathExtension] lowercaseString]);
-		if(enableInstallHandler && tmItemExtensions->find(pathExt) != tmItemExtensions->end())
+		BOOL isDirectory = NO;
+		NSString* pathExt = [[path pathExtension] lowercaseString];
+		if(enableInstallHandler && [bundleExtensions containsObject:pathExt])
 		{
 			[itemsToInstall addObject:path];
 		}
-		else if(enableInstallHandler && pathExt == "tmplugin")
+		else if(enableInstallHandler && [pathExt isEqualToString:@"tmplugin"])
 		{
 			[plugInsToInstall addObject:path];
 		}
-		else if(path::is_directory(to_s(path)))
+		else if([[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDirectory] && isDirectory)
 		{
-			document::show_browser(to_s(path));
+			[OakDocumentController.sharedInstance showFileBrowserAtPath:path];
 		}
 		else
 		{
-			documents.push_back(document::create(to_s(path)));
+			[documents addObject:[OakDocumentController.sharedInstance documentWithPath:path]];
 		}
 	}
 
@@ -68,7 +71,7 @@ void OakOpenDocuments (NSArray* paths, BOOL treatFilePackageAsFolder)
 	for(NSString* path in plugInsToInstall)
 		[[TMPlugInController sharedInstance] installPlugInAtPath:path];
 
-	document::show(documents);
+	[OakDocumentController.sharedInstance showDocuments:documents];
 }
 
 BOOL HasDocumentWindow (NSArray* windows)
@@ -436,9 +439,9 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 	if(DocumentWindowController* controller = [NSApp targetForAction:@selector(selectedDocument)])
 	{
-		document::document_ptr doc = controller.selectedDocument;
-		chooser.path      = doc ? [NSString stringWithCxxString:doc->path()] : nil;
-		chooser.directory = doc && doc->path() != NULL_STR ? [NSString stringWithCxxString:path::parent(doc->path())] : controller.untitledSavePath;
+		OakDocument* doc = controller.selectedDocument->document();
+		chooser.path      = doc.path;
+		chooser.directory = [doc.path stringByDeletingLastPathComponent] ?: doc.directory;
 	}
 	else
 	{
@@ -513,10 +516,9 @@ BOOL HasDocumentWindow (NSArray* windows)
 	}
 	else if(NSString* path = [[[sender selectedItems] lastObject] objectForKey:@"file"])
 	{
-		document::document_ptr doc = document::create(to_s(path));
-		if(NSString* line = [[[sender selectedItems] lastObject] objectForKey:@"line"])
-			doc->set_selection(to_s(line));
-		document::show(doc);
+		OakDocument* doc = [OakDocumentController.sharedInstance documentWithPath:path];
+		NSString* line = [[[sender selectedItems] lastObject] objectForKey:@"line"];
+		[OakDocumentController.sharedInstance showDocument:doc andSelect:(line ? text::pos_t(to_s(line)) : text::pos_t::undefined) inProject:nil bringToFront:YES];
 	}
 }
 

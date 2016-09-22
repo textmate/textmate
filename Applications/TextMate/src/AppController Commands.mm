@@ -3,7 +3,8 @@
 #import <bundles/bundles.h>
 #import <command/parser.h>
 #import <command/runner.h>
-#import <document/collection.h>
+#import <document/OakDocument.h>
+#import <document/OakDocumentController.h>
 #import <ns/ns.h>
 #import <settings/settings.h>
 #import <OakAppKit/NSAlert Additions.h>
@@ -33,13 +34,16 @@ OAK_DEBUG_VAR(AppController_Commands);
 		{
 			case bundles::kItemTypeSnippet:
 			{
-				document::document_ptr doc = document::create();
 				// TODO set language according to snippet’s scope selector
-				doc->sync_load();
-				document::show(doc); // If we call show() with a document that isn’t open then it will be loaded in the background, and show() will return before this has completed, meaning the next line may not target our new document.
-				[[DocumentWindowController controllerForDocument:doc] performBundleItem:item];
-				doc->close();
-				// TODO mark document as “not modified”
+
+				OakDocument* doc = [OakDocumentController.sharedInstance untitledDocument];
+				[doc loadModalForWindow:nil completionHandler:^(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID){
+					[OakDocumentController.sharedInstance showDocument:doc];
+					if(DocumentWindowController* controller = [DocumentWindowController controllerForDocument:doc])
+						[controller performBundleItem:item];
+					[doc markDocumentSaved];
+					[doc close];
+				}];
 			}
 			break;
 
@@ -53,7 +57,9 @@ OAK_DEBUG_VAR(AppController_Commands);
 
 			case bundles::kItemTypeGrammar:
 			{
-				document::show(document::from_content("", item->value_for_field(bundles::kFieldGrammarScope)));
+				OakDocument* doc = [OakDocumentController.sharedInstance untitledDocument];
+				doc.fileType = to_ns(item->value_for_field(bundles::kFieldGrammarScope));
+				[OakDocumentController.sharedInstance showDocument:doc];
 			}
 			break;
 		}

@@ -1,6 +1,8 @@
 #import <document/document.h>
 #import <command/runner.h>
 
+@class OakDocument;
+
 PUBLIC @interface DocumentWindowController : NSObject
 @property (nonatomic) NSWindow*                                  window;
 
@@ -87,5 +89,5 @@ PUBLIC @interface DocumentWindowController : NSObject
 - (IBAction)orderFrontGoToFolder:(id)sender;
 
 // Used by AppController
-+ (instancetype)controllerForDocument:(document::document_ptr const&)aDocument;
++ (instancetype)controllerForDocument:(OakDocument*)aDocument;
 @end
