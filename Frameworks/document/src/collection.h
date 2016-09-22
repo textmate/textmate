@@ -13,14 +13,12 @@ namespace document
 
 	PUBLIC void show (document_ptr document, oak::uuid_t const& collection = kCollectionAny, text::range_t const& selection = text::range_t::undefined, bool bringToFront = true);
 	PUBLIC void show (std::vector<document_ptr> const& documents);
-	PUBLIC void show_browser (std::string const& path);
 
 	struct PUBLIC ui_proxy_t
 	{
 		virtual ~ui_proxy_t () { }
 		virtual void show_document (oak::uuid_t const& collection, document_ptr document, text::range_t const& range, bool bringToFront) const = 0;
 		virtual void show_documents (std::vector<document_ptr> const& documents) const = 0;
-		virtual void show_browser (std::string const& path) const = 0;
 	};
 
 	PUBLIC void set_ui_proxy (ui_proxy_t* proxy);

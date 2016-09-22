@@ -2787,25 +2787,25 @@ static NSUInteger DisableSessionSavingCount = 0;
 	return nil;
 }
 
+- (void)bringToFront
+{
+	[self showWindow:nil];
+	if(![NSApp isActive])
+	{
+		__weak __block id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:NSApplicationDidBecomeActiveNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
+			// If our window is not on the active desktop but another one is, the system gives focus to the wrong window.
+			[self showWindow:nil];
+			[[NSNotificationCenter defaultCenter] removeObserver:observerId];
+		}];
+		[NSApp activateIgnoringOtherApps:YES];
+	}
+}
+
 + (void)load
 {
 	static struct proxy_t : document::ui_proxy_t
 	{
 	private:
-		static void bring_to_front (DocumentWindowController* aController)
-		{
-			[aController showWindow:nil];
-			if(![NSApp isActive])
-			{
-				__weak __block id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:NSApplicationDidBecomeActiveNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
-					// If our window is not on the active desktop but another one is, the system gives focus to the wrong window.
-					[aController showWindow:nil];
-					[[NSNotificationCenter defaultCenter] removeObserver:observerId];
-				}];
-				[NSApp activateIgnoringOtherApps:YES];
-			}
-		}
-
 		static DocumentWindowController* find_or_create_controller (std::vector<document::document_ptr> const& documents, oak::uuid_t const& projectUUID)
 		{
 			ASSERT(!documents.empty());
@@ -2901,56 +2901,10 @@ static NSUInteger DisableSessionSavingCount = 0;
 		}
 
 	public:
-		void show_browser (std::string const& path) const
-		{
-			std::string const folder = path::resolve(path);
-			[[NSDocumentController sharedDocumentController] noteNewRecentDocumentURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:folder]]];
-
-			for(DocumentWindowController* candidate in SortedControllers())
-			{
-				if(folder == to_s(candidate.projectPath ?: candidate.defaultProjectPath))
-					return bring_to_front(candidate);
-			}
-
-			DocumentWindowController* controller = nil;
-			for(DocumentWindowController* candidate in SortedControllers())
-			{
-				if(!candidate.fileBrowserVisible && candidate.documents.size() == 1 && is_disposable(candidate.selectedDocument))
-				{
-					controller = candidate;
-					break;
-				}
-			}
-
-			if(!controller)
-				controller = [DocumentWindowController new];
-			else if(controller.selectedDocument)
-				[controller selectedDocument]->set_custom_name("not untitled"); // release potential untitled token used
-
-			NSDictionary* project;
-			if(![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableFolderStateRestore])
-				project = [[DocumentWindowController sharedProjectStateDB] valueForKey:[NSString stringWithCxxString:folder]];
-
-			if(project && [project[@"documents"] count])
-			{
-				[controller setupControllerForProject:project skipMissingFiles:YES];
-			}
-			else
-			{
-				controller.defaultProjectPath = [NSString stringWithCxxString:folder];
-				controller.fileBrowserVisible = YES;
-				controller.documents          = { document::create() };
-				controller.fileBrowser.url    = [NSURL fileURLWithPath:[NSString stringWithCxxString:folder]];
-
-				[controller openAndSelectDocument:controller.documents[controller.selectedTabIndex]];
-			}
-			bring_to_front(controller);
-		}
-
 		void show_documents (std::vector<document::document_ptr> const& documents) const
 		{
 			DocumentWindowController* controller = controller_with_documents(documents);
-			bring_to_front(controller);
+			[controller bringToFront];
 			[controller openAndSelectDocument:[controller documents][controller.selectedTabIndex]];
 		}
 
@@ -2961,7 +2915,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 
 			DocumentWindowController* controller = controller_with_documents({ document }, collection);
 			if(bringToFront)
-				bring_to_front(controller);
+				[controller bringToFront];
 			else if(![controller.window isVisible])
 				[controller.window orderWindow:NSWindowBelow relativeTo:[([NSApp keyWindow] ?: [NSApp mainWindow]) windowNumber]];
 			[controller openAndSelectDocument:document];
@@ -2989,6 +2943,47 @@ static NSUInteger DisableSessionSavingCount = 0;
 
 - (void)showFileBrowserAtPath:(NSString*)aPath
 {
-	document::show_browser(to_s(aPath));
+	NSString* const folder = to_ns(path::resolve(to_s(aPath)));
+	[[NSDocumentController sharedDocumentController] noteNewRecentDocumentURL:[NSURL fileURLWithPath:folder]];
+
+	for(DocumentWindowController* candidate in SortedControllers())
+	{
+		if([folder isEqualToString:candidate.projectPath ?: candidate.defaultProjectPath])
+			return [candidate bringToFront];
+	}
+
+	DocumentWindowController* controller = nil;
+	for(DocumentWindowController* candidate in SortedControllers())
+	{
+		if(!candidate.fileBrowserVisible && candidate.documents.size() == 1 && is_disposable(candidate.selectedDocument))
+		{
+			controller = candidate;
+			break;
+		}
+	}
+
+	if(!controller)
+		controller = [DocumentWindowController new];
+	else if(controller.selectedDocument)
+		[controller selectedDocument]->set_custom_name("not untitled"); // release potential untitled token used
+
+	NSDictionary* project;
+	if(![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableFolderStateRestore])
+		project = [[DocumentWindowController sharedProjectStateDB] valueForKey:folder];
+
+	if(project && [project[@"documents"] count])
+	{
+		[controller setupControllerForProject:project skipMissingFiles:YES];
+	}
+	else
+	{
+		controller.defaultProjectPath = folder;
+		controller.fileBrowserVisible = YES;
+		controller.documents          = { document::create() };
+		controller.fileBrowser.url    = [NSURL fileURLWithPath:folder];
+
+		[controller openAndSelectDocument:controller.documents[controller.selectedTabIndex]];
+	}
+	[controller bringToFront];
 }
 @end

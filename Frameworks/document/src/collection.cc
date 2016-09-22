@@ -23,11 +23,6 @@ namespace document
 			ui_proxy()->show_documents(documents);
 	}
 
-	void show_browser (std::string const& path)
-	{
-		ui_proxy()->show_browser(path);
-	}
-
 	// ============
 	// = UI Proxy =
 	// ============
