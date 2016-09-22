@@ -94,7 +94,8 @@
 	else
 		return (void)NSRunAlertPanel(@"Unknown Encoding", @"The encoding used for this HTML buffer (“%@”) is unsupported.\nPlease file a bug report stating the encoding name and how you got to it.", @"Continue", nil, nil, [dataSource textEncodingName]);
 
-	OakDocument* doc = [OakDocument documentWithString:str fileType:@"text.html.basic" customName:nil];
+	NSString* name = OakNotEmptyString(self.mainFrameTitle) ? self.mainFrameTitle : nil;
+	OakDocument* doc = [OakDocument documentWithString:str fileType:@"text.html.basic" customName:name];
 	[OakDocumentController.sharedInstance showDocument:doc inProject:nil bringToFront:YES];
 }
 @end
