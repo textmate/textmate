@@ -1069,7 +1069,8 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 		void did_replace (size_t from, size_t to, char const* buf, size_t len)
 		{
 			_size += len - (to - from);
-			_self.bufferEmpty = _size == 0;
+			if(_self.bufferEmpty != _size == 0)
+				_self.bufferEmpty = _size == 0;
 
 			if(_should_sniff_file_type)
 			{
@@ -1153,7 +1154,9 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	if(OakDocumentEditor* editor = self.documentEditors.firstObject)
 			_undoManager->end_undo_group(editor.selection);
 	else	_undoManager->end_undo_group(ng::convert(*_buffer, to_s(_selection)));
-	self.revision = _buffer->revision();
+
+	if(_revision != _buffer->revision())
+		self.revision = _buffer->revision();
 }
 
 - (void)undo
