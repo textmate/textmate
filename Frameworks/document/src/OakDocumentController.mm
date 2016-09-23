@@ -267,6 +267,9 @@ namespace
 
 - (void)didTouchDocument:(OakDocument*)aDocument
 {
+	if(!aDocument)
+		return;
+
 	[self setupRankedPaths];
 	if(aDocument.path)
 			_rankedPaths[aDocument.path] = @(++_lastLRURank);
