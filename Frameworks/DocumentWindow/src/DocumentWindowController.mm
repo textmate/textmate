@@ -124,13 +124,13 @@ namespace
 	// = tracking document controller instances =
 	// ==========================================
 
-	static NSMutableDictionary* AllControllers ()
+	static NSMutableDictionary<NSString*, DocumentWindowController*>* AllControllers ()
 	{
 		static NSMutableDictionary* res = [NSMutableDictionary new];
 		return res;
 	}
 
-	static NSArray* SortedControllers ()
+	static NSArray<DocumentWindowController*>* SortedControllers ()
 	{
 		NSMutableArray* res = [NSMutableArray array];
 		for(NSNumber* flag in @[ @NO, @YES ])
