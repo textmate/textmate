@@ -557,6 +557,13 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 // = Backup =
 // ==========
 
+- (void)setKeepBackupFile:(BOOL)flag
+{
+	_keepBackupFile = flag;
+	if(!flag)
+		[self removeBackup];
+}
+
 - (void)scheduleBackup
 {
 	if(_keepBackupFile)
