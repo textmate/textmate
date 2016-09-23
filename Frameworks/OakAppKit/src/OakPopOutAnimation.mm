@@ -76,7 +76,6 @@ void OakShowPopOutAnimation (NSView* parentView, NSRect popOutRect, NSImage* anI
 
 	[window setFrame:[window frameRectForContentRect:windowRect] display:YES];
 	[parentView.window addChildWindow:window ordered:NSWindowAbove];
-	[window orderFront:nil];
 	[previousViews addObject:aView];
 
 	[aView startAnimation:nil];
