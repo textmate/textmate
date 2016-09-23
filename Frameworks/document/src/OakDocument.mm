@@ -1114,8 +1114,8 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 
 - (NSImage*)icon
 {
-	// Required because we have no setModified:
-	if(_icon && _icon.isModified != self.isDocumentEdited)
+	// Ideally we would nil the icon in setModified: or setOnDisk: but we don’t implement these
+	if(_icon && (_icon.isModified != self.isDocumentEdited || _icon.exists != self.isOnDisk))
 		_icon = nil;
 
 	if(!_icon)
