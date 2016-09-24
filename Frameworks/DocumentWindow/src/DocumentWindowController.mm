@@ -402,16 +402,16 @@ namespace
 		return;
 
 	NSMutableArray* documentsToSave = [NSMutableArray array];
-	for(auto doc : _cppDocuments)
+	for(OakDocument* doc in _documents)
 	{
-		if(doc->is_modified() && doc->path() != NULL_STR)
+		if(doc.isDocumentEdited && doc.path)
 		{
-			settings_t const settings = settings_for_path(doc->logical_path(), doc->file_type(), path::parent(doc->path()));
+			settings_t const settings = settings_for_path(to_s(doc.virtualPath ?: doc.path), to_s(doc.fileType), path::parent(to_s(doc.path)));
 			if(settings.get(kSettingsSaveOnBlurKey, false))
 			{
-				if(doc == _selectedCppDocument)
+				if([doc isEqual:self.selectedDocument])
 					[_textView updateDocumentMetadata];
-				[documentsToSave addObject:doc->document()];
+				[documentsToSave addObject:doc];
 			}
 		}
 	}
@@ -1163,18 +1163,19 @@ namespace
 
 - (IBAction)saveDocumentAs:(id)sender
 {
-	if(!_selectedCppDocument)
+	OakDocument* doc = self.selectedDocument;
+	if(!doc)
 		return;
 
-	std::string const documentPath   = _selectedCppDocument->path();
-	NSString* const suggestedFolder  = [NSString stringWithCxxString:path::parent(documentPath)] ?: self.untitledSavePath;
-	NSString* const suggestedName    = [NSString stringWithCxxString:path::name(documentPath)]   ?: [_selectedCppDocument->document() displayNameWithExtension:YES];
-	[OakSavePanel showWithPath:suggestedName directory:suggestedFolder fowWindow:self.window encoding:_selectedCppDocument->disk_encoding() completionHandler:^(NSString* path, encoding::type const& encoding){
+	NSString* const suggestedFolder = [doc.path stringByDeletingLastPathComponent] ?: self.untitledSavePath;
+	NSString* const suggestedName   = [doc.path lastPathComponent] ?: [doc displayNameWithExtension:YES];
+	[OakSavePanel showWithPath:suggestedName directory:suggestedFolder fowWindow:self.window encoding:encoding::type(to_s(doc.diskNewlines), to_s(doc.diskEncoding)) completionHandler:^(NSString* path, encoding::type const& encoding){
 		if(!path)
 			return;
-		_selectedCppDocument->set_path(to_s(path));
-		_selectedCppDocument->set_disk_encoding(encoding);
-		[self saveDocumentsUsingEnumerator:@[ _selectedCppDocument->document() ].objectEnumerator completionHandler:nil];
+		doc.path = path;
+		doc.diskNewlines = to_ns(encoding.newlines());
+		doc.diskEncoding = to_ns(encoding.charset());
+		[self saveDocumentsUsingEnumerator:@[ doc ].objectEnumerator completionHandler:nil];
 	}];
 }
 
@@ -1183,21 +1184,17 @@ namespace
 	if(OakDocument* document = [anEnumerator nextObject])
 	{
 		id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:OakDocumentWillShowAlertNotification object:document queue:nil usingBlock:^(NSNotification*){
-			for(size_t i = 0; i < _cppDocuments.size(); ++i)
+			NSUInteger i = [_documents indexOfObject:document];
+			if(i != NSNotFound && document.isLoaded)
 			{
-				if(document.isLoaded && _cppDocuments[i]->document() == document)
+				if(![document isEqual:self.selectedDocument])
 				{
-					if(_selectedCppDocument != _cppDocuments[i])
-					{
-						self.selectedTabIndex = i;
-						self.selectedCppDocument = _cppDocuments[i];
-					}
-
-					if(NSApp.isActive && (self.window.isMiniaturized || !self.window.isKeyWindow))
-						[self.window makeKeyAndOrderFront:self];
-
-					break;
+					self.selectedTabIndex = i;
+					self.selectedCppDocument = wrap(document);
 				}
+
+				if(NSApp.isActive && (self.window.isMiniaturized || !self.window.isKeyWindow))
+					[self.window makeKeyAndOrderFront:self];
 			}
 		}];
 
@@ -1253,8 +1250,8 @@ namespace
 	}
 	else
 	{
-		if(_selectedCppDocument && (_selectedCppDocument->is_modified() || !_selectedCppDocument->is_on_disk()))
-			[documentsToSave addObject:_selectedCppDocument->document()];
+		if(self.selectedDocument && (self.selectedDocument.isDocumentEdited || !self.selectedDocument.isOnDisk))
+			[documentsToSave addObject:self.selectedDocument];
 	}
 
 	[self saveDocumentsUsingEnumerator:[documentsToSave objectEnumerator] completionHandler:^(OakDocumentIOResult result){
@@ -1359,24 +1356,24 @@ namespace
 
 	if(self.autoRevealFile && self.fileBrowserVisible)
 	{
-		if(_selectedCppDocument && _selectedCppDocument->path() != NULL_STR)
+		if(self.selectedDocument.path)
 			[self revealFileInProject:self];
 	}
 }
 
 - (void)updateWindowTitle
 {
-	if(_selectedCppDocument && _documentDisplayName)
+	if(self.selectedDocument && _documentDisplayName)
 	{
-		auto map = _selectedCppDocument->document_variables();
+		auto map = self.selectedDocument.variables;
 		auto const& scm = _documentSCMVariables.empty() ? _projectSCMVariables : _documentSCMVariables;
 		map.insert(scm.begin(), scm.end());
 		if(self.projectPath)
 			map["projectDirectory"] = to_s(self.projectPath);
 
-		std::string docDirectory = _selectedCppDocument->path() != NULL_STR ? path::parent(_selectedCppDocument->path()) : to_s(self.untitledSavePath);
-		settings_t const settings = settings_for_path(_selectedCppDocument->logical_path(), _selectedCppDocument->file_type() + " " + to_s(self.scopeAttributes), docDirectory, map);
-		self.window.title = [NSString stringWithCxxString:settings.get(kSettingsWindowTitleKey, to_s(self.documentDisplayName))];
+		NSString* docDirectory = self.selectedDocument.path ? [self.selectedDocument.path stringByDeletingLastPathComponent] : self.untitledSavePath;
+		settings_t const settings = settings_for_path(to_s(self.selectedDocument.virtualPath ?: self.selectedDocument.path), to_s(self.selectedDocument.fileType) + " " + to_s(self.scopeAttributes), to_s(docDirectory), map);
+		self.window.title = to_ns(settings.get(kSettingsWindowTitleKey, to_s(self.documentDisplayName)));
 	}
 	else
 	{
@@ -1410,11 +1407,11 @@ namespace
 	};
 
 	_externalScopeAttributes.clear();
-	if(!_selectedCppDocument && !_projectPath)
+	if(!self.selectedDocument && !_projectPath)
 		return;
 
 	std::string const projectDir   = to_s(_projectPath ?: NSHomeDirectory());
-	std::string const documentPath = _selectedCppDocument && _selectedCppDocument->path() != NULL_STR ? _selectedCppDocument->path() : path::join(projectDir, "dummy");
+	std::string const documentPath = self.selectedDocument.path ? to_s(self.selectedDocument.path) : path::join(projectDir, "dummy");
 
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
 
@@ -1449,7 +1446,7 @@ namespace
 
 		dispatch_async(dispatch_get_main_queue(), ^{
 			std::string const currentProjectDir   = to_s(_projectPath ?: NSHomeDirectory());
-			std::string const currentDocumentPath = _selectedCppDocument ? _selectedCppDocument->path() : path::join(projectDir, "dummy");
+			std::string const currentDocumentPath = self.selectedDocument.path ? to_s(self.selectedDocument.path) : path::join(projectDir, "dummy");
 			if(projectDir == currentProjectDir && currentDocumentPath == currentDocumentPath)
 				_externalScopeAttributes = res;
 		});
@@ -1494,9 +1491,9 @@ namespace
 
 		std::string docDirectory = _documentPath ? path::parent(to_s(_documentPath)) : to_s(self.projectPath);
 
-		if(_selectedCppDocument)
+		if(self.selectedDocument)
 		{
-			std::string const customAttributes = settings_for_path(to_s(_documentPath), _selectedCppDocument->file_type() + " " + text::join(_documentScopeAttributes, " "), docDirectory).get(kSettingsScopeAttributesKey, NULL_STR);
+			std::string const customAttributes = settings_for_path(to_s(_documentPath), to_s(self.selectedDocument.fileType) + " " + text::join(_documentScopeAttributes, " "), docDirectory).get(kSettingsScopeAttributesKey, NULL_STR);
 			if(customAttributes != NULL_STR)
 				_documentScopeAttributes.push_back(customAttributes);
 		}
@@ -1959,7 +1956,7 @@ namespace
 		{
 			self.fileBrowser.nextResponder = self.fileBrowser.view.nextResponder;
 			self.fileBrowser.view.nextResponder = self.fileBrowser;
-			if(self.autoRevealFile && _selectedCppDocument && _selectedCppDocument->path() != NULL_STR)
+			if(self.autoRevealFile && self.selectedDocument.path)
 				[self revealFileInProject:self];
 		}
 
@@ -2032,7 +2029,7 @@ namespace
 - (IBAction)reload:(id)sender               { if(self.fileBrowser) [NSApp sendAction:_cmd to:self.fileBrowser from:sender]; }
 - (IBAction)deselectAll:(id)sender          { if(self.fileBrowser) [NSApp sendAction:_cmd to:self.fileBrowser from:sender]; }
 
-- (IBAction)revealFileInProject:(id)sender  { if(_selectedCppDocument) { self.fileBrowserVisible = YES; [self.fileBrowser selectURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:_selectedCppDocument->path()]] withParentURL:self.projectPath ? [NSURL fileURLWithPath:self.projectPath] : nil]; } }
+- (IBAction)revealFileInProject:(id)sender  { if(self.selectedDocument) { self.fileBrowserVisible = YES; [self.fileBrowser selectURL:[NSURL fileURLWithPath:self.selectedDocument.path] withParentURL:self.projectPath ? [NSURL fileURLWithPath:self.projectPath] : nil]; } }
 - (IBAction)goToProjectFolder:(id)sender    { self.fileBrowserVisible = YES; [self.fileBrowser goToURL:[NSURL fileURLWithPath:self.projectPath]]; }
 
 - (IBAction)goBack:(id)sender               { self.fileBrowserVisible = YES; [NSApp sendAction:_cmd to:self.fileBrowser from:sender]; }
@@ -2130,7 +2127,7 @@ namespace
 
 - (NSUUID*)selectedDocumentUUID
 {
-	return _selectedCppDocument ? _selectedCppDocument->document().identifier : nil;
+	return self.selectedDocument.identifier;
 }
 
 - (Find*)prepareAndReturnFindPanel
@@ -2237,7 +2234,7 @@ namespace
 
 - (NSString*)untitledSavePath
 {
-	NSString* res = self.projectPath ?: (_selectedCppDocument ? to_ns(path::parent(_selectedCppDocument->path())) : nil);
+	NSString* res = self.projectPath ?: [self.selectedDocument.path stringByDeletingLastPathComponent];
 	if(self.fileBrowserVisible)
 	{
 		NSArray* selectedURLs = self.fileBrowser.selectedURLs;
@@ -2280,13 +2277,10 @@ namespace
 
 - (IBAction)goToRelatedFile:(id)sender
 {
-	if(!_selectedCppDocument)
-		return;
-
-	std::string const documentPath = _selectedCppDocument->path();
-	if(documentPath == NULL_STR)
+	if(!self.selectedDocument.path)
 		return (void)NSBeep();
 
+	std::string const documentPath = to_s(self.selectedDocument.path);
 	std::string const documentDir  = path::parent(documentPath);
 	std::string const documentName = path::name(documentPath);
 	std::string const documentBase = path::strip_extensions(documentName);
@@ -2298,13 +2292,13 @@ namespace
 			candidates.insert(path::name(document->path()));
 	}
 
-	auto map = _selectedCppDocument->document_variables();
+	auto map = self.selectedDocument.variables;
 	auto const& scm = _documentSCMVariables.empty() ? _projectSCMVariables : _documentSCMVariables;
 	map.insert(scm.begin(), scm.end());
 	if(self.projectPath)
 		map["projectDirectory"] = to_s(self.projectPath);
 
-	settings_t const settings = settings_for_path(_selectedCppDocument->logical_path(), _selectedCppDocument->file_type() + " " + to_s(self.scopeAttributes), path::parent(documentPath), map);
+	settings_t const settings = settings_for_path(to_s(self.selectedDocument.virtualPath ?: self.selectedDocument.path), to_s(self.selectedDocument.fileType) + " " + to_s(self.scopeAttributes), path::parent(documentPath), map);
 	std::string const customCandidate = settings.get(kSettingsRelatedFilePathKey, NULL_STR);
 
 	if(customCandidate != NULL_STR && customCandidate != documentPath && (std::find_if(_cppDocuments.begin(), _cppDocuments.end(), [&customCandidate](document::document_ptr const& doc){ return customCandidate == doc->path(); }) != _cppDocuments.end() || path::exists(customCandidate)))
@@ -2415,8 +2409,8 @@ namespace
 		active = _cppDocuments.size() > 1;
 	else if([menuItem action] == @selector(revealFileInProject:) || [menuItem action] == @selector(revealFileInProjectByExpandingAncestors:))
 	{
-		active = _selectedCppDocument && _selectedCppDocument->path() != NULL_STR;
-		[menuItem setDynamicTitle:active ? [NSString stringWithFormat:@"Select “%@”", [NSString stringWithCxxString:_selectedCppDocument->display_name()]] : @"Select Document"];
+		active = self.selectedDocument.path != nil;
+		[menuItem setDynamicTitle:active ? [NSString stringWithFormat:@"Select “%@”", self.selectedDocument.displayName] : @"Select Document"];
 	}
 	else if([menuItem action] == @selector(goToProjectFolder:))
 		active = self.projectPath != nil;
@@ -2923,8 +2917,8 @@ static NSUInteger DisableSessionSavingCount = 0;
 
 	if(!controller)
 		controller = [DocumentWindowController new];
-	else if(controller.selectedCppDocument)
-		[controller selectedCppDocument]->set_custom_name("not untitled"); // release potential untitled token used
+	else if(controller.selectedDocument)
+		controller.selectedDocument.customName = @"not untitled"; // release potential untitled token used
 
 	NSDictionary* project;
 	if(![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableFolderStateRestore])
