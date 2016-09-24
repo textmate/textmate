@@ -124,7 +124,7 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 @property (nonatomic) NSArray<Bundle*>*           bundlesAlreadySuggested;
 
 @property (nonatomic) std::vector<document::document_ptr> cppDocuments;
-@property (nonatomic) document::document_ptr              selectedCppDocument;
+@property (nonatomic, readwrite) OakDocument*             selectedDocument;
 
 + (void)scheduleSessionBackup:(id)sender;
 
@@ -328,7 +328,7 @@ namespace
 		[[NSUserDefaults standardUserDefaults] setObject:NSStringFromRect([self windowFrame]) forKey:@"DocumentControllerWindowFrame"];
 
 	self.cppDocuments        = { };
-	self.selectedCppDocument = document::document_ptr();
+	self.selectedDocument    = nil;
 	self.fileBrowserVisible  = NO; // Make window frame small as we no longer respond to savableWindowFrame
 	self.identifier          = nil; // This removes us from AllControllers and causes a release
 }
@@ -884,7 +884,7 @@ namespace
 
 			// Using openAndSelectDocument: will move focus to OakTextView
 			[doc loadModalForWindow:nil completionHandler:^(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID){
-				self.selectedCppDocument = wrap(doc);
+				self.selectedDocument = doc;
 				[doc close];
 			}];
 
@@ -1092,7 +1092,7 @@ namespace
 			}
 
 			[self makeTextViewFirstResponder:self];
-			self.selectedCppDocument = wrap(document);
+			self.selectedDocument = document;
 			[self performSelector:@selector(didOpenDocuemntInTextView:) withObject:self.documentView.textView afterDelay:0];
 			[document close];
 		}
@@ -1190,7 +1190,7 @@ namespace
 				if(![document isEqual:self.selectedDocument])
 				{
 					self.selectedTabIndex = i;
-					self.selectedCppDocument = wrap(document);
+					self.selectedDocument = document;
 				}
 
 				if(NSApp.isActive && (self.window.isMiniaturized || !self.window.isKeyWindow))
@@ -1616,11 +1616,6 @@ namespace
 // = Properties =
 // ==============
 
-- (OakDocument*)selectedDocument
-{
-	return _selectedCppDocument ? _selectedCppDocument->document() : nil;
-}
-
 - (NSArray<OakDocument*>*)documents
 {
 	return _documents;
@@ -1654,26 +1649,24 @@ namespace
 	[[self class] scheduleSessionBackup:self];
 }
 
-- (void)setSelectedCppDocument:(document::document_ptr)newSelectedDocument
+- (void)setSelectedDocument:(OakDocument*)newDocument
 {
-	ASSERT(!newSelectedDocument || newSelectedDocument->is_loaded());
-	if(_selectedCppDocument == newSelectedDocument)
+	ASSERT(!newDocument || newDocument.isLoaded);
+	if([_selectedDocument isEqual:newDocument])
 	{
-		self.documentView.document = _selectedCppDocument ? _selectedCppDocument->document() : nil;
+		self.documentView.document = _selectedDocument;
 		return;
 	}
 
-	if(_selectedCppDocument)
-		_selectedCppDocument->hide();
-	if(newSelectedDocument)
-		newSelectedDocument->show();
+	[OakDocumentController.sharedInstance didTouchDocument:_selectedDocument];
+	[OakDocumentController.sharedInstance didTouchDocument:newDocument];
 
-	[self trackDocument:newSelectedDocument ? newSelectedDocument->document() : nil];
-	[self untrackDocument:self.selectedDocument];
+	[self trackDocument:newDocument];
+	[self untrackDocument:_selectedDocument];
 
-	if(_selectedCppDocument = newSelectedDocument)
+	if(_selectedDocument = newDocument)
 	{
-		NSString* projectPath = self.defaultProjectPath ?: self.fileBrowser.path ?: [NSString stringWithCxxString:path::parent(_selectedCppDocument->path())];
+		NSString* projectPath = self.defaultProjectPath ?: self.fileBrowser.path ?: [newDocument.path stringByDeletingLastPathComponent];
 		if(projectPath)
 		{
 			std::map<std::string, std::string> const map = { { "projectDirectory", to_s(projectPath) } };
@@ -1689,12 +1682,12 @@ namespace
 		}
 
 		self.projectPath         = projectPath;
-		self.documentPath        = [NSString stringWithCxxString:_selectedCppDocument->logical_path()];
-		self.documentDisplayName = [NSString stringWithCxxString:_selectedCppDocument->display_name()];
-		self.documentIsModified  = _selectedCppDocument->is_modified();
-		self.documentIsOnDisk    = _selectedCppDocument->is_on_disk();
+		self.documentPath        = _selectedDocument.virtualPath ?: newDocument.path;
+		self.documentDisplayName = _selectedDocument.displayName;
+		self.documentIsModified  = _selectedDocument.isDocumentEdited;
+		self.documentIsOnDisk    = _selectedDocument.isOnDisk;
 
-		self.documentView.document = _selectedCppDocument->document();
+		self.documentView.document = _selectedDocument;
 		[[self class] scheduleSessionBackup:self];
 	}
 	else
