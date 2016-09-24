@@ -2698,7 +2698,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 			doc[@"fileType"] = [NSString stringWithCxxString:document->file_type()];
 		if(document->display_name() != NULL_STR)
 			doc[@"displayName"] = [NSString stringWithCxxString:document->display_name()];
-		if(document == self.selectedCppDocument)
+		if([document->document() isEqual:self.selectedDocument])
 			doc[@"selected"] = @YES;
 		if([self isDocumentSticky:document->document()])
 			doc[@"sticky"] = @YES;
