@@ -140,6 +140,19 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 
 namespace
 {
+	static document::document_ptr wrap (OakDocument* document)
+	{
+		return std::make_shared<document::document_t>(document);
+	}
+
+	static std::vector<document::document_ptr> wrap (NSArray<OakDocument*>* documents)
+	{
+		std::vector<document::document_ptr> res;
+		for(OakDocument* document in documents)
+			res.push_back(wrap(document));
+		return res;
+	}
+
 	// ==========================================
 	// = tracking document controller instances =
 	// ==========================================
@@ -172,9 +185,9 @@ namespace
 	// = document_t helpers =
 	// ======================
 
-	static bool is_disposable (document::document_ptr const& doc)
+	static bool is_disposable (OakDocument* doc)
 	{
-		return doc && !doc->is_modified() && !doc->is_on_disk() && doc->path() == NULL_STR && doc->is_loaded() && doc->buffer().empty();
+		return doc && !doc.isDocumentEdited && !doc.isOnDisk && !doc.path && doc.isLoaded && doc.isBufferEmpty;
 	}
 }
 
@@ -552,7 +565,7 @@ namespace
 
 - (IBAction)performCloseTab:(id)sender
 {
-	if(_cppDocuments.empty() || _cppDocuments.size() == 1 && (is_disposable(_selectedCppDocument) || !self.fileBrowserVisible))
+	if(_cppDocuments.empty() || _cppDocuments.size() == 1 && (is_disposable(self.selectedDocument) || !self.fileBrowserVisible))
 		return [self performCloseWindow:sender];
 	NSUInteger index = [sender isKindOfClass:[OakTabBarView class]] ? [sender tag] : _selectedTabIndex;
 	[self closeTabsAtIndexes:[NSIndexSet indexSetWithIndex:index] askToSaveChanges:YES createDocumentIfEmpty:YES];
@@ -928,8 +941,8 @@ namespace
 
 - (NSUUID*)disposableDocument
 {
-	if(_selectedTabIndex < _cppDocuments.size() && is_disposable(_cppDocuments[_selectedTabIndex]))
-		return _cppDocuments[_selectedTabIndex]->document().identifier;
+	if(_selectedTabIndex < _documents.count && is_disposable(_documents[_selectedTabIndex]))
+		return _documents[_selectedTabIndex].identifier;
 	return nil;
 }
 
@@ -2718,7 +2731,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 	if(controllers.count == 1)
 	{
 		DocumentWindowController* controller = controllers.firstObject;
-		if(!controller.projectPath && !controller.fileBrowserVisible && controller.cppDocuments.size() == 1 && is_disposable(controller.selectedCppDocument))
+		if(!controller.projectPath && !controller.fileBrowserVisible && controller.cppDocuments.size() == 1 && is_disposable(controller.selectedDocument))
 			controllers = nil;
 	}
 
@@ -2804,9 +2817,9 @@ static NSUInteger DisableSessionSavingCount = 0;
 @end
 
 @implementation OakDocumentController (OakDocumentWindowControllerCategory)
-- (DocumentWindowController*)findOrCreateController:(std::vector<document::document_ptr> const&)documents project:(NSUUID*)projectUUID
+- (DocumentWindowController*)findOrCreateController:(NSArray<OakDocument*>*)documents project:(NSUUID*)projectUUID
 {
-	ASSERT(!documents.empty());
+	ASSERT(documents.count);
 
 	// =========================================
 	// = Return requested window, if it exists =
@@ -2825,14 +2838,13 @@ static NSUInteger DisableSessionSavingCount = 0;
 	// = Find window with one of our documents =
 	// =========================================
 
-	std::set<oak::uuid_t> uuids;
-	std::transform(documents.begin(), documents.end(), inserter(uuids, uuids.end()), [](document::document_ptr const& doc){ return doc->identifier(); });
+	NSSet<NSUUID*>* uuids = [NSSet setWithArray:[documents valueForKey:@"identifier"]];
 
 	for(DocumentWindowController* candidate in SortedControllers())
 	{
-		for(auto document : candidate.cppDocuments)
+		for(OakDocument* document in candidate.documents)
 		{
-			if(uuids.find(document->identifier()) != uuids.end())
+			if([uuids containsObject:document.identifier])
 				return candidate;
 		}
 	}
@@ -2841,11 +2853,8 @@ static NSUInteger DisableSessionSavingCount = 0;
 	// = Find window with project folder closest to document’s parent =
 	// ================================================================
 
-	std::vector<document::document_ptr> documentsWithPath;
-	std::copy_if(documents.begin(), documents.end(), back_inserter(documentsWithPath), [](document::document_ptr const& doc){ return doc->path() != NULL_STR; });
-
-	std::set<std::string> parents;
-	std::transform(documentsWithPath.begin(), documentsWithPath.end(), inserter(parents, parents.end()), [](document::document_ptr const& doc){ return path::parent(doc->path()); });
+	NSArray<OakDocument*>* documentsWithPath = [documents filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"path != NULL"]];
+	NSSet<NSString*>* parents = [NSSet setWithArray:[documentsWithPath valueForKeyPath:@"path.stringByDeletingLastPathComponent"]];
 
 	std::map<size_t, DocumentWindowController*> candidates;
 	for(DocumentWindowController* candidate in SortedControllers())
@@ -2853,10 +2862,10 @@ static NSUInteger DisableSessionSavingCount = 0;
 		if(candidate.projectPath)
 		{
 			std::string const projectPath = to_s(candidate.projectPath);
-			for(auto const& parent : parents)
+			for(NSString* parent in parents)
 			{
-				if(path::is_child(parent, projectPath))
-					candidates.emplace(parent.size() - projectPath.size(), candidate);
+				if(path::is_child(to_s(parent), projectPath))
+					candidates.emplace(parent.length - candidate.projectPath.length, candidate);
 			}
 		}
 	}
@@ -2870,7 +2879,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 
 	if(DocumentWindowController* candidate = [SortedControllers() firstObject])
 	{
-		if(!candidate.fileBrowserVisible && candidate.cppDocuments.size() == 1 && is_disposable(candidate.selectedCppDocument))
+		if(!candidate.fileBrowserVisible && candidate.documents.count == 1 && is_disposable(candidate.selectedDocument))
 			return candidate;
 	}
 
@@ -2880,37 +2889,37 @@ static NSUInteger DisableSessionSavingCount = 0;
 
 	DocumentWindowController* res = [DocumentWindowController new];
 
-	if(!parents.empty()) // setup project folder for new window
+	if(parents.count) // setup project folder for new window
 	{
-		std::vector<std::string> rankedParents(parents.begin(), parents.end());
-		std::sort(rankedParents.begin(), rankedParents.end(), [](std::string const& lhs, std::string const& rhs){ return lhs.size() < rhs.size(); });
-		res.defaultProjectPath = [NSString stringWithCxxString:rankedParents.front()];
+		NSArray* rankedParents = [parents.allObjects sortedArrayUsingComparator:^NSComparisonResult(NSString* lhs, NSString* rhs){
+			return lhs.length < rhs.length ? NSOrderedAscending : (lhs.length > rhs.length ? NSOrderedDescending : NSOrderedSame);
+		}];
+		res.defaultProjectPath = rankedParents.firstObject;
 	}
 
 	return res;
 }
 
-- (DocumentWindowController*)controllerWithDocuments:(std::vector<document::document_ptr> const&)documents project:(NSUUID*)projectUUID
+- (DocumentWindowController*)controllerWithDocuments:(NSArray<OakDocument*>*)documents project:(NSUUID*)projectUUID
 {
 	DocumentWindowController* controller = [self findOrCreateController:documents project:projectUUID];
 	BOOL hasDisposable = controller.disposableDocument ? YES : NO;
-	auto documentToSelect = controller.cppDocuments.size() <= (hasDisposable ? 1 : 0) ? documents.front() : documents.back();
-	[controller insertDocuments:documents atIndex:controller.selectedTabIndex + 1 selecting:documentToSelect andClosing:hasDisposable ? @[ controller.disposableDocument ] : nil];
+	auto documentToSelect = wrap(controller.documents.count <= (hasDisposable ? 1 : 0) ? documents.firstObject : documents.lastObject);
+	[controller insertDocuments:wrap(documents) atIndex:controller.selectedTabIndex + 1 selecting:documentToSelect andClosing:hasDisposable ? @[ controller.disposableDocument ] : nil];
 	return controller;
 }
 
 - (void)showDocument:(OakDocument*)aDocument andSelect:(text::range_t const&)range inProject:(NSUUID*)identifier bringToFront:(BOOL)bringToFront
 {
-	auto document = std::make_shared<document::document_t>(aDocument);
 	if(range != text::range_t::undefined)
-		document->set_selection(range);
+		aDocument.selection = to_ns(range);
 
-	DocumentWindowController* controller = [self controllerWithDocuments:{ document } project:identifier];
+	DocumentWindowController* controller = [self controllerWithDocuments:@[ aDocument ] project:identifier];
 	if(bringToFront)
 		[controller bringToFront];
 	else if(![controller.window isVisible])
 		[controller.window orderWindow:NSWindowBelow relativeTo:[([NSApp keyWindow] ?: [NSApp mainWindow]) windowNumber]];
-	[controller openAndSelectDocument:document];
+	[controller openAndSelectDocument:wrap(aDocument)];
 }
 
 - (void)showDocuments:(NSArray<OakDocument*>*)someDocument
@@ -2918,11 +2927,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 	if(someDocument.count == 0)
 		return;
 
-	std::vector<document::document_ptr> documents;
-	for(OakDocument* document in someDocument)
-		documents.push_back(std::make_shared<document::document_t>(document));
-
-	DocumentWindowController* controller = [self controllerWithDocuments:documents project:nil];
+	DocumentWindowController* controller = [self controllerWithDocuments:someDocument project:nil];
 	[controller bringToFront];
 	[controller openAndSelectDocument:controller.cppDocuments[controller.selectedTabIndex]];
 }
@@ -2941,7 +2946,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 	DocumentWindowController* controller = nil;
 	for(DocumentWindowController* candidate in SortedControllers())
 	{
-		if(!candidate.fileBrowserVisible && candidate.cppDocuments.size() == 1 && is_disposable(candidate.selectedCppDocument))
+		if(!candidate.fileBrowserVisible && candidate.documents.count == 1 && is_disposable(candidate.selectedDocument))
 		{
 			controller = candidate;
 			break;
