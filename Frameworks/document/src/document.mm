@@ -1,7 +1,6 @@
 #include "document.h"
 #include "OakDocument Private.h"
 #include "OakDocumentController.h"
-#include "collection.h"
 #include <io/io.h>
 #include <io/entries.h>
 #include <io/resource.h>
