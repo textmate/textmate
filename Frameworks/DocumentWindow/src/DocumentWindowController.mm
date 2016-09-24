@@ -897,15 +897,16 @@ namespace
 		NSURL* url = [NSURL fileURLWithPath:[NSString stringWithCxxString:path::unique(path::join([folder fileSystemRepresentation], path))]];
 		if([[OakFileManager sharedInstance] createFileAtURL:url view:self.fileBrowser.view])
 		{
-			document::document_ptr doc = document::create(to_s([url path]));
-			doc->set_file_type(fileType);
+			OakDocument* doc = [OakDocumentController.sharedInstance documentWithPath:url.path];
+			doc.fileType = to_ns(fileType);
 
-			[self insertDocuments:{ doc } atIndex:_selectedTabIndex + 1 selecting:doc andClosing:self.disposableDocument ? @[ self.disposableDocument ] : nil];
+			[self insertDocuments:wrap(@[ doc ]) atIndex:_selectedTabIndex + 1 selecting:wrap(doc) andClosing:self.disposableDocument ? @[ self.disposableDocument ] : nil];
 
 			// Using openAndSelectDocument: will move focus to OakTextView
-			doc->sync_load();
-			self.selectedCppDocument = doc;
-			doc->close();
+			[doc loadModalForWindow:nil completionHandler:^(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID){
+				self.selectedCppDocument = wrap(doc);
+				[doc close];
+			}];
 
 			[self.fileBrowser editURL:url];
 		}
@@ -987,29 +988,25 @@ namespace
 
 - (void)openItems:(NSArray*)items closingOtherTabs:(BOOL)closeOtherTabsFlag
 {
-	std::vector<document::document_ptr> documents;
-	for(id item in items)
+	NSMutableArray<OakDocument*>* documents = [NSMutableArray array];
+	for(NSDictionary* item in items)
 	{
-		std::string const path  = to_s([item objectForKey:@"path"]);
-		std::string const uuid  = to_s([item objectForKey:@"identifier"]);
-		std::string const range = to_s([item objectForKey:@"selectionString"]);
-
-		document::document_ptr doc;
-		if(path == NULL_STR && oak::uuid_t::is_valid(uuid))
-			doc = document::find(uuid);
-		if(!doc && path != NULL_STR)
-			doc = document::create(path);
+		OakDocument* doc;
+		if(!item[@"path"] && item[@"identifier"])
+			doc = [OakDocumentController.sharedInstance findDocumentWithIdentifier:[[NSUUID alloc] initWithUUIDString:item[@"identifier"]]];
+		if(!doc && item[@"path"])
+			doc = [OakDocumentController.sharedInstance documentWithPath:item[@"path"]];
 
 		if(doc)
 		{
-			doc->set_recent_tracking(false);
-			if(range != NULL_STR)
-				doc->set_selection(range);
-			documents.push_back(doc);
+			doc.recentTrackingDisabled = YES;
+			if(item[@"selectionString"])
+				doc.selection = item[@"selectionString"];
+			[documents addObject:doc];
 		}
 	}
 
-	if(documents.empty())
+	if(!documents.count)
 		return;
 
 	NSMutableArray<NSUUID*>* tabsToClose = [NSMutableArray array];
@@ -1026,26 +1023,25 @@ namespace
 		[tabsToClose addObject:uuid];
 	}
 
-	[self insertDocuments:documents atIndex:_selectedTabIndex + 1 selecting:documents.back() andClosing:tabsToClose];
-	[self openAndSelectDocument:documents.back()];
+	[self insertDocuments:wrap(documents) atIndex:_selectedTabIndex + 1 selecting:wrap(documents.lastObject) andClosing:tabsToClose];
+	[self openAndSelectDocument:wrap(documents.lastObject)];
 
 	if(self.tabBarView && ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableTabAutoCloseKey])
 	{
-		NSInteger excessTabs = _cppDocuments.size() - std::max<NSUInteger>(self.tabBarView.countOfVisibleTabs, 8);
+		NSInteger excessTabs = _documents.count - std::max<NSUInteger>(self.tabBarView.countOfVisibleTabs, 8);
 		if(excessTabs > 0)
 		{
-			std::multimap<NSInteger, size_t> ranked;
-			for(size_t i = 0; i < _cppDocuments.size(); ++i)
-				ranked.emplace(_cppDocuments[i]->lru(), i);
+			std::multimap<NSInteger, NSUInteger> ranked;
+			for(NSUInteger i = 0; i < _documents.count; ++i)
+				ranked.emplace([OakDocumentController.sharedInstance lruRankForDocument:_documents[i]], i);
 
-			std::set<oak::uuid_t> newUUIDs;
-			std::transform(documents.begin(), documents.end(), inserter(newUUIDs, newUUIDs.end()), [](auto const& doc){ return doc->identifier(); });
+			NSSet<NSUUID*>* newUUIDs = [NSSet setWithArray:[documents valueForKey:@"identifier"]];
 
 			NSMutableIndexSet* indexSet = [NSMutableIndexSet indexSet];
 			for(auto const& pair : ranked)
 			{
-				document::document_ptr doc = _cppDocuments[pair.second];
-				if(!doc->is_modified() && ![self isDocumentSticky:doc->document()] && doc->is_on_disk() && newUUIDs.find(doc->identifier()) == newUUIDs.end())
+				OakDocument* doc = _documents[pair.second];
+				if(!doc.isDocumentEdited && ![self isDocumentSticky:doc] && doc.isOnDisk && ![newUUIDs containsObject:doc.identifier])
 					[indexSet addIndex:pair.second];
 				if([indexSet count] == excessTabs)
 					break;
@@ -1147,45 +1143,49 @@ namespace
 
 - (IBAction)saveDocument:(id)sender
 {
-	if(!_selectedCppDocument)
+	OakDocument* doc = self.selectedDocument;
+	if(!doc)
 		return;
 
-	if(_selectedCppDocument->path() != NULL_STR)
+	if(doc.path)
 	{
-		[self saveDocumentsUsingEnumerator:@[ _selectedCppDocument->document() ].objectEnumerator completionHandler:nil];
+		[self saveDocumentsUsingEnumerator:@[ doc ].objectEnumerator completionHandler:nil];
 	}
 	else
 	{
 		NSString* const suggestedFolder  = self.untitledSavePath;
-		NSString* const suggestedName    = [_selectedCppDocument->document() displayNameWithExtension:YES];
-		[OakSavePanel showWithPath:suggestedName directory:suggestedFolder fowWindow:self.window encoding:_selectedCppDocument->disk_encoding() completionHandler:^(NSString* path, encoding::type const& encoding){
+		NSString* const suggestedName    = [doc displayNameWithExtension:YES];
+		[OakSavePanel showWithPath:suggestedName directory:suggestedFolder fowWindow:self.window encoding:encoding::type(to_s(doc.diskNewlines), to_s(doc.diskEncoding)) completionHandler:^(NSString* path, encoding::type const& encoding){
 			if(!path)
 				return;
 
 			std::vector<std::string> const& paths = path::expand_braces(to_s(path));
 			ASSERT_LT(0, paths.size());
 
-			_selectedCppDocument->set_path(paths[0]);
-			_selectedCppDocument->set_disk_encoding(encoding);
+			doc.path = to_ns(paths[0]);
+			doc.diskNewlines = to_ns(encoding.newlines());
+			doc.diskEncoding = to_ns(encoding.charset());
 
-			// if(_selectedCppDocument->identifier() == scratchDocument)
-			// 	scratchDocument = oak::uuid_t();
+			// if(doc.identifier == _scratchDocument)
+			// 	self.scratchDocument = nil;
 
 			if(paths.size() > 1)
 			{
 				 // FIXME check if paths[0] already exists (overwrite)
 
-				std::vector<document::document_ptr> documents = { _selectedCppDocument };
-				std::transform(paths.begin() + 1, paths.end(), back_inserter(documents), [&encoding](std::string const& path) -> document::document_ptr {
-					document::document_ptr doc = document::create(path);
-					doc->set_disk_encoding(encoding);
-					return doc;
-				});
+				NSMutableArray<OakDocument*>* documents = [NSMutableArray arrayWithObject:doc];
+				for(size_t i = 1; i < paths.size(); ++i)
+				{
+					OakDocument* newDocument = [OakDocumentController.sharedInstance documentWithPath:to_ns(paths[i])];
+					newDocument.diskNewlines = to_ns(encoding.newlines());
+					newDocument.diskEncoding = to_ns(encoding.charset());
+					[documents addObject:newDocument];
+				}
 
-				[self insertDocuments:documents atIndex:_selectedTabIndex selecting:documents.front() andClosing:nil];
+				[self insertDocuments:wrap(documents) atIndex:_selectedTabIndex selecting:wrap(doc) andClosing:nil];
 			}
 
-			[self saveDocumentsUsingEnumerator:@[ _selectedCppDocument->document() ].objectEnumerator completionHandler:nil];
+			[self saveDocumentsUsingEnumerator:@[ doc ].objectEnumerator completionHandler:nil];
 		}];
 	}
 }
@@ -1786,9 +1786,9 @@ namespace
 {
 	if(NSIndexSet* indexSet = [self tryObtainIndexSetFrom:sender])
 	{
-		document::document_ptr doc = document::create();
-		[self insertDocuments:{ doc } atIndex:[indexSet firstIndex] selecting:doc andClosing:nil];
-		[self openAndSelectDocument:doc];
+		OakDocument* doc = [OakDocumentController.sharedInstance untitledDocument];
+		[self insertDocuments:wrap(@[ doc ]) atIndex:[indexSet firstIndex] selecting:wrap(doc) andClosing:nil];
+		[self openAndSelectDocument:wrap(doc)];
 	}
 }
 
@@ -1904,11 +1904,11 @@ namespace
 
 - (BOOL)performDropOfTabItem:(OakTabItem*)tabItem fromTabBar:(OakTabBarView*)sourceTabBar index:(NSUInteger)dragIndex toTabBar:(OakTabBarView*)destTabBar index:(NSUInteger)droppedIndex operation:(NSDragOperation)operation
 {
-	document::document_ptr srcDocument = document::find(to_s(tabItem.identifier));
+	OakDocument* srcDocument = [OakDocumentController.sharedInstance findDocumentWithIdentifier:[[NSUUID alloc] initWithUUIDString:tabItem.identifier]];
 	if(!srcDocument)
 		return NO;
 
-	[self insertDocuments:{ srcDocument } atIndex:droppedIndex selecting:_selectedCppDocument andClosing:@[ srcDocument->document().identifier ]];
+	[self insertDocuments:wrap(@[ srcDocument ]) atIndex:droppedIndex selecting:_selectedCppDocument andClosing:@[ srcDocument.identifier ]];
 
 	if(operation == NSDragOperationMove && sourceTabBar != destTabBar)
 	{
@@ -2904,8 +2904,8 @@ static NSUInteger DisableSessionSavingCount = 0;
 {
 	DocumentWindowController* controller = [self findOrCreateController:documents project:projectUUID];
 	BOOL hasDisposable = controller.disposableDocument ? YES : NO;
-	auto documentToSelect = wrap(controller.documents.count <= (hasDisposable ? 1 : 0) ? documents.firstObject : documents.lastObject);
-	[controller insertDocuments:wrap(documents) atIndex:controller.selectedTabIndex + 1 selecting:documentToSelect andClosing:hasDisposable ? @[ controller.disposableDocument ] : nil];
+	OakDocument* documentToSelect = controller.documents.count <= (hasDisposable ? 1 : 0) ? documents.firstObject : documents.lastObject;
+	[controller insertDocuments:wrap(documents) atIndex:controller.selectedTabIndex + 1 selecting:wrap(documentToSelect) andClosing:hasDisposable ? @[ controller.disposableDocument ] : nil];
 	return controller;
 }
 
