@@ -80,17 +80,12 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 }
 @end
 
-namespace
-{
-	struct tracking_info_t;
-}
-
 @interface DocumentWindowController () <NSWindowDelegate, OakTabBarViewDelegate, OakTabBarViewDataSource, OakTextViewDelegate, OakFileBrowserDelegate, QLPreviewPanelDelegate, QLPreviewPanelDataSource>
 {
 	OBJC_WATCH_LEAKS(DocumentWindowController);
 
-	std::map<oak::uuid_t, tracking_info_t> _trackedDocuments;
-	NSMutableSet<NSUUID*>*                 _stickyDocumentIdentifiers;
+	NSMutableDictionary<NSUUID*, NSNumber*>* _trackedDocuments;
+	NSMutableSet<NSUUID*>*                   _stickyDocumentIdentifiers;
 
 	scm::info_ptr                          _projectSCMInfo;
 	std::map<std::string, std::string>     _projectSCMVariables;
@@ -176,66 +171,6 @@ namespace
 	// = document_t helpers =
 	// ======================
 
-	struct tracking_info_t : document::document_t::callback_t
-	{
-		tracking_info_t (DocumentWindowController* self, document::document_ptr const& document) : _self(self), _document(document) { }
-		~tracking_info_t () { ASSERT_EQ(_open_count, 0); }
-
-		void track ()
-		{
-			if(++_open_count == 1)
-			{
-				_document->add_callback(this);
-				// TODO Add kqueue watching of documents
-			}
-
-			_document->document().keepBackupFile = YES;
-			[_document->document() open];
-		}
-
-		bool untrack ()
-		{
-			if(--_open_count == 0)
-				_document->remove_callback(this);
-			[_document->document() close];
-			return _open_count == 0;
-		}
-
-		void handle_document_event (document::document_ptr document, event_t event)
-		{
-			if(document && _self.selectedCppDocument && *document == *_self.selectedCppDocument)
-			{
-				switch(event)
-				{
-					case did_change_path:
-						[_self setDocumentPath:[NSString stringWithCxxString:document->logical_path()]];
-						[_self setDocumentDisplayName:[NSString stringWithCxxString:document->display_name()]];
-						if(!_self.projectPath)
-							_self.projectPath = [NSString stringWithCxxString:path::parent(document->path())];
-					break;
-
-					case did_change_on_disk_status:  [_self setDocumentIsOnDisk:document->is_on_disk()];                      break;
-					case did_change_modified_status: [_self setDocumentIsModified:document->is_modified()];                   break;
-				}
-			}
-
-			switch(event)
-			{
-				case did_change_modified_status:
-				case did_change_path:
-					[_self updateFileBrowserStatus:nil];
-					[_self.tabBarView reloadData];
-					[[_self class] scheduleSessionBackup:nil];
-				break;
-			}
-		}
-
-	private:
-		__weak DocumentWindowController* _self;
-		document::document_ptr _document;
-		size_t _open_count = 0;
-	};
-
 	static bool is_disposable (document::document_ptr const& doc)
 	{
 		return doc && !doc->is_modified() && !doc->is_on_disk() && doc->path() == NULL_STR && doc->is_loaded() && doc->buffer().empty();
@@ -253,7 +188,8 @@ namespace
 {
 	if((self = [super init]))
 	{
-		self.identifier  = [NSString stringWithCxxString:oak::uuid_t().generate()];
+		_trackedDocuments = [NSMutableDictionary dictionary];
+		self.identifier   = [NSString stringWithCxxString:oak::uuid_t().generate()];
 
 		self.tabBarView = [[OakTabBarView alloc] initWithFrame:NSZeroRect];
 		self.tabBarView.dataSource = self;
@@ -841,25 +777,66 @@ namespace
 // = Document Tracking =
 // =====================
 
-- (void)trackDocument:(document::document_ptr)aDocument
+- (void)trackDocument:(OakDocument*)document
 {
-	if(aDocument)
+	if(!document)
+		return;
+
+	NSUInteger trackCount = [_trackedDocuments[document.identifier] intValue];
+	_trackedDocuments[document.identifier] = @(trackCount+1);
+	if(trackCount == 0)
 	{
-		auto iter = _trackedDocuments.find(aDocument->identifier());
-		if(iter == _trackedDocuments.end())
-			iter = _trackedDocuments.emplace(aDocument->identifier(), tracking_info_t(self, aDocument)).first;
-		iter->second.track();
+		for(NSString* keyPath in @[ @"path", @"onDisk", @"documentEdited" ])
+			[document addObserver:self forKeyPath:keyPath options:0 context:nullptr];
 	}
+
+	document.keepBackupFile = YES;
+	[document open];
 }
 
-- (void)untrackDocument:(document::document_ptr)aDocument
+- (void)untrackDocument:(OakDocument*)document
 {
-	if(aDocument)
+	if(!document)
+		return;
+
+	NSUInteger trackCount = [_trackedDocuments[document.identifier] intValue];
+	_trackedDocuments[document.identifier] = @(trackCount-1);
+	if(trackCount == 1)
 	{
-		auto iter = _trackedDocuments.find(aDocument->identifier());
-		ASSERT(iter != _trackedDocuments.end());
-		if(iter->second.untrack())
-			_trackedDocuments.erase(iter);
+		for(NSString* keyPath in @[ @"path", @"onDisk", @"documentEdited" ])
+			[document removeObserver:self forKeyPath:keyPath];
+	}
+
+	[document close];
+}
+
+- (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)anObject change:(NSDictionary*)change context:(void*)context
+{
+	if(self.selectedDocument && anObject && [self.selectedDocument isEqual:anObject])
+	{
+		OakDocument* document = anObject;
+		if([keyPath isEqualToString:@"path"])
+		{
+			self.documentPath        = document.virtualPath ?: document.path;
+			self.documentDisplayName = document.displayName;
+			if(!self.projectPath)
+				self.projectPath = [document.path stringByDeletingLastPathComponent];
+		}
+		else if([keyPath isEqualToString:@"onDisk"])
+		{
+			self.documentIsOnDisk = document.isOnDisk;
+		}
+		else if([keyPath isEqualToString:@"documentEdited"])
+		{
+			self.documentIsModified = document.isDocumentEdited;
+		}
+	}
+
+	if([keyPath isEqualToString:@"path"] || [keyPath isEqualToString:@"documentEdited"])
+	{
+		[self updateFileBrowserStatus:self];
+		[self.tabBarView reloadData];
+		[[self class] scheduleSessionBackup:self];
 	}
 }
 
@@ -1673,14 +1650,14 @@ namespace
 {
 	for(auto document : newDocuments)
 	{
-		[self trackDocument:document];
+		[self trackDocument:document->document()];
 
 		// Avoid resetting directory when tearing off a tab (unless moved to new project)
 		if(!document->document().path && (self.projectPath || !document->document().directory))
 			document->document().directory = self.projectPath ?: self.defaultProjectPath;
 	}
 
-	for(auto document : _cppDocuments)
+	for(OakDocument* document in self.documents)
 		[self untrackDocument:document];
 
 	_cppDocuments = newDocuments;
@@ -1706,8 +1683,8 @@ namespace
 	if(newSelectedDocument)
 		newSelectedDocument->show();
 
-	[self trackDocument:newSelectedDocument];
-	[self untrackDocument:_selectedCppDocument];
+	[self trackDocument:newSelectedDocument ? newSelectedDocument->document() : nil];
+	[self untrackDocument:self.selectedDocument];
 
 	if(_selectedCppDocument = newSelectedDocument)
 	{
