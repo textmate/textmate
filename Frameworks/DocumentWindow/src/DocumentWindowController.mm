@@ -112,7 +112,6 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 @property (nonatomic) NSString*                   projectPath;
 
 @property (nonatomic) NSString*                   documentPath;
-@property (nonatomic) BOOL                        documentIsModified;
 @property (nonatomic) BOOL                        documentIsOnDisk;
 @property (nonatomic) scm::status::type           documentSCMStatus;
 
@@ -778,7 +777,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	}
 	else if([keyPath isEqualToString:@"selectedDocument.documentEdited"])
 	{
-		self.documentIsModified = document.isDocumentEdited;
+		self.window.documentEdited = document.isDocumentEdited;
 	}
 
 	if([keyPath hasSuffix:@"arrangedObjects.path"] || [keyPath hasSuffix:@"arrangedObjects.documentEdited"])
@@ -1453,15 +1452,6 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	}
 }
 
-- (void)setDocumentIsModified:(BOOL)newDocumentIsModified
-{
-	if(_documentIsModified != newDocumentIsModified)
-	{
-		_documentIsModified = newDocumentIsModified;
-		self.window.documentEdited = _documentIsModified;
-	}
-}
-
 - (void)setDocumentIsOnDisk:(BOOL)newDocumentIsOnDisk
 {
 	if(_documentIsOnDisk != newDocumentIsOnDisk)
@@ -1600,7 +1590,6 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 		self.projectPath        = projectPath;
 		self.documentPath       = _selectedDocument.virtualPath ?: newDocument.path;
-		self.documentIsModified = _selectedDocument.isDocumentEdited;
 		self.documentIsOnDisk   = _selectedDocument.isOnDisk;
 
 		self.documentView.document = _selectedDocument;
@@ -1610,7 +1599,6 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	{
 		self.projectPath        = nil;
 		self.documentPath       = nil;
-		self.documentIsModified = NO;
 		self.documentIsOnDisk   = NO;
 	}
 }
