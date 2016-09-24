@@ -1,5 +1,4 @@
-#import <document/document.h>
-#import <command/runner.h>
+#import <bundles/item.h>
 
 @class OakDocument;
 
@@ -11,8 +10,8 @@ PUBLIC @interface DocumentWindowController : NSObject
 @property (nonatomic, readonly) NSString*                        projectPath; // effectiveProjectPath
 @property (nonatomic, readonly) NSString*                        untitledSavePath;
 
-@property (nonatomic) std::vector<document::document_ptr>        cppDocuments;
-@property (nonatomic) document::document_ptr                     selectedCppDocument;
+@property (nonatomic, readonly) NSArray<OakDocument*>*           documents;
+@property (nonatomic, readonly) OakDocument*                     selectedDocument;
 @property (nonatomic) NSUInteger                                 selectedTabIndex;
 
 @property (nonatomic) BOOL                                       fileBrowserVisible;

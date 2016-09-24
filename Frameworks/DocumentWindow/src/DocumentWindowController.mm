@@ -80,7 +80,27 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 }
 @end
 
+namespace
+{
+	struct tracking_info_t;
+}
+
 @interface DocumentWindowController () <NSWindowDelegate, OakTabBarViewDelegate, OakTabBarViewDataSource, OakTextViewDelegate, OakFileBrowserDelegate, QLPreviewPanelDelegate, QLPreviewPanelDataSource>
+{
+	OBJC_WATCH_LEAKS(DocumentWindowController);
+
+	std::map<oak::uuid_t, tracking_info_t> _trackedDocuments;
+	NSMutableSet<NSUUID*>*                 _stickyDocumentIdentifiers;
+
+	scm::info_ptr                          _projectSCMInfo;
+	std::map<std::string, std::string>     _projectSCMVariables;
+	std::vector<std::string>               _projectScopeAttributes;  // kSettingsScopeAttributesKey
+	std::vector<std::string>               _externalScopeAttributes; // attr.scm.git, attr.project.ninja
+
+	scm::info_ptr                          _documentSCMInfo;
+	std::map<std::string, std::string>     _documentSCMVariables;
+	std::vector<std::string>               _documentScopeAttributes; // attr.os-version, attr.untitled / attr.rev-path + kSettingsScopeAttributesKey
+}
 @property (nonatomic) ProjectLayoutView*          layoutView;
 @property (nonatomic) OakTabBarView*              tabBarView;
 @property (nonatomic) OakDocumentView*            documentView;
@@ -106,6 +126,9 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 
 @property (nonatomic) NSArray*                    urlArrayForQuickLook;
 @property (nonatomic) NSArray<Bundle*>*           bundlesAlreadySuggested;
+
+@property (nonatomic) std::vector<document::document_ptr> cppDocuments;
+@property (nonatomic) document::document_ptr              selectedCppDocument;
 
 + (void)scheduleSessionBackup:(id)sender;
 
@@ -220,22 +243,6 @@ namespace
 }
 
 @implementation DocumentWindowController
-{
-	OBJC_WATCH_LEAKS(DocumentWindowController);
-
-	std::map<oak::uuid_t, tracking_info_t> _trackedDocuments;
-	NSMutableSet<NSUUID*>*                 _stickyDocumentIdentifiers;
-
-	scm::info_ptr                          _projectSCMInfo;
-	std::map<std::string, std::string>     _projectSCMVariables;
-	std::vector<std::string>               _projectScopeAttributes;  // kSettingsScopeAttributesKey
-	std::vector<std::string>               _externalScopeAttributes; // attr.scm.git, attr.project.ninja
-
-	scm::info_ptr                          _documentSCMInfo;
-	std::map<std::string, std::string>     _documentSCMVariables;
-	std::vector<std::string>               _documentScopeAttributes; // attr.os-version, attr.untitled / attr.rev-path + kSettingsScopeAttributesKey
-}
-
 + (KVDB*)sharedProjectStateDB
 {
 	NSString* appSupport = [[NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES) objectAtIndex:0] stringByAppendingPathComponent:@"TextMate"];
@@ -1648,6 +1655,19 @@ namespace
 // ==============
 // = Properties =
 // ==============
+
+- (OakDocument*)selectedDocument
+{
+	return _selectedCppDocument ? _selectedCppDocument->document() : nil;
+}
+
+- (NSArray<OakDocument*>*)documents
+{
+	NSMutableArray* res = [NSMutableArray array];
+	for(auto doc : _cppDocuments)
+		[res addObject:doc->document()];
+	return res;
+}
 
 - (void)setCppDocuments:(std::vector<document::document_ptr>)newDocuments
 {
