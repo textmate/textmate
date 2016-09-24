@@ -1528,9 +1528,6 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	[OakDocumentController.sharedInstance didTouchDocument:_selectedDocument];
 	[OakDocumentController.sharedInstance didTouchDocument:newDocument];
 
-	[self trackDocument:newDocument];
-	[self untrackDocument:_selectedDocument];
-
 	if(_selectedDocument = newDocument)
 	{
 		NSString* projectPath = self.defaultProjectPath ?: self.fileBrowser.path ?: [newDocument.path stringByDeletingLastPathComponent];
