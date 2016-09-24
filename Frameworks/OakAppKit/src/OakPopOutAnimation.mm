@@ -110,6 +110,8 @@ void OakShowPopOutAnimation (NSView* parentView, NSRect popOutRect, NSImage* anI
 
 		imageLayer = [CALayer layer];
 		[shapeLayer addSublayer:imageLayer];
+
+		CFRelease(path);
 	}
 	return self;
 }
