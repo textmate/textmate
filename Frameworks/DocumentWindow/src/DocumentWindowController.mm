@@ -2,7 +2,6 @@
 #import "ProjectLayoutView.h"
 #import "SelectGrammarViewController.h"
 #import "OakRunCommandWindowController.h"
-#import <document/document.h>
 #import <document/OakDocument.h>
 #import <document/OakDocumentController.h>
 #import <OakAppKit/NSAlert Additions.h>
@@ -86,7 +85,6 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 
 	NSMutableDictionary<NSUUID*, NSNumber*>* _trackedDocuments;
 	NSMutableSet<NSUUID*>*                   _stickyDocumentIdentifiers;
-	NSArray<OakDocument*>*                   _documents;
 
 	scm::info_ptr                          _projectSCMInfo;
 	std::map<std::string, std::string>     _projectSCMVariables;
@@ -123,8 +121,7 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 @property (nonatomic) NSArray*                    urlArrayForQuickLook;
 @property (nonatomic) NSArray<Bundle*>*           bundlesAlreadySuggested;
 
-@property (nonatomic) std::vector<document::document_ptr> cppDocuments;
-@property (nonatomic, readwrite) OakDocument*             selectedDocument;
+@property (nonatomic, readwrite) OakDocument*     selectedDocument;
 
 + (void)scheduleSessionBackup:(id)sender;
 
@@ -140,19 +137,6 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 
 namespace
 {
-	static document::document_ptr wrap (OakDocument* document)
-	{
-		return std::make_shared<document::document_t>(document);
-	}
-
-	static std::vector<document::document_ptr> wrap (NSArray<OakDocument*>* documents)
-	{
-		std::vector<document::document_ptr> res;
-		for(OakDocument* document in documents)
-			res.push_back(wrap(document));
-		return res;
-	}
-
 	// ==========================================
 	// = tracking document controller instances =
 	// ==========================================
@@ -327,7 +311,7 @@ namespace
 	if((([self.window styleMask] & NSFullScreenWindowMask) != NSFullScreenWindowMask) && !self.window.isZoomed)
 		[[NSUserDefaults standardUserDefaults] setObject:NSStringFromRect([self windowFrame]) forKey:@"DocumentControllerWindowFrame"];
 
-	self.cppDocuments        = { };
+	self.documents           = nil;
 	self.selectedDocument    = nil;
 	self.fileBrowserVisible  = NO; // Make window frame small as we no longer respond to savableWindowFrame
 	self.identifier          = nil; // This removes us from AllControllers and causes a release
@@ -338,7 +322,7 @@ namespace
 	if(_documents.count == 0)
 	{
 		OakDocument* defaultDocument = [OakDocumentController.sharedInstance untitledDocument];
-		self.cppDocuments = wrap(@[ defaultDocument ]);
+		self.documents = @[ defaultDocument ];
 		[self openAndSelectDocument:defaultDocument];
 	}
 	[self.window makeKeyAndOrderFront:sender];
@@ -536,7 +520,7 @@ namespace
 	if(createIfEmptyFlag && newDocuments.count == 0)
 		[newDocuments addObject:[OakDocumentController.sharedInstance untitledDocument]];
 
-	self.cppDocuments     = wrap(newDocuments);
+	self.documents        = newDocuments;
 	self.selectedTabIndex = newSelectedTabIndex;
 
 	if(newDocuments.count && ![newDocuments[newSelectedTabIndex].identifier isEqual:selectedUUID])
@@ -894,7 +878,7 @@ namespace
 			[documents addObjectsFromArray:delegate.documents];
 	}
 
-	self.cppDocuments = wrap(documents);
+	self.documents = documents;
 
 	for(DocumentWindowController* delegate in SortedControllers())
 	{
@@ -943,7 +927,7 @@ namespace
 		[newDocuments addObject:_documents[i]];
 	}
 
-	self.cppDocuments     = wrap(newDocuments);
+	self.documents        = newDocuments;
 	self.selectedTabIndex = [_documents indexOfObject:selectDocument];
 }
 
@@ -1584,32 +1568,21 @@ namespace
 // = Properties =
 // ==============
 
-- (NSArray<OakDocument*>*)documents
+- (void)setDocuments:(NSArray<OakDocument*>*)newDocuments
 {
-	return _documents;
-}
-
-- (void)setCppDocuments:(std::vector<document::document_ptr>)newDocuments
-{
-	for(auto document : newDocuments)
+	for(OakDocument* document in newDocuments)
 	{
-		[self trackDocument:document->document()];
+		[self trackDocument:document];
 
 		// Avoid resetting directory when tearing off a tab (unless moved to new project)
-		if(!document->document().path && (self.projectPath || !document->document().directory))
-			document->document().directory = self.projectPath ?: self.defaultProjectPath;
+		if(!document.path && (self.projectPath || !document.directory))
+			document.directory = self.projectPath ?: self.defaultProjectPath;
 	}
 
-	for(OakDocument* document in self.documents)
+	for(OakDocument* document in _documents)
 		[self untrackDocument:document];
 
-	_cppDocuments = newDocuments;
-
-	NSMutableArray* docs = [NSMutableArray array];
-	for(auto doc : _cppDocuments)
-		[docs addObject:doc->document()];
-	_documents = docs;
-
+	_documents = newDocuments;
 	if(_documents.count)
 		[self.tabBarView reloadData];
 
@@ -1735,7 +1708,7 @@ namespace
 		if(documents.count == 1)
 		{
 			DocumentWindowController* controller = [DocumentWindowController new];
-			controller.cppDocuments = wrap(documents);
+			controller.documents = documents;
 			if(path::is_child(to_s(documents.firstObject.path), to_s(self.projectPath)))
 				controller.defaultProjectPath = self.projectPath;
 			[controller openAndSelectDocument:documents.firstObject];
@@ -2582,7 +2555,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 	if(documents.count == 0)
 		[documents addObject:[OakDocumentController.sharedInstance untitledDocument]];
 
-	self.cppDocuments     = wrap(documents);
+	self.documents        = documents;
 	self.selectedTabIndex = selectedTabIndex;
 
 	[self openAndSelectDocument:documents[selectedTabIndex]];
@@ -2887,7 +2860,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 	{
 		controller.defaultProjectPath = folder;
 		controller.fileBrowserVisible = YES;
-		controller.cppDocuments       = wrap(@[ [OakDocumentController.sharedInstance untitledDocument] ]);
+		controller.documents          = @[ [OakDocumentController.sharedInstance untitledDocument] ];
 		controller.fileBrowser.url    = [NSURL fileURLWithPath:folder];
 
 		[controller openAndSelectDocument:controller.documents[controller.selectedTabIndex]];
