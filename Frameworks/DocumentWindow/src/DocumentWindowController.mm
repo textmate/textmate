@@ -749,17 +749,6 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 // = Document Tracking =
 // =====================
 
-- (void)trackDocument:(OakDocument*)document
-{
-	document.keepBackupFile = YES;
-	[document open];
-}
-
-- (void)untrackDocument:(OakDocument*)document
-{
-	[document close];
-}
-
 - (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)anObject change:(NSDictionary*)change context:(void*)context
 {
 	OakDocument* document = self.selectedDocument;
@@ -1498,7 +1487,8 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 {
 	for(OakDocument* document in newDocuments)
 	{
-		[self trackDocument:document];
+		document.keepBackupFile = YES;
+		[document open];
 
 		// Avoid resetting directory when tearing off a tab (unless moved to new project)
 		if(!document.path && (self.projectPath || !document.directory))
@@ -1506,7 +1496,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	}
 
 	for(OakDocument* document in _documents)
-		[self untrackDocument:document];
+		[document close];
 
 	_documents = newDocuments;
 	if(_documents.count)
