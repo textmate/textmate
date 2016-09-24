@@ -17,10 +17,8 @@
 
 #ifdef __OBJC__
 @class OakDocument;
-@class OakDocumentObserver;
 #else
 typedef struct objc_object OakDocument;
-typedef struct objc_object OakDocumentObserver;
 #include <objc/NSObjCRuntime.h> // NSInteger
 #endif
 
@@ -34,12 +32,11 @@ namespace document
 		WATCH_LEAKS(document_t);
 
 		document_t (OakDocument* document);
-		~document_t ();
 
 		bool operator== (document_t const& rhs) const { return this == &rhs || identifier() == rhs.identifier(); }
 		bool operator!= (document_t const& rhs) const { return this != &rhs && identifier() != rhs.identifier(); }
 
-		OakDocument* document ()      { observer(); return _document; }
+		OakDocument* document ()      { return _document; }
 
 		void sync_load (CFStringRef runLoopMode = kCFRunLoopDefaultMode);
 		bool sync_save (CFStringRef runLoopMode = kCFRunLoopDefaultMode);
@@ -107,39 +104,8 @@ namespace document
 		void remove_mark (text::pos_t const& pos, std::string const& mark);
 		void remove_all_marks (std::string const& typeToClear = NULL_STR);
 
-		// ===================
-		// = Callback system =
-		// ===================
-
-		struct callback_t
-		{
-			enum event_t
-			{
-				did_save,
-
-				did_change_load_status,
-				did_change_modified_status,
-				did_change_on_disk_status,
-				did_change_path,
-				did_change_file_type,
-				did_change_indent_settings,
-				did_change_marks,
-				did_change_content,
-			};
-
-			virtual ~callback_t () { }
-			virtual void handle_document_event (document_ptr document, event_t event) = 0;
-			virtual void document_will_delete (document_t* document) { }
-		};
-
-		void add_callback (callback_t* callback);
-		void remove_callback (callback_t* callback);
-
 	private:
 		OakDocument* _document;
-		OakDocumentObserver* _observer;
-
-		OakDocumentObserver* observer ();
 	};
 
 	PUBLIC document_ptr create (std::string const& path = NULL_STR);

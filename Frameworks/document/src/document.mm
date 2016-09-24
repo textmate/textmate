@@ -17,15 +17,6 @@ OAK_DEBUG_VAR(Document_LRU);
 OAK_DEBUG_VAR(Document_Tracker);
 OAK_DEBUG_VAR(Document);
 
-@interface OakDocumentObserver : NSObject
-{
-	oak::callbacks_t<document::document_t::callback_t> _callbacks;
-	OakDocument* _document;
-	document::document_t* _cppDocument;
-}
-@property (nonatomic, readonly) BOOL hasCallbacks;
-@end
-
 namespace document
 {
 	document_ptr create (std::string const& rawPath)
@@ -52,92 +43,6 @@ namespace document
 
 } /* document */
 
-// =======================
-// = OakDocumentObserver =
-// =======================
-
-static std::map<std::string, document::document_t::callback_t::event_t> const ObservedKeys =
-{
-	{ "path",             document::document_t::callback_t::did_change_path             },
-	{ "onDisk",           document::document_t::callback_t::did_change_on_disk_status   },
-	{ "fileType",         document::document_t::callback_t::did_change_file_type        },
-	{ "loaded",           document::document_t::callback_t::did_change_load_status      },
-	{ "documentEdited",   document::document_t::callback_t::did_change_modified_status  },
-	{ "tabSize",          document::document_t::callback_t::did_change_indent_settings, },
-	{ "softTabs",         document::document_t::callback_t::did_change_indent_settings, },
-};
-
-@implementation OakDocumentObserver
-- (id)initWithDocument:(OakDocument*)aDocument cppDocument:(document::document_t*)cppDocument
-{
-	if((self = [super init]))
-	{
-		_document    = aDocument;
-		_cppDocument = cppDocument;
-
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentContentDidChange:) name:OakDocumentContentDidChangeNotification object:_document];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentMarksDidChange:)   name:OakDocumentMarksDidChangeNotification object:_document];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentDidSave:)          name:OakDocumentDidSaveNotification object:_document];
-
-		for(auto pair : ObservedKeys)
-			[_document addObserver:self forKeyPath:to_ns(pair.first) options:(NSKeyValueObservingOptionNew|NSKeyValueObservingOptionOld) context:nullptr];
-	}
-	return self;
-}
-
-- (void)dealloc
-{
-	if(auto document = _cppDocument/*.lock()*/)
-		_callbacks(&document::document_t::callback_t::document_will_delete, document/*.get()*/);
-
-	for(auto pair : ObservedKeys)
-		[_document removeObserver:self forKeyPath:to_ns(pair.first)];
-
-	[[NSNotificationCenter defaultCenter] removeObserver:self];
-}
-
-- (void)addCallback:(document::document_t::callback_t*)callback
-{
-	_callbacks.add(callback);
-}
-
-- (void)removeCallback:(document::document_t::callback_t*)callback
-{
-	_callbacks.remove(callback);
-}
-
-- (BOOL)hasCallbacks
-{
-	return _callbacks.begin() != _callbacks.end();
-}
-
-- (void)breadcast:(document::document_t::callback_t::event_t)event
-{
-	if(auto document = _cppDocument/*.lock()*/)
-		_callbacks(&document::document_t::callback_t::handle_document_event, document->shared_from_this(), event);
-}
-
-- (void)documentContentDidChange:(NSNotification*)aNotification { [self breadcast:document::document_t::callback_t::did_change_content]; }
-- (void)documentMarksDidChange:(NSNotification*)aNotification   { [self breadcast:document::document_t::callback_t::did_change_marks]; }
-
-- (void)documentDidSave:(NSNotification*)aNotification
-{
-	[self breadcast:document::document_t::callback_t::did_save];
-}
-
-- (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)document change:(NSDictionary*)change context:(void*)context
-{
-	id oldValue = change[NSKeyValueChangeOldKey];
-	id newValue = change[NSKeyValueChangeNewKey];
-	if(oldValue == newValue || [oldValue isEqual:newValue])
-		return;
-
-	auto iter = ObservedKeys.find(to_s(keyPath));
-	if(iter != ObservedKeys.end())
-		[self breadcast:iter->second];
-}
-@end
-
 namespace document
 {
 	// =========
@@ -155,18 +60,6 @@ namespace document
 
 	document_t::document_t (OakDocument* document) : _document(document)
 	{
-	}
-
-	document_t::~document_t ()
-	{
-		_observer = nil;
-	}
-
-	OakDocumentObserver* document_t::observer ()
-	{
-		if(!_observer)
-			_observer = [[OakDocumentObserver alloc] initWithDocument:_document cppDocument:this];
-		return _observer;
 	}
 
 	oak::uuid_t document_t::identifier () const        { return to_s(_document.identifier.UUIDString); }
@@ -205,8 +98,6 @@ namespace document
 
 	void document_t::sync_load (CFStringRef runLoopMode)
 	{
-		observer(); // Create OakDocumentObserver if it does not already exist
-
 		__block bool didStop = false;
 
 		auto runLoop = std::make_shared<cf::run_loop_t>(runLoopMode);
@@ -261,8 +152,6 @@ namespace document
 	void document_t::close ()
 	{
 		[_document close];
-		if(!_document.isLoaded && !_observer.hasCallbacks)
-			_observer = nil;
 	}
 
 	void document_t::add_mark (text::pos_t const& pos, std::string const& mark, std::string const& value)
@@ -278,18 +167,6 @@ namespace document
 	void document_t::remove_all_marks (std::string const& typeToClear)
 	{
 		[_document removeAllMarksOfType:to_ns(typeToClear)];
-	}
-
-	void document_t::add_callback (callback_t* callback)
-	{
-		[observer() addCallback:callback];
-	}
-
-	void document_t::remove_callback (callback_t* callback)
-	{
-		[_observer removeCallback:callback];
-		if(!_document.isLoaded && !_observer.hasCallbacks)
-			_observer = nil;
 	}
 
 	// ===========
