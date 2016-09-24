@@ -86,6 +86,7 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 
 	NSMutableDictionary<NSUUID*, NSNumber*>* _trackedDocuments;
 	NSMutableSet<NSUUID*>*                   _stickyDocumentIdentifiers;
+	NSArray<OakDocument*>*                   _documents;
 
 	scm::info_ptr                          _projectSCMInfo;
 	std::map<std::string, std::string>     _projectSCMVariables;
@@ -1640,10 +1641,7 @@ namespace
 
 - (NSArray<OakDocument*>*)documents
 {
-	NSMutableArray* res = [NSMutableArray array];
-	for(auto doc : _cppDocuments)
-		[res addObject:doc->document()];
-	return res;
+	return _documents;
 }
 
 - (void)setCppDocuments:(std::vector<document::document_ptr>)newDocuments
@@ -1661,6 +1659,11 @@ namespace
 		[self untrackDocument:document];
 
 	_cppDocuments = newDocuments;
+
+	NSMutableArray* docs = [NSMutableArray array];
+	for(auto doc : _cppDocuments)
+		[docs addObject:doc->document()];
+	_documents = docs;
 
 	if(_cppDocuments.size())
 		[self.tabBarView reloadData];
