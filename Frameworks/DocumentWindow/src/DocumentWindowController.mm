@@ -900,7 +900,7 @@ namespace
 			OakDocument* doc = [OakDocumentController.sharedInstance documentWithPath:url.path];
 			doc.fileType = to_ns(fileType);
 
-			[self insertDocuments:wrap(@[ doc ]) atIndex:_selectedTabIndex + 1 selecting:wrap(doc) andClosing:self.disposableDocument ? @[ self.disposableDocument ] : nil];
+			[self insertDocuments:@[ doc ] atIndex:_selectedTabIndex + 1 selecting:doc andClosing:self.disposableDocument ? @[ self.disposableDocument ] : nil];
 
 			// Using openAndSelectDocument: will move focus to OakTextView
 			[doc loadModalForWindow:nil completionHandler:^(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID){
@@ -947,43 +947,41 @@ namespace
 	return nil;
 }
 
-- (void)insertDocuments:(std::vector<document::document_ptr> const&)documents atIndex:(NSInteger)index selecting:(document::document_ptr const&)selectDocument andClosing:(NSArray<NSUUID*>*)closeDocuments
+- (void)insertDocuments:(NSArray<OakDocument*>*)documents atIndex:(NSInteger)index selecting:(OakDocument*)selectDocument andClosing:(NSArray<NSUUID*>*)closeDocuments
 {
-	std::set<oak::uuid_t> oldUUIDs, newUUIDs;
-	std::transform(_cppDocuments.begin(), _cppDocuments.end(), inserter(oldUUIDs, oldUUIDs.end()), [](auto const& doc){ return doc->identifier(); });
-	std::transform(documents.begin(), documents.end(), inserter(newUUIDs, newUUIDs.end()), [](auto const& doc){ return doc->identifier(); });
-	for(NSUUID* uuid in closeDocuments)
-		oldUUIDs.erase(to_s(uuid.UUIDString));
+	NSSet<NSUUID*>* newUUIDs = [NSSet setWithArray:[documents valueForKey:@"identifier"]];
+	NSMutableSet<NSUUID*>* oldUUIDs = [NSMutableSet setWithArray:[self.documents valueForKey:@"identifier"]];
+	[oldUUIDs minusSet:[NSSet setWithArray:closeDocuments]];
 
 	BOOL shouldReorder = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableTabReorderingKey];
-	std::vector<document::document_ptr> newDocuments;
-	for(NSUInteger i = 0; i <= _cppDocuments.size(); ++i)
+	NSMutableArray<OakDocument*>* newDocuments = [NSMutableArray array];
+	for(NSUInteger i = 0; i <= _documents.count; ++i)
 	{
-		if(i == MIN(index, _cppDocuments.size()))
+		if(i == MIN(index, _documents.count))
 		{
-			std::set<oak::uuid_t> didInsert;
-			for(NSUInteger j = 0; j < documents.size(); ++j)
+			NSMutableSet<NSUUID*>* didInsert = [NSMutableSet set];
+			for(NSUInteger j = 0; j < documents.count; ++j)
 			{
-				if(didInsert.find(documents[j]->identifier()) == didInsert.end() && (shouldReorder || oldUUIDs.find(documents[j]->identifier()) == oldUUIDs.end()))
+				if(![didInsert containsObject:documents[j].identifier] && (shouldReorder || ![oldUUIDs containsObject:documents[j].identifier]))
 				{
-					newDocuments.push_back(documents[j]);
-					didInsert.insert(documents[j]->identifier());
+					[newDocuments addObject:documents[j]];
+					[didInsert addObject:documents[j].identifier];
 				}
 			}
 		}
 
-		if(i == _cppDocuments.size())
+		if(i == _documents.count)
 			break;
-		else if(shouldReorder && newUUIDs.find(_cppDocuments[i]->identifier()) != newUUIDs.end())
+		else if(shouldReorder && [newUUIDs containsObject:_documents[i].identifier])
 			continue;
-		else if([closeDocuments containsObject:_cppDocuments[i]->document().identifier])
+		else if([closeDocuments containsObject:_documents[i].identifier])
 			continue;
 
-		newDocuments.push_back(_cppDocuments[i]);
+		[newDocuments addObject:_documents[i]];
 	}
 
-	self.cppDocuments     = newDocuments;
-	self.selectedTabIndex = std::find_if(newDocuments.begin(), newDocuments.end(), [&selectDocument](auto const& doc){ return *doc == *selectDocument; }) - newDocuments.begin();
+	self.cppDocuments     = wrap(newDocuments);
+	self.selectedTabIndex = [_documents indexOfObject:selectDocument];
 }
 
 - (void)openItems:(NSArray*)items closingOtherTabs:(BOOL)closeOtherTabsFlag
@@ -1023,7 +1021,7 @@ namespace
 		[tabsToClose addObject:uuid];
 	}
 
-	[self insertDocuments:wrap(documents) atIndex:_selectedTabIndex + 1 selecting:wrap(documents.lastObject) andClosing:tabsToClose];
+	[self insertDocuments:documents atIndex:_selectedTabIndex + 1 selecting:documents.lastObject andClosing:tabsToClose];
 	[self openAndSelectDocument:wrap(documents.lastObject)];
 
 	if(self.tabBarView && ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableTabAutoCloseKey])
@@ -1182,7 +1180,7 @@ namespace
 					[documents addObject:newDocument];
 				}
 
-				[self insertDocuments:wrap(documents) atIndex:_selectedTabIndex selecting:wrap(doc) andClosing:nil];
+				[self insertDocuments:documents atIndex:_selectedTabIndex selecting:doc andClosing:nil];
 			}
 
 			[self saveDocumentsUsingEnumerator:@[ doc ].objectEnumerator completionHandler:nil];
@@ -1787,7 +1785,7 @@ namespace
 	if(NSIndexSet* indexSet = [self tryObtainIndexSetFrom:sender])
 	{
 		OakDocument* doc = [OakDocumentController.sharedInstance untitledDocument];
-		[self insertDocuments:wrap(@[ doc ]) atIndex:[indexSet firstIndex] selecting:wrap(doc) andClosing:nil];
+		[self insertDocuments:@[ doc ] atIndex:[indexSet firstIndex] selecting:doc andClosing:nil];
 		[self openAndSelectDocument:wrap(doc)];
 	}
 }
@@ -1908,7 +1906,7 @@ namespace
 	if(!srcDocument)
 		return NO;
 
-	[self insertDocuments:wrap(@[ srcDocument ]) atIndex:droppedIndex selecting:_selectedCppDocument andClosing:@[ srcDocument.identifier ]];
+	[self insertDocuments:@[ srcDocument ] atIndex:droppedIndex selecting:self.selectedDocument andClosing:@[ srcDocument.identifier ]];
 
 	if(operation == NSDragOperationMove && sourceTabBar != destTabBar)
 	{
@@ -2905,7 +2903,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 	DocumentWindowController* controller = [self findOrCreateController:documents project:projectUUID];
 	BOOL hasDisposable = controller.disposableDocument ? YES : NO;
 	OakDocument* documentToSelect = controller.documents.count <= (hasDisposable ? 1 : 0) ? documents.firstObject : documents.lastObject;
-	[controller insertDocuments:wrap(documents) atIndex:controller.selectedTabIndex + 1 selecting:wrap(documentToSelect) andClosing:hasDisposable ? @[ controller.disposableDocument ] : nil];
+	[controller insertDocuments:documents atIndex:controller.selectedTabIndex + 1 selecting:documentToSelect andClosing:hasDisposable ? @[ controller.disposableDocument ] : nil];
 	return controller;
 }
 
