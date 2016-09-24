@@ -75,6 +75,7 @@ PUBLIC @interface OakDocument : NSObject
 @property (nonatomic, getter = isOnDisk)                   BOOL onDisk;
 @property (nonatomic, getter = isOpen, readonly)           BOOL open;
 @property (nonatomic, getter = isLoaded, readonly)         BOOL loaded;
+@property (nonatomic, getter = isBufferEmpty, readonly)    BOOL bufferEmpty;
 @property (nonatomic, getter = isLoading, readonly)        BOOL loading;
 @property (nonatomic, getter = isInViewingMode)            BOOL inViewingMode;
 @property (nonatomic, getter = isDocumentEdited, readonly) BOOL documentEdited;

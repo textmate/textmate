@@ -191,7 +191,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 @property (nonatomic) NSUInteger untitledCount;
 @property (nonatomic) NSUInteger openCount;
 @property (nonatomic, getter = isLoaded, readwrite) BOOL loaded;
-@property (nonatomic, getter = isBufferEmpty) BOOL bufferEmpty;
+@property (nonatomic, getter = isBufferEmpty, readwrite) BOOL bufferEmpty;
 @property (nonatomic) NSInteger revision;
 @property (nonatomic) NSInteger savedRevision;
 @property (nonatomic) NSInteger backupRevision;
