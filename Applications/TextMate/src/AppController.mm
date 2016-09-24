@@ -437,9 +437,9 @@ BOOL HasDocumentWindow (NSArray* windows)
 	chooser.scope        = textView ? [textView scopeContext] : scope::wildcard;
 	chooser.hasSelection = [textView hasSelection];
 
-	if(DocumentWindowController* controller = [NSApp targetForAction:@selector(selectedDocument)])
+	if(DocumentWindowController* controller = [NSApp targetForAction:@selector(selectedCppDocument)])
 	{
-		OakDocument* doc = controller.selectedDocument->document();
+		OakDocument* doc = controller.selectedCppDocument->document();
 		chooser.path      = doc.path;
 		chooser.directory = [doc.path stringByDeletingLastPathComponent] ?: doc.directory;
 	}
