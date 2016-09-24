@@ -887,7 +887,7 @@ namespace
 			document::document_ptr doc = document::create(to_s([url path]));
 			doc->set_file_type(fileType);
 
-			[self insertDocuments:{ doc } atIndex:_selectedTabIndex + 1 selecting:doc andClosing:[self disposableDocument]];
+			[self insertDocuments:{ doc } atIndex:_selectedTabIndex + 1 selecting:doc andClosing:self.disposableDocument ? @[ self.disposableDocument ] : nil];
 
 			// Using openAndSelectDocument: will move focus to OakTextView
 			doc->sync_load();
@@ -926,19 +926,20 @@ namespace
 	}
 }
 
-- (std::set<oak::uuid_t>)disposableDocument
+- (NSUUID*)disposableDocument
 {
 	if(_selectedTabIndex < _cppDocuments.size() && is_disposable(_cppDocuments[_selectedTabIndex]))
-		return { _cppDocuments[_selectedTabIndex]->identifier() };
-	return { };
+		return _cppDocuments[_selectedTabIndex]->document().identifier;
+	return nil;
 }
 
-- (void)insertDocuments:(std::vector<document::document_ptr> const&)documents atIndex:(NSInteger)index selecting:(document::document_ptr const&)selectDocument andClosing:(std::set<oak::uuid_t> const&)closeDocuments
+- (void)insertDocuments:(std::vector<document::document_ptr> const&)documents atIndex:(NSInteger)index selecting:(document::document_ptr const&)selectDocument andClosing:(NSArray<NSUUID*>*)closeDocuments
 {
 	std::set<oak::uuid_t> oldUUIDs, newUUIDs;
 	std::transform(_cppDocuments.begin(), _cppDocuments.end(), inserter(oldUUIDs, oldUUIDs.end()), [](auto const& doc){ return doc->identifier(); });
 	std::transform(documents.begin(), documents.end(), inserter(newUUIDs, newUUIDs.end()), [](auto const& doc){ return doc->identifier(); });
-	std::for_each(closeDocuments.begin(), closeDocuments.end(), [&oldUUIDs](auto const& uuid){ oldUUIDs.erase(uuid); });
+	for(NSUUID* uuid in closeDocuments)
+		oldUUIDs.erase(to_s(uuid.UUIDString));
 
 	BOOL shouldReorder = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableTabReorderingKey];
 	std::vector<document::document_ptr> newDocuments;
@@ -961,7 +962,7 @@ namespace
 			break;
 		else if(shouldReorder && newUUIDs.find(_cppDocuments[i]->identifier()) != newUUIDs.end())
 			continue;
-		else if(closeDocuments.find(_cppDocuments[i]->identifier()) != closeDocuments.end())
+		else if([closeDocuments containsObject:_cppDocuments[i]->document().identifier])
 			continue;
 
 		newDocuments.push_back(_cppDocuments[i]);
@@ -998,18 +999,18 @@ namespace
 	if(documents.empty())
 		return;
 
-	std::set<oak::uuid_t> tabsToClose;
+	NSMutableArray<NSUUID*>* tabsToClose = [NSMutableArray array];
 	if(closeOtherTabsFlag)
 	{
 		for(auto const& doc : _cppDocuments)
 		{
 			if(!doc->is_modified() && ![self isDocumentSticky:doc])
-				tabsToClose.insert(doc->identifier());
+				[tabsToClose addObject:doc->document().identifier];
 		}
 	}
-	else
+	else if(NSUUID* uuid = self.disposableDocument)
 	{
-		tabsToClose = [self disposableDocument];
+		[tabsToClose addObject:uuid];
 	}
 
 	[self insertDocuments:documents atIndex:_selectedTabIndex + 1 selecting:documents.back() andClosing:tabsToClose];
@@ -1168,7 +1169,7 @@ namespace
 					return doc;
 				});
 
-				[self insertDocuments:documents atIndex:_selectedTabIndex selecting:documents.front() andClosing:{ }];
+				[self insertDocuments:documents atIndex:_selectedTabIndex selecting:documents.front() andClosing:nil];
 			}
 
 			[self saveDocumentsUsingEnumerator:@[ _selectedCppDocument->document() ].objectEnumerator completionHandler:nil];
@@ -1773,7 +1774,7 @@ namespace
 	if(NSIndexSet* indexSet = [self tryObtainIndexSetFrom:sender])
 	{
 		document::document_ptr doc = document::create();
-		[self insertDocuments:{ doc } atIndex:[indexSet firstIndex] selecting:doc andClosing:{ }];
+		[self insertDocuments:{ doc } atIndex:[indexSet firstIndex] selecting:doc andClosing:nil];
 		[self openAndSelectDocument:doc];
 	}
 }
@@ -1894,7 +1895,7 @@ namespace
 	if(!srcDocument)
 		return NO;
 
-	[self insertDocuments:{ srcDocument } atIndex:droppedIndex selecting:_selectedCppDocument andClosing:{ srcDocument->identifier() }];
+	[self insertDocuments:{ srcDocument } atIndex:droppedIndex selecting:_selectedCppDocument andClosing:@[ srcDocument->document().identifier ]];
 
 	if(operation == NSDragOperationMove && sourceTabBar != destTabBar)
 	{
@@ -2892,8 +2893,9 @@ static NSUInteger DisableSessionSavingCount = 0;
 - (DocumentWindowController*)controllerWithDocuments:(std::vector<document::document_ptr> const&)documents project:(NSUUID*)projectUUID
 {
 	DocumentWindowController* controller = [self findOrCreateController:documents project:projectUUID];
-	auto documentToSelect = controller.cppDocuments.size() <= [controller disposableDocument].size() ? documents.front() : documents.back();
-	[controller insertDocuments:documents atIndex:controller.selectedTabIndex + 1 selecting:documentToSelect andClosing:[controller disposableDocument]];
+	BOOL hasDisposable = controller.disposableDocument ? YES : NO;
+	auto documentToSelect = controller.cppDocuments.size() <= (hasDisposable ? 1 : 0) ? documents.front() : documents.back();
+	[controller insertDocuments:documents atIndex:controller.selectedTabIndex + 1 selecting:documentToSelect andClosing:hasDisposable ? @[ controller.disposableDocument ] : nil];
 	return controller;
 }
 
