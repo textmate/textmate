@@ -661,12 +661,12 @@ namespace
 		// Ensure we do not remove backup files, as they are used to restore untitled documents
 		if(restoresSession)
 		{
-			for(auto document : controller.cppDocuments)
+			for(OakDocument* document in controller.documents)
 			{
-				std::string const backupPath = document->backup_path();
-				document->detach_backup();
-				if(backupPath != NULL_STR && document->path() != NULL_STR)
-					unlink(backupPath.c_str());
+				NSString* backupPath = document.backupPath;
+				document.backupPath = nil;
+				if(backupPath && document.path)
+					unlink([backupPath fileSystemRepresentation]);
 			}
 		}
 	}
