@@ -112,8 +112,6 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 @property (nonatomic) NSString*                   projectPath;
 
 @property (nonatomic) NSString*                   documentPath;
-@property (nonatomic) BOOL                        documentIsOnDisk;
-@property (nonatomic) scm::status::type           documentSCMStatus;
 
 @property (nonatomic) NSArray*                    urlArrayForQuickLook;
 @property (nonatomic) NSArray<Bundle*>*           bundlesAlreadySuggested;
@@ -173,7 +171,7 @@ namespace
 	}
 }
 
-static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.path", @"arrayController.arrangedObjects.documentEdited", @"selectedDocument.path", @"selectedDocument.onDisk" , @"selectedDocument.documentEdited" ];
+static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.path", @"arrayController.arrangedObjects.documentEdited", @"selectedDocument.path", @"selectedDocument.icon", @"selectedDocument.onDisk" , @"selectedDocument.documentEdited" ];
 
 @implementation DocumentWindowController
 + (KVDB*)sharedProjectStateDB
@@ -771,13 +769,14 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		if(!self.projectPath)
 			self.projectPath = [document.path stringByDeletingLastPathComponent];
 	}
-	else if([keyPath isEqualToString:@"selectedDocument.onDisk"])
-	{
-		self.documentIsOnDisk = document.isOnDisk;
-	}
 	else if([keyPath isEqualToString:@"selectedDocument.documentEdited"])
 	{
 		self.window.documentEdited = document.isDocumentEdited;
+	}
+	else if([keyPath isEqualToString:@"selectedDocument.icon"] || [keyPath isEqualToString:@"selectedDocument.onDisk"])
+	{
+		self.window.representedFilename = document.isOnDisk ? document.path : @"";
+		[self.window standardWindowButton:NSWindowDocumentIconButton].image = document.isOnDisk ? document.icon : nil;
 	}
 
 	if([keyPath hasSuffix:@"arrangedObjects.path"] || [keyPath hasSuffix:@"arrangedObjects.documentEdited"])
@@ -1268,24 +1267,6 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 // = Window Title =
 // ================
 
-- (void)updateProxyIcon
-{
-	if(self.documentPath && self.documentIsOnDisk)
-	{
-		OakFileIconImage* icon = [[OakFileIconImage alloc] initWithSize:NSMakeSize(16, 16)];
-		icon.path      = self.documentPath;
-		icon.scmStatus = self.documentSCMStatus;
-
-		self.window.representedFilename = icon.path;
-		[self.window standardWindowButton:NSWindowDocumentIconButton].image = icon;
-	}
-	else
-	{
-		self.window.representedFilename = @"";
-		[self.window standardWindowButton:NSWindowDocumentIconButton].image = nil;
-	}
-}
-
 - (void)updateWindowTitleAndRevealFile
 {
 	[self updateWindowTitle];
@@ -1434,39 +1415,18 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 				_documentScopeAttributes.push_back(customAttributes);
 		}
 
-		self.documentSCMStatus    = scm::status::unknown;
 		self.documentSCMVariables = std::map<std::string, std::string>();
 
 		if(_documentSCMInfo = scm::info(docDirectory))
 		{
 			__weak DocumentWindowController* weakSelf = self;
 			_documentSCMInfo->add_callback(^(scm::info_t const& info){
-				weakSelf.documentSCMStatus    = info.status(to_s(weakSelf.documentPath));
 				weakSelf.documentSCMVariables = info.scm_variables();
 			});
 		}
 
 		[self updateExternalAttributes];
-		[self updateProxyIcon];
 		[self updateWindowTitleAndRevealFile];
-	}
-}
-
-- (void)setDocumentIsOnDisk:(BOOL)newDocumentIsOnDisk
-{
-	if(_documentIsOnDisk != newDocumentIsOnDisk)
-	{
-		_documentIsOnDisk = newDocumentIsOnDisk;
-		[self updateProxyIcon];
-	}
-}
-
-- (void)setDocumentSCMStatus:(scm::status::type)newDocumentSCMStatus
-{
-	if(_documentSCMStatus != newDocumentSCMStatus)
-	{
-		_documentSCMStatus = newDocumentSCMStatus;
-		[self updateProxyIcon];
 	}
 }
 
@@ -1590,7 +1550,6 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 		self.projectPath        = projectPath;
 		self.documentPath       = _selectedDocument.virtualPath ?: newDocument.path;
-		self.documentIsOnDisk   = _selectedDocument.isOnDisk;
 
 		self.documentView.document = _selectedDocument;
 		[[self class] scheduleSessionBackup:self];
@@ -1599,7 +1558,6 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	{
 		self.projectPath        = nil;
 		self.documentPath       = nil;
-		self.documentIsOnDisk   = NO;
 	}
 }
 
