@@ -629,7 +629,7 @@ namespace
 	NSDictionary* urls = userInfo[OakFileBrowserURLMapKey];
 	for(NSURL* url in urls)
 	{
-		if([url.path isEqualToString:self.documentPath])
+		if([url.path isEqualToString:self.selectedDocument.path])
 			[self openItems:@[ @{ @"path" : [urls[url] path] } ] closingOtherTabs:NO];
 	}
 }
@@ -1315,7 +1315,7 @@ namespace
 
 - (void)updateWindowTitle
 {
-	if(self.selectedDocument && _documentDisplayName)
+	if(self.selectedDocument.displayName)
 	{
 		auto map = self.selectedDocument.variables;
 		auto const& scm = _documentSCMVariables.empty() ? _projectSCMVariables : _documentSCMVariables;
@@ -1325,7 +1325,7 @@ namespace
 
 		NSString* docDirectory = self.selectedDocument.path ? [self.selectedDocument.path stringByDeletingLastPathComponent] : self.untitledSavePath;
 		settings_t const settings = settings_for_path(to_s(self.selectedDocument.virtualPath ?: self.selectedDocument.path), to_s(self.selectedDocument.fileType) + " " + to_s(self.scopeAttributes), to_s(docDirectory), map);
-		self.window.title = to_ns(settings.get(kSettingsWindowTitleKey, to_s(self.documentDisplayName)));
+		self.window.title = to_ns(settings.get(kSettingsWindowTitleKey, to_s(self.selectedDocument.displayName)));
 	}
 	else
 	{
@@ -1554,8 +1554,8 @@ namespace
 	if(branch != vars.end())
 		attributes.insert("attr.scm.branch." + branch->second);
 
-	if(self.documentSCMStatus != scm::status::unknown)
-		attributes.insert("attr.scm.status." + to_s(self.documentSCMStatus));
+	if(self.selectedDocument.scmStatus != scm::status::unknown)
+		attributes.insert("attr.scm.status." + to_s(self.selectedDocument.scmStatus));
 
 	attributes.insert(_documentScopeAttributes.begin(), _documentScopeAttributes.end());
 	attributes.insert(_projectScopeAttributes.begin(), _projectScopeAttributes.end());
