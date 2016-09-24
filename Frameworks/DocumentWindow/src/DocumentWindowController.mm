@@ -2,7 +2,7 @@
 #import "ProjectLayoutView.h"
 #import "SelectGrammarViewController.h"
 #import "OakRunCommandWindowController.h"
-#import <document/collection.h>
+#import <document/document.h>
 #import <document/OakDocument.h>
 #import <document/OakDocumentController.h>
 #import <OakAppKit/NSAlert Additions.h>
@@ -2797,145 +2797,129 @@ static NSUInteger DisableSessionSavingCount = 0;
 		[NSApp activateIgnoringOtherApps:YES];
 	}
 }
-
-+ (void)load
-{
-	static struct proxy_t : document::ui_proxy_t
-	{
-	private:
-		static DocumentWindowController* find_or_create_controller (std::vector<document::document_ptr> const& documents, oak::uuid_t const& projectUUID)
-		{
-			ASSERT(!documents.empty());
-
-			// =========================================
-			// = Return requested window, if it exists =
-			// =========================================
-
-			if(projectUUID != document::kCollectionAny)
-			{
-				if(DocumentWindowController* res = AllControllers()[[NSString stringWithCxxString:projectUUID]])
-					return res;
-
-				if(projectUUID == "00000000-0000-0000-0000-000000000000")
-					return [DocumentWindowController new];
-			}
-
-			// =========================================
-			// = Find window with one of our documents =
-			// =========================================
-
-			std::set<oak::uuid_t> uuids;
-			std::transform(documents.begin(), documents.end(), inserter(uuids, uuids.end()), [](document::document_ptr const& doc){ return doc->identifier(); });
-
-			for(DocumentWindowController* candidate in SortedControllers())
-			{
-				for(auto document : candidate.cppDocuments)
-				{
-					if(uuids.find(document->identifier()) != uuids.end())
-						return candidate;
-				}
-			}
-
-			// ================================================================
-			// = Find window with project folder closest to document’s parent =
-			// ================================================================
-
-			std::vector<document::document_ptr> documentsWithPath;
-			std::copy_if(documents.begin(), documents.end(), back_inserter(documentsWithPath), [](document::document_ptr const& doc){ return doc->path() != NULL_STR; });
-
-			std::set<std::string> parents;
-			std::transform(documentsWithPath.begin(), documentsWithPath.end(), inserter(parents, parents.end()), [](document::document_ptr const& doc){ return path::parent(doc->path()); });
-
-			std::map<size_t, DocumentWindowController*> candidates;
-			for(DocumentWindowController* candidate in SortedControllers())
-			{
-				if(candidate.projectPath)
-				{
-					std::string const projectPath = to_s(candidate.projectPath);
-					for(auto const& parent : parents)
-					{
-						if(path::is_child(parent, projectPath))
-							candidates.emplace(parent.size() - projectPath.size(), candidate);
-					}
-				}
-			}
-
-			if(!candidates.empty())
-				return candidates.begin()->second;
-
-			// ==============================================
-			// = Use frontmost window if a “scratch” window =
-			// ==============================================
-
-			if(DocumentWindowController* candidate = [SortedControllers() firstObject])
-			{
-				if(!candidate.fileBrowserVisible && candidate.cppDocuments.size() == 1 && is_disposable(candidate.selectedCppDocument))
-					return candidate;
-			}
-
-			// ===================================
-			// = Give up and create a new window =
-			// ===================================
-
-			DocumentWindowController* res = [DocumentWindowController new];
-
-			if(!parents.empty()) // setup project folder for new window
-			{
-				std::vector<std::string> rankedParents(parents.begin(), parents.end());
-				std::sort(rankedParents.begin(), rankedParents.end(), [](std::string const& lhs, std::string const& rhs){ return lhs.size() < rhs.size(); });
-				res.defaultProjectPath = [NSString stringWithCxxString:rankedParents.front()];
-			}
-
-			return res;
-		}
-
-		static DocumentWindowController* controller_with_documents (std::vector<document::document_ptr> const& documents, oak::uuid_t const& projectUUID = document::kCollectionAny)
-		{
-			DocumentWindowController* controller = find_or_create_controller(documents, projectUUID);
-			auto documentToSelect = controller.cppDocuments.size() <= [controller disposableDocument].size() ? documents.front() : documents.back();
-			[controller insertDocuments:documents atIndex:controller.selectedTabIndex + 1 selecting:documentToSelect andClosing:[controller disposableDocument]];
-			return controller;
-		}
-
-	public:
-		void show_documents (std::vector<document::document_ptr> const& documents) const
-		{
-			DocumentWindowController* controller = controller_with_documents(documents);
-			[controller bringToFront];
-			[controller openAndSelectDocument:controller.cppDocuments[controller.selectedTabIndex]];
-		}
-
-		void show_document (oak::uuid_t const& collection, document::document_ptr document, text::range_t const& range, bool bringToFront) const
-		{
-			if(range != text::range_t::undefined)
-				document->set_selection(range);
-
-			DocumentWindowController* controller = controller_with_documents({ document }, collection);
-			if(bringToFront)
-				[controller bringToFront];
-			else if(![controller.window isVisible])
-				[controller.window orderWindow:NSWindowBelow relativeTo:[([NSApp keyWindow] ?: [NSApp mainWindow]) windowNumber]];
-			[controller openAndSelectDocument:document];
-		}
-
-	} proxy;
-
-	document::set_ui_proxy(&proxy);
-}
 @end
 
 @implementation OakDocumentController (OakDocumentWindowControllerCategory)
-- (void)showDocument:(OakDocument*)aDocument andSelect:(text::range_t const&)selection inProject:(NSUUID*)identifier bringToFront:(BOOL)bringToFront
+- (DocumentWindowController*)findOrCreateController:(std::vector<document::document_ptr> const&)documents project:(NSUUID*)projectUUID
 {
-	document::show(std::make_shared<document::document_t>(aDocument), identifier ? oak::uuid_t(to_s(identifier.UUIDString)) : document::kCollectionAny, selection, bringToFront);
+	ASSERT(!documents.empty());
+
+	// =========================================
+	// = Return requested window, if it exists =
+	// =========================================
+
+	if(projectUUID)
+	{
+		if(DocumentWindowController* res = AllControllers()[projectUUID.UUIDString])
+			return res;
+
+		if([projectUUID.UUIDString isEqual:@"00000000-0000-0000-0000-000000000000"])
+			return [DocumentWindowController new];
+	}
+
+	// =========================================
+	// = Find window with one of our documents =
+	// =========================================
+
+	std::set<oak::uuid_t> uuids;
+	std::transform(documents.begin(), documents.end(), inserter(uuids, uuids.end()), [](document::document_ptr const& doc){ return doc->identifier(); });
+
+	for(DocumentWindowController* candidate in SortedControllers())
+	{
+		for(auto document : candidate.cppDocuments)
+		{
+			if(uuids.find(document->identifier()) != uuids.end())
+				return candidate;
+		}
+	}
+
+	// ================================================================
+	// = Find window with project folder closest to document’s parent =
+	// ================================================================
+
+	std::vector<document::document_ptr> documentsWithPath;
+	std::copy_if(documents.begin(), documents.end(), back_inserter(documentsWithPath), [](document::document_ptr const& doc){ return doc->path() != NULL_STR; });
+
+	std::set<std::string> parents;
+	std::transform(documentsWithPath.begin(), documentsWithPath.end(), inserter(parents, parents.end()), [](document::document_ptr const& doc){ return path::parent(doc->path()); });
+
+	std::map<size_t, DocumentWindowController*> candidates;
+	for(DocumentWindowController* candidate in SortedControllers())
+	{
+		if(candidate.projectPath)
+		{
+			std::string const projectPath = to_s(candidate.projectPath);
+			for(auto const& parent : parents)
+			{
+				if(path::is_child(parent, projectPath))
+					candidates.emplace(parent.size() - projectPath.size(), candidate);
+			}
+		}
+	}
+
+	if(!candidates.empty())
+		return candidates.begin()->second;
+
+	// ==============================================
+	// = Use frontmost window if a “scratch” window =
+	// ==============================================
+
+	if(DocumentWindowController* candidate = [SortedControllers() firstObject])
+	{
+		if(!candidate.fileBrowserVisible && candidate.cppDocuments.size() == 1 && is_disposable(candidate.selectedCppDocument))
+			return candidate;
+	}
+
+	// ===================================
+	// = Give up and create a new window =
+	// ===================================
+
+	DocumentWindowController* res = [DocumentWindowController new];
+
+	if(!parents.empty()) // setup project folder for new window
+	{
+		std::vector<std::string> rankedParents(parents.begin(), parents.end());
+		std::sort(rankedParents.begin(), rankedParents.end(), [](std::string const& lhs, std::string const& rhs){ return lhs.size() < rhs.size(); });
+		res.defaultProjectPath = [NSString stringWithCxxString:rankedParents.front()];
+	}
+
+	return res;
+}
+
+- (DocumentWindowController*)controllerWithDocuments:(std::vector<document::document_ptr> const&)documents project:(NSUUID*)projectUUID
+{
+	DocumentWindowController* controller = [self findOrCreateController:documents project:projectUUID];
+	auto documentToSelect = controller.cppDocuments.size() <= [controller disposableDocument].size() ? documents.front() : documents.back();
+	[controller insertDocuments:documents atIndex:controller.selectedTabIndex + 1 selecting:documentToSelect andClosing:[controller disposableDocument]];
+	return controller;
+}
+
+- (void)showDocument:(OakDocument*)aDocument andSelect:(text::range_t const&)range inProject:(NSUUID*)identifier bringToFront:(BOOL)bringToFront
+{
+	auto document = std::make_shared<document::document_t>(aDocument);
+	if(range != text::range_t::undefined)
+		document->set_selection(range);
+
+	DocumentWindowController* controller = [self controllerWithDocuments:{ document } project:identifier];
+	if(bringToFront)
+		[controller bringToFront];
+	else if(![controller.window isVisible])
+		[controller.window orderWindow:NSWindowBelow relativeTo:[([NSApp keyWindow] ?: [NSApp mainWindow]) windowNumber]];
+	[controller openAndSelectDocument:document];
 }
 
 - (void)showDocuments:(NSArray<OakDocument*>*)someDocument
 {
+	if(someDocument.count == 0)
+		return;
+
 	std::vector<document::document_ptr> documents;
 	for(OakDocument* document in someDocument)
 		documents.push_back(std::make_shared<document::document_t>(document));
-	document::show(documents);
+
+	DocumentWindowController* controller = [self controllerWithDocuments:documents project:nil];
+	[controller bringToFront];
+	[controller openAndSelectDocument:controller.cppDocuments[controller.selectedTabIndex]];
 }
 
 - (void)showFileBrowserAtPath:(NSString*)aPath
