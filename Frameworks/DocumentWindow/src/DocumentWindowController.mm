@@ -113,7 +113,6 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 @property (nonatomic) NSString*                   projectPath;
 
 @property (nonatomic) NSString*                   documentPath;
-@property (nonatomic) NSString*                   documentDisplayName;
 @property (nonatomic) BOOL                        documentIsModified;
 @property (nonatomic) BOOL                        documentIsOnDisk;
 @property (nonatomic) scm::status::type           documentSCMStatus;
@@ -781,8 +780,7 @@ namespace
 		OakDocument* document = anObject;
 		if([keyPath isEqualToString:@"path"])
 		{
-			self.documentPath        = document.virtualPath ?: document.path;
-			self.documentDisplayName = document.displayName;
+			self.documentPath = document.virtualPath ?: document.path;
 			if(!self.projectPath)
 				self.projectPath = [document.path stringByDeletingLastPathComponent];
 		}
@@ -1468,15 +1466,6 @@ namespace
 	}
 }
 
-- (void)setDocumentDisplayName:(NSString*)newDisplayName
-{
-	if(_documentDisplayName != newDisplayName && ![_documentDisplayName isEqualToString:newDisplayName])
-	{
-		_documentDisplayName = newDisplayName;
-		[self updateWindowTitleAndRevealFile];
-	}
-}
-
 - (void)setDocumentIsModified:(BOOL)newDocumentIsModified
 {
 	if(_documentIsModified != newDocumentIsModified)
@@ -1622,22 +1611,20 @@ namespace
 				projectPath = [[url filePathURL] path];
 		}
 
-		self.projectPath         = projectPath;
-		self.documentPath        = _selectedDocument.virtualPath ?: newDocument.path;
-		self.documentDisplayName = _selectedDocument.displayName;
-		self.documentIsModified  = _selectedDocument.isDocumentEdited;
-		self.documentIsOnDisk    = _selectedDocument.isOnDisk;
+		self.projectPath        = projectPath;
+		self.documentPath       = _selectedDocument.virtualPath ?: newDocument.path;
+		self.documentIsModified = _selectedDocument.isDocumentEdited;
+		self.documentIsOnDisk   = _selectedDocument.isOnDisk;
 
 		self.documentView.document = _selectedDocument;
 		[[self class] scheduleSessionBackup:self];
 	}
 	else
 	{
-		self.projectPath         = nil;
-		self.documentPath        = nil;
-		self.documentDisplayName = nil;
-		self.documentIsModified  = NO;
-		self.documentIsOnDisk    = NO;
+		self.projectPath        = nil;
+		self.documentPath       = nil;
+		self.documentIsModified = NO;
+		self.documentIsOnDisk   = NO;
 	}
 }
 
