@@ -83,8 +83,7 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 {
 	OBJC_WATCH_LEAKS(DocumentWindowController);
 
-	NSMutableDictionary<NSUUID*, NSNumber*>* _trackedDocuments;
-	NSMutableSet<NSUUID*>*                   _stickyDocumentIdentifiers;
+	NSMutableSet<NSUUID*>*                 _stickyDocumentIdentifiers;
 
 	scm::info_ptr                          _projectSCMInfo;
 	std::map<std::string, std::string>     _projectSCMVariables;
@@ -121,6 +120,7 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 @property (nonatomic) NSArray<Bundle*>*           bundlesAlreadySuggested;
 
 @property (nonatomic, readwrite) OakDocument*     selectedDocument;
+@property (nonatomic) NSArrayController*          arrayController;
 
 + (void)scheduleSessionBackup:(id)sender;
 
@@ -174,6 +174,8 @@ namespace
 	}
 }
 
+static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.path", @"arrayController.arrangedObjects.documentEdited", @"selectedDocument.path", @"selectedDocument.onDisk" , @"selectedDocument.documentEdited" ];
+
 @implementation DocumentWindowController
 + (KVDB*)sharedProjectStateDB
 {
@@ -185,7 +187,6 @@ namespace
 {
 	if((self = [super init]))
 	{
-		_trackedDocuments = [NSMutableDictionary dictionary];
 		self.identifier   = [NSString stringWithCxxString:oak::uuid_t().generate()];
 
 		self.tabBarView = [[OakTabBarView alloc] initWithFrame:NSZeroRect];
@@ -217,6 +218,12 @@ namespace
 		[self.window.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[view]|" options:0 metrics:nil views:@{ @"view" : self.layoutView }]];
 		[self.window.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[view]|" options:0 metrics:nil views:@{ @"view" : self.layoutView }]];
 
+		_arrayController = [[NSArrayController alloc] init];
+		[_arrayController bind:NSContentBinding toObject:self withKeyPath:@"documents" options:nil];
+
+		for(NSString* keyPath in kObservedKeyPaths)
+			[self addObserver:self forKeyPath:keyPath options:NSKeyValueObservingOptionInitial context:nullptr];
+
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidBecomeActiveNotification:) name:NSApplicationDidBecomeActiveNotification object:NSApp];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidResignActiveNotification:) name:NSApplicationDidResignActiveNotification object:NSApp];
@@ -229,6 +236,9 @@ namespace
 
 - (void)dealloc
 {
+	for(NSString* keyPath in kObservedKeyPaths)
+		[self removeObserver:self forKeyPath:keyPath];
+
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 
 	self.window.delegate        = nil;
@@ -309,6 +319,8 @@ namespace
 {
 	if((([self.window styleMask] & NSFullScreenWindowMask) != NSFullScreenWindowMask) && !self.window.isZoomed)
 		[[NSUserDefaults standardUserDefaults] setObject:NSStringFromRect([self windowFrame]) forKey:@"DocumentControllerWindowFrame"];
+
+	[_arrayController unbind:NSContentBinding];
 
 	self.documents           = nil;
 	self.selectedDocument    = nil;
@@ -742,59 +754,34 @@ namespace
 
 - (void)trackDocument:(OakDocument*)document
 {
-	if(!document)
-		return;
-
-	NSUInteger trackCount = [_trackedDocuments[document.identifier] intValue];
-	_trackedDocuments[document.identifier] = @(trackCount+1);
-	if(trackCount == 0)
-	{
-		for(NSString* keyPath in @[ @"path", @"onDisk", @"documentEdited" ])
-			[document addObserver:self forKeyPath:keyPath options:0 context:nullptr];
-	}
-
 	document.keepBackupFile = YES;
 	[document open];
 }
 
 - (void)untrackDocument:(OakDocument*)document
 {
-	if(!document)
-		return;
-
-	NSUInteger trackCount = [_trackedDocuments[document.identifier] intValue];
-	_trackedDocuments[document.identifier] = @(trackCount-1);
-	if(trackCount == 1)
-	{
-		for(NSString* keyPath in @[ @"path", @"onDisk", @"documentEdited" ])
-			[document removeObserver:self forKeyPath:keyPath];
-	}
-
 	[document close];
 }
 
 - (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)anObject change:(NSDictionary*)change context:(void*)context
 {
-	if(self.selectedDocument && anObject && [self.selectedDocument isEqual:anObject])
+	OakDocument* document = self.selectedDocument;
+	if([keyPath isEqualToString:@"selectedDocument.path"])
 	{
-		OakDocument* document = anObject;
-		if([keyPath isEqualToString:@"path"])
-		{
-			self.documentPath = document.virtualPath ?: document.path;
-			if(!self.projectPath)
-				self.projectPath = [document.path stringByDeletingLastPathComponent];
-		}
-		else if([keyPath isEqualToString:@"onDisk"])
-		{
-			self.documentIsOnDisk = document.isOnDisk;
-		}
-		else if([keyPath isEqualToString:@"documentEdited"])
-		{
-			self.documentIsModified = document.isDocumentEdited;
-		}
+		self.documentPath = document.virtualPath ?: document.path;
+		if(!self.projectPath)
+			self.projectPath = [document.path stringByDeletingLastPathComponent];
+	}
+	else if([keyPath isEqualToString:@"selectedDocument.onDisk"])
+	{
+		self.documentIsOnDisk = document.isOnDisk;
+	}
+	else if([keyPath isEqualToString:@"selectedDocument.documentEdited"])
+	{
+		self.documentIsModified = document.isDocumentEdited;
 	}
 
-	if([keyPath isEqualToString:@"path"] || [keyPath isEqualToString:@"documentEdited"])
+	if([keyPath hasSuffix:@"arrangedObjects.path"] || [keyPath hasSuffix:@"arrangedObjects.documentEdited"])
 	{
 		[self updateFileBrowserStatus:self];
 		[self.tabBarView reloadData];
