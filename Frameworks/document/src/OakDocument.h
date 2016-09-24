@@ -69,6 +69,7 @@ PUBLIC @interface OakDocument : NSObject
 - (void)close;
 
 - (void)markDocumentSaved;
+- (BOOL)saveBackup:(id)sender;
 
 @property (nonatomic) osx::authorization_t authorization;
 
