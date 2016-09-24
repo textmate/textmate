@@ -1548,16 +1548,14 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 				projectPath = [[url filePathURL] path];
 		}
 
-		self.projectPath        = projectPath;
-		self.documentPath       = _selectedDocument.virtualPath ?: newDocument.path;
+		self.projectPath = projectPath;
 
 		self.documentView.document = _selectedDocument;
 		[[self class] scheduleSessionBackup:self];
 	}
 	else
 	{
-		self.projectPath        = nil;
-		self.documentPath       = nil;
+		self.projectPath = nil;
 	}
 }
 
