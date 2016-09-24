@@ -207,7 +207,6 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 @property (nonatomic) NSArray<void(^)(OakDocumentIOResult, NSString*, oak::uuid_t const&)>* loadCompletionHandlers;
 
 // These are also exposed in ‘OakDocument Private.h’
-@property (nonatomic) NSString* backupPath;
 @property (nonatomic) NSString* folded;
 @end
 

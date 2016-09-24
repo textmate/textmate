@@ -5,7 +5,6 @@
 - (instancetype)initWithPath:(NSString*)aPath;
 
 @property (nonatomic) NSUInteger  untitledCount;
-@property (nonatomic) NSString*   backupPath;
 @property (nonatomic) NSString*   folded;
 
 - (ng::buffer_t&)buffer;

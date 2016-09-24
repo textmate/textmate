@@ -54,6 +54,7 @@ PUBLIC @interface OakDocument : NSObject
 @property (nonatomic) NSString* customName;
 @property (nonatomic, readonly) NSString* displayName;
 @property (nonatomic, readonly) NSImage* icon;
+@property (nonatomic) NSString* backupPath;
 
 @property (nonatomic) NSString* fileType;     // Lazy: Depends on path and firstLine
 @property (nonatomic) NSString* diskEncoding;
