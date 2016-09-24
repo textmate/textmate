@@ -758,15 +758,13 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		if(!self.projectPath)
 			self.projectPath = [document.path stringByDeletingLastPathComponent];
 	}
-	else if([keyPath isEqualToString:@"selectedDocument.documentEdited"])
-	{
+
+	if([keyPath isEqualToString:@"selectedDocument.documentEdited"])
 		self.window.documentEdited = document.isDocumentEdited;
-	}
-	else if([keyPath isEqualToString:@"selectedDocument.icon"] || [keyPath isEqualToString:@"selectedDocument.onDisk"])
-	{
+	if([keyPath isEqualToString:@"selectedDocument.onDisk"] || [keyPath isEqualToString:@"selectedDocument.path"])
 		self.window.representedFilename = document.isOnDisk ? document.path : @"";
+	if([keyPath isEqualToString:@"selectedDocument.onDisk"] || [keyPath isEqualToString:@"selectedDocument.icon"])
 		[self.window standardWindowButton:NSWindowDocumentIconButton].image = document.isOnDisk ? document.icon : nil;
-	}
 
 	if([keyPath hasSuffix:@"arrangedObjects.path"] || [keyPath hasSuffix:@"arrangedObjects.displayName"] || [keyPath hasSuffix:@"arrangedObjects.documentEdited"])
 	{
