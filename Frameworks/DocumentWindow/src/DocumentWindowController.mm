@@ -574,7 +574,7 @@ namespace
 	NSMutableIndexSet* allTabs = [NSMutableIndexSet indexSetWithIndexesInRange:NSMakeRange(0, _cppDocuments.size())];
 	for(size_t i = 0; i < _cppDocuments.size(); ++i)
 	{
-		if(_cppDocuments[i]->is_modified() && _cppDocuments[i]->path() == NULL_STR || [self isDocumentSticky:_cppDocuments[i]])
+		if(_cppDocuments[i]->is_modified() && _cppDocuments[i]->path() == NULL_STR || [self isDocumentSticky:_cppDocuments[i]->document()])
 			[allTabs removeIndex:i];
 	}
 	[self closeTabsAtIndexes:allTabs askToSaveChanges:YES createDocumentIfEmpty:YES];
@@ -587,7 +587,7 @@ namespace
 	NSMutableIndexSet* otherTabs = [NSMutableIndexSet indexSet];
 	for(size_t i = 0; i < _cppDocuments.size(); ++i)
 	{
-		if(i != tabIndex && (!_cppDocuments[i]->is_modified() || _cppDocuments[i]->path() != NULL_STR) && ![self isDocumentSticky:_cppDocuments[i]])
+		if(i != tabIndex && (!_cppDocuments[i]->is_modified() || _cppDocuments[i]->path() != NULL_STR) && ![self isDocumentSticky:_cppDocuments[i]->document()])
 			[otherTabs addIndex:i];
 	}
 	[self closeTabsAtIndexes:otherTabs askToSaveChanges:YES createDocumentIfEmpty:YES];
@@ -841,19 +841,19 @@ namespace
 	}
 }
 
-- (BOOL)isDocumentSticky:(document::document_ptr)aDocument
+- (BOOL)isDocumentSticky:(OakDocument*)aDocument
 {
-	return [_stickyDocumentIdentifiers containsObject:aDocument->document().identifier];
+	return [_stickyDocumentIdentifiers containsObject:aDocument.identifier];
 }
 
-- (void)setDocument:(document::document_ptr)aDocument sticky:(BOOL)stickyFlag
+- (void)setDocument:(OakDocument*)aDocument sticky:(BOOL)stickyFlag
 {
 	if(stickyFlag)
 		_stickyDocumentIdentifiers = _stickyDocumentIdentifiers ?: [NSMutableSet set];
 
 	if(stickyFlag)
-			[_stickyDocumentIdentifiers addObject:aDocument->document().identifier];
-	else	[_stickyDocumentIdentifiers removeObject:aDocument->document().identifier];
+			[_stickyDocumentIdentifiers addObject:aDocument.identifier];
+	else	[_stickyDocumentIdentifiers removeObject:aDocument.identifier];
 }
 
 // ====================
@@ -1002,10 +1002,10 @@ namespace
 	NSMutableArray<NSUUID*>* tabsToClose = [NSMutableArray array];
 	if(closeOtherTabsFlag)
 	{
-		for(auto const& doc : _cppDocuments)
+		for(OakDocument* doc in self.documents)
 		{
-			if(!doc->is_modified() && ![self isDocumentSticky:doc])
-				[tabsToClose addObject:doc->document().identifier];
+			if(!doc.isDocumentEdited && ![self isDocumentSticky:doc])
+				[tabsToClose addObject:doc.identifier];
 		}
 	}
 	else if(NSUUID* uuid = self.disposableDocument)
@@ -1032,7 +1032,7 @@ namespace
 			for(auto const& pair : ranked)
 			{
 				document::document_ptr doc = _cppDocuments[pair.second];
-				if(!doc->is_modified() && ![self isDocumentSticky:doc] && doc->is_on_disk() && newUUIDs.find(doc->identifier()) == newUUIDs.end())
+				if(!doc->is_modified() && ![self isDocumentSticky:doc->document()] && doc->is_on_disk() && newUUIDs.find(doc->identifier()) == newUUIDs.end())
 					[indexSet addIndex:pair.second];
 				if([indexSet count] == excessTabs)
 					break;
@@ -1812,7 +1812,7 @@ namespace
 	{
 		std::vector<document::document_ptr> documents;
 		for(NSUInteger index = [indexSet firstIndex]; index != NSNotFound; index = [indexSet indexGreaterThanIndex:index])
-			[self setDocument:_cppDocuments[index] sticky:![self isDocumentSticky:_cppDocuments[index]]];
+			[self setDocument:_cppDocuments[index]->document() sticky:![self isDocumentSticky:_cppDocuments[index]->document()]];
 	}
 }
 
@@ -1834,7 +1834,7 @@ namespace
 
 	for(size_t i = 0; i < _cppDocuments.size(); ++i)
 	{
-		if([self isDocumentSticky:_cppDocuments[i]])
+		if([self isDocumentSticky:_cppDocuments[i]->document()])
 		{
 			[otherTabs removeIndex:i];
 			[rightSideTabs removeIndex:i];
@@ -2457,7 +2457,7 @@ namespace
 		{
 			active = [indexSet count] != 0;
 			if(active && [menuItem action] == @selector(toggleSticky:))
-				[menuItem setState:[self isDocumentSticky:_cppDocuments[indexSet.firstIndex]] ? NSOnState : NSOffState];
+				[menuItem setState:[self isDocumentSticky:_cppDocuments[indexSet.firstIndex]->document()] ? NSOnState : NSOffState];
 		}
 	}
 
@@ -2636,7 +2636,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 			if(NSString* displayName = info[@"displayName"])
 				doc->set_custom_name(to_s(displayName));
 			if([info[@"sticky"] boolValue])
-				[self setDocument:doc sticky:YES];
+				[self setDocument:doc->document() sticky:YES];
 		}
 
 		if(doc->path() == NULL_STR)
@@ -2700,7 +2700,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 			doc[@"displayName"] = [NSString stringWithCxxString:document->display_name()];
 		if(document == self.selectedCppDocument)
 			doc[@"selected"] = @YES;
-		if([self isDocumentSticky:document])
+		if([self isDocumentSticky:document->document()])
 			doc[@"sticky"] = @YES;
 		[docs addObject:doc];
 	}
