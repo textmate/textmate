@@ -12,10 +12,10 @@ static int32_t const NSWrapColumnWindowWidth = 0;
 
 @interface OakDocumentEditor ()
 {
-	ng::callback_t* _buffer_callback;
 	NSInteger _changeGroupLevel;
 	std::unique_ptr<ng::editor_t> _editor;
 	std::unique_ptr<ng::layout_t> _layout;
+	std::unique_ptr<ng::callback_t> _buffer_callback;
 }
 @property (nonatomic, readwrite) OakDocument* document;
 @end
@@ -82,8 +82,8 @@ static int32_t const NSWrapColumnWindowWidth = 0;
 			__weak OakDocumentEditor* _self;
 		};
 
-		_buffer_callback = new callback_t(self);
-		self.buffer.add_callback(_buffer_callback);
+		_buffer_callback = std::make_unique<callback_t>(self);
+		self.buffer.add_callback(_buffer_callback.get());
 	}
 	return self;
 }
@@ -94,7 +94,7 @@ static int32_t const NSWrapColumnWindowWidth = 0;
 		[_document endUndoGrouping];
 
 	[self documentWillSave:_document];
-	self.buffer.remove_callback(_buffer_callback);
+	self.buffer.remove_callback(_buffer_callback.get());
 	_layout.reset();
 	_editor.reset();
 	[_document close];
