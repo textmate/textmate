@@ -302,6 +302,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	if(self = [super init])
 	{
 		_identifier = [NSUUID UUID];
+		_bufferEmpty = YES;
 		_documentEditors = [NSHashTable weakObjectsHashTable];
 	}
 	return self;
@@ -1067,7 +1068,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 		void did_replace (size_t from, size_t to, char const* buf, size_t len)
 		{
 			_size += len - (to - from);
-			if(_self.bufferEmpty != _size == 0)
+			if(_self.bufferEmpty != (_size == 0))
 				_self.bufferEmpty = _size == 0;
 
 			if(_should_sniff_file_type)
