@@ -9,6 +9,7 @@
 #import <OakAppKit/OakPasteboard.h>
 #import <OakAppKit/OakPasteboardSelector.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
+#import <OakAppKit/OakSyntaxFormatter.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakFoundation/OakHistoryList.h>
 #import <OakFoundation/OakFoundation.h>
@@ -54,10 +55,11 @@ NSButton* OakCreateClickableStatusBar ()
 }
 @end
 
-static OakAutoSizingTextField* OakCreateTextField (id <NSTextFieldDelegate> delegate, NSObject* accessibilityLabel = nil)
+static OakAutoSizingTextField* OakCreateTextField (id <NSTextFieldDelegate> delegate, NSObject* accessibilityLabel, NSString* grammarName)
 {
 	OakAutoSizingTextField* res = [[OakAutoSizingTextField alloc] initWithFrame:NSZeroRect];
 	res.font = OakControlFont();
+	res.formatter = [[OakSyntaxFormatter alloc] initWithGrammarName:grammarName];
 	[[res cell] setWraps:YES];
 	OakSetAccessibilityLabel(res, accessibilityLabel);
 	res.delegate = delegate;
@@ -100,15 +102,17 @@ static NSButton* OakCreateStopSearchButton ()
 	return res;
 }
 
-@interface FindWindowController () <NSTextFieldDelegate, NSWindowDelegate, NSMenuDelegate, NSPopoverDelegate>
+@interface FindWindowController () <NSTextFieldDelegate, NSWindowDelegate, NSMenuDelegate, NSPopoverDelegate, NSTextStorageDelegate>
 @property (nonatomic) NSTextField*              findLabel;
 @property (nonatomic) OakAutoSizingTextField*   findTextField;
+@property (nonatomic) OakSyntaxFormatter*       findStringFormatter;
 @property (nonatomic) NSButton*                 findHistoryButton;
 
 @property (nonatomic) NSButton*                 countButton;
 
 @property (nonatomic) NSTextField*              replaceLabel;
 @property (nonatomic) OakAutoSizingTextField*   replaceTextField;
+@property (nonatomic) OakSyntaxFormatter*       replaceStringFormatter;
 @property (nonatomic) NSButton*                 replaceHistoryButton;
 
 @property (nonatomic) NSTextField*              optionsLabel;
@@ -146,6 +150,8 @@ static NSButton* OakCreateStopSearchButton ()
 @end
 
 @implementation FindWindowController
++ (NSSet*)keyPathsForValuesAffectingFindString           { return [NSSet setWithObject:@"regularExpression"]; }
++ (NSSet*)keyPathsForValuesAffectingReplaceString        { return [NSSet setWithObject:@"regularExpression"]; }
 + (NSSet*)keyPathsForValuesAffectingCanIgnoreWhitespace  { return [NSSet setWithObject:@"regularExpression"]; }
 + (NSSet*)keyPathsForValuesAffectingIgnoreWhitespace     { return [NSSet setWithObject:@"regularExpression"]; }
 + (NSSet*)keyPathsForValuesAffectingCanEditGlob          { return [NSSet setWithObject:@"searchTarget"]; }
@@ -167,7 +173,8 @@ static NSButton* OakCreateStopSearchButton ()
 		self.window.restorable         = NO;
 
 		self.findLabel                 = OakCreateLabel(@"Find:");
-		self.findTextField             = OakCreateTextField(self, self.findLabel);
+		self.findTextField             = OakCreateTextField(self, self.findLabel, @"source.regexp.oniguruma");
+		self.findStringFormatter       = _findTextField.formatter;
 		self.findHistoryButton         = OakCreateHistoryButton(@"Show Find History");
 		self.countButton               = OakCreateButton(@"Σ", NSSmallSquareBezelStyle);
 
@@ -175,7 +182,8 @@ static NSButton* OakCreateStopSearchButton ()
 		OakSetAccessibilityLabel(self.countButton, self.countButton.toolTip);
 
 		self.replaceLabel              = OakCreateLabel(@"Replace:");
-		self.replaceTextField          = OakCreateTextField(self, self.replaceLabel);
+		self.replaceTextField          = OakCreateTextField(self, self.replaceLabel, @"textmate.format-string");
+		self.replaceStringFormatter    = _replaceTextField.formatter;
 		self.replaceHistoryButton      = OakCreateHistoryButton(@"Show Replace History");
 
 		self.optionsLabel              = OakCreateLabel(@"Options:");
@@ -481,6 +489,17 @@ static NSButton* OakCreateStopSearchButton ()
 	{
 		NSResponder* firstResponder = [self.window firstResponder];
 		self.resultsViewController.showReplacementPreviews = firstResponder == self.replaceTextField || firstResponder == self.replaceTextField.currentEditor;
+
+		if([firstResponder isKindOfClass:[NSTextView class]])
+		{
+			NSTextView* textView = (NSTextView*)firstResponder;
+			if(textView.isFieldEditor)
+			{
+				BOOL enable = _findTextField.currentEditor || _replaceTextField.currentEditor;
+				if(textView.textStorage.delegate = enable ? self : nil)
+					[self addStylesToFieldEditor];
+			}
+		}
 	}
 }
 
@@ -888,7 +907,35 @@ static NSButton* OakCreateStopSearchButton ()
 - (void)setFindResultsHeight:(CGFloat)height { [[NSUserDefaults standardUserDefaults] setInteger:height forKey:kUserDefaultsFindResultsHeightKey]; }
 - (CGFloat)findResultsHeight                 { return [[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsFindResultsHeightKey] ?: 200; }
 
-- (void)setRegularExpression:(BOOL)flag { _regularExpression = flag; if(self.findErrorString) [self updateFindErrorString]; }
+- (void)setRegularExpression:(BOOL)flag
+{
+	_regularExpression = flag;
+	if(self.findErrorString)
+		[self updateFindErrorString];
+
+	_findStringFormatter.enabled    = flag;
+	_replaceStringFormatter.enabled = flag;
+
+	// Re-format current value
+	if(!_findTextField.currentEditor)
+		_findTextField.objectValue = _findString;
+	if(!_replaceTextField.currentEditor)
+		_replaceTextField.objectValue = _replaceString;
+
+	[self addStylesToFieldEditor];
+}
+
+- (void)textStorageDidProcessEditing:(NSNotification*)aNotification
+{
+	[self addStylesToFieldEditor];
+}
+
+- (void)addStylesToFieldEditor
+{
+	[_findStringFormatter addStylesToString:((NSTextView*)_findTextField.currentEditor).textStorage];
+	[_replaceStringFormatter addStylesToString:((NSTextView*)_replaceTextField.currentEditor).textStorage];
+}
+
 - (void)setIgnoreCase:(BOOL)flag        { if(_ignoreCase != flag) [[NSUserDefaults standardUserDefaults] setObject:@(_ignoreCase = flag) forKey:kUserDefaultsFindIgnoreCase]; }
 - (void)setWrapAround:(BOOL)flag        { if(_wrapAround != flag) [[NSUserDefaults standardUserDefaults] setObject:@(_wrapAround = flag) forKey:kUserDefaultsFindWrapAround]; }
 - (BOOL)ignoreWhitespace                { return _ignoreWhitespace && self.canIgnoreWhitespace; }
