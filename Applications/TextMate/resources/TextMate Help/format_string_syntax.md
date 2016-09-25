@@ -25,8 +25,8 @@ title: Format string syntax
 
 	«variables»
 
-	(?«var»:«if»:«else»}
-	(?«var»:«if»}
+	(?«var»:«if»:«else»)
+	(?«var»:«if»)
 
 ## In Both
 
