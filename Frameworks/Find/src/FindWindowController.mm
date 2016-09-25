@@ -907,6 +907,9 @@ static NSButton* OakCreateStopSearchButton ()
 
 - (void)setRegularExpression:(BOOL)flag
 {
+	if(_regularExpression == flag)
+		return;
+
 	_regularExpression = flag;
 	if(self.findErrorString)
 		[self updateFindErrorString];
