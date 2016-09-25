@@ -302,6 +302,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	if(self = [super init])
 	{
 		_identifier = [NSUUID UUID];
+		_bufferEmpty = YES;
 		_documentEditors = [NSHashTable weakObjectsHashTable];
 	}
 	return self;
