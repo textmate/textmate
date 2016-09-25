@@ -3,6 +3,7 @@
 #import "OakAppKit.h"
 #import "OakScopeBarView.h"
 #import "OakUIConstructionFunctions.h"
+#import "OakSyntaxFormatter.h"
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <ns/ns.h>
@@ -13,6 +14,22 @@
 	static NSAttributedString* const lineJoiner = [[NSAttributedString alloc] initWithString:@"¬" attributes:@{ NSForegroundColorAttributeName : [NSColor lightGrayColor] }];
 	static NSAttributedString* const tabJoiner  = [[NSAttributedString alloc] initWithString:@"‣" attributes:@{ NSForegroundColorAttributeName : [NSColor lightGrayColor] }];
 	static NSAttributedString* const ellipsis   = [[NSAttributedString alloc] initWithString:@"…" attributes:@{ NSForegroundColorAttributeName : [NSColor lightGrayColor] }];
+
+	NSMutableParagraphStyle* paragraphStyle = [[NSMutableParagraphStyle alloc] init];
+	[paragraphStyle setLineBreakMode:NSLineBreakByTruncatingTail];
+	NSDictionary* defaultAttributes = @{
+		NSParagraphStyleAttributeName : paragraphStyle,
+		NSFontAttributeName : [NSFont controlContentFontOfSize:0]
+	};
+
+	if([self.options[OakFindRegularExpressionOption] boolValue])
+	{
+		OakSyntaxFormatter* formatter = [[OakSyntaxFormatter alloc] initWithGrammarName:@"source.regexp.oniguruma"];
+		formatter.enabled = YES;
+		NSMutableAttributedString* str = [[NSMutableAttributedString alloc] initWithString:self.string attributes:defaultAttributes];
+		[formatter addStylesToString:str];
+		return str;
+	}
 
 	NSMutableAttributedString* res = [[NSMutableAttributedString alloc] init];
 
@@ -37,10 +54,7 @@
 		}
 	}];
 
-	NSMutableParagraphStyle* paragraphStyle = [[NSMutableParagraphStyle alloc] init];
-	[paragraphStyle setLineBreakMode:NSLineBreakByTruncatingTail];
-	[res addAttributes:@{ NSParagraphStyleAttributeName : paragraphStyle } range:NSMakeRange(0, [[res string] length])];
-
+	[res addAttributes:defaultAttributes range:NSMakeRange(0, res.string.length)];
 	return res;
 }
 @end
@@ -281,6 +295,7 @@ static NSMutableDictionary* SharedChoosers;
 		{
 			NSMutableAttributedString* str = [obj mutableCopy];
 			[str addAttribute:NSForegroundColorAttributeName value:[NSColor alternateSelectedControlTextColor] range:NSMakeRange(0, [str length])];
+			[str removeAttribute:NSBackgroundColorAttributeName range:NSMakeRange(0, [str length])];
 			[aCell setAttributedStringValue:str];
 		}
 	}
