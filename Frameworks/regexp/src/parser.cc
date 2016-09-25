@@ -173,6 +173,7 @@ bool parse_context_t::parse_variable_complex (bool(parse_context_t::*parse_conte
 						{
 							{ "upcase",      transform::kUpcase     },
 							{ "downcase",    transform::kDowncase   },
+							{ "titlecase",   transform::kCapitalize },
 							{ "capitalize",  transform::kCapitalize },
 							{ "asciify",     transform::kAsciify    },
 						};
