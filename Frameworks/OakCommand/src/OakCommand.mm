@@ -172,6 +172,7 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 	NSMutableURLRequest* _urlRequest;
 	NSFileHandle* _fileHandleForWritingHTML;
 	dispatch_queue_t _queueForWritingHTML;
+	NSMutableData* _htmlData;
 	HTMLOutputWindowController* _htmlOutputWindowController;
 
 	BOOL _userDidAbort;
@@ -196,11 +197,27 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 
 - (void)writeHTMLOutput:(char const*)bytes length:(size_t)len
 {
+	if(bytes && !_htmlOutputView)
+		_htmlOutputView = [self htmlOutputView:YES forIdentifier:self.identifier];
+
+	if(_updateHTMLViewAtomically)
+	{
+		if(bytes)
+		{
+			if(!_htmlData)
+				_htmlData = [NSMutableData dataWithCapacity:len];
+			[_htmlData appendBytes:bytes length:len];
+		}
+		else
+		{
+			[_htmlOutputView setContent:[[NSString alloc] initWithData:_htmlData encoding:NSUTF8StringEncoding]];
+			_htmlData = nil;
+		}
+		return;
+	}
+
 	if(bytes)
 	{
-		if(!_htmlOutputView)
-			_htmlOutputView = [self htmlOutputView:YES forIdentifier:self.identifier];
-
 		if(!_fileHandleForWritingHTML)
 		{
 			NSPipe* pipe = [NSPipe pipe];
