@@ -162,7 +162,7 @@ NSUInteger const kFileChooserUncommittedChangesSourceIndex = 2;
 
 - (BOOL)isDirectoryMatched
 {
-	return _coverDirectory.empty();
+	return !_coverDirectory.empty();
 }
 
 - (NSComparisonResult)rankCompare:(FileChooserItem*)otherItem
