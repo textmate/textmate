@@ -29,6 +29,11 @@ std::string to_s (NSAttributedString* anAttributedString)
 	return to_s([anAttributedString string]);
 }
 
+std::string to_s (NSUUID* identifier)
+{
+	return to_s(identifier.UUIDString);
+}
+
 std::string to_s (NSData* someData)
 {
 	return someData ? std::string((char const*)[someData bytes], (char const*)[someData bytes] + [someData length]) : NULL_STR;

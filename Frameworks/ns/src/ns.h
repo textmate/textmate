@@ -9,6 +9,7 @@ PUBLIC NSString* to_ns (std::string const& str);
 
 PUBLIC std::string to_s (NSString* aString);
 PUBLIC std::string to_s (NSAttributedString* anAttributedString);
+PUBLIC std::string to_s (NSUUID* identifier);
 PUBLIC std::string to_s (NSData* aString);
 PUBLIC std::string to_s (NSError* anError);
 PUBLIC std::string to_s (NSEvent* anEvent, bool preserveNumPadFlag = false);
