@@ -162,7 +162,6 @@ namespace document
 // = OakDocument Implementation =
 // ==============================
 
-NSString* OakDocumentContentDidChangeNotification = @"OakDocumentContentDidChangeNotification";
 NSString* OakDocumentMarksDidChangeNotification   = @"OakDocumentMarksDidChangeNotification";
 NSString* OakDocumentWillReloadNotification       = @"OakDocumentWillReloadNotification";
 NSString* OakDocumentDidReloadNotification        = @"OakDocumentDidReloadNotification";
@@ -1305,7 +1304,6 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	{
 		[self createBuffer];
 		_buffer->replace(0, _buffer->size(), to_s(newContent));
-		[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentContentDidChangeNotification object:self];
 	}
 	else if(_buffer)
 	{
@@ -1721,7 +1719,6 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 
 				[_self markDocumentSaved];
 				[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentDidReloadNotification object:_self];
-				[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentContentDidChangeNotification object:_self];
 			}
 			else if(_self->_snapshot)
 			{
@@ -1740,7 +1737,6 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 
 					_self.savedRevision = merged == yours ? _self.revision : -1;
 					[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentDidReloadNotification object:_self];
-					[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentContentDidChangeNotification object:_self];
 				}
 			}
 			else

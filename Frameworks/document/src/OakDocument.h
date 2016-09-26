@@ -5,7 +5,6 @@
 #import <regexp/find.h> // find::options_t
 #import <scm/status.h>
 
-PUBLIC extern NSString* OakDocumentContentDidChangeNotification;
 PUBLIC extern NSString* OakDocumentMarksDidChangeNotification;
 PUBLIC extern NSString* OakDocumentWillReloadNotification;
 PUBLIC extern NSString* OakDocumentDidReloadNotification;
