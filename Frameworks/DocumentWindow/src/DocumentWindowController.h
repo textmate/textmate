@@ -5,7 +5,7 @@
 PUBLIC @interface DocumentWindowController : NSObject
 @property (nonatomic) NSWindow*                                  window;
 
-@property (nonatomic) NSString*                                  identifier;
+@property (nonatomic) NSUUID*                                    identifier;
 @property (nonatomic) NSString*                                  defaultProjectPath;
 @property (nonatomic, readonly) NSString*                        projectPath; // effectiveProjectPath
 @property (nonatomic, readonly) NSString*                        untitledSavePath;

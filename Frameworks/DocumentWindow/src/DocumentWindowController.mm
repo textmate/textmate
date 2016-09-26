@@ -137,7 +137,7 @@ namespace
 	// = tracking document controller instances =
 	// ==========================================
 
-	static NSMutableDictionary<NSString*, DocumentWindowController*>* AllControllers ()
+	static NSMutableDictionary<NSUUID*, DocumentWindowController*>* AllControllers ()
 	{
 		static NSMutableDictionary* res = [NSMutableDictionary new];
 		return res;
@@ -184,7 +184,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 {
 	if((self = [super init]))
 	{
-		self.identifier   = [NSString stringWithCxxString:oak::uuid_t().generate()];
+		self.identifier   = [NSUUID UUID];
 
 		self.tabBarView = [[OakTabBarView alloc] initWithFrame:NSZeroRect];
 		self.tabBarView.dataSource = self;
@@ -1247,7 +1247,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 - (void)showDocument:(OakDocument*)aDocument
 {
-	[OakDocumentController.sharedInstance showDocument:aDocument inProject:[[NSUUID alloc] initWithUUIDString:self.identifier] bringToFront:YES];
+	[OakDocumentController.sharedInstance showDocument:aDocument inProject:self.identifier bringToFront:YES];
 }
 
 // ================
@@ -1550,12 +1550,12 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	[self.tabBarView setSelectedTab:newSelectedTabIndex];
 }
 
-- (void)setIdentifier:(NSString*)newIdentifier
+- (void)setIdentifier:(NSUUID*)newIdentifier
 {
-	if(_identifier == newIdentifier || [_identifier isEqualToString:newIdentifier])
+	if(_identifier == newIdentifier || [_identifier isEqual:newIdentifier])
 		return;
 
-	NSString* oldIdentifier = _identifier;
+	NSUUID* oldIdentifier = _identifier;
 	if(_identifier = newIdentifier)
 		[AllControllers() setObject:self forKey:newIdentifier];
 
@@ -1992,7 +1992,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 - (IBAction)orderFrontFindPanel:(id)sender
 {
 	Find* find              = [Find sharedInstance];
-	BOOL didOwnDialog       = [find.projectIdentifier isEqualToString:self.identifier];
+	BOOL didOwnDialog       = [find.projectIdentifier isEqual:self.identifier];
 	[self prepareAndReturnFindPanel];
 
 	NSInteger mode = [sender respondsToSelector:@selector(tag)] ? [sender tag] : find_tags::in_document;
@@ -2629,10 +2629,10 @@ static NSUInteger DisableSessionSavingCount = 0;
 
 	if(projectUUID)
 	{
-		if(DocumentWindowController* res = AllControllers()[projectUUID.UUIDString])
+		if(DocumentWindowController* res = AllControllers()[projectUUID])
 			return res;
 
-		if([projectUUID.UUIDString isEqual:@"00000000-0000-0000-0000-000000000000"])
+		if([projectUUID.UUIDString isEqualToString:@"00000000-0000-0000-0000-000000000000"])
 			return [DocumentWindowController new];
 	}
 

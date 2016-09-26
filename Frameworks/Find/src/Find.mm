@@ -537,7 +537,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	OakDocument* doc = item.document;
 	if(!doc.isOpen)
 		doc.recentTrackingDisabled = YES;
-	[OakDocumentController.sharedInstance showDocument:doc andSelect:item.match.range inProject:[[NSUUID alloc] initWithUUIDString:self.projectIdentifier] bringToFront:NO];
+	[OakDocumentController.sharedInstance showDocument:doc andSelect:item.match.range inProject:self.projectIdentifier bringToFront:NO];
 }
 
 - (void)didDoubleClickResult:(FFResultNode*)item

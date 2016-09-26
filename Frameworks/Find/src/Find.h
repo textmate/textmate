@@ -18,7 +18,7 @@ PUBLIC @interface Find : NSResponder
 @property (nonatomic) FFSearchTarget searchTarget;
 
 @property (nonatomic) NSString* projectFolder;
-@property (nonatomic) NSString* projectIdentifier;
+@property (nonatomic) NSUUID* projectIdentifier;
 @property (nonatomic) NSArray* fileBrowserItems;
 @property (nonatomic) NSUUID* documentIdentifier;
 
