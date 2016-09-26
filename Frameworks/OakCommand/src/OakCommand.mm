@@ -196,34 +196,54 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 
 - (void)writeHTMLOutput:(char const*)bytes length:(size_t)len
 {
-	if(!_htmlOutputView)
-		_htmlOutputView = [self htmlOutputView:YES forIdentifier:self.identifier];
-
-	if(!_fileHandleForWritingHTML)
+	if(bytes)
 	{
-		NSPipe* pipe = [NSPipe pipe];
-		_fileHandleForWritingHTML = pipe.fileHandleForWriting;
-		_queueForWritingHTML = dispatch_queue_create("org.textmate.write-html", DISPATCH_QUEUE_SERIAL);
+		if(!_htmlOutputView)
+			_htmlOutputView = [self htmlOutputView:YES forIdentifier:self.identifier];
 
-		static NSInteger UniqueKey = 0; // Make each URL unique to avoid caching
+		if(!_fileHandleForWritingHTML)
+		{
+			NSPipe* pipe = [NSPipe pipe];
+			_fileHandleForWritingHTML = pipe.fileHandleForWriting;
+			_queueForWritingHTML = dispatch_queue_create("org.textmate.write-html", DISPATCH_QUEUE_SERIAL);
 
-		_urlRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@://job/%@/%ld", kOakFileHandleURLScheme, [to_ns(_bundleCommand.name) stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], ++UniqueKey]] cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:6000];
-		[NSURLProtocol setProperty:self.identifier forKey:@"commandIdentifier" inRequest:_urlRequest];
-		[NSURLProtocol setProperty:pipe.fileHandleForReading forKey:@"fileHandle" inRequest:_urlRequest];
-		[NSURLProtocol setProperty:@(_processIdentifier) forKey:@"processIdentifier" inRequest:_urlRequest];
-		[NSURLProtocol setProperty:to_ns(_bundleCommand.name) forKey:@"processName" inRequest:_urlRequest];
-		[NSURLProtocol setProperty:self forKey:@"command" inRequest:_urlRequest];
+			static NSInteger UniqueKey = 0; // Make each URL unique to avoid caching
 
-		[_htmlOutputView loadRequest:_urlRequest environment:_environment autoScrolls:_bundleCommand.auto_scroll_output];
+			_urlRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@://job/%@/%ld", kOakFileHandleURLScheme, [to_ns(_bundleCommand.name) stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], ++UniqueKey]] cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:6000];
+			[NSURLProtocol setProperty:self.identifier forKey:@"commandIdentifier" inRequest:_urlRequest];
+			[NSURLProtocol setProperty:pipe.fileHandleForReading forKey:@"fileHandle" inRequest:_urlRequest];
+			[NSURLProtocol setProperty:@(_processIdentifier) forKey:@"processIdentifier" inRequest:_urlRequest];
+			[NSURLProtocol setProperty:to_ns(_bundleCommand.name) forKey:@"processName" inRequest:_urlRequest];
+			[NSURLProtocol setProperty:self forKey:@"command" inRequest:_urlRequest];
+
+			[_htmlOutputView loadRequest:_urlRequest environment:_environment autoScrolls:_bundleCommand.auto_scroll_output];
+		}
+
+		NSData* data = [NSData dataWithBytes:bytes length:len];
+		NSFileHandle* fh = _fileHandleForWritingHTML;
+		dispatch_async(_queueForWritingHTML, ^{
+			ssize_t bytesWritten = write(fh.fileDescriptor, [data bytes], [data length]);
+			if(bytesWritten == -1)
+				perror("HTMLOutput: write");
+		});
 	}
+	else
+	{
+		if(NSFileHandle* fh = std::exchange(_fileHandleForWritingHTML, nil))
+		{
+			dispatch_async(_queueForWritingHTML, ^{
+				[fh closeFile];
+			});
+			_queueForWritingHTML = nil;
+		}
 
-	NSData* data = [NSData dataWithBytes:bytes length:len];
-	NSFileHandle* fh = _fileHandleForWritingHTML;
-	dispatch_async(_queueForWritingHTML, ^{
-		ssize_t bytesWritten = write(fh.fileDescriptor, [data bytes], [data length]);
-		if(bytesWritten == -1)
-			perror("HTMLOutput: write");
-	});
+		if(NSMutableURLRequest* request = std::exchange(_urlRequest, nil))
+		{
+			[NSURLProtocol removePropertyForKey:@"command" inRequest:request];
+			[NSURLProtocol removePropertyForKey:@"fileHandle" inRequest:request];
+			[NSURLProtocol removePropertyForKey:@"processIdentifier" inRequest:request];
+		}
+	}
 }
 
 - (void)executeWithInput:(NSFileHandle*)fileHandleForReading variables:(std::map<std::string, std::string> const&)someVariables outputHandler:(void(^)(std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, std::map<std::string, std::string> const& environment))handler
@@ -370,7 +390,6 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 			break;
 		}
 
-		BOOL discardHTML = NO;
 		if(rc != 0 && !_userDidAbort && !(200 <= rc && rc <= 207))
 		{
 			NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithDictionary:@{
@@ -400,6 +419,8 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 
 				if(!err.empty())
 					[self writeHTMLOutput:err.data() length:err.size()];
+
+				[self writeHTMLOutput:nullptr length:0];
 			}
 		}
 		else if(placement == output::tool_tip)
@@ -421,26 +442,7 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 		}
 		else if(_htmlOutputView)
 		{
-			discardHTML = YES;
-		}
-
-		if(NSFileHandle* fh = std::exchange(_fileHandleForWritingHTML, nil))
-		{
-			dispatch_async(_queueForWritingHTML, ^{
-				[fh closeFile];
-			});
-			_queueForWritingHTML = nil;
-		}
-
-		if(NSMutableURLRequest* request = std::exchange(_urlRequest, nil))
-		{
-			[NSURLProtocol removePropertyForKey:@"command" inRequest:request];
-			[NSURLProtocol removePropertyForKey:@"fileHandle" inRequest:request];
-			[NSURLProtocol removePropertyForKey:@"processIdentifier" inRequest:request];
-		}
-
-		if(discardHTML)
-		{
+			[self writeHTMLOutput:nullptr length:0];
 			[self discardHTMLOutputView:_htmlOutputView];
 		}
 
