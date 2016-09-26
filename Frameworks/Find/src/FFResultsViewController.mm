@@ -62,12 +62,49 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 }
 @end
 
+// ====================
+// = OakTableCellView =
+// ====================
+
+@interface OakTableCellView : NSTableCellView
+{
+	BOOL _observingKeyPaths;
+}
+@property (nonatomic) FFResultsViewController* viewController;
+@property (nonatomic) NSArray<NSString*>* observeKeyPaths;
+@end
+
+@implementation OakTableCellView
+- (void)viewWillMoveToSuperview:(NSView*)aView
+{
+	if(aView && _observingKeyPaths == NO)
+	{
+		for(NSString* keyPath in self.observeKeyPaths)
+			[_viewController addObserver:self forKeyPath:keyPath options:NSKeyValueObservingOptionInitial context:nullptr];
+		_observingKeyPaths = YES;
+	}
+	else if(!aView && _observingKeyPaths == YES)
+	{
+		for(NSString* keyPath in self.observeKeyPaths)
+			[_viewController removeObserver:self forKeyPath:keyPath];
+		_observingKeyPaths = NO;
+	}
+	[super viewWillMoveToSuperview:aView];
+}
+
+- (void)observeValueForKeyPath:(NSString*)aKeyPath ofObject:(id)anObject change:(NSDictionary*)someChange context:(void*)context
+{
+	if([self.observeKeyPaths containsObject:aKeyPath])
+			[self setValue:[anObject valueForKey:aKeyPath] forKey:aKeyPath];
+	else	[super observeValueForKeyPath:aKeyPath ofObject:anObject change:someChange context:context];
+}
+@end
+
 // =================================
 // = OakSearchResultsMatchCellView =
 // =================================
 
-@interface OakSearchResultsMatchCellView : NSTableCellView
-@property (nonatomic) FFResultsViewController* viewController;
+@interface OakSearchResultsMatchCellView : OakTableCellView
 @property (nonatomic) NSString* replaceString;
 @property (nonatomic) BOOL showReplacementPreviews;
 @end
@@ -79,7 +116,8 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 {
 	if((self = [super initWithFrame:NSZeroRect]))
 	{
-		_viewController = viewController;
+		self.viewController  = viewController;
+		self.observeKeyPaths = @[ @"replaceString", @"showReplacementPreviews" ];
 
 		NSTextField* textField = OakCreateLabel(@"", font);
 		[textField setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
@@ -89,29 +127,6 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		self.textField = textField;
 	}
 	return self;
-}
-
-- (void)viewWillMoveToSuperview:(NSView*)aView
-{
-	if(aView)
-	{
-		[_viewController addObserver:self forKeyPath:@"replaceString" options:NSKeyValueObservingOptionInitial context:nullptr];
-		[_viewController addObserver:self forKeyPath:@"showReplacementPreviews" options:NSKeyValueObservingOptionInitial context:nullptr];
-	}
-	else
-	{
-		[_viewController removeObserver:self forKeyPath:@"showReplacementPreviews"];
-		[_viewController removeObserver:self forKeyPath:@"replaceString"];
-	}
-	[super viewWillMoveToSuperview:aView];
-}
-
-- (void)observeValueForKeyPath:(NSString*)aKeyPath ofObject:(id)anObject change:(NSDictionary*)someChange context:(void*)context
-{
-	NSArray* myKeys = @[ @"replaceString", @"showReplacementPreviews" ];
-	if(![myKeys containsObject:aKeyPath])
-		return [super observeValueForKeyPath:aKeyPath ofObject:anObject change:someChange context:context];
-	[self setValue:[anObject valueForKey:aKeyPath] forKey:aKeyPath];
 }
 
 - (NSAttributedString*)excerptString
@@ -138,11 +153,11 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 // = OakSearchResultsHeaderCellView =
 // ==================================
 
-@interface OakSearchResultsHeaderCellView : NSTableCellView
-@property (nonatomic) FFResultsViewController* viewController;
+@interface OakSearchResultsHeaderCellView : OakTableCellView
 @property (nonatomic) NSButton* countOfLeafsButton;
 @property (nonatomic) NSButton* removeButton;
 @property (nonatomic) BOOL showKeyEquivalent;
+@property (nonatomic) BOOL observingKeyEquivalent;
 @end
 
 @implementation OakSearchResultsHeaderCellView
@@ -150,7 +165,8 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 {
 	if((self = [super init]))
 	{
-		_viewController = viewController;
+		self.viewController  = viewController;
+		self.observeKeyPaths = @[ @"showKeyEquivalent" ];
 
 		NSImageView* imageView = [NSImageView new];
 		NSTextField* textField = OakCreateLabel(@"", [NSFont controlContentFontOfSize:0]);
@@ -182,8 +198,8 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		[imageView bind:NSValueBinding toObject:self withKeyPath:@"objectValue.document.icon" options:nil];
 		[textField bind:NSValueBinding toObject:self withKeyPath:@"objectValue.displayPath" options:nil];
 
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(outlineViewItemDidExpandCollapse:) name:NSOutlineViewItemDidExpandNotification object:_viewController.outlineView];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(outlineViewItemDidExpandCollapse:) name:NSOutlineViewItemDidCollapseNotification object:_viewController.outlineView];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(outlineViewItemDidExpandCollapse:) name:NSOutlineViewItemDidExpandNotification object:viewController.outlineView];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(outlineViewItemDidExpandCollapse:) name:NSOutlineViewItemDidCollapseNotification object:viewController.outlineView];
 
 		self.imageView          = imageView;
 		self.textField          = textField;
@@ -196,21 +212,6 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 - (void)dealloc
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
-}
-
-- (void)viewWillMoveToSuperview:(NSView*)aView
-{
-	if(aView)
-			[_viewController addObserver:self forKeyPath:@"showKeyEquivalent" options:NSKeyValueObservingOptionInitial context:nullptr];
-	else	[_viewController removeObserver:self forKeyPath:@"showKeyEquivalent"];
-	[super viewWillMoveToSuperview:aView];
-}
-
-- (void)observeValueForKeyPath:(NSString*)aKeyPath ofObject:(id)anObject change:(NSDictionary*)someChange context:(void*)context
-{
-	if(![aKeyPath isEqualToString:@"showKeyEquivalent"])
-		return [super observeValueForKeyPath:aKeyPath ofObject:anObject change:someChange context:context];
-	[self setValue:[anObject valueForKey:aKeyPath] forKey:aKeyPath];
 }
 
 - (void)setShowKeyEquivalent:(BOOL)flag
