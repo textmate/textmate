@@ -878,6 +878,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	if(_buffer)
 	{
 		self.observeFileSystem = NO;
+		[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentWillSaveNotification object:self];
 
 		std::map<std::string, std::string> attributes;
 		if(volume::settings(to_s(_path)).extended_attributes())
@@ -1004,8 +1005,6 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 			if(closeDocument)
 				[self close];
 		});
-
-		[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentWillSaveNotification object:self];
 
 		io::bytes_ptr content = std::make_shared<io::bytes_t>(_buffer->size());
 		_buffer->visit_data([&](char const* bytes, size_t offset, size_t len, bool*){
