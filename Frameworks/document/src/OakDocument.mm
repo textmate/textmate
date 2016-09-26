@@ -162,6 +162,9 @@ namespace document
 // = OakDocument Implementation =
 // ==============================
 
+static NSTimeInterval kDocumentBackupDelay = 2;
+static NSTimeInterval kDocumentIdleDelay   = 0.6;
+
 NSString* OakDocumentMarksDidChangeNotification   = @"OakDocumentMarksDidChangeNotification";
 NSString* OakDocumentWillReloadNotification       = @"OakDocumentWillReloadNotification";
 NSString* OakDocumentDidReloadNotification        = @"OakDocumentDidReloadNotification";
@@ -187,6 +190,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	std::unique_ptr<ng::undo_manager_t> _undoManager;
 	std::unique_ptr<document::watch_base_t> _fileSystemObserver;
 
+	NSTimer* _idleTimer;
 	NSTimer* _backupTimer;
 }
 @property (nonatomic) NSUInteger untitledCount;
@@ -553,24 +557,29 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	return res;
 }
 
-// ==========
-// = Backup =
-// ==========
+// =========================
+// = Backup and idle timer =
+// =========================
+
+- (void)bufferDidChange
+{
+	[_idleTimer invalidate];
+	_idleTimer = [NSTimer scheduledTimerWithTimeInterval:kDocumentIdleDelay target:self selector:@selector(idleTimerDidFire:) userInfo:nil repeats:NO];
+
+	[_backupTimer invalidate];
+	_backupTimer = _keepBackupFile ? [NSTimer scheduledTimerWithTimeInterval:kDocumentBackupDelay target:self selector:@selector(backupTimerDidFire:) userInfo:nil repeats:NO] : nil;
+}
+
+- (void)idleTimerDidFire:(NSTimer*)aTimer
+{
+	_idleTimer = nil;
+}
 
 - (void)setKeepBackupFile:(BOOL)flag
 {
 	_keepBackupFile = flag;
 	if(!flag)
 		[self removeBackup];
-}
-
-- (void)scheduleBackup
-{
-	if(_keepBackupFile)
-	{
-		[_backupTimer invalidate];
-		_backupTimer = [NSTimer scheduledTimerWithTimeInterval:2 target:self selector:@selector(backupTimerDidFire:) userInfo:nil repeats:NO];
-	}
 }
 
 - (void)backupTimerDidFire:(NSTimer*)aTimer
@@ -1077,7 +1086,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 					_self.fileType = to_ns(newFileType);
 			}
 
-			[_self scheduleBackup];
+			[_self bufferDidChange];
 		}
 
 	private:
@@ -1101,6 +1110,9 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 
 - (void)deleteBuffer
 {
+	[_idleTimer invalidate];
+	_idleTimer = nil;
+
 	_undoManager.reset();
 	if(!_buffer)
 		return;
