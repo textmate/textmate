@@ -376,7 +376,8 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 		}
 
 		BOOL discardHTML = NO;
-		if(rc != 0 && !_userDidAbort && !(200 <= rc && rc <= 207))
+		BOOL normalExit = rc == 0 || (200 <= rc && rc <= 207);
+		if(normalExit == NO && _userDidAbort == NO)
 		{
 			NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithDictionary:@{
 				NSLocalizedDescriptionKey             : [NSString stringWithFormat:@"Failure running “%@”.", to_ns(_bundleCommand.name)],
@@ -449,6 +450,9 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 			[self discardHTMLOutputView:_htmlOutputView];
 		}
 
+		if(_terminationHandler)
+			_terminationHandler(self, normalExit);
+
 		// Wake potential event loop
 		[NSApp postEvent:[NSEvent otherEventWithType:NSApplicationDefined location:NSZeroPoint modifierFlags:0 timestamp:0 windowNumber:0 context:NULL subtype:0 data1:0 data2:0] atStart:NO];
 		[[NSNotificationCenter defaultCenter] postNotificationName:OakCommandDidTerminateNotification object:self];
@@ -489,10 +493,7 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 			{
 				NSInteger choice = NSRunAlertPanel([NSString stringWithFormat:@"Stop “%@”", to_ns(_bundleCommand.name)], @"Would you like to kill the current shell command?", @"Kill Command", @"Cancel", nil);
 				if(choice == NSAlertDefaultReturn) // "Kill Command"
-				{
-					_userDidAbort = YES;
-					oak::kill_process_group_in_background(_processIdentifier);
-				}
+					[self terminate];
 			}
 			else
 			{
@@ -503,6 +504,15 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 
 	for(NSEvent* event in queuedEvents)
 		[NSApp postEvent:event atStart:NO];
+}
+
+- (void)terminate
+{
+	if(_processIdentifier != 0)
+	{
+		_userDidAbort = YES;
+		oak::kill_process_group_in_background(_processIdentifier);
+	}
 }
 
 // =============================
