@@ -48,7 +48,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 	NSButton* button = OakCreateCheckBox(nil);
 	[[button cell] setControlSize:NSSmallControlSize];
 	[button sizeToFit];
-	[button setAutoresizingMask:NSViewMinXMargin|NSViewMaxXMargin|NSViewMinYMargin|NSViewMaxYMargin];
+	[button setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
 
 	if((self = [super initWithFrame:button.frame]))
 	{
