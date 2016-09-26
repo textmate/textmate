@@ -6,11 +6,11 @@
 @end
 
 @interface HOStatusBar : OakBackgroundFillView
-@property (nonatomic, weak) id  delegate;
+@property (nonatomic, weak) id              delegate;
 
-@property (nonatomic) NSString* statusText;
-@property (nonatomic) CGFloat   progress;
-@property (nonatomic) BOOL      isBusy;
-@property (nonatomic) BOOL      canGoBack;
-@property (nonatomic) BOOL      canGoForward;
+@property (nonatomic) NSString*             statusText;
+@property (nonatomic) CGFloat               progress;
+@property (nonatomic, getter = isBusy) BOOL busy;
+@property (nonatomic) BOOL                  canGoBack;
+@property (nonatomic) BOOL                  canGoForward;
 @end

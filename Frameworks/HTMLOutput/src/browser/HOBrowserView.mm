@@ -184,7 +184,7 @@ in the hierachy returns YES, the key (equivalent) event is then passed to the me
 
 - (void)webView:(WebView*)sender didStartProvisionalLoadForFrame:(WebFrame*)frame
 {
-	_statusBar.isBusy = YES;
+	_statusBar.busy = YES;
 	[self setUpdatesProgress:YES];
 }
 
@@ -204,7 +204,7 @@ in the hierachy returns YES, the key (equivalent) event is then passed to the me
 {
 	_statusBar.canGoBack    = _webView.canGoBack;
 	_statusBar.canGoForward = _webView.canGoForward;
-	_statusBar.isBusy       = NO;
+	_statusBar.busy         = NO;
 	_statusBar.progress     = 0;
 }
 @end

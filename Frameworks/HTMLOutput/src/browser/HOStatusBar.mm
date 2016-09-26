@@ -146,25 +146,25 @@ static NSTextField* OakCreateTextField ()
 	{
 		[_progressIndicator removeFromSuperview];
 		[self addSubview:_spinner];
-		if(_isBusy)
+		if(_busy)
 			[_spinner startAnimation:nil];
 	}
 	else
 	{
 		[self addSubview:_progressIndicator];
-		if(_isBusy)
+		if(_busy)
 			[_spinner stopAnimation:nil];
 		[_spinner removeFromSuperview];
 	}
 	[self setNeedsUpdateConstraints:YES];
 }
 
-- (void)setIsBusy:(BOOL)flag
+- (void)setBusy:(BOOL)flag
 {
-	_isBusy = flag;
+	_busy = flag;
 	if(_indeterminateProgress)
 	{
-		if(_isBusy)
+		if(_busy)
 				[_spinner startAnimation:nil];
 		else	[_spinner stopAnimation:nil];
 	}
