@@ -189,11 +189,6 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 	return self;
 }
 
-- (BOOL)isAsyncCommand
-{
-	return _bundleCommand.output == output::new_window && _bundleCommand.output_format == output_format::html;
-}
-
 - (NSUUID*)identifier
 {
 	return _bundleCommand.uuid ? [[NSUUID alloc] initWithUUIDString:to_ns(_bundleCommand.uuid)] : nil;
@@ -457,53 +452,6 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 		[NSApp postEvent:[NSEvent otherEventWithType:NSApplicationDefined location:NSZeroPoint modifierFlags:0 timestamp:0 windowNumber:0 context:NULL subtype:0 data1:0 data2:0] atStart:NO];
 		[[NSNotificationCenter defaultCenter] postNotificationName:OakCommandDidTerminateNotification object:self];
 	});
-}
-
-- (void)waitUntilExit
-{
-	if(self.isAsyncCommand == YES && _processIdentifier > 0)
-	{
-		__block BOOL shouldWait = YES;
-		CFRunLoopRef runLoop = CFRunLoopGetCurrent();
-
-		dispatch_group_notify(_dispatchGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-			shouldWait = NO;
-			CFRunLoopStop(runLoop);
-		});
-
-		while(shouldWait)
-			CFRunLoopRun();
-
-		return;
-	}
-
-	NSMutableArray* queuedEvents = [NSMutableArray array];
-	while(_processIdentifier > 0)
-	{
-		// We use CFRunLoopRunInMode() to handle dispatch queues and nextEventMatchingMask:… to catcn ⌃C
-		CFRunLoopRunInMode(kCFRunLoopDefaultMode, 5, true);
-		if(NSEvent* event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:nil inMode:NSDefaultRunLoopMode dequeue:YES])
-		{
-			static NSEventType const events[] = { NSLeftMouseDown, NSLeftMouseUp, NSRightMouseDown, NSRightMouseUp, NSOtherMouseDown, NSOtherMouseUp, NSLeftMouseDragged, NSRightMouseDragged, NSOtherMouseDragged, NSKeyDown, NSKeyUp, NSFlagsChanged };
-			if(!oak::contains(std::begin(events), std::end(events), [event type]))
-			{
-				[NSApp sendEvent:event];
-			}
-			else if([event type] == NSKeyDown && (([[event charactersIgnoringModifiers] isEqualToString:@"c"] && ([event modifierFlags] & (NSShiftKeyMask|NSControlKeyMask|NSAlternateKeyMask|NSCommandKeyMask)) == NSControlKeyMask) || ([[event charactersIgnoringModifiers] isEqualToString:@"."] && ([event modifierFlags] & (NSShiftKeyMask|NSControlKeyMask|NSAlternateKeyMask|NSCommandKeyMask)) == NSCommandKeyMask)))
-			{
-				NSInteger choice = NSRunAlertPanel([NSString stringWithFormat:@"Stop “%@”", to_ns(_bundleCommand.name)], @"Would you like to kill the current shell command?", @"Kill Command", @"Cancel", nil);
-				if(choice == NSAlertDefaultReturn) // "Kill Command"
-					[self terminate];
-			}
-			else
-			{
-				[queuedEvents addObject:event];
-			}
-		}
-	}
-
-	for(NSEvent* event in queuedEvents)
-		[NSApp postEvent:event atStart:NO];
 }
 
 - (void)terminate
