@@ -83,7 +83,7 @@
 	}
 }
 
-- (void)loadHTMLString:(NSString*)someHTML
+- (void)setContent:(NSString*)someHTML
 {
 	self.pendingVisibleRect = [[[[self.webView mainFrame] frameView] documentView] visibleRect];
 	[[self.webView mainFrame] loadHTMLString:someHTML baseURL:[NSURL fileURLWithPath:NSHomeDirectory()]];
