@@ -135,7 +135,7 @@ namespace
 - (OakDocument*)findDocumentWithIdentifier:(NSUUID*)anUUID
 {
 	std::lock_guard<std::mutex> lock(_lock);
-	auto it = _documents_by_uuid.find(to_s(anUUID.UUIDString));
+	auto it = _documents_by_uuid.find(to_s(anUUID));
 	if(it != _documents_by_uuid.end())
 		return it->second->document;
 	return nil;
@@ -456,7 +456,7 @@ namespace
 - (void)internalAddDocument:(OakDocument*)doc
 {
 	auto r = std::make_shared<record_t>();
-	r->uuid     = to_s(doc.identifier.UUIDString);
+	r->uuid     = to_s(doc.identifier);
 	r->path     = to_s(doc.path);
 	r->inode    = inode_t(r->path);
 	r->document = doc;
@@ -479,7 +479,7 @@ namespace
 
 - (void)internalRemoveDocument:(OakDocument*)doc
 {
-	auto it = _documents_by_uuid.find(to_s(doc.identifier.UUIDString));
+	auto it = _documents_by_uuid.find(to_s(doc.identifier));
 	ASSERT(it != _documents_by_uuid.end());
 	if(it != _documents_by_uuid.end())
 	{

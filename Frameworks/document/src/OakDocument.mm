@@ -262,8 +262,8 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 - (std::map<std::string, std::string>)variables
 {
 	std::map<std::string, std::string> variables = {
-		{ "TM_DISPLAYNAME",   to_s(self.displayName)           },
-		{ "TM_DOCUMENT_UUID", to_s(self.identifier.UUIDString) },
+		{ "TM_DISPLAYNAME",   to_s(self.displayName) },
+		{ "TM_DOCUMENT_UUID", to_s(self.identifier)  },
 	};
 
 	if(_path)
@@ -632,7 +632,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 		auto attr = [self extendedAttributeds];
 
 		attr["com.macromates.backup.path"]           = to_s(_path);
-		attr["com.macromates.backup.identifier"]     = to_s(_identifier.UUIDString);
+		attr["com.macromates.backup.identifier"]     = to_s(_identifier);
 		attr["com.macromates.backup.file-type"]      = to_s(_fileType);
 		attr["com.macromates.backup.encoding"]       = to_s(_diskEncoding);
 		attr["com.macromates.backup.newlines"]       = to_s(_diskNewlines);

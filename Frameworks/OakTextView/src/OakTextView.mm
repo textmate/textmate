@@ -333,7 +333,7 @@ struct document_view_t : ng::buffer_api_t
 	// = Document =
 	// ============
 
-	oak::uuid_t identifier () const                 { return to_s(_document.identifier.UUIDString); }
+	oak::uuid_t identifier () const                 { return to_s(_document.identifier); }
 	std::string path () const                       { return to_s(_document.path); }
 	std::string directory () const                  { return to_s(_document.directory); }
 	std::string virtual_path () const               { return to_s(_document.virtualPath); }
