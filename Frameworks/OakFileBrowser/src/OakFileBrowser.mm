@@ -803,7 +803,7 @@ static bool is_binary (std::string const& path)
 		// TODO For commands that have ‘input = document’ we should provide the document
 		OakCommand* command = [[OakCommand alloc] initWithBundleCommand:parse_command(item)];
 		command.firstResponder = self;
-		[command executeWithInput:nil variables:item->bundle_variables() completionHandler:nil];
+		[command executeWithInput:nil variables:item->bundle_variables() outputHandler:nil];
 	}
 }
 

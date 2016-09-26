@@ -4324,7 +4324,7 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 
 	OakCommand* command = [[OakCommand alloc] initWithBundleCommand:aBundleCommand];
 	command.firstResponder = self;
-	[command executeWithInput:[[NSFileHandle alloc] initWithFileDescriptor:stdinRead closeOnDealloc:YES] variables:variables completionHandler:^(std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, std::map<std::string, std::string> const& environment){
+	[command executeWithInput:[[NSFileHandle alloc] initWithFileDescriptor:stdinRead closeOnDealloc:YES] variables:variables outputHandler:^(std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, std::map<std::string, std::string> const& environment){
 		if(outputCaret == output_caret::heuristic)
 		{
 			if(aBundleCommand.input == input::selection && inputWasSelection)
