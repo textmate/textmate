@@ -231,7 +231,7 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 	});
 }
 
-- (void)executeWithInput:(NSFileHandle*)fileHandleForReading variables:(std::map<std::string, std::string> const&)someVariables completionHandler:(void(^)(std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, std::map<std::string, std::string> const& environment))handler
+- (void)executeWithInput:(NSFileHandle*)fileHandleForReading variables:(std::map<std::string, std::string> const&)someVariables outputHandler:(void(^)(std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, std::map<std::string, std::string> const& environment))handler
 {
 	_dispatchGroup        = dispatch_group_create();
 	_processIdentifier    = 0;
@@ -241,10 +241,10 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 	_environment << oak::basic_environment();
 	[self updateEnvironment:_environment];
 
-	[self executeWithInput:(fileHandleForReading ?: [[NSFileHandle alloc] initWithFileDescriptor:open("/dev/null", O_RDONLY|O_CLOEXEC) closeOnDealloc:YES]) completionHandler:handler];
+	[self executeWithInput:(fileHandleForReading ?: [[NSFileHandle alloc] initWithFileDescriptor:open("/dev/null", O_RDONLY|O_CLOEXEC) closeOnDealloc:YES]) outputHandler:handler];
 }
 
-- (void)executeWithInput:(NSFileHandle*)inputFH completionHandler:(void(^)(std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, std::map<std::string, std::string> const& environment))handler
+- (void)executeWithInput:(NSFileHandle*)inputFH outputHandler:(void(^)(std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, std::map<std::string, std::string> const& environment))handler
 {
 	if(_didCheckRequirements == NO)
 	{
@@ -293,7 +293,7 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 				if(didSave)
 				{
 					_didSaveChanges = YES;
-					[self executeWithInput:inputFH completionHandler:handler];
+					[self executeWithInput:inputFH outputHandler:handler];
 				}
 			}];
 			return;
@@ -314,7 +314,7 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 					if(didStop)
 					{
 						_didFindHTMLOutputView = YES;
-						[self executeWithInput:inputFH completionHandler:handler];
+						[self executeWithInput:inputFH outputHandler:handler];
 					}
 				}];
 				return;

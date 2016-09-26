@@ -51,7 +51,7 @@ OAK_DEBUG_VAR(AppController_Commands);
 			{
 				OakCommand* command = [[OakCommand alloc] initWithBundleCommand:parse_command(item)];
 				command.firstResponder = NSApp;
-				[command executeWithInput:nil variables:item->bundle_variables() completionHandler:nil];
+				[command executeWithInput:nil variables:item->bundle_variables() outputHandler:nil];
 			}
 			break;
 
