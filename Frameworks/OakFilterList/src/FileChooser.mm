@@ -605,11 +605,8 @@ static NSDictionary* globs_for_path (std::string const& path)
 - (NSArray*)selectedItems
 {
 	NSMutableArray* res = [NSMutableArray array];
-	NSIndexSet* indexes = [self.tableView selectedRowIndexes];
-	for(NSUInteger i = [indexes firstIndex]; i != NSNotFound; i = [indexes indexGreaterThanIndex:i])
+	for(FileChooserItem* record in [self.items objectsAtIndexes:self.tableView.selectedRowIndexes])
 	{
-		FileChooserItem* record = self.items[i];
-
 		NSMutableDictionary* item = [NSMutableDictionary dictionary];
 		if(OakNotEmptyString(_selectionString))
 			item[@"selectionString"] = _selectionString;
@@ -652,10 +649,8 @@ static NSDictionary* globs_for_path (std::string const& path)
 {
 	if(OakNotEmptyString(_filterString))
 	{
-		NSIndexSet* indexes = [self.tableView selectedRowIndexes];
-		for(NSUInteger i = [indexes firstIndex]; i != NSNotFound; i = [indexes indexGreaterThanIndex:i])
+		for(FileChooserItem* item in [self.items objectsAtIndexes:self.tableView.selectedRowIndexes])
 		{
-			FileChooserItem* item = self.items[i];
 			if(!item.isDirectoryMatched && item.document.path)
 				[[OakAbbreviations abbreviationsForName:@"OakFileChooserBindings"] learnAbbreviation:_filterString forString:item.document.path];
 		}
