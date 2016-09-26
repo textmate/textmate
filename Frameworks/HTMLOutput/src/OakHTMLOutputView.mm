@@ -106,7 +106,7 @@
 
 - (void)webView:(WebView*)sender didStartProvisionalLoadForFrame:(WebFrame*)frame
 {
-	self.statusBar.isBusy = YES;
+	self.statusBar.busy = YES;
 	[self setUpdatesProgress:!self.isRunningCommand];
 }
 
