@@ -17,8 +17,6 @@
 
 OAK_EXTERN_C_BEGIN
 
-static std::string const kMacClassicThemeUUID = "71D40D9D-AE48-11D9-920A-000D93589AF6";
-
 static void initialize (CFBundleRef generatorBundle)
 {
 	static dispatch_once_t onceToken;

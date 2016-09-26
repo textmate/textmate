@@ -23,7 +23,7 @@ static size_t kParseSizeLimit = 1024;
 + (void)initialize
 {
 	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
-		kUserDefaultsUIThemeUUID : @"71D40D9D-AE48-11D9-920A-000D93589AF6",
+		kUserDefaultsUIThemeUUID : @(kMacClassicThemeUUID),
 	}];
 }
 

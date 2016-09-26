@@ -1,6 +1,8 @@
 #include "theme.h"
 #include <cf/cf.h>
 
+char const* kMacClassicThemeUUID = "71D40D9D-AE48-11D9-920A-000D93589AF6";
+
 static theme_t::color_info_t read_color (std::string const& str_color);
 static CGFloat read_font_size (std::string const& str_font_size);
 

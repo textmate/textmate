@@ -38,7 +38,7 @@
 + (void)initialize
 {
 	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
-		@"OakPrintThemeUUID"       : @"71D40D9D-AE48-11D9-920A-000D93589AF6",
+		@"OakPrintThemeUUID"       : @(kMacClassicThemeUUID),
 		@"OakPrintFontSize"        : @(11),
 		@"OakPrintHeaderAndFooter" : @NO,
 	}];
