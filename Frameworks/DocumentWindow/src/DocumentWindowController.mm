@@ -1717,9 +1717,18 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		{
 			if(delegate == sourceTabBar.delegate)
 			{
+				BOOL wasSelected = [tabItem.identifier isEqual:sourceTabBar.selectedTabItem.identifier];
+
 				if(delegate.fileBrowserVisible || delegate.documents.count > 1)
 						[delegate closeTabsAtIndexes:[NSIndexSet indexSetWithIndex:dragIndex] askToSaveChanges:NO createDocumentIfEmpty:YES];
 				else	[delegate close];
+
+				if(wasSelected)
+				{
+					self.selectedTabIndex = [self.documents indexOfObject:srcDocument];
+					[self openAndSelectDocument:srcDocument];
+				}
+
 				return YES;
 			}
 		}
