@@ -26,11 +26,6 @@ static void ShowLoadErrorForURL (WebFrame* frame, NSURL* url, NSError* error)
 @end
 
 @implementation HOBrowserView
-- (NSSize)intrinsicContentSize
-{
-	return NSMakeSize(NSViewNoInstrinsicMetric, NSViewNoInstrinsicMetric);
-}
-
 - (id)initWithFrame:(NSRect)frame
 {
 	if(self = [super initWithFrame:frame])
