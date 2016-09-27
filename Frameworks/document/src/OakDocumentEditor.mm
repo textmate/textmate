@@ -94,7 +94,8 @@ static int32_t const NSWrapColumnWindowWidth = 0;
 		[_document endUndoGrouping];
 
 	[self documentWillSave:_document];
-	self.buffer.remove_callback(_buffer_callback.get());
+	if(_document && _buffer_callback)
+		self.buffer.remove_callback(_buffer_callback.get());
 	_layout.reset();
 	_editor.reset();
 	[_document close];
