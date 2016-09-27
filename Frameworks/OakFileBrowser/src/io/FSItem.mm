@@ -47,7 +47,7 @@ static ino_t inode (std::string const& path)
 
 - (BOOL)isEqual:(id)otherObject
 {
-	return [otherObject isKindOfClass:[self class]] && [self.url isEqual:[otherObject url]] && self.scmStatus == [otherObject scmStatus] && self.isMissing == [otherObject isMissing];
+	return otherObject && [otherObject isKindOfClass:[self class]] && [self.url isEqual:[otherObject url]] && self.scmStatus == [otherObject scmStatus] && self.isMissing == [otherObject isMissing];
 }
 
 - (NSUInteger)hash
