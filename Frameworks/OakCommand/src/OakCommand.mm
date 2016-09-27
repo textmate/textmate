@@ -482,6 +482,11 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 	}
 }
 
+- (void)closeHTMLOutputView
+{
+	[self discardHTMLOutputView:_htmlOutputView];
+}
+
 // =============================
 // = NSErrorRecoveryAttempting =
 // =============================

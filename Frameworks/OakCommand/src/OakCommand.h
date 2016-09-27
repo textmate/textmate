@@ -16,4 +16,5 @@ PUBLIC @interface OakCommand : NSObject
 - (instancetype)initWithBundleCommand:(bundle_command_t const&)aCommand;
 - (void)executeWithInput:(NSFileHandle*)fileHandleForReading variables:(std::map<std::string, std::string> const&)someVariables outputHandler:(void(^)(std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, std::map<std::string, std::string> const& environment))handler;
 - (void)terminate;
+- (void)closeHTMLOutputView;
 @end
