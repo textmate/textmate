@@ -7,6 +7,7 @@
 
 @property (nonatomic) NSUUID* commandIdentifier; // UUID from initial load request
 @property (nonatomic, getter = isRunningCommand, readonly) BOOL runningCommand;
+@property (nonatomic, getter = isVisible, readonly) BOOL visible;
 
 // Read-only access to the webview is given to allow reading page title, etc.
 @property (nonatomic, readonly) WebView* webView;
