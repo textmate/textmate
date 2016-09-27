@@ -265,9 +265,9 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 
 - (void)executeWithInput:(NSFileHandle*)fileHandleForReading variables:(std::map<std::string, std::string> const&)someVariables outputHandler:(void(^)(std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, std::map<std::string, std::string> const& environment))handler
 {
-	_dispatchGroup        = dispatch_group_create();
-	_processIdentifier    = 0;
-	_didCheckRequirements = _didSaveChanges = _didFindHTMLOutputView = NO;
+	_dispatchGroup     = dispatch_group_create();
+	_processIdentifier = 0;
+	_didSaveChanges    = NO;
 
 	_environment = someVariables;
 	_environment << oak::basic_environment();
