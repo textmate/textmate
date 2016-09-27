@@ -15,6 +15,7 @@
 @property (nonatomic) HOAutoScroll* autoScrollHelper;
 @property (nonatomic) std::map<std::string, std::string> environment;
 @property (nonatomic) NSRect pendingVisibleRect;
+@property (nonatomic, getter = isVisible) BOOL visible;
 @end
 
 @implementation OakHTMLOutputView
@@ -98,6 +99,19 @@
 			return [NSURLProtocol propertyForKey:@"processName" inRequest:request] ?: @"";
 	}
 	return self.webView.mainFrameTitle;
+}
+
+- (void)viewDidMoveToWindow
+{
+	[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowWillCloseNotification object:nil];
+	if(self.window)
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowWillClose:) name:NSWindowWillCloseNotification object:self.window];
+	self.visible = self.window ? YES : NO;
+}
+
+- (void)windowWillClose:(NSNotification*)aNotification
+{
+	self.visible = NO;
 }
 
 // =======================
