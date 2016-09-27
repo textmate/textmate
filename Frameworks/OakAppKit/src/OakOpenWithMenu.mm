@@ -23,14 +23,10 @@ static NSArray* ApplicationURLsForPaths (NSSet* paths)
 		for(NSURL* url in appUrlsArray)
 			[appUrls addObject:CanonicalURL(url)];
 
-		CFURLRef defaultAppURL = nil;
-		if(noErr == LSGetApplicationForURL((__bridge CFURLRef)url, kLSRolesAll, NULL, &defaultAppURL))
+		if(NSURL* defaultAppURL = CanonicalURL([[NSWorkspace sharedWorkspace] URLForApplicationToOpenURL:url]))
 		{
-			NSURL* tmp = CanonicalURL((__bridge NSURL*)defaultAppURL);
-			[appUrls addObject:tmp];
-			[defaultAppURLs addObject:tmp];
-
-			CFRelease(defaultAppURL);
+			[appUrls addObject:defaultAppURL];
+			[defaultAppURLs addObject:defaultAppURL];
 		}
 
 		if(std::exchange(first, false))
