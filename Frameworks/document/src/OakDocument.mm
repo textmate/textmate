@@ -558,20 +558,21 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 // = Backup =
 // ==========
 
+- (void)bufferDidChange
+{
+	static NSTimeInterval const kDocumentBackupDelay = 2;
+
+	[_backupTimer invalidate];
+	_backupTimer = _keepBackupFile ? [NSTimer scheduledTimerWithTimeInterval:kDocumentBackupDelay target:self selector:@selector(backupTimerDidFire:) userInfo:nil repeats:NO] : nil;
+
+	[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentContentDidChangeNotification object:self];
+}
+
 - (void)setKeepBackupFile:(BOOL)flag
 {
 	_keepBackupFile = flag;
 	if(!flag)
 		[self removeBackup];
-}
-
-- (void)scheduleBackup
-{
-	if(_keepBackupFile)
-	{
-		[_backupTimer invalidate];
-		_backupTimer = [NSTimer scheduledTimerWithTimeInterval:2 target:self selector:@selector(backupTimerDidFire:) userInfo:nil repeats:NO];
-	}
 }
 
 - (void)backupTimerDidFire:(NSTimer*)aTimer
@@ -1078,7 +1079,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 					_self.fileType = to_ns(newFileType);
 			}
 
-			[_self scheduleBackup];
+			[_self bufferDidChange];
 		}
 
 	private:
@@ -1305,7 +1306,6 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	{
 		[self createBuffer];
 		_buffer->replace(0, _buffer->size(), to_s(newContent));
-		[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentContentDidChangeNotification object:self];
 	}
 	else if(_buffer)
 	{
@@ -1721,7 +1721,6 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 
 				[_self markDocumentSaved];
 				[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentDidReloadNotification object:_self];
-				[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentContentDidChangeNotification object:_self];
 			}
 			else if(_self->_snapshot)
 			{
@@ -1740,7 +1739,6 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 
 					_self.savedRevision = merged == yours ? _self.revision : -1;
 					[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentDidReloadNotification object:_self];
-					[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentContentDidChangeNotification object:_self];
 				}
 			}
 			else
