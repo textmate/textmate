@@ -2257,6 +2257,8 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		active = _documents.count > 1;
 	else if([menuItem action] == @selector(performCloseTabsToTheRight:))
 		active = _selectedTabIndex + 1 < _documents.count;
+	else if([menuItem action] == @selector(performBundleItemWithUUIDStringFrom:))
+		active = [_textView validateMenuItem:menuItem];
 
 	SEL tabBarActions[] = { @selector(performCloseTab:), @selector(takeNewTabIndexFrom::), @selector(takeTabsToCloseFrom:), @selector(takeTabsToTearOffFrom:), @selector(toggleSticky:) };
 	if(oak::contains(std::begin(tabBarActions), std::end(tabBarActions), [menuItem action]))

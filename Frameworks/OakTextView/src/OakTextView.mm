@@ -2985,6 +2985,11 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		return documentView && documentView->has_marks(to_s(OakDocumentBookmarkIdentifier));
 	else if([aMenuItem action] == @selector(jumpToNextMark:) || [aMenuItem action] == @selector(jumpToPreviousMark:))
 		return documentView && documentView->has_marks();
+	else if([aMenuItem action] == @selector(performBundleItem:))
+	{
+		if(bundles::item_ptr bundleItem = bundles::lookup(to_s(aMenuItem.representedObject)))
+			[aMenuItem updateTitle:to_ns(name_with_selection(bundleItem, self.hasSelection))];
+	}
 	return YES;
 }
 
