@@ -23,8 +23,22 @@ typedef NS_ENUM(NSInteger, OakDocumentIOResult) {
 };
 
 @class BundleGrammar;
+@class OakCommand;
 @class OakDocument;
 @class OakDocumentEditor;
+
+typedef NS_OPTIONS(NSUInteger, OakCommandRefresherOptions) {
+	OakCommandRefresherDocumentDidChange = (1 << 0),
+	OakCommandRefresherDocumentDidSave   = (1 << 1),
+	OakCommandRefresherDocumentAsInput   = (1 << 2),
+};
+
+PUBLIC @interface OakCommandRefresher : NSObject
++ (OakCommandRefresher*)scheduleRefreshForCommand:(OakCommand*)aCommand options:(OakCommandRefresherOptions)options variables:(std::map<std::string, std::string> const&)variables document:(OakDocument*)document;
++ (OakCommandRefresher*)findRefresherWithIdentifier:(NSUUID*)anIdentifier;
+- (void)stop;
+@property (nonatomic, readonly) OakCommand* command;
+@end
 
 @interface OakDocumentMatch : NSObject
 @property (nonatomic) OakDocument* document;

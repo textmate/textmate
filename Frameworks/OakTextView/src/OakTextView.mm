@@ -16,6 +16,7 @@
 #import <OakFoundation/OakFindProtocol.h>
 #import <OakFoundation/OakTimer.h>
 #import <OakSystem/application.h>
+#import <HTMLOutput/HTMLOutput.h>
 #import <crash/info.h>
 #import <buffer/indexed_map.h>
 #import <BundleMenu/BundleMenu.h>
@@ -4320,18 +4321,40 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 
 - (void)executeBundleCommand:(bundle_command_t const&)aBundleCommand buffer:(ng::buffer_api_t const&)buffer selection:(ng::ranges_t const&)selection variables:(std::map<std::string, std::string> const&)initialVariables
 {
+	if(OakCommandRefresher* refresher = [OakCommandRefresher findRefresherWithIdentifier:[[NSUUID alloc] initWithUUIDString:to_ns(aBundleCommand.uuid)]])
+	{
+		if(refresher.command.htmlOutputView)
+				[[refresher.command.htmlOutputView window] makeKeyAndOrderFront:self];
+		else	[refresher stop];
+		return;
+	}
+
+	std::map<std::string, std::string> variables = initialVariables;
+
 	int stdinRead, stdinWrite;
 	std::tie(stdinRead, stdinWrite) = io::create_pipe();
 
-	std::map<std::string, std::string> variables = initialVariables;
 	bool inputWasSelection = false;
 	ng::ranges_t const inputRanges = ng::write_unit_to_fd(buffer, selection, buffer.indent().tab_size(), stdinWrite, aBundleCommand.input, aBundleCommand.input_fallback, aBundleCommand.input_format, aBundleCommand.scope_selector, variables, &inputWasSelection);
 
 	OakCommand* command = [[OakCommand alloc] initWithBundleCommand:aBundleCommand];
 
+	auto variablesByValue = initialVariables;
 	__block BOOL didTerminate = NO;
+
 	command.terminationHandler = ^(OakCommand* command, BOOL normalExit){
 		didTerminate = YES;
+		if(normalExit && command.bundleCommand.auto_refresh != auto_refresh::never)
+		{
+			OakCommandRefresherOptions options = 0;
+			if(command.bundleCommand.auto_refresh == auto_refresh::on_document_change)
+				options |= OakCommandRefresherDocumentDidChange;
+			if(command.bundleCommand.auto_refresh == auto_refresh::on_document_save)
+				options |= OakCommandRefresherDocumentDidSave;
+			if(command.bundleCommand.input == input::entire_document)
+				options |= OakCommandRefresherDocumentAsInput;
+			[OakCommandRefresher scheduleRefreshForCommand:command options:options variables:variables document:_document];
+		}
 	};
 
 	command.firstResponder = self;

@@ -13,6 +13,8 @@
 #import <OakAppKit/NSAlert Additions.h>
 #import <OakAppKit/OakFileIconImage.h>
 #import <BundlesManager/BundlesManager.h>
+#import <OakCommand/OakCommand.h>
+#import <HTMLOutput/HTMLOutput.h>
 #import <authorization/constants.h>
 #import <cf/run_loop.h>
 #import <ns/ns.h>
@@ -171,6 +173,148 @@ NSString* OakDocumentDidSaveNotification          = @"OakDocumentDidSaveNotifica
 NSString* OakDocumentWillCloseNotification        = @"OakDocumentWillCloseNotification";
 NSString* OakDocumentWillShowAlertNotification    = @"OakDocumentWillShowAlertNotification";
 NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
+
+@interface OakCommandRefresher ()
+{
+	OakCommandRefresherOptions _options;
+	std::map<std::string, std::string> _variables;
+	OakDocument* _document;
+	BOOL _running;
+	BOOL _shouldRun;
+
+	NSTimer* _idleTimer;
+}
+@property (nonatomic, readwrite) OakCommand* command;
+@end
+
+static NSTimeInterval kDocumentIdleDelay   = 0.6;
+static NSHashTable* CommandRefreshers = [NSHashTable weakObjectsHashTable];
+
+@implementation OakCommandRefresher
++ (OakCommandRefresher*)scheduleRefreshForCommand:(OakCommand*)aCommand options:(OakCommandRefresherOptions)options variables:(std::map<std::string, std::string> const&)variables document:(OakDocument*)document
+{
+	OakCommandRefresher* refresher = [[OakCommandRefresher alloc] initWithCommand:aCommand options:options variables:variables document:document];
+	[CommandRefreshers addObject:refresher];
+	return refresher;
+}
+
++ (OakCommandRefresher*)findRefresherWithIdentifier:(NSUUID*)anIdentifier
+{
+	for(OakCommandRefresher* refresher in CommandRefreshers)
+	{
+		if([refresher.identifier isEqual:anIdentifier])
+			return refresher;
+	}
+	return nil;
+}
+
+- (id)initWithCommand:(OakCommand*)aCommand options:(OakCommandRefresherOptions)options variables:(std::map<std::string, std::string> const&)variables document:(OakDocument*)document
+{
+	if((self = [super init]))
+	{
+		_command   = aCommand;
+		_options   = options;
+		_document  = document;
+
+		_variables = variables;
+		_variables["TM_REFRESH"] = "YES";
+
+		auto handler = ^(OakCommand* command, BOOL normalExit){
+			_running = NO;
+			if(std::exchange(_shouldRun, NO) == YES && normalExit)
+				[self execute];
+		};
+
+		_command.updateHTMLViewAtomically = YES;
+		_command.terminationHandler = handler; // Deliberate retain-loop
+
+		[_command.htmlOutputView addObserver:self forKeyPath:@"visible" options:0 context:nullptr];
+		if(_options & OakCommandRefresherDocumentDidChange)
+			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(contentDidChange:) name:OakDocumentContentDidChangeNotification object:_document];
+		if(_options & OakCommandRefresherDocumentDidSave)
+			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentDidSave:) name:OakDocumentDidSaveNotification object:nil];
+
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentWillClose:) name:OakDocumentWillCloseNotification object:_document];
+	}
+	return self;
+}
+
+- (void)dealloc
+{
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
+	[_command.htmlOutputView removeObserver:self forKeyPath:@"visible"];
+	[_command closeHTMLOutputView];
+}
+
+- (NSUUID*)identifier
+{
+	return _command.identifier;
+}
+
+- (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)anObject change:(NSDictionary*)someChanges context:(void*)context
+{
+	if([keyPath isEqualToString:@"visible"])
+		return [self stop];
+	[super observeValueForKeyPath:keyPath ofObject:anObject change:someChanges context:context];
+}
+
+- (void)contentDidChange:(NSNotification*)aNotification
+{
+	[_idleTimer invalidate];
+	_idleTimer = [NSTimer scheduledTimerWithTimeInterval:kDocumentIdleDelay target:self selector:@selector(idleTimerDidFire:) userInfo:nil repeats:NO];
+}
+
+- (void)documentDidSave:(NSNotification*)aNotification
+{
+	[_idleTimer invalidate];
+	_idleTimer = [NSTimer scheduledTimerWithTimeInterval:kDocumentIdleDelay target:self selector:@selector(idleTimerDidFire:) userInfo:nil repeats:NO];
+}
+
+- (void)documentWillClose:(NSNotification*)aNotification
+{
+	[self stop];
+}
+
+- (void)idleTimerDidFire:(NSTimer*)aTimer
+{
+	_idleTimer = nil;
+	[self execute];
+}
+
+- (void)stop
+{
+	[_idleTimer invalidate];
+	_idleTimer = nil;
+	_command.terminationHandler = nil;
+}
+
+- (void)execute
+{
+	if(_shouldRun = (_running == YES))
+		return;
+
+	NSFileHandle* stdinFH;
+	if(_options & OakCommandRefresherDocumentAsInput)
+	{
+		NSMutableData* data = [NSMutableData data];
+		[_document enumerateByteRangesUsingBlock:^(char const* bytes, NSRange byteRange, BOOL* stop){
+			[data appendBytes:bytes length:byteRange.length];
+		}];
+
+		int stdinRead, stdinWrite;
+		std::tie(stdinRead, stdinWrite) = io::create_pipe();
+
+		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+			if(write(stdinWrite, data.bytes, data.length) == -1)
+				perror("command_info_t: write");
+			close(stdinWrite);
+		});
+
+		stdinFH = [[NSFileHandle alloc] initWithFileDescriptor:stdinRead closeOnDealloc:YES];
+	}
+	[_command executeWithInput:stdinFH variables:_variables outputHandler:nil];
+}
+@end
 
 @interface OakDocument ()
 {
