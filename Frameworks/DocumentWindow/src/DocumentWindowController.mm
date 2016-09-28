@@ -759,6 +759,8 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 			self.projectPath = [document.path stringByDeletingLastPathComponent];
 	}
 
+	if([keyPath isEqualToString:@"selectedDocument.path"] || [keyPath isEqualToString:@"selectedDocument.displayName"])
+		[self updateWindowTitle];
 	if([keyPath isEqualToString:@"selectedDocument.documentEdited"])
 		self.window.documentEdited = document.isDocumentEdited;
 	if([keyPath isEqualToString:@"selectedDocument.onDisk"] || [keyPath isEqualToString:@"selectedDocument.path"])
@@ -1254,17 +1256,6 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 // = Window Title =
 // ================
 
-- (void)updateWindowTitleAndRevealFile
-{
-	[self updateWindowTitle];
-
-	if(self.autoRevealFile && self.fileBrowserVisible)
-	{
-		if(self.selectedDocument.path)
-			[self revealFileInProject:self];
-	}
-}
-
 - (void)updateWindowTitle
 {
 	if(self.selectedDocument.displayName)
@@ -1382,7 +1373,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 			_projectScopeAttributes.push_back(customAttributes);
 
 		[self updateExternalAttributes];
-		[self updateWindowTitleAndRevealFile];
+		[self updateWindowTitle];
 	}
 }
 
@@ -1413,7 +1404,9 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		}
 
 		[self updateExternalAttributes];
-		[self updateWindowTitleAndRevealFile];
+
+		if(self.autoRevealFile && self.selectedDocument.path && self.fileBrowserVisible)
+			[self revealFileInProject:self];
 	}
 }
 
@@ -1422,7 +1415,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	if(_projectSCMVariables != newVariables)
 	{
 		_projectSCMVariables = newVariables;
-		[self updateWindowTitleAndRevealFile];
+		[self updateWindowTitle];
 	}
 }
 
@@ -1431,7 +1424,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	if(_documentSCMVariables != newVariables)
 	{
 		_documentSCMVariables = newVariables;
-		[self updateWindowTitleAndRevealFile];
+		[self updateWindowTitle];
 	}
 }
 
