@@ -455,7 +455,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 - (void)bundleItemChooserDidSelectItems:(id)sender
 {
 	for(NSDictionary* item in [sender selectedItems])
-		[NSApp sendAction:@selector(performBundleItemWithUUIDString:) to:nil from:[item objectForKey:@"uuid"]];
+		[NSApp sendAction:@selector(performBundleItemWithUUIDStringFrom:) to:nil from:@{ @"representedObject" : item[@"uuid"] }];
 }
 
 // ===========================

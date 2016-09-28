@@ -30,11 +30,6 @@ static NSString* NameForLocaleIdentifier (NSString* languageCode)
 }
 
 @implementation AppController (BundlesMenu)
-- (void)performBundleItemWithUUIDStringFrom:(id)anArgument
-{
-	[NSApp sendAction:@selector(performBundleItemWithUUIDString:) to:nil from:[anArgument representedObject]];
-}
-
 - (BOOL)menuHasKeyEquivalent:(NSMenu*)aMenu forEvent:(NSEvent*)theEvent target:(id*)aTarget action:(SEL*)anAction
 {
 	D(DBF_AppController_Menus, bug("%s (%s)\n", ns::glyphs_for_event_string(to_s(theEvent)).c_str(), to_s(theEvent).c_str()););

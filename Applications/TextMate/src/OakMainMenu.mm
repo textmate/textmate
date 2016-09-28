@@ -77,7 +77,7 @@ static CGPoint MenuPosition ()
 	if(!bundleItems.empty())
 	{
 		if(bundles::item_ptr item = OakShowMenuForBundleItems(bundleItems, MenuPosition()))
-			[NSApp sendAction:@selector(performBundleItemWithUUIDString:) to:nil from:[NSString stringWithCxxString:item->uuid()]];
+			[NSApp sendAction:@selector(performBundleItemWithUUIDStringFrom:) to:nil from:@{ @"representedObject" : to_ns(item->uuid()) }];
 		return YES;
 	}
 
