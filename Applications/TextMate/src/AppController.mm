@@ -496,11 +496,9 @@ BOOL HasDocumentWindow (NSArray* windows)
 	}
 	else if([item action] == @selector(performBundleItemWithUUIDStringFrom:))
 	{
-		if(bundles::item_ptr bundleItem = bundles::lookup(to_s(item.representedObject)))
-		{
-			if(id textView = [NSApp targetForAction:@selector(hasSelection)])
-				[item updateTitle:[NSString stringWithCxxString:name_with_selection(bundleItem, [textView hasSelection])]];
-		}
+		id menuItemValidator = [NSApp.keyWindow.delegate respondsToSelector:@selector(performBundleItem:)] ? NSApp.keyWindow.delegate : [NSApp targetForAction:@selector(performBundleItem:)];
+		if(menuItemValidator != self && [menuItemValidator respondsToSelector:@selector(validateMenuItem:)])
+			enabled = [menuItemValidator validateMenuItem:item];
 	}
 	return enabled;
 }
