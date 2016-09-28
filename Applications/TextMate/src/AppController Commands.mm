@@ -17,52 +17,50 @@
 OAK_DEBUG_VAR(AppController_Commands);
 
 @implementation AppController (Commands)
-- (void)performBundleItemWithUUIDString:(NSString*)uuidString
+- (void)performBundleItemWithUUIDStringFrom:(id)anArgument
 {
+	NSString* uuidString = [anArgument valueForKey:@"representedObject"];
 	if(bundles::item_ptr item = bundles::lookup(to_s(uuidString)))
 	{
-		NSWindow* mainWindow = [NSApp mainWindow];
+		if(id delegate = [NSApp.keyWindow.delegate respondsToSelector:@selector(performBundleItem:)] ? NSApp.keyWindow.delegate : [NSApp targetForAction:@selector(performBundleItem:)])
+			[delegate performBundleItem:item];
+	}
+}
 
-		id delegate = [([mainWindow attachedSheet] ?: mainWindow) delegate];
-
-		if(![delegate respondsToSelector:@selector(performBundleItem:)])
-			delegate = [NSApp targetForAction:@selector(performBundleItem:)];
-		if(delegate)
-			return [delegate performBundleItem:item];
-
-		switch(item->kind())
+- (void)performBundleItem:(bundles::item_ptr const&)item
+{
+	switch(item->kind())
+	{
+		case bundles::kItemTypeSnippet:
 		{
-			case bundles::kItemTypeSnippet:
-			{
-				// TODO set language according to snippet’s scope selector
+			// TODO set language according to snippet’s scope selector
 
-				OakDocument* doc = [OakDocumentController.sharedInstance untitledDocument];
-				[doc loadModalForWindow:nil completionHandler:^(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID){
-					[OakDocumentController.sharedInstance showDocument:doc];
-					if(DocumentWindowController* controller = [DocumentWindowController controllerForDocument:doc])
-						[controller performBundleItem:item];
-					[doc markDocumentSaved];
-					[doc close];
-				}];
-			}
-			break;
-
-			case bundles::kItemTypeCommand:
-			{
-				OakCommand* command = [[OakCommand alloc] initWithBundleCommand:parse_command(item)];
-				command.firstResponder = NSApp;
-				[command executeWithInput:nil variables:item->bundle_variables() outputHandler:nil];
-			}
-			break;
-
-			case bundles::kItemTypeGrammar:
-			{
-				OakDocument* doc = [OakDocumentController.sharedInstance untitledDocument];
-				doc.fileType = to_ns(item->value_for_field(bundles::kFieldGrammarScope));
+			OakDocument* doc = [OakDocumentController.sharedInstance untitledDocument];
+			[doc loadModalForWindow:nil completionHandler:^(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID){
 				[OakDocumentController.sharedInstance showDocument:doc];
-			}
-			break;
+				if(DocumentWindowController* controller = [DocumentWindowController controllerForDocument:doc])
+					[controller performBundleItem:item];
+				[doc markDocumentSaved];
+				[doc close];
+			}];
 		}
+		break;
+
+		case bundles::kItemTypeCommand:
+		{
+			OakCommand* command = [[OakCommand alloc] initWithBundleCommand:parse_command(item)];
+			command.firstResponder = NSApp;
+			[command executeWithInput:nil variables:item->bundle_variables() outputHandler:nil];
+		}
+		break;
+
+		case bundles::kItemTypeGrammar:
+		{
+			OakDocument* doc = [OakDocumentController.sharedInstance untitledDocument];
+			doc.fileType = to_ns(item->value_for_field(bundles::kFieldGrammarScope));
+			[OakDocumentController.sharedInstance showDocument:doc];
+		}
+		break;
 	}
 }
 @end
