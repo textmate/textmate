@@ -849,23 +849,6 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 // = Save Document =
 // =================
 
-- (void)didSaveAtPath:(NSString*)aPath withEncoding:(encoding::type)encoding success:(BOOL)success
-{
-	if(success)
-	{
-		self.onDisk        = YES;
-		self.diskEncoding  = to_ns(encoding.charset());
-		self.diskNewlines  = to_ns(encoding.newlines());
-
-		[self markDocumentSaved];
-		[self removeBackup];
-		[self updateRecentDocumentMenu];
-
-		[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentDidSaveNotification object:self];
-	}
-	self.observeFileSystem = self.isLoaded;
-}
-
 - (void)saveModalForWindow:(NSWindow*)aWindow completionHandler:(void(^)(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID))block
 {
 	if(self.isDocumentEdited && [self tryLoadBackup])
@@ -993,18 +976,30 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 			void(^_block)(OakDocumentIOResult result, NSString* path, encoding::type const& encoding, NSString* errorMessage, oak::uuid_t const& filterUUID);
 		};
 
-		BOOL closeDocument = self.isLoaded;
-		if(closeDocument)
-			[self open];
+		[self open];
 
 		auto cb = std::make_shared<callback_t>(self, aWindow, ^(OakDocumentIOResult result, NSString* path, encoding::type const& encoding, NSString* errorMessage, oak::uuid_t const& filterUUID){
 			[OakDocumentController.sharedInstance update:self];
-			if(closeDocument)
-				[self didSaveAtPath:path withEncoding:encoding success:result == OakDocumentIOResultSuccess];
+
+			// After performReplacements: we have a buffer but isLoaded == NO
+			if(self.isLoaded)
+			{
+				self.onDisk        = YES;
+				self.diskEncoding  = to_ns(encoding.charset());
+				self.diskNewlines  = to_ns(encoding.newlines());
+
+				[self markDocumentSaved];
+				[self removeBackup];
+				[self updateRecentDocumentMenu];
+
+				[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentDidSaveNotification object:self];
+			}
+			self.observeFileSystem = self.isLoaded;
+
 			if(block)
 				block(result, errorMessage, filterUUID);
-			if(closeDocument)
-				[self close];
+
+			[self close];
 		});
 
 		io::bytes_ptr content = std::make_shared<io::bytes_t>(_buffer->size());
