@@ -5,7 +5,9 @@
 
 static NSURL* CanonicalURL (NSURL* url, BOOL isDirectoryFlag = YES)
 {
-	return [NSURL fileURLWithPath:[[url filePathURL] path] isDirectory:isDirectoryFlag];
+	if(NSString* path = [[url filePathURL] path])
+		return [NSURL fileURLWithPath:path isDirectory:isDirectoryFlag];
+	return url;
 }
 
 static NSArray* ApplicationURLsForPaths (NSSet* paths)
