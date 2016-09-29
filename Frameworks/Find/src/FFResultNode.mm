@@ -332,7 +332,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 	if(!utf8::is_valid(prefix.begin(), prefix.end()) || !utf8::is_valid(middle.begin(), middle.end()) || !utf8::is_valid(suffix.begin(), suffix.end()))
 	{
 		string_builder_t builder(NSLineBreakByTruncatingTail);
-		builder.append(to_ns(text::format("%zu-%zu: Range is not valid UTF-8, please contact: http://macromates.com/support", m.first, m.last)), @{
+		builder.append(to_ns(text::format("%zu-%zu: Range is not valid UTF-8, please contact: https://macromates.com/support", m.first, m.last)), @{
 			NSFontAttributeName            : font,
 			NSForegroundColorAttributeName : [NSColor darkGrayColor]
 		});
