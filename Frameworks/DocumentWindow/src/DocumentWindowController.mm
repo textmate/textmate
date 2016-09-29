@@ -1974,7 +1974,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	if(self.fileBrowserVisible)
 	{
 		items = [[self.fileBrowser.selectedURLs filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isFileURL == YES"]] valueForKey:@"path"];
-		if(items.count == 0)
+		if(items.count == 0 && self.fileBrowser.path)
 			items = @[ self.fileBrowser.path ];
 	}
 	find.fileBrowserItems = items.count ? items : nil;
