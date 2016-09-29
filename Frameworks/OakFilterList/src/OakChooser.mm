@@ -101,12 +101,12 @@ NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string
 	size_t from = 0;
 	for(auto range : ranges)
 	{
-		[res appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:std::string(in.begin() + from, in.begin() + range.first)] attributes:baseAttributes]];
-		[res appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:std::string(in.begin() + range.first, in.begin() + range.second)] attributes:highlightAttributes]];
+		[res appendAttributedString:[[NSAttributedString alloc] initWithString:(to_ns(in.substr(from, range.first - from)) ?: @"?") attributes:baseAttributes]];
+		[res appendAttributedString:[[NSAttributedString alloc] initWithString:(to_ns(in.substr(range.first, range.second - range.first)) ?: @"?") attributes:highlightAttributes]];
 		from = range.second;
 	}
 	if(from < in.size())
-		[res appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:in.substr(from)] attributes:baseAttributes]];
+		[res appendAttributedString:[[NSAttributedString alloc] initWithString:(to_ns(in.substr(from)) ?: @"?") attributes:baseAttributes]];
 
 	return res;
 }
