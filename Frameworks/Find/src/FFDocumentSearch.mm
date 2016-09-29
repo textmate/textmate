@@ -16,7 +16,6 @@ NSString* const FFDocumentSearchDidFinishNotification         = @"FFDocumentSear
 
 	BOOL           _searching;
 	NSUInteger     _lastSearchToken;
-	NSString*      _lastDocumentPath;
 
 	NSUInteger     _scannedFileCount;
 	NSUInteger     _scannedByteCount;
@@ -28,6 +27,7 @@ NSString* const FFDocumentSearchDidFinishNotification         = @"FFDocumentSear
 	NSMutableArray<OakDocumentMatch*>* _matches;
 }
 @property (nonatomic, readwrite) NSString* currentPath;
+@property NSString* lastDocumentPath;
 @end
 
 OAK_DEBUG_VAR(Find_FolderSearch);
@@ -94,7 +94,7 @@ static NSDictionary* GlobOptionsForPath (std::string const& path, NSString* glob
 			if(*stop = searchToken != _lastSearchToken)
 				return;
 
-			_lastDocumentPath = document.path;
+			self.lastDocumentPath = document.path;
 			NSUInteger bufferSize = 0;
 			NSArray* newMatches = [document matchesForString:_searchString options:_options bufferSize:&bufferSize];
 			_scannedByteCount += bufferSize;
@@ -128,7 +128,7 @@ static NSDictionary* GlobOptionsForPath (std::string const& path, NSString* glob
 {
 	D(DBF_Find_FolderSearch, bug("\n"););
 
-	self.currentPath = [_lastDocumentPath stringByDeletingLastPathComponent];
+	self.currentPath = [self.lastDocumentPath stringByDeletingLastPathComponent];
 	@synchronized(self) {
 		if(_matches.count)
 		{
