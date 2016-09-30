@@ -154,15 +154,6 @@ static NSString* OakMenuItemIdentifier (NSMenuItem* menuItem)
 		_rank = 3 - rank;
 	}
 }
-
-- (NSComparisonResult)rankCompare:(ActionItem*)otherItem
-{
-	if(_rank < otherItem->_rank)
-		return NSOrderedAscending;
-	else if(_rank > otherItem->_rank)
-		return NSOrderedDescending;
-	return NSOrderedSame;
-}
 @end
 
 // ==============
@@ -898,16 +889,19 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	NSString* filter = self.keyEquivalentInput ? self.keyEquivalentString : self.filterString;
 
 	NSArray<ActionItem*>* items = [self unfilteredItems];
-	if(!(self.searchSource & kSearchSourceSettingsItems) && (_bundleItemField != kBundleItemKeyEquivalentField || OakIsEmptyString(filter)))
-		items = [items sortedArrayUsingDescriptors:@[ [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES selector:@selector(localizedCompare:)], [NSSortDescriptor sortDescriptorWithKey:@"path" ascending:YES selector:@selector(localizedCompare:)] ]];
 
+	BOOL preserveOrder = (self.searchSource & kSearchSourceSettingsItems) || (_bundleItemField == kBundleItemKeyEquivalentField && OakNotEmptyString(filter));
 	[items enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(ActionItem* item, NSUInteger idx, BOOL* stop){
-		double rank = (items.count - idx) / (double)items.count;
+		double rank = preserveOrder ? (items.count - idx) / (double)items.count : 1;
 		[item updateRankUsingFilter:to_s(filter) bundleItemField:_bundleItemField searchSource:_searchSource bindings:identifiers defaultRank:rank];
 	}];
 
 	NSArray* res = [items filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isMatched == YES"]];
-	res = [res sortedArrayUsingSelector:@selector(rankCompare:)];
+	res = [res sortedArrayUsingDescriptors:@[
+		[NSSortDescriptor sortDescriptorWithKey:@"rank" ascending:YES],
+		[NSSortDescriptor sortDescriptorWithKey:@"name.string" ascending:YES selector:@selector(localizedCompare:)],
+		[NSSortDescriptor sortDescriptorWithKey:@"path.string" ascending:YES selector:@selector(localizedCompare:)]
+	]];
 
 	self.items = res;
 
