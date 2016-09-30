@@ -349,7 +349,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 		_backupPath     = backupPath;
 
 		_path           = to_ns(path::resolve(path::get_attr(path, "com.macromates.backup.path")));
-		_onDisk         = access([_path fileSystemRepresentation], F_OK) == 0;
+		_onDisk         = _path && access([_path fileSystemRepresentation], F_OK) == 0;
 		_fileType       = to_ns(path::get_attr(path, "com.macromates.backup.file-type"));
 		_diskEncoding   = to_ns(path::get_attr(path, "com.macromates.backup.encoding"));
 		_diskNewlines   = to_ns(path::get_attr(path, "com.macromates.backup.newlines"));
@@ -493,18 +493,18 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	if(_observeFileSystem)
 	{
 		self.observeFileSystem = NO;
-		self.observeFileSystem = YES;
+		self.observeFileSystem = _path ? YES : NO;
 	}
 
 	if(_observeSCMStatus)
 	{
 		self.observeSCMStatus = NO;
-		self.observeSCMStatus = YES;
+		self.observeSCMStatus = _path ? YES : NO;
 	}
 
 	if(self.isLoaded)
 	{
-		self.onDisk = access([_path fileSystemRepresentation], F_OK) == 0;
+		self.onDisk = _path && access([_path fileSystemRepresentation], F_OK) == 0;
 		if(NSString* fileType = [self sniffFileType])
 			self.fileType = fileType;
 	}
@@ -984,7 +984,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 			// After performReplacements: we have a buffer but isLoaded == NO
 			if(self.isLoaded)
 			{
-				self.onDisk        = YES;
+				self.onDisk        = self.path ? YES : NO;
 				self.diskEncoding  = to_ns(encoding.charset());
 				self.diskNewlines  = to_ns(encoding.newlines());
 
@@ -1622,12 +1622,12 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	}
 	else if((flags & NOTE_DELETE) == NOTE_DELETE)
 	{
-		self.onDisk = access([_path fileSystemRepresentation], F_OK) == 0;
+		self.onDisk = _path && access([_path fileSystemRepresentation], F_OK) == 0;
 		[OakDocumentController.sharedInstance update:self];
 	}
 	else if((flags & NOTE_WRITE) == NOTE_WRITE || (flags & NOTE_CREATE) == NOTE_CREATE)
 	{
-		self.onDisk = access([_path fileSystemRepresentation], F_OK) == 0;
+		self.onDisk = _path && access([_path fileSystemRepresentation], F_OK) == 0;
 		self.needsImportDocumentChanges = YES;
 		[OakDocumentController.sharedInstance update:self];
 	}
