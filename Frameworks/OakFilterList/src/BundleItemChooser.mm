@@ -399,6 +399,9 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 @end
 
 @interface BundleItemChooser () <NSToolbarDelegate>
+{
+	NSArray<ActionItem*>* _unfilteredItems;
+}
 @property (nonatomic) OakKeyEquivalentView* keyEquivalentView;
 @property (nonatomic) NSPopUpButton* actionsPopUpButton;
 @property (nonatomic) NSView* aboveScopeBarDark;
@@ -593,6 +596,12 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	[super showWindow:sender];
 }
 
+- (void)windowWillClose:(NSNotification*)aNotification
+{
+	_unfilteredItems = nil;
+	self.items = @[ ];
+}
+
 - (void)setSourceIndex:(NSUInteger)newSourceIndex
 {
 	switch(_sourceIndex = newSourceIndex)
@@ -661,12 +670,14 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 - (void)toggleSearchAllScopes:(id)sender
 {
 	self.searchAllScopes = !self.searchAllScopes;
+	_unfilteredItems = nil;
 	[self updateItems:self];
 }
 
 - (void)setScope:(scope::context_t)aScope
 {
 	_scope = aScope;
+	_unfilteredItems = nil;
 	[self updateItems:self];
 }
 
@@ -696,6 +707,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		return;
 
 	_searchSource = newSearchSource;
+	_unfilteredItems = nil;
 	[self updateItems:self];
 }
 
@@ -721,171 +733,175 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 
 - (NSArray<ActionItem*>*)unfilteredItems
 {
-	auto format = [](plist::any_t const& plist) -> std::string {
-		return format_string::replace(to_s(plist, plist::kPreferSingleQuotedStrings|plist::kSingleLine), "\\A\\s+|\\s+\\z|(\\s+)", "${1:+ }");
-	};
-
-	NSMutableArray<ActionItem*>* items = [NSMutableArray new];
-	std::set<std::string> previousSettings, previousVariables;
-
-	for(auto const& bundleItem : relevant_items_in_scope(self.searchAllScopes ? scope::wildcard : self.scope, self.hasSelection, self.searchSource))
+	if(_unfilteredItems == nil)
 	{
-		std::string const name = name_with_selection(bundleItem, self.hasSelection);
-		std::string const path = menu_path(bundleItem);
-		NSString* const uuid   = [NSString stringWithCxxString:bundleItem->uuid()];
+		auto format = [](plist::any_t const& plist) -> std::string {
+			return format_string::replace(to_s(plist, plist::kPreferSingleQuotedStrings|plist::kSingleLine), "\\A\\s+|\\s+\\z|(\\s+)", "${1:+ }");
+		};
 
-		if(bundleItem->kind() != bundles::kItemTypeSettings)
-		{
-			std::string suffix;
-			if(bundleItem->kind() == bundles::kItemTypeGrammar)
-				suffix = " ▸ Language Grammars";
-			else if(bundleItem->kind() == bundles::kItemTypeTheme)
-				suffix = " ▸ Themes";
+		NSMutableArray<ActionItem*>* items = [NSMutableArray new];
+		std::set<std::string> previousSettings, previousVariables;
 
-			ActionItem* item = [[ActionItem alloc] init];
-			item.itemName      = to_ns(name);
-			item.location      = to_ns(path + suffix);
-			item.uuid          = uuid;
-			item.scopeSelector = to_ns(to_s(bundleItem->scope_selector()));
-			item.keyEquivalent = to_ns(key_equivalent(bundleItem));
-			item.tabTrigger    = to_ns(bundleItem->value_for_field(bundles::kFieldTabTrigger));
-			item.semanticClass = to_ns(text::join(bundleItem->values_for_field(bundles::kFieldSemanticClass), ", "));
-			[items addObject:item];
-		}
-		else
+		for(auto const& bundleItem : relevant_items_in_scope(self.searchAllScopes ? scope::wildcard : self.scope, self.hasSelection, self.searchSource))
 		{
-			plist::dictionary_t settings;
-			if(plist::get_key_path(bundleItem->plist(), bundles::kFieldSettingName, settings))
+			std::string const name = name_with_selection(bundleItem, self.hasSelection);
+			std::string const path = menu_path(bundleItem);
+			NSString* const uuid   = [NSString stringWithCxxString:bundleItem->uuid()];
+
+			if(bundleItem->kind() != bundles::kItemTypeSettings)
 			{
-				for(auto const& pair : settings)
+				std::string suffix;
+				if(bundleItem->kind() == bundles::kItemTypeGrammar)
+					suffix = " ▸ Language Grammars";
+				else if(bundleItem->kind() == bundles::kItemTypeTheme)
+					suffix = " ▸ Themes";
+
+				ActionItem* item = [[ActionItem alloc] init];
+				item.itemName      = to_ns(name);
+				item.location      = to_ns(path + suffix);
+				item.uuid          = uuid;
+				item.scopeSelector = to_ns(to_s(bundleItem->scope_selector()));
+				item.keyEquivalent = to_ns(key_equivalent(bundleItem));
+				item.tabTrigger    = to_ns(bundleItem->value_for_field(bundles::kFieldTabTrigger));
+				item.semanticClass = to_ns(text::join(bundleItem->values_for_field(bundles::kFieldSemanticClass), ", "));
+				[items addObject:item];
+			}
+			else
+			{
+				plist::dictionary_t settings;
+				if(plist::get_key_path(bundleItem->plist(), bundles::kFieldSettingName, settings))
 				{
-					if(pair.first != "shellVariables")
+					for(auto const& pair : settings)
 					{
-						ActionItem* item = [[ActionItem alloc] init];
-						item.itemName      = to_ns(pair.first);
-						item.value         = to_ns(format(pair.second));
-						item.location      = to_ns(path + " ▸ " + name);
-						item.uuid          = uuid;
-						item.eclipsed      = !self.searchAllScopes && !previousSettings.insert(pair.first).second ? YES : NO;
-						item.scopeSelector = to_ns(to_s(bundleItem->scope_selector()));
-						[items addObject:item];
-					}
-					else
-					{
-						auto const shellVariables = shell_variables(bundleItem);
-
-						BOOL eclipsed = NO;
-						if(!self.searchAllScopes)
-						{
-							for(auto const& pair : shellVariables)
-								eclipsed = !previousVariables.insert(pair.first).second || eclipsed;
-						}
-
-						for(auto const& pair : shellVariables)
+						if(pair.first != "shellVariables")
 						{
 							ActionItem* item = [[ActionItem alloc] init];
 							item.itemName      = to_ns(pair.first);
 							item.value         = to_ns(format(pair.second));
-							item.location      = to_ns(path + " ▸ " + name + " ▸ " + "shellVariables");
+							item.location      = to_ns(path + " ▸ " + name);
 							item.uuid          = uuid;
-							item.eclipsed      = eclipsed;
+							item.eclipsed      = !self.searchAllScopes && !previousSettings.insert(pair.first).second ? YES : NO;
 							item.scopeSelector = to_ns(to_s(bundleItem->scope_selector()));
 							[items addObject:item];
+						}
+						else
+						{
+							auto const shellVariables = shell_variables(bundleItem);
+
+							BOOL eclipsed = NO;
+							if(!self.searchAllScopes)
+							{
+								for(auto const& pair : shellVariables)
+									eclipsed = !previousVariables.insert(pair.first).second || eclipsed;
+							}
+
+							for(auto const& pair : shellVariables)
+							{
+								ActionItem* item = [[ActionItem alloc] init];
+								item.itemName      = to_ns(pair.first);
+								item.value         = to_ns(format(pair.second));
+								item.location      = to_ns(path + " ▸ " + name + " ▸ " + "shellVariables");
+								item.uuid          = uuid;
+								item.eclipsed      = eclipsed;
+								item.scopeSelector = to_ns(to_s(bundleItem->scope_selector()));
+								[items addObject:item];
+							}
 						}
 					}
 				}
 			}
 		}
-	}
 
-	std::set<std::pair<std::string, std::string>> seen;
-	if(self.searchSource & kSearchSourceMenuItems)
-	{
-		std::vector<menu_item_t> menuItems;
-		copy_menu_items([NSApp mainMenu], back_inserter(menuItems));
-		for(auto const& record : menuItems)
+		std::set<std::pair<std::string, std::string>> seen;
+		if(self.searchSource & kSearchSourceMenuItems)
 		{
-			ActionItem* item = [[ActionItem alloc] init];
-			item.itemName = to_ns(record.name);
-			item.location = to_ns(record.path);
-			item.menuItem = record.menu_item;
-
-			std::string const keyEquivalent = key_equivalent_for_menu_item(record.menu_item);
-			if(!keyEquivalent.empty())
-				seen.emplace(keyEquivalent, sel_getName(record.menu_item.action));
-
-			item.keyEquivalent = to_ns(keyEquivalent);
-			[items addObject:item];
-		}
-	}
-
-	if(self.searchSource & kSearchSourceKeyBindingItems)
-	{
-		static std::string const KeyBindingLocations[] =
-		{
-			oak::application_t::support("KeyBindings.dict"),
-			oak::application_t::path("Contents/Resources/KeyBindings.dict"),
-			path::join(path::home(), "Library/KeyBindings/DefaultKeyBinding.dict"),
-			"/Library/KeyBindings/DefaultKeyBinding.dict",
-			"/System/Library/Frameworks/AppKit.framework/Resources/StandardKeyBinding.dict",
-		};
-
-		std::set<std::string> keysSeen;
-		for(auto const& path : KeyBindingLocations)
-		{
-			std::string displayPath = path::is_child(path, oak::application_t::path()) ? "TextMate.app ▸ " + path::name(path) : path::with_tilde(path);
-			for(auto const& pair : plist::load(path))
+			std::vector<menu_item_t> menuItems;
+			copy_menu_items([NSApp mainMenu], back_inserter(menuItems));
+			for(auto const& record : menuItems)
 			{
-				std::string key = ns::normalize_event_string(pair.first);
-				std::string name, action;
-				if(std::string const* sel = boost::get<std::string>(&pair.second))
-				{
-					if(*sel == "noop:" || !seen.emplace(key, *sel).second)
-						continue;
-
-					action = *sel;
-					name = format_string::replace(*sel, "[a-z](?=[A-Z])", "$0 ");
-					name = format_string::replace(name, "(.+):\\z", "${1:/capitalize}");
-					name = format_string::replace(name, "\\bsub Word\\b", "Sub-word");
-
-					if(![NSApp targetForAction:NSSelectorFromString([NSString stringWithCxxString:*sel])])
-						name += " (unknown action)";
-				}
-				else
-				{
-					name = format(pair.second);
-				}
-
 				ActionItem* item = [[ActionItem alloc] init];
-				item.itemName      = to_ns(name);
-				item.location      = to_ns(displayPath);
-				item.file          = to_ns(path);
-				item.keyEquivalent = to_ns(key);
-				item.eclipsed      = !keysSeen.insert(key).second ? YES : NO;
-				item.action        = NSSelectorFromString(to_ns(action));
+				item.itemName = to_ns(record.name);
+				item.location = to_ns(record.path);
+				item.menuItem = record.menu_item;
+
+				std::string const keyEquivalent = key_equivalent_for_menu_item(record.menu_item);
+				if(!keyEquivalent.empty())
+					seen.emplace(keyEquivalent, sel_getName(record.menu_item.action));
+
+				item.keyEquivalent = to_ns(keyEquivalent);
 				[items addObject:item];
 			}
 		}
-	}
 
-	if(self.searchSource & kSearchSourceSettingsItems)
-	{
-		for(auto const& info : settings_info_for_path(to_s(self.path), self.searchAllScopes ? scope::wildcard : self.scope.right, to_s(self.directory)))
+		if(self.searchSource & kSearchSourceKeyBindingItems)
 		{
-			std::string const name = info.variable;
-			std::string const path = info.path == NULL_STR ? "TextMate.app ▸ Preferences" : (path::is_child(info.path, oak::application_t::path()) ? "TextMate.app ▸ " + path::name(info.path) : path::with_tilde(info.path)) + (info.section == NULL_STR ? "" : " ▸ " + info.section);
+			static std::string const KeyBindingLocations[] =
+			{
+				oak::application_t::support("KeyBindings.dict"),
+				oak::application_t::path("Contents/Resources/KeyBindings.dict"),
+				path::join(path::home(), "Library/KeyBindings/DefaultKeyBinding.dict"),
+				"/Library/KeyBindings/DefaultKeyBinding.dict",
+				"/System/Library/Frameworks/AppKit.framework/Resources/StandardKeyBinding.dict",
+			};
 
-			ActionItem* item = [[ActionItem alloc] init];
-			item.itemName = to_ns(name);
-			item.value    = to_ns(format(info.value));
-			item.location = to_ns(path);
-			item.file     = to_ns(info.path);
-			item.line     = [NSString stringWithFormat:@"%zu", info.line_number];
-			[items addObject:item];
+			std::set<std::string> keysSeen;
+			for(auto const& path : KeyBindingLocations)
+			{
+				std::string displayPath = path::is_child(path, oak::application_t::path()) ? "TextMate.app ▸ " + path::name(path) : path::with_tilde(path);
+				for(auto const& pair : plist::load(path))
+				{
+					std::string key = ns::normalize_event_string(pair.first);
+					std::string name, action;
+					if(std::string const* sel = boost::get<std::string>(&pair.second))
+					{
+						if(*sel == "noop:" || !seen.emplace(key, *sel).second)
+							continue;
+
+						action = *sel;
+						name = format_string::replace(*sel, "[a-z](?=[A-Z])", "$0 ");
+						name = format_string::replace(name, "(.+):\\z", "${1:/capitalize}");
+						name = format_string::replace(name, "\\bsub Word\\b", "Sub-word");
+
+						if(![NSApp targetForAction:NSSelectorFromString([NSString stringWithCxxString:*sel])])
+							name += " (unknown action)";
+					}
+					else
+					{
+						name = format(pair.second);
+					}
+
+					ActionItem* item = [[ActionItem alloc] init];
+					item.itemName      = to_ns(name);
+					item.location      = to_ns(displayPath);
+					item.file          = to_ns(path);
+					item.keyEquivalent = to_ns(key);
+					item.eclipsed      = !keysSeen.insert(key).second ? YES : NO;
+					item.action        = NSSelectorFromString(to_ns(action));
+					[items addObject:item];
+				}
+			}
 		}
-	}
 
-	return items;
+		if(self.searchSource & kSearchSourceSettingsItems)
+		{
+			for(auto const& info : settings_info_for_path(to_s(self.path), self.searchAllScopes ? scope::wildcard : self.scope.right, to_s(self.directory)))
+			{
+				std::string const name = info.variable;
+				std::string const path = info.path == NULL_STR ? "TextMate.app ▸ Preferences" : (path::is_child(info.path, oak::application_t::path()) ? "TextMate.app ▸ " + path::name(info.path) : path::with_tilde(info.path)) + (info.section == NULL_STR ? "" : " ▸ " + info.section);
+
+				ActionItem* item = [[ActionItem alloc] init];
+				item.itemName = to_ns(name);
+				item.value    = to_ns(format(info.value));
+				item.location = to_ns(path);
+				item.file     = to_ns(info.path);
+				item.line     = [NSString stringWithFormat:@"%zu", info.line_number];
+				[items addObject:item];
+			}
+		}
+
+		_unfilteredItems = items;
+	}
+	return _unfilteredItems;
 }
 
 - (void)updateItems:(id)sender
