@@ -103,11 +103,9 @@ NSUInteger const kFileChooserUncommittedChangesSourceIndex = 2;
 	_coverFile.clear();
 }
 
-- (void)updateRankUsingFilter:(std::string const&)filter glob:(path::glob_list_t const&)glob bindings:(std::vector<std::string> const&)bindings
+- (void)updateRankUsingFilter:(std::string const&)filter bindings:(std::vector<std::string> const&)bindings
 {
 	[self reset];
-	if(glob.exclude(_path))
-		return;
 
 	double rank = _isCurrent ? 0.1 : 3;
 	if(!filter.empty() && filter != NULL_STR)
@@ -382,7 +380,6 @@ static NSDictionary* globs_for_path (std::string const& path)
 		compareSelector = @selector(rankCompare:);
 
 		std::string const filter = to_s(_filterString);
-		path::glob_list_t glob;
 
 		std::vector<std::string> bindings;
 		for(NSString* str in [[OakAbbreviations abbreviationsForName:@"OakFileChooserBindings"] stringsForAbbreviation:_filterString])
@@ -392,11 +389,11 @@ static NSDictionary* globs_for_path (std::string const& path)
 		size_t const stride = 256;
 		dispatch_apply(count / stride, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t n){
 			for(size_t i = n*stride; i < (n+1)*stride; ++i)
-				[_records[first + i] updateRankUsingFilter:filter glob:glob bindings:bindings];
+				[_records[first + i] updateRankUsingFilter:filter bindings:bindings];
 		});
 
 	   for(size_t i = count - (count % stride); i < count; ++i)
-			[_records[first + i] updateRankUsingFilter:filter glob:glob bindings:bindings];
+			[_records[first + i] updateRankUsingFilter:filter bindings:bindings];
 	}
 
 	NSArray* array = [_records filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isMatched == YES"]];
