@@ -46,6 +46,9 @@ static NSString* OakMenuItemIdentifier (NSMenuItem* menuItem)
 // ==============
 
 @interface ActionItem : NSObject
+@property (nonatomic, getter = isMatched) BOOL matched;
+@property (nonatomic, readonly) double rank;
+
 @property (nonatomic) NSImage* icon;
 @property (nonatomic) id name; // NSString or NSAttributedString
 @property (nonatomic) id path; // NSString or NSAttributedString
@@ -65,6 +68,101 @@ static NSString* OakMenuItemIdentifier (NSMenuItem* menuItem)
 @end
 
 @implementation ActionItem
+- (void)reset
+{
+	_matched = NO;
+	_rank    = 0;
+}
+
+- (void)updateRankUsingFilter:(std::string const&)filter bundleItemField:(NSUInteger)bundleItemField searchSource:(NSUInteger)searchSource bindings:(NSArray<NSString*>*)identifiers defaultRank:(double)rank
+{
+	[self reset];
+
+	std::vector<std::pair<size_t, size_t>> cover_path, cover_name;
+	std::string name = to_s(_name);
+	std::string path = to_s(_path);
+
+	if(filter != NULL_STR && !filter.empty())
+	{
+		auto OakContainsString = [](NSString* haystack, NSString* needle) -> BOOL {
+			return haystack && needle && [haystack rangeOfString:needle].location != NSNotFound;
+		};
+
+		if(bundleItemField == kBundleItemTitleField)
+		{
+			std::vector<std::pair<size_t, size_t>> cover;
+			if(searchSource & (kSearchSourceActionItems|kSearchSourceMenuItems|kSearchSourceKeyBindingItems))
+			{
+				if(rank = oak::rank(filter, name, &cover))
+						rank += 1;
+				else	rank = oak::rank(filter, path + " " + name, &cover);
+			}
+			else
+			{
+				auto is_substr = [&cover](std::string const& needle, std::string const& haystack) -> BOOL {
+					NSString* str = to_ns(haystack);
+					NSRange r = [str rangeOfString:to_ns(needle) options:NSCaseInsensitiveSearch];
+					if(r.location != NSNotFound)
+						cover.emplace_back(to_s([str substringToIndex:r.location]).size(), to_s([str substringToIndex:NSMaxRange(r)]).size());
+					return r.location != NSNotFound;
+				};
+
+				if(is_substr(filter, name))
+					rank += 1;
+				else if(!is_substr(filter, path + " " + name))
+					rank = 0;
+			}
+
+			for(auto pair : cover)
+			{
+				if(rank > 1)
+					cover_name.push_back(pair);
+				else if(pair.first < path.size())
+					cover_path.emplace_back(pair.first, std::min(pair.second, path.size()));
+				else if(path.size() + 1 < pair.second)
+					cover_name.emplace_back(std::max(pair.first, path.size() + 1) - path.size() - 1, pair.second - path.size() - 1);
+			}
+		}
+		else if(bundleItemField == kBundleItemKeyEquivalentField)
+			rank = [_keyEquivalent isEqualToString:to_ns(filter)] ? rank : 0;
+		else if(bundleItemField == kBundleItemTabTriggerField)
+			rank = OakContainsString(_tabTrigger, to_ns(filter)) ? rank : 0;
+		else if(bundleItemField == kBundleItemSemanticClassField)
+			rank = OakContainsString(_semanticClass, to_ns(filter)) ? rank : 0;
+		else if(bundleItemField == kBundleItemScopeSelectorField)
+			rank = OakContainsString(_scopeSelector, to_ns(filter)) ? rank : 0;
+	}
+
+	if(_matched = (rank > 0 ? YES : NO))
+	{
+		if(bundleItemField == kBundleItemTitleField)
+		{
+			NSUInteger i = [identifiers indexOfObject:(_uuid ?: NSStringFromSelector(_action) ?: OakMenuItemIdentifier(_menuItem))];
+			if(i != NSNotFound)
+				rank = 2 + (identifiers.count - i) / identifiers.count;
+		}
+
+		if(NSString* value = _value)
+			name += " = " + to_s(value);
+
+		NSMutableAttributedString* str = CreateAttributedStringWithMarkedUpRanges(name, cover_name, NSLineBreakByTruncatingTail);
+		if(_eclipsed)
+			[str addAttribute:NSStrikethroughStyleAttributeName value:@(NSUnderlineStyleSingle|NSUnderlinePatternSolid) range:NSMakeRange(0, str.string.length)];
+
+		self.name = str;
+		self.path = CreateAttributedStringWithMarkedUpRanges(path, cover_path, NSLineBreakByTruncatingHead);
+		_rank = 3 - rank;
+	}
+}
+
+- (NSComparisonResult)rankCompare:(ActionItem*)otherItem
+{
+	if(_rank < otherItem->_rank)
+		return NSOrderedAscending;
+	else if(_rank > otherItem->_rank)
+		return NSOrderedDescending;
+	return NSOrderedSame;
+}
 @end
 
 // ==============
@@ -796,97 +894,22 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 
 - (void)updateItems:(id)sender
 {
-	auto OakContainsString = [](NSString* haystack, NSString* needle) -> BOOL {
-		return haystack && needle && [haystack rangeOfString:needle].location != NSNotFound;
-	};
-
-	NSArray* identifiers = [[OakAbbreviations abbreviationsForName:@"OakBundleItemChooserBindings"] stringsForAbbreviation:self.filterString];
+	NSArray<NSString*>* identifiers = [[OakAbbreviations abbreviationsForName:@"OakBundleItemChooserBindings"] stringsForAbbreviation:self.filterString];
 	NSString* filter = self.keyEquivalentInput ? self.keyEquivalentString : self.filterString;
 
 	NSArray<ActionItem*>* items = [self unfilteredItems];
 	if(!(self.searchSource & kSearchSourceSettingsItems) && (_bundleItemField != kBundleItemKeyEquivalentField || OakIsEmptyString(filter)))
 		items = [items sortedArrayUsingDescriptors:@[ [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES selector:@selector(localizedCompare:)], [NSSortDescriptor sortDescriptorWithKey:@"path" ascending:YES selector:@selector(localizedCompare:)] ]];
 
-	std::multimap<double, ActionItem*> rankedItems;
-	for(ActionItem* item in items)
+	for(NSUInteger i = 0; i < items.count; ++i)
 	{
-		std::vector<std::pair<size_t, size_t>> cover_path, cover_name;
-		std::string name = to_s(item.name);
-		std::string path = to_s(item.path);
-
-		double rank = (items.count - rankedItems.size()) / (double)items.count;
-		if(OakNotEmptyString(filter))
-		{
-			if(_bundleItemField == kBundleItemTitleField)
-			{
-				std::vector<std::pair<size_t, size_t>> cover;
-				if(self.searchSource & (kSearchSourceActionItems|kSearchSourceMenuItems|kSearchSourceKeyBindingItems))
-				{
-					if(rank = oak::rank(to_s(filter), name, &cover))
-							rank += 1;
-					else	rank = oak::rank(to_s(filter), path + " " + name, &cover);
-				}
-				else
-				{
-					auto is_substr = [&cover](NSString* needle, std::string const& haystack) -> BOOL {
-						NSString* str = [NSString stringWithCxxString:haystack];
-						NSRange r = [str rangeOfString:needle options:NSCaseInsensitiveSearch];
-						if(r.location != NSNotFound)
-							cover.emplace_back(to_s([str substringToIndex:r.location]).size(), to_s([str substringToIndex:NSMaxRange(r)]).size());
-						return r.location != NSNotFound;
-					};
-
-					if(is_substr(filter, name))
-						rank += 1;
-					else if(!is_substr(filter, path + " " + name))
-						rank = 0;
-				}
-
-				for(auto pair : cover)
-				{
-					if(rank > 1)
-						cover_name.push_back(pair);
-					else if(pair.first < path.size())
-						cover_path.emplace_back(pair.first, std::min(pair.second, path.size()));
-					else if(path.size() + 1 < pair.second)
-						cover_name.emplace_back(std::max(pair.first, path.size() + 1) - path.size() - 1, pair.second - path.size() - 1);
-				}
-			}
-			else if(_bundleItemField == kBundleItemKeyEquivalentField)
-				rank = [item.keyEquivalent isEqualToString:filter] ? rank : 0;
-			else if(_bundleItemField == kBundleItemTabTriggerField)
-				rank = OakContainsString(item.tabTrigger, filter) ? rank : 0;
-			else if(_bundleItemField == kBundleItemSemanticClassField)
-				rank = OakContainsString(item.semanticClass, filter) ? rank : 0;
-			else if(_bundleItemField == kBundleItemScopeSelectorField)
-				rank = OakContainsString(item.scopeSelector, filter) ? rank : 0;
-		}
-
-		if(rank > 0)
-		{
-			if(_bundleItemField == kBundleItemTitleField)
-			{
-				NSUInteger i = [identifiers indexOfObject:(item.uuid ?: NSStringFromSelector(item.action) ?: OakMenuItemIdentifier(item.menuItem))];
-				if(i != NSNotFound)
-					rank = 2 + (identifiers.count - i) / identifiers.count;
-			}
-
-			if(NSString* value = item.value)
-				name += " = " + to_s(value);
-
-			NSMutableAttributedString* str = CreateAttributedStringWithMarkedUpRanges(name, cover_name, NSLineBreakByTruncatingTail);
-			if(item.eclipsed)
-				[str addAttribute:NSStrikethroughStyleAttributeName value:@(NSUnderlineStyleSingle|NSUnderlinePatternSolid) range:NSMakeRange(0, [item.name length])];
-
-			item.name = str;
-			item.path = CreateAttributedStringWithMarkedUpRanges(path, cover_path, NSLineBreakByTruncatingHead);
-			rankedItems.emplace(3 - rank, item);
-		}
+		double rank = (items.count - i) / (double)items.count;
+		[items[i] updateRankUsingFilter:to_s(filter) bundleItemField:_bundleItemField searchSource:_searchSource bindings:identifiers defaultRank:rank];
 	}
 
-	NSMutableArray* res = [NSMutableArray array];
-	for(auto const& pair : rankedItems)
-		[res addObject:pair.second];
+	NSArray* res = [items filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isMatched == YES"]];
+	res = [res sortedArrayUsingSelector:@selector(rankCompare:)];
+
 	self.items = res;
 
 	self.window.title = [NSString stringWithFormat:@"Select Bundle Item (%@)", self.itemCountTextField.stringValue];
