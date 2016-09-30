@@ -50,10 +50,13 @@ static NSString* OakMenuItemIdentifier (NSMenuItem* menuItem)
 @property (nonatomic, readonly) double rank;
 
 @property (nonatomic) NSImage* icon;
-@property (nonatomic) id name; // NSString or NSAttributedString
-@property (nonatomic) id path; // NSString or NSAttributedString
+@property (nonatomic) NSAttributedString* name;
+@property (nonatomic) NSAttributedString* path;
 @property (nonatomic) NSString* keyEquivalent;
 @property (nonatomic) NSString* tabTrigger;
+
+@property (nonatomic) NSString* itemName;
+@property (nonatomic) NSString* location;
 
 @property (nonatomic) NSString* uuid; // Bundle item
 @property (nonatomic) NSString* file; // Settings or key binding item
@@ -72,6 +75,8 @@ static NSString* OakMenuItemIdentifier (NSMenuItem* menuItem)
 {
 	_matched = NO;
 	_rank    = 0;
+	_name    = nil;
+	_path    = nil;
 }
 
 - (void)updateRankUsingFilter:(std::string const&)filter bundleItemField:(NSUInteger)bundleItemField searchSource:(NSUInteger)searchSource bindings:(NSArray<NSString*>*)identifiers defaultRank:(double)rank
@@ -79,8 +84,8 @@ static NSString* OakMenuItemIdentifier (NSMenuItem* menuItem)
 	[self reset];
 
 	std::vector<std::pair<size_t, size_t>> cover_path, cover_name;
-	std::string name = to_s(_name);
-	std::string path = to_s(_path);
+	std::string name = to_s(_itemName);
+	std::string path = to_s(_location);
 
 	if(filter != NULL_STR && !filter.empty())
 	{
@@ -738,8 +743,8 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 				suffix = " ▸ Themes";
 
 			ActionItem* item = [[ActionItem alloc] init];
-			item.name          = to_ns(name);
-			item.path          = to_ns(path + suffix);
+			item.itemName      = to_ns(name);
+			item.location      = to_ns(path + suffix);
 			item.uuid          = uuid;
 			item.scopeSelector = to_ns(to_s(bundleItem->scope_selector()));
 			item.keyEquivalent = to_ns(key_equivalent(bundleItem));
@@ -757,9 +762,9 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 					if(pair.first != "shellVariables")
 					{
 						ActionItem* item = [[ActionItem alloc] init];
-						item.name          = to_ns(pair.first);
+						item.itemName      = to_ns(pair.first);
 						item.value         = to_ns(format(pair.second));
-						item.path          = to_ns(path + " ▸ " + name);
+						item.location      = to_ns(path + " ▸ " + name);
 						item.uuid          = uuid;
 						item.eclipsed      = !self.searchAllScopes && !previousSettings.insert(pair.first).second ? YES : NO;
 						item.scopeSelector = to_ns(to_s(bundleItem->scope_selector()));
@@ -779,9 +784,9 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 						for(auto const& pair : shellVariables)
 						{
 							ActionItem* item = [[ActionItem alloc] init];
-							item.name          = to_ns(pair.first);
+							item.itemName      = to_ns(pair.first);
 							item.value         = to_ns(format(pair.second));
-							item.path          = to_ns(path + " ▸ " + name + " ▸ " + "shellVariables");
+							item.location      = to_ns(path + " ▸ " + name + " ▸ " + "shellVariables");
 							item.uuid          = uuid;
 							item.eclipsed      = eclipsed;
 							item.scopeSelector = to_ns(to_s(bundleItem->scope_selector()));
@@ -801,8 +806,8 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		for(auto const& record : menuItems)
 		{
 			ActionItem* item = [[ActionItem alloc] init];
-			item.name     = to_ns(record.name);
-			item.path     = to_ns(record.path);
+			item.itemName = to_ns(record.name);
+			item.location = to_ns(record.path);
 			item.menuItem = record.menu_item;
 
 			std::string const keyEquivalent = key_equivalent_for_menu_item(record.menu_item);
@@ -852,8 +857,8 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 				}
 
 				ActionItem* item = [[ActionItem alloc] init];
-				item.name          = to_ns(name);
-				item.path          = to_ns(displayPath);
+				item.itemName      = to_ns(name);
+				item.location      = to_ns(displayPath);
 				item.file          = to_ns(path);
 				item.keyEquivalent = to_ns(key);
 				item.eclipsed      = !keysSeen.insert(key).second ? YES : NO;
@@ -871,11 +876,11 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 			std::string const path = info.path == NULL_STR ? "TextMate.app ▸ Preferences" : (path::is_child(info.path, oak::application_t::path()) ? "TextMate.app ▸ " + path::name(info.path) : path::with_tilde(info.path)) + (info.section == NULL_STR ? "" : " ▸ " + info.section);
 
 			ActionItem* item = [[ActionItem alloc] init];
-			item.name  = to_ns(name);
-			item.value = to_ns(format(info.value));
-			item.path  = to_ns(path);
-			item.file  = to_ns(info.path);
-			item.line  = [NSString stringWithFormat:@"%zu", info.line_number];
+			item.itemName = to_ns(name);
+			item.value    = to_ns(format(info.value));
+			item.location = to_ns(path);
+			item.file     = to_ns(info.path);
+			item.line     = [NSString stringWithFormat:@"%zu", info.line_number];
 			[items addObject:item];
 		}
 	}
@@ -899,8 +904,8 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	NSArray* res = [items filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isMatched == YES"]];
 	res = [res sortedArrayUsingDescriptors:@[
 		[NSSortDescriptor sortDescriptorWithKey:@"rank" ascending:YES],
-		[NSSortDescriptor sortDescriptorWithKey:@"name.string" ascending:YES selector:@selector(localizedCompare:)],
-		[NSSortDescriptor sortDescriptorWithKey:@"path.string" ascending:YES selector:@selector(localizedCompare:)]
+		[NSSortDescriptor sortDescriptorWithKey:@"itemName" ascending:YES selector:@selector(localizedCompare:)],
+		[NSSortDescriptor sortDescriptorWithKey:@"location" ascending:YES selector:@selector(localizedCompare:)]
 	]];
 
 	self.items = res;
