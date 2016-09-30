@@ -227,7 +227,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		if(!item || index > 8)
 			return;
 
-		NSRect rect = self.imageView.bounds;
+		NSRect rect = NSUnionRect(self.imageView.bounds, NSMakeRect(0, 0, 16, 16));
 		NSColor* color = [NSColor grayColor];
 
 		NSImage* image = [[NSImage alloc] initWithSize:rect.size];
