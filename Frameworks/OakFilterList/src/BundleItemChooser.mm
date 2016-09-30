@@ -901,11 +901,10 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	if(!(self.searchSource & kSearchSourceSettingsItems) && (_bundleItemField != kBundleItemKeyEquivalentField || OakIsEmptyString(filter)))
 		items = [items sortedArrayUsingDescriptors:@[ [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES selector:@selector(localizedCompare:)], [NSSortDescriptor sortDescriptorWithKey:@"path" ascending:YES selector:@selector(localizedCompare:)] ]];
 
-	for(NSUInteger i = 0; i < items.count; ++i)
-	{
-		double rank = (items.count - i) / (double)items.count;
-		[items[i] updateRankUsingFilter:to_s(filter) bundleItemField:_bundleItemField searchSource:_searchSource bindings:identifiers defaultRank:rank];
-	}
+	[items enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(ActionItem* item, NSUInteger idx, BOOL* stop){
+		double rank = (items.count - idx) / (double)items.count;
+		[item updateRankUsingFilter:to_s(filter) bundleItemField:_bundleItemField searchSource:_searchSource bindings:identifiers defaultRank:rank];
+	}];
 
 	NSArray* res = [items filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isMatched == YES"]];
 	res = [res sortedArrayUsingSelector:@selector(rankCompare:)];
