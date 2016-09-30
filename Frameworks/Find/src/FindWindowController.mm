@@ -919,9 +919,16 @@ static NSButton* OakCreateStopSearchButton ()
 
 	// Re-format current value
 	if(!_findTextField.currentEditor)
+	{
+		_findTextField.objectValue = nil;
 		_findTextField.objectValue = _findString;
+	}
+
 	if(!_replaceTextField.currentEditor)
+	{
+		_replaceTextField.objectValue = nil;
 		_replaceTextField.objectValue = _replaceString;
+	}
 
 	[self addStylesToFieldEditor];
 }
