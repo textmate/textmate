@@ -371,9 +371,10 @@ static NSDictionary* globs_for_path (std::string const& path)
 	SEL compareSelector = @selector(compare:);
 	if(OakNotEmptyString(_globString))
 	{
-		path::glob_t glob(to_s(_globString), false, false);
-		for(NSUInteger i = first; i < _records.count; ++i)
-			[_records[i] updateRankUsingGlob:glob];
+		path::glob_t const glob(to_s(_globString), false, false);
+		[_records enumerateObjectsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(first, _records.count - first)] options:NSEnumerationConcurrent usingBlock:^(FileChooserItem* item, NSUInteger idx, BOOL* stop){
+			[item updateRankUsingGlob:glob];
+		}];
 	}
 	else
 	{
@@ -385,15 +386,9 @@ static NSDictionary* globs_for_path (std::string const& path)
 		for(NSString* str in [[OakAbbreviations abbreviationsForName:@"OakFileChooserBindings"] stringsForAbbreviation:_filterString])
 			bindings.push_back(to_s(str));
 
-		size_t const count  = _records.count - first;
-		size_t const stride = 256;
-		dispatch_apply(count / stride, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t n){
-			for(size_t i = n*stride; i < (n+1)*stride; ++i)
-				[_records[first + i] updateRankUsingFilter:filter bindings:bindings];
-		});
-
-	   for(size_t i = count - (count % stride); i < count; ++i)
-			[_records[first + i] updateRankUsingFilter:filter bindings:bindings];
+		[_records enumerateObjectsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(first, _records.count - first)] options:NSEnumerationConcurrent usingBlock:^(FileChooserItem* item, NSUInteger idx, BOOL* stop){
+			[item updateRankUsingFilter:filter bindings:bindings];
+		}];
 	}
 
 	NSArray* array = [_records filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isMatched == YES"]];
