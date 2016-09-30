@@ -104,6 +104,8 @@ FSDataSource* DataSourceForURL (NSURL* anURL, NSUInteger someOptions)
 
 	if(servicesPboard)
 	{
+		if([paths count])
+			[types addObject:NSFilenamesPboardType];
 		if(string = [paths lastObject])
 			[types addObject:NSStringPboardType];
 	}
