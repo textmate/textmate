@@ -454,8 +454,8 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 - (void)bundleItemChooserDidSelectItems:(id)sender
 {
-	for(NSDictionary* item in [sender selectedItems])
-		[NSApp sendAction:@selector(performBundleItemWithUUIDStringFrom:) to:nil from:@{ @"representedObject" : item[@"uuid"] }];
+	for(id item in [sender selectedItems])
+		[NSApp sendAction:@selector(performBundleItemWithUUIDStringFrom:) to:nil from:@{ @"representedObject" : [item valueForKey:@"uuid"] }];
 }
 
 // ===========================
@@ -508,14 +508,14 @@ BOOL HasDocumentWindow (NSArray* windows)
 	ASSERT([sender respondsToSelector:@selector(selectedItems)]);
 	ASSERT([[sender selectedItems] count] == 1);
 
-	if(NSString* uuid = [[[sender selectedItems] lastObject] objectForKey:@"uuid"])
+	if(NSString* uuid = [[[sender selectedItems] lastObject] valueForKey:@"uuid"])
 	{
 		[[BundleEditor sharedInstance] revealBundleItem:bundles::lookup(to_s(uuid))];
 	}
-	else if(NSString* path = [[[sender selectedItems] lastObject] objectForKey:@"file"])
+	else if(NSString* path = [[[sender selectedItems] lastObject] valueForKey:@"file"])
 	{
 		OakDocument* doc = [OakDocumentController.sharedInstance documentWithPath:path];
-		NSString* line = [[[sender selectedItems] lastObject] objectForKey:@"line"];
+		NSString* line = [[[sender selectedItems] lastObject] valueForKey:@"line"];
 		[OakDocumentController.sharedInstance showDocument:doc andSelect:(line ? text::pos_t(to_s(line)) : text::pos_t::undefined) inProject:nil bringToFront:YES];
 	}
 }
