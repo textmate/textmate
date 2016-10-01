@@ -21,9 +21,6 @@ TM_SCM_COMMIT_WINDOW = "$CWD/commit"
 [ attr.untitled ]
 fileType         = text.plain
 
-[ "/usr/include/**" ]
-tabSize          = 8
-
 [ text ]
 softWrap         = true
 
@@ -47,12 +44,10 @@ softTabs         = true
 
 [ "/System/Library/Frameworks/**/Headers/**" ]
 encoding         = "MACROMAN"
+tabSize          = 8
 
 [ "hg-editor-*.txt" ]
 fileType         = "text.hg-commit"
-
-[ "{BUILD,README,INSTALL,LICENSE,COPYING,TODO}" ]
-fileType         = "text.plain"
 
 [ *.go ]
 relatedFilePath  = "${TM_FILEPATH/(?=\.go$)/_test/}"
