@@ -2727,6 +2727,12 @@ static NSUInteger DisableSessionSavingCount = 0;
 	DocumentWindowController* controller = [self controllerWithDocuments:someDocument project:nil];
 	[controller bringToFront];
 	[controller openAndSelectDocument:controller.documents[controller.selectedTabIndex]];
+
+	// If we launch TextMate with a document to open and there are also session to restore
+	// then the document window ends up behind all the other windows, despite being active
+	// and the last window ordered front. Problem only seen on MAC_OS_X_VERSION_10_11.
+	// Running the next line somehow fixes the issue.
+	[NSApp orderedWindows];
 }
 
 - (void)showFileBrowserAtPath:(NSString*)aPath
