@@ -25,6 +25,7 @@ namespace ng
 		virtual index_t index_at_eol_for (index_t const& index) const = 0;
 		virtual index_t page_up_for (index_t const& index) const = 0;
 		virtual index_t page_down_for (index_t const& index) const = 0;
+		virtual size_t effective_wrap_column () const = 0;
 	};
 
 	PUBLIC ranges_t convert (buffer_api_t const& buffer, text::selection_t const& selection);

@@ -760,7 +760,7 @@ namespace ng
 		_selections = this->snippet(from, to, str, variables, disableIndent);
 	}
 
-	void editor_t::perform (action_t action, layout_t const* layout, indent_correction_t indentCorrections, std::string const& scopeAttributes)
+	void editor_t::perform (action_t action, layout_movement_t const* layout, indent_correction_t indentCorrections, std::string const& scopeAttributes)
 	{
 		static std::string const kSingleMarkType = "•";
 		preserve_selection_helper_t selectionHelper(_buffer, _selections);
