@@ -63,10 +63,6 @@ namespace
 			if(cwd == path::home())
 				break;
 		}
-		if(global_settings_path() != NULL_STR)
-			res.push_back(global_settings_path());
-		if(default_settings_path() != NULL_STR)
-			res.push_back(default_settings_path());
 		std::reverse(res.begin(), res.end());
 		return res;
 	}
@@ -173,6 +169,40 @@ namespace
 		}
 	}
 
+	static size_t const kGlob          = 1 << 0;
+	static size_t const kScopeSelector = 1 << 1;
+	static size_t const kUnscoped      = 1 << 2;
+
+	static void extract (std::string const& directory, std::string const& path, scope::scope_t const& scope, std::function<void(section_t::assignment_t const& assignment, section_t const& section)> filter, std::vector<section_t> const& sections, size_t sectionType)
+	{
+		std::multimap<double, section_t const*> orderScopeMatches;
+		for(auto const& section : sections)
+		{
+			if((sectionType & kScopeSelector) && section.has_scope_selector)
+			{
+				double rank = 0;
+				if(section.scope_selector.does_match(scope, &rank))
+					orderScopeMatches.emplace(rank, &section);
+			}
+			else if((sectionType & kGlob) && section.has_file_glob && section.file_glob.does_match(path == NULL_STR ? directory + "/" : path))
+			{
+				for(auto const& assignment : section.variables)
+					filter(assignment, section);
+			}
+			else if((sectionType & kUnscoped) && !section.has_scope_selector && !section.has_file_glob)
+			{
+				for(auto const& assignment : section.variables)
+					filter(assignment, section);
+			}
+		}
+
+		for(auto const& section : orderScopeMatches)
+		{
+			for(auto const& assignment : section.second->variables)
+				filter(assignment, *section.second);
+		}
+	}
+
 	static void collect (std::string const& directory, std::string const& path, scope::scope_t const& scope, std::function<void(section_t::assignment_t const& assignment, section_t const& section)> filter)
 	{
 		D(DBF_Settings, bug("%s, %s, %s\n", directory.c_str(), path.c_str(), to_s(scope).c_str()););
@@ -181,39 +211,21 @@ namespace
 		std::lock_guard<std::mutex> lock(mutex);
 		sections(NULL_STR); // clear cache if too big
 
+		auto const globalSections  = sections(global_settings_path());
+		auto const defaultSections = sections(default_settings_path());
+		extract(directory, path, scope, filter, globalSections,  kUnscoped);
+		extract(directory, path, scope, filter, defaultSections, kUnscoped);
+		extract(directory, path, scope, filter, globalSections,  kScopeSelector);
+		extract(directory, path, scope, filter, globalSections,  kGlob);
+		extract(directory, path, scope, filter, defaultSections, kScopeSelector);
+		extract(directory, path, scope, filter, defaultSections, kGlob);
+
 		for(auto const& file : paths(directory))
 		{
-			std::multimap<double, section_t const*> orderScopeMatches;
-
-			for(auto const& section : sections(file))
-			{
-				if(section.has_scope_selector)
-				{
-					double rank = 0;
-					if(section.scope_selector.does_match(scope, &rank))
-						orderScopeMatches.emplace(rank, &section);
-				}
-				else if(!section.has_file_glob)
-				{
-					for(auto const& assignment : section.variables)
-						filter(assignment, section);
-				}
-			}
-
-			for(auto const& section : orderScopeMatches)
-			{
-				for(auto const& assignment : section.second->variables)
-					filter(assignment, *section.second);
-			}
-
-			for(auto const& section : sections(file))
-			{
-				if(section.has_file_glob && section.file_glob.does_match(path == NULL_STR ? directory + "/" : path))
-				{
-					for(auto const& assignment : section.variables)
-						filter(assignment, section);
-				}
-			}
+			auto const& s = sections(file);
+			extract(directory, path, scope, filter, s, kUnscoped);
+			extract(directory, path, scope, filter, s, kScopeSelector);
+			extract(directory, path, scope, filter, s, kGlob);
 		}
 	}
 
