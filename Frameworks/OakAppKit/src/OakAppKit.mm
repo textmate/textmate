@@ -167,15 +167,3 @@ NSUInteger OakPerformTableViewActionFromSelector (NSTableView* tableView, SEL se
 	[helper doCommandBySelector:selector];
 	return helper.returnCode;
 }
-
-// ======================
-
-#if !defined(MAC_OS_X_VERSION_10_10) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_10)
-// 10.9 and 10.10 SDKs don't define NSAppKitVersionNumber10_9 (nor *_10)
-// literal value taken of 1265 from https://developer.apple.com/library/prerelease/mac/releasenotes/AppKit/RN-AppKit/index.html
-#ifndef NSAppKitVersionNumber10_9
-#define NSAppKitVersionNumber10_9 1265
-#endif
-NSString *const _NSAccessibilitySharedFocusElementsAttribute = @"AXSharedFocusElements";
-NSString *const *const pNSAccessibilitySharedFocusElementsAttribute = (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_9) ? nil : &_NSAccessibilitySharedFocusElementsAttribute;
-#endif
