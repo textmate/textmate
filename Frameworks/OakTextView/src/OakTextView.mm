@@ -14,7 +14,6 @@
 #import <OakFoundation/NSString Additions.h>
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/OakFindProtocol.h>
-#import <OakFoundation/OakTimer.h>
 #import <OakSystem/application.h>
 #import <crash/info.h>
 #import <buffer/indexed_map.h>
@@ -528,8 +527,8 @@ private:
 @property (nonatomic) NSDate* lastFlagsChangeDate;
 @property (nonatomic) NSUInteger lastFlags;
 @property (nonatomic) OakFlagsState flagsState;
-@property (nonatomic) OakTimer* initiateDragTimer;
-@property (nonatomic) OakTimer* dragScrollTimer;
+@property (nonatomic) NSTimer* initiateDragTimer;
+@property (nonatomic) NSTimer* dragScrollTimer;
 @property (nonatomic) BOOL showDragCursor;
 @property (nonatomic) BOOL showColumnSelectionCursor;
 @property (nonatomic) OakChoiceMenu* choiceMenu;
@@ -3913,7 +3912,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 - (void)preparePotentialDrag:(NSEvent*)anEvent
 {
 	if([self dragDelay] != 0 && ([[self window] isKeyWindow] || ([anEvent modifierFlags] & NSCommandKeyMask)))
-			self.initiateDragTimer = [OakTimer scheduledTimerWithTimeInterval:(0.001 * [self dragDelay]) target:self selector:@selector(changeToDragPointer:) repeats:NO];
+			self.initiateDragTimer = [NSTimer scheduledTimerWithTimeInterval:(0.001 * [self dragDelay]) target:self selector:@selector(changeToDragPointer:) userInfo:nil repeats:NO];
 	else	[self changeToDragPointer:nil];
 	delayMouseDown = [[self window] isKeyWindow];
 }
@@ -4038,6 +4037,7 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 	}
 	else if(_initiateDragTimer) // delayed reaction to mouseDown
 	{
+		[self.initiateDragTimer invalidate];
 		self.initiateDragTimer = nil;
 
 		AUTO_REFRESH;
@@ -4046,7 +4046,7 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 	else
 	{
 		if(!_dragScrollTimer && [self autoscroll:[NSApp currentEvent]] == YES)
-			self.dragScrollTimer = [OakTimer scheduledTimerWithTimeInterval:(1.0/25.0) target:self selector:@selector(dragScrollTimerFired:) repeats:YES];
+			self.dragScrollTimer = [NSTimer scheduledTimerWithTimeInterval:(1.0/25.0) target:self selector:@selector(dragScrollTimerFired:) userInfo:nil repeats:YES];
 
 		AUTO_REFRESH;
 		[self actOnMouseDragged:anEvent];
@@ -4069,7 +4069,9 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 		[self actOnMouseDown];
 	delayMouseDown = NO;
 
+	[self.initiateDragTimer invalidate];
 	self.initiateDragTimer = nil;
+	[self.dragScrollTimer invalidate];
 	self.dragScrollTimer   = nil;
 	self.showDragCursor    = NO;
 }
