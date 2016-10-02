@@ -213,12 +213,12 @@ namespace
 
 		auto const globalSections  = sections(global_settings_path());
 		auto const defaultSections = sections(default_settings_path());
-		extract(directory, path, scope, filter, globalSections,  kUnscoped);
 		extract(directory, path, scope, filter, defaultSections, kUnscoped);
-		extract(directory, path, scope, filter, globalSections,  kScopeSelector);
-		extract(directory, path, scope, filter, globalSections,  kGlob);
+		extract(directory, path, scope, filter, globalSections,  kUnscoped);
 		extract(directory, path, scope, filter, defaultSections, kScopeSelector);
 		extract(directory, path, scope, filter, defaultSections, kGlob);
+		extract(directory, path, scope, filter, globalSections,  kScopeSelector);
+		extract(directory, path, scope, filter, globalSections,  kGlob);
 
 		for(auto const& file : paths(directory))
 		{
