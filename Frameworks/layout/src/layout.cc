@@ -919,8 +919,15 @@ namespace ng
 
 	void layout_t::toggle_all_folds_at_level (size_t level)
 	{
+		size_t first = SIZE_T_MAX, second = 0;
 		for(auto const& range : _folds->toggle_all_at_level(level))
-			did_fold(range.first, range.second);
+		{
+			first  = std::min(range.first, first);
+			second = std::max(range.second, second);
+		}
+
+		if(first < second)
+			did_fold(first, second);
 	}
 
 	ng::range_t layout_t::folded_range_at_point (CGPoint point) const
