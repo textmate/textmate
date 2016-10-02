@@ -214,6 +214,7 @@ namespace ng
 
 		std::shared_ptr<bool> _parser_reference;
 		bool _async_parsing = false;
+		bool _parser_running = false;
 
 		std::weak_ptr<bool> parser_reference ()
 		{

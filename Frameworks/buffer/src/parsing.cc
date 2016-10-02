@@ -30,7 +30,7 @@ namespace ng
 
 	void buffer_t::initiate_repair (size_t limit_redraw, size_t batch_start)
 	{
-		if(!_async_parsing)
+		if(!_async_parsing || _parser_running)
 			return;
 
 		if(!_dirty.empty() && !_parser_states.empty())
@@ -51,6 +51,7 @@ namespace ng
 
 				size_t bufferRev = revision();
 				auto bufferRef   = parser_reference();
+				_parser_running  = true;
 
 				CFRunLoopRef runLoop = CFRunLoopGetCurrent();
 				dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -58,6 +59,7 @@ namespace ng
 					CFRunLoopPerformBlock(runLoop, kCFRunLoopCommonModes, ^{
 						if(bufferRef.lock())
 						{
+							_parser_running = false;
 							if(bufferRev == revision())
 							{
 								update_scopes(limit_redraw, batch_start, { from, to }, result.scopes, result.state);
@@ -102,6 +104,7 @@ namespace ng
 		}
 
 		_parser_reference.reset();
+		_parser_running = false;
 
 		bool next_line_needs_update = !_dirty.empty() && _dirty.begin()->first == range.second;
 		if(!next_line_needs_update || limit_redraw == 0)
@@ -121,6 +124,8 @@ namespace ng
 			return;
 
 		_parser_reference.reset();
+		_parser_running = false;
+
 		std::lock_guard<std::mutex> lock(grammar()->mutex());
 		while(!_dirty.empty() && !_parser_states.empty())
 		{
