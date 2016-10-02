@@ -7,6 +7,7 @@
 #include <regexp/format_string.h>
 
 static double const kFoldingDotsRatio = 20.0 / 10.0; // FIXME Folding dots ratio should be obtained from the image and given to layout_t
+static size_t const kCTLineMaxSize = 2048;
 
 namespace ng
 {
@@ -247,6 +248,11 @@ namespace ng
 
 				from = i + ch.length();
 			}
+			else if(i - from >= kCTLineMaxSize)
+			{
+				insert_text(pos - bufferOffset + from, i - from);
+				from = i;
+			}
 			i += ch.length();
 		}
 
@@ -463,7 +469,11 @@ namespace ng
 		for(auto& node : _nodes)
 		{
 			if(from <= i && i <= from + node.length() && node.type() == kNodeTypeText)
+			{
+				if(i == from + node.length() && node.length() >= kCTLineMaxSize)
+					break;
 				return node.insert(i - from, len);
+			}
 			from += node.length();
 		}
 		_nodes.insert(iterator_at(i), node_t(kNodeTypeText, len));
