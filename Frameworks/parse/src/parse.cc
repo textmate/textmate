@@ -3,10 +3,13 @@
 #include <regexp/regexp.h>
 #include <regexp/format_string.h>
 #include <bundles/bundles.h>
+#include <text/utf8.h>
 #include <oak/oak.h>
 
 OAK_DEBUG_VAR(Parser);
 OAK_DEBUG_VAR(Parser_Flow);
+
+static size_t const kParserMaxLineSize = 4096;
 
 namespace
 {
@@ -564,6 +567,8 @@ namespace parse
 	stack_ptr parse (char const* first, char const* last, stack_ptr stack, std::map<size_t, scope::scope_t>& map, bool firstLine)
 	{
 		scopes_t scopes;
+		if(last - first > kParserMaxLineSize)
+			last = utf8::find_safe_end(first, first + kParserMaxLineSize);
 		auto res = parse(first, last, stack, scopes, firstLine, 0);
 		res->scope = scopes.update(stack->scope, map);
 		return res;
