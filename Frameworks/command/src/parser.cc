@@ -1,5 +1,6 @@
 #include "parser.h"
 #include <bundles/bundles.h>
+#include <text/case.h>
 
 static size_t index_of (size_t i, std::string const& needle)
 {
@@ -97,7 +98,7 @@ plist::dictionary_t convert_command_from_v1 (plist::dictionary_t plist)
 
 static void setup_fields (plist::dictionary_t const& plist, bundle_command_t& res)
 {
-	std::string scopeSelectorString, preExecString, inputString, inputFormatString, inputFallbackString, outputFormatString, outputLocationString, outputCaretString, outputReuseString, autoRefreshString;
+	std::string scopeSelectorString, preExecString, inputString, inputFormatString, inputFallbackString, outputFormatString, outputLocationString, outputCaretString, outputReuseString;
 
 	plist::get_key_path(plist, "name", res.name);
 	plist::get_key_path(plist, "uuid", res.uuid);
@@ -113,7 +114,23 @@ static void setup_fields (plist::dictionary_t const& plist, bundle_command_t& re
 	parse(plist, "outputLocation",       &res.output,         "replaceInput", "replaceDocument", "atCaret", "afterInput", "newWindow", "toolTip", "discard", "replaceSelection");
 	parse(plist, "outputCaret",          &res.output_caret,   "afterOutput", "selectOutput", "interpolateByChar", "interpolateByLine", "heuristic");
 	parse(plist, "outputReuse",          &res.output_reuse,   "reuseAvailable", "reuseNone", "reuseBusy", "reuseBusyAutoAbort");
-	parse(plist, "autoRefresh",          &res.auto_refresh,   "never", "onDocumentChange", "onDocumentSave");
+
+	plist::array_t autoRefreshArray;
+	if(plist::get_key_path(plist, "autoRefresh", autoRefreshArray))
+	{
+		for(auto const& any : autoRefreshArray)
+		{
+			if(std::string const* str = boost::get<std::string>(&any))
+			{
+				if(text::lowercase(*str) == "documentchanged")
+					res.auto_refresh |= auto_refresh::on_document_change;
+				else if(text::lowercase(*str) == "documentsaved")
+					res.auto_refresh |= auto_refresh::on_document_save;
+				else if(text::lowercase(*str) == "documentclosed")
+					res.auto_refresh |= auto_refresh::on_document_close;
+			}
+		}
+	}
 
 	plist::get_key_path(plist, "autoScrollOutput", res.auto_scroll_output);
 	plist::get_key_path(plist, "disableOutputAutoIndent", res.disable_output_auto_indent);
