@@ -75,11 +75,6 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 	[self.window close];
 }
 
-- (BOOL)needsNewWebView
-{
-	return _htmlOutputView.needsNewWebView;
-}
-
 - (BOOL)windowShouldClose:(id)sender
 {
 	D(DBF_HTMLOutputWindow, bug("\n"););
