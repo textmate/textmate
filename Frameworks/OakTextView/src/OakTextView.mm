@@ -1,6 +1,7 @@
 #import "OakTextView.h"
 #import "OakChoiceMenu.h"
 #import "OakDocumentView.h" // addAuxiliaryView:atEdge: signature
+#import "OakCommandRefresh.h"
 #import "LiveSearchView.h"
 #import "OTVHUD.h"
 #import <OakCommand/OakCommand.h>
@@ -2984,6 +2985,24 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		return documentView && documentView->has_marks(to_s(OakDocumentBookmarkIdentifier));
 	else if([aMenuItem action] == @selector(jumpToNextMark:) || [aMenuItem action] == @selector(jumpToPreviousMark:))
 		return documentView && documentView->has_marks();
+	else if([aMenuItem action] == @selector(performBundleItemWithUUIDStringFrom:))
+	{
+		if(bundles::item_ptr bundleItem = bundles::lookup(to_s(aMenuItem.representedObject)))
+		{
+			std::string name = bundleItem->name();
+			if(regexp::match_t const m = regexp::search("^(\\w+) / (\\w+) (.*)", name))
+			{
+				auto command = parse_command(bundleItem);
+				if(command.auto_refresh != auto_refresh::never)
+				{
+					BOOL shouldTeardown = NO;
+					if(OakCommandRefresher* refresher = [self existingRefresherForCommand:command])
+						shouldTeardown = !refresher.command.htmlOutputView;
+					[aMenuItem updateTitle:to_ns(format_string::expand(shouldTeardown ? "$2 $3" : "$1 $3", m.captures()))];
+				}
+			}
+		}
+	}
 	return YES;
 }
 
@@ -4310,25 +4329,55 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 // = Run Command =
 // ===============
 
+- (OakCommandRefresher*)existingRefresherForCommand:(bundle_command_t const&)aBundleCommand
+{
+	OakDocument* doc = aBundleCommand.auto_refresh & (auto_refresh::on_document_change|auto_refresh::on_document_close) ? _document : nil;
+	return [OakCommandRefresher findRefresherForCommandUUID:[[NSUUID alloc] initWithUUIDString:to_ns(aBundleCommand.uuid)] document:doc window:self.window];
+}
+
 - (void)executeBundleCommand:(bundle_command_t const&)aBundleCommand variables:(std::map<std::string, std::string> const&)initialVariables
 {
 	[self executeBundleCommand:aBundleCommand buffer:*documentView selection:documentView->ranges() variables:initialVariables];
 }
 
-- (void)executeBundleCommand:(bundle_command_t const&)aBundleCommand buffer:(ng::buffer_api_t const&)buffer selection:(ng::ranges_t const&)selection variables:(std::map<std::string, std::string> const&)initialVariables
+- (void)executeBundleCommand:(bundle_command_t)aBundleCommand buffer:(ng::buffer_api_t const&)buffer selection:(ng::ranges_t const&)selection variables:(std::map<std::string, std::string> const&)initialVariables
 {
+	if(OakCommandRefresher* refresher = [self existingRefresherForCommand:aBundleCommand])
+	{
+		if(refresher.command.htmlOutputView)
+				[refresher bringHTMLOutputToFront:self];
+		else	[refresher teardown];
+		return;
+	}
+
+	std::map<std::string, std::string> variables = initialVariables;
+
 	int stdinRead, stdinWrite;
 	std::tie(stdinRead, stdinWrite) = io::create_pipe();
 
-	std::map<std::string, std::string> variables = initialVariables;
 	bool inputWasSelection = false;
 	ng::ranges_t const inputRanges = ng::write_unit_to_fd(buffer, selection, buffer.indent().tab_size(), stdinWrite, aBundleCommand.input, aBundleCommand.input_fallback, aBundleCommand.input_format, aBundleCommand.scope_selector, variables, &inputWasSelection);
 
 	OakCommand* command = [[OakCommand alloc] initWithBundleCommand:aBundleCommand];
 
+	auto variablesByValue = initialVariables;
 	__block BOOL didTerminate = NO;
+
 	command.terminationHandler = ^(OakCommand* command, BOOL normalExit){
 		didTerminate = YES;
+		if(normalExit && aBundleCommand.auto_refresh != auto_refresh::never)
+		{
+			OakCommandRefresherOptions options = 0;
+			if(aBundleCommand.auto_refresh & auto_refresh::on_document_change)
+				options |= OakCommandRefresherDocumentDidChange;
+			if(aBundleCommand.auto_refresh & auto_refresh::on_document_save)
+				options |= OakCommandRefresherDocumentDidSave;
+			if(aBundleCommand.auto_refresh & auto_refresh::on_document_close)
+				options |= OakCommandRefresherDocumentDidClose;
+			if(aBundleCommand.input == input::entire_document)
+				options |= OakCommandRefresherDocumentAsInput;
+			[OakCommandRefresher scheduleRefreshForCommand:command document:_document window:self.window options:options variables:variables];
+		}
 	};
 
 	command.firstResponder = self;
