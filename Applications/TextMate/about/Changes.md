@@ -2,6 +2,30 @@ Title: Release Notes
 
 # Changes
 
+## 2016-10-03 (v2.0-beta.12.21)
+
+* Commands can be set to run again for certain events, for example both _HTML → Show Preview_ and _Markdown → Show Preview_ now update the preview on document changes. To enable this for a command you currently need to edit the property list for the `tmCommand` file and insert something like this:
+
+		<key>autoRefresh</key>
+		<array>
+			<string>DocumentChanged</string> <!-- Run whenever document is changed -->
+			<string>DocumentSaved</string>   <!-- Run if any document is saved     -->
+			<string>DocumentClosed</string>  <!-- Run when the document is closed  -->
+		</array>
+
+	When TextMate runs your command as a result of any of the above actions then the `TM_REFRESH` environment variable will be set to the event that triggered the execution.
+
+	If the command has HTML output then the HTML output view will be tied to the command/document, so closing the HTML output will stop running the command, and closing the document will cause the HTML output to also close (unless the command is only running on `DocumentSaved`, in this case, the HTML output will close when the window is closed, as the `DocumentSaved` event monitors saving of any document).
+
+	If the command does *not* have HTML output and its name matches `^(\w+) / (\w+) (.*)` then TextMate will show it as `$1 $3` by default and `$2 $3` when the command has been run, furthermore, if the user selects a command that has already been run, TextMate will stop running this command.
+
+	For example we could name our command “Enable / Disable Live Errors” and make it show a tool tip or gutter icon on each document change. The user will see it as “Enable Live Errors” unless it is already running, in which case it will be “Disable Live Errors”.
+
+* Format strings now support `${«var»:/titlecase}` as alias for `${«var»:/capitalize}`.
+* The find and replace text fields in the search dialog now have syntax highlight. By default they are using the Mac Classic theme but this can be changed using the `UIThemeUUID` defaults key. The grammars used for the fields are the _Regular Expressions (Oniguruma)_ and _Format String_ grammars from the TextMate bundle.
+* CoreText CTLine objects are now limited to about 2048 bytes of text which improve performance significantly for documents with extremely long lines but it may cause minor unicode incorrectness, mainly right-to-left text rendering would be affected, though officially right-to-left is still not fully supported by TextMate.
+* See [all changes since v2.0-beta.12.13](https://github.com/textmate/textmate/compare/v2.0-beta.12.13...v2.0-beta.12.21)
+
 ## 2016-09-21 (v2.0-beta.12.13)
 
 * The search dialog now has a _“File Browser Items”_ in its pop-up. This refers to the selected items in the file browser, which can be files and folders (everything selected will be searched). If there is no selection, it will use the file browser’s location.
