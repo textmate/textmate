@@ -24,6 +24,15 @@
 	return [NSSet setWithObjects:@"webView.mainFrameTitle", nil];
 }
 
+- (instancetype)initWithFrame:(NSRect)aRect
+{
+	if(self = [super initWithFrame:aRect])
+	{
+		_reusable = YES;
+	}
+	return self;
+}
+
 - (void)loadRequest:(NSURLRequest*)aRequest environment:(std::map<std::string, std::string> const&)anEnvironment autoScrolls:(BOOL)flag
 {
 	if(flag)

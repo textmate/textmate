@@ -9,4 +9,5 @@ PUBLIC @interface OakHTMLOutputView : HOBrowserView
 @property (nonatomic, readonly) NSString* mainFrameTitle;
 @property (nonatomic) NSUUID* commandIdentifier; // UUID from initial load request
 @property (nonatomic, getter = isRunningCommand, readonly) BOOL runningCommand;
+@property (nonatomic, getter = isReusable) BOOL reusable;
 @end
