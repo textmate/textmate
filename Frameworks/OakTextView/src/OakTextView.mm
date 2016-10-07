@@ -1845,7 +1845,7 @@ doScroll:
 
 - (void)performBundleItem:(bundles::item_ptr)item
 {
-	crash_reporter_info_t info(text::format("%s %s", sel_getName(_cmd), item->name_with_bundle().c_str()));
+	crash_reporter_info_t info("%s %s", sel_getName(_cmd), item->name_with_bundle().c_str());
 	// D(DBF_OakTextView_BundleItems, bug("%s\n", anItem->name_with_bundle().c_str()););
 	AUTO_REFRESH;
 	switch(item->kind())
@@ -2118,7 +2118,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 - (void)keyDown:(NSEvent*)anEvent
 {
 	D(DBF_OakTextView_TextInput, bug("%s\n", [[anEvent description] UTF8String]););
-	crash_reporter_info_t info(text::format("%s %s", sel_getName(_cmd), to_s(anEvent).c_str()));
+	crash_reporter_info_t info("%s %s", sel_getName(_cmd), to_s(anEvent).c_str());
 	try {
 		[self realKeyDown:anEvent];
 	}
@@ -3694,7 +3694,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	BOOL shouldLink       = ([info draggingSource] != self) && ([info draggingSourceOperationMask] == NSDragOperationLink);
 
 	D(DBF_OakTextView_DragNDrop, bug("local %s, should move %s, type %s, all types %s\n", BSTR([info draggingSource] == self), BSTR(shouldMove), [type UTF8String], [[types description] UTF8String]););
-	crash_reporter_info_t crashInfo(text::format("local %s, should move %s, type %s, all types %s", BSTR([info draggingSource] == self), BSTR(shouldMove), [type UTF8String], [[types description] UTF8String]));
+	crash_reporter_info_t crashInfo("local %s, should move %s, type %s, all types %s", BSTR([info draggingSource] == self), BSTR(shouldMove), [type UTF8String], [[types description] UTF8String]);
 
 	AUTO_REFRESH;
 	ng::index_t pos = dropPosition;
@@ -4154,7 +4154,7 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 			self.needsEnsureSelectionIsInVisibleArea = YES;
 	}
 	catch(std::exception const& e) {
-		crash_reporter_info_t info(text::format("Performing @selector(%s)\nC++ Exception: %s", sel_getName(aSelector), e.what()));
+		crash_reporter_info_t info("Performing @selector(%s)\nC++ Exception: %s", sel_getName(aSelector), e.what());
 		abort();
 	}
 }

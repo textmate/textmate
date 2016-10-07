@@ -39,7 +39,7 @@ namespace
 
 	static std::string ssl_decode (std::string const& src, std::string const& publicKey)
 	{
-		crash_reporter_info_t info(text::format("key size %zu, cipher size %zu", publicKey.size(), src.size()));
+		crash_reporter_info_t info("key size %zu, cipher size %zu", publicKey.size(), src.size());
 
 		std::string res = NULL_STR;
 		if(BIO* bio = BIO_new_mem_buf((void*)publicKey.data(), publicKey.size()))

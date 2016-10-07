@@ -63,7 +63,7 @@ int main (int argc, char const* argv[])
 		return NSApplicationMain(argc, argv);
 	}
 	catch(std::exception const& e) {
-		crash_reporter_info_t info(text::format("C++ Exception: %s", e.what()));
+		crash_reporter_info_t info("C++ Exception: %s", e.what());
 		abort();
 	}
 }

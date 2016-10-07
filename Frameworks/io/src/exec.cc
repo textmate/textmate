@@ -8,7 +8,7 @@
 
 OAK_DEBUG_VAR(IO_Exec);
 
-#define OAK_CHECK(expr) do { if((expr) != 0) { crash_reporter_info_t crashInfo(text::format("%s: %s", #expr, strerror(errno))); abort(); } } while(false)
+#define OAK_CHECK(expr) do { if((expr) != 0) { crash_reporter_info_t info("%s: %s", #expr, strerror(errno)); abort(); } } while(false)
 
 namespace io
 {

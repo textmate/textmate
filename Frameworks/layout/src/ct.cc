@@ -150,13 +150,13 @@ namespace ct
 
 				if(j < i)
 				{
-					crash_reporter_info_t info(text::format("bad range: %zu-%zu (at end: %s)", i, j, BSTR(pair == scopes.end())));
+					crash_reporter_info_t info("bad range: %zu-%zu (at end: %s)", i, j, BSTR(pair == scopes.end()));
 					abort();
 				}
 
 				if(!utf8::is_valid(text.begin() + i, text.begin() + j))
 				{
-					crash_reporter_info_t info(text::format("text size: %zu, line is valid utf-8: %s, %zu scope(s): %zu-%zu", text.size(), BSTR(utf8::is_valid(text.begin(), text.end())), scopes.size(), scopes.empty() ? 0 : scopes.begin()->first, scopes.empty() ? 0 : (--scopes.end())->first));
+					crash_reporter_info_t info("text size: %zu, line is valid utf-8: %s, %zu scope(s): %zu-%zu", text.size(), BSTR(utf8::is_valid(text.begin(), text.end())), scopes.size(), scopes.empty() ? 0 : scopes.begin()->first, scopes.empty() ? 0 : (--scopes.end())->first);
 					info << text::format("range %zu-%zu is not UTF-8:\n%s\n", i, j, text::to_hex(text.begin() + i, text.begin() + j).c_str());
 					abort();
 				}

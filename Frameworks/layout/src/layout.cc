@@ -576,13 +576,13 @@ namespace ng
 
 	std::vector<CGRect> layout_t::end_refresh_cycle (ng::ranges_t const& selection, CGRect visibleRect, ng::ranges_t const& highlightRanges)
 	{
-		crash_reporter_info_t crashInfo(text::format("end refresh %s", BSTR(_refresh_counter == 1)));
+		crash_reporter_info_t info("end refresh %s", BSTR(_refresh_counter == 1));
 
 		std::vector<CGRect> res;
 		if(_refresh_counter == 1)
 		{
-			crashInfo << text::format("buffer revision %zu, previous revision %zu", _buffer.revision(), _pre_refresh_revision);
-			crashInfo << text::format("buffer caret %zu, previous caret %zu", selection.last().last.index, _pre_refresh_caret);
+			info << text::format("buffer revision %zu, previous revision %zu", _buffer.revision(), _pre_refresh_revision);
+			info << text::format("buffer caret %zu, previous caret %zu", selection.last().last.index, _pre_refresh_caret);
 
 			set_tab_size(_buffer.indent().tab_size());
 			update_metrics(visibleRect);

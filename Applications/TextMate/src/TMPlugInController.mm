@@ -90,7 +90,7 @@ static id CreateInstanceOfPlugInClass (Class cl, TMPlugInController* controller)
 
 				if([bundle load])
 				{
-					crash_reporter_info_t crashInfo("bad plug-in: " + to_s(identifier));
+					crash_reporter_info_t info("bad plug-in: %s", [identifier UTF8String]);
 					if(id instance = CreateInstanceOfPlugInClass([bundle principalClass], self))
 					{
 						self.loadedPlugIns[identifier] = instance;

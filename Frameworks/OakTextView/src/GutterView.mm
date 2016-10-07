@@ -58,7 +58,7 @@ struct data_source_t
 	{
 		id fontName = [[NSUserDefaults standardUserDefaults] objectForKey:@"NSFixedPitchFont"];
 		id fontSize = [[NSUserDefaults standardUserDefaults] objectForKey:@"NSFixedPitchFontSize"];
-		crash_reporter_info_t info(text::format("User has font name override %s, size %s", BSTR(fontName), BSTR(fontSize)));
+		crash_reporter_info_t info("User has font name override %s, size %s", BSTR(fontName), BSTR(fontSize));
 		if(fontName) info << "font name: " << [[fontName description] UTF8String];
 		if(fontSize) info << "font size: " << [[fontSize description] UTF8String];
 

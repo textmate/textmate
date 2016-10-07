@@ -208,7 +208,7 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 		{
 			NSLog(@"unable to create folder ‘%@’: %@", [appSupport path], error);
 			[NSApp presentError:error];
-			crash_reporter_info_t crashInfo(to_s(error));
+			crash_reporter_info_t info(to_s(error));
 			abort();
 		}
 
@@ -240,7 +240,7 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 					continue;
 			}
 			[NSApp presentError:error];
-			crash_reporter_info_t crashInfo(to_s(error));
+			crash_reporter_info_t info(to_s(error));
 			abort();
 		}
 	}
