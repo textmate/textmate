@@ -431,7 +431,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 
 - (NSString*)sniffFileType
 {
-	io::bytes_ptr firstLine = _buffer ? std::make_shared<io::bytes_t>(_buffer->substr(_buffer->begin(0), std::min<size_t>(_buffer->eol(0), 2048))) : io::bytes_ptr();
+	io::bytes_ptr firstLine = _buffer ? std::make_shared<io::bytes_t>(_buffer->substr(_buffer->begin(0), std::min<size_t>(_buffer->size(), 2048))) : io::bytes_ptr();
 	return to_ns(file::type(to_s(_path), firstLine, to_s(_virtualPath)));
 }
 
