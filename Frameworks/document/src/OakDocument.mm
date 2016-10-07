@@ -1187,6 +1187,12 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 - (ng::buffer_t&)buffer                               { ASSERT(_buffer); return *_buffer; }
 - (ng::undo_manager_t&)undoManager                    { ASSERT(_undoManager); return *_undoManager; }
 
+- (void)setSelection:(NSString*)newSelection
+{
+	_selection    = newSelection;
+	_visibleIndex = ng::index_t();
+}
+
 - (NSArray<BundleGrammar*>*)proposedGrammars
 {
 	NSMutableArray* res = [NSMutableArray array];
