@@ -5,6 +5,7 @@
 
 struct PUBLIC crash_reporter_info_t
 {
+	__attribute__ ((format (printf, 2, 3))) crash_reporter_info_t (char const* format, ...);
 	crash_reporter_info_t (std::string const& str);
 	~crash_reporter_info_t ();
 	crash_reporter_info_t& operator= (std::string const& str);

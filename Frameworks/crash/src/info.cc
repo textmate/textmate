@@ -68,6 +68,22 @@ crash_reporter_info_t::crash_reporter_info_t (std::string const& str)
 	stack().push(str);
 }
 
+crash_reporter_info_t::crash_reporter_info_t (char const* format, ...)
+{
+	char* tmp = nullptr;
+
+	va_list ap;
+	va_start(ap, format);
+	vasprintf(&tmp, format, ap);
+	va_end(ap);
+
+	if(tmp)
+	{
+		stack().push(tmp);
+		free(tmp);
+	}
+}
+
 crash_reporter_info_t::~crash_reporter_info_t ()
 {
 	stack().pop();
