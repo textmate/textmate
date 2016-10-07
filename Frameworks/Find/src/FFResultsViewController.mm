@@ -29,9 +29,10 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 
 	__weak id      _eventMonitor;
 	BOOL           _longPressedCommandModifier;
+
+	FFResultNode*  _lastSelectedResult;
 }
 @property (nonatomic) BOOL showKeyEquivalent;
-@property (nonatomic) FFResultNode* selectedResult;
 @end
 
 // ================================
@@ -482,15 +483,6 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 // = Helper Methods =
 // ==================
 
-- (void)setSelectedResult:(FFResultNode*)newSelection
-{
-	if(_selectedResult == newSelection)
-		return;
-	_selectedResult = newSelection;
-	if(_selectedResult && _selectResultAction)
-		[NSApp sendAction:_selectResultAction to:_target from:_selectedResult];
-}
-
 - (BOOL)isCollapsed
 {
 	NSUInteger expanded = 0;
@@ -541,20 +533,40 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 	}
 }
 
+- (void)didSelectResult:(FFResultNode*)resultNode
+{
+	if(_lastSelectedResult == resultNode)
+		return;
+
+	// Prevent sending selectResultAction twice since mouse clicks sends both didSingleClick: and outlineViewSelectionDidChange:
+	_lastSelectedResult = resultNode;
+	dispatch_async(dispatch_get_main_queue(), ^{
+		_lastSelectedResult = nil;
+	});
+
+	if(_selectResultAction)
+		[NSApp sendAction:_selectResultAction to:_target from:resultNode];
+}
+
 - (void)didSingleClick:(id)sender
 {
-	self.selectedResult = _outlineView.numberOfSelectedRows == 1 ? [_outlineView itemAtRow:_outlineView.selectedRowIndexes.firstIndex] : nil;
+	if(_outlineView.clickedRow != -1 && _outlineView.numberOfSelectedRows == 1)
+		[self didSelectResult:[_outlineView itemAtRow:_outlineView.clickedRow]];
 }
 
 - (void)didDoubleClick:(id)sender
 {
-	if(_doubleClickResultAction && self.selectedResult)
-		[NSApp sendAction:_doubleClickResultAction to:_target from:self.selectedResult];
+	if(_outlineView.clickedRow != -1 && _doubleClickResultAction)
+	{
+		[self didSelectResult:[_outlineView itemAtRow:_outlineView.clickedRow]];
+		[NSApp sendAction:_doubleClickResultAction to:_target from:[_outlineView itemAtRow:_outlineView.clickedRow]];
+	}
 }
 
 - (void)outlineViewSelectionDidChange:(NSNotification*)aNotification
 {
-	self.selectedResult = _outlineView.numberOfSelectedRows == 1 ? [_outlineView itemAtRow:_outlineView.selectedRowIndexes.firstIndex] : nil;
+	if(_outlineView.numberOfSelectedRows == 1)
+		[self didSelectResult:[_outlineView itemAtRow:_outlineView.selectedRowIndexes.firstIndex]];
 }
 
 - (BOOL)outlineView:(NSOutlineView*)outlineView shouldSelectItem:(FFResultNode*)item
