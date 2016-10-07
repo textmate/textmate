@@ -34,6 +34,7 @@
 #import <settings/settings.h>
 #import <ns/ns.h>
 #import <kvdb/kvdb.h>
+#import <crash/info.h>
 
 static NSString* const kUserDefaultsAlwaysFindInDocument = @"alwaysFindInDocument";
 static NSString* const kUserDefaultsDisableFolderStateRestore = @"disableFolderStateRestore";
@@ -1030,6 +1031,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 			}
 
 			[self makeTextViewFirstResponder:self];
+			crash_reporter_info_t crashInfo(text::format("old selected document ‘%s’, new selected document ‘%s’", [_selectedDocument.displayName UTF8String] ?: "nil", [document.displayName UTF8String] ?: "nil"));
 			self.selectedDocument = document;
 			[self performSelector:@selector(didOpenDocuemntInTextView:) withObject:self.documentView.textView afterDelay:0];
 			[document close];
