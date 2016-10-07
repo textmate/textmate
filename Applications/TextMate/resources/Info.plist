@@ -38,9 +38,7 @@
 		<true/>
 	</dict>
 	<key>NSContactsUsageDescription</key>
-	<string>Your email address is used as an identifier for crash report submission. It can be changed in Preferences.
-
-It is also used as a default contact address if you create your own bundle. This can be changed in the bundle editor after you create a bundle.</string>
+	<string>Your email address is used as a default contact address when you create a new bundle. This can be changed in the bundle editor after the bundle has been created.</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>

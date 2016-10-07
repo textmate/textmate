@@ -57,16 +57,8 @@ static std::string create_gzipped_file (std::string const& path)
 
 - (void)setupUserDefaultsContact:(id)sender
 {
-	NSString* name = NSFullUserName();
-	if(ABAddressBook* ab = [ABAddressBook sharedAddressBook])
-	{
-		ABMutableMultiValue* value = [[ab me] valueForProperty:kABEmailProperty];
-		if(NSString* email = [value valueAtIndex:[value indexForIdentifier:[value primaryIdentifier]]])
-			name = name ? [NSString stringWithFormat:@"%@ <%@>", name, email] : email;
-	}
-
 	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
-		kUserDefaultsCrashReportsContactInfoKey : name ?: @"Anonymous",
+		kUserDefaultsCrashReportsContactInfoKey : NSFullUserName() ?: @"Anonymous",
 	}];
 }
 
