@@ -4074,8 +4074,16 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 
 - (void)dragScrollTimerFired:(id)sender
 {
-	AUTO_REFRESH;
-	[self actOnMouseDragged:[NSApp currentEvent]];
+	if(([NSEvent pressedMouseButtons] & 1) && documentView)
+	{
+		AUTO_REFRESH;
+		[self actOnMouseDragged:[NSApp currentEvent]];
+	}
+	else
+	{
+		[_dragScrollTimer invalidate];
+		_dragScrollTimer = nil;
+	}
 }
 
 - (void)mouseUp:(NSEvent*)anEvent
