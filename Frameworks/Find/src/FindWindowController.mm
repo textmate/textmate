@@ -540,17 +540,24 @@ static NSButton* OakCreateStopSearchButton ()
 	if(OakNotEmptyString(_findString))
 	{
 		OakPasteboardEntry* oldEntry = [[OakPasteboard pasteboardWithName:NSFindPboard] current];
-		if(!oldEntry || ![oldEntry.string isEqualToString:_findString])
+		if(oldEntry && [oldEntry.string isEqualToString:_findString])
+		{
+			if(![oldEntry.options isEqualToDictionary:newOptions])
+				oldEntry.options = newOptions;
+			oldEntry.date = [NSDate date];
+		}
+		else
+		{
 			[[OakPasteboard pasteboardWithName:NSFindPboard] addEntryWithString:_findString andOptions:newOptions];
-		else if(![oldEntry.options isEqualToDictionary:newOptions])
-			oldEntry.options = newOptions;
+		}
 	}
 
 	if(_replaceString)
 	{
-		NSString* oldReplacement = [[[OakPasteboard pasteboardWithName:OakReplacePboard] current] string];
-		if(!oldReplacement || ![oldReplacement isEqualToString:_replaceString])
-			[[OakPasteboard pasteboardWithName:OakReplacePboard] addEntryWithString:_replaceString];
+		OakPasteboardEntry* oldEntry = [[OakPasteboard pasteboardWithName:OakReplacePboard] current];
+		if(oldEntry && [oldEntry.string isEqualToString:_replaceString])
+				oldEntry.date = [NSDate date];
+		else	[[OakPasteboard pasteboardWithName:OakReplacePboard] addEntryWithString:_replaceString];
 	}
 
 	return res;

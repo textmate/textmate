@@ -14,6 +14,7 @@ extern PUBLIC NSString* const OakFindRegularExpressionOption;
 PUBLIC @interface OakPasteboardEntry : NSManagedObject
 @property (nonatomic) NSString* string;
 @property (nonatomic) NSDictionary* options;
+@property (nonatomic) NSDate* date;
 
 @property (nonatomic) BOOL fullWordMatch;
 @property (nonatomic) BOOL ignoreWhitespace;

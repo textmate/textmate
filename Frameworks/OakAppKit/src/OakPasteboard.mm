@@ -21,7 +21,6 @@ NSString* const OakFindRegularExpressionOption     = @"regularExpression";
 NSString* const kUserDefaultsDisablePersistentClipboardHistory = @"disablePersistentClipboardHistory";
 
 @interface OakPasteboardEntry ()
-@property (nonatomic) NSDate* date;
 @property (nonatomic) OakPasteboard* pasteboard;
 @property (nonatomic) NSDictionary* primitiveOptions;
 @end
