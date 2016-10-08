@@ -88,7 +88,6 @@ NSString* const kUserDefaultsDisablePersistentClipboardHistory = @"disablePersis
 @interface OakPasteboard ()
 @property (nonatomic) NSInteger changeCount;
 @property (nonatomic) BOOL disableSystemPasteboardUpdating;
-@property (nonatomic) BOOL needsSavePasteboardHistory;
 @property (nonatomic) OakPasteboardEntry* primitiveCurrentEntry;
 - (BOOL)avoidsDuplicates;
 - (void)checkForExternalPasteboardChanges;
@@ -149,9 +148,6 @@ namespace
 static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 
 @implementation OakPasteboard
-{
-	BOOL _needsSavePasteboardHistory;
-}
 @dynamic name, currentEntry, auxiliaryOptionsForCurrent, primitiveCurrentEntry;
 @synthesize changeCount, disableSystemPasteboardUpdating;
 
@@ -423,7 +419,7 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 			[[self pasteboard] setPropertyList:newEntry.options forType:OakPasteboardOptionsPboardType];
 		}
 		self.changeCount = [[self pasteboard] changeCount];
-		self.needsSavePasteboardHistory = YES;
+		[self scheduleSaveHistory:self];
 	}
 
 	[self willChangeValueForKey:@"currentEntry"];
@@ -445,27 +441,16 @@ static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 	[self internalAddEntryWithString:aString andOptions:someOptions];
 }
 
-- (void)savePasteboardHistory:(id)sender
+- (void)scheduleSaveHistory:(id)sender
 {
-	_needsSavePasteboardHistory = NO;
+	static NSTimer* saveHistoryTimer = nil;
+	[saveHistoryTimer invalidate];
+	saveHistoryTimer = [NSTimer scheduledTimerWithTimeInterval:30 target:[OakPasteboard class] selector:@selector(saveHistoryTimerDidFire:) userInfo:nil repeats:NO];
+}
+
++ (void)saveHistoryTimerDidFire:(NSTimer*)aTimer
+{
 	[OakPasteboard saveContext];
-}
-
-- (BOOL)needsSavePasteboardHistory
-{
-	return _needsSavePasteboardHistory;
-}
-
-- (void)setNeedsSavePasteboardHistory:(BOOL)flag
-{
-	if(_needsSavePasteboardHistory == flag)
-		return;
-	if([[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisablePersistentClipboardHistory])
-		return;
-
-	_needsSavePasteboardHistory = flag;
-	if(flag)
-		[self performSelector:@selector(savePasteboardHistory:) withObject:self afterDelay:60];
 }
 
 - (void)internalAddEntryWithString:(NSString*)aString andOptions:(NSDictionary*)someOptions
