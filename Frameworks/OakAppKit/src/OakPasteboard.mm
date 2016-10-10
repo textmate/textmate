@@ -323,6 +323,9 @@ static NSMutableDictionary<NSString*, OakPasteboard*>* SharedInstances = [NSMuta
 	BOOL res = YES;
 	if([self.managedObjectContext hasChanges])
 	{
+		for(NSString* name in SharedInstances)
+			[SharedInstances[name] pruneHistory:self];
+
 		@try {
 			NSError* error = nil;
 			if(!(res = [self.managedObjectContext save:&error]))
