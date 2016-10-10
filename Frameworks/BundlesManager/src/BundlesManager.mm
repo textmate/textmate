@@ -129,7 +129,7 @@ static NSString* CacheFileForDownload (NSURL* url, NSDate* date)
 {
 	NSSet* oldRecommendations = [NSSet setWithArray:[self.bundles filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isRecommended == YES"]]];
 	[self updateRemoteIndexWithCompletionHandler:^{
-		NSArray* bundles = [self.bundles filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"(hasUpdate == YES && isCompatible == YES) || (isInstalled == NO && (isMandatory == YES || (isRecommended == YES && isCompatible == YES && !(SELF IN %@))))", oldRecommendations]];
+		NSArray* bundles = [self.bundles filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"(hasUpdate == YES AND isCompatible == YES) OR (isInstalled == NO AND (isMandatory == YES OR (isRecommended == YES AND isCompatible == YES AND NOT (SELF IN %@))))", oldRecommendations]];
 		[self installBundles:bundles completionHandler:^(NSArray<Bundle*>*){ }];
 	}];
 	[[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:kUserDefaultsLastBundleUpdateCheckKey];
@@ -198,7 +198,7 @@ static NSString* CacheFileForDownload (NSURL* url, NSDate* date)
 	while(Bundle* bundle = [queue lastObject])
 	{
 		[bundlesToInstall addObject:bundle];
-		NSArray* dependencies = [bundle.dependencies filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isInstalled == NO && !(SELF IN %@)", bundlesToInstall]];
+		NSArray* dependencies = [bundle.dependencies filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isInstalled == NO AND NOT (SELF IN %@)", bundlesToInstall]];
 		[dependencies enumerateObjectsUsingBlock:^(Bundle* bundle, NSUInteger, BOOL*){ bundle.dependency = YES; }];
 		[queue replaceObjectsInRange:NSMakeRange(queue.count-1, 1) withObjectsFromArray:dependencies];
 	}
@@ -690,7 +690,7 @@ namespace
 		return;
 
 	NSMutableArray* bundles = [NSMutableArray array];
-	for(Bundle* bundle : [_bundles filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isInstalled == YES && path != NULL"]])
+	for(Bundle* bundle : [_bundles filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isInstalled == YES AND path != NULL"]])
 	{
 		NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithDictionary:@{
 			@"uuid"     : [bundle.identifier UUIDString],
