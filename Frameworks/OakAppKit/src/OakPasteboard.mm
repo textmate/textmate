@@ -457,6 +457,33 @@ static NSMutableDictionary<NSString*, OakPasteboard*>* SharedInstances = [NSMuta
 	saveHistoryTimer = [NSTimer scheduledTimerWithTimeInterval:30 target:[OakPasteboard class] selector:@selector(saveHistoryTimerDidFire:) userInfo:nil repeats:NO];
 }
 
+- (void)pruneHistory:(id)sender
+{
+	NSInteger keepAtLeast = [[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsClipboardHistoryKeepAtLeast];
+	NSInteger keepAtMost  = [[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsClipboardHistoryKeepAtMost];
+	CGFloat daysToKeep    = [[NSUserDefaults standardUserDefaults] floatForKey:kUserDefaultsClipboardHistoryDaysToKeep];
+
+	NSFetchRequest* request = [NSFetchRequest fetchRequestWithEntityName:@"PasteboardEntry"];
+	request.sortDescriptors = @[ [NSSortDescriptor sortDescriptorWithKey:@"date" ascending:NO] ];
+	request.predicate       = [NSPredicate predicateWithFormat:@"pasteboard = %@", self];
+	request.fetchLimit      = keepAtMost;
+
+	NSArray<OakPasteboardEntry*>* allEntries = [self.managedObjectContext executeFetchRequest:request error:nullptr];
+
+	NSDate* keepUntil = [NSDate dateWithTimeIntervalSinceNow:-daysToKeep*24*60*60];
+	if(keepAtMost <= allEntries.count)
+		keepUntil = [keepUntil laterDate:allEntries[keepAtMost-1].date];
+	if(keepAtLeast <= allEntries.count)
+		keepUntil = [keepUntil earlierDate:allEntries[keepAtLeast-1].date];
+
+	request = [NSFetchRequest fetchRequestWithEntityName:@"PasteboardEntry"];
+	request.predicate = [NSPredicate predicateWithFormat:@"pasteboard = %@ AND date < %@ AND SELF != %@", self, keepUntil, self.currentEntry];
+	request.includesPropertyValues = NO;
+
+	for(OakPasteboardEntry* entry in [self.managedObjectContext executeFetchRequest:request error:nullptr])
+		[entry.managedObjectContext deleteObject:entry];
+}
+
 + (void)saveHistoryTimerDidFire:(NSTimer*)aTimer
 {
 	[OakPasteboard saveContext];
@@ -479,14 +506,7 @@ static NSMutableDictionary<NSString*, OakPasteboard*>* SharedInstances = [NSMuta
 			return;
 		}
 	}
-#if 0
-	static NSInteger const kHistorySize = 10000;
-	if([self.entries count] > kHistorySize)
-	{
-		for(OakPasteboardEntry* entry in [self.entries objectsAtIndexes:[[NSIndexSet alloc] initWithIndexesInRange:NSMakeRange(0, [self.entries count] - kHistorySize/2)]])
-			[entry.managedObjectContext deleteObject:entry];
-	}
-#endif
+
 	OakPasteboardEntry* entry = [OakPasteboardEntry pasteboardEntryWithString:aString andOptions:someOptions inContext:self.managedObjectContext];
 	entry.pasteboard = self;
 	self.currentEntry = entry;
