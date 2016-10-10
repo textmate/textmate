@@ -22,9 +22,11 @@ namespace text
 {
 	bool is_east_asian_width (uint32_t ch)
 	{
+		if(ch < 0x1100 || 0x3FFFD < ch)
+			return false;
+
 		static CFCharacterSetRef const cfset = create_character_set();
 		crash_reporter_info_t info("CFCharacterSetIsLongCharacterMember: %x", ch);
-		info << text::format("CFCharacterSetRef retain count: %ld", CFGetRetainCount(cfset));
 		return CFCharacterSetIsLongCharacterMember(cfset, ch);
 	}
 
