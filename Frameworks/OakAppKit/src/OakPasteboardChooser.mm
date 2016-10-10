@@ -309,13 +309,11 @@ static NSMutableDictionary* SharedChoosers;
 - (void)clearAll:(id)sender
 {
 	NSFetchRequest* request = [NSFetchRequest fetchRequestWithEntityName:@"PasteboardEntry"];
-	request.predicate = [NSPredicate predicateWithFormat:@"pasteboard = %@", _pasteboard];
+	request.predicate = [NSPredicate predicateWithFormat:@"pasteboard = %@ AND SELF != %@", _pasteboard, _pasteboard.currentEntry];
+	request.includesPropertyValues = NO;
 	NSManagedObjectContext* managedObjectContext = _pasteboard.managedObjectContext;
 	for(OakPasteboardEntry* entry in [managedObjectContext executeFetchRequest:request error:nullptr])
-	{
-		if(entry != _pasteboard.currentEntry)
-			[managedObjectContext deleteObject:entry];
-	}
+		[managedObjectContext deleteObject:entry];
 }
 
 - (NSArray*)selectedEntriesPreservingOne
