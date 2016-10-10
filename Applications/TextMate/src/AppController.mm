@@ -33,6 +33,12 @@
 #import <scm/scm.h>
 #import <text/types.h>
 
+#if !defined(MAC_OS_X_VERSION_10_12) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_12)
+@interface NSWindow (Sierra)
+@property(class) BOOL allowsAutomaticWindowTabbing;
+@end
+#endif
+
 OAK_DEBUG_VAR(AppController);
 
 void OakOpenDocuments (NSArray* paths, BOOL treatFilePackageAsFolder)
@@ -296,6 +302,9 @@ BOOL HasDocumentWindow (NSArray* windows)
 - (void)applicationDidFinishLaunching:(NSNotification*)aNotification
 {
 	D(DBF_AppController, bug("\n"););
+
+	if([NSWindow respondsToSelector:@selector(allowsAutomaticWindowTabbing)]) // MAC_OS_X_VERSION_10_12
+		NSWindow.allowsAutomaticWindowTabbing = NO;
 
 	if(!HasDocumentWindow([NSApp orderedWindows]))
 	{
