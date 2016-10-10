@@ -113,6 +113,7 @@ namespace // PopulateMenu{Flat,Hierarchical}
 	NSArray* encodings = @[ @"WINDOWS-1252", @"MACROMAN", @"ISO-8859-1", @"UTF-8", @"UTF-16LE//BOM", @"UTF-16BE//BOM", @"SHIFT_JIS", @"GB18030" ];
 	[[NSUserDefaults standardUserDefaults] registerDefaults:@{ kUserDefaultsAvailableEncodingsKey : encodings }];
 
+	// LEGACY format used prior to 2.0-beta.10
 	NSArray* legacy = [[NSUserDefaults standardUserDefaults] stringArrayForKey:kUserDefaultsAvailableEncodingsKey];
 	if([legacy containsObject:@"UTF-16BE"] && ![legacy containsObject:@"UTF-16BE//BOM"])
 	{

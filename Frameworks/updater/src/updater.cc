@@ -65,7 +65,7 @@ namespace bundles_db
 
 	std::vector<source_ptr> sources (std::string const& installDir)
 	{
-		// Cleanup legacy files
+		// LEGACY files used prior to 2.0-alpha.9555
 		unlink(path::join(path::home(), "Library/Application Support/TextMate/Managed/KeyChain.plist").c_str());
 		unlink(path::join(sources_base_path(installDir), "Sources.plist").c_str());
 

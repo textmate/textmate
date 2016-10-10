@@ -352,6 +352,7 @@ static NSMutableDictionary<NSString*, OakPasteboard*>* SharedInstances = [NSMuta
 			res = [NSEntityDescription insertNewObjectForEntityForName:@"Pasteboard" inManagedObjectContext:self.managedObjectContext];
 			res.name = aName;
 
+			// LEGACY format used prior to 2.0-alpha.9513
 			NSString* userDefaultsKey = [aName isEqualToString:OakReplacePboard] ? @"NSReplacePboard" : aName;
 			if(NSArray* history = [[NSUserDefaults standardUserDefaults] arrayForKey:userDefaultsKey])
 			{

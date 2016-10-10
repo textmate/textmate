@@ -245,9 +245,10 @@ namespace
 	_rankedUUIDs = [NSMutableDictionary dictionary];
 
 	NSArray* paths = [[NSUserDefaults standardUserDefaults] stringArrayForKey:@"LRUDocumentPaths"];
+
+	// LEGACY format used by 2.0-beta.12.11 and earlier
 	if(!paths)
 	{
-		// Support paths written by 2.0-beta.12.11 and earlier
 		NSDictionary* dictionary = [[NSUserDefaults standardUserDefaults] dictionaryForKey:@"LRUDocumentPaths"];
 		paths = dictionary[@"paths"];
 	}
