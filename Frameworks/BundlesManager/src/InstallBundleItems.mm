@@ -99,7 +99,7 @@ void InstallBundleItems (NSArray* itemPaths)
 			int choice = NSRunAlertPanel([NSString stringWithFormat:@"Would you like to install the “%@” bundle?", [NSString stringWithCxxString:info.name]], @"Installing a bundle adds new functionality to TextMate.", @"Install", @"Cancel", nil);
 			if(choice == NSAlertDefaultReturn) // "Install"
 			{
-				std::string const installDir = path::join(path::home(), "Library/Application Support/Avian/Pristine Copy/Bundles");
+				std::string const installDir = path::join(path::home(), "Library/Application Support/TextMate/Pristine Copy/Bundles");
 				if(path::make_dir(installDir))
 				{
 					std::string const installPath = path::unique(path::join(installDir, path::name(info.path)));
