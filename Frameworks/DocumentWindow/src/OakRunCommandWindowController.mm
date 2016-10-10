@@ -44,18 +44,18 @@ static NSString* const kUserDefaultsFilterOutputType = @"filterOutputType";
 		self.executeButton        = OakCreateButton(@"Execute");
 		self.cancelButton         = OakCreateButton(@"Cancel");
 
-		struct { NSString* title; NSInteger outputOption; } outputOptions[] =
+		struct { NSString* title; NSString* keyEquivalent; NSInteger outputOption; } outputOptions[] =
 		{
-			{ @"Replace Input",      output::replace_input },
-			{ @"Insert After Input", output::after_input   },
-			{ @"New Document",       output::new_window    },
-			{ @"Tool Tip",           output::tool_tip      },
+			{ @"Replace Input",      @"1", output::replace_input },
+			{ @"Insert After Input", @"2", output::after_input   },
+			{ @"New Document",       @"3", output::new_window    },
+			{ @"Tool Tip",           @"4", output::tool_tip      },
 		};
 
 		NSMenu* menu = [self.resultPopUpButton menu];
 		[menu removeAllItems];
-		for(size_t i = 0; i < sizeofA(outputOptions); ++i)
-			[[menu addItemWithTitle:outputOptions[i].title action:@selector(takeOutputTypeFrom:) keyEquivalent:[NSString stringWithFormat:@"%c", '1' + (char)i]] setTag:outputOptions[i].outputOption];
+		for(auto const& info : outputOptions)
+			[[menu addItemWithTitle:info.title action:@selector(takeOutputTypeFrom:) keyEquivalent:info.keyEquivalent] setTag:info.outputOption];
 
 		self.executeButton.action = @selector(execute:);
 		self.cancelButton.action  = @selector(cancel:);
