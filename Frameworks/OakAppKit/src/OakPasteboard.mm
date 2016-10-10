@@ -19,6 +19,9 @@ NSString* const OakFindFullWordsOption             = @"fullWordMatch";
 NSString* const OakFindRegularExpressionOption     = @"regularExpression";
 
 NSString* const kUserDefaultsDisablePersistentClipboardHistory = @"disablePersistentClipboardHistory";
+NSString* const kUserDefaultsClipboardHistoryKeepAtLeast       = @"clipboardHistoryKeepAtLeast";
+NSString* const kUserDefaultsClipboardHistoryKeepAtMost        = @"clipboardHistoryKeepAtMost";
+NSString* const kUserDefaultsClipboardHistoryDaysToKeep        = @"clipboardHistoryDaysToKeep";
 
 @interface OakPasteboardEntry ()
 @property (nonatomic) OakPasteboard* pasteboard;
@@ -155,6 +158,12 @@ static NSMutableDictionary<NSString*, OakPasteboard*>* SharedInstances = [NSMuta
 {
 	static dispatch_once_t onceToken = 0;
 	dispatch_once(&onceToken, ^{
+		[[NSUserDefaults standardUserDefaults] registerDefaults:@{
+			kUserDefaultsClipboardHistoryKeepAtLeast :  @25,
+			kUserDefaultsClipboardHistoryKeepAtMost  : @500,
+			kUserDefaultsClipboardHistoryDaysToKeep  :  @30,
+		}];
+
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidBecomeActiveNotification:) name:NSApplicationDidBecomeActiveNotification object:NSApp];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidResignActiveNotification:) name:NSApplicationDidResignActiveNotification object:NSApp];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:NSApp];
