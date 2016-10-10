@@ -434,8 +434,63 @@ namespace
 	}
 }
 
+- (void)moveAvianBundles
+{
+	NSFileManager* fm = [NSFileManager defaultManager];
+
+	NSMutableArray* moves = [NSMutableArray array];
+	NSMutableString* moveDescription = [NSMutableString string];
+
+	for(NSString* path in NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask|NSLocalDomainMask, YES))
+	{
+		for(NSString* dir in @[ @"", @"Pristine Copy" ])
+		{
+			NSString* textMateFolder = [NSString pathWithComponents:@[ path, @"TextMate", dir ]];
+			NSString* avianFolder    = [NSString pathWithComponents:@[ path, @"Avian", dir ]];
+			NSString* src = [avianFolder stringByAppendingPathComponent:@"Bundles"];
+			NSString* dst = [textMateFolder stringByAppendingPathComponent:@"Bundles"];
+
+			if([fm fileExistsAtPath:src] == NO)
+				continue;
+
+			if([fm fileExistsAtPath:dst] == YES)
+			{
+				[moves addObject:@[ dst, [dst stringByAppendingString:@"-1.x"] ]];
+				[moveDescription appendFormat:@"Rename “Bundles” at “%@” to “Bundles-1.x” (backup).\n", [textMateFolder stringByAbbreviatingWithTildeInPath]];
+			}
+
+			[moves addObject:@[ src, dst ]];
+			[moveDescription appendFormat:@"Move “Bundles” at “%@” to “%@”.\n", [avianFolder stringByAbbreviatingWithTildeInPath], [textMateFolder stringByAbbreviatingWithTildeInPath]];
+		}
+	}
+
+	if(moves.count == 0)
+		return;
+
+	NSAlert* alert = [[NSAlert alloc] init];
+	alert.alertStyle      = NSInformationalAlertStyle;
+	alert.messageText     = @"Move Bundles?";
+	alert.informativeText = [NSString stringWithFormat:@"Bundles are no longer read from the “Avian” folder. Would you like to move the following items:\n\n%@", moveDescription];
+	[alert addButtonWithTitle:@"Move Bundles"];
+	[alert addButtonWithTitle:@"Cancel"];
+	if([alert runModal] != NSAlertFirstButtonReturn)
+		return;
+
+	for(NSArray* move in moves)
+	{
+		NSError* err;
+		if([fm moveItemAtPath:move.firstObject toPath:move.lastObject error:&err] == YES)
+			continue;
+		[[NSAlert alertWithError:err] runModal];
+		break;
+	}
+}
+
 - (void)loadBundlesIndex
 {
+	// LEGACY locations used by 2.0-beta.12.22 and earlier
+	[self moveAvianBundles];
+
 	for(auto path : bundles::locations())
 		bundlesPaths.push_back(path::join(path, "Bundles"));
 	bundlesIndexPath = path::join(path::home(), "Library/Caches/com.macromates.TextMate/BundlesIndex.binary");
