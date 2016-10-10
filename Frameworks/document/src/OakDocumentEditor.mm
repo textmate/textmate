@@ -163,8 +163,11 @@ static int32_t const NSWrapColumnWindowWidth = 0;
 		to.offset   = range.last.carry;
 		ranges.push_back(text::range_t(from, to, range.columnar));
 	}
-	aDocument.selection = to_ns(ranges);
-	aDocument.folded = to_ns(_layout->folded_as_string());
+
+	ng::index_t visibleIndex = aDocument.visibleIndex;
+	aDocument.selection    = to_ns(ranges); // This resets visibleIndex
+	aDocument.visibleIndex = visibleIndex;
+	aDocument.folded       = to_ns(_layout->folded_as_string());
 }
 
 - (void)performReplacements:(std::multimap<std::pair<size_t, size_t>, std::string> const&)someReplacements
