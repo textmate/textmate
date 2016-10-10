@@ -145,7 +145,7 @@ namespace
 	}
 }
 
-static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
+static NSMutableDictionary<NSString*, OakPasteboard*>* SharedInstances = [NSMutableDictionary new];
 
 @implementation OakPasteboard
 @dynamic name, currentEntry, auxiliaryOptionsForCurrent, primitiveCurrentEntry;
