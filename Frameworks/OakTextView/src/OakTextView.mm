@@ -1847,12 +1847,12 @@ doScroll:
 {
 	crash_reporter_info_t info("%s %s", sel_getName(_cmd), item->name_with_bundle().c_str());
 	// D(DBF_OakTextView_BundleItems, bug("%s\n", anItem->name_with_bundle().c_str()););
-	AUTO_REFRESH;
 	switch(item->kind())
 	{
 		case bundles::kItemTypeSnippet:
 		{
 			[self recordSelector:@selector(insertSnippetWithOptions:) withArgument:ns::to_dictionary(item->plist())];
+			AUTO_REFRESH;
 			documentView->snippet_dispatch(item->plist(), [self variablesForBundleItem:item]);
 		}
 		break;
@@ -1870,6 +1870,7 @@ doScroll:
 		case bundles::kItemTypeMacro:
 		{
 			[self recordSelector:@selector(playMacroWithOptions:) withArgument:ns::to_dictionary(item->plist())];
+			AUTO_REFRESH;
 			documentView->macro_dispatch(item->plist(), [self variablesForBundleItem:item]);
 		}
 		break;
