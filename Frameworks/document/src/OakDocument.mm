@@ -17,7 +17,6 @@
 #import <cf/run_loop.h>
 #import <ns/ns.h>
 #import <settings/settings.h>
-#import <settings/volume.h>
 #import <buffer/buffer.h>
 #import <undo/undo.h>
 #import <selection/types.h>
@@ -864,10 +863,6 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 		self.observeFileSystem = NO;
 		[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentWillSaveNotification object:self];
 
-		std::map<std::string, std::string> attributes;
-		if(volume::settings(to_s(_path)).extended_attributes())
-			attributes = [self extendedAttributeds];
-
 		encoding::type encoding = encoding::type(to_s(_diskNewlines), to_s(_diskEncoding));
 
 		settings_t const settings = settings_for_path(to_s(_path), to_s(_fileType), to_s([_path stringByDeletingLastPathComponent] ?: _directory));
@@ -875,6 +870,10 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 			encoding.set_charset(settings.get(kSettingsEncodingKey, kCharsetUTF8));
 		if(encoding.newlines() == NULL_STR)
 			encoding.set_newlines(settings.get(kSettingsLineEndingsKey, kLF));
+
+		std::map<std::string, std::string> attributes;
+		if(!settings.get(kSettingsDisableExtendedAttributesKey, false))
+			attributes = [self extendedAttributeds];
 
 		struct callback_t : file::save_callback_t
 		{
@@ -1028,8 +1027,12 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	if(_path && _buffer)
 	{
 		document::marks.copy_from_buffer(to_s(_path), *_buffer);
-		if(_onDisk && !self.isDocumentEdited && volume::settings(to_s(_path)).extended_attributes())
-			path::set_attributes(to_s(_path), [self extendedAttributeds]);
+		if(_onDisk && !self.isDocumentEdited)
+		{
+			settings_t const settings = settings_for_path(to_s(_path), to_s(_fileType), to_s([_path stringByDeletingLastPathComponent] ?: _directory));
+			if(!settings.get(kSettingsDisableExtendedAttributesKey, false))
+				path::set_attributes(to_s(_path), [self extendedAttributeds]);
+		}
 	}
 
 	self.observeFileSystem = NO;

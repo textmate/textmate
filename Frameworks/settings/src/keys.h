@@ -33,6 +33,7 @@ PUBLIC extern std::string const kSettingsBinaryKey;
 PUBLIC extern std::string const kSettingsEncodingKey;
 PUBLIC extern std::string const kSettingsLineEndingsKey;
 PUBLIC extern std::string const kSettingsStoreEncodingPerFileKey;
+PUBLIC extern std::string const kSettingsDisableExtendedAttributesKey;
 
 PUBLIC extern std::string const kSettingsFollowSymbolicLinksKey;
 
