@@ -1160,6 +1160,9 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 
 	if(_revision != _buffer->revision())
 		self.revision = _buffer->revision();
+
+	if(self.needsImportDocumentChanges && !_undoManager->in_undo_group())
+		[self importDocumentChanges:self];
 }
 
 - (void)undo
@@ -1649,6 +1652,9 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 
 	if(_needsImportDocumentChanges = flag)
 	{
+		if(_undoManager->in_undo_group())
+			return;
+
 		if(NSApp.isActive)
 		{
 			[self importDocumentChanges:self];
