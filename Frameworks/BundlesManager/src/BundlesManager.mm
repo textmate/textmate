@@ -479,8 +479,14 @@ namespace
 	for(NSArray* move in moves)
 	{
 		NSError* err;
-		if([fm moveItemAtPath:move.firstObject toPath:move.lastObject error:&err] == YES)
-			continue;
+
+		NSString* dstFolder = [move.lastObject stringByDeletingLastPathComponent];
+		if([fm fileExistsAtPath:dstFolder] || [fm createDirectoryAtPath:dstFolder withIntermediateDirectories:YES attributes:nil error:&err])
+		{
+			if([fm moveItemAtPath:move.firstObject toPath:move.lastObject error:&err])
+				continue;
+		}
+
 		[[NSAlert alertWithError:err] runModal];
 		break;
 	}
