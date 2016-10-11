@@ -2,6 +2,12 @@ Title: Release Notes
 
 # Changes
 
+## 2016-10-11 (v2.0-beta.12.23)
+
+* Bundles are no longer read from the Avian folder. You should have been prompted about moving them, if you had any. The reason we initially used the Avian folder was so that people could still use TextMate 1.x with bundles that did not rely on 2.0 features, so this move signals that we no longer think there is a reason to keep TextMate 1.x around. If you have a reason, please [let us know](https://macromates.com/support) (so that we can hopefully address it).
+* The `volumeSettings` user defaults key has been replaced with `disableExtendedAttributes` that can be set in `~/.tm_properties`. If you had disabled extended attributes for specific volumes, your settings should automatically appear in `~/Library/Application Support/TextMate/Global.tmProperties`.
+* See [all changes since v2.0-beta.12.21](https://github.com/textmate/textmate/compare/v2.0-beta.12.21...v2.0-beta.12.23)
+
 ## 2016-10-03 (v2.0-beta.12.21)
 
 * Commands can be set to run again for certain events, for example both _HTML → Show Preview_ and _Markdown → Show Preview_ now update the preview on document changes. To enable this for a command you currently need to edit the property list for the `tmCommand` file and insert something like this:
