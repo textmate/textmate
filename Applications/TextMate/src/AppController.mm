@@ -23,6 +23,7 @@
 #import <document/OakDocumentController.h>
 #import <bundles/query.h>
 #import <io/path.h>
+#import <regexp/glob.h>
 #import <network/tbz.h>
 #import <ns/ns.h>
 #import <license/license.h>
@@ -223,6 +224,21 @@ BOOL HasDocumentWindow (NSArray* windows)
 		@"WebKitDeveloperExtras"    : @YES,
 	}];
 	RegisterDefaults();
+
+	// LEGACY format used prior to 2.0-beta.12.23
+	if(NSDictionary* volumeSettings = [[NSUserDefaults standardUserDefaults] dictionaryForKey:@"volumeSettings"])
+	{
+		for(NSString* pathPrefix in volumeSettings)
+		{
+			id setting = volumeSettings[pathPrefix][@"extendedAttributes"];
+			if(setting && [setting boolValue] == NO)
+			{
+				std::string const glob = path::glob_t::escape(to_s(pathPrefix)) + "**";
+				settings_t::set(kSettingsDisableExtendedAttributesKey, true, NULL_STR, glob);
+			}
+		}
+		[[NSUserDefaults standardUserDefaults] removeObjectForKey:@"volumeSettings"];
+	}
 
 	[[TMPlugInController sharedInstance] loadAllPlugIns:nil];
 
