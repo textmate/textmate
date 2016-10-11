@@ -12,8 +12,9 @@ namespace ng
 		_buffer.remove_callback(&_buffer_callback);
 	}
 
-	bool undo_manager_t::can_undo () const { return _index != 0;               }
-	bool undo_manager_t::can_redo () const { return _index != _records.size(); }
+	bool undo_manager_t::can_undo () const      { return _index != 0;               }
+	bool undo_manager_t::can_redo () const      { return _index != _records.size(); }
+	bool undo_manager_t::in_undo_group () const { return _nesting_count != 0;       }
 
 	void undo_manager_t::begin_undo_group (ranges_t const& ranges)
 	{
