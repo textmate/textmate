@@ -580,7 +580,7 @@ static NSDictionary* globs_for_path (std::string const& path)
 		NSString* path = record.document.path;
 		if(path)
 		{
-			if([path hasPrefix:self.path])
+			if(self.path && [path hasPrefix:self.path])
 					path = to_ns(path::relative_to(to_s(path), to_s(self.path)));
 			else	path = [path stringByAbbreviatingWithTildeInPath];
 		}
