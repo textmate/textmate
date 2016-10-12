@@ -226,11 +226,11 @@ bool parse_context_t::parse_case_change (nodes_t& nodes)
 	{
 		switch(it[-1])
 		{
-			case 'U': nodes.emplace_back(case_change::upper);       break;
-			case 'L': nodes.emplace_back(case_change::lower);       break;
-			case 'E': nodes.emplace_back(case_change::none);        break;
-			case 'u': nodes.emplace_back(case_change::upper_next);  break;
-			case 'l': nodes.emplace_back(case_change::lower_next);  break;
+			case 'U': nodes.emplace_back(case_change_t(case_change::upper));       break;
+			case 'L': nodes.emplace_back(case_change_t(case_change::lower));       break;
+			case 'E': nodes.emplace_back(case_change_t(case_change::none));        break;
+			case 'u': nodes.emplace_back(case_change_t(case_change::upper_next));  break;
+			case 'l': nodes.emplace_back(case_change_t(case_change::lower_next));  break;
 		}
 		return true;
 	}
