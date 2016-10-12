@@ -27,6 +27,7 @@
 #import <network/tbz.h>
 #import <ns/ns.h>
 #import <license/license.h>
+#import <license/LicenseManager.h>
 #import <settings/settings.h>
 #import <oak/debug.h>
 #import <oak/compat.h>
@@ -174,7 +175,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 		NSInteger choice = NSRunAlertPanel(@"TextMate is Outdated!", @"You can get a new version from https://macromates.com/download.", @"Visit Website", @"Enter License", nil);
 		if(choice == NSAlertAlternateReturn) // "Enter License"
 		{
-			[[RegistrationWindowController sharedInstance] showWindow:self];
+			[LicenseManager.sharedInstance showAddLicenseWindow:self];
 			[NSTimer scheduledTimerWithTimeInterval:1 * kSecondsPerDay target:self selector:@selector(checkExpirationDate:) userInfo:nil repeats:NO];
 		}
 		else

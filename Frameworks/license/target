@@ -1,6 +1,6 @@
-SOURCES      = src/*.cc
-EXPORT       = src/{license,keychain}.h
-LINK        += crash text cf
+SOURCES      = src/*.{cc,mm}
+EXPORT       = src/{license,keychain,LicenseManager}.h
+LINK        += crash text cf ns OakAppKit OakFoundation
 CXX_FLAGS   += -I"$libressl_prefix/include"
 LN_FLAGS    += -Wl,-U,__Z15revoked_serialsv
 LN_FLAGS    += "$libressl_prefix"/lib/libcrypto.a

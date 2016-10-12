@@ -4,6 +4,7 @@
 #import <OakFoundation/NSString Additions.h>
 #import <BundlesManager/BundlesManager.h>
 #import <license/license.h>
+#import <license/LicenseManager.h>
 #import <ns/ns.h>
 
 static NSString* const kUserDefaultsReleaseNotesDigestKey = @"releaseNotesDigest";
@@ -15,179 +16,6 @@ static NSData* Digest (NSString* someString)
 	CC_SHA1((unsigned char*)str, strlen(str), (unsigned char*)md);
 	return [NSData dataWithBytes:md length:sizeof(md)];
 }
-
-// =======================
-// = Registration Window =
-// =======================
-
-@interface RegistrationWindowController () <NSWindowDelegate>
-@property (nonatomic) NSTextField*        ownerLabel;
-@property (nonatomic) NSTextField*        ownerTextField;
-@property (nonatomic) NSTextField*        licenseLabel;
-@property (nonatomic) NSTextField*        licenseTextField;
-@property (nonatomic) NSTextField*        statusTextField;
-@property (nonatomic) NSButton*           cancelButton;
-@property (nonatomic) NSButton*           registerButton;
-@property (nonatomic) NSObjectController* objectController;
-
-@property (nonatomic) NSString* ownerString;
-@property (nonatomic) NSString* licenseString;
-@property (nonatomic) NSString* statusString;
-@property (nonatomic) BOOL canRegister;
-@end
-
-static NSTextField* OakCreateTextField ()
-{
-	NSTextField* res = [[NSTextField alloc] initWithFrame:NSZeroRect];
-	res.font = OakControlFont();
-	[[res cell] setWraps:YES];
-	return res;
-}
-
-#ifndef CONSTRAINT
-#define CONSTRAINT(str, align) [constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:str options:align metrics:nil views:views]]
-#endif
-
-@implementation RegistrationWindowController
-+ (instancetype)sharedInstance
-{
-	static RegistrationWindowController* sharedInstance = [self new];
-	return sharedInstance;
-}
-
-- (id)init
-{
-	if((self = [super initWithWindow:[[NSPanel alloc] initWithContentRect:NSZeroRect styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSMiniaturizableWindowMask) backing:NSBackingStoreBuffered defer:NO]]))
-	{
-		self.window.title     = @"Add License";
-		self.window.delegate  = self;
-		self.window.level     = NSModalPanelWindowLevel;
-
-		self.ownerLabel       = OakCreateLabel(@"Owner:", nil, NSRightTextAlignment);
-		self.ownerTextField   = OakCreateTextField();
-		self.licenseLabel     = OakCreateLabel(@"License:", nil, NSRightTextAlignment);
-		self.licenseTextField = OakCreateTextField();
-		self.licenseTextField.font = [NSFont userFixedPitchFontOfSize:12];
-		self.statusTextField  = OakCreateLabel(@"", [NSFont labelFontOfSize:0]);
-		self.cancelButton     = OakCreateButton(@"Cancel");
-		self.registerButton   = OakCreateButton(@"Register");
-
-		self.objectController = [[NSObjectController alloc] initWithContent:self];
-		[self.ownerTextField   bind:NSValueBinding   toObject:_objectController withKeyPath:@"content.ownerString"   options:@{ NSContinuouslyUpdatesValueBindingOption: @YES }];
-		[self.licenseTextField bind:NSValueBinding   toObject:_objectController withKeyPath:@"content.licenseString" options:@{ NSContinuouslyUpdatesValueBindingOption: @YES }];
-		[self.statusTextField  bind:NSValueBinding   toObject:_objectController withKeyPath:@"content.statusString"  options:nil];
-		[self.registerButton   bind:NSEnabledBinding toObject:_objectController withKeyPath:@"content.canRegister"   options:nil];
-
-		self.registerButton.action = @selector(addLicense:);
-		self.cancelButton.action   = @selector(cancelOperation:);
-
-		OakSetupKeyViewLoop(@[ self.ownerTextField, self.licenseTextField, self.cancelButton, self.registerButton ]);
-		self.window.defaultButtonCell = self.registerButton.cell;
-
-		NSDictionary* views = @{
-			@"ownerLabel"   : self.ownerLabel,
-			@"owner"        : self.ownerTextField,
-			@"licenseLabel" : self.licenseLabel,
-			@"license"      : self.licenseTextField,
-			@"status"       : self.statusTextField,
-			@"cancel"       : self.cancelButton,
-			@"register"     : self.registerButton,
-		};
-
-		NSView* contentView = self.window.contentView;
-		OakAddAutoLayoutViewsToSuperview([views allValues], contentView);
-
-		NSMutableArray* constraints = [NSMutableArray array];
-		CONSTRAINT(@"H:|-[ownerLabel(==licenseLabel)]-[owner(==license)]-|", NSLayoutFormatAlignAllBaseline);
-		CONSTRAINT(@"H:|-[licenseLabel]-[license(==400)]-|",                 0);
-		CONSTRAINT(@"H:[status(==license)]-|",                               0);
-		CONSTRAINT(@"H:[cancel]-[register]-|",                               NSLayoutFormatAlignAllTop);
-		CONSTRAINT(@"V:|-[owner]-[license(==98)]-[status]-[register]-|",     0);
-		[constraints addObject:[NSLayoutConstraint constraintWithItem:self.licenseLabel attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.licenseTextField attribute:NSLayoutAttributeTop multiplier:1 constant:3]];
-		[contentView addConstraints:constraints];
-
-		self.ownerString = NSFullUserName();
-	}
-	return self;
-}
-
-- (IBAction)showWindow:(id)sender
-{
-	if(![self.window isVisible])
-	{
-		[self.window layoutIfNeeded];
-		[self.window center];
-	}
-	[self.window makeKeyAndOrderFront:self];
-}
-
-- (NSString*)trimmedOwnerString
-{
-	return [self.ownerString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-}
-
-- (void)validateOwnerAndLicense
-{
-	bool hasContent   = OakNotEmptyString(self.trimmedOwnerString) && OakNotEmptyString(self.licenseString);
-	bool validLicense = hasContent && license::is_valid(license::decode(to_s(self.licenseString)), to_s(self.trimmedOwnerString));
-
-	self.canRegister  = validLicense;
-	self.statusString = validLicense || !hasContent ? nil : [NSString stringWithCxxString:license::error_description(to_s(self.licenseString), to_s(self.trimmedOwnerString))];
-
-	if(validLicense)
-	{
-		auto const license = license::decode(to_s(self.licenseString));
-		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-			if(license::is_revoked(license))
-			{
-				dispatch_async(dispatch_get_main_queue(), ^{
-					self.canRegister  = NO;
-					self.statusString = @"This license has been revoked.";
-				});
-			}
-		});
-	}
-}
-
-- (void)setOwnerString:(NSString*)aString
-{
-	if(_ownerString != aString && ![_ownerString isEqualToString:aString])
-	{
-		_ownerString = aString;
-		[self validateOwnerAndLicense];
-	}
-}
-
-- (void)setLicenseString:(NSString*)aString
-{
-	if(_licenseString != aString && ![_licenseString isEqualToString:aString])
-	{
-		_licenseString = aString;
-		[self validateOwnerAndLicense];
-	}
-}
-
-- (void)addLicense:(id)sender
-{
-	[self close];
-	if(self.canRegister)
-	{
-		auto const license = license::decode(to_s(self.licenseString));
-		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-			bool revoked = license::is_revoked(license);
-			dispatch_async(dispatch_get_main_queue(), ^{
-				std::string error = "Unknown error.";
-				if(revoked)
-					NSRunAlertPanel(@"License Has Been Revoked", @"The license provided is no longer valid.\n\nThe most likely reason for revocation is that a chargeback was issued for your credit card transaction.", @"Continue", nil, nil);
-				else if(license::add(to_s(self.trimmedOwnerString), to_s(self.licenseString), &error))
-					NSRunAlertPanel(@"License Added to Keychain", @"Thanks for your support!", @"Continue", nil, nil);
-				else
-					NSRunAlertPanel(@"Failure Adding License to Keychain", [NSString stringWithCxxString:error], @"Continue", nil, nil, getprogname());
-			});
-		});
-	}
-}
-@end
 
 // ============================
 // = JavaScript Bridge Object =
@@ -236,7 +64,7 @@ static NSTextField* OakCreateTextField ()
 
 - (void)addLicense
 {
-	[[RegistrationWindowController sharedInstance] showWindow:self];
+	[LicenseManager.sharedInstance showAddLicenseWindow:self];
 }
 @end
 
