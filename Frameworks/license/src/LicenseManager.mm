@@ -11,6 +11,10 @@
 @property (nonatomic, getter = isValid) BOOL valid;
 @end
 
+@interface LicenseManager ()
+- (BOOL)addLicense:(License*)license;
+@end
+
 @implementation License
 - (void)validateOwnerAndLicense
 {
@@ -51,6 +55,10 @@
 	}
 }
 @end
+
+// ====================
+// = Add License View =
+// ====================
 
 @interface AddLicenseViewController : NSViewController
 @property (nonatomic) NSTextField* ownerLabel;
@@ -141,16 +149,8 @@ static NSTextField* OakCreateTextField ()
 
 - (void)addLicense:(id)sender
 {
-	[self.view.window performClose:self];
-
-	License* info = self.representedObject;
-	if(info.isValid)
-	{
-		std::string error = "Unknown error.";
-		if(license::add(to_s([info.owner stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet]), to_s(info.licenseAsBase32), &error))
-				NSRunAlertPanel(@"License Added to Keychain", @"Thanks for your support!", @"Continue", nil, nil);
-		else	NSRunAlertPanel(@"Failure Adding License to Keychain", @"%@", @"Continue", nil, nil, to_ns(error));
-	}
+	if([LicenseManager.sharedInstance addLicense:self.representedObject])
+		[self.view.window performClose:self];
 }
 @end
 
@@ -212,6 +212,24 @@ static NSTextField* OakCreateTextField ()
 		_license.owner = NSFullUserName();
 	}
 	return self;
+}
+
+- (BOOL)addLicense:(License*)info
+{
+	if(info.isValid == NO)
+		return NO;
+
+	std::string error = "Unknown error.";
+	if(license::add(to_s([info.owner stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet]), to_s(info.licenseAsBase32), &error))
+	{
+		NSRunAlertPanel(@"License Added to Keychain", @"Thanks for your support!", @"Continue", nil, nil);
+	}
+	else
+	{
+		NSRunAlertPanel(@"Failure Adding License to Keychain", @"%@", @"Continue", nil, nil, to_ns(error));
+	}
+
+	return YES;
 }
 
 - (void)showAddLicenseWindow:(id)sender
