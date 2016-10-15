@@ -14,27 +14,23 @@
 @implementation License
 - (void)validateOwnerAndLicense
 {
+	BOOL valid = NO;
+	NSString* status = nil;
+
 	NSString* owner = [_owner stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
-
-	bool hasContent   = OakNotEmptyString(owner) && OakNotEmptyString(_licenseAsBase32);
-	bool validLicense = hasContent && license::is_valid(license::decode(to_s(_licenseAsBase32)), to_s(owner));
-
-	self.valid  = validLicense;
-	self.status = validLicense || !hasContent ? nil : to_ns(license::error_description(to_s(_licenseAsBase32), to_s(owner)));
-
-	if(validLicense)
+	if(OakNotEmptyString(owner) && OakNotEmptyString(_licenseAsBase32))
 	{
-		auto const license = license::decode(to_s(_licenseAsBase32));
-		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-			if(license::is_revoked(license))
-			{
-				dispatch_async(dispatch_get_main_queue(), ^{
-					self.valid  = NO;
-					self.status = @"This license has been revoked.";
-				});
-			}
-		});
+		auto const decoded = license::decode(to_s(_licenseAsBase32));
+		if(!license::is_valid(decoded, to_s(owner)))
+			status = to_ns(license::error_description(to_s(_licenseAsBase32), to_s(owner)));
+		else if(license::is_revoked(decoded))
+			status = @"This license has been revoked.";
+		else
+			valid = YES;
 	}
+
+	self.valid  = valid;
+	self.status = status;
 }
 
 - (void)setOwner:(NSString*)newOwner
@@ -150,19 +146,10 @@ static NSTextField* OakCreateTextField ()
 	License* info = self.representedObject;
 	if(info.isValid)
 	{
-		auto const license = license::decode(to_s(info.licenseAsBase32));
-		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-			bool revoked = license::is_revoked(license);
-			dispatch_async(dispatch_get_main_queue(), ^{
-				std::string error = "Unknown error.";
-				if(revoked)
-					NSRunAlertPanel(@"License Has Been Revoked", @"The license provided is no longer valid.\n\nThe most likely reason for revocation is that a chargeback was issued for your credit card transaction.", @"Continue", nil, nil);
-				else if(license::add(to_s([info.owner stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet]), to_s(info.licenseAsBase32), &error))
-					NSRunAlertPanel(@"License Added to Keychain", @"Thanks for your support!", @"Continue", nil, nil);
-				else
-					NSRunAlertPanel(@"Failure Adding License to Keychain", @"%@", @"Continue", nil, nil, to_ns(error));
-			});
-		});
+		std::string error = "Unknown error.";
+		if(license::add(to_s([info.owner stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet]), to_s(info.licenseAsBase32), &error))
+				NSRunAlertPanel(@"License Added to Keychain", @"Thanks for your support!", @"Continue", nil, nil);
+		else	NSRunAlertPanel(@"Failure Adding License to Keychain", @"%@", @"Continue", nil, nil, to_ns(error));
 	}
 }
 @end
