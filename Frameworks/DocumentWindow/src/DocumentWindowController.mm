@@ -35,6 +35,7 @@
 #import <ns/ns.h>
 #import <kvdb/kvdb.h>
 #import <crash/info.h>
+#import <license/LicenseManager.h>
 
 static NSString* const kUserDefaultsAlwaysFindInDocument = @"alwaysFindInDocument";
 static NSString* const kUserDefaultsDisableFolderStateRestore = @"disableFolderStateRestore";
@@ -208,6 +209,8 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		[self.window setContentBorderThickness:0 forEdge:NSMinYEdge]; // bottom border
 		[self.window setAutorecalculatesContentBorderThickness:NO forEdge:NSMaxYEdge];
 		[self.window setAutorecalculatesContentBorderThickness:NO forEdge:NSMinYEdge];
+
+		[LicenseManager.sharedInstance decorateWindow:self.window];
 
 		OakAddAutoLayoutViewsToSuperview(@[ self.layoutView ], self.window.contentView);
 		OakSetupKeyViewLoop(@[ self.layoutView ], NO);

@@ -14,6 +14,10 @@
 @interface LicenseManager ()
 {
 	id _owner;
+
+	BOOL _decorateWindowsImmediately;
+	NSHashTable* _windowsToDecorate;
+	NSTimer* _decorateWindowsTimer;
 }
 - (BOOL)addLicense:(License*)license;
 @end
@@ -318,6 +322,42 @@ static NSString* const kAddLicenseViewIdentifier = @"org.TextMate.addLicenseButt
 			if([viewController.title isEqualToString:kAddLicenseViewIdentifier])
 				[win removeTitlebarAccessoryViewControllerAtIndex:i];
 		}
+	}
+}
+
+- (void)decorateWindowsTimerDidFire:(id)sender
+{
+	if(self.owner == nil)
+	{
+		for(NSWindow* win in _windowsToDecorate)
+		{
+			if(win)
+				[self addRegisterButtonToWindow:win];
+		}
+	}
+
+	_windowsToDecorate          = nil;
+	_decorateWindowsTimer       = nil;
+	_decorateWindowsImmediately = YES;
+}
+
+- (void)decorateWindow:(NSWindow*)window
+{
+	if(_decorateWindowsImmediately)
+	{
+		if(self.owner == nil)
+			[self addRegisterButtonToWindow:window];
+	}
+	else
+	{
+		NSTimeInterval const kAddLicenseButtonDelay = 60*60; // One hour
+
+		if(_windowsToDecorate == nil)
+			_windowsToDecorate = [NSHashTable weakObjectsHashTable];
+		[_windowsToDecorate addObject:window];
+
+		if(_decorateWindowsTimer == nil)
+			_decorateWindowsTimer = [NSTimer scheduledTimerWithTimeInterval:kAddLicenseButtonDelay target:self selector:@selector(decorateWindowsTimerDidFire:) userInfo:nil repeats:NO];
 	}
 }
 @end
