@@ -222,6 +222,7 @@ static NSTextField* OakCreateTextField ()
 	std::string error = "Unknown error.";
 	if(license::add(to_s([info.owner stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet]), to_s(info.licenseAsBase32), &error))
 	{
+		[self removeAllRegisterButtons:self];
 		NSRunAlertPanel(@"License Added to Keychain", @"Thanks for your support!", @"Continue", nil, nil);
 	}
 	else
@@ -236,5 +237,66 @@ static NSTextField* OakCreateTextField ()
 {
 	static AddLicenseWindowController* windowController = [[AddLicenseWindowController alloc] initWithLicense:_license];
 	[windowController showWindow:self];
+}
+
+// ==============================
+// = Window Titlebar Decoration =
+// ==============================
+
+static NSString* const kAddLicenseViewIdentifier = @"org.TextMate.addLicenseButton";
+
+- (void)showAddLicensePopover:(id)sender
+{
+	NSPopover* popover = [[NSPopover alloc] init];
+	popover.behavior = NSPopoverBehaviorTransient;
+	popover.contentViewController = [[AddLicenseViewController alloc] init];
+	popover.contentViewController.representedObject = _license;
+	[popover showRelativeToRect:NSZeroRect ofView:sender preferredEdge:NSMaxYEdge];
+}
+
+- (void)addRegisterButtonToWindow:(NSWindow*)window
+{
+	// MAC_OS_X_VERSION_10_10
+	if(![window respondsToSelector:@selector(addTitlebarAccessoryViewController:)])
+		return;
+
+	NSButton* addLicenseButton = [[NSButton alloc] initWithFrame:NSZeroRect];
+
+	addLicenseButton.cell.backgroundStyle = NSBackgroundStyleRaised;
+	addLicenseButton.cell.controlSize     = NSSmallControlSize;
+
+	addLicenseButton.showsBorderOnlyWhileMouseInside = YES;
+	addLicenseButton.font       = [NSFont messageFontOfSize:[NSFont systemFontSizeForControlSize:NSSmallControlSize]];
+	addLicenseButton.bezelStyle = NSRecessedBezelStyle;
+	addLicenseButton.buttonType = NSMomentaryPushInButton;
+	addLicenseButton.title      = @"Add License";
+	addLicenseButton.action     = @selector(showAddLicensePopover:);
+	addLicenseButton.target     = self;
+
+	[addLicenseButton sizeToFit];
+
+	NSTitlebarAccessoryViewController* viewController = [[NSTitlebarAccessoryViewController alloc] init];
+	viewController.layoutAttribute = NSLayoutAttributeRight;
+	viewController.title = kAddLicenseViewIdentifier;
+	viewController.view = addLicenseButton;
+	[window addTitlebarAccessoryViewController:viewController];
+}
+
+- (void)removeAllRegisterButtons:(id)sender
+{
+	// MAC_OS_X_VERSION_10_10
+	if(![NSWindow instancesRespondToSelector:@selector(titlebarAccessoryViewControllers)])
+		return;
+
+	for(NSWindow* win in [NSApp orderedWindows])
+	{
+		NSArray* viewControllers = win.titlebarAccessoryViewControllers;
+		for(NSUInteger i = viewControllers.count; i != 0; )
+		{
+			NSTitlebarAccessoryViewController* viewController = viewControllers[--i];
+			if([viewController.title isEqualToString:kAddLicenseViewIdentifier])
+				[win removeTitlebarAccessoryViewControllerAtIndex:i];
+		}
+	}
 }
 @end
