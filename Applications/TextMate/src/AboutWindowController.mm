@@ -3,7 +3,6 @@
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <BundlesManager/BundlesManager.h>
-#import <license/license.h>
 #import <license/LicenseManager.h>
 #import <ns/ns.h>
 
@@ -48,18 +47,7 @@ static NSData* Digest (NSString* someString)
 
 - (NSString*)licensees
 {
-	if(!licensees)
-	{
-		for(auto owner : license::find_all())
-		{
-			if(license::is_valid(license::decode(license::find(owner)), owner))
-			{
-				licensees = [NSString stringWithCxxString:owner];
-				break;
-			}
-		}
-	}
-	return licensees;
+	return LicenseManager.sharedInstance.owner;
 }
 
 - (void)addLicense

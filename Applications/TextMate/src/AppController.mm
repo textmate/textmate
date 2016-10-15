@@ -26,7 +26,6 @@
 #import <regexp/glob.h>
 #import <network/tbz.h>
 #import <ns/ns.h>
-#import <license/license.h>
 #import <license/LicenseManager.h>
 #import <settings/settings.h>
 #import <oak/debug.h>
@@ -164,11 +163,8 @@ BOOL HasDocumentWindow (NSArray* windows)
 	if([currentDate laterDate:warningDate] == warningDate)
 		return (void)[NSTimer scheduledTimerWithTimeInterval:7 * kSecondsPerDay target:self selector:@selector(checkExpirationDate:) userInfo:nil repeats:NO];
 
-	for(auto owner : license::find_all())
-	{
-		if(license::is_valid(license::decode(license::find(owner)), owner))
-			return;
-	}
+	if(LicenseManager.sharedInstance.owner != nil)
+		return;
 
 	if([currentDate laterDate:expirationDate] == currentDate)
 	{

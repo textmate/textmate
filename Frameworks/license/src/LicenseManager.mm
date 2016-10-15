@@ -12,6 +12,9 @@
 @end
 
 @interface LicenseManager ()
+{
+	id _owner;
+}
 - (BOOL)addLicense:(License*)license;
 @end
 
@@ -214,6 +217,23 @@ static NSTextField* OakCreateTextField ()
 	return self;
 }
 
+- (NSString*)owner
+{
+	if(_owner == nil)
+	{
+		_owner = [NSNull null];
+		for(auto owner : license::find_all())
+		{
+			if(license::is_valid(license::decode(license::find(owner)), owner))
+			{
+				_owner = to_ns(owner);
+				break;
+			}
+		}
+	}
+	return _owner != [NSNull null] ? _owner : nil;
+}
+
 - (BOOL)addLicense:(License*)info
 {
 	if(info.isValid == NO)
@@ -222,6 +242,7 @@ static NSTextField* OakCreateTextField ()
 	std::string error = "Unknown error.";
 	if(license::add(to_s([info.owner stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet]), to_s(info.licenseAsBase32), &error))
 	{
+		_owner = info.owner;
 		[self removeAllRegisterButtons:self];
 		NSRunAlertPanel(@"License Added to Keychain", @"Thanks for your support!", @"Continue", nil, nil);
 	}

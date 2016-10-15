@@ -1,5 +1,5 @@
 SOURCES      = src/*.{cc,mm}
-EXPORT       = src/{license,keychain,LicenseManager}.h
+EXPORT       = src/LicenseManager.h
 LINK        += crash text cf ns OakAppKit OakFoundation
 CXX_FLAGS   += -I"$libressl_prefix/include"
 LN_FLAGS    += -Wl,-U,__Z15revoked_serialsv
