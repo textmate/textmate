@@ -422,7 +422,7 @@ int main (int argc, char const* argv[])
 
 			if(!files.empty())
 			{
-				if(files[i % files.size()].find(kUUIDPrefix) == 0)
+				if(files[i % files.size()].compare(0, kUUIDPrefix.size(), kUUIDPrefix) == 0)
 						write_key_pair(fd, "uuid", files[i % files.size()].substr(kUUIDPrefix.size()));
 				else	write_key_pair(fd, "path", files[i % files.size()]);
 			}
@@ -441,7 +441,7 @@ int main (int argc, char const* argv[])
 			write_key_pair(fd, "mark", setMarks[i % setMarks.size()]);
 			write_key_pair(fd, "line", lines[i % lines.size()]);
 
-			if(files[i % files.size()].find(kUUIDPrefix) == 0)
+			if(files[i % files.size()].compare(0, kUUIDPrefix.size(), kUUIDPrefix) == 0)
 					write_key_pair(fd, "uuid", files[i % files.size()].substr(kUUIDPrefix.size()));
 			else	write_key_pair(fd, "path", files[i % files.size()]);
 
@@ -496,7 +496,7 @@ int main (int argc, char const* argv[])
 					write_key_pair(fd, "re-activate",         wait                  ? "yes" : "no");
 				}
 			}
-			else if(files[i].find(kUUIDPrefix) == 0)
+			else if(files[i].compare(0, kUUIDPrefix.size(), kUUIDPrefix) == 0)
 			{
 				write_key_pair(fd, "uuid", files[i].substr(kUUIDPrefix.size()));
 			}

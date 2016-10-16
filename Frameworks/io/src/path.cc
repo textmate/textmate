@@ -232,7 +232,7 @@ namespace path
 		if(!path.empty() && path[0] == '/')
 		{
 			std::string p = normalize(path);
-			if(p != "/.." && p.find("/../") != 0)
+			if(p != "/.." && p.compare(0, 4, "/../") != 0)
 				return true;
 		}
 		return false;
@@ -602,7 +602,7 @@ namespace path
 	std::string system_display_name (std::string const& path)
 	{
 		std::string res = name(path);
-		if(path.find("/Volumes/") == 0 || path.find("/home/") == 0)
+		if(path.compare(0, 9, "/Volumes/") == 0 || path.compare(0, 6, "/home/") == 0)
 			return res;
 
 		if(CFURLRef url = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault, (UInt8 const*)path.data(), path.size(), false))

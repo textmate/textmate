@@ -244,7 +244,7 @@ namespace bundles
 				return res;
 
 			ext = path::extensions(ext);
-			if(ext.find('.') == 0)
+			if(ext.compare(0, 1, ".") == 0)
 				ext = ext.substr(1);
 		}
 		return query(kFieldDropExtension, "*", scope, kItemTypeDragCommand);
