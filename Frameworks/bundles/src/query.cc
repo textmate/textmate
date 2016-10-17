@@ -337,7 +337,7 @@ namespace bundles
 			std::string actionClass;
 			if(plist::get_key_path(proxyItem->plist(), "content", actionClass))
 			{
-				if(sClass.find(actionClass) == 0)
+				if(sClass.compare(0, actionClass.size(), actionClass) == 0)
 					return key_equivalent(proxyItem);
 			}
 		}
