@@ -72,7 +72,7 @@ namespace
 		static std::string const RootScopes[] = { "text", "source", "attr" };
 		for(auto const& scope : RootScopes)
 		{
-			if(str.find(scope) == 0 && (str.size() == scope.size() || str.find_first_of("., ", scope.size()) == scope.size()))
+			if(str.compare(0, scope.size(), scope) == 0 && (str.size() == scope.size() || str.find_first_of("., ", scope.size()) == scope.size()))
 				return true;
 		}
 		return str == "";
@@ -372,7 +372,8 @@ void settings_t::set (std::string const& key, std::string const& value, std::str
 	ASSERT_NE(global_settings_path(), NULL_STR);
 
 	std::vector<std::string> sectionNames(fileType == NULL_STR ? 0 : 1, fileType);
-	if(fileType != NULL_STR && fileType.find("attr.") != 0)
+	auto str = "attr.";
+	if(fileType != NULL_STR && !oak::has_prefix(fileType.begin(), fileType.end(), str, str + strlen(str)))
 	{
 		std::vector<std::string> parts = text::split(fileType, ".");
 		for(size_t i = 0; i < parts.size(); ++i)
