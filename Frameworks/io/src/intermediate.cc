@@ -102,10 +102,8 @@ static std::string create_path (std::string const& path)
 
 namespace path
 {
-	intermediate_t::intermediate_t (std::string const& dest)
+	intermediate_t::intermediate_t (std::string const& dest) : _resolved(path::resolve_head(dest)), _intermediate(create_path(_resolved))
 	{
-		_resolved     = path::resolve_head(dest);
-		_intermediate = create_path(_resolved);
 		D(DBF_IO_Intermediate, bug("%s → %s → %s\n", dest.c_str(), _resolved.c_str(), _intermediate.c_str()););
 	}
 

@@ -33,7 +33,7 @@ std::string OakDebugBaseClass::sectionName (std::string const& title)
 {
 	size_t separatorIndex = title.find("_");
 	if(separatorIndex != std::string::npos && separatorIndex != title.size() - 1)
-		return title.substr(0, separatorIndex).c_str();
+		return title.substr(0, separatorIndex);
 	else
 		return title;
 }

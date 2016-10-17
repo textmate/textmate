@@ -25,7 +25,7 @@ namespace snippet
 
 	struct range_t
 	{
-		range_t (pos_t from, pos_t to) : from(from), to(to) { }
+		range_t (pos_t const& from, pos_t const& to) : from(from), to(to) { }
 		pos_t from, to;
 
 		bool contains (pos_t const& pos) const   { return from < pos && pos < to; }

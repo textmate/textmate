@@ -12,7 +12,7 @@ namespace bundles
 	// = Shell Command Requirements =
 	// ==============================
 
-	required_command_t::required_command_t (std::string const& command, std::string moreInfoUrl, std::string const& variable, std::vector<std::string> const& locations) : command(command), more_info_url(moreInfoUrl), variable(variable), locations(locations)
+	required_command_t::required_command_t (std::string const& command, std::string const& moreInfoUrl, std::string const& variable, std::vector<std::string> const& locations) : command(command), more_info_url(moreInfoUrl), variable(variable), locations(locations)
 	{
 	}
 

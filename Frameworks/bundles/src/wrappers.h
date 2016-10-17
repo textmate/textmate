@@ -12,7 +12,7 @@ namespace bundles
 
 	struct PUBLIC required_command_t
 	{
-		required_command_t (std::string const& command = NULL_STR, std::string moreInfoUrl = NULL_STR, std::string const& variable = NULL_STR, std::vector<std::string> const& locations = std::vector<std::string>());
+		required_command_t (std::string const& command = NULL_STR, std::string const& moreInfoUrl = NULL_STR, std::string const& variable = NULL_STR, std::vector<std::string> const& locations = std::vector<std::string>());
 
 		std::string command;
 		std::string more_info_url;
