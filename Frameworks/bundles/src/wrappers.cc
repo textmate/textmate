@@ -244,8 +244,14 @@ namespace bundles
 				return res;
 
 			ext = path::extensions(ext);
+<<<<<<< HEAD
+      auto str = ".";
+			if(oak::has_prefix(ext.begin(), ext.end(), str, str + strlen(str)))
+				ext = ext.substr(strlen(str));
+=======
 			if(ext.compare(0, 1, ".") == 0)
 				ext = ext.substr(1);
+>>>>>>> 94b6704a3d05aebb90eef82f2815d98aa876314d
 		}
 		return query(kFieldDropExtension, "*", scope, kItemTypeDragCommand);
 	}
