@@ -28,7 +28,7 @@ std::map<CFAbsoluteTime, std::string> find_reports (std::string const& process)
 	for(auto const& entry : path::entries(location))
 	{
 		std::string file(entry->d_name);
-		if(entry->d_type == DT_REG && file.find(process) == 0)
+		if(entry->d_type == DT_REG && file.compare(0, process.size(), process) == 0)
 			res.emplace(parse_date(file, process + "_%F-\x25H\x25M%S"), path::join(location, entry->d_name));
 	}
 	return res;
