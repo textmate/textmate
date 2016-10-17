@@ -66,8 +66,9 @@ static std::string copy_git_index (std::string const& dir)
 	{
 		// Submodules have their git dir in the super project (starting with 1.7.6) — if we know the user has 1.7.6 we should ask git for the git dir using: git rev-parse --resolve-git-dir /path/to/repository/.git
 		std::string const setting = path::content(gitDir);
-		if(setting.find("gitdir: ") == 0 && setting.back() == '\n')
-			gitDir = path::join(dir, setting.substr(8, setting.size()-9));
+		char const kGitDir[] = "gitdir: ";
+		if(setting.compare(0, sizeof(kGitDir), kGitDir) == 0 && setting.back() == '\n')
+			gitDir = path::join(dir, setting.substr(sizeof(kGitDir)-1, setting.size()-sizeof(kGitDir)-2));
 	}
 
 	std::string res = NULL_STR;
@@ -255,9 +256,10 @@ namespace scm
 				if(haveHead)
 				{
 					std::string branchName = io::exec(env, executable(), "symbolic-ref", "HEAD", NULL);
-					if(branchName.find("refs/heads/") == 0)
+					char const kHeadRef[] = "refs/heads/";
+					if(branchName.compare(0, sizeof(kHeadRef)-1, kHeadRef) == 0)
 					{
-						branchName = branchName.substr(11);
+						branchName = branchName.substr(sizeof(kHeadRef)-1);
 						branchName = branchName.substr(0, branchName.find("\n"));
 						res.emplace("TM_SCM_BRANCH", branchName);
 					}
