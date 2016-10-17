@@ -125,7 +125,7 @@ namespace ng
 	{
 		bool found = false;
 
-		std::vector< std::pair<size_t, size_t> > res, newFoldings;
+		std::vector< std::pair<size_t, size_t> > newFoldings;
 		for(auto const& pair : _folded)
 		{
 			if(from == pair.first && pair.second <= to || from <= pair.first && pair.second == to)
