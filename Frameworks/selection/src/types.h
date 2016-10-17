@@ -25,7 +25,7 @@ namespace ng
 	struct PUBLIC range_t
 	{
 		range_t () : columnar(false), freehanded(false), unanchored(false) { }
-		range_t (index_t first, index_t last = index_t(), bool columnar = false, bool freehanded = false, bool unanchored = false, bool color = false) : first(first), last(last ?: first), columnar(columnar), freehanded(last ? freehanded : first.carry != 0), unanchored(unanchored), color(color) { }
+		range_t (index_t const& first, index_t const& last = index_t(), bool columnar = false, bool freehanded = false, bool unanchored = false, bool color = false) : first(first), last(last ?: first), columnar(columnar), freehanded(last ? freehanded : first.carry != 0), unanchored(unanchored), color(color) { }
 
 		index_t& min ()                            { return first < last ? first : last;  }
 		index_t& max ()                            { return first < last ? last  : first; }

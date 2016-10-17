@@ -10,10 +10,7 @@ namespace ng
 		// ============
 
 		template <typename _InputIter>
-		memory_t::memory_t (_InputIter first, _InputIter last) : _offset(0)
-		{
-			_helper = std::make_shared<helper_t>(first, last);
-		}
+		memory_t::memory_t (_InputIter first, _InputIter last) : _helper(std::make_shared<helper_t>(first, last)), _offset(0) { }
 
 		template <typename _InputIter>
 		void memory_t::insert (size_t pos, _InputIter first, _InputIter last)

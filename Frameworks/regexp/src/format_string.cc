@@ -259,10 +259,7 @@ namespace format_string
 	// = format_string_t =
 	// ===================
 
-	format_string_t::format_string_t (parser::nodes_t const& n)
-	{
-		nodes = std::make_shared<parser::nodes_t>(n);
-	}
+	format_string_t::format_string_t (parser::nodes_t const& n) : nodes(std::make_shared<parser::nodes_t>(n)) { }
 
 	void format_string_t::init (std::string const& str, char const* stopChars)
 	{
