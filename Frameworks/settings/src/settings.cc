@@ -72,7 +72,7 @@ namespace
 		static std::string const RootScopes[] = { "text", "source", "attr" };
 		for(auto const& scope : RootScopes)
 		{
-			if(str.find(scope) == 0 && (str.size() == scope.size() || str.find_first_of("., ", scope.size()) == scope.size()))
+			if(str.compare(0, scope.size(), scope) == 0 && (str.size() == scope.size() || str.find_first_of("., ", scope.size()) == scope.size()))
 				return true;
 		}
 		return str == "";
