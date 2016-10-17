@@ -82,7 +82,7 @@ struct pac_proxy_callback_result_t
 
 static void pac_proxy_callback (void* client, CFArrayRef proxies, CFErrorRef error)
 {
-	pac_proxy_callback_result_t* res = (pac_proxy_callback_result_t*)client;
+	auto res = static_cast<pac_proxy_callback_result_t*>(client);
 	res->proxies    = proxies ? (CFArrayRef)CFRetain(proxies) : NULL;
 	res->error      = error   ? (CFErrorRef)CFRetain(error)   : NULL;
 	res->has_result = true;

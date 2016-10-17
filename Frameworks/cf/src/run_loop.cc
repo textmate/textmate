@@ -6,7 +6,7 @@ namespace cf
 	run_loop_t::run_loop_t (CFStringRef mode, double timeout) : _should_stop(false), _timeout(timeout)
 	{
 		struct helper_t {
-			static void wake_up (void* arg) { ((run_loop_t*)arg)->_should_stop = true; }
+			static void wake_up (void* arg) { static_cast<run_loop_t*>(arg)->_should_stop = true; }
 		};
 
 		_mode = mode;
