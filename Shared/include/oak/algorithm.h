@@ -27,6 +27,13 @@ namespace oak
 		return prefixFirst == prefixLast;
 	}
 
+	template <int size>
+	bool has_prefix (std::string const& str, char const(&prefix)[size])
+	{
+		// String literals include a trailing zero byte which we skip
+		return size ? str.compare(0, size-1, prefix) == 0 : true;
+	}
+
 	template <typename _InputIter1, typename _InputIter2, typename _InputIter3, typename _OutputIter>
 	_OutputIter replace_copy (_InputIter1 it, _InputIter1 const& srcLast, _InputIter2 const& findFirst, _InputIter2 const& findLast, _InputIter3 const& replaceFirst, _InputIter3 const& replaceLast, _OutputIter out)
 	{
