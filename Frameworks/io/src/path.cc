@@ -232,7 +232,7 @@ namespace path
 		if(!path.empty() && path[0] == '/')
 		{
 			std::string p = normalize(path);
-			if(p != "/.." && p.find("/../") != 0)
+			if(p != "/.." && !oak::has_prefix(p, "/../"))
 				return true;
 		}
 		return false;
@@ -602,7 +602,7 @@ namespace path
 	std::string system_display_name (std::string const& path)
 	{
 		std::string res = name(path);
-		if(path.find("/Volumes/") == 0 || path.find("/home/") == 0)
+		if(oak::has_prefix(path, "/Volumes/") || oak::has_prefix(path, "/home/"))
 			return res;
 
 		if(CFURLRef url = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault, (UInt8 const*)path.data(), path.size(), false))

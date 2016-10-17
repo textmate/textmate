@@ -372,7 +372,7 @@ void settings_t::set (std::string const& key, std::string const& value, std::str
 	ASSERT_NE(global_settings_path(), NULL_STR);
 
 	std::vector<std::string> sectionNames(fileType == NULL_STR ? 0 : 1, fileType);
-	if(fileType != NULL_STR && fileType.find("attr.") != 0)
+	if(fileType != NULL_STR && !oak::has_prefix(fileType, "attr."))
 	{
 		std::vector<std::string> parts = text::split(fileType, ".");
 		for(size_t i = 0; i < parts.size(); ++i)
