@@ -237,14 +237,14 @@ namespace bundles
 	std::vector<item_ptr> drag_commands_for_path (std::string const& path, scope::context_t const& scope)
 	{
 		std::string ext = text::lowercase(path);
-		while(ext != "")
+		while(!ext.empty())
 		{
 			std::vector<item_ptr> const& res = query(kFieldDropExtension, ext, scope, kItemTypeDragCommand);
 			if(!res.empty())
 				return res;
 
 			ext = path::extensions(ext);
-			if(ext.find('.') == 0)
+			if(!ext.empty() && ext.front() == '.')
 				ext = ext.substr(1);
 		}
 		return query(kFieldDropExtension, "*", scope, kItemTypeDragCommand);
