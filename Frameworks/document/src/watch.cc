@@ -49,7 +49,7 @@ namespace document
 
 		static void* server_run_stub (void* arg)
 		{
-			((watch_server_t*)arg)->server_run();
+			static_cast<watch_server_t*>(arg)->server_run();
 			return NULL;
 		}
 

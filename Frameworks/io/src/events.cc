@@ -157,7 +157,7 @@ namespace
 
 		static void callback (ConstFSEventStreamRef streamRef, void* clientCallBackInfo, size_t numEvents, void* eventPaths, FSEventStreamEventFlags const eventFlags[], FSEventStreamEventId const eventIds[])
 		{
-			stream_t& stream = *(stream_t*)clientCallBackInfo;
+			stream_t& stream = *static_cast<stream_t*>(clientCallBackInfo);
 			D(DBF_FS_Events, bug("%zu events\n", numEvents););
 
 			uint64_t lastEventId = 0;

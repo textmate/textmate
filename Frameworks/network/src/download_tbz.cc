@@ -56,7 +56,7 @@ namespace network
 
 		static size_t receive_header (void* ptr, size_t size, size_t nmemb, void* udata)
 		{
-			user_data_t& data = *((user_data_t*)udata);
+			user_data_t& data = *static_cast<user_data_t*>(udata);
 
 			char const* bytes = (char const*)ptr;
 			size_t len = nmemb * size;
@@ -96,7 +96,7 @@ namespace network
 
 		static size_t receive_data (void* ptr, size_t size, size_t nmemb, void* udata)
 		{
-			user_data_t& data = *((user_data_t*)udata);
+			user_data_t& data = *static_cast<user_data_t*>(udata);
 
 			write(data.tbz_fd, ptr, size * nmemb);
 			write(data.tmp_fd, ptr, size * nmemb);
