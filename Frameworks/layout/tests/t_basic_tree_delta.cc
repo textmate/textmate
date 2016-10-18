@@ -37,7 +37,7 @@ static void random_insert (oak::basic_tree_t<annotation_t>& tree, std::string co
 
 	std::vector<size_t> ordering(lengths.size());
 	std::iota(ordering.begin(), ordering.end(), 0);
-	std::random_shuffle(ordering.begin(), ordering.end());
+	oak::random_shuffle(ordering.begin(), ordering.end());
 
 	std::vector<size_t> srcOffsets(lengths.size(), 0);
 	std::vector< std::pair<size_t, size_t> > insertRanges;

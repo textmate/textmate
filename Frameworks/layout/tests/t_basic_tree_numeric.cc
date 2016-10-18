@@ -15,7 +15,7 @@ std::vector<ssize_t> create_keys ()
 		tmp.insert(arc4random_uniform(0xFFFFFF) - 0x7FFFFF);
 
 	std::vector<ssize_t> res(tmp.begin(), tmp.end());
-	std::random_shuffle(res.begin(), res.end());
+	oak::random_shuffle(res.begin(), res.end());
 	return res;
 }
 
@@ -75,7 +75,7 @@ void test_erase ()
 	auto tree = create_tree(keys);
 
 	std::set<ssize_t> tmp(keys.begin(), keys.end());
-	std::random_shuffle(keys.begin(), keys.end());
+	oak::random_shuffle(keys.begin(), keys.end());
 
 	for(size_t i = keys.size() >> 1; i < keys.size(); ++i)
 	{
@@ -94,7 +94,7 @@ void test_erase ()
 	std::sort(keys.begin(), keys.end());
 	OAK_ASSERT(std::equal(tree.begin(), tree.end(), keys.begin(), &numeric_bin_comp));
 
-	std::random_shuffle(keys.begin(), keys.end());
+	oak::random_shuffle(keys.begin(), keys.end());
 	for(auto const& key : keys)
 	{
 		OAK_ASSERT(tree.find(key, &numeric_comp) != tree.end());

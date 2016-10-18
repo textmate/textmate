@@ -41,7 +41,7 @@ static void random_insert (ng::buffer_t& dst, std::string const& src)
 
 	std::vector<size_t> ordering(lengths.size());
 	std::iota(ordering.begin(), ordering.end(), 0);
-	std::random_shuffle(ordering.begin(), ordering.end());
+	oak::random_shuffle(ordering.begin(), ordering.end());
 
 	std::vector<size_t> srcOffsets(lengths.size(), 0);
 	struct fragment_t { size_t dst, src, len; };

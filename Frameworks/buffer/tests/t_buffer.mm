@@ -32,7 +32,7 @@ void benchmark_insert_50_mb ()
 	std::string tmp(32*1024, '\0');
 	for(size_t i = 0; i < tmp.size(); ++i)
 		tmp[i] = (i % 0x61) == 0x60 ? '\n' : 0x20 + (i % 0x61);
-	std::random_shuffle(tmp.begin(), tmp.end());
+	oak::random_shuffle(tmp.begin(), tmp.end());
 
 	ng::buffer_t buf;
 	size_t cnt = 50*1024*1024 / tmp.size();
