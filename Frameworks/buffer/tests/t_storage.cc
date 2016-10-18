@@ -49,7 +49,7 @@ static std::string create_buffer (size_t size = 50 * 1024)
 	std::string buffer(size, '\0');
 	for(size_t i = 0; i < buffer.size(); ++i)
 		buffer[i] = 0x20 + (i % 0x60);
-	std::random_shuffle(buffer.begin(), buffer.end());
+	oak::random_shuffle(buffer.begin(), buffer.end());
 	return buffer;
 }
 
