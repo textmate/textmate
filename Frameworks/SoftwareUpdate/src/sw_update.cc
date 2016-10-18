@@ -47,7 +47,7 @@ static bool mv_path (std::string const& src, std::string const& dst, Authorizati
 		return true;
 	else if(errno == EACCES || errno == EPERM)
 	{
-		if(run_auth_command(auth, "/bin/mv", src.c_str(), dst.c_str(), NULL))
+		if(run_auth_command(auth, "/bin/mv", src.c_str(), dst.c_str(), nullptr))
 			return true;
 		perrorf("sw_update: /bin/mv \"%s\" \"%s\"", src.c_str(), dst.c_str());
 	}
@@ -60,7 +60,7 @@ static bool rm_file (std::string const& path, AuthorizationRef& auth)
 		return true;
 	else if(errno == EACCES || errno == EPERM)
 	{
-		if(run_auth_command(auth, "/bin/rm", path.c_str(), NULL))
+		if(run_auth_command(auth, "/bin/rm", path.c_str(), nullptr))
 			return true;
 		perrorf("sw_update: /bin/rm \"%s\"", path.c_str());
 	}
@@ -92,7 +92,7 @@ static bool rm_dir (std::string const& path, AuthorizationRef& auth)
 		return true;
 	else if(errno == EACCES || errno == EPERM)
 	{
-		if(run_auth_command(auth, "/bin/rmdir", path.c_str(), NULL))
+		if(run_auth_command(auth, "/bin/rmdir", path.c_str(), nullptr))
 			return true;
 		perrorf("sw_update: /bin/rmdir \"%s\"", path.c_str());
 	}

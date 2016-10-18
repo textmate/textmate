@@ -72,8 +72,8 @@ void test_simple ()
 {
 	test::jail_t jail;
 	callback_t cb(jail/*, true*/);
-	cb.must_see("foo/bar", "foo/bar/baz/fud", NULL);
-	cb.allowed("", "foo", "foo/bar/baz", NULL);
+	cb.must_see("foo/bar", "foo/bar/baz/fud", nullptr);
+	cb.allowed("", "foo", "foo/bar/baz", nullptr);
 
 	fs::watch(jail.path(), &cb, FSEventsGetCurrentEventId(), 0.1);
 	jail.touch("foo/bar/baz/fud/dummy.txt");
@@ -87,7 +87,7 @@ void test_file_watch ()
 {
 	test::jail_t jail;
 	callback_t cb(jail/*, true*/);
-	cb.must_see("foo/bar/dummy.txt", NULL);
+	cb.must_see("foo/bar/dummy.txt", nullptr);
 
 	jail.touch("foo/bar/dummy.txt");
 	fs::watch(jail.path("foo/bar/dummy.txt"), &cb, FSEventsGetCurrentEventId(), 0.1);
@@ -105,7 +105,7 @@ void test_initially_missing ()
 {
 	test::jail_t jail;
 	callback_t cb(jail/*, true*/);
-	cb.must_see("foo/bar", "foo/bar/baz", "foo/bar/fud", NULL);
+	cb.must_see("foo/bar", "foo/bar/baz", "foo/bar/fud", nullptr);
 
 	fs::watch(jail.path("foo/bar"), &cb, FSEventsGetCurrentEventId(), 0.1);
 
@@ -118,7 +118,7 @@ void test_initially_missing ()
 	jail.touch("dummy.txt");     // should be ignored
 	jail.touch("foo/dummy.txt"); // should be ignored
 	jail.touch("foo/bar/baz/fud/dummy.txt");
-	cb.must_see("foo/bar/baz/fud", NULL);
+	cb.must_see("foo/bar/baz/fud", nullptr);
 	cb.event_loop("foo/bar");
 
 	fs::unwatch(jail.path("foo/bar"), &cb);
@@ -128,7 +128,7 @@ void test_initially_missing_file ()
 {
 	test::jail_t jail;
 	callback_t cb(jail/*, true*/);
-	cb.must_see("foo/bar/dummy.txt", NULL);
+	cb.must_see("foo/bar/dummy.txt", nullptr);
 
 	fs::watch(jail.path("foo/bar/dummy.txt"), &cb, FSEventsGetCurrentEventId(), 0.1);
 
@@ -144,7 +144,7 @@ void test_initially_missing_file ()
 	jail.touch("foo/dummy.txt");
 	jail.touch("foo/bar/other.txt");
 	jail.touch("foo/bar/dummy.txt");
-	cb.must_see("foo/bar/dummy.txt", NULL);
+	cb.must_see("foo/bar/dummy.txt", nullptr);
 	cb.event_loop("foo/bar/dummy.txt");
 
 	fs::unwatch(jail.path("foo/bar/dummy.txt"), &cb);
