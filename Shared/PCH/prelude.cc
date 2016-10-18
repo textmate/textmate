@@ -19,6 +19,7 @@
 #include <vector>
 #include <memory>
 #include <numeric>
+#include <random>
 #include <thread>
 #include <boost/crc.hpp>
 #include <boost/variant.hpp>
