@@ -66,6 +66,13 @@ namespace oak
 			t = 1.0 / (1.0 + exp((-t*12.0)+6.0));
 		return std::min(t, 1.0);
 	}
+
+	template <typename _InputIter>
+	void random_shuffle(_InputIter first, _InputIter last)
+	{
+		static std::mt19937 g(std::random_device{}());
+		std::shuffle(first, last, g);
+	}
 };
 
 template <typename _SrcKeyT, typename _SrcValueT, typename _DstKeyT, typename _DstValueT>
