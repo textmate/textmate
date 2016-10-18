@@ -20,7 +20,7 @@ __attribute__ ((format (printf, 1, 2))) static std::string format_error (char co
 	asprintf(&res, "%s: %s\n", msg, err);
 	std::string str(res);
 	free(res);
-
+	free(msg);
 	return str;
 }
 
