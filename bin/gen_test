@@ -87,7 +87,7 @@ void oak_warning (std::string const& message, char const* file, int line)
 struct oak_exception : std::exception
 {
   oak_exception (std::string const& message) : _message(message) { }
-  virtual char const* what () const throw() { return _message.c_str(); }
+  virtual char const* what () const noexcept { return _message.c_str(); }
 private:
   std::string _message;
 };
