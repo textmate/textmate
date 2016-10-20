@@ -27,7 +27,7 @@ namespace scope
 
 			bool ws ();
 
-			bool parse_char (char const* ch, char* dst = NULL);
+			bool parse_char (char const* ch, char* dst = nullptr);
 
 			bool parse_scope (scope::types::scope_t& res);
 			bool parse_path (path_t& res);

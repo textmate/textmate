@@ -50,7 +50,7 @@ namespace document
 		static void* server_run_stub (void* arg)
 		{
 			static_cast<watch_server_t*>(arg)->server_run();
-			return NULL;
+			return nullptr;
 		}
 
 		void server_run ();
@@ -134,10 +134,10 @@ namespace document
 	{
 		std::tie(read_from_server_pipe, write_to_master_pipe) = io::create_pipe();
 		std::tie(read_from_master_pipe, write_to_server_pipe) = io::create_pipe();
-		pthread_create(&server_thread, NULL, &watch_server_t::server_run_stub, this);
+		pthread_create(&server_thread, nullptr, &watch_server_t::server_run_stub, this);
 
 		// attach to run-loop
-		if(CFSocketRef socket = CFSocketCreateWithNative(kCFAllocatorDefault, read_from_server_pipe, kCFSocketReadCallBack, &watch_server_t::data_from_server_stub, NULL))
+		if(CFSocketRef socket = CFSocketCreateWithNative(kCFAllocatorDefault, read_from_server_pipe, kCFSocketReadCallBack, &watch_server_t::data_from_server_stub, nullptr))
 		{
 			if(CFRunLoopSourceRef source = CFSocketCreateRunLoopSource(kCFAllocatorDefault, socket, 0))
 			{
@@ -153,7 +153,7 @@ namespace document
 		D(DBF_Document_WatchFS, bug("\n"););
 		close(write_to_server_pipe);  // tell server to shutdown
 		close(read_from_server_pipe); // causes server to get -1 when sending us data, another way to tell it to quit
-		pthread_join(server_thread, NULL);
+		pthread_join(server_thread, nullptr);
 	}
 
 	// ============================
@@ -175,7 +175,7 @@ namespace document
 		D(DBF_Document_WatchFS, bug("%zu\n", client_id););
 		std::lock_guard<std::mutex> lock(_lock);
 		clients.erase(clients.find(client_id));
-		struct { size_t client_id; std::string* path; } packet = { client_id, NULL };
+		struct { size_t client_id; std::string* path; } packet = { client_id, nullptr };
 		write(write_to_server_pipe, &packet, sizeof(packet));
 	}
 
@@ -235,7 +235,7 @@ namespace document
 			struct kevent changeList;
 			struct timespec timeout = { };
 			EV_SET(&changeList, info.fd, EVFILT_VNODE, EV_ADD | EV_ENABLE | EV_CLEAR, NOTE_DELETE | NOTE_WRITE | NOTE_RENAME | NOTE_ATTRIB, 0, (void*)client_id);
-			int n = kevent(event_queue, &changeList, 1 /* number of changes */, NULL /* event list */, 0 /* number of events */, &timeout);
+			int n = kevent(event_queue, &changeList, 1 /* number of changes */, nullptr /* event list */, 0 /* number of events */, &timeout);
 			if(n == -1)
 				perrorf("watch_server_t: kevent(\"%s\")", info.path_watched.c_str());
 		}
@@ -254,12 +254,12 @@ namespace document
 		struct kevent changeList;
 		struct timespec timeout = { };
 		EV_SET(&changeList, read_from_master_pipe, EVFILT_READ, EV_ADD | EV_ENABLE | EV_CLEAR, 0, 0, (void*)0);
-		int n = kevent(event_queue, &changeList, 1 /* number of changes */, NULL /* event list */, 0 /* number of events */, &timeout);
+		int n = kevent(event_queue, &changeList, 1 /* number of changes */, nullptr /* event list */, 0 /* number of events */, &timeout);
 		if(n == -1)
 			perror("watch_server_t: kevent");
 
 		struct kevent changed;
-		while(kevent(event_queue, NULL /* change list */, 0 /* number of changes */, &changed /* event list */, 1 /* number of events */, NULL) == 1)
+		while(kevent(event_queue, nullptr /* change list */, 0 /* number of changes */, &changed /* event list */, 1 /* number of events */, nullptr) == 1)
 		{
 			if(changed.filter == EVFILT_READ)
 			{
@@ -311,7 +311,7 @@ namespace document
 						}
 
 						std::string path = (flags & NOTE_RENAME) == NOTE_RENAME ? path::for_fd(it->second->fd) : NULL_STR;
-						struct { size_t client_id; int flags; std::string* path; } packet = { client_id, flags, path == NULL_STR ? NULL : new std::string(path) };
+						struct { size_t client_id; int flags; std::string* path; } packet = { client_id, flags, path == NULL_STR ? nullptr : new std::string(path) };
 						if(write(write_to_master_pipe, &packet, sizeof(packet)) == -1)
 							break; // channel to master is gone, let’s quit
 					}

@@ -47,19 +47,19 @@ int main (int argc, char const* argv[])
 	bool softTabs        = false;
 
 	unsigned int ch;
-	while((ch = getopt_long(argc, (char* const*)argv, "p:t:i:shv", longopts, NULL)) != -1)
+	while((ch = getopt_long(argc, (char* const*)argv, "p:t:i:shv", longopts, nullptr)) != -1)
 	{
 		switch(ch)
 		{
-			case 'p': patterns = optarg;                      break;
-			case 't': tabSize = strtol(optarg, NULL, 10);     break;
-			case 'i': indentSize = strtol(optarg, NULL, 10);  break;
-			case 's': softTabs = true;                        break;
-			case 'h': usage();                                return EX_OK;
-			case 'v': version();                              return EX_OK;
-			case '?': /* unknown option */                    return EX_USAGE;
-			case ':': /* missing option */                    return EX_USAGE;
-			default:  usage(stderr);                          return EX_USAGE;
+			case 'p': patterns = optarg;                         break;
+			case 't': tabSize = strtol(optarg, nullptr, 10);     break;
+			case 'i': indentSize = strtol(optarg, nullptr, 10);  break;
+			case 's': softTabs = true;                           break;
+			case 'h': usage();                                   return EX_OK;
+			case 'v': version();                                 return EX_OK;
+			case '?': /* unknown option */                       return EX_USAGE;
+			case ':': /* missing option */                       return EX_USAGE;
+			default:  usage(stderr);                             return EX_USAGE;
 		}
 	}
 

@@ -11,7 +11,7 @@ static std::string hardware_info (int field, bool integer = false)
 	size_t bufSize = sizeof(buf);
 	int request[] = { CTL_HW, field };
 
-	if(sysctl(request, sizeofA(request), buf, &bufSize, NULL, 0) != -1)
+	if(sysctl(request, sizeofA(request), buf, &bufSize, nullptr, 0) != -1)
 	{
 		if(integer && bufSize == 4)
 			return std::to_string(*(int*)buf);

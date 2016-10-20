@@ -58,7 +58,7 @@ static bool find_app (FSRef* outAppRef, std::string* outAppStr)
 	disable_sudo_helper_t helper;
 
 	CFURLRef appURL;
-	OSStatus err = LSFindApplicationForInfo(kLSUnknownCreator, CFSTR("com.macromates.TextMate.preview"), NULL, outAppRef, &appURL);
+	OSStatus err = LSFindApplicationForInfo(kLSUnknownCreator, CFSTR("com.macromates.TextMate.preview"), nullptr, outAppRef, &appURL);
 	if(err != noErr)
 		return fprintf(stderr, "Can’t find TextMate.app (error %d)\n", (int)err), false;
 
@@ -80,13 +80,13 @@ static void launch_app (bool disableUntitled)
 	disable_sudo_helper_t helper;
 
 	FSRef appFSRef;
-	if(!find_app(&appFSRef, NULL))
+	if(!find_app(&appFSRef, nullptr))
 		exit(EX_UNAVAILABLE);
 
 	cf::array_t args(disableUntitled ? std::vector<std::string>{ "-disableNewDocumentAtStartup", "1" } : std::vector<std::string>{ });
 
-	struct LSApplicationParameters const appParams = { 0, kLSLaunchDontAddToRecents|kLSLaunchDontSwitch|kLSLaunchAndDisplayErrors, &appFSRef, NULL, NULL, args, NULL };
-	OSStatus err = LSOpenApplication(&appParams, NULL);
+	struct LSApplicationParameters const appParams = { 0, kLSLaunchDontAddToRecents|kLSLaunchDontSwitch|kLSLaunchAndDisplayErrors, &appFSRef, nullptr, nullptr, args, nullptr };
+	OSStatus err = LSOpenApplication(&appParams, nullptr);
 	if(err != noErr)
 	{
 		fprintf(stderr, "Can’t launch TextMate.app (error %d)\n", (int)err);
@@ -96,10 +96,10 @@ static void launch_app (bool disableUntitled)
 
 static void install_auth_tool ()
 {
-	if(geteuid() == 0 && (!path::exists(kAuthToolPath) || !path::exists(kAuthPlistPath) || AuthorizationRightGet(kAuthRightName, NULL) == errAuthorizationDenied))
+	if(geteuid() == 0 && (!path::exists(kAuthToolPath) || !path::exists(kAuthPlistPath) || AuthorizationRightGet(kAuthRightName, nullptr) == errAuthorizationDenied))
 	{
 		std::string appStr = NULL_STR;
-		if(!find_app(NULL, &appStr))
+		if(!find_app(nullptr, &appStr))
 			exit(EX_UNAVAILABLE);
 
 		std::string toolPath = path::join(appStr, "Contents/Resources/PrivilegedTool");
@@ -114,7 +114,7 @@ static void install_auth_tool ()
 		pid_t pid = vfork();
 		if(pid == 0)
 		{
-			execl(arg0, arg0, "--install", NULL);
+			execl(arg0, arg0, "--install", nullptr);
 			_exit(errno);
 		}
 
@@ -317,7 +317,7 @@ int main (int argc, char const* argv[])
 		optind = 1;
 
 		int ch;
-		while((ch = getopt_long(arg.argc, (char**)arg.argv, "ac:dehl:m:p:rs:t:u:vw", longopts, NULL)) != -1)
+		while((ch = getopt_long(arg.argc, (char**)arg.argv, "ac:dehl:m:p:rs:t:u:vw", longopts, nullptr)) != -1)
 		{
 			switch(ch)
 			{
@@ -358,7 +358,7 @@ int main (int argc, char const* argv[])
 
 		if(strcmp(path, "-") != 0 && !path::is_absolute(path)) // relative path, make absolute
 		{
-			if(char* cwd = getcwd(NULL, (size_t)-1))
+			if(char* cwd = getcwd(nullptr, (size_t)-1))
 			{
 				char* tmp;
 				asprintf(&tmp, "%s/%s", cwd, path);
@@ -589,7 +589,7 @@ int main (int argc, char const* argv[])
 
 					if(key == "data")
 					{
-						bytesLeft = strtol(value.c_str(), NULL, 10);
+						bytesLeft = strtol(value.c_str(), nullptr, 10);
 
 						size_t dataLen = std::min((ssize_t)line.size(), bytesLeft);
 						write(STDOUT_FILENO, line.data(), dataLen);

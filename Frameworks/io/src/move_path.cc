@@ -90,7 +90,7 @@ namespace path
 		ASSERTF(path::exists(src), "%s\n", src.c_str());
 		ASSERTF(!path::exists(dst), "%s\n", dst.c_str());
 
-		if(copyfile(src.c_str(), dst.c_str(), NULL, COPYFILE_ALL | COPYFILE_NOFOLLOW_SRC) != 0)
+		if(copyfile(src.c_str(), dst.c_str(), nullptr, COPYFILE_ALL | COPYFILE_NOFOLLOW_SRC) != 0)
 		{
 			D(DBF_IO_Failure, bug("copyfile(\"%s\", \"%s\"): %s\n", src.c_str(), dst.c_str(), strerror(errno)););
 			return false;
@@ -107,7 +107,7 @@ namespace path
 			}
 			else if(it->d_type == DT_REG || it->d_type == DT_LNK)
 			{
-				if(copyfile(newSrc.c_str(), newDst.c_str(), NULL, COPYFILE_ALL | COPYFILE_NOFOLLOW_SRC) != 0)
+				if(copyfile(newSrc.c_str(), newDst.c_str(), nullptr, COPYFILE_ALL | COPYFILE_NOFOLLOW_SRC) != 0)
 				{
 					D(DBF_IO_Failure, bug("copyfile(\"%s\", \"%s\"): %s\n", newSrc.c_str(), newDst.c_str(), strerror(errno)););
 					res = false;

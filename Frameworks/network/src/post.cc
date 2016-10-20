@@ -22,8 +22,8 @@ static size_t receive_data (void* ptr, size_t size, size_t nmemb, void* udata)
 
 long post_to_server (std::string const& url, std::map<std::string, std::string> const& payload, std::map<std::string, std::string>* headersOut)
 {
-	struct curl_httppost* formpost = NULL;
-	struct curl_httppost* lastptr = NULL;
+	struct curl_httppost* formpost = nullptr;
+	struct curl_httppost* lastptr = nullptr;
 
 	for(auto const& pair : payload)
 	{

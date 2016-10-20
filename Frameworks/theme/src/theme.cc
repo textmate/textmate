@@ -233,7 +233,7 @@ void theme_t::shared_styles_t::setup_styles ()
 	if(_color_space)
 	{
 		CGColorSpaceRelease(_color_space);
-		_color_space = NULL;
+		_color_space = nullptr;
 	}
 
 	if(_item)
@@ -403,12 +403,12 @@ styles_t const& theme_t::styles_for_scope (scope::scope_t const& scope) const
 
 		CTFontPtr font;
 		if(base.font_name != NULL_STR)
-				font.reset(CTFontCreateWithName(cf::wrap(base.font_name), base.font_size, NULL), CFRelease);
-		else	font.reset(CTFontCreateUIFontForLanguage(kCTFontUserFixedPitchFontType, base.font_size, NULL), CFRelease);
+				font.reset(CTFontCreateWithName(cf::wrap(base.font_name), base.font_size, nullptr), CFRelease);
+		else	font.reset(CTFontCreateUIFontForLanguage(kCTFontUserFixedPitchFontType, base.font_size, nullptr), CFRelease);
 
 		if(CTFontSymbolicTraits traits = (base.bold == bool_true ? kCTFontBoldTrait : 0) + (base.italic == bool_true ? kCTFontItalicTrait : 0))
 		{
-			if(CTFontRef newFont = CTFontCreateCopyWithSymbolicTraits(font.get(), base.font_size, NULL, traits, kCTFontBoldTrait | kCTFontItalicTrait))
+			if(CTFontRef newFont = CTFontCreateCopyWithSymbolicTraits(font.get(), base.font_size, nullptr, traits, kCTFontBoldTrait | kCTFontItalicTrait))
 				font.reset(newFont, CFRelease);
 		}
 

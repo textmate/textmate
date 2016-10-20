@@ -398,7 +398,7 @@ namespace path
 		CFURLRef url = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault, (UInt8 const*)path.data(), path.size(), is_directory(path));
 		if(!url) return false;
 		CFBooleanRef pathIsLocal;
-		bool ok = CFURLCopyResourcePropertyForKey(url, kCFURLVolumeIsLocalKey, &pathIsLocal, NULL);
+		bool ok = CFURLCopyResourcePropertyForKey(url, kCFURLVolumeIsLocalKey, &pathIsLocal, nullptr);
 		CFRelease(url);
 		if(!ok) return false;
 		return (pathIsLocal == kCFBooleanTrue);
@@ -764,7 +764,7 @@ namespace path
 	{
 		std::string const& path = resolve(p);
 
-		ssize_t size = getxattr(path.c_str(), attr.c_str(), NULL, 0, 0, 0);
+		ssize_t size = getxattr(path.c_str(), attr.c_str(), nullptr, 0, 0, 0);
 		if(size <= 0)
 			return NULL_STR;
 
@@ -787,7 +787,7 @@ namespace path
 		int fd = open(path.c_str(), O_RDONLY|O_CLOEXEC);
 		if(fd != -1)
 		{
-			ssize_t listSize = flistxattr(fd, NULL, 0, 0);
+			ssize_t listSize = flistxattr(fd, nullptr, 0, 0);
 			if(listSize > 0)
 			{
 				char mem[listSize];
@@ -796,7 +796,7 @@ namespace path
 					size_t i = 0;
 					while(i < listSize)
 					{
-						ssize_t size = fgetxattr(fd, mem + i, NULL, 0, 0, 0);
+						ssize_t size = fgetxattr(fd, mem + i, nullptr, 0, 0, 0);
 						if(size > 0)
 						{
 							std::string value(size, '\0');
@@ -928,9 +928,9 @@ namespace path
 
 		if(errno == EXDEV)
 		{
-			if(copyfile(src, dst, NULL, COPYFILE_ALL | COPYFILE_MOVE | COPYFILE_UNLINK) == 0)
+			if(copyfile(src, dst, nullptr, COPYFILE_ALL | COPYFILE_MOVE | COPYFILE_UNLINK) == 0)
 				return true;
-			perrorf("copyfile(\"%s\", \"%s\", NULL, COPYFILE_ALL | COPYFILE_MOVE | COPYFILE_UNLINK)", src, dst);
+			perrorf("copyfile(\"%s\", \"%s\", nullptr, COPYFILE_ALL | COPYFILE_MOVE | COPYFILE_UNLINK)", src, dst);
 		}
 		else
 		{
@@ -964,7 +964,7 @@ namespace path
 	std::string cwd ()
 	{
 		std::string res = NULL_STR;
-		if(char* cwd = getcwd(NULL, (size_t)-1))
+		if(char* cwd = getcwd(nullptr, (size_t)-1))
 		{
 			res = cwd;
 			free(cwd);
@@ -981,7 +981,7 @@ namespace path
 			std::string message = text::format("Unable to obtain basic system information such as your home folder.\n\ngetpwuid(%d): %s", getuid(), errStr);
 
 			CFOptionFlags responseFlags;
-			CFUserNotificationDisplayAlert(0 /* timeout */, kCFUserNotificationStopAlertLevel, NULL /* iconURL */, NULL /* soundURL */, NULL /* localizationURL */, CFSTR("Missing User Database"), cf::wrap(message), CFSTR("Retry"), CFSTR("Show Radar Entry"), nil /* otherButtonTitle */, &responseFlags);
+			CFUserNotificationDisplayAlert(0 /* timeout */, kCFUserNotificationStopAlertLevel, nullptr /* iconURL */, nullptr /* soundURL */, nullptr /* localizationURL */, CFSTR("Missing User Database"), cf::wrap(message), CFSTR("Retry"), CFSTR("Show Radar Entry"), nil /* otherButtonTitle */, &responseFlags);
 
 			if((responseFlags & 0x3) == kCFUserNotificationDefaultResponse)
 			{
@@ -989,12 +989,12 @@ namespace path
 			}
 			else if((responseFlags & 0x3) == kCFUserNotificationAlternateResponse)
 			{
-				if(CFURLRef url = CFURLCreateWithString(kCFAllocatorDefault, cf::wrap("http://openradar.appspot.com/10261043"), NULL))
+				if(CFURLRef url = CFURLCreateWithString(kCFAllocatorDefault, cf::wrap("http://openradar.appspot.com/10261043"), nullptr))
 				{
 					if(CFMutableArrayRef urls = CFArrayCreateMutable(kCFAllocatorDefault, 0, &kCFTypeArrayCallBacks))
 					{
 						CFArrayAppendValue(urls, url);
-						LSOpenURLsWithRole(urls, kLSRolesViewer, NULL, NULL, NULL, 0);
+						LSOpenURLsWithRole(urls, kLSRolesViewer, nullptr, nullptr, nullptr, 0);
 						CFRelease(urls);
 					}
 					CFRelease(url);

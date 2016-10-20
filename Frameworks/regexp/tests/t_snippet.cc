@@ -3,7 +3,7 @@
 void test_snippet ()
 {
 	std::string src = "foo\n$0\nbar\n";
-	snippet::snippet_t s = snippet::parse(src, std::map<std::string, std::string>(), "" /* indent string */, text::indent_t(2, 2, false), NULL /* run command callback */);
+	snippet::snippet_t s = snippet::parse(src, std::map<std::string, std::string>(), "" /* indent string */, text::indent_t(2, 2, false), nullptr /* run command callback */);
 
 	OAK_ASSERT_EQ(s.text, "foo\n\nbar\n");
 	OAK_ASSERT_EQ(s.fields.size(), 1);
@@ -14,7 +14,7 @@ void test_snippet ()
 void test_indent ()
 {
 	std::string src = "foo\n$0\nbar\n";
-	snippet::snippet_t s = snippet::parse(src, std::map<std::string, std::string>(), "\t" /* indent string */, text::indent_t(2, 2, false), NULL /* run command callback */);
+	snippet::snippet_t s = snippet::parse(src, std::map<std::string, std::string>(), "\t" /* indent string */, text::indent_t(2, 2, false), nullptr /* run command callback */);
 
 	OAK_ASSERT_EQ(s.text, "foo\n\t\n\tbar\n\t");
 	OAK_ASSERT_EQ(s.fields.size(), 1);
@@ -25,7 +25,7 @@ void test_indent ()
 void test_soft_tabs_1 ()
 {
 	std::string src = "{\n\t$0\n}\n";
-	snippet::snippet_t s = snippet::parse(src, std::map<std::string, std::string>(), "\t" /* indent string */, text::indent_t(2, 2, true), NULL /* run command callback */);
+	snippet::snippet_t s = snippet::parse(src, std::map<std::string, std::string>(), "\t" /* indent string */, text::indent_t(2, 2, true), nullptr /* run command callback */);
 
 	OAK_ASSERT_EQ(s.text, "{\n\t  \n\t}\n\t");
 	OAK_ASSERT_EQ(s.fields.size(), 1);
@@ -36,7 +36,7 @@ void test_soft_tabs_1 ()
 void test_soft_tabs_2 ()
 {
 	std::string src = "{\n\t$0\n}\n";
-	snippet::snippet_t s = snippet::parse(src, std::map<std::string, std::string>(), "  " /* indent string */, text::indent_t(2, 2, true), NULL /* run command callback */);
+	snippet::snippet_t s = snippet::parse(src, std::map<std::string, std::string>(), "  " /* indent string */, text::indent_t(2, 2, true), nullptr /* run command callback */);
 
 	OAK_ASSERT_EQ(s.text, "{\n    \n  }\n  ");
 	OAK_ASSERT_EQ(s.fields.size(), 1);
@@ -47,7 +47,7 @@ void test_soft_tabs_2 ()
 void test_replace ()
 {
 	std::string src = "- (${1:id})${2:${TM_SELECTED_TEXT:method}}${3::(${4:id})${5:${4/(NS([AEIOQUY])?(\\w+).*)|(.)?.*/(?1:a(?2:n$2)$3:(?4:anArgument))/}}}\n{$0${1/^(void|IBAction)$|(.*)/(?2:\n\treturn nil;)/}\n}";
-	snippet::snippet_t s = snippet::parse(src, std::map<std::string, std::string>(), "" /* indent string */, text::indent_t(3, 3, false), NULL /* run command callback */);
+	snippet::snippet_t s = snippet::parse(src, std::map<std::string, std::string>(), "" /* indent string */, text::indent_t(3, 3, false), nullptr /* run command callback */);
 
 	OAK_ASSERT_EQ(s.text, "- (id)method:(id)anArgument\n{\n\treturn nil;\n}");
 	OAK_ASSERT_EQ(s.fields.size(), 6);
@@ -66,7 +66,7 @@ void test_replace ()
 void test_replace_soft_tabs ()
 {
 	std::string src = "- (${1:id})${2:${TM_SELECTED_TEXT:method}}${3::(${4:id})${5:${4/(NS([AEIOQUY])?(\\w+).*)|(.)?.*/(?1:a(?2:n$2)$3:(?4:anArgument))/}}}\n{$0${1/^(void|IBAction)$|(.*)/(?2:\n\treturn nil;)/}\n}";
-	snippet::snippet_t s = snippet::parse(src, std::map<std::string, std::string>(), "" /* indent string */, text::indent_t(3, 3, true), NULL /* run command callback */);
+	snippet::snippet_t s = snippet::parse(src, std::map<std::string, std::string>(), "" /* indent string */, text::indent_t(3, 3, true), nullptr /* run command callback */);
 
 	OAK_ASSERT_EQ(s.text, "- (id)method:(id)anArgument\n{\n   return nil;\n}");
 	OAK_ASSERT_EQ(s.fields.size(), 6);
@@ -85,7 +85,7 @@ void test_replace_soft_tabs ()
 void test_indent_replace_soft_tabs ()
 {
 	std::string src = "- (${1:id})${2:${TM_SELECTED_TEXT:method}}${3::(${4:id})${5:${4/(NS([AEIOQUY])?(\\w+).*)|(.)?.*/(?1:a(?2:n$2)$3:(?4:anArgument))/}}}\n{$0${1/^(void|IBAction)$|(.*)/(?2:\n\treturn nil;)/}\n}";
-	snippet::snippet_t s = snippet::parse(src, std::map<std::string, std::string>(), "   " /* indent string */, text::indent_t(3, 3, true), NULL /* run command callback */);
+	snippet::snippet_t s = snippet::parse(src, std::map<std::string, std::string>(), "   " /* indent string */, text::indent_t(3, 3, true), nullptr /* run command callback */);
 
 	OAK_ASSERT_EQ(s.text, "- (id)method:(id)anArgument\n   {\n      return nil;\n   }");
 	OAK_ASSERT_EQ(s.fields.size(), 6);
@@ -104,7 +104,7 @@ void test_indent_replace_soft_tabs ()
 void test_repopulating_mirrors ()
 {
 	std::string src = "${1/.+/-/}${1:x}${1/.+/-/}";
-	snippet::snippet_t s = snippet::parse(src, std::map<std::string, std::string>(), "" /* indent string */, text::indent_t(2, 2, false), NULL /* run command callback */);
+	snippet::snippet_t s = snippet::parse(src, std::map<std::string, std::string>(), "" /* indent string */, text::indent_t(2, 2, false), nullptr /* run command callback */);
 
 	OAK_ASSERT_EQ(s.text, "-x-");
 	OAK_ASSERT_EQ(s.fields.size(), 2);

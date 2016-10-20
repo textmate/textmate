@@ -6,7 +6,7 @@
 
 static std::string error_keychain (char const* prefix, OSStatus status)
 {
-	CFStringRef message = SecCopyErrorMessageString(status, NULL);
+	CFStringRef message = SecCopyErrorMessageString(status, nullptr);
 	std::string const res = text::format("%s: %s", prefix, cf::to_s(message).c_str());
 	CFRelease(message);
 	return res;
@@ -30,7 +30,7 @@ namespace license
 
 		if(CFDictionaryRef query = CFDictionaryCreate(kCFAllocatorDefault, keys, vals, sizeofA(keys), &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks))
 		{
-			CFDataRef data = NULL;
+			CFDataRef data = nullptr;
 			OSStatus err = SecItemCopyMatching(query, (CFTypeRef*)&data);
 			if(err == errSecSuccess)
 			{
@@ -57,7 +57,7 @@ namespace license
 
 		if(CFDictionaryRef query = CFDictionaryCreate(kCFAllocatorDefault, keys, vals, sizeofA(keys), &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks))
 		{
-			CFArrayRef results = NULL;
+			CFArrayRef results = nullptr;
 
 			OSStatus err = SecItemCopyMatching(query, (CFTypeRef*)&results);
 			if(err == errSecSuccess)
@@ -70,12 +70,12 @@ namespace license
 						UInt32 format = CSSM_DB_ATTRIBUTE_FORMAT_STRING;
 						SecKeychainAttributeInfo info = { 1, &tag, &format };
 
-						SecKeychainAttributeList* authAttrList = NULL;
-						err = SecKeychainItemCopyAttributesAndData(item, &info, NULL, &authAttrList, NULL, NULL);
+						SecKeychainAttributeList* authAttrList = nullptr;
+						err = SecKeychainItemCopyAttributesAndData(item, &info, nullptr, &authAttrList, nullptr, nullptr);
 						if(err == noErr)
 						{
 							res.emplace_back((char const*)authAttrList->attr->data, ((char const*)authAttrList->attr->data) + authAttrList->attr->length);
-							SecKeychainItemFreeAttributesAndData(authAttrList, NULL);
+							SecKeychainItemFreeAttributesAndData(authAttrList, nullptr);
 						}
 						else
 						{
@@ -110,7 +110,7 @@ namespace license
 
 			if(CFDictionaryRef createDict = CFDictionaryCreate(kCFAllocatorDefault, keys, vals, sizeofA(keys), &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks))
 			{
-				OSStatus status = SecItemAdd(createDict, NULL);
+				OSStatus status = SecItemAdd(createDict, nullptr);
 				if(status == noErr)
 				{
 					res = true;
