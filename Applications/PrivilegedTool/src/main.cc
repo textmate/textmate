@@ -158,7 +158,7 @@ int main (int argc, char const* argv[])
 	bool server = false, install = false, uninstall = false;
 
 	unsigned int ch;
-	while((ch = getopt_long(argc, (char* const*)argv, "siuhv", longopts, NULL)) != -1)
+	while((ch = getopt_long(argc, (char* const*)argv, "siuhv", longopts, nullptr)) != -1)
 	{
 		switch(ch)
 		{
@@ -189,7 +189,7 @@ int main (int argc, char const* argv[])
 		fd_set readfds;
 		FD_ZERO(&readfds);
 		FD_SET(fd, &readfds);
-		int rc = select(fd+1, &readfds, NULL, NULL, NULL);
+		int rc = select(fd+1, &readfds, nullptr, nullptr, nullptr);
 		if(rc == -1)
 		{
 			D(DBF_AuthServer, bug("select: %s\n", strerror(errno)););

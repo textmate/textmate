@@ -142,8 +142,8 @@ namespace find
 		{
 			iterate(it, strings)
 			{
-				CFStringLowercase(  *it, NULL);
-				CFStringUppercase(*++it, NULL);
+				CFStringLowercase(  *it, nullptr);
+				CFStringUppercase(*++it, nullptr);
 			}
 		}
 
@@ -332,7 +332,7 @@ namespace find
 				if(compiled_pattern)
 				{
 					onig_free(compiled_pattern);
-					compiled_pattern = NULL;
+					compiled_pattern = nullptr;
 				}
 			}
 		}
@@ -349,7 +349,7 @@ namespace find
 			if(!compiled_pattern)
 				return res;
 
-			if(buf == NULL)
+			if(buf == nullptr)
 			{
 				// FIXME for an empty range, this returns a result — this also affects the non-regexp search
 				if(!did_start_searching)

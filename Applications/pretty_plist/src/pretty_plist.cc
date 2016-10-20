@@ -46,7 +46,7 @@ static void parse_plist (FILE* fp, bool ascii, bool extended)
 			{
 				if(CFWriteStreamRef writeStream = CFWriteStreamCreateWithFile(kCFAllocatorDefault, url))
 				{
-					CFStringRef error = NULL;
+					CFStringRef error = nullptr;
 					CFWriteStreamOpen(writeStream);
 					CFPropertyListWriteToStream(cfPlist, writeStream, kCFPropertyListXMLFormat_v1_0, &error);
 					CFWriteStreamClose(writeStream);
@@ -80,7 +80,7 @@ int main (int argc, char* const* argv)
 	bool ascii = false, extended = false;
 
 	int ch;
-	while((ch = getopt_long(argc, argv, "axhv", longopts, NULL)) != -1)
+	while((ch = getopt_long(argc, argv, "axhv", longopts, nullptr)) != -1)
 	{
 		switch(ch)
 		{

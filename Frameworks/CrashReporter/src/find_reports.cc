@@ -15,7 +15,7 @@ static CFAbsoluteTime parse_date (std::string const& dateStr, std::string const&
 		gregorianDate.month  = bsdDate.tm_mon + 1;
 		gregorianDate.year   = bsdDate.tm_year + 1900;
 
-		return CFGregorianDateGetAbsoluteTime(gregorianDate, NULL);
+		return CFGregorianDateGetAbsoluteTime(gregorianDate, nullptr);
 	}
 	return 0;
 }

@@ -55,7 +55,7 @@ void test_download ()
 	my_filter myFilter(status, headers, body);
 
 	static std::string const url = "http://localhost:" STRINGIFY(WEB_SERVER_PORT) "/t_download.cc";
-	OAK_ASSERT_EQ(network::download(network::request_t(url, &myFilter, NULL), &error), 200);
+	OAK_ASSERT_EQ(network::download(network::request_t(url, &myFilter, nullptr), &error), 200);
 
 	struct stat buf;
 	int fd = open(__FILE__, O_RDONLY|O_CLOEXEC);

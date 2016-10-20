@@ -459,7 +459,7 @@ namespace bundles_db
 			if(path::exists(dst))
 			{
 				char date[64];
-				time_t now = time(NULL);
+				time_t now = time(nullptr);
 				strftime(date, sizeof(date), "(%F %T)", localtime(&now));
 				trash = dst + ".updating." + date;
 

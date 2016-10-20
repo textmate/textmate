@@ -76,7 +76,7 @@ int main (int argc, char* const* argv)
 	std::string key = NULL_STR;
 
 	int ch;
-	while((ch = getopt_long(argc, argv, "s:hv", longopts, NULL)) != -1)
+	while((ch = getopt_long(argc, argv, "s:hv", longopts, nullptr)) != -1)
 	{
 		switch(ch)
 		{

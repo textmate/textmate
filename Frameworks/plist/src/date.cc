@@ -23,7 +23,7 @@ namespace oak
 			gregorianDate.month  = bsdDate.tm_mon + 1;
 			gregorianDate.year   = bsdDate.tm_year + 1900;
 
-			at = CFGregorianDateGetAbsoluteTime(gregorianDate, NULL) - bsdDate.tm_gmtoff;
+			at = CFGregorianDateGetAbsoluteTime(gregorianDate, nullptr) - bsdDate.tm_gmtoff;
 		}
 		else
 		{
@@ -38,7 +38,7 @@ namespace oak
 
 	std::string to_s (date_t const& date, std::string const& dateFormat)
 	{
-		CFGregorianDate gregorianDate = CFAbsoluteTimeGetGregorianDate(date.value(), NULL);
+		CFGregorianDate gregorianDate = CFAbsoluteTimeGetGregorianDate(date.value(), nullptr);
 
 		struct tm bsdDate;
 		bsdDate.tm_sec    = (int)gregorianDate.second;

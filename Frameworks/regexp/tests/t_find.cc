@@ -20,7 +20,7 @@ void test_regexp_backward ()
 	OAK_ASSERT_LT(m.second, m.first);
 	m = matcher.match(text.data(), 10);
 	OAK_ASSERT_LT(m.second, m.first);
-	m = matcher.match(NULL, 0);
+	m = matcher.match(nullptr, 0);
 	ssize_t base = text.size();
 	OAK_ASSERT_EQ(range_t(base + m.first, base + m.second), range_t(6, 17));
 }

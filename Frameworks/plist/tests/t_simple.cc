@@ -93,7 +93,7 @@ void test_bool ()
 	OAK_ASSERT_EQ(boost::get<bool>(v[1]), false);
 
 	// plist::any_t badPlist = plist::parse_ascii(":bad");
-	// OAK_ASSERT_EQ(boost::get<bool>(&badPlist), (bool*)NULL);
+	// OAK_ASSERT_EQ(boost::get<bool>(&badPlist), (bool*)nullptr);
 }
 
 void test_double_strings ()

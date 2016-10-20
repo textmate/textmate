@@ -463,7 +463,7 @@ namespace ng
 
 		std::string const& indent = options["indent"];
 		bool const complete       = options["complete"] == "1";
-		size_t const fragments    = strtol(options["fragments"].c_str(), NULL, 10);
+		size_t const fragments    = strtol(options["fragments"].c_str(), nullptr, 10);
 		bool const columnar       = options["columnar"] == "1";
 
 		if((selections.size() != 1 || selections.last().columnar) && (fragments > 1 || oak::contains(str.begin(), str.end(), '\n')))

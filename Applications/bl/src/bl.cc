@@ -154,7 +154,7 @@ int main (int argc, char const* argv[])
 	std::string installDir = NULL_STR;
 
 	unsigned int ch;
-	while((ch = getopt_long(argc, (char* const*)argv, "s:C:hv", longopts, NULL)) != -1)
+	while((ch = getopt_long(argc, (char* const*)argv, "s:C:hv", longopts, nullptr)) != -1)
 	{
 		switch(ch)
 		{

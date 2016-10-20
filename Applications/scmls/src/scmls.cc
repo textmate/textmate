@@ -39,7 +39,7 @@ int main (int argc, char* const* argv)
 	};
 
 	int ch;
-	while((ch = getopt_long(argc, argv, "hv", longopts, NULL)) != -1)
+	while((ch = getopt_long(argc, argv, "hv", longopts, nullptr)) != -1)
 	{
 		switch(ch)
 		{

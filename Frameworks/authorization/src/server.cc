@@ -24,8 +24,8 @@ static bool install_auth_tool (osx::authorization_t const& auth)
 
 	if(auth.obtain_right("system.privilege.admin"))
 	{
-		char const* arguments[] = { "--install", NULL };
-		FILE* fp = NULL;
+		char const* arguments[] = { "--install", nullptr };
+		FILE* fp = nullptr;
 		if(oak::execute_with_privileges(auth, toolPath, kAuthorizationFlagDefaults, (char**)arguments, &fp) == errAuthorizationSuccess)
 		{
 			int status;
@@ -44,7 +44,7 @@ static bool install_auth_tool (osx::authorization_t const& auth)
 
 static double version_of_tool (std::string const& toolPath)
 {
-	std::string res = io::exec(toolPath, "--version", NULL);
+	std::string res = io::exec(toolPath, "--version", nullptr);
 	if(regexp::match_t const& m = regexp::search("\\A[^\\s]+ ([\\d.]+)", res))
 		return std::stod(m[1]);
 	return 0;

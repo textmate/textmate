@@ -24,9 +24,9 @@ static proxy_settings_t user_pw_settings (CFStringRef server, CFNumberRef portNu
 		portNumber,
 		server
 	};
-	CFDictionaryRef query = CFDictionaryCreate(NULL, keys, vals, sizeofA(keys), NULL, NULL);
+	CFDictionaryRef query = CFDictionaryCreate(nullptr, keys, vals, sizeofA(keys), nullptr, nullptr);
 
-	CFArrayRef results = NULL;
+	CFArrayRef results = nullptr;
 	OSStatus err = SecItemCopyMatching(query, (CFTypeRef*)&results);
 	if(err == errSecSuccess)
 	{
@@ -39,11 +39,11 @@ static proxy_settings_t user_pw_settings (CFStringRef server, CFNumberRef portNu
 			UInt32 format = CSSM_DB_ATTRIBUTE_FORMAT_STRING;
 			SecKeychainAttributeInfo info = { 1, &tag, &format };
 
-			void* data = NULL;
+			void* data = nullptr;
 			UInt32 dataLen = 0;
 
-			SecKeychainAttributeList* authAttrList = NULL;
-			if(SecKeychainItemCopyAttributesAndData(item, &info, NULL, &authAttrList, &dataLen, &data) == noErr)
+			SecKeychainAttributeList* authAttrList = nullptr;
+			if(SecKeychainItemCopyAttributesAndData(item, &info, nullptr, &authAttrList, &dataLen, &data) == noErr)
 			{
 				ASSERT(authAttrList->count == 1 && authAttrList->attr->tag == kSecAccountItemAttr);
 				user = std::string((char const*)authAttrList->attr->data, ((char const*)authAttrList->attr->data) + authAttrList->attr->length);
@@ -59,7 +59,7 @@ static proxy_settings_t user_pw_settings (CFStringRef server, CFNumberRef portNu
 	}
 	else if(err != errSecItemNotFound)
 	{
-		CFStringRef message = SecCopyErrorMessageString(err, NULL);
+		CFStringRef message = SecCopyErrorMessageString(err, nullptr);
 		fprintf(stderr, "TextMate/proxy: SecItemCopyMatching() failed with error ‘%s’\n", cf::to_s(message).c_str());
 		CFRelease(message);
 	}
@@ -76,15 +76,15 @@ static proxy_settings_t user_pw_settings (CFStringRef server, CFNumberRef portNu
 struct pac_proxy_callback_result_t
 {
 	bool has_result    = false;
-	CFArrayRef proxies = NULL;
-	CFErrorRef error   = NULL;
+	CFArrayRef proxies = nullptr;
+	CFErrorRef error   = nullptr;
 };
 
 static void pac_proxy_callback (void* client, CFArrayRef proxies, CFErrorRef error)
 {
 	auto res = static_cast<pac_proxy_callback_result_t*>(client);
-	res->proxies    = proxies ? (CFArrayRef)CFRetain(proxies) : NULL;
-	res->error      = error   ? (CFErrorRef)CFRetain(error)   : NULL;
+	res->proxies    = proxies ? (CFArrayRef)CFRetain(proxies) : nullptr;
+	res->error      = error   ? (CFErrorRef)CFRetain(error)   : nullptr;
 	res->has_result = true;
 }
 
@@ -119,7 +119,7 @@ proxy_settings_t first_proxy_from_array (CFArrayRef proxies, CFURLRef targetURL)
 
 				pac_proxy_callback_result_t result;
 
-				CFStreamClientContext context = { 0, &result, NULL, NULL, NULL };
+				CFStreamClientContext context = { 0, &result, nullptr, nullptr, nullptr };
 				CFRunLoopSourceRef runLoopSource = CFNetworkExecuteProxyAutoConfigurationURL(pacURL, targetURL, &pac_proxy_callback, &context);
 
 				CFStringRef runLoopMode = CFSTR("OakRunPACScriptRunLoopMode");
@@ -192,9 +192,9 @@ proxy_settings_t get_proxy_settings (std::string const& url)
 	if(regexp::search("^https?:/{2}localhost[:/]", url))
 		return res;
 
-	if(CFURLRef targetURL = CFURLCreateWithString(kCFAllocatorDefault, cf::wrap(url), NULL))
+	if(CFURLRef targetURL = CFURLCreateWithString(kCFAllocatorDefault, cf::wrap(url), nullptr))
 	{
-		if(CFDictionaryRef proxySettings = SCDynamicStoreCopyProxies(NULL))
+		if(CFDictionaryRef proxySettings = SCDynamicStoreCopyProxies(nullptr))
 		{
 			if(CFArrayRef proxies = CFNetworkCopyProxiesForURL(targetURL, proxySettings))
 			{
@@ -203,13 +203,13 @@ proxy_settings_t get_proxy_settings (std::string const& url)
 			}
 			else
 			{
-				fprintf(stderr, "TextMate/proxy: NULL returned from CFNetworkCopyProxiesForURL(‘%s’)\n", url.c_str());
+				fprintf(stderr, "TextMate/proxy: nullptr returned from CFNetworkCopyProxiesForURL(‘%s’)\n", url.c_str());
 			}
 			CFRelease(proxySettings);
 		}
 		else
 		{
-			fprintf(stderr, "TextMate/proxy: NULL returned from SCDynamicStoreCopyProxies()\n");
+			fprintf(stderr, "TextMate/proxy: nullptr returned from SCDynamicStoreCopyProxies()\n");
 		}
 		CFRelease(targetURL);
 	}
