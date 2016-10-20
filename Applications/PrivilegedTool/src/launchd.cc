@@ -8,17 +8,17 @@ int get_socket (launch_data_t dict, char const* name)
 {
 	launch_data_t array = launch_data_dict_lookup(dict, name);
 
-	if(array == NULL || (launch_data_get_type(array) == LAUNCH_DATA_ARRAY && launch_data_array_get_count(array) == 0))
+	if(array == nullptr || (launch_data_get_type(array) == LAUNCH_DATA_ARRAY && launch_data_array_get_count(array) == 0))
 	{
 		D(DBF_AuthServer_Launchd, bug("no activity for %s\n", name););
 		return -1;
 	}
 
-	assert(array != NULL && launch_data_get_type(array) == LAUNCH_DATA_ARRAY);
+	assert(array != nullptr && launch_data_get_type(array) == LAUNCH_DATA_ARRAY);
 	D(DBF_AuthServer_Launchd, bug("handle %zu sockets (%s)", launch_data_array_get_count(array), name););
 	launch_data_t fdData = launch_data_array_get_index(array, 0);
 	D(DBF_AuthServer_Launchd, bug("data %p", fdData););
-	assert(fdData != NULL && launch_data_get_type(fdData) == LAUNCH_DATA_FD);
+	assert(fdData != nullptr && launch_data_get_type(fdData) == LAUNCH_DATA_FD);
 	int fd = launch_data_get_fd(fdData);
 	D(DBF_AuthServer_Launchd, bug("fd %d", fd););
 	assert(fd >= 0);
@@ -29,11 +29,11 @@ int get_socket (launch_data_t dict, char const* name)
 int launchd_sockets ()
 {
 	launch_data_t req = launch_data_new_string(LAUNCH_KEY_CHECKIN);
-	assert(req != NULL);
+	assert(req != nullptr);
 	launch_data_t res = launch_msg(req);
-	assert(res != NULL && launch_data_get_type(res) == LAUNCH_DATA_DICTIONARY); // LAUNCH_DATA_ERRNO
+	assert(res != nullptr && launch_data_get_type(res) == LAUNCH_DATA_DICTIONARY); // LAUNCH_DATA_ERRNO
 	launch_data_t allSockets = launch_data_dict_lookup(res, LAUNCH_JOBKEY_SOCKETS);
-	assert(allSockets != NULL && launch_data_get_type(allSockets) == LAUNCH_DATA_DICTIONARY);
+	assert(allSockets != nullptr && launch_data_get_type(allSockets) == LAUNCH_DATA_DICTIONARY);
 
 	return get_socket(allSockets, "MasterSocket");
 }

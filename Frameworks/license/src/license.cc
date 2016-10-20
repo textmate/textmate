@@ -45,7 +45,7 @@ namespace
 		if(BIO* bio = BIO_new_mem_buf((void*)publicKey.data(), publicKey.size()))
 		{
 			RSA* rsa_key = nullptr;
-			if(PEM_read_bio_RSA_PUBKEY(bio, &rsa_key, NULL, NULL))
+			if(PEM_read_bio_RSA_PUBKEY(bio, &rsa_key, nullptr, nullptr))
 			{
 				std::string dst(src.size(), '\0');
 				if(RSA_size(rsa_key) == (int)src.size())
@@ -111,7 +111,7 @@ namespace license
 				static std::string const legacyTypes[] = { "heist", "eval" };
 				if(!oak::contains(std::begin(legacyTypes), std::end(legacyTypes), type->second))
 				{
-					if(!is_serial_revoked(strtol(serial->second.c_str(), NULL, 10)))
+					if(!is_serial_revoked(strtol(serial->second.c_str(), nullptr, 10)))
 						return true;
 				}
 			}
@@ -127,7 +127,7 @@ namespace license
 		if(serial == license.end())
 			return res;
 
-		if(hostent* bl = gethostbyname(text::format("%zu.bl.textmate.org", strtol(serial->second.c_str(), NULL, 10)).c_str()))
+		if(hostent* bl = gethostbyname(text::format("%zu.bl.textmate.org", strtol(serial->second.c_str(), nullptr, 10)).c_str()))
 		{
 			for(size_t i = 0; bl->h_addr_list[i]; ++i)
 			{
@@ -153,7 +153,7 @@ namespace license
 			return "This MacHeist license is for TextMate 1.x.";
 		else if(map["type"] == "eval")
 			return "This evaluation license is for TextMate 1.x.";
-		else if(is_serial_revoked(strtol(map["serial"].c_str(), NULL, 10)))
+		else if(is_serial_revoked(strtol(map["serial"].c_str(), nullptr, 10)))
 			return "This license has been revoked.";
 		return "Unknown error.";
 	}

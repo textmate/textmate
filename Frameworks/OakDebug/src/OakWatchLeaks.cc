@@ -16,8 +16,8 @@ namespace
 	static counts_t get_counts ()
 	{
 		OSSpinLockLock(&spinlock);
-		static std::map<std::string, ssize_t>* counts = NULL;
-		if(counts == NULL)
+		static std::map<std::string, ssize_t>* counts = nullptr;
+		if(counts == nullptr)
 			counts = new std::map<std::string, ssize_t>;
 		return counts_t(*counts);
 	}

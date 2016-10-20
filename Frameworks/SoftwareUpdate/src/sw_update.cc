@@ -9,22 +9,22 @@
 
 static bool run_auth_command (AuthorizationRef& auth, std::string const cmd, ...)
 {
-	if(!auth && AuthorizationCreate(NULL, kAuthorizationEmptyEnvironment, kAuthorizationFlagDefaults, &auth) != errAuthorizationSuccess)
+	if(!auth && AuthorizationCreate(nullptr, kAuthorizationEmptyEnvironment, kAuthorizationFlagDefaults, &auth) != errAuthorizationSuccess)
 		return false;
 
 	std::vector<char*> args;
 
 	va_list ap;
 	va_start(ap, cmd);
-	char* arg = NULL;
+	char* arg = nullptr;
 	while((arg = va_arg(ap, char*)) && *arg)
 		args.push_back(arg);
 	va_end(ap);
 
-	args.push_back(NULL);
+	args.push_back(nullptr);
 
 	bool res = false;
-	if(oak::execute_with_privileges(auth, cmd, kAuthorizationFlagDefaults, &args[0], NULL) == errAuthorizationSuccess)
+	if(oak::execute_with_privileges(auth, cmd, kAuthorizationFlagDefaults, &args[0], nullptr) == errAuthorizationSuccess)
 	{
 		int status;
 		int pid = wait(&status);
@@ -43,7 +43,7 @@ static bool mv_path (std::string const& src, std::string const& dst, Authorizati
 {
 	if(rename(src.c_str(), dst.c_str()) == 0)
 		return true;
-	else if(errno == EXDEV && copyfile(src.c_str(), dst.c_str(), NULL, COPYFILE_ALL | COPYFILE_RECURSIVE | COPYFILE_NOFOLLOW_SRC) == 0)
+	else if(errno == EXDEV && copyfile(src.c_str(), dst.c_str(), nullptr, COPYFILE_ALL | COPYFILE_RECURSIVE | COPYFILE_NOFOLLOW_SRC) == 0)
 		return true;
 	else if(errno == EACCES || errno == EPERM)
 	{
@@ -108,7 +108,7 @@ namespace sw_update
 	version_info_t download_info (std::string const& url, std::string* error)
 	{
 		network::save_t archiver;
-		long res = network::download(network::request_t(url, &archiver, NULL), error);
+		long res = network::download(network::request_t(url, &archiver, nullptr), error);
 		if(res == 200)
 		{
 			plist::dictionary_t const& plist = plist::load(archiver.path);
@@ -140,7 +140,7 @@ namespace sw_update
 	std::string install_update (std::string const& src)
 	{
 		char date[64];
-		time_t now = time(NULL);
+		time_t now = time(nullptr);
 		strftime(date, sizeof(date), "(%F %T)", localtime(&now));
 
 		std::string const dst         = oak::application_t::path();
@@ -152,7 +152,7 @@ namespace sw_update
 		std::string const srcExe      = path::join(src, appExe);
 		std::string const dstExe      = path::join(dst, appExe);
 
-		AuthorizationRef auth = NULL;
+		AuthorizationRef auth = nullptr;
 		if(!path::exists(srcExe))
 			return "New application is broken (TMPDIR sweeper?).";
 		else if(!mv_path(dstContents, backup, auth))

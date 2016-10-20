@@ -81,7 +81,7 @@ static std::string copy_git_index (std::string const& dir)
 		int dst = open(tmpIndex.c_str(), O_CREAT|O_TRUNC|O_WRONLY|O_CLOEXEC, S_IRUSR|S_IWUSR);
 		if(dst != -1)
 		{
-			if(fcopyfile(src, dst, NULL, COPYFILE_ALL | COPYFILE_NOFOLLOW_SRC) != -1)
+			if(fcopyfile(src, dst, nullptr, COPYFILE_ALL | COPYFILE_NOFOLLOW_SRC) != -1)
 			{
 				res = tmpIndex;
 			}
@@ -114,29 +114,29 @@ static void collect_all_paths (std::string const& git, std::map<std::string, scm
 	env["GIT_WORK_TREE"] = dir;
 	env["GIT_DIR"]       = path::join(dir, ".git");
 
-	bool haveHead = io::exec(env, git, "show-ref", "-qh", NULL) != NULL_STR;
+	bool haveHead = io::exec(env, git, "show-ref", "-qh", nullptr) != NULL_STR;
 
 	std::string const tmpIndex = copy_git_index(dir);
 	if(tmpIndex != NULL_STR)
 	{
 		env["GIT_INDEX_FILE"] = tmpIndex;
-		io::exec(env, git, "update-index", "-q", "--unmerged", "--ignore-missing", "--refresh", NULL);
+		io::exec(env, git, "update-index", "-q", "--unmerged", "--ignore-missing", "--refresh", nullptr);
 
 		// All files part of the repository (index)
 		if(haveHead)
-				parse_ls(entries, io::exec(env, git, "ls-files", "--exclude-standard", "-zt", NULL));
-		else	parse_ls(entries, io::exec(env, git, "ls-files", "--exclude-standard", "-zt", NULL), scm::status::added);
+				parse_ls(entries, io::exec(env, git, "ls-files", "--exclude-standard", "-zt", nullptr));
+		else	parse_ls(entries, io::exec(env, git, "ls-files", "--exclude-standard", "-zt", nullptr), scm::status::added);
 
 		// Modified, Deleted (on disk, not staged)
-		parse_diff(entries, io::exec(env, git, "diff-files", "--name-status", "--ignore-submodules=dirty", "-z", NULL));
+		parse_diff(entries, io::exec(env, git, "diff-files", "--name-status", "--ignore-submodules=dirty", "-z", nullptr));
 
 		// Added (to index), Deleted (from index)
 		if(haveHead)
-			parse_diff(entries, io::exec(env, git, "diff-index", "--name-status", "--ignore-submodules=dirty", "-z", "--cached", "HEAD", NULL));
+			parse_diff(entries, io::exec(env, git, "diff-index", "--name-status", "--ignore-submodules=dirty", "-z", "--cached", "HEAD", nullptr));
 	}
 
 	// All files with ‘other’ status
-	parse_ls(entries, io::exec(env, git, "ls-files", "--exclude-standard", "-zto", NULL));
+	parse_ls(entries, io::exec(env, git, "ls-files", "--exclude-standard", "-zto", nullptr));
 
 	path::remove(tmpIndex);
 }
@@ -252,10 +252,10 @@ namespace scm
 				env["GIT_WORK_TREE"] = wcPath;
 				env["GIT_DIR"]       = path::join(wcPath, ".git");
 
-				bool haveHead = io::exec(env, executable(), "show-ref", "-qh", NULL) != NULL_STR;
+				bool haveHead = io::exec(env, executable(), "show-ref", "-qh", nullptr) != NULL_STR;
 				if(haveHead)
 				{
-					std::string branchName = io::exec(env, executable(), "symbolic-ref", "HEAD", NULL);
+					std::string branchName = io::exec(env, executable(), "symbolic-ref", "HEAD", nullptr);
 					char const kHeadRef[] = "refs/heads/";
 					if(branchName.compare(0, sizeof(kHeadRef)-1, kHeadRef) == 0)
 					{

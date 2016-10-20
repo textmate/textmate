@@ -15,7 +15,7 @@ namespace path
 	{
 		struct dirent** entries;
 		typedef int(*scandir_10_8)(const char *, struct dirent ***, int (*)(const struct dirent *), int (*)(const struct dirent **, const struct dirent **));
-		int size = ((scandir_10_8)&scandir)(path.c_str(), &entries, &skip_meta_entries, NULL); // typecast required when building with the 10.7 SDK
+		int size = ((scandir_10_8)&scandir)(path.c_str(), &entries, &skip_meta_entries, nullptr); // typecast required when building with the 10.7 SDK
 		if(size != -1)
 		{
 			int actual = size;

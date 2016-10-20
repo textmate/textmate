@@ -9,7 +9,7 @@ void test_date_value ()
 
 void test_date_time_value ()
 {
-	oak::date_t now = oak::date_t(time(NULL));
+	oak::date_t now = oak::date_t(time(nullptr));
 	oak::date_t stillNow(now.value());
 	OAK_ASSERT_EQ(now.value(), stillNow.value());
 

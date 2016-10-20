@@ -57,8 +57,8 @@ static bool swap_and_unlink (std::string const& src, std::string const& dst, std
 			// Skip COPYFILE_METADATA for network drives <rdar://17480649>
 			if(path::is_local(src))
 			{
-				copyfile(dst.c_str(), src.c_str(), NULL, COPYFILE_METADATA);
-				utimes(src.c_str(), NULL);
+				copyfile(dst.c_str(), src.c_str(), nullptr, COPYFILE_METADATA);
+				utimes(src.c_str(), nullptr);
 			}
 			else
 			{
@@ -77,14 +77,14 @@ static bool swap_and_unlink (std::string const& src, std::string const& dst, std
 	if(errno == EXDEV)
 	{
 		// TODO this should copy to dst under a new name, then re-run swap_files
-		if(copyfile(src.c_str(), dst.c_str(), NULL, COPYFILE_DATA|COPYFILE_MOVE) == 0)
+		if(copyfile(src.c_str(), dst.c_str(), nullptr, COPYFILE_DATA|COPYFILE_MOVE) == 0)
 		{
 			bool res = unlink(src.c_str()) == 0;
 			if(!res)
 				errorMsg = format_error("unlink(\"%s\")", src.c_str());
 			return res;
 		}
-		errorMsg = format_error("copyfile(\"%s\", \"%s\", NULL, COPYFILE_DATA|COPYFILE_MOVE)", src.c_str(), dst.c_str());
+		errorMsg = format_error("copyfile(\"%s\", \"%s\", nullptr, COPYFILE_DATA|COPYFILE_MOVE)", src.c_str(), dst.c_str());
 		D(DBF_IO_Swap_File_Data, bug("copyfile() failed: %s\n", strerror(errno)););
 	}
 

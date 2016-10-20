@@ -14,7 +14,7 @@ namespace cf
 		_run_loop = CFRunLoopGetCurrent();
 		CFRetain(_run_loop);
 
-		CFRunLoopSourceContext context = { 0, this, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &helper_t::wake_up };
+		CFRunLoopSourceContext context = { 0, this, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, &helper_t::wake_up };
 		_source = CFRunLoopSourceCreate(kCFAllocatorDefault, 0, &context);
 		CFRunLoopAddSource(_run_loop, _source, _mode);
 	}

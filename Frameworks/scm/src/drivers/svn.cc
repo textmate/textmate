@@ -75,7 +75,7 @@ static void collect_all_paths (std::string const& svn, std::string const& xsltPa
 {
 	ASSERT_NE(svn, NULL_STR); ASSERT_NE(xsltPath, NULL_STR);
 	std::string const cmd = text::format("cd %s && %s status --no-ignore --xml|/usr/bin/xsltproc %s -", path::escape(dir).c_str(), path::escape(svn).c_str(), path::escape(xsltPath).c_str());
-	parse_status_output(entries, io::exec("/bin/sh", "-c", cmd.c_str(), NULL), dir);
+	parse_status_output(entries, io::exec("/bin/sh", "-c", cmd.c_str(), nullptr), dir);
 }
 
 namespace scm
@@ -86,7 +86,7 @@ namespace scm
 		{
 			if(CFBundleRef bundle = CFBundleGetBundleWithIdentifier(CFSTR("com.macromates.TextMate.scm")) ?: CFBundleGetMainBundle())
 			{
-				if(CFURLRef xsltURL = CFBundleCopyResourceURL(bundle, CFSTR("svn_status"), CFSTR("xslt"), NULL))
+				if(CFURLRef xsltURL = CFBundleCopyResourceURL(bundle, CFSTR("svn_status"), CFSTR("xslt"), nullptr))
 				{
 					if(CFStringRef path = CFURLCopyFileSystemPath(xsltURL, kCFURLPOSIXPathStyle))
 					{
@@ -112,7 +112,7 @@ namespace scm
 			std::map<std::string, std::string> res = { { "TM_SCM_NAME", name() } };
 			if(executable() != NULL_STR)
 			{
-				auto info = parse_info_output(io::exec(executable(), "info", wcPath.c_str(), NULL));
+				auto info = parse_info_output(io::exec(executable(), "info", wcPath.c_str(), nullptr));
 				auto urlInfo = info.find("URL");
 				if(urlInfo != info.end())
 					res.emplace("TM_SCM_BRANCH", urlInfo->second);

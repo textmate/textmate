@@ -154,8 +154,8 @@ struct expand_visitor : boost::static_visitor<void>
 		std::string src = org;
 		if(CFMutableStringRef tmp = CFStringCreateMutableCopy(kCFAllocatorDefault, 0, cf::wrap(src)))
 		{
-			CFStringTransform(tmp, NULL, kCFStringTransformStripDiacritics, false);
-			CFStringTransform(tmp, NULL, kCFStringTransformStripCombiningMarks, false);
+			CFStringTransform(tmp, nullptr, kCFStringTransformStripDiacritics, false);
+			CFStringTransform(tmp, nullptr, kCFStringTransformStripCombiningMarks, false);
 			src = cf::to_s(tmp);
 			CFRelease(tmp);
 		}
@@ -270,7 +270,7 @@ namespace format_string
 
 	std::string format_string_t::expand (std::map<std::string, std::string> const& variables) const
 	{
-		expand_visitor v(variables, NULL);
+		expand_visitor v(variables, nullptr);
 		v.traverse(*nodes);
 		v.handle_case_changes();
 		return v.res;
@@ -284,7 +284,7 @@ namespace format_string
 	{
 		D(DBF_FormatString, bug("%s\n", src.c_str()););
 
-		expand_visitor v(variables, NULL);
+		expand_visitor v(variables, nullptr);
 		v.replace(src, ptrn, *format.nodes, repeat);
 		v.handle_case_changes();
 		return v.res;

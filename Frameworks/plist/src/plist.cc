@@ -120,7 +120,7 @@ namespace plist
 
 			if(CFDataRef data = CFDataCreateWithBytesNoCopy(kCFAllocatorDefault, &v[0], v.size(), kCFAllocatorNull))
 			{
-				if(CFPropertyListRef plist = CFPropertyListCreateFromXMLData(kCFAllocatorDefault, data, kCFPropertyListImmutable, NULL))
+				if(CFPropertyListRef plist = CFPropertyListCreateFromXMLData(kCFAllocatorDefault, data, kCFPropertyListImmutable, nullptr))
 				{
 					res = convert(plist);
 					CFRelease(plist);
@@ -137,7 +137,7 @@ namespace plist
 
 		if(CFDataRef data = CFDataCreateWithBytesNoCopy(kCFAllocatorDefault, (UInt8 const*)str.data(), str.size(), kCFAllocatorNull))
 		{
-			if(CFPropertyListRef plist = CFPropertyListCreateFromXMLData(kCFAllocatorDefault, data, kCFPropertyListImmutable, NULL))
+			if(CFPropertyListRef plist = CFPropertyListCreateFromXMLData(kCFAllocatorDefault, data, kCFPropertyListImmutable, nullptr))
 			{
 				convert_any(plist, res);
 				CFRelease(plist);
@@ -164,7 +164,7 @@ namespace plist
 			CFPropertyListRef operator() (int32_t i) const                     { return CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &i); }
 			CFPropertyListRef operator() (uint64_t i) const                    { return CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt64Type, &i); }
 			CFPropertyListRef operator() (std::string const& str) const        { return CFStringCreateWithBytes(kCFAllocatorDefault, (UInt8*)str.data(), str.size(), kCFStringEncodingUTF8, false); }
-			CFPropertyListRef operator() (std::vector<char> const& data) const { return CFDataCreate(kCFAllocatorDefault, data.empty() ? NULL : (UInt8*)&data[0], data.size()); }
+			CFPropertyListRef operator() (std::vector<char> const& data) const { return CFDataCreate(kCFAllocatorDefault, data.empty() ? nullptr : (UInt8*)&data[0], data.size()); }
 			CFPropertyListRef operator() (oak::date_t const& date) const       { return CFDateCreate(kCFAllocatorDefault, date.value()); }
 
 			CFPropertyListRef operator() (plist::array_t const& array) const
@@ -289,8 +289,8 @@ namespace plist
 	static bool convert_to (uint64_t from, std::string& to)                  { to = std::to_string(from);       return true; }
 
 	static bool convert_to (std::string const& from, bool& to)               { to = from != "0" ? true : false;      return true; }
-	static bool convert_to (std::string const& from, int32_t& to)            { to = strtol(from.c_str(), NULL, 0);   return true; }
-	static bool convert_to (std::string const& from, uint64_t& to)           { to = strtoull(from.c_str(), NULL, 0); return true; }
+	static bool convert_to (std::string const& from, int32_t& to)            { to = strtol(from.c_str(), nullptr, 0);   return true; }
+	static bool convert_to (std::string const& from, uint64_t& to)           { to = strtoull(from.c_str(), nullptr, 0); return true; }
 	static bool convert_to (std::string const& from, oak::uuid_t& to)        { return oak::uuid_t::is_valid(from) ? (to = from), true : false; }
 
 	static bool convert_to (bool from, plist::any_t& to)                       { to = from; return true; }

@@ -169,7 +169,7 @@ namespace network
 			curl_easy_setopt(handle, CURLOPT_HEADERFUNCTION,   &receive_header);
 			curl_easy_setopt(handle, CURLOPT_HEADERDATA,       &userData);
 
-			struct curl_slist* headers = NULL;
+			struct curl_slist* headers = nullptr;
 			if(request._entity_tag != NULL_STR)
 			{
 				headers = curl_slist_append(headers, text::format("If-None-Match: %.*s", (int)request._entity_tag.size(), request._entity_tag.data()).c_str());

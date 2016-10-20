@@ -47,7 +47,7 @@ static void parse_status_output (scm::status_map_t& entries, std::string const& 
 static void collect_all_paths (std::string const& hg, scm::status_map_t& entries, std::string const& dir)
 {
 	ASSERT_NE(hg, NULL_STR);
-	parse_status_output(entries, io::exec(hg, "status", "--cwd", dir.c_str(), "--all", "-0", NULL));
+	parse_status_output(entries, io::exec(hg, "status", "--cwd", dir.c_str(), "--all", "-0", nullptr));
 }
 
 namespace scm
@@ -63,7 +63,7 @@ namespace scm
 			std::map<std::string, std::string> res = { { "TM_SCM_NAME", name() } };
 			if(executable() != NULL_STR)
 			{
-				std::string branchName = io::exec(executable(), "branch", "--cwd", wcPath.c_str(), NULL);
+				std::string branchName = io::exec(executable(), "branch", "--cwd", wcPath.c_str(), nullptr);
 				res.emplace("TM_SCM_BRANCH", branchName.substr(0, branchName.find("\n")));
 			}
 			return res;

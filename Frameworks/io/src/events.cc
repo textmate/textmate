@@ -81,7 +81,7 @@ namespace
 				std::string devPath = path::relative_to(_observed.path(), devInfo.mount_point);
 				D(DBF_FS_Events, bug("watch ‘%s’ / ‘%s’ (device %x, event 0x%llx)\n", devInfo.mount_point.c_str(), devPath.c_str(), devInfo.device, _event_id););
 
-				FSEventStreamContext contextInfo = { 0, this, NULL, NULL, NULL };
+				FSEventStreamContext contextInfo = { 0, this, nullptr, nullptr, nullptr };
 				if(!(_stream = FSEventStreamCreateRelativeToDevice(kCFAllocatorDefault, &events_t::callback, &contextInfo, devInfo.device, cf::wrap(std::vector<std::string>(1, devPath)), eventId, latency, kFSEventStreamCreateFlagNone)))
 					fprintf(stderr, "can’t observe ‘%s’\n", path.c_str());
 

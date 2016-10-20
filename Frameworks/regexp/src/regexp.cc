@@ -27,7 +27,7 @@ namespace regexp
 
 	void pattern_t::init (std::string const& pattern, OnigOptionType options)
 	{
-		OnigRegex tmp = NULL;
+		OnigRegex tmp = nullptr;
 
 		OnigErrorInfo einfo;
 		if((options & ONIG_OPTION_DONT_CAPTURE_GROUP) == 0)
@@ -151,7 +151,7 @@ namespace regexp
 	std::string validate (std::string const& pattern)
 	{
 		OnigErrorInfo einfo;
-		OnigRegex tmp = NULL;
+		OnigRegex tmp = nullptr;
 		int r = onig_new(&tmp, (OnigUChar const*)pattern.data(), (OnigUChar const*)pattern.data() + pattern.size(), ONIG_OPTION_CAPTURE_GROUP, ONIG_ENCODING_UTF8, ONIG_SYNTAX_DEFAULT, &einfo);
 		if(tmp)
 			onig_free(tmp);

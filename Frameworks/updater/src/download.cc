@@ -12,7 +12,7 @@ namespace bundles_db
 		etag_t collect_etag;
 
 		std::string error = NULL_STR;
-		long res = network::download(network::request_t(url, &validator, &archiver, &collect_etag, NULL).set_entity_tag(etag ? *etag : NULL_STR).update_progress_variable(progress, min, max), &error);
+		long res = network::download(network::request_t(url, &validator, &archiver, &collect_etag, nullptr).set_entity_tag(etag ? *etag : NULL_STR).update_progress_variable(progress, min, max), &error);
 		if(res == 304) // not modified
 		{
 			path::remove(archiver.path);

@@ -118,7 +118,7 @@ namespace ng
 
 		size_t beginOfSymbol = 0;
 		bool inSymbol = false;
-		transform_t* transform = NULL;
+		transform_t* transform = nullptr;
 		foreach(it, buffer->_scopes.lower_bound(from), buffer->_scopes.lower_bound(to))
 		{
 			std::map<scope::scope_t, transform_t>::iterator transformIt = transforms.find(it->second);

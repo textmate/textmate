@@ -243,8 +243,8 @@ namespace ng
 			{
 				if(plist::array_t const* value = boost::get<plist::array_t>(&pair))
 				{
-					std::string const* a1 = value->size() == 2 ? boost::get<std::string>(&(*value)[0]) : NULL;
-					std::string const* a2 = value->size() == 2 ? boost::get<std::string>(&(*value)[1]) : NULL;
+					std::string const* a1 = value->size() == 2 ? boost::get<std::string>(&(*value)[0]) : nullptr;
+					std::string const* a2 = value->size() == 2 ? boost::get<std::string>(&(*value)[1]) : nullptr;
 					if(a1 && a2 && *a1 != *a2)
 						res.emplace_back(*a1, *a2);
 				}
@@ -1324,14 +1324,14 @@ namespace ng
 		});
 
 		std::map<std::string, std::string> captures;
-		std::pair<ssize_t, ssize_t> m = f.match(NULL, 0, &captures);
+		std::pair<ssize_t, ssize_t> m = f.match(nullptr, 0, &captures);
 		while(m.first <= m.second)
 		{
 			range_t r(total + m.first, total + m.second, false, false, true);
 			if(is_subset(r, ranges))
 				res.emplace(r, captures);
 			captures.clear();
-			m = f.match(NULL, 0, &captures);
+			m = f.match(nullptr, 0, &captures);
 		}
 
 		return res;

@@ -319,7 +319,7 @@ namespace ng
 	void buffer_t::set_live_spelling (bool flag)
 	{
 		remove_meta_data(_spelling.get());
-		_spelling.reset(flag ? new spelling_t : NULL);
+		_spelling.reset(flag ? new spelling_t : nullptr);
 		add_meta_data(_spelling.get());
 
 		if(flag && _spelling)
