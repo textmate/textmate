@@ -7,7 +7,7 @@
 #include <io/path.h>
 #include <plist/uuid.h>
 
-static char const* const AppVersion = "2.10";
+static char const* const AppVersion = "2.11";
 
 static char const* socket_path ()
 {
@@ -58,7 +58,7 @@ static bool find_app (FSRef* outAppRef, std::string* outAppStr)
 	disable_sudo_helper_t helper;
 
 	CFURLRef appURL;
-	OSStatus err = LSFindApplicationForInfo(kLSUnknownCreator, CFSTR("com.macromates.TextMate.preview"), nullptr, outAppRef, &appURL);
+	OSStatus err = LSFindApplicationForInfo(kLSUnknownCreator, CFSTR("com.macromates.TextMate"), nullptr, outAppRef, &appURL);
 	if(err != noErr)
 		return fprintf(stderr, "Can’t find TextMate.app (error %d)\n", (int)err), false;
 

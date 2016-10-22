@@ -9,7 +9,7 @@
 	<key>CFBundleVersion</key>
 	<string>9800</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.macromates.${APP_NAME}.preview</string>
+	<string>com.macromates.${APP_NAME}</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>

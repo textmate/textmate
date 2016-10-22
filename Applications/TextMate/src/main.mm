@@ -57,6 +57,18 @@ int main (int argc, char const* argv[])
 			if([variable hasPrefix:@"TM_"])
 				unsetenv([variable UTF8String]);
 		}
+
+		NSUserDefaults* oldDefaults = [[NSUserDefaults alloc] initWithSuiteName:@"com.macromates.TextMate.preview"];
+		if([oldDefaults boolForKey:@"didMigrateBetaSettings"] == NO)
+		{
+			NSUserDefaults* newDefaults = [NSUserDefaults standardUserDefaults];
+			for(NSString* key in [oldDefaults dictionaryRepresentation].allKeys)
+			{
+				if([newDefaults objectForKey:key] == nil)
+					[newDefaults setObject:[oldDefaults objectForKey:key] forKey:key];
+			}
+			[oldDefaults setBool:YES forKey:@"didMigrateBetaSettings"];
+		}
 	}
 
 	try {
