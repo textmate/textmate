@@ -466,28 +466,33 @@ namespace
 	_documents_by_uuid.emplace(r->uuid, r);
 
 	if(r->path != NULL_STR)
-	{
-		ASSERT(_documents_by_path.find(r->path) == _documents_by_path.end());
-		_documents_by_path.emplace(r->path, r);
-	}
+		_documents_by_path[r->path] = r;
 
 	if(r->inode)
-	{
-		ASSERT(_documents_by_inode.find(r->inode) == _documents_by_inode.end());
-		_documents_by_inode.emplace(r->inode, r);
-	}
+		_documents_by_inode[r->inode] = r;
 }
 
 - (void)internalRemoveDocument:(OakDocument*)doc
 {
-	auto it = _documents_by_uuid.find(to_s(doc.identifier));
+	oak::uuid_t const uuid = to_s(doc.identifier);
+	auto it = _documents_by_uuid.find(uuid);
 	ASSERT(it != _documents_by_uuid.end());
 	if(it != _documents_by_uuid.end())
 	{
 		if(it->second->inode)
-			_documents_by_inode.erase(it->second->inode);
+		{
+			auto inodeIter = _documents_by_inode.find(it->second->inode);
+			if(inodeIter != _documents_by_inode.end() && inodeIter->second->uuid == uuid)
+				_documents_by_inode.erase(inodeIter);
+		}
+
 		if(it->second->path != NULL_STR)
-			_documents_by_path.erase(it->second->path);
+		{
+			auto pathIter = _documents_by_path.find(it->second->path);
+			if(pathIter != _documents_by_path.end() && pathIter->second->uuid == uuid)
+				_documents_by_path.erase(pathIter);
+		}
+
 		_documents_by_uuid.erase(it);
 	}
 }
