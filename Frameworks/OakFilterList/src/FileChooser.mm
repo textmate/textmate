@@ -478,6 +478,7 @@ static NSDictionary* globs_for_path (std::string const& path)
 	settings_t const settings = settings_for_path(NULL_STR, "", to_s(path));
 	NSMutableDictionary* options = [globs_for_path(to_s(path)) mutableCopy];
 	options[kSearchFollowDirectoryLinksKey] = @(settings.get(kSettingsFollowSymbolicLinksKey, false));
+	options[kSearchIgnoreOrderingKey] = @YES;
 
 	size_t searchToken = _lastSearchToken;
 	_searching = YES;
