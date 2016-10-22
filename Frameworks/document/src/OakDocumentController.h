@@ -6,6 +6,7 @@
 PUBLIC extern NSString* kSearchFollowDirectoryLinksKey;
 PUBLIC extern NSString* kSearchFollowFileLinksKey;
 PUBLIC extern NSString* kSearchDepthFirstSearchKey;
+PUBLIC extern NSString* kSearchIgnoreOrderingKey;
 PUBLIC extern NSString* kSearchExcludeDirectoryGlobsKey;
 PUBLIC extern NSString* kSearchExcludeFileGlobsKey;
 PUBLIC extern NSString* kSearchExcludeGlobsKey;

@@ -9,6 +9,7 @@
 NSString* kSearchFollowDirectoryLinksKey  = @"FollowDirectoryLinks";
 NSString* kSearchFollowFileLinksKey       = @"FollowFileLinks";
 NSString* kSearchDepthFirstSearchKey      = @"DepthFirstSearch";
+NSString* kSearchIgnoreOrderingKey        = @"IgnoreOrdering";
 NSString* kSearchExcludeDirectoryGlobsKey = @"ExcludeDirectoryGlobs";
 NSString* kSearchExcludeFileGlobsKey      = @"ExcludeFileGlobs";
 NSString* kSearchExcludeGlobsKey          = @"ExcludeGlobs";
@@ -315,6 +316,7 @@ namespace
 	BOOL followDirectoryLinks = [someOptions[kSearchFollowDirectoryLinksKey] boolValue];
 	BOOL followFileLinks      = [someOptions[kSearchFollowFileLinksKey] boolValue] || !someOptions[kSearchFollowFileLinksKey];
 	BOOL depthFirst           = [someOptions[kSearchDepthFirstSearchKey] boolValue];
+	BOOL ignoreOrdering       = [someOptions[kSearchIgnoreOrderingKey] boolValue];
 
 	static std::vector<std::pair<NSString*, size_t>> const map = {
 		{ kSearchExcludeDirectoryGlobsKey, path::kPathItemDirectory | path::kPathItemExclude },
@@ -361,11 +363,30 @@ namespace
 	NSMutableSet<NSUUID*>* didSee = [NSMutableSet set];
 	for(std::string const& dir : dirs)
 	{
-		for(OakDocument* document in [self untitledDocumentsInDirectory:to_ns(dir)])
+		NSArray* documents = ignoreOrdering ? [self openDocumentsInDirectory:to_ns(dir)] : [self untitledDocumentsInDirectory:to_ns(dir)];
+		for(OakDocument* document in documents)
 		{
 			if([didSee containsObject:document.identifier])
 				continue;
 			[didSee addObject:document.identifier];
+
+			if(document.path)
+			{
+				std::string const path = to_s(document.path);
+				if(globs.exclude(path, path::kPathItemFile))
+					continue;
+
+				struct stat buf;
+				if(lstat([document.path fileSystemRepresentation], &buf) == -1)
+				{
+					perrorf("lstat(\"%s\")", [document.path fileSystemRepresentation]);
+					continue;
+				}
+
+				if(didScan.emplace(buf.st_dev, buf.st_ino).second == false)
+					continue;
+			}
+
 			block(document, &stop);
 			if(stop)
 				return;
