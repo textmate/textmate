@@ -2,6 +2,16 @@ Title: Release Notes
 
 # Changes
 
+## 2016-10-23 (v2.0-beta.12.26)
+
+* TextMate’s bundle identifier has been changed to `com.macromates.TextMate` (previously it had a `preview` suffix). This is the same bundle identifier as TextMate 1.x so if you still have TextMate 1.x installed then we recommend to simply delete it.
+
+	The changed bundle identifier may cause a compatibility issue with third party software, particularly software that offers an “Open in TextMate 2”, there is unfortunately no nice solution to this problem other than request that the software is updated to use the new (old) bundle identifier.
+
+	The `mate` command line tool is among such software, but it should automatically update to version 2.11, if not, go to _Preferences → Terminal_ and select to Uninstall and then Install `mate` (the automatic updating of `mate` only works if TextMate can figure out where it was previously installed).
+
+* See [all changes since v2.0-beta.12.23](https://github.com/textmate/textmate/compare/v2.0-beta.12.23...v2.0-beta.12.26)
+
 ## 2016-10-11 (v2.0-beta.12.23)
 
 * Bundles are no longer read from the Avian folder. You should have been prompted about moving them, if you had any. The reason we initially used the Avian folder was so that people could still use TextMate 1.x with bundles that did not rely on 2.0 features, so this move signals that we no longer think there is a reason to keep TextMate 1.x around. If you have a reason, please [let us know](https://macromates.com/support) (so that we can hopefully address it).
