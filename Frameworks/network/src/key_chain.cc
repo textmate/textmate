@@ -34,7 +34,7 @@ bool key_chain_t::key_t::setup () const
 	SecExternalItemType type = kSecItemTypePublicKey;
 	SecExternalFormat format = kSecFormatPEMSequence;
 
-	CFDataRef data = CFDataCreateWithBytesNoCopy(NULL, (const UInt8*)_key_data.data(), _key_data.size(), kCFAllocatorNull);
+	CFDataRef data = CFDataCreateWithBytesNoCopy(kCFAllocatorDefault, (const UInt8*)_key_data.data(), _key_data.size(), kCFAllocatorNull);
 	CFArrayRef items = NULL;
 	OSStatus err = SecItemImport(data, NULL, &format, &type, 0, &params, NULL, &items);
 	if(err == errSecSuccess)

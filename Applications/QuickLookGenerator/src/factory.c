@@ -64,7 +64,7 @@ ULONG TextMateQuickLookPlugIn_Release (void* instance)
 HRESULT TextMateQuickLookPlugIn_QueryInterface (void* instance, REFIID iid, LPVOID* ppv)
 {
 	TextMateQuickLookPlugIn* plugin = (TextMateQuickLookPlugIn*)instance;
-	CFUUIDRef uuid = CFUUIDCreateFromUUIDBytes(NULL, iid);
+	CFUUIDRef uuid = CFUUIDCreateFromUUIDBytes(kCFAllocatorDefault, iid);
 	bool requestedCallbacks = CFEqual(uuid, kQLGeneratorCallbacksInterfaceID);
 	CFRelease(uuid);
 

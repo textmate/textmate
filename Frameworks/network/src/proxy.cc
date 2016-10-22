@@ -24,7 +24,7 @@ static proxy_settings_t user_pw_settings (CFStringRef server, CFNumberRef portNu
 		portNumber,
 		server
 	};
-	CFDictionaryRef query = CFDictionaryCreate(NULL, keys, vals, sizeofA(keys), NULL, NULL);
+	CFDictionaryRef query = CFDictionaryCreate(kCFAllocatorDefault, keys, vals, sizeofA(keys), NULL, NULL);
 
 	CFArrayRef results = NULL;
 	OSStatus err = SecItemCopyMatching(query, (CFTypeRef*)&results);

@@ -21,7 +21,7 @@ namespace network
 		if(_data)
 			CFRelease(_data);
 
-		return _data = CFDataCreateMutable(NULL, 0);
+		return _data = CFDataCreateMutable(kCFAllocatorDefault, 0);
 	}
 
 	bool check_signature_t::receive_header (std::string const& header, std::string const& value)
@@ -53,7 +53,7 @@ namespace network
 			std::string signature = decode::base64(_signature);
 
 			CFErrorRef err = NULL;
-			CFDataRef sig_data = CFDataCreateWithBytesNoCopy(NULL, (const UInt8*)signature.data(), signature.size(), kCFAllocatorNull);
+			CFDataRef sig_data = CFDataCreateWithBytesNoCopy(kCFAllocatorDefault, (const UInt8*)signature.data(), signature.size(), kCFAllocatorNull);
 			if(SecTransformRef verifier = SecVerifyTransformCreate(*key, sig_data, &err))
 			{
 				if(SecTransformSetAttribute(verifier, kSecTransformInputAttributeName, _data, &err))

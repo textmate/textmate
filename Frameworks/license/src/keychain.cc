@@ -102,7 +102,7 @@ namespace license
 		std::string& err = error ? *error : dummy;
 
 		bool res = false;
-		if(CFDataRef cfData = CFDataCreateWithBytesNoCopy(NULL, (const UInt8*)data.data(), data.size(), kCFAllocatorNull))
+		if(CFDataRef cfData = CFDataCreateWithBytesNoCopy(kCFAllocatorDefault, (const UInt8*)data.data(), data.size(), kCFAllocatorNull))
 		{
 			auto const cfKey = cf::wrap(key);
 			CFTypeRef keys[] = { kSecClass,                kSecAttrService,   kSecAttrDescription,  kSecAttrLabel,             kSecAttrComment,                kSecAttrAccount, kSecValueData };
