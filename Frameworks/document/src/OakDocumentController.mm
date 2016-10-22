@@ -208,14 +208,19 @@ namespace
 	}];
 }
 
-- (NSArray<OakDocument*>*)untitledDocumentsInDirectory:(NSString*)aDirectory
+- (NSArray<OakDocument*>*)openDocumentsInDirectory:(NSString*)aDirectory
 {
-	NSArray<OakDocument*>* array = [self.documents filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"path == NULL AND directory BEGINSWITH %@", aDirectory]];
+	NSArray<OakDocument*>* array = [self.documents filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"path BEGINSWITH %@ OR directory BEGINSWITH %@", aDirectory, aDirectory]];
 	return [array sortedArrayUsingComparator:^NSComparisonResult(OakDocument* lhs, OakDocument* rhs){
 		if(lhs.untitledCount != rhs.untitledCount)
 			return lhs.untitledCount < rhs.untitledCount ? NSOrderedAscending : NSOrderedDescending;
 		return [lhs.displayName localizedCompare:rhs.displayName];
 	}];
+}
+
+- (NSArray<OakDocument*>*)untitledDocumentsInDirectory:(NSString*)aDirectory
+{
+	return [[self openDocumentsInDirectory:aDirectory] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"path == NULL"]];
 }
 
 // =====================
