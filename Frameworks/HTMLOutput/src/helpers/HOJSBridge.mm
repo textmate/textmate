@@ -77,17 +77,17 @@ OAK_DEBUG_VAR(HTMLOutput_JSBridge);
 
 - (void)setIsBusy:(BOOL)flag
 {
-	[(id <HOJSBridgeDelegate>)_delegate setBusy:flag];
+	[_delegate setBusy:flag];
 }
 
 - (void)setProgress:(id)newProgress;
 {
-	[(id <HOJSBridgeDelegate>)_delegate setProgress:[newProgress floatValue]];
+	[_delegate setProgress:[newProgress floatValue]];
 }
 
 - (double)progress
 {
-	return [(id <HOJSBridgeDelegate>)_delegate progress];
+	return [_delegate progress];
 }
 
 - (void)log:(NSString*)aMessage

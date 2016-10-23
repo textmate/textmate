@@ -7,6 +7,9 @@
 #import <OakAppKit/OakAppKit.h>
 #import <oak/debug.h>
 
+@interface HOStatusBar (BusyAndProgressProperties) <HOJSBridgeDelegate>
+@end
+
 @interface OakHTMLOutputView ()
 {
 	OBJC_WATCH_LEAKS(OakHTMLOutputView);

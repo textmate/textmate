@@ -4,7 +4,7 @@
 @end
 
 @interface HOJSBridge : NSObject
-@property (nonatomic, weak) id /*<HOJSBridgeDelegate>*/ delegate;
+@property (nonatomic, weak) id <HOJSBridgeDelegate> delegate;
 
 - (void)setEnvironment:(const std::map<std::string, std::string>&)variables;
 - (std::map<std::string, std::string> const&)environment;
