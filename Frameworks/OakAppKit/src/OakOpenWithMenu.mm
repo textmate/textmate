@@ -130,16 +130,33 @@ static NSArray* ApplicationURLsForPaths (NSSet* paths)
 
 - (void)openWith:(id)sender
 {
+	// Since we can have multiple applications for the same bundle identifier, e.g. Xcode release and beta, we must open by URL.
+	// Unfortunately the API that is URL-based does not allow opening multiple documents at once, so we use AppleScript.
+
 	NSURL* applicationURL = [sender representedObject];
 	NSSet* filePaths = [[[sender menu] parentMenuItem] representedObject];
 
-	NSMutableArray* fileURLs = [NSMutableArray arrayWithCapacity:filePaths.count];
+	NSAppleEventDescriptor* listDesc = [NSAppleEventDescriptor listDescriptor];
+	NSInteger nextIndex = 1;
+
 	for(NSString* filePath in filePaths)
-		[fileURLs addObject:[NSURL fileURLWithPath:filePath]];
-	[[NSWorkspace sharedWorkspace] openURLs:fileURLs
-	                withAppBundleIdentifier:[[NSBundle bundleWithPath:applicationURL.path] bundleIdentifier]
-	                                options:0
-	         additionalEventParamDescriptor:NULL
-	                      launchIdentifiers:NULL];
+	{
+		if(NSURL* url = [NSURL fileURLWithPath:filePath])
+		{
+			if(NSData* urlData = [url.absoluteString dataUsingEncoding:NSUTF8StringEncoding])
+			{
+				if(NSAppleEventDescriptor* urlDesc = [NSAppleEventDescriptor descriptorWithDescriptorType:typeFileURL data:urlData])
+					[listDesc insertDescriptor:urlDesc atIndex:nextIndex++];
+			}
+		}
+	}
+
+	NSAppleEventDescriptor* odocEvent = [NSAppleEventDescriptor appleEventWithEventClass:kCoreEventClass eventID:kAEOpenDocuments targetDescriptor:nil returnID:kAutoGenerateReturnID transactionID:kAnyTransactionID];
+	[odocEvent setParamDescriptor:listDesc forKeyword:keyDirectObject];
+	NSDictionary* launchOptions = @{ NSWorkspaceLaunchConfigurationAppleEvent : odocEvent };
+
+	NSError* err = nil;
+	if(![[NSWorkspace sharedWorkspace] launchApplicationAtURL:applicationURL options:NSWorkspaceLaunchDefault configuration:launchOptions error:&err])
+		NSLog(@"%@: %@", applicationURL, err.localizedDescription);
 }
 @end
