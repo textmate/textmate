@@ -1,5 +1,5 @@
 #import "NSSavePanel Additions.h"
-#import <OakFoundation/NSString Additions.h>
+#import <OakAppKit/OakUIConstructionFunctions.h>
 
 @implementation NSSavePanel (HiddenFiles)
 + (void)initialize
@@ -13,8 +13,11 @@
 	{
 		if([self respondsToSelector:@selector(showsHiddenFiles)] && [self respondsToSelector:@selector(setShowsHiddenFiles:)])
 		{
-			NSViewController* viewController = [[NSViewController alloc] initWithNibName:@"HiddenFilesAccessoryView" bundle:[NSBundle bundleWithIdentifier:@"com.macromates.TextMate.OakAppKit"]];
-			[self setAccessoryView:viewController.view];
+			NSButton* checkbox = OakCreateCheckBox(@"Show Hidden Files");
+			[checkbox sizeToFit];
+			[checkbox bind:NSValueBinding toObject:[NSUserDefaultsController sharedUserDefaultsController] withKeyPath:@"values.NSOpenPanelShowHiddenFiles" options:nil];
+
+			[self setAccessoryView:checkbox];
 			[self bind:@"showsHiddenFiles" toObject:[NSUserDefaultsController sharedUserDefaultsController] withKeyPath:@"values.NSOpenPanelShowHiddenFiles" options:nil];
 		}
 	}
