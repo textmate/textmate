@@ -168,7 +168,7 @@ static id CreateInstanceOfPlugInClass (Class cl, TMPlugInController* controller)
 
 	if([fm fileExistsAtPath:dst])
 	{
-		NSString* newVersion = [[NSBundle bundleWithPath:src] objectForInfoDictionaryKey:@"CFBundleShortVersionString"] ?: [[NSBundle bundleWithPath:src] objectForInfoDictionaryKey:@"CFBundleVersion"];
+		NSString* newVersion = [plugInBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"] ?: [plugInBundle objectForInfoDictionaryKey:@"CFBundleVersion"];
 		NSString* oldVersion = [[NSBundle bundleWithPath:dst] objectForInfoDictionaryKey:@"CFBundleShortVersionString"] ?: [[NSBundle bundleWithPath:dst] objectForInfoDictionaryKey:@"CFBundleVersion"];
 		NSInteger choice = NSRunAlertPanel(@"Plug-in Already Installed", @"Version %@ of “%@” is already installed.\nDo you want to replace it with version %@?\n\nUpgrading a plug-in will require TextMate to be relaunched.", @"Replace", @"Cancel", nil, oldVersion ?: @"???", plugInName, newVersion ?: @"???");
 		if(choice == NSAlertDefaultReturn) // "Replace"

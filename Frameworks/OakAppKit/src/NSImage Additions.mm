@@ -13,7 +13,7 @@
 	if(NSImage* res = [cache objectForKey:name])
 		return res;
 
-	if(NSImage* image = [[NSBundle bundleForClass:aClass] imageForResource:aName])
+	if(NSImage* image = [bundle imageForResource:aName])
 	{
 		[cache setObject:image forKey:name];
 		return image;
