@@ -33,5 +33,4 @@ PRELUDE = Shared/PCH/prelude.*
 TARGETS  = vendor/*/target
 TARGETS += Frameworks/*/target
 TARGETS += Applications/target
-TARGETS += QuickLook/TextMate/target
 TARGETS += PlugIns/*/*.target
