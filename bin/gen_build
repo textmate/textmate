@@ -23,7 +23,7 @@ require 'set'
 require 'pp'
 
 GLOB_KEYS     = %w{ CP_Resources CP_SharedSupport CP_PlugIns CP_Library/QuickLook EXPORT HTML_FOOTER HTML_HEADER MARKDOWN_HEADER MARKDOWN_FOOTER PRELUDE SOURCES TARGETS TESTS TEST_SOURCES }
-STRING_KEYS   = %w{ TARGET_NAME BUNDLE_EXTENSION FLAGS C_FLAGS CXX_FLAGS OBJC_FLAGS OBJCXX_FLAGS LN_FLAGS PLIST_FLAGS BUILD }
+STRING_KEYS   = %w{ TARGET_NAME BUNDLE_EXTENSION FLAGS C_FLAGS CXX_FLAGS OBJC_FLAGS OBJCXX_FLAGS LN_FLAGS PLIST_FLAGS }
 
 COMPILER_INFO = {
   'c'  => { :rule => 'build_c',   :compiler => '$CC',  :flags => '$C_FLAGS',      },
@@ -48,7 +48,7 @@ class Targets
     targets.each do |target|
       next if target['SOURCES'].to_a.empty?
       @all << target
-      if target['EXPORT'] || linked.include?(target[:name]) || target['BUILD'] == 'lib'
+      if target['EXPORT'] || linked.include?(target[:name])
         target[:type] = :library
       else
         has_info_plist = target['CP_Resources'].to_a.find { |path| path =~ /\bInfo\.plist$/ }
