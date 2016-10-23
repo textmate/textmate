@@ -3,6 +3,63 @@
 #import <OakFoundation/NSString Additions.h>
 #import <oak/oak.h>
 
+@interface OakOpenWithApplicationInfo : NSObject
+@property (nonatomic) NSURL* url;
+@property (nonatomic) NSString* identifier;
+@property (nonatomic) NSString* name;
+@property (nonatomic) NSString* version;
+@property (nonatomic, getter = isDefaultApplication) BOOL defaultApplication;
+
+@property (nonatomic) NSUInteger countOfDuplicateNames;
+@property (nonatomic) NSUInteger countOfDuplicateVersions;
+
+@property (nonatomic, readonly) NSString* nameWithVersion;
+@property (nonatomic, readonly) NSString* displayName;
+@end
+
+@implementation OakOpenWithApplicationInfo
+- (instancetype)initWithBundleURL:(NSURL*)url
+{
+	if(self = [super init])
+	{
+		NSBundle* bundle = [NSBundle bundleWithURL:url];
+		if(!bundle)
+			return nil;
+
+		_identifier = bundle.bundleIdentifier;
+		if(!_identifier)
+		{
+			NSLog(@"warning: missing CFBundleIdentifier: %@", bundle);
+			return nil;
+		}
+
+		_url     = url;
+		_name    = [[NSFileManager defaultManager] displayNameAtPath:url.filePathURL.path];
+		_version = [bundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"] ?: ([bundle objectForInfoDictionaryKey:@"CFBundleVersion"] ?: @"???");
+	}
+	return self;
+}
+
+- (NSString*)nameWithVersion
+{
+	return [NSString stringWithFormat:@"%@ (%@)", _name, _version];
+}
+
+- (NSString*)displayName
+{
+	NSString* name = _name;
+
+	if(_countOfDuplicateNames > _countOfDuplicateVersions)
+		name = [name stringByAppendingFormat:@" (%@)", _version];
+	if(_defaultApplication)
+		name = [name stringByAppendingFormat:@" (default)"];
+	if(_countOfDuplicateVersions > 1)
+		name = [name stringByAppendingFormat:@" — %@", [[_url.filePathURL.path stringByDeletingLastPathComponent] stringByAbbreviatingWithTildeInPath]];
+
+	return name;
+}
+@end
+
 static NSURL* CanonicalURL (NSURL* url, BOOL isDirectoryFlag = YES)
 {
 	if(NSString* path = [[url filePathURL] path])
@@ -10,7 +67,7 @@ static NSURL* CanonicalURL (NSURL* url, BOOL isDirectoryFlag = YES)
 	return url;
 }
 
-static NSArray* ApplicationURLsForPaths (NSSet* paths)
+static NSArray<OakOpenWithApplicationInfo*>* ApplicationURLsForPaths (NSSet* paths)
 {
 	NSMutableSet* allAppURLs     = [NSMutableSet set];
 	NSMutableSet* defaultAppURLs = [NSMutableSet set];
@@ -36,42 +93,28 @@ static NSArray* ApplicationURLsForPaths (NSSet* paths)
 		else	[allAppURLs intersectSet:appUrls];
 	}
 
-	NSMutableArray* apps        = [NSMutableArray array];
+	NSMutableArray<OakOpenWithApplicationInfo*>* apps = [NSMutableArray array];
 	NSMutableDictionary* counts = [NSMutableDictionary dictionary];
 
 	for(NSURL* url in allAppURLs)
 	{
-		if(NSBundle* bundle = [NSBundle bundleWithURL:url])
+		if(OakOpenWithApplicationInfo* info = [[OakOpenWithApplicationInfo alloc] initWithBundleURL:url])
 		{
-			if(NSString* identifier = [bundle bundleIdentifier])
-			{
-				counts[identifier] = @([counts[identifier] intValue] + 1);
-				[apps addObject:@{
-					@"identifier" : identifier,
-					@"name"       : [[NSFileManager defaultManager] displayNameAtPath:[url path]],
-					@"version"    : [bundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"] ?: ([bundle objectForInfoDictionaryKey:@"CFBundleVersion"] ?: @"???"),
-					@"url"        : url,
-					@"isDefault"  : @([defaultAppURLs containsObject:url]),
-				}];
-			}
-			else
-			{
-				NSLog(@"warning: missing CFBundleIdentifier: %@", bundle);
-			}
+			info.defaultApplication = defaultAppURLs.count == 1 && [defaultAppURLs containsObject:url];
+			[apps addObject:info];
+
+			counts[info.name]            = @([counts[info.name] intValue]+1);
+			counts[info.nameWithVersion] = @([counts[info.nameWithVersion] intValue]+1);
 		}
 	}
 
-	NSMutableArray* res = [NSMutableArray array];
-	for(NSDictionary* app in [apps sortedArrayUsingDescriptors:@[ [NSSortDescriptor sortDescriptorWithKey:@"isDefault" ascending:NO], [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES selector:@selector(localizedCompare:)], [NSSortDescriptor sortDescriptorWithKey:@"version" ascending:NO] ]])
+	for(OakOpenWithApplicationInfo* app in apps)
 	{
-		NSString* name = app[@"name"];
-		if([counts[app[@"identifier"]] intValue] > 1)
-			name = [NSString stringWithFormat:@"%@ (%@)", name, app[@"version"]];
-		if([app[@"isDefault"] boolValue] && [defaultAppURLs count] == 1)
-			name = [NSString stringWithFormat:@"%@ (default)", name];
-		[res addObject:@{ @"name" : name, @"url" : app[@"url"], @"isDefault" : app[@"isDefault"] }];
+		app.countOfDuplicateNames    = [counts[app.name] intValue];
+		app.countOfDuplicateVersions = [counts[app.nameWithVersion] intValue];
 	}
-	return [res count] == 0 ? nil : res;
+
+	return [apps count] == 0 ? nil : [apps sortedArrayUsingDescriptors:@[ [NSSortDescriptor sortDescriptorWithKey:@"defaultApplication" ascending:NO], [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES selector:@selector(localizedCompare:)], [NSSortDescriptor sortDescriptorWithKey:@"version" ascending:NO] ]];
 }
 
 @interface OakOpenWithMenu () <NSMenuDelegate>
@@ -99,7 +142,7 @@ static NSArray* ApplicationURLsForPaths (NSSet* paths)
 	if(menu.numberOfItems > 0 || !superItem)
 		return;
 
-	NSArray* apps = ApplicationURLsForPaths(superItem.representedObject);
+	NSArray<OakOpenWithApplicationInfo*>* apps = ApplicationURLsForPaths(superItem.representedObject);
 	if(!apps)
 	{
 		[menu addItemWithTitle:@"No Suitable Applications Found" action:@selector(nop:) keyEquivalent:@""];
@@ -107,19 +150,19 @@ static NSArray* ApplicationURLsForPaths (NSSet* paths)
 	}
 
 	BOOL didInsertDefaultItems = NO;
-	for(NSDictionary* app : apps)
+	for(OakOpenWithApplicationInfo* app : apps)
 	{
-		if(didInsertDefaultItems && ![app[@"isDefault"] boolValue])
+		if(didInsertDefaultItems && app.isDefaultApplication == NO)
 			[menu addItem:[NSMenuItem separatorItem]];
-		didInsertDefaultItems = [app[@"isDefault"] boolValue];
+		didInsertDefaultItems = app.isDefaultApplication;
 
-		NSMenuItem* menuItem = [menu addItemWithTitle:app[@"name"] action:@selector(openWith:) keyEquivalent:@""];
+		NSMenuItem* menuItem = [menu addItemWithTitle:app.displayName action:@selector(openWith:) keyEquivalent:@""];
 		[menuItem setTarget:self];
-		[menuItem setRepresentedObject:app[@"url"]];
-		[menuItem setToolTip:[[[app[@"url"] filePathURL] path] stringByAbbreviatingWithTildeInPath]];
+		[menuItem setRepresentedObject:app.url];
+		[menuItem setToolTip:[app.url.filePathURL.path stringByAbbreviatingWithTildeInPath]];
 
 		NSImage* image = nil;
-		if([app[@"url"] getResourceValue:&image forKey:NSURLEffectiveIconKey error:NULL] || (image = [[NSWorkspace sharedWorkspace] iconForFile:[app[@"url"] path]]))
+		if([app.url getResourceValue:&image forKey:NSURLEffectiveIconKey error:NULL] || (image = [[NSWorkspace sharedWorkspace] iconForFile:app.url.filePathURL.path]))
 		{
 			image = [image copy];
 			image.size = NSMakeSize(16, 16);
