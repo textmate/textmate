@@ -18,6 +18,11 @@
 @end
 
 @implementation OakEncodingSaveOptionsViewController
++ (void)initialize
+{
+	[OakStringListTransformer createTransformerWithName:@"OakLineEndingsTransformer" andObjectsArray:@[ @"\n", @"\r", @"\r\n" ]];
+}
+
 - (void)dealloc
 {
 	if(_savePanel.delegate == self)
@@ -33,11 +38,6 @@
 
 - (void)loadView
 {
-	static dispatch_once_t onceToken = 0;
-	dispatch_once(&onceToken, ^{
-		[OakStringListTransformer createTransformerWithName:@"OakLineEndingsTransformer" andObjectsArray:@[ @"\n", @"\r", @"\r\n" ]];
-	});
-
 	NSPopUpButton* encodingPopUpButton    = [[OakEncodingPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO];
 	NSPopUpButton* lineEndingsPopUpButton = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO];
 
