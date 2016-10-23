@@ -1,5 +1,5 @@
 @protocol HOJSBridgeDelegate
-@property (nonatomic) BOOL isBusy;
+@property (nonatomic, getter = isBusy) BOOL busy;
 @property (nonatomic) double progress;
 @end
 

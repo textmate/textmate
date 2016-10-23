@@ -77,7 +77,7 @@ OAK_DEBUG_VAR(HTMLOutput_JSBridge);
 
 - (void)setIsBusy:(BOOL)flag
 {
-	[_delegate setIsBusy:flag];
+	[(id <HOJSBridgeDelegate>)_delegate setBusy:flag];
 }
 
 - (void)setProgress:(id)newProgress;
