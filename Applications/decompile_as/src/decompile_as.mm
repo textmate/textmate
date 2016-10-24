@@ -14,10 +14,10 @@ int main (int argc, char const* argv[])
 		NSDictionary* errorInfo = nil;
 		OSAScript* script       = [[OSAScript alloc] initWithCompiledData:[[NSFileHandle fileHandleWithStandardInput] readDataToEndOfFile] error:&errorInfo];
 		std::string str         = [[script source] UTF8String];
-	}
 
-	std::replace(str.begin(), str.end(), '\r', '\n');
-	write(STDOUT_FILENO, str.data(), str.size());
+		std::replace(str.begin(), str.end(), '\r', '\n');
+		write(STDOUT_FILENO, str.data(), str.size());
+	}
 
 	return EX_OK;
 }
