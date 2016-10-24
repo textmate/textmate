@@ -20,7 +20,5 @@
 	<string>1.0.0</string>
 	<key>CFBundleVersion</key>
 	<string>1.0</string>
-	<key>NSPrincipalClass</key>
-	<string>${TARGET_NAME}</string>
 </dict>
 </plist>
