@@ -182,12 +182,7 @@ end
 def pch_for(src, target)
   srcExt = source_type(src)
   target['PRELUDE'].each do |pch|
-    if srcExt == source_type(pch)
-      res = build_path(pch)
-      res << "-no-arc" if srcExt == 'm'  && target['OBJC_FLAGS'] =~ /-fno-objc-arc/
-      res << "-no-arc" if srcExt == 'mm' && target['OBJCXX_FLAGS'] =~ /-fno-objc-arc/
-      return res
-    end
+    return build_path(pch) if srcExt == source_type(pch)
   end
   abort "*** no pre-compiled header for #{src} (target: #{target[:name]})"
 end
@@ -741,11 +736,6 @@ open("#{builddir}/build.ninja", "w") do |io|
 
     io << "build #{pch_for(src, TARGETS.root)}.gch: #{compiler_for(src)} #{src}\n"
     io << "  RAVE_FLAGS = #{type[ext]}\n\n"
-
-    if ext =~ /^mm?$/
-      io << "build #{pch_for(src, TARGETS.root)}-no-arc.gch: #{compiler_for(src)} #{src}\n"
-      io << "  RAVE_FLAGS = #{type[ext]} -fno-objc-arc\n\n"
-    end
   end
 
   # =======================================================
