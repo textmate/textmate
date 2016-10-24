@@ -308,12 +308,9 @@ def tests(target)
 
     res << "build #{dst}.run: run_test #{dst}\n"
     res << "build #{dst}.always-run: always_run_test #{dst}\n"
-    res << "build #{dst}.coerce: skip_test #{dst}\n"
-    res << "  seal = #{dst}.run\n"
 
     res << "build #{target[:name]}:        phony #{dst}.run\n"
     res << "build #{target[:name]}/test:   phony #{dst}.always-run\n"
-    res << "build #{target[:name]}/coerce: phony #{dst}.coerce\n"
 
     target[:test] = "#{dst}.run"
   end
@@ -866,10 +863,6 @@ rule run_test
 rule always_run_test
   command = $in $test_flags
   description = Run test ‘$in’…
-
-rule skip_test
-  command = touch "$seal"
-  description = Skip test ‘$in’…
 
 rule link_static
   command = rm -f $out && ar -cqs $out $in
