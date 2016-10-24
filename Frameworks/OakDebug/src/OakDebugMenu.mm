@@ -1,8 +1,8 @@
 #import "OakDebug.h"
-#import "OakDebugMenu.h"
 #import <oak/oak.h>
 #import <malloc/malloc.h>
 
+#ifndef NDEBUG
 namespace
 {
 	struct MiB_t
@@ -48,6 +48,9 @@ namespace
 		enum unit_t { GiB, MiB, KiB, bytes } unit;
 	};
 }
+
+@interface OakDebugMenu : NSObject { }
+@end
 
 @implementation OakDebugMenu
 + (void)load
@@ -149,3 +152,4 @@ namespace
 	[[NSApp mainMenu] addItem:menuItem];
 }
 @end
+#endif
