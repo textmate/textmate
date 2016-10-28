@@ -212,7 +212,7 @@ namespace plist
 				{
 					if(CFWriteStreamOpen(writeStream))
 					{
-						res = CFPropertyListWriteToStream(cfPlist, writeStream, format == kPlistFormatBinary ? kCFPropertyListBinaryFormat_v1_0 : kCFPropertyListXMLFormat_v1_0, nullptr) != 0;
+						res = CFPropertyListWrite(cfPlist, writeStream, format == kPlistFormatBinary ? kCFPropertyListBinaryFormat_v1_0 : kCFPropertyListXMLFormat_v1_0, 0, nullptr) != 0;
 						CFWriteStreamClose(writeStream);
 					}
 					CFRelease(writeStream);
