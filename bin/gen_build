@@ -22,8 +22,9 @@ require 'shellwords'
 require 'set'
 require 'pp'
 
-GLOB_KEYS     = %w{ CP_Resources CP_SharedSupport CP_PlugIns CP_Library/QuickLook EXPORT HTML_FOOTER HTML_HEADER MARKDOWN_HEADER MARKDOWN_FOOTER PRELUDE SOURCES TARGETS TESTS TEST_SOURCES }
-STRING_KEYS   = %w{ TARGET_NAME BUNDLE_EXTENSION FLAGS C_FLAGS CXX_FLAGS OBJC_FLAGS OBJCXX_FLAGS LN_FLAGS PLIST_FLAGS }
+GLOB_KEYS   = %w{ CP_Resources CP_SharedSupport CP_PlugIns CP_Library/QuickLook EXPORT HTML_FOOTER HTML_HEADER MARKDOWN_HEADER MARKDOWN_FOOTER PRELUDE SOURCES TARGETS TESTS TEST_SOURCES }
+STRING_KEYS = %w{ TARGET_NAME BUNDLE_EXTENSION FLAGS C_FLAGS CXX_FLAGS OBJC_FLAGS OBJCXX_FLAGS LN_FLAGS PLIST_FLAGS }
+ARRAY_KEYS  = %w{ FRAMEWORKS LIBS LINK }
 
 COMPILER_INFO = {
   'c'  => { :rule => 'build_c',   :compiler => '$CC',  :flags => '$C_FLAGS',      },
@@ -32,600 +33,435 @@ COMPILER_INFO = {
   'mm' => { :rule => 'build_mm',  :compiler => '$CXX', :flags => '$OBJCXX_FLAGS', },
 }
 
-class Targets
-  include Enumerable
+BuildDependencies = Set.new
 
-  attr_reader :root
+class BuildFile
+  def initialize(variables, target_variables)
+    @commands         = [ ]
+    @user_variables   = variables
+    @target_variables = target_variables
+    @headers          = Hash.new { |hash, key| hash[key] = [ ] }
+    @variable_hash    = Hash[*variables.flatten]
+    @targets          = Set.new
+  end
 
-  def initialize(path)
-    targets = all_targets(path)
-    linked  = Set.new(targets.collect { |target| target['LINK'].to_a }.flatten)
+  def header(src, target)
+    dst = builddir("include/#{target.name}/#{File.basename(src)}")
+    @commands << "build #{dst}: cp #{escape(src)}"
+    @headers[target.name] << dst
+  end
 
-    @root = targets.first
-    @all_targets = targets
-    @all = [ ]
+  def compile(src, dependencies, target)
+    dst = builddir(src.sub(/\.[^.]+$/, ".o"))
+    ext = source_extension(src)
 
-    targets.each do |target|
-      next if target['SOURCES'].to_a.empty?
-      @all << target
-      if target['EXPORT'] || linked.include?(target[:name])
-        target[:type] = :library
+    case src
+      when /\.(c|cc|c\+\+|m|mm)$/ then
+        @commands << "build #{dst}: build_#{ext} #{escape(src)} | #{pch_for(src, target)}.gch || #{escape(dependencies).join(' ')}"
+        @commands << "  PCH_FLAGS = -include #{pch_for(src, target)}"
+        @commands << flags_for_target(target)
+
+      when /\.(rl)$/ then
+        tmp = builddir(src.sub(/\.[^.]+$/, ".cc"))
+        @commands << "build #{tmp}: gen_ragel #{escape(src)} || #{escape(dependencies).join(' ')}"
+
+        @commands << "build #{dst}: build_cc #{tmp} | #{pch_for(tmp, target)}.gch || #{escape(dependencies).join(' ')}"
+        @commands << "  PCH_FLAGS = -include #{pch_for(tmp, target)} -iquote#{escape(File.dirname(src))}"
+        @commands << flags_for_target(target)
+
+      when /\.capnp$/ then
+        @commands << "build #{escape(src)}.c++ #{escape(src)}.h: gen_capnp #{escape(src)} || #{escape(dependencies).join(' ')}"
+
+        @commands << "build #{dst}: build_cc #{escape(src)}.c++ | #{pch_for('.cc', target)}.gch || #{escape(dependencies).join(' ')}"
+        @commands << "  PCH_FLAGS = -include #{pch_for('.cc', target)}"
+        @commands << flags_for_target(target)
+
       else
-        has_info_plist = target['CP_Resources'].to_a.find { |path| path =~ /\bInfo\.plist$/ }
-        target[:type] = has_info_plist ? :bundle : :executable
+        STDERR << "*** unhandled source type ‘#{path}’\n"
+    end
+
+    dst
+  end
+
+  def link(dst, objects, frameworks, libs, target)
+    dst = builddir(dst)
+    @commands << "build #{dst}: link_executable #{escape(objects).join(' ')}"
+    @commands << "  RAVE_FLAGS =#{frameworks.map { |item| " -framework #{item}" }.join(' ')}#{libs.map { |item| " -l#{item}" }.join(' ')}"
+    @commands << flags_for_target(target)
+    dst
+  end
+
+  def copy_resource(src, dir, target)
+    dst = builddir(File.join(dir, File.basename(src)))
+
+    if @targets.member?(dst.downcase)
+      unless dst =~ %r{/Contents/./Info.plist}
+        STDERR << "*** skip #{src} since #{dst} already exists.\n"
       end
+      return nil
+    end
+
+    @targets.add(dst.downcase)
+
+    if src =~ /\$builddir\b/
+      @commands << "build #{dst}: cp #{src}"
+      return dst
+    end
+
+    case File.basename(src)
+      when /(.+)\.xib$/ then
+        dst = builddir(File.join(dir, "#$1.nib"))
+        @commands << "build #{dst}: compile_xib #{escape(src)}"
+
+      when /(.+)\.strings$/ then
+        @commands << "build #{dst}: cp_as_utf16 #{escape(src)}"
+
+      when /(.+)\.xcdatamodeld$/ then
+        dst = builddir(File.join(dir, "#$1.mom"))
+        @commands << "build #{dst}: compile_mom #{escape(src)}"
+
+      when /\bInfo\.plist$/ then
+        @commands << "build #{dst}: process_plist #{escape(src)} | bin/process_plist"
+        @commands << "  RAVE_FLAGS = -dTARGET_NAME='#{target.name}'"
+        @commands << flags_for_target(target)
+
+      when /(.+)\.md(own)?$/ then
+        dst = builddir(File.join(dir, "#$1.html"))
+        prefix, suffix = target.values['MARKDOWN_HEADER'].to_a, target.values['MARKDOWN_FOOTER'].to_a
+        @commands << "build #{dst}: markdown #{escape(prefix).join(' ')} #{escape(src)} #{escape(suffix).join(' ')} | bin/gen_html"
+        header, footer = target.values['HTML_HEADER'], target.values['HTML_FOOTER']
+        flags = ''
+        flags << " -h #{escape(header.first)}" if header.to_a.size == 1
+        flags << " -f #{escape(footer.first)}" if footer.to_a.size == 1
+        @commands << "  md_flags =#{flags}"
+
+      else
+        @commands << "build #{dst}: cp #{escape(src)}"
+    end
+
+    dst
+  end
+
+  def index_help_book(index, files, target)
+    @commands << "build #{builddir(index)}: index_help | #{escape(files).join(' ')}"
+    @commands << "  HELP_BOOK = #{builddir(File.dirname(index))}"
+    builddir(index)
+  end
+
+  def create_target(target, all_targets)
+    app_name = target.name
+    app_path = "#{builddir(File.dirname(target.path))}/#{app_name}"
+
+    if target.resources?
+      app_path = "#{app_path}.#{target.values['BUNDLE_EXTENSION'] || 'app'}"
+      resources = target.resources(self, all_targets).keys
+      @commands << "build #{app_path}: phony | #{resources.join(' ')}"
+    else
+      target.resources(self, all_targets)
+    end
+
+    @commands << "build #{app_path}.sign:      sign_executable #{app_path}"
+    @commands << "build #{app_path}.run:       run_application #{app_path} | #{app_path}.sign"
+    @commands << "  appname = #{app_name}"
+
+    tbz  = builddir("archive/#{app_name}") + '_${APP_VERSION}.tbz'
+    dsym = builddir("archive/dsym/#{app_name}") + '_${APP_VERSION}.tbz'
+
+    @commands << "build #{dsym}: dsym #{app_path}"
+    @commands << "build #{tbz}:          tbz_archive #{app_path} | #{app_path}.sign"
+    @commands << "build #{tbz}-uploaded: upload #{tbz}"
+    @commands << "build #{tbz}-deployed: deploy #{tbz}-uploaded | #{dsym}"
+
+    @commands << "build #{app_name}:           phony #{app_path}.sign"
+    @commands << "build #{app_name}/run:       phony #{app_path}.run"
+    @commands << "build #{app_name}/dsym:      phony #{dsym}"
+    @commands << "build #{app_name}/tbz:       phony #{tbz}"
+    @commands << "build #{app_name}/upload:    phony #{tbz}-uploaded"
+    @commands << "build #{app_name}/deploy:    phony #{tbz}-deployed"
+  end
+
+  def write(io, target)
+    variables = @user_variables + @target_variables
+    width = variables.map { |arr| arr.first.length }.max { |lhs, rhs| lhs <=> rhs }
+    variables.each { |arr| io << format("%-#{width}s = %s\n", *arr) }
+
+    if app_name = variables.find { |arr| arr.first == 'APP_NAME' }.last
+      io << "\n"
+      io << "build run:    phony #{app_name}/run\n"
+      io << "build tbz:    phony #{app_name}/tbz\n"
+      io << "build dsym:   phony #{app_name}/dsym\n"
+      io << "build deploy: phony #{app_name}/deploy\n"
+      io << "default run\n"
+    end
+
+    args = @user_variables.map { |key, value| "-d'#{key}=#{value =~ /\$/ ? value.gsub(/\$/, '$$') :  "$#{key}"}'" }.join(' ')
+    io << "\nrule configure\n"
+    io << "  command = bin/gen_build -C \"$builddir\" #{args} -o $out $in\n"
+    io << "  depfile = $builddir/$out.d\n"
+    io << "  generator = true\n"
+    io << "  description = Generate ‘$out’…\n"
+    io << "\n"
+    io << "build build.ninja: configure #{target.path} | bin/gen_build\n"
+
+    io << "\n" << DATA.read << "\n"
+
+    COMPILER_INFO.each do |key, value|
+      io << "rule #{value[:rule]}\n"
+      io << "  command = #{value[:compiler]} $PCH_FLAGS $FLAGS #{value[:flags]} $RAVE_FLAGS -o $out -MMD -MF $out.d -I$builddir/include $in\n"
+      io << "  depfile = $out.d\n"
+      io << "  deps = gcc\n"
+      io << "  description = Compile ‘$in’…\n\n"
+    end
+
+    target.values['PRELUDE'].each do |src|
+      flags = { 'c' => '-x c-header', 'm' => '-x objective-c-header', 'cc' => '-x c++-header', 'mm' => '-x objective-c++-header' }
+      ext = source_extension(src)
+
+      io << "build #{pch_for(src, target)}.gch: build_#{ext} #{escape(src)}\n"
+      io << "  RAVE_FLAGS = #{flags[ext]}\n\n"
+    end
+
+    io << @commands.join("\n") << "\n"
+    @headers.each do |key, value|
+      io << "build #{key}/headers: phony | #{value.join(' ')}\n"
     end
   end
 
-  def target_named(name)
-    res = self.find { |target| target[:name] == name }
-    return res unless res.nil?
-    abort "*** no target named ‘#{name}’. Did you update submodules?\n"
-  end
-
-  def each(&block)
-    @all.each(&block)
-  end
-
-  def dependencies
-    paths = [ ]
-    @all_targets.each do |target|
-      paths << target[:full_path] << target[:depeends_on_directories].to_a
-      target.each do |key, value|
-        paths << value.reject { |path| path =~ /^@/ }.map do |path|
-          File.dirname(File.join(target[:base], path))
-        end if GLOB_KEYS.include?(key) && key != 'PRELUDE'
-      end
-    end
-
-    paths.flatten.sort.uniq
+  def dependencies(io, dependencies)
+    deps = dependencies.sort.uniq.map { |path| path.gsub(/ /, '\\ ') }
+    io << "build.ninja: " << deps.join(" \\\n  ") << "\n"
   end
 
   private
 
-  def parse(path, root_dir, parent = { })
-    base = File.dirname(path)
-    dict = parent.merge({ :name => File.basename(base), :base => base, :path => base.sub(/^#{Regexp.escape root_dir}\//, ''), :full_path => path })
-    dict.delete('TARGETS')
+  def escape(path)
+    if path.class == String
+      return path if path =~ /^\$builddir/
+      path.gsub(/[ :$]/, '$\\&')
+    else
+      path.map { |obj| escape(obj) }
+    end
+  end
 
-    data = File.read(path)
-    assignments = data.scan(/^([\w\/]+)\s*(\+=|-=|=)[ \t]*(.*)$/)
+  def builddir(path)
+    "$builddir/#{path.gsub(/[ :$]/, '$\\&')}"
+  end
+
+  def source_extension(src)
+    srcExt = src[/\b[a-z\+]+$/]
+    srcExt == 'c++' ? 'cc' : srcExt
+  end
+
+  def pch_for(src, target)
+    ext = source_extension(src)
+    target.values['PRELUDE'].each do |pch|
+      return builddir(pch) if source_extension(pch) == ext
+    end
+    abort "*** no pre-compiled header for #{src} (target: #{target[:name]})"
+  end
+
+  def flags_for_target(target)
+    res = ""
+    target.values.each do |key, value|
+      if key.class == String && key =~ /FLAGS$/ && @variable_hash[key] != value
+        res << "  #{key} = #{value}\n"
+      end
+    end
+    res
+  end
+end
+
+class Target
+  attr_reader :path, :name
+  attr_reader :values
+  attr_accessor :depend
+
+  def initialize(path, base_values = nil)
+    BuildDependencies.add(path)
+
+    if base_values.nil?
+      base_values = Hash.new { |hash, key| hash[key] = [ ] if GLOB_KEYS.member?(key) || ARRAY_KEYS.member?(key) }
+    end
+
+    @path = path
+    @values = base_values.dup
+
+    dir = File.dirname(path)
+    assignments = File.read(path).scan(/^([\w\/]+)\s*(\+=|-=|=)[ \t]*(.*)$/)
+
     assignments.each do |arr|
       key, op, value = *arr
+
+      old_value = @values[key]
       value = Shellwords.shellwords(value) unless STRING_KEYS.include? key
 
       if GLOB_KEYS.include?(key)
         globs   = value.reject { |v| v =~ /^@/ }
         targets = value.reject { |v| v !~ /^@/ }
 
-        Dir.chdir(File.dirname(path)) do
+        Dir.chdir(dir) do
           value = Dir.glob(globs)
+          BuildDependencies.add(dir)
+          BuildDependencies.merge(value.map { |file| File.join(dir, File.directory?(file) ? file : File.dirname(file)) })
+          value = value.map { |file| File.join(dir, file) } unless dir == '.'
           value = value.concat(targets)
         end
       end
 
-      oldValue = dict[key]
       if STRING_KEYS.include? key
         if op == '+='
-          value = oldValue.nil? ? value : "#{oldValue} #{value}"
+          value = old_value.nil? ? value : "#{old_value} #{value}"
         elsif op == '-='
-          value = oldValue.to_s.gsub(/(^| )#{Regexp.escape value}( |$)/, ' ')
+          value = old_value.to_s.gsub(/(^| )#{Regexp.escape value}( |$)/, ' ')
         end
       else
         if op == '+='
-          value = oldValue.dup.concat(value) unless oldValue.nil?
+          value = old_value.dup.concat(value)
         elsif op == '-='
           abort "Operator -= not implemented for non-string keys"
         end
       end
+      @values[key] = value
+    end
+    @name = @values['TARGET_NAME'] || File.basename(dir)
+  end
 
-      dict[key] = value
+  def headers(builder)
+    @values['EXPORT'].each do |path|
+      builder.header(path, self)
+    end
+  end
+
+  def objects(builder)
+    if @objects.nil?
+      dependencies = all_dependencies(false).map { |target| "#{target.name}/headers" }
+      @objects = @values['SOURCES'].map do |src|
+        builder.compile(src, dependencies, self)
+      end
+    end
+    @objects
+  end
+
+  def link(builder)
+    return @link unless @link.nil?
+
+    objects    = all_dependencies.map { |target| target.objects(builder) }.flatten
+    frameworks = all_dependencies.map { |target| target.values['FRAMEWORKS'] }.flatten.sort.uniq
+    libs       = all_dependencies.map { |target| target.values['LIBS'] }.flatten.sort.uniq
+
+    dst = File.dirname(@path)
+    dst << "/#{@name}.#{@values['BUNDLE_EXTENSION'] || 'app'}/Contents/MacOS" if resources?
+
+    @link = builder.link(File.join(dst, @name), objects, frameworks, libs, self)
+  end
+
+  def resources(builder, all_targets)
+    return @resources unless @resources.nil?
+
+    exe = resources? ? "#{@name}.#{@values['BUNDLE_EXTENSION'] || 'app'}/Contents/MacOS" : ""
+    @resources = { self.link(builder) => exe }
+
+    raw = { }
+    raw.default = [ ]
+
+    all_dependencies.each do |target|
+      target.values.keys.each do |key|
+        raw[$'] += target.values[key] if key =~ /^CP_/
+      end
     end
 
-    if dict.has_key?('TARGET_NAME')
-      dict[:name] = dict['TARGET_NAME']
-      dict.delete('TARGET_NAME')
+    contents = "#{@name}.#{@values['BUNDLE_EXTENSION'] || 'app'}/Contents"
+    raw.each do |dst, paths|
+      paths.each do |path|
+        if path =~ /^@/
+          all_targets[$'].resources(builder, all_targets).each do |src, relative|
+            @resources[builder.copy_resource(src, "#{File.dirname(@path)}/#{contents}/#{dst}/#{relative}", self)] = "#{contents}/#{dst}/#{relative}"
+          end
+        elsif File.directory?(path)
+          help_book_dir = path =~ /.* Help$/ ? path : nil
+          help_book_files = [ ]
+          Dir.chdir(path) do
+            BuildDependencies.add(path)
+            Dir.glob("**/*").each do |file|
+              BuildDependencies.add(File.join(path, File.directory?(file) ? file : File.dirname(file)))
+              next if File.directory?(file)
+              full = File.join(path, file)
+              help_book_files << full unless help_book_files.nil?
+              @resources[builder.copy_resource(File.join(path, file), "#{File.dirname(@path)}/#{contents}/#{dst}/#{File.basename(path)}/#{File.dirname(file)}", self)] = "#{contents}/#{dst}/#{File.basename(path)}/#{File.dirname(file)}"
+            end
+          end
+          unless help_book_dir.nil?
+            index = "#{File.dirname(@path)}/#{contents}/#{dst}/#{File.basename(path)}/#{@name}.helpindex"
+            @resources[builder.index_help_book(index, help_book_files, self)] = help_book_dir
+          end
+        else
+          tmp = File.basename(path) == 'Info.plist' ? '.' : dst
+          @resources[builder.copy_resource(path, "#{File.dirname(@path)}/#{contents}/#{tmp}", self)] = "#{contents}/#{tmp}"
+        end
+      end
     end
 
-    dict
+    @resources.delete(nil)
+    @resources
   end
 
-  def recursive_parse(target, root_dir)
-    res = [ target ]
-    target["TARGETS"].to_a.each do |subtarget|
-      res << recursive_parse(parse(File.join(target[:base], subtarget), root_dir, target), root_dir)
+  def resources?
+    all_dependencies.any? do |target|
+      target.values.keys.any? { |key| key =~ /^CP_/ }
     end
-    res
   end
 
-  def all_targets(path)
-    recursive_parse(parse(path, File.dirname(path)), File.dirname(path)).flatten
+  private
+
+  def all_dependencies(including_self = true)
+    targets = [ ]
+    names = Set.new
+
+    new_targets = including_self ? [ self ] : self.depend.dup
+    until new_targets.empty?
+      target = new_targets.pop
+      next if names.member?(target.name)
+
+      targets << target
+      names << target.name
+      new_targets.concat(target.depend)
+    end
+
+    targets
   end
 end
 
-def esc_path(path)
-  if path.class == String
-    return path if path =~ /^\$builddir/
-    path.gsub(/[ :$]/, '$\\&')
-  else
-    path.map { |obj| esc_path(obj) }
-  end
-end
+def targets_at_path(path)
+  res = [ ]
 
-def build_path(path)
-  "$builddir/#{path.gsub(/[ :$]/, '$\\&')}"
-end
-
-def prepend(prefix, array, sep = ' ')
-  array.map do |item|
-    item =~ %r{/} ? item : esc_path("#{prefix}#{item}")
-  end.join(sep)
-end
-
-def flags_for_target(target)
-  res = ""
-  target.each do |key, value|
-    res << "  #{key} = #{value}\n" unless key.class != String || key !~ /FLAGS$/ || value == TARGETS.root[key]
-  end
-  res
-end
-
-def source_type(src)
-  srcExt = src[/\b[a-z\+]+$/]
-  srcExt == 'c++' ? 'cc' : srcExt
-end
-
-def compiler_for(src)
-  COMPILER_INFO[source_type(src)][:rule]
-end
-
-def pch_for(src, target)
-  srcExt = source_type(src)
-  target['PRELUDE'].each do |pch|
-    return build_path(pch) if srcExt == source_type(pch)
-  end
-  abort "*** no pre-compiled header for #{src} (target: #{target[:name]})"
-end
-
-def all_values_for_key(target, key)
-  all_targets = { }
-  new_targets = [ target ]
+  new_targets = [ Target.new(path) ]
   until new_targets.empty?
     target = new_targets.pop
-    unless all_targets.include? target[:base]
-      all_targets[target[:base]] = target
-      target['LINK'].to_a.each do |name|
-        TARGETS.each { |target| new_targets << target if name == target[:name] }
-      end
-    end
-  end
 
-  all_targets.map { |path, target| target[key].to_a }.flatten.sort.uniq
-end
-
-def headers(target)
-  res = ''
-  return res if target['EXPORT'].to_s.empty?
-  headers = [ ]
-  target['EXPORT'].to_a.each do |path|
-    src = File.join(target[:path], path)
-    dst = build_path("include/#{target[:name]}/#{File.basename(path)}")
-    res << "build #{dst}: cp #{esc_path src}\n"
-    headers << dst
-  end
-  headers = headers.concat(target['LINK'].map { |lib| "#{esc_path lib}/headers" }) unless target['LINK'].nil?
-  res << "build #{target[:name]}/headers: phony | #{headers.join(' ')}\n"
-  res
-end
-
-def sources(target)
-  res = ''
-  objects = [ ]
-  headers = target['LINK'].to_a.map { |goal| "#{goal}/headers" }
-  target['SOURCES'].each do |path|
-    src = File.join(target[:path], path)
-    case src
-      when /^(.*)\.(c|cc|c\+\+|m|mm)$/ then
-        base, ext = $1, $2
-        cc  = compiler_for(src)
-        dst = build_path("#{base}.o")
-        res << "build #{dst}: #{cc} #{esc_path src} | #{pch_for(src, target)}.gch || #{esc_path(headers).join(' ')}\n"
-        res << "  PCH_FLAGS = -include #{pch_for(src, target)}\n"
-        res << flags_for_target(target)
-
-        objects << dst
-
-      when /^(.*)\.(rl)$/ then
-        base, ext = $1, $2
-        dst = build_path("#{base}.cc")
-        res << "build #{dst}: gen_ragel #{esc_path src} || #{esc_path(headers).join(' ')}\n"
-
-        ext = 'cc'
-        cc  = compiler_for(dst)
-        obj = build_path("#{base}.o")
-        res << "build #{obj}: #{cc} #{dst} | #{pch_for(dst, target)}.gch || #{esc_path(headers).join(' ')}\n"
-        res << "  PCH_FLAGS = -include #{pch_for(dst, target)} -iquote#{esc_path File.dirname(src)}\n"
-        res << flags_for_target(target)
-
-        objects << obj
-
-      when /^(.*)\.capnp$/ then
-        base = $1
-        res << "build #{src}.c++ #{src}.h: gen_capnp #{esc_path src} || #{esc_path(headers).join(' ')}\n"
-
-        src = "#{src}.c++"
-        cc  = compiler_for(src)
-        dst = build_path("#{base}.o")
-        res << "build #{dst}: #{cc} #{esc_path src} | #{pch_for(src, target)}.gch || #{esc_path(headers).join(' ')}\n"
-        res << "  PCH_FLAGS = -include #{pch_for(src, target)}\n"
-        res << flags_for_target(target)
-
-        objects << dst
-
-      else
-        STDERR << "*** unhandled source type ‘#{path}’\n"
-    end
-  end
-  target[:objects] = objects
-
-  res
-end
-
-def clean(target)
-  res = ''
-  dst = build_path(File.join(target[:path]))
-  res << "build #{dst}/#{target[:name]}.clean: clean\n"
-  res << "  path = #{dst}\n"
-  res << "build #{target[:name]}/clean: phony #{dst}/#{target[:name]}.clean\n"
-end
-
-def tests(target)
-  headers = target['LINK'].to_a.map { |goal| "#{goal}/headers" }
-  fws     = prepend('-framework ', all_values_for_key(target, 'FRAMEWORKS'))
-  libs    = prepend('-l', all_values_for_key(target, 'LIBS'))
-
-  res = ''
-
-  if !target['TESTS'].to_s.empty?
-    dst = build_path("#{target[:path]}/test_#{target[:name]}")
-
-    src = target['TESTS'].map { |path| esc_path(File.join(target[:path], path)) }.join(' ')
-    ext = target['TESTS'].any? { |path| path =~ /\.mm$/ } ? 'mm' : 'cc'
-    test_src = "#{dst}.#{ext}"
-
-    res << "build #{test_src}: gen_oak_test #{src} | bin/gen_test\n"
-    res << "build #{dst}.o: #{compiler_for(test_src)} #{test_src} | #{pch_for(test_src, target)}.gch || #{target[:name]}/headers\n"
-    res << "  PCH_FLAGS = -include #{pch_for(test_src, target)}\n"
-    res << flags_for_target(target)
-    res << "build #{dst}: link_oak_test #{all_values_for_key(target, :objects).join(' ')} #{dst}.o\n"
-    res << flags_for_target(target)
-    res << "  RAVE_FLAGS = #{fws} #{libs}\n"
-
-    res << "build #{dst}.run: run_test #{dst}\n"
-    res << "build #{dst}.always-run: always_run_test #{dst}\n"
-
-    res << "build #{target[:name]}:        phony #{dst}.run\n"
-    res << "build #{target[:name]}/test:   phony #{dst}.always-run\n"
-
-    target[:test] = "#{dst}.run"
-  end
-
-  if !target['TEST_SOURCES'].to_s.empty?
-    dst = build_path("#{target[:path]}/cxx_test_#{target[:name]}")
-
-    src = target['TEST_SOURCES'].map { |path| esc_path(File.join(target[:path], path)) }.join(' ')
-    ext = target['TEST_SOURCES'].any? { |path| path =~ /\.mm$/ } ? 'mm' : 'cc'
-    test_src = "#{dst}.#{ext}"
-
-    res << "build #{test_src}: gen_cxx_test #{src}\n"
-    res << "build #{dst}.o: #{compiler_for(test_src)} #{test_src} | #{pch_for(test_src, target)}.gch || #{target[:name]}/headers\n"
-    res << "  PCH_FLAGS = -Ibin/CxxTest -include #{pch_for(test_src, target)}\n"
-    res << flags_for_target(target)
-    res << "build #{dst}: link_cxx_test #{all_values_for_key(target, :objects).join(' ')} #{dst}.o\n"
-    res << flags_for_target(target)
-    res << "  RAVE_FLAGS = #{fws} #{libs}\n"
-
-    res << "build #{dst}.run:                run_test #{dst}\n"
-    res << "build #{dst}.always-run:         always_run_test #{dst}\n"
-    res << "build #{target[:name]}/cxx_test: phony #{dst}.always-run\n"
-  end
-
-  res
-end
-
-def resources_helper(target, key, symbol)
-  res = ''
-  rsrc = [ ]
-  all_resources = [ ]
-
-  depeends_on_directories = Array.new(target[:depeends_on_directories].to_a)
-
-  target[key].to_a.each do |path|
-    if path =~ /^@/
-      src = TARGETS.target_named($')
-      abort "*** no resources in target: ‘#{path}’ (from target: #{target[:name]}).\n" unless src.has_key?(:rsrc_info)
-      src[:rsrc_info].each do |info|
-        rsrc << { :src => info[:src], :dst => esc_path(info[:install_name]) }
-      end
+    paths = target.values['TARGETS']
+    if paths.empty?
+      res << target
     else
-      src = File.join(target[:path], path)
-      abs = File.join(target[:base], path)
-      if File.directory?(abs) && !File.symlink?(abs) && abs !~ /\.xcdatamodeld$/
-        depeends_on_directories << abs
-        Dir.chdir(abs) { Dir.glob("**/*") }.each do |file|
-          if File.directory?(File.join(abs, file))
-            depeends_on_directories << File.join(abs, file)
-          else
-            all_resources << { :path => File.dirname(src), :file => File.join(File.basename(src), file) }
-          end
-        end
-      else
-        all_resources << { :path => File.dirname(src), :file => File.basename(src) }
+      values = target.values.dup
+      values['TARGETS'] = [ ]
+      paths.each do |target_path|
+        new_targets << Target.new(target_path, values)
       end
     end
   end
 
-  target[:depeends_on_directories] = depeends_on_directories.sort.uniq
+  return res
+end
 
-  all_resources.each do |dict|
-    path, file = dict[:path], dict[:file]
-    src = File.join(path, file)
-
-    case file
-      when /(.+)\.xib$/ then
-        dst = build_path(File.join(path, "#$1.nib"))
-        res << "build #{dst}: compile_xib #{esc_path src}\n"
-        rsrc << { :src => dst, :dst => esc_path("#$1.nib") }
-      when /(.+)\.strings$/ then
-        dst = build_path(File.join(path, file))
-        res << "build #{dst}: cp_as_utf16 #{esc_path src}\n"
-        rsrc << { :src => dst, :dst => esc_path(file) }
-      when /(.+)\.xcdatamodeld$/ then
-        dst = build_path(File.join(path, "#$1.mom"))
-        res << "build #{dst}: compile_mom #{esc_path src}\n"
-        rsrc << { :src => dst, :dst => esc_path("#$1.mom") }
-      when /\bInfo\.plist$/ then
-        dst = build_path(File.join(path, file))
-        res << "build #{dst}: process_plist #{esc_path src} | bin/process_plist\n"
-        res << "  RAVE_FLAGS = -dTARGET_NAME='#{target[:name]}'\n"
-        res << flags_for_target(target)
-        target[:info_plist] = dst
-      when /(.+)\.md(own)?$/ then
-        dst = build_path(File.join(path, "#$1.html"))
-        prefix, suffix = target['MARKDOWN_HEADER'].to_a, target['MARKDOWN_FOOTER'].to_a
-        res << "build #{dst}: markdown #{prefix.map { |path| esc_path(File.join(target[:path], path))}.join(' ')} #{esc_path src} #{suffix.map { |path| esc_path(File.join(target[:path], path))}.join(' ')} | bin/gen_html\n"
-        header, footer = target['HTML_HEADER'], target['HTML_FOOTER']
-        flags = ''
-        flags << " -h #{esc_path(File.join(target[:path], header.first))}" if header.to_a.size == 1
-        flags << " -f #{esc_path(File.join(target[:path], footer.first))}" if footer.to_a.size == 1
-        res << "  md_flags =#{flags}\n"
-        rsrc << { :src => dst, :dst => esc_path("#$1.html") }
-      else
-        rsrc << { :src => esc_path(src), :dst => esc_path(file) }
-    end
+def atomic_write(path)
+  temp = path + '~'
+  open(temp, 'w') do |io|
+    yield(io)
   end
-
-  help_files = rsrc.find_all { |dict| dict[:src] =~ %r{[^/]+ Help/.+\.html$} }
-  unless help_files.empty?
-    src = "#$&/#{target[:name]}.helpindex" if help_files.first[:src] =~ /.* Help(?=\/)/
-    dst = "#$&/#{target[:name]}.helpindex" if help_files.first[:dst] =~ /.* Help(?=\/)/
-
-    res << "build #{src}: index_help | #{help_files.map { |dict| dict[:src] }.join(' ')}\n"
-    res << "  HELP_BOOK = #{File.dirname(src)}\n"
-
-    rsrc << { :src => src, :dst => dst }
-  end
-
-  target[symbol] = rsrc
-
-  res
+  File.rename(temp, path)
 end
 
-def resources(target)
-  res = ''
-  target.keys.each do |key|
-    res << resources_helper(target, key, key.to_sym) if key.class == String && key =~ /^CP_/
-  end
-  res
-end
-
-def object_archive(target)
-  dst = build_path("#{target[:path]}/lib#{target[:name]}.a")
-  target[:lib] = dst
-  res = ''
-  res << "build #{dst}: link_static #{target[:objects].join(' ')} | #{target[:test]}\n"
-  res << flags_for_target(target)
-end
-
-def dynamic_lib(target)
-  dst = target[:dylib] = build_path("#{target[:path]}/#{target[:name]}.dylib")
-
-  if target[:CP_Resources].to_a.empty?
-    install_name = "@rpath/#{target[:name]}.dylib"
-  else
-    install_name = "@rpath/#{target[:name]}.framework/Versions/A/#{target[:name]}"
-  end
-
-  link_with = all_values_for_key(target, 'LINK').map { |name| TARGETS.target_named(name)[:dylib] }
-
-  res = ''
-  res << "build #{dst}: link_dynamic #{target[:objects].join(' ')} | #{target[:test]} #{link_with.join(' ')}\n"
-  res << flags_for_target(target)
-  fws  = prepend('-framework ', all_values_for_key(target, 'FRAMEWORKS'))
-  libs = prepend('-l', all_values_for_key(target, 'LIBS'))
-  res << "  RAVE_FLAGS = -install_name #{esc_path install_name} #{link_with.join(' ')} #{fws} #{libs}\n"
-end
-
-def framework_bundle(target, dst_dir = nil)
-  res = ''
-  dst = File.join(dst_dir || build_path("#{target[:path]}"), "#{target[:name]}.framework")
-
-  deps = [ ]
-
-  target.each do |key, files|
-    if key.class == Symbol && key.to_s =~ /^CP_(.+)$/
-      install_dir = $1
-      files.each do |rsrc|
-        deps << "#{dst}/Versions/A/#{install_dir}/#{rsrc[:dst]}"
-        res << "build #{deps.last}: cp #{rsrc[:src]}\n"
-      end
-    end
-  end
-
-  deps << "#{dst}/Versions/A/Resources/Info.plist"
-  res << "build #{deps.last}: cp #{target[:info_plist]}\n"
-
-  deps << "#{dst}/Versions/A/#{target[:name]}"
-  res << "build #{deps.last}: cp #{target[:dylib]}\n"
-
-  deps << "#{dst}/Versions/Current"
-  res << "build #{deps.last}: ln\n  link = A\n"
-  deps << "#{dst}/Resources"
-  res << "build #{deps.last}: ln\n  link = Versions/Current/Resources\n"
-  deps << "#{dst}/#{target[:name]}"
-  res << "build #{deps.last}: ln\n  link = Versions/Current/#{target[:name]}\n"
-
-  res << "build #{dst}: phony | #{deps.join(' ')}\n"
-end
-
-def static_executable(target)
-   objects = [ ]
-   all_values_for_key(target, 'LINK').each do |name|
-     objects << TARGETS.target_named(name)[:lib]
-   end
-   objects << target[:objects]
-
-   res = ''
-
-   dst = build_path("#{target[:path]}/#{target[:name]}")
-   target[:static_executable] = dst
-   target[:rsrc_info] = [ { :install_name => "#{target[:name]}", :src => dst } ]
-
-   res << "build #{dst}: link_executable #{objects.flatten.join(' ')}\n"
-   res << flags_for_target(target)
-   fws  = prepend('-framework ', all_values_for_key(target, 'FRAMEWORKS'))
-   libs = prepend('-l', all_values_for_key(target, 'LIBS'))
-   res << "  RAVE_FLAGS = #{fws} #{libs}\n"
-
-   res << "build #{dst}.run:   run_executable #{dst}\n"
-   res << "build #{dst}.debug: debug_executable #{dst}\n"
-
-   res << "build #{target[:name]}:       phony #{dst}\n"
-   res << "build #{target[:name]}/run:   phony #{dst}.run\n"
-   res << "build #{target[:name]}/debug: phony #{dst}.debug\n"
-
-   res
-end
-
-def dynamic_executable(target)
-   res = ''
-
-   link_with = all_values_for_key(target, 'LINK').map { |name| TARGETS.target_named(name)[:dylib] }
-
-   dst = build_path("#{target[:path]}/#{target[:name]}.dyn")
-   target[:dynamic_executable] = dst
-
-   res << "build #{dst}: link_executable #{target[:objects].join(' ')} | #{link_with.join(' ')}\n"
-   res << flags_for_target(target)
-   fws  = prepend('-framework ', all_values_for_key(target, 'FRAMEWORKS'))
-   libs = prepend('-l', all_values_for_key(target, 'LIBS'))
-   res << "  RAVE_FLAGS = #{link_with.join(' ')} #{fws} #{libs}\n"
-
-   res
-end
-
-def app_bundle(target)
-  res = ''
-  deps = [ ]
-  all_files = [ ]
-  ext = target['BUNDLE_EXTENSION'] || 'app'
-  dst = build_path("#{target[:path]}/#{target[:name]}.#{ext}")
-  target[:bundle] = dst
-
-  fw_dst = File.join(dst, "Contents/Frameworks")
-  all_values_for_key(target, 'LINK').each do |name|
-    tmp = TARGETS.target_named(name)
-    if tmp[:CP_Resources].to_a.empty?
-      res << "build #{fw_dst}/#{tmp[:name]}.dylib: cp #{tmp[:dylib]}\n"
-      deps << "#{fw_dst}/#{tmp[:name]}.dylib"
-    else
-      res << framework_bundle(tmp, fw_dst)
-      deps << "#{fw_dst}/#{tmp[:name]}.framework"
-    end
-  end
-
-  target.each do |key, files|
-    if key.class == Symbol && key.to_s =~ /^CP_(.+)$/
-      install_dir = $1
-      files.each do |rsrc|
-        deps << "#{dst}/Contents/#{install_dir}/#{rsrc[:dst]}"
-        res << "build #{deps.last}: cp #{rsrc[:src]}\n"
-        all_files << { :install_name => "#{target[:name]}.#{ext}/Contents/#{install_dir}/#{rsrc[:dst]}", :src => rsrc[:src] }
-      end
-    end
-  end
-
-  deps << "#{dst}/Contents/Info.plist"
-  res << "build #{deps.last}: cp #{target[:info_plist]}\n"
-  all_files << { :install_name => "#{target[:name]}.#{ext}/Contents/Info.plist", :src => target[:info_plist] }
-
-  deps << "#{dst}/Contents/MacOS/#{target[:name]}"
-  res << "build #{deps.last}: cp #{target[:dynamic_executable]}\n"
-  all_files << { :install_name => "#{target[:name]}.#{ext}/Contents/MacOS/#{target[:name]}", :src => target[:dynamic_executable] }
-
-  res << "build #{dst}: phony | #{deps.join(' ')}\n"
-
-  res << "build #{dst}.sign:  sign_executable #{dst}\n"
-  res << "build #{dst}.run:   run_application #{dst} | #{dst}.sign\n"
-  res << "  appname = #{target[:name]}\n"
-  res << "build #{dst}.debug: debug_executable #{dst}/Contents/MacOS/#{target[:name]} | #{dst}.sign\n"
-
-  res << "build #{target[:name]}:       phony #{dst}.sign\n"
-  res << "build #{target[:name]}/run:   phony #{dst}.run\n"
-  res << "build #{target[:name]}/debug: phony #{dst}.debug\n"
-
-  target[:rsrc_info] = all_files
-
-  res
-end
-
-def upload(target)
-  res = ''
-  exe = target[:static_executable]
-  dir, _ = File.split(exe)
-
-  name = "#{target[:name]}_${APP_VERSION}"
-  tbz  = "#{dir}/archive/#{name}.tbz"
-  meta = "#{dir}/meta/#{name}"
-
-  res << "build #{exe}.sign:    sign_executable #{exe}\n"
-  res << "build #{tbz}:         tbz_archive #{exe} | #{exe}.sign\n"
-  res << "build #{meta}.upload: upload #{tbz}\n"
-
-  res << "build #{target[:name]}/deploy: phony #{meta}.upload\n"
-end
-
-def deploy(target)
-  res = ''
-  dir, _ = File.split(target[:bundle])
-
-  name = "#{target[:name]}_${APP_VERSION}"
-  dsym = "#{dir}/dsym/#{name}.tbz"
-  tbz  = "#{dir}/archive/#{name}.tbz"
-  meta = "#{dir}/meta/#{name}"
-
-  res << "build #{dsym}:        dsym #{target[:bundle]}\n"
-  res << "build #{tbz}:         tbz_archive #{target[:bundle]} | #{target[:bundle]}.sign\n"
-  res << "build #{meta}.upload: upload #{tbz}\n"
-  res << "build #{meta}.deploy: deploy #{meta}.upload | #{dsym}\n"
-
-  res << "build #{target[:name]}/dsym:   phony #{dsym}\n"
-  res << "build #{target[:name]}/tbz:    phony #{tbz}\n"
-  res << "build #{target[:name]}/upload: phony #{meta}.upload\n"
-  res << "build #{target[:name]}/deploy: phony #{meta}.deploy\n"
-end
-
-def all_targets(buildfile, builddir)
+def ninja_targets(buildfile, builddir)
   res = Set.new
   return res unless File.exists? buildfile
 
@@ -643,10 +479,6 @@ def all_targets(buildfile, builddir)
   res
 end
 
-# =======================
-# = Program Starts Here =
-# =======================
-
 outfile, builddir = '/dev/stdout', File.expand_path('~/build')
 variables = [ ]
 
@@ -656,12 +488,12 @@ OptionParser.new do |opts|
   opts.separator "gen_build: create build.ninja based on target files"
   opts.separator "Options:"
 
-  opts.on("-h","--help", "show help.") do |v|
+  opts.on("-h", "--help", "show help.") do |v|
     puts opts
     exit
   end
 
-  opts.on("-o","--output FILE", "the «file» to write build info into.") do |v|
+  opts.on("-o", "--output FILE", "the «file» to write build info into.") do |v|
     outfile = v
   end
 
@@ -675,129 +507,70 @@ OptionParser.new do |opts|
 end.parse!
 
 abort "No root target file specified" if ARGV.empty?
-manifest = ARGV[0]
-TARGETS = Targets.new(manifest)
+path = ARGV[0]
 
-all_old_targets = all_targets(outfile, builddir)
+Dir.chdir(File.dirname(path)) do
+  targets = { }
+  targets_at_path(File.basename(path)).each { |target| targets[target.name] = target }
 
-open(outfile, "w") do |io|
-  userfile = "#{ENV['USER']}.ninja"
-  io << "ninja_required_version = 1.5\n"
-  io << "\n"
-  io << "###########################################\n"
-  io << "# AUTOMATICALLY GENERATED -- DO NOT EDIT! #\n"
-  io << "###########################################\n"
-  io << "\n"
-  io << "builddir = #{builddir}\n"
-  io << "include $builddir/build.ninja\n"
-  io << "include #{userfile}\n" if userfile != 'build.ninja' && File.exists?(File.join(File.dirname(outfile), userfile))
-end
-
-open("#{builddir}/build.ninja", "w") do |io|
-  user_variables = []
-  TARGETS.root.each do |key, value|
-    user_variables << [ key, value.kind_of?(Array) ? value.join(' ') : value ] unless key.class != String || GLOB_KEYS.include?(key)
-  end
-  user_variables.sort! { |lhs, rhs| lhs[0] <=> rhs[0] }
-
-  tmp = variables.dup.concat(user_variables)
-  width = tmp.map { |arr| arr[0].length }.max { |lhs, rhs| lhs <=> rhs }
-
-  variables.each { |arr| io << format("%-#{width}s = %s\n", *arr) }
-  io << "\n"
-
-  user_variables.each { |arr| io << format("%-#{width}s = %s\n", *arr) }
-  io << "\n"
-
-  args = variables.map { |key, value| "-d'#{key}=#{value =~ /\$/ ? value.gsub(/\$/, '$$') :  "$#{key}"}'" }.join(' ')
-  io << "rule configure\n"
-  io << "  command = bin/gen_build -C \"$builddir\" #{args} -o $out $in\n"
-  io << "  depfile = $builddir/$out.d\n"
-  io << "  generator = true\n"
-  io << "  description = Generate ‘$out’…\n"
-  io << "\n"
-  io << "build build.ninja: configure #{manifest} | bin/gen_build\n"
-  io << "\n"
-
-  io << DATA.read << "\n"
-
-  COMPILER_INFO.each do |key, value|
-    io << "rule #{value[:rule]}\n"
-    io << "  command = #{value[:compiler]} $PCH_FLAGS $FLAGS #{value[:flags]} $RAVE_FLAGS -o $out -MMD -MF $out.d -I$builddir/include $in\n"
-    io << "  depfile = $out.d\n"
-    io << "  deps = gcc\n"
-    io << "  description = Compile ‘$in’…\n\n"
+  targets.values.each do |target|
+    target.depend = target.values['LINK'].map { |name| targets[name] }
   end
 
-  TARGETS.root['PRELUDE'].each do |src|
-    type = { 'c' => '-x c-header', 'm' => '-x objective-c-header', 'cc' => '-x c++-header', 'mm' => '-x objective-c++-header' }
-    ext = source_type(src)
-    cc = COMPILER_INFO[ext][:compiler]
-
-    io << "build #{pch_for(src, TARGETS.root)}.gch: #{compiler_for(src)} #{src}\n"
-    io << "  RAVE_FLAGS = #{type[ext]}\n\n"
+  target_variables = [ ]
+  Target.new(File.basename(path)).values.each do |key, value|
+    target_variables << [ key, value.kind_of?(Array) ? value.join(' ') : value ] unless key.class != String || GLOB_KEYS.include?(key)
   end
 
-  # =======================================================
-  # = Do a topological sort based on the dependency graph =
-  # =======================================================
+  builder = BuildFile.new(variables, target_variables)
 
-  dag = ''
-  TARGETS.each do |target|
-    dag << "#{target[:name]}\t#{target[:name]}\n" if target['LINK'].nil?
-    target['LINK'].each { |dep| dag << "#{target[:name]}\t#{dep}\n" } unless target['LINK'].nil?
-    target.each do |key, value|
-      value.each { |rsrc| dag << "#{target[:name]}\t#$'\n" if rsrc =~ /^@/ } if key =~ /^CP_/
-    end
+  targets.values.each do |target|
+    target.headers(builder)
   end
-  dag = open('|/usr/bin/tsort -q', 'r+') { |tsort| tsort << dag; tsort.close_write; tsort.read }
 
-  # =========================================================================
-  # = Now iterate the targets (in the sorted order) to generate build rules =
-  # =========================================================================
+  libraries = Set.new
+  targets.values.each { |target| libraries.merge(target.values['LINK']) }
+  roots = targets.values.reject { |target| libraries.member?(target.name) || !target.values['EXPORT'].empty? }
 
-  dag.scan(/.+/).reverse_each do |name|
-    target = TARGETS.target_named(name)
+  roots.each do |target|
+    builder.create_target(target, targets)
+  end
 
-    io << clean(target)
-    io << sources(target)
-    io << resources(target)
+  all_old_targets = ninja_targets(outfile, builddir)
 
-    if target[:type] == :library
-      io << headers(target)
-      io << object_archive(target)
-      io << tests(target)
-      io << dynamic_lib(target)
-    elsif target[:type] == :executable
-      io << static_executable(target)
-      io << upload(target)
-    else
-      io << dynamic_executable(target)
-      io << app_bundle(target)
-      io << deploy(target)
+  atomic_write(outfile) do |io|
+    userfile = "#{ENV['USER']}.ninja"
+    io << "ninja_required_version = 1.5\n"
+    io << "\n"
+    io << "###########################################\n"
+    io << "# AUTOMATICALLY GENERATED -- DO NOT EDIT! #\n"
+    io << "###########################################\n"
+    io << "\n"
+    io << "builddir = #{builddir}\n"
+    io << "include $builddir/build.ninja\n"
+    io << "include #{userfile}\n" if userfile != 'build.ninja' && File.exists?(File.join(File.dirname(outfile), userfile))
+
+    atomic_write("#{builddir}/build.ninja") do |io|
+      builder.write(io, Target.new(path))
+
+      atomic_write("#{builddir}/build.ninja.d") do |io|
+        dep = BuildDependencies.to_a.map do |file|
+          file.gsub(%r{^\./|/\.(?=/|$)}, '')
+        end
+        builder.dependencies(io, dep)
+      end
     end
   end
 
-  io << "\n"
-  io << "build run:    phony #{variables.find { |k, _| k == 'APP_NAME' }.last}/run\n"
-  io << "build deploy: phony #{variables.find { |k, _| k == 'APP_NAME' }.last}/deploy\n"
-  io << "build debug:  phony #{variables.find { |k, _| k == 'APP_NAME' }.last}/debug\n"
-  io << "default run\n"
-end
+  all_new_targets = ninja_targets(outfile, builddir)
 
-open("#{builddir}/build.ninja.d", "w") do |io|
-  deps = TARGETS.dependencies.map { |path| path.gsub(/ /, '\\ ') }
-  io << outfile << ": " << deps.join(" \\\n  ") << "\n"
-end
-
-all_new_targets = all_targets(outfile, builddir)
-
-if all_old_targets && all_new_targets
-  targets_lost = all_old_targets - all_new_targets
-  targets_lost.each do |path|
-    if File.exists?(path)
-      STDERR << "Remove old target ‘#{path.sub(/#{Regexp.escape(builddir)}/, '$builddir')}’…\n"
-      File.unlink(path)
+  if all_old_targets && all_new_targets
+    targets_lost = all_old_targets - all_new_targets
+    targets_lost.each do |path|
+      if path !~ %r{/archive/} && File.exists?(path)
+        STDERR << "Remove old target ‘#{path.sub(/#{Regexp.escape(builddir)}/, '$builddir')}’…\n"
+        File.unlink(path)
+      end
     end
   end
 end
