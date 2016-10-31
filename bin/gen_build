@@ -584,11 +584,11 @@ rule touch
   description = Touch ‘$out’…
 
 rule cp
-  command = cp -p $in $out
+  command = cp -XRp $in $out
   description = Copy ‘$in’…
 
 rule cp_as_utf16
-  command = if [[ $$(head -c2 $in) == $$'\xFF\xFE' || $$(head -c2 $in) == $$'\xFE\xFF' ]]; then cp -p $in $out; else iconv -f utf-8 -t utf-16 < $in > $out~ && mv $out~ $out; fi
+  command = if [[ $$(head -c2 $in) == $$'\xFF\xFE' || $$(head -c2 $in) == $$'\xFE\xFF' ]]; then cp -XRp $in $out; else iconv -f utf-8 -t utf-16 < $in > $out~ && mv $out~ $out; fi
   description = Copy ‘$in’ as UTF-16…
 
 rule ln
@@ -672,7 +672,7 @@ rule sign_executable
   description = Sign ‘$in’…
 
 rule tbz_archive
-  command = tar $bzip2_flag -cf $out~ -C "$$(dirname $in)" "$$(basename $in)" && mv $out~ $out
+  command = COPYFILE_DISABLE=1 tar $bzip2_flag -cf $out~ -C "$$(dirname $in)" "$$(basename $in)" && mv $out~ $out
   generator = true
   description = Archive ‘$in’…
 
