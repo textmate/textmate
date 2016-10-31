@@ -123,7 +123,7 @@ TextMate is a trademark of Allan Odgaard.
 [ninja]:         https://ninja-build.org/
 [multimarkdown]: http://fletcherpenney.net/multimarkdown/
 [ragel]:         http://www.complang.org/ragel/
-[mercurial]:     http://mercurial.selenic.com/
+[mercurial]:     https://www.mercurial-scm.org/
 [capnp]:         http://kentonv.github.io/capnproto/
 [libressl]:      http://www.libressl.org
 [MacPorts]:      http://www.macports.org/
