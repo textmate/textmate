@@ -886,7 +886,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 				if(!_window)
 					return;
 
-				[OakSavePanel showWithPath:[_document displayNameWithExtension:YES] directory:_document.directory fowWindow:_window encoding:encoding::type(to_s(_document.diskNewlines), to_s(_document.diskEncoding)) completionHandler:^(NSString* path, encoding::type const& encoding){
+				[OakSavePanel showWithPath:[_document displayNameWithExtension:YES] directory:_document.directory fowWindow:_window encoding:encoding::type(to_s(_document.diskNewlines), to_s(_document.diskEncoding)) fileType:_document.fileType completionHandler:^(NSString* path, encoding::type const& encoding){
 					if(path)
 					{
 						_document.path         = path;
