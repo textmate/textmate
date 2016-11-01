@@ -58,16 +58,19 @@ int main (int argc, char const* argv[])
 				unsetenv([variable UTF8String]);
 		}
 
-		NSUserDefaults* oldDefaults = [[NSUserDefaults alloc] initWithSuiteName:@"com.macromates.TextMate.preview"];
-		if([oldDefaults boolForKey:@"didMigrateBetaSettings"] == NO)
+		if([NSUserDefaults instancesRespondToSelector:@selector(initWithSuiteName:)])
 		{
-			NSUserDefaults* newDefaults = [NSUserDefaults standardUserDefaults];
-			for(NSString* key in [oldDefaults dictionaryRepresentation].allKeys)
+			NSUserDefaults* oldDefaults = [[NSUserDefaults alloc] initWithSuiteName:@"com.macromates.TextMate.preview"];
+			if([oldDefaults boolForKey:@"didMigrateBetaSettings"] == NO)
 			{
-				if([newDefaults objectForKey:key] == nil)
-					[newDefaults setObject:[oldDefaults objectForKey:key] forKey:key];
+				NSUserDefaults* newDefaults = [NSUserDefaults standardUserDefaults];
+				for(NSString* key in [oldDefaults dictionaryRepresentation].allKeys)
+				{
+					if([newDefaults objectForKey:key] == nil)
+						[newDefaults setObject:[oldDefaults objectForKey:key] forKey:key];
+				}
+				[oldDefaults setBool:YES forKey:@"didMigrateBetaSettings"];
 			}
-			[oldDefaults setBool:YES forKey:@"didMigrateBetaSettings"];
 		}
 	}
 
