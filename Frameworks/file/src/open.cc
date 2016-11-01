@@ -395,7 +395,7 @@ namespace
 					_state      = kStateIdle;
 					_next_state = kStateHarmonizeLineFeeds;
 
-					_encoding.set_newlines(text::estimate_line_endings(_content->begin(), _content->end()));
+					_encoding.set_newlines(text::estimate_line_endings(_content->begin(), _content->end(), NULL_STR));
 					proceed();
 				}
 				break;

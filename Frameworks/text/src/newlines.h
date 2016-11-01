@@ -14,7 +14,7 @@ namespace text
 	// =====================
 
 	template <typename _InputIter>
-	std::string estimate_line_endings (_InputIter const& first, _InputIter const& last)
+	std::string estimate_line_endings (_InputIter const& first, _InputIter const& last, std::string const& fallback = kLF)
 	{
 		size_t const kEnoughSamples = 50;
 
@@ -49,7 +49,9 @@ namespace text
 			return kCRLF;
 		else if(lf_count == 0 && crlf_count == 0 && cr_count > 0)
 			return kCR;
-		return kLF;
+		else if(lf_count != 0)
+			return kLF;
+		return fallback;
 	}
 
 	template <typename _InputIter>
