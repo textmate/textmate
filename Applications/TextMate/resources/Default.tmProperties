@@ -28,6 +28,9 @@ softWrap         = true
 spellChecking    = true
 spellingLanguage = 'en'
 
+[ source.abnf ]
+lineEndings      = "\r\n"
+
 [ source.ruby ]
 softTabs         = true
 tabSize          = 2
