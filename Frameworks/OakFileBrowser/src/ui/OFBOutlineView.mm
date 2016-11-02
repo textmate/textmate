@@ -154,6 +154,8 @@
 	{
 		{ "@" + utf8::to_s(NSLeftArrowFunctionKey),  @selector(goBack:)                   },
 		{ "@" + utf8::to_s(NSRightArrowFunctionKey), @selector(goForward:)                },
+		{ utf8::to_s(NSCarriageReturnCharacter),     @selector(performEditSelectedRow:)   },
+		{ utf8::to_s(NSEnterCharacter),              @selector(performEditSelectedRow:)   },
 		{ "@" + utf8::to_s(NSDownArrowFunctionKey),  @selector(performDoubleClick:)       },
 		{ "~" + utf8::to_s(NSF2FunctionKey),         @selector(showContextMenu:)          },
 		{ "@o",                                      @selector(performDoubleClick:)       },
