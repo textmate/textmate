@@ -4370,10 +4370,38 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 	OakCommand* command = [[OakCommand alloc] initWithBundleCommand:aBundleCommand];
 
 	auto variablesByValue = initialVariables;
-	__block BOOL didTerminate = NO;
+
+	command.modalEventLoopRunner = ^(OakCommand* command, BOOL* didTerminate){
+		NSMutableArray* queuedEvents = [NSMutableArray array];
+		while(*didTerminate == NO)
+		{
+			// We use CFRunLoopRunInMode() to handle dispatch queues and nextEventMatchingMask:… to catcn ⌃C
+			CFRunLoopRunInMode(kCFRunLoopDefaultMode, 5, true);
+			if(NSEvent* event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:nil inMode:NSDefaultRunLoopMode dequeue:YES])
+			{
+				static NSEventType const events[] = { NSLeftMouseDown, NSLeftMouseUp, NSRightMouseDown, NSRightMouseUp, NSOtherMouseDown, NSOtherMouseUp, NSLeftMouseDragged, NSRightMouseDragged, NSOtherMouseDragged, NSKeyDown, NSKeyUp, NSFlagsChanged };
+				if(!oak::contains(std::begin(events), std::end(events), [event type]))
+				{
+					[NSApp sendEvent:event];
+				}
+				else if([event type] == NSKeyDown && (([[event charactersIgnoringModifiers] isEqualToString:@"c"] && ([event modifierFlags] & (NSShiftKeyMask|NSControlKeyMask|NSAlternateKeyMask|NSCommandKeyMask)) == NSControlKeyMask) || ([[event charactersIgnoringModifiers] isEqualToString:@"."] && ([event modifierFlags] & (NSShiftKeyMask|NSControlKeyMask|NSAlternateKeyMask|NSCommandKeyMask)) == NSCommandKeyMask)))
+				{
+					NSInteger choice = NSRunAlertPanel([NSString stringWithFormat:@"Stop “%@”", to_ns(aBundleCommand.name)], @"Would you like to kill the current shell command?", @"Kill Command", @"Cancel", nil);
+					if(choice == NSAlertDefaultReturn) // "Kill Command"
+						[command terminate];
+				}
+				else
+				{
+					[queuedEvents addObject:event];
+				}
+			}
+		}
+
+		for(NSEvent* event in queuedEvents)
+			[NSApp postEvent:event atStart:NO];
+	};
 
 	command.terminationHandler = ^(OakCommand* command, BOOL normalExit){
-		didTerminate = YES;
 		if(normalExit && aBundleCommand.auto_refresh != auto_refresh::never)
 		{
 			OakCommandRefresherOptions options = 0;
@@ -4415,41 +4443,6 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 		AUTO_REFRESH;
 		documentView->handle_result(out, placement, format, outputCaret, inputRanges, environment);
 	}];
-
-	if(aBundleCommand.output == output::new_window && aBundleCommand.output_format == output_format::html)
-		return;
-
-	// =================================
-	// = Wait for command to terminate =
-	// =================================
-
-	NSMutableArray* queuedEvents = [NSMutableArray array];
-	while(didTerminate == NO)
-	{
-		// We use CFRunLoopRunInMode() to handle dispatch queues and nextEventMatchingMask:… to catcn ⌃C
-		CFRunLoopRunInMode(kCFRunLoopDefaultMode, 5, true);
-		if(NSEvent* event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:nil inMode:NSDefaultRunLoopMode dequeue:YES])
-		{
-			static NSEventType const events[] = { NSLeftMouseDown, NSLeftMouseUp, NSRightMouseDown, NSRightMouseUp, NSOtherMouseDown, NSOtherMouseUp, NSLeftMouseDragged, NSRightMouseDragged, NSOtherMouseDragged, NSKeyDown, NSKeyUp, NSFlagsChanged };
-			if(!oak::contains(std::begin(events), std::end(events), [event type]))
-			{
-				[NSApp sendEvent:event];
-			}
-			else if([event type] == NSKeyDown && (([[event charactersIgnoringModifiers] isEqualToString:@"c"] && ([event modifierFlags] & (NSShiftKeyMask|NSControlKeyMask|NSAlternateKeyMask|NSCommandKeyMask)) == NSControlKeyMask) || ([[event charactersIgnoringModifiers] isEqualToString:@"."] && ([event modifierFlags] & (NSShiftKeyMask|NSControlKeyMask|NSAlternateKeyMask|NSCommandKeyMask)) == NSCommandKeyMask)))
-			{
-				NSInteger choice = NSRunAlertPanel([NSString stringWithFormat:@"Stop “%@”", to_ns(aBundleCommand.name)], @"Would you like to kill the current shell command?", @"Kill Command", @"Cancel", nil);
-				if(choice == NSAlertDefaultReturn) // "Kill Command"
-					[command terminate];
-			}
-			else
-			{
-				[queuedEvents addObject:event];
-			}
-		}
-	}
-
-	for(NSEvent* event in queuedEvents)
-		[NSApp postEvent:event atStart:NO];
 }
 
 - (void)updateEnvironment:(std::map<std::string, std::string>&)res
