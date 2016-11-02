@@ -978,20 +978,23 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 		[self open];
 
 		auto cb = std::make_shared<callback_t>(self, aWindow, ^(OakDocumentIOResult result, NSString* path, encoding::type const& encoding, NSString* errorMessage, oak::uuid_t const& filterUUID){
-			[OakDocumentController.sharedInstance update:self];
-
-			// After performReplacements: we have a buffer but isLoaded == NO
-			if(self.isLoaded)
+			if(result == OakDocumentIOResultSuccess)
 			{
-				self.onDisk        = self.path ? YES : NO;
-				self.diskEncoding  = to_ns(encoding.charset());
-				self.diskNewlines  = to_ns(encoding.newlines());
+				[OakDocumentController.sharedInstance update:self];
 
-				[self markDocumentSaved];
-				[self removeBackup];
-				[self updateRecentDocumentMenu];
+				// After performReplacements: we have a buffer but isLoaded == NO
+				if(self.isLoaded)
+				{
+					self.onDisk        = self.path ? YES : NO;
+					self.diskEncoding  = to_ns(encoding.charset());
+					self.diskNewlines  = to_ns(encoding.newlines());
 
-				[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentDidSaveNotification object:self];
+					[self markDocumentSaved];
+					[self removeBackup];
+					[self updateRecentDocumentMenu];
+
+					[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentDidSaveNotification object:self];
+				}
 			}
 			self.observeFileSystem = self.isLoaded;
 
