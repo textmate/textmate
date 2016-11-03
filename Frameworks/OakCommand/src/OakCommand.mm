@@ -100,7 +100,7 @@ static std::tuple<pid_t, int, int> my_fork (char const* cmd, int inputRead, std:
 		_exit(EXIT_FAILURE);
 	}
 
-	int const fds[] = { inputRead, outputWrite, errorWrite };
+	int const fds[] = { outputWrite, errorWrite };
 	for(int fd : fds) close(fd);
 
 	return { pid, outputRead, errorRead };
