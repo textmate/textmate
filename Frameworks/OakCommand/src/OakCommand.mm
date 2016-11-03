@@ -413,7 +413,7 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 		{
 			NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithDictionary:@{
 				NSLocalizedDescriptionKey             : [NSString stringWithFormat:@"Failure running “%@”.", to_ns(_bundleCommand.name)],
-				NSLocalizedRecoverySuggestionErrorKey : to_ns(text::trim(err + out).empty() ? text::format("Command returned status code %d.", rc) : err + out),
+				NSLocalizedRecoverySuggestionErrorKey : to_ns(text::trim(err + out).empty() ? text::format("Command returned status code %d.", rc) : err + out) ?: @"Command output is not UTF-8.",
 			}];
 
 			if(bundles::lookup(_bundleCommand.uuid))
