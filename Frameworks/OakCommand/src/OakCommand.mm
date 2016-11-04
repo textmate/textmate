@@ -477,7 +477,8 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 	if(_bundleCommand.output == output::new_window && _bundleCommand.output_format == output_format::html)
 		return;
 
-	_modalEventLoopRunner(self, &didTerminate);
+	if(_modalEventLoopRunner)
+		_modalEventLoopRunner(self, &didTerminate);
 }
 
 - (void)terminate
