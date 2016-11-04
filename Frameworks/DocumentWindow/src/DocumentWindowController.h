@@ -43,7 +43,7 @@ PUBLIC @interface DocumentWindowController : NSObject
 - (IBAction)toggleSticky:(id)sender;
 
 - (NSPoint)positionForWindowUnderCaret;
-- (void)performBundleItem:(bundles::item_ptr const&)anItem;
+- (void)performBundleItem:(bundles::item_ptr)anItem;
 - (IBAction)toggleHTMLOutput:(id)sender;
 
 - (IBAction)moveFocus:(id)sender;

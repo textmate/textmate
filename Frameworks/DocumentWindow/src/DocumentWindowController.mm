@@ -2099,7 +2099,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	return [self.textView positionForWindowUnderCaret];
 }
 
-- (void)performBundleItem:(bundles::item_ptr const&)anItem
+- (void)performBundleItem:(bundles::item_ptr)anItem
 {
 	if(anItem->kind() == bundles::kItemTypeTheme)
 	{
