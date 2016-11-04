@@ -27,7 +27,7 @@ OAK_DEBUG_VAR(AppController_Commands);
 	}
 }
 
-- (void)performBundleItem:(bundles::item_ptr const&)item
+- (void)performBundleItem:(bundles::item_ptr)item
 {
 	switch(item->kind())
 	{

@@ -672,7 +672,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 	[self setupPreviousCommitMessagesMenu];
 }
 
-- (void)performBundleItem:(bundles::item_ptr const&)anItem
+- (void)performBundleItem:(bundles::item_ptr)anItem
 {
 	if(anItem->kind() == bundles::kItemTypeTheme)
 	{
