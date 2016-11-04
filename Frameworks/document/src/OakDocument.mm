@@ -1318,7 +1318,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	}
 	else if(_buffer)
 	{
-		ASSERT_EQ(_openCount, 0);
+		ASSERT(_loaded == false);
 		[self deleteBuffer];
 	}
 }
