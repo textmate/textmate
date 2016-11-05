@@ -1,0 +1,7 @@
+binary   = "{*.{ai,gif,icns,ico,jpg,jpeg,m4v,nib,o,pdf,png,psd,pyc,rtf,scssc,tif,tiff,xib},Icon\r}"
+
+[ attr.untitled ]
+fileType = text.plain
+
+[ "{BUILD,README,INSTALL,LICENSE,COPYING,TODO}" ]
+fileType = "text.plain"

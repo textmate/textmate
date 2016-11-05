@@ -25,3 +25,6 @@
 [submodule "vendor/kvdb/vendor"]
 	path = vendor/kvdb/vendor
 	url = https://github.com/textmate/kvdb.git
+[submodule "Applications/SyntaxMate/resources/SyntaxMate.tmBundle"]
+	path = Applications/SyntaxMate/resources/SyntaxMate.tmBundle
+	url = https://github.com/shpakovski/syntaxmate.tmbundle.git
