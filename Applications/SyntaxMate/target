@@ -1,0 +1,4 @@
+CP_Resources     = resources/*
+SOURCES          = src/*.{mm}
+LINK            += file theme
+BUNDLE_EXTENSION = xpc
