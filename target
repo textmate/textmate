@@ -25,6 +25,7 @@ LN_FLAGS += -Wl,-dead_strip
 LN_FLAGS += -Wl,-dead_strip_dylibs
 LN_FLAGS += -rpath @executable_path/../Frameworks
 
+FLAGS     += -I"$libressl_prefix/include"
 CXX_FLAGS += -I"$capnp_prefix/include"
 LN_FLAGS  += -L"$capnp_prefix/lib"
 
