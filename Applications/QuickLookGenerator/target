@@ -4,6 +4,5 @@ CP_Resources      = resources/*
 FRAMEWORKS        = CoreFoundation QuickLook AppKit OSAKit
 LINK             += OakFoundation buffer bundles cf file io ns plist scope settings theme
 
-LN_FLAGS         -= -Wl,-dead_strip_dylibs
 LN_FLAGS         += -bundle
 BUNDLE_EXTENSION  = qlgenerator
