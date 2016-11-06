@@ -7,6 +7,3 @@ LINK             += OakFoundation buffer bundles cf file io ns plist scope setti
 LN_FLAGS         -= -Wl,-dead_strip_dylibs
 LN_FLAGS         += -bundle
 BUNDLE_EXTENSION  = qlgenerator
-
-# Load frameworks from the TextMate bundle
-LN_FLAGS         += -rpath @loader_path/../../../../../Frameworks

@@ -23,7 +23,6 @@ LN_FLAGS += -m64 -mmacosx-version-min=$APP_MIN_OS
 LN_FLAGS += -fvisibility=hidden -stdlib=libc++
 LN_FLAGS += -Wl,-dead_strip
 LN_FLAGS += -Wl,-dead_strip_dylibs
-LN_FLAGS += -rpath @executable_path/../Frameworks
 
 FLAGS     += -I"$libressl_prefix/include"
 CXX_FLAGS += -I"$capnp_prefix/include"
