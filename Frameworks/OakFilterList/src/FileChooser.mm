@@ -445,7 +445,7 @@ static NSDictionary* globs_for_path (std::string const& path)
 {
 	if(!_scmInfo && (_scmInfo = scm::info(to_s(_path))))
 	{
-		_scmInfo->add_callback(^(scm::info_t const& info){
+		_scmInfo->push_callback(^(scm::info_t const& info){
 			if(_sourceIndex == kFileChooserUncommittedChangesSourceIndex)
 				[self reloadSCMStatus];
 		});

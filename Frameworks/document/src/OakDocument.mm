@@ -1571,7 +1571,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 			// is bind:toObject:withKeyPath:options: → scmStatus → setObserveSCMStatus:
 			dispatch_async(dispatch_get_main_queue(), ^{
 				__weak OakDocument* weakSelf = self;
-				_scmInfo->add_callback(^(scm::info_t const& info){
+				_scmInfo->push_callback(^(scm::info_t const& info){
 					weakSelf.scmStatus    = info.status(to_s(weakSelf.path));
 					weakSelf.scmVariables = info.scm_variables();
 				});

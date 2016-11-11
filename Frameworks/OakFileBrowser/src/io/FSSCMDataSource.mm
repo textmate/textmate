@@ -119,7 +119,7 @@ static NSArray* convert (std::map<std::string, scm::status::type> const& pathsMa
 		if(_scmInfo)
 		{
 			__weak FSSCMDataSource* weakSelf = self;
-			_scmInfo->add_callback(^(scm::info_t const&){
+			_scmInfo->push_callback(^(scm::info_t const&){
 				[weakSelf postReloadNotification];
 			});
 		}

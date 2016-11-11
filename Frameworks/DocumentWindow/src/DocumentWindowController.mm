@@ -1362,7 +1362,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		if(_projectSCMInfo = scm::info(to_s(_projectPath)))
 		{
 			__weak DocumentWindowController* weakSelf = self;
-			_projectSCMInfo->add_callback(^(scm::info_t const& info){
+			_projectSCMInfo->push_callback(^(scm::info_t const& info){
 				weakSelf.projectSCMVariables = info.scm_variables();
 			});
 		}
@@ -1403,7 +1403,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		if(_documentSCMInfo = scm::info(docDirectory))
 		{
 			__weak DocumentWindowController* weakSelf = self;
-			_documentSCMInfo->add_callback(^(scm::info_t const& info){
+			_documentSCMInfo->push_callback(^(scm::info_t const& info){
 				weakSelf.documentSCMVariables = info.scm_variables();
 			});
 		}

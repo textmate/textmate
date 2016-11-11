@@ -42,7 +42,7 @@ struct tracking_t : fs::event_callback_t
 		_scm_info = scm::info(_path);
 		if(_scm_info)
 		{
-			_scm_info->add_callback(^(scm::info_t const& info){
+			_scm_info->push_callback(^(scm::info_t const& info){
 
 				std::set<std::string> pathsShown, pathsDeleted, pathsMissingOnDisk;
 				for(FSFileItem* item in _item.children)

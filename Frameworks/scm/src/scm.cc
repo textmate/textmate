@@ -113,7 +113,7 @@ namespace scm
 		return dry() ? false : _shared_info->tracks_directories();
 	}
 
-	void info_t::add_callback (void (^block)(info_t const&))
+	void info_t::push_callback (void (^block)(info_t const&))
 	{
 		_callbacks.push_back(Block_copy(block));
 		if(!dry())
@@ -401,7 +401,7 @@ namespace scm
 		__block bool shouldWait = true;
 		CFRunLoopRef runLoop = CFRunLoopGetCurrent();
 
-		info->add_callback(^(scm::info_t const& unused){
+		info->push_callback(^(scm::info_t const& unused){
 			shouldWait = false;
 			CFRunLoopStop(runLoop);
 		});

@@ -29,7 +29,7 @@ namespace scm
 		scm::status::type status (std::string const& path) const;
 
 		bool tracks_directories () const;
-		void add_callback (void (^block)(info_t const&));
+		void push_callback (void (^block)(info_t const&));
 		void pop_callback ();
 
 	private:
