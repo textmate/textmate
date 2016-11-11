@@ -151,48 +151,6 @@ BOOL HasDocumentWindow (NSArray* windows)
 	setup_rmate_server(!disableRmate, rmatePort, [rmateInterface isEqualToString:kRMateServerListenRemote]);
 }
 
-- (void)checkExpirationDate:(id)sender
-{
-	NSTimeInterval const kSecondsPerDay = 24*60*60;
-
-	NSDate* currentDate    = [NSDate date];
-	NSDate* compileDate    = [NSDate dateWithString:@COMPILE_DATE @" 00:00:00 +0000"];
-	NSDate* warningDate    = [compileDate dateByAddingTimeInterval: 90*kSecondsPerDay];
-	NSDate* expirationDate = [compileDate dateByAddingTimeInterval:180*kSecondsPerDay];
-
-	if([currentDate laterDate:warningDate] == warningDate)
-		return (void)[NSTimer scheduledTimerWithTimeInterval:7 * kSecondsPerDay target:self selector:@selector(checkExpirationDate:) userInfo:nil repeats:NO];
-
-	if(LicenseManager.sharedInstance.owner != nil)
-		return;
-
-	if([currentDate laterDate:expirationDate] == currentDate)
-	{
-		NSInteger choice = NSRunAlertPanel(@"TextMate is Outdated!", @"You can get a new version from https://macromates.com/download.", @"Visit Website", @"Enter License", nil);
-		if(choice == NSAlertAlternateReturn) // "Enter License"
-		{
-			[LicenseManager.sharedInstance showAddLicenseWindow:self];
-			[NSTimer scheduledTimerWithTimeInterval:1 * kSecondsPerDay target:self selector:@selector(checkExpirationDate:) userInfo:nil repeats:NO];
-		}
-		else
-		{
-			if(choice == NSAlertDefaultReturn) // "Visit Website"
-				[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://macromates.com/download"]];
-
-			[DocumentWindowController disableSessionSave];
-			[NSApp terminate:self];
-		}
-	}
-	else if([currentDate laterDate:warningDate] == currentDate)
-	{
-		NSInteger daysUntilExpiration = floor([expirationDate timeIntervalSinceNow] / kSecondsPerDay);
-		NSInteger weeksSinceCompilation = floor([[NSDate date] timeIntervalSinceDate:compileDate] / kSecondsPerDay / 7);
-		NSInteger choice = NSRunAlertPanel(@"TextMate is Getting Old!", @"You are using a beta of TextMate which you haven’t updated in more than %ld weeks.\nYou can continue to use this version for another %ld day%s, but consider checking for an update as many fixes and improvements await you!", @"Continue", @"Check for Updates", nil, weeksSinceCompilation, daysUntilExpiration, daysUntilExpiration == 1 ? "" : "s");
-		if(choice == NSAlertAlternateReturn) // "Check for Updates"
-			[[SoftwareUpdate sharedInstance] checkForUpdates:self];
-	}
-}
-
 - (void)applicationWillFinishLaunching:(NSNotification*)aNotification
 {
 	D(DBF_AppController, bug("\n"););
@@ -204,8 +162,6 @@ BOOL HasDocumentWindow (NSArray* windows)
 		kSoftwareUpdateChannelBeta    : [NSURL URLWithString:[NSString stringWithFormat:@"%s/releases/beta?%@", REST_API, parms]],
 		kSoftwareUpdateChannelNightly : [NSURL URLWithString:[NSString stringWithFormat:@"%s/releases/nightly?%@", REST_API, parms]],
 	}];
-
-	[self checkExpirationDate:self];
 
 	settings_t::set_default_settings_path([[[NSBundle mainBundle] pathForResource:@"Default" ofType:@"tmProperties"] fileSystemRepresentation]);
 	settings_t::set_global_settings_path(path::join(path::home(), "Library/Application Support/TextMate/Global.tmProperties"));
