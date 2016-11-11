@@ -1569,18 +1569,22 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 
 			// We must postpone potential self.scmStatus = «status» when our callstack
 			// is bind:toObject:withKeyPath:options: → scmStatus → setObserveSCMStatus:
+			__weak OakDocument* weakSelf = self;
 			dispatch_async(dispatch_get_main_queue(), ^{
-				__weak OakDocument* weakSelf = self;
-				_scmInfo->push_callback(^(scm::info_t const& info){
-					weakSelf.scmStatus    = info.status(to_s(weakSelf.path));
-					weakSelf.scmVariables = info.scm_variables();
-				});
+				OakDocument* doc = weakSelf;
+				if(doc && doc.scmInfo)
+				{
+					doc.scmInfo->push_callback(^(scm::info_t const& info){
+						doc.scmStatus    = info.status(to_s(doc.path));
+						doc.scmVariables = info.scm_variables();
+					});
+				}
 			});
 		}
 	}
-	else if(_scmInfo)
+	else
 	{
-		_scmInfo->pop_callback();
+		_scmInfo.reset();
 	}
 }
 
