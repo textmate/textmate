@@ -2,6 +2,11 @@ Title: Release Notes
 
 # Changes
 
+## 2016-11-11 (v2.0-rc.1)
+
+* Removed beta from version string (and miscellaneous fixes/improvements).
+* See [all changes since v2.0-beta.12.26](https://github.com/textmate/textmate/compare/v2.0-beta.12.26...v2.0-rc.1)
+
 ## 2016-10-23 (v2.0-beta.12.26)
 
 * TextMate’s bundle identifier has been changed to `com.macromates.TextMate` (previously it had a `preview` suffix). This is the same bundle identifier as TextMate 1.x so if you still have TextMate 1.x installed then we recommend to simply delete it.
