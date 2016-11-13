@@ -88,6 +88,7 @@ static NSDictionary* GlobOptionsForPath (std::string const& path, NSString* glob
 	NSMutableDictionary* options = [GlobOptionsForPath(to_s(CommonAncestor(_paths)), _glob, _searchBinaryFiles, _searchHiddenFolders) mutableCopy];
 	options[kSearchFollowFileLinksKey]      = @(_searchFileLinks);
 	options[kSearchFollowDirectoryLinksKey] = @(_searchFolderLinks);
+	options[kSearchDepthFirstSearchKey]     = @YES;
 
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 		[OakDocumentController.sharedInstance enumerateDocumentsAtPaths:_paths options:options usingBlock:^(OakDocument* document, BOOL* stop){
