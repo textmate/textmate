@@ -1140,7 +1140,7 @@ doScroll:
 
 + (BOOL)isCompatibleWithResponsiveScrolling
 {
-	return NO;
+	return [[NSUserDefaults standardUserDefaults] boolForKey:@"enableResponsiveScroll"];
 }
 
 - (BOOL)acceptsFirstResponder       { return YES; }
