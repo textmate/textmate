@@ -149,6 +149,7 @@ namespace
 }
 
 static NSMutableDictionary<NSString*, OakPasteboard*>* SharedInstances = [NSMutableDictionary new];
+static BOOL HasPersistentStore = NO;
 
 @implementation OakPasteboard
 @dynamic name, currentEntry, auxiliaryOptionsForCurrent, primitiveCurrentEntry;
@@ -244,9 +245,9 @@ static NSMutableDictionary<NSString*, OakPasteboard*>* SharedInstances = [NSMuta
 					continue;
 			}
 			[NSApp presentError:error];
-			crash_reporter_info_t info(to_s(error));
-			abort();
+			break;
 		}
+		HasPersistentStore = YES;
 	}
 	return persistentStoreCoordinator;
 }
@@ -321,7 +322,7 @@ static NSMutableDictionary<NSString*, OakPasteboard*>* SharedInstances = [NSMuta
 		return YES;
 
 	BOOL res = YES;
-	if([self.managedObjectContext hasChanges])
+	if([self.managedObjectContext hasChanges] && HasPersistentStore)
 	{
 		for(NSString* name in SharedInstances)
 			[SharedInstances[name] pruneHistory:self];
