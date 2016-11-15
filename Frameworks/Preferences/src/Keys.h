@@ -76,3 +76,5 @@ PUBLIC extern NSString* const kUserDefaultsLineNumbersKey;
 // =========
 
 PUBLIC extern NSString* const kUserDefaultsFolderSearchFollowLinksKey;
+PUBLIC extern NSString* const kUserDefaultsDisableCrashReportingKey;
+PUBLIC extern NSString* const kUserDefaultsCrashReportsContactInfoKey;

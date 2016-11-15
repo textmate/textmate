@@ -1,6 +1,7 @@
 #import "CrashReporter.h"
 #import "find_reports.h"
 #import <OakFoundation/NSString Additions.h>
+#import <Preferences/Keys.h>
 #import <network/post.h>
 #import <plist/date.h>
 #import <io/path.h>
@@ -8,9 +9,7 @@
 #import <ns/ns.h>
 #import <oak/oak.h>
 
-NSString* const kUserDefaultsDisableCrashReportingKey   = @"DisableCrashReports";
-NSString* const kUserDefaultsCrashReportsContactInfoKey = @"CrashReportsContactInfo";
-NSString* const kUserDefaultsCrashReportsSent           = @"CrashReportsSent";
+NSString* const kUserDefaultsCrashReportsSent = @"CrashReportsSent";
 
 static std::string hardware_info (int field, bool integer = false)
 {
@@ -53,13 +52,6 @@ static std::string create_gzipped_file (std::string const& path)
 {
 	static CrashReporter* sharedInstance = [self new];
 	return sharedInstance;
-}
-
-- (void)setupUserDefaultsContact:(id)sender
-{
-	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
-		kUserDefaultsCrashReportsContactInfoKey : NSFullUserName() ?: @"Anonymous",
-	}];
 }
 
 - (id)init
@@ -119,7 +111,6 @@ static std::string create_gzipped_file (std::string const& path)
 		if(!shouldSend.empty())
 		{
 			dispatch_sync(dispatch_get_main_queue(), ^{
-				[self setupUserDefaultsContact:self];
 				contact = to_s([[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsCrashReportsContactInfoKey]);
 			});
 		}

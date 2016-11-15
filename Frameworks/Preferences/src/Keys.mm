@@ -32,6 +32,7 @@ static NSDictionary* default_settings ()
 		kUserDefaultsRMateServerPortKey         : @"52698",
 		kUserDefaultsLicenseOwnerKey            : NSFullUserName(),
 		kUserDefaultsLineNumbersKey             : @YES,
+		kUserDefaultsCrashReportsContactInfoKey : NSFullUserName() ?: @"Anonymous",
 	};
 }
 
@@ -116,3 +117,5 @@ NSString* const kUserDefaultsLineNumbersKey             = @"lineNumbers";
 // =========
 
 NSString* const kUserDefaultsFolderSearchFollowLinksKey = @"folderSearchFollowLinks";
+NSString* const kUserDefaultsDisableCrashReportingKey   = @"DisableCrashReports";
+NSString* const kUserDefaultsCrashReportsContactInfoKey = @"CrashReportsContactInfo";

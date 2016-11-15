@@ -1,7 +1,6 @@
 #import "SoftwareUpdatePreferences.h"
 #import "Keys.h"
 #import <BundlesManager/BundlesManager.h>
-#import <CrashReporter/CrashReporter.h>
 #import <OakAppKit/NSImage Additions.h>
 #import <OakFoundation/NSDate Additions.h>
 #import <OakFoundation/OakStringListTransformer.h>
@@ -25,8 +24,6 @@
 {
 	if(self = [super initWithNibName:@"SoftwareUpdatePreferences" label:@"Software Update" image:[NSImage imageNamed:@"Software Update" inSameBundleAsClass:[self class]]])
 	{
-		[[CrashReporter sharedInstance] setupUserDefaultsContact:self];
-
 		[OakStringListTransformer createTransformerWithName:@"OakSoftwareUpdateChannelTransformer" andObjectsArray:@[ kSoftwareUpdateChannelRelease, kSoftwareUpdateChannelBeta ]];
 		[self bind:@"isChecking"  toObject:[SoftwareUpdate sharedInstance] withKeyPath:@"isChecking"  options:nil];
 		[self bind:@"lastPoll"    toObject:[SoftwareUpdate sharedInstance] withKeyPath:@"lastPoll"    options:nil];
