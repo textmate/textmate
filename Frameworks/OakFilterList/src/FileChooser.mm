@@ -486,14 +486,27 @@ static NSDictionary* globs_for_path (std::string const& path)
 		[_searchResults removeAllObjects];
 	}
 
+	dispatch_semaphore_t sem = dispatch_semaphore_create(0);
+
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+		__block BOOL didSignal = NO;
+
 		[OakDocumentController.sharedInstance enumerateDocumentsAtPath:path options:options usingBlock:^(OakDocument* document, BOOL* stop){
 			@synchronized(_searchResults) {
+				if(document.open == NO)
+				{
+					dispatch_semaphore_signal(sem);
+					didSignal = YES;
+				}
+
 				if(searchToken == _lastSearchToken)
 						[_searchResults addObject:document];
 				else	*stop = YES;
 			}
 		}];
+
+		if(didSignal == NO)
+			dispatch_semaphore_signal(sem);
 
 		dispatch_async(dispatch_get_main_queue(), ^{
 			if(searchToken == _lastSearchToken)
@@ -503,6 +516,9 @@ static NSDictionary* globs_for_path (std::string const& path)
 			}
 		});
 	});
+
+	dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
+	[self handleSearchResults:nil];
 
 	_pollInterval = 0.02;
 	_pollTimer = [NSTimer scheduledTimerWithTimeInterval:_pollInterval target:self selector:@selector(handleSearchResults:) userInfo:nil repeats:NO];
