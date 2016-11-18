@@ -2,6 +2,11 @@ Title: Release Notes
 
 # Changes
 
+## 2016-11-18 (v2.0-rc.4)
+
+* Fixes/improvements.
+* See [all changes since v2.0-rc.1](https://github.com/textmate/textmate/compare/v2.0-rc.1...v2.0-rc.4)
+
 ## 2016-11-11 (v2.0-rc.1)
 
 * Removed beta from version string (and miscellaneous fixes/improvements).
