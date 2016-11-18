@@ -310,7 +310,8 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 		[rowIndexes addIndex:0];
 
 	[_tableView selectRowIndexes:rowIndexes byExtendingSelection:NO];
-	[_tableView scrollRowToVisible:[rowIndexes firstIndex]];
+	if([[NSUserDefaults standardUserDefaults] boolForKey:@"disableFilterListAutoScroll"] == NO)
+		[_tableView scrollRowToVisible:[rowIndexes firstIndex]];
 
 	[self updateStatusText:self];
 
