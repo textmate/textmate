@@ -282,13 +282,13 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 			[[menu addItemWithTitle:it.file action:NULL keyEquivalent:@""] setTag:it.kind];
 	}
 
-	NSAlert* alert = [NSAlert alertWithMessageText:@"Create New Item" defaultButton:@"Create" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"Please choose what you want to create:"];
+	NSAlert* alert = [NSAlert tmAlertWithMessageText:@"Create New Item" informativeText:@"Please choose what you want to create:" buttons:@"Create", @"Cancel", nil];
 	NSPopUpButton* typeChooser = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO];
 	[typeChooser setMenu:menu];
 	[typeChooser sizeToFit];
 	[alert setAccessoryView:typeChooser];
 	OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){
-		if(returnCode == NSAlertDefaultReturn)
+		if(returnCode == NSAlertFirstButtonReturn)
 			[self createItemOfType:(bundles::kind_t)[[(NSPopUpButton*)[alert accessoryView] selectedItem] tag]];
 	});
 	[[alert window] recalculateKeyViewLoop];
@@ -399,7 +399,7 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 		parsedContent = plist::parse_ascii(content, &success);
 		if(!success)
 		{
-			NSAlert* alert = [NSAlert alertWithMessageText:@"Error Parsing Property List" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"The property list is not valid.\n\nUnfortunately I am presently unable to point to where the parser failed."];
+			NSAlert* alert = [NSAlert tmAlertWithMessageText:@"Error Parsing Property List" informativeText:@"The property list is not valid.\n\nUnfortunately I am presently unable to point to where the parser failed." buttons:@"OK", nil];
 			OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){ });
 			return NO;
 		}
@@ -474,7 +474,7 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 
 	if(!changes.empty())
 	{
-		NSAlert* alert = [NSAlert alertWithMessageText:@"Error Saving Bundle Item" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"Sorry, but something went wrong while trying to save your changes. More info may be available via the console."];
+		NSAlert* alert = [NSAlert tmAlertWithMessageText:@"Error Saving Bundle Item" informativeText:@"Sorry, but something went wrong while trying to save your changes. More info may be available via the console." buttons:@"OK", nil];
 		OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){
 			if(returnCode == NSAlertSecondButtonReturn) // Discard Changes
 			{
