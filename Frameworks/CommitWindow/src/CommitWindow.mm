@@ -2,7 +2,6 @@
 #import "CWItem.h"
 #import "CWStatusStringTransformer.h"
 #import "CWTableCellView.h"
-#import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/NSAlert Additions.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakFoundation/NSString Additions.h>
@@ -713,7 +712,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 			{
 				dispatch_async(dispatch_get_main_queue(), ^{
 					NSAlert* alert = [NSAlert tmAlertWithMessageText:@"Failed running diff command." informativeText:[NSString stringWithCxxString:cmdString] buttons:@"OK", nil];
-					OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){});
+					[alert beginSheetModalForWindow:self.window completionHandler:^(NSInteger returnCode){}];
 				});
 			}
 		});
@@ -773,7 +772,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 		if(rangeOfStatus.location == NSNotFound)
 		{
 			NSAlert* alert = [NSAlert tmAlertWithMessageText:@"Cannot understand output from command" informativeText:[NSString stringWithCxxString:cmdString] buttons:@"OK", nil];
-			OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){});
+			[alert beginSheetModalForWindow:self.window completionHandler:^(NSInteger returnCode){}];
 		}
 		NSString* newStatus = [outputStatus substringToIndex:rangeOfStatus.location];
 		CWItem* item = [[_arrayController arrangedObjects] objectAtIndex:row];
@@ -783,7 +782,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 	else
 	{
 		NSAlert* alert = [NSAlert tmAlertWithMessageText:@"Failed running command" informativeText:[NSString stringWithCxxString:cmdString] buttons:@"OK", nil];
-		OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){});
+		[alert beginSheetModalForWindow:self.window completionHandler:^(NSInteger returnCode){}];
 	}
 }
 
