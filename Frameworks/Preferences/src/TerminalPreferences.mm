@@ -1,6 +1,5 @@
 #import "TerminalPreferences.h"
 #import "Keys.h"
-#import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/NSAlert Additions.h>
 #import <OakAppKit/NSImage Additions.h>
 #import <OakAppKit/NSMenu Additions.h>
@@ -294,10 +293,10 @@ static bool uninstall_mate (std::string const& path)
 		[alert setMessageText:@"File Already Exists"];
 		[alert setInformativeText:[NSString stringWithCxxString:summary]];
 		[alert addButtons:@"Replace", @"Cancel", nil];
-		OakShowAlertForWindow(alert, [self.view window], ^(NSInteger returnCode){
+		[alert beginSheetModalForWindow:[self.view window] completionHandler:^(NSInteger returnCode){
 			if(returnCode == NSAlertFirstButtonReturn)
 				[self installMateAs:[[installPathPopUp titleOfSelectedItem] stringByExpandingTildeInPath]];
-		});
+		}];
 	}
 	else
 	{

@@ -6,7 +6,6 @@
 #import <OakFoundation/OakStringListTransformer.h>
 #import <OakAppKit/NSAlert Additions.h>
 #import <OakAppKit/NSImage Additions.h>
-#import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakSound.h>
 #import <OakAppKit/OakFileIconImage.h>
 #import <OakTextView/OakDocumentView.h>
@@ -287,10 +286,10 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 	[typeChooser setMenu:menu];
 	[typeChooser sizeToFit];
 	[alert setAccessoryView:typeChooser];
-	OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){
+	[alert beginSheetModalForWindow:self.window completionHandler:^(NSInteger returnCode){
 		if(returnCode == NSAlertFirstButtonReturn)
 			[self createItemOfType:(bundles::kind_t)[[(NSPopUpButton*)[alert accessoryView] selectedItem] tag]];
-	});
+	}];
 	[[alert window] recalculateKeyViewLoop];
 	[[alert window] makeFirstResponder:typeChooser];
 }
@@ -400,7 +399,7 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 		if(!success)
 		{
 			NSAlert* alert = [NSAlert tmAlertWithMessageText:@"Error Parsing Property List" informativeText:@"The property list is not valid.\n\nUnfortunately I am presently unable to point to where the parser failed." buttons:@"OK", nil];
-			OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){ });
+			[alert beginSheetModalForWindow:self.window completionHandler:^(NSInteger returnCode){ }];
 			return NO;
 		}
 	}
@@ -475,13 +474,13 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 	if(!changes.empty())
 	{
 		NSAlert* alert = [NSAlert tmAlertWithMessageText:@"Error Saving Bundle Item" informativeText:@"Sorry, but something went wrong while trying to save your changes. More info may be available via the console." buttons:@"OK", nil];
-		OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){
+		[alert beginSheetModalForWindow:self.window completionHandler:^(NSInteger returnCode){
 			if(returnCode == NSAlertSecondButtonReturn) // Discard Changes
 			{
 				changes.clear();
 				[self didChangeModifiedState];
 			}
-		});
+		}];
 	}
 
 	[self didChangeModifiedState];
@@ -907,7 +906,7 @@ static NSString* DescriptionForChanges (std::map<bundles::item_ptr, plist::dicti
 	[alert setMessageText:DescriptionForChanges(changes)];
 	[alert setInformativeText:@"Your changes will be lost if you don’t save them."];
 	[alert addButtons:@"Save", @"Cancel", @"Don’t Save", nil];
-	OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){
+	[alert beginSheetModalForWindow:self.window completionHandler:^(NSInteger returnCode){
 		if(returnCode != NSAlertSecondButtonReturn) // Not "Cancel"
 		{
 			if(returnCode == NSAlertFirstButtonReturn) // "Save"
@@ -916,7 +915,7 @@ static NSString* DescriptionForChanges (std::map<bundles::item_ptr, plist::dicti
 				changes.clear();
 			[self close];
 		}
-	});
+	}];
 	return NO;
 }
 
