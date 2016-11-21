@@ -35,20 +35,4 @@ static std::pair<dev_t, ino_t> inode (std::string const& path)
 	}
 	return YES;
 }
-
-- (BOOL)tmTrashItemAtURL:(NSURL*)trashURL resultingItemURL:(NSURL**)resultingURL error:(NSError**)error
-{
-	struct stat buf;
-	if(lstat([[trashURL path] fileSystemRepresentation], &buf) == 0 && S_ISLNK(buf.st_mode))
-	{
-		// Workaround for MAC_OS_X_VERSION_10_8 where linked file is trashed instead of link
-		std::string const res = path::move_to_trash([[trashURL path] fileSystemRepresentation]);
-		if(res != NULL_STR && resultingURL)
-			*resultingURL = [NSURL fileURLWithPath:[NSString stringWithCxxString:res]];
-		else if(res == NULL_STR && error)
-			*error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFeatureUnsupportedError userInfo:nil];
-		return res != NULL_STR;
-	}
-	return [self trashItemAtURL:trashURL resultingItemURL:resultingURL error:error];
-}
 @end
