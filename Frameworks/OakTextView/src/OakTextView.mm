@@ -6,6 +6,7 @@
 #import "OTVHUD.h"
 #import <OakCommand/OakCommand.h>
 #import <OakAppKit/OakAppKit.h>
+#import <OakAppKit/NSAlert Additions.h>
 #import <OakAppKit/NSEvent Additions.h>
 #import <OakAppKit/NSImage Additions.h>
 #import <OakAppKit/NSMenuItem Additions.h>
@@ -3203,10 +3204,10 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		[textField sizeToFit];
 		[textField setFrameSize:NSMakeSize(200, NSHeight([textField frame]))];
 
-		NSAlert* alert = [NSAlert alertWithMessageText:@"Set Wrap Column" defaultButton:@"OK" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"Specify what column text should wrap at:"];
+		NSAlert* alert = [NSAlert tmAlertWithMessageText:@"Set Wrap Column" informativeText:@"Specify what column text should wrap at:" buttons:@"OK", @"Cancel", nil];
 		[alert setAccessoryView:textField];
 		OakShowAlertForWindow(alert, [self window], ^(NSInteger returnCode){
-			if(returnCode == NSAlertDefaultReturn)
+			if(returnCode == NSAlertFirstButtonReturn)
 				[self setWrapColumn:std::max<NSInteger>([textField integerValue], 10)];
 		});
 	}
