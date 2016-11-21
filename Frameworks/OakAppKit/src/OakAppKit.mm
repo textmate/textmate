@@ -22,42 +22,6 @@ BOOL OakIsAlternateKeyOrMouseEvent (NSUInteger flags, NSEvent* anEvent)
 	return ([anEvent type] == NSLeftMouseUp || [anEvent type] == NSOtherMouseUp || [anEvent type] == NSKeyDown) && (([anEvent modifierFlags] & flags) == flags);
 }
 
-@interface OakSheetCallbackDelegate : NSObject
-@property (nonatomic, copy) void(^callback)(NSInteger);
-@property (nonatomic)       id retainedSelf;
-@end
-
-@implementation OakSheetCallbackDelegate
-- (id)initWithBlock:(void(^)(NSInteger))aBlock
-{
-	if(self = [super init])
-	{
-		self.callback = aBlock;
-		self.retainedSelf = self;
-	}
-	return self;
-}
-
-- (void)sheetDidEnd:(id)sheetOrAlert returnCode:(NSInteger)returnCode contextInfo:(void*)unused
-{
-	self.callback(returnCode);
-	self.retainedSelf = nil;
-}
-@end
-
-void OakShowSheetForWindow (NSWindow* sheet, NSWindow* window, void(^callback)(NSInteger))
-{
-	if(!window)
-	{
-		callback([NSApp runModalForWindow:sheet]);
-		return;
-	}
-
-	crash_reporter_info_t info(to_s([NSString stringWithFormat:@"sheet %@, window %@: title ‘%@’, is visible %s, is sheet %s, has sheet %s, delegate %@", sheet, window, window.title, BSTR(window.isVisible), BSTR(window.isSheet), BSTR(window.attachedSheet), window.delegate]));
-	OakSheetCallbackDelegate* delegate = [[OakSheetCallbackDelegate alloc] initWithBlock:callback];
-	[NSApp beginSheet:sheet modalForWindow:window modalDelegate:delegate didEndSelector:@selector(sheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
-}
-
 // ======================
 // = TableView Movement =
 // ======================
