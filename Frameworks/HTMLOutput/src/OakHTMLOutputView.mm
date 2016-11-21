@@ -4,7 +4,6 @@
 #import "helpers/HOJSBridge.h"
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
-#import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/NSAlert Additions.h>
 #import <oak/debug.h>
 
@@ -74,7 +73,7 @@
 
 		if(alert)
 		{
-			OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){
+			[alert beginSheetModalForWindow:self.window completionHandler:^(NSInteger returnCode){
 				if(returnCode == NSAlertFirstButtonReturn) /* "Stop" */
 				{
 					[self.webView.mainFrame stopLoading];
@@ -84,7 +83,7 @@
 					handler(NO);
 					[[NSNotificationCenter defaultCenter] removeObserver:observerId];
 				}
-			});
+			}];
 		}
 		else
 		{

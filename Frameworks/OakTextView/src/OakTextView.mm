@@ -3206,10 +3206,10 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 		NSAlert* alert = [NSAlert tmAlertWithMessageText:@"Set Wrap Column" informativeText:@"Specify what column text should wrap at:" buttons:@"OK", @"Cancel", nil];
 		[alert setAccessoryView:textField];
-		OakShowAlertForWindow(alert, [self window], ^(NSInteger returnCode){
+		[alert beginSheetModalForWindow:self.window completionHandler:^(NSInteger returnCode){
 			if(returnCode == NSAlertFirstButtonReturn)
 				[self setWrapColumn:std::max<NSInteger>([textField integerValue], 10)];
-		});
+		}];
 	}
 	else
 	{
