@@ -1,6 +1,5 @@
 #import "EncodingView.h"
 #import <OakFoundation/NSString Additions.h>
-#import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakEncodingPopUpButton.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <text/hexdump.h>
@@ -236,7 +235,7 @@ static NSTextView* MyCreateTextView ()
 - (void)beginSheetModalForWindow:(NSWindow*)aWindow completionHandler:(void(^)(NSModalResponse))callback
 {
 	[self.window layoutIfNeeded];
-	OakShowSheetForWindow(self.window, aWindow, callback);
+	[aWindow beginSheet:self.window completionHandler:callback];
 }
 
 - (BOOL)textView:(NSTextView*)aTextView doCommandBySelector:(SEL)aSelector
@@ -314,14 +313,14 @@ static NSTextView* MyCreateTextView ()
 - (IBAction)performOpenDocument:(id)sender
 {
 	[self.window orderOut:self];
-	[NSApp endSheet:self.window returnCode:NSRunStoppedResponse];
+	[self.window.sheetParent endSheet:self.window returnCode:NSModalResponseOK];
 	[self cleanup];
 }
 
 - (IBAction)performCancelOperation:(id)sender
 {
 	[self.window orderOut:self];
-	[NSApp endSheet:self.window returnCode:NSRunAbortedResponse];
+	[self.window.sheetParent endSheet:self.window returnCode:NSModalResponseCancel];
 	[self cleanup];
 }
 @end
