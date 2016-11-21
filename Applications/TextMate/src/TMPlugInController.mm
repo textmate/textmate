@@ -77,7 +77,7 @@ static id CreateInstanceOfPlugInClass (Class cl, TMPlugInController* controller)
 					NSAlert* alert = [NSAlert tmAlertWithMessageText:[NSString stringWithFormat:@"Move “%@” plug-in to Trash?", name ?: identifier] informativeText:@"Previous attempt of loading the plug-in caused abnormal exit. Would you like to move it to trash?" buttons:@"Move to Trash", @"Cancel", @"Skip Loading", nil];
 					NSInteger choice = [alert runModal];
 					if(choice == NSAlertFirstButtonReturn) // "Move to Trash"
-						[[NSFileManager defaultManager] tmTrashItemAtURL:[NSURL fileURLWithPath:aPath] resultingItemURL:nil error:nil];
+						[[NSFileManager defaultManager] trashItemAtURL:[NSURL fileURLWithPath:aPath] resultingItemURL:nil error:nil];
 
 					if(choice != NSAlertThirdButtonReturn) // "Skip Loading"
 						unlink(crashedDuringPlugInLoad.c_str());
