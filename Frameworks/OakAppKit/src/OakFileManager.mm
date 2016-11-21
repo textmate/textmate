@@ -228,7 +228,7 @@ NSString* OakReplaceDateInString (NSString* srcPath, NSDate* newDate)
 	NSURL* inTrashURL;
 
 	[[NSNotificationCenter defaultCenter] postNotificationName:OakFileManagerWillDeleteItemAtPath object:self userInfo:@{ OakFileManagerPathKey : [[trashURL filePathURL] path] }];
-	if([[NSFileManager defaultManager] tmTrashItemAtURL:trashURL resultingItemURL:&inTrashURL error:&error])
+	if([[NSFileManager defaultManager] trashItemAtURL:trashURL resultingItemURL:&inTrashURL error:&error])
 	{
 		[[[view undoManager] prepareWithInvocationTarget:self] doRestoreItem:inTrashURL toURL:trashURL view:view];
 		[self playSound:OakSoundDidTrashItemUISound];
