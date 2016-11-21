@@ -19,7 +19,7 @@ function error () { printf >&2 "%s\n\nPlease see README.md for build instruction
 
 name=TextMate
 ver=$(curl -sf "${rest_api}/releases/nightly/version")${tag:-+git.$(git rev-parse --short HEAD)}
-min_os=10.8
+min_os=10.9
 
 # ===============================
 # = Check if boost is installed =
