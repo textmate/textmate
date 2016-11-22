@@ -1,5 +1,4 @@
 #include "resource.h"
-#include "fsref.h"
 #include "path.h"
 #include <cf/cf.h>
 
@@ -27,16 +26,20 @@ namespace path
 		std::string res = NULL_STR;
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-		if(ResFileRefNum ref = FSOpenResFile(fsref_t(path), fsRdPerm))
+		FSRef fsref;
+		if(noErr != FSPathMakeRefWithOptions((UInt8 const*)path.c_str(), kFSPathMakeRefDoNotFollowLeafSymlink, &fsref, NULL))
 		{
-			if(Handle handle = Get1Resource(theType, theID))
+			if(ResFileRefNum ref = FSOpenResFile(&fsref, fsRdPerm))
 			{
-				HLock(handle);
-				res = std::string(*handle, *handle + GetHandleSize(handle));
-				HUnlock(handle);
-				ReleaseResource(handle);
+				if(Handle handle = Get1Resource(theType, theID))
+				{
+					HLock(handle);
+					res = std::string(*handle, *handle + GetHandleSize(handle));
+					HUnlock(handle);
+					ReleaseResource(handle);
+				}
+				CloseResFile(ref);
 			}
-			CloseResFile(ref);
 		}
 #pragma clang diagnostic pop
 		return res;
