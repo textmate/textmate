@@ -185,7 +185,11 @@ static NSString* CacheFileForDownload (NSURL* url, NSDate* date)
 		}
 		else
 		{
-			NSRunAlertPanel(@"Creating bundles is not yet supported.", @"You can create a new bundle in the bundle editor via File → New (⌘N) and then repeat the previous action.", @"OK", nil, nil);
+			NSAlert* alert        = [[NSAlert alloc] init];
+			alert.messageText     = @"Creating bundles is not yet supported.";
+			alert.informativeText = @"You can create a new bundle in the bundle editor via File → New (⌘N) and then repeat the previous action.";
+			[alert addButtonWithTitle:@"OK"];
+			[alert runModal];
 		}
 	}
 	return NO;

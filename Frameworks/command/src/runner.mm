@@ -1,4 +1,5 @@
 #include "runner.h"
+#import <OakAppKit/NSAlert Additions.h>
 #include <OakSystem/process.h>
 #include <OakFoundation/NSString Additions.h>
 #include <io/path.h>
@@ -210,8 +211,11 @@ namespace command
 				}
 				else if([event type] == NSKeyDown && (([[event charactersIgnoringModifiers] isEqualToString:@"c"] && ([event modifierFlags] & (NSShiftKeyMask|NSControlKeyMask|NSAlternateKeyMask|NSCommandKeyMask)) == NSControlKeyMask) || ([[event charactersIgnoringModifiers] isEqualToString:@"."] && ([event modifierFlags] & (NSShiftKeyMask|NSControlKeyMask|NSAlternateKeyMask|NSCommandKeyMask)) == NSCommandKeyMask)))
 				{
-					NSInteger choice = NSRunAlertPanel([NSString stringWithFormat:@"Stop “%@”", [NSString stringWithCxxString:_command.name]], @"Would you like to kill the current shell command?", @"Kill Command", @"Cancel", nil);
-					if(choice == NSAlertDefaultReturn) // "Kill Command"
+					NSAlert* alert        = [[NSAlert alloc] init];
+					alert.messageText     = [NSString stringWithFormat:@"Stop “%@”", [NSString stringWithCxxString:_command.name]];
+					alert.informativeText = @"Would you like to kill the current shell command?";
+					[alert addButtons:@"Kill Command", @"Cancel", nil];
+					if([alert runModal] == NSAlertFirstButtonReturn) // "Kill Command"
 					{
 						_user_abort = true;
 						oak::kill_process_group_in_background(process_id());

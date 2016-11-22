@@ -9,6 +9,7 @@
 #import <DocumentWindow/DocumentWindowController.h>
 #import <Find/Find.h>
 #import <CommitWindow/CommitWindow.h>
+#import <OakAppKit/NSAlert Additions.h>
 #import <OakAppKit/NSMenuItem Additions.h>
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakPasteboard.h>
@@ -249,8 +250,11 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 		if(promptUser)
 		{
-			NSInteger choice = NSRunAlertPanel(@"Disable Session Restore?", @"%@", @"Restore Documents", @"Disable", nil, promptUser);
-			if(choice == NSAlertAlternateReturn) // "Disable"
+			NSAlert* alert        = [[NSAlert alloc] init];
+			alert.messageText     = @"Disable Session Restore?";
+			alert.informativeText = promptUser;
+			[alert addButtons:@"Restore Documents", @"Disable", nil];
+			if([alert runModal] == NSAlertSecondButtonReturn) // "Disable"
 				restoreSession = NO;
 		}
 

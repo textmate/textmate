@@ -265,7 +265,11 @@ static bool uninstall_mate (std::string const& path)
 	}
 	else
 	{
-		NSRunAlertPanel(@"Unable to find ‘mate’", @"The ‘mate’ binary is missing from the application bundle. We recommend that you re-download the application.", @"OK", nil, nil);
+		NSAlert* alert        = [[NSAlert alloc] init];
+		alert.messageText     = @"Unable to find ‘mate’";
+		alert.informativeText = @"The ‘mate’ binary is missing from the application bundle. We recommend that you re-download the application.";
+		[alert addButtonWithTitle:@"OK"];
+		[alert runModal];
 	}
 	[self updateUI:self];
 }
@@ -330,8 +334,11 @@ static bool uninstall_mate (std::string const& path)
 					if(cp_requires_admin(to_s(oldMate)))
 					{
 						dispatch_async(dispatch_get_main_queue(), ^{
-							NSInteger choice = NSRunAlertPanel(@"Update Shell Support", @"Would you like to update the installed version of mate to version %@?", @"Update", @"Cancel", nil, newVersion);
-							if(choice == NSAlertDefaultReturn) // "Update"
+							NSAlert* alert        = [[NSAlert alloc] init];
+							alert.messageText     = @"Update Shell Support";
+							alert.informativeText = [NSString stringWithFormat:@"Would you like to update the installed version of mate to version %@?", newVersion];
+							[alert addButtons:@"Update", @"Cancel", nil];
+							if([alert runModal] == NSAlertFirstButtonReturn) // "Update"
 							{
 								if(!install_mate(to_s(newMate), to_s(oldMate)))
 									return;
