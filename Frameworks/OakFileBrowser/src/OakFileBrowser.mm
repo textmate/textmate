@@ -1220,7 +1220,7 @@ static bool is_binary (std::string const& path)
 	[panel setAllowsMultipleSelection:NO];
 	[panel setDirectoryURL:[_url isFileURL] ? _url : nil];
 	[panel beginSheetModalForWindow:_view.window completionHandler:^(NSInteger result) {
-		if(result == NSOKButton)
+		if(result == NSFileHandlingPanelOKButton)
 			[self goToURL:[[panel URLs] lastObject]];
 	}];
 }

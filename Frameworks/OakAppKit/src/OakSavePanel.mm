@@ -119,7 +119,7 @@
 	savePanel.delegate = optionsViewController;
 	[savePanel beginSheetModalForWindow:aWindow completionHandler:^(NSInteger result) {
 		savePanel.delegate = nil;
-		NSString* path = result == NSOKButton ? [[savePanel.URL filePathURL] path] : nil;
+		NSString* path = result == NSFileHandlingPanelOKButton ? [[savePanel.URL filePathURL] path] : nil;
 		encoding::type encoding(to_s(optionsViewController.lineEndings), to_s(optionsViewController.encoding));
 		aCompletionHandler(path, encoding);
 	}];

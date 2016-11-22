@@ -173,7 +173,7 @@ static bool uninstall_mate (std::string const& path)
 	NSSavePanel* savePanel = [NSSavePanel savePanel];
 	[savePanel setNameFieldStringValue:@"mate"];
 	[savePanel beginSheetModalForWindow:[self view].window completionHandler:^(NSInteger result) {
-		if(result == NSOKButton)
+		if(result == NSFileHandlingPanelOKButton)
 				[self updatePopUp:[[savePanel.URL filePathURL] path]];
 		else	[installPathPopUp selectItemAtIndex:0];
 		[self updateUI:self];
