@@ -45,7 +45,7 @@
 	[openPanel setCanChooseFiles:NO];
 	[openPanel setCanChooseDirectories:YES];
 	[openPanel beginSheetModalForWindow:[self view].window completionHandler:^(NSInteger result) {
-		if(result == NSOKButton)
+		if(result == NSFileHandlingPanelOKButton)
 			[[NSUserDefaults standardUserDefaults] setObject:[[openPanel URL] absoluteString] forKey:kUserDefaultsInitialFileBrowserURLKey];
 		[self updatePathPopUp];
 	}];
