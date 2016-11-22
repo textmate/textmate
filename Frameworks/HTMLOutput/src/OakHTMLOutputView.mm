@@ -62,11 +62,7 @@
 
 		__weak __block id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:@"OakCommandDidTerminateNotification" object:command queue:nil usingBlock:^(NSNotification* notification){
 			if(alert)
-			{
-				if([self.window respondsToSelector:@selector(endSheet:returnCode:)]) // MAC_OS_X_VERSION_10_9
-						[self.window endSheet:alert.window returnCode:NSAlertFirstButtonReturn];
-				else	[NSApp endSheet:alert.window returnCode:NSAlertFirstButtonReturn];
-			}
+				[self.window endSheet:alert.window returnCode:NSAlertFirstButtonReturn];
 			handler(YES);
 			[[NSNotificationCenter defaultCenter] removeObserver:observerId];
 		}];
