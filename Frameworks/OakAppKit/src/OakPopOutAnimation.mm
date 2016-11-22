@@ -91,7 +91,7 @@ void OakShowPopOutAnimation (NSView* parentView, NSRect popOutRect, NSImage* anI
 		shapeRect.origin = CGPointZero;
 		shapeRect = CGRectInset(shapeRect, 0.25, 0.25);
 		BOOL rectTooSmallToBeRounded = NSWidth(shapeRect) < 2 * kRectXRadius || NSHeight(shapeRect) < 2 * kRectYRadius;
-		if(rectTooSmallToBeRounded || CGPathCreateWithRoundedRect == NULL) // MAC_OS_X_VERSION_10_9
+		if(rectTooSmallToBeRounded)
 				path = CGPathCreateWithRect(shapeRect, NULL);
 		else	path = CGPathCreateWithRoundedRect(shapeRect, kRectXRadius, kRectYRadius, NULL);
 

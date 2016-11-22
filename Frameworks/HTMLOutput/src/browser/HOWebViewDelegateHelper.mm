@@ -127,7 +127,7 @@ static BOOL IsProtocolRelativeURL (NSURL* url)
 		request = [NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"file://localhost%@%s%@", [[[request URL] path] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], fragment ? "#" : "", fragment ?: @""]]];
 	}
 
-	if(IsProtocolRelativeURL([request URL]) && [NSURLComponents class]) // MAC_OS_X_VERSION_10_9
+	if(IsProtocolRelativeURL([request URL]))
 	{
 		NSURLComponents* components = [NSURLComponents componentsWithURL:[request URL] resolvingAgainstBaseURL:YES];
 		components.scheme = [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsDefaultURLProtocolKey];

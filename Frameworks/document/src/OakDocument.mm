@@ -324,16 +324,10 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 		self.fileType   = aFileType;
 
 		[self createBuffer];
-		if([someData respondsToSelector:@selector(enumerateByteRangesUsingBlock:)]) // MAC_OS_X_VERSION_10_9
-		{
-			[someData enumerateByteRangesUsingBlock:^(void const* buf, NSRange range, BOOL*){
-				_buffer->insert(range.location, (char const*)buf, range.length);
-			}];
-		}
-		else
-		{
-			_buffer->insert(0, (char const*)[someData bytes], [someData length]);
-		}
+
+		[someData enumerateByteRangesUsingBlock:^(void const* buf, NSRange range, BOOL*){
+			_buffer->insert(range.location, (char const*)buf, range.length);
+		}];
 	}
 	return self;
 }
