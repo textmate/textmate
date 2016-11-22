@@ -1,5 +1,6 @@
 #import "InstallBundleItems.h"
 #import "BundlesManager.h"
+#import <OakAppKit/NSAlert Additions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <bundles/bundles.h>
 #import <text/ctype.h>
@@ -70,7 +71,12 @@ void InstallBundleItems (NSArray* itemPaths)
 		char const* type = info.is_bundle ? "bundle" : "bundle item";
 		std::string const name = path::name(path::strip_extension(info.path));
 		std::string const title = text::format("The %s “%s” could not be installed because it is in delta format.", type, name.c_str());
-		NSRunAlertPanel([NSString stringWithCxxString:title], @"Contact the author of this %s to get a properly exported version.", @"OK", nil, nil, type);
+
+		NSAlert* alert        = [[NSAlert alloc] init];
+		alert.messageText     = [NSString stringWithCxxString:title];
+		alert.informativeText = [NSString stringWithFormat:@"Contact the author of this %s to get a properly exported version.", type];
+		[alert addButtonWithTitle:@"OK"];
+		[alert runModal];
 	}
 
 	for(auto const& info : malformed)
@@ -78,7 +84,12 @@ void InstallBundleItems (NSArray* itemPaths)
 		char const* type = info.is_bundle ? "bundle" : "bundle item";
 		std::string const name = path::name(path::strip_extension(info.path));
 		std::string const title = text::format("The %s “%s” could not be installed because it is malformed.", type, name.c_str());
-		NSRunAlertPanel([NSString stringWithCxxString:title], @"The %s lacks mandatory keys in its property list file.", @"OK", nil, nil, type);
+
+		NSAlert* alert        = [[NSAlert alloc] init];
+		alert.messageText     = [NSString stringWithCxxString:title];
+		alert.informativeText = [NSString stringWithFormat:@"The %s lacks mandatory keys in its property list file.", type];
+		[alert addButtonWithTitle:@"OK"];
+		[alert runModal];
 	}
 
 	for(auto const& info : installed)
@@ -86,8 +97,12 @@ void InstallBundleItems (NSArray* itemPaths)
 		char const* type = info.is_bundle ? "bundle" : "bundle item";
 		std::string const name = info.name;
 		std::string const title = text::format("The %s “%s” is already installed.", type, name.c_str());
-		int choice = NSRunAlertPanel([NSString stringWithCxxString:title], @"You can edit the installed %s to inspect it.", @"OK", @"Edit", nil, type);
-		if(choice == NSAlertAlternateReturn) // "Edit"
+
+		NSAlert* alert        = [[NSAlert alloc] init];
+		alert.messageText     = [NSString stringWithCxxString:title];
+		alert.informativeText = [NSString stringWithFormat:@"You can edit the installed %s to inspect it.", type];
+		[alert addButtons:@"OK", @"Edit", nil];
+		if([alert runModal] == NSAlertSecondButtonReturn) // "Edit"
 			[NSApp sendAction:@selector(editBundleItemWithUUIDString:) to:nil from:[NSString stringWithCxxString:info.uuid]];
 	}
 
@@ -96,8 +111,11 @@ void InstallBundleItems (NSArray* itemPaths)
 	{
 		if(info.is_bundle)
 		{
-			int choice = NSRunAlertPanel([NSString stringWithFormat:@"Would you like to install the “%@” bundle?", [NSString stringWithCxxString:info.name]], @"Installing a bundle adds new functionality to TextMate.", @"Install", @"Cancel", nil);
-			if(choice == NSAlertDefaultReturn) // "Install"
+			NSAlert* alert        = [[NSAlert alloc] init];
+			alert.messageText     = [NSString stringWithFormat:@"Would you like to install the “%@” bundle?", [NSString stringWithCxxString:info.name]];
+			alert.informativeText = @"Installing a bundle adds new functionality to TextMate.";
+			[alert addButtons:@"Install", @"Cancel", nil];
+			if([alert runModal] == NSAlertFirstButtonReturn) // "Install"
 			{
 				std::string const installDir = path::join(path::home(), "Library/Application Support/TextMate/Pristine Copy/Bundles");
 				if(path::make_dir(installDir))

@@ -13,7 +13,13 @@ void OakRunIOAlertPanel (char const* format, ...)
 	char* buf = NULL;
 	vasprintf(&buf, format, ap);
 	va_end(ap);
-	NSRunAlertPanel(@(buf), @"Error: %s", @"OK", nil, nil, strerror(errno));
+
+	NSAlert* alert        = [[NSAlert alloc] init];
+	alert.messageText     = @(buf);
+	alert.informativeText = [NSString stringWithFormat:@"Error: %s", strerror(errno)];
+	[alert addButtonWithTitle:@"OK"];
+	[alert runModal];
+
 	free(buf);
 }
 
