@@ -1,4 +1,5 @@
 #import "OakFileManager.h"
+#import "NSAlert Additions.h"
 #import "OakSound.h"
 #import <OakFoundation/NSFileManager Additions.h>
 #import <OakFoundation/NSString Additions.h>
@@ -76,8 +77,13 @@ NSString* OakReplaceDateInString (NSString* srcPath, NSDate* newDate)
 	NSArray* contents = [[NSFileManager defaultManager] contentsOfDirectoryAtURL:dirURL includingPropertiesForKeys:nil options:NSDirectoryEnumerationSkipsHiddenFiles error:&error];
 	if([contents count] != 0)
 	{
-		NSInteger choice = NSRunCriticalAlertPanel(@"Folder Not Empty!", @"%@", @"Delete Folder", @"Cancel", nil, [self expandFormat:@"Do you wish to delete “%@” and all the contained items?" withURL:dirURL]);
-		if(choice == NSAlertAlternateReturn) // "Cancel"
+		NSAlert* alert        = [[NSAlert alloc] init];
+		alert.alertStyle      = NSCriticalAlertStyle;
+		alert.messageText     = @"Folder Not Empty!";
+		alert.informativeText = [self expandFormat:@"Do you wish to delete “%@” and all the contained items?" withURL:dirURL];
+		[alert addButtons:@"Delete Folder", @"Cancel", nil];
+
+		if([alert runModal] == NSAlertSecondButtonReturn) // "Cancel"
 			return;
 	}
 
@@ -113,8 +119,13 @@ NSString* OakReplaceDateInString (NSString* srcPath, NSDate* newDate)
 	{
 		if([fileSize unsignedLongLongValue])
 		{
-			NSInteger choice = NSRunCriticalAlertPanel(@"Document Not Empty!", @"%@", @"Delete Document", @"Cancel", nil, [self expandFormat:@"Do you wish to delete “%@”?" withURL:fileURL]);
-			if(choice == NSAlertAlternateReturn) // "Cancel"
+			NSAlert* alert        = [[NSAlert alloc] init];
+			alert.alertStyle      = NSCriticalAlertStyle;
+			alert.messageText     = @"Document Not Empty!";
+			alert.informativeText = [self expandFormat:@"Do you wish to delete “%@”?" withURL:fileURL];
+			[alert addButtons:@"Delete Document", @"Cancel", nil];
+
+			if([alert runModal] == NSAlertSecondButtonReturn) // "Cancel"
 				return;
 		}
 	}
@@ -240,8 +251,13 @@ NSString* OakReplaceDateInString (NSString* srcPath, NSDate* newDate)
 	{
 		error = nil;
 
-		NSInteger choice = NSRunCriticalAlertPanel([NSString stringWithFormat:@"Are you sure you want to delete “%@”?", [[NSFileManager defaultManager] displayNameAtPath:[trashURL path]]], @"This item will be deleted immediately. You can’t undo this action.", @"Delete", @"Cancel", nil);
-		if(choice == NSAlertDefaultReturn) // "Delete"
+		NSAlert* alert        = [[NSAlert alloc] init];
+		alert.alertStyle      = NSCriticalAlertStyle;
+		alert.messageText     = [NSString stringWithFormat:@"Are you sure you want to delete “%@”?", [[NSFileManager defaultManager] displayNameAtPath:[trashURL path]]];
+		alert.informativeText = @"This item will be deleted immediately. You can’t undo this action.";
+		[alert addButtons:@"Delete", @"Cancel", nil];
+
+		if([alert runModal] == NSAlertFirstButtonReturn) // "Delete"
 		{
 			if([[NSFileManager defaultManager] removeItemAtURL:trashURL error:&error])
 			{
