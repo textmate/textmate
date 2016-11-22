@@ -596,7 +596,7 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 		NSSavePanel* savePanel = [NSSavePanel savePanel];
 		[savePanel setNameFieldStringValue:[NSString stringWithCxxString:name + ".tmbundle"]];
 		[savePanel beginSheetModalForWindow:self.window completionHandler:^(NSInteger result) {
-			if(result == NSOKButton)
+			if(result == NSFileHandlingPanelOKButton)
 			{
 				NSString* path = [[savePanel.URL filePathURL] path];
 				if([[NSFileManager defaultManager] fileExistsAtPath:path])
