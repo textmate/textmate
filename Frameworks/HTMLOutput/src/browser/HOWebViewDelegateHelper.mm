@@ -60,7 +60,11 @@ static BOOL IsProtocolRelativeURL (NSURL* url)
 
 - (BOOL)webView:(WebView*)sender runJavaScriptConfirmPanelWithMessage:(NSString*)message initiatedByFrame:(WebFrame*)frame
 {
-	return NSAlertDefaultReturn == NSRunAlertPanel(NSLocalizedString(@"Script Message", @"JavaScript alert title"), @"%@", NSLocalizedString(@"OK", @"JavaScript alert confirmation"), NSLocalizedString(@"Cancel", @"JavaScript alert cancel"), nil, message);
+	NSAlert* alert        = [[NSAlert alloc] init];
+	alert.messageText     = NSLocalizedString(@"Script Message", @"JavaScript alert title");
+	alert.informativeText = message;
+	[alert addButtons:NSLocalizedString(@"OK", @"JavaScript alert confirmation"), NSLocalizedString(@"Cancel", @"JavaScript alert cancel"), nil];
+	return [alert runModal] == NSAlertFirstButtonReturn;
 }
 
 - (void)webView:(WebView*)sender runOpenPanelForFileButtonWithResultListener:(id <WebOpenPanelResultListener>)resultListener

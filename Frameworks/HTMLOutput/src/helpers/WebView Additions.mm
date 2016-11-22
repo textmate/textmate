@@ -86,13 +86,26 @@
 
 	NSString* str;
 	if([encoding isEqualToString:@"utf-8"])
+	{
 		str = [[NSString alloc] initWithData:[dataSource data] encoding:NSUTF8StringEncoding];
+	}
 	else if([encoding isEqualToString:@"utf-16"] || [encoding isEqualToString:@"utf16"])
+	{
 		str = [[NSString alloc] initWithData:[dataSource data] encoding:NSUnicodeStringEncoding];
+	}
 	else if([encoding isEqualToString:@"macintosh"])
+	{
 		str = [[NSString alloc] initWithData:[dataSource data] encoding:NSMacOSRomanStringEncoding];
+	}
 	else
-		return (void)NSRunAlertPanel(@"Unknown Encoding", @"The encoding used for this HTML buffer (“%@”) is unsupported.\nPlease file a bug report stating the encoding name and how you got to it.", @"Continue", nil, nil, [dataSource textEncodingName]);
+	{
+		NSAlert* alert        = [[NSAlert alloc] init];
+		alert.messageText     = @"Unknown Encoding";
+		alert.informativeText = [NSString stringWithFormat:@"The encoding used for this HTML buffer (“%@”) is unsupported.\nPlease file a bug report stating the encoding name and how you got to it.", [dataSource textEncodingName]];
+		[alert addButtonWithTitle:@"Continue"];
+		[alert runModal];
+		return;
+	}
 
 	NSString* name = OakNotEmptyString(self.mainFrameTitle) ? self.mainFrameTitle : nil;
 	OakDocument* doc = [OakDocument documentWithString:str fileType:@"text.html.basic" customName:name];

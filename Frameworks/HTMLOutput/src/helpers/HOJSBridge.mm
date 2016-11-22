@@ -1,5 +1,6 @@
 #import "HOJSBridge.h"
 #import "add_to_buffer.h"
+#import <OakAppKit/NSAlert Additions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <oak/debug.h>
 #import <document/OakDocument.h>
@@ -212,8 +213,11 @@ OAK_DEBUG_VAR(HTMLOutput_JSShellCommand);
 
 				while(runLoop->start() == false) // timeout
 				{
-					NSInteger choice = NSRunAlertPanel(@"JavaScript Warning", @"The command ‘%@’ has been running for 15 seconds. Would you like to stop it?\n\nTo avoid this warning, the bundle command should use the asynchronous version of TextMate.system().", @"Stop Command", @"Cancel", nil, aCommand);
-					if(choice == NSAlertDefaultReturn) // "Stop Command"
+					NSAlert* alert        = [[NSAlert alloc] init];
+					alert.messageText     = @"JavaScript Warning";
+					alert.informativeText = [NSString stringWithFormat:@"The command ‘%@’ has been running for 15 seconds. Would you like to stop it?\n\nTo avoid this warning, the bundle command should use the asynchronous version of TextMate.system().", aCommand];
+					[alert addButtons:@"Stop Command", @"Cancel", nil];
+					if([alert runModal] == NSAlertFirstButtonReturn) // "Stop Command"
 					{
 						runLoop.reset();
 						[self cancelCommand];

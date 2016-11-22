@@ -140,7 +140,11 @@ OAK_DEBUG_VAR(AppController_Documents);
 			}
 			else
 			{
-				NSRunAlertPanel(@"File Does not Exist", @"The item “%@” does not exist.", @"Continue", nil, nil, [NSString stringWithCxxString:path]);
+				NSAlert* alert        = [[NSAlert alloc] init];
+				alert.messageText     = @"File Does not Exist";
+				alert.informativeText = [NSString stringWithFormat:@"The item “%@” does not exist.", [NSString stringWithCxxString:path]];
+				[alert addButtonWithTitle:@"Continue"];
+				[alert runModal];
 			}
 		}
 		else if(uuid != parameters.end())
@@ -152,7 +156,11 @@ OAK_DEBUG_VAR(AppController_Documents);
 			}
 			else
 			{
-				NSRunAlertPanel(@"File Does not Exist", @"No document found for UUID %@.", @"Continue", nil, nil, [NSString stringWithCxxString:uuid->second]);
+				NSAlert* alert        = [[NSAlert alloc] init];
+				alert.messageText     = @"File Does not Exist";
+				alert.informativeText = [NSString stringWithFormat:@"No document found for UUID %@.", [NSString stringWithCxxString:uuid->second]];
+				[alert addButtonWithTitle:@"Continue"];
+				[alert runModal];
 			}
 		}
 		else if(range != text::range_t::undefined)
@@ -187,12 +195,20 @@ OAK_DEBUG_VAR(AppController_Documents);
 		}
 		else
 		{
-			NSRunAlertPanel(@"Missing Parameter", @"You need to provide either a (file) url or line parameter. The URL given was: ‘%@’.", @"Continue", nil, nil, aURL);
+			NSAlert* alert        = [[NSAlert alloc] init];
+			alert.messageText     = @"Missing Parameter";
+			alert.informativeText = [NSString stringWithFormat:@"You need to provide either a (file) url or line parameter. The URL given was: ‘%@’.", aURL];
+			[alert addButtonWithTitle:@"Continue"];
+			[alert runModal];
 		}
 	}
 	else
 	{
-		NSRunAlertPanel(@"Unknown URL Scheme", @"This version of TextMate does not support “%@” in its URL scheme.", @"Continue", nil, nil, [aURL host]);
+		NSAlert* alert        = [[NSAlert alloc] init];
+		alert.messageText     = @"Unknown URL Scheme";
+		alert.informativeText = [NSString stringWithFormat:@"This version of TextMate does not support “%@” in its URL scheme.", [aURL host]];
+		[alert addButtonWithTitle:@"Continue"];
+		[alert runModal];
 	}
 }
 

@@ -615,7 +615,13 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 					res = res && item->save_to(dest);
 
 				if(!res)
-					NSRunAlertPanel(@"Failed to Save Bundle", @"Unknown error while saving bundle as “%@”.", @"OK", nil, nil, [path stringByAbbreviatingWithTildeInPath]);
+				{
+					NSAlert* alert        = [[NSAlert alloc] init];
+					alert.messageText     = @"Failed to Save Bundle";
+					alert.informativeText = [NSString stringWithFormat:@"Unknown error while saving bundle as “%@”.", [path stringByAbbreviatingWithTildeInPath]];
+					[alert addButtonWithTitle:@"OK"];
+					[alert runModal];
+				}
 			}
 		}];
 	}

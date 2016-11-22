@@ -7,6 +7,7 @@
 #import "FSSearchDataSource.h"
 #import "FSXcodeProjectDataSource.h"
 #import <OakAppKit/OakAppKit.h>
+#import <OakAppKit/NSAlert Additions.h>
 #import <OakAppKit/OakFileManager.h>
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
