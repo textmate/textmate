@@ -3,6 +3,7 @@
 #import "sw_update.h"
 #import <version/version.h>
 #import <OakAppKit/OakAppKit.h>
+#import <OakAppKit/NSAlert Additions.h>
 #import <OakAppKit/OakSound.h>
 #import <OakAppKit/NSMenu Additions.h>
 #import <OakFoundation/NSDate Additions.h>
@@ -148,7 +149,14 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 			if(self.errorString)
 			{
 				if(!backgroundFlag)
-					NSRunInformationalAlertPanel(@"Error checking for new version", @"%@", @"Continue", nil, nil, self.errorString);
+				{
+					NSAlert* alert        = [[NSAlert alloc] init];
+					alert.alertStyle      = NSAlertStyleInformational;
+					alert.messageText     = @"Error checking for new version";
+					alert.informativeText = self.errorString;
+					[alert addButtonWithTitle:@"Continue"];
+					[alert runModal];
+				}
 			}
 			else if(info.version != NULL_STR && info.url != NULL_STR)
 			{
@@ -159,24 +167,41 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 
 				if(version::equal(info.version, to_s(version)) && !backgroundFlag)
 				{
-					NSInteger choice = NSRunInformationalAlertPanel(@"Up To Date", @"%@ is the latest version available—you have version %@.", @"Continue", nil, redownloadFlag ? @"Redownload" : nil, newVersion, version);
-					if(choice == NSAlertOtherReturn) // “Redownload”
+					NSAlert* alert        = [[NSAlert alloc] init];
+					alert.alertStyle      = NSAlertStyleInformational;
+					alert.messageText     = @"Up To Date";
+					alert.informativeText = [NSString stringWithFormat:@"%@ is the latest version available—you have version %@.", newVersion, version];
+					[alert addButtonWithTitle:@"Continue"];
+					if(redownloadFlag)
+						[alert addButtonWithTitle:@"Redownload"];
+
+					if([alert runModal] == NSAlertSecondButtonReturn) // “Redownload”
 						downloadAndInstall = YES;
 				}
 				else if(version::less(info.version, to_s(version)) && !backgroundFlag)
 				{
-					NSInteger choice = NSRunInformationalAlertPanel(@"Up To Date", @"%@ is the latest version available—you have version %@.", @"Continue", nil, @"Downgrade", newVersion, version);
-					if(choice == NSAlertOtherReturn) // “Downgrade”
+					NSAlert* alert        = [[NSAlert alloc] init];
+					alert.alertStyle      = NSAlertStyleInformational;
+					alert.messageText     = @"Up To Date";
+					alert.informativeText = [NSString stringWithFormat:@"%@ is the latest version available—you have version %@.", newVersion, version];
+					[alert addButtons:@"Continue", @"Downgrade", nil];
+					if([alert runModal] == NSAlertSecondButtonReturn) // “Downgrade”
 						downloadAndInstall = YES;
 				}
 				else if(version::less(to_s(version), info.version))
 				{
 					if(!backgroundFlag || [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsAskBeforeUpdatingKey])
 					{
-						NSInteger choice = NSRunInformationalAlertPanel(@"New Version Available", @"%@ is now available—you have version %@. Would you like to download it now?", @"Download & Install", nil, @"Later", newVersion, version);
-						if(choice == NSAlertDefaultReturn) // “Download & Install”
+						NSAlert* alert        = [[NSAlert alloc] init];
+						alert.alertStyle      = NSAlertStyleInformational;
+						alert.messageText     = @"New Version Available";
+						alert.informativeText = [NSString stringWithFormat: @"%@ is now available—you have version %@. Would you like to download it now?", newVersion, version];
+						[alert addButtons:@"Download & Install", @"Later", nil];
+
+						NSModalResponse choice = [alert runModal];
+						if(choice == NSAlertFirstButtonReturn) // “Download & Install”
 							downloadAndInstall = YES;
-						else if(choice == NSAlertOtherReturn) // “Later”
+						else if(choice == NSAlertSecondButtonReturn) // “Later”
 							[[NSUserDefaults standardUserDefaults] setObject:[[NSDate date] dateByAddingTimeInterval:24*60*60] forKey:kUserDefaultsSoftwareUpdateSuspendUntilKey];
 					}
 					else if(version::less(to_s(self.lastVersionDownloaded), info.version))
