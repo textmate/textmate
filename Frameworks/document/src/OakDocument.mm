@@ -665,7 +665,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 
 - (void)updateRecentDocumentMenu
 {
-	if(_recentTrackingDisabled || !_path || _virtualPath)
+	if(_recentTrackingDisabled || !self.isOnDisk || _virtualPath)
 		return;
 
 	NSURL* url = [NSURL fileURLWithPath:_path];
