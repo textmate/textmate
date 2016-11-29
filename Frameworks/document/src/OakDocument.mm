@@ -310,10 +310,8 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 - (instancetype)initWithPath:(NSString*)aPath
 {
 	if(self = [self init])
-	{
 		_path   = aPath;
-		_onDisk = _path && access([_path fileSystemRepresentation], F_OK) == 0;
-	}
+
 	return self;
 }
 
@@ -348,7 +346,6 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 		_backupPath     = backupPath;
 
 		_path           = to_ns(path::resolve(path::get_attr(path, "com.macromates.backup.path")));
-		_onDisk         = _path && access([_path fileSystemRepresentation], F_OK) == 0;
 		_fileType       = to_ns(path::get_attr(path, "com.macromates.backup.file-type"));
 		_diskEncoding   = to_ns(path::get_attr(path, "com.macromates.backup.encoding"));
 		_diskNewlines   = to_ns(path::get_attr(path, "com.macromates.backup.newlines"));
@@ -503,12 +500,16 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 
 	if(self.isLoaded)
 	{
-		self.onDisk = _path && access([_path fileSystemRepresentation], F_OK) == 0;
 		if(NSString* fileType = [self sniffFileType])
 			self.fileType = fileType;
 	}
 
 	[OakDocumentController.sharedInstance update:self];
+}
+
+- (BOOL)isOnDisk
+{
+	return _path && access([_path fileSystemRepresentation], F_OK) == 0;
 }
 
 - (void)setFileType:(NSString*)newType
@@ -603,7 +604,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 
 - (BOOL)saveBackup:(id)sender
 {
-	if(_buffer && (_onDisk ? _savedRevision != _revision : !_bufferEmpty))
+	if(_buffer && (self.isOnDisk ? _savedRevision != _revision : !_bufferEmpty))
 	{
 		if(_backupPath && _backupRevision == _revision)
 			return NO;
@@ -831,7 +832,6 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	_buffer->set_async_parsing(true);
 	_buffer->bump_revision();
 
-	self.onDisk         = _path && access([_path fileSystemRepresentation], F_OK) == 0;
 	self.savedRevision  = _buffer->revision();
 	self.backupRevision = _buffer->revision(); // This is ignored when backupPath is nil
 	self.revision       = _buffer->revision();
@@ -985,7 +985,6 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 				// After performReplacements: we have a buffer but isLoaded == NO
 				if(self.isLoaded)
 				{
-					self.onDisk        = self.path ? YES : NO;
 					self.diskEncoding  = to_ns(encoding.charset());
 					self.diskNewlines  = to_ns(encoding.newlines());
 
@@ -1030,7 +1029,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	if(_path && _buffer)
 	{
 		document::marks.copy_from_buffer(to_s(_path), *_buffer);
-		if(_onDisk && !self.isDocumentEdited)
+		if(self.isOnDisk && !self.isDocumentEdited)
 		{
 			settings_t const settings = settings_for_path(to_s(_path), to_s(_fileType), to_s([_path stringByDeletingLastPathComponent] ?: _directory));
 			if(!settings.get(kSettingsDisableExtendedAttributesKey, false))
@@ -1138,7 +1137,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	[self snapshot];
 }
 
-- (BOOL)isDocumentEdited                              { return _revision != _savedRevision && (_onDisk || !(_loaded && _bufferEmpty)); }
+- (BOOL)isDocumentEdited                              { return _revision != _savedRevision && (self.isOnDisk || !(_loaded && _bufferEmpty)); }
 - (BOOL)shouldSniffFileType                           { return settings_for_path(to_s(_virtualPath ?: _path), scope::scope_t(), to_s([_path stringByDeletingLastPathComponent] ?: _directory)).get(kSettingsFileTypeKey, NULL_STR) == NULL_STR; }
 
 - (BOOL)canUndo                                       { return _undoManager && _undoManager->can_undo(); }
@@ -1640,12 +1639,10 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	}
 	else if((flags & NOTE_DELETE) == NOTE_DELETE)
 	{
-		self.onDisk = _path && access([_path fileSystemRepresentation], F_OK) == 0;
 		[OakDocumentController.sharedInstance update:self];
 	}
 	else if((flags & NOTE_WRITE) == NOTE_WRITE || (flags & NOTE_CREATE) == NOTE_CREATE)
 	{
-		self.onDisk = _path && access([_path fileSystemRepresentation], F_OK) == 0;
 		self.needsImportDocumentChanges = YES;
 		[OakDocumentController.sharedInstance update:self];
 	}

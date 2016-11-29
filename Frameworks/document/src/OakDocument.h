@@ -74,7 +74,7 @@ PUBLIC @interface OakDocument : NSObject
 
 @property (nonatomic) osx::authorization_t authorization;
 
-@property (nonatomic, getter = isOnDisk)                   BOOL onDisk;
+@property (nonatomic, getter = isOnDisk, readonly)         BOOL onDisk;
 @property (nonatomic, getter = isOpen, readonly)           BOOL open;
 @property (nonatomic, getter = isLoaded, readonly)         BOOL loaded;
 @property (nonatomic, getter = isBufferEmpty, readonly)    BOOL bufferEmpty;
