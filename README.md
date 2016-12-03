@@ -60,8 +60,7 @@ Building TextMate has the following dependencies:
 
 In practice `hg` ([mercurial][]) is only required for the SCM library’s tests so you can skip this dependency if you don’t mind a failing test.
 
-If you want to avoid the libressl linker warnings about being built for different deployment tar
-et then run `brew edit libressl` and make the following change:
+If you want to avoid the libressl linker warnings about being built for different deployment target then run `brew edit libressl` and make the following change:
 
 	-    system "./configure", *args
 	+    system "env", "LDFLAGS=-mmacosx-version-min=10.8", "CFLAGS=-mmacosx-version-min=10.8", "./configure", *args
