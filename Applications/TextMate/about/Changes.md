@@ -2,6 +2,12 @@ Title: Release Notes
 
 # Changes
 
+## 2016-12-03 (v2.0-rc.5)
+
+* Fix slowdown when editing files on high-latency file systems.
+* Don’t add non-existing files to Open Recent menu, as they will result in duplicates. *[Ronald Wampler]*
+* See [all changes since v2.0-rc.4](https://github.com/textmate/textmate/compare/v2.0-rc.4...v2.0-rc.5)
+
 ## 2016-11-18 (v2.0-rc.4)
 
 * Fixes/improvements.
