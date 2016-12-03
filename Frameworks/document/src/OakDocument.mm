@@ -177,6 +177,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	NSHashTable* _documentEditors;
 	scm::status::type _scmStatus;
 	OakFileIconImage* _icon;
+	NSString* _cachedDisplayName;
 
 	std::unique_ptr<ng::buffer_t> _buffer;
 	std::unique_ptr<ng::detail::storage_t> _snapshot;
@@ -438,8 +439,13 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 {
 	if(_customName)
 		return _customName;
+
 	if(_path)
-		return [[NSFileManager defaultManager] displayNameAtPath:_path];
+	{
+		if(!_cachedDisplayName)
+			_cachedDisplayName = [[NSFileManager defaultManager] displayNameAtPath:_path];
+		return _cachedDisplayName;
+	}
 
 	if(self.untitledCount == 0)
 		self.untitledCount = [OakDocumentController.sharedInstance firstAvailableUntitledCount];
@@ -487,6 +493,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	_path = path;
 	_directory = nil;
 	_icon = nil;
+	_cachedDisplayName = nil;
 	self.customName = nil;
 
 	if(_observeFileSystem)
