@@ -22,6 +22,7 @@ std::string const kSettingsInvisiblesMapKey               = "invisiblesMap";
 std::string const kSettingsProjectDirectoryKey            = "projectDirectory";
 std::string const kSettingsSCMStatusKey                   = "scmStatus";
 std::string const kSettingsWindowTitleKey                 = "windowTitle";
+std::string const kSettingsTabTitleKey                    = "tabTitle";
 std::string const kSettingsScopeAttributesKey             = "scopeAttributes";
 
 std::string const kSettingsSaveOnBlurKey                  = "saveOnBlur";
