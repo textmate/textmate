@@ -1265,15 +1265,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 {
 	if(self.selectedDocument.displayName)
 	{
-		auto map = self.selectedDocument.variables;
-		auto const& scm = _documentSCMVariables.empty() ? _projectSCMVariables : _documentSCMVariables;
-		map.insert(scm.begin(), scm.end());
-		if(self.projectPath)
-			map["projectDirectory"] = to_s(self.projectPath);
-
-		NSString* docDirectory = self.selectedDocument.path ? [self.selectedDocument.path stringByDeletingLastPathComponent] : self.untitledSavePath;
-		settings_t const settings = settings_for_path(to_s(self.selectedDocument.virtualPath ?: self.selectedDocument.path), to_s(self.selectedDocument.fileType) + " " + to_s(self.scopeAttributes), to_s(docDirectory), map);
-		self.window.title = to_ns(settings.get(kSettingsWindowTitleKey, to_s(self.selectedDocument.displayName)));
+		self.window.title = [self titleForDocument:self.selectedDocument withSetting:kSettingsWindowTitleKey];
 	}
 	else
 	{
@@ -1566,10 +1558,21 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 // ===========================
 
 - (NSUInteger)numberOfRowsInTabBarView:(OakTabBarView*)aTabBarView                         { return _documents.count; }
-- (NSString*)tabBarView:(OakTabBarView*)aTabBarView titleForIndex:(NSUInteger)anIndex      { return _documents[anIndex].displayName; }
 - (NSString*)tabBarView:(OakTabBarView*)aTabBarView pathForIndex:(NSUInteger)anIndex       { return _documents[anIndex].path ?: @""; }
 - (NSString*)tabBarView:(OakTabBarView*)aTabBarView identifierForIndex:(NSUInteger)anIndex { return _documents[anIndex].identifier.UUIDString; }
 - (BOOL)tabBarView:(OakTabBarView*)aTabBarView isEditedAtIndex:(NSUInteger)anIndex         { return _documents[anIndex].isDocumentEdited; }
+
+- (NSString*)tabBarView:(OakTabBarView*)aTabBarView titleForIndex:(NSUInteger)anIndex
+{
+	if (_documents[anIndex].displayName)
+	{
+		return [self titleForDocument:_documents[anIndex] withSetting:kSettingsTabTitleKey];
+	}
+	else
+	{
+		return _documents[anIndex].displayName;
+	}
+}
 
 // ==============================
 // = OakTabBarView Context Menu =
@@ -2069,6 +2072,19 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 // ===========
 // = Methods =
 // ===========
+
+- (NSString*)titleForDocument:(OakDocument*)document withSetting:(std::string)setting
+{
+	auto map = document.variables;
+	auto const& scm = _documentSCMVariables.empty() ? _projectSCMVariables : _documentSCMVariables;
+	map.insert(scm.begin(), scm.end());
+	if(self.projectPath) {
+		map["projectDirectory"] = to_s(self.projectPath);
+	}
+	NSString* docDirectory = document.path ? [document.path stringByDeletingLastPathComponent] : self.untitledSavePath;
+	settings_t const settings = settings_for_path(to_s(document.virtualPath ?: document.path), to_s(document.fileType) + " " + to_s(self.scopeAttributes), to_s(docDirectory), map);
+	return to_ns(settings.get(setting, to_s(document.displayName)));
+}
 
 - (NSString*)untitledSavePath
 {

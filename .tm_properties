@@ -2,6 +2,7 @@
 windowTitleProject   = '${projectDirectory:+ — ${projectDirectory/^.*\///}}'
 windowTitleFramework = '${TM_DIRECTORY/.*\/Frameworks\/([^\/]+)\/.*|.*/${1:+ ($1)}/}'
 windowTitle          = '$TM_DISPLAYNAME$windowTitleFramework$windowTitleProject$windowTitleSCM'
+tabTitle             = '$TM_DISPLAYNAME'
 
 excludeDirectoriesInFileChooser  = '{bin/CxxTest,build}'
 excludeDirectoriesInFolderSearch = '{bin/CxxTest,build}'

@@ -25,6 +25,7 @@ PUBLIC extern std::string const kSettingsInvisiblesMapKey;
 PUBLIC extern std::string const kSettingsProjectDirectoryKey;
 PUBLIC extern std::string const kSettingsSCMStatusKey;
 PUBLIC extern std::string const kSettingsWindowTitleKey;
+PUBLIC extern std::string const kSettingsTabTitleKey;
 PUBLIC extern std::string const kSettingsScopeAttributesKey;
 
 PUBLIC extern std::string const kSettingsSaveOnBlurKey;
