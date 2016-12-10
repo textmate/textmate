@@ -124,7 +124,7 @@ struct tracking_t : fs::event_callback_t
 				treat_as_directory = !(flags & (path::flag::package|path::flag::hidden_volume));
 				target             = to_s([[NSURL fileURLWithPath:[NSString stringWithCxxString:path] isDirectory:path::flag::directory|path::flag::package] absoluteString]);
 
-				if(path::extension(path) == ".xcodeproj")
+				if(path::extension(path) == ".xcodeproj" && [[NSUserDefaults standardUserDefaults] boolForKey:@"enableXcodeDataSource"])
 					target = "xcodeproj://localhost" + encode::url_part(path, "/") + "/";
 			}
 			else if(entry->d_type == DT_REG)
