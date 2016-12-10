@@ -365,7 +365,7 @@ int main (int argc, char const* argv[])
 	}
 	else if(command == "dependents")
 	{
-		for(auto const& bundle : dependents(index, filtered_bundles(index, sourceNames, bundleNames)))
+		for(auto const& bundle : dependents(index, filtered_bundles(index, sourceNames, bundleNames), false))
 			fprintf(stdout, "%s\n", short_bundle_info(bundle, get_width()).c_str());
 	}
 	else
