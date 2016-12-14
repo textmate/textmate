@@ -213,12 +213,20 @@ static NSDragOperation filter (NSDragOperation mask)
 
 		if(path::exists(dst))
 		{
-			char const* opDescription = (op == NSDragOperationMove) ? "moving" : ((op == NSDragOperationCopy) ? "copying" : "linking to");
-			int choice = NSRunAlertPanel(@"File Exists", @"An item named “%@” already exists in this location. Do you want to replace it with the one you’re %s?", @"Replace", @"Cancel", nil, [NSString stringWithCxxString:path::display_name(src)], opDescription);
-			if(choice == NSAlertDefaultReturn) // "Replace"
-				path::remove(dst);
-			else if(choice == NSAlertAlternateReturn) // "Cancel"
+			if(path::is_child(src, dst))
+			{
+				NSRunCriticalAlertPanel(@"Folder Exists!", @"Cannot replace folder “%@” with an item it contains.", @"OK", nil, nil, [NSString stringWithCxxString:path::display_name(dst)]);
 				continue;
+			}
+			else
+			{
+				char const* opDescription = (op == NSDragOperationMove) ? "moving" : ((op == NSDragOperationCopy) ? "copying" : "linking to");
+				int choice = NSRunAlertPanel(@"File Exists", @"An item named “%@” already exists in this location. Do you want to replace it with the one you’re %s?", @"Replace", @"Cancel", nil, [NSString stringWithCxxString:path::display_name(src)], opDescription);
+				if(choice == NSAlertDefaultReturn) // "Replace"
+					path::remove(dst);
+				else if(choice == NSAlertAlternateReturn) // "Cancel"
+					continue;
+			}
 		}
 
 		OakFileManager* fm = [OakFileManager sharedInstance];
