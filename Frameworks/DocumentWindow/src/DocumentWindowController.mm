@@ -1347,7 +1347,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		dispatch_async(dispatch_get_main_queue(), ^{
 			std::string const currentProjectDir   = to_s(_projectPath ?: NSHomeDirectory());
 			std::string const currentDocumentPath = self.selectedDocument.path ? to_s(self.selectedDocument.path) : path::join(projectDir, "dummy");
-			if(projectDir == currentProjectDir && currentDocumentPath == currentDocumentPath)
+			if(projectDir == currentProjectDir && documentPath == currentDocumentPath)
 				_externalScopeAttributes = res;
 		});
 
