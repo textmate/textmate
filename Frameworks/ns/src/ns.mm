@@ -228,17 +228,17 @@ std::string to_s (NSEvent* anEvent, bool preserveNumPadFlag)
 	CGEventRef cgEvent = [anEvent CGEvent];
 	CGKeyCode key      = (CGKeyCode)[anEvent keyCode];
 	CGEventFlags flags = CGEventGetFlags(cgEvent);
-	flags = CGEventFlags(flags & (kCGEventFlagMaskCommand | kCGEventFlagMaskShift | kCGEventFlagMaskAlternate | kCGEventFlagMaskControl | kCGEventFlagMaskNumericPad));
+	flags &= kCGEventFlagMaskCommand | kCGEventFlagMaskShift | kCGEventFlagMaskAlternate | kCGEventFlagMaskControl | kCGEventFlagMaskNumericPad;
 
 	std::string keyString              = NULL_STR;
-	std::string const keyStringNoFlags = string_for(key, CGEventFlags(0));
-	CGEventFlags newFlags              = CGEventFlags(flags & (kCGEventFlagMaskControl|kCGEventFlagMaskCommand));
+	std::string const keyStringNoFlags = string_for(key, 0);
+	CGEventFlags newFlags              = flags & (kCGEventFlagMaskControl|kCGEventFlagMaskCommand);
 
 	if(flags & kCGEventFlagMaskNumericPad)
 	{
 		static std::string const numPadKeys = "0123456789=/*-+.,";
 		if(preserveNumPadFlag && numPadKeys.find(keyStringNoFlags) != std::string::npos)
-			newFlags = CGEventFlags(newFlags | kCGEventFlagMaskNumericPad);
+			newFlags |= kCGEventFlagMaskNumericPad;
 	}
 
 	std::string const keyStringCommand = string_for(key, kCGEventFlagMaskCommand);
@@ -246,8 +246,8 @@ std::string to_s (NSEvent* anEvent, bool preserveNumPadFlag)
 	{
 		D(DBF_NSEvent, bug("command (⌘) changes key\n"););
 
-		newFlags = CGEventFlags(newFlags | (flags & kCGEventFlagMaskAlternate));
-		flags    = CGEventFlags(flags & ~kCGEventFlagMaskAlternate);
+		newFlags |= flags & kCGEventFlagMaskAlternate;
+		flags    &= ~kCGEventFlagMaskAlternate;
 
 		if(flags & kCGEventFlagMaskShift)
 		{
@@ -259,7 +259,7 @@ std::string to_s (NSEvent* anEvent, bool preserveNumPadFlag)
 			else
 			{
 				D(DBF_NSEvent, bug("shift (⇧) is literal\n"););
-				newFlags = CGEventFlags(newFlags | kCGEventFlagMaskShift);
+				newFlags |= kCGEventFlagMaskShift;
 			}
 		}
 	}
@@ -269,29 +269,29 @@ std::string to_s (NSEvent* anEvent, bool preserveNumPadFlag)
 		if((flags & kCGEventFlagMaskControl) && !is_ascii(keyStringNoFlags) && (ch = char_for_key_code(key, flags & kCGEventFlagMaskShift)))
 		{
 			keyString = std::string(1, ch);
-			newFlags = CGEventFlags(newFlags | (flags & kCGEventFlagMaskAlternate));
+			newFlags |= flags & kCGEventFlagMaskAlternate;
 		}
 		else
 		{
 			if(flags & kCGEventFlagMaskAlternate)
 			{
-				std::string const keyStringAlternate = string_for(key, CGEventFlags(flags & (kCGEventFlagMaskAlternate|kCGEventFlagMaskShift)));
+				std::string const keyStringAlternate = string_for(key, flags & (kCGEventFlagMaskAlternate|kCGEventFlagMaskShift));
 				if(!is_ascii(keyStringAlternate) || keyStringNoFlags == keyStringAlternate)
 				{
 					D(DBF_NSEvent, bug("option (⌥) is literal\n"););
-					newFlags = CGEventFlags(newFlags | kCGEventFlagMaskAlternate);
-					flags    = CGEventFlags(flags & ~kCGEventFlagMaskAlternate);
+					newFlags |= kCGEventFlagMaskAlternate;
+					flags    &= ~kCGEventFlagMaskAlternate;
 				}
 			}
 
 			if(flags & kCGEventFlagMaskShift)
 			{
-				std::string const keyStringShift = string_for(key, CGEventFlags(flags & (kCGEventFlagMaskAlternate|kCGEventFlagMaskShift)));
+				std::string const keyStringShift = string_for(key, flags & (kCGEventFlagMaskAlternate|kCGEventFlagMaskShift));
 				if(!is_ascii(keyStringShift) || keyStringNoFlags == keyStringShift)
 				{
 					D(DBF_NSEvent, bug("shift (⇧) is literal\n"););
-					newFlags = CGEventFlags(newFlags | kCGEventFlagMaskShift);
-					flags    = CGEventFlags(flags & ~kCGEventFlagMaskShift);
+					newFlags |= kCGEventFlagMaskShift;
+					flags    &= ~kCGEventFlagMaskShift;
 				}
 				else
 				{
@@ -302,5 +302,5 @@ std::string to_s (NSEvent* anEvent, bool preserveNumPadFlag)
 		}
 	}
 
-	return string_for(newFlags) + (keyString == NULL_STR ? string_for(key, CGEventFlags(flags & ~kCGEventFlagMaskControl)) : keyString);
+	return string_for(newFlags) + (keyString == NULL_STR ? string_for(key, flags & ~kCGEventFlagMaskControl) : keyString);
 }
