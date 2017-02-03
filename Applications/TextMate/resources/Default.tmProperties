@@ -27,6 +27,7 @@ softWrap         = true
 [ text.git-commit ]
 spellChecking    = true
 spellingLanguage = 'en'
+disableExtendedAttributes = true
 
 [ source.abnf ]
 lineEndings      = "\r\n"
