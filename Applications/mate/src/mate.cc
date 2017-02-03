@@ -7,7 +7,7 @@
 #include <io/path.h>
 #include <plist/uuid.h>
 
-static char const* const AppVersion = "2.11";
+static char const* const AppVersion = "2.12";
 
 static char const* socket_path ()
 {
@@ -138,18 +138,18 @@ static void usage (FILE* io)
 		"       %1$s -c<mark> [-l<line>] [-u<identifier> | file ...]\n"
 		"\n"
 		"Options:\n"
-		" -w, --[no-]wait               Wait for file to be closed by TextMate.\n"
-		" -l, --line <selection>        Setup <selection> after loading file.\n"
-		" -t, --type <filetype>         Treat file as having <filetype>.\n"
-		" -m, --name <name>             The display name shown in TextMate.\n"
-		" -r, --[no-]recent             Add file to Open Recent menu.\n"
-		" -u, --uuid <identifier>       Reference already open document with\n"
-		"                               <identifier>.\n"
-		" -e, --[no-]escapes            Set this to preserve ANSI escapes from stdin.\n"
-		" -s, --set-mark <mark>:<value> Set a mark containing <value> (requires --line).\n"
-		" -c, --clear-mark <mark>       Clear a mark (clears all marks without --line).\n"
-		" -h, --help                    Show this information.\n"
-		" -v, --version                 Print version information.\n"
+		" -w, --[no-]wait                 Wait for file to be closed by TextMate.\n"
+		" -l, --line <selection>          Setup <selection> after loading file.\n"
+		" -t, --type <filetype>           Treat file as having <filetype>.\n"
+		" -m, --name <name>               The display name shown in TextMate.\n"
+		" -r, --[no-]recent               Add file to Open Recent menu.\n"
+		" -u, --uuid <identifier>         Reference already open document with\n"
+		"                                 <identifier>.\n"
+		" -e, --[no-]escapes              Set this to preserve ANSI escapes from stdin.\n"
+		" -s, --set-mark <mark>[:<value>] Set a mark with optional <value> (requires --line).\n"
+		" -c, --clear-mark <mark>         Clear a mark (clears all marks without --line).\n"
+		" -h, --help                      Show this information.\n"
+		" -v, --version                   Print version information.\n"
 		"\n"
 		"Files opened via %1$s are added to the recent menu unless\n"
 		"the file starts with a period, --wait or --no-recent is\n"
