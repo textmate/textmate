@@ -24,7 +24,7 @@ tabSize          = 3
 softTabs         = false
 TM_C_POINTER     = "* "
 
-[ target ]
+[ {*.,}target ]
 fileType         = 'source.tm-properties'
 
 [ *.h ]
