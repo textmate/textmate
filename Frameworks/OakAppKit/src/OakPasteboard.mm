@@ -333,7 +333,11 @@ static BOOL HasPersistentStore = NO;
 				NSLog(@"failed to save context: %@", error);
 		}
 		@catch(NSException* e) {
-			NSRunAlertPanel(@"Failed Saving Clipboard History", @"CoreData threw the following exception: %@", @"Continue", nil, nil, e);
+			NSAlert* alert        = [[NSAlert alloc] init];
+			alert.messageText     = @"Failed Saving Clipboard History";
+			alert.informativeText = [NSString stringWithFormat:@"CoreData threw the following exception: %@", e];
+			[alert addButtonWithTitle:@"Continue"];
+			[alert runModal];
 		}
 	}
 	return res;

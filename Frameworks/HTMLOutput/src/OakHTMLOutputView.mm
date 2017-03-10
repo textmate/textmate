@@ -4,7 +4,7 @@
 #import "helpers/HOJSBridge.h"
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
-#import <OakAppKit/OakAppKit.h>
+#import <OakAppKit/NSAlert Additions.h>
 #import <oak/debug.h>
 
 @interface HOStatusBar (BusyAndProgressProperties) <HOJSBridgeDelegate>
@@ -58,23 +58,19 @@
 	NSURLRequest* request = self.webView.mainFrame.dataSource.initialRequest;
 	if(id command = [NSURLProtocol propertyForKey:@"command" inRequest:request])
 	{
-		NSAlert* alert = askUserFlag ? [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Stop “%@”?", [NSURLProtocol propertyForKey:@"processName" inRequest:request]] defaultButton:@"Stop" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"The job that the task is performing will not be completed."] : nil;
+		NSAlert* alert = askUserFlag ? [NSAlert tmAlertWithMessageText:[NSString stringWithFormat:@"Stop “%@”?", [NSURLProtocol propertyForKey:@"processName" inRequest:request]] informativeText:@"The job that the task is performing will not be completed." buttons:@"Stop", @"Cancel", nil] : nil;
 
 		__weak __block id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:@"OakCommandDidTerminateNotification" object:command queue:nil usingBlock:^(NSNotification* notification){
 			if(alert)
-			{
-				if([self.window respondsToSelector:@selector(endSheet:returnCode:)]) // MAC_OS_X_VERSION_10_9
-						[self.window endSheet:alert.window returnCode:NSAlertDefaultReturn];
-				else	[NSApp endSheet:alert.window returnCode:NSAlertDefaultReturn];
-			}
+				[self.window endSheet:alert.window returnCode:NSAlertFirstButtonReturn];
 			handler(YES);
 			[[NSNotificationCenter defaultCenter] removeObserver:observerId];
 		}];
 
 		if(alert)
 		{
-			OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){
-				if(returnCode == NSAlertDefaultReturn) /* "Stop" */
+			[alert beginSheetModalForWindow:self.window completionHandler:^(NSInteger returnCode){
+				if(returnCode == NSAlertFirstButtonReturn) /* "Stop" */
 				{
 					[self.webView.mainFrame stopLoading];
 				}
@@ -83,7 +79,7 @@
 					handler(NO);
 					[[NSNotificationCenter defaultCenter] removeObserver:observerId];
 				}
-			});
+			}];
 		}
 		else
 		{

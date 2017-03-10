@@ -57,10 +57,10 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 	if(bundleItem)
 		[alert addButtonWithTitle:@"Edit Command"];
 
-	OakShowAlertForWindow(alert, window, ^(NSInteger button){
+	[alert beginSheetModalForWindow:window completionHandler:^(NSInteger button){
 		if(button == NSAlertSecondButtonReturn)
 			[[BundleEditor sharedInstance] revealBundleItem:bundleItem];
-	});
+	}];
 }
 
 @interface QuickLookNSURLWrapper : NSObject <QLPreviewItem>
@@ -462,7 +462,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	}
 
 	NSAlert* alert = [DocumentWindowController saveAlertForDocuments:someDocuments];
-	OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){
+	[alert beginSheetModalForWindow:self.window completionHandler:^(NSInteger returnCode){
 		switch(returnCode)
 		{
 			case NSAlertFirstButtonReturn: /* "Save" */
@@ -485,7 +485,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 			}
 			break;
 		}
-	});
+	}];
 }
 
 - (void)closeTabsAtIndexes:(NSIndexSet*)anIndexSet askToSaveChanges:(BOOL)askToSaveFlag createDocumentIfEmpty:(BOOL)createIfEmptyFlag

@@ -1,7 +1,7 @@
 #include "io.h"
-#include "fsref.h"
 #include "intermediate.h"
 #include "entries.h"
+#include <OakFoundation/OakFoundation.h>
 #include <oak/debug.h>
 #include <text/tokenize.h>
 #include <text/format.h>
@@ -878,10 +878,7 @@ namespace path
 
 	std::string move_to_trash (std::string const& path)
 	{
-		fsref_t result;
-		if(noErr != FSMoveObjectToTrashSync(fsref_t(path), result, 0))
-			return NULL_STR;
-		return result.path();
+		return OakMoveToTrash(path);
 	}
 
 	std::string duplicate (std::string const& src, std::string dst, bool overwrite)

@@ -6,6 +6,7 @@
 #import "OTVHUD.h"
 #import <OakCommand/OakCommand.h>
 #import <OakAppKit/OakAppKit.h>
+#import <OakAppKit/NSAlert Additions.h>
 #import <OakAppKit/NSEvent Additions.h>
 #import <OakAppKit/NSImage Additions.h>
 #import <OakAppKit/NSMenuItem Additions.h>
@@ -3203,12 +3204,12 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		[textField sizeToFit];
 		[textField setFrameSize:NSMakeSize(200, NSHeight([textField frame]))];
 
-		NSAlert* alert = [NSAlert alertWithMessageText:@"Set Wrap Column" defaultButton:@"OK" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"Specify what column text should wrap at:"];
+		NSAlert* alert = [NSAlert tmAlertWithMessageText:@"Set Wrap Column" informativeText:@"Specify what column text should wrap at:" buttons:@"OK", @"Cancel", nil];
 		[alert setAccessoryView:textField];
-		OakShowAlertForWindow(alert, [self window], ^(NSInteger returnCode){
-			if(returnCode == NSAlertDefaultReturn)
+		[alert beginSheetModalForWindow:self.window completionHandler:^(NSInteger returnCode){
+			if(returnCode == NSAlertFirstButtonReturn)
 				[self setWrapColumn:std::max<NSInteger>([textField integerValue], 10)];
-		});
+		}];
 	}
 	else
 	{
@@ -3559,9 +3560,19 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 			D(DBF_OakTextView_DragNDrop, bug("insert as text: %s\n", [path UTF8String]););
 			std::string const& content = path::content(to_s(path));
 			if(!utf8::is_valid(content.begin(), content.end()))
+			{
 				binary = true;
-			else if(content.size() < SQ(1024) || NSAlertDefaultReturn == NSRunAlertPanel(@"Inserting Large File", @"The file “%@” has a size of %.1f MB. Are you sure you want to insert this as a text file?", @"Insert File", @"Cancel", nil, [path stringByAbbreviatingWithTildeInPath], content.size() / SQ(1024.0))) // larger than 1 MB?
-				merged += content;
+			}
+			else
+			{
+				NSAlert* alert        = [[NSAlert alloc] init];
+				alert.messageText     = @"Inserting Large File";
+				alert.informativeText = [NSString stringWithFormat: @"The file “%@” has a size of %.1f MB. Are you sure you want to insert this as a text file?", [path stringByAbbreviatingWithTildeInPath], content.size() / SQ(1024.0)];
+				[alert addButtons:@"Insert File", @"Cancel", nil];
+
+				if(content.size() < SQ(1024) || [alert runModal] == NSAlertFirstButtonReturn) // larger than 1 MB?
+					merged += content;
+			}
 		}
 
 		if(binary)
@@ -4001,8 +4012,11 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 
 	if(macroRecordingArray && [anEvent type] == NSLeftMouseDown)
 	{
-		NSInteger choice = NSRunAlertPanel(@"You are recording a macro", @"While recording macros it is not possible to select text or reposition the caret using your mouse.", @"Continue", @"Stop Recording", nil);
-		if(choice == NSAlertAlternateReturn) // "Stop Macro Recording"
+		NSAlert* alert        = [[NSAlert alloc] init];
+		alert.messageText     = @"You are recording a macro";
+		alert.informativeText = @"While recording macros it is not possible to select text or reposition the caret using your mouse.";
+		[alert addButtons:@"Continue", @"Stop Recording", nil];
+		if([alert runModal] == NSAlertSecondButtonReturn) // "Stop Macro Recording"
 			self.recordingMacro = NO;
 		return;
 	}
@@ -4386,8 +4400,11 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 				}
 				else if([event type] == NSKeyDown && (([[event charactersIgnoringModifiers] isEqualToString:@"c"] && ([event modifierFlags] & (NSShiftKeyMask|NSControlKeyMask|NSAlternateKeyMask|NSCommandKeyMask)) == NSControlKeyMask) || ([[event charactersIgnoringModifiers] isEqualToString:@"."] && ([event modifierFlags] & (NSShiftKeyMask|NSControlKeyMask|NSAlternateKeyMask|NSCommandKeyMask)) == NSCommandKeyMask)))
 				{
-					NSInteger choice = NSRunAlertPanel([NSString stringWithFormat:@"Stop “%@”", to_ns(aBundleCommand.name)], @"Would you like to kill the current shell command?", @"Kill Command", @"Cancel", nil);
-					if(choice == NSAlertDefaultReturn) // "Kill Command"
+					NSAlert* alert        = [[NSAlert alloc] init];
+					alert.messageText     = [NSString stringWithFormat:@"Stop “%@”", to_ns(aBundleCommand.name)];
+					alert.informativeText = @"Would you like to kill the current shell command?";
+					[alert addButtons:@"Kill Command", @"Cancel", nil];
+					if([alert runModal]== NSAlertFirstButtonReturn) // "Kill Command"
 						[command terminate];
 				}
 				else

@@ -7,6 +7,7 @@
 #import "FSSearchDataSource.h"
 #import "FSXcodeProjectDataSource.h"
 #import <OakAppKit/OakAppKit.h>
+#import <OakAppKit/NSAlert Additions.h>
 #import <OakAppKit/OakFileManager.h>
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
@@ -214,10 +215,16 @@ static NSDragOperation filter (NSDragOperation mask)
 		if(path::exists(dst))
 		{
 			char const* opDescription = (op == NSDragOperationMove) ? "moving" : ((op == NSDragOperationCopy) ? "copying" : "linking to");
-			int choice = NSRunAlertPanel(@"File Exists", @"An item named “%@” already exists in this location. Do you want to replace it with the one you’re %s?", @"Replace", @"Cancel", nil, [NSString stringWithCxxString:path::display_name(src)], opDescription);
-			if(choice == NSAlertDefaultReturn) // "Replace"
+
+			NSAlert* alert        = [[NSAlert alloc] init];
+			alert.messageText     = @"File Exists";
+			alert.informativeText = [NSString stringWithFormat:@"An item named “%@” already exists in this location. Do you want to replace it with the one you’re %s?", [NSString stringWithCxxString:path::display_name(src)], opDescription];
+			[alert addButtons:@"Replace", @"Cancel", nil];
+			NSModalResponse choice = [alert runModal];
+
+			if(choice == NSAlertFirstButtonReturn) // "Replace"
 				path::remove(dst);
-			else if(choice == NSAlertAlternateReturn) // "Cancel"
+			else if(choice == NSAlertSecondButtonReturn) // "Cancel"
 				continue;
 		}
 
