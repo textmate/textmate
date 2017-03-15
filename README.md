@@ -16,6 +16,8 @@ Before you submit a bug report please read the [writing bug reports](http://kb.t
 
 ![textmate](https://raw.github.com/textmate/textmate/gh-pages/images/screenshot.png)
 
+![textmate](http://f.cl.ly/items/0u0W0J47410b3Z0B1s0w/Screen%20Shot%202012-08-09%20at%2010.26.03%20AM.png)
+
 # Building
 
 ## Bootstrap
