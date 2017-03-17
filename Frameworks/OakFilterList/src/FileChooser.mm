@@ -239,11 +239,20 @@ static NSDictionary* globs_for_path (std::string const& path)
 @property (nonatomic) CGFloat  pollInterval;
 @end
 
+@interface FileChooserPanel : NSPanel
+@property (nonatomic) OakScopeBarView* scopeBar;
+@end
+
 @implementation FileChooser
 + (instancetype)sharedInstance
 {
 	static FileChooser* sharedInstance = [self new];
 	return sharedInstance;
+}
+
++ (Class)chooserWindowClass
+{
+	return [FileChooserPanel class];
 }
 
 - (id)init
@@ -294,6 +303,7 @@ static NSDictionary* globs_for_path (std::string const& path)
 		[self updateWindowTitle];
 
 		[scopeBar bind:NSValueBinding toObject:self withKeyPath:@"sourceIndex" options:nil];
+		((FileChooserPanel*)self.window).scopeBar = scopeBar;
 	}
 	return self;
 }
@@ -711,4 +721,9 @@ static NSDictionary* globs_for_path (std::string const& path)
 		[item setState:[item tag] == self.sourceIndex ? NSOnState : NSOffState];
 	return activate;
 }
+@end
+
+@implementation FileChooserPanel
+- (IBAction)selectNextTab:(id)sender     { _scopeBar.selectedIndex = (_scopeBar.selectedIndex + 1) % _scopeBar.labels.count;                          }
+- (IBAction)selectPreviousTab:(id)sender { _scopeBar.selectedIndex = (_scopeBar.selectedIndex + _scopeBar.labels.count - 1) % _scopeBar.labels.count; }
 @end

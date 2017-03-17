@@ -29,11 +29,20 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 @property (nonatomic) NSArray* sourceListLabels;
 @end
 
+@interface FavoriteChooserPanel : NSPanel
+@property (nonatomic) OakScopeBarView* scopeBar;
+@end
+
 @implementation FavoriteChooser
 + (instancetype)sharedInstance
 {
 	static FavoriteChooser* sharedInstance = [self new];
 	return sharedInstance;
+}
+
++ (Class)chooserWindowClass
+{
+	return [FavoriteChooserPanel class];
 }
 
 + (void)initialize
@@ -95,6 +104,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 
 		self.sourceIndex = [[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsOpenProjectSourceIndex];
 		[scopeBar bind:NSValueBinding toObject:self withKeyPath:@"sourceIndex" options:nil];
+		((FavoriteChooserPanel*)self.window).scopeBar = scopeBar;
 	}
 	return self;
 }
@@ -393,4 +403,9 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 - (void)keyDown:(NSEvent*)anEvent  { [self interpretKeyEvents:@[ anEvent ]]; }
 - (void)insertTab:(id)sender       { [self.window selectNextKeyView:self]; }
 - (void)insertBacktab:(id)sender   { [self.window selectPreviousKeyView:self]; }
+@end
+
+@implementation FavoriteChooserPanel
+- (IBAction)selectNextTab:(id)sender     { _scopeBar.selectedIndex = (_scopeBar.selectedIndex + 1) % _scopeBar.labels.count;                          }
+- (IBAction)selectPreviousTab:(id)sender { _scopeBar.selectedIndex = (_scopeBar.selectedIndex + _scopeBar.labels.count - 1) % _scopeBar.labels.count; }
 @end
