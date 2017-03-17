@@ -26,6 +26,7 @@ struct setup_t
 		{
 			OAK_FAIL("error in setup: " + script);
 		}
+		sleep(1);
 	}
 
 	scm::status::type status (std::string const& path) const
