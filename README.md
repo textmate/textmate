@@ -18,6 +18,15 @@ Before you submit a bug report please read the [writing bug reports](http://kb.t
 
 # Building
 
+## Homebrew tap
+
+This is the quickest way, but may not always be up-to-date. Requires Homebrew.
+
+`brew tap phySi0/graphical`
+`brew install textmate`
+
+That's it!
+
 ## Bootstrap
 
 To bootstrap the build you need to run `./configure` (in the root of the source tree). You can set a few (environment) variables read by this script that change the generated build file:
