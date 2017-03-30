@@ -1,7 +1,5 @@
 #import <scm/status.h>
 
-@class FSDataSource;
-
 enum FSItemURLType { FSItemURLTypeUnknown = 0, FSItemURLTypeFile, FSItemURLTypeFolder, FSItemURLTypePackage, FSItemURLTypeAlias, FSItemURLTypeMissing };
 
 @interface FSItem : NSObject
