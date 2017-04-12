@@ -106,7 +106,7 @@ static NSTextField* OakCreateTextField ()
 
 	NSArray* layout = @[
 		@"H:|-(3)-[back(==22)]-(2)-[forward(==back)]-(2)-[divider]",
-		@"V:|[back(==forward,==divider)]|",
+		@"V:|[back(==forward,==divider)]|", @"V:|[forward]|", @"V:|[divider]|",
 		@"V:[status]-5-|",
 	];
 

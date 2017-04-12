@@ -346,6 +346,7 @@ static NSString* kUserDefaultsTabItemLineBreakStyleKey = @"tabItemLineBreakStyle
 	NSDictionary* views = @{ @"left" : _leftCapView, @"right" : _rightCapView, @"title" : _textField, @"close" : _closeButton, @"overflow" : (_overflowButton ?: [NSNull null]) };
 	[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[left]-(3)-[close]-(>=3)-[title]-(>=3)-[right]-(0@450)-|" options:0 metrics:nil views:views]];
 	[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[left(==right)]|" options:0 metrics:nil views:views]];
+	[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[right]|" options:0 metrics:nil views:views]];
 	[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[close]-(5)-|" options:0 metrics:nil views:views]];
 	[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[title]-(5)-|" options:0 metrics:nil views:views]];
 
