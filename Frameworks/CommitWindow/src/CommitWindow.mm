@@ -186,6 +186,10 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[previousMessages(>=200)]-(20)-|" options:0 metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[documentView(>=400,==topDocumentViewDivider,==bottomDocumentViewDivider)]|" options:0 metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(20)-[showTableButton]" options:0 metrics:nil views:views]];
+
+		[contentView addConstraint:[NSLayoutConstraint constraintWithItem:_topDocumentViewDivider    attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0]];
+		[contentView addConstraint:[NSLayoutConstraint constraintWithItem:_bottomDocumentViewDivider attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0]];
+
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(12)-[previousMessages]-(12)-[topDocumentViewDivider][documentView][bottomDocumentViewDivider]-(12)-[showTableButton]" options:0 metrics:nil views:views]];
 
 		if(self.showsTableView)
@@ -366,6 +370,9 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 
 	[scrollViewConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[showTableButton]-(12)-[topScrollViewDivider][scrollView][bottomScrollViewDivider]" options:0 metrics:nil views:views]];
 	[scrollViewConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView(==topScrollViewDivider,==bottomScrollViewDivider)]|" options:0 metrics:nil views:views]];
+
+	[scrollViewConstraints addObject:[NSLayoutConstraint constraintWithItem:_topScrollViewDivider    attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0]];
+	[scrollViewConstraints addObject:[NSLayoutConstraint constraintWithItem:_bottomScrollViewDivider attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0]];
 
 	_scrollViewConstraints = scrollViewConstraints;
 	_scrollViewHeightConstraint = [NSLayoutConstraint constraintWithItem:_scrollView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:0];

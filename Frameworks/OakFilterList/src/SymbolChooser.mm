@@ -41,11 +41,14 @@ static SymbolChooserItem* CreateItem (OakDocument* document, text::pos_t const& 
 	{
 		self.window.title = @"Jump to Symbol";
 
+		OakBackgroundFillView* topDivider    = OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]);
+		OakBackgroundFillView* bottomDivider = OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]);
+
 		NSDictionary* views = @{
 			@"searchField"        : self.searchField,
-			@"topDivider"         : OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]),
+			@"topDivider"         : topDivider,
 			@"scrollView"         : self.scrollView,
-			@"bottomDivider"      : OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]),
+			@"bottomDivider"      : bottomDivider,
 			@"statusTextField"    : self.statusTextField,
 			@"itemCountTextField" : self.itemCountTextField,
 		};
@@ -55,7 +58,11 @@ static SymbolChooserItem* CreateItem (OakDocument* document, text::pos_t const& 
 
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[searchField(>=50)]-(8)-|"                      options:0 metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView(==topDivider,==bottomDivider)]|"         options:0 metrics:nil views:views]];
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[statusTextField]-[itemCountTextField]-|"           options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
+
+		[contentView addConstraint:[NSLayoutConstraint constraintWithItem:topDivider    attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0]];
+		[contentView addConstraint:[NSLayoutConstraint constraintWithItem:bottomDivider attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0]];
+
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[statusTextField]-[itemCountTextField]-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(2)-[searchField]-(8)-[topDivider][scrollView(>=50)][bottomDivider]-(4)-[statusTextField]-(5)-|" options:0 metrics:nil views:views]];
 	}
 	return self;

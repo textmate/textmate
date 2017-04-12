@@ -51,7 +51,7 @@ static void ShowLoadErrorForURL (WebFrame* frame, NSURL* url, NSError* error)
 
 		OakAddAutoLayoutViewsToSuperview([views allValues], self);
 
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[webView(==statusBar,==divider)]|"    options:NSLayoutFormatAlignAllTop           metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[webView(==statusBar,==divider)]|"    options:NSLayoutFormatAlignAllTop     metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[webView(>=10)][divider][statusBar]|" options:NSLayoutFormatAlignAllLeading metrics:nil views:views]];
 	}
 	return self;
