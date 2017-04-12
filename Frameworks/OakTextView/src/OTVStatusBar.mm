@@ -90,18 +90,26 @@ static NSMenuItem* OakCreateIndentMenuItem (NSString* title, SEL action, id targ
 		[wrappedBundleItemsPopUpButton addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[popup]|" options:0 metrics:nil views:@{ @"popup" : self.bundleItemsPopUp }]];
 		[wrappedBundleItemsPopUpButton addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[popup]|" options:0 metrics:nil views:@{ @"popup" : self.bundleItemsPopUp }]];
 
+		NSTextField* line    = OakCreateTextField(@"Line:");
+
+		NSView* dividerOne   = OakCreateDividerImageView();
+		NSView* dividerTwo   = OakCreateDividerImageView();
+		NSView* dividerThree = OakCreateDividerImageView();
+		NSView* dividerFour  = OakCreateDividerImageView();
+		NSView* dividerFive  = OakCreateDividerImageView();
+
 		NSDictionary* views = @{
-			@"line"         : OakCreateTextField(@"Line:"),
+			@"line"         : line,
 			@"selection"    : self.selectionField,
-			@"dividerOne"   : OakCreateDividerImageView(),
+			@"dividerOne"   : dividerOne,
 			@"grammar"      : self.grammarPopUp,
-			@"dividerTwo"   : OakCreateDividerImageView(),
+			@"dividerTwo"   : dividerTwo,
 			@"items"        : wrappedBundleItemsPopUpButton,
-			@"dividerThree" : OakCreateDividerImageView(),
+			@"dividerThree" : dividerThree,
 			@"tabSize"      : self.tabSizePopUp,
-			@"dividerFour"  : OakCreateDividerImageView(),
+			@"dividerFour"  : dividerFour,
 			@"symbol"       : self.symbolPopUp,
-			@"dividerFive"  : OakCreateDividerImageView(),
+			@"dividerFive"  : dividerFive,
 			@"recording"    : self.macroRecordingButton,
 		};
 
@@ -119,6 +127,12 @@ static NSMenuItem* OakCreateIndentMenuItem (NSString* title, SEL action, id targ
 
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-10-[line]-[selection(>=50,<=225)]-8-[dividerOne]-(-2)-[grammar(>=125@400,>=50,<=225)]-5-[dividerTwo]-(-2)-[tabSize(<=102)]-4-[dividerThree]-5-[items(==30)]-4-[dividerFour]-(-2)-[symbol(>=125@450,>=50)]-5-[dividerFive]-6-[recording]-7-|" options:0 metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[dividerOne(==dividerTwo,==dividerThree,==dividerFour,==dividerFive)]|" options:0 metrics:nil views:views]];
+
+		[self addConstraint:[NSLayoutConstraint constraintWithItem:dividerTwo   attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeTop multiplier:1.0 constant:0.0]];
+		[self addConstraint:[NSLayoutConstraint constraintWithItem:dividerThree attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeTop multiplier:1.0 constant:0.0]];
+		[self addConstraint:[NSLayoutConstraint constraintWithItem:dividerFour  attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeTop multiplier:1.0 constant:0.0]];
+		[self addConstraint:[NSLayoutConstraint constraintWithItem:dividerFive  attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeTop multiplier:1.0 constant:0.0]];
+
 		// Baseline align text-controls
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[line]-[selection]-(>=1)-[grammar]-(>=1)-[tabSize]-(>=1)-[symbol]" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
 		// Center non-text control

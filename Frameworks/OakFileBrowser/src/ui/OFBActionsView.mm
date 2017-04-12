@@ -47,9 +47,11 @@ static NSButton* OakCreateImageButton (NSImage* image)
 		[wrappedActionsPopUpButton addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[popup]|" options:0 metrics:nil views:@{ @"popup" : self.actionsPopUpButton }]];
 		[wrappedActionsPopUpButton addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[popup]|" options:0 metrics:nil views:@{ @"popup" : self.actionsPopUpButton }]];
 
+		NSView* divider = OakCreateDividerImageView();
+
 		NSDictionary* views = @{
 			@"create"    : self.createButton,
-			@"divider"   : OakCreateDividerImageView(),
+			@"divider"   : divider,
 			@"actions"   : wrappedActionsPopUpButton,
 			@"reload"    : self.reloadButton,
 			@"search"    : self.searchButton,
@@ -60,7 +62,7 @@ static NSButton* OakCreateImageButton (NSImage* image)
 		OakAddAutoLayoutViewsToSuperview([views allValues], self);
 		OakSetupKeyViewLoop(@[ self, _createButton, _actionsPopUpButton, _reloadButton, _searchButton, _favoritesButton, _scmButton ], NO);
 
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-3-[create(==24)]-1-[divider]-5-[actions(==30)]-(>=8)-[reload(==22,==search,==favorites,==scm)][search]-1-[favorites]-2-[scm]-(12)-|" options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-3-[create(==24)]-1-[divider]-5-[actions(==30)]-(>=8)-[reload(==22,==search,==favorites,==scm)][search]-1-[favorites]-2-[scm]-(12)-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[create(==divider,==actions,==reload,==search,==favorites,==scm)]|"                                                                   options:0 metrics:nil views:views]];
 	}
 	return self;
