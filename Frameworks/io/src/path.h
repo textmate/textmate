@@ -59,6 +59,8 @@ namespace path
 	PUBLIC CFIndex label_index (std::string const& path);
 	PUBLIC bool set_label_index (std::string const& path, CFIndex labelIndex);
 
+	PUBLIC std::string tag_data (std::string const& path);
+
 	PUBLIC bool exists (std::string const& path);
 	PUBLIC bool is_readable (std::string const& path);
 	PUBLIC bool is_writable (std::string const& path);
