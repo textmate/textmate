@@ -7,6 +7,7 @@
 #import <OakAppKit/NSColor Additions.h>
 #import <OakAppKit/NSImage Additions.h>
 #import <OakAppKit/OakAppKit.h>
+#import <OakAppKit/OakFinderTag.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <ns/ns.h>
 #import <io/path.h>
@@ -113,57 +114,114 @@
 @end
 
 @interface OakLabelSwatchView : NSView
-@property (nonatomic) NSInteger labelIndex;
+@property (nonatomic) NSArray<OakFinderTag*>* finderTags;
 @end
 
 @implementation OakLabelSwatchView
-- (void)setLabelIndex:(NSInteger)newLabelIndex
+- (void)setFinderTags:(NSArray<OakFinderTag*>*)newFinderTags
 {
-	ASSERT_LT(newLabelIndex, 8);
-	if(_labelIndex != newLabelIndex)
+	if(![_finderTags isEqual:newFinderTags])
 	{
-		_labelIndex = newLabelIndex;
+		_finderTags = newFinderTags;
 		[self setNeedsDisplay:YES];
 	}
 }
 
-- (BOOL)isSelected
+- (BOOL)isSelectedAndEmphasized
 {
 	NSView* view = self;
 	while(view && ![view isKindOfClass:[NSTableRowView class]])
 		view = [view superview];
-	return [view isKindOfClass:[NSTableRowView class]] && ((NSTableRowView*)view).isSelected;
+	return [view isKindOfClass:[NSTableRowView class]] && ((NSTableRowView*)view).isSelected && ((NSTableRowView*)view).isEmphasized;
 }
 
 - (void)drawRect:(NSRect)aRect
 {
-	if(_labelIndex == 0)
-		return;
+	NSMutableArray* labelColors = [NSMutableArray array];
+	for(OakFinderTag* tag in _finderTags)
+		if([tag hasLabelColor])
+			[labelColors addObject:@(tag.label)];
 
-	// color names: Gray, Green, Purple, Blue, Yellow, Red, Orange
-	static NSString* const labelColor[]  = { @"#A8A8A8", @"#AFDC49", @"#C186D7", @"#5B9CFE", @"#ECDF4A", @"#FC605C", @"#F6AC46" };
-	[[NSColor colorWithString:labelColor[_labelIndex - 1]] set];
+	auto fillAndStrokePath = ^(NSBezierPath* path, NSNumber* label){
+		NSUInteger labelInt = [label unsignedIntegerValue];
+		[[OakFinderTagManager backgroundColorForLabel:labelInt] set];
+		[path fill];
 
-	NSRect r = NSInsetRect(self.bounds, 1, 1);
-	r.size.width = NSHeight(r);
-	NSBezierPath* path = [NSBezierPath bezierPathWithOvalInRect:r];
-	[path fill];
-
-	if(self.isSelected)
-	{
-		[[NSColor whiteColor] set];
+		self.isSelectedAndEmphasized ? [[NSColor whiteColor] set] : [[OakFinderTagManager foregroundColorForLabel:labelInt] set];
 		[path stroke];
+	};
+
+	auto drawCrestent = ^(NSPoint center1, NSPoint center2, NSNumber* label){
+		[NSGraphicsContext saveGraphicsState];
+
+		NSBezierPath* clippingPath = [NSBezierPath bezierPath];
+		[clippingPath appendBezierPathWithArcWithCenter:center2 radius:5.0 startAngle:-100 endAngle:100];
+		[clippingPath appendBezierPathWithArcWithCenter:center1 radius:5.5 startAngle:60 endAngle:300 clockwise:YES];
+		[clippingPath addClip];
+
+		NSBezierPath* path = [NSBezierPath bezierPath];
+		[path appendBezierPathWithArcWithCenter:center2 radius:4.0 startAngle:0 endAngle:360];
+		[path closePath];
+
+		fillAndStrokePath(path, label);
+
+      [NSGraphicsContext restoreGraphicsState];
+	};
+
+	NSRect r = [self bounds];
+	switch([labelColors count])
+	{
+		case 0: return;
+		case 1:
+		{
+			NSBezierPath* path = [NSBezierPath bezierPath];
+			[path appendBezierPathWithArcWithCenter:NSMakePoint(NSMidX(r), NSMidY(r)) radius:4.0 startAngle:0 endAngle:360];
+
+			fillAndStrokePath(path, labelColors[0]);
+			return;
+		}
+		case 2:
+		{
+			NSPoint center = NSMakePoint(NSMidX(r), NSMidY(r));
+
+			NSPoint center1 = NSMakePoint(center.x - 2.0, center.y);
+			NSPoint center2 = NSMakePoint(center.x + 2.0, center.y);
+
+			drawCrestent(center1, center2, labelColors[0]);
+
+			NSBezierPath* path = [NSBezierPath bezierPath];
+			[path appendBezierPathWithArcWithCenter:center1 radius:4.0 startAngle:0 endAngle:360];
+			fillAndStrokePath(path, labelColors[1]);
+			return;
+		}
+		default:
+		{
+			NSPoint center = NSMakePoint(NSMidX(r), NSMidY(r));
+
+			NSPoint center1 = NSMakePoint(center.x - 4.0, center.y);
+			NSPoint center2 = NSMakePoint(center.x, center.y);
+			NSPoint center3 = NSMakePoint(center.x + 4.0, center.y);
+
+			NSUInteger lastIndex = [labelColors count] - 1;
+			drawCrestent(center2, center3, labelColors[lastIndex - 2]);
+			drawCrestent(center1, center2, labelColors[lastIndex - 1]);
+
+			NSBezierPath* path = [NSBezierPath bezierPath];
+			[path appendBezierPathWithArcWithCenter:center1 radius:4.0 startAngle:0 endAngle:360];
+			fillAndStrokePath(path, labelColors[lastIndex]);
+			return;
+		}
 	}
 }
 
 - (NSSize)intrinsicContentSize
 {
-	return NSMakeSize(10, 10);
+	return NSMakeSize(20, 10);
 }
 @end
 
 @interface OakItemButtonsView : NSView
-@property (nonatomic) NSInteger labelIndex;
+@property (nonatomic) NSArray<OakFinderTag*>* finderTags;
 @property (nonatomic) BOOL open;
 
 @property (nonatomic) SEL closeAction;
@@ -219,17 +277,17 @@
 	[super updateConstraints];
 }
 
-- (NSInteger)labelIndex
+- (NSArray<OakFinderTag*>*)finderTags
 {
-	return _labelSwatchView ? _labelSwatchView.labelIndex : 0;
+	return _labelSwatchView ? _labelSwatchView.finderTags : @[ ];
 }
 
-- (void)setLabelIndex:(NSInteger)newLabelIndex
+- (void)setFinderTags:(NSArray<OakFinderTag*>*)newFinderTags
 {
-	if(self.labelIndex == newLabelIndex)
+	if([self.finderTags isEqual:newFinderTags])
 		return;
 
-	if(newLabelIndex == 0)
+	if(!newFinderTags && [newFinderTags count] == 0)
 	{
 		[_labelSwatchView removeFromSuperview];
 		_labelSwatchView = nil;
@@ -241,13 +299,13 @@
 		OakAddAutoLayoutViewsToSuperview(@[ _labelSwatchView ], self);
 		[self setNeedsUpdateConstraints:YES];
 	}
-	_labelSwatchView.labelIndex = newLabelIndex;
+	_labelSwatchView.finderTags = newFinderTags;
 }
 
 - (void)setNilValueForKey:(NSString*)aKey
 {
-	if([aKey isEqualToString:@"labelIndex"])
-		[self setValue:@0 forKey:aKey];
+	if([aKey isEqualToString:@"finderTags"])
+		[self setValue:@[ ] forKey:aKey];
 	else if([aKey isEqualToString:@"open"])
 		[self setValue:@NO forKey:aKey];
 	else
@@ -321,7 +379,7 @@
 		[_openButton bind:NSImageBinding toObject:self withKeyPath:@"objectValue.icon" options:nil];
 		[fileTextField bind:NSValueBinding toObject:self withKeyPath:@"objectValue.wrappedValue" options:nil];
 		[fileTextField bind:NSToolTipBinding toObject:self withKeyPath:@"objectValue.toolTip" options:nil];
-		[_itemInfoButtons bind:@"labelIndex" toObject:self withKeyPath:@"objectValue.labelIndex" options:nil];
+		[_itemInfoButtons bind:@"finderTags" toObject:self withKeyPath:@"objectValue.finderTags" options:nil];
 		[_itemInfoButtons bind:@"open" toObject:self withKeyPath:@"objectValue.open" options:nil];
 
 		self.textField = fileTextField;
@@ -334,7 +392,7 @@
 	[_openButton unbind:NSImageBinding];
 	[self.textField unbind:NSValueBinding];
 	[self.textField unbind:NSToolTipBinding];
-	[_itemInfoButtons unbind:@"labelIndex"];
+	[_itemInfoButtons unbind:@"finderTags"];
 	[_itemInfoButtons unbind:@"open"];
 }
 

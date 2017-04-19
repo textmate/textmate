@@ -3,6 +3,7 @@
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/OakFileIconImage.h>
 #import <OakAppKit/OakFileManager.h>
+#import <OakAppKit/OakFinderTag.h>
 #import <Preferences/Keys.h>
 #import <io/entries.h>
 #import <io/events.h>
@@ -104,6 +105,7 @@ struct tracking_t : fs::event_callback_t
 	{
 		fs_item_t (dev_t device, dirent const* entry, std::string const& path) : device(device), inode(entry->d_fileno), path(path), target(NULL_STR), label(0), is_directory(false), is_link(false), treat_as_directory(false), sort_as_directory(false)
 		{
+			tag_data = path::tag_data(path);
 			label = path::label_index(path);
 
 			if(entry->d_type == DT_LNK)
@@ -138,6 +140,7 @@ struct tracking_t : fs::event_callback_t
 		ino_t inode;
 		std::string path;
 		std::string target;
+		std::string tag_data;
 		size_t label;
 		bool is_directory;
 		bool is_link;
@@ -254,6 +257,9 @@ struct tracking_t : fs::event_callback_t
 
 					if(allowExpandingLinks && fsItem.is_link && fsItem.sort_as_directory && item.leaf)
 						item.leaf = NO;
+
+					if(fsItem.tag_data != NULL_STR)
+						item.finderTags = [OakFinderTagManager finderTagsFromData:[NSData dataWithBytes:(void*)fsItem.tag_data.data() length:fsItem.tag_data.size()]];
 
 					[array addObject:item];
 					pathsOnDisk.insert(fsItem.path);

@@ -3,6 +3,7 @@
 #import "ui/OFBHeaderView.h"
 #import "ui/OFBOutlineView.h"
 #import "ui/OFBActionsView.h"
+#import "ui/OFBFinderTagsChooser.h"
 #import "io/FSDataSource.h"
 #import "io/FSSCMDataSource.h"
 #import "io/FSItem.h"
@@ -15,7 +16,7 @@
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakFileIconImage.h>
 #import <OakAppKit/OakFileManager.h>
-#import <OakAppKit/OakFinderLabelChooser.h>
+#import <OakAppKit/OakFinderTag.h>
 #import <OakAppKit/OakOpenWithMenu.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakAppKit/OakZoomingIcon.h>
@@ -711,10 +712,24 @@ static bool is_binary (std::string const& path)
 		[_outlineViewDelegate selectURLs:@[ itemToSelect.url ] expandChildren:NO];
 }
 
-- (void)changeColor:(OakFinderLabelChooser*)labelChooser
+- (void)didChangeFavoriteTag:(OFBFinderTagsChooser*)finderTagsChooser
 {
+	NSString* chosenTag = finderTagsChooser.chosenTag;
+
+	NSMutableArray<NSString*>* newTagNames = [NSMutableArray array];
 	for(FSItem* item in self.selectedItems)
-		item.labelIndex = [labelChooser selectedIndex];
+	{
+		for(OakFinderTag* tag in item.finderTags)
+			[newTagNames addObject:tag.displayName];
+
+		if(finderTagsChooser.removeChosenTag)
+			[newTagNames removeObject:chosenTag];
+		else if(![newTagNames containsObject:chosenTag])
+			[newTagNames addObject:chosenTag];
+
+		[item.url setResourceValue:newTagNames forKey:NSURLTagNamesKey error:nil];
+		[newTagNames removeAllObjects];
+	}
 }
 
 - (void)addSelectedEntriesToFavorites:(id)sender
@@ -925,14 +940,56 @@ static bool is_binary (std::string const& path)
 
 	if(hasFileSelected)
 	{
-		OakFinderLabelChooser* swatch = [[OakFinderLabelChooser alloc] initWithFrame:NSMakeRect(0, 0, 166, 55)];
-		swatch.selectedIndex = [[selectedItems lastObject] labelIndex];
-		swatch.action        = @selector(changeColor:);
-		swatch.target        = self;
-		swatch.font          = [aMenu font];
-
 		[aMenu addItem:[NSMenuItem separatorItem]];
-		[[aMenu addItemWithTitle:@"Color Swatch" action:NULL keyEquivalent:@""] setView:swatch];
+		[aMenu addItemWithTitle:@"Tags…" action:NULL keyEquivalent:@""];
+
+		NSCountedSet* favoriteTagNamesSet = [NSCountedSet set];
+
+		for(FSItem* item in self.selectedItems)
+		{
+			for(OakFinderTag* tag in item.finderTags)
+				if(tag.isMarkedFavorite)
+					[favoriteTagNamesSet addObject:tag.displayName];
+		}
+
+		NSMutableArray* favoriteTagNamesToRemove = [NSMutableArray array];
+		if([self.selectedItems count] == 1)
+		{
+			[favoriteTagNamesToRemove addObjectsFromArray:[favoriteTagNamesSet allObjects]];
+		}
+		else
+		{
+			for(NSString* tagName in favoriteTagNamesSet)
+				if([favoriteTagNamesSet countForObject:tagName] > 1)
+					[favoriteTagNamesToRemove addObject:tagName];
+		}
+
+		NSCountedSet* finderTagsCountedSet = [NSCountedSet set];
+		NSMutableArray* selectedFinderTags = [NSMutableArray array];
+		NSMutableArray* removeFinderTags   = [NSMutableArray array];
+
+		for(FSItem* item in self.selectedItems)
+			for(OakFinderTag* tag in item.finderTags)
+				if(tag.isMarkedFavorite)
+					[finderTagsCountedSet addObject:tag.displayName];
+
+		for(NSString* tagName in finderTagsCountedSet)
+		{
+			[selectedFinderTags addObject:tagName];
+			if([self.selectedItems count] == 1)
+				[removeFinderTags addObject:tagName];
+			else if([finderTagsCountedSet countForObject:tagName] > 1)
+				[removeFinderTags addObject:tagName];
+		}
+
+		OFBFinderTagsChooser* chooser = [OFBFinderTagsChooser finderTagsChooserForMenu:aMenu];
+		chooser.selectedFavoriteTags         = [selectedFinderTags copy];
+		chooser.selectedFavoriteTagsToRemove = [removeFinderTags copy];
+		chooser.action                       = @selector(didChangeFavoriteTag:);
+		chooser.target                       = self;
+		chooser.enabled                      = YES;
+
+		[[aMenu addItemWithTitle:@"Finder Tag" action:NULL keyEquivalent:@""] setView:chooser];
 	}
 
 	for(NSUInteger i = countOfExistingItems; i < [aMenu numberOfItems]; ++i)
