@@ -3,8 +3,8 @@ windowTitleProject   = '${projectDirectory:+ — ${projectDirectory/^.*\///}}'
 windowTitleFramework = '${TM_DIRECTORY/.*\/Frameworks\/([^\/]+)\/.*|.*/${1:+ ($1)}/}'
 windowTitle          = '$TM_DISPLAYNAME$windowTitleFramework$windowTitleProject$windowTitleSCM'
 
-excludeDirectoriesInFileChooser  = '{bin/CxxTest,build}'
-excludeDirectoriesInFolderSearch = '{bin/CxxTest,build}'
+excludeDirectoriesInFileChooser  = '{bin/CxxTest,build,SyntaxMate.tmBundle}'
+excludeDirectoriesInFolderSearch = '{bin/CxxTest,build,SyntaxMate.tmBundle}'
 
 # Variables
 TM_ORGANIZATION_NAME = 'MacroMates'
