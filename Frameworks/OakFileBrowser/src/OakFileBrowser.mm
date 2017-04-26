@@ -773,6 +773,20 @@ static bool is_binary (std::string const& path)
 	[self writeSelectionToPasteboard:[NSPasteboard generalPasteboard] types:nil];
 }
 
+- (void)copyAsPathname:(id)sender
+{
+	NSMutableArray* pathnames = [NSMutableArray array];
+	for(NSURL* url in self.selectedURLs)
+	{
+		if([url isFileURL])
+			[pathnames addObject:[url path]];
+	}
+
+	NSPasteboard* pboard = [NSPasteboard generalPasteboard];
+	[pboard clearContents];
+	[pboard writeObjects:pathnames];
+}
+
 - (BOOL)canPaste
 {
 	return [_url isFileURL] && [[[NSPasteboard generalPasteboard] availableTypeFromArray:@[ NSFilenamesPboardType ]] isEqualToString:NSFilenamesPboardType];
@@ -925,7 +939,13 @@ static bool is_binary (std::string const& path)
 		[aMenu addItem:[NSMenuItem separatorItem]];
 
 		if(hasFileSelected)
+		{
 			[aMenu addItemWithTitle:@"Copy" action:@selector(copy:) keyEquivalent:@""];
+
+			NSMenuItem* copyPathnameItem = [aMenu addItemWithTitle:@"Copy As Pathname" action:@selector(copyAsPathname:) keyEquivalent:@""];
+			copyPathnameItem.keyEquivalentModifierMask = NSAlternateKeyMask;
+			copyPathnameItem.alternate = YES;
+		}
 
 		if(self.canPaste)
 		{
@@ -1319,11 +1339,13 @@ static bool is_binary (std::string const& path)
 	}
 
 	NSString* quickLookTitle = [QLPreviewPanel sharedPreviewPanelExists] && [[QLPreviewPanel sharedPreviewPanel] isVisible] ? @"Close Quick Look" : @"Quick Look%@";
+	NSString* copyAsPathnameTitle = selectedFiles > 1 ? @"Copy%@ as Pathnames" : @"Copy%@ as Pathname";
 
 	struct { NSString* format; SEL action; } const menuTitles[] =
 	{
 		{ @"Cut%@",                   @selector(cut:)                                },
 		{ @"Copy%@",                  @selector(copy:)                               },
+		{ copyAsPathnameTitle,        @selector(copyAsPathname:)                     },
 		{ quickLookTitle,             @selector(toggleQuickLookPreview:)             },
 		{ @"Show%@ in Finder",        @selector(showSelectedEntriesInFinder:)        },
 		{ @"Add%@ to Favorites",      @selector(addSelectedEntriesToFavorites:)      },
