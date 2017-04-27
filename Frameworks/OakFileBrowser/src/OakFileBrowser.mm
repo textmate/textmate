@@ -1037,6 +1037,11 @@ static bool is_binary (std::string const& path)
 			type    = tmp.urlType;
 			itemURL = tmp.target ?: tmp.url;
 		}
+		
+		if(type == FSItemURLTypePackage && OakIsAlternateKeyOrMouseEvent())
+			type = FSItemURLTypeFolder;
+		else if(type == FSItemURLTypeFile && is_binary([itemURL.path fileSystemRepresentation]) && !OakIsAlternateKeyOrMouseEvent())
+			type = FSItemURLTypePackage;
 
 		if(type == FSItemURLTypePackage && OakIsAlternateKeyOrMouseEvent())
 			type = FSItemURLTypeFolder;
