@@ -1,5 +1,4 @@
-@interface AppController : NSObject <NSMenuDelegate>
-{
+@interface AppController : NSObject <NSMenuDelegate, NSTouchBarProvider> {
 	IBOutlet NSMenu* bundlesMenu;
 	IBOutlet NSMenu* themesMenu;
 	IBOutlet NSMenu* spellingMenu;
@@ -8,8 +7,7 @@
 	IBOutlet NSPanel* goToLinePanel;
 	IBOutlet NSTextField* goToLineTextField;
 
-	struct
-	{
+	struct {
 		std::string filter_string;
 		BOOL key_equivalent;
 		BOOL all_scopes;

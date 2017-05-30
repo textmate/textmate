@@ -281,8 +281,9 @@ static NSDictionary* RemoveOldCommits (NSDictionary* src)
 
 - (void)webView:(WebView*)aWebView didFinishLoadForFrame:(WebFrame*)aFrame
 {
-	if(![[self.toolbar selectedItemIdentifier] isEqualToString:@"Bundles"])
+	if(![[self.toolbar selectedItemIdentifier] isEqualToString:@"Bundles"]) {
 		return;
+	}
 
 	bool first = true;
 	NSMutableString* str = [NSMutableString stringWithString:@"{\"bundles\":["];
@@ -292,15 +293,12 @@ static NSDictionary* RemoveOldCommits (NSDictionary* src)
 			continue;
 
 		NSError* err = NULL;
-		if(NSString* content = [NSString stringWithContentsOfFile:[bundle.path stringByAppendingPathComponent:@"Changes.json"] encoding:NSUTF8StringEncoding error:&err])
-		{
-			if(NSDictionary* obj = [NSJSONSerialization JSONObjectWithData:[content dataUsingEncoding:NSUTF8StringEncoding] options:0 error:&err])
-			{
-				if(NSData* data = [NSJSONSerialization dataWithJSONObject:RemoveOldCommits(obj) options:0 error:&err])
-				{
-					if(!std::exchange(first, false))
+		if(NSString* content = [NSString stringWithContentsOfFile:[bundle.path stringByAppendingPathComponent:@"Changes.json"] encoding:NSUTF8StringEncoding error:&err]) {
+			if(NSDictionary* obj = [NSJSONSerialization JSONObjectWithData:[content dataUsingEncoding:NSUTF8StringEncoding] options:0 error:&err]) {
+				if(NSData* data = [NSJSONSerialization dataWithJSONObject:RemoveOldCommits(obj) options:0 error:&err]) {
+					if(!std::exchange(first, false)) {
 						[str appendString:@","];
-
+					}
 					[str appendString:[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]];
 					continue;
 				}
@@ -322,9 +320,11 @@ static NSDictionary* RemoveOldCommits (NSDictionary* src)
 
 - (void)webView:(WebView*)sender decidePolicyForNavigationAction:(NSDictionary*)actionInformation request:(NSURLRequest*)request frame:(WebFrame*)frame decisionListener:(id <WebPolicyDecisionListener>)listener
 {
-	if(![[request.URL scheme] isEqualToString:@"file"] && [[NSWorkspace sharedWorkspace] openURL:request.URL])
+	if(![[request.URL scheme] isEqualToString:@"file"] && [[NSWorkspace sharedWorkspace] openURL:request.URL]) {
 		[listener ignore];
-	else if([NSURLConnection canHandleRequest:request])
+	}
+	else if([NSURLConnection canHandleRequest:request]) {
 		[listener use];
+	}
 }
 @end

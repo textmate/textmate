@@ -42,11 +42,11 @@ OAK_DEBUG_VAR(AppController_Documents);
 	openPanel.title                           = [NSString stringWithFormat:@"%@: Open", [[[NSBundle mainBundle] localizedInfoDictionary] valueForKey: @"CFBundleName"] ?: [[NSProcessInfo processInfo] processName]];
 
 	[openPanel setShowsHiddenFilesCheckBox:YES];
-	if([openPanel runModal] == NSOKButton)
-	{
+	if([openPanel runModal] == NSOKButton) {
 		NSMutableArray* filenames = [NSMutableArray array];
-		for(NSURL* url in [openPanel URLs])
+		for(NSURL* url in [openPanel URLs]) {
 			[filenames addObject:[[url filePathURL] path]];
+		}
 
 		OakOpenDocuments(filenames);
 	}
@@ -55,25 +55,30 @@ OAK_DEBUG_VAR(AppController_Documents);
 - (BOOL)application:(NSApplication*)theApplication openFile:(NSString*)aPath
 {
 	D(DBF_AppController_Documents, bug("%s\n", [aPath UTF8String]););
-	if(!DidHandleODBEditorEvent([[[NSAppleEventManager sharedAppleEventManager] currentAppleEvent] aeDesc]))
+	if(!DidHandleODBEditorEvent([[[NSAppleEventManager sharedAppleEventManager] currentAppleEvent] aeDesc])) {
 		OakOpenDocuments(@[ aPath ]);
+	}
 	return YES;
 }
 
 - (void)application:(NSApplication*)sender openFiles:(NSArray*)filenames
 {
 	D(DBF_AppController_Documents, bug("%s\n", [[filenames description] UTF8String]););
-	if(!DidHandleODBEditorEvent([[[NSAppleEventManager sharedAppleEventManager] currentAppleEvent] aeDesc]))
+	if(!DidHandleODBEditorEvent([[[NSAppleEventManager sharedAppleEventManager] currentAppleEvent] aeDesc])) {
 		OakOpenDocuments(filenames);
+	}
 	[sender replyToOpenOrPrint:NSApplicationDelegateReplySuccess];
 }
 
 - (BOOL)applicationOpenUntitledFile:(NSApplication*)theApplication
 {
 	D(DBF_AppController_Documents, bug("\n"););
-	if([[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsShowFavoritesInsteadOfUntitledKey])
-			[self openFavorites:self];
-	else	[self newDocument:self];
+	if([[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsShowFavoritesInsteadOfUntitledKey]) {
+		[self openFavorites:self];
+	}
+	else {
+		[self newDocument:self];
+	}
 	return YES;
 }
 
@@ -113,20 +118,18 @@ OAK_DEBUG_VAR(AppController_Documents);
 			std::string const& urlStr = url->second;
 			std::string path = NULL_STR;
 
-			for(auto root : kRootURLPrefixes)
-			{
+			for(auto root : kRootURLPrefixes) {
 				if(urlStr.find(root) == 0)
 					path = path::join("/", urlStr.substr(root.size()));
 			}
 
-			for(auto tilde : kTildeURLPrefixes)
-			{
+			for(auto tilde : kTildeURLPrefixes) {
 				if(urlStr.find(tilde) == 0)
 					path = path::join(path::home(), urlStr.substr(tilde.size()));
 			}
 
 			if(path == NULL_STR && urlStr.find("file://") == 0)
-				path = path::join(path::home(), urlStr.substr(std::string("file://").size()));
+			path = path::join(path::home(), urlStr.substr(std::string("file://").size()));
 
 			if(path::is_directory(path))
 			{
@@ -138,8 +141,7 @@ OAK_DEBUG_VAR(AppController_Documents);
 				doc.recentTrackingDisabled = YES;
 				[OakDocumentController.sharedInstance showDocument:doc andSelect:range inProject:projectUUID bringToFront:YES];
 			}
-			else
-			{
+			else {
 				NSAlert* alert        = [[NSAlert alloc] init];
 				alert.messageText     = @"File Does not Exist";
 				alert.informativeText = [NSString stringWithFormat:@"The item “%@” does not exist.", [NSString stringWithCxxString:path]];
@@ -148,8 +150,7 @@ OAK_DEBUG_VAR(AppController_Documents);
 
 			}
 		}
-		else if(uuid != parameters.end())
-		{
+		else if(uuid != parameters.end()) {
 			if(OakDocument* doc = [OakDocumentController.sharedInstance findDocumentWithIdentifier:[[NSUUID alloc] initWithUUIDString:to_ns(uuid->second)]])
 			{
 				doc.recentTrackingDisabled = YES;

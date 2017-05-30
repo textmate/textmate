@@ -58,8 +58,9 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 		[alert addButtonWithTitle:@"Edit Command"];
 
 	[alert beginSheetModalForWindow:window completionHandler:^(NSInteger button){
-		if(button == NSAlertSecondButtonReturn)
+		if(button == NSAlertSecondButtonReturn) {
 			[[BundleEditor sharedInstance] revealBundleItem:bundleItem];
+        }
 	}];
 }
 
@@ -81,7 +82,7 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 }
 @end
 
-@interface DocumentWindowController () <NSWindowDelegate, OakTabBarViewDelegate, OakTabBarViewDataSource, OakTextViewDelegate, OakFileBrowserDelegate, QLPreviewPanelDelegate, QLPreviewPanelDataSource>
+@interface DocumentWindowController () <NSWindowDelegate, NSTouchBarDelegate, OakTabBarViewDelegate, OakTabBarViewDataSource, OakTextViewDelegate, OakFileBrowserDelegate, QLPreviewPanelDelegate, QLPreviewPanelDataSource>
 {
 	OBJC_WATCH_LEAKS(DocumentWindowController);
 
@@ -222,8 +223,9 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		_arrayController = [[NSArrayController alloc] init];
 		[_arrayController bind:NSContentBinding toObject:self withKeyPath:@"documents" options:nil];
 
-		for(NSString* keyPath in kObservedKeyPaths)
+		for(NSString* keyPath in kObservedKeyPaths) {
 			[self addObserver:self forKeyPath:keyPath options:NSKeyValueObservingOptionInitial context:nullptr];
+		}
 
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidBecomeActiveNotification:) name:NSApplicationDidBecomeActiveNotification object:NSApp];
@@ -237,8 +239,9 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 - (void)dealloc
 {
-	for(NSString* keyPath in kObservedKeyPaths)
+	for(NSString* keyPath in kObservedKeyPaths) {
 		[self removeObserver:self forKeyPath:keyPath];
+    }
 
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 

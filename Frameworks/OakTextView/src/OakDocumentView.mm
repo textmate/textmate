@@ -770,14 +770,15 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 				bookmarks.push_back(pos);
 		}];
 
-		if(content.count == 0)
-		{
-			if(bookmarks.empty())
-					[self.document setMarkOfType:OakDocumentBookmarkIdentifier atPosition:text::pos_t(lineNumber, 0) content:nil];
-			else	[self.document removeMarkOfType:OakDocumentBookmarkIdentifier atPosition:bookmarks.front()];
+		if(content.count == 0) {
+			if(bookmarks.empty()) {
+				[self.document setMarkOfType:OakDocumentBookmarkIdentifier atPosition:text::pos_t(lineNumber, 0) content:nil];
+			}
+			else {
+				[self.document removeMarkOfType:OakDocumentBookmarkIdentifier atPosition:bookmarks.front()];
+			}
 		}
-		else
-		{
+		else {
 			NSView* popoverContainerView = [[NSView alloc] initWithFrame:NSZeroRect];
 
 			NSTextField* textField = OakCreateLabel([content componentsJoinedByString:@"\n"]);
@@ -799,8 +800,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 			[popover showRelativeToRect:rect ofView:gutterView preferredEdge:NSMaxXEdge];
 		}
 	}
-	else if([columnIdentifier isEqualToString:kFoldingsColumnIdentifier])
-	{
+	else if([columnIdentifier isEqualToString:kFoldingsColumnIdentifier]) {
 		[_textView toggleFoldingAtLine:lineNumber recursive:OakIsAlternateKeyOrMouseEvent()];
 		[[NSNotificationCenter defaultCenter] postNotificationName:GVColumnDataSourceDidChange object:self];
 	}

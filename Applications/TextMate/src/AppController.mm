@@ -51,33 +51,31 @@ void OakOpenDocuments (NSArray* paths, BOOL treatFilePackageAsFolder)
 	NSMutableArray* itemsToInstall = [NSMutableArray array];
 	NSMutableArray* plugInsToInstall = [NSMutableArray array];
 	BOOL enableInstallHandler = treatFilePackageAsFolder == NO && ([NSEvent modifierFlags] & NSAlternateKeyMask) == 0;
-	for(NSString* path in paths)
-	{
+
+	for(NSString* path in paths) {
 		BOOL isDirectory = NO;
 		NSString* pathExt = [[path pathExtension] lowercaseString];
-		if(enableInstallHandler && [bundleExtensions containsObject:pathExt])
-		{
+		if(enableInstallHandler && [bundleExtensions containsObject:pathExt]) {
 			[itemsToInstall addObject:path];
 		}
-		else if(enableInstallHandler && [pathExt isEqualToString:@"tmplugin"])
-		{
+		else if(enableInstallHandler && [pathExt isEqualToString:@"tmplugin"]) {
 			[plugInsToInstall addObject:path];
 		}
-		else if([[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDirectory] && isDirectory)
-		{
+		else if([[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDirectory] && isDirectory) {
 			[OakDocumentController.sharedInstance showFileBrowserAtPath:path];
 		}
-		else
-		{
+		else {
 			[documents addObject:[OakDocumentController.sharedInstance documentWithPath:path]];
 		}
 	}
 
-	if([itemsToInstall count])
+	if([itemsToInstall count]) {
 		[[BundlesManager sharedInstance] installBundleItemsAtPaths:itemsToInstall];
+    }
 
-	for(NSString* path in plugInsToInstall)
+	for(NSString* path in plugInsToInstall) {
 		[[TMPlugInController sharedInstance] installPlugInAtPath:path];
+    }
 
 	[OakDocumentController.sharedInstance showDocuments:documents];
 }
@@ -86,22 +84,24 @@ BOOL HasDocumentWindow (NSArray* windows)
 {
 	for(NSWindow* window in windows)
 	{
-		if([window.delegate isKindOfClass:[DocumentWindowController class]])
+		if([window.delegate isKindOfClass:[DocumentWindowController class]]) {
 			return YES;
+		}
 	}
 	return NO;
 }
 
 @interface AppController ()
+
 @property (nonatomic) BOOL didFinishLaunching;
 @property (nonatomic) BOOL currentResponderIsOakTextView;
+
 @end
 
 @implementation AppController
 - (void)setCurrentResponderIsOakTextView:(BOOL)flag
 {
-	if(_currentResponderIsOakTextView != flag)
-	{
+	if(_currentResponderIsOakTextView != flag) {
 		_currentResponderIsOakTextView = flag;
 
 		NSMenu* mainMenu = [NSApp mainMenu];
@@ -113,11 +113,11 @@ BOOL HasDocumentWindow (NSArray* windows)
 		NSMenuItem* shiftLeftMenuItem  = [textMenu itemWithTitle:@"Shift Left"];
 		NSMenuItem* shiftRightMenuItem = [textMenu itemWithTitle:@"Shift Right"];
 
-		if(!backMenuItem || !forwardMenuItem || !shiftLeftMenuItem || !shiftRightMenuItem)
+		if(!backMenuItem || !forwardMenuItem || !shiftLeftMenuItem || !shiftRightMenuItem) {
 			return;
+		}
 
-		if(_currentResponderIsOakTextView)
-		{
+		if(_currentResponderIsOakTextView) {
 			backMenuItem.keyEquivalent                   = @"";
 			forwardMenuItem.keyEquivalent                = @"";
 
@@ -126,8 +126,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 			shiftRightMenuItem.keyEquivalent             = @"]";
 			shiftRightMenuItem.keyEquivalentModifierMask = NSCommandKeyMask;
 		}
-		else
-		{
+		else {
 			shiftLeftMenuItem.keyEquivalent           = @"";
 			shiftRightMenuItem.keyEquivalent          = @"";
 
@@ -197,24 +196,18 @@ BOOL HasDocumentWindow (NSArray* windows)
 	[[TMPlugInController sharedInstance] loadAllPlugIns:nil];
 
 	std::string dest = path::join(path::home(), "Library/Application Support/TextMate/Managed");
-	if(!path::exists(dest))
-	{
-		if(NSString* archive = [[NSBundle mainBundle] pathForResource:@"DefaultBundles" ofType:@"tbz"])
-		{
+	if(!path::exists(dest)) {
+		if(NSString* archive = [[NSBundle mainBundle] pathForResource:@"DefaultBundles" ofType:@"tbz"]) {
 			path::make_dir(dest);
 
 			network::tbz_t tbz(dest);
-			if(tbz)
-			{
+			if(tbz) {
 				int fd = open([archive fileSystemRepresentation], O_RDONLY|O_CLOEXEC);
-				if(fd != -1)
-				{
+				if(fd != -1) {
 					char buf[4096];
 					ssize_t len;
-					while((len = read(fd, buf, sizeof(buf))) > 0)
-					{
-						if(write(tbz.input_fd(), buf, len) != len)
-						{
+					while((len = read(fd, buf, sizeof(buf))) > 0) {
+						if(write(tbz.input_fd(), buf, len) != len) {
 							fprintf(stderr, "*** error writing bytes to tar\n");
 							break;
 						}
@@ -226,13 +219,11 @@ BOOL HasDocumentWindow (NSArray* windows)
 				if(!tbz.wait_for_tbz(&output, &error))
 					fprintf(stderr, "%s: %s%s\n", getprogname(), output.c_str(), error.c_str());
 			}
-			else
-			{
+			else {
 				fprintf(stderr, "%s: unable to launch tar\n", getprogname());
 			}
 		}
-		else
-		{
+		else {
 			fprintf(stderr, "%s: no ‘DefaultBundles.tbz’ in TextMate.app\n", getprogname());
 		}
 	}
@@ -243,13 +234,14 @@ BOOL HasDocumentWindow (NSArray* windows)
 		std::string const prematureTerminationDuringRestore = path::join(path::temp(), "textmate_session_restore");
 
 		NSString* promptUser = nil;
-		if(path::exists(prematureTerminationDuringRestore))
+		if(path::exists(prematureTerminationDuringRestore)) {
 			promptUser = @"Previous attempt of restoring your session caused an abnormal exit. Would you like to skip session restore?";
-		else if([NSEvent modifierFlags] & NSShiftKeyMask)
+		}
+		else if([NSEvent modifierFlags] & NSShiftKeyMask) {
 			promptUser = @"By holding down shift (⇧) you have indicated that you wish to disable restoring the documents which were open in last session.";
+		}
 
-		if(promptUser)
-		{
+		if(promptUser) {
 			NSAlert* alert        = [[NSAlert alloc] init];
 			alert.messageText     = @"Disable Session Restore?";
 			alert.informativeText = promptUser;
@@ -258,8 +250,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 				restoreSession = NO;
 		}
 
-		if(restoreSession)
-		{
+		if(restoreSession) {
 			close(open(prematureTerminationDuringRestore.c_str(), O_CREAT|O_TRUNC|O_WRONLY|O_CLOEXEC));
 			[DocumentWindowController restoreSession];
 		}
@@ -277,18 +268,24 @@ BOOL HasDocumentWindow (NSArray* windows)
 {
 	D(DBF_AppController, bug("\n"););
 
-	if([NSWindow respondsToSelector:@selector(setAllowsAutomaticWindowTabbing:)]) // MAC_OS_X_VERSION_10_12
-		NSWindow.allowsAutomaticWindowTabbing = NO;
+   if ([[NSApplication sharedApplication] respondsToSelector:@selector(isAutomaticCustomizeTouchBarMenuItemEnabled)]) {
+		[NSApplication sharedApplication].automaticCustomizeTouchBarMenuItemEnabled = YES;
+   }
 
-	if(!HasDocumentWindow([NSApp orderedWindows]))
-	{
+	if([NSWindow respondsToSelector:@selector(setAllowsAutomaticWindowTabbing:)]) {
+		NSWindow.allowsAutomaticWindowTabbing = NO;
+	}
+
+	if(!HasDocumentWindow([NSApp orderedWindows])) {
 		BOOL disableUntitledAtStartupPrefs = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableNewDocumentAtStartupKey];
 		BOOL showFavoritesInsteadPrefs     = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsShowFavoritesInsteadOfUntitledKey];
 
-		if(showFavoritesInsteadPrefs)
+		if(showFavoritesInsteadPrefs) {
 			[self openFavorites:self];
-		else if(!disableUntitledAtStartupPrefs)
+        }
+		else if(!disableUntitledAtStartupPrefs) {
 			[self newDocument:self];
+        }
 	}
 
 	[self userDefaultsDidChange:nil]; // setup mate/rmate server
@@ -362,8 +359,9 @@ BOOL HasDocumentWindow (NSArray* windows)
 - (IBAction)orderFrontGoToLinePanel:(id)sender;
 {
 	D(DBF_AppController, bug("\n"););
-	if(id textView = [NSApp targetForAction:@selector(selectionString)])
+	if(id textView = [NSApp targetForAction:@selector(selectionString)]) {
 		[goToLineTextField setStringValue:[textView selectionString]];
+	}
 	[goToLinePanel makeKeyAndOrderFront:self];
 }
 
@@ -401,8 +399,9 @@ BOOL HasDocumentWindow (NSArray* windows)
 - (void)didSelectFavorite:(id)sender
 {
 	NSMutableArray* paths = [NSMutableArray array];
-	for(id item in [sender selectedItems])
+	for(id item in [sender selectedItems]) {
 		[paths addObject:[item objectForKey:@"path"]];
+    }
 	OakOpenDocuments(paths, YES);
 }
 
@@ -420,14 +419,12 @@ BOOL HasDocumentWindow (NSArray* windows)
 	chooser.scope        = textView ? [textView scopeContext] : scope::wildcard;
 	chooser.hasSelection = [textView hasSelection];
 
-	if(DocumentWindowController* controller = [NSApp targetForAction:@selector(selectedDocument)])
-	{
-		OakDocument* doc = controller.selectedDocument;
+	if(DocumentWindowController *controller = [NSApp targetForAction:@selector(selectedDocument)]) {
+		OakDocument *doc  = controller.selectedDocument;
 		chooser.path      = doc.path;
 		chooser.directory = [doc.path stringByDeletingLastPathComponent] ?: doc.directory;
 	}
-	else
-	{
+	else {
 		chooser.path      = nil;
 		chooser.directory = nil;
 	}
@@ -437,8 +434,9 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 - (void)bundleItemChooserDidSelectItems:(id)sender
 {
-	for(id item in [sender selectedItems])
+	for(id item in [sender selectedItems]) {
 		[NSApp sendAction:@selector(performBundleItemWithUUIDStringFrom:) to:nil from:@{ @"representedObject" : [item valueForKey:@"uuid"] }];
+    }
 }
 
 // ===========================

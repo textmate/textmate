@@ -38,8 +38,9 @@ OAK_DEBUG_VAR(AppController_Commands);
 			OakDocument* doc = [OakDocumentController.sharedInstance untitledDocument];
 			[doc loadModalForWindow:nil completionHandler:^(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID){
 				[OakDocumentController.sharedInstance showDocument:doc];
-				if(DocumentWindowController* controller = [DocumentWindowController controllerForDocument:doc])
+				if(DocumentWindowController* controller = [DocumentWindowController controllerForDocument:doc]) {
 					[controller performBundleItem:item];
+				}
 				[doc markDocumentSaved];
 				[doc close];
 			}];
