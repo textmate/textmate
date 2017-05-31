@@ -27,6 +27,9 @@ TM_C_POINTER     = "* "
 [ {*.,}target ]
 fileType         = 'source.tm-properties'
 
+[ *.target ]
+fileType         = 'source.tm-properties'
+
 [ *.h ]
 fileType         = 'source.objc++'
 
