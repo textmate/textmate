@@ -434,7 +434,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 + (NSAlert*)saveAlertForDocuments:(NSArray<OakDocument*>*)someDocuments
 {
 	NSAlert* alert = [[NSAlert alloc] init];
-	[alert setAlertStyle:NSWarningAlertStyle];
+	[alert setAlertStyle:NSAlertStyleWarning];
 	if(someDocuments.count == 1)
 	{
 		OakDocument* document = someDocuments.firstObject;

@@ -96,9 +96,9 @@ static NSButton* OakSmallButton (NSString* title, SEL action, id target, NSInteg
 	self.neverButton.hidden = YES;
 
 	_eventMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:NSFlagsChangedMask handler:^NSEvent*(NSEvent* event){
-		NSUInteger modifierFlags = [self.view.window isKeyWindow] ? ([event modifierFlags] & (NSShiftKeyMask|NSControlKeyMask|NSAlternateKeyMask|NSCommandKeyMask)) : 0;
-		self.neverButton.hidden  = modifierFlags != NSAlternateKeyMask;
-		self.notNowButton.hidden = modifierFlags == NSAlternateKeyMask;
+		NSUInteger modifierFlags = [self.view.window isKeyWindow] ? ([event modifierFlags] & (NSShiftKeyMask|NSControlKeyMask|NSEventModifierFlagOption|NSCommandKeyMask)) : 0;
+		self.neverButton.hidden  = modifierFlags != NSEventModifierFlagOption;
+		self.notNowButton.hidden = modifierFlags == NSEventModifierFlagOption;
 		return event;
 	}];
 }

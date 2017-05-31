@@ -174,7 +174,7 @@ static std::string key_equivalent_for_menu_item (NSMenuItem* menuItem)
 	{
 		{ NSNumericPadKeyMask, "#" },
 		{ NSControlKeyMask,    "^" },
-		{ NSAlternateKeyMask,  "~" },
+		{ NSEventModifierFlagOption,  "~" },
 		{ NSShiftKeyMask,      "$" },
 		{ NSCommandKeyMask,    "@" },
 	};
@@ -512,7 +512,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 {
 	auto updateDefaultButton = ^NSEvent*(NSEvent* event){
 		BOOL isKeyWindow = NSApp.keyWindow == self.window;
-		BOOL optionDown  = ([event modifierFlags] & NSDeviceIndependentModifierFlagsMask) == NSAlternateKeyMask;
+		BOOL optionDown  = ([event modifierFlags] & NSDeviceIndependentModifierFlagsMask) == NSEventModifierFlagOption;
 		self.window.defaultButtonCell = self.canEdit && (!self.canAccept || (optionDown && isKeyWindow)) ? self.editButton.cell : self.selectButton.cell;
 		return event;
 	};

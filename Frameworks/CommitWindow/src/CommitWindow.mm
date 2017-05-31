@@ -211,15 +211,15 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 				if(![wealf.window isKeyWindow])
 					return event;
 
-				if([event modifierFlags] & NSAlternateKeyMask)
+				if([event modifierFlags] & NSEventModifierFlagOption)
 				{
-					wealf.commitButton.keyEquivalentModifierMask |= NSAlternateKeyMask;
+					wealf.commitButton.keyEquivalentModifierMask |= NSEventModifierFlagOption;
 					wealf.commitButton.action = @selector(performCommit:);
 					wealf.showContinueSuffix = NO;
 				}
 				else
 				{
-					wealf.commitButton.keyEquivalentModifierMask &= ~NSAlternateKeyMask;
+					wealf.commitButton.keyEquivalentModifierMask &= ~NSEventModifierFlagOption;
 					wealf.commitButton.action = @selector(performCommitAndContinue:);
 					wealf.showContinueSuffix = YES;
 				}

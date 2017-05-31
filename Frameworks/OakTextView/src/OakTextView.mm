@@ -2205,8 +2205,8 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 
 - (void)flagsChanged:(NSEvent*)anEvent
 {
-	NSInteger modifiers  = [anEvent modifierFlags] & (NSAlternateKeyMask | NSControlKeyMask | NSCommandKeyMask | NSShiftKeyMask);
-	BOOL isHoldingOption = modifiers & NSAlternateKeyMask ? YES : NO;
+	NSInteger modifiers  = [anEvent modifierFlags] & (NSEventModifierFlagOption | NSControlKeyMask | NSCommandKeyMask | NSShiftKeyMask);
+	BOOL isHoldingOption = modifiers & NSEventModifierFlagOption ? YES : NO;
 
 	self.showColumnSelectionCursor = isHoldingOption;
 	if(([NSEvent pressedMouseButtons] & 1))
@@ -2221,8 +2221,8 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 		BOOL didPressShift    = modifiers == NSShiftKeyMask && _lastFlags == 0;
 		BOOL didReleaseShift  = modifiers == 0 && _lastFlags == NSShiftKeyMask;
 
-		BOOL didPressOption   = (modifiers & ~NSShiftKeyMask) == NSAlternateKeyMask && (_lastFlags & ~NSShiftKeyMask) == 0;
-		BOOL didReleaseOption = (modifiers & ~NSShiftKeyMask) == 0 && (_lastFlags & ~NSShiftKeyMask) == NSAlternateKeyMask;
+		BOOL didPressOption   = (modifiers & ~NSShiftKeyMask) == NSEventModifierFlagOption && (_lastFlags & ~NSShiftKeyMask) == 0;
+		BOOL didReleaseOption = (modifiers & ~NSShiftKeyMask) == 0 && (_lastFlags & ~NSShiftKeyMask) == NSEventModifierFlagOption;
 
 		OakFlagsState newFlagsState = OakFlagsStateClear;
 		if(didPressOption)
@@ -3046,7 +3046,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	hideCaret = !hideCaret;
 
 	// The column selection cursor may get stuck if e.g. using ⌥F2 to bring up a menu: We see the initial “option down” but never the “option release” that would normally reset the column selection cursor state.
-	if(([NSEvent modifierFlags] & NSAlternateKeyMask) == 0)
+	if(([NSEvent modifierFlags] & NSEventModifierFlagOption) == 0)
 		self.showColumnSelectionCursor = NO;
 }
 
@@ -3594,7 +3594,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		{
 			{ NSShiftKeyMask,     "SHIFT"    },
 			{ NSControlKeyMask,   "CONTROL"  },
-			{ NSAlternateKeyMask, "OPTION"   },
+			{ NSEventModifierFlagOption, "OPTION"   },
 			{ NSCommandKeyMask,   "COMMAND"  }
 		};
 
@@ -3799,7 +3799,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (void)actOnMouseDown
 {
-	bool optionDown  = mouseDownModifierFlags & NSAlternateKeyMask;
+	bool optionDown  = mouseDownModifierFlags & NSEventModifierFlagOption;
 	bool shiftDown   = mouseDownModifierFlags & NSShiftKeyMask;
 	bool commandDown = mouseDownModifierFlags & NSCommandKeyMask;
 
@@ -3879,7 +3879,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	}
 
 	NSUInteger currentModifierFlags = [anEvent modifierFlags];
-	if(currentModifierFlags & NSAlternateKeyMask)
+	if(currentModifierFlags & NSEventModifierFlagOption)
 		range.last().columnar = true;
 
 	ng::ranges_t s = documentView->ranges();
@@ -3954,7 +3954,7 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 	{
 		{ NSShiftKeyMask,      "dyn.modifier.shift"   },
 		{ NSControlKeyMask,    "dyn.modifier.control" },
-		{ NSAlternateKeyMask,  "dyn.modifier.option"  },
+		{ NSEventModifierFlagOption,  "dyn.modifier.option"  },
 		{ NSCommandKeyMask,    "dyn.modifier.command" }
 	};
 
@@ -4050,7 +4050,7 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 	if(!hasFocus)
 		mouseDownModifierFlags &= ~NSCommandKeyMask;
 
-	if(!(mouseDownModifierFlags & NSShiftKeyMask) && [self isPointInSelection:[self convertPoint:[anEvent locationInWindow] fromView:nil]] && [anEvent clickCount] == 1 && [self dragDelay] >= 0 && !([anEvent modifierFlags] & (NSShiftKeyMask | NSControlKeyMask | NSAlternateKeyMask | NSCommandKeyMask)))
+	if(!(mouseDownModifierFlags & NSShiftKeyMask) && [self isPointInSelection:[self convertPoint:[anEvent locationInWindow] fromView:nil]] && [anEvent clickCount] == 1 && [self dragDelay] >= 0 && !([anEvent modifierFlags] & (NSShiftKeyMask | NSControlKeyMask | NSEventModifierFlagOption | NSCommandKeyMask)))
 			[self preparePotentialDrag:anEvent];
 	else	[self actOnMouseDown];
 }
@@ -4398,7 +4398,7 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 				{
 					[NSApp sendEvent:event];
 				}
-				else if([event type] == NSKeyDown && (([[event charactersIgnoringModifiers] isEqualToString:@"c"] && ([event modifierFlags] & (NSShiftKeyMask|NSControlKeyMask|NSAlternateKeyMask|NSCommandKeyMask)) == NSControlKeyMask) || ([[event charactersIgnoringModifiers] isEqualToString:@"."] && ([event modifierFlags] & (NSShiftKeyMask|NSControlKeyMask|NSAlternateKeyMask|NSCommandKeyMask)) == NSCommandKeyMask)))
+				else if([event type] == NSKeyDown && (([[event charactersIgnoringModifiers] isEqualToString:@"c"] && ([event modifierFlags] & (NSShiftKeyMask|NSControlKeyMask|NSEventModifierFlagOption|NSCommandKeyMask)) == NSControlKeyMask) || ([[event charactersIgnoringModifiers] isEqualToString:@"."] && ([event modifierFlags] & (NSShiftKeyMask|NSControlKeyMask|NSEventModifierFlagOption|NSCommandKeyMask)) == NSCommandKeyMask)))
 				{
 					NSAlert* alert        = [[NSAlert alloc] init];
 					alert.messageText     = [NSString stringWithFormat:@"Stop “%@”", to_ns(aBundleCommand.name)];

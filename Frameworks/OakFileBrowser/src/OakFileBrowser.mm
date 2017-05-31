@@ -943,7 +943,7 @@ static bool is_binary (std::string const& path)
 			[aMenu addItemWithTitle:@"Copy" action:@selector(copy:) keyEquivalent:@""];
 
 			NSMenuItem* copyPathnameItem = [aMenu addItemWithTitle:@"Copy As Pathname" action:@selector(copyAsPathname:) keyEquivalent:@""];
-			copyPathnameItem.keyEquivalentModifierMask = NSAlternateKeyMask;
+			copyPathnameItem.keyEquivalentModifierMask = NSEventModifierFlagOption;
 			copyPathnameItem.alternate = YES;
 		}
 
@@ -954,7 +954,7 @@ static bool is_binary (std::string const& path)
 			[aMenu addItemWithTitle:[NSString stringWithFormat:@"Paste %@", label] action:@selector(paste:) keyEquivalent:@""];
 
 			NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithFormat:@"Move %@ Here", label] action:@selector(pasteNext:) keyEquivalent:@"v"];
-			[menuItem setKeyEquivalentModifierMask:NSAlternateKeyMask|NSCommandKeyMask];
+			[menuItem setKeyEquivalentModifierMask:NSEventModifierFlagOption|NSCommandKeyMask];
 		}
 	}
 

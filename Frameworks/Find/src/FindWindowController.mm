@@ -229,7 +229,7 @@ static NSButton* OakCreateStopSearchButton ()
 
 		[actionMenu addItem:[NSMenuItem separatorItem]];
 		NSMenuItem* collapseExpandItem = [actionMenu addItemWithTitle:@"Collapse Results" action:@selector(toggleCollapsedState:) keyEquivalent:@"1"];
-		collapseExpandItem.keyEquivalentModifierMask = NSAlternateKeyMask|NSCommandKeyMask;
+		collapseExpandItem.keyEquivalentModifierMask = NSEventModifierFlagOption|NSCommandKeyMask;
 		collapseExpandItem.target = self.resultsViewController;
 
 		NSMenuItem* selectResultItem = [actionMenu addItemWithTitle:@"Select Result" action:NULL keyEquivalent:@""];
