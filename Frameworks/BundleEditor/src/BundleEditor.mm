@@ -6,7 +6,6 @@
 #import <OakFoundation/OakStringListTransformer.h>
 #import <OakAppKit/NSAlert Additions.h>
 #import <OakAppKit/NSImage Additions.h>
-#import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakSound.h>
 #import <OakAppKit/OakFileIconImage.h>
 #import <OakTextView/OakDocumentView.h>
@@ -282,15 +281,15 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 			[[menu addItemWithTitle:it.file action:NULL keyEquivalent:@""] setTag:it.kind];
 	}
 
-	NSAlert* alert = [NSAlert alertWithMessageText:@"Create New Item" defaultButton:@"Create" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"Please choose what you want to create:"];
+	NSAlert* alert = [NSAlert tmAlertWithMessageText:@"Create New Item" informativeText:@"Please choose what you want to create:" buttons:@"Create", @"Cancel", nil];
 	NSPopUpButton* typeChooser = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO];
 	[typeChooser setMenu:menu];
 	[typeChooser sizeToFit];
 	[alert setAccessoryView:typeChooser];
-	OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){
-		if(returnCode == NSAlertDefaultReturn)
+	[alert beginSheetModalForWindow:self.window completionHandler:^(NSInteger returnCode){
+		if(returnCode == NSAlertFirstButtonReturn)
 			[self createItemOfType:(bundles::kind_t)[[(NSPopUpButton*)[alert accessoryView] selectedItem] tag]];
-	});
+	}];
 	[[alert window] recalculateKeyViewLoop];
 	[[alert window] makeFirstResponder:typeChooser];
 }
@@ -399,8 +398,8 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 		parsedContent = plist::parse_ascii(content, &success);
 		if(!success)
 		{
-			NSAlert* alert = [NSAlert alertWithMessageText:@"Error Parsing Property List" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"The property list is not valid.\n\nUnfortunately I am presently unable to point to where the parser failed."];
-			OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){ });
+			NSAlert* alert = [NSAlert tmAlertWithMessageText:@"Error Parsing Property List" informativeText:@"The property list is not valid.\n\nUnfortunately I am presently unable to point to where the parser failed." buttons:@"OK", nil];
+			[alert beginSheetModalForWindow:self.window completionHandler:^(NSInteger returnCode){ }];
 			return NO;
 		}
 	}
@@ -474,14 +473,14 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 
 	if(!changes.empty())
 	{
-		NSAlert* alert = [NSAlert alertWithMessageText:@"Error Saving Bundle Item" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"Sorry, but something went wrong while trying to save your changes. More info may be available via the console."];
-		OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){
+		NSAlert* alert = [NSAlert tmAlertWithMessageText:@"Error Saving Bundle Item" informativeText:@"Sorry, but something went wrong while trying to save your changes. More info may be available via the console." buttons:@"OK", nil];
+		[alert beginSheetModalForWindow:self.window completionHandler:^(NSInteger returnCode){
 			if(returnCode == NSAlertSecondButtonReturn) // Discard Changes
 			{
 				changes.clear();
 				[self didChangeModifiedState];
 			}
-		});
+		}];
 	}
 
 	[self didChangeModifiedState];
@@ -597,7 +596,7 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 		NSSavePanel* savePanel = [NSSavePanel savePanel];
 		[savePanel setNameFieldStringValue:[NSString stringWithCxxString:name + ".tmbundle"]];
 		[savePanel beginSheetModalForWindow:self.window completionHandler:^(NSInteger result) {
-			if(result == NSOKButton)
+			if(result == NSFileHandlingPanelOKButton)
 			{
 				NSString* path = [[savePanel.URL filePathURL] path];
 				if([[NSFileManager defaultManager] fileExistsAtPath:path])
@@ -616,7 +615,13 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 					res = res && item->save_to(dest);
 
 				if(!res)
-					NSRunAlertPanel(@"Failed to Save Bundle", @"Unknown error while saving bundle as “%@”.", @"OK", nil, nil, [path stringByAbbreviatingWithTildeInPath]);
+				{
+					NSAlert* alert        = [[NSAlert alloc] init];
+					alert.messageText     = @"Failed to Save Bundle";
+					alert.informativeText = [NSString stringWithFormat:@"Unknown error while saving bundle as “%@”.", [path stringByAbbreviatingWithTildeInPath]];
+					[alert addButtonWithTitle:@"OK"];
+					[alert runModal];
+				}
 			}
 		}];
 	}
@@ -903,11 +908,11 @@ static NSString* DescriptionForChanges (std::map<bundles::item_ptr, plist::dicti
 		return YES;
 
 	NSAlert* alert = [[NSAlert alloc] init];
-	[alert setAlertStyle:NSWarningAlertStyle];
+	[alert setAlertStyle:NSAlertStyleWarning];
 	[alert setMessageText:DescriptionForChanges(changes)];
 	[alert setInformativeText:@"Your changes will be lost if you don’t save them."];
 	[alert addButtons:@"Save", @"Cancel", @"Don’t Save", nil];
-	OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){
+	[alert beginSheetModalForWindow:self.window completionHandler:^(NSInteger returnCode){
 		if(returnCode != NSAlertSecondButtonReturn) // Not "Cancel"
 		{
 			if(returnCode == NSAlertFirstButtonReturn) // "Save"
@@ -916,7 +921,7 @@ static NSString* DescriptionForChanges (std::map<bundles::item_ptr, plist::dicti
 				changes.clear();
 			[self close];
 		}
-	});
+	}];
 	return NO;
 }
 

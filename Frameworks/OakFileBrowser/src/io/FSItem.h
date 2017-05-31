@@ -1,6 +1,6 @@
 #import <scm/status.h>
 
-@class FSDataSource;
+@class OakFinderTag;
 
 enum FSItemURLType { FSItemURLTypeUnknown = 0, FSItemURLTypeFile, FSItemURLTypeFolder, FSItemURLTypePackage, FSItemURLTypeAlias, FSItemURLTypeMissing };
 
@@ -8,6 +8,7 @@ enum FSItemURLType { FSItemURLTypeUnknown = 0, FSItemURLTypeFile, FSItemURLTypeF
 @property (nonatomic) NSImage* icon;
 @property (nonatomic) NSString* displayName;
 @property (nonatomic) NSString* toolTip;
+@property (nonatomic) NSArray<OakFinderTag*>* finderTags;
 @property (nonatomic) NSInteger labelIndex;
 @property (nonatomic) NSURL* url;
 @property (nonatomic) FSItemURLType urlType;

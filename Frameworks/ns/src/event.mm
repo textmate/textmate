@@ -107,7 +107,7 @@ static std::string string_for (NSUInteger flags)
 	{
 		{ NSNumericPadKeyMask, "#" },
 		{ NSControlKeyMask,    "^" },
-		{ NSAlternateKeyMask,  "~" },
+		{ NSEventModifierFlagOption,  "~" },
 		{ NSShiftKeyMask,      "$" },
 		{ NSCommandKeyMask,    "@" },
 	};
@@ -124,7 +124,7 @@ static NSUInteger ns_flag_for_char (uint32_t ch)
 	{
 		case '$': return NSShiftKeyMask;
 		case '^': return NSControlKeyMask;
-		case '~': return NSAlternateKeyMask;
+		case '~': return NSEventModifierFlagOption;
 		case '@': return NSCommandKeyMask;
 		case '#': return NSNumericPadKeyMask;
 	}
@@ -191,7 +191,7 @@ namespace ns
 		std::string res = "";
 		if(flags & NSControlKeyMask)
 			res += glyph_named("control");
-		if(flags & NSAlternateKeyMask)
+		if(flags & NSEventModifierFlagOption)
 			res += glyph_named("modifier");
 		if(flags & NSShiftKeyMask)
 			res += glyph_named("shift");

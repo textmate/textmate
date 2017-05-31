@@ -7,7 +7,6 @@
 #import "merge.h"
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
-#import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakEncodingPopUpButton.h>
 #import <OakAppKit/OakSavePanel.h>
 #import <OakAppKit/NSAlert Additions.h>
@@ -326,16 +325,10 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 		self.fileType   = aFileType;
 
 		[self createBuffer];
-		if([someData respondsToSelector:@selector(enumerateByteRangesUsingBlock:)]) // MAC_OS_X_VERSION_10_9
-		{
-			[someData enumerateByteRangesUsingBlock:^(void const* buf, NSRange range, BOOL*){
-				_buffer->insert(range.location, (char const*)buf, range.length);
-			}];
-		}
-		else
-		{
-			_buffer->insert(0, (char const*)[someData bytes], [someData length]);
-		}
+
+		[someData enumerateByteRangesUsingBlock:^(void const* buf, NSRange range, BOOL*){
+			_buffer->insert(range.location, (char const*)buf, range.length);
+		}];
 	}
 	return self;
 }
@@ -915,11 +908,11 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 
 				[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentWillShowAlertNotification object:_document];
 				NSAlert* alert = [NSAlert tmAlertWithMessageText:[NSString stringWithFormat:@"The file “%@” is locked.", _document.displayName] informativeText:@"Do you want to overwrite it anyway?" buttons:@"Overwrite", @"Cancel", nil];
-				OakShowAlertForWindow(alert, _window, ^(NSInteger returnCode){
+				[alert beginSheetModalForWindow:_window completionHandler:^(NSInteger returnCode){
 					if(returnCode == NSAlertFirstButtonReturn)
 							context->set_make_writable(true);
 					else	_cancel = true;
-				});
+				}];
 			}
 
 			void select_create_parent (std::string const& path, io::bytes_ptr content, file::save_context_ptr context)
@@ -929,11 +922,11 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 
 				[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentWillShowAlertNotification object:_document];
 				NSAlert* alert = [NSAlert tmAlertWithMessageText:[NSString stringWithFormat:@"No parent folder for “%@”.", _document.displayName] informativeText:[NSString stringWithFormat:@"Do you wish to create a folder at “%@”?", [NSString stringWithCxxString:path::with_tilde(path::parent(path))]] buttons:@"Create Folder", @"Cancel", nil];
-				OakShowAlertForWindow(alert, _window, ^(NSInteger returnCode){
+				[alert beginSheetModalForWindow:_window completionHandler:^(NSInteger returnCode){
 					if(returnCode == NSAlertFirstButtonReturn)
 							context->set_create_parent(true);
 					else	_cancel = true;
-				});
+				}];
 			}
 
 			void obtain_authorization (std::string const& path, io::bytes_ptr content, osx::authorization_t auth, file::save_context_ptr context)
@@ -957,11 +950,11 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 					NSAlert* alert = [NSAlert tmAlertWithMessageText:[NSString stringWithFormat:@"Unable to save “%@” using “%@” as encoding.", _document.displayName, to_ns(charset)] informativeText:@"Please choose another encoding:" buttons:@"Save", @"Cancel", nil];
 					OakEncodingPopUpButton* encodingPopUp = [OakEncodingPopUpButton new];
 					[alert setAccessoryView:encodingPopUp];
-					OakShowAlertForWindow(alert, _window, ^(NSInteger returnCode){
+					[alert beginSheetModalForWindow:_window completionHandler:^(NSInteger returnCode){
 						if(returnCode == NSAlertFirstButtonReturn)
 								context->set_charset(to_s(encodingPopUp.encoding));
 						else	_cancel = true;
-					});
+					}];
 					[[alert window] recalculateKeyViewLoop];
 				}
 				else

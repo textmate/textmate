@@ -60,14 +60,18 @@ static BOOL IsProtocolRelativeURL (NSURL* url)
 
 - (BOOL)webView:(WebView*)sender runJavaScriptConfirmPanelWithMessage:(NSString*)message initiatedByFrame:(WebFrame*)frame
 {
-	return NSAlertDefaultReturn == NSRunAlertPanel(NSLocalizedString(@"Script Message", @"JavaScript alert title"), @"%@", NSLocalizedString(@"OK", @"JavaScript alert confirmation"), NSLocalizedString(@"Cancel", @"JavaScript alert cancel"), nil, message);
+	NSAlert* alert        = [[NSAlert alloc] init];
+	alert.messageText     = NSLocalizedString(@"Script Message", @"JavaScript alert title");
+	alert.informativeText = message;
+	[alert addButtons:NSLocalizedString(@"OK", @"JavaScript alert confirmation"), NSLocalizedString(@"Cancel", @"JavaScript alert cancel"), nil];
+	return [alert runModal] == NSAlertFirstButtonReturn;
 }
 
 - (void)webView:(WebView*)sender runOpenPanelForFileButtonWithResultListener:(id <WebOpenPanelResultListener>)resultListener
 {
 	NSOpenPanel* panel = [NSOpenPanel openPanel];
 	[panel setDirectoryURL:[NSURL fileURLWithPath:NSHomeDirectory()]];
-	if([panel runModal] == NSOKButton)
+	if([panel runModal] == NSFileHandlingPanelOKButton)
 		[resultListener chooseFilename:[[[panel URLs] objectAtIndex:0] path]];
 }
 
@@ -127,7 +131,7 @@ static BOOL IsProtocolRelativeURL (NSURL* url)
 		request = [NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"file://localhost%@%s%@", [[[request URL] path] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], fragment ? "#" : "", fragment ?: @""]]];
 	}
 
-	if(IsProtocolRelativeURL([request URL]) && [NSURLComponents class]) // MAC_OS_X_VERSION_10_9
+	if(IsProtocolRelativeURL([request URL]))
 	{
 		NSURLComponents* components = [NSURLComponents componentsWithURL:[request URL] resolvingAgainstBaseURL:YES];
 		components.scheme = [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsDefaultURLProtocolKey];

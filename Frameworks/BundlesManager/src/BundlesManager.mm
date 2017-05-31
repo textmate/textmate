@@ -1,6 +1,7 @@
 #import "BundlesManager.h"
 #import <bundles/load.h>
 #import "InstallBundleItems.h"
+#import <OakAppKit/NSAlert Additions.h>
 #import <OakFoundation/NSDate Additions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <network/network.h>
@@ -170,9 +171,9 @@ static NSString* CacheFileForDownload (NSURL* url, NSDate* date)
 	if(NSWidth(frame) > 200)
 		[bundleChooser setFrameSize:NSMakeSize(200, NSHeight(frame))];
 
-	NSAlert* alert = [NSAlert alertWithMessageText:@"Select Bundle" defaultButton:@"OK" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"Select the bundle which should be used for the new item(s)."];
+	NSAlert* alert = [NSAlert tmAlertWithMessageText:@"Select Bundle" informativeText:@"Select the bundle which should be used for the new item(s)." buttons:@"OK", @"Cancel", nil];
 	[alert setAccessoryView:bundleChooser];
-	if([alert runModal] == NSAlertDefaultReturn) // "OK"
+	if([alert runModal] == NSAlertFirstButtonReturn) // "OK"
 	{
 		if(NSString* bundleUUID = [[bundleChooser selectedItem] representedObject])
 		{
@@ -184,7 +185,11 @@ static NSString* CacheFileForDownload (NSURL* url, NSDate* date)
 		}
 		else
 		{
-			NSRunAlertPanel(@"Creating bundles is not yet supported.", @"You can create a new bundle in the bundle editor via File → New (⌘N) and then repeat the previous action.", @"OK", nil, nil);
+			NSAlert* alert        = [[NSAlert alloc] init];
+			alert.messageText     = @"Creating bundles is not yet supported.";
+			alert.informativeText = @"You can create a new bundle in the bundle editor via File → New (⌘N) and then repeat the previous action.";
+			[alert addButtonWithTitle:@"OK"];
+			[alert runModal];
 		}
 	}
 	return NO;

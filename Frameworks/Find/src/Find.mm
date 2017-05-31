@@ -112,7 +112,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	if([self.windowController isWindowLoaded] && [self.windowController.window isVisible])
 	{
 		[openPanel beginSheetModalForWindow:self.windowController.window completionHandler:^(NSInteger result) {
-			if(result == NSOKButton)
+			if(result == NSFileHandlingPanelOKButton)
 			{
 				self.windowController.otherFolder = [[[[openPanel URLs] lastObject] filePathURL] path];
 				self.windowController.searchTarget = FFSearchTargetOther;
@@ -124,7 +124,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	else
 	{
 		[openPanel beginWithCompletionHandler:^(NSInteger result) {
-			if(result == NSOKButton)
+			if(result == NSFileHandlingPanelOKButton)
 			{
 				self.windowController.otherFolder = [[[[openPanel URLs] lastObject] filePathURL] path];
 				self.windowController.searchTarget = FFSearchTargetOther;

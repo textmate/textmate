@@ -248,11 +248,20 @@ static NSTextField* OakCreateTextField ()
 	{
 		_owner = info.owner;
 		[self removeAllRegisterButtons:self];
-		NSRunAlertPanel(@"License Added to Keychain", @"Thanks for your support!", @"Continue", nil, nil);
+
+		NSAlert* alert        = [[NSAlert alloc] init];
+		alert.messageText     = @"License Added to Keychain";
+		alert.informativeText = @"Thanks for your support!";
+		[alert addButtonWithTitle:@"Continue"];
+		[alert runModal];
 	}
 	else
 	{
-		NSRunAlertPanel(@"Failure Adding License to Keychain", @"%@", @"Continue", nil, nil, to_ns(error));
+		NSAlert* alert        = [[NSAlert alloc] init];
+		alert.messageText     = @"Failure Adding License to Keychain";
+		alert.informativeText = to_ns(error);
+		[alert addButtonWithTitle:@"Continue"];
+		[alert runModal];
 	}
 
 	return YES;

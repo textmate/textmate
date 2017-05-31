@@ -215,8 +215,8 @@ private:
 	if([anEvent keyCode] != 58 && [anEvent keyCode] != 61)
 		return;
 
-	NSInteger modifiers   = [anEvent modifierFlags] & (NSAlternateKeyMask | NSControlKeyMask | NSCommandKeyMask);
-	BOOL didPressOption   = modifiers == NSAlternateKeyMask;
+	NSInteger modifiers   = [anEvent modifierFlags] & (NSEventModifierFlagOption | NSControlKeyMask | NSCommandKeyMask);
+	BOOL didPressOption   = modifiers == NSEventModifierFlagOption;
 	BOOL didReleaseOption = modifiers == 0 && _optionDownDate && [[NSDate date] timeIntervalSinceDate:_optionDownDate] < 0.18;
 
 	self.optionDownDate = didPressOption ? [NSDate date] : nil;
@@ -363,8 +363,8 @@ private:
 	AUTO_REFRESH;
 
 	CGPoint pos = [self convertPoint:[anEvent locationInWindow] fromView:nil];
-	NSUInteger modifierFlags = [anEvent modifierFlags] & (NSShiftKeyMask|NSControlKeyMask|NSAlternateKeyMask|NSCommandKeyMask);
-	bool optionDown  = modifierFlags & NSAlternateKeyMask;
+	NSUInteger modifierFlags = [anEvent modifierFlags] & (NSShiftKeyMask|NSControlKeyMask|NSEventModifierFlagOption|NSCommandKeyMask);
+	bool optionDown  = modifierFlags & NSEventModifierFlagOption;
 	bool shiftDown   = modifierFlags & NSShiftKeyMask;
 	bool commandDown = modifierFlags & NSCommandKeyMask;
 

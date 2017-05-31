@@ -1,8 +1,8 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="11201" systemVersion="15G1004" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="12120" systemVersion="16G8c" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
-        <deployment version="1080" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="11201"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="12120"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="NSApplication">
@@ -794,8 +794,7 @@ CA
                                     <action selector="viewSource:" target="-1" id="541"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Enter Full Screen" keyEquivalent="f" id="781">
-                                <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
+                            <menuItem title="Enter Full Screen" keyEquivalent="" id="781">
                                 <connections>
                                     <action selector="toggleFullScreen:" target="-1" id="782"/>
                                 </connections>
@@ -1225,7 +1224,7 @@ CQ
                 <rect key="frame" x="0.0" y="0.0" width="269" height="102"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <textField verticalHuggingPriority="750" id="393">
+                    <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="393">
                         <rect key="frame" x="50" y="60" width="199" height="22"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" alignment="left" drawsBackground="YES" id="400">
@@ -1259,7 +1258,7 @@ DQ
                             <action selector="orderOut:" target="391" id="406"/>
                         </connections>
                     </button>
-                    <textField verticalHuggingPriority="750" id="396">
+                    <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="396">
                         <rect key="frame" x="17" y="62" width="28" height="13"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <textFieldCell key="cell" sendsActionOnEndEditing="YES" alignment="left" title="Line:" id="397">

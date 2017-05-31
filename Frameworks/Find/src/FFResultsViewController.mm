@@ -343,7 +343,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		_outlineView.doubleAction = @selector(didDoubleClick:);
 
 		_eventMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:NSFlagsChangedMask handler:^NSEvent*(NSEvent* event){
-			NSUInteger modifierFlags = [_outlineView.window isKeyWindow] ? ([event modifierFlags] & (NSShiftKeyMask|NSControlKeyMask|NSAlternateKeyMask|NSCommandKeyMask)) : 0;
+			NSUInteger modifierFlags = [_outlineView.window isKeyWindow] ? ([event modifierFlags] & (NSShiftKeyMask|NSControlKeyMask|NSEventModifierFlagOption|NSCommandKeyMask)) : 0;
 			if(_longPressedCommandModifier)
 			{
 				self.showKeyEquivalent = modifierFlags == NSCommandKeyMask;

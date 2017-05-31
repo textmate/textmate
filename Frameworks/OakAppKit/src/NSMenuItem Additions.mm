@@ -177,7 +177,7 @@ static char const* kOakMenuItemTabTrigger    = "OakMenuItemTabTrigger";
 		{
 			case '$': modifiers |= NSShiftKeyMask;      break;
 			case '^': modifiers |= NSControlKeyMask;    break;
-			case '~': modifiers |= NSAlternateKeyMask;  break;
+			case '~': modifiers |= NSEventModifierFlagOption;  break;
 			case '@': modifiers |= NSCommandKeyMask;    break;
 			case '#': modifiers |= NSNumericPadKeyMask; break;
 		}

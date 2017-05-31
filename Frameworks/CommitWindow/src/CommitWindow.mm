@@ -2,7 +2,6 @@
 #import "CWItem.h"
 #import "CWStatusStringTransformer.h"
 #import "CWTableCellView.h"
-#import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/NSAlert Additions.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakFoundation/NSString Additions.h>
@@ -186,6 +185,10 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[previousMessages(>=200)]-(20)-|" options:0 metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[documentView(>=400,==topDocumentViewDivider,==bottomDocumentViewDivider)]|" options:0 metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(20)-[showTableButton]" options:0 metrics:nil views:views]];
+
+		[contentView addConstraint:[NSLayoutConstraint constraintWithItem:_topDocumentViewDivider    attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0]];
+		[contentView addConstraint:[NSLayoutConstraint constraintWithItem:_bottomDocumentViewDivider attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0]];
+
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(12)-[previousMessages]-(12)-[topDocumentViewDivider][documentView][bottomDocumentViewDivider]-(12)-[showTableButton]" options:0 metrics:nil views:views]];
 
 		if(self.showsTableView)
@@ -208,15 +211,15 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 				if(![wealf.window isKeyWindow])
 					return event;
 
-				if([event modifierFlags] & NSAlternateKeyMask)
+				if([event modifierFlags] & NSEventModifierFlagOption)
 				{
-					wealf.commitButton.keyEquivalentModifierMask |= NSAlternateKeyMask;
+					wealf.commitButton.keyEquivalentModifierMask |= NSEventModifierFlagOption;
 					wealf.commitButton.action = @selector(performCommit:);
 					wealf.showContinueSuffix = NO;
 				}
 				else
 				{
-					wealf.commitButton.keyEquivalentModifierMask &= ~NSAlternateKeyMask;
+					wealf.commitButton.keyEquivalentModifierMask &= ~NSEventModifierFlagOption;
 					wealf.commitButton.action = @selector(performCommitAndContinue:);
 					wealf.showContinueSuffix = YES;
 				}
@@ -366,6 +369,9 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 
 	[scrollViewConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[showTableButton]-(12)-[topScrollViewDivider][scrollView][bottomScrollViewDivider]" options:0 metrics:nil views:views]];
 	[scrollViewConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView(==topScrollViewDivider,==bottomScrollViewDivider)]|" options:0 metrics:nil views:views]];
+
+	[scrollViewConstraints addObject:[NSLayoutConstraint constraintWithItem:_topScrollViewDivider    attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0]];
+	[scrollViewConstraints addObject:[NSLayoutConstraint constraintWithItem:_bottomScrollViewDivider attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0]];
 
 	_scrollViewConstraints = scrollViewConstraints;
 	_scrollViewHeightConstraint = [NSLayoutConstraint constraintWithItem:_scrollView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:0];
@@ -519,19 +525,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 	[[NSUserDefaults standardUserDefaults] setBool:_showsTableView forKey:kOakCommitWindowShowFileList];
 }
 
-- (void)sheetDidEnd:(id)sheetOrAlert returnCode:(NSInteger)returnCode contextInfo:(void*)unused
-{
-	if(NSString* commitMessage = self.documentView.document.content)
-	{
-		if([[commitMessage stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length] > 0)
-			[self saveCommitMessage:commitMessage];
-	}
-
-	[self sendCommitMessageToClient:NO];
-	[self.window orderOut:self];
-}
-
-- (void)beginSheetModalForWindow:(NSWindow*)aWindow completionHandler:(void(^)(NSInteger returnCode))aCompletionHandler
+- (void)beginSheetModalForWindow:(NSWindow*)aWindow completionHandler:(void(^)(NSModalResponse returnCode))aCompletionHandler
 {
 	std::string fileType = "text.plain";
 	auto scmName = _environment.find("TM_SCM_NAME");
@@ -552,7 +546,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 
 	self.retainedSelf = self;
 
-	[NSApp beginSheet:self.window modalForWindow:aWindow modalDelegate:self didEndSelector:@selector(sheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+	[aWindow beginSheet:self.window completionHandler:aCompletionHandler];
 }
 
 - (void)sendCommitMessageToClient:(BOOL)success
@@ -572,7 +566,6 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 		if(success)
 		{
 			NSString* commitMessage = self.documentView.document.content;
-
 			NSMutableArray* outputArray = [NSMutableArray array];
 			[outputArray addObject:[NSString stringWithFormat:@" -m '%@' ", [commitMessage stringByReplacingOccurrencesOfString:@"'" withString:@"'\"'\"'"]]];
 			for(CWItem* item in [_arrayController arrangedObjects])
@@ -593,7 +586,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 				kOakCommitWindowReturnCode     : @1,
 			}];
 		}
-
+		[self saveCommitMessage];
 		self.clientPortName = nil;
 	}
 
@@ -606,27 +599,31 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 		item.commit = aState;
 }
 
-- (void)saveCommitMessage:(NSString*)aCommitMessage
+- (void)saveCommitMessage
 {
-	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
-	NSMutableArray* messages = [[defaults stringArrayForKey:kOakCommitWindowCommitMessages] mutableCopy];
-	if(messages)
+	NSString* commitMessage = self.documentView.document.content;
+	if([[commitMessage stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length] > 0)
 	{
-		NSUInteger currentIndex = [messages indexOfObject:aCommitMessage];
-		if(currentIndex != NSNotFound)
-			[messages removeObjectAtIndex:currentIndex];
+		NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+		NSMutableArray* messages = [[defaults stringArrayForKey:kOakCommitWindowCommitMessages] mutableCopy];
+		if(messages)
+		{
+			NSUInteger currentIndex = [messages indexOfObject:commitMessage];
+			if(currentIndex != NSNotFound)
+				[messages removeObjectAtIndex:currentIndex];
 
-		[messages addObject:aCommitMessage];
-		if([messages count] > kOakCommitWindowCommitMessagesMax)
-			[messages removeObjectAtIndex:0];
-	}
-	else
-	{
-		messages = [NSMutableArray arrayWithObject:aCommitMessage];
-	}
+			[messages addObject:commitMessage];
+			if([messages count] > kOakCommitWindowCommitMessagesMax)
+				[messages removeObjectAtIndex:0];
+		}
+		else
+		{
+			messages = [NSMutableArray arrayWithObject:commitMessage];
+		}
 
-	[defaults setObject:messages forKey:kOakCommitWindowCommitMessages];
-	[defaults synchronize];
+		[defaults setObject:messages forKey:kOakCommitWindowCommitMessages];
+		[defaults synchronize];
+	}
 }
 
 - (void)setupPreviousCommitMessagesMenu
@@ -713,7 +710,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 			{
 				dispatch_async(dispatch_get_main_queue(), ^{
 					NSAlert* alert = [NSAlert tmAlertWithMessageText:@"Failed running diff command." informativeText:[NSString stringWithCxxString:cmdString] buttons:@"OK", nil];
-					OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){});
+					[alert beginSheetModalForWindow:self.window completionHandler:^(NSInteger returnCode){}];
 				});
 			}
 		});
@@ -723,19 +720,19 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 - (void)performCommit:(id)sender
 {
 	[self sendCommitMessageToClient:YES];
-	[NSApp endSheet:self.window returnCode:NSRunStoppedResponse];
+	[self.window.sheetParent endSheet:self.window returnCode:NSModalResponseOK];
 }
 
 - (void)performCommitAndContinue:(id)sender
 {
 	[self sendCommitMessageToClient:YES andContinue:YES];
-	[NSApp endSheet:self.window returnCode:NSRunStoppedResponse];
+	[self.window.sheetParent endSheet:self.window returnCode:NSModalResponseOK];
 }
 
 - (void)cancel:(id)sender
 {
 	[self sendCommitMessageToClient:NO];
-	[NSApp endSheet:self.window returnCode:NSRunAbortedResponse];
+	[self.window.sheetParent endSheet:self.window returnCode:NSModalResponseCancel];
 }
 
 - (void)checkAll:(id)sender
@@ -773,7 +770,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 		if(rangeOfStatus.location == NSNotFound)
 		{
 			NSAlert* alert = [NSAlert tmAlertWithMessageText:@"Cannot understand output from command" informativeText:[NSString stringWithCxxString:cmdString] buttons:@"OK", nil];
-			OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){});
+			[alert beginSheetModalForWindow:self.window completionHandler:^(NSInteger returnCode){}];
 		}
 		NSString* newStatus = [outputStatus substringToIndex:rangeOfStatus.location];
 		CWItem* item = [[_arrayController arrangedObjects] objectAtIndex:row];
@@ -783,7 +780,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 	else
 	{
 		NSAlert* alert = [NSAlert tmAlertWithMessageText:@"Failed running command" informativeText:[NSString stringWithCxxString:cmdString] buttons:@"OK", nil];
-		OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){});
+		[alert beginSheetModalForWindow:self.window completionHandler:^(NSInteger returnCode){}];
 	}
 }
 

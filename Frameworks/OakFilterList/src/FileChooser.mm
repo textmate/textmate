@@ -265,15 +265,20 @@ static NSDictionary* globs_for_path (std::string const& path)
 		_progressIndicator.controlSize          = NSSmallControlSize;
 		_progressIndicator.displayedWhenStopped = NO;
 
+		OakBackgroundFillView* aboveScopeBarDark  = OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]);
+		OakBackgroundFillView* aboveScopeBarLight = OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.797 alpha:1], [NSColor colorWithCalibratedWhite:0.912 alpha:1]);
+		OakBackgroundFillView* topDivider         = OakCreateHorizontalLine([NSColor darkGrayColor], [NSColor colorWithCalibratedWhite:0.551 alpha:1]);
+		OakBackgroundFillView* bottomDivider      = OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]);
+
 		NSDictionary* views = @{
 			@"searchField"        : self.searchField,
-			@"aboveScopeBarDark"  : OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]),
-			@"aboveScopeBarLight" : OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.797 alpha:1], [NSColor colorWithCalibratedWhite:0.912 alpha:1]),
+			@"aboveScopeBarDark"  : aboveScopeBarDark,
+			@"aboveScopeBarLight" : aboveScopeBarLight,
 			@"scopeBar"           : scopeBar,
-			@"topDivider"         : OakCreateHorizontalLine([NSColor darkGrayColor], [NSColor colorWithCalibratedWhite:0.551 alpha:1]),
+			@"topDivider"         : topDivider,
 			@"scrollView"         : self.scrollView,
-			@"bottomDivider"      : OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]),
-			@"statusTextField"    : self.statusTextField,
+			@"bottomDivider"      : bottomDivider,
+	 		@"statusTextField"    : self.statusTextField,
 			@"itemCountTextField" : self.itemCountTextField,
 			@"progressIndicator"  : _progressIndicator,
 		};
@@ -287,6 +292,11 @@ static NSDictionary* globs_for_path (std::string const& path)
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[scopeBar]-(>=8)-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView(==topDivider,==bottomDivider)]|"         options:0 metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(24)-[statusTextField]-[itemCountTextField]-(4)-[progressIndicator]-(4)-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
+
+		[contentView addConstraint:[NSLayoutConstraint constraintWithItem:aboveScopeBarLight attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0]];
+		[contentView addConstraint:[NSLayoutConstraint constraintWithItem:topDivider         attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0]];
+		[contentView addConstraint:[NSLayoutConstraint constraintWithItem:bottomDivider      attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0]];
+
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(2)-[searchField]-(8)-[aboveScopeBarDark][aboveScopeBarLight]-(3)-[scopeBar]-(4)-[topDivider][scrollView(>=50)][bottomDivider]-(4)-[statusTextField]-(5)-|" options:0 metrics:nil views:views]];
 
 		self.sourceIndex = [[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsFileChooserSourceIndexKey];

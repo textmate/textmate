@@ -77,7 +77,7 @@ static id CreateInstanceOfPlugInClass (Class cl, TMPlugInController* controller)
 					NSAlert* alert = [NSAlert tmAlertWithMessageText:[NSString stringWithFormat:@"Move “%@” plug-in to Trash?", name ?: identifier] informativeText:@"Previous attempt of loading the plug-in caused abnormal exit. Would you like to move it to trash?" buttons:@"Move to Trash", @"Cancel", @"Skip Loading", nil];
 					NSInteger choice = [alert runModal];
 					if(choice == NSAlertFirstButtonReturn) // "Move to Trash"
-						[[NSFileManager defaultManager] tmTrashItemAtURL:[NSURL fileURLWithPath:aPath] resultingItemURL:nil error:nil];
+						[[NSFileManager defaultManager] trashItemAtURL:[NSURL fileURLWithPath:aPath] resultingItemURL:nil error:nil];
 
 					if(choice != NSAlertThirdButtonReturn) // "Skip Loading"
 						unlink(crashedDuringPlugInLoad.c_str());
@@ -155,14 +155,22 @@ static id CreateInstanceOfPlugInClass (Class cl, TMPlugInController* controller)
 
 	if([[plugInBundle objectForInfoDictionaryKey:@"TMPlugInAPIVersion"] intValue] != kPlugInAPIVersion)
 	{
-		NSRunAlertPanel(@"Cannot Install Plug-in", @"The %@ plug-in is not compatible with this version of TextMate.", @"Continue", nil, nil, plugInName);
+		NSAlert* alert        = [[NSAlert alloc] init];
+		alert.messageText     = @"Cannot Install Plug-in";
+		alert.informativeText = [NSString stringWithFormat:@"The %@ plug-in is not compatible with this version of TextMate.", plugInName];
+		[alert addButtonWithTitle:@"Continue"];
+		[alert runModal];
 		return;
 	}
 
 	NSArray* blacklist = [[NSUserDefaults standardUserDefaults] stringArrayForKey:kUserDefaultsDisabledPlugInsKey];
 	if([blacklist containsObject:[plugInBundle objectForInfoDictionaryKey:@"CFBundleIdentifier"]])
 	{
-		NSRunAlertPanel(@"Cannot Install Plug-in", @"The %@ plug-in should not be used with this version of TextMate because of stability problems.", @"Continue", nil, nil, plugInName);
+		NSAlert* alert        = [[NSAlert alloc] init];
+		alert.messageText     = @"Cannot Install Plug-in";
+		alert.informativeText = [NSString stringWithFormat:@"The %@ plug-in should not be used with this version of TextMate because of stability problems.", plugInName];
+		[alert addButtonWithTitle:@"Continue"];
+		[alert runModal];
 		return;
 	}
 
@@ -170,16 +178,26 @@ static id CreateInstanceOfPlugInClass (Class cl, TMPlugInController* controller)
 	{
 		NSString* newVersion = [plugInBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"] ?: [plugInBundle objectForInfoDictionaryKey:@"CFBundleVersion"];
 		NSString* oldVersion = [[NSBundle bundleWithPath:dst] objectForInfoDictionaryKey:@"CFBundleShortVersionString"] ?: [[NSBundle bundleWithPath:dst] objectForInfoDictionaryKey:@"CFBundleVersion"];
-		NSInteger choice = NSRunAlertPanel(@"Plug-in Already Installed", @"Version %@ of “%@” is already installed.\nDo you want to replace it with version %@?\n\nUpgrading a plug-in will require TextMate to be relaunched.", @"Replace", @"Cancel", nil, oldVersion ?: @"???", plugInName, newVersion ?: @"???");
-		if(choice == NSAlertDefaultReturn) // "Replace"
+
+		NSAlert* alert        = [[NSAlert alloc] init];
+		alert.messageText     = @"Plug-in Already Installed";
+		alert.informativeText = [NSString stringWithFormat:@"Version %@ of “%@” is already installed.\nDo you want to replace it with version %@?\n\nUpgrading a plug-in will require TextMate to be relaunched.", oldVersion ?: @"???", plugInName, newVersion ?: @"???"];
+		[alert addButtons:@"Replace", @"Cancel", nil];
+
+		NSModalResponse choice = [alert runModal];
+		if(choice == NSAlertFirstButtonReturn) // "Replace"
 		{
 			if(![fm removeItemAtPath:dst error:NULL])
 			{
-				NSRunAlertPanel(@"Install Failed", @"Couldn't remove old plug-in (“%@”)", @"Continue", nil, nil, [dst stringByAbbreviatingWithTildeInPath]);
+				NSAlert* alert = [[NSAlert alloc] init];
+				alert.messageText = @"Install Failed";
+				alert.informativeText = [NSString stringWithFormat:@"Couldn't remove old plug-in (“%@”)", [dst stringByAbbreviatingWithTildeInPath]];
+				[alert addButtonWithTitle:@"Continue"];
+				[alert runModal];
 				dst = nil;
 			}
 		}
-		else if(choice == NSAlertAlternateReturn) // "Cancel"
+		else if(choice == NSAlertSecondButtonReturn) // "Cancel"
 		{
 			dst = nil;
 		}
@@ -193,18 +211,29 @@ static id CreateInstanceOfPlugInClass (Class cl, TMPlugInController* controller)
 	{
 		if([fm copyItemAtPath:src toPath:dst error:NULL])
 		{
-			NSInteger choice = NSRunAlertPanel(@"Plug-in Installed", @"To activate “%@” you will need to relaunch TextMate.", @"Relaunch", @"Cancel", nil, plugInName);
-			if(choice == NSAlertDefaultReturn) // "Relaunch"
+			NSAlert* alert        = [[NSAlert alloc] init];
+			alert.messageText     = @"Plug-in Installed";
+			alert.informativeText = [NSString stringWithFormat:@"To activate “%@” you will need to relaunch TextMate.", plugInName];
+			[alert addButtons:@"Relaunch", @"Cancel", nil];
+			if([alert runModal] == NSAlertFirstButtonReturn) // "Relaunch"
 				oak::application_t::relaunch();
 		}
 		else
 		{
-			NSRunAlertPanel(@"Install Failed", @"The plug-in has not been installed.", @"Continue", nil, nil);
+			NSAlert* alert        = [[NSAlert alloc] init];
+			alert.messageText     = @"Install Failed";
+			alert.informativeText = @"The plug-in has not been installed.";
+			[alert addButtonWithTitle:@"Continue"];
+			[alert runModal];
 		}
 	}
 	else
 	{
-		NSRunAlertPanel(@"Install Failed", @"It was not possible to create the plug-in folder (“%@”)", @"Continue", nil, nil, [dstDir stringByAbbreviatingWithTildeInPath]);
+		NSAlert* alert        = [[NSAlert alloc] init];
+		alert.messageText     = @"Install Failed";
+		alert.informativeText = [NSString stringWithFormat:@"It was not possible to create the plug-in folder (“%@”)", [dstDir stringByAbbreviatingWithTildeInPath]];
+		[alert addButtonWithTitle:@"Continue"];
+		[alert runModal];
 	}
 }
 @end
