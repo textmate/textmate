@@ -113,8 +113,11 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 @property (nonatomic) BOOL                        htmlOutputInWindow;
 
 @property (nonatomic) NSString*                   projectPath;
-
 @property (nonatomic) NSString*                   documentPath;
+
+@property (nonatomic) NSButton*	                 touchBarPreviousTabButton;
+@property (nonatomic) NSButton*	                 touchBarNextTabButton;
+@property (nonatomic) NSButton*	                 touchBarQuickOpenButton;
 
 @property (nonatomic) NSArray*                    urlArrayForQuickLook;
 @property (nonatomic) NSArray<Bundle*>*           bundlesAlreadySuggested;
@@ -526,22 +529,25 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 	NSMutableArray<OakDocument*>* newDocuments = [NSMutableArray array];
 	NSUInteger newSelectedTabIndex = _selectedTabIndex;
-	for(OakDocument* document in _documents)
-	{
-		if(![uuids containsObject:document.identifier])
+	for(OakDocument* document in _documents) {
+		if(![uuids containsObject:document.identifier]) {
 			[newDocuments addObject:document];
-		if([selectedUUID isEqual:document.identifier])
+		}
+		if([selectedUUID isEqual:document.identifier]) {
 			newSelectedTabIndex = MAX(newDocuments.count, 1) - 1;
+		}
 	}
 
-	if(createIfEmptyFlag && newDocuments.count == 0)
+	if(createIfEmptyFlag && newDocuments.count == 0) {
 		[newDocuments addObject:[OakDocumentController.sharedInstance untitledDocument]];
+	}
 
 	self.documents        = newDocuments;
 	self.selectedTabIndex = newSelectedTabIndex;
 
-	if(newDocuments.count && ![newDocuments[newSelectedTabIndex].identifier isEqual:selectedUUID])
+	if(newDocuments.count && ![newDocuments[newSelectedTabIndex].identifier isEqual:selectedUUID]) {
 		[self openAndSelectDocument:newDocuments[newSelectedTabIndex]];
+	}
 }
 
 - (IBAction)performCloseTab:(id)sender
@@ -1407,8 +1413,9 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 		[self updateExternalAttributes];
 
-		if(self.autoRevealFile && self.selectedDocument.path && self.fileBrowserVisible)
+		if(self.autoRevealFile && self.selectedDocument.path && self.fileBrowserVisible) {
 			[self revealFileInProject:self];
+		}
 	}
 }
 
@@ -1478,24 +1485,27 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 - (void)setDocuments:(NSArray<OakDocument*>*)newDocuments
 {
-	for(OakDocument* document in newDocuments)
-	{
+	for(OakDocument* document in newDocuments) {
 		document.keepBackupFile = YES;
 		[document open];
 
 		// Avoid resetting directory when tearing off a tab (unless moved to new project)
-		if(!document.path && (self.projectPath || !document.directory))
+		if(!document.path && (self.projectPath || !document.directory)) {
 			document.directory = self.projectPath ?: self.defaultProjectPath;
+		}
 	}
 
-	for(OakDocument* document in _documents)
+	for(OakDocument* document in _documents) {
 		[document close];
+	}
 
 	_documents = newDocuments;
-	if(_documents.count)
+	if(_documents.count) {
 		[self.tabBarView reloadData];
+	}
 
 	[self updateFileBrowserStatus:self];
+	[self updateTouchBarButtons];
 	[[self class] scheduleSessionBackup:self];
 }
 
@@ -1853,7 +1863,10 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	[[self class] scheduleSessionBackup:self];
 }
 
-- (IBAction)toggleFileBrowser:(id)sender    { self.fileBrowserVisible = !self.fileBrowserVisible; }
+- (IBAction)toggleFileBrowser:(id)sender
+{
+	self.fileBrowserVisible = !self.fileBrowserVisible;
+}
 
 - (void)updateFileBrowserStatus:(id)sender
 {
@@ -2214,30 +2227,32 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	}
 
 	int i = 0;
-	for(OakDocument* document in _documents)
-	{
+	for(OakDocument* document in _documents) {
 		NSMenuItem* item = [aMenu addItemWithTitle:document.displayName action:@selector(takeSelectedTabIndexFrom:) keyEquivalent:i < 8 ? [NSString stringWithFormat:@"%c", '1' + i] : @""];
 		item.tag     = i;
 		item.toolTip = [document.path stringByAbbreviatingWithTildeInPath];
-		if(aMenu.propertiesToUpdate & NSMenuPropertyItemImage)
+
+		if(aMenu.propertiesToUpdate & NSMenuPropertyItemImage) {
 			item.image = document.icon;
-		if(i == _selectedTabIndex)
+		}
+		if(i == _selectedTabIndex) {
 			[item setState:NSOnState];
-		else if(document.isDocumentEdited)
+		}
+		else if(document.isDocumentEdited) {
 			[item setModifiedState:YES];
+		}
+
 		++i;
 	}
 
-	if(i == 0)
-	{
+	if(i == 0) {
 		[aMenu addItemWithTitle:@"No Tabs Open" action:@selector(nop:) keyEquivalent:@""];
 	}
-	else
-	{
+	else {
 		[aMenu addItem:[NSMenuItem separatorItem]];
 
 		NSMenuItem* item = [aMenu addItemWithTitle:@"Last Tab" action:@selector(takeSelectedTabIndexFrom:) keyEquivalent:@"9"];
-		item.tag     = _documents.count-1;
+		item.tag     = _documents.count - 1;
 		item.toolTip = _documents.lastObject.displayName;
 	}
 }
@@ -2395,8 +2410,15 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 static NSUInteger DisableSessionSavingCount = 0;
 
-+ (void)disableSessionSave { ++DisableSessionSavingCount; }
-+ (void)enableSessionSave  { --DisableSessionSavingCount; }
++ (void)disableSessionSave
+{
+	++DisableSessionSavingCount;
+}
+
++ (void)enableSessionSave
+{
+	--DisableSessionSavingCount;
+}
 
 + (BOOL)restoreSession
 {
@@ -2587,6 +2609,16 @@ static NSTouchBarItemIdentifier NavigationTouchBarIdentifier = @"com.textmate.to
 	return bar;
 }
 
+- (void)updateTouchBarButtons
+{
+	if (self.touchBarPreviousTabButton != nil) {
+		self.touchBarPreviousTabButton.enabled = (_documents.count > 1);
+	}
+	if (self.touchBarNextTabButton != nil) {
+		self.touchBarNextTabButton.enabled = (_documents.count > 1);
+	}
+}
+
 - (nullable NSTouchBarItem *)touchBar:(NSTouchBar *)touchBar makeItemForIdentifier:(NSTouchBarItemIdentifier)identifier
 {
 	if ([identifier isEqualToString:NavigationTouchBarIdentifier]) {
@@ -2600,20 +2632,26 @@ static NSTouchBarItemIdentifier NavigationTouchBarIdentifier = @"com.textmate.to
 
 - (NSView *)touchBar:(NSTouchBar *)touchBar navigationViewForIdentifier:(NSTouchBarItemIdentifier)identifier
 {
-	NSButton *backButton = [NSButton buttonWithTitle:@"" image:[NSImage imageNamed:NSImageNameTouchBarGoBackTemplate] target:self action:@selector(selectPreviousTab:)];
-	backButton.frame = NSMakeRect(0.0, 0.0, 74.0, 30.0);
-
-	NSButton *forwardButton = [NSButton buttonWithTitle:@"" image:[NSImage imageNamed:NSImageNameTouchBarGoForwardTemplate] target:self action:@selector(selectNextTab:)];
-	forwardButton.frame = NSMakeRect(75.0, 0.0, 74.0, 30.0);
-
-	NSButton *openButton = [NSButton buttonWithTitle:@"" image:[NSImage imageNamed:NSImageNameTouchBarSearchTemplate] target:self action:@selector(goToFile:)];
-	openButton.frame = NSMakeRect(154.0, 0.0, 75.0, 30.0);
+	if (self.touchBarPreviousTabButton == nil) {
+		self.touchBarPreviousTabButton = [NSButton buttonWithImage:[NSImage imageNamed:NSImageNameTouchBarGoBackTemplate] target:self action:@selector(selectPreviousTab:)];
+		self.touchBarPreviousTabButton.frame = NSMakeRect(0.0, 0.0, 74.0, 30.0);
+		self.touchBarPreviousTabButton.enabled = (_documents.count > 1);
+	}
+	if (self.touchBarNextTabButton == nil) {
+		self.touchBarNextTabButton = [NSButton buttonWithImage:[NSImage imageNamed:NSImageNameTouchBarGoForwardTemplate] target:self action:@selector(selectNextTab:)];
+		self.touchBarNextTabButton.frame = NSMakeRect(75.0, 0.0, 74.0, 30.0);
+		self.touchBarNextTabButton.enabled = (_documents.count > 1);
+	}
+	if (self.touchBarQuickOpenButton == nil) {
+		self.touchBarQuickOpenButton = [NSButton buttonWithImage:[NSImage imageNamed:NSImageNameTouchBarSearchTemplate] target:self action:@selector(goToFile:)];
+		self.touchBarQuickOpenButton.frame = NSMakeRect(154.0, 0.0, 75.0, 30.0);
+	}
 
 	NSView *navigationView = [[NSView alloc] init];
 	navigationView.subviews = @[
-		backButton,
-		forwardButton,
-		openButton,
+		self.touchBarPreviousTabButton,
+		self.touchBarNextTabButton,
+		self.touchBarQuickOpenButton,
 	];
 
 	return navigationView;
