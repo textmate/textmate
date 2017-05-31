@@ -84,8 +84,9 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 		gutterView.delegate    = self;
 		[gutterView insertColumnWithIdentifier:kBookmarksColumnIdentifier atPosition:0 dataSource:self delegate:self];
 		[gutterView insertColumnWithIdentifier:kFoldingsColumnIdentifier atPosition:2 dataSource:self delegate:self];
-		if([[NSUserDefaults standardUserDefaults] boolForKey:@"DocumentView Disable Line Numbers"])
+		if([[NSUserDefaults standardUserDefaults] boolForKey:@"DocumentView Disable Line Numbers"]) {
 			[gutterView setVisibility:NO forColumnWithIdentifier:GVLineNumbersColumnIdentifier];
+		}
 		[gutterView setTranslatesAutoresizingMaskIntoConstraints:NO];
 
 		gutterScrollView = [[OakDisableAccessibilityScrollView alloc] initWithFrame:NSZeroRect];
