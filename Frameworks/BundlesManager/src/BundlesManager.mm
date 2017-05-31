@@ -473,7 +473,7 @@ namespace
 		return;
 
 	NSAlert* alert = [[NSAlert alloc] init];
-	alert.alertStyle      = NSInformationalAlertStyle;
+	alert.alertStyle      = NSAlertStyleInformational;
 	alert.messageText     = @"Move Bundles?";
 	alert.informativeText = [NSString stringWithFormat:@"Bundles are no longer read from the “Avian” folder. Would you like to move the following items:\n\n%@", moveDescription];
 	[alert addButtonWithTitle:@"Move Bundles"];

@@ -50,7 +50,7 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 		commandName = bundleItem ? bundleItem->name() : "(unknown)";
 
 	NSAlert* alert = [[NSAlert alloc] init];
-	[alert setAlertStyle:NSCriticalAlertStyle];
+	[alert setAlertStyle:NSAlertStyleCritical];
 	[alert setMessageText:[NSString stringWithCxxString:text::format("Failure running “%.*s”.", (int)commandName.size(), commandName.data())]];
 	[alert setInformativeText:[NSString stringWithCxxString:message] ?: @"No output"];
 	[alert addButtonWithTitle:@"OK"];
@@ -426,7 +426,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 + (NSAlert*)saveAlertForDocuments:(NSArray<OakDocument*>*)someDocuments
 {
 	NSAlert* alert = [[NSAlert alloc] init];
-	[alert setAlertStyle:NSWarningAlertStyle];
+	[alert setAlertStyle:NSAlertStyleWarning];
 	if(someDocuments.count == 1)
 	{
 		OakDocument* document = someDocuments.firstObject;
