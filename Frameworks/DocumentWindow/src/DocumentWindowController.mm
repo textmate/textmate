@@ -117,6 +117,7 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 @property (nonatomic) NSButton*	                 touchBarPreviousTabButton;
 @property (nonatomic) NSButton*	                 touchBarNextTabButton;
 @property (nonatomic) NSButton*	                 touchBarQuickOpenButton;
+@property (nonatomic) NSButton*	                 touchBarNewTabButton;
 
 @property (nonatomic) NSArray*                    urlArrayForQuickLook;
 @property (nonatomic) NSArray<Bundle*>*           bundlesAlreadySuggested;
@@ -844,25 +845,26 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 - (IBAction)moveDocumentToNewWindow:(id)sender
 {
-	if(_documents.count > 1)
+	if(_documents.count > 1) {
 		[self takeTabsToTearOffFrom:[NSIndexSet indexSetWithIndex:_selectedTabIndex]];
+	}
 }
 
 - (IBAction)mergeAllWindows:(id)sender
 {
 	NSMutableArray<OakDocument*>* documents = [_documents mutableCopy];
-	for(DocumentWindowController* delegate in SortedControllers())
-	{
-		if(delegate != self && !delegate.window.isMiniaturized)
+	for(DocumentWindowController* delegate in SortedControllers()) {
+		if(delegate != self && !delegate.window.isMiniaturized) {
 			[documents addObjectsFromArray:delegate.documents];
+		}
 	}
 
 	self.documents = documents;
 
-	for(DocumentWindowController* delegate in SortedControllers())
-	{
-		if(delegate != self && !delegate.window.isMiniaturized)
+	for(DocumentWindowController* delegate in SortedControllers()) {
+		if(delegate != self && !delegate.window.isMiniaturized) {
 			[delegate.window close];
+		}
 	}
 }
 
@@ -1260,18 +1262,23 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	[OakDocumentController.sharedInstance showDocument:aDocument inProject:self.identifier bringToFront:YES];
 }
 
+- (IBAction)openFavorites:(id)sender
+{
+	if ([[NSApplication.sharedApplication delegate] respondsToSelector:@selector(openFavorites:)]) {
+		[[NSApplication.sharedApplication delegate] performSelector:@selector(openFavorites:) withObject:sender];
+	}
+}
+
 // ================
 // = Window Title =
 // ================
 
 - (void)updateWindowTitle
 {
-	if(self.selectedDocument.displayName)
-	{
+	if(self.selectedDocument.displayName) {
 		self.window.title = [self titleForDocument:self.selectedDocument withSetting:kSettingsWindowTitleKey];
 	}
-	else
-	{
+	else {
 		self.window.title = @"«no documents»";
 	}
 }
@@ -2309,6 +2316,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 // =============
 
 static NSTouchBarItemIdentifier TouchBarNavigationItemIdentifier = @"com.textmate.touch-bar.navigation";
+static NSTouchBarItemIdentifier TouchBarGlobalItemIdentifier = @"com.textmate.touch-bar.global";
 
 - (NSTouchBar *)makeTouchBar
 {
@@ -2316,6 +2324,8 @@ static NSTouchBarItemIdentifier TouchBarNavigationItemIdentifier = @"com.textmat
 	bar.delegate = self;
 	bar.defaultItemIdentifiers = @[
 		TouchBarNavigationItemIdentifier,
+		NSTouchBarItemIdentifierFlexibleSpace,
+		TouchBarGlobalItemIdentifier,
 	];
 	return bar;
 }
@@ -2333,10 +2343,16 @@ static NSTouchBarItemIdentifier TouchBarNavigationItemIdentifier = @"com.textmat
 - (nullable NSTouchBarItem *)touchBar:(NSTouchBar *)touchBar makeItemForIdentifier:(NSTouchBarItemIdentifier)identifier
 {
 	if ([identifier isEqualToString:TouchBarNavigationItemIdentifier]) {
-		NSCustomTouchBarItem *item = [[NSCustomTouchBarItem alloc] initWithIdentifier:identifier];
-		item.view = [self touchBar:touchBar navigationViewForIdentifier:identifier];
-		item.visibilityPriority = NSTouchBarItemPriorityNormal;
-		return item;
+		NSCustomTouchBarItem *navigationItem = [[NSCustomTouchBarItem alloc] initWithIdentifier:identifier];
+		navigationItem.view = [self touchBar:touchBar navigationViewForIdentifier:identifier];
+		navigationItem.visibilityPriority = NSTouchBarItemPriorityNormal;
+		return navigationItem;
+	}
+	if ([identifier isEqualToString:TouchBarGlobalItemIdentifier]) {
+		NSCustomTouchBarItem *globalItem = [[NSCustomTouchBarItem alloc] initWithIdentifier:identifier];
+		globalItem.view = [NSButton buttonWithImage:[NSImage imageNamed:NSImageNameTouchBarBookmarksTemplate] target:self action:@selector(openFavorites:)];
+		globalItem.visibilityPriority = NSTouchBarItemPriorityNormal;
+		return globalItem;
 	}
 	return nil;
 }
@@ -2350,12 +2366,16 @@ static NSTouchBarItemIdentifier TouchBarNavigationItemIdentifier = @"com.textmat
 	}
 	if (self.touchBarNextTabButton == nil) {
 		self.touchBarNextTabButton = [NSButton buttonWithImage:[NSImage imageNamed:NSImageNameTouchBarGoForwardTemplate] target:self action:@selector(selectNextTab:)];
-		self.touchBarNextTabButton.frame = NSMakeRect(75.0, 0.0, 74.0, 30.0);
+		self.touchBarNextTabButton.frame = NSMakeRect(76.0, 0.0, 74.0, 30.0);
 		self.touchBarNextTabButton.enabled = (_documents.count > 1);
 	}
 	if (self.touchBarQuickOpenButton == nil) {
-		self.touchBarQuickOpenButton = [NSButton buttonWithImage:[NSImage imageNamed:NSImageNameTouchBarSearchTemplate] target:self action:@selector(goToFile:)];
-		self.touchBarQuickOpenButton.frame = NSMakeRect(154.0, 0.0, 75.0, 30.0);
+		self.touchBarQuickOpenButton = [NSButton buttonWithImage:[NSImage imageNamed:NSImageNameTouchBarShareTemplate] target:self action:@selector(goToFile:)];
+		self.touchBarQuickOpenButton.frame = NSMakeRect(166.0, 0.0, 74.0, 30.0);
+	}
+	if (self.touchBarNewTabButton == nil) {
+		self.touchBarNewTabButton = [NSButton buttonWithImage:[NSImage imageNamed:NSImageNameTouchBarComposeTemplate] target:self action:@selector(newDocumentInTab:)];
+		self.touchBarNewTabButton.frame = NSMakeRect(256.0, 0.0, 74.0, 30.0);
 	}
 
 	NSView *navigationView = [[NSView alloc] init];
@@ -2363,6 +2383,7 @@ static NSTouchBarItemIdentifier TouchBarNavigationItemIdentifier = @"com.textmat
 		self.touchBarPreviousTabButton,
 		self.touchBarNextTabButton,
 		self.touchBarQuickOpenButton,
+		self.touchBarNewTabButton,
 	];
 
 	return navigationView;
