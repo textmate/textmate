@@ -277,18 +277,24 @@ BOOL HasDocumentWindow (NSArray* windows)
 {
 	D(DBF_AppController, bug("\n"););
 
-	if([NSWindow respondsToSelector:@selector(setAllowsAutomaticWindowTabbing:)]) // MAC_OS_X_VERSION_10_12
+	if([NSWindow respondsToSelector:@selector(setAllowsAutomaticWindowTabbing:)]) {
 		NSWindow.allowsAutomaticWindowTabbing = NO;
+	}
 
-	if(!HasDocumentWindow([NSApp orderedWindows]))
-	{
+	if ([[NSApplication sharedApplication] respondsToSelector:@selector(isAutomaticCustomizeTouchBarMenuItemEnabled)]) {
+		[NSApplication sharedApplication].automaticCustomizeTouchBarMenuItemEnabled = YES;
+	}
+
+	if(!HasDocumentWindow([NSApp orderedWindows])) {
 		BOOL disableUntitledAtStartupPrefs = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableNewDocumentAtStartupKey];
 		BOOL showFavoritesInsteadPrefs     = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsShowFavoritesInsteadOfUntitledKey];
 
-		if(showFavoritesInsteadPrefs)
+		if(showFavoritesInsteadPrefs) {
 			[self openFavorites:self];
-		else if(!disableUntitledAtStartupPrefs)
+		}
+		else if(!disableUntitledAtStartupPrefs) {
 			[self newDocument:self];
+		}
 	}
 
 	[self userDefaultsDidChange:nil]; // setup mate/rmate server
