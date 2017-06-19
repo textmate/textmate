@@ -55,49 +55,50 @@ void OakOpenDocuments (NSArray* paths, BOOL treatFilePackageAsFolder)
 	{
 		BOOL isDirectory = NO;
 		NSString* pathExt = [[path pathExtension] lowercaseString];
-		if(enableInstallHandler && [bundleExtensions containsObject:pathExt])
-		{
+		if(enableInstallHandler && [bundleExtensions containsObject:pathExt]) {
 			[itemsToInstall addObject:path];
 		}
-		else if(enableInstallHandler && [pathExt isEqualToString:@"tmplugin"])
-		{
+		else if(enableInstallHandler && [pathExt isEqualToString:@"tmplugin"]) {
 			[plugInsToInstall addObject:path];
 		}
-		else if([[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDirectory] && isDirectory)
-		{
+		else if([[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDirectory] && isDirectory) {
 			[OakDocumentController.sharedInstance showFileBrowserAtPath:path];
 		}
-		else
-		{
+		else {
 			[documents addObject:[OakDocumentController.sharedInstance documentWithPath:path]];
 		}
 	}
 
-	if([itemsToInstall count])
+	if([itemsToInstall count]) {
 		[[BundlesManager sharedInstance] installBundleItemsAtPaths:itemsToInstall];
+	}
 
-	for(NSString* path in plugInsToInstall)
+	for(NSString* path in plugInsToInstall) {
 		[[TMPlugInController sharedInstance] installPlugInAtPath:path];
+	}
 
 	[OakDocumentController.sharedInstance showDocuments:documents];
 }
 
 BOOL HasDocumentWindow (NSArray* windows)
 {
-	for(NSWindow* window in windows)
-	{
-		if([window.delegate isKindOfClass:[DocumentWindowController class]])
+	for(NSWindow* window in windows) {
+		if([window.delegate isKindOfClass:[DocumentWindowController class]]) {
 			return YES;
+		}
 	}
 	return NO;
 }
 
 @interface AppController ()
+
 @property (nonatomic) BOOL didFinishLaunching;
 @property (nonatomic) BOOL currentResponderIsOakTextView;
+
 @end
 
 @implementation AppController
+
 - (void)setCurrentResponderIsOakTextView:(BOOL)flag
 {
 	if(_currentResponderIsOakTextView != flag)
@@ -407,8 +408,9 @@ BOOL HasDocumentWindow (NSArray* windows)
 - (void)didSelectFavorite:(id)sender
 {
 	NSMutableArray* paths = [NSMutableArray array];
-	for(id item in [sender selectedItems])
+	for(id item in [sender selectedItems]) {
 		[paths addObject:[item objectForKey:@"path"]];
+	}
 	OakOpenDocuments(paths, YES);
 }
 
