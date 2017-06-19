@@ -5,6 +5,7 @@
 #import <document/OakDocument.h>
 #import <document/OakDocumentController.h>
 #import <OakAppKit/NSAlert Additions.h>
+#import <OakAppKit/NSImage Additions.h>
 #import <OakAppKit/NSMenuItem Additions.h>
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakFileIconImage.h>
@@ -2369,13 +2370,13 @@ static NSTouchBarItemIdentifier TouchBarGlobalItemIdentifier = @"com.textmate.to
 		self.touchBarNextTabButton.frame = NSMakeRect(76.0, 0.0, 74.0, 30.0);
 		self.touchBarNextTabButton.enabled = (_documents.count > 1);
 	}
-	if (self.touchBarQuickOpenButton == nil) {
-		self.touchBarQuickOpenButton = [NSButton buttonWithImage:[NSImage imageNamed:NSImageNameTouchBarShareTemplate] target:self action:@selector(goToFile:)];
-		self.touchBarQuickOpenButton.frame = NSMakeRect(166.0, 0.0, 74.0, 30.0);
-	}
 	if (self.touchBarNewTabButton == nil) {
-		self.touchBarNewTabButton = [NSButton buttonWithImage:[NSImage imageNamed:NSImageNameTouchBarComposeTemplate] target:self action:@selector(newDocumentInTab:)];
-		self.touchBarNewTabButton.frame = NSMakeRect(256.0, 0.0, 74.0, 30.0);
+		self.touchBarNewTabButton = [NSButton buttonWithImage:[NSImage imageNamed:@"TouchBarNewTab" isTemplate:true] target:self action:@selector(newDocumentInTab:)];
+		self.touchBarNewTabButton.frame = NSMakeRect(166.0, 0.0, 74.0, 30.0);
+	}
+	if (self.touchBarQuickOpenButton == nil) {
+		self.touchBarQuickOpenButton = [NSButton buttonWithImage:[NSImage imageNamed:@"TouchBarQuickOpen" isTemplate:true] target:self action:@selector(goToFile:)];
+		self.touchBarQuickOpenButton.frame = NSMakeRect(256.0, 0.0, 74.0, 30.0);
 	}
 
 	NSView *navigationView = [[NSView alloc] init];
