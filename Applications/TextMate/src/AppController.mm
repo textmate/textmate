@@ -76,32 +76,28 @@ void OakOpenDocuments (NSArray* paths, BOOL treatFilePackageAsFolder)
 	if([itemsToInstall count])
 		[[BundlesManager sharedInstance] installBundleItemsAtPaths:itemsToInstall];
 
-	for(NSString* path in plugInsToInstall) {
+	for(NSString* path in plugInsToInstall)
 		[[TMPlugInController sharedInstance] installPlugInAtPath:path];
-	}
 
 	[OakDocumentController.sharedInstance showDocuments:documents];
 }
 
 BOOL HasDocumentWindow (NSArray* windows)
 {
-	for(NSWindow* window in windows) {
-		if([window.delegate isKindOfClass:[DocumentWindowController class]]) {
+	for(NSWindow* window in windows)
+	{
+		if([window.delegate isKindOfClass:[DocumentWindowController class]])
 			return YES;
-		}
 	}
 	return NO;
 }
 
 @interface AppController ()
-
 @property (nonatomic) BOOL didFinishLaunching;
 @property (nonatomic) BOOL currentResponderIsOakTextView;
-
 @end
 
 @implementation AppController
-
 - (void)setCurrentResponderIsOakTextView:(BOOL)flag
 {
 	if(_currentResponderIsOakTextView != flag)
@@ -281,24 +277,21 @@ BOOL HasDocumentWindow (NSArray* windows)
 {
 	D(DBF_AppController, bug("\n"););
 
-	if([NSWindow respondsToSelector:@selector(setAllowsAutomaticWindowTabbing:)]) {
+	if([NSWindow respondsToSelector:@selector(setAllowsAutomaticWindowTabbing:)]) // MAC_OS_X_VERSION_10_12
 		NSWindow.allowsAutomaticWindowTabbing = NO;
-	}
 
-	if ([[NSApplication sharedApplication] respondsToSelector:@selector(isAutomaticCustomizeTouchBarMenuItemEnabled)]) {
+	if ([[NSApplication sharedApplication] respondsToSelector:@selector(isAutomaticCustomizeTouchBarMenuItemEnabled)]) // MAC_OS_X_VERSION_10_12_1
 		[NSApplication sharedApplication].automaticCustomizeTouchBarMenuItemEnabled = YES;
-	}
 
-	if(!HasDocumentWindow([NSApp orderedWindows])) {
+	if(!HasDocumentWindow([NSApp orderedWindows]))
+	{
 		BOOL disableUntitledAtStartupPrefs = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableNewDocumentAtStartupKey];
 		BOOL showFavoritesInsteadPrefs     = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsShowFavoritesInsteadOfUntitledKey];
 
-		if(showFavoritesInsteadPrefs) {
+		if(showFavoritesInsteadPrefs)
 			[self openFavorites:self];
-		}
-		else if(!disableUntitledAtStartupPrefs) {
+		else if(!disableUntitledAtStartupPrefs)
 			[self newDocument:self];
-		}
 	}
 
 	[self userDefaultsDidChange:nil]; // setup mate/rmate server
@@ -411,9 +404,8 @@ BOOL HasDocumentWindow (NSArray* windows)
 - (void)didSelectFavorite:(id)sender
 {
 	NSMutableArray* paths = [NSMutableArray array];
-	for(id item in [sender selectedItems]) {
+	for(id item in [sender selectedItems])
 		[paths addObject:[item objectForKey:@"path"]];
-	}
 	OakOpenDocuments(paths, YES);
 }
 
