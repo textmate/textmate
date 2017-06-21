@@ -55,23 +55,26 @@ void OakOpenDocuments (NSArray* paths, BOOL treatFilePackageAsFolder)
 	{
 		BOOL isDirectory = NO;
 		NSString* pathExt = [[path pathExtension] lowercaseString];
-		if(enableInstallHandler && [bundleExtensions containsObject:pathExt]) {
+		if(enableInstallHandler && [bundleExtensions containsObject:pathExt])
+		{
 			[itemsToInstall addObject:path];
 		}
-		else if(enableInstallHandler && [pathExt isEqualToString:@"tmplugin"]) {
+		else if(enableInstallHandler && [pathExt isEqualToString:@"tmplugin"])
+		{
 			[plugInsToInstall addObject:path];
 		}
-		else if([[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDirectory] && isDirectory) {
+		else if([[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDirectory] && isDirectory)
+		{
 			[OakDocumentController.sharedInstance showFileBrowserAtPath:path];
 		}
-		else {
+		else
+		{
 			[documents addObject:[OakDocumentController.sharedInstance documentWithPath:path]];
 		}
 	}
 
-	if([itemsToInstall count]) {
+	if([itemsToInstall count])
 		[[BundlesManager sharedInstance] installBundleItemsAtPaths:itemsToInstall];
-	}
 
 	for(NSString* path in plugInsToInstall) {
 		[[TMPlugInController sharedInstance] installPlugInAtPath:path];
