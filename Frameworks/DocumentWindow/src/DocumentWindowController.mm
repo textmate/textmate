@@ -113,6 +113,7 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 @property (nonatomic) BOOL                        htmlOutputInWindow;
 
 @property (nonatomic) NSString*                   projectPath;
+
 @property (nonatomic) NSString*                   documentPath;
 
 @property (nonatomic) NSSegmentedControl*	        touchBarTabSegmentedControl;
@@ -843,26 +844,25 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 - (IBAction)moveDocumentToNewWindow:(id)sender
 {
-	if(_documents.count > 1) {
+	if(_documents.count > 1)
 		[self takeTabsToTearOffFrom:[NSIndexSet indexSetWithIndex:_selectedTabIndex]];
-	}
 }
 
 - (IBAction)mergeAllWindows:(id)sender
 {
 	NSMutableArray<OakDocument*>* documents = [_documents mutableCopy];
-	for(DocumentWindowController* delegate in SortedControllers()) {
-		if(delegate != self && !delegate.window.isMiniaturized) {
+	for(DocumentWindowController* delegate in SortedControllers())
+	{
+		if(delegate != self && !delegate.window.isMiniaturized)
 			[documents addObjectsFromArray:delegate.documents];
-		}
 	}
 
 	self.documents = documents;
 
-	for(DocumentWindowController* delegate in SortedControllers()) {
-		if(delegate != self && !delegate.window.isMiniaturized) {
+	for(DocumentWindowController* delegate in SortedControllers())
+	{
+		if(delegate != self && !delegate.window.isMiniaturized)
 			[delegate.window close];
-		}
 	}
 }
 
@@ -1064,10 +1064,12 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	if(!doc)
 		return;
 
-	if(doc.path) {
+	if(doc.path)
+	{
 		[self saveDocumentsUsingEnumerator:@[ doc ].objectEnumerator completionHandler:nil];
 	}
-	else {
+	else
+	{
 		NSString* const suggestedFolder  = self.untitledSavePath;
 		NSString* const suggestedName    = [doc displayNameWithExtension:YES];
 		[OakSavePanel showWithPath:suggestedName directory:suggestedFolder fowWindow:self.window encoding:encoding::type(to_s(doc.diskNewlines), to_s(doc.diskEncoding)) fileType:doc.fileType completionHandler:^(NSString* path, encoding::type const& encoding){
@@ -1271,10 +1273,12 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 - (void)updateWindowTitle
 {
-	if(self.selectedDocument.displayName) {
+	if(self.selectedDocument.displayName)
+	{
 		self.window.title = [self titleForDocument:self.selectedDocument withSetting:kSettingsWindowTitleKey];
 	}
-	else {
+	else
+	{
 		self.window.title = @"«no documents»";
 	}
 }
@@ -1479,27 +1483,24 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 - (void)setDocuments:(NSArray<OakDocument*>*)newDocuments
 {
-	for(OakDocument* document in newDocuments) {
+	for(OakDocument* document in newDocuments)
+	{
 		document.keepBackupFile = YES;
 		[document open];
 
 		// Avoid resetting directory when tearing off a tab (unless moved to new project)
-		if(!document.path && (self.projectPath || !document.directory)) {
+		if(!document.path && (self.projectPath || !document.directory))
 			document.directory = self.projectPath ?: self.defaultProjectPath;
-		}
 	}
 
-	for(OakDocument* document in _documents) {
+	for(OakDocument* document in _documents)
 		[document close];
-	}
 
 	_documents = newDocuments;
-	if(_documents.count) {
+	if(_documents.count)
 		[self.tabBarView reloadData];
-	}
 
 	[self updateFileBrowserStatus:self];
-	[self updateTouchBarButtons];
 	[[self class] scheduleSessionBackup:self];
 }
 
@@ -1736,17 +1737,9 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	return YES;
 }
 
-- (IBAction)selectNextTab:(id)sender
-{
-	self.selectedTabIndex = (_selectedTabIndex + 1) % _documents.count;
-	[self openAndSelectDocument:_documents[_selectedTabIndex]];
-}
-
-- (IBAction)selectPreviousTab:(id)sender
-{
-	self.selectedTabIndex = (_selectedTabIndex + _documents.count - 1) % _documents.count;
-	[self openAndSelectDocument:_documents[_selectedTabIndex]];
-}
+- (IBAction)selectNextTab:(id)sender            { self.selectedTabIndex = (_selectedTabIndex + 1) % _documents.count;                    [self openAndSelectDocument:_documents[_selectedTabIndex]]; }
+- (IBAction)selectPreviousTab:(id)sender        { self.selectedTabIndex = (_selectedTabIndex + _documents.count - 1) % _documents.count; [self openAndSelectDocument:_documents[_selectedTabIndex]]; }
+- (IBAction)takeSelectedTabIndexFrom:(id)sender { self.selectedTabIndex = [sender tag];                                                  [self openAndSelectDocument:_documents[_selectedTabIndex]]; }
 
 - (IBAction)navigateTabs:(NSSegmentedControl *)control
 {
@@ -1758,12 +1751,6 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		[self selectNextTab:control];
 		break;
 	}
-}
-
-- (IBAction)takeSelectedTabIndexFrom:(id)sender
-{
-	self.selectedTabIndex = [sender tag];
-	[self openAndSelectDocument:_documents[_selectedTabIndex]];
 }
 
 // ==================
@@ -1869,9 +1856,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	[[self class] scheduleSessionBackup:self];
 }
 
-- (IBAction)toggleFileBrowser:(id)sender    {
-	self.fileBrowserVisible = !self.fileBrowserVisible;
-}
+- (IBAction)toggleFileBrowser:(id)sender    { self.fileBrowserVisible = !self.fileBrowserVisible; }
 
 - (void)updateFileBrowserStatus:(id)sender
 {
@@ -2408,6 +2393,8 @@ static NSTouchBarItemIdentifier TouchBarFavoritesItemIdentifier = @"com.textmate
 // = QuickLook =
 // =============
 
+// QLPreviewPanelController
+
 - (BOOL)acceptsPreviewPanelControl:(QLPreviewPanel*)panel
 {
 	return self.fileBrowserVisible && [self.fileBrowser.selectedURLs count];
@@ -2494,13 +2481,8 @@ static NSTouchBarItemIdentifier TouchBarFavoritesItemIdentifier = @"com.textmate
 
 static NSUInteger DisableSessionSavingCount = 0;
 
-+ (void)disableSessionSave {
-	++DisableSessionSavingCount;
-}
-
-+ (void)enableSessionSave  {
-	--DisableSessionSavingCount;
-}
++ (void)disableSessionSave { ++DisableSessionSavingCount; }
++ (void)enableSessionSave  { --DisableSessionSavingCount; }
 
 + (BOOL)restoreSession
 {

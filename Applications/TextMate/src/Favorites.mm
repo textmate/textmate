@@ -30,7 +30,6 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 @end
 
 @implementation FavoriteChooser
-
 + (instancetype)sharedInstance
 {
 	static FavoriteChooser* sharedInstance = [self new];
@@ -110,13 +109,8 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 	return self;
 }
 
-- (IBAction)selectNextTab:(id)sender     {
-	self.sourceIndex = (self.sourceIndex + 1) % self.sourceListLabels.count;
-}
-
-- (IBAction)selectPreviousTab:(id)sender {
-	self.sourceIndex = (self.sourceIndex + self.sourceListLabels.count - 1) % self.sourceListLabels.count;
-}
+- (IBAction)selectNextTab:(id)sender     { self.sourceIndex = (self.sourceIndex + 1) % self.sourceListLabels.count; }
+- (IBAction)selectPreviousTab:(id)sender { self.sourceIndex = (self.sourceIndex + self.sourceListLabels.count - 1) % self.sourceListLabels.count; }
 
 - (NSView*)tableView:(NSTableView*)aTableView viewForTableColumn:(NSTableColumn*)aTableColumn row:(NSInteger)row
 {

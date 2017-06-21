@@ -54,9 +54,8 @@ int main (int argc, char const* argv[])
 	@autoreleasepool {
 		for(NSString* variable in [[[NSProcessInfo processInfo] environment] allKeys])
 		{
-			if([variable hasPrefix:@"TM_"]) {
+			if([variable hasPrefix:@"TM_"])
 				unsetenv([variable UTF8String]);
-			}
 		}
 
 		if([NSUserDefaults instancesRespondToSelector:@selector(initWithSuiteName:)])
@@ -67,9 +66,8 @@ int main (int argc, char const* argv[])
 				NSUserDefaults* newDefaults = [NSUserDefaults standardUserDefaults];
 				for(NSString* key in [oldDefaults dictionaryRepresentation].allKeys)
 				{
-					if([newDefaults objectForKey:key] == nil) {
+					if([newDefaults objectForKey:key] == nil)
 						[newDefaults setObject:[oldDefaults objectForKey:key] forKey:key];
-					}
 				}
 				[oldDefaults setBool:YES forKey:@"didMigrateBetaSettings"];
 			}
