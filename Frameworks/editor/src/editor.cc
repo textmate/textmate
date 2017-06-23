@@ -546,7 +546,7 @@ namespace ng
 
 				int minIndent = INT_MAX;
 
-				std::vector< std::pair<char const*, char const*> > const& v = text::to_lines(str.data(), str.data() + str.size());
+				auto const& v = text::to_lines(str.data(), str.data() + str.size());
 				for(auto const& it : v)
 				{
 					if(!text::is_blank(it.first, it.second))
