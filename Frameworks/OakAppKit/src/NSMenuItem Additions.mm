@@ -11,7 +11,7 @@
 	NSMutableAttributedString* contents;
 	CGSize size;
 }
-- (void)appendTableCellWithString:(NSString*)string table:(NSTextTable*)table textAlignment:(NSTextAlignment)textAlignment verticalAlignment:(NSTextBlockVerticalAlignment)verticalAlignment font:(NSFont*)font row:(int)row column:(int)column;
+- (void)appendTableCellWithString:(NSString*)string table:(NSTextTable*)table textAlignment:(NSTextAlignment)textAlignment verticalAlignment:(NSTextBlockVerticalAlignment)verticalAlignment font:(NSFont*)font row:(NSInteger)row column:(NSInteger)column;
 - (CGSize)size;
 @end
 
@@ -73,7 +73,7 @@
 
 // Helper method for adding table cell into the attributed string
 
-- (void)appendTableCellWithString:(NSString*)string table:(NSTextTable*)table textAlignment:(NSTextAlignment)textAlignment verticalAlignment:(NSTextBlockVerticalAlignment)verticalAlignment font:(NSFont*)font row:(int)row column:(int)column;
+- (void)appendTableCellWithString:(NSString*)string table:(NSTextTable*)table textAlignment:(NSTextAlignment)textAlignment verticalAlignment:(NSTextBlockVerticalAlignment)verticalAlignment font:(NSFont*)font row:(NSInteger)row column:(NSInteger)column;
 {
 	CGSize stringSize = [string sizeWithAttributes:@{ NSFontAttributeName : font }];
 

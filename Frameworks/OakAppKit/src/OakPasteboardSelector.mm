@@ -297,7 +297,7 @@ static size_t line_count (std::string const& text)
 	return self;
 }
 
-- (void)setIndex:(unsigned)index
+- (void)setIndex:(NSUInteger)index
 {
 	[tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:index] byExtendingSelection:NO];
 }
@@ -314,7 +314,7 @@ static size_t line_count (std::string const& text)
 	return [tableViewHelper entries];
 }
 
-- (unsigned)showAtLocation:(NSPoint)aLocation
+- (NSInteger)showAtLocation:(NSPoint)aLocation
 {
 	NSWindow* parentWindow = [NSApp keyWindow];
 	NSWindow* window = [self window];
