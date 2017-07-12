@@ -567,7 +567,7 @@ static BOOL HasPersistentStore = NO;
 	return self.current;
 }
 
-- (BOOL)selectItemAtPosition:(NSPoint)location withWidth:(CGFloat)width respondToSingleClick:(BOOL)singleClick
+- (void)selectItemAtPosition:(NSPoint)location withWidth:(CGFloat)width respondToSingleClick:(BOOL)singleClick
 {
 	[self checkForExternalPasteboardChanges];
 	NSFetchRequest* request = [NSFetchRequest fetchRequestWithEntityName:@"PasteboardEntry"];
@@ -579,7 +579,7 @@ static BOOL HasPersistentStore = NO;
 	if(!entries)
 	{
 		NSLog(@"%s %@", sel_getName(_cmd), error);
-		return NO;
+		return;
 	}
 
 	NSUInteger selectedRow = self.currentEntry ? [entries indexOfObject:self.currentEntry] : 0;
@@ -603,8 +603,6 @@ static BOOL HasPersistentStore = NO;
 
 	if(newSelection != -1)
 		self.currentEntry = [newEntries objectAtIndex:newSelection];
-
-	return [pasteboardSelector shouldSendAction];
 }
 
 - (void)selectItemForControl:(NSView*)controlView

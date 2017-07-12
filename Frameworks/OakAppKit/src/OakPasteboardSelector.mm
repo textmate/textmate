@@ -135,7 +135,6 @@ static size_t line_count (std::string const& text)
 }
 - (void)setTableView:(NSTableView*)aTableView;
 @property (nonatomic) BOOL shouldClose;
-@property (nonatomic) BOOL shouldSendAction;
 @end
 
 @implementation OakPasteboardSelectorTableViewHelper
@@ -229,7 +228,6 @@ static size_t line_count (std::string const& text)
 
 - (void)accept:(id)sender
 {
-	_shouldSendAction = entries.count > 0 ? YES : NO;
 	_shouldClose = YES;
 }
 
@@ -261,7 +259,7 @@ static size_t line_count (std::string const& text)
 
 - (void)didDoubleClickInTableView:(id)aTableView
 {
-	_shouldClose = _shouldSendAction = YES;
+	_shouldClose = YES;
 }
 
 - (NSArray*)entries
@@ -343,10 +341,5 @@ static size_t line_count (std::string const& text)
 - (void)setPerformsActionOnSingleClick
 {
 	[tableViewHelper setPerformsActionOnSingleClick];
-}
-
-- (BOOL)shouldSendAction
-{
-	return tableViewHelper.shouldSendAction;
 }
 @end

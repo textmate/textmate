@@ -15,6 +15,5 @@ PUBLIC @interface OakPasteboardSelector : NSWindowController
 - (NSInteger)showAtLocation:(NSPoint)aLocation;
 - (void)setWidth:(CGFloat)width;
 - (void)setPerformsActionOnSingleClick;
-- (BOOL)shouldSendAction;
 - (NSArray*)entries;
 @end
