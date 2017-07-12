@@ -132,10 +132,10 @@ static size_t line_count (std::string const& text)
 {
 	NSTableView* tableView;
 	NSMutableArray* entries;
-	BOOL shouldClose;
-	BOOL shouldSendAction;
 }
 - (void)setTableView:(NSTableView*)aTableView;
+@property (nonatomic) BOOL shouldClose;
+@property (nonatomic) BOOL shouldSendAction;
 @end
 
 @implementation OakPasteboardSelectorTableViewHelper
@@ -229,13 +229,13 @@ static size_t line_count (std::string const& text)
 
 - (void)accept:(id)sender
 {
-	shouldSendAction = entries.count > 0 ? YES : NO;
-	shouldClose = YES;
+	_shouldSendAction = entries.count > 0 ? YES : NO;
+	_shouldClose = YES;
 }
 
 - (void)cancel:(id)sender
 {
-	shouldClose = YES;
+	_shouldClose = YES;
 }
 
 - (void)doCommandBySelector:(SEL)aSelector
@@ -261,17 +261,7 @@ static size_t line_count (std::string const& text)
 
 - (void)didDoubleClickInTableView:(id)aTableView
 {
-	shouldClose = shouldSendAction = YES;
-}
-
-- (BOOL)shouldSendAction
-{
-	return shouldSendAction;
-}
-
-- (BOOL)shouldClose
-{
-	return shouldClose;
+	_shouldClose = _shouldSendAction = YES;
 }
 
 - (NSArray*)entries
@@ -333,7 +323,7 @@ static size_t line_count (std::string const& text)
 				[window sendEvent:event];
 		else	[NSApp sendEvent:event];
 
-		if(orderOutEvent || [tableViewHelper shouldClose])
+		if(orderOutEvent || tableViewHelper.shouldClose)
 			break;
 	}
 
@@ -357,6 +347,6 @@ static size_t line_count (std::string const& text)
 
 - (BOOL)shouldSendAction
 {
-	return [tableViewHelper shouldSendAction];
+	return tableViewHelper.shouldSendAction;
 }
 @end
