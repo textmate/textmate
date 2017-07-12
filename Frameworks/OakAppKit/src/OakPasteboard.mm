@@ -590,16 +590,19 @@ static BOOL HasPersistentStore = NO;
 		[pasteboardSelector setWidth:width];
 	if(singleClick)
 		[pasteboardSelector setPerformsActionOnSingleClick];
-	selectedRow = [pasteboardSelector showAtLocation:location];
 
-	NSSet* keep = [NSSet setWithArray:[pasteboardSelector entries]];
+	NSInteger newSelection = [pasteboardSelector showAtLocation:location];
+	NSArray* newEntries = [pasteboardSelector entries];
+
+	NSSet* keep = [NSSet setWithArray:newEntries];
 	for(OakPasteboardEntry* entry in entries)
 	{
 		if(![keep containsObject:entry])
 			[entry.managedObjectContext deleteObject:entry];
 	}
 
-	self.currentEntry = [[pasteboardSelector entries] objectAtIndex:selectedRow];
+	if(newSelection != -1)
+		self.currentEntry = [newEntries objectAtIndex:newSelection];
 
 	return [pasteboardSelector shouldSendAction];
 }
