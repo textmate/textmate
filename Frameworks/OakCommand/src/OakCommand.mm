@@ -233,6 +233,7 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 			[NSURLProtocol setProperty:to_ns(_bundleCommand.name) forKey:@"processName" inRequest:_urlRequest];
 			[NSURLProtocol setProperty:self forKey:@"command" inRequest:_urlRequest];
 
+			_htmlOutputView.disableJavaScriptAPI = _bundleCommand.disable_javascript_api;
 			[_htmlOutputView loadRequest:_urlRequest environment:_environment autoScrolls:_bundleCommand.auto_scroll_output];
 		}
 

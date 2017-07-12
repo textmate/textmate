@@ -66,6 +66,7 @@ struct PUBLIC bundle_command_t
 
 	bool auto_scroll_output           = false;
 	bool disable_output_auto_indent   = false;
+	bool disable_javascript_api       = false;
 };
 
 PUBLIC bundle_command_t parse_command (bundles::item_ptr bundleItem);

@@ -9,6 +9,7 @@
 @property (nonatomic, getter = isRunningCommand, readonly) BOOL runningCommand;
 @property (nonatomic, getter = isVisible, readonly) BOOL visible;
 @property (nonatomic, getter = isReusable) BOOL reusable;
+@property (nonatomic) BOOL disableJavaScriptAPI;
 
 // Read-only access to the webview is given to allow reading page title, etc.
 @property (nonatomic, readonly) WebView* webView;

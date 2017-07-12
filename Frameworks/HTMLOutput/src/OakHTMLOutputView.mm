@@ -134,6 +134,9 @@
 
 - (void)webView:(WebView*)sender didClearWindowObject:(WebScriptObject*)windowScriptObject forFrame:(WebFrame*)frame
 {
+	if(self.disableJavaScriptAPI)
+		return;
+
 	NSString* scheme = [[[[[self.webView mainFrame] dataSource] request] URL] scheme];
 	if(self.isRunningCommand || [@[ @"tm-file", @"file" ] containsObject:scheme])
 	{
