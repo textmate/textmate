@@ -14,15 +14,19 @@ FLAGS += -DNDEBUG -Os
 # LINK   = OakDebug
 
 CXX_FLAGS    += -fvisibility=hidden -std=c++1z -stdlib=libc++
+CXX_FLAGS    += -flto=thin
 OBJC_FLAGS   += -fvisibility=hidden -fobjc-arc -std=c99 -fobjc-abi-version=3
+OBJC_FLAGS   += -flto=thin
 OBJCXX_FLAGS += -fvisibility=hidden -std=c++1z -stdlib=libc++ -fobjc-abi-version=3
 OBJCXX_FLAGS += -fobjc-arc -fobjc-call-cxx-cdtors
+OBJCXX_FLAGS += -flto=thin
 LIBS         += c++
 
 LN_FLAGS += -m64 -mmacosx-version-min=$APP_MIN_OS
 LN_FLAGS += -fvisibility=hidden -stdlib=libc++
 LN_FLAGS += -Wl,-dead_strip
 LN_FLAGS += -Wl,-dead_strip_dylibs
+LN_FLAGS += -flto=thin
 
 FLAGS     += -I"$libressl_prefix/include"
 CXX_FLAGS += -I"$capnp_prefix/include"
