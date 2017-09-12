@@ -5,4 +5,8 @@
 
 @protocol CAAnimationDelegate <NSObject>
 @end
+
+#define NSAlertStyleWarning       NSWarningAlertStyle
+#define NSAlertStyleInformational NSInformationalAlertStyle
+#define NSAlertStyleCritical      NSCriticalAlertStyle
 #endif
