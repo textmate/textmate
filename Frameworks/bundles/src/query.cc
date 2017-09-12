@@ -316,7 +316,7 @@ namespace bundles
 		std::deque<std::string> path;
 		while(item = lookup(item->parent_menu()))
 			path.push_front(item->name());
-		return text::join(path, " ▸ ");
+		return text::join(path, " ‣ ");
 	}
 
 	std::string key_equivalent (item_ptr const& item)

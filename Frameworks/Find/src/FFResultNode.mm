@@ -82,7 +82,7 @@ static NSAttributedString* PathComponentString (std::string const& path, std::st
 		NSFontAttributeName            : font,
 		NSForegroundColorAttributeName : [NSColor darkGrayColor]
 	});
-	builder.append(to_ns(text::join(std::vector<std::string>(components.begin(), components.end()), " ▸ ")));
+	builder.append(to_ns(text::join(std::vector<std::string>(components.begin(), components.end()), " ‣ ")));
 	builder.append(to_ns((path::is_absolute(path) ? path::display_name(path) : path)), NSBoldFontMask);
 	return builder.attributed_string();
 }
