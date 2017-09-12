@@ -3,6 +3,7 @@
 
 #include "prelude.c"
 #include "prelude-mac.h"
+#include "oak/sdk-compat.h"
 
 #import <objc/objc-runtime.h>
 #import <AddressBook/AddressBook.h>

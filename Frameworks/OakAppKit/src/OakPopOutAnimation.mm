@@ -13,11 +13,7 @@ static double const  kGrowFinishTime = 0.10;
 static double const  kFadeStartTime  = 0.35;
 static double const  kFadeFinishTime = 0.70;
 
-#if !defined(MAC_OS_X_VERSION_10_12) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_12)
-@interface OakPopOutView : NSView
-#else
 @interface OakPopOutView : NSView <CAAnimationDelegate>
-#endif
 {
 	OBJC_WATCH_LEAKS(OakPopOutView);
 	CALayer* imageLayer;

@@ -35,12 +35,6 @@
 #import <scm/scm.h>
 #import <text/types.h>
 
-#if !defined(MAC_OS_X_VERSION_10_12) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_12)
-@interface NSWindow (Sierra)
-+ (void)setAllowsAutomaticWindowTabbing:(BOOL)flag;
-@end
-#endif
-
 OAK_DEBUG_VAR(AppController);
 
 void OakOpenDocuments (NSArray* paths, BOOL treatFilePackageAsFolder)
