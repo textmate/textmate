@@ -378,8 +378,12 @@ class Target
     raw.each do |dst, paths|
       paths.each do |path|
         if path =~ /^@/
-          all_targets[$'].resources(builder, all_targets).each do |src, relative|
-            @resources[builder.copy_resource(src, "#{File.dirname(@path)}/#{contents}/#{dst}/#{relative}", self)] = "#{contents}/#{dst}/#{relative}"
+          if all_targets.has_key?($')
+            all_targets[$'].resources(builder, all_targets).each do |src, relative|
+              @resources[builder.copy_resource(src, "#{File.dirname(@path)}/#{contents}/#{dst}/#{relative}", self)] = "#{contents}/#{dst}/#{relative}"
+            end
+          else
+            STDERR << "*** no such target: #{$'}\n"
           end
         elsif File.directory?(path)
           help_book_dir = path =~ /.* Help$/ ? path : nil
