@@ -9,7 +9,7 @@
 @end
 
 @implementation PreferencesPane
-- (NSString*)identifier { return _toolbarItemLabel; }
+- (NSString*)viewIdentifier { return _toolbarItemLabel; }
 
 - (id)initWithNibName:(NSString*)aNibName label:(NSString*)aLabel image:(NSImage*)anImage
 {

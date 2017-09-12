@@ -8,7 +8,7 @@
 @end
 
 @implementation VariablesPreferences
-- (NSString*)identifier            { return @"Variables"; }
+- (NSString*)viewIdentifier        { return @"Variables"; }
 - (NSImage*)toolbarItemImage       { return [NSImage imageNamed:@"Variables" inSameBundleAsClass:[self class]]; }
 - (NSString*)toolbarItemLabel      { return @"Variables"; }
 

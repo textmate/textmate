@@ -1,7 +1,7 @@
 #import <MASPreferences/MASPreferencesViewController.h>
 
 @interface PreferencesPane : NSViewController <MASPreferencesViewController>
-@property (nonatomic, readonly) NSString*   identifier;
+@property (nonatomic, readonly) NSString*   viewIdentifier;
 @property (nonatomic, readonly) NSString*   toolbarItemLabel;
 @property (nonatomic, readonly) NSImage*    toolbarItemImage;
 @property (nonatomic) NSDictionary*         defaultsProperties;

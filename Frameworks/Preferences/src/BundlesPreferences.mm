@@ -70,7 +70,7 @@ static NSMutableSet* BundlesBeingInstalled = [NSMutableSet set];
 @end
 
 @implementation BundlesPreferences
-- (NSString*)identifier            { return @"Bundles"; }
+- (NSString*)viewIdentifier        { return @"Bundles"; }
 - (NSImage*)toolbarItemImage       { return [[NSWorkspace sharedWorkspace] iconForFileType:@"tmbundle"]; }
 - (NSString*)toolbarItemLabel      { return @"Bundles"; }
 - (NSView*)initialKeyView          { return bundlesTableView; }

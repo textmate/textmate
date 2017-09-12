@@ -10,7 +10,7 @@
 	IBOutlet NSSearchField* searchField;
 	IBOutlet NSArrayController* arrayController;
 }
-@property (nonatomic, readonly) NSString* identifier;
+@property (nonatomic, readonly) NSString* viewIdentifier;
 @property (nonatomic, readonly) NSImage*  toolbarItemImage;
 @property (nonatomic, readonly) NSString* toolbarItemLabel;
 - (IBAction)didClickBundleLink:(id)sender;
