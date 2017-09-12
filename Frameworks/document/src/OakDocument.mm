@@ -724,7 +724,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 
 			[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentWillShowAlertNotification object:_self];
 			[controller beginSheetModalForWindow:_window completionHandler:^(NSModalResponse response){
-				if(response != NSModalResponseAbort)
+				if(response != NSModalResponseCancel)
 				{
 					context->set_charset(to_s(controller.encoding));
 					if(controller.trainClassifier)

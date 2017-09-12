@@ -312,14 +312,12 @@ static NSTextView* MyCreateTextView ()
 
 - (IBAction)performOpenDocument:(id)sender
 {
-	[self.window orderOut:self];
 	[self.window.sheetParent endSheet:self.window returnCode:NSModalResponseOK];
 	[self cleanup];
 }
 
 - (IBAction)performCancelOperation:(id)sender
 {
-	[self.window orderOut:self];
 	[self.window.sheetParent endSheet:self.window returnCode:NSModalResponseCancel];
 	[self cleanup];
 }
