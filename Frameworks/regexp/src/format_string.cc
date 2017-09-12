@@ -7,6 +7,8 @@
 #include <text/case.h>
 #include <text/utf8.h>
 #include <text/transcode.h>
+#include <text/encode.h>
+#include <text/format.h>
 #include <cf/cf.h>
 
 OAK_DEBUG_VAR(FormatString);
@@ -169,6 +171,103 @@ struct expand_visitor : boost::static_visitor<void>
 		return buffer;
 	}
 
+	static std::string shell_escape (std::string const& src)
+	{
+		std::string const special   = "|&;<>()$`\\\" \t\n*?[#˜=%";
+		std::string const separator = "'";
+
+		std::string res;
+
+		std::string::size_type bow = 0;
+		while(true)
+		{
+			std::string::size_type eow   = src.find(separator, bow);
+			std::string::size_type count = eow == std::string::npos ? eow : eow - bow;
+			std::string const word = src.substr(bow, count);
+
+			bool needQuotes = word.find_first_of(special) != std::string::npos;
+			if(needQuotes)
+				res += "'";
+			res += word;
+			if(needQuotes)
+				res += "'";
+
+			if(eow == std::string::npos)
+				break;
+
+			res += "\\'";
+			bow = eow + separator.size();
+		}
+		return res;
+	}
+
+	static std::string relative_time (std::string const& src)
+	{
+		time_t now = time(nullptr);
+		for(auto format : { "%F %T %z", "%F %T", "%F", "%T" })
+		{
+			struct tm bsdTime = *gmtime(&now);
+			if(strptime(src.c_str(), format, &bsdTime))
+			{
+				static char const DateWithoutTZ[] = "YYYY-MM-DD HH:MM:SS";
+				bool hasTZ = src.size() > sizeof(DateWithoutTZ);
+
+				double const duration = round(difftime(now, hasTZ ? mktime(&bsdTime) : timegm(&bsdTime)));
+				char* tmp = nullptr;
+
+				if(duration < 0)             asprintf(&tmp, "in the future");
+				else if(duration < 2)        asprintf(&tmp, "just now"); // TODO Should be ‘today’ when src has no time part
+				else if(duration < 60)       asprintf(&tmp, "%.0f seconds ago", duration);
+				else if(duration < 90)       asprintf(&tmp, "a minute ago");
+				else if(duration < 3570)     asprintf(&tmp, "%.0f minutes ago", duration/60);
+				else if(duration < 5400)     asprintf(&tmp, "an hour ago");
+				else if(duration < 84600)    asprintf(&tmp, "%.0f hours ago", duration/(60*60));
+				else if(duration < 129600)   asprintf(&tmp, "a day ago");
+				else if(duration < 561600)   asprintf(&tmp, "%.0f days ago", duration/(24*60*60));
+				else if(duration < 1036800)  asprintf(&tmp, "a week ago");
+				else if(duration < 2419200)  asprintf(&tmp, "%.0f weeks ago", duration/(7*24*60*60));
+				else if(duration < 3952800)  asprintf(&tmp, "a month ago");
+				else if(duration < 30304800) asprintf(&tmp, "%.0f months ago", duration/(30.5*24*60*60));
+				else if(duration < 47304000) asprintf(&tmp, "a year ago");
+				else asprintf(&tmp, "%.0f years ago", duration/(365*24*60*60));
+
+				std::string res = tmp;
+				free(tmp);
+				return res;
+			}
+		}
+		return src;
+	}
+
+	static std::string format_number (std::string const& src)
+	{
+		return format_string::replace(src, "(\\d+)(\\.\\d+)?", "${1/\\d{1,3}(?=\\d{3}+(?!\\d))/$0,/g}${2}");
+	}
+
+	static std::string format_duration (std::string const& src)
+	{
+		try {
+			double seconds = std::stod(src); // This may throw an exception
+			double minutes = round(seconds / 60);
+			struct { char const* singular; char const* plural; size_t amount; } units[] = {
+				{ "day",    "days",    (size_t)(minutes / 60 / 24) },
+				{ "hour",   "hours",   (size_t)(minutes / 60) % 24 },
+				{ "minute", "minutes", (size_t)(minutes) % 60      },
+			};
+
+			std::vector<std::string> v;
+			for(auto const& unit : units)
+			{
+				if(unit.amount)
+					v.emplace_back(text::format("%zu %s", unit.amount, unit.amount == 1 ? unit.singular : unit.plural));
+			}
+			return text::join(v, ", ");
+		}
+		catch (...) {
+		}
+		return src;
+	}
+
 	void operator() (parser::variable_change_t const& v)
 	{
 		std::map<std::string, std::string>::const_iterator it = variable(v.name);
@@ -183,6 +282,26 @@ struct expand_visitor : boost::static_visitor<void>
 				value = capitalize(value);
 			if(v.change & parser::transform::kAsciify)
 				value = asciify(value);
+			if(v.change & parser::transform::kUrlEncode)
+				value = encode::url_part(value);
+			if(v.change & parser::transform::kShellEscape)
+				value = shell_escape(value);
+			if(v.change & parser::transform::kRelative)
+				value = relative_time(value);
+			if(v.change & parser::transform::kNumber)
+				value = format_number(value);
+			if(v.change & parser::transform::kDuration)
+				value = format_duration(value);
+			if(v.change & parser::transform::kDirname)
+			{
+				char buf[MAXPATHLEN];
+				value = dirname_r(value.c_str(), buf) ?: value;
+			}
+			if(v.change & parser::transform::kBasename)
+			{
+				char buf[MAXPATHLEN];
+				value = basename_r(value.c_str(), buf) ?: value;
+			}
 			res += value;
 		}
 	}
