@@ -107,17 +107,15 @@ struct expand_visitor : boost::static_visitor<void>
 		res.insert(res.end(), it, last);
 	}
 
-	std::map<std::string, std::string>::const_iterator variable (std::string const& name) const
+	std::string variable (std::string const& name, std::string const& fallback = std::string()) const
 	{
 		std::map<std::string, std::string>::const_iterator it = variables.find(name);
-		return it != variables.end() && it->second != NULL_STR ? it : variables.end();
+		return it != variables.end() && it->second != NULL_STR ? it->second : fallback;
 	}
 
 	void operator() (parser::variable_t const& v)
 	{
-		std::map<std::string, std::string>::const_iterator it = variable(v.name);
-		if(it != variables.end())
-			res += it->second;
+		res += variable(v.name);
 	}
 
 	void operator() (parser::variable_transform_t const& v)
@@ -127,22 +125,20 @@ struct expand_visitor : boost::static_visitor<void>
 		tmp.handle_case_changes();
 		auto ptrn = regexp::pattern_t(tmp.res, parser::convert(v.options));
 
-		std::map<std::string, std::string>::const_iterator it = variable(v.name);
-		replace(it != variables.end() ? it->second : "", ptrn, v.format, v.options & parser::regexp_options::g);
+		replace(variable(v.name), ptrn, v.format, v.options & parser::regexp_options::g);
 	}
 
 	void operator() (parser::variable_fallback_t const& v)
 	{
-		std::map<std::string, std::string>::const_iterator it = variable(v.name);
-		if(it != variables.end())
-				res += it->second;
+		std::string const value = variable(v.name, NULL_STR);
+		if(value != NULL_STR)
+				res += value;
 		else	traverse(v.fallback);
 	}
 
 	void operator() (parser::variable_condition_t const& v)
 	{
-		std::map<std::string, std::string>::const_iterator it = variable(v.name);
-		traverse(it != variables.end() ? v.if_set : v.if_not_set);
+		traverse(variable(v.name, NULL_STR) != NULL_STR ? v.if_set : v.if_not_set);
 	}
 
 	static std::string capitalize (std::string const& src)
@@ -271,10 +267,9 @@ struct expand_visitor : boost::static_visitor<void>
 
 	void operator() (parser::variable_change_t const& v)
 	{
-		std::map<std::string, std::string>::const_iterator it = variable(v.name);
-		if(it != variables.end())
+		std::string value = variable(v.name, NULL_STR);
+		if(value != NULL_STR)
 		{
-			std::string value = it->second;
 			if(v.change & parser::transform::kUpcase)
 				value = text::uppercase(value);
 			if(v.change & parser::transform::kDowncase)
