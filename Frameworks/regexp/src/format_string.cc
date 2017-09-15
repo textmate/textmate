@@ -386,13 +386,8 @@ namespace format_string
 		nodes = std::make_shared<parser::nodes_t>(n);
 	}
 
-	std::string format_string_t::expand (std::map<std::string, std::string> const& variables) const
+	std::string format_string_t::expand (std::function<std::string(std::string const&, std::string const&)> const& getVariable) const
 	{
-		auto getVariable = [&variables](std::string const& name, std::string const& fallback) -> std::string {
-			auto it = variables.find(name);
-			return it != variables.end() ? it->second : fallback;
-		};
-
 		expand_visitor v(getVariable, nullptr);
 		v.traverse(*nodes);
 		v.handle_case_changes();
@@ -418,11 +413,20 @@ namespace format_string
 		return v.res;
 	}
 
-	std::string expand (std::string const& format, std::map<std::string, std::string> const& variables)
+	std::string expand (std::string const& format, std::function<std::string(std::string const&, std::string const&)> const& getVariable)
 	{
 		if(format.find_first_of("$(\\") == std::string::npos)
 			return format;
-		return format_string_t(format).expand(variables);
+		return format_string_t(format).expand(getVariable);
+	}
+
+	std::string expand (std::string const& format, std::map<std::string, std::string> const& variables)
+	{
+		auto getVariable = [&variables](std::string const& name, std::string const& fallback) -> std::string {
+			auto it = variables.find(name);
+			return it != variables.end() ? it->second : fallback;
+		};
+		return expand(format, getVariable);
 	}
 
 	std::string escape (std::string const& format)
