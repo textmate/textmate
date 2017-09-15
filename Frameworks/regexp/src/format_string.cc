@@ -17,7 +17,7 @@ struct expand_visitor : boost::static_visitor<void>
 {
 	WATCH_LEAKS(expand_visitor);
 
-	std::map<std::string, std::string> variables;
+	std::function<std::string(std::string const&, std::string const&)> variable;
 	snippet::run_command_callback_t* callback;
 	std::string res;
 	std::vector< std::pair<size_t, parser::case_change::type> > case_changes;
@@ -27,7 +27,7 @@ struct expand_visitor : boost::static_visitor<void>
 	std::multimap<size_t, snippet::field_ptr> mirrors;
 	std::multimap<size_t, snippet::field_ptr> ambiguous;
 
-	expand_visitor (std::map<std::string, std::string> const& variables, snippet::run_command_callback_t* callback) : variables(variables), callback(callback)
+	expand_visitor (std::function<std::string(std::string const&, std::string const&)> const& variable, snippet::run_command_callback_t* callback) : variable(variable), callback(callback)
 	{
 		rank_count = 0;
 	}
@@ -80,18 +80,27 @@ struct expand_visitor : boost::static_visitor<void>
 		{
 			res.insert(res.end(), it, m.buffer() + m.begin());
 
-			std::map<std::string, std::string> tmp(m.captures());
-			tmp.insert(variables.begin(), variables.end());
+			std::set<std::string> eclipsed;
 			for(size_t i = 0; i < m.size(); ++i)
 			{
 				if(!m.did_match(i))
-					tmp.erase(std::to_string(i));
+					eclipsed.erase(std::to_string(i));
 			}
 
-			expand_visitor nestedVisitor(tmp, callback);
-			nestedVisitor.traverse(format);
-			nestedVisitor.handle_case_changes();
-			res += nestedVisitor.res;
+			auto getVariable = [&](std::string const& name, std::string const& fallback) -> std::string {
+				if(eclipsed.find(name) == eclipsed.end())
+				{
+					auto const captures = m.captures();
+					auto const it = captures.find(name);
+					return it != captures.end() ? it->second : this->variable(name, fallback);
+				}
+				return fallback;
+			};
+
+			expand_visitor tmp(getVariable, callback);
+			tmp.traverse(format);
+			tmp.handle_case_changes();
+			res += tmp.res;
 
 			it = m.buffer() + m.end();
 			if(!repeat)
@@ -107,25 +116,19 @@ struct expand_visitor : boost::static_visitor<void>
 		res.insert(res.end(), it, last);
 	}
 
-	std::string variable (std::string const& name, std::string const& fallback = std::string()) const
-	{
-		std::map<std::string, std::string>::const_iterator it = variables.find(name);
-		return it != variables.end() && it->second != NULL_STR ? it->second : fallback;
-	}
-
 	void operator() (parser::variable_t const& v)
 	{
-		res += variable(v.name);
+		res += variable(v.name, std::string());
 	}
 
 	void operator() (parser::variable_transform_t const& v)
 	{
-		expand_visitor tmp(variables, callback);
+		expand_visitor tmp(variable, callback);
 		tmp.traverse(v.pattern);
 		tmp.handle_case_changes();
 		auto ptrn = regexp::pattern_t(tmp.res, parser::convert(v.options));
 
-		replace(variable(v.name), ptrn, v.format, v.options & parser::regexp_options::g);
+		replace(variable(v.name, std::string()), ptrn, v.format, v.options & parser::regexp_options::g);
 	}
 
 	void operator() (parser::variable_fallback_t const& v)
@@ -346,7 +349,7 @@ struct expand_visitor : boost::static_visitor<void>
 		std::vector<std::string> all_choices;
 		for(auto const& it : v.choices)
 		{
-			expand_visitor tmp(variables, callback);
+			expand_visitor tmp(variable, callback);
 			tmp.traverse(it);
 			tmp.handle_case_changes();
 			all_choices.push_back(tmp.res);
@@ -385,7 +388,12 @@ namespace format_string
 
 	std::string format_string_t::expand (std::map<std::string, std::string> const& variables) const
 	{
-		expand_visitor v(variables, nullptr);
+		auto getVariable = [&variables](std::string const& name, std::string const& fallback) -> std::string {
+			auto it = variables.find(name);
+			return it != variables.end() ? it->second : fallback;
+		};
+
+		expand_visitor v(getVariable, nullptr);
 		v.traverse(*nodes);
 		v.handle_case_changes();
 		return v.res;
@@ -399,7 +407,12 @@ namespace format_string
 	{
 		D(DBF_FormatString, bug("%s\n", src.c_str()););
 
-		expand_visitor v(variables, nullptr);
+		auto getVariable = [&variables](std::string const& name, std::string const& fallback) -> std::string {
+			auto it = variables.find(name);
+			return it != variables.end() ? it->second : fallback;
+		};
+
+		expand_visitor v(getVariable, nullptr);
 		v.replace(src, ptrn, *format.nodes, repeat);
 		v.handle_case_changes();
 		return v.res;
@@ -444,7 +457,12 @@ namespace snippet
 {
 	snippet_t parse (std::string const& str, std::map<std::string, std::string> const& variables, std::string const& indentString, text::indent_t const& indent, run_command_callback_t* callback)
 	{
-		expand_visitor v(variables, callback);
+		auto getVariable = [&variables](std::string const& name, std::string const& fallback) -> std::string {
+			auto it = variables.find(name);
+			return it != variables.end() ? it->second : fallback;
+		};
+
+		expand_visitor v(getVariable, callback);
 		v.traverse(parser::parse_snippet(str));
 		v.handle_case_changes();
 
