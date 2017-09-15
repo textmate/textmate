@@ -135,7 +135,7 @@ namespace snippet
 	struct run_command_callback_t
 	{
 		virtual ~run_command_callback_t () { }
-		virtual std::string run_command (std::string const& cmd, std::map<std::string, std::string> const& environment) = 0;
+		virtual std::string run_command (std::string const& cmd) = 0;
 	};
 
 	PUBLIC snippet_t parse (std::string const& str, std::map<std::string, std::string> const& variables, std::string const& indentString, text::indent_t const& indent, run_command_callback_t* callback);

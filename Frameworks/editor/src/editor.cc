@@ -367,7 +367,10 @@ namespace ng
 	{
 		struct callback_t : snippet::run_command_callback_t
 		{
-			std::string run_command (std::string const& cmd, std::map<std::string, std::string> const& environment)
+			std::map<std::string, std::string> environment;
+			callback_t (std::map<std::string, std::string> const& environment) : environment(environment) { }
+
+			std::string run_command (std::string const& cmd)
 			{
 				__block int status = 0;
 				__block std::string output, error;
@@ -401,7 +404,7 @@ namespace ng
 				return utf8::is_valid(res.begin(), res.end()) ? res : sanitized_utf8(res);
 			}
 
-		} callback;
+		} callback(variables);
 
 		std::string indent = disableIndent ? "" : _buffer.substr(_buffer.begin(_buffer.convert(from).line), from);
 		size_t i = 0;

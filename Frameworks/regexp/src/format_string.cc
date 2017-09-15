@@ -362,7 +362,7 @@ struct expand_visitor : boost::static_visitor<void>
 	{
 		if(callback)
 		{
-			std::string const& str = callback->run_command(v.code, variables);
+			std::string const& str = callback->run_command(v.code);
 			res.insert(res.end(), str.begin(), !str.empty() && str.back() == '\n' ? --str.end() : str.end());
 		}
 	}
