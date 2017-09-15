@@ -21,7 +21,6 @@ namespace format_string
 
 	private:
 		friend std::string replace (std::string const& src, regexp::pattern_t const& ptrn, format_string_t const& format, bool repeat, std::map<std::string, std::string> const& variables);
-		friend std::set<std::string> get_variables (format_string_t const&);
 
 		void init (std::string const& str, char const* stopChars);
 		std::shared_ptr<parser::nodes_t> nodes;
