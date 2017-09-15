@@ -88,9 +88,10 @@ struct expand_visitor : boost::static_visitor<void>
 					tmp.erase(std::to_string(i));
 			}
 
-			tmp.swap(variables);
-			traverse(format);
-			tmp.swap(variables);
+			expand_visitor nestedVisitor(tmp, callback);
+			nestedVisitor.traverse(format);
+			nestedVisitor.handle_case_changes();
+			res += nestedVisitor.res;
 
 			it = m.buffer() + m.end();
 			if(!repeat)
