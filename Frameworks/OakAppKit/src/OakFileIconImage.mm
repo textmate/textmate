@@ -191,24 +191,44 @@ enum {
 
 - (BOOL)draw
 {
+	NSSize dstSize = self.size;
+
 	NSImage* buffer = nil;
 	if(self.isModified)
 	{
-		buffer = [[NSImage alloc] initWithSize:[self size]];
+		// If we use `self.size` for the off-screen image buffer then
+		// we get a scaled up 16×16 image in the file chooser (⌘T).
+		//
+		// My theory is that when drawing the image, the image size
+		// is 16×16 but the graphics context uses a transformation so
+		// that each point is multiple pixels, which our off-screen
+		// image does not replicate.
+		//
+		// I do not know how to get the actual “pixel size” of the
+		// destination, so using the largest image is a workaround
+		// and knowing the actual size could give a better result.
+
+		for(NSImage* image in self.imageStack)
+		{
+			if(dstSize.width * dstSize.height < image.size.width * image.size.height)
+				dstSize = image.size;
+		}
+
+		buffer = [[NSImage alloc] initWithSize:dstSize];
 		[buffer lockFocus];
 	}
 
 	NSCompositingOperation op = NSCompositeCopy;
 	for(NSImage* image in self.imageStack)
 	{
-		[image drawInRect:(NSRect){ NSZeroPoint, self.size } fromRect:NSZeroRect operation:op fraction:1];
+		[image drawInRect:(NSRect){ NSZeroPoint, dstSize } fromRect:NSZeroRect operation:op fraction:1];
 		op = NSCompositeSourceOver;
 	}
 
 	if(self.isModified)
 	{
 		[buffer unlockFocus];
-		[buffer drawAtPoint:NSZeroPoint fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:0.4];
+		[buffer drawInRect:(NSRect){ NSZeroPoint, self.size } fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:0.4];
 	}
 
 	return YES;
