@@ -88,7 +88,7 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 	self.pollTimer = nil;
 
 	struct statfs sfsb;
-	BOOL readOnlyFileSystem = statfs(oak::application_t::path().c_str(), &sfsb) != 0 || (sfsb.f_flags & MNT_RDONLY);
+	BOOL readOnlyFileSystem = statfs([NSBundle mainBundle].bundlePath.fileSystemRepresentation, &sfsb) != 0 || (sfsb.f_flags & MNT_RDONLY);
 	BOOL disablePolling = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableSoftwareUpdatesKey];
 	D(DBF_SoftwareUpdate_Check, bug("download visible %s, disable polling %s, read only file system %s → %s\n", BSTR(self.downloadWindow), BSTR(disablePolling), BSTR(readOnlyFileSystem), BSTR(!self.downloadWindow && !disablePolling && !readOnlyFileSystem)););
 	if(_downloadWindow.isWorking || disablePolling || readOnlyFileSystem)
