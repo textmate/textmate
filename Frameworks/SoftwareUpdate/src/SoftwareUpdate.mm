@@ -43,7 +43,7 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 	CGFloat secondsLeft;
 }
 @property (nonatomic) NSDate* lastPoll;
-@property (nonatomic) BOOL isChecking;
+@property (nonatomic, readwrite, getter = isChecking) BOOL checking;
 @property (nonatomic) NSString* lastVersionDownloaded;
 @property (nonatomic) NSString* errorString;
 @property (nonatomic) NSTimer* pollTimer;
@@ -134,7 +134,7 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 {
 	if(self.isChecking)
 		return;
-	self.isChecking = YES;
+	self.checking = YES;
 
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
 		std::string error = NULL_STR;
@@ -143,7 +143,7 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 		dispatch_async(dispatch_get_main_queue(), ^{
 			self.errorString = [NSString stringWithCxxString:error];
 			self.lastPoll    = [NSDate date];
-			self.isChecking  = NO;
+			self.checking    = NO;
 
 			if(self.errorString)
 			{

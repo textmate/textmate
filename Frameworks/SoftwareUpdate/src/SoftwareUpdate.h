@@ -13,7 +13,7 @@ PUBLIC extern NSString* const kSoftwareUpdateChannelNightly;
 PUBLIC @interface SoftwareUpdate : NSObject <DownloadWindowControllerDelegate>
 @property (nonatomic)           NSDictionary* channels;
 @property (nonatomic, readonly) NSDate*       lastPoll;
-@property (nonatomic, readonly) BOOL          isChecking;
+@property (nonatomic, readonly, getter = isChecking) BOOL checking;
 @property (nonatomic, readonly) NSString*     errorString;
 
 - (void)setSignee:(key_chain_t::key_t const&)aSignee;

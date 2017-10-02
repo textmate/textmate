@@ -9,7 +9,7 @@
 // kUserDefaultsLastSoftwareUpdateCheckKey
 
 @interface SoftwareUpdatePreferences ()
-@property (nonatomic) BOOL isChecking;
+@property (nonatomic, readwrite, getter = isChecking) BOOL checking;
 @property (nonatomic) NSDate* lastPoll;
 @property (nonatomic) NSString* errorString;
 
@@ -18,14 +18,14 @@
 @end
 
 @implementation SoftwareUpdatePreferences
-+ (NSSet*)keyPathsForValuesAffectingLastCheck { return [NSSet setWithObjects:@"isChecking", @"lastPollString", @"errorString", nil]; }
++ (NSSet*)keyPathsForValuesAffectingLastCheck { return [NSSet setWithObjects:@"checking", @"lastPollString", @"errorString", nil]; }
 
 - (id)init
 {
 	if(self = [super initWithNibName:@"SoftwareUpdatePreferences" label:@"Software Update" image:[NSImage imageNamed:@"Software Update" inSameBundleAsClass:[self class]]])
 	{
 		[OakStringListTransformer createTransformerWithName:@"OakSoftwareUpdateChannelTransformer" andObjectsArray:@[ kSoftwareUpdateChannelRelease, kSoftwareUpdateChannelBeta ]];
-		[self bind:@"isChecking"  toObject:[SoftwareUpdate sharedInstance] withKeyPath:@"isChecking"  options:nil];
+		[self bind:@"checking"    toObject:[SoftwareUpdate sharedInstance] withKeyPath:@"checking"    options:nil];
 		[self bind:@"lastPoll"    toObject:[SoftwareUpdate sharedInstance] withKeyPath:@"lastPoll"    options:nil];
 		[self bind:@"errorString" toObject:[SoftwareUpdate sharedInstance] withKeyPath:@"errorString" options:nil];
 
@@ -43,7 +43,7 @@
 
 - (NSString*)lastCheck
 {
-	return _isChecking ? @"Checking…" : (_errorString ?: (_lastPollString ?: @"Never"));
+	return _checking ? @"Checking…" : (_errorString ?: (_lastPollString ?: @"Never"));
 }
 
 - (void)updateLastPollString:(id)sender
