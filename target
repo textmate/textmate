@@ -13,9 +13,9 @@ FLAGS += -fcolor-diagnostics
 FLAGS += -DNDEBUG -Os
 # LINK   = OakDebug
 
-CXX_FLAGS    += -fvisibility=hidden -std=c++1z
+CXX_FLAGS    += -fvisibility=hidden -std=c++14
 OBJC_FLAGS   += -fvisibility=hidden -fobjc-arc -std=c99 -fobjc-abi-version=3
-OBJCXX_FLAGS += -fvisibility=hidden -std=c++1z -fobjc-abi-version=3
+OBJCXX_FLAGS += -fvisibility=hidden -std=c++14 -fobjc-abi-version=3
 OBJCXX_FLAGS += -fobjc-arc -fobjc-call-cxx-cdtors
 LIBS         += c++
 
