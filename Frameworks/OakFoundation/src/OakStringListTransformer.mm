@@ -2,47 +2,43 @@
 #import <oak/debug.h>
 
 @interface OakStringListTransformer ()
-@property (nonatomic) NSArray* stringList;
+@property (nonatomic) NSDictionary<NSString*, NSNumber*>* mapping;
 @end
 
 @implementation OakStringListTransformer
 + (Class)transformedValueClass         { return [NSNumber class]; }
 + (BOOL)allowsReverseTransformation    { return YES; }
 
-+ (void)createTransformerWithName:(NSString*)aName andObjectsArray:(NSArray*)aList
++ (void)createTransformerWithName:(NSString*)aName andObjectsDictionary:(NSDictionary*)mapping
 {
 	if([NSValueTransformer valueTransformerForName:aName])
 		return;
 
 	OakStringListTransformer* transformer = [OakStringListTransformer new];
-	transformer.stringList = aList;
+	transformer.mapping = mapping;
 	[NSValueTransformer setValueTransformer:transformer forName:aName];
 }
 
-+ (void)createTransformerWithName:(NSString*)aName andObjects:(id)firstObj, ...
++ (void)createTransformerWithName:(NSString*)aName andObjectsArray:(NSArray*)aList
 {
-	ASSERT(firstObj != nil);
-
-	va_list ap;
-	va_start(ap, firstObj);
-	NSMutableArray* list = [NSMutableArray array];
-	do {
-		[list addObject:firstObj];
-	} while(firstObj = va_arg(ap, id));
-	va_end(ap);
-
-	[self createTransformerWithName:aName andObjectsArray:list];
+	NSMutableDictionary* dict = [NSMutableDictionary dictionary];
+	for(NSUInteger i = 0; i < aList.count; ++i)
+		dict[aList[i]] = @(i);
+	[self createTransformerWithName:aName andObjectsDictionary:dict];
 }
 
-- (id)transformedValue:(id)value
+- (NSNumber*)transformedValue:(NSString*)value
 {
-	NSUInteger i = value ? [self.stringList indexOfObject:value] : NSNotFound;
-	return i != NSNotFound ? @(i) : nil;
+	return value ? _mapping[value] : nil;
 }
 
-- (id)reverseTransformedValue:(id)value
+- (NSString*)reverseTransformedValue:(NSNumber*)value
 {
-	NSUInteger i = value ? [value unsignedIntValue] : NSNotFound;
-	return i < [self.stringList count] ? [self.stringList objectAtIndex:i] : nil;
+	for(NSString* key in _mapping)
+	{
+		if([_mapping[key] isEqual:value])
+			return key;
+	}
+	return nil;
 }
 @end
