@@ -35,6 +35,13 @@ struct shared_state_t
 typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 
 @interface SoftwareUpdate ()
+{
+	key_chain_t keyChain;
+	NSTimeInterval pollInterval;
+
+	shared_state_ptr sharedState;
+	CGFloat secondsLeft;
+}
 @property (nonatomic) NSDate* lastPoll;
 @property (nonatomic) BOOL isChecking;
 @property (nonatomic) NSString* lastVersionDownloaded;
@@ -48,14 +55,6 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 @end
 
 @implementation SoftwareUpdate
-{
-	key_chain_t keyChain;
-	NSTimeInterval pollInterval;
-
-	shared_state_ptr sharedState;
-	CGFloat secondsLeft;
-}
-
 + (instancetype)sharedInstance
 {
 	static SoftwareUpdate* sharedInstance = [self new];
