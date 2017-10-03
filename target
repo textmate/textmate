@@ -24,8 +24,8 @@ LN_FLAGS += -fvisibility=hidden
 LN_FLAGS += -Wl,-dead_strip
 LN_FLAGS += -Wl,-dead_strip_dylibs
 
-FLAGS     += -I"$libressl_prefix/include"
-CXX_FLAGS += -I"$capnp_prefix/include"
+FLAGS += -I"$libressl_prefix/include"
+FLAGS += -I"$capnp_prefix/include"
 
 PRELUDE = Shared/PCH/prelude.*
 
