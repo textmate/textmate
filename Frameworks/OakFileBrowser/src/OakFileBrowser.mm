@@ -543,8 +543,14 @@ static bool is_binary (std::string const& path)
 - (NSArray*)selectedItems
 {
 	NSIndexSet* indexSet = [_outlineView selectedRowIndexes];
-	NSInteger clickedRow = [_outlineView clickedRow];
-	indexSet = clickedRow == -1 || clickedRow >= _outlineView.numberOfRows || [indexSet containsIndex:clickedRow] ? indexSet : [NSIndexSet indexSetWithIndex:clickedRow];
+
+	NSEvent* currentEvent = [NSApp currentEvent];
+	if(currentEvent.type != NSKeyDown && currentEvent.type != NSKeyUp)
+	{
+		NSInteger clickedRow = [_outlineView clickedRow];
+		if(0 <= clickedRow && clickedRow < _outlineView.numberOfRows && ![indexSet containsIndex:clickedRow])
+			indexSet = [NSIndexSet indexSetWithIndex:clickedRow];
+	}
 
 	NSMutableArray* res = [NSMutableArray array];
 	for(NSUInteger index = [indexSet firstIndex]; index != NSNotFound; index = [indexSet indexGreaterThanIndex:index])
