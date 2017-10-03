@@ -105,7 +105,7 @@
 
 - (void)showContextMenu:(id)sender
 {
-	if(NSMenu* menu = [self menuForEvent:[NSApp currentEvent]])
+	if(NSMenu* menu = self.menu)
 	{
 		NSInteger row = [self selectedRow] != -1 ? [self selectedRow] : 0;
 		NSRect rect = [self convertRect:[self rectOfRow:row] toView:nil];
