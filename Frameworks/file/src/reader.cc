@@ -90,13 +90,9 @@ namespace file
 			{
 				charset = "ISO-8859-1";
 
-				encoding::classifier_t db;
-				static std::string const kEncodingFrequenciesPath = path::join(path::home(), "Library/Caches/com.macromates.TextMate/EncodingFrequencies.binary");
-				db.load(kEncodingFrequenciesPath);
-
 				std::multimap<double, std::string> probabilities;
-				for(auto const& charset : db.charsets())
-					probabilities.emplace(1 - db.probability(buf.begin(), buf.end(), charset), charset);
+				for(auto const& charset : encoding::charsets())
+					probabilities.emplace(1 - encoding::probability(buf.data(), buf.data() + buf.size(), charset), charset);
 
 				if(!probabilities.empty() && probabilities.begin()->first < 1)
 					charset = probabilities.begin()->second;

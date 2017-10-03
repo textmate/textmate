@@ -712,13 +712,9 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 			EncodingWindowController* controller = [[EncodingWindowController alloc] initWithData:[NSData dataWithBytesNoCopy:content->begin() length:content->size() freeWhenDone:NO]];
 			controller.displayName = _self.displayName;
 
-			__block encoding::classifier_t db;
-			static std::string const kEncodingFrequenciesPath = path::join(path::home(), "Library/Caches/com.macromates.TextMate/EncodingFrequencies.binary");
-			db.load(kEncodingFrequenciesPath);
-
 			std::multimap<double, std::string> probabilities;
-			for(auto const& charset : db.charsets())
-				probabilities.emplace(1 - db.probability(content->begin(), content->end(), charset), charset);
+			for(auto const& charset : encoding::charsets())
+				probabilities.emplace(1 - encoding::probability(content->begin(), content->end(), charset), charset);
 			if(!probabilities.empty() && probabilities.begin()->first < 1)
 				controller.encoding = [NSString stringWithCxxString:probabilities.begin()->second];
 
@@ -728,10 +724,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 				{
 					context->set_charset(to_s(controller.encoding));
 					if(controller.trainClassifier)
-					{
-						db.learn(content->begin(), content->end(), to_s(controller.encoding));
-						db.save(kEncodingFrequenciesPath);
-					}
+						encoding::learn(content->begin(), content->end(), to_s(controller.encoding));
 				}
 			}];
 		}
@@ -1695,13 +1688,9 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 			{
 				_encoding_state = kEncodingUseFallback;
 
-				encoding::classifier_t db;
-				static std::string const kEncodingFrequenciesPath = path::join(path::home(), "Library/Caches/com.macromates.TextMate/EncodingFrequencies.binary");
-				db.load(kEncodingFrequenciesPath);
-
 				std::multimap<double, std::string> probabilities;
-				for(auto const& charset : db.charsets())
-					probabilities.emplace(1 - db.probability(content->begin(), content->end(), charset), charset);
+				for(auto const& charset : encoding::charsets())
+					probabilities.emplace(1 - encoding::probability(content->begin(), content->end(), charset), charset);
 				if(!probabilities.empty() && probabilities.begin()->first < 1)
 						context->set_charset(probabilities.begin()->second);
 				else	context->set_charset("ISO-8859-1");
