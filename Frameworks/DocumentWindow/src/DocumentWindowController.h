@@ -2,9 +2,7 @@
 
 @class OakDocument;
 
-PUBLIC @interface DocumentWindowController : NSObject
-@property (nonatomic) NSWindow*                                  window;
-
+PUBLIC @interface DocumentWindowController : NSWindowController
 @property (nonatomic) NSUUID*                                    identifier;
 @property (nonatomic) NSString*                                  defaultProjectPath;
 @property (nonatomic, readonly) NSString*                        projectPath; // effectiveProjectPath
