@@ -1,5 +1,5 @@
 @interface EncodingWindowController : NSWindowController
-- (id)initWithFirst:(char const*)firstPointer last:(char const*)lastPointer;
+- (instancetype)initWithData:(NSData*)data;
 - (void)beginSheetModalForWindow:(NSWindow*)aWindow completionHandler:(void(^)(NSModalResponse))callback;
 @property (nonatomic) NSString* encoding;
 @property (nonatomic) NSString* displayName;

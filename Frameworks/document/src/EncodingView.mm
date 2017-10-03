@@ -157,8 +157,7 @@ static NSTextView* MyCreateTextView ()
 @interface EncodingWindowController () <NSWindowDelegate, NSTextViewDelegate>
 {
 	OBJC_WATCH_LEAKS(EncodingWindowController);
-	char const* first;
-	char const* last;
+	NSData* _data;
 }
 @property (nonatomic) NSObjectController* objectController;
 @property (nonatomic) NSTextField* title;
@@ -175,13 +174,11 @@ static NSTextView* MyCreateTextView ()
 @end
 
 @implementation EncodingWindowController
-- (id)initWithFirst:(char const*)firstPointer last:(char const*)lastPointer
+- (instancetype)initWithData:(NSData*)data
 {
 	if(self = [super initWithWindow:[[NSWindow alloc] initWithContentRect:NSZeroRect styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask) backing:NSBackingStoreBuffered defer:NO]])
 	{
-		first = firstPointer;
-		last  = std::min(firstPointer + 256*1024, lastPointer);
-
+		_data            = data;
 		_encoding        = @"ISO-8859-1";
 		_displayName     = @"untitled";
 		_trainClassifier = YES;
@@ -292,7 +289,8 @@ static NSTextView* MyCreateTextView ()
 - (void)updateTextView
 {
 	bool couldConvert = true;
-	[[self.textView textStorage] setAttributedString:convert_and_highlight(first, last, to_s(self.encoding), "UTF-8", &couldConvert)];
+	char const* bytes = (char const*)_data.bytes;
+	[[self.textView textStorage] setAttributedString:convert_and_highlight(bytes, bytes + MIN(_data.length, 256*1024), to_s(self.encoding), "UTF-8", &couldConvert)];
 	self.acceptableEncoding = couldConvert;
 }
 

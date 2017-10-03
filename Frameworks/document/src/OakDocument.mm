@@ -709,7 +709,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 		{
 			[_window.attachedSheet orderOut:_self];
 
-			EncodingWindowController* controller = [[EncodingWindowController alloc] initWithFirst:content->begin() last:content->end()];
+			EncodingWindowController* controller = [[EncodingWindowController alloc] initWithData:[NSData dataWithBytesNoCopy:content->begin() length:content->size() freeWhenDone:NO]];
 			controller.displayName = _self.displayName;
 
 			__block encoding::classifier_t db;
