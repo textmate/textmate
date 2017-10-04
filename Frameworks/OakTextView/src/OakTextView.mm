@@ -467,7 +467,7 @@ private:
 	ng::layout_t* _layout;
 };
 
-@interface OakTextView () <NSTextInputClient, NSDraggingSource, NSIgnoreMisspelledWords, NSChangeSpelling, NSTextFieldDelegate, NSAccessibilityCustomRotorItemSearchDelegate>
+@interface OakTextView () <NSTextInputClient, NSDraggingSource, NSIgnoreMisspelledWords, NSChangeSpelling, NSTextFieldDelegate, NSTouchBarDelegate, NSAccessibilityCustomRotorItemSearchDelegate>
 {
 	OBJC_WATCH_LEAKS(OakTextView);
 
@@ -2964,6 +2964,78 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 }
 
 // ============================
+
+// =============
+// = Touch Bar =
+// =============
+
+static NSTouchBarItemIdentifier kOTVTouchBarCustomizationIdentifier          = @"com.macromates.TextMate.otv.customizationIdentifer";
+static NSTouchBarItemIdentifier kOTVTouchBarItemIdentifierNavigateMarkers    = @"com.macromates.TextMate.otv.navigateMarkers";
+static NSTouchBarItemIdentifier kOTVTouchBarItemIdentifierAddRemoveBookmark  = @"com.macromates.TextMate.otv.addRemoveBookmark";
+
+- (NSTouchBar*)makeTouchBar
+{
+	NSTouchBar* touchBar = [NSTouchBar new];
+	touchBar.delegate = self;
+	touchBar.defaultItemIdentifiers = @[ kOTVTouchBarItemIdentifierAddRemoveBookmark, kOTVTouchBarItemIdentifierNavigateMarkers, ];
+   touchBar.customizationIdentifier = kOTVTouchBarCustomizationIdentifier;
+	touchBar.customizationAllowedItemIdentifiers = @[ kOTVTouchBarItemIdentifierAddRemoveBookmark, kOTVTouchBarItemIdentifierNavigateMarkers, ];
+
+	return touchBar;
+}
+
+- (NSTouchBarItem*)touchBar:(NSTouchBar*)touchBar makeItemForIdentifier:(NSTouchBarItemIdentifier)identifier
+{
+	if([identifier isEqualToString:kOTVTouchBarItemIdentifierAddRemoveBookmark])
+	{
+		NSImage* bookmarkImage = [NSImage imageNamed:@"RemoveBookmarkTemplate" inSameBundleAsClass:[self class]];
+		bookmarkImage.accessibilityDescription = @"add or remove bookmark";
+
+		NSCustomTouchBarItem* bookmarkButtonTouchBarItem = [[NSCustomTouchBarItem alloc] initWithIdentifier:kOTVTouchBarItemIdentifierAddRemoveBookmark];
+		bookmarkButtonTouchBarItem.view = [NSButton buttonWithImage:bookmarkImage target:self action:@selector(toggleCurrentBookmark:)];
+		bookmarkButtonTouchBarItem.visibilityPriority = NSTouchBarItemPriorityHigh;
+		bookmarkButtonTouchBarItem.customizationLabel = @"Add/Remove Bookmark";
+
+		return bookmarkButtonTouchBarItem;
+	}
+	else if([identifier isEqualToString:kOTVTouchBarItemIdentifierNavigateMarkers])
+	{
+		NSSegmentedControl* navigateMarkerSegmentedControl = [NSSegmentedControl new];
+		navigateMarkerSegmentedControl.segmentCount = 2;
+		navigateMarkerSegmentedControl.target       = self;
+		navigateMarkerSegmentedControl.action       = @selector(performNavigateMarkersSegmentAction:);
+		navigateMarkerSegmentedControl.trackingMode = NSSegmentSwitchTrackingMomentary;
+		navigateMarkerSegmentedControl.segmentStyle = NSSegmentStyleSeparated;
+
+		NSImage* goUpImage = [NSImage imageNamed:NSImageNameTouchBarGoUpTemplate];
+		goUpImage.accessibilityDescription = @"previous mark";
+		NSImage* goDownImage = [NSImage imageNamed:NSImageNameTouchBarGoDownTemplate];
+		goDownImage.accessibilityDescription = @"next mark";
+
+		[navigateMarkerSegmentedControl setImage:goUpImage forSegment:0];
+		[navigateMarkerSegmentedControl setImage:goDownImage forSegment:1];
+
+		NSCustomTouchBarItem* markersTouchBarItem = [[NSCustomTouchBarItem alloc] initWithIdentifier:kOTVTouchBarItemIdentifierNavigateMarkers];
+		markersTouchBarItem.view = navigateMarkerSegmentedControl;
+		markersTouchBarItem.visibilityPriority = NSTouchBarItemPriorityHigh;
+		markersTouchBarItem.customizationLabel = @"Previous/Next Mark";
+
+		return markersTouchBarItem;
+	}
+
+	return nil;
+}
+
+- (void)performNavigateMarkersSegmentAction:(id)sender
+{
+	switch([sender selectedSegment])
+	{
+		case 0: [self jumpToPreviousMark:self]; break;
+		case 1: [self jumpToNextMark:self];     break;
+	}
+}
+
+// =============
 
 - (void)insertSnippetWithOptions:(NSDictionary*)someOptions // For Dialog popup
 {
