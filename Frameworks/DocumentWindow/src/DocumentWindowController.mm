@@ -2308,6 +2308,7 @@ static NSTouchBarItemIdentifier kTouchBarFavoritesItemIdentifier = @"com.macroma
 	NSTouchBar* bar = [[NSTouchBar alloc] init];
 	bar.delegate = self;
 	bar.defaultItemIdentifiers = @[
+		NSTouchBarItemIdentifierOtherItemsProxy,
 		kTouchBarTabNavigationIdentifier,
 		kTouchBarNewTabItemIdentifier,
 		kTouchBarQuickOpenItemIdentifier,
