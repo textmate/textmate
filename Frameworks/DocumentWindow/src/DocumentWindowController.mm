@@ -2341,29 +2341,34 @@ static NSTouchBarItemIdentifier kTouchBarFavoritesItemIdentifier = @"com.macroma
 	}
 	else if([identifier isEqualToString:kTouchBarNewTabItemIdentifier])
 	{
+		NSImage* newTabImage = [NSImage imageNamed:@"TouchBarNewTabTemplate"];
+		newTabImage.accessibilityDescription = @"new tab";
 		res = [[NSCustomTouchBarItem alloc] initWithIdentifier:identifier];
-		res.view = [NSButton buttonWithImage:[NSImage imageNamed:@"TouchBarNewTabTemplate"] target:self action:@selector(newDocumentInTab:)];
+		res.view = [NSButton buttonWithImage:newTabImage target:self action:@selector(newDocumentInTab:)];
 		res.visibilityPriority = NSTouchBarItemPriorityNormal;
 	}
 	else if([identifier isEqualToString:kTouchBarQuickOpenItemIdentifier])
 	{
+		NSImage* quickOpenImage = [NSImage imageNamed:@"TouchBarQuickOpenTemplate"];
+		quickOpenImage.accessibilityDescription = @"quick open";
 		res = [[NSCustomTouchBarItem alloc] initWithIdentifier:identifier];
-		res.view = [NSButton buttonWithImage:[NSImage imageNamed:@"TouchBarQuickOpenTemplate"] target:self action:@selector(goToFile:)];
+		res.view = [NSButton buttonWithImage:quickOpenImage target:self action:@selector(goToFile:)];
 		res.visibilityPriority = NSTouchBarItemPriorityNormal;
 	}
 	else if([identifier isEqualToString:kTouchBarFindItemIdentifier])
 	{
 		NSButton* findInProjectButton = [NSButton buttonWithImage:[NSImage imageNamed:NSImageNameTouchBarSearchTemplate] target:self action:@selector(orderFrontFindPanel:)];
 		findInProjectButton.tag = find_tags::in_project;
-
 		res = [[NSCustomTouchBarItem alloc] initWithIdentifier:identifier];
 		res.view = findInProjectButton;
 		res.visibilityPriority = NSTouchBarItemPriorityNormal;
 	}
 	else if([identifier isEqualToString:kTouchBarFavoritesItemIdentifier])
 	{
+		NSImage* favoritesProjectsImage = [NSImage imageNamed:NSImageNameTouchBarBookmarksTemplate];
+		favoritesProjectsImage.accessibilityDescription = @"favorite projects";
 		res = [[NSCustomTouchBarItem alloc] initWithIdentifier:identifier];
-		res.view = [NSButton buttonWithImage:[NSImage imageNamed:NSImageNameTouchBarBookmarksTemplate] target:nil action:@selector(openFavorites:)];
+		res.view = [NSButton buttonWithImage:favoritesProjectsImage target:nil action:@selector(openFavorites:)];
 		res.visibilityPriority = NSTouchBarItemPriorityNormal;
 	}
 	return res;
