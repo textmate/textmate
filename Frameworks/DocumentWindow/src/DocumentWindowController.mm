@@ -2297,6 +2297,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 // = Touch Bar =
 // =============
 
+static NSTouchBarItemIdentifier kTouchBarCustomizationIdentifier = @"com.macromates.TextMate.touch-bar.customization-identifier";
 static NSTouchBarItemIdentifier kTouchBarTabNavigationIdentifier = @"com.macromates.TextMate.touch-bar.tab-navigation";
 static NSTouchBarItemIdentifier kTouchBarNewTabItemIdentifier    = @"com.macromates.TextMate.touch-bar.new-tab";
 static NSTouchBarItemIdentifier kTouchBarQuickOpenItemIdentifier = @"com.macromates.TextMate.touch-bar.quick-open";
@@ -2309,6 +2310,15 @@ static NSTouchBarItemIdentifier kTouchBarFavoritesItemIdentifier = @"com.macroma
 	bar.delegate = self;
 	bar.defaultItemIdentifiers = @[
 		NSTouchBarItemIdentifierOtherItemsProxy,
+		kTouchBarTabNavigationIdentifier,
+		kTouchBarNewTabItemIdentifier,
+		kTouchBarQuickOpenItemIdentifier,
+		NSTouchBarItemIdentifierFlexibleSpace,
+		kTouchBarFindItemIdentifier,
+		kTouchBarFavoritesItemIdentifier,
+	];
+	bar.customizationIdentifier = kTouchBarCustomizationIdentifier;
+	bar.customizationAllowedItemIdentifiers = @[
 		kTouchBarTabNavigationIdentifier,
 		kTouchBarNewTabItemIdentifier,
 		kTouchBarQuickOpenItemIdentifier,
@@ -2338,6 +2348,7 @@ static NSTouchBarItemIdentifier kTouchBarFavoritesItemIdentifier = @"com.macroma
 
 		res = [[NSCustomTouchBarItem alloc] initWithIdentifier:identifier];
 		res.view = _previousNextTouchBarControl;
+		res.customizationLabel = @"Back/Forward Tab";
 	}
 	else if([identifier isEqualToString:kTouchBarNewTabItemIdentifier])
 	{
@@ -2346,6 +2357,7 @@ static NSTouchBarItemIdentifier kTouchBarFavoritesItemIdentifier = @"com.macroma
 		res = [[NSCustomTouchBarItem alloc] initWithIdentifier:identifier];
 		res.view = [NSButton buttonWithImage:newTabImage target:self action:@selector(newDocumentInTab:)];
 		res.visibilityPriority = NSTouchBarItemPriorityNormal;
+		res.customizationLabel = @"New Tab";
 	}
 	else if([identifier isEqualToString:kTouchBarQuickOpenItemIdentifier])
 	{
@@ -2354,6 +2366,7 @@ static NSTouchBarItemIdentifier kTouchBarFavoritesItemIdentifier = @"com.macroma
 		res = [[NSCustomTouchBarItem alloc] initWithIdentifier:identifier];
 		res.view = [NSButton buttonWithImage:quickOpenImage target:self action:@selector(goToFile:)];
 		res.visibilityPriority = NSTouchBarItemPriorityNormal;
+		res.customizationLabel = @"Quick Open";
 	}
 	else if([identifier isEqualToString:kTouchBarFindItemIdentifier])
 	{
@@ -2362,6 +2375,7 @@ static NSTouchBarItemIdentifier kTouchBarFavoritesItemIdentifier = @"com.macroma
 		res = [[NSCustomTouchBarItem alloc] initWithIdentifier:identifier];
 		res.view = findInProjectButton;
 		res.visibilityPriority = NSTouchBarItemPriorityNormal;
+		res.customizationLabel = @"Find";
 	}
 	else if([identifier isEqualToString:kTouchBarFavoritesItemIdentifier])
 	{
@@ -2370,6 +2384,7 @@ static NSTouchBarItemIdentifier kTouchBarFavoritesItemIdentifier = @"com.macroma
 		res = [[NSCustomTouchBarItem alloc] initWithIdentifier:identifier];
 		res.view = [NSButton buttonWithImage:favoritesProjectsImage target:nil action:@selector(openFavorites:)];
 		res.visibilityPriority = NSTouchBarItemPriorityNormal;
+		res.customizationLabel = @"Favorite Projects";
 	}
 	return res;
 }
