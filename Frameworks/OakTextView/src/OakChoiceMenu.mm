@@ -34,7 +34,8 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 - (void)dealloc
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
-	self.window = nil;
+	[_window close];
+	_window = nil;
 }
 
 - (void)sizeToFit
