@@ -1,5 +1,5 @@
 #import "Keys.h"
-#import <OakAppKit/OakTabBarView.h>
+#import <OakTabBarView/OakTabBarView.h>
 #import <BundlesManager/BundlesManager.h>
 
 static NSArray* default_environment ()

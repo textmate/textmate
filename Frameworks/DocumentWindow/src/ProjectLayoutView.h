@@ -1,4 +1,4 @@
-#import <OakAppKit/OakTabBarView.h>
+#import <OakTabBarView/OakTabBarView.h>
 
 @interface ProjectLayoutView : NSView
 @property (nonatomic) OakTabBarView* tabBarView;

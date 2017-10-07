@@ -1,10 +1,10 @@
 #import "OakTabBarView.h"
 #import "OakTabItemView.h"
-#import "OakRolloverButton.h"
-#import "OakFileIconImage.h"
-#import "OakAppKit.h"
-#import "NSImage Additions.h"
-#import "NSMenuItem Additions.h"
+#import <OakAppKit/OakRolloverButton.h>
+#import <OakAppKit/OakFileIconImage.h>
+#import <OakAppKit/OakAppKit.h>
+#import <OakAppKit/NSImage Additions.h>
+#import <OakAppKit/NSMenuItem Additions.h>
 #import <OakFoundation/OakFoundation.h>
 #import <oak/debug.h>
 

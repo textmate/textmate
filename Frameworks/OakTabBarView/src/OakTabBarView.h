@@ -1,4 +1,4 @@
-#import "OakUIConstructionFunctions.h"
+#import <OakAppKit/OakUIConstructionFunctions.h>
 #import <oak/debug.h>
 
 PUBLIC extern NSString* const kUserDefaultsDisableTabBarCollapsingKey;

@@ -1,4 +1,4 @@
-#import "OakUIConstructionFunctions.h"
+#import <OakAppKit/OakUIConstructionFunctions.h>
 #import <oak/misc.h>
 
 @class OakRolloverButton;

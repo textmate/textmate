@@ -1,7 +1,7 @@
 #import "OFBHeaderView.h"
 #import <OakAppKit/OakAppKit.h>
-#import <OakAppKit/OakTabItemView.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
+#import <OakTabBarView/OakTabItemView.h>
 #import <Preferences/Keys.h>
 
 static NSButton* OakCreateImageButton (NSString* imageName)

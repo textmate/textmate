@@ -1,0 +1,6 @@
+SOURCES      = src/*.mm
+CP_Resources = gfx/*.png
+TEST_SOURCES = tests/gui_*.mm
+LINK        += OakFoundation OakAppKit
+EXPORT       = src/*.h
+FRAMEWORKS   = Cocoa

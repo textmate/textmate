@@ -1,6 +1,6 @@
 #import "OakTabItemView.h"
-#import "OakRolloverButton.h"
-#import "NSImage Additions.h"
+#import <OakAppKit/OakRolloverButton.h>
+#import <OakAppKit/NSImage Additions.h>
 
 static NSString* kUserDefaultsTabItemMinWidthKey       = @"tabItemMinWidth";
 static NSString* kUserDefaultsTabItemMaxWidthKey       = @"tabItemMaxWidth";
