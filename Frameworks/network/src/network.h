@@ -5,7 +5,7 @@
 #include "download.h"
 #include "filter_save.h"
 #include "filter_check_signature.h"
-#include "filter_etag.h"
+#include "filter_header.h"
 #include <oak/misc.h>
 
 namespace network

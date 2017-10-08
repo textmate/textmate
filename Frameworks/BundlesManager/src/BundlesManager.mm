@@ -683,12 +683,12 @@ namespace
 	{
 		network::check_signature_t validator(keyChain, kHTTPSigneeHeader, kHTTPSignatureHeader);
 		network::save_t archiver(false);
-		etag_t collect_etag;
+		network::header_t collect_etag("etag");
 
 		std::string error = NULL_STR;
 		long res = network::download(network::request_t(url, &validator, &archiver, &collect_etag, NULL).set_entity_tag(etag), &error);
 		if(res == 200)
-			return { archiver.path, collect_etag.etag };
+			return { archiver.path, collect_etag.value() };
 		else if(res == 304) // Not modified
 			path::remove(archiver.path);
 		else if(res != 0)

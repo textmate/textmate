@@ -9,7 +9,7 @@ namespace bundles_db
 	{
 		network::check_signature_t validator(keyChain, kHTTPSigneeHeader, kHTTPSignatureHeader);
 		network::save_t archiver(false);
-		etag_t collect_etag;
+		network::header_t collect_etag("etag");
 
 		std::string error = NULL_STR;
 		long res = network::download(network::request_t(url, &validator, &archiver, &collect_etag, nullptr).set_entity_tag(etag ? *etag : NULL_STR).update_progress_variable(progress, min, max), &error);
@@ -20,7 +20,7 @@ namespace bundles_db
 		else if(res == 200)
 		{
 			if(etag)
-				*etag = collect_etag.etag;
+				*etag = collect_etag.value();
 			return archiver.path;
 		}
 		else
