@@ -339,7 +339,8 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 	if(err == NULL_STR)
 	{
 		self.downloadWindow.activityText = @"Relaunching…";
-		oak::application_t::relaunch();
+		NSString* args = [NSString stringWithFormat:@"-disableSessionRestore NO -didUpdateFrom '%@'", [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"]];
+		oak::application_t::relaunch([args UTF8String]);
 	}
 	else
 	{
