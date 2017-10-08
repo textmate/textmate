@@ -105,12 +105,12 @@ namespace oak
 		return "???";
 	}
 
-	void application_t::relaunch ()
+	void application_t::relaunch (char const* args)
 	{
 		ASSERT(_app_path != NULL_STR);
 		D(DBF_Application, bug("%s\n", _app_path.c_str()););
-		std::string script = text::format("{ kill %1$d; while ps -xp %1$d; do if (( ++n == 300 )); then exit; fi; sleep .2; done; open '%2$s' --args -disableSessionRestore NO; } &>/dev/null &", getpid(), _app_path.c_str());
-		io::exec("/bin/sh", "-c", script.c_str(), nullptr);
+		std::string script = text::format("{ kill %1$d; while ps -xp %1$d; do if (( ++n == 300 )); then exit; fi; sleep .2; done; open \"$0\" --args $1; } &>/dev/null &", getpid());
+		io::exec("/bin/sh", "-c", script.c_str(), _app_path.c_str(), args, nullptr);
 	}
 
 } /* oak */
