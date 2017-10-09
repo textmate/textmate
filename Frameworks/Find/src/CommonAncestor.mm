@@ -23,7 +23,7 @@ static NSString* helper (NSArray<NSString*>* paths)
 			pathSeparatorIndex = i;
 	}
 
-	return paths.firstObject;
+	return pathSeparatorIndex ? [paths.firstObject substringToIndex:pathSeparatorIndex] : @"/";
 }
 
 NSString* CommonAncestor (NSArray<NSString*>* paths)
