@@ -210,7 +210,7 @@ static char const* kOakMenuItemTabTrigger    = "OakMenuItemTabTrigger";
 
 - (void)setDynamicTitle:(NSString*)plainTitle
 {
-	if(self.userKeyEquivalent && ![self.userKeyEquivalent isEqualToString:@""])
+	if(OakNotEmptyString(self.userKeyEquivalent))
 	{
 		NSString* title = plainTitle;
 		plainTitle = self.title;
