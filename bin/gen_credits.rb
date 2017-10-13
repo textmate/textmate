@@ -85,6 +85,11 @@ class GitHubLookup
     request = Net::HTTP::Get.new(uri.request_uri, {'User-Agent' => 'curl'})
     response = http.request(request)
 
+    # we may be rate-limited
+    if response.code == '403'
+      return @db[emailhash] = nil
+    end
+
     # could be a 404, return nil if so
     if response.code == '404'
       return @db[emailhash] = nil
