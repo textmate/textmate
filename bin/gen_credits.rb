@@ -6,6 +6,7 @@
 $KCODE = 'U' if RUBY_VERSION < "1.9"
 
 require 'digest/md5'
+require 'fileutils'
 require 'net/https'
 require 'uri'
 require 'cgi'
@@ -21,7 +22,8 @@ require 'set'
 class GitHubLookup
 
   def self.initialize(dbm_file)
-    @db = DBM.new(dbm_file)
+    FileUtils.mkdir_p(File.dirname(dbm_file))
+    @db = DBM.new(dbm_file, 0644, DBM::WRCREAT)
     # seed with some contributors that don't have an email
     # address assigned publicly in their account
     @db['1178ce2f664a6cee9a05a3e11af5d8d2'] = 'aaronbrethorst'
@@ -82,6 +84,11 @@ class GitHubLookup
     # issue request
     request = Net::HTTP::Get.new(uri.request_uri, {'User-Agent' => 'curl'})
     response = http.request(request)
+
+    # we may be rate-limited
+    if response.code == '403'
+      return @db[emailhash] = nil
+    end
 
     # could be a 404, return nil if so
     if response.code == '404'
