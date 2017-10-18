@@ -1567,8 +1567,8 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 				{
 					__weak OakDocument* weakSelf = self;
 					_scmInfo->push_callback(^(scm::info_t const& info){
-						weakSelf.scmStatus    = info.status(to_s(weakSelf.path));
-						weakSelf.scmVariables = info.scm_variables();
+						[weakSelf setScmStatus:info.status(to_s(weakSelf.path))];
+						[weakSelf setScmVariables:info.scm_variables()];
 					});
 				}
 			});

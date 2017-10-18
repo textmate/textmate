@@ -131,7 +131,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 
 		self.clientPortName = someOptions[kOakCommitWindowClientPortName];
 		[self parseArguments:someOptions[kOakCommitWindowArguments]];
-		self.environment = convert(someOptions[kOakCommitWindowEnvironment]);
+		[self setEnvironment:convert(someOptions[kOakCommitWindowEnvironment])];
 
 		// send all diffs to a separate window
 		_environment["TM_PROJECT_UUID"] = to_s(oak::uuid_t().generate());
