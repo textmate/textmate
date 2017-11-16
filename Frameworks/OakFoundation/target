@@ -1,4 +1,4 @@
 SOURCES      = src/*.mm
-LINK        += io text
+LINK        += io text ns
 EXPORT       = src/*.h
 FRAMEWORKS   = Cocoa
