@@ -21,7 +21,7 @@
 @property (nonatomic) OakDocumentView*     documentView;
 @property (nonatomic) BundleGrammar*       grammar;
 
-@property (nonatomic) void(^callback)(SelectGrammarResponse, BundleGrammar*);
+@property (nonatomic, strong) void(^callback)(SelectGrammarResponse, BundleGrammar*);
 @end
 
 static NSButton* OakSmallButton (NSString* title, SEL action, id target, NSInteger tag)
