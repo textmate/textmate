@@ -24,9 +24,9 @@ static void get_key_path (plist::dictionary_t const& plist, std::string const& s
 	font_size = read_font_size(temp_str);
 }
 
-static CGColorPtr OakColorCreateFromThemeColor (theme_t::color_info_t const& color, CGColorSpaceRef colorspace)
+static CGColorPtr OakColorCreateFromThemeColorOrDefault (theme_t::color_info_t const& color, CGColorSpaceRef colorspace, CGColorPtr default_color)
 {
-	return color.is_blank() ? CGColorPtr() : CGColorPtr(CGColorCreate(colorspace, (CGFloat[4]){ color.red, color.green, color.blue, color.alpha }), CGColorRelease);
+	return color.is_blank() ? default_color : CGColorPtr(CGColorCreate(colorspace, (CGFloat[4]){ color.red, color.green, color.blue, color.alpha }), CGColorRelease);
 }
 
 static bool color_is_dark (CGColorRef const color)
@@ -276,9 +276,17 @@ void theme_t::shared_styles_t::setup_styles ()
 	// =======================================
 
 	// We assume that the first style is the unscoped root style
+	if(!_styles.empty())
+	{
+		_foreground = OakColorCreateFromThemeColorOrDefault(_styles[0].foreground, _color_space, CGColorPtr(CGColorCreate(_color_space, (CGFloat[4]){ 1, 1, 1, 1 }), CGColorRelease));
+		_background = OakColorCreateFromThemeColorOrDefault(_styles[0].background, _color_space, CGColorPtr(CGColorCreate(_color_space, (CGFloat[4]){ 0, 0, 0, 1 }), CGColorRelease));
+	}
+	else
+	{
+		_foreground = CGColorPtr(CGColorCreate(_color_space, (CGFloat[4]){ 1, 1, 1, 1 }), CGColorRelease);
+		_background = CGColorPtr(CGColorCreate(_color_space, (CGFloat[4]){ 0, 0, 0, 1 }), CGColorRelease);
+	}
 
-	_foreground     = (_styles.empty() ? CGColorPtr() : OakColorCreateFromThemeColor(_styles[0].foreground, _color_space)) ?: CGColorPtr(CGColorCreate(_color_space, (CGFloat[4]){ 1, 1, 1, 1 }), CGColorRelease);
-	_background     = (_styles.empty() ? CGColorPtr() : OakColorCreateFromThemeColor(_styles[0].background, _color_space)) ?: CGColorPtr(CGColorCreate(_color_space, (CGFloat[4]){ 0, 0, 0, 1 }), CGColorRelease);
 	_is_dark        = color_is_dark(_background.get());
 	_is_transparent = CGColorGetAlpha(_background.get()) < 1;
 
@@ -318,7 +326,7 @@ void theme_t::shared_styles_t::setup_styles ()
 			{
 				if(_gutter_styles.*(gutterKey.field))
 					CGColorRelease(_gutter_styles.*(gutterKey.field));
-				_gutter_styles.*(gutterKey.field) = CGColorRetain(OakColorCreateFromThemeColor(color, _color_space).get());
+				_gutter_styles.*(gutterKey.field) = CGColorRetain(OakColorCreateFromThemeColorOrDefault(color, _color_space, nullptr).get());
 			}
 		}
 	}
@@ -412,10 +420,10 @@ styles_t const& theme_t::styles_for_scope (scope::scope_t const& scope) const
 				font.reset(newFont, CFRelease);
 		}
 
-		CGColorPtr foreground = OakColorCreateFromThemeColor(base.foreground, _styles->_color_space) ?: CGColorPtr(CGColorCreate(_styles->_color_space, (CGFloat[4]){   0,   0,   0,   1 }), CGColorRelease);
-		CGColorPtr background = OakColorCreateFromThemeColor(base.background, _styles->_color_space) ?: CGColorPtr(CGColorCreate(_styles->_color_space, (CGFloat[4]){   1,   1,   1,   1 }), CGColorRelease);
-		CGColorPtr caret      = OakColorCreateFromThemeColor(base.caret,      _styles->_color_space) ?: CGColorPtr(CGColorCreate(_styles->_color_space, (CGFloat[4]){   0,   0,   0,   1 }), CGColorRelease);
-		CGColorPtr selection  = OakColorCreateFromThemeColor(base.selection,  _styles->_color_space) ?: CGColorPtr(CGColorCreate(_styles->_color_space, (CGFloat[4]){ 0.5, 0.5, 0.5,   1 }), CGColorRelease);
+		CGColorPtr foreground = OakColorCreateFromThemeColorOrDefault(base.foreground, _styles->_color_space, CGColorPtr(CGColorCreate(_styles->_color_space, (CGFloat[4]){   0,   0,   0,   1 }), CGColorRelease));
+		CGColorPtr background = OakColorCreateFromThemeColorOrDefault(base.background, _styles->_color_space, CGColorPtr(CGColorCreate(_styles->_color_space, (CGFloat[4]){   1,   1,   1,   1 }), CGColorRelease));
+		CGColorPtr caret      = OakColorCreateFromThemeColorOrDefault(base.caret,      _styles->_color_space, CGColorPtr(CGColorCreate(_styles->_color_space, (CGFloat[4]){   0,   0,   0,   1 }), CGColorRelease));
+		CGColorPtr selection  = OakColorCreateFromThemeColorOrDefault(base.selection,  _styles->_color_space, CGColorPtr(CGColorCreate(_styles->_color_space, (CGFloat[4]){ 0.5, 0.5, 0.5,   1 }), CGColorRelease));
 
 		styles_t res(foreground, background, caret, selection, font, base.underlined == bool_true, base.strikethrough == bool_true, base.misspelled == bool_true);
 		styles = _cache.insert(std::make_pair(scope, res)).first;
