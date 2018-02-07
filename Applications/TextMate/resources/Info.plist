@@ -264,6 +264,18 @@
 		</dict>
 		<dict>
 			<key>CFBundleTypeIconFile</key>
+			<string>Blank</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>org.dlang.d</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeIconFile</key>
 			<string>Diff</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
@@ -1239,7 +1251,6 @@
 			<array>
 				<string>g</string>
 				<string>vss</string>
-				<string>d</string>
 				<string>e</string>
 				<string>go</string>
 				<string>gri</string>
@@ -1702,6 +1713,28 @@
 				</array>
 				<key>public.mime-type</key>
 				<string>text/css</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.source-code</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>D source</string>
+			<key>UTTypeIconFile</key>
+			<string>D</string>
+			<key>UTTypeIdentifier</key>
+			<string>org.dlang.d</string>
+			<key>UTTypeReferenceURL</key>
+			<string>https://dlang.org</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>d</string>
+					<string>di</string>
+				</array>
 			</dict>
 		</dict>
 		<dict>
