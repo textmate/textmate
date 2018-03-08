@@ -216,7 +216,7 @@ namespace oak
 				out->emplace_back(0, filter.size());
 			return 1;
 		}
-		return calculate_rank(filter, candidate, out);
+		return filter.size() * candidate.size() > 8096 ? filter.size() / candidate.size() : calculate_rank(filter, candidate, out);
 	}
 
 } /* oak */
