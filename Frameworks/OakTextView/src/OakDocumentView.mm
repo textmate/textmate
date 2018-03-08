@@ -86,6 +86,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 		[gutterView insertColumnWithIdentifier:kFoldingsColumnIdentifier atPosition:2 dataSource:self delegate:self];
 		if([[NSUserDefaults standardUserDefaults] boolForKey:@"DocumentView Disable Line Numbers"])
 			[gutterView setVisibility:NO forColumnWithIdentifier:GVLineNumbersColumnIdentifier];
+		[gutterView setVisibility:NO forColumnWithIdentifier:GVDiffLineNumbersColumnIdentifier];
 		[gutterView setTranslatesAutoresizingMaskIntoConstraints:NO];
 
 		gutterScrollView = [[OakDisableAccessibilityScrollView alloc] initWithFrame:NSZeroRect];
@@ -293,6 +294,12 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	{
 		_statusBar.softTabs = self.document.softTabs;
 	}
+	else if([aKeyPath isEqualToString:@"diffBuffer"])
+	{
+		BOOL isVisibleFlag = [gutterView visibilityForColumnWithIdentifier:GVLineNumbersColumnIdentifier];
+		[gutterView setVisibility:(isVisibleFlag && self.document.diffEnabled) forColumnWithIdentifier:GVDiffLineNumbersColumnIdentifier];
+		[_textView setNeedsDisplay:YES];
+	}
 }
 
 - (void)dealloc
@@ -307,7 +314,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 
 - (void)setDocument:(OakDocument*)aDocument
 {
-	NSArray* const documentKeys = @[ @"fileType", @"tabSize", @"softTabs" ];
+	NSArray* const documentKeys = @[ @"fileType", @"tabSize", @"softTabs", @"diffBuffer" ];
 
 	OakDocument* oldDocument = self.document;
 	if(oldDocument)
@@ -387,6 +394,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	D(DBF_OakDocumentView, bug("show line numbers %s\n", BSTR([gutterView visibilityForColumnWithIdentifier:GVLineNumbersColumnIdentifier])););
 	BOOL isVisibleFlag = ![gutterView visibilityForColumnWithIdentifier:GVLineNumbersColumnIdentifier];
 	[gutterView setVisibility:isVisibleFlag forColumnWithIdentifier:GVLineNumbersColumnIdentifier];
+	[gutterView setVisibility:(isVisibleFlag && self.document.diffEnabled) forColumnWithIdentifier:GVDiffLineNumbersColumnIdentifier];
 	if(isVisibleFlag)
 			[[NSUserDefaults standardUserDefaults] removeObjectForKey:@"DocumentView Disable Line Numbers"];
 	else	[[NSUserDefaults standardUserDefaults] setObject:@YES forKey:@"DocumentView Disable Line Numbers"];
@@ -685,6 +693,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 
 - (GVLineRecord)lineRecordForPosition:(CGFloat)yPos                              { return [_textView lineRecordForPosition:yPos];               }
 - (GVLineRecord)lineFragmentForLine:(NSUInteger)aLine column:(NSUInteger)aColumn { return [_textView lineFragmentForLine:aLine column:aColumn]; }
+- (NSUInteger)maxLineNumberForPosition:(CGFloat)yPos { return [_textView maxLineNumberForPosition:yPos]; };
 
 // =========================
 // = GutterView DataSource =

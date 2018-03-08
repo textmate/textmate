@@ -81,6 +81,11 @@ namespace scm
 				res.emplace(path::join(wcPath, pair.first), pair.second);
 			return res;
 		}
+		
+		std::string content (std::string const& wcPath, std::string const& fileName, std::string const& revision) const
+		{
+			return NULL_STR;
+		}
 	};
 
 	driver_t* hg_driver () { return new hg_driver_t; }

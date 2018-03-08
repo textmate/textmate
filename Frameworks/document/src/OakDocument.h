@@ -4,6 +4,7 @@
 #import <command/parser.h>
 #import <regexp/find.h> // find::options_t
 #import <scm/scm.h>
+#import <buffer/buffer.h>
 
 PUBLIC extern NSString* OakDocumentContentDidChangeNotification;
 PUBLIC extern NSString* OakDocumentMarksDidChangeNotification;
@@ -83,6 +84,7 @@ PUBLIC @interface OakDocument : NSObject
 @property (nonatomic, getter = isDocumentEdited, readonly) BOOL documentEdited;
 @property (nonatomic, getter = isRecentTrackingDisabled)   BOOL recentTrackingDisabled;
 @property (nonatomic)                                      BOOL keepBackupFile;
+@property (nonatomic)                                      BOOL diffEnabled;
 
 // Storage for OakTextView
 @property (nonatomic) NSString* selection;
@@ -103,6 +105,8 @@ PUBLIC @interface OakDocument : NSObject
 - (BOOL)performReplacements:(std::multimap<std::pair<size_t, size_t>, std::string> const&)someReplacements checksum:(uint32_t)crc32;
 @property (nonatomic) NSString* content;
 
+- (void)diffAgainstSCMWithProjectPath:(NSString*)projectPath;
+		
 - (NSArray<BundleGrammar*>*)proposedGrammars;
 - (std::map<std::string, std::string>)variables;
 

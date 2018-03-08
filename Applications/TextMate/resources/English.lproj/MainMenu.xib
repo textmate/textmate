@@ -800,6 +800,13 @@ CA
                                     <action selector="toggleFullScreen:" target="-1" id="782"/>
                                 </connections>
                             </menuItem>
+                            <menuItem isSeparatorItem="YES" id="SkH-aW-Yk1"/>
+                            <menuItem title="Diff" keyEquivalent="D" id="SCv-aY-Lw5">
+                                <modifierMask key="keyEquivalentModifierMask" control="YES"/>
+                                <connections>
+                                    <action selector="diff:" target="-1" id="14907"/>
+                                </connections>
+                            </menuItem>
                         </items>
                     </menu>
                 </menuItem>

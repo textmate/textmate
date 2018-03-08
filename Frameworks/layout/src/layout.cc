@@ -43,7 +43,14 @@ namespace ng
 		struct parser_callback_t : ng::callback_t
 		{
 			parser_callback_t (layout_t& layout) : layout(layout) { }
-			void did_replace (size_t from, size_t to, char const* buf, size_t len) { layout.did_erase(from, to); layout.did_insert(from, from + len); }
+			void did_replace (size_t from, size_t to, char const* buf, size_t len)
+			{
+				layout.add_diff_data(from, to, buf, len);
+				layout.did_erase(from, to);
+				layout.did_insert(from, from + len);
+			}
+
+			void will_replace (size_t from, size_t to, char const* buf, size_t len) { layout.remove_diff_data(from, to, buf, len); }
 
 		private:
 			layout_t& layout;
@@ -343,28 +350,99 @@ namespace ng
 		return res;
 	}
 
-	ng::index_t layout_t::index_at_point (CGPoint point) const
+	ng::index_t layout_t::cap_in_height (size_t offset, layout_t::row_tree_t::iterator& rowIter, CGPoint point, ng::buffer_t const& buffer) const
+	{
+		CGFloat clickedY = point.y - _margin.top;
+		if(clickedY < rowIter->offset._height)
+			return offset;
+		else if(clickedY < rowIter->offset._height + rowIter->key._height)
+			return rowIter->value.index_at_point(point, *_metrics, buffer, offset, CGPointMake(_margin.left, _margin.top + rowIter->offset._height));
+		else
+			return offset + rowIter->value.length();
+	}
+
+	ng::index_t layout_t::index_at_point (CGPoint point, layout_t::direction_t hint) const
 	{
 		CGFloat clickedY = point.y - _margin.top;
 		auto rowIter = _rows.upper_bound(clickedY, &row_y_comp);
 		if(rowIter != _rows.begin())
 			--rowIter;
 
-		if(clickedY < rowIter->offset._height)
-			return rowIter->offset._length;
-		else if(clickedY < rowIter->offset._height + rowIter->key._height)
-			return rowIter->value.index_at_point(point, *_metrics, _buffer, rowIter->offset._length, CGPointMake(_margin.left, _margin.top + rowIter->offset._height));
-		else
-			return rowIter->offset._length + rowIter->key._length;
+		if(rowIter->value.is_diff_row())
+		{
+			CGFloat offsetY = rowIter->offset._height + rowIter->key._height;
+			if(hint == up)
+			{
+				// Assumption: There will always be at least one non diff row
+				// If before rowIter it will be found there, else after
+				rowIter = _rows.lower_bound(rowIter->offset._length, &row_key_comp);
+				ASSERT_NE(rowIter, _rows.end());
+				if(rowIter->value.is_diff_row())
+				{
+					rowIter = _rows.upper_bound(rowIter->offset._length, &row_key_comp);
+					ASSERT_NE(rowIter, _rows.end());
+					offsetY = rowIter->offset._height - offsetY;
+				}
+				else
+					offsetY = rowIter->offset._height + rowIter->key._height - offsetY;
+			}
+			else if(hint == down)
+			{
+				rowIter = _rows.upper_bound(rowIter->offset._length, &row_key_comp);
+				if(rowIter == _rows.end())
+				{
+					rowIter = _rows.lower_bound(rowIter->offset._length, &row_key_comp);
+					offsetY = rowIter->offset._height + rowIter->key._height - offsetY;
+				}
+				else
+					offsetY = rowIter->offset._height - offsetY;
+			}
+			else if(hint == closest)
+			{
+				auto beforeIter = _rows.lower_bound(rowIter->offset._length, &row_key_comp);
+				if(beforeIter->value.is_diff_row())
+					beforeIter = _rows.upper_bound(rowIter->offset._length, &row_key_comp);
+
+				auto afterIter = _rows.upper_bound(rowIter->offset._length, &row_key_comp);
+				CGFloat beforeY = beforeIter->offset._height + beforeIter->key._height;
+				if(afterIter == _rows.end() || clickedY - beforeY < afterIter->offset._height - clickedY )
+				{
+					offsetY = beforeIter->offset._height + beforeIter->key._height - clickedY - 1;
+					rowIter = beforeIter;
+				}
+				else
+				{
+					offsetY = afterIter->offset._height + 1 - clickedY;
+					rowIter = afterIter;
+				}
+			}
+			clickedY += offsetY;
+			point.y += offsetY;
+		}
+		return cap_in_height(rowIter->offset._length, rowIter, point, _buffer);
 	}
 
 	ng::line_record_t layout_t::line_record_for (CGFloat y) const
 	{
-		size_t index = index_at_point(CGPointMake(0, y)).index;
-		auto row = row_for_offset(index);
+		CGFloat clickedY = y - _margin.top;
+		auto row = _rows.upper_bound(clickedY, &row_y_comp);
+		if(row != _rows.begin())
+			--row;
+
 		if(row != _rows.end())
-			return row->value.line_record_for(_buffer.convert(index).line, index, *_metrics, _buffer, row->offset._length, CGPointMake(_margin.left, _margin.top + row->offset._height));
-		return ng::line_record_t(0, 0, 0, 0, 0);
+		{
+			if(row->value.is_diff_row())
+			{
+				ng::index_t index = cap_in_height(row->offset._diff_index + row->key._diff_index, row, CGPointMake(0, y), *_diff_model->_diff_buffer);
+				return row->value.line_record_for(_diff_model->_diff_buffer->convert(index.index).line, index.index, *_metrics, *_diff_model->_diff_buffer, row->offset._length, CGPointMake(_margin.left, _margin.top + row->offset._height));
+			}
+			else
+			{
+				ng::index_t index = cap_in_height(row->offset._length, row, CGPointMake(0, y), _buffer);
+				return row->value.line_record_for(_buffer.convert(index.index).line, index.index, *_metrics, _buffer, row->offset._length, CGPointMake(_margin.left, _margin.top + row->offset._height));
+			}
+		}
+		return ng::line_record_t(0, 0, 0, 0, 0, false, false);
 	}
 
 	ng::line_record_t layout_t::line_record_for (text::pos_t const& pos) const
@@ -374,7 +452,37 @@ namespace ng
 		auto row = row_for_offset(index);
 		if(row != _rows.end())
 			return row->value.line_record_for(n, index, *_metrics, _buffer, row->offset._length, CGPointMake(_margin.left, _margin.top + row->offset._height));
-		return ng::line_record_t(0, 0, 0, 0, 0);
+		return ng::line_record_t(0, 0, 0, 0, 0, false, false);
+	}
+
+	size_t layout_t::max_line_for (CGFloat y) const
+	{
+		CGFloat clickedY = y - _margin.top;
+		auto row = _rows.upper_bound(clickedY, &row_y_comp);
+		if(row != _rows.begin())
+			--row;
+		if(!diff_enabled())
+		{
+			ng::index_t index = cap_in_height(row->offset._length, row, CGPointMake(0, y), _buffer);
+			return _buffer.convert(index.index).line;
+		}
+		else
+		{
+			size_t diffLine = 0, normalLine = 0;
+			if(row->value.is_diff_row())
+			{
+				diffLine = _diff_model->_diff_buffer->convert(diff_index(row)).line;
+				auto length = row->offset._length + row->offset._length;
+				normalLine = length == 0 ? 0 : _buffer.convert(length).line - 1;
+			}
+			else
+			{
+				normalLine = _buffer.convert(row->offset._length).line;
+				auto length = diff_index(row);
+				diffLine = length == 0 ? 0 : _diff_model->_diff_buffer->convert(length).line - 1;
+			}
+			return std::max(normalLine, diffLine);
+		}
 	}
 
 	CGFloat layout_t::width () const  { return _margin.left + content_width() + _margin.right; }
@@ -387,7 +495,7 @@ namespace ng
 	bool layout_t::update_row (row_tree_t::iterator rowIter)
 	{
 		CGFloat oldHeight = rowIter->key._height;
-		rowIter->key._length = rowIter->value.length();
+		rowIter->key._length = rowIter->value.is_diff_row() ? 0 : rowIter->value.length();
 		rowIter->key._width  = rowIter->value.width();
 		rowIter->key._height = rowIter->value.height(*_metrics);
 		rowIter->key._softlines = rowIter->value.softline_count(*_metrics);
@@ -398,6 +506,14 @@ namespace ng
 
 	void layout_t::update_metrics_for_row (row_tree_t::iterator rowIter)
 	{
+		size_t length = rowIter->offset._length;
+		buffer_t const* buffer = &_buffer;
+
+		if(rowIter->value.is_diff_row())
+		{
+			length = diff_index(rowIter);
+			buffer = &*_diff_model->_diff_buffer;
+		}
 		if(rowIter->value.layout(_theme, effective_soft_wrap(rowIter), effective_wrap_column(), *_metrics, CGRectZero, _buffer, rowIter->offset._length))
 		{
 			bool didUpdateHeight = update_row(rowIter);
@@ -459,14 +575,16 @@ namespace ng
 		ASSERT_LE(from, to);
 		if(from == to)
 			return;
+		bool fullRefresh = false;
+		auto paragraph_cache = remove_old_diff_layout(from, to);
 
 		auto fromRow = row_for_offset(from);
 		auto toRow   = row_for_offset(to);
 
-		bool fullRefresh = false;
 		if(fromRow == toRow)
 		{
 			fromRow->value.erase(from, to, _buffer, fromRow->offset._length);
+			clear_diff_status(fromRow);
 			fullRefresh = update_row(fromRow) || fullRefresh;
 		}
 		else
@@ -478,10 +596,12 @@ namespace ng
 			toRow->value.insert(base, prefixLenToInsert, _buffer, base);
 			update_row(toRow);
 			_rows.erase(fromRow, toRow);
+			clear_diff_status(toRow);
 
 			repair_folds(base, base + prefixLenToInsert);
 			fullRefresh = true;
 		}
+		fullRefresh = add_new_diff_layout(from, to, paragraph_cache) || fullRefresh;
 		refresh_line_at_index(from, fullRefresh);
 	}
 
@@ -493,7 +613,9 @@ namespace ng
 			return;
 
 		bool fullRefresh = false;
+		auto paragraph_cache = remove_old_diff_layout(first, last);
 		auto row = row_for_offset(first);
+		clear_diff_status(row);
 
 		size_t suffixLen = 0;
 		if(_buffer.convert(first).line != _buffer.convert(last).line)
@@ -523,6 +645,7 @@ namespace ng
 			row->value.insert(last, suffixLen, _buffer, row->offset._length);
 			fullRefresh = update_row(row) || fullRefresh;
 		}
+		fullRefresh = add_new_diff_layout(first, last, paragraph_cache) || fullRefresh;
 
 		fullRefresh = repair_folds(first, last + suffixLen) || fullRefresh;
 
@@ -633,6 +756,14 @@ namespace ng
 		if(_refresh_counter)
 		{
 			auto row = row_for_offset(index);
+			refresh_row(row, fullRefresh);
+		}
+	}
+
+	void layout_t::refresh_row (layout_t::row_tree_t::iterator row, bool fullRefresh)
+	{
+		if(_refresh_counter)
+		{
 			CGRect lineRefreshRect = full_width(rect_for(row));
 			_dirty_rects.push_back(fullRefresh ? full_height(lineRefreshRect) : lineRefreshRect);
 		}
@@ -642,7 +773,8 @@ namespace ng
 	{
 		foreach(row, _rows.lower_bound(from, &row_offset_comp), _rows.lower_bound(to, &row_offset_comp))
 		{
-			row->value.did_update_scopes(from, to, _buffer, row->offset._length);
+			if(!row->value.is_diff_row())
+				row->value.did_update_scopes(from, to, _buffer, row->offset._length);
 			refresh_line_at_index(row->offset._length, false);
 		}
 	}
@@ -673,7 +805,7 @@ namespace ng
 	ng::index_t layout_t::index_above (ng::index_t const& index) const
 	{
 		CGRect r = rect_at_index(index);
-		ng::index_t const indexAbove = index_at_point(CGPointMake(CGRectGetMinX(r), CGRectGetMinY(r)-1));
+		ng::index_t const indexAbove = index_at_point(CGPointMake(CGRectGetMinX(r), CGRectGetMinY(r)-1), up);
 		if(_buffer.convert(index.index).line == 0)
 			return indexAbove;
 
@@ -695,7 +827,7 @@ namespace ng
 	ng::index_t layout_t::index_below (ng::index_t const& index) const
 	{
 		CGRect r = rect_at_index(index);
-		ng::index_t const indexBelow = index_at_point(CGPointMake(CGRectGetMinX(r), CGRectGetMaxY(r)));
+		ng::index_t const indexBelow = index_at_point(CGPointMake(CGRectGetMinX(r), CGRectGetMaxY(r)), down);
 		if(_buffer.convert(index.index).line+1 == _buffer.lines())
 			return indexBelow;
 
@@ -729,7 +861,7 @@ namespace ng
 	ng::index_t layout_t::page_up_for (index_t const& index) const
 	{
 		CGRect r = rect_at_index(index);
-		ng::index_t const indexPageUp = index_at_point(CGPointMake(CGRectGetMinX(r), CGRectGetMinY(r) - _viewport_size.height));
+		ng::index_t const indexPageUp = index_at_point(CGPointMake(CGRectGetMinX(r), CGRectGetMinY(r) - _viewport_size.height), up);
 		if(_buffer.convert(index.index).line == 0)
 			return indexPageUp;
 
@@ -742,7 +874,7 @@ namespace ng
 	ng::index_t layout_t::page_down_for (index_t const& index) const
 	{
 		CGRect r = rect_at_index(index);
-		ng::index_t const indexPageDown = index_at_point(CGPointMake(CGRectGetMinX(r), CGRectGetMinY(r) + _viewport_size.height));
+		ng::index_t const indexPageDown = index_at_point(CGPointMake(CGRectGetMinX(r), CGRectGetMinY(r) + _viewport_size.height), down);
 		if(_buffer.convert(index.index).line+1 == _buffer.lines())
 			return indexPageDown;
 
@@ -822,7 +954,6 @@ namespace ng
 
 		CGFloat const yMin = CGRectGetMinY(visibleRect) - _margin.top;
 		CGFloat const yMax = CGRectGetMaxY(visibleRect) - _margin.top;
-
 		auto firstY = _rows.upper_bound(yMin, &row_y_comp);
 		if(firstY != _rows.begin())
 			--firstY;
@@ -830,7 +961,10 @@ namespace ng
 		if(drawBackground)
 		{
 			foreach(row, firstY, _rows.lower_bound(yMax, &row_y_comp))
-				row->value.draw_background(_theme, *_metrics, context, isFlipped, visibleRect, background, _buffer, row->offset._length, CGPointMake(_margin.left, _margin.top + row->offset._height));
+				if(row->value.is_diff_row())
+					row->value.draw_background(_theme, *_metrics, context, isFlipped, visibleRect, background, *_diff_model->_diff_buffer, diff_index(row), CGPointMake(_margin.left, _margin.top + row->offset._height));
+				else
+					row->value.draw_background(_theme, *_metrics, context, isFlipped, visibleRect, background, _buffer, row->offset._length, CGPointMake(_margin.left, _margin.top + row->offset._height));
 		}
 
 		base_colors_t const& baseColors = get_base_colors(_theme->is_dark());
@@ -868,8 +1002,16 @@ namespace ng
 		}
 
 		foreach(row, firstY, _rows.lower_bound(yMax, &row_y_comp))
-			row->value.draw_foreground(_theme, *_metrics, context, isFlipped, visibleRect, _buffer, row->offset._length, selection, CGPointMake(_margin.left, _margin.top + row->offset._height));
-
+		{
+			if(row->value.is_diff_row())
+			{
+				row->value.draw_foreground(_theme, *_metrics, context, isFlipped, visibleRect, *_diff_model->_diff_buffer, diff_index(row), selection, CGPointMake(_margin.left, _margin.top + row->offset._height));
+			}
+			else
+			{
+				row->value.draw_foreground(_theme, *_metrics, context, isFlipped, visibleRect, _buffer, row->offset._length, selection, CGPointMake(_margin.left, _margin.top + row->offset._height));
+			}
+		}
 		if(_draw_caret && !_drop_marker)
 		{
 			for(auto const& range : selection)
@@ -936,8 +1078,9 @@ namespace ng
 		auto rowIter = _rows.upper_bound(clickedY, &row_y_comp);
 		if(rowIter != _rows.begin())
 			--rowIter;
-
-		if(clickedY < rowIter->offset._height)
+		if(rowIter->value.is_diff_row())
+			return {};
+		else if(clickedY < rowIter->offset._height)
 			return {};
 		else if(clickedY < rowIter->offset._height + rowIter->key._height)
 			return rowIter->value.folded_range_at_point(point, *_metrics, _buffer, rowIter->offset._length, CGPointMake(_margin.left, _margin.top + rowIter->offset._height));
@@ -962,8 +1105,13 @@ namespace ng
 	std::string layout_t::to_s () const
 	{
 		std::string const buffer = _buffer.substr(0, _buffer.size());
-		return _rows.to_s([&buffer](row_tree_t::value_type info){
-			return text::format("y: %.1f-%.1f, w: %1.f, bytes: %zu-%zu\n» %s\n%s", info.offset._height, info.offset._height + info.key._height, info.key._width, info.offset._length, info.offset._length + info.key._length, buffer.substr(info.offset._length, info.key._length).c_str(), ng::to_s(info.value).c_str());
+		std::string const diffBuffer = _diff_model->_diff_buffer->substr(0, _diff_model->_diff_buffer->size());
+		return _rows.to_s([&buffer, &diffBuffer](row_tree_t::value_type info){
+			size_t diffIndex = info.key._diff_index + info.offset._diff_index;
+			std::string line = info.value.is_diff_row() ?
+				diffBuffer.substr(diffIndex, info.value.length()):
+				buffer.substr(info.offset._length, info.key._length);
+			return text::format("y: %.1f-%.1f, w: %1.f, d: %zu:%zu, bytes: %zu-%zu\n» %s\n%s", info.offset._height, info.offset._height + info.key._height, info.key._width, info.offset._diff_index, info.key._diff_index, info.offset._length, info.offset._length + info.key._length, line.c_str(), ng::to_s(info.value).c_str());
 		});
 	}
 

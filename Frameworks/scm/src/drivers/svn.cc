@@ -133,6 +133,11 @@ namespace scm
 			return res;
 		}
 
+		std::string content (std::string const& wcPath, std::string const& fileName, std::string const& revision) const
+		{
+			return NULL_STR;
+		}
+
 		bool tracks_directories () const { return true; }
 
 	private:

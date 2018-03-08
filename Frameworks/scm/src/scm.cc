@@ -29,7 +29,8 @@ namespace scm
 		std::map<std::string, std::string> const& variables () const    { return _variables; }
 		std::map<std::string, scm::status::type> const& status () const { return _status; }
 		bool tracks_directories () const                                { return _driver->tracks_directories(); }
-
+		std::string content (std::string const& fileName, std::string const& revision) { return _driver->content(_root_path, fileName, revision); }
+		
 		void add_client (info_t* client);
 		void remove_client (info_t* client);
 
@@ -111,6 +112,10 @@ namespace scm
 	bool info_t::tracks_directories () const
 	{
 		return dry() ? false : _shared_info->tracks_directories();
+	}
+
+	std::string info_t::content (std::string const& fileName, std::string const& revision) {
+		return dry() ? NULL_STR : _shared_info->content(fileName, revision);
 	}
 
 	void info_t::push_callback (void (^block)(info_t const&))

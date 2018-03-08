@@ -12,6 +12,7 @@ namespace scm
 
 		virtual std::map<std::string, std::string> variables (std::string const& wcPath) const = 0;
 		virtual status_map_t status (std::string const& wcPath) const = 0;
+		virtual std::string content (std::string const& wcPath, std::string const& fileName, std::string const& revision) const = 0;
 
 		std::string const& name () const           { return _name; }
 		virtual bool tracks_directories () const   { return false; }

@@ -27,6 +27,7 @@ namespace scm
 		std::map<std::string, std::string> scm_variables () const;
 		std::map<std::string, scm::status::type> const& status () const;
 		scm::status::type status (std::string const& path) const;
+		std::string content (std::string const& fileName, std::string const& revision);
 
 		bool tracks_directories () const;
 		void push_callback (void (^block)(info_t const&));

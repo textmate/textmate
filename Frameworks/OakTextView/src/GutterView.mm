@@ -14,6 +14,7 @@ OAK_DEBUG_VAR(GutterView);
 
 NSString* GVColumnDataSourceDidChange   = @"GVColumnDataSourceDidChange";
 NSString* GVLineNumbersColumnIdentifier = @"lineNumbers";
+NSString* GVDiffLineNumbersColumnIdentifier = @"diffNumbers";
 
 static CGFloat WidthOfLineNumbers (NSUInteger lineNumber, NSFont* font);
 
@@ -65,6 +66,7 @@ struct data_source_t
 		hiddenColumns       = [NSMutableSet new];
 		self.lineNumberFont = [NSFont userFixedPitchFontOfSize:12];
 		[self insertColumnWithIdentifier:GVLineNumbersColumnIdentifier atPosition:0 dataSource:nil delegate:nil];
+		[self insertColumnWithIdentifier:GVDiffLineNumbersColumnIdentifier atPosition:0 dataSource:nil delegate:nil];
 
 		mouseDownAtPoint     = NSMakePoint(-1, -1);
 		mouseHoveringAtPoint = NSMakePoint(-1, -1);
@@ -194,9 +196,9 @@ struct data_source_t
 	if(!self.delegate)
 		return 5;
 
-	if(identifier == [GVLineNumbersColumnIdentifier UTF8String])
+	if(identifier == [GVLineNumbersColumnIdentifier UTF8String] || identifier == [GVDiffLineNumbersColumnIdentifier UTF8String])
 	{
-		NSUInteger lastLineNumber = [self.delegate lineRecordForPosition:NSHeight([_partnerView frame])].lineNumber;
+		NSUInteger lastLineNumber = [self.delegate maxLineNumberForPosition:NSHeight([_partnerView frame])];
 		CGFloat newWidth = WidthOfLineNumbers(lastLineNumber == NSNotFound ? 0 : lastLineNumber + 1, self.lineNumberFont);
 
 		width = [self columnWithIdentifier:identifier]->width;
@@ -332,10 +334,11 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 		CGContextSetShouldAntialias((CGContextRef)[[NSGraphicsContext currentContext] graphicsPort], false);
 
 	std::pair<NSUInteger, NSUInteger> prevLine(NSNotFound, 0);
+	BOOL prevType = NO;
 	for(CGFloat y = NSMinY(aRect); y < NSMaxY(aRect); )
 	{
 		GVLineRecord record = [self.delegate lineRecordForPosition:y];
-		if(record.lastY <= y || prevLine == std::make_pair(record.lineNumber, record.softlineOffset))
+		if(record.lastY <= y || (prevLine == std::make_pair(record.lineNumber, record.softlineOffset) && prevType == record.diffRemoved))
 			break;
 		prevLine = std::make_pair(record.lineNumber, record.softlineOffset);
 
@@ -346,12 +349,27 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 		for(auto const& dataSource : [self visibleColumnDataSources])
 		{
 			NSRect columnRect = NSMakeRect(dataSource.x0, record.firstY, dataSource.width, record.lastY - record.firstY);
-			if(dataSource.identifier == GVLineNumbersColumnIdentifier.UTF8String)
+			if(dataSource.identifier == GVLineNumbersColumnIdentifier.UTF8String && !record.diffRemoved)
 			{
 				NSColor* textColor = selectedRow ? self.selectionForegroundColor : self.foregroundColor;
 				DrawText(record.softlineOffset == 0 ? std::to_string(record.lineNumber + 1) : "·", columnRect, NSMinY(columnRect) + record.baseline, self.lineNumberFont, textColor);
 			}
-			else if(record.softlineOffset == 0)
+			if(dataSource.identifier == GVLineNumbersColumnIdentifier.UTF8String && record.diffRemoved)
+			{
+				NSColor* textColor = selectedRow ? self.selectionForegroundColor : self.foregroundColor;
+				DrawText("-", columnRect, NSMinY(columnRect) + record.baseline, self.lineNumberFont, textColor);
+			}
+			else if(dataSource.identifier == GVDiffLineNumbersColumnIdentifier.UTF8String && record.diffRemoved)
+			{
+				NSColor* textColor = selectedRow ? self.selectionForegroundColor : self.foregroundColor;
+				DrawText(record.softlineOffset == 0 ? std::to_string(record.lineNumber + 1) : "·", columnRect, NSMinY(columnRect) + record.baseline, self.lineNumberFont, textColor);
+			}
+			else if(dataSource.identifier == GVDiffLineNumbersColumnIdentifier.UTF8String && record.diffAdded)
+			{
+				NSColor* textColor = selectedRow ? self.selectionForegroundColor : self.foregroundColor;
+				DrawText("+", columnRect, NSMinY(columnRect) + record.baseline, self.lineNumberFont, textColor);
+			}
+			else if(record.softlineOffset == 0 && !record.diffRemoved)
 			{
 				BOOL isHoveringRect = NSMouseInRect(mouseHoveringAtPoint, columnRect, [self isFlipped]);
 				BOOL isDownInRect   = NSMouseInRect(mouseDownAtPoint,     columnRect, [self isFlipped]);
@@ -397,6 +415,7 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 		}
 
 		y = record.lastY;
+		prevType = record.diffRemoved;
 	}
 }
 
@@ -444,7 +463,7 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 	{
 		for(auto const& dataSource : [self visibleColumnDataSources])
 		{
-			if(dataSource.identifier == [GVLineNumbersColumnIdentifier UTF8String])
+			if(dataSource.identifier == [GVLineNumbersColumnIdentifier UTF8String] || dataSource.identifier == [GVDiffLineNumbersColumnIdentifier UTF8String])
 				continue;
 
 			NSRect columnRect = NSMakeRect(dataSource.x0, record.firstY, dataSource.width, record.lastY - record.firstY);

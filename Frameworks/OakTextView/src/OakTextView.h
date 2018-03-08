@@ -48,11 +48,12 @@ PUBLIC @interface OakTextView : OakView
 @property (nonatomic, readonly) BOOL                        hasSelection;
 @property (nonatomic) NSString*                             selectionString;
 @property (nonatomic, readonly) NSString*                   symbol;
-
+@property (nonatomic, readonly) BOOL                        isDiffActive;
 @property (nonatomic, getter = isRecordingMacro) BOOL       recordingMacro;
 
 - (GVLineRecord)lineRecordForPosition:(CGFloat)yPos;
 - (GVLineRecord)lineFragmentForLine:(NSUInteger)aLine column:(NSUInteger)aColumn;
+- (NSUInteger)maxLineNumberForPosition:(CGFloat)yPos;
 
 - (BOOL)filterDocumentThroughCommand:(NSString*)commandString input:(input::type)inputUnit output:(output::type)outputUnit;
 
