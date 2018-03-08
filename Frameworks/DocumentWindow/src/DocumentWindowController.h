@@ -2,7 +2,7 @@
 
 @class OakDocument;
 
-PUBLIC @interface DocumentWindowController : NSResponder
+PUBLIC @interface DocumentWindowController : NSObject
 @property (nonatomic) NSWindow*                                  window;
 
 @property (nonatomic) NSUUID*                                    identifier;
