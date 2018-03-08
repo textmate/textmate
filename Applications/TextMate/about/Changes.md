@@ -2,6 +2,14 @@ Title: Release Notes
 
 # Changes
 
+## 2018-03-08 (v2.0-rc.8)
+
+* You can now set `tabTitle` in `.tm_properties` to change the title of tabs (defaults to `$TM_DISPLAYNAME`) *[Jake Kirshner]*
+* Holding option (⌥) when showing the file browser’s context menu will change “Copy «file»” to “Copy «file» as Pathname”. *[Ronald Wampler]*
+* Bundle commands that show untrusted content in the HTML output window can now set `disableJavaScriptAPI` to `true` in their `tmCommand` property list to disable the JavaScript API normally exposed in the HTML output window. This is set for _HTML → Show Preview_.
+* Added some new format string transformations, [see this commit for details](https://github.com/textmate/textmate/commit/107a56e12dcd074ae62898548dd22e7487f7e859). Though this build does not support `dirname` nor `basename`.
+* See [all changes since v2.0-rc.5](https://github.com/textmate/textmate/compare/v2.0-rc.5...v2.0-rc.8)
+
 ## 2016-12-03 (v2.0-rc.5)
 
 * Fix slowdown when editing files on high-latency file systems.
