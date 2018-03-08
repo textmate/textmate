@@ -609,9 +609,6 @@ BOOL HasDocumentWindow (NSArray* windows)
 	if([NSWindow respondsToSelector:@selector(setAllowsAutomaticWindowTabbing:)]) // MAC_OS_X_VERSION_10_12
 		NSWindow.allowsAutomaticWindowTabbing = NO;
 
-	if([NSApp respondsToSelector:@selector(setAutomaticCustomizeTouchBarMenuItemEnabled)]) // MAC_OS_X_VERSION_10_12_1
-		NSApp.automaticCustomizeTouchBarMenuItemEnabled = YES;
-
 	if(!HasDocumentWindow([NSApp orderedWindows]))
 	{
 		BOOL disableUntitledAtStartupPrefs = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableNewDocumentAtStartupKey];

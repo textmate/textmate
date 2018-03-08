@@ -82,7 +82,7 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 }
 @end
 
-@interface DocumentWindowController () <NSWindowDelegate, NSTouchBarDelegate, OakTabBarViewDelegate, OakTabBarViewDataSource, OakTextViewDelegate, OakFileBrowserDelegate, QLPreviewPanelDelegate, QLPreviewPanelDataSource>
+@interface DocumentWindowController () <NSWindowDelegate, OakTabBarViewDelegate, OakTabBarViewDataSource, OakTextViewDelegate, OakFileBrowserDelegate, QLPreviewPanelDelegate, QLPreviewPanelDataSource>
 {
 	OBJC_WATCH_LEAKS(DocumentWindowController);
 
@@ -111,8 +111,6 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 @property (nonatomic) HTMLOutputWindowController* htmlOutputWindowController;
 @property (nonatomic) OakHTMLOutputView*          htmlOutputView;
 @property (nonatomic) BOOL                        htmlOutputInWindow;
-
-@property (nonatomic) NSSegmentedControl*         previousNextTouchBarControl;
 
 @property (nonatomic) NSString*                   projectPath;
 
@@ -1494,7 +1492,6 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		[self.tabBarView reloadData];
 
 	[self updateFileBrowserStatus:self];
-	[self updateTouchBarButtons];
 	[[self class] scheduleSessionBackup:self];
 }
 
@@ -2278,90 +2275,6 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	}
 
 	return active;
-}
-
-// =============
-// = Touch Bar =
-// =============
-
-static NSTouchBarItemIdentifier kTouchBarTabNavigationIdentifier = @"com.macromates.TextMate.touch-bar.tab-navigation";
-static NSTouchBarItemIdentifier kTouchBarNewTabItemIdentifier    = @"com.macromates.TextMate.touch-bar.new-tab";
-static NSTouchBarItemIdentifier kTouchBarQuickOpenItemIdentifier = @"com.macromates.TextMate.touch-bar.quick-open";
-static NSTouchBarItemIdentifier kTouchBarFindItemIdentifier      = @"com.macromates.TextMate.touch-bar.find";
-static NSTouchBarItemIdentifier kTouchBarFavoritesItemIdentifier = @"com.macromates.TextMate.touch-bar.favorites";
-
-- (NSTouchBar*)makeTouchBar
-{
-	NSTouchBar* bar = [[NSTouchBar alloc] init];
-	bar.delegate = self;
-	bar.defaultItemIdentifiers = @[
-		kTouchBarTabNavigationIdentifier,
-		kTouchBarNewTabItemIdentifier,
-		kTouchBarQuickOpenItemIdentifier,
-		NSTouchBarItemIdentifierFlexibleSpace,
-		kTouchBarFindItemIdentifier,
-		kTouchBarFavoritesItemIdentifier,
-	];
-	return bar;
-}
-
-- (void)updateTouchBarButtons
-{
-	_previousNextTouchBarControl.enabled = _documents.count > 1;
-}
-
-- (NSTouchBarItem*)touchBar:(NSTouchBar*)touchBar makeItemForIdentifier:(NSTouchBarItemIdentifier)identifier
-{
-	NSCustomTouchBarItem* res;
-	if([identifier isEqualToString:kTouchBarTabNavigationIdentifier])
-	{
-		if(!_previousNextTouchBarControl)
-		{
-			_previousNextTouchBarControl = [NSSegmentedControl segmentedControlWithImages:@[ [NSImage imageNamed:NSImageNameTouchBarGoBackTemplate], [NSImage imageNamed:NSImageNameTouchBarGoForwardTemplate] ] trackingMode:NSSegmentSwitchTrackingMomentary target:self action:@selector(didClickPreviousNextTouchBarControl:)];
-			_previousNextTouchBarControl.segmentStyle = NSSegmentStyleSeparated;
-			_previousNextTouchBarControl.enabled      = _documents.count > 1;
-		}
-
-		res = [[NSCustomTouchBarItem alloc] initWithIdentifier:identifier];
-		res.view = _previousNextTouchBarControl;
-	}
-	else if([identifier isEqualToString:kTouchBarNewTabItemIdentifier])
-	{
-		res = [[NSCustomTouchBarItem alloc] initWithIdentifier:identifier];
-		res.view = [NSButton buttonWithImage:[NSImage imageNamed:@"TouchBarNewTabTemplate"] target:self action:@selector(newDocumentInTab:)];
-		res.visibilityPriority = NSTouchBarItemPriorityNormal;
-	}
-	else if([identifier isEqualToString:kTouchBarQuickOpenItemIdentifier])
-	{
-		res = [[NSCustomTouchBarItem alloc] initWithIdentifier:identifier];
-		res.view = [NSButton buttonWithImage:[NSImage imageNamed:@"TouchBarQuickOpenTemplate"] target:self action:@selector(goToFile:)];
-		res.visibilityPriority = NSTouchBarItemPriorityNormal;
-	}
-	else if([identifier isEqualToString:kTouchBarFindItemIdentifier])
-	{
-		NSButton* findInProjectButton = [NSButton buttonWithImage:[NSImage imageNamed:NSImageNameTouchBarSearchTemplate] target:self action:@selector(orderFrontFindPanel:)];
-		findInProjectButton.tag = find_tags::in_project;
-
-		res = [[NSCustomTouchBarItem alloc] initWithIdentifier:identifier];
-		res.view = findInProjectButton;
-		res.visibilityPriority = NSTouchBarItemPriorityNormal;
-	}
-	else if([identifier isEqualToString:kTouchBarFavoritesItemIdentifier])
-	{
-		res = [[NSCustomTouchBarItem alloc] initWithIdentifier:identifier];
-		res.view = [NSButton buttonWithImage:[NSImage imageNamed:NSImageNameTouchBarBookmarksTemplate] target:nil action:@selector(openFavorites:)];
-		res.visibilityPriority = NSTouchBarItemPriorityNormal;
-	}
-	return res;
-}
-
-- (void)didClickPreviousNextTouchBarControl:(NSSegmentedControl*)control
-{
-	switch(control.selectedSegment)
-	{
-		case 0: [self selectPreviousTab:control]; break;
-		case 1: [self selectNextTab:control];     break;
-	}
 }
 
 // =============
