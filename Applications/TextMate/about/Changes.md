@@ -2,6 +2,11 @@ Title: Release Notes
 
 # Changes
 
+## 2018-04-02 (v2.0-rc.9)
+
+* TextMate’s QuickLook plug-in no longer claims `public.data` (files without extension). The idea was to support previewing files like `README` but a side-effect was that TextMate’s QuickLook plug-in became responsible for generating thumbnails for all binary files without a dedicated QuickLook plug-in (e.g. disk images or zip archives). There appears to be no way to dynamically opt out of thumbnail generation, therefor we’ve had to remove support for previewing files without extension.
+* See [all changes since v2.0-rc.8](https://github.com/textmate/textmate/compare/v2.0-rc.8...v2.0-rc.9)
+
 ## 2018-03-08 (v2.0-rc.8)
 
 * You can now set `tabTitle` in `.tm_properties` to change the title of tabs (defaults to `$TM_DISPLAYNAME`) *[Jake Kirshner]*
