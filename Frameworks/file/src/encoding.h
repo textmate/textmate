@@ -3,6 +3,7 @@
 
 #include "bytes.h"
 #include <oak/oak.h>
+#include <text/case.h>
 
 PUBLIC extern std::string const kCharsetNoEncoding;
 PUBLIC extern std::string const kCharsetASCII;
@@ -46,7 +47,7 @@ namespace encoding
 		std::string const& charset () const  { return _charset; }
 
 		void set_newlines (std::string const& newlines) { _newlines = newlines; }
-		void set_charset (std::string const& charset)   { _charset = charset; }
+		void set_charset (std::string const& charset)   { _charset = text::uppercase(charset); }
 
 	private:
 		std::string _newlines = NULL_STR;
