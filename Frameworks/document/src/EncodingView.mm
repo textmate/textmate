@@ -200,6 +200,7 @@ static NSTextView* MyCreateTextView ()
 
 		self.scrollView.hasVerticalScroller   = YES;
 		self.scrollView.hasHorizontalScroller = YES;
+		self.scrollView.autohidesScrollers    = YES;
 		self.scrollView.borderType            = NSBezelBorder;
 		self.scrollView.documentView          = self.textView;
 

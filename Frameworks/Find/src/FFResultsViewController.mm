@@ -319,6 +319,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		_scrollView = [[NSScrollView alloc] initWithFrame:NSZeroRect];
 		_scrollView.hasVerticalScroller   = YES;
 		_scrollView.hasHorizontalScroller = NO;
+		_scrollView.autohidesScrollers    = YES;
 		_scrollView.borderType            = NSNoBorder;
 		_scrollView.documentView          = _outlineView;
 
