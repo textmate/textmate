@@ -63,6 +63,19 @@ NSUInteger const OakMoveNoActionReturn = 3;
 				row = (row + numberOfRows) % numberOfRows;
 		else	row = oak::cap((NSInteger)0, row, numberOfRows - 1);
 
+		if([_tableView.delegate respondsToSelector:@selector(tableView:shouldSelectRow:)])
+		{
+			while(0 <= row && row < numberOfRows)
+			{
+				if([_tableView.delegate tableView:_tableView shouldSelectRow:row])
+					break;
+				row += anOffset > 0 ? +1 : -1;;
+			}
+
+			if(row < 0 || row >= numberOfRows)
+				row = [_tableView selectedRow];
+		}
+
 		[_tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:extend && _tableView.allowsMultipleSelection];
 		[_tableView scrollRowToVisible:row];
 
