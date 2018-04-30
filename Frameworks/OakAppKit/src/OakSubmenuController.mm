@@ -39,6 +39,11 @@ OAK_DEBUG_VAR(OakSubmenuController);
 	[marksMenu setDelegate:self];
 }
 
+- (BOOL)isSelectTabMenu:(NSMenu*)aMenu
+{
+	return [aMenu.title isEqualToString:@"Select Tab"];
+}
+
 - (void)updateMenu:(NSMenu*)aMenu withSelector:(SEL)aSelector
 {
 	[aMenu removeAllItems];
@@ -50,14 +55,14 @@ OAK_DEBUG_VAR(OakSubmenuController);
 
 - (void)menuNeedsUpdate:(NSMenu*)aMenu
 {
-	[self updateMenu:aMenu withSelector:aMenu == selectTabMenu ? @selector(updateSelectTabMenu:) : @selector(updateBookmarksMenu:)];
+	[self updateMenu:aMenu withSelector:[self isSelectTabMenu:aMenu] ? @selector(updateSelectTabMenu:) : @selector(updateBookmarksMenu:)];
 }
 
 - (BOOL)menuHasKeyEquivalent:(NSMenu*)aMenu forEvent:(NSEvent*)anEvent target:(id*)anId action:(SEL*)aSEL
 {
 	D(DBF_OakSubmenuController, bug("%s %s\n", to_s(anEvent).c_str(), [[aMenu description] UTF8String]););
 
-	if(aMenu != selectTabMenu)
+	if(![self isSelectTabMenu:aMenu])
 		return NO;
 
 	std::string const eventString = to_s(anEvent);
