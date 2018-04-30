@@ -12,6 +12,6 @@
                 <outlet property="delegate" destination="455" id="456"/>
             </connections>
         </customObject>
-        <customObject id="455" customClass="ApplicationController"/>
+        <customObject id="455" customClass="AppDelegate"/>
     </objects>
 </document>

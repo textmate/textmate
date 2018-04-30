@@ -1,11 +1,11 @@
-#import "ApplicationController.h"
+#import "AppDelegate.h"
 #import <MenuBuilder/MenuBuilder.h>
 
-@interface ApplicationController () <NSApplicationDelegate, NSWindowDelegate>
+@interface AppDelegate () <NSApplicationDelegate, NSWindowDelegate>
 @property (nonatomic) NSWindow* window;
 @end
 
-@implementation ApplicationController
+@implementation AppDelegate
 - (void)applicationWillFinishLaunching:(NSNotification*)aNotification
 {
 	MBMenu const items = {

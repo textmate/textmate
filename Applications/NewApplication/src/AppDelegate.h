@@ -1,0 +1,2 @@
+@interface AppDelegate : NSObject
+@end
