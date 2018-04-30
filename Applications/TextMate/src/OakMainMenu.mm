@@ -1,8 +1,9 @@
-#include <ns/ns.h>
-#include <bundles/bundles.h>
-#include <OakFoundation/NSString Additions.h>
-#include <BundleMenu/BundleMenu.h>
-#include <crash/info.h>
+#import "OakMainMenu.h"
+#import <ns/ns.h>
+#import <bundles/bundles.h>
+#import <OakFoundation/NSString Additions.h>
+#import <BundleMenu/BundleMenu.h>
+#import <crash/info.h>
 
 /*
 
@@ -45,12 +46,6 @@ static CGPoint MenuPosition ()
 
 	return pos;
 }
-
-@interface OakMainMenu : NSMenu
-{
-	IBOutlet NSMenuItem* bundlesMenuItem;
-}
-@end
 
 @implementation OakMainMenu
 - (BOOL)performWindowMenuAction:(SEL)anAction

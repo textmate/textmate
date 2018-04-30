@@ -1,0 +1,2 @@
+@interface OakMainMenu : NSMenu
+@end
