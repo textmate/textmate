@@ -5,6 +5,7 @@
 #import <OakAppKit/NSMenuItem Additions.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakFoundation/NSString Additions.h>
+#import <MenuBuilder/MenuBuilder.h>
 #import <bundles/bundles.h>
 #import <text/ctype.h>
 #import <ns/ns.h>
@@ -34,14 +35,6 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSObject* accessibi
 	[res setImage:image];
 	[res setImagePosition:NSImageOnly];
 	OakSetAccessibilityLabel(res, accessibilityLabel);
-	return res;
-}
-
-static NSMenuItem* OakCreateIndentMenuItem (NSString* title, SEL action, id target)
-{
-	NSMenuItem* res = [[NSMenuItem alloc] initWithTitle:title action:action keyEquivalent:@""];
-	[res setTarget:target];
-	[res setIndentationLevel:1];
 	return res;
 }
 
@@ -147,21 +140,20 @@ static NSMenuItem* OakCreateIndentMenuItem (NSString* title, SEL action, id targ
 
 - (void)setupTabSizeMenu:(id)sender
 {
-	NSMenu* tabSizeMenu = self.tabSizePopUp.menu;
-	[tabSizeMenu removeAllItems];
-	[tabSizeMenu addItemWithTitle:@"Current Indent" action:NULL keyEquivalent:@""];
-	[tabSizeMenu addItemWithTitle:@"Indent Size" action:@selector(nop:) keyEquivalent:@""];
-	for(auto size : { 2, 3, 4, 8 })
-	{
-		NSMenuItem* item = OakCreateIndentMenuItem([NSString stringWithFormat:@"%d", size], @selector(takeTabSizeFrom:), self.target);
-		[item setTag:size];
-		[tabSizeMenu addItem:item];
-	}
-	[tabSizeMenu addItem:OakCreateIndentMenuItem(@"Other…", @selector(showTabSizeSelectorPanel:), self.target)];
-	[tabSizeMenu addItem:[NSMenuItem separatorItem]];
-	[[tabSizeMenu addItemWithTitle:@"Indent Using" action:@selector(nop:) keyEquivalent:@""] setTarget:self.target];
-	[tabSizeMenu addItem:OakCreateIndentMenuItem(@"Tabs", @selector(setIndentWithTabs:), self.target)];
-	[tabSizeMenu addItem:OakCreateIndentMenuItem(@"Spaces", @selector(setIndentWithSpaces:), self.target)];
+	MBMenu const items = {
+		{ @"Current Indent" },
+		{ @"Indent Size",  @selector(nop:) },
+		{ @"2",            @selector(takeTabSizeFrom:), .tag = 2, .target = self.target, .indent = 1 },
+		{ @"3",            @selector(takeTabSizeFrom:), .tag = 3, .target = self.target, .indent = 1 },
+		{ @"4",            @selector(takeTabSizeFrom:), .tag = 4, .target = self.target, .indent = 1 },
+		{ @"8",            @selector(takeTabSizeFrom:), .tag = 8, .target = self.target, .indent = 1 },
+		{ @"Other…",       @selector(showTabSizeSelectorPanel:),  .target = self.target, .indent = 1 },
+		{ /* -------- */ },
+		{ @"Indent Using", @selector(nop:) },
+		{ @"Tabs",         @selector(setIndentWithTabs:),         .target = self.target, .indent = 1 },
+		{ @"Spaces",       @selector(setIndentWithSpaces:),       .target = self.target, .indent = 1 },
+	};
+	self.tabSizePopUp.menu = MBCreateMenu(items);
 }
 
 - (void)setTarget:(id)newTarget

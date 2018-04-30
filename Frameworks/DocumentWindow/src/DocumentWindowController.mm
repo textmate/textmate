@@ -11,6 +11,7 @@
 #import <OakAppKit/OakFileManager.h>
 #import <OakAppKit/OakPasteboard.h>
 #import <OakAppKit/OakSavePanel.h>
+#import <MenuBuilder/MenuBuilder.h>
 #import <OakTabBarView/OakTabBarView.h>
 #import <OakFoundation/NSString Additions.h>
 #import <Preferences/Keys.h>
@@ -1649,25 +1650,17 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	}
 
 	SEL closeSingleTabSelector = tabIndex == _selectedTabIndex ? @selector(performCloseTab:) : @selector(takeTabsToCloseFrom:);
-
-	NSMenu* menu = [NSMenu new];
-	[menu addItemWithTitle:@"New Tab"                 action:@selector(takeNewTabIndexFrom:)   keyEquivalent:@""];
-	[menu addItemWithTitle:@"Move Tab to New Window"  action:@selector(takeTabsToTearOffFrom:) keyEquivalent:@""];
-	[menu addItem:[NSMenuItem separatorItem]];
-	[menu addItemWithTitle:@"Close Tab"               action:closeSingleTabSelector            keyEquivalent:@""];
-	[menu addItemWithTitle:@"Close Other Tabs"        action:@selector(takeTabsToCloseFrom:)   keyEquivalent:@""];
-	[menu addItemWithTitle:@"Close Tabs to the Right" action:@selector(takeTabsToCloseFrom:)   keyEquivalent:@""];
-	[menu addItem:[NSMenuItem separatorItem]];
-	[menu addItemWithTitle:@"Sticky"                  action:@selector(toggleSticky:)          keyEquivalent:@""];
-
-	NSIndexSet* indexSets[] = { newTabAtTab, total > 1 ? clickedTab : [NSIndexSet indexSet], nil, clickedTab, otherTabs, rightSideTabs, nil, clickedTab };
-	for(size_t i = 0; i < sizeofA(indexSets); ++i)
-	{
-		if(NSIndexSet* indexSet = indexSets[i])
-			[[menu itemAtIndex:i] setRepresentedObject:indexSet];
-	}
-
-	return menu;
+	MBMenu const items = {
+		{ @"New Tab",                  @selector(takeNewTabIndexFrom:),    .representedObject = newTabAtTab   },
+		{ @"Move Tab to New Window",   @selector(takeTabsToTearOffFrom:),  .representedObject = total > 1 ? clickedTab : [NSIndexSet indexSet] },
+		{ /* -------- */ },
+		{ @"Close Tab",                closeSingleTabSelector,             .representedObject = clickedTab    },
+		{ @"Close Other Tabs",         @selector(takeTabsToCloseFrom:),    .representedObject = otherTabs     },
+		{ @"Close Tabs to the Right",  @selector(takeTabsToCloseFrom:),    .representedObject = rightSideTabs },
+		{ /* -------- */ },
+		{ @"Sticky",                   @selector(toggleSticky:),           .representedObject = clickedTab    },
+	};
+	return MBCreateMenu(items);
 }
 
 // =========================

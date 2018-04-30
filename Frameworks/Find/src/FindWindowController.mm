@@ -13,6 +13,7 @@
 #import <OakFoundation/NSString Additions.h>
 #import <OakFoundation/OakHistoryList.h>
 #import <OakFoundation/OakFoundation.h>
+#import <MenuBuilder/MenuBuilder.h>
 #import <Preferences/Keys.h>
 #import <ns/ns.h>
 #import <io/path.h>
@@ -215,37 +216,29 @@ static NSButton* OakCreateStopSearchButton ()
 		// = Create action pop-up menu =
 		// =============================
 
-		NSMenu* actionMenu = self.actionsPopUpButton.menu;
+		MBMenu const items = {
+			{ /* Placeholder */ },
+			{ @"Search",                               @selector(nop:)                                    },
+			{ @"Binary Files",                         @selector(toggleSearchBinaryFiles:),   .indent = 1 },
+			{ @"Hidden Folders",                       @selector(toggleSearchHiddenFolders:), .indent = 1 },
+			{ @"Symbolic Links to Folders",            @selector(toggleSearchFolderLinks:),   .indent = 1 },
+			{ @"Symbolic Links to Files",              @selector(toggleSearchFileLinks:),     .indent = 1 },
+			{ /* -------- */ },
+			{ @"Collapse Results",                     @selector(toggleCollapsedState:),      @"1", .modifierFlags = NSCommandKeyMask|NSAlternateKeyMask, .target = self.resultsViewController },
+			{ @"Select Result",                        .delegate = self                                   },
+			{ /* -------- */ },
+			{ @"Copy Matching Parts",                  @selector(copyMatchingParts:)                      },
+			{ @"Copy Matching Parts With Filenames",   @selector(copyMatchingPartsWithFilename:)          },
+			{ @"Copy Entire Lines",                    @selector(copyEntireLines:)                        },
+			{ @"Copy Entire Lines With Filenames",     @selector(copyEntireLinesWithFilename:)            },
+			{ @"Copy Replacements",                    @selector(copyReplacements:)                       },
+			{ /* -------- */ },
+			{ @"Check All",                            @selector(checkAll:)                               },
+			{ @"Uncheck All",                          @selector(uncheckAll:)                             },
+		};
 
-		[actionMenu addItemWithTitle:@"Placeholder" action:NULL keyEquivalent:@""];
-
-		[actionMenu addItemWithTitle:@"Search" action:@selector(nop:) keyEquivalent:@""];
-		[actionMenu addItemWithTitle:@"Binary Files" action:@selector(toggleSearchBinaryFiles:) keyEquivalent:@""];
-		[actionMenu addItemWithTitle:@"Hidden Folders" action:@selector(toggleSearchHiddenFolders:) keyEquivalent:@""];
-		[actionMenu addItemWithTitle:@"Symbolic Links to Folders" action:@selector(toggleSearchFolderLinks:) keyEquivalent:@""];
-		[actionMenu addItemWithTitle:@"Symbolic Links to Files" action:@selector(toggleSearchFileLinks:) keyEquivalent:@""];
-		for(NSUInteger i = [actionMenu numberOfItems]-4; i < [actionMenu numberOfItems]; ++i)
-			[[actionMenu itemAtIndex:i] setIndentationLevel:1];
-
-		[actionMenu addItem:[NSMenuItem separatorItem]];
-		NSMenuItem* collapseExpandItem = [actionMenu addItemWithTitle:@"Collapse Results" action:@selector(toggleCollapsedState:) keyEquivalent:@"1"];
-		collapseExpandItem.keyEquivalentModifierMask = NSAlternateKeyMask|NSCommandKeyMask;
-		collapseExpandItem.target = self.resultsViewController;
-
-		NSMenuItem* selectResultItem = [actionMenu addItemWithTitle:@"Select Result" action:NULL keyEquivalent:@""];
-		selectResultItem.submenu = [NSMenu new];
-		selectResultItem.submenu.delegate = self;
-
-		[actionMenu addItem:[NSMenuItem separatorItem]];
-		[actionMenu addItemWithTitle:@"Copy Matching Parts"                action:@selector(copyMatchingParts:)             keyEquivalent:@""];
-		[actionMenu addItemWithTitle:@"Copy Matching Parts With Filenames" action:@selector(copyMatchingPartsWithFilename:) keyEquivalent:@""];
-		[actionMenu addItemWithTitle:@"Copy Entire Lines"                  action:@selector(copyEntireLines:)               keyEquivalent:@""];
-		[actionMenu addItemWithTitle:@"Copy Entire Lines With Filenames"   action:@selector(copyEntireLinesWithFilename:)   keyEquivalent:@""];
-		[actionMenu addItemWithTitle:@"Copy Replacements"                  action:@selector(copyReplacements:)              keyEquivalent:@""];
-
-		[actionMenu addItem:[NSMenuItem separatorItem]];
-		[actionMenu addItemWithTitle:@"Check All" action:@selector(checkAll:) keyEquivalent:@""];
-		[actionMenu addItemWithTitle:@"Uncheck All" action:@selector(uncheckAll:) keyEquivalent:@""];
+		if(NSMenu* actionMenu = MBCreateMenu(items))
+			self.actionsPopUpButton.menu = actionMenu;
 
 		// =============================
 
