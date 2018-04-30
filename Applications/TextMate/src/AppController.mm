@@ -108,9 +108,9 @@ BOOL HasDocumentWindow (NSArray* windows)
 				{ /* -------- */ },
 				{ @"Services",              .systemMenu = MBMenuTypeServices               },
 				{ /* -------- */ },
-				{ @"Hide TextMate",         @selector(hide:),                       @"h", .target = NSApp },
-				{ @"Hide Others",           @selector(hideOtherApplications:),      @"h", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption, .target = NSApp },
-				{ @"Show All",              @selector(unhideAllApplications:),            .target = NSApp },
+				{ @"Hide TextMate",         @selector(hide:),                       @"h"   },
+				{ @"Hide Others",           @selector(hideOtherApplications:),      @"h", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption },
+				{ @"Show All",              @selector(unhideAllApplications:),             },
 				{ /* -------- */ },
 				{ @"Quit TextMate",         @selector(terminate:),                  @"q"   },
 			}
@@ -194,8 +194,8 @@ BOOL HasDocumentWindow (NSArray* windows)
 						{ /* -------- */ },
 						{ @"Show Find History",           @selector(showFindHistory:),              @"f", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption|NSEventModifierFlagControl },
 						{ /* -------- */ },
-						{ @"Incremental Search",          @selector(incrementalSearch:),            @"s", .modifierFlags = NSEventModifierFlagControl, .tag = 1 },
-						{ @"Incremental Search Previous", @selector(incrementalSearchPrevious:),    @"S", .modifierFlags = NSEventModifierFlagControl, .tag = 1 },
+						{ @"Incremental Search",          @selector(incrementalSearch:),            @"s", .modifierFlags = NSEventModifierFlagControl },
+						{ @"Incremental Search Previous", @selector(incrementalSearchPrevious:),    @"S", .modifierFlags = NSEventModifierFlagControl },
 						{ /* -------- */ },
 						{ @"Find Next",                   @selector(findNext:),                     @"g"   },
 						{ @"Find Previous",               @selector(findPrevious:),                 @"G"   },
@@ -203,10 +203,10 @@ BOOL HasDocumentWindow (NSArray* windows)
 						{ /* -------- */ },
 						{ @"Find Behavior",
 							.submenu = {
-								{ @"Ignore Case",        @selector(toggleFindOption:), @"c", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption, .tag = 2 },
-								{ @"Regular Expression", @selector(toggleFindOption:), @"r", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption, .tag = 8 },
-								{ @"Ignore Whitespace",  @selector(toggleFindOption:),       .tag = 4 },
-								{ @"Wrap Around",        @selector(toggleFindOption:), @"a", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption, .tag = 128 },
+								{ @"Ignore Case",        @selector(toggleFindOption:), @"c", .tag =   2, .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption },
+								{ @"Regular Expression", @selector(toggleFindOption:), @"r", .tag =   8, .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption },
+								{ @"Ignore Whitespace",  @selector(toggleFindOption:),       .tag =   4  },
+								{ @"Wrap Around",        @selector(toggleFindOption:), @"a", .tag = 128, .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption },
 							}
 						},
 						{ /* -------- */ },
@@ -217,7 +217,6 @@ BOOL HasDocumentWindow (NSArray* windows)
 						{ /* -------- */ },
 						{ @"Use Selection for Find",      @selector(copySelectionToFindPboard:),    @"e"   },
 						{ @"Use Selection for Replace",   @selector(copySelectionToReplacePboard:), @"E"   },
-						{ /* -------- */ },
 					}
 				},
 				{ @"Spelling",
@@ -274,10 +273,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 						{ @"Other…", @selector(showTabSizeSelectorPanel:) },
 					}
 				},
-				{ @"Theme",
-					.submenuRef = &themesMenu, .submenu = {
-					}
-				},
+				{ @"Theme",                  .submenuRef = &themesMenu                },
 				{ /* -------- */ },
 				{ @"Fold Current Block",     @selector(toggleCurrentFolding:), .key = NSF1FunctionKey, .modifierFlags = 0 },
 				{ @"Toggle Foldings at Level",
@@ -310,19 +306,16 @@ BOOL HasDocumentWindow (NSArray* windows)
 				{ @"Set Bookmark",               @selector(toggleCurrentBookmark:),        .key = NSF2FunctionKey },
 				{ @"Jump to Next Bookmark",      @selector(goToNextBookmark:),             .key = NSF2FunctionKey, .modifierFlags = 0 },
 				{ @"Jump to Previous Bookmark",  @selector(goToPreviousBookmark:),         .key = NSF2FunctionKey, .modifierFlags = NSEventModifierFlagShift },
-				{ @"Jump to Bookmark",
-					.delegate = OakSubmenuController.sharedInstance, .submenu = {
-					}
-				},
+				{ @"Jump to Bookmark",           .delegate = OakSubmenuController.sharedInstance },
 				{ /* -------- */ },
 				{ @"Jump To Next Mark",          @selector(jumpToNextMark:),               .key = NSF3FunctionKey, .modifierFlags = 0 },
 				{ @"Jump To Previous Mark",      @selector(jumpToPreviousMark:),           .key = NSF3FunctionKey, .modifierFlags = NSEventModifierFlagShift },
 				{ /* -------- */ },
 				{ @"Scroll",
 					.submenu = {
-						{ @"Line Up",      @selector(scrollLineUp:),      .key = NSUpArrowFunctionKey, .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption|NSEventModifierFlagControl },
-						{ @"Line Down",    @selector(scrollLineDown:),    .key = NSDownArrowFunctionKey, .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption|NSEventModifierFlagControl },
-						{ @"Column Left",  @selector(scrollColumnLeft:),  .key = NSLeftArrowFunctionKey, .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption|NSEventModifierFlagControl },
+						{ @"Line Up",      @selector(scrollLineUp:),      .key = NSUpArrowFunctionKey,    .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption|NSEventModifierFlagControl },
+						{ @"Line Down",    @selector(scrollLineDown:),    .key = NSDownArrowFunctionKey,  .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption|NSEventModifierFlagControl },
+						{ @"Column Left",  @selector(scrollColumnLeft:),  .key = NSLeftArrowFunctionKey,  .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption|NSEventModifierFlagControl },
 						{ @"Column Right", @selector(scrollColumnRight:), .key = NSRightArrowFunctionKey, .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption|NSEventModifierFlagControl },
 					}
 				},
@@ -338,9 +331,9 @@ BOOL HasDocumentWindow (NSArray* windows)
 				{ /* -------- */ },
 				{ @"Move Selection",
 					.submenu = {
-						{ @"Up",    @selector(moveSelectionUp:),    .key = NSUpArrowFunctionKey, .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagControl },
-						{ @"Down",  @selector(moveSelectionDown:),  .key = NSDownArrowFunctionKey, .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagControl },
-						{ @"Left",  @selector(moveSelectionLeft:),  .key = NSLeftArrowFunctionKey, .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagControl },
+						{ @"Up",    @selector(moveSelectionUp:),    .key = NSUpArrowFunctionKey,    .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagControl },
+						{ @"Down",  @selector(moveSelectionDown:),  .key = NSDownArrowFunctionKey,  .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagControl },
+						{ @"Left",  @selector(moveSelectionLeft:),  .key = NSLeftArrowFunctionKey,  .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagControl },
 						{ @"Right", @selector(moveSelectionRight:), .key = NSRightArrowFunctionKey, .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagControl },
 					}
 				},
@@ -400,10 +393,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 				{ /* -------- */ },
 				{ @"Select Next Tab",        @selector(selectNextTab:),         @"}" },
 				{ @"Select Previous Tab",    @selector(selectPreviousTab:),     @"{" },
-				{ @"Select Tab",
-					.delegate = OakSubmenuController.sharedInstance, .submenu = {
-					}
-				},
+				{ @"Select Tab",             .delegate = OakSubmenuController.sharedInstance },
 				{ /* -------- */ },
 				{ @"Bring All to Front",     @selector(arrangeInFront:)              },
 				{ @"Merge All Windows",      @selector(mergeAllWindows:)             },
