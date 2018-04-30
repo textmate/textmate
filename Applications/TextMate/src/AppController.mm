@@ -425,6 +425,15 @@ BOOL HasDocumentWindow (NSArray* windows)
 	return menu;
 }
 
+- (NSMenu*)applicationDockMenu:(NSApplication*)anApplication
+{
+	MBMenu const items = {
+		{ @"New File", @selector(newDocumentAndActivate:),  .target = self },
+		{ @"Open…",    @selector(openDocumentAndActivate:), .target = self },
+	};
+	return MBCreateMenu(items);
+}
+
 - (void)setCurrentResponderIsOakTextView:(BOOL)flag
 {
 	if(_currentResponderIsOakTextView != flag)

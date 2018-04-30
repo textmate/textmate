@@ -9,7 +9,6 @@
         <customObject id="-2" userLabel="File's Owner" customClass="NSApplication">
             <connections>
                 <outlet property="delegate" destination="208" id="806"/>
-                <outlet property="dockMenu" destination="783" id="787"/>
             </connections>
         </customObject>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
@@ -80,21 +79,5 @@ DQ
                 <outlet property="initialFirstResponder" destination="393" id="401"/>
             </connections>
         </window>
-        <menu id="783" userLabel="DockMenu">
-            <items>
-                <menuItem title="New File" id="784">
-                    <modifierMask key="keyEquivalentModifierMask"/>
-                    <connections>
-                        <action selector="newDocumentAndActivate:" target="208" id="791"/>
-                    </connections>
-                </menuItem>
-                <menuItem title="Open…" id="789">
-                    <modifierMask key="keyEquivalentModifierMask"/>
-                    <connections>
-                        <action selector="openDocumentAndActivate:" target="208" id="792"/>
-                    </connections>
-                </menuItem>
-            </items>
-        </menu>
     </objects>
 </document>
