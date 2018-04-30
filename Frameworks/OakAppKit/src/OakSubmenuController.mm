@@ -33,10 +33,10 @@ OAK_DEBUG_VAR(OakSubmenuController);
 @end
 
 @implementation OakSubmenuController
-- (void)awakeFromNib
++ (instancetype)sharedInstance
 {
-	[selectTabMenu setDelegate:self];
-	[marksMenu setDelegate:self];
+	static OakSubmenuController* sharedInstance = [self new];
+	return sharedInstance;
 }
 
 - (BOOL)isSelectTabMenu:(NSMenu*)aMenu

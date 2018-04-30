@@ -1,9 +1,9 @@
 @interface AppController : NSObject <NSMenuDelegate>
 {
-	IBOutlet NSMenu* bundlesMenu;
-	IBOutlet NSMenu* themesMenu;
-	IBOutlet NSMenu* spellingMenu;
-	IBOutlet NSMenu* wrapColumnMenu;
+	NSMenu* bundlesMenu;
+	NSMenu* themesMenu;
+	NSMenu* spellingMenu;
+	NSMenu* wrapColumnMenu;
 
 	IBOutlet NSPanel* goToLinePanel;
 	IBOutlet NSTextField* goToLineTextField;
