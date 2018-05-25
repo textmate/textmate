@@ -85,7 +85,7 @@ static void launch_app (bool disableUntitled)
 
 	cf::array_t args(disableUntitled ? std::vector<std::string>{ "-disableNewDocumentAtStartup", "1" } : std::vector<std::string>{ });
 
-	struct LSApplicationParameters const appParams = { 0, kLSLaunchDontAddToRecents|kLSLaunchDontSwitch|kLSLaunchAndDisplayErrors, &appFSRef, nullptr, nullptr, args, nullptr };
+	struct LSApplicationParameters const appParams = { 0, kLSLaunchDontAddToRecents|kLSLaunchAndDisplayErrors, &appFSRef, nullptr, nullptr, args, nullptr };
 	OSStatus err = LSOpenApplication(&appParams, nullptr);
 	if(err != noErr)
 	{
