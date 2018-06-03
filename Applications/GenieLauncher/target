@@ -1,0 +1,3 @@
+CP_Resources = resources/*
+SOURCES      = src/*.mm
+FRAMEWORKS   = Cocoa
