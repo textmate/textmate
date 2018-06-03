@@ -1,0 +1,95 @@
+{
+	Root = {
+		items     = ( "Item" );
+		variables = (
+			{ name = "NSString"; value = "FormatString"; disabled = "Boolean"; }
+		);
+	};
+
+	FormatString     = "NSString|NSNumber";     // External variables: ${query}, ${last_query}, ${clipboard}, ${find}
+	TimePeriod       = "NSString|.doubleValue"; // Example: 2w, 3d, 5h, 8m, 13s, 2.1… (default unit is seconds)
+	Boolean          = ".boolValue";            // Must respond to: boolValue
+	Float            = ".doubleValue";          // Must respond to: doubleValue
+
+	DataSourceResult = {
+		items     = ( "Item" );
+		expires_in = "TimePeriod";
+		depends_on = "NSString";                // File that the data depends on, e.g. ‘~/Music/iTunes/iTunes Music Library.xml’
+	};
+
+	Item = {
+		uid           = "NSString";
+
+		kind          = "NSString";            // Values: (web|script|file|sqlite|spotlight|recentDocuments|exec)
+		predicate     = "NSString";            // Make children of this item be children of items matching predicate
+		isTemplate    = "Boolean";             // This is a template to be used by parent data source
+		isPlaceholder = "Boolean";             // This is a placeholder to be used by parent data source
+
+		disabled      = "Boolean";
+		readOnly      = "Boolean";
+
+		title         = "FormatString";
+		subtitle      = "FormatString";
+		match         = "NSString";            // Match the filter string against this field instead of title
+		uiTitle       = "FormatString";        // Title used for notifications and other dialogs
+
+		icon = {
+			image       = "NSString";          // Path to icon file
+			fileType    = "NSString";          // UTI, file type extension, or HFS file type
+			application = "NSString";          // CFBundleIdentifier
+			text        = "FormatString";      // Arbitrary text, e.g. emoji
+			named       = "NSString";          // System image
+			file        = "NSString";          // Use icon of existing file
+			url         = "NSString";          // Obtain favicon from URL
+			alpha       = "Float";             // Set the icon’s alpha value
+		};
+
+		disableLRUOrdering   = "Boolean";      // Recently used items will not be shown at the top
+		disableLearning      = "Boolean";      // Recently used items with the current filter string will not be shown at the top
+		disableFuzzyMatching = "Boolean";      // Filter string must be a connected substring of the item to be matched
+		disableRankOrdering  = "Boolean";      // Items deemed a “better” match of the filter string will not be shown at the top
+
+		exec                = ( "NSString" );  // Defaults to: exec = ( "/bin/sh", "-c", «script», «scriptArguments»... );
+		script              = "NSString";
+		scriptArguments     = ( "FormatString" );  // These are appended to exec and are also set for multi-select
+		standardInputString = "FormatString";      // Defaults to an array of selected items as JSON
+		output              = "NSString";          // Values: (notification|html). Defaults to "notification"
+		live                = "Boolean";           // TODO Run this action when user selects it and show output (implies HTML)
+		variables           = (
+			{ name = "NSString"; value = "FormatString"; disabled = "Boolean"; }
+		);
+
+		url        = "FormatString";
+		file       = "FormatString";
+		value      = "FormatString";           // Fallback for ⇥ and ⌘C
+
+		invalidate = "FormatString";           // Set to uid of data source to invalidate
+
+		option     = "Item";                   // Alternative item to use when option (⌥) is down
+
+		children   = ( "Item" );
+
+		// ====================
+		// = Data Source Keys =
+		// ====================
+
+		bundleIdentifier = "FormatString";     // Used by: recentDocuments
+
+		sqlDatabase      = "FormatString";     // Used by: sqlite3
+		sqlQuery         = "NSString";         // Used by: sqlite3
+
+		mdQuery          = "NSString";         // Used by: spotlight
+		mdScope          = (                   // Used by: spotlight
+			{ path = "NSString"; disabled = "Boolean"; }
+		);
+
+		mdApplicationIsRunning = "Boolean";
+		mdApplicationCanOpen   = "FormatString";
+
+		sortBy           = "NSString";         // Which key to use for sorting
+		descending       = "Boolean";
+
+		// exec, script, scriptArguments, and output (= json|list) for ‘kind = exec’ (re-used for ‘kind = commnad’)
+		timeOut          = "NSNumber";
+	};
+}

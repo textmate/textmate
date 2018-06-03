@@ -1,0 +1,23 @@
+{	CFBundleName                  = "${TARGET_NAME}";
+	CFBundleVersion               = "${GENIE_REVISION}";
+	CFBundleShortVersionString    = "${GENIE_VERSION}";
+	CFBundleIdentifier            = "com.macromates.${TARGET_NAME}";
+
+	CFBundleExecutable            = "${TARGET_NAME}";
+	CFBundleIconFile              = "Genie";
+
+	LSMinimumSystemVersion        = "10.12";
+	LSUIElement                   = 1;
+
+	// CFBundleHelpBookName
+	// CFBundleHelpBookFolder
+	// NSContactsUsageDescription
+
+	CFBundleDevelopmentRegion     = "English";
+	CFBundleInfoDictionaryVersion = "6.0";
+	CFBundlePackageType           = "APPL";
+	CFBundleSignature             = "????";
+
+	NSMainNibFile                 = "MainMenu";
+	NSPrincipalClass              = "NSApplication";
+}

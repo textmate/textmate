@@ -1,0 +1,2 @@
+@interface AppDelegate : NSResponder
+@end
