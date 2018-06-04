@@ -119,7 +119,7 @@ static NSString* const kGenieItemsDidChangeNotification = @"GenieItemsDidChangeN
 		}
 	}
 
-	[_items setArray:items];
+	[[self mutableArrayValueForKey:@"items"] setArray:items];
 
 	self.observedPaths = paths;
 }
