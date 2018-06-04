@@ -35,7 +35,7 @@
 	if(self = [super init])
 	{
 		_string           = aString;
-		_normalizedString = [aString lowercaseString];
+		_normalizedString = [[aString lowercaseString] decomposedStringWithCanonicalMapping];
 
 		NSRange spaceRange = [_string rangeOfString:@" " options:NSLiteralSearch];
 		if(spaceRange.location == NSNotFound)
@@ -45,7 +45,7 @@
 		}
 		else
 		{
-			_filterString = [[_string substringToIndex:spaceRange.location] lowercaseString];
+			_filterString = [[[_string substringToIndex:spaceRange.location] lowercaseString] decomposedStringWithCanonicalMapping];
 			_queryString  = [_string substringFromIndex:NSMaxRange(spaceRange)];
 		}
 
@@ -991,7 +991,7 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 - (NSString*)match
 {
 	if(!_match)
-		_match = [self staticValueForKey:@"match"] ?: self.title;
+		_match = [([self staticValueForKey:@"match"] ?: self.title) decomposedStringWithCanonicalMapping];
 	return _match;
 }
 
