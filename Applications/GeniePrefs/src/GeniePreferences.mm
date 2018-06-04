@@ -88,8 +88,6 @@ static NSString* kDisableLaunchAtLoginSettingsKey   = @"disableLaunchAtLogin";
 	NSDictionary<NSString*, NSViewController*>* _viewControllers;
 	NSSplitView* _splitView;
 	NSView* _containerView;
-
-	NSButton* _advancedButton;
 }
 @property (nonatomic) GenieItemKind selectedItemKind;
 @end
