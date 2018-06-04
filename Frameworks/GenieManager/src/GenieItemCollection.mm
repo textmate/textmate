@@ -35,7 +35,7 @@ static BOOL SimpleMatch (NSString* needle, NSString* haystack)
 	NSArray<GenieItem*>* _replacementItems;
 	BOOL _defaultContainer;
 }
-@property (nonatomic) NSArray<GenieItem*>* items;
+@property (nonatomic, copy) NSArray<GenieItem*>* items;
 @property (nonatomic, readwrite) NSArray<GenieItem*>* arrangedObjects;
 @end
 
@@ -78,7 +78,7 @@ static BOOL SimpleMatch (NSString* needle, NSString* haystack)
 		[_enabledItems removeObserver:self fromObjectsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, _enabledItems.count)] forKeyPath:@"replacementItems" context:kGenieItemReplacementItemsBinding];
 	}
 
-	_items        = newItems;
+	_items        = [newItems copy];
 	_enabledItems = [_items filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"disabled != YES && kind != %ld", kGenieItemKindPredicateGroup]];
 
 	NSArray* busyItems = [_enabledItems filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"busy = YES"]];
