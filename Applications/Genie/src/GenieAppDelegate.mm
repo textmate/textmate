@@ -141,6 +141,26 @@ static NSString* kEnableClipboardHistorySettingsKey = @"enableClipboardHistory";
 static NSString* kDisableLaunchAtLoginSettingsKey   = @"disableLaunchAtLogin";
 static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 
+@interface MyTextField : NSTextField
+@end
+
+@implementation MyTextField
+- (BOOL)mouseDownCanMoveWindow
+{
+	return YES;
+}
+@end
+
+@interface MyFieldEditor : NSTextView
+@end
+
+@implementation MyFieldEditor
+- (BOOL)mouseDownCanMoveWindow
+{
+	return YES;
+}
+@end
+
 @interface GenieBorderlessWindow : NSPanel
 @end
 
@@ -161,6 +181,8 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 	GlobalHotkey* _hotkey;
 
 	NSWindow* _window;
+	NSTextView* _sharedFieldEditor;
+
 	NSProgressIndicator* _progressIndicator;
 	NSTextField* _textField;
 	NSTableView* _tableView;
@@ -451,7 +473,7 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 	[_window center];
 	_window.frameAutosaveName = @"Catalog";
 
-	_textField = [NSTextField textFieldWithString:@""];
+	_textField = [MyTextField textFieldWithString:@""];
 	_textField.delegate        = self;
 	_textField.font            = [NSFont systemFontOfSize:21];
 	_textField.bezeled         = NO;
@@ -559,6 +581,19 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 - (void)applicationDidResignActive:(NSNotification*)aNotification
 {
 	self.collection.live = NO;
+}
+
+- (id)windowWillReturnFieldEditor:(NSWindow*)aWindow toObject:(id)someObject
+{
+	if(someObject != _textField)
+		return nil;
+
+	if(!_sharedFieldEditor)
+	{
+		_sharedFieldEditor = [[MyFieldEditor alloc] initWithFrame:NSZeroRect];
+		_sharedFieldEditor.fieldEditor = YES;
+	}
+	return _sharedFieldEditor;
 }
 
 - (void)windowDidBecomeKey:(NSNotification*)aNotification
