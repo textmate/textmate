@@ -554,7 +554,7 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 	[_tableView bind:NSContentBinding toObject:self withKeyPath:@"collection.arrangedObjects" options:nil];
 	[_tableView bind:NSSelectionIndexesBinding toObject:self withKeyPath:@"collection.selectionIndexes" options:nil];
 
-	[_textField bind:NSValueBinding toObject:self withKeyPath:@"collection.queryString" options:@{ NSContinuouslyUpdatesValueBindingOption: @YES, NSNullPlaceholderBindingOption: @"Search" }];
+	[_textField bind:NSValueBinding toObject:self withKeyPath:@"collection.queryString" options:@{ NSContinuouslyUpdatesValueBindingOption: @YES, NSNullPlaceholderBindingOption: @"Genie Search" }];
 	[_progressIndicator bind:NSAnimateBinding toObject:self withKeyPath:@"collection.busy" options:nil];
 
 	[self goToRoot:self];
