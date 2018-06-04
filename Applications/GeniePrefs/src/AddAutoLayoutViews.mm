@@ -20,6 +20,41 @@ void GenieAddAutoLayoutViewsToSuperview (NSDictionary* views, NSView* superview)
 	}
 }
 
+void GenieSetupKeyViewLoop (NSArray<__kindof NSResponder*>* superviews, BOOL setFirstResponder)
+{
+	std::set<id> seen;
+	for(NSView* candidate in superviews)
+		seen.insert(candidate);
+
+	NSMutableArray* views = [NSMutableArray new];
+	for(NSView* view in superviews)
+	{
+		if([view isEqual:[NSNull null]])
+			continue;
+
+		[views addObject:view];
+		NSView* subview = view;
+		while((subview = subview.nextKeyView) && [subview isDescendantOf:view] && seen.insert(subview).second)
+			[views addObject:subview];
+	}
+
+	if(views.count == 1)
+	{
+		[views.firstObject setNextKeyView:nil];
+	}
+	else
+	{
+		for(size_t i = 0; i < views.count; ++i)
+			[views[i] setNextKeyView:views[(i + 1) % views.count]];
+	}
+
+	if(setFirstResponder)
+	{
+		if(NSView* view = views.firstObject)
+			view.window.initialFirstResponder = view;
+	}
+}
+
 NSScrollView* GenieCreateTextView (BOOL editable)
 {
 	NSTextView* textView = [[NSTextView alloc] initWithFrame:NSZeroRect];
