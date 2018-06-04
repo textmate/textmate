@@ -497,6 +497,12 @@
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-[textField]-(20)-[ok]-|"         options:0 metrics:nil views:views]];
 }
 
+- (void)viewWillAppear
+{
+	self.view.window.initialFirstResponder = _textField;
+	[super viewDidAppear];
+}
+
 - (void)acceptChangedIcon:(id)sender
 {
 	[self.objectController commitEditing];
