@@ -180,6 +180,9 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 {
 	GlobalHotkey* _hotkey;
 
+	NSMutableArray<NSString*>* _historyArray;
+	NSUInteger _nextHistoryIndex;
+
 	NSWindow* _window;
 	NSTextView* _sharedFieldEditor;
 
@@ -427,6 +430,9 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 				{ @"Parent",        @selector(goToParentFolder:), .key = NSUpArrowFunctionKey   },
 				{ @"Children",      @selector(goToChildItems:),   .key = NSDownArrowFunctionKey },
 				{ @"Back to Start", @selector(goToRoot:),         @"/" },
+				{ /* -------- */ },
+				{ @"Back in History",    @selector(goToPreviousHistoryItem:), .key = NSUpArrowFunctionKey,   .modifierFlags = NSEventModifierFlagControl },
+				{ @"Forward in History", @selector(goToNextHistoryItem:),     .key = NSDownArrowFunctionKey, .modifierFlags = NSEventModifierFlagControl },
 			}
 		},
 		{ @"Window",
@@ -452,6 +458,9 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 
 - (void)applicationDidFinishLaunching:(NSNotification*)aNotification
 {
+	_historyArray     = [[[NSUserDefaults standardUserDefaults] arrayForKey:@"history"] mutableCopy] ?: [NSMutableArray array];
+	_nextHistoryIndex = _historyArray.count;
+
 	[self userDefaultsDidChange:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
 	[[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:@"com.macromates.GeniePrefs"];
@@ -495,6 +504,9 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 		{ @"Parent",                @selector(goToParentFolder:),           .key = NSUpArrowFunctionKey   },
 		{ @"Children",              @selector(goToChildItems:),             .key = NSDownArrowFunctionKey },
 		{ @"Back to Start",         @selector(goToRoot:),                   @"/" },
+		{ /* -------- */ },
+		{ @"Back in History",       @selector(goToPreviousHistoryItem:), .key = NSUpArrowFunctionKey,   .modifierFlags = NSEventModifierFlagControl },
+		{ @"Forward in History",    @selector(goToNextHistoryItem:),     .key = NSDownArrowFunctionKey, .modifierFlags = NSEventModifierFlagControl },
 		{ /* -------- */ },
 		{ @"Quit Genie",            @selector(terminate:),                  @"q" },
 	};
@@ -609,6 +621,9 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 
 - (void)windowWillClose:(NSNotification*)aNotification
 {
+	[self addToHistory:self.collection.queryString];
+	[[NSUserDefaults standardUserDefaults] setObject:_historyArray forKey:@"history"];
+
 	// We do this after delay to avoid seeing the busy indicator when closing the window
 	[self performSelector:@selector(goToRoot:) withObject:self afterDelay:0];
 
@@ -628,7 +643,10 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 		if(GenieItem* item = self.collection.selectedObjects.firstObject)
 		{
 			if(NSString* value = item.value)
-				self.collection.queryString = value;
+			{
+				[self addToHistory:self.collection.queryString];
+				[self setNewQueryString:value];
+			}
 		}
 	}
 }
@@ -761,6 +779,40 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 				NSBeep();
 		}];
 		[NSApp hide:self];
+	}
+}
+
+// ===================
+// = History Support =
+// ===================
+
+- (void)setNewQueryString:(NSString*)newString
+{
+	self.collection.queryString = newString;
+	if(_window.firstResponder == _sharedFieldEditor)
+		[_sharedFieldEditor setSelectedRange:NSMakeRange(_sharedFieldEditor.string.length, 0)];
+}
+
+- (void)addToHistory:(NSString*)aString
+{
+	if(OakNotEmptyString(aString) && ![_historyArray.lastObject isEqualToString:aString])
+		[_historyArray addObject:aString];
+	_nextHistoryIndex = _historyArray.count;
+}
+
+- (void)goToPreviousHistoryItem:(id)sender
+{
+	if(_nextHistoryIndex > 0)
+		[self setNewQueryString:_historyArray[--_nextHistoryIndex]];
+}
+
+- (void)goToNextHistoryItem:(id)sender
+{
+	if(_nextHistoryIndex < _historyArray.count)
+	{
+		if(++_nextHistoryIndex == _historyArray.count)
+				[self setNewQueryString:@""];
+		else	[self setNewQueryString:_historyArray[_nextHistoryIndex]];
 	}
 }
 
@@ -1006,6 +1058,10 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 		return _history.count > 1;
 	else if(aMenuItem.action == @selector(toggleQuickLookPreview:))
 		return self.previewableItems.count;
+	else if(aMenuItem.action == @selector(goToPreviousHistoryItem:))
+		return _nextHistoryIndex > 0;
+	else if(aMenuItem.action == @selector(goToNextHistoryItem:))
+		return _nextHistoryIndex < _historyArray.count;
 	return YES;
 }
 
