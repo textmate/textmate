@@ -9,6 +9,7 @@
 
 static void* kGenieItemBusyBinding             = &kGenieItemBusyBinding;
 static void* kGenieItemReplacementItemsBinding = &kGenieItemReplacementItemsBinding;
+static void* kGenieItemItemsChangedBinding     = &kGenieItemItemsChangedBinding;
 
 static BOOL SimpleMatch (NSString* needle, NSString* haystack)
 {
@@ -32,6 +33,7 @@ static BOOL SimpleMatch (NSString* needle, NSString* haystack)
 	NSInteger _countOfBusyItems;
 	NSArray<GenieItem*>* _enabledItems;
 	NSArray<GenieItem*>* _replacementItems;
+	BOOL _defaultContainer;
 }
 @property (nonatomic) NSArray<GenieItem*>* items;
 @property (nonatomic, readwrite) NSArray<GenieItem*>* arrangedObjects;
@@ -40,20 +42,31 @@ static BOOL SimpleMatch (NSString* needle, NSString* haystack)
 @implementation GenieItemCollection
 + (instancetype)defaultCollection
 {
-	return [[self alloc] initWithItems:GenieManager.sharedInstance.items];
+	return [[self alloc] initWithDefaultItems];
 }
 
 - (instancetype)initWithItems:(NSArray<GenieItem*>*)items
 {
-	if(self = [super init])
-	{
+	if(self = [self init])
 		self.items = items;
+	return self;
+}
+
+- (instancetype)initWithDefaultItems
+{
+	if(self = [self init])
+	{
+		self.items = GenieManager.sharedInstance.items;
+		[GenieManager.sharedInstance addObserver:self forKeyPath:@"items" options:0 context:kGenieItemItemsChangedBinding];
+		_defaultContainer = YES;
 	}
 	return self;
 }
 
 - (void)dealloc
 {
+	if(_defaultContainer)
+		[GenieManager.sharedInstance removeObserver:self forKeyPath:@"items" context:kGenieItemItemsChangedBinding];
 	self.items = nil;
 }
 
@@ -252,6 +265,10 @@ static BOOL SimpleMatch (NSString* needle, NSString* haystack)
 	{
 		_replacementItems = [_enabledItems valueForKeyPath:@"replacementItems.@unionOfArrays.self"];
 		[self rearrangeObjects];
+	}
+	else if(context == kGenieItemItemsChangedBinding)
+	{
+		self.items = GenieManager.sharedInstance.items;
 	}
 	else
 	{
