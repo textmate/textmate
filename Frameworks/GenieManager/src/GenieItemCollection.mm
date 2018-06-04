@@ -29,7 +29,6 @@ static BOOL SimpleMatch (NSString* needle, NSString* haystack)
 	NSInteger _countOfBusyItems;
 	NSArray<GenieItem*>* _enabledItems;
 	NSArray<GenieItem*>* _replacementItems;
-	GenieLRUDatabase* _database;
 }
 @property (nonatomic) NSArray<GenieItem*>* items;
 @property (nonatomic, readwrite) NSArray<GenieItem*>* arrangedObjects;
@@ -48,7 +47,6 @@ static void* kGenieItemReplacementItemsBinding = &kGenieItemReplacementItemsBind
 {
 	if(self = [super init])
 	{
-		_database  = GenieLRUDatabase.sharedInstance;
 		self.items = items;
 	}
 	return self;
@@ -108,6 +106,7 @@ static void* kGenieItemReplacementItemsBinding = &kGenieItemReplacementItemsBind
 		RankingGroupNoMatch,
 	};
 
+	GenieLRUDatabase* database = GenieLRUDatabase.sharedInstance;
 	NSMutableArray* filteredItems = [NSMutableArray array];
 
 	if(OakIsEmptyString(_filter.normalizedString))
@@ -119,7 +118,7 @@ static void* kGenieItemReplacementItemsBinding = &kGenieItemReplacementItemsBind
 
 			if(item.isFallback)
 				group = RankingGroupFallbackMatch;
-			else if(item.disableLRUOrdering == NO && (rank = [_database lruForItem:item withFilter:nil]))
+			else if(item.disableLRUOrdering == NO && (rank = [database lruForItem:item withFilter:nil]))
 				group = RankingGroupPrefixMatch;
 
 			[filteredItems addObject:@{
@@ -153,11 +152,11 @@ static void* kGenieItemReplacementItemsBinding = &kGenieItemReplacementItemsBind
 					{
 						group = RankingGroupOtherMatch;
 					}
-					else if(item.disableLearning == NO && (rank = [_database lruForItem:item withFilter:filter]))
+					else if(item.disableLearning == NO && (rank = [database lruForItem:item withFilter:filter]))
 					{
 						group = RankingGroupExactMatch;
 					}
-					else if(item.disableLearning == NO && (rank = [_database lruForItem:item withFilterPrefix:filter]))
+					else if(item.disableLearning == NO && (rank = [database lruForItem:item withFilterPrefix:filter]))
 					{
 						group = RankingGroupPrefixMatch;
 					}
