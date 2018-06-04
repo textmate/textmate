@@ -140,6 +140,7 @@
 	};
 
 	GenieAddAutoLayoutViewsToSuperview(views, contentView);
+	GenieSetupKeyViewLoop(@[ contentView, _tableView, addButton, _removeButton ]);
 
 	CGFloat rowHeight    = [_tableView rowHeight] + [_tableView intercellSpacing].height;
 	CGFloat headerHeight = _tableView.headerView ? NSHeight([_tableView.headerView headerRectOfColumn:0]) : 0;
@@ -331,6 +332,7 @@
 	};
 
 	GenieAddAutoLayoutViewsToSuperview(views, contentView);
+	GenieSetupKeyViewLoop(@[ contentView, outlineView, _addButton, _removeButton ]);
 
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[scrollView]|"                           options:0 metrics:nil views:views]];
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[add(==21)]-(-1)-[remove(==21)]-(>=0)-|" options:NSLayoutFormatAlignAllTop|NSLayoutFormatAlignAllBottom metrics:nil views:views]];
@@ -491,6 +493,7 @@
 	};
 
 	GenieAddAutoLayoutViewsToSuperview(views, contentView);
+	GenieSetupKeyViewLoop(@[ textField, cancelButton, acceptButton, popUpButton ]);
 
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[popUp]-[textField(>=200)]-|"    options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(>=8)-[cancel]-[ok(==cancel)]-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
@@ -586,6 +589,7 @@
 	};
 
 	GenieAddAutoLayoutViewsToSuperview(views, contentView);
+	GenieSetupKeyViewLoop(@[ contentView, titleTextField, subtitleTextField, matchTextField, _changeImageButton ]);
 
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[titleLabel]-[title]"                              options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[subtitleLabel]-[subtitle]"                        options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
@@ -706,6 +710,7 @@
 	};
 
 	GenieAddAutoLayoutViewsToSuperview(views, contentView);
+	GenieSetupKeyViewLoop(@[ contentView, urlTextField ]);
 
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[urlLabel]-[url]-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[url]-(>=20)-|" options:NSLayoutFormatAlignAllLeading|NSLayoutFormatAlignAllTrailing metrics:nil views:views]];
@@ -728,6 +733,7 @@
 	};
 
 	GenieAddAutoLayoutViewsToSuperview(views, contentView);
+	GenieSetupKeyViewLoop(@[ contentView, fileTextField ]);
 
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[fileLabel]-[file]-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[file]-(>=20)-|" options:NSLayoutFormatAlignAllLeading|NSLayoutFormatAlignAllTrailing metrics:nil views:views]];
@@ -762,6 +768,7 @@
 	};
 
 	GenieAddAutoLayoutViewsToSuperview(views, contentView);
+	GenieSetupKeyViewLoop(@[ contentView, scriptTextView, _argvTable.view ]);
 
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[scriptLabel]-[script]-|"              options:NSLayoutFormatAlignAllTop metrics:nil views:views]];
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[argvLabel]-[argv]-|"                  options:NSLayoutFormatAlignAllTop metrics:nil views:views]];
@@ -814,6 +821,7 @@
 	};
 
 	GenieAddAutoLayoutViewsToSuperview(views, contentView);
+	GenieSetupKeyViewLoop(@[ contentView, titleTextField, queryTextField, sortByPopUp, ascendingCheckBox, scope.view ]);
 
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[titleLabel]-[title]-|"            options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[queryLabel]-[query]-|"            options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
@@ -850,6 +858,7 @@
 	};
 
 	GenieAddAutoLayoutViewsToSuperview(views, contentView);
+	GenieSetupKeyViewLoop(@[ contentView, titleTextField, databaseTextField, queryTextView ]);
 
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[titleLabel]-[title]-|"               options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[databaseLabel]-[database]-|"         options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
@@ -879,6 +888,7 @@
 	};
 
 	GenieAddAutoLayoutViewsToSuperview(views, contentView);
+	GenieSetupKeyViewLoop(@[ contentView, titleTextField, bundleIdentifierTextField ]);
 
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[titleLabel]-[title]-|"                       options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[bundleIdentifierLabel]-[bundleIdentifier]-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
@@ -906,6 +916,7 @@
 	};
 
 	GenieAddAutoLayoutViewsToSuperview(views, contentView);
+	GenieSetupKeyViewLoop(@[ contentView, titleTextField, predicateTextField ]);
 
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[titleLabel]-[title]-|"         options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[predicateLabel]-[predicate]-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
@@ -943,6 +954,7 @@
 	};
 
 	GenieAddAutoLayoutViewsToSuperview(views, contentView);
+	GenieSetupKeyViewLoop(@[ contentView, titleTextField, scriptTextView, _argvTable.view ]);
 
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[titleLabel]-[title]-|"                options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[scriptLabel]-[script]-|"              options:NSLayoutFormatAlignAllTop metrics:nil views:views]];

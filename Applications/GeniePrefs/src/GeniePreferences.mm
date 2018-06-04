@@ -281,6 +281,7 @@ static NSIndexPath* IndexPathForGenieItemWithIdentifier (NSString* identifier, N
 	};
 
 	GenieAddAutoLayoutViewsToSuperview(views, contentView);
+	GenieSetupKeyViewLoop(@[ contentView, _variablesTable.view, _launchAtLoginButton, _enableClipboardHistoryButton ]);
 
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[variablesLabel]-[variables]-|"                          options:NSLayoutFormatAlignAllTop metrics:nil views:views]];
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[launchAtLogin]-(>=20)-|"                                  options:0 metrics:nil views:views]];

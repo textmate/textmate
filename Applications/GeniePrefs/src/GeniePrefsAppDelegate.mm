@@ -218,7 +218,7 @@
 		_preferencesViewController = [[GeniePreferences alloc] init];
 
 		_window.title = @"Preferences";
-		_window.autorecalculatesKeyViewLoop = YES;
+		_window.autorecalculatesKeyViewLoop = NO;
 		_window.contentView = _preferencesViewController.view;
 		_window.delegate = self;
 
