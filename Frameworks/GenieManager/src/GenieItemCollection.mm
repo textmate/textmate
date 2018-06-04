@@ -7,6 +7,9 @@
 #import <ns/ns.h>
 #import <oak/debug.h>
 
+static void* kGenieItemBusyBinding             = &kGenieItemBusyBinding;
+static void* kGenieItemReplacementItemsBinding = &kGenieItemReplacementItemsBinding;
+
 static BOOL SimpleMatch (NSString* needle, NSString* haystack)
 {
 	haystack = [haystack lowercaseString];
@@ -33,9 +36,6 @@ static BOOL SimpleMatch (NSString* needle, NSString* haystack)
 @property (nonatomic) NSArray<GenieItem*>* items;
 @property (nonatomic, readwrite) NSArray<GenieItem*>* arrangedObjects;
 @end
-
-static void* kGenieItemBusyBinding             = &kGenieItemBusyBinding;
-static void* kGenieItemReplacementItemsBinding = &kGenieItemReplacementItemsBinding;
 
 @implementation GenieItemCollection
 + (instancetype)defaultCollection
