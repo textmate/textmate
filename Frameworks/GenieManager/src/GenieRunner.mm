@@ -10,9 +10,6 @@ BOOL RunGenieItems (NSArray<GenieItem*>* items)
 
 	for(GenieItem* item in items)
 	{
-		if(NSString* invalidate = item.invalidate)
-			[GenieItem expireItemsForIdentifier:invalidate];
-
 		if(NSArray* program = item.scriptWithArguments)
 		{
 			NSString* key = [program componentsJoinedByString:@"|"];
@@ -53,11 +50,16 @@ BOOL RunGenieItems (NSArray<GenieItem*>* items)
 
 	for(NSMutableArray<GenieItem*>* items in actions.allValues)
 	{
+		NSMutableSet<NSString*>* invalidateIdentifiers = [NSMutableSet set];
+
 		NSMutableArray* jsonValues = [NSMutableArray array];
 		for(GenieItem* item in items)
 		{
 			if(NSDictionary* jsonItem = item.asJSONObject)
 				[jsonValues addObject:jsonItem];
+
+			if(NSString* invalidate = item.invalidate)
+				[invalidateIdentifiers addObject:invalidate];
 		}
 
 		GenieItem* item = items.firstObject;
@@ -79,6 +81,9 @@ BOOL RunGenieItems (NSArray<GenieItem*>* items)
 		NSString* uiTitle = item.uiTitle ?: title;
 
 		[task launch:^(int rc, NSData* stdoutData, NSData* stderrData){
+			for(NSString* identifier in invalidateIdentifiers)
+				[GenieItem expireItemsForIdentifier:identifier];
+
 			NSString* stdoutStr = [[NSString alloc] initWithData:stdoutData encoding:NSUTF8StringEncoding];
 			NSString* stderrStr = [[NSString alloc] initWithData:stderrData encoding:NSUTF8StringEncoding];
 
