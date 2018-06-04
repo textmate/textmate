@@ -31,6 +31,7 @@ static BOOL SimpleMatch (NSString* needle, NSString* haystack)
 	NSArray<GenieItem*>* _replacementItems;
 	GenieLRUDatabase* _database;
 }
+@property (nonatomic) NSArray<GenieItem*>* items;
 @property (nonatomic, readwrite) NSArray<GenieItem*>* arrangedObjects;
 @end
 
