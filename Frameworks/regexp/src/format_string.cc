@@ -293,13 +293,13 @@ struct expand_visitor : boost::static_visitor<void>
 				value = format_duration(value);
 
 #if defined(MAC_OS_X_VERSION_10_12) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_12)
-			if(dirname_r != nullptr && (v.change & parser::transform::kDirname))
+			if(v.change & parser::transform::kDirname)
 			{
 				char buf[MAXPATHLEN];
 				value = dirname_r(value.c_str(), buf) ?: value;
 			}
 
-			if(basename_r != nullptr && (v.change & parser::transform::kBasename))
+			if(v.change & parser::transform::kBasename)
 			{
 				char buf[MAXPATHLEN];
 				value = basename_r(value.c_str(), buf) ?: value;
