@@ -247,18 +247,18 @@ struct expand_visitor : boost::static_visitor<void>
 	static std::string format_duration (std::string const& src)
 	{
 		try {
-			double seconds = std::stod(src); // This may throw an exception
-			double minutes = round(seconds / 60);
-			struct { char const* singular; char const* plural; size_t amount; } units[] = {
-				{ "day",    "days",    (size_t)(minutes / 60 / 24) },
-				{ "hour",   "hours",   (size_t)(minutes / 60) % 24 },
-				{ "minute", "minutes", (size_t)(minutes) % 60      },
+			size_t seconds = round(std::stod(src)); // This may throw an exception
+			struct { char const* singular; char const* plural; size_t amount; bool include; } units[] = {
+				{ "day",    "days",    (seconds / 60 / 60 / 24), true },
+				{ "hour",   "hours",   (seconds / 60 / 60) % 24, true },
+				{ "minute", "minutes", (seconds / 60) % 60,      true },
+				{ "second", "seconds", (seconds) % 60,           seconds < 10 * 60 }, // Include seconds for durations up to 10 minutes
 			};
 
 			std::vector<std::string> v;
 			for(auto const& unit : units)
 			{
-				if(unit.amount)
+				if(unit.amount && unit.include)
 					v.emplace_back(text::format("%zu %s", unit.amount, unit.amount == 1 ? unit.singular : unit.plural));
 			}
 			return text::join(v, ", ");
