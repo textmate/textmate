@@ -845,7 +845,9 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 
 - (NSDictionary*)environment
 {
-	return GenieManager.sharedInstance.environment;
+	if(!_environment)
+		_environment = [GenieManager.sharedInstance.environment copy];
+	return _environment;
 }
 
 - (void)setValueForKey:(NSString*)aKey dependsOnVariable:(NSString*)aVariable

@@ -36,7 +36,7 @@ typedef NS_ENUM(NSUInteger, GenieItemKind) {
 
 @property (nonatomic, readonly) NSMutableArray<GenieItem*>* children;
 @property (nonatomic, readonly) NSString* directory;
-@property (nonatomic, readonly) NSDictionary* environment;
+@property (nonatomic) NSDictionary* environment;
 
 @property (nonatomic) GenieFilter* filter;
 @property (nonatomic, readonly) BOOL acceptsQuery;
