@@ -145,15 +145,19 @@ static void* kResultItemsBinding = &kResultItemsBinding;
 
 - (void)startQuery
 {
-	[_dataSourceItem addObserver:self forKeyPath:@"replacementItems" options:0 context:kResultItemsBinding];
-	_dataSourceItem.live = YES;
 	_startQueryDate = [NSDate date];
+
+	NSMutableDictionary* dict = [_dataSourceItem.environment mutableCopy];
+	dict[@"GENIE_DEBUG"] = @"1";
+	_dataSourceItem.environment = dict;
+
+	[_dataSourceItem addObserver:self forKeyPath:@"replacementItems" options:0 context:kResultItemsBinding];
+	[_dataSourceItem refreshDataSource];
 }
 
 - (void)stopQuery
 {
 	[_dataSourceItem removeObserver:self forKeyPath:@"replacementItems" context:kResultItemsBinding];
-	_dataSourceItem.live = NO;
 
 	NSNumberFormatter* formatter = [NSNumberFormatter new];
 	formatter.numberStyle = NSNumberFormatterDecimalStyle;
