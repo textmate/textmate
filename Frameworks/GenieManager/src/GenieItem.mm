@@ -1558,7 +1558,7 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 			[items addObject:searchItem];
 	}
 
-	GenieDataSourceCacheRecord* res = [[GenieDataSourceCacheRecord alloc] initWithDigest:nil];
+	GenieDataSourceCacheRecord* res = [[GenieDataSourceCacheRecord alloc] initWithDigest:bundleIdentifier];
 	res.disablePersistence = YES;
 	res.dependsOnPath = dependsOnPath;
 	res.items = items;
