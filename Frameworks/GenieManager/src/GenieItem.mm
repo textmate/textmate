@@ -118,6 +118,7 @@ static NSTimeInterval ParseDuration (id value)
 }
 
 NSString* GenieDataSourceCacheRecordDidExpireNotification = @"GenieDataSourceCacheRecordDidExpireNotification";
+void* kRunningApplicationsBindings = &kRunningApplicationsBindings;
 
 @interface GenieDataSourceCacheRecord : NSObject
 {
@@ -128,6 +129,7 @@ NSString* GenieDataSourceCacheRecordDidExpireNotification = @"GenieDataSourceCac
 @property (nonatomic) NSDate* creationDate;
 @property (nonatomic) NSDate* expirationDate;
 @property (nonatomic) NSString* dependsOnPath;
+@property (nonatomic) BOOL dependsOnRunningApplications;
 @property (nonatomic) NSString* digest;
 @property (nonatomic) NSString* title;
 @property (nonatomic) BOOL forceExpired;
@@ -169,6 +171,7 @@ NSString* GenieDataSourceCacheRecordDidExpireNotification = @"GenieDataSourceCac
 - (void)dealloc
 {
 	self.watchDependencies = NO;
+	self.dependsOnRunningApplications = NO;
 }
 
 - (BOOL)writeToFile:(NSString*)aPath
@@ -274,6 +277,28 @@ NSString* GenieDataSourceCacheRecordDidExpireNotification = @"GenieDataSourceCac
 		if(_dependsOnDispatchSource)
 			dispatch_source_cancel(_dependsOnDispatchSource);
 		_dependsOnDispatchSource = nullptr;
+	}
+}
+
+- (void)setDependsOnRunningApplications:(BOOL)flag
+{
+	if(_dependsOnRunningApplications == flag)
+		return;
+
+	if(_dependsOnRunningApplications = flag)
+			[NSWorkspace.sharedWorkspace addObserver:self forKeyPath:@"runningApplications" options:0 context:kRunningApplicationsBindings];
+	else	[NSWorkspace.sharedWorkspace removeObserver:self forKeyPath:@"runningApplications" context:kRunningApplicationsBindings];
+}
+
+- (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)someObject change:(NSDictionary*)someChanges context:(void*)context
+{
+	if(context == kRunningApplicationsBindings)
+	{
+		[self cacheRecordDidExpire:self];
+	}
+	else
+	{
+		[super observeValueForKeyPath:keyPath ofObject:someObject change:someChanges context:context];
 	}
 }
 @end
@@ -1575,10 +1600,12 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 
 	if(NSMetadataQuery* query = [self createMetadataQuery])
 	{
+		BOOL dependsOnRunningApplications = [[self staticValueForKey:@"mdApplicationIsRunning"] boolValue];
 		__weak __block id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:NSMetadataQueryDidFinishGatheringNotification object:query queue:nil usingBlock:^(NSNotification*){
 			[[NSNotificationCenter defaultCenter] removeObserver:observerId];
 
 			GenieDataSourceCacheRecord* res = [[GenieDataSourceCacheRecord alloc] initWithDigest:nil];
+			res.dependsOnRunningApplications = dependsOnRunningApplications;
 			res.disablePersistence = YES;
 			res.items = query.results;
 			callback(res, nil, nil, nil);
