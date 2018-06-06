@@ -45,6 +45,8 @@ typedef NS_ENUM(NSUInteger, GenieItemKind) {
 @property (nonatomic, getter = isLive) BOOL live;
 @property (nonatomic, readonly, getter = isBusy) BOOL busy;
 @property (nonatomic, readonly) NSArray<GenieItem*>* replacementItems;
+@property (nonatomic) BOOL dataSourceNeedsUpdate;
+- (void)refreshDataSource;
 
 @property (nonatomic, readonly) BOOL disableLRUOrdering;
 @property (nonatomic, readonly) BOOL disableLearning;

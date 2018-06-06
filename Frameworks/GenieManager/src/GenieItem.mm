@@ -436,7 +436,6 @@ void* kRunningApplicationsBindings = &kRunningApplicationsBindings;
 	BOOL _pendingUpdateHTML;
 
 	NSMetadataQuery* _metadataQuery;
-	NSArray<__kindof GenieItem*>* _dataSourceResults;
 
 	// =============================
 	// = Used by Genie Preferences =
@@ -446,6 +445,7 @@ void* kRunningApplicationsBindings = &kRunningApplicationsBindings;
 	NSMutableArray* _mutableScriptArguments;
 }
 @property (nonatomic) GenieDataSourceCacheRecord* dataSourceCacheRecord;
+@property (nonatomic) NSArray<__kindof GenieItem*>* dataSourceResults;
 @property (nonatomic, readwrite, getter = isBusy) BOOL busy;
 @property (nonatomic, readwrite) BOOL disableLRUOrdering;
 - (instancetype)initWithIdentifier:(NSString*)anIdentifier parentItem:(GenieItem*)parentItem directory:(NSString*)directory;
@@ -550,6 +550,11 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 };
 
 @implementation GenieItem
++ (NSSet*)keyPathsForValuesAffectingReplacementItems
+{
+	return [NSSet setWithArray:@[ @"dataSourceResults" ]];
+}
+
 + (void)expireItemsForIdentifier:(NSString*)identifier
 {
 	if(GenieDataSourceCacheRecord* record = [GenieDataSourceCache.sharedInstance resultForKey:identifier])
@@ -667,27 +672,6 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSMetadataQueryDidUpdateNotification object:_metadataQuery];
 		[_metadataQuery stopQuery];
 		_metadataQuery = nil;
-	}
-}
-
-- (void)cacheRecordDidExpire:(NSNotification*)aNotification
-{
-	if(_live)
-		[self refreshDataSource];
-}
-
-- (void)setDataSourceCacheRecord:(GenieDataSourceCacheRecord*)newDataSourceCacheRecord
-{
-	if(_dataSourceCacheRecord)
-	{
-		_dataSourceCacheRecord.watchDependencies = NO;
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:GenieDataSourceCacheRecordDidExpireNotification object:_dataSourceCacheRecord];
-	}
-
-	if(_dataSourceCacheRecord = newDataSourceCacheRecord)
-	{
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheRecordDidExpire:) name:GenieDataSourceCacheRecordDidExpireNotification object:_dataSourceCacheRecord];
-		_dataSourceCacheRecord.watchDependencies = YES;
 	}
 }
 
@@ -1221,73 +1205,6 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 // = Data Source =
 // ===============
 
-- (void)acceptDataSourceItems:(NSArray*)items
-{
-	NSArray* templateItems = [_children filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"template = YES"]];
-	GenieItem* templateItem = templateItems.firstObject;
-
-	NSMutableArray* newItems = [NSMutableArray array];
-	for(id item in items)
-	{
-		GenieItem* newItem;
-		if([item isKindOfClass:[NSDictionary class]])
-			newItem = [[GenieItemDictionary alloc] initWithValues:item dataSource:self templateItem:templateItem parentItem:self.parentItem directory:self.directory];
-		else if([item isKindOfClass:[NSMetadataItem class]])
-			newItem = [[GenieItemMetadata alloc] initWithValues:item dataSource:self templateItem:templateItem parentItem:self.parentItem directory:self.directory];
-		else
-			continue;
-
-		newItem.filter = _filter;
-		newItem.live   = _live;
-		[newItems addObject:newItem];
-	}
-
-	[self willChangeValueForKey:@"replacementItems"];
-	_dataSourceResults = newItems;
-	[self didChangeValueForKey:@"replacementItems"];
-}
-
-- (void)setLive:(BOOL)flag
-{
-	if(_live == flag)
-		return;
-
-	if(_live = flag)
-	{
-		if(!self.hasReplacementItems)
-			return;
-
-		BOOL expired = _dataSourceCacheRecord.expired;
-		if(!_dataSourceResults)
-		{
-			expired = YES;
-			if(GenieDataSourceCacheRecord* cacheRecord = [GenieDataSourceCache.sharedInstance resultForKey:self.identifier])
-			{
-				if(self.kind == kGenieItemKindCommandResult)
-					cacheRecord.digest = [self.scriptWithArguments componentsJoinedByString:@"\034"];
-
-				[self acceptDataSourceItems:cacheRecord.items];
-				self.dataSourceCacheRecord = cacheRecord;
-				expired = cacheRecord.expired;
-			}
-
-			if(!_dataSourceResults)
-			{
-				NSArray* placeholders = [_children filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"placeholder = YES"]];
-				[placeholders makeObjectsPerformSelector:@selector(setFilter:) withObject:_filter];
-				_dataSourceResults = placeholders ?: @[ ];
-			}
-		}
-
-		if(expired)
-			[self refreshDataSource];
-	}
-	else
-	{
-		[self flushCachedValues];
-	}
-}
-
 - (void)flushCachedValues
 {
 	for(GenieItem* item in _dataSourceResults)
@@ -1323,15 +1240,60 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 	return @[ self ];
 }
 
-// ===============
-// = Data Source =
-// ===============
+- (void)setLive:(BOOL)flag
+{
+	if(_live == flag)
+		return;
 
-- (void)refreshDataSource
+	if(_live = flag)
+			[self refreshDataSourceIfNeeded];
+	else	[self flushCachedValues];
+}
+
+- (void)setDataSourceNeedsUpdate:(BOOL)flag
+{
+	if(_dataSourceNeedsUpdate == flag)
+		return;
+
+	if(_dataSourceNeedsUpdate = flag)
+		[self refreshDataSourceIfNeeded];
+}
+
+- (void)refreshDataSourceIfNeeded
 {
 	if(!self.hasReplacementItems)
 		return;
 
+	if(_live && !_dataSourceResults)
+	{
+		if(GenieDataSourceCacheRecord* cacheRecord = [GenieDataSourceCache.sharedInstance resultForKey:self.identifier])
+		{
+			if(self.kind == kGenieItemKindCommandResult)
+				cacheRecord.digest = [self.scriptWithArguments componentsJoinedByString:@"\034"];
+
+			self.dataSourceCacheRecord = cacheRecord;
+			self.dataSourceResults = [self createGenieItemsFrom:cacheRecord.items];
+
+			if(cacheRecord.expired)
+					_dataSourceNeedsUpdate = YES;
+			else	[cacheRecord checkExpired];
+		}
+
+		if(!_dataSourceResults)
+		{
+			NSArray* placeholders = [_children filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"placeholder = YES"]];
+			[placeholders makeObjectsPerformSelector:@selector(setFilter:) withObject:_filter];
+			self.dataSourceResults = placeholders ?: @[ ];
+			_dataSourceNeedsUpdate = YES;
+		}
+	}
+
+	if(_live && _dataSourceNeedsUpdate)
+		[self refreshDataSource];
+}
+
+- (void)refreshDataSource
+{
 	if(_updating)
 	{
 		_pendingUpdate = YES;
@@ -1345,13 +1307,14 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 		if(NSArray* items = res.items)
 		{
 			if(![_dataSourceCacheRecord.items isEqualToArray:items])
-				[self acceptDataSourceItems:items];
+				self.dataSourceResults = [self createGenieItemsFrom:items];
 
 			if(self.kind == kGenieItemKindCommandResult && self.identifier)
 				[GenieDataSourceCache.sharedInstance setResult:res forKey:self.identifier];
 		}
 
 		self.dataSourceCacheRecord = res;
+		self.dataSourceNeedsUpdate = NO;
 
 		_updating = NO;
 		self.busy = NO;
@@ -1370,6 +1333,48 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 		case kGenieItemKindCommandResult:   [self runScriptDataSourceAndCallback:callback];          break;
 		case kGenieItemKindRecentDocuments: [self runRecentDocumentsDataSourceAndCallback:callback]; break;
 	}
+}
+
+- (NSArray<GenieItem*>*)createGenieItemsFrom:(NSArray*)items
+{
+	GenieItem* templateItem = [_children filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"template = YES"]].firstObject;
+
+	NSMutableArray<GenieItem*>* genieItems = [NSMutableArray array];
+	for(id item in items)
+	{
+		GenieItem* genieItem;
+		if([item isKindOfClass:[NSDictionary class]])
+			genieItem = [[GenieItemDictionary alloc] initWithValues:item dataSource:self templateItem:templateItem parentItem:self.parentItem directory:self.directory];
+		else if([item isKindOfClass:[NSMetadataItem class]])
+			genieItem = [[GenieItemMetadata alloc] initWithValues:item dataSource:self templateItem:templateItem parentItem:self.parentItem directory:self.directory];
+		else
+			continue;
+
+		genieItem.filter = _filter;
+		genieItem.live   = _live;
+		[genieItems addObject:genieItem];
+	}
+	return genieItems;
+}
+
+- (void)setDataSourceCacheRecord:(GenieDataSourceCacheRecord*)newDataSourceCacheRecord
+{
+	if(_dataSourceCacheRecord)
+	{
+		_dataSourceCacheRecord.watchDependencies = NO;
+		[[NSNotificationCenter defaultCenter] removeObserver:self name:GenieDataSourceCacheRecordDidExpireNotification object:_dataSourceCacheRecord];
+	}
+
+	if(_dataSourceCacheRecord = newDataSourceCacheRecord)
+	{
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheRecordDidExpire:) name:GenieDataSourceCacheRecordDidExpireNotification object:_dataSourceCacheRecord];
+		_dataSourceCacheRecord.watchDependencies = YES;
+	}
+}
+
+- (void)cacheRecordDidExpire:(NSNotification*)aNotification
+{
+	self.dataSourceNeedsUpdate = YES;
 }
 
 // ======================
