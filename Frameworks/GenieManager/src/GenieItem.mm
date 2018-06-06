@@ -1316,7 +1316,7 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 	_updating = YES;
 	self.busy = YES;
 
-	auto callback = ^(GenieDataSourceCacheRecord* res){
+	auto callback = ^(GenieDataSourceCacheRecord* res, NSString* error, NSData* stdout, NSData* stderr){
 		if(NSArray* items = res.items)
 		{
 			if(![_dataSourceCacheRecord.items isEqualToArray:items])
@@ -1351,7 +1351,7 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 // = Script Data Source =
 // ======================
 
-- (void)runScriptDataSourceAndCallback:(void(^)(GenieDataSourceCacheRecord*))callback
+- (void)runScriptDataSourceAndCallback:(void(^)(GenieDataSourceCacheRecord*, NSString*, NSData*, NSData*))callback
 {
 	NSArray* program = self.scriptWithArguments;
 
@@ -1366,9 +1366,8 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 	// self.standardError  = nil;
 
 	[task launch:^(int rc, NSData* stdoutData, NSData* stderrData){
-		// self.standardOutput = stdoutData;
-		// self.standardError  = stderrData;
 		GenieDataSourceCacheRecord* res;
+		NSString* error;
 		if(rc == 0)
 		{
 			@try {
@@ -1391,18 +1390,18 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 				}
 				else
 				{
-					// self.error = @"command did not produce expected JSON output";
+					error = @"command did not produce expected JSON output";
 				}
 			}
 			@catch (NSException* e) {
-				// self.error = [NSString stringWithFormat:@"exception parsing JSON output: %@", e];
+				error = [NSString stringWithFormat:@"exception parsing JSON output: %@", e];
 			}
 		}
 		else
 		{
-			// self.error = [NSString stringWithFormat:@"command terminated with code %d", rc];
+			error = [NSString stringWithFormat:@"command terminated with code %d", rc];
 		}
-		callback(res);
+		callback(res, error, stdoutData, stderrData);
 	}];
 }
 
@@ -1410,7 +1409,7 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 // = Sqlite Data Source =
 // ======================
 
-- (void)runSqliteDataSourceAndCallback:(void(^)(GenieDataSourceCacheRecord*))callback
+- (void)runSqliteDataSourceAndCallback:(void(^)(GenieDataSourceCacheRecord*, NSString*, NSData*, NSData*))callback
 {
 	NSString* path  = self.sqlDatabase;
 	NSString* query = [self staticValueForKey:@"sqlQuery"];
@@ -1457,7 +1456,7 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 							res.disablePersistence = YES;
 							res.dependsOnPath = path;
 							res.items = items;
-							callback(res);
+							callback(res, error, nil, nil);
 						});
 					}
 					else
@@ -1480,9 +1479,7 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 			if(error)
 			{
 				dispatch_async(dispatch_get_main_queue(), ^{
-					NSLog(@"[%@ runSqliteDataSource] %@", [self class], error);
-					// self.error = error;
-					callback(nil);
+					callback(nil, error, nil, nil);
 				});
 			}
 		});
@@ -1500,11 +1497,12 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 // = Recent Documents Data Source =
 // ================================
 
-- (void)runRecentDocumentsDataSourceAndCallback:(void(^)(GenieDataSourceCacheRecord*))callback
+- (void)runRecentDocumentsDataSourceAndCallback:(void(^)(GenieDataSourceCacheRecord*, NSString*, NSData*, NSData*))callback
 {
 	NSString* bundleIdentifier = self.bundleIdentifier;
 	NSMutableArray<NSURL*>* urls = [NSMutableArray array];
 	NSString* dependsOnPath;
+	NSString* error;
 
 	@try {
 		// modern = 10.13 (High Sierra)
@@ -1543,9 +1541,14 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 
 			dependsOnPath = legacyPath;
 		}
+		else
+		{
+			error = [NSString stringWithFormat:@"unable to locate recent documents for bundle identifier ‘%@’", bundleIdentifier];
+		}
 	}
 	@catch (NSException* e) {
 		os_log_error(OS_LOG_DEFAULT, "exception reading recent documents for ‘%@’: %@", bundleIdentifier, e);
+		error = [NSString stringWithFormat:@"exception reading recent documents for bundle identifier ‘%@’: %@", bundleIdentifier, e];
 	}
 
 	NSMutableArray<NSMetadataItem*>* items = [NSMutableArray array];
@@ -1559,14 +1562,14 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 	res.disablePersistence = YES;
 	res.dependsOnPath = dependsOnPath;
 	res.items = items;
-	callback(res);
+	callback(res, error, nil, nil);
 }
 
 // ===================
 // = Spotlight Query =
 // ===================
 
-- (void)runSpotlightQueryAndCallback:(void(^)(GenieDataSourceCacheRecord*))callback
+- (void)runSpotlightQueryAndCallback:(void(^)(GenieDataSourceCacheRecord*, NSString*, NSData*, NSData*))callback
 {
 	// [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(metadataDidUpdateNotification:) name:NSMetadataQueryDidUpdateNotification object:_metadataQuery];
 
@@ -1578,7 +1581,7 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 			GenieDataSourceCacheRecord* res = [[GenieDataSourceCacheRecord alloc] initWithDigest:nil];
 			res.disablePersistence = YES;
 			res.items = query.results;
-			callback(res);
+			callback(res, nil, nil, nil);
 
 			[query stopQuery];
 		}];
@@ -1589,7 +1592,7 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 		GenieDataSourceCacheRecord* res = [[GenieDataSourceCacheRecord alloc] initWithDigest:nil];
 		res.disablePersistence = YES;
 		res.items = @[ ];
-		callback(res);
+		callback(res, nil, nil, nil);
 	}
 }
 
