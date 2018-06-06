@@ -429,9 +429,6 @@ void* kRunningApplicationsBindings = &kRunningApplicationsBindings;
 	NSMutableDictionary<NSString*, id>*            _cachedValues;
 	NSMutableDictionary<NSString*, NSMutableSet*>* _valuesDependingOnKeys;
 
-	BOOL _updating; // TODO merge with ‘busy’ property
-	BOOL _pendingUpdate;
-
 	BOOL _updatingHTML;
 	BOOL _pendingUpdateHTML;
 
@@ -446,7 +443,8 @@ void* kRunningApplicationsBindings = &kRunningApplicationsBindings;
 }
 @property (nonatomic) GenieDataSourceCacheRecord* dataSourceCacheRecord;
 @property (nonatomic) NSArray<__kindof GenieItem*>* dataSourceResults;
-@property (nonatomic, readwrite, getter = isBusy) BOOL busy;
+@property (nonatomic) BOOL updating;
+@property (nonatomic) BOOL pendingUpdate;
 @property (nonatomic, readwrite) BOOL disableLRUOrdering;
 - (instancetype)initWithIdentifier:(NSString*)anIdentifier parentItem:(GenieItem*)parentItem directory:(NSString*)directory;
 - (void)updateMetadataDisplayName;
@@ -550,6 +548,11 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 };
 
 @implementation GenieItem
++ (NSSet*)keyPathsForValuesAffectingBusy
+{
+	return [NSSet setWithArray:@[ @"updating" ]];
+}
+
 + (NSSet*)keyPathsForValuesAffectingReplacementItems
 {
 	return [NSSet setWithArray:@[ @"dataSourceResults" ]];
@@ -1242,6 +1245,11 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 	return @[ self ];
 }
 
+- (BOOL)isBusy
+{
+	return _updating;
+}
+
 - (void)setLive:(BOOL)flag
 {
 	if(_live == flag)
@@ -1301,9 +1309,7 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 		_pendingUpdate = YES;
 		return;
 	}
-
-	_updating = YES;
-	self.busy = YES;
+	self.updating = YES;
 
 	auto callback = ^(GenieDataSourceCacheRecord* res, NSString* error, NSData* stdout, NSData* stderr){
 		if(NSArray* items = res.items)
@@ -1318,9 +1324,7 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 		self.dataSourceCacheRecord = res;
 		self.dataSourceNeedsUpdate = NO;
 
-		_updating = NO;
-		self.busy = NO;
-
+		self.updating = NO;
 		if(_pendingUpdate)
 		{
 			_pendingUpdate = NO;
