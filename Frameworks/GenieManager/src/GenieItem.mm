@@ -1706,7 +1706,8 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 	for(NSURL* url in searchItems)
 	{
 		if(NSMetadataItem* searchItem = [[NSMetadataItem alloc] initWithURL:url])
-			[metadataItems addObject:searchItem];
+				[metadataItems addObject:searchItem];
+		else	NSLog(@"%s *** failed to create meta data item for %@", sel_getName(_cmd), url.filePathURL.path);
 	}
 	return metadataItems;
 }
