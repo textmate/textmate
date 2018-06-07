@@ -444,7 +444,6 @@ void* kRunningApplicationsBindings = &kRunningApplicationsBindings;
 @property (nonatomic) GenieDataSourceCacheRecord* dataSourceCacheRecord;
 @property (nonatomic) NSArray<__kindof GenieItem*>* dataSourceResults;
 @property (nonatomic) BOOL updating;
-@property (nonatomic) BOOL pendingUpdate;
 @property (nonatomic, readwrite) BOOL disableLRUOrdering;
 - (instancetype)initWithIdentifier:(NSString*)anIdentifier parentItem:(GenieItem*)parentItem directory:(NSString*)directory;
 - (void)updateMetadataDisplayName;
@@ -876,12 +875,11 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 			[_cachedValues removeObjectForKey:key];
 			[self didChangeValueForKey:key];
 
-			// FIXME Should set expired = YES because we may not be live but currently there is only cache record’s expired property
 			if([key isEqualToString:@"scriptWithArguments"])
 			{
 				_dataSourceCacheRecord.digest = [self.scriptWithArguments componentsJoinedByString:@"\034"];
-				if(_dataSourceCacheRecord.expired && _updating)
-					_pendingUpdate = YES;
+				if(_dataSourceCacheRecord.expired)
+					self.dataSourceNeedsUpdate = YES;
 			}
 		}
 	}
@@ -1306,10 +1304,11 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 {
 	if(_updating)
 	{
-		_pendingUpdate = YES;
+		_dataSourceNeedsUpdate = YES;
 		return;
 	}
 	self.updating = YES;
+	self.dataSourceNeedsUpdate = NO;
 
 	auto callback = ^(GenieDataSourceCacheRecord* res, NSString* error, NSData* stdout, NSData* stderr){
 		if(NSArray* items = res.items)
@@ -1322,14 +1321,10 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 		}
 
 		self.dataSourceCacheRecord = res;
-		self.dataSourceNeedsUpdate = NO;
-
 		self.updating = NO;
-		if(_pendingUpdate)
-		{
-			_pendingUpdate = NO;
+
+		if(_dataSourceNeedsUpdate)
 			[self refreshDataSource];
-		}
 	};
 
 	switch(self.kind)
