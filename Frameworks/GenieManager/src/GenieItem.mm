@@ -1602,8 +1602,6 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 
 - (void)runSpotlightQueryAndCallback:(void(^)(GenieDataSourceCacheRecord*, NSString*, NSData*, NSData*))callback
 {
-	// [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(metadataDidUpdateNotification:) name:NSMetadataQueryDidUpdateNotification object:_metadataQuery];
-
 	if(NSMetadataQuery* query = [self createMetadataQuery])
 	{
 		BOOL dependsOnRunningApplications = [[self staticValueForKey:@"mdApplicationIsRunning"] boolValue];
@@ -1746,12 +1744,6 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 
 	return query;
 }
-#if 0
-- (void)metadataDidUpdateNotification:(NSNotification*)aNotification
-{
-	[self acceptDataSourceItems:_metadataQuery.results];
-}
-#endif
 
 // =============================
 // = Used by Genie Preferences =
