@@ -76,10 +76,18 @@ static NSString* HTMLItemDidUpdateHeightNotification = @"HTMLItemDidUpdateHeight
 - (void)setObjectValue:(id)newValue
 {
 	id oldValue = self.objectValue;
-	[super setObjectValue:newValue];
-
 	if(oldValue)
+	{
 		[oldValue removeObserver:self forKeyPath:@"html" context:kHTMLBinding];
+		if(_currentNavigationRequest)
+		{
+			_HTMLString = nil;
+			_currentNavigationRequest = nil;
+			[_webView stopLoading];
+		}
+	}
+
+	[super setObjectValue:newValue];
 
 	if(newValue)
 		[newValue addObserver:self forKeyPath:@"html" options:NSKeyValueObservingOptionInitial context:kHTMLBinding];
@@ -116,15 +124,19 @@ static NSString* HTMLItemDidUpdateHeightNotification = @"HTMLItemDidUpdateHeight
 
 	if(NSDictionary* objectValue = self.objectValue)
 	{
+		__weak GenieHTMLTableCellView* weakSelf = self;
 		[self.webView evaluateJavaScript:@"[ window.innerHeight, document.body.getBoundingClientRect().top, document.body.getBoundingClientRect().bottom ]" completionHandler:^(id res, NSError* error){
-			if([res isKindOfClass:[NSArray class]] && [res count] == 3)
+			if(weakSelf.objectValue == objectValue)
 			{
-				// CGFloat curHeight = [[res objectAtIndex:0] doubleValue];
-				CGFloat top       = [[res objectAtIndex:1] doubleValue];
-				CGFloat bottom    = [[res objectAtIndex:2] doubleValue];
-				CGFloat newHeight = bottom + top; // top gives us the top margin which we’ll re-use for bottom margin
+				if([res isKindOfClass:[NSArray class]] && [res count] == 3)
+				{
+					// CGFloat curHeight = [[res objectAtIndex:0] doubleValue];
+					CGFloat top       = [[res objectAtIndex:1] doubleValue];
+					CGFloat bottom    = [[res objectAtIndex:2] doubleValue];
+					CGFloat newHeight = bottom + top; // top gives us the top margin which we’ll re-use for bottom margin
 
-				[[NSNotificationCenter defaultCenter] postNotificationName:HTMLItemDidUpdateHeightNotification object:objectValue userInfo:@{ @"height": @(newHeight) }];
+					[[NSNotificationCenter defaultCenter] postNotificationName:HTMLItemDidUpdateHeightNotification object:objectValue userInfo:@{ @"height": @(newHeight) }];
+				}
 			}
 		}];
 	}
