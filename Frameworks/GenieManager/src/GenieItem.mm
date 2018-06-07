@@ -1600,6 +1600,16 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 // = Spotlight Query =
 // ===================
 
+- (NSArray<NSMetadataItem*>*)itemsFromQuery:(NSMetadataQuery*)query
+{
+	NSMutableArray<NSMetadataItem*>* items = [NSMutableArray array];
+	[query disableUpdates];
+	for(NSUInteger i = 0; i < query.resultCount; ++i)
+		[items addObject:[query resultAtIndex:i]];
+	[query enableUpdates];
+	return items;
+}
+
 - (void)runSpotlightQueryAndCallback:(void(^)(GenieDataSourceCacheRecord*, NSString*, NSData*, NSData*))callback
 {
 	if(NSMetadataQuery* query = [self createMetadataQuery])
@@ -1611,7 +1621,7 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 			GenieDataSourceCacheRecord* res = [[GenieDataSourceCacheRecord alloc] initWithDigest:nil];
 			res.dependsOnRunningApplications = dependsOnRunningApplications;
 			res.disablePersistence = YES;
-			res.items = query.results;
+			res.items = [self itemsFromQuery:query];
 			callback(res, nil, nil, nil);
 
 			[query stopQuery];
