@@ -129,7 +129,6 @@ void* kRunningApplicationsBindings = &kRunningApplicationsBindings;
 @property (nonatomic) NSDate* creationDate;
 @property (nonatomic) NSDate* expirationDate;
 @property (nonatomic) NSString* dependsOnPath;
-@property (nonatomic) BOOL dependsOnRunningApplications;
 @property (nonatomic) NSString* digest;
 @property (nonatomic) NSString* title;
 @property (nonatomic) BOOL forceExpired;
@@ -171,7 +170,6 @@ void* kRunningApplicationsBindings = &kRunningApplicationsBindings;
 - (void)dealloc
 {
 	self.watchDependencies = NO;
-	self.dependsOnRunningApplications = NO;
 }
 
 - (BOOL)writeToFile:(NSString*)aPath
@@ -277,28 +275,6 @@ void* kRunningApplicationsBindings = &kRunningApplicationsBindings;
 		if(_dependsOnDispatchSource)
 			dispatch_source_cancel(_dependsOnDispatchSource);
 		_dependsOnDispatchSource = nullptr;
-	}
-}
-
-- (void)setDependsOnRunningApplications:(BOOL)flag
-{
-	if(_dependsOnRunningApplications == flag)
-		return;
-
-	if(_dependsOnRunningApplications = flag)
-			[NSWorkspace.sharedWorkspace addObserver:self forKeyPath:@"runningApplications" options:0 context:kRunningApplicationsBindings];
-	else	[NSWorkspace.sharedWorkspace removeObserver:self forKeyPath:@"runningApplications" context:kRunningApplicationsBindings];
-}
-
-- (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)someObject change:(NSDictionary*)someChanges context:(void*)context
-{
-	if(context == kRunningApplicationsBindings)
-	{
-		[self cacheRecordDidExpire:self];
-	}
-	else
-	{
-		[super observeValueForKeyPath:keyPath ofObject:someObject change:someChanges context:context];
 	}
 }
 @end
@@ -444,6 +420,7 @@ void* kRunningApplicationsBindings = &kRunningApplicationsBindings;
 @property (nonatomic) GenieDataSourceCacheRecord* dataSourceCacheRecord;
 @property (nonatomic) NSArray<__kindof GenieItem*>* dataSourceResults;
 @property (nonatomic) BOOL updating;
+@property (nonatomic) BOOL dependsOnRunningApplications;
 @property (nonatomic, readwrite) BOOL disableLRUOrdering;
 - (instancetype)initWithIdentifier:(NSString*)anIdentifier parentItem:(GenieItem*)parentItem directory:(NSString*)directory;
 - (void)updateMetadataDisplayNameForItem:(GenieItemMetadata*)genieItem;
@@ -668,6 +645,7 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 {
 	self.live = NO;
 	self.dataSourceCacheRecord = nil;
+	self.dependsOnRunningApplications = NO;
 
 	if(_metadataQuery)
 	{
@@ -1600,6 +1578,41 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 // = Spotlight Query =
 // ===================
 
+- (void)setDependsOnRunningApplications:(BOOL)flag
+{
+	if(_dependsOnRunningApplications == flag)
+		return;
+
+	if(_dependsOnRunningApplications = flag)
+			[NSWorkspace.sharedWorkspace addObserver:self forKeyPath:@"runningApplications" options:0 context:kRunningApplicationsBindings];
+	else	[NSWorkspace.sharedWorkspace removeObserver:self forKeyPath:@"runningApplications" context:kRunningApplicationsBindings];
+}
+
+- (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)someObject change:(NSDictionary*)someChanges context:(void*)context
+{
+	if(context == kRunningApplicationsBindings)
+	{
+		if(_metadataQuery)
+		{
+			[[NSNotificationCenter defaultCenter] removeObserver:self name:NSMetadataQueryDidUpdateNotification object:_metadataQuery];
+			[_metadataQuery stopQuery];
+			_metadataQuery = nil;
+		}
+
+		self.dependsOnRunningApplications = NO;
+		self.dataSourceNeedsUpdate = YES;
+	}
+	else
+	{
+		[super observeValueForKeyPath:keyPath ofObject:someObject change:someChanges context:context];
+	}
+}
+
+- (void)metadataDidUpdateNotification:(NSNotification*)aNotification
+{
+	self.dataSourceNeedsUpdate = YES;
+}
+
 - (NSArray<NSMetadataItem*>*)itemsFromQuery:(NSMetadataQuery*)query
 {
 	NSMutableArray<NSMetadataItem*>* items = [NSMutableArray array];
@@ -1612,20 +1625,34 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 
 - (void)runSpotlightQueryAndCallback:(void(^)(GenieDataSourceCacheRecord*, NSString*, NSData*, NSData*))callback
 {
-	if(NSMetadataQuery* query = [self createMetadataQuery])
+	if(_metadataQuery)
+	{
+		GenieDataSourceCacheRecord* res = [[GenieDataSourceCacheRecord alloc] initWithDigest:nil];
+		res.disablePersistence = YES;
+		res.items = [self itemsFromQuery:_metadataQuery];
+		callback(res, nil, nil, nil);
+	}
+	else if(NSMetadataQuery* query = [self createMetadataQuery])
 	{
 		BOOL dependsOnRunningApplications = [[self staticValueForKey:@"mdApplicationIsRunning"] boolValue];
 		__weak __block id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:NSMetadataQueryDidFinishGatheringNotification object:query queue:nil usingBlock:^(NSNotification*){
 			[[NSNotificationCenter defaultCenter] removeObserver:observerId];
 
 			GenieDataSourceCacheRecord* res = [[GenieDataSourceCacheRecord alloc] initWithDigest:nil];
-			res.dependsOnRunningApplications = dependsOnRunningApplications;
 			res.disablePersistence = YES;
 			res.items = [self itemsFromQuery:query];
 			callback(res, nil, nil, nil);
 
-			[query stopQuery];
+			if(self.dependsOnRunningApplications = dependsOnRunningApplications)
+				[query stopQuery];
 		}];
+
+		if(!dependsOnRunningApplications)
+		{
+			_metadataQuery = query;
+			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(metadataDidUpdateNotification:) name:NSMetadataQueryDidUpdateNotification object:query];
+		}
+
 		[query startQuery];
 	}
 	else
