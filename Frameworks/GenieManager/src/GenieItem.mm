@@ -405,10 +405,10 @@ void* kRunningApplicationsBindings = &kRunningApplicationsBindings;
 
 @interface GenieItemMetadata : GenieItem
 {
-	NSMetadataItem* _metadataItem;
 	__weak GenieItem* _dataSource;
 	GenieItem* _templateItem;
 }
+@property (nonatomic, readonly) NSMetadataItem* metadataItem;
 @property (nonatomic) NSString* metadataItemDisplayName;
 @property (nonatomic, readonly) NSString* nameWithVersion;
 @property (nonatomic, readonly) NSString* nameWithoutVersion;
@@ -446,7 +446,7 @@ void* kRunningApplicationsBindings = &kRunningApplicationsBindings;
 @property (nonatomic) BOOL updating;
 @property (nonatomic, readwrite) BOOL disableLRUOrdering;
 - (instancetype)initWithIdentifier:(NSString*)anIdentifier parentItem:(GenieItem*)parentItem directory:(NSString*)directory;
-- (void)updateMetadataDisplayName;
+- (void)updateMetadataDisplayNameForItem:(GenieItemMetadata*)genieItem;
 @end
 
 @implementation GenieItemMetadata
@@ -480,7 +480,7 @@ void* kRunningApplicationsBindings = &kRunningApplicationsBindings;
 	if([aKey isEqualToString:NSMetadataItemDisplayNameKey])
 	{
 		if(!_metadataItemDisplayName)
-			[_dataSource updateMetadataDisplayName];
+			[_dataSource updateMetadataDisplayNameForItem:self];
 		return _metadataItemDisplayName;
 	}
 
@@ -1629,8 +1629,14 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 	}
 }
 
-- (void)updateMetadataDisplayName
+- (void)updateMetadataDisplayNameForItem:(GenieItemMetadata*)genieItem
 {
+	if(![genieItem.metadataItem valueForAttribute:NSMetadataItemVersionKey])
+	{
+		genieItem.metadataItemDisplayName = genieItem.nameWithoutVersion;
+		return;
+	}
+
 	NSMutableDictionary* counts = [NSMutableDictionary dictionary];
 	for(GenieItemMetadata* item in _dataSourceResults)
 	{
