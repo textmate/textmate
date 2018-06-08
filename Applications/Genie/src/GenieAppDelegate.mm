@@ -731,7 +731,9 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 
 - (void)goToRoot:(id)sender
 {
+	[_tableView unbind:NSSelectionIndexesBinding];
 	self.history = @[ GenieItemCollection.defaultCollection ];
+	[_tableView bind:NSSelectionIndexesBinding toObject:self withKeyPath:@"collection.selectionIndexes" options:nil];
 
 	[_tableView scrollRowToVisible:0];
 }
@@ -757,7 +759,9 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 		if(children.count)
 		{
 			[self logAction:@"tab" forItems:@[ item ]];
+			[_tableView unbind:NSSelectionIndexesBinding];
 			self.history = [self.history arrayByAddingObject:[[GenieItemCollection alloc] initWithItems:children]];
+			[_tableView bind:NSSelectionIndexesBinding toObject:self withKeyPath:@"collection.selectionIndexes" options:nil];
 			[_tableView scrollRowToVisible:0];
 
 			return YES;
