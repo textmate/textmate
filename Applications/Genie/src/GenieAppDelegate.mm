@@ -190,6 +190,7 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 
 @interface AppDelegate () <NSApplicationDelegate, QLPreviewPanelDelegate, QLPreviewPanelDataSource, NSWindowDelegate, NSTextFieldDelegate, NSTableViewDelegate, NSTableViewDataSource>
 {
+	BOOL _disableUserDefaultsNotification;
 	GlobalHotkey* _hotkey;
 
 	NSMutableArray<NSString*>* _historyArray;
@@ -224,6 +225,10 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 
 - (void)userDefaultsDidChange:(NSNotification*)aNotification
 {
+	if(_disableUserDefaultsNotification)
+		return;
+	_disableUserDefaultsNotification = YES;
+
 	BOOL enableClipboardHistory = [[NSUserDefaults standardUserDefaults] boolForKey:kEnableClipboardHistorySettingsKey];
 	if(![ClipboardHistory.sharedInstance trySetEnabled:enableClipboardHistory])
 	{
@@ -252,6 +257,8 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 			return noErr;
 		}];
 	}
+
+	_disableUserDefaultsNotification = NO;
 }
 
 - (GenieItemCollection*)collection
