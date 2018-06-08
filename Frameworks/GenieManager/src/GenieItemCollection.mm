@@ -54,9 +54,8 @@ static BOOL SimpleMatch (NSString* needle, NSString* haystack)
 
 - (instancetype)initWithDefaultItems
 {
-	if(self = [self init])
+	if(self = [self initWithItems:GenieManager.sharedInstance.items])
 	{
-		self.items = GenieManager.sharedInstance.items;
 		[GenieManager.sharedInstance addObserver:self forKeyPath:@"items" options:0 context:kGenieItemItemsChangedBinding];
 		_defaultContainer = YES;
 	}
