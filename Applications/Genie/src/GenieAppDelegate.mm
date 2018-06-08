@@ -18,6 +18,7 @@
 #import <oak/debug.h>
 #import <os/log.h>
 #import <WebKit/WebKit.h>
+#import <ServiceManagement/ServiceManagement.h>
 
 // ==========================
 // = GenieHTMLTableCellView =
@@ -238,7 +239,7 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 
 		os_log_error(OS_LOG_DEFAULT, "Failed to monitor clipboard");
 	}
-#if 0
+
 	BOOL launchAtLogin = ![[NSUserDefaults standardUserDefaults] boolForKey:kDisableLaunchAtLoginSettingsKey];
 	if(!SMLoginItemSetEnabled(CFSTR("com.macromates.GenieLauncher"), launchAtLogin))
 	{
@@ -248,7 +249,7 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 
 		os_log_error(OS_LOG_DEFAULT, "Failed to create login item for Genie");
 	}
-#endif
+
 	NSString* activationKeyEvent = [[NSUserDefaults standardUserDefaults] stringForKey:kActivationKeyEventSettingsKey];
 	if(activationKeyEvent && ![activationKeyEvent isEqualToString:_hotkey.eventString])
 	{

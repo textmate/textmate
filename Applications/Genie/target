@@ -3,4 +3,4 @@ CP_Library/LoginItems = @GenieLauncher
 CP_Resources          = resources/* @GeniePrefs
 CP_SharedSupport/bin  = @plist_to_json @volumes
 LINK                 += ns regexp text GenieManager MenuBuilder OakAppKit OakFoundation SoftwareUpdate
-FRAMEWORKS            = Cocoa
+FRAMEWORKS            = Cocoa ServiceManagement
