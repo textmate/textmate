@@ -153,8 +153,6 @@ static NSTextField* CreateTextField (NSString* label, NSFont* font)
 	if(_optionDown != flag)
 	{
 		_optionDown = flag;
-
-		NSLog(@"[%@ setOptionDown:%s]", [self class], BSTR(flag));
 #if 0
 		NSString* keyPath = _optionDown ? @"objectValue.alternateTitle" : @"objectValue.title";
 		[self.textField unbind:NSValueBinding];

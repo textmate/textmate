@@ -699,8 +699,6 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 		return [self performReturn:aTextView], YES;
 	else if(res == OakMoveCancelReturn)
 		return [self performHideAndClose:self], YES;
-	else if(res == OakMoveNoActionReturn)
-		NSLog(@"%s %@", sel_getName(_cmd), NSStringFromSelector(aCommand));
 	return res != OakMoveNoActionReturn;
 }
 
