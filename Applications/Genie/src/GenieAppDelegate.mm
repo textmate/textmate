@@ -254,6 +254,7 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 	if(activationKeyEvent && ![activationKeyEvent isEqualToString:_hotkey.eventString])
 	{
 		_hotkey = [GlobalHotkey globalHotkeyForEventString:activationKeyEvent handler:^OSStatus{
+			[self goToRoot:self];
 			[NSApp activateIgnoringOtherApps:YES];
 			return noErr;
 		}];
@@ -644,10 +645,7 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 	[self addToHistory:self.collection.queryString];
 	[[NSUserDefaults standardUserDefaults] setObject:_historyArray forKey:@"history"];
 
-	// We do this after delay to avoid seeing the busy indicator when closing the window
-	[self performSelector:@selector(goToRoot:) withObject:self afterDelay:0];
-
-	// TODO Should set: collection.live = NO
+	self.history = @[ ];
 }
 
 - (void)performHideAndClose:(id)sender
