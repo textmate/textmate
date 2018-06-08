@@ -1941,8 +1941,21 @@ static NSSet* const kFilteredKeys = [NSSet setWithObjects:
 	NSArray* scriptArguments = [self.mutableScriptArguments valueForKey:@"value"];
 	res[@"scriptArguments"] = scriptArguments.count ? scriptArguments : nil;
 
-	NSArray* mdScope = self.mdScope;
-	res[@"mdScope"] = mdScope.count ? mdScope : nil;
+	NSMutableArray* scopes = [NSMutableArray array];
+	for(NSDictionary* scope in self.mdScope)
+	{
+		if(!scope[@"disabled"] || [scope[@"disabled"] boolValue])
+		{
+			[scopes addObject:scope];
+		}
+		else
+		{
+			NSMutableDictionary* dict = [scope mutableCopy];
+			dict[@"disabled"] = nil;
+			[scopes addObject:dict];
+		}
+	}
+	res[@"mdScope"] = scopes.count ? scopes : nil;
 
 	return res;
 }
