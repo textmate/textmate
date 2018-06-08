@@ -658,7 +658,7 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 
 - (void)performTab:(id)sender
 {
-	if([self goToChildItems:sender] == 0)
+	if([self goToChildItems:sender] == NO)
 	{
 		if(GenieItem* item = self.collection.selectedObjects.firstObject)
 		{
