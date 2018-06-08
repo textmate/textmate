@@ -726,11 +726,16 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 	}
 }
 
-- (void)goToRoot:(id)sender
+- (void)setHistory:(NSArray<GenieItemCollection*>*)newHistory
 {
 	self.collection.live = NO;
-	self.history = @[ GenieItemCollection.defaultCollection ];
+	_history = newHistory;
 	self.collection.live = YES;
+}
+
+- (void)goToRoot:(id)sender
+{
+	self.history = @[ GenieItemCollection.defaultCollection ];
 
 	[_tableView scrollRowToVisible:0];
 }
@@ -756,11 +761,7 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 		if(children.count)
 		{
 			[self logAction:@"tab" forItems:@[ item ]];
-
-			self.collection.live = NO;
 			self.history = [self.history arrayByAddingObject:[[GenieItemCollection alloc] initWithItems:children]];
-			self.collection.live = YES;
-
 			[_tableView scrollRowToVisible:0];
 
 			return YES;
@@ -774,9 +775,7 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 	if(self.history.count > 1)
 	{
 		[_tableView unbind:NSSelectionIndexesBinding];
-		self.collection.live = NO;
 		self.history = [self.history subarrayWithRange:NSMakeRange(0, self.history.count-1)];
-		self.collection.live = YES;
 		[_tableView bind:NSSelectionIndexesBinding toObject:self withKeyPath:@"collection.selectionIndexes" options:nil];
 
 		NSIndexSet* indexSet = self.collection.selectionIndexes;
