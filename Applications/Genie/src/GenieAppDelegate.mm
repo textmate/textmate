@@ -191,6 +191,7 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 
 @interface AppDelegate () <NSApplicationDelegate, QLPreviewPanelDelegate, QLPreviewPanelDataSource, NSWindowDelegate, NSTextFieldDelegate, NSTableViewDelegate, NSTableViewDataSource>
 {
+	NSRunningApplication* _frontmostApp;
 	BOOL _disableUserDefaultsNotification;
 	GlobalHotkey* _hotkey;
 
@@ -224,6 +225,15 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 	}];
 }
 
+- (instancetype)init
+{
+	if(self = [super init])
+	{
+		_frontmostApp = NSWorkspace.sharedWorkspace.frontmostApplication;
+	}
+	return self;
+}
+
 - (void)userDefaultsDidChange:(NSNotification*)aNotification
 {
 	if(_disableUserDefaultsNotification)
@@ -254,8 +264,7 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 	if(activationKeyEvent && ![activationKeyEvent isEqualToString:_hotkey.eventString])
 	{
 		_hotkey = [GlobalHotkey globalHotkeyForEventString:activationKeyEvent handler:^OSStatus{
-			[self goToRoot:self];
-			[NSApp activateIgnoringOtherApps:YES];
+			[self showWindow:self];
 			return noErr;
 		}];
 	}
@@ -473,8 +482,6 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 
 	if(NSMenu* menu = MBCreateMenu(items))
 		NSApp.mainMenu = menu;
-
-	[NSApp activateIgnoringOtherApps:YES];
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification*)aNotification
@@ -578,9 +585,6 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 	[_textField bind:NSValueBinding toObject:self withKeyPath:@"collection.queryString" options:@{ NSContinuouslyUpdatesValueBindingOption: @YES, NSNullPlaceholderBindingOption: @"Genie Search" }];
 	[_progressIndicator bind:NSAnimateBinding toObject:self withKeyPath:@"collection.busy" options:nil];
 
-	[self goToRoot:self];
-	[_window makeKeyAndOrderFront:self];
-
 	// =========================
 	// = Setup Software Update =
 	// =========================
@@ -603,17 +607,32 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 
 		[self launchPreferencesWithArguments:@[ @"-showChanges", @"YES" ]];
 	}
+
+	[_frontmostApp activateWithOptions:NSApplicationActivateIgnoringOtherApps];
+	_frontmostApp = nil;
 }
 
 - (void)applicationDidBecomeActive:(NSNotification*)aNotification
 {
-	self.collection.live = YES;
-	[_window makeKeyAndOrderFront:self];
+	[self showWindow:nil];
 }
 
 - (void)applicationDidResignActive:(NSNotification*)aNotification
 {
-	self.collection.live = NO;
+	[_window performClose:self];
+}
+
+- (void)showWindow:(id)sender
+{
+	if(NSApp.isActive)
+	{
+		[self goToRoot:self];
+		[_window makeKeyAndOrderFront:self];
+	}
+	else
+	{
+		[NSApp activateIgnoringOtherApps:YES];
+	}
 }
 
 - (id)windowWillReturnFieldEditor:(NSWindow*)aWindow toObject:(id)someObject
