@@ -104,52 +104,40 @@ static NSTimeInterval GetMediaDuration (NSString* path)
 @interface GenieMediaDuration ()
 {
 	NSMutableDictionary<NSString*, NSArray<void(^)(NSTimeInterval)>*>* _callbacks;
-
-	NSString* _cachePath;
-	NSMutableDictionary<NSString*, NSNumber*>* _cache;
-	BOOL _dirty;
+	NSMutableDictionary<NSString*, NSDictionary*>* _durations;
 }
 @end
 
 @implementation GenieMediaDuration
 + (instancetype)sharedInstance
 {
-	static GenieMediaDuration* sharedInstance = [self new];
+	static GenieMediaDuration* sharedInstance = [[self alloc] init];
 	return sharedInstance;
 }
 
 - (instancetype)init
 {
-	if(self = [super init])
+	if(self = [super initWithPath:[[GenieManager.sharedInstance cacheFolderByAppendingPathComponent:nil] stringByAppendingPathComponent:@"MediaDuration.plist"]])
 	{
 		_callbacks = [NSMutableDictionary dictionary];
 
-		NSString* cacheDir = [GenieManager.sharedInstance cacheFolderByAppendingPathComponent:nil];
-		_cachePath = [cacheDir stringByAppendingPathComponent:@"MediaDuration.plist"];
-		_cache     = [NSMutableDictionary dictionaryWithContentsOfFile:_cachePath] ?: [NSMutableDictionary dictionary];
-
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:NSApp];
+		NSDictionary* cache = [NSDictionary dictionaryWithContentsOfFile:self.path];
+		_durations = [cache[@"durations"] mutableCopy] ?: [NSMutableDictionary dictionary];
 	}
 	return self;
 }
 
-- (void)applicationWillTerminate:(NSNotification*)aNotification
+- (void)writeToFile:(NSString*)aPath
 {
-	[self synchronize];
-}
-
-- (void)synchronize
-{
-	if(_dirty)
-	{
-		[_cache writeToFile:_cachePath atomically:YES];
-		_dirty = NO;
-	}
+	NSDictionary* cache = @{
+		@"durations": _durations,
+	};
+	[cache writeToFile:aPath atomically:YES];
 }
 
 - (NSTimeInterval)durationForPath:(NSString*)aPath
 {
-	return aPath ? [_cache[aPath] doubleValue] : 0;
+	return aPath ? [_durations[aPath][@"duration"] doubleValue] : 0;
 }
 
 - (void)obtainDurationForPath:(NSString*)aPath andCallback:(void(^)(NSTimeInterval))aCallback
@@ -157,9 +145,9 @@ static NSTimeInterval GetMediaDuration (NSString* path)
 	if(!aPath)
 		return;
 
-	if(NSNumber* value = _cache[aPath])
+	if(NSDictionary* record = _durations[aPath])
 	{
-		if(NSTimeInterval duration = [value doubleValue])
+		if(NSTimeInterval duration = [record[@"duration"] doubleValue])
 			aCallback(duration);
 	}
 	else if(NSArray<void(^)(NSTimeInterval)>* existingCallbacks = _callbacks[aPath])
@@ -173,8 +161,13 @@ static NSTimeInterval GetMediaDuration (NSString* path)
 		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 			NSTimeInterval duration = GetMediaDuration(aPath);
 			dispatch_async(dispatch_get_main_queue(), ^{
-				_cache[aPath] = @(duration/1000);
-				_dirty = YES;
+				NSMutableDictionary* record = [NSMutableDictionary dictionary];
+				record[@"created"]              = [NSDate date];
+				record[@"duration"]             = duration ? @(duration/1000) : nil;
+				record[@"fileModificationDate"] = [[NSFileManager.defaultManager attributesOfItemAtPath:aPath error:nullptr] fileModificationDate];
+				_durations[aPath] = record;
+
+				self.dirty = YES;
 
 				NSArray<void(^)(NSTimeInterval)>* callbacks = _callbacks[aPath];
 				_callbacks[aPath] = nil;
