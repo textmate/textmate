@@ -1,23 +1,34 @@
-{	CFBundleName                  = "${TARGET_NAME}";
-	CFBundleVersion               = "${GENIE_REVISION}";
-	CFBundleShortVersionString    = "${GENIE_VERSION}";
-	CFBundleIdentifier            = "com.macromates.${TARGET_NAME}";
-
-	CFBundleExecutable            = "${TARGET_NAME}";
-	CFBundleIconFile              = "Genie";
-
-	LSMinimumSystemVersion        = "10.12";
-	LSUIElement                   = 1;
-
-	// CFBundleHelpBookName
-	// CFBundleHelpBookFolder
-	// NSContactsUsageDescription
-
-	CFBundleDevelopmentRegion     = "English";
-	CFBundleInfoDictionaryVersion = "6.0";
-	CFBundlePackageType           = "APPL";
-	CFBundleSignature             = "????";
-
-	NSMainNibFile                 = "MainMenu";
-	NSPrincipalClass              = "NSApplication";
-}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleName</key>
+	<string>${TARGET_NAME}</string>
+	<key>CFBundleVersion</key>
+	<string>${GENIE_REVISION}</string>
+	<key>CFBundleShortVersionString</key>
+	<string>${GENIE_VERSION}</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.macromates.${TARGET_NAME}</string>
+	<key>CFBundleExecutable</key>
+	<string>${TARGET_NAME}</string>
+	<key>CFBundleIconFile</key>
+	<string>Genie</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>10.12</string>
+	<key>LSUIElement</key>
+	<true/>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>NSMainNibFile</key>
+	<string>MainMenu</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+</dict>
+</plist>
