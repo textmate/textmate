@@ -103,9 +103,9 @@
 				dispatch_source_set_event_handler(timer, ^{
 					switch(state = temp.isRunning ? state+1 : 4)
 					{
-						case 1: NSLog(@"*** timeout: send SIGINT to %@",  temp.launchPath); [temp interrupt]; break;
-						case 2: NSLog(@"*** timeout: send SIGTERM to %@", temp.launchPath); [temp terminate]; break;
-						case 3: NSLog(@"*** timeout: send SIGKILL to %@", temp.launchPath); kill(temp.processIdentifier, SIGKILL);
+						case 1: NSLog(@"*** timeout: send SIGINT to %@ %@",  temp.launchPath, [temp.arguments componentsJoinedByString:@" "]); [temp interrupt]; break;
+						case 2: NSLog(@"*** timeout: send SIGTERM to %@ %@", temp.launchPath, [temp.arguments componentsJoinedByString:@" "]); [temp terminate]; break;
+						case 3: NSLog(@"*** timeout: send SIGKILL to %@ %@", temp.launchPath, [temp.arguments componentsJoinedByString:@" "]); kill(temp.processIdentifier, SIGKILL);
 						case 4: dispatch_source_cancel(timer); break;
 					}
 				});
@@ -128,9 +128,9 @@
 	{
 		switch(state = _task.isRunning ? state+1 : 4)
 		{
-			case 1: NSLog(@"*** timeout: send SIGINT to %@",  _task.launchPath); [_task interrupt]; break;
-			case 2: NSLog(@"*** timeout: send SIGTERM to %@", _task.launchPath); [_task terminate]; break;
-			case 3: NSLog(@"*** timeout: send SIGKILL to %@", _task.launchPath); kill(_task.processIdentifier, SIGKILL);
+			case 1: NSLog(@"*** timeout: send SIGINT to %@ %@",  _task.launchPath, [_task.arguments componentsJoinedByString:@" "]); [_task interrupt]; break;
+			case 2: NSLog(@"*** timeout: send SIGTERM to %@ %@", _task.launchPath, [_task.arguments componentsJoinedByString:@" "]); [_task terminate]; break;
+			case 3: NSLog(@"*** timeout: send SIGKILL to %@ %@", _task.launchPath, [_task.arguments componentsJoinedByString:@" "]); kill(_task.processIdentifier, SIGKILL);
 			case 4:
 				self.task = nil;
 				return;
