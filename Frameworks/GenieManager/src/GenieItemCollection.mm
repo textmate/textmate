@@ -235,6 +235,11 @@ static BOOL SimpleMatch (NSString* needle, NSString* haystack)
 	if(_filter.normalizedString == oldFilterString || [_filter.normalizedString isEqualToString:oldFilterString])
 		return;
 
+	BOOL isOldAPrefix = oldFilterString && [_filter.normalizedString hasPrefix:oldFilterString];
+	BOOL isNewAPrefix = _filter.normalizedString && [oldFilterString hasPrefix:_filter.normalizedString];
+	if(!isOldAPrefix && !isNewAPrefix)
+		self.selectionIndexes = _arrangedObjects.count ? [NSIndexSet indexSetWithIndex:0] : nil;
+
 	[self rearrangeObjects];
 }
 
