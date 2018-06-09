@@ -1,3 +1,6 @@
+@interface GenieDatabase : NSObject
+@end
+
 @interface GenieMediaDuration : NSObject
 + (instancetype)sharedInstance;
 - (NSTimeInterval)durationForPath:(NSString*)aPath;

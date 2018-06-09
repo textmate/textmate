@@ -28,6 +28,75 @@ static NSTimeInterval GetMediaDuration (NSString* path)
 	return 0;
 }
 
+// =================
+// = GenieDatabase =
+// =================
+
+@interface GenieDatabase ()
+{
+	NSTimer* _saveTimer;
+}
+@property (nonatomic) NSString* path;
+@property (nonatomic, getter = isDirty) BOOL dirty;
+@end
+
+@implementation GenieDatabase
+- (instancetype)init
+{
+	return [self initWithPath:nil];
+}
+
+- (instancetype)initWithPath:(NSString*)aPath
+{
+	if(self = [super init])
+	{
+		_path = aPath;
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:NSApp];
+	}
+	return self;
+}
+
+- (void)dealloc
+{
+	[NSNotificationCenter.defaultCenter removeObserver:self name:NSApplicationWillTerminateNotification object:NSApp];
+}
+
+- (void)setDirty:(BOOL)flag
+{
+	if(_saveTimer)
+	{
+		[_saveTimer invalidate];
+		_saveTimer = nil;
+	}
+
+	if(_dirty = flag)
+		_saveTimer = [NSTimer scheduledTimerWithTimeInterval:2 target:self selector:@selector(saveTimerDidFire:) userInfo:nil repeats:NO];
+}
+
+- (void)saveTimerDidFire:(NSTimer*)aTimer
+{
+	[self synchronizeIfNeeded];
+}
+
+- (void)applicationWillTerminate:(NSNotification*)aNotification
+{
+	[self synchronizeIfNeeded];
+}
+
+- (void)synchronizeIfNeeded
+{
+	if(self.isDirty)
+	{
+		[self writeToFile:self.path];
+		self.dirty = NO;
+	}
+}
+
+- (void)writeToFile:(NSString*)path
+{
+}
+@end
+
 // ======================
 // = GenieMediaDuration =
 // ======================
