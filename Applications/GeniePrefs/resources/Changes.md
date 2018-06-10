@@ -1,3 +1,26 @@
+# Genie 0.11-beta (2018-06-04)
+
+This version is a major refactoring/rewrite: Be sure to update `Application Support/Genie` from GitHub.
+
+### Improvements
+
+- You can use ⌃↑ or ⌃↓ to scroll through filter string history. This is mainly if you do some complex calculation, close Genie, and wants to get back to the calculation and augment it.
+
+- There is a spinner to show when data sources are active. Currently it shows immediately, so it may cause a bit of flicker for short-lived data sources. I have kept it like this for debugging/diagnostics (being sure something is running or *not* running). Eventually it’ll be made to start after a short delay.
+
+- The Show Calendar item has arrows to go to previous/next month.
+
+- Performance for Dry Run in Genie Preferences should be much better, although currently there is no console output for script data sources.
+
+### Regressions
+
+- Alternate actions are currently not supported (these appeared when holding down option), I plan to bring them back but in a slightly different form, as I want this to work with predicate groups.
+
+- Variables are no longer recursively expanded. E.g. before you could set an item’s title to `${foo}` then set the variable `foo` to `${bar}` etc. and Genie would follow it until it reached a literal value (or detected a loop). There are two reasons I changed this:
+
+	1. Values coming from sqlite3 or spotlight should *not* be further expanded, and with the previous system there was no way to indicate that a value is a literal string rather than a format string.
+	2. Values are transformed based on the field being expanded, e.g. when an item’s URL property uses variables, the value is URL-encoded, and if title or subtitle references `${file}` then the path will be abbreviated with a tilde (when appropriate), etc. When supporting recursive expansion, these transformations became a little opaque, because some you’d want inherited, others not.
+
 # Genie 0.10-beta (2018-05-08)
 
 * It’s now possible to debug data sources: Open preferences and select a data source (spotlight, sqlite3, or custom script), now choose Data Source → Dry Run (⌘R) from the menu.
