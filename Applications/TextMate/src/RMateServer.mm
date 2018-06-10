@@ -489,7 +489,7 @@ struct socket_observer_t
 				if(n != std::string::npos)
 				{
 					std::string const key   = str.substr(0, n);
-					std::string const value = str.substr(n+2);
+					std::string const value = str.substr(std::min(n+2, str.size()));
 
 					if(key == "data")
 					{
