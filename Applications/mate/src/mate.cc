@@ -7,7 +7,7 @@
 #include <io/path.h>
 #include <plist/uuid.h>
 
-static char const* const AppVersion = "2.12";
+static char const* const AppVersion = "2.13";
 
 static char const* socket_path ()
 {
@@ -192,9 +192,27 @@ static void append (std::string const& str, std::vector<std::string>& v)
 	}
 }
 
+static std::string escape_value (std::string const& value)
+{
+	if(!value.find('\\') && !value.find('\n'))
+		return value;
+
+	std::string escaped;
+	for(auto const& ch : value)
+	{
+		if(ch == '\\')
+			escaped += "\\\\";
+		else if(ch == '\n')
+			escaped += "\\n";
+		else
+			escaped += ch;
+	}
+	return escaped;
+}
+
 static void write_key_pair (int fd, std::string const& key, std::string const& value)
 {
-	std::string const str = key + ": " + value + "\r\n";
+	std::string const str = key + ": " + escape_value(value) + "\r\n";
 	write(fd, str.data(), str.size());
 }
 

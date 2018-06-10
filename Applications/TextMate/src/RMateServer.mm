@@ -506,7 +506,27 @@ struct socket_observer_t
 					{
 						D(DBF_RMateServer, bug("Got argument: %s = %s\n", key.c_str(), value.c_str()););
 						if(!value.empty())
-							records.back().arguments.emplace(key, value);
+						{
+							std::string unescaped;
+							bool unescape_next = false;
+							for(auto const& ch : value)
+							{
+								if(unescape_next)
+								{
+									unescaped += ch == 'n' ? '\n' : ch;
+									unescape_next = false;
+								}
+								else if(ch == '\\')
+								{
+									unescape_next = true;
+								}
+								else
+								{
+									unescaped += ch;
+								}
+							}
+							records.back().arguments.emplace(key, unescaped);
+						}
 					}
 				}
 			}
