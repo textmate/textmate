@@ -7,8 +7,8 @@
 - (void)obtainDurationForPath:(NSString*)aPath andCallback:(void(^)(NSTimeInterval))aCallback;
 @end
 
-@interface GenieFavoriteIcon : NSObject
+@interface GenieFavoriteIcon : GenieDatabase
 + (instancetype)sharedInstance;
-- (NSImage*)imageForURL:(NSURL*)aURL;
-- (void)obtainImageForURL:(NSURL*)aURL andCallback:(void(^)(NSImage*))aCallback;
+- (NSImage*)favoriteIconForURL:(NSURL*)aURL;
+- (void)obtainFavoriteIconForURL:(NSURL*)aURL andCallback:(void(^)(NSImage*))aCallback;
 @end

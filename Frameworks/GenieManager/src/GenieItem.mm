@@ -1030,12 +1030,12 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 		{
 			if(NSURL* url = [NSURL URLWithString:urlString])
 			{
-				res = [GenieFavoriteIcon.sharedInstance imageForURL:url];
+				res = [GenieFavoriteIcon.sharedInstance favoriteIconForURL:url];
 				if(!res)
 				{
 					res = [[NSWorkspace sharedWorkspace] iconForFileType:@"com.apple.web-internet-location"];
 
-					[GenieFavoriteIcon.sharedInstance obtainImageForURL:url andCallback:^(NSImage* image){
+					[GenieFavoriteIcon.sharedInstance obtainFavoriteIconForURL:url andCallback:^(NSImage* image){
 						[self willChangeValueForKey:@"iconImage"];
 						image.size = iconSize;
 						_cachedValues[@"iconImage"] = image;
@@ -1056,12 +1056,12 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 		{
 			if(NSURL* url = [NSURL URLWithString:urlString])
 			{
-				res = [GenieFavoriteIcon.sharedInstance imageForURL:url];
+				res = [GenieFavoriteIcon.sharedInstance favoriteIconForURL:url];
 				if(!res)
 				{
 					res = [[NSWorkspace sharedWorkspace] iconForFileType:@"com.apple.web-internet-location"];
 
-					[GenieFavoriteIcon.sharedInstance obtainImageForURL:url andCallback:^(NSImage* image){
+					[GenieFavoriteIcon.sharedInstance obtainFavoriteIconForURL:url andCallback:^(NSImage* image){
 						[self willChangeValueForKey:@"iconImage"];
 						image.size = iconSize;
 						_cachedValues[@"iconImage"] = image;
