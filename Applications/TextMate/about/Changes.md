@@ -2,6 +2,14 @@ Title: Release Notes
 
 # Changes
 
+## 2018-06-11 (v2.0-rc.10)
+
+* It is now possible to scroll project/folder search results horizontally.
+* Fixed misclassification of file encoding for documents saved with TextEdit. *[Ronald Wampler]*
+* Fixed potential deadlock when using ⇧⌘T just after loading a new document.
+* Fixed an issue where setting a mark (in the gutter) via `mate` could cause TextMate to crash.
+* See [all changes since v2.0-rc.9](https://github.com/textmate/textmate/compare/v2.0-rc.9...v2.0-rc.10)
+
 ## 2018-04-02 (v2.0-rc.9)
 
 * TextMate’s QuickLook plug-in no longer claims `public.data` (files without extension). The idea was to support previewing files like `README` but a side-effect was that TextMate’s QuickLook plug-in became responsible for generating thumbnails for all binary files without a dedicated QuickLook plug-in (e.g. disk images or zip archives). There appears to be no way to dynamically opt out of thumbnail generation, therefor we’ve had to remove support for previewing files without extension.
