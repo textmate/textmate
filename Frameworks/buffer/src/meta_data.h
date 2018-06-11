@@ -7,6 +7,9 @@ namespace ng
 {
 	struct spelling_t : meta_data_t
 	{
+		bool disabled () const        { return _disabled; }
+		void set_disabled (bool flag) { _disabled = flag; }
+
 		void check_spelling (buffer_t const* buffer);
 		std::map<size_t, bool> misspellings (buffer_t const* buffer, size_t from, size_t to) const;
 
@@ -20,6 +23,7 @@ namespace ng
 
 		typedef indexed_map_t<bool> tree_t;
 		tree_t _misspellings;    // true = misspelled, false = proper
+		bool _disabled = false;
 	};
 
 	struct symbols_t : meta_data_t

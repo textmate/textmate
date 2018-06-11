@@ -1,4 +1,5 @@
 #include "buffer.h"
+#include "meta_data.h"
 
 OAK_DEBUG_VAR(Buffer_Parsing);
 
@@ -126,6 +127,12 @@ namespace ng
 		_parser_reference.reset();
 		_parser_running = false;
 
+		// Using the NSSpellChecker API while main thread is blocked can result in this exception:
+		// Dispatch Thread Soft Limit Reached: 64 (too many dispatch threads blocked in synchronous operations)
+		// Therefor we disable spell checking during refresh. First noticed with macOS 10.12
+		if(_spelling)
+			_spelling->set_disabled(true);
+
 		std::lock_guard<std::mutex> lock(grammar()->mutex());
 		while(!_dirty.empty() && !_parser_states.empty())
 		{
@@ -144,6 +151,9 @@ namespace ng
 			auto newState = parse::parse(line.data(), line.data() + line.size(), state->second, newScopes, from == 0);
 			update_scopes(0, from, std::make_pair(from, to), newScopes, newState);
 		}
+
+		if(_spelling)
+			_spelling->set_disabled(false);
 	}
 
 } /* ng */

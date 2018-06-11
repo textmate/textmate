@@ -74,6 +74,9 @@ namespace ng
 			fromIter = toIter;
 		_misspellings.remove(fromIter, toIter);
 
+		if(_disabled)
+			return;
+
 		size_t revision = buffer->revision();
 		for(auto const& r : ranges)
 		{
