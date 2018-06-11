@@ -124,6 +124,7 @@ void* kRunningApplicationsBindings = &kRunningApplicationsBindings;
 {
 	NSTimer* _expirationTimer;
 	dispatch_source_t _dependsOnDispatchSource;
+	NSTimer* _dependsOnTimer;
 }
 @property (nonatomic) NSArray* items;
 @property (nonatomic) NSDate* creationDate;
@@ -230,6 +231,18 @@ void* kRunningApplicationsBindings = &kRunningApplicationsBindings;
 	self.expired = YES;
 }
 
+- (void)setDependsOnDidChange:(BOOL)flag
+{
+	if(_dependsOnTimer)
+		[_dependsOnTimer invalidate];
+	_dependsOnTimer = flag ? [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(dependsOnTimerDidFire:) userInfo:nil repeats:NO] : nil;
+}
+
+- (void)dependsOnTimerDidFire:(NSTimer*)aTimer
+{
+	[self cacheRecordDidExpire:nil];
+}
+
 - (void)setWatchDependencies:(BOOL)flag
 {
 	if(_watchDependencies == flag)
@@ -256,7 +269,7 @@ void* kRunningApplicationsBindings = &kRunningApplicationsBindings;
 
 				__weak GenieDataSourceCacheRecord* _self = self;
 				dispatch_source_set_event_handler(_dependsOnDispatchSource, ^{
-					[_self cacheRecordDidExpire:nil];
+					[_self setDependsOnDidChange:YES];
 				});
 
 				dispatch_resume(_dependsOnDispatchSource);
@@ -275,6 +288,10 @@ void* kRunningApplicationsBindings = &kRunningApplicationsBindings;
 		if(_dependsOnDispatchSource)
 			dispatch_source_cancel(_dependsOnDispatchSource);
 		_dependsOnDispatchSource = nullptr;
+
+		if(_dependsOnTimer)
+			[_dependsOnTimer invalidate];
+		_dependsOnTimer = nil;
 	}
 }
 @end
