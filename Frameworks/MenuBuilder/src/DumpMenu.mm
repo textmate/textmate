@@ -90,10 +90,10 @@ static NSString* MBInternalDumpMenu (NSMenu* menu, NSInteger indent)
 				};
 
 				modifier_mapping_t mappings[] = {
-					{ NSEventModifierFlagCommand, @"NSEventModifierFlagCommand" },
-					{ NSEventModifierFlagShift,   @"NSEventModifierFlagShift"   },
-					{ NSEventModifierFlagOption,  @"NSEventModifierFlagOption"  },
-					{ NSEventModifierFlagControl, @"NSEventModifierFlagControl" },
+					{ NSCommandKeyMask,   @"NSEventModifierFlagCommand" },
+					{ NSShiftKeyMask,     @"NSEventModifierFlagShift"   },
+					{ NSAlternateKeyMask, @"NSEventModifierFlagOption"  },
+					{ NSControlKeyMask,   @"NSEventModifierFlagControl" },
 				};
 
 				NSMutableArray* array = [NSMutableArray array];

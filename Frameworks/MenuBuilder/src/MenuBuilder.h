@@ -17,7 +17,7 @@ struct PUBLIC MBMenuItem
 	NSString*             title             = nil;
 	SEL                   action            = NULL;
 	NSString*             keyEquivalent     = @"";
-	NSUInteger            modifierFlags     = NSEventModifierFlagCommand;
+	NSUInteger            modifierFlags     = NSCommandKeyMask;
 	NSInteger             tag               = 0;
 	NSInteger             indent            = 0;
 	id                    target            = nil;
