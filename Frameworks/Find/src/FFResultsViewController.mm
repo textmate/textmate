@@ -29,6 +29,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 
 	__weak id      _eventMonitor;
 	BOOL           _longPressedCommandModifier;
+	CGFloat        _pendingColumnWidth;
 
 	FFResultNode*  _lastSelectedResult;
 }
@@ -121,8 +122,16 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		self.observeKeyPaths = @[ @"replaceString", @"showReplacementPreviews" ];
 
 		NSTextField* textField = OakCreateLabel(@"", font);
-		[textField setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
-		[self addSubview:textField];
+		[textField setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
+		[textField setContentCompressionResistancePriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
+
+		NSDictionary* views = @{
+			@"textField": textField,
+		};
+		OakAddAutoLayoutViewsToSuperview(views.allValues, self);
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[textField]" options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[textField]|" options:0 metrics:nil views:views]];
+
 		[textField bind:NSValueBinding toObject:self withKeyPath:@"excerptString" options:nil];
 
 		self.textField = textField;
@@ -305,6 +314,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		_outlineView.usesAlternatingRowBackgroundColors = YES;
 		_outlineView.headerView                         = nil;
 		_outlineView.rowHeight                          = std::max(lineHeight, 14.0);
+		_outlineView.columnAutoresizingStyle            = NSTableViewNoColumnAutoresizing;
 
 		NSTableColumn* tableColumn = [[NSTableColumn alloc] initWithIdentifier:@"checkbox"];
 		tableColumn.width = 50;
@@ -317,7 +327,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 
 		_scrollView = [[NSScrollView alloc] initWithFrame:NSZeroRect];
 		_scrollView.hasVerticalScroller   = YES;
-		_scrollView.hasHorizontalScroller = NO;
+		_scrollView.hasHorizontalScroller = YES;
 		_scrollView.autohidesScrollers    = YES;
 		_scrollView.borderType            = NSNoBorder;
 		_scrollView.documentView          = _outlineView;
@@ -374,6 +384,8 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 
 - (void)setResults:(FFResultNode*)someResults
 {
+	[_outlineView sizeLastColumnToFit];
+
 	_results = someResults;
 	[_outlineView reloadData];
 }
@@ -603,6 +615,18 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 	return [self outlineView:outlineView isGroupItem:item] ? 22 : item.lineSpan * [outlineView rowHeight];
 }
 
+- (void)commitPendingColumnWidth:(NSTableColumn*)tableColumn
+{
+	if(_pendingColumnWidth)
+	{
+		tableColumn.minWidth = MIN(_pendingColumnWidth, tableColumn.minWidth);
+		tableColumn.maxWidth = MAX(_pendingColumnWidth, tableColumn.maxWidth);
+		tableColumn.width    = _pendingColumnWidth;
+
+		_pendingColumnWidth = 0;
+	}
+}
+
 - (NSView*)outlineView:(NSOutlineView*)outlineView viewForTableColumn:(NSTableColumn*)tableColumn item:(FFResultNode*)item
 {
 	NSString* identifier = tableColumn.identifier ?: @"group";
@@ -628,7 +652,17 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 			res = cellView = [[OakSearchResultsMatchCellView alloc] initWithViewController:self font:_searchResultsFont];
 			cellView.identifier = identifier;
 		}
+
 		cellView.objectValue = item;
+		[cellView layoutSubtreeIfNeeded];
+		CGFloat width = NSMaxX(cellView.textField.frame) + 32;
+
+		if(tableColumn.width < width && _pendingColumnWidth < width)
+		{
+			if(_pendingColumnWidth == 0)
+				[self performSelector:@selector(commitPendingColumnWidth:) withObject:tableColumn afterDelay:0];
+			_pendingColumnWidth = width;
+		}
 	}
 	else
 	{
