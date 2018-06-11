@@ -1,12 +1,11 @@
 #import "OakFoundation.h"
 #import "NSString Additions.h"
-#import <ns/ns.h>
 
 std::string OakMoveToTrash (std::string const& path)
 {
 	NSURL* resultingItemURL;
 	if([[NSFileManager defaultManager] trashItemAtURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:path]] resultingItemURL:&resultingItemURL error:nil])
-			return to_s([resultingItemURL path]);
+			return resultingItemURL.filePathURL.path.fileSystemRepresentation ?: NULL_STR;
 	else	return NULL_STR;
 }
 
