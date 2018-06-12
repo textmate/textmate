@@ -1005,7 +1005,13 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 - (NSString*)title                { return [self expandedStringForKey:@"title"                                  abbreviatePath:YES urlEncodeVariables:NO  fallback:@"${kMDItemDisplayName}"]; }
 - (NSString*)subtitle             { return [self expandedStringForKey:@"subtitle"                               abbreviatePath:YES urlEncodeVariables:NO  fallback:@"${kMDItemPath}"]; }
 - (NSString*)file                 { return [self absolutePathForPath:[self expandedStringForKey:@"file"         abbreviatePath:NO  urlEncodeVariables:NO  fallback:@"${kMDItemPath}"]]; }
-- (NSString*)url                  { return [self expandedStringForKey:@"url"                                    abbreviatePath:NO  urlEncodeVariables:YES fallback:nil]; }
+
+- (NSString*)url
+{
+	NSString* urlString = [self expandedStringForKey:@"url" abbreviatePath:NO urlEncodeVariables:YES fallback:nil];
+	return [urlString stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet characterSetWithRange:NSMakeRange(0, 128)]];
+}
+
 - (NSString*)value                { return [self expandedStringForKey:@"value"                                  abbreviatePath:NO  urlEncodeVariables:NO  fallback:nil]; }
 - (NSString*)uiTitle              { return [self expandedStringForKey:@"uiTitle"                                abbreviatePath:NO  urlEncodeVariables:NO  fallback:nil]; }
 - (NSString*)invalidate           { return [self expandedStringForKey:@"invalidate"                             abbreviatePath:NO  urlEncodeVariables:NO  fallback:nil]; }
