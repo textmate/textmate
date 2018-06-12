@@ -478,8 +478,7 @@ void* kRunningApplicationsBindings = &kRunningApplicationsBindings;
 		return _metadataItemDisplayName;
 	}
 
-	BOOL metadataItemKey = [aKey hasPrefix:@"kMDItem"] || [aKey hasPrefix:@"_kMDItem"];
-	id value = metadataItemKey ? [_metadataItem valueForAttribute:aKey] : nil;
+	id value = [_metadataItem valueForAttribute:aKey];
 	if(!value && ![@[ @"uid", @"isTemplate" ] containsObject:aKey])
 		value = [_templateItem staticValueForKey:aKey];
 	return value;
