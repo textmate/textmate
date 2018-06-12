@@ -103,6 +103,20 @@
 	_arrayController.avoidsEmptySelection = NO;
 }
 
+- (void)cancel:(id)sender
+{
+	NSResponder* firstResponder = _tableView.window.firstResponder;
+	if([firstResponder isKindOfClass:[NSTextView class]] && ((NSTextView*)firstResponder).delegate == _tableView)
+	{
+		[_arrayController discardEditing];
+		[_tableView.window makeFirstResponder:_tableView];
+	}
+	else
+	{
+		[self.nextResponder doCommandBySelector:@selector(cancel:)];
+	}
+}
+
 - (BOOL)validateMenuItem:(NSMenuItem*)aMenuItem
 {
 	if(aMenuItem.action == @selector(delete:))
@@ -273,6 +287,20 @@
 - (void)delete:(id)sender
 {
 	[_removeButton performClick:self];
+}
+
+- (void)cancel:(id)sender
+{
+	NSResponder* firstResponder = _outlineView.window.firstResponder;
+	if([firstResponder isKindOfClass:[NSTextView class]] && ((NSTextView*)firstResponder).delegate == _outlineView)
+	{
+		[self.treeController discardEditing];
+		[_outlineView.window makeFirstResponder:_outlineView];
+	}
+	else
+	{
+		[self.nextResponder doCommandBySelector:@selector(cancel:)];
+	}
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem*)aMenuItem
