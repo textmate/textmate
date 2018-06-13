@@ -131,12 +131,14 @@ static BOOL RunSQLStatement (NSString* dbPath, char const* query, std::map<std::
 									"   'application_id'   INTEGER NOT NULL REFERENCES applications (id),"
 									"   'date'             TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP"
 									");"
+									"BEGIN TRANSACTION;"
 									"INSERT INTO applications ('name', 'identifier') VALUES (:name, :identifier);"
 									"INSERT INTO clippings ('clipping') VALUES (:clipping);"
 									"INSERT INTO history ('clipping_id', 'application_id')"
 									" SELECT clippings.id, applications.id"
 									" FROM 'clippings' JOIN 'applications'"
-									" WHERE clipping = :clipping AND identifier = :identifier;";
+									" WHERE clipping = :clipping AND identifier = :identifier;"
+									"END TRANSACTION;";
 
 								std::map<std::string, NSString*> variables = {
 									{ ":name",       currentApp.localizedName },
