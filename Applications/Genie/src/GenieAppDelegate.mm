@@ -457,8 +457,8 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 		},
 		{
 			@"Go", .submenu = {
-				{ @"Descend",            @selector(goToChildItems:),          @"\t", .modifierFlags = 0                        },
-				{ @"Ascend",             @selector(goToParentFolder:),        @"\t", .modifierFlags = NSEventModifierFlagShift },
+				{ @"Descend",            @selector(goToChildItems:),          .key = NSDownArrowFunctionKey },
+				{ @"Ascend",             @selector(goToParentFolder:),        .key = NSUpArrowFunctionKey   },
 				{ @"Back to Start",      @selector(goToRoot:),                @"/" },
 				{ /* -------- */ },
 				{ @"Back in History",    @selector(goToPreviousHistoryItem:), .key = NSUpArrowFunctionKey,   .modifierFlags = NSEventModifierFlagControl },
