@@ -1446,12 +1446,8 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 	NSString* query = [self staticValueForKey:@"sqlQuery"];
 	if(path && query)
 	{
-		// self.error = nil;
-
 		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 			NSString* error;
-
-			// usleep(250000); // FIXME Only sleep when refresh is caused by database file changing
 
 			sqlite3* db = nullptr;
 			if(sqlite3_open_v2(path.fileSystemRepresentation, &db, SQLITE_OPEN_READONLY, nullptr) == SQLITE_OK)
