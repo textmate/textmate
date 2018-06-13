@@ -997,7 +997,7 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 - (NSString*)match
 {
 	if(!_match)
-		_match = [([self staticValueForKey:@"match"] ?: self.title) decomposedStringWithCanonicalMapping];
+		_match = [[([self staticValueForKey:@"match"] ?: self.title) lowercaseString] decomposedStringWithCanonicalMapping];
 	return _match;
 }
 
