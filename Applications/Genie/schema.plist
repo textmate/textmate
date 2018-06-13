@@ -77,6 +77,7 @@
 
 		sqlDatabase      = "FormatString";     // Used by: sqlite3
 		sqlQuery         = "NSString";         // Used by: sqlite3
+		sqlBindings      = ( "NSString" );     // Used by: sqlite3
 
 		mdQuery          = "NSString";         // Used by: spotlight
 		mdScope          = (                   // Used by: spotlight
