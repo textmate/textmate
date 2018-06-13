@@ -865,12 +865,22 @@
 }
 @end
 
+@interface SqliteProperties ()
+{
+	TableViewController* _bindingsTable;
+}
+@end
+
 @implementation SqliteProperties
 - (void)makeView:(NSView*)contentView
 {
+	_bindingsTable = [[TableViewController alloc] initWithColumnNames:@[ @"value" ] visibleRows:3 showHeaderView:NO prototype:@{ @"value": @"binding" }];
+	[_bindingsTable.arrayController bind:NSContentArrayBinding toObject:self.treeController withKeyPath:@"selection.mutableSqlBindings" options:nil];
+
 	NSTextField* titleLabel        = [NSTextField labelWithString:@"Title:"];
 	NSTextField* databaseLabel     = [NSTextField labelWithString:@"Database:"];
 	NSTextField* queryLabel        = [NSTextField labelWithString:@"Query:"];
+	NSTextField* bindingsLabel     = [NSTextField labelWithString:@"Bindings:"];
 	NSTextField* titleTextField    = [NSTextField textFieldWithString:@""];
 	NSTextField* databaseTextField = [NSTextField textFieldWithString:@""];
 	NSScrollView* queryScrollView  = GenieCreateTextView();
@@ -880,18 +890,21 @@
 		@"titleLabel":     titleLabel,
 		@"databaseLabel":  databaseLabel,
 		@"queryLabel":     queryLabel,
+		@"bindingsLabel":  bindingsLabel,
 		@"title":          titleTextField,
 		@"database":       databaseTextField,
 		@"query":          queryScrollView,
+		@"bindings":       _bindingsTable.view,
 	};
 
 	GenieAddAutoLayoutViewsToSuperview(views, contentView);
 	GenieSetupKeyViewLoop(@[ contentView, titleTextField, databaseTextField, queryTextView ]);
 
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[titleLabel]-[title]-|"               options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[databaseLabel]-[database]-|"         options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[queryLabel]-[query]-|"               options:NSLayoutFormatAlignAllTop metrics:nil views:views]];
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-[title]-[database]-[query(>=100)]-|"  options:NSLayoutFormatAlignAllLeading|NSLayoutFormatAlignAllTrailing metrics:nil views:views]];
+	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[titleLabel]-[title]-|"                         options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
+	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[databaseLabel]-[database]-|"                   options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
+	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[queryLabel]-[query]-|"                         options:NSLayoutFormatAlignAllTop metrics:nil views:views]];
+	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[bindingsLabel]-[bindings]-|"                   options:NSLayoutFormatAlignAllTop metrics:nil views:views]];
+	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-[title]-[database]-[query(>=100)]-[bindings]-|" options:NSLayoutFormatAlignAllLeading|NSLayoutFormatAlignAllTrailing metrics:nil views:views]];
 
 	[titleTextField bind:NSValueBinding toObject:self.treeController withKeyPath:@"selection.primitiveTitle" options:nil];
 	[databaseTextField bind:NSValueBinding toObject:self.treeController withKeyPath:@"selection.primitiveSqlDatabase" options:nil];

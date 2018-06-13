@@ -1914,7 +1914,7 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 - (void)setDisplayName:(NSString*)newString     { self.primitiveTitle = newString; }
 
 static NSSet* const kFilteredKeys = [NSSet setWithObjects:
-	@"uid", @"disabled", @"kind", @"title", @"subtitle", @"match", @"icon", @"children", @"file", @"url", @"script", @"scriptArguments", @"predicate", @"bundleIdentifier", @"sqlDatabase", @"sqlQuery", @"mdQuery", @"mdScope", @"sortBy", @"descending",
+	@"uid", @"disabled", @"kind", @"title", @"subtitle", @"match", @"icon", @"children", @"file", @"url", @"script", @"scriptArguments", @"predicate", @"bundleIdentifier", @"sqlDatabase", @"sqlQuery", @"sqlBindings", @"mdQuery", @"mdScope", @"sortBy", @"descending",
 	nil
 ];
 
