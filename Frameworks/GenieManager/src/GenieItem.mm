@@ -433,6 +433,7 @@ void* kRunningApplicationsBindings = &kRunningApplicationsBindings;
 
 	NSMutableArray* _mdScope;
 	NSMutableArray* _mutableScriptArguments;
+	NSMutableArray* _mutableSqlBindings;
 }
 @property (nonatomic) GenieDataSourceCacheRecord* dataSourceCacheRecord;
 @property (nonatomic) NSArray<__kindof GenieItem*>* dataSourceResults;
@@ -1446,6 +1447,10 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 	NSString* query = [self staticValueForKey:@"sqlQuery"];
 	if(path && query)
 	{
+		NSMutableArray* queryArguments = [NSMutableArray array];
+		for(NSString* argument in [_mutableSqlBindings valueForKey:@"value"] ?: [self staticValueForKey:@"sqlBindings"])
+			[queryArguments addObject:[self expandedStringFromFormat:argument whileExpanding:@"scriptArguments" abbreviatePath:NO urlEncodeVariables:NO] ?: @""];
+
 		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 			NSString* error;
 
@@ -1457,6 +1462,9 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 				sqlite3_stmt* stmt = nullptr;
 				if(sqlite3_prepare_v2(db, [query UTF8String], -1, &stmt, nullptr) == SQLITE_OK)
 				{
+					for(NSUInteger i = 0; i < queryArguments.count; ++i)
+						sqlite3_bind_text(stmt, i+1, [queryArguments[i] UTF8String], -1, nullptr);
+
 					NSMutableArray<NSDictionary*>* items = [NSMutableArray array];
 
 					int rc = SQLITE_ROW;
@@ -1887,6 +1895,17 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 
 - (NSString*)sqlQuery                                       { return _values[@"sqlQuery"]; }
 - (void)setSqlQuery:(NSString*)newString                    { _values[@"sqlQuery"] = newString; }
+
+- (NSMutableArray*)mutableSqlBindings
+{
+	if(!_mutableSqlBindings)
+	{
+		_mutableSqlBindings = [NSMutableArray array];
+		for(NSString* value in _values[@"sqlBindings"])
+			[_mutableSqlBindings addObject:[@{ @"value": value } mutableCopy]];
+	}
+	return _mutableSqlBindings;
+}
 
 // Other
 
