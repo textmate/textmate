@@ -824,11 +824,8 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 	if(selectedItems.count)
 	{
 		[self logAction:@"return" forItems:selectedItems];
-		[GenieManager.sharedInstance runAsInactive:^{
+		if(RunGenieItems(selectedItems))
 			[_window close];
-			if(!RunGenieItems(selectedItems))
-				NSBeep();
-		}];
 	}
 }
 
