@@ -119,6 +119,8 @@
 		[[stdoutPipe fileHandleForWriting] closeFile];
 		[[stderrPipe fileHandleForWriting] closeFile];
 		self.task = nil;
+
+		callback(EX_UNAVAILABLE, nil, [e.reason dataUsingEncoding:NSUTF8StringEncoding]);
 	}
 }
 
