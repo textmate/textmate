@@ -613,9 +613,10 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 	_frontmostApp = nil;
 }
 
-- (void)applicationDidBecomeActive:(NSNotification*)aNotification
+- (BOOL)applicationShouldHandleReopen:(NSApplication*)anApplication hasVisibleWindows:(BOOL)visibleWindowsFlag
 {
 	[self showWindow:nil];
+	return NO;
 }
 
 - (void)applicationDidResignActive:(NSNotification*)aNotification
@@ -625,15 +626,10 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 
 - (void)showWindow:(id)sender
 {
-	if(NSApp.isActive)
-	{
+	[GenieManager.sharedInstance runAsActive:^{
 		[self goToRoot:self];
 		[_window makeKeyAndOrderFront:self];
-	}
-	else
-	{
-		[NSApp activateIgnoringOtherApps:YES];
-	}
+	}];
 }
 
 - (id)windowWillReturnFieldEditor:(NSWindow*)aWindow toObject:(id)someObject
@@ -809,15 +805,11 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 	if(selectedItems.count)
 	{
 		[self logAction:@"return" forItems:selectedItems];
-
-		__weak __block id appDidDeactivateObserver = [[[NSWorkspace sharedWorkspace] notificationCenter] addObserverForName:NSWorkspaceDidDeactivateApplicationNotification object:nil queue:nil usingBlock:^(NSNotification* n){
+		[GenieManager.sharedInstance runAsInactive:^{
 			[_window close];
-			[[[NSWorkspace sharedWorkspace] notificationCenter] removeObserver:appDidDeactivateObserver];
-
 			if(!RunGenieItems(selectedItems))
 				NSBeep();
 		}];
-		[NSApp hide:self];
 	}
 }
 
@@ -1068,8 +1060,10 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 		NSArray* baseArguments = @[ NSBundle.mainBundle.bundleIdentifier ];
 		someArguments = someArguments ? [baseArguments arrayByAddingObjectsFromArray:someArguments] : baseArguments;
 
-		[self performHideAndClose:self];
-		[[NSWorkspace sharedWorkspace] launchApplicationAtURL:url options:NSWorkspaceLaunchDefault configuration:@{ NSWorkspaceLaunchConfigurationArguments: someArguments } error:nullptr];
+		[GenieManager.sharedInstance runAsInactive:^{
+			[_window close];
+			[[NSWorkspace sharedWorkspace] launchApplicationAtURL:url options:NSWorkspaceLaunchDefault configuration:@{ NSWorkspaceLaunchConfigurationArguments: someArguments } error:nullptr];
+		}];
 	}
 	else
 	{
