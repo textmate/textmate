@@ -128,7 +128,7 @@ static NSString* HTMLItemDidUpdateHeightNotification = @"HTMLItemDidUpdateHeight
 		[_webView.configuration.userContentController addUserScript:script];
 
 		@try {
-			_currentNavigationRequest = [_webView loadHTMLString:_HTMLString baseURL:[NSURL URLWithString:@"file://localhost/"]];
+			_currentNavigationRequest = [_webView loadHTMLString:_HTMLString baseURL:[NSURL fileURLWithPath:@"/" isDirectory:YES]];
 		}
 		@catch (NSException* e) {
 			os_log_error(OS_LOG_DEFAULT, "exception loading HTML string: %@", e);
