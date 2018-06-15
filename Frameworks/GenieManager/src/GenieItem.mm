@@ -763,7 +763,7 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 
 - (void)updateHTML
 {
-	if(_hasHTMLOutput)
+	if(_hasHTMLOutput && !_htmlOutputItem[@"html"])
 	{
 		if(_updatingHTML)
 		{
@@ -1264,6 +1264,7 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 	else
 	{
 		[self flushCachedValues];
+		_htmlOutputItem[@"html"]  = nil;
 		_htmlOutputItem[@"query"] = nil;
 	}
 }
