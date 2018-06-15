@@ -588,7 +588,7 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 		_fallback = [[self staticValueForKey:@"match"] isEqualToString:@"*"];
 
 		if(_hasHTMLOutput = [[self staticValueForKey:@"output"] isEqualToString:@"html"])
-			_htmlOutputItem = [NSMutableDictionary dictionaryWithDictionary:@{ @"readOnly": @YES }];
+			_htmlOutputItem = [NSMutableDictionary dictionaryWithDictionary:@{ @"readOnly": @YES, @"query": self.queryString ?: @"" }];
 
 		BOOL acceptQuery = _fallback;
 		for(NSString* key in @[ @"title", @"subtitle", @"file", @"url", @"value", @"scriptArguments", @"standardInputString" ])
@@ -833,7 +833,10 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 	[_dataSourceResults makeObjectsPerformSelector:_cmd withObject:newFilter];
 
 	if(![oldQuery isEqualToString:self.queryString])
+	{
+		_htmlOutputItem[@"query"] = self.queryString;
 		[self updateValuesForKeysDependingOnVariable:@"query"];
+	}
 }
 
 // ===========================
@@ -1255,8 +1258,14 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 		return;
 
 	if(_live = flag)
-			[self refreshDataSourceIfNeeded];
-	else	[self flushCachedValues];
+	{
+		[self refreshDataSourceIfNeeded];
+	}
+	else
+	{
+		[self flushCachedValues];
+		_htmlOutputItem[@"query"] = nil;
+	}
 }
 
 - (void)setDataSourceNeedsUpdate:(BOOL)flag

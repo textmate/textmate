@@ -42,14 +42,24 @@
 @end
 
 @interface GenieHTMLTableCellView : NSTableCellView <WKNavigationDelegate, WKScriptMessageHandler>
+{
+	BOOL _disableQueryStringEvent;
+}
 @property (nonatomic) WKWebView* webView;
 @property (nonatomic) NSString* HTMLString;
 @property (nonatomic) WKNavigation* currentNavigationRequest;
 - (instancetype)init;
 @end
 
-static void* kHTMLBinding = &kHTMLBinding;
+static void* kHTMLBinding  = &kHTMLBinding;
+static void* kQueryBinding = &kQueryBinding;
 static NSString* HTMLItemDidUpdateHeightNotification = @"HTMLItemDidUpdateHeightNotification";
+
+static NSString* EscapeJavaScriptString (NSString* src)
+{
+	NSRegularExpression* regex = [NSRegularExpression regularExpressionWithPattern:@"['\"\\\\]" options:0 error:nil];
+	return [regex stringByReplacingMatchesInString:src options:0 range:NSMakeRange(0, src.length) withTemplate:@"\\\\$0"];
+}
 
 @implementation GenieHTMLTableCellView
 - (instancetype)init
@@ -58,6 +68,7 @@ static NSString* HTMLItemDidUpdateHeightNotification = @"HTMLItemDidUpdateHeight
 	{
 		WKWebViewConfiguration* webConfig = [[WKWebViewConfiguration alloc] init];
 		webConfig.suppressesIncrementalRendering = YES;
+		[webConfig.userContentController addScriptMessageHandler:self name:@"queryMessageHandler"];
 		[webConfig.userContentController addScriptMessageHandler:self name:@"logMessageHandler"];
 
 		_webView = [[WKWebViewDisableScrollGesture alloc] initWithFrame:NSZeroRect configuration:webConfig];
@@ -81,6 +92,12 @@ static NSString* HTMLItemDidUpdateHeightNotification = @"HTMLItemDidUpdateHeight
 	{
 		NSLog(@"JavaScript Console: %@", message.body);
 	}
+	else if([message.name isEqualToString:@"queryMessageHandler"])
+	{
+		_disableQueryStringEvent = YES;
+		self.objectValue[@"query"] = message.body;
+		_disableQueryStringEvent = NO;
+	}
 }
 
 - (void)setObjectValue:(id)newValue
@@ -89,6 +106,7 @@ static NSString* HTMLItemDidUpdateHeightNotification = @"HTMLItemDidUpdateHeight
 	if(oldValue)
 	{
 		[oldValue removeObserver:self forKeyPath:@"html" context:kHTMLBinding];
+		[oldValue removeObserver:self forKeyPath:@"query" context:kQueryBinding];
 		if(_currentNavigationRequest)
 		{
 			_HTMLString = nil;
@@ -100,13 +118,23 @@ static NSString* HTMLItemDidUpdateHeightNotification = @"HTMLItemDidUpdateHeight
 	[super setObjectValue:newValue];
 
 	if(newValue)
+	{
 		[newValue addObserver:self forKeyPath:@"html" options:NSKeyValueObservingOptionInitial context:kHTMLBinding];
+		[newValue addObserver:self forKeyPath:@"query" options:NSKeyValueObservingOptionInitial context:kQueryBinding];
+	}
 }
 
 - (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)value change:(NSDictionary*)changeDictionary context:(void*)someContext
 {
 	if(someContext == kHTMLBinding && [keyPath isEqualToString:@"html"])
+	{
 		self.HTMLString = [value valueForKey:@"html"];
+	}
+	else if(someContext == kQueryBinding && [keyPath isEqualToString:@"query"])
+	{
+		if(!_disableQueryStringEvent)
+			[self.webView evaluateJavaScript:[NSString stringWithFormat:@"genie.updateQuery('%@');", EscapeJavaScriptString([value valueForKey:@"query"] ?: @"")] completionHandler:nil];
+	}
 }
 
 - (void)setHTMLString:(NSString*)newHTMLString
@@ -117,11 +145,19 @@ static NSString* HTMLItemDidUpdateHeightNotification = @"HTMLItemDidUpdateHeight
 	_currentNavigationRequest = nil;
 	if(_HTMLString = newHTMLString)
 	{
-		NSString* source = @""
+		NSString* queryString = self.objectValue[@"query"] ?: @"";
+		NSString* source = [NSString stringWithFormat:@""
 			"let genie = {"
-			"  log(str) { webkit.messageHandlers.logMessageHandler.postMessage(str); }"
-			"};"
-		;
+			"  log(str)         { webkit.messageHandlers.logMessageHandler.postMessage(str); },"
+			"  set query(str)   { webkit.messageHandlers.queryMessageHandler.postMessage(this.internal_storage = str); },"
+			"  get query()      { return this.internal_storage; },"
+			"  updateQuery(str) {"
+			"	  this.internal_storage = str;"
+			"    window.dispatchEvent(new Event('querychange'));"
+			"  },"
+			"  internal_storage: '%@'"
+			"};", EscapeJavaScriptString(queryString)
+		];
 
 		WKUserScript* script = [[WKUserScript alloc] initWithSource:source injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:NO];
 		[_webView.configuration.userContentController removeAllUserScripts];
