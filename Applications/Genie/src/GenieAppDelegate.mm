@@ -711,7 +711,19 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 
 - (void)performDoubleClick:(id)sender
 {
-	[self executeItems:sender];
+	NSArray* selectedItems = self.collection.selectedObjects;
+	if(selectedItems.count)
+	{
+		if(RunGenieItems(selectedItems))
+		{
+			[self logAction:@"click" forItems:selectedItems];
+			[_window close];
+		}
+		else
+		{
+			[self performTab:sender];
+		}
+	}
 }
 
 - (BOOL)control:(NSControl*)aControl textView:(NSTextView*)aTextView doCommandBySelector:(SEL)aCommand
