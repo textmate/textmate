@@ -1,5 +1,6 @@
 #import "GenieRunner.h"
 #import "GenieTask.h"
+#import "GenieManager.h"
 
 BOOL RunGenieItems (NSArray<GenieItem*>* items)
 {
@@ -89,12 +90,13 @@ BOOL RunGenieItems (NSArray<GenieItem*>* items)
 
 			if(rc != 0)
 			{
-				NSAlert* alert = [[NSAlert alloc] init];
-				alert.messageText     = title;
-				alert.informativeText = stderrStr.length ? stderrStr : (stdoutStr.length ? stdoutStr : [NSString stringWithFormat:@"Command returned status code %d.", rc]);
-				[NSApp activateIgnoringOtherApps:YES];
-				[alert runModal];
-				[NSApp hide:nil];
+				[GenieManager.sharedInstance runAsActive:^{
+					NSAlert* alert = [[NSAlert alloc] init];
+					alert.messageText     = title;
+					alert.informativeText = stderrStr.length ? stderrStr : (stdoutStr.length ? stdoutStr : [NSString stringWithFormat:@"Command returned status code %d.", rc]);
+					[alert runModal];
+					[NSApp hide:nil];
+				}];
 			}
 			else if(stdoutStr.length || stderrStr.length)
 			{
