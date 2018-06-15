@@ -41,7 +41,7 @@
 }
 @end
 
-@interface GenieHTMLTableCellView : NSTableCellView <WKNavigationDelegate>
+@interface GenieHTMLTableCellView : NSTableCellView <WKNavigationDelegate, WKScriptMessageHandler>
 @property (nonatomic) WKWebView* webView;
 @property (nonatomic) NSString* HTMLString;
 @property (nonatomic) WKNavigation* currentNavigationRequest;
@@ -58,6 +58,7 @@ static NSString* HTMLItemDidUpdateHeightNotification = @"HTMLItemDidUpdateHeight
 	{
 		WKWebViewConfiguration* webConfig = [[WKWebViewConfiguration alloc] init];
 		webConfig.suppressesIncrementalRendering = YES;
+		[webConfig.userContentController addScriptMessageHandler:self name:@"logMessageHandler"];
 
 		_webView = [[WKWebViewDisableScrollGesture alloc] initWithFrame:NSZeroRect configuration:webConfig];
 		_webView.navigationDelegate = self;
@@ -72,6 +73,14 @@ static NSString* HTMLItemDidUpdateHeightNotification = @"HTMLItemDidUpdateHeight
 		// [self bind:@"HTMLString" toObject:self withKeyPath:@"objectValue.html" options:nil];
 	}
 	return self;
+}
+
+- (void)userContentController:(WKUserContentController*)userContentController didReceiveScriptMessage:(WKScriptMessage*)message
+{
+	if([message.name isEqualToString:@"logMessageHandler"])
+	{
+		NSLog(@"JavaScript Console: %@", message.body);
+	}
 }
 
 - (void)setObjectValue:(id)newValue
@@ -108,6 +117,16 @@ static NSString* HTMLItemDidUpdateHeightNotification = @"HTMLItemDidUpdateHeight
 	_currentNavigationRequest = nil;
 	if(_HTMLString = newHTMLString)
 	{
+		NSString* source = @""
+			"let genie = {"
+			"  log(str) { webkit.messageHandlers.logMessageHandler.postMessage(str); }"
+			"};"
+		;
+
+		WKUserScript* script = [[WKUserScript alloc] initWithSource:source injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:NO];
+		[_webView.configuration.userContentController removeAllUserScripts];
+		[_webView.configuration.userContentController addUserScript:script];
+
 		@try {
 			_currentNavigationRequest = [_webView loadHTMLString:_HTMLString baseURL:[NSURL URLWithString:@"file://localhost/"]];
 		}
