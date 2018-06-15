@@ -4,12 +4,12 @@
 #import <oak/debug.h>
 #import "ClipboardHistory.h"
 
-static BOOL RunSQLStatement (NSString* dbPath, char const* query, std::map<std::string, NSString*> const& variables)
+static BOOL RunSQLStatement (NSString* dbPath, char const* query, std::map<std::string, id> const& variables)
 {
 	BOOL res = NO;
 
-   sqlite3* db = nullptr;
-   if(sqlite3_open([[dbPath stringByExpandingTildeInPath] fileSystemRepresentation], &db) == SQLITE_OK)
+	sqlite3* db = nullptr;
+	if(sqlite3_open([[dbPath stringByExpandingTildeInPath] fileSystemRepresentation], &db) == SQLITE_OK)
 	{
 		sqlite3_busy_timeout(db, 250);
 
@@ -23,8 +23,44 @@ static BOOL RunSQLStatement (NSString* dbPath, char const* query, std::map<std::
 				{
 					auto it = variables.find(sqlite3_bind_parameter_name(stmt, i+1));
 					if(it != variables.end())
-							sqlite3_bind_text(stmt, i+1, [it->second UTF8String], -1, nullptr);
-					else	os_log_error(OS_LOG_DEFAULT, "sqlite3: no variable for binding: ‘%s’", sqlite3_bind_parameter_name(stmt, i+1));
+					{
+						id value = it->second;
+						if([value isKindOfClass:[NSString class]])
+						{
+							sqlite3_bind_text(stmt, i+1, [value UTF8String], -1, nullptr);
+						}
+						else if([value isKindOfClass:[NSNull class]])
+						{
+							sqlite3_bind_null(stmt, i+1);
+						}
+						else if([value isKindOfClass:[NSNumber class]])
+						{
+							static std::map<std::string, std::function<int(sqlite3_stmt*, int, id)>> const typeMapping = {
+								{ @encode(BOOL),               [](sqlite3_stmt* stmt, int i, NSNumber* value) -> int { return sqlite3_bind_int(stmt, i, value.boolValue ? 1 : 0);       } },
+								{ @encode(char),               [](sqlite3_stmt* stmt, int i, NSNumber* value) -> int { return sqlite3_bind_int(stmt, i, value.charValue);               } },
+								{ @encode(unsigned char),      [](sqlite3_stmt* stmt, int i, NSNumber* value) -> int { return sqlite3_bind_int(stmt, i, value.unsignedCharValue);       } },
+								{ @encode(short),              [](sqlite3_stmt* stmt, int i, NSNumber* value) -> int { return sqlite3_bind_int(stmt, i, value.shortValue);              } },
+								{ @encode(unsigned short),     [](sqlite3_stmt* stmt, int i, NSNumber* value) -> int { return sqlite3_bind_int(stmt, i, value.unsignedShortValue);      } },
+								{ @encode(int),                [](sqlite3_stmt* stmt, int i, NSNumber* value) -> int { return sqlite3_bind_int(stmt, i, value.intValue);                } },
+								{ @encode(unsigned int),       [](sqlite3_stmt* stmt, int i, NSNumber* value) -> int { return sqlite3_bind_int64(stmt, i, value.unsignedIntValue);      } },
+								{ @encode(long),               [](sqlite3_stmt* stmt, int i, NSNumber* value) -> int { return sqlite3_bind_int64(stmt, i, value.longValue);             } },
+								{ @encode(unsigned long),      [](sqlite3_stmt* stmt, int i, NSNumber* value) -> int { return sqlite3_bind_int64(stmt, i, value.unsignedLongValue);     } },
+								{ @encode(long long),          [](sqlite3_stmt* stmt, int i, NSNumber* value) -> int { return sqlite3_bind_int64(stmt, i, value.longLongValue);         } },
+								{ @encode(unsigned long long), [](sqlite3_stmt* stmt, int i, NSNumber* value) -> int { return sqlite3_bind_int64(stmt, i, value.unsignedLongLongValue); } },
+								{ @encode(float),              [](sqlite3_stmt* stmt, int i, NSNumber* value) -> int { return sqlite3_bind_double(stmt, i, value.floatValue);           } },
+								{ @encode(double),             [](sqlite3_stmt* stmt, int i, NSNumber* value) -> int { return sqlite3_bind_double(stmt, i, value.doubleValue);          } },
+							};
+
+							auto pair = [value objCType] ? typeMapping.find([value objCType]) : typeMapping.end();
+							if(pair != typeMapping.end())
+									pair->second(stmt, i+1, value);
+							else	sqlite3_bind_text(stmt, i+1, [[value stringValue] UTF8String], -1, nullptr);
+						}
+					}
+					else
+					{
+						os_log_error(OS_LOG_DEFAULT, "sqlite3: no variable for binding: ‘%s’", sqlite3_bind_parameter_name(stmt, i+1));
+					}
 				}
 
 				if(sqlite3_step(stmt) != SQLITE_DONE || sqlite3_finalize(stmt) != SQLITE_OK)
@@ -37,7 +73,7 @@ static BOOL RunSQLStatement (NSString* dbPath, char const* query, std::map<std::
 		}
 	}
 
-   sqlite3_close(db);
+	sqlite3_close(db);
 
 	if(res == NO)
 		os_log_error(OS_LOG_DEFAULT, "sqlite3: error running query: %s", sqlite3_errmsg(db));
@@ -140,7 +176,7 @@ static BOOL RunSQLStatement (NSString* dbPath, char const* query, std::map<std::
 									" WHERE clipping = :clipping AND identifier = :identifier;"
 									"END TRANSACTION;";
 
-								std::map<std::string, NSString*> variables = {
+								std::map<std::string, id> variables = {
 									{ ":name",       currentApp.localizedName },
 									{ ":identifier", currentApp.bundleIdentifier },
 									{ ":clipping",   textClipping },
