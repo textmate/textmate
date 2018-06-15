@@ -58,6 +58,43 @@ static NSString* const kGenieItemsDidChangeNotification = @"GenieItemsDidChangeN
 	return [[NSUserDefaults alloc] initWithSuiteName:kGenieIdentifier];
 }
 
+- (void)runInNextEventLoopIteration:(void(^)())callback
+{
+	callback();
+}
+
+- (void)runAsActive:(void(^)())callback
+{
+	if(NSApp.isActive)
+	{
+		callback();
+	}
+	else
+	{
+		__weak __block id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:NSApplicationDidBecomeActiveNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
+			[[NSNotificationCenter defaultCenter] removeObserver:observerId];
+			[self performSelector:@selector(runInNextEventLoopIteration:) withObject:callback afterDelay:0];
+		}];
+		[NSApp activateIgnoringOtherApps:YES];
+	}
+}
+
+- (void)runAsInactive:(void(^)())callback
+{
+	if(!NSApp.isActive)
+	{
+		callback();
+	}
+	else
+	{
+		__weak __block id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:NSApplicationDidResignActiveNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
+			[[NSNotificationCenter defaultCenter] removeObserver:observerId];
+			[self performSelector:@selector(runInNextEventLoopIteration:) withObject:callback afterDelay:0];
+		}];
+		[NSApp hide:self];
+	}
+}
+
 - (NSBundle*)mainBundle
 {
 	NSString* bundleIdentifier = NSBundle.mainBundle.bundleIdentifier;

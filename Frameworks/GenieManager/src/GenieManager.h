@@ -9,4 +9,7 @@
 + (instancetype)sharedInstance;
 - (NSString*)cacheFolderByAppendingPathComponent:(NSString*)aPath;
 - (BOOL)synchronize;
+
+- (void)runAsActive:(void(^)())callback;
+- (void)runAsInactive:(void(^)())callback;
 @end
