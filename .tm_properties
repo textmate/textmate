@@ -19,6 +19,10 @@ TM_NINJA_TARGET      = 'TextMate/run'
 
 TM_ISSUE_URL         = 'https://github.com/textmate/textmate/issues/%s'
 
+[ {Applications,Frameworks}/Genie*/** ]
+saveOnBlur = true
+TM_NINJA_TARGET = "Genie/run"
+
 [ 'source.c++, source.objc++' ]
 tabSize          = 3
 softTabs         = false
