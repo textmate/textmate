@@ -95,7 +95,7 @@ static NSString* EscapeJavaScriptString (NSString* src)
 	else if([message.name isEqualToString:@"queryMessageHandler"])
 	{
 		_disableQueryStringEvent = YES;
-		self.objectValue[@"query"] = message.body;
+		self.htmlItem.queryString = message.body;
 		_disableQueryStringEvent = NO;
 	}
 }
@@ -105,8 +105,8 @@ static NSString* EscapeJavaScriptString (NSString* src)
 	id oldValue = self.objectValue;
 	if(oldValue)
 	{
-		[oldValue removeObserver:self forKeyPath:@"html" context:kHTMLBinding];
-		[oldValue removeObserver:self forKeyPath:@"query" context:kQueryBinding];
+		[oldValue removeObserver:self forKeyPath:@"htmlString" context:kHTMLBinding];
+		[oldValue removeObserver:self forKeyPath:@"queryString" context:kQueryBinding];
 		if(_currentNavigationRequest)
 		{
 			_HTMLString = nil;
@@ -119,22 +119,27 @@ static NSString* EscapeJavaScriptString (NSString* src)
 
 	if(newValue)
 	{
-		[newValue addObserver:self forKeyPath:@"html" options:NSKeyValueObservingOptionInitial context:kHTMLBinding];
-		[newValue addObserver:self forKeyPath:@"query" options:NSKeyValueObservingOptionInitial context:kQueryBinding];
+		[newValue addObserver:self forKeyPath:@"htmlString" options:NSKeyValueObservingOptionInitial context:kHTMLBinding];
+		[newValue addObserver:self forKeyPath:@"queryString" options:NSKeyValueObservingOptionInitial context:kQueryBinding];
 	}
 }
 
 - (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)value change:(NSDictionary*)changeDictionary context:(void*)someContext
 {
-	if(someContext == kHTMLBinding && [keyPath isEqualToString:@"html"])
+	if(someContext == kHTMLBinding)
 	{
-		self.HTMLString = [value valueForKey:@"html"];
+		self.HTMLString = self.htmlItem.htmlString;
 	}
-	else if(someContext == kQueryBinding && [keyPath isEqualToString:@"query"])
+	else if(someContext == kQueryBinding)
 	{
 		if(!_disableQueryStringEvent)
-			[self.webView evaluateJavaScript:[NSString stringWithFormat:@"genie.updateQuery('%@');", EscapeJavaScriptString([value valueForKey:@"query"] ?: @"")] completionHandler:nil];
+			[self.webView evaluateJavaScript:[NSString stringWithFormat:@"genie.updateQuery('%@');", EscapeJavaScriptString(self.htmlItem.queryString ?: @"")] completionHandler:nil];
 	}
+}
+
+- (GenieHTMLItem*)htmlItem
+{
+	return [self.objectValue isKindOfClass:[GenieHTMLItem class]] ? self.objectValue : nil;
 }
 
 - (void)setHTMLString:(NSString*)newHTMLString
@@ -145,7 +150,7 @@ static NSString* EscapeJavaScriptString (NSString* src)
 	_currentNavigationRequest = nil;
 	if(_HTMLString = newHTMLString)
 	{
-		NSString* queryString = self.objectValue[@"query"] ?: @"";
+		NSString* queryString = self.htmlItem.queryString ?: @"";
 		NSString* source = [NSString stringWithFormat:@""
 			"let genie = {"
 			"  log(str)         { webkit.messageHandlers.logMessageHandler.postMessage(str); },"
@@ -178,11 +183,11 @@ static NSString* EscapeJavaScriptString (NSString* src)
 		return;
 	_currentNavigationRequest = nil;
 
-	if(NSDictionary* objectValue = self.objectValue)
+	if(GenieHTMLItem* htmlItem = self.htmlItem)
 	{
 		__weak GenieHTMLTableCellView* weakSelf = self;
 		[self.webView evaluateJavaScript:@"[ window.innerHeight, document.body.getBoundingClientRect().top, document.body.getBoundingClientRect().bottom ]" completionHandler:^(id res, NSError* error){
-			if(weakSelf.objectValue == objectValue)
+			if(weakSelf.htmlItem == htmlItem)
 			{
 				if([res isKindOfClass:[NSArray class]] && [res count] == 3)
 				{
@@ -191,7 +196,8 @@ static NSString* EscapeJavaScriptString (NSString* src)
 					CGFloat bottom    = [[res objectAtIndex:2] doubleValue];
 					CGFloat newHeight = bottom + top; // top gives us the top margin which we’ll re-use for bottom margin
 
-					[[NSNotificationCenter defaultCenter] postNotificationName:HTMLItemDidUpdateHeightNotification object:objectValue userInfo:@{ @"height": @(newHeight) }];
+					htmlItem.height = newHeight;
+					[[NSNotificationCenter defaultCenter] postNotificationName:HTMLItemDidUpdateHeightNotification object:htmlItem userInfo:@{ @"height": @(newHeight) }];
 				}
 			}
 		}];
@@ -974,14 +980,12 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 - (CGFloat)tableView:(NSTableView*)aTableView heightOfRow:(NSInteger)rowIndex
 {
 	id item = self.collection.arrangedObjects[rowIndex];
-	BOOL regularItem = [item isKindOfClass:[GenieItem class]];
-	return regularItem ? 38 : ([[item valueForKey:@"height"] doubleValue] ?: 1);
+	return [item isKindOfClass:[GenieHTMLItem class]] ? MAX(((GenieHTMLItem*)item).height, 1) : 38;
 }
 
 - (BOOL)tableView:(NSTableView*)aTableView shouldSelectRow:(NSInteger)rowIndex
 {
-	id item = self.collection.arrangedObjects[rowIndex];
-	return ![[item valueForKey:@"readOnly"] boolValue];
+	return ![self.collection.arrangedObjects[rowIndex] readOnly];
 }
 
 // ====================================
@@ -1043,14 +1047,10 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 
 - (void)htmlItemDidUpdateHeight:(NSNotification*)aNotification
 {
-	NSMutableDictionary* item = aNotification.object;
-	NSNumber* height = aNotification.userInfo[@"height"];
-	item[@"height"] = height;
-
-	NSInteger rowIndex = [self.collection.arrangedObjects indexOfObject:(GenieItem*)item];
+	NSInteger rowIndex = [self.collection.arrangedObjects indexOfObject:aNotification.object];
 	if(rowIndex == NSNotFound)
 	{
-		NSLog(@"%s *** item not found, new height %.0f", sel_getName(_cmd), [height doubleValue]);
+		NSLog(@"%s *** item not found: %@", sel_getName(_cmd), aNotification.object);
 		return;
 	}
 

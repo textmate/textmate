@@ -525,6 +525,22 @@ void* kRunningApplicationsBindings = &kRunningApplicationsBindings;
 }
 @end
 
+// =================
+// = GenieHTMLItem =
+// =================
+
+@implementation GenieHTMLItem
+- (id)initWithOriginalItem:(GenieItem*)originalItem
+{
+	if(self = [super init])
+	{
+		_originalItem = originalItem;
+		_readOnly = YES;
+	}
+	return self;
+}
+@end
+
 // =============
 // = GenieItem =
 // =============
@@ -588,7 +604,10 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 		_fallback = [[self staticValueForKey:@"match"] isEqualToString:@"*"];
 
 		if(_hasHTMLOutput = [[self staticValueForKey:@"output"] isEqualToString:@"html"])
-			_htmlOutputItem = [NSMutableDictionary dictionaryWithDictionary:@{ @"readOnly": @YES, @"query": self.queryString ?: @"" }];
+		{
+			_htmlOutputItem = [[GenieHTMLItem alloc] initWithOriginalItem:self];
+			_htmlOutputItem.queryString = self.queryString;
+		}
 
 		BOOL acceptQuery = _fallback;
 		for(NSString* key in @[ @"title", @"subtitle", @"file", @"url", @"value", @"scriptArguments", @"standardInputString" ])
@@ -763,7 +782,7 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 
 - (void)updateHTML
 {
-	if(_hasHTMLOutput && !_htmlOutputItem[@"html"])
+	if(_hasHTMLOutput && !_htmlOutputItem.htmlString)
 	{
 		if(_updatingHTML)
 		{
@@ -784,7 +803,7 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 			[task launch:^(int rc, NSData* stdoutData, NSData* stderrData){
 				NSString* stdoutStr = [[NSString alloc] initWithData:stdoutData encoding:NSUTF8StringEncoding];
 				NSString* stderrStr = [[NSString alloc] initWithData:stderrData encoding:NSUTF8StringEncoding];
-				_htmlOutputItem[@"html"] = rc == 0 && OakNotEmptyString(stdoutStr) ? stdoutStr : stderrStr;
+				_htmlOutputItem.htmlString = rc == 0 && OakNotEmptyString(stdoutStr) ? stdoutStr : stderrStr;
 
 				_updatingHTML = NO;
 				if(_pendingUpdateHTML)
@@ -834,7 +853,7 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 
 	if(![oldQuery isEqualToString:self.queryString])
 	{
-		_htmlOutputItem[@"query"] = self.queryString;
+		_htmlOutputItem.queryString = self.queryString;
 		[self updateValuesForKeysDependingOnVariable:@"query"];
 	}
 }
@@ -1264,8 +1283,8 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 	else
 	{
 		[self flushCachedValues];
-		_htmlOutputItem[@"html"]  = nil;
-		_htmlOutputItem[@"query"] = nil;
+		_htmlOutputItem.htmlString  = nil;
+		_htmlOutputItem.queryString = nil;
 	}
 }
 

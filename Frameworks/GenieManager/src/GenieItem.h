@@ -21,6 +21,16 @@ typedef NS_ENUM(NSUInteger, GenieItemKind) {
 	kGenieItemKindCopyValue,
 };
 
+@class GenieItem;
+
+@interface GenieHTMLItem : NSObject
+@property (nonatomic, weak) GenieItem* originalItem;
+@property (nonatomic, readonly) BOOL readOnly;
+@property (nonatomic) NSString* queryString;
+@property (nonatomic) NSString* htmlString;
+@property (nonatomic) CGFloat height;
+@end
+
 @interface GenieItem : NSObject <QLPreviewItem>
 + (void)expireItemsForIdentifier:(NSString*)identifier;
 
@@ -54,7 +64,7 @@ typedef NS_ENUM(NSUInteger, GenieItemKind) {
 @property (nonatomic, readonly) BOOL disableRankOrdering;
 
 @property (nonatomic, readonly) BOOL hasHTMLOutput;
-@property (nonatomic, readonly) id htmlOutputItem;
+@property (nonatomic, readonly) GenieHTMLItem* htmlOutputItem;
 - (void)updateHTML;
 
 @property (nonatomic, readonly) NSArray* allKeys;
