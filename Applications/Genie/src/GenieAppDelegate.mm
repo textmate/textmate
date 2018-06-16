@@ -57,8 +57,8 @@ static NSString* HTMLItemDidUpdateHeightNotification = @"HTMLItemDidUpdateHeight
 
 static NSString* EscapeJavaScriptString (NSString* src)
 {
-	NSRegularExpression* regex = [NSRegularExpression regularExpressionWithPattern:@"['\"\\\\]" options:0 error:nil];
-	return [regex stringByReplacingMatchesInString:src options:0 range:NSMakeRange(0, src.length) withTemplate:@"\\\\$0"];
+	static NSRegularExpression* const regex = [NSRegularExpression regularExpressionWithPattern:@"['\"\\\\]" options:0 error:nil];
+	return src ? [regex stringByReplacingMatchesInString:src options:0 range:NSMakeRange(0, src.length) withTemplate:@"\\\\$0"] : @"";
 }
 
 @implementation GenieHTMLTableCellView
@@ -133,7 +133,7 @@ static NSString* EscapeJavaScriptString (NSString* src)
 	else if(someContext == kQueryBinding)
 	{
 		if(!_disableQueryStringEvent)
-			[self.webView evaluateJavaScript:[NSString stringWithFormat:@"genie.updateQuery('%@');", EscapeJavaScriptString(self.htmlItem.queryString ?: @"")] completionHandler:nil];
+			[self.webView evaluateJavaScript:[NSString stringWithFormat:@"genie.updateQuery('%@');", EscapeJavaScriptString(self.htmlItem.queryString)] completionHandler:nil];
 	}
 }
 
@@ -150,7 +150,6 @@ static NSString* EscapeJavaScriptString (NSString* src)
 	_currentNavigationRequest = nil;
 	if(_HTMLString = newHTMLString)
 	{
-		NSString* queryString = self.htmlItem.queryString ?: @"";
 		NSString* source = [NSString stringWithFormat:@""
 			"let genie = {"
 			"  log(str)         { webkit.messageHandlers.logMessageHandler.postMessage(str); },"
@@ -161,7 +160,7 @@ static NSString* EscapeJavaScriptString (NSString* src)
 			"    window.dispatchEvent(new Event('querychange'));"
 			"  },"
 			"  internal_storage: '%@'"
-			"};", EscapeJavaScriptString(queryString)
+			"};", EscapeJavaScriptString(self.htmlItem.queryString)
 		];
 
 		WKUserScript* script = [[WKUserScript alloc] initWithSource:source injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:NO];
