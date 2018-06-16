@@ -120,7 +120,7 @@
 			modifierFlags:0
 			timestamp:[anEvent timestamp]
 			windowNumber:[win windowNumber]
-			context:[anEvent context]
+			context:nil
 			eventNumber:0
 			clickCount:1
 			pressure:1];

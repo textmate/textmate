@@ -2413,7 +2413,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 		modifierFlags:0
 		timestamp:[anEvent timestamp]
 		windowNumber:[win windowNumber]
-		context:[anEvent context]
+		context:nil
 		eventNumber:0
 		clickCount:1
 		pressure:1];
