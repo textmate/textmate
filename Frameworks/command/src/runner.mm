@@ -175,7 +175,7 @@ namespace command
 			runner->did_exit(rc);
 
 			// Wake up our local event loop (if it is running)
-			[NSApp postEvent:[NSEvent otherEventWithType:NSApplicationDefined location:NSZeroPoint modifierFlags:0 timestamp:0 windowNumber:0 context:NULL subtype:0 data1:0 data2:0] atStart:NO];
+			[NSApp postEvent:[NSEvent otherEventWithType:NSEventTypeApplicationDefined location:NSZeroPoint modifierFlags:0 timestamp:0 windowNumber:0 context:NULL subtype:0 data1:0 data2:0] atStart:NO];
 		};
 
 		bool hasHTMLOutput = _command.output == output::new_window && _command.output_format == output_format::html;
@@ -202,14 +202,14 @@ namespace command
 		{
 			// We use CFRunLoopRunInMode() to handle dispatch queues and nextEventMatchingMask:… to catcn ⌃C
 			CFRunLoopRunInMode(kCFRunLoopDefaultMode, 5, true);
-			if(NSEvent* event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:nil inMode:NSDefaultRunLoopMode dequeue:YES])
+			if(NSEvent* event = [NSApp nextEventMatchingMask:NSEventMaskAny untilDate:nil inMode:NSDefaultRunLoopMode dequeue:YES])
 			{
-				static NSEventType const events[] = { NSLeftMouseDown, NSLeftMouseUp, NSRightMouseDown, NSRightMouseUp, NSOtherMouseDown, NSOtherMouseUp, NSLeftMouseDragged, NSRightMouseDragged, NSOtherMouseDragged, NSKeyDown, NSKeyUp, NSFlagsChanged };
+				static NSEventType const events[] = { NSEventTypeLeftMouseDown, NSEventTypeLeftMouseUp, NSEventTypeRightMouseDown, NSEventTypeRightMouseUp, NSEventTypeOtherMouseDown, NSEventTypeOtherMouseUp, NSEventTypeLeftMouseDragged, NSEventTypeRightMouseDragged, NSEventTypeOtherMouseDragged, NSEventTypeKeyDown, NSEventTypeKeyUp, NSEventTypeFlagsChanged };
 				if(!oak::contains(std::begin(events), std::end(events), [event type]))
 				{
 					[NSApp sendEvent:event];
 				}
-				else if([event type] == NSKeyDown && (([[event charactersIgnoringModifiers] isEqualToString:@"c"] && ([event modifierFlags] & (NSShiftKeyMask|NSControlKeyMask|NSAlternateKeyMask|NSCommandKeyMask)) == NSControlKeyMask) || ([[event charactersIgnoringModifiers] isEqualToString:@"."] && ([event modifierFlags] & (NSShiftKeyMask|NSControlKeyMask|NSAlternateKeyMask|NSCommandKeyMask)) == NSCommandKeyMask)))
+				else if([event type] == NSEventTypeKeyDown && (([[event charactersIgnoringModifiers] isEqualToString:@"c"] && ([event modifierFlags] & (NSEventModifierFlagShift|NSEventModifierFlagControl|NSEventModifierFlagOption|NSEventModifierFlagCommand)) == NSEventModifierFlagControl) || ([[event charactersIgnoringModifiers] isEqualToString:@"."] && ([event modifierFlags] & (NSEventModifierFlagShift|NSEventModifierFlagControl|NSEventModifierFlagOption|NSEventModifierFlagCommand)) == NSEventModifierFlagCommand)))
 				{
 					NSAlert* alert        = [[NSAlert alloc] init];
 					alert.messageText     = [NSString stringWithFormat:@"Stop “%@”", [NSString stringWithCxxString:_command.name]];

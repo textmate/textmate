@@ -105,11 +105,11 @@ static std::string string_for (NSUInteger flags)
 {
 	static struct EventFlag_t { NSUInteger flag; std::string symbol; } const EventFlags[] =
 	{
-		{ NSNumericPadKeyMask, "#" },
-		{ NSControlKeyMask,    "^" },
-		{ NSAlternateKeyMask,  "~" },
-		{ NSShiftKeyMask,      "$" },
-		{ NSCommandKeyMask,    "@" },
+		{ NSEventModifierFlagNumericPad, "#" },
+		{ NSEventModifierFlagControl,    "^" },
+		{ NSEventModifierFlagOption,     "~" },
+		{ NSEventModifierFlagShift,      "$" },
+		{ NSEventModifierFlagCommand,    "@" },
 	};
 
 	std::string res = "";
@@ -122,11 +122,11 @@ static NSUInteger ns_flag_for_char (uint32_t ch)
 {
 	switch(ch)
 	{
-		case '$': return NSShiftKeyMask;
-		case '^': return NSControlKeyMask;
-		case '~': return NSAlternateKeyMask;
-		case '@': return NSCommandKeyMask;
-		case '#': return NSNumericPadKeyMask;
+		case '$': return NSEventModifierFlagShift;
+		case '^': return NSEventModifierFlagControl;
+		case '~': return NSEventModifierFlagOption;
+		case '@': return NSEventModifierFlagCommand;
+		case '#': return NSEventModifierFlagNumericPad;
 	}
 	return 0;
 }
@@ -189,13 +189,13 @@ namespace ns
 	std::string glyphs_for_flags (NSUInteger flags)
 	{
 		std::string res = "";
-		if(flags & NSControlKeyMask)
+		if(flags & NSEventModifierFlagControl)
 			res += glyph_named("control");
-		if(flags & NSAlternateKeyMask)
+		if(flags & NSEventModifierFlagOption)
 			res += glyph_named("modifier");
-		if(flags & NSShiftKeyMask)
+		if(flags & NSEventModifierFlagShift)
 			res += glyph_named("shift");
-		if(flags & NSCommandKeyMask)
+		if(flags & NSEventModifierFlagCommand)
 			res += glyph_named("command");
 		return res;
 	}
@@ -205,11 +205,11 @@ namespace ns
 		std::string key; NSUInteger flags;
 		parse_event_string(eventString, key, flags);
 
-		if((flags & NSShiftKeyMask) == 0)
+		if((flags & NSEventModifierFlagShift) == 0)
 		{
 			std::string const upCased = text::uppercase(key);
 			if(key != text::lowercase(key))
-				flags |= NSShiftKeyMask;
+				flags |= NSEventModifierFlagShift;
 			else if(key != upCased)
 				key = upCased;
 		}
@@ -218,7 +218,7 @@ namespace ns
 		if(startOfKey)
 			*startOfKey = modifierString.size();
 
-		return modifierString + glyphs_for_key(key, flags & NSNumericPadKeyMask);
+		return modifierString + glyphs_for_key(key, flags & NSEventModifierFlagNumericPad);
 	}
 
 } /* ns */
@@ -245,7 +245,7 @@ NSAttributedString* OakAttributedStringForEventString (NSString* eventString, NS
 	CGFloat keyWidth   = [font maximumAdvancement].width;
 
 	NSMutableParagraphStyle* pStyle = [NSMutableParagraphStyle new];
-	[pStyle setAlignment:NSRightTextAlignment];
+	[pStyle setAlignment:NSTextAlignmentRight];
 	[pStyle setTabStops:@[ [[NSTextTab alloc] initWithType:NSLeftTabStopType location:ceil(flagsWidth + keyWidth)] ]];
 	[str addAttributes:@{ NSParagraphStyleAttributeName : pStyle } range:NSMakeRange(0, [str length])];
 

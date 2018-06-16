@@ -25,7 +25,7 @@ void OakRunIOAlertPanel (char const* format, ...)
 
 BOOL OakIsAlternateKeyOrMouseEvent (NSUInteger flags, NSEvent* anEvent)
 {
-	return ([anEvent type] == NSLeftMouseUp || [anEvent type] == NSOtherMouseUp || [anEvent type] == NSKeyDown) && (([anEvent modifierFlags] & flags) == flags);
+	return ([anEvent type] == NSEventTypeLeftMouseUp || [anEvent type] == NSEventTypeOtherMouseUp || [anEvent type] == NSEventTypeKeyDown) && (([anEvent modifierFlags] & flags) == flags);
 }
 
 // ======================

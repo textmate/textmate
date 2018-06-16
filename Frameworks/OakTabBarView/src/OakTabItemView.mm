@@ -450,7 +450,7 @@ static NSString* kUserDefaultsTabItemLineBreakStyleKey = @"tabItemLineBreakStyle
 		_overflowButton = [[OakRolloverButton alloc] initWithFrame:NSZeroRect];
 		OakSetAccessibilityLabel(_overflowButton, @"Show tab overflow menu");
 
-		[_overflowButton sendActionOn:NSLeftMouseDownMask];
+		[_overflowButton sendActionOn:NSEventMaskLeftMouseDown];
 		[self updateStyle];
 
 		OakAddAutoLayoutViewsToSuperview(@[ _overflowButton ], self);

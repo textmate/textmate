@@ -164,7 +164,7 @@ static CGFloat const LabelNameHeight = 15;
 	if(self.highlightedIndex != -1)
 	{
 		NSMutableParagraphStyle* style = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
-		[style setAlignment:NSCenterTextAlignment];
+		[style setAlignment:NSTextAlignmentCenter];
 		NSDictionary* attributes = @{
 			NSFontAttributeName            : [[NSFontManager sharedFontManager] convertFont:[NSFont labelFontOfSize:0] toHaveTrait:NSBoldFontMask],
 			NSForegroundColorAttributeName : [NSColor grayColor],

@@ -109,13 +109,13 @@ static NSString* const kRecordingPlaceholderString = @"…";
 		if(self.disableGlobalHotkeys)
 			_hotkeyToken = PushSymbolicHotKeyMode(kHIHotKeyModeAllDisabled);
 
-		_eventMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:NSFlagsChangedMask|NSKeyDownMask handler:^NSEvent*(NSEvent* event){
-			if([event type] == NSFlagsChanged)
+		_eventMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:NSEventMaskFlagsChanged|NSEventMaskKeyDown handler:^NSEvent*(NSEvent* event){
+			if([event type] == NSEventTypeFlagsChanged)
 			{
 				std::string const str = ns::glyphs_for_flags([event modifierFlags]);
 				self.displayString = str == "" ? kRecordingPlaceholderString : [NSString stringWithCxxString:str];
 			}
-			else if([event type] == NSKeyDown)
+			else if([event type] == NSEventTypeKeyDown)
 			{
 				self.eventString = [NSString stringWithCxxString:to_s(event)];
 				self.recording = NO;

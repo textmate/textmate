@@ -174,7 +174,7 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 		[[_itemCountTextField cell] setBackgroundStyle:NSBackgroundStyleRaised];
 		[_itemCountTextField setContentHuggingPriority:NSLayoutPriorityDefaultHigh forOrientation:NSLayoutConstraintOrientationHorizontal];
 
-		_window = [[NSPanel alloc] initWithContentRect:NSMakeRect(600, 700, 400, 500) styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSTexturedBackgroundWindowMask) backing:NSBackingStoreBuffered defer:NO];
+		_window = [[NSPanel alloc] initWithContentRect:NSMakeRect(600, 700, 400, 500) styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskTexturedBackground) backing:NSBackingStoreBuffered defer:NO];
 		[_window setAutorecalculatesContentBorderThickness:NO forEdge:NSMaxYEdge];
 		[_window setAutorecalculatesContentBorderThickness:NO forEdge:NSMinYEdge];
 		[_window setContentBorderThickness:32 forEdge:NSMaxYEdge];

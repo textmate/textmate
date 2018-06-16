@@ -315,7 +315,7 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 	else if(NSMouseInRect(mouseDownPos, [self htmlOutputResizeRect], [self isFlipped]))
 		view = _htmlOutputView;
 
-	if(!view || [anEvent type] != NSLeftMouseDown)
+	if(!view || [anEvent type] != NSEventTypeLeftMouseDown)
 	{
 		[super mouseDown:anEvent];
 	}
@@ -339,10 +339,10 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 		NSRect initialFrame = view.frame;
 
 		BOOL didDrag = NO;
-		while([anEvent type] != NSLeftMouseUp)
+		while([anEvent type] != NSEventTypeLeftMouseUp)
 		{
-			anEvent = [NSApp nextEventMatchingMask:(NSLeftMouseDraggedMask|NSLeftMouseDownMask|NSLeftMouseUpMask) untilDate:[NSDate distantFuture] inMode:NSEventTrackingRunLoopMode dequeue:YES];
-			if([anEvent type] != NSLeftMouseDragged)
+			anEvent = [NSApp nextEventMatchingMask:(NSEventMaskLeftMouseDragged|NSEventMaskLeftMouseDown|NSEventMaskLeftMouseUp) untilDate:[NSDate distantFuture] inMode:NSEventTrackingRunLoopMode dequeue:YES];
+			if([anEvent type] != NSEventTypeLeftMouseDragged)
 				break;
 
 			NSPoint mouseCurrentPos = [self convertPoint:[anEvent locationInWindow] fromView:nil];

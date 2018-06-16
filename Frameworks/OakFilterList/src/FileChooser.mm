@@ -262,7 +262,7 @@ static NSDictionary* globs_for_path (std::string const& path)
 
 		_progressIndicator = [[NSProgressIndicator alloc] initWithFrame:NSZeroRect];
 		_progressIndicator.style                = NSProgressIndicatorSpinningStyle;
-		_progressIndicator.controlSize          = NSSmallControlSize;
+		_progressIndicator.controlSize          = NSControlSizeSmall;
 		_progressIndicator.displayedWhenStopped = NO;
 
 		OakBackgroundFillView* aboveScopeBarDark  = OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]);

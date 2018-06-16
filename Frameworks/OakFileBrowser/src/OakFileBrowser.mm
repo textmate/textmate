@@ -545,7 +545,7 @@ static bool is_binary (std::string const& path)
 	NSIndexSet* indexSet = [_outlineView selectedRowIndexes];
 
 	NSEvent* currentEvent = [NSApp currentEvent];
-	if(currentEvent.type != NSKeyDown && currentEvent.type != NSKeyUp)
+	if(currentEvent.type != NSEventTypeKeyDown && currentEvent.type != NSEventTypeKeyUp)
 	{
 		NSInteger clickedRow = [_outlineView clickedRow];
 		if(0 <= clickedRow && clickedRow < _outlineView.numberOfRows && ![indexSet containsIndex:clickedRow])
@@ -879,8 +879,8 @@ static bool is_binary (std::string const& path)
 	if(rootPath)
 	{
 		[aMenu addItem:[NSMenuItem separatorItem]];
-		[[aMenu addItemWithTitle:@"New File"   action:@selector(newDocumentInDirectory:) keyEquivalent:@"n"] setKeyEquivalentModifierMask:NSCommandKeyMask|NSControlKeyMask];
-		[[aMenu addItemWithTitle:@"New Folder" action:@selector(newFolder:)              keyEquivalent:@"n"] setKeyEquivalentModifierMask:NSCommandKeyMask|NSShiftKeyMask];
+		[[aMenu addItemWithTitle:@"New File"   action:@selector(newDocumentInDirectory:) keyEquivalent:@"n"] setKeyEquivalentModifierMask:NSEventModifierFlagCommand|NSEventModifierFlagControl];
+		[[aMenu addItemWithTitle:@"New Folder" action:@selector(newFolder:)              keyEquivalent:@"n"] setKeyEquivalentModifierMask:NSEventModifierFlagCommand|NSEventModifierFlagShift];
 	}
 
 	if(rootPath || hasFileSelected)
@@ -934,7 +934,7 @@ static bool is_binary (std::string const& path)
 			[aMenu addItemWithTitle:@"Copy" action:@selector(copy:) keyEquivalent:@""];
 
 			NSMenuItem* copyPathnameItem = [aMenu addItemWithTitle:@"Copy As Pathname" action:@selector(copyAsPathname:) keyEquivalent:@""];
-			copyPathnameItem.keyEquivalentModifierMask = NSAlternateKeyMask;
+			copyPathnameItem.keyEquivalentModifierMask = NSEventModifierFlagOption;
 			copyPathnameItem.alternate = YES;
 		}
 
@@ -945,7 +945,7 @@ static bool is_binary (std::string const& path)
 			[aMenu addItemWithTitle:[NSString stringWithFormat:@"Paste %@", label] action:@selector(paste:) keyEquivalent:@""];
 
 			NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithFormat:@"Move %@ Here", label] action:@selector(pasteNext:) keyEquivalent:@"v"];
-			[menuItem setKeyEquivalentModifierMask:NSAlternateKeyMask|NSCommandKeyMask];
+			[menuItem setKeyEquivalentModifierMask:NSEventModifierFlagOption|NSEventModifierFlagCommand];
 		}
 	}
 
@@ -1024,7 +1024,7 @@ static bool is_binary (std::string const& path)
 	{
 		if(FSItem* item = [_outlineView itemAtRow:row])
 		{
-			if([item.url isFileURL] && ([NSEvent modifierFlags] & (NSShiftKeyMask|NSControlKeyMask|NSCommandKeyMask)) == NSCommandKeyMask)
+			if([item.url isFileURL] && ([NSEvent modifierFlags] & (NSEventModifierFlagShift|NSEventModifierFlagControl|NSEventModifierFlagCommand)) == NSEventModifierFlagCommand)
 					[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:@[ item.url ]];
 			else	[self openItems:@[ item ] animate:YES];
 		}
@@ -1104,7 +1104,7 @@ static bool is_binary (std::string const& path)
 - (IBAction)didSingleClickOutlineView:(id)sender
 {
 	BOOL singleClickShouldOpen = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFileBrowserSingleClickToOpenKey];
-	BOOL noModifiers = !([NSEvent modifierFlags] & (NSShiftKeyMask|NSControlKeyMask|NSCommandKeyMask));
+	BOOL noModifiers = !([NSEvent modifierFlags] & (NSEventModifierFlagShift|NSEventModifierFlagControl|NSEventModifierFlagCommand));
 	FSItem* item = _outlineView.clickedRow != -1 ? [_outlineView itemAtRow:_outlineView.clickedRow] : nil;
 	if(singleClickShouldOpen && noModifiers && item.urlType == FSItemURLTypeFile)
 		[self openItems:@[ item ] animate:NO];

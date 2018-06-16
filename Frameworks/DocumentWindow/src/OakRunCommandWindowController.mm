@@ -32,14 +32,14 @@ static NSString* const kUserDefaultsFilterOutputType = @"filterOutputType";
 
 - (id)init
 {
-	if((self = [super initWithWindow:[[NSPanel alloc] initWithContentRect:NSZeroRect styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask) backing:NSBackingStoreBuffered defer:NO]]))
+	if((self = [super initWithWindow:[[NSPanel alloc] initWithContentRect:NSZeroRect styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskMiniaturizable) backing:NSBackingStoreBuffered defer:NO]]))
 	{
 		self.outputType           = output::replace_input;
 		self.myConstraints        = [NSMutableArray new];
 
-		self.commandLabel         = OakCreateLabel(@"Command:", nil, NSRightTextAlignment);
+		self.commandLabel         = OakCreateLabel(@"Command:", nil, NSTextAlignmentRight);
 		self.commandComboBox      = OakCreateComboBox();
-		self.resultLabel          = OakCreateLabel(@"Result:", nil, NSRightTextAlignment);
+		self.resultLabel          = OakCreateLabel(@"Result:", nil, NSTextAlignmentRight);
 		self.resultPopUpButton    = OakCreatePopUpButton();
 		self.executeButton        = OakCreateButton(@"Execute");
 		self.cancelButton         = OakCreateButton(@"Cancel");

@@ -71,10 +71,10 @@ static NSString* MBInternalDumpMenu (NSMenu* menu, NSInteger indent)
 
 			NSUInteger flags = item.keyEquivalentModifierMask;
 			BOOL includeFlags = YES;
-			if(flags == NSCommandKeyMask)
+			if(flags == NSEventModifierFlagCommand)
 				includeFlags = NO;
 
-			if(flags == (NSShiftKeyMask|NSCommandKeyMask) && item.keyEquivalent.length == 1)
+			if(flags == (NSEventModifierFlagShift|NSEventModifierFlagCommand) && item.keyEquivalent.length == 1)
 			{
 				unichar ch = [item.keyEquivalent characterAtIndex:0];
 				if(ch < 0x80 && isalpha(ch))

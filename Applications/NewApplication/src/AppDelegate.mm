@@ -204,7 +204,7 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification*)aNotification
 {
-	_window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 400, 400) styleMask:(NSTitledWindowMask|NSResizableWindowMask|NSClosableWindowMask|NSMiniaturizableWindowMask) backing:NSBackingStoreBuffered defer:NO];
+	_window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 400, 400) styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskResizable|NSWindowStyleMaskClosable|NSWindowStyleMaskMiniaturizable) backing:NSBackingStoreBuffered defer:NO];
 	_window.releasedWhenClosed = NO;
 	_window.delegate           = self;
 	_window.title              = @"New Application";

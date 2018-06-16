@@ -83,7 +83,7 @@ static BOOL IsProtocolRelativeURL (NSURL* url)
 
 	HOBrowserView* view = [HOBrowserView new];
 	NSWindow* window = [[NSWindow alloc] initWithContentRect:(NSRect){origin, NSMakeSize(750, 800)}
-																  styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask)
+																  styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskMiniaturizable)
 																	 backing:NSBackingStoreBuffered
 																		defer:NO];
 	[window bind:NSTitleBinding toObject:view.webView withKeyPath:@"mainFrameTitle" options:nil];

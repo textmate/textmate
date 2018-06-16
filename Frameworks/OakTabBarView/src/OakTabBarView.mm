@@ -628,7 +628,7 @@ static NSString* const OakTabItemPasteboardType = @"com.macromates.TextMate.tabI
 
 	NSImage* dragImage = [[NSImage alloc] initWithSize:image.size];
 	[dragImage lockFocus];
-	[image drawAtPoint:NSZeroPoint fromRect:NSZeroRect operation:NSCompositeCopy fraction:0.8];
+	[image drawAtPoint:NSZeroPoint fromRect:NSZeroRect operation:NSCompositingOperationCopy fraction:0.8];
 	[dragImage unlockFocus];
 
 	_draggedTabIndex = [_tabItems indexOfObject:tabItem];
@@ -812,7 +812,7 @@ static NSString* const OakTabItemPasteboardType = @"com.macromates.TextMate.tabI
 		_tag = [_tabItems indexOfObject:tabItem]; // performCloseTab: asks for [sender tag]
 
 		BOOL closeOther = OakIsAlternateKeyOrMouseEvent();
-		if(_isMouseInside && ([[NSApp currentEvent] type] == NSLeftMouseUp || [[NSApp currentEvent] type] == NSOtherMouseUp) && !closeOther && tabItem != _overflowTabItem)
+		if(_isMouseInside && ([[NSApp currentEvent] type] == NSEventTypeLeftMouseUp || [[NSApp currentEvent] type] == NSEventTypeOtherMouseUp) && !closeOther && tabItem != _overflowTabItem)
 		{
 			_didCloseTabIndex = _tag;
 			_didCloseTabFrame = tabItem.targetFrame;

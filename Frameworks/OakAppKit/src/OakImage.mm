@@ -35,8 +35,8 @@
 	CGFloat x = self.image.edge == CGRectMinXEdge || self.image.edge == CGRectMaxYEdge ? 0 : imageSize.width  - badgeSize.width;
 	CGFloat y = self.image.edge == CGRectMinXEdge || self.image.edge == CGRectMinYEdge ? 0 : imageSize.height - badgeSize.height;
 
-	[self.image.base drawAtPoint:NSZeroPoint fromRect:NSZeroRect operation:NSCompositeCopy fraction:1];
-	[self.image.badge drawAtPoint:NSMakePoint(x, y) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1];
+	[self.image.base drawAtPoint:NSZeroPoint fromRect:NSZeroRect operation:NSCompositingOperationCopy fraction:1];
+	[self.image.badge drawAtPoint:NSMakePoint(x, y) fromRect:NSZeroRect operation:NSCompositingOperationSourceOver fraction:1];
 	return YES;
 }
 @end

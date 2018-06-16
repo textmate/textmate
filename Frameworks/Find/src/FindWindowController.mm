@@ -26,7 +26,7 @@ NSButton* OakCreateClickableStatusBar ()
 {
 	NSButton* res = [[NSButton alloc] initWithFrame:NSZeroRect];
 	[res.cell setLineBreakMode:NSLineBreakByTruncatingTail];
-	res.alignment  = NSLeftTextAlignment;
+	res.alignment  = NSTextAlignmentLeft;
 	res.bordered   = NO;
 	res.buttonType = NSToggleButton;
 	res.title      = @"";
@@ -83,7 +83,7 @@ static NSProgressIndicator* OakCreateProgressIndicator ()
 {
 	NSProgressIndicator* res = [[NSProgressIndicator alloc] initWithFrame:NSZeroRect];
 	res.style                = NSProgressIndicatorSpinningStyle;
-	res.controlSize          = NSSmallControlSize;
+	res.controlSize          = NSControlSizeSmall;
 	res.displayedWhenStopped = NO;
 	return res;
 }
@@ -97,7 +97,7 @@ static NSButton* OakCreateStopSearchButton ()
 	res.imagePosition = NSImageOnly;
 	res.toolTip       = @"Stop Search";
 	res.keyEquivalent = @".";
-	res.keyEquivalentModifierMask = NSCommandKeyMask;
+	res.keyEquivalentModifierMask = NSEventModifierFlagCommand;
 	[res.cell setImageScaling:NSImageScaleProportionallyDown];
 	OakSetAccessibilityLabel(res, res.toolTip);
 	return res;
@@ -159,7 +159,7 @@ static NSButton* OakCreateStopSearchButton ()
 - (id)init
 {
 	NSRect r = [[NSScreen mainScreen] visibleFrame];
-	if((self = [super initWithWindow:[[NSPanel alloc] initWithContentRect:NSMakeRect(NSMidX(r)-100, NSMidY(r)+100, 200, 200) styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask) backing:NSBackingStoreBuffered defer:NO]]))
+	if((self = [super initWithWindow:[[NSPanel alloc] initWithContentRect:NSMakeRect(NSMidX(r)-100, NSMidY(r)+100, 200, 200) styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskMiniaturizable) backing:NSBackingStoreBuffered defer:NO]]))
 	{
 		_projectFolder = NSHomeDirectory();
 
@@ -224,7 +224,7 @@ static NSButton* OakCreateStopSearchButton ()
 			{ @"Symbolic Links to Folders",            @selector(toggleSearchFolderLinks:),   .indent = 1 },
 			{ @"Symbolic Links to Files",              @selector(toggleSearchFileLinks:),     .indent = 1 },
 			{ /* -------- */ },
-			{ @"Collapse Results",                     @selector(toggleCollapsedState:),      @"1", .modifierFlags = NSCommandKeyMask|NSAlternateKeyMask, .target = self.resultsViewController },
+			{ @"Collapse Results",                     @selector(toggleCollapsedState:),      @"1", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption, .target = self.resultsViewController },
 			{ @"Select Result",                        .delegate = self                                   },
 			{ /* -------- */ },
 			{ @"Copy Matching Parts",                  @selector(copyMatchingParts:)                      },

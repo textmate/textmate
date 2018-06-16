@@ -33,7 +33,7 @@ static __weak OakToolTip* LastToolTip;
 - (id)init
 {
 	D(DBF_OakToolTip, bug("\n"););
-	if(self = [super initWithContentRect:NSZeroRect styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:NO])
+	if(self = [super initWithContentRect:NSZeroRect styleMask:NSWindowStyleMaskBorderless backing:NSBackingStoreBuffered defer:NO])
 	{
 		NSFont* defaultFont = [NSFont toolTipsFontOfSize:0];
 		NSFontDescriptor* descriptor = [defaultFont.fontDescriptor fontDescriptorByAddingAttributes:@{
@@ -110,11 +110,11 @@ static __weak OakToolTip* LastToolTip;
 	didOpenAtDate = [NSDate date];
 	mousePositionWhenOpened = NSZeroPoint;
 
-	__weak __block id eventMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:(NSLeftMouseDownMask|NSRightMouseDownMask|NSMouseMovedMask|NSKeyDownMask|NSScrollWheelMask|NSOtherMouseDownMask) handler:^NSEvent*(NSEvent* event){
-		if([event type] == NSMouseMoved && ![self shouldCloseForMousePosition:[NSEvent mouseLocation]])
+	__weak __block id eventMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:(NSEventMaskLeftMouseDown|NSEventMaskRightMouseDown|NSEventMaskMouseMoved|NSEventMaskKeyDown|NSEventMaskScrollWheel|NSEventMaskOtherMouseDown) handler:^NSEvent*(NSEvent* event){
+		if([event type] == NSEventTypeMouseMoved && ![self shouldCloseForMousePosition:[NSEvent mouseLocation]])
 			return event;
 
-		[self fadeOutSlowly:[event type] == NSMouseMoved];
+		[self fadeOutSlowly:[event type] == NSEventTypeMouseMoved];
 		[NSEvent removeMonitor:eventMonitor];
 		return event;
 	}];

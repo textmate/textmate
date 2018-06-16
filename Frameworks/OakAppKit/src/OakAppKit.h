@@ -3,7 +3,7 @@
 
 PUBLIC extern NSString* const OakCursorDidHideNotification;
 
-PUBLIC BOOL OakIsAlternateKeyOrMouseEvent (NSUInteger flags = NSAlternateKeyMask, NSEvent* anEvent = [NSApp currentEvent]);
+PUBLIC BOOL OakIsAlternateKeyOrMouseEvent (NSUInteger flags = NSEventModifierFlagOption, NSEvent* anEvent = [NSApp currentEvent]);
 
 PUBLIC extern NSUInteger const OakMoveMoveReturn;
 PUBLIC extern NSUInteger const OakMoveAcceptReturn;

@@ -322,11 +322,11 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 
 	[self.selectionBackgroundColor set];
 	for(auto const& rect : backgroundRects)
-		NSRectFillUsingOperation(NSIntersectionRect(rect, NSIntersectionRect(aRect, self.frame)), NSCompositeSourceOver);
+		NSRectFillUsingOperation(NSIntersectionRect(rect, NSIntersectionRect(aRect, self.frame)), NSCompositingOperationSourceOver);
 
 	[self.selectionBorderColor set];
 	for(auto const& rect : borderRects)
-		NSRectFillUsingOperation(NSIntersectionRect(rect, NSIntersectionRect(aRect, self.frame)), NSCompositeSourceOver);
+		NSRectFillUsingOperation(NSIntersectionRect(rect, NSIntersectionRect(aRect, self.frame)), NSCompositingOperationSourceOver);
 
 	if(!self.antiAlias)
 		CGContextSetShouldAntialias((CGContextRef)[[NSGraphicsContext currentContext] graphicsPort], false);
@@ -385,7 +385,7 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 						CGImageRef cgImage = [image CGImageForProposedRect:&imageRect context:[NSGraphicsContext currentContext] hints:nil];
 						CGContextClipToMask((CGContextRef)[[NSGraphicsContext currentContext] graphicsPort], imageRect, cgImage);
 
-						NSRectFillUsingOperation(imageRect, NSCompositeSourceOver);
+						NSRectFillUsingOperation(imageRect, NSCompositingOperationSourceOver);
 						[NSGraphicsContext restoreGraphicsState];
 					}
 					else
@@ -465,10 +465,10 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 		mouseDownAtPoint = pos;
 		[self setNeedsDisplayInRect:columnRect];
 
-		while([event type] != NSLeftMouseUp)
+		while([event type] != NSEventTypeLeftMouseUp)
 		{
-			event = [NSApp nextEventMatchingMask:(NSLeftMouseUpMask|NSMouseMovedMask|NSLeftMouseDraggedMask|NSMouseEnteredMask|NSMouseExitedMask) untilDate:[NSDate distantFuture] inMode:NSEventTrackingRunLoopMode dequeue:YES];
-			if([event type] == NSMouseMoved || [event type] == NSLeftMouseDragged)
+			event = [NSApp nextEventMatchingMask:(NSEventMaskLeftMouseUp|NSEventMaskMouseMoved|NSEventMaskLeftMouseDragged|NSEventMaskMouseEntered|NSEventMaskMouseExited) untilDate:[NSDate distantFuture] inMode:NSEventTrackingRunLoopMode dequeue:YES];
+			if([event type] == NSEventTypeMouseMoved || [event type] == NSEventTypeLeftMouseDragged)
 				[self mouseMoved:event];
 		}
 
@@ -493,10 +493,10 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 	else
 	{
 		[_partnerView mouseDown:event];
-		while([event type] != NSLeftMouseUp)
+		while([event type] != NSEventTypeLeftMouseUp)
 		{
-			event = [NSApp nextEventMatchingMask:(NSLeftMouseUpMask|NSMouseMovedMask|NSLeftMouseDraggedMask|NSMouseEnteredMask|NSMouseExitedMask) untilDate:[NSDate distantFuture] inMode:NSEventTrackingRunLoopMode dequeue:YES];
-			if([event type] == NSMouseMoved || [event type] == NSLeftMouseDragged)
+			event = [NSApp nextEventMatchingMask:(NSEventMaskLeftMouseUp|NSEventMaskMouseMoved|NSEventMaskLeftMouseDragged|NSEventMaskMouseEntered|NSEventMaskMouseExited) untilDate:[NSDate distantFuture] inMode:NSEventTrackingRunLoopMode dequeue:YES];
+			if([event type] == NSEventTypeMouseMoved || [event type] == NSEventTypeLeftMouseDragged)
 				[_partnerView mouseDragged:event];
 		}
 		[_partnerView mouseUp:event];

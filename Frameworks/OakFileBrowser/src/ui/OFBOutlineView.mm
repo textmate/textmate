@@ -115,7 +115,7 @@
 		NSWindow* win = [self window];
 		NSEvent* anEvent = [NSApp currentEvent];
 		NSEvent* fakeEvent = [NSEvent
-			mouseEventWithType:NSLeftMouseDown
+			mouseEventWithType:NSEventTypeLeftMouseDown
 			location:pos
 			modifierFlags:0
 			timestamp:[anEvent timestamp]

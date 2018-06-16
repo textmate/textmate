@@ -176,7 +176,7 @@ static NSTextView* MyCreateTextView ()
 @implementation EncodingWindowController
 - (instancetype)initWithData:(NSData*)data
 {
-	if(self = [super initWithWindow:[[NSWindow alloc] initWithContentRect:NSZeroRect styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask) backing:NSBackingStoreBuffered defer:NO]])
+	if(self = [super initWithWindow:[[NSWindow alloc] initWithContentRect:NSZeroRect styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskMiniaturizable) backing:NSBackingStoreBuffered defer:NO]])
 	{
 		_data            = data;
 		_encoding        = @"ISO-8859-1";

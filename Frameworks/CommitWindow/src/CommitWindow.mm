@@ -146,20 +146,20 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 
 		[CWStatusStringTransformer register];
 
-		self.window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 600, 350) styleMask:NSTitledWindowMask|NSResizableWindowMask backing:NSBackingStoreBuffered defer:NO];
+		self.window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 600, 350) styleMask:NSWindowStyleMaskTitled|NSWindowStyleMaskResizable backing:NSBackingStoreBuffered defer:NO];
 		self.window.delegate          = self;
 		self.window.frameAutosaveName = @"Commit Window";
 
 		_commitButton = OakCreateButton([self commitButtonTitle], NSRoundedBezelStyle);
 		_commitButton.action                    = @selector(performCommit:);
 		_commitButton.keyEquivalent             = @"\r";
-		_commitButton.keyEquivalentModifierMask = NSCommandKeyMask;
+		_commitButton.keyEquivalentModifierMask = NSEventModifierFlagCommand;
 		_commitButton.target                    = self;
 
 		_cancelButton = OakCreateButton(@"Cancel", NSRoundedBezelStyle);
 		_cancelButton.action                    = @selector(cancel:);
 		_cancelButton.keyEquivalent             = @".";
-		_cancelButton.keyEquivalentModifierMask = NSCommandKeyMask;
+		_cancelButton.keyEquivalentModifierMask = NSEventModifierFlagCommand;
 		_cancelButton.target                    = self;
 
 		_showTableButton = [[NSButton alloc] initWithFrame:NSZeroRect];
@@ -207,19 +207,19 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 		if(self.showContinueSuffix)
 		{
 			__weak auto wealf = self;
-			_eventMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:NSFlagsChangedMask handler:^NSEvent*(NSEvent* event){
+			_eventMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:NSEventMaskFlagsChanged handler:^NSEvent*(NSEvent* event){
 				if(![wealf.window isKeyWindow])
 					return event;
 
-				if([event modifierFlags] & NSAlternateKeyMask)
+				if([event modifierFlags] & NSEventModifierFlagOption)
 				{
-					wealf.commitButton.keyEquivalentModifierMask |= NSAlternateKeyMask;
+					wealf.commitButton.keyEquivalentModifierMask |= NSEventModifierFlagOption;
 					wealf.commitButton.action = @selector(performCommit:);
 					wealf.showContinueSuffix = NO;
 				}
 				else
 				{
-					wealf.commitButton.keyEquivalentModifierMask &= ~NSAlternateKeyMask;
+					wealf.commitButton.keyEquivalentModifierMask &= ~NSEventModifierFlagOption;
 					wealf.commitButton.action = @selector(performCommitAndContinue:);
 					wealf.showContinueSuffix = YES;
 				}

@@ -9,7 +9,7 @@
 @implementation OakZoomingIcon
 - (id)initWithIcon:(NSImage*)icon rect:(NSRect)aRect
 {
-	if(self = [super initWithContentRect:aRect styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:NO])
+	if(self = [super initWithContentRect:aRect styleMask:NSWindowStyleMaskBorderless backing:NSBackingStoreBuffered defer:NO])
 	{
 		self.releasedWhenClosed = NO;
 		self.ignoresMouseEvents = YES;
@@ -29,7 +29,7 @@
 
 		[NSAnimationContext beginGrouping];
 
-		[NSAnimationContext currentContext].duration = ([[NSApp currentEvent] modifierFlags] & NSShiftKeyMask) ? 2.5 : 0.25;
+		[NSAnimationContext currentContext].duration = ([[NSApp currentEvent] modifierFlags] & NSEventModifierFlagShift) ? 2.5 : 0.25;
 		[NSAnimationContext currentContext].completionHandler = ^{
 			[self orderOut:self];
 		};

@@ -93,9 +93,9 @@ static NSTextField* OakCreateTextField ()
 @implementation AddLicenseViewController
 - (void)loadView
 {
-	self.ownerLabel       = OakCreateLabel(@"Owner:", nil, NSRightTextAlignment);
+	self.ownerLabel       = OakCreateLabel(@"Owner:", nil, NSTextAlignmentRight);
 	self.ownerTextField   = OakCreateTextField();
-	self.licenseLabel     = OakCreateLabel(@"License:", nil, NSRightTextAlignment);
+	self.licenseLabel     = OakCreateLabel(@"License:", nil, NSTextAlignmentRight);
 	self.licenseTextField = OakCreateTextField();
 	self.licenseTextField.font = [NSFont userFixedPitchFontOfSize:12];
 	self.statusTextField  = OakCreateLabel(@"", [NSFont labelFontOfSize:0]);
@@ -172,7 +172,7 @@ static NSTextField* OakCreateTextField ()
 @implementation AddLicenseWindowController
 - (instancetype)initWithLicense:(License*)license
 {
-	if((self = [super initWithWindow:[[NSPanel alloc] initWithContentRect:NSZeroRect styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSMiniaturizableWindowMask) backing:NSBackingStoreBuffered defer:NO]]))
+	if((self = [super initWithWindow:[[NSPanel alloc] initWithContentRect:NSZeroRect styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskMiniaturizable) backing:NSBackingStoreBuffered defer:NO]]))
 	{
 		self.window.title    = @"Add License";
 		self.window.level    = NSModalPanelWindowLevel;
@@ -297,10 +297,10 @@ static NSString* const kAddLicenseViewIdentifier = @"org.TextMate.addLicenseButt
 	NSButton* addLicenseButton = [[NSButton alloc] initWithFrame:NSZeroRect];
 
 	addLicenseButton.cell.backgroundStyle = NSBackgroundStyleRaised;
-	addLicenseButton.cell.controlSize     = NSSmallControlSize;
+	addLicenseButton.cell.controlSize     = NSControlSizeSmall;
 
 	addLicenseButton.showsBorderOnlyWhileMouseInside = YES;
-	addLicenseButton.font       = [NSFont messageFontOfSize:[NSFont systemFontSizeForControlSize:NSSmallControlSize]];
+	addLicenseButton.font       = [NSFont messageFontOfSize:[NSFont systemFontSizeForControlSize:NSControlSizeSmall]];
 	addLicenseButton.bezelStyle = NSRecessedBezelStyle;
 	addLicenseButton.buttonType = NSMomentaryPushInButton;
 	addLicenseButton.title      = @"Add License";

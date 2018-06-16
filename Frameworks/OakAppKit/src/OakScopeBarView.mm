@@ -5,7 +5,7 @@ static NSButton* OakCreateScopeButton (NSString* label, NSUInteger tag, SEL acti
 {
 	NSButton* res = [NSButton new];
 	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
-	[[res cell] setControlSize:NSSmallControlSize];
+	[[res cell] setControlSize:NSControlSizeSmall];
 	NSString* accessibilityRole = NSAccessibilityRadioButtonRole;
 	[[res cell] accessibilitySetOverrideValue:accessibilityRole forAttribute:NSAccessibilityRoleAttribute];
 	[[res cell] accessibilitySetOverrideValue:NSAccessibilityRoleDescription(accessibilityRole, nil) forAttribute:NSAccessibilityRoleDescriptionAttribute];

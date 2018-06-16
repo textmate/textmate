@@ -1041,7 +1041,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 - (void)ensureSelectionIsInVisibleArea:(id)sender
 {
 	self.needsEnsureSelectionIsInVisibleArea = NO;
-	if([[self.window currentEvent] type] == NSLeftMouseDragged) // User is drag-selecting
+	if([[self.window currentEvent] type] == NSEventTypeLeftMouseDragged) // User is drag-selecting
 		return;
 
 	ng::range_t range = documentView->ranges().last();
@@ -2038,7 +2038,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	else if(plist::dictionary_t const* nested = boost::get<plist::dictionary_t>(&anAction))
 	{
 		__block id eventMonitor;
-		eventMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:NSKeyDownMask handler:^NSEvent*(NSEvent* event){
+		eventMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:NSEventMaskKeyDown handler:^NSEvent*(NSEvent* event){
 			plist::dictionary_t::const_iterator pair = nested->find(to_s(event));
 			if(pair != nested->end())
 			{
@@ -2057,7 +2057,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	BOOL hasKey = (self.keyState & (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask)) == (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask);
 	BOOL otherTextViewHasKey = [self.window.firstResponder isKindOfClass:[self class]];
 	BOOL recordingShortcut = [self.window.firstResponder isKindOfClass:NSClassFromString(@"OakKeyEquivalentView")];
-	BOOL noCommandFlag = (anEvent.modifierFlags & NSCommandKeyMask) != NSCommandKeyMask;
+	BOOL noCommandFlag = (anEvent.modifierFlags & NSEventModifierFlagCommand) != NSEventModifierFlagCommand;
 	if(!hasKey && (otherTextViewHasKey || recordingShortcut || noCommandFlag))
 		return NO;
 
@@ -2205,8 +2205,8 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 
 - (void)flagsChanged:(NSEvent*)anEvent
 {
-	NSInteger modifiers  = [anEvent modifierFlags] & (NSAlternateKeyMask | NSControlKeyMask | NSCommandKeyMask | NSShiftKeyMask);
-	BOOL isHoldingOption = modifiers & NSAlternateKeyMask ? YES : NO;
+	NSInteger modifiers  = [anEvent modifierFlags] & (NSEventModifierFlagOption | NSEventModifierFlagControl | NSEventModifierFlagCommand | NSEventModifierFlagShift);
+	BOOL isHoldingOption = modifiers & NSEventModifierFlagOption ? YES : NO;
 
 	self.showColumnSelectionCursor = isHoldingOption;
 	if(([NSEvent pressedMouseButtons] & 1))
@@ -2218,11 +2218,11 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	{
 		BOOL tapThreshold     = [[NSDate date] timeIntervalSinceDate:_lastFlagsChangeDate] < 0.18;
 
-		BOOL didPressShift    = modifiers == NSShiftKeyMask && _lastFlags == 0;
-		BOOL didReleaseShift  = modifiers == 0 && _lastFlags == NSShiftKeyMask;
+		BOOL didPressShift    = modifiers == NSEventModifierFlagShift && _lastFlags == 0;
+		BOOL didReleaseShift  = modifiers == 0 && _lastFlags == NSEventModifierFlagShift;
 
-		BOOL didPressOption   = (modifiers & ~NSShiftKeyMask) == NSAlternateKeyMask && (_lastFlags & ~NSShiftKeyMask) == 0;
-		BOOL didReleaseOption = (modifiers & ~NSShiftKeyMask) == 0 && (_lastFlags & ~NSShiftKeyMask) == NSAlternateKeyMask;
+		BOOL didPressOption   = (modifiers & ~NSEventModifierFlagShift) == NSEventModifierFlagOption && (_lastFlags & ~NSEventModifierFlagShift) == 0;
+		BOOL didReleaseOption = (modifiers & ~NSEventModifierFlagShift) == 0 && (_lastFlags & ~NSEventModifierFlagShift) == NSEventModifierFlagOption;
 
 		OakFlagsState newFlagsState = OakFlagsStateClear;
 		if(didPressOption)
@@ -2408,7 +2408,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	NSWindow* win = [self window];
 	NSEvent* anEvent = [NSApp currentEvent];
 	NSEvent* fakeEvent = [NSEvent
-		mouseEventWithType:NSLeftMouseDown
+		mouseEventWithType:NSEventTypeLeftMouseDown
 		location:[win convertRectFromScreen:(NSRect){ [self positionForWindowUnderCaret], NSZeroSize }].origin
 		modifierFlags:0
 		timestamp:[anEvent timestamp]
@@ -3046,7 +3046,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	hideCaret = !hideCaret;
 
 	// The column selection cursor may get stuck if e.g. using ⌥F2 to bring up a menu: We see the initial “option down” but never the “option release” that would normally reset the column selection cursor state.
-	if(([NSEvent modifierFlags] & NSAlternateKeyMask) == 0)
+	if(([NSEvent modifierFlags] & NSEventModifierFlagOption) == 0)
 		self.showColumnSelectionCursor = NO;
 }
 
@@ -3592,10 +3592,10 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 		static struct { NSUInteger mask; std::string name; } const qualNames[] =
 		{
-			{ NSShiftKeyMask,     "SHIFT"    },
-			{ NSControlKeyMask,   "CONTROL"  },
-			{ NSAlternateKeyMask, "OPTION"   },
-			{ NSCommandKeyMask,   "COMMAND"  }
+			{ NSEventModifierFlagShift,     "SHIFT"    },
+			{ NSEventModifierFlagControl,   "CONTROL"  },
+			{ NSEventModifierFlagOption,    "OPTION"   },
+			{ NSEventModifierFlagCommand,   "COMMAND"  }
 		};
 
 		auto env = handler->bundle_variables();
@@ -3799,9 +3799,9 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (void)actOnMouseDown
 {
-	bool optionDown  = mouseDownModifierFlags & NSAlternateKeyMask;
-	bool shiftDown   = mouseDownModifierFlags & NSShiftKeyMask;
-	bool commandDown = mouseDownModifierFlags & NSCommandKeyMask;
+	bool optionDown  = mouseDownModifierFlags & NSEventModifierFlagOption;
+	bool shiftDown   = mouseDownModifierFlags & NSEventModifierFlagShift;
+	bool commandDown = mouseDownModifierFlags & NSEventModifierFlagCommand;
 
 	ng::ranges_t s = documentView->ranges();
 
@@ -3879,7 +3879,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	}
 
 	NSUInteger currentModifierFlags = [anEvent modifierFlags];
-	if(currentModifierFlags & NSAlternateKeyMask)
+	if(currentModifierFlags & NSEventModifierFlagOption)
 		range.last().columnar = true;
 
 	ng::ranges_t s = documentView->ranges();
@@ -3899,7 +3899,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 	NSImage* image = [[NSImage alloc] initWithSize:srcImage.size];
 	[image lockFocus];
-	[srcImage drawAtPoint:NSZeroPoint fromRect:NSZeroRect operation:NSCompositeCopy fraction:0.5];
+	[srcImage drawAtPoint:NSZeroPoint fromRect:NSZeroRect operation:NSCompositingOperationCopy fraction:0.5];
 	[image unlockFocus];
 
 	std::vector<std::string> v;
@@ -3942,7 +3942,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (void)preparePotentialDrag:(NSEvent*)anEvent
 {
-	if([self dragDelay] != 0 && ([[self window] isKeyWindow] || ([anEvent modifierFlags] & NSCommandKeyMask)))
+	if([self dragDelay] != 0 && ([[self window] isKeyWindow] || ([anEvent modifierFlags] & NSEventModifierFlagCommand)))
 			self.initiateDragTimer = [NSTimer scheduledTimerWithTimeInterval:(0.001 * [self dragDelay]) target:self selector:@selector(changeToDragPointer:) userInfo:nil repeats:NO];
 	else	[self changeToDragPointer:nil];
 	delayMouseDown = [[self window] isKeyWindow];
@@ -3952,10 +3952,10 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 {
 	static struct { NSUInteger modifier; char const* scope; } const map[] =
 	{
-		{ NSShiftKeyMask,      "dyn.modifier.shift"   },
-		{ NSControlKeyMask,    "dyn.modifier.control" },
-		{ NSAlternateKeyMask,  "dyn.modifier.option"  },
-		{ NSCommandKeyMask,    "dyn.modifier.command" }
+		{ NSEventModifierFlagShift,      "dyn.modifier.shift"   },
+		{ NSEventModifierFlagControl,    "dyn.modifier.control" },
+		{ NSEventModifierFlagOption,     "dyn.modifier.option"  },
+		{ NSEventModifierFlagCommand,    "dyn.modifier.command" }
 	};
 
 	for(auto const& it : map)
@@ -4000,7 +4000,7 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 
 - (void)mouseDown:(NSEvent*)anEvent
 {
-	if([self.inputContext handleEvent:anEvent] || !documentView || [anEvent type] != NSLeftMouseDown || ignoreMouseDown)
+	if([self.inputContext handleEvent:anEvent] || !documentView || [anEvent type] != NSEventTypeLeftMouseDown || ignoreMouseDown)
 		return (void)(ignoreMouseDown = NO);
 
 	if(ng::range_t r = documentView->folded_range_at_point([self convertPoint:[anEvent locationInWindow] fromView:nil]))
@@ -4010,7 +4010,7 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 		return;
 	}
 
-	if(macroRecordingArray && [anEvent type] == NSLeftMouseDown)
+	if(macroRecordingArray && [anEvent type] == NSEventTypeLeftMouseDown)
 	{
 		NSAlert* alert        = [[NSAlert alloc] init];
 		alert.messageText     = @"You are recording a macro";
@@ -4048,9 +4048,9 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 
 	BOOL hasFocus = (self.keyState & (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask)) == (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask);
 	if(!hasFocus)
-		mouseDownModifierFlags &= ~NSCommandKeyMask;
+		mouseDownModifierFlags &= ~NSEventModifierFlagCommand;
 
-	if(!(mouseDownModifierFlags & NSShiftKeyMask) && [self isPointInSelection:[self convertPoint:[anEvent locationInWindow] fromView:nil]] && [anEvent clickCount] == 1 && [self dragDelay] >= 0 && !([anEvent modifierFlags] & (NSShiftKeyMask | NSControlKeyMask | NSAlternateKeyMask | NSCommandKeyMask)))
+	if(!(mouseDownModifierFlags & NSEventModifierFlagShift) && [self isPointInSelection:[self convertPoint:[anEvent locationInWindow] fromView:nil]] && [anEvent clickCount] == 1 && [self dragDelay] >= 0 && !([anEvent modifierFlags] & (NSEventModifierFlagShift | NSEventModifierFlagControl | NSEventModifierFlagOption | NSEventModifierFlagCommand)))
 			[self preparePotentialDrag:anEvent];
 	else	[self actOnMouseDown];
 }
@@ -4391,14 +4391,14 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 		{
 			// We use CFRunLoopRunInMode() to handle dispatch queues and nextEventMatchingMask:… to catcn ⌃C
 			CFRunLoopRunInMode(kCFRunLoopDefaultMode, 5, true);
-			if(NSEvent* event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:nil inMode:NSDefaultRunLoopMode dequeue:YES])
+			if(NSEvent* event = [NSApp nextEventMatchingMask:NSEventMaskAny untilDate:nil inMode:NSDefaultRunLoopMode dequeue:YES])
 			{
-				static NSEventType const events[] = { NSLeftMouseDown, NSLeftMouseUp, NSRightMouseDown, NSRightMouseUp, NSOtherMouseDown, NSOtherMouseUp, NSLeftMouseDragged, NSRightMouseDragged, NSOtherMouseDragged, NSKeyDown, NSKeyUp, NSFlagsChanged };
+				static NSEventType const events[] = { NSEventTypeLeftMouseDown, NSEventTypeLeftMouseUp, NSEventTypeRightMouseDown, NSEventTypeRightMouseUp, NSEventTypeOtherMouseDown, NSEventTypeOtherMouseUp, NSEventTypeLeftMouseDragged, NSEventTypeRightMouseDragged, NSEventTypeOtherMouseDragged, NSEventTypeKeyDown, NSEventTypeKeyUp, NSEventTypeFlagsChanged };
 				if(!oak::contains(std::begin(events), std::end(events), [event type]))
 				{
 					[NSApp sendEvent:event];
 				}
-				else if([event type] == NSKeyDown && (([[event charactersIgnoringModifiers] isEqualToString:@"c"] && ([event modifierFlags] & (NSShiftKeyMask|NSControlKeyMask|NSAlternateKeyMask|NSCommandKeyMask)) == NSControlKeyMask) || ([[event charactersIgnoringModifiers] isEqualToString:@"."] && ([event modifierFlags] & (NSShiftKeyMask|NSControlKeyMask|NSAlternateKeyMask|NSCommandKeyMask)) == NSCommandKeyMask)))
+				else if([event type] == NSEventTypeKeyDown && (([[event charactersIgnoringModifiers] isEqualToString:@"c"] && ([event modifierFlags] & (NSEventModifierFlagShift|NSEventModifierFlagControl|NSEventModifierFlagOption|NSEventModifierFlagCommand)) == NSEventModifierFlagControl) || ([[event charactersIgnoringModifiers] isEqualToString:@"."] && ([event modifierFlags] & (NSEventModifierFlagShift|NSEventModifierFlagControl|NSEventModifierFlagOption|NSEventModifierFlagCommand)) == NSEventModifierFlagCommand)))
 				{
 					NSAlert* alert        = [[NSAlert alloc] init];
 					alert.messageText     = [NSString stringWithFormat:@"Stop “%@”", to_ns(aBundleCommand.name)];

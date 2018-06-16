@@ -43,7 +43,7 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 	CGFloat const kTableViewPadding = 4;
 	CGFloat const kScrollBarWidth   = 15;
 
-	NSTextField* textField = OakCreateLabel(@"", self.font, NSLeftTextAlignment, NSLineBreakByTruncatingTail);
+	NSTextField* textField = OakCreateLabel(@"", self.font, NSTextAlignmentLeft, NSLineBreakByTruncatingTail);
 	if(_choices.count == 0)
 		[textField sizeToFit];
 
@@ -132,7 +132,7 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 	NSTextField* res = [aTableView makeViewWithIdentifier:identifier owner:self];
 	if(!res)
 	{
-		res = OakCreateLabel(@"", self.font, NSLeftTextAlignment, NSLineBreakByTruncatingTail);
+		res = OakCreateLabel(@"", self.font, NSTextAlignmentLeft, NSLineBreakByTruncatingTail);
 		res.identifier = identifier;
 	}
 	return res;
@@ -140,7 +140,7 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 
 - (void)showAtTopLeftPoint:(NSPoint)aPoint forView:(NSView*)aView
 {
-	_window = [[NSPanel alloc] initWithContentRect:NSMakeRect(aPoint.x, aPoint.y, 0, 0) styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:NO];
+	_window = [[NSPanel alloc] initWithContentRect:NSMakeRect(aPoint.x, aPoint.y, 0, 0) styleMask:NSWindowStyleMaskBorderless backing:NSBackingStoreBuffered defer:NO];
 	_window.opaque             = NO;
 	_window.alphaValue         = 0.97;
 	_window.backgroundColor    = [NSColor colorWithCalibratedRed:1.00 green:0.96 blue:0.76 alpha:1];

@@ -64,14 +64,14 @@ static NSTextField* OakCreateTextField ()
 		[_statusTextField.cell setLineBreakMode:NSLineBreakByTruncatingMiddle];
 
 		_progressIndicator = [NSProgressIndicator new];
-		_progressIndicator.controlSize          = NSSmallControlSize;
+		_progressIndicator.controlSize          = NSControlSizeSmall;
 		_progressIndicator.maxValue             = 1;
 		_progressIndicator.indeterminate        = NO;
 		_progressIndicator.displayedWhenStopped = NO;
 		_progressIndicator.bezeled              = NO;
 
 		_spinner = [NSProgressIndicator new];
-		_spinner.controlSize          = NSSmallControlSize;
+		_spinner.controlSize          = NSControlSizeSmall;
 		_spinner.style                = NSProgressIndicatorSpinningStyle;
 		_spinner.displayedWhenStopped = NO;
 

@@ -20,7 +20,7 @@ static NSTextField* OakCreateTextField (NSString* label)
 	[res setDrawsBackground:NO];
 	[res setFont:OakStatusBarFont()];
 	[res setStringValue:label];
-	[res setAlignment:NSRightTextAlignment];
+	[res setAlignment:NSTextAlignmentRight];
 	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
 	[[res cell] setLineBreakMode:NSLineBreakByTruncatingMiddle];
 	return res;

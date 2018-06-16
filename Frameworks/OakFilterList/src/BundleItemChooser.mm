@@ -172,22 +172,22 @@ static std::string key_equivalent_for_menu_item (NSMenuItem* menuItem)
 
 	static struct { NSUInteger flag; std::string symbol; } const EventFlags[] =
 	{
-		{ NSNumericPadKeyMask, "#" },
-		{ NSControlKeyMask,    "^" },
-		{ NSAlternateKeyMask,  "~" },
-		{ NSShiftKeyMask,      "$" },
-		{ NSCommandKeyMask,    "@" },
+		{ NSEventModifierFlagNumericPad, "#" },
+		{ NSEventModifierFlagControl,    "^" },
+		{ NSEventModifierFlagOption,     "~" },
+		{ NSEventModifierFlagShift,      "$" },
+		{ NSEventModifierFlagCommand,    "@" },
 	};
 
 	std::string key  = to_s([menuItem keyEquivalent]);
 	NSUInteger flags = [menuItem keyEquivalentModifierMask];
 
-	if(flags & NSShiftKeyMask)
+	if(flags & NSEventModifierFlagShift)
 	{
 		std::string const upCased = text::uppercase(key);
 		if(key != upCased)
 		{
-			flags &= ~NSShiftKeyMask;
+			flags &= ~NSEventModifierFlagShift;
 			key = upCased;
 		}
 	}
@@ -481,13 +481,13 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 
 		self.selectButton                  = OakCreateButton(@"Select");
 		self.selectButton.font             = [NSFont messageFontOfSize:[NSFont smallSystemFontSize]];
-		self.selectButton.cell.controlSize = NSSmallControlSize;
+		self.selectButton.cell.controlSize = NSControlSizeSmall;
 		self.selectButton.target           = self;
 		self.selectButton.action           = @selector(accept:);
 
 		self.editButton                  = OakCreateButton(@"Edit");
 		self.editButton.font             = [NSFont messageFontOfSize:[NSFont smallSystemFontSize]];
-		self.editButton.cell.controlSize = NSSmallControlSize;
+		self.editButton.cell.controlSize = NSControlSizeSmall;
 		self.editButton.target           = self;
 		self.editButton.action           = @selector(editItem:);
 
@@ -512,7 +512,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 {
 	auto updateDefaultButton = ^NSEvent*(NSEvent* event){
 		BOOL isKeyWindow = NSApp.keyWindow == self.window;
-		BOOL optionDown  = ([event modifierFlags] & NSDeviceIndependentModifierFlagsMask) == NSAlternateKeyMask;
+		BOOL optionDown  = ([event modifierFlags] & NSEventModifierFlagDeviceIndependentFlagsMask) == NSEventModifierFlagOption;
 		self.window.defaultButtonCell = self.canEdit && (!self.canAccept || (optionDown && isKeyWindow)) ? self.editButton.cell : self.selectButton.cell;
 		return event;
 	};
@@ -520,7 +520,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	updateDefaultButton([NSApp currentEvent]);
 	if(NSApp.keyWindow == self.window)
 	{
-		_eventMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:NSFlagsChangedMask handler:updateDefaultButton];
+		_eventMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:NSEventMaskFlagsChanged handler:updateDefaultButton];
 	}
 	else if(_eventMonitor)
 	{

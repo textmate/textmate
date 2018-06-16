@@ -42,7 +42,7 @@ OAK_DEBUG_VAR(AppController_Documents);
 	openPanel.title                           = [NSString stringWithFormat:@"%@: Open", [[[NSBundle mainBundle] localizedInfoDictionary] valueForKey: @"CFBundleName"] ?: [[NSProcessInfo processInfo] processName]];
 
 	[openPanel setShowsHiddenFilesCheckBox:YES];
-	if([openPanel runModal] == NSOKButton)
+	if([openPanel runModal] == NSModalResponseOK)
 	{
 		NSMutableArray* filenames = [NSMutableArray array];
 		for(NSURL* url in [openPanel URLs])

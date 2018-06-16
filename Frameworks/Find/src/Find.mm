@@ -296,7 +296,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 			case FindActionReplace:        _findOperation = kFindOperationReplace;                                                          break;
 		}
 
-		self.closeWindowOnSuccess = action == FindActionFindNext && [[NSApp currentEvent] type] == NSKeyDown && to_s([NSApp currentEvent]) == utf8::to_s(NSCarriageReturnCharacter);
+		self.closeWindowOnSuccess = action == FindActionFindNext && [[NSApp currentEvent] type] == NSEventTypeKeyDown && to_s([NSApp currentEvent]) == utf8::to_s(NSCarriageReturnCharacter);
 		[OakPasteboard pasteboardWithName:NSFindPboard].auxiliaryOptionsForCurrent = nil;
 		[NSApp sendAction:@selector(performFindOperation:) to:nil from:self];
 	}

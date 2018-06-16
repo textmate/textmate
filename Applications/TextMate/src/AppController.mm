@@ -47,7 +47,7 @@ void OakOpenDocuments (NSArray* paths, BOOL treatFilePackageAsFolder)
 	NSMutableArray<OakDocument*>* documents = [NSMutableArray array];
 	NSMutableArray* itemsToInstall = [NSMutableArray array];
 	NSMutableArray* plugInsToInstall = [NSMutableArray array];
-	BOOL enableInstallHandler = treatFilePackageAsFolder == NO && ([NSEvent modifierFlags] & NSAlternateKeyMask) == 0;
+	BOOL enableInstallHandler = treatFilePackageAsFolder == NO && ([NSEvent modifierFlags] & NSEventModifierFlagOption) == 0;
 	for(NSString* path in paths)
 	{
 		BOOL isDirectory = NO;
@@ -448,9 +448,9 @@ BOOL HasDocumentWindow (NSArray* windows)
 			forwardMenuItem.keyEquivalent                = @"";
 
 			shiftLeftMenuItem.keyEquivalent              = @"[";
-			shiftLeftMenuItem.keyEquivalentModifierMask  = NSCommandKeyMask;
+			shiftLeftMenuItem.keyEquivalentModifierMask  = NSEventModifierFlagCommand;
 			shiftRightMenuItem.keyEquivalent             = @"]";
-			shiftRightMenuItem.keyEquivalentModifierMask = NSCommandKeyMask;
+			shiftRightMenuItem.keyEquivalentModifierMask = NSEventModifierFlagCommand;
 		}
 		else
 		{
@@ -458,9 +458,9 @@ BOOL HasDocumentWindow (NSArray* windows)
 			shiftRightMenuItem.keyEquivalent          = @"";
 
 			backMenuItem.keyEquivalent                = @"[";
-			backMenuItem.keyEquivalentModifierMask    = NSCommandKeyMask;
+			backMenuItem.keyEquivalentModifierMask    = NSEventModifierFlagCommand;
 			forwardMenuItem.keyEquivalent             = @"]";
-			forwardMenuItem.keyEquivalentModifierMask = NSCommandKeyMask;
+			forwardMenuItem.keyEquivalentModifierMask = NSEventModifierFlagCommand;
 		}
 	}
 }
@@ -574,7 +574,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 		NSString* promptUser = nil;
 		if(path::exists(prematureTerminationDuringRestore))
 			promptUser = @"Previous attempt of restoring your session caused an abnormal exit. Would you like to skip session restore?";
-		else if([NSEvent modifierFlags] & NSShiftKeyMask)
+		else if([NSEvent modifierFlags] & NSEventModifierFlagShift)
 			promptUser = @"By holding down shift (⇧) you have indicated that you wish to disable restoring the documents which were open in last session.";
 
 		if(promptUser)

@@ -166,8 +166,8 @@ FSDataSource* DataSourceForURL (NSURL* anURL, NSUInteger someOptions)
 	NSString* dropPath    = [(item ?: self.rootItem).url path];
 
 	dev_t targetDevice = path::device([dropPath fileSystemRepresentation]);
-	BOOL linkOperation = ([[NSApp currentEvent] modifierFlags] & NSControlKeyMask) == NSControlKeyMask;
-	BOOL toggleOperation = ([[NSApp currentEvent] modifierFlags] & NSAlternateKeyMask) == NSAlternateKeyMask;
+	BOOL linkOperation = ([[NSApp currentEvent] modifierFlags] & NSEventModifierFlagControl) == NSEventModifierFlagControl;
+	BOOL toggleOperation = ([[NSApp currentEvent] modifierFlags] & NSEventModifierFlagOption) == NSEventModifierFlagOption;
 
 	// We accept the drop as long as long as it is valid for at least one of the items
 	for(NSString* aPath in draggedPaths)

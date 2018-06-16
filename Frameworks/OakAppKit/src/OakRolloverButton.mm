@@ -120,12 +120,12 @@ typedef NS_ENUM(NSUInteger, OakImageState) {
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidChangeMainOrKey:) name:NSWindowDidResignKeyNotification object:newWindow];
 	}
 
-	self.active = ([newWindow styleMask] & NSFullScreenWindowMask) || [newWindow isMainWindow] || [newWindow isKeyWindow];
+	self.active = ([newWindow styleMask] & NSWindowStyleMaskFullScreen) || [newWindow isMainWindow] || [newWindow isKeyWindow];
 }
 
 - (void)windowDidChangeMainOrKey:(NSNotification*)aNotification
 {
-	self.active = ([self.window styleMask] & NSFullScreenWindowMask) || [self.window isMainWindow] || [self.window isKeyWindow];
+	self.active = ([self.window styleMask] & NSWindowStyleMaskFullScreen) || [self.window isMainWindow] || [self.window isKeyWindow];
 }
 
 - (void)updateTrackingAreas

@@ -107,7 +107,7 @@ static size_t line_count (std::string const& text)
 			NSString* moreLinesText           = [NSString stringWithFormat:@"%lu more line%s", [lines count] - [clippedLines count], ([lines count] - [clippedLines count]) != 1 ? "s" : ""];
 			NSDictionary* moreLinesAttributes = @{
 				NSForegroundColorAttributeName : ([self isHighlighted] ? [NSColor whiteColor] : [NSColor lightGrayColor]),
-				NSFontAttributeName            : [NSFont controlContentFontOfSize:[NSFont systemFontSizeForControlSize:NSSmallControlSize]],
+				NSFontAttributeName            : [NSFont controlContentFontOfSize:[NSFont systemFontSizeForControlSize:NSControlSizeSmall]],
 			};
 			NSAttributedString* moreLines     = [[NSAttributedString alloc] initWithString:moreLinesText attributes:moreLinesAttributes];
 			NSSize size             = [moreLines size];
@@ -311,13 +311,13 @@ static size_t line_count (std::string const& text)
 	[window orderFront:self];
 	[tableView scrollRowToVisible:tableView.selectedRow];
 
-	while(NSEvent* event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:[NSDate distantFuture] inMode:NSDefaultRunLoopMode dequeue:YES])
+	while(NSEvent* event = [NSApp nextEventMatchingMask:NSEventMaskAny untilDate:[NSDate distantFuture] inMode:NSDefaultRunLoopMode dequeue:YES])
 	{
-		static std::set<NSEventType> const keyEvent   = { NSKeyDown, NSKeyUp };
-		static std::set<NSEventType> const mouseEvent = { NSLeftMouseDown, NSLeftMouseUp, NSRightMouseDown, NSRightMouseUp, NSOtherMouseDown, NSOtherMouseUp };
+		static std::set<NSEventType> const keyEvent   = { NSEventTypeKeyDown, NSEventTypeKeyUp };
+		static std::set<NSEventType> const mouseEvent = { NSEventTypeLeftMouseDown, NSEventTypeLeftMouseUp, NSEventTypeRightMouseDown, NSEventTypeRightMouseUp, NSEventTypeOtherMouseDown, NSEventTypeOtherMouseUp };
 
 		bool orderOutEvent = (keyEvent.find([event type]) != keyEvent.end() && [event window] != parentWindow) || (mouseEvent.find([event type]) != mouseEvent.end() && [event window] != window);
-		if(!orderOutEvent && keyEvent.find([event type]) != keyEvent.end() && !([event modifierFlags] & NSCommandKeyMask))
+		if(!orderOutEvent && keyEvent.find([event type]) != keyEvent.end() && !([event modifierFlags] & NSEventModifierFlagCommand))
 				[window sendEvent:event];
 		else	[NSApp sendEvent:event];
 

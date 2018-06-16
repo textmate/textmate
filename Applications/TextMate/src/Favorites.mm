@@ -118,7 +118,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 	if(!res)
 	{
 		NSButton* removeButton = [NSButton new];
-		[[removeButton cell] setControlSize:NSSmallControlSize];
+		[[removeButton cell] setControlSize:NSControlSizeSmall];
 		removeButton.refusesFirstResponder = YES;
 		removeButton.bezelStyle = NSRoundRectBezelStyle;
 		removeButton.buttonType = NSMomentaryPushInButton;

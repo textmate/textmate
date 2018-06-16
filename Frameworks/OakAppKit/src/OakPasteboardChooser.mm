@@ -128,7 +128,7 @@ static NSMutableDictionary* SharedChoosers;
 		_scrollView.borderType            = NSNoBorder;
 		_scrollView.documentView          = _tableView;
 
-		_window = [[NSPanel alloc] initWithContentRect:NSMakeRect(600, 700, 400, 500) styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSTexturedBackgroundWindowMask) backing:NSBackingStoreBuffered defer:NO];
+		_window = [[NSPanel alloc] initWithContentRect:NSMakeRect(600, 700, 400, 500) styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskTexturedBackground) backing:NSBackingStoreBuffered defer:NO];
 		[_window setAutorecalculatesContentBorderThickness:NO forEdge:NSMaxYEdge];
 		[_window setContentBorderThickness:32 forEdge:NSMaxYEdge];
 		[[_window standardWindowButton:NSWindowMiniaturizeButton] setHidden:YES];

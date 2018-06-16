@@ -51,8 +51,8 @@ static void OakSetupApplicationWithView (NSResponder* aView, std::string testNam
 	else if([aView isKindOfClass:[NSView class]])
 	{
 		NSView* view = (NSView*)aView;
-		NSRect winRect = [NSWindow frameRectForContentRect:NSInsetRect([view bounds], -10, -10) styleMask:NSTitledWindowMask|NSResizableWindowMask];
-		window = [[NSWindow alloc] initWithContentRect:winRect styleMask:NSTitledWindowMask|NSResizableWindowMask backing:NSBackingStoreBuffered defer:NO];
+		NSRect winRect = [NSWindow frameRectForContentRect:NSInsetRect([view bounds], -10, -10) styleMask:NSWindowStyleMaskTitled|NSWindowStyleMaskResizable];
+		window = [[NSWindow alloc] initWithContentRect:winRect styleMask:NSWindowStyleMaskTitled|NSWindowStyleMaskResizable backing:NSBackingStoreBuffered defer:NO];
 		[view setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
 		[view setFrame:NSInsetRect([[window contentView] bounds], 10, 10)];
 		[[window contentView] addSubview:view];

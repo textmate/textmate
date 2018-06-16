@@ -146,12 +146,12 @@ OakRolloverButton* OakCreateCloseButton (NSString* accessibilityLabel)
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidChangeMainOrKey:) name:NSWindowDidResignKeyNotification object:newWindow];
 	}
 
-	self.active = ([newWindow styleMask] & NSFullScreenWindowMask) || [newWindow isMainWindow] || [newWindow isKeyWindow];
+	self.active = ([newWindow styleMask] & NSWindowStyleMaskFullScreen) || [newWindow isMainWindow] || [newWindow isKeyWindow];
 }
 
 - (void)windowDidChangeMainOrKey:(NSNotification*)aNotification
 {
-	self.active = ([self.window styleMask] & NSFullScreenWindowMask) || [self.window isMainWindow] || [self.window isKeyWindow];
+	self.active = ([self.window styleMask] & NSWindowStyleMaskFullScreen) || [self.window isMainWindow] || [self.window isKeyWindow];
 }
 
 - (void)setActive:(BOOL)flag
@@ -216,7 +216,7 @@ OakRolloverButton* OakCreateCloseButton (NSString* accessibilityLabel)
 		CGContextRef context = (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort];
 		CGAffineTransform affineTransform = CGContextGetCTM(context);
 		CGContextSetPatternPhase(context, CGSizeMake(affineTransform.tx, affineTransform.ty));
-		NSRectFillUsingOperation(aRect, NSCompositeSourceOver);
+		NSRectFillUsingOperation(aRect, NSCompositingOperationSourceOver);
 	}
 	else if([value isKindOfClass:[NSColor class]])
 	{

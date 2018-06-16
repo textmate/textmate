@@ -48,7 +48,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 - (id)initWithFrame:(NSRect)aFrame
 {
 	NSButton* button = OakCreateCheckBox(nil);
-	[[button cell] setControlSize:NSSmallControlSize];
+	[[button cell] setControlSize:NSControlSizeSmall];
 	[button sizeToFit];
 	[button setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
 
@@ -183,13 +183,13 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 
 		NSButton* countOfLeafs = [NSButton new];
 		[[countOfLeafs cell] setHighlightsBy:NSNoCellMask];
-		countOfLeafs.alignment  = NSCenterTextAlignment;
+		countOfLeafs.alignment  = NSTextAlignmentCenter;
 		countOfLeafs.bezelStyle = NSInlineBezelStyle;
 		countOfLeafs.font       = [NSFont labelFontOfSize:0];
 		countOfLeafs.identifier = @"countOfLeafs";
 
 		NSButton* remove = [NSButton new];
-		[[remove cell] setControlSize:NSSmallControlSize];
+		[[remove cell] setControlSize:NSControlSizeSmall];
 		remove.bezelStyle = NSRoundRectBezelStyle;
 		remove.buttonType = NSMomentaryPushInButton;
 		remove.image      = [NSImage imageNamed:NSImageNameRemoveTemplate];
@@ -251,7 +251,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		[path stroke];
 
 		NSMutableParagraphStyle* pStyle = [NSMutableParagraphStyle new];
-		[pStyle setAlignment:NSCenterTextAlignment];
+		[pStyle setAlignment:NSTextAlignmentCenter];
 		NSDictionary* attributes = @{
 			NSFontAttributeName            : [NSFont boldSystemFontOfSize:0],
 			NSForegroundColorAttributeName : color,
@@ -352,17 +352,17 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		_outlineView.action       = @selector(didSingleClick:);
 		_outlineView.doubleAction = @selector(didDoubleClick:);
 
-		_eventMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:NSFlagsChangedMask handler:^NSEvent*(NSEvent* event){
-			NSUInteger modifierFlags = [_outlineView.window isKeyWindow] ? ([event modifierFlags] & (NSShiftKeyMask|NSControlKeyMask|NSAlternateKeyMask|NSCommandKeyMask)) : 0;
+		_eventMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:NSEventMaskFlagsChanged handler:^NSEvent*(NSEvent* event){
+			NSUInteger modifierFlags = [_outlineView.window isKeyWindow] ? ([event modifierFlags] & (NSEventModifierFlagShift|NSEventModifierFlagControl|NSEventModifierFlagOption|NSEventModifierFlagCommand)) : 0;
 			if(_longPressedCommandModifier)
 			{
-				self.showKeyEquivalent = modifierFlags == NSCommandKeyMask;
+				self.showKeyEquivalent = modifierFlags == NSEventModifierFlagCommand;
 				if(modifierFlags == 0)
 					_longPressedCommandModifier = NO;
 			}
 			else
 			{
-				if(modifierFlags == NSCommandKeyMask)
+				if(modifierFlags == NSEventModifierFlagCommand)
 						[self performSelector:@selector(delayedLongPressedCommandModifier:) withObject:self afterDelay:0.2];
 				else	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(delayedLongPressedCommandModifier:) object:self];
 			}

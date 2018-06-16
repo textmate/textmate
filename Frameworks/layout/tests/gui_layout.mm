@@ -215,8 +215,8 @@ private:
 	if([anEvent keyCode] != 58 && [anEvent keyCode] != 61)
 		return;
 
-	NSInteger modifiers   = [anEvent modifierFlags] & (NSAlternateKeyMask | NSControlKeyMask | NSCommandKeyMask);
-	BOOL didPressOption   = modifiers == NSAlternateKeyMask;
+	NSInteger modifiers   = [anEvent modifierFlags] & (NSEventModifierFlagOption | NSEventModifierFlagControl | NSEventModifierFlagCommand);
+	BOOL didPressOption   = modifiers == NSEventModifierFlagOption;
 	BOOL didReleaseOption = modifiers == 0 && _optionDownDate && [[NSDate date] timeIntervalSinceDate:_optionDownDate] < 0.18;
 
 	self.optionDownDate = didPressOption ? [NSDate date] : nil;
@@ -363,10 +363,10 @@ private:
 	AUTO_REFRESH;
 
 	CGPoint pos = [self convertPoint:[anEvent locationInWindow] fromView:nil];
-	NSUInteger modifierFlags = [anEvent modifierFlags] & (NSShiftKeyMask|NSControlKeyMask|NSAlternateKeyMask|NSCommandKeyMask);
-	bool optionDown  = modifierFlags & NSAlternateKeyMask;
-	bool shiftDown   = modifierFlags & NSShiftKeyMask;
-	bool commandDown = modifierFlags & NSCommandKeyMask;
+	NSUInteger modifierFlags = [anEvent modifierFlags] & (NSEventModifierFlagShift|NSEventModifierFlagControl|NSEventModifierFlagOption|NSEventModifierFlagCommand);
+	bool optionDown  = modifierFlags & NSEventModifierFlagOption;
+	bool shiftDown   = modifierFlags & NSEventModifierFlagShift;
+	bool commandDown = modifierFlags & NSEventModifierFlagCommand;
 
 	ng::index_t index = layout->index_at_point(pos);
 	if(!optionDown)

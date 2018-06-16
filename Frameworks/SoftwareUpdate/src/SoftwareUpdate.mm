@@ -125,8 +125,8 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 {
 	D(DBF_SoftwareUpdate_Check, bug("\n"););
 
-	BOOL isShiftDown = OakIsAlternateKeyOrMouseEvent(NSShiftKeyMask);
-	NSURL* url = [self.channels objectForKey:OakIsAlternateKeyOrMouseEvent(NSAlternateKeyMask) ? kSoftwareUpdateChannelNightly : [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsSoftwareUpdateChannelKey]];
+	BOOL isShiftDown = OakIsAlternateKeyOrMouseEvent(NSEventModifierFlagShift);
+	NSURL* url = [self.channels objectForKey:OakIsAlternateKeyOrMouseEvent(NSEventModifierFlagOption) ? kSoftwareUpdateChannelNightly : [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsSoftwareUpdateChannelKey]];
 	[self checkVersionAtURL:url inBackground:NO allowRedownload:isShiftDown];
 }
 

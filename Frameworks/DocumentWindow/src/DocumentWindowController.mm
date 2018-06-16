@@ -203,7 +203,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		self.layoutView.tabBarView   = self.tabBarView;
 		self.layoutView.documentView = self.documentView;
 
-		NSUInteger windowStyle = (NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask|NSTexturedBackgroundWindowMask);
+		NSUInteger windowStyle = (NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskMiniaturizable|NSWindowStyleMaskTexturedBackground);
 		self.window = [[NSWindow alloc] initWithContentRect:[NSWindow contentRectForFrameRect:[self frameRectForNewWindow] styleMask:windowStyle] styleMask:windowStyle backing:NSBackingStoreBuffered defer:NO];
 		self.window.collectionBehavior = NSWindowCollectionBehaviorFullScreenPrimary;
 		self.window.delegate           = self;
@@ -278,7 +278,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	std::map<CGFloat, NSWindow*> ourWindows;
 	for(NSWindow* win in [NSApp windows])
 	{
-		if([win isVisible] && [win isOnActiveSpace] && ![win isZoomed] && (([win styleMask] & NSFullScreenWindowMask)) != NSFullScreenWindowMask && [[win delegate] isKindOfClass:[self class]])
+		if([win isVisible] && [win isOnActiveSpace] && ![win isZoomed] && (([win styleMask] & NSWindowStyleMaskFullScreen)) != NSWindowStyleMaskFullScreen && [[win delegate] isKindOfClass:[self class]])
 			ourWindows.emplace(NSMaxY([win frame]), win);
 	}
 
@@ -321,7 +321,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 - (void)windowWillClose:(NSNotification*)aNotification
 {
-	if((([self.window styleMask] & NSFullScreenWindowMask) != NSFullScreenWindowMask) && !self.window.isZoomed)
+	if((([self.window styleMask] & NSWindowStyleMaskFullScreen) != NSWindowStyleMaskFullScreen) && !self.window.isZoomed)
 		[[NSUserDefaults standardUserDefaults] setObject:NSStringFromRect([self windowFrame]) forKey:@"DocumentControllerWindowFrame"];
 
 	[_arrayController unbind:NSContentBinding];
@@ -1786,7 +1786,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 				[self revealFileInProject:self];
 		}
 
-		if(!self.disableFileBrowserWindowResize && ([self.window styleMask] & NSFullScreenWindowMask) != NSFullScreenWindowMask)
+		if(!self.disableFileBrowserWindowResize && ([self.window styleMask] & NSWindowStyleMaskFullScreen) != NSWindowStyleMaskFullScreen)
 		{
 			NSRect windowFrame = self.window.frame;
 
@@ -2397,7 +2397,7 @@ static NSTouchBarItemIdentifier kTouchBarFavoritesItemIdentifier = @"com.macroma
 
 - (BOOL)previewPanel:(QLPreviewPanel*)panel handleEvent:(NSEvent*)event
 {
-	if([event type] == NSKeyDown)
+	if([event type] == NSEventTypeKeyDown)
 	{
 		[self.fileBrowser.outlineView keyDown:event];
 		NSArray* newSelection = self.fileBrowser.selectedURLs;
@@ -2567,7 +2567,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 	if(NSDictionary* history = self.fileBrowserHistory)
 		res[@"fileBrowserState"] = history;
 
-	if(([self.window styleMask] & NSFullScreenWindowMask) == NSFullScreenWindowMask)
+	if(([self.window styleMask] & NSWindowStyleMaskFullScreen) == NSWindowStyleMaskFullScreen)
 		res[@"fullScreen"] = @YES;
 	else if(self.window.isZoomed)
 		res[@"zoomed"] = @YES;

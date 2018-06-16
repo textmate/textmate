@@ -218,17 +218,17 @@ enum {
 		[buffer lockFocus];
 	}
 
-	NSCompositingOperation op = NSCompositeCopy;
+	NSCompositingOperation op = NSCompositingOperationCopy;
 	for(NSImage* image in self.imageStack)
 	{
 		[image drawInRect:(NSRect){ NSZeroPoint, dstSize } fromRect:NSZeroRect operation:op fraction:1];
-		op = NSCompositeSourceOver;
+		op = NSCompositingOperationSourceOver;
 	}
 
 	if(self.isModified)
 	{
 		[buffer unlockFocus];
-		[buffer drawInRect:(NSRect){ NSZeroPoint, self.size } fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:0.4];
+		[buffer drawInRect:(NSRect){ NSZeroPoint, self.size } fromRect:NSZeroRect operation:NSCompositingOperationSourceOver fraction:0.4];
 	}
 
 	return YES;

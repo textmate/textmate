@@ -472,7 +472,7 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 
 		// Wake potential event loop
 		didTerminate = YES;
-		[NSApp postEvent:[NSEvent otherEventWithType:NSApplicationDefined location:NSZeroPoint modifierFlags:0 timestamp:0 windowNumber:0 context:NULL subtype:0 data1:0 data2:0] atStart:NO];
+		[NSApp postEvent:[NSEvent otherEventWithType:NSEventTypeApplicationDefined location:NSZeroPoint modifierFlags:0 timestamp:0 windowNumber:0 context:NULL subtype:0 data1:0 data2:0] atStart:NO];
 		[[NSNotificationCenter defaultCenter] postNotificationName:OakCommandDidTerminateNotification object:self];
 	});
 
