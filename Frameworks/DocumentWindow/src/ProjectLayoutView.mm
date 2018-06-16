@@ -341,7 +341,7 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 		BOOL didDrag = NO;
 		while([anEvent type] != NSLeftMouseUp)
 		{
-			anEvent = [NSApp nextEventMatchingMask:(NSLeftMouseDraggedMask|NSLeftMouseDown|NSLeftMouseUpMask) untilDate:[NSDate distantFuture] inMode:NSEventTrackingRunLoopMode dequeue:YES];
+			anEvent = [NSApp nextEventMatchingMask:(NSLeftMouseDraggedMask|NSLeftMouseDownMask|NSLeftMouseUpMask) untilDate:[NSDate distantFuture] inMode:NSEventTrackingRunLoopMode dequeue:YES];
 			if([anEvent type] != NSLeftMouseDragged)
 				break;
 
