@@ -1306,15 +1306,15 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 	{
 		if(GenieDataSourceCacheRecord* cacheRecord = [GenieDataSourceCache.sharedInstance resultForKey:self.identifier])
 		{
-			if(self.kind == kGenieItemKindCommandResult)
-				cacheRecord.digest = [self.scriptWithArguments componentsJoinedByString:@"\034"];
+			if(self.kind != kGenieItemKindCommandResult || [cacheRecord.digest isEqualToString:[self.scriptWithArguments componentsJoinedByString:@"\034"]])
+			{
+				self.dataSourceCacheRecord = cacheRecord;
+				self.dataSourceResults = [self createGenieItemsFrom:cacheRecord.items];
 
-			self.dataSourceCacheRecord = cacheRecord;
-			self.dataSourceResults = [self createGenieItemsFrom:cacheRecord.items];
-
-			if(cacheRecord.expired)
-					_dataSourceNeedsUpdate = YES;
-			else	[cacheRecord checkExpired];
+				if(cacheRecord.expired)
+						_dataSourceNeedsUpdate = YES;
+				else	[cacheRecord checkExpired];
+			}
 		}
 
 		if(!_dataSourceResults)
