@@ -991,7 +991,7 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 
 - (void)tableViewSelectionDidChange:(NSNotification*)aNotification
 {
-	if(QLPreviewPanel.sharedPreviewPanel.dataSource == self)
+	if(QLPreviewPanel.sharedPreviewPanelExists && QLPreviewPanel.sharedPreviewPanel.dataSource == self)
 	{
 		_previewItems = self.previewableItems;
 		[QLPreviewPanel.sharedPreviewPanel reloadData];
