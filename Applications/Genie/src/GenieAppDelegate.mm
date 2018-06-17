@@ -671,6 +671,8 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 
 	[_frontmostApp activateWithOptions:NSApplicationActivateIgnoringOtherApps];
 	_frontmostApp = nil;
+
+	GenieItemCollection* __attribute__ ((unused)) prefetchItems = GenieItemCollection.defaultCollection;
 }
 
 - (BOOL)applicationShouldHandleReopen:(NSApplication*)anApplication hasVisibleWindows:(BOOL)visibleWindowsFlag
