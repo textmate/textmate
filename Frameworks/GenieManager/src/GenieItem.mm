@@ -1422,10 +1422,6 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 	id timeOutValue = [self staticValueForKey:@"timeOut"];
 	task.timeOut = timeOutValue ? [timeOutValue intValue] : 30; // 30s
 
-	// self.error = nil;
-	// self.standardOutput = nil;
-	// self.standardError  = nil;
-
 	[task launch:^(int rc, NSData* stdoutData, NSData* stderrData){
 		GenieDataSourceCacheRecord* res;
 		NSString* error;
