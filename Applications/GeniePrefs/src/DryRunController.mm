@@ -157,6 +157,9 @@ static void* kResultItemsBinding = &kResultItemsBinding;
 
 - (void)stopQuery
 {
+	if(!_startQueryDate)
+		return;
+
 	[_dataSourceItem removeObserver:self forKeyPath:@"replacementItems" context:kResultItemsBinding];
 
 	NSNumberFormatter* formatter = [NSNumberFormatter new];
@@ -167,6 +170,8 @@ static void* kResultItemsBinding = &kResultItemsBinding;
 
 	// TODO Update status text
 	NSLog(@"%s %@ items in %@ seconds", sel_getName(_cmd), items, seconds);
+
+	_startQueryDate = nil;
 }
 
 - (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)value change:(NSDictionary*)changeDictionary context:(void*)someContext
