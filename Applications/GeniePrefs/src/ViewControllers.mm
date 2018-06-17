@@ -121,7 +121,7 @@
 {
 	if(aMenuItem.action == @selector(delete:))
 		return _removeButton.isEnabled;
-	return [super validateMenuItem:aMenuItem];
+	return [super respondsToSelector:@selector(validateMenuItem:)] ? [super validateMenuItem:aMenuItem] : YES;
 }
 
 - (void)makeView:(NSView*)contentView
@@ -307,7 +307,7 @@
 {
 	if(aMenuItem.action == @selector(delete:))
 		return _removeButton.isEnabled;
-	return [super validateMenuItem:aMenuItem];
+	return [super respondsToSelector:@selector(validateMenuItem:)] ? [super validateMenuItem:aMenuItem] : YES;
 }
 
 - (void)makeView:(NSView*)contentView

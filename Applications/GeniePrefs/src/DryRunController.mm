@@ -338,7 +338,7 @@ static void* kResultItemsBinding = &kResultItemsBinding;
 {
 	if(aMenuItem.action == @selector(copy:))
 		return _treeController.selectedObjects.firstObject ? YES : NO;
-	return [super validateMenuItem:aMenuItem];
+	return [super respondsToSelector:@selector(validateMenuItem:)] ? [super validateMenuItem:aMenuItem] : YES;
 }
 
 - (void)closeDryRunSheet:(id)sender

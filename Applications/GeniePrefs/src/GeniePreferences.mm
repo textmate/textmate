@@ -388,7 +388,7 @@ static NSIndexPath* IndexPathForGenieItemWithIdentifier (NSString* identifier, N
 {
 	if(aMenuItem.action == @selector(performDataSourceDryRun:))
 		return [self findDataSourceItem] != nil;
-	return [super validateMenuItem:aMenuItem];
+	return [super respondsToSelector:@selector(validateMenuItem:)] ? [super validateMenuItem:aMenuItem] : YES;
 }
 
 // =======================
