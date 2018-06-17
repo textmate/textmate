@@ -313,7 +313,7 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 	BOOL launchAtLogin = ![[NSUserDefaults standardUserDefaults] boolForKey:kDisableLaunchAtLoginSettingsKey];
 	if(!SMLoginItemSetEnabled(CFSTR("com.macromates.GenieLauncher"), launchAtLogin))
 	{
-		[[NSUserDefaults standardUserDefaults] setBool:launchAtLogin forKey:kDisableLaunchAtLoginSettingsKey];
+		[[NSUserDefaults standardUserDefaults] setBool:YES forKey:kDisableLaunchAtLoginSettingsKey];
 		[[NSUserDefaults standardUserDefaults] synchronize];
 		[[NSDistributedNotificationCenter defaultCenter] postNotificationName:NSUserDefaultsDidChangeNotification object:@"com.macromates.Genie" userInfo:nil deliverImmediately:YES];
 
