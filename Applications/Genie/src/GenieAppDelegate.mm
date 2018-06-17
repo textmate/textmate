@@ -171,7 +171,7 @@ static NSString* EscapeJavaScriptString (NSString* src)
 			_currentNavigationRequest = [_webView loadHTMLString:_HTMLString baseURL:[NSURL fileURLWithPath:@"/" isDirectory:YES]];
 		}
 		@catch (NSException* e) {
-			os_log_error(OS_LOG_DEFAULT, "exception loading HTML string: %@", e);
+			os_log_error(OS_LOG_DEFAULT, "exception loading HTML string: %{public}@", e);
 		}
 	}
 }

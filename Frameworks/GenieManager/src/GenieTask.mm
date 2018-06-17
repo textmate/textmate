@@ -69,7 +69,7 @@
 			[fh closeFile];
 		}
 		@catch (NSException* e) {
-			os_log_error(OS_LOG_DEFAULT, "exception writing to task’s stdin: %@", e);
+			os_log_error(OS_LOG_DEFAULT, "exception writing to task’s stdin: %{public}@", e);
 		}
 	});
 
@@ -114,7 +114,7 @@
 		}
 	}
 	@catch (NSException* e) {
-		os_log_error(OS_LOG_DEFAULT, "exception launching task: %@", e);
+		os_log_error(OS_LOG_DEFAULT, "exception launching task: %{public}@", e);
 		[[stdinPipe fileHandleForReading] closeFile];
 		[[stdoutPipe fileHandleForWriting] closeFile];
 		[[stderrPipe fileHandleForWriting] closeFile];

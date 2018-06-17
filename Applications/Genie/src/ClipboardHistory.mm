@@ -59,7 +59,7 @@ static BOOL RunSQLStatement (NSString* dbPath, char const* query, std::map<std::
 					}
 					else
 					{
-						os_log_error(OS_LOG_DEFAULT, "sqlite3: no variable for binding: ‘%s’", sqlite3_bind_parameter_name(stmt, i+1));
+						os_log_error(OS_LOG_DEFAULT, "sqlite3: no variable for binding: ‘%{public}s’", sqlite3_bind_parameter_name(stmt, i+1));
 					}
 				}
 
@@ -76,7 +76,7 @@ static BOOL RunSQLStatement (NSString* dbPath, char const* query, std::map<std::
 	sqlite3_close(db);
 
 	if(res == NO)
-		os_log_error(OS_LOG_DEFAULT, "sqlite3: error running query: %s", sqlite3_errmsg(db));
+		os_log_error(OS_LOG_DEFAULT, "sqlite3: error running query: %{public}s", sqlite3_errmsg(db));
 
 	return res;
 }

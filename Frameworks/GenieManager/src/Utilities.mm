@@ -362,14 +362,14 @@ static NSTimeInterval GetMediaDuration (NSString* path)
 					}
 				}
 				@catch (NSException* e) {
-					os_log_error(OS_LOG_DEFAULT, "exception parsing JSON output: %@", e);
+					os_log_error(OS_LOG_DEFAULT, "exception parsing JSON output: %{public}@", e);
 				}
 			}
 			else
 			{
 				NSString* stdoutStr = [[NSString alloc] initWithData:stdoutData encoding:NSUTF8StringEncoding];
 				NSString* stderrStr = [[NSString alloc] initWithData:stderrData encoding:NSUTF8StringEncoding];
-				os_log_error(OS_LOG_DEFAULT, "%@ returned with code %d\n%@\n%@", [_script lastPathComponent], rc, stderrStr, stdoutStr);
+				os_log_error(OS_LOG_DEFAULT, "%{public}@ returned with code %d\n%{public}@\n%{public}@", [_script lastPathComponent], rc, stderrStr, stdoutStr);
 			}
 		}];
 	}

@@ -1203,7 +1203,7 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 				res = tmp;
 
 				if(![NSFileManager.defaultManager isExecutableFileAtPath:res.firstObject])
-					os_log_error(OS_LOG_DEFAULT, "no executable at path: %@", res.firstObject);
+					os_log_error(OS_LOG_DEFAULT, "no executable at path: %{public}@", res.firstObject);
 			}
 		}
 
@@ -1551,9 +1551,9 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 	else
 	{
 		if(!path)
-			os_log_error(OS_LOG_DEFAULT, "missing database in sqlite3 item: %@", self);
+			os_log_error(OS_LOG_DEFAULT, "missing database in sqlite3 item: %{public}@", self);
 		if(!query)
-			os_log_error(OS_LOG_DEFAULT, "missing query in sqlite3 item: %@", self);
+			os_log_error(OS_LOG_DEFAULT, "missing query in sqlite3 item: %{public}@", self);
 	}
 }
 
@@ -1611,7 +1611,7 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 		}
 	}
 	@catch (NSException* e) {
-		os_log_error(OS_LOG_DEFAULT, "exception reading recent documents for ‘%@’: %@", bundleIdentifier, e);
+		os_log_error(OS_LOG_DEFAULT, "exception reading recent documents for ‘%{public}@’: %{public}@", bundleIdentifier, e);
 		error = [NSString stringWithFormat:@"exception reading recent documents for bundle identifier ‘%@’: %@", bundleIdentifier, e];
 	}
 
