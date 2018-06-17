@@ -42,7 +42,7 @@ static NSString* DisplayName (NSURL* url, size_t numberOfParents = 0)
 	else if([[url scheme] isEqualToString:[kURLLocationBundles scheme]])
 		res = @"Bundles";
 	else // if([url isFileURL])
-		res = [NSString stringWithCxxString:path::display_name([[url path] fileSystemRepresentation], numberOfParents)];
+		res = [NSString stringWithCxxString:path::display_name([url fileSystemRepresentation], numberOfParents)];
 	return res ?: [url absoluteString] ?: @"«nil»";
 }
 
@@ -371,7 +371,7 @@ static bool is_binary (std::string const& path)
 		{
 			for(NSURL* currentURL = ParentForURL(aURL); currentURL; currentURL = ParentForURL(currentURL))
 			{
-				if([currentURL isFileURL] && (path::info([[currentURL path] fileSystemRepresentation]) & path::flag::package))
+				if([currentURL isFileURL] && (path::info([currentURL fileSystemRepresentation]) & path::flag::package))
 				{
 					parentURL = currentURL;
 					break;
@@ -639,7 +639,7 @@ static bool is_binary (std::string const& path)
 
 	for(FSItem* item in self.selectedItems)
 	{
-		if([item.target path] && path::is_directory([[item.target path] fileSystemRepresentation]))
+		if([item.target path] && path::is_directory([item.target fileSystemRepresentation]))
 			return (void)[self goToURL:[NSURL fileURLWithPath:[item.target path]]];
 	}
 }
@@ -1059,14 +1059,14 @@ static bool is_binary (std::string const& path)
 		FSItemURLType type = item.urlType;
 		if(type == FSItemURLTypeAlias)
 		{
-			FSItem* tmp = [FSItem itemWithURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:path::resolve([itemURL.path fileSystemRepresentation])]]];
+			FSItem* tmp = [FSItem itemWithURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:path::resolve([itemURL fileSystemRepresentation])]]];
 			type    = tmp.urlType;
 			itemURL = tmp.target ?: tmp.url;
 		}
 
 		if(type == FSItemURLTypePackage && OakIsAlternateKeyOrMouseEvent())
 			type = FSItemURLTypeFolder;
-		else if(type == FSItemURLTypeFile && is_binary([itemURL.path fileSystemRepresentation]) && !OakIsAlternateKeyOrMouseEvent())
+		else if(type == FSItemURLTypeFile && is_binary([itemURL fileSystemRepresentation]) && !OakIsAlternateKeyOrMouseEvent())
 			type = FSItemURLTypePackage;
 
 		switch(type)
@@ -1151,7 +1151,7 @@ static bool is_binary (std::string const& path)
 	{
 		for(NSURL* selectedURL in self.selectedURLs)
 		{
-			if([selectedURL isFileURL] && path::is_directory([[selectedURL path] fileSystemRepresentation]))
+			if([selectedURL isFileURL] && path::is_directory([selectedURL fileSystemRepresentation]))
 				return [self goToURL:[FSSCMDataSource scmURLWithPath:[selectedURL path]]];
 		}
 		[self goToURL:[FSSCMDataSource scmURLWithPath:[_url path]]];
@@ -1258,7 +1258,7 @@ static bool is_binary (std::string const& path)
 	NSUInteger selectedFiles = 0;
 	struct stat buf;
 	for(FSItem* item in self.selectedItems)
-		selectedFiles += [item.url isFileURL] && lstat([[item.url path] fileSystemRepresentation], &buf) == 0 ? 1 : 0;
+		selectedFiles += [item.url isFileURL] && lstat([item.url fileSystemRepresentation], &buf) == 0 ? 1 : 0;
 
 	if([item action] == @selector(goToParentFolder:))
 		res = ParentForURL(_url) != nil;

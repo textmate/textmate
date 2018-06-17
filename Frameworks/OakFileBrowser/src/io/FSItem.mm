@@ -26,7 +26,7 @@ static ino_t inode (std::string const& path)
 		if([anURL isFileURL])
 		{
 			self.icon         = [OakFileIconImage fileIconImageWithPath:[anURL path] size:NSMakeSize(16, 16)];
-			self.displayName  = [NSString stringWithCxxString:path::display_name([[anURL path] fileSystemRepresentation])];
+			self.displayName  = [NSString stringWithCxxString:path::display_name([anURL fileSystemRepresentation])];
 			self.leaf         = ![[anURL absoluteString] hasSuffix:@"/"];
 			self.sortAsFolder = !self.leaf;
 			self.target       = self.leaf ? nil : anURL;
@@ -128,7 +128,7 @@ static ino_t inode (std::string const& path)
 	if(!_url.isFileURL || OakIsEmptyString(newBasename))
 		return NO;
 
-	std::string src = [_url.path fileSystemRepresentation];
+	std::string src = [_url fileSystemRepresentation];
 	std::string dst = path::join(path::parent(src), [[newBasename stringByReplacingOccurrencesOfString:@"/" withString:@":"] fileSystemRepresentation]);
 	if(src == dst)
 		return NO;
@@ -156,8 +156,8 @@ static ino_t inode (std::string const& path)
 {
 	if(_urlType == FSItemURLTypeUnknown && [(self.target ?: self.url) isFileURL])
 	{
-		uint32_t flags = path::info([[(self.target ?: self.url) path] fileSystemRepresentation]);
-		if(!path::exists([[(self.target ?: self.url) path] fileSystemRepresentation]))
+		uint32_t flags = path::info([(self.target ?: self.url) fileSystemRepresentation]);
+		if(!path::exists([(self.target ?: self.url) fileSystemRepresentation]))
 			_urlType = FSItemURLTypeMissing;
 		else if(flags & path::flag::alias)
 			_urlType = FSItemURLTypeAlias;

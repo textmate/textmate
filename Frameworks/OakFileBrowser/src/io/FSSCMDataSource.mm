@@ -110,7 +110,7 @@ static NSArray* convert (std::map<std::string, scm::status::type> const& pathsMa
 	{
 		_url     = anURL;
 		_options = someOptions;
-		_scmInfo = scm::info([[anURL path] fileSystemRepresentation]);
+		_scmInfo = scm::info([anURL fileSystemRepresentation]);
 		_items   = [NSMapTable strongToWeakObjectsMapTable];
 
 		NSArray* query = [[anURL query] componentsSeparatedByString:@"="];

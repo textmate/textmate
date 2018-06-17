@@ -199,7 +199,7 @@ static NSDragOperation filter (NSDragOperation mask)
 	if(item.leaf || ![(item ?: self.rootItem).url isFileURL])
 		return NO;
 
-	std::string const dropPath = [[(item ?: self.rootItem).url path] fileSystemRepresentation];
+	std::string const dropPath = [(item ?: self.rootItem).url fileSystemRepresentation];
 	NSDragOperation const op = filter([info draggingSourceOperationMask]);
 	if(op == 0)
 		return fprintf(stderr, "Unsupported drag operation %02lx for %s\n", [info draggingSourceOperationMask], dropPath.c_str()), NO;

@@ -141,7 +141,7 @@ static BOOL IsProtocolRelativeURL (NSURL* url)
 	if([[request URL] isFileURL])
 	{
 		NSURL* redirectURL = [NSURL URLWithString:[NSString stringWithFormat:@"file://localhost%@?path=%@&error=1", [[[NSBundle bundleForClass:[self class]] pathForResource:@"error_not_found" ofType:@"html"] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], [[[request URL] path] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]];
-		char const* path = [[[request URL] path] fileSystemRepresentation];
+		char const* path = [[request URL] fileSystemRepresentation];
 
 		struct stat buf;
 		if(path && stat(path, &buf) == 0)

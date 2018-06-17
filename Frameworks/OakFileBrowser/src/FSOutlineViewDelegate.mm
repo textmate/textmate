@@ -666,7 +666,7 @@ struct expansion_state_t
 
 	if(!state)
 	{
-		state = std::make_shared<expansion_state_t>([[url absoluteString] fileSystemRepresentation], _outlineView.recursiveRequest);
+		state = std::make_shared<expansion_state_t>([url fileSystemRepresentation], _outlineView.recursiveRequest);
 		state->animate = item != _dataSource.rootItem;
 		_expansionRequests.emplace(state->url, state);
 	}
@@ -822,7 +822,7 @@ struct expansion_state_t
 	if(item.leaf)
 		return;
 
-	auto pair = _expansionRequests.find([[item.url absoluteString] fileSystemRepresentation]);
+	auto pair = _expansionRequests.find([item.url fileSystemRepresentation]);
 	if(pair != _expansionRequests.end())
 		pair->second->stop = true;
 

@@ -5,7 +5,7 @@ std::string OakMoveToTrash (std::string const& path)
 {
 	NSURL* resultingItemURL;
 	if([[NSFileManager defaultManager] trashItemAtURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:path]] resultingItemURL:&resultingItemURL error:nil])
-			return resultingItemURL.filePathURL.path.fileSystemRepresentation ?: NULL_STR;
+			return resultingItemURL.fileSystemRepresentation ?: NULL_STR;
 	else	return NULL_STR;
 }
 

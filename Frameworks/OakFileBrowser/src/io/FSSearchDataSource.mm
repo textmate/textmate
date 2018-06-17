@@ -89,12 +89,12 @@ namespace
 	if((self = [super init]))
 	{
 		NSMutableArray* results = [NSMutableArray new];
-		for(auto const& item : execute_saved_search([[anURL path] fileSystemRepresentation]))
+		for(auto const& item : execute_saved_search([anURL fileSystemRepresentation]))
 			[results addObject:[FSItem itemWithURL:[NSURL fileURLWithPath:CFBridgingRelease(MDItemCopyAttribute(item, kMDItemPath)) isDirectory:NO]]];
 
 		self.rootItem = [FSItem itemWithURL:anURL];
 		self.rootItem.icon        = [OakFileIconImage fileIconImageWithPath:[anURL path] size:NSMakeSize(16, 16)];
-		self.rootItem.displayName = [NSString stringWithCxxString:path::display_name([[anURL path] fileSystemRepresentation])];
+		self.rootItem.displayName = [NSString stringWithCxxString:path::display_name([anURL fileSystemRepresentation])];
 		self.rootItem.children    = results;
 	}
 	return self;

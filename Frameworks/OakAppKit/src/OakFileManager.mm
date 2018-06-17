@@ -100,7 +100,7 @@ NSString* OakReplaceDateInString (NSString* srcPath, NSDate* newDate)
 
 - (BOOL)doCreateFile:(NSURL*)fileURL view:(NSView*)view
 {
-	int fd = open([[fileURL path] fileSystemRepresentation], O_CREAT|O_EXCL|O_WRONLY|O_CLOEXEC, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH);
+	int fd = open([fileURL fileSystemRepresentation], O_CREAT|O_EXCL|O_WRONLY|O_CLOEXEC, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH);
 	if(fd != -1)
 	{
 		close(fd);
@@ -152,7 +152,7 @@ NSString* OakReplaceDateInString (NSString* srcPath, NSDate* newDate)
 	BOOL res = NO;
 
 	NSError* error = nil;
-	if(path::is_child([[[dstURL filePathURL] path] fileSystemRepresentation], [[[srcURL filePathURL] path] fileSystemRepresentation]))
+	if(path::is_child([dstURL fileSystemRepresentation], [srcURL fileSystemRepresentation]))
 	{
 		error = [NSError errorWithDomain:NSPOSIXErrorDomain code:ENOTSUP userInfo:nil];
 	}
@@ -303,7 +303,7 @@ NSString* OakReplaceDateInString (NSString* srcPath, NSDate* newDate)
 
 - (NSURL*)createUntitledDirectoryAtURL:(NSURL*)anURL view:(NSView*)view
 {
-	NSURL* dst = [NSURL fileURLWithPath:[NSString stringWithCxxString:path::unique(path::join([[anURL path] fileSystemRepresentation], "untitled folder"))] isDirectory:YES];
+	NSURL* dst = [NSURL fileURLWithPath:[NSString stringWithCxxString:path::unique(path::join([anURL fileSystemRepresentation], "untitled folder"))] isDirectory:YES];
 	if([self doCreateDirectory:dst view:view])
 	{
 		[[view undoManager] setActionName:@"New Folder"];
@@ -326,7 +326,7 @@ NSString* OakReplaceDateInString (NSString* srcPath, NSDate* newDate)
 {
 	NSNumber* isDirectory = @NO;
 	[srcURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:nil];
-	NSURL* dst = [NSURL fileURLWithPath:[NSString stringWithCxxString:path::unique([[srcURL path] fileSystemRepresentation], " copy")] isDirectory:[isDirectory boolValue]];
+	NSURL* dst = [NSURL fileURLWithPath:[NSString stringWithCxxString:path::unique([srcURL fileSystemRepresentation], " copy")] isDirectory:[isDirectory boolValue]];
 
 	if(![isDirectory boolValue])
 	{

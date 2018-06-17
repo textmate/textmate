@@ -20,8 +20,8 @@ static std::pair<dev_t, ino_t> inode (std::string const& path)
 		// NSFileManager cannot be used to make case-changes on case-insensitive file systems <rdar://13161552>.
 		if([localError.domain isEqualToString:NSCocoaErrorDomain] && localError.code == NSFileWriteFileExistsError)
 		{
-			std::string const src = [srcURL.path fileSystemRepresentation];
-			std::string const dst = [dstURL.path fileSystemRepresentation];
+			std::string const src = [srcURL fileSystemRepresentation];
+			std::string const dst = [dstURL fileSystemRepresentation];
 			if(src != dst && inode(src) == inode(dst))
 			{
 				if(rename(src.c_str(), dst.c_str()) == 0)

@@ -145,7 +145,7 @@ struct tracking_t : fs::event_callback_t
 		bool sort_as_directory;
 	};
 
-	std::string const dir = [[self.url path] fileSystemRepresentation];
+	std::string const dir = [self.url fileSystemRepresentation];
 	if(!_tracking)
 	{
 		_tracking.reset(new tracking_t(dataSource, self, dir));
@@ -197,7 +197,7 @@ struct tracking_t : fs::event_callback_t
 				{
 					if(!item.isMissing)
 						existingItems.emplace(std::make_pair(item.device, item.inode), item);
-					allItems.emplace([[item.url absoluteString] fileSystemRepresentation], item);
+					allItems.emplace([item.url fileSystemRepresentation], item);
 				}
 
 				std::set<std::string> pathsOnDisk;
@@ -220,7 +220,7 @@ struct tracking_t : fs::event_callback_t
 					}
 					else
 					{
-						auto it = allItems.find([[url absoluteString] fileSystemRepresentation]);
+						auto it = allItems.find([url fileSystemRepresentation]);
 						if(it != allItems.end())
 						{
 							item = it->second;
@@ -269,7 +269,7 @@ struct tracking_t : fs::event_callback_t
 						NSURL* url = [NSURL fileURLWithPath:[NSString stringWithCxxString:pair.first] isDirectory:NO];
 
 						FSFileItem* item;
-						auto it = allItems.find([[url absoluteString] fileSystemRepresentation]);
+						auto it = allItems.find([url fileSystemRepresentation]);
 						if(it != allItems.end())
 						{
 							item = it->second;
@@ -316,7 +316,7 @@ struct tracking_t : fs::event_callback_t
 
 - (void)applicationDidBecomeActive:(NSNotification*)aNotification
 {
-	std::string const dir = [[self.url path] fileSystemRepresentation];
+	std::string const dir = [self.url fileSystemRepresentation];
 	struct timespec lastModified = _tracking->_last_modified;
 
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
