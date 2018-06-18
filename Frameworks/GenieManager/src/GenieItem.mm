@@ -611,24 +611,24 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 			_htmlOutputItem.queryString = self.queryString;
 		}
 
-		BOOL acceptQuery = _fallback;
+		BOOL acceptsQuery = _fallback;
 		for(NSString* key in @[ @"title", @"subtitle", @"file", @"url", @"value", @"scriptArguments", @"standardInputString" ])
 		{
-			if(acceptQuery)
+			if(acceptsQuery)
 				break;
 
 			id value = [self staticValueForKey:key];
 			if([value isKindOfClass:[NSString class]])
 			{
-				acceptQuery = [value containsString:@"${query"];
+				acceptsQuery = [value containsString:@"${query"];
 			}
 			else if([value isKindOfClass:[NSArray class]])
 			{
 				for(id str in value)
-					acceptQuery = [str containsString:@"${query"];
+					acceptsQuery = [str containsString:@"${query"];
 			}
 		}
-		_acceptsQuery = acceptQuery;
+		_acceptsQuery = acceptsQuery;
 
 		_disableLRUOrdering   = [[self staticValueForKey:@"disableLRUOrdering"] boolValue];
 		_disableLearning      = [[self staticValueForKey:@"disableLearning"] boolValue];
