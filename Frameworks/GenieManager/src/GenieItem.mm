@@ -611,7 +611,7 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 			_htmlOutputItem.queryString = self.queryString;
 		}
 
-		BOOL acceptsQuery = _fallback;
+		BOOL acceptsQuery = _fallback || [[self staticValueForKey:@"acceptsQuery"] boolValue];
 		for(NSString* key in @[ @"title", @"subtitle", @"file", @"url", @"value", @"scriptArguments", @"standardInputString" ])
 		{
 			if(acceptsQuery)
