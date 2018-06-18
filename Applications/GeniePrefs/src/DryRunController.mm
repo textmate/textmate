@@ -2,6 +2,7 @@
 #import "AddAutoLayoutViews.h"
 #import <GenieManager/GenieManager.h>
 #import <GenieManager/GenieItem.h>
+#import <OakFoundation/OakFoundation.h>
 
 @interface ExplodedResultItem : NSObject
 {
@@ -116,23 +117,27 @@
 	BOOL _didLoadView;
 	NSTreeController* _treeController;
 	NSOutlineView* _outlineView;
-	GenieItem* _dataSourceItem;
-	NSDate* _startQueryDate;
+
+	NSString* _displayName;
+	NSString* _scriptPath;
+	NSData* _standardOutputData;
+	NSData* _standardErrorData;
 }
 @property (nonatomic) NSArray* jsonItems;
 @property (nonatomic) NSTextView* textView;
-@property (nonatomic) NSAttributedString* consoleOutputAttributedString;
-@end
 
-static void* kResultItemsBinding = &kResultItemsBinding;
+@property (nonatomic) NSArray* genieItems;
+@property (nonatomic) NSString* errorString;
+@property (nonatomic) BOOL consoleIncludesStandardOutput;
+@property (nonatomic, getter = isRunning) BOOL running;
+@end
 
 @implementation DryRunViewController
 - (instancetype)initWithDataSourceItem:(GenieItem*)dataSourceItem
 {
 	if(self = [super init])
 	{
-		_dataSourceItem = dataSourceItem;
-		[self startQuery];
+		[self startQueryForItem:dataSourceItem];
 	}
 	return self;
 }
@@ -140,44 +145,91 @@ static void* kResultItemsBinding = &kResultItemsBinding;
 - (void)dealloc
 {
 	NSLog(@"[%@ dealloc]", [self class]);
-	[self stopQuery];
 }
 
-- (void)startQuery
+- (void)startQueryForItem:(GenieItem*)dataSourceItem
 {
-	_startQueryDate = [NSDate date];
+	NSDate* startDate = [NSDate date];
+	_displayName = dataSourceItem.displayName;
 
-	NSMutableDictionary* dict = [_dataSourceItem.environment mutableCopy];
+	__weak __block id observerId = [NSNotificationCenter.defaultCenter addObserverForName:GenieItemDidReceiveNewItemsNotification object:dataSourceItem queue:nil usingBlock:^(NSNotification* notification){
+		[NSNotificationCenter.defaultCenter removeObserver:observerId];
+		self.running = NO;
+
+		NSDictionary* userInfo = notification.userInfo;
+		if(OakIsEmptyString(userInfo[@"errorString"]))
+		{
+			NSNumberFormatter* formatter = [NSNumberFormatter new];
+			formatter.numberStyle = NSNumberFormatterDecimalStyle;
+			formatter.maximumFractionDigits = 1;
+			NSString* seconds = [formatter stringFromNumber:@([[NSDate date] timeIntervalSinceDate:startDate])];
+
+			NSString* countOfItems = [NSNumberFormatter localizedStringFromNumber:@(dataSourceItem.replacementItems.count) numberStyle:NSNumberFormatterDecimalStyle];
+			self.errorString = [NSString stringWithFormat:@"Got %@ items in %@ seconds", countOfItems, seconds];
+		}
+		else
+		{
+			self.errorString = userInfo[@"errorString"];
+		}
+
+		self.genieItems = userInfo[@"items"] ? dataSourceItem.replacementItems : nil;
+
+		_scriptPath         = userInfo[@"scriptPath"];
+		_standardOutputData = userInfo[@"standardOutputData"];
+		_standardErrorData  = userInfo[@"standardErrorData"];
+		[self updateConsoleOutput];
+	}];
+
+	NSMutableDictionary* dict = [dataSourceItem.environment mutableCopy];
 	dict[@"GENIE_DEBUG"] = @"1";
-	_dataSourceItem.environment = dict;
+	dataSourceItem.environment = dict;
 
-	[_dataSourceItem addObserver:self forKeyPath:@"replacementItems" options:0 context:kResultItemsBinding];
-	[_dataSourceItem refreshDataSource];
+	self.running = YES;
+	[dataSourceItem refreshDataSource];
 }
 
-- (void)stopQuery
+- (void)updateConsoleOutput
 {
-	if(!_startQueryDate)
+	NSMutableAttributedString* res = [[NSMutableAttributedString alloc] init];
+
+	NSDictionary* outputStyles = @{
+		NSFontAttributeName: [NSFont userFixedPitchFontOfSize:0],
+	};
+
+	NSDictionary* errorStyles = @{
+		NSFontAttributeName: [NSFont userFixedPitchFontOfSize:0],
+		NSForegroundColorAttributeName : NSColor.redColor
+	};
+
+	NSArray<NSData*>* data         = @[ _standardErrorData ?: [NSData data], (_consoleIncludesStandardOutput ? _standardOutputData : nil) ?: [NSData data] ];
+	NSArray<NSDictionary*>* styles = @[ errorStyles, outputStyles ];
+
+	for(NSUInteger i = 0; i < MIN(data.count, styles.count); ++i)
+	{
+		if(NSString* string = [[NSString alloc] initWithData:data[i] encoding:NSUTF8StringEncoding])
+		{
+			if(_scriptPath && _displayName)
+				string = [string stringByReplacingOccurrencesOfString:_scriptPath withString:_displayName];
+
+			if(NSAttributedString* attributedString = [[NSAttributedString alloc] initWithString:string attributes:styles[i]])
+			{
+				[res appendAttributedString:attributedString];
+				if(string.length && ![string hasSuffix:@"\n"])
+					[res appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
+			}
+		}
+	}
+
+	[_textView.textStorage setAttributedString:res];
+}
+
+- (void)setConsoleIncludesStandardOutput:(BOOL)newConsoleIncludesStandardOutput
+{
+	if(_consoleIncludesStandardOutput == newConsoleIncludesStandardOutput)
 		return;
 
-	[_dataSourceItem removeObserver:self forKeyPath:@"replacementItems" context:kResultItemsBinding];
-
-	NSNumberFormatter* formatter = [NSNumberFormatter new];
-	formatter.numberStyle = NSNumberFormatterDecimalStyle;
-	formatter.maximumFractionDigits = 1;
-	NSString* seconds = [formatter stringFromNumber:@([NSDate.date timeIntervalSinceDate:_startQueryDate])];
-	NSString* items = [NSNumberFormatter localizedStringFromNumber:@(_dataSourceItem.replacementItems.count) numberStyle:NSNumberFormatterDecimalStyle];
-
-	// TODO Update status text
-	NSLog(@"%s %@ items in %@ seconds", sel_getName(_cmd), items, seconds);
-
-	_startQueryDate = nil;
-}
-
-- (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)value change:(NSDictionary*)changeDictionary context:(void*)someContext
-{
-	if(someContext == kResultItemsBinding)
-		[self stopQuery];
+	_consoleIncludesStandardOutput = newConsoleIncludesStandardOutput;
+	[self updateConsoleOutput];
 }
 
 - (void)loadView
@@ -197,7 +249,7 @@ static void* kResultItemsBinding = &kResultItemsBinding;
 	_treeController = [[NSTreeController alloc] init];
 	_treeController.childrenKeyPath = @"children";
 	_treeController.leafKeyPath     = @"leaf";
-	[_treeController bind:NSContentBinding toObject:self withKeyPath:@"dataSourceItem.replacementItems" options:@{ NSValueTransformerNameBindingOption: @"ExplodePropertyListValueTransformer" }];
+	[_treeController bind:NSContentBinding toObject:self withKeyPath:@"genieItems" options:@{ NSValueTransformerNameBindingOption: @"ExplodePropertyListValueTransformer" }];
 
 	// ===============
 	// = JSON Output =
@@ -265,13 +317,6 @@ static void* kResultItemsBinding = &kResultItemsBinding;
 	[consoleContentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[textView(>=500)]-|" options:0 metrics:nil views:views]];
 	[consoleContentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-[textView(>=300)]-[onlyStdout]-|" options:NSLayoutFormatAlignAllLeft|NSLayoutFormatAlignAllRight metrics:nil views:views]];
 
-	// If we bind directly to NSTextView then it becomes editable
-	// [textView bind:NSAttributedStringBinding toObject:_dataSourceItem withKeyPath:@"consoleOutput" options:0];
-#if 0
-	[self bind:@"consoleOutputAttributedString" toObject:_dataSourceItem withKeyPath:@"consoleOutput" options:0];
-
-	[onlyStdout bind:NSValueBinding toObject:_dataSourceItem withKeyPath:@"consoleIncludesStandardOutput" options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
-#endif
 	NSTabViewItem* consoleTabViewItem = [[NSTabViewItem alloc] initWithIdentifier:@"Console"];
 	consoleTabViewItem.label = @"Console";
 	consoleTabViewItem.view = consoleContentView;
@@ -312,16 +357,9 @@ static void* kResultItemsBinding = &kResultItemsBinding;
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[busy]-[statusText]-[close]-|" options:NSLayoutFormatAlignAllTop|NSLayoutFormatAlignAllBottom metrics:nil views:views]];
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-[tabView]-[close]-|"           options:NSLayoutFormatAlignAllRight metrics:nil views:views]];
 
-	[busy       bind:NSAnimateBinding toObject:self withKeyPath:@"dataSourceItem.busy"  options:nil];
-#if 0
-	[statusText bind:NSValueBinding   toObject:self withKeyPath:@"dataSourceItem.error" options:nil];
-#endif
-}
-
-- (void)setConsoleOutputAttributedString:(NSAttributedString*)anAttributedString
-{
-	_consoleOutputAttributedString = anAttributedString;
-	[_textView.textStorage setAttributedString:anAttributedString];
+	[busy       bind:NSAnimateBinding toObject:self withKeyPath:@"running"                       options:nil];
+	[statusText bind:NSValueBinding   toObject:self withKeyPath:@"errorString"                   options:nil];
+	[onlyStdout bind:NSValueBinding   toObject:self withKeyPath:@"consoleIncludesStandardOutput" options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
 }
 
 - (void)copy:(id)sender
