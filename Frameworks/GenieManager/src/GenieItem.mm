@@ -13,6 +13,8 @@
 #import <os/log.h>
 #import <sqlite3.h> 
 
+NSString* GenieItemDidReceiveNewItemsNotification = @"GenieItemDidReceiveNewItemsNotification";
+
 // ================
 // = Genie Filter =
 // ================
@@ -1351,6 +1353,15 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 		}
 
 		self.dataSourceCacheRecord = res;
+
+		NSMutableDictionary* userInfo = [NSMutableDictionary dictionary];
+		userInfo[@"items"]              = res.items;
+		userInfo[@"errorString"]        = error;
+		userInfo[@"scriptPath"]         = _kind == kGenieItemKindCommandResult ? self.scriptWithArguments.firstObject : nil;
+		userInfo[@"standardOutputData"] = stdout;
+		userInfo[@"standardErrorData"]  = stderr;
+		[NSNotificationCenter.defaultCenter postNotificationName:GenieItemDidReceiveNewItemsNotification object:self userInfo:userInfo];
+
 		self.updating = NO;
 
 		if(_dataSourceNeedsUpdate)

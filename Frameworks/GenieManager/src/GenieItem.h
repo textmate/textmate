@@ -31,6 +31,8 @@ typedef NS_ENUM(NSUInteger, GenieItemKind) {
 @property (nonatomic) CGFloat height;
 @end
 
+extern NSString* GenieItemDidReceiveNewItemsNotification;
+
 @interface GenieItem : NSObject <QLPreviewItem>
 + (void)expireItemsForIdentifier:(NSString*)identifier;
 
