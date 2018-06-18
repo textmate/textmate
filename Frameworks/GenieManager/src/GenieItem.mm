@@ -117,8 +117,8 @@ static NSTimeInterval ParseDuration (id value)
 	return res;
 }
 
-NSString* GenieDataSourceCacheRecordDidExpireNotification = @"GenieDataSourceCacheRecordDidExpireNotification";
-void* kRunningApplicationsBindings = &kRunningApplicationsBindings;
+static NSString* GenieDataSourceCacheRecordDidExpireNotification = @"GenieDataSourceCacheRecordDidExpireNotification";
+static void* kRunningApplicationsBindings = &kRunningApplicationsBindings;
 
 @interface GenieDataSourceCacheRecord : NSObject
 {
