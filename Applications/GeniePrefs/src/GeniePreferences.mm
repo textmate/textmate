@@ -62,34 +62,135 @@ static NSString* kDisableLaunchAtLoginSettingsKey   = @"disableLaunchAtLogin";
 }
 @end
 
-@interface GeniePreferences ()
+@interface GeneralSettingsViewController ()
 {
 	GenieUserDefaultsProxy* _genieSettings;
 	NSObjectController* _genieSettingsController;
 
-	NSTreeController* _treeController;
-
 	TableViewController* _variablesTable;
-	NSButton* _enableClipboardHistoryButton;
+
 	NSButton* _launchAtLoginButton;
+	NSButton* _enableClipboardHistoryButton;
+}
+@property (nonatomic) NSResponder* initialFirstResponder;
+@end
+
+@implementation GeneralSettingsViewController
+- (instancetype)init
+{
+	if(self = [super init])
+	{
+		self.title = @"General";
+
+		_genieSettings           = [[GenieUserDefaultsProxy alloc] init];
+		_genieSettingsController = [[NSObjectController alloc] initWithContent:_genieSettings];
+	}
+	return self;
+}
+
+- (void)loadView
+{
+	NSView* contentView = [[NSView alloc] initWithFrame:NSZeroRect];
+
+	NSTextField* variablesLabel = [NSTextField labelWithString:@"Variables:"];
+	_variablesTable = [[TableViewController alloc] initWithColumnNames:@[ @"disabled", @"name", @"value" ] visibleRows:5 showHeaderView:YES prototype:@{ @"name": @"variable", @"value": @"value" }];
+
+	_launchAtLoginButton          = [NSButton checkboxWithTitle:@"Launch at Login" target:nil action:nil];
+	_enableClipboardHistoryButton = [NSButton checkboxWithTitle:@"Clipboard History" target:nil action:nil];
+
+	[_enableClipboardHistoryButton bind:NSValueBinding toObject:_genieSettingsController withKeyPath:@"content.enableClipboardHistory" options:nil];
+	[_launchAtLoginButton bind:NSValueBinding toObject:_genieSettingsController withKeyPath:@"content.disableLaunchAtLogin" options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
+
+	NSDictionary* views = @{
+		@"variablesLabel":    variablesLabel,
+		@"variables":         _variablesTable.view,
+		@"launchAtLogin":     _launchAtLoginButton,
+		@"clipboardHistory":  _enableClipboardHistoryButton,
+	};
+
+	GenieAddAutoLayoutViewsToSuperview(views, contentView);
+	GenieSetupKeyViewLoop(@[ contentView, _variablesTable.view, _launchAtLoginButton, _enableClipboardHistoryButton ]);
+
+	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[variablesLabel]-[variables]-|"                          options:NSLayoutFormatAlignAllTop metrics:nil views:views]];
+	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[launchAtLogin]-(>=20)-|"                                  options:0 metrics:nil views:views]];
+	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[clipboardHistory]-(>=20)-|"                               options:0 metrics:nil views:views]];
+	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-[variables]-[launchAtLogin]-[clipboardHistory]-(>=20)-|" options:NSLayoutFormatAlignAllLeading metrics:nil views:views]];
+
+	[_variablesTable.arrayController bind:NSContentArrayBinding toObject:GenieManager.sharedInstance withKeyPath:@"variables" options:nil];
+
+	NSArray<NSTableColumn*>* tableColumns = _variablesTable.tableView.tableColumns;
+	tableColumns[0].title = @"";
+	tableColumns[1].title = @"Variable Name";
+	tableColumns[2].title = @"Value";
+
+	self.initialFirstResponder = _variablesTable.tableView;
+	self.view = contentView;
+}
+@end
+
+@interface ChangesViewController ()
+@property (nonatomic) NSResponder* initialFirstResponder;
+@end
+
+@implementation ChangesViewController
+- (instancetype)init
+{
+	if(self = [super init])
+	{
+		self.title = @"Changes";
+	}
+	return self;
+}
+
+- (void)loadView
+{
+	NSView* contentView = [[NSView alloc] initWithFrame:NSZeroRect];
+
+	WKWebViewConfiguration* webConfig = [[WKWebViewConfiguration alloc] init];
+	webConfig.suppressesIncrementalRendering = YES;
+
+	WKWebView* webView = [[WKWebView alloc] initWithFrame:NSZeroRect configuration:webConfig];
+
+	NSDictionary* views = @{ @"webView": webView };
+	GenieAddAutoLayoutViewsToSuperview(views, contentView);
+
+	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(>=20)-[webView(<=600,==600@100)]-(>=20)-|" options:0 metrics:nil views:views]];
+	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-[webView]-|" options:0 metrics:nil views:views]];
+	[contentView addConstraint:[NSLayoutConstraint constraintWithItem:webView attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
+
+	if(NSURL* url = [[NSBundle mainBundle] URLForResource:@"Changes" withExtension:@"html"])
+		[webView loadFileURL:url allowingReadAccessToURL:[NSURL fileURLWithPath:[url.path stringByDeletingLastPathComponent]]];
+
+	self.initialFirstResponder = webView;
+	self.view = contentView;
+}
+@end
+
+@interface CatalogViewController () <NSOutlineViewDataSource>
+{
+	NSTreeController* _treeController;
 
 	NSTextView* _textView;
 	NSScrollView* _textViewScrollView;
-
-	BOOL _didLoadView;
 
 	// ====================
 	// = View Controllers =
 	// ====================
 
-	CatalogViewController* _catalogViewController;
 	Properties* _properties;
 
 	NSDictionary<NSString*, NSViewController*>* _viewControllers;
 	NSSplitView* _splitView;
 	NSView* _containerView;
+
+	NSString* _dragType;
+	NSArray* _draggedNodes;
 }
 @property (nonatomic) GenieItemKind selectedItemKind;
+@property (nonatomic) NSOutlineView* outlineView;
+@property (nonatomic) NSButton* addButton;
+@property (nonatomic) NSButton* removeButton;
+@property (nonatomic) NSResponder* initialFirstResponder;
 @end
 
 static NSIndexPath* IndexPathForGenieItemWithIdentifier (NSString* identifier, NSArray<GenieItem*>* items, NSIndexPath* parent = nil)
@@ -112,13 +213,12 @@ static NSIndexPath* IndexPathForGenieItemWithIdentifier (NSString* identifier, N
 	return nil;
 }
 
-@implementation GeniePreferences
+@implementation CatalogViewController
 - (instancetype)init
 {
 	if(self = [super init])
 	{
-		_genieSettings           = [[GenieUserDefaultsProxy alloc] init];
-		_genieSettingsController = [[NSObjectController alloc] initWithContent:_genieSettings];
+		self.title = @"Catalog";
 
 		_treeController = [[NSTreeController alloc] init];
 		_treeController.childrenKeyPath = @"children";
@@ -137,10 +237,7 @@ static NSIndexPath* IndexPathForGenieItemWithIdentifier (NSString* identifier, N
 			[NSString stringWithFormat:@"%lu", kGenieItemKindPredicateGroup]:      [[PredicateGroupProperties alloc] initWithTreeController:_treeController],
 		};
 
-		_catalogViewController = [[CatalogViewController alloc] initWithTreeController:_treeController];
-		_properties            = [[Properties alloc] initWithTreeController:_treeController];
-
-		[self addChildViewController:_catalogViewController];
+		_properties = [[Properties alloc] initWithTreeController:_treeController];
 		[self addChildViewController:_properties];
 
 		[self bind:@"selectedItemKind" toObject:_treeController withKeyPath:@"selection.kind" options:nil];
@@ -156,31 +253,90 @@ static NSIndexPath* IndexPathForGenieItemWithIdentifier (NSString* identifier, N
 
 - (void)loadView
 {
-	if(_didLoadView)
-		return;
-	_didLoadView = YES;
+	NSOutlineView* outlineView = [[NSOutlineView alloc] initWithFrame:NSZeroRect];
+	_outlineView = outlineView;
 
-	NSView* contentView = [[NSView alloc] initWithFrame:NSZeroRect];
-	contentView.autoresizingMask = NSViewWidthSizable|NSViewHeightSizable;
+	NSTableColumn* spaceColumn = [[NSTableColumn alloc] initWithIdentifier:@"space"];
+	spaceColumn.width    = 0;
+	spaceColumn.editable = NO;
+	[outlineView addTableColumn:spaceColumn];
 
-	NSTabView* tabView = [[NSTabView alloc] initWithFrame:NSZeroRect];
-	[tabView addTabViewItem:[self catalogTabViewItem]];
-	[tabView addTabViewItem:[self generalTabViewItem]];
-	[tabView addTabViewItem:[self changesTabViewItem]];
+	NSTableColumn* enabledColumn = [[NSTableColumn alloc] initWithIdentifier:@"enabled"];
+	NSButtonCell* checkboxCell = [[NSButtonCell alloc] init];
+	checkboxCell.buttonType = NSSwitchButton;
+	checkboxCell.title      = @"";
+	enabledColumn.dataCell = checkboxCell;
+	enabledColumn.width    = 16;
+	[outlineView addTableColumn:enabledColumn];
+
+	NSTableColumn* tableColumn = [[NSTableColumn alloc] initWithIdentifier:@"title"];
+	[outlineView addTableColumn:tableColumn];
+	outlineView.intercellSpacing = NSMakeSize(3, 12);
+	outlineView.outlineTableColumn = tableColumn;
+	outlineView.headerView = nil;
+	outlineView.usesAlternatingRowBackgroundColors = YES;
+	outlineView.indentationMarkerFollowsCell = YES;
+	outlineView.indentationPerLevel = 16;
+	outlineView.autoresizesOutlineColumn = NO;
+	outlineView.dataSource = self;
+
+	_dragType = [NSUUID UUID].UUIDString;
+	[outlineView registerForDraggedTypes:@[ _dragType ]];
+
+	NSScrollView* scrollView = [[NSScrollView alloc] initWithFrame:NSZeroRect];
+	scrollView.hasVerticalScroller = YES;
+	scrollView.autohidesScrollers  = YES;
+	scrollView.borderType          = NSBezelBorder;
+	scrollView.documentView        = outlineView;
+
+	_addButton    = [NSButton buttonWithImage:[NSImage imageNamed:NSImageNameAddTemplate] target:_treeController action:@selector(insert:)];
+	_removeButton = [NSButton buttonWithImage:[NSImage imageNamed:NSImageNameRemoveTemplate] target:_treeController action:@selector(remove:)];
+	for(NSButton* button in @[ _addButton, _removeButton ])
+		button.bezelStyle = NSSmallSquareBezelStyle;
 
 	NSDictionary* views = @{
-		@"tabView": tabView,
+		@"scrollView":   scrollView,
+		@"add":          _addButton,
+		@"remove":       _removeButton,
 	};
 
+	NSView* contentView = [[NSView alloc] initWithFrame:NSZeroRect];
+
 	GenieAddAutoLayoutViewsToSuperview(views, contentView);
+	GenieSetupKeyViewLoop(@[ contentView, outlineView, _addButton, _removeButton ]);
 
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[tabView]-|" options:0 metrics:nil views:views]];
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-[tabView]-|" options:0 metrics:nil views:views]];
+	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[scrollView]|"                           options:0 metrics:nil views:views]];
+	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[add(==21)]-(-1)-[remove(==21)]-(>=0)-|" options:NSLayoutFormatAlignAllTop|NSLayoutFormatAlignAllBottom metrics:nil views:views]];
+	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-[scrollView]-[add(==21)]-|"              options:0 metrics:nil views:views]];
 
-	self.view = contentView;
+	[outlineView   bind:NSContentBinding             toObject:_treeController withKeyPath:@"arrangedObjects" options:nil];
+	[outlineView   bind:NSSelectionIndexPathsBinding toObject:_treeController withKeyPath:NSSelectionIndexPathsBinding options:nil];
+	[enabledColumn bind:NSValueBinding               toObject:_treeController withKeyPath:@"arrangedObjects.disabled" options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
+	[tableColumn   bind:NSValueBinding               toObject:_treeController withKeyPath:@"arrangedObjects.displayName" options:nil];
+	[tableColumn   bind:NSEditableBinding            toObject:_treeController withKeyPath:@"arrangedObjects.canEditDisplayName" options:nil];
 
-	if([[NSUserDefaults standardUserDefaults] boolForKey:@"showChanges"])
-		[tabView selectTabViewItemWithIdentifier:@"Changes"];
+	[_addButton     bind:NSEnabledBinding toObject:_treeController withKeyPath:@"canInsert" options:nil];
+	[_removeButton  bind:NSEnabledBinding toObject:_treeController withKeyPath:@"canRemove" options:nil];
+
+	NSSplitView* splitView = [[NSSplitView alloc] initWithFrame:NSZeroRect];
+	splitView.autoresizingMask = NSViewWidthSizable|NSViewHeightSizable;
+	splitView.vertical = YES;
+
+	[splitView addSubview:contentView];
+	[splitView addSubview:_properties.view];
+	[splitView setHoldingPriority:NSLayoutPriorityDefaultLow+1 forSubviewAtIndex:0];
+
+	_splitView = splitView;
+
+	_containerView = _properties.containerView;
+
+	_addButton.target    = self;
+	_addButton.action    = @selector(insertCatalogItem:);
+	_removeButton.target = self;
+	_removeButton.action = @selector(removeCatalogItem:);
+
+	self.initialFirstResponder = _outlineView;
+	self.view = _splitView;
 
 	// Select the proper view controller for currently selected item
 	self.selectedItemKind = _selectedItemKind;
@@ -192,6 +348,14 @@ static NSIndexPath* IndexPathForGenieItemWithIdentifier (NSString* identifier, N
 	[_splitView setAutosaveName:@"Catalog"];
 
 	[super viewWillAppear];
+}
+
+- (void)viewDidAppear
+{
+	NSInteger selectedRow = _outlineView.selectedRow;
+	if(selectedRow > 0)
+		[_outlineView scrollRowToVisible:selectedRow];
+	[super viewDidAppear];
 }
 
 - (void)viewDidDisappear
@@ -227,105 +391,6 @@ static NSIndexPath* IndexPathForGenieItemWithIdentifier (NSString* identifier, N
 	{
 		NSLog(@"[%@ setSelectedItemKind:%@] no view controller for this kind", [self class], @(newSelectedItemKind));
 	}
-}
-
-// ==================
-// = Tab View Items =
-// ==================
-
-- (NSTabViewItem*)catalogTabViewItem
-{
-	NSSplitView* splitView = [[NSSplitView alloc] initWithFrame:NSZeroRect];
-	splitView.autoresizingMask = NSViewWidthSizable|NSViewHeightSizable;
-	splitView.vertical = YES;
-
-	[splitView addSubview:_catalogViewController.view];
-	[splitView addSubview:_properties.view];
-	[splitView setHoldingPriority:NSLayoutPriorityDefaultLow+1 forSubviewAtIndex:0];
-
-	_splitView = splitView;
-
-	NSTabViewItem* tabViewItem = [[NSTabViewItem alloc] initWithIdentifier:@"General"];
-	tabViewItem.label = @"Catalog";
-	tabViewItem.view = splitView;
-	tabViewItem.initialFirstResponder = _catalogViewController.outlineView;
-
-	_containerView = _properties.containerView;
-
-	_catalogViewController.addButton.target    = self;
-	_catalogViewController.addButton.action    = @selector(insertCatalogItem:);
-	_catalogViewController.removeButton.target = self;
-	_catalogViewController.removeButton.action = @selector(removeCatalogItem:);
-
-	return tabViewItem;
-}
-
-- (NSTabViewItem*)generalTabViewItem
-{
-	NSView* contentView = [[NSView alloc] initWithFrame:NSZeroRect];
-
-	NSTextField* variablesLabel = [NSTextField labelWithString:@"Variables:"];
-	_variablesTable = [[TableViewController alloc] initWithColumnNames:@[ @"disabled", @"name", @"value" ] visibleRows:5 showHeaderView:YES prototype:@{ @"name": @"variable", @"value": @"value" }];
-
-	_launchAtLoginButton          = [NSButton checkboxWithTitle:@"Launch at Login" target:nil action:nil];
-	_enableClipboardHistoryButton = [NSButton checkboxWithTitle:@"Clipboard History" target:nil action:nil];
-
-	[_enableClipboardHistoryButton bind:NSValueBinding toObject:_genieSettingsController withKeyPath:@"content.enableClipboardHistory" options:nil];
-	[_launchAtLoginButton bind:NSValueBinding toObject:_genieSettingsController withKeyPath:@"content.disableLaunchAtLogin" options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
-
-	NSDictionary* views = @{
-		@"variablesLabel":    variablesLabel,
-		@"variables":         _variablesTable.view,
-		@"launchAtLogin":     _launchAtLoginButton,
-		@"clipboardHistory":  _enableClipboardHistoryButton,
-	};
-
-	GenieAddAutoLayoutViewsToSuperview(views, contentView);
-	GenieSetupKeyViewLoop(@[ contentView, _variablesTable.view, _launchAtLoginButton, _enableClipboardHistoryButton ]);
-
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[variablesLabel]-[variables]-|"                          options:NSLayoutFormatAlignAllTop metrics:nil views:views]];
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[launchAtLogin]-(>=20)-|"                                  options:0 metrics:nil views:views]];
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[clipboardHistory]-(>=20)-|"                               options:0 metrics:nil views:views]];
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-[variables]-[launchAtLogin]-[clipboardHistory]-(>=20)-|" options:NSLayoutFormatAlignAllLeading metrics:nil views:views]];
-
-	[_variablesTable.arrayController bind:NSContentArrayBinding toObject:GenieManager.sharedInstance withKeyPath:@"variables" options:nil];
-
-	NSArray<NSTableColumn*>* tableColumns = _variablesTable.tableView.tableColumns;
-	tableColumns[0].title = @"";
-	tableColumns[1].title = @"Variable Name";
-	tableColumns[2].title = @"Value";
-
-	NSTabViewItem* tabViewItem = [[NSTabViewItem alloc] initWithIdentifier:@"General"];
-	tabViewItem.label = @"General";
-	tabViewItem.view = contentView;
-	tabViewItem.initialFirstResponder = _variablesTable.tableView;
-	return tabViewItem;
-}
-
-- (NSTabViewItem*)changesTabViewItem
-{
-	NSView* contentView = [[NSView alloc] initWithFrame:NSZeroRect];
-
-	WKWebViewConfiguration* webConfig = [[WKWebViewConfiguration alloc] init];
-	webConfig.suppressesIncrementalRendering = YES;
-
-	WKWebView* webView = [[WKWebView alloc] initWithFrame:NSZeroRect configuration:webConfig];
-
-	NSDictionary* views = @{ @"webView": webView };
-	GenieAddAutoLayoutViewsToSuperview(views, contentView);
-
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(>=20)-[webView(<=600,==600@100)]-(>=20)-|" options:0 metrics:nil views:views]];
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-[webView]-|" options:0 metrics:nil views:views]];
-	[contentView addConstraint:[NSLayoutConstraint constraintWithItem:webView attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
-
-	if(NSURL* url = [[NSBundle mainBundle] URLForResource:@"Changes" withExtension:@"html"])
-		[webView loadFileURL:url allowingReadAccessToURL:[NSURL fileURLWithPath:[url.path stringByDeletingLastPathComponent]]];
-
-	NSTabViewItem* tabViewItem = [[NSTabViewItem alloc] initWithIdentifier:@"Changes"];
-	tabViewItem.label = @"Changes";
-	tabViewItem.view = contentView;
-	tabViewItem.initialFirstResponder = webView;
-	return tabViewItem;
 }
 
 // =======================
@@ -388,6 +453,8 @@ static NSIndexPath* IndexPathForGenieItemWithIdentifier (NSString* identifier, N
 {
 	if(aMenuItem.action == @selector(performDataSourceDryRun:))
 		return [self findDataSourceItem] != nil;
+	else if(aMenuItem.action == @selector(delete:))
+		return _removeButton.isEnabled;
 	return [super respondsToSelector:@selector(validateMenuItem:)] ? [super validateMenuItem:aMenuItem] : YES;
 }
 
@@ -415,14 +482,14 @@ static NSIndexPath* IndexPathForGenieItemWithIdentifier (NSString* identifier, N
 		indexPath = [NSIndexPath indexPathWithIndex:[[_treeController.arrangedObjects childNodes] count]];
 	[_treeController insertObject:newItem atArrangedObjectIndexPath:indexPath];
 
-	NSArray<NSTableColumn*>* tableColumns = _catalogViewController.outlineView.tableColumns;
+	NSArray<NSTableColumn*>* tableColumns = _outlineView.tableColumns;
 	for(NSUInteger i = 0; i < tableColumns.count; ++i)
 	{
 		if(tableColumns[i].isEditable && [tableColumns[i].dataCell isKindOfClass:[NSTextFieldCell class]])
 		{
-			NSInteger rowIndex = _catalogViewController.outlineView.selectedRow;
+			NSInteger rowIndex = _outlineView.selectedRow;
 			if(rowIndex != -1)
-				[_catalogViewController.outlineView editColumn:i row:rowIndex withEvent:nil select:YES];
+				[_outlineView editColumn:i row:rowIndex withEvent:nil select:YES];
 			break;
 		}
 	}
@@ -479,5 +546,89 @@ static NSIndexPath* IndexPathForGenieItemWithIdentifier (NSString* identifier, N
 - (void)cancelAdvancedSettings:(id)sender
 {
  	[self.view.window endSheet:[sender window] returnCode:NSModalResponseCancel];
+}
+
+// ===================
+// = Catalog Support =
+// ===================
+
+- (void)delete:(id)sender
+{
+	[_removeButton performClick:self];
+}
+
+- (void)cancel:(id)sender
+{
+	NSResponder* firstResponder = _outlineView.window.firstResponder;
+	if([firstResponder isKindOfClass:[NSTextView class]] && ((NSTextView*)firstResponder).delegate == _outlineView)
+	{
+		[_treeController discardEditing];
+		[_outlineView.window makeFirstResponder:_outlineView];
+	}
+	else
+	{
+		[self.nextResponder doCommandBySelector:@selector(cancel:)];
+	}
+}
+
+- (NSInteger)outlineView:(NSOutlineView*)anOutlineView numberOfChildrenOfItem:(id)item                                 { return 0; }
+- (BOOL)outlineView:(NSOutlineView*)anOutlineView isItemExpandable:(id)item                                            { return NO; }
+- (id)outlineView:(NSOutlineView*)anOutlineView child:(NSInteger)index ofItem:(id)item                                 { return nil; }
+- (id)outlineView:(NSOutlineView*)anOutlineView objectValueForTableColumn:(NSTableColumn*)aTableColumn byItem:(id)item { return nil; }
+
+- (void)outlineView:(NSOutlineView*)outlineView draggingSession:(NSDraggingSession*)session willBeginAtPoint:(NSPoint)screenPoint forItems:(NSArray*)draggedItems
+{
+	_draggedNodes = draggedItems;
+	[session.draggingPasteboard setData:[NSData data] forType:_dragType];
+}
+
+- (void)outlineView:(NSOutlineView*)outlineView draggingSession:(NSDraggingSession*)session endedAtPoint:(NSPoint)screenPoint operation:(NSDragOperation)operation
+{
+	if(operation == NSDragOperationDelete)
+		NSLog(@"%s trash items", sel_getName(_cmd));
+	_draggedNodes = nil;
+}
+
+- (BOOL)outlineView:(NSOutlineView*)anOutlineView writeItems:(NSArray*)items toPasteboard:(NSPasteboard*)pboard
+{
+	NSMutableArray* itemUids = [NSMutableArray array];
+	for(NSTreeNode* item in items)
+		[itemUids addObject:[item.representedObject identifier]];
+
+	[pboard clearContents];
+	[pboard setPropertyList:itemUids forType:_dragType];
+	return YES;
+}
+
+- (NSDragOperation)outlineView:(NSOutlineView*)anOutlineView validateDrop:(id<NSDraggingInfo>)info proposedItem:(id)item proposedChildIndex:(NSInteger)childIndex
+{
+	BOOL optionDown = ([NSEvent modifierFlags] & NSEventModifierFlagOption) == NSEventModifierFlagOption;
+	return optionDown ? NSDragOperationCopy : NSDragOperationMove;
+}
+
+- (BOOL)outlineView:(NSOutlineView*)anOutlineView acceptDrop:(id<NSDraggingInfo>)info item:(id)item childIndex:(NSInteger)childIndex
+{
+	// TODO Duplicate
+	// TODO Check if drop destination is valid (not dragging item into itself)
+	// TODO Drag to trash?
+
+	if(_draggedNodes)
+	{
+		if(childIndex == NSOutlineViewDropOnItemIndex)
+			childIndex = 0;
+
+		NSIndexPath* indexPath = item ? [((NSTreeNode*)item).indexPath indexPathByAddingIndex:childIndex] : [NSIndexPath indexPathWithIndex:childIndex];
+		NSLog(@"%s move %@ to %@", sel_getName(_cmd), _draggedNodes, indexPath);
+		[_treeController moveNodes:_draggedNodes toIndexPath:indexPath];
+		return YES;
+	}
+
+	// NSPasteboard* pboard = info.draggingPasteboard;
+	// if(NSArray* draggedUids = [pboard propertyListForType:_dragType])
+	// {
+	// 	NSDragOperation op = [info draggingSourceOperationMask];
+	// 	BOOL move = (op & NSDragOperationMove) == NSDragOperationMove;
+	// }
+	return NO;
 }
 @end

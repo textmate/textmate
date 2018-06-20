@@ -2,9 +2,14 @@
 #import "GeniePrefsAppDelegate.h"
 #import "GeniePreferences.h"
 
-@interface AppDelegate () <NSApplicationDelegate, NSWindowDelegate>
+@interface AppDelegate () <NSApplicationDelegate, NSWindowDelegate, NSToolbarDelegate>
+{
+	NSDictionary<NSString*, NSViewController*>* _viewControllers;
+}
 @property (nonatomic) NSWindow* window;
-@property (nonatomic) GeniePreferences* preferencesViewController;
+@property (nonatomic) NSToolbar* toolbar;
+@property (nonatomic) NSString* selectedViewIdentifier;
+@property (nonatomic) NSViewController* selectedViewController;
 @end
 
 @implementation AppDelegate
@@ -215,12 +220,24 @@
 {
 	if(_window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600) styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskResizable|NSWindowStyleMaskClosable|NSWindowStyleMaskMiniaturizable) backing:NSBackingStoreBuffered defer:NO])
 	{
-		_preferencesViewController = [[GeniePreferences alloc] init];
+		_toolbar = [[NSToolbar alloc] initWithIdentifier:@"About TextMate"];
+		_toolbar.allowsUserCustomization = NO;
+		_toolbar.displayMode             = NSToolbarDisplayModeLabelOnly;
+		_toolbar.delegate                = self;
+
+		_viewControllers = @{
+			@"Catalog": [[CatalogViewController alloc] init],
+			@"General": [[GeneralSettingsViewController alloc] init],
+			@"Changes": [[ChangesViewController alloc] init],
+		};
 
 		_window.title = @"Preferences";
 		_window.autorecalculatesKeyViewLoop = NO;
-		_window.contentView = _preferencesViewController.view;
+		_window.toolbar = _toolbar;
 		_window.delegate = self;
+
+		BOOL showChanges = [[NSUserDefaults standardUserDefaults] boolForKey:@"showChanges"];
+		self.selectedViewIdentifier = showChanges ? @"Changes" : @"Catalog";
 
 		[_window layoutIfNeeded];
 		[_window center];
@@ -232,8 +249,76 @@
 
 - (void)windowWillClose:(NSNotification*)aNotification
 {
-	[_preferencesViewController commitEditing];
+	[_selectedViewController commitEditing];
 
 	[NSApp performSelector:@selector(terminate:) withObject:self afterDelay:0];
+}
+
+- (void)setSelectedViewIdentifier:(NSString*)newSelectedViewIdentifier
+{
+	if([_selectedViewIdentifier isEqualToString:newSelectedViewIdentifier])
+		return;
+
+	_selectedViewController.nextResponder = nil;
+	_selectedViewController = nil;
+
+	_selectedViewIdentifier = newSelectedViewIdentifier;
+	_toolbar.selectedItemIdentifier = _selectedViewIdentifier;
+	if(_selectedViewController = _viewControllers[_selectedViewIdentifier])
+	{
+		_window.contentView = _selectedViewController.view;
+		// [_window recalculateKeyViewLoop];
+
+		if(_window.firstResponder == _window)
+		{
+			if([_selectedViewController respondsToSelector:@selector(initialFirstResponder)])
+					[_window makeFirstResponder:[_selectedViewController performSelector:@selector(initialFirstResponder)]];
+			else	[_window selectKeyViewFollowingView:_window.contentView];
+		}
+	}
+	else
+	{
+		_window.contentView = [[NSView alloc] initWithFrame:NSZeroRect];
+	}
+}
+
+// ====================
+// = Toolbar Delegate =
+// ====================
+
+- (void)didClickToolbarItem:(id)sender
+{
+	NSString* identifier = nil;
+	if([sender respondsToSelector:@selector(itemIdentifier)])
+		identifier = [sender itemIdentifier];
+	else if([sender respondsToSelector:@selector(representedObject)])
+		identifier = [sender representedObject];
+
+	if(identifier)
+		self.selectedViewIdentifier = identifier;
+}
+
+- (NSToolbarItem*)toolbar:(NSToolbar*)aToolbar itemForItemIdentifier:(NSString*)anIdentifier willBeInsertedIntoToolbar:(BOOL)flag
+{
+	NSToolbarItem* res = [[NSToolbarItem alloc] initWithItemIdentifier:anIdentifier];
+	res.label  = _viewControllers[anIdentifier].title;
+	res.action = @selector(didClickToolbarItem:);
+	res.target = self;
+	return res;
+}
+
+- (NSArray*)toolbarAllowedItemIdentifiers:(NSToolbar*)aToolbar
+{
+	return [_viewControllers.allKeys arrayByAddingObjectsFromArray:@[ NSToolbarSpaceItemIdentifier, NSToolbarFlexibleSpaceItemIdentifier ]];
+}
+
+- (NSArray*)toolbarDefaultItemIdentifiers:(NSToolbar*)aToolbar
+{
+	return _viewControllers.allKeys;
+}
+
+- (NSArray*)toolbarSelectableItemIdentifiers:(NSToolbar*)aToolbar
+{
+	return _viewControllers.allKeys;
 }
 @end

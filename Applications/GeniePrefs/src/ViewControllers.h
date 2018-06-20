@@ -13,12 +13,6 @@
 - (instancetype)initWithTreeController:(NSTreeController*)aTreeController;
 @end
 
-@interface CatalogViewController : TreeViewController
-@property (nonatomic) NSOutlineView* outlineView;
-@property (nonatomic) NSButton* addButton;
-@property (nonatomic) NSButton* removeButton;
-@end
-
 @interface BasicProperties : TreeViewController
 @property (nonatomic) NSButton* changeImageButton;
 @end
