@@ -201,7 +201,7 @@ static NSString* const kRecordingPlaceholderString = @"…";
 {
 	NSRect frame = [self bounds];
 
-	[[NSColor grayColor] set];
+	[[NSColor lightGrayColor] set];
 	NSFrameRect(frame);
 	NSEraseRect(NSIntersectionRect(aRect, NSInsetRect(frame, 1, 1)));
 
