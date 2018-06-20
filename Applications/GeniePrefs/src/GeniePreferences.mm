@@ -67,7 +67,7 @@ static NSString* kDisableLaunchAtLoginSettingsKey   = @"disableLaunchAtLogin";
 	GenieUserDefaultsProxy* _genieSettings;
 	NSObjectController* _genieSettingsController;
 
-	TableViewController* _variablesTable;
+	GenieTableViewController* _variablesTable;
 
 	NSButton* _launchAtLoginButton;
 	NSButton* _enableClipboardHistoryButton;
@@ -93,7 +93,7 @@ static NSString* kDisableLaunchAtLoginSettingsKey   = @"disableLaunchAtLogin";
 	NSView* contentView = [[NSView alloc] initWithFrame:NSZeroRect];
 
 	NSTextField* variablesLabel = [NSTextField labelWithString:@"Variables:"];
-	_variablesTable = [[TableViewController alloc] initWithColumnNames:@[ @"disabled", @"name", @"value" ] visibleRows:5 showHeaderView:YES prototype:@{ @"name": @"variable", @"value": @"value" }];
+	_variablesTable = [[GenieTableViewController alloc] initWithColumnNames:@[ @"disabled", @"name", @"value" ] visibleRows:5 showHeaderView:YES prototype:@{ @"name": @"variable", @"value": @"value" }];
 
 	_launchAtLoginButton          = [NSButton checkboxWithTitle:@"Launch at Login" target:nil action:nil];
 	_enableClipboardHistoryButton = [NSButton checkboxWithTitle:@"Clipboard History" target:nil action:nil];

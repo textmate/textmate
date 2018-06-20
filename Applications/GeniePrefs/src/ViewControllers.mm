@@ -40,7 +40,7 @@
 }
 @end
 
-@interface TableViewController () <NSTableViewDataSource>
+@interface GenieTableViewController () <NSTableViewDataSource>
 {
 	NSArray* _columnNames;
 	NSUInteger  _visibleRows;
@@ -51,7 +51,7 @@
 }
 @end
 
-@implementation TableViewController
+@implementation GenieTableViewController
 - (instancetype)initWithColumnNames:(NSArray*)columnNames visibleRows:(NSUInteger)visibleRows
 {
 	return [self initWithColumnNames:columnNames visibleRows:visibleRows showHeaderView:NO prototype:@{ }];
@@ -601,12 +601,12 @@
 
 @implementation ShellProperties
 {
-	TableViewController* _argvTable;
+	GenieTableViewController* _argvTable;
 }
 
 - (void)makeView:(NSView*)contentView
 {
-	_argvTable = [[TableViewController alloc] initWithColumnNames:@[ @"value" ] visibleRows:3 showHeaderView:NO prototype:@{ @"value": @"argument" }];
+	_argvTable = [[GenieTableViewController alloc] initWithColumnNames:@[ @"value" ] visibleRows:3 showHeaderView:NO prototype:@{ @"value": @"argument" }];
 	[_argvTable.arrayController bind:NSContentArrayBinding toObject:self.treeController withKeyPath:@"selection.mutableScriptArguments" options:nil];
 
 	NSTextField* scriptLabel = [NSTextField labelWithString:@"Script:"];
@@ -637,7 +637,7 @@
 
 @implementation SpotlightProperties
 {
-	TableViewController* scope;
+	GenieTableViewController* scope;
 }
 
 - (void)makeView:(NSView*)contentView
@@ -660,7 +660,7 @@
 
 	NSButton* ascendingCheckBox = [NSButton checkboxWithTitle:@"Ascending" target:nil action:NULL];
 
-	scope = [[TableViewController alloc] initWithColumnNames:@[ @"disabled", @"path" ] visibleRows:3 showHeaderView:NO prototype:@{ @"path": @"/some/path" }];
+	scope = [[GenieTableViewController alloc] initWithColumnNames:@[ @"disabled", @"path" ] visibleRows:3 showHeaderView:NO prototype:@{ @"path": @"/some/path" }];
 	[scope.arrayController bind:NSContentArrayBinding toObject:self.treeController withKeyPath:@"selection.mdScope" options:nil];
 
 	NSDictionary* views = @{
@@ -694,14 +694,14 @@
 
 @interface SqliteProperties ()
 {
-	TableViewController* _bindingsTable;
+	GenieTableViewController* _bindingsTable;
 }
 @end
 
 @implementation SqliteProperties
 - (void)makeView:(NSView*)contentView
 {
-	_bindingsTable = [[TableViewController alloc] initWithColumnNames:@[ @"value" ] visibleRows:3 showHeaderView:NO prototype:@{ @"value": @"binding" }];
+	_bindingsTable = [[GenieTableViewController alloc] initWithColumnNames:@[ @"value" ] visibleRows:3 showHeaderView:NO prototype:@{ @"value": @"binding" }];
 	[_bindingsTable.arrayController bind:NSContentArrayBinding toObject:self.treeController withKeyPath:@"selection.mutableSqlBindings" options:nil];
 
 	NSTextField* titleLabel        = [NSTextField labelWithString:@"Title:"];
@@ -797,12 +797,12 @@
 
 @implementation ExecDataSourceProperties
 {
-	TableViewController* _argvTable;
+	GenieTableViewController* _argvTable;
 }
 
 - (void)makeView:(NSView*)contentView
 {
-	_argvTable = [[TableViewController alloc] initWithColumnNames:@[ @"value" ] visibleRows:3 showHeaderView:NO prototype:@{ @"value": @"argument" }];
+	_argvTable = [[GenieTableViewController alloc] initWithColumnNames:@[ @"value" ] visibleRows:3 showHeaderView:NO prototype:@{ @"value": @"argument" }];
 
 	NSTextField* titleLabel  = [NSTextField labelWithString:@"Title:"];
 	NSTextField* scriptLabel = [NSTextField labelWithString:@"Script:"];

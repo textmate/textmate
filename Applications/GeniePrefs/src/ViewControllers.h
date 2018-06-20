@@ -1,7 +1,7 @@
 @interface GeneralViewController : NSViewController
 @end
 
-@interface TableViewController : NSViewController
+@interface GenieTableViewController : NSViewController
 @property (nonatomic) NSArrayController* arrayController;
 @property (nonatomic) NSTableView* tableView;
 - (instancetype)initWithColumnNames:(NSArray*)columnNames visibleRows:(NSUInteger)visibleRows;
