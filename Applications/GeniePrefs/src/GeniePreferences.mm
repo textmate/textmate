@@ -146,25 +146,15 @@ static NSString* kDisableLaunchAtLoginSettingsKey   = @"disableLaunchAtLogin";
 
 - (void)loadView
 {
-	NSView* contentView = [[NSView alloc] initWithFrame:NSZeroRect];
-
 	WKWebViewConfiguration* webConfig = [[WKWebViewConfiguration alloc] init];
 	webConfig.suppressesIncrementalRendering = YES;
 
 	WKWebView* webView = [[WKWebView alloc] initWithFrame:NSZeroRect configuration:webConfig];
-
-	NSDictionary* views = @{ @"webView": webView };
-	GenieAddAutoLayoutViewsToSuperview(views, contentView);
-
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(>=20)-[webView(<=600,==600@100)]-(>=20)-|" options:0 metrics:nil views:views]];
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-[webView]-|" options:0 metrics:nil views:views]];
-	[contentView addConstraint:[NSLayoutConstraint constraintWithItem:webView attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
-
 	if(NSURL* url = [[NSBundle mainBundle] URLForResource:@"Changes" withExtension:@"html"])
 		[webView loadFileURL:url allowingReadAccessToURL:[NSURL fileURLWithPath:[url.path stringByDeletingLastPathComponent]]];
 
 	self.initialFirstResponder = webView;
-	self.view = contentView;
+	self.view = webView;
 }
 @end
 
