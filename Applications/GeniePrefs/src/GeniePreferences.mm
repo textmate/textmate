@@ -1,4 +1,5 @@
 #import "GeniePreferences.h"
+#import "GenieTableViewController.h"
 #import "ViewControllers.h"
 #import "AddAutoLayoutViews.h"
 #import "DryRunController.h"
