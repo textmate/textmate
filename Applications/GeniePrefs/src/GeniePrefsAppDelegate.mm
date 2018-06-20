@@ -157,10 +157,10 @@
 				},
 				{ @"Text",
 					.submenu = {
-						{ @"Align Left",  @selector(alignLeft:),    @"{"   },
+						{ @"Align Left",  @selector(alignLeft:)            },
 						{ @"Center",      @selector(alignCenter:),  @"|"   },
 						{ @"Justify",     @selector(alignJustified:)       },
-						{ @"Align Right", @selector(alignRight:),   @"}"   },
+						{ @"Align Right", @selector(alignRight:)           },
 						{ /* -------- */ },
 						{ @"Writing Direction",
 							.submenu = {
@@ -185,11 +185,14 @@
 		},
 		{ @"View",
 			.submenu = {
-				{ @"Show Toolbar",       @selector(toggleToolbarShown:),           @"t", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption },
-				{ @"Customize Toolbar…", @selector(runToolbarCustomizationPalette:)       },
+				{ @"Show Toolbar",         @selector(toggleToolbarShown:),           @"t", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption },
+				{ @"Customize Toolbar…",   @selector(runToolbarCustomizationPalette:)       },
 				{ /* -------- */ },
-				{ @"Show Sidebar",       @selector(toggleSourceList:),             @"s", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagControl },
-				{ @"Enter Full Screen",  @selector(toggleFullScreen:),             @"f", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagControl },
+				{ @"Select Next View",     @selector(selectNextView:),               @"}"   },
+				{ @"Select Previous View", @selector(selectPreviousView:),           @"{"   },
+				{ /* -------- */ },
+				{ @"Show Sidebar",         @selector(toggleSourceList:),             @"s", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagControl },
+				{ @"Enter Full Screen",    @selector(toggleFullScreen:),             @"f", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagControl },
 			}
 		},
 		{ @"Data Source",
@@ -281,6 +284,17 @@
 		_window.contentView = [[NSView alloc] initWithFrame:NSZeroRect];
 	}
 }
+
+- (void)selectViewAtRelativeOffset:(NSInteger)offset
+{
+	NSArray* allIdentifiers = [self toolbarSelectableItemIdentifiers:self.toolbar];
+	NSUInteger index = [allIdentifiers indexOfObject:self.selectedViewIdentifier];
+	if(index != NSNotFound)
+		self.selectedViewIdentifier = allIdentifiers[(index + allIdentifiers.count + offset) % allIdentifiers.count];
+}
+
+- (void)selectNextView:(id)sender     { [self selectViewAtRelativeOffset:+1]; }
+- (void)selectPreviousView:(id)sender { [self selectViewAtRelativeOffset:-1]; }
 
 // ====================
 // = Toolbar Delegate =
