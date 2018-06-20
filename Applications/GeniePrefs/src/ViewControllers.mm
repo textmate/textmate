@@ -124,7 +124,7 @@
 	return [super respondsToSelector:@selector(validateMenuItem:)] ? [super validateMenuItem:aMenuItem] : YES;
 }
 
-- (void)makeView:(NSView*)contentView
+- (void)loadView
 {
 	_tableView = [[NSTableView alloc] initWithFrame:NSZeroRect];
 	_tableView.usesAlternatingRowBackgroundColors = YES;
@@ -146,6 +146,8 @@
 	_removeButton       = [NSButton buttonWithImage:[NSImage imageNamed:NSImageNameRemoveTemplate] target:_arrayController action:@selector(remove:)];
 	for(NSButton* button in @[ addButton, _removeButton ])
 		button.bezelStyle = NSSmallSquareBezelStyle;
+
+	NSView* contentView = [[NSView alloc] initWithFrame:NSZeroRect];
 
 	NSDictionary* views = @{
 		@"scrollView": scrollView,
@@ -195,6 +197,8 @@
 	[_removeButton bind:NSEnabledBinding toObject:_arrayController withKeyPath:@"canRemove" options:nil];
 
 	[_tableView sizeLastColumnToFit];
+
+	self.view = contentView;
 }
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView*)aTableView
