@@ -1,4 +1,6 @@
-# Genie 0.11-beta (2018-06-04)
+# Changes
+
+## Genie 0.11-beta (2018-06-04)
 
 This version is a major refactoring/rewrite: Be sure to update `Application Support/Genie` from GitHub.
 
@@ -21,7 +23,7 @@ This version is a major refactoring/rewrite: Be sure to update `Application Supp
 	1. Values coming from sqlite3 or spotlight should *not* be further expanded, and with the previous system there was no way to indicate that a value is a literal string rather than a format string.
 	2. Values are transformed based on the field being expanded, e.g. when an item’s URL property uses variables, the value is URL-encoded, and if title or subtitle references `${file}` then the path will be abbreviated with a tilde (when appropriate), etc. When supporting recursive expansion, these transformations became a little opaque, because some you’d want inherited, others not.
 
-# Genie 0.10-beta (2018-05-08)
+## Genie 0.10-beta (2018-05-08)
 
 * It’s now possible to debug data sources: Open preferences and select a data source (spotlight, sqlite3, or custom script), now choose Data Source → Dry Run (⌘R) from the menu.
 
@@ -29,15 +31,15 @@ This version is a major refactoring/rewrite: Be sure to update `Application Supp
 
 	There is currently no way to provide arguments (like `${query}`) when doing a dry run, and variables are not expanded, e.g. a database path using `$HOME` will fail when executed from the preferences window.
 
-# Genie 0.9 (2018-04-29)
+## Genie 0.9 (2018-04-29)
 
 * Fix issue with rendering UI in standard resolution (and scaled) on retina screens.
 
-# Genie 0.8 (2018-04-28)
+## Genie 0.8 (2018-04-28)
 
 * Fix crash on macOS 10.13.
 
-# Genie 0.7 (2018-04-28)
+## Genie 0.7 (2018-04-28)
 
 * Selecting multiple items and pressing return will now look at the item’s type and arguments:
 
