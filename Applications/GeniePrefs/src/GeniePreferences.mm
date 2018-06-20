@@ -302,9 +302,9 @@ static NSIndexPath* IndexPathForGenieItemWithIdentifier (NSString* identifier, N
 	NSView* leftContentView = [[NSView alloc] initWithFrame:NSZeroRect];
 	GenieAddAutoLayoutViewsToSuperview(leftViews, leftContentView);
 
-	[leftContentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[scrollView]|"                           options:0 metrics:nil views:leftViews]];
-	[leftContentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[add(==21)]-(-1)-[remove(==21)]-(>=0)-|" options:NSLayoutFormatAlignAllTop|NSLayoutFormatAlignAllBottom metrics:nil views:leftViews]];
-	[leftContentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-[scrollView]-[add(==21)]-|"              options:0 metrics:nil views:leftViews]];
+	[leftContentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[scrollView]-(6)-|"                       options:0 metrics:nil views:leftViews]];
+	[leftContentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[add(==21)]-(-1)-[remove(==21)]-(>=20)-|" options:NSLayoutFormatAlignAllTop|NSLayoutFormatAlignAllBottom metrics:nil views:leftViews]];
+	[leftContentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-[scrollView]-[add(==21)]-|"               options:0 metrics:nil views:leftViews]];
 
 	[outlineView   bind:NSContentBinding             toObject:_treeController withKeyPath:@"arrangedObjects" options:nil];
 	[outlineView   bind:NSSelectionIndexPathsBinding toObject:_treeController withKeyPath:NSSelectionIndexPathsBinding options:nil];
@@ -356,7 +356,7 @@ static NSIndexPath* IndexPathForGenieItemWithIdentifier (NSString* identifier, N
 	_containerView  = [[NSView alloc] initWithFrame:NSZeroRect];
 	_advancedButton = [NSButton buttonWithTitle:@"Advanced…" target:nil action:@selector(showAdvancedSettings:)];
 
-	NSDictionary* rightViews = @{
+	NSDictionary* boxedViews = @{
 		@"actionLabel":     actionLabel,
 		@"action":          popUpButton,
 		@"leftSeparator":   leftSeparator,
@@ -365,23 +365,32 @@ static NSIndexPath* IndexPathForGenieItemWithIdentifier (NSString* identifier, N
 		@"advanced":        _advancedButton,
 	};
 
+	NSBox* boxView = [[NSBox alloc] initWithFrame:NSZeroRect];
+	boxView.titlePosition = NSNoTitle;
+	GenieAddAutoLayoutViewsToSuperview(boxedViews, boxView);
+
+	[boxView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[leftSeparator(>=10)]-[actionLabel]"               options:NSLayoutFormatAlignAllCenterY metrics:nil views:boxedViews]];
+	[boxView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[actionLabel]-[action]"                              options:NSLayoutFormatAlignAllBaseline metrics:nil views:boxedViews]];
+	[boxView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[action]-[rightSeparator(==leftSeparator)]-|"        options:0 metrics:nil views:boxedViews]];
+	[boxView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[container]|"                                       options:0 metrics:nil views:boxedViews]];
+	[boxView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(>=20)-[advanced]-|"                               options:0 metrics:nil views:boxedViews]];
+	[boxView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-[action]-[container][advanced]-|"                  options:0 metrics:nil views:boxedViews]];
+	[boxView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[leftSeparator(==rightSeparator,==1)]"               options:0 metrics:nil views:boxedViews]];
+
+	NSLayoutConstraint* separatorConstraint = [NSLayoutConstraint constraintWithItem:leftSeparator attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:rightSeparator attribute:NSLayoutAttributeTop multiplier:1 constant:0];
+	[boxView addConstraint:separatorConstraint];
+
+	[popUpButton bind:NSSelectedTagBinding toObject:_treeController withKeyPath:@"selection.kind" options:nil];
+	[self bind:@"countOfAdvancedKeys" toObject:_treeController withKeyPath:@"selection.countOfAdvancedKeys" options:nil];
+
+	NSDictionary* rightViews = @{
+		@"box":     boxView,
+	};
+
 	NSView* rightContentView = [[NSView alloc] initWithFrame:NSZeroRect];
 	GenieAddAutoLayoutViewsToSuperview(rightViews, rightContentView);
 
-	[rightContentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[leftSeparator(>=10)]-[actionLabel]"               options:NSLayoutFormatAlignAllCenterY metrics:nil views:rightViews]];
-	[rightContentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[actionLabel]-[action]"                              options:NSLayoutFormatAlignAllBaseline metrics:nil views:rightViews]];
-	[rightContentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[action]-[rightSeparator(==leftSeparator)]-|"        options:0 metrics:nil views:rightViews]];
-	[rightContentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[container]|"                                       options:0 metrics:nil views:rightViews]];
-	[rightContentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(>=20)-[advanced]-|"                               options:0 metrics:nil views:rightViews]];
-	[rightContentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-[action]-[container][advanced]-|"                  options:0 metrics:nil views:rightViews]];
-	[rightContentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[leftSeparator(==rightSeparator,==1)]"               options:0 metrics:nil views:rightViews]];
-
-	NSLayoutConstraint* separatorConstraint = [NSLayoutConstraint constraintWithItem:leftSeparator attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:rightSeparator attribute:NSLayoutAttributeTop multiplier:1 constant:0];
-	[rightContentView addConstraint:separatorConstraint];
-
-	[popUpButton bind:NSSelectedTagBinding toObject:_treeController withKeyPath:@"selection.kind" options:nil];
-
-	[self bind:@"countOfAdvancedKeys" toObject:_treeController withKeyPath:@"selection.countOfAdvancedKeys" options:nil];
+	[rightContentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(6)-[box]-|" options:0 metrics:nil views:rightViews]];
 
 	// ==============
 	// = Split View =
@@ -396,6 +405,10 @@ static NSIndexPath* IndexPathForGenieItemWithIdentifier (NSString* identifier, N
 	[splitView addSubview:leftContentView];
 	[splitView addSubview:rightContentView];
 	[splitView setHoldingPriority:NSLayoutPriorityDefaultLow+1 forSubviewAtIndex:0];
+
+	NSLayoutConstraint* boxTopConstraint    = [NSLayoutConstraint constraintWithItem:boxView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:scrollView attribute:NSLayoutAttributeTop multiplier:1 constant:0];
+	NSLayoutConstraint* boxBottomConstraint = [NSLayoutConstraint constraintWithItem:boxView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:scrollView attribute:NSLayoutAttributeBottom multiplier:1 constant:0];
+	[splitView addConstraints:@[ boxTopConstraint, boxBottomConstraint ]];
 
 	_splitView = splitView;
 
