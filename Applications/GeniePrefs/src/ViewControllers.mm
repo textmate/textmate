@@ -5,7 +5,6 @@
 #import <GenieManager/GenieItem.h>
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/OakStringListTransformer.h>
-#import <MenuBuilder/MenuBuilder.h>
 
 @interface TreeViewController ()
 {
@@ -253,78 +252,6 @@
 	};
 
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[match]-[nextView]" options:NSLayoutFormatAlignAllLeading metrics:nil views:views]];
-}
-@end
-
-@interface Properties ()
-@property (nonatomic) NSUInteger countOfAdvancedKeys;
-@end
-
-@implementation Properties
-- (void)makeView:(NSView*)contentView
-{
-	MBMenu const items = {
-		{ @"Group Item",            .tag = kGenieItemKindGroup,                       },
-		{ @"Action",                @selector(nop:)                                   },
-		{ @"Go to Web Address",     .tag = kGenieItemKindWebAddress,      .indent = 1 },
-		{ @"Run Script",            .tag = kGenieItemKindRunScript,       .indent = 1 },
-		{ @"Open File",             .tag = kGenieItemKindOpenFile,        .indent = 1 },
-		{ @"Data Source",           @selector(nop:)                                   },
-		{ @"Spotlight Search",      .tag = kGenieItemKindSpotlight,       .indent = 1 },
-		{ @"Sqlite Search",         .tag = kGenieItemKindSqlite,          .indent = 1 },
-		{ @"Items from Script",     .tag = kGenieItemKindCommandResult,   .indent = 1 },
-		{ @"Recent Documents",      .tag = kGenieItemKindRecentDocuments, .indent = 1 },
-		{ @"Child Actions",         @selector(nop:)                                   },
-		{ @"Predicate Group",       .tag = kGenieItemKindPredicateGroup,  .indent = 1 },
-	};
-
-	NSTextField* actionLabel   = [NSTextField labelWithString:@"Item Type:"];
-	NSPopUpButton* popUpButton = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO];
-	popUpButton.menu = MBCreateMenu(items);
-
-	NSBox* leftSeparator  = [[NSBox alloc] initWithFrame:NSZeroRect];
-	NSBox* rightSeparator = [[NSBox alloc] initWithFrame:NSZeroRect];
-
-	for(NSBox* separator in @[ leftSeparator, rightSeparator ])
-	{
-		separator.boxType = NSBoxSeparator;
-		[separator setContentHuggingPriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
-	}
-
-	_containerView  = [[NSView alloc] initWithFrame:NSZeroRect];
-	_advancedButton = [NSButton buttonWithTitle:@"Advanced…" target:nil action:@selector(showAdvancedSettings:)];
-
-	NSDictionary* views = @{
-		@"actionLabel":     actionLabel,
-		@"action":          popUpButton,
-		@"leftSeparator":   leftSeparator,
-		@"rightSeparator":  rightSeparator,
-		@"container":       _containerView,
-		@"advanced":        _advancedButton,
-	};
-
-	GenieAddAutoLayoutViewsToSuperview(views, contentView);
-
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[leftSeparator(>=10)]-[actionLabel]"               options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[actionLabel]-[action]"                              options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[action]-[rightSeparator(==leftSeparator)]-|"        options:0 metrics:nil views:views]];
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[container]|"                                       options:0 metrics:nil views:views]];
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(>=20)-[advanced]-|"                               options:0 metrics:nil views:views]];
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-[action]-[container][advanced]-|"                  options:0 metrics:nil views:views]];
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[leftSeparator(==rightSeparator,==1)]"               options:0 metrics:nil views:views]];
-
-	NSLayoutConstraint* separatorConstraint = [NSLayoutConstraint constraintWithItem:leftSeparator attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:rightSeparator attribute:NSLayoutAttributeTop multiplier:1 constant:0];
-	[contentView addConstraint:separatorConstraint];
-
-	[popUpButton bind:NSSelectedTagBinding toObject:self.treeController withKeyPath:@"selection.kind" options:nil];
-
-	[self bind:@"countOfAdvancedKeys" toObject:self.treeController withKeyPath:@"selection.countOfAdvancedKeys" options:nil];
-}
-
-- (void)setCountOfAdvancedKeys:(NSUInteger)newCountOfAdvancedKeys
-{
-	_countOfAdvancedKeys = newCountOfAdvancedKeys;
-	_advancedButton.title = newCountOfAdvancedKeys ? [NSString stringWithFormat:@"Advanced (%lu)…", _countOfAdvancedKeys] : @"Advanced…";
 }
 @end
 

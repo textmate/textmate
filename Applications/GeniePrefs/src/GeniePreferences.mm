@@ -5,6 +5,7 @@
 #import "DryRunController.h"
 #import <GenieManager/GenieManager.h>
 #import <GenieManager/GenieItem.h>
+#import <MenuBuilder/MenuBuilder.h>
 #import <ServiceManagement/ServiceManagement.h>
 #import <oak/debug.h>
 
@@ -178,11 +179,10 @@ static NSString* kDisableLaunchAtLoginSettingsKey   = @"disableLaunchAtLogin";
 	// = View Controllers =
 	// ====================
 
-	Properties* _properties;
-
 	NSDictionary<NSString*, NSViewController*>* _viewControllers;
 	NSSplitView* _splitView;
 	NSView* _containerView;
+	NSButton* _advancedButton;
 
 	NSString* _dragType;
 	NSArray* _draggedNodes;
@@ -191,6 +191,7 @@ static NSString* kDisableLaunchAtLoginSettingsKey   = @"disableLaunchAtLogin";
 @property (nonatomic) NSOutlineView* outlineView;
 @property (nonatomic) NSButton* addButton;
 @property (nonatomic) NSButton* removeButton;
+@property (nonatomic) NSUInteger countOfAdvancedKeys;
 @property (nonatomic) NSResponder* initialFirstResponder;
 @end
 
@@ -238,9 +239,6 @@ static NSIndexPath* IndexPathForGenieItemWithIdentifier (NSString* identifier, N
 			[NSString stringWithFormat:@"%lu", kGenieItemKindPredicateGroup]:      [[PredicateGroupProperties alloc] initWithTreeController:_treeController],
 		};
 
-		_properties = [[Properties alloc] initWithTreeController:_treeController];
-		[self addChildViewController:_properties];
-
 		[self bind:@"selectedItemKind" toObject:_treeController withKeyPath:@"selection.kind" options:nil];
 
 		if(NSString* selectedItemIdentifier = [[NSUserDefaults standardUserDefaults] stringForKey:@"selectedItemIdentifier"])
@@ -252,9 +250,22 @@ static NSIndexPath* IndexPathForGenieItemWithIdentifier (NSString* identifier, N
 	return self;
 }
 
+- (void)setCountOfAdvancedKeys:(NSUInteger)newCountOfAdvancedKeys
+{
+	_countOfAdvancedKeys = newCountOfAdvancedKeys;
+	_advancedButton.title = newCountOfAdvancedKeys ? [NSString stringWithFormat:@"Advanced (%lu)…", _countOfAdvancedKeys] : @"Advanced…";
+}
+
 - (void)loadView
 {
+	_dragType = [NSUUID UUID].UUIDString;
+
+	// ======================
+	// = Left of Split View =
+	// ======================
+
 	NSOutlineView* outlineView = [[NSOutlineView alloc] initWithFrame:NSZeroRect];
+	[outlineView registerForDraggedTypes:@[ _dragType ]];
 	_outlineView = outlineView;
 
 	NSTableColumn* spaceColumn = [[NSTableColumn alloc] initWithIdentifier:@"space"];
@@ -281,9 +292,6 @@ static NSIndexPath* IndexPathForGenieItemWithIdentifier (NSString* identifier, N
 	outlineView.autoresizesOutlineColumn = NO;
 	outlineView.dataSource = self;
 
-	_dragType = [NSUUID UUID].UUIDString;
-	[outlineView registerForDraggedTypes:@[ _dragType ]];
-
 	NSScrollView* scrollView = [[NSScrollView alloc] initWithFrame:NSZeroRect];
 	scrollView.hasVerticalScroller = YES;
 	scrollView.autohidesScrollers  = YES;
@@ -295,20 +303,18 @@ static NSIndexPath* IndexPathForGenieItemWithIdentifier (NSString* identifier, N
 	for(NSButton* button in @[ _addButton, _removeButton ])
 		button.bezelStyle = NSSmallSquareBezelStyle;
 
-	NSDictionary* views = @{
+	NSDictionary* leftViews = @{
 		@"scrollView":   scrollView,
 		@"add":          _addButton,
 		@"remove":       _removeButton,
 	};
 
-	NSView* contentView = [[NSView alloc] initWithFrame:NSZeroRect];
+	NSView* leftContentView = [[NSView alloc] initWithFrame:NSZeroRect];
+	GenieAddAutoLayoutViewsToSuperview(leftViews, leftContentView);
 
-	GenieAddAutoLayoutViewsToSuperview(views, contentView);
-	GenieSetupKeyViewLoop(@[ contentView, outlineView, _addButton, _removeButton ]);
-
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[scrollView]|"                           options:0 metrics:nil views:views]];
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[add(==21)]-(-1)-[remove(==21)]-(>=0)-|" options:NSLayoutFormatAlignAllTop|NSLayoutFormatAlignAllBottom metrics:nil views:views]];
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-[scrollView]-[add(==21)]-|"              options:0 metrics:nil views:views]];
+	[leftContentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[scrollView]|"                           options:0 metrics:nil views:leftViews]];
+	[leftContentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[add(==21)]-(-1)-[remove(==21)]-(>=0)-|" options:NSLayoutFormatAlignAllTop|NSLayoutFormatAlignAllBottom metrics:nil views:leftViews]];
+	[leftContentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-[scrollView]-[add(==21)]-|"              options:0 metrics:nil views:leftViews]];
 
 	[outlineView   bind:NSContentBinding             toObject:_treeController withKeyPath:@"arrangedObjects" options:nil];
 	[outlineView   bind:NSSelectionIndexPathsBinding toObject:_treeController withKeyPath:NSSelectionIndexPathsBinding options:nil];
@@ -316,25 +322,92 @@ static NSIndexPath* IndexPathForGenieItemWithIdentifier (NSString* identifier, N
 	[tableColumn   bind:NSValueBinding               toObject:_treeController withKeyPath:@"arrangedObjects.displayName" options:nil];
 	[tableColumn   bind:NSEditableBinding            toObject:_treeController withKeyPath:@"arrangedObjects.canEditDisplayName" options:nil];
 
-	[_addButton     bind:NSEnabledBinding toObject:_treeController withKeyPath:@"canInsert" options:nil];
-	[_removeButton  bind:NSEnabledBinding toObject:_treeController withKeyPath:@"canRemove" options:nil];
+	[_addButton    bind:NSEnabledBinding toObject:_treeController withKeyPath:@"canInsert" options:nil];
+	[_removeButton bind:NSEnabledBinding toObject:_treeController withKeyPath:@"canRemove" options:nil];
+
+	_addButton.target    = self;
+	_addButton.action    = @selector(insertCatalogItem:);
+
+	_removeButton.target = self;
+	_removeButton.action = @selector(removeCatalogItem:);
+
+	// =======================
+	// = Right of Split View =
+	// =======================
+
+	MBMenu const items = {
+		{ @"Group Item",            .tag = kGenieItemKindGroup,                       },
+		{ @"Action",                @selector(nop:)                                   },
+		{ @"Go to Web Address",     .tag = kGenieItemKindWebAddress,      .indent = 1 },
+		{ @"Run Script",            .tag = kGenieItemKindRunScript,       .indent = 1 },
+		{ @"Open File",             .tag = kGenieItemKindOpenFile,        .indent = 1 },
+		{ @"Data Source",           @selector(nop:)                                   },
+		{ @"Spotlight Search",      .tag = kGenieItemKindSpotlight,       .indent = 1 },
+		{ @"Sqlite Search",         .tag = kGenieItemKindSqlite,          .indent = 1 },
+		{ @"Items from Script",     .tag = kGenieItemKindCommandResult,   .indent = 1 },
+		{ @"Recent Documents",      .tag = kGenieItemKindRecentDocuments, .indent = 1 },
+		{ @"Child Actions",         @selector(nop:)                                   },
+		{ @"Predicate Group",       .tag = kGenieItemKindPredicateGroup,  .indent = 1 },
+	};
+
+	NSTextField* actionLabel   = [NSTextField labelWithString:@"Item Type:"];
+	NSPopUpButton* popUpButton = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO];
+	popUpButton.menu = MBCreateMenu(items);
+
+	NSBox* leftSeparator  = [[NSBox alloc] initWithFrame:NSZeroRect];
+	NSBox* rightSeparator = [[NSBox alloc] initWithFrame:NSZeroRect];
+
+	for(NSBox* separator in @[ leftSeparator, rightSeparator ])
+	{
+		separator.boxType = NSBoxSeparator;
+		[separator setContentHuggingPriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
+	}
+
+	_containerView  = [[NSView alloc] initWithFrame:NSZeroRect];
+	_advancedButton = [NSButton buttonWithTitle:@"Advanced…" target:nil action:@selector(showAdvancedSettings:)];
+
+	NSDictionary* rightViews = @{
+		@"actionLabel":     actionLabel,
+		@"action":          popUpButton,
+		@"leftSeparator":   leftSeparator,
+		@"rightSeparator":  rightSeparator,
+		@"container":       _containerView,
+		@"advanced":        _advancedButton,
+	};
+
+	NSView* rightContentView = [[NSView alloc] initWithFrame:NSZeroRect];
+	GenieAddAutoLayoutViewsToSuperview(rightViews, rightContentView);
+
+	[rightContentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[leftSeparator(>=10)]-[actionLabel]"               options:NSLayoutFormatAlignAllCenterY metrics:nil views:rightViews]];
+	[rightContentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[actionLabel]-[action]"                              options:NSLayoutFormatAlignAllBaseline metrics:nil views:rightViews]];
+	[rightContentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[action]-[rightSeparator(==leftSeparator)]-|"        options:0 metrics:nil views:rightViews]];
+	[rightContentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[container]|"                                       options:0 metrics:nil views:rightViews]];
+	[rightContentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(>=20)-[advanced]-|"                               options:0 metrics:nil views:rightViews]];
+	[rightContentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-[action]-[container][advanced]-|"                  options:0 metrics:nil views:rightViews]];
+	[rightContentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[leftSeparator(==rightSeparator,==1)]"               options:0 metrics:nil views:rightViews]];
+
+	NSLayoutConstraint* separatorConstraint = [NSLayoutConstraint constraintWithItem:leftSeparator attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:rightSeparator attribute:NSLayoutAttributeTop multiplier:1 constant:0];
+	[rightContentView addConstraint:separatorConstraint];
+
+	[popUpButton bind:NSSelectedTagBinding toObject:_treeController withKeyPath:@"selection.kind" options:nil];
+
+	[self bind:@"countOfAdvancedKeys" toObject:_treeController withKeyPath:@"selection.countOfAdvancedKeys" options:nil];
+
+	// ==============
+	// = Split View =
+	// ==============
+
+	GenieSetupKeyViewLoop(@[ leftContentView, outlineView, _addButton, _removeButton, popUpButton, _containerView, _advancedButton ]);
 
 	NSSplitView* splitView = [[NSSplitView alloc] initWithFrame:NSZeroRect];
 	splitView.autoresizingMask = NSViewWidthSizable|NSViewHeightSizable;
 	splitView.vertical = YES;
 
-	[splitView addSubview:contentView];
-	[splitView addSubview:_properties.view];
+	[splitView addSubview:leftContentView];
+	[splitView addSubview:rightContentView];
 	[splitView setHoldingPriority:NSLayoutPriorityDefaultLow+1 forSubviewAtIndex:0];
 
 	_splitView = splitView;
-
-	_containerView = _properties.containerView;
-
-	_addButton.target    = self;
-	_addButton.action    = @selector(insertCatalogItem:);
-	_removeButton.target = self;
-	_removeButton.action = @selector(removeCatalogItem:);
 
 	self.initialFirstResponder = _outlineView;
 	self.view = _splitView;

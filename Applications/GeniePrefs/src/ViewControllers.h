@@ -6,11 +6,6 @@
 @property (nonatomic) NSButton* changeImageButton;
 @end
 
-@interface Properties : TreeViewController
-@property (nonatomic) NSView* containerView;
-@property (nonatomic) NSButton* advancedButton;
-@end
-
 @interface URLProperties : BasicProperties
 @end
 
