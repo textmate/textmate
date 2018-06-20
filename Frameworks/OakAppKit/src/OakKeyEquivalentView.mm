@@ -31,6 +31,11 @@ static NSString* const kRecordingPlaceholderString = @"…";
 	return NSMakeSize(NSViewNoInstrinsicMetric, 22);
 }
 
+- (CGFloat)baselineOffsetFromBottom
+{
+	return 5;
+}
+
 - (void)setEventString:(NSString*)aString
 {
 	if(_eventString == aString || [_eventString isEqualToString:aString])
