@@ -7,13 +7,21 @@
 #import <OakFoundation/OakStringListTransformer.h>
 #import <MenuBuilder/MenuBuilder.h>
 
-@interface GeneralViewController ()
+@interface TreeViewController ()
 {
 	BOOL _didLoadView;
 }
+@property (nonatomic) NSTreeController* treeController;
 @end
 
-@implementation GeneralViewController
+@implementation TreeViewController
+- (instancetype)initWithTreeController:(NSTreeController*)aTreeController
+{
+	if(self = [super init])
+		_treeController = aTreeController;
+	return self;
+}
+
 - (void)loadView
 {
 	if(!_didLoadView)
@@ -28,20 +36,7 @@
 }
 @end
 
-@interface TreeViewController ()
-@property (nonatomic) NSTreeController* treeController;
-@end
-
-@implementation TreeViewController
-- (instancetype)initWithTreeController:(NSTreeController*)aTreeController
-{
-	if(self = [super init])
-		_treeController = aTreeController;
-	return self;
-}
-@end
-
-@interface ChangeIconViewController : GeneralViewController
+@interface ChangeIconViewController : NSViewController
 {
 	NSPopUpButton* _popUpButton;
 	NSTextField* _textField;
@@ -74,7 +69,7 @@
 	}
 }
 
-- (void)makeView:(NSView*)contentView
+- (void)loadView
 {
 	NSArray* popUpItems = @[
 		@{ @"title": @"Image Path",     @"placeholder": @"Image file path",           @"property": @"image"       },
@@ -116,6 +111,8 @@
 	[acceptButton setKeyEquivalent:@"\r"];
 	[cancelButton setKeyEquivalent:@"\e"];
 
+	NSView* contentView = [[NSView alloc] initWithFrame:NSZeroRect];
+
 	NSDictionary* views = @{
 		@"popUp":         popUpButton,
 		@"textField":     textField,
@@ -129,6 +126,8 @@
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[popUp]-[textField(>=200)]-|"    options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(>=8)-[cancel]-[ok(==cancel)]-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
 	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-[textField]-(20)-[ok]-|"         options:0 metrics:nil views:views]];
+
+	self.view = contentView;
 }
 
 - (void)viewWillAppear

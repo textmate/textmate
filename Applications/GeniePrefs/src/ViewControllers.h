@@ -1,7 +1,4 @@
-@interface GeneralViewController : NSViewController
-@end
-
-@interface TreeViewController : GeneralViewController
+@interface TreeViewController : NSViewController
 - (instancetype)initWithTreeController:(NSTreeController*)aTreeController;
 @end
 
