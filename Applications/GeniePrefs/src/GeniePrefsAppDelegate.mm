@@ -296,7 +296,7 @@
 
 - (void)selectViewAtRelativeOffset:(NSInteger)offset
 {
-	NSArray* allIdentifiers = [self toolbarSelectableItemIdentifiers:self.toolbar];
+	NSArray* allIdentifiers = [[_toolbar.items filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"itemIdentifier IN %@", [_toolbar.delegate toolbarSelectableItemIdentifiers:_toolbar]]] valueForKeyPath:@"itemIdentifier"];
 	NSUInteger index = [allIdentifiers indexOfObject:self.selectedViewIdentifier];
 	if(index != NSNotFound)
 		self.selectedViewIdentifier = allIdentifiers[(index + allIdentifiers.count + offset) % allIdentifiers.count];
