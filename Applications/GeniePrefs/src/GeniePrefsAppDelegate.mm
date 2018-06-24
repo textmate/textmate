@@ -246,7 +246,8 @@
 		_window.delegate = self;
 
 		BOOL showChanges = [[NSUserDefaults standardUserDefaults] boolForKey:@"showChanges"];
-		self.selectedViewIdentifier = showChanges ? @"Changes" : @"Catalog";
+		NSString* lastViewIdentifier = [[NSUserDefaults standardUserDefaults] stringForKey:@"selectedPreferencesPane"];
+		self.selectedViewIdentifier = showChanges ? @"Changes" : (lastViewIdentifier ?: @"Catalog");
 
 		[_window layoutIfNeeded];
 		[_window center];
@@ -275,6 +276,8 @@
 	_toolbar.selectedItemIdentifier = _selectedViewIdentifier;
 	if(_selectedViewController = _viewControllers[_selectedViewIdentifier])
 	{
+		[[NSUserDefaults standardUserDefaults] setObject:_selectedViewIdentifier forKey:@"selectedPreferencesPane"];
+
 		_window.contentView = _selectedViewController.view;
 		// [_window recalculateKeyViewLoop];
 
