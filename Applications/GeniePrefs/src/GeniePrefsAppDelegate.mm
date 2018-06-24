@@ -338,7 +338,7 @@
 
 - (NSArray*)toolbarDefaultItemIdentifiers:(NSToolbar*)aToolbar
 {
-	return _viewControllers.allKeys;
+	return @[ @"General", @"Catalog", NSToolbarFlexibleSpaceItemIdentifier, @"Changes" ];
 }
 
 - (NSArray*)toolbarSelectableItemIdentifiers:(NSToolbar*)aToolbar
