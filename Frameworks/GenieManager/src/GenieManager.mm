@@ -11,7 +11,7 @@
 #import "GenieTask.h"
 #import "hash.h"
 
-static NSString* const kGenieIdentifier                 = @"com.macromates.Genie";
+static NSString* const kGenieBundleIdentifier           = @"com.macromates.Genie";
 static NSString* const kVariablesSettingsKey            = @"variables";
 static NSString* const kGenieItemsDidChangeNotification = @"GenieItemsDidChangeNotification";
 
@@ -61,9 +61,9 @@ static NSString* const kGenieItemsDidChangeNotification = @"GenieItemsDidChangeN
 + (NSUserDefaults*)userDefaults
 {
 	NSString* bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
-	if([bundleIdentifier isEqualToString:kGenieIdentifier])
+	if([bundleIdentifier isEqualToString:kGenieBundleIdentifier])
 		return [NSUserDefaults standardUserDefaults];
-	return [[NSUserDefaults alloc] initWithSuiteName:kGenieIdentifier];
+	return [[NSUserDefaults alloc] initWithSuiteName:kGenieBundleIdentifier];
 }
 
 - (void)runInNextEventLoopIteration:(void(^)())callback
@@ -106,10 +106,10 @@ static NSString* const kGenieItemsDidChangeNotification = @"GenieItemsDidChangeN
 - (NSBundle*)mainBundle
 {
 	NSString* bundleIdentifier = NSBundle.mainBundle.bundleIdentifier;
-	if([bundleIdentifier isEqualToString:kGenieIdentifier])
+	if([bundleIdentifier isEqualToString:kGenieBundleIdentifier])
 		return NSBundle.mainBundle;
 
-	NSURL* url = [NSWorkspace.sharedWorkspace URLForApplicationWithBundleIdentifier:kGenieIdentifier];
+	NSURL* url = [NSWorkspace.sharedWorkspace URLForApplicationWithBundleIdentifier:kGenieBundleIdentifier];
 	return url ? [NSBundle bundleWithURL:url] : nil;
 }
 
@@ -127,7 +127,7 @@ static NSString* const kGenieItemsDidChangeNotification = @"GenieItemsDidChangeN
 		[self reloadItems:self];
 
 		NSString* bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
-		if([bundleIdentifier isEqualToString:kGenieIdentifier])
+		if([bundleIdentifier isEqualToString:kGenieBundleIdentifier])
 			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
 
 		[[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:@"com.macromates.GeniePrefs"];
