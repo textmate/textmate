@@ -1095,7 +1095,11 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 
 	if(!res)
 	{
-		if(NSString* file = self.file)
+		NSString* pathFromURL;
+		if(NSString* urlString = self.url)
+			pathFromURL = [NSURL URLWithString:urlString].filePathURL.path;
+
+		if(NSString* file = self.file ?: pathFromURL)
 		{
 			res = [[NSWorkspace sharedWorkspace] iconForFile:file];
 		}
