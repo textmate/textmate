@@ -229,15 +229,17 @@
 		_toolbar.delegate                = self;
 
 		_viewControllers = @{
-			@"Catalog": [[CatalogViewController alloc] init],
-			@"General": [[GeneralSettingsViewController alloc] init],
-			@"Changes": [[ChangesViewController alloc] init],
+			@"Catalog":   [[CatalogViewController alloc] init],
+			@"General":   [[GeneralSettingsViewController alloc] init],
+			@"Variables": [[VariablesViewController alloc] init],
+			@"Changes":   [[ChangesViewController alloc] init],
 		};
 
 		_images = @{
-			@"General": [NSImage imageNamed:NSImageNamePreferencesGeneral],
-			@"Catalog": [NSImage imageNamed:NSImageNameFolderSmart],
-			@"Changes": [NSImage imageNamed:NSImageNameInfo],
+			@"General":   [NSImage imageNamed:NSImageNamePreferencesGeneral],
+			@"Catalog":   [NSImage imageNamed:NSImageNameFolderSmart],
+			@"Variables": [NSImage imageNamed:@"Variables"],
+			@"Changes":   [NSImage imageNamed:NSImageNameInfo],
 		};
 
 		_window.title = @"Preferences";
@@ -338,7 +340,7 @@
 
 - (NSArray*)toolbarDefaultItemIdentifiers:(NSToolbar*)aToolbar
 {
-	return @[ @"General", @"Catalog", NSToolbarFlexibleSpaceItemIdentifier, @"Changes" ];
+	return @[ @"General", @"Catalog", @"Variables", NSToolbarFlexibleSpaceItemIdentifier, @"Changes" ];
 }
 
 - (NSArray*)toolbarSelectableItemIdentifiers:(NSToolbar*)aToolbar

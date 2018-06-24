@@ -7,15 +7,26 @@
 #import <GenieManager/GenieItem.h>
 #import <GenieManager/GenieUserDefaults.h>
 #import <MenuBuilder/MenuBuilder.h>
+#import <OakAppKit/OakKeyEquivalentView.h>
 #import <ServiceManagement/ServiceManagement.h>
 #import <oak/debug.h>
+
+static NSSet* const kExistingDefaultsKeys = [NSSet setWithArray:@[
+	kDisableLaunchAtLoginSettingsKey,
+	kActivationKeyEventSettingsKey,
+	kEnableClipboardHistorySettingsKey,
+	kClipboardHistoryIgnoreAppsSettingsKey,
+	kClipboardHistoryExpireAfterSettingsKey,
+	kDisableSoftwareUpdateSettingsKey,
+	kSoftwareUpdatePrereleasesEnabled,
+]];
 
 @interface GenieUserDefaultsProxy : NSObject
 {
 	NSUserDefaults* _genieUserDefaults;
+	NSMutableDictionary* _cachedUserDefaults;
 }
-@property (nonatomic) BOOL enableClipboardHistory;
-@property (nonatomic) BOOL disableLaunchAtLogin;
+@property (nonatomic) BOOL softwareUpdatePrereleasesEnabled;
 @end
 
 @implementation GenieUserDefaultsProxy
@@ -23,67 +34,403 @@
 {
 	if(self = [super init])
 	{
-		_genieUserDefaults      = GenieManager.userDefaults;
-		_enableClipboardHistory = [_genieUserDefaults boolForKey:kEnableClipboardHistorySettingsKey];
-		_disableLaunchAtLogin   = [_genieUserDefaults boolForKey:kDisableLaunchAtLoginSettingsKey];
-
+		_genieUserDefaults  = GenieManager.userDefaults;
+		_cachedUserDefaults = [NSMutableDictionary dictionary];
 		[[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:@"com.macromates.Genie"];
 	}
 	return self;
 }
 
+- (id)valueForKey:(NSString*)aKey
+{
+	if(![kExistingDefaultsKeys containsObject:aKey])
+		return [super valueForKey:aKey];
+
+	id res = _cachedUserDefaults[aKey];
+	if(!res)
+	{
+		if(res = [_genieUserDefaults objectForKey:aKey])
+			_cachedUserDefaults[aKey] = res;
+	}
+	return res;
+}
+
+- (void)setValue:(id)someValue forKey:(NSString*)aKey
+{
+	if(![kExistingDefaultsKeys containsObject:aKey])
+		return [super setValue:someValue forKey:aKey];
+
+	id oldValue = _cachedUserDefaults[aKey];
+	if([someValue isEqual:oldValue])
+		return;
+
+	[self willChangeValueForKey:aKey];
+	_cachedUserDefaults[aKey] = someValue;
+	[self didChangeValueForKey:aKey];
+
+	[_genieUserDefaults setObject:someValue forKey:aKey];
+	[_genieUserDefaults synchronize];
+	[[NSDistributedNotificationCenter defaultCenter] postNotificationName:NSUserDefaultsDidChangeNotification object:@"com.macromates.GeniePrefs" userInfo:nil deliverImmediately:YES];
+}
+
 - (void)userDefaultsDidChange:(NSNotification*)aNotification
 {
-	[self willChangeValueForKey:@"enableClipboardHistory"];
-	_enableClipboardHistory = [_genieUserDefaults boolForKey:kEnableClipboardHistorySettingsKey];
-	[self didChangeValueForKey:@"enableClipboardHistory"];
-
-	[self willChangeValueForKey:@"disableLaunchAtLogin"];
-	_disableLaunchAtLogin = [_genieUserDefaults boolForKey:kDisableLaunchAtLoginSettingsKey];
-	[self didChangeValueForKey:@"disableLaunchAtLogin"];
-}
-
-- (void)setEnableClipboardHistory:(BOOL)flag
-{
-	if(_enableClipboardHistory == flag)
-		return;
-	[_genieUserDefaults setBool:(_enableClipboardHistory = flag) forKey:kEnableClipboardHistorySettingsKey];
-	[_genieUserDefaults synchronize];
-	[[NSDistributedNotificationCenter defaultCenter] postNotificationName:NSUserDefaultsDidChangeNotification object:@"com.macromates.GeniePrefs" userInfo:nil deliverImmediately:YES];
-}
-
-- (void)setDisableLaunchAtLogin:(BOOL)flag
-{
-	if(_disableLaunchAtLogin == flag)
-		return;
-	[_genieUserDefaults setBool:(_disableLaunchAtLogin = flag) forKey:kDisableLaunchAtLoginSettingsKey];
-	[_genieUserDefaults synchronize];
-	[[NSDistributedNotificationCenter defaultCenter] postNotificationName:NSUserDefaultsDidChangeNotification object:@"com.macromates.GeniePrefs" userInfo:nil deliverImmediately:YES];
+	for(NSString* key in kExistingDefaultsKeys)
+		[self setValue:[_genieUserDefaults objectForKey:key] forKey:key];
 }
 @end
 
-@interface GeneralSettingsViewController ()
-{
-	GenieUserDefaultsProxy* _genieSettings;
-	NSObjectController* _genieSettingsController;
-
-	GenieTableViewController* _variablesTable;
-
-	NSButton* _launchAtLoginButton;
-	NSButton* _enableClipboardHistoryButton;
-}
-@property (nonatomic) NSResponder* initialFirstResponder;
+@interface GeneralSettingsViewController () <NSMenuDelegate>
+@property (nonatomic) GenieUserDefaultsProxy* userDefaultsProxy;
+@property (nonatomic) NSButton* clearClipboardHistoryButton;
+@property (nonatomic, getter = isSoftwareUpdatePrereleasesEnabled) BOOL softwareUpdatePrereleasesEnabled;
+@property (nonatomic) NSArrayController* timeIntervalArrayController;
+@property (nonatomic) NSPopUpButton* ignoredApplicationsPopUpButton;
 @end
 
 @implementation GeneralSettingsViewController
++ (NSSet*)keyPathsForValuesAffectingSoftwareUpdatePrereleasesEnabled { return [NSSet setWithArray:@[ [@"userDefaultsProxy." stringByAppendingString:kDisableSoftwareUpdateSettingsKey] ]]; }
+- (BOOL)isSoftwareUpdatePrereleasesEnabled                           { return ![[_userDefaultsProxy valueForKey:kDisableSoftwareUpdateSettingsKey] boolValue] && [[_userDefaultsProxy valueForKey:kSoftwareUpdatePrereleasesEnabled] boolValue]; }
+- (void)setSoftwareUpdatePrereleasesEnabled:(BOOL)flag               { [_userDefaultsProxy setValue:@(flag) forKey:kSoftwareUpdatePrereleasesEnabled]; }
+
 - (instancetype)init
 {
 	if(self = [super init])
 	{
 		self.title = @"General";
+		_userDefaultsProxy = [[GenieUserDefaultsProxy alloc] init];
+	}
+	return self;
+}
 
-		_genieSettings           = [[GenieUserDefaultsProxy alloc] init];
-		_genieSettingsController = [[NSObjectController alloc] initWithContent:_genieSettings];
+- (NSBox*)horizontalSeparator
+{
+	NSBox* separator = [[NSBox alloc] initWithFrame:NSMakeRect(0, 0, 200, 1)];
+	separator.boxType = NSBoxSeparator;
+	[separator setContentHuggingPriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
+	return separator;
+}
+
+- (NSTextField*)textFieldWithInformation:(NSString*)someText
+{
+	NSTextField* textField = [NSTextField wrappingLabelWithString:someText];
+	textField.textColor = NSColor.secondaryLabelColor;
+	textField.font = [NSFont systemFontOfSize:NSFont.smallSystemFontSize];
+	return textField;
+}
+
+- (void)loadView
+{
+	NSArray* timeIntervals = @[
+		@{ @"title": @"24 hours", @"duration": @"24 hours" },
+		@{ @"title": @"1 week",   @"duration": @"7 days"   },
+		@{ @"title": @"1 month",  @"duration": @"1 month"  },
+		@{ @"title": @"1 year",   @"duration": @"1 year"   },
+	];
+
+	NSString* expireAfter = [_userDefaultsProxy valueForKey:kClipboardHistoryExpireAfterSettingsKey];
+	if([timeIntervals filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"duration == %@", expireAfter]].count == 0)
+		timeIntervals = [timeIntervals arrayByAddingObject:@{ @"title": expireAfter, @"duration": expireAfter }];
+
+	_timeIntervalArrayController = [[NSArrayController alloc] init];
+	_timeIntervalArrayController.content = timeIntervals;
+
+	NSView* contentView = [[NSView alloc] initWithFrame:NSZeroRect];
+
+	NSButton* launchAtLoginEnabledCheckbox           = [NSButton checkboxWithTitle:@"Launch Genie when logging in" target:nil action:nil];
+	OakKeyEquivalentView* showGenieKeyEquivalentView = [[OakKeyEquivalentView alloc] initWithFrame:NSZeroRect];
+	NSTextField* shortcutExplanation                 = [self textFieldWithInformation:@"If you want to use ⌘Space to bring up Genie then you may need to disable “Show Spotlight search” under Shortcuts in Keyboard Preferences."];
+	NSButton* clipboardHistoryEnabledCheckbox        = [NSButton checkboxWithTitle:@"Enable clipboard history" target:nil action:nil];
+	NSTextField* clipboardExplanation                = [self textFieldWithInformation:@"This option requires that you allow Genie to control your computer in Security & Privacy settings."];
+	NSPopUpButton* expireClipboardPopUpButton        = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO];
+	NSButton* softwareUpdateEnabledCheckbox          = [NSButton checkboxWithTitle:@"Automatically check for updates" target:nil action:nil];
+	NSButton* softwareUpdatePrereleasesCheckbox      = [NSButton checkboxWithTitle:@"Include pre-releases" target:nil action:nil];
+
+	_clearClipboardHistoryButton = [NSButton buttonWithTitle:@"Clear History" target:nil action:@selector(clearClipboardHistory:)];
+
+	_ignoredApplicationsPopUpButton = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:YES];
+	[_ignoredApplicationsPopUpButton.menu addItem:[self ignoredAppsSummaryMenuItem]];
+	_ignoredApplicationsPopUpButton.menu.delegate = self;
+
+	NSGridView* gridView = [NSGridView gridViewWithViews:@[
+		@[ [NSTextField labelWithString:@"Startup:"],                  launchAtLoginEnabledCheckbox,            [NSButton buttonWithTitle:@"Quit Genie" target:nil action:@selector(terminateGenie:)] ],
+
+		@[ [self horizontalSeparator] ],
+
+		@[ [NSTextField labelWithString:@"Genie shortcut:"],           showGenieKeyEquivalentView ],
+		@[ NSGridCell.emptyContentView,                                shortcutExplanation ],
+
+		@[ [self horizontalSeparator] ],
+
+		@[ [NSTextField labelWithString:@"Clipboard history:"],        clipboardHistoryEnabledCheckbox,         _clearClipboardHistoryButton ],
+		@[ NSGridCell.emptyContentView,                                clipboardExplanation ],
+		@[ [NSTextField labelWithString:@"Ignore text copied from:"],  _ignoredApplicationsPopUpButton ],
+		@[ [NSTextField labelWithString:@"Keep history for:"],         expireClipboardPopUpButton ],
+
+		@[ [self horizontalSeparator] ],
+
+		@[ [NSTextField labelWithString:@"Software update:"],          softwareUpdateEnabledCheckbox,           [NSButton buttonWithTitle:@"Check Now" target:nil action:@selector(checkForSoftwareUpdate:)] ],
+		@[ NSGridCell.emptyContentView,                                softwareUpdatePrereleasesCheckbox ],
+	]];
+
+	gridView.rowAlignment = NSGridRowAlignmentLastBaseline;
+	[gridView columnAtIndex:0].xPlacement = NSGridCellPlacementTrailing;
+	[gridView columnAtIndex:2].leadingPadding = 20;
+	[gridView cellForView:showGenieKeyEquivalentView].customPlacementConstraints = [NSLayoutConstraint constraintsWithVisualFormat:@"H:[shortcut(<=140,==140@250)]" options:0 metrics:nil views:@{ @"shortcut": showGenieKeyEquivalentView }];
+	[gridView cellForView:clipboardExplanation].row.bottomPadding = 4;
+
+	for(NSUInteger rowIndex : { 1, 4, 9 })
+	{
+		[gridView rowAtIndex:rowIndex].height = 12;
+		[gridView rowAtIndex:rowIndex].yPlacement = NSGridCellPlacementCenter;
+		[gridView mergeCellsInHorizontalRange:NSMakeRange(0, 3) verticalRange:NSMakeRange(rowIndex, 1)];
+	}
+
+	for(NSView* view in @[ shortcutExplanation, clipboardExplanation])
+	{
+		NSGridCell* gridCell = [gridView cellForView:view];
+		gridCell.customPlacementConstraints = [NSLayoutConstraint constraintsWithVisualFormat:@"H:[text(<=400)]" options:0 metrics:nil views:@{ @"text": view }];
+		[gridView mergeCellsInHorizontalRange:NSMakeRange(1, 2) verticalRange:NSMakeRange([gridView indexOfRow:gridCell.row], 1)];
+	}
+
+	NSDictionary* views = @{
+		@"gridView": gridView,
+	};
+
+	GenieAddAutoLayoutViewsToSuperview(views, contentView);
+	GenieSetupKeyViewLoop(@[ contentView, gridView ]);
+
+	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(>=20)-[gridView]-(>=20)-|" options:0 metrics:nil views:views]];
+	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-[gridView]-(>=20)-|"        options:0 metrics:nil views:views]];
+	[contentView addConstraint:[NSLayoutConstraint constraintWithItem:gridView attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
+
+	[launchAtLoginEnabledCheckbox             bind:NSValueBinding           toObject:_userDefaultsProxy withKeyPath:kDisableLaunchAtLoginSettingsKey                   options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
+	[showGenieKeyEquivalentView               bind:NSValueBinding           toObject:_userDefaultsProxy withKeyPath:kActivationKeyEventSettingsKey                     options:nil];
+
+	[clipboardHistoryEnabledCheckbox          bind:NSValueBinding           toObject:_userDefaultsProxy           withKeyPath:kEnableClipboardHistorySettingsKey       options:nil];
+	[expireClipboardPopUpButton               bind:NSContentBinding         toObject:_timeIntervalArrayController withKeyPath:@"arrangedObjects"                       options:nil];
+	[expireClipboardPopUpButton               bind:NSContentObjectsBinding  toObject:_timeIntervalArrayController withKeyPath:@"arrangedObjects.duration"              options:nil];
+	[expireClipboardPopUpButton               bind:NSContentValuesBinding   toObject:_timeIntervalArrayController withKeyPath:@"arrangedObjects.title"                 options:nil];
+	[expireClipboardPopUpButton               bind:NSSelectedObjectBinding  toObject:_userDefaultsProxy           withKeyPath:kClipboardHistoryExpireAfterSettingsKey  options:nil];
+	[expireClipboardPopUpButton               bind:NSEnabledBinding         toObject:_userDefaultsProxy           withKeyPath:kEnableClipboardHistorySettingsKey       options:nil];
+	[_ignoredApplicationsPopUpButton          bind:NSEnabledBinding         toObject:_userDefaultsProxy           withKeyPath:kEnableClipboardHistorySettingsKey       options:nil];
+
+	[softwareUpdateEnabledCheckbox            bind:NSValueBinding           toObject:_userDefaultsProxy           withKeyPath:kDisableSoftwareUpdateSettingsKey        options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
+	[softwareUpdatePrereleasesCheckbox        bind:NSEnabledBinding         toObject:_userDefaultsProxy           withKeyPath:kDisableSoftwareUpdateSettingsKey        options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
+	[softwareUpdatePrereleasesCheckbox        bind:NSValueBinding           toObject:self                         withKeyPath:@"softwareUpdatePrereleasesEnabled"      options:nil];
+
+	self.view = contentView;
+}
+
+- (void)viewWillAppear
+{
+	_clearClipboardHistoryButton.enabled = [NSFileManager.defaultManager fileExistsAtPath:[GenieClipboardHistoryPath stringByExpandingTildeInPath]];
+}
+
+- (void)viewDidDisappear
+{
+	[self updateIgnoredAppsUsingBlock:^(NSArray<NSDictionary*>* ignoredApps){
+		return [ignoredApps filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"disabled != YES"]];
+	}];
+}
+
+- (void)terminateGenie:(id)sender
+{
+	BOOL didTerminate = YES;
+	for(NSRunningApplication* app in [NSRunningApplication runningApplicationsWithBundleIdentifier:@"com.macromates.Genie"])
+		didTerminate = [app terminate];
+
+	if(didTerminate)
+		[NSApp performSelector:@selector(terminate:) withObject:self afterDelay:0];
+}
+
+- (void)checkForSoftwareUpdate:(id)sender
+{
+	[[NSDistributedNotificationCenter defaultCenter] postNotificationName:@"com.macromates.perform-software-update-check" object:@"com.macromates.GeniePrefs" userInfo:nil deliverImmediately:YES];
+}
+
+// =====================
+// = Clipboard History =
+// =====================
+
+- (void)clearClipboardHistory:(id)sender
+{
+	NSString* path = [GenieClipboardHistoryPath stringByExpandingTildeInPath];
+
+	NSError* error;
+	if(![NSFileManager.defaultManager removeItemAtPath:path error:&error])
+	{
+		if(!([error.domain isEqualToString:NSPOSIXErrorDomain] && error.code == ENOENT))
+			[self.view.window presentError:error modalForWindow:self.view.window delegate:nil didPresentSelector:NULL contextInfo:nullptr];
+	}
+	_clearClipboardHistoryButton.enabled = [NSFileManager.defaultManager fileExistsAtPath:path];
+}
+
+- (NSMenuItem*)ignoredAppsSummaryMenuItem
+{
+	NSArray* ignoredApps = [_userDefaultsProxy valueForKey:kClipboardHistoryIgnoreAppsSettingsKey];
+	ignoredApps = [ignoredApps filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"disabled != YES"]];
+
+	if(ignoredApps.count == 0)
+		return [[NSMenuItem alloc] initWithTitle:@"Select Application" action:nil keyEquivalent:@""];
+	else if(ignoredApps.count > 1)
+		return [[NSMenuItem alloc] initWithTitle:[NSString stringWithFormat:@"%ld applications", ignoredApps.count] action:nil keyEquivalent:@""];
+
+	NSString* bundleIdentifier = ignoredApps.firstObject[@"bundleIdentifier"];
+	NSString* title = ignoredApps.firstObject[@"localizedName"];
+	NSImage* icon;
+
+	if(NSRunningApplication* app = [NSRunningApplication runningApplicationsWithBundleIdentifier:bundleIdentifier].firstObject)
+	{
+		title = app.localizedName;
+		icon  = [app.icon copy];
+	}
+	else if(NSString* bundlePath = [NSWorkspace.sharedWorkspace absolutePathForAppBundleWithIdentifier:bundleIdentifier])
+	{
+		title = [NSFileManager.defaultManager displayNameAtPath:bundlePath];
+		icon  = [[NSWorkspace.sharedWorkspace iconForFile:bundlePath] copy];
+	}
+	icon.size = NSMakeSize(16, 16);
+
+	NSMenuItem* menuItem = [[NSMenuItem alloc] initWithTitle:title action:nil keyEquivalent:@""];
+	menuItem.image = icon;
+	return menuItem;
+}
+
+- (void)menuNeedsUpdate:(NSMenu*)aMenu
+{
+	NSMutableSet* ignoredAppIdentifiers = [NSMutableSet set];
+
+	NSMutableArray<NSMenuItem*>* applicationMenuItems = [NSMutableArray array];
+	for(NSDictionary* appInfo in [_userDefaultsProxy valueForKey:kClipboardHistoryIgnoreAppsSettingsKey])
+	{
+		NSString* bundleIdentifier = appInfo[@"bundleIdentifier"];
+		if(!bundleIdentifier || [ignoredAppIdentifiers containsObject:bundleIdentifier])
+			continue;
+		[ignoredAppIdentifiers addObject:bundleIdentifier];
+
+		BOOL disabled   = [appInfo[@"disabled"] boolValue];
+		NSString* title = appInfo[@"localizedName"];
+		NSImage* icon;
+
+		if(NSRunningApplication* app = [NSRunningApplication runningApplicationsWithBundleIdentifier:bundleIdentifier].firstObject)
+		{
+			title = app.localizedName;
+			icon  = [app.icon copy];
+		}
+		else if(NSString* bundlePath = [NSWorkspace.sharedWorkspace absolutePathForAppBundleWithIdentifier:bundleIdentifier])
+		{
+			title = [NSFileManager.defaultManager displayNameAtPath:bundlePath];
+			icon  = [[NSWorkspace.sharedWorkspace iconForFile:bundlePath] copy];
+		}
+		else if(disabled)
+		{
+			continue;
+		}
+		icon.size = NSMakeSize(16, 16);
+
+		NSMenuItem* appItem = [[NSMenuItem alloc] initWithTitle:title action:disabled ? @selector(ignoreApplication:) : @selector(unignoreApplication:) keyEquivalent:@""];
+		appItem.representedObject = @{ @"bundleIdentifier": bundleIdentifier, @"localizedName": title };
+		appItem.state             = disabled ? NSOffState : NSOnState;
+		appItem.image             = icon;
+		[applicationMenuItems addObject:appItem];
+	}
+
+	for(NSRunningApplication* runningApp in [[NSWorkspace.sharedWorkspace runningApplications] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"activationPolicy == %@ && bundleIdentifier != %@", @(NSApplicationActivationPolicyRegular), [NSBundle.mainBundle bundleIdentifier]]])
+	{
+		if([ignoredAppIdentifiers containsObject:runningApp.bundleIdentifier])
+			continue;
+
+		NSImage* appIcon = [runningApp.icon copy];
+		appIcon.size = NSMakeSize(16, 16);
+
+		NSMenuItem* appItem = [[NSMenuItem alloc] initWithTitle:runningApp.localizedName action:@selector(ignoreApplication:) keyEquivalent:@""];
+		appItem.representedObject = @{ @"bundleIdentifier": runningApp.bundleIdentifier, @"localizedName": runningApp.localizedName };
+		appItem.image = appIcon;
+		[applicationMenuItems addObject:appItem];
+	}
+
+	[aMenu removeAllItems];
+	[aMenu addItem:[self ignoredAppsSummaryMenuItem]];
+
+	if(applicationMenuItems.count)
+	{
+		for(NSMenuItem* menuItem in [applicationMenuItems sortedArrayUsingDescriptors:@[ [NSSortDescriptor sortDescriptorWithKey:@"title" ascending:YES selector:@selector(caseInsensitiveCompare:)]]])
+			[aMenu addItem:menuItem];
+		[aMenu addItem:[NSMenuItem separatorItem]];
+	}
+
+	[aMenu addItemWithTitle:@"Other…" action:@selector(ignoreOtherApplication:) keyEquivalent:@""];
+}
+
+- (void)updateIgnoredAppsUsingBlock:(NSArray<NSDictionary*>*(^)(NSArray<NSDictionary*>*))transformer
+{
+	NSArray* ignoredApps = [_userDefaultsProxy valueForKey:kClipboardHistoryIgnoreAppsSettingsKey] ?: @[ ];
+	[_userDefaultsProxy setValue:transformer(ignoredApps) forKey:kClipboardHistoryIgnoreAppsSettingsKey];
+
+	[_ignoredApplicationsPopUpButton.menu removeAllItems];
+	[_ignoredApplicationsPopUpButton.menu addItem:[self ignoredAppsSummaryMenuItem]];
+	[_ignoredApplicationsPopUpButton synchronizeTitleAndSelectedItem];
+}
+
+- (void)ignoreApplication:(id)sender
+{
+	if(NSDictionary* appInfo = [sender representedObject])
+	{
+		[self updateIgnoredAppsUsingBlock:^(NSArray<NSDictionary*>* ignoredApps){
+			return [[ignoredApps filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"bundleIdentifier != %@", appInfo[@"bundleIdentifier"]]] arrayByAddingObject:appInfo];
+		}];
+	}
+}
+
+- (void)unignoreApplication:(id)sender
+{
+	NSDictionary* appInfo = [sender representedObject];
+	if(NSString* bundleIdentifier = appInfo[@"bundleIdentifier"])
+	{
+		[self updateIgnoredAppsUsingBlock:^(NSArray<NSDictionary*>* ignoredApps){
+			return [[ignoredApps filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"bundleIdentifier != %@", bundleIdentifier]] arrayByAddingObject:@{ @"bundleIdentifier": bundleIdentifier, @"localizedName": appInfo[@"localizedName"], @"disabled": @YES }];
+		}];
+	}
+}
+
+- (void)ignoreOtherApplication:(id)sender
+{
+	NSOpenPanel* openPanel = [NSOpenPanel openPanel];
+	openPanel.allowedFileTypes = @[ @"com.apple.application-bundle" ];
+	openPanel.directoryURL     = [NSURL fileURLWithPath:NSSearchPathForDirectoriesInDomains(NSApplicationDirectory, NSLocalDomainMask, YES).firstObject];
+	openPanel.prompt           = @"Select";
+
+	[openPanel beginSheetModalForWindow:self.view.window completionHandler:^(NSInteger result){
+		if(result == NSFileHandlingPanelOKButton)
+		{
+			if(NSBundle* bundle = [NSBundle bundleWithURL:openPanel.URL])
+			{
+				NSString* bundleIdentifier = bundle.bundleIdentifier;
+				NSString* title = [NSFileManager.defaultManager displayNameAtPath:bundle.bundlePath];
+
+				[self updateIgnoredAppsUsingBlock:^(NSArray<NSDictionary*>* ignoredApps){
+					return [[ignoredApps filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"bundleIdentifier != %@", bundleIdentifier]] arrayByAddingObject:@{ @"bundleIdentifier": bundleIdentifier, @"localizedName": title }];
+				}];
+			}
+		}
+	}];
+}
+@end
+
+@interface VariablesViewController ()
+{
+	GenieTableViewController* _variablesTableViewController;
+}
+@property (nonatomic) NSResponder* initialFirstResponder;
+@end
+
+@implementation VariablesViewController
+- (instancetype)init
+{
+	if(self = [super init])
+	{
+		self.title = @"Variables";
 	}
 	return self;
 }
@@ -92,38 +439,26 @@
 {
 	NSView* contentView = [[NSView alloc] initWithFrame:NSZeroRect];
 
-	NSTextField* variablesLabel = [NSTextField labelWithString:@"Variables:"];
-	_variablesTable = [[GenieTableViewController alloc] initWithColumnNames:@[ @"disabled", @"name", @"value" ] visibleRows:5 showHeaderView:YES prototype:@{ @"name": @"variable", @"value": @"value" }];
-
-	_launchAtLoginButton          = [NSButton checkboxWithTitle:@"Launch at Login" target:nil action:nil];
-	_enableClipboardHistoryButton = [NSButton checkboxWithTitle:@"Clipboard History" target:nil action:nil];
-
-	[_enableClipboardHistoryButton bind:NSValueBinding toObject:_genieSettingsController withKeyPath:@"content.enableClipboardHistory" options:nil];
-	[_launchAtLoginButton bind:NSValueBinding toObject:_genieSettingsController withKeyPath:@"content.disableLaunchAtLogin" options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
+	_variablesTableViewController = [[GenieTableViewController alloc] initWithColumnNames:@[ @"disabled", @"name", @"value" ] visibleRows:10 showHeaderView:YES prototype:@{ @"name": @"variable", @"value": @"value" }];
+	[_variablesTableViewController.arrayController bind:NSContentArrayBinding toObject:GenieManager.sharedInstance withKeyPath:@"variables" options:nil];
 
 	NSDictionary* views = @{
-		@"variablesLabel":    variablesLabel,
-		@"variables":         _variablesTable.view,
-		@"launchAtLogin":     _launchAtLoginButton,
-		@"clipboardHistory":  _enableClipboardHistoryButton,
+		@"table": _variablesTableViewController.view,
 	};
 
 	GenieAddAutoLayoutViewsToSuperview(views, contentView);
-	GenieSetupKeyViewLoop(@[ contentView, _variablesTable.view, _launchAtLoginButton, _enableClipboardHistoryButton ]);
+	GenieSetupKeyViewLoop(@[ contentView, _variablesTableViewController.view ]);
 
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[variablesLabel]-[variables]-|"                          options:NSLayoutFormatAlignAllTop metrics:nil views:views]];
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[launchAtLogin]-(>=20)-|"                                  options:0 metrics:nil views:views]];
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[clipboardHistory]-(>=20)-|"                               options:0 metrics:nil views:views]];
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-[variables]-[launchAtLogin]-[clipboardHistory]-(>=20)-|" options:NSLayoutFormatAlignAllLeading metrics:nil views:views]];
+	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(>=20)-[table(<=400,==400@250)]-(>=20)-|" options:0 metrics:nil views:views]];
+	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-[table]-(>=20)-|"                         options:0 metrics:nil views:views]];
+	[contentView addConstraint:[NSLayoutConstraint constraintWithItem:_variablesTableViewController.view attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
 
-	[_variablesTable.arrayController bind:NSContentArrayBinding toObject:GenieManager.sharedInstance withKeyPath:@"variables" options:nil];
-
-	NSArray<NSTableColumn*>* tableColumns = _variablesTable.tableView.tableColumns;
+	NSArray<NSTableColumn*>* tableColumns = _variablesTableViewController.tableView.tableColumns;
 	tableColumns[0].title = @"";
 	tableColumns[1].title = @"Variable Name";
 	tableColumns[2].title = @"Value";
 
-	self.initialFirstResponder = _variablesTable.tableView;
+	self.initialFirstResponder = _variablesTableViewController.tableView;
 	self.view = contentView;
 }
 @end

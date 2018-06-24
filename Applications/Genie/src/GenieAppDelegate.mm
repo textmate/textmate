@@ -278,6 +278,7 @@ static NSString* EscapeJavaScriptString (NSString* src)
 	if(self = [super init])
 	{
 		_frontmostApp = NSWorkspace.sharedWorkspace.frontmostApplication;
+		[[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(performSoftwareUpdateCheck:) name:@"com.macromates.perform-software-update-check" object:@"com.macromates.GeniePrefs"];
 	}
 	return self;
 }
