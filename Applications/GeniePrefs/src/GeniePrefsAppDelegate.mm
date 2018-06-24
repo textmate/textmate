@@ -5,6 +5,7 @@
 @interface AppDelegate () <NSApplicationDelegate, NSWindowDelegate, NSToolbarDelegate>
 {
 	NSDictionary<NSString*, NSViewController*>* _viewControllers;
+	NSDictionary<NSString*, NSImage*>* _images;
 }
 @property (nonatomic) NSWindow* window;
 @property (nonatomic) NSToolbar* toolbar;
@@ -225,13 +226,18 @@
 	{
 		_toolbar = [[NSToolbar alloc] initWithIdentifier:@"About TextMate"];
 		_toolbar.allowsUserCustomization = NO;
-		_toolbar.displayMode             = NSToolbarDisplayModeLabelOnly;
 		_toolbar.delegate                = self;
 
 		_viewControllers = @{
 			@"Catalog": [[CatalogViewController alloc] init],
 			@"General": [[GeneralSettingsViewController alloc] init],
 			@"Changes": [[ChangesViewController alloc] init],
+		};
+
+		_images = @{
+			@"General": [NSImage imageNamed:NSImageNamePreferencesGeneral],
+			@"Catalog": [NSImage imageNamed:NSImageNameFolderSmart],
+			@"Changes": [NSImage imageNamed:NSImageNameInfo],
 		};
 
 		_window.title = @"Preferences";
@@ -316,6 +322,7 @@
 {
 	NSToolbarItem* res = [[NSToolbarItem alloc] initWithItemIdentifier:anIdentifier];
 	res.label  = _viewControllers[anIdentifier].title;
+	res.image  = _images[anIdentifier];
 	res.action = @selector(didClickToolbarItem:);
 	res.target = self;
 	return res;
