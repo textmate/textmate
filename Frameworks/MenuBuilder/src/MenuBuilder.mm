@@ -13,6 +13,7 @@ NSMenuItem* MBCreateMenuItem (MBMenuItem const& item)
 	menuItem.enabled                   = item.enabled;
 	menuItem.hidden                    = item.hidden;
 	menuItem.indentationLevel          = item.indent;
+	menuItem.state                     = item.state;
 	menuItem.representedObject         = item.representedObject;
 
 	if(item.key)
