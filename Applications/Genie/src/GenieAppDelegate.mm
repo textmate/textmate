@@ -573,8 +573,8 @@ static NSString* EscapeJavaScriptString (NSString* src)
 	static MBMenu const items = {
 		{ /* Placeholder */ },
 		{ @"Preferences…",          @selector(orderFrontPreferences:),      @"," },
-		{ @"Check for Updates",     @selector(performSoftwareUpdateCheck:)       },
-		{ @"Check for Test Builds", @selector(performSoftwareUpdateCheck:), .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption, .alternate = YES },
+		{ @"Check for Update",      @selector(performSoftwareUpdateCheck:)       },
+		{ @"Check for Test Build",  @selector(performSoftwareUpdateCheck:), .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption, .alternate = YES },
 		{ /* -------- */ },
 		{ @"Descend",               @selector(goToChildItems:),             @"\t", .modifierFlags = 0                        },
 		{ @"Ascend",                @selector(goToParentFolder:),           @"\t", .modifierFlags = NSEventModifierFlagShift },
