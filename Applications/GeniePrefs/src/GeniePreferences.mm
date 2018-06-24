@@ -756,7 +756,8 @@ static NSIndexPath* IndexPathForGenieItemWithIdentifier (NSString* identifier, N
 
 - (void)viewWillAppear
 {
-	[_splitView setPosition:225 ofDividerAtIndex:0];
+	if(![[NSUserDefaults standardUserDefaults] objectForKey:@"NSSplitView Subview Frames Catalog"])
+		[_splitView setPosition:225 ofDividerAtIndex:0];
 	[_splitView setAutosaveName:@"Catalog"];
 
 	[super viewWillAppear];
