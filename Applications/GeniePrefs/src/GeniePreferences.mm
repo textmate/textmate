@@ -225,10 +225,12 @@ static NSSet* const kExistingDefaultsKeys = [NSSet setWithArray:@[
 - (void)viewWillAppear
 {
 	_clearClipboardHistoryButton.enabled = [NSFileManager.defaultManager fileExistsAtPath:[GenieClipboardHistoryPath stringByExpandingTildeInPath]];
+	[super viewWillAppear];
 }
 
 - (void)viewDidDisappear
 {
+	[super viewDidDisappear];
 	[self updateIgnoredAppsUsingBlock:^(NSArray<NSDictionary*>* ignoredApps){
 		return [ignoredApps filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"disabled != YES"]];
 	}];
