@@ -7,6 +7,7 @@
 #import <GenieManager/GenieItem.h>
 #import <GenieManager/GenieItemCollection.h>
 #import <GenieManager/GenieLRUDatabase.h>
+#import <GenieManager/GenieUserDefaults.h>
 #import <MenuBuilder/MenuBuilder.h>
 #import <SoftwareUpdate/SoftwareUpdate.h>
 #import <OakFoundation/OakFoundation.h>
@@ -210,10 +211,6 @@ static NSString* EscapeJavaScriptString (NSString* src)
 
 // ==========================
 
-static NSString* kEnableClipboardHistorySettingsKey = @"enableClipboardHistory";
-static NSString* kDisableLaunchAtLoginSettingsKey   = @"disableLaunchAtLogin";
-static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
-
 @interface MyTextField : NSTextField
 @end
 
@@ -275,15 +272,6 @@ static NSString* kActivationKeyEventSettingsKey     = @"activationKeyEvent";
 
 @implementation AppDelegate
 + (NSSet*)keyPathsForValuesAffectingCollection { return [NSSet setWithArray:@[ @"history" ]]; }
-
-+ (void)initialize
-{
-	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
-		kEnableClipboardHistorySettingsKey : @NO,
-		kDisableLaunchAtLoginSettingsKey   : @NO,
-		kActivationKeyEventSettingsKey     : @"@ ",
-	}];
-}
 
 - (instancetype)init
 {

@@ -5,12 +5,10 @@
 #import "DryRunController.h"
 #import <GenieManager/GenieManager.h>
 #import <GenieManager/GenieItem.h>
+#import <GenieManager/GenieUserDefaults.h>
 #import <MenuBuilder/MenuBuilder.h>
 #import <ServiceManagement/ServiceManagement.h>
 #import <oak/debug.h>
-
-static NSString* kEnableClipboardHistorySettingsKey = @"enableClipboardHistory";
-static NSString* kDisableLaunchAtLoginSettingsKey   = @"disableLaunchAtLogin";
 
 @interface GenieUserDefaultsProxy : NSObject
 {

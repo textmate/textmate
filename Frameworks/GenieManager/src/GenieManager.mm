@@ -1,4 +1,5 @@
 #import "GenieItem.h"
+#import "GenieUserDefaults.h"
 #import <os/log.h>
 #import <regexp/format_string.h>
 #import <plist/plist.h>
@@ -40,7 +41,14 @@ static NSString* const kGenieItemsDidChangeNotification = @"GenieItemsDidChangeN
 	static NSString* const kAppleMapsURL = @"http://maps.apple.com/?q=%s";
 
 	[self.userDefaults registerDefaults:@{
-		kVariablesSettingsKey: @[
+		kEnableClipboardHistorySettingsKey:      @NO,
+		kDisableLaunchAtLoginSettingsKey:        @NO,
+		kActivationKeyEventSettingsKey:          @"@ ",
+		kClipboardHistoryExpireAfterSettingsKey: @"24 hours",
+		kClipboardHistoryIgnoreAppsSettingsKey:  @[
+			@{ @"bundleIdentifier": @"com.apple.keychainaccess", @"localizedName": @"Keychain Access" }
+		],
+		kVariablesSettingsKey:                   @[
 			@{ @"name": @"EDITOR",        @"value": @"mate -w" },
 			@{ @"name": @"LC_CTYPE",      @"value": @"en_US.UTF-8"                   },
 			@{ @"name": @"LOGIN_SHELL",   @"value": @"${SHELL:-bash} -lc"            },

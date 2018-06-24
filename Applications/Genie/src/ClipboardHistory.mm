@@ -3,6 +3,7 @@
 #import <ns/ns.h>
 #import <oak/debug.h>
 #import "ClipboardHistory.h"
+#import <GenieManager/GenieUserDefaults.h>
 
 static BOOL RunSQLStatement (NSString* dbPath, char const* query, std::map<std::string, id> const& variables)
 {
@@ -182,7 +183,7 @@ static BOOL RunSQLStatement (NSString* dbPath, char const* query, std::map<std::
 									{ ":clipping",   textClipping },
 								};
 
-								RunSQLStatement(@"~/Library/Application Support/Genie/ClipboardHistory.db", query, variables);
+								RunSQLStatement(GenieClipboardHistoryPath, query, variables);
 							}
 						}
 					}
