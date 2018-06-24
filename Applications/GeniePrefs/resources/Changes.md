@@ -1,5 +1,23 @@
 # Changes
 
+## Genie 0.12-beta (2018-06-24)
+
+* Improved preferences window, you can now:
+
+	- Set the shortcut to bring up Genie.
+	- Set for how long clipboard history should be kept. If you want a duration that is not in the pop-up then you can use `defaults write com.macromates.Genie clipboardHistoryExpireAfter «value»` where `«value»` should be a number followed by `hours`, `days`, `months`, or `years`, e.g. `12 hours`.
+	- Set if applications should opt-out of participating in clipboard history. Defaults to Keychain Access.
+
+	There are still some minor quirks to work out. For example recording a new shortcut key may bring up Genie if you pick the same key and checking for updates will bring up a non-focused dialog. Both issues are because Genie and the preferences window are separate applications.
+
+* The Dry Run feature in preferences (⌘R) now show console output and potential error.
+
+* You can now bind parameters to sqlite3 queries. Use `?` in the query itself and then provide the value via the “Bindings” table below the query.
+
+* Items with (inline) HTML output can now access the query string as `genie.query` (from JavaScript) and a `querychange` event is fired when the query string is changed (though the event target is currently `window`). It is also possible to write to the `genie.query` property, although currently the filter string (shown to the user) is not updated (but may be in the future). The “Show Calendar” item has been updated to make use of this, so it is pure HTML/JavaScript. There may still be some flashing when the filter string changes, this is due to how view-based table views do not always re-use same views for same rows when content changes, so a new `WKWebView` is created. It should however be possible to address.
+
+* Items can now set `acceptsQuery = :true;` (using the “Advanced…” button). Normally Genie detects this automatically by looking if the title, script arguments, etc. reference the `${query}` variable, but items with inline HTML can access this via JavaScript, which Genie won’t (currently) detect.
+
 ## Genie 0.11-beta (2018-06-04)
 
 This version is a major refactoring/rewrite: Be sure to update `Application Support/Genie` from GitHub.
