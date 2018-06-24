@@ -39,7 +39,7 @@ static std::string glyph_named (std::string const& name)
 		{ "numlock",      "⌧" },
 		{ "help",         "?⃝" },
 
-		{ "space",        "␣" }
+		{ "space",        "Space" }
 	};
 
 	for(auto const& keyGlyph : KeyGlyphs)
