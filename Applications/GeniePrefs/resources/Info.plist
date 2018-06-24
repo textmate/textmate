@@ -24,6 +24,11 @@
 	<string>${GENIE_REVISION}</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>10.12</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
