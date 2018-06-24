@@ -285,7 +285,7 @@
 		{
 			if([_selectedViewController respondsToSelector:@selector(initialFirstResponder)])
 					[_window makeFirstResponder:[_selectedViewController performSelector:@selector(initialFirstResponder)]];
-			else	[_window selectKeyViewFollowingView:_window.contentView];
+			else	[_window makeFirstResponder:_window.contentView];
 		}
 	}
 	else
