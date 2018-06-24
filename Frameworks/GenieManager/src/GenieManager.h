@@ -7,6 +7,7 @@
 @property (nonatomic, readonly) NSDictionary* environment;
 @property (nonatomic) NSArray* variables; // Only accessed by Genie Prefs
 + (instancetype)sharedInstance;
++ (NSUserDefaults*)userDefaults;
 - (NSString*)cacheFolderByAppendingPathComponent:(NSString*)aPath;
 - (BOOL)synchronize;
 

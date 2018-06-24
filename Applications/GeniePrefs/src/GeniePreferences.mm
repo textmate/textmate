@@ -23,7 +23,7 @@
 {
 	if(self = [super init])
 	{
-		_genieUserDefaults      = [[NSUserDefaults alloc] initWithSuiteName:@"com.macromates.Genie"];
+		_genieUserDefaults      = GenieManager.userDefaults;
 		_enableClipboardHistory = [_genieUserDefaults boolForKey:kEnableClipboardHistorySettingsKey];
 		_disableLaunchAtLogin   = [_genieUserDefaults boolForKey:kDisableLaunchAtLoginSettingsKey];
 
