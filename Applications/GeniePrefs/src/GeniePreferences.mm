@@ -481,6 +481,8 @@ static NSSet* const kExistingDefaultsKeys = [NSSet setWithArray:@[
 
 - (void)loadView
 {
+	NSView* contentView = [[NSView alloc] initWithFrame:NSZeroRect];
+
 	WKWebViewConfiguration* webConfig = [[WKWebViewConfiguration alloc] init];
 	webConfig.suppressesIncrementalRendering = YES;
 
@@ -488,8 +490,11 @@ static NSSet* const kExistingDefaultsKeys = [NSSet setWithArray:@[
 	if(NSURL* url = [[NSBundle mainBundle] URLForResource:@"Changes" withExtension:@"html"])
 		[webView loadFileURL:url allowingReadAccessToURL:[NSURL fileURLWithPath:[url.path stringByDeletingLastPathComponent]]];
 
+	webView.autoresizingMask = NSViewWidthSizable|NSViewHeightSizable;
+	[contentView addSubview:webView];
+
 	self.initialFirstResponder = webView;
-	self.view = webView;
+	self.view = contentView;
 }
 @end
 
