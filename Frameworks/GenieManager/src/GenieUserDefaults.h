@@ -1,5 +1,8 @@
 extern NSString* const GenieClipboardHistoryPath;
 
+extern NSString* const kGenieBundleIdentifier;
+extern NSString* const kGeniePrefsBundleIdentifier;
+
 extern NSString* const kActivationKeyEventSettingsKey;
 extern NSString* const kDisableLaunchAtLoginSettingsKey;
 

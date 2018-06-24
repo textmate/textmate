@@ -11,7 +11,6 @@
 #import "GenieTask.h"
 #import "hash.h"
 
-static NSString* const kGenieBundleIdentifier           = @"com.macromates.Genie";
 static NSString* const kVariablesSettingsKey            = @"variables";
 static NSString* const kGenieItemsDidChangeNotification = @"GenieItemsDidChangeNotification";
 
@@ -130,8 +129,8 @@ static NSString* const kGenieItemsDidChangeNotification = @"GenieItemsDidChangeN
 		if([bundleIdentifier isEqualToString:kGenieBundleIdentifier])
 			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
 
-		[[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:@"com.macromates.GeniePrefs"];
-		[[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(genieItemsDidChange:) name:kGenieItemsDidChangeNotification object:@"com.macromates.GeniePrefs"];
+		[[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:kGeniePrefsBundleIdentifier];
+		[[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(genieItemsDidChange:) name:kGenieItemsDidChangeNotification object:kGeniePrefsBundleIdentifier];
 	}
 	return self;
 }
@@ -291,9 +290,9 @@ static NSString* const kGenieItemsDidChangeNotification = @"GenieItemsDidChangeN
 	[itemsPlist writeToFile:_itemsPath atomically:YES];
 
 	[GenieManager.userDefaults setObject:_variables forKey:kVariablesSettingsKey];
-	[[NSDistributedNotificationCenter defaultCenter] postNotificationName:NSUserDefaultsDidChangeNotification object:@"com.macromates.GeniePrefs" userInfo:nil deliverImmediately:NO];
+	[[NSDistributedNotificationCenter defaultCenter] postNotificationName:NSUserDefaultsDidChangeNotification object:kGeniePrefsBundleIdentifier userInfo:nil deliverImmediately:NO];
 
-	[[NSDistributedNotificationCenter defaultCenter] postNotificationName:kGenieItemsDidChangeNotification object:@"com.macromates.GeniePrefs" userInfo:nil deliverImmediately:YES];
+	[[NSDistributedNotificationCenter defaultCenter] postNotificationName:kGenieItemsDidChangeNotification object:kGeniePrefsBundleIdentifier userInfo:nil deliverImmediately:YES];
 
 	return YES;
 }

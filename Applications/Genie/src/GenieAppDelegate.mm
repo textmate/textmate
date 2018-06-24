@@ -278,7 +278,7 @@ static NSString* EscapeJavaScriptString (NSString* src)
 	if(self = [super init])
 	{
 		_frontmostApp = NSWorkspace.sharedWorkspace.frontmostApplication;
-		[[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(performSoftwareUpdateCheck:) name:@"com.macromates.perform-software-update-check" object:@"com.macromates.GeniePrefs"];
+		[[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(performSoftwareUpdateCheck:) name:@"com.macromates.perform-software-update-check" object:kGeniePrefsBundleIdentifier];
 	}
 	return self;
 }
@@ -294,7 +294,7 @@ static NSString* EscapeJavaScriptString (NSString* src)
 	{
 		[[NSUserDefaults standardUserDefaults] setBool:ClipboardHistory.sharedInstance.enabled forKey:kEnableClipboardHistorySettingsKey];
 		[[NSUserDefaults standardUserDefaults] synchronize];
-		[[NSDistributedNotificationCenter defaultCenter] postNotificationName:NSUserDefaultsDidChangeNotification object:@"com.macromates.Genie" userInfo:nil deliverImmediately:YES];
+		[[NSDistributedNotificationCenter defaultCenter] postNotificationName:NSUserDefaultsDidChangeNotification object:kGenieBundleIdentifier userInfo:nil deliverImmediately:YES];
 
 		os_log_error(OS_LOG_DEFAULT, "Failed to monitor clipboard");
 	}
@@ -304,7 +304,7 @@ static NSString* EscapeJavaScriptString (NSString* src)
 	{
 		[[NSUserDefaults standardUserDefaults] setBool:YES forKey:kDisableLaunchAtLoginSettingsKey];
 		[[NSUserDefaults standardUserDefaults] synchronize];
-		[[NSDistributedNotificationCenter defaultCenter] postNotificationName:NSUserDefaultsDidChangeNotification object:@"com.macromates.Genie" userInfo:nil deliverImmediately:YES];
+		[[NSDistributedNotificationCenter defaultCenter] postNotificationName:NSUserDefaultsDidChangeNotification object:kGenieBundleIdentifier userInfo:nil deliverImmediately:YES];
 
 		os_log_error(OS_LOG_DEFAULT, "Failed to create login item for Genie");
 	}
@@ -540,7 +540,7 @@ static NSString* EscapeJavaScriptString (NSString* src)
 
 	[self userDefaultsDidChange:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
-	[[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:@"com.macromates.GeniePrefs"];
+	[[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:kGeniePrefsBundleIdentifier];
 
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(htmlItemDidUpdateHeight:) name:HTMLItemDidUpdateHeightNotification object:nil];
 

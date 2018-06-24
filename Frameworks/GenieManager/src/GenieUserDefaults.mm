@@ -2,6 +2,9 @@
 
 NSString* const GenieClipboardHistoryPath = @"~/Library/Application Support/Genie/ClipboardHistory.db";
 
+NSString* const kGenieBundleIdentifier      = @"com.macromates.Genie";
+NSString* const kGeniePrefsBundleIdentifier = @"com.macromates.GeniePrefs";
+
 NSString* const kActivationKeyEventSettingsKey          = @"activationKeyEvent";
 NSString* const kDisableLaunchAtLoginSettingsKey        = @"disableLaunchAtLogin";
 

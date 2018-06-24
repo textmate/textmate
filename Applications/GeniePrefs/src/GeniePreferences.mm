@@ -36,7 +36,7 @@ static NSSet* const kExistingDefaultsKeys = [NSSet setWithArray:@[
 	{
 		_genieUserDefaults  = GenieManager.userDefaults;
 		_cachedUserDefaults = [NSMutableDictionary dictionary];
-		[[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:@"com.macromates.Genie"];
+		[[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:kGenieBundleIdentifier];
 	}
 	return self;
 }
@@ -70,7 +70,7 @@ static NSSet* const kExistingDefaultsKeys = [NSSet setWithArray:@[
 
 	[_genieUserDefaults setObject:someValue forKey:aKey];
 	[_genieUserDefaults synchronize];
-	[[NSDistributedNotificationCenter defaultCenter] postNotificationName:NSUserDefaultsDidChangeNotification object:@"com.macromates.GeniePrefs" userInfo:nil deliverImmediately:YES];
+	[[NSDistributedNotificationCenter defaultCenter] postNotificationName:NSUserDefaultsDidChangeNotification object:kGeniePrefsBundleIdentifier userInfo:nil deliverImmediately:YES];
 }
 
 - (void)userDefaultsDidChange:(NSNotification*)aNotification
@@ -239,7 +239,7 @@ static NSSet* const kExistingDefaultsKeys = [NSSet setWithArray:@[
 - (void)terminateGenie:(id)sender
 {
 	BOOL didTerminate = YES;
-	for(NSRunningApplication* app in [NSRunningApplication runningApplicationsWithBundleIdentifier:@"com.macromates.Genie"])
+	for(NSRunningApplication* app in [NSRunningApplication runningApplicationsWithBundleIdentifier:kGenieBundleIdentifier])
 		didTerminate = [app terminate];
 
 	if(didTerminate)
@@ -248,7 +248,7 @@ static NSSet* const kExistingDefaultsKeys = [NSSet setWithArray:@[
 
 - (void)checkForSoftwareUpdate:(id)sender
 {
-	[[NSDistributedNotificationCenter defaultCenter] postNotificationName:@"com.macromates.perform-software-update-check" object:@"com.macromates.GeniePrefs" userInfo:nil deliverImmediately:YES];
+	[[NSDistributedNotificationCenter defaultCenter] postNotificationName:@"com.macromates.perform-software-update-check" object:kGeniePrefsBundleIdentifier userInfo:nil deliverImmediately:YES];
 }
 
 // =====================
