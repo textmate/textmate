@@ -546,7 +546,7 @@ static NSString* EscapeJavaScriptString (NSString* src)
 
 	_drawTableViewAsHighlighted = YES;
 
-	_window = [[GenieBorderlessWindow alloc] initWithContentRect:NSMakeRect(0, 0, 400, 600) styleMask:NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskFullSizeContentView backing:NSBackingStoreBuffered defer:NO];
+	_window = [[GenieBorderlessWindow alloc] initWithContentRect:NSMakeRect(0, 0, 400, 480) styleMask:NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskFullSizeContentView backing:NSBackingStoreBuffered defer:NO];
 	_window.releasedWhenClosed         = NO;
 	_window.titleVisibility            = NSWindowTitleHidden;
 	_window.titlebarAppearsTransparent = YES;
