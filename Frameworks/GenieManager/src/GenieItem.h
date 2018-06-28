@@ -77,7 +77,7 @@ extern NSString* GenieItemDidReceiveNewItemsNotification;
 @property (nonatomic, readonly) NSString*     subtitle;
 @property (nonatomic, readonly) NSString*     match;
 @property (nonatomic, readonly) NSString*     file;
-@property (nonatomic, readonly) NSString*     url;
+@property (nonatomic, readonly) NSString*     URL;
 @property (nonatomic, readonly) NSString*     value;
 @property (nonatomic, readonly) NSString*     uiTitle;
 @property (nonatomic, readonly) NSString*     invalidate;

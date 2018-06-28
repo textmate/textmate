@@ -775,7 +775,7 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 - (NSURL*)previewItemURL
 {
 	NSURL* url;
-	if(NSString* urlString = self.url)
+	if(NSString* urlString = self.URL)
 		url = [NSURL URLWithString:urlString];
 	else if(NSString* file = self.file)
 		url = [NSURL fileURLWithPath:file];
@@ -936,7 +936,10 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 			parentItem = parentItem.parentItem;
 		}
 
-		static NSSet* const dynamicKeys = [NSSet setWithArray:@[ @"title", @"subtitle", @"file", @"url", @"value", @"uiTitle", @"invalidate", @"bundleIdentifier", @"sqlDatabase", @"mdApplicationCanOpen" ]];
+		if([parentKey isEqualToString:@"url"])
+			parentKey = @"URL";
+
+		static NSSet* const dynamicKeys = [NSSet setWithArray:@[ @"title", @"subtitle", @"file", @"URL", @"value", @"uiTitle", @"invalidate", @"bundleIdentifier", @"sqlDatabase", @"mdApplicationCanOpen" ]];
 		if([dynamicKeys containsObject:parentKey])
 				value = [parentItem valueForKey:parentKey];
 		else	value = [parentItem stringForKey:parentKey whileExpanding:nil];
@@ -1030,7 +1033,7 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 - (NSString*)subtitle             { return [self expandedStringForKey:@"subtitle"                               abbreviatePath:YES urlEncodeVariables:NO  fallback:@"${kMDItemPath}"]; }
 - (NSString*)file                 { return [self absolutePathForPath:[self expandedStringForKey:@"file"         abbreviatePath:NO  urlEncodeVariables:NO  fallback:@"${kMDItemPath}"]]; }
 
-- (NSString*)url
+- (NSString*)URL
 {
 	NSString* urlString = [self expandedStringForKey:@"url" abbreviatePath:NO urlEncodeVariables:YES fallback:nil];
 	return [urlString stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet characterSetWithRange:NSMakeRange(0, 128)]];
@@ -1096,14 +1099,14 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 	if(!res)
 	{
 		NSString* pathFromURL;
-		if(NSString* urlString = self.url)
+		if(NSString* urlString = self.URL)
 			pathFromURL = [NSURL URLWithString:urlString].filePathURL.path;
 
 		if(NSString* file = self.file ?: pathFromURL)
 		{
 			res = [[NSWorkspace sharedWorkspace] iconForFile:file];
 		}
-		else if(NSString* urlString = self.url)
+		else if(NSString* urlString = self.URL)
 		{
 			if(NSURL* url = [NSURL URLWithString:urlString])
 			{
@@ -1226,7 +1229,7 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 		return @[ value ];
 	else if(NSString* file = self.file)
 		return @[ [NSURL fileURLWithPath:file], file ];
-	else if(NSString* urlString = self.url)
+	else if(NSString* urlString = self.URL)
 		return @[ [NSURL URLWithString:urlString], urlString ];
 	else if(NSString* title = self.title)
 		return @[ title ];

@@ -59,7 +59,7 @@ BOOL RunGenieItems (NSArray<GenieItem*>* items)
 					[taskInfo addGenieItem:item];
 			else	actions[key] = [[GenieItemTaskInfo alloc] initWithItem:item];
 		}
-		else if(NSString* urlString = item.url)
+		else if(NSString* urlString = item.URL)
 		{
 			if(NSURL* url = [NSURL URLWithString:urlString])
 				[urls addObject:url];
