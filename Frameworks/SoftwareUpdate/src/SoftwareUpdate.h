@@ -7,8 +7,8 @@ PUBLIC extern NSString* const kUserDefaultsSubmitUsageInfoKey;
 PUBLIC extern NSString* const kUserDefaultsAskBeforeUpdatingKey;
 
 PUBLIC extern NSString* const kSoftwareUpdateChannelRelease;
-PUBLIC extern NSString* const kSoftwareUpdateChannelBeta;
-PUBLIC extern NSString* const kSoftwareUpdateChannelNightly;
+PUBLIC extern NSString* const kSoftwareUpdateChannelPrerelease;
+PUBLIC extern NSString* const kSoftwareUpdateChannelCanary;
 
 PUBLIC @interface SoftwareUpdate : NSObject <DownloadWindowControllerDelegate>
 @property (nonatomic)           NSDictionary* channels;

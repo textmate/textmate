@@ -23,8 +23,8 @@ NSString* const kUserDefaultsLastSoftwareUpdateCheckKey    = @"SoftwareUpdateLas
 NSString* const kUserDefaultsSoftwareUpdateSuspendUntilKey = @"SoftwareUpdateSuspendUntil";
 
 NSString* const kSoftwareUpdateChannelRelease              = @"release";
-NSString* const kSoftwareUpdateChannelBeta                 = @"beta";
-NSString* const kSoftwareUpdateChannelNightly              = @"nightly";
+NSString* const kSoftwareUpdateChannelPrerelease           = @"beta";
+NSString* const kSoftwareUpdateChannelCanary               = @"nightly";
 
 struct shared_state_t
 {
@@ -126,7 +126,7 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 	D(DBF_SoftwareUpdate_Check, bug("\n"););
 
 	BOOL isShiftDown = OakIsAlternateKeyOrMouseEvent(NSEventModifierFlagShift);
-	NSURL* url = [self.channels objectForKey:OakIsAlternateKeyOrMouseEvent(NSEventModifierFlagOption) ? kSoftwareUpdateChannelNightly : [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsSoftwareUpdateChannelKey]];
+	NSURL* url = [self.channels objectForKey:OakIsAlternateKeyOrMouseEvent(NSEventModifierFlagOption) ? kSoftwareUpdateChannelCanary : [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsSoftwareUpdateChannelKey]];
 	[self checkVersionAtURL:url inBackground:NO allowRedownload:isShiftDown];
 }
 
