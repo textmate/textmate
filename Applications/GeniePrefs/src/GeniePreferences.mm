@@ -110,6 +110,13 @@ static NSSet* const kExistingDefaultsKeys = [NSSet setWithArray:@[
 	{
 		self.title = @"General";
 		_userDefaultsProxy = [[GenieUserDefaultsProxy alloc] init];
+
+		// Upgrading from 0.12-beta
+		if([[_userDefaultsProxy valueForKey:kSoftwareUpdatePrereleasesEnabled] boolValue])
+		{
+			[_userDefaultsProxy setValue:kSoftwareUpdateChannelPrerelease forKey:kUserDefaultsSoftwareUpdateChannelKey];
+			[_userDefaultsProxy setValue:nil forKey:kSoftwareUpdatePrereleasesEnabled];
+		}
 	}
 	return self;
 }
