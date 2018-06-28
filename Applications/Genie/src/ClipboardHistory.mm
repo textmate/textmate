@@ -143,14 +143,14 @@ static BOOL RunSQLStatement (NSString* dbPath, char const* query, std::map<std::
 					NSInteger changeCount = pasteboard.changeCount;
 					if(_clipboardChangeCount != changeCount)
 					{
-						os_log_info(OS_LOG_DEFAULT, "new clipboard change count: %ld → %ld: %{public}@", _clipboardChangeCount, changeCount, currentApp.bundleIdentifier);
+						os_log_debug(OS_LOG_DEFAULT, "new clipboard change count: %ld → %ld: %{public}@", _clipboardChangeCount, changeCount, currentApp.bundleIdentifier);
 						_clipboardChangeCount = changeCount;
 
 						NSArray* ignoredApps = [[NSUserDefaults standardUserDefaults] arrayForKey:kClipboardHistoryIgnoreAppsSettingsKey];
 						ignoredApps = [ignoredApps filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"disabled != YES && bundleIdentifier == %@", currentApp.bundleIdentifier]];
 						if(ignoredApps.count)
 						{
-							os_log_info(OS_LOG_DEFAULT, "ignore change from %{public}@", currentApp.bundleIdentifier);
+							os_log_debug(OS_LOG_DEFAULT, "ignore change from %{public}@", currentApp.bundleIdentifier);
 							return;
 						}
 
@@ -164,7 +164,7 @@ static BOOL RunSQLStatement (NSString* dbPath, char const* query, std::map<std::
 								if(!expireAfter || NSNotFound == [regex rangeOfFirstMatchInString:expireAfter options:0 range:NSMakeRange(0, expireAfter.length)].location)
 									expireAfter = @"24 hours";
 								expireAfter = [@"-" stringByAppendingString:expireAfter];
-								os_log_info(OS_LOG_DEFAULT, "expire clipboard history after %{public}@", expireAfter);
+								os_log_debug(OS_LOG_DEFAULT, "expire clipboard history after %{public}@", expireAfter);
 
 								char const* query =
 									"CREATE TABLE IF NOT EXISTS 'applications' ("
