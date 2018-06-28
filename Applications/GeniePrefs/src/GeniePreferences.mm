@@ -7,6 +7,7 @@
 #import <GenieManager/GenieItem.h>
 #import <GenieManager/GenieUserDefaults.h>
 #import <MenuBuilder/MenuBuilder.h>
+#import <SoftwareUpdate/SoftwareUpdate.h>
 #import <OakAppKit/OakKeyEquivalentView.h>
 #import <ServiceManagement/ServiceManagement.h>
 #import <oak/debug.h>
@@ -19,6 +20,7 @@ static NSSet* const kExistingDefaultsKeys = [NSSet setWithArray:@[
 	kClipboardHistoryExpireAfterSettingsKey,
 	kDisableSoftwareUpdateSettingsKey,
 	kSoftwareUpdatePrereleasesEnabled,
+	kUserDefaultsSoftwareUpdateChannelKey,
 ]];
 
 @interface GenieUserDefaultsProxy : NSObject
@@ -90,8 +92,17 @@ static NSSet* const kExistingDefaultsKeys = [NSSet setWithArray:@[
 
 @implementation GeneralSettingsViewController
 + (NSSet*)keyPathsForValuesAffectingSoftwareUpdatePrereleasesEnabled { return [NSSet setWithArray:@[ [@"userDefaultsProxy." stringByAppendingString:kDisableSoftwareUpdateSettingsKey] ]]; }
-- (BOOL)isSoftwareUpdatePrereleasesEnabled                           { return ![[_userDefaultsProxy valueForKey:kDisableSoftwareUpdateSettingsKey] boolValue] && [[_userDefaultsProxy valueForKey:kSoftwareUpdatePrereleasesEnabled] boolValue]; }
-- (void)setSoftwareUpdatePrereleasesEnabled:(BOOL)flag               { [_userDefaultsProxy setValue:@(flag) forKey:kSoftwareUpdatePrereleasesEnabled]; }
+
+- (BOOL)isSoftwareUpdatePrereleasesEnabled
+{
+	NSString* channel = [_userDefaultsProxy valueForKey:kUserDefaultsSoftwareUpdateChannelKey];
+	return ![[_userDefaultsProxy valueForKey:kDisableSoftwareUpdateSettingsKey] boolValue] && [channel isEqual:kSoftwareUpdateChannelPrerelease];
+}
+
+- (void)setSoftwareUpdatePrereleasesEnabled:(BOOL)flag
+{
+	[_userDefaultsProxy setValue:(flag ? kSoftwareUpdateChannelPrerelease : nil) forKey:kUserDefaultsSoftwareUpdateChannelKey];
+}
 
 - (instancetype)init
 {
