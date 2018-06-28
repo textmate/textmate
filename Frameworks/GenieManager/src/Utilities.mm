@@ -3,9 +3,7 @@
 #import "GenieManager.h" // cacheFolderByAppendingPathComponent:
 #import "hash.h"
 #import <os/log.h>
-
-#define UNICODE
-#include <MediaInfo/MediaInfo.h>
+#import <MediaInfo/MediaInfo.h>
 
 static NSTimeInterval GetMediaDuration (NSString* path)
 {
