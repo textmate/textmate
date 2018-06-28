@@ -379,7 +379,7 @@ static NSTimeInterval GetMediaDuration (NSString* path)
 // = Public API =
 // ==============
 
-- (NSString*)urlStringWithoutQueryFromURL:(NSURL*)aURL
+- (NSString*)URLStringWithoutQueryFromURL:(NSURL*)aURL
 {
 	NSString* str = aURL.absoluteString;
 	for(NSString* specialChar in @[ @"?", @"#" ])
@@ -393,7 +393,7 @@ static NSTimeInterval GetMediaDuration (NSString* path)
 
 - (NSImage*)favoriteIconForURL:(NSURL*)aURL
 {
-	NSString* urlString = [self urlStringWithoutQueryFromURL:aURL];
+	NSString* urlString = [self URLStringWithoutQueryFromURL:aURL];
 	if(NSString* imageUrl = [self favoriteIconURLForURL:urlString])
 		return [self imageForURL:imageUrl];
 	return nil;
@@ -401,7 +401,7 @@ static NSTimeInterval GetMediaDuration (NSString* path)
 
 - (void)obtainFavoriteIconForURL:(NSURL*)aURL andCallback:(void(^)(NSImage*))aCallback
 {
-	NSString* urlString = [self urlStringWithoutQueryFromURL:aURL];
+	NSString* urlString = [self URLStringWithoutQueryFromURL:aURL];
 	[self obtainFavoriteIconURLForURL:urlString andCallback:^(NSString* imageUrl){
 		[self obtainImageForURL:imageUrl andCallback:^(NSImage* image){
 			aCallback(image);
