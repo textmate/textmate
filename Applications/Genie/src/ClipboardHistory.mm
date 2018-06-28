@@ -187,6 +187,7 @@ static BOOL RunSQLStatement (NSString* dbPath, char const* query, std::map<std::
 									");"
 									"BEGIN TRANSACTION;"
 									"DELETE FROM history WHERE date < DATETIME('now', :expireAfter);"
+									"DELETE FROM clippings WHERE id IN (SELECT clippings.id FROM clippings LEFT JOIN history ON clipping_id = clippings.id WHERE clipping_id IS NULL);"
 									"INSERT INTO applications ('name', 'identifier') VALUES (:name, :identifier);"
 									"INSERT INTO clippings ('clipping') VALUES (:clipping);"
 									"INSERT INTO history ('clipping_id', 'application_id')"
