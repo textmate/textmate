@@ -784,7 +784,7 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 
 - (void)updateHTML
 {
-	if(_hasHTMLOutput && !_htmlOutputItem.htmlString)
+	if(_hasHTMLOutput && _live && !_htmlOutputItem.htmlString)
 	{
 		if(_updatingHTML)
 		{
@@ -803,9 +803,12 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 			task.timeOut     = 15;
 
 			[task launch:^(int rc, NSData* stdoutData, NSData* stderrData){
-				NSString* stdoutStr = [[NSString alloc] initWithData:stdoutData encoding:NSUTF8StringEncoding];
-				NSString* stderrStr = [[NSString alloc] initWithData:stderrData encoding:NSUTF8StringEncoding];
-				_htmlOutputItem.htmlString = rc == 0 && OakNotEmptyString(stdoutStr) ? stdoutStr : stderrStr;
+				if(_live)
+				{
+					NSString* stdoutStr = [[NSString alloc] initWithData:stdoutData encoding:NSUTF8StringEncoding];
+					NSString* stderrStr = [[NSString alloc] initWithData:stderrData encoding:NSUTF8StringEncoding];
+					_htmlOutputItem.htmlString = rc == 0 && OakNotEmptyString(stdoutStr) ? stdoutStr : stderrStr;
+				}
 
 				_updatingHTML = NO;
 				if(_pendingUpdateHTML)
