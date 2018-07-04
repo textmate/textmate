@@ -198,7 +198,7 @@
 		},
 		{ @"Data Source",
 			.submenu = {
-				{ @"Dry Run",            @selector(performDataSourceDryRun:),      @"r" },
+				{ @"Run",                @selector(performDataSourceDryRun:),      @"r" },
 			}
 		},
 		{ @"Window",
