@@ -18,7 +18,7 @@
 @interface SpotlightProperties : TreeViewController
 @end
 
-@interface SqliteProperties : TreeViewController
+@interface SQLiteProperties : TreeViewController
 @end
 
 @interface RecentDocumentsProperties : TreeViewController

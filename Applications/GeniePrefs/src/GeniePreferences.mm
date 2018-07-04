@@ -581,7 +581,7 @@ static NSIndexPath* IndexPathForGenieItemWithIdentifier (NSString* identifier, N
 			[NSString stringWithFormat:@"%lu", kGenieItemKindRunScript]:           [[ShellProperties alloc] initWithTreeController:_treeController],
 			[NSString stringWithFormat:@"%lu", kGenieItemKindOpenFile]:            [[FileProperties alloc] initWithTreeController:_treeController],
 			[NSString stringWithFormat:@"%lu", kGenieItemKindSpotlight]:           [[SpotlightProperties alloc] initWithTreeController:_treeController],
-			[NSString stringWithFormat:@"%lu", kGenieItemKindSqlite]:              [[SqliteProperties alloc] initWithTreeController:_treeController],
+			[NSString stringWithFormat:@"%lu", kGenieItemKindSQLite]:              [[SQLiteProperties alloc] initWithTreeController:_treeController],
 			[NSString stringWithFormat:@"%lu", kGenieItemKindCommandResult]:       [[ExecDataSourceProperties alloc] initWithTreeController:_treeController],
 			[NSString stringWithFormat:@"%lu", kGenieItemKindRecentDocuments]:     [[RecentDocumentsProperties alloc] initWithTreeController:_treeController],
 			[NSString stringWithFormat:@"%lu", kGenieItemKindPredicateGroup]:      [[PredicateGroupProperties alloc] initWithTreeController:_treeController],
@@ -691,7 +691,7 @@ static NSIndexPath* IndexPathForGenieItemWithIdentifier (NSString* identifier, N
 		{ @"Open File",             .tag = kGenieItemKindOpenFile,        .indent = 1 },
 		{ @"Data Source",           @selector(nop:)                                   },
 		{ @"Spotlight Search",      .tag = kGenieItemKindSpotlight,       .indent = 1 },
-		{ @"Sqlite Search",         .tag = kGenieItemKindSqlite,          .indent = 1 },
+		{ @"SQLite Search",         .tag = kGenieItemKindSQLite,          .indent = 1 },
 		{ @"Items from Script",     .tag = kGenieItemKindCommandResult,   .indent = 1 },
 		{ @"Recent Documents",      .tag = kGenieItemKindRecentDocuments, .indent = 1 },
 		{ @"Child Actions",         @selector(nop:)                                   },
@@ -841,7 +841,7 @@ static NSIndexPath* IndexPathForGenieItemWithIdentifier (NSString* identifier, N
 		switch(item.kind)
 		{
 			case kGenieItemKindSpotlight:
-			case kGenieItemKindSqlite:
+			case kGenieItemKindSQLite:
 			case kGenieItemKindCommandResult:
 			case kGenieItemKindRecentDocuments:
 				return item;
@@ -859,7 +859,7 @@ static NSIndexPath* IndexPathForGenieItemWithIdentifier (NSString* identifier, N
 		switch(item.kind)
 		{
 			case kGenieItemKindSpotlight:
-			case kGenieItemKindSqlite:
+			case kGenieItemKindSQLite:
 			case kGenieItemKindCommandResult:
 			case kGenieItemKindRecentDocuments:
 				return item;

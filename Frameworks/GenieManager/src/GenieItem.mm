@@ -552,7 +552,7 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 	{ kGenieItemKindRunScript,       @"script"          },
 	{ kGenieItemKindOpenFile,        @"file"            },
 	{ kGenieItemKindSpotlight,       @"spotlight"       },
-	{ kGenieItemKindSqlite,          @"sqlite"          },
+	{ kGenieItemKindSQLite,          @"sqlite"          },
 	{ kGenieItemKindCommandResult,   @"exec"            },
 	{ kGenieItemKindRecentDocuments, @"recentDocuments" },
 	{ kGenieItemKindPredicateGroup,  @"predicateGroup"  },
@@ -1258,7 +1258,7 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 	switch(self.kind)
 	{
 		case kGenieItemKindSpotlight:
-		case kGenieItemKindSqlite:
+		case kGenieItemKindSQLite:
 		case kGenieItemKindCommandResult:
 		case kGenieItemKindRecentDocuments:
 			return YES;
@@ -1381,7 +1381,7 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 	switch(self.kind)
 	{
 		case kGenieItemKindSpotlight:       [self runSpotlightQueryAndCallback:callback];            break;
-		case kGenieItemKindSqlite:          [self runSqliteDataSourceAndCallback:callback];          break;
+		case kGenieItemKindSQLite:          [self runSQLiteDataSourceAndCallback:callback];          break;
 		case kGenieItemKindCommandResult:   [self runScriptDataSourceAndCallback:callback];          break;
 		case kGenieItemKindRecentDocuments: [self runRecentDocumentsDataSourceAndCallback:callback]; break;
 	}
@@ -1484,10 +1484,10 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 }
 
 // ======================
-// = Sqlite Data Source =
+// = SQLite Data Source =
 // ======================
 
-- (void)runSqliteDataSourceAndCallback:(void(^)(GenieDataSourceCacheRecord*, NSString*, NSData*, NSData*))callback
+- (void)runSQLiteDataSourceAndCallback:(void(^)(GenieDataSourceCacheRecord*, NSString*, NSData*, NSData*))callback
 {
 	NSString* path  = self.sqlDatabase;
 	NSString* query = [self staticValueForKey:@"sqlQuery"];
@@ -1934,7 +1934,7 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 	return _mutableScriptArguments;
 }
 
-// Sqlite
+// SQLite
 
 - (NSString*)primitiveSqlDatabase                           { return _values[@"sqlDatabase"]; }
 - (void)setPrimitiveSqlDatabase:(NSString*)newString        { _values[@"sqlDatabase"] = newString; }

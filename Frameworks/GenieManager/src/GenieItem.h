@@ -14,7 +14,7 @@ typedef NS_ENUM(NSUInteger, GenieItemKind) {
 	kGenieItemKindRunScript,
 	kGenieItemKindOpenFile,
 	kGenieItemKindSpotlight,
-	kGenieItemKindSqlite,
+	kGenieItemKindSQLite,
 	kGenieItemKindCommandResult,
 	kGenieItemKindRecentDocuments,
 	kGenieItemKindPredicateGroup,

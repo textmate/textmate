@@ -394,13 +394,13 @@
 }
 @end
 
-@interface SqliteProperties ()
+@interface SQLiteProperties ()
 {
 	GenieTableViewController* _bindingsTable;
 }
 @end
 
-@implementation SqliteProperties
+@implementation SQLiteProperties
 - (void)makeView:(NSView*)contentView
 {
 	_bindingsTable = [[GenieTableViewController alloc] initWithColumnNames:@[ @"value" ] visibleRows:3 showHeaderView:NO prototype:@{ @"value": @"binding" }];
