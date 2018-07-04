@@ -64,20 +64,31 @@ static BOOL RunSQLStatement (NSString* dbPath, char const* query, std::map<std::
 					}
 				}
 
-				if(sqlite3_step(stmt) != SQLITE_DONE || sqlite3_finalize(stmt) != SQLITE_OK)
+				if(sqlite3_step(stmt) != SQLITE_DONE)
+				{
+					os_log_error(OS_LOG_DEFAULT, "sqlite3_step: %{public}s", sqlite3_errmsg(db));
 					res = NO;
+				}
+
+				if(sqlite3_finalize(stmt) != SQLITE_OK)
+				{
+					os_log_error(OS_LOG_DEFAULT, "sqlite3_finalize: %{public}s", sqlite3_errmsg(db));
+					res = NO;
+				}
 			}
 			else
 			{
+				os_log_error(OS_LOG_DEFAULT, "sqlite3_prepare_v2: %{public}s", sqlite3_errmsg(db));
 				res = NO;
 			}
 		}
 	}
 
-	sqlite3_close(db);
-
-	if(res == NO)
-		os_log_error(OS_LOG_DEFAULT, "sqlite3: error running query: %{public}s", sqlite3_errmsg(db));
+	if(sqlite3_close(db) != SQLITE_OK)
+	{
+		os_log_error(OS_LOG_DEFAULT, "sqlite3_close: %{public}s", sqlite3_errmsg(db));
+		res = NO;
+	}
 
 	return res;
 }
