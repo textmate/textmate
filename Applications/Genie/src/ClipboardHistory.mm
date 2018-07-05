@@ -209,10 +209,13 @@ static BOOL RunSQLStatement (NSString* dbPath, char const* query, std::map<std::
 
 								std::map<std::string, id> variables = {
 									{ ":name",        currentApp.localizedName },
-									{ ":identifier",  currentApp.bundleIdentifier },
+									{ ":identifier",  currentApp.bundleIdentifier ?: @"unknown" },
 									{ ":clipping",    textClipping },
 									{ ":expireAfter", expireAfter },
 								};
+
+								if(!currentApp.bundleIdentifier)
+									os_log_error(OS_LOG_DEFAULT, "No bundle identifier for %{public}@, clipboard contains %@", currentApp, textClipping);
 
 								RunSQLStatement(GenieClipboardHistoryPath, query, variables);
 							}
