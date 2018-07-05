@@ -153,6 +153,9 @@ static NSString* JSStringFromString (NSString* src)
 	if(_HTMLString = newHTMLString)
 	{
 		NSString* source = [NSString stringWithFormat:@""
+			"var style = document.createElement('style');"
+			"document.head.appendChild(style);"
+			"style.sheet.insertRule(':root { font-family: system-ui, -apple-system; }');"
 			"let genie = {"
 			"  log(str)         { webkit.messageHandlers.logMessageHandler.postMessage(str); },"
 			"  set query(str)   { webkit.messageHandlers.queryMessageHandler.postMessage(this.internal_storage = str); },"
@@ -165,7 +168,7 @@ static NSString* JSStringFromString (NSString* src)
 			"};", JSStringFromString(self.htmlItem.queryString)
 		];
 
-		WKUserScript* script = [[WKUserScript alloc] initWithSource:source injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:NO];
+		WKUserScript* script = [[WKUserScript alloc] initWithSource:source injectionTime:WKUserScriptInjectionTimeAtDocumentEnd forMainFrameOnly:NO];
 		[_webView.configuration.userContentController removeAllUserScripts];
 		[_webView.configuration.userContentController addUserScript:script];
 
