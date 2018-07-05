@@ -63,6 +63,18 @@ static NSString* JSStringFromString (NSString* src)
 	return [NSString stringWithFormat:@"'%@'", escaped];
 }
 
+static NSString* CSSColorFromColor (NSColor* orgColor)
+{
+	CGFloat red, green, blue, alpha;
+	if(NSColor* color = [orgColor colorUsingColorSpace:NSColorSpace.sRGBColorSpace])
+	{
+		[color getRed:&red green:&green blue:&blue alpha:&alpha];
+		return [NSString stringWithFormat:@"rgba(%.0f, %.0f, %.0f, %.2f)", 255*red, 255*green, 255*blue, alpha];
+	}
+	os_log_error(OS_LOG_DEFAULT, "unable to convert color to sRGB color space: %{public}@", orgColor);
+	return @"black";
+}
+
 @implementation GenieHTMLTableCellView
 - (instancetype)init
 {
@@ -155,7 +167,13 @@ static NSString* JSStringFromString (NSString* src)
 		NSString* source = [NSString stringWithFormat:@""
 			"var style = document.createElement('style');"
 			"document.head.appendChild(style);"
+			"style.sheet.insertRule(':root { --textColor: %@; }');"
+			"style.sheet.insertRule(':root { --labelColor: %@; }');"
+			"style.sheet.insertRule(':root { --secondaryLabelColor: %@; }');"
+			"style.sheet.insertRule(':root { --tertiaryLabelColor: %@; }');"
+			"style.sheet.insertRule(':root { --quaternaryLabelColor: %@; }');"
 			"style.sheet.insertRule(':root { font-family: system-ui, -apple-system; }');"
+			"style.sheet.insertRule(':root { color: var(--textColor); }');"
 			"let genie = {"
 			"  log(str)         { webkit.messageHandlers.logMessageHandler.postMessage(str); },"
 			"  set query(str)   { webkit.messageHandlers.queryMessageHandler.postMessage(this.internal_storage = str); },"
@@ -165,7 +183,13 @@ static NSString* JSStringFromString (NSString* src)
 			"    window.dispatchEvent(new Event('querychange'));"
 			"  },"
 			"  internal_storage: %@"
-			"};", JSStringFromString(self.htmlItem.queryString)
+			"};",
+				CSSColorFromColor(NSColor.controlTextColor),
+				CSSColorFromColor(NSColor.labelColor),
+				CSSColorFromColor(NSColor.secondaryLabelColor),
+				CSSColorFromColor(NSColor.tertiaryLabelColor),
+				CSSColorFromColor(NSColor.quaternaryLabelColor),
+				JSStringFromString(self.htmlItem.queryString)
 		];
 
 		WKUserScript* script = [[WKUserScript alloc] initWithSource:source injectionTime:WKUserScriptInjectionTimeAtDocumentEnd forMainFrameOnly:NO];
