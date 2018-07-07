@@ -111,6 +111,8 @@
 						{ @"Stop Speaking",  @selector(stopSpeaking:)  },
 					}
 				},
+				{ /* -------- */ },
+				{ @"Edit in TextNate",      @selector(editInTextMate:),   @"k" },
 			}
 		},
 		{ @"Format",
