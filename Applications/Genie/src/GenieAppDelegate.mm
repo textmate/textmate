@@ -60,6 +60,7 @@ static NSString* JSStringFromString (NSString* src)
 {
 	static NSRegularExpression* const regex = [NSRegularExpression regularExpressionWithPattern:@"['\"\\\\]" options:0 error:nil];
 	NSString* escaped = src ? [regex stringByReplacingMatchesInString:src options:0 range:NSMakeRange(0, src.length) withTemplate:@"\\\\$0"] : @"";
+	escaped = [escaped stringByReplacingOccurrencesOfString:@"\n" withString:@"\\n"];
 	return [NSString stringWithFormat:@"'%@'", escaped];
 }
 
