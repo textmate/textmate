@@ -84,6 +84,7 @@ static NSString* CSSColorFromColor (NSColor* orgColor)
 		WKWebViewConfiguration* webConfig = [[WKWebViewConfiguration alloc] init];
 		webConfig.suppressesIncrementalRendering = YES;
 		[webConfig.userContentController addScriptMessageHandler:self name:@"queryMessageHandler"];
+		[webConfig.userContentController addScriptMessageHandler:self name:@"execMessageHandler"];
 		[webConfig.userContentController addScriptMessageHandler:self name:@"logMessageHandler"];
 		[webConfig.userContentController addScriptMessageHandler:self name:@"errorMessageHandler"];
 
@@ -111,6 +112,26 @@ static NSString* CSSColorFromColor (NSColor* orgColor)
 	else if([message.name isEqualToString:@"errorMessageHandler"])
 	{
 		os_log_error(OS_LOG_DEFAULT, "%{public}@:%{public}@: %{public}@", self.htmlItem.originalItem.title, message.body[@"lineno"], message.body[@"message"]);
+	}
+	else if([message.name isEqualToString:@"execMessageHandler"])
+	{
+		if([message.body isKindOfClass:[NSDictionary class]])
+		{
+			NSArray* argv = message.body[@"argv"];
+			if([argv isKindOfClass:[NSArray class]])
+			{
+				[self.htmlItem exec:argv completionHandler:^(int rc, NSString* stdoutStr, NSString* stderrStr){
+					NSNumber* callbackId = message.body[@"callback_id"];
+					if([callbackId isKindOfClass:[NSNumber class]])
+					{
+						[self.webView evaluateJavaScript:[NSString stringWithFormat:@"genie.exec_callback(%@, %d, %@, %@);", callbackId, rc, JSStringFromString(stdoutStr), JSStringFromString(stderrStr)] completionHandler:^(id res, NSError* error){
+							if(error)
+								os_log_error(OS_LOG_DEFAULT, "error running callback: %{public}@", error);
+						}];
+					}
+				}];
+			}
+		}
 	}
 	else if([message.name isEqualToString:@"queryMessageHandler"])
 	{
@@ -185,11 +206,32 @@ static NSString* CSSColorFromColor (NSColor* orgColor)
 			"  log(str)         { webkit.messageHandlers.logMessageHandler.postMessage(str); },"
 			"  set query(str)   { webkit.messageHandlers.queryMessageHandler.postMessage(this.internal_storage = str); },"
 			"  get query()      { return this.internal_storage; },"
+			"  exec(argv, callback) {"
+			"    var options = { argv: argv };"
+			"    if(callback != undefined) {"
+			"      this.callbacks.set(this.next_callback_id, callback);"
+			"      options.callback_id = this.next_callback_id;"
+			"      this.next_callback_id += 1;"
+			"    }"
+			"    webkit.messageHandlers.execMessageHandler.postMessage(options);"
+			"  },"
+			"  exec_callback(callback_id, rc, out, err) {"
+			"    const callback = this.callbacks.get(callback_id);"
+			"    if(callback) {"
+			"      callback(rc, out, err);"
+			"      this.callbacks.delete(callback_id);"
+			"    }"
+			"    else {"
+			"      this.log('No callback');"
+			"    }"
+			"  },"
 			"  updateQuery(str) {"
 			"	  this.internal_storage = str;"
 			"    window.dispatchEvent(new Event('querychange'));"
 			"  },"
-			"  internal_storage: %@"
+			"  internal_storage: %@,"
+			"  next_callback_id: 1,"
+			"  callbacks: new Map()"
 			"};",
 				CSSColorFromColor(NSColor.controlTextColor),
 				CSSColorFromColor(NSColor.labelColor),

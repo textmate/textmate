@@ -29,6 +29,7 @@ typedef NS_ENUM(NSUInteger, GenieItemKind) {
 @property (nonatomic) NSString* queryString;
 @property (nonatomic) NSString* htmlString;
 @property (nonatomic) CGFloat height;
+- (void)exec:(NSArray*)argv completionHandler:(void(^)(int, NSString*, NSString*))callback;
 @end
 
 extern NSString* GenieItemDidReceiveNewItemsNotification;

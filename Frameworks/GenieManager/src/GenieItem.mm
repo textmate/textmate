@@ -541,6 +541,19 @@ static void* kRunningApplicationsBindings = &kRunningApplicationsBindings;
 	}
 	return self;
 }
+
+- (void)exec:(NSArray*)argv completionHandler:(void(^)(int, NSString*, NSString*))callback;
+{
+	GenieTask* task = [[GenieTask alloc] initWithCommand:argv directory:self.originalItem.directory];
+	task.environment = self.originalItem.environment;
+	task.timeOut = 15;
+
+	[task launch:^(int rc, NSData* stdoutData, NSData* stderrData){
+		NSString* stdoutStr = [[NSString alloc] initWithData:stdoutData encoding:NSUTF8StringEncoding];
+		NSString* stderrStr = [[NSString alloc] initWithData:stderrData encoding:NSUTF8StringEncoding];
+		callback(rc, stdoutStr, stderrStr);
+	}];
+}
 @end
 
 // =============
