@@ -303,19 +303,21 @@
 
 @implementation ShellProperties
 {
+	TextViewController* _textViewController;
 	GenieTableViewController* _argvTable;
 }
 
 - (void)makeView:(NSView*)contentView
 {
+	_textViewController = [TextViewController textViewController];
 	_argvTable = [[GenieTableViewController alloc] initWithColumnNames:@[ @"value" ] visibleRows:3 showHeaderView:NO prototype:@{ @"value": @"argument" }];
 	[_argvTable.arrayController bind:NSContentArrayBinding toObject:self.treeController withKeyPath:@"selection.mutableScriptArguments" options:nil];
 
 	NSTextField* scriptLabel = [NSTextField labelWithString:@"Script:"];
 	NSTextField* argvLabel   = [NSTextField labelWithString:@"Arguments:"];
 
-	NSScrollView* scriptScrollView = GenieCreateTextView();
-	NSTextView* scriptTextView     = scriptScrollView.documentView;
+	NSView* scriptScrollView   = _textViewController.view;
+	NSTextView* scriptTextView = _textViewController.textView;
 
 	NSDictionary* views = @{
 		@"scriptLabel": scriptLabel,
@@ -396,6 +398,7 @@
 
 @interface SQLiteProperties ()
 {
+	TextViewController* _textViewController;
 	GenieTableViewController* _bindingsTable;
 }
 @end
@@ -403,6 +406,7 @@
 @implementation SQLiteProperties
 - (void)makeView:(NSView*)contentView
 {
+	_textViewController = [TextViewController textViewController];
 	_bindingsTable = [[GenieTableViewController alloc] initWithColumnNames:@[ @"value" ] visibleRows:3 showHeaderView:NO prototype:@{ @"value": @"binding" }];
 	[_bindingsTable.arrayController bind:NSContentArrayBinding toObject:self.treeController withKeyPath:@"selection.mutableSqlBindings" options:nil];
 
@@ -412,8 +416,8 @@
 	NSTextField* bindingsLabel     = [NSTextField labelWithString:@"Bindings:"];
 	NSTextField* titleTextField    = [NSTextField textFieldWithString:@""];
 	NSTextField* databaseTextField = [NSTextField textFieldWithString:@""];
-	NSScrollView* queryScrollView  = GenieCreateTextView();
-	NSTextView* queryTextView      = queryScrollView.documentView;
+	NSView* queryScrollView        = _textViewController.view;
+	NSTextView* queryTextView      = _textViewController.textView;
 
 	NSDictionary* views = @{
 		@"titleLabel":     titleLabel,
@@ -499,20 +503,22 @@
 
 @implementation ExecDataSourceProperties
 {
+	TextViewController* _textViewController;
 	GenieTableViewController* _argvTable;
 }
 
 - (void)makeView:(NSView*)contentView
 {
+	_textViewController = [TextViewController textViewController];
 	_argvTable = [[GenieTableViewController alloc] initWithColumnNames:@[ @"value" ] visibleRows:3 showHeaderView:NO prototype:@{ @"value": @"argument" }];
 
 	NSTextField* titleLabel  = [NSTextField labelWithString:@"Title:"];
 	NSTextField* scriptLabel = [NSTextField labelWithString:@"Script:"];
 	NSTextField* argvLabel   = [NSTextField labelWithString:@"Arguments:"];
 
-	NSTextField* titleTextField    = [NSTextField textFieldWithString:@""];
-	NSScrollView* scriptScrollView = GenieCreateTextView();
-	NSTextView* scriptTextView     = scriptScrollView.documentView;
+	NSTextField* titleTextField = [NSTextField textFieldWithString:@""];
+	NSView* scriptScrollView    = _textViewController.view;
+	NSTextView* scriptTextView  = _textViewController.textView;
 
 	NSDictionary* views = @{
 		@"titleLabel":   titleLabel,
