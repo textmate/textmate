@@ -85,6 +85,7 @@ static NSString* CSSColorFromColor (NSColor* orgColor)
 		webConfig.suppressesIncrementalRendering = YES;
 		[webConfig.userContentController addScriptMessageHandler:self name:@"queryMessageHandler"];
 		[webConfig.userContentController addScriptMessageHandler:self name:@"logMessageHandler"];
+		[webConfig.userContentController addScriptMessageHandler:self name:@"errorMessageHandler"];
 
 		_webView = [[WKWebViewDisableScrollGesture alloc] initWithFrame:NSZeroRect configuration:webConfig];
 		_webView.navigationDelegate = self;
@@ -106,6 +107,10 @@ static NSString* CSSColorFromColor (NSColor* orgColor)
 	if([message.name isEqualToString:@"logMessageHandler"])
 	{
 		NSLog(@"JavaScript Console: %@", message.body);
+	}
+	else if([message.name isEqualToString:@"errorMessageHandler"])
+	{
+		os_log_error(OS_LOG_DEFAULT, "%{public}@:%{public}@: %{public}@", self.htmlItem.originalItem.title, message.body[@"lineno"], message.body[@"message"]);
 	}
 	else if([message.name isEqualToString:@"queryMessageHandler"])
 	{
@@ -166,6 +171,7 @@ static NSString* CSSColorFromColor (NSColor* orgColor)
 	if(_HTMLString = newHTMLString)
 	{
 		NSString* source = [NSString stringWithFormat:@""
+			"window.addEventListener('error', function(event) { webkit.messageHandlers.errorMessageHandler.postMessage({ message: event.message, filename: event.filename, lineno: event.lineno, colno: event.colno }); });"
 			"var style = document.createElement('style');"
 			"document.head.appendChild(style);"
 			"style.sheet.insertRule(':root { --textColor: %@; }');"
