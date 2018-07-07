@@ -891,7 +891,7 @@ static NSIndexPath* IndexPathForGenieItemWithIdentifier (NSString* identifier, N
 		return [self findDataSourceItem] != nil;
 	else if(aMenuItem.action == @selector(delete:))
 		return _removeButton.isEnabled;
-	return [super respondsToSelector:@selector(validateMenuItem:)] ? [super validateMenuItem:aMenuItem] : YES;
+	return YES;
 }
 
 // =======================

@@ -376,7 +376,7 @@
 {
 	if(aMenuItem.action == @selector(copy:))
 		return _treeController.selectedObjects.firstObject ? YES : NO;
-	return [super respondsToSelector:@selector(validateMenuItem:)] ? [super validateMenuItem:aMenuItem] : YES;
+	return YES;
 }
 
 - (void)closeDryRunSheet:(id)sender

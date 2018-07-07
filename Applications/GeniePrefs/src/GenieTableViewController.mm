@@ -82,7 +82,7 @@
 {
 	if(aMenuItem.action == @selector(delete:))
 		return _removeButton.isEnabled;
-	return [super respondsToSelector:@selector(validateMenuItem:)] ? [super validateMenuItem:aMenuItem] : YES;
+	return YES;
 }
 
 - (void)loadView
