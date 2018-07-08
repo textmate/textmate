@@ -137,21 +137,17 @@
 
 - (void)drawRect:(NSRect)aRect
 {
-	NSMutableArray* labelColors = [NSMutableArray array];
-	for(OakFinderTag* tag in _finderTags)
-		if([tag hasLabelColor])
-			[labelColors addObject:@(tag.label)];
+	NSArray<OakFinderTag*>* tagsWithLabelColor = [_finderTags filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"hasLabelColor == YES"]];
 
-	auto fillAndStrokePath = ^(NSBezierPath* path, NSNumber* label){
-		NSUInteger labelInt = [label unsignedIntegerValue];
-		[[OakFinderTagManager backgroundColorForLabel:labelInt] set];
+	auto fillAndStrokePath = ^(NSBezierPath* path, OakFinderTag* tag){
+		[[OakFinderTagManager backgroundColorForLabel:tag.label] set];
 		[path fill];
 
-		self.isSelectedAndEmphasized ? [[NSColor whiteColor] set] : [[OakFinderTagManager foregroundColorForLabel:labelInt] set];
+		self.isSelectedAndEmphasized ? [[NSColor whiteColor] set] : [[OakFinderTagManager foregroundColorForLabel:tag.label] set];
 		[path stroke];
 	};
 
-	auto drawCrestent = ^(NSPoint center1, NSPoint center2, NSNumber* label){
+	auto drawCrestent = ^(NSPoint center1, NSPoint center2, OakFinderTag* tag){
 		[NSGraphicsContext saveGraphicsState];
 
 		NSBezierPath* clippingPath = [NSBezierPath bezierPath];
@@ -163,13 +159,13 @@
 		[path appendBezierPathWithArcWithCenter:center2 radius:4.0 startAngle:0 endAngle:360];
 		[path closePath];
 
-		fillAndStrokePath(path, label);
+		fillAndStrokePath(path, tag);
 
 		[NSGraphicsContext restoreGraphicsState];
 	};
 
 	NSRect r = [self bounds];
-	switch([labelColors count])
+	switch([tagsWithLabelColor count])
 	{
 		case 0: return;
 		case 1:
@@ -177,7 +173,7 @@
 			NSBezierPath* path = [NSBezierPath bezierPath];
 			[path appendBezierPathWithArcWithCenter:NSMakePoint(NSMidX(r), NSMidY(r)) radius:4.0 startAngle:0 endAngle:360];
 
-			fillAndStrokePath(path, labelColors[0]);
+			fillAndStrokePath(path, tagsWithLabelColor[0]);
 			return;
 		}
 		case 2:
@@ -187,11 +183,11 @@
 			NSPoint center1 = NSMakePoint(center.x - 2.0, center.y);
 			NSPoint center2 = NSMakePoint(center.x + 2.0, center.y);
 
-			drawCrestent(center1, center2, labelColors[0]);
+			drawCrestent(center1, center2, tagsWithLabelColor[0]);
 
 			NSBezierPath* path = [NSBezierPath bezierPath];
 			[path appendBezierPathWithArcWithCenter:center1 radius:4.0 startAngle:0 endAngle:360];
-			fillAndStrokePath(path, labelColors[1]);
+			fillAndStrokePath(path, tagsWithLabelColor[1]);
 			return;
 		}
 		default:
@@ -202,13 +198,13 @@
 			NSPoint center2 = NSMakePoint(center.x, center.y);
 			NSPoint center3 = NSMakePoint(center.x + 4.0, center.y);
 
-			NSUInteger lastIndex = [labelColors count] - 1;
-			drawCrestent(center2, center3, labelColors[lastIndex - 2]);
-			drawCrestent(center1, center2, labelColors[lastIndex - 1]);
+			NSUInteger lastIndex = [tagsWithLabelColor count] - 1;
+			drawCrestent(center2, center3, tagsWithLabelColor[lastIndex - 2]);
+			drawCrestent(center1, center2, tagsWithLabelColor[lastIndex - 1]);
 
 			NSBezierPath* path = [NSBezierPath bezierPath];
 			[path appendBezierPathWithArcWithCenter:center1 radius:4.0 startAngle:0 endAngle:360];
-			fillAndStrokePath(path, labelColors[lastIndex]);
+			fillAndStrokePath(path, tagsWithLabelColor[lastIndex]);
 			return;
 		}
 	}
