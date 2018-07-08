@@ -404,11 +404,6 @@ namespace path
 		return (pathIsLocal == kCFBooleanTrue);
 	}
 
-	std::string tag_data (std::string const& path)
-	{
-		return get_attr(path, "com.apple.metadata:_kMDItemUserTags");
-	}
-
 	// ========
 	// = Info =
 	// ========

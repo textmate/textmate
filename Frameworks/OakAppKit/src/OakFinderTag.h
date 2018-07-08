@@ -13,7 +13,6 @@ PUBLIC @interface OakFinderTag : NSObject
 
 PUBLIC @interface OakFinderTagManager : NSObject
 + (NSArray<OakFinderTag*>*)finderTagsForURL:(NSURL*)aURL;
-+ (NSArray<OakFinderTag*>*)finderTagsFromData:(NSData*)data;
 + (NSColor*)backgroundColorForLabel:(NSUInteger)label;
 + (NSColor*)foregroundColorForLabel:(NSUInteger)label;
 @property (nonatomic, class, readonly) NSArray<OakFinderTag*>* favoriteFinderTags;
