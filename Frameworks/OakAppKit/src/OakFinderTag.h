@@ -4,7 +4,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 PUBLIC @interface OakFinderTag : NSObject
 @property (nonatomic) NSString* displayName;
-@property (nonatomic, getter=isMarkedFavorite) BOOL markedFavorite;
 @property (nonatomic, readonly) NSColor* backgroundColor;
 @property (nonatomic, readonly) NSColor* foregroundColor;
 - (BOOL)hasLabelColor;

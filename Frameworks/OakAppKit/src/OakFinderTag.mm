@@ -20,20 +20,19 @@ static struct label_colors_t { NSString* name; NSString* backgroundColor; NSStri
 @end
 
 @implementation OakFinderTag
-- (instancetype)initWithDisplayName:(NSString*)name label:(NSUInteger)label markedFavorite:(BOOL)markedFavorite
+- (instancetype)initWithDisplayName:(NSString*)name label:(NSUInteger)label
 {
 	if(self = [super init])
 	{
 		_displayName = name;
 		_label = label;
-		_markedFavorite = markedFavorite;
 	}
 	return self;
 }
 
-+ (instancetype)tagWithDisplayName:(NSString*)name label:(NSUInteger)label markedFavorite:(BOOL)markedFavorite
++ (instancetype)tagWithDisplayName:(NSString*)name label:(NSUInteger)label
 {
-	return [[OakFinderTag alloc] initWithDisplayName:name label:label markedFavorite:markedFavorite];
+	return [[OakFinderTag alloc] initWithDisplayName:name label:label];
 }
 
 - (BOOL)hasLabelColor
@@ -51,7 +50,7 @@ static struct label_colors_t { NSString* name; NSString* backgroundColor; NSStri
 	return [NSColor colorWithString:labelColors[_label].foregroundColor];
 }
 
-- (id)copyWithZone:(NSZone*)zone { return [[OakFinderTag alloc] initWithDisplayName:_displayName label:_label markedFavorite:_markedFavorite]; }
+- (id)copyWithZone:(NSZone*)zone { return [[OakFinderTag alloc] initWithDisplayName:_displayName label:_label]; }
 - (NSUInteger)hash               { return [_displayName hash]; }
 - (BOOL)isEqual:(id)otherObject  { return [otherObject isKindOfClass:[self class]] && [_displayName isEqualToString:[otherObject displayName]]; }
 - (NSString*)description         { return [NSString stringWithFormat:@"<%@: %@ (%@)>", self.class, _displayName, @(_label)]; }
@@ -79,10 +78,9 @@ static struct label_colors_t { NSString* name; NSString* backgroundColor; NSStri
 	for(NSString* tag in plist)
 	{
 		NSArray* tagComponents = [tag componentsSeparatedByString:@"\n"];
-		BOOL isFavorite = [self.favoriteFinderTags indexOfObjectPassingTest:^BOOL(OakFinderTag* favoriteTag, NSUInteger, BOOL*){ return [tagComponents[0] isEqualToString:favoriteTag.displayName]; }] != NSNotFound;
 		if([tagComponents count] == 2)
-				[finderTags addObject:[OakFinderTag tagWithDisplayName:tagComponents[0] label:[tagComponents[1] integerValue] markedFavorite:isFavorite]];
-		else	[finderTags addObject:[OakFinderTag tagWithDisplayName:tagComponents[0] label:0 markedFavorite:isFavorite]];
+				[finderTags addObject:[OakFinderTag tagWithDisplayName:tagComponents[0] label:[tagComponents[1] integerValue]]];
+		else	[finderTags addObject:[OakFinderTag tagWithDisplayName:tagComponents[0] label:0]];
 	}
 
 	return [finderTags copy];
@@ -104,8 +102,7 @@ static struct label_colors_t { NSString* name; NSString* backgroundColor; NSStri
 		auto it = std::find_if(std::begin(labelColors), std::end(labelColors), [=](label_colors_t const& labelColors){ return [labelColors.name isEqualToString:name]; });
 		NSUInteger label = it != std::end(labelColors) ? std::distance(std::begin(labelColors), it) : 0;
 
-		OakFinderTag* tag = [[OakFinderTag alloc] initWithDisplayName:name label:label markedFavorite:YES];
-		[tags addObject:tag];
+		[tags addObject:[[OakFinderTag alloc] initWithDisplayName:name label:label]];
 	}
 	return [tags copy];
 }
