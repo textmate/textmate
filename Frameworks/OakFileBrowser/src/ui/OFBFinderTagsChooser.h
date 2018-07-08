@@ -5,8 +5,8 @@
 @property (nonatomic) SEL action;
 @property (nonatomic) NSFont* font;
 @property (nonatomic, getter=isEnabled) BOOL enabled;
-@property (nonatomic) NSArray<OakFinderTag*>* selectedFavoriteTags;
-@property (nonatomic) NSArray<OakFinderTag*>* selectedFavoriteTagsToRemove;
+@property (nonatomic) NSArray<OakFinderTag*>* selectedTags;
+@property (nonatomic) NSArray<OakFinderTag*>* selectedTagsToRemove;
 @property (nonatomic) OakFinderTag* chosenTag;
 @property (nonatomic, readonly) BOOL removeChosenTag;
 + (OFBFinderTagsChooser*)finderTagsChooserForMenu:(NSMenu*)aMenu;

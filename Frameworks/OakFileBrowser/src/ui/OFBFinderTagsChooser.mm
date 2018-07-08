@@ -7,7 +7,7 @@ static constexpr CGFloat LabelNameHeight = 15;
 
 @interface OFBFinderTagsChooser ()
 {
-	OakFinderTag* _hoverFavoriteTag;
+	OakFinderTag* _hoverTag;
 }
 @property (nonatomic) NSArray<OakFinderTag*>* favoriteFinderTags;
 @end
@@ -93,9 +93,9 @@ static constexpr CGFloat LabelNameHeight = 15;
 	for(OakFinderTag* tag in _favoriteFinderTags)
 	{
 		NSRect tagRect = [self rectForFavoriteTag:tag];
-		BOOL tagSelected = [_selectedFavoriteTags containsObject:tag];
-		BOOL tagHovered = [_hoverFavoriteTag isEqual:tag];
-		BOOL shouldRemoveSelectedTag = _selectedFavoriteTagsToRemove && [_selectedFavoriteTagsToRemove containsObject:tag];
+		BOOL tagSelected = [_selectedTags containsObject:tag];
+		BOOL tagHovered = [_hoverTag isEqual:tag];
+		BOOL shouldRemoveSelectedTag = _selectedTagsToRemove && [_selectedTagsToRemove containsObject:tag];
 
 		if(tagSelected)
 		{
@@ -133,11 +133,11 @@ static constexpr CGFloat LabelNameHeight = 15;
 			if(shouldRemoveSelectedTag)
 			{
 				[self drawXInRect:innerSwatchRect];
-				[[NSString stringWithFormat:@"Remove Tag “%@”", _hoverFavoriteTag.displayName] drawInRect:labelRect withAttributes:[self labelAttributes]];
+				[[NSString stringWithFormat:@"Remove Tag “%@”", _hoverTag.displayName] drawInRect:labelRect withAttributes:[self labelAttributes]];
 			}
 			else
 			{
-				[[NSString stringWithFormat:@"Add Tag “%@”", _hoverFavoriteTag.displayName] drawInRect:labelRect withAttributes:[self labelAttributes]];
+				[[NSString stringWithFormat:@"Add Tag “%@”", _hoverTag.displayName] drawInRect:labelRect withAttributes:[self labelAttributes]];
 			}
 		}
 	}
@@ -175,7 +175,7 @@ static constexpr CGFloat LabelNameHeight = 15;
 		return;
 
 	NSPoint pos = [self convertPoint:[anEvent locationInWindow] fromView:nil];
-	_hoverFavoriteTag = [self tagAtPoint:pos];
+	_hoverTag = [self tagAtPoint:pos];
 	[self setNeedsDisplay:YES];
 }
 
@@ -208,7 +208,7 @@ static constexpr CGFloat LabelNameHeight = 15;
 	{
 		if(NSPointInRect(localPoint, [self rectForFavoriteTag:tag]))
 		{
-			_removeChosenTag = _selectedFavoriteTagsToRemove && [_selectedFavoriteTagsToRemove containsObject:tag];
+			_removeChosenTag = _selectedTagsToRemove && [_selectedTagsToRemove containsObject:tag];
 			_chosenTag       = tag;
 
 			if([self target] && [[self target] respondsToSelector:[self action]])

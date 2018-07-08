@@ -974,11 +974,11 @@ static bool is_binary (std::string const& path)
 		}
 
 		OFBFinderTagsChooser* chooser = [OFBFinderTagsChooser finderTagsChooserForMenu:aMenu];
-		chooser.selectedFavoriteTags         = finderTagsCountedSet.objectEnumerator.allObjects;
-		chooser.selectedFavoriteTagsToRemove = [removeFinderTags copy];
-		chooser.action                       = @selector(didChangeFavoriteTag:);
-		chooser.target                       = self;
-		chooser.enabled                      = YES;
+		chooser.selectedTags         = finderTagsCountedSet.objectEnumerator.allObjects;
+		chooser.selectedTagsToRemove = [removeFinderTags copy];
+		chooser.action               = @selector(didChangeFavoriteTag:);
+		chooser.target               = self;
+		chooser.enabled              = YES;
 
 		[[aMenu addItemWithTitle:@"Finder Tag" action:NULL keyEquivalent:@""] setView:chooser];
 	}
