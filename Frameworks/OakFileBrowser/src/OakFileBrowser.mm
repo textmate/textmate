@@ -964,18 +964,18 @@ static bool is_binary (std::string const& path)
 		[aMenu addItemWithTitle:@"Tags…" action:@selector(nop:) keyEquivalent:@""];
 
 		NSCountedSet* finderTagsCountedSet = [NSCountedSet set];
-		NSMutableArray* selectedFinderTags = [NSMutableArray array];
-		NSMutableArray* removeFinderTags   = [NSMutableArray array];
+		NSMutableArray<OakFinderTag*>* selectedFinderTags = [NSMutableArray array];
+		NSMutableArray<OakFinderTag*>* removeFinderTags   = [NSMutableArray array];
 
 		for(FSItem* item in self.selectedItems)
 			for(OakFinderTag* tag in item.finderTags)
-				[finderTagsCountedSet addObject:tag.displayName];
+				[finderTagsCountedSet addObject:tag];
 
-		for(NSString* tagName in finderTagsCountedSet)
+		for(OakFinderTag* tag in finderTagsCountedSet)
 		{
-			[selectedFinderTags addObject:tagName];
-			if([finderTagsCountedSet countForObject:tagName] == self.selectedItems.count)
-				[removeFinderTags addObject:tagName];
+			[selectedFinderTags addObject:tag];
+			if([finderTagsCountedSet countForObject:tag] == self.selectedItems.count)
+				[removeFinderTags addObject:tag];
 		}
 
 		OFBFinderTagsChooser* chooser = [OFBFinderTagsChooser finderTagsChooserForMenu:aMenu];

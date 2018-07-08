@@ -7,7 +7,7 @@ static constexpr CGFloat LabelNameHeight = 15;
 
 @interface OFBFinderTagsChooser ()
 {
-	NSString* _hoverFavoriteTag;
+	OakFinderTag* _hoverFavoriteTag;
 }
 @property (nonatomic) NSArray<OakFinderTag*>* favoriteFinderTags;
 @end
@@ -93,9 +93,9 @@ static constexpr CGFloat LabelNameHeight = 15;
 	for(OakFinderTag* tag in _favoriteFinderTags)
 	{
 		NSRect tagRect = [self rectForFavoriteTag:tag];
-		BOOL tagSelected = [_selectedFavoriteTags containsObject:tag.displayName];
-		BOOL tagHovered = [_hoverFavoriteTag isEqualToString:tag.displayName];
-		BOOL shouldRemoveSelectedTag = _selectedFavoriteTagsToRemove && [_selectedFavoriteTagsToRemove containsObject:tag.displayName];
+		BOOL tagSelected = [_selectedFavoriteTags containsObject:tag];
+		BOOL tagHovered = [_hoverFavoriteTag isEqual:tag];
+		BOOL shouldRemoveSelectedTag = _selectedFavoriteTagsToRemove && [_selectedFavoriteTagsToRemove containsObject:tag];
 
 		if(tagSelected)
 		{
@@ -133,11 +133,11 @@ static constexpr CGFloat LabelNameHeight = 15;
 			if(shouldRemoveSelectedTag)
 			{
 				[self drawXInRect:innerSwatchRect];
-				[[NSString stringWithFormat:@"Remove Tag “%@”", _hoverFavoriteTag] drawInRect:labelRect withAttributes:[self labelAttributes]];
+				[[NSString stringWithFormat:@"Remove Tag “%@”", _hoverFavoriteTag.displayName] drawInRect:labelRect withAttributes:[self labelAttributes]];
 			}
 			else
 			{
-				[[NSString stringWithFormat:@"Add Tag “%@”", _hoverFavoriteTag] drawInRect:labelRect withAttributes:[self labelAttributes]];
+				[[NSString stringWithFormat:@"Add Tag “%@”", _hoverFavoriteTag.displayName] drawInRect:labelRect withAttributes:[self labelAttributes]];
 			}
 		}
 	}
@@ -175,8 +175,7 @@ static constexpr CGFloat LabelNameHeight = 15;
 		return;
 
 	NSPoint pos = [self convertPoint:[anEvent locationInWindow] fromView:nil];
-	OakFinderTag* tag = [self tagAtPoint:pos];
-	_hoverFavoriteTag = tag.displayName;
+	_hoverFavoriteTag = [self tagAtPoint:pos];
 	[self setNeedsDisplay:YES];
 }
 
@@ -209,7 +208,7 @@ static constexpr CGFloat LabelNameHeight = 15;
 	{
 		if(NSPointInRect(localPoint, [self rectForFavoriteTag:tag]))
 		{
-			_removeChosenTag = _selectedFavoriteTagsToRemove && [_selectedFavoriteTagsToRemove containsObject:tag.displayName];
+			_removeChosenTag = _selectedFavoriteTagsToRemove && [_selectedFavoriteTagsToRemove containsObject:tag];
 			_chosenTag       = tag;
 
 			if([self target] && [[self target] respondsToSelector:[self action]])
