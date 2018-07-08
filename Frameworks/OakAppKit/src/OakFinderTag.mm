@@ -15,6 +15,10 @@ static struct label_colors_t { NSString* name; NSString* backgroundColor; NSStri
 	{ @"Orange", @"#FD9938",   @"#FD8510" },
 };
 
+@interface OakFinderTag ()
+@property (nonatomic) NSUInteger label;
+@end
+
 @implementation OakFinderTag
 - (instancetype)initWithDisplayName:(NSString*)name label:(NSUInteger)label markedFavorite:(BOOL)markedFavorite
 {
