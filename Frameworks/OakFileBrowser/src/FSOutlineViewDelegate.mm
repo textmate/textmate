@@ -300,12 +300,9 @@
 
 - (void)setNilValueForKey:(NSString*)aKey
 {
-	if([aKey isEqualToString:@"finderTags"])
-		[self setValue:@[ ] forKey:aKey];
-	else if([aKey isEqualToString:@"open"])
-		[self setValue:@NO forKey:aKey];
-	else
-		[super setNilValueForKey:aKey];
+	if([aKey isEqualToString:@"open"])
+			[self setValue:@NO forKey:aKey];
+	else	[super setNilValueForKey:aKey];
 }
 
 - (void)setOpen:(BOOL)flag
