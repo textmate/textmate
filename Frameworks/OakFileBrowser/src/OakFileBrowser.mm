@@ -734,6 +734,9 @@ static bool is_binary (std::string const& path)
 			[newTagNames addObject:chosenTag];
 
 		[item.url setResourceValue:newTagNames forKey:NSURLTagNamesKey error:nil];
+		std::string const tag_data = path::tag_data(item.url.fileSystemRepresentation);
+		item.finderTags = tag_data == NULL_STR ? nil : [OakFinderTagManager finderTagsFromData:[NSData dataWithBytes:(void*)tag_data.data() length:tag_data.size()]];
+
 		[newTagNames removeAllObjects];
 	}
 }
