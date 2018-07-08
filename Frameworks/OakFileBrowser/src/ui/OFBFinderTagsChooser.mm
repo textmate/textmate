@@ -20,9 +20,9 @@ static constexpr CGFloat LabelNameHeight = 15;
 
 - (NSSize)intrinsicContentSize
 {
-	const CGFloat numberOfFavoriteTags = [[OakFinderTagManager favoriteFinderTags] count];
-	const CGFloat width = SwatchDiameter * numberOfFavoriteTags + SwatchMargin * (numberOfFavoriteTags + 1);
-	const CGFloat height = SwatchDiameter + LabelNameHeight;
+	CGFloat const numberOfFavoriteTags = [[OakFinderTagManager favoriteFinderTags] count];
+	CGFloat const width = SwatchDiameter * numberOfFavoriteTags + SwatchMargin * (numberOfFavoriteTags + 1);
+	CGFloat const height = SwatchDiameter + LabelNameHeight;
 	return NSMakeSize(width, height);
 }
 
@@ -65,7 +65,7 @@ static constexpr CGFloat LabelNameHeight = 15;
 - (void)drawXInRect:(NSRect)aRect
 {
 	NSRect r = NSInsetRect(aRect, 3, 3);
-	const CGFloat inscribedRectLength = r.size.width;
+	CGFloat const inscribedRectLength = r.size.width;
 	NSBezierPath* line = [NSBezierPath bezierPath];
 	[line moveToPoint:r.origin];
 	[line lineToPoint:NSMakePoint(r.origin.x + inscribedRectLength, r.origin.y + inscribedRectLength)];
@@ -239,5 +239,4 @@ static constexpr CGFloat LabelNameHeight = 15;
 {
 	[self _handleMouseMoved:anEvent];
 }
-
 @end

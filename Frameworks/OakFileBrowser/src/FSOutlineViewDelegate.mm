@@ -165,7 +165,7 @@
 
 		fillAndStrokePath(path, label);
 
-      [NSGraphicsContext restoreGraphicsState];
+		[NSGraphicsContext restoreGraphicsState];
 	};
 
 	NSRect r = [self bounds];

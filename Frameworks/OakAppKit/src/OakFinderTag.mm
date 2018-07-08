@@ -52,7 +52,7 @@ static struct label_colors_t { NSString* name; NSString* backgroundColor; NSStri
 		NSArray* tagComponents = [tag componentsSeparatedByString:@"\n"];
 		BOOL isFavorite = [self.favoriteFinderTags indexOfObjectPassingTest:^BOOL(OakFinderTag* favoriteTag, NSUInteger, BOOL*){ return [tagComponents[0] isEqualToString:favoriteTag.displayName]; }] != NSNotFound;
 		if([tagComponents count] == 2)
-			[finderTags addObject:[OakFinderTag tagWithDisplayName:tagComponents[0] label:[tagComponents[1] integerValue] markedFavorite:isFavorite]];
+				[finderTags addObject:[OakFinderTag tagWithDisplayName:tagComponents[0] label:[tagComponents[1] integerValue] markedFavorite:isFavorite]];
 		else	[finderTags addObject:[OakFinderTag tagWithDisplayName:tagComponents[0] label:0 markedFavorite:isFavorite]];
 	}
 
