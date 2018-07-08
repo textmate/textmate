@@ -206,7 +206,7 @@ static constexpr CGFloat LabelNameHeight = 15;
 		if(NSPointInRect(localPoint, [self rectForFavoriteTag:tag]))
 		{
 			_removeChosenTag = _selectedFavoriteTagsToRemove && [_selectedFavoriteTagsToRemove containsObject:tag.displayName];
-			_chosenTag       = tag.displayName;
+			_chosenTag       = tag;
 
 			if([self target] && [[self target] respondsToSelector:[self action]])
 				[NSApp sendAction:[self action] to:[self target] from:self];

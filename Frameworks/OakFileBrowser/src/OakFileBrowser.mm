@@ -720,24 +720,15 @@ static bool is_binary (std::string const& path)
 
 - (void)didChangeFavoriteTag:(OFBFinderTagsChooser*)finderTagsChooser
 {
-	NSString* chosenTag = finderTagsChooser.chosenTag;
-
-	NSMutableArray<NSString*>* newTagNames = [NSMutableArray array];
+	OakFinderTag* chosenTag = finderTagsChooser.chosenTag;
 	for(FSItem* item in self.selectedItems)
 	{
-		for(OakFinderTag* tag in item.finderTags)
-			[newTagNames addObject:tag.displayName];
-
+		NSMutableArray<OakFinderTag*>* tags = [item.finderTags mutableCopy];
 		if(finderTagsChooser.removeChosenTag)
-			[newTagNames removeObject:chosenTag];
-		else if(![newTagNames containsObject:chosenTag])
-			[newTagNames addObject:chosenTag];
-
-		[item.url setResourceValue:newTagNames forKey:NSURLTagNamesKey error:nil];
-		std::string const tag_data = path::tag_data(item.url.fileSystemRepresentation);
-		item.finderTags = tag_data == NULL_STR ? nil : [OakFinderTagManager finderTagsFromData:[NSData dataWithBytes:(void*)tag_data.data() length:tag_data.size()]];
-
-		[newTagNames removeAllObjects];
+			[tags removeObject:chosenTag];
+		else if(![tags containsObject:chosenTag])
+			[tags addObject:chosenTag];
+		item.finderTags = tags;
 	}
 }
 
