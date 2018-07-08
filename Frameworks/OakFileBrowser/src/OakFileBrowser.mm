@@ -718,7 +718,7 @@ static bool is_binary (std::string const& path)
 		[_outlineViewDelegate selectURLs:@[ itemToSelect.url ] expandChildren:NO];
 }
 
-- (void)didChangeFavoriteTag:(OFBFinderTagsChooser*)finderTagsChooser
+- (void)didChangeFinderTag:(OFBFinderTagsChooser*)finderTagsChooser
 {
 	OakFinderTag* chosenTag = finderTagsChooser.chosenTag;
 	for(FSItem* item in self.selectedItems)
@@ -976,7 +976,7 @@ static bool is_binary (std::string const& path)
 		OFBFinderTagsChooser* chooser = [OFBFinderTagsChooser finderTagsChooserForMenu:aMenu];
 		chooser.selectedTags         = finderTagsCountedSet.objectEnumerator.allObjects;
 		chooser.selectedTagsToRemove = [removeFinderTags copy];
-		chooser.action               = @selector(didChangeFavoriteTag:);
+		chooser.action               = @selector(didChangeFinderTag:);
 		chooser.target               = self;
 		chooser.enabled              = YES;
 
