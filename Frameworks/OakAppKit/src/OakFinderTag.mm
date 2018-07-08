@@ -90,28 +90,23 @@ static struct label_colors_t { NSString* name; NSString* backgroundColor; NSStri
 
 + (NSArray<OakFinderTag*>*)favoriteFinderTags
 {
-	static NSArray* favoriteFinderTags;
-	static dispatch_once_t onceToken = 0;
-	dispatch_once(&onceToken, ^{
-		NSUserDefaults* finderDefaults = [[NSUserDefaults alloc] initWithSuiteName:@"com.apple.finder"];
-		NSArray<NSString*>* favoriteTagNames = [finderDefaults arrayForKey:@"FavoriteTagNames"];
-		if(!favoriteTagNames)
-			favoriteTagNames = @[ @"Red", @"Orange", @"Yellow", @"Green", @"Blue", @"Purple" ];
+	NSUserDefaults* finderDefaults = [[NSUserDefaults alloc] initWithSuiteName:@"com.apple.finder"];
+	NSArray<NSString*>* favoriteTagNames = [finderDefaults arrayForKey:@"FavoriteTagNames"];
+	if(!favoriteTagNames)
+		favoriteTagNames = @[ @"Red", @"Orange", @"Yellow", @"Green", @"Blue", @"Purple" ];
 
-		NSMutableArray<OakFinderTag*>* tags = [NSMutableArray new];
-		for(NSString* name in favoriteTagNames)
-		{
-			if(OakIsEmptyString(name))
-				continue;
+	NSMutableArray<OakFinderTag*>* tags = [NSMutableArray new];
+	for(NSString* name in favoriteTagNames)
+	{
+		if(OakIsEmptyString(name))
+			continue;
 
-			auto it = std::find_if(std::begin(labelColors), std::end(labelColors), [=](label_colors_t const& labelColors){ return [labelColors.name isEqualToString:name]; });
-			NSUInteger label = it != std::end(labelColors) ? std::distance(std::begin(labelColors), it) : 0;
+		auto it = std::find_if(std::begin(labelColors), std::end(labelColors), [=](label_colors_t const& labelColors){ return [labelColors.name isEqualToString:name]; });
+		NSUInteger label = it != std::end(labelColors) ? std::distance(std::begin(labelColors), it) : 0;
 
-			OakFinderTag* tag = [[OakFinderTag alloc] initWithDisplayName:name label:label markedFavorite:YES];
-			[tags addObject:tag];
-		}
-		favoriteFinderTags = [tags copy];
-	});
-	return favoriteFinderTags;
+		OakFinderTag* tag = [[OakFinderTag alloc] initWithDisplayName:name label:label markedFavorite:YES];
+		[tags addObject:tag];
+	}
+	return [tags copy];
 }
 @end

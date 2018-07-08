@@ -12,7 +12,7 @@ PUBLIC @interface OakFinderTag : NSObject
 
 PUBLIC @interface OakFinderTagManager : NSObject
 + (NSArray<OakFinderTag*>*)finderTagsForURL:(NSURL*)aURL;
-@property (nonatomic, class, readonly) NSArray<OakFinderTag*>* favoriteFinderTags;
++ (NSArray<OakFinderTag*>*)favoriteFinderTags;
 @end
 
 NS_ASSUME_NONNULL_END
