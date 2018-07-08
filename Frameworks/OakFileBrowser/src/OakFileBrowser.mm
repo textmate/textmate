@@ -963,27 +963,6 @@ static bool is_binary (std::string const& path)
 		[aMenu addItem:[NSMenuItem separatorItem]];
 		[aMenu addItemWithTitle:@"Tags…" action:@selector(nop:) keyEquivalent:@""];
 
-		NSCountedSet* favoriteTagNamesSet = [NSCountedSet set];
-
-		for(FSItem* item in self.selectedItems)
-		{
-			for(OakFinderTag* tag in item.finderTags)
-				if(tag.isMarkedFavorite)
-					[favoriteTagNamesSet addObject:tag.displayName];
-		}
-
-		NSMutableArray* favoriteTagNamesToRemove = [NSMutableArray array];
-		if([self.selectedItems count] == 1)
-		{
-			[favoriteTagNamesToRemove addObjectsFromArray:[favoriteTagNamesSet allObjects]];
-		}
-		else
-		{
-			for(NSString* tagName in favoriteTagNamesSet)
-				if([favoriteTagNamesSet countForObject:tagName] > 1)
-					[favoriteTagNamesToRemove addObject:tagName];
-		}
-
 		NSCountedSet* finderTagsCountedSet = [NSCountedSet set];
 		NSMutableArray* selectedFinderTags = [NSMutableArray array];
 		NSMutableArray* removeFinderTags   = [NSMutableArray array];
