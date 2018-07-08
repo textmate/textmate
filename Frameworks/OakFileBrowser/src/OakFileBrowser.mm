@@ -969,8 +969,7 @@ static bool is_binary (std::string const& path)
 
 		for(FSItem* item in self.selectedItems)
 			for(OakFinderTag* tag in item.finderTags)
-				if(tag.isMarkedFavorite)
-					[finderTagsCountedSet addObject:tag.displayName];
+				[finderTagsCountedSet addObject:tag.displayName];
 
 		for(NSString* tagName in finderTagsCountedSet)
 		{
