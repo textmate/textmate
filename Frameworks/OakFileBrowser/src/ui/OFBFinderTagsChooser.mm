@@ -5,22 +5,26 @@ static constexpr CGFloat SwatchDiameter  = 20;
 static constexpr CGFloat SwatchMargin    = 2;
 static constexpr CGFloat LabelNameHeight = 15;
 
-@implementation OFBFinderTagsChooser
+@interface OFBFinderTagsChooser ()
 {
 	NSString* _hoverFavoriteTag;
 }
+@property (nonatomic) NSArray<OakFinderTag*>* favoriteFinderTags;
+@end
 
+@implementation OFBFinderTagsChooser
 + (OFBFinderTagsChooser*)finderTagsChooserForMenu:(NSMenu*)aMenu
 {
 	OFBFinderTagsChooser* chooser = [[OFBFinderTagsChooser alloc] initWithFrame:NSMakeRect(0, 0, 200, 45)];
 	chooser.font = [aMenu font];
+	chooser.favoriteFinderTags = [OakFinderTagManager favoriteFinderTags];
 	[chooser setNeedsDisplay:YES];
 	return chooser;
 }
 
 - (NSSize)intrinsicContentSize
 {
-	CGFloat const numberOfFavoriteTags = [[OakFinderTagManager favoriteFinderTags] count];
+	CGFloat const numberOfFavoriteTags = _favoriteFinderTags.count;
 	CGFloat const width = SwatchDiameter * numberOfFavoriteTags + SwatchMargin * (numberOfFavoriteTags + 1);
 	CGFloat const height = SwatchDiameter + LabelNameHeight;
 	return NSMakeSize(width, height);
@@ -52,13 +56,13 @@ static constexpr CGFloat LabelNameHeight = 15;
 
 - (NSRect)rectForFavoriteTag:(OakFinderTag*)aTag
 {
-	NSUInteger index = [[OakFinderTagManager favoriteFinderTags] indexOfObject:aTag];
-	return (index < [[OakFinderTagManager favoriteFinderTags] count]) ? NSMakeRect(22 + index*(SwatchDiameter + SwatchMargin * 2), LabelNameHeight + 5, SwatchDiameter, SwatchDiameter) : NSZeroRect;
+	NSUInteger index = [_favoriteFinderTags indexOfObject:aTag];
+	return (index < _favoriteFinderTags.count) ? NSMakeRect(22 + index*(SwatchDiameter + SwatchMargin * 2), LabelNameHeight + 5, SwatchDiameter, SwatchDiameter) : NSZeroRect;
 }
 
 - (OakFinderTag*)tagAtPoint:(NSPoint)aPoint
 {
-	for(OakFinderTag* tag in [OakFinderTagManager favoriteFinderTags])
+	for(OakFinderTag* tag in _favoriteFinderTags)
 	{
 		NSRect r = [self rectForFavoriteTag:tag];
 		if(NSMouseInRect(aPoint, r, [self isFlipped]))
@@ -86,7 +90,7 @@ static constexpr CGFloat LabelNameHeight = 15;
 	if(!self.isEnabled)
 		CGContextSetAlpha((CGContextRef)[[NSGraphicsContext currentContext] graphicsPort], 0.5);
 
-	for(OakFinderTag* tag in [OakFinderTagManager favoriteFinderTags])
+	for(OakFinderTag* tag in _favoriteFinderTags)
 	{
 		NSRect tagRect = [self rectForFavoriteTag:tag];
 		BOOL tagSelected = [_selectedFavoriteTags containsObject:tag.displayName];
@@ -148,7 +152,7 @@ static constexpr CGFloat LabelNameHeight = 15;
 
 	if(self.isEnabled)
 	{
-		for(OakFinderTag* tag in [OakFinderTagManager favoriteFinderTags])
+		for(OakFinderTag* tag in _favoriteFinderTags)
 		{
 			NSTrackingArea* trackingArea = [[NSTrackingArea alloc] initWithRect:[self rectForFavoriteTag:tag] options:NSTrackingMouseEnteredAndExited|NSTrackingActiveInKeyWindow owner:self userInfo:nil];
 			[self addTrackingArea:trackingArea];
@@ -201,7 +205,7 @@ static constexpr CGFloat LabelNameHeight = 15;
 		return;
 
 	NSPoint localPoint = [self convertPoint:[anEvent locationInWindow] fromView:nil];
-	for(OakFinderTag* tag in [OakFinderTagManager favoriteFinderTags])
+	for(OakFinderTag* tag in _favoriteFinderTags)
 	{
 		if(NSPointInRect(localPoint, [self rectForFavoriteTag:tag]))
 		{
