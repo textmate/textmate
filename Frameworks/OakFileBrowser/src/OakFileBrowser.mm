@@ -1039,6 +1039,8 @@ static bool is_binary (std::string const& path)
 
 	if(countOfExistingItems == [aMenu numberOfItems])
 		[aMenu addItemWithTitle:@"No available actions" action:@selector(nop:) keyEquivalent:@""];
+
+	[aMenu addItem:[NSMenuItem separatorItem]];
 }
 
 - (BOOL)menuHasKeyEquivalent:(NSMenu*)aMenu forEvent:(NSEvent*)anEvent target:(id*)anId action:(SEL*)aSEL
