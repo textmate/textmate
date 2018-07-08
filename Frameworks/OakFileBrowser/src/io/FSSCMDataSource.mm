@@ -43,7 +43,6 @@ static NSArray* convert (std::map<std::string, scm::status::type> const& pathsMa
 
 		item.displayName = [NSString stringWithCxxString:path::display_name(pair.first, *parent++)];
 		item.target      = url;
-		item.labelIndex  = path::label_index(pair.first);
 		item.toolTip     = [NSString stringWithCxxString:path::relative_to(pair.first, wcPath)];
 		item.leaf        = YES;
 		item.scmStatus   = hideSCMBadge ? scm::status::none : pair.second;

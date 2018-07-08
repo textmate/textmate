@@ -103,10 +103,9 @@ struct tracking_t : fs::event_callback_t
 {
 	struct fs_item_t
 	{
-		fs_item_t (dev_t device, dirent const* entry, std::string const& path) : device(device), inode(entry->d_fileno), path(path), target(NULL_STR), label(0), is_directory(false), is_link(false), treat_as_directory(false), sort_as_directory(false)
+		fs_item_t (dev_t device, dirent const* entry, std::string const& path) : device(device), inode(entry->d_fileno), path(path), target(NULL_STR), is_directory(false), is_link(false), treat_as_directory(false), sort_as_directory(false)
 		{
 			tag_data = path::tag_data(path);
-			label = path::label_index(path);
 
 			if(entry->d_type == DT_LNK)
 			{
@@ -141,7 +140,6 @@ struct tracking_t : fs::event_callback_t
 		std::string path;
 		std::string target;
 		std::string tag_data;
-		size_t label;
 		bool is_directory;
 		bool is_link;
 		bool treat_as_directory;
@@ -249,7 +247,6 @@ struct tracking_t : fs::event_callback_t
 					item.inode        = fsItem.inode;
 					item.displayName  = [NSString stringWithCxxString:path::display_name(fsItem.path)];
 					item.icon         = image;
-					item.labelIndex   = fsItem.label;
 					item.sortAsFolder = fsItem.sort_as_directory;
 					item.leaf         = !fsItem.treat_as_directory;
 					item.link         = fsItem.is_link;

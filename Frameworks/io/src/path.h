@@ -56,9 +56,6 @@ namespace path
 	PUBLIC dev_t device (std::string const& path);
 	PUBLIC uint32_t info (std::string const& path, uint32_t mask = 0xFFFFFF); // the type of the file, mask given to limit work done, see possible values below
 
-	PUBLIC CFIndex label_index (std::string const& path);
-	PUBLIC bool set_label_index (std::string const& path, CFIndex labelIndex);
-
 	PUBLIC std::string tag_data (std::string const& path);
 
 	PUBLIC bool exists (std::string const& path);

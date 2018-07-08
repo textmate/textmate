@@ -404,38 +404,6 @@ namespace path
 		return (pathIsLocal == kCFBooleanTrue);
 	}
 
-	CFIndex label_index (std::string const& path)
-	{
-		CFIndex res = 0;
-		if(CFURLRef url = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault, (UInt8 const*)path.data(), path.size(), is_directory(path)))
-		{
-			CFNumberRef number;
-			if(CFURLCopyResourcePropertyForKey(url, kCFURLLabelNumberKey, &number, nullptr))
-			{
-				CFNumberGetValue(number, kCFNumberCFIndexType, &res);
-				CFRelease(number);
-			}
-			CFRelease(url);
-		}
-		return res;
-	}
-
-	bool set_label_index (std::string const& path, CFIndex labelIndex)
-	{
-		bool res = false;
-		if(CFURLRef url = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault, (UInt8 const*)path.data(), path.size(), is_directory(path)))
-		{
-			if(CFNumberRef number = CFNumberCreate(kCFAllocatorDefault, kCFNumberCFIndexType, &labelIndex))
-			{
-				if(CFURLSetResourcePropertyForKey(url, kCFURLLabelNumberKey, number, nullptr))
-					res = true;
-				CFRelease(number);
-			}
-			CFRelease(url);
-		}
-		return res;
-	}
-
 	std::string tag_data (std::string const& path)
 	{
 		return get_attr(path, "com.apple.metadata:_kMDItemUserTags");

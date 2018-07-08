@@ -9,7 +9,6 @@ enum FSItemURLType { FSItemURLTypeUnknown = 0, FSItemURLTypeFile, FSItemURLTypeF
 @property (nonatomic) NSString* displayName;
 @property (nonatomic) NSString* toolTip;
 @property (nonatomic) NSArray<OakFinderTag*>* finderTags;
-@property (nonatomic) NSInteger labelIndex;
 @property (nonatomic) NSURL* url;
 @property (nonatomic) FSItemURLType urlType;
 @property (nonatomic) NSURL* target;
