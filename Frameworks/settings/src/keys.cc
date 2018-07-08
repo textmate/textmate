@@ -34,6 +34,7 @@ std::string const kSettingsStoreEncodingPerFileKey        = "storeEncodingPerFil
 std::string const kSettingsDisableExtendedAttributesKey   = "disableExtendedAttributes";
 
 std::string const kSettingsFollowSymbolicLinksKey         = "followSymbolicLinks";
+std::string const kSettingsExcludeSCMDeletedKey           = "excludeSCMDeleted";
 
 std::string const kSettingsIncludeKey                     = "include";
 std::string const kSettingsIncludeDirectoriesKey          = "includeDirectories";
