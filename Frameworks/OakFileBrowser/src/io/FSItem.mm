@@ -18,6 +18,12 @@ static ino_t inode (std::string const& path)
 	return 0;
 }
 
+@interface FSItem ()
+{
+	NSArray<OakFinderTag*>* _finderTags;
+}
+@end
+
 @implementation FSItem { OBJC_WATCH_LEAKS(FSItem); }
 - (FSItem*)initWithURL:(NSURL*)anURL
 {
@@ -71,6 +77,12 @@ static ino_t inode (std::string const& path)
 	if(!_finderTags)
 		_finderTags = [OakFinderTagManager finderTagsForURL:self.url];
 	return _finderTags;
+}
+
+- (void)setFinderTags:(NSArray*)newFinderTags
+{
+	_finderTags = newFinderTags;
+	[self.url setResourceValue:[newFinderTags valueForKeyPath:@"displayName"] forKey:NSURLTagNamesKey error:nil];
 }
 
 - (scm::status::type)scmStatus
