@@ -242,6 +242,11 @@
 	return self;
 }
 
+- (void)setBackgroundStyle:(NSBackgroundStyle)newBackgroundStyle
+{
+	_closeButton.cell.backgroundStyle = newBackgroundStyle;
+}
+
 - (void)updateConstraints
 {
 	if(_myConstraints)
