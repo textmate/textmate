@@ -975,9 +975,7 @@ static bool is_binary (std::string const& path)
 		for(NSString* tagName in finderTagsCountedSet)
 		{
 			[selectedFinderTags addObject:tagName];
-			if([self.selectedItems count] == 1)
-				[removeFinderTags addObject:tagName];
-			else if([finderTagsCountedSet countForObject:tagName] > 1)
+			if([finderTagsCountedSet countForObject:tagName] == self.selectedItems.count)
 				[removeFinderTags addObject:tagName];
 		}
 
