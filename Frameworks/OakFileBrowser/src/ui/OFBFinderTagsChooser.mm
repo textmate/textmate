@@ -114,9 +114,9 @@ static constexpr CGFloat LabelNameHeight = 15;
 		NSRect innerSwatchRect = NSInsetRect(tagRect, 3.5, 3.5);
 		NSBezierPath* path = [NSBezierPath bezierPathWithOvalInRect:innerSwatchRect];
 
-		[[OakFinderTagManager backgroundColorForLabel:tag.label] set];
+		[tag.backgroundColor set];
 		[path fill];
-		[[OakFinderTagManager foregroundColorForLabel:tag.label] set];
+		[tag.foregroundColor set];
 		[path stroke];
 
 		if(tagHovered)

@@ -3,6 +3,18 @@
 #import <OakAppKit/NSColor Additions.h>
 #import <io/path.h>
 
+static struct label_colors_t { NSString* name; NSString* backgroundColor; NSString* foregroundColor; } const labelColors[] =
+{
+	{ @"Clear",  @"#69696900", @"#696969" },
+	{ @"Gray",   @"#939396",   @"#7E7E82" },
+	{ @"Green",  @"#5EC53F",   @"#42B71F" },
+	{ @"Purple", @"#C46FDA",   @"#B855D1" },
+	{ @"Blue",   @"#3FA8F0",   @"#2096EC" },
+	{ @"Yellow", @"#F0C63A",   @"#EDB916" },
+	{ @"Red",    @"#FB494A",   @"#FB282C" },
+	{ @"Orange", @"#FD9938",   @"#FD8510" },
+};
+
 @implementation OakFinderTag
 - (instancetype)initWithDisplayName:(NSString*)name label:(NSUInteger)label markedFavorite:(BOOL)markedFavorite
 {
@@ -25,23 +37,21 @@
 	return _label == 0 ? NO : YES;
 }
 
+- (NSColor*)backgroundColor
+{
+	return [NSColor colorWithString:labelColors[_label].backgroundColor];
+}
+
+- (NSColor*)foregroundColor
+{
+	return [NSColor colorWithString:labelColors[_label].foregroundColor];
+}
+
 - (id)copyWithZone:(NSZone*)zone { return [[OakFinderTag alloc] initWithDisplayName:_displayName label:_label markedFavorite:_markedFavorite]; }
 - (NSUInteger)hash               { return [_displayName hash]; }
 - (BOOL)isEqual:(id)otherObject  { return [otherObject isKindOfClass:[self class]] && [_displayName isEqualToString:[otherObject displayName]]; }
 - (NSString*)description         { return [NSString stringWithFormat:@"<%@: %@ (%@)>", self.class, _displayName, @(_label)]; }
 @end
-
-static struct label_colors_t { NSString* name; NSString* backgroundColor; NSString* foregroundColor; } const labelColors[] =
-{
-	{ @"Clear",  @"#69696900", @"#696969" },
-	{ @"Gray",   @"#939396",   @"#7E7E82" },
-	{ @"Green",  @"#5EC53F",   @"#42B71F" },
-	{ @"Purple", @"#C46FDA",   @"#B855D1" },
-	{ @"Blue",   @"#3FA8F0",   @"#2096EC" },
-	{ @"Yellow", @"#F0C63A",   @"#EDB916" },
-	{ @"Red",    @"#FB494A",   @"#FB282C" },
-	{ @"Orange", @"#FD9938",   @"#FD8510" },
-};
 
 @implementation OakFinderTagManager
 + (NSArray<OakFinderTag*>*)finderTagsForURL:(NSURL*)aURL
@@ -72,16 +82,6 @@ static struct label_colors_t { NSString* name; NSString* backgroundColor; NSStri
 	}
 
 	return [finderTags copy];
-}
-
-+ (NSColor*)backgroundColorForLabel:(NSUInteger)label
-{
-	return [NSColor colorWithString:labelColors[label].backgroundColor];
-}
-
-+ (NSColor*)foregroundColorForLabel:(NSUInteger)label
-{
-	return [NSColor colorWithString:labelColors[label].foregroundColor];
 }
 
 + (NSArray<OakFinderTag*>*)favoriteFinderTags

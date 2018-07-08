@@ -140,10 +140,10 @@
 	NSArray<OakFinderTag*>* tagsWithLabelColor = [_finderTags filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"hasLabelColor == YES"]];
 
 	auto fillAndStrokePath = ^(NSBezierPath* path, OakFinderTag* tag){
-		[[OakFinderTagManager backgroundColorForLabel:tag.label] set];
+		[tag.backgroundColor set];
 		[path fill];
 
-		self.isSelectedAndEmphasized ? [[NSColor whiteColor] set] : [[OakFinderTagManager foregroundColorForLabel:tag.label] set];
+		self.isSelectedAndEmphasized ? [[NSColor whiteColor] set] : [tag.foregroundColor set];
 		[path stroke];
 	};
 
