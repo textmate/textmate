@@ -153,14 +153,15 @@ struct tracking_t : fs::event_callback_t
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(fileManagerDidChangeContentsOfDirectory:) name:OakFileManagerDidChangeContentsOfDirectory object:nil];
 	}
 
+	settings_t const settings = settings_for_path(NULL_STR, "", dir);
+
 	bool allowExpandingLinks = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsAllowExpandingLinksKey];
 	bool includeHidden       = (dataSource.dataSourceOptions & kFSDataSourceOptionIncludeHidden) == kFSDataSourceOptionIncludeHidden;
+	bool includeSCMDeleted   = includeHidden || !settings.get(kSettingsExcludeSCMDeletedKey, false);
 
 	path::glob_list_t globs;
 	if(!includeHidden)
 	{
-		settings_t const& settings = settings_for_path(NULL_STR, "", dir);
-
 		globs.add_exclude_glob(settings.get(kSettingsExcludeDirectoriesInBrowserKey), path::kPathItemDirectory);
 		globs.add_exclude_glob(settings.get(kSettingsExcludeDirectoriesKey),          path::kPathItemDirectory);
 		globs.add_exclude_glob(settings.get(kSettingsExcludeFilesInBrowserKey),       path::kPathItemFile);
@@ -257,7 +258,7 @@ struct tracking_t : fs::event_callback_t
 					pathsOnDisk.insert(fsItem.path);
 				}
 
-				if(scmInfo)
+				if(scmInfo && includeSCMDeleted)
 				{
 					for(auto pair : scmInfo->status())
 					{

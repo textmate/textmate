@@ -37,6 +37,7 @@ PUBLIC extern std::string const kSettingsStoreEncodingPerFileKey;
 PUBLIC extern std::string const kSettingsDisableExtendedAttributesKey;
 
 PUBLIC extern std::string const kSettingsFollowSymbolicLinksKey;
+PUBLIC extern std::string const kSettingsExcludeSCMDeletedKey;
 
 PUBLIC extern std::string const kSettingsIncludeKey;
 PUBLIC extern std::string const kSettingsIncludeDirectoriesKey;
