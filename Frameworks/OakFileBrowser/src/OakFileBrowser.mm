@@ -963,23 +963,18 @@ static bool is_binary (std::string const& path)
 		[aMenu addItem:[NSMenuItem separatorItem]];
 		[aMenu addItemWithTitle:@"Tags…" action:@selector(nop:) keyEquivalent:@""];
 
-		NSCountedSet* finderTagsCountedSet = [NSCountedSet set];
-		NSMutableArray<OakFinderTag*>* selectedFinderTags = [NSMutableArray array];
-		NSMutableArray<OakFinderTag*>* removeFinderTags   = [NSMutableArray array];
+		NSArray<OakFinderTag*>* allTags = [self.selectedItems valueForKeyPath:@"@unionOfArrays.finderTags"];
+		NSCountedSet* finderTagsCountedSet = [[NSCountedSet alloc] initWithArray:allTags];
 
-		for(FSItem* item in self.selectedItems)
-			for(OakFinderTag* tag in item.finderTags)
-				[finderTagsCountedSet addObject:tag];
-
+		NSMutableArray<OakFinderTag*>* removeFinderTags = [NSMutableArray array];
 		for(OakFinderTag* tag in finderTagsCountedSet)
 		{
-			[selectedFinderTags addObject:tag];
 			if([finderTagsCountedSet countForObject:tag] == self.selectedItems.count)
 				[removeFinderTags addObject:tag];
 		}
 
 		OFBFinderTagsChooser* chooser = [OFBFinderTagsChooser finderTagsChooserForMenu:aMenu];
-		chooser.selectedFavoriteTags         = [selectedFinderTags copy];
+		chooser.selectedFavoriteTags         = finderTagsCountedSet.objectEnumerator.allObjects;
 		chooser.selectedFavoriteTagsToRemove = [removeFinderTags copy];
 		chooser.action                       = @selector(didChangeFavoriteTag:);
 		chooser.target                       = self;
