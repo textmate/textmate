@@ -970,7 +970,7 @@ static bool is_binary (std::string const& path)
 	if(hasFileSelected)
 	{
 		[aMenu addItem:[NSMenuItem separatorItem]];
-		[aMenu addItemWithTitle:@"Tags…" action:NULL keyEquivalent:@""];
+		[aMenu addItemWithTitle:@"Tags…" action:@selector(nop:) keyEquivalent:@""];
 
 		NSCountedSet* favoriteTagNamesSet = [NSCountedSet set];
 
