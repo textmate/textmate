@@ -48,10 +48,6 @@ static NSArray* convert (std::map<std::string, scm::status::type> const& pathsMa
 		item.scmStatus   = hideSCMBadge ? scm::status::none : pair.second;
 		item.missing     = pair.second == scm::status::deleted;
 
-		std::string const tag_data = path::tag_data(pair.first);
-		if(tag_data != NULL_STR)
-			item.finderTags = [OakFinderTagManager finderTagsFromData:[NSData dataWithBytes:(void*)tag_data.data() length:tag_data.size()]];
-
 		[res addObject:item];
 	}
 	return res;

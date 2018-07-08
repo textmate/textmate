@@ -105,8 +105,6 @@ struct tracking_t : fs::event_callback_t
 	{
 		fs_item_t (dev_t device, dirent const* entry, std::string const& path) : device(device), inode(entry->d_fileno), path(path), target(NULL_STR), is_directory(false), is_link(false), treat_as_directory(false), sort_as_directory(false)
 		{
-			tag_data = path::tag_data(path);
-
 			if(entry->d_type == DT_LNK)
 			{
 				std::string const resolved = path::resolve_head(path);
@@ -139,7 +137,6 @@ struct tracking_t : fs::event_callback_t
 		ino_t inode;
 		std::string path;
 		std::string target;
-		std::string tag_data;
 		bool is_directory;
 		bool is_link;
 		bool treat_as_directory;
@@ -254,9 +251,6 @@ struct tracking_t : fs::event_callback_t
 
 					if(allowExpandingLinks && fsItem.is_link && fsItem.sort_as_directory && item.leaf)
 						item.leaf = NO;
-
-					if(fsItem.tag_data != NULL_STR)
-						item.finderTags = [OakFinderTagManager finderTagsFromData:[NSData dataWithBytes:(void*)fsItem.tag_data.data() length:fsItem.tag_data.size()]];
 
 					[array addObject:item];
 					pathsOnDisk.insert(fsItem.path);

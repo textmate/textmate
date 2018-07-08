@@ -3,6 +3,7 @@
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/OakFileIconImage.h>
 #import <OakAppKit/OakFileManager.h>
+#import <OakAppKit/OakFinderTag.h>
 #import <OakAppKit/IOAlertPanel.h>
 #import <ns/ns.h>
 #import <io/path.h>
@@ -63,6 +64,13 @@ static ino_t inode (std::string const& path)
 - (NSString*)path
 {
 	return [self.url path];
+}
+
+- (NSArray<OakFinderTag*>*)finderTags
+{
+	if(!_finderTags)
+		_finderTags = [OakFinderTagManager finderTagsForURL:self.url];
+	return _finderTags;
 }
 
 - (scm::status::type)scmStatus

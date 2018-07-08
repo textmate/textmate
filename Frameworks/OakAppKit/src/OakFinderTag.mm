@@ -1,6 +1,7 @@
 #import "OakFinderTag.h"
 #import <OakFoundation/OakFoundation.h>
 #import <OakAppKit/NSColor Additions.h>
+#import <io/path.h>
 
 @implementation OakFinderTag
 - (instancetype)initWithDisplayName:(NSString*)name label:(NSUInteger)label markedFavorite:(BOOL)markedFavorite
@@ -43,6 +44,20 @@ static struct label_colors_t { NSString* name; NSString* backgroundColor; NSStri
 };
 
 @implementation OakFinderTagManager
++ (NSArray<OakFinderTag*>*)finderTagsForURL:(NSURL*)aURL
+{
+	if(aURL.filePathURL)
+	{
+		std::string const bplist = path::get_attr(aURL.fileSystemRepresentation, "com.apple.metadata:_kMDItemUserTags");
+		if(bplist != NULL_STR)
+		{
+			NSData* data = [NSData dataWithBytes:(void*)bplist.data() length:bplist.size()];
+			return [self finderTagsFromData:data];
+		}
+	}
+	return @[ ];
+}
+
 + (NSArray<OakFinderTag*>*)finderTagsFromData:(NSData*)data
 {
 	id plist = [NSPropertyListSerialization propertyListFromData:data mutabilityOption:NSPropertyListImmutable format:nil errorDescription:nil];
