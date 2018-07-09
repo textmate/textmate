@@ -107,11 +107,13 @@ static NSString* CSSColorFromColor (NSColor* orgColor)
 {
 	if([message.name isEqualToString:@"logMessageHandler"])
 	{
-		NSLog(@"JavaScript Console: %@", message.body);
+		if(os_log_t log = os_log_create("com.macromates.JavaScript", "log"))
+			os_log_info(log, "%{public}@", message.body);
 	}
 	else if([message.name isEqualToString:@"errorMessageHandler"])
 	{
-		os_log_error(OS_LOG_DEFAULT, "%{public}@:%{public}@: %{public}@", self.htmlItem.originalItem.title, message.body[@"lineno"], message.body[@"message"]);
+		if(os_log_t log = os_log_create("com.macromates.JavaScript", "error"))
+			os_log_error(log, "%{public}@:%{public}@: %{public}@", self.htmlItem.originalItem.title ?: self.htmlItem.originalItem.asJSONObject, message.body[@"lineno"], message.body[@"message"]);
 	}
 	else if([message.name isEqualToString:@"execMessageHandler"])
 	{
