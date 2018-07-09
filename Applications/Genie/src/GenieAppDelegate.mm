@@ -193,17 +193,10 @@ static NSString* CSSColorFromColor (NSColor* orgColor)
 	_currentNavigationRequest = nil;
 	if(_HTMLString = newHTMLString)
 	{
+		[_webView.configuration.userContentController removeAllUserScripts];
+
 		NSString* source = [NSString stringWithFormat:@""
 			"window.addEventListener('error', function(event) { webkit.messageHandlers.errorMessageHandler.postMessage({ message: event.message, filename: event.filename, lineno: event.lineno, colno: event.colno }); });"
-			"var style = document.createElement('style');"
-			"document.head.appendChild(style);"
-			"style.sheet.insertRule(':root { --textColor: %@; }');"
-			"style.sheet.insertRule(':root { --labelColor: %@; }');"
-			"style.sheet.insertRule(':root { --secondaryLabelColor: %@; }');"
-			"style.sheet.insertRule(':root { --tertiaryLabelColor: %@; }');"
-			"style.sheet.insertRule(':root { --quaternaryLabelColor: %@; }');"
-			"style.sheet.insertRule(':root { font-family: system-ui, -apple-system; }');"
-			"style.sheet.insertRule(':root { color: var(--textColor); }');"
 			"let genie = {"
 			"  log(str)         { webkit.messageHandlers.logMessageHandler.postMessage(str); },"
 			"  set query(str)   { webkit.messageHandlers.queryMessageHandler.postMessage(this.internal_storage = str); },"
@@ -234,18 +227,31 @@ static NSString* CSSColorFromColor (NSColor* orgColor)
 			"  internal_storage: %@,"
 			"  next_callback_id: 1,"
 			"  callbacks: new Map()"
-			"};",
+			"};", JSStringFromString(self.htmlItem.queryString)
+		];
+
+		WKUserScript* script = [[WKUserScript alloc] initWithSource:source injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:NO];
+		[_webView.configuration.userContentController addUserScript:script];
+
+		NSString* css = [NSString stringWithFormat:@""
+			"var style = document.createElement('style');"
+			"document.head.appendChild(style);"
+			"style.sheet.insertRule(':root { --textColor: %@; }');"
+			"style.sheet.insertRule(':root { --labelColor: %@; }');"
+			"style.sheet.insertRule(':root { --secondaryLabelColor: %@; }');"
+			"style.sheet.insertRule(':root { --tertiaryLabelColor: %@; }');"
+			"style.sheet.insertRule(':root { --quaternaryLabelColor: %@; }');"
+			"style.sheet.insertRule(':root { font-family: system-ui, -apple-system; }');"
+			"style.sheet.insertRule(':root { color: var(--textColor); }');",
 				CSSColorFromColor(NSColor.controlTextColor),
 				CSSColorFromColor(NSColor.labelColor),
 				CSSColorFromColor(NSColor.secondaryLabelColor),
 				CSSColorFromColor(NSColor.tertiaryLabelColor),
-				CSSColorFromColor(NSColor.quaternaryLabelColor),
-				JSStringFromString(self.htmlItem.queryString)
+				CSSColorFromColor(NSColor.quaternaryLabelColor)
 		];
 
-		WKUserScript* script = [[WKUserScript alloc] initWithSource:source injectionTime:WKUserScriptInjectionTimeAtDocumentEnd forMainFrameOnly:NO];
-		[_webView.configuration.userContentController removeAllUserScripts];
-		[_webView.configuration.userContentController addUserScript:script];
+		WKUserScript* cssScript = [[WKUserScript alloc] initWithSource:css injectionTime:WKUserScriptInjectionTimeAtDocumentEnd forMainFrameOnly:NO];
+		[_webView.configuration.userContentController addUserScript:cssScript];
 
 		@try {
 			_currentNavigationRequest = [_webView loadHTMLString:_HTMLString baseURL:[NSURL fileURLWithPath:@"/" isDirectory:YES]];
