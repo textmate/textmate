@@ -1086,7 +1086,7 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 		else if(NSString* imagePath = [self absolutePathForPath:iconInfo[@"image"]])
 			res = [[NSImage alloc] initByReferencingFile:imagePath];
 		else if(NSString* text = [self expandedStringFromFormat:iconInfo[@"text"] whileExpanding:@"iconImage" abbreviatePath:NO urlEncodeVariables:NO])
-			res = [StringImage imageWithString:text size:NSMakeSize(64, 64)];
+			res = [StringImage imageWithString:text size:iconSize];
 		else if(NSString* bundleIdentifier = iconInfo[@"application"])
 		{
 			if(NSString* path = [[NSWorkspace sharedWorkspace] absolutePathForAppBundleWithIdentifier:bundleIdentifier])
