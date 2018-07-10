@@ -978,7 +978,6 @@ static bool is_binary (std::string const& path)
 		chooser.selectedTagsToRemove = [removeFinderTags copy];
 		chooser.action               = @selector(didChangeFinderTag:);
 		chooser.target               = self;
-		chooser.enabled              = YES;
 
 		[[aMenu addItemWithTitle:@"Finder Tag" action:NULL keyEquivalent:@""] setView:chooser];
 	}

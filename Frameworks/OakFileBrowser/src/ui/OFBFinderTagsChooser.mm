@@ -103,11 +103,6 @@ static constexpr CGFloat LabelNameHeight = 15;
 	return NSMakeSize(width, height);
 }
 
-- (void)setEnabled:(BOOL)flag
-{
-	_enabled = flag;
-}
-
 - (void)viewDidMoveToSuperview
 {
 	if(_didCreateSubviews || !self.superview)
@@ -197,9 +192,6 @@ static constexpr CGFloat LabelNameHeight = 15;
 
 - (void)drawRect:(NSRect)aRect
 {
-	if(!self.isEnabled)
-		CGContextSetAlpha((CGContextRef)[[NSGraphicsContext currentContext] graphicsPort], 0.5);
-
 	if(_hoverTag)
 	{
 		NSRect labelRect = NSMakeRect(0, 0, self.bounds.size.width, LabelNameHeight);
