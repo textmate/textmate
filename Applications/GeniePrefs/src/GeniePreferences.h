@@ -7,5 +7,8 @@
 @interface VariablesViewController : NSViewController
 @end
 
+@interface DocumentationViewController : NSViewController
+@end
+
 @interface ChangesViewController : NSViewController
 @end

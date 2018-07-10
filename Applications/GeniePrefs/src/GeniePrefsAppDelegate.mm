@@ -234,6 +234,7 @@
 			@"Catalog":   [[CatalogViewController alloc] init],
 			@"General":   [[GeneralSettingsViewController alloc] init],
 			@"Variables": [[VariablesViewController alloc] init],
+			@"Docs":      [[DocumentationViewController alloc] init],
 			@"Changes":   [[ChangesViewController alloc] init],
 		};
 
@@ -241,6 +242,7 @@
 			@"General":   [NSImage imageNamed:NSImageNamePreferencesGeneral],
 			@"Catalog":   [NSImage imageNamed:NSImageNameFolderSmart],
 			@"Variables": [NSImage imageNamed:@"Variables"],
+			@"Docs":      [NSImage imageNamed:NSImageNameBookmarksTemplate],
 			@"Changes":   [NSImage imageNamed:NSImageNameInfo],
 		};
 
@@ -342,7 +344,7 @@
 
 - (NSArray*)toolbarDefaultItemIdentifiers:(NSToolbar*)aToolbar
 {
-	return @[ @"General", @"Catalog", @"Variables", NSToolbarFlexibleSpaceItemIdentifier, @"Changes" ];
+	return @[ @"General", @"Catalog", @"Variables", NSToolbarFlexibleSpaceItemIdentifier, @"Docs", NSToolbarSpaceItemIdentifier, @"Changes" ];
 }
 
 - (NSArray*)toolbarSelectableItemIdentifiers:(NSToolbar*)aToolbar

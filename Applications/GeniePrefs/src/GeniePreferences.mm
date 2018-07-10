@@ -483,6 +483,39 @@ static NSSet* const kExistingDefaultsKeys = [NSSet setWithArray:@[
 }
 @end
 
+@interface DocumentationViewController ()
+@property (nonatomic) NSResponder* initialFirstResponder;
+@end
+
+@implementation DocumentationViewController
+- (instancetype)init
+{
+	if(self = [super init])
+	{
+		self.title = @"Docs";
+	}
+	return self;
+}
+
+- (void)loadView
+{
+	NSView* contentView = [[NSView alloc] initWithFrame:NSZeroRect];
+
+	WKWebViewConfiguration* webConfig = [[WKWebViewConfiguration alloc] init];
+	webConfig.suppressesIncrementalRendering = YES;
+
+	WKWebView* webView = [[WKWebView alloc] initWithFrame:NSZeroRect configuration:webConfig];
+	if(NSURL* url = [[NSBundle mainBundle] URLForResource:@"Docs" withExtension:@"html"])
+		[webView loadFileURL:url allowingReadAccessToURL:[NSURL fileURLWithPath:[url.path stringByDeletingLastPathComponent]]];
+
+	webView.autoresizingMask = NSViewWidthSizable|NSViewHeightSizable;
+	[contentView addSubview:webView];
+
+	self.initialFirstResponder = webView;
+	self.view = contentView;
+}
+@end
+
 @interface ChangesViewController ()
 @property (nonatomic) NSResponder* initialFirstResponder;
 @end
