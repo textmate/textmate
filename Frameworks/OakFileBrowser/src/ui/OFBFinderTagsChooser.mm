@@ -74,10 +74,10 @@ static constexpr CGFloat LabelNameHeight = 15;
 
 @interface OFBFinderTagsChooser ()
 {
-	OakFinderTag* _hoverTag;
 	BOOL _didCreateSubviews;
 }
 @property (nonatomic) NSArray<OakFinderTag*>* favoriteFinderTags;
+@property (nonatomic) OakFinderTag* hoverTag;
 @end
 
 @implementation OFBFinderTagsChooser
@@ -88,6 +88,11 @@ static constexpr CGFloat LabelNameHeight = 15;
 	chooser.favoriteFinderTags = [OakFinderTagManager favoriteFinderTags];
 	[chooser setNeedsDisplay:YES];
 	return chooser;
+}
+
+- (void)dealloc
+{
+	[NSNotificationCenter.defaultCenter removeObserver:self];
 }
 
 - (NSSize)intrinsicContentSize
@@ -101,7 +106,6 @@ static constexpr CGFloat LabelNameHeight = 15;
 - (void)setEnabled:(BOOL)flag
 {
 	_enabled = flag;
-	[self updateTrackingAreas];
 }
 
 - (void)viewDidMoveToSuperview
@@ -109,6 +113,9 @@ static constexpr CGFloat LabelNameHeight = 15;
 	if(_didCreateSubviews || !self.superview)
 		return;
 	_didCreateSubviews = YES;
+
+	[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(mouseDidEnterFinderTagButton:) name:OakRolloverButtonMouseDidEnterNotification object:nil];
+	[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(mouseDidLeaveFinderTagButton:) name:OakRolloverButtonMouseDidLeaveNotification object:nil];
 
 	for(NSUInteger i = 0; i < _favoriteFinderTags.count; ++i)
 	{
@@ -127,6 +134,26 @@ static constexpr CGFloat LabelNameHeight = 15;
 		button.tag = i;
 
 		[self addSubview:button];
+	}
+}
+
+- (void)mouseDidEnterFinderTagButton:(NSNotification*)aNotificaiton
+{
+	OakRolloverButton* button = aNotificaiton.object;
+	if([self.subviews containsObject:button])
+	{
+		self.hoverTag = _favoriteFinderTags[button.tag];
+		[self setNeedsDisplay:YES];
+	}
+}
+
+- (void)mouseDidLeaveFinderTagButton:(NSNotification*)aNotificaiton
+{
+	OakRolloverButton* button = aNotificaiton.object;
+	if([self.subviews containsObject:button])
+	{
+		self.hoverTag = nil;
+		[self setNeedsDisplay:YES];
 	}
 }
 
@@ -168,17 +195,6 @@ static constexpr CGFloat LabelNameHeight = 15;
 	return (index < _favoriteFinderTags.count) ? NSMakeRect(22 + index*(SwatchDiameter + SwatchMargin * 2), LabelNameHeight + 5, SwatchDiameter, SwatchDiameter) : NSZeroRect;
 }
 
-- (OakFinderTag*)tagAtPoint:(NSPoint)aPoint
-{
-	for(OakFinderTag* tag in _favoriteFinderTags)
-	{
-		NSRect r = [self rectForFavoriteTag:tag];
-		if(NSMouseInRect(aPoint, r, [self isFlipped]))
-			return tag;
-	}
-	return nil;
-}
-
 - (void)drawRect:(NSRect)aRect
 {
 	if(!self.isEnabled)
@@ -191,61 +207,5 @@ static constexpr CGFloat LabelNameHeight = 15;
 				[[NSString stringWithFormat:@"Remove Tag “%@”", _hoverTag.displayName] drawInRect:labelRect withAttributes:[self labelAttributes]];
 		else	[[NSString stringWithFormat:@"Add Tag “%@”", _hoverTag.displayName] drawInRect:labelRect withAttributes:[self labelAttributes]];
 	}
-}
-
-- (void)updateTrackingAreas
-{
-	[super updateTrackingAreas];
-
-	for(NSTrackingArea* trackingArea in self.trackingAreas)
-		[self removeTrackingArea:trackingArea];
-
-	if(self.isEnabled)
-	{
-		for(OakFinderTag* tag in _favoriteFinderTags)
-		{
-			NSTrackingArea* trackingArea = [[NSTrackingArea alloc] initWithRect:[self rectForFavoriteTag:tag] options:NSTrackingMouseEnteredAndExited|NSTrackingActiveInKeyWindow owner:self userInfo:nil];
-			[self addTrackingArea:trackingArea];
-		}
-	}
-}
-
-// ================
-// = Mouse Events =
-// ================
-
-- (BOOL)acceptsFirstMouse:(NSEvent*)anEvent
-{
-	return YES;
-}
-
-- (void)_handleMouseMoved:(NSEvent*)anEvent
-{
-	if(!self.isEnabled)
-		return;
-
-	NSPoint pos = [self convertPoint:[anEvent locationInWindow] fromView:nil];
-	_hoverTag = [self tagAtPoint:pos];
-	[self setNeedsDisplay:YES];
-}
-
-- (void)mouseDragged:(NSEvent*)anEvent
-{
-	[self _handleMouseMoved:anEvent];
-}
-
-- (void)rightMouseDragged:(NSEvent*)anEvent
-{
-	[self _handleMouseMoved:anEvent];
-}
-
-- (void)mouseEntered:(NSEvent*)anEvent
-{
-	[self _handleMouseMoved:anEvent];
-}
-
-- (void)mouseExited:(NSEvent*)anEvent
-{
-	[self _handleMouseMoved:anEvent];
 }
 @end
