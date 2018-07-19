@@ -154,7 +154,7 @@ function latest_version ($arguments) {
 
 		$builds = array();
 
-		$db = new PDO('mysql:host='.DB_HOST.';dbname='.DB_TABLE, DB_USER, DB_PASS);
+		$db = new PDO("mysql:host=".DB_HOST.";dbname=".DB_TABLE.";charset=utf8mb4", DB_USER, DB_PASS);
 		foreach($db->query('SELECT build_id, name, version, depends, label, signee, signature, url FROM releases LEFT JOIN builds ON (build_id = builds.id)') as $row) {
 			if(fulfills_requirements($table, $row['depends']) && fulfills_requirements($table, $row['label']))
 				$builds[$row['version']] = $row;
@@ -185,7 +185,7 @@ function latest_version ($arguments) {
 
 function get_build ($arguments, $method) {
 	try {
-		$db = new PDO('mysql:host='.DB_HOST.';dbname='.DB_TABLE, DB_USER, DB_PASS);
+		$db = new PDO("mysql:host=".DB_HOST.";dbname=".DB_TABLE.";charset=utf8mb4", DB_USER, DB_PASS);
 
 		$stmt = $db->prepare('SELECT url, signee, signature FROM builds WHERE id = :build_id');
 		if($stmt->execute(array('build_id' => $arguments['build_id']))) {
