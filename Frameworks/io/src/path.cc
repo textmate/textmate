@@ -883,7 +883,7 @@ namespace path
 			if(mkdir(path.c_str(), S_IRWXU|S_IRWXG|S_IRWXO) == -1)
 				perrorf("path::make_dir: mkdir(\"%s\")", path.c_str());
 		}
-		return exists(path) && info(resolve(path)) & flag::directory;
+		return is_directory(path);
 	}
 
 	bool rename_or_copy (std::string const& cppSrc, std::string const& cppDst, bool createParent)
