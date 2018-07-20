@@ -1,4 +1,5 @@
 #import "FSItem.h"
+#import "path_info.h"
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/OakFileIconImage.h>

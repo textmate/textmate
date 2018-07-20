@@ -7,6 +7,7 @@
 #import "io/FSDataSource.h"
 #import "io/FSSCMDataSource.h"
 #import "io/FSItem.h"
+#import "io/path_info.h"
 #import "FSOutlineViewDelegate.h"
 #import <Preferences/Keys.h>
 #import <io/io.h>

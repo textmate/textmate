@@ -36,25 +36,7 @@ namespace path
 
 	PUBLIC std::string unique (std::string const& requestedPath, std::string const& suffix = ""); // /foo/bar.txt → /foo/bar«suffix» 2.txt
 
-	namespace flag
-	{
-		PUBLIC extern uint32_t
-			meta,             /* for “.” and “..” entries */
-			file,
-			directory,
-			symlink,
-			dotfile,
-			hidden,           /* file is hidden, does not include ‘dotfile’ */
-			alias,
-			package,
-			application,
-			stationery_pad,
-			hidden_volume,
-			hidden_extension;
-	}
-
 	PUBLIC dev_t device (std::string const& path);
-	PUBLIC uint32_t info (std::string const& path, uint32_t mask = 0xFFFFFF); // the type of the file, mask given to limit work done, see possible values below
 
 	PUBLIC bool exists (std::string const& path);
 	PUBLIC bool is_readable (std::string const& path);
