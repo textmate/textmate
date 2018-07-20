@@ -390,7 +390,13 @@ namespace path
 
 	bool is_directory (std::string const& path)
 	{
-		return path != NULL_STR && path::info(path::resolve_head(path)) & path::flag::directory;
+		if(path != NULL_STR)
+		{
+			struct stat buf;
+			if(lstat(path::resolve_head(path).c_str(), &buf) == 0)
+				return S_ISDIR(buf.st_mode);
+		}
+		return false;
 	}
 
 	bool is_local (std::string const& path)
