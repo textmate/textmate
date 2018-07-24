@@ -14,9 +14,59 @@
 static NSString* const kVariablesSettingsKey            = @"variables";
 static NSString* const kGenieItemsDidChangeNotification = @"GenieItemsDidChangeNotification";
 
+static NSDictionary* ConvertItem (NSMutableDictionary* items, NSString* identifier)
+{
+	NSMutableDictionary* newValues = [items[identifier] mutableCopy];
+	if(!newValues)
+		return nil;
+
+	items[identifier] = nil;
+
+	newValues[@"uid"] = identifier;
+	if(NSArray* children = newValues[@"children"])
+	{
+		NSMutableArray* newChildren = [NSMutableArray array];
+		for(id childIdentifier in children)
+		{
+			if([childIdentifier isKindOfClass:[NSString class]])
+			{
+				if(NSDictionary* newChildItem = ConvertItem(items, childIdentifier))
+					[newChildren addObject:newChildItem];
+			}
+			else
+			{
+				// This real child item has already replaced the identifier
+				[newChildren addObject:childIdentifier];
+			}
+		}
+		newValues[@"children"] = newChildren;
+	}
+	return newValues;
+}
+
+static NSArray* FlattenItems (NSArray<NSDictionary*>* items, NSMutableDictionary* itemRepository)
+{
+	NSMutableArray* res = [NSMutableArray array];
+	for(NSDictionary* item in items)
+	{
+		if(NSString* uid = item[@"uid"])
+		{
+			[res addObject:uid];
+
+			NSMutableDictionary* mutableItem = [item mutableCopy];
+			mutableItem[@"uid"]      = nil;
+			mutableItem[@"children"] = FlattenItems(item[@"children"], itemRepository);
+			itemRepository[uid] = @{ @"values": mutableItem };
+		}
+	}
+	return res.count ? res : nil;
+}
+
 @interface GenieManager ()
 {
 	NSString* _itemsPath;
+	NSString* _customItemsPath;
+	NSString* _defaultItemsPath;
 	NSMutableArray<GenieItem*>* _items;
 
 	NSDictionary* _environment;
@@ -120,9 +170,12 @@ static NSString* const kGenieItemsDidChangeNotification = @"GenieItemsDidChangeN
 
 		NSString* appSupport  = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES).firstObject;
 		NSString* genieFolder = [appSupport stringByAppendingPathComponent:@"Genie"];
+		NSString* supportPath = self.mainBundle.sharedSupportPath;
 
-		_items     = [NSMutableArray array];
-		_itemsPath = [genieFolder stringByAppendingPathComponent:@"Items.plist"];
+		_items            = [NSMutableArray array];
+		_itemsPath        = [genieFolder stringByAppendingPathComponent:@"Items.plist"];
+		_customItemsPath  = [genieFolder stringByAppendingPathComponent:@"Custom.genieItems"];
+		_defaultItemsPath = [supportPath stringByAppendingPathComponent:@"Default.genieItems"];
 		[self reloadItems:self];
 
 		NSString* bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
@@ -149,11 +202,64 @@ static NSString* const kGenieItemsDidChangeNotification = @"GenieItemsDidChangeN
 {
 	self.needsReloadItems = NO;
 
-	NSMutableArray* items = [NSMutableArray array];
 	NSMutableArray* paths = [NSMutableArray array];
-
-	if(NSDictionary* rawItems = [NSDictionary dictionaryWithContentsOfFile:_itemsPath])
+	if(NSDictionary* customRepository = [NSDictionary dictionaryWithContentsOfFile:_customItemsPath])
 	{
+		[paths addObject:_customItemsPath];
+
+		NSDictionary* defaultItems = [NSDictionary dictionaryWithContentsOfFile:_defaultItemsPath][@"items"];
+		NSDictionary* customItems  = customRepository[@"items"];
+
+		NSMutableSet* identifiers = [NSMutableSet setWithArray:customItems.allKeys];
+		[identifiers addObjectsFromArray:defaultItems.allKeys];
+
+		NSMutableDictionary<NSString*, NSDictionary*>* values = [NSMutableDictionary dictionary];
+		NSMutableDictionary<NSString*, NSNumber*>* weights    = [NSMutableDictionary dictionary];
+		for(NSString* identifier in identifiers)
+		{
+			NSDictionary* defaultValues = defaultItems[identifier];
+			NSDictionary* customValues  = customItems[identifier];
+
+			if(NSMutableDictionary* mergedValues = [defaultValues[@"values"] mutableCopy])
+			{
+				if(NSDictionary* replacementValues = customValues[@"values"])
+					[mergedValues addEntriesFromDictionary:replacementValues];
+				for(NSString* key in customValues[@"removeValues"])
+					[mergedValues removeObjectForKey:key];
+				values[identifier] = mergedValues;
+			}
+			else if(![customValues[@"partial"] boolValue])
+			{
+				values[identifier] = customValues[@"values"];
+			}
+
+			weights[identifier] = customValues[@"weight"] ?: defaultValues[@"weight"];
+		}
+
+		NSMutableDictionary* rootValues = [values mutableCopy];
+		for(NSString* identifier in rootValues.allKeys)
+		{
+			if(NSDictionary* newItem = ConvertItem(rootValues, identifier))
+				rootValues[identifier] = newItem;
+		}
+
+		std::multimap<NSInteger, GenieItem*> weighted;
+		for(NSString* identifier in rootValues)
+		{
+			NSString* path = defaultItems[identifier] ? _defaultItemsPath : _customItemsPath;
+			if(GenieItem* item = [[GenieItem alloc] initWithValues:rootValues[identifier] parentItem:nil directory:[path stringByDeletingLastPathComponent]])
+				weighted.emplace(weights[item.identifier].intValue, item);
+		}
+
+		NSMutableArray* items = [NSMutableArray array];
+		for(auto const& pair : weighted)
+			[items addObject:pair.second];
+
+		[[self mutableArrayValueForKey:@"items"] setArray:items];
+	}
+	else if(NSDictionary* rawItems = [NSDictionary dictionaryWithContentsOfFile:_itemsPath])
+	{
+		NSMutableArray* items = [NSMutableArray array];
 		[paths addObject:_itemsPath];
 
 		for(NSDictionary* rawItem in rawItems[@"items"])
@@ -161,9 +267,8 @@ static NSString* const kGenieItemsDidChangeNotification = @"GenieItemsDidChangeN
 			if(GenieItem* item = [[GenieItem alloc] initWithValues:rawItem parentItem:nil directory:[_itemsPath stringByDeletingLastPathComponent]])
 				[items addObject:item];
 		}
+		[[self mutableArrayValueForKey:@"items"] setArray:items];
 	}
-
-	[[self mutableArrayValueForKey:@"items"] setArray:items];
 
 	self.observedPaths = paths;
 }
@@ -272,22 +377,92 @@ static NSString* const kGenieItemsDidChangeNotification = @"GenieItemsDidChangeN
 
 - (BOOL)synchronize
 {
+	BOOL const saveDelta = YES;
+
 	self.observedPaths = nil;
+	NSDictionary* const defaultItems = [NSDictionary dictionaryWithContentsOfFile:_defaultItemsPath][@"items"];
 
-	// ==================================
-	// = Write all items to single file =
-	// ==================================
+	NSMutableDictionary* allItems = [NSMutableDictionary dictionary];
+	FlattenItems([_items valueForKey:@"rawValues"], allItems);
 
-	NSMutableArray* items = [NSMutableArray array];
+	NSMutableDictionary* repository = [NSMutableDictionary dictionary];
+	for(NSString* identifier in allItems)
+	{
+		NSDictionary* customItem = allItems[identifier];
+		if(saveDelta)
+		{
+			if(NSDictionary* defaultItem = defaultItems[identifier])
+			{
+				if([defaultItem[@"values"] isEqualToDictionary:customItem[@"values"]])
+				{
+					customItem = nil;
+				}
+				else
+				{
+					NSMutableDictionary* newValues = [NSMutableDictionary dictionary];
+					NSMutableArray* removeValues   = [NSMutableArray array];
+
+					NSMutableSet* keys = [NSMutableSet setWithArray:[customItem[@"values"] allKeys]];
+					[keys addObjectsFromArray:[defaultItem[@"values"] allKeys]];
+					for(NSString* key in keys.allObjects)
+					{
+						id customValue = customItem[@"values"][key];
+						id defaultValue = defaultItem[@"values"][key];
+						if([customValue isEqual:defaultValue])
+							continue;
+						else if(customValue)
+							newValues[key] = customValue;
+						else
+							[removeValues addObject:key];
+					}
+
+					NSMutableDictionary* deltaItem = [NSMutableDictionary dictionary];
+					deltaItem[@"removeValues"] = removeValues.count ? removeValues : nil;
+					deltaItem[@"values"]       = newValues.count ? newValues : nil;
+					deltaItem[@"partial"]      = @YES;
+					customItem = deltaItem;
+				}
+			}
+		}
+		repository[identifier] = customItem;
+	}
+
+	// ==================
+	// = Update Weights =
+	// ==================
+
+	NSInteger lastWeight = -1;
 	for(GenieItem* item in _items)
-		[items addObject:item.rawValues];
+	{
+		NSNumber* weight = defaultItems[item.identifier][@"weight"];
+		BOOL updateWeight = !weight || weight.intValue < lastWeight;
+		if(updateWeight || !saveDelta)
+		{
+			if(updateWeight)
+				weight = @(lastWeight + 1);
 
-	NSDictionary* itemsPlist = @{
-		@"items": items
+			if(NSDictionary* existingItem = repository[item.identifier])
+			{
+				NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithDictionary:existingItem];
+				dict[@"weight"] = weight;
+				repository[item.identifier] = dict;
+			}
+			else
+			{
+				repository[item.identifier] = @{ @"weight": weight };
+			}
+		}
+		lastWeight = weight.intValue;
+	}
+
+	// ==================
+
+	NSDictionary* customItemsPlist = @{
+		@"items": repository,
 	};
 
-	[NSFileManager.defaultManager createDirectoryAtPath:[_itemsPath stringByDeletingLastPathComponent] withIntermediateDirectories:YES attributes:nil error:nullptr];
-	[itemsPlist writeToFile:_itemsPath atomically:YES];
+	[NSFileManager.defaultManager createDirectoryAtPath:[_customItemsPath stringByDeletingLastPathComponent] withIntermediateDirectories:YES attributes:nil error:nullptr];
+	[customItemsPlist writeToFile:_customItemsPath atomically:YES];
 
 	[GenieManager.userDefaults setObject:_variables forKey:kVariablesSettingsKey];
 	[[NSDistributedNotificationCenter defaultCenter] postNotificationName:NSUserDefaultsDidChangeNotification object:kGeniePrefsBundleIdentifier userInfo:nil deliverImmediately:NO];
