@@ -1310,6 +1310,15 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 		[self flushCachedValues];
 		_htmlOutputItem.htmlString  = nil;
 		_htmlOutputItem.queryString = nil;
+
+		if(self.kind == kGenieItemKindCommandResult)
+		{
+			if(GenieDataSourceCacheRecord* cacheRecord = self.dataSourceCacheRecord)
+			{
+				if(!cacheRecord.expirationDate && !cacheRecord.dependsOnPath)
+					_dataSourceNeedsUpdate = YES;
+			}
+		}
 	}
 }
 
