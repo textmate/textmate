@@ -14,6 +14,21 @@
 static NSString* const kVariablesSettingsKey            = @"variables";
 static NSString* const kGenieItemsDidChangeNotification = @"GenieItemsDidChangeNotification";
 
+@interface GenieItemsDocument : NSObject
+{
+	NSString* _itemsPath;
+	NSString* _customItemsPath;
+	NSString* _defaultItemsPath;
+
+	std::vector<dispatch_source_t> _dispatchSources;
+
+	BOOL _needsReloadItems;
+	NSTimer* _reloadItemsTimer;
+}
+@property (nonatomic) NSArray* observedPaths;
+@property (nonatomic, readonly) NSMutableArray<GenieItem*>* items;
+@end
+
 static NSDictionary* ConvertItem (NSMutableDictionary* items, NSString* identifier)
 {
 	NSMutableDictionary* newValues = [items[identifier] mutableCopy];
@@ -62,115 +77,14 @@ static NSArray* FlattenItems (NSArray<NSDictionary*>* items, NSMutableDictionary
 	return res.count ? res : nil;
 }
 
-@interface GenieManager ()
-{
-	NSString* _itemsPath;
-	NSString* _customItemsPath;
-	NSString* _defaultItemsPath;
-	NSMutableArray<GenieItem*>* _items;
-
-	NSDictionary* _environment;
-	std::vector<dispatch_source_t> _dispatchSources;
-
-	BOOL _needsReloadItems;
-	NSTimer* _reloadItemsTimer;
-}
-@property (nonatomic) NSArray* observedPaths;
-@end
-
-@implementation GenieManager
-+ (instancetype)sharedInstance
-{
-	static GenieManager* sharedInstance = [self new];
-	return sharedInstance;
-}
-
-+ (void)initialize
-{
-	static NSString* const kAppleMapsURL = @"http://maps.apple.com/?q=%s";
-
-	[self.userDefaults registerDefaults:@{
-		kEnableClipboardHistorySettingsKey:      @NO,
-		kDisableLaunchAtLoginSettingsKey:        @NO,
-		kActivationKeyEventSettingsKey:          @"@ ",
-		kClipboardHistoryExpireAfterSettingsKey: @"24 hours",
-		kClipboardHistoryIgnoreAppsSettingsKey:  @[
-			@{ @"bundleIdentifier": @"com.apple.keychainaccess", @"localizedName": @"Keychain Access" }
-		],
-		kVariablesSettingsKey:                   @[
-			@{ @"name": @"EDITOR",        @"value": @"mate -w" },
-			@{ @"name": @"LC_CTYPE",      @"value": @"en_US.UTF-8"                   },
-			@{ @"name": @"LOGIN_SHELL",   @"value": @"${SHELL:-bash} -lc"            },
-			@{ @"name": @"MAPS_URL",      @"value": kAppleMapsURL, @"disabled": @YES },
-			@{ @"name": @"PATH",          @"value": @"/usr/local/bin:$PATH"          },
-		],
-	}];
-}
-
-+ (NSUserDefaults*)userDefaults
-{
-	NSString* bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
-	if([bundleIdentifier isEqualToString:kGenieBundleIdentifier])
-		return [NSUserDefaults standardUserDefaults];
-	return [[NSUserDefaults alloc] initWithSuiteName:kGenieBundleIdentifier];
-}
-
-- (void)runInNextEventLoopIteration:(void(^)())callback
-{
-	callback();
-}
-
-- (void)runAsActive:(void(^)())callback
-{
-	if(NSApp.isActive)
-	{
-		callback();
-	}
-	else
-	{
-		__weak __block id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:NSApplicationDidBecomeActiveNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
-			[[NSNotificationCenter defaultCenter] removeObserver:observerId];
-			[self performSelector:@selector(runInNextEventLoopIteration:) withObject:callback afterDelay:0];
-		}];
-		[NSApp activateIgnoringOtherApps:YES];
-	}
-}
-
-- (void)runAsInactive:(void(^)())callback
-{
-	if(!NSApp.isActive)
-	{
-		callback();
-	}
-	else
-	{
-		__weak __block id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:NSApplicationDidResignActiveNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
-			[[NSNotificationCenter defaultCenter] removeObserver:observerId];
-			[self performSelector:@selector(runInNextEventLoopIteration:) withObject:callback afterDelay:0];
-		}];
-		[NSApp hide:self];
-	}
-}
-
-- (NSBundle*)mainBundle
-{
-	NSString* bundleIdentifier = NSBundle.mainBundle.bundleIdentifier;
-	if([bundleIdentifier isEqualToString:kGenieBundleIdentifier])
-		return NSBundle.mainBundle;
-
-	NSURL* url = [NSWorkspace.sharedWorkspace URLForApplicationWithBundleIdentifier:kGenieBundleIdentifier];
-	return url ? [NSBundle bundleWithURL:url] : nil;
-}
-
+@implementation GenieItemsDocument
 - (instancetype)init
 {
 	if(self = [super init])
 	{
-		self.variables = [GenieManager.userDefaults arrayForKey:kVariablesSettingsKey];
-
 		NSString* appSupport  = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES).firstObject;
 		NSString* genieFolder = [appSupport stringByAppendingPathComponent:@"Genie"];
-		NSString* supportPath = self.mainBundle.sharedSupportPath;
+		NSString* supportPath = NSBundle.mainBundle.sharedSupportPath;
 
 		_items            = [NSMutableArray array];
 		_itemsPath        = [genieFolder stringByAppendingPathComponent:@"Items.plist"];
@@ -178,24 +92,9 @@ static NSArray* FlattenItems (NSArray<NSDictionary*>* items, NSMutableDictionary
 		_defaultItemsPath = [supportPath stringByAppendingPathComponent:@"Default.genieItems"];
 		[self reloadItems:self];
 
-		NSString* bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
-		if([bundleIdentifier isEqualToString:kGenieBundleIdentifier])
-			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
-
-		[[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:kGeniePrefsBundleIdentifier];
 		[[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(genieItemsDidChange:) name:kGenieItemsDidChangeNotification object:kGeniePrefsBundleIdentifier];
 	}
 	return self;
-}
-
-- (NSString*)cacheFolderByAppendingPathComponent:(NSString*)aPath
-{
-	NSString* cacheDir = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).firstObject;
-	cacheDir = [cacheDir stringByAppendingPathComponent:NSBundle.mainBundle.bundleIdentifier];
-	if(aPath)
-		cacheDir = [cacheDir stringByAppendingPathComponent:aPath];
-	[NSFileManager.defaultManager createDirectoryAtPath:cacheDir withIntermediateDirectories:YES attributes:nil error:nullptr];
-	return cacheDir;
 }
 
 - (void)reloadItems:(id)sender
@@ -322,8 +221,9 @@ static NSArray* FlattenItems (NSArray<NSDictionary*>* items, NSMutableDictionary
 			close(fd);
 		});
 
+		__weak GenieItemsDocument* weakSelf = self;
 		dispatch_source_set_event_handler(source, ^{
-			[GenieManager.sharedInstance didChangeObservedPath:path];
+			[weakSelf didChangeObservedPath:path];
 		});
 
 		_dispatchSources.emplace_back(source);
@@ -331,51 +231,7 @@ static NSArray* FlattenItems (NSArray<NSDictionary*>* items, NSMutableDictionary
 	}
 }
 
-- (void)userDefaultsDidChange:(NSNotification*)aNotification
-{
-	self.variables = [GenieManager.userDefaults arrayForKey:kVariablesSettingsKey];
-}
-
-- (void)setVariables:(NSArray*)newVariables
-{
-	if([_variables isEqual:newVariables])
-		return;
-
-	NSMutableArray* variables = [NSMutableArray array];
-	for(NSDictionary* variable in newVariables)
-		[variables addObject:[variable mutableCopy]];
-
-	_variables   = variables;
-	_environment = nil;
-}
-
-- (NSDictionary*)environment
-{
-	if(!_environment)
-	{
-		std::map<std::string, std::string> map;
-
-		NSDictionary* env = NSProcessInfo.processInfo.environment;
-		for(NSString* key in env)
-			map.emplace(to_s(key), to_s(env[key]));
-
-		if(NSString* supportPath = self.mainBundle.sharedSupportPath)
-			map["GENIE_SUPPORT_PATH"] = supportPath.fileSystemRepresentation;
-
-		map["GENIE_CACHES_PATH"] = [self cacheFolderByAppendingPathComponent:nil].fileSystemRepresentation;
-
-		for(NSDictionary* variable in [_variables filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"disabled != YES"]])
-			map[to_s(variable[@"name"])] = format_string::expand(to_s(variable[@"value"]), map);
-
-		NSMutableDictionary* variables = [NSMutableDictionary dictionary];
-		for(auto const& pair : map)
-			variables[[NSString stringWithUTF8String:pair.first.c_str()]] = [NSString stringWithUTF8String:pair.second.c_str()];
-		_environment = variables;
-	}
-	return _environment;
-}
-
-- (BOOL)synchronize
+- (void)saveDocument:(id)sender
 {
 	BOOL const saveDelta = YES;
 
@@ -464,10 +320,181 @@ static NSArray* FlattenItems (NSArray<NSDictionary*>* items, NSMutableDictionary
 	[NSFileManager.defaultManager createDirectoryAtPath:[_customItemsPath stringByDeletingLastPathComponent] withIntermediateDirectories:YES attributes:nil error:nullptr];
 	[customItemsPlist writeToFile:_customItemsPath atomically:YES];
 
+	[[NSDistributedNotificationCenter defaultCenter] postNotificationName:kGenieItemsDidChangeNotification object:kGeniePrefsBundleIdentifier userInfo:nil deliverImmediately:YES];
+}
+@end
+
+@interface GenieManager ()
+{
+	GenieItemsDocument* _document;
+	NSMutableArray<GenieItem*>* _items;
+
+	NSDictionary* _environment;
+}
+@end
+
+@implementation GenieManager
++ (instancetype)sharedInstance
+{
+	static GenieManager* sharedInstance = [self new];
+	return sharedInstance;
+}
+
++ (void)initialize
+{
+	static NSString* const kAppleMapsURL = @"http://maps.apple.com/?q=%s";
+
+	[self.userDefaults registerDefaults:@{
+		kEnableClipboardHistorySettingsKey:      @NO,
+		kDisableLaunchAtLoginSettingsKey:        @NO,
+		kActivationKeyEventSettingsKey:          @"@ ",
+		kClipboardHistoryExpireAfterSettingsKey: @"24 hours",
+		kClipboardHistoryIgnoreAppsSettingsKey:  @[
+			@{ @"bundleIdentifier": @"com.apple.keychainaccess", @"localizedName": @"Keychain Access" }
+		],
+		kVariablesSettingsKey:                   @[
+			@{ @"name": @"EDITOR",        @"value": @"mate -w" },
+			@{ @"name": @"LC_CTYPE",      @"value": @"en_US.UTF-8"                   },
+			@{ @"name": @"LOGIN_SHELL",   @"value": @"${SHELL:-bash} -lc"            },
+			@{ @"name": @"MAPS_URL",      @"value": kAppleMapsURL, @"disabled": @YES },
+			@{ @"name": @"PATH",          @"value": @"/usr/local/bin:$PATH"          },
+		],
+	}];
+}
+
++ (NSUserDefaults*)userDefaults
+{
+	NSString* bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
+	if([bundleIdentifier isEqualToString:kGenieBundleIdentifier])
+		return [NSUserDefaults standardUserDefaults];
+	return [[NSUserDefaults alloc] initWithSuiteName:kGenieBundleIdentifier];
+}
+
+- (void)runInNextEventLoopIteration:(void(^)())callback
+{
+	callback();
+}
+
+- (void)runAsActive:(void(^)())callback
+{
+	if(NSApp.isActive)
+	{
+		callback();
+	}
+	else
+	{
+		__weak __block id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:NSApplicationDidBecomeActiveNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
+			[[NSNotificationCenter defaultCenter] removeObserver:observerId];
+			[self performSelector:@selector(runInNextEventLoopIteration:) withObject:callback afterDelay:0];
+		}];
+		[NSApp activateIgnoringOtherApps:YES];
+	}
+}
+
+- (void)runAsInactive:(void(^)())callback
+{
+	if(!NSApp.isActive)
+	{
+		callback();
+	}
+	else
+	{
+		__weak __block id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:NSApplicationDidResignActiveNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
+			[[NSNotificationCenter defaultCenter] removeObserver:observerId];
+			[self performSelector:@selector(runInNextEventLoopIteration:) withObject:callback afterDelay:0];
+		}];
+		[NSApp hide:self];
+	}
+}
+
+- (NSBundle*)mainBundle
+{
+	NSString* bundleIdentifier = NSBundle.mainBundle.bundleIdentifier;
+	if([bundleIdentifier isEqualToString:kGenieBundleIdentifier])
+		return NSBundle.mainBundle;
+
+	NSURL* url = [NSWorkspace.sharedWorkspace URLForApplicationWithBundleIdentifier:kGenieBundleIdentifier];
+	return url ? [NSBundle bundleWithURL:url] : nil;
+}
+
+- (instancetype)init
+{
+	if(self = [super init])
+	{
+		self.variables = [GenieManager.userDefaults arrayForKey:kVariablesSettingsKey];
+
+		_document = [[GenieItemsDocument alloc] init];
+		_items = _document.items;
+
+		NSString* bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
+		if([bundleIdentifier isEqualToString:kGenieBundleIdentifier])
+			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
+
+		[[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:kGeniePrefsBundleIdentifier];
+	}
+	return self;
+}
+
+- (NSString*)cacheFolderByAppendingPathComponent:(NSString*)aPath
+{
+	NSString* cacheDir = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).firstObject;
+	cacheDir = [cacheDir stringByAppendingPathComponent:NSBundle.mainBundle.bundleIdentifier];
+	if(aPath)
+		cacheDir = [cacheDir stringByAppendingPathComponent:aPath];
+	[NSFileManager.defaultManager createDirectoryAtPath:cacheDir withIntermediateDirectories:YES attributes:nil error:nullptr];
+	return cacheDir;
+}
+
+- (void)userDefaultsDidChange:(NSNotification*)aNotification
+{
+	self.variables = [GenieManager.userDefaults arrayForKey:kVariablesSettingsKey];
+}
+
+- (void)setVariables:(NSArray*)newVariables
+{
+	if([_variables isEqual:newVariables])
+		return;
+
+	NSMutableArray* variables = [NSMutableArray array];
+	for(NSDictionary* variable in newVariables)
+		[variables addObject:[variable mutableCopy]];
+
+	_variables   = variables;
+	_environment = nil;
+}
+
+- (NSDictionary*)environment
+{
+	if(!_environment)
+	{
+		std::map<std::string, std::string> map;
+
+		NSDictionary* env = NSProcessInfo.processInfo.environment;
+		for(NSString* key in env)
+			map.emplace(to_s(key), to_s(env[key]));
+
+		if(NSString* supportPath = self.mainBundle.sharedSupportPath)
+			map["GENIE_SUPPORT_PATH"] = supportPath.fileSystemRepresentation;
+
+		map["GENIE_CACHES_PATH"] = [self cacheFolderByAppendingPathComponent:nil].fileSystemRepresentation;
+
+		for(NSDictionary* variable in [_variables filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"disabled != YES"]])
+			map[to_s(variable[@"name"])] = format_string::expand(to_s(variable[@"value"]), map);
+
+		NSMutableDictionary* variables = [NSMutableDictionary dictionary];
+		for(auto const& pair : map)
+			variables[[NSString stringWithUTF8String:pair.first.c_str()]] = [NSString stringWithUTF8String:pair.second.c_str()];
+		_environment = variables;
+	}
+	return _environment;
+}
+
+- (BOOL)synchronize
+{
+	[_document saveDocument:self];
+
 	[GenieManager.userDefaults setObject:_variables forKey:kVariablesSettingsKey];
 	[[NSDistributedNotificationCenter defaultCenter] postNotificationName:NSUserDefaultsDidChangeNotification object:kGeniePrefsBundleIdentifier userInfo:nil deliverImmediately:NO];
-
-	[[NSDistributedNotificationCenter defaultCenter] postNotificationName:kGenieItemsDidChangeNotification object:kGeniePrefsBundleIdentifier userInfo:nil deliverImmediately:YES];
 
 	return YES;
 }
