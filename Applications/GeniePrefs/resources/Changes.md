@@ -1,5 +1,32 @@
 # Changes
 
+## Genie 0.15-beta (2018-07-25)
+
+* Genie now includes the default set of items. Any changes you make to items are saved as `~/Library/Application Support/Genie/Custom.genieItems` (saving only the changes).
+* If there is no `Custom.genieItems` then Genie will still load the old `Items.plist`, this is incase you have changes that you wish to keep. If this is the case, do the following to make sure `Custom.genieItems` becomes a delta against the latest version if `Items.plist`:
+
+    1. Quit Genie
+    2. Delete any existing `Custom.genieItems`
+    3. Git update `~/Library/Application Support/Genie`
+    4. Launch Genie
+    5. Open Genie Preferences
+    6. Close Preferences → This should save a new `Custom.genieItems`
+    7. You can now delete all files from `~/Library/Application Support/Genie` except `Custom.genieItems` and possibly `ClipboardHistory.db`
+
+    If you do not have customizations (that you wish to keep), just do:
+
+    1. Quit Genie
+    2. Delete `~/Library/Application Support/Genie`
+    3. Launch Genie
+
+* Fixed issue with stale results from script data source that had no expiration or dependency (these should expire when closing the window, but did not).
+
+* Fixed exception if using malformed predicate strings for Spotlight Query or Predicate Group items.
+
+* I forgot to include changes in the last release: Major change is that there is now documentation (in the Preferences window), which you may have noticed. In the documentation you can read about how JavaScript can now run shell commands (new in last build). This is currently used by _Set Timer_ where it is now possible to click a timer to cancel it.
+
+* Also added in last build are CSS variables for `textColor`, `labelColor`, `secondaryLabelColor`, `tertiaryLabelColor`, and `quaternaryLabelColor`. These should be used instead of hardcoded colors in anticipation of darkmode support. The _Show Calendar_ makes use of these (and now includes week numbers).
+
 ## Genie 0.12-beta (2018-06-24)
 
 * Improved preferences window, you can now:
