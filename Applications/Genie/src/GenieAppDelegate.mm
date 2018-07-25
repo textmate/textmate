@@ -912,10 +912,15 @@ static NSString* CSSColorFromColor (NSColor* orgColor)
 
 		for(GenieItem* predicateItem in [GenieManager.sharedInstance.items filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"disabled = NO && kind = %ld", kGenieItemKindPredicateGroup]])
 		{
-			if([item matchesPredicate:[NSPredicate predicateWithFormat:[predicateItem staticValueForKey:@"predicate"]]])
-			{
-				for(GenieItem* predicateChild in predicateItem.children)
-					[children addObject:[predicateChild copyWithNewParent:item]];
+			try {
+				if([item matchesPredicate:[NSPredicate predicateWithFormat:[predicateItem staticValueForKey:@"predicate"]]])
+				{
+					for(GenieItem* predicateChild in predicateItem.children)
+						[children addObject:[predicateChild copyWithNewParent:item]];
+				}
+			}
+			catch (NSException* e) {
+				os_log_error(OS_LOG_DEFAULT, "Failed to create predicate ‘%@’: %{public}@", [predicateItem staticValueForKey:@"predicate"], e.reason);
 			}
 		}
 

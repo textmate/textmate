@@ -1835,7 +1835,13 @@ static std::map<GenieItemKind, NSString*> KindMapping = {
 - (NSMetadataQuery*)createMetadataQuery
 {
 	NSMetadataQuery* query = [[NSMetadataQuery alloc] init];
-	query.predicate = [NSPredicate predicateFromMetadataQueryString:[self staticValueForKey:@"mdQuery"] ?: @"TRUE"];
+	try {
+		query.predicate = [NSPredicate predicateFromMetadataQueryString:[self staticValueForKey:@"mdQuery"] ?: @"TRUE"];
+	}
+	catch (NSException* e) {
+		os_log_error(OS_LOG_DEFAULT, "Failed to create query ‘%@’: %{public}@", [self staticValueForKey:@"mdQuery"], e.reason);
+		return nil;
+	}
 
 	NSArray* searchScopes;
 	if(NSArray* scopes = [self staticValueForKey:@"mdScope"])
