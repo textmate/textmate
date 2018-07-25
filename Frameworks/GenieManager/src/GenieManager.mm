@@ -18,7 +18,6 @@ static NSString* const kGenieItemsDidChangeNotification = @"GenieItemsDidChangeN
 {
 	NSString* _itemsPath;
 	NSString* _customItemsPath;
-	NSString* _defaultItemsPath;
 
 	std::vector<dispatch_source_t> _dispatchSources;
 
@@ -78,18 +77,28 @@ static NSArray* FlattenItems (NSArray<NSDictionary*>* items, NSMutableDictionary
 }
 
 @implementation GenieItemsDocument
+- (NSString*)defaultItemsPath
+{
+	static NSString* const defaultItemsPath = [NSBundle.mainBundle.sharedSupportPath stringByAppendingPathComponent:@"Default.genieItems"];
+	return defaultItemsPath;
+}
+
+- (NSDictionary*)defaultItems
+{
+	static NSDictionary* const defaultItems = [NSDictionary dictionaryWithContentsOfFile:self.defaultItemsPath][@"items"];
+	return defaultItems;
+}
+
 - (instancetype)init
 {
 	if(self = [super init])
 	{
 		NSString* appSupport  = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES).firstObject;
 		NSString* genieFolder = [appSupport stringByAppendingPathComponent:@"Genie"];
-		NSString* supportPath = NSBundle.mainBundle.sharedSupportPath;
 
 		_items            = [NSMutableArray array];
 		_itemsPath        = [genieFolder stringByAppendingPathComponent:@"Items.plist"];
 		_customItemsPath  = [genieFolder stringByAppendingPathComponent:@"Custom.genieItems"];
-		_defaultItemsPath = [supportPath stringByAppendingPathComponent:@"Default.genieItems"];
 		[self reloadItems:self];
 
 		[[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(genieItemsDidChange:) name:kGenieItemsDidChangeNotification object:kGeniePrefsBundleIdentifier];
@@ -106,7 +115,7 @@ static NSArray* FlattenItems (NSArray<NSDictionary*>* items, NSMutableDictionary
 	{
 		[paths addObject:_customItemsPath];
 
-		NSDictionary* defaultItems = [NSDictionary dictionaryWithContentsOfFile:_defaultItemsPath][@"items"];
+		NSDictionary* defaultItems = self.defaultItems;
 		NSDictionary* customItems  = customRepository[@"items"];
 
 		NSMutableSet* identifiers = [NSMutableSet setWithArray:customItems.allKeys];
@@ -145,7 +154,7 @@ static NSArray* FlattenItems (NSArray<NSDictionary*>* items, NSMutableDictionary
 		std::multimap<NSInteger, GenieItem*> weighted;
 		for(NSString* identifier in rootValues)
 		{
-			NSString* path = defaultItems[identifier] ? _defaultItemsPath : _customItemsPath;
+			NSString* path = defaultItems[identifier] ? self.defaultItemsPath : _customItemsPath;
 			if(GenieItem* item = [[GenieItem alloc] initWithValues:rootValues[identifier] parentItem:nil directory:[path stringByDeletingLastPathComponent]])
 				weighted.emplace(weights[item.identifier].intValue, item);
 		}
@@ -236,7 +245,7 @@ static NSArray* FlattenItems (NSArray<NSDictionary*>* items, NSMutableDictionary
 	BOOL const saveDelta = YES;
 
 	self.observedPaths = nil;
-	NSDictionary* const defaultItems = [NSDictionary dictionaryWithContentsOfFile:_defaultItemsPath][@"items"];
+	NSDictionary* const defaultItems = self.defaultItems;
 
 	NSMutableDictionary* allItems = [NSMutableDictionary dictionary];
 	FlattenItems([_items valueForKey:@"rawValues"], allItems);
