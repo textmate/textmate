@@ -292,6 +292,15 @@ static NSArray* FlattenItems (NSArray<NSDictionary*>* items, NSMutableDictionary
 		repository[identifier] = customItem;
 	}
 
+	// =================
+	// = Deleted Items =
+	// =================
+
+	NSMutableSet* missingItems = [NSMutableSet setWithArray:defaultItems.allKeys];
+	[missingItems minusSet:[NSSet setWithArray:allItems.allKeys]];
+	for(NSString* identifier in missingItems)
+		repository[identifier] = @{ @"deleted": @YES };
+
 	// ==================
 	// = Update Weights =
 	// ==================
