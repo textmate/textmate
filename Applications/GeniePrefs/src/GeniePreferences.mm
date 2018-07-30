@@ -483,8 +483,35 @@ static NSSet* const kExistingDefaultsKeys = [NSSet setWithArray:@[
 }
 @end
 
-@interface DocumentationViewController ()
+@interface WebViewController () <WKNavigationDelegate>
 @property (nonatomic) NSResponder* initialFirstResponder;
+@property (nonatomic) WKWebView* webView;
+@end
+
+@implementation WebViewController
+- (void)webView:(WKWebView*)webView decidePolicyForNavigationAction:(WKNavigationAction*)navigationAction decisionHandler:(void(^)(WKNavigationActionPolicy))handler
+{
+	NSURLRequest* request = navigationAction.request;
+	if(![[request.URL scheme] isEqualToString:@"file"] && [NSWorkspace.sharedWorkspace openURL:request.URL] || ![NSURLConnection canHandleRequest:request])
+			handler(WKNavigationActionPolicyCancel);
+	else	handler(WKNavigationActionPolicyAllow);
+}
+
+- (void)loadView
+{
+	NSView* contentView = [[NSView alloc] initWithFrame:NSZeroRect];
+
+	WKWebViewConfiguration* webConfig = [[WKWebViewConfiguration alloc] init];
+	webConfig.suppressesIncrementalRendering = YES;
+
+	_webView = [[WKWebView alloc] initWithFrame:NSZeroRect configuration:webConfig];
+	_webView.navigationDelegate = self;
+	_webView.autoresizingMask   = NSViewWidthSizable|NSViewHeightSizable;
+	[contentView addSubview:_webView];
+
+	self.initialFirstResponder = _webView;
+	self.view = contentView;
+}
 @end
 
 @implementation DocumentationViewController
@@ -499,25 +526,10 @@ static NSSet* const kExistingDefaultsKeys = [NSSet setWithArray:@[
 
 - (void)loadView
 {
-	NSView* contentView = [[NSView alloc] initWithFrame:NSZeroRect];
-
-	WKWebViewConfiguration* webConfig = [[WKWebViewConfiguration alloc] init];
-	webConfig.suppressesIncrementalRendering = YES;
-
-	WKWebView* webView = [[WKWebView alloc] initWithFrame:NSZeroRect configuration:webConfig];
+	[super loadView];
 	if(NSURL* url = [[NSBundle mainBundle] URLForResource:@"Docs" withExtension:@"html"])
-		[webView loadFileURL:url allowingReadAccessToURL:[NSURL fileURLWithPath:[url.path stringByDeletingLastPathComponent]]];
-
-	webView.autoresizingMask = NSViewWidthSizable|NSViewHeightSizable;
-	[contentView addSubview:webView];
-
-	self.initialFirstResponder = webView;
-	self.view = contentView;
+		[self.webView loadFileURL:url allowingReadAccessToURL:[NSURL fileURLWithPath:[url.path stringByDeletingLastPathComponent]]];
 }
-@end
-
-@interface ChangesViewController ()
-@property (nonatomic) NSResponder* initialFirstResponder;
 @end
 
 @implementation ChangesViewController
@@ -532,20 +544,9 @@ static NSSet* const kExistingDefaultsKeys = [NSSet setWithArray:@[
 
 - (void)loadView
 {
-	NSView* contentView = [[NSView alloc] initWithFrame:NSZeroRect];
-
-	WKWebViewConfiguration* webConfig = [[WKWebViewConfiguration alloc] init];
-	webConfig.suppressesIncrementalRendering = YES;
-
-	WKWebView* webView = [[WKWebView alloc] initWithFrame:NSZeroRect configuration:webConfig];
+	[super loadView];
 	if(NSURL* url = [[NSBundle mainBundle] URLForResource:@"Changes" withExtension:@"html"])
-		[webView loadFileURL:url allowingReadAccessToURL:[NSURL fileURLWithPath:[url.path stringByDeletingLastPathComponent]]];
-
-	webView.autoresizingMask = NSViewWidthSizable|NSViewHeightSizable;
-	[contentView addSubview:webView];
-
-	self.initialFirstResponder = webView;
-	self.view = contentView;
+		[self.webView loadFileURL:url allowingReadAccessToURL:[NSURL fileURLWithPath:[url.path stringByDeletingLastPathComponent]]];
 }
 @end
 

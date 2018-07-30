@@ -7,8 +7,11 @@
 @interface VariablesViewController : NSViewController
 @end
 
-@interface DocumentationViewController : NSViewController
+@interface WebViewController : NSViewController
 @end
 
-@interface ChangesViewController : NSViewController
+@interface DocumentationViewController : WebViewController
+@end
+
+@interface ChangesViewController : WebViewController
 @end
