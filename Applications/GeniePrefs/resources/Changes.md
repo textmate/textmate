@@ -1,5 +1,11 @@
 # Changes
 
+## Genie 0.16-beta (2018-07-30)
+
+* Default items would not load when there were no custom items (this should only be a problem on first run).
+* Show a warning about inability to perform software updates when Genie is running on a read-only file system, which is probably happening more often that you’d expect due to [App Translocation](https://mjtsai.com/blog/2016/06/16/gatekeeper-path-randomization/)
+* Another change in 0.14-beta that I forgot to mention is the new Edit → Edit in TextMate (⌘K) menu command which is available for most text views.
+
 ## Genie 0.15-beta (2018-07-25)
 
 * Genie now includes the default set of items. Any changes you make to items are saved as `~/Library/Application Support/Genie/Custom.genieItems` (saving only the changes).
