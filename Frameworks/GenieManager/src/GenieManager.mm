@@ -110,75 +110,68 @@ static NSArray* FlattenItems (NSArray<NSDictionary*>* items, NSMutableDictionary
 {
 	self.needsReloadItems = NO;
 
-	NSMutableArray* paths = [NSMutableArray array];
-	if(NSDictionary* customRepository = [NSDictionary dictionaryWithContentsOfFile:_customItemsPath])
+	NSDictionary* customRepository = [NSDictionary dictionaryWithContentsOfFile:_customItemsPath];
+	NSDictionary* customItems      = customRepository[@"items"];
+	NSDictionary* defaultItems     = self.defaultItems;
+
+	NSMutableSet* identifiers = [NSMutableSet setWithArray:defaultItems.allKeys];
+	if(NSArray* customItemKeys = customItems.allKeys)
+		[identifiers addObjectsFromArray:customItemKeys];
+
+	NSMutableDictionary<NSString*, NSDictionary*>* values = [NSMutableDictionary dictionary];
+	NSMutableDictionary<NSString*, NSNumber*>* weights    = [NSMutableDictionary dictionary];
+	for(NSString* identifier in identifiers)
 	{
-		[paths addObject:_customItemsPath];
+		NSDictionary* defaultValues = defaultItems[identifier];
+		NSDictionary* customValues  = customItems[identifier];
 
-		NSDictionary* defaultItems = self.defaultItems;
-		NSDictionary* customItems  = customRepository[@"items"];
-
-		NSMutableSet* identifiers = [NSMutableSet setWithArray:customItems.allKeys];
-		[identifiers addObjectsFromArray:defaultItems.allKeys];
-
-		NSMutableDictionary<NSString*, NSDictionary*>* values = [NSMutableDictionary dictionary];
-		NSMutableDictionary<NSString*, NSNumber*>* weights    = [NSMutableDictionary dictionary];
-		for(NSString* identifier in identifiers)
+		if(customValues)
 		{
-			NSDictionary* defaultValues = defaultItems[identifier];
-			NSDictionary* customValues  = customItems[identifier];
-
-			if(NSMutableDictionary* mergedValues = [defaultValues[@"values"] mutableCopy])
+			if(![customValues[@"deleted"] boolValue])
 			{
-				if(NSDictionary* replacementValues = customValues[@"values"])
-					[mergedValues addEntriesFromDictionary:replacementValues];
-				for(NSString* key in customValues[@"removeValues"])
-					[mergedValues removeObjectForKey:key];
-				values[identifier] = mergedValues;
+				if(NSMutableDictionary* mergedValues = [defaultValues[@"values"] mutableCopy])
+				{
+					if(NSDictionary* replacementValues = customValues[@"values"])
+						[mergedValues addEntriesFromDictionary:replacementValues];
+					for(NSString* key in customValues[@"removeValues"])
+						[mergedValues removeObjectForKey:key];
+					values[identifier] = mergedValues;
+				}
+				else if(![customValues[@"partial"] boolValue])
+				{
+					values[identifier] = customValues[@"values"];
+				}
 			}
-			else if(![customValues[@"partial"] boolValue])
-			{
-				values[identifier] = customValues[@"values"];
-			}
-
-			weights[identifier] = customValues[@"weight"] ?: defaultValues[@"weight"];
 		}
-
-		NSMutableDictionary* rootValues = [values mutableCopy];
-		for(NSString* identifier in rootValues.allKeys)
+		else
 		{
-			if(NSDictionary* newItem = ConvertItem(rootValues, identifier))
-				rootValues[identifier] = newItem;
+			values[identifier] = defaultValues[@"values"];
 		}
 
-		std::multimap<NSInteger, GenieItem*> weighted;
-		for(NSString* identifier in rootValues)
-		{
-			NSString* path = defaultItems[identifier] ? self.defaultItemsPath : _customItemsPath;
-			if(GenieItem* item = [[GenieItem alloc] initWithValues:rootValues[identifier] parentItem:nil directory:[path stringByDeletingLastPathComponent]])
-				weighted.emplace(weights[item.identifier].intValue, item);
-		}
-
-		NSMutableArray* items = [NSMutableArray array];
-		for(auto const& pair : weighted)
-			[items addObject:pair.second];
-
-		[[self mutableArrayValueForKey:@"items"] setArray:items];
-	}
-	else if(NSDictionary* rawItems = [NSDictionary dictionaryWithContentsOfFile:_itemsPath])
-	{
-		NSMutableArray* items = [NSMutableArray array];
-		[paths addObject:_itemsPath];
-
-		for(NSDictionary* rawItem in rawItems[@"items"])
-		{
-			if(GenieItem* item = [[GenieItem alloc] initWithValues:rawItem parentItem:nil directory:[_itemsPath stringByDeletingLastPathComponent]])
-				[items addObject:item];
-		}
-		[[self mutableArrayValueForKey:@"items"] setArray:items];
+		weights[identifier] = customValues[@"weight"] ?: defaultValues[@"weight"];
 	}
 
-	self.observedPaths = paths;
+	NSMutableDictionary* rootValues = [values mutableCopy];
+	for(NSString* identifier in rootValues.allKeys)
+	{
+		if(NSDictionary* newItem = ConvertItem(rootValues, identifier))
+			rootValues[identifier] = newItem;
+	}
+
+	std::multimap<NSInteger, GenieItem*> weighted;
+	for(NSString* identifier in rootValues)
+	{
+		NSString* path = defaultItems[identifier] ? self.defaultItemsPath : _customItemsPath;
+		if(GenieItem* item = [[GenieItem alloc] initWithValues:rootValues[identifier] parentItem:nil directory:[path stringByDeletingLastPathComponent]])
+			weighted.emplace(weights[item.identifier].intValue, item);
+	}
+
+	NSMutableArray* items = [NSMutableArray array];
+	for(auto const& pair : weighted)
+		[items addObject:pair.second];
+
+	[[self mutableArrayValueForKey:@"items"] setArray:items];
+	self.observedPaths = customRepository ? @[ _customItemsPath ] : @[ ];
 }
 
 - (void)genieItemsDidChange:(NSNotification*)aNotification
