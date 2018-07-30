@@ -178,7 +178,7 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 				{
 					NSAlert* alert        = [[NSAlert alloc] init];
 					alert.alertStyle      = NSAlertStyleInformational;
-					alert.messageText     = @"Error checking for new version";
+					alert.messageText     = @"Error Checking for new Version";
 					alert.informativeText = self.errorString;
 					[alert addButtonWithTitle:@"Continue"];
 					[alert runModal];
