@@ -156,11 +156,10 @@ struct tracking_t : fs::event_callback_t
 	bool allowExpandingLinks = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsAllowExpandingLinksKey];
 	bool includeHidden       = (dataSource.dataSourceOptions & kFSDataSourceOptionIncludeHidden) == kFSDataSourceOptionIncludeHidden;
 
+	settings_t const settings = settings_for_path(NULL_STR, "", dir);
 	path::glob_list_t globs;
 	if(!includeHidden)
 	{
-		settings_t const& settings = settings_for_path(NULL_STR, "", dir);
-
 		globs.add_exclude_glob(settings.get(kSettingsExcludeDirectoriesInBrowserKey), path::kPathItemDirectory);
 		globs.add_exclude_glob(settings.get(kSettingsExcludeDirectoriesKey),          path::kPathItemDirectory);
 		globs.add_exclude_glob(settings.get(kSettingsExcludeFilesInBrowserKey),       path::kPathItemFile);
@@ -257,7 +256,8 @@ struct tracking_t : fs::event_callback_t
 					pathsOnDisk.insert(fsItem.path);
 				}
 
-				if(scmInfo)
+				// SCM deleted items
+				if(scmInfo && (includeHidden || !settings.get(kSettingsExcludeSCMDeletedKey, false)))
 				{
 					for(auto pair : scmInfo->status())
 					{
