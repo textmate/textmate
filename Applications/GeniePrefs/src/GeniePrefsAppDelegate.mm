@@ -112,7 +112,7 @@
 					}
 				},
 				{ /* -------- */ },
-				{ @"Edit in TextNate",      @selector(editInTextMate:),   @"k" },
+				{ @"Edit in TextMate",      @selector(editInTextMate:),   @"k" },
 			}
 		},
 		{ @"Format",
