@@ -220,9 +220,14 @@ function get_build ($arguments, $method) {
 // = Main =
 // ========
 
+function get_index () {
+	echo "No content here.\n";
+}
+
 load_settings('../secrets.ini') or fail(500);
 
 dispatch(get_current_uri(), array(
 	array('GET',      '/version/:label',               'latest_version'),
 	array('GET|HEAD', '/builds/:build_id/:build_name', 'get_build'),
+	array('GET|HEAD', '/',                             'get_index'),
 ));
