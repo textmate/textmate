@@ -45,13 +45,21 @@ function load_settings ($filename) {
 function dispatch ($uri, $routes) {
 	$http_response = 404; // Not Found
 
+	if($uri['method'] == 'OPTIONS') {
+		$methods = array_map(function ($route) { return $route[0]; }, $routes);
+		array_unshift($methods, 'OPTIONS');
+		$methods = array_unique(explode('|', implode('|', $methods)));
+		header('Allow: ' . implode(', ', $methods));
+		fail(200, NULL);
+	}
+
 	foreach($routes as $route) {
 		$route_method  = $route[0];
 		$route_uri     = $route[1];
 		$route_handler = $route[2];
 
 		$delim = '&';
-		$regex = preg_replace('/\\\:(\w+)/', '(?<\1>.+?)', preg_quote($route_uri, $delim));
+		$regex = preg_replace('/\\\{\\\:(.+?)\\\}|\\\:(\w+)/', '(?<\1\2>.+?)', preg_quote($route_uri, $delim));
 		if(preg_match("{$delim}^{$regex}\${$delim}", $uri['path'], $matches)) {
 			if(preg_match("/{$route_method}/", $uri['method']) == 1) {
 				call_user_func($route_handler, $matches, $uri['method']);
@@ -215,6 +223,6 @@ function get_build ($arguments, $method) {
 load_settings('../secrets.ini') or fail(500);
 
 dispatch(get_current_uri(), array(
-	array('GET|OPTIONS',      '/version/:label',               'latest_version'),
-	array('GET|OPTIONS|HEAD', '/builds/:build_id/:build_name', 'get_build'),
+	array('GET',      '/version/:label',               'latest_version'),
+	array('GET|HEAD', '/builds/:build_id/:build_name', 'get_build'),
 ));
