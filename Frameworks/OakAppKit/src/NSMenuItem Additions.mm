@@ -87,6 +87,7 @@
 	NSMutableParagraphStyle* paragraphStyle = [NSMutableParagraphStyle new];
 	[paragraphStyle setTextBlocks:@[ block ]];
 	[paragraphStyle setAlignment:textAlignment];
+	[paragraphStyle setLineBreakMode:NSLineBreakByClipping];
 
 	string = [string stringByAppendingString:@"\n"];
 
