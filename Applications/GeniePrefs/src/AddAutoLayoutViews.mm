@@ -69,6 +69,11 @@ NSScrollView* GenieCreateTextView (BOOL editable)
 	textView.richText              = NO;
 	textView.usesFindBar           = YES;
 
+	textView.automaticQuoteSubstitutionEnabled  = NO;
+	textView.automaticDashSubstitutionEnabled   = NO;
+	textView.automaticTextReplacementEnabled    = NO;
+	textView.automaticSpellingCorrectionEnabled = NO;
+
 	NSScrollView* scrollView = [[NSScrollView alloc] initWithFrame:NSZeroRect];
 	scrollView.hasVerticalScroller = YES;
 	scrollView.autohidesScrollers  = YES;
