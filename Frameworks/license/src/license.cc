@@ -146,7 +146,7 @@ namespace license
 			return NULL_STR;
 
 		if(map.size() == 0)
-			return "Malformed license key. Try paste it again.";
+			return "Malformed license key. Try pasting it again.";
 		else if(sha_digest(owner) != text::uppercase(map["owner"]))
 			return "This license is tied to another owner name. Check registration email.";
 		else if(map["type"] == "heist")
