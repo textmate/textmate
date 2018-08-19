@@ -119,14 +119,63 @@ static NSString* kUserDefaultsTabItemLineBreakStyleKey = @"tabItemLineBreakStyle
 			@"IW_normal"   : @"TabIWDivider",
 		},
 		@"closeButton" : @{
-			@"AW_normal"   : @"TabCloseThin",
-			@"AW_pressed"  : @"TabCloseThin_Pressed",
-			@"AW_rollover" : @"TabCloseThin_Rollover",
+			@"AW_normal"   : @"TabCloseThinTemplate",
+			@"AW_pressed"  : @"TabCloseThin_Pressed_Template",
+			@"AW_rollover" : @"TabCloseThin_Rollover_Template",
 		},
 		@"closeButtonModified" : @{
-			@"AW_normal"   : @"TabCloseThin_Modified",
-			@"AW_pressed"  : @"TabCloseThin_ModifiedPressed",
-			@"AW_rollover" : @"TabCloseThin_ModifiedRollover",
+			@"AW_normal"   : @"TabCloseThin_Modified_Template",
+			@"AW_pressed"  : @"TabCloseThin_ModifiedPressed_Template",
+			@"AW_rollover" : @"TabCloseThin_ModifiedRollover_Template",
+		},
+		@"overflowButton" : @{
+			@"AW_normal"   : @"TabOverflowThinTemplate",
+		},
+	};
+	return [self imagesForNames:imageNames];
+}
+
+- (NSDictionary*)mojaveLightImages
+{
+	return [self yosemiteImages];
+}
+
+- (NSDictionary*)mojaveDarkImages
+{
+	NSDictionary* imageNames = @{
+		@"tabBar" : @{
+			@"AW_normal"   : @"TabAWBackground_Dark",
+			@"IW_normal"   : @"TabIWBackground_Dark",
+		},
+		@"tabItemSelected" : @{
+			@"AW_normal"   : @"TabAWBackgroundSelected_Dark",
+			@"IW_normal"   : @"TabIWBackgroundSelected_Dark",
+		},
+		@"leftTabCap" : @{
+			@"AW_normal"   : @"TabAWDivider_Dark",
+			@"IW_normal"   : @"TabIWDivider_Dark",
+		},
+		@"leftTabCapSelected" : @{
+			@"AW_normal"   : @"TabAWDivider_Dark",
+			@"IW_normal"   : @"TabIWDivider_Dark",
+		},
+		@"rightTabCap" : @{
+			@"AW_normal"   : @"TabAWDivider_Dark",
+			@"IW_normal"   : @"TabIWDivider_Dark",
+		},
+		@"rightTabCapSelected" : @{
+			@"AW_normal"   : @"TabAWDivider_Dark",
+			@"IW_normal"   : @"TabIWDivider_Dark",
+		},
+		@"closeButton" : @{
+			@"AW_normal"   : @"TabCloseThinTemplate",
+			@"AW_pressed"  : @"TabCloseThin_Pressed_Template",
+			@"AW_rollover" : @"TabCloseThin_Rollover_Template",
+		},
+		@"closeButtonModified" : @{
+			@"AW_normal"   : @"TabCloseThin_Modified_Template",
+			@"AW_pressed"  : @"TabCloseThin_ModifiedPressed_Template",
+			@"AW_rollover" : @"TabCloseThin_ModifiedRollover_Template",
 		},
 		@"overflowButton" : @{
 			@"AW_normal"   : @"TabOverflowThinTemplate",
@@ -151,8 +200,32 @@ static NSString* kUserDefaultsTabItemLineBreakStyleKey = @"tabItemLineBreakStyle
 		_inactiveTabTextStyles = _activeTabTextStyles.mutableCopy;
 		_inactiveTabTextStyles[NSForegroundColorAttributeName] = [NSColor colorWithCalibratedWhite:0.5 alpha:1];
 
+		// MAC_OS_X_VERSION_10_14
+		if([NSProcessInfo instancesRespondToSelector:@selector(isOperatingSystemAtLeastVersion:)] && [[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:{ 10, 14, 0 }])
+		{
+			_activeTabTextStyles = @{
+				NSParagraphStyleAttributeName  : parStyle,
+				NSFontAttributeName            : [NSFont systemFontOfSize:11],
+				NSForegroundColorAttributeName : [NSColor secondaryLabelColor],
+			}.mutableCopy;
+
+			_inactiveTabTextStyles = _activeTabTextStyles.mutableCopy;
+			_inactiveTabTextStyles[NSForegroundColorAttributeName] = [NSColor tertiaryLabelColor];
+			_selectedTabTextStyles = _activeTabTextStyles.mutableCopy;
+			_selectedTabTextStyles[NSForegroundColorAttributeName] = [NSColor labelColor];
+
+			NSAppearanceName appearanceName = [[NSApplication sharedApplication].effectiveAppearance bestMatchFromAppearancesWithNames:@[ NSAppearanceNameAqua, NSAppearanceNameDarkAqua ]];
+			if([appearanceName isEqualToString:NSAppearanceNameDarkAqua])
+					_images = [self mojaveDarkImages];
+			else	_images = [self mojaveLightImages];
+
+			_leftPadding  = -1;
+			_rightPadding = 0;
+
+			[[NSApplication sharedApplication] addObserver:self forKeyPath:@"effectiveAppearance" options:NSKeyValueObservingOptionNew context:nil];
+		}
 		// MAC_OS_X_VERSION_10_10
-		if([NSProcessInfo instancesRespondToSelector:@selector(isOperatingSystemAtLeastVersion:)] && [[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:{ 10, 10, 0 }])
+		else if([NSProcessInfo instancesRespondToSelector:@selector(isOperatingSystemAtLeastVersion:)] && [[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:{ 10, 10, 0 }])
 		{
 			_selectedTabTextStyles = _activeTabTextStyles.mutableCopy;
 			_selectedTabTextStyles[NSForegroundColorAttributeName] = [NSColor blackColor];
@@ -198,6 +271,21 @@ static NSString* kUserDefaultsTabItemLineBreakStyleKey = @"tabItemLineBreakStyle
 	aButton.inactiveRegularImage  = images[@"IW_normal"];
 	aButton.inactivePressedImage  = images[@"IW_pressed"];
 	aButton.inactiveRolloverImage = images[@"IW_rollover"];
+}
+
+- (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)object change:(NSDictionary*)change context:(void*)context
+{
+	// MAC_OS_X_VERSION_10_14
+	if([NSProcessInfo instancesRespondToSelector:@selector(isOperatingSystemAtLeastVersion:)] && [[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:{ 10, 14, 0 }])
+	{
+		if([keyPath isEqualToString:@"effectiveAppearance"])
+		{
+			NSAppearanceName appearanceName = [[NSApplication sharedApplication].effectiveAppearance bestMatchFromAppearancesWithNames:@[ NSAppearanceNameAqua, NSAppearanceNameDarkAqua ]];
+			if([appearanceName isEqualToString:NSAppearanceNameDarkAqua])
+					_images = [self mojaveDarkImages];
+			else	_images = [self mojaveLightImages];
+		}
+	}
 }
 
 - (void)updateView:(OakBackgroundFillView*)aView forState:(NSString*)aState
@@ -465,11 +553,11 @@ static NSString* kUserDefaultsTabItemLineBreakStyleKey = @"tabItemLineBreakStyle
 
 - (void)drawRect:(NSRect)aRect
 {
+	[self updateStyle];
 	// Ideally we would use NSMaxX(_leftCapView.frame)
 	// and NSMinX(_rightCapView.frame) but presumably
 	// because we are layer backed, we might be asked to
 	// draw before these subviews have been positioned.
-
 	NSRect bounds = self.bounds;
 	bounds.origin.x   += _leftCapView.activeBackgroundImage.size.width;
 	bounds.size.width -= _leftCapView.activeBackgroundImage.size.width + _rightCapView.activeBackgroundImage.size.width;
