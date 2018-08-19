@@ -140,6 +140,12 @@ static NSString* const OakTabItemPasteboardType = @"com.macromates.TextMate.tabI
 	return self;
 }
 
+-(void)drawRect:(NSRect)aRect
+{
+	[OakTabBarStyle.sharedInstance setupTabBarView:self];
+	[super drawRect:aRect];
+}
+
 - (void)setupAddTabButton
 {
 	if(_addTabButton)
