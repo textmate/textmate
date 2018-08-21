@@ -261,6 +261,8 @@ namespace ng
 		{
 			if(action == "findPrevious")
 				options |= find::backwards;
+			else if(action == "findAll")
+				options |= find::all_matches;
 			find(searchFor, options, searchOnlySelection);
 		}
 	}
