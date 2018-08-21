@@ -212,7 +212,23 @@ namespace ng
 
 		if(searchFor != NULL_STR)
 		{
-			find_clipboard()->push_back(searchFor);
+			static struct { std::string key; find::options_t flag; } const optionMap[] =
+			{
+				{ "fullWordMatch",       find::full_words         },
+				{ "ignoreCase",          find::ignore_case        },
+				{ "ignoreWhitespace",    find::ignore_whitespace  },
+				{ "regularExpression",   find::regular_expression },
+				{ "wrapAround",          find::wrap_around        },
+			};
+
+			std::map<std::string, std::string> searchOptions;
+			for(auto const& option : optionMap)
+			{
+				if(options & option.flag)
+					searchOptions.emplace(option.key, "1");
+			}
+
+			find_clipboard()->push_back(searchFor, searchOptions);
 		}
 		else if(clipboard_t::entry_ptr searchEntry = find_clipboard()->current())
 		{
