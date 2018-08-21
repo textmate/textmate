@@ -1,4 +1,5 @@
 FLAGS        += -DCOMPILE_DATE=\"`date +%Y-%m-%d`\"
 LN_FLAGS     += -fobjc-link-runtime
 LN_FLAGS     += -Wl,-U,__Z15revoked_serialsv
+LN_FLAGS     += -Wl,-U,_NSAppearanceNameDarkAqua
 TARGETS       = */target
