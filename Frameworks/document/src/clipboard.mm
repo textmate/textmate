@@ -5,14 +5,6 @@
 #import <cf/cf.h>
 #import <ns/ns.h>
 
-struct my_entry_t : clipboard_t::entry_t
-{
-	my_entry_t (std::string const& content, std::map<std::string, std::string> const& options) : clipboard_t::entry_t(content), _options(options) { }
-	virtual std::map<std::string, std::string> const& options () const { return _options; }
-private:
-	std::map<std::string, std::string> _options;
-};
-
 static clipboard_t::entry_ptr to_entry (OakPasteboardEntry* src, BOOL includeFindOptions)
 {
 	if(!src)
@@ -29,7 +21,7 @@ static clipboard_t::entry_ptr to_entry (OakPasteboardEntry* src, BOOL includeFin
 		map["ignoreCase"] = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFindIgnoreCase] ? "1" : "0";
 	}
 
-	return std::make_shared<my_entry_t>(to_s(src.string), map);
+	return std::make_shared<clipboard_t::entry_t>(to_s(src.string), map);
 }
 
 struct oak_pasteboard_t : clipboard_t

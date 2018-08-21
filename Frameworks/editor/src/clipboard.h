@@ -7,12 +7,13 @@ struct PUBLIC clipboard_t
 {
 	struct PUBLIC entry_t
 	{
-		entry_t (std::string const& content);
-		virtual ~entry_t ()                                      { }
-		virtual std::string const& content () const              { return _content; }
-		virtual std::map<std::string, std::string> const& options () const;
+		entry_t (std::string const& content, std::map<std::string, std::string> const& options);
+		virtual ~entry_t ()                                                { }
+		virtual std::string const& content () const                        { return _content; }
+		virtual std::map<std::string, std::string> const& options () const { return _options; }
 	private:
 		std::string _content;
+		std::map<std::string, std::string> _options;
 	};
 
 	typedef std::shared_ptr<entry_t> entry_ptr;
@@ -26,7 +27,7 @@ struct PUBLIC clipboard_t
 	virtual entry_ptr next () = 0;
 	virtual void push_back (entry_ptr entry) = 0;
 
-	void push_back (std::string const& content) { push_back(std::make_shared<entry_t>(content)); }
+	void push_back (std::string const& content, std::map<std::string, std::string> const& options = { }) { push_back(std::make_shared<entry_t>(content, options)); }
 };
 
 typedef std::shared_ptr<clipboard_t> clipboard_ptr;

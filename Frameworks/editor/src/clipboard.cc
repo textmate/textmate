@@ -2,19 +2,13 @@
 #include <text/utf8.h>
 #include <text/hexdump.h>
 
-clipboard_t::entry_t::entry_t (std::string const& content) : _content(content)
+clipboard_t::entry_t::entry_t (std::string const& content, std::map<std::string, std::string> const& options) : _content(content), _options(options)
 {
 	if(!utf8::is_valid(_content.begin(), _content.end()))
 	{
 		std::string const prefix = "*** malformed UTF-8 data on clipboard:\n";
 		_content = prefix + text::to_hex(_content.begin(), _content.end()) + "\n";
 	}
-}
-
-std::map<std::string, std::string> const& clipboard_t::entry_t::options () const
-{
-	static std::map<std::string, std::string> const dummy;
-	return dummy;
 }
 
 struct simple_clipboard_t : clipboard_t

@@ -290,24 +290,15 @@ namespace ng
 		_selections = ng::sanitize(_buffer, _selections);
 	}
 
-	struct my_clipboard_entry_t : clipboard_t::entry_t
+	static std::map<std::string, std::string> create_find_options (std::string const& indent, bool complete, size_t fragments, bool columnar)
 	{
-		my_clipboard_entry_t (std::string const& content, std::string const& indent, bool complete, size_t fragments, bool columnar) : clipboard_t::entry_t(content)
-		{
-			if(indent != NULL_STR) _options["indent"]    = indent;
-			if(complete)           _options["complete"]  = "1";
-			if(fragments > 1)      _options["fragments"] = std::to_string(fragments);
-			if(columnar)           _options["columnar"]  = "1";
-		}
-
-		my_clipboard_entry_t (std::string const& content, std::map<std::string, std::string> const& options = { }) : clipboard_t::entry_t(content), _options(options)
-		{
-		}
-
-		std::map<std::string, std::string> const& options () const { return _options; }
-	private:
-		std::map<std::string, std::string> _options;
-	};
+		std::map<std::string, std::string> res;
+		if(indent != NULL_STR) res["indent"]    = indent;
+		if(complete)           res["complete"]  = "1";
+		if(fragments > 1)      res["fragments"] = std::to_string(fragments);
+		if(columnar)           res["columnar"]  = "1";
+		return res;
+	}
 
 	clipboard_t::entry_ptr editor_t::copy (ng::buffer_t const& buffer, ng::ranges_t const& selections)
 	{
@@ -338,7 +329,7 @@ namespace ng
 		for(auto const& range : dissect_columnar(buffer, selections))
 			v.push_back(buffer.substr(range.min().index, range.max().index));
 		bool columnar = selections.size() == 1 && selections.last().columnar;
-		return std::make_shared<my_clipboard_entry_t>(text::join(v, "\n"), indent, complete, v.size(), columnar);
+		return std::make_shared<clipboard_t::entry_t>(text::join(v, "\n"), create_find_options(indent, complete, v.size(), columnar));
 	}
 
 	static bool suitable_for_reindent (std::string const& str)
@@ -957,9 +948,9 @@ namespace ng
 					if(clipboard_t::entry_ptr oldEntry = yank_clipboard()->current())
 					{
 						if(action == kAppendSelectionToYankPboard)
-							entry = std::make_shared<my_clipboard_entry_t>(oldEntry->content() + entry->content(), "", false, 1, false);
+							entry = std::make_shared<clipboard_t::entry_t>(oldEntry->content() + entry->content(), create_find_options("", false, 1, false));
 						else if(action == kPrependSelectionToYankPboard)
-							entry = std::make_shared<my_clipboard_entry_t>(entry->content() + oldEntry->content(), "", false, 1, false);
+							entry = std::make_shared<clipboard_t::entry_t>(entry->content() + oldEntry->content(), create_find_options("", false, 1, false));
 					}
 				}
 				yank_clipboard()->push_back(entry);
@@ -1032,11 +1023,11 @@ namespace ng
 					std::string regexp;
 					for(std::string const& str : set)
 						regexp.append("|" + regexp::escape(str));
-					find_clipboard()->push_back(std::make_shared<my_clipboard_entry_t>(regexp.substr(1), std::map<std::string, std::string>{ { "regularExpression", "1" } }));
+					find_clipboard()->push_back(regexp.substr(1), { { "regularExpression", "1" } });
 				}
 				else if(!set.empty())
 				{
-					find_clipboard()->push_back(std::make_shared<my_clipboard_entry_t>(*set.begin()));
+					find_clipboard()->push_back(*set.begin());
 				}
 			}
 			break;
