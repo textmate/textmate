@@ -76,7 +76,6 @@ After this you can press ⌘B to build from within TextMate. In case you haven't
 The default target is `TextMate/run`. This will relaunch TextMate but when called from within TextMate, a dialog will appear before the current instance is killed. As there is full session restore, it is safe to relaunch even with unsaved changes.
 
 If the current file is a test file then the target to build is changed to build the library to which the test belongs (this is done by setting `TM_NINJA_TARGET` in the `.tm_properties` file found in the root of the source tree).
-
 Similarly, if the current file belongs to an application target (other than `TextMate.app`) then `TM_NINJA_TARGET` is set to build and run this application.
 
 ## Build Targets
@@ -123,7 +122,7 @@ TextMate is a trademark of Allan Odgaard.
 [multimarkdown]: http://fletcherpenney.net/multimarkdown/
 [ragel]:         http://www.complang.org/ragel/
 [mercurial]:     https://www.mercurial-scm.org/
-[capnp]:         http://kentonv.github.io/capnproto/
+[capnp]:         https://github.com/capnproto/capnproto.git
 [libressl]:      http://www.libressl.org
 [MacPorts]:      http://www.macports.org/
 [Homebrew]:      http://brew.sh/
