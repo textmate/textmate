@@ -9,6 +9,7 @@
 #import <text/tokenize.h>
 #import <text/trim.h>
 #import <text/encode.h>
+#import <text/parse.h>
 #import <command/runner.h> // bundle_command_t, fix_shebang
 #import <bundles/wrappers.h>
 #import <regexp/format_string.h>
@@ -414,13 +415,30 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 		if(normalExit == NO && _userDidAbort == NO)
 		{
 			NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithDictionary:@{
-				NSLocalizedDescriptionKey             : [NSString stringWithFormat:@"Failure running “%@”.", to_ns(_bundleCommand.name)],
-				NSLocalizedRecoverySuggestionErrorKey : to_ns(text::trim(err + out).empty() ? text::format("Command returned status code %d.", rc) : err + out) ?: @"Command output is not UTF-8.",
+				NSLocalizedDescriptionKey : [NSString stringWithFormat:@"Failure running “%@”.", to_ns(_bundleCommand.name)],
 			}];
 
+			NSMutableArray* buttonLabels = [NSMutableArray arrayWithObject:@"OK"];
 			if(bundles::lookup(_bundleCommand.uuid))
+				[buttonLabels addObject:@"Edit Command"];
+
+			std::string output = text::trim(err + out);
+			if(std::count(output.begin(), output.end(), '\n') > 7)
 			{
-				dict[NSLocalizedRecoveryOptionsErrorKey] = @[ @"OK", @"Edit Command" ];
+				[buttonLabels addObject:@"Show Full Output"];
+				dict[@"OakCommandOutput"] = to_ns(output);
+
+				std::vector<std::string> lines = text::split(output, "\n");
+				lines.erase(lines.begin() + 4, lines.begin() + lines.size() - 3);
+				lines[3] = "⋮";
+				output = text::join(lines, "\n");
+			}
+
+			dict[NSLocalizedRecoverySuggestionErrorKey] = to_ns(output.empty() ? text::format("Command returned status code %d.", rc) : output) ?: @"Command output is not UTF-8.";
+
+			if(buttonLabels.count > 1)
+			{
+				dict[NSLocalizedRecoveryOptionsErrorKey] = buttonLabels;
 				dict[NSRecoveryAttempterErrorKey]        = self;
 			}
 
@@ -519,6 +537,12 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 			{
 				Class cl = NSClassFromString(@"BundleEditor");
 				[[cl sharedInstance] revealBundleItem:bundles::lookup(_bundleCommand.uuid)];
+			}
+			else if(recoveryOptionIndex == 2)
+			{
+				NSString* commandOutput = error.userInfo[@"OakCommandOutput"];
+				OakDocument* doc = [OakDocument documentWithString:commandOutput fileType:@"text.plain" customName:@"Command Output"];
+				[OakDocumentController.sharedInstance showDocument:doc];
 			}
 		}
 		break;
