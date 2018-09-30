@@ -1,0 +1,60 @@
+Here’s how TaskPaper reads a ﬁle
+--------------------------------
+(taken from the TaskPaper User's Guide as of v. 2.3.2. Copy: http://is.gd/JXUr6D)
+
+* Files are expected to use the UTF-8 encoding and use ‘\n’ to separate lines.
+
+* A task is a line that begins with a hyphen followed by a space ('- ') which
+can optionally be preﬁxed (i.e indented) with tabs or spaces. A task can have
+zero or more tags anywhere on the line (not just trailing at the end).
+
+* A project is a line that isn't a task and ends with a colon (':'), or a colon
+(':\n') followed by a newline. Tags can exist after the colon, but if any
+non-tag text is present, then it won’t be recognized as a project.
+
+* A note is any line that doesn't match the task or project rules.
+
+* Indentation level (with tabs, not spaces) deﬁnes ownership. For instance, if
+you indent one task under another task, then it is considered a subtask. Tasks
+and notes own all objects that are indented underneath them. Empty lines are
+ignored when calculating ownership.
+
+* A tag has the form "@tag", i.e. it starts with an "at" character ("@"),
+followed by a run of non-whitespace characters. A tag can optionally have a
+value assigned to it. The value syntax immediately follows the tag word (no
+whitespace between) and is enclosed by parentheses: '(' and ')'. The value text
+inside can have whitespace, but no newlines. Here is an example of a tag with a
+value: @tag(tag's value).
+
+The rest of this file exemplifies the spec
+------------------------------------------
+All the lines up to this one have been notes that don't belong to any project or task
+
+- This is a task that doesn't belong to a project
+
+A project with some nesting and notes:
+- task one
+- task two
+	- subtask a
+		this task has (owns) a note
+	- subtask b
+		- sub-subtask c
+		  another note
+- task three
+It's unclear from the spec which project this note belongs to.
+We're going to presume it belongs to the preceeding project.
+Also, we read the spec as requiring these three lines to be three separate notes (?).
+This project is: @tagged
+- and so is this @task
+- this @tag(has a value)
+- this one has tags @mixed in @with the text
+- and @this(one) has @both
+- this is not a project even though it ends with a colon:
+This is a note even though it contains a colon: and a dash - and @tags
+	- this is a subtask of a note (which is kinda weird IMO)
+
+	- and the whitespace above should be ignored resulting in this also being a subtask
+
+Things we are not worrying about for now...
+* nested @tags(like @this(!)) - not sure if this is allowed by the spec?
+

@@ -1,10 +1,11 @@
-FLAGS        += -I/usr/local/include -DUNICODE -DSIZE_T_IS_LONG
-LN_FLAGS     += -L/usr/local/lib
+FLAGS            += -I/usr/local/include -DUNICODE -DSIZE_T_IS_LONG
+LN_FLAGS         += -L/usr/local/lib
 
-SOURCES       = src/*.mm
-CP_Resources  = resources/*
-LINK         += ns plist regexp text OakFoundation
-LIBS         += sqlite3
-LIBS         += /usr/local/opt/media-info/lib/lib{mediainfo,zen}.a curl z
-EXPORT        = src/Genie*.h src/Task.h src/Utilities.h
-FRAMEWORKS    = Cocoa
+SOURCES           = src/*.mm
+CP_Resources      = resources/*
+CP_SharedSupport  = support/*
+LINK             += ns plist regexp text OakFoundation
+LIBS             += sqlite3
+LIBS             += /usr/local/opt/media-info/lib/lib{mediainfo,zen}.a curl z
+EXPORT            = src/Genie*.h src/Task.h src/Utilities.h
+FRAMEWORKS        = Cocoa

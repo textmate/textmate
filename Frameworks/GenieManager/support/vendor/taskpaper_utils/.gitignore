@@ -1,0 +1,12 @@
+.bundle/
+.virb/
+.yardoc/
+coverage/
+doc/
+measurements/
+tmp/
+
+Gemfile.lock
+Makefile
+scratch.md
+taskpaper_tools-*.gem

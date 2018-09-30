@@ -1,0 +1,32 @@
+# encoding: utf-8
+
+group :development do
+  gem 'rake'
+  gem 'rspec'
+end
+
+group :yard do
+  gem 'yard'
+  gem 'kramdown'
+  gem 'rdoc'
+end
+
+group :metrics do
+  gem 'coveralls'
+  gem 'flay'
+  gem 'flog'
+  gem 'reek'
+  gem 'rubocop'
+  gem 'simplecov'
+  # gem 'yardstick', git: 'https://github.com/dkubb/yardstick.git'
+
+  platforms :ruby_19, :ruby_20 do
+    # gem 'mutant',    git: 'https://github.com/mbj/mutant.git'
+    # gem 'unparser',  git: 'https://github.com/mbj/unparser.git'
+    gem 'yard-spellcheck'
+  end
+end
+
+group :benchmarks do
+  gem 'rbench'
+end

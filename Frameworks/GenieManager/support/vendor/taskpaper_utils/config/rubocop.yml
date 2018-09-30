@@ -1,0 +1,65 @@
+AllCops:
+  Includes:
+    - '**/*.rake'
+    - 'Gemfile'
+    - 'Gemfile.devtools'
+  Excludes:
+    - '**/vendor/**'
+    - '**/benchmarks/**'
+
+ParameterLists:
+  Max: 3
+  CountKeywordArgs: true
+
+BlockNesting:
+  Max: 3
+
+LineLength:
+  Max: 89
+
+# Add lowercase 'todo' as an accepted annotation
+CommentAnnotation:
+  Keywords:
+    - todo
+
+# Not all trivial readers/writers can be defined with attr_* methods ?
+TrivialAccessors:
+  Enabled: true
+
+
+# Align with the style guide.
+CollectionMethods:
+  PreferredMethods:
+    collect:  'map'
+    inject:   'reduce'
+    find:     'detect'
+    find_all: 'select'
+
+# Do not force public/protected/private keyword to be indented at the same
+# level as the def keyword. My personal preference is to outdent these keywords
+# because I think when scanning code it makes it easier to identify the
+# sections of code and visually separate them. When the keyword is at the same
+# level I think it sort of blends in with the def keywords and makes it harder
+# to scan the code and see where the sections are.
+AccessModifierIndentation:
+  Enabled: false
+
+# Disable documentation checking until a class needs to be documented once
+Documentation:
+  Enabled: false
+
+# Do not favor modifier if/unless usage when you have a single-line body
+IfUnlessModifier:
+  Enabled: false
+
+# Allow case equality operator
+CaseEquality:
+  Enabled: false
+
+# Constants do not always have to use SCREAMING_SNAKE_CASE
+ConstantName:
+  Enabled: false
+
+# Allow empty lines around body
+EmptyLinesAroundBody:
+  Enabled: false

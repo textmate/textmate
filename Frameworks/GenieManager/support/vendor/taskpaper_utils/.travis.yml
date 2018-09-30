@@ -1,0 +1,9 @@
+language: ruby
+bundler_args: --without yard guard benchmarks
+script: "bundle exec rake ci"
+rvm:
+  - 2.0.0
+notifications:
+  email:
+    on_success: change
+    on_failure: change

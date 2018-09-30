@@ -1,0 +1,4341 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>items</key>
+	<dict>
+		<key>02B310AA-AE84-4D91-B036-68F838D5BCE0</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>isTemplate</key>
+				<true/>
+				<key>kind</key>
+				<string>script</string>
+				<key>script</key>
+				<string>/usr/sbin/diskutil eject "$0"</string>
+				<key>scriptArguments</key>
+				<array>
+					<string>${kMDItemPath}</string>
+				</array>
+				<key>subtitle</key>
+				<string>${kMDItemPath}</string>
+				<key>title</key>
+				<string>Eject “${kMDItemDisplayName}”</string>
+				<key>uiTitle</key>
+				<string>Eject Volume</string>
+			</dict>
+		</dict>
+		<key>038B3A8E-0BEF-4C9D-B9F0-75E3DB4DC259</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>bundleIdentifier</key>
+				<string>${parent.parent.kMDItemCFBundleIdentifier}</string>
+				<key>children</key>
+				<array>
+					<string>BBA3799F-7A82-40C1-906F-7E4015FB8467</string>
+				</array>
+				<key>kind</key>
+				<string>recentDocuments</string>
+				<key>title</key>
+				<string>Find Recent Documents</string>
+			</dict>
+		</dict>
+		<key>07EACA7B-B703-4D45-8654-A81328E47BE9</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>kind</key>
+				<string>web</string>
+				<key>subtitle</key>
+				<string>Search for ‘${query:-${find:?[${find}]:…}}’</string>
+				<key>title</key>
+				<string>Apple Developer Docs</string>
+				<key>url</key>
+				<string>https://developer.apple.com/search/?q=${query:-${find}}</string>
+			</dict>
+			<key>weight</key>
+			<integer>9888</integer>
+		</dict>
+		<key>091FA501-753C-4241-88F2-47FF28CA7D34</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>icon</key>
+				<dict>
+					<key>text</key>
+					<string>📚</string>
+				</dict>
+				<key>kind</key>
+				<string>script</string>
+				<key>script</key>
+				<string>if [[ -z $1 ]]
+  then "$GOPATH/bin/shiori" add "$0"
+  else "$GOPATH/bin/shiori" add "$0" --tags "$1"
+fi
+</string>
+				<key>scriptArguments</key>
+				<array>
+					<string>${find/^(http)?.*/${1:?$0:${clipboard}}/}</string>
+					<string>${query}</string>
+				</array>
+				<key>subtitle</key>
+				<string>${find/^(http)?.*/${1:?$0:${clipboard}}/} • ${query:-[tags]}</string>
+				<key>title</key>
+				<string>Add Bookmark</string>
+			</dict>
+			<key>weight</key>
+			<integer>9600</integer>
+		</dict>
+		<key>0E50511A-14D6-4BE8-8F98-99231F8A5ACA</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>disableLRUOrdering</key>
+				<true/>
+				<key>disableRankOrdering</key>
+				<true/>
+				<key>isTemplate</key>
+				<true/>
+				<key>subtitle</key>
+				<string>Arrived ${kMDItemContentModificationDate:/relative}${kMDItemDurationSeconds:+ • ${kMDItemDurationSeconds:/duration}}</string>
+			</dict>
+		</dict>
+		<key>110E7A4B-00A9-4EBB-856E-30409370CB70</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>kind</key>
+				<string>web</string>
+				<key>subtitle</key>
+				<string>Search for ‘${query:-${find:?[${find}]:…}}’</string>
+				<key>title</key>
+				<string>Stack Overflow</string>
+				<key>url</key>
+				<string>https://stackoverflow.com/search?q=${query:-${find}}</string>
+			</dict>
+			<key>weight</key>
+			<integer>13824</integer>
+		</dict>
+		<key>121593A1-7BAA-4213-B534-075390F2CDE6</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>kind</key>
+				<string>web</string>
+				<key>subtitle</key>
+				<string>Search for ‘${query:-${find:?[${find}]:…}}’</string>
+				<key>title</key>
+				<string>Wikipedia</string>
+				<key>url</key>
+				<string>https://en.wikipedia.org/w/index.php?title=Special%3ASearch&amp;search=${query:-${find}}</string>
+			</dict>
+			<key>weight</key>
+			<integer>14784</integer>
+		</dict>
+		<key>148329EE-1939-4273-A07F-B6126CFCFC6D</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>icon</key>
+				<dict>
+					<key>image</key>
+					<string>icons/the-pirate-bay.png</string>
+				</dict>
+				<key>kind</key>
+				<string>web</string>
+				<key>subtitle</key>
+				<string>Search for ‘${query:-${find:-…}}’</string>
+				<key>title</key>
+				<string>The Pirate Bay</string>
+				<key>url</key>
+				<string>https://thepiratebay.org/search/${query:-${find}}</string>
+			</dict>
+			<key>weight</key>
+			<integer>14112</integer>
+		</dict>
+		<key>16CFA3AD-18EC-4834-B0F2-684E7210A0F9</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>kind</key>
+				<string>web</string>
+				<key>subtitle</key>
+				<string>Search for ‘${query:-…}’</string>
+				<key>title</key>
+				<string>Netflix</string>
+				<key>url</key>
+				<string>https://www.netflix.com/search/${query}</string>
+			</dict>
+			<key>weight</key>
+			<integer>12288</integer>
+		</dict>
+		<key>170B423B-8B36-46F9-A540-09CE7A519587</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>kind</key>
+				<string>exec</string>
+				<key>script</key>
+				<string>#!/usr/bin/env ruby
+require 'json'
+require 'shellwords'
+require 'uri'
+
+MAPS_URL = ENV['MAPS_URL'] || 'https://maps.google.com/maps?q=%s'
+
+items = []
+
+def each_value(json, key)
+  if json.has_key?(key)
+    json[key]['labels'].each_with_index.map do |label, i|
+      yield(label.sub(/_\$!&lt;(.+)&gt;!\$_/, '\1'), json[key]['values'][i], json[key]['identifiers'][i])
+    end
+  end
+end
+
+if file = ARGV.first
+  open('|"$GENIE_SUPPORT_PATH/bin/plist_to_json" ' + file.shellescape) do |io|
+    json = JSON.parse(io.read)
+
+    each_value(json, 'Address') do |label, address, identifier|
+      addr_line = "#{address['Street']}, #{address['ZIP']} #{address['City']}, #{address['Country']}"
+      items &lt;&lt; {
+        :title              =&gt; [ address['Street'], label ].reject { |e| e.to_s.empty? }.join(' — '),
+        :subtitle           =&gt; "#{address['ZIP']} #{address['City']}, #{address['Country']}",
+        :url                =&gt; MAPS_URL % URI.encode(addr_line),
+        :icon               =&gt; { :application =&gt; 'com.apple.Maps' },
+        :value              =&gt; "#{address['Street']}\n#{address['ZIP']} #{address['City']}\n#{address['Country']}\n",
+        :disableLRUOrdering =&gt; true,
+      }
+    end
+
+    each_value(json, 'Phone') do |label, phone, identifier|
+      items &lt;&lt; {
+        :title              =&gt; [ phone, label ].reject { |e| e.to_s.empty? }.join(' — '),
+        :subtitle           =&gt; "${url}",
+        :url                =&gt; "tel:#{phone.tr(' ', '-')}",
+        :icon               =&gt; { :application =&gt; 'com.apple.FaceTime' },
+        :value              =&gt; phone,
+        :disableLRUOrdering =&gt; true,
+      }
+    end
+
+    each_value(json, 'URLs') do |label, url, identifier|
+      items &lt;&lt; {
+        :title              =&gt; [ url, label ].reject { |e| e.to_s.empty? }.join(' — '),
+        :url                =&gt; url,
+        :icon               =&gt; { :fileType =&gt; 'webloc' },
+        :value              =&gt; url,
+        :disableLRUOrdering =&gt; true,
+      }
+    end
+
+    each_value(json, 'Email') do |label, email, identifier|
+      items &lt;&lt; {
+        :title              =&gt; [ email, label ].reject { |e| e.to_s.empty? }.join(' — '),
+        :match              =&gt; "*",
+        :subtitle           =&gt; "New letter with subject: ‘${query:-…}’",
+        :url                =&gt; "mailto:#{email}?subject=${query}",
+        :value              =&gt; email,
+        :icon               =&gt; { :fileType =&gt; 'com.apple.mail.email' },
+        :disableLRUOrdering =&gt; true,
+      }
+    end
+  end
+end
+
+puts JSON.generate({
+  :items =&gt; items
+});
+</string>
+				<key>scriptArguments</key>
+				<array>
+					<string>${parent.kMDItemPath}</string>
+				</array>
+				<key>title</key>
+				<string>Parse Contact</string>
+			</dict>
+		</dict>
+		<key>1B971EAD-689E-44D1-BA9E-27703E7A26D5</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>6C7EB569-A43B-4B5C-ABDA-EBC55F0F2447</string>
+				</array>
+				<key>icon</key>
+				<dict>
+					<key>file</key>
+					<string>~/Shared/Projects</string>
+				</dict>
+				<key>subtitle</key>
+				<string>List of TextMate Projects</string>
+				<key>title</key>
+				<string>Recent Projects</string>
+			</dict>
+			<key>weight</key>
+			<integer>13056</integer>
+		</dict>
+		<key>1C9364B0-555E-40E9-9285-E39A4CCD729F</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>icon</key>
+				<dict>
+					<key>fileType</key>
+					<string>'FNDR'</string>
+				</dict>
+				<key>kind</key>
+				<string>script</string>
+				<key>script</key>
+				<string>if defaults read com.apple.finder AppleShowAllFiles &amp;&gt;/dev/null
+	then defaults delete com.apple.finder AppleShowAllFiles
+	else defaults write com.apple.finder AppleShowAllFiles -bool YES
+fi &amp;&amp; killall Finder
+</string>
+				<key>subtitle</key>
+				<string>Toggle whether or not hidden files are shown in Finder</string>
+				<key>title</key>
+				<string>Toggle Hidden Files</string>
+			</dict>
+			<key>weight</key>
+			<integer>14496</integer>
+		</dict>
+		<key>1D768652-3133-41E4-B7D1-07035D6B0595</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>B08D2E26-FC05-49A5-AD9B-34F93EFEB18B</string>
+				</array>
+				<key>kind</key>
+				<string>spotlight</string>
+				<key>mdQuery</key>
+				<string>kMDItemContentType == 'com.apple.ical.ics.event'</string>
+				<key>mdScope</key>
+				<array>
+					<dict>
+						<key>path</key>
+						<string>~/Library/Calendars</string>
+					</dict>
+				</array>
+				<key>sortBy</key>
+				<string>kMDItemDisplayName</string>
+				<key>title</key>
+				<string>Find Calendar Events</string>
+			</dict>
+		</dict>
+		<key>1E21D118-DEBA-4A16-A019-75B957DE5109</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>699918A4-6501-4E34-9A4C-CCDE1E495603</string>
+				</array>
+				<key>kind</key>
+				<string>sqlite</string>
+				<key>sqlDatabase</key>
+				<string>~/.bash_sqlite3</string>
+				<key>sqlQuery</key>
+				<string>SELECT history.id AS uid, directory, command AS match, start AS date FROM history
+  JOIN commands ON (commands.id = command_id)
+  JOIN directories ON (directories.id = directory_id)
+  GROUP BY command_id
+  ORDER BY start DESC
+</string>
+				<key>title</key>
+				<string>Find Bash History</string>
+			</dict>
+		</dict>
+		<key>20598B1E-9AEA-492D-B5FB-E9A36E7CA6DD</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>isTemplate</key>
+				<true/>
+				<key>kind</key>
+				<string>script</string>
+				<key>script</key>
+				<string>/usr/bin/open -b "$0" "$1"</string>
+				<key>scriptArguments</key>
+				<array>
+					<string>${kMDItemCFBundleIdentifier}</string>
+					<string>${parent.url}</string>
+				</array>
+				<key>subtitle</key>
+				<string>${parent.url}</string>
+				<key>title</key>
+				<string>Open in ${kMDItemDisplayName}</string>
+			</dict>
+		</dict>
+		<key>2139D8B3-DB04-4226-8A94-D1F0DF6E5060</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>kind</key>
+				<string>web</string>
+				<key>subtitle</key>
+				<string>Search for ‘${query:-${find:?[${find}]:…}}’</string>
+				<key>title</key>
+				<string>Internet Movie Database</string>
+				<key>url</key>
+				<string>https://www.imdb.com/find?s=all&amp;q=${query:-${find}}</string>
+			</dict>
+			<key>weight</key>
+			<integer>11904</integer>
+		</dict>
+		<key>22850FA4-8354-4A4F-94F9-58624A4C2681</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>AD683729-CE8B-4FDA-B191-35F1D01F2B15</string>
+				</array>
+				<key>descending</key>
+				<true/>
+				<key>kind</key>
+				<string>spotlight</string>
+				<key>mdQuery</key>
+				<string>kMDItemContentTypeTree == 'public.email-message' &amp;&amp; com_apple_mail_read != 1 &amp;&amp; com_apple_mail_dateReceived &gt; $time.today(-30) &amp;&amp; kMDItemIsLikelyJunk != 1</string>
+				<key>sortBy</key>
+				<string>com_apple_mail_dateReceived</string>
+				<key>title</key>
+				<string>Find Recent Email</string>
+			</dict>
+		</dict>
+		<key>22D1C304-D87B-4C7F-9413-D22778937A0C</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>2F30F0D3-63F3-44D0-B77C-33F65DCE0AA7</string>
+				</array>
+				<key>kind</key>
+				<string>predicateGroup</string>
+				<key>predicate</key>
+				<string>kMDItemContentType UTI-CONFORMS-TO 'public.movie'</string>
+				<key>title</key>
+				<string>Movie Actions</string>
+			</dict>
+			<key>weight</key>
+			<integer>15456</integer>
+		</dict>
+		<key>244CF3B6-FAF9-49CF-AB25-C5EED227BDB0</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>kind</key>
+				<string>web</string>
+				<key>subtitle</key>
+				<string>Search for ‘${query:-${find:?[${find}]:…}}’</string>
+				<key>title</key>
+				<string>GitHub</string>
+				<key>url</key>
+				<string>https://github.com/search?utf8=✓&amp;q=${query:-${find}}</string>
+			</dict>
+			<key>weight</key>
+			<integer>11520</integer>
+		</dict>
+		<key>26196856-6B7E-425A-86DA-3270C16B28AA</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>kind</key>
+				<string>web</string>
+				<key>subtitle</key>
+				<string>Translate ‘${query:-${clipboard:?[${clipboard}]:…}}’ to English</string>
+				<key>title</key>
+				<string>Translate to English</string>
+				<key>url</key>
+				<string>https://translate.google.com/#auto/en/${query:-${clipboard}}</string>
+			</dict>
+			<key>weight</key>
+			<integer>14208</integer>
+		</dict>
+		<key>28A559C8-73BC-4B82-942D-1B2A9D936A69</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>0E50511A-14D6-4BE8-8F98-99231F8A5ACA</string>
+				</array>
+				<key>descending</key>
+				<true/>
+				<key>kind</key>
+				<string>spotlight</string>
+				<key>mdQuery</key>
+				<string>kMDItemContentTypeTree == 'public.movie'</string>
+				<key>mdScope</key>
+				<array>
+					<dict>
+						<key>path</key>
+						<string>~/Movies</string>
+					</dict>
+					<dict>
+						<key>path</key>
+						<string>~/Desktop</string>
+					</dict>
+					<dict>
+						<key>path</key>
+						<string>~/Downloads</string>
+					</dict>
+				</array>
+				<key>sortBy</key>
+				<string>kMDItemContentModificationDate</string>
+				<key>title</key>
+				<string>Find Recent Movies</string>
+			</dict>
+		</dict>
+		<key>2B9D09A0-7AC0-4793-90E4-4F873318A210</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>icon</key>
+				<dict>
+					<key>fileType</key>
+					<string>'FNDR'</string>
+				</dict>
+				<key>kind</key>
+				<string>script</string>
+				<key>script</key>
+				<string>if defaults read com.apple.finder CreateDesktop &amp;&gt;/dev/null
+	then defaults delete com.apple.finder CreateDesktop
+	else defaults write com.apple.finder CreateDesktop -bool NO
+fi &amp;&amp; killall Finder
+</string>
+				<key>subtitle</key>
+				<string>Toggle whether or not icons are shown on your desktop</string>
+				<key>title</key>
+				<string>Toggle Desktop Icons</string>
+			</dict>
+			<key>weight</key>
+			<integer>14400</integer>
+		</dict>
+		<key>2D2A1AE0-A5F0-44DD-A7C8-CDC7A325FC4D</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>disabled</key>
+				<true/>
+				<key>kind</key>
+				<string>web</string>
+				<key>match</key>
+				<string>*</string>
+				<key>subtitle</key>
+				<string>Search for ‘${query:-…}’</string>
+				<key>title</key>
+				<string>DuckDuckGo</string>
+				<key>url</key>
+				<string>https://duckduckgo.com/?q=${query}</string>
+			</dict>
+			<key>weight</key>
+			<integer>15072</integer>
+		</dict>
+		<key>2D6EF04D-C4D8-43B2-A3EC-8A36077B244E</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>kind</key>
+				<string>exec</string>
+				<key>script</key>
+				<string>#!/usr/bin/env ruby
+require 'json'
+
+URL_REGEX = %r{^
+  ( (https?|s?ftp|ftps|file|smb|afp|nfs|(x-)?man(-page)?|gopher|txmt):// | mailto: )
+  [-:@a-zA-Z0-9_.,~%+/?=&amp;#;]+
+$}x
+
+items = []
+
+if query = ARGV.first
+  query = query.sub(%r{^www\.[a-z]+\.[a-z]{2,}(/.*)?$}i, 'http://\&amp;')
+  if query =~ URL_REGEX
+    items.push({
+      :title    =&gt; 'Open URL',
+      :subtitle =&gt; '${query:-${find}}',
+      :match    =&gt; '*',
+      :url      =&gt; query,
+    })
+  end
+end
+
+puts JSON.generate({
+  :items =&gt; items
+});
+</string>
+				<key>scriptArguments</key>
+				<array>
+					<string>${query:-${find}}</string>
+				</array>
+				<key>title</key>
+				<string>Open URL</string>
+			</dict>
+			<key>weight</key>
+			<integer>12384</integer>
+		</dict>
+		<key>2DC4C14C-52F5-453E-B429-CB9489EF5BCF</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>isPlaceholder</key>
+				<true/>
+				<key>subtitle</key>
+				<string>This may take a few seconds…</string>
+				<key>title</key>
+				<string>Parsing iTunes Library</string>
+			</dict>
+		</dict>
+		<key>2F30F0D3-63F3-44D0-B77C-33F65DCE0AA7</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>icon</key>
+				<dict>
+					<key>text</key>
+					<string>🎥</string>
+				</dict>
+				<key>isAlternate</key>
+				<true/>
+				<key>kind</key>
+				<string>script</string>
+				<key>script</key>
+				<string>#!/usr/bin/env ruby
+require 'shellwords'
+
+if path = ARGV.first
+  Process.daemon(nil, true) # Preserve STDOUT
+  %x{ /usr/bin/open -W #{path.shellescape} }
+
+  dir = File.dirname(path)
+  Dir.chdir(dir) do
+    to_keep = Dir.glob("*").reject do |file|
+      file =~ /\.(txt|nfo|srt)$/i || file == File.basename(path)
+    end
+    path = dir if to_keep.empty?
+  end
+
+  script = &lt;&lt;-AS
+    on run argv
+      set theFile to POSIX file (first item of argv)
+      tell app "Finder"
+        set basename to name of (theFile as alias)
+        delete theFile
+        return "File “" &amp; basename &amp; "” moved to Trash"
+      end tell
+    end run
+  AS
+
+  script = script.split("\n").map { |line| [ '-e', line.strip ] }.flatten
+  exec('/usr/bin/osascript', *script, path)
+end
+</string>
+				<key>scriptArguments</key>
+				<array>
+					<string>${parent.file}</string>
+				</array>
+				<key>subtitle</key>
+				<string>${parent.file:/basename}</string>
+				<key>title</key>
+				<string>Play and Move to Trash</string>
+			</dict>
+		</dict>
+		<key>2F634020-6A29-4AF5-BD2A-94AE7AAD5AEE</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>icon</key>
+				<dict>
+					<key>fileType</key>
+					<string>'FNDR'</string>
+				</dict>
+				<key>kind</key>
+				<string>script</string>
+				<key>script</key>
+				<string>/usr/bin/open -R "$0"</string>
+				<key>scriptArguments</key>
+				<array>
+					<string>${parent.file}</string>
+				</array>
+				<key>subtitle</key>
+				<string>${parent.file}</string>
+				<key>title</key>
+				<string>Show in Finder</string>
+			</dict>
+		</dict>
+		<key>3020F240-A935-4EC1-9C24-A8DFAB378FCB</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>disableFileActions</key>
+				<true/>
+				<key>disableLRUOrdering</key>
+				<true/>
+				<key>disableRankOrdering</key>
+				<true/>
+				<key>isTemplate</key>
+				<true/>
+				<key>subtitle</key>
+				<string>${kMDItemDateAdded:/relative} • ${kMDItemURL}</string>
+			</dict>
+		</dict>
+		<key>31EA8109-6DF3-4302-9E0F-03CF4B757961</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>http://www.unicode.org/Public/UNIDATA/UnicodeData.txt</string>
+				</array>
+				<key>icon</key>
+				<dict>
+					<key>text</key>
+					<string>🔎</string>
+				</dict>
+				<key>subtitle</key>
+				<string>Search the unicode database for characters</string>
+				<key>title</key>
+				<string>Unicode Database</string>
+			</dict>
+			<key>weight</key>
+			<integer>14688</integer>
+		</dict>
+		<key>32003E08-EBAA-4176-9030-9639B55009A7</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>02B310AA-AE84-4D91-B036-68F838D5BCE0</string>
+				</array>
+				<key>kind</key>
+				<string>exec</string>
+				<key>script</key>
+				<string>exec "$GENIE_SUPPORT_PATH/bin/volumes"</string>
+				<key>title</key>
+				<string>Ejectable Volumes</string>
+			</dict>
+		</dict>
+		<key>36D55732-3C39-4469-B4E5-3F7FD2C610BD</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>72F1C561-0BC2-4AD2-A1CE-41F1A250AE8B</string>
+				</array>
+				<key>kind</key>
+				<string>sqlite</string>
+				<key>sqlDatabase</key>
+				<string>~/Library/Application Support/Genie/ClipboardHistory.db</string>
+				<key>sqlQuery</key>
+				<string>SELECT history.id AS uid, clipping AS match, name AS app, date FROM history
+  JOIN clippings ON (clipping_id = clippings.id)
+  JOIN applications ON (application_id = applications.id)
+  ORDER BY date DESC;
+</string>
+				<key>title</key>
+				<string>Find Clipboard History</string>
+			</dict>
+		</dict>
+		<key>3792D4CC-05FB-44A4-AB14-9539C7B33FCE</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>disableLRUOrdering</key>
+				<string>true</string>
+				<key>isTemplate</key>
+				<true/>
+				<key>kind</key>
+				<string>script</string>
+				<key>script</key>
+				<string>/usr/bin/open -b "$0" "$1"</string>
+				<key>scriptArguments</key>
+				<array>
+					<string>${kMDItemCFBundleIdentifier}</string>
+					<string>${parent.parent.file}</string>
+				</array>
+			</dict>
+		</dict>
+		<key>3AA2B88A-1579-4A12-BB3A-140CE5AA479B</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>2F634020-6A29-4AF5-BD2A-94AE7AAD5AEE</string>
+					<string>6F68E558-D3A3-4ED8-BC7B-8C2559B623B0</string>
+				</array>
+				<key>kind</key>
+				<string>predicateGroup</string>
+				<key>predicate</key>
+				<string>kMDItemContentType UTI-CONFORMS-TO 'public.item' &amp;&amp; !(kMDItemContentType UTI-CONFORMS-TO 'public.url') &amp;&amp; disableFileActions != YES</string>
+				<key>title</key>
+				<string>File Actions</string>
+			</dict>
+			<key>weight</key>
+			<integer>15744</integer>
+		</dict>
+		<key>3BCD0470-6F3B-4D53-B8F5-702519FC0A84</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>icon</key>
+				<dict>
+					<key>application</key>
+					<string>com.apple.iTunes</string>
+				</dict>
+				<key>kind</key>
+				<string>script</string>
+				<key>script</key>
+				<string>#!/usr/bin/osascript
+
+on run argv
+	set trackId to (first item of argv)
+	tell app "iTunes"
+		activate
+		reveal (first track of (library playlist 1) whose persistent ID is trackId)
+	end tell
+end run
+</string>
+				<key>scriptArguments</key>
+				<array>
+					<string>${parent.iTunesTrackId}</string>
+				</array>
+				<key>subtitle</key>
+				<string>${parent.iTunesTrackName:-${parent.parent.parent.title} → ${parent.parent.title} → ${parent.title}}</string>
+				<key>title</key>
+				<string>Show “${parent.iTunesTrackName:-${parent.title}}” in iTunes</string>
+			</dict>
+		</dict>
+		<key>3CF5F64A-BF9C-4629-847E-B20CE3BEB6B2</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>28A559C8-73BC-4B82-942D-1B2A9D936A69</string>
+				</array>
+				<key>icon</key>
+				<dict>
+					<key>file</key>
+					<string>~/Movies</string>
+				</dict>
+				<key>subtitle</key>
+				<string>A reverse chronological list of movie files</string>
+				<key>title</key>
+				<string>Recent Movies</string>
+			</dict>
+			<key>weight</key>
+			<integer>12960</integer>
+		</dict>
+		<key>411DE45A-13D8-4CC8-93BA-798CF22A2BD6</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>038B3A8E-0BEF-4C9D-B9F0-75E3DB4DC259</string>
+				</array>
+				<key>icon</key>
+				<dict>
+					<key>fileType</key>
+					<string>'rcnt'</string>
+				</dict>
+				<key>subtitle</key>
+				<string>${parent.kMDItemCFBundleIdentifier}</string>
+				<key>title</key>
+				<string>Recent Documents</string>
+			</dict>
+		</dict>
+		<key>41F55EDD-858B-491C-9E7B-770550F6F2F3</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>73A49D48-D0CF-469B-BFD6-545AB4565E8F</string>
+				</array>
+				<key>icon</key>
+				<dict>
+					<key>file</key>
+					<string>~/Downloads</string>
+				</dict>
+				<key>subtitle</key>
+				<string>A reverse chronological list of ~/Downloads</string>
+				<key>title</key>
+				<string>Recent Downloads</string>
+			</dict>
+			<key>weight</key>
+			<integer>12768</integer>
+		</dict>
+		<key>455F3C71-109B-4885-B50F-A61EB9A04524</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>22850FA4-8354-4A4F-94F9-58624A4C2681</string>
+				</array>
+				<key>icon</key>
+				<dict>
+					<key>fileType</key>
+					<string>emlx</string>
+				</dict>
+				<key>subtitle</key>
+				<string>Show unread messages going back 30 days</string>
+				<key>title</key>
+				<string>Recent Email</string>
+			</dict>
+			<key>weight</key>
+			<integer>12864</integer>
+		</dict>
+		<key>468DC1F1-A3D9-4B4D-AE7E-6ADA4A9D8904</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>isTemplate</key>
+				<true/>
+				<key>subtitle</key>
+				<string>${url} • modified ${modified:/relative}</string>
+			</dict>
+		</dict>
+		<key>477263E5-EFB1-4F18-ACD8-016FBE1F4726</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>CCCC7130-6CCE-4B1C-953D-36782EFEBBD2</string>
+				</array>
+				<key>kind</key>
+				<string>exec</string>
+				<key>script</key>
+				<string>#!/usr/bin/env ruby
+require 'json'
+require 'shellwords'
+
+PASSWORD_STORE_DIR = ENV['PASSWORD_STORE_DIR'] || File.expand_path('~/.password-store')
+
+res = [ ]
+
+Dir.chdir(PASSWORD_STORE_DIR) do
+  Dir.glob('**/*.gpg') do |path|
+    dir, name = File.dirname(path), File.basename(path, '.gpg')
+    subpath = dir == '.' ? name : "#{dir}/#{name}"
+    res &lt;&lt; {
+      :uid      =&gt; subpath,
+      :title    =&gt; name,
+      :subtitle =&gt; dir == '.' ? '' : dir,
+      :match    =&gt; subpath,
+      :file     =&gt; "#{PASSWORD_STORE_DIR}/#{path}",
+    }
+  end
+end
+
+puts JSON.generate({
+  :items =&gt; res.sort_by { |item| item[:match].downcase }
+})
+</string>
+				<key>title</key>
+				<string>Get list of passwords</string>
+			</dict>
+		</dict>
+		<key>4ABAB1D6-DF63-48DB-B046-C76B98B922FC</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>3020F240-A935-4EC1-9C24-A8DFAB378FCB</string>
+				</array>
+				<key>descending</key>
+				<true/>
+				<key>kind</key>
+				<string>spotlight</string>
+				<key>mdQuery</key>
+				<string>kMDItemContentType == 'com.apple.safari.history'</string>
+				<key>mdScope</key>
+				<array>
+					<dict>
+						<key>path</key>
+						<string>~/Library</string>
+					</dict>
+				</array>
+				<key>sortBy</key>
+				<string>kMDItemDateAdded</string>
+				<key>title</key>
+				<string>Find Safari History</string>
+			</dict>
+		</dict>
+		<key>4E85805C-DCAC-4656-94FF-08AEC97DA0AF</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>isTemplate</key>
+				<true/>
+				<key>kind</key>
+				<string>script</string>
+				<key>script</key>
+				<string>#!/usr/bin/osascript
+
+on run argv
+	tell app id (first item of argv) to quit
+end run
+</string>
+				<key>scriptArguments</key>
+				<array>
+					<string>${kMDItemCFBundleIdentifier}</string>
+				</array>
+				<key>subtitle</key>
+				<string>${kMDItemPath}</string>
+				<key>title</key>
+				<string>Quit ${kMDItemDisplayName}</string>
+			</dict>
+		</dict>
+		<key>4FC20C28-8A0A-422A-A188-3D86A1166A5B</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>isPlaceholder</key>
+				<true/>
+				<key>subtitle</key>
+				<string>Search for emojicons</string>
+				<key>title</key>
+				<string>Emoji Database</string>
+			</dict>
+		</dict>
+		<key>5108FEE8-C924-4A8C-B7EC-EDBA3A0475EE</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>A692E893-1BEE-495C-BDC6-24B9151CCEC2</string>
+				</array>
+				<key>subtitle</key>
+				<string>${parent.file}</string>
+				<key>title</key>
+				<string>Open With</string>
+			</dict>
+		</dict>
+		<key>52272D2C-4D3B-473F-8475-52844FC39A1E</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>8324CD41-2E24-4904-8A65-07241BAFE8FC</string>
+				</array>
+				<key>icon</key>
+				<dict>
+					<key>application</key>
+					<string>com.hogbaysoftware.TaskPaper3.direct</string>
+				</dict>
+				<key>subtitle</key>
+				<string>Manage your tasks</string>
+				<key>title</key>
+				<string>Tasks</string>
+			</dict>
+			<key>weight</key>
+			<integer>13920</integer>
+		</dict>
+		<key>5568B234-55D5-4D3F-BE7C-0EF79ACD0F6C</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>kind</key>
+				<string>exec</string>
+				<key>script</key>
+				<string>#!/usr/bin/env ruby
+require 'json'
+
+items = []
+
+if query = ARGV.first
+  if query =~ %r{^=?([+\-*/^0-9.,() ]*?)([+\-*/^ ]*)$}
+    expression, trailing = $1, $2
+    result = open('|/usr/bin/bc -l', 'w+') do |io|
+      io.write(expression.tr(',', '') + "\n")
+      io.close_write
+      io.read
+    end
+
+    result = result.chomp.to_f.round(4).to_s
+    result = result.sub(/(\.[0-9]*[^0]+)0+$|\.0+$/, '\1')
+
+    items.push({
+      :title    =&gt; '= ${value:/number}${trailing}',
+      :subtitle =&gt; '&gt; ${query/^(?:= *)?(.+)?/${1:-Enter math expression…}/}',
+      :icon     =&gt; { :image =&gt; 'icons/calculator.icns' },
+      :match    =&gt; '*',
+
+      :value    =&gt; "#{result}",
+      :trailing =&gt; trailing,
+    })
+  end
+end
+
+puts JSON.generate({
+  :items =&gt; items
+});
+</string>
+				<key>scriptArguments</key>
+				<array>
+					<string>${query}</string>
+				</array>
+				<key>title</key>
+				<string>Calculator</string>
+			</dict>
+			<key>weight</key>
+			<integer>10272</integer>
+		</dict>
+		<key>56146474-3DC0-4407-B430-9235E7463454</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>kind</key>
+				<string>web</string>
+				<key>subtitle</key>
+				<string>Search for ‘${query:-${find:?[${find}]:…}}’</string>
+				<key>title</key>
+				<string>C-plus-plus Reference</string>
+				<key>url</key>
+				<string>http://www.cplusplus.com/search.do?q=${query:-${find}}</string>
+			</dict>
+			<key>weight</key>
+			<integer>10560</integer>
+		</dict>
+		<key>590E3593-077B-4DA0-A94B-58EC482712DA</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>kind</key>
+				<string>exec</string>
+				<key>script</key>
+				<string>#!/usr/bin/env ruby
+require 'json'
+
+my_ip = %x{ /usr/bin/dig +short myip.opendns.com @resolver1.opendns.com }.chop 
+abort "error #$? from /usr/bin/dig" if $?.exitstatus != 0
+
+puts JSON.generate({
+  :expires_in =&gt; '10m',
+  :items =&gt; [
+    {
+      :uid      =&gt; my_ip,
+      :title    =&gt; 'Your IP Address is: ${value}',
+      :subtitle =&gt; 'Copy to clipboard with ⌘C',
+      :icon     =&gt; { :image =&gt; 'icons/ip.png' },
+      :match    =&gt; 'ip',
+      :value    =&gt; my_ip,
+    }
+  ]
+});
+</string>
+				<key>title</key>
+				<string>Show IP Address</string>
+			</dict>
+			<key>weight</key>
+			<integer>13728</integer>
+		</dict>
+		<key>59D68385-50AA-4065-9403-ED3C45059FAB</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>4ABAB1D6-DF63-48DB-B046-C76B98B922FC</string>
+				</array>
+				<key>icon</key>
+				<dict>
+					<key>fileType</key>
+					<string>webhistory</string>
+				</dict>
+				<key>subtitle</key>
+				<string>Your Safari browsing history</string>
+				<key>title</key>
+				<string>Safari History</string>
+			</dict>
+			<key>weight</key>
+			<integer>13344</integer>
+		</dict>
+		<key>5B97F69F-A820-4D43-87F8-33F7B1C4D4A5</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>DF16CA8B-593F-4846-887A-C87EB91F8EBA</string>
+				</array>
+				<key>icon</key>
+				<dict>
+					<key>application</key>
+					<string>com.apple.AddressBook</string>
+				</dict>
+				<key>subtitle</key>
+				<string>List of all your contacts</string>
+				<key>title</key>
+				<string>All Contacts</string>
+			</dict>
+			<key>weight</key>
+			<integer>9792</integer>
+		</dict>
+		<key>5D70622F-F555-4311-921D-1324DB1D2E06</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>kind</key>
+				<string>web</string>
+				<key>subtitle</key>
+				<string>Translate ‘${query:-${clipboard:?[${clipboard}]:…}}’ to Thai</string>
+				<key>title</key>
+				<string>Translate to Thai</string>
+				<key>url</key>
+				<string>https://translate.google.com/#auto/th/${query:-${clipboard}}</string>
+			</dict>
+			<key>weight</key>
+			<integer>14304</integer>
+		</dict>
+		<key>5DCFEA69-0A0C-432C-85B5-AED7ED70AF86</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>file</key>
+				<string>~/.reminders</string>
+				<key>icon</key>
+				<dict>
+					<key>application</key>
+					<string>com.macromates.TextMate</string>
+				</dict>
+				<key>kind</key>
+				<string>file</string>
+				<key>subtitle</key>
+				<string>${file}</string>
+				<key>title</key>
+				<string>Edit Reminders</string>
+			</dict>
+			<key>weight</key>
+			<integer>11136</integer>
+		</dict>
+		<key>5E5A4A6F-30A5-4177-BDFF-6F122B15A639</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>icon</key>
+				<dict>
+					<key>image</key>
+					<string>icons/journal.png</string>
+				</dict>
+				<key>kind</key>
+				<string>script</string>
+				<key>script</key>
+				<string>jrnl "$0"</string>
+				<key>scriptArguments</key>
+				<array>
+					<string>${query}</string>
+				</array>
+				<key>subtitle</key>
+				<string>Entry text: ‘${query:-…}’</string>
+				<key>title</key>
+				<string>Add Journal Entry</string>
+			</dict>
+			<key>weight</key>
+			<integer>9696</integer>
+		</dict>
+		<key>5EAA01EE-EF1B-4E60-8A58-09905C4C93F1</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>4FC20C28-8A0A-422A-A188-3D86A1166A5B</string>
+				</array>
+				<key>kind</key>
+				<string>exec</string>
+				<key>script</key>
+				<string>#!/usr/bin/env ruby
+require 'json'
+require 'open-uri'
+
+EMOJI_URL        = 'https://raw.githubusercontent.com/iamcal/emoji-data/master/emoji.json'
+REGION_CODES_URL = 'https://raw.githubusercontent.com/lukes/ISO-3166-Countries-with-Regional-Codes/master/slim-2/slim-2.json'
+
+$regions = nil
+
+def region_name(code)
+  if $regions.nil?
+    $regions = {}
+    open(REGION_CODES_URL) do |io|
+      JSON.parse(io.read).each do |region|
+        $regions[region['alpha-2'].downcase] = region['name']
+      end
+    end
+  end
+  $regions[code.downcase]
+end
+
+def normalize(name)
+  res = name.to_s.downcase.gsub(/-|_/, ' ').gsub(/\bcjk\b/, 'CJK')
+  res.empty? ? nil : res
+end
+
+categories = Hash.new { |h1,k1| h1[k1] = [] }
+
+open(EMOJI_URL) do |io|
+  if json = JSON.parse(io.read)
+    json.each do |emoji|
+
+      official = normalize(emoji['name'])
+      short    = normalize(emoji['short_name'])
+
+      if official =~ /^(REGIONAL INDICATOR SYMBOL LETTERS) (\w\w)$/i
+        if region = region_name($2)
+          official, short = region, nil
+        else
+          official, short = "#$1 #{$2.upcase}"
+        end
+      end
+
+      if official &amp;&amp; short &amp;&amp; official != short
+        name = "#{official} (#{short})"
+      else
+        name = official || short
+      end
+
+      code_points = emoji['unified'].split('-')
+      character   = code_points.map { |cp| cp.hex }.pack('U*')
+
+      # "skin_variations"
+
+      category = emoji["category"]
+      categories[category] &lt;&lt; {
+        :name                 =&gt; name,
+        :title                =&gt; '${name:/capitalize}',
+        :subtitle             =&gt; code_points.map { |e| "U+#{e}" }.join(' ') + ' • Copy with ⌘C • Press ↩ for Emojipedia',
+        :icon                 =&gt; { :text =&gt; '${value}' },
+        :match                =&gt; "#{name} #{character}",
+        :disableFuzzyMatching =&gt; true,
+        :value                =&gt; character,
+        :url                  =&gt; 'https://emojipedia.org/search/?q=${value}',
+      }
+    end
+  end
+end
+
+items = []
+
+categories.each do |key, value|
+  items &lt;&lt; {
+    :title              =&gt; key,
+    :subtitle           =&gt; "#{value.count} emojicons",
+    :icon               =&gt; { :text =&gt; value.first[:value] },
+    :children           =&gt; value,
+    :disableLRUOrdering =&gt; true,
+  }
+end
+
+items = items.sort { |lhs, rhs| lhs[:title] &lt;=&gt; rhs[:title] }
+
+puts JSON.generate({
+  :expires_in =&gt; '1w',
+  :items      =&gt; [
+    {
+      :uid      =&gt; '39CA18B1-7021-4D63-9EAD-07EBD38404E2',
+      :title    =&gt; 'Emoji Database',
+      :subtitle =&gt; 'Search for emojicons',
+      :icon     =&gt; { :text =&gt; '💩' },
+      :children =&gt; items,
+    }
+  ]
+})
+</string>
+				<key>title</key>
+				<string>Emoji Database</string>
+			</dict>
+			<key>weight</key>
+			<integer>11424</integer>
+		</dict>
+		<key>6657B0FF-D906-495B-A058-2D89A2D0F843</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>icon</key>
+				<dict>
+					<key>text</key>
+					<string>${emoji_flag}</string>
+				</dict>
+				<key>isTemplate</key>
+				<true/>
+				<key>match</key>
+				<string>*</string>
+				<key>subtitle</key>
+				<string>${from_amount:/number} ${from_currency} • Rates from ${rates_updated:/relative}</string>
+				<key>title</key>
+				<string>= ${to_amount:/number} ${to_currency}</string>
+				<key>value</key>
+				<string>${to_amount}</string>
+			</dict>
+		</dict>
+		<key>67A2CF41-572C-4FD5-8C8E-04A7502A58C2</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>6BDA095C-B898-4580-8B23-E818CE341740</string>
+				</array>
+				<key>icon</key>
+				<dict>
+					<key>text</key>
+					<string>📡</string>
+				</dict>
+				<key>subtitle</key>
+				<string>Convert text to the NATO spelling alphabet</string>
+				<key>title</key>
+				<string>NATO</string>
+			</dict>
+			<key>weight</key>
+			<integer>12096</integer>
+		</dict>
+		<key>682D983B-B559-4A8F-AE91-91845D851029</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>icon</key>
+				<dict>
+					<key>text</key>
+					<string>💿</string>
+				</dict>
+				<key>kind</key>
+				<string>script</string>
+				<key>script</key>
+				<string>/usr/bin/osascript bin/itunes-play.scpt --random</string>
+				<key>subtitle</key>
+				<string>Pick a rnadom album with a duration of 28-80 minutes</string>
+				<key>title</key>
+				<string>Play Random Album</string>
+			</dict>
+		</dict>
+		<key>6868FA8D-A575-4EBF-8DB7-7946EF079C9E</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>F94DE348-7A44-462B-9EBE-1A4FAB97C810</string>
+				</array>
+				<key>descending</key>
+				<true/>
+				<key>icon</key>
+				<dict>
+					<key>application</key>
+					<string>com.apple.systempreferences</string>
+				</dict>
+				<key>kind</key>
+				<string>spotlight</string>
+				<key>mdQuery</key>
+				<string>kMDItemContentType == 'com.apple.systempreference.prefpane'</string>
+				<key>sortBy</key>
+				<string>kMDItemLastUsedDate</string>
+				<key>title</key>
+				<string>Preference Panes</string>
+			</dict>
+			<key>weight</key>
+			<integer>12576</integer>
+		</dict>
+		<key>69054D37-45FB-40A3-80EF-1B01F0198790</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>icon</key>
+				<dict>
+					<key>image</key>
+					<string>icons/journal.png</string>
+				</dict>
+				<key>kind</key>
+				<string>script</string>
+				<key>script</key>
+				<string>jrnl --edit</string>
+				<key>title</key>
+				<string>Edit Journal</string>
+			</dict>
+			<key>weight</key>
+			<integer>11040</integer>
+		</dict>
+		<key>6953CAB4-72F8-4FD0-8CB8-FB7DA2DDB812</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>icon</key>
+				<dict>
+					<key>image</key>
+					<string>icons/google-search.icns</string>
+				</dict>
+				<key>kind</key>
+				<string>web</string>
+				<key>match</key>
+				<string>*</string>
+				<key>subtitle</key>
+				<string>Search for ‘${query:-…}’</string>
+				<key>title</key>
+				<string>Google Search</string>
+				<key>url</key>
+				<string>https://www.google.com/search?q=${query}</string>
+			</dict>
+			<key>weight</key>
+			<integer>14976</integer>
+		</dict>
+		<key>699918A4-6501-4E34-9A4C-CCDE1E495603</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>disableFuzzyMatching</key>
+				<true/>
+				<key>disableLRUOrdering</key>
+				<true/>
+				<key>disableLearning</key>
+				<true/>
+				<key>disableRankOrdering</key>
+				<true/>
+				<key>isTemplate</key>
+				<true/>
+				<key>kind</key>
+				<string>script</string>
+				<key>script</key>
+				<string>#!/usr/bin/osascript
+
+on run argv
+	tell app "iTerm"
+		activate
+		tell current session of current window
+			write text (first item of argv) newline no
+		end tell
+	end tell
+end run
+</string>
+				<key>scriptArguments</key>
+				<array>
+					<string>${match}</string>
+				</array>
+				<key>subtitle</key>
+				<string>Started ${date:/relative} in ${directory}</string>
+				<key>title</key>
+				<string>${match}</string>
+			</dict>
+		</dict>
+		<key>69BCBCB8-D944-4A3B-9F9A-94BFAEB85A85</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>icon</key>
+				<dict>
+					<key>image</key>
+					<string>/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/EjectMediaIcon.icns</string>
+				</dict>
+				<key>kind</key>
+				<string>script</string>
+				<key>script</key>
+				<string>#!/usr/bin/env ruby
+require 'json'
+require 'shellwords'
+
+open('|"$GENIE_SUPPORT_PATH/bin/volumes"') do |io|
+  JSON.parse(io.read)['items'].each do |item|
+    next if item['rootVolume']
+    if path = item['kMDItemPath']
+      STDOUT &lt;&lt; %x{ /usr/sbin/diskutil eject #{path.shellescape} }
+    end
+  end
+end
+</string>
+				<key>subtitle</key>
+				<string>Eject all removable disks</string>
+				<key>title</key>
+				<string>Eject All</string>
+			</dict>
+			<key>weight</key>
+			<integer>11232</integer>
+		</dict>
+		<key>6BDA095C-B898-4580-8B23-E818CE341740</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>kind</key>
+				<string>exec</string>
+				<key>script</key>
+				<string>#!/usr/bin/env ruby
+require 'json'
+
+WORDS = %w[
+  Alfa Bravo Charlie Delta Echo Foxtrot Golf Hotel India
+  Juliett Kilo Lima Mike November Oscar Papa Quebec Romeo
+  Sierra Tango Uniform Victor Whiskey X-ray Yankee Zulu
+]
+
+A, Z, SPACE = *'AZ '.unpack('U*')
+
+items = []
+
+if query = ARGV.first
+  unless query.empty?
+    as_words = query.upcase.strip.unpack('U*').map do |ch|
+      case ch
+        when A..Z  then WORDS[ch - A]
+        when SPACE then '•'
+        else [ ch ].pack('U')
+      end
+    end.join(' ')
+
+    items.push({
+      :uid      =&gt; "FD58A505-41BF-40D1-9EF4-A6B0373F78C2",
+      :title    =&gt; "= #{as_words}",
+      :subtitle =&gt; "&gt; ‘#{query}’",
+      :match    =&gt; "*",
+    })
+  else
+    items.push({
+      :uid      =&gt; "FD58A505-41BF-40D1-9EF4-A6B0373F78C2",
+      :title    =&gt; '= …',
+      :subtitle =&gt; '&gt; Enter some text…',
+      :match    =&gt; "*",
+    })
+  end
+end
+
+puts JSON.generate({
+  :items =&gt; items
+});
+</string>
+				<key>scriptArguments</key>
+				<array>
+					<string>${query}</string>
+				</array>
+				<key>title</key>
+				<string>Spelling Alphabet</string>
+			</dict>
+		</dict>
+		<key>6C7EB569-A43B-4B5C-ABDA-EBC55F0F2447</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>EB36BF99-8D80-4C81-95DB-E9E467CB5EE1</string>
+				</array>
+				<key>kind</key>
+				<string>exec</string>
+				<key>output</key>
+				<string>list</string>
+				<key>script</key>
+				<string>/usr/bin/find "${HOME}/Shared/Projects" -type d -mindepth 1 -maxdepth 1</string>
+				<key>title</key>
+				<string>Search ~/Shared/Projects</string>
+			</dict>
+		</dict>
+		<key>6F68E558-D3A3-4ED8-BC7B-8C2559B623B0</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>icon</key>
+				<dict>
+					<key>fileType</key>
+					<string>'trsh'</string>
+				</dict>
+				<key>kind</key>
+				<string>script</string>
+				<key>script</key>
+				<string>#!/usr/bin/osascript
+
+on run argv
+	set theFile to POSIX file (first item of argv)
+	tell app "Finder"
+		set basename to name of (theFile as alias)
+		delete theFile
+		return "File “" &amp; basename &amp; "” moved to Trash"
+	end tell
+end run
+</string>
+				<key>scriptArguments</key>
+				<array>
+					<string>${parent.file}</string>
+				</array>
+				<key>subtitle</key>
+				<string>${parent.file}</string>
+				<key>title</key>
+				<string>Move to Trash</string>
+			</dict>
+		</dict>
+		<key>72F1C561-0BC2-4AD2-A1CE-41F1A250AE8B</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>disableFuzzyMatching</key>
+				<true/>
+				<key>disableLRUOrdering</key>
+				<true/>
+				<key>disableLearning</key>
+				<true/>
+				<key>disableRankOrdering</key>
+				<true/>
+				<key>isTemplate</key>
+				<true/>
+				<key>kind</key>
+				<string>script</string>
+				<key>script</key>
+				<string>#!/usr/bin/env ruby
+require 'json'
+
+items = JSON.parse(STDIN.read)['items']
+items = items.reverse.map { |item| item['match'] }
+
+last_item = items.pop
+items.map! { |item| item.chomp('') }
+items.push(last_item)
+
+open('|/usr/bin/pbcopy', 'w') do |io|
+  io &lt;&lt; items.join("\n")
+end
+
+exec('/usr/bin/osascript', '-e', 'tell app "System Events" to keystroke "v" using command down')
+</string>
+				<key>subtitle</key>
+				<string>Created ${date:/relative} in ${app}</string>
+				<key>title</key>
+				<string>${match}</string>
+			</dict>
+		</dict>
+		<key>7306618A-851A-4BD9-B046-6A274D746853</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>FC8868AF-5037-4ECE-9332-F420AFF8CCF0</string>
+				</array>
+				<key>icon</key>
+				<dict>
+					<key>text</key>
+					<string>📚</string>
+				</dict>
+				<key>subtitle</key>
+				<string>Shiori — Bookmarks Manager</string>
+				<key>title</key>
+				<string>Bookmarks</string>
+			</dict>
+			<key>weight</key>
+			<integer>10176</integer>
+		</dict>
+		<key>73A49D48-D0CF-469B-BFD6-545AB4565E8F</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>7542B57A-FC72-4A11-9E19-D09553D89D86</string>
+				</array>
+				<key>descending</key>
+				<true/>
+				<key>kind</key>
+				<string>spotlight</string>
+				<key>mdQuery</key>
+				<string>kMDItemContentTypeTree == 'public.item'</string>
+				<key>mdScope</key>
+				<array>
+					<dict>
+						<key>path</key>
+						<string>~/Downloads</string>
+					</dict>
+				</array>
+				<key>sortBy</key>
+				<string>kMDItemContentModificationDate</string>
+				<key>title</key>
+				<string>Search ~/Downloads</string>
+			</dict>
+		</dict>
+		<key>73DB826E-CCBC-4A82-8561-D8C5AA32F75E</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>2DC4C14C-52F5-453E-B429-CB9489EF5BCF</string>
+				</array>
+				<key>kind</key>
+				<string>exec</string>
+				<key>script</key>
+				<string>#!/usr/bin/env ruby
+require 'uri'
+require 'json'
+require 'shellwords'
+require 'logger'
+require 'i18n'
+I18n.config.available_locales = :en
+
+CACHE_DIR = ENV['GENIE_CACHES_PATH'] || '/tmp'
+LOG_FILE  = File.join(CACHE_DIR, 'itunes-music-library.log')
+
+$log = Logger.new(ENV.has_key?('GENIE_DEBUG') || STDERR.tty? ? STDERR : LOG_FILE)
+$log.formatter = proc do |severity, datetime, progname, msg|
+  "[#{datetime.strftime('%Y-%m-%d %H:%M:%S.%3N')}] [#{Process.pid}] %7s #{msg}\n" % "[#{severity}]"
+end
+
+ENV['GENIE_SUPPORT_PATH'] = `find_app com.macromates.Genie` + '/Contents/SharedSupport' unless ENV.has_key?('GENIE_SUPPORT_PATH')
+
+def duration_to_str(duration)
+  minutes = (duration / 60).round.to_i
+  infos   = [ [ minutes / 60 / 24, 'day' ], [ minutes / 60 % 24, 'hour' ], [ minutes % 60, 'minute' ] ].reject { |time| time[0] == 0 }
+  infos.map { |info| pluralize(*info) }.join(', ')
+end
+
+class Track
+  attr_accessor :disabled, :name, :artist, :album_artist, :sort_artist, :album, :sort_album, :compilation, :year, :genre, :track_number, :disc_number, :total_time, :persistent_id
+
+  def initialize(track)
+    fields = [ 'Disabled', 'Name', 'Artist', 'Album Artist', 'Sort Artist', 'Album', 'Sort Album', 'Compilation', 'Year', 'Genre', 'Track Number', 'Disc Number', 'Total Time', 'Persistent ID', 'Location' ]
+    fields.each do |field|
+      unless track[field].to_s.empty?
+        ivar = field.tr(' ', '_').downcase
+        self.instance_variable_set("@#{ivar}", track[field])
+      end
+    end
+  end
+
+  def description(include_album: nil)
+    duration = @total_time.nil? ? nil : format("%d:%02d", @total_time.to_i / 1000 / 60, @total_time.to_i / 1000 % 60)
+    track_info = [ duration, @artist, include_album &amp;&amp; @album ].reject { |info| info.nil? }
+    res = {
+      :uid                =&gt; @persistent_id,
+      :title              =&gt; @name || 'Unknown Track',
+      :subtitle           =&gt; track_info.join(' • '),
+      :icon               =&gt; { :text =&gt; '🎵' },
+      :exec               =&gt; [ $0, '--play' ],
+      :disableLRUOrdering =&gt; true,
+
+      :iTunesTrackId =&gt; @persistent_id,
+
+      :option        =&gt; {
+        :title =&gt; "Show ‘#{@name || 'Unknown Track'}’ in iTunes",
+        :exec  =&gt; [ '/usr/bin/osascript', 'bin/itunes-play.scpt', '--reveal', @persistent_id ],
+      }
+    }
+
+    path = URI.decode(URI.parse(@location).path) rescue nil
+    if path
+      res[:file]          = path
+      res[:contentType]   = 'public.audio'
+    end
+
+    if @disabled
+      res[:disabledTrack] = true
+      res[:icon][:alpha]  = 0.4
+    end
+
+    res
+  end
+end
+
+class Collection
+  attr_accessor :tracks, :duration
+
+  def initialize(tracks)
+    @tracks, @duration = tracks, tracks.inject(0.0) { |total, track| total + (track.total_time.to_f / 1000) }
+  end
+end
+
+class Playlist &lt; Collection
+  attr_accessor :name, :persistent_id
+
+  def initialize(name, persistent_id, tracks)
+    super(tracks)
+    @name, @persistent_id = name, persistent_id
+  end
+end
+
+class Album &lt; Collection
+  attr_accessor :name, :year, :genre
+
+  def initialize(tracks)
+    super(tracks)
+
+    @name = tracks.first.album
+
+    years = tracks.select { |track| track.year }.map { |track| track.year }
+    count = years.inject(Hash.new(0)) { |hash, year| hash[year] += 1; hash }
+    @year = years.sort_by { |year| count[year] }.last
+
+    genres = tracks.select { |track| track.genre }.map { |track| track.genre }
+    count  = genres.inject(Hash.new(0)) { |hash, genre| hash[genre] += 1; hash }
+    @genre = genres.sort_by { |genre| count[genre] }.last
+  end
+
+  def compilation?
+    @tracks.any? { |track| track.compilation }
+  end
+end
+
+class Artist
+  attr_accessor :albums, :name, :duration
+
+  def initialize(albums)
+    @albums, @name = albums, albums.first.tracks.first.album_artist || albums.first.tracks.first.artist
+    @duration = albums.inject(0.0) { |total, album| total + album.duration }
+  end
+
+  def compilations?
+    @albums.any? { |album| album.compilation? }
+  end
+
+  def first_album_year
+    @albums.select { |album| album.year &amp;&amp; album.year != 0 }.map { |album| album.year.to_i }.min
+  end
+
+  def last_album_year
+    @albums.select { |album| album.year &amp;&amp; album.year != 0 }.map { |album| album.year.to_i }.max
+  end
+end
+
+class Library
+  attr_accessor :artists, :playlists
+
+  def database_path
+    begin
+      cmd = '|"${GENIE_SUPPORT_PATH}/bin/plist_to_json" "${HOME}/Library/Preferences/com.apple.iApps.plist"'
+      res = open(cmd) { |io| JSON.parse(io.read) }
+      res['iTunesRecentDatabasePaths'].first
+    rescue Exception =&gt; e
+      '~/Music/iTunes/iTunes Music Library.xml'
+    end
+  end
+
+  def initialize
+    path  = File.expand_path(self.database_path)
+    plist = open('|"$GENIE_SUPPORT_PATH/bin/plist_to_json" ' + path.shellescape) { |io| JSON.parse(io.read) }
+
+    playlists   = plist['Playlists']
+    track_by_id = plist['Tracks']
+    track_by_id = Hash[track_by_id.map { |key, track| [ key, Track.new(track) ] }]
+
+    categories = { }
+    playlists.each do |playlist|
+      [ 'Music', 'Movies', 'TV Shows', 'Audiobooks', 'Voice Memos' ].each do |category|
+        if playlist.has_key?(category) &amp;&amp; playlist[category]
+          categories[category] = playlist['Playlist Items']
+        end
+      end
+    end
+
+    @playlists = []
+
+    playlists.each do |playlist|
+      next if playlist.has_key?('Visible') &amp;&amp; !playlist['Visible'] || playlist.has_key?('Distinguished Kind')
+      tracks = (playlist['Playlist Items'] || []).map { |item| track_by_id[item['Track ID'].to_s] }.reject { |track| track.nil? }
+      unless tracks.empty?
+        @playlists &lt;&lt; Playlist.new(playlist['Name'], playlist['Playlist Persistent ID'], tracks)
+      end
+    end
+
+    tree = Hash.new { |h1,k1| h1[k1] = Hash.new { |h2,k2| h2[k2] = [] } }
+
+    categories['Music'].each do |item|
+      track = track_by_id[item['Track ID'].to_s]
+      artist_key = track.compilation ? 'Compilations' : I18n.transliterate(track.album_artist || track.artist || '').downcase
+      album_key  = I18n.transliterate(track.album || '').downcase
+      tree[artist_key][album_key] &lt;&lt; track
+    end
+
+    artists = tree.values.map do |album_hash|
+      albums = album_hash.values.map do |album_tracks|
+        Album.new(album_tracks.sort_by { |track| [ (track.disc_number || 1).to_i, (track.track_number || 1).to_i, track.name || '' ] })
+      end
+      Artist.new(albums.sort_by { |album| [ (album.name.nil? ? 0 : 1), (album.year || 0).to_i, I18n::transliterate(album.tracks.first.sort_album || album.name || '').downcase, (album.tracks.first.disc_number || 1).to_i ] })
+    end
+
+    @artists = artists.sort_by do |artist|
+      some_track = artist.albums.first.tracks.first
+      [ (artist.compilations? ? 0 : (artist.name.nil? ? 1 : 2)), I18n::transliterate(some_track.album_artist || some_track.sort_artist || some_track.artist || '').downcase ]
+    end
+  end
+end
+
+def pluralize(count, single, multiple = single + 's')
+  "#{count} #{count == 1 ? single : multiple}"
+end
+
+def get_track_ids_object(obj)
+  if obj.has_key?('children')
+    get_track_ids_array(obj['children'])
+  elsif obj.has_key?('iTunesTrackId') &amp;&amp; !obj.has_key?('disabledTrack')
+    obj['iTunesTrackId']
+  elsif obj.has_key?('iTunesTrackIds')
+    obj['iTunesTrackIds']
+  else
+    nil
+  end
+end
+
+def get_track_ids_array(arr)
+  arr.map do |obj|
+    get_track_ids_object(obj)
+  end.flatten.reject { |track_id| track_id.nil? }
+end
+
+if ARGV[0] == '--play'
+  track_ids = get_track_ids_array(JSON.parse(STDIN.read)['items'])
+  $log.info("Play #{track_ids}")
+  exec('/usr/bin/osascript', 'bin/itunes-play.scpt', *track_ids)
+else
+  $counts = Hash.new(0)
+  $log.info("Updating library index…")
+  lib = Library.new
+
+  all_albums  = []
+  all_artists = lib.artists.map do |artist|
+    $counts[:artists] += 1
+    albums = artist.albums.map do |album|
+      $counts[:albums] += 1
+      album_info = [ album.year, pluralize(album.tracks.count, 'song'), duration_to_str(album.duration), album.genre ].reject { |info| info.nil? }
+
+      all_albums &lt;&lt; {
+        :title              =&gt; "#{album.name || 'Unknown Album'} by #{artist.compilations? ? 'Various Artists' : (artist.name || 'Unknown Artist')}",
+        :subtitle           =&gt; album_info.join(' • '),
+        :match              =&gt; album.name || 'Unknown Album',
+        :icon               =&gt; { :text =&gt; '💿' },
+        :disableLRUOrdering =&gt; true,
+        :iTunesTrackIds     =&gt; album.tracks.reject { |track| track.disabled }.map { |track| track.persistent_id },
+        :exec               =&gt; [ $0, '--play' ],
+      }
+
+      {
+        :title              =&gt; album.name || 'Unknown Album',
+        :subtitle           =&gt; album_info.join(' • '),
+        :icon               =&gt; { :text =&gt; '💿' },
+        :disableLRUOrdering =&gt; true,
+        :exec               =&gt; [ $0, '--play' ],
+        :children           =&gt; album.tracks.map do |track|
+          $counts[:tracks] += 1
+          track.description
+        end
+      }
+    end
+
+    artist_info = [ pluralize(artist.albums.count, 'album') ]
+    first_year, last_year = artist.first_album_year, artist.last_album_year
+    if first_year &amp;&amp; last_year
+      artist_info &lt;&lt; (first_year == last_year ? "#{first_year}" : "#{first_year}-#{last_year}")
+    end
+    artist_info &lt;&lt; duration_to_str(artist.duration)
+
+    {
+      :title              =&gt; artist.compilations? ? 'Compliations' : (artist.name || 'Unknown Artist'),
+      :subtitle           =&gt; artist_info.join(' • '),
+      :icon               =&gt; { :text =&gt; '👤' },
+      :disableLRUOrdering =&gt; true,
+      :exec               =&gt; [ $0, '--play' ],
+      :children           =&gt; albums.count == 1 ? albums.first[:children] : albums
+    }
+  end
+
+  items = [
+    {
+      :title              =&gt; 'All Albums',
+      :subtitle           =&gt; pluralize(all_albums.count, 'album'),
+      :icon               =&gt; { :text =&gt; '💿' },
+      :disableLRUOrdering =&gt; true,
+      :children           =&gt; all_albums.sort { |lhs, rhs| lhs[:title] &lt;=&gt; rhs[:title] },
+    },
+    {
+      :title              =&gt; 'All Playlists',
+      :subtitle           =&gt; pluralize(lib.playlists.count, 'playlist'),
+      :icon               =&gt; { :text =&gt; '🎶' },
+      :disableLRUOrdering =&gt; true,
+      :children           =&gt; lib.playlists.map do |playlist|
+        $counts[:playlists] += 1
+        playlist_info = [ pluralize(playlist.tracks.count, 'song'), duration_to_str(playlist.duration) ]
+        {
+          :title              =&gt; playlist.name,
+          :subtitle           =&gt; playlist_info.join(' • '),
+          :icon               =&gt; { :text =&gt; '🎶' },
+          :exec               =&gt; [ '/usr/bin/osascript', 'bin/itunes-play.scpt', '--playlist', playlist.persistent_id ],
+          :disableLRUOrdering =&gt; true,
+          :children           =&gt; playlist.tracks.map { |track| track.description(include_album: true) },
+        }
+      end
+    }
+  ]
+
+  items += all_artists
+
+  puts JSON.generate({
+    :depends_on =&gt; File.expand_path(lib.database_path),
+    :items      =&gt; items,
+  })
+
+  $log.info("Finished updating library index: #{$counts}")
+end
+</string>
+				<key>title</key>
+				<string>iTunes Library</string>
+			</dict>
+		</dict>
+		<key>7542B57A-FC72-4A11-9E19-D09553D89D86</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>disableLRUOrdering</key>
+				<true/>
+				<key>isTemplate</key>
+				<true/>
+			</dict>
+		</dict>
+		<key>772C2685-560D-4A19-9C41-00B149AC6E38</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>1D768652-3133-41E4-B7D1-07035D6B0595</string>
+				</array>
+				<key>icon</key>
+				<dict>
+					<key>application</key>
+					<string>com.apple.iCal</string>
+				</dict>
+				<key>subtitle</key>
+				<string>List of all your calendar events</string>
+				<key>title</key>
+				<string>Calendar Events</string>
+			</dict>
+			<key>weight</key>
+			<integer>10368</integer>
+		</dict>
+		<key>7CF4E3FC-9A7C-48CF-8D0B-71D030B9E0D3</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>5108FEE8-C924-4A8C-B7EC-EDBA3A0475EE</string>
+				</array>
+				<key>kind</key>
+				<string>predicateGroup</string>
+				<key>predicate</key>
+				<string>kMDItemContentType UTI-CONFORMS-TO 'public.item' &amp;&amp; !(kMDItemContentType UTI-CONFORMS-TO 'public.url') &amp;&amp; disableFileActions != YES &amp;&amp; !(kMDItemContentType UTI-CONFORMS-TO 'com.apple.application')</string>
+				<key>title</key>
+				<string>Document Actions</string>
+			</dict>
+			<key>weight</key>
+			<integer>15648</integer>
+		</dict>
+		<key>8324CD41-2E24-4904-8A65-07241BAFE8FC</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>kind</key>
+				<string>exec</string>
+				<key>script</key>
+				<string>#!/usr/bin/env ruby
+
+$: &lt;&lt; File.expand_path('./vendor/taskpaper_utils/lib')
+require 'forwardable'
+require 'taskpaper_utils'
+require 'json'
+require 'logger'
+
+LOG_FILE  = File.join(ENV['GENIE_CACHES_PATH'] || '/tmp', 'tasks.log')
+TASK_FILE = ENV['TASKS_PATH'] || File.expand_path('~/Documents/Default.taskpaper')
+
+$log = Logger.new(ENV.has_key?('GENIE_DEBUG') || STDERR.tty? ? STDERR : LOG_FILE)
+$log.formatter = proc do |severity, datetime, progname, msg|
+  "[#{datetime.strftime('%Y-%m-%d %H:%M:%S.%3N')}] [#{Process.pid}] %7s #{msg}\n" % "[#{severity}]"
+end
+
+def pluralize(count, single, multiple = single + 's')
+  "#{count} #{count == 1 ? single : multiple}"
+end
+
+def itemize_entry(entry, parents = [])
+  tasks    = entry.children_of_type(:task)
+  notes    = entry.children_of_type(:note).reject { |note| note.text.empty? }
+  projects = entry.children_of_type(:project)
+  parents_and_self = parents + [ entry.text_with_trailing_tags ]
+
+  subtitle = []
+  subtitle &lt;&lt; pluralize(tasks.count, 'task') unless tasks.count == 0
+  subtitle &lt;&lt; entry.trailing_tags.strip unless entry.trailing_tags.empty?
+  subtitle &lt;&lt; pluralize(projects.count, 'project') unless projects.count == 0
+
+  case notes.count
+    when 1                  then subtitle &lt;&lt; notes.first.text
+    when 2..Float::INFINITY then subtitle &lt;&lt; pluralize(notes.count, 'note')
+  end
+
+  items = [
+    {
+      :title    =&gt; 'New Task',
+      :subtitle =&gt; 'Text: ‘${query:-…}’',
+      :match    =&gt; '*',
+      :icon     =&gt; { :text =&gt; '+' }, # { :name =&gt; 'NSAddTemplate' },
+      :exec     =&gt; [ $0, '--new-entry', '- ${query}', *parents_and_self ],
+    }
+  ]
+
+  items += tasks.map { |task| itemize_entry(task, parents_and_self) }
+  items += projects.map { |project| itemize_entry(project, parents_and_self) }
+
+  {
+    :title              =&gt; entry.text,
+    :subtitle           =&gt; subtitle.empty? &amp;&amp; entry.type == :project ? 'No tasks' : subtitle.join(' • '),
+    :file               =&gt; TASK_FILE,
+    :disableLRUOrdering =&gt; true,
+    :children           =&gt; items,
+
+    :exec   =&gt; [ '/usr/bin/open', '${file}' ],
+    :option =&gt; {
+      :title =&gt; "Mark ‘#{entry.text}’ as @done",
+      :exec  =&gt; [ $0, '--add-tag', '@done', *parents_and_self ],
+    }
+  }
+end
+
+def add_entry(text, node, path, prefix = '')
+  if path.empty?
+    node.add_entry(TaskpaperUtils::Entry.parse(prefix + text))
+    return true
+  else
+    node.each do |entry|
+      next unless entry.text_with_trailing_tags == path.first
+      return true if add_entry(text, entry, path[1..-1], "\t" + prefix)
+    end
+  end
+  false
+end
+
+def add_tag(tag, node, path)
+  if path.empty?
+    node.raw_text.sub!(/$/, ' ' + tag)
+    return true
+  else
+    node.each do |entry|
+      next unless entry.text_with_trailing_tags == path.first
+      return true if add_tag(tag, entry, path[1..-1])
+    end
+  end
+  false
+end
+
+$log.debug("#$0 #{ARGV}")
+
+begin
+  document = TaskpaperUtils.parse_file(TASK_FILE)
+rescue Errno::ENOENT =&gt; e
+  document = TaskpaperUtils::parse([ "Inbox:", "\t- Hold option (⌥) to complete this item", "Archive:" ])
+end
+
+if ARGV.first == '--new-entry'
+  _, text, *path = *ARGV
+
+  if add_entry(text, document, path)
+    TaskpaperUtils.save(document, TASK_FILE)
+
+    STDOUT &lt;&lt; path.map { |str| str.sub(/:$/, '') }.join(' → ') &lt;&lt; ': ' unless path.empty?
+    STDOUT &lt;&lt; text.sub(/\A- |:\z/, '') &lt;&lt; "\n"
+  else
+    abort 'Failed to create new entry'
+  end
+elsif ARGV.first == '--add-tag'
+  _, tag, *path = *ARGV
+
+  if add_tag(tag, document, path)
+    TaskpaperUtils.save(document, TASK_FILE)
+
+    STDOUT &lt;&lt; "Marked as #{tag}\n"
+  else
+    abort "Failed to add tag to #{path.join(' → ')}"
+  end
+else
+  items = [
+    {
+      :title    =&gt; 'New Project',
+      :subtitle =&gt; 'Name: ‘${query:-…}’',
+      :match    =&gt; '*',
+      :icon     =&gt; { :text =&gt; '+' }, # { :name =&gt; 'NSAddTemplate' },
+      :exec     =&gt; [ $0, '--new-entry', '${query}:' ],
+    }
+  ]
+
+  document.each { |project| items &lt;&lt; itemize_entry(project) }
+
+  puts JSON.generate({
+    :items      =&gt; items,
+    :depends_on =&gt; TASK_FILE
+  })
+end
+</string>
+				<key>title</key>
+				<string>Parse tasks document</string>
+			</dict>
+		</dict>
+		<key>8677D921-5215-45DD-B744-D9628E26F81B</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>disableFuzzyMatching</key>
+				<true/>
+				<key>icon</key>
+				<dict>
+					<key>text</key>
+					<string>${char}</string>
+				</dict>
+				<key>isTemplate</key>
+				<true/>
+				<key>kind</key>
+				<string>script</string>
+				<key>script</key>
+				<string>printf '%s' "$0" | /usr/bin/pbcopy &amp;&amp; echo 'Character copied to clipboard.'</string>
+				<key>scriptArguments</key>
+				<array>
+					<string>${char}</string>
+				</array>
+				<key>subtitle</key>
+				<string>U+${code}</string>
+				<key>title</key>
+				<string>${description/\b\w{3,}/${0:/downcase/capitalize}/g}: ${char}</string>
+				<key>uiTitle</key>
+				<string>Unicode Database</string>
+			</dict>
+		</dict>
+		<key>8C375141-2063-4CD4-8FAF-2BCC2DBD9456</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>kind</key>
+				<string>web</string>
+				<key>subtitle</key>
+				<string>Search for ‘${query:-${find:?[${find}]:…}}’</string>
+				<key>title</key>
+				<string>Rotten Tomatoes</string>
+				<key>url</key>
+				<string>https://www.rottentomatoes.com/search/?search=${query:-${find}}</string>
+			</dict>
+			<key>weight</key>
+			<integer>13248</integer>
+		</dict>
+		<key>9AB2748B-06C1-45A4-821B-07D3659F6154</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>icon</key>
+				<dict>
+					<key>file</key>
+					<string>/System/Library/PreferencePanes/Keyboard.prefPane</string>
+				</dict>
+				<key>kind</key>
+				<string>script</string>
+				<key>script</key>
+				<string>#!/usr/bin/osascript
+
+if app "KeyboardViewer" is running then
+	quit app "KeyboardViewer"
+else
+	activate app "KeyboardViewer"
+end if
+</string>
+				<key>title</key>
+				<string>Toggle Keyboard Viewer</string>
+			</dict>
+			<key>weight</key>
+			<integer>14592</integer>
+		</dict>
+		<key>A692E893-1BEE-495C-BDC6-24B9151CCEC2</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>3792D4CC-05FB-44A4-AB14-9539C7B33FCE</string>
+				</array>
+				<key>kind</key>
+				<string>spotlight</string>
+				<key>mdApplicationCanOpen</key>
+				<string>${parent.parent.file}</string>
+				<key>mdQuery</key>
+				<string>kMDItemContentType == 'com.apple.application-bundle'</string>
+				<key>mdScope</key>
+				<array>
+					<dict>
+						<key>disabled</key>
+						<true/>
+						<key>path</key>
+						<string>/Applications</string>
+					</dict>
+					<dict>
+						<key>disabled</key>
+						<true/>
+						<key>path</key>
+						<string>~/Applications</string>
+					</dict>
+				</array>
+				<key>sortBy</key>
+				<string>kMDItemDisplayName</string>
+				<key>title</key>
+				<string>Find Open With</string>
+			</dict>
+		</dict>
+		<key>A8AF3ABF-6DF2-49AB-9B60-6AA6E069E2AA</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>icon</key>
+				<dict>
+					<key>text</key>
+					<string>⏯</string>
+				</dict>
+				<key>isPlaceholder</key>
+				<true/>
+				<key>kind</key>
+				<string>script</string>
+				<key>script</key>
+				<string>/usr/bin/osascript -e 'tell app "iTunes" to playpause'</string>
+				<key>title</key>
+				<string>Play/Pause</string>
+			</dict>
+		</dict>
+		<key>AA14AFE7-ADC1-4DD7-9210-AC80EDA5725F</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>icon</key>
+				<dict>
+					<key>text</key>
+					<string>🎥</string>
+				</dict>
+				<key>kind</key>
+				<string>script</string>
+				<key>script</key>
+				<string>if which -s youtube-dl; then
+	if cd ~/Downloads &amp;&amp; youtube-dl --no-mtime -q "$0"
+		then echo "Successfully download movie"
+		else echo &gt;&amp;2 "Failed to download movie at: $0"; exit 1
+	fi
+else
+	echo &gt;&amp;2 "You need to install youtube-dl for this action to work."
+	exit 1
+fi
+</string>
+				<key>scriptArguments</key>
+				<array>
+					<string>${query:-${find/^(http)?.*/${1:?$0:${clipboard/^(http)?.*/${1:?$0:…}/}}/}}</string>
+				</array>
+				<key>subtitle</key>
+				<string>Download movie from ‘${query:-${find/^(http)?.*/${1:?$0:${clipboard/^(http)?.*/${1:?$0:…}/}}/}}’</string>
+				<key>title</key>
+				<string>Download Movie</string>
+			</dict>
+			<key>weight</key>
+			<integer>10944</integer>
+		</dict>
+		<key>AD683729-CE8B-4FDA-B191-35F1D01F2B15</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>disableLRUOrdering</key>
+				<true/>
+				<key>isTemplate</key>
+				<true/>
+				<key>subtitle</key>
+				<string>Received ${com_apple_mail_dateReceived:/relative} from ${kMDItemAuthors} • ${kMDItemMailboxes}</string>
+				<key>title</key>
+				<string>${kMDItemSubject/^$/(no subject)/}</string>
+			</dict>
+		</dict>
+		<key>AE366238-F5DA-4D6E-95B4-C1F5B216431D</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>C6381C2E-9748-46D7-B682-E8BACAAFEC46</string>
+				</array>
+				<key>kind</key>
+				<string>predicateGroup</string>
+				<key>predicate</key>
+				<string>kMDItemContentType UTI-CONFORMS-TO 'public.url'</string>
+				<key>title</key>
+				<string>URL Actions</string>
+			</dict>
+			<key>weight</key>
+			<integer>15168</integer>
+		</dict>
+		<key>AE455740-7305-48B9-9FB2-55B1A832AE19</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>3BCD0470-6F3B-4D53-B8F5-702519FC0A84</string>
+				</array>
+				<key>kind</key>
+				<string>predicateGroup</string>
+				<key>predicate</key>
+				<string>iTunesTrackId != NULL</string>
+				<key>title</key>
+				<string>Song Actions</string>
+			</dict>
+			<key>weight</key>
+			<integer>15360</integer>
+		</dict>
+		<key>AE793593-62F1-4EC2-AAF7-309145F11377</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>6657B0FF-D906-495B-A058-2D89A2D0F843</string>
+				</array>
+				<key>kind</key>
+				<string>exec</string>
+				<key>script</key>
+				<string>#!/usr/bin/env ruby
+require 'logger'
+require 'open-uri'
+require 'json'
+
+ACCESS_KEY   = "8324a567ad1442678203ae1a75e9d68f"
+API_ENDPOINT = "http://data.fixer.io/api/latest?access_key=#{ACCESS_KEY}"
+CACHE_DIR    = ENV['GENIE_CACHES_PATH'] || '/tmp'
+LOCK_FILE    = File.join(CACHE_DIR, 'currency-rates.lock')
+RATES_FILE   = File.join(CACHE_DIR, 'currency-rates.json')
+LOG_FILE     = File.join(CACHE_DIR, 'currency-rates.log')
+EXPIRES_IN   = 60*60 # 1h
+
+$log = Logger.new(ENV.has_key?('GENIE_DEBUG') || STDERR.tty? ? STDERR : LOG_FILE)
+$log.formatter = proc do |severity, datetime, progname, msg|
+  "[#{datetime.strftime('%Y-%m-%d %H:%M:%S.%3N')}] [#{Process.pid}] %7s #{msg}\n" % "[#{severity}]"
+end
+
+def update_rates_if_expired(force = false)
+  open(LOCK_FILE, File::RDWR|File::CREAT, 0644) do |io|
+    io.flock(File::LOCK_EX)
+    expires = JSON.parse(io.read)['expires'].to_i rescue Time.now.to_i - 1
+
+    now = Time.now.to_i
+    if expires &lt; now || force
+      new_expires = Time.now.to_i + EXPIRES_IN
+      begin
+        $log.info("Updating rates (expired %.0f minutes ago)" % ((now - expires) / 60))
+        open(API_ENDPOINT) do |socket|
+          if json = socket.read
+            if data = JSON.parse(json)
+              if data['success']
+                File.write(RATES_FILE + '~', json)
+                File.rename(RATES_FILE + '~', RATES_FILE)
+                new_expires = data['timestamp'] + 60*60 if data.has_key?('timestamp')
+                $log.info("Finished updating rates")
+              else
+                $log.error("Unsuccessful response from API: #{json}")
+              end
+            end
+          end
+        end
+      rescue Exception =&gt; e
+        $log.fatal("Exception while updating rates: #{e}")
+      ensure
+        io.rewind
+        io.truncate(0)
+        io.write({ 'expires' =&gt; new_expires }.to_json + "\n")
+      end
+    else
+      $log.debug("Rates expires in %.0f minutes" % ((expires - now) / 60))
+    end
+  end
+end
+
+class Rates
+  def initialize
+    begin
+      @rates = JSON.parse(File.read(RATES_FILE))
+    rescue Errno::ENOENT =&gt; e
+      $log.info("No rates at: ‘#{RATES_FILE}’")
+      update_rates_if_expired(true)
+      @rates = JSON.parse(File.read(RATES_FILE))
+    end
+  end
+
+  def currencies
+    @rates['rates'].map { |key, value| key }
+  end
+
+  def updated
+    Time.at(@rates['timestamp'])
+  end
+
+  def convert(amount, from, to)
+    amount * @rates['rates'][to] / @rates['rates'][from]
+  end
+end
+
+def flag_for_currency(code)
+  [ code[0].ord - 'A'.ord + 0x1F1E6, code[1].ord - 'A'.ord + 0x1F1E6 ].pack('U*')
+end
+
+def get_conversions(str)
+  res = [ ]
+  if str.tr(',', '') =~ /([\d.]+)\s+(\w+)(?:\s+(?:(?:to|in)\s+)?(\w+))?/
+    amount, from, to = $1.to_f, $2.upcase, $3.to_s.upcase
+    $log.debug("Convert: #{str}")
+
+    converter = Rates.new
+    currencies = converter.currencies
+
+    currencies.each do |from_candidate|
+      if from_candidate.start_with?(from)
+        currencies.each do |to_candidate|
+          if to_candidate.start_with?(to)
+            res &lt;&lt; {
+              :from_amount   =&gt; format("%.2f", amount),
+              :from_currency =&gt; from_candidate,
+              :to_amount     =&gt; format("%.2f", converter.convert(amount, from_candidate, to_candidate)),
+              :to_currency   =&gt; to_candidate,
+              :emoji_flag    =&gt; flag_for_currency(to_candidate),
+              :rates_updated =&gt; converter.updated,
+            }
+          end
+        end
+      end
+    end
+  end
+  res
+end
+
+items = [ ]
+if value = ARGV.first
+  items = get_conversions(value)
+
+  ranks = { }
+  next_rank = 1
+
+  open(LOG_FILE) do |io|
+    io.grep(/\s([A-Z]{3})\s+([A-Z]{3})$/i) do
+      from, to = $1.upcase, $2.upcase
+      if record = ranks[from]
+        record[:rank] = next_rank
+        record[:to][to] = record[:next_to_rank]
+        record[:next_to_rank] += 1
+      else
+        ranks[from] = { :rank =&gt; next_rank, :next_to_rank =&gt; 2, :to =&gt; { to =&gt; 1 } }
+      end
+      next_rank += 1
+    end
+  end
+
+  items.sort! do |lhs, rhs|
+    lhs_from_currency, lhs_to_currency = lhs[:from_currency], lhs[:to_currency]
+    rhs_from_currency, rhs_to_currency = rhs[:from_currency], rhs[:to_currency]
+
+    lhs_from_rank = ranks.has_key?(lhs_from_currency) ? ranks[lhs_from_currency][:rank] : 0
+    rhs_from_rank = ranks.has_key?(rhs_from_currency) ? ranks[rhs_from_currency][:rank] : 0
+
+    if lhs_from_rank != rhs_from_rank
+      rhs_from_rank &lt;=&gt; lhs_from_rank
+    elsif lhs_from_currency != rhs_from_currency
+      lhs_from_currency &lt;=&gt; rhs_from_currency
+    elsif !ranks.has_key?(lhs_from_currency)
+      # TODO We should use the ‘from rank’
+      lhs_to_currency &lt;=&gt; rhs_to_currency
+    else
+      record = ranks[lhs_from_currency][:to]
+
+      lhs_to_rank = record.has_key?(lhs_to_currency) ? record[lhs_to_currency] : 0
+      rhs_to_rank = record.has_key?(rhs_to_currency) ? record[rhs_to_currency] : 0
+
+      if lhs_to_rank != rhs_to_rank
+        rhs_to_rank &lt;=&gt; lhs_to_rank
+      else
+        # TODO We should fallback on the ‘from rank’
+        lhs_to_currency &lt;=&gt; rhs_to_currency
+      end
+    end
+  end
+end
+
+puts JSON.generate({
+  :items      =&gt; items,
+  :depends_on =&gt; RATES_FILE
+})
+
+unless items.empty?
+  Process.daemon(nil, ENV.has_key?('GENIE_DEBUG')) # do not close STDERR in debug mode
+  update_rates_if_expired
+end
+</string>
+				<key>scriptArguments</key>
+				<array>
+					<string>${query}</string>
+				</array>
+				<key>title</key>
+				<string>Currency Conversion</string>
+			</dict>
+			<key>weight</key>
+			<integer>10752</integer>
+		</dict>
+		<key>B08D2E26-FC05-49A5-AD9B-34F93EFEB18B</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>disableFileActions</key>
+				<true/>
+				<key>isTemplate</key>
+				<true/>
+				<key>subtitle</key>
+				<string>Press ⌘Y for details${kMDItemComment/.+/ • $0/}</string>
+				<key>title</key>
+				<string>${kMDItemTitle}</string>
+			</dict>
+		</dict>
+		<key>B1D7DACB-DAB8-482E-B754-3B6A216C9B04</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>kind</key>
+				<string>web</string>
+				<key>subtitle</key>
+				<string>Search for ‘${query:-${find:?[${find}]:…}}’</string>
+				<key>title</key>
+				<string>Mozilla Developer Network</string>
+				<key>url</key>
+				<string>https://developer.mozilla.org/en-US/search?q=${query:-${find}}</string>
+			</dict>
+			<key>weight</key>
+			<integer>12000</integer>
+		</dict>
+		<key>B2847620-A283-416F-BDB4-990F4B956215</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>477263E5-EFB1-4F18-ACD8-016FBE1F4726</string>
+				</array>
+				<key>comment</key>
+				<string>https://www.passwordstore.org/</string>
+				<key>icon</key>
+				<dict>
+					<key>fileType</key>
+					<string>'lock'</string>
+				</dict>
+				<key>subtitle</key>
+				<string>Search for ‘…’</string>
+				<key>title</key>
+				<string>Pass: The Standard Unix Password Manager</string>
+			</dict>
+			<key>weight</key>
+			<integer>12480</integer>
+		</dict>
+		<key>B5F28602-2183-4C73-9D1E-20B5944627E9</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>C5249282-D97F-4772-BE13-0FAD61714EF1</string>
+				</array>
+				<key>descending</key>
+				<true/>
+				<key>kind</key>
+				<string>spotlight</string>
+				<key>mdQuery</key>
+				<string>kMDItemCFBundleIdentifier == 'com.apple.dt.Xcode'</string>
+				<key>sortBy</key>
+				<string>kMDItemVersion</string>
+				<key>title</key>
+				<string>Select Xcode Version</string>
+			</dict>
+			<key>weight</key>
+			<integer>13440</integer>
+		</dict>
+		<key>BB1A19FE-5847-4EA6-A888-565938B8BAD3</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>kind</key>
+				<string>exec</string>
+				<key>script</key>
+				<string>#!/usr/bin/env ruby
+require 'json'
+require 'shellwords'
+
+# frontmost = %x{ osascript -e 'tell app "System Events" to return name of the first process whose frontmost is true' }.chomp
+
+script = &lt;&lt;-AS
+  set theString to ""
+
+  tell application "Finder"
+    set theItems to selection
+    repeat with itemRef in theItems
+      set theString to theString &amp; (url of itemRef) &amp; "\n"
+    end repeat
+  end tell
+
+  return theString
+AS
+
+script = script.split("\n").map { |line| [ '-e', line.strip ] }.flatten
+urls = %x{ /usr/bin/osascript #{script.shelljoin} }.strip
+
+items = []
+urls.split("\n").reject { |url| url.empty? }.each do |url|
+  items &lt;&lt; {
+    :title    =&gt; "Finder Selection",
+    :subtitle =&gt; "${url}",
+    :url      =&gt; url,
+  }
+end
+
+puts JSON.generate({
+  :items =&gt; items,
+});
+</string>
+				<key>title</key>
+				<string>Finder Selection</string>
+			</dict>
+			<key>weight</key>
+			<integer>11616</integer>
+		</dict>
+		<key>BBA3799F-7A82-40C1-906F-7E4015FB8467</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>disableLRUOrdering</key>
+				<true/>
+				<key>isTemplate</key>
+				<true/>
+				<key>kind</key>
+				<string>script</string>
+				<key>script</key>
+				<string>/usr/bin/open -b "$0" "$1"</string>
+				<key>scriptArguments</key>
+				<array>
+					<string>${parent.parent.kMDItemCFBundleIdentifier}</string>
+					<string>${kMDItemPath}</string>
+				</array>
+			</dict>
+		</dict>
+		<key>C2127BF2-5F70-4C76-BF65-6A45C5213AEF</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>icon</key>
+				<dict>
+					<key>image</key>
+					<string>icons/clock.icns</string>
+				</dict>
+				<key>kind</key>
+				<string>script</string>
+				<key>output</key>
+				<string>html</string>
+				<key>script</key>
+				<string>#!/usr/bin/env ruby
+require 'json'
+require 'time'
+require 'erb'
+
+CACHE_DIR  = ENV['GENIE_CACHES_PATH'] || '/tmp'
+TIMER_FILE = File.join(CACHE_DIR, 'set-timer.json')
+
+class Time
+  def to_json(*args)
+    iso8601(9).to_json(*args)
+  end
+end
+
+def load_timers(&amp;block)
+  open(TIMER_FILE, File::RDWR|File::CREAT, 0644) do |io|
+    io.flock(File::LOCK_EX)
+
+    wrapper = JSON.parse(io.read) rescue { 'timers' =&gt; [ ] }
+
+    timers = wrapper['timers'].map do |timer|
+      timer.update(timer) { |key, value| key =~ /^(created|expires)$/ ? Time.parse(value) : value }
+    end.reject { |timer| timer['expires'] &lt; Time.now }
+
+    org_timers = timers.dup
+    block.call(timers)
+
+    if timers != org_timers
+      io.rewind
+      io.truncate(0)
+      io.write({ :timers =&gt; timers }.to_json + "\n")
+    end
+  end
+end
+
+if ENV.has_key?('GENIE_HTML_OUTPUT')
+  load_timers do |timers|
+    erb = ERB.new(DATA.read)
+    puts erb.result(binding)
+  end
+else
+  case ARGV.shift
+    when '--add-timer' then
+      if minutes = ARGV.shift
+        Process.daemon(true, true) # Preserve current directory and STDOUT
+        expires = Time.now + minutes.to_f * 60
+
+        load_timers do |timers|
+          timers &lt;&lt; { 'created' =&gt; Time.now, 'expires' =&gt; expires, 'process' =&gt; Process.pid }
+        end
+
+        sleep(expires - Time.now)
+        %x{ for volume in 0.05 0.5 1; do /usr/bin/afplay -v $volume sounds/temple-bell.mp3; done &amp;&gt;/dev/null &amp; disown }
+        puts "Time’s up!" # If Genie has been terminated this will trigger a SIGPIPE so we do this after playing the sample
+      end
+    when '--remove-timer' then
+      if processId = ARGV.shift.to_i
+        load_timers do |timers|
+          if timers.any? { |timer| timer['process'] == processId }
+            Process.kill("INT", processId)
+            timers.reject! { |timer| timer['process'] == processId }
+          else
+            STDERR &lt;&lt; timers.inspect &lt;&lt; "\n"
+            abort "No timer for identifier: #{processId}"
+          end
+        end
+      end
+    else
+      abort "Unknown argument."
+  end
+end
+
+__END__
+&lt;html&gt;
+&lt;head&gt;
+  &lt;style type='text/css' media='screen'&gt;
+    body {
+      font-feature-settings: "tnum";
+    }
+    a {
+      text-decoration: none;
+      color: var(--textColor);
+    }
+    a:active {
+      color: var(--secondaryLabelColor);
+    }
+    .dot {
+      color: var(--tertiaryLabelColor);
+    }
+  &lt;/style&gt;
+  &lt;script type="text/javascript"&gt;
+    function Countdown(expires, identifier) {
+      this.expires    = expires;
+      this.identifier = identifier;
+
+      const updateHTMLValue = () =&gt; {
+        const diff = Math.round(Math.max(this.expires - Date.now(), 0) / 1000);
+
+        const seconds = diff % 60;
+        const minutes = (diff - seconds) / 60;
+
+        this.htmlValue = "&lt;a href='#' onClick='javascript:kill(event, &amp;quot;" + identifier + "&amp;quot;);'&gt;&lt;big&gt;" + minutes + "&lt;/big&gt;&lt;small&gt;m&lt;/small&gt; &lt;big&gt;" + (seconds &lt; 10 ? '0' : '') + seconds + "&lt;/big&gt;&lt;small&gt;s&lt;/small&gt;&lt;/a&gt;";
+
+        window.dispatchEvent(new Event('countdownchange'));
+
+        if(diff &gt; 0) {
+          let delay = (expires - Date.now()) % 1000;
+          delay = delay &lt; 500 ? delay + 1000 : delay;
+          setTimeout(updateHTMLValue, delay == 0 ? 1000 : delay);
+        }
+      };
+
+      updateHTMLValue();
+    }
+
+    var countdownTimers = [
+      &lt;% for timer in timers %&gt;
+        new Countdown(new Date("&lt;%= timer['expires'].iso8601(9) %&gt;").getTime(), &lt;%= timer['process'] %&gt;),
+      &lt;% end %&gt;
+    ];
+
+    function updateHTMLForTimers () {
+      const countdowns = countdownTimers.map(obj =&gt; obj.htmlValue);
+      const element = document.querySelector('#runningTimers');
+      element.innerHTML = countdowns.length &gt; 0 ? countdowns.join(' &lt;small class="dot"&gt;•&lt;/small&gt; ') : "&lt;big&gt;No timers&lt;/big&gt;";
+    }
+
+    function kill (event, processId) {
+      genie.exec([ "&lt;%= $0.gsub(/(?=["\\])/, '\\') %&gt;", "--remove-timer", processId ]);
+
+      countdownTimers = countdownTimers.filter(countdown =&gt; {
+        return countdown.identifier != processId;
+      });
+      updateHTMLForTimers();
+
+      event.preventDefault();
+    }
+
+    window.onload = function () {
+      window.addEventListener("countdownchange", updateHTMLForTimers);
+      updateHTMLForTimers();
+    };
+  &lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;span id="runningTimers"&gt;&lt;/span&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</string>
+				<key>scriptArguments</key>
+				<array>
+					<string>--add-timer</string>
+					<string>${query:-${last_query:-4}}</string>
+				</array>
+				<key>subtitle</key>
+				<string>Play sound after ${query:-[${last_query:-4}]} minute${query:?${query/^1$|(.*)/${1:+s}/}:${last_query/^1$|(.*)/${1:+s}/}}</string>
+				<key>title</key>
+				<string>Set Timer</string>
+			</dict>
+			<key>weight</key>
+			<integer>13536</integer>
+		</dict>
+		<key>C5249282-D97F-4772-BE13-0FAD61714EF1</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>disableLRUOrdering</key>
+				<true/>
+				<key>isTemplate</key>
+				<true/>
+				<key>kind</key>
+				<string>script</string>
+				<key>script</key>
+				<string>#!/usr/bin/osascript
+
+on run argv
+	tell app "iTerm"
+		activate
+		tell current session of current window
+			write text (first item of argv)
+		end tell
+	end tell
+end run
+</string>
+				<key>scriptArguments</key>
+				<array>
+					<string>sudo xcode-select -s ${kMDItemPath:/shellescape}</string>
+				</array>
+				<key>subtitle</key>
+				<string>Set ${kMDItemPath} as active developer directory</string>
+				<key>title</key>
+				<string>Select ${kMDItemDisplayName}</string>
+			</dict>
+		</dict>
+		<key>C6381C2E-9748-46D7-B682-E8BACAAFEC46</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>20598B1E-9AEA-492D-B5FB-E9A36E7CA6DD</string>
+				</array>
+				<key>kind</key>
+				<string>spotlight</string>
+				<key>mdApplicationCanOpen</key>
+				<string>${parent.url}</string>
+				<key>mdQuery</key>
+				<string>kMDItemContentType == 'com.apple.application-bundle' &amp;&amp; kMDItemCFBundleIdentifier != 'com.googlecode.iterm2' &amp;&amp; kMDItemCFBundleIdentifier != 'com.googlecode.mactlmgr.tlu'</string>
+				<key>mdScope</key>
+				<array>
+					<dict>
+						<key>disabled</key>
+						<true/>
+						<key>path</key>
+						<string>/Applications</string>
+					</dict>
+					<dict>
+						<key>disabled</key>
+						<true/>
+						<key>path</key>
+						<string>~/Applications</string>
+					</dict>
+				</array>
+				<key>sortBy</key>
+				<string>kMDItemDisplayName</string>
+				<key>title</key>
+				<string>Open in Browser</string>
+			</dict>
+		</dict>
+		<key>C7268E47-C8B2-4320-9069-816E768E24B6</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>kind</key>
+				<string>web</string>
+				<key>subtitle</key>
+				<string>Search for ‘${query:-${find:?[${find}]:…}}’</string>
+				<key>title</key>
+				<string>Google Maps</string>
+				<key>url</key>
+				<string>https://maps.google.com/maps?q=${query:-${find}}</string>
+			</dict>
+			<key>weight</key>
+			<integer>11808</integer>
+		</dict>
+		<key>C73E8734-5C64-48EF-A50C-C16665BFBCBE</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>kind</key>
+				<string>web</string>
+				<key>subtitle</key>
+				<string>Lookup ‘${query:-${find:?[${find}]:…}}’</string>
+				<key>title</key>
+				<string>Dansk Sprognævn</string>
+				<key>url</key>
+				<string>https://dsn.dk/?retskriv=${query:-${find}}</string>
+			</dict>
+			<key>weight</key>
+			<integer>10848</integer>
+		</dict>
+		<key>CC50E272-B32F-43D9-8895-AEE62E7C34DD</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>descending</key>
+				<true/>
+				<key>icon</key>
+				<dict>
+					<key>file</key>
+					<string>/Applications</string>
+				</dict>
+				<key>kind</key>
+				<string>spotlight</string>
+				<key>mdQuery</key>
+				<string>kMDItemContentType == 'com.apple.application-bundle' &amp;&amp; kMDItemCFBundleIdentifier != 'com.google.Chrome.app.*'</string>
+				<key>mdScope</key>
+				<array>
+					<dict>
+						<key>path</key>
+						<string>/Applications</string>
+					</dict>
+					<dict>
+						<key>path</key>
+						<string>~/Applications</string>
+					</dict>
+					<dict>
+						<key>path</key>
+						<string>~/build</string>
+					</dict>
+				</array>
+				<key>sortBy</key>
+				<string>kMDItemLastUsedDate</string>
+				<key>title</key>
+				<string>Applications</string>
+			</dict>
+			<key>weight</key>
+			<integer>9984</integer>
+		</dict>
+		<key>CCCC7130-6CCE-4B1C-953D-36782EFEBBD2</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>isTemplate</key>
+				<true/>
+				<key>kMDItemContentType</key>
+				<string>public.item</string>
+				<key>kind</key>
+				<string>script</string>
+				<key>script</key>
+				<string>$LOGIN_SHELL 'pass -c "$0"' "$0"</string>
+				<key>scriptArguments</key>
+				<array>
+					<string>${match}</string>
+				</array>
+				<key>uiTitle</key>
+				<string>${parent.title}</string>
+			</dict>
+		</dict>
+		<key>D842D0E3-DCFB-4149-99DB-4FC3A13CEEE0</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>4E85805C-DCAC-4656-94FF-08AEC97DA0AF</string>
+				</array>
+				<key>kind</key>
+				<string>spotlight</string>
+				<key>mdApplicationIsRunning</key>
+				<true/>
+				<key>mdQuery</key>
+				<string>kMDItemContentType == 'com.apple.application-bundle' &amp;&amp; kMDItemCFBundleIdentifier != 'com.google.Chrome.app.*'</string>
+				<key>mdScope</key>
+				<array>
+					<dict>
+						<key>path</key>
+						<string>/Applications</string>
+					</dict>
+					<dict>
+						<key>path</key>
+						<string>~/Applications</string>
+					</dict>
+					<dict>
+						<key>path</key>
+						<string>~/build</string>
+					</dict>
+				</array>
+				<key>title</key>
+				<string>Quit Application</string>
+			</dict>
+			<key>weight</key>
+			<integer>12672</integer>
+		</dict>
+		<key>DA687326-1CC0-4C1F-AF0E-AF7355F6228D</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>icon</key>
+				<dict>
+					<key>text</key>
+					<string>#⃣</string>
+				</dict>
+				<key>kind</key>
+				<string>script</string>
+				<key>script</key>
+				<string>#!/usr/local/bin/bash -l
+
+pass "NemID/V912-003-279"|grep "^$1"|{
+	read index code
+	echo -n "$code"|pbcopy
+	echo "Copied $index → $code to clipboard"
+}
+</string>
+				<key>scriptArguments</key>
+				<array>
+					<string>${query:-${find}}</string>
+				</array>
+				<key>subtitle</key>
+				<string>Search for ‘${query:-${find:?[${find}]:…}}’</string>
+				<key>title</key>
+				<string>NemID</string>
+			</dict>
+			<key>weight</key>
+			<integer>12192</integer>
+		</dict>
+		<key>DEFE641E-C12B-4E8F-B77B-2B23096B2695</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>com.apple.iTunes.player-controls</string>
+					<string>682D983B-B559-4A8F-AE91-91845D851029</string>
+					<string>73DB826E-CCBC-4A82-8561-D8C5AA32F75E</string>
+				</array>
+				<key>kind</key>
+				<string>predicateGroup</string>
+				<key>predicate</key>
+				<string>kMDItemCFBundleIdentifier == 'com.apple.iTunes'</string>
+				<key>title</key>
+				<string>iTunes Actions</string>
+			</dict>
+			<key>weight</key>
+			<integer>15264</integer>
+		</dict>
+		<key>DF16CA8B-593F-4846-887A-C87EB91F8EBA</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>E8293557-113F-48C7-9E9F-04B29338EE4E</string>
+				</array>
+				<key>kind</key>
+				<string>spotlight</string>
+				<key>mdQuery</key>
+				<string>kMDItemContentType == 'com.apple.addressbook.person'</string>
+				<key>mdScope</key>
+				<array>
+					<dict>
+						<key>path</key>
+						<string>~/Library/Application Support/AddressBook/Sources</string>
+					</dict>
+				</array>
+				<key>sortBy</key>
+				<string>kMDItemDisplayName</string>
+				<key>title</key>
+				<string>Find All Contacts</string>
+			</dict>
+		</dict>
+		<key>DFDC3C94-8CB7-4BEA-9A28-69A65A77A8ED</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>32003E08-EBAA-4176-9030-9639B55009A7</string>
+				</array>
+				<key>icon</key>
+				<dict>
+					<key>image</key>
+					<string>/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/EjectMediaIcon.icns</string>
+				</dict>
+				<key>subtitle</key>
+				<string>Press ⇥ for list of volumes</string>
+				<key>title</key>
+				<string>Eject Volume</string>
+			</dict>
+			<key>weight</key>
+			<integer>11328</integer>
+		</dict>
+		<key>E0445F2C-C77F-4318-9BB4-BBADC6850A8B</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>1E21D118-DEBA-4A16-A019-75B957DE5109</string>
+				</array>
+				<key>comment</key>
+				<string>Setup bash to store history in sqlite3: «blog post not yet written»</string>
+				<key>icon</key>
+				<dict>
+					<key>text</key>
+					<string>&gt; _</string>
+				</dict>
+				<key>title</key>
+				<string>Bash History</string>
+			</dict>
+			<key>weight</key>
+			<integer>10080</integer>
+		</dict>
+		<key>E26B020B-AA50-4B82-A965-3F79AC086101</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>icon</key>
+				<dict>
+					<key>text</key>
+					<string>🐌</string>
+				</dict>
+				<key>isPlaceholder</key>
+				<true/>
+				<key>subtitle</key>
+				<string>http://www.unicode.org/Public/UNIDATA/UnicodeData.txt</string>
+				<key>title</key>
+				<string>Downloading list of unicode characters…</string>
+			</dict>
+		</dict>
+		<key>E3CB3CD6-2028-4993-9027-8A50394C0054</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>411DE45A-13D8-4CC8-93BA-798CF22A2BD6</string>
+				</array>
+				<key>kind</key>
+				<string>predicateGroup</string>
+				<key>predicate</key>
+				<string>kMDItemContentType UTI-CONFORMS-TO 'com.apple.application-bundle'</string>
+				<key>title</key>
+				<string>Application Actions</string>
+			</dict>
+			<key>weight</key>
+			<integer>15552</integer>
+		</dict>
+		<key>E562CB2D-843D-4400-BB9C-DA7D22AA6A11</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>acceptsQuery</key>
+				<true/>
+				<key>icon</key>
+				<dict>
+					<key>application</key>
+					<string>com.apple.iCal</string>
+				</dict>
+				<key>kind</key>
+				<string>script</string>
+				<key>output</key>
+				<string>html</string>
+				<key>script</key>
+				<string>#!/usr/bin/env ruby
+
+STDOUT &lt;&lt; DATA.read if ENV.has_key?('GENIE_HTML_OUTPUT')
+
+__END__
+&lt;html&gt;
+&lt;head&gt;
+  &lt;script type="text/javascript"&gt;
+    // Source: https://weeknumber.net/how-to/javascript
+    Date.prototype.getWeek = function() {
+      var date = new Date(this.getTime());
+      date.setHours(0, 0, 0, 0);
+      date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+      var week_one = new Date(date.getFullYear(), 0, 4);
+      return 1 + Math.round(((date.getTime() - week_one.getTime()) / 86400000 - 3 + (week_one.getDay() + 6) % 7) / 7);
+    }
+
+    function equal_dates(lhs, rhs) {
+      return lhs.getDate() == rhs.getDate() &amp;&amp; lhs.getMonth() == rhs.getMonth() &amp;&amp; lhs.getFullYear() == rhs.getFullYear();
+    }
+
+    function generate_calendar(year, month) {
+      let month_names = new Array('January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December');
+      let today = new Date();
+
+      var date = new Date(year, month, 1);
+      let heading = document.querySelector('.calendar .heading');
+      heading.innerHTML = month_names[date.getMonth()] + ' ' + date.getFullYear();
+
+      let dayOfWeek = date.getDay(); // 0-6 = Sunday-Saturday
+      date.setDate(date.getDate() - (dayOfWeek + 6) % 7);
+
+      for(var i = 0; i &lt; 6; i++) {
+        let element = document.querySelector('.row_' + i + ' .week_number');
+        element.innerHTML = date.getWeek();
+
+        for(var j = 0; j &lt; 7; j++) {
+          let digit_class = date.getDate() &lt; 10 ? 'single-digit' : 'double-digit';
+          let element = document.querySelector('.row_' + i + ' .col_' + j);
+          element.innerHTML = equal_dates(date, today) ? '&lt;span class="today ' + digit_class + '"&gt;' + date.getDate() + '&lt;/span&gt;' : date.getDate();
+
+          if(date.getMonth() != month) {
+            element.classList.add("adjacent_month");
+          }
+          else {
+            element.classList.remove("adjacent_month");
+          }
+
+          date.setDate(date.getDate() + 1);
+        }
+      }
+    }
+
+    function date_from_query (str) {
+      var today = new Date();
+
+      let match = /(\d+)(?: (\d+))?/.exec(str);
+      var month = (match &amp;&amp; match[1]) ? Number(match[1])-1 : today.getMonth();
+      var year  = (match &amp;&amp; match[2]) ? Number(match[2])   : today.getFullYear();
+
+      month = Math.max(0, Math.min(month, 11));
+      year  = year &gt; 100 ? year : (year &gt; 70 ? year + 1900 : year + 2000);
+
+      return new Date(year, month, 1);
+    }
+
+    function update () {
+      let date = date_from_query(genie.query);
+      generate_calendar(date.getFullYear(), date.getMonth());
+    }
+
+    function next_month(event, number) {
+      let date = date_from_query(genie.query);
+      date.setMonth(date.getMonth() + number);
+      genie.query = date.getMonth()+1 + ' ' + date.getFullYear();
+      update();
+      event.preventDefault();
+    }
+
+    window.addEventListener("load",        update);
+    window.addEventListener("querychange", update);
+  &lt;/script&gt;
+  &lt;style type='text/css' media='screen'&gt;
+    .calendar a {
+      text-decoration: none;
+      color: var(--labelColor);
+    }
+    .calendar a:active {
+      color: var(--secondaryLabelColor);
+    }
+    .calendar td, .calendar th {
+      padding: 5px;
+      margin: 5px;
+    }
+    .calendar .heading_row th {
+      padding-top: 0;
+      margin-top: 0;
+    }
+    .calendar td, .days_row th {
+      text-align: right;
+    }
+    .calendar .adjacent_month {
+      color: var(--quaternaryLabelColor);
+    }
+    .calendar .week_number {
+      color: var(--tertiaryLabelColor);
+      font-style: italic;
+      border-left: 1px solid var(--tertiaryLabelColor);
+    }
+    .calendar .today {
+      background-color: red;
+      border-radius: 50%;
+      color: white;
+    }
+    .calendar .today.single-digit {
+      padding: 4px 8px;
+      margin-right: -8px;
+    }
+    .calendar .today.double-digit {
+      padding: 4px 5px;
+      margin-right: -5px;
+    }
+    .calendar .adjacent_month .today {
+      background-color: var(--tertiaryLabelColor);
+    }
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;table class="calendar" cellspacing="0" cellpadding="0"&gt;
+  &lt;colgroup&gt;
+    &lt;col width="35"&gt;
+    &lt;col width="35"&gt;
+    &lt;col width="35"&gt;
+    &lt;col width="35"&gt;
+    &lt;col width="35"&gt;
+    &lt;col width="35"&gt;
+    &lt;col width="35"&gt;
+    &lt;col&gt;
+  &lt;/colgroup&gt;
+  &lt;tr class="heading_row"&gt;
+    &lt;th align="right"&gt;&lt;a href="#" onClick="javascript:next_month(event, -1);"&gt;◀&lt;/a&gt;&lt;/th&gt;&lt;th colspan="5" class="heading"&gt;June 2018&lt;/th&gt;&lt;th align="left"&gt;&lt;a href="#" onClick="javascript:next_month(event, +1);"&gt;▶&lt;/a&gt;&lt;/th&gt;
+  &lt;/tr&gt;
+  &lt;tr class="days_row"&gt;&lt;th&gt;Mo&lt;/th&gt;&lt;th&gt;Tu&lt;/th&gt;&lt;th&gt;We&lt;/th&gt;&lt;th&gt;Th&lt;/th&gt;&lt;th&gt;Fr&lt;/th&gt;&lt;th&gt;Sa&lt;/th&gt;&lt;th&gt;Su&lt;/th&gt;&lt;/tr&gt;
+  &lt;tr class="row_0"&gt;&lt;td class="col_0"&gt;&lt;/td&gt;&lt;td class="col_1"&gt;&lt;/td&gt;&lt;td class="col_2"&gt;&lt;/td&gt;&lt;td class="col_3"&gt;&lt;/td&gt;&lt;td class="col_4"&gt;&lt;/td&gt;&lt;td class="col_5"&gt;&lt;/td&gt;&lt;td class="col_6"&gt;&lt;/td&gt;&lt;td class="week_number"&gt;&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr class="row_1"&gt;&lt;td class="col_0"&gt;&lt;/td&gt;&lt;td class="col_1"&gt;&lt;/td&gt;&lt;td class="col_2"&gt;&lt;/td&gt;&lt;td class="col_3"&gt;&lt;/td&gt;&lt;td class="col_4"&gt;&lt;/td&gt;&lt;td class="col_5"&gt;&lt;/td&gt;&lt;td class="col_6"&gt;&lt;/td&gt;&lt;td class="week_number"&gt;&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr class="row_2"&gt;&lt;td class="col_0"&gt;&lt;/td&gt;&lt;td class="col_1"&gt;&lt;/td&gt;&lt;td class="col_2"&gt;&lt;/td&gt;&lt;td class="col_3"&gt;&lt;/td&gt;&lt;td class="col_4"&gt;&lt;/td&gt;&lt;td class="col_5"&gt;&lt;/td&gt;&lt;td class="col_6"&gt;&lt;/td&gt;&lt;td class="week_number"&gt;&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr class="row_3"&gt;&lt;td class="col_0"&gt;&lt;/td&gt;&lt;td class="col_1"&gt;&lt;/td&gt;&lt;td class="col_2"&gt;&lt;/td&gt;&lt;td class="col_3"&gt;&lt;/td&gt;&lt;td class="col_4"&gt;&lt;/td&gt;&lt;td class="col_5"&gt;&lt;/td&gt;&lt;td class="col_6"&gt;&lt;/td&gt;&lt;td class="week_number"&gt;&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr class="row_4"&gt;&lt;td class="col_0"&gt;&lt;/td&gt;&lt;td class="col_1"&gt;&lt;/td&gt;&lt;td class="col_2"&gt;&lt;/td&gt;&lt;td class="col_3"&gt;&lt;/td&gt;&lt;td class="col_4"&gt;&lt;/td&gt;&lt;td class="col_5"&gt;&lt;/td&gt;&lt;td class="col_6"&gt;&lt;/td&gt;&lt;td class="week_number"&gt;&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr class="row_5"&gt;&lt;td class="col_0"&gt;&lt;/td&gt;&lt;td class="col_1"&gt;&lt;/td&gt;&lt;td class="col_2"&gt;&lt;/td&gt;&lt;td class="col_3"&gt;&lt;/td&gt;&lt;td class="col_4"&gt;&lt;/td&gt;&lt;td class="col_5"&gt;&lt;/td&gt;&lt;td class="col_6"&gt;&lt;/td&gt;&lt;td class="week_number"&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;
+</string>
+				<key>subtitle</key>
+				<string>Arguments: [month] [year]</string>
+				<key>title</key>
+				<string>Show Calendar</string>
+			</dict>
+			<key>weight</key>
+			<integer>13632</integer>
+		</dict>
+		<key>E66B6350-EEE2-4B19-85A9-60A8E72DDAA5</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>icon</key>
+				<dict>
+					<key>file</key>
+					<string>/System/Library/PreferencePanes/Localization.prefPane</string>
+				</dict>
+				<key>kind</key>
+				<string>script</string>
+				<key>output</key>
+				<string>html</string>
+				<key>script</key>
+				<string>#!/usr/bin/env ruby
+require 'erb'
+
+exit unless ENV.has_key?('GENIE_HTML_OUTPUT')
+
+TZ_NAMES = [
+  { :city =&gt; "Sydney",      :region =&gt; "Australia",       :tz =&gt; "Australia/Sydney",    :emoji =&gt; '🇦🇺' },
+  { :city =&gt; "Bangkok",     :region =&gt; "Asia",            :tz =&gt; "Asia/Bangkok",        :emoji =&gt; '🇹🇭' },
+  { :city =&gt; "Cyprus",      :region =&gt; "Europe",          :tz =&gt; "Europe/Nicosia",      :emoji =&gt; '🇨🇾' },
+  { :city =&gt; "Copenhagen",  :region =&gt; "Europe",          :tz =&gt; "Europe/Copenhagen",   :emoji =&gt; '🇩🇰' },
+  { :city =&gt; "New York",    :region =&gt; "U.S. East coast", :tz =&gt; "America/New_York",    :emoji =&gt; '🇺🇸' },
+  { :city =&gt; "Alabama",     :region =&gt; "United States",   :tz =&gt; "US/Central",          :emoji =&gt; '🇺🇸' },
+  { :city =&gt; "Los Angeles", :region =&gt; "U.S. West coast", :tz =&gt; "America/Los_Angeles", :emoji =&gt; '🇺🇸' },
+  { :city =&gt; "Honolulu",    :region =&gt; "Hawaii",          :tz =&gt; "Pacific/Honolulu",    :emoji =&gt; '🇺🇸' },
+]
+
+timezones = TZ_NAMES.map do |e|
+  time, date, zone = %x{ TZ="#{e[:tz]}" date '+%H.%M%n%A, %e %B%n%Z (%z)' }.chomp.gsub(/ {2,}/, ' ').split("\n")
+  { 'time' =&gt; time, 'date' =&gt; date, 'city' =&gt; e[:city] }
+end
+
+erb = ERB.new(DATA.read)
+puts erb.result(binding)
+
+__END__
+&lt;html&gt;
+&lt;head&gt;
+  &lt;style type='text/css' media='screen'&gt;
+    small {
+      color: var(--secondaryLabelColor);
+      font-size: 60%;
+    }
+    .city {
+      margin-bottom: 3px;
+    }
+    big {
+      font-feature-settings: "tnum";
+      font-size: 160%;
+    }
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;table&gt;
+    &lt;% for timezone in timezones %&gt;
+      &lt;tr&gt;
+        &lt;td valign="bottom"&gt;
+          &lt;small&gt;&lt;%= timezone['date'] %&gt;&lt;/small&gt;
+          &lt;div class="city"&gt;&lt;%= timezone['city'] %&gt;&lt;/div&gt;
+        &lt;/td&gt;
+        &lt;td style="padding-left: 20px;" valign="bottom"&gt;
+          &lt;big&gt;&lt;%= timezone['time'] %&gt;&lt;/big&gt;
+        &lt;/td&gt;
+      &lt;/tr&gt;
+    &lt;% end %&gt;
+  &lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</string>
+				<key>subtitle</key>
+				<string>Show the time in different zones</string>
+				<key>title</key>
+				<string>Time Zones</string>
+			</dict>
+			<key>weight</key>
+			<integer>14016</integer>
+		</dict>
+		<key>E8293557-113F-48C7-9E9F-04B29338EE4E</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>170B423B-8B36-46F9-A540-09CE7A519587</string>
+				</array>
+				<key>disableFileActions</key>
+				<true/>
+				<key>disableLRUOrdering</key>
+				<true/>
+				<key>isTemplate</key>
+				<true/>
+				<key>subtitle</key>
+				<string>Press ⇥ to view fields and ↩ to open in Contacts</string>
+			</dict>
+		</dict>
+		<key>EB36BF99-8D80-4C81-95DB-E9E467CB5EE1</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>file</key>
+				<string>${listItem}</string>
+				<key>icon</key>
+				<dict>
+					<key>application</key>
+					<string>com.macromates.TextMate</string>
+				</dict>
+				<key>isTemplate</key>
+				<true/>
+				<key>kind</key>
+				<string>script</string>
+				<key>script</key>
+				<string>/usr/bin/open -b com.macromates.TextMate "$0"</string>
+				<key>scriptArguments</key>
+				<array>
+					<string>${listItem}</string>
+				</array>
+				<key>subtitle</key>
+				<string>Open With Textmate</string>
+				<key>title</key>
+				<string>${listItem:/basename}</string>
+			</dict>
+		</dict>
+		<key>F085FA2B-EFE2-4E98-B2C8-A63C260CA625</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>kind</key>
+				<string>web</string>
+				<key>subtitle</key>
+				<string>Search for ‘${query:-${find:?[${find}]:…}}’</string>
+				<key>title</key>
+				<string>YouTube</string>
+				<key>url</key>
+				<string>https://www.youtube.com/results?search_query=${query:-${find}}</string>
+			</dict>
+			<key>weight</key>
+			<integer>14880</integer>
+		</dict>
+		<key>F94DE348-7A44-462B-9EBE-1A4FAB97C810</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>isTemplate</key>
+				<true/>
+				<key>title</key>
+				<string>${kMDItemDisplayName} Preference Pane</string>
+			</dict>
+		</dict>
+		<key>F9FA6AAD-CBC9-4CAA-AA07-01156718F62B</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>36D55732-3C39-4469-B4E5-3F7FD2C610BD</string>
+				</array>
+				<key>comment</key>
+				<string>You must enable clipboard monitoring to see your history here</string>
+				<key>icon</key>
+				<dict>
+					<key>text</key>
+					<string>⌘C</string>
+				</dict>
+				<key>title</key>
+				<string>Clipboard History</string>
+			</dict>
+			<key>weight</key>
+			<integer>10464</integer>
+		</dict>
+		<key>FB6A10CC-B227-412A-9ECE-D3E09C7FFC63</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>icon</key>
+				<dict>
+					<key>name</key>
+					<string>NSMultipleDocuments</string>
+				</dict>
+				<key>kind</key>
+				<string>script</string>
+				<key>script</key>
+				<string>#!/usr/bin/env ruby
+require 'shellwords'
+
+script = &lt;&lt;-AS
+  set theString to ""
+
+  tell application "Finder"
+    set theItems to selection as alias list
+    repeat with itemRef in theItems
+      set theString to theString &amp; (POSIX path of itemRef) &amp; "\n"
+    end repeat
+  end tell
+
+  return theString
+AS
+
+script = script.split("\n").map { |line| [ '-e', line.strip ] }.flatten
+files = %x{ /usr/bin/osascript #{script.shelljoin} }.strip
+files = files.split("\n")
+
+exec('vidir', *files)
+</string>
+				<key>subtitle</key>
+				<string>Rename files selected in Finder</string>
+				<key>title</key>
+				<string>Rename Files</string>
+			</dict>
+			<key>weight</key>
+			<integer>13152</integer>
+		</dict>
+		<key>FC8868AF-5037-4ECE-9332-F420AFF8CCF0</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>468DC1F1-A3D9-4B4D-AE7E-6ADA4A9D8904</string>
+				</array>
+				<key>kind</key>
+				<string>sqlite</string>
+				<key>sqlDatabase</key>
+				<string>${ENV_SHIORI_DB:-$HOME/.shiori.db}</string>
+				<key>sqlQuery</key>
+				<string>SELECT id AS uid, title, url, modified FROM bookmark ORDER BY id DESC</string>
+				<key>title</key>
+				<string>Find Bookmarks</string>
+			</dict>
+		</dict>
+		<key>FE2FA962-515E-497D-833F-7801E02FB760</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>icon</key>
+				<dict>
+					<key>text</key>
+					<string>∞</string>
+				</dict>
+				<key>kind</key>
+				<string>script</string>
+				<key>script</key>
+				<string>#!/bin/sh
+/usr/bin/uuidgen|/usr/bin/tr -d '\n'|/usr/bin/pbcopy
+echo "Identifier copied to your clipboard"
+</string>
+				<key>subtitle</key>
+				<string>This will copy a universally unique identifier to your clipboard</string>
+				<key>title</key>
+				<string>Create Universally Unique Identifier</string>
+			</dict>
+			<key>weight</key>
+			<integer>10656</integer>
+		</dict>
+		<key>com.apple.iTunes.player-controls</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>A8AF3ABF-6DF2-49AB-9B60-6AA6E069E2AA</string>
+				</array>
+				<key>icon</key>
+				<dict>
+					<key>text</key>
+					<string>⏯</string>
+				</dict>
+				<key>isAlternate</key>
+				<true/>
+				<key>kind</key>
+				<string>exec</string>
+				<key>script</key>
+				<string>#!/usr/bin/env ruby
+require 'json'
+require 'shellwords'
+
+script = &lt;&lt;-AS
+  tell application "iTunes"
+    if it is running and player state is playing then
+      "icon='⏸' title='Pause' trackId='" &amp; (get persistent ID of current track) &amp; "' trackName='" &amp; (get name of current track) &amp; "' subtitle='Playing " &amp; (get name of current track) &amp; " by " &amp; (get artist of current track) &amp; "'"
+    else if it is running and player state is paused then
+      "icon='▶' title='Resume' trackId='" &amp; (get persistent ID of current track) &amp; "' trackName='" &amp; (get name of current track) &amp; "' subtitle='Resume playing " &amp; (get name of current track) &amp; " by " &amp; (get artist of current track) &amp; "'"
+    else
+      "icon='▶' title='Play' subtitle='Nothing is playing'"
+    end if
+  end tell
+AS
+
+script = script.split("\n").map { |line| [ '-e', line.strip ] }.flatten
+player_status = %x{ /usr/bin/osascript #{script.shelljoin} }.strip
+
+info = Hash[player_status.scan(/(\w+)='(.*?)'(?= \w+='|$)/)]
+
+puts JSON.generate({
+  :expires_in =&gt; '1s',
+  :items =&gt; [
+    {
+      :title              =&gt; info['title'],
+      :subtitle           =&gt; info['subtitle'],
+      :match              =&gt; 'Play/Pause',
+      :icon               =&gt; { :text =&gt; info['icon'] },
+      :exec               =&gt; [ '/usr/bin/osascript', '-e', 'tell app "iTunes" to playpause' ],
+      :disableLRUOrdering =&gt; true,
+      :iTunesTrackId      =&gt; info['trackId'],
+      :iTunesTrackName    =&gt; info['trackName'],
+    }
+  ]
+});
+</string>
+				<key>title</key>
+				<string>Play/Pause</string>
+			</dict>
+		</dict>
+		<key>http://www.unicode.org/Public/UNIDATA/UnicodeData.txt</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>8677D921-5215-45DD-B744-D9628E26F81B</string>
+					<string>E26B020B-AA50-4B82-A965-3F79AC086101</string>
+				</array>
+				<key>kind</key>
+				<string>exec</string>
+				<key>script</key>
+				<string>#!/usr/bin/env ruby
+require 'json'
+require 'open-uri'
+
+items = [ ]
+
+open('http://www.unicode.org/Public/UNIDATA/UnicodeData.txt') do |io|
+  while line = io.gets
+    code, description, group, unused = line.split(';', 4)
+    next if group[0] == 'C'
+    char = [code.hex].pack("U*")
+    items &lt;&lt; {
+      :uid         =&gt; code,
+      :char        =&gt; char,
+      :code        =&gt; code,
+      :description =&gt; description,
+      :match       =&gt; "#{description} #{char}",
+    }
+  end
+end
+
+puts JSON.generate({
+  :expires_in =&gt; '1w',
+  :items      =&gt; items
+})
+</string>
+				<key>title</key>
+				<string>Get data from unicode.org</string>
+			</dict>
+		</dict>
+		<key>https://www.googleapis.com/drive/v3/files</key>
+		<dict>
+			<key>values</key>
+			<dict>
+				<key>kind</key>
+				<string>exec</string>
+				<key>script</key>
+				<string>#!/usr/bin/ruby
+require 'socket'
+require 'net/http'
+require 'net/https'
+require 'uri'
+require 'json'
+require 'webrick'
+require 'shellwords'
+require 'fileutils'
+require 'logger'
+require 'tempfile'
+require 'open-uri'
+
+LOG_FILE        = File.join(ENV['GENIE_CACHES_PATH'] || ENV['TMPDIR'] || '/tmp', 'google-drive.log')
+
+CLIENT_ID       = '70343894907-6rvsghkfepgplo00rvu207n5q2u3lgg9.apps.googleusercontent.com'
+CLIENT_SECRET   = 'W5PWpNabkbwGA60dpPSvDsU6'
+REDIRECT_URL    = 'http://localhost:19763'
+
+MIME_TYPE_ICONS = {
+  'application/vnd.google-apps.document'     =&gt; { :image =&gt; 'icons/google-document.png'     },
+  'application/vnd.google-apps.spreadsheet'  =&gt; { :image =&gt; 'icons/google-spreadsheet.png'  },
+  'application/vnd.google-apps.presentation' =&gt; { :image =&gt; 'icons/google-presentation.png' },
+  'application/vnd.google-apps.form'         =&gt; { :image =&gt; 'icons/google-form.png'         },
+  'application/pdf'                          =&gt; { :fileType =&gt; 'com.adobe.pdf'              },
+}
+
+$log = Logger.new(ENV.has_key?('GENIE_DEBUG') || STDERR.tty? ? STDERR : LOG_FILE)
+$log.formatter = proc do |severity, datetime, progname, msg|
+  "[#{datetime.strftime('%Y-%m-%d %H:%M:%S.%3N')}] [#{Process.pid}] %7s #{msg}\n" % "[#{severity}]"
+end
+
+def duration_in_words(from, to = Time.now)
+  duration = (to - from).round.to_f
+  case duration
+    when               0...2 then 'just now'
+    when              2...60 then '%.0f seconds ago' % duration
+    when             60...90 then 'a minute ago'
+    when           90...3570 then '%.0f minutes ago' % (duration/60)
+    when         3570...5400 then 'an hour ago'
+    when        5400...84600 then '%.0f hours ago' % (duration/(60*60))
+    when      84600...129600 then 'a day ago'
+    when     129600...561600 then '%.0f days ago' % (duration/(24*60*60))
+    when    561600...1036800 then 'a week ago'
+    when   1036800...2419200 then '%.0f weeks ago' % (duration/(7*24*60*60))
+    when   2419200...3952800 then 'a month ago'
+    when  3952800...30304800 then '%.0f months ago' % (duration/(30.5*24*60*60))
+    when 30304800...47304000 then 'a year ago'
+    else                          '%.0f years ago' % (duration/(365*24*60*60))
+  end
+end
+
+class Keychain
+  def self.add(password, account, service, comment = nil, label = nil)
+    %x{ /usr/bin/security -q add-generic-password -j #{comment.to_s.shellescape} -l #{(label || service).shellescape} -s #{service.shellescape} -a #{account.shellescape} -w #{password.shellescape} -U }
+    $log.error("Exit code #$? from /usr/bin/security while adding generic password for #{account}") if $?.exitstatus != 0
+    $?.exitstatus == 0
+  end
+
+  def self.find(account, service)
+    open("|/usr/bin/security 2&gt;&amp;1 find-generic-password -s #{service.shellescape} -a #{account.shellescape} -g") do |io|
+      if io.read =~ /^password:\s+(?:0x(\h+)\s+)?"(.*)"$/
+        $1 ? $1.scan(/\h\h/).map { |ch| ch.hex }.pack("C*") : $2
+      end
+    end
+  end
+
+  def self.comment(account, service)
+    open("|/usr/bin/security 2&gt;&amp;1 -v find-generic-password -s #{service.shellescape} -a #{account.shellescape}") do |io|
+      if io.read =~ /^attributes:\n(^\s+.*\n)+/m
+        if $1 =~ /^\s+"icmt"&lt;blob&gt;=(?:0x(\h+)\s+)?"(.*)"$/
+          $1 ? $1.scan(/\h\h/).map { |ch| ch.hex }.pack('C*') : $2
+        end
+      end
+    end
+  end
+
+  def self.delete(account, service)
+    %x{ /usr/bin/security 2&gt;&amp;1 -q delete-generic-password -s #{service.shellescape} -a #{account.shellescape} }
+    $log.debug("Deleted generic password for #{account}")
+    $?.exitstatus == 0
+  end
+end
+
+class Auth
+  def initialize(host, port)
+    @server = TCPServer.new(host, port)
+  end
+
+  def accept_token
+    $log.debug("Starting HTTP server")
+    loop do
+      socket = @server.accept
+
+      request = ''
+      until (str = socket.gets).chomp.empty?
+        request &lt;&lt; str
+      end
+
+      util = WEBrick::HTTPRequest.new(WEBrick::Config::HTTP)
+      util.parse(StringIO.new(request))
+      $log.debug("Received HTTP request: #{util.request_line.chomp}")
+
+      token = nil
+      if util.request_method == 'GET' &amp;&amp; util.path == '/' &amp;&amp; util.query.has_key?('code')
+        token = Auth.get_token({
+          'grant_type'   =&gt; 'authorization_code',
+          'code'         =&gt; util.query['code'],
+          'redirect_uri' =&gt; REDIRECT_URL,
+        })
+      end
+
+      response = token.nil? ? "Something went wrong.\n" : "Successfully connected to Google Drive!\n"
+
+      socket.print "HTTP/1.1 200 OK\r\n"
+      socket.print "Content-Type: text/plain\r\n"
+      socket.print "Content-Length: #{response.bytesize}\r\n"
+      socket.print "Connection: close\r\n"
+      socket.print "\r\n"
+      socket.print response
+      socket.close
+
+      # Only serve a single request for ‘GET /’
+      break if util.request_method == 'GET' &amp;&amp; util.path == '/'
+    end
+    $log.debug("Stopping HTTP server")
+  end
+
+  ACCOUNT_NAME  = 'Google Drive'
+  ACCESS_TOKEN  = 'com.macromates.account.Google.oauth-token'
+  REFRESH_TOKEN = 'com.macromates.account.Google.oauth-refresh-token'
+
+  def self.get_token(options)
+    token = nil
+
+    token_url = 'https://www.googleapis.com/oauth2/v3/token'
+    response = Net::HTTP.post_form(URI.parse(token_url), options.merge({
+      'client_id'     =&gt; CLIENT_ID,
+      'client_secret' =&gt; CLIENT_SECRET,
+    }))
+
+    if response.code.to_i == 200
+      json = JSON.parse(response.body)
+      if json.has_key?('refresh_token')
+        Keychain.add(json['refresh_token'], ACCOUNT_NAME, REFRESH_TOKEN)
+        $log.info("Refresh token added to keychain")
+      end
+
+      if json.has_key?('access_token')
+        $log.warn("Access token has no expiration time") unless json.has_key?('expires_in')
+        Keychain.add(json['access_token'], ACCOUNT_NAME, ACCESS_TOKEN, json.has_key?('expires_in') ? "Expires: #{(Time.now + json['expires_in'].to_i).iso8601}" : nil)
+        token = json['access_token']
+        $log.info("Access token added to keychain, expires in #{json['expires_in']} seconds")
+      else
+        $log.error("Access token missing from server response: #{json}")
+      end
+    else
+      $log.error("Server returned #{response.code} when requesting token: #{JSON.parse(response.body)['error_description']}")
+    end
+
+    token
+  end
+
+  def self.try_get_token
+    if Keychain.comment(ACCOUNT_NAME, ACCESS_TOKEN) =~ /^Expires: (.*)/
+      return Keychain.find(ACCOUNT_NAME, ACCESS_TOKEN) if (Time.parse($1) - Time.now) &gt; 10
+      $log.info("Access token expired #{duration_in_words(Time.parse($1))}")
+    end
+
+    if refresh_token = Keychain.find(ACCOUNT_NAME, REFRESH_TOKEN)
+      return get_token({
+        'grant_type'    =&gt; 'refresh_token',
+        'refresh_token' =&gt; refresh_token,
+      })
+    end
+
+    nil
+  end
+
+  def self.authenticate
+    uri = URI.parse(REDIRECT_URL)
+    thread = nil
+    begin
+      server = Auth.new(uri.host, uri.port)
+      thread = Thread.new { server.accept_token }
+    rescue Errno::EADDRINUSE =&gt; e
+      $log.error("Already waiting for authentication: #{e}")
+    end
+
+    $log.info('Requesting user authentication via browser')
+    auth_url = 'https://accounts.google.com/o/oauth2/auth?' + URI.encode_www_form({
+      'client_id'       =&gt; CLIENT_ID,
+      'redirect_uri'    =&gt; REDIRECT_URL,
+      'scope'           =&gt; 'https://www.googleapis.com/auth/drive',
+      'response_type'   =&gt; 'code',
+      'access_type'     =&gt; 'offline',
+      'approval_prompt' =&gt; 'force'
+    })
+    %x{ open #{auth_url.shellescape} }
+
+    thread.join unless thread.nil?
+
+    if token = Keychain.find(ACCOUNT_NAME, ACCESS_TOKEN)
+      return token
+    end
+
+    abort 'No access token'
+  end
+
+  def self.has_valid_token?
+    try_get_token ? true : false
+  end
+
+  def self.token
+    try_get_token || authenticate
+  end
+
+  def self.revoke
+    if token = Keychain.find(ACCOUNT_NAME, REFRESH_TOKEN)
+      revoke_url = 'https://accounts.google.com/o/oauth2/revoke'
+      response = Net::HTTP.post_form(URI.parse(revoke_url), { 'token' =&gt; token })
+      if response.code.to_i == 200
+        Keychain.delete(ACCOUNT_NAME, ACCESS_TOKEN)
+        Keychain.delete(ACCOUNT_NAME, REFRESH_TOKEN)
+        $log.info("Revoked access token")
+        return true
+      else
+        $log.error("Server returned #{response.code} when revoking token: #{JSON.parse(response.body)['error_description']}")
+      end
+    else
+      $log.warn("Refresh token missing while trying to revoke access")
+    end
+    false
+  end
+end
+
+class GoogleDrive
+  def self.get_items(token, expr)
+    uri = URI.parse('https://www.googleapis.com/drive/v3/files')
+
+    query = {
+      'q'                     =&gt; "trashed=false and (#{expr})",
+      'fields'                =&gt; 'nextPageToken,files(id,name,webViewLink,mimeType,parents,modifiedTime,lastModifyingUser(displayName))',
+      'pageSize'              =&gt; 1000,
+      'supportsTeamDrives'    =&gt; true,
+      'includeTeamDriveItems' =&gt; true,
+    }
+
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = true
+
+    items = []
+
+    loop do
+      uri.query = URI.encode_www_form(query)
+      request = Net::HTTP::Get.new(uri.request_uri)
+      request.add_field('authorization', "Bearer #{token}")
+      response = http.request(request)
+
+      if response.code.to_i == 200
+        body = JSON.parse(response.body)
+        $log.info("Got #{body['files'].size} files from Google Drive")
+        items += body['files']
+
+        next if query['pageToken'] = body['nextPageToken']
+      else
+        $log.error("Server returned #{response.code} when fetching items from Google Drive: #{JSON.parse(response.body)['error']['message']}")
+      end
+
+      break
+    end
+
+    items
+  end
+end
+
+# ========
+# = Main =
+# ========
+
+start       = Time.now
+exit_status = true
+
+$log.debug("#$0 #{ARGV}")
+
+begin
+  if ARGV[0] == '--authenticate'
+    if Auth.authenticate
+      STDOUT &lt;&lt; "Successfully authenticated\n"
+    else
+      STDERR &lt;&lt; "Failed to authenticate\n"
+    end
+  elsif ARGV[0] == '--revoke'
+    if Auth.revoke
+      STDOUT &lt;&lt; "Successfully signed out\n"
+    else
+      STDERR &lt;&lt; "Failed to sign out\n"
+    end
+  elsif ARGV[0] == '--create'
+    type = ARGV[1]
+
+    name = (ARGV[2] == '--name' ? ARGV[3] : nil).to_s.strip
+    name = name.empty? ? 'Untitled' : name
+
+    token = Auth.token
+    uri = URI.parse('https://www.googleapis.com/drive/v3/files?fields=webViewLink')
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = true
+    request = Net::HTTP::Post.new(uri.request_uri)
+    request['authorization'] = "Bearer #{token}"
+    request["content-type"]  = 'application/json'
+    request.body = JSON.generate({
+      :mimeType =&gt; type,
+      :name     =&gt; name,
+    })
+
+    response = http.request(request)
+    if response.code.to_i == 200
+      body = JSON.parse(response.body)
+      if body.has_key?('webViewLink')
+        %x{ open #{body['webViewLink'].shellescape} }
+      else
+        $log.error("No webViewLink in response: #{response.body}")
+        STDERR &lt;&lt; "Link to new document missing from server response\n"
+      end
+    else
+      $log.error("Server returned #{response.code} when creating document with type #{type}: #{JSON.parse(response.body)['error_description']}")
+      STDERR &lt;&lt; "Failed to create document.\nServer responded with status #{response.code}\n"
+    end
+  elsif ARGV.size == 0
+    res = [ ]
+    expires_in = 0
+
+    if Auth.has_valid_token?
+      mime_types = MIME_TYPE_ICONS.keys &lt;&lt; 'application/vnd.google-apps.folder'
+      query = mime_types.map { |type| "mimeType='#{type}'" }.join(' or ')
+      if custom = ENV['custom_query']
+        query = "(#{query}) and (#{custom})"
+        $log.info("Using custom query: #{query}")
+      end
+      if items = GoogleDrive.get_items(Auth.token, query)
+        parents_by_id = { }
+        folders = items.select { |item| item['mimeType'] == 'application/vnd.google-apps.folder' }
+        folders.each { |item| parents_by_id[item['id']] = item }
+
+        files = items.reject { |item| item['mimeType'] == 'application/vnd.google-apps.folder' }
+        files = files.sort { |lhs, rhs| rhs['modifiedTime'] &lt;=&gt; lhs['modifiedTime'] }
+
+        res = files.map do |item|
+          parents = []
+          parent = item
+          while parent &amp;&amp; parent.has_key?('parents')
+            parent_id = parent['parents'].first
+            if parent = parents_by_id[parent_id]
+              parents &lt;&lt; parent['name']
+            end
+          end
+
+          parents  = parents.reverse.join('/')
+          modified = "Modified ${modifiedTime:/relative} by #{item.has_key?('lastModifyingUser') ? item['lastModifyingUser']['displayName'] : 'anonymous'}"
+
+          {
+            :uid          =&gt; item['id'],
+            :title        =&gt; item['name'],
+            :subtitle     =&gt; [ parents, modified ].reject { |e| e.to_s.empty? }.join(' • '),
+            :icon         =&gt; MIME_TYPE_ICONS[item['mimeType']],
+            :url          =&gt; item['webViewLink'],
+
+            :modifiedTime =&gt; Time.parse(item['modifiedTime']).strftime("%F %T %z"),
+          }
+        end
+      end
+
+      document_types = {
+        'Document'     =&gt; 'application/vnd.google-apps.document',
+        'Spreadsheet'  =&gt; 'application/vnd.google-apps.spreadsheet',
+        'Presentation' =&gt; 'application/vnd.google-apps.presentation',
+        'Form'         =&gt; 'application/vnd.google-apps.form',
+      }
+
+      document_types.each do |label, type|
+        res &lt;&lt; {
+          :uid        =&gt; type,
+          :title      =&gt; "New #{label} on Google Drive",
+          :subtitle   =&gt; 'Named: ‘${query:-Untitled}’',
+          :icon       =&gt; { :image =&gt; 'icons/google-drive.png' },
+          :match      =&gt; "New #{label}",
+          :exec       =&gt; [ $0, '--create', type, '--name', '${query:-Untitled}' ],
+          :invalidate =&gt; 'https://www.googleapis.com/drive/v3/files',
+        }
+      end
+
+      res &lt;&lt; {
+        :uid        =&gt; 'BFAE3FC0-4A14-45B9-9EBA-0D89A296D677',
+        :title      =&gt; 'Clear Google Drive Cache',
+        :subtitle   =&gt; 'Expunge all Google Drive items from the cache',
+        :icon       =&gt; { :image =&gt; 'icons/google-drive.png' },
+        :script     =&gt; 'echo "Cache has been cleared"',
+        :invalidate =&gt; 'https://www.googleapis.com/drive/v3/files',
+      }
+
+      res &lt;&lt; {
+        :uid        =&gt; '8832BDA3-7A1F-4DA9-85B1-220D194AADB9',
+        :title      =&gt; 'Sign out of Google Drive',
+        :icon       =&gt; { :fileType =&gt; "'ejec'" },
+        :exec       =&gt; [ $0, '--revoke' ],
+        :invalidate =&gt; 'https://www.googleapis.com/drive/v3/files',
+      }
+
+      expires_in = '10m'
+    else
+      res &lt;&lt; {
+        :uid        =&gt; '850C503B-A12A-49B2-AC7A-06EAA56806FF',
+        :title      =&gt; 'Authenticate Google Drive',
+        :subtitle   =&gt; 'Add Google Drive files to search results',
+        :icon       =&gt; { :image =&gt; 'icons/google-drive.png' },
+        :exec       =&gt; [ $0, '--authenticate' ],
+        :invalidate =&gt; 'https://www.googleapis.com/drive/v3/files',
+      }
+    end
+
+    puts JSON.generate({
+      :expires_in =&gt; expires_in,
+      :items =&gt; res,
+    })
+  else
+    $log.error("Unknown argument")
+  end
+rescue Exception =&gt; e
+  $log.fatal("Uncaught exception: #{e}")
+  e.backtrace.each { |line| $log.fatal(line) }
+  exit_status = false
+end
+
+$log.debug("Execution took #{(Time.now - start).round(3)} seconds")
+exit(exit_status)
+</string>
+				<key>title</key>
+				<string>Google Drive</string>
+			</dict>
+			<key>weight</key>
+			<integer>11712</integer>
+		</dict>
+	</dict>
+</dict>
+</plist>
