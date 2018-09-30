@@ -722,9 +722,9 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 			[controller beginSheetModalForWindow:_window completionHandler:^(NSModalResponse response){
 				if(response != NSModalResponseCancel)
 				{
-					context->set_charset(to_s(controller.encoding));
+					context->set_charset(to_s(controller.encodingNoBOM));
 					if(controller.trainClassifier)
-						encoding::learn(content->begin(), content->end(), to_s(controller.encoding));
+						encoding::learn(content->begin(), content->end(), to_s(controller.encodingNoBOM));
 				}
 			}];
 		}

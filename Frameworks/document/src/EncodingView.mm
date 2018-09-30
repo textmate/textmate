@@ -291,7 +291,7 @@ static NSTextView* MyCreateTextView ()
 {
 	bool couldConvert = true;
 	char const* bytes = (char const*)_data.bytes;
-	[[self.textView textStorage] setAttributedString:convert_and_highlight(bytes, bytes + MIN(_data.length, 256*1024), to_s(self.encoding), "UTF-8", &couldConvert)];
+	[[self.textView textStorage] setAttributedString:convert_and_highlight(bytes, bytes + MIN(_data.length, 256*1024), to_s(self.encodingNoBOM), "UTF-8", &couldConvert)];
 	self.acceptableEncoding = couldConvert;
 }
 
@@ -301,6 +301,11 @@ static NSTextView* MyCreateTextView ()
 		return;
 	_encoding = anEncoding;
 	[self updateTextView];
+}
+
+- (NSString*)encodingNoBOM
+{
+	return [_encoding stringByReplacingOccurrencesOfString:@"//BOM" withString:@""];
 }
 
 - (void)cleanup
