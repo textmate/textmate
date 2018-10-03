@@ -90,7 +90,7 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 
 	NSAlert* alert = [[NSAlert alloc] init];
 	alert.messageText            = @"Software Update Disabled";
-	alert.informativeText        = [NSString stringWithFormat:@"%1$@ is running on a read-only file system and can therefor not be updated.\n\nIf you downloaded %1$@ from the internet then moving it out of the Downloads folder should solve the problem.", appName];
+	alert.informativeText        = [NSString stringWithFormat:@"%1$@ is running on a read-only file system and can therefore not be updated.\n\nIf you downloaded %1$@ from the internet then moving it out of the Downloads folder should solve the problem.", appName];
 	alert.showsSuppressionButton = YES;
 	[alert addButtonWithTitle:@"OK"];
 	[alert runModal];
