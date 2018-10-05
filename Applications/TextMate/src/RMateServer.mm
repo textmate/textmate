@@ -371,7 +371,7 @@ namespace // wrap in anonymous namespace to avoid clashing with other callbacks 
 	{
 		WATCH_LEAKS(reactivate_callback_t);
 
-		reactivate_callback_t () : shared_count(std::make_shared<size_t>(0))
+		reactivate_callback_t () : _shared_count(std::make_shared<size_t>(0))
 		{
 			D(DBF_RMateServer, bug("%p\n", this););
 			_terminal = [[NSWorkspace sharedWorkspace] frontmostApplication];
@@ -379,12 +379,12 @@ namespace // wrap in anonymous namespace to avoid clashing with other callbacks 
 
 		void watch_document (OakDocument* document)
 		{
-			auto counter = shared_count;
+			auto counter = _shared_count;
 			NSRunningApplication* terminal = _terminal;
 
 			++*counter;
 			__weak __block id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:OakDocumentWillCloseNotification object:document queue:nil usingBlock:^(NSNotification*){
-				D(DBF_RMateServer, bug("%zu → %zu\n", *shared_count, *shared_count - 1););
+				D(DBF_RMateServer, bug("%zu → %zu\n", *counter, *counter - 1););
 				if(--*counter == 0)
 					[terminal activateWithOptions:NSApplicationActivateIgnoringOtherApps];
 				[[NSNotificationCenter defaultCenter] removeObserver:observerId];
@@ -392,7 +392,7 @@ namespace // wrap in anonymous namespace to avoid clashing with other callbacks 
 		}
 
 	private:
-		std::shared_ptr<size_t> shared_count;
+		std::shared_ptr<size_t> _shared_count;
 		NSRunningApplication* _terminal;
 	};
 }
