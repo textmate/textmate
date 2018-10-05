@@ -84,11 +84,14 @@ static size_t kParseSizeLimit = 1024;
 		return;
 
 	NSString* plain = styled.string;
-	for(NSString* attr in @[ NSForegroundColorAttributeName, NSBackgroundColorAttributeName,NSUnderlineStyleAttributeName, NSStrikethroughStyleAttributeName ])
+	for(NSString* attr in @[ NSForegroundColorAttributeName, NSBackgroundColorAttributeName, NSUnderlineStyleAttributeName, NSStrikethroughStyleAttributeName ])
 		[styled removeAttribute:attr range:NSMakeRange(0, plain.length)];
 
 	if(_enabled == NO || ![self tryLoadGrammarAndTheme])
+	{
+		[styled addAttributes:@{ NSForegroundColorAttributeName: [NSColor controlTextColor] } range:NSMakeRange(0, plain.length)];
 		return;
+	}
 
 	std::string str = to_s(plain);
 	std::map<size_t, scope::scope_t> scopes;
