@@ -206,7 +206,7 @@ static NSString* const kRecordingPlaceholderString = @"…";
 	NSEraseRect(NSIntersectionRect(aRect, NSInsetRect(frame, 1, 1)));
 
 	NSDictionary* stringAttributes = @{
-		NSForegroundColorAttributeName : self.recording ? [NSColor grayColor] : [NSColor blackColor],
+		NSForegroundColorAttributeName : self.recording ? [NSColor grayColor] : [NSColor controlTextColor],
 		NSFontAttributeName            : OakControlFont()
 	};
 

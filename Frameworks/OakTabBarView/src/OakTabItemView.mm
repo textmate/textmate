@@ -228,7 +228,7 @@ static NSString* kUserDefaultsTabItemLineBreakStyleKey = @"tabItemLineBreakStyle
 		else if([NSProcessInfo instancesRespondToSelector:@selector(isOperatingSystemAtLeastVersion:)] && [[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:{ 10, 10, 0 }])
 		{
 			_selectedTabTextStyles = _activeTabTextStyles.mutableCopy;
-			_selectedTabTextStyles[NSForegroundColorAttributeName] = [NSColor blackColor];
+			_selectedTabTextStyles[NSForegroundColorAttributeName] = [NSColor controlTextColor];
 
 			_images = [self yosemiteImages];
 			_leftPadding  = -1;
