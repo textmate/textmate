@@ -248,17 +248,17 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 - (NSDictionary*)allViews
 {
 	NSDictionary* views = @{
-		@"previousMessages"          : self.previousCommitMessagesPopUpButton,
-		@"topDocumentViewDivider"    : self.topDocumentViewDivider,
-		@"documentView"              : self.documentView,
-		@"bottomDocumentViewDivider" : self.bottomDocumentViewDivider,
-		@"topScrollViewDivider"      : self.topScrollViewDivider ?: [NSNull null],
-		@"scrollView"                : self.scrollView ?: [NSNull null],
-		@"bottomScrollViewDivider"   : self.bottomScrollViewDivider ?: [NSNull null],
-		@"showTableButton"           : self.showTableButton,
-		@"action"                    : self.actionPopUpButton ?: [NSNull null],
-		@"cancel"                    : self.cancelButton,
-		@"commit"                    : self.commitButton,
+		@"previousMessages":          self.previousCommitMessagesPopUpButton,
+		@"topDocumentViewDivider":    self.topDocumentViewDivider,
+		@"documentView":              self.documentView,
+		@"bottomDocumentViewDivider": self.bottomDocumentViewDivider,
+		@"topScrollViewDivider":      self.topScrollViewDivider ?: [NSNull null],
+		@"scrollView":                self.scrollView ?: [NSNull null],
+		@"bottomScrollViewDivider":   self.bottomScrollViewDivider ?: [NSNull null],
+		@"showTableButton":           self.showTableButton,
+		@"action":                    self.actionPopUpButton ?: [NSNull null],
+		@"cancel":                    self.cancelButton,
+		@"commit":                    self.commitButton,
 	};
 
 	return views;
@@ -575,15 +575,15 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 			}
 			[outputArray addObject:@"\n"];
 			[proxy connectFromServerWithOptions:@{
-				kOakCommitWindowStandardOutput : [outputArray componentsJoinedByString:@" "],
-				kOakCommitWindowReturnCode     : @0,
-				kOakCommitWindowContinue       : @(continueFlag),
+				kOakCommitWindowStandardOutput: [outputArray componentsJoinedByString:@" "],
+				kOakCommitWindowReturnCode:     @0,
+				kOakCommitWindowContinue:       @(continueFlag),
 			}];
 		}
 		else
 		{
 			[proxy connectFromServerWithOptions:@{
-				kOakCommitWindowReturnCode     : @1,
+				kOakCommitWindowReturnCode:     @1,
 			}];
 		}
 		[self saveCommitMessage];

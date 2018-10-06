@@ -62,17 +62,17 @@ static NSAttributedString* convert_and_highlight (char const* first, char const*
 	NSMutableAttributedString* output = [[NSMutableAttributedString alloc] init];
 
 	NSDictionary* regularStyle = @{
-		NSFontAttributeName : [NSFont userFixedPitchFontOfSize:0],
-		NSForegroundColorAttributeName : [NSColor grayColor],
+		NSFontAttributeName:            [NSFont userFixedPitchFontOfSize:0],
+		NSForegroundColorAttributeName: [NSColor grayColor],
 	};
 	NSDictionary* lineHighlightStyle = @{
-		NSFontAttributeName : [NSFont userFixedPitchFontOfSize:0],
-		NSForegroundColorAttributeName : [NSColor grayColor],
-		NSBackgroundColorAttributeName : [NSColor colorWithCalibratedWhite:0.9 alpha:1],
+		NSFontAttributeName:            [NSFont userFixedPitchFontOfSize:0],
+		NSForegroundColorAttributeName: [NSColor grayColor],
+		NSBackgroundColorAttributeName: [NSColor colorWithCalibratedWhite:0.9 alpha:1],
 	};
 	NSDictionary* characterHighlightStyle = @{
-		NSFontAttributeName : [NSFont userFixedPitchFontOfSize:0],
-		NSBackgroundColorAttributeName : [NSColor colorWithCalibratedWhite:0.9 alpha:1],
+		NSFontAttributeName:            [NSFont userFixedPitchFontOfSize:0],
+		NSBackgroundColorAttributeName: [NSColor colorWithCalibratedWhite:0.9 alpha:1],
 	};
 
 	size_t bol = 0;
@@ -247,14 +247,14 @@ static NSTextView* MyCreateTextView ()
 - (NSDictionary*)allViews
 {
 	return @{
-		@"title"       : self.title,
-		@"explanation" : self.explanation,
-		@"label"       : self.label,
-		@"popUp"       : self.popUpButton,
-		@"textView"    : self.scrollView,
-		@"learn"       : self.learnCheckBox,
-		@"open"        : self.openButton,
-		@"cancel"      : self.cancelButton
+		@"title":       self.title,
+		@"explanation": self.explanation,
+		@"label":       self.label,
+		@"popUp":       self.popUpButton,
+		@"textView":    self.scrollView,
+		@"learn":       self.learnCheckBox,
+		@"open":        self.openButton,
+		@"cancel":      self.cancelButton
 	};
 }
 

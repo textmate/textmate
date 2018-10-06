@@ -25,9 +25,9 @@ static NSString* kUserDefaultsTabItemLineBreakStyleKey = @"tabItemLineBreakStyle
 + (void)initialize
 {
 	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
-		kUserDefaultsTabItemMinWidthKey       : @(120),
-		kUserDefaultsTabItemMaxWidthKey       : @(250),
-		kUserDefaultsTabItemLineBreakStyleKey : @(NSLineBreakByTruncatingMiddle),
+		kUserDefaultsTabItemMinWidthKey:       @(120),
+		kUserDefaultsTabItemMaxWidthKey:       @(250),
+		kUserDefaultsTabItemLineBreakStyleKey: @(NSLineBreakByTruncatingMiddle),
 	}];
 }
 
@@ -47,45 +47,45 @@ static NSString* kUserDefaultsTabItemLineBreakStyleKey = @"tabItemLineBreakStyle
 - (NSDictionary*)mavericksImages
 {
 	NSDictionary* imageNames = @{
-		@"tabBar" : @{
-			@"AW_normal"   : @"AW InactiveTabBG",
-			@"IW_normal"   : @"IW InactiveTabBG",
+		@"tabBar": @{
+			@"AW_normal":   @"AW InactiveTabBG",
+			@"IW_normal":   @"IW InactiveTabBG",
 		},
-		@"tabItemSelected" : @{
-			@"AW_normal"   : @"AW ActiveTabFill",
-			@"IW_normal"   : @"IW ActiveTabFill",
+		@"tabItemSelected": @{
+			@"AW_normal":   @"AW ActiveTabFill",
+			@"IW_normal":   @"IW ActiveTabFill",
 		},
-		@"leftTabCap" : @{
-			@"AW_normal"   : @"AW InactiveTabLeftCap",
-			@"IW_normal"   : @"IW InactiveTabLeftCap",
+		@"leftTabCap": @{
+			@"AW_normal":   @"AW InactiveTabLeftCap",
+			@"IW_normal":   @"IW InactiveTabLeftCap",
 		},
-		@"leftTabCapSelected" : @{
-			@"AW_normal"   : @"AW ActiveTabLeftCap",
-			@"IW_normal"   : @"IW ActiveTabLeftCap",
+		@"leftTabCapSelected": @{
+			@"AW_normal":   @"AW ActiveTabLeftCap",
+			@"IW_normal":   @"IW ActiveTabLeftCap",
 		},
-		@"rightTabCap" : @{
-			@"AW_normal"   : @"AW InactiveTabRightCap",
-			@"IW_normal"   : @"IW InactiveTabRightCap",
+		@"rightTabCap": @{
+			@"AW_normal":   @"AW InactiveTabRightCap",
+			@"IW_normal":   @"IW InactiveTabRightCap",
 		},
-		@"rightTabCapSelected" : @{
-			@"AW_normal"   : @"AW ActiveTabRightCap",
-			@"IW_normal"   : @"IW ActiveTabRightCap",
+		@"rightTabCapSelected": @{
+			@"AW_normal":   @"AW ActiveTabRightCap",
+			@"IW_normal":   @"IW ActiveTabRightCap",
 		},
-		@"closeButton" : @{
-			@"AW_normal"   : @"AW ActiveTabClose",
-			@"AW_pressed"  : @"AW ActiveTabClosePressed",
-			@"AW_rollover" : @"AW ActiveTabCloseRollover",
-			@"IW_normal"   : @"IW ActiveTabClose",
-			@"IW_pressed"  : @"IW ActiveTabClosePressed",
-			@"IW_rollover" : @"IW ActiveTabCloseRollover",
+		@"closeButton": @{
+			@"AW_normal":   @"AW ActiveTabClose",
+			@"AW_pressed":  @"AW ActiveTabClosePressed",
+			@"AW_rollover": @"AW ActiveTabCloseRollover",
+			@"IW_normal":   @"IW ActiveTabClose",
+			@"IW_pressed":  @"IW ActiveTabClosePressed",
+			@"IW_rollover": @"IW ActiveTabCloseRollover",
 		},
-		@"closeButtonModified" : @{
-			@"AW_normal"   : @"TabClose_Modified",
-			@"AW_pressed"  : @"TabClose_ModifiedPressed",
-			@"AW_rollover" : @"TabClose_ModifiedRollover",
+		@"closeButtonModified": @{
+			@"AW_normal":   @"TabClose_Modified",
+			@"AW_pressed":  @"TabClose_ModifiedPressed",
+			@"AW_rollover": @"TabClose_ModifiedRollover",
 		},
-		@"overflowButton" : @{
-			@"AW_normal"   : @"TabOverflowTemplate",
+		@"overflowButton": @{
+			@"AW_normal":   @"TabOverflowTemplate",
 		},
 	};
 	return [self imagesForNames:imageNames];
@@ -94,42 +94,42 @@ static NSString* kUserDefaultsTabItemLineBreakStyleKey = @"tabItemLineBreakStyle
 - (NSDictionary*)yosemiteImages
 {
 	NSDictionary* imageNames = @{
-		@"tabBar" : @{
-			@"AW_normal"   : @"TabAWBackground",
-			@"IW_normal"   : @"TabIWBackground",
+		@"tabBar": @{
+			@"AW_normal":   @"TabAWBackground",
+			@"IW_normal":   @"TabIWBackground",
 		},
-		@"tabItemSelected" : @{
-			@"AW_normal"   : @"TabAWBackgroundSelected",
-			@"IW_normal"   : @"TabIWBackgroundSelected",
+		@"tabItemSelected": @{
+			@"AW_normal":   @"TabAWBackgroundSelected",
+			@"IW_normal":   @"TabIWBackgroundSelected",
 		},
-		@"leftTabCap" : @{
-			@"AW_normal"   : @"TabAWDivider",
-			@"IW_normal"   : @"TabIWDivider",
+		@"leftTabCap": @{
+			@"AW_normal":   @"TabAWDivider",
+			@"IW_normal":   @"TabIWDivider",
 		},
-		@"leftTabCapSelected" : @{
-			@"AW_normal"   : @"TabAWDivider",
-			@"IW_normal"   : @"TabIWDivider",
+		@"leftTabCapSelected": @{
+			@"AW_normal":   @"TabAWDivider",
+			@"IW_normal":   @"TabIWDivider",
 		},
-		@"rightTabCap" : @{
-			@"AW_normal"   : @"TabAWDivider",
-			@"IW_normal"   : @"TabIWDivider",
+		@"rightTabCap": @{
+			@"AW_normal":   @"TabAWDivider",
+			@"IW_normal":   @"TabIWDivider",
 		},
-		@"rightTabCapSelected" : @{
-			@"AW_normal"   : @"TabAWDivider",
-			@"IW_normal"   : @"TabIWDivider",
+		@"rightTabCapSelected": @{
+			@"AW_normal":   @"TabAWDivider",
+			@"IW_normal":   @"TabIWDivider",
 		},
-		@"closeButton" : @{
-			@"AW_normal"   : @"TabCloseThinTemplate",
-			@"AW_pressed"  : @"TabCloseThin_Pressed_Template",
-			@"AW_rollover" : @"TabCloseThin_Rollover_Template",
+		@"closeButton": @{
+			@"AW_normal":   @"TabCloseThinTemplate",
+			@"AW_pressed":  @"TabCloseThin_Pressed_Template",
+			@"AW_rollover": @"TabCloseThin_Rollover_Template",
 		},
-		@"closeButtonModified" : @{
-			@"AW_normal"   : @"TabCloseThin_Modified_Template",
-			@"AW_pressed"  : @"TabCloseThin_ModifiedPressed_Template",
-			@"AW_rollover" : @"TabCloseThin_ModifiedRollover_Template",
+		@"closeButtonModified": @{
+			@"AW_normal":   @"TabCloseThin_Modified_Template",
+			@"AW_pressed":  @"TabCloseThin_ModifiedPressed_Template",
+			@"AW_rollover": @"TabCloseThin_ModifiedRollover_Template",
 		},
-		@"overflowButton" : @{
-			@"AW_normal"   : @"TabOverflowThinTemplate",
+		@"overflowButton": @{
+			@"AW_normal":   @"TabOverflowThinTemplate",
 		},
 	};
 	return [self imagesForNames:imageNames];
@@ -143,42 +143,42 @@ static NSString* kUserDefaultsTabItemLineBreakStyleKey = @"tabItemLineBreakStyle
 - (NSDictionary*)mojaveDarkImages
 {
 	NSDictionary* imageNames = @{
-		@"tabBar" : @{
-			@"AW_normal"   : @"TabAWBackground_Dark",
-			@"IW_normal"   : @"TabIWBackground_Dark",
+		@"tabBar": @{
+			@"AW_normal":   @"TabAWBackground_Dark",
+			@"IW_normal":   @"TabIWBackground_Dark",
 		},
-		@"tabItemSelected" : @{
-			@"AW_normal"   : @"TabAWBackgroundSelected_Dark",
-			@"IW_normal"   : @"TabIWBackgroundSelected_Dark",
+		@"tabItemSelected": @{
+			@"AW_normal":   @"TabAWBackgroundSelected_Dark",
+			@"IW_normal":   @"TabIWBackgroundSelected_Dark",
 		},
-		@"leftTabCap" : @{
-			@"AW_normal"   : @"TabAWDivider_Dark",
-			@"IW_normal"   : @"TabIWDivider_Dark",
+		@"leftTabCap": @{
+			@"AW_normal":   @"TabAWDivider_Dark",
+			@"IW_normal":   @"TabIWDivider_Dark",
 		},
-		@"leftTabCapSelected" : @{
-			@"AW_normal"   : @"TabAWDivider_Dark",
-			@"IW_normal"   : @"TabIWDivider_Dark",
+		@"leftTabCapSelected": @{
+			@"AW_normal":   @"TabAWDivider_Dark",
+			@"IW_normal":   @"TabIWDivider_Dark",
 		},
-		@"rightTabCap" : @{
-			@"AW_normal"   : @"TabAWDivider_Dark",
-			@"IW_normal"   : @"TabIWDivider_Dark",
+		@"rightTabCap": @{
+			@"AW_normal":   @"TabAWDivider_Dark",
+			@"IW_normal":   @"TabIWDivider_Dark",
 		},
-		@"rightTabCapSelected" : @{
-			@"AW_normal"   : @"TabAWDivider_Dark",
-			@"IW_normal"   : @"TabIWDivider_Dark",
+		@"rightTabCapSelected": @{
+			@"AW_normal":   @"TabAWDivider_Dark",
+			@"IW_normal":   @"TabIWDivider_Dark",
 		},
-		@"closeButton" : @{
-			@"AW_normal"   : @"TabCloseThinTemplate",
-			@"AW_pressed"  : @"TabCloseThin_Pressed_Template",
-			@"AW_rollover" : @"TabCloseThin_Rollover_Template",
+		@"closeButton": @{
+			@"AW_normal":   @"TabCloseThinTemplate",
+			@"AW_pressed":  @"TabCloseThin_Pressed_Template",
+			@"AW_rollover": @"TabCloseThin_Rollover_Template",
 		},
-		@"closeButtonModified" : @{
-			@"AW_normal"   : @"TabCloseThin_Modified_Template",
-			@"AW_pressed"  : @"TabCloseThin_ModifiedPressed_Template",
-			@"AW_rollover" : @"TabCloseThin_ModifiedRollover_Template",
+		@"closeButtonModified": @{
+			@"AW_normal":   @"TabCloseThin_Modified_Template",
+			@"AW_pressed":  @"TabCloseThin_ModifiedPressed_Template",
+			@"AW_rollover": @"TabCloseThin_ModifiedRollover_Template",
 		},
-		@"overflowButton" : @{
-			@"AW_normal"   : @"TabOverflowThinTemplate",
+		@"overflowButton": @{
+			@"AW_normal":   @"TabOverflowThinTemplate",
 		},
 	};
 	return [self imagesForNames:imageNames];
@@ -192,9 +192,9 @@ static NSString* kUserDefaultsTabItemLineBreakStyleKey = @"tabItemLineBreakStyle
 		[parStyle setLineBreakMode:(NSLineBreakMode)[[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsTabItemLineBreakStyleKey]];
 
 		_activeTabTextStyles = @{
-			NSParagraphStyleAttributeName  : parStyle,
-			NSFontAttributeName            : [NSFont systemFontOfSize:11],
-			NSForegroundColorAttributeName : [NSColor colorWithCalibratedWhite:0.2 alpha:1],
+			NSParagraphStyleAttributeName:  parStyle,
+			NSFontAttributeName:            [NSFont systemFontOfSize:11],
+			NSForegroundColorAttributeName: [NSColor colorWithCalibratedWhite:0.2 alpha:1],
 		}.mutableCopy;
 
 		_inactiveTabTextStyles = _activeTabTextStyles.mutableCopy;
@@ -204,9 +204,9 @@ static NSString* kUserDefaultsTabItemLineBreakStyleKey = @"tabItemLineBreakStyle
 		if([NSProcessInfo instancesRespondToSelector:@selector(isOperatingSystemAtLeastVersion:)] && [[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:{ 10, 14, 0 }])
 		{
 			_activeTabTextStyles = @{
-				NSParagraphStyleAttributeName  : parStyle,
-				NSFontAttributeName            : [NSFont systemFontOfSize:11],
-				NSForegroundColorAttributeName : [NSColor secondaryLabelColor],
+				NSParagraphStyleAttributeName:  parStyle,
+				NSFontAttributeName:            [NSFont systemFontOfSize:11],
+				NSForegroundColorAttributeName: [NSColor secondaryLabelColor],
 			}.mutableCopy;
 
 			_inactiveTabTextStyles = _activeTabTextStyles.mutableCopy;
@@ -247,7 +247,7 @@ static NSString* kUserDefaultsTabItemLineBreakStyleKey = @"tabItemLineBreakStyle
 			[shadow setShadowOffset:NSMakeSize(0, -1)];
 			[shadow setShadowBlurRadius:1];
 
-			NSDictionary* fontStyles = @{ NSShadowAttributeName : shadow, NSFontAttributeName : [NSFont boldSystemFontOfSize:11] };
+			NSDictionary* fontStyles = @{ NSShadowAttributeName: shadow, NSFontAttributeName: [NSFont boldSystemFontOfSize:11] };
 			[_activeTabTextStyles addEntriesFromDictionary:fontStyles];
 			[_inactiveTabTextStyles addEntriesFromDictionary:fontStyles];
 		}
@@ -431,7 +431,7 @@ static NSString* kUserDefaultsTabItemLineBreakStyleKey = @"tabItemLineBreakStyle
 		[self removeConstraints:_myConstraints];
 	_myConstraints = [NSMutableArray new];
 
-	NSDictionary* views = @{ @"left" : _leftCapView, @"right" : _rightCapView, @"title" : _textField, @"close" : _closeButton, @"overflow" : (_overflowButton ?: [NSNull null]) };
+	NSDictionary* views = @{ @"left": _leftCapView, @"right": _rightCapView, @"title": _textField, @"close": _closeButton, @"overflow": (_overflowButton ?: [NSNull null]) };
 	[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[left]-(3)-[close]-(>=3)-[title]-(>=3)-[right]-(0@450)-|" options:0 metrics:nil views:views]];
 	[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[left(==right)]|" options:0 metrics:nil views:views]];
 	[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[right]|" options:0 metrics:nil views:views]];

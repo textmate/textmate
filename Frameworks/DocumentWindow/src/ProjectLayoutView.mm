@@ -20,8 +20,8 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 + (void)initialize
 {
 	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
-		kUserDefaultsFileBrowserWidthKey : @250,
-		kUserDefaultsHTMLOutputSizeKey   : NSStringFromSize(NSMakeSize(200, 200))
+		kUserDefaultsFileBrowserWidthKey: @250,
+		kUserDefaultsHTMLOutputSizeKey:   NSStringFromSize(NSMakeSize(200, 200))
 	}];
 }
 
@@ -131,12 +131,12 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 	[super updateConstraints];
 
 	NSDictionary* views = @{
-		@"tabBarView"                 : _tabBarView,
-		@"documentView"               : _documentView,
-		@"fileBrowserView"            : _fileBrowserView            ?: [NSNull null],
-		@"fileBrowserDivider"         : _fileBrowserDivider         ?: [NSNull null],
-		@"htmlOutputView"             : _htmlOutputView             ?: [NSNull null],
-		@"htmlOutputDivider"          : _htmlOutputDivider          ?: [NSNull null],
+		@"tabBarView":         _tabBarView,
+		@"documentView":       _documentView,
+		@"fileBrowserView":    _fileBrowserView    ?: [NSNull null],
+		@"fileBrowserDivider": _fileBrowserDivider ?: [NSNull null],
+		@"htmlOutputView":     _htmlOutputView     ?: [NSNull null],
+		@"htmlOutputDivider":  _htmlOutputDivider  ?: [NSNull null],
 	};
 
 	// =======================

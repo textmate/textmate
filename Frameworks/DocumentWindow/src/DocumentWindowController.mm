@@ -219,8 +219,8 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		OakSetupKeyViewLoop(@[ self.layoutView ], NO);
 		self.window.initialFirstResponder = self.textView;
 
-		[self.window.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[view]|" options:0 metrics:nil views:@{ @"view" : self.layoutView }]];
-		[self.window.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[view]|" options:0 metrics:nil views:@{ @"view" : self.layoutView }]];
+		[self.window.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[view]|" options:0 metrics:nil views:@{ @"view": self.layoutView }]];
+		[self.window.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[view]|" options:0 metrics:nil views:@{ @"view": self.layoutView }]];
 
 		_arrayController = [[NSArrayController alloc] init];
 		[_arrayController bind:NSContentBinding toObject:self withKeyPath:@"documents" options:nil];
@@ -645,7 +645,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	for(NSURL* url in urls)
 	{
 		if([url.path isEqualToString:self.selectedDocument.path])
-			[self openItems:@[ @{ @"path" : [urls[url] path] } ] closingOtherTabs:NO];
+			[self openItems:@[ @{ @"path": [urls[url] path] } ] closingOtherTabs:NO];
 	}
 }
 
@@ -1737,7 +1737,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	for(NSURL* url in someURLs)
 	{
 		if([url isFileURL])
-			[items addObject:@{ @"path" : [url path] }];
+			[items addObject:@{ @"path": [url path] }];
 	}
 	[self openItems:items closingOtherTabs:OakIsAlternateKeyOrMouseEvent()];
 }
@@ -2141,7 +2141,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	std::string const customCandidate = settings.get(kSettingsRelatedFilePathKey, NULL_STR);
 
 	if(customCandidate != NULL_STR && customCandidate != documentPath && ([_documents indexOfObjectPassingTest:^BOOL(OakDocument* doc, NSUInteger, BOOL*){ return customCandidate == to_s(doc.path); }] != NSNotFound || path::exists(customCandidate)))
-		return [self openItems:@[ @{ @"path" : [NSString stringWithCxxString:customCandidate] } ] closingOtherTabs:NO];
+		return [self openItems:@[ @{ @"path": [NSString stringWithCxxString:customCandidate] } ] closingOtherTabs:NO];
 
 	for(auto const& entry : path::entries(documentDir))
 	{
@@ -2175,7 +2175,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	ASSERT(it != v.end());
 
 	NSString* path = [NSString stringWithCxxString:path::join(documentDir, v[((it - v.begin()) + 1) % v.size()])];
-	[self openItems:@[ @{ @"path" : path } ] closingOtherTabs:NO];
+	[self openItems:@[ @{ @"path": path } ] closingOtherTabs:NO];
 }
 
 // ============================
@@ -2626,7 +2626,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 	for(DocumentWindowController* controller in [controllers reverseObjectEnumerator])
 		[projects addObject:[controller sessionInfoIncludingUntitledDocuments:includeUntitled]];
 
-	NSDictionary* session = @{ @"projects" : projects };
+	NSDictionary* session = @{ @"projects": projects };
 	return [session writeToFile:[self sessionPath] atomically:YES];
 }
 

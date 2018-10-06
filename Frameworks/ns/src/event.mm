@@ -232,14 +232,14 @@ NSAttributedString* OakAttributedStringForEventString (NSString* eventString, NS
 	NSString* flags = [NSString stringWithCxxString:glyphString.substr(0, keyStartsAt)];
 	NSString* key   = [NSString stringWithCxxString:glyphString.substr(keyStartsAt)];
 
-	NSDictionary* style = @{ NSFontAttributeName : font };
+	NSDictionary* style = @{ NSFontAttributeName: font };
 	NSMutableAttributedString* str = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@%@\t", flags, key] attributes:style];
 
 	NSRange flagsRange = NSMakeRange(0, [flags length]);
 	NSRange keyRange   = NSMakeRange(NSMaxRange(flagsRange), [key length]);
 
 	if(NSGlyphInfo* glyphInfo = [FunctionKeys containsObject:key] ? [NSGlyphInfo glyphInfoWithGlyphName:key forFont:font baseString:key] : nil)
-		[str addAttributes:@{ NSGlyphInfoAttributeName : glyphInfo } range:keyRange];
+		[str addAttributes:@{ NSGlyphInfoAttributeName: glyphInfo } range:keyRange];
 
 	CGFloat flagsWidth = [[str attributedSubstringFromRange:flagsRange] size].width;
 	CGFloat keyWidth   = [font maximumAdvancement].width;
@@ -247,7 +247,7 @@ NSAttributedString* OakAttributedStringForEventString (NSString* eventString, NS
 	NSMutableParagraphStyle* pStyle = [NSMutableParagraphStyle new];
 	[pStyle setAlignment:NSTextAlignmentRight];
 	[pStyle setTabStops:@[ [[NSTextTab alloc] initWithType:NSLeftTabStopType location:ceil(flagsWidth + keyWidth)] ]];
-	[str addAttributes:@{ NSParagraphStyleAttributeName : pStyle } range:NSMakeRange(0, [str length])];
+	[str addAttributes:@{ NSParagraphStyleAttributeName: pStyle } range:NSMakeRange(0, [str length])];
 
 	return str;
 }

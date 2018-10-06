@@ -69,9 +69,9 @@
 	[shadow setShadowBlurRadius:1.2];
 
 	_textField.objectValue = [[NSMutableAttributedString alloc] initWithString:someText attributes:@{
-		NSParagraphStyleAttributeName  : pStyle,
-		NSForegroundColorAttributeName : [NSColor whiteColor],
-		NSShadowAttributeName          : shadow
+		NSParagraphStyleAttributeName:  pStyle,
+		NSForegroundColorAttributeName: [NSColor whiteColor],
+		NSShadowAttributeName:          shadow
 	}];
 }
 

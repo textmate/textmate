@@ -194,7 +194,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		remove.buttonType = NSMomentaryPushInButton;
 		remove.image      = [NSImage imageNamed:NSImageNameRemoveTemplate];
 
-		NSDictionary* views = @{ @"icon" : imageView, @"text" : textField, @"count" : countOfLeafs, @"remove" : remove };
+		NSDictionary* views = @{ @"icon": imageView, @"text": textField, @"count": countOfLeafs, @"remove": remove };
 		OakAddAutoLayoutViewsToSuperview([views allValues], self);
 
 		[textField setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
@@ -253,9 +253,9 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		NSMutableParagraphStyle* pStyle = [NSMutableParagraphStyle new];
 		[pStyle setAlignment:NSTextAlignmentCenter];
 		NSDictionary* attributes = @{
-			NSFontAttributeName            : [NSFont boldSystemFontOfSize:0],
-			NSForegroundColorAttributeName : color,
-			NSParagraphStyleAttributeName  : pStyle,
+			NSFontAttributeName:            [NSFont boldSystemFontOfSize:0],
+			NSForegroundColorAttributeName: color,
+			NSParagraphStyleAttributeName:  pStyle,
 		};
 
 		NSAttributedString* str = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%lu", (index + 1) % 10] attributes:attributes];
@@ -333,9 +333,9 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		_scrollView.documentView          = _outlineView;
 
 		NSDictionary* views = @{
-			@"topDivider"    : _topDivider,
-			@"scrollView"    : _scrollView,
-			@"bottomDivider" : _bottomDivider,
+			@"topDivider":    _topDivider,
+			@"scrollView":    _scrollView,
+			@"bottomDivider": _bottomDivider,
 		};
 
 		NSView* containerView = [[NSView alloc] initWithFrame:NSZeroRect];

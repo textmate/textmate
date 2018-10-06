@@ -67,7 +67,7 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 + (void)initialize
 {
 	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
-		kUserDefaultsSoftwareUpdateChannelKey : kSoftwareUpdateChannelRelease
+		kUserDefaultsSoftwareUpdateChannelKey: kSoftwareUpdateChannelRelease
 	}];
 }
 

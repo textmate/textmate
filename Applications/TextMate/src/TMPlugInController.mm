@@ -37,7 +37,7 @@ static id CreateInstanceOfPlugInClass (Class cl, TMPlugInController* controller)
 + (void)initialize
 {
 	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
-		kUserDefaultsDisabledPlugInsKey : @[ @"io.emmet.EmmetTextmate" ]
+		kUserDefaultsDisabledPlugInsKey: @[ @"io.emmet.EmmetTextmate" ]
 	}];
 }
 

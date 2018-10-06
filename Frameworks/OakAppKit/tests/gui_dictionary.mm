@@ -24,8 +24,8 @@
 - (NSDictionary*)stringAttributes
 {
 	static NSDictionary* attrs = @{
-		NSForegroundColorAttributeName : [NSColor blackColor],
-		NSFontAttributeName            : [NSFont userFixedPitchFontOfSize:12]
+		NSForegroundColorAttributeName: [NSColor blackColor],
+		NSFontAttributeName:            [NSFont userFixedPitchFontOfSize:12]
 	};
 	return attrs;
 }

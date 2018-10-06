@@ -159,10 +159,10 @@ static bool uninstall_mate (std::string const& path)
 		[OakStringListTransformer createTransformerWithName:@"OakRMateInterfaceTransformer" andObjectsArray:@[ kRMateServerListenLocalhost, kRMateServerListenRemote ]];
 
 		self.defaultsProperties = @{
-			@"path"         : kUserDefaultsMateInstallPathKey,
-			@"disableRMate" : kUserDefaultsDisableRMateServerKey,
-			@"interface"    : kUserDefaultsRMateServerListenKey,
-			@"port"         : kUserDefaultsRMateServerPortKey,
+			@"path":         kUserDefaultsMateInstallPathKey,
+			@"disableRMate": kUserDefaultsDisableRMateServerKey,
+			@"interface":    kUserDefaultsRMateServerListenKey,
+			@"port":         kUserDefaultsRMateServerPortKey,
 		};
 	}
 	return self;

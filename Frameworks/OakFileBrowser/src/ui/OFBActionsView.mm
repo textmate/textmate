@@ -44,19 +44,19 @@ static NSButton* OakCreateImageButton (NSImage* image)
 
 		NSView* wrappedActionsPopUpButton = [NSView new];
 		OakAddAutoLayoutViewsToSuperview(@[ self.actionsPopUpButton ], wrappedActionsPopUpButton);
-		[wrappedActionsPopUpButton addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[popup]|" options:0 metrics:nil views:@{ @"popup" : self.actionsPopUpButton }]];
-		[wrappedActionsPopUpButton addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[popup]|" options:0 metrics:nil views:@{ @"popup" : self.actionsPopUpButton }]];
+		[wrappedActionsPopUpButton addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[popup]|" options:0 metrics:nil views:@{ @"popup": self.actionsPopUpButton }]];
+		[wrappedActionsPopUpButton addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[popup]|" options:0 metrics:nil views:@{ @"popup": self.actionsPopUpButton }]];
 
 		NSView* divider = OakCreateDividerImageView();
 
 		NSDictionary* views = @{
-			@"create"    : self.createButton,
-			@"divider"   : divider,
-			@"actions"   : wrappedActionsPopUpButton,
-			@"reload"    : self.reloadButton,
-			@"search"    : self.searchButton,
-			@"favorites" : self.favoritesButton,
-			@"scm"       : self.scmButton,
+			@"create":    self.createButton,
+			@"divider":   divider,
+			@"actions":   wrappedActionsPopUpButton,
+			@"reload":    self.reloadButton,
+			@"search":    self.searchButton,
+			@"favorites": self.favoritesButton,
+			@"scm":       self.scmButton,
 		};
 
 		OakAddAutoLayoutViewsToSuperview([views allValues], self);

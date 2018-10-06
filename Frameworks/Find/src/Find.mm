@@ -322,7 +322,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	NSResponder* keyView = [[NSApp keyWindow] firstResponder];
 	id element = [keyView respondsToSelector:@selector(cell)] ? [keyView performSelector:@selector(cell)] : keyView;
 	if([element respondsToSelector:@selector(accessibilityIsIgnored)] && ![element accessibilityIsIgnored])
-		NSAccessibilityPostNotificationWithUserInfo(element, NSAccessibilityAnnouncementRequestedNotification, @{ NSAccessibilityAnnouncementKey : self.windowController.statusString });
+		NSAccessibilityPostNotificationWithUserInfo(element, NSAccessibilityAnnouncementRequestedNotification, @{ NSAccessibilityAnnouncementKey: self.windowController.statusString });
 
 	if(self.closeWindowOnSuccess && aNumber != 0)
 		return [self.windowController close];
@@ -454,12 +454,12 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	for(FFResultNode* parent in _results.children)
 	{
 		[documents addObject:@{
-			@"identifier"      : parent.firstResultNode.document.identifier.UUIDString,
-			@"firstMatchRange" : [NSString stringWithCxxString:parent.firstResultNode.match.range],
-			@"lastMatchRange"  : [NSString stringWithCxxString:parent.lastResultNode.match.range],
+			@"identifier":      parent.firstResultNode.document.identifier.UUIDString,
+			@"firstMatchRange": [NSString stringWithCxxString:parent.firstResultNode.match.range],
+			@"lastMatchRange":  [NSString stringWithCxxString:parent.lastResultNode.match.range],
 		}];
 	}
-	[OakPasteboard pasteboardWithName:NSFindPboard].auxiliaryOptionsForCurrent = @{ @"documents" : documents };
+	[OakPasteboard pasteboardWithName:NSFindPboard].auxiliaryOptionsForCurrent = @{ @"documents": documents };
 }
 
 - (void)folderSearchDidFinish:(NSNotification*)aNotification

@@ -196,7 +196,7 @@ static NSArray<OakOpenWithApplicationInfo*>* ApplicationURLsForPaths (NSSet* pat
 
 	NSAppleEventDescriptor* odocEvent = [NSAppleEventDescriptor appleEventWithEventClass:kCoreEventClass eventID:kAEOpenDocuments targetDescriptor:nil returnID:kAutoGenerateReturnID transactionID:kAnyTransactionID];
 	[odocEvent setParamDescriptor:listDesc forKeyword:keyDirectObject];
-	NSDictionary* launchOptions = @{ NSWorkspaceLaunchConfigurationAppleEvent : odocEvent };
+	NSDictionary* launchOptions = @{ NSWorkspaceLaunchConfigurationAppleEvent: odocEvent };
 
 	NSError* err = nil;
 	if(![[NSWorkspace sharedWorkspace] launchApplicationAtURL:applicationURL options:NSWorkspaceLaunchDefault configuration:launchOptions error:&err])

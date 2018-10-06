@@ -25,8 +25,8 @@ static __weak OakToolTip* LastToolTip;
 + (void)initialize
 {
 	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
-		@"OakToolTipMouseMoveIgnorePeriod"  : @1,
-		@"OakToolTipMouseDistanceThreshold" : @5,
+		@"OakToolTipMouseMoveIgnorePeriod":  @1,
+		@"OakToolTipMouseDistanceThreshold": @5,
 	}];
 }
 
@@ -37,7 +37,7 @@ static __weak OakToolTip* LastToolTip;
 	{
 		NSFont* defaultFont = [NSFont toolTipsFontOfSize:0];
 		NSFontDescriptor* descriptor = [defaultFont.fontDescriptor fontDescriptorByAddingAttributes:@{
-			NSFontFeatureSettingsAttribute: @[ @{ NSFontFeatureTypeIdentifierKey : @(kNumberSpacingType), NSFontFeatureSelectorIdentifierKey : @(kMonospacedNumbersSelector) } ]
+			NSFontFeatureSettingsAttribute: @[ @{ NSFontFeatureTypeIdentifierKey: @(kNumberSpacingType), NSFontFeatureSelectorIdentifierKey: @(kMonospacedNumbersSelector) } ]
 		}];
 		defaultFont = [NSFont fontWithDescriptor:descriptor size:0];
 

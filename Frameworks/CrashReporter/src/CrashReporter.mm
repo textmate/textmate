@@ -140,7 +140,7 @@ static std::string create_gzipped_file (std::string const& path)
 						NSUserNotification* notification = [NSUserNotification new];
 						notification.title           = @"Crash Report Sent";
 						notification.informativeText = @"Diagnostic information has been sent to MacroMates.com regarding your last crash.";
-						notification.userInfo        = @{ @"path" : path, @"url" : url };
+						notification.userInfo        = @{ @"path": path, @"url": url };
 						[[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
 					}
 				}

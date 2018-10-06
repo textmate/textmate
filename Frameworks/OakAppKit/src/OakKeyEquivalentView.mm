@@ -86,7 +86,7 @@ static NSString* const kRecordingPlaceholderString = @"…";
 			_clearButton.target = self;
 			_clearButton.action = @selector(clearKeyEquivalent:);
 
-			NSDictionary* views = @{ @"clear" : _clearButton };
+			NSDictionary* views = @{ @"clear": _clearButton };
 			OakAddAutoLayoutViewsToSuperview([views allValues], self);
 			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(>=4)-[clear]-(4)-|" options:0 metrics:nil views:views]];
 			[self addConstraint:[NSLayoutConstraint constraintWithItem:_clearButton attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
@@ -206,8 +206,8 @@ static NSString* const kRecordingPlaceholderString = @"…";
 	NSEraseRect(NSIntersectionRect(aRect, NSInsetRect(frame, 1, 1)));
 
 	NSDictionary* stringAttributes = @{
-		NSForegroundColorAttributeName : self.recording ? [NSColor grayColor] : [NSColor controlTextColor],
-		NSFontAttributeName            : OakControlFont()
+		NSForegroundColorAttributeName: self.recording ? [NSColor grayColor] : [NSColor controlTextColor],
+		NSFontAttributeName:            OakControlFont()
 	};
 
 	NSSize size = [self.displayString sizeWithAttributes:stringAttributes];

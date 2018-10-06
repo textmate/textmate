@@ -75,12 +75,12 @@ static NSButton* OakSmallButton (NSString* title, SEL action, id target, NSInteg
 	_progressIndicator.bezeled              = NO;
 
 	NSDictionary* views = @{
-		@"divider"  : self.divider,
-		@"label"    : self.label,
-		@"progress" : self.progressIndicator,
-		@"never"    : self.neverButton,
-		@"notNow"   : self.notNowButton,
-		@"install"  : self.installButton,
+		@"divider":  self.divider,
+		@"label":    self.label,
+		@"progress": self.progressIndicator,
+		@"never":    self.neverButton,
+		@"notNow":   self.notNowButton,
+		@"install":  self.installButton,
 	};
 
 	self.view = [[NSView alloc] initWithFrame:NSZeroRect];

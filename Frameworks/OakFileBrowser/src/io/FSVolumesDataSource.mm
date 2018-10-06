@@ -30,7 +30,7 @@
 
 - (void)workspaceDidChangeVolumeList:(NSNotification*)aNotification
 {
-	[[NSNotificationCenter defaultCenter] postNotificationName:FSItemDidReloadNotification object:_dataSource userInfo:@{ @"item" : self }];
+	[[NSNotificationCenter defaultCenter] postNotificationName:FSItemDidReloadNotification object:_dataSource userInfo:@{ @"item": self }];
 }
 
 - (void)loadChildren:(FSDataSource*)dataSource completionHandler:(void(^)(NSArray*))block

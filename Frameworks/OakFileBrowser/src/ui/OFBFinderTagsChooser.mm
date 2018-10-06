@@ -177,9 +177,9 @@ static constexpr CGFloat LabelNameHeight = 15;
 	else	labelColor = [NSColor colorWithCalibratedWhite:0 alpha:0.5];
 
 	NSDictionary* labelAttributes = @{
-		NSFontAttributeName : [NSFont boldSystemFontOfSize:[NSFont systemFontSizeForControlSize:NSSmallControlSize]],
-		NSForegroundColorAttributeName : labelColor,
-		NSParagraphStyleAttributeName  : style,
+		NSFontAttributeName:            [NSFont boldSystemFontOfSize:[NSFont systemFontSizeForControlSize:NSSmallControlSize]],
+		NSForegroundColorAttributeName: labelColor,
+		NSParagraphStyleAttributeName:  style,
 	};
 	return labelAttributes;
 }

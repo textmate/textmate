@@ -80,8 +80,8 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSObject* accessibi
 
 		NSView* wrappedBundleItemsPopUpButton = [NSView new];
 		OakAddAutoLayoutViewsToSuperview(@[ self.bundleItemsPopUp ], wrappedBundleItemsPopUpButton);
-		[wrappedBundleItemsPopUpButton addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[popup]|" options:0 metrics:nil views:@{ @"popup" : self.bundleItemsPopUp }]];
-		[wrappedBundleItemsPopUpButton addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[popup]|" options:0 metrics:nil views:@{ @"popup" : self.bundleItemsPopUp }]];
+		[wrappedBundleItemsPopUpButton addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[popup]|" options:0 metrics:nil views:@{ @"popup": self.bundleItemsPopUp }]];
+		[wrappedBundleItemsPopUpButton addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[popup]|" options:0 metrics:nil views:@{ @"popup": self.bundleItemsPopUp }]];
 
 		NSTextField* line    = OakCreateTextField(@"Line:");
 
@@ -92,18 +92,18 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSObject* accessibi
 		NSView* dividerFive  = OakCreateDividerImageView();
 
 		NSDictionary* views = @{
-			@"line"         : line,
-			@"selection"    : self.selectionField,
-			@"dividerOne"   : dividerOne,
-			@"grammar"      : self.grammarPopUp,
-			@"dividerTwo"   : dividerTwo,
-			@"items"        : wrappedBundleItemsPopUpButton,
-			@"dividerThree" : dividerThree,
-			@"tabSize"      : self.tabSizePopUp,
-			@"dividerFour"  : dividerFour,
-			@"symbol"       : self.symbolPopUp,
-			@"dividerFive"  : dividerFive,
-			@"recording"    : self.macroRecordingButton,
+			@"line":         line,
+			@"selection":    self.selectionField,
+			@"dividerOne":   dividerOne,
+			@"grammar":      self.grammarPopUp,
+			@"dividerTwo":   dividerTwo,
+			@"items":        wrappedBundleItemsPopUpButton,
+			@"dividerThree": dividerThree,
+			@"tabSize":      self.tabSizePopUp,
+			@"dividerFour":  dividerFour,
+			@"symbol":       self.symbolPopUp,
+			@"dividerFive":  dividerFive,
+			@"recording":    self.macroRecordingButton,
 		};
 
 		OakAddAutoLayoutViewsToSuperview([views allValues], self);

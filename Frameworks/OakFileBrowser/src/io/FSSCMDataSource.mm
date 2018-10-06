@@ -134,7 +134,7 @@ static NSArray* convert (std::map<std::string, scm::status::type> const& pathsMa
 		if(FSItem* item = [_items objectForKey:key])
 		{
 			if(item.children)
-				[[NSNotificationCenter defaultCenter] postNotificationName:FSItemDidReloadNotification object:self userInfo:@{ @"item" : item }];
+				[[NSNotificationCenter defaultCenter] postNotificationName:FSItemDidReloadNotification object:self userInfo:@{ @"item": item }];
 		}
 	}
 }

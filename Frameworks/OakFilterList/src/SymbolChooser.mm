@@ -45,12 +45,12 @@ static SymbolChooserItem* CreateItem (OakDocument* document, text::pos_t const& 
 		OakBackgroundFillView* bottomDivider = OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]);
 
 		NSDictionary* views = @{
-			@"searchField"        : self.searchField,
-			@"topDivider"         : topDivider,
-			@"scrollView"         : self.scrollView,
-			@"bottomDivider"      : bottomDivider,
-			@"statusTextField"    : self.statusTextField,
-			@"itemCountTextField" : self.itemCountTextField,
+			@"searchField":        self.searchField,
+			@"topDivider":         topDivider,
+			@"scrollView":         self.scrollView,
+			@"bottomDivider":      bottomDivider,
+			@"statusTextField":    self.statusTextField,
+			@"itemCountTextField": self.itemCountTextField,
 		};
 
 		NSView* contentView = self.window.contentView;

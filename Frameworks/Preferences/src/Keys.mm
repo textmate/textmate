@@ -5,34 +5,34 @@
 static NSArray* default_environment ()
 {
 	return @[
-		@{ @"enabled" : @NO, @"name" : @"PATH",            @"value" : @"$PATH:/opt/local/bin:/usr/local/bin:/usr/texbin" },
-		@{ @"enabled" : @NO, @"name" : @"TM_C_POINTER",    @"value" : @"* "                               },
-		@{ @"enabled" : @NO, @"name" : @"TM_CXX_FLAGS",    @"value" : @"-framework Carbon -liconv -include vector -include string -include map -include cstdio -funsigned-char -Wall -Wwrite-strings -Wformat=2 -Winit-self -Wmissing-include-dirs -Wno-parentheses -Wno-sign-compare -Wno-switch" },
-		@{ @"enabled" : @NO, @"name" : @"TM_FULLNAME",     @"value" : @"Scrooge McDuck"                   },
-		@{ @"enabled" : @NO, @"name" : @"TM_ORGANIZATION", @"value" : @"The Billionaires Club"            },
-		@{ @"enabled" : @NO, @"name" : @"TM_XHTML",        @"value" : @" /"                               },
-		@{ @"enabled" : @NO, @"name" : @"TM_GIT",          @"value" : @"/opt/local/bin/git"               },
-		@{ @"enabled" : @NO, @"name" : @"TM_HG",           @"value" : @"/opt/local/bin/hg"                },
-		@{ @"enabled" : @NO, @"name" : @"TM_MAKE_FLAGS",   @"value" : @"rj8"                              },
+		@{ @"enabled": @NO, @"name": @"PATH",            @"value": @"$PATH:/opt/local/bin:/usr/local/bin:/usr/texbin" },
+		@{ @"enabled": @NO, @"name": @"TM_C_POINTER",    @"value": @"* "                               },
+		@{ @"enabled": @NO, @"name": @"TM_CXX_FLAGS",    @"value": @"-framework Carbon -liconv -include vector -include string -include map -include cstdio -funsigned-char -Wall -Wwrite-strings -Wformat=2 -Winit-self -Wmissing-include-dirs -Wno-parentheses -Wno-sign-compare -Wno-switch" },
+		@{ @"enabled": @NO, @"name": @"TM_FULLNAME",     @"value": @"Scrooge McDuck"                   },
+		@{ @"enabled": @NO, @"name": @"TM_ORGANIZATION", @"value": @"The Billionaires Club"            },
+		@{ @"enabled": @NO, @"name": @"TM_XHTML",        @"value": @" /"                               },
+		@{ @"enabled": @NO, @"name": @"TM_GIT",          @"value": @"/opt/local/bin/git"               },
+		@{ @"enabled": @NO, @"name": @"TM_HG",           @"value": @"/opt/local/bin/hg"                },
+		@{ @"enabled": @NO, @"name": @"TM_MAKE_FLAGS",   @"value": @"rj8"                              },
 	];
 }
 
 static NSDictionary* default_settings ()
 {
 	return @{
-		kUserDefaultsHTMLOutputPlacementKey     : @"window",
-		kUserDefaultsFileBrowserPlacementKey    : @"right",
-		kUserDefaultsFoldersOnTopKey            : @YES,
-		kUserDefaultsShowFileExtensionsKey      : @NO,
-		kUserDefaultsEnvironmentVariablesKey    : default_environment(),
-		kUserDefaultsDisableBundleUpdatesKey    : @NO,
-		kUserDefaultsLastBundleUpdateCheckKey   : [NSDate distantPast],
-		kUserDefaultsDisableRMateServerKey      : @NO,
-		kUserDefaultsRMateServerListenKey       : kRMateServerListenLocalhost,
-		kUserDefaultsRMateServerPortKey         : @"52698",
-		kUserDefaultsLicenseOwnerKey            : NSFullUserName(),
-		kUserDefaultsLineNumbersKey             : @YES,
-		kUserDefaultsCrashReportsContactInfoKey : NSFullUserName() ?: @"Anonymous",
+		kUserDefaultsHTMLOutputPlacementKey:     @"window",
+		kUserDefaultsFileBrowserPlacementKey:    @"right",
+		kUserDefaultsFoldersOnTopKey:            @YES,
+		kUserDefaultsShowFileExtensionsKey:      @NO,
+		kUserDefaultsEnvironmentVariablesKey:    default_environment(),
+		kUserDefaultsDisableBundleUpdatesKey:    @NO,
+		kUserDefaultsLastBundleUpdateCheckKey:   [NSDate distantPast],
+		kUserDefaultsDisableRMateServerKey:      @NO,
+		kUserDefaultsRMateServerListenKey:       kRMateServerListenLocalhost,
+		kUserDefaultsRMateServerPortKey:         @"52698",
+		kUserDefaultsLicenseOwnerKey:            NSFullUserName(),
+		kUserDefaultsLineNumbersKey:             @YES,
+		kUserDefaultsCrashReportsContactInfoKey: NSFullUserName() ?: @"Anonymous",
 	};
 }
 

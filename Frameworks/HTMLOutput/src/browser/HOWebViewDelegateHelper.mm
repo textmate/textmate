@@ -28,7 +28,7 @@ static BOOL IsProtocolRelativeURL (NSURL* url)
 + (void)initialize
 {
 	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
-		kUserDefaultsDefaultURLProtocolKey : @"https",
+		kUserDefaultsDefaultURLProtocolKey: @"https",
 	}];
 }
 

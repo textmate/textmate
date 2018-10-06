@@ -4,7 +4,7 @@
 @implementation NSSavePanel (HiddenFiles)
 + (void)initialize
 {
-	[[NSUserDefaults standardUserDefaults] registerDefaults:@{ @"NSOpenPanelShowHiddenFiles" : @NO }];
+	[[NSUserDefaults standardUserDefaults] registerDefaults:@{ @"NSOpenPanelShowHiddenFiles": @NO }];
 }
 
 - (void)setShowsHiddenFilesCheckBox:(BOOL)flag

@@ -11,15 +11,15 @@
 @implementation OakPasteboardEntry (DisplayString)
 - (NSAttributedString*)displayString
 {
-	static NSAttributedString* const lineJoiner = [[NSAttributedString alloc] initWithString:@"¬" attributes:@{ NSForegroundColorAttributeName : [NSColor lightGrayColor] }];
-	static NSAttributedString* const tabJoiner  = [[NSAttributedString alloc] initWithString:@"‣" attributes:@{ NSForegroundColorAttributeName : [NSColor lightGrayColor] }];
-	static NSAttributedString* const ellipsis   = [[NSAttributedString alloc] initWithString:@"…" attributes:@{ NSForegroundColorAttributeName : [NSColor lightGrayColor] }];
+	static NSAttributedString* const lineJoiner = [[NSAttributedString alloc] initWithString:@"¬" attributes:@{ NSForegroundColorAttributeName: [NSColor lightGrayColor] }];
+	static NSAttributedString* const tabJoiner  = [[NSAttributedString alloc] initWithString:@"‣" attributes:@{ NSForegroundColorAttributeName: [NSColor lightGrayColor] }];
+	static NSAttributedString* const ellipsis   = [[NSAttributedString alloc] initWithString:@"…" attributes:@{ NSForegroundColorAttributeName: [NSColor lightGrayColor] }];
 
 	NSMutableParagraphStyle* paragraphStyle = [[NSMutableParagraphStyle alloc] init];
 	[paragraphStyle setLineBreakMode:NSLineBreakByTruncatingTail];
 	NSDictionary* defaultAttributes = @{
-		NSParagraphStyleAttributeName : paragraphStyle,
-		NSFontAttributeName : [NSFont controlContentFontOfSize:0]
+		NSParagraphStyleAttributeName: paragraphStyle,
+		NSFontAttributeName:           [NSFont controlContentFontOfSize:0]
 	};
 
 	if([self.options[OakFindRegularExpressionOption] boolValue])
@@ -154,16 +154,16 @@ static NSMutableDictionary* SharedChoosers;
 		actionButton.action   = @selector(accept:);
 
 		NSDictionary* views = @{
-			@"searchField"        : self.searchField,
-			@"aboveScopeBarDark"  : OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]),
-			@"aboveScopeBarLight" : OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.797 alpha:1], [NSColor colorWithCalibratedWhite:0.912 alpha:1]),
-			@"scopeBar"           : scopeBar,
-			@"topDivider"         : OakCreateHorizontalLine([NSColor darkGrayColor], [NSColor colorWithCalibratedWhite:0.551 alpha:1]),
-			@"scrollView"         : self.scrollView,
-			@"bottomDivider"      : OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]),
-			@"delete"             : deleteButton,
-			@"clearAll"           : clearAllButton,
-			@"action"             : actionButton,
+			@"searchField":        self.searchField,
+			@"aboveScopeBarDark":  OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]),
+			@"aboveScopeBarLight": OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.797 alpha:1], [NSColor colorWithCalibratedWhite:0.912 alpha:1]),
+			@"scopeBar":           scopeBar,
+			@"topDivider":         OakCreateHorizontalLine([NSColor darkGrayColor], [NSColor colorWithCalibratedWhite:0.551 alpha:1]),
+			@"scrollView":         self.scrollView,
+			@"bottomDivider":      OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]),
+			@"delete":             deleteButton,
+			@"clearAll":           clearAllButton,
+			@"action":             actionButton,
 		};
 
 		NSView* contentView = self.window.contentView;

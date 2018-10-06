@@ -281,7 +281,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		[shortcutTextField setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
 		[shortcutTextField setContentCompressionResistancePriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
 
-		NSDictionary* views = @{ @"icon" : imageView, @"name" : textField, @"context" : contextTextField, @"shortcut" : shortcutTextField };
+		NSDictionary* views = @{ @"icon": imageView, @"name": textField, @"context": contextTextField, @"shortcut": shortcutTextField };
 		OakAddAutoLayoutViewsToSuperview([views allValues], self);
 
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(4)-[icon]-(4)-[name]-(4)-[shortcut]-(8)-|" options:0 metrics:nil views:views]];
@@ -553,17 +553,17 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 - (NSDictionary*)allViews
 {
 	return @{
-		@"searchField"        : self.keyEquivalentInput ? self.keyEquivalentView : self.searchField,
-		@"actions"            : self.actionsPopUpButton,
-		@"aboveScopeBarDark"  : self.aboveScopeBarDark,
-		@"aboveScopeBarLight" : self.aboveScopeBarLight,
-		@"scopeBar"           : self.scopeBar,
-		@"topDivider"         : self.topDivider,
-		@"scrollView"         : self.scrollView,
-		@"bottomDivider"      : self.bottomDivider,
-		@"status"             : self.statusTextField,
-		@"edit"               : self.editButton,
-		@"select"             : self.selectButton,
+		@"searchField":        self.keyEquivalentInput ? self.keyEquivalentView : self.searchField,
+		@"actions":            self.actionsPopUpButton,
+		@"aboveScopeBarDark":  self.aboveScopeBarDark,
+		@"aboveScopeBarLight": self.aboveScopeBarLight,
+		@"scopeBar":           self.scopeBar,
+		@"topDivider":         self.topDivider,
+		@"scrollView":         self.scrollView,
+		@"bottomDivider":      self.bottomDivider,
+		@"status":             self.statusTextField,
+		@"edit":               self.editButton,
+		@"select":             self.selectButton,
 	};
 }
 

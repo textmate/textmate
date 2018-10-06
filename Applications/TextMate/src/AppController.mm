@@ -503,8 +503,8 @@ BOOL HasDocumentWindow (NSArray* windows)
 		rename(src.c_str(), dst.c_str());
 
 	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
-		@"NSRecentDocumentsLimit"   : @25,
-		@"WebKitDeveloperExtras"    : @YES,
+		@"NSRecentDocumentsLimit": @25,
+		@"WebKitDeveloperExtras":  @YES,
 	}];
 	RegisterDefaults();
 
@@ -765,7 +765,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 - (void)bundleItemChooserDidSelectItems:(id)sender
 {
 	for(id item in [sender selectedItems])
-		[NSApp sendAction:@selector(performBundleItemWithUUIDStringFrom:) to:nil from:@{ @"representedObject" : [item valueForKey:@"uuid"] }];
+		[NSApp sendAction:@selector(performBundleItemWithUUIDStringFrom:) to:nil from:@{ @"representedObject": [item valueForKey:@"uuid"] }];
 }
 
 // ===========================

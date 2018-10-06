@@ -39,17 +39,17 @@ static size_t line_count (std::string const& text)
 	if([self isHighlighted])
 	{
 		static NSDictionary* const highlightedAttributes = @{
-			NSForegroundColorAttributeName : [NSColor alternateSelectedControlTextColor],
-			NSParagraphStyleAttributeName  : style,
-			NSFontAttributeName            : [NSFont controlContentFontOfSize:0],
+			NSForegroundColorAttributeName: [NSColor alternateSelectedControlTextColor],
+			NSParagraphStyleAttributeName:  style,
+			NSFontAttributeName:            [NSFont controlContentFontOfSize:0],
 		};
 		return highlightedAttributes;
 	}
 	else
 	{
 		static NSDictionary* const attributes = @{
-			NSParagraphStyleAttributeName : style,
-			NSFontAttributeName           : [NSFont controlContentFontOfSize:0],
+			NSParagraphStyleAttributeName: style,
+			NSFontAttributeName:           [NSFont controlContentFontOfSize:0],
 		};
 		return attributes;
 	}
@@ -106,8 +106,8 @@ static size_t line_count (std::string const& text)
 		{
 			NSString* moreLinesText           = [NSString stringWithFormat:@"%lu more line%s", [lines count] - [clippedLines count], ([lines count] - [clippedLines count]) != 1 ? "s" : ""];
 			NSDictionary* moreLinesAttributes = @{
-				NSForegroundColorAttributeName : ([self isHighlighted] ? [NSColor whiteColor] : [NSColor lightGrayColor]),
-				NSFontAttributeName            : [NSFont controlContentFontOfSize:[NSFont systemFontSizeForControlSize:NSControlSizeSmall]],
+				NSForegroundColorAttributeName: ([self isHighlighted] ? [NSColor whiteColor] : [NSColor lightGrayColor]),
+				NSFontAttributeName:            [NSFont controlContentFontOfSize:[NSFont systemFontSizeForControlSize:NSControlSizeSmall]],
 			};
 			NSAttributedString* moreLines     = [[NSAttributedString alloc] initWithString:moreLinesText attributes:moreLinesAttributes];
 			NSSize size             = [moreLines size];

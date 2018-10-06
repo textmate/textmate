@@ -336,43 +336,43 @@ static NSButton* OakCreateStopSearchButton ()
 - (NSDictionary*)allViews
 {
 	NSDictionary* views = @{
-		@"findLabel"         : self.findLabel,
-		@"find"              : self.findTextField,
-		@"findHistory"       : self.findHistoryButton,
-		@"count"             : self.countButton,
-		@"replaceLabel"      : self.replaceLabel,
-		@"replace"           : self.replaceTextField,
-		@"replaceHistory"    : self.replaceHistoryButton,
+		@"findLabel":         self.findLabel,
+		@"find":              self.findTextField,
+		@"findHistory":       self.findHistoryButton,
+		@"count":             self.countButton,
+		@"replaceLabel":      self.replaceLabel,
+		@"replace":           self.replaceTextField,
+		@"replaceHistory":    self.replaceHistoryButton,
 
-		@"optionsLabel"      : self.optionsLabel,
-		@"regularExpression" : self.regularExpressionCheckBox,
-		@"ignoreWhitespace"  : self.ignoreWhitespaceCheckBox,
-		@"ignoreCase"        : self.ignoreCaseCheckBox,
-		@"wrapAround"        : self.wrapAroundCheckBox,
+		@"optionsLabel":      self.optionsLabel,
+		@"regularExpression": self.regularExpressionCheckBox,
+		@"ignoreWhitespace":  self.ignoreWhitespaceCheckBox,
+		@"ignoreCase":        self.ignoreCaseCheckBox,
+		@"wrapAround":        self.wrapAroundCheckBox,
 
-		@"whereLabel"        : self.whereLabel,
-		@"where"             : self.wherePopUpButton,
-		@"matching"          : self.matchingLabel,
-		@"glob"              : self.globTextField,
-		@"actions"           : self.actionsPopUpButton,
+		@"whereLabel":        self.whereLabel,
+		@"where":             self.wherePopUpButton,
+		@"matching":          self.matchingLabel,
+		@"glob":              self.globTextField,
+		@"actions":           self.actionsPopUpButton,
 
-		@"results"           : self.showsResultsOutlineView ? self.resultsViewController.view : [NSNull null],
-		@"status"            : self.statusTextField,
+		@"results":           self.showsResultsOutlineView ? self.resultsViewController.view : [NSNull null],
+		@"status":            self.statusTextField,
 
-		@"findAll"           : self.findAllButton,
-		@"replaceAll"        : self.replaceAllButton,
-		@"replaceButton"     : self.replaceButton,
-		@"replaceAndFind"    : self.replaceAndFindButton,
-		@"previous"          : self.findPreviousButton,
-		@"next"              : self.findNextButton,
+		@"findAll":           self.findAllButton,
+		@"replaceAll":        self.replaceAllButton,
+		@"replaceButton":     self.replaceButton,
+		@"replaceAndFind":    self.replaceAndFindButton,
+		@"previous":          self.findPreviousButton,
+		@"next":              self.findNextButton,
 	};
 
 	if(self.isBusy)
 	{
 		NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithDictionary:views];
 		[dict addEntriesFromDictionary:@{
-			@"busy"       : self.progressIndicator,
-			@"stopSearch" : self.stopSearchButton,
+			@"busy":       self.progressIndicator,
+			@"stopSearch": self.stopSearchButton,
 		}];
 		views = dict;
 	}
@@ -422,7 +422,7 @@ static NSButton* OakCreateStopSearchButton ()
 	if(self.showsResultsOutlineView)
 	{
 		CONSTRAINT(@"H:|[results]|", 0);
-		[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[where]-[results(>=50,==height@490)]-(8)-[status]" options:0 metrics:@{ @"height" : @(self.findResultsHeight) } views:views]];
+		[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[where]-[results(>=50,==height@490)]-(8)-[status]" options:0 metrics:@{ @"height": @(self.findResultsHeight) } views:views]];
 	}
 	else
 	{
@@ -525,9 +525,9 @@ static NSButton* OakCreateStopSearchButton ()
 	// =====================
 
 	NSDictionary* newOptions = @{
-		OakFindRegularExpressionOption : @(self.regularExpression),
-		OakFindIgnoreWhitespaceOption  : @(self.ignoreWhitespace),
-		OakFindFullWordsOption         : @(self.fullWords),
+		OakFindRegularExpressionOption: @(self.regularExpression),
+		OakFindIgnoreWhitespaceOption:  @(self.ignoreWhitespace),
+		OakFindFullWordsOption:         @(self.fullWords),
 	};
 
 	if(OakNotEmptyString(_findString))
@@ -814,8 +814,8 @@ static NSButton* OakCreateStopSearchButton ()
 	if(OakIsEmptyString(aString))
 		return @" ";
 
-	static NSAttributedString* const lineJoiner = [[NSAttributedString alloc] initWithString:@"¬" attributes:@{ NSForegroundColorAttributeName : [NSColor lightGrayColor] }];
-	static NSAttributedString* const tabJoiner  = [[NSAttributedString alloc] initWithString:@"‣" attributes:@{ NSForegroundColorAttributeName : [NSColor lightGrayColor] }];
+	static NSAttributedString* const lineJoiner = [[NSAttributedString alloc] initWithString:@"¬" attributes:@{ NSForegroundColorAttributeName: [NSColor lightGrayColor] }];
+	static NSAttributedString* const tabJoiner  = [[NSAttributedString alloc] initWithString:@"‣" attributes:@{ NSForegroundColorAttributeName: [NSColor lightGrayColor] }];
 
 	NSMutableAttributedString* res = [[NSMutableAttributedString alloc] init];
 
@@ -836,9 +836,9 @@ static NSButton* OakCreateStopSearchButton ()
 	NSMutableParagraphStyle* paragraphStyle = [[NSMutableParagraphStyle alloc] init];
 	[paragraphStyle setLineBreakMode:NSLineBreakByTruncatingMiddle];
 	NSDictionary* globalAttrs = @{
-		NSParagraphStyleAttributeName  : paragraphStyle,
-		NSForegroundColorAttributeName : [NSColor textColor],
-		NSFontAttributeName            : OakStatusBarFont(),
+		NSParagraphStyleAttributeName:  paragraphStyle,
+		NSForegroundColorAttributeName: [NSColor textColor],
+		NSFontAttributeName:            OakStatusBarFont(),
 	};
 	[res addAttributes:globalAttrs range:NSMakeRange(0, [[res string] length])];
 

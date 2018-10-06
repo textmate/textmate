@@ -24,9 +24,9 @@
 - (IBAction)addVariable:(id)sender
 {
 	NSDictionary* entry = @{
-		@"enabled" : @YES,
-		@"name"    : @"VARIABLE_NAME",
-		@"value"   : @"variable value",
+		@"enabled": @YES,
+		@"name":    @"VARIABLE_NAME",
+		@"value":   @"variable value",
 	};
 
 	NSInteger pos = [variablesTableView selectedRow] != -1 ? [variablesTableView selectedRow] : [_variables count];

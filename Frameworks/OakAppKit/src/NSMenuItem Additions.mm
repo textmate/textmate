@@ -75,7 +75,7 @@
 
 - (void)appendTableCellWithString:(NSString*)string table:(NSTextTable*)table textAlignment:(NSTextAlignment)textAlignment verticalAlignment:(NSTextBlockVerticalAlignment)verticalAlignment font:(NSFont*)font row:(NSInteger)row column:(NSInteger)column;
 {
-	CGSize stringSize = [string sizeWithAttributes:@{ NSFontAttributeName : font }];
+	CGSize stringSize = [string sizeWithAttributes:@{ NSFontAttributeName: font }];
 
 	NSTextTableBlock* block = [[NSTextTableBlock alloc] initWithTable:table startingRow:row rowSpan:1 startingColumn:column columnSpan:1];
 
@@ -223,7 +223,7 @@ static char const* kOakMenuItemTabTrigger    = "OakMenuItemTabTrigger";
 		else
 		{
 			NSFont* font = self.menu.font ?: [NSFont menuFontOfSize:0];
-			self.attributedTitle = [[NSAttributedString alloc] initWithString:title attributes:@{ NSFontAttributeName : font }];
+			self.attributedTitle = [[NSAttributedString alloc] initWithString:title attributes:@{ NSFontAttributeName: font }];
 		}
 	}
 	self.title = plainTitle;

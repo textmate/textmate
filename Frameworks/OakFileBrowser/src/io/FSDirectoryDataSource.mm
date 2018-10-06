@@ -340,7 +340,7 @@ struct tracking_t : fs::event_callback_t
 - (void)internalNeedsReload
 {
 	if(_tracking)
-		[[NSNotificationCenter defaultCenter] postNotificationName:FSItemDidReloadNotification object:_tracking->_data_source userInfo:@{ @"item" : self }];
+		[[NSNotificationCenter defaultCenter] postNotificationName:FSItemDidReloadNotification object:_tracking->_data_source userInfo:@{ @"item": self }];
 }
 @end
 

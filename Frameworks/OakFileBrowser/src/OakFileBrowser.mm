@@ -146,7 +146,7 @@ static bool is_binary (std::string const& path)
 	{
 		NSString* urlString = [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsInitialFileBrowserURLKey];
 		_url     = urlString ? [NSURL URLWithString:urlString] : kURLLocationHome;
-		_history = [NSMutableArray arrayWithObject:@{ @"url" : _url }];
+		_history = [NSMutableArray arrayWithObject:@{ @"url": _url }];
 
 		BOOL foldersOnTop   = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFoldersOnTopKey];
 		BOOL showExtensions = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsShowFileExtensionsKey];
@@ -244,10 +244,10 @@ static bool is_binary (std::string const& path)
 	_outlineViewDelegate.target            = self;
 
 	NSDictionary* views = @{
-		@"header"         : _headerView,
-		@"browser"        : scrollView,
-		@"actionsDivider" : OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1], [NSColor colorWithCalibratedWhite:0.750 alpha:1]),
-		@"actions"        : _actionsView,
+		@"header":         _headerView,
+		@"browser":        scrollView,
+		@"actionsDivider": OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1], [NSColor colorWithCalibratedWhite:0.750 alpha:1]),
+		@"actions":        _actionsView,
 	};
 
 	OakAddAutoLayoutViewsToSuperview([views allValues], _view);
@@ -346,7 +346,7 @@ static bool is_binary (std::string const& path)
 
 	if(_historyIndex + 1 < _history.count)
 		[_history removeObjectsInRange:NSMakeRange(_historyIndex + 1, _history.count - (_historyIndex + 1))];
-	[_history addObject:@{ @"url" : aURL }];
+	[_history addObject:@{ @"url": aURL }];
 	self.historyIndex = self.historyIndex + 1;
 }
 
@@ -475,8 +475,8 @@ static bool is_binary (std::string const& path)
 		return;
 
 	_history[_historyIndex] = @{
-		@"url"          : _url,
-		@"scrollOffset" : @(NSMinY([_outlineView visibleRect]))
+		@"url":          _url,
+		@"scrollOffset": @(NSMinY([_outlineView visibleRect]))
 	};
 }
 
@@ -495,9 +495,9 @@ static bool is_binary (std::string const& path)
 	}
 
 	return @{
-		@"history"      : history,
-		@"historyIndex" : @(self.historyIndex),
-		@"selection"    : [self.selectedURLs valueForKey:@"absoluteString"],
+		@"history":      history,
+		@"historyIndex": @(self.historyIndex),
+		@"selection":    [self.selectedURLs valueForKey:@"absoluteString"],
 	};
 }
 
@@ -615,7 +615,7 @@ static bool is_binary (std::string const& path)
 	else if([duplicatedURLs count] > 1)
 		[_outlineViewDelegate selectURLs:[duplicatedURLs allValues] expandChildren:NO];
 
-	[[NSNotificationCenter defaultCenter] postNotificationName:OakFileBrowserDidDuplicateURLs object:self userInfo:@{ OakFileBrowserURLMapKey : duplicatedURLs }];
+	[[NSNotificationCenter defaultCenter] postNotificationName:OakFileBrowserDidDuplicateURLs object:self userInfo:@{ OakFileBrowserURLMapKey: duplicatedURLs }];
 }
 
 - (void)revealSelectedItem:(id)sender

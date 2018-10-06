@@ -47,7 +47,7 @@ NSString* OakReplaceDateInString (NSString* srcPath, NSDate* newDate)
 
 - (void)postDidChangeContentsOfDirectory:(NSString*)aDirectory
 {
-	[[NSNotificationCenter defaultCenter] postNotificationName:OakFileManagerDidChangeContentsOfDirectory object:self userInfo:@{ OakFileManagerPathKey : aDirectory }];
+	[[NSNotificationCenter defaultCenter] postNotificationName:OakFileManagerDidChangeContentsOfDirectory object:self userInfo:@{ OakFileManagerPathKey: aDirectory }];
 }
 
 // ===================
@@ -135,7 +135,7 @@ NSString* OakReplaceDateInString (NSString* srcPath, NSDate* newDate)
 		return;
 	}
 
-	[[NSNotificationCenter defaultCenter] postNotificationName:OakFileManagerWillDeleteItemAtPath object:self userInfo:@{ OakFileManagerPathKey : [[fileURL filePathURL] path] }];
+	[[NSNotificationCenter defaultCenter] postNotificationName:OakFileManagerWillDeleteItemAtPath object:self userInfo:@{ OakFileManagerPathKey: [[fileURL filePathURL] path] }];
 	if([[NSFileManager defaultManager] removeItemAtURL:fileURL error:&error])
 	{
 		[[[view undoManager] prepareWithInvocationTarget:self] doCreateFile:fileURL view:view];
@@ -171,7 +171,7 @@ NSString* OakReplaceDateInString (NSString* srcPath, NSDate* newDate)
 - (void)doRemoveCopy:(NSURL*)dstURL ofURL:(NSURL*)srcURL view:(NSView*)view
 {
 	NSError* error;
-	[[NSNotificationCenter defaultCenter] postNotificationName:OakFileManagerWillDeleteItemAtPath object:self userInfo:@{ OakFileManagerPathKey : [[dstURL filePathURL] path] }];
+	[[NSNotificationCenter defaultCenter] postNotificationName:OakFileManagerWillDeleteItemAtPath object:self userInfo:@{ OakFileManagerPathKey: [[dstURL filePathURL] path] }];
 	if([[NSFileManager defaultManager] removeItemAtURL:dstURL error:&error])
 	{
 		[[[view undoManager] prepareWithInvocationTarget:self] doCreateCopy:dstURL ofURL:srcURL view:view];
@@ -238,7 +238,7 @@ NSString* OakReplaceDateInString (NSString* srcPath, NSDate* newDate)
 	NSError* error = nil;
 	NSURL* inTrashURL;
 
-	[[NSNotificationCenter defaultCenter] postNotificationName:OakFileManagerWillDeleteItemAtPath object:self userInfo:@{ OakFileManagerPathKey : [[trashURL filePathURL] path] }];
+	[[NSNotificationCenter defaultCenter] postNotificationName:OakFileManagerWillDeleteItemAtPath object:self userInfo:@{ OakFileManagerPathKey: [[trashURL filePathURL] path] }];
 	if([[NSFileManager defaultManager] trashItemAtURL:trashURL resultingItemURL:&inTrashURL error:&error])
 	{
 		[[[view undoManager] prepareWithInvocationTarget:self] doRestoreItem:inTrashURL toURL:trashURL view:view];

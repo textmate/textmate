@@ -510,8 +510,8 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 		be::entry_ptr entry = parent_for_column(aBrowser, aColumn, bundles)->children()[aRow];
 
 		NSDictionary* attrs = @{
-			NSForegroundColorAttributeName : entry->disabled() ? [NSColor grayColor] : [NSColor controlTextColor],
-			NSParagraphStyleAttributeName  : paragraphStyle
+			NSForegroundColorAttributeName: entry->disabled() ? [NSColor grayColor] : [NSColor controlTextColor],
+			NSParagraphStyleAttributeName:  paragraphStyle
 		};
 		[cell setAttributedStringValue:[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:entry->name()] attributes:attrs]];
 		[cell setLeaf:!entry->has_children()];

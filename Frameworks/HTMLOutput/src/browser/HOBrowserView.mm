@@ -44,9 +44,9 @@ static void ShowLoadErrorForURL (WebFrame* frame, NSURL* url, NSError* error)
 		_webView.frameLoadDelegate      = self;
 
 		NSDictionary* views = @{
-			@"webView"   : _webView,
-			@"divider"   : OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1], [NSColor colorWithCalibratedWhite:0.750 alpha:1]),
-			@"statusBar" : _statusBar
+			@"webView":   _webView,
+			@"divider":   OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1], [NSColor colorWithCalibratedWhite:0.750 alpha:1]),
+			@"statusBar": _statusBar
 		};
 
 		OakAddAutoLayoutViewsToSuperview([views allValues], self);

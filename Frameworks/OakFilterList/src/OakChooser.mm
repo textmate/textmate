@@ -26,7 +26,7 @@
 		NSTextField* fileTextField = OakCreateLabel(@"", [NSFont systemFontOfSize:13]);
 		NSTextField* folderTextField = OakCreateLabel(@"", [NSFont controlContentFontOfSize:10]);
 
-		NSDictionary* views = @{ @"icon" : imageView, @"file" : fileTextField, @"folder" : folderTextField, @"close" : closeButton };
+		NSDictionary* views = @{ @"icon": imageView, @"file": fileTextField, @"folder": folderTextField, @"close": closeButton };
 		OakAddAutoLayoutViewsToSuperview([views allValues], self);
 
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(4)-[icon]-(4)-[file]-(4)-[close(==16)]-(8)-|" options:0 metrics:nil views:views]];
@@ -88,12 +88,12 @@ NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string
 	NSMutableParagraphStyle* paragraphStyle = [[NSMutableParagraphStyle alloc] init];
 	[paragraphStyle setLineBreakMode:lineBreakMode];
 
-	NSDictionary* baseAttributes      = @{ NSParagraphStyleAttributeName : paragraphStyle };
+	NSDictionary* baseAttributes      = @{ NSParagraphStyleAttributeName: paragraphStyle };
 	NSDictionary* highlightAttributes = @{
-		NSParagraphStyleAttributeName  : paragraphStyle,
-		NSBackgroundColorAttributeName : [NSColor tmMatchedTextBackgroundColor],
-		NSUnderlineStyleAttributeName  : @(NSUnderlineStyleSingle),
-		NSUnderlineColorAttributeName  : [NSColor tmMatchedTextUnderlineColor],
+		NSParagraphStyleAttributeName:  paragraphStyle,
+		NSBackgroundColorAttributeName: [NSColor tmMatchedTextBackgroundColor],
+		NSUnderlineStyleAttributeName:  @(NSUnderlineStyleSingle),
+		NSUnderlineColorAttributeName:  [NSColor tmMatchedTextUnderlineColor],
 	};
 
 	NSMutableAttributedString* res = [[NSMutableAttributedString alloc] init];

@@ -73,12 +73,12 @@ static NSString* const kUserDefaultsFilterOutputType = @"filterOutputType";
 		[self commandChanged:nil];
 
 		NSDictionary* views = @{
-			@"commandLabel" : self.commandLabel,
-			@"command"      : self.commandComboBox,
-			@"resultLabel"  : self.resultLabel,
-			@"result"       : self.resultPopUpButton,
-			@"execute"      : self.executeButton,
-			@"cancel"       : self.cancelButton,
+			@"commandLabel": self.commandLabel,
+			@"command":      self.commandComboBox,
+			@"resultLabel":  self.resultLabel,
+			@"result":       self.resultPopUpButton,
+			@"execute":      self.executeButton,
+			@"cancel":       self.cancelButton,
 		};
 
 		NSView* contentView = self.window.contentView;

@@ -127,7 +127,7 @@ static NSData* Digest (NSString* someString)
 		webViewPrefs.cacheModel     = WebCacheModelDocumentViewer;
 		self.webView.preferencesIdentifier = kAboutWindowPreferencesIdentifier;
 
-		NSDictionary* views = @{ @"webView" : self.webView };
+		NSDictionary* views = @{ @"webView": self.webView };
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[webView(>=200)]|" options:NSLayoutFormatAlignAllTop     metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[webView(>=200)]|" options:NSLayoutFormatAlignAllLeading metrics:nil views:views]];
 	}
@@ -164,12 +164,12 @@ static NSData* Digest (NSString* someString)
 	_selectedPage = pageName;
 
 	NSDictionary* pages = @{
-		@"About"         : @"About",
-		@"Changes"       : @"Changes",
-		@"Bundles"       : @"Bundles",
-		@"Registration"  : @"Registration",
-		@"Legal"         : @"Legal",
-		@"Contributions" : @"Contributions"
+		@"About":         @"About",
+		@"Changes":       @"Changes",
+		@"Bundles":       @"Bundles",
+		@"Registration":  @"Registration",
+		@"Legal":         @"Legal",
+		@"Contributions": @"Contributions"
 	};
 
 	if(NSString* file = pages[pageName])

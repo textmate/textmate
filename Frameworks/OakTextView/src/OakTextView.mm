@@ -704,7 +704,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 - (void)showToolTip:(NSString*)aToolTip
 {
 	OakShowToolTip(aToolTip, [self.textView positionForWindowUnderCaret]);
-	NSAccessibilityPostNotificationWithUserInfo(self.textView, NSAccessibilityAnnouncementRequestedNotification, @{ NSAccessibilityAnnouncementKey : aToolTip });
+	NSAccessibilityPostNotificationWithUserInfo(self.textView, NSAccessibilityAnnouncementRequestedNotification, @{ NSAccessibilityAnnouncementKey: aToolTip });
 }
 
 - (void)didFind:(NSUInteger)aNumber occurrencesOf:(NSString*)aFindString atPosition:(text::pos_t const&)aPosition wrapped:(BOOL)didWrap
@@ -1962,8 +1962,8 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 		update_menu_key_equivalents([NSApp mainMenu], actionToKey);
 
 		[[NSUserDefaults standardUserDefaults] registerDefaults:@{
-			kUserDefaultsFontSmoothingKey     : @(OTVFontSmoothingDisabledForDarkHiDPI),
-			kUserDefaultsWrapColumnPresetsKey : @[ @40, @80 ],
+			kUserDefaultsFontSmoothingKey:     @(OTVFontSmoothingDisabledForDarkHiDPI),
+			kUserDefaultsWrapColumnPresetsKey: @[ @40, @80 ],
 		}];
 	});
 
@@ -2613,12 +2613,12 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 							auto newLastMatch = ng::find(*documentView, ng::ranges_t(0), findStr, (find::options_t)(options | find::backwards | find::wrap_around));
 							auto to_range = [&](auto it) { return text::range_t(documentView->convert(it->first.min().index), documentView->convert(it->first.max().index)); };
 							[newDocuments replaceObjectAtIndex:i withObject:@{
-								@"identifier"      : [NSString stringWithCxxString:documentView->identifier()],
-								@"firstMatchRange" : [NSString stringWithCxxString:to_range(newFirstMatch.begin())],
-								@"lastMatchRange"  : [NSString stringWithCxxString:to_range((newLastMatch.empty() ? newFirstMatch : newLastMatch).begin())]
+								@"identifier":      [NSString stringWithCxxString:documentView->identifier()],
+								@"firstMatchRange": [NSString stringWithCxxString:to_range(newFirstMatch.begin())],
+								@"lastMatchRange":  [NSString stringWithCxxString:to_range((newLastMatch.empty() ? newFirstMatch : newLastMatch).begin())]
 							}];
 						}
-						[OakPasteboard pasteboardWithName:NSFindPboard].auxiliaryOptionsForCurrent = @{ @"documents" : newDocuments };
+						[OakPasteboard pasteboardWithName:NSFindPboard].auxiliaryOptionsForCurrent = @{ @"documents": newDocuments };
 
 						// ====================================================
 
@@ -3479,7 +3479,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	D(DBF_OakTextView_Macros, bug("%s\n", to_s(plist::convert((__bridge CFPropertyListRef)[[NSUserDefaults standardUserDefaults] arrayForKey:@"OakMacroManagerScratchMacro"])).c_str()););
 	AUTO_REFRESH;
 	if(NSArray* scratchMacro = [[NSUserDefaults standardUserDefaults] arrayForKey:@"OakMacroManagerScratchMacro"])
-			documentView->macro_dispatch(plist::convert((__bridge CFDictionaryRef)@{ @"commands" : scratchMacro }), [self variables]);
+			documentView->macro_dispatch(plist::convert((__bridge CFDictionaryRef)@{ @"commands": scratchMacro }), [self variables]);
 	else	NSBeep();
 }
 
@@ -3492,7 +3492,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		{
 			oak::uuid_t uuid = oak::uuid_t().generate();
 
-			plist::dictionary_t plist = plist::convert((__bridge CFDictionaryRef)@{ @"commands" : scratchMacro });
+			plist::dictionary_t plist = plist::convert((__bridge CFDictionaryRef)@{ @"commands": scratchMacro });
 			plist[bundles::kFieldUUID] = to_s(uuid);
 			plist[bundles::kFieldName] = std::string("untitled");
 

@@ -38,9 +38,9 @@
 + (void)initialize
 {
 	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
-		@"OakPrintThemeUUID"       : @(kMacClassicThemeUUID),
-		@"OakPrintFontSize"        : @(11),
-		@"OakPrintHeaderAndFooter" : @NO,
+		@"OakPrintThemeUUID":       @(kMacClassicThemeUUID),
+		@"OakPrintFontSize":        @(11),
+		@"OakPrintHeaderAndFooter": @NO,
 	}];
 }
 
@@ -182,11 +182,11 @@
 		[printHeaders bind:NSValueBinding toObject:self withKeyPath:@"printHeaderAndFooter" options:nil];
 
 		NSDictionary* views = @{
-			@"themesLabel"    : themesLabel,
-			@"themes"         : themes,
-			@"fontSizesLabel" : fontSizesLabel,
-			@"fontSizes"      : fontSizes,
-			@"printHeaders"   : printHeaders
+			@"themesLabel":    themesLabel,
+			@"themes":         themes,
+			@"fontSizesLabel": fontSizesLabel,
+			@"fontSizes":      fontSizes,
+			@"printHeaders":   printHeaders
 		};
 
 		OakAddAutoLayoutViewsToSuperview([views allValues], contentView);

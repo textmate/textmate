@@ -20,7 +20,7 @@ namespace
 				[paragraph setAllowsDefaultTighteningForTruncation:NO];
 
 			_string = [[NSMutableAttributedString alloc] init];
-			_attributes.push_back(@{ NSParagraphStyleAttributeName : paragraph });
+			_attributes.push_back(@{ NSParagraphStyleAttributeName: paragraph });
 			_font_traits.push_back(0);
 		}
 
@@ -79,8 +79,8 @@ static NSAttributedString* PathComponentString (std::string const& path, std::st
 
 	string_builder_t builder(NSLineBreakByTruncatingMiddle);
 	builder.push_style(@{
-		NSFontAttributeName            : font,
-		NSForegroundColorAttributeName : [NSColor darkGrayColor]
+		NSFontAttributeName:            font,
+		NSForegroundColorAttributeName: [NSColor darkGrayColor]
 	});
 	builder.append(to_ns(text::join(std::vector<std::string>(components.begin(), components.end()), " ‣ ")));
 	builder.append(to_ns((path::is_absolute(path) ? path::display_name(path) : path)), NSBoldFontMask);
@@ -98,7 +98,7 @@ static void append (string_builder_t& dst, std::string const& src, size_t from, 
 			if(src[i] == '\t')
 				dst.append(@"\u2003");
 			else if(src[i] == '\r')
-				dst.append(@"<CR>", @{ NSForegroundColorAttributeName : [NSColor lightGrayColor] });
+				dst.append(@"<CR>", @{ NSForegroundColorAttributeName: [NSColor lightGrayColor] });
 			begin = i+1;
 		}
 	}
@@ -109,23 +109,23 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 {
 	NSFontTraitMask matchFontTraits = NSBoldFontMask;
 	NSDictionary* matchAttributes = @{
-		NSForegroundColorAttributeName : [NSColor blackColor],
-		NSBackgroundColorAttributeName : [NSColor tmMatchedTextBackgroundColor],
-		NSUnderlineStyleAttributeName  : @(NSUnderlineStyleSingle),
-		NSUnderlineColorAttributeName  : [NSColor tmMatchedTextUnderlineColor],
+		NSForegroundColorAttributeName: [NSColor blackColor],
+		NSBackgroundColorAttributeName: [NSColor tmMatchedTextBackgroundColor],
+		NSUnderlineStyleAttributeName:  @(NSUnderlineStyleSingle),
+		NSUnderlineColorAttributeName:  [NSColor tmMatchedTextUnderlineColor],
 	};
 
 	string_builder_t builder(NSLineBreakByTruncatingTail);
 	builder.push_style(@{
-		NSFontAttributeName            : font,
-		NSForegroundColorAttributeName : [NSColor darkGrayColor]
+		NSFontAttributeName:            font,
+		NSForegroundColorAttributeName: [NSColor darkGrayColor]
 	});
 
 	// Ensure monospaced digits for the line number prefix
 	NSFontDescriptor* descriptor = [font.fontDescriptor fontDescriptorByAddingAttributes:@{
-		NSFontFeatureSettingsAttribute: @[ @{ NSFontFeatureTypeIdentifierKey : @(kNumberSpacingType), NSFontFeatureSelectorIdentifierKey : @(kMonospacedNumbersSelector) } ]
+		NSFontFeatureSettingsAttribute: @[ @{ NSFontFeatureTypeIdentifierKey: @(kNumberSpacingType), NSFontFeatureSelectorIdentifierKey: @(kMonospacedNumbersSelector) } ]
 	}];
-	builder.append(to_ns(text::pad(++n, 4) + ": "), @{ NSFontAttributeName : [NSFont fontWithDescriptor:descriptor size:0] });
+	builder.append(to_ns(text::pad(++n, 4) + ": "), @{ NSFontAttributeName: [NSFont fontWithDescriptor:descriptor size:0] });
 
 	bool inMatch = false;
 	size_t last = text.size();
@@ -170,7 +170,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 				if(inMatch)
 					builder.pop_style();
 				builder.append(@"\n");
-				builder.append(to_ns(text::pad(++n, 4) + ": "), @{ NSFontAttributeName : [NSFont fontWithDescriptor:descriptor size:0] });
+				builder.append(to_ns(text::pad(++n, 4) + ": "), @{ NSFontAttributeName: [NSFont fontWithDescriptor:descriptor size:0] });
 				if(inMatch)
 					builder.push_style(matchAttributes, matchFontTraits);
 			}
@@ -333,8 +333,8 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 	{
 		string_builder_t builder(NSLineBreakByTruncatingTail);
 		builder.append(to_ns(text::format("%zu-%zu: Range is not valid UTF-8, please contact: https://macromates.com/support", m.first, m.last)), @{
-			NSFontAttributeName            : font,
-			NSForegroundColorAttributeName : [NSColor darkGrayColor]
+			NSFontAttributeName:            font,
+			NSForegroundColorAttributeName: [NSColor darkGrayColor]
 		});
 		return builder.attributed_string();
 	}

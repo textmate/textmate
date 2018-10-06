@@ -30,12 +30,12 @@
 		[self bind:@"errorString" toObject:[SoftwareUpdate sharedInstance] withKeyPath:@"errorString" options:nil];
 
 		self.defaultsProperties = @{
-			@"disableSoftwareUpdates" : kUserDefaultsDisableSoftwareUpdatesKey,
-			@"disableCrashReports"    : kUserDefaultsDisableCrashReportingKey,
-			@"softwareUpdateChannel"  : kUserDefaultsSoftwareUpdateChannelKey,
-			@"askBeforeDownloading"   : kUserDefaultsAskBeforeUpdatingKey,
-			@"submitUsageInfo"        : kUserDefaultsSubmitUsageInfoKey,
-			@"contactInfo"            : kUserDefaultsCrashReportsContactInfoKey,
+			@"disableSoftwareUpdates": kUserDefaultsDisableSoftwareUpdatesKey,
+			@"disableCrashReports":    kUserDefaultsDisableCrashReportingKey,
+			@"softwareUpdateChannel":  kUserDefaultsSoftwareUpdateChannelKey,
+			@"askBeforeDownloading":   kUserDefaultsAskBeforeUpdatingKey,
+			@"submitUsageInfo":        kUserDefaultsSubmitUsageInfoKey,
+			@"contactInfo":            kUserDefaultsCrashReportsContactInfoKey,
 		};
 	}
 	return self;

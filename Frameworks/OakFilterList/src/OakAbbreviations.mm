@@ -79,7 +79,7 @@ static NSString* const FCExpandedStringKey = @"long";
 	if(OakIsEmptyString(anAbbreviation) || OakIsEmptyString(aString))
 		return;
 
-	NSDictionary* dict = @{ FCAbbreviationKey : anAbbreviation, FCExpandedStringKey : aString };
+	NSDictionary* dict = @{ FCAbbreviationKey: anAbbreviation, FCExpandedStringKey: aString };
 	[self.bindings removeObject:dict];
 	[self.bindings insertObject:dict atIndex:0];
 }

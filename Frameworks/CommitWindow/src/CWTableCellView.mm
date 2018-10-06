@@ -24,9 +24,9 @@
 
 		[textField        bind:NSValueBinding toObject:self withKeyPath:@"objectValue.path"      options:0];
 		[_commitCheckBox  bind:NSValueBinding toObject:self withKeyPath:@"objectValue.commit"    options:0];
-		[_statusTextField bind:NSValueBinding toObject:self withKeyPath:@"objectValue.scmStatus" options:@{ NSValueTransformerNameBindingOption : @"CWStatusStringTransformer" }];
+		[_statusTextField bind:NSValueBinding toObject:self withKeyPath:@"objectValue.scmStatus" options:@{ NSValueTransformerNameBindingOption: @"CWStatusStringTransformer" }];
 
-		NSDictionary* views = @{ @"commit" : _commitCheckBox, @"status" : _statusTextField, @"textField" : textField, @"diff" : _diffButton };
+		NSDictionary* views = @{ @"commit": _commitCheckBox, @"status": _statusTextField, @"textField": textField, @"diff": _diffButton };
 		OakAddAutoLayoutViewsToSuperview([views allValues], self);
 
 		[_commitCheckBox setContentCompressionResistancePriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];

@@ -97,11 +97,11 @@ static NSTextField* OakCreateTextField ()
 	[super updateConstraints];
 
 	NSDictionary* views = @{
-		@"back"     : _goBackButton,
-		@"forward"  : _goForwardButton,
-		@"divider"  : _divider,
-		@"status"   : _statusTextField,
-		@"spinner"  : _indeterminateProgress ? _spinner : _progressIndicator,
+		@"back":    _goBackButton,
+		@"forward": _goForwardButton,
+		@"divider": _divider,
+		@"status":  _statusTextField,
+		@"spinner": _indeterminateProgress ? _spinner : _progressIndicator,
 	};
 
 	NSArray* layout = @[

@@ -17,14 +17,14 @@
 		[OakStringListTransformer createTransformerWithName:@"OakLineEndingsSettingsTransformer" andObjectsArray:@[ @"\\n", @"\\r", @"\\r\\n" ]];
 
 		self.defaultsProperties = @{
-			@"disableSessionRestore"         : kUserDefaultsDisableSessionRestoreKey,
-			@"disableDocumentAtStartup"      : kUserDefaultsDisableNewDocumentAtStartupKey,
-			@"disableDocumentAtReactivation" : kUserDefaultsDisableNewDocumentAtReactivationKey,
+			@"disableSessionRestore":         kUserDefaultsDisableSessionRestoreKey,
+			@"disableDocumentAtStartup":      kUserDefaultsDisableNewDocumentAtStartupKey,
+			@"disableDocumentAtReactivation": kUserDefaultsDisableNewDocumentAtReactivationKey,
 		};
 
 		self.tmProperties = @{
-			@"encoding"       : [NSString stringWithCxxString:kSettingsEncodingKey],
-			@"lineEndings"    : [NSString stringWithCxxString:kSettingsLineEndingsKey],
+			@"encoding":    [NSString stringWithCxxString:kSettingsEncodingKey],
+			@"lineEndings": [NSString stringWithCxxString:kSettingsLineEndingsKey],
 		};
 	}
 	return self;

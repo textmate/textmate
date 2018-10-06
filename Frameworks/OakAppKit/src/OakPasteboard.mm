@@ -160,9 +160,9 @@ static BOOL HasPersistentStore = NO;
 	static dispatch_once_t onceToken = 0;
 	dispatch_once(&onceToken, ^{
 		[[NSUserDefaults standardUserDefaults] registerDefaults:@{
-			kUserDefaultsClipboardHistoryKeepAtLeast :  @25,
-			kUserDefaultsClipboardHistoryKeepAtMost  : @500,
-			kUserDefaultsClipboardHistoryDaysToKeep  :  @30,
+			kUserDefaultsClipboardHistoryKeepAtLeast:  @25,
+			kUserDefaultsClipboardHistoryKeepAtMost:  @500,
+			kUserDefaultsClipboardHistoryDaysToKeep:   @30,
 		}];
 
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidBecomeActiveNotification:) name:NSApplicationDidBecomeActiveNotification object:NSApp];

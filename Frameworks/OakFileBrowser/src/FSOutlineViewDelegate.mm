@@ -255,7 +255,7 @@
 
 	if(_labelSwatchView)
 	{
-		NSDictionary* views = @{ @"labelSwatch" : _labelSwatchView };
+		NSDictionary* views = @{ @"labelSwatch": _labelSwatchView };
 		[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:_labelSwatchView attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
 		[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(>=0)-[labelSwatch]-(>=0)-|" options:0 metrics:nil views:views]];
 		[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[labelSwatch]-(24)-|" options:0 metrics:nil views:views]];
@@ -263,7 +263,7 @@
 
 	if(_closeButton)
 	{
-		NSDictionary* views = @{ @"closeButton" : _closeButton };
+		NSDictionary* views = @{ @"closeButton": _closeButton };
 		[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:_closeButton attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
 		[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(>=0)-[closeButton]-(>=0)-|" options:0 metrics:nil views:views]];
 		[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[closeButton]-(8)-|" options:0 metrics:nil views:views]];
@@ -366,7 +366,7 @@
 		fileTextField.delegate = self;
 		fileTextField.formatter = [[FSItemFormatter alloc] init];
 
-		NSDictionary* views = @{ @"icon" : _openButton, @"file" : fileTextField, @"itemInfoButtons" : _itemInfoButtons };
+		NSDictionary* views = @{ @"icon": _openButton, @"file": fileTextField, @"itemInfoButtons": _itemInfoButtons };
 		OakAddAutoLayoutViewsToSuperview([views allValues], self);
 
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(4)-[icon]-(4)-[file]-(4)-[itemInfoButtons]-(0@750)-|" options:0 metrics:nil views:views]];

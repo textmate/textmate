@@ -23,7 +23,7 @@ static size_t kParseSizeLimit = 1024;
 + (void)initialize
 {
 	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
-		kUserDefaultsUIThemeUUID : @(kMacClassicThemeUUID),
+		kUserDefaultsUIThemeUUID: @(kMacClassicThemeUUID),
 	}];
 }
 
@@ -104,10 +104,10 @@ static size_t kParseSizeLimit = 1024;
 		size_t to = ++pair != scopes.end() ? pair->first : str.size();
 		size_t len = utf16::distance(str.data() + from, str.data() + to);
 		[styled addAttributes:@{
-			NSForegroundColorAttributeName    : [NSColor colorWithCGColor:styles.foreground()],
-			NSBackgroundColorAttributeName    : [NSColor colorWithCGColor:styles.background()],
-			NSUnderlineStyleAttributeName     : @(styles.underlined() ? NSUnderlineStyleSingle : NSUnderlineStyleNone),
-			NSStrikethroughStyleAttributeName : @(styles.strikethrough() ? NSUnderlineStyleSingle : NSUnderlineStyleNone),
+			NSForegroundColorAttributeName:    [NSColor colorWithCGColor:styles.foreground()],
+			NSBackgroundColorAttributeName:    [NSColor colorWithCGColor:styles.background()],
+			NSUnderlineStyleAttributeName:     @(styles.underlined() ? NSUnderlineStyleSingle : NSUnderlineStyleNone),
+			NSStrikethroughStyleAttributeName: @(styles.strikethrough() ? NSUnderlineStyleSingle : NSUnderlineStyleNone),
 		} range:NSMakeRange(pos, len)];
 
 		pos += len;

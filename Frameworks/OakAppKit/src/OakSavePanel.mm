@@ -55,9 +55,9 @@
 		[[lineEndingsPopUpButton.menu addItemWithTitle:titles[i] action:nil keyEquivalent:@""] setTag:i];
 
 	NSDictionary* views = @{
-		@"encodingLabel"    : OakCreateLabel(@"Encoding:"),
-		@"encodingPopUp"    : encodingPopUpButton,
-		@"lineEndingsPopUp" : lineEndingsPopUpButton,
+		@"encodingLabel":    OakCreateLabel(@"Encoding:"),
+		@"encodingPopUp":    encodingPopUpButton,
+		@"lineEndingsPopUp": lineEndingsPopUpButton,
 	};
 
 	NSView* containerView = [[NSView alloc] initWithFrame:NSZeroRect];

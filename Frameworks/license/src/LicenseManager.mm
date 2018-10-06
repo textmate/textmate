@@ -126,14 +126,14 @@ static NSTextField* OakCreateTextField ()
 
 	OakSetupKeyViewLoop(@[ self.ownerTextField, self.licenseTextField, self.buyButton, self.cancelButton, self.registerButton ]);
 	NSDictionary* views = @{
-		@"ownerLabel"   : self.ownerLabel,
-		@"owner"        : self.ownerTextField,
-		@"licenseLabel" : self.licenseLabel,
-		@"license"      : self.licenseTextField,
-		@"status"       : self.statusTextField,
-		@"buy"          : self.buyButton,
-		@"cancel"       : self.cancelButton,
-		@"register"     : self.registerButton,
+		@"ownerLabel":   self.ownerLabel,
+		@"owner":        self.ownerTextField,
+		@"licenseLabel": self.licenseLabel,
+		@"license":      self.licenseTextField,
+		@"status":       self.statusTextField,
+		@"buy":          self.buyButton,
+		@"cancel":       self.cancelButton,
+		@"register":     self.registerButton,
 	};
 
 	self.view = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 100, 100)];

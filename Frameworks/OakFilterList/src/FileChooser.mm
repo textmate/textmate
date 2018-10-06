@@ -200,12 +200,12 @@ static NSDictionary* globs_for_path (std::string const& path)
 	};
 
 	NSDictionary* res = @{
-		kSearchExcludeDirectoryGlobsKey : [NSMutableArray array],
-		kSearchExcludeFileGlobsKey      : [NSMutableArray array],
-		kSearchExcludeGlobsKey          : [NSMutableArray array],
-		kSearchDirectoryGlobsKey        : [NSMutableArray array],
-		kSearchFileGlobsKey             : [NSMutableArray array],
-		kSearchGlobsKey                 : [NSMutableArray array],
+		kSearchExcludeDirectoryGlobsKey: [NSMutableArray array],
+		kSearchExcludeFileGlobsKey:      [NSMutableArray array],
+		kSearchExcludeGlobsKey:          [NSMutableArray array],
+		kSearchDirectoryGlobsKey:        [NSMutableArray array],
+		kSearchFileGlobsKey:             [NSMutableArray array],
+		kSearchGlobsKey:                 [NSMutableArray array],
 	};
 
 	settings_t const settings = settings_for_path(NULL_STR, "", path);
@@ -271,16 +271,16 @@ static NSDictionary* globs_for_path (std::string const& path)
 		OakBackgroundFillView* bottomDivider      = OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]);
 
 		NSDictionary* views = @{
-			@"searchField"        : self.searchField,
-			@"aboveScopeBarDark"  : aboveScopeBarDark,
-			@"aboveScopeBarLight" : aboveScopeBarLight,
-			@"scopeBar"           : scopeBar,
-			@"topDivider"         : topDivider,
-			@"scrollView"         : self.scrollView,
-			@"bottomDivider"      : bottomDivider,
-	 		@"statusTextField"    : self.statusTextField,
-			@"itemCountTextField" : self.itemCountTextField,
-			@"progressIndicator"  : _progressIndicator,
+			@"searchField":        self.searchField,
+			@"aboveScopeBarDark":  aboveScopeBarDark,
+			@"aboveScopeBarLight": aboveScopeBarLight,
+			@"scopeBar":           scopeBar,
+			@"topDivider":         topDivider,
+			@"scrollView":         self.scrollView,
+			@"bottomDivider":      bottomDivider,
+			@"statusTextField":    self.statusTextField,
+			@"itemCountTextField": self.itemCountTextField,
+			@"progressIndicator":  _progressIndicator,
 		};
 
 		NSView* contentView = self.window.contentView;

@@ -52,14 +52,14 @@ static NSPopUpButton* OakCreateFolderPopUpButton ()
 			NSFont* font = [NSFont systemFontOfSize:12];
 
 			_activeAttributes = @{
-				NSParagraphStyleAttributeName  : parStyle,
-				NSFontAttributeName            : font,
-				NSForegroundColorAttributeName : [NSColor colorWithCalibratedWhite:0.2 alpha:1]
+				NSParagraphStyleAttributeName:  parStyle,
+				NSFontAttributeName:            font,
+				NSForegroundColorAttributeName: [NSColor colorWithCalibratedWhite:0.2 alpha:1]
 			};
 			_inactiveAttributes = @{
-				NSParagraphStyleAttributeName  : parStyle,
-				NSFontAttributeName            : font,
-				NSForegroundColorAttributeName : [NSColor colorWithCalibratedWhite:0.5 alpha:1]
+				NSParagraphStyleAttributeName:  parStyle,
+				NSFontAttributeName:            font,
+				NSForegroundColorAttributeName: [NSColor colorWithCalibratedWhite:0.5 alpha:1]
 			};
 		}
 		else
@@ -72,16 +72,16 @@ static NSPopUpButton* OakCreateFolderPopUpButton ()
 			NSFont* font = [NSFont boldSystemFontOfSize:12];
 
 			_activeAttributes = @{
-				NSParagraphStyleAttributeName  : parStyle,
-				NSFontAttributeName            : font,
-				NSForegroundColorAttributeName : [NSColor colorWithCalibratedWhite:0.2 alpha:1],
-				NSShadowAttributeName          : shadow,
+				NSParagraphStyleAttributeName:  parStyle,
+				NSFontAttributeName:            font,
+				NSForegroundColorAttributeName: [NSColor colorWithCalibratedWhite:0.2 alpha:1],
+				NSShadowAttributeName:          shadow,
 			};
 			_inactiveAttributes = @{
-				NSParagraphStyleAttributeName  : parStyle,
-				NSFontAttributeName            : font,
-				NSForegroundColorAttributeName : [NSColor colorWithCalibratedWhite:0.5 alpha:1],
-				NSShadowAttributeName          : shadow,
+				NSParagraphStyleAttributeName:  parStyle,
+				NSFontAttributeName:            font,
+				NSForegroundColorAttributeName: [NSColor colorWithCalibratedWhite:0.5 alpha:1],
+				NSShadowAttributeName:          shadow,
 			};
 		}
 	}
@@ -122,11 +122,11 @@ static NSPopUpButton* OakCreateFolderPopUpButton ()
 		_bottomDivider = OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1], [NSColor colorWithCalibratedWhite:0.750 alpha:1]);
 
 		NSDictionary* views = @{
-			@"folder"        : self.folderPopUpButton,
-			@"divider"       : OakCreateDividerImageView(),
-			@"back"          : self.goBackButton,
-			@"forward"       : self.goForwardButton,
-			@"bottomDivider" : _bottomDivider,
+			@"folder":        self.folderPopUpButton,
+			@"divider":       OakCreateDividerImageView(),
+			@"back":          self.goBackButton,
+			@"forward":       self.goForwardButton,
+			@"bottomDivider": _bottomDivider,
 		};
 
 		OakAddAutoLayoutViewsToSuperview([views allValues], self);

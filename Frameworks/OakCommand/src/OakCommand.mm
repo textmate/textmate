@@ -301,8 +301,8 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 			else	message = text::format("This command requires ‘%1$s’ which wasn’t found on your system.\n\nThe following locations were searched:%2$s\n\nIf ‘%1$s’ is installed elsewhere then you need to set PATH in Preferences → Variables to include the folder in which it can be found.", failedRequirement.command.c_str(), ("\n\u2003• " + text::join(paths, "\n\u2003• ")).c_str());
 
 			NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithDictionary:@{
-				NSLocalizedDescriptionKey             : [NSString stringWithFormat:@"Unable to run “%.*s”.", (int)_bundleCommand.name.size(), _bundleCommand.name.data()],
-				NSLocalizedRecoverySuggestionErrorKey : to_ns(message),
+				NSLocalizedDescriptionKey:             [NSString stringWithFormat:@"Unable to run “%.*s”.", (int)_bundleCommand.name.size(), _bundleCommand.name.data()],
+				NSLocalizedRecoverySuggestionErrorKey: to_ns(message),
 			}];
 
 			if(failedRequirement.more_info_url != NULL_STR)
@@ -415,7 +415,7 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 		if(normalExit == NO && _userDidAbort == NO)
 		{
 			NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithDictionary:@{
-				NSLocalizedDescriptionKey : [NSString stringWithFormat:@"Failure running “%@”.", to_ns(_bundleCommand.name)],
+				NSLocalizedDescriptionKey: [NSString stringWithFormat:@"Failure running “%@”.", to_ns(_bundleCommand.name)],
 			}];
 
 			NSMutableArray* buttonLabels = [NSMutableArray arrayWithObject:@"OK"];

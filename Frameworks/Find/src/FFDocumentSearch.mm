@@ -44,12 +44,12 @@ static NSDictionary* GlobOptionsForPath (std::string const& path, NSString* glob
 	};
 
 	NSDictionary* res = @{
-		kSearchExcludeDirectoryGlobsKey : [NSMutableArray array],
-		kSearchExcludeFileGlobsKey      : [NSMutableArray array],
-		kSearchExcludeGlobsKey          : [NSMutableArray array],
-		kSearchDirectoryGlobsKey        : [NSMutableArray arrayWithObject:searchHiddenFolders ? @"{,.}*" : @"*"],
-		kSearchFileGlobsKey             : [NSMutableArray arrayWithArray:glob ? @[ glob ] : @[ ]],
-		kSearchGlobsKey                 : [NSMutableArray array],
+		kSearchExcludeDirectoryGlobsKey: [NSMutableArray array],
+		kSearchExcludeFileGlobsKey:      [NSMutableArray array],
+		kSearchExcludeGlobsKey:          [NSMutableArray array],
+		kSearchDirectoryGlobsKey:        [NSMutableArray arrayWithObject:searchHiddenFolders ? @"{,.}*" : @"*"],
+		kSearchFileGlobsKey:             [NSMutableArray arrayWithArray:glob ? @[ glob ] : @[ ]],
+		kSearchGlobsKey:                 [NSMutableArray array],
 	};
 
 	settings_t const settings = settings_for_path(NULL_STR, "", path);
@@ -133,7 +133,7 @@ static NSDictionary* GlobOptionsForPath (std::string const& path, NSString* glob
 	@synchronized(self) {
 		if(_matches.count)
 		{
-			[[NSNotificationCenter defaultCenter] postNotificationName:FFDocumentSearchDidReceiveResultsNotification object:self userInfo:@{ @"matches" : _matches }];
+			[[NSNotificationCenter defaultCenter] postNotificationName:FFDocumentSearchDidReceiveResultsNotification object:self userInfo:@{ @"matches": _matches }];
 			[_matches removeAllObjects];
 		}
 	}

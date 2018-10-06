@@ -760,8 +760,8 @@ namespace
 	for(Bundle* bundle : [_bundles filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isInstalled == YES AND path != NULL"]])
 	{
 		NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithDictionary:@{
-			@"uuid"     : [bundle.identifier UUIDString],
-			@"path"     : [bundle.path stringByReplacingOccurrencesOfString:[_installDirectory stringByAppendingString:@"/"] withString:@""],
+			@"uuid": [bundle.identifier UUIDString],
+			@"path": [bundle.path stringByReplacingOccurrencesOfString:[_installDirectory stringByAppendingString:@"/"] withString:@""],
 		}];
 
 		if(bundle.lastUpdated)
@@ -774,7 +774,7 @@ namespace
 		[bundles addObject:dict];
 	}
 
-	NSDictionary* plist = @{ @"bundles" : bundles };
+	NSDictionary* plist = @{ @"bundles": bundles };
 	[plist writeToFile:_localIndexPath atomically:YES];
 }
 @end

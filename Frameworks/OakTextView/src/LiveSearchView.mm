@@ -9,8 +9,8 @@
 + (void)initialize
 {
 	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
-		@"incrementalSearchIgnoreCase" : @YES,
-		@"incrementalSearchWrapAround" : @NO,
+		@"incrementalSearchIgnoreCase": @YES,
+		@"incrementalSearchWrapAround": @NO,
 	}];
 }
 
@@ -27,10 +27,10 @@
 		self.wrapAroundCheckBox = OakCreateCheckBox(@"Wrap Around");
 
 		NSDictionary* views = @{
-			@"divider"    : self.divider,
-			@"textField"  : self.textField,
-			@"ignoreCase" : self.ignoreCaseCheckBox,
-			@"wrapAround" : self.wrapAroundCheckBox,
+			@"divider":    self.divider,
+			@"textField":  self.textField,
+			@"ignoreCase": self.ignoreCaseCheckBox,
+			@"wrapAround": self.wrapAroundCheckBox,
 		};
 
 		OakAddAutoLayoutViewsToSuperview([views allValues], self);

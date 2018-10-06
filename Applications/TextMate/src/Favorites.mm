@@ -39,7 +39,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 + (void)initialize
 {
 	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
-		kUserDefaultsOpenProjectSourceIndex : @0,
+		kUserDefaultsOpenProjectSourceIndex: @0,
 	}];
 }
 
@@ -76,15 +76,15 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 		OakBackgroundFillView* bottomDivider      = OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]);
 
 		NSDictionary* views = @{
-			@"searchField"        : self.searchField,
-			@"aboveScopeBarDark"  : aboveScopeBarDark,
-			@"aboveScopeBarLight" : aboveScopeBarLight,
-			@"scopeBar"           : scopeBar,
-			@"topDivider"         : topDivider,
-			@"scrollView"         : self.scrollView,
-			@"bottomDivider"      : bottomDivider,
-			@"statusTextField"    : self.statusTextField,
-			@"itemCountTextField" : self.itemCountTextField,
+			@"searchField":        self.searchField,
+			@"aboveScopeBarDark":  aboveScopeBarDark,
+			@"aboveScopeBarLight": aboveScopeBarLight,
+			@"scopeBar":           scopeBar,
+			@"topDivider":         topDivider,
+			@"scrollView":         self.scrollView,
+			@"bottomDivider":      bottomDivider,
+			@"statusTextField":    self.statusTextField,
+			@"itemCountTextField": self.itemCountTextField,
 		};
 
 		NSView* contentView = self.window.contentView;
@@ -156,7 +156,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 		for(id pair in [[[self sharedProjectStateDB] allObjects] sortedArrayUsingDescriptors:@[ [NSSortDescriptor sortDescriptorWithKey:@"value.lastRecentlyUsed" ascending:NO], [NSSortDescriptor sortDescriptorWithKey:@"key.lastPathComponent" ascending:YES selector:@selector(localizedCompare:)] ]])
 		{
 			if(access([pair[@"key"] fileSystemRepresentation], F_OK) == 0)
-				[items addObject:@{ @"path" : pair[@"key"] }];
+				[items addObject:@{ @"path": pair[@"key"] }];
 		}
 	}
 	else if(_sourceIndex == kOakSourceIndexFavorites)
@@ -175,8 +175,8 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 						if(subentry->d_type == DT_DIR)
 						{
 							NSMutableDictionary* item = [NSMutableDictionary dictionaryWithDictionary:@{
-								@"path" : [NSString stringWithCxxString:path::join(path, subentry->d_name)],
-								@"isRemoveDisabled" : @YES
+								@"path":             [NSString stringWithCxxString:path::join(path, subentry->d_name)],
+								@"isRemoveDisabled": @YES
 							}];
 
 							if(includeSymlinkName)
@@ -189,8 +189,8 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 				else
 				{
 					NSMutableDictionary* item = [NSMutableDictionary dictionaryWithDictionary:@{
-						@"path" : [NSString stringWithCxxString:path],
-						@"link" : [NSString stringWithCxxString:path::join(favoritesPath, entry->d_name)]
+						@"path": [NSString stringWithCxxString:path],
+						@"link": [NSString stringWithCxxString:path::join(favoritesPath, entry->d_name)]
 					}];
 
 					if(path::name(path) != entry->d_name)
@@ -211,10 +211,10 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 		NSString* path = item[@"path"];
 		NSMutableDictionary* tmp = [item mutableCopy];
 		[tmp addEntriesFromDictionary:@{
-			@"icon"   : [OakFileIconImage fileIconImageWithPath:path size:NSMakeSize(32, 32)],
-			@"name"   : item[@"name"]   ?: [NSString stringWithCxxString:path::display_name(to_s(path))],
-			@"folder" : item[@"folder"] ?: [[path stringByDeletingLastPathComponent] stringByAbbreviatingWithTildeInPath],
-			@"info"   : [path stringByAbbreviatingWithTildeInPath]
+			@"icon":   [OakFileIconImage fileIconImageWithPath:path size:NSMakeSize(32, 32)],
+			@"name":   item[@"name"]   ?: [NSString stringWithCxxString:path::display_name(to_s(path))],
+			@"folder": item[@"folder"] ?: [[path stringByDeletingLastPathComponent] stringByAbbreviatingWithTildeInPath],
+			@"info":   [path stringByAbbreviatingWithTildeInPath]
 		}];
 		[_originalItems addObject:tmp];
 	}

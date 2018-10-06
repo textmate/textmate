@@ -98,7 +98,7 @@ static NSAttributedString* attributedStatusString (NSString* aString)
 
 		ColorsFromStatus(charString, &foreColor, &backColor);
 
-		NSDictionary* attributes = @{NSForegroundColorAttributeName : foreColor, NSBackgroundColorAttributeName : backColor};
+		NSDictionary* attributes = @{ NSForegroundColorAttributeName: foreColor, NSBackgroundColorAttributeName: backColor };
 
 		attributedCharString = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithFormat:@"%C%@%C", hairSpace, charString, hairSpace] attributes:attributes];
 

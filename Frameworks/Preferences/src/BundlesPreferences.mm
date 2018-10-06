@@ -167,10 +167,10 @@ static NSMutableSet* BundlesBeingInstalled = [NSMutableSet set];
 - (void)tableView:(NSTableView*)aTableView didClickTableColumn:(NSTableColumn*)aTableColumn
 {
 	NSDictionary* map = @{
-		@"name"         : @"name",
-		@"installed"    : @"installed",
-		@"date"         : @"downloadLastUpdated",
-		@"description"  : @"textSummary"
+		@"name":        @"name",
+		@"installed":   @"installed",
+		@"date":        @"downloadLastUpdated",
+		@"description": @"textSummary"
 	};
 
 	NSString* key = map[aTableColumn.identifier];

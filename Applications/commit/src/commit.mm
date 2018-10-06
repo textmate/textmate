@@ -73,9 +73,9 @@ int main (int argc, char* argv[])
 				[arg addObject:@(argv[i])];
 
 			NSDictionary* plist = @{
-				kOakCommitWindowClientPortName : client.portName,
-				kOakCommitWindowArguments      : arg,
-				kOakCommitWindowEnvironment    : [[NSProcessInfo processInfo] environment],
+				kOakCommitWindowClientPortName: client.portName,
+				kOakCommitWindowArguments:      arg,
+				kOakCommitWindowEnvironment:    [[NSProcessInfo processInfo] environment],
 			};
 
 			if(id proxy = [NSConnection rootProxyForConnectionWithRegisteredName:kOakCommitWindowServerConnectionName host:nil])
