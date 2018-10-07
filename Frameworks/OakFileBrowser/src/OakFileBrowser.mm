@@ -432,6 +432,17 @@ static bool is_binary (std::string const& path)
 	[self reload:self];
 }
 
+- (NSURL*)createNewFileWithSuggestedPath:(NSString*)path
+{
+	NSURL* url = [NSURL fileURLWithPath:to_ns(path::unique(to_s(path)))];
+	if([[OakFileManager sharedInstance] createFileAtURL:url view:self.view])
+	{
+		[self editURL:url];
+		return url;
+	}
+	return nil;
+}
+
 // ===================
 // = History support =
 // ===================

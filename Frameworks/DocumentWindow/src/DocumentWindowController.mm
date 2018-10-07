@@ -823,8 +823,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 				path = "untitled." + ext;
 		}
 
-		NSURL* url = [NSURL fileURLWithPath:[NSString stringWithCxxString:path::unique(path::join([folder fileSystemRepresentation], path))]];
-		if([[OakFileManager sharedInstance] createFileAtURL:url view:self.fileBrowser.view])
+		if(NSURL* url = [self.fileBrowser createNewFileWithSuggestedPath:to_ns(path::join([folder fileSystemRepresentation], path))])
 		{
 			OakDocument* doc = [OakDocumentController.sharedInstance documentWithPath:url.path];
 			doc.fileType = to_ns(fileType);
@@ -836,8 +835,6 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 				self.selectedDocument = doc;
 				[doc close];
 			}];
-
-			[self.fileBrowser editURL:url];
 		}
 	}
 }
