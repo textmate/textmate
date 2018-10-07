@@ -112,20 +112,56 @@ OakRolloverButton* OakCreateCloseButton (NSString* accessibilityLabel)
 
 @implementation OakBackgroundFillView
 {
+	NSView* _visualEffectBackgroundView;
 	id _activeBackgroundValue;
 	id _inactiveBackgroundValue;
 }
 
+- (instancetype)initWithFrame:(NSRect)aRect
+{
+	if(self = [super initWithFrame:aRect])
+	{
+		_style = OakBackgroundFillViewStyleNone;
+		[self setWantsLayer:YES]; // required by NSVisualEffectBlendingModeWithinWindow
+	}
+	return self;
+}
+
 - (void)setupHeaderBackground
 {
-	self.activeBackgroundGradient   = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1] endingColor:[NSColor colorWithCalibratedWhite:0.760 alpha:1]];
-	self.inactiveBackgroundGradient = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1] endingColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1]];
+	if([self wantsVisualEffectView])
+	{
+		NSVisualEffectView* effectView = [[NSVisualEffectView alloc] initWithFrame:[self bounds]];
+		effectView.material = NSVisualEffectMaterialHeaderView;
+		effectView.blendingMode = NSVisualEffectBlendingModeBehindWindow;
+		_visualEffectBackgroundView = effectView;
+		[_visualEffectBackgroundView setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
+		[self addSubview:_visualEffectBackgroundView positioned:NSWindowBelow relativeTo:nil];
+	}
+	else
+	{
+		self.activeBackgroundGradient   = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1] endingColor:[NSColor colorWithCalibratedWhite:0.760 alpha:1]];
+		self.inactiveBackgroundGradient = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1] endingColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1]];
+	}
 }
 
 - (void)setupStatusBarBackground
 {
-	self.activeBackgroundGradient   = [[NSGradient alloc] initWithColorsAndLocations:[NSColor colorWithCalibratedWhite:1 alpha:0.68], 0.0, [NSColor colorWithCalibratedWhite:1 alpha:0.5], 0.0416, [NSColor colorWithCalibratedWhite:1 alpha:0], 1.0, nil];
-	self.inactiveBackgroundGradient = [[NSGradient alloc] initWithColorsAndLocations:[NSColor colorWithCalibratedWhite:1 alpha:0.68], 0.0, [NSColor colorWithCalibratedWhite:1 alpha:0.5], 0.0416, [NSColor colorWithCalibratedWhite:1 alpha:0], 1.0, nil];
+	if([self wantsVisualEffectView])
+	{
+		NSVisualEffectView* effectView = [[NSVisualEffectView alloc] initWithFrame:[self bounds]];
+		effectView.material = NSVisualEffectMaterialTitlebar;
+		effectView.blendingMode = NSVisualEffectBlendingModeWithinWindow;
+		effectView.state = NSVisualEffectStateFollowsWindowActiveState;
+		_visualEffectBackgroundView = effectView;
+		[_visualEffectBackgroundView setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
+		[self addSubview:_visualEffectBackgroundView positioned:NSWindowBelow relativeTo:nil];
+	}
+	else
+	{
+		self.activeBackgroundGradient   = [[NSGradient alloc] initWithColorsAndLocations:[NSColor colorWithCalibratedWhite:1 alpha:0.68], 0.0, [NSColor colorWithCalibratedWhite:1 alpha:0.5], 0.0416, [NSColor colorWithCalibratedWhite:1 alpha:0], 1.0, nil];
+		self.inactiveBackgroundGradient = [[NSGradient alloc] initWithColorsAndLocations:[NSColor colorWithCalibratedWhite:1 alpha:0.68], 0.0, [NSColor colorWithCalibratedWhite:1 alpha:0.5], 0.0416, [NSColor colorWithCalibratedWhite:1 alpha:0], 1.0, nil];
+	}
 }
 
 - (void)viewWillMoveToWindow:(NSWindow*)newWindow
@@ -201,8 +237,46 @@ OakRolloverButton* OakCreateCloseButton (NSString* accessibilityLabel)
 	else	return NSMakeSize(NSViewNoInstrinsicMetric, NSViewNoInstrinsicMetric);
 }
 
+- (void)setStyle:(OakBackgroundFillViewStyle)aStyle
+{
+	_style = aStyle;
+	[self updateBackgroundStyle];
+	self.needsDisplay = YES;
+}
+
+- (BOOL)wantsVisualEffectView
+{
+	return _style != OakBackgroundFillViewStyleNone && [NSProcessInfo instancesRespondToSelector:@selector(isOperatingSystemAtLeastVersion:)] && [[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:{ 10, 14, 0 }];
+}
+
+- (void)updateBackgroundStyle
+{
+	if(self.style == OakBackgroundFillViewStyleHeader)
+	{
+		[self setupHeaderBackground];
+	}
+	else if(self.style == OakBackgroundFillViewStyleStatusBar)
+	{
+		[self setupStatusBarBackground];
+	}
+	else
+	{
+		if(_visualEffectBackgroundView != nil)
+		{
+			[_visualEffectBackgroundView removeFromSuperview];
+			_visualEffectBackgroundView = nil;
+		}
+	}
+}
+
 - (void)drawRect:(NSRect)aRect
 {
+	if(_visualEffectBackgroundView != nil)
+	{
+		[super drawRect:aRect];
+		return;
+	}
+
 	id value = _active || !_inactiveBackgroundValue ? _activeBackgroundValue : _inactiveBackgroundValue;
 	if([value isKindOfClass:[NSGradient class]])
 	{

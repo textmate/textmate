@@ -1,9 +1,14 @@
 #import "OakRolloverButton.h"
 #import <oak/misc.h>
 
+typedef NS_ENUM(NSUInteger, OakBackgroundFillViewStyle) {
+	OakBackgroundFillViewStyleNone = 0,
+	OakBackgroundFillViewStyleHeader,
+	OakBackgroundFillViewStyleStatusBar,
+};
+
 PUBLIC @interface OakBackgroundFillView : NSView
-- (void)setupHeaderBackground;
-- (void)setupStatusBarBackground;
+@property (nonatomic) OakBackgroundFillViewStyle style;
 @property (nonatomic) NSImage* activeBackgroundImage;
 @property (nonatomic) NSImage* inactiveBackgroundImage;
 @property (nonatomic) NSColor* activeBackgroundColor;
