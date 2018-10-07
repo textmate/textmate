@@ -18,6 +18,7 @@
 {
 	if(self = [super initWithFrame:aRect])
 	{
+		self.style = OakBackgroundFillViewStyleHeader;
 		self.divider = OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1], [NSColor colorWithCalibratedWhite:0.750 alpha:1]);
 
 		self.textField = [[NSTextField alloc] initWithFrame:NSZeroRect];
@@ -25,7 +26,6 @@
 
 		self.ignoreCaseCheckBox = OakCreateCheckBox(@"Ignore Case");
 		self.wrapAroundCheckBox = OakCreateCheckBox(@"Wrap Around");
-
 		NSDictionary* views = @{
 			@"divider"    : self.divider,
 			@"textField"  : self.textField,
@@ -43,30 +43,5 @@
 		[self.wrapAroundCheckBox bind:NSValueBinding toObject:[NSUserDefaultsController sharedUserDefaultsController] withKeyPath:@"values.incrementalSearchWrapAround" options:nil];
 	}
 	return self;
-}
-
-- (BOOL)isFlipped
-{
-	return YES;
-}
-
-- (BOOL)isOpaque
-{
-	return YES;
-}
-
-- (void)drawRect:(NSRect)dirtyRect
-{
-	NSColor* cornerColor = [NSColor colorWithDeviceWhite:239.0/255.0 alpha:1];
-	NSColor* middleColor = [NSColor colorWithDeviceWhite:223/255.0 alpha:1];
-	int angle = 270;
-
-	NSGradient* aGradient = [[NSGradient alloc] initWithColorsAndLocations:
-		cornerColor, 0.0,
-		middleColor, 0.5,
-		cornerColor, 1.0, nil];
-
-	NSRect bounds = NSMakeRect(self.bounds.origin.x, self.bounds.origin.y+1, self.bounds.size.width, self.bounds.size.height-1);
-	[aGradient drawInRect:bounds angle:angle];
 }
 @end

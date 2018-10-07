@@ -107,7 +107,7 @@ static NSPopUpButton* OakCreateFolderPopUpButton ()
 {
 	if(self = [super initWithFrame:aRect])
 	{
-		[self setupHeaderBackground];
+		self.style = OakBackgroundFillViewStyleHeader;
 
 		self.folderPopUpButton       = OakCreateFolderPopUpButton();
 		self.goBackButton            = OakCreateImageButton(NSImageNameGoLeftTemplate);
@@ -158,14 +158,24 @@ static NSPopUpButton* OakCreateFolderPopUpButton ()
 	{
 		_inTabBar = flag;
 		_bottomDivider.hidden = flag;
-		if(flag)
-				[[OakTabBarStyle sharedInstance] setupTabBarView:self];
-		else	[self setupHeaderBackground];
 	}
+	if(flag)
+	{
+		self.style = OakBackgroundFillViewStyleNone;
+		[[OakTabBarStyle sharedInstance] setupTabBarView:self];
+	}
+	else self.style = OakBackgroundFillViewStyleHeader;
 }
 
 - (NSSize)intrinsicContentSize
 {
 	return NSMakeSize(NSViewNoInstrinsicMetric, 24);
+}
+
+- (void)layout
+{
+	if(_inTabBar)
+		[[OakTabBarStyle sharedInstance] setupTabBarView:self];
+	[super layout];
 }
 @end

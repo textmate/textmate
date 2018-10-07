@@ -21,7 +21,7 @@ static NSButton* OakCreateImageButton (NSImage* image)
 {
 	if(self = [super initWithFrame:aRect])
 	{
-		[self setupStatusBarBackground];
+		self.style = OakBackgroundFillViewStyleStatusBar;
 
 		self.createButton       = OakCreateImageButton([NSImage imageNamed:NSImageNameAddTemplate]);
 		self.actionsPopUpButton = OakCreateActionPopUpButton();

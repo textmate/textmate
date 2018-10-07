@@ -1,4 +1,6 @@
-@interface LiveSearchView : NSView
+#import <OakAppKit/OakUIConstructionFunctions.h>
+
+@interface LiveSearchView : OakBackgroundFillView
 @property (nonatomic) NSTextField* textField;
 @property (nonatomic) NSButton* ignoreCaseCheckBox;
 @property (nonatomic) NSButton* wrapAroundCheckBox;
