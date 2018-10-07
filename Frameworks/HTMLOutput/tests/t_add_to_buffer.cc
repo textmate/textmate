@@ -15,7 +15,7 @@ static void small_adds (std::string const& expect, std::string const& src, size_
 		first = next;
 	}
 
-	if(!clearPrevious)
+	if(!clearPrevious) // occurs when the function is called with false as its fourth argument
 		OAK_ASSERT_EQ(std::string(tmp.begin(), utf8::find_safe_end(tmp.begin(), tmp.end())), expect);
 
 	OAK_ASSERT_EQ(dst, expect);
@@ -41,7 +41,7 @@ void test_add_to_buffer ()
 	{
 		small_adds(GoodUTF8, GoodUTF8, i, true);
 		small_adds(GoodUTF8, BadUTF8,  i, true);
-		small_adds(GoodUTF8, GoodUTF8, i, false);
+		small_adds(GoodUTF8, GoodUTF8, i, false); // clears previous tests because the fourth arg is false
 		small_adds(GoodUTF8, BadUTF8,  i, false);
 	}
 }
