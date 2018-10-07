@@ -44,7 +44,6 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 
 	NSScrollView* gutterScrollView;
 	GutterView* gutterView;
-	NSColor* gutterDividerColor;
 	NSMutableDictionary* gutterImages;
 
 	OakBackgroundFillView* gutterDividerView;
