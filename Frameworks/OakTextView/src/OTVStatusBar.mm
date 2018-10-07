@@ -55,7 +55,7 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSObject* accessibi
 {
 	if(self = [super initWithFrame:aRect])
 	{
-		[self setupStatusBarBackground];
+		self.style = OakBackgroundFillViewStyleStatusBar;
 
 		self.selectionField               = OakCreateTextField(@"1:1");
 		self.grammarPopUp                 = OakCreateStatusBarPopUpButton(@"", @"Grammar");

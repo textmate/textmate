@@ -42,7 +42,7 @@ static NSTextField* OakCreateTextField ()
 {
 	if(self = [super initWithFrame:frame])
 	{
-		[self setupStatusBarBackground];
+		self.style = OakBackgroundFillViewStyleStatusBar;
 		_indeterminateProgress = YES;
 
 		_divider                  = OakCreateDividerImageView();
