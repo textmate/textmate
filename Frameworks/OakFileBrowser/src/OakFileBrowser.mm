@@ -335,7 +335,6 @@ static bool is_binary (std::string const& path)
 		[menu addItem:[NSMenuItem separatorItem]];
 		[[menu addItemWithTitle:[NSString stringWithFormat:@"Use “%@” as Project Folder", DisplayName(_url)] action:@selector(takeProjectPathFrom:) keyEquivalent:@""] setRepresentedObject:path];
 	}
-
 }
 
 - (void)goToURL:(NSURL*)aURL
