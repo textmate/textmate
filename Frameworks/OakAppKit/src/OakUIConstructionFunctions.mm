@@ -202,6 +202,9 @@ OakRolloverButton* OakCreateCloseButton (NSString* accessibilityLabel)
 
 - (void)setStyle:(OakBackgroundFillViewStyle)aStyle
 {
+	if(_style == aStyle)
+		return;
+
 	_style = aStyle;
 	[self updateBackgroundStyle];
 	self.needsDisplay = YES;
@@ -209,6 +212,12 @@ OakRolloverButton* OakCreateCloseButton (NSString* accessibilityLabel)
 
 - (void)updateBackgroundStyle
 {
+	if(_visualEffectBackgroundView)
+	{
+		[_visualEffectBackgroundView removeFromSuperview];
+		_visualEffectBackgroundView = nil;
+	}
+
 	if(self.style == OakBackgroundFillViewStyleHeader)
 	{
 		if([NSProcessInfo instancesRespondToSelector:@selector(isOperatingSystemAtLeastVersion:)] && [[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:{ 10, 14, 0 }])
@@ -226,7 +235,8 @@ OakRolloverButton* OakCreateCloseButton (NSString* accessibilityLabel)
 			self.inactiveBackgroundGradient = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1] endingColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1]];
 		}
 	}
-	else if(self.style == OakBackgroundFillViewStyleStatusBar)
+
+	if(self.style == OakBackgroundFillViewStyleStatusBar)
 	{
 		// MAC_OS_X_VERSION_10_10
 		if([NSProcessInfo instancesRespondToSelector:@selector(isOperatingSystemAtLeastVersion:)] && [[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:{ 10, 10, 0 }])
@@ -243,14 +253,6 @@ OakRolloverButton* OakCreateCloseButton (NSString* accessibilityLabel)
 		{
 			self.activeBackgroundGradient   = [[NSGradient alloc] initWithColorsAndLocations:[NSColor colorWithCalibratedWhite:1 alpha:0.68], 0.0, [NSColor colorWithCalibratedWhite:1 alpha:0.0416], 0.0416, [NSColor colorWithCalibratedWhite:1 alpha:0], 1.0, nil];
 			self.inactiveBackgroundGradient = [[NSGradient alloc] initWithColorsAndLocations:[NSColor colorWithCalibratedWhite:1 alpha:0.68], 0.0, [NSColor colorWithCalibratedWhite:1 alpha:0.0416], 0.0416, [NSColor colorWithCalibratedWhite:1 alpha:0], 1.0, nil];
-		}
-	}
-	else
-	{
-		if(_visualEffectBackgroundView != nil)
-		{
-			[_visualEffectBackgroundView removeFromSuperview];
-			_visualEffectBackgroundView = nil;
 		}
 	}
 }
