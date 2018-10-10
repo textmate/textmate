@@ -201,7 +201,7 @@ static NSString* kUserDefaultsTabItemLineBreakStyleKey = @"tabItemLineBreakStyle
 		_inactiveTabTextStyles[NSForegroundColorAttributeName] = [NSColor colorWithCalibratedWhite:0.5 alpha:1];
 
 		// MAC_OS_X_VERSION_10_14
-		if([NSProcessInfo instancesRespondToSelector:@selector(isOperatingSystemAtLeastVersion:)] && [[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:{ 10, 14, 0 }])
+		if(OAK_AVAILABLE(10, 14))
 		{
 			_activeTabTextStyles = @{
 				NSParagraphStyleAttributeName:  parStyle,
@@ -225,7 +225,7 @@ static NSString* kUserDefaultsTabItemLineBreakStyleKey = @"tabItemLineBreakStyle
 			[[NSApplication sharedApplication] addObserver:self forKeyPath:@"effectiveAppearance" options:NSKeyValueObservingOptionNew context:nil];
 		}
 		// MAC_OS_X_VERSION_10_10
-		else if([NSProcessInfo instancesRespondToSelector:@selector(isOperatingSystemAtLeastVersion:)] && [[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:{ 10, 10, 0 }])
+		else if(OAK_AVAILABLE(10, 10))
 		{
 			_selectedTabTextStyles = _activeTabTextStyles.mutableCopy;
 			_selectedTabTextStyles[NSForegroundColorAttributeName] = [NSColor controlTextColor];
@@ -276,7 +276,7 @@ static NSString* kUserDefaultsTabItemLineBreakStyleKey = @"tabItemLineBreakStyle
 - (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)object change:(NSDictionary*)change context:(void*)context
 {
 	// MAC_OS_X_VERSION_10_14
-	if([NSProcessInfo instancesRespondToSelector:@selector(isOperatingSystemAtLeastVersion:)] && [[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:{ 10, 14, 0 }])
+	if(OAK_AVAILABLE(10, 14))
 	{
 		if([keyPath isEqualToString:@"effectiveAppearance"])
 		{
