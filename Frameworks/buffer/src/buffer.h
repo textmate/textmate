@@ -62,6 +62,7 @@ namespace ng
 
 	struct PUBLIC buffer_api_t
 	{
+		virtual ~buffer_api_t () = default;
 		virtual size_t size () const = 0;
 		virtual std::string operator[] (size_t i) const = 0;
 		virtual std::string substr (size_t from, size_t to) const = 0;
