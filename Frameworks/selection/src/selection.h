@@ -17,6 +17,7 @@ namespace ng
 
 	struct layout_movement_t
 	{
+		virtual ~layout_movement_t () = default;
 		virtual index_t index_left_of (index_t const& index) const = 0;
 		virtual index_t index_right_of (index_t const& index) const = 0;
 		virtual index_t index_above (index_t const& index) const = 0;
