@@ -14,7 +14,7 @@ extern PUBLIC NSString* OakFileBrowserURLMapKey;
 PUBLIC @interface OakFileBrowser : NSResponder
 @property (nonatomic, weak) id <OakFileBrowserDelegate> delegate;
 
-@property (nonatomic)           NSURL*        url;
+@property (nonatomic)           NSURL*        URL;
 @property (nonatomic, readonly) NSString*     path;
 @property (nonatomic, readonly) NSString*     directoryForNewItems;
 

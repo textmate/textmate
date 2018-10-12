@@ -145,8 +145,8 @@ static bool is_binary (std::string const& path)
 	if(self = [super init])
 	{
 		NSString* urlString = [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsInitialFileBrowserURLKey];
-		_url     = urlString ? [NSURL URLWithString:urlString] : kURLLocationHome;
-		_history = [NSMutableArray arrayWithObject:@{ @"url": _url }];
+		_URL     = urlString ? [NSURL URLWithString:urlString] : kURLLocationHome;
+		_history = [NSMutableArray arrayWithObject:@{ @"url": _URL }];
 
 		BOOL foldersOnTop   = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFoldersOnTopKey];
 		BOOL showExtensions = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsShowFileExtensionsKey];
@@ -261,7 +261,7 @@ static bool is_binary (std::string const& path)
 {
 	[self createViews];
 	self.sessionState = fileBrowserState;
-	self.url = _url;
+	self.URL = _URL;
 }
 
 - (NSRect)iconFrameForEntry:(id)anEntry
@@ -293,13 +293,13 @@ static bool is_binary (std::string const& path)
 // = Basic API =
 // =============
 
-- (void)setUrl:(NSURL*)aURL
+- (void)setURL:(NSURL*)aURL
 {
-	if(_outlineViewDelegate.dataSource && [_url isEqual:aURL])
+	if(_outlineViewDelegate.dataSource && [_URL isEqual:aURL])
 		return;
 
-	_url = aURL;
-	_outlineViewDelegate.dataSource = DataSourceForURL(_url, _dataSourceOptions);
+	_URL = aURL;
+	_outlineViewDelegate.dataSource = DataSourceForURL(_URL, _dataSourceOptions);
 
 	NSMenu* folderPopUpMenu = _headerView.folderPopUpButton.menu;
 	[folderPopUpMenu removeAllItems];
@@ -308,7 +308,7 @@ static bool is_binary (std::string const& path)
 	menuItem.image = _outlineViewDelegate.dataSource.rootItem.icon;
 	menuItem.image.size = NSMakeSize(16, 16);
 	menuItem.target = self;
-	menuItem.representedObject = _url;
+	menuItem.representedObject = _URL;
 
 	[_headerView.folderPopUpButton selectItem:menuItem];
 }
@@ -319,7 +319,7 @@ static bool is_binary (std::string const& path)
 	while([menu numberOfItems] > 1)
 		[menu removeItemAtIndex:[menu numberOfItems]-1];
 
-	for(NSURL* currentURL = ParentForURL(_url); currentURL; currentURL = ParentForURL(currentURL))
+	for(NSURL* currentURL = ParentForURL(_URL); currentURL; currentURL = ParentForURL(currentURL))
 	{
 		NSMenuItem* menuItem = [menu addItemWithTitle:DisplayName(currentURL) action:@selector(takeURLFrom:) keyEquivalent:@""];
 		menuItem.representedObject = currentURL;
@@ -330,17 +330,17 @@ static bool is_binary (std::string const& path)
 	[menu addItem:[NSMenuItem separatorItem]];
 	[[menu addItemWithTitle:@"Other…" action:@selector(orderFrontGoToFolder:) keyEquivalent:@""] setTarget:self];
 
-	if(NSString* path = [[_url filePathURL] path])
+	if(NSString* path = [[_URL filePathURL] path])
 	{
 		[menu addItem:[NSMenuItem separatorItem]];
-		[[menu addItemWithTitle:[NSString stringWithFormat:@"Use “%@” as Project Folder", DisplayName(_url)] action:@selector(takeProjectPathFrom:) keyEquivalent:@""] setRepresentedObject:path];
+		[[menu addItemWithTitle:[NSString stringWithFormat:@"Use “%@” as Project Folder", DisplayName(_URL)] action:@selector(takeProjectPathFrom:) keyEquivalent:@""] setRepresentedObject:path];
 	}
 }
 
 - (void)goToURL:(NSURL*)aURL
 {
 	ASSERT(_historyIndex != NSNotFound);
-	if([_url isEqual:aURL])
+	if([_URL isEqual:aURL])
 		return;
 
 	if(_historyIndex + 1 < _history.count)
@@ -360,7 +360,7 @@ static bool is_binary (std::string const& path)
 		BOOL isChild = NO;
 		for(NSURL* currentURL = ParentForURL(aURL); currentURL; currentURL = ParentForURL(currentURL))
 		{
-			if([currentURL isEqual:_url] || [currentURL isEqual:parentURL])
+			if([currentURL isEqual:_URL] || [currentURL isEqual:parentURL])
 			{
 				parentURL = currentURL;
 				isChild = YES;
@@ -393,7 +393,7 @@ static bool is_binary (std::string const& path)
 
 - (NSString*)path
 {
-	NSURL* tmp = [[_url scheme] isEqualToString:@"scm"] ? ParentForURL(_url) : _url;
+	NSURL* tmp = [[_URL scheme] isEqualToString:@"scm"] ? ParentForURL(_URL) : _URL;
 	return [tmp isFileURL] ? [tmp path] : nil;
 }
 
@@ -471,7 +471,7 @@ static bool is_binary (std::string const& path)
 	_historyIndex = newIndex;
 
 	NSDictionary* entry = _history[newIndex];
-	[self setUrl:entry[@"url"]];
+	self.URL = entry[@"url"];
 	[_outlineViewDelegate scrollToOffset:[entry[@"scrollOffset"] floatValue]];
 
 	_headerView.goBackButton.enabled    = self.canGoBack;
@@ -480,12 +480,12 @@ static bool is_binary (std::string const& path)
 
 - (void)syncHistoryState
 {
-	ASSERT(_url);
+	ASSERT(_URL);
 	if(_historyIndex == NSNotFound)
 		return;
 
 	_history[_historyIndex] = @{
-		@"url":          _url,
+		@"url":          _URL,
 		@"scrollOffset": @(NSMinY([_outlineView visibleRect]))
 	};
 }
@@ -659,8 +659,8 @@ static bool is_binary (std::string const& path)
 - (void)showSelectedEntriesInFinder:(id)sender
 {
 	NSArray* urls = self.selectedURLs;
-	if(urls.count == 0 && [_url isFileURL])
-		urls = @[ _url ];
+	if(urls.count == 0 && [_URL isFileURL])
+		urls = @[ _URL ];
 	[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:urls];
 }
 
@@ -681,10 +681,10 @@ static bool is_binary (std::string const& path)
 
 		if(!item.leaf && [_outlineView isItemExpanded:item])
 			[folders addObject:item.path];
-		else if([_url isFileURL]) // TODO Test if parent folder is actually shown by current data source
+		else if([_URL isFileURL]) // TODO Test if parent folder is actually shown by current data source
 			[folders addObject:[item.path stringByDeletingLastPathComponent]];
 	}
-	return [folders count] == 1 ? [folders anyObject] : [[_url filePathURL] path];
+	return [folders count] == 1 ? [folders anyObject] : [[_URL filePathURL] path];
 }
 
 - (void)newFolder:(id)sender
@@ -750,8 +750,8 @@ static bool is_binary (std::string const& path)
 		return (void)OakRunIOAlertPanel("Failed to create Favorites folder.");
 
 	NSArray* urls = self.selectedURLs;
-	if(![urls count] && [_url isFileURL])
-		urls = @[ _url ];
+	if(![urls count] && [_URL isFileURL])
+		urls = @[ _URL ];
 
 	for(NSURL* url in urls)
 	{
@@ -800,7 +800,7 @@ static bool is_binary (std::string const& path)
 
 - (BOOL)canPaste
 {
-	return [_url isFileURL] && [[[NSPasteboard generalPasteboard] availableTypeFromArray:@[ NSFilenamesPboardType ]] isEqualToString:NSFilenamesPboardType];
+	return [_URL isFileURL] && [[[NSPasteboard generalPasteboard] availableTypeFromArray:@[ NSFilenamesPboardType ]] isEqualToString:NSFilenamesPboardType];
 }
 
 - (void)pasteItemsAndKeepSource:(BOOL)keepSource
@@ -854,7 +854,7 @@ static bool is_binary (std::string const& path)
 - (void)updateMenu:(NSMenu*)aMenu
 {
 	NSUInteger countOfExistingItems = [aMenu numberOfItems];
-	NSString* rootPath = [_url isFileURL] ? [_url path] : nil;
+	NSString* rootPath = [_URL isFileURL] ? [_URL path] : nil;
 
 	NSArray* selectedItems = self.selectedItems;
 	bool hasFileSelected = false;
@@ -1147,7 +1147,7 @@ static bool is_binary (std::string const& path)
 - (IBAction)reload:(id)sender
 {
 	CGFloat scrollOffset = NSMinY([_outlineView visibleRect]);
-	_outlineViewDelegate.dataSource = DataSourceForURL(_url, _dataSourceOptions);
+	_outlineViewDelegate.dataSource = DataSourceForURL(_URL, _dataSourceOptions);
 	[_outlineViewDelegate scrollToOffset:scrollOffset];
 }
 
@@ -1161,21 +1161,21 @@ static bool is_binary (std::string const& path)
 	self.showExcludedItems = !self.showExcludedItems;
 }
 
-- (IBAction)goToParentFolder:(id)sender   { [self selectURL:_url withParentURL:ParentForURL(_url)]; }
+- (IBAction)goToParentFolder:(id)sender   { [self selectURL:_URL withParentURL:ParentForURL(_URL)]; }
 - (IBAction)goToComputer:(id)sender       { [self goToURL:kURLLocationComputer];  }
 - (IBAction)goToHome:(id)sender           { [self goToURL:kURLLocationHome];      }
 - (IBAction)goToDesktop:(id)sender        { [self goToURL:kURLLocationDesktop];   }
 
 - (IBAction)goToFavorites:(id)sender
 {
-	if([_url isEqual:kURLLocationFavorites] && self.canGoBack)
+	if([_URL isEqual:kURLLocationFavorites] && self.canGoBack)
 			[self goBack:sender];
 	else	[self goToURL:kURLLocationFavorites];
 }
 
 - (IBAction)goToSCMDataSource:(id)sender
 {
-	if([_url.scheme isEqualToString:@"scm"])
+	if([_URL.scheme isEqualToString:@"scm"])
 	{
 		if(self.canGoBack)
 				[self goBack:sender];
@@ -1188,7 +1188,7 @@ static bool is_binary (std::string const& path)
 			if([selectedURL isFileURL] && path::is_directory([selectedURL fileSystemRepresentation]))
 				return [self goToURL:[FSSCMDataSource scmURLWithPath:[selectedURL path]]];
 		}
-		[self goToURL:[FSSCMDataSource scmURLWithPath:[_url path]]];
+		[self goToURL:[FSSCMDataSource scmURLWithPath:[_URL path]]];
 	}
 }
 
@@ -1201,7 +1201,7 @@ static bool is_binary (std::string const& path)
 	[panel setCanChooseFiles:NO];
 	[panel setCanChooseDirectories:YES];
 	[panel setAllowsMultipleSelection:NO];
-	[panel setDirectoryURL:[_url isFileURL] ? _url : nil];
+	[panel setDirectoryURL:[_URL isFileURL] ? _URL : nil];
 	[panel beginSheetModalForWindow:_view.window completionHandler:^(NSInteger result) {
 		if(result == NSFileHandlingPanelOKButton)
 			[self goToURL:[[panel URLs] lastObject]];
@@ -1295,7 +1295,7 @@ static bool is_binary (std::string const& path)
 		selectedFiles += [item.url isFileURL] && lstat([item.url fileSystemRepresentation], &buf) == 0 ? 1 : 0;
 
 	if([item action] == @selector(goToParentFolder:))
-		res = ParentForURL(_url) != nil;
+		res = ParentForURL(_URL) != nil;
 	else if([item action] == @selector(goBack:))
 		res = self.canGoBack;
 	else if([item action] == @selector(goForward:))
@@ -1344,7 +1344,7 @@ static bool is_binary (std::string const& path)
 			{
 				switch(selectedFiles)
 				{
-					case 0:  items = [NSString stringWithFormat:@" “%@”", DisplayName(_url)]; break;
+					case 0:  items = [NSString stringWithFormat:@" “%@”", DisplayName(_URL)]; break;
 					case 1:  items = [NSString stringWithFormat:@" “%@”", ((FSItem*)[self.selectedItems lastObject]).displayName]; break;
 					default: items = [NSString stringWithFormat:@" %ld Items", selectedFiles]; break;
 				}

@@ -1761,7 +1761,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 			self.fileBrowser.delegate = self;
 			[self.fileBrowser setupViewWithState:_fileBrowserHistory];
 			if(self.projectPath && !_fileBrowserHistory)
-				self.fileBrowser.url = [NSURL fileURLWithPath:self.projectPath];
+				self.fileBrowser.URL = [NSURL fileURLWithPath:self.projectPath];
 			[self updateFileBrowserStatus:self];
 			if(self.layoutView.tabsAboveDocument)
 				[self.tabBarView expand];
@@ -2874,7 +2874,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 		controller.defaultProjectPath = folder;
 		controller.fileBrowserVisible = YES;
 		controller.documents          = @[ [OakDocumentController.sharedInstance untitledDocument] ];
-		controller.fileBrowser.url    = [NSURL fileURLWithPath:folder];
+		controller.fileBrowser.URL    = [NSURL fileURLWithPath:folder];
 
 		[controller openAndSelectDocument:controller.documents[controller.selectedTabIndex]];
 	}
