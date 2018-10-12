@@ -6,9 +6,8 @@
 #import <OakAppKit/NSImage Additions.h>
 #import <OakAppKit/NSMenuItem Additions.h>
 #import <OakFoundation/OakFoundation.h>
+#import <Preferences/Keys.h>
 #import <oak/debug.h>
-
-NSString* const kUserDefaultsDisableTabBarCollapsingKey = @"disableTabBarCollapsing";
 
 static NSString* const OakTabItemPasteboardType = @"com.macromates.TextMate.tabItem";
 
