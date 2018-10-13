@@ -2,10 +2,11 @@
 
 NSMenuItem* MBCreateMenuItem (MBMenuItem const& item)
 {
-	if(!item.title || item.separator)
-		return [NSMenuItem separatorItem];
+	NSMenuItem* menuItem;
+	if(item.title && !item.separator)
+			menuItem = [[NSMenuItem alloc] initWithTitle:item.title action:item.action keyEquivalent:item.keyEquivalent];
+	else	menuItem = [NSMenuItem separatorItem];
 
-	NSMenuItem* menuItem = [[NSMenuItem alloc] initWithTitle:item.title action:item.action keyEquivalent:item.keyEquivalent];
 	menuItem.keyEquivalentModifierMask = item.modifierFlags;
 	menuItem.tag                       = item.tag;
 	menuItem.target                    = item.target;
