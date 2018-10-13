@@ -407,7 +407,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 		},
 	};
 
-	NSMenu* menu = MBCreateMenu(items, @"AMainMenu", [[OakMainMenu alloc] init]);
+	NSMenu* menu = MBCreateMenu(items, [[OakMainMenu alloc] initWithTitle:@"AMainMenu"]);
 	bundlesMenu.delegate    = self;
 	themesMenu.delegate     = self;
 	spellingMenu.delegate   = self;

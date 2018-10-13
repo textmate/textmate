@@ -22,7 +22,7 @@ NSMenuItem* MBCreateMenuItem (MBMenuItem const& item)
 
 	if(item.submenu.size() > 0 || item.systemMenu != MBMenuTypeRegular || item.delegate || item.submenuRef)
 	{
-		NSMenu* submenu = MBCreateMenu(item.submenu, item.title);
+		NSMenu* submenu = MBCreateMenu(item.submenu, [[NSMenu alloc] initWithTitle:item.title]);
 		submenu.delegate = item.delegate;
 		menuItem.submenu = submenu;
 
@@ -49,9 +49,9 @@ NSMenuItem* MBCreateMenuItem (MBMenuItem const& item)
 	return menuItem;
 }
 
-PUBLIC NSMenu* MBCreateMenu (MBMenu const& items, NSString* title, NSMenu* existingMenu)
+PUBLIC NSMenu* MBCreateMenu (MBMenu const& items, NSMenu* existingMenu)
 {
-	NSMenu* menu = existingMenu ?: [[NSMenu alloc] initWithTitle:title];
+	NSMenu* menu = existingMenu ?: [[NSMenu alloc] initWithTitle:@"AMainMenu"];
 	for(auto const& item : items)
 		[menu addItem:MBCreateMenuItem(item)];
 	return menu;
