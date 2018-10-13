@@ -1848,23 +1848,23 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 - (CGFloat)fileBrowserWidth                 { return self.layoutView.fileBrowserWidth;   }
 - (void)setFileBrowserWidth:(CGFloat)aWidth { self.layoutView.fileBrowserWidth = aWidth; }
 
-- (IBAction)newFolder:(id)sender            { if(self.fileBrowser) [NSApp sendAction:_cmd to:self.fileBrowser from:sender]; }
-- (IBAction)reload:(id)sender               { if(self.fileBrowser) [NSApp sendAction:_cmd to:self.fileBrowser from:sender]; }
-- (IBAction)deselectAll:(id)sender          { if(self.fileBrowser) [NSApp sendAction:_cmd to:self.fileBrowser from:sender]; }
+- (IBAction)newFolder:(id)sender            { if(self.fileBrowser) [self.fileBrowser newFolder:sender];   }
+- (IBAction)reload:(id)sender               { if(self.fileBrowser) [self.fileBrowser reload:sender];      }
+- (IBAction)deselectAll:(id)sender          { if(self.fileBrowser) [self.fileBrowser deselectAll:sender]; }
 
 - (IBAction)revealFileInProject:(id)sender  { if(self.selectedDocument) { self.fileBrowserVisible = YES; [self.fileBrowser selectURL:[NSURL fileURLWithPath:self.selectedDocument.path] withParentURL:self.projectPath ? [NSURL fileURLWithPath:self.projectPath] : nil]; } }
 - (IBAction)goToProjectFolder:(id)sender    { self.fileBrowserVisible = YES; [self.fileBrowser goToURL:[NSURL fileURLWithPath:self.projectPath]]; }
 
-- (IBAction)goBack:(id)sender               { self.fileBrowserVisible = YES; [NSApp sendAction:_cmd to:self.fileBrowser from:sender]; }
-- (IBAction)goForward:(id)sender            { self.fileBrowserVisible = YES; [NSApp sendAction:_cmd to:self.fileBrowser from:sender]; }
-- (IBAction)goToParentFolder:(id)sender     { self.fileBrowserVisible = YES; [NSApp sendAction:_cmd to:self.fileBrowser from:sender]; }
+- (IBAction)goBack:(id)sender               { self.fileBrowserVisible = YES; [self.fileBrowser goBack:sender];               }
+- (IBAction)goForward:(id)sender            { self.fileBrowserVisible = YES; [self.fileBrowser goForward:sender];            }
+- (IBAction)goToParentFolder:(id)sender     { self.fileBrowserVisible = YES; [self.fileBrowser goToParentFolder:sender];     }
 
-- (IBAction)goToComputer:(id)sender         { self.fileBrowserVisible = YES; [NSApp sendAction:_cmd to:self.fileBrowser from:sender]; }
-- (IBAction)goToHome:(id)sender             { self.fileBrowserVisible = YES; [NSApp sendAction:_cmd to:self.fileBrowser from:sender]; }
-- (IBAction)goToDesktop:(id)sender          { self.fileBrowserVisible = YES; [NSApp sendAction:_cmd to:self.fileBrowser from:sender]; }
-- (IBAction)goToFavorites:(id)sender        { self.fileBrowserVisible = YES; [NSApp sendAction:_cmd to:self.fileBrowser from:sender]; }
-- (IBAction)goToSCMDataSource:(id)sender    { self.fileBrowserVisible = YES; [NSApp sendAction:_cmd to:self.fileBrowser from:sender]; }
-- (IBAction)orderFrontGoToFolder:(id)sender { self.fileBrowserVisible = YES; [NSApp sendAction:_cmd to:self.fileBrowser from:sender]; }
+- (IBAction)goToComputer:(id)sender         { self.fileBrowserVisible = YES; [self.fileBrowser goToComputer:sender];         }
+- (IBAction)goToHome:(id)sender             { self.fileBrowserVisible = YES; [self.fileBrowser goToHome:sender];             }
+- (IBAction)goToDesktop:(id)sender          { self.fileBrowserVisible = YES; [self.fileBrowser goToDesktop:sender];          }
+- (IBAction)goToFavorites:(id)sender        { self.fileBrowserVisible = YES; [self.fileBrowser goToFavorites:sender];        }
+- (IBAction)goToSCMDataSource:(id)sender    { self.fileBrowserVisible = YES; [self.fileBrowser goToSCMDataSource:sender];    }
+- (IBAction)orderFrontGoToFolder:(id)sender { self.fileBrowserVisible = YES; [self.fileBrowser orderFrontGoToFolder:sender]; }
 
 // ===============
 // = HTML Output =

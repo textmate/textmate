@@ -32,6 +32,7 @@ PUBLIC @interface OakFileBrowser : NSResponder
 - (void)goToURL:(NSURL*)aURL;
 - (void)selectURL:(NSURL*)aURL withParentURL:(NSURL*)parentURL;
 - (NSURL*)createNewFileWithSuggestedPath:(NSString*)path;
+- (void)newFolder:(id)sender;
 
 - (NSRect)iconFrameForURL:(NSURL*)aURL;
 
