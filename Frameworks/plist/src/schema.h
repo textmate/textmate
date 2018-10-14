@@ -65,7 +65,7 @@ namespace plist
 			T OBJ_TYPE::* _field;
 		};
 
-		_fields.emplace(field, field_ptr((field_t*)new variant_field_t(dstField)));
+		_fields.emplace(field, std::make_shared<variant_field_t>(dstField));
 		return *this;
 	}
 
@@ -87,7 +87,7 @@ namespace plist
 			bool(*_converter)(SRC_T const&, DST_T&);
 		};
 
-		_fields.emplace(field, field_ptr((field_t*)new variant_field_t(dstField, converter)));
+		_fields.emplace(field, std::make_shared<variant_field_t>(dstField, converter));
 		return *this;
 	}
 
