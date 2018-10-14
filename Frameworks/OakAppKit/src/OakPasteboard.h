@@ -39,4 +39,5 @@ PUBLIC @interface OakPasteboard : NSManagedObject
 
 - (void)bindComboBoxToPasteboardHistory:(NSComboBox*)comboBox;
 - (void)unbindComboBoxFromPasteboardHistory:(NSComboBox*)comboBox;
+- (void)updateBoundComboBoxNow:(NSComboBox*)comboBox;
 @end

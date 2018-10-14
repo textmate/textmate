@@ -440,11 +440,15 @@ static NSButton* OakCreateStopSearchButton ()
 	self.regularExpression = entry.regularExpression;
 	self.ignoreWhitespace  = entry.ignoreWhitespace;
 	self.fullWords         = entry.fullWordMatch;
+
+	[[OakPasteboard pasteboardWithName:NSFindPboard] updateBoundComboBoxNow:self.findComboBox];
 }
 
 - (void)replaceClipboardDidChange:(NSNotification*)aNotification
 {
 	self.replaceString = [[[OakPasteboard pasteboardWithName:OakReplacePboard] current] string];
+
+	[[OakPasteboard pasteboardWithName:OakReplacePboard] updateBoundComboBoxNow:self.replaceComboBox];
 }
 
 - (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)object change:(NSDictionary*)change context:(void*)context

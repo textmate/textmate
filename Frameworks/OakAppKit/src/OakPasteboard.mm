@@ -592,7 +592,7 @@ static BOOL HasPersistentStore = NO;
 
 - (void)bindComboBoxToPasteboardHistory:(NSComboBox*)comboBox
 {
-	[self.historyArrayController fetch:self];
+	[self.historyArrayController fetchWithRequest:nil merge:YES error:nullptr];
 	[comboBox bind:NSContentBinding       toObject:self.historyArrayController withKeyPath:@"arrangedObjects"		  options:
 		@{ NSRaisesForNotApplicableKeysBindingOption: @YES }];
 	[comboBox bind:NSContentValuesBinding toObject:self.historyArrayController withKeyPath:@"arrangedObjects.string" options:
@@ -612,5 +612,11 @@ static BOOL HasPersistentStore = NO;
 	[NSNotificationCenter.defaultCenter removeObserver:self name:NSComboBoxSelectionDidChangeNotification object:comboBox];
 	[comboBox unbind:NSContentValuesBinding];
 	[comboBox unbind:NSContentBinding];
+}
+
+- (void)updateBoundComboBoxNow:(NSComboBox*)comboBox
+{
+	[self unbindComboBoxFromPasteboardHistory:comboBox];
+	[self bindComboBoxToPasteboardHistory:comboBox];
 }
 @end
