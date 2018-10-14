@@ -23,6 +23,7 @@ namespace plist
 	private:
 		struct field_t
 		{
+			virtual ~field_t() = default;
 			virtual bool handle (plist::any_t const& value, OBJ_TYPE* obj) const = 0;
 		};
 
