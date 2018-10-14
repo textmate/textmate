@@ -7,7 +7,6 @@
 #import <OakAppKit/NSAlert Additions.h>
 #import <OakAppKit/NSMenuItem Additions.h>
 #import <OakAppKit/OakPasteboard.h>
-#import <OakAppKit/OakPasteboardSelector.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakAppKit/OakSyntaxFormatter.h>
 #import <OakFoundation/NSString Additions.h>
@@ -37,46 +36,16 @@ NSButton* OakCreateClickableStatusBar ()
 	return res;
 }
 
-@interface OakAutoSizingTextField : NSTextField
-@property (nonatomic) NSSize myIntrinsicContentSize;
-@end
-
-@implementation OakAutoSizingTextField
-- (NSSize)intrinsicContentSize
+static NSComboBox* OakCreateFindPanelComboBox (id <NSComboBoxDelegate> delegate, NSView* labelView, NSString* grammarName)
 {
-	return NSEqualSizes(self.myIntrinsicContentSize, NSZeroSize) ? [super intrinsicContentSize] : self.myIntrinsicContentSize;
-}
-
-- (void)updateIntrinsicContentSizeToEncompassString:(NSString*)aString
-{
-	NSTextFieldCell* cell = [self.cell copy];
-	cell.stringValue = aString;
-
-	self.myIntrinsicContentSize = NSMakeSize(NSViewNoInstrinsicMetric, MAX(22, MIN([cell cellSizeForBounds:NSMakeRect(0, 0, NSWidth([self bounds]), CGFLOAT_MAX)].height, 225)));
-	[self invalidateIntrinsicContentSize];
-}
-@end
-
-static OakAutoSizingTextField* OakCreateTextField (id <NSTextFieldDelegate> delegate, NSView* labelView, NSString* grammarName)
-{
-	OakAutoSizingTextField* res = [[OakAutoSizingTextField alloc] initWithFrame:NSZeroRect];
-	res.font = OakControlFont();
+	NSComboBox* res = OakCreateComboBox(labelView);
 	res.formatter = [[OakSyntaxFormatter alloc] initWithGrammarName:grammarName];
-	[[res cell] setWraps:YES];
-	res.accessibilityTitleUIElement = labelView;
 	res.delegate = delegate;
-	return res;
-}
 
-static NSButton* OakCreateHistoryButton (NSString* toolTip)
-{
-	NSButton* res = [[NSButton alloc] initWithFrame:NSZeroRect];
-	res.bezelStyle = NSRoundedDisclosureBezelStyle;
-	res.buttonType = NSMomentaryLightButton;
-	res.title      = @"";
-	res.toolTip    = toolTip;
-	res.accessibilityLabel = toolTip;
-	[res setContentCompressionResistancePriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
+	res.cell.wraps = YES;
+	res.numberOfVisibleItems = 12;
+	[res setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
+	[res setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationVertical];
 	return res;
 }
 
@@ -104,18 +73,16 @@ static NSButton* OakCreateStopSearchButton ()
 	return res;
 }
 
-@interface FindWindowController () <NSTextFieldDelegate, NSWindowDelegate, NSMenuDelegate, NSPopoverDelegate, NSTextStorageDelegate>
+@interface FindWindowController () <NSComboBoxDelegate, NSWindowDelegate, NSMenuDelegate, NSPopoverDelegate, NSTextStorageDelegate>
 @property (nonatomic) NSTextField*              findLabel;
-@property (nonatomic) OakAutoSizingTextField*   findTextField;
+@property (nonatomic) NSComboBox*               findComboBox;
 @property (nonatomic) OakSyntaxFormatter*       findStringFormatter;
-@property (nonatomic) NSButton*                 findHistoryButton;
 
 @property (nonatomic) NSButton*                 countButton;
 
 @property (nonatomic) NSTextField*              replaceLabel;
-@property (nonatomic) OakAutoSizingTextField*   replaceTextField;
+@property (nonatomic) NSComboBox*               replaceComboBox;
 @property (nonatomic) OakSyntaxFormatter*       replaceStringFormatter;
-@property (nonatomic) NSButton*                 replaceHistoryButton;
 
 @property (nonatomic) NSTextField*              optionsLabel;
 @property (nonatomic) NSButton*                 ignoreCaseCheckBox;
@@ -180,18 +147,16 @@ static NSButton* OakCreateStopSearchButton ()
 		self.window.restorable         = NO;
 
 		self.findLabel                 = OakCreateLabel(@"Find:");
-		self.findTextField             = OakCreateTextField(self, self.findLabel, @"source.regexp.oniguruma");
-		self.findStringFormatter       = _findTextField.formatter;
-		self.findHistoryButton         = OakCreateHistoryButton(@"Show Find History");
+		self.findComboBox              = OakCreateFindPanelComboBox(self, self.findLabel, @"source.regexp.oniguruma");
+		self.findStringFormatter       = _findComboBox.formatter;
 		self.countButton               = OakCreateButton(@"Σ", NSSmallSquareBezelStyle);
 
 		self.countButton.toolTip = @"Show Results Count";
 		self.countButton.accessibilityLabel = self.countButton.toolTip;
 
 		self.replaceLabel              = OakCreateLabel(@"Replace:");
-		self.replaceTextField          = OakCreateTextField(self, self.replaceLabel, @"textmate.format-string");
-		self.replaceStringFormatter    = _replaceTextField.formatter;
-		self.replaceHistoryButton      = OakCreateHistoryButton(@"Show Replace History");
+		self.replaceComboBox           = OakCreateFindPanelComboBox(self, self.replaceLabel, @"textmate.format-string");
+		self.replaceStringFormatter    = _replaceComboBox.formatter;
 
 		self.optionsLabel              = OakCreateLabel(@"Options:");
 
@@ -250,8 +215,6 @@ static NSButton* OakCreateStopSearchButton ()
 
 		// =============================
 
-		self.findHistoryButton.action     = @selector(showFindHistory:);
-		self.replaceHistoryButton.action  = @selector(showReplaceHistory:);
 		self.countButton.action           = @selector(countOccurrences:);
 		self.findAllButton.action         = @selector(findAll:);
 		self.replaceAllButton.action      = @selector(replaceAll:);
@@ -265,8 +228,8 @@ static NSButton* OakCreateStopSearchButton ()
 		self.globHistoryList  = [[OakHistoryList alloc] initWithName:@"Find in Folder Globs.default" stackSize:10 fallbackUserDefaultsKey:kUserDefaultsDefaultFindGlobsKey];
 		self.recentFolders    = [[OakHistoryList alloc] initWithName:@"findRecentPlaces" stackSize:21];
 
-		[self.findTextField             bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.findString"           options:@{ NSContinuouslyUpdatesValueBindingOption: @YES }];
-		[self.replaceTextField          bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.replaceString"        options:@{ NSContinuouslyUpdatesValueBindingOption: @YES }];
+		[self.findComboBox              bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.findString"           options:@{ NSContinuouslyUpdatesValueBindingOption: @YES }];
+		[self.replaceComboBox           bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.replaceString"        options:@{ NSContinuouslyUpdatesValueBindingOption: @YES }];
 		[self.globTextField             bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.globHistoryList.head" options:nil];
 		[self.globTextField             bind:NSContentValuesBinding toObject:_objectController withKeyPath:@"content.globHistoryList.list" options:nil];
 		[self.globTextField             bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.canEditGlob"          options:nil];
@@ -286,6 +249,9 @@ static NSButton* OakCreateStopSearchButton ()
 		[self.findNextButton            bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.findString.length"    options:nil];
 
 		[self.resultsViewController     bind:@"replaceString"       toObject:_objectController withKeyPath:@"content.replaceString"        options:nil];
+
+		[[OakPasteboard pasteboardWithName:NSFindPboard] bindComboBoxToPasteboardHistory:self.findComboBox];
+		[[OakPasteboard pasteboardWithName:OakReplacePboard] bindComboBoxToPasteboardHistory:self.replaceComboBox];
 
 		NSView* contentView = self.window.contentView;
 		OakAddAutoLayoutViewsToSuperview([self.allViews allValues], contentView);
@@ -315,6 +281,8 @@ static NSButton* OakCreateStopSearchButton ()
 
 - (void)dealloc
 {
+	[[OakPasteboard pasteboardWithName:NSFindPboard] unbindComboBoxFromPasteboardHistory:_findComboBox];
+	[[OakPasteboard pasteboardWithName:OakReplacePboard] unbindComboBoxFromPasteboardHistory:_replaceComboBox];
 	[self.window removeObserver:self forKeyPath:@"firstResponder"];
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 }
@@ -345,12 +313,10 @@ static NSButton* OakCreateStopSearchButton ()
 {
 	NSDictionary* views = @{
 		@"findLabel":         self.findLabel,
-		@"find":              self.findTextField,
-		@"findHistory":       self.findHistoryButton,
+		@"find":              self.findComboBox,
 		@"count":             self.countButton,
 		@"replaceLabel":      self.replaceLabel,
-		@"replace":           self.replaceTextField,
-		@"replaceHistory":    self.replaceHistoryButton,
+		@"replace":           self.replaceComboBox,
 
 		@"optionsLabel":      self.optionsLabel,
 		@"regularExpression": self.regularExpressionCheckBox,
@@ -401,14 +367,13 @@ static NSButton* OakCreateStopSearchButton ()
 	NSDictionary* views = self.allViews;
 
 	CONSTRAINT(@"H:|-(>=20,==20@75)-[findLabel]-[find(>=100)]",        0);
-	CONSTRAINT(@"H:[find]-(5)-[findHistory]-[count(==findHistory)]-|", NSLayoutFormatAlignAllTop);
+	CONSTRAINT(@"H:[find]-(5)-[count(==21)]-|",                        NSLayoutFormatAlignAllTop);
 	CONSTRAINT(@"V:[count(==21)]",                                     NSLayoutFormatAlignAllLeft|NSLayoutFormatAlignAllRight);
 	CONSTRAINT(@"H:|-(>=20,==20@75)-[replaceLabel]-[replace]",         0);
-	CONSTRAINT(@"H:[replace]-(5)-[replaceHistory]",                    NSLayoutFormatAlignAllTop);
-	CONSTRAINT(@"V:|-[find]-[replace]",                                NSLayoutFormatAlignAllLeft|NSLayoutFormatAlignAllRight);
+	CONSTRAINT(@"V:|-[find(==20)]-[replace(==20)]",                                NSLayoutFormatAlignAllLeft|NSLayoutFormatAlignAllRight);
 
-	[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self.findLabel attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.findTextField attribute:NSLayoutAttributeTop multiplier:1 constant:3]];
-	[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self.replaceLabel attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.replaceTextField attribute:NSLayoutAttributeTop multiplier:1 constant:3]];
+	[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self.findLabel attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.findComboBox attribute:NSLayoutAttributeTop multiplier:1 constant:3]];
+	[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self.replaceLabel attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.replaceComboBox attribute:NSLayoutAttributeTop multiplier:1 constant:3]];
 
 	CONSTRAINT(@"H:|-(>=20,==20@75)-[optionsLabel]-[regularExpression]-[ignoreWhitespace]-(>=20)-|", NSLayoutFormatAlignAllBaseline);
 	CONSTRAINT(@"H:[ignoreCase(==regularExpression)]-[wrapAround(==ignoreWhitespace)]",              NSLayoutFormatAlignAllTop|NSLayoutFormatAlignAllBottom);
@@ -416,12 +381,12 @@ static NSButton* OakCreateStopSearchButton ()
 	CONSTRAINT(@"V:[replace]-[ignoreWhitespace]-[wrapAround]",                                       0);
 
 	CONSTRAINT(@"H:|-(>=20,==20@75)-[whereLabel]-[where(<=180)]-[matching]", NSLayoutFormatAlignAllBaseline);
-	CONSTRAINT(@"H:[matching]-[glob]-[actions]",                             0);
-	[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self.actionsPopUpButton attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.globTextField    attribute:NSLayoutAttributeTop multiplier:1 constant:1]];
+	CONSTRAINT(@"H:[matching]-[glob]-[actions]-(>=20@25)-|",                 0);
+	[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self.actionsPopUpButton attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.globTextField    attribute:NSLayoutAttributeTop multiplier:1 constant:0]];
 	[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self.actionsPopUpButton attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.wherePopUpButton attribute:NSLayoutAttributeTop multiplier:1 constant:0]];
 
 	CONSTRAINT(@"V:[ignoreCase]-[where]",                                    NSLayoutFormatAlignAllLeft);
-	[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self.replaceTextField attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self.globTextField attribute:NSLayoutAttributeRight multiplier:1 constant:0]];
+	[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self.countButton attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self.actionsPopUpButton attribute:NSLayoutAttributeRight multiplier:1 constant:0]];
 
 	[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self.findLabel attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self.replaceLabel attribute:NSLayoutAttributeRight multiplier:1 constant:0]];
 	[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self.findLabel attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self.optionsLabel attribute:NSLayoutAttributeRight multiplier:1 constant:0]];
@@ -452,8 +417,8 @@ static NSButton* OakCreateStopSearchButton ()
 	[self.window.contentView addConstraints:_myConstraints];
 
 	if(self.showsResultsOutlineView)
-			OakSetupKeyViewLoop(@[ self.findTextField, self.replaceTextField, self.countButton, self.regularExpressionCheckBox, self.ignoreWhitespaceCheckBox, self.ignoreCaseCheckBox, self.wrapAroundCheckBox, self.wherePopUpButton, self.globTextField, self.actionsPopUpButton, self.resultsViewController.outlineView, self.findAllButton, self.replaceAllButton, self.replaceButton, self.replaceAndFindButton, self.findPreviousButton, self.findNextButton ]);
-	else	OakSetupKeyViewLoop(@[ self.findTextField, self.replaceTextField, self.countButton, self.regularExpressionCheckBox, self.ignoreWhitespaceCheckBox, self.ignoreCaseCheckBox, self.wrapAroundCheckBox, self.wherePopUpButton, self.globTextField, self.actionsPopUpButton, self.findAllButton, self.replaceAllButton, self.replaceButton, self.replaceAndFindButton, self.findPreviousButton, self.findNextButton ]);
+			OakSetupKeyViewLoop(@[ self.findComboBox, self.replaceComboBox, self.countButton, self.regularExpressionCheckBox, self.ignoreWhitespaceCheckBox, self.ignoreCaseCheckBox, self.wrapAroundCheckBox, self.wherePopUpButton, self.globTextField, self.actionsPopUpButton, self.resultsViewController.outlineView, self.findAllButton, self.replaceAllButton, self.replaceButton, self.replaceAndFindButton, self.findPreviousButton, self.findNextButton ]);
+	else	OakSetupKeyViewLoop(@[ self.findComboBox, self.replaceComboBox, self.countButton, self.regularExpressionCheckBox, self.ignoreWhitespaceCheckBox, self.ignoreCaseCheckBox, self.wrapAroundCheckBox, self.wherePopUpButton, self.globTextField, self.actionsPopUpButton, self.findAllButton, self.replaceAllButton, self.replaceButton, self.replaceAndFindButton, self.findPreviousButton, self.findNextButton ]);
 }
 
 - (void)userDefaultsDidChange:(NSNotification*)aNotification
@@ -487,14 +452,14 @@ static NSButton* OakCreateStopSearchButton ()
 	if([keyPath isEqualToString:@"firstResponder"])
 	{
 		NSResponder* firstResponder = [self.window firstResponder];
-		self.resultsViewController.showReplacementPreviews = firstResponder == self.replaceTextField || firstResponder == self.replaceTextField.currentEditor;
+		self.resultsViewController.showReplacementPreviews = firstResponder == self.replaceComboBox || firstResponder == self.replaceComboBox.currentEditor;
 
 		if([firstResponder isKindOfClass:[NSTextView class]])
 		{
 			NSTextView* textView = (NSTextView*)firstResponder;
 			if(textView.isFieldEditor)
 			{
-				BOOL enable = _findTextField.currentEditor || _replaceTextField.currentEditor;
+				BOOL enable = _findComboBox.currentEditor || _replaceComboBox.currentEditor;
 				if(textView.textStorage.delegate = enable ? self : nil)
 					[self addStylesToFieldEditor];
 			}
@@ -517,7 +482,7 @@ static NSButton* OakCreateStopSearchButton ()
 	BOOL isVisibleAndKey = [self isWindowLoaded] && [self.window isVisible] && [self.window isKeyWindow];
 	[super showWindow:sender];
 	if(!isVisibleAndKey || ![[self.window firstResponder] isKindOfClass:[NSTextView class]])
-		[self.window makeFirstResponder:self.findTextField];
+		[self.window makeFirstResponder:self.findComboBox];
 }
 
 - (BOOL)commitEditing
@@ -692,18 +657,24 @@ static NSButton* OakCreateStopSearchButton ()
 
 // ==============================
 
+- (void)expandComboBox:(NSComboBox*)comboBox
+{
+	// https://stackoverflow.com/questions/4499262/how-to-programmatically-open-an-nscomboboxs-list
+	id accessibilityComboBox = NSAccessibilityUnignoredDescendant(comboBox);
+	if(![accessibilityComboBox isAccessibilityExpanded]) {
+		[self.window makeFirstResponder:comboBox];
+		[accessibilityComboBox setAccessibilityExpanded:YES];
+	}
+}
+
 - (IBAction)showFindHistory:(id)sender
 {
-	if(![[[OakPasteboardSelector sharedInstance] window] isVisible])
-		[[OakPasteboard pasteboardWithName:NSFindPboard] selectItemForControl:self.findTextField];
-	// if the panel is visible it will automatically be hidden due to the mouse click
+	[self expandComboBox:self.findComboBox];
 }
 
 - (IBAction)showReplaceHistory:(id)sender
 {
-	if(![[[OakPasteboardSelector sharedInstance] window] isVisible])
-		[[OakPasteboard pasteboardWithName:OakReplacePboard] selectItemForControl:self.replaceTextField];
-	// if the panel is visible it will automatically be hidden due to the mouse click
+	[self expandComboBox:self.replaceComboBox];
 }
 
 - (void)popoverDidClose:(NSNotification*)aNotification
@@ -733,7 +704,7 @@ static NSButton* OakCreateStopSearchButton ()
 		textField.stringValue = _findErrorString;
 		[textField sizeToFit];
 
-		[self.findStringPopver showRelativeToRect:NSZeroRect ofView:self.findTextField preferredEdge:NSMaxYEdge];
+		[self.findStringPopver showRelativeToRect:NSZeroRect ofView:self.findComboBox preferredEdge:NSMaxYEdge];
 	}
 	else
 	{
@@ -895,7 +866,6 @@ static NSButton* OakCreateStopSearchButton ()
 		return;
 
 	_findString = aString ?: @"";
-	[self.findTextField updateIntrinsicContentSizeToEncompassString:_findString];
 
 	if(self.findErrorString)
 		[self updateFindErrorString];
@@ -903,11 +873,7 @@ static NSButton* OakCreateStopSearchButton ()
 
 - (void)setReplaceString:(NSString*)aString
 {
-	if(_replaceString == aString || [_replaceString isEqualToString:aString])
-		return;
-
 	_replaceString = aString ?: @"";
-	[self.replaceTextField updateIntrinsicContentSizeToEncompassString:_replaceString];
 }
 
 - (void)setFindResultsHeight:(CGFloat)height { [[NSUserDefaults standardUserDefaults] setInteger:height forKey:kUserDefaultsFindResultsHeightKey]; }
@@ -926,16 +892,16 @@ static NSButton* OakCreateStopSearchButton ()
 	_replaceStringFormatter.enabled = flag;
 
 	// Re-format current value
-	if(!_findTextField.currentEditor)
+	if(!_findComboBox.currentEditor)
 	{
-		_findTextField.objectValue = nil;
-		_findTextField.objectValue = _findString;
+		_findComboBox.objectValue = nil;
+		_findComboBox.objectValue = _findString;
 	}
 
-	if(!_replaceTextField.currentEditor)
+	if(!_replaceComboBox.currentEditor)
 	{
-		_replaceTextField.objectValue = nil;
-		_replaceTextField.objectValue = _replaceString;
+		_replaceComboBox.objectValue = nil;
+		_replaceComboBox.objectValue = _replaceString;
 	}
 
 	[self addStylesToFieldEditor];
@@ -948,8 +914,8 @@ static NSButton* OakCreateStopSearchButton ()
 
 - (void)addStylesToFieldEditor
 {
-	[_findStringFormatter addStylesToString:((NSTextView*)_findTextField.currentEditor).textStorage];
-	[_replaceStringFormatter addStylesToString:((NSTextView*)_replaceTextField.currentEditor).textStorage];
+	[_findStringFormatter addStylesToString:((NSTextView*)_findComboBox.currentEditor).textStorage];
+	[_replaceStringFormatter addStylesToString:((NSTextView*)_replaceComboBox.currentEditor).textStorage];
 }
 
 - (void)setIgnoreCase:(BOOL)flag        { if(_ignoreCase != flag) [[NSUserDefaults standardUserDefaults] setObject:@(_ignoreCase = flag) forKey:kUserDefaultsFindIgnoreCase]; }
@@ -1012,23 +978,13 @@ static NSButton* OakCreateStopSearchButton ()
 
 		if(lastNewline.location == NSNotFound || lastNewline.location < NSMaxRange(insertionPoint))
 		{
-			if(control == self.findTextField)
+			if(control == self.findComboBox)
 				return [self showFindHistory:control], YES;
-			else if(control == self.replaceTextField)
+			else if(control == self.replaceComboBox)
 				return [self showReplaceHistory:control], YES;
 		}
 	}
 	return NO;
-}
-
-- (void)controlTextDidChange:(NSNotification*)aNotification
-{
-	OakAutoSizingTextField* textField = [aNotification object];
-	NSDictionary* userInfo = [aNotification userInfo];
-	NSTextView* textView = userInfo[@"NSFieldEditor"];
-
-	if(textView && textField)
-		[textField updateIntrinsicContentSizeToEncompassString:textView.string];
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem*)aMenuItem

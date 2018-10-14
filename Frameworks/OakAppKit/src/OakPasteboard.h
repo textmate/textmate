@@ -37,5 +37,6 @@ PUBLIC @interface OakPasteboard : NSManagedObject
 @property (nonatomic) OakPasteboardEntry* currentEntry;
 @property (nonatomic) NSDictionary* auxiliaryOptionsForCurrent;
 
-- (void)selectItemForControl:(NSView*)controlView;
+- (void)bindComboBoxToPasteboardHistory:(NSComboBox*)comboBox;
+- (void)unbindComboBoxFromPasteboardHistory:(NSComboBox*)comboBox;
 @end

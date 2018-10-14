@@ -1,5 +1,4 @@
 #import "OakPasteboard.h"
-#import "OakPasteboardSelector.h"
 #import <crash/info.h>
 #import <ns/ns.h>
 #import <oak/oak.h>
@@ -40,6 +39,11 @@ NSString* const kUserDefaultsClipboardHistoryDaysToKeep        = @"clipboardHist
 	res.options = someOptions;
 	res.date = [NSDate date];
 	return res;
+}
+
+- (id)copyWithZone:(NSZone*)zone
+{
+	return self;
 }
 
 - (void)setOptions:(NSDictionary*)aDictionary
@@ -92,6 +96,7 @@ NSString* const kUserDefaultsClipboardHistoryDaysToKeep        = @"clipboardHist
 @property (nonatomic) NSInteger changeCount;
 @property (nonatomic) BOOL disableSystemPasteboardUpdating;
 @property (nonatomic) OakPasteboardEntry* primitiveCurrentEntry;
+@property (nonatomic, readonly) NSArrayController *historyArrayController;
 - (BOOL)avoidsDuplicates;
 - (void)checkForExternalPasteboardChanges;
 @end
@@ -153,7 +158,7 @@ static BOOL HasPersistentStore = NO;
 
 @implementation OakPasteboard
 @dynamic name, currentEntry, auxiliaryOptionsForCurrent, primitiveCurrentEntry;
-@synthesize changeCount, disableSystemPasteboardUpdating;
+@synthesize changeCount, disableSystemPasteboardUpdating, historyArrayController = _historyArrayController;
 
 + (void)initialize
 {
@@ -387,6 +392,11 @@ static BOOL HasPersistentStore = NO;
 	return res;
 }
 
+- (void)dealloc
+{
+	[NSNotificationCenter.defaultCenter removeObserver:self];
+}
+
 - (NSPasteboard*)pasteboard
 {
 	return [NSPasteboard pasteboardWithName:self.name];
@@ -457,6 +467,19 @@ static BOOL HasPersistentStore = NO;
 	D(DBF_Pasteboard, bug("%s\n", [aString UTF8String]););
 	[self checkForExternalPasteboardChanges];
 	[self internalAddEntryWithString:aString andOptions:someOptions];
+}
+
+- (NSArrayController*)historyArrayController
+{
+	if(!_historyArrayController)
+	{
+		_historyArrayController = [[NSArrayController alloc] init];
+		_historyArrayController.managedObjectContext = self.managedObjectContext;
+		_historyArrayController.entityName = @"PasteboardEntry";
+		_historyArrayController.fetchPredicate = [NSPredicate predicateWithFormat:@"pasteboard = %@", self];
+		_historyArrayController.sortDescriptors = @[ [NSSortDescriptor sortDescriptorWithKey:@"date" ascending:NO] ];
+	}
+	return _historyArrayController;
 }
 
 - (void)scheduleSaveHistory:(id)sender
@@ -567,47 +590,27 @@ static BOOL HasPersistentStore = NO;
 	return self.current;
 }
 
-- (void)selectItemAtPosition:(NSPoint)location withWidth:(CGFloat)width respondToSingleClick:(BOOL)singleClick
+- (void)bindComboBoxToPasteboardHistory:(NSComboBox*)comboBox
 {
-	[self checkForExternalPasteboardChanges];
-	NSFetchRequest* request = [NSFetchRequest fetchRequestWithEntityName:@"PasteboardEntry"];
-	request.predicate = [NSPredicate predicateWithFormat:@"pasteboard = %@", self];
-	request.sortDescriptors = @[ [NSSortDescriptor sortDescriptorWithKey:@"date" ascending:NO] ];
+	[self.historyArrayController fetch:self];
+	[comboBox bind:NSContentBinding       toObject:self.historyArrayController withKeyPath:@"arrangedObjects"		  options:
+		@{ NSRaisesForNotApplicableKeysBindingOption: @YES }];
+	[comboBox bind:NSContentValuesBinding toObject:self.historyArrayController withKeyPath:@"arrangedObjects.string" options:
+		@{ NSRaisesForNotApplicableKeysBindingOption: @YES }];
 
-	NSError* error;
-	NSArray* entries = [self.managedObjectContext executeFetchRequest:request error:&error];
-	if(!entries)
-	{
-		NSLog(@"%s %@", sel_getName(_cmd), error);
-		return;
-	}
-
-	NSUInteger selectedRow = self.currentEntry ? [entries indexOfObject:self.currentEntry] : 0;
-	OakPasteboardSelector* pasteboardSelector = [OakPasteboardSelector sharedInstance];
-	[pasteboardSelector setEntries:entries];
-	[pasteboardSelector setIndex:selectedRow == NSNotFound ? 0 : selectedRow];
-	if(width)
-		[pasteboardSelector setWidth:width];
-	if(singleClick)
-		[pasteboardSelector setPerformsActionOnSingleClick];
-
-	NSInteger newSelection = [pasteboardSelector showAtLocation:location];
-	NSArray* newEntries = [pasteboardSelector entries];
-
-	NSSet* keep = [NSSet setWithArray:newEntries];
-	for(OakPasteboardEntry* entry in entries)
-	{
-		if(![keep containsObject:entry])
-			[entry.managedObjectContext deleteObject:entry];
-	}
-
-	if(newSelection != -1)
-		self.currentEntry = [newEntries objectAtIndex:newSelection];
+	[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(comboBoxSelectionDidChange:) name:NSComboBoxSelectionDidChangeNotification object:comboBox];
 }
 
-- (void)selectItemForControl:(NSView*)controlView
+- (void)comboBoxSelectionDidChange:(NSNotification*)notification
 {
-	NSPoint origin = [[controlView window] convertRectToScreen:[controlView frame]].origin;
-	[self selectItemAtPosition:origin withWidth:[controlView frame].size.width respondToSingleClick:YES];
+	NSComboBox* comboBox = notification.object;
+	self.currentEntry = self.historyArrayController.arrangedObjects[comboBox.indexOfSelectedItem];
+}
+
+- (void)unbindComboBoxFromPasteboardHistory:(NSComboBox*)comboBox
+{
+	[NSNotificationCenter.defaultCenter removeObserver:self name:NSComboBoxSelectionDidChangeNotification object:comboBox];
+	[comboBox unbind:NSContentValuesBinding];
+	[comboBox unbind:NSContentBinding];
 }
 @end
