@@ -53,3 +53,8 @@ extern NSURL* kURLLocationFavorites;
 - (instancetype)initWithURL:(NSURL*)url;
 - (void)updateFileProperties;
 @end
+
+@interface FileItem (Observer)
++ (id)addObserverToDirectoryAtURL:(NSURL*)url usingBlock:(void(^)(NSArray<NSURL*>*))handler;
++ (void)removeObserver:(id)someObserver;
+@end
