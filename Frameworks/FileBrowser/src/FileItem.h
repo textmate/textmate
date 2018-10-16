@@ -1,0 +1,55 @@
+#import <scm/status.h>
+
+// Defined in OakFileBrowser/OakFSUtilities.h (private header)
+extern NSURL* kURLLocationComputer;
+extern NSURL* kURLLocationFavorites;
+
+@class OakFinderTag;
+
+@interface NSURL (CompatibilityWrapper)
+@property (nonatomic, readonly) BOOL tmHasDirectoryPath;
+@end
+
+@interface FileItem : NSObject <QLPreviewItem>
+@property (nonatomic) NSURL* URL;
+
+@property (nonatomic, readonly) NSURL* fileReferenceURL;
+@property (nonatomic, readonly) NSURL* resolvedURL;
+@property (nonatomic, readonly) NSURL* parentURL;
+@property (nonatomic, readonly, getter = isDirectory) BOOL directory;
+
+@property (nonatomic, readonly) NSImage* image;
+@property (nonatomic, readonly) scm::status::type SCMStatus;
+@property (nonatomic, readonly) NSString* displayName;
+
+@property (nonatomic) NSString* localizedName;
+@property (nonatomic) NSString* disambiguationSuffix;
+@property (nonatomic) NSString* toolTip;
+
+@property (nonatomic, readonly) BOOL canRename;
+@property (nonatomic, readonly, getter = isApplication) BOOL application;
+
+@property (nonatomic, getter = isOpen)             BOOL open;
+@property (nonatomic, getter = isModified)         BOOL modified;
+
+@property (nonatomic, getter = isMissing)          BOOL missing;
+@property (nonatomic, getter = isHidden)           BOOL hidden;
+@property (nonatomic, getter = hasHiddenExtension) BOOL hiddenExtension;
+@property (nonatomic, getter = isSymbolicLink)     BOOL symbolicLink;
+@property (nonatomic, getter = isPackage)          BOOL package;
+@property (nonatomic, getter = isLinkToPackage)    BOOL linkToPackage;
+@property (nonatomic, getter = isLinkToDirectory)  BOOL linkToDirectory;
+
+@property (nonatomic) NSArray<OakFinderTag*>* finderTags;
+
+@property (nonatomic) NSArray<FileItem*>* children;
+@property (nonatomic) NSMutableArray<FileItem*>* arrangedChildren;
+
++ (instancetype)fileItemWithURL:(NSURL*)url;
+
++ (void)registerClass:(Class)klass forURLScheme:(NSString*)urlScheme;
++ (Class)classForURL:(NSURL*)url;
+
+- (instancetype)initWithURL:(NSURL*)url;
+- (void)updateFileProperties;
+@end
