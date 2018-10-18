@@ -255,6 +255,25 @@ OakRolloverButton* OakCreateCloseButton (NSString* accessibilityLabel)
 			self.inactiveBackgroundGradient = [[NSGradient alloc] initWithColorsAndLocations:[NSColor colorWithCalibratedWhite:1 alpha:0.68], 0.0, [NSColor colorWithCalibratedWhite:1 alpha:0.0416], 0.0416, [NSColor colorWithCalibratedWhite:1 alpha:0], 1.0, nil];
 		}
 	}
+
+	if(self.style == OakBackgroundFillViewStyleDivider)
+	{
+		if(OAK_AVAILABLE(10,14))
+		{
+			self.activeBackgroundColor   = [NSColor separatorColor];
+			self.inactiveBackgroundColor = nil;
+		}
+		else
+		{
+			self.activeBackgroundColor   = [NSColor colorWithCalibratedWhite:0.500 alpha:1];
+			self.inactiveBackgroundColor = [NSColor colorWithCalibratedWhite:0.750 alpha:1];
+		}
+	}
+
+	if(self.style == OakBackgroundFillViewStyleDarkDivider)
+	{
+		self.activeBackgroundColor = [NSColor controlShadowColor];
+	}
 }
 
 - (void)drawRect:(NSRect)aRect
