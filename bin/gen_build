@@ -146,6 +146,13 @@ class BuildFile
     dst
   end
 
+  def compile_xcassets(catalogs, files, dir, target)
+    dst = builddir(File.join(dir, "Assets.car"))
+    @commands << "build #{dst}: compile_xcassets #{escape(catalogs).join(' ')} | #{escape(files).join(' ')}"
+    @commands << "  outputdir = #{builddir(dir)}"
+    dst
+  end
+
   def index_help_book(index, files, target)
     @commands << "build #{builddir(index)}: index_help | #{escape(files).join(' ')}"
     @commands << "  HELP_BOOK = #{builddir(File.dirname(index))}"
@@ -374,6 +381,7 @@ class Target
       end
     end
 
+    asset_catalogs, asset_catalog_files = [ ], [ ]
     contents = "#{@name}.#{@values['BUNDLE_EXTENSION'] || 'app'}/Contents"
     raw.each do |dst, paths|
       paths.each do |path|
@@ -386,8 +394,10 @@ class Target
             STDERR << "*** no such target: #{$'}\n"
           end
         elsif File.directory?(path)
-          help_book_dir = path =~ /.* Help$/ ? path : nil
-          help_book_files = [ ]
+          asset_catalog_dir = path =~ /(.+)\.xcassets$/ ? path : nil
+          asset_catalogs << asset_catalog_dir unless asset_catalog_dir.nil?
+          help_book_dir     = path =~ /.* Help$/ ? path : nil
+          help_book_files   = [ ]
           Dir.chdir(path) do
             BuildDependencies.add(path)
             Dir.glob("**/*").each do |file|
@@ -395,7 +405,11 @@ class Target
               next if File.directory?(file)
               full = File.join(path, file)
               help_book_files << full unless help_book_dir.nil?
-              @resources[builder.copy_resource(File.join(path, file), "#{File.dirname(@path)}/#{contents}/#{dst}/#{File.basename(path)}/#{File.dirname(file)}", self)] = "#{contents}/#{dst}/#{File.basename(path)}/#{File.dirname(file)}"
+              if asset_catalog_dir
+                asset_catalog_files << full
+              else
+                @resources[builder.copy_resource(File.join(path, file), "#{File.dirname(@path)}/#{contents}/#{dst}/#{File.basename(path)}/#{File.dirname(file)}", self)] = "#{contents}/#{dst}/#{File.basename(path)}/#{File.dirname(file)}"
+              end
             end
           end
           unless help_book_dir.nil?
@@ -407,6 +421,10 @@ class Target
           @resources[builder.copy_resource(path, "#{File.dirname(@path)}/#{contents}/#{tmp}", self)] = "#{contents}/#{tmp}"
         end
       end
+    end
+
+    unless asset_catalogs.empty?
+      @resources[builder.compile_xcassets(asset_catalogs, asset_catalog_files, "#{File.dirname(@path)}/#{contents}/Resources", self)] = "#{File.dirname(@path)}/#{contents}/Resources"
     end
 
     @resources.delete(nil)
@@ -717,6 +735,10 @@ rule dsym
 rule compile_xib
   command = xcrun ibtool --errors --warnings --notices --output-format human-readable-text --minimum-deployment-target $APP_MIN_OS --compile $out $in
   description = Compile xib ‘$in’…
+
+rule compile_xcassets
+  command = xcrun actool --errors --warnings --notices --output-format human-readable-text --platform macosx --minimum-deployment-target $APP_MIN_OS --compile $outputdir $in
+  description = Compile xcassets ‘$in’…
 
 rule process_plist
   command = bin/process_plist > $out~ $in $PLIST_FLAGS $RAVE_FLAGS && mv $out~ $out
