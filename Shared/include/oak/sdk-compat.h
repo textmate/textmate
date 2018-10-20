@@ -37,6 +37,7 @@ extern NSAppearanceName const NSAppearanceNameDarkAqua __attribute__((weak_impor
 @end
 
 @interface NSColor (Mojave)
++ (NSColor*)colorNamed:(NSString*)colorName;
 + (NSColor*)separatorColor;
 @end
 #endif

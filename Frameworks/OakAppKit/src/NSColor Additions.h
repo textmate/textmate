@@ -4,4 +4,5 @@
 + (NSColor*)tmMatchedTextUnderlineColor;
 + (NSColor*)tmMatchedTextSelectedBackgroundColor;
 + (NSColor*)tmMatchedTextSelectedUnderlineColor;
++ (NSColor*)tmDarkDividerColor;
 @end

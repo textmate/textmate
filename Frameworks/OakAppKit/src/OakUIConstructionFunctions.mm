@@ -1,4 +1,5 @@
 #import "OakUIConstructionFunctions.h"
+#import "NSColor Additions.h"
 #import "NSImage Additions.h"
 
 NSFont* OakStatusBarFont ()
@@ -272,7 +273,7 @@ OakRolloverButton* OakCreateCloseButton (NSString* accessibilityLabel)
 
 	if(self.style == OakBackgroundFillViewStyleDarkDivider)
 	{
-		self.activeBackgroundColor = [NSColor controlShadowColor];
+		self.activeBackgroundColor = [NSColor tmDarkDividerColor];
 	}
 }
 
