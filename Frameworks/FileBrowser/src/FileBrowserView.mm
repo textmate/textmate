@@ -134,7 +134,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 		NSDictionary* views = @{
 			@"header":  _headerView,
 			@"files":   _scrollView,
-			@"divider": OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1], [NSColor colorWithCalibratedWhite:0.750 alpha:1]),
+			@"divider": OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider),
 			@"actions": _actionsView,
 		};
 

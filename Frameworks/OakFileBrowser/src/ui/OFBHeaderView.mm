@@ -119,7 +119,7 @@ static NSPopUpButton* OakCreateFolderPopUpButton ()
 		[self.goBackButton.cell accessibilitySetOverrideValue:self.goBackButton.toolTip forAttribute:NSAccessibilityDescriptionAttribute];
 		[self.goForwardButton.cell accessibilitySetOverrideValue:self.goForwardButton.toolTip forAttribute:NSAccessibilityDescriptionAttribute];
 
-		_bottomDivider = OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1], [NSColor colorWithCalibratedWhite:0.750 alpha:1]);
+		_bottomDivider = OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider);
 
 		NSDictionary* views = @{
 			@"folder":        self.folderPopUpButton,

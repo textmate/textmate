@@ -175,8 +175,8 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 		_previousCommitMessagesPopUpButton.bezelStyle = NSTexturedRoundedBezelStyle;
 		[self setupPreviousCommitMessagesMenu];
 
-		_topDocumentViewDivider    = OakCreateHorizontalLine([NSColor grayColor]);
-		_bottomDocumentViewDivider = OakCreateHorizontalLine([NSColor grayColor]);
+		_topDocumentViewDivider    = OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider);
+		_bottomDocumentViewDivider = OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider);
 
 		NSView* contentView = self.window.contentView;
 		OakAddAutoLayoutViewsToSuperview([self.allViews allValues], contentView);
@@ -355,8 +355,8 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 	_scrollView.borderType            = NSNoBorder;
 	_scrollView.documentView          = _tableView;
 
-	_topScrollViewDivider    = OakCreateHorizontalLine([NSColor grayColor]);
-	_bottomScrollViewDivider = OakCreateHorizontalLine([NSColor grayColor]);
+	_topScrollViewDivider    = OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider);
+	_bottomScrollViewDivider = OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider);
 
 	_actionPopUpButton = OakCreateActionPopUpButton(YES);
 	_actionPopUpButton.bezelStyle = NSTexturedRoundedBezelStyle;

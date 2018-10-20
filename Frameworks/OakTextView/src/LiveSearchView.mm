@@ -19,7 +19,7 @@
 	if(self = [super initWithFrame:aRect])
 	{
 		self.style   = OakBackgroundFillViewStyleHeader;
-		self.divider = OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1], [NSColor colorWithCalibratedWhite:0.750 alpha:1]);
+		self.divider = OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider);
 
 		self.textField = [[NSTextField alloc] initWithFrame:NSZeroRect];
 		self.textField.focusRingType = NSFocusRingTypeNone;

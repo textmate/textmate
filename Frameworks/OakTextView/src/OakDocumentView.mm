@@ -95,8 +95,8 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 		[gutterScrollView.contentView addConstraint:[NSLayoutConstraint constraintWithItem:gutterView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:gutterScrollView.contentView attribute:NSLayoutAttributeTop multiplier:1.0 constant:0.0]];
 		[gutterScrollView.contentView addConstraint:[NSLayoutConstraint constraintWithItem:gutterView attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:gutterScrollView.contentView attribute:NSLayoutAttributeRight multiplier:1.0 constant:0.0]];
 
-		gutterDividerView = OakCreateVerticalLine(nil);
-		statusDividerView = OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1], [NSColor colorWithCalibratedWhite:0.750 alpha:1]);
+		gutterDividerView = OakCreateVerticalLine(OakBackgroundFillViewStyleNone);
+		statusDividerView = OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider);
 
 		_statusBar = [[OTVStatusBar alloc] initWithFrame:NSZeroRect];
 		_statusBar.delegate = self;
@@ -164,7 +164,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	}
 	else
 	{
-		statusDividerView = OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1], [NSColor colorWithCalibratedWhite:0.750 alpha:1]);
+		statusDividerView = OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider);
 
 		_statusBar = [[OTVStatusBar alloc] initWithFrame:NSZeroRect];
 		_statusBar.delegate = self;
