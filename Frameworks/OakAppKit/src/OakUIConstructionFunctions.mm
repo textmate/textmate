@@ -328,6 +328,24 @@ OakBackgroundFillView* OakCreateHorizontalLine (NSColor* primaryColor, NSColor* 
 	return view;
 }
 
+OakBackgroundFillView* OakCreateVerticalLine (OakBackgroundFillViewStyle style)
+{
+	OakBackgroundFillView* view = [[OakBackgroundFillView alloc] initWithFrame:NSZeroRect];
+	view.style = style;
+	[view addConstraint:[NSLayoutConstraint constraintWithItem:view attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:1]];
+	view.translatesAutoresizingMaskIntoConstraints = NO;
+	return view;
+}
+
+OakBackgroundFillView* OakCreateHorizontalLine (OakBackgroundFillViewStyle style)
+{
+	OakBackgroundFillView* view = [[OakBackgroundFillView alloc] initWithFrame:NSZeroRect];
+	view.style = style;
+	[view addConstraint:[NSLayoutConstraint constraintWithItem:view attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:1]];
+	view.translatesAutoresizingMaskIntoConstraints = NO;
+	return view;
+}
+
 NSView* OakCreateDividerImageView ()
 {
 	OakBackgroundFillView* divider = [[OakBackgroundFillView alloc] initWithFrame:NSZeroRect];

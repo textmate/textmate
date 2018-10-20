@@ -246,7 +246,7 @@ static bool is_binary (std::string const& path)
 	NSDictionary* views = @{
 		@"header":         _headerView,
 		@"browser":        scrollView,
-		@"actionsDivider": OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1], [NSColor colorWithCalibratedWhite:0.750 alpha:1]),
+		@"actionsDivider": OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider),
 		@"actions":        _actionsView,
 	};
 

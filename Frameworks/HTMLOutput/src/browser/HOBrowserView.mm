@@ -45,7 +45,7 @@ static void ShowLoadErrorForURL (WebFrame* frame, NSURL* url, NSError* error)
 
 		NSDictionary* views = @{
 			@"webView":   _webView,
-			@"divider":   OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1], [NSColor colorWithCalibratedWhite:0.750 alpha:1]),
+			@"divider":   OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider),
 			@"statusBar": _statusBar
 		};
 

@@ -78,14 +78,14 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 
 - (void)setHtmlOutputView:(NSView*)aHtmlOutputView
 {
-	_htmlOutputDivider = [self replaceView:_htmlOutputDivider withView:(aHtmlOutputView ? (_htmlOutputOnRight ? OakCreateVerticalLine([NSColor controlShadowColor]) : OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1])) : nil)];
+	_htmlOutputDivider = [self replaceView:_htmlOutputDivider withView:(aHtmlOutputView ? (_htmlOutputOnRight ? OakCreateVerticalLine(OakBackgroundFillViewStyleDarkDivider) : OakCreateHorizontalLine(OakBackgroundFillViewStyleDarkDivider)) : nil)];
 	_htmlOutputView    = [self replaceView:_htmlOutputView withView:aHtmlOutputView];
 	[self updateKeyViewLoop];
 }
 
 - (void)setFileBrowserView:(NSView*)aFileBrowserView
 {
-	_fileBrowserDivider = [self replaceView:_fileBrowserDivider withView:aFileBrowserView ? OakCreateVerticalLine([NSColor controlShadowColor]) : nil];
+	_fileBrowserDivider = [self replaceView:_fileBrowserDivider withView:aFileBrowserView ? OakCreateVerticalLine(OakBackgroundFillViewStyleDarkDivider) : nil];
 	_fileBrowserView    = [self replaceView:_fileBrowserView withView:aFileBrowserView];
 	[self updateKeyViewLoop];
 }

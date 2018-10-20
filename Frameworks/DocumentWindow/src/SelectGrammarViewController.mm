@@ -58,7 +58,7 @@ static NSButton* OakSmallButton (NSString* title, SEL action, id target, NSInteg
 		return;
 	_didLoadView = YES;
 
-	self.divider           = OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1], [NSColor colorWithCalibratedWhite:0.750 alpha:1]);
+	self.divider           = OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider);
 	self.label             = OakCreateLabel(self.labelString);
 	self.neverButton       = OakSmallButton(@"Never", @selector(didClickButton:), self, SelectGrammarResponseNever);
 	self.notNowButton      = OakSmallButton(@"Not Now", @selector(didClickButton:), self, SelectGrammarResponseNotNow);

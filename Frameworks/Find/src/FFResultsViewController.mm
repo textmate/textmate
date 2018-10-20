@@ -303,8 +303,8 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		[label sizeToFit];
 		CGFloat lineHeight = std::max(NSHeight(label.frame), ceil(_searchResultsFont.ascender) + ceil(fabs(_searchResultsFont.descender)) + ceil(_searchResultsFont.leading));
 
-		_topDivider    = OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1]);
-		_bottomDivider = OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1]);
+		_topDivider    = OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider);
+		_bottomDivider = OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider);
 
 		_outlineView = [[NSOutlineView alloc] initWithFrame:NSZeroRect];
 		OakSetAccessibilityLabel(_outlineView, @"Results");
