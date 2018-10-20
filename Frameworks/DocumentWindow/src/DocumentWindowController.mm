@@ -632,10 +632,10 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		return doc.isDocumentEdited == NO && path::is_child(to_s(doc.path), to_s(path));
 	}];
 
-	id oldFirstResponder = self.window.firstResponder;
+	BOOL firstResponderInOutlineView = [self.window.firstResponder isKindOfClass:[NSView class]] && [(NSView*)self.window.firstResponder isDescendantOf:self.fileBrowser.outlineView];
 	[self closeTabsAtIndexes:indexSet askToSaveChanges:NO createDocumentIfEmpty:YES];
-	if(oldFirstResponder && oldFirstResponder != self.window.firstResponder)
-		[self.window makeFirstResponder:oldFirstResponder];
+	if(firstResponderInOutlineView && !([self.window.firstResponder isKindOfClass:[NSView class]] && [(NSView*)self.window.firstResponder isDescendantOf:self.fileBrowser.outlineView]))
+		[self.window makeFirstResponder:self.fileBrowser.outlineView];
 }
 
 - (void)fileBrowserDidDuplicateAtURLs:(NSNotification*)aNotification
