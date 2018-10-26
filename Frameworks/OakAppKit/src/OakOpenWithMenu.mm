@@ -94,7 +94,7 @@ static NSArray<OakOpenWithApplicationInfo*>* ApplicationURLsForPaths (NSSet* pat
 	}
 
 	NSMutableArray<OakOpenWithApplicationInfo*>* apps = [NSMutableArray array];
-	NSMutableDictionary* counts = [NSMutableDictionary dictionary];
+	NSCountedSet* counts = [[NSCountedSet alloc] initWithCapacity:allAppURLs.count * 2];
 
 	for(NSURL* url in allAppURLs)
 	{
@@ -103,15 +103,15 @@ static NSArray<OakOpenWithApplicationInfo*>* ApplicationURLsForPaths (NSSet* pat
 			info.defaultApplication = defaultAppURLs.count == 1 && [defaultAppURLs containsObject:url];
 			[apps addObject:info];
 
-			counts[info.name]            = @([counts[info.name] intValue]+1);
-			counts[info.nameWithVersion] = @([counts[info.nameWithVersion] intValue]+1);
+			[counts addObject:info.name];
+			[counts addObject:info.nameWithVersion];
 		}
 	}
 
 	for(OakOpenWithApplicationInfo* app in apps)
 	{
-		app.countOfDuplicateNames    = [counts[app.name] intValue];
-		app.countOfDuplicateVersions = [counts[app.nameWithVersion] intValue];
+		app.countOfDuplicateNames    = [counts countForObject:app.name];
+		app.countOfDuplicateVersions = [counts countForObject:app.nameWithVersion];
 	}
 
 	return [apps count] == 0 ? nil : [apps sortedArrayUsingDescriptors:@[ [NSSortDescriptor sortDescriptorWithKey:@"defaultApplication" ascending:NO], [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES selector:@selector(localizedCompare:)], [NSSortDescriptor sortDescriptorWithKey:@"version" ascending:NO] ]];
