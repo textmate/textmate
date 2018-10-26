@@ -338,7 +338,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	{
 		OakDocument* defaultDocument = [OakDocumentController.sharedInstance untitledDocument];
 		self.documents = @[ defaultDocument ];
-		[self openAndSelectDocument:defaultDocument];
+		[self openAndSelectDocument:defaultDocument activate:YES];
 	}
 	[self.window makeKeyAndOrderFront:sender];
 }
@@ -460,7 +460,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		if(![doc isEqual:self.selectedDocument])
 		{
 			self.selectedTabIndex = [self.documents indexOfObject:doc];
-			[self openAndSelectDocument:doc];
+			[self openAndSelectDocument:doc activate:YES];
 		}
 	}
 
@@ -491,7 +491,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	}];
 }
 
-- (void)closeTabsAtIndexes:(NSIndexSet*)anIndexSet askToSaveChanges:(BOOL)askToSaveFlag createDocumentIfEmpty:(BOOL)createIfEmptyFlag
+- (void)closeTabsAtIndexes:(NSIndexSet*)anIndexSet askToSaveChanges:(BOOL)askToSaveFlag createDocumentIfEmpty:(BOOL)createIfEmptyFlag activate:(BOOL)activateFlag
 {
 	NSArray<OakDocument*>* documentsToClose = [_documents objectsAtIndexes:anIndexSet];
 	if(documentsToClose.count == 0)
@@ -505,14 +505,14 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 			[self showCloseWarningUIForDocuments:documentsToSave completionHandler:^(BOOL canClose){
 				if(canClose)
 				{
-					[self closeTabsAtIndexes:anIndexSet askToSaveChanges:NO createDocumentIfEmpty:createIfEmptyFlag];
+					[self closeTabsAtIndexes:anIndexSet askToSaveChanges:NO createDocumentIfEmpty:createIfEmptyFlag activate:activateFlag];
 				}
 				else
 				{
 					NSIndexSet* newIndexes = [_documents indexesOfObjectsAtIndexes:anIndexSet options:0 passingTest:^BOOL(OakDocument* doc, NSUInteger idx, BOOL* stop){
 						return doc.isDocumentEdited == NO;
 					}];
-					[self closeTabsAtIndexes:newIndexes askToSaveChanges:YES createDocumentIfEmpty:createIfEmptyFlag];
+					[self closeTabsAtIndexes:newIndexes askToSaveChanges:YES createDocumentIfEmpty:createIfEmptyFlag activate:activateFlag];
 				}
 			}];
 			return;
@@ -539,7 +539,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	self.selectedTabIndex = newSelectedTabIndex;
 
 	if(newDocuments.count && ![newDocuments[newSelectedTabIndex].identifier isEqual:selectedUUID])
-		[self openAndSelectDocument:newDocuments[newSelectedTabIndex]];
+		[self openAndSelectDocument:newDocuments[newSelectedTabIndex] activate:activateFlag];
 }
 
 - (IBAction)performCloseTab:(id)sender
@@ -547,7 +547,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	NSUInteger index = [sender isKindOfClass:[OakTabBarView class]] ? [sender tag] : _selectedTabIndex;
 	if(index == NSNotFound || _documents.count == 0 || _documents.count == 1 && (is_disposable(self.selectedDocument) || !self.fileBrowserVisible))
 		return [self performCloseWindow:sender];
-	[self closeTabsAtIndexes:[NSIndexSet indexSetWithIndex:index] askToSaveChanges:YES createDocumentIfEmpty:YES];
+	[self closeTabsAtIndexes:[NSIndexSet indexSetWithIndex:index] askToSaveChanges:YES createDocumentIfEmpty:YES activate:YES];
 }
 
 - (IBAction)performCloseSplit:(id)sender
@@ -566,7 +566,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	NSIndexSet* allTabs = [_documents indexesOfObjectsPassingTest:^BOOL(OakDocument* doc, NSUInteger idx, BOOL* stop){
 		return [self isDocumentSticky:doc] == NO && (doc.isDocumentEdited == NO || doc.path);
 	}];
-	[self closeTabsAtIndexes:allTabs askToSaveChanges:YES createDocumentIfEmpty:YES];
+	[self closeTabsAtIndexes:allTabs askToSaveChanges:YES createDocumentIfEmpty:YES activate:YES];
 }
 
 - (IBAction)performCloseOtherTabsXYZ:(id)sender
@@ -578,14 +578,14 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	NSUInteger tabIndex = [sender isKindOfClass:[OakTabBarView class]] ? [sender tag] : _selectedTabIndex;
 	[otherTabs removeIndex:tabIndex];
 
-	[self closeTabsAtIndexes:otherTabs askToSaveChanges:YES createDocumentIfEmpty:YES];
+	[self closeTabsAtIndexes:otherTabs askToSaveChanges:YES createDocumentIfEmpty:YES activate:YES];
 }
 
 - (IBAction)performCloseTabsToTheRight:(id)sender
 {
 	NSUInteger from = _selectedTabIndex + 1, to = _documents.count;
 	if(from < to)
-		[self closeTabsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(from, to - from)] askToSaveChanges:YES createDocumentIfEmpty:YES];
+		[self closeTabsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(from, to - from)] askToSaveChanges:YES createDocumentIfEmpty:YES activate:YES];
 }
 
 - (void)saveProjectState
@@ -632,10 +632,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		return doc.isDocumentEdited == NO && path::is_child(to_s(doc.path), to_s(path));
 	}];
 
-	BOOL firstResponderInOutlineView = [self.window.firstResponder isKindOfClass:[NSView class]] && [(NSView*)self.window.firstResponder isDescendantOf:self.fileBrowser.outlineView];
-	[self closeTabsAtIndexes:indexSet askToSaveChanges:NO createDocumentIfEmpty:YES];
-	if(firstResponderInOutlineView && !([self.window.firstResponder isKindOfClass:[NSView class]] && [(NSView*)self.window.firstResponder isDescendantOf:self.fileBrowser.outlineView]))
-		[self.window makeFirstResponder:self.fileBrowser.outlineView];
+	[self closeTabsAtIndexes:indexSet askToSaveChanges:NO createDocumentIfEmpty:YES activate:NO];
 }
 
 - (void)fileBrowserDidDuplicateAtURLs:(NSNotification*)aNotification
@@ -645,7 +642,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	for(NSURL* url in urls)
 	{
 		if([url.path isEqualToString:self.selectedDocument.path])
-			[self openItems:@[ @{ @"path": [urls[url] path] } ] closingOtherTabs:NO];
+			[self openItems:@[ @{ @"path": [urls[url] path] } ] closingOtherTabs:NO activate:NO];
 	}
 }
 
@@ -907,7 +904,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	self.selectedTabIndex = [_documents indexOfObject:selectDocument];
 }
 
-- (void)openItems:(NSArray*)items closingOtherTabs:(BOOL)closeOtherTabsFlag
+- (void)openItems:(NSArray*)items closingOtherTabs:(BOOL)closeOtherTabsFlag activate:(BOOL)activateFlag
 {
 	NSMutableArray<OakDocument*>* documents = [NSMutableArray array];
 	for(NSDictionary* item in items)
@@ -945,7 +942,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	}
 
 	[self insertDocuments:documents atIndex:_selectedTabIndex + 1 selecting:documents.lastObject andClosing:tabsToClose];
-	[self openAndSelectDocument:documents.lastObject];
+	[self openAndSelectDocument:documents.lastObject activate:activateFlag];
 
 	if(self.tabBarView && ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableTabAutoCloseKey])
 	{
@@ -968,7 +965,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 					break;
 			}
 
-			[self closeTabsAtIndexes:indexSet askToSaveChanges:NO createDocumentIfEmpty:NO];
+			[self closeTabsAtIndexes:indexSet askToSaveChanges:NO createDocumentIfEmpty:NO activate:activateFlag];
 		}
 	}
 }
@@ -983,7 +980,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		[textView performBundleItem:item];
 }
 
-- (void)openAndSelectDocument:(OakDocument*)document
+- (void)openAndSelectDocument:(OakDocument*)document activate:(BOOL)activateFlag
 {
 	[document loadModalForWindow:self.window completionHandler:^(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID){
 		if(result == OakDocumentIOResultSuccess)
@@ -1033,7 +1030,9 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 				document.fileType = to_ns(settings_for_path(to_s(document.virtualPath ?: document.path), docAttributes, to_s(self.projectPath)).get(kSettingsFileTypeKey, "text.plain"));
 			}
 
-			[self makeTextViewFirstResponder:self];
+			if(activateFlag)
+				[self makeTextViewFirstResponder:self];
+
 			crash_reporter_info_t info("old selected document ‘%s’, new selected document ‘%s’", [_selectedDocument.displayName UTF8String] ?: "nil", [document.displayName UTF8String] ?: "nil");
 			self.selectedDocument = document;
 			[self performSelector:@selector(didOpenDocuemntInTextView:) withObject:self.documentView.textView afterDelay:0];
@@ -1047,7 +1046,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 			// Close the tab that failed to open
 			NSUInteger i = [_documents indexOfObject:document];
 			if(i != NSNotFound)
-				[self closeTabsAtIndexes:[NSIndexSet indexSetWithIndex:i] askToSaveChanges:NO createDocumentIfEmpty:self.fileBrowserVisible];
+				[self closeTabsAtIndexes:[NSIndexSet indexSetWithIndex:i] askToSaveChanges:NO createDocumentIfEmpty:self.fileBrowserVisible activate:activateFlag];
 
 			if(_documents.count == 0)
 				[self close];
@@ -1584,14 +1583,14 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	{
 		OakDocument* doc = [OakDocumentController.sharedInstance untitledDocument];
 		[self insertDocuments:@[ doc ] atIndex:[indexSet firstIndex] selecting:doc andClosing:nil];
-		[self openAndSelectDocument:doc];
+		[self openAndSelectDocument:doc activate:YES];
 	}
 }
 
 - (void)takeTabsToCloseFrom:(id)sender
 {
 	if(NSIndexSet* indexSet = [self tryObtainIndexSetFrom:sender])
-		[self closeTabsAtIndexes:indexSet askToSaveChanges:YES createDocumentIfEmpty:YES];
+		[self closeTabsAtIndexes:indexSet askToSaveChanges:YES createDocumentIfEmpty:YES activate:YES];
 }
 
 - (void)takeTabsToTearOffFrom:(id)sender
@@ -1605,9 +1604,9 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 			controller.documents = documents;
 			if(path::is_child(to_s(documents.firstObject.path), to_s(self.projectPath)))
 				controller.defaultProjectPath = self.projectPath;
-			[controller openAndSelectDocument:documents.firstObject];
+			[controller openAndSelectDocument:documents.firstObject activate:YES];
 			[controller showWindow:self];
-			[self closeTabsAtIndexes:indexSet askToSaveChanges:NO createDocumentIfEmpty:YES];
+			[self closeTabsAtIndexes:indexSet askToSaveChanges:NO createDocumentIfEmpty:YES activate:YES];
 		}
 	}
 }
@@ -1666,7 +1665,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 - (BOOL)tabBarView:(OakTabBarView*)aTabBarView shouldSelectIndex:(NSUInteger)anIndex
 {
-	[self openAndSelectDocument:_documents[anIndex]];
+	[self openAndSelectDocument:_documents[anIndex] activate:YES];
 	self.selectedTabIndex = anIndex;
 	return YES;
 }
@@ -1703,13 +1702,13 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 				BOOL wasSelected = [tabItem.identifier isEqual:sourceTabBar.selectedTabItem.identifier];
 
 				if(delegate.fileBrowserVisible || delegate.documents.count > 1)
-						[delegate closeTabsAtIndexes:[NSIndexSet indexSetWithIndex:dragIndex] askToSaveChanges:NO createDocumentIfEmpty:YES];
+						[delegate closeTabsAtIndexes:[NSIndexSet indexSetWithIndex:dragIndex] askToSaveChanges:NO createDocumentIfEmpty:YES activate:YES];
 				else	[delegate close];
 
 				if(wasSelected)
 				{
 					self.selectedTabIndex = [self.documents indexOfObject:srcDocument];
-					[self openAndSelectDocument:srcDocument];
+					[self openAndSelectDocument:srcDocument activate:YES];
 				}
 
 				return YES;
@@ -1720,9 +1719,9 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	return YES;
 }
 
-- (IBAction)selectNextTab:(id)sender            { self.selectedTabIndex = (_selectedTabIndex + 1) % _documents.count;                    [self openAndSelectDocument:_documents[_selectedTabIndex]]; }
-- (IBAction)selectPreviousTab:(id)sender        { self.selectedTabIndex = (_selectedTabIndex + _documents.count - 1) % _documents.count; [self openAndSelectDocument:_documents[_selectedTabIndex]]; }
-- (IBAction)takeSelectedTabIndexFrom:(id)sender { self.selectedTabIndex = [sender tag];                                                  [self openAndSelectDocument:_documents[_selectedTabIndex]]; }
+- (IBAction)selectNextTab:(id)sender            { self.selectedTabIndex = (_selectedTabIndex + 1) % _documents.count;                    [self openAndSelectDocument:_documents[_selectedTabIndex] activate:YES]; }
+- (IBAction)selectPreviousTab:(id)sender        { self.selectedTabIndex = (_selectedTabIndex + _documents.count - 1) % _documents.count; [self openAndSelectDocument:_documents[_selectedTabIndex] activate:YES]; }
+- (IBAction)takeSelectedTabIndexFrom:(id)sender { self.selectedTabIndex = [sender tag];                                                  [self openAndSelectDocument:_documents[_selectedTabIndex] activate:YES]; }
 
 // ==================
 // = OakFileBrowser =
@@ -1736,7 +1735,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		if([url isFileURL])
 			[items addObject:@{ @"path": [url path] }];
 	}
-	[self openItems:items closingOtherTabs:OakIsAlternateKeyOrMouseEvent()];
+	[self openItems:items closingOtherTabs:OakIsAlternateKeyOrMouseEvent() activate:YES];
 }
 
 - (void)fileBrowser:(OakFileBrowser*)aFileBrowser closeURL:(NSURL*)anURL
@@ -1747,7 +1746,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	NSIndexSet* indexSet = [_documents indexesOfObjectsPassingTest:^BOOL(OakDocument* doc, NSUInteger idx, BOOL* stop){
 		return [doc.path isEqualToString:anURL.path];
 	}];
-	[self closeTabsAtIndexes:indexSet askToSaveChanges:YES createDocumentIfEmpty:YES];
+	[self closeTabsAtIndexes:indexSet askToSaveChanges:YES createDocumentIfEmpty:YES activate:NO];
 }
 
 - (void)setFileBrowserVisible:(BOOL)makeVisibleFlag
@@ -2048,7 +2047,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 - (void)fileChooserDidSelectItems:(FileChooser*)sender
 {
 	ASSERT([sender respondsToSelector:@selector(selectedItems)]);
-	[self openItems:[sender selectedItems] closingOtherTabs:OakIsAlternateKeyOrMouseEvent()];
+	[self openItems:[sender selectedItems] closingOtherTabs:OakIsAlternateKeyOrMouseEvent() activate:YES];
 }
 
 // ===========
@@ -2138,7 +2137,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	std::string const customCandidate = settings.get(kSettingsRelatedFilePathKey, NULL_STR);
 
 	if(customCandidate != NULL_STR && customCandidate != documentPath && ([_documents indexOfObjectPassingTest:^BOOL(OakDocument* doc, NSUInteger, BOOL*){ return customCandidate == to_s(doc.path); }] != NSNotFound || path::exists(customCandidate)))
-		return [self openItems:@[ @{ @"path": [NSString stringWithCxxString:customCandidate] } ] closingOtherTabs:NO];
+		return [self openItems:@[ @{ @"path": [NSString stringWithCxxString:customCandidate] } ] closingOtherTabs:NO activate:YES];
 
 	for(auto const& entry : path::entries(documentDir))
 	{
@@ -2172,7 +2171,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	ASSERT(it != v.end());
 
 	NSString* path = [NSString stringWithCxxString:path::join(documentDir, v[((it - v.begin()) + 1) % v.size()])];
-	[self openItems:@[ @{ @"path": path } ] closingOtherTabs:NO];
+	[self openItems:@[ @{ @"path": path } ] closingOtherTabs:NO activate:YES];
 }
 
 // ============================
@@ -2552,7 +2551,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 	self.documents        = documents;
 	self.selectedTabIndex = selectedTabIndex;
 
-	[self openAndSelectDocument:documents[selectedTabIndex]];
+	[self openAndSelectDocument:documents[selectedTabIndex] activate:YES];
 }
 
 - (NSDictionary*)sessionInfoIncludingUntitledDocuments:(BOOL)includeUntitled
@@ -2816,7 +2815,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 		[controller bringToFront];
 	else if(![controller.window isVisible])
 		[controller.window orderWindow:NSWindowBelow relativeTo:[([NSApp keyWindow] ?: [NSApp mainWindow]) windowNumber]];
-	[controller openAndSelectDocument:aDocument];
+	[controller openAndSelectDocument:aDocument activate:YES];
 }
 
 - (void)showDocuments:(NSArray<OakDocument*>*)someDocument
@@ -2826,7 +2825,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 
 	DocumentWindowController* controller = [self controllerWithDocuments:someDocument project:nil];
 	[controller bringToFront];
-	[controller openAndSelectDocument:controller.documents[controller.selectedTabIndex]];
+	[controller openAndSelectDocument:controller.documents[controller.selectedTabIndex] activate:YES];
 
 	// If we launch TextMate with a document to open and there are also session to restore
 	// then the document window ends up behind all the other windows, despite being active
@@ -2876,7 +2875,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 		controller.documents          = @[ [OakDocumentController.sharedInstance untitledDocument] ];
 		controller.fileBrowser.URL    = [NSURL fileURLWithPath:folder];
 
-		[controller openAndSelectDocument:controller.documents[controller.selectedTabIndex]];
+		[controller openAndSelectDocument:controller.documents[controller.selectedTabIndex] activate:YES];
 	}
 	[controller bringToFront];
 }
