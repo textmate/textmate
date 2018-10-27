@@ -315,7 +315,8 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 
 - (void)rearrangeChildrenInParent:(FileItem*)item
 {
-	if(NSMutableArray<FileItem*>* existingChildren = item.arrangedChildren)
+	NSMutableArray<FileItem*>* existingChildren = item.arrangedChildren;
+	if(existingChildren && existingChildren.count * item.children.count < 250000)
 	{
 		NSArray* newArrangedChildren = [self arrangeChildren:item.children inParent:item];
 
