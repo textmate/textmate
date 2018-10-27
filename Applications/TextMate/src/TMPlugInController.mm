@@ -1,5 +1,4 @@
 #import "TMPlugInController.h"
-#import <OakFoundation/NSFileManager Additions.h>
 #import <OakAppKit/NSAlert Additions.h>
 #import <OakSystem/application.h>
 #import <crash/info.h>

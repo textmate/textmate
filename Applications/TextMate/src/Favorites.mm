@@ -6,7 +6,6 @@
 #import <OakAppKit/OakScopeBarView.h>
 #import <OakAppKit/OakSound.h>
 #import <OakFoundation/NSString Additions.h>
-#import <OakFoundation/NSFileManager Additions.h>
 #import <OakSystem/application.h>
 #import <text/ranker.h>
 #import <io/entries.h>
