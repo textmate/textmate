@@ -19,6 +19,7 @@
 
 @property (nonatomic, readonly) FileItem* fileItem;
 @property (nonatomic, readonly) NSArray<FileItem*>* selectedItems;
+@property (nonatomic, readonly) NSArray<FileItem*>* previewableItems;
 @property (nonatomic, readonly) NSURL* directoryURLForNewItems;
 
 @property (nonatomic, readonly) NSSet<NSURL*>* expandedURLs;
