@@ -75,6 +75,7 @@ NSString* const kUserDefaultsDisableTabReorderingKey           = @"disableTabReo
 NSString* const kUserDefaultsDisableTabAutoCloseKey            = @"disableTabAutoClose";
 NSString* const kUserDefaultsDisableTabBarCollapsingKey        = @"disableTabBarCollapsing";
 NSString* const kUserDefaultsAllowExpandingLinksKey            = @"allowExpandingLinks";
+NSString* const kUserDefaultsAllowExpandingPackagesKey         = @"allowExpandingPackages";
 
 // ===========
 // = Bundles =
