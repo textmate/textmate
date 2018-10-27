@@ -81,6 +81,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 @property (nonatomic, readwrite) FileItem* fileItem;
 @property (nonatomic) NSScrollView* scrollView;
 @property (nonatomic) BOOL canExpandSymbolicLinks;
+@property (nonatomic) BOOL canExpandPackages;
 @property (nonatomic) BOOL sortDirectoriesBeforeFiles;
 @end
 
@@ -96,6 +97,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 		_loadingURLs       = [NSMutableSet set];
 
 		_canExpandSymbolicLinks     = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsAllowExpandingLinksKey];
+		_canExpandPackages          = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsAllowExpandingPackagesKey];
 		_sortDirectoriesBeforeFiles = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsFoldersOnTopKey];
 
 		_expandedURLs  = [NSMutableSet set];
@@ -158,6 +160,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 - (void)userDefaultsDidChange:(id)sender
 {
 	self.canExpandSymbolicLinks     = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsAllowExpandingLinksKey];
+	self.canExpandPackages          = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsAllowExpandingPackagesKey];
 	self.sortDirectoriesBeforeFiles = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsFoldersOnTopKey];
 }
 
@@ -174,7 +177,27 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 	while(FileItem* item = stack.firstObject)
 	{
 		[stack removeObjectAtIndex:0];
-		if(item.isLinkToDirectory && !item.isLinkToPackage)
+		if(item.isLinkToDirectory && (_canExpandPackages || !item.isLinkToPackage))
+			[_outlineView reloadItem:item reloadChildren:YES];
+		if([_outlineView isExpandable:item] && item.arrangedChildren)
+			[stack addObjectsFromArray:item.arrangedChildren];
+	}
+}
+
+- (void)setCanExpandPackages:(BOOL)flag
+{
+	if(_canExpandPackages == flag)
+		return;
+	_canExpandPackages = flag;
+
+	if(!self.fileItem)
+		return;
+
+	NSMutableArray<FileItem*>* stack = [self.fileItem.arrangedChildren mutableCopy];
+	while(FileItem* item = stack.firstObject)
+	{
+	[stack removeObjectAtIndex:0];
+		if(item.isDirectory && item.isPackage)
 			[_outlineView reloadItem:item reloadChildren:YES];
 		if([_outlineView isExpandable:item] && item.arrangedChildren)
 			[stack addObjectsFromArray:item.arrangedChildren];
@@ -756,7 +779,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 
 - (BOOL)outlineView:(NSOutlineView*)outlineView isItemExpandable:(FileItem*)item
 {
-	return item.isDirectory && !item.isPackage || (_canExpandSymbolicLinks && item.isLinkToDirectory && !item.isLinkToPackage);
+	return item.isDirectory && (_canExpandPackages || !item.isPackage) || (_canExpandSymbolicLinks && item.isLinkToDirectory && (_canExpandPackages || !item.isLinkToPackage));
 }
 
 - (BOOL)outlineView:(NSOutlineView*)outlineView isGroupItem:(FileItem*)item
