@@ -25,6 +25,7 @@
 @property (nonatomic, readonly) NSSet<NSURL*>* expandedURLs;
 @property (nonatomic, readonly) NSSet<NSURL*>* selectedURLs;
 
+- (void)reload:(id)sender;
 - (void)expandURLs:(NSArray<NSURL*>*)expandURLs selectURLs:(NSArray<NSURL*>*)selectURLs;
 - (NSRect)imageRectOfItem:(FileItem*)item;
 

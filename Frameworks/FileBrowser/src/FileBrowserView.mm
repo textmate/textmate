@@ -3,6 +3,7 @@
 #import "FileItemTableCellView.h"
 #import "FileBrowserOutlineView.h"
 #import "SCMManager.h"
+#import "FSEventsManager.h"
 #import "OFB/OFBHeaderView.h"
 #import "OFB/OFBActionsView.h"
 #import <MenuBuilder/MenuBuilder.h>
@@ -689,6 +690,19 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 {
 	if(FileItem* item = [FileItem fileItemWithURL:url])
 		self.fileItem = item;
+}
+
+- (void)reload:(id)sender
+{
+	NSMutableArray<FileItem*>* stack = [NSMutableArray arrayWithObject:self.fileItem];
+	while(FileItem* item = stack.firstObject)
+	{
+		[stack removeObjectAtIndex:0];
+		if(!item.arrangedChildren)
+			continue;
+		[FSEventsManager.sharedInstance reloadDirectoryAtURL:item.resolvedURL];
+		[stack addObjectsFromArray:item.arrangedChildren];
+	}
 }
 
 - (NSArray<FileItem*>*)selectedItems
