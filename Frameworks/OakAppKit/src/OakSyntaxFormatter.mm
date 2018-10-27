@@ -103,12 +103,16 @@ static size_t kParseSizeLimit = 1024;
 		styles_t styles = _theme->styles_for_scope(pair->second);
 		size_t to = ++pair != scopes.end() ? pair->first : str.size();
 		size_t len = utf16::distance(str.data() + from, str.data() + to);
-		[styled addAttributes:@{
+		NSMutableDictionary* attributes = [@{
 			NSForegroundColorAttributeName:    [NSColor colorWithCGColor:styles.foreground()],
-			NSBackgroundColorAttributeName:    [NSColor colorWithCGColor:styles.background()],
 			NSUnderlineStyleAttributeName:     @(styles.underlined() ? NSUnderlineStyleSingle : NSUnderlineStyleNone),
 			NSStrikethroughStyleAttributeName: @(styles.strikethrough() ? NSUnderlineStyleSingle : NSUnderlineStyleNone),
-		} range:NSMakeRange(pos, len)];
+		} mutableCopy];
+
+		if(!CGColorEqualToColor(styles.background(), _theme->background()))
+			attributes[NSBackgroundColorAttributeName] = [NSColor colorWithCGColor:styles.background()];
+
+		[styled addAttributes:attributes range:NSMakeRange(pos, len)];
 
 		pos += len;
 		from = to;
