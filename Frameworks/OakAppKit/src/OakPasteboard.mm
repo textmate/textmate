@@ -1,4 +1,5 @@
 #import "OakPasteboard.h"
+#import "OakSyntaxFormatter.h"
 #import <crash/info.h>
 #import <ns/ns.h>
 #import <oak/oak.h>
@@ -590,13 +591,12 @@ static BOOL HasPersistentStore = NO;
 	return self.current;
 }
 
-- (void)bindComboBoxToPasteboardHistory:(NSComboBox*)comboBox
+- (void)bindComboBoxToPasteboardHistory:(NSComboBox*)comboBox valueTransformerName:(NSValueTransformerName)valueTransformerName
 {
 	[self.historyArrayController fetchWithRequest:nil merge:YES error:nullptr];
-	[comboBox bind:NSContentBinding       toObject:self.historyArrayController withKeyPath:@"arrangedObjects"		  options:
-		@{ NSRaisesForNotApplicableKeysBindingOption: @YES }];
-	[comboBox bind:NSContentValuesBinding toObject:self.historyArrayController withKeyPath:@"arrangedObjects.string" options:
-		@{ NSRaisesForNotApplicableKeysBindingOption: @YES }];
+	[comboBox bind:NSContentValuesBinding toObject:self.historyArrayController withKeyPath:@"arrangedObjects" options:
+		@{ NSRaisesForNotApplicableKeysBindingOption: @YES,
+		         NSValueTransformerNameBindingOption: valueTransformerName }];
 
 	[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(comboBoxSelectionDidChange:) name:NSComboBoxSelectionDidChangeNotification object:comboBox];
 }
@@ -611,12 +611,11 @@ static BOOL HasPersistentStore = NO;
 {
 	[NSNotificationCenter.defaultCenter removeObserver:self name:NSComboBoxSelectionDidChangeNotification object:comboBox];
 	[comboBox unbind:NSContentValuesBinding];
-	[comboBox unbind:NSContentBinding];
 }
 
-- (void)updateBoundComboBoxNow:(NSComboBox*)comboBox
+- (void)updateBoundComboBoxNow:(NSComboBox*)comboBox valueTransformerName:(NSValueTransformerName)valueTransformerName
 {
 	[self unbindComboBoxFromPasteboardHistory:comboBox];
-	[self bindComboBoxToPasteboardHistory:comboBox];
+	[self bindComboBoxToPasteboardHistory:comboBox valueTransformerName:valueTransformerName];
 }
 @end

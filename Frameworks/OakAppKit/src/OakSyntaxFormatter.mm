@@ -1,4 +1,5 @@
 #import "OakSyntaxFormatter.h"
+#import "OakPasteboard.h"
 #import <bundles/query.h>
 #import <theme/theme.h>
 #import <parse/parse.h>
@@ -9,6 +10,110 @@
 static NSString* const kUserDefaultsUIThemeUUID = @"UIThemeUUID";
 static size_t kParseSizeLimit = 1024;
 
+@interface OakSyntaxFormatterTransformer : NSValueTransformer
+@property (nonatomic, copy) NSString* name;
+@property (nonatomic, weak) OakSyntaxFormatter* syntaxFormatter;
+@end
+
+@implementation OakSyntaxFormatterTransformer
+{
+@protected
+	__weak OakSyntaxFormatter* _syntaxFormatter;
+}
++ (Class)transformedValueClass
+{
+	return [NSAttributedString class];
+}
+
+- (void)dealloc
+{
+	[self deregisterTransformer];
+}
+
+- (void)registerTransformer
+{
+	[NSValueTransformer setValueTransformer:self forName:_name];
+}
+
+- (void)deregisterTransformer
+{
+	if(_name)
+		[NSValueTransformer setValueTransformer:nil forName:_name];
+}
+
+- (void)setName:(NSString*)name
+{
+	[self deregisterTransformer];
+	_name = [name copy];
+	[self registerTransformer];
+}
+
+- (id)transformedValue:(id)value
+{
+	if(!value)
+		return nil;
+
+	if([value isKindOfClass:[NSArray class]])
+	{
+      NSMutableArray *res = [NSMutableArray array];
+      for (id element in value)
+	  		[res addObject:[self transformedValue:element]];
+		return res;
+	}
+
+	return [self concreteTransformedValue:value];
+}
+
+- (id)concreteTransformedValue:(id)value
+{
+	return [_syntaxFormatter attributedStringForObjectValue:value withDefaultAttributes:@{}];
+}
+
+- (id)reverseTransformedValue:(id)transformedValue
+{
+	if([transformedValue isKindOfClass:[NSAttributedString class]])
+		transformedValue = [transformedValue string];
+
+	id res;
+	[_syntaxFormatter getObjectValue:&res forString:transformedValue errorDescription:nullptr];
+	return res;
+}
+@end
+
+@interface OakPasteboardEntryFormatterTransformer : OakSyntaxFormatterTransformer
+@end
+
+@implementation OakPasteboardEntryFormatterTransformer
++ (BOOL)allowsReverseTransformation
+{
+	return NO;
+}
+
+- (id)concreteTransformedValue:(id)value
+{
+	return [_syntaxFormatter attributedStringForObjectValue:[value string] withDefaultAttributes:@{}];
+}
+@end
+
+@interface OakPasteboardEntryRegexOnlyFormatterTransformer : OakSyntaxFormatterTransformer
+@end
+
+@implementation OakPasteboardEntryRegexOnlyFormatterTransformer
++ (BOOL)allowsReverseTransformation
+{
+	return NO;
+}
+
+- (id)concreteTransformedValue:(id)value
+{
+	BOOL enabled = _syntaxFormatter.enabled;
+	_syntaxFormatter.enabled = (enabled && [(OakPasteboardEntry*)value regularExpression]);
+	id res = [_syntaxFormatter attributedStringForObjectValue:[value string] withDefaultAttributes:@{}];
+	_syntaxFormatter.enabled = enabled;
+	return res;
+}
+@end
+
 @interface OakSyntaxFormatter ()
 {
 	NSString* _grammarName;
@@ -17,9 +122,14 @@ static size_t kParseSizeLimit = 1024;
 	parse::grammar_ptr _grammar;
 	theme_ptr _theme;
 }
+@property (nonatomic, readonly) OakSyntaxFormatterTransformer* transformer;
+@property (nonatomic, readonly) OakPasteboardEntryFormatterTransformer* pasteboardEntryTransformer;
+@property (nonatomic, readonly) OakPasteboardEntryRegexOnlyFormatterTransformer* pasteboardEntryRegexOnlyTransformer;
 @end
 
 @implementation OakSyntaxFormatter
+@synthesize transformer = _transformer, pasteboardEntryTransformer = _pasteboardEntryTransformer, pasteboardEntryRegexOnlyTransformer = _pasteboardEntryRegexOnlyTransformer;
+
 + (void)initialize
 {
 	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
@@ -36,8 +146,71 @@ static size_t kParseSizeLimit = 1024;
 	return self;
 }
 
+- (OakSyntaxFormatter*)copyWithZone:(NSZone*)zone
+{
+	OakSyntaxFormatter* copy = [[self.class allocWithZone:zone] initWithGrammarName:_grammarName];
+	copy.enabled = _enabled;
+	copy->_didLoadGrammarAndTheme = _didLoadGrammarAndTheme;
+	copy->_grammar = _grammar;
+	copy->_theme = _theme;
+	return copy;
+}
+
+- (NSValueTransformer*)transformer
+{
+	if(!_transformer)
+	{
+		_transformer = [OakSyntaxFormatterTransformer new];
+		_transformer.name = self.transformerName;
+		_transformer.syntaxFormatter = self;
+	}
+	return _transformer;
+}
+
+- (NSValueTransformerName)transformerName
+{
+	(void)[self transformer];
+	return [NSString stringWithFormat:@"OakSyntaxFormatter_%p", self];
+}
+
+- (NSValueTransformer*)pasteboardEntryTransformer
+{
+	if(!_pasteboardEntryTransformer)
+	{
+		_pasteboardEntryTransformer = [OakPasteboardEntryFormatterTransformer new];
+		_pasteboardEntryTransformer.name = self.pasteboardEntryTransformerName;
+		_pasteboardEntryTransformer.syntaxFormatter = self;
+	}
+	return _pasteboardEntryTransformer;
+}
+
+- (NSValueTransformerName)pasteboardEntryTransformerName
+{
+	(void)[self pasteboardEntryTransformer];
+	return [NSString stringWithFormat:@"OakPasteboardEntryFormatter_%p", self];
+}
+
+- (NSValueTransformer*)pasteboardEntryRegexOnlyTransformer
+{
+	if(!_pasteboardEntryRegexOnlyTransformer)
+	{
+		_pasteboardEntryRegexOnlyTransformer = [OakPasteboardEntryRegexOnlyFormatterTransformer new];
+		_pasteboardEntryRegexOnlyTransformer.name = self.pasteboardEntryRegexOnlyTransformerName;
+		_pasteboardEntryRegexOnlyTransformer.syntaxFormatter = self;
+	}
+	return _pasteboardEntryRegexOnlyTransformer;
+}
+
+- (NSValueTransformerName)pasteboardEntryRegexOnlyTransformerName
+{
+	(void)[self pasteboardEntryRegexOnlyTransformer];
+	return [NSString stringWithFormat:@"OakPasteboardEntryRegexOnlyFormatter_%p", self];
+}
+
 - (NSString*)stringForObjectValue:(id)value
 {
+	if([value isKindOfClass:[NSAttributedString class]])
+		value = [value string];
 	return value;
 }
 
@@ -50,6 +223,8 @@ static size_t kParseSizeLimit = 1024;
 
 - (NSAttributedString*)attributedStringForObjectValue:(id)value withDefaultAttributes:(NSDictionary*)attributes
 {
+	if([value isKindOfClass:[NSAttributedString class]])
+		value = [value string];
 	NSMutableAttributedString* styled = [[NSMutableAttributedString alloc] initWithString:value attributes:attributes];
 	[self addStylesToString:styled];
 	return styled;

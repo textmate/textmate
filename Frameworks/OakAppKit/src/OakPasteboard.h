@@ -11,6 +11,8 @@ extern PUBLIC NSString* const OakFindIgnoreWhitespaceOption;
 extern PUBLIC NSString* const OakFindFullWordsOption;
 extern PUBLIC NSString* const OakFindRegularExpressionOption;
 
+@class OakSyntaxFormatter;
+
 PUBLIC @interface OakPasteboardEntry : NSManagedObject
 @property (nonatomic) NSString* string;
 @property (nonatomic) NSDictionary* options;
@@ -37,7 +39,7 @@ PUBLIC @interface OakPasteboard : NSManagedObject
 @property (nonatomic) OakPasteboardEntry* currentEntry;
 @property (nonatomic) NSDictionary* auxiliaryOptionsForCurrent;
 
-- (void)bindComboBoxToPasteboardHistory:(NSComboBox*)comboBox;
+- (void)bindComboBoxToPasteboardHistory:(NSComboBox*)comboBox valueTransformerName:(NSValueTransformerName)valueTransformerName;
 - (void)unbindComboBoxFromPasteboardHistory:(NSComboBox*)comboBox;
-- (void)updateBoundComboBoxNow:(NSComboBox*)comboBox;
+- (void)updateBoundComboBoxNow:(NSComboBox*)comboBox valueTransformerName:(NSValueTransformerName)valueTransformerName;
 @end
