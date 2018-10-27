@@ -98,6 +98,11 @@ namespace
 	return self;
 }
 
+- (void)reloadDirectoryAtURL:(NSURL*)url
+{
+	[[_directories objectForKey:url] reloadDirectoryAndNotify];
+}
+
 - (void)resetObservers
 {
 	_fsEvents.reset(new fs_events_t(_directories.keyEnumerator.allObjects, ^(NSURL* url){
