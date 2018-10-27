@@ -7,7 +7,6 @@
 #import <OakAppKit/NSAlert Additions.h>
 #import <OakAppKit/NSMenuItem Additions.h>
 #import <OakAppKit/OakAppKit.h>
-#import <OakAppKit/OakFileIconImage.h>
 #import <OakAppKit/OakFileManager.h>
 #import <OakAppKit/OakPasteboard.h>
 #import <OakAppKit/OakSavePanel.h>
@@ -17,6 +16,7 @@
 #import <Preferences/Keys.h>
 #import <OakTextView/OakDocumentView.h>
 #import <OakFileBrowser/OakFileBrowser.h>
+#import <FileBrowser/FileBrowserViewController.h>
 #import <OakCommand/OakCommand.h>
 #import <HTMLOutputWindow/HTMLOutputWindow.h>
 #import <OakFilterList/FileChooser.h>
@@ -64,25 +64,7 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 	}];
 }
 
-@interface QuickLookNSURLWrapper : NSObject <QLPreviewItem>
-@property (nonatomic) NSURL* url;
-@end
-
-@implementation QuickLookNSURLWrapper
-- (id)initWithURL:(NSURL*)aURL
-{
-	if((self = [super init]))
-		self.url = aURL;
-	return self;
-}
-
-- (NSURL*)previewItemURL
-{
-	return self.url;
-}
-@end
-
-@interface DocumentWindowController () <NSWindowDelegate, NSTouchBarDelegate, OakTabBarViewDelegate, OakTabBarViewDataSource, OakTextViewDelegate, OakFileBrowserDelegate, QLPreviewPanelDelegate, QLPreviewPanelDataSource>
+@interface DocumentWindowController () <NSWindowDelegate, NSTouchBarDelegate, OakTabBarViewDelegate, OakTabBarViewDataSource, OakTextViewDelegate, OakFileBrowserDelegate>
 {
 	OBJC_WATCH_LEAKS(DocumentWindowController);
 
@@ -101,7 +83,7 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 @property (nonatomic) OakTabBarView*              tabBarView;
 @property (nonatomic) OakDocumentView*            documentView;
 @property (nonatomic) OakTextView*                textView;
-@property (nonatomic) OakFileBrowser*             fileBrowser;
+@property (nonatomic) FileBrowserViewController*  fileBrowser;
 
 @property (nonatomic) BOOL                        disableFileBrowserWindowResize;
 @property (nonatomic) BOOL                        autoRevealFile;
@@ -118,7 +100,6 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 
 @property (nonatomic) NSString*                   documentPath;
 
-@property (nonatomic) NSArray*                    urlArrayForQuickLook;
 @property (nonatomic) NSArray<Bundle*>*           bundlesAlreadySuggested;
 
 @property (nonatomic, readwrite) OakDocument*     selectedDocument;
@@ -809,30 +790,11 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	if(!self.fileBrowserVisible)
 		return;
 
-	if(NSString* folder = [self.fileBrowser directoryForNewItems])
+	if(NSURL* url = [self.fileBrowser newFile:self])
 	{
-		std::string path = "untitled";
-		std::string fileType = settings_for_path(NULL_STR, "attr.untitled", to_s(folder)).get(kSettingsFileTypeKey, "text.plain");
-		for(auto item : bundles::query(bundles::kFieldGrammarScope, fileType))
-		{
-			std::string const& ext = item->value_for_field(bundles::kFieldGrammarExtension);
-			if(ext != NULL_STR)
-				path = "untitled." + ext;
-		}
-
-		if(NSURL* url = [self.fileBrowser createNewFileWithSuggestedPath:to_ns(path::join([folder fileSystemRepresentation], path))])
-		{
-			OakDocument* doc = [OakDocumentController.sharedInstance documentWithPath:url.path];
-			doc.fileType = to_ns(fileType);
-
-			[self insertDocuments:@[ doc ] atIndex:_selectedTabIndex + 1 selecting:doc andClosing:self.disposableDocument ? @[ self.disposableDocument ] : nil];
-
-			// Using openAndSelectDocument: will move focus to OakTextView
-			[doc loadModalForWindow:nil completionHandler:^(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID){
-				self.selectedDocument = doc;
-				[doc close];
-			}];
-		}
+		OakDocument* doc = [OakDocumentController.sharedInstance documentWithPath:url.path];
+		[self insertDocuments:@[ doc ] atIndex:_selectedTabIndex + 1 selecting:doc andClosing:self.disposableDocument ? @[ self.disposableDocument ] : nil];
+		[self openAndSelectDocument:doc activate:NO];
 	}
 }
 
@@ -1236,7 +1198,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 	if(aCommand.firstResponder == _fileBrowser)
 	{
-		NSURL* fileURL = [[_fileBrowser.selectedURLs filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isFileURL == YES"]] firstObject];
+		NSURL* fileURL = _fileBrowser.selectedFileURLs.firstObject;
 		res = bundles::scope_variables(res);
 		res = variables_for_path(res, to_s(fileURL.path));
 	}
@@ -1756,16 +1718,16 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		_fileBrowserVisible = makeVisibleFlag;
 		if(!self.fileBrowser && makeVisibleFlag)
 		{
-			self.fileBrowser = [OakFileBrowser new];
+			self.fileBrowser = [[FileBrowserViewController alloc] init];
 			self.fileBrowser.delegate = self;
 			[self.fileBrowser setupViewWithState:_fileBrowserHistory];
 			if(self.projectPath && !_fileBrowserHistory)
-				self.fileBrowser.URL = [NSURL fileURLWithPath:self.projectPath];
+				[self.fileBrowser goToURL:[NSURL fileURLWithPath:self.projectPath]];
 			[self updateFileBrowserStatus:self];
 			if(self.layoutView.tabsAboveDocument)
 				[self.tabBarView expand];
 
-			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(fileBrowserDidDuplicateAtURLs:) name:OakFileBrowserDidDuplicateURLs object:_fileBrowser];
+			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(fileBrowserDidDuplicateAtURLs:) name:OakFileBrowserDidDuplicateURLs object:nil];
 		}
 
 		if(!makeVisibleFlag && [[self.window firstResponder] isKindOfClass:[NSView class]] && [(NSView*)[self.window firstResponder] isDescendantOf:self.layoutView.fileBrowserView])
@@ -1776,8 +1738,6 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 		if(makeVisibleFlag)
 		{
-			self.fileBrowser.nextResponder = self.fileBrowser.view.nextResponder;
-			self.fileBrowser.view.nextResponder = self.fileBrowser;
 			if(self.autoRevealFile && self.selectedDocument.path)
 				[self revealFileInProject:self];
 		}
@@ -1962,9 +1922,9 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	NSArray* items;
 	if(self.fileBrowserVisible)
 	{
-		items = [[self.fileBrowser.selectedURLs filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isFileURL == YES"]] valueForKey:@"path"];
-		if(items.count == 0 && self.fileBrowser.path)
-			items = @[ self.fileBrowser.path ];
+		items = [self.fileBrowser.selectedFileURLs valueForKey:@"path"];
+		if(items.count == 0)
+			items = @[ self.fileBrowser.path ?: find.projectFolder ];
 	}
 	find.fileBrowserItems = items.count ? items : nil;
 
@@ -2069,21 +2029,10 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 - (NSString*)untitledSavePath
 {
-	NSString* res = self.projectPath ?: [self.selectedDocument.path stringByDeletingLastPathComponent];
+	NSString* res;
 	if(self.fileBrowserVisible)
-	{
-		NSArray* selectedURLs = self.fileBrowser.selectedURLs;
-		if([selectedURLs count] == 1 && [[selectedURLs lastObject] isFileURL])
-		{
-			NSString* path = [[selectedURLs lastObject] path];
-			res = path::is_directory(to_s(path)) ? path : [path stringByDeletingLastPathComponent];
-		}
-		else if(NSString* folder = self.fileBrowser.path)
-		{
-			res = folder;
-		}
-	}
-	return res;
+		res = self.fileBrowser.outlineView.numberOfSelectedRows == 1 ? self.fileBrowser.directoryURLForNewItems.path : self.fileBrowser.path;
+	return res ?: self.projectPath ?: [self.selectedDocument.path stringByDeletingLastPathComponent];
 }
 
 - (BOOL)treatAsProjectWindow
@@ -2235,7 +2184,10 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		active = !self.htmlOutputInWindow || self.htmlOutputWindowController;
 	}
 	else if([menuItem action] == @selector(newDocumentInDirectory:))
-		active = self.fileBrowserVisible && [self.fileBrowser directoryForNewItems] != nil;
+	{
+		active = self.fileBrowserVisible && self.fileBrowser.directoryURLForNewItems;
+		[menuItem setDynamicTitle:active ? [NSString stringWithFormat:@"New File in “%@”", [NSFileManager.defaultManager displayNameAtPath:self.fileBrowser.directoryURLForNewItems.path]] : @"New File"];
+	}
 	else if(delegateToFileBrowser.find([menuItem action]) != delegateToFileBrowser.end())
 		active = self.fileBrowserVisible && [self.fileBrowser validateMenuItem:menuItem];
 	else if([menuItem action] == @selector(moveDocumentToNewWindow:))
@@ -2358,65 +2310,6 @@ static NSTouchBarItemIdentifier kTouchBarFavoritesItemIdentifier = @"com.macroma
 		case 0: [self selectPreviousTab:control]; break;
 		case 1: [self selectNextTab:control];     break;
 	}
-}
-
-// =============
-// = QuickLook =
-// =============
-
-// QLPreviewPanelController
-
-- (BOOL)acceptsPreviewPanelControl:(QLPreviewPanel*)panel
-{
-	return self.fileBrowserVisible && [self.fileBrowser.selectedURLs count];
-}
-
-- (void)beginPreviewPanelControl:(QLPreviewPanel*)panel
-{
-	[QLPreviewPanel sharedPreviewPanel].delegate   = self;
-	[QLPreviewPanel sharedPreviewPanel].dataSource = self;
-
-	self.urlArrayForQuickLook = self.fileBrowser.selectedURLs;
-}
-
-- (void)endPreviewPanelControl:(QLPreviewPanel*)panel
-{
-	self.urlArrayForQuickLook = nil;
-}
-
-// QLPreviewPanelDelegate
-
-- (NSRect)previewPanel:(QLPreviewPanel*)panel sourceFrameOnScreenForPreviewItem:(id <QLPreviewItem>)item
-{
-	return [_fileBrowser iconFrameForURL:item.previewItemURL];
-}
-
-- (BOOL)previewPanel:(QLPreviewPanel*)panel handleEvent:(NSEvent*)event
-{
-	if([event type] == NSEventTypeKeyDown)
-	{
-		[self.fileBrowser.outlineView keyDown:event];
-		NSArray* newSelection = self.fileBrowser.selectedURLs;
-		if(![newSelection isEqualToArray:self.urlArrayForQuickLook])
-		{
-			self.urlArrayForQuickLook = newSelection;
-			[panel reloadData];
-		}
-		return YES;
-	}
-	return NO;
-}
-
-// QLPreviewPanelDataSource
-
-- (NSInteger)numberOfPreviewItemsInPreviewPanel:(QLPreviewPanel*)panel
-{
-	return self.urlArrayForQuickLook.count;
-}
-
-- (id <QLPreviewItem>)previewPanel:(QLPreviewPanel*)panel previewItemAtIndex:(NSInteger)index
-{
-	return [[QuickLookNSURLWrapper alloc] initWithURL:self.urlArrayForQuickLook[index]];
 }
 
 // ======================
@@ -2873,8 +2766,8 @@ static NSUInteger DisableSessionSavingCount = 0;
 		controller.defaultProjectPath = folder;
 		controller.fileBrowserVisible = YES;
 		controller.documents          = @[ [OakDocumentController.sharedInstance untitledDocument] ];
-		controller.fileBrowser.URL    = [NSURL fileURLWithPath:folder];
 
+		[controller.fileBrowser goToURL:[NSURL fileURLWithPath:folder]];
 		[controller openAndSelectDocument:controller.documents[controller.selectedTabIndex] activate:YES];
 	}
 	[controller bringToFront];

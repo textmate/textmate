@@ -1,5 +1,5 @@
 SOURCES          = src/*.mm
 CP_Resources     = resources/*
-LINK            += BundleEditor BundlesManager Find HTMLOutputWindow MenuBuilder OakAppKit OakTabBarView OakCommand OakFileBrowser OakFilterList OakFoundation OakSystem OakTextView Preferences command document file io kvdb license network ns scm settings text
+LINK            += BundleEditor BundlesManager FileBrowser Find HTMLOutputWindow MenuBuilder OakAppKit OakTabBarView OakCommand OakFileBrowser OakFilterList OakFoundation OakSystem OakTextView Preferences command document file io kvdb license network ns scm settings text
 EXPORT           = src/DocumentWindowController.h
 FRAMEWORKS       = Cocoa
