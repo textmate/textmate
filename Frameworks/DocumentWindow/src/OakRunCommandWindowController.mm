@@ -61,7 +61,7 @@ static NSString* const kUserDefaultsFilterOutputType = @"filterOutputType";
 		self.cancelButton.action  = @selector(cancel:);
 
 		self.objectController     = [[NSObjectController alloc] initWithContent:self];
-		self.commandHistoryList   = [[OakHistoryList alloc] initWithName:@"Filter Through Command History" stackSize:10 defaultItems:@"cat -n", nil];
+		self.commandHistoryList   = [[OakHistoryList alloc] initWithName:@"Filter Through Command History" stackSize:10 defaultItems:@"sort|uniq -c", @"seq 100", @"cat -n", nil];
 
 		self.window.title         = @"Filter Through Command";
 		self.window.delegate      = self;
