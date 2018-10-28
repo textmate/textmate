@@ -37,7 +37,6 @@ namespace text
 
 		~transcode_t ()
 		{
-			ASSERT_EQ(_partial_sequence.size(), 0);
 			ASSERT_EQ(_left, _buffer_size);
 			if(_handle != (iconv_t)-1)
 				iconv_close(_handle);
