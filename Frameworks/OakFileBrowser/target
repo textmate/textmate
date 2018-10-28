@@ -1,5 +1,0 @@
-SOURCES       = src/**/*.mm
-EXPORT        = src/OakFileBrowser.h
-CP_Resources  = resources/* gfx/**/*.png
-LINK         += OakAppKit OakFoundation OakTabBarView Preferences io
-FRAMEWORKS    = Cocoa
