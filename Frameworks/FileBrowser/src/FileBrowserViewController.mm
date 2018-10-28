@@ -73,7 +73,7 @@ static bool is_binary (std::string const& path)
 
 		_currentLocationMenuItem = [[NSMenuItem alloc] initWithTitle:@"" action:@selector(takeURLFrom:) keyEquivalent:@""];
 		_currentLocationMenuItem.target = self;
-		[_currentLocationMenuItem bind:NSTitleBinding toObject:_fileBrowserView withKeyPath:@"fileItem.localizedName" options:nil];
+		[_currentLocationMenuItem bind:NSTitleBinding toObject:_fileBrowserView withKeyPath:@"fileItem.displayName" options:nil];
 		[_currentLocationMenuItem bind:NSImageBinding toObject:_fileBrowserView withKeyPath:@"fileItem.image" options:nil];
 
 		NSOutlineView* outlineView = _fileBrowserView.outlineView;
