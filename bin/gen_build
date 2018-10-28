@@ -394,7 +394,7 @@ class Target
               BuildDependencies.add(File.join(path, File.directory?(file) ? file : File.dirname(file)))
               next if File.directory?(file)
               full = File.join(path, file)
-              help_book_files << full unless help_book_files.nil?
+              help_book_files << full unless help_book_dir.nil?
               @resources[builder.copy_resource(File.join(path, file), "#{File.dirname(@path)}/#{contents}/#{dst}/#{File.basename(path)}/#{File.dirname(file)}", self)] = "#{contents}/#{dst}/#{File.basename(path)}/#{File.dirname(file)}"
             end
           end
