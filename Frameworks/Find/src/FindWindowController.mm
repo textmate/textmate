@@ -21,6 +21,7 @@
 
 NSString* const kUserDefaultsFolderOptionsKey     = @"Folder Search Options";
 NSString* const kUserDefaultsFindResultsHeightKey = @"findResultsHeight";
+NSString* const kUserDefaultsDefaultFindGlobsKey  = @"defaultFindInFolderGlobs";
 
 NSButton* OakCreateClickableStatusBar ()
 {
@@ -156,6 +157,13 @@ static NSButton* OakCreateStopSearchButton ()
 + (NSSet*)keyPathsForValuesAffectingCanEditGlob          { return [NSSet setWithObject:@"searchTarget"]; }
 + (NSSet*)keyPathsForValuesAffectingCanReplaceInDocument { return [NSSet setWithObject:@"searchTarget"]; }
 
++ (void)initialize
+{
+	[NSUserDefaults.standardUserDefaults registerDefaults:@{
+		kUserDefaultsDefaultFindGlobsKey: @[ @"*", @"*.txt", @"*.{c,h}" ],
+	}];
+}
+
 - (id)init
 {
 	NSRect r = [[NSScreen mainScreen] visibleFrame];
@@ -254,7 +262,7 @@ static NSButton* OakCreateStopSearchButton ()
 		self.stopSearchButton.action      = @selector(stopSearch:);
 
 		self.objectController = [[NSObjectController alloc] initWithContent:self];
-		self.globHistoryList  = [[OakHistoryList alloc] initWithName:@"Find in Folder Globs.default" stackSize:10 defaultItems:@"*", @"*.txt", @"*.{c,h}", nil];
+		self.globHistoryList  = [[OakHistoryList alloc] initWithName:@"Find in Folder Globs.default" stackSize:10 fallbackUserDefaultsKey:kUserDefaultsDefaultFindGlobsKey];
 		self.recentFolders    = [[OakHistoryList alloc] initWithName:@"findRecentPlaces" stackSize:21];
 
 		[self.findTextField             bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.findString"           options:@{ NSContinuouslyUpdatesValueBindingOption: @YES }];
@@ -960,7 +968,7 @@ static NSButton* OakCreateStopSearchButton ()
 	if(_projectFolder != aFolder && ![_projectFolder isEqualToString:aFolder])
 	{
 		_projectFolder = aFolder ?: @"";
-		self.globHistoryList = [[OakHistoryList alloc] initWithName:[NSString stringWithFormat:@"Find in Folder Globs.%@", _projectFolder] stackSize:10 defaultItems:@"*", @"*.txt", @"*.{c,h}", nil];
+		self.globHistoryList = [[OakHistoryList alloc] initWithName:[NSString stringWithFormat:@"Find in Folder Globs.%@", _projectFolder] stackSize:10 fallbackUserDefaultsKey:kUserDefaultsDefaultFindGlobsKey];
 		[self updateSearchInPopUpMenu];
 	}
 }
