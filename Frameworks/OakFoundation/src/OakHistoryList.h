@@ -12,6 +12,7 @@ PUBLIC @interface OakHistoryList : NSObject
 @property (nonatomic) id head;
 
 - (id)initWithName:(NSString*)defaultsName stackSize:(NSUInteger)size;
+- (id)initWithName:(NSString*)defaultsName stackSize:(NSUInteger)size fallbackUserDefaultsKey:(NSString*)fallbackDefaultsName;
 - (id)initWithName:(NSString*)defaultsName stackSize:(NSUInteger)size defaultItems:(id)firstItem, ...;
 - (void)addObject:(id)newItem;
 - (NSEnumerator*)objectEnumerator;

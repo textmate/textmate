@@ -60,6 +60,19 @@ static id RetrieveObjectAtKeyPath (NSString* keyPath)
 	return self;
 }
 
+- (instancetype)initWithName:(NSString*)defaultsName stackSize:(NSUInteger)size fallbackUserDefaultsKey:(NSString*)fallbackDefaultsName
+{
+	if(self = [self initWithName:defaultsName stackSize:size])
+	{
+		if(self.list.count == 0)
+		{
+			if(NSArray* array = [NSUserDefaults.standardUserDefaults arrayForKey:fallbackDefaultsName])
+				[self.list setArray:array];
+		}
+	}
+	return self;
+}
+
 - (instancetype)initWithName:(NSString*)defaultsName stackSize:(NSUInteger)size defaultItems:(id)firstItem, ...
 {
 	if(self = [self initWithName:defaultsName stackSize:size])
