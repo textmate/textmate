@@ -1,7 +1,7 @@
 #import "FileBrowserNotifications.h"
 
-NSString* const OakFileManagerWillDeleteItemAtPath = @"OakFileManagerWillDeleteItemAtPath";
-NSString* const OakFileManagerPathKey              = @"directory";
+NSString* const FileBrowserWillDeleteNotification   = @"FileBrowserWillDeleteNotification";
+NSString* const FileBrowserPathKey                  = @"FileBrowserPathKey";
 
-NSString* const OakFileBrowserDidDuplicateURLs     = @"OakFileBrowserDidDuplicateURLs";
-NSString* const OakFileBrowserURLMapKey            = @"OakFileBrowserURLMapKey";
+NSString* const FileBrowserDidDuplicateNotification = @"FileBrowserDidDuplicateNotification";
+NSString* const FileBrowserURLDictionaryKey         = @"FileBrowserURLDictionaryKey";

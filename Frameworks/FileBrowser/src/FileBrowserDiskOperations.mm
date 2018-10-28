@@ -198,7 +198,7 @@
 			if([NSFileManager.defaultManager copyItemAtURL:srcURL toURL:*destURL error:error])
 			{
 				if(op == FBOperationDuplicate)
-					[NSNotificationCenter.defaultCenter postNotificationName:OakFileBrowserDidDuplicateURLs object:self userInfo:@{ OakFileBrowserURLMapKey: @{ srcURL: *destURL } }];
+					[NSNotificationCenter.defaultCenter postNotificationName:FileBrowserDidDuplicateNotification object:self userInfo:@{ FileBrowserURLDictionaryKey: @{ srcURL: *destURL } }];
 				return YES;
 			}
 		}
@@ -206,7 +206,7 @@
 
 		case FBOperationTrash:
 		{
-			[NSNotificationCenter.defaultCenter postNotificationName:OakFileManagerWillDeleteItemAtPath object:self userInfo:@{ OakFileManagerPathKey: srcURL.path }];
+			[NSNotificationCenter.defaultCenter postNotificationName:FileBrowserWillDeleteNotification object:self userInfo:@{ FileBrowserPathKey: srcURL.path }];
 
 			if([NSFileManager.defaultManager trashItemAtURL:srcURL resultingItemURL:destURL error:error])
 				return YES;
@@ -287,7 +287,7 @@
 {
 	if(op & (FBOperationLink|FBOperationCopy|FBOperationDuplicate|FBOperationNewFile|FBOperationNewFolder))
 	{
-		[NSNotificationCenter.defaultCenter postNotificationName:OakFileManagerWillDeleteItemAtPath object:self userInfo:@{ OakFileManagerPathKey: destURL.path }];
+		[NSNotificationCenter.defaultCenter postNotificationName:FileBrowserWillDeleteNotification object:self userInfo:@{ FileBrowserPathKey: destURL.path }];
 		return [NSFileManager.defaultManager removeItemAtURL:destURL error:error];
 	}
 	else if(op & (FBOperationMove|FBOperationRename|FBOperationTrash))

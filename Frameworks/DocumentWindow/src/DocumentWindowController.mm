@@ -210,7 +210,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidBecomeActiveNotification:) name:NSApplicationDidBecomeActiveNotification object:NSApp];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidResignActiveNotification:) name:NSApplicationDidResignActiveNotification object:NSApp];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(fileManagerWillDeleteItemAtPath:) name:OakFileManagerWillDeleteItemAtPath object:nil];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(fileBrowserWillDelete:) name:FileBrowserWillDeleteNotification object:nil];
 
 		[self userDefaultsDidChange:nil];
 	}
@@ -602,10 +602,10 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	return NO;
 }
 
-- (void)fileManagerWillDeleteItemAtPath:(NSNotification*)aNotification
+- (void)fileBrowserWillDelete:(NSNotification*)aNotification
 {
 	NSDictionary* userInfo = [aNotification userInfo];
-	NSString* path = userInfo[OakFileManagerPathKey];
+	NSString* path = userInfo[FileBrowserPathKey];
 
 	NSIndexSet* indexSet = [_documents indexesOfObjectsPassingTest:^BOOL(OakDocument* doc, NSUInteger idx, BOOL* stop){
 		return doc.isDocumentEdited == NO && path::is_child(to_s(doc.path), to_s(path));
@@ -614,10 +614,10 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	[self closeTabsAtIndexes:indexSet askToSaveChanges:NO createDocumentIfEmpty:YES activate:NO];
 }
 
-- (void)fileBrowserDidDuplicateAtURLs:(NSNotification*)aNotification
+- (void)fileBrowserDidDuplicate:(NSNotification*)aNotification
 {
 	NSDictionary* userInfo = [aNotification userInfo];
-	NSDictionary* urls = userInfo[OakFileBrowserURLMapKey];
+	NSDictionary* urls = userInfo[FileBrowserURLDictionaryKey];
 	for(NSURL* url in urls)
 	{
 		if([url.path isEqualToString:self.selectedDocument.path])
@@ -1725,7 +1725,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 			if(self.layoutView.tabsAboveDocument)
 				[self.tabBarView expand];
 
-			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(fileBrowserDidDuplicateAtURLs:) name:OakFileBrowserDidDuplicateURLs object:nil];
+			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(fileBrowserDidDuplicate:) name:FileBrowserDidDuplicateNotification object:nil];
 		}
 
 		if(!makeVisibleFlag && [[self.window firstResponder] isKindOfClass:[NSView class]] && [(NSView*)[self.window firstResponder] isDescendantOf:self.layoutView.fileBrowserView])
