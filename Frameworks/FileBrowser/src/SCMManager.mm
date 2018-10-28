@@ -29,13 +29,9 @@
 @end
 
 @interface SCMDirectoryObserver : NSObject
-{
-	std::map<std::string, scm::status::type> _matchingURLs;
-}
 @property (nonatomic, readonly) NSURL* directoryURL;
 @property (nonatomic, readonly) void(^handler)(std::map<std::string, scm::status::type> const&);
-@property (nonatomic, readonly) scm::status::type mask;
-- (instancetype)initWithURL:(NSURL*)url mask:(scm::status::type)mask usingBlock:(void(^)(std::map<std::string, scm::status::type> const&))handler;
+- (instancetype)initWithURL:(NSURL*)url usingBlock:(void(^)(std::map<std::string, scm::status::type> const&))handler;
 - (void)updateMatchingURLs:(std::map<std::string, scm::status::type> const&)statusMap;
 @end
 
@@ -66,16 +62,16 @@
 	return directory;
 }
 
-- (id)addObserverToURL:(NSURL*)url usingBlock:(void(^)(scm::status::type))handler
+- (id)addObserverToFileAtURL:(NSURL*)url usingBlock:(void(^)(scm::status::type))handler
 {
 	SCMFileObserver* observer = [[SCMFileObserver alloc] initWithURL:url usingBlock:handler];
 	[[self directoryAtURL:url.URLByDeletingLastPathComponent] addFileObserver:observer];
 	return observer;
 }
 
-- (id)addObserverForStatus:(scm::status::type)mask inDirectoryAtURL:(NSURL*)url usingBlock:(void(^)(std::map<std::string, scm::status::type> const&))handler
+- (id)addObserverToRepositoryAtURL:(NSURL*)url usingBlock:(void(^)(std::map<std::string, scm::status::type> const&))handler
 {
-	SCMDirectoryObserver* observer = [[SCMDirectoryObserver alloc] initWithURL:url mask:mask usingBlock:handler];
+	SCMDirectoryObserver* observer = [[SCMDirectoryObserver alloc] initWithURL:url usingBlock:handler];
 	[[self directoryAtURL:url] addDirectoryObserver:observer];
 	return observer;
 }
@@ -185,12 +181,11 @@
 @end
 
 @implementation SCMDirectoryObserver
-- (instancetype)initWithURL:(NSURL*)url mask:(scm::status::type)mask usingBlock:(void(^)(std::map<std::string, scm::status::type> const&))handler
+- (instancetype)initWithURL:(NSURL*)url usingBlock:(void(^)(std::map<std::string, scm::status::type> const&))handler
 {
 	if(self = [super init])
 	{
 		_directoryURL = url;
-		_mask         = mask;
 		_handler      = handler;
 	}
 	return self;
@@ -198,15 +193,6 @@
 
 - (void)updateMatchingURLs:(std::map<std::string, scm::status::type> const&)statusMap
 {
-	std::map<std::string, scm::status::type> matchingURLs;
-
-	for(auto const& pair : statusMap)
-	{
-		if(pair.second & _mask)
-			matchingURLs.insert(pair);
-	}
-
-	if(_matchingURLs != matchingURLs)
-		_handler(_matchingURLs = matchingURLs);
+	_handler(statusMap);
 }
 @end

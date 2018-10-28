@@ -23,13 +23,13 @@
 		NSURL* repositoryURL = [NSURL fileURLWithPath:url.path isDirectory:YES];
 		if([url.query hasSuffix:@"unstaged"])
 		{
-			_scmObserver = [SCMManager.sharedInstance addObserverForStatus:(scm::status::type)(scm::status::modified|scm::status::added|scm::status::deleted|scm::status::conflicted) inDirectoryAtURL:repositoryURL usingBlock:^(std::map<std::string, scm::status::type> const& map){
+			_scmObserver = [SCMManager.sharedInstance addObserverToRepositoryAtURL:repositoryURL usingBlock:^(std::map<std::string, scm::status::type> const& map){
 				handler([SCMStatusObserver unstagedURLsInDirectoryAtURL:url]);
 			}];
 		}
 		else if([url.query hasSuffix:@"untracked"])
 		{
-			_scmObserver = [SCMManager.sharedInstance addObserverForStatus:scm::status::unversioned inDirectoryAtURL:repositoryURL usingBlock:^(std::map<std::string, scm::status::type> const& map){
+			_scmObserver = [SCMManager.sharedInstance addObserverToRepositoryAtURL:repositoryURL usingBlock:^(std::map<std::string, scm::status::type> const& map){
 				handler([SCMStatusObserver untrackedURLsInDirectoryAtURL:url]);
 			}];
 		}

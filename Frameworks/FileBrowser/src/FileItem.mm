@@ -87,7 +87,7 @@ static NSMutableDictionary* SchemeToClass;
 	if(flag)
 	{
 		__weak FileItem* weakSelf = self;
-		_SCMStatusObserver = [SCMManager.sharedInstance addObserverToURL:_URL usingBlock:^(scm::status::type newStatus){
+		_SCMStatusObserver = [SCMManager.sharedInstance addObserverToFileAtURL:_URL usingBlock:^(scm::status::type newStatus){
 			weakSelf.SCMStatus = newStatus;
 			weakSelf.missing   = newStatus == scm::status::deleted;
 		}];
