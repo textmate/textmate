@@ -5,39 +5,37 @@
 
 OAK_DEBUG_VAR(Find_HistoryList);
 
-static void StoreObjectAtKeyPath (id obj, std::string const& keyPath)
+static NSArray<NSString*>* SplitKeyPath (NSString* keyPath)
 {
-	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+	NSRange r = [keyPath rangeOfString:@"."];
+	return r.location == NSNotFound ? @[ keyPath ] : @[ [keyPath substringToIndex:r.location], [keyPath substringFromIndex:NSMaxRange(r)] ];
+}
 
-	std::string::size_type sep = keyPath.find('.');
-	if(sep == std::string::npos)
+static void StoreObjectAtKeyPath (id obj, NSString* keyPath)
+{
+	NSArray<NSString*>* pathArray = SplitKeyPath(keyPath);
+	if(pathArray.count == 1)
 	{
-		[defaults setObject:obj forKey:[NSString stringWithCxxString:keyPath]];
+		[NSUserDefaults.standardUserDefaults setObject:obj forKey:keyPath];
 	}
-	else
+	else if(pathArray.count == 2)
 	{
-		NSString* primary   = [NSString stringWithCxxString:keyPath.substr(0, sep)];
-		NSString* secondary = [NSString stringWithCxxString:keyPath.substr(sep+1)];
-
 		NSMutableDictionary* dict = [NSMutableDictionary dictionary];
-		if(NSDictionary* existingDict = [defaults dictionaryForKey:primary])
+		if(NSDictionary* existingDict = [NSUserDefaults.standardUserDefaults dictionaryForKey:pathArray.firstObject])
 			[dict setValuesForKeysWithDictionary:existingDict];
-		[dict setObject:obj forKey:secondary];
-		[defaults setObject:dict forKey:primary];
+		[dict setObject:obj forKey:pathArray.lastObject];
+		[NSUserDefaults.standardUserDefaults setObject:dict forKey:pathArray.firstObject];
 	}
 }
 
-static id RetrieveObjectAtKeyPath (std::string const& keyPath)
+static id RetrieveObjectAtKeyPath (NSString* keyPath)
 {
-	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
-
-	std::string::size_type sep = keyPath.find('.');
-	if(sep == std::string::npos)
-		return [defaults objectForKey:[NSString stringWithCxxString:keyPath]];
-
-	NSString* primary   = [NSString stringWithCxxString:keyPath.substr(0, sep)];
-	NSString* secondary = [NSString stringWithCxxString:keyPath.substr(sep+1)];
-	return [[defaults dictionaryForKey:primary] objectForKey:secondary];
+	NSArray<NSString*>* pathArray = SplitKeyPath(keyPath);
+	if(pathArray.count == 1)
+		return [NSUserDefaults.standardUserDefaults objectForKey:keyPath];
+	else if(pathArray.count == 2)
+		return [[NSUserDefaults.standardUserDefaults dictionaryForKey:pathArray.firstObject] objectForKey:pathArray.lastObject];
+	return nil;
 }
 
 @interface OakHistoryList ()
@@ -47,7 +45,7 @@ static id RetrieveObjectAtKeyPath (std::string const& keyPath)
 @end
 
 @implementation OakHistoryList
-- (id)initWithName:(NSString*)defaultsName stackSize:(NSUInteger)size defaultItems:(id)firstItem, ...
+- (instancetype)initWithName:(NSString*)defaultsName stackSize:(NSUInteger)size
 {
 	D(DBF_Find_HistoryList, bug("Creating list with name %s and %zu items\n", [defaultsName UTF8String], (size_t)size););
 	if(self = [self init])
@@ -56,11 +54,17 @@ static id RetrieveObjectAtKeyPath (std::string const& keyPath)
 		self.name      = defaultsName;
 		self.list      = [[NSMutableArray alloc] initWithCapacity:size];
 
-		if(NSArray* array = RetrieveObjectAtKeyPath([self.name UTF8String]))
-		{
-			[self.list setArray:array];
-		}
-		else
+		if(NSArray* array = RetrieveObjectAtKeyPath(self.name))
+			[self.list setArray:[array subarrayWithRange:NSMakeRange(0, MIN(array.count, self.stackSize))]];
+	}
+	return self;
+}
+
+- (instancetype)initWithName:(NSString*)defaultsName stackSize:(NSUInteger)size defaultItems:(id)firstItem, ...
+{
+	if(self = [self initWithName:defaultsName stackSize:size])
+	{
+		if(self.list.count == 0)
 		{
 			va_list ap;
 			va_start(ap, firstItem);
@@ -71,16 +75,8 @@ static id RetrieveObjectAtKeyPath (std::string const& keyPath)
 			}
 			va_end(ap);
 		}
-
-		while([self.list count] > self.stackSize)
-			[self.list removeLastObject];
 	}
 	return self;
-}
-
-- (id)initWithName:(NSString*)defaultsName stackSize:(NSUInteger)size
-{
-	return [self initWithName:defaultsName stackSize:size defaultItems:nil];
 }
 
 - (void)addObject:(id)newItem;
@@ -104,7 +100,7 @@ static id RetrieveObjectAtKeyPath (std::string const& keyPath)
 	[self didChangeValueForKey:@"currentObject"];
 	[self didChangeValueForKey:@"head"];
 
-	StoreObjectAtKeyPath(self.list, [self.name UTF8String]);
+	StoreObjectAtKeyPath(self.list, self.name);
 }
 
 - (NSEnumerator*)objectEnumerator;
