@@ -1,0 +1,5 @@
+SOURCES       = src/*.mm
+EXPORT        = src/FileBrowserViewController.h src/FileBrowserNotifications.h
+CP_Resources  = resources/*
+LINK         += BundlesManager MenuBuilder OakAppKit OakFileBrowser OakFoundation Preferences bundles io ns text
+FRAMEWORKS    = Cocoa
