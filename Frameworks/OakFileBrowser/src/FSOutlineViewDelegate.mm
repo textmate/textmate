@@ -1,20 +1,6 @@
 #import <OakAppKit/OakFinderTag.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 
-@interface OakSelectBasenameCell : NSTextFieldCell
-@end
-
-@implementation OakSelectBasenameCell
-- (void)selectWithFrame:(NSRect)aRect inView:(NSView*)aView editor:(NSText*)aText delegate:(id)someDelegate start:(NSInteger)start length:(NSInteger)length
-{
-	NSString* path = self.stringValue;
-	if([self.objectValue respondsToSelector:@selector(firstObject)])
-		path = [self.objectValue firstObject];
-	NSString* basename = [path stringByDeletingPathExtension];
-	[super selectWithFrame:aRect inView:aView editor:aText delegate:someDelegate start:start length:(start == 0 && basename ? MIN(basename.length, length) : length)];
-}
-@end
-
 @interface OakLabelSwatchView : NSView
 @property (nonatomic) NSArray<OakFinderTag*>* finderTags;
 @end

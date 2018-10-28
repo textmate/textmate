@@ -8,8 +8,18 @@
 - (id)initWithCloseAction:(SEL)closeAction target:(id)target;
 @end
 
-// Implemented in OakFileBrowser/FSOutlineViewDelegate.mm
-@interface OakSelectBasenameCell : NSTextFieldCell
+@interface FileItemSelectBasenameCell : NSTextFieldCell
+@end
+
+@implementation FileItemSelectBasenameCell
+- (void)selectWithFrame:(NSRect)aRect inView:(NSView*)aView editor:(NSText*)aText delegate:(id)someDelegate start:(NSInteger)start length:(NSInteger)length
+{
+	NSString* path = self.stringValue;
+	if([self.objectValue respondsToSelector:@selector(firstObject)])
+		path = [self.objectValue firstObject];
+	NSString* basename = [path stringByDeletingPathExtension];
+	[super selectWithFrame:aRect inView:aView editor:aText delegate:someDelegate start:start length:(start == 0 && basename ? MIN(basename.length, length) : length)];
+}
 @end
 
 @implementation FileItem (FileItemWrapper)
@@ -79,7 +89,7 @@
 		_itemInfoButtons = [[OakItemButtonsView alloc] initWithCloseAction:@selector(didClickCloseButton:) target:self];
 
 		NSTextField* textField = OakCreateLabel(@"", [NSFont controlContentFontOfSize:0]);
-		textField.cell = [[OakSelectBasenameCell alloc] initTextCell:@""];
+		textField.cell = [[FileItemSelectBasenameCell alloc] initTextCell:@""];
 		[textField.cell setWraps:NO];
 		[textField.cell setLineBreakMode:NSLineBreakByTruncatingMiddle];
 		textField.formatter = [[FileItemFormatter alloc] initWithTableCellView:self];
