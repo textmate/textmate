@@ -3,15 +3,15 @@
 #import <io/path.h>
 #import <ns/ns.h>
 
-@class SCMRepository;
+@class SCMDirectory;
 @class SCMFileObserver;
 @class SCMDirectoryObserver;
 
 @interface SCMManager ()
-@property (nonatomic, readonly) NSMutableDictionary<NSURL*, SCMRepository*>* repositories;
+@property (nonatomic, readonly) NSMutableDictionary<NSURL*, SCMDirectory*>* directories;
 @end
 
-@interface SCMRepository : NSObject
+@interface SCMDirectory : NSObject
 @property (nonatomic, readonly) NSURL* URL;
 @property (nonatomic, readonly) NSMutableArray<SCMFileObserver*>* fileObservers;
 @property (nonatomic, readonly) NSMutableArray<SCMDirectoryObserver*>* directoryObservers;
@@ -50,55 +50,55 @@
 {
 	if(self = [super init])
 	{
-		_repositories = [NSMutableDictionary dictionary];
+		_directories = [NSMutableDictionary dictionary];
 	}
 	return self;
 }
 
-- (SCMRepository*)repositoryForDirectoryAtURL:(NSURL*)url
+- (SCMDirectory*)directoryAtURL:(NSURL*)url
 {
-	SCMRepository* repository = _repositories[url];
-	if(!repository)
+	SCMDirectory* directory = _directories[url];
+	if(!directory)
 	{
-		repository = [[SCMRepository alloc] initWithURL:url];
-		_repositories[url] = repository;
+		directory = [[SCMDirectory alloc] initWithURL:url];
+		_directories[url] = directory;
 	}
-	return repository;
+	return directory;
 }
 
 - (id)addObserverToURL:(NSURL*)url usingBlock:(void(^)(scm::status::type))handler
 {
 	SCMFileObserver* observer = [[SCMFileObserver alloc] initWithURL:url usingBlock:handler];
-	[[self repositoryForDirectoryAtURL:url.URLByDeletingLastPathComponent] addFileObserver:observer];
+	[[self directoryAtURL:url.URLByDeletingLastPathComponent] addFileObserver:observer];
 	return observer;
 }
 
 - (id)addObserverForStatus:(scm::status::type)mask inDirectoryAtURL:(NSURL*)url usingBlock:(void(^)(std::map<std::string, scm::status::type> const&))handler
 {
 	SCMDirectoryObserver* observer = [[SCMDirectoryObserver alloc] initWithURL:url mask:mask usingBlock:handler];
-	[[self repositoryForDirectoryAtURL:url] addDirectoryObserver:observer];
+	[[self directoryAtURL:url] addDirectoryObserver:observer];
 	return observer;
 }
 
 - (void)removeObserver:(id)someObserver
 {
-	SCMRepository* repository;
+	SCMDirectory* directory;
 
 	if([someObserver isKindOfClass:[SCMFileObserver class]])
 	{
 		SCMFileObserver* observer = someObserver;
-		repository = _repositories[observer.fileURL.URLByDeletingLastPathComponent];
-		[repository.fileObservers removeObject:observer];
+		directory = _directories[observer.fileURL.URLByDeletingLastPathComponent];
+		[directory.fileObservers removeObject:observer];
 	}
 	else if([someObserver isKindOfClass:[SCMDirectoryObserver class]])
 	{
 		SCMDirectoryObserver* observer = someObserver;
-		repository = _repositories[observer.directoryURL];
-		[repository.directoryObservers removeObject:observer];
+		directory = _directories[observer.directoryURL];
+		[directory.directoryObservers removeObject:observer];
 	}
 
-	if(repository && repository.fileObservers.count == 0 && repository.directoryObservers.count == 0)
-		_repositories[repository.URL] = nil;
+	if(directory && directory.fileObservers.count == 0 && directory.directoryObservers.count == 0)
+		_directories[directory.URL] = nil;
 }
 
 - (NSArray<NSURL*>*)urlsWithStatus:(scm::status::type)statusMask inDirectoryAtURL:(NSURL*)directoryURL
@@ -119,7 +119,7 @@
 }
 @end
 
-@implementation SCMRepository
+@implementation SCMDirectory
 - (instancetype)initWithURL:(NSURL*)url
 {
 	if(self = [self init])
@@ -130,7 +130,7 @@
 
 		if(_scmInfo = scm::info(url.fileSystemRepresentation))
 		{
-			__weak SCMRepository* weakSelf = self;
+			__weak SCMDirectory* weakSelf = self;
 			_scmInfo->push_callback(^(scm::info_t const& info){
 				for(SCMFileObserver* observer in weakSelf.fileObservers)
 					observer.SCMStatus = info.status(observer.fileURL.fileSystemRepresentation);
