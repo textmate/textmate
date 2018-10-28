@@ -3,21 +3,19 @@
 @class FSEventsDirectory;
 
 @interface FSEventsClient : NSObject
-@property (nonatomic, readonly) void(^handler)(NSArray<NSURL*>*);
+@property (nonatomic, readonly) void(^handler)();
 @property (nonatomic) FSEventsDirectory* directory;
-- (instancetype)initWithBlock:(void(^)(NSArray<NSURL*>*))handler;
+- (instancetype)initWithBlock:(void(^)())handler;
 - (void)removeFromDirectory;
 @end
 
 @interface FSEventsDirectory : NSObject
 @property (nonatomic, readonly) NSURL* URL;
 @property (nonatomic, readonly) NSMutableArray<FSEventsClient*>* clients;
-@property (nonatomic, readonly) id scmObserver;
-@property (nonatomic) NSArray<NSURL*>* urls;
 - (instancetype)initWithURL:(NSURL*)url;
 - (void)addClient:(FSEventsClient*)observer;
 - (void)removeClient:(FSEventsClient*)observer;
-- (void)reloadDirectoryAndNotify;
+- (void)notifyObservers;
 @end
 
 // ============================
@@ -100,17 +98,17 @@ namespace
 
 - (void)reloadDirectoryAtURL:(NSURL*)url
 {
-	[[_directories objectForKey:url] reloadDirectoryAndNotify];
+	[[_directories objectForKey:url] notifyObservers];
 }
 
 - (void)resetObservers
 {
 	_fsEvents.reset(new fs_events_t(_directories.keyEnumerator.allObjects, ^(NSURL* url){
-		[[_directories objectForKey:url] reloadDirectoryAndNotify];
+		[[_directories objectForKey:url] notifyObservers];
 	}));
 }
 
-- (id)addObserverToDirectoryAtURL:(NSURL*)url usingBlock:(void(^)(NSArray<NSURL*>*))handler
+- (id)addObserverToDirectoryAtURL:(NSURL*)url usingBlock:(void(^)())handler
 {
 	FSEventsDirectory* directory = [_directories objectForKey:url];
 	if(!directory)
@@ -148,26 +146,16 @@ namespace
 	return self;
 }
 
-- (void)reloadDirectoryAndNotify
+- (void)notifyObservers
 {
-	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-		NSArray<NSURL*>* urls = [NSFileManager.defaultManager contentsOfDirectoryAtURL:_URL includingPropertiesForKeys:@[ NSURLIsDirectoryKey, NSURLIsPackageKey, NSURLIsSymbolicLinkKey, NSURLIsHiddenKey, NSURLLocalizedNameKey, NSURLEffectiveIconKey ] options:0 error:nil];
-		dispatch_async(dispatch_get_main_queue(), ^{
-			self.urls = urls;
-			for(FSEventsClient* client in _clients)
-				client.handler(self.urls);
-		});
-	});
+	for(FSEventsClient* client in _clients)
+		client.handler();
 }
 
 - (void)addClient:(FSEventsClient*)observer
 {
 	observer.directory = self;
 	[_clients addObject:observer];
-
-	if(self.urls)
-			observer.handler(self.urls);
-	else	[self reloadDirectoryAndNotify];
 }
 
 - (void)removeClient:(FSEventsClient*)observer
@@ -178,7 +166,7 @@ namespace
 @end
 
 @implementation FSEventsClient
-- (instancetype)initWithBlock:(void(^)(NSArray<NSURL*>*))handler
+- (instancetype)initWithBlock:(void(^)())handler
 {
 	if(self = [super init])
 		_handler = handler;

@@ -27,13 +27,15 @@
 		_scmURLs = @[ ];
 
 		__weak FileSystemObserver* weakSelf = self;
-		_fsEventsObserver = [FSEventsManager.sharedInstance addObserverToDirectoryAtURL:url usingBlock:^(NSArray<NSURL*>* urls){
-			[weakSelf updateFSEventsURLs:urls scmURLs:nil];
+		_fsEventsObserver = [FSEventsManager.sharedInstance addObserverToDirectoryAtURL:url usingBlock:^{
+			[weakSelf loadContentsOfDirectoryAtURL:url];
 		}];
 
 		_scmObserver = [SCMManager.sharedInstance addObserverToRepositoryAtURL:url usingBlock:^(std::map<std::string, scm::status::type> const&){
 			[weakSelf updateFSEventsURLs:nil scmURLs:[SCMManager.sharedInstance urlsWithStatus:scm::status::deleted inDirectoryAtURL:url]];
 		}];
+
+		[self loadContentsOfDirectoryAtURL:url];
 	}
 	return self;
 }
@@ -42,6 +44,17 @@
 {
 	[FSEventsManager.sharedInstance removeObserver:_fsEventsObserver];
 	[SCMManager.sharedInstance removeObserver:_scmObserver];
+}
+
+- (void)loadContentsOfDirectoryAtURL:(NSURL*)url
+{
+	__weak FileSystemObserver* weakSelf = self;
+	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+		NSArray<NSURL*>* urls = [NSFileManager.defaultManager contentsOfDirectoryAtURL:url includingPropertiesForKeys:@[ NSURLIsDirectoryKey, NSURLIsPackageKey, NSURLIsSymbolicLinkKey, NSURLIsHiddenKey, NSURLLocalizedNameKey, NSURLEffectiveIconKey ] options:0 error:nil];
+		dispatch_async(dispatch_get_main_queue(), ^{
+			[weakSelf updateFSEventsURLs:urls scmURLs:nil];
+		});
+	});
 }
 
 - (void)updateFSEventsURLs:(NSArray<NSURL*>*)fsEventsURLs scmURLs:(NSArray<NSURL*>*)scmURLs
