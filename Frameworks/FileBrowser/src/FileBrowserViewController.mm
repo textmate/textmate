@@ -11,7 +11,6 @@
 #import <OakAppKit/OakFinderTag.h>
 #import <OakAppKit/OakZoomingIcon.h>
 #import <OakCommand/OakCommand.h>
-#import <OakFileBrowser/OakFileBrowser.h>
 #import <Preferences/Keys.h>
 #import <bundles/bundles.h>
 #import <ns/ns.h>

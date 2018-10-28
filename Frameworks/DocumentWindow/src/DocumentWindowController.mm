@@ -7,7 +7,6 @@
 #import <OakAppKit/NSAlert Additions.h>
 #import <OakAppKit/NSMenuItem Additions.h>
 #import <OakAppKit/OakAppKit.h>
-#import <OakAppKit/OakFileManager.h>
 #import <OakAppKit/OakPasteboard.h>
 #import <OakAppKit/OakSavePanel.h>
 #import <MenuBuilder/MenuBuilder.h>
@@ -15,7 +14,6 @@
 #import <OakFoundation/NSString Additions.h>
 #import <Preferences/Keys.h>
 #import <OakTextView/OakDocumentView.h>
-#import <OakFileBrowser/OakFileBrowser.h>
 #import <FileBrowser/FileBrowserViewController.h>
 #import <OakCommand/OakCommand.h>
 #import <HTMLOutputWindow/HTMLOutputWindow.h>

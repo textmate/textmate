@@ -1,14 +1,10 @@
 #import "FileBrowserView.h"
+#import "FileBrowserNotifications.h"
 #import "FileItem.h"
 #import <OakAppKit/OakSound.h>
-#import <OakAppKit/OakFileManager.h> // Only for OakFileManagerWillDeleteItemAtPath
 #import <OakAppKit/NSAlert Additions.h>
 #import <io/path.h>
 #import <ns/ns.h>
-
-// From OakFileBrowser.h
-extern PUBLIC NSString* OakFileBrowserDidDuplicateURLs;
-extern PUBLIC NSString* OakFileBrowserURLMapKey;
 
 @implementation FileBrowserView (DiskOperations)
 - (NSArray<NSURL*>*)performOperation:(FBOperation)op withURLs:(NSDictionary<NSURL*, NSURL*>*)urls unique:(BOOL)makeUnique select:(BOOL)selectDestinationURLs

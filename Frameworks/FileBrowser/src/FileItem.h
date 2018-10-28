@@ -1,8 +1,8 @@
+#import <oak/misc.h>
 #import <scm/status.h>
 
-// Defined in OakFileBrowser/OakFSUtilities.h (private header)
-extern NSURL* kURLLocationComputer;
-extern NSURL* kURLLocationFavorites;
+PUBLIC extern NSURL* const kURLLocationComputer;
+PUBLIC extern NSURL* const kURLLocationFavorites;
 
 @class OakFinderTag;
 

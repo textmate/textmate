@@ -1,4 +1,5 @@
 #import "FileBrowserView.h"
+#import "FileBrowserNotifications.h"
 #import "FileItem.h"
 #import "FileItemTableCellView.h"
 #import "FileBrowserOutlineView.h"

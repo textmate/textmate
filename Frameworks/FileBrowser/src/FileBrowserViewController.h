@@ -1,4 +1,11 @@
-@protocol OakFileBrowserDelegate;
+#import "FileBrowserNotifications.h"
+
+@class OakFileBrowser;
+
+@protocol OakFileBrowserDelegate
+- (void)fileBrowser:(OakFileBrowser*)aFileBrowser openURLs:(NSArray*)someURLs;
+- (void)fileBrowser:(OakFileBrowser*)aFileBrowser closeURL:(NSURL*)anURL;
+@end
 
 @interface FileBrowserViewController : NSViewController
 @property (nonatomic, weak) id <OakFileBrowserDelegate> delegate;
