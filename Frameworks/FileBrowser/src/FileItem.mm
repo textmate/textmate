@@ -197,12 +197,12 @@ static NSMutableDictionary* SchemeToClass;
 	if(_URL.isFileURL)
 	{
 		NSNumber* flag;
-		NSURL* parentUrl;
+		NSURL* parentURL;
 
 		if([_URL getResourceValue:&flag forKey:NSURLIsVolumeKey error:nil] && [flag boolValue])
 			return kURLLocationComputer;
-		else if([_URL getResourceValue:&parentUrl forKey:NSURLParentDirectoryURLKey error:nil] && parentUrl)
-			return parentUrl;
+		else if([_URL getResourceValue:&parentURL forKey:NSURLParentDirectoryURLKey error:nil] && parentURL)
+			return parentURL;
 	}
 	return nil;
 }
