@@ -62,7 +62,7 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 	}];
 }
 
-@interface DocumentWindowController () <NSWindowDelegate, NSTouchBarDelegate, OakTabBarViewDelegate, OakTabBarViewDataSource, OakTextViewDelegate, OakFileBrowserDelegate>
+@interface DocumentWindowController () <NSWindowDelegate, NSTouchBarDelegate, OakTabBarViewDelegate, OakTabBarViewDataSource, OakTextViewDelegate, FileBrowserDelegate>
 {
 	OBJC_WATCH_LEAKS(DocumentWindowController);
 
@@ -108,8 +108,8 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 - (void)makeTextViewFirstResponder:(id)sender;
 - (void)updateFileBrowserStatus:(id)sender;
 
-- (void)fileBrowser:(OakFileBrowser*)aFileBrowser openURLs:(NSArray*)someURLs;
-- (void)fileBrowser:(OakFileBrowser*)aFileBrowser closeURL:(NSURL*)anURL;
+- (void)fileBrowser:(FileBrowserViewController*)fileBrowser openURLs:(NSArray*)someURLs;
+- (void)fileBrowser:(FileBrowserViewController*)fileBrowser closeURL:(NSURL*)anURL;
 
 - (void)takeNewTabIndexFrom:(id)sender;   // used by newDocumentInTab:
 - (void)takeTabsToTearOffFrom:(id)sender; // used by moveDocumentToNewWindow:
@@ -1687,7 +1687,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 // = OakFileBrowser =
 // ==================
 
-- (void)fileBrowser:(OakFileBrowser*)aFileBrowser openURLs:(NSArray*)someURLs
+- (void)fileBrowser:(FileBrowserViewController*)fileBrowser openURLs:(NSArray*)someURLs
 {
 	NSMutableArray* items = [NSMutableArray array];
 	for(NSURL* url in someURLs)
@@ -1698,7 +1698,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	[self openItems:items closingOtherTabs:OakIsAlternateKeyOrMouseEvent() activate:YES];
 }
 
-- (void)fileBrowser:(OakFileBrowser*)aFileBrowser closeURL:(NSURL*)anURL
+- (void)fileBrowser:(FileBrowserViewController*)fileBrowser closeURL:(NSURL*)anURL
 {
 	if(![anURL isFileURL])
 		return;

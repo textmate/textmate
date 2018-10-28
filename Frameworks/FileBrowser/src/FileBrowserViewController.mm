@@ -283,7 +283,7 @@ static bool is_binary (std::string const& path)
 		[NSWorkspace.sharedWorkspace openFile:item.resolvedURL.path];
 
 	if(itemsToOpenInTextMate.count > 0)
-		[self.delegate fileBrowser:nil openURLs:[itemsToOpenInTextMate valueForKeyPath:@"URL"]];
+		[self.delegate fileBrowser:self openURLs:[itemsToOpenInTextMate valueForKeyPath:@"URL"]];
 }
 
 - (void)didSingleClickOutlineView:(id)sender
@@ -311,7 +311,7 @@ static bool is_binary (std::string const& path)
 
 - (void)didClickItemCloseButton:(FileItem*)item
 {
-	[self.delegate fileBrowser:nil closeURL:item.URL];
+	[self.delegate fileBrowser:self closeURL:item.URL];
 }
 
 // ===============

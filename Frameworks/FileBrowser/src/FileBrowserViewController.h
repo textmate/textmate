@@ -1,14 +1,14 @@
 #import "FileBrowserNotifications.h"
 
-@class OakFileBrowser;
+@class FileBrowserViewController;
 
-@protocol OakFileBrowserDelegate
-- (void)fileBrowser:(OakFileBrowser*)aFileBrowser openURLs:(NSArray*)someURLs;
-- (void)fileBrowser:(OakFileBrowser*)aFileBrowser closeURL:(NSURL*)anURL;
+@protocol FileBrowserDelegate
+- (void)fileBrowser:(FileBrowserViewController*)fileBrowser openURLs:(NSArray*)someURLs;
+- (void)fileBrowser:(FileBrowserViewController*)fileBrowser closeURL:(NSURL*)anURL;
 @end
 
 @interface FileBrowserViewController : NSViewController
-@property (nonatomic, weak) id <OakFileBrowserDelegate> delegate;
+@property (nonatomic, weak) id <FileBrowserDelegate> delegate;
 
 @property (nonatomic, readonly) NSString*        path;
 @property (nonatomic, readonly) NSURL*           directoryURLForNewItems;
