@@ -537,6 +537,12 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	OakDocument* doc = item.document;
 	if(!doc.isOpen)
 		doc.recentTrackingDisabled = YES;
+
+	NSMutableDictionary* captures = [NSMutableDictionary dictionary];
+	for(auto pair : item.match.captures)
+		captures[to_ns(pair.first)] = to_ns(pair.second);
+	doc.matchCaptures = [captures copy];
+
 	[OakDocumentController.sharedInstance showDocument:doc andSelect:item.match.range inProject:self.projectIdentifier bringToFront:NO];
 }
 
