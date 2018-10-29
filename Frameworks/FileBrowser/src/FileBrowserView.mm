@@ -198,7 +198,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 	NSMutableArray<FileItem*>* stack = [self.fileItem.arrangedChildren mutableCopy];
 	while(FileItem* item = stack.firstObject)
 	{
-	[stack removeObjectAtIndex:0];
+		[stack removeObjectAtIndex:0];
 		if(item.isDirectory && item.isPackage)
 			[_outlineView reloadItem:item reloadChildren:YES];
 		if([_outlineView isExpandable:item] && item.arrangedChildren)
