@@ -538,7 +538,6 @@ private:
 @property (nonatomic, copy) NSString* liveSearchString;
 @property (nonatomic) ng::ranges_t liveSearchRanges;
 @property (nonatomic, readonly) links_ptr links;
-@property (nonatomic) NSDictionary* matchCaptures; // Captures from last regexp match
 @property (nonatomic) BOOL needsEnsureSelectionIsInVisibleArea;
 @property (nonatomic, readwrite) NSString* symbol;
 @property (nonatomic) scm::status::type scmStatus;
@@ -2548,7 +2547,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	if(findOperation == kFindOperationReplace || findOperation == kFindOperationReplaceAndFind)
 	{
 		std::string replacement = to_s(aFindServer.replaceString);
-		if(NSDictionary* captures = self.matchCaptures)
+		if(NSDictionary* captures = _document.matchCaptures)
 		{
 			std::map<std::string, std::string> variables;
 			for(NSString* key in [captures allKeys])
@@ -2569,7 +2568,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 		case kFindOperationFind:
 		case kFindOperationCount:
 		{
-			self.matchCaptures = nil;
+			_document.matchCaptures = nil;
 			bool isCounting = findOperation == kFindOperationCount || findOperation == kFindOperationCountInSelection;
 
 			std::string const findStr = to_s(aFindServer.findString);
@@ -2667,7 +2666,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 						NSMutableDictionary* captures = [NSMutableDictionary dictionary];
 						for(auto pair : allMatches[res.last()])
 							captures[[NSString stringWithCxxString:pair.first]] = [NSString stringWithCxxString:pair.second];
-						self.matchCaptures = captures;
+						_document.matchCaptures = captures;
 					}
 				}
 

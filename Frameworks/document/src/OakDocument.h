@@ -87,6 +87,7 @@ PUBLIC @interface OakDocument : NSObject
 // Storage for OakTextView
 @property (nonatomic) NSString* selection;
 @property (nonatomic) ng::index_t visibleIndex;
+@property (nonatomic) NSDictionary* matchCaptures; // Captures from last regexp match
 
 - (void)setMarkOfType:(NSString*)aMark atPosition:(text::pos_t const&)aPos content:(NSString*)value;
 - (void)removeMarkOfType:(NSString*)aMark atPosition:(text::pos_t const&)aPos;
