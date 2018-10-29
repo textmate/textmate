@@ -156,8 +156,9 @@ static std::string create_gzipped_file (std::string const& path)
 		NSMutableArray* array = [NSMutableArray array];
 		for(auto path : updatedHasSent)
 			[array addObject:[NSString stringWithCxxString:path]];
-		[[NSUserDefaults standardUserDefaults] setObject:array forKey:kUserDefaultsCrashReportsSent];
-
+		dispatch_async(dispatch_get_main_queue(), ^{
+			[[NSUserDefaults standardUserDefaults] setObject:array forKey:kUserDefaultsCrashReportsSent];
+		});
 	});
 }
 @end
