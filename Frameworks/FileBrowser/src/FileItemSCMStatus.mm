@@ -23,13 +23,13 @@
 		if([url.query hasSuffix:@"unstaged"])
 		{
 			_scmObserver = [SCMManager.sharedInstance addObserverToRepositoryAtURL:repositoryURL usingBlock:^(SCMRepository* repository){
-				handler([SCMStatusObserver unstagedURLsInDirectoryAtURL:repositoryURL]);
+				handler([SCMStatusObserver unstagedURLsInRepository:repository]);
 			}];
 		}
 		else if([url.query hasSuffix:@"untracked"])
 		{
 			_scmObserver = [SCMManager.sharedInstance addObserverToRepositoryAtURL:repositoryURL usingBlock:^(SCMRepository* repository){
-				handler([SCMStatusObserver untrackedURLsInDirectoryAtURL:repositoryURL]);
+				handler([SCMStatusObserver untrackedURLsInRepository:repository]);
 			}];
 		}
 		else if(SCMRepository* repository = [SCMManager.sharedInstance repositoryAtURL:repositoryURL])
@@ -52,35 +52,32 @@
 		[SCMManager.sharedInstance removeObserver:_scmObserver];
 }
 
-+ (NSArray<NSURL*>*)unstagedURLsInDirectoryAtURL:(NSURL*)url
++ (NSArray<NSURL*>*)unstagedURLsInRepository:(SCMRepository*)repository
 {
 	std::map<std::string, scm::status::type> unstagedPaths;
-	if(SCMRepository* repository = [SCMManager.sharedInstance repositoryAtURL:url])
+	for(auto const& pair : repository.status)
 	{
-		for(auto const& pair : repository.status)
+		if(pair.second & (scm::status::modified|scm::status::added|scm::status::deleted|scm::status::conflicted|scm::status::unversioned))
 		{
-			if(pair.second & (scm::status::modified|scm::status::added|scm::status::deleted|scm::status::conflicted|scm::status::unversioned))
-			{
-				if(!(pair.second & scm::status::unversioned))
-					unstagedPaths.insert(pair);
-			}
+			if(!(pair.second & scm::status::unversioned))
+				unstagedPaths.insert(pair);
+		}
+	}
+
+	if(!repository.tracksDirectories)
+	{
+		std::vector<std::string> parents;
+
+		std::string child = NULL_STR;
+		for(auto it = unstagedPaths.rbegin(); it != unstagedPaths.rend(); ++it)
+		{
+			if(path::is_child(child, it->first))
+					parents.push_back(it->first);
+			else	child = it->first;
 		}
 
-		if(!repository.tracksDirectories)
-		{
-			std::vector<std::string> parents;
-
-			std::string child = NULL_STR;
-			for(auto it = unstagedPaths.rbegin(); it != unstagedPaths.rend(); ++it)
-			{
-				if(path::is_child(child, it->first))
-						parents.push_back(it->first);
-				else	child = it->first;
-			}
-
-			for(auto const& path : parents)
-				unstagedPaths.erase(path);
-		}
+		for(auto const& path : parents)
+			unstagedPaths.erase(path);
 	}
 
 	NSMutableArray<NSURL*>* res = [NSMutableArray array];
@@ -89,35 +86,32 @@
 	return res;
 }
 
-+ (NSArray<NSURL*>*)untrackedURLsInDirectoryAtURL:(NSURL*)url
++ (NSArray<NSURL*>*)untrackedURLsInRepository:(SCMRepository*)repository
 {
 	std::map<std::string, scm::status::type> untrackedPaths;
-	if(SCMRepository* repository = [SCMManager.sharedInstance repositoryAtURL:url])
+	for(auto pair : repository.status)
 	{
-		for(auto pair : repository.status)
+		if(pair.second & (scm::status::modified|scm::status::added|scm::status::deleted|scm::status::conflicted|scm::status::unversioned))
 		{
-			if(pair.second & (scm::status::modified|scm::status::added|scm::status::deleted|scm::status::conflicted|scm::status::unversioned))
-			{
-				if(pair.second & scm::status::unversioned)
-					untrackedPaths.insert(pair);
-			}
+			if(pair.second & scm::status::unversioned)
+				untrackedPaths.insert(pair);
+		}
+	}
+
+	if(!repository.tracksDirectories)
+	{
+		std::vector<std::string> children;
+
+		std::string parent = NULL_STR;
+		for(auto const& pair : untrackedPaths)
+		{
+			if(path::is_child(pair.first, parent))
+				children.push_back(pair.first);
+			else	parent = pair.first;
 		}
 
-		if(!repository.tracksDirectories)
-		{
-			std::vector<std::string> children;
-
-			std::string parent = NULL_STR;
-			for(auto const& pair : untrackedPaths)
-			{
-				if(path::is_child(pair.first, parent))
-					children.push_back(pair.first);
-				else	parent = pair.first;
-			}
-
-			for(auto const& path : children)
-				untrackedPaths.erase(path);
-		}
+		for(auto const& path : children)
+			untrackedPaths.erase(path);
 	}
 
 	NSMutableArray<NSURL*>* res = [NSMutableArray array];
