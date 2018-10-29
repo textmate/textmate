@@ -29,7 +29,7 @@
 		_scmURLs = @[ ];
 
 		__weak FileSystemObserver* weakSelf = self;
-		_fsEventsObserver = [FSEventsManager.sharedInstance addObserverToDirectoryAtURL:url usingBlock:^{
+		_fsEventsObserver = [FSEventsManager.sharedInstance addObserverToDirectoryAtURL:url usingBlock:^(NSURL*){
 			[weakSelf loadContentsOfDirectoryAtURL:url];
 		}];
 

@@ -113,7 +113,7 @@ namespace scm
 			[self tryUpdateStatusInBackground];
 
 			__weak SCMRepository* weakSelf = self;
-			_fsEventsObserver = [FSEventsManager.sharedInstance addObserverToDirectoryAtURL:url observeSubdirectories:YES usingBlock:^{
+			_fsEventsObserver = [FSEventsManager.sharedInstance addObserverToDirectoryAtURL:url observeSubdirectories:YES usingBlock:^(NSURL* url){
 				[weakSelf tryUpdateStatusInBackground];
 			}];
 		}

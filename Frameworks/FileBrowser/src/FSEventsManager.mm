@@ -3,10 +3,10 @@
 @class FSEventsDirectory;
 
 @interface FSEventsClient : NSObject
-@property (nonatomic, readonly) void(^handler)();
+@property (nonatomic, readonly) void(^handler)(NSURL*);
 @property (nonatomic, readonly) BOOL observeSubdirectories;
 @property (nonatomic) FSEventsDirectory* directory;
-- (instancetype)initWithBlock:(void(^)())handler observeSubdirectories:(BOOL)flag;
+- (instancetype)initWithBlock:(void(^)(NSURL*))handler observeSubdirectories:(BOOL)flag;
 - (void)removeFromDirectory;
 @end
 
@@ -120,12 +120,12 @@ namespace
 	}));
 }
 
-- (id)addObserverToDirectoryAtURL:(NSURL*)url usingBlock:(void(^)())handler
+- (id)addObserverToDirectoryAtURL:(NSURL*)url usingBlock:(void(^)(NSURL*))handler
 {
 	return [self addObserverToDirectoryAtURL:url observeSubdirectories:NO usingBlock:handler];
 }
 
-- (id)addObserverToDirectoryAtURL:(NSURL*)url observeSubdirectories:(BOOL)flag usingBlock:(void(^)())handler
+- (id)addObserverToDirectoryAtURL:(NSURL*)url observeSubdirectories:(BOOL)flag usingBlock:(void(^)(NSURL*))handler
 {
 	FSEventsDirectory* directory = [_directories objectForKey:url];
 	if(!directory)
@@ -169,7 +169,7 @@ namespace
 	for(FSEventsClient* client in _clients)
 	{
 		if(changeInCurrentDirectory || client.observeSubdirectories)
-			client.handler();
+			client.handler(url);
 	}
 }
 
@@ -187,7 +187,7 @@ namespace
 @end
 
 @implementation FSEventsClient
-- (instancetype)initWithBlock:(void(^)())handler observeSubdirectories:(BOOL)flag
+- (instancetype)initWithBlock:(void(^)(NSURL*))handler observeSubdirectories:(BOOL)flag
 {
 	if(self = [super init])
 	{
