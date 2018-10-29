@@ -78,9 +78,9 @@ static CGPoint MenuPosition ()
 
 	if([super performKeyEquivalent:anEvent])
 		return YES;
-	else if(keyString == "~@\uF702") // ⌥⌘⇠
+	else if(keyString == "~@\uF702" || keyString == "@{") // ⌥⌘⇠ or ⌘{
 		return [self performWindowMenuAction:@selector(selectPreviousTab:)];
-	else if(keyString == "~@\uF703") // ⌥⌘⇢
+	else if(keyString == "~@\uF703" || keyString == "@}") // ⌥⌘⇢ or ⌘}
 		return [self performWindowMenuAction:@selector(selectNextTab:)];
 	return NO;
 }
