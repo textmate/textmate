@@ -24,13 +24,13 @@
 		if([url.query hasSuffix:@"unstaged"])
 		{
 			_scmObserver = [SCMManager.sharedInstance addObserverToRepositoryAtURL:repositoryURL usingBlock:^(std::map<std::string, scm::status::type> const& map){
-				handler([SCMStatusObserver unstagedURLsInDirectoryAtURL:url]);
+				handler([SCMStatusObserver unstagedURLsInDirectoryAtURL:repositoryURL]);
 			}];
 		}
 		else if([url.query hasSuffix:@"untracked"])
 		{
 			_scmObserver = [SCMManager.sharedInstance addObserverToRepositoryAtURL:repositoryURL usingBlock:^(std::map<std::string, scm::status::type> const& map){
-				handler([SCMStatusObserver untrackedURLsInDirectoryAtURL:url]);
+				handler([SCMStatusObserver untrackedURLsInDirectoryAtURL:repositoryURL]);
 			}];
 		}
 		else if(scm::scm_enabled_for_path(repositoryURL.fileSystemRepresentation))
