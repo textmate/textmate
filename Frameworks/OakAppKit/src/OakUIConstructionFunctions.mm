@@ -221,6 +221,7 @@ OakRolloverButton* OakCreateCloseButton (NSString* accessibilityLabel)
 
 	if(self.style == OakBackgroundFillViewStyleHeader)
 	{
+#if 0
 		if(OAK_AVAILABLE(10, 14))
 		{
 			NSVisualEffectView* effectView = [[NSVisualEffectView alloc] initWithFrame:[self bounds]];
@@ -231,6 +232,7 @@ OakRolloverButton* OakCreateCloseButton (NSString* accessibilityLabel)
 			[self addSubview:_visualEffectBackgroundView positioned:NSWindowBelow relativeTo:nil];
 		}
 		else
+#endif
 		{
 			self.activeBackgroundGradient   = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1] endingColor:[NSColor colorWithCalibratedWhite:0.760 alpha:1]];
 			self.inactiveBackgroundGradient = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1] endingColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1]];
