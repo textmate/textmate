@@ -31,7 +31,7 @@
 			[weakSelf loadContentsOfDirectoryAtURL:url];
 		}];
 
-		_scmObserver = [SCMManager.sharedInstance addObserverToRepositoryAtURL:url usingBlock:^(std::map<std::string, scm::status::type> const&){
+		_scmObserver = [SCMManager.sharedInstance addObserverToRepositoryAtURL:url usingBlock:^(SCMRepository* repository){
 			[weakSelf updateFSEventsURLs:nil scmURLs:[SCMManager.sharedInstance urlsWithStatus:scm::status::deleted inDirectoryAtURL:url]];
 		}];
 

@@ -19,16 +19,16 @@ namespace scm
 {
 	BOOL _needsUpdate;
 	BOOL _updating;
-	NSDate* _lastUpdate;
 	NSTimer* _updateTimer;
 }
 @property (nonatomic, readwrite) std::map<std::string, scm::status::type> status;
 @property (nonatomic, readwrite) std::map<std::string, std::string> variables;
 @property (nonatomic, readonly) scm::driver_t const* driver;
 @property (nonatomic, readonly) NSMutableArray<SCMRepositoryObserver*>* observers;
+@property (nonatomic) NSDate* lastUpdate;
 @property (nonatomic) id fsEventsObserver;
 - (instancetype)initWithURL:(NSURL*)url driver:(scm::driver_t const*)driver;
-- (SCMRepositoryObserver*)addObserver:(void(^)(std::map<std::string, scm::status::type> const&))handler;
+- (SCMRepositoryObserver*)addObserver:(void(^)(SCMRepository*))handler;
 - (void)removeObserver:(SCMRepositoryObserver*)observer;
 @end
 
@@ -40,7 +40,7 @@ namespace scm
 @property (nonatomic, readonly) SCMRepositoryObserver* repositoryObserver;
 @property (nonatomic, readonly) NSMutableArray<SCMDirectoryObserver*>* observers;
 - (instancetype)initWithURL:(NSURL*)url;
-- (SCMDirectoryObserver*)addObserver:(void(^)(std::map<std::string, scm::status::type> const&))handler;
+- (SCMDirectoryObserver*)addObserver:(void(^)(SCMRepository*))handler;
 - (void)removeObserver:(SCMDirectoryObserver*)observer;
 @end
 
@@ -55,14 +55,14 @@ namespace scm
 // ===========================================
 
 @interface SCMRepositoryObserver : NSObject
-@property (nonatomic, readonly) void(^handler)(std::map<std::string, scm::status::type> const&);
+@property (nonatomic, readonly) void(^handler)(SCMRepository*);
 @property (nonatomic) SCMRepository* repository;
-- (instancetype)initWithBlock:(void(^)(std::map<std::string, scm::status::type> const&))handler;
+- (instancetype)initWithBlock:(void(^)(SCMRepository*))handler;
 - (void)remove;
 @end
 
 @implementation SCMRepositoryObserver
-- (instancetype)initWithBlock:(void(^)(std::map<std::string, scm::status::type> const&))handler
+- (instancetype)initWithBlock:(void(^)(SCMRepository*))handler
 {
 	if(self = [super init])
 		_handler = handler;
@@ -76,14 +76,14 @@ namespace scm
 @end
 
 @interface SCMDirectoryObserver : NSObject
-@property (nonatomic, readonly) void(^handler)(std::map<std::string, scm::status::type> const&);
+@property (nonatomic, readonly) void(^handler)(SCMRepository*);
 @property (nonatomic) SCMDirectory* directory;
-- (instancetype)initWithBlock:(void(^)(std::map<std::string, scm::status::type> const&))handler;
+- (instancetype)initWithBlock:(void(^)(SCMRepository*))handler;
 - (void)remove;
 @end
 
 @implementation SCMDirectoryObserver
-- (instancetype)initWithBlock:(void(^)(std::map<std::string, scm::status::type> const&))handler
+- (instancetype)initWithBlock:(void(^)(SCMRepository*))handler
 {
 	if(self = [super init])
 		_handler = handler;
@@ -171,7 +171,7 @@ namespace scm
 	_variables = variables;
 
 	for(SCMRepositoryObserver* observer in [_observers copy])
-		observer.handler(status);
+		observer.handler(self);
 
 	_updating   = NO;
 	_lastUpdate = [NSDate date];
@@ -179,14 +179,14 @@ namespace scm
 		[self tryUpdateStatusInBackground];
 }
 
-- (SCMRepositoryObserver*)addObserver:(void(^)(std::map<std::string, scm::status::type> const&))handler
+- (SCMRepositoryObserver*)addObserver:(void(^)(SCMRepository*))handler
 {
 	SCMRepositoryObserver* observer = [[SCMRepositoryObserver alloc] initWithBlock:handler];
 	observer.repository = self;
 	[_observers addObject:observer];
 
 	if(_lastUpdate)
-		handler(_status);
+		handler(self);
 
 	return observer;
 }
@@ -208,9 +208,9 @@ namespace scm
 		_observers  = [NSMutableArray array];
 
 		__weak SCMDirectory* weakSelf = self;
-		_repositoryObserver = [_repository addObserver:^(std::map<std::string, scm::status::type> const& status){
+		_repositoryObserver = [_repository addObserver:^(SCMRepository* repository){
 			for(SCMDirectoryObserver* observer in [weakSelf.observers copy])
-				observer.handler(status);
+				observer.handler(repository);
 		}];
 	}
 	return self;
@@ -221,14 +221,14 @@ namespace scm
 	[_repository removeObserver:_repositoryObserver];
 }
 
-- (SCMDirectoryObserver*)addObserver:(void(^)(std::map<std::string, scm::status::type> const&))handler
+- (SCMDirectoryObserver*)addObserver:(void(^)(SCMRepository*))handler
 {
 	SCMDirectoryObserver* observer = [[SCMDirectoryObserver alloc] initWithBlock:handler];
 	observer.directory = self;
 	[_observers addObject:observer];
 
-	if(_repository)
-		handler(_repository.status);
+	if(_repository && _repository.lastUpdate)
+		handler(_repository);
 
 	return observer;
 }
@@ -303,14 +303,15 @@ namespace scm
 - (id)addObserverToFileAtURL:(NSURL*)url usingBlock:(void(^)(scm::status::type))handler
 {
 	__block scm::status::type oldStatus = scm::status::unknown;
-	return [[self directoryAtURL:url.URLByDeletingLastPathComponent] addObserver:^(std::map<std::string, scm::status::type> const& status){
-		auto it = status.find(url.fileSystemRepresentation);
+	return [[self directoryAtURL:url.URLByDeletingLastPathComponent] addObserver:^(SCMRepository* repository){
+		auto const status = repository.status;
+		auto const it = status.find(url.fileSystemRepresentation);
 		if(it != status.end() && it->second != oldStatus)
 			handler(oldStatus = it->second);
 	}];
 }
 
-- (id)addObserverToRepositoryAtURL:(NSURL*)url usingBlock:(void(^)(std::map<std::string, scm::status::type> const&))handler
+- (id)addObserverToRepositoryAtURL:(NSURL*)url usingBlock:(void(^)(SCMRepository*))handler
 {
 	return [[self repositoryAtURL:url] addObserver:handler];
 }

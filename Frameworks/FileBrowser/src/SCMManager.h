@@ -12,7 +12,7 @@
 + (instancetype)sharedInstance;
 
 - (id)addObserverToFileAtURL:(NSURL*)url usingBlock:(void(^)(scm::status::type))handler;
-- (id)addObserverToRepositoryAtURL:(NSURL*)url usingBlock:(void(^)(std::map<std::string, scm::status::type> const&))handler;
+- (id)addObserverToRepositoryAtURL:(NSURL*)url usingBlock:(void(^)(SCMRepository*))handler;
 - (void)removeObserver:(id)someObserver;
 
 - (SCMRepository*)repositoryAtURL:(NSURL*)url;

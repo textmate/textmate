@@ -22,13 +22,13 @@
 		NSURL* repositoryURL = [NSURL fileURLWithPath:url.path isDirectory:YES];
 		if([url.query hasSuffix:@"unstaged"])
 		{
-			_scmObserver = [SCMManager.sharedInstance addObserverToRepositoryAtURL:repositoryURL usingBlock:^(std::map<std::string, scm::status::type> const& map){
+			_scmObserver = [SCMManager.sharedInstance addObserverToRepositoryAtURL:repositoryURL usingBlock:^(SCMRepository* repository){
 				handler([SCMStatusObserver unstagedURLsInDirectoryAtURL:repositoryURL]);
 			}];
 		}
 		else if([url.query hasSuffix:@"untracked"])
 		{
-			_scmObserver = [SCMManager.sharedInstance addObserverToRepositoryAtURL:repositoryURL usingBlock:^(std::map<std::string, scm::status::type> const& map){
+			_scmObserver = [SCMManager.sharedInstance addObserverToRepositoryAtURL:repositoryURL usingBlock:^(SCMRepository* repository){
 				handler([SCMStatusObserver untrackedURLsInDirectoryAtURL:repositoryURL]);
 			}];
 		}
@@ -167,7 +167,7 @@
 			if(_repository)
 			{
 				__weak SCMStatusFileItem* weakSelf = self;
-				_observer = [SCMManager.sharedInstance addObserverToRepositoryAtURL:_repository.URL usingBlock:^(std::map<std::string, scm::status::type> const&){
+				_observer = [SCMManager.sharedInstance addObserverToRepositoryAtURL:_repository.URL usingBlock:^(SCMRepository* repository){
 					[weakSelf updateBranchName];
 				}];
 			}
