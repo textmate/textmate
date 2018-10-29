@@ -26,6 +26,7 @@ namespace scm
 @property (nonatomic) NSDate* lastUpdate;
 @property (nonatomic) id fsEventsObserver;
 - (instancetype)initWithURL:(NSURL*)url driver:(scm::driver_t const*)driver;
+- (scm::status::type)SCMStatusForURL:(NSURL*)url;
 - (SCMRepositoryObserver*)addObserver:(void(^)(SCMRepository*))handler;
 - (void)removeObserver:(SCMRepositoryObserver*)observer;
 @end
@@ -177,6 +178,17 @@ namespace scm
 		[self tryUpdateStatusInBackground];
 }
 
+- (scm::status::type)SCMStatusForURL:(NSURL*)url
+{
+	if(_lastUpdate)
+	{
+		auto it = _status.find(url.fileSystemRepresentation);
+		if(it != _status.end())
+			return it->second;
+	}
+	return scm::status::unknown;
+}
+
 - (SCMRepositoryObserver*)addObserver:(void(^)(SCMRepository*))handler
 {
 	SCMRepositoryObserver* observer = [[SCMRepositoryObserver alloc] initWithBlock:handler];
@@ -302,10 +314,9 @@ namespace scm
 {
 	__block scm::status::type oldStatus = scm::status::unknown;
 	return [[self directoryAtURL:url.URLByDeletingLastPathComponent] addObserver:^(SCMRepository* repository){
-		auto const status = repository.status;
-		auto const it = status.find(url.fileSystemRepresentation);
-		if(it != status.end() && it->second != oldStatus)
-			handler(oldStatus = it->second);
+		scm::status::type newStatus = [repository SCMStatusForURL:url];
+		if(oldStatus != newStatus)
+			handler(oldStatus = newStatus);
 	}];
 }
 
