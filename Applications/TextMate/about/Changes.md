@@ -2,6 +2,16 @@ Title: Release Notes
 
 # Changes
 
+## 2018-10-29 (v2.0-rc.11)
+
+* File browser now supports setting multiple tags on items instead of the previous single label system. *[Ronald Wampler]*
+* It is possible to set `excludeSCMDeleted = true` in a `.tm_properties` file to suppress the “ghost” items that appear after deleting a file on disk which is still tracked by your version control system. *[Ian Gregory]*
+* You can now run `defaults write com.macromates.TextMate allowExpandingPackages -bool YES` to have file packages be expandable in the file browser (like directories). If you do work with a lot of file packages and need to descend into these, be aware that it is also possible to hold option (⌥) when you either double-click the item’s label or single click the icon, to descend into the file package.
+* The list of default file globs used when searching folders can be set, e.g. `defaults write com.macromates.TextMate defaultFindInFolderGlobs '( "{*,.tm_properties}", "*" )'`. Be aware though that unique history is kept per folder, to clear your history run: `defaults delete com.macromates.TextMate 'Find in Folder Globs'`.
+* The behavior of control up/down has changed slightly: Previously these keys would (also) “skip” the current paired sequence when next to an opening/closing character, for example pressing control down with `foo‸(bar);` would move the insertion point past the braces, i.e.: `foo(bar)‸;`. This is no longer the case, and the keys will always move to the opening/closing character of the current pair that the insertion point is inside.
+* Completely overhauled the file browser: Little difference from the user’s POV but the performance characteristics may have changed slightly, please report any issues to the [mailing list or support](https://macromates.com/support). Furthermore, we no longer support saved searches or alias files. If you use any of these things, please let us know.
+* See [all changes since v2.0-rc.10](https://github.com/textmate/textmate/compare/v2.0-rc.10...v2.0-rc.11)
+
 ## 2018-06-11 (v2.0-rc.10)
 
 * It is now possible to scroll project/folder search results horizontally.
