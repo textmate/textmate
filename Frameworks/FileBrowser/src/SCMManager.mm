@@ -2,8 +2,6 @@
 #import "FSEventsManager.h"
 #import "drivers/api.h"
 #import <scm/scm.h>
-#import <io/path.h>
-#import <ns/ns.h>
 
 namespace scm
 {
@@ -319,22 +317,5 @@ namespace scm
 - (void)removeObserver:(id)someObserver
 {
 	[someObserver remove];
-}
-
-- (NSArray<NSURL*>*)urlsWithStatus:(scm::status::type)statusMask inDirectoryAtURL:(NSURL*)directoryURL
-{
-	NSMutableArray<NSURL*>* res = [NSMutableArray array];
-	if(SCMRepository* repository = [self repositoryAtURL:directoryURL])
-	{
-		std::string const dir = directoryURL.fileSystemRepresentation;
-		for(auto pair : repository.status)
-		{
-			if(!(pair.second & statusMask) || dir != path::parent(pair.first))
-				continue;
-
-			[res addObject:[NSURL fileURLWithPath:to_ns(pair.first) isDirectory:NO]];
-		}
-	}
-	return res;
 }
 @end

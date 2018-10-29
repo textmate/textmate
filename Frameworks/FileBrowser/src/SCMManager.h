@@ -16,5 +16,4 @@
 - (void)removeObserver:(id)someObserver;
 
 - (SCMRepository*)repositoryAtURL:(NSURL*)url;
-- (NSArray<NSURL*>*)urlsWithStatus:(scm::status::type)statusMask inDirectoryAtURL:(NSURL*)directoryURL;
 @end

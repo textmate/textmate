@@ -1,6 +1,8 @@
 #import "FileItem.h"
 #import "FSEventsManager.h"
 #import "SCMManager.h"
+#import <io/path.h>
+#import <ns/ns.h>
 
 // =======================================
 // = File system and SCM status observer =
@@ -32,7 +34,18 @@
 		}];
 
 		_scmObserver = [SCMManager.sharedInstance addObserverToRepositoryAtURL:url usingBlock:^(SCMRepository* repository){
-			[weakSelf updateFSEventsURLs:nil scmURLs:[SCMManager.sharedInstance urlsWithStatus:scm::status::deleted inDirectoryAtURL:url]];
+			NSMutableArray<NSURL*>* urls = [NSMutableArray array];
+
+			std::string const dir = url.fileSystemRepresentation;
+			for(auto pair : repository.status)
+			{
+				if(!(pair.second & scm::status::deleted) || dir != path::parent(pair.first))
+					continue;
+
+				[urls addObject:[NSURL fileURLWithPath:to_ns(pair.first) isDirectory:NO]];
+			}
+
+			[weakSelf updateFSEventsURLs:nil scmURLs:urls];
 		}];
 
 		[self loadContentsOfDirectoryAtURL:url];
