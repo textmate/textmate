@@ -18,12 +18,12 @@ namespace scm
 	BOOL _needsUpdate;
 	BOOL _updating;
 	NSTimer* _updateTimer;
+	NSDate* _noUpdateBefore;
 }
 @property (nonatomic, readwrite) std::map<std::string, scm::status::type> status;
 @property (nonatomic, readwrite) std::map<std::string, std::string> variables;
 @property (nonatomic, readonly) scm::driver_t const* driver;
 @property (nonatomic, readonly) NSMutableArray<SCMRepositoryObserver*>* observers;
-@property (nonatomic) NSDate* lastUpdate;
 @property (nonatomic) id fsEventsObserver;
 - (instancetype)initWithURL:(NSURL*)url driver:(scm::driver_t const*)driver;
 - (scm::status::type)SCMStatusForURL:(NSURL*)url;
@@ -106,6 +106,7 @@ namespace scm
 		_driver            = driver;
 		_enabled           = scm::scm_enabled_for_path(url.fileSystemRepresentation);
 		_tracksDirectories = driver && driver->tracks_directories();
+		_noUpdateBefore    = [NSDate distantPast];
 		_observers         = [NSMutableArray array];
 
 		if(_enabled == YES)
@@ -114,16 +115,26 @@ namespace scm
 
 			__weak SCMRepository* weakSelf = self;
 			_fsEventsObserver = [FSEventsManager.sharedInstance addObserverToDirectoryAtURL:url observeSubdirectories:YES usingBlock:^(NSURL* url){
+				_noUpdateBefore = [_noUpdateBefore laterDate:[NSDate dateWithTimeIntervalSinceNow:NSApp.isActive ? 0.5 : 3]];
 				[weakSelf tryUpdateStatusInBackground];
 			}];
 		}
+
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(applicationDidBecomeActive:) name:NSApplicationDidBecomeActiveNotification object:NSApp];
 	}
 	return self;
 }
 
 - (void)dealloc
 {
+	[NSNotificationCenter.defaultCenter removeObserver:self name:NSApplicationDidBecomeActiveNotification object:NSApp];
 	[FSEventsManager.sharedInstance removeObserver:_fsEventsObserver];
+}
+
+- (void)applicationDidBecomeActive:(NSNotification*)aNotification
+{
+	if(_updateTimer)
+		[self updateStatusInBackground:nil];
 }
 
 - (void)tryUpdateStatusInBackground
@@ -131,11 +142,14 @@ namespace scm
 	if(_updating)
 	{
 		_needsUpdate = YES;
+		return;
 	}
-	else if(_lastUpdate && [[NSDate date] timeIntervalSinceDate:_lastUpdate] < 1.5)
+
+	NSTimeInterval delayUpdate = [_noUpdateBefore timeIntervalSinceNow];
+	if(delayUpdate > 0)
 	{
-		if(!_updateTimer)
-			_updateTimer = [NSTimer scheduledTimerWithTimeInterval:1.5 - [[NSDate date] timeIntervalSinceDate:_lastUpdate] target:self selector:@selector(updateStatusInBackground:) userInfo:nil repeats:NO];
+		[_updateTimer invalidate];
+		_updateTimer = [NSTimer scheduledTimerWithTimeInterval:delayUpdate target:self selector:@selector(updateStatusInBackground:) userInfo:nil repeats:NO];
 	}
 	else
 	{
@@ -168,19 +182,20 @@ namespace scm
 {
 	_status    = status;
 	_variables = variables;
+	_hasStatus = YES;
 
 	for(SCMRepositoryObserver* observer in [_observers copy])
 		observer.handler(self);
 
-	_updating   = NO;
-	_lastUpdate = [NSDate date];
+	_updating       = NO;
+	_noUpdateBefore = [_noUpdateBefore laterDate:[NSDate dateWithTimeIntervalSinceNow:1.5]];
 	if(_needsUpdate)
 		[self tryUpdateStatusInBackground];
 }
 
 - (scm::status::type)SCMStatusForURL:(NSURL*)url
 {
-	if(_lastUpdate)
+	if(_hasStatus)
 	{
 		auto it = _status.find(url.fileSystemRepresentation);
 		if(it != _status.end())
@@ -195,7 +210,7 @@ namespace scm
 	observer.repository = self;
 	[_observers addObject:observer];
 
-	if(_lastUpdate)
+	if(_hasStatus)
 		handler(self);
 
 	return observer;
@@ -237,7 +252,7 @@ namespace scm
 	observer.directory = self;
 	[_observers addObject:observer];
 
-	if(_repository && _repository.lastUpdate)
+	if(_repository.hasStatus)
 		handler(_repository);
 
 	return observer;

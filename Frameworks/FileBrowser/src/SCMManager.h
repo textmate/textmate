@@ -4,6 +4,7 @@
 @property (nonatomic, readonly) NSURL* URL;
 @property (nonatomic, readonly) BOOL enabled;
 @property (nonatomic, readonly) BOOL tracksDirectories;
+@property (nonatomic, readonly) BOOL hasStatus;
 @property (nonatomic, readonly) std::map<std::string, scm::status::type> status;
 @property (nonatomic, readonly) std::map<std::string, std::string> variables;
 @end
