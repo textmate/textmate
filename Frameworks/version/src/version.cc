@@ -2,7 +2,7 @@
 
 static bool is_numeric (std::string const& str)
 {
-	return str.find_first_not_of("0123456789") == std::string::npos;
+	return !str.empty() && str.find_first_not_of("0123456789") == std::string::npos;
 }
 
 static std::vector<std::string> components (std::string const& str)
