@@ -3,7 +3,6 @@
 #import <OakAppKit/NSImage Additions.h>
 #import <io/path.h>
 #import <ns/ns.h>
-#import <scm/scm.h>
 
 // ================
 // = SCM Observer =
@@ -33,14 +32,13 @@
 				handler([SCMStatusObserver untrackedURLsInDirectoryAtURL:repositoryURL]);
 			}];
 		}
-		else if(scm::scm_enabled_for_path(repositoryURL.fileSystemRepresentation))
+		else if(SCMRepository* repository = [SCMManager.sharedInstance repositoryAtURL:repositoryURL])
 		{
-			auto scmInfo = scm::info(repositoryURL.fileSystemRepresentation);
-			if(scmInfo && scmInfo->root_path() != NULL_STR)
+			if(repository.enabled)
 			{
 				handler(@[
-					[NSURL URLWithString:[NSString stringWithFormat:@"scm://localhost%@/?show=unstaged", to_ns(scmInfo->root_path())]],
-					[NSURL URLWithString:[NSString stringWithFormat:@"scm://localhost%@/?show=untracked", to_ns(scmInfo->root_path())]],
+					[NSURL URLWithString:[NSString stringWithFormat:@"scm://localhost%@/?show=unstaged", repository.URL.path]],
+					[NSURL URLWithString:[NSString stringWithFormat:@"scm://localhost%@/?show=untracked", repository.URL.path]],
 				]);
 			}
 		}
@@ -57,9 +55,9 @@
 + (NSArray<NSURL*>*)unstagedURLsInDirectoryAtURL:(NSURL*)url
 {
 	std::map<std::string, scm::status::type> unstagedPaths;
-	if(auto scmInfo = scm::info(url.fileSystemRepresentation))
+	if(SCMRepository* repository = [SCMManager.sharedInstance repositoryAtURL:url])
 	{
-		for(auto const& pair : scmInfo->status())
+		for(auto const& pair : repository.status)
 		{
 			if(pair.second & (scm::status::modified|scm::status::added|scm::status::deleted|scm::status::conflicted|scm::status::unversioned))
 			{
@@ -68,7 +66,7 @@
 			}
 		}
 
-		if(!scmInfo->tracks_directories())
+		if(!repository.tracksDirectories)
 		{
 			std::vector<std::string> parents;
 
@@ -94,9 +92,9 @@
 + (NSArray<NSURL*>*)untrackedURLsInDirectoryAtURL:(NSURL*)url
 {
 	std::map<std::string, scm::status::type> untrackedPaths;
-	if(auto scmInfo = scm::info(url.fileSystemRepresentation))
+	if(SCMRepository* repository = [SCMManager.sharedInstance repositoryAtURL:url])
 	{
-		for(auto pair : scmInfo->status())
+		for(auto pair : repository.status)
 		{
 			if(pair.second & (scm::status::modified|scm::status::added|scm::status::deleted|scm::status::conflicted|scm::status::unversioned))
 			{
@@ -105,7 +103,7 @@
 			}
 		}
 
-		if(!scmInfo->tracks_directories())
+		if(!repository.tracksDirectories)
 		{
 			std::vector<std::string> children;
 
@@ -139,7 +137,8 @@
 
 @interface SCMStatusFileItem : FileItem
 {
-	scm::info_ptr _scmInfo;
+	SCMRepository* _repository;
+	id _observer;
 }
 @end
 
@@ -158,26 +157,23 @@
 {
 	if(self = [super initWithURL:url])
 	{
-		if(!scm::scm_enabled_for_path(url.fileSystemRepresentation))
+		_repository = [SCMManager.sharedInstance repositoryAtURL:[NSURL fileURLWithPath:url.path isDirectory:YES]];
+		if(_repository && _repository.enabled == NO)
 		{
 			self.disambiguationSuffix = @" (disabled)";
 		}
 		else if(![self.URL.query hasSuffix:@"unstaged"] && ![self.URL.query hasSuffix:@"untracked"])
 		{
-			_scmInfo = scm::info(url.fileSystemRepresentation);
-			if(_scmInfo && _scmInfo->root_path() != NULL_STR)
+			if(_repository)
 			{
-				[self updateBranchName];
-
 				__weak SCMStatusFileItem* weakSelf = self;
-				_scmInfo->push_callback(^(scm::info_t const& info){
+				_observer = [SCMManager.sharedInstance addObserverToRepositoryAtURL:_repository.URL usingBlock:^(std::map<std::string, scm::status::type> const&){
 					[weakSelf updateBranchName];
-				});
+				}];
 			}
 			else
 			{
 				self.disambiguationSuffix = @" (no status)";
-				_scmInfo.reset();
 			}
 		}
 	}
@@ -186,21 +182,16 @@
 
 - (void)dealloc
 {
-	if(_scmInfo)
-		_scmInfo->pop_callback();
+	[SCMManager.sharedInstance removeObserver:_observer];
 }
 
 - (void)updateBranchName
 {
-	if(!_scmInfo->dry())
+	if(_repository)
 	{
-		auto const vars   = _scmInfo->scm_variables();
-		auto const branch = vars.find("TM_SCM_BRANCH");
-		self.disambiguationSuffix = branch != vars.end() ? [NSString stringWithFormat:@" (%@)", to_ns(branch->second)] : @"";
-	}
-	else
-	{
-		self.disambiguationSuffix = @" (fetching…)";
+		auto const variables = _repository.variables;
+		auto const branch    = variables.find("TM_SCM_BRANCH");
+		self.disambiguationSuffix = branch != variables.end() ? [NSString stringWithFormat:@" (%@)", to_ns(branch->second)] : @"";
 	}
 }
 
@@ -210,8 +201,8 @@
 		return @"Uncommitted Changes";
 	else if([self.URL.query hasSuffix:@"untracked"])
 		return @"Untracked Items";
-	else if(_scmInfo && _scmInfo->root_path() != NULL_STR)
-		return [NSFileManager.defaultManager displayNameAtPath:to_ns(_scmInfo->root_path())];
+	else if(_repository)
+		return [NSFileManager.defaultManager displayNameAtPath:_repository.URL.path];
 
 	return super.localizedName;
 }
