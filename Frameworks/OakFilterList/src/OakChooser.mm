@@ -141,8 +141,7 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 		tableView.target                  = self;
 		tableView.dataSource              = self;
 		tableView.delegate                = self;
-		if(nil != &NSAccessibilitySharedFocusElementsAttribute) // MAC_OS_X_VERSION_10_10
-			[_searchField.cell accessibilitySetOverrideValue:@[tableView] forAttribute:NSAccessibilitySharedFocusElementsAttribute];
+		[_searchField.cell accessibilitySetOverrideValue:@[tableView] forAttribute:NSAccessibilitySharedFocusElementsAttribute];
 		_tableView = tableView;
 
 		_scrollView = [[NSScrollView alloc] initWithFrame:NSZeroRect];
@@ -274,8 +273,7 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 	[self updateFilterString:_filterString];
 
 	// see http://lists.apple.com/archives/accessibility-dev/2014/Aug/msg00024.html
-	if(nil != &NSAccessibilitySharedFocusElementsAttribute) // MAC_OS_X_VERSION_10_10
-		NSAccessibilityPostNotification(_tableView, NSAccessibilitySelectedRowsChangedNotification);
+	NSAccessibilityPostNotification(_tableView, NSAccessibilitySelectedRowsChangedNotification);
 }
 
 - (void)updateFilterString:(NSString*)aString

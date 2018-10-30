@@ -290,10 +290,6 @@ static NSString* const kAddLicenseViewIdentifier = @"org.TextMate.addLicenseButt
 
 - (void)addRegisterButtonToWindow:(NSWindow*)window
 {
-	// MAC_OS_X_VERSION_10_10
-	if(![window respondsToSelector:@selector(addTitlebarAccessoryViewController:)])
-		return;
-
 	NSButton* addLicenseButton = [[NSButton alloc] initWithFrame:NSZeroRect];
 
 	addLicenseButton.cell.backgroundStyle = NSBackgroundStyleRaised;
@@ -318,10 +314,6 @@ static NSString* const kAddLicenseViewIdentifier = @"org.TextMate.addLicenseButt
 
 - (void)removeAllRegisterButtons:(id)sender
 {
-	// MAC_OS_X_VERSION_10_10
-	if(![NSWindow instancesRespondToSelector:@selector(titlebarAccessoryViewControllers)])
-		return;
-
 	for(NSWindow* win in [NSApp orderedWindows])
 	{
 		NSArray* viewControllers = win.titlebarAccessoryViewControllers;

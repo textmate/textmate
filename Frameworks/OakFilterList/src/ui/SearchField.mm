@@ -165,8 +165,6 @@ static NSString* CreateSpacedString(NSUInteger length)
 @implementation OakLinkedSearchField
 + (void)initialize
 {
-	// MAC_OS_X_VERSION_10_10
-	if((nil == &NSAccessibilitySharedFocusElementsAttribute) && (self == OakLinkedSearchField.class))
-		[OakLinkedSearchField setCellClass:[OakLinkedSearchFieldCell class]];
+	[OakLinkedSearchField setCellClass:[OakLinkedSearchFieldCell class]];
 }
 @end

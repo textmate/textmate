@@ -239,22 +239,13 @@ OakRolloverButton* OakCreateCloseButton (NSString* accessibilityLabel)
 
 	if(self.style == OakBackgroundFillViewStyleStatusBar)
 	{
-		// MAC_OS_X_VERSION_10_10
-		if(OAK_AVAILABLE(10, 10))
-		{
-			NSVisualEffectView* effectView = [[NSVisualEffectView alloc] initWithFrame:[self bounds]];
-			effectView.material     = NSVisualEffectMaterialTitlebar;
-			effectView.blendingMode = NSVisualEffectBlendingModeWithinWindow;
-			effectView.state        = NSVisualEffectStateFollowsWindowActiveState;
-			_visualEffectBackgroundView = effectView;
-			[_visualEffectBackgroundView setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
-			[self addSubview:_visualEffectBackgroundView positioned:NSWindowBelow relativeTo:nil];
-		}
-		else
-		{
-			self.activeBackgroundGradient   = [[NSGradient alloc] initWithColorsAndLocations:[NSColor colorWithCalibratedWhite:1 alpha:0.68], 0.0, [NSColor colorWithCalibratedWhite:1 alpha:0.0416], 0.0416, [NSColor colorWithCalibratedWhite:1 alpha:0], 1.0, nil];
-			self.inactiveBackgroundGradient = [[NSGradient alloc] initWithColorsAndLocations:[NSColor colorWithCalibratedWhite:1 alpha:0.68], 0.0, [NSColor colorWithCalibratedWhite:1 alpha:0.0416], 0.0416, [NSColor colorWithCalibratedWhite:1 alpha:0], 1.0, nil];
-		}
+		NSVisualEffectView* effectView = [[NSVisualEffectView alloc] initWithFrame:[self bounds]];
+		effectView.material     = NSVisualEffectMaterialTitlebar;
+		effectView.blendingMode = NSVisualEffectBlendingModeWithinWindow;
+		effectView.state        = NSVisualEffectStateFollowsWindowActiveState;
+		_visualEffectBackgroundView = effectView;
+		[_visualEffectBackgroundView setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
+		[self addSubview:_visualEffectBackgroundView positioned:NSWindowBelow relativeTo:nil];
 	}
 
 	if(self.style == OakBackgroundFillViewStyleDivider)
