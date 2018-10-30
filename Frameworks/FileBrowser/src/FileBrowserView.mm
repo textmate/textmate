@@ -439,6 +439,9 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 {
 	_modifiedURLs = newModifiedURLs;
 
+	if(!self.fileItem)
+		return;
+
 	NSMutableArray<FileItem*>* stack = [NSMutableArray arrayWithObject:self.fileItem];
 	while(FileItem* item = stack.firstObject)
 	{
@@ -452,6 +455,9 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 - (void)setOpenURLs:(NSArray<NSURL*>*)newOpenURLs
 {
 	_openURLs = newOpenURLs;
+
+	if(!self.fileItem)
+		return;
 
 	NSMutableArray<FileItem*>* stack = [NSMutableArray arrayWithObject:self.fileItem];
 	while(FileItem* item = stack.firstObject)
