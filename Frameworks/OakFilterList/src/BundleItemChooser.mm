@@ -471,8 +471,8 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		self.scopeBar = [OakScopeBarView new];
 		self.scopeBar.labels = _sourceListLabels;
 
-		self.topDivider          = OakCreateHorizontalLine([NSColor darkGrayColor], [NSColor colorWithCalibratedWhite:0.551 alpha:1]),
-		self.bottomDivider       = OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]);
+		self.topDivider          = OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider),
+		self.bottomDivider       = OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider);
 
 		self.selectButton                  = OakCreateButton(@"Select");
 		self.selectButton.font             = [NSFont messageFontOfSize:[NSFont smallSystemFontSize]];

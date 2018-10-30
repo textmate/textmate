@@ -264,8 +264,8 @@ static NSDictionary* globs_for_path (std::string const& path)
 		_progressIndicator.controlSize          = NSControlSizeSmall;
 		_progressIndicator.displayedWhenStopped = NO;
 
-		OakBackgroundFillView* topDivider    = OakCreateHorizontalLine([NSColor darkGrayColor], [NSColor colorWithCalibratedWhite:0.551 alpha:1]);
-		OakBackgroundFillView* bottomDivider = OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]);
+		OakBackgroundFillView* topDivider    = OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider);
+		OakBackgroundFillView* bottomDivider = OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider);
 
 		NSDictionary* views = @{
 			@"scopeBar":           scopeBar,

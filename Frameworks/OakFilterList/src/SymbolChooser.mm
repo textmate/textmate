@@ -41,7 +41,7 @@ static SymbolChooserItem* CreateItem (OakDocument* document, text::pos_t const& 
 	{
 		self.window.title = @"Jump to Symbol";
 
-		OakBackgroundFillView* bottomDivider = OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]);
+		OakBackgroundFillView* bottomDivider = OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider);
 
 		NSDictionary* views = @{
 			@"scrollView":         self.scrollView,
