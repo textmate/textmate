@@ -60,6 +60,9 @@
 @end
 
 @interface OakPasteboardChooser () <NSWindowDelegate, NSTextFieldDelegate, NSTableViewDelegate, NSSearchFieldDelegate>
+{
+	NSTitlebarAccessoryViewController* _accessoryViewController;
+}
 @property (nonatomic) OakPasteboard*        pasteboard;
 @property (nonatomic) NSArrayController*    arrayController;
 @property (nonatomic) NSWindow*             window;
@@ -128,15 +131,27 @@ static NSMutableDictionary* SharedChoosers;
 		_scrollView.borderType            = NSNoBorder;
 		_scrollView.documentView          = _tableView;
 
-		_window = [[NSPanel alloc] initWithContentRect:NSMakeRect(600, 700, 400, 500) styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskTexturedBackground) backing:NSBackingStoreBuffered defer:NO];
-		[_window setAutorecalculatesContentBorderThickness:NO forEdge:NSMaxYEdge];
-		[_window setContentBorderThickness:32 forEdge:NSMaxYEdge];
+		_window = [[NSPanel alloc] initWithContentRect:NSMakeRect(600, 700, 400, 500) styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable) backing:NSBackingStoreBuffered defer:NO];
 		[[_window standardWindowButton:NSWindowMiniaturizeButton] setHidden:YES];
 		[[_window standardWindowButton:NSWindowZoomButton] setHidden:YES];
 		_window.autorecalculatesKeyViewLoop = YES;
 		_window.delegate                    = self;
 		_window.level                       = NSFloatingWindowLevel;
 		_window.title                       = windowTitle;
+
+		NSDictionary* titleBarViews = @{
+			@"searchField": _searchField
+		};
+
+		NSView* titleBarView = [[NSView alloc] initWithFrame:NSZeroRect];
+		OakAddAutoLayoutViewsToSuperview(titleBarViews.allValues, titleBarView);
+		[titleBarView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[searchField]-(8)-|" options:0 metrics:nil views:titleBarViews]];
+		[titleBarView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(4)-[searchField]-(8)-|" options:0 metrics:nil views:titleBarViews]];
+		[titleBarView setFrameSize:titleBarView.fittingSize];
+
+		_accessoryViewController = [[NSTitlebarAccessoryViewController alloc] init];
+		_accessoryViewController.view = titleBarView;
+		[_window addTitlebarAccessoryViewController:_accessoryViewController];
 
 		_arrayController = [[NSArrayController alloc] init];
 		_arrayController.managedObjectContext         = aPasteboard.managedObjectContext;
@@ -154,13 +169,10 @@ static NSMutableDictionary* SharedChoosers;
 		actionButton.action   = @selector(accept:);
 
 		NSDictionary* views = @{
-			@"searchField":        self.searchField,
-			@"aboveScopeBarDark":  OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]),
-			@"aboveScopeBarLight": OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.797 alpha:1], [NSColor colorWithCalibratedWhite:0.912 alpha:1]),
 			@"scopeBar":           scopeBar,
-			@"topDivider":         OakCreateHorizontalLine([NSColor darkGrayColor], [NSColor colorWithCalibratedWhite:0.551 alpha:1]),
+			@"topDivider":         OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider),
 			@"scrollView":         self.scrollView,
-			@"bottomDivider":      OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]),
+			@"bottomDivider":      OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider),
 			@"delete":             deleteButton,
 			@"clearAll":           clearAllButton,
 			@"action":             actionButton,
@@ -169,15 +181,12 @@ static NSMutableDictionary* SharedChoosers;
 		NSView* contentView = self.window.contentView;
 		OakAddAutoLayoutViewsToSuperview([views allValues], contentView);
 
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[searchField(>=50)]-(8)-|"                      options:0 metrics:nil views:views]];
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[aboveScopeBarDark]|"                                options:0 metrics:nil views:views]];
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[aboveScopeBarLight]|"                               options:0 metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[scopeBar]-(>=8)-|"                             options:0 metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[topDivider]|"                                       options:0 metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView]|"                                       options:0 metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[bottomDivider]|"                                    options:0 metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[delete]-[clearAll]-(>=20)-[action]-(8)-|"      options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(2)-[searchField]-(8)-[aboveScopeBarDark][aboveScopeBarLight]-(3)-[scopeBar]-(4)-[topDivider][scrollView(>=50)][bottomDivider]-(5)-[clearAll]-(6)-|" options:0 metrics:nil views:views]];
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(4)-[scopeBar]-(4)-[topDivider][scrollView(>=50)][bottomDivider]-(5)-[clearAll]-(6)-|" options:0 metrics:nil views:views]];
 
 		_window.defaultButtonCell = actionButton.cell;
 
