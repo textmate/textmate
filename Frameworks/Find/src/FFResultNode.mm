@@ -80,7 +80,7 @@ static NSAttributedString* PathComponentString (std::string const& path, std::st
 	string_builder_t builder(NSLineBreakByTruncatingMiddle);
 	builder.push_style(@{
 		NSFontAttributeName:            font,
-		NSForegroundColorAttributeName: [NSColor darkGrayColor]
+		NSForegroundColorAttributeName: [NSColor secondaryLabelColor]
 	});
 	builder.append(to_ns(text::join(std::vector<std::string>(components.begin(), components.end()), " ‣ ")));
 	builder.append(to_ns((path::is_absolute(path) ? path::display_name(path) : path)), NSBoldFontMask);
@@ -109,7 +109,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 {
 	NSFontTraitMask matchFontTraits = NSBoldFontMask;
 	NSDictionary* matchAttributes = @{
-		NSForegroundColorAttributeName: [NSColor blackColor],
+		NSForegroundColorAttributeName: [NSColor textColor],
 		NSBackgroundColorAttributeName: [NSColor tmMatchedTextBackgroundColor],
 		NSUnderlineStyleAttributeName:  @(NSUnderlineStyleSingle),
 		NSUnderlineColorAttributeName:  [NSColor tmMatchedTextUnderlineColor],
@@ -118,7 +118,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 	string_builder_t builder(NSLineBreakByTruncatingTail);
 	builder.push_style(@{
 		NSFontAttributeName:            font,
-		NSForegroundColorAttributeName: [NSColor darkGrayColor]
+		NSForegroundColorAttributeName: [NSColor secondaryLabelColor]
 	});
 
 	// Ensure monospaced digits for the line number prefix
@@ -334,7 +334,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 		string_builder_t builder(NSLineBreakByTruncatingTail);
 		builder.append(to_ns(text::format("%zu-%zu: Range is not valid UTF-8, please contact: https://macromates.com/support", m.first, m.last)), @{
 			NSFontAttributeName:            font,
-			NSForegroundColorAttributeName: [NSColor darkGrayColor]
+			NSForegroundColorAttributeName: [NSColor secondaryLabelColor]
 		});
 		return builder.attributed_string();
 	}
