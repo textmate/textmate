@@ -1,7 +1,6 @@
 #import "Favorites.h"
 #import <OakFilterList/OakAbbreviations.h>
 #import <OakAppKit/OakAppKit.h>
-#import <OakAppKit/OakFileIconImage.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakAppKit/OakScopeBarView.h>
 #import <OakAppKit/OakSound.h>
@@ -200,9 +199,13 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 	for(NSDictionary* item in items)
 	{
 		NSString* path = item[@"path"];
+
+		NSImage* image = [NSWorkspace.sharedWorkspace iconForFile:path];
+		image.size = NSMakeSize(32, 32);
+
 		NSMutableDictionary* tmp = [item mutableCopy];
 		[tmp addEntriesFromDictionary:@{
-			@"icon":   [OakFileIconImage fileIconImageWithPath:path size:NSMakeSize(32, 32)],
+			@"icon":   image,
 			@"name":   item[@"name"]   ?: [NSString stringWithCxxString:path::display_name(to_s(path))],
 			@"folder": item[@"folder"] ?: [[path stringByDeletingLastPathComponent] stringByAbbreviatingWithTildeInPath],
 			@"info":   [path stringByAbbreviatingWithTildeInPath]

@@ -1,5 +1,4 @@
 #import "NSMenu Additions.h"
-#import "OakFileIconImage.h"
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <text/case.h>
@@ -117,7 +116,7 @@ static char const* kOakMenuItemTabTrigger    = "OakMenuItemTabTrigger";
 {
 	NSImage* icon = nil;
 	if([[NSFileManager defaultManager] fileExistsAtPath:path])
-		icon = [OakFileIconImage fileIconImageWithPath:path size:NSMakeSize(16, 16)];
+		icon = [[NSWorkspace sharedWorkspace] iconForFile:path];
 	else if(OakNotEmptyString([path pathExtension]))
 		icon = [[NSWorkspace sharedWorkspace] iconForFileType:[path pathExtension]];
 	else
