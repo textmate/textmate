@@ -418,20 +418,53 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 	[self updateDisambiguationSuffixInParent:item];
 }
 
+- (NSString*)disambiguationSuffixForURL:(NSURL*)url numberOfParents:(NSInteger)numberOfParents
+{
+	NSMutableArray* parentNames = [NSMutableArray array];
+	for(NSUInteger i = 0; i < numberOfParents; ++i)
+	{
+		NSNumber* flag;
+		if([url getResourceValue:&flag forKey:NSURLIsVolumeKey error:nil] && [flag boolValue])
+			return nil;
+
+		NSURL* parentURL;
+		if(![url getResourceValue:&parentURL forKey:NSURLParentDirectoryURLKey error:nil] || [url isEqual:parentURL])
+			return nil;
+
+		NSString* parentName;
+		if(![parentURL getResourceValue:&parentName forKey:NSURLLocalizedNameKey error:nil])
+			return nil;
+
+		[parentNames addObject:parentName];
+		url = parentURL;
+	}
+	return [[parentNames.reverseObjectEnumerator allObjects] componentsJoinedByString:@"/"];
+}
+
 - (void)updateDisambiguationSuffixInParent:(FileItem*)item
 {
-	NSArray<FileItem*>* children = [item.arrangedChildren filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"URL.isFileURL == YES"]];
-	NSCountedSet* counts = [[NSCountedSet alloc] initWithArray:[children valueForKeyPath:@"localizedName"]];
-
+	NSArray* children = [item.arrangedChildren filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"URL.isFileURL == YES"]];
 	for(FileItem* child in children)
+		child.disambiguationSuffix = nil;
+
+	NSInteger showNumberOfParents = 1;
+	while(children.count)
 	{
-		NSString* suffix = nil;
-		if([counts countForObject:child.localizedName] > 1)
+		NSCountedSet* countOfConflicts = [[NSCountedSet alloc] initWithArray:[children valueForKeyPath:@"displayName"]];
+		NSMutableArray* conflictedChildren = [NSMutableArray array];
+		for(FileItem* child in children)
 		{
-			if(NSString* parentDisplayName = [NSFileManager.defaultManager displayNameAtPath:child.parentURL.path])
-				suffix = [@" — " stringByAppendingString:parentDisplayName];
+			if([countOfConflicts countForObject:child.displayName] == 1)
+				continue;
+
+			if(NSString* newSuffix = [self disambiguationSuffixForURL:child.URL numberOfParents:showNumberOfParents])
+			{
+				child.disambiguationSuffix = [@" — " stringByAppendingString:newSuffix];
+				[conflictedChildren addObject:child];
+			}
 		}
-		child.disambiguationSuffix = suffix;
+		children = conflictedChildren;
+		++showNumberOfParents;
 	}
 }
 
