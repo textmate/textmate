@@ -992,13 +992,26 @@ static bool is_binary (std::string const& path)
 	NSMutableSet<NSURL*>* expandURLs = [self.fileBrowserView.expandedURLs mutableCopy];
 
 	NSURL* childURL = url;
-	while([childURL getResourceValue:&childURL forKey:NSURLParentDirectoryURLKey error:nil] && ![childURL isEqual:parentURL])
+	while(true)
 	{
+		NSNumber* flag;
+		if([childURL getResourceValue:&flag forKey:NSURLIsVolumeKey error:nil] && [flag boolValue])
+			break;
+
+		NSURL* potentialParentURL;
+		if(![childURL getResourceValue:&potentialParentURL forKey:NSURLParentDirectoryURLKey error:nil] || [childURL isEqual:potentialParentURL])
+			break;
+
+		childURL = potentialParentURL;
 		if([childURL isEqual:currentParent])
 		{
 			parentURL = currentParent;
 			break;
 		}
+
+		if([childURL isEqual:parentURL])
+			break;
+
 		[expandURLs addObject:childURL];
 	}
 
@@ -1006,6 +1019,11 @@ static bool is_binary (std::string const& path)
 	{
 		[self goToURL:parentURL];
 		[self.fileBrowserView expandURLs:expandURLs.allObjects selectURLs:@[ url ]];
+	}
+	else
+	{
+		[self goToURL:url.URLByDeletingLastPathComponent];
+		[self.fileBrowserView expandURLs:nil selectURLs:@[ url ]];
 	}
 }
 
