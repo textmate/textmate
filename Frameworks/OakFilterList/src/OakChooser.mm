@@ -112,6 +112,10 @@ NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string
 }
 
 @interface OakChooser () <NSWindowDelegate, NSTextFieldDelegate, NSTableViewDataSource, NSTableViewDelegate, NSSearchFieldDelegate>
+{
+	NSTitlebarAccessoryViewController* _accessoryViewController;
+	NSView* _titleBarView;
+}
 @end
 
 static void* kFirstResponderBinding = &kFirstResponderBinding;
@@ -173,11 +177,7 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 		[[_itemCountTextField cell] setBackgroundStyle:NSBackgroundStyleRaised];
 		[_itemCountTextField setContentHuggingPriority:NSLayoutPriorityDefaultHigh forOrientation:NSLayoutConstraintOrientationHorizontal];
 
-		_window = [[NSPanel alloc] initWithContentRect:NSMakeRect(600, 700, 400, 500) styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskTexturedBackground) backing:NSBackingStoreBuffered defer:NO];
-		[_window setAutorecalculatesContentBorderThickness:NO forEdge:NSMaxYEdge];
-		[_window setAutorecalculatesContentBorderThickness:NO forEdge:NSMinYEdge];
-		[_window setContentBorderThickness:32 forEdge:NSMaxYEdge];
-		[_window setContentBorderThickness:23 forEdge:NSMinYEdge];
+		_window = [[NSPanel alloc] initWithContentRect:NSMakeRect(600, 700, 400, 500) styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable) backing:NSBackingStoreBuffered defer:NO];
 		[[_window standardWindowButton:NSWindowMiniaturizeButton] setHidden:YES];
 		[[_window standardWindowButton:NSWindowZoomButton] setHidden:YES];
 		_window.delegate          = self;
@@ -187,6 +187,13 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 
 		[_searchField bind:NSValueBinding toObject:self withKeyPath:@"filterString" options:nil];
 		[_window addObserver:self forKeyPath:@"firstResponder" options:NSKeyValueObservingOptionOld|NSKeyValueObservingOptionNew context:kFirstResponderBinding];
+
+		if(NSView* titleBarView = self.titleBarView)
+		{
+			_accessoryViewController = [[NSTitlebarAccessoryViewController alloc] init];
+			_accessoryViewController.view = titleBarView;
+			[self.window addTitlebarAccessoryViewController:_accessoryViewController];
+		}
 	}
 	return self;
 }
@@ -201,6 +208,24 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 	_tableView.target     = nil;
 	_tableView.dataSource = nil;
 	_tableView.delegate   = nil;
+}
+
+- (NSView*)titleBarView
+{
+	if(!_titleBarView)
+	{
+		_titleBarView = [[NSView alloc] initWithFrame:NSZeroRect];
+
+		NSDictionary* titleBarViews = @{
+			@"searchField": self.searchField
+		};
+
+		OakAddAutoLayoutViewsToSuperview(titleBarViews.allValues, _titleBarView);
+		[_titleBarView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[searchField]-(8)-|" options:0 metrics:nil views:titleBarViews]];
+		[_titleBarView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(4)-[searchField]-(8)-|" options:0 metrics:nil views:titleBarViews]];
+		[_titleBarView setFrameSize:_titleBarView.fittingSize];
+	}
+	return _titleBarView;
 }
 
 - (void)showWindow:(id)sender

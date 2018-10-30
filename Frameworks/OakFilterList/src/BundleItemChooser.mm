@@ -404,8 +404,6 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 }
 @property (nonatomic) OakKeyEquivalentView* keyEquivalentView;
 @property (nonatomic) NSPopUpButton* actionsPopUpButton;
-@property (nonatomic) NSView* aboveScopeBarDark;
-@property (nonatomic) NSView* aboveScopeBarLight;
 @property (nonatomic) OakScopeBarView* scopeBar;
 @property (nonatomic) NSView* topDivider;
 @property (nonatomic) NSView* bottomDivider;
@@ -470,9 +468,6 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		[actionMenu addItem:[NSMenuItem separatorItem]];
 		[actionMenu addItemWithTitle:@"Search All Scopes" action:@selector(toggleSearchAllScopes:) keyEquivalent:key < 9 ? [NSString stringWithFormat:@"%c", '0' + (++key % 10)] : @""];
 
-		self.aboveScopeBarDark  = OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]);
-		self.aboveScopeBarLight = OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.797 alpha:1], [NSColor colorWithCalibratedWhite:0.912 alpha:1]);
-
 		self.scopeBar = [OakScopeBarView new];
 		self.scopeBar.labels = _sourceListLabels;
 
@@ -491,7 +486,29 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		self.editButton.target           = self;
 		self.editButton.action           = @selector(editItem:);
 
-		OakAddAutoLayoutViewsToSuperview([self.allViews allValues], self.window.contentView);
+		NSDictionary* views = @{
+			@"scopeBar":      self.scopeBar,
+			@"topDivider":    self.topDivider,
+			@"scrollView":    self.scrollView,
+			@"bottomDivider": self.bottomDivider,
+			@"status":        self.statusTextField,
+			@"edit":          self.editButton,
+			@"select":        self.selectButton,
+		};
+
+		NSView* contentView = self.window.contentView;
+		OakAddAutoLayoutViewsToSuperview(views.allValues, contentView);
+
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[scopeBar]-(>=8)-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView(==topDivider,==bottomDivider)]|"     options:0 metrics:nil views:views]];
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(24)-[status]-[edit]-[select]-|"                options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(4)-[scopeBar]-(4)-[topDivider][scrollView(>=50)][bottomDivider]-(4)-[select]-(5)-|" options:0 metrics:nil views:views]];
+
+		[contentView addConstraint:[NSLayoutConstraint constraintWithItem:_topDivider         attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0]];
+		[contentView addConstraint:[NSLayoutConstraint constraintWithItem:_bottomDivider      attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0]];
+
+		OakAddAutoLayoutViewsToSuperview(@[ self.actionsPopUpButton ], self.titleBarView);
+		[self.titleBarView removeConstraints:self.titleBarView.constraints];
 		[self setupLayoutConstraints];
 
 		[self.scopeBar bind:NSValueBinding toObject:self withKeyPath:@"sourceIndex" options:nil];
@@ -550,41 +567,17 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	}
 }
 
-- (NSDictionary*)allViews
-{
-	return @{
-		@"searchField":        self.keyEquivalentInput ? self.keyEquivalentView : self.searchField,
-		@"actions":            self.actionsPopUpButton,
-		@"aboveScopeBarDark":  self.aboveScopeBarDark,
-		@"aboveScopeBarLight": self.aboveScopeBarLight,
-		@"scopeBar":           self.scopeBar,
-		@"topDivider":         self.topDivider,
-		@"scrollView":         self.scrollView,
-		@"bottomDivider":      self.bottomDivider,
-		@"status":             self.statusTextField,
-		@"edit":               self.editButton,
-		@"select":             self.selectButton,
-	};
-}
-
 - (void)setupLayoutConstraints
 {
-	NSDictionary* views = self.allViews;
+	NSDictionary* views = @{
+		@"searchField": self.keyEquivalentInput ? self.keyEquivalentView : self.searchField,
+		@"actions":     self.actionsPopUpButton,
+	};
 
 	NSMutableArray* constraints = [NSMutableArray array];
-	[constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[searchField(>=50)]-[actions]-(8)-|"        options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
-	[constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[aboveScopeBarDark(==aboveScopeBarLight)]|"      options:0 metrics:nil views:views]];
-	[constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[scopeBar]-(>=8)-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
-	[constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView(==topDivider,==bottomDivider)]|"     options:0 metrics:nil views:views]];
-	[constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(24)-[status]-[edit]-[select]-|"                options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
-	[constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(2)-[searchField]-(8)-[aboveScopeBarDark][aboveScopeBarLight]-(3)-[scopeBar]-(4)-[topDivider][scrollView(>=50)][bottomDivider]-(4)-[select]-(5)-|" options:0 metrics:nil views:views]];
-
-	NSView* contentView = self.window.contentView;
-	[constraints addObject:[NSLayoutConstraint constraintWithItem:_aboveScopeBarLight attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0]];
-	[constraints addObject:[NSLayoutConstraint constraintWithItem:_topDivider         attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0]];
-	[constraints addObject:[NSLayoutConstraint constraintWithItem:_bottomDivider      attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0]];
-
-	[contentView addConstraints:constraints];
+	[constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[searchField(>=50)]-[actions]-(8)-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
+	[constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(4)-[searchField]-(8)-|" options:0 metrics:nil views:views]];
+	[self.titleBarView addConstraints:constraints];
 	self.layoutConstraints = constraints;
 
 	OakSetupKeyViewLoop(@[ (self.keyEquivalentInput ? self.keyEquivalentView : self.searchField), self.actionsPopUpButton, self.scopeBar, self.editButton, self.selectButton ]);
@@ -646,7 +639,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 
 	_keyEquivalentInput = flag;
 
-	NSView* contentView = self.window.contentView;
+	NSView* contentView = self.titleBarView;
 	[contentView removeConstraints:self.layoutConstraints];
 	self.layoutConstraints = nil;
 

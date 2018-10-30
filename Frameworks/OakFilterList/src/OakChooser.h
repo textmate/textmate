@@ -21,6 +21,7 @@ PUBLIC @interface OakChooser : NSResponder
 
 // For subclasses
 @property (nonatomic) NSArray*       items;
+@property (nonatomic, readonly) NSView* titleBarView;
 @property (nonatomic) NSSearchField* searchField;
 @property (nonatomic) NSScrollView*  scrollView;
 @property (nonatomic) NSTableView*   tableView;
