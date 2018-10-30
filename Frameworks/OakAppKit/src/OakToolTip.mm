@@ -55,6 +55,7 @@ static __weak OakToolTip* LastToolTip;
 		[field setDrawsBackground:NO];
 		[field setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
 		[field setFont:defaultFont];
+		[field setTextColor:[NSColor blackColor]];
 		[field setStringValue:@"This is a nice little code block"];
 
 		[self setContentView:field];
