@@ -237,34 +237,34 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 			return;
 
 		NSRect rect = NSUnionRect(self.imageView.bounds, NSMakeRect(0, 0, 16, 16));
-		NSColor* color = [NSColor grayColor];
+		NSImage* image = [NSImage imageWithSize:rect.size flipped:NO drawingHandler:^BOOL(NSRect dstRect){
+			NSColor* color = [NSColor secondaryLabelColor];
 
-		NSImage* image = [[NSImage alloc] initWithSize:rect.size];
-		[image lockFocus];
+			CGFloat ptrn[] = { 2, 1 };
+			NSBezierPath* path = [NSBezierPath bezierPathWithRoundedRect:NSIntegralRect(NSInsetRect(dstRect, 1, 1)) xRadius:2 yRadius:2];
+			[path setLineDash:ptrn count:sizeofA(ptrn) phase:0];
+			[path setLineWidth:1];
 
-		CGFloat ptrn[] = { 2, 1 };
-		NSBezierPath* path = [NSBezierPath bezierPathWithRoundedRect:NSIntegralRect(NSInsetRect(rect, 1, 1)) xRadius:2 yRadius:2];
-		[path setLineDash:ptrn count:sizeofA(ptrn) phase:0];
-		[path setLineWidth:1];
+			[color set];
+			[path stroke];
 
-		[color set];
-		[path stroke];
+			NSMutableParagraphStyle* pStyle = [NSMutableParagraphStyle new];
+			[pStyle setAlignment:NSTextAlignmentCenter];
+			NSDictionary* attributes = @{
+				NSFontAttributeName:            [NSFont boldSystemFontOfSize:0],
+				NSForegroundColorAttributeName: color,
+				NSParagraphStyleAttributeName:  pStyle,
+			};
 
-		NSMutableParagraphStyle* pStyle = [NSMutableParagraphStyle new];
-		[pStyle setAlignment:NSTextAlignmentCenter];
-		NSDictionary* attributes = @{
-			NSFontAttributeName:            [NSFont boldSystemFontOfSize:0],
-			NSForegroundColorAttributeName: color,
-			NSParagraphStyleAttributeName:  pStyle,
-		};
+			NSAttributedString* str = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%lu", (index + 1) % 10] attributes:attributes];
+			NSSize size = [str size];
+			dstRect.origin.y = 0.5 * (NSHeight(dstRect) - size.height);
+			dstRect.size.height = size.height;
+			[str drawInRect:NSIntegralRect(dstRect)];
 
-		NSAttributedString* str = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%lu", (index + 1) % 10] attributes:attributes];
-		NSSize size = [str size];
-		rect.origin.y = 0.5 * (NSHeight(rect) - size.height);
-		rect.size.height = size.height;
-		[str drawInRect:NSIntegralRect(rect)];
+			return YES;
+		}];
 
-		[image unlockFocus];
 		[self.imageView setImage:image];
 	}
 	else
