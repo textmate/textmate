@@ -15,17 +15,10 @@ static NSButton* OakCreateImageButton (NSString* imageName)
 	return res;
 }
 
-@interface OFBHeaderViewPopupButtonCell : NSPopUpButtonCell
-@property (nonatomic) NSDictionary* activeAttributes;
-@property (nonatomic) NSDictionary* inactiveAttributes;
-@end
-
 static NSPopUpButton* OakCreateFolderPopUpButton ()
 {
 	NSPopUpButton* res = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:YES];
-	OFBHeaderViewPopupButtonCell* cell = [[OFBHeaderViewPopupButtonCell alloc] initTextCell:@"" pullsDown:YES];
-	[res setCell:cell];
-	[cell setArrowPosition:NSPopUpArrowAtBottom];
+	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
 	[res setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
 	[res setContentHuggingPriority:NSLayoutPriorityFittingSizeCompression forOrientation:NSLayoutConstraintOrientationHorizontal];
 	[res setContentHuggingPriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationVertical];
@@ -36,70 +29,6 @@ static NSPopUpButton* OakCreateFolderPopUpButton ()
 @interface OFBHeaderView ()
 @property (nonatomic) BOOL    inTabBar;
 @property (nonatomic) NSView* bottomDivider;
-@end
-
-@implementation OFBHeaderViewPopupButtonCell
-- (id)initTextCell:(NSString*)title pullsDown:(BOOL)pullsDown
-{
-	if(self = [super initTextCell:title pullsDown:pullsDown])
-	{
-		NSMutableParagraphStyle* parStyle = [NSMutableParagraphStyle new];
-		[parStyle setLineBreakMode:NSLineBreakByTruncatingMiddle];
-
-		// MAC_OS_X_VERSION_10_10
-		if(OAK_AVAILABLE(10, 10))
-		{
-			NSFont* font = [NSFont systemFontOfSize:12];
-
-			_activeAttributes = @{
-				NSParagraphStyleAttributeName:  parStyle,
-				NSFontAttributeName:            font,
-				NSForegroundColorAttributeName: [NSColor colorWithCalibratedWhite:0.2 alpha:1]
-			};
-			_inactiveAttributes = @{
-				NSParagraphStyleAttributeName:  parStyle,
-				NSFontAttributeName:            font,
-				NSForegroundColorAttributeName: [NSColor colorWithCalibratedWhite:0.5 alpha:1]
-			};
-		}
-		else
-		{
-			NSShadow* shadow = [NSShadow new];
-			[shadow setShadowColor:[NSColor colorWithCalibratedWhite:1 alpha:0.5]];
-			[shadow setShadowOffset:NSMakeSize(0, -1)];
-			[shadow setShadowBlurRadius:1];
-
-			NSFont* font = [NSFont boldSystemFontOfSize:12];
-
-			_activeAttributes = @{
-				NSParagraphStyleAttributeName:  parStyle,
-				NSFontAttributeName:            font,
-				NSForegroundColorAttributeName: [NSColor colorWithCalibratedWhite:0.2 alpha:1],
-				NSShadowAttributeName:          shadow,
-			};
-			_inactiveAttributes = @{
-				NSParagraphStyleAttributeName:  parStyle,
-				NSFontAttributeName:            font,
-				NSForegroundColorAttributeName: [NSColor colorWithCalibratedWhite:0.5 alpha:1],
-				NSShadowAttributeName:          shadow,
-			};
-		}
-	}
-	return self;
-}
-
-- (NSRect)drawTitle:(NSAttributedString*)title withFrame:(NSRect)frame inView:(NSView*)controlView
-{
-	OFBHeaderView* headerView = (OFBHeaderView*)controlView.superview;
-	if(headerView.inTabBar)
-	{
-		NSDictionary* attrs = headerView.active ? _activeAttributes : _inactiveAttributes;
-		frame.origin.y    += 1;
-		frame.size.height -= 1;
-		return [super drawTitle:[[NSAttributedString alloc] initWithString:title.string attributes:attrs] withFrame:frame inView:controlView];
-	}
-	return [super drawTitle:title withFrame:frame inView:controlView];
-}
 @end
 
 @implementation OFBHeaderView
