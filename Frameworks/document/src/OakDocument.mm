@@ -5,6 +5,7 @@
 #import "Printing.h"
 #import "watch.h"
 #import "merge.h"
+#import <FileBrowser/FileItemImage.h>
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/OakEncodingPopUpButton.h>
@@ -175,7 +176,9 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 
 	NSHashTable* _documentEditors;
 	scm::status::type _scmStatus;
-	OakFileIconImage* _icon;
+	NSImage* _icon;
+	BOOL _iconIsModified;
+	BOOL _iconIsOnDisk;
 	NSString* _cachedDisplayName;
 
 	std::unique_ptr<ng::buffer_t> _buffer;
@@ -1109,18 +1112,12 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 - (NSImage*)icon
 {
 	// Ideally we would nil the icon in setModified: or setOnDisk: but we don’t implement these
-	if(_icon && (_icon.isModified != self.isDocumentEdited || _icon.exists != self.isOnDisk))
-		_icon = nil;
-
-	if(!_icon)
+	if(!_icon || (_iconIsModified != self.isDocumentEdited || _iconIsOnDisk != self.isOnDisk))
 	{
 		self.observeSCMStatus = YES;
-
-		_icon = [[OakFileIconImage alloc] initWithSize:NSMakeSize(16, 16)];
-		_icon.path      = _virtualPath ?: _path;
-		_icon.scmStatus = _scmStatus;
-		_icon.modified  = self.isDocumentEdited;
-		_icon.exists    = self.isOnDisk;
+		_icon = CreateIconImageForURL([NSURL fileURLWithPath:(_virtualPath ?: _path) isDirectory:NO], self.isDocumentEdited, !self.isOnDisk, NO, NO, _scmStatus);
+		_iconIsModified = self.isDocumentEdited;
+		_iconIsOnDisk   = self.isOnDisk;
 	}
 	return _icon;
 }
