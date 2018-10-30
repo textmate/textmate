@@ -44,53 +44,6 @@ static NSString* kUserDefaultsTabItemLineBreakStyleKey = @"tabItemLineBreakStyle
 	return res;
 }
 
-- (NSDictionary*)mavericksImages
-{
-	NSDictionary* imageNames = @{
-		@"tabBar": @{
-			@"AW_normal":   @"AW InactiveTabBG",
-			@"IW_normal":   @"IW InactiveTabBG",
-		},
-		@"tabItemSelected": @{
-			@"AW_normal":   @"AW ActiveTabFill",
-			@"IW_normal":   @"IW ActiveTabFill",
-		},
-		@"leftTabCap": @{
-			@"AW_normal":   @"AW InactiveTabLeftCap",
-			@"IW_normal":   @"IW InactiveTabLeftCap",
-		},
-		@"leftTabCapSelected": @{
-			@"AW_normal":   @"AW ActiveTabLeftCap",
-			@"IW_normal":   @"IW ActiveTabLeftCap",
-		},
-		@"rightTabCap": @{
-			@"AW_normal":   @"AW InactiveTabRightCap",
-			@"IW_normal":   @"IW InactiveTabRightCap",
-		},
-		@"rightTabCapSelected": @{
-			@"AW_normal":   @"AW ActiveTabRightCap",
-			@"IW_normal":   @"IW ActiveTabRightCap",
-		},
-		@"closeButton": @{
-			@"AW_normal":   @"AW ActiveTabClose",
-			@"AW_pressed":  @"AW ActiveTabClosePressed",
-			@"AW_rollover": @"AW ActiveTabCloseRollover",
-			@"IW_normal":   @"IW ActiveTabClose",
-			@"IW_pressed":  @"IW ActiveTabClosePressed",
-			@"IW_rollover": @"IW ActiveTabCloseRollover",
-		},
-		@"closeButtonModified": @{
-			@"AW_normal":   @"TabClose_Modified",
-			@"AW_pressed":  @"TabClose_ModifiedPressed",
-			@"AW_rollover": @"TabClose_ModifiedRollover",
-		},
-		@"overflowButton": @{
-			@"AW_normal":   @"TabOverflowTemplate",
-		},
-	};
-	return [self imagesForNames:imageNames];
-}
-
 - (NSDictionary*)yosemiteImages
 {
 	NSDictionary* imageNames = @{
@@ -224,8 +177,7 @@ static NSString* kUserDefaultsTabItemLineBreakStyleKey = @"tabItemLineBreakStyle
 
 			[[NSApplication sharedApplication] addObserver:self forKeyPath:@"effectiveAppearance" options:NSKeyValueObservingOptionNew context:nil];
 		}
-		// MAC_OS_X_VERSION_10_10
-		else if(OAK_AVAILABLE(10, 10))
+		else
 		{
 			_selectedTabTextStyles = _activeTabTextStyles.mutableCopy;
 			_selectedTabTextStyles[NSForegroundColorAttributeName] = [NSColor controlTextColor];
@@ -233,23 +185,6 @@ static NSString* kUserDefaultsTabItemLineBreakStyleKey = @"tabItemLineBreakStyle
 			_images = [self yosemiteImages];
 			_leftPadding  = -1;
 			_rightPadding = 0;
-		}
-		else
-		{
-			_selectedTabTextStyles = _activeTabTextStyles.copy;
-
-			_images = [self mavericksImages];
-			_leftPadding  = 0;
-			_rightPadding = -5;
-
-			NSShadow* shadow = [NSShadow new];
-			[shadow setShadowColor:[NSColor colorWithCalibratedWhite:1 alpha:0.5]];
-			[shadow setShadowOffset:NSMakeSize(0, -1)];
-			[shadow setShadowBlurRadius:1];
-
-			NSDictionary* fontStyles = @{ NSShadowAttributeName: shadow, NSFontAttributeName: [NSFont boldSystemFontOfSize:11] };
-			[_activeTabTextStyles addEntriesFromDictionary:fontStyles];
-			[_inactiveTabTextStyles addEntriesFromDictionary:fontStyles];
 		}
 
 		NSImage* rightCapImage = _images[@"rightTabCap"][@"AW_normal"];
