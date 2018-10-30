@@ -48,6 +48,7 @@ static size_t line_count (std::string const& text)
 	else
 	{
 		static NSDictionary* const attributes = @{
+			NSForegroundColorAttributeName: [NSColor controlTextColor],
 			NSParagraphStyleAttributeName: style,
 			NSFontAttributeName:           [NSFont controlContentFontOfSize:0],
 		};
@@ -106,7 +107,7 @@ static size_t line_count (std::string const& text)
 		{
 			NSString* moreLinesText           = [NSString stringWithFormat:@"%lu more line%s", [lines count] - [clippedLines count], ([lines count] - [clippedLines count]) != 1 ? "s" : ""];
 			NSDictionary* moreLinesAttributes = @{
-				NSForegroundColorAttributeName: ([self isHighlighted] ? [NSColor whiteColor] : [NSColor lightGrayColor]),
+				NSForegroundColorAttributeName: ([self isHighlighted] ? [NSColor alternateSelectedControlTextColor] : [NSColor secondaryLabelColor]),
 				NSFontAttributeName:            [NSFont controlContentFontOfSize:[NSFont systemFontSizeForControlSize:NSControlSizeSmall]],
 			};
 			NSAttributedString* moreLines     = [[NSAttributedString alloc] initWithString:moreLinesText attributes:moreLinesAttributes];
