@@ -131,7 +131,7 @@ void OakAddBundlesToMenu (std::vector<bundles::item_ptr> const& items, bool setK
 	}
 }
 
-bundles::item_ptr OakShowMenuForBundleItems (std::vector<bundles::item_ptr> const& items, CGPoint const& pos)
+bundles::item_ptr OakShowMenuForBundleItems (std::vector<bundles::item_ptr> const& items, NSView* view, NSPoint pos)
 {
 	if(items.empty())
 		return bundles::item_ptr();
@@ -155,7 +155,7 @@ bundles::item_ptr OakShowMenuForBundleItems (std::vector<bundles::item_ptr> cons
 		}
 	}
 
-	if([menu popUpMenuPositioningItem:nil atLocation:NSPointFromCGPoint(pos) inView:nil])
+	if([menu popUpMenuPositioningItem:nil atLocation:pos inView:view])
 		return bundles::lookup(to_s(menuTarget.selectedItemUUID));
 
 	return bundles::item_ptr();

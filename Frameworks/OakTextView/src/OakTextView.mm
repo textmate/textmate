@@ -2066,7 +2066,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	std::vector<bundles::item_ptr> const& items = bundles::query(bundles::kFieldKeyEquivalent, eventString, [self scopeContext]);
 	if(!items.empty())
 	{
-		if(bundles::item_ptr item = OakShowMenuForBundleItems(items, [self positionForWindowUnderCaret]))
+		if(bundles::item_ptr item = [self showMenuForBundleItems:items])
 			[self performBundleItem:item];
 		return YES;
 	}
@@ -2101,7 +2101,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 - (void)oldKeyDown:(NSEvent*)anEvent
 {
 	std::vector<bundles::item_ptr> const& items = bundles::query(bundles::kFieldKeyEquivalent, to_s(anEvent), [self scopeContext]);
-	if(bundles::item_ptr item = OakShowMenuForBundleItems(items, [self positionForWindowUnderCaret]))
+	if(bundles::item_ptr item = [self showMenuForBundleItems:items])
 	{
 		[self performBundleItem:item];
 	}
@@ -2310,6 +2310,13 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	else	{ p = [NSEvent mouseLocation]; p.y -= 16; }
 
 	return p;
+}
+
+- (bundles::item_ptr)showMenuForBundleItems:(std::vector<bundles::item_ptr> const&)items
+{
+	NSPoint pos = [self positionForWindowUnderCaret];
+	pos = [self convertPoint:[self.window convertRectFromScreen:(NSRect){ pos, NSZeroSize }].origin fromView:nil];
+	return OakShowMenuForBundleItems(items, self, pos);
 }
 
 - (NSMenu*)checkSpellingMenuForRanges:(ng::ranges_t const&)someRanges
@@ -2917,7 +2924,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	AUTO_REFRESH;
 	ng::range_t range;
 	std::vector<bundles::item_ptr> const& items = items_for_tab_expansion(documentView, documentView->ranges(), to_s([self scopeAttributes]), &range);
-	if(bundles::item_ptr item = OakShowMenuForBundleItems(items, [self positionForWindowUnderCaret]))
+	if(bundles::item_ptr item = [self showMenuForBundleItems:items])
 	{
 		[self recordSelector:@selector(deleteTabTrigger:) withArgument:[NSString stringWithCxxString:documentView->substr(range.first.index, range.last.index)]];
 		documentView->delete_tab_trigger(documentView->substr(range.first.index, range.last.index));
@@ -3585,7 +3592,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		AUTO_REFRESH;
 		documentView->insert(merged, true);
 	}
-	else if(bundles::item_ptr handler = OakShowMenuForBundleItems(std::vector<bundles::item_ptr>(allHandlers.begin(), allHandlers.end()), [self positionForWindowUnderCaret]))
+	else if(bundles::item_ptr handler = [self showMenuForBundleItems:std::vector<bundles::item_ptr>(allHandlers.begin(), allHandlers.end())])
 	{
 		D(DBF_OakTextView_DragNDrop, bug("execute %s\n", handler->name_with_bundle().c_str()););
 
@@ -4031,7 +4038,7 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 	std::vector<bundles::item_ptr> const& items = bundles::query(bundles::kFieldSemanticClass, callbackName, add_modifiers_to_scope(ng::scope(*documentView, documentView->index_at_point([self convertPoint:[anEvent locationInWindow] fromView:nil]), to_s([self scopeAttributes])), [anEvent modifierFlags]));
 	if(!items.empty())
 	{
-		if(bundles::item_ptr item = OakShowMenuForBundleItems(items, [self positionForWindowUnderCaret]))
+		if(bundles::item_ptr item = [self showMenuForBundleItems:items])
 		{
 			AUTO_REFRESH;
 			documentView->set_ranges(ng::range_t(documentView->index_at_point([self convertPoint:[anEvent locationInWindow] fromView:nil]).index));
