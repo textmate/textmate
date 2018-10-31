@@ -154,7 +154,7 @@ static NSString* kUserDefaultsTabItemLineBreakStyleKey = @"tabItemLineBreakStyle
 		_inactiveTabTextStyles[NSForegroundColorAttributeName] = [NSColor colorWithCalibratedWhite:0.5 alpha:1];
 
 		// MAC_OS_X_VERSION_10_14
-		if(OAK_AVAILABLE(10, 14))
+		if(@available(macos 10.14, *))
 		{
 			_activeTabTextStyles = @{
 				NSParagraphStyleAttributeName:  parStyle,
@@ -211,7 +211,7 @@ static NSString* kUserDefaultsTabItemLineBreakStyleKey = @"tabItemLineBreakStyle
 - (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)object change:(NSDictionary*)change context:(void*)context
 {
 	// MAC_OS_X_VERSION_10_14
-	if(OAK_AVAILABLE(10, 14))
+	if(@available(macos 10.14, *))
 	{
 		if([keyPath isEqualToString:@"effectiveAppearance"])
 		{

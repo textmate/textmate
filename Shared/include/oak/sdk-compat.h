@@ -1,9 +1,3 @@
-#if __has_builtin(__builtin_available)
-#define OAK_AVAILABLE(major, minor) @available(macos major##.##minor, *)
-#else
-#define OAK_AVAILABLE(major, minor) [NSProcessInfo instancesRespondToSelector:@selector(isOperatingSystemAtLeastVersion:)] && [[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:{ major, minor, 0 }]
-#endif
-
 #if !defined(MAC_OS_X_VERSION_10_12) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_12)
 @interface NSWindow (Sierra)
 + (void)setAllowsAutomaticWindowTabbing:(BOOL)flag;

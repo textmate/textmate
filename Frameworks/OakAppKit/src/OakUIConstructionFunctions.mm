@@ -221,7 +221,7 @@ OakRolloverButton* OakCreateCloseButton (NSString* accessibilityLabel)
 
 	if(self.style == OakBackgroundFillViewStyleHeader)
 	{
-		if(OAK_AVAILABLE(10, 14))
+		if(@available(macos 10.14, *))
 		{
 			NSVisualEffectView* effectView = [[NSVisualEffectView alloc] initWithFrame:[self bounds]];
 			effectView.material     = NSVisualEffectMaterialHeaderView; // MAC_OS_X_VERSION_10_14
@@ -250,7 +250,7 @@ OakRolloverButton* OakCreateCloseButton (NSString* accessibilityLabel)
 
 	if(self.style == OakBackgroundFillViewStyleDivider)
 	{
-		if(OAK_AVAILABLE(10,14))
+		if(@available(macos 10.14, *))
 		{
 			self.activeBackgroundColor   = [NSColor separatorColor];
 			self.inactiveBackgroundColor = nil;

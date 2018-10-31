@@ -23,7 +23,7 @@
 + (NSColor*)tmMatchedTextSelectedBackgroundColor { return [NSColor colorWithCalibratedWhite:1.0 alpha:0.30]; }
 + (NSColor*)tmMatchedTextSelectedUnderlineColor  { return [NSColor whiteColor]; }
 
-#define COLOR_ASSET(name, color) + (NSColor*)tm##name { if(OAK_AVAILABLE(10, 14)) return [NSColor colorNamed:@#name]; return color; }
+#define COLOR_ASSET(name, color) + (NSColor*)tm##name { if(@available(macos 10.14, *)) return [NSColor colorNamed:@#name]; return color; }
 
 COLOR_ASSET(DarkDividerColor, [NSColor controlShadowColor])
 @end
