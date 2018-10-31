@@ -187,6 +187,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		self.window.collectionBehavior = NSWindowCollectionBehaviorFullScreenPrimary;
 		self.window.delegate           = self;
 		self.window.releasedWhenClosed = NO;
+		self.window.titlebarAppearsTransparent = YES;
 		[self.window setContentBorderThickness:0 forEdge:NSMaxYEdge]; // top border
 		[self.window setContentBorderThickness:0 forEdge:NSMinYEdge]; // bottom border
 		[self.window setAutorecalculatesContentBorderThickness:NO forEdge:NSMaxYEdge];
