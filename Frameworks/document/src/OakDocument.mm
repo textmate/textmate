@@ -1114,7 +1114,8 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	if(!_icon || (_iconIsModified != self.isDocumentEdited || _iconIsOnDisk != self.isOnDisk))
 	{
 		self.observeSCMStatus = YES;
-		_icon = CreateIconImageForURL([NSURL fileURLWithPath:(_virtualPath ?: _path) isDirectory:NO], self.isDocumentEdited, !self.isOnDisk, NO, NO, _scmStatus);
+		NSString* path = _virtualPath ?: _path;
+		_icon = CreateIconImageForURL(path ? [NSURL fileURLWithPath:path isDirectory:NO] : nil, self.isDocumentEdited, !self.isOnDisk, NO, NO, _scmStatus);
 		_iconIsModified = self.isDocumentEdited;
 		_iconIsOnDisk   = self.isOnDisk;
 	}
