@@ -260,7 +260,7 @@ static NSDictionary* RemoveOldCommits (NSDictionary* src)
 	NSMutableDictionary* res = [src mutableCopy];
 	NSMutableArray* commits = [NSMutableArray array];
 
-	NSInteger year = [[[[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar] components:NSYearCalendarUnit fromDate:[NSDate date]] year];
+	NSInteger year = [[[[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian] components:NSCalendarUnitYear fromDate:[NSDate date]] year];
 	NSMutableArray* years = [NSMutableArray array];
 	for(size_t i = year-2; i <= year; ++i)
 		[years addObject:[NSString stringWithFormat:@"%4zu-", i]];
