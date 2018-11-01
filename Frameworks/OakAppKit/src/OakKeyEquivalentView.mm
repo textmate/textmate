@@ -203,10 +203,14 @@ static NSString* const kRecordingPlaceholderString = @"…";
 
 	[[NSColor lightGrayColor] set];
 	NSFrameRect(frame);
-	NSEraseRect(NSIntersectionRect(aRect, NSInsetRect(frame, 1, 1)));
+
+	if(@available(macos 10.14, *))
+		[[NSColor controlColor] set];
+	else	[[NSColor whiteColor] set];
+	NSRectFill(NSIntersectionRect(aRect, NSInsetRect(frame, 1, 1)));
 
 	NSDictionary* stringAttributes = @{
-		NSForegroundColorAttributeName: self.recording ? [NSColor grayColor] : [NSColor controlTextColor],
+		NSForegroundColorAttributeName: self.recording ? [NSColor secondaryLabelColor] : [NSColor labelColor],
 		NSFontAttributeName:            OakControlFont()
 	};
 
