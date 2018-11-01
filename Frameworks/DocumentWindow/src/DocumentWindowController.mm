@@ -2715,7 +2715,11 @@ static NSUInteger DisableSessionSavingCount = 0;
 	if(someDocument.count == 0)
 		return;
 
-	DocumentWindowController* controller = [self controllerWithDocuments:someDocument project:nil];
+	NSUUID* projectUUID = nil;
+	if(NSEvent.modifierFlags & NSEventModifierFlagOption)
+		projectUUID = [[NSUUID alloc] initWithUUIDString:@"00000000-0000-0000-0000-000000000000"];
+
+	DocumentWindowController* controller = [self controllerWithDocuments:someDocument project:projectUUID];
 	[controller bringToFront];
 	[controller openAndSelectDocument:controller.documents[controller.selectedTabIndex] activate:YES];
 
