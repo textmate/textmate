@@ -146,6 +146,27 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[header][files][divider][actions]|"     options:NSLayoutFormatAlignAllLeft metrics:nil views:views]];
 
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:NSUserDefaults.standardUserDefaults];
+
+		if(@available(macos 10.11, *))
+		{
+			NSVisualEffectView* effectView = [[NSVisualEffectView alloc] initWithFrame:NSZeroRect];
+			effectView.material = NSVisualEffectMaterialSidebar; // MAC_OS_X_VERSION_10_11
+
+			_outlineView.backgroundColor = NSColor.clearColor;
+			_scrollView.drawsBackground  = NO;
+
+			NSDictionary* views = @{
+				@"header":  _headerView,
+				@"files":   _scrollView,
+				@"effect":  effectView,
+			};
+
+			effectView.translatesAutoresizingMaskIntoConstraints = NO;
+			[self addSubview:effectView positioned:NSWindowBelow relativeTo:_scrollView];
+
+			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[effect]|" options:0 metrics:nil views:views]];
+			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[header][effect(==files)]" options:NSLayoutFormatAlignAllLeft metrics:nil views:views]];
+		}
 	}
 	return self;
 }
