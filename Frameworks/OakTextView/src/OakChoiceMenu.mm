@@ -8,13 +8,12 @@ NSUInteger const OakChoiceMenuKeyTab      = 2;
 NSUInteger const OakChoiceMenuKeyCancel   = 3;
 NSUInteger const OakChoiceMenuKeyMovement = 4;
 
-@interface OakChoiceMenu () <NSTableViewDelegate>
+@interface OakChoiceMenu () <NSTableViewDataSource, NSTableViewDelegate>
 {
 	NSTableView* _tableView;
 	NSUInteger _keyAction;
 	NSPoint _topLeftPosition;
 }
-@property (nonatomic) NSWindow* window;
 @end
 
 enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMoveUp, kActionMoveDown, kActionPageUp, kActionPageDown, kActionMoveToBeginning, kActionMoveToEnd };
@@ -22,11 +21,39 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 @implementation OakChoiceMenu
 - (id)init
 {
-	if((self = [super init]))
+	if(self = [super initWithWindow:[[NSPanel alloc] initWithContentRect:NSZeroRect styleMask:NSWindowStyleMaskBorderless backing:NSBackingStoreBuffered defer:NO]])
 	{
 		_choices = [NSArray array];
 		_choiceIndex = NSNotFound;
 		_font = [NSFont controlContentFontOfSize:0];
+
+		self.window.opaque             = NO;
+		self.window.alphaValue         = 0.97;
+		self.window.backgroundColor    = [NSColor colorWithCalibratedRed:1.00 green:0.96 blue:0.76 alpha:1];
+		self.window.hasShadow          = YES;
+		self.window.level              = NSStatusWindowLevel;
+		self.window.ignoresMouseEvents = YES;
+
+		_tableView = [[NSTableView alloc] initWithFrame:NSZeroRect];
+		[_tableView addTableColumn:[[NSTableColumn alloc] initWithIdentifier:@"mainColumn"]];
+		_tableView.headerView                         = nil;
+		_tableView.focusRingType                      = NSFocusRingTypeNone;
+		_tableView.autoresizingMask                   = NSViewWidthSizable|NSViewHeightSizable;
+		_tableView.usesAlternatingRowBackgroundColors = YES;
+		_tableView.allowsMultipleSelection            = YES;
+		_tableView.dataSource                         = self;
+		_tableView.delegate                           = self;
+		[_tableView reloadData];
+
+		NSScrollView* scrollView         = [[NSScrollView alloc] initWithFrame:NSZeroRect];
+		scrollView.hasVerticalScroller   = YES;
+		scrollView.hasHorizontalScroller = NO;
+		scrollView.autohidesScrollers    = YES;
+		scrollView.borderType            = NSNoBorder;
+		scrollView.documentView          = _tableView;
+		scrollView.autoresizingMask      = NSViewWidthSizable|NSViewHeightSizable;
+
+		[self.window setContentView:scrollView];
 	}
 	return self;
 }
@@ -34,8 +61,7 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 - (void)dealloc
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
-	[_window close];
-	_window = nil;
+	[self close];
 }
 
 - (void)sizeToFit
@@ -61,23 +87,14 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 		width += kScrollBarWidth;
 
 	CGFloat height = std::min<NSUInteger>([_choices count], 10) * ([_tableView rowHeight]+[_tableView intercellSpacing].height);
-	NSRect frame   = { { NSMinX(_window.frame), NSMaxY(_window.frame) - height }, { std::min<CGFloat>(ceil(width), 400), height } };
-	[_window setFrame:frame display:YES];
-}
-
-- (void)setWindow:(NSWindow*)aWindow
-{
-	if(aWindow == _window)
-		return;
-
-	[[_window parentWindow] removeChildWindow:_window];
-	_window = aWindow;
+	NSRect frame   = { { NSMinX(self.window.frame), NSMaxY(self.window.frame) - height }, { std::min<CGFloat>(ceil(width), 400), height } };
+	[self.window setFrame:frame display:YES];
 }
 
 - (void)viewBoundsDidChange:(NSNotification*)aNotification
 {
 	NSView* aView = [[aNotification object] documentView];
-	[_window setFrameTopLeftPoint:[[aView window] convertRectToScreen:[aView convertRect:(NSRect){ _topLeftPosition, NSZeroSize } fromView:nil]].origin];
+	[self.window setFrameTopLeftPoint:[[aView window] convertRectToScreen:[aView convertRect:(NSRect){ _topLeftPosition, NSZeroSize } fromView:nil]].origin];
 }
 
 - (NSString*)selectedChoice
@@ -140,34 +157,7 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 
 - (void)showAtTopLeftPoint:(NSPoint)aPoint forView:(NSView*)aView
 {
-	_window = [[NSPanel alloc] initWithContentRect:NSMakeRect(aPoint.x, aPoint.y, 0, 0) styleMask:NSWindowStyleMaskBorderless backing:NSBackingStoreBuffered defer:NO];
-	_window.opaque             = NO;
-	_window.alphaValue         = 0.97;
-	_window.backgroundColor    = [NSColor colorWithCalibratedRed:1.00 green:0.96 blue:0.76 alpha:1];
-	_window.hasShadow          = YES;
-	_window.level              = NSStatusWindowLevel;
-	_window.ignoresMouseEvents = YES;
-
-	_tableView = [[NSTableView alloc] initWithFrame:NSZeroRect];
-	[_tableView addTableColumn:[[NSTableColumn alloc] initWithIdentifier:@"mainColumn"]];
-	_tableView.headerView                         = nil;
-	_tableView.focusRingType                      = NSFocusRingTypeNone;
-	_tableView.autoresizingMask                   = NSViewWidthSizable|NSViewHeightSizable;
-	_tableView.usesAlternatingRowBackgroundColors = YES;
-	_tableView.allowsMultipleSelection            = YES;
-	_tableView.dataSource                         = self;
-	_tableView.delegate                           = self;
-	[_tableView reloadData];
-
-	NSScrollView* scrollView         = [[NSScrollView alloc] initWithFrame:NSZeroRect];
-	scrollView.hasVerticalScroller   = YES;
-	scrollView.hasHorizontalScroller = NO;
-	scrollView.autohidesScrollers    = YES;
-	scrollView.borderType            = NSNoBorder;
-	scrollView.documentView          = _tableView;
-	scrollView.autoresizingMask      = NSViewWidthSizable|NSViewHeightSizable;
-
-	[_window setContentView:scrollView];
+	[self.window setFrameTopLeftPoint:aPoint];
 
 	if(_choiceIndex != NSNotFound)
 		[_tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:_choiceIndex] byExtendingSelection:NO];
@@ -176,20 +166,20 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 
 	_topLeftPosition = [aView convertRect:[[aView window] convertRectFromScreen:(NSRect){ aPoint, NSZeroSize }] toView:nil].origin;
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(viewBoundsDidChange:) name:NSViewBoundsDidChangeNotification object:[[aView enclosingScrollView] contentView]];
-	[[aView window] addChildWindow:_window ordered:NSWindowAbove];
+	[[aView window] addChildWindow:self.window ordered:NSWindowAbove];
 
-	[_window orderFront:self];
+	[self.window orderFront:self];
 }
 
 - (BOOL)isVisible
 {
-	return [_window isVisible];
+	return [self.window isVisible];
 }
 
 - (NSUInteger)didHandleKeyEvent:(NSEvent*)anEvent
 {
 	NSUInteger res = OakChoiceMenuKeyUnused;
-	if(!_window)
+	if(!self.window)
 		return res;
 
 	_keyAction = kActionNop;

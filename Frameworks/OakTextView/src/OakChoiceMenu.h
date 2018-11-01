@@ -4,7 +4,7 @@ extern NSUInteger const OakChoiceMenuKeyTab;
 extern NSUInteger const OakChoiceMenuKeyCancel;
 extern NSUInteger const OakChoiceMenuKeyMovement;
 
-@interface OakChoiceMenu : NSResponder <NSTableViewDataSource>
+@interface OakChoiceMenu : NSWindowController
 @property (nonatomic) NSArray* choices;
 @property (nonatomic) NSUInteger choiceIndex;
 @property (nonatomic, readonly) NSString* selectedChoice;
