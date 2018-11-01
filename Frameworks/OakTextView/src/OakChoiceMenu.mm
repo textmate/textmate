@@ -10,9 +10,9 @@ NSUInteger const OakChoiceMenuKeyMovement = 4;
 
 @interface OakChoiceMenu () <NSTableViewDelegate>
 {
-	NSTableView* tableView;
-	NSUInteger keyAction;
-	NSPoint topLeftPosition;
+	NSTableView* _tableView;
+	NSUInteger _keyAction;
+	NSPoint _topLeftPosition;
 }
 @property (nonatomic) NSWindow* window;
 @end
@@ -55,12 +55,12 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 		width = std::max(width, kTableViewPadding + NSWidth(textField.frame));
 	}
 
-	tableView.rowHeight = NSHeight(textField.frame);
+	_tableView.rowHeight = NSHeight(textField.frame);
 
 	if([_choices count] > 10)
 		width += kScrollBarWidth;
 
-	CGFloat height = std::min<NSUInteger>([_choices count], 10) * ([tableView rowHeight]+[tableView intercellSpacing].height);
+	CGFloat height = std::min<NSUInteger>([_choices count], 10) * ([_tableView rowHeight]+[_tableView intercellSpacing].height);
 	NSRect frame   = { { NSMinX(_window.frame), NSMaxY(_window.frame) - height }, { std::min<CGFloat>(ceil(width), 400), height } };
 	[_window setFrame:frame display:YES];
 }
@@ -77,7 +77,7 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 - (void)viewBoundsDidChange:(NSNotification*)aNotification
 {
 	NSView* aView = [[aNotification object] documentView];
-	[_window setFrameTopLeftPoint:[[aView window] convertRectToScreen:[aView convertRect:(NSRect){ topLeftPosition, NSZeroSize } fromView:nil]].origin];
+	[_window setFrameTopLeftPoint:[[aView window] convertRectToScreen:[aView convertRect:(NSRect){ _topLeftPosition, NSZeroSize } fromView:nil]].origin];
 }
 
 - (NSString*)selectedChoice
@@ -93,7 +93,7 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 	id oldSelection = self.selectedChoice;
 	self.choiceIndex = NSNotFound;
 	_choices = newChoices;
-	[tableView reloadData];
+	[_tableView reloadData];
 	self.choiceIndex = [_choices indexOfObject:oldSelection];
 
 	[self sizeToFit];
@@ -106,12 +106,12 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 		_choiceIndex = newIndex;
 		if(_choiceIndex == NSNotFound)
 		{
-			[tableView deselectAll:self];
+			[_tableView deselectAll:self];
 		}
 		else
 		{
-			[tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:_choiceIndex] byExtendingSelection:NO];
-			[tableView scrollRectToVisible:[tableView rectOfRow:_choiceIndex]];
+			[_tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:_choiceIndex] byExtendingSelection:NO];
+			[_tableView scrollRectToVisible:[_tableView rectOfRow:_choiceIndex]];
 		}
 	}
 }
@@ -148,33 +148,33 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 	_window.level              = NSStatusWindowLevel;
 	_window.ignoresMouseEvents = YES;
 
-	tableView = [[NSTableView alloc] initWithFrame:NSZeroRect];
-	[tableView addTableColumn:[[NSTableColumn alloc] initWithIdentifier:@"mainColumn"]];
-	tableView.headerView                         = nil;
-	tableView.focusRingType                      = NSFocusRingTypeNone;
-	tableView.autoresizingMask                   = NSViewWidthSizable|NSViewHeightSizable;
-	tableView.usesAlternatingRowBackgroundColors = YES;
-	tableView.allowsMultipleSelection            = YES;
-	tableView.dataSource                         = self;
-	tableView.delegate                           = self;
-	[tableView reloadData];
+	_tableView = [[NSTableView alloc] initWithFrame:NSZeroRect];
+	[_tableView addTableColumn:[[NSTableColumn alloc] initWithIdentifier:@"mainColumn"]];
+	_tableView.headerView                         = nil;
+	_tableView.focusRingType                      = NSFocusRingTypeNone;
+	_tableView.autoresizingMask                   = NSViewWidthSizable|NSViewHeightSizable;
+	_tableView.usesAlternatingRowBackgroundColors = YES;
+	_tableView.allowsMultipleSelection            = YES;
+	_tableView.dataSource                         = self;
+	_tableView.delegate                           = self;
+	[_tableView reloadData];
 
 	NSScrollView* scrollView         = [[NSScrollView alloc] initWithFrame:NSZeroRect];
 	scrollView.hasVerticalScroller   = YES;
 	scrollView.hasHorizontalScroller = NO;
 	scrollView.autohidesScrollers    = YES;
 	scrollView.borderType            = NSNoBorder;
-	scrollView.documentView          = tableView;
+	scrollView.documentView          = _tableView;
 	scrollView.autoresizingMask      = NSViewWidthSizable|NSViewHeightSizable;
 
 	[_window setContentView:scrollView];
 
 	if(_choiceIndex != NSNotFound)
-		[tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:_choiceIndex] byExtendingSelection:NO];
+		[_tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:_choiceIndex] byExtendingSelection:NO];
 
 	[self sizeToFit];
 
-	topLeftPosition = [aView convertRect:[[aView window] convertRectFromScreen:(NSRect){ aPoint, NSZeroSize }] toView:nil].origin;
+	_topLeftPosition = [aView convertRect:[[aView window] convertRectFromScreen:(NSRect){ aPoint, NSZeroSize }] toView:nil].origin;
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(viewBoundsDidChange:) name:NSViewBoundsDidChangeNotification object:[[aView enclosingScrollView] contentView]];
 	[[aView window] addChildWindow:_window ordered:NSWindowAbove];
 
@@ -192,15 +192,15 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 	if(!_window)
 		return res;
 
-	keyAction = kActionNop;
+	_keyAction = kActionNop;
 	[self interpretKeyEvents:@[ anEvent ]];
-	if(keyAction == kActionNop)
+	if(_keyAction == kActionNop)
 		return res;
 
 	NSInteger offset = 0;
-	NSInteger visibleRows = floor(NSHeight([tableView visibleRect]) / ([tableView rowHeight]+[tableView intercellSpacing].height)) - 1;
+	NSInteger visibleRows = floor(NSHeight([_tableView visibleRect]) / ([_tableView rowHeight]+[_tableView intercellSpacing].height)) - 1;
 	res = OakChoiceMenuKeyMovement;
-	switch(keyAction)
+	switch(_keyAction)
 	{
 		case kActionMoveUp:          offset = -1;                  break;
 		case kActionMoveDown:        offset = +1;                  break;
@@ -246,7 +246,7 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 
 	auto it = map.find(aSelector);
 	if(it != map.end())
-		keyAction = it->second;
+		_keyAction = it->second;
 }
 
 - (void)insertText:(id)aString
