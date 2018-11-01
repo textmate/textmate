@@ -131,7 +131,7 @@ static NSMutableDictionary* SharedChoosers;
 		_scrollView.borderType            = NSNoBorder;
 		_scrollView.documentView          = _tableView;
 
-		_window = [[NSPanel alloc] initWithContentRect:NSMakeRect(600, 700, 400, 500) styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable) backing:NSBackingStoreBuffered defer:NO];
+		_window = [[NSPanel alloc] initWithContentRect:NSMakeRect(600, 700, 400, 500) styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskFullSizeContentView) backing:NSBackingStoreBuffered defer:NO];
 		[[_window standardWindowButton:NSWindowMiniaturizeButton] setHidden:YES];
 		[[_window standardWindowButton:NSWindowZoomButton] setHidden:YES];
 		_window.autorecalculatesKeyViewLoop = YES;
@@ -139,14 +139,23 @@ static NSMutableDictionary* SharedChoosers;
 		_window.level                       = NSFloatingWindowLevel;
 		_window.title                       = windowTitle;
 
+		NSBox* topDividierView = [[NSBox alloc] initWithFrame:NSZeroRect];
+		topDividierView.boxType     = NSBoxCustom;
+		topDividierView.borderType  = NSLineBorder;
+		topDividierView.borderColor = NSColor.quaternaryLabelColor;
+
 		NSDictionary* titleBarViews = @{
-			@"searchField": _searchField
+			@"searchField": _searchField,
+			@"dividerView": topDividierView,
+			@"scopeBar":    scopeBar,
 		};
 
 		NSView* titleBarView = [[NSView alloc] initWithFrame:NSZeroRect];
 		OakAddAutoLayoutViewsToSuperview(titleBarViews.allValues, titleBarView);
 		[titleBarView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[searchField]-(8)-|" options:0 metrics:nil views:titleBarViews]];
-		[titleBarView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(4)-[searchField]-(8)-|" options:0 metrics:nil views:titleBarViews]];
+		[titleBarView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[dividerView]|" options:0 metrics:nil views:titleBarViews]];
+		[titleBarView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[scopeBar]-(>=8)-|" options:0 metrics:nil views:titleBarViews]];
+		[titleBarView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(4)-[searchField]-(4)-[dividerView(==1)]-(4)-[scopeBar]-(4)-|" options:0 metrics:nil views:titleBarViews]];
 		[titleBarView setFrameSize:titleBarView.fittingSize];
 
 		_accessoryViewController = [[NSTitlebarAccessoryViewController alloc] init];
@@ -168,25 +177,49 @@ static NSMutableDictionary* SharedChoosers;
 		clearAllButton.action = @selector(clearAll:);
 		actionButton.action   = @selector(accept:);
 
+		NSBox* bottomDividierView = [[NSBox alloc] initWithFrame:NSZeroRect];
+		bottomDividierView.boxType     = NSBoxCustom;
+		bottomDividierView.borderType  = NSLineBorder;
+		bottomDividierView.borderColor = NSColor.quaternaryLabelColor;
+
+		NSDictionary* footerViews = @{
+			@"dividerView": bottomDividierView,
+			@"delete":      deleteButton,
+			@"clearAll":    clearAllButton,
+			@"action":      actionButton,
+		};
+
+		NSVisualEffectView* footerView = [[NSVisualEffectView alloc] initWithFrame:NSZeroRect];
+		footerView.blendingMode = NSVisualEffectBlendingModeWithinWindow;
+		footerView.material     = NSVisualEffectMaterialTitlebar;
+		if(@available(macos 10.14, *))
+			footerView.material = NSVisualEffectMaterialHeaderView;
+
+		OakAddAutoLayoutViewsToSuperview(footerViews.allValues, footerView);
+
+		[footerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[dividerView]|"                                 options:0 metrics:nil views:footerViews]];
+		[footerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[delete]-[clearAll]-(>=20)-[action]-(8)-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:footerViews]];
+		[footerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[dividerView(==1)]-(5)-[clearAll]-(6)-|"             options:0 metrics:nil views:footerViews]];
+
 		NSDictionary* views = @{
-			@"scopeBar":           scopeBar,
-			@"topDivider":         OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider),
-			@"scrollView":         self.scrollView,
-			@"bottomDivider":      OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider),
-			@"delete":             deleteButton,
-			@"clearAll":           clearAllButton,
-			@"action":             actionButton,
+			@"scrollView": _scrollView,
+			@"footerView": footerView,
 		};
 
 		NSView* contentView = self.window.contentView;
-		OakAddAutoLayoutViewsToSuperview([views allValues], contentView);
+		_scrollView.translatesAutoresizingMaskIntoConstraints = NO;
+		[contentView addSubview:_scrollView positioned:NSWindowAbove relativeTo:nil];
 
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[scopeBar]-(>=8)-|"                             options:0 metrics:nil views:views]];
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[topDivider]|"                                       options:0 metrics:nil views:views]];
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView]|"                                       options:0 metrics:nil views:views]];
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[bottomDivider]|"                                    options:0 metrics:nil views:views]];
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[delete]-[clearAll]-(>=20)-[action]-(8)-|"      options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(4)-[scopeBar]-(4)-[topDivider][scrollView(>=50)][bottomDivider]-(5)-[clearAll]-(6)-|" options:0 metrics:nil views:views]];
+		footerView.translatesAutoresizingMaskIntoConstraints = NO;
+		[contentView addSubview:footerView positioned:NSWindowAbove relativeTo:_scrollView];
+
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[scrollView(>=111)]|" options:0 metrics:nil views:views]];
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView(==footerView)]|" options:NSLayoutFormatAlignAllBottom metrics:nil views:views]];
+
+		NSEdgeInsets insets = _scrollView.contentInsets;
+		insets.bottom += footerView.fittingSize.height;
+		_scrollView.automaticallyAdjustsContentInsets = NO;
+		_scrollView.contentInsets = insets;
 
 		_window.defaultButtonCell = actionButton.cell;
 
