@@ -16,13 +16,13 @@ PUBLIC @interface OakChooser : NSWindowController
 - (void)showWindowRelativeToFrame:(NSRect)parentFrame;
 
 // For subclasses
-@property (nonatomic) NSArray*       items;
-@property (nonatomic, readonly) NSView* titleBarView;
-@property (nonatomic) NSSearchField* searchField;
-@property (nonatomic) NSScrollView*  scrollView;
-@property (nonatomic) NSTableView*   tableView;
-@property (nonatomic) NSTextField*   statusTextField;
-@property (nonatomic) NSTextField*   itemCountTextField;
+@property (nonatomic) NSArray* items;
+@property (nonatomic, readonly) NSView*        titleBarView;
+@property (nonatomic, readonly) NSSearchField* searchField;
+@property (nonatomic, readonly) NSScrollView*  scrollView;
+@property (nonatomic, readonly) NSTableView*   tableView;
+@property (nonatomic, readonly) NSTextField*   statusTextField;
+@property (nonatomic, readonly) NSTextField*   itemCountTextField;
 
 @property (nonatomic) BOOL drawTableViewAsHighlighted;
 - (void)updateFilterString:(NSString*)aString;
