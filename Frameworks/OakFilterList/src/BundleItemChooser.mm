@@ -1,10 +1,10 @@
 #import "BundleItemChooser.h"
+#import <FileBrowser/FileItemImage.h>
 #import "OakAbbreviations.h"
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakAppKit/OakKeyEquivalentView.h>
 #import <OakAppKit/OakScopeBarView.h>
-#import <OakAppKit/OakFileIconImage.h>
 #import <OakAppKit/NSColor Additions.h>
 #import <OakAppKit/NSImage Additions.h>
 #import <OakFoundation/OakFoundation.h>
@@ -331,7 +331,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	{
 		if(path::is_child(to_s(path), oak::application_t::path()))
 				image = [NSImage imageNamed:NSImageNameApplicationIcon];
-		else	image = [OakFileIconImage fileIconImageWithPath:path size:NSMakeSize(32, 32)];
+		else	image = CreateIconImageForURL([NSURL fileURLWithPath:path], NO, NO, NO, NO, scm::status::unknown);
 	}
 	else
 	{
