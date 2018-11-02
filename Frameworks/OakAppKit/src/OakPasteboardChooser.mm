@@ -273,6 +273,7 @@ static NSMutableDictionary* SharedChoosers;
 			_footerView.material = NSVisualEffectMaterialHeaderView;
 
 		NSView* contentView = self.window.contentView;
+		contentView.wantsLayer = YES;
 		_footerView.translatesAutoresizingMaskIntoConstraints = NO;
 		[contentView addSubview:_footerView positioned:NSWindowAbove relativeTo:nil];
 
