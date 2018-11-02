@@ -441,7 +441,6 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		_searchSource     = kSearchSourceActionItems|kSearchSourceMenuItems|kSearchSourceKeyBindingItems;
 
 		self.window.title = @"Select Bundle Item";
-		[self.window setContentBorderThickness:31 forEdge:NSMinYEdge];
 
 		self.actionsPopUpButton = OakCreateActionPopUpButton(YES /* bordered */);
 		NSMenu* actionMenu = self.actionsPopUpButton.menu;
