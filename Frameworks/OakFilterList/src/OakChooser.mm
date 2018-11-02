@@ -111,7 +111,7 @@ NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string
 	return res;
 }
 
-@interface OakChooser () <NSWindowDelegate, NSTextFieldDelegate, NSTableViewDataSource, NSTableViewDelegate, NSSearchFieldDelegate>
+@interface OakChooser () <NSTextFieldDelegate, NSTableViewDataSource, NSTableViewDelegate, NSSearchFieldDelegate>
 {
 	NSTitlebarAccessoryViewController* _accessoryViewController;
 	NSView* _titleBarView;
@@ -123,7 +123,7 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 @implementation OakChooser
 - (id)init
 {
-	if((self = [super init]))
+	if((self = [super initWithWindow:[[NSPanel alloc] initWithContentRect:NSMakeRect(600, 700, 400, 500) styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable) backing:NSBackingStoreBuffered defer:NO]]))
 	{
 		_items = @[ ];
 
@@ -177,16 +177,13 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 		[[_itemCountTextField cell] setBackgroundStyle:NSBackgroundStyleRaised];
 		[_itemCountTextField setContentHuggingPriority:NSLayoutPriorityDefaultHigh forOrientation:NSLayoutConstraintOrientationHorizontal];
 
-		_window = [[NSPanel alloc] initWithContentRect:NSMakeRect(600, 700, 400, 500) styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable) backing:NSBackingStoreBuffered defer:NO];
-		[[_window standardWindowButton:NSWindowMiniaturizeButton] setHidden:YES];
-		[[_window standardWindowButton:NSWindowZoomButton] setHidden:YES];
-		_window.delegate          = self;
-		_window.nextResponder     = self;
-		_window.level             = NSFloatingWindowLevel;
-		_window.frameAutosaveName = NSStringFromClass([self class]);
+		[[self.window standardWindowButton:NSWindowMiniaturizeButton] setHidden:YES];
+		[[self.window standardWindowButton:NSWindowZoomButton] setHidden:YES];
+		self.window.level             = NSFloatingWindowLevel;
+		self.window.frameAutosaveName = NSStringFromClass([self class]);
 
 		[_searchField bind:NSValueBinding toObject:self withKeyPath:@"filterString" options:nil];
-		[_window addObserver:self forKeyPath:@"firstResponder" options:NSKeyValueObservingOptionOld|NSKeyValueObservingOptionNew context:kFirstResponderBinding];
+		[self.window addObserver:self forKeyPath:@"firstResponder" options:NSKeyValueObservingOptionOld|NSKeyValueObservingOptionNew context:kFirstResponderBinding];
 
 		if(NSView* titleBarView = self.titleBarView)
 		{
@@ -202,9 +199,8 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 {
 	_searchField.delegate = nil;
 	[_searchField unbind:NSValueBinding];
-	[_window removeObserver:self forKeyPath:@"firstResponder" context:kFirstResponderBinding];
+	[self.window removeObserver:self forKeyPath:@"firstResponder" context:kFirstResponderBinding];
 
-	_window.delegate      = nil;
 	_tableView.target     = nil;
 	_tableView.dataSource = nil;
 	_tableView.delegate   = nil;
@@ -230,28 +226,23 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 
 - (void)showWindow:(id)sender
 {
-	[_window makeFirstResponder:_window.initialFirstResponder];
-	[_window makeKeyAndOrderFront:self];
+	[self.window makeFirstResponder:self.window.initialFirstResponder];
+	[super showWindow:sender];
 }
 
 - (void)showWindowRelativeToFrame:(NSRect)parentFrame
 {
-	if(![_window isVisible])
+	if(![self.window isVisible])
 	{
-		[_window layoutIfNeeded];
-		NSRect frame  = [_window frame];
+		[self.window layoutIfNeeded];
+		NSRect frame  = [self.window frame];
 		NSRect parent = parentFrame;
 
 		frame.origin.x = NSMinX(parent) + round((NSWidth(parent)  - NSWidth(frame))  * 1 / 4);
 		frame.origin.y = NSMinY(parent) + round((NSHeight(parent) - NSHeight(frame)) * 3 / 4);
-		[_window setFrame:frame display:NO];
+		[self.window setFrame:frame display:NO];
 	}
 	[self showWindow:self];
-}
-
-- (void)close
-{
-	[_window performClose:self];
 }
 
 // ================================================================================
@@ -373,15 +364,15 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 
 - (void)accept:(id)sender
 {
-	[_window orderOut:self];
+	[self.window orderOut:self];
 	if(_action)
 		[NSApp sendAction:_action to:_target from:self];
-	[_window close];
+	[self.window close];
 }
 
 - (void)cancel:(id)sender
 {
-	[self close];
+	[self.window performClose:self];
 }
 
 // =========================

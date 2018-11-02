@@ -6,18 +6,14 @@ PUBLIC @interface OakFileTableCellView : NSTableCellView
 - (instancetype)initWithCloseButton:(NSButton*)closeButton;
 @end
 
-PUBLIC @interface OakChooser : NSResponder
-@property (nonatomic) NSWindow* window;
-
+PUBLIC @interface OakChooser : NSWindowController
 @property (nonatomic) SEL action;
 @property (nonatomic, weak) id target;
 
 @property (nonatomic) NSString* filterString;
 @property (nonatomic, readonly) NSArray* selectedItems;
 
-- (void)showWindow:(id)sender;
 - (void)showWindowRelativeToFrame:(NSRect)parentFrame;
-- (void)close;
 
 // For subclasses
 @property (nonatomic) NSArray*       items;

@@ -60,11 +60,6 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 		self.tableView.refusesFirstResponder = NO;
 		self.tableView.rowHeight = 38;
 
-		self.window.nextResponder = nil;
-		NSResponder* nextResponder = self.tableView.nextResponder;
-		self.tableView.nextResponder = self;
-		self.nextResponder = nextResponder;
-
 		OakScopeBarView* scopeBar = [OakScopeBarView new];
 		scopeBar.labels = self.sourceListLabels;
 
