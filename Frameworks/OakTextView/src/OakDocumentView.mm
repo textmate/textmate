@@ -396,6 +396,17 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	}
 }
 
+- (void)viewDidChangeEffectiveAppearance
+{
+	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+	if([defaults boolForKey:@"changeThemeBasedOnAppearance"])
+	{
+		NSAppearanceName appearanceName = [self.effectiveAppearance bestMatchFromAppearancesWithNames:@[ NSAppearanceNameAqua, NSAppearanceNameDarkAqua ]];
+		NSString* themeUUID = [appearanceName isEqualToString:NSAppearanceNameDarkAqua] ? [defaults stringForKey:@"darkModeThemeUUID"] : [defaults stringForKey:@"universalThemeUUID"];
+		[self setThemeWithUUID:themeUUID];
+	}
+}
+
 - (IBAction)toggleLineNumbers:(id)sender
 {
 	D(DBF_OakDocumentView, bug("show line numbers %s\n", BSTR([gutterView visibilityForColumnWithIdentifier:GVLineNumbersColumnIdentifier])););
