@@ -132,18 +132,29 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 		_scrollView.hasHorizontalScroller = NO;
 		_scrollView.hasVerticalScroller   = YES;
 
+		NSView* dividerView = OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider);
+
 		NSDictionary* views = @{
 			@"header":  _headerView,
 			@"files":   _scrollView,
-			@"divider": OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider),
+			@"divider": dividerView,
 			@"actions": _actionsView,
 		};
 
 		OakAddAutoLayoutViewsToSuperview(views.allValues, self);
+		[_headerView removeFromSuperview];
+		[self addSubview:_headerView positioned:NSWindowAbove relativeTo:nil];
+
 		OakSetupKeyViewLoop(@[ self, _headerView, _outlineView, _actionsView ], NO);
 
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[files(==header,==divider,==actions)]|" options:0 metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[header][files][divider][actions]|"     options:NSLayoutFormatAlignAllLeft metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[header]-(>=0)-[divider]"               options:NSLayoutFormatAlignAllLeft metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[files][divider][actions]|"             options:NSLayoutFormatAlignAllLeft metrics:nil views:views]];
+
+		NSEdgeInsets insets = _scrollView.contentInsets;
+		insets.top += _headerView.fittingSize.height;
+		_scrollView.automaticallyAdjustsContentInsets = NO;
+		_scrollView.contentInsets = insets;
 
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:NSUserDefaults.standardUserDefaults];
 
@@ -157,15 +168,14 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 
 			NSDictionary* views = @{
 				@"header":  _headerView,
-				@"files":   _scrollView,
 				@"effect":  effectView,
+				@"divider": dividerView,
 			};
 
 			effectView.translatesAutoresizingMaskIntoConstraints = NO;
-			[self addSubview:effectView positioned:NSWindowBelow relativeTo:_scrollView];
+			[self addSubview:effectView positioned:NSWindowBelow relativeTo:nil];
 
-			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[effect]|" options:0 metrics:nil views:views]];
-			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[header][effect(==files)]" options:NSLayoutFormatAlignAllLeft metrics:nil views:views]];
+			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[header][effect][divider]" options:NSLayoutFormatAlignAllLeft|NSLayoutFormatAlignAllRight metrics:nil views:views]];
 		}
 	}
 	return self;
