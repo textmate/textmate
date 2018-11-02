@@ -2,6 +2,11 @@ Title: Release Notes
 
 # Changes
 
+## 2018-11-02 (v2.0-rc.15)
+
+* Blurred backgrounds and other visual tweaks, but more to come…
+* See [all changes since v2.0-rc.14](https://github.com/textmate/textmate/compare/v2.0-rc.14...v2.0-rc.15)
+
 ## 2018-11-01 (v2.0-rc.14)
 
 * Holding down option (⌥) when opening a file will ensure it opens in a new window (instead of existing project).
