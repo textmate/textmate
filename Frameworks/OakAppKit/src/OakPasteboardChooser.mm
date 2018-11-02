@@ -68,6 +68,7 @@
 @property (nonatomic) NSSearchField*        searchField;
 @property (nonatomic) NSScrollView*         scrollView;
 @property (nonatomic) NSTableView*          tableView;
+@property (nonatomic) NSVisualEffectView*   footerView;
 @property (nonatomic) BOOL                  didFetchTableViewData;
 @end
 
@@ -97,10 +98,12 @@ static NSMutableDictionary* SharedChoosers;
 			actionName  = @"Find Next";
 		}
 
-		_searchField = [[NSSearchField alloc] initWithFrame:NSZeroRect];
-		[_searchField.cell setScrollable:YES];
-		[_searchField.cell setSendsSearchStringImmediately:YES];
-		_searchField.delegate = self;
+		_arrayController = [[NSArrayController alloc] init];
+		_arrayController.managedObjectContext         = aPasteboard.managedObjectContext;
+		_arrayController.automaticallyPreparesContent = YES;
+		_arrayController.entityName                   = @"PasteboardEntry";
+		_arrayController.fetchPredicate               = [NSPredicate predicateWithFormat:@"pasteboard == %@", _pasteboard];
+		_arrayController.sortDescriptors              = @[ [NSSortDescriptor sortDescriptorWithKey:@"date" ascending:NO] ];
 
 		OakScopeBarView* scopeBar = [OakScopeBarView new];
 		scopeBar.labels = @[ @"All", @"Starred" ];
@@ -109,26 +112,7 @@ static NSMutableDictionary* SharedChoosers;
 		NSTableColumn* tableColumn = [[NSTableColumn alloc] initWithIdentifier:@"name"];
 		tableColumn.dataCell = [[NSTextFieldCell alloc] initTextCell:@""];
 		[tableColumn.dataCell setLineBreakMode:NSLineBreakByTruncatingMiddle];
-
-		NSTableView* tableView = [[NSTableView alloc] initWithFrame:NSZeroRect];
-		[tableView addTableColumn:tableColumn];
-		tableView.allowsTypeSelect                   = NO;
-		tableView.headerView                         = nil;
-		tableView.focusRingType                      = NSFocusRingTypeNone;
-		tableView.allowsEmptySelection               = NO;
-		tableView.allowsMultipleSelection            = NO;
-		tableView.usesAlternatingRowBackgroundColors = YES;
-		tableView.doubleAction                       = @selector(accept:);
-		tableView.target                             = self;
-		tableView.delegate                           = self;
-		_tableView                                   = tableView;
-
-		_scrollView = [[NSScrollView alloc] initWithFrame:NSZeroRect];
-		_scrollView.hasVerticalScroller   = YES;
-		_scrollView.hasHorizontalScroller = NO;
-		_scrollView.autohidesScrollers    = YES;
-		_scrollView.borderType            = NSNoBorder;
-		_scrollView.documentView          = _tableView;
+		[self.tableView addTableColumn:tableColumn];
 
 		[[self.window standardWindowButton:NSWindowMiniaturizeButton] setHidden:YES];
 		[[self.window standardWindowButton:NSWindowZoomButton] setHidden:YES];
@@ -136,35 +120,21 @@ static NSMutableDictionary* SharedChoosers;
 		self.window.level                       = NSFloatingWindowLevel;
 		self.window.title                       = windowTitle;
 
-		NSBox* topDividierView = [[NSBox alloc] initWithFrame:NSZeroRect];
-		topDividierView.boxType     = NSBoxCustom;
-		topDividierView.borderType  = NSLineBorder;
-		topDividierView.borderColor = NSColor.quaternaryLabelColor;
-
-		NSDictionary* titleBarViews = @{
-			@"searchField": _searchField,
-			@"dividerView": topDividierView,
+		NSDictionary* titlebarViews = @{
+			@"searchField": self.searchField,
+			@"dividerView": [self makeDividerView],
 			@"scopeBar":    scopeBar,
 		};
 
-		NSView* titleBarView = [[NSView alloc] initWithFrame:NSZeroRect];
-		OakAddAutoLayoutViewsToSuperview(titleBarViews.allValues, titleBarView);
-		[titleBarView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[searchField]-(8)-|" options:0 metrics:nil views:titleBarViews]];
-		[titleBarView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[dividerView]|" options:0 metrics:nil views:titleBarViews]];
-		[titleBarView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[scopeBar]-(>=8)-|" options:0 metrics:nil views:titleBarViews]];
-		[titleBarView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(4)-[searchField]-(4)-[dividerView(==1)]-(4)-[scopeBar]-(4)-|" options:0 metrics:nil views:titleBarViews]];
-		[titleBarView setFrameSize:titleBarView.fittingSize];
+		NSView* titlebarView = [[NSView alloc] initWithFrame:NSZeroRect];
+		OakAddAutoLayoutViewsToSuperview(titlebarViews.allValues, titlebarView);
 
-		_accessoryViewController = [[NSTitlebarAccessoryViewController alloc] init];
-		_accessoryViewController.view = titleBarView;
-		[self.window addTitlebarAccessoryViewController:_accessoryViewController];
+		[titlebarView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[searchField]-(8)-|" options:0 metrics:nil views:titlebarViews]];
+		[titlebarView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[dividerView]|" options:0 metrics:nil views:titlebarViews]];
+		[titlebarView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[scopeBar]-(>=8)-|" options:0 metrics:nil views:titlebarViews]];
+		[titlebarView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(4)-[searchField]-(8)-[dividerView(==1)]-(4)-[scopeBar]-(4)-|" options:0 metrics:nil views:titlebarViews]];
 
-		_arrayController = [[NSArrayController alloc] init];
-		_arrayController.managedObjectContext         = aPasteboard.managedObjectContext;
-		_arrayController.automaticallyPreparesContent = YES;
-		_arrayController.entityName                   = @"PasteboardEntry";
-		_arrayController.fetchPredicate               = [NSPredicate predicateWithFormat:@"pasteboard == %@", _pasteboard];
-		_arrayController.sortDescriptors              = @[ [NSSortDescriptor sortDescriptorWithKey:@"date" ascending:NO] ];
+		[self addTitlebarAccessoryView:titlebarView];
 
 		NSButton* deleteButton   = OakCreateButton(@"Delete", NSTexturedRoundedBezelStyle);
 		NSButton* clearAllButton = OakCreateButton(@"Clear History", NSTexturedRoundedBezelStyle);
@@ -174,49 +144,21 @@ static NSMutableDictionary* SharedChoosers;
 		clearAllButton.action = @selector(clearAll:);
 		actionButton.action   = @selector(accept:);
 
-		NSBox* bottomDividierView = [[NSBox alloc] initWithFrame:NSZeroRect];
-		bottomDividierView.boxType     = NSBoxCustom;
-		bottomDividierView.borderType  = NSLineBorder;
-		bottomDividierView.borderColor = NSColor.quaternaryLabelColor;
-
 		NSDictionary* footerViews = @{
-			@"dividerView": bottomDividierView,
+			@"dividerView": [self makeDividerView],
 			@"delete":      deleteButton,
 			@"clearAll":    clearAllButton,
 			@"action":      actionButton,
 		};
 
-		NSVisualEffectView* footerView = [[NSVisualEffectView alloc] initWithFrame:NSZeroRect];
-		footerView.blendingMode = NSVisualEffectBlendingModeWithinWindow;
-		footerView.material     = NSVisualEffectMaterialTitlebar;
-		if(@available(macos 10.14, *))
-			footerView.material = NSVisualEffectMaterialHeaderView;
-
+		NSView* footerView = self.footerView;
 		OakAddAutoLayoutViewsToSuperview(footerViews.allValues, footerView);
 
 		[footerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[dividerView]|"                                 options:0 metrics:nil views:footerViews]];
 		[footerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[delete]-[clearAll]-(>=20)-[action]-(8)-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:footerViews]];
 		[footerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[dividerView(==1)]-(5)-[clearAll]-(6)-|"             options:0 metrics:nil views:footerViews]];
 
-		NSDictionary* views = @{
-			@"scrollView": _scrollView,
-			@"footerView": footerView,
-		};
-
-		NSView* contentView = self.window.contentView;
-		_scrollView.translatesAutoresizingMaskIntoConstraints = NO;
-		[contentView addSubview:_scrollView positioned:NSWindowAbove relativeTo:nil];
-
-		footerView.translatesAutoresizingMaskIntoConstraints = NO;
-		[contentView addSubview:footerView positioned:NSWindowAbove relativeTo:_scrollView];
-
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[scrollView(>=111)]|" options:0 metrics:nil views:views]];
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView(==footerView)]|" options:NSLayoutFormatAlignAllBottom metrics:nil views:views]];
-
-		NSEdgeInsets insets = _scrollView.contentInsets;
-		insets.bottom += footerView.fittingSize.height;
-		_scrollView.automaticallyAdjustsContentInsets = NO;
-		_scrollView.contentInsets = insets;
+		[self updateScrollViewInsets];
 
 		self.window.defaultButtonCell = actionButton.cell;
 
@@ -238,6 +180,112 @@ static NSMutableDictionary* SharedChoosers;
 	_tableView.delegate = nil;
 	_tableView.target   = nil;
 }
+
+// =====================
+// = View Construction =
+// =====================
+
+- (NSBox*)makeDividerView
+{
+	NSBox* dividerView = [[NSBox alloc] initWithFrame:NSZeroRect];
+	dividerView.boxType     = NSBoxCustom;
+	dividerView.borderType  = NSLineBorder;
+	dividerView.borderColor = NSColor.quaternaryLabelColor;
+	return dividerView;
+}
+
+- (void)addTitlebarAccessoryView:(NSView*)titlebarView
+{
+	titlebarView.translatesAutoresizingMaskIntoConstraints = NO;
+	[titlebarView setFrameSize:titlebarView.fittingSize];
+
+	_accessoryViewController = [[NSTitlebarAccessoryViewController alloc] init];
+	_accessoryViewController.view = titlebarView;
+	[self.window addTitlebarAccessoryViewController:_accessoryViewController];
+}
+
+- (void)updateScrollViewInsets
+{
+	NSEdgeInsets insets = self.scrollView.contentInsets;
+	insets.bottom += self.footerView.fittingSize.height;
+	self.scrollView.automaticallyAdjustsContentInsets = NO;
+	self.scrollView.contentInsets = insets;
+}
+
+- (NSSearchField*)searchField
+{
+	if(!_searchField)
+	{
+		_searchField = [[NSSearchField alloc] initWithFrame:NSZeroRect];
+		[_searchField.cell setScrollable:YES];
+		[_searchField.cell setSendsSearchStringImmediately:YES];
+		_searchField.delegate = self;
+	}
+	return _searchField;
+}
+
+- (NSTableView*)tableView
+{
+	if(!_tableView)
+	{
+		_tableView = [[NSTableView alloc] initWithFrame:NSZeroRect];
+		_tableView.allowsTypeSelect                   = NO;
+		_tableView.headerView                         = nil;
+		_tableView.focusRingType                      = NSFocusRingTypeNone;
+		_tableView.allowsEmptySelection               = NO;
+		_tableView.allowsMultipleSelection            = NO;
+		_tableView.usesAlternatingRowBackgroundColors = YES;
+		_tableView.doubleAction                       = @selector(accept:);
+		_tableView.target                             = self;
+		_tableView.delegate                           = self;
+	}
+	return _tableView;
+}
+
+- (NSScrollView*)scrollView
+{
+	if(!_scrollView)
+	{
+		_scrollView = [[NSScrollView alloc] initWithFrame:NSZeroRect];
+		_scrollView.hasVerticalScroller   = YES;
+		_scrollView.hasHorizontalScroller = NO;
+		_scrollView.autohidesScrollers    = YES;
+		_scrollView.borderType            = NSNoBorder;
+		_scrollView.documentView          = self.tableView;
+
+		NSView* contentView = self.window.contentView;
+		_scrollView.translatesAutoresizingMaskIntoConstraints = NO;
+		[contentView addSubview:_scrollView positioned:NSWindowBelow relativeTo:nil];
+
+		NSDictionary* views = @{ @"scrollView": _scrollView };
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[scrollView]|" options:0 metrics:nil views:views]];
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView]|" options:0 metrics:nil views:views]];
+	}
+	return _scrollView;
+}
+
+- (NSVisualEffectView*)footerView
+{
+	if(!_footerView)
+	{
+		_footerView = [[NSVisualEffectView alloc] initWithFrame:NSZeroRect];
+		_footerView.blendingMode = NSVisualEffectBlendingModeWithinWindow;
+		_footerView.material     = NSVisualEffectMaterialTitlebar;
+		if(@available(macos 10.14, *))
+			_footerView.material = NSVisualEffectMaterialHeaderView;
+
+		NSView* contentView = self.window.contentView;
+		_footerView.translatesAutoresizingMaskIntoConstraints = NO;
+		[contentView addSubview:_footerView positioned:NSWindowAbove relativeTo:nil];
+
+		NSDictionary* views = @{ @"footerView": _footerView, };
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(>=77)-[footerView]|" options:0 metrics:nil views:views]];
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[footerView]|" options:0 metrics:nil views:views]];
+	}
+	return _footerView;
+}
+
+// =====================
 
 - (void)showWindow:(id)sender
 {
