@@ -381,6 +381,21 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	}
 }
 
+- (IBAction)takeThemeUUIDFrom:(id)sender
+{
+	[self setThemeWithUUID:[sender representedObject]];
+}
+
+- (void)setThemeWithUUID:(NSString*)themeUUID
+{
+	if(bundles::item_ptr const& themeItem = bundles::lookup(to_s(themeUUID)))
+	{
+		_textView.theme = parse_theme(themeItem);
+		settings_t::set(kSettingsThemeKey, to_s(themeUUID));
+		[self updateStyle];
+	}
+}
+
 - (IBAction)toggleLineNumbers:(id)sender
 {
 	D(DBF_OakDocumentView, bug("show line numbers %s\n", BSTR([gutterView visibilityForColumnWithIdentifier:GVLineNumbersColumnIdentifier])););
@@ -662,21 +677,6 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 }
 
 - (void)toggleMacroRecording:(id)sender    { [_textView toggleMacroRecording:sender]; }
-
-- (IBAction)takeThemeUUIDFrom:(id)sender
-{
-	[self setThemeWithUUID:[sender representedObject]];
-}
-
-- (void)setThemeWithUUID:(NSString*)themeUUID
-{
-	if(bundles::item_ptr const& themeItem = bundles::lookup(to_s(themeUUID)))
-	{
-		_textView.theme = parse_theme(themeItem);
-		settings_t::set(kSettingsThemeKey, to_s(themeUUID));
-		[self updateStyle];
-	}
-}
 
 // =============================
 // = GutterView Delegate Proxy =
