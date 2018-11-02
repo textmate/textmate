@@ -110,12 +110,19 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 	NSTableCellView* res = [aTableView makeViewWithIdentifier:aTableColumn.identifier owner:self];
 	if(!res)
 	{
+		NSImage* removeTemplateImage = [NSImage imageWithSize:NSMakeSize(8, 8) flipped:NO drawingHandler:^BOOL(NSRect dstRect){
+			[[NSColor blackColor] set];
+			NSRectFill(NSInsetRect(dstRect, 0, floor(NSHeight(dstRect)/2)-1));
+			return YES;
+		}];
+		[removeTemplateImage setTemplate:YES];
+
 		NSButton* removeButton = [NSButton new];
 		[[removeButton cell] setControlSize:NSControlSizeSmall];
 		removeButton.refusesFirstResponder = YES;
 		removeButton.bezelStyle = NSRoundRectBezelStyle;
 		removeButton.buttonType = NSMomentaryPushInButton;
-		removeButton.image      = [NSImage imageNamed:NSImageNameRemoveTemplate];
+		removeButton.image      = removeTemplateImage;
 		removeButton.target     = self;
 		removeButton.action     = @selector(takeItemToRemoveFrom:);
 

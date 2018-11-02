@@ -188,11 +188,18 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		countOfLeafs.font       = [NSFont labelFontOfSize:0];
 		countOfLeafs.identifier = @"countOfLeafs";
 
+		NSImage* removeTemplateImage = [NSImage imageWithSize:NSMakeSize(8, 8) flipped:NO drawingHandler:^BOOL(NSRect dstRect){
+			[[NSColor blackColor] set];
+			NSRectFill(NSInsetRect(dstRect, 0, floor(NSHeight(dstRect)/2)-1));
+			return YES;
+		}];
+		[removeTemplateImage setTemplate:YES];
+
 		NSButton* remove = [NSButton new];
 		[[remove cell] setControlSize:NSControlSizeSmall];
 		remove.bezelStyle = NSRoundRectBezelStyle;
 		remove.buttonType = NSMomentaryPushInButton;
-		remove.image      = [NSImage imageNamed:NSImageNameRemoveTemplate];
+		remove.image      = removeTemplateImage;
 
 		NSDictionary* views = @{ @"icon": imageView, @"text": textField, @"count": countOfLeafs, @"remove": remove };
 		OakAddAutoLayoutViewsToSuperview([views allValues], self);
