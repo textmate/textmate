@@ -8,6 +8,11 @@
 	<%- meta_data.each do |key, value| -%>
 	<meta name="<%= key %>" content="<%= value %>" />
 	<%- end -%>
+	<script>
+		var style = document.createElement('style');
+		document.head.appendChild(style);
+		style.sheet.insertRule(TextMate.themeColors());
+	</script>
 	<link href="css/stylesheet.css" rel="stylesheet" type="text/css" />
 	<%- css_files.each do |css| -%>
 	<link rel="stylesheet" type="text/css" href="<%= css %>" charset="utf-8" />

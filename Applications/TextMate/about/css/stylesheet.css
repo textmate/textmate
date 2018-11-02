@@ -6,11 +6,11 @@ body {
   line-height: 1.6;
   padding: 0;
   margin: 1.15rem;
-  background-color: #f1f1f1;
+  background-color: var(--backgroundColor);
   background-position: top right;
   background-repeat: no-repeat;
   background-attachment: fixed;
-  color: #000; }
+  color: var(--textColor); }
 
 @media screen and (-webkit-max-device-pixel-ratio: 1.999) {
   body {
@@ -20,7 +20,7 @@ body {
     background-image: url("flower@2x.png");
     background-size: 50%; } }
 body > h1, body > h2, body > p {
-  text-shadow: 0 0 1px white, 0 1px 0 rgba(255, 255, 255, 0.75); }
+  text-shadow: 0 0 1px var(--backgroundColor), 0 1px 0 var(--shadowColor); }
 
 h1, h2, h3, h4, h5, h6, p, ul, ol {
   margin: 0 0 1.6rem 0; }
@@ -35,6 +35,7 @@ h2 {
   font-size: 1.6rem; }
 
 article {
+  color: #000;
   background-color: rgba(255, 255, 255, 0.8);
   border: 1px solid rgba(0, 0, 0, 0.5);
   border-radius: 5px;
