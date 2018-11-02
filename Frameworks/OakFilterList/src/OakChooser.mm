@@ -161,9 +161,7 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 - (NSBox*)makeDividerView
 {
 	NSBox* dividerView = [[NSBox alloc] initWithFrame:NSZeroRect];
-	dividerView.boxType     = NSBoxCustom;
-	dividerView.borderType  = NSLineBorder;
-	dividerView.borderColor = NSColor.quaternaryLabelColor;
+	dividerView.boxType     = NSBoxSeparator;
 	return dividerView;
 }
 
