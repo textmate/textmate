@@ -510,6 +510,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		OakAddAutoLayoutViewsToSuperview(@[ self.actionsPopUpButton ], self.titleBarView);
 		[self.titleBarView removeConstraints:self.titleBarView.constraints];
 		[self setupLayoutConstraints];
+		OakSetupKeyViewLoop(@[ self.searchField, self.actionsPopUpButton, self.scopeBar, self.editButton, self.selectButton ]);
 
 		[self.scopeBar bind:NSValueBinding toObject:self withKeyPath:@"sourceIndex" options:nil];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidChangeKeyStatus:) name:NSWindowDidBecomeKeyNotification object:self.window];
@@ -579,8 +580,6 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	[constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(4)-[searchField]-(8)-|" options:0 metrics:nil views:views]];
 	[self.titleBarView addConstraints:constraints];
 	self.layoutConstraints = constraints;
-
-	OakSetupKeyViewLoop(@[ (self.keyEquivalentInput ? self.keyEquivalentView : self.searchField), self.actionsPopUpButton, self.scopeBar, self.editButton, self.selectButton ]);
 }
 
 - (void)showWindow:(id)sender
@@ -632,6 +631,23 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	return _keyEquivalentView;
 }
 
+- (void)replaceView:(NSView*)oldView withView:(NSView*)newView
+{
+	NSView* next = oldView.nextKeyView;
+	NSView* prev = oldView.previousKeyView;
+
+	NSView* contentView = oldView.superview;
+	[oldView removeFromSuperview];
+
+	[contentView addSubview:newView];
+
+	prev.nextKeyView = newView;
+	newView.nextKeyView = next;
+
+	newView.window.initialFirstResponder = newView;
+	[newView.window makeFirstResponder:newView];
+}
+
 - (void)setKeyEquivalentInput:(BOOL)flag
 {
 	if(_keyEquivalentInput == flag)
@@ -644,18 +660,10 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	self.layoutConstraints = nil;
 
 	if(flag)
-	{
-		[self.searchField removeFromSuperview];
-		[contentView addSubview:self.keyEquivalentView];
-	}
-	else
-	{
-		[self.keyEquivalentView removeFromSuperview];
-		[contentView addSubview:self.searchField];
-	}
+			[self replaceView:self.searchField withView:self.keyEquivalentView];
+	else	[self replaceView:self.keyEquivalentView withView:self.searchField];
 
 	[self setupLayoutConstraints];
-	[self.window makeFirstResponder:self.keyEquivalentInput ? self.keyEquivalentView : self.searchField];
 
 	self.keyEquivalentView.eventString = nil;
 	self.keyEquivalentView.recording   = self.keyEquivalentInput;
