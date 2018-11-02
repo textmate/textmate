@@ -36,11 +36,11 @@ static NSButton* OakCreateImageButton (NSImage* image)
 		self.favoritesButton.toolTip    = @"Show favorites";
 		self.scmButton.toolTip          = @"Show source control management status";
 
-		[self.createButton.cell    accessibilitySetOverrideValue:self.createButton.toolTip    forAttribute:NSAccessibilityDescriptionAttribute];
-		[self.reloadButton.cell    accessibilitySetOverrideValue:self.reloadButton.toolTip    forAttribute:NSAccessibilityDescriptionAttribute];
-		[self.searchButton.cell    accessibilitySetOverrideValue:self.searchButton.toolTip    forAttribute:NSAccessibilityDescriptionAttribute];
-		[self.favoritesButton.cell accessibilitySetOverrideValue:self.favoritesButton.toolTip forAttribute:NSAccessibilityDescriptionAttribute];
-		[self.scmButton.cell       accessibilitySetOverrideValue:self.scmButton.toolTip       forAttribute:NSAccessibilityDescriptionAttribute];
+		self.reloadButton.image.accessibilityDescription    = self.reloadButton.toolTip;
+		self.createButton.image.accessibilityDescription    = self.createButton.toolTip;
+		self.searchButton.image.accessibilityDescription    = self.searchButton.toolTip;
+		self.favoritesButton.image.accessibilityDescription = self.favoritesButton.toolTip;
+		self.scmButton.image.accessibilityDescription       = self.scmButton.toolTip;
 
 		NSView* wrappedActionsPopUpButton = [NSView new];
 		OakAddAutoLayoutViewsToSuperview(@[ self.actionsPopUpButton ], wrappedActionsPopUpButton);

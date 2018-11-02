@@ -50,12 +50,13 @@ NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel)
 	return res;
 }
 
-NSPopUpButton* OakCreatePopUpButton (BOOL pullsDown, NSString* initialItemTitle, NSObject* accessibilityLabel)
+NSPopUpButton* OakCreatePopUpButton (BOOL pullsDown, NSString* initialItemTitle, NSView* labelView)
 {
 	NSPopUpButton* res = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:pullsDown];
 	if(initialItemTitle)
 		[[res cell] setMenuItem:[[NSMenuItem alloc] initWithTitle:initialItemTitle action:NULL keyEquivalent:@""]];
-	OakSetAccessibilityLabel(res, accessibilityLabel);
+	if(labelView)
+		res.accessibilityTitleUIElement = labelView;
 	return res;
 }
 
@@ -73,26 +74,26 @@ NSPopUpButton* OakCreateActionPopUpButton (BOOL bordered)
 
 	[[res cell] setUsesItemFromMenu:NO];
 	[[res cell] setMenuItem:item];
-	OakSetAccessibilityLabel(res, @"Actions");
+	res.accessibilityLabel = @"Actions";
 
 	return res;
 }
 
-NSPopUpButton* OakCreateStatusBarPopUpButton (NSString* initialItemTitle, NSObject* accessibilityLabel)
+NSPopUpButton* OakCreateStatusBarPopUpButton (NSString* initialItemTitle, NSString* accessibilityLabel)
 {
 	NSPopUpButton* res = OakCreatePopUpButton(NO, initialItemTitle);
 	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
 	res.font     = OakStatusBarFont();
 	res.bordered = NO;
-	OakSetAccessibilityLabel(res, accessibilityLabel);
+	res.accessibilityLabel = accessibilityLabel;
 	return res;
 }
 
-NSComboBox* OakCreateComboBox (NSObject* accessibilityLabel)
+NSComboBox* OakCreateComboBox (NSView* labelView)
 {
 	NSComboBox* res = [[NSComboBox alloc] initWithFrame:NSZeroRect];
 	res.font = OakControlFont();
-	OakSetAccessibilityLabel(res, accessibilityLabel);
+	res.accessibilityTitleUIElement = labelView;
 	return res;
 }
 
@@ -103,7 +104,7 @@ OakRolloverButton* OakCreateCloseButton (NSString* accessibilityLabel)
 	closeButton.pressedImage  = [NSImage imageNamed:@"ClosePressedTemplate"  inSameBundleAsClass:[OakRolloverButton class]];
 	closeButton.rolloverImage = [NSImage imageNamed:@"CloseRolloverTemplate" inSameBundleAsClass:[OakRolloverButton class]];
 
-	OakSetAccessibilityLabel(closeButton, accessibilityLabel);
+	closeButton.accessibilityLabel = accessibilityLabel;
 	return closeButton;
 }
 
@@ -399,20 +400,4 @@ void OakAddAutoLayoutViewsToSuperview (NSArray* views, NSView* superview)
 		[view setTranslatesAutoresizingMaskIntoConstraints:NO];
 		[superview addSubview:view];
 	}
-}
-
-BOOL OakSetAccessibilityLabel (NSObject* element, NSObject* label)
-{
-	if(!(element = NSAccessibilityUnignoredDescendant(element)))
-		return NO;
-
-	NSString* attribute = NSAccessibilityDescriptionAttribute;
-	if(![label isKindOfClass:NSString.class])
-	{
-		attribute = NSAccessibilityTitleUIElementAttribute;
-		if(!(label = NSAccessibilityUnignoredDescendant(label)))
-			return NO;
-	}
-
-	return [element accessibilitySetOverrideValue:label forAttribute:attribute];
 }

@@ -626,7 +626,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		[_keyEquivalentView setTranslatesAutoresizingMaskIntoConstraints:NO];
 		[_keyEquivalentView bind:NSValueBinding toObject:self withKeyPath:@"keyEquivalentString" options:nil];
 		[_keyEquivalentView addObserver:self forKeyPath:@"recording" options:NSKeyValueObservingOptionNew context:kRecordingBinding];
-		[_keyEquivalentView accessibilitySetOverrideValue:@[ self.tableView ] forAttribute:NSAccessibilitySharedFocusElementsAttribute];
+		_keyEquivalentView.accessibilitySharedFocusElements = @[ self.tableView ];
 	}
 	return _keyEquivalentView;
 }

@@ -294,7 +294,7 @@ static NSString* kUserDefaultsTabItemLineBreakStyleKey = @"tabItemLineBreakStyle
 		_rightCapView = [[OakBackgroundFillView alloc] initWithFrame:NSZeroRect];
 
 		_closeButton = [[OakRolloverButton alloc] initWithFrame:NSZeroRect];
-		OakSetAccessibilityLabel(_closeButton, @"Close tab");
+		_closeButton.accessibilityLabel = @"Close tab";
 		_closeButton.disableWindowOrderingForFirstMouse = YES;
 
 		_textField = OakCreateLabel(aTitle);
@@ -471,7 +471,7 @@ static NSString* kUserDefaultsTabItemLineBreakStyleKey = @"tabItemLineBreakStyle
 	if(_showOverflowButton)
 	{
 		_overflowButton = [[OakRolloverButton alloc] initWithFrame:NSZeroRect];
-		OakSetAccessibilityLabel(_overflowButton, @"Show tab overflow menu");
+		_overflowButton.accessibilityLabel = @"Show tab overflow menu";
 
 		[_overflowButton sendActionOn:NSEventMaskLeftMouseDown];
 		[self updateStyle];

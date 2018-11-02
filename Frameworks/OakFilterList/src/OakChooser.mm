@@ -172,7 +172,7 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 		_searchField = [[OakLinkedSearchField alloc] initWithFrame:NSZeroRect];
 		[_searchField.cell setScrollable:YES];
 		[_searchField.cell setSendsSearchStringImmediately:YES];
-		[_searchField.cell accessibilitySetOverrideValue:@[ self.tableView ] forAttribute:NSAccessibilitySharedFocusElementsAttribute];
+		_searchField.accessibilitySharedFocusElements = @[ self.tableView ];
 		if(!NSApp.isFullKeyboardAccessEnabled)
 			_searchField.focusRingType = NSFocusRingTypeNone;
 		_searchField.delegate = self;

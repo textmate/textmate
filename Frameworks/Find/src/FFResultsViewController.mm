@@ -307,7 +307,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		_bottomDivider = OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider);
 
 		_outlineView = [[NSOutlineView alloc] initWithFrame:NSZeroRect];
-		OakSetAccessibilityLabel(_outlineView, @"Results");
+		_outlineView.accessibilityLabel                 = @"Results";
 		_outlineView.focusRingType                      = NSFocusRingTypeNone;
 		_outlineView.allowsMultipleSelection            = YES;
 		_outlineView.autoresizesOutlineColumn           = NO;

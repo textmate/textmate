@@ -26,15 +26,15 @@ static NSTextField* OakCreateTextField (NSString* label)
 	return res;
 }
 
-static NSButton* OakCreateImageToggleButton (NSImage* image, NSObject* accessibilityLabel)
+static NSButton* OakCreateImageToggleButton (NSImage* image, NSString* accessibilityLabel)
 {
 	NSButton* res = [NSButton new];
+	res.accessibilityLabel = accessibilityLabel;
 	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
 	[res setButtonType:NSToggleButton];
 	[res setBordered:NO];
 	[res setImage:image];
 	[res setImagePosition:NSImageOnly];
-	OakSetAccessibilityLabel(res, accessibilityLabel);
 	return res;
 }
 

@@ -57,13 +57,13 @@ NSButton* OakCreateClickableStatusBar ()
 }
 @end
 
-static OakAutoSizingTextField* OakCreateTextField (id <NSTextFieldDelegate> delegate, NSObject* accessibilityLabel, NSString* grammarName)
+static OakAutoSizingTextField* OakCreateTextField (id <NSTextFieldDelegate> delegate, NSView* labelView, NSString* grammarName)
 {
 	OakAutoSizingTextField* res = [[OakAutoSizingTextField alloc] initWithFrame:NSZeroRect];
 	res.font = OakControlFont();
 	res.formatter = [[OakSyntaxFormatter alloc] initWithGrammarName:grammarName];
 	[[res cell] setWraps:YES];
-	OakSetAccessibilityLabel(res, accessibilityLabel);
+	res.accessibilityTitleUIElement = labelView;
 	res.delegate = delegate;
 	return res;
 }
@@ -75,7 +75,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 	res.buttonType = NSMomentaryLightButton;
 	res.title      = @"";
 	res.toolTip    = toolTip;
-	OakSetAccessibilityLabel(res, toolTip);
+	res.accessibilityLabel = toolTip;
 	[res setContentCompressionResistancePriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
 	return res;
 }
@@ -100,7 +100,7 @@ static NSButton* OakCreateStopSearchButton ()
 	res.keyEquivalent = @".";
 	res.keyEquivalentModifierMask = NSEventModifierFlagCommand;
 	[res.cell setImageScaling:NSImageScaleProportionallyDown];
-	OakSetAccessibilityLabel(res, res.toolTip);
+	res.accessibilityLabel = res.toolTip;
 	return res;
 }
 
@@ -186,7 +186,7 @@ static NSButton* OakCreateStopSearchButton ()
 		self.countButton               = OakCreateButton(@"Σ", NSSmallSquareBezelStyle);
 
 		self.countButton.toolTip = @"Show Results Count";
-		OakSetAccessibilityLabel(self.countButton, self.countButton.toolTip);
+		self.countButton.accessibilityLabel = self.countButton.toolTip;
 
 		self.replaceLabel              = OakCreateLabel(@"Replace:");
 		self.replaceTextField          = OakCreateTextField(self, self.replaceLabel, @"textmate.format-string");

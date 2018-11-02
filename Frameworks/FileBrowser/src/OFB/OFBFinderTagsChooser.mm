@@ -119,7 +119,7 @@ static constexpr CGFloat LabelNameHeight = 15;
 		BOOL isRemovable  = [_selectedTagsToRemove containsObject:tag];
 
 		OakRolloverButton* button = [[OakRolloverButton alloc] initWithFrame:[self rectForFavoriteTag:tag]];
-		OakSetAccessibilityLabel(button, isRemovable ? [NSString stringWithFormat:@"Remove tag %@", tag.displayName] : [NSString stringWithFormat:@"Add tag %@", tag.displayName]);
+		button.accessibilityLabel = [NSString stringWithFormat:@"%@ tag %@", (isRemovable ? @"Remove" : @"Add"), tag.displayName];
 
 		button.regularImage  = [OFBFinderTagImage imageWithSize:NSMakeSize(SwatchDiameter, SwatchDiameter) backgroundColor:tag.backgroundColor foregroundColor:tag.foregroundColor selected:isSelected removable:isRemovable mouseOver:NO];
 		button.pressedImage  = [OFBFinderTagImage imageWithSize:NSMakeSize(SwatchDiameter, SwatchDiameter) backgroundColor:tag.backgroundColor foregroundColor:tag.foregroundColor selected:isSelected removable:isRemovable mouseOver:YES];
