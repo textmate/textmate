@@ -332,7 +332,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 
 	if(_symbolChooser)
 	{
-		_symbolChooser.document        = self.document;
+		_symbolChooser.TMDocument      = self.document;
 		_symbolChooser.selectionString = _textView.selectionString;
 	}
 
@@ -493,8 +493,8 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	{
 		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowWillCloseNotification object:_symbolChooser.window];
 
-		_symbolChooser.target   = nil;
-		_symbolChooser.document = nil;
+		_symbolChooser.target     = nil;
+		_symbolChooser.TMDocument = nil;
 	}
 
 	if(_symbolChooser = aSymbolChooser)
@@ -502,7 +502,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 		_symbolChooser.target          = self;
 		_symbolChooser.action          = @selector(symbolChooserDidSelectItems:);
 		_symbolChooser.filterString    = @"";
-		_symbolChooser.document        = self.document;
+		_symbolChooser.TMDocument      = self.document;
 		_symbolChooser.selectionString = _textView.selectionString;
 
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(symbolChooserWillClose:) name:NSWindowWillCloseNotification object:_symbolChooser.window];

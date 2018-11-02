@@ -64,15 +64,15 @@ static SymbolChooserItem* CreateItem (OakDocument* document, text::pos_t const& 
 
 - (void)windowWillClose:(NSNotification*)aNotification
 {
-	[self setDocument:nil];
+	[self setTMDocument:nil];
 }
 
-- (void)setDocument:(OakDocument*)aDocument
+- (void)setTMDocument:(OakDocument*)aDocument
 {
-	if(_document = aDocument)
+	if(_TMDocument = aDocument)
 		[self updateItems:self];
 	NSString* title = @"Jump to Symbol";
-	self.window.title = _document ? [title stringByAppendingFormat:@" — %@", _document.displayName] : title;
+	self.window.title = _TMDocument ? [title stringByAppendingFormat:@" — %@", _TMDocument.displayName] : title;
 }
 
 - (void)setSelectionString:(NSString*)aString
@@ -106,13 +106,13 @@ static SymbolChooserItem* CreateItem (OakDocument* document, text::pos_t const& 
 - (void)updateItems:(id)sender
 {
 	NSMutableArray* res = [NSMutableArray array];
-	if(_document)
+	if(_TMDocument)
 	{
 		if(OakIsEmptyString(self.filterString))
 		{
-			[_document enumerateSymbolsUsingBlock:^(text::pos_t const& pos, NSString* symbol){
+			[_TMDocument enumerateSymbolsUsingBlock:^(text::pos_t const& pos, NSString* symbol){
 				if(![symbol isEqualToString:@"-"])
-					[res addObject:CreateItem(_document, pos, symbol, std::vector< std::pair<size_t, size_t> >())];
+					[res addObject:CreateItem(_TMDocument, pos, symbol, std::vector< std::pair<size_t, size_t> >())];
 			}];
 		}
 		else
@@ -122,7 +122,7 @@ static SymbolChooserItem* CreateItem (OakDocument* document, text::pos_t const& 
 			__block NSString* sectionName = nil;
 			__block std::multimap<double, SymbolChooserItem*> rankedItems;
 
-			[_document enumerateSymbolsUsingBlock:^(text::pos_t const& pos, NSString* symbol){
+			[_TMDocument enumerateSymbolsUsingBlock:^(text::pos_t const& pos, NSString* symbol){
 				if([symbol isEqualToString:@"-"])
 					return;
 
@@ -132,7 +132,7 @@ static SymbolChooserItem* CreateItem (OakDocument* document, text::pos_t const& 
 
 				std::vector< std::pair<size_t, size_t> > ranges;
 				if(double rank = oak::rank(filter, to_s(symbol), &ranges))
-					rankedItems.emplace(1 - rank, CreateItem(_document, pos, indented && sectionName ? [NSString stringWithFormat:@"%@ — %@", symbol, sectionName] : symbol, ranges));
+					rankedItems.emplace(1 - rank, CreateItem(_TMDocument, pos, indented && sectionName ? [NSString stringWithFormat:@"%@ — %@", symbol, sectionName] : symbol, ranges));
 			}];
 
 			for(auto const& pair : rankedItems)
