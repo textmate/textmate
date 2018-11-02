@@ -114,11 +114,11 @@ NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string
 @interface OakChooser () <NSTextFieldDelegate, NSTableViewDataSource, NSTableViewDelegate, NSSearchFieldDelegate>
 {
 	NSTitlebarAccessoryViewController* _accessoryViewController;
-	NSView* _titleBarView;
 
 	NSSearchField*      _searchField;
 	NSScrollView*       _scrollView;
 	NSTableView*        _tableView;
+	NSVisualEffectView* _footerView;
 	NSTextField*        _statusTextField;
 	NSTextField*        _itemCountTextField;
 }
@@ -139,13 +139,6 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 		self.window.frameAutosaveName = NSStringFromClass([self class]);
 
 		[self.window addObserver:self forKeyPath:@"firstResponder" options:NSKeyValueObservingOptionOld|NSKeyValueObservingOptionNew context:kFirstResponderBinding];
-
-		if(NSView* titleBarView = self.titleBarView)
-		{
-			_accessoryViewController = [[NSTitlebarAccessoryViewController alloc] init];
-			_accessoryViewController.view = titleBarView;
-			[self.window addTitlebarAccessoryViewController:_accessoryViewController];
-		}
 	}
 	return self;
 }
@@ -164,6 +157,33 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 // =====================
 // = View Construction =
 // =====================
+
+- (NSBox*)makeDividerView
+{
+	NSBox* dividerView = [[NSBox alloc] initWithFrame:NSZeroRect];
+	dividerView.boxType     = NSBoxCustom;
+	dividerView.borderType  = NSLineBorder;
+	dividerView.borderColor = NSColor.quaternaryLabelColor;
+	return dividerView;
+}
+
+- (void)addTitlebarAccessoryView:(NSView*)titlebarView
+{
+	titlebarView.translatesAutoresizingMaskIntoConstraints = NO;
+	[titlebarView setFrameSize:titlebarView.fittingSize];
+
+	_accessoryViewController = [[NSTitlebarAccessoryViewController alloc] init];
+	_accessoryViewController.view = titlebarView;
+	[self.window addTitlebarAccessoryViewController:_accessoryViewController];
+}
+
+- (void)updateScrollViewInsets
+{
+	NSEdgeInsets insets = self.scrollView.contentInsets;
+	insets.bottom += self.footerView.fittingSize.height;
+	self.scrollView.automaticallyAdjustsContentInsets = NO;
+	self.scrollView.contentInsets = insets;
+}
 
 - (NSSearchField*)searchField
 {
@@ -212,6 +232,14 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 		_scrollView.autohidesScrollers    = YES;
 		_scrollView.borderType            = NSNoBorder;
 		_scrollView.documentView          = self.tableView;
+
+		NSView* contentView = self.window.contentView;
+		_scrollView.translatesAutoresizingMaskIntoConstraints = NO;
+		[contentView addSubview:_scrollView positioned:NSWindowBelow relativeTo:nil];
+
+		NSDictionary* views = @{ @"scrollView": _scrollView };
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[scrollView]|" options:0 metrics:nil views:views]];
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView]|" options:0 metrics:nil views:views]];
 	}
 	return _scrollView;
 }
@@ -252,25 +280,28 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 	return _itemCountTextField;
 }
 
-// =====================
-
-- (NSView*)titleBarView
+- (NSVisualEffectView*)footerView
 {
-	if(!_titleBarView)
+	if(!_footerView)
 	{
-		_titleBarView = [[NSView alloc] initWithFrame:NSZeroRect];
+		_footerView = [[NSVisualEffectView alloc] initWithFrame:NSZeroRect];
+		_footerView.blendingMode = NSVisualEffectBlendingModeWithinWindow;
+		_footerView.material     = NSVisualEffectMaterialTitlebar;
+		if(@available(macos 10.14, *))
+			_footerView.material = NSVisualEffectMaterialHeaderView;
 
-		NSDictionary* titleBarViews = @{
-			@"searchField": self.searchField
-		};
+		NSView* contentView = self.window.contentView;
+		_footerView.translatesAutoresizingMaskIntoConstraints = NO;
+		[contentView addSubview:_footerView positioned:NSWindowAbove relativeTo:nil];
 
-		OakAddAutoLayoutViewsToSuperview(titleBarViews.allValues, _titleBarView);
-		[_titleBarView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[searchField]-(8)-|" options:0 metrics:nil views:titleBarViews]];
-		[_titleBarView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(4)-[searchField]-(8)-|" options:0 metrics:nil views:titleBarViews]];
-		[_titleBarView setFrameSize:_titleBarView.fittingSize];
+		NSDictionary* views = @{ @"footerView": _footerView, };
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(>=77)-[footerView]|" options:0 metrics:nil views:views]];
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[footerView]|" options:0 metrics:nil views:views]];
 	}
-	return _titleBarView;
+	return _footerView;
 }
+
+// =====================
 
 - (void)showWindow:(id)sender
 {

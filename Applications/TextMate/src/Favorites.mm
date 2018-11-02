@@ -63,30 +63,38 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 		OakScopeBarView* scopeBar = [OakScopeBarView new];
 		scopeBar.labels = self.sourceListLabels;
 
-		OakBackgroundFillView* topDivider    = OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider);
-		OakBackgroundFillView* bottomDivider = OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider);
+		NSDictionary* titlebarViews = @{
+			@"searchField": self.searchField,
+			@"dividerView": [self makeDividerView],
+			@"scopeBar":    scopeBar,
+		};
 
-		NSDictionary* views = @{
-			@"scopeBar":           scopeBar,
-			@"topDivider":         topDivider,
-			@"scrollView":         self.scrollView,
-			@"bottomDivider":      bottomDivider,
+		NSView* titlebarView = [[NSView alloc] initWithFrame:NSZeroRect];
+		OakAddAutoLayoutViewsToSuperview(titlebarViews.allValues, titlebarView);
+
+		[titlebarView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[searchField]-(8)-|" options:0 metrics:nil views:titlebarViews]];
+		[titlebarView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[dividerView]|" options:0 metrics:nil views:titlebarViews]];
+		[titlebarView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[scopeBar]-(>=8)-|" options:0 metrics:nil views:titlebarViews]];
+
+		[titlebarView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(4)-[searchField]-(8)-[dividerView(==1)]-(4)-[scopeBar]-(4)-|" options:0 metrics:nil views:titlebarViews]];
+		[self addTitlebarAccessoryView:titlebarView];
+
+		NSDictionary* footerViews = @{
+			@"dividerView":        [self makeDividerView],
 			@"statusTextField":    self.statusTextField,
 			@"itemCountTextField": self.itemCountTextField,
 		};
 
-		NSView* contentView = self.window.contentView;
-		OakAddAutoLayoutViewsToSuperview([views allValues], contentView);
+		NSView* footerView = self.footerView;
+		OakAddAutoLayoutViewsToSuperview(footerViews.allValues, footerView);
+
+		[footerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[dividerView]|"                                 options:0 metrics:nil views:footerViews]];
+		[footerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[statusTextField]-[itemCountTextField]-|"      options:NSLayoutFormatAlignAllCenterY metrics:nil views:footerViews]];
+		[footerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[dividerView(==1)]-(4)-[statusTextField]-(5)-|" options:0 metrics:nil views:footerViews]];
+
+		[self updateScrollViewInsets];
+
 		OakSetupKeyViewLoop(@[ self.tableView, self.searchField, scopeBar ]);
-
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[scopeBar]-(>=8)-|"                             options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView(==topDivider,==bottomDivider)]|"         options:0 metrics:nil views:views]];
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[statusTextField]-[itemCountTextField]-|"           options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
-
-		[contentView addConstraint:[NSLayoutConstraint constraintWithItem:topDivider         attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0]];
-		[contentView addConstraint:[NSLayoutConstraint constraintWithItem:bottomDivider      attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0]];
-
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(4)-[scopeBar]-(4)-[topDivider][scrollView(>=50)][bottomDivider]-(4)-[statusTextField]-(5)-|" options:0 metrics:nil views:views]];
 
 		self.sourceIndex = [[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsOpenProjectSourceIndex];
 		[scopeBar bind:NSValueBinding toObject:self withKeyPath:@"sourceIndex" options:nil];

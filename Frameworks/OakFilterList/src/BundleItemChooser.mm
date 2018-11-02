@@ -402,6 +402,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 {
 	NSArray<ActionItem*>* _unfilteredItems;
 }
+@property (nonatomic) NSView* titlebarView;
 @property (nonatomic) OakKeyEquivalentView* keyEquivalentView;
 @property (nonatomic) NSPopUpButton* actionsPopUpButton;
 @property (nonatomic) OakScopeBarView* scopeBar;
@@ -471,8 +472,8 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		self.scopeBar = [OakScopeBarView new];
 		self.scopeBar.labels = _sourceListLabels;
 
-		self.topDivider          = OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider),
-		self.bottomDivider       = OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider);
+		self.topDivider          = [self makeDividerView];
+		self.bottomDivider       = [self makeDividerView];
 
 		self.selectButton                  = OakCreateButton(@"Select");
 		self.selectButton.font             = [NSFont messageFontOfSize:[NSFont smallSystemFontSize]];
@@ -486,30 +487,35 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		self.editButton.target           = self;
 		self.editButton.action           = @selector(editItem:);
 
-		NSDictionary* views = @{
-			@"scopeBar":      self.scopeBar,
-			@"topDivider":    self.topDivider,
-			@"scrollView":    self.scrollView,
-			@"bottomDivider": self.bottomDivider,
-			@"status":        self.statusTextField,
-			@"edit":          self.editButton,
-			@"select":        self.selectButton,
+		NSDictionary* titlebarViews = @{
+			@"searchField": self.keyEquivalentInput ? self.keyEquivalentView : self.searchField,
+			@"actions":     self.actionsPopUpButton,
+			@"dividerView": self.topDivider,
+			@"scopeBar":    self.scopeBar,
 		};
 
-		NSView* contentView = self.window.contentView;
-		OakAddAutoLayoutViewsToSuperview(views.allValues, contentView);
-
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[scopeBar]-(>=8)-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView(==topDivider,==bottomDivider)]|"     options:0 metrics:nil views:views]];
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(24)-[status]-[edit]-[select]-|"                options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(4)-[scopeBar]-(4)-[topDivider][scrollView(>=50)][bottomDivider]-(4)-[select]-(5)-|" options:0 metrics:nil views:views]];
-
-		[contentView addConstraint:[NSLayoutConstraint constraintWithItem:_topDivider         attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0]];
-		[contentView addConstraint:[NSLayoutConstraint constraintWithItem:_bottomDivider      attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0]];
-
-		OakAddAutoLayoutViewsToSuperview(@[ self.actionsPopUpButton ], self.titleBarView);
-		[self.titleBarView removeConstraints:self.titleBarView.constraints];
+		self.titlebarView = [[NSView alloc] initWithFrame:NSZeroRect];
+		OakAddAutoLayoutViewsToSuperview(titlebarViews.allValues, self.titlebarView);
 		[self setupLayoutConstraints];
+
+		[self addTitlebarAccessoryView:self.titlebarView];
+
+		NSDictionary* footerViews = @{
+			@"dividerView": self.bottomDivider,
+			@"status":      self.statusTextField,
+			@"edit":        self.editButton,
+			@"select":      self.selectButton,
+		};
+
+		NSView* footerView = self.footerView;
+		OakAddAutoLayoutViewsToSuperview(footerViews.allValues, footerView);
+
+		[footerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[dividerView]|"                       options:0 metrics:nil views:footerViews]];
+		[footerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(24)-[status]-[edit]-[select]-|"     options:NSLayoutFormatAlignAllCenterY metrics:nil views:footerViews]];
+		[footerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[dividerView(==1)]-(4)-[select]-(5)-|" options:0 metrics:nil views:footerViews]];
+
+		[self updateScrollViewInsets];
+
 		OakSetupKeyViewLoop(@[ self.searchField, self.actionsPopUpButton, self.scopeBar, self.editButton, self.selectButton ]);
 
 		[self.scopeBar bind:NSValueBinding toObject:self withKeyPath:@"sourceIndex" options:nil];
@@ -570,15 +576,19 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 
 - (void)setupLayoutConstraints
 {
-	NSDictionary* views = @{
+	NSDictionary* titlebarViews = @{
 		@"searchField": self.keyEquivalentInput ? self.keyEquivalentView : self.searchField,
 		@"actions":     self.actionsPopUpButton,
+		@"dividerView": self.topDivider,
+		@"scopeBar":    self.scopeBar,
 	};
 
 	NSMutableArray* constraints = [NSMutableArray array];
-	[constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[searchField(>=50)]-[actions]-(8)-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
-	[constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(4)-[searchField]-(8)-|" options:0 metrics:nil views:views]];
-	[self.titleBarView addConstraints:constraints];
+	[constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[searchField(>=50)]-[actions]-(8)-|"                       options:NSLayoutFormatAlignAllCenterY metrics:nil views:titlebarViews]];
+	[constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[dividerView]|"                                                 options:0 metrics:nil views:titlebarViews]];
+	[constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[scopeBar]-(>=8)-|"                                        options:0 metrics:nil views:titlebarViews]];
+	[constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(4)-[searchField]-(8)-[dividerView(==1)]-(4)-[scopeBar]-(4)-|" options:0 metrics:nil views:titlebarViews]];
+	[self.titlebarView addConstraints:constraints];
 	self.layoutConstraints = constraints;
 }
 
@@ -655,7 +665,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 
 	_keyEquivalentInput = flag;
 
-	NSView* contentView = self.titleBarView;
+	NSView* contentView = self.titlebarView;
 	[contentView removeConstraints:self.layoutConstraints];
 	self.layoutConstraints = nil;
 
