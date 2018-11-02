@@ -59,13 +59,12 @@
 }
 @end
 
-@interface OakPasteboardChooser () <NSWindowDelegate, NSTextFieldDelegate, NSTableViewDelegate, NSSearchFieldDelegate>
+@interface OakPasteboardChooser () <NSTextFieldDelegate, NSTableViewDelegate, NSSearchFieldDelegate>
 {
 	NSTitlebarAccessoryViewController* _accessoryViewController;
 }
 @property (nonatomic) OakPasteboard*        pasteboard;
 @property (nonatomic) NSArrayController*    arrayController;
-@property (nonatomic) NSWindow*             window;
 @property (nonatomic) NSSearchField*        searchField;
 @property (nonatomic) NSScrollView*         scrollView;
 @property (nonatomic) NSTableView*          tableView;
@@ -86,7 +85,7 @@ static NSMutableDictionary* SharedChoosers;
 
 - (id)initWithPasteboard:(OakPasteboard*)aPasteboard
 {
-	if((self = [super init]))
+	if(self = [super initWithWindow:[[NSPanel alloc] initWithContentRect:NSMakeRect(600, 700, 400, 500) styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskFullSizeContentView) backing:NSBackingStoreBuffered defer:NO]])
 	{
 		_pasteboard = aPasteboard;
 
@@ -131,13 +130,11 @@ static NSMutableDictionary* SharedChoosers;
 		_scrollView.borderType            = NSNoBorder;
 		_scrollView.documentView          = _tableView;
 
-		_window = [[NSPanel alloc] initWithContentRect:NSMakeRect(600, 700, 400, 500) styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskFullSizeContentView) backing:NSBackingStoreBuffered defer:NO];
-		[[_window standardWindowButton:NSWindowMiniaturizeButton] setHidden:YES];
-		[[_window standardWindowButton:NSWindowZoomButton] setHidden:YES];
-		_window.autorecalculatesKeyViewLoop = YES;
-		_window.delegate                    = self;
-		_window.level                       = NSFloatingWindowLevel;
-		_window.title                       = windowTitle;
+		[[self.window standardWindowButton:NSWindowMiniaturizeButton] setHidden:YES];
+		[[self.window standardWindowButton:NSWindowZoomButton] setHidden:YES];
+		self.window.autorecalculatesKeyViewLoop = YES;
+		self.window.level                       = NSFloatingWindowLevel;
+		self.window.title                       = windowTitle;
 
 		NSBox* topDividierView = [[NSBox alloc] initWithFrame:NSZeroRect];
 		topDividierView.boxType     = NSBoxCustom;
@@ -160,7 +157,7 @@ static NSMutableDictionary* SharedChoosers;
 
 		_accessoryViewController = [[NSTitlebarAccessoryViewController alloc] init];
 		_accessoryViewController.view = titleBarView;
-		[_window addTitlebarAccessoryViewController:_accessoryViewController];
+		[self.window addTitlebarAccessoryViewController:_accessoryViewController];
 
 		_arrayController = [[NSArrayController alloc] init];
 		_arrayController.managedObjectContext         = aPasteboard.managedObjectContext;
@@ -221,11 +218,7 @@ static NSMutableDictionary* SharedChoosers;
 		_scrollView.automaticallyAdjustsContentInsets = NO;
 		_scrollView.contentInsets = insets;
 
-		_window.defaultButtonCell = actionButton.cell;
-
-		NSResponder* nextResponder = [_tableView nextResponder];
-		[_tableView setNextResponder:self];
-		[self setNextResponder:nextResponder];
+		self.window.defaultButtonCell = actionButton.cell;
 
 		[deleteButton bind:NSEnabledBinding toObject:_arrayController withKeyPath:@"canRemove" options:nil];
 		[actionButton bind:NSEnabledBinding toObject:_arrayController withKeyPath:@"canRemove" options:nil];
@@ -242,7 +235,6 @@ static NSMutableDictionary* SharedChoosers;
 	[_pasteboard removeObserver:self forKeyPath:@"currentEntry" context:kOakPasteboardChooserCurrentEntryBinding];
 	[[[_tableView tableColumns] lastObject] unbind:NSValueBinding];
 
-	_window.delegate    = nil;
 	_tableView.delegate = nil;
 	_tableView.target   = nil;
 }
@@ -263,22 +255,22 @@ static NSMutableDictionary* SharedChoosers;
 		_arrayController.selectedObjects = @[ _pasteboard.currentEntry ];
 		[_tableView scrollRowToVisible:[_tableView selectedRow]];
 	}
-	[_window makeFirstResponder:_tableView];
-	[_window makeKeyAndOrderFront:self];
+	[self.window makeFirstResponder:_tableView];
+	[self.window makeKeyAndOrderFront:self];
 	self.didFetchTableViewData = YES;
 }
 
 - (void)showWindowRelativeToFrame:(NSRect)parentFrame
 {
-	if(![_window isVisible])
+	if(![self.window isVisible])
 	{
-		[_window layoutIfNeeded];
-		NSRect frame  = [_window frame];
+		[self.window layoutIfNeeded];
+		NSRect frame  = [self.window frame];
 		NSRect parent = parentFrame;
 
 		frame.origin.x = NSMinX(parent) + round((NSWidth(parent)  - NSWidth(frame))  * 1 / 4);
 		frame.origin.y = NSMinY(parent) + round((NSHeight(parent) - NSHeight(frame)) * 3 / 4);
-		[_window setFrame:frame display:NO];
+		[self.window setFrame:frame display:NO];
 	}
 	[self showWindow:self];
 }
@@ -287,11 +279,6 @@ static NSMutableDictionary* SharedChoosers;
 {
 	[_searchField unbind:NSValueBinding];
 	[SharedChoosers performSelector:@selector(removeObjectForKey:) withObject:_pasteboard.name afterDelay:0];
-}
-
-- (void)close
-{
-	[_window performClose:self];
 }
 
 - (void)observeValueForKeyPath:(NSString*)aKeyPath ofObject:(id)anObject change:(NSDictionary*)aDictionary context:(void*)aContext
@@ -350,20 +337,20 @@ static NSMutableDictionary* SharedChoosers;
 // = Action Method =
 // =================
 
-- (IBAction)orderFrontFindPanel:(id)sender { [_window makeFirstResponder:_searchField]; }
-- (IBAction)findAllInSelection:(id)sender  { [_window makeFirstResponder:_searchField]; }
+- (IBAction)orderFrontFindPanel:(id)sender { [self.window makeFirstResponder:_searchField]; }
+- (IBAction)findAllInSelection:(id)sender  { [self.window makeFirstResponder:_searchField]; }
 
 - (void)accept:(id)sender
 {
-	[_window orderOut:self];
+	[self.window orderOut:self];
 	if(_action)
 		[NSApp sendAction:_action to:_target from:self];
-	[_window close];
+	[self.window close];
 }
 
 - (void)cancel:(id)sender
 {
-	[self close];
+	[self.window performClose:self];
 }
 
 - (void)clearAll:(id)sender
@@ -408,19 +395,19 @@ static NSMutableDictionary* SharedChoosers;
 
 - (void)insertTab:(id)sender
 {
-	[_window selectNextKeyView:self];
+	[self.window selectNextKeyView:self];
 }
 
 - (void)insertBacktab:(id)sender
 {
-	[_window selectPreviousKeyView:self];
+	[self.window selectPreviousKeyView:self];
 }
 
 - (void)insertText:(id)aString
 {
 	self.filterString = aString;
-	[_window makeFirstResponder:_searchField];
-	NSText* fieldEditor = (NSText*)[_window firstResponder];
+	[self.window makeFirstResponder:_searchField];
+	NSText* fieldEditor = (NSText*)[self.window firstResponder];
 	if([fieldEditor isKindOfClass:[NSText class]])
 		[fieldEditor setSelectedRange:NSMakeRange([[fieldEditor string] length], 0)];
 }
