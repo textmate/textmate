@@ -17,6 +17,7 @@ PUBLIC @interface OakTabBarView : OakBackgroundFillView
 - (void)expand;
 - (void)reloadData;
 - (void)setSelectedTabIndex:(NSUInteger)anIndex;
+- (void)performClose:(id)sender;
 
 @property (nonatomic, readonly) NSArray<OakTabItem*>* tabItems;
 @property (nonatomic, readonly) OakTabItem* selectedTabItem;

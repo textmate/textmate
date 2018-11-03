@@ -403,7 +403,9 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 	NSView* view = (NSView*)[[self window] firstResponder];
 	if([view isKindOfClass:[NSView class]] && [view isDescendantOf:_htmlOutputView])
 		[NSApp sendAction:@selector(performCloseSplit:) to:nil from:_htmlOutputView];
-	else if(_tabBarView)
-		[_tabBarView tryToPerform:_cmd with:sender];
+	else if([self.window.delegate respondsToSelector:@selector(performClose:)])
+		[self.window.delegate performSelector:@selector(performClose:) withObject:sender];
+	else
+		NSBeep();
 }
 @end

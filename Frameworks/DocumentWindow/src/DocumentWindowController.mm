@@ -523,6 +523,11 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		[self openAndSelectDocument:newDocuments[newSelectedTabIndex] activate:activateFlag];
 }
 
+- (void)performClose:(id)sender
+{
+	[self.tabBarView performClose:sender];
+}
+
 - (IBAction)performCloseTab:(id)sender
 {
 	NSUInteger index = [sender isKindOfClass:[OakTabBarView class]] ? [sender tag] : _selectedTabIndex;
