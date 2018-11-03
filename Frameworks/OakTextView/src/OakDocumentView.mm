@@ -28,17 +28,7 @@ static NSString* const kUserDefaultsLineNumberFontNameKey    = @"lineNumberFontN
 static NSString* const kBookmarksColumnIdentifier = @"bookmarks";
 static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 
-@interface OakDisableAccessibilityScrollView : NSScrollView
-@end
-
-@implementation OakDisableAccessibilityScrollView
-- (BOOL)accessibilityIsIgnored
-{
-	return YES;
-}
-@end
-
-@interface OakDocumentView () <GutterViewDelegate, GutterViewColumnDataSource, GutterViewColumnDelegate, OTVStatusBarDelegate>
+@interface OakDocumentView () <NSAccessibilityGroup, GutterViewDelegate, GutterViewColumnDataSource, GutterViewColumnDelegate, OTVStatusBarDelegate>
 {
 	OBJC_WATCH_LEAKS(OakDocumentView);
 
@@ -68,6 +58,9 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	D(DBF_OakDocumentView, bug("%s\n", [NSStringFromRect(aRect) UTF8String]););
 	if(self = [super initWithFrame:aRect])
 	{
+		self.accessibilityRole  = NSAccessibilityGroupRole;
+		self.accessibilityLabel = @"Editor";
+
 		_textView = [[OakTextView alloc] initWithFrame:NSZeroRect];
 		_textView.autoresizingMask = NSViewWidthSizable|NSViewHeightSizable;
 
@@ -87,7 +80,8 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 			[gutterView setVisibility:NO forColumnWithIdentifier:GVLineNumbersColumnIdentifier];
 		[gutterView setTranslatesAutoresizingMaskIntoConstraints:NO];
 
-		gutterScrollView = [[OakDisableAccessibilityScrollView alloc] initWithFrame:NSZeroRect];
+		gutterScrollView = [[NSScrollView alloc] initWithFrame:NSZeroRect];
+		gutterScrollView.accessibilityElement = NO;
 		gutterScrollView.borderType   = NSNoBorder;
 		gutterScrollView.documentView = gutterView;
 
@@ -813,47 +807,6 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 - (void)documentMarksDidChange:(NSNotification*)aNotification
 {
 	[[NSNotificationCenter defaultCenter] postNotificationName:GVColumnDataSourceDidChange object:self];
-}
-
-// =================
-// = Accessibility =
-// =================
-
-- (BOOL)accessibilityIsIgnored
-{
-	return NO;
-}
-
-- (NSSet*)myAccessibilityAttributeNames
-{
-	static NSSet* set = [NSSet setWithArray:@[
-		NSAccessibilityRoleAttribute,
-		NSAccessibilityDescriptionAttribute,
-	]];
-	return set;
-}
-
-- (NSArray*)accessibilityAttributeNames
-{
-	static NSArray* attributes = [[[self myAccessibilityAttributeNames] setByAddingObjectsFromArray:[super accessibilityAttributeNames]] allObjects];
-	return attributes;
-}
-
-- (BOOL)accessibilityIsAttributeSettable:(NSString*)attribute
-{
-	if([[self myAccessibilityAttributeNames] containsObject:attribute])
-		return NO;
-	return [super accessibilityIsAttributeSettable:attribute];
-}
-
-- (id)accessibilityAttributeValue:(NSString*)attribute
-{
-	if([attribute isEqualToString:NSAccessibilityRoleAttribute])
-		return NSAccessibilityGroupRole;
-	else if([attribute isEqualToString:NSAccessibilityDescriptionAttribute])
-		return @"Editor";
-	else
-		return [super accessibilityAttributeValue:attribute];
 }
 
 // ============
