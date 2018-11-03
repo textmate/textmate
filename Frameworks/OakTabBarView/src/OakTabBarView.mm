@@ -18,28 +18,27 @@ static NSString* const OakTabItemPasteboardType = @"com.macromates.TextMate.tabI
 @end
 
 @implementation OakTabItem
+- (instancetype)initWithTitle:(NSString*)title path:(NSString*)path identifier:(NSString*)identifier modified:(BOOL)modified
+{
+	if(self = [super init])
+	{
+		_title      = title;
+		_path       = path;
+		_identifier = identifier;
+		_modified   = modified;
+	}
+	return self;
+}
+
 + (instancetype)tabItemWithTitle:(NSString*)aTitle path:(NSString*)aPath identifier:(NSString*)anIdentifier modified:(BOOL)flag;
 {
-	OakTabItem* res = [OakTabItem new];
-	res.title      = aTitle;
-	res.path       = aPath;
-	res.identifier = anIdentifier;
-	res.modified   = flag;
-	return res;
+	return [[OakTabItem alloc] initWithTitle:aTitle path:aPath identifier:anIdentifier modified:flag];
 }
 
 + (instancetype)tabItemFromPasteboardItem:(NSPasteboardItem*)pasteboardItem
 {
 	NSDictionary* plist = [pasteboardItem propertyListForType:OakTabItemPasteboardType];
-	if(!plist)
-		return nil;
-
-	OakTabItem* res = [OakTabItem new];
-	res.title      = plist[@"title"];
-	res.path       = plist[@"path"];
-	res.identifier = plist[@"identifier"];
-	res.modified   = [plist[@"modified"] boolValue];
-	return res;
+	return plist ? [[OakTabItem alloc] initWithTitle:plist[@"title"] path:plist[@"path"] identifier:plist[@"identifier"] modified:[plist[@"modified"] boolValue]] : nil;
 }
 
 - (NSArray*)writableTypesForPasteboard:(NSPasteboard*)aPasteboard
@@ -99,7 +98,7 @@ static NSString* const OakTabItemPasteboardType = @"com.macromates.TextMate.tabI
 
 @interface OakTabBarView () <NSDraggingSource/*, NSDraggingDestination*/>
 {
-	NSMutableArray* _tabItems;
+	NSMutableArray<OakTabItem*>* _tabItems;
 
 	OakTabItem* _draggedTabItem;
 	OakTabItem* _preliminaryTabItem;

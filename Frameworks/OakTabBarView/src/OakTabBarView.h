@@ -2,10 +2,9 @@
 #import <oak/misc.h>
 
 PUBLIC @interface OakTabItem : NSObject
-+ (instancetype)tabItemWithTitle:(NSString*)aTitle path:(NSString*)aPath identifier:(NSString*)anIdentifier modified:(BOOL)flag;
 @property (nonatomic) NSString* title;
 @property (nonatomic) NSString* path;
-@property (nonatomic) NSString* identifier;
+@property (nonatomic, readonly) NSString* identifier;
 @property (nonatomic, getter = isModified) BOOL modified;
 @end
 
@@ -19,9 +18,8 @@ PUBLIC @interface OakTabBarView : OakBackgroundFillView
 - (void)reloadData;
 - (void)setSelectedTab:(NSUInteger)anIndex;
 
-@property (nonatomic, readonly) NSArray* tabItems;
-@property (nonatomic) OakTabItem* selectedTabItem;
-- (OakTabItem*)tabItemForView:(id)aView;
+@property (nonatomic, readonly) NSArray<OakTabItem*>* tabItems;
+@property (nonatomic, readonly) OakTabItem* selectedTabItem;
 
 @property (nonatomic) BOOL neverHideLeftBorder;
 @end
