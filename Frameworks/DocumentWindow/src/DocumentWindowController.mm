@@ -1498,7 +1498,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 - (void)setSelectedTabIndex:(NSUInteger)newSelectedTabIndex
 {
 	_selectedTabIndex = newSelectedTabIndex;
-	[self.tabBarView setSelectedTab:newSelectedTabIndex];
+	[self.tabBarView setSelectedTabIndex:newSelectedTabIndex];
 }
 
 - (void)setIdentifier:(NSUUID*)newIdentifier

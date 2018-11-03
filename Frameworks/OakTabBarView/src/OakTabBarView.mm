@@ -585,7 +585,7 @@ static NSString* const OakTabItemPasteboardType = @"com.macromates.TextMate.tabI
 		{
 			NSUInteger tabIndex = [_tabItems indexOfObject:tabItem];
 			if([_delegate tabBarView:self shouldSelectIndex:tabIndex])
-				self.selectedTab = tabIndex;
+				self.selectedTabIndex = tabIndex;
 		}
 	}
 }
@@ -911,7 +911,7 @@ static NSString* const OakTabItemPasteboardType = @"com.macromates.TextMate.tabI
 		self.selectedTabItem = _tabItems.firstObject;
 }
 
-- (void)setSelectedTab:(NSUInteger)anIndex
+- (void)setSelectedTabIndex:(NSUInteger)anIndex
 {
 	self.selectedTabItem = anIndex < _tabItems.count ? _tabItems[anIndex] : nil;
 }
