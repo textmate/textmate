@@ -1,5 +1,6 @@
 #import "OakTabBarView.h"
 #import "OakTabItemView.h"
+#import "OakTabBarStyle.h"
 #import <OakAppKit/OakRolloverButton.h>
 #import <OakAppKit/OakFileIconImage.h>
 #import <OakAppKit/OakAppKit.h>

@@ -1,5 +1,5 @@
 #import <OakAppKit/OakUIConstructionFunctions.h>
-#import <oak/debug.h>
+#import <oak/misc.h>
 
 PUBLIC @interface OakTabItem : NSObject
 + (instancetype)tabItemWithTitle:(NSString*)aTitle path:(NSString*)aPath identifier:(NSString*)anIdentifier modified:(BOOL)flag;
