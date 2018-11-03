@@ -9,6 +9,7 @@
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakPasteboard.h>
 #import <OakAppKit/OakSavePanel.h>
+#import <OakAppKit/OakUIConstructionFunctions.h>
 #import <MenuBuilder/MenuBuilder.h>
 #import <OakTabBarView/OakTabBarView.h>
 #import <OakFoundation/NSString Additions.h>
