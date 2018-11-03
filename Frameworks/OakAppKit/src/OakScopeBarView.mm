@@ -16,12 +16,21 @@ static NSButton* OakCreateScopeButton (NSString* label, NSUInteger tag, SEL acti
 	return res;
 }
 
-@interface OakScopeBarView ()
+@interface OakScopeBarView () <NSAccessibilityGroup>
 @property (nonatomic) NSArray* buttons;
 @property (nonatomic) NSMutableArray* myConstraints;
 @end
 
 @implementation OakScopeBarView
+- (instancetype)initWithFrame:(NSRect)aRect
+{
+	if(self = [super initWithFrame:aRect])
+	{
+		self.accessibilityRole = NSAccessibilityRadioGroupRole;
+	}
+	return self;
+}
+
 - (void)setLabels:(NSArray*)anArray
 {
 	if(_labels == anArray || [_labels isEqualToArray:anArray])
@@ -98,42 +107,4 @@ static NSButton* OakCreateScopeButton (NSString* label, NSUInteger tag, SEL acti
 
 - (id)value                   { return @(self.selectedIndex); }
 - (void)setValue:(id)newValue { self.selectedIndex = [newValue intValue]; }
-
-// =================
-// = Accessibility =
-// =================
-
-- (BOOL)accessibilityIsIgnored
-{
-	return NO;
-}
-
-- (NSSet*)myAccessibilityAttributeNames
-{
-	static NSSet* set = [NSSet setWithArray:@[
-		NSAccessibilityRoleAttribute,
-	]];
-	return set;
-}
-
-- (NSArray*)accessibilityAttributeNames
-{
-	static NSArray* attributes = [[[self myAccessibilityAttributeNames] setByAddingObjectsFromArray:[super accessibilityAttributeNames]] allObjects];
-	return attributes;
-}
-
-- (BOOL)accessibilityIsAttributeSettable:(NSString*)attribute
-{
-	if([[self myAccessibilityAttributeNames] containsObject:attribute])
-		return NO;
-	return [super accessibilityIsAttributeSettable:attribute];
-}
-
-- (id)accessibilityAttributeValue:(NSString *)attribute
-{
-	if([attribute isEqualToString:NSAccessibilityRoleAttribute])
-		return NSAccessibilityRadioGroupRole;
-	else
-		return [super accessibilityAttributeValue:attribute];
-}
 @end
