@@ -1454,7 +1454,11 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 	_documents = newDocuments;
 	if(_documents.count)
+	{
 		[self.tabBarView reloadData];
+		if(!self.tabBarView.selectedTabItem)
+			[self.tabBarView setSelectedTabIndex:MIN(_selectedTabIndex, _documents.count-1)];
+	}
 
 	[self updateFileBrowserStatus:self];
 	[self updateTouchBarButtons];
