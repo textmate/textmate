@@ -1054,7 +1054,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 		{
 			NSButton* imageButton = view.openButton;
 			NSRect imageRect = NSIntersectionRect([imageButton convertRect:imageButton.bounds toView:nil], [_outlineView convertRect:_outlineView.visibleRect toView:nil]);
-			return NSEqualSizes(imageRect.size, NSZeroSize) ? NSZeroRect : [self.window convertRectToScreen:imageRect];
+			return NSIsEmptyRect(imageRect) ? NSZeroRect : [self.window convertRectToScreen:imageRect];
 		}
 	}
 	return NSZeroRect;
