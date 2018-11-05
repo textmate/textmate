@@ -55,6 +55,12 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSString* accessibi
 {
 	if(self = [super initWithFrame:aRect])
 	{
+		NSImage* recordMacroImage = [NSImage imageWithSize:NSMakeSize(16, 16) flipped:NO drawingHandler:^BOOL(NSRect dstRect){
+			[NSColor.redColor set];
+			[[NSBezierPath bezierPathWithOvalInRect:NSInsetRect(dstRect, 2, 2)] fill];
+			return YES;
+		}];
+
 		self.style = OakBackgroundFillViewStyleStatusBar;
 
 		self.selectionField               = OakCreateTextField(@"1:1");
@@ -63,7 +69,7 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSString* accessibi
 		self.tabSizePopUp.pullsDown       = YES;
 		self.bundleItemsPopUp             = OakCreateStatusBarPopUpButton(nil, @"Bundle Item");
 		self.symbolPopUp                  = OakCreateStatusBarPopUpButton(@"", @"Symbol");
-		self.macroRecordingButton         = OakCreateImageToggleButton([NSImage imageNamed:@"Recording" inSameBundleAsClass:[self class]], @"Record a macro");
+		self.macroRecordingButton         = OakCreateImageToggleButton(recordMacroImage, @"Record a macro");
 		self.macroRecordingButton.action  = @selector(toggleMacroRecording:);
 		self.macroRecordingButton.toolTip = @"Click to start recording a macro";
 
