@@ -180,19 +180,19 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		self.textView.delegate = self;
 
 		self.layoutView = [[ProjectLayoutView alloc] initWithFrame:NSZeroRect];
-		self.layoutView.tabBarView   = self.tabBarView;
 		self.layoutView.documentView = self.documentView;
 
-		NSUInteger windowStyle = (NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskMiniaturizable|NSWindowStyleMaskTexturedBackground);
+		NSUInteger windowStyle = (NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskMiniaturizable);
 		self.window = [[NSWindow alloc] initWithContentRect:[NSWindow contentRectForFrameRect:[self frameRectForNewWindow] styleMask:windowStyle] styleMask:windowStyle backing:NSBackingStoreBuffered defer:NO];
 		self.window.collectionBehavior = NSWindowCollectionBehaviorFullScreenPrimary;
 		self.window.delegate           = self;
 		self.window.releasedWhenClosed = NO;
-		self.window.titlebarAppearsTransparent = YES;
-		[self.window setContentBorderThickness:0 forEdge:NSMaxYEdge]; // top border
-		[self.window setContentBorderThickness:0 forEdge:NSMinYEdge]; // bottom border
-		[self.window setAutorecalculatesContentBorderThickness:NO forEdge:NSMaxYEdge];
-		[self.window setAutorecalculatesContentBorderThickness:NO forEdge:NSMinYEdge];
+
+		NSTitlebarAccessoryViewController* viewController = [[NSTitlebarAccessoryViewController alloc] init];
+		self.tabBarView.frameSize = self.tabBarView.intrinsicContentSize;
+		viewController.view = self.tabBarView;
+		viewController.fullScreenMinHeight = NSHeight(self.tabBarView.frame);
+		[self.window addTitlebarAccessoryViewController:viewController];
 
 		[LicenseManager.sharedInstance decorateWindow:self.window];
 

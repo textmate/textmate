@@ -65,14 +65,12 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 - (void)updateKeyViewLoop
 {
 	OakSetupKeyViewLoop(@[
-		_tabBarView      ?: [NSNull null],
 		_documentView    ?: [NSNull null],
 		_htmlOutputView  ?: [NSNull null],
 		_fileBrowserView ?: [NSNull null],
 	], NO);
 }
 
-- (void)setTabBarView:(OakTabBarView*)aTabBarView    { _tabBarView = (OakTabBarView*)[self replaceView:_tabBarView withView:aTabBarView]; [self updateKeyViewLoop]; }
 - (void)setDocumentView:(NSView*)aDocumentView       { _documentView = [self replaceView:_documentView withView:aDocumentView]; [self updateKeyViewLoop]; }
 
 - (void)setHtmlOutputView:(NSView*)aHtmlOutputView
@@ -119,7 +117,6 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 	[super updateConstraints];
 
 	NSDictionary* views = @{
-		@"tabBarView":         _tabBarView,
 		@"documentView":       _documentView,
 		@"fileBrowserView":    _fileBrowserView    ?: [NSNull null],
 		@"fileBrowserDivider": _fileBrowserDivider ?: [NSNull null],
@@ -127,22 +124,12 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 		@"htmlOutputDivider":  _htmlOutputDivider  ?: [NSNull null],
 	};
 
-	// =======================
-	// = Anchor Tab Bar View =
-	// =======================
-
-	// top
-	CONSTRAINT(@"V:|[tabBarView]", 0);
-
-	// left + right
-	CONSTRAINT(@"H:|[tabBarView]|", 0);
-
 	// ========================
 	// = Anchor Document View =
 	// ========================
 
 	// top
-	CONSTRAINT(@"V:[tabBarView][documentView]", 0);
+	CONSTRAINT(@"V:|[documentView]", 0);
 
 	// bottom
 	if(_htmlOutputView && !_htmlOutputOnRight)
@@ -176,8 +163,8 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 		[_myConstraints addObject:self.fileBrowserWidthConstraint];
 
 		// top
-		CONSTRAINT(@"V:|[tabBarView][fileBrowserDivider]", 0);
-		CONSTRAINT(@"V:|[tabBarView][fileBrowserView]", 0);
+		CONSTRAINT(@"V:|[fileBrowserDivider]", 0);
+		CONSTRAINT(@"V:|[fileBrowserView]", 0);
 
 		// bottom
 		if(_htmlOutputView && !_htmlOutputOnRight)
@@ -220,8 +207,8 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 		if(_htmlOutputOnRight)
 		{
 			// top + bottom
-			CONSTRAINT(@"V:[tabBarView][htmlOutputView]|", 0);
-			CONSTRAINT(@"V:[tabBarView][htmlOutputDivider]|", 0);
+			CONSTRAINT(@"V:|[htmlOutputView]|", 0);
+			CONSTRAINT(@"V:|[htmlOutputDivider]|", 0);
 
 			// left + right
 			if(_fileBrowserView && _fileBrowserOnRight)

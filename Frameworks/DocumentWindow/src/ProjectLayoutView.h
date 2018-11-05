@@ -1,7 +1,6 @@
 #import <OakTabBarView/OakTabBarView.h>
 
 @interface ProjectLayoutView : NSView
-@property (nonatomic) OakTabBarView* tabBarView;
 @property (nonatomic) NSView* documentView;
 @property (nonatomic) NSView* fileBrowserView;
 @property (nonatomic) NSView* fileBrowserHeaderView;
