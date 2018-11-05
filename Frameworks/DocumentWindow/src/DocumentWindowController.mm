@@ -1733,8 +1733,6 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 			if(self.projectPath && !_fileBrowserHistory)
 				[self.fileBrowser goToURL:[NSURL fileURLWithPath:self.projectPath]];
 			[self updateFileBrowserStatus:self];
-			if(self.layoutView.tabsAboveDocument)
-				[self.tabBarView expand];
 
 			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(fileBrowserDidDuplicate:) name:FileBrowserDidDuplicateNotification object:nil];
 		}

@@ -1,8 +1,6 @@
 #import "OFBHeaderView.h"
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
-#import <OakTabBarView/OakTabBarStyle.h>
-#import <Preferences/Keys.h>
 
 static NSButton* OakCreateImageButton (NSString* imageName)
 {
@@ -27,7 +25,6 @@ static NSPopUpButton* OakCreateFolderPopUpButton ()
 }
 
 @interface OFBHeaderView ()
-@property (nonatomic) BOOL    inTabBar;
 @property (nonatomic) NSView* bottomDivider;
 @end
 
@@ -64,51 +61,12 @@ static NSPopUpButton* OakCreateFolderPopUpButton ()
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(-3)-[folder(>=75)]-(3)-[divider]-(2)-[back(==22)]-(2)-[forward(==back)]-(3)-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[bottomDivider]|"                                                                options:0 metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[folder(==divider,==back,==forward)][bottomDivider]|"                            options:0 metrics:nil views:views]];
-
-		[self userDefaultsDidChange:nil];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
 	}
 	return self;
-}
-
-- (void)dealloc
-{
-	[[NSNotificationCenter defaultCenter] removeObserver:self];
-}
-
-- (void)userDefaultsDidChange:(NSNotification*)aNotification
-{
-	self.inTabBar = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsTabsAboveDocumentKey];
-}
-
-- (void)setInTabBar:(BOOL)flag
-{
-	if(_inTabBar != flag)
-	{
-		_inTabBar = flag;
-		_bottomDivider.hidden = flag;
-	}
-
-	if(flag)
-	{
-		self.style = OakBackgroundFillViewStyleNone;
-		[[OakTabBarStyle sharedInstance] setupTabBarView:self];
-	}
-	else
-	{
-		self.style = OakBackgroundFillViewStyleHeader;
-	}
 }
 
 - (NSSize)intrinsicContentSize
 {
 	return NSMakeSize(NSViewNoInstrinsicMetric, 24);
-}
-
-- (void)layout
-{
-	if(_inTabBar)
-		[[OakTabBarStyle sharedInstance] setupTabBarView:self];
-	[super layout];
 }
 @end
