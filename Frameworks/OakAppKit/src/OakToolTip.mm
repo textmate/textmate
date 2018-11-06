@@ -98,7 +98,7 @@ static __weak OakToolTip* LastToolTip;
 		return NO;
 
 	NSPoint const& p = mousePositionWhenOpened;
-	CGFloat dist = sqrt(SQ(p.x - aPoint.x) + SQ(p.y - aPoint.y));
+	CGFloat dist = hypot(p.x - aPoint.x, p.y - aPoint.y);
 
 	CGFloat moveThreshold = [[NSUserDefaults standardUserDefaults] floatForKey:@"OakToolTipMouseDistanceThreshold"];
 	return dist > moveThreshold;

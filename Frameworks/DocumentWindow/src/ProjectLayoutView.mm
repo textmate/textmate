@@ -313,8 +313,8 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 				break;
 
 			NSPoint mouseCurrentPos = [self convertPoint:[anEvent locationInWindow] fromView:nil];
-			if(!didDrag && SQ(fabs(mouseDownPos.x - mouseCurrentPos.x)) + SQ(fabs(mouseDownPos.y - mouseCurrentPos.y)) < SQ(1))
-				continue; // we didn't even drag a pixel
+			if(!didDrag && hypot(mouseDownPos.x - mouseCurrentPos.x, mouseDownPos.y - mouseCurrentPos.y) < 2.5)
+				continue;
 
 			if(view == _htmlOutputView)
 			{
