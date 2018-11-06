@@ -5,6 +5,7 @@
 #include <scope/scope.h>
 
 PUBLIC extern char const* kMacClassicThemeUUID;
+PUBLIC extern char const* kTwilightThemeUUID;
 
 typedef std::shared_ptr<std::remove_pointer<CTFontRef>::type> CTFontPtr;
 typedef std::shared_ptr<std::remove_pointer<CGColorRef>::type> CGColorPtr;
