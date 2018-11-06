@@ -149,17 +149,19 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[files(==header,==divider,==actions)]|" options:0 metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[header]-(>=0)-[divider]"               options:NSLayoutFormatAlignAllLeft metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[files][divider][actions]|"             options:NSLayoutFormatAlignAllLeft metrics:nil views:views]];
 
-		NSEdgeInsets insets = _scrollView.contentInsets;
-		insets.top += _headerView.fittingSize.height;
-		_scrollView.automaticallyAdjustsContentInsets = NO;
-		_scrollView.contentInsets = insets;
-
-		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:NSUserDefaults.standardUserDefaults];
-
-		if(@available(macos 10.11, *))
+		if(@available(macos 10.12, *))
 		{
+			// Placing files behind header seems to require MAC_OS_X_VERSION_10_12 for proper rendering
+			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[files][divider][actions]|" options:NSLayoutFormatAlignAllLeft metrics:nil views:views]];
+
+			NSEdgeInsets insets = _scrollView.contentInsets;
+			insets.top += _headerView.fittingSize.height;
+			_scrollView.automaticallyAdjustsContentInsets = NO;
+			_scrollView.contentInsets = insets;
+
+			[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:NSUserDefaults.standardUserDefaults];
+
 			NSVisualEffectView* effectView = [[NSVisualEffectView alloc] initWithFrame:NSZeroRect];
 			effectView.material = NSVisualEffectMaterialSidebar; // MAC_OS_X_VERSION_10_11
 
@@ -176,6 +178,10 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 			[self addSubview:effectView positioned:NSWindowBelow relativeTo:nil];
 
 			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[header][effect][divider]" options:NSLayoutFormatAlignAllLeft|NSLayoutFormatAlignAllRight metrics:nil views:views]];
+		}
+		else
+		{
+			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[header][files][divider][actions]|" options:NSLayoutFormatAlignAllLeft metrics:nil views:views]];
 		}
 	}
 	return self;
