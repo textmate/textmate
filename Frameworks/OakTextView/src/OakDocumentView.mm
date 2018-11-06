@@ -396,8 +396,9 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	if([defaults boolForKey:@"changeThemeBasedOnAppearance"])
 	{
 		NSAppearanceName appearanceName = [self.effectiveAppearance bestMatchFromAppearancesWithNames:@[ NSAppearanceNameAqua, NSAppearanceNameDarkAqua ]];
-		NSString* themeUUID = [appearanceName isEqualToString:NSAppearanceNameDarkAqua] ? [defaults stringForKey:@"darkModeThemeUUID"] : [defaults stringForKey:@"universalThemeUUID"];
-		[self setThemeWithUUID:themeUUID];
+		if([appearanceName isEqualToString:NSAppearanceNameDarkAqua])
+				[self setThemeWithUUID:[defaults stringForKey:@"darkModeThemeUUID"]  ?: to_ns(kTwilightThemeUUID)];
+		else	[self setThemeWithUUID:[defaults stringForKey:@"universalThemeUUID"] ?: to_ns(kMacClassicThemeUUID)];
 	}
 }
 
