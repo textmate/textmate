@@ -114,7 +114,6 @@ static NSString* const OakTabItemPasteboardType = @"com.macromates.TextMate.tabI
 	NSRect _didCloseTabFrame;
 }
 @property (nonatomic) NSUInteger draggedTabIndex;
-@property (nonatomic) BOOL expanded;
 @property (nonatomic) NSPoint mouseDownPos;
 @property (nonatomic) BOOL isMouseInside;
 @end
@@ -125,16 +124,13 @@ static NSString* const OakTabItemPasteboardType = @"com.macromates.TextMate.tabI
 	if(self = [super initWithFrame:aFrame])
 	{
 		_tabItems = [NSMutableArray new];
-		_expanded = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableTabBarCollapsingKey];
-		if(_expanded)
-			[self setupAddTabButton];
+		[self setupAddTabButton];
 
 		OakTabBarStyle* tabStyle = [OakTabBarStyle sharedInstance];
 		[tabStyle setupTabBarView:self];
 
 		[self registerForDraggedTypes:@[ OakTabItemPasteboardType ]];
 		self.wantsLayer = YES;
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
 	}
 	return self;
 }
@@ -162,34 +158,9 @@ static NSString* const OakTabItemPasteboardType = @"com.macromates.TextMate.tabI
 	[self addSubview:_addTabButton];
 }
 
-- (void)dealloc
-{
-	[[NSNotificationCenter defaultCenter] removeObserver:self name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
-}
-
-- (void)userDefaultsDidChange:(NSNotification*)aNotification
-{
-	self.expanded = _expanded || [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableTabBarCollapsingKey];
-}
-
-- (void)expand
-{
-	self.expanded = YES;
-}
-
-- (void)setExpanded:(BOOL)flag
-{
-	if(_expanded == flag)
-		return;
-	_expanded = flag;
-	[self invalidateIntrinsicContentSize];
-	if(_expanded && !_addTabButton)
-		[self setupAddTabButton];
-}
-
 - (NSSize)intrinsicContentSize
 {
-	return NSMakeSize(OakTabBarStyle.sharedInstance.minimumTabSize, _expanded ? self.activeBackgroundImage.size.height : 2);
+	return NSMakeSize(OakTabBarStyle.sharedInstance.minimumTabSize, self.activeBackgroundImage.size.height);
 }
 
 - (BOOL)isOpaque
@@ -398,7 +369,7 @@ static NSString* const OakTabItemPasteboardType = @"com.macromates.TextMate.tabI
 
 	NSRect bounds = NSMakeRect(leftPadding, 0, NSWidth(self.bounds) - NSWidth(_addTabButton.frame) - rightPadding - leftPadding, NSHeight(self.bounds));
 
-	if(!_tabItems.count || !_expanded || NSWidth(bounds) < tabMinWidth)
+	if(!_tabItems.count || NSWidth(bounds) < tabMinWidth)
 	{
 		for(OakTabItem* tabItem in _tabItems)
 		{
@@ -896,16 +867,9 @@ static NSString* const OakTabItemPasteboardType = @"com.macromates.TextMate.tabI
 
 	_tabItems = newTabs;
 
-	if(!_expanded && _tabItems.count > 1)
-	{
-		self.expanded = YES;
-	}
-	else
-	{
-		if(oldCount && newCount && oldCount != newCount)
-				[self animateLayoutUpdate];
-		else	[self resizeTabItemViewFrames];
-	}
+	if(oldCount && newCount && oldCount != newCount)
+			[self animateLayoutUpdate];
+	else	[self resizeTabItemViewFrames];
 
 	if(!_selectedTabItem && _tabItems.count)
 		self.selectedTabItem = _tabItems.firstObject;

@@ -14,7 +14,6 @@ PUBLIC @interface OakTabBarView : OakBackgroundFillView
 @property (nonatomic, weak) id <OakTabBarViewDelegate> delegate;
 @property (nonatomic, weak) id <OakTabBarViewDataSource> dataSource;
 @property (nonatomic, readonly) NSUInteger countOfVisibleTabs;
-- (void)expand;
 - (void)reloadData;
 - (void)setSelectedTabIndex:(NSUInteger)anIndex;
 - (void)performClose:(id)sender;
