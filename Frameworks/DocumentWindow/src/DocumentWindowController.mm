@@ -78,6 +78,7 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 	std::map<std::string, std::string>     _documentSCMVariables;
 	std::vector<std::string>               _documentScopeAttributes; // attr.os-version, attr.untitled / attr.rev-path + kSettingsScopeAttributesKey
 }
+@property (nonatomic) NSTitlebarAccessoryViewController* titlebarViewController;
 @property (nonatomic) ProjectLayoutView*          layoutView;
 @property (nonatomic) OakTabBarView*              tabBarView;
 @property (nonatomic) OakDocumentView*            documentView;
@@ -188,11 +189,11 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		self.window.delegate           = self;
 		self.window.releasedWhenClosed = NO;
 
-		NSTitlebarAccessoryViewController* viewController = [[NSTitlebarAccessoryViewController alloc] init];
+		_titlebarViewController = [[NSTitlebarAccessoryViewController alloc] init];
 		self.tabBarView.frameSize = self.tabBarView.intrinsicContentSize;
-		viewController.view = self.tabBarView;
-		viewController.fullScreenMinHeight = NSHeight(self.tabBarView.frame);
-		[self.window addTitlebarAccessoryViewController:viewController];
+		_titlebarViewController.view = self.tabBarView;
+		_titlebarViewController.fullScreenMinHeight = NSHeight(self.tabBarView.frame);
+		[self.window addTitlebarAccessoryViewController:_titlebarViewController];
 
 		[LicenseManager.sharedInstance decorateWindow:self.window];
 
@@ -366,6 +367,12 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	{
 		self.oldWindowFrame = self.newWindowFrame = NSZeroRect;
 		self.layoutView.fileBrowserOnRight = !self.layoutView.fileBrowserOnRight;
+	}
+
+	if(@available(macos 10.12, *))
+	{
+		BOOL disableTabBarCollapsingKey = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsDisableTabBarCollapsingKey];
+		self.titlebarViewController.hidden = !disableTabBarCollapsingKey && self.documents.count <= 1;
 	}
 }
 
@@ -1458,6 +1465,12 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		[self.tabBarView reloadData];
 		if(!self.tabBarView.selectedTabItem)
 			[self.tabBarView setSelectedTabIndex:MIN(_selectedTabIndex, _documents.count-1)];
+	}
+
+	if(@available(macos 10.12, *))
+	{
+		BOOL disableTabBarCollapsingKey = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsDisableTabBarCollapsingKey];
+		self.titlebarViewController.hidden = !disableTabBarCollapsingKey && self.documents.count <= 1;
 	}
 
 	[self updateFileBrowserStatus:self];
