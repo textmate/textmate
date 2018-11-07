@@ -251,8 +251,13 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 - (NSRect)cascadedWindowFrame
 {
-	NSRect r = [self windowFrame];
-	return { { NSMinX(r) + 21, NSMinY(r) - 23 }, r.size };
+	NSRect frameRect   = [self windowFrame];
+	NSRect contentRect = [NSWindow contentRectForFrameRect:frameRect styleMask:self.window.styleMask];
+
+	CGFloat offset = NSMaxY(frameRect) - NSMaxY(contentRect);
+	frameRect.origin.y -= offset;
+	frameRect.origin.x += offset;
+	return frameRect;
 }
 
 - (NSRect)frameRectForNewWindow
