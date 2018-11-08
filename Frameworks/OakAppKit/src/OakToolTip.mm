@@ -41,13 +41,10 @@ static __weak OakToolTip* LastToolTip;
 		}];
 		defaultFont = [NSFont fontWithDescriptor:descriptor size:0];
 
-		[self setAlphaValue:0.97];
-		[self setOpaque:NO];
-		[self setBackgroundColor:[NSColor colorWithCalibratedRed:1.00 green:0.96 blue:0.76 alpha:1]];
 		[self setHasShadow:YES];
 		[self setLevel:NSStatusWindowLevel];
 
-		field = [[NSTextField alloc] initWithFrame:NSZeroRect];
+		field = [[NSTextField alloc] initWithFrame:self.contentView.bounds];
 		[field setEditable:NO];
 		[field setSelectable:NO];
 		[field setBezeled:NO];
@@ -55,10 +52,29 @@ static __weak OakToolTip* LastToolTip;
 		[field setDrawsBackground:NO];
 		[field setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
 		[field setFont:defaultFont];
-		[field setTextColor:[NSColor blackColor]];
 		[field setStringValue:@"This is a nice little code block"];
 
-		[self setContentView:field];
+		if(@available(macos 10.14, *))
+		{
+			NSVisualEffectView* effectView = [[NSVisualEffectView alloc] initWithFrame:self.contentView.frame];
+			effectView.material = NSVisualEffectMaterialToolTip;
+			effectView.autoresizingMask = NSViewWidthSizable|NSViewHeightSizable;
+			[self.contentView addSubview:effectView];
+			[field setTextColor:NSColor.labelColor];
+
+			NSAppearanceName appearanceName = [NSApp.effectiveAppearance bestMatchFromAppearancesWithNames:@[ NSAppearanceNameAqua, NSAppearanceNameDarkAqua ]];
+			if([appearanceName isEqualToString:NSAppearanceNameDarkAqua])
+				[field setBordered:YES];
+		}
+		else
+		{
+			[self setAlphaValue:0.97];
+			[self setOpaque:NO];
+			[self setBackgroundColor:[NSColor colorWithCalibratedRed:NSBlack green:0.96 blue:0.76 alpha:1]];
+			[field setTextColor:NSColor.blackColor];
+		}
+
+		[self.contentView addSubview:field positioned:NSWindowAbove relativeTo:nil];
 		[self setFrame:[self frameRectForContentRect:[field frame]] display:NO];
 
 		self.enforceMouseThreshold = YES;
@@ -126,9 +142,8 @@ static __weak OakToolTip* LastToolTip;
 	D(DBF_OakToolTip, bug("%s\n", [NSStringFromPoint(aPoint) UTF8String]););
 	aScreen = aScreen ?: [NSScreen mainScreen];
 
-	[field sizeToFit];
 	NSRect r = [aScreen visibleFrame];
-	NSRect frame = [self frameRectForContentRect:[field frame]];
+	NSRect frame = [self frameRectForContentRect:{ NSZeroPoint, field.fittingSize }];
 	frame.size.width = std::min(NSWidth(frame), NSWidth(r));
 	frame.size.height = std::min(NSHeight(frame), NSHeight(r));
 	[self setFrame:frame display:NO];
