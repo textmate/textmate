@@ -117,7 +117,7 @@ namespace ct
 
 			CGGlyph emGlyph;
 			if(CTFontGetGlyphsForCharacters(font, (UniChar const*)u"n", &emGlyph, 1))
-				_column_width = CTFontGetAdvancesForGlyphs(font, kCTFontHorizontalOrientation, &emGlyph, nullptr, 1);
+				_column_width = CTFontGetAdvancesForGlyphs(font, kCTFontOrientationHorizontal, &emGlyph, nullptr, 1);
 
 			CFRelease(font);
 		}
@@ -209,7 +209,7 @@ namespace ct
 							stopLocation += tabWidth;
 						newTabWidths += stopLocation - newX;
 						standardTabWidths += CTLineGetOffsetForStringIndex(_line.get(), j+1, nullptr) - x;
-						tabs.push_back(CTTextTabCreate(kCTNaturalTextAlignment, stopLocation, nullptr));
+						tabs.push_back(CTTextTabCreate(kCTTextAlignmentNatural, stopLocation, nullptr));
 						_tab_locations.push_back(i);
 					break;
 				}
