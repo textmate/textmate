@@ -110,7 +110,6 @@ static NSButton* OakSmallButton (NSString* title, SEL action, id target, NSInteg
 	self.callback     = callback;
 
 	[_documentView addAuxiliaryView:self.view atEdge:NSMaxYEdge];
-	self.nextResponder = _documentView;
 }
 
 - (void)dismiss
