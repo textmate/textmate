@@ -1,6 +1,7 @@
 #import "FileBrowserViewController.h"
 #import "FileBrowserView.h"
 #import "FileItem.h"
+#import "SCMManager.h"
 #import "OFB/OFBHeaderView.h"
 #import "OFB/OFBActionsView.h"
 #import "OFB/OFBFinderTagsChooser.h"
@@ -187,14 +188,44 @@ static bool is_binary (std::string const& path)
 
 - (void)goToSCMDataSource:(id)sender
 {
-	if(NSURL* url = self.fileBrowserView.URL.filePathURL)
-		[self goToURL:[NSURL URLWithString:[NSString stringWithFormat:@"scm://localhost%@/", url.path]]];
-	else if(self.canGoBack)
-		[self goBack:self];
-	else if(NSURL* url = self.fileBrowserView.fileItem.parentURL)
-		[self goToURL:url];
+	NSURL* url = self.fileBrowserView.URL;
+	if([url.scheme isEqualToString:@"file"])
+	{
+		SCMRepository* repository = [SCMManager.sharedInstance repositoryAtURL:url];
+		if(repository && repository.enabled)
+		{
+			[self goToURL:[NSURL URLWithString:[NSString stringWithFormat:@"scm://localhost%@/", url.path]]];
+		}
+		else
+		{
+			NSAlert* alert = [[NSAlert alloc] init];
+
+			if(repository)
+			{
+				alert.messageText     = [NSString stringWithFormat:@"Version control is disabled for “%@”.", self.fileBrowserView.fileItem.localizedName];
+				alert.informativeText = @"For performance reasons TextMate will not monitor version control information for this folder.";
+			}
+			else
+			{
+				alert.messageText     = [NSString stringWithFormat:@"Version control is not available for “%@”.", self.fileBrowserView.fileItem.localizedName];
+				alert.informativeText = @"You need to initialize the folder using your favorite version control system before TextMate can show you status.";
+			}
+
+			[alert addButtonWithTitle:@"OK"];
+			[alert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse response){ }];
+		}
+	}
+	else if([url.scheme isEqualToString:@"scm"])
+	{
+		if(self.canGoBack)
+			[self goBack:self];
+		else if(NSURL* parentURL = self.fileBrowserView.fileItem.parentURL)
+			[self goToURL:parentURL];
+	}
 	else
+	{
 		NSBeep();
+	}
 }
 
 - (void)goToParentFolder:(id)sender
