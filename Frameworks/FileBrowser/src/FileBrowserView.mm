@@ -330,7 +330,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 		globs.add_include_glob(settings.get(kSettingsIncludeFilesInBrowserKey),       path::kPathItemFile);
 		globs.add_include_glob(settings.get(kSettingsIncludeFilesKey),                path::kPathItemFile);
 		globs.add_include_glob(settings.get(kSettingsIncludeInBrowserKey),            path::kPathItemAny);
-		globs.add_include_glob(settings.get(kSettingsIncludeKey),                     path::kPathItemAny);
+		globs.add_include_glob(settings.get(kSettingsIncludeKey, "*"),                path::kPathItemAny);
 
 		predicate = [NSPredicate predicateWithBlock:^BOOL(FileItem* item, NSDictionary* bindings){
 			if(item.hidden && ![item.URL.lastPathComponent hasPrefix:@"."])
