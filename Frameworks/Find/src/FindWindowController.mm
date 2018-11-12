@@ -1048,6 +1048,11 @@ static OakSyntaxFormatter* OakCreateSyntaxFormatter (NSString* grammarName)
 			else if(control == self.replaceComboBox)
 				return [self showReplaceHistory:control], YES;
 		}
+		else
+		{
+			[textView moveDown:nil];
+			return YES;
+		}
 	}
 	return NO;
 }
