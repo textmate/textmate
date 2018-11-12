@@ -690,7 +690,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 - (void)expandURLs:(NSArray<NSURL*>*)expandURLs selectURLs:(NSArray<NSURL*>*)selectURLs
 {
 	_loadingURLsCompletionHandlers = [(_loadingURLsCompletionHandlers ?: @[ ]) arrayByAddingObject:^{
-		[self centerSelectionInVisibleArea:self];
+		[self performSelector:@selector(centerSelectionInVisibleArea:) withObject:self afterDelay:0];
 	}];
 
 	_expandedURLs = expandURLs ? [NSMutableSet setWithArray:expandURLs] : _expandedURLs;
