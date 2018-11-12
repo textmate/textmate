@@ -83,13 +83,17 @@ static OakSyntaxFormatter* OakCreateSyntaxFormatter (NSString* grammarName)
 @property (nonatomic) NSTextField*              findLabel;
 @property (nonatomic) NSComboBox*               findComboBox;
 @property (nonatomic) OakSyntaxFormatter*       findStringFormatter;
+@property (nonatomic) OakSyntaxFormatter*       findCellFormatter;
 @property (nonatomic) OakSyntaxFormatter*       findHistoryFormatter;
+@property (nonatomic) BOOL                      findBoxListIsOpen;
 
 @property (nonatomic) NSButton*                 countButton;
 
 @property (nonatomic) NSTextField*              replaceLabel;
 @property (nonatomic) NSComboBox*               replaceComboBox;
 @property (nonatomic) OakSyntaxFormatter*       replaceStringFormatter;
+@property (nonatomic) OakSyntaxFormatter*       replaceCellFormatter;
+@property (nonatomic) BOOL                      replaceBoxListIsOpen;
 
 @property (nonatomic) NSTextField*              optionsLabel;
 @property (nonatomic) NSButton*                 ignoreCaseCheckBox;
@@ -156,15 +160,18 @@ static OakSyntaxFormatter* OakCreateSyntaxFormatter (NSString* grammarName)
 		self.findLabel                 = OakCreateLabel(@"Find:");
 		self.findComboBox              = OakCreateFindPanelComboBox(self, self.findLabel);
 		self.findStringFormatter       = OakCreateSyntaxFormatter(@"source.regexp.oniguruma");
+		self.findCellFormatter         = [_findStringFormatter copy];
+		_findComboBox.formatter        = _findCellFormatter;
 		self.findHistoryFormatter      = [_findStringFormatter copy];
-		self.countButton               = OakCreateButton(@"Σ", NSSmallSquareBezelStyle);
 
+		self.countButton               = OakCreateButton(@"Σ", NSSmallSquareBezelStyle);
 		self.countButton.toolTip = @"Show Results Count";
 		self.countButton.accessibilityLabel = self.countButton.toolTip;
 
 		self.replaceLabel              = OakCreateLabel(@"Replace:");
 		self.replaceComboBox           = OakCreateFindPanelComboBox(self, self.replaceLabel);
 		self.replaceStringFormatter    = OakCreateSyntaxFormatter(@"textmate.format-string");
+		self.replaceCellFormatter      = [_replaceStringFormatter copy];
 		_replaceComboBox.formatter     = _replaceStringFormatter;
 
 		self.optionsLabel              = OakCreateLabel(@"Options:");
@@ -238,11 +245,11 @@ static OakSyntaxFormatter* OakCreateSyntaxFormatter (NSString* grammarName)
 		self.recentFolders    = [[OakHistoryList alloc] initWithName:@"findRecentPlaces" stackSize:21];
 
 		[self.findComboBox              bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.findString"           options:
-		@{ NSContinuouslyUpdatesValueBindingOption: @YES,
-		       NSValueTransformerNameBindingOption: _findStringFormatter.transformerName }];
+			@{ NSContinuouslyUpdatesValueBindingOption: @YES,
+		          NSValueTransformerNameBindingOption: _findStringFormatter.transformerName }];
 		[self.replaceComboBox           bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.replaceString"        options:
-		@{ NSContinuouslyUpdatesValueBindingOption: @YES,
-		       NSValueTransformerNameBindingOption: _replaceStringFormatter.transformerName }];
+			@{ NSContinuouslyUpdatesValueBindingOption: @YES,
+		          NSValueTransformerNameBindingOption: _replaceStringFormatter.transformerName }];
 		[self.globTextField             bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.globHistoryList.head" options:nil];
 		[self.globTextField             bind:NSContentValuesBinding toObject:_objectController withKeyPath:@"content.globHistoryList.list" options:nil];
 		[self.globTextField             bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.canEditGlob"          options:nil];
@@ -289,7 +296,6 @@ static OakSyntaxFormatter* OakCreateSyntaxFormatter (NSString* grammarName)
 
 		[self.window addObserver:self forKeyPath:@"firstResponder" options:0 context:NULL];
 
-		[self findClipboardDidChange:nil];
 		[self initializeFormatterEnabledStates];
 	}
 	return self;
@@ -463,9 +469,6 @@ static OakSyntaxFormatter* OakCreateSyntaxFormatter (NSString* grammarName)
 - (void)replaceClipboardDidChange:(NSNotification*)aNotification
 {
 	self.replaceString = [[[OakPasteboard pasteboardWithName:OakReplacePboard] current] string];
-
-	// Consistent behaviour w/ find box: when an item is selected, it does not remain the selected item in the dropdown menu
-	[self forceUpdateReplaceBoxFormatter];
 
 	[[OakPasteboard pasteboardWithName:OakReplacePboard] updateBoundComboBoxNow:_replaceComboBox valueTransformerName:_replaceStringFormatter.pasteboardEntryTransformerName];
 }
@@ -912,7 +915,9 @@ static OakSyntaxFormatter* OakCreateSyntaxFormatter (NSString* grammarName)
 		[self updateFindErrorString];
 
 	_findStringFormatter.enabled    = flag;
+	_findCellFormatter.enabled      = flag && !_findBoxListIsOpen;
 	_replaceStringFormatter.enabled = flag;
+	_replaceCellFormatter.enabled   = flag && !_replaceBoxListIsOpen;
 
 	// Re-format current value
 	if(!_findComboBox.currentEditor)
@@ -938,40 +943,44 @@ static OakSyntaxFormatter* OakCreateSyntaxFormatter (NSString* grammarName)
 - (void)initializeFormatterEnabledStates
 {
 	_findStringFormatter.enabled    = _regularExpression;
+	_findCellFormatter.enabled      = _regularExpression;
 	_replaceStringFormatter.enabled = _regularExpression;
+	_replaceCellFormatter.enabled   = _regularExpression;
 }
 
-- (void)regulateFindBoxFormatter
+- (void)addStylesToTextFieldIfHasFieldEditor:(NSTextField*)textField syntaxFormatter:(OakSyntaxFormatter*)syntaxFormatter cellFormatter:(OakSyntaxFormatter*)cellFormatter listIsOpen:(BOOL)listIsOpen
 {
-	if(_findComboBox.currentEditor)
-		_findComboBox.formatter = nil;
-	else
-		_findComboBox.formatter = _findStringFormatter;
-}
-
-- (void)forceUpdateReplaceBoxFormatter
-{
-	if(_replaceComboBox.currentEditor)
-	{
-		_replaceComboBox.formatter = nil;
-		_replaceComboBox.formatter = _replaceStringFormatter;
-	}
-}
-
-- (void)addStylesToTextFieldIfHasFieldEditor:(NSTextField*)textField formatter:(OakSyntaxFormatter*)formatter
-{
+	cellFormatter.enabled = _regularExpression && !listIsOpen;
 	if(NSTextView* editorTextView = (NSTextView*)textField.currentEditor)
-	{
-		[formatter addStylesToString:editorTextView.textStorage];
-	}
+		[syntaxFormatter addStylesToString:editorTextView.textStorage];
 }
 
 - (void)addStylesToFieldEditor
 {
-	[self addStylesToTextFieldIfHasFieldEditor:_findComboBox formatter:_findStringFormatter];
-	[self regulateFindBoxFormatter];
-	[self addStylesToTextFieldIfHasFieldEditor:_replaceComboBox formatter:_replaceStringFormatter];
-	[self forceUpdateReplaceBoxFormatter];
+	[self addStylesToTextFieldIfHasFieldEditor:_findComboBox syntaxFormatter:_findStringFormatter cellFormatter:_findCellFormatter listIsOpen:_findBoxListIsOpen];
+	[self addStylesToTextFieldIfHasFieldEditor:_replaceComboBox syntaxFormatter:_replaceStringFormatter cellFormatter:_replaceCellFormatter listIsOpen:_replaceBoxListIsOpen];
+}
+
+- (void)comboBoxWillPopUp:(NSNotification*)notification
+{
+	id comboBox = notification.object;
+	if(comboBox == _findComboBox)
+		_findBoxListIsOpen = YES;
+	else if(comboBox == _replaceComboBox)
+		_replaceBoxListIsOpen = YES;
+
+	dispatch_async(dispatch_get_main_queue(), ^{
+		// By next runloop cycle, the menu has *just* appeared onscreen
+		[comboBox scrollItemAtIndexToTop:0];
+	});
+}
+- (void)comboBoxWillDismiss:(NSNotification*)notification
+{
+	id comboBox = notification.object;
+	if(comboBox == _findComboBox)
+		_findBoxListIsOpen = NO;
+	else if(comboBox == _replaceComboBox)
+		_replaceBoxListIsOpen = NO;
 }
 
 - (void)setIgnoreCase:(BOOL)flag        { if(_ignoreCase != flag) [[NSUserDefaults standardUserDefaults] setObject:@(_ignoreCase = flag) forKey:kUserDefaultsFindIgnoreCase]; }

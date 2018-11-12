@@ -122,13 +122,12 @@ static size_t kParseSizeLimit = 1024;
 	parse::grammar_ptr _grammar;
 	theme_ptr _theme;
 }
-@property (nonatomic, readonly) OakSyntaxFormatterTransformer* transformer;
-@property (nonatomic, readonly) OakPasteboardEntryFormatterTransformer* pasteboardEntryTransformer;
-@property (nonatomic, readonly) OakPasteboardEntryRegexOnlyFormatterTransformer* pasteboardEntryRegexOnlyTransformer;
+@property (nonatomic) OakSyntaxFormatterTransformer* transformer;
+@property (nonatomic) OakPasteboardEntryFormatterTransformer* pasteboardEntryTransformer;
+@property (nonatomic) OakPasteboardEntryRegexOnlyFormatterTransformer* pasteboardEntryRegexOnlyTransformer;
 @end
 
 @implementation OakSyntaxFormatter
-@synthesize transformer = _transformer, pasteboardEntryTransformer = _pasteboardEntryTransformer, pasteboardEntryRegexOnlyTransformer = _pasteboardEntryRegexOnlyTransformer;
 
 + (void)initialize
 {
@@ -223,8 +222,11 @@ static size_t kParseSizeLimit = 1024;
 
 - (NSAttributedString*)attributedStringForObjectValue:(id)value withDefaultAttributes:(NSDictionary*)attributes
 {
+	// This is true if this formatter is attached to a combo box cell, and a value transformer attached to the menu binding produces an attributed string value; unforunate that combo box bindings work this way, but we can only work around it
+	// Basically, just let it pass through, because somebody's already formatted it for us:
 	if([value isKindOfClass:[NSAttributedString class]])
-		value = [value string];
+		return [value copy];
+
 	NSMutableAttributedString* styled = [[NSMutableAttributedString alloc] initWithString:value attributes:attributes];
 	[self addStylesToString:styled];
 	return styled;

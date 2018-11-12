@@ -615,7 +615,11 @@ static BOOL HasPersistentStore = NO;
 
 - (void)updateBoundComboBoxNow:(NSComboBox*)comboBox valueTransformerName:(NSValueTransformerName)valueTransformerName
 {
+	NSInteger previousNumItems = comboBox.numberOfItems;
+	id selectedObj = comboBox.objectValueOfSelectedItem;
 	[self unbindComboBoxFromPasteboardHistory:comboBox];
 	[self bindComboBoxToPasteboardHistory:comboBox valueTransformerName:valueTransformerName];
+	if(comboBox.numberOfItems == previousNumItems)
+		[comboBox selectItemWithObjectValue:selectedObj];
 }
 @end
