@@ -162,22 +162,8 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 
 			[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:NSUserDefaults.standardUserDefaults];
 
-			NSVisualEffectView* effectView = [[NSVisualEffectView alloc] initWithFrame:NSZeroRect];
-			effectView.material = NSVisualEffectMaterialSidebar; // MAC_OS_X_VERSION_10_11
-
 			_outlineView.backgroundColor = NSColor.clearColor;
 			_scrollView.drawsBackground  = NO;
-
-			NSDictionary* views = @{
-				@"header":  _headerView,
-				@"effect":  effectView,
-				@"divider": dividerView,
-			};
-
-			effectView.translatesAutoresizingMaskIntoConstraints = NO;
-			[self addSubview:effectView positioned:NSWindowBelow relativeTo:nil];
-
-			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[header][effect][divider]" options:NSLayoutFormatAlignAllLeft|NSLayoutFormatAlignAllRight metrics:nil views:views]];
 		}
 		else
 		{
