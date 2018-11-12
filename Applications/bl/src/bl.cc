@@ -197,7 +197,7 @@ int main (int argc, char const* argv[])
 		}
 
 		__block std::vector<bundles_db::source_ptr> failedUpdate;
-		dispatch_apply(toUpdate.size(), dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t i){
+		dispatch_apply(toUpdate.size(), DISPATCH_APPLY_AUTO, ^(size_t i){
 			fprintf(stderr, "Downloading ‘%s’…\n", toUpdate[i]->url().c_str());
 			if(!update(toUpdate[i]))
 				failedUpdate.push_back(toUpdate[i]);
@@ -249,7 +249,7 @@ int main (int argc, char const* argv[])
 				}
 			}
 
-			dispatch_apply(n, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t i){
+			dispatch_apply(n, DISPATCH_APPLY_AUTO, ^(size_t i){
 				if(!install(toInstall[i], installDir, &progress[i]))
 					failed.push_back(toInstall[i]);
 			});

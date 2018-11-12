@@ -229,7 +229,7 @@ int main (int argc, char const* argv[])
     dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
       if(parallel)
       {
-        dispatch_apply(tests.size(), dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t n){
+        dispatch_apply(tests.size(), DISPATCH_APPLY_AUTO, ^(size_t n){
           tests[n].execute(measure, repeat);
         });
       }

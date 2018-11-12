@@ -217,7 +217,7 @@ static NSString* CacheFileForDownload (NSURL* url, NSDate* date)
 
 	dispatch_group_t group = dispatch_group_create();
 	dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-		dispatch_apply(bundles.count, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t i){
+		dispatch_apply(bundles.count, DISPATCH_APPLY_AUTO, ^(size_t i){
 			Bundle* bundle = bundles[i];
 			NSString* archive = CacheFileForDownload(bundle.downloadURL, bundle.downloadLastUpdated);
 
