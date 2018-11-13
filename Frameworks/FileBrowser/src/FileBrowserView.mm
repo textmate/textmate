@@ -1039,7 +1039,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 - (NSRect)imageRectOfItem:(FileItem*)item
 {
 	NSInteger row = [_outlineView rowForItem:item];
-	if(row != NSNotFound)
+	if(row != -1)
 	{
 		FileItemTableCellView* view = [_outlineView viewAtColumn:0 row:row makeIfNecessary:YES];
 		if([view isKindOfClass:[FileItemTableCellView class]])
