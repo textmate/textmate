@@ -150,9 +150,9 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[files(==header,==divider,==actions)]|" options:0 metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[header]-(>=0)-[divider]"               options:NSLayoutFormatAlignAllLeft metrics:nil views:views]];
 
-		if(@available(macos 10.12, *))
+		if(@available(macos 10.14, *))
 		{
-			// Placing files behind header seems to require MAC_OS_X_VERSION_10_12 for proper rendering
+			// The OakBackgroundFillViewStyleHeader is only using transparent header material on 10.14 and later
 			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[files][divider][actions]|" options:NSLayoutFormatAlignAllLeft metrics:nil views:views]];
 
 			NSEdgeInsets insets = _scrollView.contentInsets;
