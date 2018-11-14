@@ -56,7 +56,7 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSString* accessibi
 	if(self = [super initWithFrame:aRect])
 	{
 		NSImage* recordMacroImage = [NSImage imageWithSize:NSMakeSize(16, 16) flipped:NO drawingHandler:^BOOL(NSRect dstRect){
-			[NSColor.redColor set];
+			[NSColor.systemRedColor set];
 			[[NSBezierPath bezierPathWithOvalInRect:NSInsetRect(dstRect, 2, 2)] fill];
 			return YES;
 		}];
