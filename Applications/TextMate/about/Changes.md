@@ -2,6 +2,12 @@ Title: Release Notes
 
 # Changes
 
+## 2018-11-14 (v2.0-rc.18)
+
+* If you run `defaults write com.macromates.TextMate changeThemeBasedOnAppearance -bool YES` then TextMate will switch theme based on appearance (light/dark). The themes used can be controlled using the `darkModeThemeUUID` and `universalThemeUUID` defaults keys. *[Ronald Wampler]*
+* The document tabs have been moved to the titlebar, this means that file browser header can no longer be merged with the tab bar, automatically hiding the tab bar (when there is only one tab) is only possible when running macOS 10.12 or later, and currently the light tabs do not match the title bar background color on 10.14. The last one will be fixed in an upcoming build (to have active tab use “titlebar material”). The first one is probably not coming back anytime soon.
+* See [all changes since v2.0-rc.15](https://github.com/textmate/textmate/compare/v2.0-rc.15...v2.0-rc.18)
+
 ## 2018-11-02 (v2.0-rc.15)
 
 * Blurred backgrounds and other visual tweaks, but more to come…
