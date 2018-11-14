@@ -160,8 +160,6 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 			_scrollView.automaticallyAdjustsContentInsets = NO;
 			_scrollView.contentInsets = insets;
 
-			[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:NSUserDefaults.standardUserDefaults];
-
 			_outlineView.backgroundColor = NSColor.clearColor;
 			_scrollView.drawsBackground  = NO;
 		}
@@ -169,6 +167,8 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 		{
 			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[header][files][divider][actions]|" options:NSLayoutFormatAlignAllLeft metrics:nil views:views]];
 		}
+
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:NSUserDefaults.standardUserDefaults];
 	}
 	return self;
 }
