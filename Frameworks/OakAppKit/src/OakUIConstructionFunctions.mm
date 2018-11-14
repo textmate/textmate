@@ -341,18 +341,12 @@ OakBackgroundFillView* OakCreateHorizontalLine (OakBackgroundFillViewStyle style
 
 NSView* OakCreateDividerImageView ()
 {
-	OakBackgroundFillView* divider = [[OakBackgroundFillView alloc] initWithFrame:NSZeroRect];
-	divider.activeBackgroundImage = [NSImage imageNamed:@"Divider" inSameBundleAsClass:[OakBackgroundFillView class]];
-	divider.translatesAutoresizingMaskIntoConstraints = NO;
-	[divider setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
-
-	NSView* res = [[NSView alloc] initWithFrame:NSZeroRect];
-	[res addSubview:divider];
-
-	[res addConstraint:[NSLayoutConstraint constraintWithItem:divider attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:res attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
-	[res addConstraint:[NSLayoutConstraint constraintWithItem:divider attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:res attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
-	[res addConstraint:[NSLayoutConstraint constraintWithItem:res attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:divider attribute:NSLayoutAttributeWidth multiplier:1 constant:0]];
-
+	NSImageView* res = [[NSImageView alloc] initWithFrame:NSZeroRect];
+	res.image = [NSImage imageWithSize:NSMakeSize(1, 16) flipped:NO drawingHandler:^BOOL(NSRect dstRect){
+		[[NSColor quaternaryLabelColor] set];
+		NSRectFill(dstRect);
+		return YES;
+	}];
 	return res;
 }
 
