@@ -13,6 +13,7 @@
 
 #if !defined(MAC_OS_X_VERSION_10_14) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_14)
 #define NSVisualEffectMaterialHeaderView (NSVisualEffectMaterial)10
+#define NSVisualEffectMaterialToolTip (NSVisualEffectMaterial)17
 #endif
 
 #if !defined(MAC_OS_X_VERSION_10_13) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_13)
@@ -28,6 +29,10 @@ extern NSAppearanceName const NSAppearanceNameDarkAqua __attribute__((weak_impor
 
 @interface NSApplication (Mojave)
 @property(readonly, strong) NSAppearance *effectiveAppearance;
+@end
+
+@interface NSView (Mojave)
+- (void)viewDidChangeEffectiveAppearance;
 @end
 
 @interface NSColor (Mojave)
