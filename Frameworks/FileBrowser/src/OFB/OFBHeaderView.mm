@@ -4,8 +4,7 @@
 
 static NSButton* OakCreateImageButton (NSString* imageName)
 {
-	NSButton* res = [NSButton new];
-	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
+	NSButton* res = [[NSButton alloc] initWithFrame:NSZeroRect];
 	[res setButtonType:NSMomentaryChangeButton];
 	[res setBordered:NO];
 	[res setImage:[NSImage imageNamed:imageName]];
@@ -16,7 +15,6 @@ static NSButton* OakCreateImageButton (NSString* imageName)
 static NSPopUpButton* OakCreateFolderPopUpButton ()
 {
 	NSPopUpButton* res = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:YES];
-	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
 	[res setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
 	[res setContentHuggingPriority:NSLayoutPriorityFittingSizeCompression forOrientation:NSLayoutConstraintOrientationHorizontal];
 	[res setContentHuggingPriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationVertical];
