@@ -47,15 +47,16 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 @implementation OakSearchResultsCheckboxView
 - (id)initWithFrame:(NSRect)aFrame
 {
-	NSButton* button = OakCreateCheckBox(nil);
-	[[button cell] setControlSize:NSControlSizeSmall];
-	[button sizeToFit];
-	[button setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
-
-	if((self = [super initWithFrame:button.frame]))
+	if((self = [super initWithFrame:aFrame]))
 	{
-		_button = button;
+		_button = OakCreateCheckBox(nil);
+		_button.cell.controlSize = NSControlSizeSmall;
+
+		_button.translatesAutoresizingMaskIntoConstraints = NO;
 		[self addSubview:_button];
+
+		[self addConstraint:[NSLayoutConstraint constraintWithItem:_button attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
+		[self addConstraint:[NSLayoutConstraint constraintWithItem:_button attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
 
 		[_button bind:NSEnabledBinding toObject:self withKeyPath:@"objectValue.readOnly" options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
 		[_button bind:NSValueBinding toObject:self withKeyPath:@"objectValue.excluded" options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
