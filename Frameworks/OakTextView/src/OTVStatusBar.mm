@@ -23,6 +23,11 @@ static NSTextField* OakCreateTextField (NSString* label)
 	[res setAlignment:NSTextAlignmentRight];
 	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
 	[[res cell] setLineBreakMode:NSLineBreakByTruncatingMiddle];
+
+	// This is to match the other controls in the status bar
+	if(@available(macos 10.14, *))
+		res.textColor = NSColor.secondaryLabelColor;
+
 	return res;
 }
 
