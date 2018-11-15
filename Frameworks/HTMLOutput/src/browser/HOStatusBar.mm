@@ -127,16 +127,6 @@ static NSTextField* OakCreateTextField ()
 	[self addConstraints:_layoutConstraints];
 }
 
-- (void)drawRect:(NSRect)aRect
-{
-	if([self.window contentBorderThicknessForEdge:NSMinYEdge] < NSMaxY(self.frame))
-	{
-		[[NSColor windowBackgroundColor] set];
-		NSRectFill(aRect);
-		[super drawRect:aRect];
-	}
-}
-
 - (void)setIndeterminateProgress:(BOOL)newIndeterminateProgress
 {
 	if(_indeterminateProgress == newIndeterminateProgress)

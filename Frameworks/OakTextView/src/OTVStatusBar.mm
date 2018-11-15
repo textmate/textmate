@@ -173,16 +173,6 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSString* accessibi
 	return NSMakeSize(NSViewNoInstrinsicMetric, 24);
 }
 
-- (void)drawRect:(NSRect)aRect
-{
-	if([self.window contentBorderThicknessForEdge:NSMinYEdge] < NSMaxY(self.frame))
-	{
-		[[NSColor windowBackgroundColor] set];
-		NSRectFill(aRect);
-		[super drawRect:aRect];
-	}
-}
-
 - (void)updateMacroRecordingAnimation:(NSTimer*)aTimer
 {
 	CGFloat fraction = oak::cap(0.00, 0.70 + 0.30 * cos(M_PI + _recordingTime), 1.0);

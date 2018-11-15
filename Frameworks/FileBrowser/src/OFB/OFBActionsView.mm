@@ -72,14 +72,4 @@ static NSButton* OakCreateImageButton (NSImage* image)
 {
 	return NSMakeSize(NSViewNoInstrinsicMetric, 24);
 }
-
-- (void)drawRect:(NSRect)aRect
-{
-	if([self.window contentBorderThicknessForEdge:NSMinYEdge] < NSMaxY(self.frame))
-	{
-		[[NSColor windowBackgroundColor] set];
-		NSRectFill(aRect);
-		[super drawRect:aRect];
-	}
-}
 @end
