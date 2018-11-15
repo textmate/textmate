@@ -341,19 +341,21 @@ OakBackgroundFillView* OakCreateHorizontalLine (OakBackgroundFillViewStyle style
 
 NSView* OakCreateDividerImageView ()
 {
-	OakBackgroundFillView* divider = [[OakBackgroundFillView alloc] initWithFrame:NSZeroRect];
-	divider.activeBackgroundImage = [NSImage imageNamed:@"Divider" inSameBundleAsClass:[OakBackgroundFillView class]];
-	divider.translatesAutoresizingMaskIntoConstraints = NO;
-	[divider setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
+	NSBox* box = [[NSBox alloc] initWithFrame:NSZeroRect];
+	box.boxType = NSBoxSeparator;
 
-	NSView* res = [[NSView alloc] initWithFrame:NSZeroRect];
-	[res addSubview:divider];
+	NSDictionary* views = @{
+		@"box": box,
+	};
 
-	[res addConstraint:[NSLayoutConstraint constraintWithItem:divider attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:res attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
-	[res addConstraint:[NSLayoutConstraint constraintWithItem:divider attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:res attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
-	[res addConstraint:[NSLayoutConstraint constraintWithItem:res attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:divider attribute:NSLayoutAttributeWidth multiplier:1 constant:0]];
+	NSView* contentView = [[NSView alloc] initWithFrame:NSZeroRect];
+	OakAddAutoLayoutViewsToSuperview(views.allValues, contentView);
 
-	return res;
+	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[box(==1)]|" options:0 metrics:nil views:views]];
+	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[box(==16)]" options:0 metrics:nil views:views]];
+	[contentView addConstraint:[NSLayoutConstraint constraintWithItem:box attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
+
+	return contentView;
 }
 
 void OakSetupKeyViewLoop (NSArray* superviews, BOOL setFirstResponder)
