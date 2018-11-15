@@ -3,7 +3,6 @@
 @interface ProjectLayoutView : NSView
 @property (nonatomic) NSView* documentView;
 @property (nonatomic) NSView* fileBrowserView;
-@property (nonatomic) NSView* fileBrowserHeaderView;
 @property (nonatomic) NSView* htmlOutputView;
 
 @property (nonatomic) CGFloat fileBrowserWidth;

@@ -1758,8 +1758,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		if(!makeVisibleFlag && [[self.window firstResponder] isKindOfClass:[NSView class]] && [(NSView*)[self.window firstResponder] isDescendantOf:self.layoutView.fileBrowserView])
 			[self makeTextViewFirstResponder:self];
 
-		self.layoutView.fileBrowserView       = makeVisibleFlag ? self.fileBrowser.view : nil;
-		self.layoutView.fileBrowserHeaderView = makeVisibleFlag ? self.fileBrowser.headerView : nil;
+		self.layoutView.fileBrowserView = makeVisibleFlag ? self.fileBrowser.view : nil;
 
 		if(makeVisibleFlag)
 		{
