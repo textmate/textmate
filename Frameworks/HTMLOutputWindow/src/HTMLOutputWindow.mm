@@ -30,8 +30,6 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 		[self.window setContentView:self.htmlOutputView];
 		[self.window setDelegate:self];
 		[self.window setReleasedWhenClosed:NO];
-		[self.window setAutorecalculatesContentBorderThickness:NO forEdge:NSMinYEdge];
-		[self.window setContentBorderThickness:25 forEdge:NSMinYEdge];
 		[self.window setCollectionBehavior:NSWindowCollectionBehaviorMoveToActiveSpace|NSWindowCollectionBehaviorFullScreenAuxiliary];
 
 		// Register to application activation/deactivation notification so we can tweak our collection behavior
