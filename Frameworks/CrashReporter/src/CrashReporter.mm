@@ -3,7 +3,6 @@
 #import <OakFoundation/NSString Additions.h>
 #import <Preferences/Keys.h>
 #import <network/post.h>
-#import <plist/date.h>
 #import <io/path.h>
 #import <text/format.h>
 #import <ns/ns.h>
@@ -96,10 +95,10 @@ static std::string create_gzipped_file (std::string const& path)
 
 		// can send: all reports from the last week
 		std::set<std::string> canSend;
-		oak::date_t const cutOffDate = oak::date_t::now() - 7*24*60*60;
+		time_t const cutOffDate = time(nullptr) - 7*24*60*60;
 		for(auto pair : find_reports(to_s([[NSProcessInfo processInfo] processName])))
 		{
-			if(cutOffDate < oak::date_t(pair.first))
+			if(cutOffDate < pair.first)
 				canSend.insert(pair.second);
 		}
 

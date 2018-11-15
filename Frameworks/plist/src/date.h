@@ -26,7 +26,7 @@ namespace oak
 		CFAbsoluteTime at;
 	};
 
-	PUBLIC std::string to_s (date_t const& date, std::string const& dateFormat = "%F %T +0000");
+	PUBLIC std::string to_s (date_t const& date, std::string const& dateFormat = "%F %T %z");
 
 } /* oak */
 

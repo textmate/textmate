@@ -3,7 +3,9 @@
 
 namespace oak
 {
-	date_t::date_t (time_t unixTime) : at((CFAbsoluteTime)unixTime - 978307200)
+	static time_t kUnixEpochOffset = 978307200;
+
+	date_t::date_t (time_t unixTime) : at((CFAbsoluteTime)(unixTime - kUnixEpochOffset))
 	{
 	}
 
@@ -12,18 +14,12 @@ namespace oak
 		if(str == NULL_STR)
 			return;
 
-		struct tm bsdDate;
+		struct tm bsdDate = { };
 		if(strptime(str.c_str(), "%F %T %z", &bsdDate))
 		{
-			CFGregorianDate gregorianDate;
-			gregorianDate.second = bsdDate.tm_sec;
-			gregorianDate.minute = bsdDate.tm_min;
-			gregorianDate.hour   = bsdDate.tm_hour;
-			gregorianDate.day    = bsdDate.tm_mday;
-			gregorianDate.month  = bsdDate.tm_mon + 1;
-			gregorianDate.year   = bsdDate.tm_year + 1900;
-
-			at = CFGregorianDateGetAbsoluteTime(gregorianDate, nullptr) - bsdDate.tm_gmtoff;
+			time_t seconds = mktime(&bsdDate);
+			if(seconds != -1)
+				at = (CFAbsoluteTime)(seconds - kUnixEpochOffset);
 		}
 		else
 		{
@@ -38,23 +34,9 @@ namespace oak
 
 	std::string to_s (date_t const& date, std::string const& dateFormat)
 	{
-		CFGregorianDate gregorianDate = CFAbsoluteTimeGetGregorianDate(date.value(), nullptr);
-
-		struct tm bsdDate;
-		bsdDate.tm_sec    = (int)gregorianDate.second;
-		bsdDate.tm_min    = gregorianDate.minute;
-		bsdDate.tm_hour   = gregorianDate.hour;
-		bsdDate.tm_mday   = gregorianDate.day;
-		bsdDate.tm_mon    = gregorianDate.month - 1;
-		bsdDate.tm_year   = gregorianDate.year - 1900;
-		bsdDate.tm_wday   = 0;
-		bsdDate.tm_yday   = 0;
-		bsdDate.tm_isdst  = 0;
-		bsdDate.tm_gmtoff = 0;
-		bsdDate.tm_zone   = (char*)"UTC";
-
 		char buf[64];
-		strftime(buf, sizeof(buf), dateFormat.c_str(), &bsdDate);
+		time_t seconds = date.time_value();
+		strftime(buf, sizeof(buf), dateFormat.c_str(), localtime(&seconds));
 		return std::string(buf);
 	}
 
