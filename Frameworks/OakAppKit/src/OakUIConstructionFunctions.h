@@ -32,8 +32,6 @@ PUBLIC NSComboBox* OakCreateComboBox (NSView* labelView = nil);
 PUBLIC OakRolloverButton* OakCreateCloseButton (NSString* accessibilityLabel = @"Close document");
 PUBLIC NSView* OakCreateDividerImageView ();
 
-PUBLIC OakBackgroundFillView* OakCreateVerticalLine (NSColor* primaryColor, NSColor* secondaryColor = nil);
-PUBLIC OakBackgroundFillView* OakCreateHorizontalLine (NSColor* primaryColor, NSColor* secondaryColor = nil);
 PUBLIC OakBackgroundFillView* OakCreateVerticalLine (OakBackgroundFillViewStyle style);
 PUBLIC OakBackgroundFillView* OakCreateHorizontalLine (OakBackgroundFillViewStyle style);
 PUBLIC void OakSetupKeyViewLoop (NSArray* views, BOOL setFirstResponder = YES);
