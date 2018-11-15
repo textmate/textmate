@@ -120,7 +120,7 @@ namespace plist
 
 			if(CFDataRef data = CFDataCreateWithBytesNoCopy(kCFAllocatorDefault, &v[0], v.size(), kCFAllocatorNull))
 			{
-				if(CFPropertyListRef plist = CFPropertyListCreateFromXMLData(kCFAllocatorDefault, data, kCFPropertyListImmutable, nullptr))
+				if(CFPropertyListRef plist = CFPropertyListCreateWithData(kCFAllocatorDefault, data, kCFPropertyListImmutable, nullptr, nullptr))
 				{
 					res = convert(plist);
 					CFRelease(plist);
@@ -137,7 +137,7 @@ namespace plist
 
 		if(CFDataRef data = CFDataCreateWithBytesNoCopy(kCFAllocatorDefault, (UInt8 const*)str.data(), str.size(), kCFAllocatorNull))
 		{
-			if(CFPropertyListRef plist = CFPropertyListCreateFromXMLData(kCFAllocatorDefault, data, kCFPropertyListImmutable, nullptr))
+			if(CFPropertyListRef plist = CFPropertyListCreateWithData(kCFAllocatorDefault, data, kCFPropertyListImmutable, nullptr, nullptr))
 			{
 				convert_any(plist, res);
 				CFRelease(plist);

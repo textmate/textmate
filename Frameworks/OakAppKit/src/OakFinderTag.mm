@@ -73,7 +73,7 @@ static struct label_colors_t { NSString* name; NSString* backgroundColor; NSStri
 
 + (NSArray<OakFinderTag*>*)finderTagsFromData:(NSData*)data
 {
-	id plist = [NSPropertyListSerialization propertyListFromData:data mutabilityOption:NSPropertyListImmutable format:nil errorDescription:nil];
+	id plist = [NSPropertyListSerialization propertyListWithData:data options:NSPropertyListImmutable format:nil error:nil];
 	NSMutableArray<OakFinderTag*>* finderTags = [NSMutableArray array];
 	for(NSString* tag in plist)
 	{
