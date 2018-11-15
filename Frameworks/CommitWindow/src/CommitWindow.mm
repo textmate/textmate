@@ -150,13 +150,13 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 		self.window.delegate          = self;
 		self.window.frameAutosaveName = @"Commit Window";
 
-		_commitButton = OakCreateButton([self commitButtonTitle], NSRoundedBezelStyle);
+		_commitButton = OakCreateButton([self commitButtonTitle]);
 		_commitButton.action                    = @selector(performCommit:);
 		_commitButton.keyEquivalent             = @"\r";
 		_commitButton.keyEquivalentModifierMask = NSEventModifierFlagCommand;
 		_commitButton.target                    = self;
 
-		_cancelButton = OakCreateButton(@"Cancel", NSRoundedBezelStyle);
+		_cancelButton = OakCreateButton(@"Cancel");
 		_cancelButton.action                    = @selector(cancel:);
 		_cancelButton.keyEquivalent             = @".";
 		_cancelButton.keyEquivalentModifierMask = NSEventModifierFlagCommand;

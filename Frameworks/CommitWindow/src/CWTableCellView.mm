@@ -17,7 +17,7 @@
 		NSTextField* statusTextField = OakCreateLabel();
 		_statusTextField = statusTextField;
 
-		NSButton* diffButton = OakCreateButton(@"Diff", NSRoundedBezelStyle);
+		NSButton* diffButton = OakCreateButton(@"Diff");
 		diffButton.font = [NSFont messageFontOfSize:9];
 		[diffButton.cell setControlSize: NSControlSizeMini];
 		_diffButton = diffButton;
