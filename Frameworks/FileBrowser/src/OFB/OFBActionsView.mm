@@ -21,7 +21,9 @@ static NSButton* OakCreateImageButton (NSImage* image)
 {
 	if(self = [super initWithFrame:aRect])
 	{
-		self.style = OakBackgroundFillViewStyleStatusBar;
+		self.material     = NSVisualEffectMaterialTitlebar;
+		self.blendingMode = NSVisualEffectBlendingModeWithinWindow;
+		self.state        = NSVisualEffectStateFollowsWindowActiveState;
 
 		self.createButton       = OakCreateImageButton([NSImage imageNamed:NSImageNameAddTemplate]);
 		self.actionsPopUpButton = OakCreateActionPopUpButton();

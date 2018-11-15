@@ -1,11 +1,9 @@
-#import <OakAppKit/OakUIConstructionFunctions.h>
-
 @protocol OTVStatusBarDelegate <NSObject>
 - (void)showBundleItemSelector:(NSPopUpButton*)popUpButton;
 - (void)showSymbolSelector:(NSPopUpButton*)popUpButton;
 @end
 
-@interface OTVStatusBar : OakBackgroundFillView
+@interface OTVStatusBar : NSVisualEffectView
 - (void)showBundlesMenu:(id)sender;
 @property (nonatomic) NSString* selectionString;
 @property (nonatomic) NSString* grammarName;

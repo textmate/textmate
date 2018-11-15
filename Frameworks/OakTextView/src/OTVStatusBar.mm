@@ -61,7 +61,9 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSString* accessibi
 			return YES;
 		}];
 
-		self.style = OakBackgroundFillViewStyleStatusBar;
+		self.material     = NSVisualEffectMaterialTitlebar;
+		self.blendingMode = NSVisualEffectBlendingModeWithinWindow;
+		self.state        = NSVisualEffectStateFollowsWindowActiveState;
 
 		self.selectionField               = OakCreateTextField(@"1:1");
 		self.grammarPopUp                 = OakCreateStatusBarPopUpButton(@"", @"Grammar");
