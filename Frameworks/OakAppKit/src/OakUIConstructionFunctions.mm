@@ -41,8 +41,6 @@ NSButton* OakCreateCheckBox (NSString* label)
 NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel)
 {
 	NSButton* res = [[NSButton alloc] initWithFrame:NSZeroRect];
-	[res setContentHuggingPriority:NSLayoutPriorityDefaultHigh forOrientation:NSLayoutConstraintOrientationHorizontal];
-	[res setContentHuggingPriority:NSLayoutPriorityDefaultHigh forOrientation:NSLayoutConstraintOrientationVertical];
 	res.bezelStyle = bezel;
 	res.buttonType = NSMomentaryPushInButton;
 	res.font       = OakControlFont();
