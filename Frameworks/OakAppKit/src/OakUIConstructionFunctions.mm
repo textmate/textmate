@@ -14,6 +14,16 @@ NSFont* OakControlFont ()
 
 NSTextField* OakCreateLabel (NSString* label, NSFont* font, NSTextAlignment alignment, NSLineBreakMode lineBreakMode)
 {
+	if(@available(macos 10.12, *))
+	{
+		NSTextField* res = [NSTextField labelWithString:label];
+		[[res cell] setLineBreakMode:lineBreakMode];
+		res.alignment = alignment;
+		if(font)
+			res.font = font;
+		return res;
+	}
+
 	NSTextField* res = [[NSTextField alloc] initWithFrame:NSZeroRect];
 	[[res cell] setWraps:NO];
 	[[res cell] setLineBreakMode:lineBreakMode];
@@ -30,6 +40,14 @@ NSTextField* OakCreateLabel (NSString* label, NSFont* font, NSTextAlignment alig
 
 NSButton* OakCreateCheckBox (NSString* label)
 {
+	if(@available(macos 10.12, *))
+	{
+		NSButton* res = [NSButton checkboxWithTitle:(label ?: @"") target:nil action:nil];
+		// When we have a row that only contains checkboxes (e.g. Find options), nothing restrains the height of that row
+		[res setContentHuggingPriority:NSLayoutPriorityDefaultHigh forOrientation:NSLayoutConstraintOrientationVertical];
+		return res;
+	}
+
 	NSButton* res = [[NSButton alloc] initWithFrame:NSZeroRect];
 	[res setContentHuggingPriority:NSLayoutPriorityDefaultHigh forOrientation:NSLayoutConstraintOrientationVertical];
 	res.buttonType = NSSwitchButton;
@@ -40,6 +58,14 @@ NSButton* OakCreateCheckBox (NSString* label)
 
 NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel)
 {
+	if(@available(macos 10.12, *))
+	{
+		NSButton* res = [NSButton buttonWithTitle:label target:nil action:nil];
+		if(bezel != NSRoundedBezelStyle)
+			res.bezelStyle = bezel;
+		return res;
+	}
+
 	NSButton* res = [[NSButton alloc] initWithFrame:NSZeroRect];
 	res.bezelStyle = bezel;
 	res.buttonType = NSMomentaryPushInButton;
