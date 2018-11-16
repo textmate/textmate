@@ -18,8 +18,8 @@
 		_statusTextField = statusTextField;
 
 		NSButton* diffButton = OakCreateButton(@"Diff");
-		diffButton.font = [NSFont messageFontOfSize:9];
-		[diffButton.cell setControlSize: NSControlSizeMini];
+		diffButton.font = [NSFont messageFontOfSize:[NSFont systemFontSizeForControlSize:NSControlSizeMini]];
+		[diffButton.cell setControlSize:NSControlSizeMini];
 		_diffButton = diffButton;
 
 		[textField        bind:NSValueBinding toObject:self withKeyPath:@"objectValue.path"      options:0];

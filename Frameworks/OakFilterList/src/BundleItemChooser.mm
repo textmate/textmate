@@ -475,13 +475,13 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		self.bottomDivider       = [self makeDividerView];
 
 		self.selectButton                  = OakCreateButton(@"Select");
-		self.selectButton.font             = [NSFont messageFontOfSize:[NSFont smallSystemFontSize]];
+		self.selectButton.font             = [NSFont messageFontOfSize:[NSFont systemFontSizeForControlSize:NSControlSizeSmall]];
 		self.selectButton.cell.controlSize = NSControlSizeSmall;
 		self.selectButton.target           = self;
 		self.selectButton.action           = @selector(accept:);
 
 		self.editButton                  = OakCreateButton(@"Edit");
-		self.editButton.font             = [NSFont messageFontOfSize:[NSFont smallSystemFontSize]];
+		self.editButton.font             = [NSFont messageFontOfSize:[NSFont systemFontSizeForControlSize:NSControlSizeSmall]];
 		self.editButton.cell.controlSize = NSControlSizeSmall;
 		self.editButton.target           = self;
 		self.editButton.action           = @selector(editItem:);
