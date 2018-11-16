@@ -463,14 +463,14 @@ static OakSyntaxFormatter* OakCreateSyntaxFormatter (NSString* grammarName)
 	self.ignoreWhitespace  = entry.ignoreWhitespace;
 	self.fullWords         = entry.fullWordMatch;
 
-	[[OakPasteboard pasteboardWithName:NSFindPboard] updateBoundComboBoxNow:_findComboBox valueTransformerName:_findHistoryFormatter.pasteboardEntryRegexOnlyTransformerName];
+	[[OakPasteboard pasteboardWithName:NSFindPboard] updateBoundComboBoxNow:_findComboBox valueTransformerName:_findHistoryFormatter.pasteboardEntryRegexOnlyTransformerName reselectSelectedItem:_findBoxListIsOpen];
 }
 
 - (void)replaceClipboardDidChange:(NSNotification*)aNotification
 {
 	self.replaceString = [[[OakPasteboard pasteboardWithName:OakReplacePboard] current] string];
 
-	[[OakPasteboard pasteboardWithName:OakReplacePboard] updateBoundComboBoxNow:_replaceComboBox valueTransformerName:_replaceStringFormatter.pasteboardEntryTransformerName];
+	[[OakPasteboard pasteboardWithName:OakReplacePboard] updateBoundComboBoxNow:_replaceComboBox valueTransformerName:_replaceStringFormatter.pasteboardEntryTransformerName reselectSelectedItem:_replaceBoxListIsOpen];
 }
 
 - (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)object change:(NSDictionary*)change context:(void*)context

@@ -41,5 +41,5 @@ PUBLIC @interface OakPasteboard : NSManagedObject
 
 - (void)bindComboBoxToPasteboardHistory:(NSComboBox*)comboBox valueTransformerName:(NSValueTransformerName)valueTransformerName;
 - (void)unbindComboBoxFromPasteboardHistory:(NSComboBox*)comboBox;
-- (void)updateBoundComboBoxNow:(NSComboBox*)comboBox valueTransformerName:(NSValueTransformerName)valueTransformerName;
+- (void)updateBoundComboBoxNow:(NSComboBox*)comboBox valueTransformerName:(NSValueTransformerName)valueTransformerName reselectSelectedItem:(BOOL)reselect;
 @end
