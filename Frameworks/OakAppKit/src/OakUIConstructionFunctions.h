@@ -27,7 +27,6 @@ PUBLIC NSButton* OakCreateCheckBox (NSString* label);
 PUBLIC NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel = NSRoundedBezelStyle);
 PUBLIC NSPopUpButton* OakCreatePopUpButton (BOOL pullsDown = NO, NSString* initialItemTitle = nil, NSView* labelView = nil);
 PUBLIC NSPopUpButton* OakCreateActionPopUpButton (BOOL bordered = NO);
-PUBLIC NSPopUpButton* OakCreateStatusBarPopUpButton (NSString* initialItemTitle = nil, NSString* accessibilityLabel = nil);
 PUBLIC NSComboBox* OakCreateComboBox (NSView* labelView = nil);
 PUBLIC OakRolloverButton* OakCreateCloseButton (NSString* accessibilityLabel = @"Close document");
 PUBLIC NSView* OakCreateDividerImageView ();

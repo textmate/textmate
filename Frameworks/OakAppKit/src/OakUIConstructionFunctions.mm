@@ -103,16 +103,6 @@ NSPopUpButton* OakCreateActionPopUpButton (BOOL bordered)
 	return res;
 }
 
-NSPopUpButton* OakCreateStatusBarPopUpButton (NSString* initialItemTitle, NSString* accessibilityLabel)
-{
-	NSPopUpButton* res = OakCreatePopUpButton(NO, initialItemTitle);
-	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
-	res.font     = OakStatusBarFont();
-	res.bordered = NO;
-	res.accessibilityLabel = accessibilityLabel;
-	return res;
-}
-
 NSComboBox* OakCreateComboBox (NSView* labelView)
 {
 	NSComboBox* res = [[NSComboBox alloc] initWithFrame:NSZeroRect];

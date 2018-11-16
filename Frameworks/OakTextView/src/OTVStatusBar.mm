@@ -31,6 +31,16 @@ static NSTextField* OakCreateTextField (NSString* label)
 	return res;
 }
 
+static NSPopUpButton* OakCreateStatusBarPopUpButton (NSString* initialItemTitle = nil, NSString* accessibilityLabel = nil)
+{
+	NSPopUpButton* res = OakCreatePopUpButton(NO, initialItemTitle);
+	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
+	res.font     = OakStatusBarFont();
+	res.bordered = NO;
+	res.accessibilityLabel = accessibilityLabel;
+	return res;
+}
+
 static NSButton* OakCreateImageToggleButton (NSImage* image, NSString* accessibilityLabel)
 {
 	NSButton* res = [NSButton new];
