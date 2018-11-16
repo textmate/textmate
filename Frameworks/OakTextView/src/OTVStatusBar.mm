@@ -90,6 +90,11 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSString* accessibi
 		self.macroRecordingButton.action  = @selector(toggleMacroRecording:);
 		self.macroRecordingButton.toolTip = @"Click to start recording a macro";
 
+		NSFontDescriptor* descriptor = [self.selectionField.font.fontDescriptor fontDescriptorByAddingAttributes:@{
+			NSFontFeatureSettingsAttribute: @[ @{ NSFontFeatureTypeIdentifierKey: @(kNumberSpacingType), NSFontFeatureSelectorIdentifierKey: @(kMonospacedNumbersSelector) } ]
+		}];
+		self.selectionField.font = [NSFont fontWithDescriptor:descriptor size:0];
+
 		[self setupTabSizeMenu:self];
 
 		// ===========================
