@@ -27,10 +27,11 @@ NSButton* OakCreateClickableStatusBar ()
 {
 	NSButton* res = [[NSButton alloc] initWithFrame:NSZeroRect];
 	[res.cell setLineBreakMode:NSLineBreakByTruncatingTail];
+	[res.cell setControlSize:NSControlSizeSmall];
 	res.alignment  = NSTextAlignmentLeft;
 	res.bordered   = NO;
 	res.buttonType = NSToggleButton;
-	res.title      = @"";
+	res.title      = @" "; // Ensure initial (fitting) size can fit a line of text
 
 	[res setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
 	[res setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationVertical];
@@ -845,8 +846,7 @@ static NSButton* OakCreateStopSearchButton ()
 	[paragraphStyle setLineBreakMode:NSLineBreakByTruncatingMiddle];
 	NSDictionary* globalAttrs = @{
 		NSParagraphStyleAttributeName:  paragraphStyle,
-		NSForegroundColorAttributeName: [NSColor textColor],
-		NSFontAttributeName:            OakStatusBarFont(),
+		NSForegroundColorAttributeName: NSColor.controlTextColor,
 	};
 	[res addAttributes:globalAttrs range:NSMakeRange(0, [[res string] length])];
 
@@ -855,8 +855,7 @@ static NSButton* OakCreateStopSearchButton ()
 
 - (void)setStatusString:(NSString*)aString
 {
-	self.statusTextField.attributedTitle = [self formatStatusString:_statusString = aString];
-	self.alternateStatusString = nil;
+	self.statusTextField.attributedTitle = self.statusTextField.attributedAlternateTitle = [self formatStatusString:_statusString = aString];
 }
 
 - (void)setAlternateStatusString:(NSString*)aString
