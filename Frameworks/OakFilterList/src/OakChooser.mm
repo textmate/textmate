@@ -274,6 +274,11 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 		_itemCountTextField.selectable      = NO;
 		[[_itemCountTextField cell] setBackgroundStyle:NSBackgroundStyleRaised];
 		[_itemCountTextField setContentHuggingPriority:NSLayoutPriorityDefaultHigh forOrientation:NSLayoutConstraintOrientationHorizontal];
+
+		NSFontDescriptor* descriptor = [_itemCountTextField.font.fontDescriptor fontDescriptorByAddingAttributes:@{
+			NSFontFeatureSettingsAttribute: @[ @{ NSFontFeatureTypeIdentifierKey: @(kNumberSpacingType), NSFontFeatureSelectorIdentifierKey: @(kMonospacedNumbersSelector) } ]
+		}];
+		_itemCountTextField.font = [NSFont fontWithDescriptor:descriptor size:0];
 	}
 	return _itemCountTextField;
 }
