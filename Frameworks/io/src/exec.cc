@@ -8,8 +8,6 @@
 
 OAK_DEBUG_VAR(IO_Exec);
 
-#define OAK_CHECK(expr) do { if((expr) != 0) { crash_reporter_info_t info("%s: %s", #expr, strerror(errno)); abort(); } } while(false)
-
 namespace io
 {
 	process_t spawn (std::vector<std::string> const& args, std::map<std::string, std::string> const& environment)
@@ -25,25 +23,44 @@ namespace io
 		if(in != -1 && out != -1 && err != -1)
 		{
 			posix_spawn_file_actions_t fileActions;
-			OAK_CHECK(posix_spawn_file_actions_init(&fileActions));
-			OAK_CHECK(posix_spawn_file_actions_adddup2(&fileActions, in,  STDIN_FILENO));
-			OAK_CHECK(posix_spawn_file_actions_adddup2(&fileActions, out, STDOUT_FILENO));
-			OAK_CHECK(posix_spawn_file_actions_adddup2(&fileActions, err, STDERR_FILENO));
+			if(posix_spawn_file_actions_init(&fileActions) == 0)
+			{
+				if(posix_spawn_file_actions_adddup2(&fileActions, in,  STDIN_FILENO) == 0 && posix_spawn_file_actions_adddup2(&fileActions, out, STDOUT_FILENO) == 0 && posix_spawn_file_actions_adddup2(&fileActions, err, STDERR_FILENO) == 0)
+				{
+					posix_spawnattr_t flags;
+					if(posix_spawnattr_init(&flags) == 0)
+					{
+						if(posix_spawnattr_setflags(&flags, POSIX_SPAWN_SETSIGDEF|POSIX_SPAWN_CLOEXEC_DEFAULT) == 0)
+						{
+							char* argv[args.size() + 1];
+							std::transform(args.begin(), args.end(), &argv[0], [](std::string const& str){ return (char*)str.c_str(); });
+							argv[args.size()] = nullptr;
 
-			posix_spawnattr_t flags;
-			OAK_CHECK(posix_spawnattr_init(&flags));
-			OAK_CHECK(posix_spawnattr_setflags(&flags, POSIX_SPAWN_SETSIGDEF|POSIX_SPAWN_CLOEXEC_DEFAULT));
-
-			char* argv[args.size() + 1];
-			std::transform(args.begin(), args.end(), &argv[0], [](std::string const& str){ return (char*)str.c_str(); });
-			argv[args.size()] = nullptr;
-
-			rc = posix_spawn(&res.pid, argv[0], &fileActions, &flags, argv, oak::c_array(environment));
-			if(rc != 0)
-				perrorf("io::spawn: posix_spawn(\"%s\")", argv[0]);
-
-			OAK_CHECK(posix_spawnattr_destroy(&flags));
-			OAK_CHECK(posix_spawn_file_actions_destroy(&fileActions));
+							rc = posix_spawn(&res.pid, argv[0], &fileActions, &flags, argv, oak::c_array(environment));
+							if(rc != 0)
+								perrorf("io::spawn: posix_spawn(\"%s\")", argv[0]);
+						}
+						else
+						{
+							perrorf("posix_spawnattr_setflags");
+						}
+						posix_spawnattr_destroy(&flags);
+					}
+					else
+					{
+						perror("posix_spawnattr_init");
+					}
+				}
+				else
+				{
+					perror("posix_spawn_file_actions_adddup2");
+				}
+				posix_spawn_file_actions_destroy(&fileActions);
+			}
+			else
+			{
+				perror("posix_spawn_file_actions_init");
+			}
 		}
 
 		close(in);
