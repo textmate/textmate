@@ -27,11 +27,11 @@ NSButton* OakCreateClickableStatusBar ()
 {
 	NSButton* res = [[NSButton alloc] initWithFrame:NSZeroRect];
 	[res.cell setLineBreakMode:NSLineBreakByTruncatingTail];
-	[res.cell setControlSize:NSControlSizeSmall];
-	res.alignment  = NSTextAlignmentLeft;
-	res.bordered   = NO;
-	res.buttonType = NSToggleButton;
-	res.title      = @" "; // Ensure initial (fitting) size can fit a line of text
+	res.controlSize = NSControlSizeSmall;
+	res.alignment   = NSTextAlignmentLeft;
+	res.bordered    = NO;
+	res.buttonType  = NSToggleButton;
+	res.title       = @" "; // Ensure initial (fitting) size can fit a line of text
 
 	[res setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
 	[res setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationVertical];

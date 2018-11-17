@@ -48,7 +48,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 	if((self = [super initWithFrame:aFrame]))
 	{
 		_button = OakCreateCheckBox(nil);
-		_button.cell.controlSize = NSControlSizeSmall;
+		_button.controlSize = NSControlSizeSmall;
 
 		_button.translatesAutoresizingMaskIntoConstraints = NO;
 		[self addSubview:_button];
@@ -195,10 +195,10 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		[removeTemplateImage setTemplate:YES];
 
 		NSButton* remove = [NSButton new];
-		[[remove cell] setControlSize:NSControlSizeSmall];
-		remove.bezelStyle = NSRoundRectBezelStyle;
-		remove.buttonType = NSMomentaryPushInButton;
-		remove.image      = removeTemplateImage;
+		remove.controlSize = NSControlSizeSmall;
+		remove.bezelStyle  = NSRoundRectBezelStyle;
+		remove.buttonType  = NSMomentaryPushInButton;
+		remove.image       = removeTemplateImage;
 
 		NSDictionary* views = @{ @"icon": imageView, @"text": textField, @"count": countOfLeafs, @"remove": remove };
 		OakAddAutoLayoutViewsToSuperview([views allValues], self);

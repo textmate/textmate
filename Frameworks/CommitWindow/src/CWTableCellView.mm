@@ -11,7 +11,7 @@
 		self.textField = textField;
 
 		NSButton* commitCheckBox = OakCreateCheckBox(@"");
-		[commitCheckBox.cell setControlSize:NSControlSizeSmall];
+		commitCheckBox.controlSize = NSControlSizeSmall;
 		_commitCheckBox = commitCheckBox;
 
 		NSTextField* statusTextField = OakCreateLabel();
@@ -19,7 +19,7 @@
 
 		NSButton* diffButton = OakCreateButton(@"Diff");
 		diffButton.font = [NSFont messageFontOfSize:[NSFont systemFontSizeForControlSize:NSControlSizeMini]];
-		[diffButton.cell setControlSize:NSControlSizeMini];
+		diffButton.controlSize = NSControlSizeMini;
 		_diffButton = diffButton;
 
 		[textField        bind:NSValueBinding toObject:self withKeyPath:@"objectValue.path"      options:0];
