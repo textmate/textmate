@@ -1,7 +1,6 @@
-#import <OakAppKit/OakUIConstructionFunctions.h>
 #import <oak/misc.h>
 
-PUBLIC @interface OakTabItem : NSObject
+@interface OakTabItem : NSObject
 @property (nonatomic) NSString* title;
 @property (nonatomic) NSString* path;
 @property (nonatomic, readonly) NSString* identifier;
@@ -10,12 +9,12 @@ PUBLIC @interface OakTabItem : NSObject
 
 @protocol OakTabBarViewDelegate, OakTabBarViewDataSource;
 
-PUBLIC @interface OakTabBarView : OakBackgroundFillView
+@interface OakTabBarView : NSView
 @property (nonatomic, weak) id <OakTabBarViewDelegate> delegate;
 @property (nonatomic, weak) id <OakTabBarViewDataSource> dataSource;
-@property (nonatomic, readonly) NSUInteger countOfVisibleTabs;
+@property (nonatomic, readonly) NSInteger countOfVisibleTabs;
 - (void)reloadData;
-- (void)setSelectedTabIndex:(NSUInteger)anIndex;
+- (void)setSelectedTabIndex:(NSInteger)anIndex;
 - (void)performClose:(id)sender;
 
 @property (nonatomic, readonly) NSArray<OakTabItem*>* tabItems;
