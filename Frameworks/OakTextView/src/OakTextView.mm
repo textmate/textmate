@@ -962,9 +962,13 @@ static std::string shell_quote (std::vector<std::string> paths)
 	if(_scmStatus == newStatus)
 		return;
 
+	BOOL notifyHooks = _scmStatus != scm::status::unknown || newStatus != scm::status::none;
 	_scmStatus = newStatus;
-	for(auto const& item : bundles::query(bundles::kFieldSemanticClass, "callback.document.did-change-scm-status", [self scopeContext], bundles::kItemTypeMost, oak::uuid_t(), false))
-		[self performBundleItem:item];
+	if(notifyHooks)
+	{
+		for(auto const& item : bundles::query(bundles::kFieldSemanticClass, "callback.document.did-change-scm-status", [self scopeContext], bundles::kItemTypeMost, oak::uuid_t(), false))
+			[self performBundleItem:item];
+	}
 }
 
 - (void)setNilValueForKey:(NSString*)key
