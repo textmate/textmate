@@ -39,9 +39,9 @@ OAK_DEBUG_VAR(OakSubmenuController);
 	return sharedInstance;
 }
 
-- (BOOL)isSelectTabMenu:(NSMenu*)aMenu
+- (BOOL)isShowTabMenu:(NSMenu*)aMenu
 {
-	return [aMenu.title isEqualToString:@"Select Tab"];
+	return [aMenu.title isEqualToString:@"Show Tab"];
 }
 
 - (void)updateMenu:(NSMenu*)aMenu withSelector:(SEL)aSelector
@@ -55,14 +55,14 @@ OAK_DEBUG_VAR(OakSubmenuController);
 
 - (void)menuNeedsUpdate:(NSMenu*)aMenu
 {
-	[self updateMenu:aMenu withSelector:[self isSelectTabMenu:aMenu] ? @selector(updateSelectTabMenu:) : @selector(updateBookmarksMenu:)];
+	[self updateMenu:aMenu withSelector:[self isShowTabMenu:aMenu] ? @selector(updateShowTabMenu:) : @selector(updateBookmarksMenu:)];
 }
 
 - (BOOL)menuHasKeyEquivalent:(NSMenu*)aMenu forEvent:(NSEvent*)anEvent target:(id*)anId action:(SEL*)aSEL
 {
 	D(DBF_OakSubmenuController, bug("%s %s\n", to_s(anEvent).c_str(), [[aMenu description] UTF8String]););
 
-	if(![self isSelectTabMenu:aMenu])
+	if(![self isShowTabMenu:aMenu])
 		return NO;
 
 	std::string const eventString = to_s(anEvent);
@@ -70,7 +70,7 @@ OAK_DEBUG_VAR(OakSubmenuController);
 		return NO;
 
 	NSMenu* dummy = [OakKeyEquivalentMenu new];
-	[self updateMenu:dummy withSelector:@selector(updateSelectTabMenu:)];
+	[self updateMenu:dummy withSelector:@selector(updateShowTabMenu:)];
 	for(NSMenuItem* item in [dummy itemArray])
 	{
 		if(eventString == ns::create_event_string(item.keyEquivalent, item.keyEquivalentModifierMask))

@@ -339,7 +339,7 @@ static NSButton* OakCreateStopSearchButton ()
 - (void)menuNeedsUpdate:(NSMenu*)aMenu
 {
 	[aMenu removeAllItems];
-	[NSApp sendAction:@selector(updateSelectTabMenu:) to:nil from:aMenu];
+	[NSApp sendAction:@selector(updateShowTabMenu:) to:nil from:aMenu];
 }
 
 - (NSDictionary*)allViews

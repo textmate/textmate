@@ -282,7 +282,7 @@ static NSData* Digest (NSString* someString)
 
 // ====================
 
-- (void)updateSelectTabMenu:(NSMenu*)aMenu
+- (void)updateShowTabMenu:(NSMenu*)aMenu
 {
 	if(![[self window] isKeyWindow])
 	{

@@ -67,7 +67,7 @@ OAK_DEBUG_VAR(Preferences);
 	[self.windowController selectControllerAtIndex:index];
 }
 
-- (void)updateSelectTabMenu:(NSMenu*)aMenu
+- (void)updateShowTabMenu:(NSMenu*)aMenu
 {
 	if(![self.windowController.window isKeyWindow])
 		return;

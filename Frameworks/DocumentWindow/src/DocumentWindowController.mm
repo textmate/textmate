@@ -2148,11 +2148,11 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	[self openItems:@[ @{ @"path": path } ] closingOtherTabs:NO activate:YES];
 }
 
-// ============================
-// = Select Tab Menu Delegate =
-// ============================
+// ==========================
+// = Show Tab Menu Delegate =
+// ==========================
 
-- (void)updateSelectTabMenu:(NSMenu*)aMenu
+- (void)updateShowTabMenu:(NSMenu*)aMenu
 {
 	if(![self.window isKeyWindow])
 	{

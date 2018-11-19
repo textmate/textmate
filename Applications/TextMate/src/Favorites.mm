@@ -341,7 +341,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 		self.sourceIndex = [sender tag];
 }
 
-- (void)updateSelectTabMenu:(NSMenu*)aMenu
+- (void)updateShowTabMenu:(NSMenu*)aMenu
 {
 	if(self.window.isKeyWindow)
 	{
