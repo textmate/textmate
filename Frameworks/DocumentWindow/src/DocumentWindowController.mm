@@ -529,8 +529,12 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	if(createIfEmptyFlag && newDocuments.count == 0)
 		[newDocuments addObject:[OakDocumentController.sharedInstance untitledDocument]];
 
-	self.documents        = newDocuments;
-	self.selectedTabIndex = newSelectedTabIndex;
+	[NSAnimationContext runAnimationGroup:^(NSAnimationContext* context){
+		context.allowsImplicitAnimation = YES;
+		self.documents        = newDocuments;
+		self.selectedTabIndex = newSelectedTabIndex;
+	} completionHandler:^{
+	}];
 
 	if(newDocuments.count && ![newDocuments[newSelectedTabIndex].identifier isEqual:selectedUUID])
 		[self openAndSelectDocument:newDocuments[newSelectedTabIndex] activate:activateFlag];
@@ -847,6 +851,27 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	return nil;
 }
 
+- (BOOL)documents:(NSArray<OakDocument*>*)lhs hasCommonSubsequenceWithDocuments:(NSArray<OakDocument*>*)rhs
+{
+	NSMutableSet<NSUUID*>* subsequence = [NSMutableSet setWithArray:[lhs valueForKey:@"identifier"]];
+	[subsequence intersectSet:[NSSet setWithArray:[rhs valueForKey:@"identifier"]]];
+
+	NSUInteger i = 0, j = 0;
+	while(i < lhs.count && j < rhs.count)
+	{
+		if(![subsequence containsObject:lhs[i].identifier])
+			++i;
+		else if(![subsequence containsObject:rhs[j].identifier])
+			++j;
+		else if(![lhs[i].identifier isEqual:rhs[j].identifier])
+			return NO;
+		++i;
+		++j;
+	}
+
+	return YES;
+}
+
 - (void)insertDocuments:(NSArray<OakDocument*>*)documents atIndex:(NSInteger)index selecting:(OakDocument*)selectDocument andClosing:(NSArray<NSUUID*>*)closeDocuments
 {
 	NSSet<NSUUID*>* newUUIDs = [NSSet setWithArray:[documents valueForKey:@"identifier"]];
@@ -880,8 +905,12 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		[newDocuments addObject:_documents[i]];
 	}
 
-	self.documents        = newDocuments;
-	self.selectedTabIndex = [_documents indexOfObject:selectDocument];
+	[NSAnimationContext runAnimationGroup:^(NSAnimationContext* context){
+		context.allowsImplicitAnimation = [self documents:self.documents hasCommonSubsequenceWithDocuments:newDocuments];
+		self.documents        = newDocuments;
+		self.selectedTabIndex = [_documents indexOfObject:selectDocument];
+	} completionHandler:^{
+	}];
 }
 
 - (void)openItems:(NSArray*)items closingOtherTabs:(BOOL)closeOtherTabsFlag activate:(BOOL)activateFlag
