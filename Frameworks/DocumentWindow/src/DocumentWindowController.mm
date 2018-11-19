@@ -102,8 +102,9 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 
 @property (nonatomic) NSArray<Bundle*>*           bundlesAlreadySuggested;
 
-@property (nonatomic, readwrite) OakDocument*     selectedDocument;
-@property (nonatomic) NSArrayController*          arrayController;
+@property (nonatomic, readwrite) NSArray<OakDocument*>* documents;
+@property (nonatomic, readwrite) OakDocument*           selectedDocument;
+@property (nonatomic) NSArrayController*                arrayController;
 
 + (void)scheduleSessionBackup:(id)sender;
 

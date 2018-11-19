@@ -10,7 +10,7 @@ PUBLIC @interface DocumentWindowController : NSResponder
 @property (nonatomic, readonly) NSString*                        projectPath; // effectiveProjectPath
 @property (nonatomic, readonly) NSString*                        untitledSavePath;
 
-@property (nonatomic) NSArray<OakDocument*>*                     documents;
+@property (nonatomic, readonly) NSArray<OakDocument*>*           documents;
 @property (nonatomic, readonly) OakDocument*                     selectedDocument;
 @property (nonatomic) NSUInteger                                 selectedTabIndex;
 
