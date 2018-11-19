@@ -864,6 +864,8 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 	if(_document = aDocument)
 	{
+		_scmStatus = scm::status::unknown;
+
 		documentView = std::make_shared<document_view_t>(_document, to_s(self.scopeAttributes), self.scrollPastEnd, fontScaleFactor);
 		documentView->set_command_runner([self](bundle_command_t const& cmd, ng::buffer_api_t const& buffer, ng::ranges_t const& selection, std::map<std::string, std::string> const& variables){
 			[self executeBundleCommand:cmd buffer:buffer selection:selection variables:variables];
