@@ -11,6 +11,7 @@
 #import <OakAppKit/OakOpenWithMenu.h>
 #import <OakAppKit/OakFinderTag.h>
 #import <OakAppKit/OakZoomingIcon.h>
+#import <OakFoundation/OakFoundation.h>
 #import <OakCommand/OakCommand.h>
 #import <Preferences/Keys.h>
 #import <bundles/bundles.h>
@@ -603,25 +604,44 @@ static bool is_binary (std::string const& path)
 	}
 }
 
+- (BOOL)writeItems:(NSArray<FileItem*>*)items toPasteboard:(NSPasteboard*)pboard
+{
+	NSArray<NSURL*>* urls     = [items valueForKeyPath:@"URL"];
+	NSArray<NSString*>* paths = [[urls filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isFileURL == YES"]] valueForKeyPath:@"path"];
+
+	NSMutableArray* types = [NSMutableArray array];
+
+	if(paths.count)
+		[types addObject:NSFilenamesPboardType];
+	else if(urls.count == 1)
+		[types addObject:NSURLPboardType];
+
+	NSArray<NSString*>* names = [items valueForKeyPath:@"localizedName"];
+	NSString* string = [names componentsJoinedByString:@"\r"];
+	if(OakNotEmptyString(string))
+		[types addObject:NSStringPboardType];
+
+	[pboard declareTypes:types owner:nil];
+	if([types containsObject:NSStringPboardType])
+		[pboard setString:string forType:NSStringPboardType];
+	if([types containsObject:NSFilenamesPboardType])
+		[pboard setPropertyList:paths forType:NSFilenamesPboardType];
+	if([types containsObject:NSURLPboardType])
+		[urls.lastObject writeToPasteboard:pboard];
+
+	return types.count;
+}
+
 - (void)cutURLs:(id)sender
 {
-	NSOutlineView* outlineView = self.fileBrowserView.outlineView;
-
-	NSPasteboard* pboard = [NSPasteboard generalPasteboard];
-	[outlineView.dataSource outlineView:outlineView writeItems:self.fileBrowserView.previewableItems toPasteboard:NSPasteboard.generalPasteboard];
-	if([pboard availableTypeFromArray:@[ NSFilenamesPboardType ]])
-	{
-		NSArray* paths = [pboard propertyListForType:NSFilenamesPboardType];
-		[pboard declareTypes:@[ NSFilenamesPboardType, @"OakFileBrowserOperation" ] owner:nil];
-		[pboard setPropertyList:paths forType:NSFilenamesPboardType];
+	NSPasteboard* pboard = NSPasteboard.generalPasteboard;
+	if([self writeItems:self.fileBrowserView.previewableItems toPasteboard:pboard])
 		[pboard setString:@"cut" forType:@"OakFileBrowserOperation"];
-	}
 }
 
 - (void)copyURLs:(id)sender
 {
-	NSOutlineView* outlineView = self.fileBrowserView.outlineView;
-	[outlineView.dataSource outlineView:outlineView writeItems:self.fileBrowserView.previewableItems toPasteboard:NSPasteboard.generalPasteboard];
+	[self writeItems:self.fileBrowserView.previewableItems toPasteboard:NSPasteboard.generalPasteboard];
 }
 
 - (void)copyAsPathname:(id)sender

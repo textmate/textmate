@@ -10,7 +10,6 @@
 #import <MenuBuilder/MenuBuilder.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakAppKit/NSMenuItem Additions.h>
-#import <OakFoundation/OakFoundation.h>
 #import <Preferences/Keys.h>
 #import <io/path.h>
 #import <io/resource.h>
@@ -878,34 +877,6 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 - (id <NSPasteboardWriting>)outlineView:(NSOutlineView*)outlineView pasteboardWriterForItem:(FileItem*)item
 {
 	return item.URL.filePathURL;
-}
-
-- (BOOL)outlineView:(NSOutlineView*)outlineView writeItems:(NSArray*)items toPasteboard:(NSPasteboard*)pboard
-{
-	NSArray<NSURL*>* urls     = [items valueForKeyPath:@"URL"];
-	NSArray<NSString*>* paths = [[urls filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isFileURL == YES"]] valueForKeyPath:@"path"];
-
-	NSMutableArray* types = [NSMutableArray array];
-
-	if(paths.count)
-		[types addObject:NSFilenamesPboardType];
-	else if(urls.count == 1)
-		[types addObject:NSURLPboardType];
-
-	NSArray<NSString*>* names = [items valueForKeyPath:@"localizedName"];
-	NSString* string = [names componentsJoinedByString:@"\r"];
-	if(OakNotEmptyString(string))
-		[types addObject:NSStringPboardType];
-
-	[pboard declareTypes:types owner:nil];
-	if([types containsObject:NSStringPboardType])
-		[pboard setString:string forType:NSStringPboardType];
-	if([types containsObject:NSFilenamesPboardType])
-		[pboard setPropertyList:paths forType:NSFilenamesPboardType];
-	if([types containsObject:NSURLPboardType])
-		[urls.lastObject writeToPasteboard:pboard];
-
-	return types.count;
 }
 
 // ===============================
