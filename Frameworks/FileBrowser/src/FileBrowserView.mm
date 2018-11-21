@@ -875,43 +875,27 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 	return item;
 }
 
+- (id <NSPasteboardWriting>)outlineView:(NSOutlineView*)outlineView pasteboardWriterForItem:(FileItem*)item
+{
+	return item.URL.filePathURL;
+}
+
 - (BOOL)outlineView:(NSOutlineView*)outlineView writeItems:(NSArray*)items toPasteboard:(NSPasteboard*)pboard
 {
 	NSArray<NSURL*>* urls     = [items valueForKeyPath:@"URL"];
-	NSArray<NSString*>* names = [items valueForKeyPath:@"localizedName"];
 	NSArray<NSString*>* paths = [[urls filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isFileURL == YES"]] valueForKeyPath:@"path"];
 
-	BOOL isDragPboard    = [pboard.name isEqualToString:NSDragPboard];
-	BOOL isGeneralPboard = [pboard.name isEqualToString:NSGeneralPboard];
-
 	NSMutableArray* types = [NSMutableArray array];
-	NSString* string = NULL;
 
 	if(paths.count)
 		[types addObject:NSFilenamesPboardType];
 	else if(urls.count == 1)
 		[types addObject:NSURLPboardType];
 
-	if(isGeneralPboard)
-	{
-		string = [names componentsJoinedByString:@"\r"];
-		if(OakNotEmptyString(string))
-			[types addObject:NSStringPboardType];
-	}
-	else if(isDragPboard)
-	{
-		for(NSString* path in paths)
-		{
-			if(path::is_text_clipping(path.fileSystemRepresentation))
-			{
-				if(string = to_ns(path::resource(path.fileSystemRepresentation, typeUTF8Text, 256)))
-				{
-					[types addObject:NSStringPboardType];
-					break;
-				}
-			}
-		}
-	}
+	NSArray<NSString*>* names = [items valueForKeyPath:@"localizedName"];
+	NSString* string = [names componentsJoinedByString:@"\r"];
+	if(OakNotEmptyString(string))
+		[types addObject:NSStringPboardType];
 
 	[pboard declareTypes:types owner:nil];
 	if([types containsObject:NSStringPboardType])
