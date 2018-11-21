@@ -881,44 +881,33 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 	NSArray<NSString*>* names = [items valueForKeyPath:@"localizedName"];
 	NSArray<NSString*>* paths = [[urls filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isFileURL == YES"]] valueForKeyPath:@"path"];
 
-	BOOL isDragPboard     = [pboard.name isEqualToString:NSDragPboard];
-	BOOL isGeneralPboard  = [pboard.name isEqualToString:NSGeneralPboard];
-	BOOL isServicesPboard = !isDragPboard && !isGeneralPboard;
+	BOOL isDragPboard    = [pboard.name isEqualToString:NSDragPboard];
+	BOOL isGeneralPboard = [pboard.name isEqualToString:NSGeneralPboard];
 
 	NSMutableArray* types = [NSMutableArray array];
 	NSString* string = NULL;
 
-	if(isServicesPboard)
+	if(paths.count)
+		[types addObject:NSFilenamesPboardType];
+	else if(urls.count == 1)
+		[types addObject:NSURLPboardType];
+
+	if(isGeneralPboard)
 	{
-		if(paths.count)
-			[types addObject:NSFilenamesPboardType];
-		if(string = paths.lastObject)
+		string = [names componentsJoinedByString:@"\r"];
+		if(OakNotEmptyString(string))
 			[types addObject:NSStringPboardType];
 	}
-	else // is drag or general pasteboard
+	else if(isDragPboard)
 	{
-		if(paths.count)
-			[types addObject:NSFilenamesPboardType];
-		else if(urls.count == 1)
-			[types addObject:NSURLPboardType];
-
-		if(isGeneralPboard)
+		for(NSString* path in paths)
 		{
-			string = [names componentsJoinedByString:@"\r"];
-			if(OakNotEmptyString(string))
-				[types addObject:NSStringPboardType];
-		}
-		else if(isDragPboard)
-		{
-			for(NSString* path in paths)
+			if(path::is_text_clipping(path.fileSystemRepresentation))
 			{
-				if(path::is_text_clipping(path.fileSystemRepresentation))
+				if(string = to_ns(path::resource(path.fileSystemRepresentation, typeUTF8Text, 256)))
 				{
-					if(string = to_ns(path::resource(path.fileSystemRepresentation, typeUTF8Text, 256)))
-					{
-						[types addObject:NSStringPboardType];
-						break;
-					}
+					[types addObject:NSStringPboardType];
+					break;
 				}
 			}
 		}
@@ -1076,14 +1065,18 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 
 - (id)validRequestorForSendType:(NSString*)sendType returnType:(NSString*)returnType
 {
-	if(returnType == nil && [sendType isEqualToString:NSFilenamesPboardType])
-			return self;
-	else	return [super validRequestorForSendType:sendType returnType:returnType];
+	return returnType == nil && sendType != nil && [@[ NSFilenamesPboardType, NSURLPboardType ] containsObject:sendType] ? self : nil;
 }
 
 - (BOOL)writeSelectionToPasteboard:(NSPasteboard*)pboard types:(NSArray*)types
 {
-	return [_outlineView.dataSource outlineView:_outlineView writeItems:self.selectedItems toPasteboard:pboard];
+	NSArray<NSURL*>* urls = [self.previewableItems valueForKeyPath:@"URL"];
+	if(urls.count == 0)
+		return NO;
+
+	[pboard clearContents];
+	[pboard writeObjects:urls];
+	return YES;
 }
 
 // ===================
