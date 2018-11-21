@@ -606,30 +606,16 @@ static bool is_binary (std::string const& path)
 
 - (BOOL)writeItems:(NSArray<FileItem*>*)items toPasteboard:(NSPasteboard*)pboard
 {
-	NSArray<NSURL*>* urls     = [items valueForKeyPath:@"URL"];
-	NSArray<NSString*>* paths = [[urls filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isFileURL == YES"]] valueForKeyPath:@"path"];
+	if(!items.count)
+		return NO;
 
-	NSMutableArray* types = [NSMutableArray array];
+	[pboard clearContents];
+	[pboard writeObjects:[items valueForKeyPath:@"URL"]];
 
-	if(paths.count)
-		[types addObject:NSFilenamesPboardType];
-	else if(urls.count == 1)
-		[types addObject:NSURLPboardType];
+	if(![pboard.types containsObject:NSStringPboardType])
+		[pboard writeObjects:[items valueForKeyPath:@"localizedName"]];
 
-	NSArray<NSString*>* names = [items valueForKeyPath:@"localizedName"];
-	NSString* string = [names componentsJoinedByString:@"\r"];
-	if(OakNotEmptyString(string))
-		[types addObject:NSStringPboardType];
-
-	[pboard declareTypes:types owner:nil];
-	if([types containsObject:NSStringPboardType])
-		[pboard setString:string forType:NSStringPboardType];
-	if([types containsObject:NSFilenamesPboardType])
-		[pboard setPropertyList:paths forType:NSFilenamesPboardType];
-	if([types containsObject:NSURLPboardType])
-		[urls.lastObject writeToPasteboard:pboard];
-
-	return types.count;
+	return YES;
 }
 
 - (void)cutURLs:(id)sender
