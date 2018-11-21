@@ -626,13 +626,13 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		[array addObject:captures.empty() ? _windowController.replaceString : to_ns(format_string::expand(replacementString, captures))];
 	}
 
-	[[NSPasteboard generalPasteboard] declareTypes:@[ NSStringPboardType ] owner:nil];
-	[[NSPasteboard generalPasteboard] setString:[array componentsJoinedByString:@"\n"] forType:NSStringPboardType];
+	[NSPasteboard.generalPasteboard clearContents];
+	[NSPasteboard.generalPasteboard writeObjects:array];
 }
 
 - (void)copyEntireLines:(BOOL)entireLines withFilename:(BOOL)withFilename
 {
-	std::vector<std::string> res;
+	NSMutableArray* array = [NSMutableArray array];
 
 	for(FFResultNode* item in _windowController.resultsViewController.selectedResults)
 	{
@@ -647,11 +647,11 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		if(withFilename)
 			str = text::format("%s:%lu\t", [item.path UTF8String], m.lineNumber + 1) + str;
 
-		res.push_back(str);
+		[array addObject:to_ns(str)];
 	}
 
-	[[NSPasteboard generalPasteboard] declareTypes:@[ NSStringPboardType ] owner:nil];
-	[[NSPasteboard generalPasteboard] setString:[NSString stringWithCxxString:text::join(res, "\n")] forType:NSStringPboardType];
+	[NSPasteboard.generalPasteboard clearContents];
+	[NSPasteboard.generalPasteboard writeObjects:array];
 }
 
 - (void)copy:(id)sender                          { [self copyEntireLines:YES withFilename:NO ]; }
