@@ -14,7 +14,6 @@
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/NSImage Additions.h>
 #import <OakAppKit/OakToolTip.h>
-#import <OakAppKit/OakPasteboard.h>
 #import <OakAppKit/OakPasteboardChooser.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakAppKit/NSMenuItem Additions.h>
