@@ -11,6 +11,7 @@ static size_t kParseSizeLimit = 1024;
 @interface OakSyntaxFormatter ()
 {
 	NSString* _grammarName;
+	NSFont* _font;
 
 	BOOL _didLoadGrammarAndTheme;
 	parse::grammar_ptr _grammar;
@@ -72,13 +73,19 @@ static size_t kParseSizeLimit = 1024;
 	if(!styled || !_grammarName)
 		return;
 
+	if(!_font)
+	{
+		NSDictionary* attributes = [styled attributesAtIndex:0 effectiveRange:nil];
+		_font = attributes[NSFontAttributeName] ?: [NSFont systemFontOfSize:0];
+	}
+
 	NSString* plain = styled.string;
 	for(NSString* attr in @[ NSForegroundColorAttributeName, NSBackgroundColorAttributeName, NSUnderlineStyleAttributeName, NSStrikethroughStyleAttributeName ])
 		[styled removeAttribute:attr range:NSMakeRange(0, plain.length)];
 
 	if(_enabled == NO || ![self tryLoadGrammarAndTheme])
 	{
-		[styled addAttributes:@{ NSForegroundColorAttributeName: [NSColor controlTextColor] } range:NSMakeRange(0, plain.length)];
+		[styled addAttributes:@{ NSFontAttributeName: _font, NSForegroundColorAttributeName: [NSColor controlTextColor] } range:NSMakeRange(0, plain.length)];
 		return;
 	}
 
@@ -94,6 +101,7 @@ static size_t kParseSizeLimit = 1024;
 		size_t to = ++pair != scopes.end() ? pair->first : str.size();
 		size_t len = utf16::distance(str.data() + from, str.data() + to);
 		NSMutableDictionary* attributes = [@{
+			NSFontAttributeName:               _font,
 			NSForegroundColorAttributeName:    styles.foregroundColor,
 			NSUnderlineStyleAttributeName:     @(styles.underlined ? NSUnderlineStyleSingle : NSUnderlineStyleNone),
 			NSStrikethroughStyleAttributeName: @(styles.strikethrough ? NSUnderlineStyleSingle : NSUnderlineStyleNone),
@@ -101,6 +109,14 @@ static size_t kParseSizeLimit = 1024;
 
 		if(![styles.backgroundColor isEqual:_theme.backgroundColor])
 			attributes[NSBackgroundColorAttributeName] = styles.backgroundColor;
+
+		if(styles.fontTraits)
+		{
+			attributes[NSFontAttributeName] = [NSFont fontWithDescriptor:[NSFontDescriptor fontDescriptorWithFontAttributes:@{
+				NSFontFamilyAttribute: _font.familyName,
+				NSFontTraitsAttribute: @{ NSFontSymbolicTrait: @(styles.fontTraits) },
+			}] size:_font.pointSize];
+		}
 
 		[styled addAttributes:attributes range:NSMakeRange(pos, len)];
 
