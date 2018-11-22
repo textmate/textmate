@@ -1,12 +1,11 @@
 #import "OakSyntaxFormatter.h"
 #import <bundles/query.h>
-#import <theme/theme.h>
+#import <theme/OakTheme.h>
 #import <parse/parse.h>
 #import <parse/grammar.h>
 #import <text/utf16.h>
 #import <ns/ns.h>
 
-static NSString* const kUserDefaultsUIThemeUUID = @"UIThemeUUID";
 static size_t kParseSizeLimit = 1024;
 
 @interface OakSyntaxFormatter ()
@@ -15,18 +14,11 @@ static size_t kParseSizeLimit = 1024;
 
 	BOOL _didLoadGrammarAndTheme;
 	parse::grammar_ptr _grammar;
-	theme_ptr _theme;
+	OakTheme* _theme;
 }
 @end
 
 @implementation OakSyntaxFormatter
-+ (void)initialize
-{
-	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
-		kUserDefaultsUIThemeUUID: @(kMacClassicThemeUUID),
-	}];
-}
-
 - (instancetype)initWithGrammarName:(NSString*)grammarName
 {
 	if(self = [self init])
@@ -65,13 +57,10 @@ static size_t kParseSizeLimit = 1024;
 				break;
 		}
 
-		if(bundles::item_ptr themeItem = bundles::lookup(to_s([[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsUIThemeUUID])))
-			_theme = parse_theme(themeItem);
+		_theme = [OakTheme theme];
 
 		if(!_grammar)
 			NSLog(@"Failed to load grammar: %@", _grammarName);
-		if(!_theme)
-			NSLog(@"Failed to load theme: %@", [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsUIThemeUUID]);
 
 		_didLoadGrammarAndTheme = YES;
 	}
@@ -100,17 +89,18 @@ static size_t kParseSizeLimit = 1024;
 	size_t from = 0, pos = 0;
 	for(auto pair = scopes.begin(); pair != scopes.end(); )
 	{
-		styles_t styles = _theme->styles_for_scope(pair->second);
+		OakThemeStyles* styles = [_theme stylesForScope:pair->second];
+
 		size_t to = ++pair != scopes.end() ? pair->first : str.size();
 		size_t len = utf16::distance(str.data() + from, str.data() + to);
 		NSMutableDictionary* attributes = [@{
-			NSForegroundColorAttributeName:    [NSColor colorWithCGColor:styles.foreground()],
-			NSUnderlineStyleAttributeName:     @(styles.underlined() ? NSUnderlineStyleSingle : NSUnderlineStyleNone),
-			NSStrikethroughStyleAttributeName: @(styles.strikethrough() ? NSUnderlineStyleSingle : NSUnderlineStyleNone),
+			NSForegroundColorAttributeName:    styles.foregroundColor,
+			NSUnderlineStyleAttributeName:     @(styles.underlined ? NSUnderlineStyleSingle : NSUnderlineStyleNone),
+			NSStrikethroughStyleAttributeName: @(styles.strikethrough ? NSUnderlineStyleSingle : NSUnderlineStyleNone),
 		} mutableCopy];
 
-		if(!CGColorEqualToColor(styles.background(), _theme->background()))
-			attributes[NSBackgroundColorAttributeName] = [NSColor colorWithCGColor:styles.background()];
+		if(![styles.backgroundColor isEqual:_theme.backgroundColor])
+			attributes[NSBackgroundColorAttributeName] = styles.backgroundColor;
 
 		[styled addAttributes:attributes range:NSMakeRange(pos, len)];
 
