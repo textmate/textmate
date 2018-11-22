@@ -23,7 +23,7 @@ NSString* const kUserDefaultsFolderOptionsKey     = @"Folder Search Options";
 NSString* const kUserDefaultsFindResultsHeightKey = @"findResultsHeight";
 NSString* const kUserDefaultsDefaultFindGlobsKey  = @"defaultFindInFolderGlobs";
 
-NSButton* OakCreateClickableStatusBar ()
+static NSButton* OakCreateClickableStatusBar ()
 {
 	NSButton* res = [[NSButton alloc] initWithFrame:NSZeroRect];
 	[res.cell setLineBreakMode:NSLineBreakByTruncatingTail];
