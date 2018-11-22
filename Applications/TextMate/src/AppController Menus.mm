@@ -72,6 +72,9 @@ static NSString* NameForLocaleIdentifier (NSString* languageCode)
 	std::map<std::string, std::multimap<std::string, bundles::item_ptr, text::less_t>> ordered;
 	for(auto const& item : bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeTheme))
 	{
+		if(item->hidden_from_user())
+			continue;
+
 		auto semanticClass = text::split(item->value_for_field(bundles::kFieldSemanticClass), ".");
 		std::string themeClass = semanticClass.size() > 2 && semanticClass.front() == "theme" ? semanticClass[1] : "unspecified";
 		ordered[themeClass].emplace(item->name(), item);
