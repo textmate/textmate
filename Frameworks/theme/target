@@ -1,4 +1,4 @@
 TESTS        = tests/*.cc
-SOURCES      = src/*.cc
+SOURCES      = src/*.{cc,mm}
 LINK        += bundles cf scope text
 EXPORT       = src/*.h
