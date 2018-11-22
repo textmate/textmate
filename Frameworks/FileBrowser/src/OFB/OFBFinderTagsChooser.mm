@@ -3,68 +3,98 @@
 #import <OakAppKit/OakRolloverButton.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 
-static constexpr CGFloat SwatchDiameter  = 20;
-static constexpr CGFloat SwatchMargin    = 2;
-static constexpr CGFloat LabelNameHeight = 15;
+static constexpr CGFloat SwatchButtonWidth  = 24;
 
 @interface OFBFinderTagImage : NSImage
-+ (NSImage*)imageWithSize:(NSSize)aSize backgroundColor:(NSColor*)bgColor foregroundColor:(NSColor*)fgColor selected:(BOOL)selectedFlag removable:(BOOL)removableFlag mouseOver:(BOOL)mouseOverFlag;
++ (NSImage*)imageWithSize:(NSSize)aSize forLabelColor:(NSColor*)aLabelColor selected:(BOOL)selectedFlag removable:(BOOL)removableFlag mouseOver:(BOOL)mouseOverFlag;
 @end
 
 @implementation OFBFinderTagImage
-+ (NSImage*)imageWithSize:(NSSize)aSize backgroundColor:(NSColor*)bgColor foregroundColor:(NSColor*)fgColor selected:(BOOL)selectedFlag removable:(BOOL)removableFlag mouseOver:(BOOL)mouseOverFlag
++ (NSImage*)imageWithSize:(NSSize)aSize forLabelColor:(NSColor*)aLabelColor selected:(BOOL)selectedFlag removable:(BOOL)removableFlag mouseOver:(BOOL)mouseOverFlag
 {
-	auto drawXInRect = ^(NSRect aRect){
-		NSRect r = NSInsetRect(aRect, 3, 3);
-		CGFloat const inscribedRectLength = r.size.width;
-		NSBezierPath* line = [NSBezierPath bezierPath];
-		[line moveToPoint:r.origin];
-		[line lineToPoint:NSMakePoint(r.origin.x + inscribedRectLength, r.origin.y + inscribedRectLength)];
-		[line moveToPoint:NSMakePoint(r.origin.x + inscribedRectLength, r.origin.y)];
-		[line lineToPoint:NSMakePoint(r.origin.x, r.origin.y + inscribedRectLength)];
-		[line setLineWidth:1.5];
-		[[NSColor labelColor] set];
-		[line stroke];
-	};
-
 	return [NSImage imageWithSize:aSize flipped:NO drawingHandler:^BOOL(NSRect dstRect){
-		// Allow 1 pixel for anti-aliasing the drawn circle
-		dstRect = NSInsetRect(dstRect, 1, 1);
+		NSRect outerSwatchRect = NSInsetRect(dstRect, 2.5, 2.5);
+		NSRect innerSwatchRect = NSInsetRect(dstRect, 5.5, 5.5);
 
-		if(selectedFlag)
+		NSColor* borderColor = aLabelColor;
+		NSColor* fillColor = nil;
+		NSColor* markColor = nil;
+
+		if(borderColor)
 		{
-			NSBezierPath* path = [NSBezierPath bezierPathWithOvalInRect:dstRect];
-			[[NSColor colorWithCalibratedWhite:0.5 alpha:1.0] set];
-			[path stroke];
-			[[NSColor whiteColor] set];
-			[path fill];
+			NSColor* rgbColor = [borderColor colorUsingColorSpace:NSColorSpace.sRGBColorSpace];
+
+			CGFloat factor = 0.8;
+			CGFloat r = 1 - factor*(1 - rgbColor.redComponent);
+			CGFloat g = 1 - factor*(1 - rgbColor.greenComponent);
+			CGFloat b = 1 - factor*(1 - rgbColor.blueComponent);
+
+			fillColor = [NSColor colorWithSRGBRed:r green:g blue:b alpha:1.0];
+
+			markColor = [NSColor whiteColor];
+		}
+		else
+		{
+			borderColor = [NSColor secondaryLabelColor];
+			fillColor = [NSColor clearColor];
+			markColor = borderColor;
 		}
 
 		if(mouseOverFlag)
 		{
-			[[NSColor colorWithCalibratedWhite:0.5 alpha:1.0] set];
-			NSBezierPath* path = [NSBezierPath bezierPathWithOvalInRect:dstRect];
+			NSBezierPath* path = [NSBezierPath bezierPathWithOvalInRect:outerSwatchRect];
+			[fillColor set];
+			[path fill];
+			[borderColor set];
 			[path stroke];
-			[[NSColor whiteColor] set];
-			[path fill];
+
+			if(removableFlag)
+			{
+				NSRect r = NSInsetRect(innerSwatchRect, 3, 3);
+				CGFloat const inscribedRectLength = r.size.width;
+				NSBezierPath* line = [NSBezierPath bezierPath];
+				[line moveToPoint:r.origin];
+				[line lineToPoint:NSMakePoint(r.origin.x + inscribedRectLength, r.origin.y + inscribedRectLength)];
+				[line moveToPoint:NSMakePoint(r.origin.x + inscribedRectLength, r.origin.y)];
+				[line lineToPoint:NSMakePoint(r.origin.x, r.origin.y + inscribedRectLength)];
+				[line setLineWidth:1.5];
+				[markColor set];
+				[line stroke];
+			}
+			else
+			{
+				NSRect r = NSInsetRect(innerSwatchRect, 3, 3);
+				NSBezierPath* line = [NSBezierPath bezierPath];
+				[line moveToPoint:NSMakePoint(r.origin.x + r.size.width/2, r.origin.y)];
+				[line lineToPoint:NSMakePoint(r.origin.x + r.size.width/2, r.origin.y + r.size.height)];
+				[line moveToPoint:NSMakePoint(r.origin.x, r.origin.y + r.size.height/2)];
+				[line lineToPoint:NSMakePoint(r.origin.x+r.size.width, r.origin.y + r.size.height/2)];
+				[line setLineWidth:1.5];
+				[markColor set];
+				[line stroke];
+			}
 		}
-
-		NSRect innerSwatchRect = NSInsetRect(dstRect, 3.5, 3.5);
-		NSBezierPath* path = [NSBezierPath bezierPathWithOvalInRect:innerSwatchRect];
-
-		[bgColor set];
-		[path fill];
-		[fgColor set];
-		[path stroke];
-
-		if(mouseOverFlag)
+		else
 		{
-			[[NSColor colorWithCalibratedWhite:0.45 alpha:0.2] set];
-			NSBezierPath* path = [NSBezierPath bezierPathWithOvalInRect:NSInsetRect(innerSwatchRect, -4, -4)];
-			[path fill];
+			NSBezierPath* path = [NSBezierPath bezierPathWithOvalInRect:innerSwatchRect];
 
-			if(mouseOverFlag && removableFlag)
-				drawXInRect(innerSwatchRect);
+			[fillColor set];
+			[path fill];
+			[borderColor set];
+			[path stroke];
+
+			if(selectedFlag)
+			{
+				NSRect r = NSInsetRect(innerSwatchRect, 3, 3);
+				NSBezierPath* line = [NSBezierPath bezierPath];
+				[line moveToPoint:NSMakePoint(r.origin.x, r.origin.y + r.size.width * 0.5)];
+				[line lineToPoint:NSMakePoint(r.origin.x + r.size.width/4, r.origin.y)];
+				[line lineToPoint:NSMakePoint(r.origin.x + r.size.width, r.origin.y + r.size.height)];
+				[line setLineWidth:1.5];
+				[markColor set];
+				[line stroke];
+			}
+
 		}
 
 		return YES;
@@ -74,19 +104,18 @@ static constexpr CGFloat LabelNameHeight = 15;
 
 @interface OFBFinderTagsChooser ()
 {
-	BOOL _didCreateSubviews;
+	NSTextField* _tagTextField;
 }
 @property (nonatomic) NSArray<OakFinderTag*>* favoriteFinderTags;
+@property (nonatomic) NSArray<OakFinderTag*>* selectedTags;
+@property (nonatomic) NSArray<OakFinderTag*>* selectedTagsToRemove;
 @property (nonatomic) OakFinderTag* hoverTag;
 @end
 
 @implementation OFBFinderTagsChooser
-+ (OFBFinderTagsChooser*)finderTagsChooserForMenu:(NSMenu*)aMenu
++ (OFBFinderTagsChooser*)finderTagsChooserWithSelectedTags:(NSArray<OakFinderTag*>*)selectedTags andSelectedTagsToRemove:(NSArray<OakFinderTag*>*)selectedTagsToRemove forMenu:(NSMenu*)aMenu
 {
-	OFBFinderTagsChooser* chooser = [[OFBFinderTagsChooser alloc] initWithFrame:NSMakeRect(0, 0, 200, 45)];
-	chooser.font = [aMenu font];
-	chooser.favoriteFinderTags = [OakFinderTagManager favoriteFinderTags];
-	[chooser setNeedsDisplay:YES];
+	OFBFinderTagsChooser* chooser = [[OFBFinderTagsChooser alloc] initWithSelectedTags:selectedTags andSelectedTagsToRemove:selectedTagsToRemove forMenu:aMenu];
 	return chooser;
 }
 
@@ -97,39 +126,78 @@ static constexpr CGFloat LabelNameHeight = 15;
 
 - (NSSize)intrinsicContentSize
 {
-	CGFloat const numberOfFavoriteTags = _favoriteFinderTags.count;
-	CGFloat const width = SwatchDiameter * numberOfFavoriteTags + SwatchMargin * (numberOfFavoriteTags + 1);
-	CGFloat const height = SwatchDiameter + LabelNameHeight;
-	return NSMakeSize(width, height);
+	return NSMakeSize(SwatchButtonWidth * (_favoriteFinderTags.count + 1), SwatchButtonWidth + [_tagTextField intrinsicContentSize].height);
 }
 
-- (void)viewDidMoveToSuperview
+- (instancetype)initWithSelectedTags:(NSArray<OakFinderTag*>*)selectedTags andSelectedTagsToRemove:(NSArray<OakFinderTag*>*)selectedTagsToRemove forMenu:(NSMenu*)aMenu
 {
-	if(_didCreateSubviews || !self.superview)
-		return;
-	_didCreateSubviews = YES;
-
-	[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(mouseDidEnterFinderTagButton:) name:OakRolloverButtonMouseDidEnterNotification object:nil];
-	[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(mouseDidLeaveFinderTagButton:) name:OakRolloverButtonMouseDidLeaveNotification object:nil];
-
-	for(NSUInteger i = 0; i < _favoriteFinderTags.count; ++i)
+	if(self = [super initWithFrame:NSZeroRect])
 	{
-		OakFinderTag* tag = _favoriteFinderTags[i];
-		BOOL isSelected   = [_selectedTags containsObject:tag];
-		BOOL isRemovable  = [_selectedTagsToRemove containsObject:tag];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(mouseDidEnterFinderTagButton:) name:OakRolloverButtonMouseDidEnterNotification object:nil];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(mouseDidLeaveFinderTagButton:) name:OakRolloverButtonMouseDidLeaveNotification object:nil];
 
-		OakRolloverButton* button = [[OakRolloverButton alloc] initWithFrame:[self rectForFavoriteTag:tag]];
-		button.accessibilityLabel = [NSString stringWithFormat:@"%@ tag %@", (isRemovable ? @"Remove" : @"Add"), tag.displayName];
+		_favoriteFinderTags = [OakFinderTagManager favoriteFinderTags];
+		_selectedTags = selectedTags;
+		_selectedTagsToRemove = selectedTagsToRemove;
 
-		button.regularImage  = [OFBFinderTagImage imageWithSize:NSMakeSize(SwatchDiameter, SwatchDiameter) backgroundColor:tag.backgroundColor foregroundColor:tag.foregroundColor selected:isSelected removable:isRemovable mouseOver:NO];
-		button.pressedImage  = [OFBFinderTagImage imageWithSize:NSMakeSize(SwatchDiameter, SwatchDiameter) backgroundColor:tag.backgroundColor foregroundColor:tag.foregroundColor selected:isSelected removable:isRemovable mouseOver:YES];
-		button.rolloverImage = [OFBFinderTagImage imageWithSize:NSMakeSize(SwatchDiameter, SwatchDiameter) backgroundColor:tag.backgroundColor foregroundColor:tag.foregroundColor selected:isSelected removable:isRemovable mouseOver:YES];
-		button.target = self;
-		button.action = @selector(didClickFinderTag:);
-		button.tag = i;
+		self.autoresizesSubviews = YES;
+		self.autoresizingMask = NSViewWidthSizable|NSViewHeightSizable;
 
-		[self addSubview:button];
+		_tagTextField = [[NSTextField alloc] initWithFrame:NSZeroRect];
+		_tagTextField.font            = [aMenu font];
+		_tagTextField.textColor       = [NSColor disabledControlTextColor];
+		_tagTextField.bezeled         = NO;
+		_tagTextField.bordered        = NO;
+		_tagTextField.drawsBackground = NO;
+		_tagTextField.editable        = NO;
+		_tagTextField.selectable      = NO;
+		_tagTextField.stringValue     = @"Tags…";
+
+		_tagTextField.translatesAutoresizingMaskIntoConstraints = NO;
+		[self addSubview:_tagTextField];
+
+		NSMutableArray<OakRolloverButton*>* buttons = [NSMutableArray arrayWithCapacity:_favoriteFinderTags.count];
+		for(NSUInteger i = 0; i < _favoriteFinderTags.count; ++i)
+		{
+			OakFinderTag* tag = _favoriteFinderTags[i];
+			BOOL isSelected   = [_selectedTags containsObject:tag];
+			BOOL isRemovable  = [_selectedTagsToRemove containsObject:tag];
+
+			OakRolloverButton* button = [[OakRolloverButton alloc] initWithFrame:NSZeroRect];
+			button.accessibilityLabel = [NSString stringWithFormat:@"%@ tag %@", (isRemovable ? @"Remove" : @"Add"), tag.displayName];
+
+			button.regularImage  = [OFBFinderTagImage imageWithSize:NSMakeSize(SwatchButtonWidth, SwatchButtonWidth) forLabelColor:tag.labelColor selected:isSelected removable:isRemovable mouseOver:NO];
+			button.pressedImage  = [OFBFinderTagImage imageWithSize:NSMakeSize(SwatchButtonWidth, SwatchButtonWidth) forLabelColor:tag.labelColor selected:isSelected removable:isRemovable mouseOver:YES];
+			button.rolloverImage = [OFBFinderTagImage imageWithSize:NSMakeSize(SwatchButtonWidth, SwatchButtonWidth) forLabelColor:tag.labelColor selected:isSelected removable:isRemovable mouseOver:YES];
+			button.target = self;
+			button.action = @selector(didClickFinderTag:);
+			button.tag = i;
+
+			[buttons addObject:button];
+		}
+
+		if(buttons.count)
+		{
+			OakAddAutoLayoutViewsToSuperview(buttons, self);
+	  		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[tagButton]-(5)-[tagTextField]|" options:0 metrics:nil views:@{ @"tagButton": buttons.firstObject , @"tagTextField" : _tagTextField }]];
+			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[tagTextField]|" options:0 metrics:nil views:@{ @"tagButton": buttons.firstObject , @"tagTextField" : _tagTextField }]];
+			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[tagButton]" options:0 metrics:nil views:@{ @"tagButton": buttons.firstObject }]];
+			for(size_t i = 0; i < [buttons count]-1; ++i)
+			{
+				[self addConstraint:[NSLayoutConstraint constraintWithItem:buttons[i] attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:buttons[i+1] attribute:NSLayoutAttributeLeft multiplier:1 constant:0]];
+				[self addConstraint:[NSLayoutConstraint constraintWithItem:buttons[i] attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:buttons[i+1] attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
+			}
+		}
+		else
+		{
+	  		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[tagTextField]|" options:0 metrics:nil views:@{ @"tagTextField" : _tagTextField }]];
+			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[tagTextField]|" options:0 metrics:nil views:@{ @"tagTextField" : _tagTextField }]];
+		}
+
+		[self setFrameSize:[self fittingSize]];
 	}
+
+	return self;
 }
 
 - (void)mouseDidEnterFinderTagButton:(NSNotification*)aNotificaiton
@@ -138,7 +206,9 @@ static constexpr CGFloat LabelNameHeight = 15;
 	if([self.subviews containsObject:button])
 	{
 		self.hoverTag = _favoriteFinderTags[button.tag];
-		[self setNeedsDisplay:YES];
+		if([_selectedTagsToRemove containsObject:_hoverTag])
+				_tagTextField.stringValue = [NSString stringWithFormat:@"Remove “%@”", _hoverTag.displayName];
+		else	_tagTextField.stringValue = [NSString stringWithFormat:@"Add “%@”", _hoverTag.displayName];
 	}
 }
 
@@ -148,6 +218,7 @@ static constexpr CGFloat LabelNameHeight = 15;
 	if([self.subviews containsObject:button])
 	{
 		self.hoverTag = nil;
+		_tagTextField.stringValue = @"Tags…";
 		[self setNeedsDisplay:YES];
 	}
 }
@@ -166,33 +237,4 @@ static constexpr CGFloat LabelNameHeight = 15;
 	}
 }
 
-- (NSDictionary*)labelAttributes
-{
-	NSMutableParagraphStyle* style = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
-	[style setAlignment:NSCenterTextAlignment];
-
-	NSDictionary* labelAttributes = @{
-		NSFontAttributeName:            [NSFont boldSystemFontOfSize:[NSFont systemFontSizeForControlSize:NSSmallControlSize]],
-		NSForegroundColorAttributeName: [NSColor secondaryLabelColor],
-		NSParagraphStyleAttributeName:  style,
-	};
-	return labelAttributes;
-}
-
-- (NSRect)rectForFavoriteTag:(OakFinderTag*)aTag
-{
-	NSUInteger index = [_favoriteFinderTags indexOfObject:aTag];
-	return (index < _favoriteFinderTags.count) ? NSMakeRect(22 + index*(SwatchDiameter + SwatchMargin * 2), LabelNameHeight + 5, SwatchDiameter, SwatchDiameter) : NSZeroRect;
-}
-
-- (void)drawRect:(NSRect)aRect
-{
-	if(_hoverTag)
-	{
-		NSRect labelRect = NSMakeRect(0, 0, self.bounds.size.width, LabelNameHeight);
-		if([_selectedTagsToRemove containsObject:_hoverTag])
-				[[NSString stringWithFormat:@"Remove Tag “%@”", _hoverTag.displayName] drawInRect:labelRect withAttributes:[self labelAttributes]];
-		else	[[NSString stringWithFormat:@"Add Tag “%@”", _hoverTag.displayName] drawInRect:labelRect withAttributes:[self labelAttributes]];
-	}
-}
 @end

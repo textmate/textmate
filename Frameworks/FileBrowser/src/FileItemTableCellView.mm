@@ -166,10 +166,30 @@
 	NSArray<OakFinderTag*>* tagsWithLabelColor = [_finderTags filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"hasLabelColor == YES"]];
 
 	auto fillAndStrokePath = ^(NSBezierPath* path, OakFinderTag* tag){
-		[tag.backgroundColor set];
+
+		NSColor* borderColor = tag.labelColor;
+		NSColor* fillColor = nil;
+
+		if(borderColor)
+		{
+			NSColor* rgbColor = [borderColor colorUsingColorSpace:NSColorSpace.sRGBColorSpace];
+			CGFloat factor = 0.8;
+			CGFloat r = 1 - factor*(1 - rgbColor.redComponent);
+			CGFloat g = 1 - factor*(1 - rgbColor.greenComponent);
+			CGFloat b = 1 - factor*(1 - rgbColor.blueComponent);
+
+			fillColor = [NSColor colorWithSRGBRed:r green:g blue:b alpha:1.0];
+		}
+		else
+		{
+			borderColor = [NSColor secondaryLabelColor];
+			fillColor = [NSColor clearColor];
+		}
+
+		[fillColor set];
 		[path fill];
 
-		self.isSelectedAndEmphasized ? [[NSColor whiteColor] set] : [tag.foregroundColor set];
+		self.isSelectedAndEmphasized ? [[NSColor whiteColor] set] : [borderColor set];
 		[path stroke];
 	};
 
