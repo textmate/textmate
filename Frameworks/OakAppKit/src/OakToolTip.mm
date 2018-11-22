@@ -54,19 +54,19 @@ static __weak OakToolTip* LastToolTip;
 		[field setFont:defaultFont];
 		[field setStringValue:@"This is a nice little code block"];
 
-		// if(@available(macos 10.14, *))
-		// {
-		// 	NSVisualEffectView* effectView = [[NSVisualEffectView alloc] initWithFrame:self.contentView.frame];
-		// 	effectView.material = NSVisualEffectMaterialToolTip;
-		// 	effectView.autoresizingMask = NSViewWidthSizable|NSViewHeightSizable;
-		// 	[self.contentView addSubview:effectView];
-		// 	[field setTextColor:NSColor.labelColor];
-		//
-		// 	NSAppearanceName appearanceName = [NSApp.effectiveAppearance bestMatchFromAppearancesWithNames:@[ NSAppearanceNameAqua, NSAppearanceNameDarkAqua ]];
-		// 	if([appearanceName isEqualToString:NSAppearanceNameDarkAqua])
-		// 		[field setBordered:YES];
-		// }
-		// else
+		if(@available(macos 10.14, *))
+		{
+			NSVisualEffectView* effectView = [[NSVisualEffectView alloc] initWithFrame:self.contentView.frame];
+			effectView.material = NSVisualEffectMaterialToolTip;
+			effectView.autoresizingMask = NSViewWidthSizable|NSViewHeightSizable;
+			[self.contentView addSubview:effectView];
+			[field setTextColor:NSColor.labelColor];
+
+			NSAppearanceName appearanceName = [NSApp.effectiveAppearance bestMatchFromAppearancesWithNames:@[ NSAppearanceNameAqua, NSAppearanceNameDarkAqua ]];
+			if([appearanceName isEqualToString:NSAppearanceNameDarkAqua])
+				[field setBordered:YES];
+		}
+		else
 		{
 			[self setAlphaValue:0.97];
 			[self setOpaque:NO];
