@@ -384,7 +384,6 @@ static bool is_binary (std::string const& path)
 		{ @"Paste",                   @selector(pasteURLs:)                                                                       },
 		{ @"Move Items Here",         @selector(moveURLs:),            @"v", NSEventModifierFlagCommand|NSEventModifierFlagOption },
 		{ /* -------- */ },
-		{ @"Tags…",                   @selector(nop:), .tag = kRequiresSelectionTag },
 		{ @"Finder Tag", .ref = &finderTagsMenuItem,   .tag = kRequiresSelectionTag },
 		{ /* -------- */ },
 		{ @"Undo",                    @selector(undo:), .target = self.fileBrowserView },
@@ -415,9 +414,7 @@ static bool is_binary (std::string const& path)
 				[removeFinderTags addObject:tag];
 		}
 
-		OFBFinderTagsChooser* chooser = [OFBFinderTagsChooser finderTagsChooserForMenu:menu];
-		chooser.selectedTags         = finderTagsCountedSet.objectEnumerator.allObjects;
-		chooser.selectedTagsToRemove = [removeFinderTags copy];
+		OFBFinderTagsChooser* chooser = [OFBFinderTagsChooser finderTagsChooserWithSelectedTags:finderTagsCountedSet.objectEnumerator.allObjects andSelectedTagsToRemove:[removeFinderTags copy] forMenu:menu];
 		chooser.action               = @selector(didChangeFinderTag:);
 		chooser.target               = self;
 

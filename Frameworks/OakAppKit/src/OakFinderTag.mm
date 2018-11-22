@@ -2,18 +2,7 @@
 #import <OakFoundation/OakFoundation.h>
 #import <OakAppKit/NSColor Additions.h>
 #import <io/path.h>
-
-static struct label_colors_t { NSString* name; NSString* backgroundColor; NSString* foregroundColor; } const labelColors[] =
-{
-	{ @"Clear",  @"#69696900", @"#696969" },
-	{ @"Gray",   @"#939396",   @"#7E7E82" },
-	{ @"Green",  @"#5EC53F",   @"#42B71F" },
-	{ @"Purple", @"#C46FDA",   @"#B855D1" },
-	{ @"Blue",   @"#3FA8F0",   @"#2096EC" },
-	{ @"Yellow", @"#F0C63A",   @"#EDB916" },
-	{ @"Red",    @"#FB494A",   @"#FB282C" },
-	{ @"Orange", @"#FD9938",   @"#FD8510" },
-};
+#import <ns/ns.h>
 
 @interface OakFinderTag ()
 @property (nonatomic) NSUInteger label;
@@ -40,14 +29,19 @@ static struct label_colors_t { NSString* name; NSString* backgroundColor; NSStri
 	return _label == 0 ? NO : YES;
 }
 
-- (NSColor*)backgroundColor
+- (NSColor*)labelColor
 {
-	return [NSColor colorWithString:labelColors[_label].backgroundColor];
-}
-
-- (NSColor*)foregroundColor
-{
-	return [NSColor colorWithString:labelColors[_label].foregroundColor];
+	switch(_label)
+	{
+		case 1: return [NSColor systemGrayColor];
+		case 2: return [NSColor systemGreenColor];
+		case 3: return [NSColor systemPurpleColor];
+		case 4: return [NSColor systemBlueColor];
+		case 5: return [NSColor systemYellowColor];
+		case 6: return [NSColor systemRedColor];
+		case 7: return [NSColor systemOrangeColor];
+		default: return nil;
+	}
 }
 
 - (id)copyWithZone:(NSZone*)zone { return [[OakFinderTag alloc] initWithDisplayName:_displayName label:_label]; }
@@ -88,10 +82,21 @@ static struct label_colors_t { NSString* name; NSString* backgroundColor; NSStri
 
 + (NSArray<OakFinderTag*>*)favoriteFinderTags
 {
+	static std::map<std::string, int> const labelColors =
+	{
+		{ "Gray",   1 },
+		{ "Green",  2 },
+		{ "Purple", 3 },
+		{ "Blue",   4 },
+		{ "Yellow", 5 },
+		{ "Red",    6 },
+		{ "Orange", 7 },
+	};
+
 	NSUserDefaults* finderDefaults = [[NSUserDefaults alloc] initWithSuiteName:@"com.apple.finder"];
 	NSArray<NSString*>* favoriteTagNames = [finderDefaults arrayForKey:@"FavoriteTagNames"];
 	if(!favoriteTagNames)
-		favoriteTagNames = @[ @"Red", @"Orange", @"Yellow", @"Green", @"Blue", @"Purple" ];
+		favoriteTagNames = @[ @"Red", @"Orange", @"Yellow", @"Green", @"Blue", @"Purple", @"Gray" ];
 
 	NSMutableArray<OakFinderTag*>* tags = [NSMutableArray new];
 	for(NSString* name in favoriteTagNames)
@@ -99,8 +104,8 @@ static struct label_colors_t { NSString* name; NSString* backgroundColor; NSStri
 		if(OakIsEmptyString(name))
 			continue;
 
-		auto it = std::find_if(std::begin(labelColors), std::end(labelColors), [=](label_colors_t const& labelColors){ return [labelColors.name isEqualToString:name]; });
-		NSUInteger label = it != std::end(labelColors) ? std::distance(std::begin(labelColors), it) : 0;
+		auto it = labelColors.find(to_s(name));
+		NSUInteger label = it != labelColors.end() ? it->second : 0;
 
 		[tags addObject:[[OakFinderTag alloc] initWithDisplayName:name label:label]];
 	}
