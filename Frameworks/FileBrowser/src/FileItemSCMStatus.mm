@@ -37,8 +37,8 @@
 			if(repository.enabled)
 			{
 				handler(@[
-					[NSURL URLWithString:[NSString stringWithFormat:@"scm://localhost%@/?show=unstaged", repository.URL.path]],
-					[NSURL URLWithString:[NSString stringWithFormat:@"scm://localhost%@/?show=untracked", repository.URL.path]],
+					[NSURL URLWithString:[NSString stringWithFormat:@"scm://localhost%@/?show=unstaged", [repository.URL.path stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]],
+					[NSURL URLWithString:[NSString stringWithFormat:@"scm://localhost%@/?show=untracked", [repository.URL.path stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]],
 				]);
 			}
 		}
@@ -211,7 +211,7 @@
 - (NSURL*)parentURL
 {
 	if([self.URL.query hasSuffix:@"unstaged"] || [self.URL.query hasSuffix:@"untracked"])
-		return [NSURL URLWithString:[NSString stringWithFormat:@"scm://localhost%@/", self.URL.path]];
+		return [NSURL URLWithString:[NSString stringWithFormat:@"scm://localhost%@/", [self.URL.path stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]];
 	return [NSURL fileURLWithPath:self.URL.path];
 }
 @end
