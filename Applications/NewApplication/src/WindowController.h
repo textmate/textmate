@@ -1,0 +1,2 @@
+@interface WindowController : NSWindowController
+@end

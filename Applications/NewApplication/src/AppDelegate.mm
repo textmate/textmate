@@ -1,4 +1,5 @@
 #import "AppDelegate.h"
+#import "WindowController.h"
 #import <MenuBuilder/MenuBuilder.h>
 
 @interface AppDelegate () <NSApplicationDelegate, NSWindowDelegate>
@@ -204,16 +205,7 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification*)aNotification
 {
-	_window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 400, 400) styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskResizable|NSWindowStyleMaskClosable|NSWindowStyleMaskMiniaturizable) backing:NSBackingStoreBuffered defer:NO];
-	_window.releasedWhenClosed = NO;
-	_window.delegate           = self;
-	_window.title              = @"New Application";
-	[_window center];
-	[_window makeKeyAndOrderFront:self];
-}
-
-- (void)windowWillClose:(NSNotification*)aNotification
-{
-	[NSApp terminate:self];
+	WindowController* windowController = [[WindowController alloc] init];
+	[windowController showWindow:self];
 }
 @end
