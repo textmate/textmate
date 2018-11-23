@@ -64,11 +64,12 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 		_textView.autoresizingMask = NSViewWidthSizable|NSViewHeightSizable;
 
 		textScrollView = [[NSScrollView alloc] initWithFrame:NSZeroRect];
-		textScrollView.hasVerticalScroller   = YES;
-		textScrollView.hasHorizontalScroller = YES;
-		textScrollView.autohidesScrollers    = YES;
-		textScrollView.borderType            = NSNoBorder;
-		textScrollView.documentView          = _textView;
+		textScrollView.hasVerticalScroller      = YES;
+		textScrollView.verticalScrollElasticity = NSScrollElasticityAllowed;
+		textScrollView.hasHorizontalScroller    = YES;
+		textScrollView.autohidesScrollers       = YES;
+		textScrollView.borderType               = NSNoBorder;
+		textScrollView.documentView             = _textView;
 
 		gutterView = [[GutterView alloc] initWithFrame:NSZeroRect];
 		gutterView.partnerView = _textView;
