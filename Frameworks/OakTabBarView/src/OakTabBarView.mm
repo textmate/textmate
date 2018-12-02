@@ -811,7 +811,9 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 	_draggedTabIndex = draggedTabItem ? [_tabItems indexOfObject:draggedTabItem] : -1;
 	_dropTabAtIndex  = droppedTabItem ? [_tabItems indexOfObject:droppedTabItem] : (_dropTabAtIndex == -1 ? -1 : _tabItems.count);
 
-	[self updateToLayout:[self makeLayout]];
+	NSArray<OakTabFrame*>* newLayout = [self makeLayout];
+	if(![_toLayout isEqual:newLayout])
+		[self updateToLayout:newLayout];
 }
 
 - (void)updateTrackingAreas
@@ -1299,9 +1301,6 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 
 - (void)updateToLayout:(NSArray<OakTabFrame*>*)newLayout
 {
-	if([_toLayout isEqual:newLayout])
-		return;
-
 	if(NSAnimationContext.currentContext.allowsImplicitAnimation)
 	{
 		_fromLayout = _currentLayout;
