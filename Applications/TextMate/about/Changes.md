@@ -2,6 +2,12 @@ Title: Release Notes
 
 # Changes
 
+## 2018-12-02 (v2.0-rc.20)
+
+* Document tabs now use “titlebar material” to be a better fit for macOS 10.14.
+* Status bar font size has been increased to 12 pt and can be changed by using `defaults write com.macromates.TextMate statusBarFontSize 13`.
+* See [all changes since v2.0-rc.18](https://github.com/textmate/textmate/compare/v2.0-rc.18...v2.0-rc.20)
+
 ## 2018-11-14 (v2.0-rc.18)
 
 * If you run `defaults write com.macromates.TextMate changeThemeBasedOnAppearance -bool YES` then TextMate will switch theme based on appearance (light/dark). The themes used can be controlled using the `darkModeThemeUUID` and `universalThemeUUID` defaults keys. *[Ronald Wampler]*
