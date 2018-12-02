@@ -297,8 +297,8 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 		[self addConstraints:_overflowButtonConstraints];
 
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[overflow]|" options:0 metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[close]-(5)-|" options:0 metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[title]-(4)-|" options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[close]-(4)-|" options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[title]-(3)-|" options:0 metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[overflow]|" options:0 metrics:nil views:views]];
 
 		[_textField setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
@@ -1342,7 +1342,7 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 		[tabView removeFromSuperview];
 
 	NSRect createNewTabButtonFrame = _createNewTabButton.frame;
-	CGFloat x = -1, y = NSMinY(self.bounds), height = NSHeight(self.bounds);
+	CGFloat x = -1, y = NSMinY(self.bounds)+1, height = NSHeight(self.bounds)-1;
 
 	for(OakTabFrame* tabFrame in _currentLayout)
 	{
