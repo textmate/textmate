@@ -146,9 +146,7 @@ NSString* const kUserDefaultsScrollPastEndKey      = @"scrollPastEnd";
 	} else if([attribute isEqualToString:NSAccessibilityWindowAttribute] || [attribute isEqualToString:NSAccessibilityTopLevelUIElementAttribute]) {
 		value = [self.textView accessibilityAttributeValue:attribute];
 	} else if([attribute isEqualToString:NSAccessibilityPositionAttribute] || [attribute isEqualToString:NSAccessibilitySizeAttribute]) {
-		NSRect frame = self.frame;
-		frame = [self.textView convertRect:frame toView:nil];
-		frame = [self.textView.window convertRectToScreen:frame];
+		NSRect frame = NSAccessibilityFrameInView(self.textView, self.frame);
 		if([attribute isEqualToString:NSAccessibilityPositionAttribute])
 			value = [NSValue valueWithPoint:frame.origin];
 		else
@@ -1582,8 +1580,7 @@ doScroll:
 		return NSZeroRect;
 	ng::range_t range = [self rangeForNSRange:nsRange];
 	NSRect rect = documentView->rect_for_range(range.min().index, range.max().index, true);
-	rect = [self convertRect:rect toView:nil];
-	return [[self window] convertRectToScreen:rect];
+	return NSAccessibilityFrameInView(self, rect);
 }
 
 // ===================
@@ -1789,11 +1786,8 @@ doScroll:
 		return;
 
 	size_t const index = documentView->ranges().last().min().index;
-	NSRect selectedRect = documentView->rect_at_index(index, false);
-	selectedRect = [self convertRect:selectedRect toView:nil];
-	selectedRect = [[self window] convertRectToScreen:selectedRect];
-	NSRect viewRect = [self convertRect:[self visibleRect] toView:nil];
-	viewRect = [[self window] convertRectToScreen:viewRect];
+	NSRect selectedRect = NSAccessibilityFrameInView(self, documentView->rect_at_index(index, false));
+	NSRect viewRect = NSAccessibilityFrameInView(self, [self visibleRect]);
 	viewRect.origin.y = [[NSScreen mainScreen] frame].size.height - (viewRect.origin.y + viewRect.size.height);
 	selectedRect.origin.y = [[NSScreen mainScreen] frame].size.height - (selectedRect.origin.y + selectedRect.size.height);
 	UAZoomChangeFocus(&viewRect, &selectedRect, kUAZoomFocusTypeInsertionPoint);
