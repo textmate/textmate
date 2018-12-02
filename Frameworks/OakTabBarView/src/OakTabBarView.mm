@@ -1140,6 +1140,8 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 
 - (NSArray<OakTabFrame*>*)makeLayoutForTabItems:(NSArray<OakTabItem*>*)tabItems inRectOfWidth:(CGFloat)totalWidth
 {
+	totalWidth += 1; // We place leftmost tab at position -1
+
 	NSMutableArray<OakTabFrame*>* array = [NSMutableArray array];
 	if(_maximumTabSize * tabItems.count <= totalWidth)
 	{
@@ -1341,7 +1343,7 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 		[tabView removeFromSuperview];
 
 	NSRect createNewTabButtonFrame = _createNewTabButton.frame;
-	CGFloat x = 0, y = NSMinY(self.bounds), height = NSHeight(self.bounds);
+	CGFloat x = -1, y = NSMinY(self.bounds), height = NSHeight(self.bounds);
 
 	for(OakTabFrame* tabFrame in _currentLayout)
 	{
