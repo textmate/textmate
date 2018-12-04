@@ -808,8 +808,8 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 
 	_tabItems = newTabItems;
 
-	_draggedTabIndex = draggedTabItem ? [_tabItems indexOfObject:draggedTabItem] : -1;
-	_dropTabAtIndex  = droppedTabItem ? [_tabItems indexOfObject:droppedTabItem] : (_dropTabAtIndex == -1 ? -1 : _tabItems.count);
+	_draggedTabIndex = draggedTabItem ? ([_tabItems indexOfObject:draggedTabItem] == NSNotFound ? -1 : [_tabItems indexOfObject:draggedTabItem]) : -1;
+	_dropTabAtIndex  = droppedTabItem ? ([_tabItems indexOfObject:droppedTabItem] == NSNotFound ? -1 : [_tabItems indexOfObject:droppedTabItem]) : (_dropTabAtIndex == -1 ? -1 : _tabItems.count);
 
 	NSArray<OakTabFrame*>* newLayout = [self makeLayout];
 	if(![_toLayout isEqual:newLayout])
