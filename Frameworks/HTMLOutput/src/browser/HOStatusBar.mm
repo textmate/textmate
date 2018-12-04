@@ -42,6 +42,7 @@ static NSTextField* OakCreateTextField ()
 {
 	if(self = [super initWithFrame:frame])
 	{
+		self.wantsLayer   = YES;
 		self.material     = NSVisualEffectMaterialTitlebar;
 		self.blendingMode = NSVisualEffectBlendingModeWithinWindow;
 		self.state        = NSVisualEffectStateFollowsWindowActiveState;
