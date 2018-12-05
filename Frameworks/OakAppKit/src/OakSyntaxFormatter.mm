@@ -1,4 +1,5 @@
 #import "OakSyntaxFormatter.h"
+#import <OakFoundation/OakFoundation.h>
 #import <bundles/query.h>
 #import <theme/OakTheme.h>
 #import <parse/parse.h>
@@ -70,7 +71,8 @@ static size_t kParseSizeLimit = 1024;
 
 - (void)addStylesToString:(NSMutableAttributedString*)styled
 {
-	if(!styled || !_grammarName)
+	NSString* plain = styled.string;
+	if(OakIsEmptyString(plain) || !_grammarName)
 		return;
 
 	if(!_font)
@@ -79,7 +81,6 @@ static size_t kParseSizeLimit = 1024;
 		_font = attributes[NSFontAttributeName] ?: [NSFont systemFontOfSize:0];
 	}
 
-	NSString* plain = styled.string;
 	for(NSString* attr in @[ NSForegroundColorAttributeName, NSBackgroundColorAttributeName, NSUnderlineStyleAttributeName, NSStrikethroughStyleAttributeName ])
 		[styled removeAttribute:attr range:NSMakeRange(0, plain.length)];
 
