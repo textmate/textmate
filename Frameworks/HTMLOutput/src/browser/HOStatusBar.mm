@@ -5,7 +5,6 @@
 static NSButton* OakCreateImageButton (NSImage* image)
 {
 	NSButton* res = [NSButton new];
-	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
 	[res setButtonType:NSMomentaryChangeButton];
 	[res setBordered:NO];
 	[res setImage:image];
@@ -22,7 +21,6 @@ static NSTextField* OakCreateTextField ()
 	[res setBezeled:NO];
 	[res setDrawsBackground:NO];
 	[res setFont:OakStatusBarFont()];
-	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
 	return res;
 }
 

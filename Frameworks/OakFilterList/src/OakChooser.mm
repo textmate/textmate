@@ -253,7 +253,6 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 		_statusTextField.editable        = NO;
 		_statusTextField.font            = OakStatusBarFont();
 		_statusTextField.selectable      = NO;
-		[[_statusTextField cell] setBackgroundStyle:NSBackgroundStyleRaised];
 		[[_statusTextField cell] setLineBreakMode:NSLineBreakByTruncatingMiddle];
 		[_statusTextField setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
 		[_statusTextField setContentHuggingPriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
@@ -272,7 +271,6 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 		_itemCountTextField.editable        = NO;
 		_itemCountTextField.font            = OakStatusBarFont();
 		_itemCountTextField.selectable      = NO;
-		[[_itemCountTextField cell] setBackgroundStyle:NSBackgroundStyleRaised];
 		[_itemCountTextField setContentHuggingPriority:NSLayoutPriorityDefaultHigh forOrientation:NSLayoutConstraintOrientationHorizontal];
 
 		NSFontDescriptor* descriptor = [_itemCountTextField.font.fontDescriptor fontDescriptorByAddingAttributes:@{

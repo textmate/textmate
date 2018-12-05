@@ -88,8 +88,7 @@ NSPopUpButton* OakCreateActionPopUpButton (BOOL bordered)
 {
 	NSPopUpButton* res = [NSPopUpButton new];
 	res.pullsDown = YES;
-	if(!(res.bordered = bordered))
-		[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
+	res.bordered = bordered;
 
 	NSMenuItem* item = [NSMenuItem new];
 	item.title = @"";

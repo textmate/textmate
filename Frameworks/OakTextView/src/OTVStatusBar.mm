@@ -21,7 +21,6 @@ static NSTextField* OakCreateTextField (NSString* label)
 	[res setFont:OakStatusBarFont()];
 	[res setStringValue:label];
 	[res setAlignment:NSTextAlignmentRight];
-	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
 	[[res cell] setLineBreakMode:NSLineBreakByTruncatingMiddle];
 
 	// This is to match the other controls in the status bar
@@ -34,7 +33,6 @@ static NSTextField* OakCreateTextField (NSString* label)
 static NSPopUpButton* OakCreateStatusBarPopUpButton (NSString* initialItemTitle = nil, NSString* accessibilityLabel = nil)
 {
 	NSPopUpButton* res = OakCreatePopUpButton(NO, initialItemTitle);
-	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
 	res.font     = OakStatusBarFont();
 	res.bordered = NO;
 	res.accessibilityLabel = accessibilityLabel;
@@ -45,7 +43,6 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSString* accessibi
 {
 	NSButton* res = [NSButton new];
 	res.accessibilityLabel = accessibilityLabel;
-	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
 	[res setButtonType:NSToggleButton];
 	[res setBordered:NO];
 	[res setImage:image];
