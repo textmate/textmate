@@ -378,17 +378,15 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 
 	if(_tabItem)
 	{
-		self.accessibilityElement                = YES;
-		self.closeButton.hidden                  = NO;
-		self.closeButton.accessibilityElement    = YES;
-		self.overflowButton.accessibilityElement = YES;
+		self.accessibilityElement                     = YES;
+		self.closeButton.cell.accessibilityElement    = YES;
+		self.overflowButton.cell.accessibilityElement = YES;
 	}
 	else
 	{
-		self.accessibilityElement                = NO;
-		self.closeButton.hidden                  = YES;
-		self.closeButton.accessibilityElement    = NO;
-		self.overflowButton.accessibilityElement = NO;
+		self.accessibilityElement                     = NO;
+		self.closeButton.cell.accessibilityElement    = NO;
+		self.overflowButton.cell.accessibilityElement = NO;
 
 		self.textField.alphaValue      = 0.0;
 		self.backgroundView.alphaValue = 0.1;
