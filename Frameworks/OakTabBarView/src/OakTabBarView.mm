@@ -966,7 +966,7 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 	if(NSImage* dragImage = tabView.dragImage)
 		[dragItem setDraggingFrame:[self convertRect:tabView.backgroundView.frame fromView:tabView] contents:dragImage];
 
-	self.draggedTabIndex = [_tabItems indexOfObject:tabView.tabItem];
+	self.draggedTabIndex = [_tabItems indexOfObject:tabView.tabItem] == NSNotFound ? -1 : [_tabItems indexOfObject:tabView.tabItem];
 	self.dropTabAtIndex  = _draggedTabIndex+1;
 
 	[self beginDraggingSessionWithItems:@[ dragItem ] event:self.window.currentEvent source:self];
