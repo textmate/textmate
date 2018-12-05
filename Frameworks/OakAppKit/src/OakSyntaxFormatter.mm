@@ -77,7 +77,7 @@ static size_t kParseSizeLimit = 1024;
 
 	if(!_font)
 	{
-		NSDictionary* attributes = [styled attributesAtIndex:0 effectiveRange:nil];
+		NSDictionary* attributes = [styled fontAttributesInRange:NSMakeRange(0, plain.length)];
 		_font = attributes[NSFontAttributeName] ?: [NSFont systemFontOfSize:0];
 	}
 
