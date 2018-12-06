@@ -2,6 +2,11 @@ Title: Release Notes
 
 # Changes
 
+## 2018-12-06 (v2.0-rc.22)
+
+* Improve UI for tagging files (file browser action menu). *[Ronald Wampler]*
+* See [all changes since v2.0-rc.20](https://github.com/textmate/textmate/compare/v2.0-rc.20...v2.0-rc.22)
+
 ## 2018-12-02 (v2.0-rc.20)
 
 * Document tabs now use “titlebar material” to be a better fit for macOS 10.14.
