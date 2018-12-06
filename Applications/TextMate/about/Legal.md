@@ -13,7 +13,7 @@ Onigmo is licensed under the [BSD license][bsd-onig].
 Based on [Oniguruma], copyright K.Kosako.
 
 [Onigmo]: https://github.com/k-takata/Onigmo
-[Oniguruma]: http://www.geocities.jp/kosako3/oniguruma/
+[Oniguruma]: https://github.com/kkos/oniguruma
 [bsd-onig]: https://raw.github.com/k-takata/Onigmo/master/COPYING
 
 ## MASPreferences
