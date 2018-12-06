@@ -22,15 +22,6 @@ Based on [Oniguruma], copyright K.Kosako.
 
 [MASPreferences]: https://github.com/shpakovski/MASPreferences
 
-## XcodeEditor
-
-[XcodeEditor][] is copyright Jasper Blues and contributors.
-
-XcodeEditor is licensed under the [Apache license][].
-
-[XcodeEditor]: https://github.com/jasperblues/XcodeEditor
-[Apache license]: http://www.apache.org/licenses/LICENSE-2.0
-
 ## MGScopeBar
 
 	Copyright (c) 2008 Matt Gemmell
