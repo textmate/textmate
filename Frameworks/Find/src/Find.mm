@@ -40,6 +40,7 @@ enum FindActionTag
 @property (nonatomic) FindWindowController* windowController;
 @property (nonatomic) FFDocumentSearch* documentSearch;
 @property (nonatomic) FFResultNode* results;
+@property (nonatomic, weak) id <FindDelegate> resultsDelegate;
 @property (nonatomic) NSUInteger countOfMatches;
 @property (nonatomic) NSUInteger countOfExcludedMatches;
 @property (nonatomic) NSUInteger countOfReadOnlyMatches;
@@ -396,6 +397,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	}
 
 	_windowController.resultsViewController.results = _results = [FFResultNode new];
+	_resultsDelegate = self.delegate;
 }
 
 - (void)setDocumentSearch:(FFDocumentSearch*)newSearcher
@@ -543,13 +545,14 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		captures[to_ns(pair.first)] = to_ns(pair.second);
 	doc.matchCaptures = [captures copy];
 
-	[_delegate selectRange:item.match.range inDocument:doc];
+	[_resultsDelegate selectRange:item.match.range inDocument:doc];
 }
 
 - (void)didDoubleClickResult:(FFResultNode*)item
 {
 	if([[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsKeepSearchResultsOnDoubleClick] boolValue])
 		return;
+	[_resultsDelegate bringToFront];
 	[self.windowController close];
 }
 
