@@ -543,7 +543,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		captures[to_ns(pair.first)] = to_ns(pair.second);
 	doc.matchCaptures = [captures copy];
 
-	[OakDocumentController.sharedInstance showDocument:doc andSelect:item.match.range inProject:self.projectIdentifier bringToFront:NO];
+	[_delegate selectRange:item.match.range inDocument:doc];
 }
 
 - (void)didDoubleClickResult:(FFResultNode*)item

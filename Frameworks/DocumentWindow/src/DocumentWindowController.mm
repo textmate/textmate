@@ -63,7 +63,7 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 	}];
 }
 
-@interface DocumentWindowController () <NSWindowDelegate, NSTouchBarDelegate, OakTabBarViewDelegate, OakTabBarViewDataSource, OakTextViewDelegate, FileBrowserDelegate>
+@interface DocumentWindowController () <NSWindowDelegate, NSTouchBarDelegate, OakTabBarViewDelegate, OakTabBarViewDataSource, OakTextViewDelegate, FileBrowserDelegate, FindDelegate>
 {
 	OBJC_WATCH_LEAKS(DocumentWindowController);
 
@@ -1971,7 +1971,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	Find* find = [Find sharedInstance];
 	find.documentIdentifier = self.selectedDocumentUUID;
 	find.projectFolder      = self.projectPath ?: self.untitledSavePath ?: NSHomeDirectory();
-	find.projectIdentifier  = self.identifier;
+	find.delegate           = self;
 
 	NSArray* items;
 	if(self.fileBrowserVisible)
@@ -1988,7 +1988,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 - (IBAction)orderFrontFindPanel:(id)sender
 {
 	Find* find              = [Find sharedInstance];
-	BOOL didOwnDialog       = [find.projectIdentifier isEqual:self.identifier];
+	BOOL didOwnDialog       = find.delegate == self;
 	[self prepareAndReturnFindPanel];
 
 	NSInteger mode = [sender respondsToSelector:@selector(tag)] ? [sender tag] : find_tags::in_document;
@@ -2027,6 +2027,17 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	OakRunCommandWindowController* runCommand = [OakRunCommandWindowController sharedInstance];
 	[self positionWindow:runCommand.window];
 	[runCommand showWindow:nil];
+}
+
+// ================
+// = FindDelegate =
+// ================
+
+- (void)selectRange:(text::range_t const&)range inDocument:(OakDocument*)aDocument
+{
+	if(range != text::range_t::undefined)
+		aDocument.selection = to_ns(range);
+	[self openItems:@[ @{ @"identifier": aDocument.identifier.UUIDString } ] closingOtherTabs:NO activate:YES];
 }
 
 // ==================
