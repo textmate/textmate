@@ -31,6 +31,7 @@
 #import <layout/layout.h>
 #import <ns/ns.h>
 #import <ns/spellcheck.h>
+#import <text/case.h>
 #import <text/classification.h>
 #import <text/format.h>
 #import <text/newlines.h>
@@ -279,6 +280,12 @@ struct document_view_t : ng::buffer_api_t
 		return buf.symbol_at(ranges().last().first.index);
 	}
 
+	std::map<size_t, std::string> symbols () const
+	{
+		ng::buffer_t const& buf = [_document_editor buffer];
+		return buf.symbols();
+	}
+
 	bool has_marks (std::string const& type = NULL_STR) const
 	{
 		return [_document_editor buffer].prev_mark(SIZE_T_MAX, type).second != NULL_STR;
@@ -460,7 +467,7 @@ private:
 	ng::layout_t* _layout;
 };
 
-@interface OakTextView () <NSTextInputClient, NSDraggingSource, NSIgnoreMisspelledWords, NSChangeSpelling, NSTextFieldDelegate>
+@interface OakTextView () <NSTextInputClient, NSDraggingSource, NSIgnoreMisspelledWords, NSChangeSpelling, NSTextFieldDelegate, NSAccessibilityCustomRotorItemSearchDelegate>
 {
 	OBJC_WATCH_LEAKS(OakTextView);
 
@@ -1700,6 +1707,13 @@ doScroll:
 	return [self nsRangeForRange:ng::range_t(index, index + length)];
 }
 
+- (NSArray*)accessibilityCustomRotors API_AVAILABLE(macos(10.13))
+{
+	return @[
+		[[NSAccessibilityCustomRotor alloc] initWithLabel:@"Symbols" itemSearchDelegate:self],
+	];
+}
+
 - (NSUInteger)accessibilityArrayAttributeCount:(NSString*)attribute
 {
 	if([attribute isEqualToString:NSAccessibilityChildrenAttribute])
@@ -1778,6 +1792,81 @@ doScroll:
 		_links = links;
 	}
 	return _links;
+}
+
+// ================================================
+// = NSAccessibilityCustomRotorItemSearchDelegate =
+// ================================================
+
+- (NSAccessibilityCustomRotorItemResult*)rotor:(NSAccessibilityCustomRotor*)rotor resultForSearchParameters:(NSAccessibilityCustomRotorSearchParameters*)searchParameters API_AVAILABLE(macos(10.13))
+{
+	auto const symbols = documentView->symbols();
+
+	std::string const filterString = searchParameters.filterString ? text::lowercase(to_s(searchParameters.filterString)) : "";
+
+	auto const substringMatcher = [&filterString](const std::pair<size_t, std::string>& symbolPair){
+		std::string const symbol = text::lowercase(symbolPair.second);
+		return symbol.find(filterString) != std::string::npos;
+	};
+
+	NSAccessibilityCustomRotorItemResult* currentItem = searchParameters.currentItem;
+	NSUInteger location = currentItem.targetRange.location;
+
+	// Contrary to what is implied in NSAccessibilityCustomRotor.h, the first call does not
+	// set ‘location’ to NSNotFound nor ‘currentItem’ to nil (macOS 10.14.2).
+	if(!currentItem.targetElement && location == 0 && currentItem.targetRange.length == 0)
+		location = NSNotFound;
+
+	auto it = symbols.end();
+	switch(searchParameters.searchDirection)
+	{
+		case NSAccessibilityCustomRotorSearchDirectionNext:
+		{
+			if(location == NSNotFound)
+			{
+				it = symbols.begin();
+			}
+			else
+			{
+				ng::index_t	const currentIndex = [self rangeForNSRange:NSMakeRange(location, 0)].min();
+				it = symbols.upper_bound(currentIndex.index);
+			}
+			it = std::find_if(it, symbols.end(), substringMatcher);
+		}
+		break;
+
+		case NSAccessibilityCustomRotorSearchDirectionPrevious:
+		{
+			if(location == NSNotFound)
+			{
+				it = symbols.end();
+			}
+			else
+			{
+				ng::index_t	const currentIndex = [self rangeForNSRange:NSMakeRange(location, 0)].min();
+				it = symbols.lower_bound(currentIndex.index);
+			}
+			auto rit = std::make_reverse_iterator(it);
+			rit = std::find_if(rit, symbols.rend(), substringMatcher);
+			if(rit == symbols.rend())
+					it = symbols.end();
+			else	it = (++rit).base();
+		}
+		break;
+	}
+
+	if(it == symbols.end())
+		return nil;
+
+	NSAccessibilityCustomRotorItemResult* result = [[NSAccessibilityCustomRotorItemResult alloc] initWithTargetElement:self];
+
+	ng::index_t const resultIndex = it->first;
+	text::pos_t const pos = documentView->convert(resultIndex.index);
+	size_t const end = documentView->end(pos.line);
+	result.targetRange = [self nsRangeForRange:ng::range_t(resultIndex, end)];
+	result.customLabel = to_ns(it->second);
+
+	return result;
 }
 
 - (void)updateZoom:(id)sender
