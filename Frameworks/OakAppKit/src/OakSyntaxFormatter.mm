@@ -75,6 +75,9 @@ static size_t kParseSizeLimit = 1024;
 	if(OakIsEmptyString(plain) || !_grammarName)
 		return;
 
+	if(_enabled == NO || ![self tryLoadGrammarAndTheme])
+		return;
+
 	if(!_font)
 	{
 		NSDictionary* attributes = [styled fontAttributesInRange:NSMakeRange(0, plain.length)];
@@ -83,12 +86,6 @@ static size_t kParseSizeLimit = 1024;
 
 	for(NSString* attr in @[ NSForegroundColorAttributeName, NSBackgroundColorAttributeName, NSUnderlineStyleAttributeName, NSStrikethroughStyleAttributeName ])
 		[styled removeAttribute:attr range:NSMakeRange(0, plain.length)];
-
-	if(_enabled == NO || ![self tryLoadGrammarAndTheme])
-	{
-		[styled addAttributes:@{ NSFontAttributeName: _font, NSForegroundColorAttributeName: [NSColor controlTextColor] } range:NSMakeRange(0, plain.length)];
-		return;
-	}
 
 	std::string str = to_s(plain);
 	std::map<size_t, scope::scope_t> scopes;
@@ -124,5 +121,6 @@ static size_t kParseSizeLimit = 1024;
 		pos += len;
 		from = to;
 	}
+	[styled fixFontAttributeInRange:NSMakeRange(0, plain.length)];
 }
 @end
