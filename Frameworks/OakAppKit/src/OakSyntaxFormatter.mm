@@ -87,6 +87,7 @@ static size_t kParseSizeLimit = 1024;
 	if(_enabled == NO || ![self tryLoadGrammarAndTheme])
 	{
 		[styled addAttributes:@{ NSFontAttributeName: _font, NSForegroundColorAttributeName: [NSColor controlTextColor] } range:NSMakeRange(0, plain.length)];
+		[styled fixFontAttributeInRange:NSMakeRange(0, plain.length)];
 		return;
 	}
 
@@ -124,5 +125,6 @@ static size_t kParseSizeLimit = 1024;
 		pos += len;
 		from = to;
 	}
+	[styled fixFontAttributeInRange:NSMakeRange(0, plain.length)];
 }
 @end
