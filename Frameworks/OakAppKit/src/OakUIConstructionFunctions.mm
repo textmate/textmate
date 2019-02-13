@@ -41,7 +41,7 @@ NSTextField* OakCreateLabel (NSString* label, NSFont* font, NSTextAlignment alig
 
 NSButton* OakCreateCheckBox (NSString* label)
 {
-	if(@available(macos 10.12, *))
+	if(@available(macos 10.14, *))
 	{
 		NSButton* res = [NSButton checkboxWithTitle:(label ?: @"") target:nil action:nil];
 		// When we have a row that only contains checkboxes (e.g. Find options), nothing restrains the height of that row
