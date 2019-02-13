@@ -46,7 +46,7 @@ static void parse_plist (FILE* fp, bool ascii, bool extended)
 			{
 				if(CFWriteStreamRef writeStream = CFWriteStreamCreateWithFile(kCFAllocatorDefault, url))
 				{
-					CFStringRef error = nullptr;
+					CFErrorRef error = nullptr;
 					CFWriteStreamOpen(writeStream);
 					CFPropertyListWrite(cfPlist, writeStream, kCFPropertyListXMLFormat_v1_0, 0, &error);
 					CFWriteStreamClose(writeStream);
