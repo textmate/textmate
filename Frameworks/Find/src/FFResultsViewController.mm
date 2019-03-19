@@ -22,7 +22,9 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 
 @interface FFResultsViewController () <NSOutlineViewDataSource, NSOutlineViewDelegate>
 {
+	NSView*        _topDivider;
 	NSScrollView*  _scrollView;
+	NSView*        _bottomDivider;
 	NSFont*        _searchResultsFont;
 
 	__weak id      _eventMonitor;
@@ -309,6 +311,9 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		[label sizeToFit];
 		CGFloat lineHeight = std::max(NSHeight(label.frame), ceil(_searchResultsFont.ascender) + ceil(fabs(_searchResultsFont.descender)) + ceil(_searchResultsFont.leading));
 
+		_topDivider    = OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider);
+		_bottomDivider = OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider);
+
 		_outlineView = [[NSOutlineView alloc] initWithFrame:NSZeroRect];
 		_outlineView.accessibilityLabel                 = @"Results";
 		_outlineView.focusRingType                      = NSFocusRingTypeNone;
@@ -332,18 +337,20 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		_scrollView.hasVerticalScroller   = YES;
 		_scrollView.hasHorizontalScroller = YES;
 		_scrollView.autohidesScrollers    = YES;
-		_scrollView.borderType            = NSLineBorder;
+		_scrollView.borderType            = NSNoBorder;
 		_scrollView.documentView          = _outlineView;
 
 		NSDictionary* views = @{
-			@"scrollView": _scrollView,
+			@"topDivider":    _topDivider,
+			@"scrollView":    _scrollView,
+			@"bottomDivider": _bottomDivider,
 		};
 
 		NSView* containerView = [[NSView alloc] initWithFrame:NSZeroRect];
 		OakAddAutoLayoutViewsToSuperview([views allValues], containerView);
 
-		[containerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[scrollView]|" options:0 metrics:nil views:views]];
-		[containerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(-1)-[scrollView]-(-1)-|" options:0 metrics:nil views:views]];
+		[containerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[topDivider][scrollView][bottomDivider]|" options:NSLayoutFormatAlignAllLeading|NSLayoutFormatAlignAllTrailing metrics:nil views:views]];
+		[containerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView]|" options:0 metrics:nil views:views]];
 
 		self.view = containerView;
 
