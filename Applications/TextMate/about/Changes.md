@@ -2,6 +2,12 @@ Title: Release Notes
 
 # Changes
 
+## 2019-03-19 (v2.0-rc.23)
+
+* Some UI fixes for 10.13 and earlier (introduced in previous build(s)).
+* Implement accessibility rotor for document symbols. [Explanation here](https://github.com/textmate/textmate/commit/85d3af94bae07982bc149440ee099970a021abb6). *[Boris Dušek]*
+* See [all changes since v2.0-rc.22](https://github.com/textmate/textmate/compare/v2.0-rc.22...v2.0-rc.23)
+
 ## 2018-12-06 (v2.0-rc.22)
 
 * Improve UI for tagging files (file browser action menu). *[Ronald Wampler]*
