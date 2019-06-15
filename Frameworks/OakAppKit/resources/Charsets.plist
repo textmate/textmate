@@ -68,7 +68,7 @@
 		{	name = 'Japanese – Windows Shift-JIS CP932'; code = 'CP932'; },
 		{	name = 'Japanese – Windows Shift-JIS CP943'; code = 'CP943'; },
 		{	name = 'Korean – EUC-KR'; code = 'EUC-KR'; },
-		{	name = 'Korean – ISO-2022-JP'; code = 'ISO-2022-KR'; },
+		{	name = 'Korean – ISO-2022-KR'; code = 'ISO-2022-KR'; },
 		{	name = 'Korean – ISO-IR-149'; code = 'ISO-IR-149'; },
 		{	name = 'Korean – JOHAB'; code = 'CP1361'; },
 		{	name = 'Korean – Windows, DOS'; code = 'CP949'; },
