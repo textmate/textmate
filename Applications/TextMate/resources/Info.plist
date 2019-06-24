@@ -37,6 +37,8 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>NSAppleEventsUsageDescription</key>
+	<string>TextMate needs to send back a response to the application from which “Edit in TextMate” was invoked. This is done using AppleEvents.</string>
 	<key>NSContactsUsageDescription</key>
 	<string>Your email address is used as a default contact address when you create a new bundle. This can be changed in the bundle editor after the bundle has been created.</string>
 	<key>NSMainNibFile</key>
