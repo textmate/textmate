@@ -1,4 +1,4 @@
 TESTS   = tests/*.cc
 SOURCES = src/*.{cc,mm}
 EXPORT  = src/*.h
-LINK   += OakFoundation OakSystem buffer bundles cf io plist regexp scope selection settings text
+LINK   += OakAppKit OakFoundation OakSystem buffer bundles cf io plist regexp scope selection settings text
