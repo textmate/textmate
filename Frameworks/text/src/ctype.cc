@@ -1,8 +1,8 @@
 #include "ctype.h"
+#include "format.h"
 #include <oak/oak.h>
 #include <oak/debug.h>
 #include <crash/info.h>
-#include <text/format.h>
 
 static CFCharacterSetRef create_character_set ()
 {

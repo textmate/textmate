@@ -1,6 +1,6 @@
 #import "OakFinderTag.h"
+#import "NSColor Additions.h"
 #import <OakFoundation/OakFoundation.h>
-#import <OakAppKit/NSColor Additions.h>
 #import <io/path.h>
 #import <ns/ns.h>
 

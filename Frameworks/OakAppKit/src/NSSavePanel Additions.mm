@@ -1,5 +1,5 @@
 #import "NSSavePanel Additions.h"
-#import <OakAppKit/OakUIConstructionFunctions.h>
+#import "OakUIConstructionFunctions.h"
 
 @implementation NSSavePanel (HiddenFiles)
 + (void)initialize
