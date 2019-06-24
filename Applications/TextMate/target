@@ -8,3 +8,4 @@ FRAMEWORKS           = Cocoa
 HTML_HEADER          = templates/header.html
 HTML_FOOTER          = templates/footer.html
 MARKDOWN_FOOTER      = references.md
+CS_ENTITLEMENTS      = Entitlements.plist
