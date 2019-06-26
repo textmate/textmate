@@ -1,3 +1,3 @@
 SOURCES       = src/*.mm
-LINK         += HTMLOutput HTMLOutputWindow OakAppKit OakSystem bundles cf command document io ns regexp settings text
+LINK         += BundleEditor HTMLOutput HTMLOutputWindow OakAppKit OakSystem bundles cf command document io ns regexp settings text
 EXPORT        = src/*.h
