@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>${TARGET_NAME}</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.macromates.${APP_NAME}.${TARGET_NAME}</string>
+	<string>com.macromates.framework.${TARGET_NAME}</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundlePackageType</key>
