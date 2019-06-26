@@ -9,13 +9,13 @@ static double const AppVersion = 1.0;
 
 void version ()
 {
-	fprintf(stdout, "%1$s %2$.1f (" COMPILE_DATE ")\n", getprogname(), AppVersion);
+	fprintf(stdout, "%1$s %2$.1f (" __DATE__ ")\n", getprogname(), AppVersion);
 }
 
 void usage (FILE* io)
 {
 	fprintf(io,
-		"%1$s %2$.1f (" COMPILE_DATE ")\n"
+		"%1$s %2$.1f (" __DATE__ ")\n"
 		"Usage: %1$s [-g<selector>td<string>lhv] grammar ...\n"
 		"Options:\n"
 		" -g, --grammar <selector>  Which grammar to use.\n"

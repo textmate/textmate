@@ -34,13 +34,13 @@ static void reap_children (int theSignal)
 
 static void version ()
 {
-	fprintf(stdout, "%1$s %2$.1f (" COMPILE_DATE ")\n", getprogname(), AppVersion);
+	fprintf(stdout, "%1$s %2$.1f (" __DATE__ ")\n", getprogname(), AppVersion);
 }
 
 static void usage (FILE* io = stdout)
 {
 	fprintf(io,
-		"%1$s %2$.1f (" COMPILE_DATE ")\n"
+		"%1$s %2$.1f (" __DATE__ ")\n"
 		"Usage: %1$s [-siuhv]\n"
 		"Description:\n"
 		" Server for authenticated file system operations.\n"

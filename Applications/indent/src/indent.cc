@@ -12,7 +12,7 @@ extern int optind;
 
 static void usage (FILE* io = stdout)
 {
-	fprintf(io, "%1$s %2$.1f (" COMPILE_DATE ")\n", getprogname(), AppVersion);
+	fprintf(io, "%1$s %2$.1f (" __DATE__ ")\n", getprogname(), AppVersion);
 	fprintf(io, "Usage: %s [ptishv] «file» ..\n", getprogname());
 	fprintf(io, "\n");
 	fprintf(io, "Options:\n");
@@ -26,7 +26,7 @@ static void usage (FILE* io = stdout)
 
 static void version ()
 {
-	fprintf(stdout, "%1$s %2$.1f (" COMPILE_DATE ")\n", getprogname(), AppVersion);
+	fprintf(stdout, "%1$s %2$.1f (" __DATE__ ")\n", getprogname(), AppVersion);
 }
 
 int main (int argc, char const* argv[])

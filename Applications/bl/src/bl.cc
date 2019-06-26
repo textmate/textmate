@@ -40,7 +40,7 @@ extern int optind;
 
 static void usage (FILE* io = stdout)
 {
-	fprintf(io, "%1$s %2$.1f (" COMPILE_DATE ")\n", getprogname(), AppVersion);
+	fprintf(io, "%1$s %2$.1f (" __DATE__ ")\n", getprogname(), AppVersion);
 	fprintf(io, "Usage: %s list [Cs] [«bundle» ..]\n", getprogname());
 	fprintf(io, "       %s install [Cs] «bundle» ..\n", getprogname());
 	fprintf(io, "       %s uninstall [Cs] «bundle» ..\n", getprogname());
@@ -134,7 +134,7 @@ static std::string short_bundle_info (bundles_db::bundle_ptr bundle, int width)
 
 static void version ()
 {
-	fprintf(stdout, "%1$s %2$.1f (" COMPILE_DATE ")\n", getprogname(), AppVersion);
+	fprintf(stdout, "%1$s %2$.1f (" __DATE__ ")\n", getprogname(), AppVersion);
 }
 
 int main (int argc, char const* argv[])

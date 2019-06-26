@@ -4,13 +4,13 @@ static double const AppVersion = 2.1;
 
 static void version ()
 {
-	fprintf(stdout, "%1$s %2$.1f (" COMPILE_DATE ")\n", getprogname(), AppVersion);
+	fprintf(stdout, "%1$s %2$.1f (" __DATE__ ")\n", getprogname(), AppVersion);
 }
 
 static void usage (FILE* io)
 {
 	fprintf(io,
-		"%1$s %2$.1f (" COMPILE_DATE ")\n"
+		"%1$s %2$.1f (" __DATE__ ")\n"
 		"Usage: %1$s [-axhv] file\n"
 		"Description:\n"
 		" Reads a property list and outputs ASCII version to stdout.\n"

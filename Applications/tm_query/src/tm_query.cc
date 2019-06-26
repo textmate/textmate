@@ -6,13 +6,13 @@ static double const AppVersion = 1.0;
 
 static void version ()
 {
-	fprintf(stdout, "%1$s %2$.1f (" COMPILE_DATE ")\n", getprogname(), AppVersion);
+	fprintf(stdout, "%1$s %2$.1f (" __DATE__ ")\n", getprogname(), AppVersion);
 }
 
 static void usage (FILE* io = stdout)
 {
 	fprintf(io,
-		"%1$s %2$.1f (" COMPILE_DATE ")\n"
+		"%1$s %2$.1f (" __DATE__ ")\n"
 		"Usage: %1$s [-s<key>hv] ...\n"
 		"Options:\n"
 		" -s, --setting <key>       Print setting value for a key.\n"

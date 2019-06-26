@@ -132,7 +132,7 @@ static void usage (FILE* io)
 	std::string pad(8 - std::min(strlen(getprogname()), size_t(8)), ' ');
 
 	fprintf(io,
-		"%1$s %2$s (" COMPILE_DATE ")\n"
+		"%1$s %2$s (" __DATE__ ")\n"
 		"Usage: %1$s [-wl<selection>t<filetype>m<name>rehv] [-u<identifier> | file ...]\n"
 		"       %1$s [-c<mark>] -s<mark>:<value> -l<line> [-u<identifier> | file ...]\n"
 		"       %1$s -c<mark> [-l<line>] [-u<identifier> | file ...]\n"
@@ -178,7 +178,7 @@ static void usage (FILE* io)
 
 static void version ()
 {
-	fprintf(stdout, "%1$s %2$s (" COMPILE_DATE ")\n", getprogname(), AppVersion);
+	fprintf(stdout, "%1$s %2$s (" __DATE__ ")\n", getprogname(), AppVersion);
 }
 
 static void append (std::string const& str, std::vector<std::string>& v)
