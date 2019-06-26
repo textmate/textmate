@@ -32,7 +32,6 @@ FLAGS += -I"$capnp_prefix/include"
 
 PRELUDE = Shared/PCH/prelude.*
 
-FLAGS    += -DCOMPILE_DATE=\"`date +%Y-%m-%d`\"
 LN_FLAGS += -fobjc-link-runtime
 
 TARGETS  = vendor/*/target
