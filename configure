@@ -11,11 +11,10 @@ function error () { printf >&2 "%s\n\nPlease see README.md for build instruction
 : ${capnp_prefix:=/usr/local}
 : ${rest_api:=https://api.textmate.org}
 
-# ========================================================
-# = Application name, version, revision, and required OS =
-# ========================================================
+# =======================================
+# = Application version and required OS =
+# =======================================
 
-name=TextMate
 ver=$(curl -sf "${rest_api}/releases/nightly/version")${tag:-+git.$(git rev-parse --short HEAD)}
 min_os=10.10
 
@@ -91,7 +90,7 @@ done
 mkdir -p "$builddir/Frameworks/SoftwareUpdate/fixtures"
 DST=$(cd >/dev/null "$builddir/Frameworks/SoftwareUpdate/fixtures"; pwd) make -C Frameworks/SoftwareUpdate/fixtures
 
-bin/gen_build -o build.ninja -C "$builddir" -dAPP_NAME="$name" -dAPP_VERSION="$ver" -dAPP_MIN_OS="$min_os" -didentity="$identity" -drest_api="$rest_api" -dbzip2_flag="$bzip2_flag" -dtest_flags="$test" -dcapnp_prefix="$capnp_prefix" -dlibressl_prefix="$libressl_prefix" target
+bin/gen_build -o build.ninja -C "$builddir" -dAPP_VERSION="$ver" -dAPP_MIN_OS="$min_os" -didentity="$identity" -drest_api="$rest_api" -dbzip2_flag="$bzip2_flag" -dtest_flags="$test" -dcapnp_prefix="$capnp_prefix" -dlibressl_prefix="$libressl_prefix" target
 
 BUNDLES_TBZ=Applications/TextMate/resources/DefaultBundles.tbz
 test -e "$BUNDLES_TBZ" || builddir="$builddir" bin/create_default_bundles_tbz "$BUNDLES_TBZ"
