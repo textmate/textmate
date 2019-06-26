@@ -459,7 +459,6 @@ end
 
 def targets_at_path(path)
   res = [ ]
-
   new_targets = [ Target.new(path) ]
   until new_targets.empty?
     target = new_targets.pop
@@ -470,9 +469,10 @@ def targets_at_path(path)
     else
       values = target.values.dup
       values['TARGETS'] = [ ]
-      paths.each do |target_path|
-        new_targets << Target.new(target_path, values)
+      paths = paths.map do |target_path|
+        Target.new(target_path, values)
       end
+      new_targets << paths
     end
   end
 
