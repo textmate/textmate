@@ -26,7 +26,6 @@ To bootstrap the build you need to run `./configure` (in the root of the source 
 * `identity` — for Apple’s `codesign`. Defaults to ad-hoc signing, which does not use an identity at all.
 * `boostdir` — location of boost includes. By default it will search various locations including MacPorts and Homebrew.
 * `sparsedir` — location of sparsehash includes. By default it will search various locations including MacPorts and Homebrew.
-* `CC` and `CXX` — C and C++ compiler.
 
 In the simplest case (assuming [Homebrew][] is installed) you would run:
 
@@ -81,32 +80,10 @@ Similarly, if the current file belongs to an application target (other than `Tex
 
 ## Build Targets
 
-The build system classifies a target either as a library or an application. The latter can either be a bundled or non-bundled application. E.g. `mate` is non-bundled (just a `mate` executable) where `TextMate.app` is a bundled application.
+For the `TextMate.app` application there are two symbolic build targets:
 
-For each output there are a few symbolic targets you can build. While the examples below refer to a specific library or application, they exist for all targets of same type.
-
-For the `io` library:
-
-	ninja io                 # Build the io library and run tests.
-	ninja io/clean           # Remove the build folder for the io library.
-	ninja io/headers         # Copy exported headers to $builddir/include.
-
-For the `mate` (non-bundled) application:
-
-	ninja mate               # Build the mate executable.
-	ninja mate/run           # Build and run the mate executable.
-	ninja mate/clean         # Remove the build folder for the mate executable.
-
-For the `TextMate.app` application:
-
-	ninja TextMate           # Build and sign TextMate.app.
-	ninja TextMate/run       # Build, sign, and run TextMate.app.
-	ninja TextMate/clean     # Remove the build folder for TextMate.app.
-	ninja TextMate/dsym      # Create a tarball with extracted dSYM files.
-	ninja TextMate/tbz       # Create a tarball of TextMate.app. Also produce the dsym tarball.
-	ninja TextMate/deploy    # Push a nightly build. Fails without proper credentials :)
-
-Note that `ninja TextMate/clean` only cleans the TextMate build folder (`$builddir/Applications/TextMate`), but all libraries and applications it depends on are not cleaned.
+	ninja TextMate      # Build and sign TextMate
+	ninja TextMate/run  # Build, sign, and (re)launch TextMate
 
 To clean everything run:
 
