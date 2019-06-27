@@ -59,7 +59,7 @@
 }
 @end
 
-@interface OakPasteboardChooser () <NSTextFieldDelegate, NSTableViewDelegate, NSSearchFieldDelegate>
+@interface OakPasteboardChooser () <NSWindowDelegate, NSTextFieldDelegate, NSTableViewDelegate, NSSearchFieldDelegate>
 {
 	NSTitlebarAccessoryViewController* _accessoryViewController;
 }
@@ -117,6 +117,7 @@ static NSMutableDictionary* SharedChoosers;
 		[[self.window standardWindowButton:NSWindowMiniaturizeButton] setHidden:YES];
 		[[self.window standardWindowButton:NSWindowZoomButton] setHidden:YES];
 		self.window.autorecalculatesKeyViewLoop = YES;
+		self.window.delegate                    = self;
 		self.window.level                       = NSFloatingWindowLevel;
 		self.window.title                       = windowTitle;
 
@@ -177,8 +178,9 @@ static NSMutableDictionary* SharedChoosers;
 	[_pasteboard removeObserver:self forKeyPath:@"currentEntry" context:kOakPasteboardChooserCurrentEntryBinding];
 	[[[_tableView tableColumns] lastObject] unbind:NSValueBinding];
 
-	_tableView.delegate = nil;
-	_tableView.target   = nil;
+	self.window.delegate = nil;
+	_tableView.delegate  = nil;
+	_tableView.target    = nil;
 }
 
 // =====================
