@@ -148,7 +148,8 @@ class Target
       signature  = "#{bundle_path}/Contents/_CodeSignature/CodeResources"
 
       buildfile.build('link', objects, executable, link_flags)
-      buildfile.build('sign', bundle_path, signature, sign_flags, [ executable, *resources ])
+      buildfile.meta(bundle_path, executable, *resources)
+      buildfile.build('sign', bundle_path, signature, sign_flags)
       buildfile.meta(self.name, signature)
       buildfile.default(self.name)
 
