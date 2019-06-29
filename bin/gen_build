@@ -197,10 +197,14 @@ class Target
 
   def link_dependencies(all_targets)
     if @link_dependencies.nil?
-      @link_dependencies = [ ]
-      @link_dependencies = @context.array_for('LINK').map do |name|
-        [ name, *all_targets[name].link_dependencies(all_targets) ]
-      end.flatten.sort.uniq
+      queue = [ self.name ]
+      seen  = Set.new(queue)
+      while name = queue.shift
+        new_names  = Set.new(all_targets[name].context.array_for('LINK'))
+        queue     += (new_names - seen).to_a
+        seen      += new_names
+      end
+      @link_dependencies = seen.delete(self.name).to_a.sort
     end
     @link_dependencies
   end
