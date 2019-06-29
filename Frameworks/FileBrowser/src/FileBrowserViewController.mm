@@ -195,7 +195,7 @@ static bool is_binary (std::string const& path)
 		SCMRepository* repository = [SCMManager.sharedInstance repositoryAtURL:url];
 		if(repository && repository.enabled)
 		{
-			[self goToURL:[NSURL URLWithString:[NSString stringWithFormat:@"scm://localhost%@/", [url.path stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]]];
+			[self goToURL:[NSURL URLWithString:[NSString stringWithFormat:@"scm://localhost%@/", [url.path stringByAddingPercentEncodingWithAllowedCharacters:NSCharacterSet.URLPathAllowedCharacterSet]]]];
 		}
 		else
 		{

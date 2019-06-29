@@ -49,7 +49,7 @@ static BOOL IsProtocolRelativeURL (NSURL* url)
 - (void)webView:(WebView*)sender mouseDidMoveOverElement:(NSDictionary*)elementInformation modifierFlags:(NSUInteger)modifierFlags
 {
 	NSURL* url = [elementInformation objectForKey:@"WebElementLinkURL"];
-	[self webView:sender setStatusText:[[url absoluteString] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+	[self webView:sender setStatusText:[[url absoluteString] stringByRemovingPercentEncoding]];
 }
 
 - (void)webView:(WebView*)sender runJavaScriptAlertPanelWithMessage:(NSString*)message initiatedByFrame:(WebFrame*)frame
@@ -128,7 +128,7 @@ static BOOL IsProtocolRelativeURL (NSURL* url)
 	if([[[request URL] scheme] isEqualToString:@"tm-file"])
 	{
 		NSString* fragment = [[request URL] fragment];
-		request = [NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"file://localhost%@%s%@", [[[request URL] path] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], fragment ? "#" : "", fragment ?: @""]]];
+		request = [NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"file://localhost%@%s%@", [[[request URL] path] stringByAddingPercentEncodingWithAllowedCharacters:NSCharacterSet.URLPathAllowedCharacterSet], fragment ? "#" : "", fragment ?: @""]]];
 	}
 
 	if(IsProtocolRelativeURL([request URL]))
@@ -140,7 +140,7 @@ static BOOL IsProtocolRelativeURL (NSURL* url)
 
 	if([[request URL] isFileURL])
 	{
-		NSURL* redirectURL = [NSURL URLWithString:[NSString stringWithFormat:@"file://localhost%@?path=%@&error=1", [[[NSBundle bundleForClass:[self class]] pathForResource:@"error_not_found" ofType:@"html"] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], [[[request URL] path] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]];
+		NSURL* redirectURL = [NSURL URLWithString:[NSString stringWithFormat:@"file://localhost%@?path=%@&error=1", [[[NSBundle bundleForClass:[self class]] pathForResource:@"error_not_found" ofType:@"html"] stringByAddingPercentEncodingWithAllowedCharacters:NSCharacterSet.URLPathAllowedCharacterSet], [[[request URL] path] stringByAddingPercentEncodingWithAllowedCharacters:NSCharacterSet.URLQueryAllowedCharacterSet]]];
 		char const* path = [[request URL] fileSystemRepresentation];
 
 		struct stat buf;
