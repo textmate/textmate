@@ -15,7 +15,7 @@ abort "#{PROGRAM_NAME}: No release tag specified, use -t/--tag." if new_tag.nil?
 
 did_output = false
 ARGF.each do |line|
-  if !did_output && line =~ %r{^#.*\b(v2(?:\.\d+)*-\w+(?:\.\w+)*)}
+  if !did_output && line =~ %r{^#.*\b(v\d+(?:\.\d+)*(-\w+(?:\.\w+)*)?)}
     old_tag = $1
     abort "#{PROGRAM_NAME}: Changes already added for release tag ‘#{old_tag}’." if new_tag == old_tag
     changes = %x{git log --pretty=tformat:'* %s *[%an]*' --date=short #{old_tag}..|tail -r}
