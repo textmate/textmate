@@ -293,12 +293,12 @@ class Buildfile
     })
 
     self.rule('link', {
-      'command'     => 'xcrun clang++ $FLAGS -o $out $in',
+      'command'     => 'xcrun clang++ $args -o $out $in',
       'description' => 'Link executable ‘$out’…',
     })
 
     self.rule('sign', {
-      'command'     => 'xcrun codesign $FLAGS --options runtime --timestamp --deep -fs "$identity" $in && touch $out',
+      'command'     => 'xcrun codesign $args --options runtime --timestamp --deep -fs "$identity" $in && touch $out',
       'description' => 'Sign ‘$in’…',
     })
 
@@ -339,8 +339,8 @@ SHELL
     @rules << [ name, values ]
   end
 
-  def build(rule, src, dst, flags = nil, deps = nil, outs = nil, order_only = nil)
-    @build << [ rule, src, dst, flags, deps, outs, order_only ]
+  def build(rule, src, dst, args = nil, deps = nil, outs = nil, order_only = nil)
+    @build << [ rule, src, dst, args, deps, outs, order_only ]
     dst
   end
 
@@ -382,15 +382,15 @@ SHELL
     end
 
     esc = lambda { |x| Array(x).map { |file| file.gsub(/[ :$]/, '$\&') }.join(' ') }
-    @build.each do |rule, src, dst, flags, deps, outs, order_only|
+    @build.each do |rule, src, dst, args, deps, outs, order_only|
       res << "build #{esc.call(dst)}"
       res << " | #{esc.call(outs)}" unless outs.to_a.empty?
       res << ": #{rule} #{esc.call(src)}"
       res << " | #{esc.call(deps)}" unless deps.to_s.empty?
       res << " || #{esc.call(order_only)}" unless order_only.to_a.empty?
       res << "\n"
-      flags = Array(flags).join("\n").gsub(/\s+/, ' ').strip
-      res << "  FLAGS = #{flags}\n" unless flags.empty?
+      args = Array(args).join("\n").gsub(/\s+/, ' ').strip
+      res << "  args = #{args}\n" unless args.empty?
       res << "\n"
     end
 
@@ -552,7 +552,7 @@ class CompileClang < Compiler
   def setup(buildfile, context)
     COMPILER_INFO.each do |_, info|
       buildfile.rule(info[:rule], {
-        'command'     => "#{info[:compiler]} $FLAGS -o $out -MMD -MF $out.d $in",
+        'command'     => "#{info[:compiler]} $args -o $out -MMD -MF $out.d $in",
         'depfile'     => "$out.d",
         'deps'        => "gcc",
         'description' => "Compile ‘$in’…",
@@ -652,7 +652,7 @@ class CompilePropertyList < Compiler
 
   def setup(buildfile, context)
     buildfile.rule('process_plist', {
-      'command'     => 'bin/process_plist > $out~ $FLAGS $in && mv $out~ $out',
+      'command'     => 'bin/process_plist > $out~ $args $in && mv $out~ $out',
       'description' => 'Process plist ‘$in’…',
     })
   end
@@ -673,7 +673,7 @@ class CompileMarkdown < Compiler
 
   def setup(buildfile, context)
     buildfile.rule('markdown', {
-      'command'     => 'bin/gen_html > $out~ $FLAGS $in && mv $out~ $out',
+      'command'     => 'bin/gen_html > $out~ $args $in && mv $out~ $out',
       'description' => 'Generate ‘$out’…',
     })
   end
