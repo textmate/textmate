@@ -296,6 +296,8 @@ BOOL HasDocumentWindow (NSArray* windows)
 				{ /* -------- */ },
 				{ @"View Source",            @selector(viewSource:),           @"u", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption },
 				{ @"Enter Full Screen",      @selector(toggleFullScreen:),     @"f", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagControl },
+				{ /* -------- */ },
+				{ @"Customize Touch Bar…", @selector(toggleTouchBarCustomizationPalette:) },
 			}
 		},
 		{ @"Navigate",
