@@ -27,7 +27,7 @@ typedef NS_ENUM(NSUInteger, OakImageState) {
 {
 	if((self = [super initWithFrame:aFrame]))
 	{
-		self.buttonType = NSMomentaryChangeButton;
+		self.buttonType = NSButtonTypeMomentaryChange;
 		self.bordered   = NO;
 
 		[self setContentCompressionResistancePriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];

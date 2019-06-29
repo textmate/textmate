@@ -30,7 +30,7 @@ static NSButton* OakCreateClickableStatusBar ()
 	res.controlSize = NSControlSizeSmall;
 	res.alignment   = NSTextAlignmentLeft;
 	res.bordered    = NO;
-	res.buttonType  = NSToggleButton;
+	res.buttonType  = NSButtonTypeToggle;
 	res.title       = @" "; // Ensure initial (fitting) size can fit a line of text
 
 	[res setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
@@ -53,7 +53,7 @@ static NSButton* OakCreateClickableStatusBar ()
 	NSTextFieldCell* cell = [self.cell copy];
 	cell.stringValue = aString;
 
-	self.myIntrinsicContentSize = NSMakeSize(NSViewNoInstrinsicMetric, MAX(22, MIN([cell cellSizeForBounds:NSMakeRect(0, 0, NSWidth([self bounds]), CGFLOAT_MAX)].height, 225)));
+	self.myIntrinsicContentSize = NSMakeSize(NSViewNoIntrinsicMetric, MAX(22, MIN([cell cellSizeForBounds:NSMakeRect(0, 0, NSWidth([self bounds]), CGFLOAT_MAX)].height, 225)));
 	[self invalidateIntrinsicContentSize];
 }
 @end
@@ -72,7 +72,7 @@ static OakAutoSizingTextField* OakCreateTextField (id <NSTextFieldDelegate> dele
 static NSButton* OakCreateHistoryButton (NSString* toolTip)
 {
 	NSButton* res = [[NSButton alloc] initWithFrame:NSZeroRect];
-	res.bezelStyle = NSRoundedDisclosureBezelStyle;
+	res.bezelStyle = NSBezelStyleRoundedDisclosure;
 	res.buttonType = NSMomentaryLightButton;
 	res.title      = @"";
 	res.toolTip    = toolTip;
@@ -84,7 +84,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 static NSProgressIndicator* OakCreateProgressIndicator ()
 {
 	NSProgressIndicator* res = [[NSProgressIndicator alloc] initWithFrame:NSZeroRect];
-	res.style                = NSProgressIndicatorSpinningStyle;
+	res.style                = NSProgressIndicatorStyleSpinning;
 	res.controlSize          = NSControlSizeSmall;
 	res.displayedWhenStopped = NO;
 	return res;
@@ -93,7 +93,7 @@ static NSProgressIndicator* OakCreateProgressIndicator ()
 static NSButton* OakCreateStopSearchButton ()
 {
 	NSButton* res = [[NSButton alloc] initWithFrame:NSZeroRect];
-	res.buttonType    = NSMomentaryChangeButton;
+	res.buttonType    = NSButtonTypeMomentaryChange;
 	res.bordered      = NO;
 	res.image         = [NSImage imageNamed:NSImageNameStopProgressFreestandingTemplate];
 	res.imagePosition = NSImageOnly;
@@ -184,7 +184,7 @@ static NSButton* OakCreateStopSearchButton ()
 		self.findTextField             = OakCreateTextField(self, self.findLabel, @"source.regexp.oniguruma");
 		self.findStringFormatter       = _findTextField.formatter;
 		self.findHistoryButton         = OakCreateHistoryButton(@"Show Find History");
-		self.countButton               = OakCreateButton(@"Σ", NSSmallSquareBezelStyle);
+		self.countButton               = OakCreateButton(@"Σ", NSBezelStyleSmallSquare);
 
 		self.countButton.toolTip = @"Show Results Count";
 		self.countButton.accessibilityLabel = self.countButton.toolTip;
@@ -1034,13 +1034,13 @@ static NSButton* OakCreateStopSearchButton ()
 {
 	BOOL res = YES;
 	if(aMenuItem.action == @selector(toggleSearchHiddenFolders:))
-		[aMenuItem setState:self.searchHiddenFolders ? NSOnState : NSOffState];
+		[aMenuItem setState:self.searchHiddenFolders ? NSControlStateValueOn : NSControlStateValueOff];
 	else if(aMenuItem.action == @selector(toggleSearchFolderLinks:))
-		[aMenuItem setState:self.searchFolderLinks ? NSOnState : NSOffState];
+		[aMenuItem setState:self.searchFolderLinks ? NSControlStateValueOn : NSControlStateValueOff];
 	else if(aMenuItem.action == @selector(toggleSearchFileLinks:))
-		[aMenuItem setState:self.searchFileLinks ? NSOnState : NSOffState];
+		[aMenuItem setState:self.searchFileLinks ? NSControlStateValueOn : NSControlStateValueOff];
 	else if(aMenuItem.action == @selector(toggleSearchBinaryFiles:))
-		[aMenuItem setState:self.searchBinaryFiles ? NSOnState : NSOffState];
+		[aMenuItem setState:self.searchBinaryFiles ? NSControlStateValueOn : NSControlStateValueOff];
 	else if(aMenuItem.action == @selector(goToParentFolder:))
 		res = self.searchFolder != nil || _searchTarget == FFSearchTargetFileBrowserItems && CommonAncestor(_fileBrowserItems);
 	return res;

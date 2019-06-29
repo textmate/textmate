@@ -90,7 +90,7 @@ namespace // PopulateMenu{Flat,Hierarchical}
 			[menuItem setRepresentedObject:[NSString stringWithCxxString:item.represented_object]];
 			[menuItem setTarget:target];
 			if(selected == item.represented_object)
-				[menuItem setState:NSOnState];
+				[menuItem setState:NSControlStateValueOn];
 		}
 	}
 }

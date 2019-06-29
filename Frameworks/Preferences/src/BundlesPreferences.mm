@@ -13,7 +13,7 @@
 static NSMutableSet* BundlesBeingInstalled = [NSMutableSet set];
 
 @interface Bundle (BundlesInstallPreferences)
-@property (nonatomic) NSCellStateValue installedCellState;
+@property (nonatomic) NSControlStateValue installedCellState;
 @end
 
 @implementation Bundle (BundlesInstallPreferences)
@@ -22,16 +22,16 @@ static NSMutableSet* BundlesBeingInstalled = [NSMutableSet set];
 	return [NSSet setWithObjects:@"installed", nil];
 }
 
-- (NSCellStateValue)installedCellState
+- (NSControlStateValue)installedCellState
 {
-	auto res = self.isInstalled ? NSOnState : NSOffState;
-	return [BundlesBeingInstalled containsObject:self] ? NSMixedState : res;
+	auto res = self.isInstalled ? NSControlStateValueOn : NSControlStateValueOff;
+	return [BundlesBeingInstalled containsObject:self] ? NSControlStateValueMixed : res;
 }
 
-- (void)setInstalledCellState:(NSCellStateValue)newValue
+- (void)setInstalledCellState:(NSControlStateValue)newValue
 {
 	BundlesManager* manager = [BundlesManager sharedInstance];
-	if(newValue == NSOffState)
+	if(newValue == NSControlStateValueOff)
 	{
 		[manager uninstallBundle:self];
 		manager.activityText = [NSString stringWithFormat:@"Uninstalled ‘%@’.", self.name];

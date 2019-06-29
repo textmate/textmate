@@ -713,7 +713,7 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 
 - (NSSize)intrinsicContentSize
 {
-	return NSMakeSize(NSViewNoInstrinsicMetric, 23);
+	return NSMakeSize(NSViewNoIntrinsicMetric, 23);
 }
 
 - (BOOL)mouseDownCanMoveWindow
@@ -729,7 +729,7 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 		_createNewTabButton.accessibilityLabel = @"Create new tab";
 		_createNewTabButton.image      = [NSImage imageNamed:NSImageNameAddTemplate];
 		_createNewTabButton.bordered   = NO;
-		_createNewTabButton.buttonType = NSMomentaryChangeButton;
+		_createNewTabButton.buttonType = NSButtonTypeMomentaryChange;
 		_createNewTabButton.toolTip    = @"Create new tab";
 		_createNewTabButton.action     = @selector(newTab:);
 		_createNewTabButton.target     = self;
@@ -860,7 +860,7 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 		}
 
 		if(tabItem.isSelected)
-			item.state = NSOnState;
+			item.state = NSControlStateValueOn;
 		else if(tabItem.isModified)
 			item.modifiedState = YES;
 	}

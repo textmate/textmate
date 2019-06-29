@@ -137,9 +137,9 @@ static NSMutableDictionary* SharedChoosers;
 
 		[self addTitlebarAccessoryView:titlebarView];
 
-		NSButton* deleteButton   = OakCreateButton(@"Delete", NSTexturedRoundedBezelStyle);
-		NSButton* clearAllButton = OakCreateButton(@"Clear History", NSTexturedRoundedBezelStyle);
-		NSButton* actionButton   = OakCreateButton(actionName, NSTexturedRoundedBezelStyle);
+		NSButton* deleteButton   = OakCreateButton(@"Delete", NSBezelStyleTexturedRounded);
+		NSButton* clearAllButton = OakCreateButton(@"Clear History", NSBezelStyleTexturedRounded);
+		NSButton* actionButton   = OakCreateButton(actionName, NSBezelStyleTexturedRounded);
 
 		deleteButton.action   = @selector(deleteForward:);
 		clearAllButton.action = @selector(clearAll:);

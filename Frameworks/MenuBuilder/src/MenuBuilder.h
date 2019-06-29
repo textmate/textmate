@@ -20,7 +20,7 @@ struct PUBLIC MBMenuItem
 	NSUInteger            modifierFlags     = NSEventModifierFlagCommand;
 	NSInteger             tag               = 0;
 	NSInteger             indent            = 0;
-	NSCellStateValue      state             = NSOffState;
+	NSControlStateValue   state             = NSControlStateValueOff;
 	id                    target            = nil;
 	id                    delegate          = nil;
 	unichar               key               = 0;

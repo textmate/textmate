@@ -164,15 +164,15 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 
 		_showTableButton = [[NSButton alloc] initWithFrame:NSZeroRect];
 		_showTableButton.buttonType = NSOnOffButton;
-		_showTableButton.bezelStyle = NSRoundedDisclosureBezelStyle;
+		_showTableButton.bezelStyle = NSBezelStyleRoundedDisclosure;
 		_showTableButton.title = @"";
 		_showTableButton.action = @selector(toggleTableView:);
-		_showTableButton.state = _showsTableView ? NSOnState : NSOffState;
+		_showTableButton.state = _showsTableView ? NSControlStateValueOn : NSControlStateValueOff;
 
 		_previousCommitMessagesPopUpButton = [NSPopUpButton new];
 		_previousCommitMessagesPopUpButton.bordered   = YES;
 		_previousCommitMessagesPopUpButton.pullsDown  = YES;
-		_previousCommitMessagesPopUpButton.bezelStyle = NSTexturedRoundedBezelStyle;
+		_previousCommitMessagesPopUpButton.bezelStyle = NSBezelStyleTexturedRounded;
 		[self setupPreviousCommitMessagesMenu];
 
 		_topDocumentViewDivider    = OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider);
@@ -359,7 +359,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 	_bottomScrollViewDivider = OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider);
 
 	_actionPopUpButton = OakCreateActionPopUpButton(YES);
-	_actionPopUpButton.bezelStyle = NSTexturedRoundedBezelStyle;
+	_actionPopUpButton.bezelStyle = NSBezelStyleTexturedRounded;
 	_actionPopUpButton.menu.delegate = self;
 
 	OakAddAutoLayoutViewsToSuperview(@[ _topScrollViewDivider, _scrollView, _bottomScrollViewDivider, _actionPopUpButton ], contentView);
@@ -710,7 +710,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 			{
 				dispatch_async(dispatch_get_main_queue(), ^{
 					NSAlert* alert = [NSAlert tmAlertWithMessageText:@"Failed running diff command." informativeText:[NSString stringWithCxxString:cmdString] buttons:@"OK", nil];
-					[alert beginSheetModalForWindow:self.window completionHandler:^(NSInteger returnCode){}];
+					[alert beginSheetModalForWindow:self.window completionHandler:^(NSModalResponse returnCode){}];
 				});
 			}
 		});
@@ -770,7 +770,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 		if(rangeOfStatus.location == NSNotFound)
 		{
 			NSAlert* alert = [NSAlert tmAlertWithMessageText:@"Cannot understand output from command" informativeText:[NSString stringWithCxxString:cmdString] buttons:@"OK", nil];
-			[alert beginSheetModalForWindow:self.window completionHandler:^(NSInteger returnCode){}];
+			[alert beginSheetModalForWindow:self.window completionHandler:^(NSModalResponse returnCode){}];
 		}
 		NSString* newStatus = [outputStatus substringToIndex:rangeOfStatus.location];
 		CWItem* item = [[_arrayController arrangedObjects] objectAtIndex:row];
@@ -780,7 +780,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 	else
 	{
 		NSAlert* alert = [NSAlert tmAlertWithMessageText:@"Failed running command" informativeText:[NSString stringWithCxxString:cmdString] buttons:@"OK", nil];
-		[alert beginSheetModalForWindow:self.window completionHandler:^(NSInteger returnCode){}];
+		[alert beginSheetModalForWindow:self.window completionHandler:^(NSModalResponse returnCode){}];
 	}
 }
 
@@ -920,6 +920,6 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 	}
 
 	OakCommitWindow* commitWindow = [[OakCommitWindow alloc] initWithOptions:someOptions];
-	[commitWindow beginSheetModalForWindow:projectWindow completionHandler:^(NSInteger returnCode){ }];
+	[commitWindow beginSheetModalForWindow:projectWindow completionHandler:^(NSModalResponse returnCode){ }];
 }
 @end

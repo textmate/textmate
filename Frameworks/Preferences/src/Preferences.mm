@@ -81,7 +81,7 @@ OAK_DEBUG_VAR(Preferences);
 		item.tag = i;
 		item.target = self;
 		if([viewController.identifier isEqualToString:selectedIdentifier])
-			[item setState:NSOnState];
+			[item setState:NSControlStateValueOn];
 		++i;
 	}
 }

@@ -117,9 +117,9 @@
 	[savePanel setAccessoryView:optionsViewController.view];
 	[optionsViewController updateSettings:[optionsViewController encodingForURL:[savePanel URL]]];
 	savePanel.delegate = optionsViewController;
-	[savePanel beginSheetModalForWindow:aWindow completionHandler:^(NSInteger result) {
+	[savePanel beginSheetModalForWindow:aWindow completionHandler:^(NSModalResponse result) {
 		savePanel.delegate = nil;
-		NSString* path = result == NSFileHandlingPanelOKButton ? [[savePanel.URL filePathURL] path] : nil;
+		NSString* path = result == NSModalResponseOK ? [[savePanel.URL filePathURL] path] : nil;
 		encoding::type encoding(to_s(optionsViewController.lineEndings), to_s(optionsViewController.encoding));
 		aCompletionHandler(path, encoding);
 	}];

@@ -903,7 +903,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 
 				[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentWillShowAlertNotification object:_document];
 				NSAlert* alert = [NSAlert tmAlertWithMessageText:[NSString stringWithFormat:@"The file “%@” is locked.", _document.displayName] informativeText:@"Do you want to overwrite it anyway?" buttons:@"Overwrite", @"Cancel", nil];
-				[alert beginSheetModalForWindow:_window completionHandler:^(NSInteger returnCode){
+				[alert beginSheetModalForWindow:_window completionHandler:^(NSModalResponse returnCode){
 					if(returnCode == NSAlertFirstButtonReturn)
 							context->set_make_writable(true);
 					else	_cancel = true;
@@ -917,7 +917,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 
 				[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentWillShowAlertNotification object:_document];
 				NSAlert* alert = [NSAlert tmAlertWithMessageText:[NSString stringWithFormat:@"No parent folder for “%@”.", _document.displayName] informativeText:[NSString stringWithFormat:@"Do you wish to create a folder at “%@”?", [NSString stringWithCxxString:path::with_tilde(path::parent(path))]] buttons:@"Create Folder", @"Cancel", nil];
-				[alert beginSheetModalForWindow:_window completionHandler:^(NSInteger returnCode){
+				[alert beginSheetModalForWindow:_window completionHandler:^(NSModalResponse returnCode){
 					if(returnCode == NSAlertFirstButtonReturn)
 							context->set_create_parent(true);
 					else	_cancel = true;
@@ -945,7 +945,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 					NSAlert* alert = [NSAlert tmAlertWithMessageText:[NSString stringWithFormat:@"Unable to save “%@” using “%@” as encoding.", _document.displayName, to_ns(charset)] informativeText:@"Please choose another encoding:" buttons:@"Save", @"Cancel", nil];
 					OakEncodingPopUpButton* encodingPopUp = [OakEncodingPopUpButton new];
 					[alert setAccessoryView:encodingPopUp];
-					[alert beginSheetModalForWindow:_window completionHandler:^(NSInteger returnCode){
+					[alert beginSheetModalForWindow:_window completionHandler:^(NSModalResponse returnCode){
 						if(returnCode == NSAlertFirstButtonReturn)
 								context->set_charset(to_s(encodingPopUp.encoding));
 						else	_cancel = true;

@@ -276,7 +276,7 @@ static NSDictionary* globs_for_path (std::string const& path)
 		[self addTitlebarAccessoryView:titlebarView];
 
 		_progressIndicator = [[NSProgressIndicator alloc] initWithFrame:NSZeroRect];
-		_progressIndicator.style                = NSProgressIndicatorSpinningStyle;
+		_progressIndicator.style                = NSProgressIndicatorStyleSpinning;
 		_progressIndicator.controlSize          = NSControlSizeSmall;
 		_progressIndicator.displayedWhenStopped = NO;
 
@@ -715,7 +715,7 @@ static NSDictionary* globs_for_path (std::string const& path)
 	if([item action] == @selector(goToParentFolder:))
 		activate = _sourceIndex == kFileChooserAllSourceIndex && to_s(_path) != path::parent(to_s(_path));
 	else if([item action] == @selector(takeSourceIndexFrom:))
-		[item setState:[item tag] == self.sourceIndex ? NSOnState : NSOffState];
+		[item setState:[item tag] == self.sourceIndex ? NSControlStateValueOn : NSControlStateValueOff];
 	return activate;
 }
 @end

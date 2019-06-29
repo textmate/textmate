@@ -51,7 +51,7 @@ NSButton* OakCreateCheckBox (NSString* label)
 
 	NSButton* res = [[NSButton alloc] initWithFrame:NSZeroRect];
 	[res setContentHuggingPriority:NSLayoutPriorityDefaultHigh forOrientation:NSLayoutConstraintOrientationVertical];
-	res.buttonType = NSSwitchButton;
+	res.buttonType = NSButtonTypeSwitch;
 	res.font       = OakControlFont();
 	res.title      = label;
 	return res;
@@ -62,14 +62,14 @@ NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel)
 	if(@available(macos 10.12, *))
 	{
 		NSButton* res = [NSButton buttonWithTitle:label target:nil action:nil];
-		if(bezel != NSRoundedBezelStyle)
+		if(bezel != NSBezelStyleRounded)
 			res.bezelStyle = bezel;
 		return res;
 	}
 
 	NSButton* res = [[NSButton alloc] initWithFrame:NSZeroRect];
 	res.bezelStyle = bezel;
-	res.buttonType = NSMomentaryPushInButton;
+	res.buttonType = NSButtonTypeMomentaryPushIn;
 	res.font       = OakControlFont();
 	res.title      = label;
 	return res;
@@ -213,7 +213,7 @@ OakRolloverButton* OakCreateCloseButton (NSString* accessibilityLabel)
 {
 	if(NSImage* image = self.activeBackgroundImage ?: self.inactiveBackgroundImage)
 			return image.size;
-	else	return NSMakeSize(NSViewNoInstrinsicMetric, NSViewNoInstrinsicMetric);
+	else	return NSMakeSize(NSViewNoIntrinsicMetric, NSViewNoIntrinsicMetric);
 }
 
 - (void)setStyle:(OakBackgroundFillViewStyle)aStyle

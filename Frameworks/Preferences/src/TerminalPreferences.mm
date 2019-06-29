@@ -172,8 +172,8 @@ static bool uninstall_mate (std::string const& path)
 {
 	NSSavePanel* savePanel = [NSSavePanel savePanel];
 	[savePanel setNameFieldStringValue:@"mate"];
-	[savePanel beginSheetModalForWindow:[self view].window completionHandler:^(NSInteger result) {
-		if(result == NSFileHandlingPanelOKButton)
+	[savePanel beginSheetModalForWindow:[self view].window completionHandler:^(NSModalResponse result) {
+		if(result == NSModalResponseOK)
 				[self updatePopUp:[[savePanel.URL filePathURL] path]];
 		else	[installPathPopUp selectItemAtIndex:0];
 		[self updateUI:self];
@@ -212,7 +212,7 @@ static bool uninstall_mate (std::string const& path)
 
 	[installPathPopUp setEnabled:isInstalled ? NO : YES];
 	[installButton setAction:isInstalled ? @selector(performUninstallMate:) : @selector(performInstallMate:)];
-	[installButton setState:isInstalled ? NSOnState : NSOffState];
+	[installButton setState:isInstalled ? NSControlStateValueOn : NSControlStateValueOff];
 }
 
 - (void)loadView
@@ -297,7 +297,7 @@ static bool uninstall_mate (std::string const& path)
 		[alert setMessageText:@"File Already Exists"];
 		[alert setInformativeText:[NSString stringWithCxxString:summary]];
 		[alert addButtons:@"Replace", @"Cancel", nil];
-		[alert beginSheetModalForWindow:[self.view window] completionHandler:^(NSInteger returnCode){
+		[alert beginSheetModalForWindow:[self.view window] completionHandler:^(NSModalResponse returnCode){
 			if(returnCode == NSAlertFirstButtonReturn)
 				[self installMateAs:[[installPathPopUp titleOfSelectedItem] stringByExpandingTildeInPath]];
 		}];

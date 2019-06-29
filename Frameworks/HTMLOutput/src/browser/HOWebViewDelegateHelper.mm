@@ -71,7 +71,7 @@ static BOOL IsProtocolRelativeURL (NSURL* url)
 {
 	NSOpenPanel* panel = [NSOpenPanel openPanel];
 	[panel setDirectoryURL:[NSURL fileURLWithPath:NSHomeDirectory()]];
-	if([panel runModal] == NSFileHandlingPanelOKButton)
+	if([panel runModal] == NSModalResponseOK)
 		[resultListener chooseFilename:[[[panel URLs] objectAtIndex:0] path]];
 }
 

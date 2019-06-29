@@ -54,7 +54,7 @@
 				switch([alert runModal])
 				{
 					case NSAlertFirstButtonReturn: // Replace
-						forceFlag = alert.suppressionButton.state == NSOnState;
+						forceFlag = alert.suppressionButton.state == NSControlStateValueOn;
 						res = [self performOperation:op sourceURL:srcURL destinationURL:&destURL force:YES error:&error];
 					break;
 
@@ -81,7 +81,7 @@
 				switch([alert runModal])
 				{
 					case NSAlertFirstButtonReturn: // Delete
-						forceFlag = alert.suppressionButton.state == NSOnState;
+						forceFlag = alert.suppressionButton.state == NSControlStateValueOn;
 						res = [self performOperation:op sourceURL:srcURL destinationURL:&destURL force:YES error:&error];
 					break;
 

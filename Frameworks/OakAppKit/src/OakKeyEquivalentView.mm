@@ -28,7 +28,7 @@ static NSString* const kRecordingPlaceholderString = @"…";
 
 - (NSSize)intrinsicContentSize
 {
-	return NSMakeSize(NSViewNoInstrinsicMetric, 22);
+	return NSMakeSize(NSViewNoIntrinsicMetric, 22);
 }
 
 - (CGFloat)baselineOffsetFromBottom

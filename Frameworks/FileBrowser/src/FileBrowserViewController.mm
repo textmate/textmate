@@ -609,7 +609,7 @@ static bool is_binary (std::string const& path)
 	[pboard clearContents];
 	[pboard writeObjects:[items valueForKeyPath:@"URL"]];
 
-	if(![pboard.types containsObject:NSStringPboardType])
+	if(![pboard.types containsObject:NSPasteboardTypeString])
 		[pboard writeObjects:[items valueForKeyPath:@"localizedName"]];
 
 	return YES;
@@ -1080,8 +1080,8 @@ static bool is_binary (std::string const& path)
 	panel.allowsMultipleSelection = NO;
 	panel.directoryURL            = self.fileBrowserView.URL.filePathURL;
 
-	[panel beginSheetModalForWindow:self.view.window completionHandler:^(NSInteger result) {
-		if(result == NSFileHandlingPanelOKButton)
+	[panel beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse result) {
+		if(result == NSModalResponseOK)
 			[self goToURL:panel.URLs.lastObject];
 	}];
 }

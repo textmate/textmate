@@ -5,7 +5,7 @@
 static NSButton* OakCreateImageButton (NSImage* image)
 {
 	NSButton* res = [NSButton new];
-	[res setButtonType:NSMomentaryChangeButton];
+	[res setButtonType:NSButtonTypeMomentaryChange];
 	[res setBordered:NO];
 	[res setImage:image];
 	[res setImagePosition:NSImageOnly];
@@ -74,7 +74,7 @@ static NSTextField* OakCreateTextField ()
 
 		_spinner = [NSProgressIndicator new];
 		_spinner.controlSize          = NSControlSizeSmall;
-		_spinner.style                = NSProgressIndicatorSpinningStyle;
+		_spinner.style                = NSProgressIndicatorStyleSpinning;
 		_spinner.displayedWhenStopped = NO;
 
 		NSArray* views = @[ _divider, _goBackButton, _goForwardButton, _statusTextField, _spinner ];
@@ -87,7 +87,7 @@ static NSTextField* OakCreateTextField ()
 
 - (NSSize)intrinsicContentSize
 {
-	return NSMakeSize(NSViewNoInstrinsicMetric, 24);
+	return NSMakeSize(NSViewNoIntrinsicMetric, 24);
 }
 
 - (void)updateConstraints

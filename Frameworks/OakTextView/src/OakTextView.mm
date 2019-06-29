@@ -2038,7 +2038,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 		}];
 	});
 
-	[NSApp registerServicesMenuSendTypes:@[ NSStringPboardType ] returnTypes:@[ NSStringPboardType ]];
+	[NSApp registerServicesMenuSendTypes:@[ NSPasteboardTypeString ] returnTypes:@[ NSPasteboardTypeString ]];
 }
 
 // ======================
@@ -2047,9 +2047,9 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 
 - (id)validRequestorForSendType:(NSString*)sendType returnType:(NSString*)returnType
 {
-	if([sendType isEqualToString:NSStringPboardType] && [self hasSelection] && !macroRecordingArray)
+	if([sendType isEqualToString:NSPasteboardTypeString] && [self hasSelection] && !macroRecordingArray)
 		return self;
-	if(!sendType && [returnType isEqualToString:NSStringPboardType] && !macroRecordingArray)
+	if(!sendType && [returnType isEqualToString:NSPasteboardTypeString] && !macroRecordingArray)
 		return self;
 	return [super validRequestorForSendType:sendType returnType:returnType];
 }
@@ -2057,22 +2057,22 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 - (BOOL)writeSelectionToPasteboard:(NSPasteboard*)pboard types:(NSArray*)types
 {
 	BOOL res = NO;
-	if([self hasSelection] && [types containsObject:NSStringPboardType])
+	if([self hasSelection] && [types containsObject:NSPasteboardTypeString])
 	{
 		std::vector<std::string> v;
 		ng::ranges_t const ranges = ng::dissect_columnar(*documentView, documentView->ranges());
 		for(auto const& range : ranges)
 			v.push_back(documentView->substr(range.min().index, range.max().index));
 
-		[pboard declareTypes:@[ NSStringPboardType ] owner:nil];
-		res = [pboard setString:[NSString stringWithCxxString:text::join(v, "\n")] forType:NSStringPboardType];
+		[pboard declareTypes:@[ NSPasteboardTypeString ] owner:nil];
+		res = [pboard setString:[NSString stringWithCxxString:text::join(v, "\n")] forType:NSPasteboardTypeString];
 	}
 	return res;
 }
 
 - (BOOL)readSelectionFromPasteboard:(NSPasteboard*)pboard
 {
-	if(NSString* str = [pboard stringForType:[pboard availableTypeFromArray:@[ NSStringPboardType ]]])
+	if(NSString* str = [pboard stringForType:[pboard availableTypeFromArray:@[ NSPasteboardTypeString ]]])
 	{
 		AUTO_REFRESH;
 		documentView->insert(to_s(str));
@@ -2869,8 +2869,8 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 
 - (find::options_t)incrementalSearchOptions
 {
-	BOOL ignoreCase = self.liveSearchView.ignoreCaseCheckBox.state == NSOnState;
-	BOOL wrapAround = self.liveSearchView.wrapAroundCheckBox.state == NSOnState;
+	BOOL ignoreCase = self.liveSearchView.ignoreCaseCheckBox.state == NSControlStateValueOn;
+	BOOL wrapAround = self.liveSearchView.wrapAroundCheckBox.state == NSControlStateValueOn;
 	return (ignoreCase ? find::ignore_case : find::none) | (wrapAround ? find::wrap_around : find::none) | find::ignore_whitespace;
 }
 
@@ -3044,11 +3044,11 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	else if([aMenuItem action] == @selector(toggleShowIndentGuides:))
 		[aMenuItem setTitle:(documentView && documentView->draw_indent_guides()) ? @"Hide Indent Guides" : @"Show Indent Guides"];
 	else if([aMenuItem action] == @selector(toggleContinuousSpellChecking:))
-		[aMenuItem setState:documentView->live_spelling() ? NSOnState : NSOffState];
+		[aMenuItem setState:documentView->live_spelling() ? NSControlStateValueOn : NSControlStateValueOff];
 	else if([aMenuItem action] == @selector(takeSpellingLanguageFrom:))
-		[aMenuItem setState:[[NSString stringWithCxxString:documentView->spelling_language()] isEqualToString:[aMenuItem representedObject]] ? NSOnState : NSOffState];
+		[aMenuItem setState:[[NSString stringWithCxxString:documentView->spelling_language()] isEqualToString:[aMenuItem representedObject]] ? NSControlStateValueOn : NSControlStateValueOff];
 	else if([aMenuItem action] == @selector(takeWrapColumnFrom:))
-		[aMenuItem setState:(documentView && documentView->wrap_column() == [aMenuItem tag]) ? NSOnState : NSOffState];
+		[aMenuItem setState:(documentView && documentView->wrap_column() == [aMenuItem tag]) ? NSControlStateValueOn : NSControlStateValueOff];
 	else if([aMenuItem action] == @selector(undo:))
 	{
 		[aMenuItem setTitle:@"Undo"];
@@ -3292,7 +3292,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 			[alertWindow recalculateKeyViewLoop];
 		}
 
-		[alert beginSheetModalForWindow:self.window completionHandler:^(NSInteger returnCode){
+		[alert beginSheetModalForWindow:self.window completionHandler:^(NSModalResponse returnCode){
 			if(returnCode == NSAlertFirstButtonReturn)
 				[self setWrapColumn:std::max<NSInteger>([textField integerValue], 10)];
 		}];
@@ -3608,7 +3608,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 {
 	return @[ NSColorPboardType, NSFilenamesPboardType,
 		@"WebURLsWithTitlesPboardType", (NSString*)kUTTypeURL, @"public.url-name", NSURLPboardType,
-		NSStringPboardType ];
+		NSPasteboardTypeString ];
 }
 
 - (void)setDropMarkAtPoint:(NSPoint)aPoint
@@ -3808,7 +3808,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		documentView->set_ranges(ng::range_t(pos));
 		documentView->insert(text::join(paths, "\n"));
 	}
-	else if(NSString* text = [pboard stringForType:[pboard availableTypeFromArray:@[ NSStringPboardType ]]])
+	else if(NSString* text = [pboard stringForType:[pboard availableTypeFromArray:@[ NSPasteboardTypeString ]]])
 	{
 		D(DBF_OakTextView_DragNDrop, bug("plain text: %s\n", [text UTF8String]););
 		if(shouldMove && documentView->has_selection())

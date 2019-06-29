@@ -185,7 +185,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		NSButton* countOfLeafs = [NSButton new];
 		[[countOfLeafs cell] setHighlightsBy:NSNoCellMask];
 		countOfLeafs.alignment  = NSTextAlignmentCenter;
-		countOfLeafs.bezelStyle = NSInlineBezelStyle;
+		countOfLeafs.bezelStyle = NSBezelStyleInline;
 		countOfLeafs.font       = [NSFont labelFontOfSize:0];
 		countOfLeafs.identifier = @"countOfLeafs";
 
@@ -198,8 +198,8 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 
 		NSButton* remove = [NSButton new];
 		remove.controlSize = NSControlSizeSmall;
-		remove.bezelStyle  = NSRoundRectBezelStyle;
-		remove.buttonType  = NSMomentaryPushInButton;
+		remove.bezelStyle  = NSBezelStyleRoundRect;
+		remove.buttonType  = NSButtonTypeMomentaryPushIn;
 		remove.image       = removeTemplateImage;
 
 		NSDictionary* views = @{ @"icon": imageView, @"text": textField, @"count": countOfLeafs, @"remove": remove };

@@ -120,8 +120,8 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 		NSButton* removeButton = [NSButton new];
 		removeButton.controlSize = NSControlSizeSmall;
 		removeButton.refusesFirstResponder = YES;
-		removeButton.bezelStyle = NSRoundRectBezelStyle;
-		removeButton.buttonType = NSMomentaryPushInButton;
+		removeButton.bezelStyle = NSBezelStyleRoundRect;
+		removeButton.buttonType = NSButtonTypeMomentaryPushIn;
 		removeButton.image      = removeTemplateImage;
 		removeButton.target     = self;
 		removeButton.action     = @selector(takeItemToRemoveFrom:);
@@ -358,7 +358,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 {
 	BOOL activate = YES;
 	if([item action] == @selector(takeSourceIndexFrom:))
-		[item setState:[item tag] == self.sourceIndex ? NSOnState : NSOffState];
+		[item setState:[item tag] == self.sourceIndex ? NSControlStateValueOn : NSControlStateValueOff];
 	return activate;
 }
 

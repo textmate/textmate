@@ -94,7 +94,7 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 	alert.showsSuppressionButton = YES;
 	[alert addButtonWithTitle:@"OK"];
 	[alert runModal];
-	if(alert.suppressionButton.state == NSOnState)
+	if(alert.suppressionButton.state == NSControlStateValueOn)
 		[[NSUserDefaults standardUserDefaults] setBool:YES forKey:kUserDefaultsSoftwareUpdateDisableReadOnlyFileSystemWarningKey];
 }
 

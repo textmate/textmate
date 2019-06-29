@@ -57,7 +57,7 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 	if(bundleItem)
 		[alert addButtonWithTitle:@"Edit Command"];
 
-	[alert beginSheetModalForWindow:window completionHandler:^(NSInteger button){
+	[alert beginSheetModalForWindow:window completionHandler:^(NSModalResponse button){
 		if(button == NSAlertSecondButtonReturn)
 			[[BundleEditor sharedInstance] revealBundleItem:bundleItem];
 	}];
@@ -459,7 +459,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	}
 
 	NSAlert* alert = [DocumentWindowController saveAlertForDocuments:someDocuments];
-	[alert beginSheetModalForWindow:self.window completionHandler:^(NSInteger returnCode){
+	[alert beginSheetModalForWindow:self.window completionHandler:^(NSModalResponse returnCode){
 		switch(returnCode)
 		{
 			case NSAlertFirstButtonReturn: /* "Save" */
@@ -2209,7 +2209,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		if(aMenu.propertiesToUpdate & NSMenuPropertyItemImage)
 			item.image = document.icon;
 		if(i == _selectedTabIndex)
-			[item setState:NSOnState];
+			[item setState:NSControlStateValueOn];
 		else if(document.isDocumentEdited)
 			[item setModifiedState:YES];
 		++i;
@@ -2271,7 +2271,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	else if([menuItem action] == @selector(moveFocus:))
 		[menuItem setTitle:self.window.firstResponder == self.textView ? @"Move Focus to File Browser" : @"Move Focus to Document"];
 	else if([menuItem action] == @selector(takeProjectPathFrom:))
-		[menuItem setState:[self.defaultProjectPath isEqualToString:[menuItem representedObject]] ? NSOnState : NSOffState];
+		[menuItem setState:[self.defaultProjectPath isEqualToString:[menuItem representedObject]] ? NSControlStateValueOn : NSControlStateValueOff];
 	else if([menuItem action] == @selector(performCloseOtherTabsXYZ:))
 		active = _documents.count > 1;
 	else if([menuItem action] == @selector(performCloseTabsToTheRight:))
@@ -2286,7 +2286,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		{
 			active = [indexSet count] != 0;
 			if(active && [menuItem action] == @selector(toggleSticky:))
-				[menuItem setState:[self isDocumentSticky:_documents[indexSet.firstIndex]] ? NSOnState : NSOffState];
+				[menuItem setState:[self isDocumentSticky:_documents[indexSet.firstIndex]] ? NSControlStateValueOn : NSControlStateValueOff];
 		}
 	}
 

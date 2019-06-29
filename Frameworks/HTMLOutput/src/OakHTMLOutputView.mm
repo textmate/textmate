@@ -69,7 +69,7 @@
 
 		if(alert)
 		{
-			[alert beginSheetModalForWindow:self.window completionHandler:^(NSInteger returnCode){
+			[alert beginSheetModalForWindow:self.window completionHandler:^(NSModalResponse returnCode){
 				if(returnCode == NSAlertFirstButtonReturn) /* "Stop" */
 				{
 					[self.webView.mainFrame stopLoading];

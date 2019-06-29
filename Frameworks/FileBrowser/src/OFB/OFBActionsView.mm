@@ -6,7 +6,7 @@
 static NSButton* OakCreateImageButton (NSImage* image)
 {
 	NSButton* res = [NSButton new];
-	[res setButtonType:NSMomentaryChangeButton];
+	[res setButtonType:NSButtonTypeMomentaryChange];
 	[res setBordered:NO];
 	[res setImage:image];
 	[res setImagePosition:NSImageOnly];
@@ -70,6 +70,6 @@ static NSButton* OakCreateImageButton (NSImage* image)
 
 - (NSSize)intrinsicContentSize
 {
-	return NSMakeSize(NSViewNoInstrinsicMetric, 24);
+	return NSMakeSize(NSViewNoIntrinsicMetric, 24);
 }
 @end

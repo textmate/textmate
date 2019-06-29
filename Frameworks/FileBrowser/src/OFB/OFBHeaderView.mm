@@ -5,7 +5,7 @@
 static NSButton* OakCreateImageButton (NSString* imageName)
 {
 	NSButton* res = [[NSButton alloc] initWithFrame:NSZeroRect];
-	[res setButtonType:NSMomentaryChangeButton];
+	[res setButtonType:NSButtonTypeMomentaryChange];
 	[res setBordered:NO];
 	[res setImage:[NSImage imageNamed:imageName]];
 	[res setImagePosition:NSImageOnly];
@@ -65,6 +65,6 @@ static NSPopUpButton* OakCreateFolderPopUpButton ()
 
 - (NSSize)intrinsicContentSize
 {
-	return NSMakeSize(NSViewNoInstrinsicMetric, 24);
+	return NSMakeSize(NSViewNoIntrinsicMetric, 24);
 }
 @end

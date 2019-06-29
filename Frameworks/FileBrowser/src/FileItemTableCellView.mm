@@ -78,7 +78,7 @@
 	{
 		_openButton = [[NSButton alloc] initWithFrame:NSZeroRect];
 		_openButton.refusesFirstResponder = YES;
-		_openButton.buttonType            = NSMomentaryChangeButton;
+		_openButton.buttonType            = NSButtonTypeMomentaryChange;
 		_openButton.bordered              = NO;
 		_openButton.imagePosition         = NSImageOnly;
 

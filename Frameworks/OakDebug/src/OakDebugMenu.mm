@@ -78,7 +78,7 @@ namespace
 + (BOOL)validateMenuItem:(NSMenuItem*)menuItem
 {
 	bool enabled = OakDebugBaseClass::registry()[[[menuItem representedObject] UTF8String]];
-	[menuItem setState:enabled ? NSOnState : NSOffState];
+	[menuItem setState:enabled ? NSControlStateValueOn : NSControlStateValueOff];
 	return YES;
 }
 
@@ -136,7 +136,7 @@ namespace
 		}
 		[item setRepresentedObject:@(it.first.c_str())];
 		[item setTarget:self];
-		[item setState:it.second ? NSOnState : NSOffState];
+		[item setState:it.second ? NSControlStateValueOn : NSControlStateValueOff];
 	}
 }
 

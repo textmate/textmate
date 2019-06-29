@@ -5,8 +5,8 @@ static NSButton* OakCreateScopeButton (NSString* label, NSUInteger tag, SEL acti
 {
 	NSButton* res = [NSButton new];
 	res.accessibilityRole               = NSAccessibilityRadioButtonRole;
-	res.bezelStyle                      = NSRecessedBezelStyle;
-	res.buttonType                      = NSPushOnPushOffButton;
+	res.bezelStyle                      = NSBezelStyleRecessed;
+	res.buttonType                      = NSButtonTypePushOnPushOff;
 	res.title                           = label;
 	res.tag                             = tag;
 	res.action                          = action;
@@ -85,7 +85,7 @@ static NSButton* OakCreateScopeButton (NSString* label, NSUInteger tag, SEL acti
 - (void)setSelectedIndex:(NSInteger)newSelectedIndex
 {
 	for(NSButton* button in _buttons)
-		[button setState:[button tag] == newSelectedIndex ? NSOnState : NSOffState];
+		[button setState:[button tag] == newSelectedIndex ? NSControlStateValueOn : NSControlStateValueOff];
 	if(_selectedIndex == newSelectedIndex)
 		return;
 

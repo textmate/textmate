@@ -296,7 +296,7 @@ static NSData* Digest (NSString* someString)
 		NSMenuItem* item = [aMenu addItemWithTitle:label action:@selector(didClickToolbarItem:) keyEquivalent:key < 9 ? [NSString stringWithFormat:@"%c", '0' + (++key % 10)] : @""];
 		[item setRepresentedObject:label];
 		[item setTarget:self];
-		[item setState:[label isEqualToString:[self.toolbar selectedItemIdentifier]] ? NSOnState : NSOffState];
+		[item setState:[label isEqualToString:[self.toolbar selectedItemIdentifier]] ? NSControlStateValueOn : NSControlStateValueOff];
 	}
 }
 

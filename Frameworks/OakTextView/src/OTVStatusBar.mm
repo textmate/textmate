@@ -43,7 +43,7 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSString* accessibi
 {
 	NSButton* res = [NSButton new];
 	res.accessibilityLabel = accessibilityLabel;
-	[res setButtonType:NSToggleButton];
+	[res setButtonType:NSButtonTypeToggle];
 	[res setBordered:NO];
 	[res setImage:image];
 	[res setImagePosition:NSImageOnly];
@@ -185,7 +185,7 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSString* accessibi
 
 - (NSSize)intrinsicContentSize
 {
-	return NSMakeSize(NSViewNoInstrinsicMetric, 24);
+	return NSMakeSize(NSViewNoIntrinsicMetric, 24);
 }
 
 - (void)updateMacroRecordingAnimation:(NSTimer*)aTimer
@@ -225,7 +225,7 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSString* accessibi
 
 	for(NSMenuItem* item in grammarMenu.itemArray)
 	{
-		if([item state] == NSOnState)
+		if([item state] == NSControlStateValueOn)
 			[self.grammarPopUp selectItem:item];
 	}
 }
