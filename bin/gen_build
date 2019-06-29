@@ -29,6 +29,15 @@ class Context
     Context.new(options, dir, self)
   end
 
+  def to_h
+    chain.inject(Hash.new) do |hash, obj|
+      obj.options.each do |key, value|
+        hash[key] = hash.key?(key) ? value + "\n" + hash[key] : value
+      end
+      hash
+    end
+  end
+
   def keys
     chain.map { |obj| obj.options.keys }.flatten.uniq
   end
