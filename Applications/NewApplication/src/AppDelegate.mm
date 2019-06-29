@@ -177,11 +177,13 @@
 		},
 		{ @"View",
 			.submenu = {
-				{ @"Show Toolbar",       @selector(toggleToolbarShown:),           @"t", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption },
-				{ @"Customize Toolbar…", @selector(runToolbarCustomizationPalette:)       },
+				{ @"Show Toolbar",         @selector(toggleToolbarShown:),           @"t", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption },
+				{ @"Customize Toolbar…",   @selector(runToolbarCustomizationPalette:)     },
 				{ /* -------- */ },
-				{ @"Show Sidebar",       @selector(toggleSourceList:),             @"s", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagControl },
-				{ @"Enter Full Screen",  @selector(toggleFullScreen:),             @"f", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagControl },
+				{ @"Show Sidebar",         @selector(toggleSourceList:),             @"s", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagControl },
+				{ @"Enter Full Screen",    @selector(toggleFullScreen:),             @"f", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagControl },
+				{ /* -------- */ },
+				{ @"Customize Touch Bar…", @selector(toggleTouchBarCustomizationPalette:) },
 			}
 		},
 		{ @"Window",
