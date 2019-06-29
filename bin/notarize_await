@@ -1,0 +1,17 @@
+#!/bin/sh
+set -e
+
+XML="$(/usr/bin/mktemp)"
+trap 'rm -rf "$XML"' EXIT
+
+command=$1
+
+while true; do
+	eval $command > "$XML"
+	status=$(plutil -extract notarization-info.Status xml1 -o - "$XML"|sed -n 's/.*<string>\(.*\)<\/string>.*/\1/p')
+	case $status in
+		'in progress') sleep 20 ;;
+		'success')     cat "$XML" && exit 0 ;;
+		*)             cat "$XML" && echo "Unexpected result: $status" >&2; exit 1 ;;
+	esac
+done
