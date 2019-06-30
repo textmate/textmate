@@ -290,7 +290,9 @@ class Buildfile
     @context, @dir, @variables = context, dir, variables
     @rules, @build, @default_targets = [], [], []
 
-    args = variables.map { |key, value| "-d'#{key}=#{value =~ /\$/ ? value.gsub(/\$/, '$$') :  "$#{key}"}'" }.join(' ')
+    skip_keys = Set.new(context.keys)
+    args = variables.reject { |key, value| skip_keys.include?(key) }
+    args = args.map { |key, value| "-d'#{key}=#{value =~ /\$/ ? value.gsub(/\$/, '$$') :  "$#{key}"}'" }.join(' ')
     self.rule('gen_build', {
       'command'     => "bin/gen_build -C \"$builddir\" #{args} -o $out $in",
       'depfile'     => '$builddir/$out.d',
