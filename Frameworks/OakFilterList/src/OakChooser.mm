@@ -111,7 +111,7 @@ NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string
 	return res;
 }
 
-@interface OakChooser () <NSTextFieldDelegate, NSTableViewDataSource, NSTableViewDelegate, NSSearchFieldDelegate>
+@interface OakChooser () <NSWindowDelegate, NSTextFieldDelegate, NSTableViewDataSource, NSTableViewDelegate, NSSearchFieldDelegate>
 {
 	NSTitlebarAccessoryViewController* _accessoryViewController;
 
@@ -137,6 +137,7 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 		[[self.window standardWindowButton:NSWindowZoomButton] setHidden:YES];
 		self.window.level             = NSFloatingWindowLevel;
 		self.window.frameAutosaveName = NSStringFromClass([self class]);
+		self.window.delegate          = self;
 
 		[self.window addObserver:self forKeyPath:@"firstResponder" options:NSKeyValueObservingOptionOld|NSKeyValueObservingOptionNew context:kFirstResponderBinding];
 	}
