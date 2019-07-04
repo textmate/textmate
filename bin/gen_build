@@ -303,7 +303,7 @@ class Buildfile
     self.build('gen_build', 'target', 'build.ninja', nil, 'bin/gen_build')
 
     self.rule('copy', {
-      'command'     => 'cp -Xp $in $out',
+      'command'     => 'cp -Xp $in $out && touch $out',
       'description' => 'Copy ‘$in’…',
     })
 
