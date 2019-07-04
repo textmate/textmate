@@ -694,6 +694,16 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	[self updateItems:self];
 }
 
+- (void)setHasSelection:(BOOL)flag
+{
+	if(_hasSelection != flag)
+	{
+		_hasSelection = flag;
+		_unfilteredItems = nil;
+		[self updateItems:self];
+	}
+}
+
 - (void)setKeyEquivalentString:(NSString*)aString
 {
 	if([_keyEquivalentString isEqualToString:aString])
