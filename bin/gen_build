@@ -119,17 +119,17 @@ class Target
     buildfile.assign("#{self.name}_dir", File.join(buildfile.dir, self.dir))
     targets = [ self.name, *link_dependencies(all_targets) ].map { |name| all_targets[name] }
 
-    libs       = targets.inject(Set.new)   { |set, target| set += target.context.array_for('LIBS') }
+    mixed_libs = targets.inject(Set.new)   { |set, target| set += target.context.array_for('LIBS') }
     frameworks = targets.inject(Set.new)   { |set, target| set += target.context.array_for('FRAMEWORKS') }
     ln_flags   = targets.inject(Set.new)   { |set, target| set += target.context.array_for('LN_FLAGS') }
     objects    = targets.inject(Array.new) { |arr, target| arr += target.objects(buildfile, all_targets) }
 
-    quote = Proc.new { |str| str =~ /\$/ ? "\"#{str}\"" : str }
+    static, dynamic = mixed_libs.partition { |lib| lib =~ /\.a$/ }
 
-    link_flags  = ln_flags.map(&quote)
-    link_flags += frameworks.map(&quote).map { |framework| "-framework #{framework}" }
-    link_flags += libs.reject { |lib| lib =~ /\.a$/ }.map(&quote).map { |lib| "-l#{lib}" }
-    link_flags += libs.select { |lib| lib =~ /\.a$/ }.map(&quote)
+    hash = { '' => [ *ln_flags, *static ], '-l' => dynamic, '-framework ' => frameworks }
+    link_flags = hash.map do |prefix, args|
+      args.map { |arg| prefix + arg.sub(/^(?=.*?\$).*$/, '"\&"') }
+    end.flatten
 
     sign_flags = ''
     if entitlements = @context.path_for('CS_ENTITLEMENTS')
