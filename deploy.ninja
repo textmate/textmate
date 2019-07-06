@@ -32,6 +32,7 @@ rule tbz_archive
 rule sign_archive
   command     = set -o pipefail; openssl dgst -dss1 -sign $keyfile $in|openssl > $out~ enc -base64 && mv $out~ $out
   description = Sign ‘$in’…
+  pool        = console
 
 rule update_changes
   command     = bin/update_changes -t "v${version}" $in > $in~ && mv $in~ $in && mate -wl5 $in && touch $out
