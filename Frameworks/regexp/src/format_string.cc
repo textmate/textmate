@@ -84,7 +84,7 @@ struct expand_visitor : boost::static_visitor<void>
 			for(size_t i = 0; i < m.size(); ++i)
 			{
 				if(!m.did_match(i))
-					eclipsed.erase(std::to_string(i));
+					eclipsed.insert(std::to_string(i));
 			}
 
 			auto getVariable = [&](std::string const& name, std::string const& fallback) -> std::string {
