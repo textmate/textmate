@@ -326,7 +326,7 @@ class Buildfile
       'command' => <<~SHELL.gsub(/\s+/, ' '),
         {
           app_name=$$(basename $in .app);
-          if pgrep "$$$app_name"; then
+          if pgrep "$$app_name"; then
             if [[ -x "$$DIALOG" && $$("$$DIALOG" alert --title "Relaunch $$app_name?" --body "Would you like to quit $$app_name and start the newly built version?" --button1 Relaunch --button2 Cancel|pl) != *"buttonClicked = 0"* ]];
               then exit;
             fi;
