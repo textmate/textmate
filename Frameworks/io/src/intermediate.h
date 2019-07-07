@@ -7,15 +7,19 @@ namespace path
 {
 	struct PUBLIC intermediate_t
 	{
-		intermediate_t (std::string const& dest);
-		bool commit (std::string* errorMsg = nullptr) const;
+		struct strategy_t
+		{
+			virtual ~strategy_t () { }
+			virtual char const* path () const = 0;
+			virtual bool commit (std::string* errorMsg) const = 0;
+		};
 
-		operator std::string const& () const { return _intermediate; }
-		operator char const* () const        { return _intermediate.c_str(); }
+		intermediate_t (std::string const& dest);
+		operator char const* () const                       { return _strategy->path(); }
+		bool commit (std::string* errorMsg = nullptr) const { return _strategy->commit(errorMsg); }
 
 	private:
-		std::string _resolved;
-		std::string _intermediate;
+		std::unique_ptr<strategy_t> _strategy;
 	};
 
 } /* path */

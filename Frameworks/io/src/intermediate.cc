@@ -102,16 +102,33 @@ static std::string create_path (std::string const& path)
 
 namespace path
 {
-	intermediate_t::intermediate_t (std::string const& dest) : _resolved(path::resolve_head(dest)), _intermediate(create_path(_resolved))
+	struct atomic_strategy_t : intermediate_t::strategy_t
 	{
-		D(DBF_IO_Intermediate, bug("%s → %s → %s\n", dest.c_str(), _resolved.c_str(), _intermediate.c_str()););
-	}
+		atomic_strategy_t (std::string const& dest) : _resolved(path::resolve_head(dest)), _intermediate(create_path(_resolved))
+		{
+			D(DBF_IO_Intermediate, bug("%s → %s → %s\n", dest.c_str(), _resolved.c_str(), _intermediate.c_str()););
+		}
 
-	bool intermediate_t::commit (std::string* errorMsg) const
+		char const* path () const
+		{
+			return _intermediate.c_str();
+		}
+
+		bool commit (std::string* errorMsg) const
+		{
+			D(DBF_IO_Intermediate, bug("%s ⇔ %s (swap: %s)\n", _resolved.c_str(), _intermediate.c_str(), BSTR(_intermediate != _resolved)););
+			std::string ignoreErrorMsg;
+			return _intermediate == _resolved ? true : swap_and_unlink(_intermediate, _resolved, errorMsg ? *errorMsg : ignoreErrorMsg);
+		}
+
+	private:
+		std::string _resolved;
+		std::string _intermediate;
+	};
+
+	intermediate_t::intermediate_t (std::string const& dest)
 	{
-		D(DBF_IO_Intermediate, bug("%s ⇔ %s (swap: %s)\n", _resolved.c_str(), _intermediate.c_str(), BSTR(_intermediate != _resolved)););
-		std::string unused;
-		return _intermediate == _resolved ? true : swap_and_unlink(_intermediate, _resolved, errorMsg ? *errorMsg : unused);
+		_strategy.reset(new atomic_strategy_t(dest));
 	}
 
 } /* path */
