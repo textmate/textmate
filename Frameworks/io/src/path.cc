@@ -587,16 +587,8 @@ namespace path
 	{
 		intermediate_t dest(path);
 
-		int fd = open(dest, O_CREAT|O_TRUNC|O_WRONLY|O_CLOEXEC, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH);
-		if(fd == -1)
-			return false;
-
-		int res DB_VAR = write(fd, first, last - first);
-		ASSERT_EQ(res, last - first);
-		int rc DB_VAR = close(fd);
-		ASSERT_EQ(rc, 0);
-
-		return dest.commit();
+		int fd = dest.open();
+		return fd != -1 && write(fd, first, last - first) == last - first && dest.close();
 	}
 
 	std::string get_attr (std::string const& p, std::string const& attr)

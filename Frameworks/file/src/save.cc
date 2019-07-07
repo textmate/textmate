@@ -134,17 +134,12 @@ namespace
 
 			path::intermediate_t dest(path, atomicSave);
 
-			int fd = open(dest, O_CREAT|O_TRUNC|O_WRONLY|O_CLOEXEC, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH);
+			int fd = dest.open(&error);
 			if(fd == -1)
-				error = text::format("open(\"%s\"): %s", (char const*)dest, strerror(errno));
+				;
 			else if(write(fd, bytes->get(), bytes->size()) != bytes->size())
-			{
 				error = text::format("write: %s", strerror(errno));
-				close(fd);
-			}
-			else if(close(fd) != 0)
-				error = text::format("close: %s", strerror(errno));
-			else if(!dest.commit(&error))
+			else if(!dest.close(&error))
 				;
 			else if(!path::set_attributes(path, attributes))
 				error = text::format("Setting extended attributes");

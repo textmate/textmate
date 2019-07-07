@@ -14,16 +14,18 @@ namespace path
 		struct strategy_t
 		{
 			virtual ~strategy_t () { }
-			virtual char const* path () const = 0;
-			virtual bool commit (std::string* errorMsg) const = 0;
+			virtual char const* setup (std::string* errorMsg) = 0;
+			virtual bool commit (std::string* errorMsg) = 0;
 		};
 
 		intermediate_t (std::string const& dest, atomic_t atomicSave = atomic_t::always);
-		operator char const* () const                       { return _strategy->path(); }
-		bool commit (std::string* errorMsg = nullptr) const { return _strategy->commit(errorMsg); }
+		~intermediate_t ();
+		int open (std::string* errorMsg = nullptr, int oflag = O_CREAT|O_TRUNC|O_WRONLY|O_CLOEXEC, mode_t mode = S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH);
+		bool close (std::string* errorMsg = nullptr);
 
 	private:
 		std::unique_ptr<strategy_t> _strategy;
+		int _fileDescriptor = -1;
 	};
 
 } /* path */

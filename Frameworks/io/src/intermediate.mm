@@ -109,16 +109,6 @@ namespace path
 		filemanager_strategy_t (NSURL* destURL)
 		{
 			_destURL = destURL;
-
-			NSError* error;
-			if(_tempDirectoryURL = [NSFileManager.defaultManager URLForDirectory:NSItemReplacementDirectory inDomain:NSUserDomainMask appropriateForURL:destURL create:YES error:&error])
-			{
-				_tempURL = [_tempDirectoryURL URLByAppendingPathComponent:_destURL.lastPathComponent];
-			}
-			else
-			{
-				os_log_error(OS_LOG_DEFAULT, "Failed to obtain NSItemReplacementDirectory for %{public}@: %{public}@\n", destURL, error);
-			}
 		}
 
 		~filemanager_strategy_t ()
@@ -128,17 +118,34 @@ namespace path
 				os_log_error(OS_LOG_DEFAULT, "failed removing %{public}@: %{public}@\n", _tempDirectoryURL, error);
 		}
 
-		char const* path () const
+		char const* setup (std::string* errorMsg)
 		{
-			return _tempURL.fileSystemRepresentation;
+			NSError* error;
+			if(_tempDirectoryURL = [NSFileManager.defaultManager URLForDirectory:NSItemReplacementDirectory inDomain:NSUserDomainMask appropriateForURL:_destURL create:YES error:&error])
+			{
+				_tempURL = [_tempDirectoryURL URLByAppendingPathComponent:_destURL.lastPathComponent];
+				return _tempURL.fileSystemRepresentation;
+			}
+
+			NSString* displayName;
+			[_destURL getResourceValue:&displayName forKey:NSURLLocalizedNameKey error:nil];
+			*errorMsg = to_s([NSString stringWithFormat:@"Failed to obtain replacement directory for %@: %@", displayName ?: _destURL.path, error.localizedDescription]);
+
+			os_log_error(OS_LOG_DEFAULT, "failed to obtain NSItemReplacementDirectory for %{public}@: %{public}@\n", _destURL, error);
+			return nullptr;
 		}
 
-		bool commit (std::string* errorMsg) const
+		bool commit (std::string* errorMsg)
 		{
 			NSError* error;
 			if([NSFileManager.defaultManager replaceItemAtURL:_destURL withItemAtURL:_tempURL backupItemName:nil options:NSFileManagerItemReplacementUsingNewMetadataOnly resultingItemURL:nil error:&error])
 				return true;
-			os_log_error(OS_LOG_DEFAULT, "failed replacing %{public}@ with %{public}@: %{public}@\n", _tempURL, _destURL, error);
+
+			NSString* displayName;
+			[_destURL getResourceValue:&displayName forKey:NSURLLocalizedNameKey error:nil];
+			*errorMsg = to_s([NSString stringWithFormat:@"Failed replacing %@ with %@: %@", displayName ?: _destURL.path, _tempURL.path, error.localizedDescription]);
+
+			os_log_error(OS_LOG_DEFAULT, "failed replacing %{public}@ with %{public}@: %{public}@\n", _destURL, _tempURL, error);
 			return false;
 		}
 
@@ -155,16 +162,15 @@ namespace path
 			D(DBF_IO_Intermediate, bug("%s → %s → %s\n", dest.c_str(), _resolved.c_str(), _intermediate.c_str()););
 		}
 
-		char const* path () const
+		char const* setup (std::string* errorMsg)
 		{
 			return _intermediate.c_str();
 		}
 
-		bool commit (std::string* errorMsg) const
+		bool commit (std::string* errorMsg)
 		{
 			D(DBF_IO_Intermediate, bug("%s ⇔ %s (swap: %s)\n", _resolved.c_str(), _intermediate.c_str(), BSTR(_intermediate != _resolved)););
-			std::string ignoreErrorMsg;
-			return _intermediate == _resolved ? true : swap_and_unlink(_intermediate, _resolved, errorMsg ? *errorMsg : ignoreErrorMsg);
+			return _intermediate == _resolved ? true : swap_and_unlink(_intermediate, _resolved, *errorMsg);
 		}
 
 	private:
@@ -178,12 +184,12 @@ namespace path
 		{
 		}
 
-		char const* path () const
+		char const* setup (std::string* errorMsg)
 		{
 			return _path.c_str();
 		}
 
-		bool commit (std::string* errorMsg) const
+		bool commit (std::string* errorMsg)
 		{
 			return true;
 		}
@@ -200,7 +206,7 @@ namespace path
 		}
 		else if(path::exists(dest))
  		{
-			NSURL* destURL = [NSURL fileURLWithPath:to_ns(path::resolve_head(dest)) isDirectory:NO];
+			NSURL* destURL = [NSURL fileURLWithPath:to_ns(dest) isDirectory:NO];
 
 			NSError* error;
 			NSNumber* boolean;
@@ -216,6 +222,35 @@ namespace path
 		{
 			_strategy.reset(new non_atomic_strategy_t(dest));
 		}
+	}
+
+	intermediate_t::~intermediate_t ()
+	{
+		if(_fileDescriptor != -1)
+			::close(_fileDescriptor);
+	}
+
+	int intermediate_t::open (std::string* errorMsg, int oflag, mode_t mode)
+	{
+		std::string ignoredErrorMsg;
+		if(char const* path = _strategy->setup(errorMsg ?: &ignoredErrorMsg))
+		{
+			_fileDescriptor = ::open(path, oflag, mode);
+			if(_fileDescriptor == -1 && errorMsg)
+				*errorMsg = text::format("open(\"%s\"): %s", path, strerror(errno));
+		}
+		return _fileDescriptor;
+	}
+
+	bool intermediate_t::close (std::string* errorMsg)
+	{
+		int res = ::close(_fileDescriptor);
+		if(res == -1 && errorMsg)
+			*errorMsg = text::format("close(\"%d\"): %s", _fileDescriptor, strerror(errno));
+
+		_fileDescriptor = -1;
+		std::string ignoredErrorMsg;
+		return res != -1 && _strategy->commit(errorMsg ?: &ignoredErrorMsg);
 	}
 
 } /* path */
