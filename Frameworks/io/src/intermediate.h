@@ -5,6 +5,10 @@
 
 namespace path
 {
+	enum struct atomic_t {
+		always = 0, external_volumes, remote_volumes, never, legacy
+	};
+
 	struct PUBLIC intermediate_t
 	{
 		struct strategy_t
@@ -14,7 +18,7 @@ namespace path
 			virtual bool commit (std::string* errorMsg) const = 0;
 		};
 
-		intermediate_t (std::string const& dest);
+		intermediate_t (std::string const& dest, atomic_t atomicSave = atomic_t::always);
 		operator char const* () const                       { return _strategy->path(); }
 		bool commit (std::string* errorMsg = nullptr) const { return _strategy->commit(errorMsg); }
 

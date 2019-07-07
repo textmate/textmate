@@ -1,7 +1,9 @@
 #include "intermediate.h"
 #include "path.h"
+#include <ns/ns.h>
 #include <text/format.h>
 #include <oak/debug.h>
+#include <os/log.h>
 
 OAK_DEBUG_VAR(IO_Intermediate);
 OAK_DEBUG_VAR(IO_Swap_File_Data);
@@ -102,6 +104,50 @@ static std::string create_path (std::string const& path)
 
 namespace path
 {
+	struct filemanager_strategy_t : intermediate_t::strategy_t
+	{
+		filemanager_strategy_t (NSURL* destURL)
+		{
+			_destURL = destURL;
+
+			NSError* error;
+			if(_tempDirectoryURL = [NSFileManager.defaultManager URLForDirectory:NSItemReplacementDirectory inDomain:NSUserDomainMask appropriateForURL:destURL create:YES error:&error])
+			{
+				_tempURL = [_tempDirectoryURL URLByAppendingPathComponent:_destURL.lastPathComponent];
+			}
+			else
+			{
+				os_log_error(OS_LOG_DEFAULT, "Failed to obtain NSItemReplacementDirectory for %{public}@: %{public}@\n", destURL, error);
+			}
+		}
+
+		~filemanager_strategy_t ()
+		{
+			NSError* error;
+			if(_tempDirectoryURL && ![NSFileManager.defaultManager removeItemAtURL:_tempDirectoryURL error:&error])
+				os_log_error(OS_LOG_DEFAULT, "failed removing %{public}@: %{public}@\n", _tempDirectoryURL, error);
+		}
+
+		char const* path () const
+		{
+			return _tempURL.fileSystemRepresentation;
+		}
+
+		bool commit (std::string* errorMsg) const
+		{
+			NSError* error;
+			if([NSFileManager.defaultManager replaceItemAtURL:_destURL withItemAtURL:_tempURL backupItemName:nil options:NSFileManagerItemReplacementUsingNewMetadataOnly resultingItemURL:nil error:&error])
+				return true;
+			os_log_error(OS_LOG_DEFAULT, "failed replacing %{public}@ with %{public}@: %{public}@\n", _tempURL, _destURL, error);
+			return false;
+		}
+
+	private:
+		NSURL* _destURL;
+		NSURL* _tempDirectoryURL;
+		NSURL* _tempURL;
+	};
+
 	struct atomic_strategy_t : intermediate_t::strategy_t
 	{
 		atomic_strategy_t (std::string const& dest) : _resolved(path::resolve_head(dest)), _intermediate(create_path(_resolved))
@@ -126,9 +172,50 @@ namespace path
 		std::string _intermediate;
 	};
 
-	intermediate_t::intermediate_t (std::string const& dest)
+	struct non_atomic_strategy_t : intermediate_t::strategy_t
 	{
-		_strategy.reset(new atomic_strategy_t(dest));
+		non_atomic_strategy_t (std::string const& dest) : _path(dest)
+		{
+		}
+
+		char const* path () const
+		{
+			return _path.c_str();
+		}
+
+		bool commit (std::string* errorMsg) const
+		{
+			return true;
+		}
+
+	private:
+		std::string _path;
+	};
+
+	intermediate_t::intermediate_t (std::string const& dest, atomic_t atomicSave)
+	{
+		if(atomicSave == atomic_t::legacy)
+		{
+			_strategy.reset(new atomic_strategy_t(dest));
+		}
+		else if(path::exists(dest))
+ 		{
+			NSURL* destURL = [NSURL fileURLWithPath:to_ns(path::resolve_head(dest)) isDirectory:NO];
+
+			NSError* error;
+			NSNumber* boolean;
+
+			BOOL isInternalVolume = [destURL getResourceValue:&boolean forKey:NSURLVolumeIsInternalKey error:&error] && boolean.boolValue;
+			BOOL isLocalVolume    = [destURL getResourceValue:&boolean forKey:NSURLVolumeIsLocalKey error:&error] && boolean.boolValue;
+
+			if(atomicSave == atomic_t::always || atomicSave == atomic_t::external_volumes && !isInternalVolume || atomicSave == atomic_t::remote_volumes && !isLocalVolume)
+					_strategy.reset(new filemanager_strategy_t(destURL));
+			else	_strategy.reset(new non_atomic_strategy_t(dest));
+		}
+		else
+		{
+			_strategy.reset(new non_atomic_strategy_t(dest));
+		}
 	}
 
 } /* path */
