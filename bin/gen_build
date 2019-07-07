@@ -759,11 +759,34 @@ if __FILE__ == $PROGRAM_NAME
     # ================
 
     config = Context.new(Target.read(ravefile))
+    files  = []
 
     all_targets = config.paths_for('TARGETS').map do |file|
       dir, options = File.dirname(file), Target.read(file)
-      [ (options['TARGET_NAME'] ||= File.basename(dir)), Target.new(dir, config.derive(options, dir)) ]
+      name, target = (options['TARGET_NAME'] ||= File.basename(dir)), Target.new(dir, config.derive(options, dir))
+      files << [ file, target ]
+      [ name, target ]
     end.to_h
+
+    # ====================================
+    # = Check Existence of Named Targets =
+    # ====================================
+
+    files.each do |file, target|
+      target.context.array_for('LINK').each do |name|
+        unless all_targets.key?(name =~ /^@(.*)/ ? $1 : name)
+          abort "#{file}: no such target: #{name} (required by LINK)"
+        end
+      end
+
+      target.context.keys.select { |key| key =~ /^CP_/ }.each do |key|
+        target.context.array_for(key).each do |name|
+          if name =~ /^@(.*)/ && !all_targets.key?($1)
+            abort "#{file}: no such target: #{name} (required by #{key})"
+          end
+        end
+      end
+    end
 
     # =================================
     # = Topological Sort Root Targets =
