@@ -11,6 +11,7 @@ TM_ORGANIZATION_NAME = 'MacroMates'
 
 TM_TODO_IGNORE       = '/(build|CxxTest|PlugIns|vendor)/|\.(md|html)$'
 
+# find ~/build/TextMate -regex '.*/include/[^/]*' -exec ln -s {} ~/build/TextMate/include \;
 TM_CXX_FLAGS         = '$TM_CXX_FLAGS    -I"$CWD/Shared/include" -I"${builddir:-$HOME/build/TextMate}/include"'
 TM_OBJCXX_FLAGS      = '$TM_OBJCXX_FLAGS -I"$CWD/Shared/include" -I"${builddir:-$HOME/build/TextMate}/include"'
 
