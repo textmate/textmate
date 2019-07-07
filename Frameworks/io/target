@@ -1,4 +1,4 @@
-SOURCES      = src/*.cc
+SOURCES      = src/*.{cc,mm}
 TESTS        = tests/*.cc
 LINK        += text cf regexp crash OakFoundation
 FRAMEWORKS   = Carbon Security
