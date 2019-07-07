@@ -29,6 +29,7 @@ PUBLIC extern std::string const kSettingsTabTitleKey;
 PUBLIC extern std::string const kSettingsScopeAttributesKey;
 
 PUBLIC extern std::string const kSettingsSaveOnBlurKey;
+PUBLIC extern std::string const kSettingsAtomicSaveKey;
 
 PUBLIC extern std::string const kSettingsBinaryKey;
 PUBLIC extern std::string const kSettingsEncodingKey;

@@ -26,6 +26,7 @@ std::string const kSettingsTabTitleKey                    = "tabTitle";
 std::string const kSettingsScopeAttributesKey             = "scopeAttributes";
 
 std::string const kSettingsSaveOnBlurKey                  = "saveOnBlur";
+std::string const kSettingsAtomicSaveKey                  = "atomicSave";
 
 std::string const kSettingsBinaryKey                      = "binary";
 std::string const kSettingsEncodingKey                    = "encoding";
