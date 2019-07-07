@@ -2,6 +2,35 @@ Title: Release Notes
 
 # Changes
 
+## 2019-07-07 (v2.0-rc.25)
+
+### Atomic Saving
+
+TextMate has been using `exchangedata` for atomic saving. This API allows writing an updated file to a new location and then swap the data part atomically with the old file’s. This ensures that the saved file is never in a partially written state, it preserves all file metadata (of which there is a lot), it preserves the file’s inode, so any potential hardlinks are not broken, etc.
+
+Unfortunately APFS, the new default file system for macOS, does not support `exchangedata`.
+
+TextMate falls back on `rename` when `exchangedata` is unavailable.
+
+This require that all metadata of the old file be copied to the new one, but there is no way to preserve the inode, so hardlinks will break, furthermore, as this is effectively a completely new file, the date of its parent diretory will be updated. Some software will monitor directories for new files and do a rescan each time the directory is updated, which previously would only be when files were created or deleted, but now each save may also trigger such rescan.
+
+For this reason, there is a new setting to control when and how TextMate should use atomic saving. It can be controlled by setting `atomicSave` in `.tm_properties` to one of the following values:
+
+- `always`: This is the default, it uses `NSFileManager` API (so no inode preservation even on HFS+).
+- `externalVolumes`: Disable atomic saving only for internal disks.
+- `remoteVolumes`: Use atomic saving only for remote drives (e.g. network mounts).
+- `never`: Never use atomic saving.
+- `legacy`: This will use `exchangedata` when available and fallback on `rename`. This option will be removed in the future.
+
+### Other Changes
+
+* Miscellaneous touch bar improvements. *[Ronald Wampler]*
+* There has been a few reports of missing content when expanding folders in the file browser. This build contains a workaround, so if you continue to experience this, [please let us know](https://macromates.com/support).
+* When searching for a regular expression with captures, we have `$1-n` available in the replacement (format) string. If this format string does further replacements with _optional_ captures (e.g. `${1/(foo)?|(bar)?/…/g}`) then `$1-n` would be inherited from the parent search for the non-matching optional captures.
+* TextMate is now using the hardened runtime, is notarized, and built with a deployment target of macOS 10.12.
+* Fix typo in character set name: ‘Korean – {ISO-2022-JP → ISO-2022-KR}’. *[DaeHyun Sung]*
+* See [all changes since v2.0-rc.23](https://github.com/textmate/textmate/compare/v2.0-rc.23...v2.0-rc.25)
+
 ## 2019-03-19 (v2.0-rc.23)
 
 * Some UI fixes for 10.13 and earlier (introduced in previous build(s)).
