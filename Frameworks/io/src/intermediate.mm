@@ -198,8 +198,10 @@ namespace path
 		std::string _path;
 	};
 
-	intermediate_t::intermediate_t (std::string const& dest, atomic_t atomicSave)
+	intermediate_t::intermediate_t (std::string const& originalDest, atomic_t atomicSave)
 	{
+		std::string const dest = path::resolve_head(originalDest);
+
 		if(atomicSave == atomic_t::legacy)
 		{
 			_strategy.reset(new atomic_strategy_t(dest));
