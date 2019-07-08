@@ -18,7 +18,7 @@ body {
 @media screen and (-webkit-min-device-pixel-ratio: 2) {
   body {
     background-image: url("flower@2x.png");
-    background-size: 50%; } }
+    background-size: 363px 359px; } }
 body > h1, body > h2, body > p {
   text-shadow: 0 0 1px var(--backgroundColor), 0 1px 0 var(--shadowColor); }
 
