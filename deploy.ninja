@@ -30,7 +30,7 @@ rule tbz_archive
   generator   = true
 
 rule sign_archive
-  command     = set -o pipefail; openssl dgst -dss1 -sign $keyfile $in|openssl > $out~ enc -base64 && mv $out~ $out
+  command     = set -o pipefail; bash -c 'openssl dgst -dss1 -sign $keyfile $in'|openssl > $out~ enc -base64 && mv $out~ $out
   description = Sign ‘$in’…
   pool        = console
 
