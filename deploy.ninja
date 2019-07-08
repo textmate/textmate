@@ -48,3 +48,8 @@ rule git_tag
   command     = printf 'Deployment build\n%s\nSDK: %s (requires %s)\n%s\n' "$$(xcrun clang --version)" "$$(xcrun --show-sdk-version)" "$APP_MIN_OS" "$$("$capnp_prefix/bin/capnp" --version)" | git tag -a "v${version}" -F - && touch $out
   description = Tag release v${version}…
   generator   = true
+
+rule git_push_tag
+  command     = git push origin "v${version}" && touch $out
+  description = Push tag for v${version}…
+  generator   = true
