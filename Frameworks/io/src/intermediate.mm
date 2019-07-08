@@ -198,7 +198,7 @@ namespace path
 		std::string _path;
 	};
 
-	intermediate_t::intermediate_t (std::string const& originalDest, atomic_t atomicSave)
+	intermediate_t::intermediate_t (std::string const& originalDest, atomic_t atomicSave, mode_t mode) : _mode(mode)
 	{
 		std::string const dest = path::resolve_head(originalDest);
 
@@ -208,6 +208,10 @@ namespace path
 		}
 		else if(path::exists(dest))
  		{
+			struct stat buf;
+			if(stat(dest.c_str(), &buf) == 0)
+				_mode = buf.st_mode;
+
 			NSURL* destURL = [NSURL fileURLWithPath:to_ns(dest) isDirectory:NO];
 
 			NSError* error;
@@ -232,12 +236,12 @@ namespace path
 			::close(_fileDescriptor);
 	}
 
-	int intermediate_t::open (std::string* errorMsg, int oflag, mode_t mode)
+	int intermediate_t::open (std::string* errorMsg, int oflag)
 	{
 		std::string ignoredErrorMsg;
 		if(char const* path = _strategy->setup(errorMsg ?: &ignoredErrorMsg))
 		{
-			_fileDescriptor = ::open(path, oflag, mode);
+			_fileDescriptor = ::open(path, oflag, _mode);
 			if(_fileDescriptor == -1 && errorMsg)
 				*errorMsg = text::format("open(\"%s\"): %s", path, strerror(errno));
 		}

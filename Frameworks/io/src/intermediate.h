@@ -18,14 +18,15 @@ namespace path
 			virtual bool commit (std::string* errorMsg) = 0;
 		};
 
-		intermediate_t (std::string const& dest, atomic_t atomicSave = atomic_t::always);
+		intermediate_t (std::string const& dest, atomic_t atomicSave = atomic_t::always, mode_t mode = S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH);
 		~intermediate_t ();
-		int open (std::string* errorMsg = nullptr, int oflag = O_CREAT|O_TRUNC|O_WRONLY|O_CLOEXEC, mode_t mode = S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH);
+		int open (std::string* errorMsg = nullptr, int oflag = O_CREAT|O_TRUNC|O_WRONLY|O_CLOEXEC);
 		bool close (std::string* errorMsg = nullptr);
 
 	private:
 		std::unique_ptr<strategy_t> _strategy;
 		int _fileDescriptor = -1;
+		mode_t _mode;
 	};
 
 } /* path */
