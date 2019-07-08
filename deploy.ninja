@@ -2,18 +2,18 @@
 #
 # The following variables are used by the rules:
 #
-#   `version`:   Current version (for release notes)
-#   `bundle_id`: Primary bundle identifier (for notarization)
-#   `user`:      Apple ID (for notarization)
-#   `pass`:      Password (for notarization)
-#   `keyfile`:   OpenSSL signing key (for deployment)
+#   `version`:            Current version (for release notes)
+#   `keyfile`:            OpenSSL signing key (for deployment)
+#   `notarize_user`:      Apple ID (for notarization)
+#   `notarize_pass`:      Password (for notarization)
+#   `notarize_bundle_id`: Primary bundle identifier (for notarization)
 
 rule notarize_submit
-  command     = xcrun altool --notarize-app -u $user -p $pass --output-format xml > $out~ -f $in --primary-bundle-id $bundle_id -t osx && mv $out~ $out
+  command     = xcrun altool --notarize-app -u $notarize_user -p $notarize_pass --output-format xml > $out~ -f $in --primary-bundle-id $notarize_bundle_id -t osx && mv $out~ $out
   description = Submit notarization request for ‘$in’…
 
 rule notarize_status
-  command     = bin/notarize_await "xcrun altool --notarization-info '$$(plutil -extract notarization-upload.RequestUUID xml1 -o - $in|sed -n 's/.*<string>\(.*\)<\/string>.*/\1/p')' -u $user -p $pass --output-format xml" > $out~ && mv $out~ $out
+  command     = bin/notarize_await "xcrun altool --notarization-info '$$(plutil -extract notarization-upload.RequestUUID xml1 -o - $in|sed -n 's/.*<string>\(.*\)<\/string>.*/\1/p')' -u $notarize_user -p $notarize_pass --output-format xml" > $out~ && mv $out~ $out
   description = Waiting for notarization…
 
 rule notarize_staple
