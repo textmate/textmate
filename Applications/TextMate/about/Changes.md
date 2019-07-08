@@ -2,6 +2,10 @@ Title: Release Notes
 
 # Changes
 
+## 2019-07-08 (v2.0-rc.26)
+
+* Fix ability to (atomically) save files opened via their symbolic link.
+
 ## 2019-07-07 (v2.0-rc.25)
 
 ### Atomic Saving
