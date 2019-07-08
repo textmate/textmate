@@ -2,6 +2,11 @@ Title: Release Notes
 
 # Changes
 
+## 2019-07-08 (v2.0-rc.27)
+
+* Saving a file would lose the existing file’s permission flags.
+* See [all changes since v2.0-rc.26](https://github.com/textmate/textmate/compare/v2.0-rc.26...v2.0-rc.27)
+
 ## 2019-07-08 (v2.0-rc.26)
 
 * Fix ability to (atomically) save files opened via their symbolic link.
