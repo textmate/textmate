@@ -39,7 +39,7 @@ class Context
   end
 
   def keys
-    chain.map { |obj| obj.options.keys }.flatten.uniq
+    chain.flat_map { |obj| obj.options.keys }.uniq
   end
 
   def [](key)
@@ -48,10 +48,10 @@ class Context
   end
 
   def array_for(key)
-    chain.map do |obj|
+    chain.flat_map do |obj|
       value = obj.options[key]
       value.is_a?(Array) ? value : Shellwords.shellwords(value.to_s)
-    end.flatten
+    end
   end
 
   def path_for(key)
@@ -61,13 +61,13 @@ class Context
   end
 
   def paths_for(key)
-    chain.select { |obj| obj.options.key?(key) }.map do |instance|
+    chain.select { |obj| obj.options.key?(key) }.flat_map do |instance|
       files = Dir.chdir(instance.dir || '.') do
         globs = instance.array_for(key).reject { |glob| glob =~ /^@(\w+)/ }
-        globs.map { |glob| Dir.glob(glob) }.flatten
+        globs.flat_map { |glob| Dir.glob(glob) }
       end
       files.map { |file| instance.dir ? File.join(instance.dir, file) : file }
-    end.flatten
+    end
   end
 
   def target_names_for(key)
@@ -127,9 +127,9 @@ class Target
     static, dynamic = mixed_libs.partition { |lib| lib =~ /\.a$/ }
 
     hash = { '' => [ *ln_flags, *static ], '-l' => dynamic, '-framework ' => frameworks }
-    link_flags = hash.map do |prefix, args|
+    link_flags = hash.flat_map do |prefix, args|
       args.map { |arg| prefix + arg.sub(/^(?=.*?\$).*$/, '"\&"') }
-    end.flatten
+    end
 
     sign_flags = ''
     if entitlements = @context.path_for('CS_ENTITLEMENTS')
@@ -792,12 +792,12 @@ if __FILE__ == $PROGRAM_NAME
     # = Topological Sort Root Targets =
     # =================================
 
-    link_targets = Set.new(all_targets.map { |_, target| target.context.array_for('LINK') }.flatten)
+    link_targets = Set.new(all_targets.flat_map { |_, target| target.context.array_for('LINK') })
     root_targets = all_targets.reject { |name, _| link_targets.include?(name) }
 
     nodes = root_targets.map do |name, target|
       keys = target.context.keys.select { |key| key =~ /^CP_/ }
-      deps = keys.map { |key| target.context.target_names_for(key) }.flatten
+      deps = keys.flat_map { |key| target.context.target_names_for(key) }
       [ name, deps ]
     end.to_h
 
@@ -831,11 +831,11 @@ if __FILE__ == $PROGRAM_NAME
     # = Calculate build file dependencies =
     # =====================================
 
-    dependencies = all_targets.map do |name, target|
-      target.context.keys.select { |key| key =~ /^(SOURCES|TESTS|CP_.*)$/ }.map do |key|
-        all_targets[name].context.paths_for(key).map { |file| File.dirname(file) }.uniq
+    dependencies = all_targets.flat_map do |name, target|
+      target.context.keys.select { |key| key =~ /^(SOURCES|TESTS|CP_.*)$/ }.flat_map do |key|
+        all_targets[name].context.paths_for(key).map { |file| File.dirname(file) }
       end
-    end.flatten.uniq
+    end.uniq
     dependencies += [ '.', ravefile, *config.paths_for('TARGETS') ]
 
     # ============================
