@@ -2,6 +2,28 @@ Title: Release Notes
 
 # Changes
 
+## 2019-07-13 (v2.0-rc.28)
+
+* Add debug output when TextMate is activated via `mate`.
+
+    The debug output from this build may help shed some light on a reported issue where there is a noticeable delay from calling `mate` in a terminal and until TextMate is brought to front.
+
+    If you have this issue first run `mate --version` to ensure that TextMate auto-updated it to `2.13.1-beta` (if not, go to Preferences → Terminal and uninstall/install it).
+
+    When the problem occurs, immediately run `date` in your terminal to get a timestamp to correlate with the debug log.
+
+    Then run this command to obtain the log:
+
+        log show --predicate 'subsystem = "com.macromates.TextMate" && category = "BringToFront"'
+
+    See `man log` for options such as `--start date/time` (to limit the query to e.g. the last 10 minutes).
+
+    Send the log (with as many details as possible) to support, or preferably (if you are on the mailing list): Follow up in the current thread about the issue.
+
+    Relevant information is whether or not you are using spaces and/or multiple screens.
+
+* See [all changes since v2.0-rc.27](https://github.com/textmate/textmate/compare/v2.0-rc.27...v2.0-rc.28)
+
 ## 2019-07-08 (v2.0-rc.27)
 
 * Saving a file would lose the existing file’s permission flags.
