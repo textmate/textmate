@@ -131,9 +131,12 @@ class Target
       args.map { |arg| prefix + arg.sub(/^(?=.*?\$).*$/, '"\&"') }
     end
 
-    sign_flags = ''
+    sign_flags = []
     if entitlements = @context.path_for('CS_ENTITLEMENTS')
       sign_flags << "--entitlements #{entitlements.shellescape}"
+    end
+    if codesign_flags = @context['CODESIGN_FLAGS']
+      sign_flags << codesign_flags
     end
 
     is_bundle = targets.any? { |target| target.context.keys.any? { |key| key =~ /^CP_/ } }
@@ -313,7 +316,7 @@ class Buildfile
     })
 
     self.rule('sign', {
-      'command'     => 'xcrun codesign $args --options runtime --timestamp --deep -fs "$identity" $in && touch $out',
+      'command'     => 'xcrun codesign $args --deep -fs "$identity" $in && touch $out',
       'description' => 'Sign ‘$in’…',
     })
 
