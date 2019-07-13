@@ -225,12 +225,17 @@ namespace scm
 			return;
 		_pending_update = true;
 
-		CFRunLoopRef currentRunLoop = CFRunLoopGetCurrent();
-		shared_info_weak_ptr weakThis = shared_from_this();
-		static dispatch_queue_t queue = dispatch_queue_create("org.textmate.scm.status", DISPATCH_QUEUE_SERIAL);
-		dispatch_after(_no_check_before, queue, ^{
-			async_update(weakThis, currentRunLoop);
-		});
+		if(CFRunLoopRef currentRunLoop = CFRunLoopGetCurrent())
+		{
+			static dispatch_queue_t queue = dispatch_queue_create("org.textmate.scm.status", DISPATCH_QUEUE_SERIAL);
+			shared_info_weak_ptr weakThis = shared_from_this();
+
+			CFRetain(currentRunLoop);
+			dispatch_after(_no_check_before, queue, ^{
+				async_update(weakThis, currentRunLoop);
+				CFRelease(currentRunLoop);
+			});
+		}
 	}
 
 	void shared_info_t::fs_did_change (std::set<std::string> const& changedPaths)
