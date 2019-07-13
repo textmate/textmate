@@ -3,7 +3,6 @@
 #include <ns/ns.h>
 #include <text/format.h>
 #include <oak/debug.h>
-#include <os/log.h>
 
 OAK_DEBUG_VAR(IO_Intermediate);
 OAK_DEBUG_VAR(IO_Swap_File_Data);
