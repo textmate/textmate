@@ -2665,6 +2665,10 @@ static NSUInteger DisableSessionSavingCount = 0;
 
 - (void)bringToFront
 {
+	os_log_t log = os_log_create("com.macromates.TextMate", "BringToFront");
+	os_log(log, "TextMate: Bring to Front requested, NSApp.isActive: %{BOOL}d", NSApp.isActive);
+
+	os_log(log, "TextMate: Call [self showWindow:nil]");
 	[self showWindow:nil];
 	if(NSApp.isActive)
 	{
@@ -2672,6 +2676,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 
 		__weak __block id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:NSApplicationDidResignActiveNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
 			[[NSNotificationCenter defaultCenter] removeObserver:observerId];
+			os_log(log, "TextMate: NSApp unexpectedly resigned active, re-activate!");
 			[NSApp activateIgnoringOtherApps:YES];
 		}];
 
@@ -2683,9 +2688,11 @@ static NSUInteger DisableSessionSavingCount = 0;
 	{
 		__weak __block id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:NSApplicationDidBecomeActiveNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
 			// If our window is not on the active desktop but another one is, the system gives focus to the wrong window.
+			os_log(log, "TextMate: NSApp became active, now call [self showWindow:nil]");
 			[self showWindow:nil];
 			[[NSNotificationCenter defaultCenter] removeObserver:observerId];
 		}];
+		os_log(log, "TextMate: Call [NSApp activateIgnoringOtherApps:YES]");
 		[NSApp activateIgnoringOtherApps:YES];
 	}
 }

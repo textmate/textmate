@@ -441,11 +441,20 @@ struct socket_observer_t
 			parse();
 			if(state == done)
 			{
+				os_log_t log = os_log_create("com.macromates.TextMate", "BringToFront");
+				os_log(log, "TextMate: Done receiving data from mate");
+
 				D(DBF_RMateServer, bug("done\n"););
 				if(records.empty() || records.begin()->command == "open") // we treat no command as ‘open’ to bring our application to front
+				{
+					os_log(log, "TextMate: Open documents from mate");
 					open_documents(socket);
+				}
 				else
+				{
+					os_log(log, "TextMate: Update marks via mate");
 					handle_marks(socket);
+				}
 				return false;
 			}
 		}
@@ -550,6 +559,7 @@ struct socket_observer_t
 
 	void open_documents (socket_t const& socket)
 	{
+		os_log_t log = os_log_create("com.macromates.TextMate", "BringToFront");
 		reactivate_callback_t reactivate_callback;
 
 		NSMutableArray<OakDocument*>* documents = [NSMutableArray array];
@@ -568,6 +578,7 @@ struct socket_observer_t
 			{
 				if(path::is_directory(args["path"]))
 				{
+					os_log(log, "TextMate: Show file browser for %{public}@", to_ns(args["path"]));
 					[OakDocumentController.sharedInstance showFileBrowserAtPath:to_ns(args["path"])];
 					continue;
 				}
@@ -630,13 +641,27 @@ struct socket_observer_t
 				doc.authorization = args["authorization"];
 
 			if(oak::uuid_t::is_valid(args["project-uuid"]))
-					[OakDocumentController.sharedInstance showDocument:doc inProject:[[NSUUID alloc] initWithUUIDString:to_ns(args["project-uuid"])] bringToFront:YES];
-			else	[documents addObject:doc];
+			{
+				os_log(log, "TextMate: Project with UUID requested %{public}@", to_ns(args["project-uuid"]));
+				[OakDocumentController.sharedInstance showDocument:doc inProject:[[NSUUID alloc] initWithUUIDString:to_ns(args["project-uuid"])] bringToFront:YES];
+			}
+			else
+			{
+				[documents addObject:doc];
+			}
 		}
 
 		if(documents.count)
-				[OakDocumentController.sharedInstance showDocuments:documents];
-		else	[NSApp activateIgnoringOtherApps:YES];
+		{
+			os_log(log, "TextMate: Show %lu document(s)", documents.count);
+			[OakDocumentController.sharedInstance showDocuments:documents];
+		}
+		else
+		{
+			os_log(log, "TextMate: No documents to open, call [NSApp activateIgnoringOtherApps:YES]");
+			[NSApp activateIgnoringOtherApps:YES];
+		}
+		os_log(log, "TextMate: Done receiving documents from mate");
 	}
 
 	void handle_marks (socket_t const& socket)
@@ -676,9 +701,12 @@ struct socket_observer_t
 
 static bool rmate_connection_handler_t (socket_t const& socket)
 {
+	os_log_t log = os_log_create("com.macromates.TextMate", "BringToFront");
+
 	socklen_t dummyLen = std::max(sizeof(sockaddr_un), sizeof(sockaddr_in));
 	char dummy[dummyLen];
 	int newFd = accept(socket, (sockaddr*)&dummy[0], &dummyLen);
+	os_log(log, "TextMate: Accepted connection from mate");
 
 	std::string welcome = "220 " + sys_info(KERN_HOSTNAME) + " RMATE TextMate (" + sys_info(KERN_OSTYPE) + " " + sys_info(KERN_OSRELEASE) + ")\n";
 	ssize_t len = write(newFd, welcome.data(), welcome.size());
