@@ -21,7 +21,3 @@
 
 /* Find all initial progress status. */
 "Searching\\U2026" = "Searching…";
-
-/* Find all was prematurely terminated. */
-"Stopped search in folder \\U201C%@\\U201D." = "Stopped search in folder “%@”.";
-

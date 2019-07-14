@@ -19,12 +19,6 @@
 #define MSG_SEARCHING_FOLDER_FMT             FFString(@"Searching “%@”…",     @"Find all progress status.")
 #define MSG_SEARCHING_FMT                    FFString(@"Searching…",          @"Find all initial progress status.")
 
-#define MSG_FIND_ALL_ABORTED                 FFString(@"Stopped search in folder “%@”.", @"Find all was prematurely terminated.")
-
-#define MSG_FIND_ALL_IN_DOCUMENT_HEADER      FFString(@"Find All Results in “%@”",                @"Find all in document, results list header text.")
-#define MSG_FIND_ALL_RESULTS                 FFString(@"Find All Results in “%@” matching “%@”",  @"Find all in files, results list header text.")
-#define MSG_FIND_ALL_RESULTS_OPEN_FILES      FFString(@"Find All Results in Open Documents",      @"Find all in open documents, results list header text.")
-
 #define MSG_REPLACE_ALL_RESULTS              FFString(@"%@ replacements made across %@ file(s).", @"Replace all, replacement count status text")
 
 #define MSG_WINDOW_TITLE                     FFString(@"Find",              @"Default window title.")
