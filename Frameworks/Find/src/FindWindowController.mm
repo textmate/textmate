@@ -2,7 +2,6 @@
 #import "FFResultsViewController.h"
 #import "FFFolderMenu.h"
 #import "CommonAncestor.h"
-#import "Strings.h"
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/NSAlert Additions.h>
 #import <OakAppKit/NSMenuItem Additions.h>
@@ -506,11 +505,11 @@ static NSButton* OakCreateStopSearchButton ()
 - (void)updateWindowTitle
 {
 	if(NSString* folder = self.searchFolder)
-		self.window.title = [NSString localizedStringWithFormat:MSG_FIND_IN_FOLDER_WINDOW_TITLE, [folder stringByAbbreviatingWithTildeInPath]];
+		self.window.title = [NSString localizedStringWithFormat:@"Find — %@", [folder stringByAbbreviatingWithTildeInPath]];
 	else if(_searchTarget == FFSearchTargetOpenFiles)
-		self.window.title = MSG_FIND_IN_OPEN_FILES_WINDOW_TITLE;
+		self.window.title = @"Find — Open Files";
 	else
-		self.window.title = MSG_WINDOW_TITLE;
+		self.window.title = @"Find";
 }
 
 - (void)showWindow:(id)sender

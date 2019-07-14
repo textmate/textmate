@@ -4,7 +4,6 @@
 #import "FFResultsViewController.h"
 #import "FFDocumentSearch.h"
 #import "CommonAncestor.h"
-#import "Strings.h"
 #import <OakFoundation/OakFindProtocol.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/NSAlert Additions.h>
@@ -275,7 +274,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 						++fileCount;
 					}
 				}
-				self.windowController.statusString = [NSString stringWithFormat:MSG_REPLACE_ALL_RESULTS, [NSNumberFormatter localizedStringFromNumber:@(replaceCount) numberStyle:NSNumberFormatterDecimalStyle], [NSNumberFormatter localizedStringFromNumber:@(fileCount) numberStyle:NSNumberFormatterDecimalStyle]];
+				self.windowController.statusString = [NSString stringWithFormat:@"%@ replacements made across %@ file(s).", [NSNumberFormatter localizedStringFromNumber:@(replaceCount) numberStyle:NSNumberFormatterDecimalStyle], [NSNumberFormatter localizedStringFromNumber:@(fileCount) numberStyle:NSNumberFormatterDecimalStyle]];
 			}
 			break;
 
@@ -415,7 +414,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	if(_documentSearch = newSearcher)
 	{
 		self.windowController.busy                    = YES;
-		self.windowController.statusString            = MSG_SEARCHING_FMT;
+		self.windowController.statusString            = @"Searching…";
 		self.windowController.showsResultsOutlineView = YES;
 		self.windowController.resultsViewController.hideCheckBoxes = NO;
 
@@ -478,12 +477,12 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 	[self addResultsToPasteboard:self];
 
-	NSString* fmt = MSG_ZERO_MATCHES_FMT;
+	NSString* fmt;
 	switch(self.countOfMatches)
 	{
-		case 0:  fmt = MSG_ZERO_MATCHES_FMT;     break;
-		case 1:  fmt = MSG_ONE_MATCH_FMT;        break;
-		default: fmt = MSG_MULTIPLE_MATCHES_FMT; break;
+		case 0:  fmt = @"No results found for “%@”.";     break;
+		case 1:  fmt = @"Found one result for “%@”.";     break;
+		default: fmt = @"Found %2$@ results for “%1$@”."; break;
 	}
 
 	NSString* searchString = [_documentSearch searchString] ?: self.windowController.findString;
@@ -495,8 +494,8 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		formatter.maximumFractionDigits = 1;
 		NSString* seconds = [formatter stringFromNumber:@([_documentSearch searchDuration])];
 
-		self.windowController.statusString          = [msg stringByAppendingFormat:([_documentSearch scannedFileCount] == 1 ? MSG_SEARCHED_FILES_ONE : MSG_SEARCHED_FILES_MULTIPLE), seconds, [NSNumberFormatter localizedStringFromNumber:@([_documentSearch scannedFileCount]) numberStyle:NSNumberFormatterDecimalStyle]];
-		self.windowController.alternateStatusString = [msg stringByAppendingFormat:MSG_SEARCHED_BYTES, seconds, [NSString stringWithCxxString:text::format_size([_documentSearch scannedByteCount])]];
+		self.windowController.statusString          = [msg stringByAppendingFormat:([_documentSearch scannedFileCount] == 1 ? @" (searched one file in %@ seconds)" : @" (searched %2$@ files in %1$@ seconds)"), seconds, [NSNumberFormatter localizedStringFromNumber:@([_documentSearch scannedFileCount]) numberStyle:NSNumberFormatterDecimalStyle]];
+		self.windowController.alternateStatusString = [msg stringByAppendingFormat:@" (searched %2$@ in %1$@ seconds)", seconds, [NSString stringWithCxxString:text::format_size([_documentSearch scannedByteCount])]];
 	}
 	else
 	{
@@ -526,7 +525,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		if(path::is_directory(searchPath))
 			relative += "/";
 
-		self.windowController.statusString = [NSString localizedStringWithFormat:MSG_SEARCHING_FOLDER_FMT, [NSString stringWithCxxString:relative]];
+		self.windowController.statusString = [NSString localizedStringWithFormat:@"Searching “%@”…", [NSString stringWithCxxString:relative]];
 	}
 }
 
@@ -571,12 +570,12 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	[item.document removeAllMarksOfType:kSearchMarkIdentifier];
 	[self addResultsToPasteboard:self];
 
-	NSString* fmt = MSG_SHOWING_ZERO_MATCHES_FMT;
+	NSString* fmt;
 	switch(self.countOfMatches)
 	{
-		case 0:  fmt = MSG_SHOWING_ZERO_MATCHES_FMT;     break;
-		case 1:  fmt = MSG_SHOWING_ONE_MATCH_FMT;        break;
-		default: fmt = MSG_SHOWING_MULTIPLE_MATCHES_FMT; break;
+		case 0:  fmt = @"No results for “%@”.";             break;
+		case 1:  fmt = @"Showing one result for “%@”.";     break;
+		default: fmt = @"Showing %2$@ results for “%1$@”."; break;
 	}
 	_windowController.statusString = [NSString stringWithFormat:fmt, [_documentSearch searchString], [NSNumberFormatter localizedStringFromNumber:@(self.countOfMatches) numberStyle:NSNumberFormatterDecimalStyle]];
 }
