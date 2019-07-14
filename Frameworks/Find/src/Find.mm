@@ -313,7 +313,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	};
 
 	std::map<std::string, std::string> variables;
-	variables["count"]  = std::to_string(aNumber);
+	variables["count"]  = to_s([NSNumberFormatter localizedStringFromNumber:@(aNumber) numberStyle:NSNumberFormatterDecimalStyle]);
 	variables["found"]  = to_s(aFindString);
 	variables["line"]   = aPosition ? std::to_string(aPosition.line + 1)   : NULL_STR;
 	variables["column"] = aPosition ? std::to_string(aPosition.column + 1) : NULL_STR;
@@ -331,11 +331,11 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 - (void)didReplace:(NSUInteger)aNumber occurrencesOf:(NSString*)aFindString with:(NSString*)aReplacementString
 {
 	static NSString* const formatStrings[2][3] = {
-		{ @"Nothing replaced (no occurrences of “%@”).", @"Replaced one occurrence of “%@”.", @"Replaced %2$ld occurrences of “%@”." },
-		{ @"Nothing replaced (no matches for “%@”).",    @"Replaced one match of “%@”.",      @"Replaced %2$ld matches of “%@”."     }
+		{ @"Nothing replaced (no occurrences of “%@”).", @"Replaced one occurrence of “%@”.", @"Replaced %2$@ occurrences of “%@”." },
+		{ @"Nothing replaced (no matches for “%@”).",    @"Replaced one match of “%@”.",      @"Replaced %2$@ matches of “%@”."     }
 	};
 	NSString* format = formatStrings[(_findOptions & find::regular_expression) ? 1 : 0][aNumber > 2 ? 2 : aNumber];
-	self.windowController.statusString = [NSString stringWithFormat:format, aFindString, aNumber];
+	self.windowController.statusString = [NSString stringWithFormat:format, aFindString, [NSNumberFormatter localizedStringFromNumber:@(aNumber) numberStyle:NSNumberFormatterDecimalStyle]];
 }
 
 // =============

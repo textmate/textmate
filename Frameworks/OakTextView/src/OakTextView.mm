@@ -718,22 +718,22 @@ static std::string shell_quote (std::vector<std::string> paths)
 	{
 		case 0:  format = @"No more %@ “%@”.";                break;
 		case 1:  format = didWrap ? @"Search wrapped." : nil; break;
-		default: format = @"%3$ld %@ “%@”.";                  break;
+		default: format = @"%3$@ %@ “%@”.";                   break;
 	}
 
 	NSString* classifier = (self.findOptions & find::regular_expression) ? @"matches for" : @"occurrences of";
 	if(format)
-		[self showToolTip:[NSString stringWithFormat:format, classifier, aFindString, aNumber]];
+		[self showToolTip:[NSString stringWithFormat:format, classifier, aFindString, [NSNumberFormatter localizedStringFromNumber:@(aNumber) numberStyle:NSNumberFormatterDecimalStyle]]];
 }
 
 - (void)didReplace:(NSUInteger)aNumber occurrencesOf:(NSString*)aFindString with:(NSString*)aReplacementString
 {
 	static NSString* const formatStrings[2][3] = {
-		{ @"Nothing replaced (no occurrences of “%@”).", @"Replaced one occurrence of “%@”.", @"Replaced %2$ld occurrences of “%@”." },
-		{ @"Nothing replaced (no matches for “%@”).",    @"Replaced one match of “%@”.",      @"Replaced %2$ld matches of “%@”."     }
+		{ @"Nothing replaced (no occurrences of “%@”).", @"Replaced one occurrence of “%@”.", @"Replaced %2$@ occurrences of “%@”." },
+		{ @"Nothing replaced (no matches for “%@”).",    @"Replaced one match of “%@”.",      @"Replaced %2$@ matches of “%@”."     }
 	};
 	NSString* format = formatStrings[(self.findOptions & find::regular_expression) ? 1 : 0][aNumber > 2 ? 2 : aNumber];
-	[self showToolTip:[NSString stringWithFormat:format, aFindString, aNumber]];
+	[self showToolTip:[NSString stringWithFormat:format, aFindString, [NSNumberFormatter localizedStringFromNumber:@(aNumber) numberStyle:NSNumberFormatterDecimalStyle]]];
 }
 @end
 
