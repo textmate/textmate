@@ -87,7 +87,8 @@ static id CreateInstanceOfPlugInClass (Class cl, TMPlugInController* controller)
 
 				close(open(crashedDuringPlugInLoad.c_str(), O_CREAT|O_TRUNC|O_WRONLY|O_CLOEXEC));
 
-				if([bundle load])
+				NSError* loadError;
+				if([bundle loadAndReturnError:&loadError])
 				{
 					crash_reporter_info_t info("bad plug-in: %s", [identifier UTF8String]);
 					if(id instance = CreateInstanceOfPlugInClass([bundle principalClass], self))
@@ -101,7 +102,7 @@ static id CreateInstanceOfPlugInClass (Class cl, TMPlugInController* controller)
 				}
 				else
 				{
-					NSLog(@"Failed to load plug-in: %@, path %@", name ?: identifier, aPath);
+					NSLog(@"Failed to load ‘%@’ (%@): %@", name ?: identifier, [aPath stringByAbbreviatingWithTildeInPath], [loadError localizedDescription]);
 				}
 
 				unlink(crashedDuringPlugInLoad.c_str());
