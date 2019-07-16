@@ -289,12 +289,14 @@ end
 class Buildfile
   attr_reader :dir
 
-  def initialize(context, dir, variables)
+  def initialize(context, dir, variables = {})
     @context, @dir, @variables = context, dir, variables
     @rules, @build, @default_targets = [], [], []
+  end
 
-    skip_keys = Set.new(context.keys)
-    args = variables.reject { |key, value| skip_keys.include?(key) }
+  def add_basic_rules
+    skip_keys = @context ? Set.new(@context.keys) : Set.new
+    args = @variables.reject { |key, value| skip_keys.include?(key) }
     args = args.map { |key, value| "-d'#{key}=#{value =~ /\$/ ? value.gsub(/\$/, '$$') :  "$#{key}"}'" }.join(' ')
     self.rule('gen_build', {
       'command'     => "bin/gen_build -C \"$builddir\" #{args} -o $out $in",
@@ -390,7 +392,7 @@ SHELL
   end
 
   def to_s
-    variables = @variables.merge(@context.to_h)
+    variables = @context ? @variables.merge(@context.to_h) : @variables
 
     width = variables.map { |key, value| key.length }.max { |lhs, rhs| lhs <=> rhs }
     res   = variables.map { |key, value| format("%-#{width}s = %s\n", key, value) }.join
@@ -825,6 +827,7 @@ if __FILE__ == $PROGRAM_NAME
     # =====================
 
     buildfile = Buildfile.new(config, builddir, variables)
+    buildfile.add_basic_rules
 
     ordered.reverse.each do |name|
       root_targets[name].setup_build(buildfile, all_targets)
