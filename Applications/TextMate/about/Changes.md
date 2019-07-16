@@ -2,6 +2,12 @@ Title: Release Notes
 
 # Changes
 
+## 2019-07-16 (v2.0-rc.29)
+
+* Add more debug output for when TextMate is activated via mate.
+* Miscellaneous minor fixes and tweaks.
+* See [all changes since v2.0-rc.28](https://github.com/textmate/textmate/compare/v2.0-rc.28...v2.0-rc.29)
+
 ## 2019-07-13 (v2.0-rc.28)
 
 * Add debug output when TextMate is activated via `mate`.
