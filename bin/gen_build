@@ -117,19 +117,9 @@ class Target
     abort "*** setup_build already called" unless @files.empty?
 
     buildfile.assign("#{self.name}_dir", File.join(buildfile.dir, self.dir))
+
     targets = [ self.name, *link_dependencies(all_targets) ].map { |name| all_targets[name] }
-
-    mixed_libs = targets.inject(Set.new)   { |set, target| set += target.context.array_for('LIBS') }
-    frameworks = targets.inject(Set.new)   { |set, target| set += target.context.array_for('FRAMEWORKS') }
-    ln_flags   = targets.inject(Set.new)   { |set, target| set += target.context.array_for('LN_FLAGS') }
-    objects    = targets.inject(Array.new) { |arr, target| arr += target.objects(buildfile, all_targets) }
-
-    static, dynamic = mixed_libs.partition { |lib| lib =~ /\.a$/ }
-
-    hash = { '' => [ *ln_flags, *static ], '-l' => dynamic, '-framework ' => frameworks }
-    link_flags = hash.flat_map do |prefix, args|
-      args.map { |arg| prefix + arg.sub(/^(?=.*?\$).*$/, '"\&"') }
-    end
+    objects = targets.flat_map { |target| target.objects(buildfile, all_targets) }
 
     sign_flags = []
     if entitlements = @context.path_for('CS_ENTITLEMENTS')
@@ -159,7 +149,7 @@ class Target
       executable = "#{bundle_path}/Contents/MacOS/#{self.name}"
       signature  = "#{bundle_path}/Contents/_CodeSignature/CodeResources"
 
-      buildfile.build('link', objects, executable, link_flags)
+      buildfile.build('link', objects, executable, link_flags(all_targets))
       buildfile.meta(bundle_path, executable, *resources)
       buildfile.build('sign', bundle_path, signature, sign_flags)
       buildfile.meta(self.name, signature)
@@ -178,7 +168,7 @@ class Target
       signature  = File.join(buildfile.dir, self.dir, "#{self.name}.sign")
       executable = File.join(buildfile.dir, self.dir, self.name)
 
-      buildfile.build('link', objects, executable, link_flags)
+      buildfile.build('link', objects, executable, link_flags(all_targets))
       buildfile.build('sign', executable, signature, sign_flags)
       buildfile.meta(self.name, signature)
       buildfile.default(self.name)
@@ -225,27 +215,25 @@ class Target
     @include_directory
   end
 
-  def objects(buildfile, all_targets)
-    if @objects.nil?
-      @objects = [ ]
+  def objects_for_sources(buildfile, all_targets, sources, include_dirs: nil)
+    dirs = (link_dependencies(all_targets) + @context.array_for('IMPORT')).uniq.map do |name|
+      all_targets[name].include_directory(buildfile)
+    end
 
-      dirs = (link_dependencies(all_targets) + @context.array_for('IMPORT')).uniq.map do |name|
-        all_targets[name].include_directory(buildfile)
-      end
+    dirs += include_dirs unless include_dirs.nil?
 
-      context = @context.derive({ 'include_dirs' => dirs })
+    context = @context.derive({ 'include_dirs' => dirs })
 
-      @context.paths_for('SOURCES').each do |file|
-        buildfile.transform(Asset.new(file, context)).each do |asset|
-          if File.extname(asset.file) == '.o'
-            @objects << asset.file
-          else
-            STDERR << "Unhandled file type: #{asset.file}\n"
-          end
-        end
+    sources.flat_map do |file|
+      buildfile.transform(Asset.new(file, context)).map do |asset|
+        abort "*** No rule to make object file from: #{file}" unless File.extname(asset.file) == '.o'
+        asset.file
       end
     end
-    @objects
+  end
+
+  def objects(buildfile, all_targets)
+    @objects ||= objects_for_sources(buildfile, all_targets, @context.paths_for('SOURCES'))
   end
 
   def resources(buildfile, all_targets)
@@ -283,6 +271,21 @@ class Target
       end
     end
     @resources
+  end
+
+  def link_flags(all_targets)
+    targets    = [ self.name, *link_dependencies(all_targets) ].map { |name| all_targets[name] }
+
+    mixed_libs = targets.inject(Set.new) { |set, target| set += target.context.array_for('LIBS') }
+    frameworks = targets.inject(Set.new) { |set, target| set += target.context.array_for('FRAMEWORKS') }
+    ln_flags   = targets.inject(Set.new) { |set, target| set += target.context.array_for('LN_FLAGS') }
+
+    static, dynamic = mixed_libs.partition { |lib| lib =~ /\.a$/ }
+
+    hash = { '' => [ *ln_flags, *static ], '-l' => dynamic, '-framework ' => frameworks }
+    hash.flat_map do |prefix, args|
+      args.map { |arg| prefix + arg.sub(/^(?=.*?\$).*$/, '"\&"') }
+    end
   end
 end
 
