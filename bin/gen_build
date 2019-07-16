@@ -295,18 +295,6 @@ class Buildfile
   end
 
   def add_basic_rules
-    skip_keys = @context ? Set.new(@context.keys) : Set.new
-    args = @variables.reject { |key, value| skip_keys.include?(key) }
-    args = args.map { |key, value| "-d'#{key}=#{value =~ /\$/ ? value.gsub(/\$/, '$$') :  "$#{key}"}'" }.join(' ')
-    self.rule('gen_build', {
-      'command'     => "bin/gen_build -C \"$builddir\" #{args} -o $out $in",
-      'depfile'     => '$builddir/$out.d',
-      'generator'   => 'true',
-      'description' => 'Generate ‘$out’…',
-    })
-
-    self.build('gen_build', 'target', 'build.ninja', nil, 'bin/gen_build')
-
     self.rule('copy', {
       'command'     => 'cp -Xp $in $out && touch $out',
       'description' => 'Copy ‘$in’…',
@@ -826,7 +814,7 @@ if __FILE__ == $PROGRAM_NAME
     # = Create build file =
     # =====================
 
-    buildfile = Buildfile.new(config, builddir, variables)
+    buildfile = Buildfile.new(config, builddir)
     buildfile.add_basic_rules
 
     ordered.reverse.each do |name|
@@ -853,15 +841,25 @@ if __FILE__ == $PROGRAM_NAME
     File.write("#{builddir}/build.ninja", buildfile.to_s)
     File.write("#{builddir}/build.ninja.d", "build.ninja: #{dependencies.sort.map { |dep| dep.gsub(/ /, '\\ ') }.join(" \\\n  ")}\n")
 
+    bootstrap = Buildfile.new(nil, builddir, variables)
+    bootstrap.assign('ninja_required_version', '1.5')
+    bootstrap.assign('builddir', builddir)
+
+    args = variables.reject { |key, value| config.keys.include?(key) }
+    args = args.map { |key, value| "-d'#{key}=#{value =~ /\$/ ? value.gsub(/\$/, '$$') :  "$#{key}"}'" }.join(' ')
+
+    bootstrap.rule('gen_build', {
+      'command'     => "bin/gen_build -C \"$builddir\" #{args} -o $out $in",
+      'depfile'     => '$builddir/$out.d',
+      'generator'   => 'true',
+      'description' => 'Generate ‘$out’…',
+    })
+
+    bootstrap.build('gen_build', 'target', 'build.ninja', nil, 'bin/gen_build')
+
     open("#{outfile}", "w") do |io|
       userfile = "#{ENV['USER']}.ninja"
-      io << "ninja_required_version = 1.5\n"
-      io << "\n"
-      io << "###########################################\n"
-      io << "# AUTOMATICALLY GENERATED -- DO NOT EDIT! #\n"
-      io << "###########################################\n"
-      io << "\n"
-      io << "builddir = #{builddir}\n"
+      io << bootstrap.to_s
       io << "include $builddir/build.ninja\n"
       io << "include #{userfile}\n" if userfile != 'build.ninja' && File.exists?(File.join(File.dirname(outfile), userfile))
     end
