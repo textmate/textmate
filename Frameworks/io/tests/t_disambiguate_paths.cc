@@ -2,15 +2,6 @@
 #include <text/format.h>
 #include <test/jail.h>
 
-static std::string make_localised_dir (std::string const& path, std::string const& title)
-{
-	// /path/to/folder.localized/.localized/en.strings
-	std::string const lPath = path + ".localized";
-	path::set_content(path::join(lPath, ".localized/en.strings"), text::format("\"%s\" = \"%s\";\n", path::name(path).c_str(), title.c_str()));
-	OAK_ASSERT_EQ(path::display_name(lPath), title);
-	return lPath;
-}
-
 template <size_t N> void run_test (std::string const (&path_list)[N], size_t expected_parents)
 {
 	std::vector<std::string> paths(path_list, path_list + N);
@@ -63,15 +54,4 @@ void test_disambiguate_paths_duplicates ()
 	OAK_ASSERT_EQ(parents[6], 1);
 	OAK_ASSERT_EQ(parents[7], 0);
 	OAK_ASSERT_EQ(parents[8], 2);
-}
-
-void test_localisation ()
-{
-	test::jail_t jail;
-
-	std::string const a = make_localised_dir(jail.path("a/foo"), "A/Foo (Localised)");
-	std::string const b = make_localised_dir(jail.path("b/foo"), "B/Foo (Localised)");
-
-	std::string const paths[] = { a + "/bar", b + "/bar" };
-	run_test(paths, "bar — a/A/Foo (Localised)");
 }
