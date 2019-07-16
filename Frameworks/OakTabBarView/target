@@ -1,6 +1,6 @@
 SOURCES      = src/*.mm
 CP_Resources = gfx/*.png
 TEST_SOURCES = tests/gui_*.mm
-LINK        += OakFoundation OakAppKit Preferences
+LINK        += OakFoundation OakAppKit
 EXPORT       = src/OakTabBarView.h src/OakTabBarStyle.h
 FRAMEWORKS   = Cocoa
