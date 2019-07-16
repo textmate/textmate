@@ -120,6 +120,7 @@ class Target
 
     targets = [ self.name, *link_dependencies(all_targets) ].map { |name| all_targets[name] }
     objects = targets.flat_map { |target| target.objects(buildfile, all_targets) }
+    tests   = targets.flat_map { |target| target.test_results(buildfile, all_targets) }
 
     sign_flags = []
     if entitlements = @context.path_for('CS_ENTITLEMENTS')
@@ -287,6 +288,57 @@ class Target
       args.map { |arg| prefix + arg.sub(/^(?=.*?\$).*$/, '"\&"') }
     end
   end
+
+  def test_results(buildfile, all_targets)
+    if @test_results.nil?
+      @test_results = []
+
+      cxx_test_sources = @context.paths_for('TESTS')
+      unless cxx_test_sources.empty?
+        ext = cxx_test_sources.any? { |file| File.extname(file) == '.mm' } ? 'mm' : 'cc'
+
+        test_source        = File.join(buildfile.dir, self.dir, "test_#{self.name}.#{ext}")
+        test_executable    = File.join(buildfile.dir, self.dir, "test_#{self.name}")
+        test_passed        = File.join(buildfile.dir, self.dir, "test_#{self.name}.passed")
+        test_ignore_passed = File.join(buildfile.dir, self.dir, "test_#{self.name}.ignore")
+
+        targets = [ self.name, *link_dependencies(all_targets) ].map { |name| all_targets[name] }
+        test_objects  = targets.inject(Array.new) { |arr, target| arr += target.objects(buildfile, all_targets) }
+        test_objects += objects_for_sources(buildfile, all_targets, [ test_source ], include_dirs: [ self.include_directory(buildfile) ])
+
+        buildfile.build('gen_test', cxx_test_sources, test_source)
+        buildfile.build('link', test_objects, test_executable, link_flags(all_targets))
+        buildfile.build('run_test', test_executable, test_passed)
+        buildfile.build('always_run_test', test_executable, test_ignore_passed)
+
+        buildfile.meta("#{self.name}/test", test_ignore_passed)
+        @test_results << test_passed
+      end
+
+      objc_test_sources = @context.paths_for('TEST_SOURCES')
+      unless objc_test_sources.empty?
+        ext = objc_test_sources.any? { |file| File.extname(file) == '.mm' } ? 'mm' : 'cc'
+
+        test_source        = File.join(buildfile.dir, self.dir, "cxx_test_#{self.name}.#{ext}")
+        test_executable    = File.join(buildfile.dir, self.dir, "cxx_test_#{self.name}")
+        test_passed        = File.join(buildfile.dir, self.dir, "cxx_test_#{self.name}.passed")
+        test_ignore_passed = File.join(buildfile.dir, self.dir, "cxx_test_#{self.name}.ignore")
+
+        targets = [ self.name, *link_dependencies(all_targets) ].map { |name| all_targets[name] }
+        test_objects  = targets.inject(Array.new) { |arr, target| arr += target.objects(buildfile, all_targets) }
+        test_objects += objects_for_sources(buildfile, all_targets, [ test_source ], include_dirs: [ 'bin/CxxTest', self.include_directory(buildfile) ])
+
+        buildfile.build('gen_cxx_test', objc_test_sources, test_source)
+        buildfile.build('link', test_objects, test_executable, link_flags(all_targets))
+        buildfile.build('run_test', test_executable, test_passed)
+        buildfile.build('always_run_test', test_executable, test_ignore_passed)
+
+        buildfile.meta("#{self.name}/cxx_test", test_ignore_passed)
+        @test_results << test_passed
+      end
+    end
+    @test_results
+  end
 end
 
 class Buildfile
@@ -301,6 +353,26 @@ class Buildfile
     self.rule('copy', {
       'command'     => 'cp -Xp $in $out && touch $out',
       'description' => 'Copy ‘$in’…',
+    })
+
+    self.rule('gen_test', {
+      'command'     => 'bin/gen_test > $out~ $in && mv $out~ $out',
+      'description' => 'Generate test ‘$out’…',
+    })
+
+    self.rule('gen_cxx_test', {
+      'command'     => 'bin/CxxTest/bin/cxxtestgen --have-std -o $out --runner=unix $in',
+      'description' => 'Generate test ‘$out’…',
+    })
+
+    self.rule('run_test', {
+      'command'     => '$in $test_runner_flags && touch $out',
+      'description' => 'Run ‘$in’…',
+    })
+
+    self.rule('always_run_test', {
+      'command'     => '$in $test_runner_flags',
+      'description' => 'Run ‘$in’…',
     })
 
     self.rule('link', {
@@ -829,7 +901,7 @@ if __FILE__ == $PROGRAM_NAME
     # =====================================
 
     dependencies = all_targets.flat_map do |name, target|
-      target.context.keys.select { |key| key =~ /^(SOURCES|TESTS|CP_.*)$/ }.flat_map do |key|
+      target.context.keys.select { |key| key =~ /^(SOURCES|TESTS|TEST_SOURCES|CP_.*)$/ }.flat_map do |key|
         all_targets[name].context.paths_for(key).map { |file| File.dirname(file) }
       end
     end.uniq
