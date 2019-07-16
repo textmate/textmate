@@ -45,12 +45,12 @@ void test_brace_movement ()
 	OAK_ASSERT_EQ(move("this (is ‸(a test)).", kSelectionMoveToBeginOfTypingPair), "this (‸is (a test)).");
 	OAK_ASSERT_EQ(move("this (is (‸a test)).", kSelectionMoveToBeginOfTypingPair), "this (‸is (a test)).");
 	OAK_ASSERT_EQ(move("this (is (a test‸)).", kSelectionMoveToBeginOfTypingPair), "this (is (‸a test)).");
-	OAK_ASSERT_EQ(move("this (is (a test)‸).", kSelectionMoveToBeginOfTypingPair), "this (is ‸(a test)).");
-	OAK_ASSERT_EQ(move("this (is (a test))‸.", kSelectionMoveToBeginOfTypingPair), "this ‸(is (a test)).");
+	OAK_ASSERT_EQ(move("this (is (a test)‸).", kSelectionMoveToBeginOfTypingPair), "this (‸is (a test)).");
+	OAK_ASSERT_EQ(move("this (is (a test))‸.", kSelectionMoveToBeginOfTypingPair), "this (is (a test))‸.");
 	OAK_ASSERT_EQ(move("this (is (a test)).‸", kSelectionMoveToBeginOfTypingPair), "this (is (a test)).‸");
 
 	OAK_ASSERT_EQ(move("‸this (is (a test)).", kSelectionMoveToEndOfTypingPair), "‸this (is (a test)).");
-	OAK_ASSERT_EQ(move("this ‸(is (a test)).", kSelectionMoveToEndOfTypingPair), "this (is (a test))‸.");
+	OAK_ASSERT_EQ(move("this ‸(is (a test)).", kSelectionMoveToEndOfTypingPair), "this ‸(is (a test)).");
 	OAK_ASSERT_EQ(move("this (‸is (a test)).", kSelectionMoveToEndOfTypingPair), "this (is (a test)‸).");
 	OAK_ASSERT_EQ(move("this (is ‸(a test)).", kSelectionMoveToEndOfTypingPair), "this (is (a test)‸).");
 	OAK_ASSERT_EQ(move("this (is (‸a test)).", kSelectionMoveToEndOfTypingPair), "this (is (a test‸)).");
@@ -76,12 +76,12 @@ void test_bad_nesting ()
 void test_tag_movement ()
 {
 	OAK_ASSERT_EQ(move("<html></html‸>", kSelectionMoveToBeginOfTypingPair), "<html></html‸>");
-	OAK_ASSERT_EQ(move("<html></html>‸", kSelectionMoveToBeginOfTypingPair), "‸<html></html>");
+	OAK_ASSERT_EQ(move("<html></html>‸", kSelectionMoveToBeginOfTypingPair), "<html></html>‸");
 	OAK_ASSERT_EQ(move("<html><body></body‸></html>", kSelectionMoveToBeginOfTypingPair), "<html><body>‸</body></html>");
 	OAK_ASSERT_EQ(move("<html><body>‸</body></html>", kSelectionMoveToBeginOfTypingPair), "<html>‸<body></body></html>");
 
 	OAK_ASSERT_EQ(move("<‸html></html>", kSelectionMoveToEndOfTypingPair), "<‸html></html>");
-	OAK_ASSERT_EQ(move("‸<html></html>", kSelectionMoveToEndOfTypingPair), "<html></html>‸");
+	OAK_ASSERT_EQ(move("‸<html></html>", kSelectionMoveToEndOfTypingPair), "‸<html></html>");
 	OAK_ASSERT_EQ(move("<html><‸body></body></html>", kSelectionMoveToEndOfTypingPair), "<html><body>‸</body></html>");
 	OAK_ASSERT_EQ(move("<html><body>‸</body></html>", kSelectionMoveToEndOfTypingPair), "<html><body></body>‸</html>");
 
@@ -90,9 +90,9 @@ void test_tag_movement ()
 	OAK_ASSERT_EQ(move("<ul><li>first</li> ‸ <li> <a> <b>hello</b> <em>world</em></a></li><li>third</li></ul>", kSelectionMoveToBeginOfTypingPair), "<ul>‸<li>first</li>  <li> <a> <b>hello</b> <em>world</em></a></li><li>third</li></ul>");
 	OAK_ASSERT_EQ(move("<ul><li>first</li>  <li‸> <a> <b>hello</b> <em>world</em></a></li><li>third</li></ul>", kSelectionMoveToBeginOfTypingPair), "<ul>‸<li>first</li>  <li> <a> <b>hello</b> <em>world</em></a></li><li>third</li></ul>");
 	OAK_ASSERT_EQ(move("<ul><li>first</li>  <li>‸ <a> <b>hello</b> <em>world</em></a></li><li>third</li></ul>", kSelectionMoveToBeginOfTypingPair), "<ul>‸<li>first</li>  <li> <a> <b>hello</b> <em>world</em></a></li><li>third</li></ul>");
-	OAK_ASSERT_EQ(move("<ul><li>first</li>  <li> <a> <b>hello</b>‸ <em>world</em></a></li><li>third</li></ul>", kSelectionMoveToBeginOfTypingPair), "<ul><li>first</li>  <li> <a> ‸<b>hello</b> <em>world</em></a></li><li>third</li></ul>");
+	OAK_ASSERT_EQ(move("<ul><li>first</li>  <li> <a> <b>hello</b>‸ <em>world</em></a></li><li>third</li></ul>", kSelectionMoveToBeginOfTypingPair), "<ul><li>first</li>  <li> <a>‸ <b>hello</b> <em>world</em></a></li><li>third</li></ul>");
 	OAK_ASSERT_EQ(move("<ul><li>first</li>  <li> <a> <b>hello</b> ‸<em>world</em></a></li><li>third</li></ul>", kSelectionMoveToBeginOfTypingPair), "<ul><li>first</li>  <li> <a>‸ <b>hello</b> <em>world</em></a></li><li>third</li></ul>");
-	OAK_ASSERT_EQ(move("<ul><li>first</li>  <li> <a> <b>hello</b> <em>world</em></a>‸</li><li>third</li></ul>", kSelectionMoveToBeginOfTypingPair), "<ul><li>first</li>  <li> ‸<a> <b>hello</b> <em>world</em></a></li><li>third</li></ul>");
+	OAK_ASSERT_EQ(move("<ul><li>first</li>  <li> <a> <b>hello</b> <em>world</em></a>‸</li><li>third</li></ul>", kSelectionMoveToBeginOfTypingPair), "<ul><li>first</li>  <li>‸ <a> <b>hello</b> <em>world</em></a></li><li>third</li></ul>");
 
 	OAK_ASSERT_EQ(move("<ul><li>first‸</li>  <li> <a> <b>hello</b> <em>world</em></a></li><li>third</li></ul>", kSelectionMoveToEndOfTypingPair), "<ul><li>first</li>  <li> <a> <b>hello</b> <em>world</em></a></li><li>third</li>‸</ul>");
 	OAK_ASSERT_EQ(move("<ul><li>first</li> ‸ <li> <a> <b>hello</b> <em>world</em></a></li><li>third</li></ul>", kSelectionMoveToEndOfTypingPair), "<ul><li>first</li>  <li> <a> <b>hello</b> <em>world</em></a></li><li>third</li>‸</ul>");
