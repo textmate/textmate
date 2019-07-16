@@ -3,6 +3,7 @@
 #include <test/jail.h>
 #include <io/path.h>
 #include <io/exec.h>
+#include <text/format.h>
 
 void test_basic_status ()
 {
