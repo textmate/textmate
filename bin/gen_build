@@ -414,7 +414,7 @@ SHELL
       res << "\n"
     end
 
-    if @default_targets
+    unless @default_targets.empty?
       res << "default #{@default_targets.join(' ')}\n\n"
     end
 
