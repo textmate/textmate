@@ -7,11 +7,15 @@ trap 'rm -rf "$XML"' EXIT
 command=$1
 
 while true; do
-	eval $command > "$XML"
-	status=$(plutil -extract notarization-info.Status xml1 -o - "$XML"|sed -n 's/.*<string>\(.*\)<\/string>.*/\1/p')
-	case $status in
-		'in progress') sleep 20 ;;
-		'success')     cat "$XML" && exit 0 ;;
-		*)             cat "$XML" && echo "Unexpected result: $status" >&2; exit 1 ;;
-	esac
+	if eval $command > "$XML"; then
+		status=$(plutil -extract notarization-info.Status xml1 -o - "$XML"|sed -n 's/.*<string>\(.*\)<\/string>.*/\1/p')
+		case $status in
+			'in progress') sleep 20 ;;
+			'success')     cat "$XML"; exit 0 ;;
+			*)             echo "*** Unexpected status: $status"|cat >&2 - "$XML"; exit 1 ;;
+		esac
+	else
+		echo "*** Unexpected return code: $? (retry in 10s)"|cat >&2 - "$XML"
+		sleep 10
+	fi
 done
