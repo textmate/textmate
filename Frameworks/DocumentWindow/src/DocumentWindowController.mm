@@ -2806,14 +2806,18 @@ static NSUInteger DisableSessionSavingCount = 0;
 
 - (void)showDocuments:(NSArray<OakDocument*>*)someDocument
 {
+	os_log_t log = os_log_create("com.macromates.TextMate", "BringToFront");
 	if(someDocument.count == 0)
 		return;
 
 	NSUUID* projectUUID = nil;
+	os_log(log, "TextMate: Check if option is down");
 	if(NSEvent.modifierFlags & NSEventModifierFlagOption)
 		projectUUID = [[NSUUID alloc] initWithUUIDString:@"00000000-0000-0000-0000-000000000000"];
 
+	os_log(log, "TextMate: Create new document controller");
 	DocumentWindowController* controller = [self controllerWithDocuments:someDocument project:projectUUID];
+	os_log(log, "TextMate: Call ‘bringToFront’ on the new document controller");
 	[controller bringToFront];
 	[controller openAndSelectDocument:controller.documents[controller.selectedTabIndex] activate:YES];
 
@@ -2826,36 +2830,49 @@ static NSUInteger DisableSessionSavingCount = 0;
 
 - (void)showFileBrowserAtPath:(NSString*)aPath
 {
+	os_log_t log = os_log_create("com.macromates.TextMate", "BringToFront");
 	NSString* const folder = to_ns(path::resolve(to_s(aPath)));
+	os_log(log, "TextMate: Let system know about a new recent document (directory)");
 	[[NSDocumentController sharedDocumentController] noteNewRecentDocumentURL:[NSURL fileURLWithPath:folder]];
 
+	os_log(log, "TextMate: Check if we have an open window showing requested path in file browser");
 	for(DocumentWindowController* candidate in SortedControllers())
 	{
 		if([folder isEqualToString:candidate.projectPath ?: candidate.defaultProjectPath])
+		{
+			os_log(log, "TextMate: Found candidate, send it ‘bringToFront’");
 			return [candidate bringToFront];
+		}
 	}
 
 	DocumentWindowController* controller = nil;
+	os_log(log, "TextMate: Check if we have an open “disposable” window");
 	for(DocumentWindowController* candidate in SortedControllers())
 	{
 		if(!candidate.fileBrowserVisible && candidate.documents.count == 1 && is_disposable(candidate.selectedDocument))
 		{
+			os_log(log, "TextMate: Found candidate");
 			controller = candidate;
 			break;
 		}
 	}
 
 	if(!controller)
+	{
+		os_log(log, "TextMate: Create new window");
 		controller = [DocumentWindowController new];
+	}
 	else if(controller.selectedDocument)
 		controller.selectedDocument.customName = @"not untitled"; // release potential untitled token used
 
 	NSDictionary* project;
+	os_log(log, "TextMate: Check if state restoration has been disabled");
 	if(![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableFolderStateRestore])
 		project = [[DocumentWindowController sharedProjectStateDB] valueForKey:folder];
 
 	if(project && [project[@"documents"] count])
 	{
+		os_log(log, "TextMate: Restore state");
 		[controller setupControllerForProject:project skipMissingFiles:YES];
 	}
 	else
@@ -2864,9 +2881,12 @@ static NSUInteger DisableSessionSavingCount = 0;
 		controller.fileBrowserVisible = YES;
 		controller.documents          = @[ [OakDocumentController.sharedInstance untitledDocument] ];
 
+		os_log(log, "TextMate: Point file browser to requested path");
 		[controller.fileBrowser goToURL:[NSURL fileURLWithPath:folder]];
+		os_log(log, "TextMate: Ensure we have a selected document");
 		[controller openAndSelectDocument:controller.documents[controller.selectedTabIndex] activate:YES];
 	}
+	os_log(log, "TextMate: Call ‘bringToFront’");
 	[controller bringToFront];
 }
 @end
