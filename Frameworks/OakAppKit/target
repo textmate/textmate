@@ -1,6 +1,5 @@
 SOURCES      = src/*.{cc,mm}
 CP_Resources = resources/* gfx/**/*.{png,tiff,icns} icons/*
-TESTS        = tests/t_*.mm
 TEST_SOURCES = tests/gui_*.mm
 LINK        += OakFoundation bundles crash file io ns parse regexp scm settings text theme
 EXPORT       = src/*.h
