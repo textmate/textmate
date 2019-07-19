@@ -154,7 +154,6 @@ class Target
       buildfile.meta(bundle_path, executable, *resources)
       buildfile.build('sign', bundle_path, signature, sign_flags)
       buildfile.meta(self.name, signature)
-      buildfile.default(self.name)
 
       @files << [ executable, "#{bundle}/Contents/MacOS/#{self.name}", signature ]
       @files << [ signature, "#{bundle}/Contents/_CodeSignature/CodeResources" ]
@@ -172,7 +171,6 @@ class Target
       buildfile.build('link', objects, executable, link_flags(all_targets))
       buildfile.build('sign', executable, signature, sign_flags)
       buildfile.meta(self.name, signature)
-      buildfile.default(self.name)
 
       buildfile.assign("#{self.name}_exe", executable)
       buildfile.assign("#{self.name}_sign", signature)
