@@ -179,6 +179,8 @@ class Target
 
       @files << [ executable, self.name, signature ]
     end
+
+    buildfile.meta("#{self.name}/tests", *tests)
   end
 
   protected
