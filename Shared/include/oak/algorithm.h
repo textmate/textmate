@@ -9,12 +9,6 @@ namespace oak
 		return std::find(first, last, value) != last;
 	}
 
-	template <typename _ValueT>
-	_ValueT cap (_ValueT min, _ValueT cur, _ValueT max)
-	{
-		return std::max(min, std::min(cur, max));
-	}
-
 	template <typename _InputIter1, typename _InputIter2>
 	bool has_prefix (_InputIter1 srcFirst, _InputIter1 const& srcLast, _InputIter2 prefixFirst, _InputIter2 const& prefixLast)
 	{
