@@ -568,7 +568,7 @@ namespace ng
 		{
 			size_t first = from + it->first;
 			size_t last  = ++it != map.end() ? from + it->first : to;
-			if(oak::cap(first, index, last) == index)
+			if(std::clamp(index, first, last) == index)
 				return { first, last };
 		}
 		return { 0, 0 };

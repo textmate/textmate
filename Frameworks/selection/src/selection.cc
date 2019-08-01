@@ -163,8 +163,8 @@ namespace ng
 
 	static index_t cap (buffer_api_t const& buffer, text::pos_t const& pos)
 	{
-		size_t line = oak::cap<size_t>(0, pos.line,   buffer.lines()-1);
-		size_t col  = oak::cap<size_t>(0, pos.column, buffer.eol(line) - buffer.begin(line));
+		size_t line = std::clamp<size_t>(pos.line,   0, buffer.lines()-1);
+		size_t col  = std::clamp<size_t>(pos.column, 0, buffer.eol(line) - buffer.begin(line));
 		index_t res = buffer.sanitize_index(buffer.convert(text::pos_t(line, col)));
 		if(pos.offset && res.index < buffer.size() && buffer[res.index] == "\n")
 			res.carry = pos.offset;

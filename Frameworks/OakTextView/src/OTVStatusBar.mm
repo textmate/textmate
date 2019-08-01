@@ -190,7 +190,7 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSString* accessibi
 
 - (void)updateMacroRecordingAnimation:(NSTimer*)aTimer
 {
-	CGFloat fraction = oak::cap(0.00, 0.70 + 0.30 * cos(M_PI + _recordingTime), 1.0);
+	CGFloat fraction = std::clamp(0.70 + 0.30 * cos(M_PI + _recordingTime), 0.00, 1.0);
 	self.macroRecordingButton.alphaValue = fraction;
 	_recordingTime += 0.075;
 }

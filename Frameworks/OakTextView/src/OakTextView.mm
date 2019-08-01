@@ -1043,7 +1043,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 	CGFloat w = NSWidth([self visibleRect]), h = NSHeight([self visibleRect]);
 
 	CGFloat x = r.origin.x < w ? 0 : r.origin.x - w/2;
-	CGFloat y = oak::cap(NSMinY([self frame]), r.origin.y - (h-r.size.height)/2, NSHeight([self frame]) - h);
+	CGFloat y = std::clamp(r.origin.y - (h-r.size.height)/2, NSMinY(self.frame), NSHeight(self.frame) - h);
 
 	[self scrollRectToVisible:CGRectMake(round(x), round(y), w, h)];
 }
@@ -1094,25 +1094,25 @@ static std::string shell_quote (std::vector<std::string> paths)
 		x = r.origin.x < w/2 ? 0 : r.origin.x - 5*r.size.width;
 	}
 
-	if(oak::cap<CGFloat>(y + h - 1.5*r.size.height, r.origin.y, y + h + 1.5*r.size.height) == r.origin.y) // scroll down
+	if(std::clamp<CGFloat>(r.origin.y, y + h - 1.5*r.size.height, y + h + 1.5*r.size.height) == r.origin.y) // scroll down
 	{
 		D(DBF_OakTextView_ViewRect, bug("scroll down\n"););
 		y = r.origin.y + 1.5*r.size.height - h;
 	}
-	else if(oak::cap<CGFloat>(y - 3*r.size.height, r.origin.y, y + 0.5*r.size.height) == r.origin.y) // scroll up
+	else if(std::clamp<CGFloat>(r.origin.y, y - 3*r.size.height, y + 0.5*r.size.height) == r.origin.y) // scroll up
 	{
 		D(DBF_OakTextView_ViewRect, bug("scroll up\n"););
 		y = r.origin.y - 0.5*r.size.height;
 	}
-	else if(oak::cap(y, r.origin.y, y + h) != r.origin.y) // center y
+	else if(std::clamp(r.origin.y, y, y + h) != r.origin.y) // center y
 	{
 		y = r.origin.y - (h-r.size.height)/2;
 	}
 
 doScroll:
 	CGRect b = [self bounds];
-	x = oak::cap(NSMinX(b), x, NSMaxX(b) - w);
-	y = oak::cap(NSMinY(b), y, NSMaxY(b) - h);
+	x = std::clamp(x, NSMinX(b), NSMaxX(b) - w);
+	y = std::clamp(y, NSMinY(b), NSMaxY(b) - h);
 
 	NSClipView* contentView = [[self enclosingScrollView] contentView];
 	if([contentView respondsToSelector:@selector(_extendNextScrollRelativeToCurrentPosition)])
@@ -1483,8 +1483,8 @@ doScroll:
 
 	std::for_each(lbegin, lend, [=](links_t::iterator::value_type const& pair){
 		ng::range_t range = pair.second.range;
-		range.first = oak::cap(ng::index_t(from), range.min(), ng::index_t(to));
-		range.last  = oak::cap(ng::index_t(from), range.max(), ng::index_t(to));
+		range.first = std::clamp(range.min(), ng::index_t(from), ng::index_t(to));
+		range.last  = std::clamp(range.max(), ng::index_t(from), ng::index_t(to));
 		if(!range.empty())
 		{
 			range.first.index -= from;

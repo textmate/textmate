@@ -18,7 +18,7 @@ namespace plist
 	{
 		int64_t val = 0;
 		CFNumberGetValue(num, kCFNumberSInt64Type, &val);
-		if(oak::cap<int64_t>(INT32_MIN, val, INT32_MAX) == val)
+		if(std::clamp<int64_t>(val, INT32_MIN, INT32_MAX) == val)
 				res = int32_t(val);
 		else	res = uint64_t(val);
 	}

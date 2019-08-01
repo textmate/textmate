@@ -225,7 +225,7 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 	}
 
 	if(res == OakChoiceMenuKeyMovement)
-		self.choiceIndex = oak::cap<NSInteger>(0, (_choiceIndex == NSNotFound ? (offset > 0 ? -1 : [_choices count]) : _choiceIndex) + offset, [_choices count] - 1);
+		self.choiceIndex = std::clamp<NSInteger>((_choiceIndex == NSNotFound ? (offset > 0 ? -1 : [_choices count]) : _choiceIndex) + offset, 0, [_choices count] - 1);
 
 	return res;
 }

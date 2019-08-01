@@ -978,7 +978,7 @@ static bool is_binary (std::string const& path)
 	if(newHistory.count)
 	{
 		self.history      = newHistory;
-		self.historyIndex = oak::cap<NSUInteger>(0, [fileBrowserState[@"historyIndex"] intValue], newHistory.count);
+		self.historyIndex = std::clamp([fileBrowserState[@"historyIndex"] unsignedIntegerValue], (NSUInteger)0, newHistory.count);
 
 		NSMutableArray<NSURL*>* expandedURLs = [NSMutableArray array];
 		for(NSString* urlString in fileBrowserState[@"expanded"])

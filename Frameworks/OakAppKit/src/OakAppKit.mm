@@ -61,7 +61,7 @@ NSUInteger const OakMoveNoActionReturn = 3;
 		NSInteger numberOfRows = [_tableView numberOfRows];
 		if(std::abs(anOffset) == 1 && numberOfRows && [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsEnableLoopFilterList])
 				row = (row + numberOfRows) % numberOfRows;
-		else	row = oak::cap((NSInteger)0, row, numberOfRows - 1);
+		else	row = std::clamp(row, (NSInteger)0, numberOfRows - 1);
 
 		if([_tableView.delegate respondsToSelector:@selector(tableView:shouldSelectRow:)])
 		{

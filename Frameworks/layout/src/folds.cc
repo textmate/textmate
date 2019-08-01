@@ -164,7 +164,7 @@ namespace ng
 			std::vector< std::pair<size_t, size_t> > newFoldings;
 			for(auto const& pair : _folded)
 			{
-				if(oak::cap(pair.first, bol, pair.second) == bol || oak::cap(pair.first, eol, pair.second) == eol)
+				if(std::clamp(bol, pair.first, pair.second) == bol || std::clamp(eol, pair.first, pair.second) == eol)
 				{
 					if(res.first == res.second)
 						res = pair;
@@ -337,7 +337,7 @@ namespace ng
 		size_t bol = _buffer.begin(n), eol = _buffer.eol(n);
 		for(auto const& pair : foldable_ranges())
 		{
-			if(oak::cap(pair.first, bol, pair.second) == bol || oak::cap(pair.first, eol, pair.second) == eol)
+			if(std::clamp(bol, pair.first, pair.second) == bol || std::clamp(eol, pair.first, pair.second) == eol)
 				res = pair;
 		}
 		return res;

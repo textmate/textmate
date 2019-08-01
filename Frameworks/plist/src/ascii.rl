@@ -75,7 +75,7 @@ static bool parse_int (char const*& p, char const* pe, plist::any_t& res)
 	char* dummy;
 	quad_t val = strtoq(p, &dummy, 0);
 	p = dummy;
-	if(oak::cap<quad_t>(INT32_MIN, val, INT32_MAX) == val)
+	if(std::clamp<quad_t>(val, INT32_MIN, INT32_MAX) == val)
 			res = int32_t(val);
 	else	res = uint64_t(val);
 

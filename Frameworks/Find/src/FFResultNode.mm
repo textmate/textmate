@@ -134,7 +134,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 		size_t eol = text.find(newlines, it);
 		eol = eol != std::string::npos ? eol : last;
 
-		if(oak::cap(it, from, eol) == from)
+		if(std::clamp(from, it, eol) == from)
 		{
 			append(builder, text, it, from);
 			it = from;
@@ -144,7 +144,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 			inMatch = true;
 		}
 
-		if(inMatch && oak::cap(it, to, eol) == to)
+		if(inMatch && std::clamp(to, it, eol) == to)
 		{
 			append(builder, text, it, to);
 			it = to;

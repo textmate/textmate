@@ -158,7 +158,7 @@ namespace ng
 			for(auto& mark : _marks)
 			{
 				size_t& index = mark.position.index;
-				if(oak::cap(from, index, to) == index)
+				if(std::clamp(index, from, to) == index)
 				{
 					if(mark.type == mark_t::kUnpairedMark || index != from && index != to)
 					{
@@ -1311,7 +1311,7 @@ namespace ng
 			int line        = pos.line;
 			int col         = visual_distance(_buffer, _buffer.begin(line), pair.first, false);
 
-			line = oak::cap(0, line + deltaY, int(_buffer.lines()-1));
+			line = std::clamp(line + deltaY, 0, int(_buffer.lines()-1));
 			col  = std::max(col + deltaX, 0);
 			replacements.emplace(visual_advance(_buffer, _buffer.begin(line), col, false), pair.second);
 		}
