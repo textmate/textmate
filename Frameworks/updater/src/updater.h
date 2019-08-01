@@ -47,7 +47,6 @@ namespace bundles_db
 		oak::uuid_t uuid () const              { return _uuid; }
 		std::string origin () const            { return _origin; }
 		std::string name () const              { return _name; }
-		std::string requires () const          { return _requires; }
 		std::string category () const          { return _category; }
 		std::string html_url () const          { return _html_url; }
 		std::string description () const       { return _description; }
