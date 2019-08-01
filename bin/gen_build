@@ -925,6 +925,7 @@ if __FILE__ == $PROGRAM_NAME
 
     bootstrap = Buildfile.new(nil, builddir, variables)
     bootstrap.assign('ninja_required_version', '1.5')
+    bootstrap.assign('builddir', builddir)
 
     args = variables.reject { |key, value| config.keys.include?(key) }
     args = args.map { |key, value| "-d'#{key}=#{value =~ /\$/ ? value.gsub(/\$/, '$$') :  "$#{key}"}'" }.join(' ')
