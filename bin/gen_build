@@ -170,7 +170,9 @@ class Target
 
       buildfile.build('link', objects, executable, link_flags(all_targets))
       buildfile.build('sign', executable, signature, sign_flags)
+      buildfile.build('run', executable, "#{executable}.run", nil, signature)
       buildfile.meta(self.name, signature)
+      buildfile.meta("#{self.name}/run", "#{executable}.run")
 
       buildfile.assign("#{self.name}_exe", executable)
       buildfile.assign("#{self.name}_sign", signature)
@@ -388,6 +390,11 @@ class Buildfile
     self.rule('index_help', {
       'command'     => '/usr/bin/hiutil -Cvaf $out "$HELP_BOOK"',
       'description' => 'Index help book ‘$HELP_BOOK’…',
+    })
+
+    self.rule('run', {
+      'command'     => '$in',
+      'description' => 'Run ‘$in’…',
     })
 
     self.rule('run_application', {
