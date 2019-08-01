@@ -207,18 +207,18 @@ static size_t line_count (std::string const& text)
 
 - (void)deleteBackward:(id)sender
 {
-	int selectedRow = [tableView selectedRow];
+	NSInteger selectedRow = [tableView selectedRow];
 	if(selectedRow == -1 || [entries count] <= 1)
 		return NSBeep();
 	[entries removeObjectAtIndex:selectedRow];
 	[tableView reloadData];
 	if([entries count] > 0)
-		[tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:oak::cap(0, selectedRow - 1, (int)[entries count]-1)] byExtendingSelection:NO];
+		[tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:oak::cap<NSInteger>(0, selectedRow - 1, [entries count]-1)] byExtendingSelection:NO];
 }
 
 - (void)deleteForward:(id)sender
 {
-	int selectedRow = [tableView selectedRow];
+	NSInteger selectedRow = [tableView selectedRow];
 	if(selectedRow == -1 || [entries count] <= 1)
 		return NSBeep();
 	[entries removeObjectAtIndex:selectedRow];
