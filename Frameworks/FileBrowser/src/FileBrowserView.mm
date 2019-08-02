@@ -1064,8 +1064,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 		return NO;
 
 	[pboard clearContents];
-	[pboard writeObjects:urls];
-	return YES;
+	return [pboard writeObjects:urls];
 }
 
 // ===================
