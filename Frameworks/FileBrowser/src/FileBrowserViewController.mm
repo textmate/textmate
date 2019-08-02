@@ -609,7 +609,7 @@ static bool is_binary (std::string const& path)
 	[pboard clearContents];
 	[pboard writeObjects:[items valueForKeyPath:@"URL"]];
 
-	if(![pboard.types containsObject:NSPasteboardTypeString])
+	if(![pboard availableTypeFromArray:@[ NSPasteboardTypeString ]])
 		[pboard writeObjects:[items valueForKeyPath:@"localizedName"]];
 
 	return YES;
