@@ -2056,18 +2056,16 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 
 - (BOOL)writeSelectionToPasteboard:(NSPasteboard*)pboard types:(NSArray*)types
 {
-	BOOL res = NO;
-	if([self hasSelection] && [types containsObject:NSPasteboardTypeString])
-	{
-		std::vector<std::string> v;
-		ng::ranges_t const ranges = ng::dissect_columnar(*documentView, documentView->ranges());
-		for(auto const& range : ranges)
-			v.push_back(documentView->substr(range.min().index, range.max().index));
+	if(![self hasSelection])
+		return NO;
 
-		[pboard declareTypes:@[ NSPasteboardTypeString ] owner:nil];
-		res = [pboard setString:[NSString stringWithCxxString:text::join(v, "\n")] forType:NSPasteboardTypeString];
-	}
-	return res;
+	std::vector<std::string> v;
+	ng::ranges_t const ranges = ng::dissect_columnar(*documentView, documentView->ranges());
+	for(auto const& range : ranges)
+		v.push_back(documentView->substr(range.min().index, range.max().index));
+
+	[pboard clearContents];
+	return [pboard writeObjects:@[ to_ns(text::join(v, "\n")) ]];
 }
 
 - (BOOL)readSelectionFromPasteboard:(NSPasteboard*)pboard
