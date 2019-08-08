@@ -659,16 +659,40 @@ static bool is_binary (std::string const& path)
 	NSMutableDictionary<NSURL*, NSURL*>* urls = [NSMutableDictionary dictionary];
 	if(items.count == 1)
 	{
-		NSRegularExpression* regex = [NSRegularExpression regularExpressionWithPattern:@"(\\b|_)\\d{4}(?:-\\d{2}){2}(\\b|_)" options:0 error:nil];
-		NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
-		formatter.dateFormat = @"yyyy-MM-dd";
-
 		if(NSURL* url = items.firstObject.URL)
 		{
 			NSString* base = url.lastPathComponent;
-			NSString* name = [regex stringByReplacingMatchesInString:base options:0 range:NSMakeRange(0, base.length) withTemplate:[NSString stringWithFormat:@"$1%@$2", [formatter stringFromDate:[NSDate date]]]];
-			if(![base isEqualToString:name])
-				urls[url] = [url.URLByDeletingLastPathComponent URLByAppendingPathComponent:name isDirectory:url.tmHasDirectoryPath];
+			NSString* newBase;
+
+			NSRegularExpression* dateRegex   = [NSRegularExpression regularExpressionWithPattern:@"(\\b|_)[1-2][0-9]{3}(-|_|)(?!00|1[3-9])[0-1][0-9]\\2(?!00|3[2-9])[0-3][0-9](\\b|_)" options:0 error:nil];
+			NSRegularExpression* numberRegex = [NSRegularExpression regularExpressionWithPattern:@"^\\d{2,}" options:0 error:nil];
+
+			if(NSTextCheckingResult* match = [dateRegex firstMatchInString:base options:0 range:NSMakeRange(0, base.length)])
+			{
+				NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
+				dateFormatter.dateFormat = [NSString stringWithFormat:@"yyyy%1$@MM%1$@dd", [base substringWithRange:[match rangeAtIndex:2]]];
+				newBase = [base stringByReplacingCharactersInRange:match.range withString:[dateRegex replacementStringForResult:match inString:base offset:0 template:[NSString stringWithFormat:@"$1%@$3", [dateFormatter stringFromDate:NSDate.date]]]];
+			}
+			else if(NSTextCheckingResult* match = [numberRegex firstMatchInString:base options:0 range:NSMakeRange(0, base.length)])
+			{
+				std::set<NSInteger> set;
+				for(NSURL* otherURL in [NSFileManager.defaultManager contentsOfDirectoryAtURL:url.URLByDeletingLastPathComponent includingPropertiesForKeys:nil options:0 error:nil])
+				{
+					NSString* otherBase = otherURL.lastPathComponent;
+					if(NSTextCheckingResult* tmp = [numberRegex firstMatchInString:otherBase options:0 range:NSMakeRange(0, otherBase.length)])
+						set.insert([otherBase substringWithRange:tmp.range].integerValue);
+				}
+
+				NSInteger i = [base substringWithRange:match.range].integerValue + 1;
+				while(set.find(i) != set.end())
+					++i;
+
+				NSString* number = [NSString stringWithFormat:@"%0*ld", (int)match.range.length, i];
+				newBase = [base stringByReplacingCharactersInRange:match.range withString:number];
+			}
+
+			if(newBase && ![newBase isEqualToString:base])
+				urls[url] = [url.URLByDeletingLastPathComponent URLByAppendingPathComponent:newBase isDirectory:url.tmHasDirectoryPath];
 		}
 	}
 
