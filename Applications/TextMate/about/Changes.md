@@ -2,6 +2,12 @@ Title: Release Notes
 
 # Changes
 
+## 2019-08-21 (v2.0-rc.30)
+
+* Add even more debug output for when TextMate is activated via mate.
+* Look for numeric prefix when duplicating a file and increase it if found. This means `001_file.txt` will become `002_file.txt` when duplicated in the file browser, instead of `001_file copy.txt`.
+* See [all changes since v2.0-rc.29](https://github.com/textmate/textmate/compare/v2.0-rc.29...v2.0-rc.30)
+
 ## 2019-07-16 (v2.0-rc.29)
 
 * Add more debug output for when TextMate is activated via mate.
