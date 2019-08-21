@@ -171,32 +171,41 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 {
 	if((self = [super init]))
 	{
-		self.identifier   = [NSUUID UUID];
+		os_log_t log = os_log_create("com.macromates.TextMate", "BringToFront");
+		os_log(log, "TextMate: Create New Window");
+		self.identifier = [NSUUID UUID];
 
 		self.tabBarView = [[OakTabBarView alloc] initWithFrame:NSZeroRect];
+		os_log(log, "TextMate: Created OakTabBarView instance");
 		self.tabBarView.dataSource = self;
 		self.tabBarView.delegate   = self;
 
 		self.documentView = [[OakDocumentView alloc] init];
+		os_log(log, "TextMate: Created OakDocumentView instance");
 		self.textView = self.documentView.textView;
 		self.textView.delegate = self;
 
 		self.layoutView = [[ProjectLayoutView alloc] initWithFrame:NSZeroRect];
+		os_log(log, "TextMate: Created ProjectLayoutView instance");
 		self.layoutView.documentView = self.documentView;
 
 		NSUInteger windowStyle = (NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskMiniaturizable);
 		self.window = [[NSWindow alloc] initWithContentRect:[NSWindow contentRectForFrameRect:[self frameRectForNewWindow] styleMask:windowStyle] styleMask:windowStyle backing:NSBackingStoreBuffered defer:NO];
+		os_log(log, "TextMate: Created NSWindow instance");
 		self.window.collectionBehavior = NSWindowCollectionBehaviorFullScreenPrimary;
 		self.window.delegate           = self;
 		self.window.releasedWhenClosed = NO;
 
 		_titlebarViewController = [[NSTitlebarAccessoryViewController alloc] init];
+		os_log(log, "TextMate: Created NSTitlebarAccessoryViewController instance");
 		self.tabBarView.frameSize = self.tabBarView.intrinsicContentSize;
 		_titlebarViewController.view = self.tabBarView;
 		_titlebarViewController.fullScreenMinHeight = NSHeight(self.tabBarView.frame);
 		[self.window addTitlebarAccessoryViewController:_titlebarViewController];
+		os_log(log, "TextMate: Added titlebar accessory view controller to window");
 
 		[LicenseManager.sharedInstance decorateWindow:self.window];
+		os_log(log, "TextMate: Decorated window");
 
 		OakAddAutoLayoutViewsToSuperview(@[ self.layoutView ], self.window.contentView);
 		OakSetupKeyViewLoop(@[ self.layoutView ], NO);
@@ -216,7 +225,9 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidResignActiveNotification:) name:NSApplicationDidResignActiveNotification object:NSApp];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(fileBrowserWillDelete:) name:FileBrowserWillDeleteNotification object:nil];
 
-		[self userDefaultsDidChange:nil];
+		os_log(log, "TextMate: Window initialization complete, update defaults");
+		[self userDefaultsDidChange:nil debug:YES];
+		os_log(log, "TextMate: Defaults updated");
 	}
 	return self;
 }
@@ -364,22 +375,38 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 - (void)userDefaultsDidChange:(NSNotification*)aNotification
 {
+	[self userDefaultsDidChange:aNotification debug:NO];
+}
+
+- (void)userDefaultsDidChange:(NSNotification*)aNotification debug:(BOOL)debugFlag
+{
+	os_log_t log = os_log_create("com.macromates.TextMate", "BringToFront");
+	if(debugFlag) os_log(log, "TextMate: Entering userDefaultsDidChange");
+
+	if(debugFlag) os_log(log, "TextMate: Update htmlOutputInWindow");
 	self.htmlOutputInWindow = [[[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsHTMLOutputPlacementKey] isEqualToString:@"window"];
+	if(debugFlag) os_log(log, "TextMate: Update disableFileBrowserWindowResize");
 	self.disableFileBrowserWindowResize = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableFileBrowserWindowResizeKey];
+	if(debugFlag) os_log(log, "TextMate: Update autoRevealFile");
 	self.autoRevealFile = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsAutoRevealFileKey];
+	if(debugFlag) os_log(log, "TextMate: Update documentView.hideStatusBar");
 	self.documentView.hideStatusBar = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsHideStatusBarKey];
 
 	if(self.layoutView.fileBrowserOnRight != [[[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsFileBrowserPlacementKey] isEqualToString:@"right"])
 	{
+		if(debugFlag) os_log(log, "TextMate: Update layoutView.fileBrowserOnRight");
 		self.oldWindowFrame = self.newWindowFrame = NSZeroRect;
 		self.layoutView.fileBrowserOnRight = !self.layoutView.fileBrowserOnRight;
 	}
 
 	if(@available(macos 10.12, *))
 	{
+		if(debugFlag) os_log(log, "TextMate: Update titlebarViewController.hidden");
 		BOOL disableTabBarCollapsingKey = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsDisableTabBarCollapsingKey];
 		self.titlebarViewController.hidden = !disableTabBarCollapsingKey && self.documents.count <= 1;
 	}
+
+	if(debugFlag) os_log(log, "TextMate: Leaving userDefaultsDidChange");
 }
 
 - (void)applicationDidBecomeActiveNotification:(NSNotification*)aNotification
