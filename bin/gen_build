@@ -20,6 +20,8 @@ require 'optparse'
 require 'shellwords'
 require 'set'
 
+BIN = File.dirname(__FILE__)
+
 class Context
   def initialize(options = { }, dir = nil, parent = nil)
     @options, @dir, @parent = options, dir, parent
@@ -328,7 +330,7 @@ class Target
 
         targets = [ self.name, *link_dependencies(all_targets) ].map { |name| all_targets[name] }
         test_objects  = targets.inject(Array.new) { |arr, target| arr += target.objects(buildfile, all_targets) }
-        test_objects += objects_for_sources(buildfile, all_targets, [ test_source ], include_dirs: [ 'bin/CxxTest', self.include_directory(buildfile) ])
+        test_objects += objects_for_sources(buildfile, all_targets, [ test_source ], include_dirs: [ "#{BIN}/CxxTest", self.include_directory(buildfile) ])
 
         buildfile.build('gen_cxx_test', objc_test_sources, test_source)
         buildfile.build('link', test_objects, test_executable, link_flags(all_targets))
@@ -358,12 +360,12 @@ class Buildfile
     })
 
     self.rule('gen_test', {
-      'command'     => 'bin/gen_test > $out~ $in && mv $out~ $out',
+      'command'     => "#{BIN}/gen_test > $out~ $in && mv $out~ $out",
       'description' => 'Generate test ‘$out’…',
     })
 
     self.rule('gen_cxx_test', {
-      'command'     => 'bin/CxxTest/bin/cxxtestgen --have-std -o $out --runner=unix $in',
+      'command'     => "#{BIN}/CxxTest/bin/cxxtestgen --have-std -o $out --runner=unix $in",
       'description' => 'Generate test ‘$out’…',
     })
 
@@ -744,7 +746,7 @@ class CompilePropertyList < Compiler
 
   def setup(buildfile, context)
     buildfile.rule('process_plist', {
-      'command'     => 'bin/process_plist > $out~ $args $in && mv $out~ $out',
+      'command'     => "#{BIN}/process_plist > $out~ $args $in && mv $out~ $out",
       'description' => 'Process plist ‘$in’…',
     })
   end
@@ -754,7 +756,7 @@ class CompilePropertyList < Compiler
     flags << asset.context['PLIST_FLAGS']
 
     new_asset = self.derive_asset(asset, buildfile.dir)
-    buildfile.build('process_plist', asset.file, new_asset.file, flags, [ 'bin/process_plist' ])
+    buildfile.build('process_plist', asset.file, new_asset.file, flags, [ "#{BIN}/process_plist" ])
     [ new_asset ]
   end
 end
@@ -765,7 +767,7 @@ class CompileMarkdown < Compiler
 
   def setup(buildfile, context)
     buildfile.rule('markdown', {
-      'command'     => 'bin/gen_html > $out~ $args $in && mv $out~ $out',
+      'command'     => "#{BIN}/gen_html > $out~ $args $in && mv $out~ $out",
       'description' => 'Generate ‘$out’…',
     })
   end
@@ -774,7 +776,7 @@ class CompileMarkdown < Compiler
     header = asset.context.path_for('HTML_HEADER')
     footer = asset.context.path_for('HTML_FOOTER')
 
-    deps = [ 'bin/gen_html' ]
+    deps = [ "#{BIN}/gen_html" ]
     deps << header unless header.nil?
     deps << footer unless footer.nil?
 
@@ -932,13 +934,13 @@ if __FILE__ == $PROGRAM_NAME
     args = args.map { |key, value| "-d'#{key}=#{value =~ /\$/ ? value.gsub(/\$/, '$$') :  "$#{key}"}'" }.join(' ')
 
     bootstrap.rule('gen_build', {
-      'command'     => "bin/gen_build -C \"$builddir\" #{args} -o $out $in",
+      'command'     => "#{__FILE__} -C \"$builddir\" #{args} -o $out $in",
       'depfile'     => '$builddir/$out.d',
       'generator'   => 'true',
       'description' => 'Generate ‘$out’…',
     })
 
-    bootstrap.build('gen_build', 'target', 'build.ninja', nil, 'bin/gen_build')
+    bootstrap.build('gen_build', 'target', 'build.ninja', nil, __FILE__)
 
     open("#{outfile}", "w") do |io|
       userfile = "#{ENV['USER']}.ninja"
