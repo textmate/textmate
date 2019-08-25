@@ -146,6 +146,9 @@ static double calculate_rank (std::string const& lhs, std::string const& rhs, st
 		do {
 
 			++i; ++len;
+			if(i == n)
+				break;
+
 			first[i] = std::max(bestJIndex + len, first[i]);
 			if(len < bestJLength && n < 4)
 			{
