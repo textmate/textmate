@@ -2,6 +2,12 @@ Title: Release Notes
 
 # Changes
 
+## 2019-08-26 (v2.0-rc.31)
+
+* Attempt at workaround for system stall when calling TextMate via mate.
+* Fix two buffer overflow bugs.
+* See [all changes since v2.0-rc.30](https://github.com/textmate/textmate/compare/v2.0-rc.30...v2.0-rc.31)
+
 ## 2019-08-21 (v2.0-rc.30)
 
 * Add even more debug output for when TextMate is activated via mate.
