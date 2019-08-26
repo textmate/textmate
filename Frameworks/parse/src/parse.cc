@@ -491,7 +491,7 @@ namespace parse
 					break;
 				}
 			}
-			else if(!rule->children.empty() || rule->while_string != NULL_STR || rule->end_string != NULL_STR) // begin-part of rule
+			else if(rule->while_string != NULL_STR || rule->end_string != NULL_STR) // begin-part of rule
 			{
 				if(m.match.empty() && has_cycle(rule->rule_id, i, stack))
 				{
