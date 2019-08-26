@@ -399,6 +399,11 @@ static BOOL HasPersistentStore = NO;
 
 - (void)checkForExternalPasteboardChanges
 {
+	// Do not touch clipboard unless we are active as CFPasteboardCopyData can stall
+	// See https://lists.macromates.com/textmate/2019-August/041109.html
+	if(!NSApp.isActive)
+		return;
+
 	D(DBF_Pasteboard, bug("new data: %s (%zd = %zd)\n", BSTR((self.changeCount != [[self pasteboard] changeCount])), (ssize_t)self.changeCount, (ssize_t)[[self pasteboard] changeCount]););
 	if(self.changeCount != [[self pasteboard] changeCount])
 	{
