@@ -171,41 +171,32 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 {
 	if((self = [super init]))
 	{
-		os_log_t log = os_log_create("com.macromates.TextMate", "BringToFront");
-		os_log(log, "TextMate: Create New Window");
 		self.identifier = [NSUUID UUID];
 
 		self.tabBarView = [[OakTabBarView alloc] initWithFrame:NSZeroRect];
-		os_log(log, "TextMate: Created OakTabBarView instance");
 		self.tabBarView.dataSource = self;
 		self.tabBarView.delegate   = self;
 
 		self.documentView = [[OakDocumentView alloc] init];
-		os_log(log, "TextMate: Created OakDocumentView instance");
 		self.textView = self.documentView.textView;
 		self.textView.delegate = self;
 
 		self.layoutView = [[ProjectLayoutView alloc] initWithFrame:NSZeroRect];
-		os_log(log, "TextMate: Created ProjectLayoutView instance");
 		self.layoutView.documentView = self.documentView;
 
 		NSUInteger windowStyle = (NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskMiniaturizable);
 		self.window = [[NSWindow alloc] initWithContentRect:[NSWindow contentRectForFrameRect:[self frameRectForNewWindow] styleMask:windowStyle] styleMask:windowStyle backing:NSBackingStoreBuffered defer:NO];
-		os_log(log, "TextMate: Created NSWindow instance");
 		self.window.collectionBehavior = NSWindowCollectionBehaviorFullScreenPrimary;
 		self.window.delegate           = self;
 		self.window.releasedWhenClosed = NO;
 
 		_titlebarViewController = [[NSTitlebarAccessoryViewController alloc] init];
-		os_log(log, "TextMate: Created NSTitlebarAccessoryViewController instance");
 		self.tabBarView.frameSize = self.tabBarView.intrinsicContentSize;
 		_titlebarViewController.view = self.tabBarView;
 		_titlebarViewController.fullScreenMinHeight = NSHeight(self.tabBarView.frame);
 		[self.window addTitlebarAccessoryViewController:_titlebarViewController];
-		os_log(log, "TextMate: Added titlebar accessory view controller to window");
 
 		[LicenseManager.sharedInstance decorateWindow:self.window];
-		os_log(log, "TextMate: Decorated window");
 
 		OakAddAutoLayoutViewsToSuperview(@[ self.layoutView ], self.window.contentView);
 		OakSetupKeyViewLoop(@[ self.layoutView ], NO);
@@ -225,9 +216,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidResignActiveNotification:) name:NSApplicationDidResignActiveNotification object:NSApp];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(fileBrowserWillDelete:) name:FileBrowserWillDeleteNotification object:nil];
 
-		os_log(log, "TextMate: Window initialization complete, update defaults");
-		[self userDefaultsDidChange:nil debug:YES];
-		os_log(log, "TextMate: Defaults updated");
+		[self userDefaultsDidChange:nil];
 	}
 	return self;
 }
@@ -375,38 +364,22 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 - (void)userDefaultsDidChange:(NSNotification*)aNotification
 {
-	[self userDefaultsDidChange:aNotification debug:NO];
-}
-
-- (void)userDefaultsDidChange:(NSNotification*)aNotification debug:(BOOL)debugFlag
-{
-	os_log_t log = os_log_create("com.macromates.TextMate", "BringToFront");
-	if(debugFlag) os_log(log, "TextMate: Entering userDefaultsDidChange");
-
-	if(debugFlag) os_log(log, "TextMate: Update htmlOutputInWindow");
 	self.htmlOutputInWindow = [[[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsHTMLOutputPlacementKey] isEqualToString:@"window"];
-	if(debugFlag) os_log(log, "TextMate: Update disableFileBrowserWindowResize");
 	self.disableFileBrowserWindowResize = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableFileBrowserWindowResizeKey];
-	if(debugFlag) os_log(log, "TextMate: Update autoRevealFile");
 	self.autoRevealFile = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsAutoRevealFileKey];
-	if(debugFlag) os_log(log, "TextMate: Update documentView.hideStatusBar");
 	self.documentView.hideStatusBar = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsHideStatusBarKey];
 
 	if(self.layoutView.fileBrowserOnRight != [[[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsFileBrowserPlacementKey] isEqualToString:@"right"])
 	{
-		if(debugFlag) os_log(log, "TextMate: Update layoutView.fileBrowserOnRight");
 		self.oldWindowFrame = self.newWindowFrame = NSZeroRect;
 		self.layoutView.fileBrowserOnRight = !self.layoutView.fileBrowserOnRight;
 	}
 
 	if(@available(macos 10.12, *))
 	{
-		if(debugFlag) os_log(log, "TextMate: Update titlebarViewController.hidden");
 		BOOL disableTabBarCollapsingKey = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsDisableTabBarCollapsingKey];
 		self.titlebarViewController.hidden = !disableTabBarCollapsingKey && self.documents.count <= 1;
 	}
-
-	if(debugFlag) os_log(log, "TextMate: Leaving userDefaultsDidChange");
 }
 
 - (void)applicationDidBecomeActiveNotification:(NSNotification*)aNotification
@@ -2692,10 +2665,6 @@ static NSUInteger DisableSessionSavingCount = 0;
 
 - (void)bringToFront
 {
-	os_log_t log = os_log_create("com.macromates.TextMate", "BringToFront");
-	os_log(log, "TextMate: Bring to Front requested, NSApp.isActive: %{BOOL}d", NSApp.isActive);
-
-	os_log(log, "TextMate: Call [self showWindow:nil]");
 	[self showWindow:nil];
 	if(NSApp.isActive)
 	{
@@ -2703,7 +2672,6 @@ static NSUInteger DisableSessionSavingCount = 0;
 
 		__weak __block id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:NSApplicationDidResignActiveNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
 			[[NSNotificationCenter defaultCenter] removeObserver:observerId];
-			os_log(log, "TextMate: NSApp unexpectedly resigned active, re-activate!");
 			[NSApp activateIgnoringOtherApps:YES];
 		}];
 
@@ -2715,11 +2683,9 @@ static NSUInteger DisableSessionSavingCount = 0;
 	{
 		__weak __block id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:NSApplicationDidBecomeActiveNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
 			// If our window is not on the active desktop but another one is, the system gives focus to the wrong window.
-			os_log(log, "TextMate: NSApp became active, now call [self showWindow:nil]");
 			[self showWindow:nil];
 			[[NSNotificationCenter defaultCenter] removeObserver:observerId];
 		}];
-		os_log(log, "TextMate: Call [NSApp activateIgnoringOtherApps:YES]");
 		[NSApp activateIgnoringOtherApps:YES];
 	}
 }
@@ -2833,18 +2799,14 @@ static NSUInteger DisableSessionSavingCount = 0;
 
 - (void)showDocuments:(NSArray<OakDocument*>*)someDocument
 {
-	os_log_t log = os_log_create("com.macromates.TextMate", "BringToFront");
 	if(someDocument.count == 0)
 		return;
 
 	NSUUID* projectUUID = nil;
-	os_log(log, "TextMate: Check if option is down");
 	if(NSEvent.modifierFlags & NSEventModifierFlagOption)
 		projectUUID = [[NSUUID alloc] initWithUUIDString:@"00000000-0000-0000-0000-000000000000"];
 
-	os_log(log, "TextMate: Create new document controller");
 	DocumentWindowController* controller = [self controllerWithDocuments:someDocument project:projectUUID];
-	os_log(log, "TextMate: Call ‘bringToFront’ on the new document controller");
 	[controller bringToFront];
 	[controller openAndSelectDocument:controller.documents[controller.selectedTabIndex] activate:YES];
 
@@ -2857,49 +2819,36 @@ static NSUInteger DisableSessionSavingCount = 0;
 
 - (void)showFileBrowserAtPath:(NSString*)aPath
 {
-	os_log_t log = os_log_create("com.macromates.TextMate", "BringToFront");
 	NSString* const folder = to_ns(path::resolve(to_s(aPath)));
-	os_log(log, "TextMate: Let system know about a new recent document (directory)");
 	[[NSDocumentController sharedDocumentController] noteNewRecentDocumentURL:[NSURL fileURLWithPath:folder]];
 
-	os_log(log, "TextMate: Check if we have an open window showing requested path in file browser");
 	for(DocumentWindowController* candidate in SortedControllers())
 	{
 		if([folder isEqualToString:candidate.projectPath ?: candidate.defaultProjectPath])
-		{
-			os_log(log, "TextMate: Found candidate, send it ‘bringToFront’");
 			return [candidate bringToFront];
-		}
 	}
 
 	DocumentWindowController* controller = nil;
-	os_log(log, "TextMate: Check if we have an open “disposable” window");
 	for(DocumentWindowController* candidate in SortedControllers())
 	{
 		if(!candidate.fileBrowserVisible && candidate.documents.count == 1 && is_disposable(candidate.selectedDocument))
 		{
-			os_log(log, "TextMate: Found candidate");
 			controller = candidate;
 			break;
 		}
 	}
 
 	if(!controller)
-	{
-		os_log(log, "TextMate: Create new window");
 		controller = [DocumentWindowController new];
-	}
 	else if(controller.selectedDocument)
 		controller.selectedDocument.customName = @"not untitled"; // release potential untitled token used
 
 	NSDictionary* project;
-	os_log(log, "TextMate: Check if state restoration has been disabled");
 	if(![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableFolderStateRestore])
 		project = [[DocumentWindowController sharedProjectStateDB] valueForKey:folder];
 
 	if(project && [project[@"documents"] count])
 	{
-		os_log(log, "TextMate: Restore state");
 		[controller setupControllerForProject:project skipMissingFiles:YES];
 	}
 	else
@@ -2908,12 +2857,9 @@ static NSUInteger DisableSessionSavingCount = 0;
 		controller.fileBrowserVisible = YES;
 		controller.documents          = @[ [OakDocumentController.sharedInstance untitledDocument] ];
 
-		os_log(log, "TextMate: Point file browser to requested path");
 		[controller.fileBrowser goToURL:[NSURL fileURLWithPath:folder]];
-		os_log(log, "TextMate: Ensure we have a selected document");
 		[controller openAndSelectDocument:controller.documents[controller.selectedTabIndex] activate:YES];
 	}
-	os_log(log, "TextMate: Call ‘bringToFront’");
 	[controller bringToFront];
 }
 @end

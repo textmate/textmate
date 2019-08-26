@@ -7,7 +7,7 @@
 #include <io/path.h>
 #include <plist/uuid.h>
 
-static char const* const AppVersion = "2.13.1-beta";
+static char const* const AppVersion = "2.13.1";
 
 static char const* socket_path ()
 {
@@ -281,8 +281,6 @@ _InputIter remove_ansi_escapes (_InputIter it, _InputIter last, escape_state_t* 
 
 int main (int argc, char const* argv[])
 {
-	os_log_t log = os_log_create("com.macromates.TextMate", "BringToFront");
-
 	extern char* optarg;
 	extern int optind;
 	extern int optreset;
@@ -395,8 +393,6 @@ int main (int argc, char const* argv[])
 		files.push_back(path);
 	}
 
-	os_log(log, "mate: Open file(s): %{public}s", text::join(files, ", ").c_str());
-
 	std::string defaultProject = projects.empty() ? (getenv("TM_PROJECT_UUID") ?: "") : projects.back();
 
 	bool stdinIsAPipe = isatty(STDIN_FILENO) == 0;
@@ -416,20 +412,14 @@ int main (int argc, char const* argv[])
 	strcpy(addr.sun_path, socket_path());
 	addr.sun_len = SUN_LEN(&addr);
 
-	os_log(log, "mate: Connect to TextMate");
-
 	bool didLaunch = false;
 	while(-1 == connect(fd, (sockaddr*)&addr, sizeof(addr)))
 	{
-		if(didLaunch)
-			os_log(log, "mate: Connect failed, retry in 0.5s: %{darwin.errno}d", errno);
 		if(!didLaunch)
 			launch_app(!files.empty());
 		didLaunch = true;
 		usleep(500000);
 	}
-
-	os_log(log, "mate: Connection established");
 
 	char buf[1024];
 	ssize_t len = read(fd, buf, sizeof(buf));
@@ -555,7 +545,6 @@ int main (int argc, char const* argv[])
 	}
 
 	write(fd, ".\r\n", 3);
-	os_log(log, "mate: Done sending, waiting for response");
 
 	// =========================
 	// = Now wait for messages =
@@ -633,6 +622,5 @@ int main (int argc, char const* argv[])
 	}
 
 	close(fd);
-	os_log(log, "mate: Closed connection");
 	return EX_OK;
 }
