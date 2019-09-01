@@ -2968,16 +2968,16 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 // =============
 
 static NSTouchBarItemIdentifier kOTVTouchBarCustomizationIdentifier          = @"com.macromates.TextMate.otv.customizationIdentifer";
-static NSTouchBarItemIdentifier kOTVTouchBarItemIdentifierNavigateMarkers    = @"com.macromates.TextMate.otv.navigateMarkers";
+static NSTouchBarItemIdentifier kOTVTouchBarItemIdentifierNavigateBookmarks  = @"com.macromates.TextMate.otv.navigateBookmarks";
 static NSTouchBarItemIdentifier kOTVTouchBarItemIdentifierAddRemoveBookmark  = @"com.macromates.TextMate.otv.addRemoveBookmark";
 
 - (NSTouchBar*)makeTouchBar
 {
 	NSTouchBar* touchBar = [NSTouchBar new];
 	touchBar.delegate = self;
-	touchBar.defaultItemIdentifiers = @[ kOTVTouchBarItemIdentifierAddRemoveBookmark, kOTVTouchBarItemIdentifierNavigateMarkers, ];
+	touchBar.defaultItemIdentifiers = @[ kOTVTouchBarItemIdentifierAddRemoveBookmark, kOTVTouchBarItemIdentifierNavigateBookmarks, ];
    touchBar.customizationIdentifier = kOTVTouchBarCustomizationIdentifier;
-	touchBar.customizationAllowedItemIdentifiers = @[ kOTVTouchBarItemIdentifierAddRemoveBookmark, kOTVTouchBarItemIdentifierNavigateMarkers, ];
+	touchBar.customizationAllowedItemIdentifiers = @[ kOTVTouchBarItemIdentifierAddRemoveBookmark, kOTVTouchBarItemIdentifierNavigateBookmarks, ];
 
 	return touchBar;
 }
@@ -2996,27 +2996,27 @@ static NSTouchBarItemIdentifier kOTVTouchBarItemIdentifierAddRemoveBookmark  = @
 
 		return bookmarkButtonTouchBarItem;
 	}
-	else if([identifier isEqualToString:kOTVTouchBarItemIdentifierNavigateMarkers])
+	else if([identifier isEqualToString:kOTVTouchBarItemIdentifierNavigateBookmarks])
 	{
 		NSSegmentedControl* navigateMarkerSegmentedControl = [NSSegmentedControl new];
 		navigateMarkerSegmentedControl.segmentCount = 2;
 		navigateMarkerSegmentedControl.target       = self;
-		navigateMarkerSegmentedControl.action       = @selector(performNavigateMarkersSegmentAction:);
+		navigateMarkerSegmentedControl.action       = @selector(performNavigateBookMarksSegmentAction:);
 		navigateMarkerSegmentedControl.trackingMode = NSSegmentSwitchTrackingMomentary;
 		navigateMarkerSegmentedControl.segmentStyle = NSSegmentStyleSeparated;
 
 		NSImage* goUpImage = [NSImage imageNamed:NSImageNameTouchBarGoUpTemplate];
-		goUpImage.accessibilityDescription = @"previous mark";
+		goUpImage.accessibilityDescription = @"previous bookmark";
 		NSImage* goDownImage = [NSImage imageNamed:NSImageNameTouchBarGoDownTemplate];
-		goDownImage.accessibilityDescription = @"next mark";
+		goDownImage.accessibilityDescription = @"next bookmark";
 
 		[navigateMarkerSegmentedControl setImage:goUpImage forSegment:0];
 		[navigateMarkerSegmentedControl setImage:goDownImage forSegment:1];
 
-		NSCustomTouchBarItem* markersTouchBarItem = [[NSCustomTouchBarItem alloc] initWithIdentifier:kOTVTouchBarItemIdentifierNavigateMarkers];
+		NSCustomTouchBarItem* markersTouchBarItem = [[NSCustomTouchBarItem alloc] initWithIdentifier:kOTVTouchBarItemIdentifierNavigateBookmarks];
 		markersTouchBarItem.view = navigateMarkerSegmentedControl;
 		markersTouchBarItem.visibilityPriority = NSTouchBarItemPriorityHigh;
-		markersTouchBarItem.customizationLabel = @"Previous/Next Mark";
+		markersTouchBarItem.customizationLabel = @"Previous/Next Bookmark";
 
 		return markersTouchBarItem;
 	}
@@ -3024,12 +3024,12 @@ static NSTouchBarItemIdentifier kOTVTouchBarItemIdentifierAddRemoveBookmark  = @
 	return nil;
 }
 
-- (void)performNavigateMarkersSegmentAction:(id)sender
+- (void)performNavigateBookmarksSegmentAction:(id)sender
 {
 	switch([sender selectedSegment])
 	{
-		case 0: [self jumpToPreviousMark:self]; break;
-		case 1: [self jumpToNextMark:self];     break;
+		case 0: [self goToPreviousBookmark:self]; break;
+		case 1: [self goToNextBookmark:self];     break;
 	}
 }
 
