@@ -2976,7 +2976,7 @@ static NSTouchBarItemIdentifier kOTVTouchBarItemIdentifierAddRemoveBookmark  = @
 	NSTouchBar* touchBar = [NSTouchBar new];
 	touchBar.delegate = self;
 	touchBar.defaultItemIdentifiers = @[ kOTVTouchBarItemIdentifierAddRemoveBookmark, kOTVTouchBarItemIdentifierNavigateBookmarks, ];
-   touchBar.customizationIdentifier = kOTVTouchBarCustomizationIdentifier;
+	touchBar.customizationIdentifier = kOTVTouchBarCustomizationIdentifier;
 	touchBar.customizationAllowedItemIdentifiers = @[ kOTVTouchBarItemIdentifierAddRemoveBookmark, kOTVTouchBarItemIdentifierNavigateBookmarks, ];
 
 	return touchBar;
