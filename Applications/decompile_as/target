@@ -1,2 +1,0 @@
-SOURCES    = src/*.mm
-FRAMEWORKS = Foundation OSAKit
