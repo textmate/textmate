@@ -2,6 +2,20 @@ Title: Release Notes
 
 # Changes
 
+## 2019-09-15 (v2.0)
+
+After far too long, there is no longer any qualifier suffix in the version string, so it is now finally just “TextMate 2.0”.
+
+I am grateful to everybody who has submitted a pull request, but the following people deserve a special mention:
+
+* Boris Dušek who is responsibly for TextMate’s much improved accessibility support.
+* Jacob Bandes-Storch was a tremendous help replacing use of 32 bit APIs.
+* Ronald Wampler is just an all around great contributor.
+
+Not everything on the wishlist made it into 2.0, but TextMate remains a work in progress, so don’t despair :)
+
+*— Allan Odgaard*
+
 ## 2019-08-26 (v2.0-rc.31)
 
 * Attempt at workaround for system stall when calling TextMate via mate.
