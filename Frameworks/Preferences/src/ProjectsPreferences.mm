@@ -27,6 +27,7 @@
 			@"allowExpandingLinks":          kUserDefaultsAllowExpandingLinksKey,
 			@"fileBrowserSingleClickToOpen": kUserDefaultsFileBrowserSingleClickToOpenKey,
 			@"disableTabReordering":         kUserDefaultsDisableTabReorderingKey,
+			@"disableTabAutoClose":          kUserDefaultsDisableTabAutoCloseKey,
 		};
 
 		self.tmProperties = @{
