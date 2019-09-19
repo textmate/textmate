@@ -8,7 +8,7 @@ After far too long, there is no longer any qualifier suffix in the version strin
 
 I am grateful to everybody who has submitted a pull request, but the following people deserve a special mention:
 
-* Boris Dušek who is responsibly for TextMate’s much improved accessibility support.
+* Boris Dušek who is responsible for TextMate’s much improved accessibility support.
 * Jacob Bandes-Storch was a tremendous help replacing use of 32 bit APIs.
 * Ronald Wampler is just an all around great contributor.
 
