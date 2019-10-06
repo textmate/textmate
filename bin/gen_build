@@ -124,9 +124,10 @@ class Target
     objects = targets.flat_map { |target| target.objects(buildfile, all_targets) }
     tests   = targets.flat_map { |target| target.test_results(buildfile, all_targets) }
 
-    sign_flags = []
+    sign_flags, sign_deps = [], []
     if entitlements = @context.path_for('CS_ENTITLEMENTS')
       sign_flags << "--entitlements #{entitlements.shellescape}"
+      sign_deps << entitlements
     end
     if codesign_flags = @context['CODESIGN_FLAGS']
       sign_flags << codesign_flags
@@ -154,7 +155,7 @@ class Target
 
       buildfile.build('link', objects, executable, link_flags(all_targets))
       buildfile.meta(bundle_path, executable, *resources)
-      buildfile.build('sign', bundle_path, signature, sign_flags)
+      buildfile.build('sign', bundle_path, signature, sign_flags, sign_deps)
       buildfile.meta(self.name, signature)
 
       @files << [ executable, "#{bundle}/Contents/MacOS/#{self.name}", signature ]
@@ -171,7 +172,7 @@ class Target
       executable = File.join(buildfile.dir, self.dir, self.name)
 
       buildfile.build('link', objects, executable, link_flags(all_targets))
-      buildfile.build('sign', executable, signature, sign_flags)
+      buildfile.build('sign', executable, signature, sign_flags, sign_deps)
       buildfile.build('run', executable, "#{executable}.run", nil, signature)
       buildfile.meta(self.name, signature)
       buildfile.meta("#{self.name}/run", "#{executable}.run")
