@@ -136,6 +136,15 @@ namespace path
 
 		bool commit (std::string* errorMsg)
 		{
+			struct stat sbuf;
+			if(stat(_destURL.fileSystemRepresentation, &sbuf) == 0)
+			{
+				// Skip copyfile() for network drives <rdar://17480649>
+				if(path::is_local(_destURL.fileSystemRepresentation))
+					copyfile(_destURL.fileSystemRepresentation, _tempURL.fileSystemRepresentation, nullptr, COPYFILE_XATTR|COPYFILE_ACL);
+				chmod(_tempURL.fileSystemRepresentation, sbuf.st_mode & (S_IRWXU|S_IRWXG|S_IRWXO));
+			}
+
 			NSError* error;
 			if([NSFileManager.defaultManager replaceItemAtURL:_destURL withItemAtURL:_tempURL backupItemName:nil options:NSFileManagerItemReplacementUsingNewMetadataOnly resultingItemURL:nil error:&error])
 				return true;
