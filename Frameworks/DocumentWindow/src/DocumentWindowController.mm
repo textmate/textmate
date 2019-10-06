@@ -256,9 +256,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	NSRect contentRect = [NSWindow contentRectForFrameRect:frameRect styleMask:self.window.styleMask];
 
 	CGFloat offset = NSMaxY(frameRect) - NSMaxY(contentRect);
-	frameRect.origin.y -= offset;
-	frameRect.origin.x += offset;
-	return frameRect;
+	return NSOffsetRect(frameRect, offset, -offset);
 }
 
 - (NSRect)frameRectForNewWindow
