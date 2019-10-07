@@ -33,16 +33,16 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 
 		_tableView = [[NSTableView alloc] initWithFrame:NSZeroRect];
 		[_tableView addTableColumn:[[NSTableColumn alloc] initWithIdentifier:@"mainColumn"]];
-		_tableView.headerView                         = nil;
-		_tableView.focusRingType                      = NSFocusRingTypeNone;
-		_tableView.autoresizingMask                   = NSViewWidthSizable|NSViewHeightSizable;
-		_tableView.allowsMultipleSelection            = YES;
-		_tableView.dataSource                         = self;
-		_tableView.delegate                           = self;
-		_tableView.backgroundColor                    = NSColor.clearColor;
+		_tableView.headerView              = nil;
+		_tableView.focusRingType           = NSFocusRingTypeNone;
+		_tableView.autoresizingMask        = NSViewWidthSizable|NSViewHeightSizable;
+		_tableView.allowsMultipleSelection = YES;
+		_tableView.dataSource              = self;
+		_tableView.delegate                = self;
+		_tableView.backgroundColor         = NSColor.clearColor;
 		[_tableView reloadData];
 
-		NSScrollView* scrollView         = [[NSScrollView alloc] initWithFrame:NSZeroRect];
+		NSScrollView* scrollView = [[NSScrollView alloc] initWithFrame:NSZeroRect];
 		scrollView.hasVerticalScroller   = YES;
 		scrollView.hasHorizontalScroller = NO;
 		scrollView.autohidesScrollers    = YES;
