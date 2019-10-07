@@ -2,6 +2,13 @@ Title: Release Notes
 
 # Changes
 
+## 2019-10-07 (v2.0.1)
+
+* Allow loading plug-ins not signed by Apple nor MacroMates.
+* Fixed: File permission flags were lost when saving using the default atomic save algorithm.
+* Fixed: Disposing a nib using `"$DIALOG" nib --dispose «token»` would not close the nib’s window.
+* See [all changes since v2.0](https://github.com/textmate/textmate/compare/v2.0...v2.0.1)
+
 ## 2019-09-15 (v2.0)
 
 After far too long, there is no longer any qualifier suffix in the version string, so it is now finally just “TextMate 2.0”.
