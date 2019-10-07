@@ -14,8 +14,6 @@
 #import <libkern/OSAtomic.h>
 #import <machine/byte_order.h>
 
-#if defined(MAC_OS_X_VERSION_10_12) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_12)
 #import <os/log.h>
-#endif
 
 #endif /* end of include guard: PRELUDE_MAC_H_X1SR1JB2 */

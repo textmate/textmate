@@ -59,19 +59,9 @@ NSButton* OakCreateCheckBox (NSString* label)
 
 NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel)
 {
-	if(@available(macos 10.12, *))
-	{
-		NSButton* res = [NSButton buttonWithTitle:label target:nil action:nil];
-		if(bezel != NSBezelStyleRounded)
-			res.bezelStyle = bezel;
-		return res;
-	}
-
-	NSButton* res = [[NSButton alloc] initWithFrame:NSZeroRect];
-	res.bezelStyle = bezel;
-	res.buttonType = NSButtonTypeMomentaryPushIn;
-	res.font       = OakControlFont();
-	res.title      = label;
+	NSButton* res = [NSButton buttonWithTitle:label target:nil action:nil];
+	if(bezel != NSBezelStyleRounded)
+		res.bezelStyle = bezel;
 	return res;
 }
 

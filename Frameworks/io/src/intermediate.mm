@@ -114,10 +114,7 @@ namespace path
 		{
 			NSError* error;
 			if(_tempDirectoryURL && ![NSFileManager.defaultManager removeItemAtURL:_tempDirectoryURL error:&error])
-			{
-				if(@available(macos 10.12, *))
-					os_log_error(OS_LOG_DEFAULT, "failed removing %{public}@: %{public}@\n", _tempDirectoryURL, error);
-			}
+				os_log_error(OS_LOG_DEFAULT, "failed removing %{public}@: %{public}@\n", _tempDirectoryURL, error);
 		}
 
 		char const* setup (std::string* errorMsg)
@@ -133,8 +130,7 @@ namespace path
 			[_destURL getResourceValue:&displayName forKey:NSURLLocalizedNameKey error:nil];
 			*errorMsg = to_s([NSString stringWithFormat:@"Failed to obtain replacement directory for %@: %@", displayName ?: _destURL.path, error.localizedDescription]);
 
-			if(@available(macos 10.12, *))
-				os_log_error(OS_LOG_DEFAULT, "failed to obtain NSItemReplacementDirectory for %{public}@: %{public}@\n", _destURL, error);
+			os_log_error(OS_LOG_DEFAULT, "failed to obtain NSItemReplacementDirectory for %{public}@: %{public}@\n", _destURL, error);
 			return nullptr;
 		}
 
@@ -157,8 +153,7 @@ namespace path
 			[_destURL getResourceValue:&displayName forKey:NSURLLocalizedNameKey error:nil];
 			*errorMsg = to_s([NSString stringWithFormat:@"Failed replacing %@ with %@: %@", displayName ?: _destURL.path, _tempURL.path, error.localizedDescription]);
 
-			if(@available(macos 10.12, *))
-				os_log_error(OS_LOG_DEFAULT, "failed replacing %{public}@ with %{public}@: %{public}@\n", _destURL, _tempURL, error);
+			os_log_error(OS_LOG_DEFAULT, "failed replacing %{public}@ with %{public}@: %{public}@\n", _destURL, _tempURL, error);
 			return false;
 		}
 
