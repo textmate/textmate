@@ -1124,7 +1124,7 @@ static NSDragOperation filter (NSDragOperation mask)
 
 	NSMutableDictionary<NSURL*, NSURL*>* urls = [NSMutableDictionary dictionary];
 	for(NSURL* url in [self URLsFromPasteboard:info.draggingPasteboard])
-		urls[url] = [newParent.resolvedURL URLByAppendingPathComponent:url.lastPathComponent isDirectory:op != NSDragOperationLink && url.tmHasDirectoryPath];
+		urls[url] = [newParent.resolvedURL URLByAppendingPathComponent:url.lastPathComponent isDirectory:op != NSDragOperationLink && url.hasDirectoryPath];
 
 	switch(op)
 	{

@@ -6,10 +6,6 @@ PUBLIC extern NSURL* const kURLLocationFavorites;
 
 @class OakFinderTag;
 
-@interface NSURL (CompatibilityWrapper)
-@property (nonatomic, readonly) BOOL tmHasDirectoryPath;
-@end
-
 @interface FileItem : NSObject <QLPreviewItem>
 @property (nonatomic) NSURL* URL;
 

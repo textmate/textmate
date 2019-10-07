@@ -237,7 +237,7 @@
 		{
 			NSRegularExpression* regex = [NSRegularExpression regularExpressionWithPattern:@"^(.*?)(?: \\d+)?(\\.\\w+)?$" options:0 error:nil];
 			NSString* name = [regex stringByReplacingMatchesInString:base options:0 range:NSMakeRange(0, base.length) withTemplate:[NSString stringWithFormat:@"$1 %ld$2", ++i]];
-			destURL = [destURL.URLByDeletingLastPathComponent URLByAppendingPathComponent:name isDirectory:destURL.tmHasDirectoryPath];
+			destURL = [destURL.URLByDeletingLastPathComponent URLByAppendingPathComponent:name isDirectory:destURL.hasDirectoryPath];
 		}
 		[existingURLs addObject:destURL];
 		[res addObject:destURL];

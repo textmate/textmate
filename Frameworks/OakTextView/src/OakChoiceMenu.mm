@@ -39,6 +39,7 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 		_tableView.allowsMultipleSelection            = YES;
 		_tableView.dataSource                         = self;
 		_tableView.delegate                           = self;
+		_tableView.backgroundColor                    = NSColor.clearColor;
 		[_tableView reloadData];
 
 		NSScrollView* scrollView         = [[NSScrollView alloc] initWithFrame:NSZeroRect];
@@ -48,33 +49,18 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 		scrollView.borderType            = NSNoBorder;
 		scrollView.documentView          = _tableView;
 		scrollView.autoresizingMask      = NSViewWidthSizable|NSViewHeightSizable;
+		scrollView.drawsBackground       = NO;
 
-		if(@available(macos 10.11, *))
-		{
-			NSVisualEffectView* effectView = [[NSVisualEffectView alloc] initWithFrame:NSZeroRect];
-			effectView.autoresizingMask = NSViewWidthSizable|NSViewHeightSizable;
+		NSVisualEffectView* effectView = [[NSVisualEffectView alloc] initWithFrame:NSZeroRect];
+		effectView.autoresizingMask = NSViewWidthSizable|NSViewHeightSizable;
+		effectView.material         = NSVisualEffectMaterialMenu;
 
-			effectView.material = NSVisualEffectMaterialMenu; // MAC_OS_X_VERSION_10_11
-			if(@available(macos 10.14, *))
-				effectView.blendingMode = NSVisualEffectBlendingModeBehindWindow; // MAC_OS_X_VERSION_10_14
+		if(@available(macos 10.14, *))
+			effectView.blendingMode = NSVisualEffectBlendingModeBehindWindow; // MAC_OS_X_VERSION_10_14
 
-			_tableView.backgroundColor = NSColor.clearColor;
-			scrollView.drawsBackground  = NO;
+		[effectView addSubview:scrollView positioned:NSWindowBelow relativeTo:nil];
 
-			[effectView addSubview:scrollView positioned:NSWindowBelow relativeTo:nil];
-
-			[self.window setContentView:effectView];
-		}
-		else
-		{
-			self.window.opaque             = NO;
-			self.window.alphaValue         = 0.97;
-			self.window.backgroundColor    = [NSColor colorWithCalibratedRed:1.00 green:0.96 blue:0.76 alpha:1];
-
-			_tableView.usesAlternatingRowBackgroundColors = YES;
-
-			[self.window setContentView:scrollView];
-		}
+		[self.window setContentView:effectView];
 	}
 	return self;
 }

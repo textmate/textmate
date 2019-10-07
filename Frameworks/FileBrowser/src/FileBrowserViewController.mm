@@ -692,7 +692,7 @@ static bool is_binary (std::string const& path)
 			}
 
 			if(newBase && ![newBase isEqualToString:base])
-				urls[url] = [url.URLByDeletingLastPathComponent URLByAppendingPathComponent:newBase isDirectory:url.tmHasDirectoryPath];
+				urls[url] = [url.URLByDeletingLastPathComponent URLByAppendingPathComponent:newBase isDirectory:url.hasDirectoryPath];
 		}
 	}
 
