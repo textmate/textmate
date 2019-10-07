@@ -1,4 +1,4 @@
-APP_MIN_OS = 10.12
+APP_MIN_OS = 10.11
 
 FLAGS += -c -pipe -fPIC -gdwarf-2
 FLAGS += -m64 -mmacosx-version-min=$APP_MIN_OS
