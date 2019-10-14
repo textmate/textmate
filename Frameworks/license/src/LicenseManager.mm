@@ -106,12 +106,8 @@ static NSTextField* OakCreateTextField ()
 	self.registerButton.keyEquivalent = @"\r";
 	self.cancelButton.keyEquivalent = @"\033";
 
-	NSString* const ownerPlaceholder = @"name";
-	NSString* const licensePlaceholder = @""
-		@"IFWGYIDDN5WXA33TNF2GKIDQNBSW433NMVXGCIDBOJSSA2LNOBSX-\n"
-		@"E3LBNZSW45BOEAQCACSBNRWCAY3PNZ2GC3LJNZQXIZLEEB2GQ2LO-\n"
-		@"M5ZSAYLSMUQHK3TTMF2GS43GMFRXI33SPEXAUQLMNQQHA2DFNZXW-\n"
-		@"2ZLOMEQGC4TFEBSW24DUPEQGC3TEEBZWK3DGNRSXG4ZOEAQAU";
+	NSString* const ownerPlaceholder   = @"name";
+	NSString* const licensePlaceholder = @"license key (4 lines)";
 
 	[self.ownerTextField   bind:NSValueBinding   toObject:self withKeyPath:@"representedObject.owner"           options:@{ NSContinuouslyUpdatesValueBindingOption: @YES, NSNullPlaceholderBindingOption: ownerPlaceholder }];
 	[self.licenseTextField bind:NSValueBinding   toObject:self withKeyPath:@"representedObject.licenseAsBase32" options:@{ NSContinuouslyUpdatesValueBindingOption: @YES, NSNullPlaceholderBindingOption: licensePlaceholder }];
