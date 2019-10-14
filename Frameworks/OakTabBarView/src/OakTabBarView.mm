@@ -1337,7 +1337,10 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 	_currentLayout = newLayout;
 
 	for(OakTabView* tabView in existingTabViews.allValues)
+	{
+		tabView.tabItem.tabView = nil;
 		[tabView removeFromSuperview];
+	}
 
 	NSRect createNewTabButtonFrame = _createNewTabButton.frame;
 	CGFloat x = -1, y = NSMinY(self.bounds)+1, height = NSHeight(self.bounds)-1;
