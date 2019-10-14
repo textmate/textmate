@@ -340,18 +340,24 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	{
 		[[self window] setOpaque:!theme->is_transparent() && !theme->gutter_styles().is_transparent()];
 		[textScrollView setBackgroundColor:[NSColor colorWithCGColor:theme->background(to_s(self.document.fileType))]];
+		[textScrollView setScrollerKnobStyle:theme->is_dark() ? NSScrollerKnobStyleLight : NSScrollerKnobStyleDark];
 
-		if(theme->is_dark())
+		if(@available(macOS 10.14, *))
 		{
-			NSImage* whiteIBeamImage = [NSImage imageNamed:@"IBeam white" inSameBundleAsClass:[self class]];
-			[whiteIBeamImage setSize:[[[NSCursor IBeamCursor] image] size]];
-			[_textView setIbeamCursor:[[NSCursor alloc] initWithImage:whiteIBeamImage hotSpot:NSMakePoint(4, 9)]];
-			[textScrollView setScrollerKnobStyle:NSScrollerKnobStyleLight];
+			[_textView setIbeamCursor:NSCursor.IBeamCursor];
 		}
 		else
 		{
-			[_textView setIbeamCursor:[NSCursor IBeamCursor]];
-			[textScrollView setScrollerKnobStyle:NSScrollerKnobStyleDark];
+			if(theme->is_dark())
+			{
+				NSImage* whiteIBeamImage = [NSImage imageNamed:@"IBeam white" inSameBundleAsClass:[self class]];		
+				[whiteIBeamImage setSize:NSCursor.IBeamCursor.image.size];
+				[_textView setIbeamCursor:[[NSCursor alloc] initWithImage:whiteIBeamImage hotSpot:NSMakePoint(4, 9)]];
+			}
+			else
+			{
+				[_textView setIbeamCursor:NSCursor.IBeamCursor];
+			}
 		}
 
 		[self updateGutterViewFont:self]; // trigger update of gutter view’s line number font
