@@ -1667,7 +1667,16 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		{ /* -------- */ },
 		{ @"Sticky",                   @selector(toggleSticky:),           .representedObject = clickedTab    },
 	};
-	return MBCreateMenu(items);
+
+	NSMenu* menu = MBCreateMenu(items);
+	for(NSMenuItem* item in menu.itemArray)
+	{
+		// In fullscreen mode the window’s delegate is ignored as a target for menu actions, therefore we have to manually set the target for these menu items (as a workaround for what I can only assume is an OS bug)
+
+		if(!item.target && item.action)
+			item.target = [NSApp targetForAction:item.action];
+	}
+	return menu;
 }
 
 // =========================
