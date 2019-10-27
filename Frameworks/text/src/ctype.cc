@@ -2,7 +2,6 @@
 #include "format.h"
 #include <oak/oak.h>
 #include <oak/debug.h>
-#include <crash/info.h>
 
 static CFCharacterSetRef create_character_set ()
 {
@@ -26,7 +25,6 @@ namespace text
 			return false;
 
 		static CFCharacterSetRef const cfset = create_character_set();
-		crash_reporter_info_t info("CFCharacterSetIsLongCharacterMember: %x", ch);
 		return CFCharacterSetIsLongCharacterMember(cfset, ch);
 	}
 
