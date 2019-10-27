@@ -823,7 +823,7 @@ namespace ng
 				{
 					index = isLeftward ? range.min() : range.max();
 
-					static std::set<move_unit_type> const left_right = { kSelectionMoveLeft,  kSelectionMoveRight, kSelectionMoveFreehandedRight, kSelectionMoveFreehandedLeft                                                                                                           };
+					static std::set<move_unit_type> const left_right = { kSelectionMoveLeft,  kSelectionMoveRight, kSelectionMoveFreehandedRight, kSelectionMoveFreehandedLeft };
 					if(left_right.find(unit) != left_right.end())
 						unit = kSelectionMoveNowhere;
 				}
