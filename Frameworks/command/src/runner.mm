@@ -139,6 +139,33 @@ namespace command
 			command->insert(0, "#!/bin/bash\n[[ -f \"${TM_SUPPORT_PATH}/lib/bash_init.sh\" ]] && . \"${TM_SUPPORT_PATH}/lib/bash_init.sh\"\n\n");
 	}
 
+	static NSString* hash (NSData* data)
+	{
+		uint8_t digest[CC_SHA1_DIGEST_LENGTH];
+		CC_SHA1(data.bytes, data.length, digest);
+
+		NSMutableString* output = [NSMutableString stringWithCapacity:CC_SHA1_DIGEST_LENGTH * 2];
+		for(int i = 0; i < CC_SHA1_DIGEST_LENGTH; i++)
+			[output appendFormat:@"%02x", digest[i]];
+		return output;
+	}
+
+	std::string create_script_path (std::string const& command)
+	{
+		NSData* data = [NSData dataWithBytesNoCopy:(void*)command.data() length:command.size() freeWhenDone:NO];
+
+		NSString* scriptPath = [NSString pathWithComponents:@[ NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).firstObject, NSBundle.mainBundle.bundleIdentifier, @"Scripts", hash(data) ]];
+		if(![NSFileManager.defaultManager isExecutableFileAtPath:scriptPath])
+		{
+			[NSFileManager.defaultManager createDirectoryAtPath:scriptPath.stringByDeletingLastPathComponent withIntermediateDirectories:YES attributes:nil error:nullptr];
+
+			[data writeToFile:scriptPath atomically:NO];
+			[NSFileManager.defaultManager setAttributes:@{ NSFilePosixPermissions: @(S_IRWXU) } ofItemAtPath:scriptPath error:nil];
+		}
+
+		return scriptPath.fileSystemRepresentation;
+	}
+
 	// ==================
 	// = Command Runner =
 	// ==================
@@ -159,7 +186,7 @@ namespace command
 		ASSERT(_delegate);
 		ASSERT(_command.command.find("#!") == 0);
 
-		_temp_path = path::temp("command", _command.command);
+		_temp_path = create_script_path(_command.command);
 		ASSERT(_temp_path != NULL_STR);
 
 		int stdinRead, stdinWrite;
@@ -272,7 +299,6 @@ namespace command
 		newOut.swap(_out);
 		newErr.swap(_err);
 
-		unlink(_temp_path.c_str());
 		_temp_path = NULL_STR;
 
 		output::type placement         = _command.output;

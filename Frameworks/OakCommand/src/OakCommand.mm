@@ -10,7 +10,7 @@
 #import <text/trim.h>
 #import <text/encode.h>
 #import <text/parse.h>
-#import <command/runner.h> // bundle_command_t, fix_shebang
+#import <command/runner.h> // bundle_command_t, fix_shebang, create_script_path
 #import <bundles/wrappers.h>
 #import <regexp/format_string.h>
 #import <OakAppKit/OakToolTip.h>
@@ -364,13 +364,12 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 	auto htmlOutHandler = ^(char const* bytes, size_t len) { [self writeHTMLOutput:bytes length:len]; };
 
 	std::string const directory = format_string::expand("${TM_DIRECTORY:-${TM_PROJECT_DIRECTORY:-$TMPDIR}}", _environment);
-	std::string scriptPath = path::temp("command", _bundleCommand.command);
+	std::string const scriptPath = command::create_script_path(_bundleCommand.command);
 	ASSERT(scriptPath != NULL_STR);
 
 	__block BOOL didTerminate = NO;
 	_processIdentifier = run_command(_dispatchGroup, scriptPath, inputFH.fileDescriptor, _environment, directory, CFRunLoopGetCurrent(), hasHTMLOutput ? htmlOutHandler : stdoutHandler, stderrHandler, ^(int status) {
 		_processIdentifier = 0;
-		unlink(scriptPath.c_str());
 
 		std::string newOut, newErr;
 		oak::replace_copy(out.begin(), out.end(), scriptPath.begin(), scriptPath.end(), _bundleCommand.name.begin(), _bundleCommand.name.end(), back_inserter(newOut));

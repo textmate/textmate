@@ -11,6 +11,7 @@
 namespace command
 {
 	PUBLIC void fix_shebang (std::string* command);
+	PUBLIC std::string create_script_path (std::string const& command);
 
 	struct delegate_t;
 	struct runner_t;
