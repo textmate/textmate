@@ -157,6 +157,9 @@ namespace
 				if(stream._requestedExists && requestedPath != stream._observed.path())
 					path = path::join(requestedPath, path::relative_to(path, stream._observed.path()));
 
+				if(path.size() > 1 && path.back() == '/')
+					path.erase(path.size()-1, 1);
+
 				D(DBF_FS_Events, bug("%zu/%zu) 0x%llx: %s%s%s%s\n", i+1, numEvents, eventIds[i], path.c_str(), (eventFlags[i] & kFSEventStreamEventFlagMustScanSubDirs) ? ", recursive" : "", (eventFlags[i] & kFSEventStreamEventFlagHistoryDone) ? ", history done" : "", stream._replay ? " (replay history)" : ""););
 				if(eventFlags[i] & kFSEventStreamEventFlagHistoryDone)
 				{
