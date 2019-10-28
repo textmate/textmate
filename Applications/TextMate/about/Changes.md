@@ -2,13 +2,13 @@ Title: Release Notes
 
 # Changes
 
-## 2019-10-27 (v2.0.2)
+## 2019-10-28 (v2.0.3)
 
 * Fixed: Context menu items for tabs would be disabled in full screen mode.
 * Fixed: Changes made to bundles on disk could go undetected on macOS 10.15.
 * Fixed: Performance for executing bundle commands on macOS 10.15 would depend on network connectivity as Apple seems to call home each time a new script is executed (so now we re-use the temporary files to only have them call home for first launch).
 * Fixed: In rare circumstances the tab bar (after launch) would have one tab missing even though space was allocated for this tab.
-* See [all changes since v2.0.1](https://github.com/textmate/textmate/compare/v2.0.1...v2.0.2)
+* See [all changes since v2.0.1](https://github.com/textmate/textmate/compare/v2.0.1...v2.0.3)
 
 ## 2019-10-07 (v2.0.1)
 
