@@ -386,7 +386,7 @@ class Buildfile
     })
 
     self.rule('sign', {
-      'command'     => 'xcrun codesign $args --deep -fs "$identity" $in && touch $out',
+      'command'     => 'xcrun codesign $args -fs "$identity" $in && touch $out',
       'description' => 'Sign ‘$in’…',
     })
 
