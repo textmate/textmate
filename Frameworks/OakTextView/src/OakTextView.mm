@@ -1218,10 +1218,18 @@ doScroll:
 	//     similar to basic_tree_t for conversion between UTF-8 and UTF-16 indexes.
 	//     Currently poor performance for large documents (O(N)) would then get to O(log(N))
 	//     Also currently copy of whole text is created here, which is not optimal
-	size_t from = range.min().index, to = range.max().index;
+
+	size_t to = std::min(range.max().index, documentView->size());
+	if(to == 0)
+		return NSMakeRange(0, 0);
+
 	std::string const text = documentView->substr(0, to);
+	size_t from = std::min(range.min().index, text.size());
+
+	crash_reporter_info_t info("%s %s, actual %zu-%zu", sel_getName(_cmd), to_s(range).c_str(), from, to);
+
 	NSUInteger location = utf16::distance(text.data(), text.data() + from);
-	NSUInteger length   = utf16::distance(text.data() + from, text.data() + to);
+	NSUInteger length   = utf16::distance(text.data() + from, text.data() + text.size());
 	return NSMakeRange(location, length);
 }
 
