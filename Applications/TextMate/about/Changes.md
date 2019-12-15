@@ -2,6 +2,11 @@ Title: Release Notes
 
 # Changes
 
+## 2019-12-15 (v2.0.4)
+
+* Possible fix for accessibility features causing crashes on macOS 10.15.
+* See [all changes since v2.0.3](https://github.com/textmate/textmate/compare/v2.0.3...v2.0.4)
+
 ## 2019-10-28 (v2.0.3)
 
 * Fixed: Context menu items for tabs would be disabled in full screen mode.
