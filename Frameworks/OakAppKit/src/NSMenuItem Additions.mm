@@ -5,23 +5,16 @@
 #import <text/utf8.h>
 #import <ns/ns.h>
 
-@interface MenuMutableAttributedString : NSMutableAttributedString
-{
-	NSMutableAttributedString* contents;
-	CGSize size;
-}
-- (void)appendTableCellWithString:(NSString*)string table:(NSTextTable*)table textAlignment:(NSTextAlignment)textAlignment verticalAlignment:(NSTextBlockVerticalAlignment)verticalAlignment font:(NSFont*)font row:(NSInteger)row column:(NSInteger)column;
-- (CGSize)size;
+@interface MenuAttributedString : NSAttributedString
+@property (nonatomic) NSAttributedString* wrappedAttributedString;
+@property (nonatomic) CGSize desiredSize;
 @end
 
-@implementation MenuMutableAttributedString
-
-// Methods to override in subclass
-
+@implementation MenuAttributedString
 - (instancetype)init
 {
 	if(self = [super init])
-		contents = [[NSMutableAttributedString alloc] init];
+		_wrappedAttributedString = [[NSAttributedString alloc] init];
 	return self;
 }
 
@@ -30,87 +23,40 @@
 	if(self = [self init])
 	{
 		if(anAttributedString)
-			[contents setAttributedString:anAttributedString];
+			_wrappedAttributedString = [anAttributedString copy];
 	}
 	return self;
 }
 
 - (NSString*)string
 {
-	return [contents string];
+	return [_wrappedAttributedString string];
 }
 
 - (NSDictionary*)attributesAtIndex:(NSUInteger)location effectiveRange:(NSRange*)range
 {
-	return [contents attributesAtIndex:location effectiveRange:range];
-}
-
-- (void)replaceCharactersInRange:(NSRange)range withString:(NSString*)string
-{
-	[contents replaceCharactersInRange:range withString:string];
-}
-
-- (void)setAttributes:(NSDictionary*)attributes range:(NSRange)range
-{
-	[contents setAttributes:attributes range:range];
+	return [_wrappedAttributedString attributesAtIndex:location effectiveRange:range];
 }
 
 - (id)copyWithZone:(NSZone*)zone
 {
-	MenuMutableAttributedString* copy = [MenuMutableAttributedString allocWithZone:zone];
-	copy->contents = [contents copyWithZone:zone];
-	copy->size = size;
+	MenuAttributedString* copy = [[MenuAttributedString allocWithZone:zone] initWithAttributedString:_wrappedAttributedString];
+	copy.desiredSize = _desiredSize;
 	return copy;
 }
 
-// NOTE: AppKit additions produce invalid values here, provide our own implementation
+// We overload this method to return a height without the newline that
+// is required to make the attributed string use the menu’s full width
+
+- (NSRect)boundingRectWithSize:(NSSize)aSize options:(NSStringDrawingOptions)options context:(NSStringDrawingContext*)context
+{
+	return NSMakeRect(0, 0, _desiredSize.width, _desiredSize.height);
+}
 
 - (NSRect)boundingRectWithSize:(NSSize)aSize options:(NSStringDrawingOptions)options // Not called after MAC_OS_X_VERSION_10_14
 {
 	return [self boundingRectWithSize:aSize options:options context:nil];
 }
-
-- (NSRect)boundingRectWithSize:(NSSize)aSize options:(NSStringDrawingOptions)options context:(NSStringDrawingContext*)context
-{
-	return NSMakeRect(0, 0, size.width, size.height);
-}
-
-// Helper method for adding table cell into the attributed string
-
-- (void)appendTableCellWithString:(NSString*)string table:(NSTextTable*)table textAlignment:(NSTextAlignment)textAlignment verticalAlignment:(NSTextBlockVerticalAlignment)verticalAlignment font:(NSFont*)font row:(NSInteger)row column:(NSInteger)column;
-{
-	CGSize stringSize = [string sizeWithAttributes:@{ NSFontAttributeName: font }];
-
-	NSTextTableBlock* block = [[NSTextTableBlock alloc] initWithTable:table startingRow:row rowSpan:1 startingColumn:column columnSpan:1];
-
-	if(column > 0)
-		[block setContentWidth:stringSize.width type:NSTextBlockAbsoluteValueType];
-
-	block.verticalAlignment = verticalAlignment;
-
-	NSMutableParagraphStyle* paragraphStyle = [NSMutableParagraphStyle new];
-	[paragraphStyle setTextBlocks:@[ block ]];
-	[paragraphStyle setAlignment:textAlignment];
-	[paragraphStyle setLineBreakMode:NSLineBreakByClipping];
-
-	string = [string stringByAppendingString:@"\n"];
-
-	NSMutableAttributedString* cellString = [[NSMutableAttributedString alloc] initWithString:string];
-	[cellString addAttribute:NSParagraphStyleAttributeName value:paragraphStyle range:NSMakeRange(0, [cellString length])];
-	[cellString addAttribute:NSFontAttributeName value:font range:NSMakeRange(0, [cellString length])];
-
-	size.width += stringSize.width;
-	if(size.height < stringSize.height)
-		size.height = stringSize.height;
-
-	[self appendAttributedString:cellString];
-}
-
-- (CGSize)size
-{
-	return size;
-}
-
 @end
 
 static char const* kOakMenuItemKeyEquivalent = "OakMenuItemKeyEquivalent";
@@ -136,13 +82,53 @@ static char const* kOakMenuItemTabTrigger    = "OakMenuItemTabTrigger";
 
 - (void)setActivationString:(NSString*)anActivationString withFont:(NSFont*)aFont
 {
-	MenuMutableAttributedString* attributedTitle = [MenuMutableAttributedString new];
-	NSTextTable* table = [NSTextTable new];
-	[table setNumberOfColumns:2];
+	NSFont* menuFont = self.menu.font ?: [NSFont menuFontOfSize:0];
 
-	NSFont* font = self.menu.font ?: [NSFont menuFontOfSize:0];
-	[attributedTitle appendTableCellWithString:self.title table:table textAlignment:NSTextAlignmentLeft verticalAlignment:NSTextBlockMiddleAlignment font:font row:0 column:0];
-	[attributedTitle appendTableCellWithString:anActivationString table:table textAlignment:NSTextAlignmentRight verticalAlignment:aFont && aFont.pointSize >= 13 ? NSTextBlockBottomAlignment : NSTextBlockMiddleAlignment font:(aFont ?: font) row:0 column:1];
+	NSString* leftString  = self.title;
+	NSString* rightString = anActivationString;
+
+	NSSize leftSize  = [leftString sizeWithAttributes:@{ NSFontAttributeName: menuFont }];
+	NSSize rightSize = [rightString sizeWithAttributes:@{ NSFontAttributeName: aFont ?: menuFont }];
+
+	NSTextTable* table = [[NSTextTable alloc] init];
+	table.numberOfColumns = 2;
+
+	NSTextTableBlock* leftBlock  = [[NSTextTableBlock alloc] initWithTable:table startingRow:0 rowSpan:1 startingColumn:0 columnSpan:1];
+	NSTextTableBlock* rightBlock = [[NSTextTableBlock alloc] initWithTable:table startingRow:0 rowSpan:1 startingColumn:1 columnSpan:1];
+
+	leftBlock.verticalAlignment  = NSTextBlockMiddleAlignment;
+	rightBlock.verticalAlignment = aFont && aFont.pointSize >= 13 ? NSTextBlockBottomAlignment : NSTextBlockMiddleAlignment;
+
+	[rightBlock setContentWidth:rightSize.width type:NSTextBlockAbsoluteValueType];
+
+	NSMutableParagraphStyle* leftPStyle = [[NSMutableParagraphStyle alloc] init];
+	leftPStyle.textBlocks    = @[ leftBlock ];
+	leftPStyle.alignment     = NSTextAlignmentLeft;
+	leftPStyle.lineBreakMode = NSLineBreakByClipping;
+
+	NSMutableParagraphStyle* rightPStyle = [[NSMutableParagraphStyle alloc] init];
+	rightPStyle.textBlocks    = @[ rightBlock ];
+	rightPStyle.alignment     = NSTextAlignmentRight;
+	rightPStyle.lineBreakMode = NSLineBreakByClipping;
+
+	// This is required to make the attributed string use the menu’s full width
+	leftString = [leftString stringByAppendingString:@"\n"];
+
+	NSMutableAttributedString* attributedString = [[NSMutableAttributedString alloc] init];
+
+	[attributedString appendAttributedString:[[NSAttributedString alloc] initWithString:leftString attributes:@{
+		NSParagraphStyleAttributeName: leftPStyle,
+		NSFontAttributeName:           menuFont,
+	}]];
+
+	[attributedString appendAttributedString:[[NSAttributedString alloc] initWithString:rightString attributes:@{
+		NSParagraphStyleAttributeName: rightPStyle,
+		NSFontAttributeName:           aFont ?: menuFont,
+	}]];
+
+	MenuAttributedString* attributedTitle = [[MenuAttributedString alloc] initWithAttributedString:attributedString];
+	// Set the string’s bounding box to the height *excluding* the newline appended above
+	attributedTitle.desiredSize = NSMakeSize(leftSize.width + rightSize.width, MAX(leftSize.height, rightSize.height));
 
 	NSString* plainTitle = self.title;
 	self.attributedTitle = attributedTitle;
