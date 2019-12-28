@@ -2,25 +2,18 @@ Title: Release Notes
 
 # Changes
 
-## 2019-12-15 (v2.0.4)
+## 2019-12-28 (v2.0.5)
 
-* Possible fix for accessibility features causing crashes on macOS 10.15.
-* See [all changes since v2.0.3](https://github.com/textmate/textmate/compare/v2.0.3...v2.0.4)
-
-## 2019-10-28 (v2.0.3)
-
+* Fixed: Double height of menu items with custom shortcuts on macOS 10.15.
+* Fixed: Crashes when using accessibility features on macOS 10.15.
 * Fixed: Context menu items for tabs would be disabled in full screen mode.
 * Fixed: Changes made to bundles on disk could go undetected on macOS 10.15.
-* Fixed: Performance for executing bundle commands on macOS 10.15 would depend on network connectivity as Apple seems to call home each time a new script is executed (so now we re-use the temporary files to only have them call home for first launch).
+* Fixed: Delay when re-executing (bundle) commands on macOS 10.15. Starting with macOS 10.15 Apple will “call home” each time a new script/binary is executed, this can have a delay of more than a second, depending on internet connectivity/location. The result seems to be cached per inode, previously TextMate would use temporary files when executing scripts or shell commands (giving them a new inode on each run), it now re-uses these files to avoid the delay on repeated executions.
 * Fixed: In rare circumstances the tab bar (after launch) would have one tab missing even though space was allocated for this tab.
-* See [all changes since v2.0.1](https://github.com/textmate/textmate/compare/v2.0.1...v2.0.3)
-
-## 2019-10-07 (v2.0.1)
-
-* Allow loading plug-ins not signed by Apple nor MacroMates.
 * Fixed: File permission flags were lost when saving using the default atomic save algorithm.
 * Fixed: Disposing a nib using `"$DIALOG" nib --dispose «token»` would not close the nib’s window.
-* See [all changes since v2.0](https://github.com/textmate/textmate/compare/v2.0...v2.0.1)
+* Fixed: Plug-ins not signed by Apple nor MacroMates would not be loaded.
+* See [all changes since v2.0](https://github.com/textmate/textmate/compare/v2.0...v2.0.5)
 
 ## 2019-09-15 (v2.0)
 
