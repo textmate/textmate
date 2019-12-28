@@ -2,6 +2,10 @@ Title: Release Notes
 
 # Changes
 
+## 2019-12-28 (v2.0.6)
+
+* Rebuild using older SDK as possible workaround for newly introduced crash on macOS 10.13.
+
 ## 2019-12-28 (v2.0.5)
 
 * Fixed: Double height of menu items with custom shortcuts on macOS 10.15.
