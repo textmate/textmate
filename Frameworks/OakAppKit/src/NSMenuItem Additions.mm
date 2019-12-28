@@ -65,7 +65,12 @@
 
 // NOTE: AppKit additions produce invalid values here, provide our own implementation
 
-- (NSRect)boundingRectWithSize:(NSSize)aSize options:(NSStringDrawingOptions)options
+- (NSRect)boundingRectWithSize:(NSSize)aSize options:(NSStringDrawingOptions)options // Not called after MAC_OS_X_VERSION_10_14
+{
+	return [self boundingRectWithSize:aSize options:options context:nil];
+}
+
+- (NSRect)boundingRectWithSize:(NSSize)aSize options:(NSStringDrawingOptions)options context:(NSStringDrawingContext*)context
 {
 	return NSMakeRect(0, 0, size.width, size.height);
 }
