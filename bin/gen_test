@@ -30,7 +30,7 @@ ARGV.each do |file|
   end
 end
 
-STDOUT << ERB.new(DATA.read, 0, '-<>').result(binding)
+STDOUT << ERB.new(DATA.read, trim_mode: '-<>').result(binding)
 
 __END__
 #line 37 "<%= $PROGRAM_NAME %>"
