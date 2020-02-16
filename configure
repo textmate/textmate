@@ -82,6 +82,16 @@ for dep in ninja ragel multimarkdown pgrep pkill; do
 	which -s "$dep" || error "*** dependency missing: ‘${dep}’."
 done
 
+for libplistdir in /usr/include/plist /{opt,usr}/local/include/plist ; do
+    if [[ -d $libplistdir ]]; then
+        if which -s brew && brew ls --versions libplist > /dev/null; then
+            error "*** conflict found: ‘libplist’ at: ${libplistdir}. Use \`brew unlink libplist\` before building."
+        else
+            error "*** conflict found: ‘libplist’ at: ${libplistdir}. Remove or unlink this directory before building."
+        fi
+    fi
+done
+
 # =====================================
 # = Generate fixtures and build files =
 # =====================================
