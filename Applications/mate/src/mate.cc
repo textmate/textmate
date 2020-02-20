@@ -157,7 +157,7 @@ static void usage (FILE* io)
 		"\n"
 		"By default %1$s will wait for files to be closed if the command name\n"
 		"has a \"_wait\" suffix (e.g. via a symbolic link) or when used as a\n"
-		"filter like in this examples:\n"
+		"filter as in these examples:\n"
 		"\n"
 		"    ls *.tex|%1$s|sh%3$s-w implied\n"
 		"    %1$s -|cat -n   %3$s-w implied (read from stdin)\n"
