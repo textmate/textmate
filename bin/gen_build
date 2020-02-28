@@ -672,16 +672,17 @@ class CompileClang < Compiler
     info = COMPILER_INFO[@canonical_ext]
 
     flags = [ "-include #{@@prelude[@canonical_ext][:include]}" ]
-    flags << asset.context[info[:flags]]
-    flags << asset.context['FLAGS']
+    deps  = [ @@prelude[@canonical_ext][:outfile] ]
 
     order_only = nil
 
-    deps = [ @@prelude[@canonical_ext][:outfile] ]
     if dirs = asset.context.array_for('include_dirs')
       flags << dirs.map { |dir| "-I#{dir}" }.shelljoin
       order_only = dirs
     end
+
+    flags << asset.context[info[:flags]]
+    flags << asset.context['FLAGS']
 
     new_asset = self.derive_asset(asset, buildfile.dir)
     buildfile.build(info[:rule], asset.file, new_asset.file, flags, deps, nil, order_only)
