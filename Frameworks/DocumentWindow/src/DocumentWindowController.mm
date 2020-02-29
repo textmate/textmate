@@ -186,6 +186,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 		NSUInteger windowStyle = (NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskMiniaturizable);
 		self.window = [[NSWindow alloc] initWithContentRect:[NSWindow contentRectForFrameRect:[self frameRectForNewWindow] styleMask:windowStyle] styleMask:windowStyle backing:NSBackingStoreBuffered defer:NO];
+		self.window.animationBehavior  = NSWindowAnimationBehaviorDocumentWindow;
 		self.window.collectionBehavior = NSWindowCollectionBehaviorFullScreenPrimary;
 		self.window.delegate           = self;
 		self.window.releasedWhenClosed = NO;
