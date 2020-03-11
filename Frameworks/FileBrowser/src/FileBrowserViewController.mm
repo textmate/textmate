@@ -128,7 +128,8 @@ static bool is_binary (std::string const& path)
 
 - (NSView*)headerView                { return self.fileBrowserView.headerView;              }
 - (NSOutlineView*)outlineView        { return self.fileBrowserView.outlineView; }
-- (NSString*)path                    { return self.fileBrowserView.URL.filePathURL.path;    }
+- (NSURL*)URL                        { return self.fileBrowserView.URL;                     }
+- (NSString*)path                    { return self.URL.filePathURL.path;                    }
 - (NSURL*)directoryURLForNewItems    { return self.fileBrowserView.directoryURLForNewItems; }
 - (NSArray<FileItem*>*)selectedItems { return self.fileBrowserView.selectedItems; }
 - (NSArray<NSURL*>*)selectedFileURLs { return [[self.selectedItems filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"URL.isFileURL == YES"]] valueForKeyPath:@"URL"]; }

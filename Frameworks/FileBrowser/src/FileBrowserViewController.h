@@ -10,7 +10,8 @@
 @interface FileBrowserViewController : NSViewController
 @property (nonatomic, weak) id <FileBrowserDelegate> delegate;
 
-@property (nonatomic, readonly) NSString*        path;
+@property (nonatomic, readonly) NSURL*           URL;
+@property (nonatomic, readonly) NSString*        path; // Returns self.URL.filePathURL.path
 @property (nonatomic, readonly) NSURL*           directoryURLForNewItems;
 @property (nonatomic, readonly) NSArray<NSURL*>* selectedFileURLs;
 
