@@ -1,7 +1,11 @@
 #import "FileBrowserViewController.h"
 #import "FileBrowserView.h"
+#import "FileBrowserOutlineView.h"
+#import "FileBrowserNotifications.h"
 #import "FileItem.h"
+#import "FileItemTableCellView.h"
 #import "SCMManager.h"
+#import "FSEventsManager.h"
 #import "OFB/OFBHeaderView.h"
 #import "OFB/OFBActionsView.h"
 #import "OFB/OFBFinderTagsChooser.h"
@@ -19,6 +23,7 @@
 #import <regexp/glob.h>
 #import <settings/settings.h>
 #import <text/ctype.h>
+#import <text/utf8.h>
 
 static bool is_binary (std::string const& path)
 {
@@ -32,7 +37,85 @@ static bool is_binary (std::string const& path)
 	return false;
 }
 
-@interface FileBrowserViewController () <NSMenuDelegate>
+static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray* rhs)
+{
+	NSInteger width  = lhs.count + 1;
+	NSInteger height = rhs.count + 1;
+
+	NSInteger* matrix = new NSInteger[width * height];
+
+	for(NSInteger i = lhs.count; i >= 0; --i)
+	{
+		for(NSInteger j = rhs.count; j >= 0; --j)
+		{
+			if(i == lhs.count || j == rhs.count)
+				matrix[width*i + j] = 0;
+			else if([lhs[i] isEqual:rhs[j]])
+				matrix[width*i + j] = matrix[width*(i+1) + j+1] + 1;
+			else
+				matrix[width*i + j] = MAX(matrix[width*(i+1) + j], matrix[width*i + j+1]);
+		}
+	}
+
+	NSMutableIndexSet* res = [NSMutableIndexSet indexSet];
+	for(NSInteger i = 0, j = 0; i < lhs.count && j < rhs.count; )
+	{
+		if([lhs[i] isEqual:rhs[j]])
+		{
+			[res addIndex:i];
+			i++;
+			j++;
+		}
+		else if(matrix[width*i + j+1] < matrix[width*(i+1) + j])
+		{
+			i++;
+		}
+		else
+		{
+			j++;
+		}
+	}
+
+	delete [] matrix;
+
+	return res;
+}
+
+@interface FileBrowserViewController () <NSMenuDelegate, NSOutlineViewDataSource, NSOutlineViewDelegate, NSTextFieldDelegate, QLPreviewPanelDataSource>
+{
+	NSUndoManager* _fileBrowserUndoManager;
+	NSArray<FileItem*>* _previewItems;
+
+	NSMutableDictionary<NSURL*, id>* _fileItemObservers;
+
+	NSMutableSet<NSURL*>* _loadingURLs;
+	NSArray<void(^)()>* _loadingURLsCompletionHandlers;
+
+	NSInteger _expandingChildrenCounter;
+	NSInteger _collapsingChildrenCounter;
+	NSInteger _nestedCollapsingChildrenCounter;
+}
+@property (nonatomic) BOOL canExpandSymbolicLinks;
+@property (nonatomic) BOOL canExpandPackages;
+@property (nonatomic) BOOL sortDirectoriesBeforeFiles;
+
+@property (nonatomic) BOOL showExcludedItems;
+
+@property (nonatomic, readonly) NSArray<FileItem*>* selectedItems;
+@property (nonatomic, readonly) NSArray<FileItem*>* previewableItems;
+
+@property (nonatomic) NSMutableSet<NSURL*>* expandedURLs;
+@property (nonatomic) NSMutableSet<NSURL*>* selectedURLs;
+
+- (void)expandURLs:(NSArray<NSURL*>*)expandURLs selectURLs:(NSArray<NSURL*>*)selectURLs;
+- (NSRect)imageRectOfItem:(FileItem*)item;
+
+- (void)updateDisambiguationSuffixInParent:(FileItem*)item;
+
+// =============================
+// = FileBrowserViewController =
+// =============================
+
 @property (nonatomic) NSMenuItem* currentLocationMenuItem;
 @property (nonatomic) NSMutableArray<NSDictionary*>* history;
 @property (nonatomic) NSInteger historyIndex;
@@ -43,8 +126,33 @@ static bool is_binary (std::string const& path)
 + (NSSet*)keyPathsForValuesAffectingCanGoBack    { return [NSSet setWithObjects:@"historyIndex", nil]; }
 + (NSSet*)keyPathsForValuesAffectingCanGoForward { return [NSSet setWithObjects:@"historyIndex", nil]; }
 
+- (instancetype)init
+{
+	if(self = [super init])
+	{
+		_fileItemObservers = [NSMutableDictionary dictionary];
+		_loadingURLs       = [NSMutableSet set];
+
+		_canExpandSymbolicLinks     = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsAllowExpandingLinksKey];
+		_canExpandPackages          = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsAllowExpandingPackagesKey];
+		_sortDirectoriesBeforeFiles = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsFoldersOnTopKey];
+
+		_expandedURLs = [NSMutableSet set];
+		_selectedURLs = [NSMutableSet set];
+
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:NSUserDefaults.standardUserDefaults];
+	}
+	return self;
+}
+
 - (void)dealloc
 {
+	[NSNotificationCenter.defaultCenter removeObserver:self name:NSUserDefaultsDidChangeNotification object:NSUserDefaults.standardUserDefaults];
+
+	for(id observer in _fileItemObservers.allValues)
+		[FileItem removeObserver:observer];
+	_fileItemObservers = nil;
+
 	if(_currentLocationMenuItem)
 	{
 		[_currentLocationMenuItem unbind:NSTitleBinding];
@@ -55,7 +163,16 @@ static bool is_binary (std::string const& path)
 	{
 		[headerView.goBackButton    unbind:NSEnabledBinding];
 		[headerView.goForwardButton unbind:NSEnabledBinding];
+
+		[NSNotificationCenter.defaultCenter removeObserver:self name:NSPopUpButtonWillPopUpNotification object:headerView.folderPopUpButton];
 	}
+}
+
+- (void)userDefaultsDidChange:(id)sender
+{
+	self.canExpandSymbolicLinks     = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsAllowExpandingLinksKey];
+	self.canExpandPackages          = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsAllowExpandingPackagesKey];
+	self.sortDirectoriesBeforeFiles = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsFoldersOnTopKey];
 }
 
 - (void)loadView
@@ -69,16 +186,14 @@ static bool is_binary (std::string const& path)
 	{
 		_fileBrowserView = [[FileBrowserView alloc] initWithFrame:NSZeroRect];
 
-		_fileBrowserView.target      = self;
-		_fileBrowserView.openAction  = @selector(didClickItemImageButton:);
-		_fileBrowserView.closeAction = @selector(didClickItemCloseButton:);
-
 		_currentLocationMenuItem = [[NSMenuItem alloc] initWithTitle:@"" action:@selector(takeURLFrom:) keyEquivalent:@""];
 		_currentLocationMenuItem.target = self;
-		[_currentLocationMenuItem bind:NSTitleBinding toObject:_fileBrowserView withKeyPath:@"fileItem.displayName" options:nil];
-		[_currentLocationMenuItem bind:NSImageBinding toObject:_fileBrowserView withKeyPath:@"fileItem.image" options:nil];
+		[_currentLocationMenuItem bind:NSTitleBinding toObject:self withKeyPath:@"fileItem.displayName" options:nil];
+		[_currentLocationMenuItem bind:NSImageBinding toObject:self withKeyPath:@"fileItem.image" options:nil];
 
 		NSOutlineView* outlineView = _fileBrowserView.outlineView;
+		outlineView.dataSource   = self;
+		outlineView.delegate     = self;
 		outlineView.target       = self;
 		outlineView.action       = @selector(didSingleClickOutlineView:);
 		outlineView.doubleAction = @selector(didDoubleClickOutlineView:);
@@ -123,15 +238,12 @@ static bool is_binary (std::string const& path)
 
 - (void)toggleShowInvisibles:(id)sender
 {
-	self.fileBrowserView.showExcludedItems = !self.fileBrowserView.showExcludedItems;
+	self.showExcludedItems = !self.showExcludedItems;
 }
 
 - (NSView*)headerView                { return self.fileBrowserView.headerView;              }
 - (NSOutlineView*)outlineView        { return self.fileBrowserView.outlineView;             }
-- (NSURL*)URL                        { return self.fileBrowserView.URL;                     }
 - (NSString*)path                    { return self.URL.filePathURL.path;                    }
-- (NSURL*)directoryURLForNewItems    { return self.fileBrowserView.directoryURLForNewItems; }
-- (NSArray<FileItem*>*)selectedItems { return self.fileBrowserView.selectedItems;           }
 - (NSArray<NSURL*>*)selectedFileURLs { return [[self.selectedItems filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"URL.isFileURL == YES"]] valueForKeyPath:@"URL"]; }
 
 - (BOOL)canGoBack                    { return _historyIndex > 0; }
@@ -150,7 +262,7 @@ static bool is_binary (std::string const& path)
 - (void)setHistoryIndex:(NSInteger)index
 {
 	_historyIndex = index;
-	self.fileBrowserView.URL = self.history[index][@"url"];
+	self.URL = self.history[index][@"url"];
 }
 
 - (void)addHistoryURL:(NSURL*)url
@@ -172,7 +284,7 @@ static bool is_binary (std::string const& path)
 
 - (void)goToURL:(NSURL*)url
 {
-	if(url && ![self.fileBrowserView.URL isEqual:url])
+	if(url && ![self.URL isEqual:url])
 		[self addHistoryURL:url];
 }
 
@@ -182,7 +294,7 @@ static bool is_binary (std::string const& path)
 
 - (void)goToFavorites:(id)sender
 {
-	if(![self.fileBrowserView.URL isEqual:kURLLocationFavorites])
+	if(![self.URL isEqual:kURLLocationFavorites])
 		[self goToURL:kURLLocationFavorites];
 	else if(self.canGoBack)
 		[self goBack:sender];
@@ -190,7 +302,7 @@ static bool is_binary (std::string const& path)
 
 - (void)goToSCMDataSource:(id)sender
 {
-	NSURL* url = self.fileBrowserView.URL;
+	NSURL* url = self.URL;
 	if([url.scheme isEqualToString:@"file"])
 	{
 		SCMRepository* repository = [SCMManager.sharedInstance repositoryAtURL:url];
@@ -204,12 +316,12 @@ static bool is_binary (std::string const& path)
 
 			if(repository)
 			{
-				alert.messageText     = [NSString stringWithFormat:@"Version control is disabled for “%@”.", self.fileBrowserView.fileItem.localizedName];
+				alert.messageText     = [NSString stringWithFormat:@"Version control is disabled for “%@”.", self.fileItem.localizedName];
 				alert.informativeText = @"For performance reasons TextMate will not monitor version control information for this folder.";
 			}
 			else
 			{
-				alert.messageText     = [NSString stringWithFormat:@"Version control is not available for “%@”.", self.fileBrowserView.fileItem.localizedName];
+				alert.messageText     = [NSString stringWithFormat:@"Version control is not available for “%@”.", self.fileItem.localizedName];
 				alert.informativeText = @"You need to initialize the folder using your favorite version control system before TextMate can show you status.";
 			}
 
@@ -221,7 +333,7 @@ static bool is_binary (std::string const& path)
 	{
 		if(self.canGoBack)
 			[self goBack:self];
-		else if(NSURL* parentURL = self.fileBrowserView.fileItem.parentURL)
+		else if(NSURL* parentURL = self.fileItem.parentURL)
 			[self goToURL:parentURL];
 	}
 	else
@@ -232,11 +344,11 @@ static bool is_binary (std::string const& path)
 
 - (void)goToParentFolder:(id)sender
 {
-	if(NSURL* url = self.fileBrowserView.fileItem.parentURL)
+	if(NSURL* url = self.fileItem.parentURL)
 	{
-		NSURL* cameFromURL = self.fileBrowserView.URL;
+		NSURL* cameFromURL = self.URL;
 		[self goToURL:url];
-		[self.fileBrowserView expandURLs:nil selectURLs:@[ cameFromURL ]];
+		[self expandURLs:nil selectURLs:@[ cameFromURL ]];
 	}
 }
 
@@ -251,7 +363,7 @@ static bool is_binary (std::string const& path)
 	while(menu.numberOfItems > 1)
 		[menu removeItemAtIndex:menu.numberOfItems-1];
 
-	FileItem* fileItem = self.fileBrowserView.fileItem;
+	FileItem* fileItem = self.fileItem;
 	while(fileItem = [FileItem fileItemWithURL:fileItem.parentURL])
 	{
 		NSMenuItem* menuItem = [menu addItemWithTitle:fileItem.localizedName action:@selector(takeURLFrom:) keyEquivalent:@""];
@@ -263,7 +375,7 @@ static bool is_binary (std::string const& path)
 	[menu addItem:[NSMenuItem separatorItem]];
 	[[menu addItemWithTitle:@"Other…" action:@selector(orderFrontGoToFolder:) keyEquivalent:@""] setTarget:self];
 
-	FileItem* item = self.fileBrowserView.fileItem;
+	FileItem* item = self.fileItem;
 	if(NSURL* url = item.URL.filePathURL)
 	{
 		[menu addItem:[NSMenuItem separatorItem]];
@@ -305,7 +417,7 @@ static bool is_binary (std::string const& path)
 		for(NSArray* items in @[ itemsToOpen, itemsToOpenInTextMate ])
 		{
 			for(FileItem* item in items)
-				[OakZoomingIcon zoomIcon:item.image fromRect:[self.fileBrowserView imageRectOfItem:item]];
+				[OakZoomingIcon zoomIcon:item.image fromRect:[self imageRectOfItem:item]];
 		}
 	}
 
@@ -337,16 +449,6 @@ static bool is_binary (std::string const& path)
 	[self openItems:self.selectedItems animate:YES];
 }
 
-- (void)didClickItemImageButton:(FileItem*)item
-{
-	[self openItems:@[ item ] animate:YES];
-}
-
-- (void)didClickItemCloseButton:(FileItem*)item
-{
-	[self.delegate fileBrowser:self closeURL:item.URL];
-}
-
 // ===============
 // = Action Menu =
 // ===============
@@ -373,7 +475,7 @@ static bool is_binary (std::string const& path)
 		{ /* -------- */ },
 		{ @"Rename",                  @selector(editSelectedEntries:)                },
 		{ @"Duplicate",               @selector(duplicateSelectedEntries:)           },
-		{ @"Quick Look",              @selector(toggleQuickLookPreview:), .target = self.fileBrowserView },
+		{ @"Quick Look",              @selector(toggleQuickLookPreview:), .target = self },
 		{ @"Add to Favorites",        @selector(addSelectedEntriesToFavorites:)      },
 		{ @"Remove From Favorites",   @selector(removeSelectedEntriesFromFavorites:) },
 		{ /* -------- */ },
@@ -387,14 +489,14 @@ static bool is_binary (std::string const& path)
 		{ /* -------- */ },
 		{ @"Finder Tag", .ref = &finderTagsMenuItem,   .tag = kRequiresSelectionTag },
 		{ /* -------- */ },
-		{ @"Undo",                    @selector(undo:), .target = self.fileBrowserView },
-		{ @"Redo",                    @selector(redo:), .target = self.fileBrowserView },
+		{ @"Undo",                    @selector(undo:), .target = self },
+		{ @"Redo",                    @selector(redo:), .target = self },
 		{ /* -------- */ },
 	};
 
 	MBCreateMenu(items, menu);
 
-	if(self.fileBrowserView.previewableItems.count == 0)
+	if(self.previewableItems.count == 0)
 	{
 		NSInteger i = [menu indexOfItemWithTag:kRequiresSelectionTag];
 		while(i != -1)
@@ -444,7 +546,7 @@ static bool is_binary (std::string const& path)
 			menuItem.target = self;
 	}
 
-	[OakOpenWithMenu addOpenWithMenuForPaths:[NSSet setWithArray:[self.fileBrowserView.previewableItems valueForKeyPath:@"resolvedURL.path"]] toMenuItem:openWithMenuItem];
+	[OakOpenWithMenu addOpenWithMenuForPaths:[NSSet setWithArray:[self.previewableItems valueForKeyPath:@"resolvedURL.path"]] toMenuItem:openWithMenuItem];
 }
 
 - (void)menuNeedsUpdate:(NSMenu*)menu
@@ -474,7 +576,7 @@ static bool is_binary (std::string const& path)
 	if([resolvedURL getResourceValue:&parentURL forKey:NSURLParentDirectoryURLKey error:nil])
 	{
 		[self goToURL:parentURL];
-		[self.fileBrowserView expandURLs:nil selectURLs:@[ resolvedURL ]];
+		[self expandURLs:nil selectURLs:@[ resolvedURL ]];
 	}
 }
 
@@ -484,23 +586,23 @@ static bool is_binary (std::string const& path)
 	if(NSURL* enclosingFolder = url.URLByDeletingLastPathComponent)
 	{
 		[self goToURL:enclosingFolder];
-		[self.fileBrowserView expandURLs:nil selectURLs:@[ url ]];
+		[self expandURLs:nil selectURLs:@[ url ]];
 	}
 }
 
 - (void)showPackageContents:(id)sender
 {
-	[self goToURL:self.fileBrowserView.previewableItems.firstObject.resolvedURL];
+	[self goToURL:self.previewableItems.firstObject.resolvedURL];
 }
 
 - (void)showSelectedEntriesInFinder:(id)sender
 {
-	[NSWorkspace.sharedWorkspace activateFileViewerSelectingURLs:[self.fileBrowserView.previewableItems valueForKeyPath:@"resolvedURL"]];
+	[NSWorkspace.sharedWorkspace activateFileViewerSelectingURLs:[self.previewableItems valueForKeyPath:@"resolvedURL"]];
 }
 
 - (NSURL*)newFile:(id)sender
 {
-	NSURL* directoryURL = self.fileBrowserView.directoryURLForNewItems;
+	NSURL* directoryURL = self.directoryURLForNewItems;
 	if(!directoryURL)
 		return nil;
 
@@ -514,14 +616,14 @@ static bool is_binary (std::string const& path)
 	}
 
 	NSURL* newFileURL = [[directoryURL URLByAppendingPathComponent:@"untitled" isDirectory:NO] URLByAppendingPathExtension:pathExtension];
-	NSArray<NSURL*>* urls = [self.fileBrowserView performOperation:FBOperationNewFile sourceURLs:nil destinationURLs:@[ newFileURL ] unique:YES select:YES];
-	if(urls.count == 1 && self.fileBrowserView.outlineView.numberOfSelectedRows == 1)
+	NSArray<NSURL*>* urls = [self performOperation:FBOperationNewFile sourceURLs:nil destinationURLs:@[ newFileURL ] unique:YES select:YES];
+	if(urls.count == 1 && self.outlineView.numberOfSelectedRows == 1)
 	{
-		FileItem* newItem = [self.fileBrowserView.outlineView itemAtRow:self.fileBrowserView.outlineView.selectedRow];
+		FileItem* newItem = [self.outlineView itemAtRow:self.outlineView.selectedRow];
 		if([newItem.URL isEqual:urls.firstObject])
 		{
-			[self.fileBrowserView.outlineView scrollRowToVisible:self.fileBrowserView.outlineView.selectedRow];
-			[self.fileBrowserView.outlineView editColumn:0 row:self.fileBrowserView.outlineView.selectedRow withEvent:nil select:YES];
+			[self.outlineView scrollRowToVisible:self.outlineView.selectedRow];
+			[self.outlineView editColumn:0 row:self.outlineView.selectedRow withEvent:nil select:YES];
 		}
 	}
 	return urls.firstObject;
@@ -529,19 +631,19 @@ static bool is_binary (std::string const& path)
 
 - (NSURL*)newFolder:(id)sender
 {
-	NSURL* directoryURL = self.fileBrowserView.directoryURLForNewItems;
+	NSURL* directoryURL = self.directoryURLForNewItems;
 	if(!directoryURL)
 		return nil;
 
 	NSURL* newFolderURL = [directoryURL URLByAppendingPathComponent:@"untitled folder" isDirectory:YES];
-	NSArray<NSURL*>* urls = [self.fileBrowserView performOperation:FBOperationNewFolder sourceURLs:nil destinationURLs:@[ newFolderURL ] unique:YES select:YES];
-	if(urls.count == 1 && self.fileBrowserView.outlineView.numberOfSelectedRows == 1)
+	NSArray<NSURL*>* urls = [self performOperation:FBOperationNewFolder sourceURLs:nil destinationURLs:@[ newFolderURL ] unique:YES select:YES];
+	if(urls.count == 1 && self.outlineView.numberOfSelectedRows == 1)
 	{
-		FileItem* newItem = [self.fileBrowserView.outlineView itemAtRow:self.fileBrowserView.outlineView.selectedRow];
+		FileItem* newItem = [self.outlineView itemAtRow:self.outlineView.selectedRow];
 		if([newItem.URL isEqual:urls.firstObject])
 		{
-			[self.fileBrowserView.outlineView scrollRowToVisible:self.fileBrowserView.outlineView.selectedRow];
-			[self.fileBrowserView.outlineView editColumn:0 row:self.fileBrowserView.outlineView.selectedRow withEvent:nil select:YES];
+			[self.outlineView scrollRowToVisible:self.outlineView.selectedRow];
+			[self.outlineView editColumn:0 row:self.outlineView.selectedRow withEvent:nil select:YES];
 		}
 	}
 	return urls.firstObject;
@@ -549,15 +651,15 @@ static bool is_binary (std::string const& path)
 
 - (void)editSelectedEntries:(id)sender
 {
-	NSArray<FileItem*>* items = self.fileBrowserView.previewableItems;
+	NSArray<FileItem*>* items = self.previewableItems;
 	if(items.count == 1 && items.firstObject.canRename)
 	{
-		NSInteger row = [self.fileBrowserView.outlineView rowForItem:items.firstObject];
+		NSInteger row = [self.outlineView rowForItem:items.firstObject];
 		if(row != -1)
 		{
 			[NSApp activateIgnoringOtherApps:YES];
-			[self.fileBrowserView.window makeKeyWindow];
-			[self.fileBrowserView.outlineView editColumn:0 row:row withEvent:nil select:YES];
+			[self.outlineView.window makeKeyWindow];
+			[self.outlineView editColumn:0 row:row withEvent:nil select:YES];
 		}
 	}
 }
@@ -568,7 +670,7 @@ static bool is_binary (std::string const& path)
 	NSError* error;
 	if([NSFileManager.defaultManager createDirectoryAtURL:url withIntermediateDirectories:YES attributes:nil error:&error])
 	{
-		for(FileItem* item in self.fileBrowserView.previewableItems)
+		for(FileItem* item in self.previewableItems)
 		{
 			NSURL* linkURL = [url URLByAppendingPathComponent:item.localizedName];
 			if(![NSFileManager.defaultManager createSymbolicLinkAtURL:linkURL withDestinationURL:item.resolvedURL error:&error])
@@ -583,7 +685,7 @@ static bool is_binary (std::string const& path)
 
 - (void)removeSelectedEntriesFromFavorites:(id)sender
 {
-	for(FileItem* item in self.fileBrowserView.previewableItems)
+	for(FileItem* item in self.previewableItems)
 	{
 		NSError* error;
 		if(![NSFileManager.defaultManager trashItemAtURL:item.URL resultingItemURL:nil error:&error])
@@ -619,19 +721,19 @@ static bool is_binary (std::string const& path)
 - (void)cutURLs:(id)sender
 {
 	NSPasteboard* pboard = NSPasteboard.generalPasteboard;
-	if([self writeItems:self.fileBrowserView.previewableItems toPasteboard:pboard])
+	if([self writeItems:self.previewableItems toPasteboard:pboard])
 		[pboard setString:@"cut" forType:@"OakFileBrowserOperation"];
 }
 
 - (void)copyURLs:(id)sender
 {
-	[self writeItems:self.fileBrowserView.previewableItems toPasteboard:NSPasteboard.generalPasteboard];
+	[self writeItems:self.previewableItems toPasteboard:NSPasteboard.generalPasteboard];
 }
 
 - (void)copyAsPathname:(id)sender
 {
 	NSMutableArray* pathnames = [NSMutableArray array];
-	for(FileItem* item in self.fileBrowserView.previewableItems)
+	for(FileItem* item in self.previewableItems)
 	{
 		if(NSString* path = item.URL.path)
 			[pathnames addObject:path];
@@ -655,7 +757,7 @@ static bool is_binary (std::string const& path)
 
 - (void)duplicateSelectedEntries:(id)sender
 {
-	NSArray<FileItem*>* items = self.fileBrowserView.previewableItems;
+	NSArray<FileItem*>* items = self.previewableItems;
 
 	NSMutableDictionary<NSURL*, NSURL*>* urls = [NSMutableDictionary dictionary];
 	if(items.count == 1)
@@ -708,14 +810,14 @@ static bool is_binary (std::string const& path)
 		}
 	}
 
-	[self.fileBrowserView performOperation:FBOperationDuplicate withURLs:urls unique:YES select:YES];
-	if(urls.count == 1 && self.fileBrowserView.outlineView.numberOfSelectedRows == 1)
-		[self.fileBrowserView.outlineView editColumn:0 row:self.fileBrowserView.outlineView.selectedRow withEvent:nil select:YES];
+	[self performOperation:FBOperationDuplicate withURLs:urls unique:YES select:YES];
+	if(urls.count == 1 && self.outlineView.numberOfSelectedRows == 1)
+		[self.outlineView editColumn:0 row:self.outlineView.selectedRow withEvent:nil select:YES];
 }
 
 - (void)deleteURLs:(id)sender
 {
-	NSOutlineView* outlineView = self.fileBrowserView.outlineView;
+	NSOutlineView* outlineView = self.outlineView;
 
 	NSIndexSet* selectedRowIndexes = outlineView.selectedRowIndexes;
 	NSInteger clickedRow = outlineView.clickedRow;
@@ -725,7 +827,7 @@ static bool is_binary (std::string const& path)
 	{
 		FileItem* item = [outlineView itemAtRow:clickedRow];
 		if(NSURL* url = item.URL.filePathURL)
-			[self.fileBrowserView performOperation:FBOperationTrash sourceURLs:@[ url ] destinationURLs:nil unique:NO select:NO];
+			[self performOperation:FBOperationTrash sourceURLs:@[ url ] destinationURLs:nil unique:NO select:NO];
 	}
 	else
 	{
@@ -733,7 +835,7 @@ static bool is_binary (std::string const& path)
 		FileItem* selectItem;
 		FileItem* previousItem;
 
-		NSMutableArray<FileItem*>* stack = [self.fileBrowserView.fileItem.arrangedChildren mutableCopy];
+		NSMutableArray<FileItem*>* stack = [self.fileItem.arrangedChildren mutableCopy];
 		while(FileItem* item = stack.firstObject)
 		{
 			[stack removeObjectAtIndex:0];
@@ -752,9 +854,9 @@ static bool is_binary (std::string const& path)
 			}
 		}
 
-		[self.fileBrowserView performOperation:FBOperationTrash sourceURLs:urlsToTrash destinationURLs:nil unique:NO select:NO];
+		[self performOperation:FBOperationTrash sourceURLs:urlsToTrash destinationURLs:nil unique:NO select:NO];
 
-		NSInteger selectRow = [outlineView rowForItem:selectItem ?: self.fileBrowserView.fileItem.arrangedChildren.firstObject];
+		NSInteger selectRow = [outlineView rowForItem:selectItem ?: self.fileItem.arrangedChildren.firstObject];
 		if(selectRow != -1)
 		{
 			[outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:selectRow] byExtendingSelection:NO];
@@ -771,7 +873,7 @@ static bool is_binary (std::string const& path)
 
 - (void)insertItemsAndRemoveOriginal:(BOOL)removeOriginal
 {
-	if(NSURL* directoryURL = self.fileBrowserView.directoryURLForNewItems)
+	if(NSURL* directoryURL = self.directoryURLForNewItems)
 	{
 		NSMutableDictionary* urls = [NSMutableDictionary dictionary];
 		for(NSURL* srcURL in [self URLsFromPasteboard:NSPasteboard.generalPasteboard])
@@ -786,8 +888,8 @@ static bool is_binary (std::string const& path)
 		}
 
 		if(removeOriginal)
-				[self.fileBrowserView performOperation:FBOperationMove withURLs:urls unique:YES select:YES];
-		else	[self.fileBrowserView performOperation:FBOperationCopy withURLs:urls unique:YES select:YES];
+				[self performOperation:FBOperationMove withURLs:urls unique:YES select:YES];
+		else	[self performOperation:FBOperationCopy withURLs:urls unique:YES select:YES];
 	}
 }
 
@@ -802,7 +904,7 @@ static bool is_binary (std::string const& path)
 - (void)didChangeFinderTag:(OFBFinderTagsChooser*)finderTagsChooser
 {
 	OakFinderTag* chosenTag = finderTagsChooser.chosenTag;
-	for(FileItem* item in self.fileBrowserView.previewableItems)
+	for(FileItem* item in self.previewableItems)
 	{
 		NSMutableArray<OakFinderTag*>* tags = [item.finderTags mutableCopy];
 		if(finderTagsChooser.removeChosenTag)
@@ -827,24 +929,45 @@ static bool is_binary (std::string const& path)
 
 - (BOOL)canPaste
 {
-	return self.fileBrowserView.directoryURLForNewItems && [[NSPasteboard.generalPasteboard availableTypeFromArray:@[ NSFilenamesPboardType ]] isEqualToString:NSFilenamesPboardType];
+	return self.directoryURLForNewItems && [[NSPasteboard.generalPasteboard availableTypeFromArray:@[ NSFilenamesPboardType ]] isEqualToString:NSFilenamesPboardType];
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem*)menuItem
 {
 	NSArray<FileItem*>* selectedItems    = self.selectedItems;
-	NSArray<FileItem*>* previewableItems = self.fileBrowserView.previewableItems;
+	NSArray<FileItem*>* previewableItems = self.previewableItems;
 
 	BOOL res = YES;
 
-	if(menuItem.action == @selector(toggleShowInvisibles:))
-		menuItem.dynamicTitle = self.fileBrowserView.showExcludedItems ? @"Hide Invisible Files" : @"Show Invisible Files";
+	if(menuItem.action == @selector(undo:))
+	{
+		menuItem.title = self.activeUndoManager.undoMenuItemTitle;
+		res = self.activeUndoManager.canUndo;
+	}
+	else if(menuItem.action == @selector(redo:))
+	{
+		menuItem.title = self.activeUndoManager.redoMenuItemTitle;
+		res = self.activeUndoManager.canRedo;
+	}
+	else if(menuItem.action == @selector(toggleQuickLookPreview:))
+	{
+		if([QLPreviewPanel sharedPreviewPanelExists] && [QLPreviewPanel sharedPreviewPanel].isVisible)
+			menuItem.title = @"Close Quick Look";
+		else if(self.previewableItems.count == 0)
+			menuItem.hidden = YES;
+		else if(self.previewableItems.count == 1)
+			menuItem.title = [NSString stringWithFormat:@"Quick Look “%@”", self.previewableItems.firstObject.localizedName];
+		else
+			menuItem.title = [NSString stringWithFormat:@"Quick Look %ld Items", self.previewableItems.count];
+	}
+	else if(menuItem.action == @selector(toggleShowInvisibles:))
+		menuItem.dynamicTitle = self.showExcludedItems ? @"Hide Invisible Files" : @"Show Invisible Files";
 	else if(menuItem.action == @selector(goBack:))
 		res = self.canGoBack;
 	else if(menuItem.action == @selector(goForward:))
 		res = self.canGoForward;
 	else if(menuItem.action == @selector(newFolder:))
-		res = self.fileBrowserView.directoryURLForNewItems ? YES : NO;
+		res = self.directoryURLForNewItems ? YES : NO;
 	else if(menuItem.action == @selector(openSelectedItems:))
 		menuItem.hidden = previewableItems.count == 0;
 	else if(menuItem.action == @selector(openWithMenuAction:))
@@ -854,7 +977,7 @@ static bool is_binary (std::string const& path)
 	else if(menuItem.action == @selector(showOriginal:))
 		menuItem.hidden = selectedItems.count != 1 || [selectedItems.firstObject.URL isEqual:selectedItems.firstObject.resolvedURL];
 	else if(menuItem.action == @selector(showEnclosingFolder:))
-		menuItem.hidden = selectedItems.count != 1 || [selectedItems.firstObject.parentURL isEqual:((FileItem*)[self.fileBrowserView.outlineView parentForItem:selectedItems.firstObject]).URL ?: selectedItems.firstObject.parentURL];
+		menuItem.hidden = selectedItems.count != 1 || [selectedItems.firstObject.parentURL isEqual:((FileItem*)[self.outlineView parentForItem:selectedItems.firstObject]).URL ?: selectedItems.firstObject.parentURL];
 	else if(menuItem.action == @selector(showPackageContents:))
 		menuItem.hidden = previewableItems.count != 1 || previewableItems.firstObject.isPackage == NO;
 	else if(menuItem.action == @selector(editSelectedEntries:))
@@ -911,7 +1034,7 @@ static bool is_binary (std::string const& path)
 				NSString* items;
 				switch(previewableItems.count)
 				{
-					case 0:  items = [NSString stringWithFormat:@" “%@”", self.fileBrowserView.fileItem.localizedName]; break;
+					case 0:  items = [NSString stringWithFormat:@" “%@”", self.fileItem.localizedName]; break;
 					case 1:  items = [NSString stringWithFormat:@" “%@”", previewableItems.firstObject.localizedName]; break;
 					default: items = [NSString stringWithFormat:@" %ld Items", previewableItems.count]; break;
 				}
@@ -920,7 +1043,7 @@ static bool is_binary (std::string const& path)
 		}
 
 		NSString* folderNameForNewItems;
-		if([self.fileBrowserView.directoryURLForNewItems getResourceValue:&folderNameForNewItems forKey:NSURLLocalizedNameKey error:nil])
+		if([self.directoryURLForNewItems getResourceValue:&folderNameForNewItems forKey:NSURLLocalizedNameKey error:nil])
 		{
 			if(menuItem.action == @selector(newFolder:))
 				menuItem.dynamicTitle = [NSString stringWithFormat:@"New Folder in “%@”", folderNameForNewItems];
@@ -949,12 +1072,6 @@ static bool is_binary (std::string const& path)
 // = Public API =
 // ==============
 
-- (NSArray<NSURL*>*)modifiedURLs                          { return self.fileBrowserView.modifiedURLs; }
-- (void)setModifiedURLs:(NSArray<NSURL*>*)newModifiedURLs { self.fileBrowserView.modifiedURLs = newModifiedURLs; }
-
-- (NSArray<NSURL*>*)openURLs                              { return self.fileBrowserView.openURLs; }
-- (void)setOpenURLs:(NSArray<NSURL*>*)newOpenURLs         { self.fileBrowserView.openURLs = newOpenURLs; }
-
 - (NSDictionary*)sessionState
 {
 	NSMutableArray* history = [NSMutableArray array];
@@ -979,15 +1096,15 @@ static bool is_binary (std::string const& path)
 	return @{
 		@"history":      history,
 		@"historyIndex": @(_historyIndex - from),
-		@"selection":    [self.fileBrowserView.selectedURLs.allObjects valueForKeyPath:@"absoluteString"] ?: @[ ],
-		@"expanded":     [self.fileBrowserView.expandedURLs.allObjects valueForKeyPath:@"absoluteString"] ?: @[ ],
-		@"showHidden":   @(self.fileBrowserView.showExcludedItems),
+		@"selection":    [self.selectedURLs.allObjects valueForKeyPath:@"absoluteString"] ?: @[ ],
+		@"expanded":     [self.expandedURLs.allObjects valueForKeyPath:@"absoluteString"] ?: @[ ],
+		@"showHidden":   @(self.showExcludedItems),
 	};
 }
 
 - (void)setupViewWithState:(NSDictionary*)fileBrowserState
 {
-	self.fileBrowserView.showExcludedItems = [fileBrowserState[@"showHidden"] boolValue];
+	self.showExcludedItems = [fileBrowserState[@"showHidden"] boolValue];
 
 	NSMutableArray* newHistory = [NSMutableArray array];
 	for(NSDictionary* entry in fileBrowserState[@"history"])
@@ -1013,7 +1130,7 @@ static bool is_binary (std::string const& path)
 		for(NSString* urlString in fileBrowserState[@"selection"])
 			[selectedURLs addObject:[NSURL URLWithString:urlString]];
 
-		[self.fileBrowserView expandURLs:expandedURLs selectURLs:selectedURLs];
+		[self expandURLs:expandedURLs selectURLs:selectedURLs];
 	}
 }
 
@@ -1036,19 +1153,19 @@ static bool is_binary (std::string const& path)
 
 - (void)selectURL:(NSURL*)url withParentURL:(NSURL*)parentURL
 {
-	for(NSInteger i = 0; i < self.fileBrowserView.outlineView.numberOfRows; ++i)
+	for(NSInteger i = 0; i < self.outlineView.numberOfRows; ++i)
 	{
-		FileItem* item = [self.fileBrowserView.outlineView itemAtRow:i];
+		FileItem* item = [self.outlineView itemAtRow:i];
 		if([url isEqual:item.URL])
 		{
-			[self.fileBrowserView.outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:i] byExtendingSelection:NO];
-			[self.fileBrowserView centerSelectionInVisibleArea:self];
+			[self.outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:i] byExtendingSelection:NO];
+			[self centerSelectionInVisibleArea:self];
 			return;
 		}
 	}
 
-	NSURL* currentParent = self.fileBrowserView.URL;
-	NSMutableSet<NSURL*>* expandURLs = [self.fileBrowserView.expandedURLs mutableCopy];
+	NSURL* currentParent = self.URL;
+	NSMutableSet<NSURL*>* expandURLs = [self.expandedURLs mutableCopy];
 
 	NSURL* childURL = url;
 	while(true)
@@ -1077,18 +1194,13 @@ static bool is_binary (std::string const& path)
 	if([childURL isEqual:parentURL])
 	{
 		[self goToURL:parentURL];
-		[self.fileBrowserView expandURLs:expandURLs.allObjects selectURLs:@[ url ]];
+		[self expandURLs:expandURLs.allObjects selectURLs:@[ url ]];
 	}
 	else
 	{
 		[self goToURL:url.URLByDeletingLastPathComponent];
-		[self.fileBrowserView expandURLs:nil selectURLs:@[ url ]];
+		[self expandURLs:nil selectURLs:@[ url ]];
 	}
-}
-
-- (void)reload:(id)sender
-{
-	[self.fileBrowserView reload:self];
 }
 
 - (void)deselectAll:(id)sender
@@ -1103,7 +1215,7 @@ static bool is_binary (std::string const& path)
 	panel.canChooseFiles          = NO;
 	panel.canChooseDirectories    = YES;
 	panel.allowsMultipleSelection = NO;
-	panel.directoryURL            = self.fileBrowserView.URL.filePathURL;
+	panel.directoryURL            = self.URL.filePathURL;
 
 	[panel beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse result) {
 		if(result == NSModalResponseOK)
@@ -1146,5 +1258,989 @@ static bool is_binary (std::string const& path)
 			// Tear down animation overlay here
 		}
 	}];
+}
+
+// ========================
+// = From FileBrowserView =
+// ========================
+
+- (void)setCanExpandSymbolicLinks:(BOOL)flag
+{
+	if(_canExpandSymbolicLinks == flag)
+		return;
+	_canExpandSymbolicLinks = flag;
+
+	if(!self.fileItem)
+		return;
+
+	NSMutableArray<FileItem*>* stack = [self.fileItem.arrangedChildren mutableCopy];
+	while(FileItem* item = stack.firstObject)
+	{
+		[stack removeObjectAtIndex:0];
+		if(item.isLinkToDirectory && (_canExpandPackages || !item.isLinkToPackage))
+			[self.outlineView reloadItem:item reloadChildren:YES];
+		if([self.outlineView isExpandable:item] && item.arrangedChildren)
+			[stack addObjectsFromArray:item.arrangedChildren];
+	}
+}
+
+- (void)setCanExpandPackages:(BOOL)flag
+{
+	if(_canExpandPackages == flag)
+		return;
+	_canExpandPackages = flag;
+
+	if(!self.fileItem)
+		return;
+
+	NSMutableArray<FileItem*>* stack = [self.fileItem.arrangedChildren mutableCopy];
+	while(FileItem* item = stack.firstObject)
+	{
+		[stack removeObjectAtIndex:0];
+		if(item.isDirectory && item.isPackage)
+			[self.outlineView reloadItem:item reloadChildren:YES];
+		if([self.outlineView isExpandable:item] && item.arrangedChildren)
+			[stack addObjectsFromArray:item.arrangedChildren];
+	}
+}
+
+- (void)setSortDirectoriesBeforeFiles:(BOOL)flag
+{
+	if(_sortDirectoriesBeforeFiles == flag)
+		return;
+	_sortDirectoriesBeforeFiles = flag;
+
+	if(!self.fileItem)
+		return;
+
+	NSMutableArray<FileItem*>* stack = [NSMutableArray arrayWithObject:self.fileItem];
+	while(FileItem* item = stack.firstObject)
+	{
+		[stack removeObjectAtIndex:0];
+		[self rearrangeChildrenInParent:item];
+		if(item == self.fileItem || [self.outlineView isItemExpanded:item])
+			[stack addObjectsFromArray:item.arrangedChildren];
+	}
+}
+
+- (void)setShowExcludedItems:(BOOL)flag
+{
+	if(_showExcludedItems == flag)
+		return;
+	_showExcludedItems = flag;
+
+	if(!self.fileItem)
+		return;
+
+	NSMutableArray<FileItem*>* stack = [NSMutableArray arrayWithObject:self.fileItem];
+	while(FileItem* item = stack.firstObject)
+	{
+		[stack removeObjectAtIndex:0];
+		[self rearrangeChildrenInParent:item];
+		if(item == self.fileItem || [self.outlineView isItemExpanded:item])
+			[stack addObjectsFromArray:item.arrangedChildren];
+	}
+}
+
+- (NSComparator)itemComparator
+{
+	NSArray<NSSortDescriptor*>* sortDescriptors = @[
+		[NSSortDescriptor sortDescriptorWithKey:@"localizedName" ascending:YES selector:@selector(localizedCompare:)],
+		[NSSortDescriptor sortDescriptorWithKey:@"URL.URLByDeletingLastPathComponent.lastPathComponent" ascending:YES selector:@selector(localizedCompare:)],
+	];
+
+	return ^NSComparisonResult(FileItem* lhs, FileItem* rhs){
+		if(_sortDirectoriesBeforeFiles)
+		{
+			if((lhs.isDirectory || lhs.isLinkToDirectory) && !(rhs.isDirectory || rhs.isLinkToDirectory))
+				return NSOrderedAscending;
+			else if((rhs.isDirectory || rhs.isLinkToDirectory) && !(lhs.isDirectory || lhs.isLinkToDirectory))
+				return NSOrderedDescending;
+		}
+
+		for(NSSortDescriptor* sortDescriptor in sortDescriptors)
+		{
+			NSComparisonResult order = [sortDescriptor compareObject:lhs toObject:rhs];
+			if(order != NSOrderedSame)
+				return order;
+		}
+
+		return NSOrderedSame;
+	};
+}
+
+- (NSPredicate*)itemPredicateForChildrenInParent:(FileItem*)parentOrNil
+{
+	NSPredicate* predicate = [NSPredicate predicateWithValue:YES];
+	if(!_showExcludedItems)
+	{
+		NSURL* directoryURL = (parentOrNil ?: self.fileItem).URL;
+		settings_t const settings = settings_for_path(NULL_STR, "", directoryURL.fileSystemRepresentation);
+		bool excludeMissingFiles = [directoryURL.scheme isEqual:@"scm"] ? false : settings.get(kSettingsExcludeSCMDeletedKey, false);
+
+		path::glob_list_t globs;
+		globs.add_exclude_glob(settings.get(kSettingsExcludeDirectoriesInBrowserKey), path::kPathItemDirectory);
+		globs.add_exclude_glob(settings.get(kSettingsExcludeDirectoriesKey),          path::kPathItemDirectory);
+		globs.add_exclude_glob(settings.get(kSettingsExcludeFilesInBrowserKey),       path::kPathItemFile);
+		globs.add_exclude_glob(settings.get(kSettingsExcludeFilesKey),                path::kPathItemFile);
+		globs.add_exclude_glob(settings.get(kSettingsExcludeInBrowserKey),            path::kPathItemAny);
+		globs.add_exclude_glob(settings.get(kSettingsExcludeKey),                     path::kPathItemAny);
+
+		globs.add_include_glob(settings.get(kSettingsIncludeDirectoriesInBrowserKey), path::kPathItemDirectory);
+		globs.add_include_glob(settings.get(kSettingsIncludeDirectoriesKey),          path::kPathItemDirectory);
+		globs.add_include_glob(settings.get(kSettingsIncludeFilesInBrowserKey),       path::kPathItemFile);
+		globs.add_include_glob(settings.get(kSettingsIncludeFilesKey),                path::kPathItemFile);
+		globs.add_include_glob(settings.get(kSettingsIncludeInBrowserKey),            path::kPathItemAny);
+		globs.add_include_glob(settings.get(kSettingsIncludeKey, "*"),                path::kPathItemAny);
+
+		predicate = [NSPredicate predicateWithBlock:^BOOL(FileItem* item, NSDictionary* bindings){
+			if(item.hidden && ![item.URL.lastPathComponent hasPrefix:@"."])
+				return NO;
+
+			if(excludeMissingFiles && item.isMissing)
+				return NO;
+
+			char const* path = item.URL.fileSystemRepresentation;
+			size_t itemType  = item.isDirectory ? path::kPathItemDirectory : path::kPathItemFile;
+			return item.hidden ? globs.include(path, itemType) : !globs.exclude(path, itemType);
+		}];
+	}
+	return predicate;
+}
+
+- (NSArray<FileItem*>*)arrangeChildren:(NSArray<FileItem*>*)children inParent:(FileItem*)parentOrNil
+{
+	return [[children filteredArrayUsingPredicate:[self itemPredicateForChildrenInParent:parentOrNil]] sortedArrayUsingComparator:self.itemComparator];
+}
+
+- (void)rearrangeChildrenInParent:(FileItem*)item
+{
+	NSMutableArray<FileItem*>* existingChildren = item.arrangedChildren;
+	if(existingChildren && existingChildren.count * item.children.count < 250000)
+	{
+		NSArray* newArrangedChildren = [self arrangeChildren:item.children inParent:item];
+
+		// ================
+		// = Remove Items =
+		// ================
+
+		NSMutableIndexSet* indexesToRemove = [NSMutableIndexSet indexSet];
+		for(NSUInteger i = 0; i < existingChildren.count; ++i)
+		{
+			if(![newArrangedChildren containsObject:existingChildren[i]])
+				[indexesToRemove addIndex:i];
+		}
+
+		if(indexesToRemove.count)
+		{
+			BOOL wasFirstResponderInOutlineView = [self.outlineView.window.firstResponder isKindOfClass:[NSView class]] && [(NSView*)self.outlineView.window.firstResponder isDescendantOf:self.outlineView];
+
+			[existingChildren removeObjectsAtIndexes:indexesToRemove];
+			[self.outlineView removeItemsAtIndexes:indexesToRemove inParent:(item != self.fileItem ? item : nil) withAnimation:NSTableViewAnimationEffectFade|NSTableViewAnimationSlideUp];
+
+			if(wasFirstResponderInOutlineView && !([self.outlineView.window.firstResponder isKindOfClass:[NSView class]] && [(NSView*)self.outlineView.window.firstResponder isDescendantOf:self.outlineView]))
+				[self.outlineView.window makeFirstResponder:self.outlineView];
+		}
+
+		// =======================
+		// = Move Items (rename) =
+		// =======================
+
+		NSComparator compare = self.itemComparator;
+
+		BOOL alreadySorted = YES;
+		for(NSUInteger i = 1; alreadySorted && i < existingChildren.count; ++i)
+			alreadySorted = compare(existingChildren[i-1], existingChildren[i]) != NSOrderedDescending;
+
+		if(!alreadySorted)
+		{
+			NSMutableIndexSet* lcs = MutableLongestCommonSubsequence(existingChildren, newArrangedChildren);
+
+			std::vector<std::pair<BOOL, FileItem*>> v;
+			for(NSUInteger i = 0; i < existingChildren.count; ++i)
+				v.emplace_back([lcs containsIndex:i], existingChildren[i]);
+
+			for(NSUInteger i = 0; i < v.size(); )
+			{
+				if(v[i].first == YES)
+				{
+					i++;
+				}
+				else
+				{
+					FileItem* child = existingChildren[i];
+
+					v.erase(v.begin() + i);
+					NSInteger newIndex = 0;
+					for(; newIndex < v.size(); ++newIndex)
+					{
+						if(v[newIndex].first && compare(child, v[newIndex].second) == NSOrderedAscending)
+							break;
+					}
+					v.emplace(v.begin() + newIndex, YES, child);
+
+					[existingChildren removeObjectAtIndex:i];
+					[existingChildren insertObject:child atIndex:newIndex];
+					[self.outlineView moveItemAtIndex:i inParent:(item != self.fileItem ? item : nil) toIndex:newIndex inParent:(item != self.fileItem ? item : nil)];
+				}
+			}
+		}
+
+		// ================
+		// = Insert Items =
+		// ================
+
+		NSMutableIndexSet* insertionIndexes = [NSMutableIndexSet indexSet];
+		for(NSUInteger i = 0; i < newArrangedChildren.count; ++i)
+		{
+			FileItem* child = newArrangedChildren[i];
+			if(![existingChildren containsObject:child])
+				[insertionIndexes addIndex:i];
+		}
+
+		if(insertionIndexes.count)
+		{
+			[existingChildren insertObjects:[newArrangedChildren objectsAtIndexes:insertionIndexes] atIndexes:insertionIndexes];
+			[self.outlineView insertItemsAtIndexes:insertionIndexes inParent:(item != self.fileItem ? item : nil) withAnimation:NSTableViewAnimationEffectFade|NSTableViewAnimationSlideUp];
+		}
+	}
+	else
+	{
+		item.arrangedChildren = [[self arrangeChildren:item.children inParent:item] mutableCopy];
+		[self.outlineView reloadItem:(item != self.fileItem ? item : nil) reloadChildren:YES];
+
+		if(item == self.fileItem)
+			[self.outlineView setNeedsDisplay:YES];
+	}
+
+	[self updateDisambiguationSuffixInParent:item];
+}
+
+- (NSString*)disambiguationSuffixForURL:(NSURL*)url numberOfParents:(NSInteger)numberOfParents
+{
+	NSMutableArray* parentNames = [NSMutableArray array];
+	for(NSUInteger i = 0; i < numberOfParents; ++i)
+	{
+		NSNumber* flag;
+		if([url getResourceValue:&flag forKey:NSURLIsVolumeKey error:nil] && [flag boolValue])
+			return nil;
+
+		NSURL* parentURL;
+		if(![url getResourceValue:&parentURL forKey:NSURLParentDirectoryURLKey error:nil] || [url isEqual:parentURL])
+			return nil;
+
+		NSString* parentName;
+		if(![parentURL getResourceValue:&parentName forKey:NSURLLocalizedNameKey error:nil])
+			return nil;
+
+		[parentNames addObject:parentName];
+		url = parentURL;
+	}
+	return [[parentNames.reverseObjectEnumerator allObjects] componentsJoinedByString:@"/"];
+}
+
+- (void)updateDisambiguationSuffixInParent:(FileItem*)item
+{
+	NSArray* children = [item.arrangedChildren filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"URL.isFileURL == YES"]];
+	for(FileItem* child in children)
+		child.disambiguationSuffix = nil;
+
+	NSInteger showNumberOfParents = 1;
+	while(children.count)
+	{
+		NSCountedSet* countOfConflicts = [[NSCountedSet alloc] initWithArray:[children valueForKeyPath:@"displayName"]];
+		NSMutableArray* conflictedChildren = [NSMutableArray array];
+		for(FileItem* child in children)
+		{
+			if([countOfConflicts countForObject:child.displayName] == 1)
+				continue;
+
+			if(NSString* newSuffix = [self disambiguationSuffixForURL:child.URL numberOfParents:showNumberOfParents])
+			{
+				child.disambiguationSuffix = [@" — " stringByAppendingString:newSuffix];
+				[conflictedChildren addObject:child];
+			}
+		}
+		children = conflictedChildren;
+		++showNumberOfParents;
+	}
+}
+
+- (void)setModifiedURLs:(NSArray<NSURL*>*)newModifiedURLs
+{
+	_modifiedURLs = newModifiedURLs;
+
+	if(!self.fileItem)
+		return;
+
+	NSMutableArray<FileItem*>* stack = [NSMutableArray arrayWithObject:self.fileItem];
+	while(FileItem* item = stack.firstObject)
+	{
+		[stack removeObjectAtIndex:0];
+		item.modified = [_modifiedURLs containsObject:item.URL];
+		if(item.children)
+			[stack addObjectsFromArray:item.children];
+	}
+}
+
+- (void)setOpenURLs:(NSArray<NSURL*>*)newOpenURLs
+{
+	_openURLs = newOpenURLs;
+
+	if(!self.fileItem)
+		return;
+
+	NSMutableArray<FileItem*>* stack = [NSMutableArray arrayWithObject:self.fileItem];
+	while(FileItem* item = stack.firstObject)
+	{
+		[stack removeObjectAtIndex:0];
+		item.open = [_openURLs containsObject:item.URL];
+		if(item.children)
+			[stack addObjectsFromArray:item.children];
+	}
+}
+
+// ===========================
+// = Loading/Expanding Items =
+// ===========================
+
+- (void)setFileItem:(FileItem*)item
+{
+	if(_fileItem)
+	{
+		// Remove visible but non-selected/expanded items from pending selection/expansion
+		_expandedURLs = [self.expandedURLs mutableCopy];
+		_selectedURLs = [self.selectedURLs mutableCopy];
+
+		for(id observer in _fileItemObservers.allValues)
+			[FileItem removeObserver:observer];
+		_fileItemObservers = [NSMutableDictionary dictionary];
+	}
+
+	_fileItem = item;
+
+	[self.outlineView reloadItem:nil reloadChildren:YES];
+	[self.outlineView deselectAll:self];
+	[self.outlineView scrollRowToVisible:0];
+
+	[self loadChildrenForItem:item expandChildren:NO];
+}
+
+- (void)outlineViewItemDidExpand:(NSNotification*)aNotification
+{
+	FileItem* item = aNotification.userInfo[@"NSObject"];
+	[self loadChildrenForItem:item expandChildren:_expandingChildrenCounter > 0];
+}
+
+- (void)loadChildrenForItem:(FileItem*)item expandChildren:(BOOL)flag
+{
+	if(item.arrangedChildren || item.children)
+		return;
+
+	NSURL* url = item.URL;
+
+	if(_fileItemObservers[url])
+	{
+		// ================
+		// = Debug Output =
+		// ================
+
+		NSMutableArray<NSString*>* itemInfo = [NSMutableArray array];
+
+		NSMutableArray<FileItem*>* stack = [NSMutableArray arrayWithObject:self.fileItem];
+		while(FileItem* item = stack.firstObject)
+		{
+			if(item.isDirectory)
+			{
+				NSMutableString* info = [item.URL.path mutableCopy];
+				if(item == self.fileItem || [self.outlineView isItemExpanded:item])
+					[info appendString:@" [expanded]"];
+				if([_fileItemObservers objectForKey:item.URL])
+					[info appendString:@" [observing]"];
+				if([_loadingURLs containsObject:item.URL])
+					[info appendString:@" [loading]"];
+				if(item.arrangedChildren || item.children)
+					[info appendFormat:@" [%lu / %lu children]", item.arrangedChildren.count, item.children.count];
+				[itemInfo addObject:info];
+			}
+
+			[stack removeObjectAtIndex:0];
+			if(NSArray<FileItem*>* children = item.arrangedChildren)
+				[stack addObjectsFromArray:children];
+		}
+
+		NSLog(@"%s *** Observer already exists for: %@\n%@", sel_getName(_cmd), url, [itemInfo componentsJoinedByString:@"\n"]);
+
+		// ===================================
+		// = Temporary (possible) workaround =
+		// ===================================
+
+		[FileItem removeObserver:_fileItemObservers[url]];
+		_fileItemObservers[url] = nil;
+	}
+
+	[_loadingURLs addObject:url];
+
+	__weak FileBrowserViewController* weakSelf = self;
+	_fileItemObservers[url] = [FileItem addObserverToDirectoryAtURL:item.resolvedURL usingBlock:^(NSArray<NSURL*>* urls){
+		[weakSelf didReceiveURLs:urls forItemWithURL:url expandChildren:flag];
+	}];
+}
+
+- (FileItem*)findItemForURL:(NSURL*)url
+{
+	NSMutableArray<FileItem*>* stack = [NSMutableArray arrayWithObject:self.fileItem];
+	while(FileItem* item = stack.firstObject)
+	{
+		[stack removeObjectAtIndex:0];
+		if([item.URL isEqual:url])
+			return item;
+		if(NSArray<FileItem*>* children = item.arrangedChildren)
+			[stack addObjectsFromArray:children];
+	}
+	return nil;
+}
+
+- (void)didReceiveURLs:(NSArray<NSURL*>*)urls forItemWithURL:(NSURL*)url expandChildren:(BOOL)flag
+{
+	FileItem* item = [self findItemForURL:url];
+	if(!item)
+	{
+		NSLog(@"%s *** unable to find item for %@", sel_getName(_cmd), url);
+	}
+	else if(item != self.fileItem && ![self.outlineView isItemExpanded:item])
+	{
+		NSLog(@"%s *** item no longer expanded: %@", sel_getName(_cmd), item);
+
+		item.children = nil;
+		item.arrangedChildren = nil;
+		[self.outlineView reloadItem:item reloadChildren:YES];
+
+		[FileItem removeObserver:_fileItemObservers[url]];
+		_fileItemObservers[url] = nil;
+	}
+	else
+	{
+		NSMutableArray* children = [NSMutableArray array];
+
+		if(item.children)
+		{
+			NSMutableSet<NSURL*>* newURLs = [NSMutableSet setWithArray:urls];
+
+			for(FileItem* child in item.children)
+			{
+				if(NSURL* url = child.fileReferenceURL.filePathURL)
+					child.URL = url;
+
+				if([newURLs containsObject:child.URL])
+				{
+					[newURLs removeObject:child.URL];
+					[child updateFileProperties];
+					[children addObject:child];
+				}
+			}
+
+			urls = newURLs.allObjects;
+		}
+
+		for(NSURL* url in urls)
+		{
+			FileItem* newItem = [FileItem fileItemWithURL:url];
+			newItem.open     = [_openURLs containsObject:url];
+			newItem.modified = [_modifiedURLs containsObject:url];
+			[children addObject:newItem];
+		}
+
+		item.children = [children copy];
+		[self rearrangeChildrenInParent:item];
+
+		for(FileItem* child in item.arrangedChildren)
+		{
+			if((flag && !child.isSymbolicLink || [_expandedURLs containsObject:child.URL] || [child.URL.scheme isEqualToString:@"scm"]) && [self.outlineView isExpandable:child])
+				[self.outlineView expandItem:child expandChildren:flag && !child.isSymbolicLink];
+
+			if([_selectedURLs containsObject:child.URL])
+			{
+				[self.outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:[self.outlineView rowForItem:child]] byExtendingSelection:YES];
+				[_selectedURLs removeObject:child.URL];
+			}
+		}
+	}
+
+	[_loadingURLs removeObject:url];
+	[self checkLoadCompletionHandlers];
+}
+
+- (void)checkLoadCompletionHandlers
+{
+	if(_loadingURLs.count == 0)
+	{
+		NSArray<void(^)()>* completionHandlers = _loadingURLsCompletionHandlers;
+		_loadingURLsCompletionHandlers = nil;
+		for(void(^handler)() in completionHandlers)
+			handler();
+	}
+}
+
+- (void)expandURLs:(NSArray<NSURL*>*)expandURLs selectURLs:(NSArray<NSURL*>*)selectURLs
+{
+	_loadingURLsCompletionHandlers = [(_loadingURLsCompletionHandlers ?: @[ ]) arrayByAddingObject:^{
+		[self performSelector:@selector(centerSelectionInVisibleArea:) withObject:self afterDelay:0];
+	}];
+
+	_expandedURLs = expandURLs ? [NSMutableSet setWithArray:expandURLs] : _expandedURLs;
+	_selectedURLs = selectURLs ? [NSMutableSet setWithArray:selectURLs] : _selectedURLs;
+
+	NSMutableArray<FileItem*>* stack = [self.fileItem.arrangedChildren mutableCopy];
+	while(FileItem* item = stack.firstObject)
+	{
+		[stack removeObjectAtIndex:0];
+		if([_expandedURLs containsObject:item.URL])
+		{
+			[self.outlineView expandItem:item];
+			if(NSArray<FileItem*>* arrangedChildren = item.arrangedChildren)
+				[stack addObjectsFromArray:arrangedChildren];
+		}
+	}
+
+	NSMutableIndexSet* indexesToSelect = [NSMutableIndexSet indexSet];
+	for(NSUInteger i = 0; i < self.outlineView.numberOfRows; ++i)
+	{
+		FileItem* item = [self.outlineView itemAtRow:i];
+		if([_selectedURLs containsObject:item.URL])
+			[indexesToSelect addIndex:i];
+	}
+	[self.outlineView selectRowIndexes:indexesToSelect byExtendingSelection:NO];
+
+	[self checkLoadCompletionHandlers];
+}
+
+- (void)outlineView:(NSOutlineView*)outlineView willExpandItem:(FileItem*)item expandChildren:(BOOL)flag
+{
+	_expandingChildrenCounter += flag ? 1 : 0;
+}
+
+- (void)outlineView:(NSOutlineView*)outlineView didExpandItem:(FileItem*)item expandChildren:(BOOL)flag
+{
+	_expandingChildrenCounter -= flag ? 1 : 0;
+}
+
+- (void)outlineView:(NSOutlineView*)outlineView willCollapseItem:(id)someItem collapseChildren:(BOOL)flag
+{
+	_collapsingChildrenCounter += flag ? 1 : 0;
+}
+
+- (void)outlineView:(NSOutlineView*)outlineView didCollapseItem:(id)someItem collapseChildren:(BOOL)flag
+{
+	_collapsingChildrenCounter -= flag ? 1 : 0;
+}
+
+- (void)outlineViewItemWillCollapse:(NSNotification*)aNotification
+{
+	FileItem* item = aNotification.userInfo[@"NSObject"];
+	if(_nestedCollapsingChildrenCounter == 0 || _collapsingChildrenCounter > 0)
+		[_expandedURLs removeObject:item.URL];
+
+	_nestedCollapsingChildrenCounter += 1;
+}
+
+- (void)outlineViewItemDidCollapse:(NSNotification*)aNotification
+{
+	_nestedCollapsingChildrenCounter -= 1;
+}
+
+// ================
+// = Location URL =
+// ================
+
+- (NSURL*)URL
+{
+	return _fileItem.URL;
+}
+
+- (void)setURL:(NSURL*)url
+{
+	if(FileItem* item = [FileItem fileItemWithURL:url])
+		self.fileItem = item;
+}
+
+- (void)reload:(id)sender
+{
+	NSMutableArray<FileItem*>* stack = [NSMutableArray arrayWithObject:self.fileItem];
+	while(FileItem* item = stack.firstObject)
+	{
+		[stack removeObjectAtIndex:0];
+		if(!item.arrangedChildren)
+			continue;
+		[FSEventsManager.sharedInstance reloadDirectoryAtURL:item.resolvedURL];
+		[stack addObjectsFromArray:item.arrangedChildren];
+	}
+}
+
+- (NSArray<FileItem*>*)selectedItems
+{
+	NSIndexSet* indexSet;
+
+	NSInteger clickedRow = self.outlineView.clickedRow;
+	if(0 <= clickedRow && clickedRow < self.outlineView.numberOfRows && ![self.outlineView.selectedRowIndexes containsIndex:clickedRow])
+			indexSet = [NSIndexSet indexSetWithIndex:clickedRow];
+	else	indexSet = self.outlineView.selectedRowIndexes;
+
+	NSMutableArray* res = [NSMutableArray array];
+	for(NSUInteger index = indexSet.firstIndex; index != NSNotFound; index = [indexSet indexGreaterThanIndex:index])
+		[res addObject:[self.outlineView itemAtRow:index]];
+	return res;
+}
+
+- (NSURL*)directoryURLForNewItems
+{
+	NSMutableArray<NSURL*>* candidates = [NSMutableArray array];
+	for(FileItem* item in self.selectedItems)
+	{
+		if(item.resolvedURL.isFileURL && [self.outlineView isItemExpanded:item])
+		{
+			[candidates addObject:item.resolvedURL];
+		}
+		else if(FileItem* parentItem = [self.outlineView parentForItem:item])
+		{
+			if(parentItem.resolvedURL.isFileURL)
+				[candidates addObject:parentItem.resolvedURL];
+		}
+	}
+	return candidates.lastObject ?: self.fileItem.URL.filePathURL;
+}
+
+- (void)centerSelectionInVisibleArea:(id)sender
+{
+	if(self.outlineView.numberOfSelectedRows == 0)
+		return;
+
+	NSInteger row = self.outlineView.selectedRowIndexes.firstIndex;
+
+	NSRect rowRect     = [self.outlineView rectOfRow:row];
+	NSRect visibleRect = self.outlineView.visibleRect;
+	if(NSMinY(rowRect) < NSMinY(visibleRect) || NSMaxY(rowRect) > NSMaxY(visibleRect))
+		[self.outlineView scrollPoint:NSMakePoint(NSMinX(rowRect), round(NSMidY(rowRect) - NSHeight(visibleRect)/2))];
+}
+
+- (NSSet<NSURL*>*)selectedURLs
+{
+	NSMutableSet<NSURL*>* res = [_selectedURLs mutableCopy];
+	NSIndexSet* selectedIndexes = self.outlineView.selectedRowIndexes;
+	for(NSUInteger i = 0; i < self.outlineView.numberOfRows; ++i)
+	{
+		FileItem* item = [self.outlineView itemAtRow:i];
+		if([selectedIndexes containsIndex:i])
+				[res addObject:item.URL];
+		else	[res removeObject:item.URL];
+	}
+	return [res copy];
+}
+
+- (NSSet<NSURL*>*)expandedURLs
+{
+	NSMutableSet<NSURL*>* res = [_expandedURLs mutableCopy];
+	for(NSUInteger i = 0; i < self.outlineView.numberOfRows; ++i)
+	{
+		FileItem* item = [self.outlineView itemAtRow:i];
+		if([self.outlineView isItemExpanded:item] && ![item.URL.scheme isEqualToString:@"scm"])
+				[res addObject:item.URL];
+		else	[res removeObject:item.URL];
+	}
+	return [res copy];
+}
+
+// ===========================
+// = NSOutlineViewDataSource =
+// ===========================
+
+- (NSInteger)outlineView:(NSOutlineView*)outlineView numberOfChildrenOfItem:(FileItem*)item
+{
+	return (item ?: _fileItem).arrangedChildren.count;
+}
+
+- (id)outlineView:(NSOutlineView*)outlineView child:(NSInteger)childIndex ofItem:(FileItem*)item
+{
+	return (item ?: _fileItem).arrangedChildren[childIndex];
+}
+
+- (BOOL)outlineView:(NSOutlineView*)outlineView isItemExpandable:(FileItem*)item
+{
+	return item.isDirectory && (_canExpandPackages || !item.isPackage) || (_canExpandSymbolicLinks && item.isLinkToDirectory && (_canExpandPackages || !item.isLinkToPackage));
+}
+
+- (BOOL)outlineView:(NSOutlineView*)outlineView isGroupItem:(FileItem*)item
+{
+	return [item.URL.scheme isEqualToString:@"scm"];
+}
+
+- (BOOL)outlineView:(NSOutlineView*)outlineView shouldSelectItem:(FileItem*)item
+{
+	return item.URL.isFileURL;
+}
+
+- (id)outlineView:(NSOutlineView*)outlineView objectValueForTableColumn:(NSTableColumn*)tableColumn byItem:(FileItem*)item
+{
+	return item;
+}
+
+- (id <NSPasteboardWriting>)outlineView:(NSOutlineView*)outlineView pasteboardWriterForItem:(FileItem*)item
+{
+	return item.URL.filePathURL;
+}
+
+// ===============================
+// = Table cell view constructor =
+// ===============================
+
+- (NSView*)outlineView:(NSOutlineView*)outlineView viewForTableColumn:(NSTableColumn*)tableColumn item:(FileItem*)item
+{
+	FileItemTableCellView* res = [outlineView makeViewWithIdentifier:tableColumn.identifier owner:self];
+	if(!res)
+	{
+		res = [[FileItemTableCellView alloc] init];
+		res.identifier  = tableColumn.identifier;
+		res.target      = self;
+		res.closeAction = @selector(takeItemToCloseFrom:);
+		res.openButton.target = self;
+		res.openButton.action = @selector(takeItemToOpenFrom:);
+		res.textField.delegate = self;
+	}
+	return res;
+}
+
+- (void)takeItemToOpenFrom:(id)sender
+{
+	NSInteger row = [self.outlineView rowForView:sender];
+	if(row != -1)
+	{
+		FileItem* item = [self.outlineView itemAtRow:row];
+		[self openItems:@[ item ] animate:YES];
+	}
+}
+
+- (void)takeItemToCloseFrom:(id)sender
+{
+	NSInteger row = [self.outlineView rowForView:sender];
+	if(row != -1)
+	{
+		FileItem* item = [self.outlineView itemAtRow:row];
+		[self.delegate fileBrowser:self closeURL:item.URL];
+	}
+}
+
+- (BOOL)control:(NSTextField*)textField textShouldEndEditing:(NSText*)fieldEditor
+{
+	NSInteger row = [self.outlineView rowForView:textField];
+	if(row == -1)
+		return NO;
+
+	FileItem* item = [self.outlineView itemAtRow:row];
+	NSURL* newURL = [[item.URL URLByDeletingLastPathComponent] URLByAppendingPathComponent:fieldEditor.string isDirectory:item.isDirectory];
+	if(![item.URL isEqual:newURL])
+	{
+		// Because of the animation we need to run this after field editor has been removed
+		dispatch_async(dispatch_get_main_queue(), ^{
+			[self performOperation:FBOperationRename withURLs:@{ item.URL: newURL } unique:NO select:YES];
+		});
+	}
+
+	return YES;
+}
+
+// =============
+// = QuickLook =
+// =============
+
+- (NSArray<FileItem*>*)previewableItems
+{
+	return [self.selectedItems filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"previewItemURL != nil"]];
+}
+
+- (void)toggleQuickLookPreview:(id)sender
+{
+	if([QLPreviewPanel sharedPreviewPanelExists] && [[QLPreviewPanel sharedPreviewPanel] isVisible])
+			[[QLPreviewPanel sharedPreviewPanel] orderOut:nil];
+	else	[[QLPreviewPanel sharedPreviewPanel] makeKeyAndOrderFront:nil];
+}
+
+- (BOOL)acceptsPreviewPanelControl:(QLPreviewPanel*)previewPanel
+{
+	return YES;
+}
+
+- (void)beginPreviewPanelControl:(QLPreviewPanel*)previewPanel
+{
+	_previewItems = self.previewableItems;
+	previewPanel.delegate   = self;
+	previewPanel.dataSource = self;
+}
+
+- (void)endPreviewPanelControl:(QLPreviewPanel*)previewPanel
+{
+	_previewItems = nil;
+}
+
+- (NSInteger)numberOfPreviewItemsInPreviewPanel:(QLPreviewPanel*)previewPanel
+{
+	return _previewItems.count;
+}
+
+- (id <QLPreviewItem>)previewPanel:(QLPreviewPanel*)panel previewItemAtIndex:(NSInteger)index
+{
+	return _previewItems[index];
+}
+
+- (NSRect)previewPanel:(QLPreviewPanel*)previewPanel sourceFrameOnScreenForPreviewItem:(id <QLPreviewItem>)item
+{
+	return [self imageRectOfItem:item];
+}
+
+- (NSRect)imageRectOfItem:(FileItem*)item
+{
+	NSInteger row = [self.outlineView rowForItem:item];
+	if(row != -1)
+	{
+		FileItemTableCellView* view = [self.outlineView viewAtColumn:0 row:row makeIfNecessary:YES];
+		if([view isKindOfClass:[FileItemTableCellView class]])
+		{
+			NSButton* imageButton = view.openButton;
+			NSRect imageRect = NSIntersectionRect([imageButton convertRect:imageButton.bounds toView:nil], [self.outlineView convertRect:self.outlineView.visibleRect toView:nil]);
+			return NSIsEmptyRect(imageRect) ? NSZeroRect : [view.window convertRectToScreen:imageRect];
+		}
+	}
+	return NSZeroRect;
+}
+
+- (BOOL)previewPanel:(QLPreviewPanel*)previewPanel handleEvent:(NSEvent*)event
+{
+	std::string const eventString = to_s(event);
+	if((event.type == NSEventTypeKeyUp || event.type == NSEventTypeKeyDown) && (eventString == utf8::to_s(NSUpArrowFunctionKey) || eventString == utf8::to_s(NSDownArrowFunctionKey)))
+	{
+		[self.view.window sendEvent:event];
+		_previewItems = self.previewableItems;
+		[previewPanel reloadData];
+		return YES;
+	}
+	return NO;
+}
+
+// ============
+// = Services =
+// ============
+
++ (void)initialize
+{
+	[NSApplication.sharedApplication registerServicesMenuSendTypes:@[ NSFilenamesPboardType, NSURLPboardType ] returnTypes:@[ ]];
+}
+
+- (id)validRequestorForSendType:(NSString*)sendType returnType:(NSString*)returnType
+{
+	return returnType == nil && sendType != nil && [@[ NSFilenamesPboardType, NSURLPboardType ] containsObject:sendType] ? self : nil;
+}
+
+- (BOOL)writeSelectionToPasteboard:(NSPasteboard*)pboard types:(NSArray*)types
+{
+	NSArray<NSURL*>* urls = [self.previewableItems valueForKeyPath:@"URL"];
+	if(urls.count == 0)
+		return NO;
+
+	[pboard clearContents];
+	return [pboard writeObjects:urls];
+}
+
+// ===================
+// = Accepting Drops =
+// ===================
+
+- (NSDragOperation)outlineView:(NSOutlineView*)outlineView validateDrop:(id <NSDraggingInfo>)info proposedItem:(FileItem*)item proposedChildIndex:(NSInteger)childIndex
+{
+	NSURL* dropURL = (item ?: self.fileItem).resolvedURL.filePathURL;
+	if(![self.outlineView isExpandable:item] || !dropURL || ![NSFileManager.defaultManager fileExistsAtPath:dropURL.path])
+		return NSDragOperationNone;
+
+	NSPasteboard* pboard  = info.draggingPasteboard;
+	NSArray* draggedPaths = [pboard propertyListForType:NSFilenamesPboardType];
+
+	dev_t targetDevice   = path::device(dropURL.fileSystemRepresentation);
+	BOOL linkOperation   = (NSApp.currentEvent.modifierFlags & NSEventModifierFlagControl) == NSEventModifierFlagControl;
+	BOOL toggleOperation = (NSApp.currentEvent.modifierFlags & NSEventModifierFlagOption) == NSEventModifierFlagOption;
+
+	// We accept the drop as long as it is valid for at least one of the items
+	for(NSString* draggedPath in draggedPaths)
+	{
+		BOOL sameSource = (path::device(draggedPath.fileSystemRepresentation) == targetDevice);
+		NSDragOperation operation = linkOperation ? NSDragOperationLink : ((sameSource != toggleOperation) ? NSDragOperationMove : NSDragOperationCopy);
+
+		// Can’t move into same location
+		NSString* parentPath = draggedPath.stringByDeletingLastPathComponent;
+		if(operation == NSDragOperationMove && [parentPath isEqualToString:dropURL.path])
+			continue;
+
+		[outlineView setDropItem:item dropChildIndex:NSOutlineViewDropOnItemIndex];
+		return operation;
+	}
+	return NSDragOperationNone;
+}
+
+static NSDragOperation filter (NSDragOperation mask)
+{
+	return (mask & NSDragOperationMove) ? NSDragOperationMove : ((mask & NSDragOperationCopy) ? NSDragOperationCopy : ((mask & NSDragOperationLink) ? NSDragOperationLink : 0));
+}
+
+- (BOOL)outlineView:(NSOutlineView*)outlineView acceptDrop:(id <NSDraggingInfo>)info item:(FileItem*)item childIndex:(NSInteger)childIndex
+{
+	FileItem* newParent = item ?: self.fileItem;
+
+	NSDragOperation op = filter(info.draggingSourceOperationMask);
+	if(op == 0 || ![self.outlineView isExpandable:newParent] || !newParent.resolvedURL.isFileURL)
+		return NO;
+
+	NSMutableDictionary<NSURL*, NSURL*>* urls = [NSMutableDictionary dictionary];
+	for(NSURL* url in [self URLsFromPasteboard:info.draggingPasteboard])
+		urls[url] = [newParent.resolvedURL URLByAppendingPathComponent:url.lastPathComponent isDirectory:op != NSDragOperationLink && url.hasDirectoryPath];
+
+	switch(op)
+	{
+		case NSDragOperationLink: [self performOperation:FBOperationLink withURLs:urls unique:NO select:NO]; break;
+		case NSDragOperationCopy: [self performOperation:FBOperationCopy withURLs:urls unique:NO select:NO]; break;
+		case NSDragOperationMove: [self performOperation:FBOperationMove withURLs:urls unique:NO select:NO]; break;
+	}
+
+	return YES;
+}
+
+- (void)outlineView:(NSOutlineView*)outlineView didTrashURLs:(NSArray<NSURL*>*)someURLs
+{
+	[self performOperation:FBOperationTrash sourceURLs:someURLs destinationURLs:nil unique:NO select:NO];
+}
+
+// =============
+// = Undo/Redo =
+// =============
+
+- (NSUndoManager*)undoManager
+{
+	if(!_fileBrowserUndoManager)
+		_fileBrowserUndoManager = [[NSUndoManager alloc] init];
+	return _fileBrowserUndoManager;
+}
+
+- (NSUndoManager*)activeUndoManager
+{
+	NSResponder* firstResponder = self.view.window.firstResponder;
+	if([firstResponder isKindOfClass:[NSView class]] && [(NSView*)firstResponder isDescendantOf:self.view])
+			return firstResponder.undoManager;
+	else	return self.undoManager;
+}
+
+- (void)undo:(id)sender
+{
+	[self.activeUndoManager undo];
+}
+
+- (void)redo:(id)sender
+{
+	[self.activeUndoManager redo];
 }
 @end

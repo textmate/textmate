@@ -1,4 +1,4 @@
-#import "FileBrowserView.h"
+#import "FileBrowserViewController.h"
 #import "FileBrowserNotifications.h"
 #import "FileItem.h"
 #import <OakAppKit/OakSound.h>
@@ -6,7 +6,7 @@
 #import <io/path.h>
 #import <ns/ns.h>
 
-@implementation FileBrowserView (DiskOperations)
+@implementation FileBrowserViewController (DiskOperations)
 - (NSArray<NSURL*>*)performOperation:(FBOperation)op withURLs:(NSDictionary<NSURL*, NSURL*>*)urls unique:(BOOL)makeUnique select:(BOOL)selectDestinationURLs
 {
 	NSMutableArray* srcURLs  = [NSMutableArray array];
@@ -524,7 +524,7 @@
 
 - (BOOL)presentError:(NSError*)error
 {
-	[self presentError:error modalForWindow:self.window delegate:nil didPresentSelector:nullptr contextInfo:nullptr];
+	[self presentError:error modalForWindow:self.view.window delegate:nil didPresentSelector:nullptr contextInfo:nullptr];
 	return YES;
 }
 @end
