@@ -1068,6 +1068,60 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 	return res;
 }
 
+// =====================
+// = NSRestorableState =
+// =====================
+
++ (NSArray<NSString*>*)restorableStateKeyPaths
+{
+	return @[ @"showExcludedItems" ];
+}
+
+- (void)restoreStateWithCoder:(NSCoder*)state
+{
+	[super restoreStateWithCoder:state];
+
+	NSArray* newHistory = [state decodeObjectForKey:@"history"];
+	if(newHistory.count)
+	{
+		self.history      = [newHistory mutableCopy];
+		self.historyIndex = std::clamp<NSInteger>([state decodeIntegerForKey:@"historyIndex"], 0, newHistory.count);
+
+		NSArray<NSURL*>* expandedURLs = [state decodeObjectForKey:@"expandedURLs"];
+		NSArray<NSURL*>* selectedURLs = [state decodeObjectForKey:@"selectedURLs"];
+		[self expandURLs:expandedURLs selectURLs:selectedURLs];
+	}
+}
+
+- (void)encodeRestorableStateWithCoder:(NSCoder*)state
+{
+	[super encodeRestorableStateWithCoder:state];
+
+	NSMutableArray* history = [NSMutableArray array];
+	NSUInteger from = _history.count > 5 ? _history.count - 5 : 0;
+	for(NSUInteger i = from; i < _history.count; ++i)
+	{
+		NSDictionary* record = _history[i];
+		NSNumber* scrollOffset = i == _historyIndex ? @(NSMinY(self.outlineView.visibleRect)) : record[@"scrollOffset"];
+		if(scrollOffset && scrollOffset.doubleValue > 0)
+		{
+			[history addObject:@{
+				@"url":          record[@"url"],
+				@"scrollOffset": scrollOffset,
+			}];
+		}
+		else
+		{
+			[history addObject:@{ @"url": record[@"url"], }];
+		}
+	}
+
+	[state encodeObject:history forKey:@"history"];
+	[state encodeInteger:_historyIndex - from forKey:@"historyIndex"];
+	[state encodeObject:self.selectedURLs.allObjects forKey:@"selectedURLs"];
+	[state encodeObject:self.expandedURLs.allObjects forKey:@"expandedURLs"];
+}
+
 // ==============
 // = Public API =
 // ==============
@@ -1624,12 +1678,15 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 	[self.outlineView scrollRowToVisible:0];
 
 	[self loadChildrenForItem:item expandChildren:NO];
+
+	[self invalidateRestorableState];
 }
 
 - (void)outlineViewItemDidExpand:(NSNotification*)aNotification
 {
 	FileItem* item = aNotification.userInfo[@"NSObject"];
 	[self loadChildrenForItem:item expandChildren:_expandingChildrenCounter > 0];
+	[self invalidateRestorableState];
 }
 
 - (void)loadChildrenForItem:(FileItem*)item expandChildren:(BOOL)flag
@@ -1847,6 +1904,14 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 - (void)outlineViewItemDidCollapse:(NSNotification*)aNotification
 {
 	_nestedCollapsingChildrenCounter -= 1;
+
+	if(_nestedCollapsingChildrenCounter == 0)
+		[self invalidateRestorableState];
+}
+
+- (void)outlineViewSelectionDidChange:(NSNotification*)aNotification
+{
+	[self invalidateRestorableState];
 }
 
 // ================
