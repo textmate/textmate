@@ -56,26 +56,17 @@
 
 		OakSetupKeyViewLoop(@[ self, _headerView, _outlineView, _actionsView ], NO);
 
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[files(==header,==divider,==actions)]|" options:0 metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[header]-(>=0)-[divider]"               options:NSLayoutFormatAlignAllLeft metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[files(==header,==divider,==actions)]|" options:NSLayoutFormatAlignAllLeft metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[header]-(>=0)-[divider]"               options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[files][divider][actions]|"             options:0 metrics:nil views:views]];
 
-		if(@available(macos 10.14, *))
-		{
-			// The OakBackgroundFillViewStyleHeader is only using transparent header material on 10.14 and later
-			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[files][divider][actions]|" options:NSLayoutFormatAlignAllLeft metrics:nil views:views]];
+		NSEdgeInsets insets = _scrollView.contentInsets;
+		insets.top += _headerView.fittingSize.height;
+		_scrollView.automaticallyAdjustsContentInsets = NO;
+		_scrollView.contentInsets = insets;
 
-			NSEdgeInsets insets = _scrollView.contentInsets;
-			insets.top += _headerView.fittingSize.height;
-			_scrollView.automaticallyAdjustsContentInsets = NO;
-			_scrollView.contentInsets = insets;
-
-			_outlineView.backgroundColor = NSColor.clearColor;
-			_scrollView.drawsBackground  = NO;
-		}
-		else
-		{
-			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[header][files][divider][actions]|" options:NSLayoutFormatAlignAllLeft metrics:nil views:views]];
-		}
+		_outlineView.backgroundColor = NSColor.clearColor;
+		_scrollView.drawsBackground  = NO;
 	}
 	return self;
 }
