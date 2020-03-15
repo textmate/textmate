@@ -41,7 +41,7 @@
 		_scrollView.hasHorizontalScroller = NO;
 		_scrollView.hasVerticalScroller   = YES;
 
-		NSView* dividerView = OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider);
+		NSView* dividerView = OakCreateNSBoxSeparator();
 
 		NSDictionary* views = @{
 			@"header":  _headerView,
@@ -58,7 +58,7 @@
 
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[files(==header,==divider,==actions)]|" options:NSLayoutFormatAlignAllLeft metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[header]-(>=0)-[divider]"               options:0 metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[files][divider][actions]|"             options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[files][divider(==1)][actions]|"        options:0 metrics:nil views:views]];
 
 		NSEdgeInsets insets = _scrollView.contentInsets;
 		insets.top += _headerView.fittingSize.height;
