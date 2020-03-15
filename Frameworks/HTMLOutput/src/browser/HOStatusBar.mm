@@ -47,7 +47,7 @@ static NSTextField* OakCreateTextField ()
 
 		_indeterminateProgress = YES;
 
-		_divider                  = OakCreateDividerImageView();
+		_divider                  = OakCreateNSBoxSeparator();
 
 		_goBackButton             = OakCreateImageButton([NSImage imageNamed:NSImageNameGoLeftTemplate]);
 		_goBackButton.toolTip     = @"Show the previous page";
@@ -107,13 +107,12 @@ static NSTextField* OakCreateTextField ()
 	};
 
 	NSArray* layout = @[
-		@"H:|-(3)-[back(==22)]-(2)-[forward(==back)]-(2)-[divider]",
-		@"V:|[back(==forward,==divider)]|", @"V:|[forward]|", @"V:|[divider]|",
-		@"V:[status]-5-|",
+		@"V:[status]-5-|", @"V:|-4-[divider]-5-|"
 	];
 
 	for(NSString* str in layout)
 		[_layoutConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:str options:0 metrics:nil views:views]];
+	[_layoutConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(3)-[back(==22)]-(2)-[forward(==back)]-(2)-[divider(==1)]" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
 
 	if(!_indeterminateProgress)
 	{

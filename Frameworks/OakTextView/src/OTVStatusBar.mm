@@ -111,11 +111,11 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSString* accessibi
 
 		NSTextField* line    = OakCreateTextField(@"Line:");
 
-		NSView* dividerOne   = OakCreateDividerImageView();
-		NSView* dividerTwo   = OakCreateDividerImageView();
-		NSView* dividerThree = OakCreateDividerImageView();
-		NSView* dividerFour  = OakCreateDividerImageView();
-		NSView* dividerFive  = OakCreateDividerImageView();
+		NSView* dividerOne   = OakCreateNSBoxSeparator();
+		NSView* dividerTwo   = OakCreateNSBoxSeparator();
+		NSView* dividerThree = OakCreateNSBoxSeparator();
+		NSView* dividerFour  = OakCreateNSBoxSeparator();
+		NSView* dividerFive  = OakCreateNSBoxSeparator();
 
 		NSDictionary* views = @{
 			@"line":         line,
@@ -144,13 +144,14 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSString* accessibi
 		[self.symbolPopUp setContentHuggingPriority:NSLayoutPriorityDefaultLow-1 forOrientation:NSLayoutConstraintOrientationHorizontal];
 		[self.symbolPopUp setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow-1 forOrientation:NSLayoutConstraintOrientationHorizontal];
 
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-10-[line]-[selection(>=50,<=225)]-8-[dividerOne]-(-2)-[grammar(>=125@400,>=50,<=225)]-5-[dividerTwo]-(-2)-[tabSize]-4-[dividerThree]-5-[items(==31)]-4-[dividerFour]-(-2)-[symbol(>=125@450,>=50)]-5-[dividerFive]-6-[recording]-7-|" options:0 metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[dividerOne(==dividerTwo,==dividerThree,==dividerFour,==dividerFive)]|" options:NSLayoutFormatAlignAllTop metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-10-[line]-[selection(>=50,<=225)]-8-[dividerOne(==1)]-(-2)-[grammar(>=125@400,>=50,<=225)]-5-[dividerTwo(==1)]-(-2)-[tabSize]-4-[dividerThree(==1)]-5-[items(==31)]-4-[dividerFour(==1)]-(-2)-[symbol(>=125@450,>=50)]-5-[dividerFive(==1)]-6-[recording]-7-|" options:0 metrics:nil views:views]];
 
 		// Baseline align text-controls
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[line]-[selection]-(>=1)-[grammar]-(>=1)-[tabSize]-(>=1)-[symbol]" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
+
 		// Center non-text control
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[selection]-(>=1)-[dividerOne]-(>=1)-[items]-(>=1)-[recording]" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[selection]-(>=1)-[dividerOne]-(>=1)-[dividerTwo]-(>=1)-[dividerThree]-(>=1)-[items]-(>=1)-[dividerFour]-(>=1)-[dividerFive]-(>=1)-[recording]" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-4-[dividerOne(==15@250,==dividerTwo,==dividerThree,==dividerFour,==dividerFive)]-5-|" options:0 metrics:nil views:views]];
 
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(grammarPopUpButtonWillPopUp:) name:NSPopUpButtonWillPopUpNotification object:self.grammarPopUp];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(bundleItemsPopUpButtonWillPopUp:) name:NSPopUpButtonWillPopUpNotification object:self.bundleItemsPopUp];
