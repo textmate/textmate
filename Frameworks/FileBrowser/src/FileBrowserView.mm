@@ -41,12 +41,9 @@
 		_scrollView.hasHorizontalScroller = NO;
 		_scrollView.hasVerticalScroller   = YES;
 
-		NSView* dividerView = OakCreateNSBoxSeparator();
-
 		NSDictionary* views = @{
 			@"header":  _headerView,
 			@"files":   _scrollView,
-			@"divider": dividerView,
 			@"actions": _actionsView,
 		};
 
@@ -56,9 +53,9 @@
 
 		OakSetupKeyViewLoop(@[ self, _headerView, _outlineView, _actionsView ], NO);
 
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[files(==header,==divider,==actions)]|" options:NSLayoutFormatAlignAllLeft metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[header]-(>=0)-[divider]"               options:0 metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[files][divider(==1)][actions]|"        options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[files(==header,==actions)]|" options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[header]-(>=0)-[actions]"     options:NSLayoutFormatAlignAllLeading metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[files][actions]|"            options:NSLayoutFormatAlignAllLeading metrics:nil views:views]];
 
 		NSEdgeInsets insets = _scrollView.contentInsets;
 		insets.top += _headerView.fittingSize.height;

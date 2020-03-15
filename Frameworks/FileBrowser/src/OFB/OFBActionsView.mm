@@ -47,27 +47,31 @@ static NSButton* OakCreateImageButton (NSImage* image)
 		[wrappedActionsPopUpButton addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[popup]|" options:0 metrics:nil views:@{ @"popup": self.actionsPopUpButton }]];
 		[wrappedActionsPopUpButton addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[popup]|" options:0 metrics:nil views:@{ @"popup": self.actionsPopUpButton }]];
 
+		NSView* topDivider = OakCreateNSBoxSeparator();
+
 		NSDictionary* views = @{
-			@"create":    self.createButton,
-			@"divider":   OakCreateNSBoxSeparator(),
-			@"actions":   wrappedActionsPopUpButton,
-			@"reload":    self.reloadButton,
-			@"search":    self.searchButton,
-			@"favorites": self.favoritesButton,
-			@"scm":       self.scmButton,
+			@"topDivider": topDivider,
+			@"create":     self.createButton,
+			@"divider":    OakCreateNSBoxSeparator(),
+			@"actions":    wrappedActionsPopUpButton,
+			@"reload":     self.reloadButton,
+			@"search":     self.searchButton,
+			@"favorites":  self.favoritesButton,
+			@"scm":        self.scmButton,
 		};
 
 		OakAddAutoLayoutViewsToSuperview([views allValues], self);
 		OakSetupKeyViewLoop(@[ self, _createButton, _actionsPopUpButton, _reloadButton, _searchButton, _favoritesButton, _scmButton ], NO);
 
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-8-[create]-8-[divider(==1)]-8-[actions(==31)]-(>=8)-[reload]-4-[search]-4-[favorites]-4-[scm]-(12)-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-4-[divider]-5-|"                                                                                      options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[topDivider]|"                                                                                         options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[topDivider(==1)]-4-[divider]-5-|"                                                                     options:0 metrics:nil views:views]];
 	}
 	return self;
 }
 
 - (NSSize)intrinsicContentSize
 {
-	return NSMakeSize(NSViewNoIntrinsicMetric, 24);
+	return NSMakeSize(NSViewNoIntrinsicMetric, 25);
 }
 @end

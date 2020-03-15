@@ -36,7 +36,6 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	NSMutableDictionary* gutterImages;
 
 	OakBackgroundFillView* gutterDividerView;
-	OakBackgroundFillView* statusDividerView;
 
 	NSScrollView* textScrollView;
 
@@ -90,13 +89,12 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 		[gutterScrollView.contentView addConstraint:[NSLayoutConstraint constraintWithItem:gutterView attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:gutterScrollView.contentView attribute:NSLayoutAttributeRight multiplier:1.0 constant:0.0]];
 
 		gutterDividerView = OakCreateVerticalLine(OakBackgroundFillViewStyleNone);
-		statusDividerView = OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider);
 
 		_statusBar = [[OTVStatusBar alloc] initWithFrame:NSZeroRect];
 		_statusBar.delegate = self;
 		_statusBar.target = self;
 
-		OakAddAutoLayoutViewsToSuperview(@[ gutterScrollView, gutterDividerView, textScrollView, statusDividerView, _statusBar ], self);
+		OakAddAutoLayoutViewsToSuperview(@[ gutterScrollView, gutterDividerView, textScrollView, _statusBar ], self);
 		OakSetupKeyViewLoop(@[ self, _textView, _statusBar ], NO);
 
 		self.document = [OakDocument documentWithString:@"" fileType:@"text.plain" customName:@"placeholder"];
@@ -120,9 +118,8 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 
 	if(_statusBar)
 	{
-		[stackedViews addObjectsFromArray:@[ statusDividerView, _statusBar ]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_statusBar(==statusDividerView)]|" options:NSLayoutFormatAlignAllLeft|NSLayoutFormatAlignAllRight metrics:nil views:NSDictionaryOfVariableBindings(statusDividerView, _statusBar)]];
-		[self addConstraint:[NSLayoutConstraint constraintWithItem:statusDividerView attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0]];
+		[stackedViews addObject:_statusBar];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_statusBar]|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_statusBar)]];
 	}
 
 	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[gutterScrollView(==gutterView)][gutterDividerView][textScrollView(>=100)]|" options:NSLayoutFormatAlignAllTop|NSLayoutFormatAlignAllBottom metrics:nil views:NSDictionaryOfVariableBindings(gutterScrollView, gutterView, gutterDividerView, textScrollView)]];
@@ -148,9 +145,6 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	_hideStatusBar = flag;
 	if(_hideStatusBar)
 	{
-		[statusDividerView removeFromSuperview];
-		statusDividerView = nil;
-
 		[_statusBar removeFromSuperview];
 		_statusBar.delegate = nil;
 		_statusBar.target = nil;
@@ -158,13 +152,11 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	}
 	else
 	{
-		statusDividerView = OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider);
-
 		_statusBar = [[OTVStatusBar alloc] initWithFrame:NSZeroRect];
 		_statusBar.delegate = self;
 		_statusBar.target = self;
 
-		OakAddAutoLayoutViewsToSuperview(@[ statusDividerView, _statusBar ], self);
+		OakAddAutoLayoutViewsToSuperview(@[ _statusBar ], self);
 	}
 	[self setNeedsUpdateConstraints:YES];
 }

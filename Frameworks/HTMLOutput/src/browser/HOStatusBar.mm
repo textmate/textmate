@@ -25,6 +25,7 @@ static NSTextField* OakCreateTextField ()
 }
 
 @interface HOStatusBar ()
+@property (nonatomic) NSView*              topDivider;
 @property (nonatomic) NSView*              divider;
 @property (nonatomic) NSButton*            goBackButton;
 @property (nonatomic) NSButton*            goForwardButton;
@@ -47,6 +48,7 @@ static NSTextField* OakCreateTextField ()
 
 		_indeterminateProgress = YES;
 
+		_topDivider               = OakCreateNSBoxSeparator();
 		_divider                  = OakCreateNSBoxSeparator();
 
 		_goBackButton             = OakCreateImageButton([NSImage imageNamed:NSImageNameGoLeftTemplate]);
@@ -77,7 +79,7 @@ static NSTextField* OakCreateTextField ()
 		_spinner.style                = NSProgressIndicatorStyleSpinning;
 		_spinner.displayedWhenStopped = NO;
 
-		NSArray* views = @[ _divider, _goBackButton, _goForwardButton, _statusTextField, _spinner ];
+		NSArray* views = @[ _topDivider, _divider, _goBackButton, _goForwardButton, _statusTextField, _spinner ];
 		OakAddAutoLayoutViewsToSuperview(views, self);
 
 		[_progressIndicator setTranslatesAutoresizingMaskIntoConstraints:NO];
@@ -87,7 +89,7 @@ static NSTextField* OakCreateTextField ()
 
 - (NSSize)intrinsicContentSize
 {
-	return NSMakeSize(NSViewNoIntrinsicMetric, 24);
+	return NSMakeSize(NSViewNoIntrinsicMetric, 25);
 }
 
 - (void)updateConstraints
@@ -99,15 +101,16 @@ static NSTextField* OakCreateTextField ()
 	[super updateConstraints];
 
 	NSDictionary* views = @{
-		@"back":    _goBackButton,
-		@"forward": _goForwardButton,
-		@"divider": _divider,
-		@"status":  _statusTextField,
-		@"spinner": _indeterminateProgress ? _spinner : _progressIndicator,
+		@"topDivider": _topDivider,
+		@"back":       _goBackButton,
+		@"forward":    _goForwardButton,
+		@"divider":    _divider,
+		@"status":     _statusTextField,
+		@"spinner":    _indeterminateProgress ? _spinner : _progressIndicator,
 	};
 
 	NSArray* layout = @[
-		@"V:[status]-5-|", @"V:|-4-[divider]-5-|"
+		@"H:|[topDivider]|", @"V:|[topDivider(==1)]-4-[divider]-5-|", @"V:[status]-5-|"
 	];
 
 	for(NSString* str in layout)
