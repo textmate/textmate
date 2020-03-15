@@ -58,7 +58,7 @@ static NSButton* OakSmallButton (NSString* title, SEL action, id target, NSInteg
 		return;
 	_didLoadView = YES;
 
-	self.divider           = OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider);
+	self.divider           = OakCreateNSBoxSeparator();
 	self.label             = OakCreateLabel(self.labelString);
 	self.neverButton       = OakSmallButton(@"Never", @selector(didClickButton:), self, SelectGrammarResponseNever);
 	self.notNowButton      = OakSmallButton(@"Not Now", @selector(didClickButton:), self, SelectGrammarResponseNotNow);
@@ -90,7 +90,7 @@ static NSButton* OakSmallButton (NSString* title, SEL action, id target, NSInteg
 	[self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[label]-(>=8)-[notNow(==install)]-[install]-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
 	[self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[label]-(>=8)-[never(==install)]-[install]-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
 	[self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[label]-(>=8)-[progress]-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
-	[self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(8)-[label]-(8)-[divider]|" options:0 metrics:nil views:views]];
+	[self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(8)-[label]-(8)-[divider(==1)]|" options:0 metrics:nil views:views]];
 	[self.view addConstraint:[NSLayoutConstraint constraintWithItem:_progressIndicator attribute:NSLayoutAttributeLeading relatedBy:NSLayoutRelationEqual toItem:_notNowButton attribute:NSLayoutAttributeLeading multiplier:1 constant:0]];
 
 	self.neverButton.hidden = YES;

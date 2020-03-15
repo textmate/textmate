@@ -19,7 +19,7 @@
 	if(self = [super initWithFrame:aRect])
 	{
 		self.style   = OakBackgroundFillViewStyleHeader;
-		self.divider = OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider);
+		self.divider = OakCreateNSBoxSeparator();
 
 		self.textField = [[NSTextField alloc] initWithFrame:NSZeroRect];
 		self.textField.focusRingType = NSFocusRingTypeNone;
@@ -38,7 +38,7 @@
 
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[divider]|" options:0 metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[textField]-[ignoreCase]-[wrapAround]-(8)-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[divider]-(8)-[textField]-(8)-|" options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[divider(==1)]-(8)-[textField]-(8)-|" options:0 metrics:nil views:views]];
 
 		[self.ignoreCaseCheckBox bind:NSValueBinding toObject:[NSUserDefaultsController sharedUserDefaultsController] withKeyPath:@"values.incrementalSearchIgnoreCase" options:nil];
 		[self.wrapAroundCheckBox bind:NSValueBinding toObject:[NSUserDefaultsController sharedUserDefaultsController] withKeyPath:@"values.incrementalSearchWrapAround" options:nil];
