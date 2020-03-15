@@ -4,7 +4,6 @@
 typedef NS_ENUM(NSUInteger, OakBackgroundFillViewStyle) {
 	OakBackgroundFillViewStyleNone = 0,
 	OakBackgroundFillViewStyleHeader,
-	OakBackgroundFillViewStyleDivider,
 	OakBackgroundFillViewStyleDarkDivider,
 };
 

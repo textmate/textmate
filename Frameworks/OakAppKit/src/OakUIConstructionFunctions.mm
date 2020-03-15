@@ -242,20 +242,6 @@ OakRolloverButton* OakCreateCloseButton (NSString* accessibilityLabel)
 		}
 	}
 
-	if(self.style == OakBackgroundFillViewStyleDivider)
-	{
-		if(@available(macos 10.14, *))
-		{
-			self.activeBackgroundColor   = [NSColor separatorColor];
-			self.inactiveBackgroundColor = nil;
-		}
-		else
-		{
-			self.activeBackgroundColor   = [NSColor colorWithCalibratedWhite:0.500 alpha:1];
-			self.inactiveBackgroundColor = [NSColor colorWithCalibratedWhite:0.750 alpha:1];
-		}
-	}
-
 	if(self.style == OakBackgroundFillViewStyleDarkDivider)
 	{
 		self.activeBackgroundColor = [NSColor tmDarkDividerColor];
