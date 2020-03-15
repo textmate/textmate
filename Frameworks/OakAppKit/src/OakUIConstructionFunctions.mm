@@ -331,6 +331,13 @@ NSView* OakCreateDividerImageView ()
 	return contentView;
 }
 
+NSView* OakCreateNSBoxSeparator ()
+{
+	NSBox* box = [[NSBox alloc] initWithFrame:NSZeroRect];
+	box.boxType = NSBoxSeparator;
+	return box;
+}
+
 void OakSetupKeyViewLoop (NSArray* superviews, BOOL setFirstResponder)
 {
 	std::set<id> seen;

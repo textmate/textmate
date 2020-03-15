@@ -159,13 +159,6 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 // = View Construction =
 // =====================
 
-- (NSBox*)makeDividerView
-{
-	NSBox* dividerView = [[NSBox alloc] initWithFrame:NSZeroRect];
-	dividerView.boxType     = NSBoxSeparator;
-	return dividerView;
-}
-
 - (void)addTitlebarAccessoryView:(NSView*)titlebarView
 {
 	titlebarView.translatesAutoresizingMaskIntoConstraints = NO;

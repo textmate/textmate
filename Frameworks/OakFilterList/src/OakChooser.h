@@ -23,7 +23,6 @@ PUBLIC @interface OakChooser : NSWindowController
 @property (nonatomic, readonly) NSVisualEffectView* footerView;
 @property (nonatomic, readonly) NSTextField*        statusTextField;
 @property (nonatomic, readonly) NSTextField*        itemCountTextField;
-- (NSBox*)makeDividerView;
 - (void)addTitlebarAccessoryView:(NSView*)titlebarView;
 - (void)updateScrollViewInsets;
 

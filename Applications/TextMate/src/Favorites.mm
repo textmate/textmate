@@ -65,7 +65,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 
 		NSDictionary* titlebarViews = @{
 			@"searchField": self.searchField,
-			@"dividerView": [self makeDividerView],
+			@"dividerView": OakCreateNSBoxSeparator(),
 			@"scopeBar":    scopeBar,
 		};
 
@@ -80,7 +80,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 		[self addTitlebarAccessoryView:titlebarView];
 
 		NSDictionary* footerViews = @{
-			@"dividerView":        [self makeDividerView],
+			@"dividerView":        OakCreateNSBoxSeparator(),
 			@"statusTextField":    self.statusTextField,
 			@"itemCountTextField": self.itemCountTextField,
 		};

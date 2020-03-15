@@ -261,7 +261,7 @@ static NSDictionary* globs_for_path (std::string const& path)
 
 		NSDictionary* titlebarViews = @{
 			@"searchField": self.searchField,
-			@"dividerView": [self makeDividerView],
+			@"dividerView": OakCreateNSBoxSeparator(),
 			@"scopeBar":    scopeBar,
 		};
 
@@ -281,7 +281,7 @@ static NSDictionary* globs_for_path (std::string const& path)
 		_progressIndicator.displayedWhenStopped = NO;
 
 		NSDictionary* footerViews = @{
-			@"dividerView":        [self makeDividerView],
+			@"dividerView":        OakCreateNSBoxSeparator(),
 			@"statusTextField":    self.statusTextField,
 			@"itemCountTextField": self.itemCountTextField,
 			@"progressIndicator":  _progressIndicator,

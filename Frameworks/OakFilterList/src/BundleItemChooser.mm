@@ -471,8 +471,8 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		self.scopeBar = [OakScopeBarView new];
 		self.scopeBar.labels = _sourceListLabels;
 
-		self.topDivider          = [self makeDividerView];
-		self.bottomDivider       = [self makeDividerView];
+		self.topDivider          = OakCreateNSBoxSeparator();
+		self.bottomDivider       = OakCreateNSBoxSeparator();
 
 		self.selectButton             = OakCreateButton(@"Select");
 		self.selectButton.font        = [NSFont messageFontOfSize:[NSFont systemFontSizeForControlSize:NSControlSizeSmall]];

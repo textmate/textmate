@@ -53,7 +53,7 @@ static SymbolChooserItem* CreateItem (OakDocument* document, text::pos_t const& 
 		[self addTitlebarAccessoryView:titlebarView];
 
 		NSDictionary* footerViews = @{
-			@"dividerView":        [self makeDividerView],
+			@"dividerView":        OakCreateNSBoxSeparator(),
 			@"statusTextField":    self.statusTextField,
 			@"itemCountTextField": self.itemCountTextField,
 		};

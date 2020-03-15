@@ -123,7 +123,7 @@ static NSMutableDictionary* SharedChoosers;
 
 		NSDictionary* titlebarViews = @{
 			@"searchField": self.searchField,
-			@"dividerView": [self makeDividerView],
+			@"dividerView": OakCreateNSBoxSeparator(),
 			@"scopeBar":    scopeBar,
 		};
 
@@ -146,7 +146,7 @@ static NSMutableDictionary* SharedChoosers;
 		actionButton.action   = @selector(accept:);
 
 		NSDictionary* footerViews = @{
-			@"dividerView": [self makeDividerView],
+			@"dividerView": OakCreateNSBoxSeparator(),
 			@"delete":      deleteButton,
 			@"clearAll":    clearAllButton,
 			@"action":      actionButton,
@@ -186,13 +186,6 @@ static NSMutableDictionary* SharedChoosers;
 // =====================
 // = View Construction =
 // =====================
-
-- (NSBox*)makeDividerView
-{
-	NSBox* dividerView = [[NSBox alloc] initWithFrame:NSZeroRect];
-	dividerView.boxType = NSBoxSeparator;
-	return dividerView;
-}
 
 - (void)addTitlebarAccessoryView:(NSView*)titlebarView
 {
