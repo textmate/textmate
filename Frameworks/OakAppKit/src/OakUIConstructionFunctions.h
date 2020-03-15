@@ -29,7 +29,6 @@ PUBLIC NSPopUpButton* OakCreatePopUpButton (BOOL pullsDown = NO, NSString* initi
 PUBLIC NSPopUpButton* OakCreateActionPopUpButton (BOOL bordered = NO);
 PUBLIC NSComboBox* OakCreateComboBox (NSView* labelView = nil);
 PUBLIC OakRolloverButton* OakCreateCloseButton (NSString* accessibilityLabel = @"Close document");
-PUBLIC NSView* OakCreateDividerImageView ();
 PUBLIC NSView* OakCreateNSBoxSeparator ();
 
 PUBLIC OakBackgroundFillView* OakCreateVerticalLine (OakBackgroundFillViewStyle style);

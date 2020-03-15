@@ -312,25 +312,6 @@ OakBackgroundFillView* OakCreateHorizontalLine (OakBackgroundFillViewStyle style
 	return view;
 }
 
-NSView* OakCreateDividerImageView ()
-{
-	NSBox* box = [[NSBox alloc] initWithFrame:NSZeroRect];
-	box.boxType = NSBoxSeparator;
-
-	NSDictionary* views = @{
-		@"box": box,
-	};
-
-	NSView* contentView = [[NSView alloc] initWithFrame:NSZeroRect];
-	OakAddAutoLayoutViewsToSuperview(views.allValues, contentView);
-
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[box(==1)]|" options:0 metrics:nil views:views]];
-	[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[box(==16)]" options:0 metrics:nil views:views]];
-	[contentView addConstraint:[NSLayoutConstraint constraintWithItem:box attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
-
-	return contentView;
-}
-
 NSView* OakCreateNSBoxSeparator ()
 {
 	NSBox* box = [[NSBox alloc] initWithFrame:NSZeroRect];
