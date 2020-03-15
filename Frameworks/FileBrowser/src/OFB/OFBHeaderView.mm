@@ -31,7 +31,8 @@ static NSPopUpButton* OakCreateFolderPopUpButton ()
 {
 	if(self = [super initWithFrame:aRect])
 	{
-		self.style = OakBackgroundFillViewStyleHeader;
+		self.blendingMode = NSVisualEffectBlendingModeWithinWindow;
+		self.material     = NSVisualEffectMaterialTitlebar;
 
 		self.folderPopUpButton       = OakCreateFolderPopUpButton();
 		self.goBackButton            = OakCreateImageButton(NSImageNameGoLeftTemplate);
