@@ -311,8 +311,8 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		[label sizeToFit];
 		CGFloat lineHeight = std::max(NSHeight(label.frame), ceil(_searchResultsFont.ascender) + ceil(fabs(_searchResultsFont.descender)) + ceil(_searchResultsFont.leading));
 
-		_topDivider    = OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider);
-		_bottomDivider = OakCreateHorizontalLine(OakBackgroundFillViewStyleDivider);
+		_topDivider    = OakCreateNSBoxSeparator();
+		_bottomDivider = OakCreateNSBoxSeparator();
 
 		_outlineView = [[NSOutlineView alloc] initWithFrame:NSZeroRect];
 		_outlineView.accessibilityLabel                 = @"Results";
@@ -349,7 +349,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		NSView* containerView = [[NSView alloc] initWithFrame:NSZeroRect];
 		OakAddAutoLayoutViewsToSuperview([views allValues], containerView);
 
-		[containerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[topDivider][scrollView][bottomDivider]|" options:NSLayoutFormatAlignAllLeading|NSLayoutFormatAlignAllTrailing metrics:nil views:views]];
+		[containerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[topDivider(==1)][scrollView][bottomDivider(==1)]|" options:NSLayoutFormatAlignAllLeading|NSLayoutFormatAlignAllTrailing metrics:nil views:views]];
 		[containerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView]|" options:0 metrics:nil views:views]];
 
 		self.view = containerView;
