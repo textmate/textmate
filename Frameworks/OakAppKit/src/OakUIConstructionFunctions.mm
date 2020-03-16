@@ -241,11 +241,6 @@ OakRolloverButton* OakCreateCloseButton (NSString* accessibilityLabel)
 			self.inactiveBackgroundGradient = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1] endingColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1]];
 		}
 	}
-
-	if(self.style == OakBackgroundFillViewStyleDarkDivider)
-	{
-		self.activeBackgroundColor = [NSColor tmDarkDividerColor];
-	}
 }
 
 - (void)drawRect:(NSRect)aRect
@@ -285,15 +280,6 @@ OakBackgroundFillView* OakCreateVerticalLine (OakBackgroundFillViewStyle style)
 	OakBackgroundFillView* view = [[OakBackgroundFillView alloc] initWithFrame:NSZeroRect];
 	view.style = style;
 	[view addConstraint:[NSLayoutConstraint constraintWithItem:view attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:1]];
-	view.translatesAutoresizingMaskIntoConstraints = NO;
-	return view;
-}
-
-OakBackgroundFillView* OakCreateHorizontalLine (OakBackgroundFillViewStyle style)
-{
-	OakBackgroundFillView* view = [[OakBackgroundFillView alloc] initWithFrame:NSZeroRect];
-	view.style = style;
-	[view addConstraint:[NSLayoutConstraint constraintWithItem:view attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:1]];
 	view.translatesAutoresizingMaskIntoConstraints = NO;
 	return view;
 }
