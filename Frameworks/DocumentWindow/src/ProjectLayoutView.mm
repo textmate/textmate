@@ -73,16 +73,25 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 
 - (void)setDocumentView:(NSView*)aDocumentView       { _documentView = [self replaceView:_documentView withView:aDocumentView]; [self updateKeyViewLoop]; }
 
+- (NSView*)createDividerAlongYAxis:(BOOL)flag
+{
+	NSView* res = OakCreateNSBoxSeparator();
+	res.translatesAutoresizingMaskIntoConstraints = NO;
+	[res addConstraint:[NSLayoutConstraint constraintWithItem:res attribute:(flag ? NSLayoutAttributeWidth : NSLayoutAttributeHeight) relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:1]];
+	[res addConstraint:[NSLayoutConstraint constraintWithItem:res attribute:(flag ? NSLayoutAttributeHeight : NSLayoutAttributeWidth) relatedBy:NSLayoutRelationGreaterThanOrEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:2]];
+	return res;
+}
+
 - (void)setHtmlOutputView:(NSView*)aHtmlOutputView
 {
-	_htmlOutputDivider = [self replaceView:_htmlOutputDivider withView:(aHtmlOutputView ? (_htmlOutputOnRight ? OakCreateVerticalLine(OakBackgroundFillViewStyleDarkDivider) : OakCreateHorizontalLine(OakBackgroundFillViewStyleDarkDivider)) : nil)];
+	_htmlOutputDivider = [self replaceView:_htmlOutputDivider withView:(aHtmlOutputView ? [self createDividerAlongYAxis:_htmlOutputOnRight] : nil)];
 	_htmlOutputView    = [self replaceView:_htmlOutputView withView:aHtmlOutputView];
 	[self updateKeyViewLoop];
 }
 
 - (void)setFileBrowserView:(NSView*)aFileBrowserView
 {
-	_fileBrowserDivider = [self replaceView:_fileBrowserDivider withView:aFileBrowserView ? OakCreateVerticalLine(OakBackgroundFillViewStyleDarkDivider) : nil];
+	_fileBrowserDivider = [self replaceView:_fileBrowserDivider withView:aFileBrowserView ? [self createDividerAlongYAxis:YES] : nil];
 	_fileBrowserView    = [self replaceView:_fileBrowserView withView:aFileBrowserView];
 	[self updateKeyViewLoop];
 }
