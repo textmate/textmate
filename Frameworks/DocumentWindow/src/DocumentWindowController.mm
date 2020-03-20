@@ -1780,8 +1780,11 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 			self.fileBrowser = [[FileBrowserViewController alloc] init];
 			self.fileBrowser.delegate = self;
 			[self.fileBrowser setupViewWithState:_fileBrowserHistory];
-			if(self.projectPath && !_fileBrowserHistory)
-				[self.fileBrowser goToURL:[NSURL fileURLWithPath:self.projectPath]];
+			if(!_fileBrowserHistory)
+			{
+				if(NSString* path = self.projectPath ?: self.defaultProjectPath)
+					[self.fileBrowser goToURL:[NSURL fileURLWithPath:path]];
+			}
 			[self updateFileBrowserStatus:self];
 
 			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(fileBrowserDidDuplicate:) name:FileBrowserDidDuplicateNotification object:nil];
