@@ -199,21 +199,24 @@ static NSDictionary* globs_for_path (std::string const& path)
 		{ kSettingsIncludeKey,                         kSearchGlobsKey                 },
 	};
 
-	NSDictionary* res = @{
-		kSearchExcludeDirectoryGlobsKey: [NSMutableArray array],
-		kSearchExcludeFileGlobsKey:      [NSMutableArray array],
-		kSearchExcludeGlobsKey:          [NSMutableArray array],
-		kSearchDirectoryGlobsKey:        [NSMutableArray array],
-		kSearchFileGlobsKey:             [NSMutableArray array],
-		kSearchGlobsKey:                 [NSMutableArray array],
-	};
+	NSMutableDictionary* res = [NSMutableDictionary dictionary];
 
 	settings_t const settings = settings_for_path(NULL_STR, "", path);
 	for(auto const& pair : map)
 	{
 		if(NSString* glob = to_ns(settings.get(pair.first)))
+		{
+			if(!res[pair.second])
+				res[pair.second] = [NSMutableArray array];
 			[res[pair.second] addObject:glob];
+		}
 	}
+
+	if(!res[kSearchDirectoryGlobsKey] && !res[kSearchGlobsKey])
+		res[kSearchDirectoryGlobsKey] = @[ @"*" ];
+	if(!res[kSearchFileGlobsKey] && !res[kSearchGlobsKey])
+		res[kSearchFileGlobsKey] = @[ @"*" ];
+
 	return res;
 }
 
