@@ -27,7 +27,11 @@ static NSString* const OakTabItemPasteboardType = @"com.macromates.TextMate.tabI
 
 @class OakTabView;
 
-@interface OakTabItem () <NSPasteboardWriting>
+@interface OakTabItem : NSObject <NSPasteboardWriting>
+@property (nonatomic, readonly) NSString* identifier;
+@property (nonatomic) NSString* title;
+@property (nonatomic) NSString* path;
+@property (nonatomic, getter = isModified) BOOL modified;
 @property (nonatomic, getter = isSelected) BOOL selected;
 @property (nonatomic) CGFloat fittingWidth;
 @property (nonatomic) BOOL needsLayout;
@@ -203,7 +207,7 @@ static NSString* const OakTabItemPasteboardType = @"com.macromates.TextMate.tabI
 
 	NSInteger _tag;
 }
-@property (nonatomic, readwrite) NSMutableArray<OakTabItem*>* tabItems;
+@property (nonatomic) NSMutableArray<OakTabItem*>* tabItems;
 @property (nonatomic) NSInteger draggedTabIndex;
 @property (nonatomic) NSInteger dropTabAtIndex;
 @property (nonatomic) NSInteger freezeTabFramesLeftOfIndex;
@@ -869,11 +873,6 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 // ===========
 // = Actions =
 // ===========
-
-- (OakTabItem*)selectedTabItem
-{
-	return [_tabItems filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"selected == YES"]].firstObject;
-}
 
 - (void)setSelectedTabIndex:(NSUInteger)index
 {

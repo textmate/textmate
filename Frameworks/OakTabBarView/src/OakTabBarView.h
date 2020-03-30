@@ -1,12 +1,5 @@
 #import <oak/misc.h>
 
-@interface OakTabItem : NSObject
-@property (nonatomic) NSString* title;
-@property (nonatomic) NSString* path;
-@property (nonatomic, readonly) NSString* identifier;
-@property (nonatomic, getter = isModified) BOOL modified;
-@end
-
 @protocol OakTabBarViewDelegate, OakTabBarViewDataSource;
 
 @interface OakTabBarView : NSView
@@ -16,9 +9,6 @@
 @property (nonatomic) NSUInteger selectedTabIndex;
 - (void)reloadData;
 - (void)performClose:(id)sender;
-
-@property (nonatomic, readonly) NSArray<OakTabItem*>* tabItems;
-@property (nonatomic, readonly) OakTabItem* selectedTabItem;
 
 @property (nonatomic) BOOL neverHideLeftBorder;
 @end
