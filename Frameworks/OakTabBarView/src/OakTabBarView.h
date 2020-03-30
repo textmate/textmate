@@ -31,7 +31,7 @@
 - (NSMenu*)menuForTabBarView:(OakTabBarView*)aTabBarView;
 
 // Methods sent to the delegate which the tab was dragged to
-- (BOOL)performDropOfTabItem:(OakTabItem*)tabItem fromTabBar:(OakTabBarView*)sourceTabBar index:(NSUInteger)dragIndex toTabBar:(OakTabBarView*)destTabBar index:(NSUInteger)droppedIndex operation:(NSDragOperation)operation;
+- (BOOL)performDropOfTabItem:(NSUUID*)tabItemUUID fromTabBar:(OakTabBarView*)sourceTabBar index:(NSUInteger)dragIndex toTabBar:(OakTabBarView*)destTabBar index:(NSUInteger)droppedIndex operation:(NSDragOperation)operation;
 
 - (void)performCloseTab:(OakTabBarView*)sender;
 - (void)performCloseOtherTabsXYZ:(OakTabBarView*)sender;

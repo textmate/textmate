@@ -1057,7 +1057,7 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 		return NO;
 
 	BOOL shouldDelegate = [_delegate respondsToSelector:@selector(performDropOfTabItem:fromTabBar:index:toTabBar:index:operation:)];
-	return shouldDelegate && [_delegate performDropOfTabItem:tabItem fromTabBar:sourceTabBar index:fromIndex toTabBar:self index:toIndex operation:(mask & NSDragOperationMove) ?: (mask & NSDragOperationCopy)];
+	return shouldDelegate && [_delegate performDropOfTabItem:[[NSUUID alloc] initWithUUIDString:tabItem.identifier] fromTabBar:sourceTabBar index:fromIndex toTabBar:self index:toIndex operation:(mask & NSDragOperationMove) ?: (mask & NSDragOperationCopy)];
 }
 
 - (void)concludeDragOperation:(id <NSDraggingInfo>)sender
