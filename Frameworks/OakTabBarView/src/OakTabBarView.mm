@@ -787,7 +787,7 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 	NSMutableArray<OakTabItem*>* newTabItems = [NSMutableArray array];
 	for(NSUInteger i = 0; i < newCount; ++i)
 	{
-		NSString* identifier = [_dataSource tabBarView:self identifierForIndex:i];
+		NSString* identifier = [_dataSource tabBarView:self UUIDForIndex:i].UUIDString;
 		OakTabItem* tabItem = oldTabItems[identifier];
 		if(tabItem)
 		{
