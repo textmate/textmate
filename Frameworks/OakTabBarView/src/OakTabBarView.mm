@@ -737,10 +737,9 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 	return _createNewTabButton;
 }
 
-- (NSInteger)selectedTabIndex
+- (NSUInteger)selectedTabIndex
 {
-	NSUInteger res = [_tabItems indexOfObjectPassingTest:^BOOL(OakTabItem* tabItem, NSUInteger index, BOOL* stop){ return tabItem.isSelected; }];
-	return res != NSNotFound ? res : -1;
+	return [_tabItems indexOfObjectPassingTest:^BOOL(OakTabItem* tabItem, NSUInteger index, BOOL* stop){ return tabItem.isSelected; }];
 }
 
 - (void)setDraggedTabIndex:(NSInteger)newDraggedTabIndex
@@ -876,12 +875,12 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 	return [_tabItems filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"selected == YES"]].firstObject;
 }
 
-- (void)setSelectedTabIndex:(NSInteger)index
+- (void)setSelectedTabIndex:(NSUInteger)index
 {
 	for(NSUInteger i = 0; i < _tabItems.count; ++i)
 		_tabItems[i].selected = i == index;
 
-	if(0 <= index && index < _tabItems.count)
+	if(index < _tabItems.count)
 	{
 		if(!_tabItems[index].tabView || NSWidth(_tabItems[index].tabView.frame) == 0)
 			[self updateToLayout:[self makeLayout]];

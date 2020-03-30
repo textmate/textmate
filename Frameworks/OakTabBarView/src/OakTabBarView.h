@@ -13,8 +13,8 @@
 @property (nonatomic, weak) id <OakTabBarViewDelegate> delegate;
 @property (nonatomic, weak) id <OakTabBarViewDataSource> dataSource;
 @property (nonatomic, readonly) NSInteger countOfVisibleTabs;
+@property (nonatomic) NSUInteger selectedTabIndex;
 - (void)reloadData;
-- (void)setSelectedTabIndex:(NSInteger)anIndex;
 - (void)performClose:(id)sender;
 
 @property (nonatomic, readonly) NSArray<OakTabItem*>* tabItems;

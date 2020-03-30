@@ -1494,7 +1494,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	if(_documents.count)
 	{
 		[self.tabBarView reloadData];
-		if(!self.tabBarView.selectedTabItem)
+		if(self.tabBarView.selectedTabIndex == NSNotFound)
 			[self.tabBarView setSelectedTabIndex:MIN(_selectedTabIndex, _documents.count-1)];
 	}
 
@@ -1720,7 +1720,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		{
 			if(delegate == sourceTabBar.delegate)
 			{
-				BOOL wasSelected = [tabItem.identifier isEqual:sourceTabBar.selectedTabItem.identifier];
+				BOOL wasSelected = dragIndex == sourceTabBar.selectedTabIndex;
 
 				if(delegate.fileBrowserVisible || delegate.documents.count > 1)
 						[delegate closeTabsAtIndexes:[NSIndexSet indexSetWithIndex:dragIndex] askToSaveChanges:NO createDocumentIfEmpty:YES activate:YES];
