@@ -1,5 +1,5 @@
 SOURCES       = src/*.mm src/OFB/*.mm
-EXPORT        = src/FileBrowserViewController.h src/FileBrowserNotifications.h src/FileItemImage.h
+EXPORT        = src/FileBrowserViewController.h src/FileBrowserNotifications.h src/FileItemImage.h src/SCMManager.h
 CP_Resources  = resources/*
 LINK         += MenuBuilder OakAppKit OakCommand OakFoundation Preferences bundles io ns regexp scm settings text
 FRAMEWORKS    = Cocoa
