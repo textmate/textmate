@@ -11,9 +11,11 @@ TM_ORGANIZATION_NAME = 'MacroMates'
 
 TM_TODO_IGNORE       = '/(build|CxxTest|PlugIns|vendor)/|\.(md|html)$'
 
-# find ~/build/TextMate -regex '.*/include/[^/]*' -exec ln -s {} ~/build/TextMate/include \;
-TM_CXX_FLAGS         = '$TM_CXX_FLAGS    -I"$CWD/Shared/include" -I"${builddir:-$HOME/build/TextMate}/include"'
-TM_OBJCXX_FLAGS      = '$TM_OBJCXX_FLAGS -I"$CWD/Shared/include" -I"${builddir:-$HOME/build/TextMate}/include"'
+TM_BUILD_DIR         = '${builddir:-$HOME/build/TextMate}'
+TM_FRAMEWORKS        = 'authorization buffer BundleEditor BundleEditor BundleMenu bundles BundlesManager cf command CommitWindow crash CrashReporter document DocumentWindow editor encoding file FileBrowser Find HTMLOutput HTMLOutputWindow io layout license MenuBuilder network ns OakAppKit OakCommand OakDebug OakFilterList OakFoundation OakSystem OakTabBarView OakTextView parse plist Preferences regexp scm scope selection settings SoftwareUpdate text theme undo updater version'
+TM_FRAMEWORK_INCLUDE = '${TM_FRAMEWORKS/\w+/-I"${TM_BUILD_DIR}\/Frameworks\/$0\/include"/g}'
+TM_CXX_FLAGS         = '$TM_CXX_FLAGS    -I"$CWD/Shared/include" -I"$TM_BUILD_DIR/include" ${TM_FRAMEWORK_INCLUDE}'
+TM_OBJCXX_FLAGS      = '$TM_OBJCXX_FLAGS -I"$CWD/Shared/include" -I"$TM_BUILD_DIR/include" ${TM_FRAMEWORK_INCLUDE}'
 
 TM_NINJA_FILE        = '${CWD}/build.ninja'
 TM_NINJA_TARGET      = 'TextMate/run'
