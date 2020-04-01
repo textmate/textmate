@@ -398,6 +398,7 @@ class Buildfile
     self.rule('run', {
       'command'     => '$in',
       'description' => 'Run ‘$in’…',
+      'pool'        => 'console',
     })
 
     self.rule('run_application', {
