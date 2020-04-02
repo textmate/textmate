@@ -49,7 +49,7 @@ static NSMutableDictionary* SchemeToClass;
 		self.URL = url;
 
 		NSNumber* flag;
-		BOOL disableSCMStatus = [url getResourceValue:&flag forKey:@"org.textmate.disable-scm-status" error:nil] && [flag boolValue];
+		BOOL disableSCMStatus = [url getResourceValue:&flag forKey:@"org.textmate.disable-scm-status" error:nil] && flag.boolValue;
 
 		[self updateFileProperties];
 		[self addSCMStatusObserver:url.isFileURL && !disableSCMStatus];
@@ -83,7 +83,7 @@ static NSMutableDictionary* SchemeToClass;
 - (BOOL)canRename
 {
 	NSNumber* flag;
-	return _URL.isFileURL && !self.isMissing && (![_URL getResourceValue:&flag forKey:NSURLIsVolumeKey error:nil] || ![flag boolValue]);
+	return _URL.isFileURL && !self.isMissing && (![_URL getResourceValue:&flag forKey:NSURLIsVolumeKey error:nil] || !flag.boolValue);
 }
 
 - (void)updateFileProperties
@@ -93,12 +93,12 @@ static NSMutableDictionary* SchemeToClass;
 
 	NSNumber* flag;
 
-	self.hidden          = [_URL getResourceValue:&flag forKey:NSURLIsHiddenKey error:nil] && [flag boolValue];
-	self.hiddenExtension = [_URL getResourceValue:&flag forKey:NSURLHasHiddenExtensionKey error:nil] && [flag boolValue];
-	self.symbolicLink    = [_URL getResourceValue:&flag forKey:NSURLIsSymbolicLinkKey error:nil] && [flag boolValue];
-	self.package         = !_symbolicLink && [_URL getResourceValue:&flag forKey:NSURLIsPackageKey error:nil] && [flag boolValue];
-	self.linkToDirectory = _symbolicLink && [self.resolvedURL getResourceValue:&flag forKey:NSURLIsDirectoryKey error:nil] && [flag boolValue];
-	self.linkToPackage   = _symbolicLink && [self.resolvedURL getResourceValue:&flag forKey:NSURLIsPackageKey error:nil] && [flag boolValue];;
+	self.hidden          = [_URL getResourceValue:&flag forKey:NSURLIsHiddenKey error:nil] && flag.boolValue;
+	self.hiddenExtension = [_URL getResourceValue:&flag forKey:NSURLHasHiddenExtensionKey error:nil] && flag.boolValue;
+	self.symbolicLink    = [_URL getResourceValue:&flag forKey:NSURLIsSymbolicLinkKey error:nil] && flag.boolValue;
+	self.package         = !_symbolicLink && [_URL getResourceValue:&flag forKey:NSURLIsPackageKey error:nil] && flag.boolValue;
+	self.linkToDirectory = _symbolicLink && [self.resolvedURL getResourceValue:&flag forKey:NSURLIsDirectoryKey error:nil] && flag.boolValue;
+	self.linkToPackage   = _symbolicLink && [self.resolvedURL getResourceValue:&flag forKey:NSURLIsPackageKey error:nil] && flag.boolValue;;
 	self.finderTags      = [OakFinderTagManager finderTagsForURL:self.URL];
 	self.missing         = _missing && ![NSFileManager.defaultManager fileExistsAtPath:_URL.path];
 }
@@ -168,7 +168,7 @@ static NSMutableDictionary* SchemeToClass;
 		url = [url URLByResolvingSymlinksInPath];
 
 		NSNumber* flag;
-		if([url getResourceValue:&flag forKey:NSURLIsSymbolicLinkKey error:nil] && [flag boolValue])
+		if([url getResourceValue:&flag forKey:NSURLIsSymbolicLinkKey error:nil] && flag.boolValue)
 		{
 			NSError* error;
 			if(NSString* path = [NSFileManager.defaultManager destinationOfSymbolicLinkAtPath:_URL.path error:&error])
@@ -185,7 +185,7 @@ static NSMutableDictionary* SchemeToClass;
 		NSNumber* flag;
 		NSURL* parentURL;
 
-		if([_URL getResourceValue:&flag forKey:NSURLIsVolumeKey error:nil] && [flag boolValue])
+		if([_URL getResourceValue:&flag forKey:NSURLIsVolumeKey error:nil] && flag.boolValue)
 			return kURLLocationComputer;
 		else if([_URL getResourceValue:&parentURL forKey:NSURLParentDirectoryURLKey error:nil] && parentURL)
 			return parentURL;
@@ -196,7 +196,7 @@ static NSMutableDictionary* SchemeToClass;
 - (BOOL)isApplication
 {
 	NSNumber* flag;
-	return _URL.isFileURL && [_URL getResourceValue:&flag forKey:NSURLIsApplicationKey error:nil] && [flag boolValue];
+	return _URL.isFileURL && [_URL getResourceValue:&flag forKey:NSURLIsApplicationKey error:nil] && flag.boolValue;
 }
 
 // ===========================================

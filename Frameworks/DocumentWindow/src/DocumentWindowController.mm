@@ -137,7 +137,7 @@ namespace
 		{
 			for(NSWindow* window in [NSApp orderedWindows])
 			{
-				if([window isMiniaturized] == [flag boolValue] && [window.delegate respondsToSelector:@selector(identifier)])
+				if([window isMiniaturized] == flag.boolValue && [window.delegate respondsToSelector:@selector(identifier)])
 				{
 					DocumentWindowController* delegate = (DocumentWindowController*)window.delegate;
 					if(id controller = AllControllers()[delegate.identifier])

@@ -1225,7 +1225,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 	while(true)
 	{
 		NSNumber* flag;
-		if([childURL getResourceValue:&flag forKey:NSURLIsVolumeKey error:nil] && [flag boolValue])
+		if([childURL getResourceValue:&flag forKey:NSURLIsVolumeKey error:nil] && flag.boolValue)
 			break;
 
 		NSURL* potentialParentURL;
@@ -1576,7 +1576,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 	for(NSUInteger i = 0; i < numberOfParents; ++i)
 	{
 		NSNumber* flag;
-		if([url getResourceValue:&flag forKey:NSURLIsVolumeKey error:nil] && [flag boolValue])
+		if([url getResourceValue:&flag forKey:NSURLIsVolumeKey error:nil] && flag.boolValue)
 			return nil;
 
 		NSURL* parentURL;

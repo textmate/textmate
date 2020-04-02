@@ -141,7 +141,7 @@ static CGFloat ParseFontSize (NSString* fontSizeString)
 
 			if(NSNumber* misspelled = settings[@"misspelled"])
 			{
-				_options     |= [misspelled boolValue] ? OakThemeStyleMisspelled : 0;
+				_options     |= misspelled.boolValue ? OakThemeStyleMisspelled : 0;
 				_optionsMask |= OakThemeStyleMisspelled;
 			}
 

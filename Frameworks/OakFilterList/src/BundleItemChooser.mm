@@ -557,7 +557,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	if(context == kRecordingBinding)
 	{
 		NSNumber* isRecording = change[NSKeyValueChangeNewKey];
-		self.drawTableViewAsHighlighted = ![isRecording boolValue];
+		self.drawTableViewAsHighlighted = !isRecording.boolValue;
 	}
 	else
 	{

@@ -108,7 +108,7 @@ namespace
 			[[_directories objectForKey:url] didObserveChangeInDirectoryAtURL:originalURL];
 
 			NSNumber* isVolume;
-			if([url getResourceValue:&isVolume forKey:NSURLIsVolumeKey error:nil] && [isVolume boolValue])
+			if([url getResourceValue:&isVolume forKey:NSURLIsVolumeKey error:nil] && isVolume.boolValue)
 				break;
 
 			NSURL* parentURL;
