@@ -136,6 +136,11 @@ static NSArray<OakOpenWithApplicationInfo*>* ApplicationURLsForPaths (NSSet* pat
 	[item setSubmenu:submenu];
 }
 
+- (BOOL)menuHasKeyEquivalent:(NSMenu*)aMenu forEvent:(NSEvent*)theEvent target:(id*)aTarget action:(SEL*)anAction
+{
+	return NO;
+}
+
 - (void)menuNeedsUpdate:(NSMenu*)menu
 {
 	NSMenuItem* superItem = [menu parentMenuItem];
