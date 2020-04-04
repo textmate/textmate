@@ -3,9 +3,9 @@
 #import "OakDocumentEditor.h"
 #import "EncodingView.h"
 #import "Printing.h"
-#import "watch.h"
 #import "merge.h"
 #import <FileBrowser/FileItemImage.h>
+#import <FileBrowser/KEventManager.h>
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/OakEncodingPopUpButton.h>
@@ -185,7 +185,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	ng::callback_t* _callback;
 
 	std::unique_ptr<ng::undo_manager_t> _undoManager;
-	std::unique_ptr<document::watch_base_t> _fileSystemObserver;
+	id _fileSystemObserver;
 
 	NSTimer* _backupTimer;
 }
@@ -1600,40 +1600,35 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	if(_observeFileSystem == flag)
 		return;
 
-	struct watch_t : document::watch_base_t
-	{
-		watch_t (std::string const& path, OakDocument* document) : watch_base_t(path), _self(document) { }
-
-		void callback (int flags, std::string const& newPath)
-		{
-			[_self fileSystemDidChangeToPath:to_ns(newPath) flags:flags];
-		}
-
-	private:
-		__weak OakDocument* _self;
-	};
-
 	_observeFileSystem = flag;
-	_fileSystemObserver.reset();
-
 	if(flag && _path)
-		_fileSystemObserver = std::make_unique<watch_t>(to_s(_path), self);
+	{
+		__weak OakDocument* weakSelf = self;
+		_fileSystemObserver = [KEventManager.sharedInstance addObserverToItemAtURL:[NSURL fileURLWithPath:_path] usingBlock:^(NSURL* url, NSUInteger mask){
+			[weakSelf fileSystemDidChangeToPath:url.path flags:mask];
+		}];
+	}
+	else
+	{
+		[KEventManager.sharedInstance removeObserver:_fileSystemObserver];
+		_fileSystemObserver = nil;
+	}
 }
 
-- (void)fileSystemDidChangeToPath:(NSString*)newPath flags:(int)flags
+- (void)fileSystemDidChangeToPath:(NSString*)newPath flags:(NSUInteger)flags
 {
 	ASSERT_NE(_openCount, 0);
 
-	if((flags & NOTE_RENAME) == NOTE_RENAME)
+	if((flags & DISPATCH_VNODE_RENAME) == DISPATCH_VNODE_RENAME)
 	{
 		self.path = newPath;
 	}
-	else if((flags & NOTE_DELETE) == NOTE_DELETE)
+	else if((flags & DISPATCH_VNODE_DELETE) == DISPATCH_VNODE_DELETE)
 	{
 		self.onDisk = _path && access([_path fileSystemRepresentation], F_OK) == 0;
 		[OakDocumentController.sharedInstance update:self];
 	}
-	else if((flags & NOTE_WRITE) == NOTE_WRITE || (flags & NOTE_CREATE) == NOTE_CREATE)
+	else if((flags & DISPATCH_VNODE_WRITE) == DISPATCH_VNODE_WRITE)
 	{
 		self.onDisk = _path && access([_path fileSystemRepresentation], F_OK) == 0;
 		self.needsImportDocumentChanges = YES;
