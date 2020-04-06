@@ -2,6 +2,11 @@
 #include <text/utf8.h>
 #include <text/hexdump.h>
 
+std::string const kClipboardOptionIndent    = "indent";
+std::string const kClipboardOptionComplete  = "complete";
+std::string const kClipboardOptionFragments = "fragments";
+std::string const kClipboardOptionColumnar  = "columnar";
+
 clipboard_t::entry_t::entry_t (std::string const& content, std::map<std::string, std::string> const& options) : _content(content), _options(options)
 {
 	if(!utf8::is_valid(_content.begin(), _content.end()))

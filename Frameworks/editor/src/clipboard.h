@@ -3,6 +3,11 @@
 
 #include <oak/misc.h>
 
+extern std::string const kClipboardOptionIndent;
+extern std::string const kClipboardOptionComplete;
+extern std::string const kClipboardOptionFragments;
+extern std::string const kClipboardOptionColumnar;
+
 struct PUBLIC clipboard_t
 {
 	struct PUBLIC entry_t

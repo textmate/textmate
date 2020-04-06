@@ -293,10 +293,10 @@ namespace ng
 	static std::map<std::string, std::string> create_find_options (std::string const& indent, bool complete, size_t fragments, bool columnar)
 	{
 		std::map<std::string, std::string> res;
-		if(indent != NULL_STR) res["indent"]    = indent;
-		if(complete)           res["complete"]  = "1";
-		if(fragments > 1)      res["fragments"] = std::to_string(fragments);
-		if(columnar)           res["columnar"]  = "1";
+		if(indent != NULL_STR) res[kClipboardOptionIndent]    = indent;
+		if(complete)           res[kClipboardOptionComplete]  = "1";
+		if(fragments > 1)      res[kClipboardOptionFragments] = std::to_string(fragments);
+		if(columnar)           res[kClipboardOptionColumnar]  = "1";
 		return res;
 	}
 
@@ -455,10 +455,10 @@ namespace ng
 		std::map<std::string, std::string> options = entry->options();
 		str.erase(text::convert_line_endings(str.begin(), str.end(), text::estimate_line_endings(str.begin(), str.end())), str.end());
 
-		std::string const& indent = options["indent"];
-		bool const complete       = options["complete"] == "1";
-		size_t const fragments    = strtol(options["fragments"].c_str(), nullptr, 10);
-		bool const columnar       = options["columnar"] == "1";
+		std::string const& indent = options[kClipboardOptionIndent];
+		bool const complete       = options[kClipboardOptionComplete] == "1";
+		size_t const fragments    = strtol(options[kClipboardOptionFragments].c_str(), nullptr, 10);
+		bool const columnar       = options[kClipboardOptionColumnar] == "1";
 
 		if((selections.size() != 1 || selections.last().columnar) && (fragments > 1 || oak::contains(str.begin(), str.end(), '\n')))
 		{
