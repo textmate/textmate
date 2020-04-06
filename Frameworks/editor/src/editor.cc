@@ -948,9 +948,9 @@ namespace ng
 					if(clipboard_t::entry_ptr oldEntry = yank_clipboard()->current())
 					{
 						if(action == kAppendSelectionToYankPboard)
-							entry = std::make_shared<clipboard_t::entry_t>(oldEntry->content() + entry->content(), create_find_options("", false, 1, false));
+							entry = std::make_shared<clipboard_t::entry_t>(oldEntry->content() + entry->content());
 						else if(action == kPrependSelectionToYankPboard)
-							entry = std::make_shared<clipboard_t::entry_t>(entry->content() + oldEntry->content(), create_find_options("", false, 1, false));
+							entry = std::make_shared<clipboard_t::entry_t>(entry->content() + oldEntry->content());
 					}
 				}
 				yank_clipboard()->push_back(entry);
