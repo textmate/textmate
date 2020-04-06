@@ -219,7 +219,7 @@ static NSMutableSet* BundlesBeingInstalled = [NSMutableSet set];
 	if([[aTableColumn identifier] isEqualToString:@"installed"])
 	{
 		Bundle* bundle = arrayController.arrangedObjects[rowIndex];
-		return bundle.isInstalled != -1;
+		return ![BundlesBeingInstalled containsObject:bundle];
 	}
 	return NO;
 }
