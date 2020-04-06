@@ -18,12 +18,12 @@
 
 @property (nonatomic, readonly) NSView*          headerView;
 @property (nonatomic, readonly) NSOutlineView*   outlineView;
-@property (nonatomic, readonly) NSDictionary*    sessionState;
+@property (nonatomic, readonly) id               sessionState;
 
 @property (nonatomic) NSArray<NSURL*>* openURLs;
 @property (nonatomic) NSArray<NSURL*>* modifiedURLs;
 
-- (void)setupViewWithState:(NSDictionary*)fileBrowserState;
+- (void)setupViewWithState:(id)state;
 - (std::map<std::string, std::string>)variables;
 
 - (void)goToURL:(NSURL*)url;

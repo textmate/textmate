@@ -1862,7 +1862,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	self.fileBrowser.modifiedURLs = modifiedURLs;
 }
 
-- (NSDictionary*)fileBrowserHistory         { return self.fileBrowser.sessionState ?: _fileBrowserHistory; }
+- (id)fileBrowserHistory                    { return self.fileBrowser.sessionState ?: _fileBrowserHistory; }
 - (CGFloat)fileBrowserWidth                 { return self.layoutView.fileBrowserWidth;   }
 - (void)setFileBrowserWidth:(CGFloat)aWidth { self.layoutView.fileBrowserWidth = aWidth; }
 
@@ -2544,7 +2544,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 
 	if(NSString* projectPath = self.defaultProjectPath)
 		res[@"projectPath"] = projectPath;
-	if(NSDictionary* history = self.fileBrowserHistory)
+	if(id history = self.fileBrowserHistory)
 		res[@"fileBrowserState"] = history;
 
 	if(([self.window styleMask] & NSWindowStyleMaskFullScreen) == NSWindowStyleMaskFullScreen)

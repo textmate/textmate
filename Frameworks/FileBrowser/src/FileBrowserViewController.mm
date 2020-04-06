@@ -1126,7 +1126,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 // = Public API =
 // ==============
 
-- (NSDictionary*)sessionState
+- (id)sessionState
 {
 	NSMutableArray* history = [NSMutableArray array];
 	NSUInteger from = _history.count > 5 ? _history.count - 5 : 0;
@@ -1156,7 +1156,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 	};
 }
 
-- (void)setupViewWithState:(NSDictionary*)fileBrowserState
+- (void)setupViewWithState:(id)state
 {
 	self.showExcludedItems = [fileBrowserState[@"showHidden"] boolValue];
 
