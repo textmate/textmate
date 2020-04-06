@@ -1128,63 +1128,54 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 
 - (id)sessionState
 {
-	NSMutableArray* history = [NSMutableArray array];
-	NSUInteger from = _history.count > 5 ? _history.count - 5 : 0;
-	for(NSUInteger i = from; i < _history.count; ++i)
+	if(NSKeyedArchiver* coder = [[NSKeyedArchiver alloc] init])
 	{
-		NSDictionary* record = _history[i];
-		NSNumber* scrollOffset = i == _historyIndex ? @(NSMinY(self.outlineView.visibleRect)) : record[@"scrollOffset"];
-		if(scrollOffset && scrollOffset.doubleValue > 0)
-		{
-			[history addObject:@{
-				@"url":          [record[@"url"] absoluteString],
-				@"scrollOffset": scrollOffset,
-			}];
-		}
-		else
-		{
-			[history addObject:@{ @"url": [record[@"url"] absoluteString], }];
-		}
+		[self encodeRestorableStateWithCoder:coder];
+		[coder finishEncoding];
+		return coder.encodedData;
 	}
-
-	return @{
-		@"history":      history,
-		@"historyIndex": @(_historyIndex - from),
-		@"selection":    [self.selectedURLs.allObjects valueForKeyPath:@"absoluteString"] ?: @[ ],
-		@"expanded":     [self.expandedURLs.allObjects valueForKeyPath:@"absoluteString"] ?: @[ ],
-		@"showHidden":   @(self.showExcludedItems),
-	};
+	return nil;
 }
 
 - (void)setupViewWithState:(id)state
 {
-	self.showExcludedItems = [fileBrowserState[@"showHidden"] boolValue];
-
-	NSMutableArray* newHistory = [NSMutableArray array];
-	for(NSDictionary* entry in fileBrowserState[@"history"])
+	if([state isKindOfClass:[NSData class]])
 	{
-		if(NSString* urlString = entry[@"url"])
-		{
-			[newHistory addObject:@{
-				@"url": [NSURL URLWithString:urlString],
-			}];
-		}
+		if(NSCoder* coder = [[NSKeyedUnarchiver alloc] initForReadingWithData:state])
+			[self restoreStateWithCoder:coder];
 	}
-
-	if(newHistory.count)
+	else if([state isKindOfClass:[NSDictionary class]])
 	{
-		self.history      = newHistory;
-		self.historyIndex = std::clamp([fileBrowserState[@"historyIndex"] unsignedIntegerValue], (NSUInteger)0, newHistory.count);
+		NSDictionary* fileBrowserState = state;
 
-		NSMutableArray<NSURL*>* expandedURLs = [NSMutableArray array];
-		for(NSString* urlString in fileBrowserState[@"expanded"])
-			[expandedURLs addObject:[NSURL URLWithString:urlString]];
+		self.showExcludedItems = [fileBrowserState[@"showHidden"] boolValue];
 
-		NSMutableArray<NSURL*>* selectedURLs = [NSMutableArray array];
-		for(NSString* urlString in fileBrowserState[@"selection"])
-			[selectedURLs addObject:[NSURL URLWithString:urlString]];
+		NSMutableArray* newHistory = [NSMutableArray array];
+		for(NSDictionary* entry in fileBrowserState[@"history"])
+		{
+			if(NSString* urlString = entry[@"url"])
+			{
+				[newHistory addObject:@{
+					@"url": [NSURL URLWithString:urlString],
+				}];
+			}
+		}
 
-		[self expandURLs:expandedURLs selectURLs:selectedURLs];
+		if(newHistory.count)
+		{
+			self.history      = newHistory;
+			self.historyIndex = std::clamp([fileBrowserState[@"historyIndex"] unsignedIntegerValue], (NSUInteger)0, newHistory.count);
+
+			NSMutableArray<NSURL*>* expandedURLs = [NSMutableArray array];
+			for(NSString* urlString in fileBrowserState[@"expanded"])
+				[expandedURLs addObject:[NSURL URLWithString:urlString]];
+
+			NSMutableArray<NSURL*>* selectedURLs = [NSMutableArray array];
+			for(NSString* urlString in fileBrowserState[@"selection"])
+				[selectedURLs addObject:[NSURL URLWithString:urlString]];
+
+			[self expandURLs:expandedURLs selectURLs:selectedURLs];
+		}
 	}
 }
 
