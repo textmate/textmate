@@ -352,7 +352,7 @@ static NSMutableDictionary* SharedChoosers;
 
 	if(OakIsEmptyString(_filterString))
 			_arrayController.fetchPredicate = [NSPredicate predicateWithFormat:@"pasteboard == %@", _pasteboard];
-	else	_arrayController.fetchPredicate = [NSPredicate predicateWithFormat:@"pasteboard == %@ AND string LIKE[nc] %@", _pasteboard, [NSString stringWithFormat:@"*%@*", _filterString]];
+	else	_arrayController.fetchPredicate = [NSPredicate predicateWithFormat:@"pasteboard == %@ AND string CONTAINS[cd] %@", _pasteboard, _filterString];
 	[_arrayController fetch:self];
 }
 
