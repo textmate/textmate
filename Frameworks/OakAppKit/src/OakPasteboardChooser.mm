@@ -351,9 +351,8 @@ static NSMutableDictionary* SharedChoosers;
 	[self didChangeValueForKey:@"filterString"];
 
 	if(OakIsEmptyString(_filterString))
-			_arrayController.fetchPredicate = [NSPredicate predicateWithFormat:@"pasteboard == %@", _pasteboard];
-	else	_arrayController.fetchPredicate = [NSPredicate predicateWithFormat:@"pasteboard == %@ AND string CONTAINS[cd] %@", _pasteboard, _filterString];
-	[_arrayController fetch:self];
+			_arrayController.filterPredicate = nil;
+	else	_arrayController.filterPredicate = [NSPredicate predicateWithFormat:@"string CONTAINS[cd] %@", _filterString];
 }
 
 // ========================
