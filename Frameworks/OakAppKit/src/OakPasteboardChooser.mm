@@ -98,12 +98,7 @@ static NSMutableDictionary* SharedChoosers;
 			actionName  = @"Find Next";
 		}
 
-		_arrayController = [[NSArrayController alloc] init];
-		_arrayController.managedObjectContext         = aPasteboard.managedObjectContext;
-		_arrayController.automaticallyPreparesContent = YES;
-		_arrayController.entityName                   = @"PasteboardEntry";
-		_arrayController.fetchPredicate               = [NSPredicate predicateWithFormat:@"pasteboard == %@", _pasteboard];
-		_arrayController.sortDescriptors              = @[ [NSSortDescriptor sortDescriptorWithKey:@"date" ascending:NO] ];
+		_arrayController = [_pasteboard arrayController];
 
 		OakScopeBarView* scopeBar = [OakScopeBarView new];
 		scopeBar.labels = @[ @"All", @"Starred" ];

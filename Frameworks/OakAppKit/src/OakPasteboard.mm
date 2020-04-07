@@ -474,6 +474,17 @@ static BOOL HasPersistentStore = NO;
 		[managedObjectContext deleteObject:entry];
 }
 
+- (NSArrayController*)arrayController
+{
+	NSArrayController* res = [[NSArrayController alloc] init];
+	res.managedObjectContext         = self.managedObjectContext;
+	res.automaticallyPreparesContent = YES;
+	res.entityName                   = @"PasteboardEntry";
+	res.fetchPredicate               = [NSPredicate predicateWithFormat:@"pasteboard == %@", self];
+	res.sortDescriptors              = @[ [NSSortDescriptor sortDescriptorWithKey:@"date" ascending:NO] ];
+	return res;
+}
+
 - (void)scheduleSaveHistory:(id)sender
 {
 	static NSTimer* saveHistoryTimer = nil;
