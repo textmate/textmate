@@ -396,13 +396,8 @@ static NSMutableDictionary* SharedChoosers;
 
 - (NSArray*)selectedEntriesPreservingOne
 {
-	NSFetchRequest* request = [[NSFetchRequest alloc] init];
-	request.entity    = [NSEntityDescription entityForName:@"PasteboardEntry" inManagedObjectContext:_pasteboard.managedObjectContext];
-	request.predicate = [NSPredicate predicateWithFormat:@"pasteboard == %@", _pasteboard];
-	NSUInteger countOfAllEntries = [_pasteboard.managedObjectContext countForFetchRequest:request error:nullptr];
-
 	NSArray* entries = [_arrayController selectedObjects];
-	if([entries count] == countOfAllEntries)
+	if([entries count] == [_arrayController.arrangedObjects count])
 	{
 		NSMutableArray* tmp = [entries mutableCopy];
 		[tmp removeObject:_pasteboard.currentEntry];
