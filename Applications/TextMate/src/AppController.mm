@@ -311,8 +311,8 @@ BOOL HasDocumentWindow (NSArray* windows)
 				{ @"Jump to Previous Bookmark",  @selector(goToPreviousBookmark:),         .key = NSF2FunctionKey, .modifierFlags = NSEventModifierFlagShift },
 				{ @"Jump to Bookmark",           .delegate = OakSubmenuController.sharedInstance },
 				{ /* -------- */ },
-				{ @"Jump To Next Mark",          @selector(jumpToNextMark:),               .key = NSF3FunctionKey, .modifierFlags = 0 },
-				{ @"Jump To Previous Mark",      @selector(jumpToPreviousMark:),           .key = NSF3FunctionKey, .modifierFlags = NSEventModifierFlagShift },
+				{ @"Jump to Next Mark",          @selector(jumpToNextMark:),               .key = NSF3FunctionKey, .modifierFlags = 0 },
+				{ @"Jump to Previous Mark",      @selector(jumpToPreviousMark:),           .key = NSF3FunctionKey, .modifierFlags = NSEventModifierFlagShift },
 				{ /* -------- */ },
 				{ @"Scroll",
 					.submenu = {
