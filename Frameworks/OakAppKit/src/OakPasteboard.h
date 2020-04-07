@@ -28,6 +28,7 @@ PUBLIC @interface OakPasteboard : NSManagedObject
 
 - (void)addEntryWithString:(NSString*)aString;
 - (void)addEntryWithString:(NSString*)aString andOptions:(NSDictionary*)someOptions;
+- (void)removeAllEntries;
 
 - (OakPasteboardEntry*)previous;
 - (OakPasteboardEntry*)current;

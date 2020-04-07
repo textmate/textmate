@@ -464,6 +464,16 @@ static BOOL HasPersistentStore = NO;
 	[self internalAddEntryWithString:aString andOptions:someOptions];
 }
 
+- (void)removeAllEntries
+{
+	NSFetchRequest* request = [NSFetchRequest fetchRequestWithEntityName:@"PasteboardEntry"];
+	request.predicate = [NSPredicate predicateWithFormat:@"pasteboard = %@ AND SELF != %@", self, self.currentEntry];
+	request.includesPropertyValues = NO;
+	NSManagedObjectContext* managedObjectContext = self.managedObjectContext;
+	for(OakPasteboardEntry* entry in [managedObjectContext executeFetchRequest:request error:nullptr])
+		[managedObjectContext deleteObject:entry];
+}
+
 - (void)scheduleSaveHistory:(id)sender
 {
 	static NSTimer* saveHistoryTimer = nil;
