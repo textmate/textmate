@@ -1,6 +1,7 @@
 #include "clipboard.h"
 #include <text/utf8.h>
 #include <text/hexdump.h>
+#include <text/format.h>
 
 std::string const kClipboardOptionIndent    = "indent";
 std::string const kClipboardOptionComplete  = "complete";
@@ -14,6 +15,20 @@ clipboard_t::entry_t::entry_t (std::string const& content, std::map<std::string,
 		std::string const prefix = "*** malformed UTF-8 data on clipboard:\n";
 		_content = prefix + text::to_hex(_content.begin(), _content.end()) + "\n";
 	}
+}
+
+static std::map<std::string, std::string> create_clipboard_options (std::string const& indent, bool complete, size_t fragments, bool columnar)
+{
+	std::map<std::string, std::string> res;
+	if(indent != NULL_STR) res[kClipboardOptionIndent]    = indent;
+	if(complete)           res[kClipboardOptionComplete]  = "1";
+	if(fragments > 1)      res[kClipboardOptionFragments] = std::to_string(fragments);
+	if(columnar)           res[kClipboardOptionColumnar]  = "1";
+	return res;
+}
+
+clipboard_t::entry_t::entry_t (std::vector<std::string> const& contents, std::string const& indent, bool complete, bool columnar) : entry_t(text::join(contents, "\n"), create_clipboard_options(indent, complete, contents.size(), columnar))
+{
 }
 
 struct simple_clipboard_t : clipboard_t

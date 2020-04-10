@@ -290,16 +290,6 @@ namespace ng
 		_selections = ng::sanitize(_buffer, _selections);
 	}
 
-	static std::map<std::string, std::string> create_find_options (std::string const& indent, bool complete, size_t fragments, bool columnar)
-	{
-		std::map<std::string, std::string> res;
-		if(indent != NULL_STR) res[kClipboardOptionIndent]    = indent;
-		if(complete)           res[kClipboardOptionComplete]  = "1";
-		if(fragments > 1)      res[kClipboardOptionFragments] = std::to_string(fragments);
-		if(columnar)           res[kClipboardOptionColumnar]  = "1";
-		return res;
-	}
-
 	clipboard_t::entry_ptr editor_t::copy (ng::buffer_t const& buffer, ng::ranges_t const& selections)
 	{
 		std::string indent = NULL_STR;
@@ -329,7 +319,7 @@ namespace ng
 		for(auto const& range : dissect_columnar(buffer, selections))
 			v.push_back(buffer.substr(range.min().index, range.max().index));
 		bool columnar = selections.size() == 1 && selections.last().columnar;
-		return std::make_shared<clipboard_t::entry_t>(text::join(v, "\n"), create_find_options(indent, complete, v.size(), columnar));
+		return std::make_shared<clipboard_t::entry_t>(v, indent, complete, columnar);
 	}
 
 	static bool suitable_for_reindent (std::string const& str)
