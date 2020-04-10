@@ -875,7 +875,7 @@ static NSButton* OakCreateStopSearchButton ()
 
 - (IBAction)goToParentFolder:(id)sender
 {
-	if(_searchTarget == FFSearchTargetFileBrowserItems)
+	if(_searchTarget == FFSearchTargetFileBrowserItems && _fileBrowserItems.count > 1)
 	{
 		self.otherFolder = CommonAncestor(_fileBrowserItems);
 		self.searchTarget = FFSearchTargetOther;
