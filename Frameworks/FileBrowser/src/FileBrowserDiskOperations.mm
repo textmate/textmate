@@ -33,8 +33,8 @@
 	NSUInteger total = MAX(srcURLs.count, destURLs.count);
 	for(NSUInteger i = 0; i < total; ++i)
 	{
-		NSURL* srcURL  = i < srcURLs.count  ? srcURLs[i]  : nil;
-		NSURL* destURL = i < destURLs.count ? destURLs[i] : nil;
+		NSURL* srcURL  = i < srcURLs.count  ? srcURLs[i].filePathURL  : nil;
+		NSURL* destURL = i < destURLs.count ? destURLs[i].filePathURL : nil;
 
 		NSError* error;
 		BOOL res = [self performOperation:op sourceURL:srcURL destinationURL:&destURL force:forceFlag error:&error];
