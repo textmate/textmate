@@ -790,7 +790,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 	if([item action] == @selector(toggleFindOption:))
 	{
 		BOOL active = NO;
-		if(OakPasteboardEntry* entry = [[OakPasteboard pasteboardWithName:NSFindPboard] current])
+		if(OakPasteboardEntry* entry = [OakPasteboard.findPasteboard current])
 		{
 			switch([item tag])
 			{

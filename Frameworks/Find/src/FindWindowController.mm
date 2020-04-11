@@ -300,8 +300,8 @@ static NSButton* OakCreateStopSearchButton ()
 		[self replaceClipboardDidChange:nil];
 
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(findClipboardDidChange:) name:OakPasteboardDidChangeNotification object:[OakPasteboard pasteboardWithName:NSFindPboard]];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(replaceClipboardDidChange:) name:OakPasteboardDidChangeNotification object:[OakPasteboard pasteboardWithName:OakReplacePboard]];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(findClipboardDidChange:) name:OakPasteboardDidChangeNotification object:OakPasteboard.findPasteboard];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(replaceClipboardDidChange:) name:OakPasteboardDidChangeNotification object:OakPasteboard.replacePasteboard];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textViewWillPerformFindOperation:) name:@"OakTextViewWillPerformFindOperation" object:nil];
 
 		// Register to application activation/deactivation notification so we can tweak our collection behavior
@@ -470,7 +470,7 @@ static NSButton* OakCreateStopSearchButton ()
 
 - (void)findClipboardDidChange:(NSNotification*)aNotification
 {
-	OakPasteboardEntry* entry = [[OakPasteboard pasteboardWithName:NSFindPboard] current];
+	OakPasteboardEntry* entry = [OakPasteboard.findPasteboard current];
 	self.findString        = entry.string;
 	self.regularExpression = entry.regularExpression;
 	self.ignoreWhitespace  = entry.ignoreWhitespace;
@@ -479,7 +479,7 @@ static NSButton* OakCreateStopSearchButton ()
 
 - (void)replaceClipboardDidChange:(NSNotification*)aNotification
 {
-	self.replaceString = [[[OakPasteboard pasteboardWithName:OakReplacePboard] current] string];
+	self.replaceString = [[OakPasteboard.replacePasteboard current] string];
 }
 
 - (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)object change:(NSDictionary*)change context:(void*)context
@@ -540,7 +540,7 @@ static NSButton* OakCreateStopSearchButton ()
 
 	if(OakNotEmptyString(_findString))
 	{
-		OakPasteboardEntry* oldEntry = [[OakPasteboard pasteboardWithName:NSFindPboard] current];
+		OakPasteboardEntry* oldEntry = [OakPasteboard.findPasteboard current];
 		if(oldEntry && [oldEntry.string isEqualToString:_findString])
 		{
 			if(![oldEntry.options isEqualToDictionary:newOptions])
@@ -549,16 +549,16 @@ static NSButton* OakCreateStopSearchButton ()
 		}
 		else
 		{
-			[[OakPasteboard pasteboardWithName:NSFindPboard] addEntryWithString:_findString andOptions:newOptions];
+			[OakPasteboard.findPasteboard addEntryWithString:_findString andOptions:newOptions];
 		}
 	}
 
 	if(_replaceString)
 	{
-		OakPasteboardEntry* oldEntry = [[OakPasteboard pasteboardWithName:OakReplacePboard] current];
+		OakPasteboardEntry* oldEntry = [OakPasteboard.replacePasteboard current];
 		if(oldEntry && [oldEntry.string isEqualToString:_replaceString])
 				oldEntry.date = [NSDate date];
-		else	[[OakPasteboard pasteboardWithName:OakReplacePboard] addEntryWithString:_replaceString];
+		else	[OakPasteboard.replacePasteboard addEntryWithString:_replaceString];
 	}
 
 	return res;
@@ -695,14 +695,14 @@ static NSButton* OakCreateStopSearchButton ()
 - (IBAction)showFindHistory:(id)sender
 {
 	if(![[[OakPasteboardSelector sharedInstance] window] isVisible])
-		[[OakPasteboard pasteboardWithName:NSFindPboard] selectItemForControl:self.findTextField];
+		[OakPasteboard.findPasteboard selectItemForControl:self.findTextField];
 	// if the panel is visible it will automatically be hidden due to the mouse click
 }
 
 - (IBAction)showReplaceHistory:(id)sender
 {
 	if(![[[OakPasteboardSelector sharedInstance] window] isVisible])
-		[[OakPasteboard pasteboardWithName:OakReplacePboard] selectItemForControl:self.replaceTextField];
+		[OakPasteboard.replacePasteboard selectItemForControl:self.replaceTextField];
 	// if the panel is visible it will automatically be hidden due to the mouse click
 }
 

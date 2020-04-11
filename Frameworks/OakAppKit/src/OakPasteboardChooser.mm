@@ -78,10 +78,10 @@ static void* kOakPasteboardChooserCurrentEntryBinding = &kOakPasteboardChooserCu
 static NSMutableDictionary* SharedChoosers;
 
 @implementation OakPasteboardChooser
-+ (instancetype)sharedChooserForName:(NSString*)aName
++ (instancetype)sharedChooserForPasteboard:(OakPasteboard*)pboard
 {
 	SharedChoosers = SharedChoosers ?: [NSMutableDictionary new];
-	return [SharedChoosers objectForKey:aName] ?: [[OakPasteboardChooser alloc] initWithPasteboard:[OakPasteboard pasteboardWithName:aName]];
+	return [SharedChoosers objectForKey:pboard.name] ?: [[OakPasteboardChooser alloc] initWithPasteboard:pboard];
 }
 
 - (id)initWithPasteboard:(OakPasteboard*)aPasteboard
@@ -92,7 +92,7 @@ static NSMutableDictionary* SharedChoosers;
 
 		NSString* windowTitle = @"Clipboard History";
 		NSString* actionName  = @"Paste";
-		if([_pasteboard isEqual:[OakPasteboard pasteboardWithName:NSFindPboard]])
+		if([_pasteboard isEqual:OakPasteboard.findPasteboard])
 		{
 			windowTitle = @"Find History";
 			actionName  = @"Find Next";

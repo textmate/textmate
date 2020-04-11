@@ -702,8 +702,8 @@ static std::string shell_quote (std::vector<std::string> paths)
 	return res;
 }
 
-- (NSString*)findString      { return [[OakPasteboard pasteboardWithName:NSFindPboard] current].string;    }
-- (NSString*)replaceString   { return [[OakPasteboard pasteboardWithName:OakReplacePboard] current].string; }
+- (NSString*)findString      { return [OakPasteboard.findPasteboard current].string;    }
+- (NSString*)replaceString   { return [OakPasteboard.replacePasteboard current].string; }
 
 - (void)showToolTip:(NSString*)aToolTip
 {
@@ -2659,7 +2659,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 			std::string const findStr = to_s(aFindServer.findString);
 			find::options_t options   = aFindServer.findOptions;
 
-			NSArray* documents = [[OakPasteboard pasteboardWithName:NSFindPboard].auxiliaryOptionsForCurrent objectForKey:@"documents"];
+			NSArray* documents = [OakPasteboard.findPasteboard.auxiliaryOptionsForCurrent objectForKey:@"documents"];
 			if(documents && [documents count] > 1)
 				options &= ~find::wrap_around;
 
@@ -2702,7 +2702,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 								@"lastMatchRange":  [NSString stringWithCxxString:to_range((newLastMatch.empty() ? newFirstMatch : newLastMatch).begin())]
 							}];
 						}
-						[OakPasteboard pasteboardWithName:NSFindPboard].auxiliaryOptionsForCurrent = @{ @"documents": newDocuments };
+						OakPasteboard.findPasteboard.auxiliaryOptionsForCurrent = @{ @"documents": newDocuments };
 
 						// ====================================================
 
@@ -2787,7 +2787,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 - (void)recordSelector:(SEL)aSelector andPerform:(find_operation_t)findOperation withOptions:(find::options_t)extraOptions
 {
 	[self recordSelector:aSelector withArgument:nil];
-	[self performFindOperation:[OakTextViewFindServer findServerWithTextView:self operation:findOperation options:[[OakPasteboard pasteboardWithName:NSFindPboard] current].findOptions | extraOptions]];
+	[self performFindOperation:[OakTextViewFindServer findServerWithTextView:self operation:findOperation options:[OakPasteboard.findPasteboard current].findOptions | extraOptions]];
 }
 
 - (void)setShowLiveSearch:(BOOL)flag

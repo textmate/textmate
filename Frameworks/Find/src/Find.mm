@@ -297,7 +297,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		}
 
 		self.closeWindowOnSuccess = action == FindActionFindNext && [[NSApp currentEvent] type] == NSEventTypeKeyDown && to_s([NSApp currentEvent]) == utf8::to_s(NSCarriageReturnCharacter);
-		[OakPasteboard pasteboardWithName:NSFindPboard].auxiliaryOptionsForCurrent = nil;
+		OakPasteboard.findPasteboard.auxiliaryOptionsForCurrent = nil;
 		[NSApp sendAction:@selector(performFindOperation:) to:nil from:self];
 	}
 }
@@ -371,7 +371,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 			ASSERTF(false, "Unknown find option tag %d\n", option);
 	}
 
-	if([[[[OakPasteboard pasteboardWithName:NSFindPboard] current] string] isEqualToString:self.windowController.findString])
+	if([[[OakPasteboard.findPasteboard current] string] isEqualToString:self.windowController.findString])
 		[self.windowController commitEditing]; // update the options on the pasteboard immediately if the find string has not been changed
 }
 
@@ -460,7 +460,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 			@"lastMatchRange":  [NSString stringWithCxxString:parent.lastResultNode.match.range],
 		}];
 	}
-	[OakPasteboard pasteboardWithName:NSFindPboard].auxiliaryOptionsForCurrent = @{ @"documents": documents };
+	OakPasteboard.findPasteboard.auxiliaryOptionsForCurrent = @{ @"documents": documents };
 }
 
 - (void)folderSearchDidFinish:(NSNotification*)aNotification
@@ -502,7 +502,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		self.windowController.statusString = msg;
 	}
 
-	__weak __block id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:OakPasteboardDidChangeNotification object:[OakPasteboard pasteboardWithName:NSFindPboard] queue:nil usingBlock:^(NSNotification*){
+	__weak __block id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:OakPasteboardDidChangeNotification object:OakPasteboard.findPasteboard queue:nil usingBlock:^(NSNotification*){
 		for(FFResultNode* parent in _results.children)
 			[parent.document removeAllMarksOfType:kSearchMarkIdentifier];
 		[[NSNotificationCenter defaultCenter] removeObserver:observerId];

@@ -43,9 +43,9 @@ static int32_t const NSWrapColumnWindowWidth = 0;
 		[_document loadModalForWindow:nil completionHandler:nil];
 
 		_editor = std::make_unique<ng::editor_t>([_document buffer]);
-		_editor->set_clipboard(get_clipboard(NSGeneralPboard));
-		_editor->set_find_clipboard(get_clipboard(NSFindPboard));
-		_editor->set_replace_clipboard(get_clipboard(OakReplacePboard));
+		_editor->set_clipboard(get_clipboard(OakPasteboard.generalPasteboard));
+		_editor->set_find_clipboard(get_clipboard(OakPasteboard.findPasteboard));
+		_editor->set_replace_clipboard(get_clipboard(OakPasteboard.replacePasteboard));
 
 		settings_t const settings = settings_for_path(to_s(_document.virtualPath ?: _document.path), to_s(_document.fileType), to_s(_document.directory ?: [_document.path stringByDeletingLastPathComponent]));
 		std::string const invisibles_map = settings.get(kSettingsInvisiblesMapKey, "");

@@ -387,6 +387,10 @@ static BOOL HasPersistentStore = NO;
 	return res;
 }
 
++ (OakPasteboard*)generalPasteboard  { return [OakPasteboard pasteboardWithName:NSGeneralPboard];  }
++ (OakPasteboard*)findPasteboard     { return [OakPasteboard pasteboardWithName:NSFindPboard];     }
++ (OakPasteboard*)replacePasteboard  { return [OakPasteboard pasteboardWithName:OakReplacePboard]; }
+
 - (NSPasteboard*)pasteboard
 {
 	return [NSPasteboard pasteboardWithName:self.name];

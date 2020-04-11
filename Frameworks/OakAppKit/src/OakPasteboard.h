@@ -1,7 +1,6 @@
 #import <oak/oak.h>
 #import <regexp/find.h> // for find::options_t
 
-extern PUBLIC NSString* const OakReplacePboard;
 extern PUBLIC NSString* const OakPasteboardDidChangeNotification;
 
 extern PUBLIC NSString* const kUserDefaultsFindWrapAround;
@@ -24,7 +23,9 @@ PUBLIC @interface OakPasteboardEntry : NSManagedObject
 @end
 
 PUBLIC @interface OakPasteboard : NSManagedObject
-+ (OakPasteboard*)pasteboardWithName:(NSString*)aName;
+@property (class, readonly) OakPasteboard* generalPasteboard;
+@property (class, readonly) OakPasteboard* findPasteboard;
+@property (class, readonly) OakPasteboard* replacePasteboard;
 
 - (void)addEntryWithString:(NSString*)aString;
 - (void)addEntryWithString:(NSString*)aString andOptions:(NSDictionary*)someOptions;

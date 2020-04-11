@@ -15,6 +15,7 @@
 #import <OakAppKit/NSImage Additions.h>
 #import <OakAppKit/OakToolTip.h>
 #import <OakAppKit/OakPasteboardChooser.h>
+#import <OakAppKit/OakPasteboard.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakAppKit/NSMenuItem Additions.h>
 #import <BundleMenu/BundleMenu.h>
@@ -481,14 +482,14 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 
 - (void)showClipboardHistory:(id)sender
 {
-	OakPasteboardChooser* chooser = [OakPasteboardChooser sharedChooserForName:NSGeneralPboard];
+	OakPasteboardChooser* chooser = [OakPasteboardChooser sharedChooserForPasteboard:OakPasteboard.generalPasteboard];
 	chooser.action = @selector(paste:);
 	[chooser showWindowRelativeToFrame:[self.window convertRectToScreen:[_textView convertRect:[_textView visibleRect] toView:nil]]];
 }
 
 - (void)showFindHistory:(id)sender
 {
-	OakPasteboardChooser* chooser = [OakPasteboardChooser sharedChooserForName:NSFindPboard];
+	OakPasteboardChooser* chooser = [OakPasteboardChooser sharedChooserForPasteboard:OakPasteboard.findPasteboard];
 	chooser.action = @selector(findNext:);
 	[chooser showWindowRelativeToFrame:[self.window convertRectToScreen:[_textView convertRect:[_textView visibleRect] toView:nil]]];
 }

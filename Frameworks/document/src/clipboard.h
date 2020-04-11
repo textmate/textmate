@@ -1,3 +1,5 @@
 #include <editor/clipboard.h>
 
-PUBLIC clipboard_ptr get_clipboard (NSString* pboardName);
+@class OakPasteboard;
+
+PUBLIC clipboard_ptr get_clipboard (OakPasteboard* pboard);

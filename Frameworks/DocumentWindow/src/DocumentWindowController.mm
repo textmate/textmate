@@ -2060,7 +2060,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	fc.action          = @selector(fileChooserDidSelectItems:);
 	fc.path            = self.projectPath ?: self.untitledSavePath ?: NSHomeDirectory();
 
-	if(OakPasteboardEntry* entry = [[OakPasteboard pasteboardWithName:NSFindPboard] current])
+	if(OakPasteboardEntry* entry = [OakPasteboard.findPasteboard current])
 	{
 		std::string str = to_s(entry.string);
 		if(regexp::search("\\A.*?(\\.|/).*?:\\d+\\z", str))

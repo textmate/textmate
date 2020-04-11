@@ -26,10 +26,10 @@ static clipboard_t::entry_ptr to_entry (OakPasteboardEntry* src, BOOL includeFin
 
 struct oak_pasteboard_t : clipboard_t
 {
-	oak_pasteboard_t (NSString* pboardName)
+	oak_pasteboard_t (OakPasteboard* pboard)
 	{
-		pasteboard         = [OakPasteboard pasteboardWithName:pboardName];
-		includeFindOptions = [pboardName isEqualToString:NSFindPboard];
+		pasteboard         = pboard;
+		includeFindOptions = [pboard isEqual:OakPasteboard.findPasteboard];
 	}
 
 	bool empty () const                     { return false; }
@@ -44,7 +44,7 @@ private:
 	BOOL includeFindOptions;
 };
 
-clipboard_ptr get_clipboard (NSString* pboardName)
+clipboard_ptr get_clipboard (OakPasteboard* pboard)
 {
-	return std::make_shared<oak_pasteboard_t>(pboardName);
+	return std::make_shared<oak_pasteboard_t>(pboard);
 }
