@@ -896,10 +896,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 
 - (NSArray<NSURL*>*)URLsFromPasteboard:(NSPasteboard*)pboard
 {
-	NSMutableArray<NSURL*>* res = [NSMutableArray array];
-	for(NSString* path in [pboard availableTypeFromArray:@[ NSFilenamesPboardType ]] ? [pboard propertyListForType:NSFilenamesPboardType] : @[ ])
-		[res addObject:[NSURL fileURLWithPath:path]];
-	return res;
+	return [pboard readObjectsForClasses:@[ [NSURL class] ] options:nil];
 }
 
 - (void)didChangeFinderTag:(OFBFinderTagsChooser*)finderTagsChooser
@@ -930,7 +927,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 
 - (BOOL)canPaste
 {
-	return self.directoryURLForNewItems && [[NSPasteboard.generalPasteboard availableTypeFromArray:@[ NSFilenamesPboardType ]] isEqualToString:NSFilenamesPboardType];
+	return self.directoryURLForNewItems && [self URLsFromPasteboard:NSPasteboard.generalPasteboard].count;
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem*)menuItem
