@@ -712,8 +712,9 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 	[pboard clearContents];
 	[pboard writeObjects:[items valueForKeyPath:@"URL"]];
 
+	// If we use writeObjects: then Terminal.app will paste both URLs and their fallback strings
 	if(![pboard availableTypeFromArray:@[ NSPasteboardTypeString ]])
-		[pboard writeObjects:[items valueForKeyPath:@"localizedName"]];
+		[pboard setString:[[items valueForKeyPath:@"localizedName"] componentsJoinedByString:@"\n"] forType:NSPasteboardTypeString];
 
 	return YES;
 }
