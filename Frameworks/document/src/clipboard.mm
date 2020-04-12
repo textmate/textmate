@@ -21,7 +21,14 @@ static clipboard_t::entry_ptr to_entry (OakPasteboardEntry* src, BOOL includeFin
 		map["ignoreCase"] = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFindIgnoreCase] ? "1" : "0";
 	}
 
-	return std::make_shared<clipboard_t::entry_t>(to_s(src.string), map);
+	std::vector<std::string> contents;
+	for(NSString* str in src.strings)
+		contents.push_back(to_s(str));
+
+	if(contents.size() > 1)
+		map[kClipboardOptionFragments] = std::to_string(contents.size());
+
+	return std::make_shared<clipboard_t::entry_t>(contents, map);
 }
 
 struct oak_pasteboard_t : clipboard_t
@@ -38,7 +45,12 @@ struct oak_pasteboard_t : clipboard_t
 	entry_ptr current () const              { return to_entry([pasteboard current], includeFindOptions); }
 	entry_ptr next ()                       { return to_entry([pasteboard next], includeFindOptions); }
 
-	void push_back (entry_ptr entry)        { [pasteboard addEntryWithString:[NSString stringWithCxxString:entry->content()] options:(__bridge NSDictionary*)((CFDictionaryRef)cf::wrap(entry->options()))]; }
+	void push_back (entry_ptr entry)
+	{
+		if(OakPasteboardEntry* res = [pasteboard addEntryWithStrings:(__bridge NSArray*)((CFArrayRef)cf::wrap(entry->contents())) options:(__bridge NSDictionary*)((CFDictionaryRef)cf::wrap(entry->options()))])
+			[pasteboard updatePasteboardWithEntry:res];
+	}
+
 private:
 	OakPasteboard* pasteboard;
 	BOOL includeFindOptions;
