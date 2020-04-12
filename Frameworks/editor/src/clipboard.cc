@@ -5,7 +5,6 @@
 
 std::string const kClipboardOptionIndent    = "indent";
 std::string const kClipboardOptionComplete  = "complete";
-std::string const kClipboardOptionFragments = "fragments";
 std::string const kClipboardOptionColumnar  = "columnar";
 
 clipboard_t::entry_t::entry_t (std::string const& content, std::map<std::string, std::string> const& options) : _contents(1, content), _options(options)

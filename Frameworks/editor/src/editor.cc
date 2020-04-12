@@ -441,19 +441,20 @@ namespace ng
 		if(!entry)
 			return selections;
 
-		std::string str                            = entry->content();
-		std::map<std::string, std::string> options = entry->options();
+		std::vector<std::string> strings = entry->contents();
+		size_t const fragments           = strings.size();
+		std::string str                  = fragments == 1 ? strings.back() : entry->content();
 		str.erase(text::convert_line_endings(str.begin(), str.end(), text::estimate_line_endings(str.begin(), str.end())), str.end());
 
+		std::map<std::string, std::string> options = entry->options();
 		std::string const& indent = options[kClipboardOptionIndent];
 		bool const complete       = options[kClipboardOptionComplete] == "1";
-		size_t const fragments    = strtol(options[kClipboardOptionFragments].c_str(), nullptr, 10);
 		bool const columnar       = options[kClipboardOptionColumnar] == "1";
 
 		if((selections.size() != 1 || selections.last().columnar) && (fragments > 1 || oak::contains(str.begin(), str.end(), '\n')))
 		{
-			std::vector<std::string> words = text::split(str, "\n");
-			if(words.size() > 1 && words.back().empty())
+			std::vector<std::string> words = fragments == 1 ? text::split(str, "\n") : strings;
+			if(fragments == 1 && words.size() > 1 && words.back().empty())
 				words.pop_back();
 
 			size_t i = 0;
@@ -465,7 +466,6 @@ namespace ng
 
 		if(fragments > 1 && selections.size() == 1)
 		{
-			ASSERT_EQ(fragments, std::count(str.begin(), str.end(), '\n') + 1);
 			if(columnar)
 			{
 				index_t caret = dissect_columnar(buffer, selections).last().min();
@@ -473,7 +473,7 @@ namespace ng
 				size_t col    = visual_distance(buffer, buffer.begin(n), caret);
 
 				std::multimap<range_t, std::string> insertions;
-				for(auto const& line : text::tokenize(str.begin(), str.end(), '\n'))
+				for(auto const& line : strings)
 				{
 					if(n+1 < buffer.lines())
 					{
@@ -497,7 +497,7 @@ namespace ng
 			{
 				std::multimap<range_t, std::string> insertions;
 				ng::range_t caret = dissect_columnar(buffer, selections).last();
-				for(auto const& line : text::tokenize(str.begin(), str.end(), '\n'))
+				for(auto const& line : strings)
 				{
 					insertions.emplace(caret, line);
 					caret = caret.max();

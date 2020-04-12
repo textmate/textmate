@@ -25,9 +25,6 @@ static clipboard_t::entry_ptr to_entry (OakPasteboardEntry* src, BOOL includeFin
 	for(NSString* str in src.strings)
 		contents.push_back(to_s(str));
 
-	if(contents.size() > 1)
-		map[kClipboardOptionFragments] = std::to_string(contents.size());
-
 	return std::make_shared<clipboard_t::entry_t>(contents, map);
 }
 
