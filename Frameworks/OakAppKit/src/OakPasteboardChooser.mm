@@ -59,7 +59,7 @@
 }
 @end
 
-@interface OakPasteboardChooser () <NSWindowDelegate, NSTextFieldDelegate, NSTableViewDelegate, NSSearchFieldDelegate>
+@interface OakPasteboardChooser () <NSWindowDelegate, NSTextFieldDelegate, NSTableViewDelegate, NSTableViewDataSource, NSSearchFieldDelegate>
 {
 	NSTitlebarAccessoryViewController* _accessoryViewController;
 }
@@ -69,11 +69,8 @@
 @property (nonatomic) NSScrollView*         scrollView;
 @property (nonatomic) NSTableView*          tableView;
 @property (nonatomic) NSVisualEffectView*   footerView;
-@property (nonatomic) BOOL                  didFetchTableViewData;
+@property (nonatomic) BOOL                  hasSelection;
 @end
-
-static void* kOakPasteboardChooserSelectionBinding    = &kOakPasteboardChooserSelectionBinding;
-static void* kOakPasteboardChooserCurrentEntryBinding = &kOakPasteboardChooserCurrentEntryBinding;
 
 static NSMutableDictionary* SharedChoosers;
 
@@ -98,7 +95,7 @@ static NSMutableDictionary* SharedChoosers;
 			actionName  = @"Find Next";
 		}
 
-		_arrayController = [_pasteboard arrayController];
+		_arrayController = [[NSArrayController alloc] init];
 
 		OakScopeBarView* scopeBar = [OakScopeBarView new];
 		scopeBar.labels = @[ @"All", @"Starred" ];
@@ -158,24 +155,22 @@ static NSMutableDictionary* SharedChoosers;
 
 		self.window.defaultButtonCell = actionButton.cell;
 
-		[deleteButton bind:NSEnabledBinding toObject:_arrayController withKeyPath:@"canRemove" options:nil];
-		[actionButton bind:NSEnabledBinding toObject:_arrayController withKeyPath:@"canRemove" options:nil];
-		[tableColumn bind:NSValueBinding toObject:_arrayController withKeyPath:@"arrangedObjects.displayString" options:nil];
-		[_pasteboard addObserver:self forKeyPath:@"currentEntry" options:0 context:kOakPasteboardChooserCurrentEntryBinding];
-		[_arrayController addObserver:self forKeyPath:@"selection" options:0 context:kOakPasteboardChooserSelectionBinding];
+		[deleteButton bind:NSEnabledBinding toObject:self withKeyPath:@"hasSelection" options:nil];
+		[actionButton bind:NSEnabledBinding toObject:self withKeyPath:@"hasSelection" options:nil];
+
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(clipboardDidChange:) name:OakPasteboardDidChangeNotification object:_pasteboard];
 	}
 	return self;
 }
 
 - (void)dealloc
 {
-	[_arrayController removeObserver:self forKeyPath:@"selection" context:kOakPasteboardChooserSelectionBinding];
-	[_pasteboard removeObserver:self forKeyPath:@"currentEntry" context:kOakPasteboardChooserCurrentEntryBinding];
-	[[[_tableView tableColumns] lastObject] unbind:NSValueBinding];
+	[NSNotificationCenter.defaultCenter removeObserver:self name:OakPasteboardDidChangeNotification object:_pasteboard];
 
-	self.window.delegate = nil;
-	_tableView.delegate  = nil;
-	_tableView.target    = nil;
+	self.window.delegate  = nil;
+	_tableView.dataSource = nil;
+	_tableView.delegate   = nil;
+	_tableView.target     = nil;
 }
 
 // =====================
@@ -212,6 +207,24 @@ static NSMutableDictionary* SharedChoosers;
 	return _searchField;
 }
 
+- (void)refreshTableViewAndSelect:(OakPasteboardEntry*)clipboardEntry
+{
+	_arrayController.content = [_pasteboard entries];
+	[_tableView reloadData];
+
+	NSUInteger row = clipboardEntry ? [self.pasteboardEntries indexOfObject:clipboardEntry] : NSNotFound;
+	if(row != NSNotFound)
+	{
+		[_tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+		[_tableView scrollRowToVisible:_tableView.selectedRow];
+	}
+}
+
+- (void)clipboardDidChange:(NSNotification*)aNotification
+{
+	[self refreshTableViewAndSelect:_pasteboard.currentEntry];
+}
+
 - (NSTableView*)tableView
 {
 	if(!_tableView)
@@ -226,6 +239,7 @@ static NSMutableDictionary* SharedChoosers;
 		_tableView.doubleAction                       = @selector(accept:);
 		_tableView.target                             = self;
 		_tableView.delegate                           = self;
+		_tableView.dataSource                         = self;
 	}
 	return _tableView;
 }
@@ -281,20 +295,10 @@ static NSMutableDictionary* SharedChoosers;
 	[SharedChoosers setObject:self forKey:_pasteboard.name];
 
 	[_searchField bind:NSValueBinding toObject:self withKeyPath:@"filterString" options:nil];
-	[_arrayController fetch:self];
-	[self performSelector:@selector(arrayControllerDidFinishInitialFetch:) withObject:nil afterDelay:0];
-}
+	[self refreshTableViewAndSelect:_pasteboard.currentEntry];
 
-- (void)arrayControllerDidFinishInitialFetch:(id)sender
-{
-	if(_pasteboard.currentEntry)
-	{
-		_arrayController.selectedObjects = @[ _pasteboard.currentEntry ];
-		[_tableView scrollRowToVisible:[_tableView selectedRow]];
-	}
 	[self.window makeFirstResponder:_tableView];
 	[self.window makeKeyAndOrderFront:self];
-	self.didFetchTableViewData = YES;
 }
 
 - (void)showWindowRelativeToFrame:(NSRect)parentFrame
@@ -318,36 +322,35 @@ static NSMutableDictionary* SharedChoosers;
 	[SharedChoosers performSelector:@selector(removeObjectForKey:) withObject:_pasteboard.name afterDelay:0];
 }
 
-- (void)observeValueForKeyPath:(NSString*)aKeyPath ofObject:(id)anObject change:(NSDictionary*)aDictionary context:(void*)aContext
-{
-	if(aContext == kOakPasteboardChooserSelectionBinding)
-	{
-		if(self.didFetchTableViewData)
-			_pasteboard.currentEntry = [_arrayController.selectedObjects firstObject];
-	}
-	else if(aContext == kOakPasteboardChooserCurrentEntryBinding)
-	{
-		_arrayController.selectedObjects = _pasteboard.currentEntry ? @[ _pasteboard.currentEntry ] : @[ ];
-		[_tableView scrollRowToVisible:[_tableView selectedRow]];
-	}
-	else
-	{
-		[super observeValueForKeyPath:aKeyPath ofObject:anObject change:aDictionary context:aContext];
-	}
-}
-
 - (void)setFilterString:(NSString*)newString
 {
 	if(_filterString == newString || [_filterString isEqualToString:newString])
 		return;
 
-	[self willChangeValueForKey:@"filterString"];
-	_filterString = newString;
-	[self didChangeValueForKey:@"filterString"];
+	NSIndexSet* oldSelectedRowIndexes = _tableView.selectedRowIndexes;
+	NSArray<OakPasteboardEntry*>* oldSelectedEntries = [self.pasteboardEntries objectsAtIndexes:oldSelectedRowIndexes];
+	NSUInteger oldRowCount = _tableView.numberOfRows;
 
-	if(OakIsEmptyString(_filterString))
-			_arrayController.filterPredicate = nil;
-	else	_arrayController.filterPredicate = [NSPredicate predicateWithFormat:@"string CONTAINS[cd] %@", _filterString];
+	_filterString = newString;
+	_arrayController.filterPredicate = OakIsEmptyString(_filterString) ? nil : [NSPredicate predicateWithFormat:@"string CONTAINS[cd] %@", _filterString];
+	[_tableView reloadData];
+
+	if(_tableView.numberOfRows && _tableView.numberOfRows != oldRowCount)
+	{
+		NSIndexSet* newSelectedRowIndexes;
+
+		if(oldSelectedRowIndexes.count != 1 || oldSelectedRowIndexes.firstIndex != 0)
+		{
+			newSelectedRowIndexes = [self.pasteboardEntries indexesOfObjectsPassingTest:^BOOL(OakPasteboardEntry* entry, NSUInteger idx, BOOL* stop){
+				return [oldSelectedEntries containsObject:entry];
+			}];
+		}
+
+		if(newSelectedRowIndexes.count == 0)
+			newSelectedRowIndexes = [NSIndexSet indexSetWithIndex:0];
+
+		[self didSelectEntry:[self.pasteboardEntries objectAtIndex:newSelectedRowIndexes.firstIndex] updatePasteboard:YES];
+	}
 }
 
 // ========================
@@ -367,6 +370,56 @@ static NSMutableDictionary* SharedChoosers;
 			[aCell setAttributedStringValue:str];
 		}
 	}
+}
+
+- (void)didSelectEntry:(OakPasteboardEntry*)clipboardEntry updatePasteboard:(BOOL)flag
+{
+	NSUInteger row = clipboardEntry ? [self.pasteboardEntries indexOfObject:clipboardEntry] : NSNotFound;
+	if(row != NSNotFound)
+	{
+		[_tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+		[_tableView scrollRowToVisible:_tableView.selectedRow];
+	}
+
+	if(flag)
+	{
+		[NSNotificationCenter.defaultCenter removeObserver:self name:OakPasteboardDidChangeNotification object:_pasteboard];
+		[_pasteboard updatePasteboardWithEntry:clipboardEntry];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(clipboardDidChange:) name:OakPasteboardDidChangeNotification object:_pasteboard];
+	}
+}
+
+- (void)tableViewSelectionDidChange:(NSNotification*)notification
+{
+	NSIndexSet* selectedRowIndexes = _tableView.selectedRowIndexes;
+	self.hasSelection = selectedRowIndexes.count != 0;
+
+	if(selectedRowIndexes.count == 1)
+	{
+		OakPasteboardEntry* clipboardEntry = [self.pasteboardEntries objectAtIndex:selectedRowIndexes.firstIndex];
+		[self didSelectEntry:clipboardEntry updatePasteboard:YES];
+	}
+}
+
+// ==========================
+// = NSTableView DataSource =
+// ==========================
+
+- (NSArray<OakPasteboardEntry*>*)pasteboardEntries
+{
+	return _arrayController.arrangedObjects;
+}
+
+- (NSInteger)numberOfRowsInTableView:(NSTableView*)aTableView
+{
+	return [self.pasteboardEntries count];
+}
+
+- (id)tableView:(NSTableView*)aTableView objectValueForTableColumn:(NSTableColumn*)aTableColumn row:(NSInteger)rowIndex
+{
+	if(![[aTableColumn identifier] isEqualToString:@"name"])
+		return nil;
+	return [[self.pasteboardEntries objectAtIndex:rowIndex] displayString];
 }
 
 // =================
@@ -392,31 +445,43 @@ static NSMutableDictionary* SharedChoosers;
 - (void)clearAll:(id)sender
 {
 	[_pasteboard removeAllEntries];
+	[_pasteboard updatePasteboardWithEntry:nil]; // Triggers OakPasteboardDidChangeNotification
 }
 
-- (NSArray*)selectedEntriesPreservingOne
+- (NSArray<OakPasteboardEntry*>*)selectedEntries
 {
-	NSArray* entries = [_arrayController selectedObjects];
-	if([entries count] == [_arrayController.arrangedObjects count])
-	{
-		NSMutableArray* tmp = [entries mutableCopy];
-		[tmp removeObject:_pasteboard.currentEntry];
-		entries = tmp;
-	}
-
-	return entries;
+	NSArray<OakPasteboardEntry*>* res = [self.pasteboardEntries objectsAtIndexes:_tableView.selectedRowIndexes];
+	return res.count ? res : nil;
 }
 
 - (void)deleteForward:(id)sender
 {
-	[_arrayController removeObjects:[self selectedEntriesPreservingOne]];
+	if(NSArray<OakPasteboardEntry*>* entries = self.selectedEntries)
+	{
+		NSUInteger row = _tableView.selectedRowIndexes.firstIndex;
+
+		[_pasteboard removeEntries:entries];
+		[self refreshTableViewAndSelect:nil];
+
+		if(_tableView.numberOfRows)
+				[self didSelectEntry:[self.pasteboardEntries objectAtIndex:MIN(row, _tableView.numberOfRows-1)] updatePasteboard:YES];
+		else	[_pasteboard updatePasteboardWithEntry:nil];
+	}
 }
 
 - (void)deleteBackward:(id)sender
 {
-	NSArray* entries = [self selectedEntriesPreservingOne];
-	[_arrayController selectPrevious:self];
-	[_arrayController removeObjects:entries];
+	if(NSArray<OakPasteboardEntry*>* entries = self.selectedEntries)
+	{
+		NSUInteger row = _tableView.selectedRowIndexes.firstIndex;
+
+		[_pasteboard removeEntries:entries];
+		[self refreshTableViewAndSelect:nil];
+
+		if(_tableView.numberOfRows)
+				[self didSelectEntry:[self.pasteboardEntries objectAtIndex:(row > 0 ? row-1 : row)] updatePasteboard:YES];
+		else	[_pasteboard updatePasteboardWithEntry:nil];
+	}
 }
 
 - (void)insertTab:(id)sender

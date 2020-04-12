@@ -10,34 +10,38 @@ extern PUBLIC NSString* const OakFindIgnoreWhitespaceOption;
 extern PUBLIC NSString* const OakFindFullWordsOption;
 extern PUBLIC NSString* const OakFindRegularExpressionOption;
 
-PUBLIC @interface OakPasteboardEntry : NSManagedObject
-@property (nonatomic) NSString* string;
-@property (nonatomic) NSDictionary* options;
-@property (nonatomic) NSDate* date;
+PUBLIC @interface OakPasteboardEntry : NSObject
+@property (nonatomic, readonly) NSString* string;
+@property (nonatomic, readonly) NSArray<NSString*>* strings;
+@property (nonatomic, readonly) NSDictionary* options;
 
-@property (nonatomic) BOOL fullWordMatch;
-@property (nonatomic) BOOL ignoreWhitespace;
-@property (nonatomic) BOOL regularExpression;
+@property (nonatomic, readonly) BOOL fullWordMatch;
+@property (nonatomic, readonly) BOOL ignoreWhitespace;
+@property (nonatomic, readonly) BOOL regularExpression;
 
 @property (nonatomic, readonly) find::options_t findOptions;
 @end
 
-PUBLIC @interface OakPasteboard : NSManagedObject
+PUBLIC @interface OakPasteboard : NSObject
 @property (class, readonly) OakPasteboard* generalPasteboard;
 @property (class, readonly) OakPasteboard* findPasteboard;
 @property (class, readonly) OakPasteboard* replacePasteboard;
 
 - (void)addEntryWithString:(NSString*)aString;
-- (void)addEntryWithString:(NSString*)aString andOptions:(NSDictionary*)someOptions;
+- (void)addEntryWithString:(NSString*)aString options:(NSDictionary*)someOptions;
+- (OakPasteboardEntry*)addEntryWithStrings:(NSArray<NSString*>*)someStrings options:(NSDictionary*)someOptions;
+- (void)removeEntries:(NSArray<OakPasteboardEntry*>*)pasteboardEntries;
 - (void)removeAllEntries;
-- (NSArrayController*)arrayController;
+- (NSArray<OakPasteboardEntry*>*)entries;
+
+- (void)updatePasteboardWithEntry:(OakPasteboardEntry*)pasteboardEntry;
 
 - (OakPasteboardEntry*)previous;
 - (OakPasteboardEntry*)current;
 - (OakPasteboardEntry*)next;
 
-@property (nonatomic) NSString* name;
-@property (nonatomic) OakPasteboardEntry* currentEntry;
+@property (nonatomic, readonly) NSString* name;
+@property (nonatomic, readonly) OakPasteboardEntry* currentEntry;
 @property (nonatomic) NSDictionary* auxiliaryOptionsForCurrent;
 
 - (void)selectItemForControl:(NSView*)controlView;
