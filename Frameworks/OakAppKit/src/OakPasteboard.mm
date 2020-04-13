@@ -154,10 +154,6 @@ static NSArray* RunSQLStatement (sqlite3* db, char const* query, std::map<std::s
 // = OakPasteboardEntry =
 // ======================
 
-@interface OakPasteboardEntry ()
-@property (nonatomic, readonly) NSUInteger historyId;
-@end
-
 @implementation OakPasteboardEntry
 - (id)initWithStrings:(NSArray<NSString*>*)strings options:(NSDictionary*)options
 {
