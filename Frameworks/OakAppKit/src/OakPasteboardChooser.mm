@@ -218,6 +218,16 @@ static NSMutableDictionary* SharedChoosers;
 		[_tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
 		[_tableView scrollRowToVisible:_tableView.selectedRow];
 	}
+	else if(NSArray* historyIds = clipboardEntry.options[@"historyIds"])
+	{
+		NSSet* set = [NSSet setWithArray:historyIds];
+		NSIndexSet* indexSet = [self.pasteboardEntries indexesOfObjectsPassingTest:^BOOL(OakPasteboardEntry* entry, NSUInteger, BOOL*){
+			return [set containsObject:@(entry.historyId)];
+		}];
+
+		if(indexSet.count)
+			[_tableView selectRowIndexes:indexSet byExtendingSelection:NO];
+	}
 }
 
 - (void)clipboardDidChange:(NSNotification*)aNotification
@@ -234,7 +244,7 @@ static NSMutableDictionary* SharedChoosers;
 		_tableView.headerView                         = nil;
 		_tableView.focusRingType                      = NSFocusRingTypeNone;
 		_tableView.allowsEmptySelection               = NO;
-		_tableView.allowsMultipleSelection            = NO;
+		_tableView.allowsMultipleSelection            = YES;
 		_tableView.usesAlternatingRowBackgroundColors = YES;
 		_tableView.doubleAction                       = @selector(accept:);
 		_tableView.target                             = self;
@@ -429,9 +439,18 @@ static NSMutableDictionary* SharedChoosers;
 - (IBAction)orderFrontFindPanel:(id)sender { [self.window makeFirstResponder:_searchField]; }
 - (IBAction)findAllInSelection:(id)sender  { [self.window makeFirstResponder:_searchField]; }
 
+- (void)updatePasteboardWithSelectedEntries:(id)sender
+{
+	NSArray<OakPasteboardEntry*>* selectedEntries = self.selectedEntries;
+	if(selectedEntries.count > 1)
+		[_pasteboard updatePasteboardWithEntries:selectedEntries];
+}
+
 - (void)accept:(id)sender
 {
+	[self updatePasteboardWithSelectedEntries:self];
 	[self.window orderOut:self];
+
 	if(_action)
 		[NSApp sendAction:_action to:_target from:self];
 	[self.window close];
@@ -439,6 +458,7 @@ static NSMutableDictionary* SharedChoosers;
 
 - (void)cancel:(id)sender
 {
+	[self updatePasteboardWithSelectedEntries:self];
 	[self.window performClose:self];
 }
 
