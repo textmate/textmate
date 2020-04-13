@@ -35,6 +35,7 @@ PUBLIC @interface OakPasteboard : NSObject
 - (NSArray<OakPasteboardEntry*>*)entries;
 
 - (void)updatePasteboardWithEntry:(OakPasteboardEntry*)pasteboardEntry;
+- (void)updatePasteboardWithEntries:(NSArray<OakPasteboardEntry*>*)pasteboardEntries;
 
 - (OakPasteboardEntry*)previous;
 - (OakPasteboardEntry*)current;
