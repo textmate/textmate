@@ -14,6 +14,7 @@ PUBLIC @interface OakPasteboardEntry : NSObject
 @property (nonatomic, readonly) NSString* string;
 @property (nonatomic, readonly) NSArray<NSString*>* strings;
 @property (nonatomic, readonly) NSDictionary* options;
+@property (nonatomic, getter = isFlagged) BOOL flagged;
 @property (nonatomic, readonly) NSUInteger historyId; // This is only to be used by OakPasteboardChooser
 
 @property (nonatomic, readonly) BOOL fullWordMatch;

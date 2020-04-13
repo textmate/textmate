@@ -29,6 +29,10 @@ NSString* const kUserDefaultsClipboardHistoryDaysToKeep        = @"clipboardHist
 // = SQLite3 =
 // ===========
 
+@interface OakPasteboard ()
++ (sqlite3*)SQLDatabase;
+@end
+
 static NSDictionary* ColumnsAsDictionary (sqlite3_stmt* stmt)
 {
 	NSMutableDictionary* item = [NSMutableDictionary dictionary];
@@ -155,12 +159,13 @@ static NSArray* RunSQLStatement (sqlite3* db, char const* query, std::map<std::s
 // ======================
 
 @implementation OakPasteboardEntry
-- (id)initWithStrings:(NSArray<NSString*>*)strings options:(NSDictionary*)options
+- (id)initWithStrings:(NSArray<NSString*>*)strings options:(NSDictionary*)options flagged:(BOOL)flagged
 {
 	if(self = [self init])
 	{
 		_strings = strings;
 		_options = options;
+		_flagged = flagged;
 	}
 	return self;
 }
@@ -185,6 +190,19 @@ static NSArray* RunSQLStatement (sqlite3* db, char const* query, std::map<std::s
 - (NSString*)description
 {
 	return [NSString stringWithFormat:@"<%@: %@ [%@]>", [self class], [_strings componentsJoinedByString:@"|"], [_options.allKeys componentsJoinedByString:@"|"]];
+}
+
+- (void)setFlagged:(BOOL)newFlagged
+{
+	_flagged = newFlagged;
+	if(NSUInteger historyId = self.historyId)
+	{
+		char const* query = nullptr;
+		if(_flagged)
+				query = "INSERT INTO flags (id) VALUES (:historyId);";
+		else	query = "DELETE FROM flags WHERE id = :historyId;";
+		RunSQLStatement(OakPasteboard.SQLDatabase, query, { { ":historyId", @(historyId) } });
+	}
 }
 
 - (BOOL)fullWordMatch       { return [self.options[OakFindFullWordsOption] boolValue]; };
@@ -368,6 +386,10 @@ namespace
 				"   'date'             TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,"
 				"   CONSTRAINT fk_clipboard FOREIGN KEY (clipboard_id) REFERENCES clipboards (id) ON DELETE CASCADE"
 				");"
+				"CREATE TABLE IF NOT EXISTS 'flags' ("
+				"   'id'               INTEGER NOT NULL,"
+				"   CONSTRAINT fk_id FOREIGN KEY (id) REFERENCES history (id) ON DELETE CASCADE"
+				");"
 				"CREATE TABLE IF NOT EXISTS 'groups' ("
 				"   'id'               INTEGER NOT NULL PRIMARY KEY,"
 				"   'history_id'       INTEGER NOT NULL,"
@@ -506,7 +528,7 @@ namespace
 	NSDictionary* options = [self.pasteboard propertyListForType:OakPasteboardOptionsPboardType];
 	if(!options && [self.lastEntry.strings isEqual:strings])
 		options = self.lastEntry.options;
-	return strings.count ? [[OakPasteboardEntry alloc] initWithStrings:strings options:options] : nil;
+	return strings.count ? [[OakPasteboardEntry alloc] initWithStrings:strings options:options flagged:NO] : nil;
 }
 
 - (OakPasteboardEntry*)fetchEntryWithHistoryId:(NSUInteger)historyId
@@ -514,7 +536,7 @@ namespace
 	if(!historyId)
 		return nil;
 
-	char const* query = "SELECT options, string FROM history LEFT JOIN groups ON history.id = history_id LEFT JOIN strings ON strings.id = string_id WHERE history.id = :history_id AND string IS NOT NULL;";
+	char const* query = "SELECT options, flags.id AS flagged, string FROM history LEFT JOIN flags USING (id) LEFT JOIN groups ON history.id = history_id LEFT JOIN strings ON strings.id = string_id WHERE history.id = :history_id AND string IS NOT NULL;";
 	NSArray* rows = RunSQLStatement(OakPasteboard.SQLDatabase, query, { { ":history_id", @(historyId) } });
 	NSArray* strings = [rows valueForKeyPath:@"string"];
 
@@ -522,7 +544,7 @@ namespace
 	if(NSData* optionsData = rows.firstObject[@"options"])
 		[options addEntriesFromDictionary:[NSPropertyListSerialization propertyListWithData:optionsData options:NSPropertyListImmutable format:nil error:nil]];
 
-	return [[OakPasteboardEntry alloc] initWithStrings:strings options:options];
+	return [[OakPasteboardEntry alloc] initWithStrings:strings options:options flagged:rows.firstObject[@"flagged"] ? YES : NO];
 }
 
 - (NSArray<OakPasteboardEntry*>*)entries
@@ -599,25 +621,35 @@ namespace
 		{ ":options", options.count ? [NSPropertyListSerialization dataWithPropertyList:options format:NSPropertyListBinaryFormat_v1_0 options:0 error:nil] : nil },
 	};
 
+	BOOL isFlagged = NO;
+	if(self.avoidsDuplicates)
+	{
+		NSString* query = [NSString stringWithFormat:@"SELECT COUNT(*) AS flagCount FROM (SELECT history_id, COUNT(*) AS count FROM history LEFT JOIN flags USING (id) LEFT JOIN groups ON history_id = history.id LEFT JOIN clipboards ON clipboard_id = clipboards.id LEFT JOIN strings ON strings.id = string_id WHERE name = :name AND string_id IN (%@) AND flags.id IS NOT NULL GROUP BY history_id HAVING count = %lu);", [stringIds componentsJoinedByString:@", "], stringIds.count];
+		if(NSDictionary* res = RunSQLStatement(OakPasteboard.SQLDatabase, query.UTF8String, variables).firstObject)
+			isFlagged = [res[@"flagCount"] integerValue] ? YES : NO;
+	}
+
 	char const* queryFormat =
 		"BEGIN TRANSACTION;"
 		"INSERT INTO clipboards ('name') VALUES (:name);"
 		"%s"
 		"INSERT INTO history ('options', 'clipboard_id') SELECT :options, id FROM clipboards WHERE name = :name;"
 		"SELECT LAST_INSERT_ROWID() AS history_id;"
+		"%s"
 		"INSERT INTO groups ('history_id', 'string_id') VALUES %s;"
 		"END TRANSACTION;"
 		;
 
 	NSString* deleteQuery = self.avoidsDuplicates ? [NSString stringWithFormat:@"DELETE FROM history WHERE id IN (SELECT history_id FROM (SELECT history_id, COUNT(*) AS count FROM groups LEFT JOIN history ON history_id = history.id LEFT JOIN clipboards ON clipboard_id = clipboards.id LEFT JOIN strings ON string_id = strings.id WHERE name = :name AND string_id IN (%@) GROUP BY history_id HAVING count = %lu));", [stringIds componentsJoinedByString:@", "], stringIds.count] : @"";
-	std::string query = text::format(queryFormat, deleteQuery.UTF8String, [values componentsJoinedByString:@","].UTF8String);
+	NSString* flagQuery = isFlagged ? @"INSERT INTO flags (id) VALUES (LAST_INSERT_ROWID());" : @"";
+	std::string query = text::format(queryFormat, deleteQuery.UTF8String, flagQuery.UTF8String, [values componentsJoinedByString:@","].UTF8String);
 
 	if(NSDictionary* res = RunSQLStatement(OakPasteboard.SQLDatabase, query.c_str(), variables).firstObject)
 		options[@"historyId"] = res[@"history_id"];
 
 	[self pruneHistory:self];
 
-	return [[OakPasteboardEntry alloc] initWithStrings:someStrings options:options];
+	return [[OakPasteboardEntry alloc] initWithStrings:someStrings options:options flagged:NO];
 }
 
 - (void)addEntryWithString:(NSString*)aString options:(NSDictionary*)someOptions
@@ -665,7 +697,7 @@ namespace
 
 - (void)removeAllEntries
 {
-	char const* query = "DELETE FROM history WHERE clipboard_id = (SELECT id FROM clipboards WHERE name = :name);";
+	char const* query = "DELETE FROM history WHERE clipboard_id = (SELECT id FROM clipboards WHERE name = :name) AND id NOT IN (SELECT id FROM flags);";
 	RunSQLStatement(OakPasteboard.SQLDatabase, query, { { ":name", _name } });
 }
 
@@ -693,7 +725,7 @@ namespace
 	NSInteger keepAtMost  = [NSUserDefaults.standardUserDefaults integerForKey:kUserDefaultsClipboardHistoryKeepAtMost];
 	CGFloat daysToKeep    = [NSUserDefaults.standardUserDefaults floatForKey:kUserDefaultsClipboardHistoryDaysToKeep];
 
-	if(NSDictionary* row = RunSQLStatement(OakPasteboard.SQLDatabase, "SELECT COUNT(*) AS count FROM history LEFT JOIN clipboards ON clipboards.id = clipboard_id WHERE name = :name", { { ":name", _name }}).firstObject)
+	if(NSDictionary* row = RunSQLStatement(OakPasteboard.SQLDatabase, "SELECT COUNT(*) AS count FROM history LEFT JOIN flags USING (id) LEFT JOIN clipboards ON clipboards.id = clipboard_id WHERE flags.id IS NULL AND name = :name", { { ":name", _name }}).firstObject)
 	{
 		NSUInteger count = [row[@"count"] integerValue];
 
@@ -704,21 +736,21 @@ namespace
 
 		if(keepAtLeast && keepAtLeast <= count)
 		{
-			char const* query = "SELECT date FROM history LEFT JOIN clipboards ON clipboards.id = clipboard_id WHERE name = :name ORDER BY history.id LIMIT :offset, 1;";
+			char const* query = "SELECT date FROM history LEFT JOIN flags USING (id) LEFT JOIN clipboards ON clipboards.id = clipboard_id WHERE flags.id IS NULL AND name = :name ORDER BY history.id LIMIT :offset, 1;";
 			if(NSDictionary* row = RunSQLStatement(OakPasteboard.SQLDatabase, query, { { ":name", _name }, { ":offset", @(count - keepAtLeast) } }).firstObject)
 				keepUntil = [NSString stringWithFormat:@"MIN(\"%@\", %@)", row[@"date"], keepUntil];
 		}
 
 		if(keepAtMost && keepAtMost <= count)
 		{
-			char const* query = "SELECT date FROM history LEFT JOIN clipboards ON clipboards.id = clipboard_id WHERE name = :name ORDER BY history.id LIMIT :offset, 1;";
+			char const* query = "SELECT date FROM history LEFT JOIN flags USING (id) LEFT JOIN clipboards ON clipboards.id = clipboard_id WHERE flags.id IS NULL AND name = :name ORDER BY history.id LIMIT :offset, 1;";
 			if(NSDictionary* row = RunSQLStatement(OakPasteboard.SQLDatabase, query, { { ":name", _name }, { ":offset", @(count - keepAtMost) } }).firstObject)
 				keepUntil = [NSString stringWithFormat:@"MAX(\"%@\", %@)", row[@"date"], keepUntil];
 		}
 
 		char const* queryFormat =
-			"SELECT COUNT(*) AS count FROM history WHERE date < %1$s AND clipboard_id = (SELECT id FROM clipboards WHERE name = :name);"
-			"DELETE FROM history WHERE date < %1$s AND clipboard_id = (SELECT id FROM clipboards WHERE name = :name);"
+			"SELECT COUNT(*) AS count FROM history LEFT JOIN flags USING (id) WHERE date < %1$s AND flags.id IS NULL AND clipboard_id = (SELECT id FROM clipboards WHERE name = :name);"
+			"DELETE FROM history WHERE id IN (SELECT history.id FROM history LEFT JOIN flags USING (id) WHERE date < %1$s AND flags.id IS NULL AND clipboard_id = (SELECT id FROM clipboards WHERE name = :name));"
 			"SELECT COUNT(*) AS count FROM strings LEFT JOIN groups ON string_id = strings.id WHERE string_id IS NULL;"
 			"DELETE FROM strings WHERE id IN (SELECT strings.id FROM strings LEFT JOIN groups ON string_id = strings.id WHERE string_id IS NULL);"
 			;
