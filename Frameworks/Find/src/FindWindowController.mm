@@ -812,8 +812,8 @@ static NSButton* OakCreateStopSearchButton ()
 	if(OakIsEmptyString(aString))
 		return @" ";
 
-	static NSAttributedString* const lineJoiner = [[NSAttributedString alloc] initWithString:@"¬" attributes:@{ NSForegroundColorAttributeName: [NSColor lightGrayColor] }];
-	static NSAttributedString* const tabJoiner  = [[NSAttributedString alloc] initWithString:@"‣" attributes:@{ NSForegroundColorAttributeName: [NSColor lightGrayColor] }];
+	static NSAttributedString* const lineJoiner = [[NSAttributedString alloc] initWithString:@"¬" attributes:@{ NSForegroundColorAttributeName: NSColor.tertiaryLabelColor }];
+	static NSAttributedString* const tabJoiner  = [[NSAttributedString alloc] initWithString:@"‣" attributes:@{ NSForegroundColorAttributeName: NSColor.tertiaryLabelColor }];
 
 	NSMutableAttributedString* res = [[NSMutableAttributedString alloc] init];
 

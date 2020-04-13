@@ -97,7 +97,7 @@ static void append (string_builder_t& dst, std::string const& src, size_t from, 
 			if(src[i] == '\t')
 				dst.append(@"\u2003");
 			else if(src[i] == '\r')
-				dst.append(@"<CR>", @{ NSForegroundColorAttributeName: [NSColor lightGrayColor] });
+				dst.append(@"<CR>", @{ NSForegroundColorAttributeName: NSColor.tertiaryLabelColor });
 			begin = i+1;
 		}
 	}
