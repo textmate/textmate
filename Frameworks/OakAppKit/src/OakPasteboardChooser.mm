@@ -22,39 +22,39 @@
 		NSFontAttributeName:           [NSFont controlContentFontOfSize:0]
 	};
 
+	NSMutableAttributedString* res = [[NSMutableAttributedString alloc] init];
 	if([self.options[OakFindRegularExpressionOption] boolValue])
 	{
 		OakSyntaxFormatter* formatter = [[OakSyntaxFormatter alloc] initWithGrammarName:@"source.regexp.oniguruma"];
 		formatter.enabled = YES;
-		NSMutableAttributedString* str = [[NSMutableAttributedString alloc] initWithString:self.string attributes:defaultAttributes];
-		[formatter addStylesToString:str];
-		return str;
+		[res setAttributedString:[[NSMutableAttributedString alloc] initWithString:self.string attributes:defaultAttributes]];
+		[formatter addStylesToString:res];
+	}
+	else
+	{
+		__block bool firstLine = true;
+		[self.string enumerateLinesUsingBlock:^(NSString* line, BOOL* stop){
+			if(!std::exchange(firstLine, false))
+				[res appendAttributedString:lineJoiner];
+
+			bool firstTab = true;
+			for(NSString* str in [line componentsSeparatedByString:@"\t"])
+			{
+				if([[res string] length] > 1024)
+				{
+					[res appendAttributedString:ellipsis];
+					*stop = YES;
+					break;
+				}
+
+				if(!std::exchange(firstTab, false))
+					[res appendAttributedString:tabJoiner];
+				[res appendAttributedString:[[NSAttributedString alloc] initWithString:str]];
+			}
+		}];
+		[res addAttributes:defaultAttributes range:NSMakeRange(0, res.string.length)];
 	}
 
-	NSMutableAttributedString* res = [[NSMutableAttributedString alloc] init];
-
-	__block bool firstLine = true;
-	[self.string enumerateLinesUsingBlock:^(NSString* line, BOOL* stop){
-		if(!std::exchange(firstLine, false))
-			[res appendAttributedString:lineJoiner];
-
-		bool firstTab = true;
-		for(NSString* str in [line componentsSeparatedByString:@"\t"])
-		{
-			if([[res string] length] > 1024)
-			{
-				[res appendAttributedString:ellipsis];
-				*stop = YES;
-				break;
-			}
-
-			if(!std::exchange(firstTab, false))
-				[res appendAttributedString:tabJoiner];
-			[res appendAttributedString:[[NSAttributedString alloc] initWithString:str]];
-		}
-	}];
-
-	[res addAttributes:defaultAttributes range:NSMakeRange(0, res.string.length)];
 	return res;
 }
 @end
