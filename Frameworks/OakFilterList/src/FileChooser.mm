@@ -235,6 +235,7 @@ static NSDictionary* globs_for_path (std::string const& path)
 	NSUInteger _lastSearchToken;
 	NSMutableArray<OakDocument*>* _searchResults;
 }
+@property (nonatomic) OakScopeBarView* scopeBar;
 @property (nonatomic) NSArray* sourceListLabels;
 @property (nonatomic) NSProgressIndicator* progressIndicator;
 
@@ -259,13 +260,13 @@ static NSDictionary* globs_for_path (std::string const& path)
 		self.tableView.allowsMultipleSelection = YES;
 		self.tableView.rowHeight = 38;
 
-		OakScopeBarView* scopeBar = [OakScopeBarView new];
-		scopeBar.labels = self.sourceListLabels;
+		_scopeBar = [OakScopeBarView new];
+		_scopeBar.labels = self.sourceListLabels;
 
 		NSDictionary* titlebarViews = @{
 			@"searchField": self.searchField,
 			@"dividerView": OakCreateNSBoxSeparator(),
-			@"scopeBar":    scopeBar,
+			@"scopeBar":    _scopeBar,
 		};
 
 		NSView* titlebarView = [[NSView alloc] initWithFrame:NSZeroRect];
@@ -299,17 +300,18 @@ static NSDictionary* globs_for_path (std::string const& path)
 
 		[self updateScrollViewInsets];
 
-		OakSetupKeyViewLoop(@[ self.searchField, scopeBar ]);
+		OakSetupKeyViewLoop(@[ self.searchField, _scopeBar ]);
 
 		self.sourceIndex = [[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsFileChooserSourceIndexKey];
 		[self updateWindowTitle];
-		[scopeBar bind:NSValueBinding toObject:self withKeyPath:@"sourceIndex" options:nil];
+		[_scopeBar bind:NSValueBinding toObject:self withKeyPath:@"sourceIndex" options:nil];
 	}
 	return self;
 }
 
-- (IBAction)selectNextTab:(id)sender     { self.sourceIndex = (self.sourceIndex + 1) % self.sourceListLabels.count; }
-- (IBAction)selectPreviousTab:(id)sender { self.sourceIndex = (self.sourceIndex + self.sourceListLabels.count - 1) % self.sourceListLabels.count; }
+- (IBAction)selectNextTab:(id)sender     { [_scopeBar selectNextButton:sender]; }
+- (IBAction)selectPreviousTab:(id)sender { [_scopeBar selectPreviousButton:sender]; }
+- (void)updateShowTabMenu:(NSMenu*)aMenu { [_scopeBar updateGoToMenu:aMenu];}
 
 - (void)showWindow:(id)sender
 {
@@ -343,12 +345,6 @@ static NSDictionary* globs_for_path (std::string const& path)
 		return;
 	_currentDocument = identifier;
 	[self reload];
-}
-
-- (void)takeSourceIndexFrom:(id)sender
-{
-	if([sender respondsToSelector:@selector(tag)])
-		self.sourceIndex = [sender tag];
 }
 
 - (void)setSourceIndex:(NSUInteger)newIndex
@@ -698,27 +694,11 @@ static NSDictionary* globs_for_path (std::string const& path)
 	self.path = [_path stringByDeletingLastPathComponent];
 }
 
-- (void)updateShowTabMenu:(NSMenu*)aMenu
-{
-	if(self.window.isKeyWindow)
-	{
-		[[aMenu addItemWithTitle:@"All" action:@selector(takeSourceIndexFrom:) keyEquivalent:@"1"] setTag:kFileChooserAllSourceIndex];
-		[[aMenu addItemWithTitle:@"Open Documents" action:@selector(takeSourceIndexFrom:) keyEquivalent:@"2"] setTag:kFileChooserOpenDocumentsSourceIndex];
-		[[aMenu addItemWithTitle:@"Uncommitted Documents" action:@selector(takeSourceIndexFrom:) keyEquivalent:@"3"] setTag:kFileChooserUncommittedChangesSourceIndex];
-	}
-	else
-	{
-		[aMenu addItemWithTitle:@"No Sources" action:@selector(nop:) keyEquivalent:@""];
-	}
-}
-
 - (BOOL)validateMenuItem:(NSMenuItem*)item
 {
 	BOOL activate = YES;
 	if([item action] == @selector(goToParentFolder:))
 		activate = _sourceIndex == kFileChooserAllSourceIndex && to_s(_path) != path::parent(to_s(_path));
-	else if([item action] == @selector(takeSourceIndexFrom:))
-		[item setState:[item tag] == self.sourceIndex ? NSControlStateValueOn : NSControlStateValueOff];
 	return activate;
 }
 @end

@@ -1043,6 +1043,6 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	[self.window close];
 }
 
-- (IBAction)selectNextTab:(id)sender     { self.sourceIndex = (self.sourceIndex + 1) % self.sourceListLabels.count; }
-- (IBAction)selectPreviousTab:(id)sender { self.sourceIndex = (self.sourceIndex + self.sourceListLabels.count - 1) % self.sourceListLabels.count; }
+- (IBAction)selectNextTab:(id)sender     { [_scopeBar selectNextButton:sender]; }
+- (IBAction)selectPreviousTab:(id)sender { [_scopeBar selectPreviousButton:sender]; }
 @end

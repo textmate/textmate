@@ -23,6 +23,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 {
 	NSMutableArray* _originalItems;
 }
+@property (nonatomic) OakScopeBarView* scopeBar;
 @property (nonatomic) NSInteger sourceIndex;
 @property (nonatomic) NSArray* sourceListLabels;
 @end
@@ -60,13 +61,13 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 		self.tableView.refusesFirstResponder = NO;
 		self.tableView.rowHeight = 38;
 
-		OakScopeBarView* scopeBar = [OakScopeBarView new];
-		scopeBar.labels = self.sourceListLabels;
+		_scopeBar = [OakScopeBarView new];
+		_scopeBar.labels = self.sourceListLabels;
 
 		NSDictionary* titlebarViews = @{
 			@"searchField": self.searchField,
 			@"dividerView": OakCreateNSBoxSeparator(),
-			@"scopeBar":    scopeBar,
+			@"scopeBar":    _scopeBar,
 		};
 
 		NSView* titlebarView = [[NSView alloc] initWithFrame:NSZeroRect];
@@ -94,16 +95,17 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 
 		[self updateScrollViewInsets];
 
-		OakSetupKeyViewLoop(@[ self.tableView, self.searchField, scopeBar ]);
+		OakSetupKeyViewLoop(@[ self.tableView, self.searchField, _scopeBar ]);
 
 		self.sourceIndex = [[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsOpenProjectSourceIndex];
-		[scopeBar bind:NSValueBinding toObject:self withKeyPath:@"sourceIndex" options:nil];
+		[_scopeBar bind:NSValueBinding toObject:self withKeyPath:@"sourceIndex" options:nil];
 	}
 	return self;
 }
 
-- (IBAction)selectNextTab:(id)sender     { self.sourceIndex = (self.sourceIndex + 1) % self.sourceListLabels.count; }
-- (IBAction)selectPreviousTab:(id)sender { self.sourceIndex = (self.sourceIndex + self.sourceListLabels.count - 1) % self.sourceListLabels.count; }
+- (IBAction)selectNextTab:(id)sender     { [_scopeBar selectNextButton:sender]; }
+- (IBAction)selectPreviousTab:(id)sender { [_scopeBar selectPreviousButton:sender]; }
+- (void)updateShowTabMenu:(NSMenu*)aMenu { [_scopeBar updateGoToMenu:aMenu]; }
 
 - (NSView*)tableView:(NSTableView*)aTableView viewForTableColumn:(NSTableColumn*)aTableColumn row:(NSInteger)row
 {
@@ -333,33 +335,6 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 	NSInteger row = [self.tableView rowForView:sender];
 	if(row != -1)
 		[self removeItemsAtIndexes:[NSIndexSet indexSetWithIndex:row]];
-}
-
-- (void)takeSourceIndexFrom:(id)sender
-{
-	if([sender respondsToSelector:@selector(tag)])
-		self.sourceIndex = [sender tag];
-}
-
-- (void)updateShowTabMenu:(NSMenu*)aMenu
-{
-	if(self.window.isKeyWindow)
-	{
-		[[aMenu addItemWithTitle:@"Recent Projects" action:@selector(takeSourceIndexFrom:) keyEquivalent:@"1"] setTag:kOakSourceIndexRecentProjects];
-		[[aMenu addItemWithTitle:@"Favorites" action:@selector(takeSourceIndexFrom:) keyEquivalent:@"2"] setTag:kOakSourceIndexFavorites];
-	}
-	else
-	{
-		[aMenu addItemWithTitle:@"No Sources" action:@selector(nop:) keyEquivalent:@""];
-	}
-}
-
-- (BOOL)validateMenuItem:(NSMenuItem*)item
-{
-	BOOL activate = YES;
-	if([item action] == @selector(takeSourceIndexFrom:))
-		[item setState:[item tag] == self.sourceIndex ? NSControlStateValueOn : NSControlStateValueOff];
-	return activate;
 }
 
 - (void)deleteForward:(id)sender

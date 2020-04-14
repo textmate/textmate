@@ -65,6 +65,7 @@ static NSUserInterfaceItemIdentifier const kTableColumnIdentifierFlag = @"flag";
 @interface OakPasteboardChooser () <NSWindowDelegate, NSTextFieldDelegate, NSTableViewDelegate, NSTableViewDataSource, NSSearchFieldDelegate>
 {
 	NSTitlebarAccessoryViewController* _accessoryViewController;
+	OakScopeBarView* _scopeBar;
 }
 @property (nonatomic) OakPasteboard*        pasteboard;
 @property (nonatomic) NSArrayController*    arrayController;
@@ -101,8 +102,8 @@ static NSMutableDictionary* SharedChoosers;
 
 		_arrayController = [[NSArrayController alloc] init];
 
-		OakScopeBarView* scopeBar = [OakScopeBarView new];
-		scopeBar.labels = @[ @"All", @"Flagged" ];
+		_scopeBar = [OakScopeBarView new];
+		_scopeBar.labels = @[ @"All", @"Flagged" ];
 
 		NSTableColumn* tableColumn = [[NSTableColumn alloc] initWithIdentifier:kTableColumnIdentifierMain];
 		tableColumn.resizingMask = NSTableColumnAutoresizingMask;
@@ -127,7 +128,7 @@ static NSMutableDictionary* SharedChoosers;
 		NSDictionary* titlebarViews = @{
 			@"searchField": self.searchField,
 			@"dividerView": OakCreateNSBoxSeparator(),
-			@"scopeBar":    scopeBar,
+			@"scopeBar":    _scopeBar,
 		};
 
 		NSView* titlebarView = [[NSView alloc] initWithFrame:NSZeroRect];
@@ -172,7 +173,7 @@ static NSMutableDictionary* SharedChoosers;
 		[flagButton bind:NSEnabledBinding toObject:self withKeyPath:@"hasSelection" options:nil];
 		[deleteButton bind:NSEnabledBinding toObject:self withKeyPath:@"hasSelection" options:nil];
 		[actionButton bind:NSEnabledBinding toObject:self withKeyPath:@"hasSelection" options:nil];
-		[scopeBar bind:NSValueBinding toObject:self withKeyPath:@"sourceIndex" options:nil];
+		[_scopeBar bind:NSValueBinding toObject:self withKeyPath:@"sourceIndex" options:nil];
 
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(clipboardDidChange:) name:OakPasteboardDidChangeNotification object:_pasteboard];
 	}
@@ -348,27 +349,9 @@ static NSMutableDictionary* SharedChoosers;
 	[SharedChoosers performSelector:@selector(removeObjectForKey:) withObject:_pasteboard.name afterDelay:0];
 }
 
-- (IBAction)selectNextTab:(id)sender     { self.sourceIndex = (_sourceIndex + 2 + 1) % 2; }
-- (IBAction)selectPreviousTab:(id)sender { self.sourceIndex = (_sourceIndex + 2 - 1) % 2; }
-
-- (void)takeSourceIndexFrom:(id)sender
-{
-	if([sender respondsToSelector:@selector(tag)])
-		self.sourceIndex = [sender tag];
-}
-
-- (void)updateShowTabMenu:(NSMenu*)aMenu
-{
-	if(self.window.isKeyWindow)
-	{
-		[[aMenu addItemWithTitle:@"All" action:@selector(takeSourceIndexFrom:) keyEquivalent:@"1"] setTag:0];
-		[[aMenu addItemWithTitle:@"Flagged" action:@selector(takeSourceIndexFrom:) keyEquivalent:@"2"] setTag:1];
-	}
-	else
-	{
-		[aMenu addItemWithTitle:@"No Sources" action:@selector(nop:) keyEquivalent:@""];
-	}
-}
+- (IBAction)selectNextTab:(id)sender     { [_scopeBar selectNextButton:sender]; }
+- (IBAction)selectPreviousTab:(id)sender { [_scopeBar selectPreviousButton:sender]; }
+- (void)updateShowTabMenu:(NSMenu*)aMenu { [_scopeBar updateGoToMenu:aMenu]; }
 
 - (void)setSourceIndex:(NSUInteger)newIndex
 {

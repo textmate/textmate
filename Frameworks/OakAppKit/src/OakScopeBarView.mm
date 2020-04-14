@@ -76,10 +76,44 @@ static NSButton* OakCreateScopeButton (NSString* label, NSUInteger tag, SEL acti
 	[self addConstraints:_myConstraints];
 }
 
+- (void)updateGoToMenu:(NSMenu*)aMenu
+{
+	if(self.window.isKeyWindow)
+	{
+		for(int i = 0; i < _labels.count; ++i)
+		{
+			NSMenuItem* item = [aMenu addItemWithTitle:_labels[i] action:@selector(takeSelectedIndexFrom:) keyEquivalent:i < 9 ? [NSString stringWithFormat:@"%c", '1' + i] : @""];
+			item.tag = i;
+			item.target = self;
+		}
+	}
+	else
+	{
+		[aMenu addItemWithTitle:@"No Sources" action:@selector(nop:) keyEquivalent:@""];
+	}
+}
+
+- (void)selectNextButton:(id)sender
+{
+	self.selectedIndex = (self.selectedIndex + 1) % _buttons.count;
+}
+
+- (void)selectPreviousButton:(id)sender
+{
+	self.selectedIndex = (self.selectedIndex + _buttons.count - 1) % _buttons.count;
+}
+
 - (void)takeSelectedIndexFrom:(id)sender
 {
 	if([sender respondsToSelector:@selector(tag)])
 		self.selectedIndex = [sender tag];
+}
+
+- (BOOL)validateMenuItem:(NSMenuItem*)item
+{
+	if(item.action == @selector(takeSelectedIndexFrom:))
+		item.state = [item tag] == self.selectedIndex ? NSControlStateValueOn : NSControlStateValueOff;
+	return YES;
 }
 
 - (void)setSelectedIndex:(NSInteger)newSelectedIndex
