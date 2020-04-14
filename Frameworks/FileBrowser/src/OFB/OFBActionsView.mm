@@ -65,13 +65,8 @@ static NSButton* OakCreateImageButton (NSImage* image)
 
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-8-[create]-8-[divider(==1)]-8-[actions(==31)]-(>=8)-[reload]-4-[search]-4-[favorites]-4-[scm]-(12)-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[topDivider]|"                                                                                         options:0 metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[topDivider(==1)]-4-[divider]-5-|"                                                                     options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[topDivider(==1)]-4-[divider(==15)]-5-|"                                                                     options:0 metrics:nil views:views]];
 	}
 	return self;
-}
-
-- (NSSize)intrinsicContentSize
-{
-	return NSMakeSize(NSViewNoIntrinsicMetric, 25);
 }
 @end

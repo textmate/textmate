@@ -87,11 +87,6 @@ static NSTextField* OakCreateTextField ()
 	return self;
 }
 
-- (NSSize)intrinsicContentSize
-{
-	return NSMakeSize(NSViewNoIntrinsicMetric, 25);
-}
-
 - (void)updateConstraints
 {
 	if(_layoutConstraints)
@@ -110,7 +105,7 @@ static NSTextField* OakCreateTextField ()
 	};
 
 	NSArray* layout = @[
-		@"H:|[topDivider]|", @"V:|[topDivider(==1)]-4-[divider]-5-|", @"V:[status]-5-|"
+		@"H:|[topDivider]|", @"V:|[topDivider(==1)]-4-[divider(==15)]-5-|", @"V:[status]-5-|"
 	];
 
 	for(NSString* str in layout)
