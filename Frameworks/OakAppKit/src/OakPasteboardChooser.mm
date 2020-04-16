@@ -555,9 +555,7 @@ static NSMutableDictionary* SharedChoosers;
 		for(OakPasteboardEntry* entry in entries)
 			entry.flagged = shouldFlag;
 
-		NSTableColumn* tableColumn = [_tableView tableColumnWithIdentifier:kTableColumnIdentifierFlag];
-		NSUInteger columnIndex = [_tableView.tableColumns indexOfObject:tableColumn];
-		[_tableView reloadDataForRowIndexes:_tableView.selectedRowIndexes columnIndexes:[NSIndexSet indexSetWithIndex:columnIndex]];
+		[_tableView reloadDataForRowIndexes:_tableView.selectedRowIndexes columnIndexes:[NSIndexSet indexSetWithIndex:[_tableView columnWithIdentifier:kTableColumnIdentifierFlag]]];
 	}
 }
 
