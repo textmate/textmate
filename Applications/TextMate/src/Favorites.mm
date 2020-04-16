@@ -23,7 +23,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 {
 	NSMutableArray* _originalItems;
 }
-@property (nonatomic) OakScopeBarView* scopeBar;
+@property (nonatomic) OakScopeBarViewController* scopeBar;
 @property (nonatomic) NSInteger sourceIndex;
 @property (nonatomic) NSArray* sourceListLabels;
 @end
@@ -61,13 +61,13 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 		self.tableView.refusesFirstResponder = NO;
 		self.tableView.rowHeight = 38;
 
-		_scopeBar = [OakScopeBarView new];
+		_scopeBar = [[OakScopeBarViewController alloc] init];
 		_scopeBar.labels = self.sourceListLabels;
 
 		NSDictionary* titlebarViews = @{
 			@"searchField": self.searchField,
 			@"dividerView": OakCreateNSBoxSeparator(),
-			@"scopeBar":    _scopeBar,
+			@"scopeBar":    _scopeBar.view,
 		};
 
 		NSView* titlebarView = [[NSView alloc] initWithFrame:NSZeroRect];
@@ -95,7 +95,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 
 		[self updateScrollViewInsets];
 
-		OakSetupKeyViewLoop(@[ self.tableView, self.searchField, _scopeBar ]);
+		OakSetupKeyViewLoop(@[ self.tableView, self.searchField, _scopeBar.view ]);
 
 		self.sourceIndex = [[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsOpenProjectSourceIndex];
 		[_scopeBar bind:NSValueBinding toObject:self withKeyPath:@"sourceIndex" options:nil];

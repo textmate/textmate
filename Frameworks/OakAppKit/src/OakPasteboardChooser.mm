@@ -65,7 +65,7 @@ static NSUserInterfaceItemIdentifier const kTableColumnIdentifierFlag = @"flag";
 @interface OakPasteboardChooser () <NSWindowDelegate, NSTextFieldDelegate, NSTableViewDelegate, NSTableViewDataSource, NSSearchFieldDelegate>
 {
 	NSTitlebarAccessoryViewController* _accessoryViewController;
-	OakScopeBarView* _scopeBar;
+	OakScopeBarViewController* _scopeBar;
 }
 @property (nonatomic) OakPasteboard*        pasteboard;
 @property (nonatomic) NSArrayController*    arrayController;
@@ -102,7 +102,7 @@ static NSMutableDictionary* SharedChoosers;
 
 		_arrayController = [[NSArrayController alloc] init];
 
-		_scopeBar = [OakScopeBarView new];
+		_scopeBar = [[OakScopeBarViewController alloc] init];
 		_scopeBar.labels = @[ @"All", @"Flagged" ];
 
 		NSTableColumn* tableColumn = [[NSTableColumn alloc] initWithIdentifier:kTableColumnIdentifierMain];
@@ -128,7 +128,7 @@ static NSMutableDictionary* SharedChoosers;
 		NSDictionary* titlebarViews = @{
 			@"searchField": self.searchField,
 			@"dividerView": OakCreateNSBoxSeparator(),
-			@"scopeBar":    _scopeBar,
+			@"scopeBar":    _scopeBar.view,
 		};
 
 		NSView* titlebarView = [[NSView alloc] initWithFrame:NSZeroRect];

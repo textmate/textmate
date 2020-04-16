@@ -405,7 +405,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 @property (nonatomic) NSView* titlebarView;
 @property (nonatomic) OakKeyEquivalentView* keyEquivalentView;
 @property (nonatomic) NSPopUpButton* actionsPopUpButton;
-@property (nonatomic) OakScopeBarView* scopeBar;
+@property (nonatomic) OakScopeBarViewController* scopeBar;
 @property (nonatomic) NSView* topDivider;
 @property (nonatomic) NSView* bottomDivider;
 @property (nonatomic) NSButton* selectButton;
@@ -468,7 +468,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		[actionMenu addItem:[NSMenuItem separatorItem]];
 		[actionMenu addItemWithTitle:@"Search All Scopes" action:@selector(toggleSearchAllScopes:) keyEquivalent:key < 9 ? [NSString stringWithFormat:@"%c", '0' + (++key % 10)] : @""];
 
-		self.scopeBar = [OakScopeBarView new];
+		self.scopeBar = [[OakScopeBarViewController alloc] init];
 		self.scopeBar.labels = _sourceListLabels;
 
 		self.topDivider          = OakCreateNSBoxSeparator();
@@ -490,7 +490,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 			@"searchField": self.keyEquivalentInput ? self.keyEquivalentView : self.searchField,
 			@"actions":     self.actionsPopUpButton,
 			@"dividerView": self.topDivider,
-			@"scopeBar":    self.scopeBar,
+			@"scopeBar":    self.scopeBar.view,
 		};
 
 		self.titlebarView = [[NSView alloc] initWithFrame:NSZeroRect];
@@ -515,7 +515,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 
 		[self updateScrollViewInsets];
 
-		OakSetupKeyViewLoop(@[ self.searchField, self.actionsPopUpButton, self.scopeBar, self.editButton, self.selectButton ]);
+		OakSetupKeyViewLoop(@[ self.searchField, self.actionsPopUpButton, self.scopeBar.view, self.editButton, self.selectButton ]);
 
 		[self.scopeBar bind:NSValueBinding toObject:self withKeyPath:@"sourceIndex" options:nil];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidChangeKeyStatus:) name:NSWindowDidBecomeKeyNotification object:self.window];
@@ -579,7 +579,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		@"searchField": self.keyEquivalentInput ? self.keyEquivalentView : self.searchField,
 		@"actions":     self.actionsPopUpButton,
 		@"dividerView": self.topDivider,
-		@"scopeBar":    self.scopeBar,
+		@"scopeBar":    self.scopeBar.view,
 	};
 
 	NSMutableArray* constraints = [NSMutableArray array];

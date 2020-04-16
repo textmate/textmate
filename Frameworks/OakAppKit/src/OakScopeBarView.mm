@@ -16,19 +16,42 @@ static NSButton* OakCreateScopeButton (NSString* label, NSUInteger tag, SEL acti
 	return res;
 }
 
-@interface OakScopeBarView () <NSAccessibilityGroup>
-@property (nonatomic) NSArray* buttons;
-@property (nonatomic) NSMutableArray* myConstraints;
+@interface OakScopeBarViewController ()
+@property (nonatomic) NSArray<NSButton*>* buttons;
+@property (nonatomic) NSMutableArray<NSLayoutConstraint*>* viewConstraints;
 @end
 
-@implementation OakScopeBarView
-- (instancetype)initWithFrame:(NSRect)aRect
+@implementation OakScopeBarViewController
+- (void)loadView
 {
-	if(self = [super initWithFrame:aRect])
+	NSView* view = [[NSView alloc] initWithFrame:NSZeroRect];
+	view.accessibilityRole = NSAccessibilityRadioGroupRole;
+	self.view = view;
+}
+
+- (void)viewWillAppear
+{
+	if(_buttons.count != _labels.count)
+		[self updateButtons];
+}
+
+- (void)updateButtons
+{
+	for(NSView* button in _buttons)
+		[button removeFromSuperview];
+
+	NSMutableArray<NSButton*>* buttons = [NSMutableArray array];
+	for(NSUInteger i = 0; i < _labels.count; ++i)
 	{
-		self.accessibilityRole = NSAccessibilityRadioGroupRole;
+		NSButton* button = OakCreateScopeButton(_labels[i], i, @selector(takeSelectedIndexFrom:), self);
+		button.state = i == _selectedIndex ? NSControlStateValueOn : NSControlStateValueOff;
+		[buttons addObject:button];
 	}
-	return self;
+	_buttons = buttons;
+
+	OakAddAutoLayoutViewsToSuperview(_buttons, self.view);
+	OakSetupKeyViewLoop([@[ self.view ] arrayByAddingObjectsFromArray:_buttons], NO);
+	[self.view setNeedsUpdateConstraints:YES];
 }
 
 - (void)setLabels:(NSArray*)anArray
@@ -36,49 +59,35 @@ static NSButton* OakCreateScopeButton (NSString* label, NSUInteger tag, SEL acti
 	if(_labels == anArray || [_labels isEqualToArray:anArray])
 		return;
 	_labels = anArray;
-
-	_selectedIndex = NSNotFound;
-	for(NSView* button in _buttons)
-		[button removeFromSuperview];
-
-	NSMutableArray* buttons = [NSMutableArray new];
-	for(NSInteger i = 0; i < anArray.count; ++i)
-		[buttons addObject:OakCreateScopeButton(anArray[i], i, @selector(takeSelectedIndexFrom:), self)];
-	_buttons = buttons;
-
-	OakAddAutoLayoutViewsToSuperview(_buttons, self);
-	OakSetupKeyViewLoop([@[ self ] arrayByAddingObjectsFromArray:_buttons], NO);
-	if(_buttons.count)
-		self.selectedIndex = 0;
-
-	[self setNeedsUpdateConstraints:YES];
+	[self updateButtons];
 }
 
-- (void)updateConstraints
+- (void)updateViewConstraints
 {
-	if(_myConstraints)
-		[self removeConstraints:_myConstraints];
-	_myConstraints = [NSMutableArray array];
-	[super updateConstraints];
+	if(_viewConstraints)
+		[self.view removeConstraints:_viewConstraints];
+	_viewConstraints = [NSMutableArray array];
+
+	[super updateViewConstraints];
 
 	if(_buttons.count)
 	{
-		[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[view]|" options:0 metrics:nil views:@{ @"view": _buttons[0] }]];
-		[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[view]" options:0 metrics:nil views:@{ @"view": _buttons[0] }]];
-		[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[view]|" options:0 metrics:nil views:@{ @"view": _buttons[_buttons.count-1] }]];
-		for(size_t i = 0; i < [_buttons count]-1; ++i)
+		[_viewConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[view]|" options:0 metrics:nil views:@{ @"view": _buttons[0] }]];
+		[_viewConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[view]" options:0 metrics:nil views:@{ @"view": _buttons[0] }]];
+		[_viewConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[view]|" options:0 metrics:nil views:@{ @"view": _buttons[_buttons.count-1] }]];
+		for(NSUInteger i = 0; i < _buttons.count-1; ++i)
 		{
-			[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:_buttons[i] attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:_buttons[i+1] attribute:NSLayoutAttributeLeft multiplier:1 constant:0]];
-			[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:_buttons[i] attribute:NSLayoutAttributeBaseline relatedBy:NSLayoutRelationEqual toItem:_buttons[i+1] attribute:NSLayoutAttributeBaseline multiplier:1 constant:0]];
+			[_viewConstraints addObject:[NSLayoutConstraint constraintWithItem:_buttons[i] attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:_buttons[i+1] attribute:NSLayoutAttributeLeft multiplier:1 constant:0]];
+			[_viewConstraints addObject:[NSLayoutConstraint constraintWithItem:_buttons[i] attribute:NSLayoutAttributeBaseline relatedBy:NSLayoutRelationEqual toItem:_buttons[i+1] attribute:NSLayoutAttributeBaseline multiplier:1 constant:0]];
 		}
 	}
 
-	[self addConstraints:_myConstraints];
+	[self.view addConstraints:_viewConstraints];
 }
 
 - (void)updateGoToMenu:(NSMenu*)aMenu
 {
-	if(self.window.isKeyWindow)
+	if(self.view.window.isKeyWindow)
 	{
 		for(int i = 0; i < _labels.count; ++i)
 		{
@@ -118,12 +127,12 @@ static NSButton* OakCreateScopeButton (NSString* label, NSUInteger tag, SEL acti
 
 - (void)setSelectedIndex:(NSInteger)newSelectedIndex
 {
-	for(NSButton* button in _buttons)
-		[button setState:[button tag] == newSelectedIndex ? NSControlStateValueOn : NSControlStateValueOff];
 	if(_selectedIndex == newSelectedIndex)
 		return;
-
 	_selectedIndex = newSelectedIndex;
+
+	for(NSButton* button in _buttons)
+		button.state = button.tag == _selectedIndex ? NSControlStateValueOn : NSControlStateValueOff;
 
 	if(NSDictionary* info = [self infoForBinding:NSValueBinding])
 	{
