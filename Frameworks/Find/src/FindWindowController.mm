@@ -26,6 +26,7 @@ static NSButton* OakCreateClickableStatusBar ()
 {
 	NSButton* res = [[NSButton alloc] initWithFrame:NSZeroRect];
 	[res.cell setLineBreakMode:NSLineBreakByTruncatingTail];
+	res.font        = [NSFont messageFontOfSize:[NSFont systemFontSizeForControlSize:NSControlSizeSmall]];
 	res.controlSize = NSControlSizeSmall;
 	res.alignment   = NSTextAlignmentLeft;
 	res.bordered    = NO;
