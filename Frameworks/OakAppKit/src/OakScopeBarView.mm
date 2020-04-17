@@ -19,41 +19,41 @@ static NSButton* OakCreateScopeButton (NSString* label, NSUInteger tag, SEL acti
 }
 
 @interface OakScopeBarViewController ()
-@property (nonatomic) NSArray<NSButton*>* buttons;
-@property (nonatomic) NSMutableArray<NSLayoutConstraint*>* viewConstraints;
+@property (nonatomic) NSStackView* stackView;
 @end
 
 @implementation OakScopeBarViewController
 - (void)loadView
 {
-	NSView* view = [[NSView alloc] initWithFrame:NSZeroRect];
-	view.accessibilityRole = NSAccessibilityRadioGroupRole;
-	self.view = view;
-}
-
-- (void)viewWillAppear
-{
-	if(_buttons.count != _labels.count)
-		[self updateButtons];
+	_stackView = [[NSStackView alloc] initWithFrame:NSZeroRect];
+	_stackView.accessibilityRole = NSAccessibilityRadioGroupRole;
+	[self updateButtons];
+	self.view = _stackView;
 }
 
 - (void)updateButtons
 {
-	for(NSView* button in _buttons)
-		[button removeFromSuperview];
+	if(!_stackView)
+		return;
 
-	NSMutableArray<NSButton*>* buttons = [NSMutableArray array];
+	for(NSView* button in _stackView.arrangedSubviews)
+		[_stackView removeArrangedSubview:button];
+
+	switch(_controlSize)
+	{
+		case NSControlSizeRegular: _stackView.spacing = 4; break;
+		case NSControlSizeSmall:   _stackView.spacing = 2; break;
+		case NSControlSizeMini:    _stackView.spacing = 2; break;
+	}
+
 	for(NSUInteger i = 0; i < _labels.count; ++i)
 	{
 		NSButton* button = OakCreateScopeButton(_labels[i], i, @selector(takeSelectedIndexFrom:), self, _controlSize);
 		button.state = i == _selectedIndex ? NSControlStateValueOn : NSControlStateValueOff;
-		[buttons addObject:button];
+		[_stackView addArrangedSubview:button];
 	}
-	_buttons = buttons;
 
-	OakAddAutoLayoutViewsToSuperview(_buttons, self.view);
-	OakSetupKeyViewLoop([@[ self.view ] arrayByAddingObjectsFromArray:_buttons], NO);
-	[self.view setNeedsUpdateConstraints:YES];
+	OakSetupKeyViewLoop([@[ _stackView ] arrayByAddingObjectsFromArray:_stackView.arrangedSubviews], NO);
 }
 
 - (void)setControlSize:(NSControlSize)newControlSize
@@ -61,13 +61,7 @@ static NSButton* OakCreateScopeButton (NSString* label, NSUInteger tag, SEL acti
 	if(_controlSize == newControlSize)
 		return;
 	_controlSize = newControlSize;
-
-	if(_buttons.count)
-	{
-		for(NSButton* button in _buttons)
-			button.controlSize = _controlSize;
-		[self.view setNeedsUpdateConstraints:YES];
-	}
+	[self updateButtons];
 }
 
 - (void)setLabels:(NSArray*)anArray
@@ -76,29 +70,6 @@ static NSButton* OakCreateScopeButton (NSString* label, NSUInteger tag, SEL acti
 		return;
 	_labels = anArray;
 	[self updateButtons];
-}
-
-- (void)updateViewConstraints
-{
-	if(_viewConstraints)
-		[self.view removeConstraints:_viewConstraints];
-	_viewConstraints = [NSMutableArray array];
-
-	[super updateViewConstraints];
-
-	if(_buttons.count)
-	{
-		[_viewConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[view]|" options:0 metrics:nil views:@{ @"view": _buttons[0] }]];
-		[_viewConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[view]" options:0 metrics:nil views:@{ @"view": _buttons[0] }]];
-		[_viewConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[view]|" options:0 metrics:nil views:@{ @"view": _buttons[_buttons.count-1] }]];
-		for(NSUInteger i = 0; i < _buttons.count-1; ++i)
-		{
-			[_viewConstraints addObject:[NSLayoutConstraint constraintWithItem:_buttons[i] attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:_buttons[i+1] attribute:NSLayoutAttributeLeft multiplier:1 constant:0]];
-			[_viewConstraints addObject:[NSLayoutConstraint constraintWithItem:_buttons[i] attribute:NSLayoutAttributeBaseline relatedBy:NSLayoutRelationEqual toItem:_buttons[i+1] attribute:NSLayoutAttributeBaseline multiplier:1 constant:0]];
-		}
-	}
-
-	[self.view addConstraints:_viewConstraints];
 }
 
 - (void)updateGoToMenu:(NSMenu*)aMenu
@@ -120,12 +91,12 @@ static NSButton* OakCreateScopeButton (NSString* label, NSUInteger tag, SEL acti
 
 - (void)selectNextButton:(id)sender
 {
-	self.selectedIndex = (self.selectedIndex + 1) % _buttons.count;
+	self.selectedIndex = (_selectedIndex + 1) % _labels.count;
 }
 
 - (void)selectPreviousButton:(id)sender
 {
-	self.selectedIndex = (self.selectedIndex + _buttons.count - 1) % _buttons.count;
+	self.selectedIndex = (_selectedIndex + _labels.count - 1) % _labels.count;
 }
 
 - (void)takeSelectedIndexFrom:(id)sender
@@ -155,7 +126,7 @@ static NSButton* OakCreateScopeButton (NSString* label, NSUInteger tag, SEL acti
 	BOOL notifyObservers = _selectedIndex != newSelectedIndex;
 
 	_selectedIndex = newSelectedIndex;
-	for(NSButton* button in _buttons)
+	for(NSButton* button in _stackView.arrangedSubviews)
 		button.state = button.tag == _selectedIndex ? NSControlStateValueOn : NSControlStateValueOff;
 
 	if(notifyObservers)
