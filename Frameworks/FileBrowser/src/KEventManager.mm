@@ -40,7 +40,7 @@ static bool paths_share_inode (NSString* lhs, NSString* rhs)
 @end
 
 @interface KEventManager ()
-- (KEventManagerNode*)findNodeForURL:(NSURL*)url create:(BOOL)flag;
+- (KEventManagerNode*)nodeForURL:(NSURL*)url makeIfNecessary:(BOOL)flag;
 @end
 
 // =========================
@@ -331,7 +331,7 @@ static bool paths_share_inode (NSString* lhs, NSString* rhs)
 
 - (void)didMoveObservedPathToPath:(NSString*)newPath
 {
-	KEventManagerNode* newNode = [KEventManager.sharedInstance findNodeForURL:[NSURL fileURLWithPath:newPath] create:YES];
+	KEventManagerNode* newNode = [KEventManager.sharedInstance nodeForURL:[NSURL fileURLWithPath:newPath] makeIfNecessary:YES];
 
 	for(KEventManagerNode* childNode in self.childNodes)
 		[childNode addToParentNode:newNode];
@@ -399,7 +399,7 @@ static bool paths_share_inode (NSString* lhs, NSString* rhs)
 	os_log_debug(kLogEventManager, "[%{public}@ dealloc]", [self class]);
 }
 
-- (KEventManagerNode*)findNodeForURL:(NSURL*)url create:(BOOL)flag
+- (KEventManagerNode*)nodeForURL:(NSURL*)url makeIfNecessary:(BOOL)flag
 {
 	NSMutableArray<NSString*>* pathComponents = [NSMutableArray array];
 
@@ -413,7 +413,7 @@ static bool paths_share_inode (NSString* lhs, NSString* rhs)
 
 	if(!isVolume)
 	{
-		os_log_error(kLogEventManager, "[%{public}@ findNodeForURL:%{public}@ create:%{public}s] No volume found in URL", [self class], url, flag ? "YES" : "NO");
+		os_log_error(kLogEventManager, "[%{public}@ nodeForURL:%{public}@ makeIfNecessary:%{public}s] No volume found in URL", [self class], url, flag ? "YES" : "NO");
 		return nil;
 	}
 
@@ -435,7 +435,7 @@ static bool paths_share_inode (NSString* lhs, NSString* rhs)
 - (id)addObserverToItemAtURL:(NSURL*)url usingBlock:(void(^)(NSURL*, NSUInteger))handler
 {
 	KEventManagerCallback* callback = [[KEventManagerCallback alloc] initWithBlock:handler];
-	[[self findNodeForURL:url create:YES] addCallback:callback];
+	[[self nodeForURL:url makeIfNecessary:YES] addCallback:callback];
 	return callback;
 }
 
