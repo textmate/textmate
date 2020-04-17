@@ -24,7 +24,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 	NSMutableArray* _originalItems;
 }
 @property (nonatomic) OakScopeBarViewController* scopeBar;
-@property (nonatomic) NSInteger sourceIndex;
+@property (nonatomic) NSUInteger sourceIndex;
 @property (nonatomic) NSArray* sourceListLabels;
 @end
 
@@ -138,7 +138,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 	return res;
 }
 
-- (void)setSourceIndex:(NSInteger)newIndex
+- (void)setSourceIndex:(NSUInteger)newIndex
 {
 	if(_sourceIndex == newIndex)
 		return;
