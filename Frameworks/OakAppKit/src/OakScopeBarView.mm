@@ -1,12 +1,14 @@
 #import "OakScopeBarView.h"
 #import "OakUIConstructionFunctions.h"
 
-static NSButton* OakCreateScopeButton (NSString* label, NSUInteger tag, SEL action, id target)
+static NSButton* OakCreateScopeButton (NSString* label, NSUInteger tag, SEL action, id target, NSControlSize controlSize)
 {
-	NSButton* res = [NSButton new];
+	NSButton* res = [[NSButton alloc] initWithFrame:NSZeroRect];
 	res.accessibilityRole               = NSAccessibilityRadioButtonRole;
 	res.bezelStyle                      = NSBezelStyleRecessed;
 	res.buttonType                      = NSButtonTypePushOnPushOff;
+	res.controlSize                     = controlSize;
+	res.font                            = [NSFont messageFontOfSize:[NSFont systemFontSizeForControlSize:controlSize]];
 	res.title                           = label;
 	res.tag                             = tag;
 	res.action                          = action;
@@ -43,7 +45,7 @@ static NSButton* OakCreateScopeButton (NSString* label, NSUInteger tag, SEL acti
 	NSMutableArray<NSButton*>* buttons = [NSMutableArray array];
 	for(NSUInteger i = 0; i < _labels.count; ++i)
 	{
-		NSButton* button = OakCreateScopeButton(_labels[i], i, @selector(takeSelectedIndexFrom:), self);
+		NSButton* button = OakCreateScopeButton(_labels[i], i, @selector(takeSelectedIndexFrom:), self, _controlSize);
 		button.state = i == _selectedIndex ? NSControlStateValueOn : NSControlStateValueOff;
 		[buttons addObject:button];
 	}
@@ -52,6 +54,20 @@ static NSButton* OakCreateScopeButton (NSString* label, NSUInteger tag, SEL acti
 	OakAddAutoLayoutViewsToSuperview(_buttons, self.view);
 	OakSetupKeyViewLoop([@[ self.view ] arrayByAddingObjectsFromArray:_buttons], NO);
 	[self.view setNeedsUpdateConstraints:YES];
+}
+
+- (void)setControlSize:(NSControlSize)newControlSize
+{
+	if(_controlSize == newControlSize)
+		return;
+	_controlSize = newControlSize;
+
+	if(_buttons.count)
+	{
+		for(NSButton* button in _buttons)
+			button.controlSize = _controlSize;
+		[self.view setNeedsUpdateConstraints:YES];
+	}
 }
 
 - (void)setLabels:(NSArray*)anArray
