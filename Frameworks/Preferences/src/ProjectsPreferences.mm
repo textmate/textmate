@@ -72,21 +72,26 @@
 	NSMenu* menu = [fileBrowserPathPopUp menu];
 	[menu removeAllItems];
 
-	NSURL* url = [NSURL fileURLWithPath:NSHomeDirectory()];
+	NSArray<NSURL*>* const defaultURLs = @[
+		[NSFileManager.defaultManager URLForDirectory:NSDesktopDirectory inDomain:NSUserDomainMask appropriateForURL:nil create:NO error:nil],
+		NSFileManager.defaultManager.homeDirectoryForCurrentUser,
+		[NSURL fileURLWithPath:@"/" isDirectory:YES],
+	];
+
+	NSURL* url = defaultURLs[1];
 	if(NSString* urlString = [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsInitialFileBrowserURLKey])
 		url = [NSURL URLWithString:urlString];
 
-	NSArray* defaultPathList = @[ [NSHomeDirectory() stringByAppendingPathComponent:@"Desktop"], NSHomeDirectory(), @"/" ];
-	if(![defaultPathList containsObject:[url path]])
+	if(![defaultURLs containsObject:url])
 	{
 		[menu addItem:[self menuItemForURL:url]];
 		[menu addItem:[NSMenuItem separatorItem]];
 	}
 
-	for(NSString* path in defaultPathList)
+	for(NSURL* defaultURL in defaultURLs)
 	{
-		[menu addItem:[self menuItemForURL:[NSURL fileURLWithPath:path]]];
-		if([path isEqualToString:[url path]])
+		[menu addItem:[self menuItemForURL:defaultURL]];
+		if([defaultURL isEqual:url])
 			[fileBrowserPathPopUp selectItemAtIndex:[menu numberOfItems]-1];
 	}
 
