@@ -1,14 +1,14 @@
 #import "BundlesPreferences.h"
 #import <BundlesManager/BundlesManager.h>
 #import <OakFoundation/OakFoundation.h>
-#import <OakFoundation/NSDate Additions.h>
-#import <OakFoundation/NSString Additions.h>
-#import <MGScopeBar/MGScopeBar.h>
-#import <ns/ns.h>
-#import <regexp/format_string.h>
-#import <text/case.h>
-#import <text/ctype.h>
-#import <text/decode.h>
+#import <OakAppKit/OakUIConstructionFunctions.h>
+#import <OakAppKit/OakScopeBarView.h>
+
+static NSUserInterfaceItemIdentifier const kTableColumnIdentifierInstalled   = @"Installed";
+static NSUserInterfaceItemIdentifier const kTableColumnIdentifierBundleName  = @"BundleName";
+static NSUserInterfaceItemIdentifier const kTableColumnIdentifierWebLink     = @"WebLink";
+static NSUserInterfaceItemIdentifier const kTableColumnIdentifierUpdated     = @"Updated";
+static NSUserInterfaceItemIdentifier const kTableColumnIdentifierDescription = @"Description";
 
 static NSMutableSet* BundlesBeingInstalled = [NSMutableSet set];
 
@@ -24,13 +24,12 @@ static NSMutableSet* BundlesBeingInstalled = [NSMutableSet set];
 
 - (NSControlStateValue)installedCellState
 {
-	auto res = self.isInstalled ? NSControlStateValueOn : NSControlStateValueOff;
-	return [BundlesBeingInstalled containsObject:self] ? NSControlStateValueMixed : res;
+	return [BundlesBeingInstalled containsObject:self] ? NSControlStateValueMixed : (self.isInstalled ? NSControlStateValueOn : NSControlStateValueOff);
 }
 
 - (void)setInstalledCellState:(NSControlStateValue)newValue
 {
-	BundlesManager* manager = [BundlesManager sharedInstance];
+	BundlesManager* manager = BundlesManager.sharedInstance;
 	if(newValue == NSControlStateValueOff)
 	{
 		[manager uninstallBundle:self];
@@ -62,102 +61,186 @@ static NSMutableSet* BundlesBeingInstalled = [NSMutableSet set];
 }
 @end
 
-@interface BundlesPreferences ()
+@interface BundlesPreferences () <NSTableViewDelegate>
 {
-	NSMutableSet* enabledCategories;
+	NSMutableSet*              _enabledCategories;
+	NSArrayController*         _arrayController;
+	OakScopeBarViewController* _scopeBar;
+	NSSearchField*             _searchField;
+	NSTableView*               _bundlesTableView;
 }
-@property (nonatomic) BundlesManager* bundlesManager;
+@property (nonatomic) NSUInteger selectedIndex;
 @end
 
 @implementation BundlesPreferences
 - (NSString*)viewIdentifier        { return @"Bundles"; }
-- (NSImage*)toolbarItemImage       { return [[NSWorkspace sharedWorkspace] iconForFileType:@"tmbundle"]; }
+- (NSImage*)toolbarItemImage       { return [NSWorkspace.sharedWorkspace iconForFileType:@"tmbundle"]; }
 - (NSString*)toolbarItemLabel      { return @"Bundles"; }
-- (NSView*)initialKeyView          { return bundlesTableView; }
+- (NSView*)initialKeyView          { return _bundlesTableView; }
+- (BOOL)hasResizableWidth          { return YES; }
+- (BOOL)hasResizableHeight         { return YES; }
 
 - (id)init
 {
-	if(self = [super initWithNibName:@"BundlesPreferences" bundle:[NSBundle bundleForClass:[self class]]])
+	if(self = [self initWithNibName:nil bundle:nil])
 	{
-		[MGScopeBar class]; // Ensure that we reference the class so that the linker doesn’t strip the framework
+		_enabledCategories = [NSMutableSet set];
+		_selectedIndex     = NSNotFound;
 
-		_bundlesManager = [BundlesManager sharedInstance];
-		enabledCategories = [NSMutableSet set];
+		_scopeBar = [[OakScopeBarViewController alloc] init];
+		_scopeBar.allowsEmptySelection = YES;
+		_scopeBar.controlSize = NSControlSizeSmall;
 	}
 	return self;
 }
 
-- (void)awakeFromNib
+- (NSTableColumn*)columnWithIdentifier:(NSUserInterfaceItemIdentifier)identifier title:(NSString*)title editable:(BOOL)editable width:(CGFloat)width resizingMask:(NSTableColumnResizingOptions)resizingMask
 {
-	[bundlesTableView setIndicatorImage:[NSImage imageNamed:@"NSAscendingSortIndicator"] inTableColumn:[bundlesTableView tableColumnWithIdentifier:@"name"]];
-	arrayController.sortDescriptors = @[
+	NSTableColumn* tableColumn = [[NSTableColumn alloc] initWithIdentifier:identifier];
+
+	tableColumn.title        = title;
+	tableColumn.editable     = editable;
+	tableColumn.width        = width;
+	tableColumn.resizingMask = resizingMask;
+
+	if(resizingMask == NSTableColumnNoResizing)
+	{
+		tableColumn.minWidth = width;
+		tableColumn.maxWidth = width;
+	}
+
+	return tableColumn;
+}
+
+- (void)loadView
+{
+	NSMutableSet* categories = [NSMutableSet set];
+	for(Bundle* bundle in BundlesManager.sharedInstance.bundles)
+	{
+		if(NSString* category = bundle.category)
+			[categories addObject:category];
+	}
+	_scopeBar.labels = [[categories allObjects] sortedArrayUsingSelector:@selector(localizedCompare:)];
+
+	_searchField = [[NSSearchField alloc] initWithFrame:NSZeroRect];
+	_searchField.controlSize = NSControlSizeSmall;
+	_searchField.font        = [NSFont systemFontOfSize:[NSFont systemFontSizeForControlSize:NSControlSizeSmall]];
+	_searchField.action      = @selector(filterStringDidChange:);
+	[_searchField.cell setScrollable:YES];
+	[_searchField.cell setSendsSearchStringImmediately:YES];
+
+	_arrayController = [[NSArrayController alloc] init];
+	_arrayController.avoidsEmptySelection = NO;
+	_arrayController.sortDescriptors = @[
 		[NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES selector:@selector(localizedCompare:)],
 		[NSSortDescriptor sortDescriptorWithKey:@"installed" ascending:YES],
 		[NSSortDescriptor sortDescriptorWithKey:@"downloadLastUpdated" ascending:YES],
 		[NSSortDescriptor sortDescriptorWithKey:@"textSummary" ascending:YES selector:@selector(localizedCompare:)]
 	];
+
+	NSTableColumn* installedTableColumn   = [self columnWithIdentifier:kTableColumnIdentifierInstalled   title:@""            editable:YES width:16  resizingMask:NSTableColumnNoResizing];
+	NSTableColumn* bundleTableColumn      = [self columnWithIdentifier:kTableColumnIdentifierBundleName  title:@"Bundle"      editable:NO  width:140 resizingMask:NSTableColumnUserResizingMask];
+	NSTableColumn* linkTableColumn        = [self columnWithIdentifier:kTableColumnIdentifierWebLink     title:@""            editable:NO  width:16  resizingMask:NSTableColumnNoResizing];
+	NSTableColumn* updatedTableColumn     = [self columnWithIdentifier:kTableColumnIdentifierUpdated     title:@"Updated"     editable:NO  width:90  resizingMask:NSTableColumnNoResizing];
+	NSTableColumn* descriptionTableColumn = [self columnWithIdentifier:kTableColumnIdentifierDescription title:@"Description" editable:NO  width:140 resizingMask:NSTableColumnAutoresizingMask];
+
+	NSButtonCell* installedCell = [[NSButtonCell alloc] init];
+	installedCell.buttonType       = NSButtonTypeSwitch;
+	installedCell.allowsMixedState = YES;
+	installedCell.controlSize      = NSControlSizeSmall;
+	installedCell.title            = @"";
+	installedTableColumn.dataCell = installedCell;
+
+	NSButtonCell* linkCell = [[NSButtonCell alloc] init];
+	linkCell.buttonType  = NSButtonTypeMomentaryChange;
+	linkCell.bezelStyle  = NSBezelStyleInline;
+	linkCell.bordered    = NO;
+	linkCell.controlSize = NSControlSizeSmall;
+	linkCell.title       = @"";
+	linkCell.action      = @selector(didClickBundleLink:);
+	linkCell.target      = self;
+	linkTableColumn.dataCell = linkCell;
+
+	NSDateFormatter* updatedFormatter = [[NSDateFormatter alloc] init];
+	updatedFormatter.dateStyle = NSDateFormatterMediumStyle;
+
+	NSTextFieldCell* updatedCell = [[NSTextFieldCell alloc] initTextCell:@""];
+	updatedCell.alignment = NSTextAlignmentRight;
+	updatedCell.formatter = updatedFormatter;
+	updatedTableColumn.dataCell = updatedCell;
+
+	_bundlesTableView = [[NSTableView alloc] initWithFrame:NSZeroRect];
+	_bundlesTableView.allowsColumnReordering  = NO;
+	_bundlesTableView.columnAutoresizingStyle = NSTableViewLastColumnOnlyAutoresizingStyle;
+	_bundlesTableView.delegate                = self;
+
+	for(NSTableColumn* tableColumn in @[ installedTableColumn, bundleTableColumn, linkTableColumn, updatedTableColumn, descriptionTableColumn ])
+		[_bundlesTableView addTableColumn:tableColumn];
+	[_bundlesTableView setIndicatorImage:[NSImage imageNamed:@"NSAscendingSortIndicator"] inTableColumn:bundleTableColumn];
+
+	NSScrollView* scrollView = [[NSScrollView alloc] initWithFrame:NSZeroRect];
+	scrollView.hasVerticalScroller   = YES;
+	scrollView.hasHorizontalScroller = NO;
+	scrollView.autohidesScrollers    = YES;
+	scrollView.borderType            = NSBezelBorder;
+	scrollView.documentView          = _bundlesTableView;
+
+	NSButton* updateBundlesCheckbox = [NSButton checkboxWithTitle:@"Check for and install updates automatically" target:nil action:nil];
+
+	NSView* view = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 480, 272)];
+
+	NSDictionary* views = @{
+		@"scopeBar":      _scopeBar.view,
+		@"search":        _searchField,
+		@"scrollView":    scrollView,
+		@"updateBundles": updateBundlesCheckbox,
+	};
+
+	OakAddAutoLayoutViewsToSuperview(views.allValues, view);
+
+	[view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-8-[scopeBar]-(>=8)-[search(>=50,<=100,==100@250)]-8-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
+	[view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[scrollView(>=50)]-|" options:0 metrics:nil views:views]];
+	[view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[updateBundles]-(>=8)-|" options:0 metrics:nil views:views]];
+	[view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-8-[search]-8-[scrollView(>=50)]-[updateBundles]-|" options:0 metrics:nil views:views]];
+
+	// ============
+	// = Bindings =
+	// ============
+
+	[_arrayController bind:NSContentBinding toObject:BundlesManager.sharedInstance withKeyPath:@"bundles" options:nil];
+	[_scopeBar bind:NSValueBinding toObject:self withKeyPath:@"selectedIndex" options:nil];
+
+	[_bundlesTableView bind:NSContentBinding          toObject:_arrayController withKeyPath:@"arrangedObjects" options:nil];
+	[_bundlesTableView bind:NSSelectionIndexesBinding toObject:_arrayController withKeyPath:@"selectionIndexes" options:nil];
+
+	[installedTableColumn   bind:NSValueBinding toObject:_arrayController withKeyPath:@"arrangedObjects.installedCellState" options:nil];
+	[bundleTableColumn      bind:NSValueBinding toObject:_arrayController withKeyPath:@"arrangedObjects.name" options:nil];
+	[updatedTableColumn     bind:NSValueBinding toObject:_arrayController withKeyPath:@"arrangedObjects.downloadLastUpdated" options:nil];
+	[descriptionTableColumn bind:NSValueBinding toObject:_arrayController withKeyPath:@"arrangedObjects.textSummary" options:nil];
+
+	[updateBundlesCheckbox bind:NSValueBinding toObject:NSUserDefaultsController.sharedUserDefaultsController withKeyPath:@"values.disableBundleUpdates" options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
+
+	self.view = view;
 }
 
-// =======================
-// = MGScopeBar Delegate =
-// =======================
-
-- (int)numberOfGroupsInScopeBar:(MGScopeBar*)theScopeBar
+- (void)setSelectedIndex:(NSUInteger)newSelectedIndex
 {
-	return 1;
-}
-
-- (NSArray*)scopeBar:(MGScopeBar*)theScopeBar itemIdentifiersForGroup:(int)groupNumber
-{
-	if(groupNumber != 0)
-		return @[ ];
-
-	NSMutableSet* set = [NSMutableSet set];
-	for(Bundle* bundle in _bundlesManager.bundles)
-	{
-		if(NSString* category = bundle.category)
-			[set addObject:category];
-	}
-	return [[set allObjects] sortedArrayUsingSelector:@selector(localizedCompare:)];
-}
-
-- (NSString*)scopeBar:(MGScopeBar*)theScopeBar labelForGroup:(int)groupNumber
-{
-	return nil;
-}
-
-- (MGScopeBarGroupSelectionMode)scopeBar:(MGScopeBar*)theScopeBar selectionModeForGroup:(int)groupNumber
-{
-	return MGMultipleSelectionMode;
-}
-
-- (NSString*)scopeBar:(MGScopeBar*)theScopeBar titleOfItem:(NSString*)identifier inGroup:(int)groupNumber
-{
-	return identifier;
-}
-
-- (void)scopeBar:(MGScopeBar*)theScopeBar selectedStateChanged:(BOOL)selected forItem:(NSString*)identifier inGroup:(int)groupNumber
-{
-	if(selected)
-			[enabledCategories addObject:identifier];
-	else	[enabledCategories removeObject:identifier];
+	_selectedIndex = newSelectedIndex;
+	[_enabledCategories removeAllObjects];
+	if(_selectedIndex < _scopeBar.labels.count)
+		[_enabledCategories addObject:_scopeBar.labels[_selectedIndex]];
 	[self filterStringDidChange:self];
 }
 
-- (NSView*)accessoryViewForScopeBar:(MGScopeBar*)theScopeBar
-{
-	return searchField;
-}
-
-- (IBAction)filterStringDidChange:(id)sender
+- (void)filterStringDidChange:(id)sender
 {
 	NSMutableArray* predicates = [NSMutableArray array];
-	if(OakNotEmptyString(searchField.stringValue))
-		[predicates addObject:[NSPredicate predicateWithFormat:@"name CONTAINS[cd] %@", searchField.stringValue]];
-	if(enabledCategories.count)
-		[predicates addObject:[NSPredicate predicateWithFormat:@"category IN %@", enabledCategories]];
-	arrayController.filterPredicate = [NSCompoundPredicate andPredicateWithSubpredicates:predicates];
-	[arrayController rearrangeObjects];
+	if(OakNotEmptyString(_searchField.stringValue))
+		[predicates addObject:[NSPredicate predicateWithFormat:@"name CONTAINS[cd] %@", _searchField.stringValue]];
+	if(_enabledCategories.count)
+		[predicates addObject:[NSPredicate predicateWithFormat:@"category IN %@", _enabledCategories]];
+	_arrayController.filterPredicate = [NSCompoundPredicate andPredicateWithSubpredicates:predicates];
+	[_arrayController rearrangeObjects];
 }
 
 // ========================
@@ -167,20 +250,20 @@ static NSMutableSet* BundlesBeingInstalled = [NSMutableSet set];
 - (void)tableView:(NSTableView*)aTableView didClickTableColumn:(NSTableColumn*)aTableColumn
 {
 	NSDictionary* map = @{
-		@"name":        @"name",
-		@"installed":   @"installed",
-		@"date":        @"downloadLastUpdated",
-		@"description": @"textSummary"
+		kTableColumnIdentifierInstalled:   @"installed",
+		kTableColumnIdentifierBundleName:  @"name",
+		kTableColumnIdentifierUpdated:     @"downloadLastUpdated",
+		kTableColumnIdentifierDescription: @"textSummary"
 	};
 
 	NSString* key = map[aTableColumn.identifier];
 	if(!key)
 		return;
 
-	NSMutableArray* descriptors = [arrayController.sortDescriptors mutableCopy];
+	NSMutableArray* descriptors = [_arrayController.sortDescriptors mutableCopy];
 
 	NSInteger i = 0;
-	while(i < descriptors.count && ![arrayController.sortDescriptors[i].key isEqualToString:key])
+	while(i < descriptors.count && ![_arrayController.sortDescriptors[i].key isEqualToString:key])
 		++i;
 
 	if(i == descriptors.count)
@@ -191,34 +274,34 @@ static NSMutableSet* BundlesBeingInstalled = [NSMutableSet set];
 	[descriptors removeObjectAtIndex:i];
 	[descriptors insertObject:descriptor atIndex:0];
 
-	arrayController.sortDescriptors = descriptors;
+	_arrayController.sortDescriptors = descriptors;
 
-	for(NSTableColumn* tableColumn in [bundlesTableView tableColumns])
+	for(NSTableColumn* tableColumn in [_bundlesTableView tableColumns])
 		[aTableView setIndicatorImage:nil inTableColumn:tableColumn];
 	[aTableView setIndicatorImage:[NSImage imageNamed:(descriptor.ascending ? @"NSAscendingSortIndicator" : @"NSDescendingSortIndicator")] inTableColumn:aTableColumn];
 }
 
 - (void)tableView:(NSTableView*)aTableView willDisplayCell:(id)aCell forTableColumn:(NSTableColumn*)aTableColumn row:(NSInteger)rowIndex
 {
-	if([[aTableColumn identifier] isEqualToString:@"link"])
+	if([aTableColumn.identifier isEqualToString:kTableColumnIdentifierWebLink])
 	{
-		Bundle* bundle = arrayController.arrangedObjects[rowIndex];
+		Bundle* bundle = _arrayController.arrangedObjects[rowIndex];
 		BOOL enabled = bundle.htmlURL ? YES : NO;
 		[aCell setEnabled:enabled];
 		[aCell setImage:enabled ? [NSImage imageNamed:@"NSFollowLinkFreestandingTemplate"] : nil];
 	}
-	else if([[aTableColumn identifier] isEqualToString:@"installed"])
+	else if([aTableColumn.identifier isEqualToString:kTableColumnIdentifierInstalled])
 	{
-		Bundle* bundle = arrayController.arrangedObjects[rowIndex];
+		Bundle* bundle = _arrayController.arrangedObjects[rowIndex];
 		[aCell setEnabled:!bundle.isMandatory || !bundle.isInstalled];
 	}
 }
 
 - (BOOL)tableView:(NSTableView*)aTableView shouldEditTableColumn:(NSTableColumn*)aTableColumn row:(NSInteger)rowIndex
 {
-	if([[aTableColumn identifier] isEqualToString:@"installed"])
+	if([aTableColumn.identifier isEqualToString:kTableColumnIdentifierInstalled])
 	{
-		Bundle* bundle = arrayController.arrangedObjects[rowIndex];
+		Bundle* bundle = _arrayController.arrangedObjects[rowIndex];
 		return ![BundlesBeingInstalled containsObject:bundle];
 	}
 	return NO;
@@ -226,15 +309,15 @@ static NSMutableSet* BundlesBeingInstalled = [NSMutableSet set];
 
 - (BOOL)tableView:(NSTableView*)aTableView shouldSelectRow:(NSInteger)rowIndex
 {
-	NSInteger clickedColumn = [aTableView clickedColumn];
-	return clickedColumn != [aTableView columnWithIdentifier:@"installed"] && clickedColumn != [aTableView columnWithIdentifier:@"link"];
+	NSInteger clickedColumn = aTableView.clickedColumn;
+	return clickedColumn != [aTableView columnWithIdentifier:kTableColumnIdentifierInstalled] && clickedColumn != [aTableView columnWithIdentifier:kTableColumnIdentifierWebLink];
 }
 
-- (IBAction)didClickBundleLink:(NSTableView*)aTableView
+- (void)didClickBundleLink:(NSTableView*)aTableView
 {
-	NSInteger rowIndex = [aTableView clickedRow];
-	Bundle* bundle = arrayController.arrangedObjects[rowIndex];
+	NSInteger rowIndex = aTableView.clickedRow;
+	Bundle* bundle = _arrayController.arrangedObjects[rowIndex];
 	if(bundle.htmlURL)
-		[[NSWorkspace sharedWorkspace] openURL:bundle.htmlURL];
+		[NSWorkspace.sharedWorkspace openURL:bundle.htmlURL];
 }
 @end
