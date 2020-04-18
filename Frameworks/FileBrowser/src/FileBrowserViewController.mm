@@ -1196,12 +1196,11 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 
 - (void)selectURL:(NSURL*)url withParentURL:(NSURL*)parentURL
 {
-	url = url.fileReferenceURL;
-
+	NSURL* fileReferenceURL = url.fileReferenceURL;
 	for(NSInteger i = 0; i < self.outlineView.numberOfRows; ++i)
 	{
 		FileItem* item = [self.outlineView itemAtRow:i];
-		if([url isEqual:item.fileReferenceURL])
+		if([url isEqual:item.URL] || [fileReferenceURL isEqual:item.fileReferenceURL])
 		{
 			[self.outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:i] byExtendingSelection:NO];
 			[self centerSelectionInVisibleArea:self];
