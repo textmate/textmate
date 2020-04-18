@@ -2,6 +2,33 @@ Title: Release Notes
 
 # Changes
 
+## 2020-04-18 (v2.0.7)
+
+### Clipboard and Clipboard History
+
+The Clipboard History dialogs (Edit → Paste → Show History and Edit → Find → Show Find History) now allow you to flag entries. This can be done either by clicking the flag button or using ⌘F2 (the shortcut normally used to toggle bookmarks).
+
+Flagged entries will not be removed from history neither automatically nor when using “Clear History”. All flagged entries can be seen by selecting the Flagged source (note: dialogs with a “source selector” support normal tab navigation keys such as ⌘{ / ⌘} for previous/next and ⌘1-⌘n to select the nth source).
+
+It is now possible to select multiple entires in the clipboard history dialogs. If you paste with multiple entries selected then it will insert the items with newlines in between. If you search, it will construct a regular expression matching any of the selected items.
+
+Note that the latter can also be achieved by using ⌘E (Edit → Find → Use Selection for Find) when there are multiple selections. It may sound like a novelty, but I use this feature close to daily.
+
+Multiple selections are now stored on the clipboard as multiple strings, this may improve compatibility with other applications that also support multiple selections. Previously they were stored as a single newline-delimited string. This also means that copy/paste of multiple selections work even when the selections include newlines (this would previously lead to newlines being lost due to how we stored a single combined string on the clipboard).
+
+Clipboard history is now stored in a sqlite database (`~/Library/Application Support/TextMate/PasteboardHistory.db`) instead of using CoreData. This means old history has been lost (no good way to migrate this data).
+
+If you have disabled persistent history (via the `disablePersistentClipboardHistory` defaults key) then the sqlite database is memory backed, and history (including flagged items) will be lost if you quit TextMate.
+
+TextMate should now always pick up clipboard changes: Previously it could miss updates that happened while TextMate was active, as the system occasionally will forget to bump the change count of the clipboard in this situation, so we no longer rely on the clipboard’s change count.
+
+### Other Changes
+
+* If you copy items from the file browser (⌘C) and paste in Apple’s Terminal.app then proper (full) paths should now be inserted. Previously this only worked for iTerm2.app (as Terminal.app is peculiar in how it interprets the clipboard).
+* If you rename an ancestor folder of an open document, TextMate should now notice this and will update the path accordingly. It will also treat moving a file to trash as that file being deleted (instead of simply renamed).
+* The filter bar in Bundles preferences now support dark mode and acts like a set of radio buttons (so clicking one category will unselect other categories).
+* See [all changes since v2.0.6](https://github.com/textmate/textmate/compare/v2.0.6...v2.0.7)
+
 ## 2019-12-28 (v2.0.6)
 
 * Rebuild using older SDK as possible workaround for newly introduced crash on macOS 10.13.
