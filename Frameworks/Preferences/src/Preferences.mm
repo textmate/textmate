@@ -28,11 +28,6 @@ OAK_DEBUG_VAR(Preferences);
 	return sharedInstance;
 }
 
-+ (void)restoreWindowWithIdentifier:(NSString*)identifier state:(NSCoder*)state completionHandler:(void (^)(NSWindow*, NSError*))completionHandler
-{
-	completionHandler([Preferences sharedInstance].windowController.window, nil);
-}
-
 - (NSWindowController*)windowController
 {
 	if(!_windowController)
@@ -48,10 +43,6 @@ OAK_DEBUG_VAR(Preferences);
 
 		self.windowController = [[MASPreferencesWindowController alloc] initWithViewControllers:self.viewControllers];
 		_windowController.nextResponder = self;
-		_windowController.window.identifier = @"preferences";
-		_windowController.window.restorationClass = [self class];
-		_windowController.window.restorable = YES;
-		[_windowController.window invalidateRestorableState];
 	}
 	return _windowController;
 }
