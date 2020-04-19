@@ -2,6 +2,11 @@ Title: Release Notes
 
 # Changes
 
+## 2020-04-19 (v2.0.8)
+
+* Miscellaneous improvements.
+* See [all changes since v2.0.7](https://github.com/textmate/textmate/compare/v2.0.7...v2.0.8)
+
 ## 2020-04-18 (v2.0.7)
 
 ### Clipboard and Clipboard History
