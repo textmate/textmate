@@ -7,7 +7,7 @@ namespace oak
 {
 	struct PUBLIC application_t
 	{
-		application_t (int argc, char const* argv[], bool redirectStdErr = false);
+		application_t (int argc, char const* argv[]);
 
 		static void relaunch (char const* args = "-disableSessionRestore NO");
 		static std::string name ();
