@@ -1,5 +1,7 @@
 #import <MASPreferences/MASPreferencesViewController.h>
 
+NSView* OakSetupGridViewWithSeparators (NSGridView* gridView, std::vector<NSUInteger> rows = { });
+
 @interface PreferencesPane : NSViewController <MASPreferencesViewController>
 @property (nonatomic, readonly) NSString*   viewIdentifier;
 @property (nonatomic, readonly) NSString*   toolbarItemLabel;

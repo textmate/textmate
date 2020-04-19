@@ -1,7 +1,40 @@
 #import "PreferencesPane.h"
 #import <OakFoundation/NSString Additions.h>
+#import <OakAppKit/OakUIConstructionFunctions.h>
 #import <ns/ns.h>
 #import <settings/settings.h>
+
+NSView* OakSetupGridViewWithSeparators (NSGridView* gridView, std::vector<NSUInteger> rows)
+{
+	gridView.rowAlignment = NSGridRowAlignmentFirstBaseline;
+	[gridView rowAtIndex:0].topPadding                                  = 20;
+	[gridView rowAtIndex:gridView.numberOfRows-1].bottomPadding         = 20;
+	[gridView columnAtIndex:0].xPlacement                               = NSGridCellPlacementTrailing;
+	[gridView columnAtIndex:0].leadingPadding                           = 8;
+	[gridView columnAtIndex:0].width                                    = 200;
+	[gridView columnAtIndex:gridView.numberOfColumns-1].trailingPadding = 8;
+	[gridView columnAtIndex:gridView.numberOfColumns-1].width           = 400;
+
+	for(NSUInteger row : rows)
+	{
+		[gridView mergeCellsInHorizontalRange:NSMakeRange(0, gridView.numberOfColumns) verticalRange:NSMakeRange(row, 1)];
+		[gridView cellAtColumnIndex:0 rowIndex:row].contentView = OakCreateNSBoxSeparator();
+		[gridView cellAtColumnIndex:0 rowIndex:row].xPlacement = NSGridCellPlacementFill;
+		[gridView cellAtColumnIndex:0 rowIndex:row].yPlacement = NSGridCellPlacementCenter;
+		[gridView rowAtIndex:row].topPadding = 8;
+		[gridView rowAtIndex:row].bottomPadding = 8;
+		[gridView rowAtIndex:row].rowAlignment = NSGridRowAlignmentNone;
+	}
+
+	NSSize size = gridView.fittingSize;
+	gridView.frame = { .size = size };
+	[gridView addConstraints:@[
+		[NSLayoutConstraint constraintWithItem:gridView attribute:NSLayoutAttributeWidth  relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:size.width],
+		[NSLayoutConstraint constraintWithItem:gridView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:size.height],
+	]];
+
+	return gridView;
+}
 
 @interface PreferencesPane ()
 @property (nonatomic, readwrite) NSString* toolbarItemLabel;
