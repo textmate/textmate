@@ -187,7 +187,7 @@ static NSMutableSet* BundlesBeingInstalled = [NSMutableSet set];
 
 	NSButton* updateBundlesCheckbox = [NSButton checkboxWithTitle:@"Check for and install updates automatically" target:nil action:nil];
 
-	NSView* view = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 480, 272)];
+	NSView* view = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 622, 454)];
 
 	NSDictionary* views = @{
 		@"scopeBar":      _scopeBar.view,
