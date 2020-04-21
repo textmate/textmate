@@ -3,11 +3,10 @@
 #include <oak/oak.h>
 #include <text/format.h>
 #include <text/parse.h>
-#include <cf/cf.h>
 #include <io/path.h>
 #include <plist/uuid.h>
 
-static char const* const AppVersion = "2.13.1";
+static char const* const AppVersion = "2.13.2";
 
 static char const* socket_path ()
 {
@@ -53,43 +52,25 @@ private:
 	gid_t _gid;
 };
 
-static bool find_app (FSRef* outAppRef, std::string* outAppStr)
+static NSURL* find_app ()
 {
 	disable_sudo_helper_t helper;
 
-	CFURLRef appURL;
-	OSStatus err = LSFindApplicationForInfo(kLSUnknownCreator, CFSTR("com.macromates.TextMate"), nullptr, outAppRef, &appURL);
-	if(err != noErr)
-		return fprintf(stderr, "Can’t find TextMate.app (error %d)\n", (int)err), false;
+	if(NSURL* url = [NSWorkspace.sharedWorkspace URLForApplicationWithBundleIdentifier:@"com.macromates.TextMate"])
+		return url;
 
-	if(outAppStr)
-	{
-		if(CFStringRef appPath = CFURLCopyFileSystemPath(appURL, kCFURLPOSIXPathStyle))
-		{
-			*outAppStr = cf::to_s(appPath);
-			CFRelease(appPath);
-		}
-		CFRelease(appURL);
-	}
-
-	return err == noErr;
+	fprintf(stderr, "Can’t find TextMate.app\n");
+	exit(EX_UNAVAILABLE);
 }
 
 static void launch_app (bool disableUntitled)
 {
 	disable_sudo_helper_t helper;
 
-	FSRef appFSRef;
-	if(!find_app(&appFSRef, nullptr))
-		exit(EX_UNAVAILABLE);
-
-	cf::array_t args(disableUntitled ? std::vector<std::string>{ "-disableNewDocumentAtStartup", "1" } : std::vector<std::string>{ });
-
-	struct LSApplicationParameters const appParams = { 0, kLSLaunchDontAddToRecents|kLSLaunchDontSwitch|kLSLaunchAndDisplayErrors, &appFSRef, nullptr, nullptr, args, nullptr };
-	OSStatus err = LSOpenApplication(&appParams, nullptr);
-	if(err != noErr)
+	NSError* error;
+	if(![NSWorkspace.sharedWorkspace launchApplicationAtURL:find_app() options:NSWorkspaceLaunchWithoutActivation|NSWorkspaceLaunchWithoutAddingToRecents configuration:(disableUntitled ? @{ NSWorkspaceLaunchConfigurationArguments: @[ @"-disableNewDocumentAtStartup", @"1" ] } : nil) error:&error])
 	{
-		fprintf(stderr, "Can’t launch TextMate.app (error %d)\n", (int)err);
+		fprintf(stderr, "Can’t launch TextMate.app: %s\n", error.localizedDescription.UTF8String);
 		exit(EX_UNAVAILABLE);
 	}
 }
@@ -98,13 +79,9 @@ static void install_auth_tool ()
 {
 	if(geteuid() == 0 && (!path::exists(kAuthToolPath) || !path::exists(kAuthPlistPath) || AuthorizationRightGet(kAuthRightName, nullptr) == errAuthorizationDenied))
 	{
-		std::string appStr = NULL_STR;
-		if(!find_app(nullptr, &appStr))
-			exit(EX_UNAVAILABLE);
+		NSURL* toolURL = [find_app() URLByAppendingPathComponent:@"Contents/Resources/PrivilegedTool"];
 
-		std::string toolPath = path::join(appStr, "Contents/Resources/PrivilegedTool");
-		char const* arg0 = toolPath.c_str();
-
+		char const* arg0 = toolURL.fileSystemRepresentation;
 		if(access(arg0, X_OK) != 0)
 		{
 			fprintf(stderr, "No such executable file: ‘%s’\n", arg0);
