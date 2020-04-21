@@ -193,6 +193,9 @@ static bool uninstall_mate (std::string const& path)
 	[menu addItem:[NSMenuItem separatorItem]];
 	[menu addItemWithTitle:@"Other…" action:@selector(selectInstallPath:) keyEquivalent:@""];
 
+	for(NSMenuItem* menuItem in menu.itemArray)
+		menuItem.target = self;
+
 	if(path)
 		[installPathPopUp selectItemWithTitle:path];
 }
@@ -229,6 +232,7 @@ static bool uninstall_mate (std::string const& path)
 	}
 
 	installPathPopUp.target = self;
+	installButton.target = self;
 	statusTextFormat  = to_s([installStatusText stringValue]);
 	summaryTextFormat = to_s([installSummaryText stringValue]);
 	[self updatePopUp:self.mateInstallPath];
