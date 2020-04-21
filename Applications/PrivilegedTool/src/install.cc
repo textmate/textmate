@@ -99,11 +99,11 @@ int install_tool (std::string const& toolPath)
 
 	if(!path::make_dir(path::parent(kAuthToolPath)))
 		return EX_CANTCREAT;
-	path::remove(kAuthToolPath);
-	if(!path::copy(toolPath, kAuthToolPath))
+	unlink(kAuthToolPath);
+	if(copyfile(toolPath.c_str(), kAuthToolPath, nullptr, COPYFILE_ALL | COPYFILE_NOFOLLOW_SRC) != 0)
 		return EX_IOERR;
 	chown(kAuthToolPath, 0, 0);
-	if(path::exists(kAuthPlistPath))
+	if(access(kAuthPlistPath, F_OK) == 0)
 		launch_control("unload", kAuthPlistPath);
 	if(!path::set_content(kAuthPlistPath, plist_content()))
 		return EX_IOERR;
@@ -119,8 +119,8 @@ int uninstall_tool ()
 	if(path::exists(kAuthPlistPath))
 	{
 		launch_control("unload", kAuthPlistPath);
-		path::remove(kAuthPlistPath);
+		unlink(kAuthPlistPath);
 	}
-	path::remove(kAuthToolPath);
+	unlink(kAuthToolPath);
 	return EX_OK;
 }
