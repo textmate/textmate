@@ -274,7 +274,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 						++fileCount;
 					}
 				}
-				self.windowController.statusString = [NSString stringWithFormat:@"%@ replacements made across %@ file(s).", [NSNumberFormatter localizedStringFromNumber:@(replaceCount) numberStyle:NSNumberFormatterDecimalStyle], [NSNumberFormatter localizedStringFromNumber:@(fileCount) numberStyle:NSNumberFormatterDecimalStyle]];
+				self.windowController.statusString = [NSString stringWithFormat:@"%@ replacement%@ made across %@ file%@.", [NSNumberFormatter localizedStringFromNumber:@(replaceCount) numberStyle:NSNumberFormatterDecimalStyle], replaceCount == 1 ? @"" : @"s", [NSNumberFormatter localizedStringFromNumber:@(fileCount) numberStyle:NSNumberFormatterDecimalStyle], fileCount == 1 ? @"" : @"s"];
 			}
 			break;
 
