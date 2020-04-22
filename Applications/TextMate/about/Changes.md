@@ -2,10 +2,11 @@ Title: Release Notes
 
 # Changes
 
-## 2020-04-19 (v2.0.8)
+## 2020-04-22 (v2.0.9)
 
-* Miscellaneous improvements.
-* See [all changes since v2.0.7](https://github.com/textmate/textmate/compare/v2.0.7...v2.0.8)
+* In the find dialog, opening history and dismissing with escape no longer updates the text field.
+* Some of the controls in the Terminal preferences pane (where you install the `mate` shell command) would not work if full keyboard focus was disabled and “accept rmate connections” was also disabled.
+* See [all changes since v2.0.7](https://github.com/textmate/textmate/compare/v2.0.7...v2.0.9)
 
 ## 2020-04-18 (v2.0.7)
 
