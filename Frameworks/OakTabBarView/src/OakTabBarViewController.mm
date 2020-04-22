@@ -1,4 +1,5 @@
 #import "OakTabBarViewController.h"
+#import <OakAppKit/NSMenuItem Additions.h>
 
 @interface NSArray<ObjectType> (SafeAccessor)
 - (ObjectType)mySafeObjectAtIndex:(NSUInteger)index;
@@ -37,6 +38,45 @@
 	self.tabBarView.frameSize = self.tabBarView.intrinsicContentSize;
 	self.fullScreenMinHeight = self.tabBarView.intrinsicContentSize.height;
 	self.view = self.tabBarView;
+}
+
+- (void)updateGoToMenu:(NSMenu*)aMenu
+{
+	if(self.view.window.isKeyWindow)
+	{
+		for(int i = 0; i < _titles.count; ++i)
+		{
+			NSMenuItem* item = [aMenu addItemWithTitle:[_titles mySafeObjectAtIndex:i] action:@selector(takeSelectedTabIndexFrom:) keyEquivalent:i < 8 ? [NSString stringWithFormat:@"%c", '1' + i] : @""];
+			item.tag     = i;
+			item.target  = self;
+			item.toolTip = [_toolTips mySafeObjectAtIndex:i];
+			if((aMenu.propertiesToUpdate & NSMenuPropertyItemImage) && i < _images.count)
+				item.image = [_images mySafeObjectAtIndex:i];
+			if(i == _tabBarView.selectedTabIndex)
+				item.state = NSControlStateValueOn;
+			else if([_modifiedStates mySafeObjectAtIndex:i].boolValue)
+				[item setModifiedState:YES];
+		}
+	}
+
+	if(aMenu.numberOfItems == 0)
+	{
+		[aMenu addItemWithTitle:@"No Tabs Open" action:@selector(nop:) keyEquivalent:@""];
+	}
+	else
+	{
+		[aMenu addItem:[NSMenuItem separatorItem]];
+
+		NSMenuItem* item = [aMenu addItemWithTitle:@"Last Tab" action:@selector(takeSelectedTabIndexFrom:) keyEquivalent:@"9"];
+		item.tag     = _identifiers.count-1;
+		item.target  = self;
+		item.toolTip = [_toolTips mySafeObjectAtIndex:item.tag];
+	}
+}
+
+- (void)takeSelectedTabIndexFrom:(id)sender
+{
+	self.selectedIndex = [sender tag];
 }
 
 - (id <OakTabBarViewDelegate>)delegate

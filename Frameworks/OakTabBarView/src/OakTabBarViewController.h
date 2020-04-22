@@ -6,7 +6,10 @@
 @property (nonatomic) NSArray<NSNumber*>* modifiedStates;
 @property (nonatomic) NSArray<NSURL*>*    URLs;
 @property (nonatomic) NSArray<NSString*>* toolTips;
+@property (nonatomic) NSArray<NSImage*>*  images;
 @property (nonatomic) NSUInteger          selectedIndex;
 
 @property (nonatomic, weak) id <OakTabBarViewDelegate> delegate;
+
+- (void)updateGoToMenu:(NSMenu*)aMenu;
 @end
