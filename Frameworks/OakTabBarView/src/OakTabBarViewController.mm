@@ -1,5 +1,17 @@
 #import "OakTabBarViewController.h"
 
+@interface NSArray<ObjectType> (SafeAccessor)
+- (ObjectType)mySafeObjectAtIndex:(NSUInteger)index;
+@end
+
+@implementation NSArray (SafeAccessor)
+- (id)mySafeObjectAtIndex:(NSUInteger)index
+{
+	id obj = index < self.count ? [self objectAtIndex:index] : nil;
+	return obj != NSNull.null ? obj : nil;
+}
+@end
+
 @interface OakTabBarViewController () <OakTabBarViewDataSource>
 {
 	OakTabBarView* _tabBarView;
@@ -138,23 +150,21 @@
 
 - (NSString*)tabBarView:(OakTabBarView*)aTabBarView titleForIndex:(NSUInteger)anIndex
 {
-	return _titles[anIndex];
+	return [_titles mySafeObjectAtIndex:anIndex];
 }
 
 - (NSString*)tabBarView:(OakTabBarView*)aTabBarView pathForIndex:(NSUInteger)anIndex
 {
-	NSURL* url = _URLs[anIndex];
-	return [url respondsToSelector:@selector(filePathURL)] ? url.filePathURL.path : nil;
+	return [_URLs mySafeObjectAtIndex:anIndex].filePathURL.path;
 }
 
 - (NSUUID*)tabBarView:(OakTabBarView*)aTabBarView UUIDForIndex:(NSUInteger)anIndex
 {
-	return _identifiers[anIndex];
+	return [_identifiers mySafeObjectAtIndex:anIndex];
 }
 
 - (BOOL)tabBarView:(OakTabBarView*)aTabBarView isEditedAtIndex:(NSUInteger)anIndex
 {
-	NSNumber* modified = _modifiedStates[anIndex];
-	return [modified respondsToSelector:@selector(boolValue)] ? modified.boolValue : NO;
+	return [_modifiedStates mySafeObjectAtIndex:anIndex].boolValue;
 }
 @end
