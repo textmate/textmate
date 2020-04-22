@@ -269,6 +269,12 @@ static size_t line_count (std::string const& text)
 }
 @end
 
+@interface OakPasteboardSelector ()
+{
+	OakPasteboardSelectorTableViewHelper* tableViewHelper;
+}
+@end
+
 @implementation OakPasteboardSelector
 + (instancetype)sharedInstance
 {

@@ -1,12 +1,8 @@
 #import <oak/misc.h>
 
-@class OakPasteboardSelectorTableViewHelper;
-
 PUBLIC @interface OakPasteboardSelector : NSWindowController
 {
-@private
 	IBOutlet NSTableView* tableView;
-	OakPasteboardSelectorTableViewHelper* tableViewHelper;
 }
 + (instancetype)sharedInstance;
 - (void)setIndex:(NSUInteger)index;
