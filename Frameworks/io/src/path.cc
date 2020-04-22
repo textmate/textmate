@@ -438,7 +438,7 @@ namespace path
 	// = Helper stuff =
 	// ================
 
-	std::string system_display_name (std::string const& path)
+	static std::string system_display_name (std::string const& path)
 	{
 		std::string res = name(path);
 		if(oak::has_prefix(path, "/Volumes/") || oak::has_prefix(path, "/home/"))
@@ -447,7 +447,7 @@ namespace path
 		if(CFURLRef url = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault, (UInt8 const*)path.data(), path.size(), false))
 		{
 			CFStringRef displayName;
-			if(LSCopyDisplayNameForURL(url, &displayName) == noErr)
+			if(CFURLCopyResourcePropertyForKey(url, kCFURLLocalizedNameKey, &displayName, nullptr))
 			{
 				res = cf::to_s(displayName);
 				CFRelease(displayName);
