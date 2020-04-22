@@ -47,40 +47,21 @@ struct socket_callback_t
 
 		helper = std::make_shared<helper_t>(f, fd, this);
 
-		CFSocketContext const context = { 0, helper.get(), NULL, NULL, NULL };
-		if(socket = CFSocketCreateWithNative(kCFAllocatorDefault, fd, kCFSocketReadCallBack, callback, &context))
+		if(_dispatchSource = dispatch_source_create(DISPATCH_SOURCE_TYPE_READ, (int)fd, 0, dispatch_get_main_queue()))
 		{
-			CFSocketSetSocketFlags(socket, CFSocketGetSocketFlags(socket) & ~kCFSocketCloseOnInvalidate);
-			if(run_loop_source = CFSocketCreateRunLoopSource(kCFAllocatorDefault, socket, 0))
-					CFRunLoopAddSource(CFRunLoopGetCurrent(), run_loop_source, kCFRunLoopDefaultMode);
-			else	fprintf(stderr, "*** CFSocketCreateRunLoopSource() failed\n");
-		}
-		else
-		{
-			fprintf(stderr, "*** CFSocketCreateWithNative() failed: fd = %d\n", (int)fd);
+			dispatch_source_set_event_handler(_dispatchSource, ^{
+				(*helper)();
+			});
+			dispatch_resume(_dispatchSource);
 		}
 	}
 
 	~socket_callback_t ()
 	{
 		D(DBF_RMateServer, bug("%p\n", this););
-		ASSERT(CFRunLoopContainsSource(CFRunLoopGetCurrent(), run_loop_source, kCFRunLoopDefaultMode));
 
-		if(socket)
-		{
-			CFSocketInvalidate(socket);
-			if(run_loop_source)
-			{
-				CFRunLoopRemoveSource(CFRunLoopGetCurrent(), run_loop_source, kCFRunLoopDefaultMode);
-				CFRelease(run_loop_source);
-			}
-			CFRelease(socket);
-		}
-	}
-
-	static void callback (CFSocketRef s, CFSocketCallBackType callbackType, CFDataRef address, void const* data, void* info)
-	{
-		(*(helper_t*)info)();
+		if(_dispatchSource)
+			dispatch_source_cancel(_dispatchSource);
 	}
 
 private:
@@ -96,8 +77,7 @@ private:
 	};
 
 	std::shared_ptr<helper_t> helper;
-	CFSocketRef socket;
-	CFRunLoopSourceRef run_loop_source;
+	dispatch_source_t _dispatchSource;
 };
 
 typedef std::shared_ptr<socket_callback_t> socket_callback_ptr;
