@@ -3644,7 +3644,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	if(NSArray* scratchMacro = [[NSUserDefaults standardUserDefaults] arrayForKey:@"OakMacroManagerScratchMacro"])
 	{
 		bundles::item_ptr bundle;
-		if([[BundlesManager sharedInstance] findBundleForInstall:&bundle])
+		if([BundlesManager.sharedInstance findBundleForInstall:&bundle])
 		{
 			oak::uuid_t uuid = oak::uuid_t().generate();
 

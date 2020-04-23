@@ -48,7 +48,7 @@ static NSMutableArray* FoldersAtPath (NSString* folder)
 
 + (void)addFolderSubmenuToMenuItem:(NSMenuItem*)aMenuItem
 {
-	[[self sharedInstance] addFolderSubmenuToMenuItem:aMenuItem];
+	[FFFolderMenu.sharedInstance addFolderSubmenuToMenuItem:aMenuItem];
 }
 
 - (void)addFolderSubmenuToMenuItem:(NSMenuItem*)aMenuItem

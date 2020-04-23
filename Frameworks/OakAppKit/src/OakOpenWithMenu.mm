@@ -130,7 +130,7 @@ static NSArray<OakOpenWithApplicationInfo*>* ApplicationURLsForPaths (NSSet* pat
 + (void)addOpenWithMenuForPaths:(NSSet*)paths toMenuItem:(NSMenuItem*)item
 {
 	NSMenu* submenu = [NSMenu new];
-	[submenu setDelegate:[OakOpenWithMenu sharedInstance]];
+	[submenu setDelegate:OakOpenWithMenu.sharedInstance];
 
 	[item setRepresentedObject:paths];
 	[item setSubmenu:submenu];

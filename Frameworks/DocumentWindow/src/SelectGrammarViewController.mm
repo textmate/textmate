@@ -134,7 +134,7 @@ static NSButton* OakSmallButton (NSString* title, SEL action, id target, NSInteg
 		_label.stringValue = [NSString stringWithFormat:@"Installing ‘%@’…", bundle.name];
 		[_progressIndicator startAnimation:self];
 
-		[[BundlesManager sharedInstance] installBundles:@[ bundle ] completionHandler:^(NSArray<Bundle*>* bundles){
+		[BundlesManager.sharedInstance installBundles:@[ bundle ] completionHandler:^(NSArray<Bundle*>* bundles){
 			[_progressIndicator stopAnimation:self];
 			_callback(tag, _grammar);
 			[self dismiss];

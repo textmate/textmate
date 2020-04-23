@@ -71,10 +71,10 @@ void OakOpenDocuments (NSArray* paths, BOOL treatFilePackageAsFolder)
 	}
 
 	if([itemsToInstall count])
-		[[BundlesManager sharedInstance] installBundleItemsAtPaths:itemsToInstall];
+		[BundlesManager.sharedInstance installBundleItemsAtPaths:itemsToInstall];
 
 	for(NSString* path in plugInsToInstall)
-		[[TMPlugInController sharedInstance] installPlugInAtPath:path];
+		[TMPlugInController.sharedInstance installPlugInAtPath:path];
 
 	[OakDocumentController.sharedInstance showDocuments:documents];
 }
@@ -492,7 +492,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 	if(NSMenu* menu = [self mainMenu])
 		NSApp.mainMenu = menu;
 
-	SoftwareUpdate* swUpdate = [SoftwareUpdate sharedInstance];
+	SoftwareUpdate* swUpdate = SoftwareUpdate.sharedInstance;
 	NSString* parms = [NSString stringWithFormat:@"v=%@&os=%zu.%zu.%zu", [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"] stringByAddingPercentEncodingWithAllowedCharacters:NSCharacterSet.URLQueryAllowedCharacterSet], oak::os_major(), oak::os_minor(), oak::os_patch()];
 	[swUpdate setSignee:key_chain_t::key_t("org.textmate.duff", "Allan Odgaard", "-----BEGIN PUBLIC KEY-----\nMIIBtjCCASsGByqGSM44BAEwggEeAoGBAPIE9PpXPK3y2eBDJ0dnR/D8xR1TiT9m\n8DnPXYqkxwlqmjSShmJEmxYycnbliv2JpojYF4ikBUPJPuerlZfOvUBC99ERAgz7\nN1HYHfzFIxVo1oTKWurFJ1OOOsfg8AQDBDHnKpS1VnwVoDuvO05gK8jjQs9E5LcH\ne/opThzSrI7/AhUAy02E9H7EOwRyRNLofdtPxpa10o0CgYBKDfcBscidAoH4pkHR\nIOEGTCYl3G2Pd1yrblCp0nCCUEBCnvmrWVSXUTVa2/AyOZUTN9uZSC/Kq9XYgqwj\nhgzqa8h/a8yD+ao4q8WovwGeb6Iso3WlPl8waz6EAPR/nlUTnJ4jzr9t6iSH9owS\nvAmWrgeboia0CI2AH++liCDvigOBhAACgYAFWO66xFvmF2tVIB+4E7CwhrSi2uIk\ndeBrpmNcZZ+AVFy1RXJelNe/cZ1aXBYskn/57xigklpkfHR6DGqpEbm6KC/47Jfy\ny5GEx+F/eBWEePi90XnLinytjmXRmS2FNqX6D15XNG1xJfjociA8bzC7s4gfeTUd\nlpQkBq2z71yitA==\n-----END PUBLIC KEY-----\n")];
 	[swUpdate setChannels:@{
@@ -531,7 +531,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 		[[NSUserDefaults standardUserDefaults] removeObjectForKey:@"volumeSettings"];
 	}
 
-	[[TMPlugInController sharedInstance] loadAllPlugIns:nil];
+	[TMPlugInController.sharedInstance loadAllPlugIns:nil];
 
 	std::string dest = path::join(path::home(), "Library/Application Support/TextMate/Managed");
 	if(!path::exists(dest))
@@ -573,7 +573,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 			fprintf(stderr, "%s: no ‘DefaultBundles.tbz’ in TextMate.app\n", getprogname());
 		}
 	}
-	[[BundlesManager sharedInstance] loadBundlesIndex];
+	[BundlesManager.sharedInstance loadBundlesIndex];
 
 	if(BOOL restoreSession = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableSessionRestoreKey])
 	{
@@ -639,8 +639,8 @@ BOOL HasDocumentWindow (NSArray* windows)
 	[TerminalPreferences updateMateIfRequired];
 	[AboutWindowController showChangesIfUpdated];
 
-	[[CrashReporter sharedInstance] applicationDidFinishLaunching:aNotification];
-	[[CrashReporter sharedInstance] postNewCrashReportsToURLString:[NSString stringWithFormat:@"%s/crashes", REST_API]];
+	[CrashReporter.sharedInstance applicationDidFinishLaunching:aNotification];
+	[CrashReporter.sharedInstance postNewCrashReportsToURLString:[NSString stringWithFormat:@"%s/crashes", REST_API]];
 
 	[OakCommitWindowServer sharedInstance]; // Setup server
 
@@ -675,13 +675,13 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 - (IBAction)orderFrontAboutPanel:(id)sender
 {
-	[[AboutWindowController sharedInstance] showAboutWindow:self];
+	[AboutWindowController.sharedInstance showAboutWindow:self];
 }
 
 - (IBAction)orderFrontFindPanel:(id)sender
 {
 	D(DBF_AppController, bug("\n"););
-	Find* find = [Find sharedInstance];
+	Find* find = Find.sharedInstance;
 	NSInteger mode = [sender respondsToSelector:@selector(tag)] ? [sender tag] : find_tags::in_document;
 	switch(mode)
 	{
@@ -710,24 +710,24 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 - (IBAction)performSoftwareUpdateCheck:(id)sender
 {
-	[[SoftwareUpdate sharedInstance] checkForUpdates:self];
+	[SoftwareUpdate.sharedInstance checkForUpdates:self];
 }
 
 - (IBAction)showPreferences:(id)sender
 {
 	D(DBF_AppController, bug("\n"););
-	[[Preferences sharedInstance] showWindow:self];
+	[Preferences.sharedInstance showWindow:self];
 }
 
 - (IBAction)showBundleEditor:(id)sender
 {
 	D(DBF_AppController, bug("\n"););
-	[[BundleEditor sharedInstance] showWindow:self];
+	[BundleEditor.sharedInstance showWindow:self];
 }
 
 - (IBAction)openFavorites:(id)sender
 {
-	FavoriteChooser* chooser = [FavoriteChooser sharedInstance];
+	FavoriteChooser* chooser = FavoriteChooser.sharedInstance;
 	chooser.action = @selector(didSelectFavorite:);
 	[chooser showWindow:self];
 }
@@ -746,7 +746,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 - (IBAction)showBundleItemChooser:(id)sender
 {
-	BundleItemChooser* chooser = [BundleItemChooser sharedInstance];
+	BundleItemChooser* chooser = BundleItemChooser.sharedInstance;
 	chooser.action     = @selector(bundleItemChooserDidSelectItems:);
 	chooser.editAction = @selector(editBundleItem:);
 
@@ -781,7 +781,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 - (IBAction)toggleFindOption:(id)sender
 {
-	[[Find sharedInstance] takeFindOptionToToggleFrom:sender];
+	[Find.sharedInstance takeFindOptionToToggleFrom:sender];
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem*)item
@@ -827,7 +827,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 	if(NSString* uuid = [[[sender selectedItems] lastObject] valueForKey:@"uuid"])
 	{
-		[[BundleEditor sharedInstance] revealBundleItem:bundles::lookup(to_s(uuid))];
+		[BundleEditor.sharedInstance revealBundleItem:bundles::lookup(to_s(uuid))];
 	}
 	else if(NSString* path = [[[sender selectedItems] lastObject] valueForKey:@"file"])
 	{
@@ -839,7 +839,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 - (void)editBundleItemWithUUIDString:(NSString*)uuidString
 {
-	[[BundleEditor sharedInstance] revealBundleItem:bundles::lookup(to_s(uuidString))];
+	[BundleEditor.sharedInstance revealBundleItem:bundles::lookup(to_s(uuidString))];
 }
 
 // ============

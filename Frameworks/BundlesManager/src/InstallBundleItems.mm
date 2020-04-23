@@ -134,7 +134,7 @@ void InstallBundleItems (NSArray* itemPaths)
 		else
 		{
 			bundles::item_ptr bundle;
-			if([[BundlesManager sharedInstance] findBundleForInstall:&bundle])
+			if([BundlesManager.sharedInstance findBundleForInstall:&bundle])
 			{
 				static struct { std::string extension; std::string directory; } DirectoryMap[] =
 				{
@@ -177,5 +177,5 @@ void InstallBundleItems (NSArray* itemPaths)
 	}
 
 	for(auto path : pathsToReload)
-		[[BundlesManager sharedInstance] reloadPath:[NSString stringWithCxxString:path]];
+		[BundlesManager.sharedInstance reloadPath:[NSString stringWithCxxString:path]];
 }

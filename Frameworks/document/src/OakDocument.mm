@@ -1199,7 +1199,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	std::string const firstLine = _buffer ? _buffer->substr(_buffer->begin(0), std::min<size_t>(_buffer->eol(0), 2048)) : NULL_STR;
 	std::string const path      = to_s(_virtualPath ?: _path);
 
-	for(Bundle* bundle in [BundlesManager sharedInstance].bundles)
+	for(Bundle* bundle in BundlesManager.sharedInstance.bundles)
 	{
 		for(BundleGrammar* grammar in bundle.grammars)
 		{

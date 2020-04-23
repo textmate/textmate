@@ -57,7 +57,7 @@ static NSString* NameForLocaleIdentifier (NSString* languageCode)
 
 		NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithCxxString:pair.first] action:NULL keyEquivalent:@""];
 		menuItem.submenu = [[NSMenu alloc] initWithTitle:[NSString stringWithCxxString:pair.second->uuid()]];
-		menuItem.submenu.delegate = [BundleMenuDelegate sharedInstance];
+		menuItem.submenu.delegate = BundleMenuDelegate.sharedInstance;
 	}
 
 	if(ordered.empty())

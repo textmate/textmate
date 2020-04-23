@@ -127,7 +127,7 @@ static NSData* Digest (NSString* someString)
 			NSData* currentDigest = Digest(releaseNotes);
 			dispatch_async(dispatch_get_main_queue(), ^{
 				if(lastDigest && ![lastDigest isEqualToData:currentDigest])
-					[[AboutWindowController sharedInstance] showChangesWindow:self];
+					[AboutWindowController.sharedInstance showChangesWindow:self];
 				[[NSUserDefaults standardUserDefaults] setObject:currentDigest forKey:kUserDefaultsReleaseNotesDigestKey];
 			});
 		}
@@ -333,7 +333,7 @@ static NSDictionary* RemoveOldCommits (NSDictionary* src)
 
 	bool first = true;
 	NSMutableString* str = [NSMutableString stringWithString:@"{\"bundles\":["];
-	for(Bundle* bundle in [BundlesManager sharedInstance].bundles)
+	for(Bundle* bundle in BundlesManager.sharedInstance.bundles)
 	{
 		if(!bundle.installed || !bundle.path)
 			continue;

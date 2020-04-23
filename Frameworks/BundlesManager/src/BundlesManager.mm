@@ -334,14 +334,14 @@ static NSString* CacheFileForDownload (NSURL* url, NSDate* date)
 		void set_replaying_history (bool flag, std::string const& observedPath, uint64_t eventId)
 		{
 			D(DBF_BundlesManager_FSEvents, bug("%s (observing ‘%s’)\n", BSTR(flag), observedPath.c_str()););
-			[[BundlesManager sharedInstance] setEventId:eventId forPath:[NSString stringWithCxxString:observedPath]];
+			[BundlesManager.sharedInstance setEventId:eventId forPath:[NSString stringWithCxxString:observedPath]];
 		}
 
 		void did_change (std::string const& path, std::string const& observedPath, uint64_t eventId, bool recursive)
 		{
 			D(DBF_BundlesManager_FSEvents, bug("%s (observing ‘%s’)\n", path.c_str(), observedPath.c_str()););
-			[[BundlesManager sharedInstance] reloadPath:[NSString stringWithCxxString:path] recursive:recursive];
-			[[BundlesManager sharedInstance] setEventId:eventId forPath:[NSString stringWithCxxString:observedPath]];
+			[BundlesManager.sharedInstance reloadPath:[NSString stringWithCxxString:path] recursive:recursive];
+			[BundlesManager.sharedInstance setEventId:eventId forPath:[NSString stringWithCxxString:observedPath]];
 		}
 	};
 

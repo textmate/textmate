@@ -536,7 +536,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 
 - (IBAction)showSymbolChooser:(id)sender
 {
-	self.symbolChooser = [SymbolChooser sharedInstance];
+	self.symbolChooser = SymbolChooser.sharedInstance;
 	[self.symbolChooser showWindowRelativeToFrame:[self.window convertRectToScreen:[_textView convertRect:[_textView visibleRect] toView:nil]]];
 }
 
@@ -625,7 +625,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 
 		NSMenuItem* menuItem = [bundleItemsMenu addItemWithTitle:[NSString stringWithCxxString:pair.first] action:NULL keyEquivalent:@""];
 		menuItem.submenu = [[NSMenu alloc] initWithTitle:[NSString stringWithCxxString:pair.second->uuid()]];
-		menuItem.submenu.delegate = [BundleMenuDelegate sharedInstance];
+		menuItem.submenu.delegate = BundleMenuDelegate.sharedInstance;
 
 		if(selectedGrammar)
 		{

@@ -692,14 +692,14 @@ static NSButton* OakCreateStopSearchButton ()
 
 - (IBAction)showFindHistory:(id)sender
 {
-	if(![[[OakPasteboardSelector sharedInstance] window] isVisible])
+	if(![[OakPasteboardSelector.sharedInstance window] isVisible])
 		[OakPasteboard.findPasteboard selectItemForControl:self.findTextField];
 	// if the panel is visible it will automatically be hidden due to the mouse click
 }
 
 - (IBAction)showReplaceHistory:(id)sender
 {
-	if(![[[OakPasteboardSelector sharedInstance] window] isVisible])
+	if(![[OakPasteboardSelector.sharedInstance window] isVisible])
 		[OakPasteboard.replacePasteboard selectItemForControl:self.replaceTextField];
 	// if the panel is visible it will automatically be hidden due to the mouse click
 }

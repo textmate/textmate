@@ -791,7 +791,7 @@ namespace
 	NSArray<OakPasteboardEntry*>* entries = self.entries;
 
 	NSUInteger selectedRow = self.currentEntry ? [entries indexOfObject:self.currentEntry] : 0;
-	OakPasteboardSelector* pasteboardSelector = [OakPasteboardSelector sharedInstance];
+	OakPasteboardSelector* pasteboardSelector = OakPasteboardSelector.sharedInstance;
 	[pasteboardSelector setEntries:entries];
 	[pasteboardSelector setIndex:selectedRow == NSNotFound ? 0 : selectedRow];
 	if(width)

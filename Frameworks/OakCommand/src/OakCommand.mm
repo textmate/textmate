@@ -534,7 +534,7 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 		{
 			if(recoveryOptionIndex == 1)
 			{
-				[[BundleEditor sharedInstance] revealBundleItem:bundles::lookup(_bundleCommand.uuid)];
+				[BundleEditor.sharedInstance revealBundleItem:bundles::lookup(_bundleCommand.uuid)];
 			}
 			else if(recoveryOptionIndex == 2)
 			{

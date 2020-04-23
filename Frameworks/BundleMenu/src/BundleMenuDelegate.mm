@@ -46,7 +46,7 @@ OAK_DEBUG_VAR(BundleMenu);
 				NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithCxxString:item->name()] action:NULL keyEquivalent:@""];
 
 				menuItem.submenu = [[NSMenu alloc] initWithTitle:[NSString stringWithCxxString:item->uuid()]];
-				menuItem.submenu.delegate = [BundleMenuDelegate sharedInstance];
+				menuItem.submenu.delegate = BundleMenuDelegate.sharedInstance;
 			}
 			break;
 

@@ -329,7 +329,7 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 			std::string itemFolder = path::parent(trashedItem->paths().front());
 			if(trashedItem->kind() == bundles::kItemTypeBundle && trashedItem->paths().size() == 1)
 				itemFolder = path::parent(itemFolder);
-			[[BundlesManager sharedInstance] reloadPath:[NSString stringWithCxxString:itemFolder]];
+			[BundlesManager.sharedInstance reloadPath:[NSString stringWithCxxString:itemFolder]];
 		}
 	}
 }
@@ -462,7 +462,7 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 		item->set_plist(pair.second);
 		if(item->save())
 		{
-			[[BundlesManager sharedInstance] reloadPath:[NSString stringWithCxxString:item->paths().front()]];
+			[BundlesManager.sharedInstance reloadPath:[NSString stringWithCxxString:item->paths().front()]];
 		}
 		else
 		{

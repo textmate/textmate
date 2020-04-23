@@ -255,7 +255,7 @@ namespace // PopulateMenu{Flat,Hierarchical}
 
 - (void)customizeAvailableEncodings:(id)sender
 {
-	[[OakCustomizeEncodingsWindowController sharedInstance] showWindow:self];
+	[OakCustomizeEncodingsWindowController.sharedInstance showWindow:self];
 	[self updateMenu];
 }
 

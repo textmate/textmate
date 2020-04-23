@@ -59,7 +59,7 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 
 	[alert beginSheetModalForWindow:window completionHandler:^(NSModalResponse button){
 		if(button == NSAlertSecondButtonReturn)
-			[[BundleEditor sharedInstance] revealBundleItem:bundleItem];
+			[BundleEditor.sharedInstance revealBundleItem:bundleItem];
 	}];
 }
 
@@ -1973,7 +1973,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 - (Find*)prepareAndReturnFindPanel
 {
-	Find* find = [Find sharedInstance];
+	Find* find = Find.sharedInstance;
 	find.documentIdentifier = self.selectedDocumentUUID;
 	find.projectFolder      = self.projectPath ?: self.untitledSavePath ?: NSHomeDirectory();
 	find.delegate           = self;
@@ -1992,7 +1992,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 - (IBAction)orderFrontFindPanel:(id)sender
 {
-	Find* find              = [Find sharedInstance];
+	Find* find              = Find.sharedInstance;
 	BOOL didOwnDialog       = find.delegate == self;
 	[self prepareAndReturnFindPanel];
 
@@ -2029,7 +2029,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 - (IBAction)orderFrontRunCommandWindow:(id)sender
 {
-	OakRunCommandWindowController* runCommand = [OakRunCommandWindowController sharedInstance];
+	OakRunCommandWindowController* runCommand = OakRunCommandWindowController.sharedInstance;
 	[self positionWindow:runCommand.window];
 	[runCommand showWindow:nil];
 }
@@ -2051,7 +2051,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 - (IBAction)goToFile:(id)sender
 {
-	FileChooser* fc = [FileChooser sharedInstance];
+	FileChooser* fc = FileChooser.sharedInstance;
 
 	fc.path            = nil; // Disable potential work when updating filterString/currentDocument
 	fc.filterString    = @"";
