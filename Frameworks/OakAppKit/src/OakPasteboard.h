@@ -45,7 +45,6 @@ PUBLIC @interface OakPasteboard : NSObject
 
 @property (nonatomic, readonly) NSString* name;
 @property (nonatomic, readonly) OakPasteboardEntry* currentEntry;
-@property (nonatomic) NSDictionary* auxiliaryOptionsForCurrent;
 
 - (void)selectItemForControl:(NSView*)controlView;
 @end
