@@ -66,6 +66,7 @@ static NSUserInterfaceItemIdentifier const kTableColumnIdentifierFlag = @"flag";
 {
 	NSTitlebarAccessoryViewController* _accessoryViewController;
 	OakScopeBarViewController* _scopeBar;
+	BOOL _skipUpdatePasteboard;
 }
 @property (nonatomic) OakPasteboard*        pasteboard;
 @property (nonatomic) NSArrayController*    arrayController;
@@ -247,9 +248,16 @@ static NSMutableDictionary* SharedChoosers;
 	}
 }
 
+- (void)selectCurrentClipboardEntry:(id)sender
+{
+	_skipUpdatePasteboard = YES;
+	[self refreshTableViewAndSelect:_pasteboard.currentEntry];
+	_skipUpdatePasteboard = NO;
+}
+
 - (void)clipboardDidChange:(NSNotification*)aNotification
 {
-	[self refreshTableViewAndSelect:_pasteboard.currentEntry];
+	[self selectCurrentClipboardEntry:self];
 }
 
 - (NSTableView*)tableView
@@ -322,7 +330,7 @@ static NSMutableDictionary* SharedChoosers;
 	[SharedChoosers setObject:self forKey:_pasteboard.name];
 
 	[_searchField bind:NSValueBinding toObject:self withKeyPath:@"filterString" options:nil];
-	[self refreshTableViewAndSelect:_pasteboard.currentEntry];
+	[self selectCurrentClipboardEntry:self];
 
 	[self.window makeFirstResponder:_tableView];
 	[self.window makeKeyAndOrderFront:self];
@@ -361,7 +369,7 @@ static NSMutableDictionary* SharedChoosers;
 		if(_sourceIndex == 0)
 		{
 			_arrayController.filterPredicate = nil;
-			[self refreshTableViewAndSelect:_pasteboard.currentEntry];
+			[self selectCurrentClipboardEntry:self];
 		}
 		else
 		{
@@ -444,7 +452,7 @@ static NSMutableDictionary* SharedChoosers;
 	NSIndexSet* selectedRowIndexes = _tableView.selectedRowIndexes;
 	self.hasSelection = selectedRowIndexes.count != 0;
 
-	if(selectedRowIndexes.count == 1)
+	if(selectedRowIndexes.count == 1 && !_skipUpdatePasteboard)
 	{
 		OakPasteboardEntry* clipboardEntry = [self.pasteboardEntries objectAtIndex:selectedRowIndexes.firstIndex];
 		[self didSelectEntry:clipboardEntry updatePasteboard:YES];
