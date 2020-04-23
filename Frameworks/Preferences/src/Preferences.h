@@ -3,6 +3,6 @@
 @class MASPreferencesWindowController;
 
 PUBLIC @interface Preferences : NSResponder
-+ (instancetype)sharedInstance;
+@property (class, readonly) Preferences* sharedInstance;
 - (void)showWindow:(id)sender;
 @end

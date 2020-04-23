@@ -1,5 +1,5 @@
 @interface AboutWindowController : NSWindowController
-+ (instancetype)sharedInstance;
+@property (class, readonly) AboutWindowController* sharedInstance;
 + (void)showChangesIfUpdated;
 - (void)showAboutWindow:(id)sender;
 - (void)showChangesWindow:(id)sender;

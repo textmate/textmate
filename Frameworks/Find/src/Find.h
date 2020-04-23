@@ -30,6 +30,8 @@ typedef NS_ENUM(NSInteger, FFSearchTarget) {
 @end
 
 PUBLIC @interface Find : NSResponder
+@property (class, readonly) Find* sharedInstance;
+
 @property (nonatomic) FFSearchTarget searchTarget;
 
 @property (nonatomic, weak) id <FindDelegate> delegate;
@@ -40,8 +42,6 @@ PUBLIC @interface Find : NSResponder
 @property (nonatomic, readonly) BOOL isVisible;
 
 @property (nonatomic) NSArray<FindMatch*>* findMatches;
-
-+ (instancetype)sharedInstance;
 - (void)showWindow:(id)sender;
 - (IBAction)showFolderSelectionPanel:(id)sender;
 - (IBAction)takeFindOptionToToggleFrom:(id)sender;

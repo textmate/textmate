@@ -99,7 +99,7 @@ namespace // PopulateMenu{Flat,Hierarchical}
 {
 	NSMutableArray* encodings;
 }
-+ (instancetype)sharedInstance;
+@property (class, readonly) OakCustomizeEncodingsWindowController* sharedInstance;
 @end
 
 @interface OakEncodingPopUpButton ()

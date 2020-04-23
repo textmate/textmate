@@ -1,7 +1,7 @@
 #include <oak/misc.h>
 
 PUBLIC @interface CrashReporter : NSObject
-+ (instancetype)sharedInstance;
+@property (class, readonly) CrashReporter* sharedInstance;
 - (void)applicationDidFinishLaunching:(NSNotification*)aNotification;
 - (void)postNewCrashReportsToURLString:(NSString*)aURL;
 @end

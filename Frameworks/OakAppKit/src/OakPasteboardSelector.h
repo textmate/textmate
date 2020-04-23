@@ -4,7 +4,8 @@ PUBLIC @interface OakPasteboardSelector : NSWindowController
 {
 	IBOutlet NSTableView* tableView;
 }
-+ (instancetype)sharedInstance;
+@property (class, readonly) OakPasteboardSelector* sharedInstance;
+
 - (void)setIndex:(NSUInteger)index;
 - (void)setEntries:(NSArray*)entries;
 

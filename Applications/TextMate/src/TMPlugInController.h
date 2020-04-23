@@ -8,7 +8,7 @@
 @end
 
 @interface TMPlugInController : NSObject <TMPlugInController>
-+ (instancetype)sharedInstance;
+@property (class, readonly) TMPlugInController* sharedInstance;
 - (void)loadAllPlugIns:(id)sender;
 - (CGFloat)version;
 - (void)installPlugInAtPath:(NSString*)aPath;

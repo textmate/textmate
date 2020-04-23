@@ -15,7 +15,7 @@ PUBLIC extern NSString* kSearchFileGlobsKey;
 PUBLIC extern NSString* kSearchGlobsKey;
 
 PUBLIC @interface OakDocumentController : NSObject
-+ (instancetype)sharedInstance;
+@property (class, readonly) OakDocumentController* sharedInstance;
 
 - (OakDocument*)untitledDocument;
 - (OakDocument*)documentWithPath:(NSString*)aPath;

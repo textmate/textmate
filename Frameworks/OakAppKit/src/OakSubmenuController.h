@@ -1,5 +1,5 @@
 #import <oak/misc.h>
 
 @interface OakSubmenuController : NSObject <NSMenuDelegate>
-+ (instancetype)sharedInstance;
+@property (class, readonly) OakSubmenuController* sharedInstance;
 @end

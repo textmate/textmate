@@ -18,5 +18,5 @@ static NSString* const kOakCommitWindowContinue             = @"continue";
 @end
 
 PUBLIC @interface OakCommitWindowServer : NSObject <OakCommitWindowServerProtocol>
-+ (instancetype)sharedInstance;
+@property (class, readonly) OakCommitWindowServer* sharedInstance;
 @end

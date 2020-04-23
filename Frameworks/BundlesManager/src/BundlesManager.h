@@ -5,6 +5,8 @@ PUBLIC extern NSString* const kUserDefaultsDisableBundleUpdatesKey;
 PUBLIC extern NSString* const kUserDefaultsLastBundleUpdateCheckKey;
 
 PUBLIC @interface BundlesManager : NSObject
+@property (class, readonly) BundlesManager* sharedInstance;
+
 @property (nonatomic) NSString* activityText;
 @property (nonatomic) BOOL      isBusy;
 @property (nonatomic, readonly) BOOL      determinateProgress;
@@ -14,8 +16,6 @@ PUBLIC @interface BundlesManager : NSObject
 
 - (void)installBundles:(NSArray<Bundle*>*)someBundles completionHandler:(void(^)(NSArray<Bundle*>*))callback;
 - (void)uninstallBundle:(Bundle*)aBundle;
-
-+ (instancetype)sharedInstance;
 - (void)loadBundlesIndex;
 - (void)installBundleItemsAtPaths:(NSArray*)somePaths;
 - (BOOL)findBundleForInstall:(bundles::item_ptr*)res;

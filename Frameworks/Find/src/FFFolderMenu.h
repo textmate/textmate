@@ -1,5 +1,5 @@
 @interface FFFolderMenu : NSObject <NSMenuDelegate>
-+ (instancetype)sharedInstance;
+@property (class, readonly) FFFolderMenu* sharedInstance;
 + (void)addFolderSubmenuToMenuItem:(NSMenuItem*)aMenuItem;
 - (void)addFolderSubmenuToMenuItem:(NSMenuItem*)aMenuItem;
 @end

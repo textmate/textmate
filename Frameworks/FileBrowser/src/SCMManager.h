@@ -10,7 +10,7 @@
 @end
 
 @interface SCMManager : NSObject
-+ (instancetype)sharedInstance;
+@property (class, readonly) SCMManager* sharedInstance;
 
 - (id)addObserverToFileAtURL:(NSURL*)url usingBlock:(void(^)(scm::status::type))handler;
 - (id)addObserverToRepositoryAtURL:(NSURL*)url usingBlock:(void(^)(SCMRepository*))handler;
