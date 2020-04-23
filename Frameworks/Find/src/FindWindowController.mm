@@ -106,6 +106,9 @@ static NSButton* OakCreateStopSearchButton ()
 }
 
 @interface FindWindowController () <NSTextFieldDelegate, NSWindowDelegate, NSMenuDelegate, NSPopoverDelegate, NSTextStorageDelegate>
+{
+	BOOL _ignoreWhitespace;
+}
 @property (nonatomic) NSTextField*              findLabel;
 @property (nonatomic) OakAutoSizingTextField*   findTextField;
 @property (nonatomic) OakSyntaxFormatter*       findStringFormatter;
@@ -150,6 +153,9 @@ static NSButton* OakCreateStopSearchButton ()
 
 @property (nonatomic, readonly) BOOL            canIgnoreWhitespace;
 @property (nonatomic) CGFloat                   findResultsHeight;
+
+@property (nonatomic) BOOL                      findStringUpdated;
+@property (nonatomic) BOOL                      replaceStringUpdated;
 @end
 
 @implementation FindWindowController
@@ -476,11 +482,13 @@ static NSButton* OakCreateStopSearchButton ()
 	self.regularExpression = entry.regularExpression;
 	self.ignoreWhitespace  = entry.ignoreWhitespace;
 	self.fullWords         = entry.fullWordMatch;
+	self.findStringUpdated = NO;
 }
 
 - (void)replaceClipboardDidChange:(NSNotification*)aNotification
 {
-	self.replaceString = [[OakPasteboard.replacePasteboard current] string];
+	self.replaceString        = [[OakPasteboard.replacePasteboard current] string];
+	self.replaceStringUpdated = NO;
 }
 
 - (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)object change:(NSDictionary*)change context:(void*)context
@@ -533,24 +541,23 @@ static NSButton* OakCreateStopSearchButton ()
 	// = Update Pasteboard =
 	// =====================
 
-	NSDictionary* newOptions = @{
-		OakFindRegularExpressionOption: @(self.regularExpression),
-		OakFindIgnoreWhitespaceOption:  @(self.ignoreWhitespace),
-		OakFindFullWordsOption:         @(self.fullWords),
-	};
-
-	if(OakNotEmptyString(_findString))
+	if(_findStringUpdated && OakNotEmptyString(_findString))
 	{
-		NSDictionary* oldAuxiliaryOptions = OakPasteboard.findPasteboard.auxiliaryOptionsForCurrent;
+		NSDictionary* newOptions = @{
+			OakFindRegularExpressionOption: @(self.regularExpression),
+			OakFindIgnoreWhitespaceOption:  @(self.ignoreWhitespace),
+			OakFindFullWordsOption:         @(self.fullWords),
+		};
 
-		OakPasteboardEntry* oldEntry = [OakPasteboard.findPasteboard current];
 		[OakPasteboard.findPasteboard addEntryWithString:_findString options:newOptions];
-		if(oldEntry && [oldEntry.string isEqualToString:_findString])
-			OakPasteboard.findPasteboard.auxiliaryOptionsForCurrent = oldAuxiliaryOptions;
+		_findStringUpdated = NO;
 	}
 
-	if(_replaceString)
+	if(_replaceStringUpdated && _replaceString)
+	{
 		[OakPasteboard.replacePasteboard addEntryWithString:_replaceString];
+		_replaceStringUpdated = NO;
+	}
 
 	return res;
 }
@@ -884,6 +891,7 @@ static NSButton* OakCreateStopSearchButton ()
 		return;
 
 	_findString = aString ?: @"";
+	_findStringUpdated = YES;
 	[self.findTextField updateIntrinsicContentSizeToEncompassString:_findString];
 
 	if(self.findErrorString)
@@ -896,6 +904,7 @@ static NSButton* OakCreateStopSearchButton ()
 		return;
 
 	_replaceString = aString ?: @"";
+	_replaceStringUpdated = YES;
 	[self.replaceTextField updateIntrinsicContentSizeToEncompassString:_replaceString];
 }
 
@@ -908,6 +917,7 @@ static NSButton* OakCreateStopSearchButton ()
 		return;
 
 	_regularExpression = flag;
+	_findStringUpdated = YES;
 	if(self.findErrorString)
 		[self updateFindErrorString];
 
@@ -928,6 +938,24 @@ static NSButton* OakCreateStopSearchButton ()
 	}
 
 	[self addStylesToFieldEditor];
+}
+
+- (void)setIgnoreWhitespace:(BOOL)flag
+{
+	if(_ignoreWhitespace == flag)
+		return;
+
+	_ignoreWhitespace  = flag;
+	_findStringUpdated = YES;
+}
+
+- (void)setFullWords:(BOOL)flag
+{
+	if(_fullWords == flag)
+		return;
+
+	_fullWords         = flag;
+	_findStringUpdated = YES;
 }
 
 - (void)textStorageDidProcessEditing:(NSNotification*)aNotification
