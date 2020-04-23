@@ -971,10 +971,13 @@ static std::string shell_quote (std::vector<std::string> paths)
 	BOOL notifyHooks = _scmStatus != scm::status::unknown || newStatus != scm::status::none;
 	_scmStatus = newStatus;
 	if(notifyHooks)
-	{
-		for(auto const& item : bundles::query(bundles::kFieldSemanticClass, "callback.document.did-change-scm-status", [self scopeContext], bundles::kItemTypeMost, oak::uuid_t(), false))
-			[self performBundleItem:item];
-	}
+		[self performSelector:@selector(runDidChangeSCMStatusCallbacks:) withObject:self afterDelay:0];
+}
+
+- (void)runDidChangeSCMStatusCallbacks:(id)sender
+{
+	for(auto const& item : bundles::query(bundles::kFieldSemanticClass, "callback.document.did-change-scm-status", [self scopeContext], bundles::kItemTypeMost, oak::uuid_t(), false))
+		[self performBundleItem:item];
 }
 
 - (void)setNilValueForKey:(NSString*)key
