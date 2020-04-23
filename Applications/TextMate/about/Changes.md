@@ -2,13 +2,7 @@ Title: Release Notes
 
 # Changes
 
-## 2020-04-22 (v2.0.9)
-
-* In the find dialog, opening history and dismissing with escape no longer updates the text field.
-* Some of the controls in the Terminal preferences pane (where you install the `mate` shell command) would not work if full keyboard focus was disabled and “accept rmate connections” was also disabled.
-* See [all changes since v2.0.7](https://github.com/textmate/textmate/compare/v2.0.7...v2.0.9)
-
-## 2020-04-18 (v2.0.7)
+## 2020-04-23 (v2.0.10)
 
 ### Clipboard and Clipboard History
 
@@ -33,7 +27,7 @@ TextMate should now always pick up clipboard changes: Previously it could miss u
 * If you copy items from the file browser (⌘C) and paste in Apple’s Terminal.app then proper (full) paths should now be inserted. Previously this only worked for iTerm2.app (as Terminal.app is peculiar in how it interprets the clipboard).
 * If you rename an ancestor folder of an open document, TextMate should now notice this and will update the path accordingly. It will also treat moving a file to trash as that file being deleted (instead of simply renamed).
 * The filter bar in Bundles preferences now support dark mode and acts like a set of radio buttons (so clicking one category will unselect other categories).
-* See [all changes since v2.0.6](https://github.com/textmate/textmate/compare/v2.0.6...v2.0.7)
+* See [all changes since v2.0.6](https://github.com/textmate/textmate/compare/v2.0.6...v2.0.10)
 
 ## 2019-12-28 (v2.0.6)
 
