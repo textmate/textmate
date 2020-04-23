@@ -35,6 +35,19 @@ enum FindActionTag
 	FindActionReplace,
 };
 
+@implementation FindMatch
+- (instancetype)initWithUUID:(NSUUID*)uuid firstRange:(text::range_t const&)firstRange lastRange:(text::range_t const&)lastRange
+{
+	if(self = [super init])
+	{
+		_UUID       = uuid;
+		_firstRange = firstRange;
+		_lastRange  = lastRange;
+	}
+	return self;
+}
+@end
+
 @interface Find () <OakFindServerProtocol>
 @property (nonatomic) FindWindowController* windowController;
 @property (nonatomic) FFDocumentSearch* documentSearch;
@@ -297,7 +310,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		}
 
 		self.closeWindowOnSuccess = action == FindActionFindNext && [[NSApp currentEvent] type] == NSEventTypeKeyDown && to_s([NSApp currentEvent]) == utf8::to_s(NSCarriageReturnCharacter);
-		OakPasteboard.findPasteboard.auxiliaryOptionsForCurrent = nil;
+		self.findMatches = nil;
 		[NSApp sendAction:@selector(performFindOperation:) to:nil from:self];
 	}
 }
@@ -449,18 +462,12 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	[self acceptMatches:[aNotification userInfo][@"matches"]];
 }
 
-- (void)addResultsToPasteboard:(id)sender
+- (void)setUpFindMatches:(id)sender
 {
-	NSMutableArray* documents = [NSMutableArray array];
+	NSMutableArray* findMatches = [NSMutableArray array];
 	for(FFResultNode* parent in _results.children)
-	{
-		[documents addObject:@{
-			@"identifier":      parent.firstResultNode.document.identifier.UUIDString,
-			@"firstMatchRange": [NSString stringWithCxxString:parent.firstResultNode.match.range],
-			@"lastMatchRange":  [NSString stringWithCxxString:parent.lastResultNode.match.range],
-		}];
-	}
-	OakPasteboard.findPasteboard.auxiliaryOptionsForCurrent = @{ @"documents": documents };
+		[findMatches addObject:[[FindMatch alloc] initWithUUID:parent.firstResultNode.document.identifier firstRange:parent.firstResultNode.match.range lastRange:parent.lastResultNode.match.range]];
+	self.findMatches = findMatches;
 }
 
 - (void)folderSearchDidFinish:(NSNotification*)aNotification
@@ -475,7 +482,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	[self bind:@"countOfReadOnlyMatches" toObject:_results withKeyPath:@"countOfReadOnly" options:nil];
 	[self bind:@"countOfExcludedReadOnlyMatches" toObject:_results withKeyPath:@"countOfExcludedReadOnly" options:nil];
 
-	[self addResultsToPasteboard:self];
+	[self setUpFindMatches:self];
 
 	NSString* fmt;
 	switch(self.countOfMatches)
@@ -503,6 +510,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	}
 
 	__weak __block id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:OakPasteboardDidChangeNotification object:OakPasteboard.findPasteboard queue:nil usingBlock:^(NSNotification*){
+		self.findMatches = nil;
 		for(FFResultNode* parent in _results.children)
 			[parent.document removeAllMarksOfType:kSearchMarkIdentifier];
 		[[NSNotificationCenter defaultCenter] removeObserver:observerId];
@@ -568,7 +576,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	}
 
 	[item.document removeAllMarksOfType:kSearchMarkIdentifier];
-	[self addResultsToPasteboard:self];
+	[self setUpFindMatches:self];
 
 	NSString* fmt;
 	switch(self.countOfMatches)

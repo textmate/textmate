@@ -43,6 +43,7 @@
 #import <editor/editor.h>
 #import <editor/write.h>
 #import <io/exec.h>
+#import <Find/Find.h>
 
 OAK_DEBUG_VAR(OakTextView_TextInput);
 OAK_DEBUG_VAR(OakTextView_Accessibility);
@@ -2659,8 +2660,8 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 			std::string const findStr = to_s(aFindServer.findString);
 			find::options_t options   = aFindServer.findOptions;
 
-			NSArray* documents = [OakPasteboard.findPasteboard.auxiliaryOptionsForCurrent objectForKey:@"documents"];
-			if(documents && [documents count] > 1)
+			NSArray<FindMatch*>* findMatches = Find.sharedInstance.findMatches;
+			if(findMatches && findMatches.count > 1)
 				options &= ~find::wrap_around;
 
 			bool didWrap = false;
@@ -2675,51 +2676,42 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 				std::transform(allMatches.begin(), allMatches.end(), std::back_inserter(res), [](auto const& p){ return p.first; });
 			}
 
-			if(res.empty() && !isCounting && documents && [documents count] > 1)
+			if(res.empty() && !isCounting && findMatches && findMatches.count > 1)
 			{
-				for(NSUInteger i = 0; i < [documents count]; ++i)
+				for(NSUInteger i = 0; i < findMatches.count; ++i)
 				{
-					NSString* uuid = [[documents objectAtIndex:i] objectForKey:@"identifier"];
-					if(uuid && oak::uuid_t(to_s(uuid)) == documentView->identifier())
+					NSUUID* uuid = findMatches[i].UUID;
+					if(oak::uuid_t(to_s(uuid)) == documentView->identifier())
 					{
 						// ====================================================
 						// = Update our document’s matches on Find pasteboard =
 						// ====================================================
 
-						NSMutableArray* newDocuments = [documents mutableCopy];
+						NSMutableArray<FindMatch*>* newFindMatches = [findMatches mutableCopy];
 						auto newFirstMatch = ng::find(*documentView, ng::ranges_t(0), findStr, (find::options_t)(options & ~find::backwards));
 						if(newFirstMatch.empty())
 						{
-							[newDocuments removeObjectAtIndex:i];
+							[newFindMatches removeObjectAtIndex:i];
 						}
 						else
 						{
 							auto newLastMatch = ng::find(*documentView, ng::ranges_t(0), findStr, (find::options_t)(options | find::backwards | find::wrap_around));
 							auto to_range = [&](auto it) { return text::range_t(documentView->convert(it->first.min().index), documentView->convert(it->first.max().index)); };
-							[newDocuments replaceObjectAtIndex:i withObject:@{
-								@"identifier":      [NSString stringWithCxxString:documentView->identifier()],
-								@"firstMatchRange": [NSString stringWithCxxString:to_range(newFirstMatch.begin())],
-								@"lastMatchRange":  [NSString stringWithCxxString:to_range((newLastMatch.empty() ? newFirstMatch : newLastMatch).begin())]
-							}];
+							auto newFindMatch = [[FindMatch alloc] initWithUUID:uuid firstRange:to_range(newFirstMatch.begin()) lastRange:to_range((newLastMatch.empty() ? newFirstMatch : newLastMatch).begin())];
+							[newFindMatches replaceObjectAtIndex:i withObject:newFindMatch];
 						}
-						OakPasteboard.findPasteboard.auxiliaryOptionsForCurrent = @{ @"documents": newDocuments };
+						Find.sharedInstance.findMatches = newFindMatches;
 
 						// ====================================================
 
-						NSDictionary* info = [documents objectAtIndex:(i + ((options & find::backwards) ? [documents count] - 1 : 1)) % [documents count]];
-						OakDocument* doc;
-						if(NSString* path = info[@"path"])
-							doc = [OakDocumentController.sharedInstance documentWithPath:path];
-						else if(NSString* identifier = info[@"identifier"])
-							doc = [OakDocumentController.sharedInstance findDocumentWithIdentifier:[[NSUUID alloc] initWithUUIDString:identifier]];
-
-						if(doc)
+						FindMatch* findMatch = findMatches[(i + ((options & find::backwards) ? findMatches.count - 1 : 1)) % findMatches.count];
+						if(OakDocument* doc = [OakDocumentController.sharedInstance findDocumentWithIdentifier:findMatch.UUID])
 						{
 							if(!doc.isOpen)
 								doc.recentTrackingDisabled = YES;
 
-							NSString* range = [info objectForKey:(options & find::backwards) ? @"lastMatchRange" : @"firstMatchRange"];
-							[OakDocumentController.sharedInstance showDocument:doc andSelect:to_s(range) inProject:nil bringToFront:YES];
+							text::range_t range = (options & find::backwards) ? findMatch.lastRange : findMatch.firstRange;
+							[OakDocumentController.sharedInstance showDocument:doc andSelect:range inProject:nil bringToFront:YES];
 							return;
 						}
 					}
