@@ -302,7 +302,7 @@ static NSDictionary* globs_for_path (std::string const& path)
 
 		OakSetupKeyViewLoop(@[ self.searchField, _scopeBar.view ]);
 
-		self.sourceIndex = [[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsFileChooserSourceIndexKey];
+		self.sourceIndex = [NSUserDefaults.standardUserDefaults integerForKey:kUserDefaultsFileChooserSourceIndexKey];
 		[self updateWindowTitle];
 		[_scopeBar bind:NSValueBinding toObject:self withKeyPath:@"sourceIndex" options:nil];
 	}
@@ -356,8 +356,8 @@ static NSDictionary* globs_for_path (std::string const& path)
 		[self reload];
 
 		if(_sourceIndex == 0)
-				[[NSUserDefaults standardUserDefaults] removeObjectForKey:kUserDefaultsFileChooserSourceIndexKey];
-		else	[[NSUserDefaults standardUserDefaults] setObject:@(_sourceIndex) forKey:kUserDefaultsFileChooserSourceIndexKey];
+				[NSUserDefaults.standardUserDefaults removeObjectForKey:kUserDefaultsFileChooserSourceIndexKey];
+		else	[NSUserDefaults.standardUserDefaults setObject:@(_sourceIndex) forKey:kUserDefaultsFileChooserSourceIndexKey];
 	}
 }
 

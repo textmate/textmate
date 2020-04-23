@@ -109,7 +109,7 @@ static NSString* NameForLocaleIdentifier (NSString* languageCode)
 
 	std::multimap<std::string, NSString*, text::less_t> ordered;
 
-	NSSpellChecker* spellChecker = [NSSpellChecker sharedSpellChecker];
+	NSSpellChecker* spellChecker = NSSpellChecker.sharedSpellChecker;
 	for(NSString* lang in [spellChecker availableLanguages])
 		ordered.emplace(to_s(NameForLocaleIdentifier(lang)), lang);
 
@@ -138,7 +138,7 @@ static NSString* NameForLocaleIdentifier (NSString* languageCode)
 	menuItem.tag = NSWrapColumnWindowWidth;
 	[aMenu addItem:[NSMenuItem separatorItem]];
 
-	NSArray* presets = [[NSUserDefaults standardUserDefaults] arrayForKey:kUserDefaultsWrapColumnPresetsKey];
+	NSArray* presets = [NSUserDefaults.standardUserDefaults arrayForKey:kUserDefaultsWrapColumnPresetsKey];
 	for(NSNumber* preset in [presets sortedArrayUsingSelector:@selector(compare:)])
 	{
 		menuItem = [aMenu addItemWithTitle:[NSString stringWithFormat:@"%@", preset] action:action keyEquivalent:@""];

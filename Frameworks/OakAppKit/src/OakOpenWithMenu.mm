@@ -34,7 +34,7 @@
 		}
 
 		_url     = url;
-		_name    = [[NSFileManager defaultManager] displayNameAtPath:url.filePathURL.path];
+		_name    = [NSFileManager.defaultManager displayNameAtPath:url.filePathURL.path];
 		_version = [bundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"] ?: ([bundle objectForInfoDictionaryKey:@"CFBundleVersion"] ?: @"???");
 	}
 	return self;
@@ -82,7 +82,7 @@ static NSArray<OakOpenWithApplicationInfo*>* ApplicationURLsForPaths (NSSet* pat
 		for(NSURL* url in appUrlsArray)
 			[appUrls addObject:CanonicalURL(url)];
 
-		if(NSURL* defaultAppURL = CanonicalURL([[NSWorkspace sharedWorkspace] URLForApplicationToOpenURL:url]))
+		if(NSURL* defaultAppURL = CanonicalURL([NSWorkspace.sharedWorkspace URLForApplicationToOpenURL:url]))
 		{
 			[appUrls addObject:defaultAppURL];
 			[defaultAppURLs addObject:defaultAppURL];
@@ -167,7 +167,7 @@ static NSArray<OakOpenWithApplicationInfo*>* ApplicationURLsForPaths (NSSet* pat
 		[menuItem setToolTip:[app.url.filePathURL.path stringByAbbreviatingWithTildeInPath]];
 
 		NSImage* image = nil;
-		if([app.url getResourceValue:&image forKey:NSURLEffectiveIconKey error:NULL] || (image = [[NSWorkspace sharedWorkspace] iconForFile:app.url.filePathURL.path]))
+		if([app.url getResourceValue:&image forKey:NSURLEffectiveIconKey error:NULL] || (image = [NSWorkspace.sharedWorkspace iconForFile:app.url.filePathURL.path]))
 		{
 			image = [image copy];
 			image.size = NSMakeSize(16, 16);
@@ -204,7 +204,7 @@ static NSArray<OakOpenWithApplicationInfo*>* ApplicationURLsForPaths (NSSet* pat
 	NSDictionary* launchOptions = @{ NSWorkspaceLaunchConfigurationAppleEvent: odocEvent };
 
 	NSError* err = nil;
-	if(![[NSWorkspace sharedWorkspace] launchApplicationAtURL:applicationURL options:NSWorkspaceLaunchDefault configuration:launchOptions error:&err])
+	if(![NSWorkspace.sharedWorkspace launchApplicationAtURL:applicationURL options:NSWorkspaceLaunchDefault configuration:launchOptions error:&err])
 		NSLog(@"%@: %@", applicationURL, err.localizedDescription);
 }
 @end

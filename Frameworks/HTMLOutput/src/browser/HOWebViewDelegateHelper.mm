@@ -17,7 +17,7 @@ static BOOL IsProtocolRelativeURL (NSURL* url)
 	if([url.scheme isEqualToString:@"file"] && url.host)
 	{
 		// If host has a dot and does not exist on disk then treat as protocol-relative URL
-		if([url.host containsString:@"."] && ![[NSFileManager defaultManager] fileExistsAtPath:[@"/" stringByAppendingPathComponent:url.host]])
+		if([url.host containsString:@"."] && ![NSFileManager.defaultManager fileExistsAtPath:[@"/" stringByAppendingPathComponent:url.host]])
 			return YES;
 	}
 
@@ -27,7 +27,7 @@ static BOOL IsProtocolRelativeURL (NSURL* url)
 @implementation HOWebViewDelegateHelper
 + (void)initialize
 {
-	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
+	[NSUserDefaults.standardUserDefaults registerDefaults:@{
 		kUserDefaultsDefaultURLProtocolKey: @"https",
 	}];
 }
@@ -134,7 +134,7 @@ static BOOL IsProtocolRelativeURL (NSURL* url)
 	if(IsProtocolRelativeURL([request URL]))
 	{
 		NSURLComponents* components = [NSURLComponents componentsWithURL:[request URL] resolvingAgainstBaseURL:YES];
-		components.scheme = [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsDefaultURLProtocolKey];
+		components.scheme = [NSUserDefaults.standardUserDefaults stringForKey:kUserDefaultsDefaultURLProtocolKey];
 		request = [NSURLRequest requestWithURL:components.URL];
 	}
 

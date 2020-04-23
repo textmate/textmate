@@ -30,7 +30,7 @@ NSString* CommonAncestor (NSArray<NSString*>* paths)
 {
 	NSString* path = helper(paths);
 	BOOL isDirectory = NO;
-	if([[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDirectory] && !isDirectory)
+	if([NSFileManager.defaultManager fileExistsAtPath:path isDirectory:&isDirectory] && !isDirectory)
 		path = [path stringByDeletingLastPathComponent];
 	return path;
 }

@@ -68,15 +68,15 @@ static NSMutableSet<OakCommandRefresher*>* CommandRefreshers = [NSMutableSet set
 
 		[_command.htmlOutputView addObserver:self forKeyPath:@"visible" options:0 context:nullptr];
 		if(_options & OakCommandRefresherDocumentDidChange)
-			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(contentDidChange:) name:OakDocumentContentDidChangeNotification object:_document];
+			[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(contentDidChange:) name:OakDocumentContentDidChangeNotification object:_document];
 
 		if(_options & (OakCommandRefresherDocumentDidChange|OakCommandRefresherDocumentDidClose))
-			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentWillClose:) name:OakDocumentWillCloseNotification object:_document];
+			[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(documentWillClose:) name:OakDocumentWillCloseNotification object:_document];
 
 		if(_options & OakCommandRefresherDocumentDidSave)
 		{
-			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentDidSave:) name:OakDocumentDidSaveNotification object:nil];
-			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowWillClose:) name:NSWindowWillCloseNotification object:window];
+			[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(documentDidSave:) name:OakDocumentDidSaveNotification object:nil];
+			[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(windowWillClose:) name:NSWindowWillCloseNotification object:window];
 		}
 	}
 	return self;
@@ -85,7 +85,7 @@ static NSMutableSet<OakCommandRefresher*>* CommandRefreshers = [NSMutableSet set
 - (void)dealloc
 {
 	_command.htmlOutputView.reusable = YES;
-	[[NSNotificationCenter defaultCenter] removeObserver:self];
+	[NSNotificationCenter.defaultCenter removeObserver:self];
 	[_command.htmlOutputView removeObserver:self forKeyPath:@"visible"];
 }
 

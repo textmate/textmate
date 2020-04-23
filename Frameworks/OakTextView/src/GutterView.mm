@@ -56,8 +56,8 @@ struct data_source_t
 {
 	if(self = [super initWithFrame:frame])
 	{
-		id fontName = [[NSUserDefaults standardUserDefaults] objectForKey:@"NSFixedPitchFont"];
-		id fontSize = [[NSUserDefaults standardUserDefaults] objectForKey:@"NSFixedPitchFontSize"];
+		id fontName = [NSUserDefaults.standardUserDefaults objectForKey:@"NSFixedPitchFont"];
+		id fontSize = [NSUserDefaults.standardUserDefaults objectForKey:@"NSFixedPitchFontSize"];
 		crash_reporter_info_t info("User has font name override %s, size %s", BSTR(fontName), BSTR(fontSize));
 		if(fontName) info << "font name: " << [[fontName description] UTF8String];
 		if(fontSize) info << "font size: " << [[fontSize description] UTF8String];
@@ -71,15 +71,15 @@ struct data_source_t
 
 		[self userDefaultsDidChange:nil];
 
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cursorDidHide:) name:OakCursorDidHideNotification object:nil];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(cursorDidHide:) name:OakCursorDidHideNotification object:nil];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:NSUserDefaults.standardUserDefaults];
 	}
 	return self;
 }
 
 - (void)userDefaultsDidChange:(id)sender
 {
-	self.antiAlias = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableAntiAliasKey];
+	self.antiAlias = ![NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsDisableAntiAliasKey];
 }
 
 - (void)updateTrackingAreas
@@ -91,9 +91,9 @@ struct data_source_t
 
 - (void)viewDidMoveToWindow
 {
-	[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidResignKeyNotification object:nil];
+	[NSNotificationCenter.defaultCenter removeObserver:self name:NSWindowDidResignKeyNotification object:nil];
 	if(self.window)
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidResignKey:) name:NSWindowDidResignKeyNotification object:self.window];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(windowDidResignKey:) name:NSWindowDidResignKeyNotification object:self.window];
 }
 
 - (void)windowDidResignKey:(NSNotification*)notification
@@ -107,9 +107,9 @@ struct data_source_t
 	for(auto const& it : columnDataSources)
 	{
 		if(it.datasource)
-			[[NSNotificationCenter defaultCenter] removeObserver:self name:GVColumnDataSourceDidChange object:it.datasource];
+			[NSNotificationCenter.defaultCenter removeObserver:self name:GVColumnDataSourceDidChange object:it.datasource];
 	}
-	[[NSNotificationCenter defaultCenter] removeObserver:self];
+	[NSNotificationCenter.defaultCenter removeObserver:self];
 }
 
 - (void)setupSelectionRects
@@ -156,11 +156,11 @@ struct data_source_t
 	D(DBF_GutterView, bug("%s (%p)\n", [[[aView class] description] UTF8String], aView););
 
 	if(_partnerView)
-		[[NSNotificationCenter defaultCenter] removeObserver:self];
+		[NSNotificationCenter.defaultCenter removeObserver:self];
 	if(_partnerView = aView)
 	{
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(boundsDidChange:) name:NSViewBoundsDidChangeNotification object:[[_partnerView enclosingScrollView] contentView]];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(boundsDidChange:) name:NSViewFrameDidChangeNotification object:_partnerView];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(boundsDidChange:) name:NSViewBoundsDidChangeNotification object:[[_partnerView enclosingScrollView] contentView]];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(boundsDidChange:) name:NSViewFrameDidChangeNotification object:_partnerView];
 	}
 }
 
@@ -169,7 +169,7 @@ struct data_source_t
 	ASSERT(index <= columnDataSources.size());
 	columnDataSources.insert(columnDataSources.begin() + index, data_source_t(columnIdentifier.UTF8String, columnDataSource, columnDelegate));
 	if(columnDelegate)
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(columnDataSourceDidChange:) name:GVColumnDataSourceDidChange object:columnDelegate];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(columnDataSourceDidChange:) name:GVColumnDataSourceDidChange object:columnDelegate];
 	[self reloadData:self];
 }
 

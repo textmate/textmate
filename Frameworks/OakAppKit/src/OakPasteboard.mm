@@ -290,8 +290,8 @@ namespace
 			kUserDefaultsClipboardHistoryDaysToKeep:   @30,
 		}];
 
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidBecomeActiveNotification:) name:NSApplicationDidBecomeActiveNotification object:NSApp];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidResignActiveNotification:) name:NSApplicationDidResignActiveNotification object:NSApp];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(applicationDidBecomeActiveNotification:) name:NSApplicationDidBecomeActiveNotification object:NSApp];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(applicationDidResignActiveNotification:) name:NSApplicationDidResignActiveNotification object:NSApp];
 	});
 }
 
@@ -348,7 +348,7 @@ namespace
 			if(os_log_info_enabled(kLogSQLite))
 				os_log_info(kLogSQLite, "Opening sqlite3 database: %{public}@", memoryDatabase ? @":memory:" : self.databaseURL.path.stringByAbbreviatingWithTildeInPath);
 
-			[[NSNotificationCenter defaultCenter] addObserverForName:NSApplicationWillTerminateNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
+			[NSNotificationCenter.defaultCenter addObserverForName:NSApplicationWillTerminateNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
 				if(!memoryDatabase)
 				{
 					char const* query =

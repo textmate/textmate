@@ -58,7 +58,7 @@ NSView* OakSetupGridViewWithSeparators (NSGridView* gridView, std::vector<NSUInt
 {
 	if(NSString* key = [_defaultsProperties objectForKey:aKey])
 	{
-		return [[NSUserDefaults standardUserDefaults] setObject:newValue forKey:key];
+		return [NSUserDefaults.standardUserDefaults setObject:newValue forKey:key];
 	}
 	else if(NSString* key = [_tmProperties objectForKey:aKey])
 	{
@@ -73,7 +73,7 @@ NSView* OakSetupGridViewWithSeparators (NSGridView* gridView, std::vector<NSUInt
 - (id)valueForUndefinedKey:(NSString*)aKey
 {
 	if(NSString* key = [_defaultsProperties objectForKey:aKey])
-		return [[NSUserDefaults standardUserDefaults] objectForKey:key];
+		return [NSUserDefaults.standardUserDefaults objectForKey:key];
 	else if(NSString* key = [_tmProperties objectForKey:aKey])
 		return [NSString stringWithCxxString:settings_t::raw_get(to_s(key))];
 	return [super valueForUndefinedKey:aKey];
@@ -83,6 +83,6 @@ NSView* OakSetupGridViewWithSeparators (NSGridView* gridView, std::vector<NSUInt
 {
 	NSString* anchor = [sender isKindOfClass:[NSButton class]] ? [sender alternateTitle] : nil;
 	if(anchor)
-		[[NSHelpManager sharedHelpManager] openHelpAnchor:anchor inBook:[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleHelpBookName"]];
+		[NSHelpManager.sharedHelpManager openHelpAnchor:anchor inBook:[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleHelpBookName"]];
 }
 @end

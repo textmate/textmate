@@ -4,7 +4,7 @@
 @implementation NSSavePanel (HiddenFiles)
 + (void)initialize
 {
-	[[NSUserDefaults standardUserDefaults] registerDefaults:@{ @"NSOpenPanelShowHiddenFiles": @NO }];
+	[NSUserDefaults.standardUserDefaults registerDefaults:@{ @"NSOpenPanelShowHiddenFiles": @NO }];
 }
 
 - (void)setShowsHiddenFilesCheckBox:(BOOL)flag
@@ -14,7 +14,7 @@
 		if([self respondsToSelector:@selector(showsHiddenFiles)] && [self respondsToSelector:@selector(setShowsHiddenFiles:)])
 		{
 			NSButton* checkbox = OakCreateCheckBox(@"Show Hidden Files");
-			[checkbox bind:NSValueBinding toObject:[NSUserDefaultsController sharedUserDefaultsController] withKeyPath:@"values.NSOpenPanelShowHiddenFiles" options:nil];
+			[checkbox bind:NSValueBinding toObject:NSUserDefaultsController.sharedUserDefaultsController withKeyPath:@"values.NSOpenPanelShowHiddenFiles" options:nil];
 
 			NSDictionary* views = @{
 				@"checkbox": checkbox,
@@ -29,7 +29,7 @@
 			contentView.autoresizingMask = NSViewWidthSizable|NSViewHeightSizable;
 			[self setAccessoryView:contentView];
 
-			[self bind:@"showsHiddenFiles" toObject:[NSUserDefaultsController sharedUserDefaultsController] withKeyPath:@"values.NSOpenPanelShowHiddenFiles" options:nil];
+			[self bind:@"showsHiddenFiles" toObject:NSUserDefaultsController.sharedUserDefaultsController withKeyPath:@"values.NSOpenPanelShowHiddenFiles" options:nil];
 		}
 	}
 	else

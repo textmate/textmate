@@ -54,20 +54,20 @@
 	[openPanel setCanChooseDirectories:YES];
 	[openPanel beginSheetModalForWindow:[self view].window completionHandler:^(NSModalResponse result) {
 		if(result == NSModalResponseOK)
-			[[NSUserDefaults standardUserDefaults] setObject:[[openPanel URL] absoluteString] forKey:kUserDefaultsInitialFileBrowserURLKey];
+			[NSUserDefaults.standardUserDefaults setObject:[[openPanel URL] absoluteString] forKey:kUserDefaultsInitialFileBrowserURLKey];
 		[self updatePathPopUp];
 	}];
 }
 
 - (void)takeFileBrowserPathFrom:(id)sender
 {
-	[[NSUserDefaults standardUserDefaults] setObject:[[sender representedObject] absoluteString] forKey:kUserDefaultsInitialFileBrowserURLKey];
+	[NSUserDefaults.standardUserDefaults setObject:[[sender representedObject] absoluteString] forKey:kUserDefaultsInitialFileBrowserURLKey];
 	[self updatePathPopUp];
 }
 
 - (NSMenuItem*)menuItemForURL:(NSURL*)aURL
 {
-	NSMenuItem* res = [[NSMenuItem alloc] initWithTitle:[[NSFileManager defaultManager] displayNameAtPath:[aURL path]] action:@selector(takeFileBrowserPathFrom:) keyEquivalent:@""];
+	NSMenuItem* res = [[NSMenuItem alloc] initWithTitle:[NSFileManager.defaultManager displayNameAtPath:[aURL path]] action:@selector(takeFileBrowserPathFrom:) keyEquivalent:@""];
 	[res setTarget:self];
 	[res setRepresentedObject:aURL];
 	if([aURL isFileURL])
@@ -87,7 +87,7 @@
 	];
 
 	NSURL* url = defaultURLs[1];
-	if(NSString* urlString = [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsInitialFileBrowserURLKey])
+	if(NSString* urlString = [NSUserDefaults.standardUserDefaults stringForKey:kUserDefaultsInitialFileBrowserURLKey])
 		url = [NSURL URLWithString:urlString];
 
 	if(![defaultURLs containsObject:url])

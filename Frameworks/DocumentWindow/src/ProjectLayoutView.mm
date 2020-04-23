@@ -19,7 +19,7 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 @implementation ProjectLayoutView { OBJC_WATCH_LEAKS(ProjectLayoutView); }
 + (void)initialize
 {
-	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
+	[NSUserDefaults.standardUserDefaults registerDefaults:@{
 		kUserDefaultsFileBrowserWidthKey: @250,
 		kUserDefaultsHTMLOutputSizeKey:   NSStringFromSize(NSMakeSize(200, 200))
 	}];
@@ -30,23 +30,23 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 	if(self = [super initWithFrame:aRect])
 	{
 		_myConstraints    = [NSMutableArray array];
-		_fileBrowserWidth = [[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsFileBrowserWidthKey];
-		_htmlOutputSize   = NSSizeFromString([[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsHTMLOutputSizeKey]);
+		_fileBrowserWidth = [NSUserDefaults.standardUserDefaults integerForKey:kUserDefaultsFileBrowserWidthKey];
+		_htmlOutputSize   = NSSizeFromString([NSUserDefaults.standardUserDefaults stringForKey:kUserDefaultsHTMLOutputSizeKey]);
 
 		[self userDefaultsDidChange:nil];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:NSUserDefaults.standardUserDefaults];
 	}
 	return self;
 }
 
 - (void)dealloc
 {
-	[[NSNotificationCenter defaultCenter] removeObserver:self];
+	[NSNotificationCenter.defaultCenter removeObserver:self];
 }
 
 - (void)userDefaultsDidChange:(NSNotification*)aNotification
 {
-	self.htmlOutputOnRight = [[[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsHTMLOutputPlacementKey] isEqualToString:@"right"];
+	self.htmlOutputOnRight = [[NSUserDefaults.standardUserDefaults stringForKey:kUserDefaultsHTMLOutputPlacementKey] isEqualToString:@"right"];
 }
 
 - (NSView*)replaceView:(NSView*)oldView withView:(NSView*)newView
@@ -341,7 +341,7 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 				}
 				self.htmlOutputSizeConstraint.priority   = NSLayoutPriorityDragThatCannotResizeWindow-1;
 
-				[[NSUserDefaults standardUserDefaults] setObject:NSStringFromSize(_htmlOutputSize) forKey:kUserDefaultsHTMLOutputSizeKey];
+				[NSUserDefaults.standardUserDefaults setObject:NSStringFromSize(_htmlOutputSize) forKey:kUserDefaultsHTMLOutputSizeKey];
 			}
 			else if(view == _fileBrowserView)
 			{
@@ -350,7 +350,7 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 				self.fileBrowserWidthConstraint.constant = _fileBrowserWidth;
 				self.fileBrowserWidthConstraint.priority = NSLayoutPriorityDragThatCannotResizeWindow-1;
 
-				[[NSUserDefaults standardUserDefaults] setInteger:_fileBrowserWidth forKey:kUserDefaultsFileBrowserWidthKey];
+				[NSUserDefaults.standardUserDefaults setInteger:_fileBrowserWidth forKey:kUserDefaultsFileBrowserWidthKey];
 			}
 
 			[[self window] invalidateCursorRectsForView:self];

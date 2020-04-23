@@ -56,8 +56,8 @@ namespace
 + (void)load
 {
 	@autoreleasepool {
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(installDebugMenu:) name:NSApplicationDidFinishLaunchingNotification object:NSApp];
-		for(NSString* flag in [[NSUserDefaults standardUserDefaults] stringArrayForKey:@"OakDebug Enabled"])
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(installDebugMenu:) name:NSApplicationDidFinishLaunchingNotification object:NSApp];
+		for(NSString* flag in [NSUserDefaults.standardUserDefaults stringArrayForKey:@"OakDebug Enabled"])
 			OakDebugBaseClass::registry()[[flag UTF8String]] = true;
 	}
 }
@@ -72,7 +72,7 @@ namespace
 		if(it.second)
 			[debugEnabled addObject:@(it.first.c_str())];
 	}
-	[[NSUserDefaults standardUserDefaults] setObject:debugEnabled forKey:@"OakDebug Enabled"];
+	[NSUserDefaults.standardUserDefaults setObject:debugEnabled forKey:@"OakDebug Enabled"];
 }
 
 + (BOOL)validateMenuItem:(NSMenuItem*)menuItem

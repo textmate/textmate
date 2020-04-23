@@ -74,11 +74,11 @@ namespace odb // wrap in namespace to avoid clashing with other callbacks named 
 
 		save_close_callback_t (OakDocument* document, std::string path, std::string token, ae_record_ptr sender)
 		{
-			_save_observer = [[NSNotificationCenter defaultCenter] addObserverForName:OakDocumentDidSaveNotification object:document queue:nil usingBlock:^(NSNotification*){
+			_save_observer = [NSNotificationCenter.defaultCenter addObserverForName:OakDocumentDidSaveNotification object:document queue:nil usingBlock:^(NSNotification*){
 				send_event(kAEModifiedFile, path, token, sender);
 			}];
 
-			_close_observer = [[NSNotificationCenter defaultCenter] addObserverForName:OakDocumentWillCloseNotification object:document queue:nil usingBlock:^(NSNotification*){
+			_close_observer = [NSNotificationCenter.defaultCenter addObserverForName:OakDocumentWillCloseNotification object:document queue:nil usingBlock:^(NSNotification*){
 				send_event(kAEClosedFile, path, token, sender);
 				delete this;
 			}];
@@ -86,8 +86,8 @@ namespace odb // wrap in namespace to avoid clashing with other callbacks named 
 
 		~save_close_callback_t ()
 		{
-			[[NSNotificationCenter defaultCenter] removeObserver:_save_observer];
-			[[NSNotificationCenter defaultCenter] removeObserver:_close_observer];
+			[NSNotificationCenter.defaultCenter removeObserver:_save_observer];
+			[NSNotificationCenter.defaultCenter removeObserver:_close_observer];
 		}
 
 	private:

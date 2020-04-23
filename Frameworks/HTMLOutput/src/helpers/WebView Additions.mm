@@ -66,14 +66,14 @@
 {
 	OakPasteboardEntry* entry = [OakPasteboard.findPasteboard current];
 	if(OakNotEmptyString(entry.string))
-		[self searchFor:entry.string direction:YES caseSensitive:![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFindIgnoreCase] wrap:[[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFindWrapAround]];
+		[self searchFor:entry.string direction:YES caseSensitive:![NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsFindIgnoreCase] wrap:[NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsFindWrapAround]];
 }
 
 - (IBAction)findPrevious:(id)sender
 {
 	OakPasteboardEntry* entry = [OakPasteboard.findPasteboard current];
 	if(OakNotEmptyString(entry.string))
-		[self searchFor:entry.string direction:NO caseSensitive:![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFindIgnoreCase] wrap:[[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFindWrapAround]];
+		[self searchFor:entry.string direction:NO caseSensitive:![NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsFindIgnoreCase] wrap:[NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsFindWrapAround]];
 }
 
 - (void)viewSource:(id)sender

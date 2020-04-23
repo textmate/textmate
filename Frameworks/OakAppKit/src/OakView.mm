@@ -14,19 +14,19 @@ NSUInteger const OakViewViewIsFirstResponderMask = 1 << 3;
 {
 	if((self = [super initWithFrame:aFrame]))
 	{
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateKeyState:) name:NSApplicationDidBecomeActiveNotification object:NSApp];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateKeyState:) name:NSApplicationDidResignActiveNotification object:NSApp];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateKeyState:) name:NSWindowDidBecomeMainNotification object:nil];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateKeyState:) name:NSWindowDidResignMainNotification object:nil];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateKeyState:) name:NSWindowDidBecomeKeyNotification object:nil];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateKeyState:) name:NSWindowDidResignKeyNotification object:nil];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(updateKeyState:) name:NSApplicationDidBecomeActiveNotification object:NSApp];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(updateKeyState:) name:NSApplicationDidResignActiveNotification object:NSApp];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(updateKeyState:) name:NSWindowDidBecomeMainNotification object:nil];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(updateKeyState:) name:NSWindowDidResignMainNotification object:nil];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(updateKeyState:) name:NSWindowDidBecomeKeyNotification object:nil];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(updateKeyState:) name:NSWindowDidResignKeyNotification object:nil];
 	}
 	return self;
 }
 
 - (void)dealloc
 {
-	[[NSNotificationCenter defaultCenter] removeObserver:self];
+	[NSNotificationCenter.defaultCenter removeObserver:self];
 }
 
 - (void)updateKeyState:(NSNotification*)aNotification

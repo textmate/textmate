@@ -80,15 +80,15 @@ static void ShowLoadErrorForURL (WebFrame* frame, NSURL* url, NSError* error)
 {
 	if(flag)
 	{
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(webViewProgressEstimateChanged:) name:WebViewProgressFinishedNotification object:_webView];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(webViewProgressEstimateChanged:) name:WebViewProgressEstimateChangedNotification object:_webView];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(webViewProgressEstimateChanged:) name:WebViewProgressStartedNotification object:_webView];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(webViewProgressEstimateChanged:) name:WebViewProgressFinishedNotification object:_webView];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(webViewProgressEstimateChanged:) name:WebViewProgressEstimateChangedNotification object:_webView];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(webViewProgressEstimateChanged:) name:WebViewProgressStartedNotification object:_webView];
 	}
 	else
 	{
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:WebViewProgressStartedNotification object:_webView];
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:WebViewProgressEstimateChangedNotification object:_webView];
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:WebViewProgressFinishedNotification object:_webView];
+		[NSNotificationCenter.defaultCenter removeObserver:self name:WebViewProgressStartedNotification object:_webView];
+		[NSNotificationCenter.defaultCenter removeObserver:self name:WebViewProgressEstimateChangedNotification object:_webView];
+		[NSNotificationCenter.defaultCenter removeObserver:self name:WebViewProgressFinishedNotification object:_webView];
 	}
 }
 

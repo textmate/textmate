@@ -25,7 +25,7 @@ static NSString* const kVariableKeyValue   = @"value";
 {
 	if(self = [self initWithNibName:nil bundle:nil])
 	{
-		self.variables = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] arrayForKey:kUserDefaultsEnvironmentVariablesKey]];
+		self.variables = [NSMutableArray arrayWithArray:[NSUserDefaults.standardUserDefaults arrayForKey:kUserDefaultsEnvironmentVariablesKey]];
 	}
 	return self;
 }
@@ -40,7 +40,7 @@ static NSString* const kVariableKeyValue   = @"value";
 
 	NSInteger pos = [variablesTableView selectedRow] != -1 ? [variablesTableView selectedRow] : [_variables count];
 	[_variables insertObject:entry atIndex:pos];
-	[[NSUserDefaults standardUserDefaults] setObject:[_variables copy] forKey:kUserDefaultsEnvironmentVariablesKey];
+	[NSUserDefaults.standardUserDefaults setObject:[_variables copy] forKey:kUserDefaultsEnvironmentVariablesKey];
 	[variablesTableView reloadData];
 	[variablesTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:pos] byExtendingSelection:NO];
 	[variablesTableView editColumn:1 row:pos withEvent:nil select:YES];
@@ -58,7 +58,7 @@ static NSString* const kVariableKeyValue   = @"value";
 		}
 
 		[_variables removeObjectAtIndex:row];
-		[[NSUserDefaults standardUserDefaults] setObject:[_variables copy] forKey:kUserDefaultsEnvironmentVariablesKey];
+		[NSUserDefaults.standardUserDefaults setObject:[_variables copy] forKey:kUserDefaultsEnvironmentVariablesKey];
 		[variablesTableView reloadData];
 		if(row > 0)
 			--row;
@@ -179,6 +179,6 @@ static NSString* const kVariableKeyValue   = @"value";
 	if(![aTableColumn.identifier isEqualToString:kVariableKeyEnabled] && ![newValue[kVariableKeyEnabled] boolValue])
 		newValue[kVariableKeyEnabled] = @YES;
 	[_variables replaceObjectAtIndex:rowIndex withObject:newValue];
-	[[NSUserDefaults standardUserDefaults] setObject:[_variables copy] forKey:kUserDefaultsEnvironmentVariablesKey];
+	[NSUserDefaults.standardUserDefaults setObject:[_variables copy] forKey:kUserDefaultsEnvironmentVariablesKey];
 }
 @end

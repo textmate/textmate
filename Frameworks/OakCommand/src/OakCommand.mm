@@ -490,7 +490,7 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 		// Wake potential event loop
 		didTerminate = YES;
 		[NSApp postEvent:[NSEvent otherEventWithType:NSEventTypeApplicationDefined location:NSZeroPoint modifierFlags:0 timestamp:0 windowNumber:0 context:NULL subtype:0 data1:0 data2:0] atStart:NO];
-		[[NSNotificationCenter defaultCenter] postNotificationName:OakCommandDidTerminateNotification object:self];
+		[NSNotificationCenter.defaultCenter postNotificationName:OakCommandDidTerminateNotification object:self];
 	});
 
 	if(_bundleCommand.output == output::new_window && _bundleCommand.output_format == output_format::html)
@@ -526,7 +526,7 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 		case OakCommandRequirementsMissingError:
 		{
 			if(recoveryOptionIndex == 1)
-				[[NSWorkspace sharedWorkspace] openURL:error.userInfo[@"moreInfoURL"]];
+				[NSWorkspace.sharedWorkspace openURL:error.userInfo[@"moreInfoURL"]];
 		}
 		break;
 

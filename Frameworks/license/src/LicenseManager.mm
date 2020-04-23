@@ -147,7 +147,7 @@ static NSTextField* OakCreateTextField ()
 
 - (void)visitOnlineStore:(id)sender
 {
-	[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://shop.macromates.com"]];
+	[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:@"https://shop.macromates.com"]];
 }
 
 - (void)addLicense:(id)sender

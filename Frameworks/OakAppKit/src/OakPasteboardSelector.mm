@@ -34,7 +34,7 @@ static size_t line_count (std::string const& text)
 
 - (NSDictionary*)textAttributes
 {
-	static NSMutableParagraphStyle* const style = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
+	static NSMutableParagraphStyle* const style = [NSParagraphStyle.defaultParagraphStyle mutableCopy];
 	[style setLineBreakMode:NSLineBreakByTruncatingTail];
 	if([self isHighlighted])
 	{

@@ -136,7 +136,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 		// send all diffs to a separate window
 		_environment["TM_PROJECT_UUID"] = to_s(oak::uuid_t().generate());
 
-		_showsTableView = [[NSUserDefaults standardUserDefaults] boolForKey:kOakCommitWindowShowFileList];
+		_showsTableView = [NSUserDefaults.standardUserDefaults boolForKey:kOakCommitWindowShowFileList];
 
 		self.documentView = [[OakDocumentView alloc] initWithFrame:NSZeroRect];
 		self.documentView.hideStatusBar     = YES;
@@ -516,7 +516,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 
 	_showsTableView = flag;
 
-	[[NSUserDefaults standardUserDefaults] setBool:_showsTableView forKey:kOakCommitWindowShowFileList];
+	[NSUserDefaults.standardUserDefaults setBool:_showsTableView forKey:kOakCommitWindowShowFileList];
 }
 
 - (void)beginSheetModalForWindow:(NSWindow*)aWindow completionHandler:(void(^)(NSModalResponse returnCode))aCompletionHandler
@@ -598,7 +598,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 	NSString* commitMessage = self.documentView.document.content;
 	if([[commitMessage stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length] > 0)
 	{
-		NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+		NSUserDefaults* defaults = NSUserDefaults.standardUserDefaults;
 		NSMutableArray* messages = [[defaults stringArrayForKey:kOakCommitWindowCommitMessages] mutableCopy];
 		if(messages)
 		{
@@ -626,7 +626,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 	[menu removeAllItems];
 	[menu addItemWithTitle:@"Previous Commit Messages" action:NULL keyEquivalent:@""];
 
-	if(NSArray* commitMessages = [[NSUserDefaults standardUserDefaults] stringArrayForKey:kOakCommitWindowCommitMessages])
+	if(NSArray* commitMessages = [NSUserDefaults.standardUserDefaults stringArrayForKey:kOakCommitWindowCommitMessages])
 	{
 		[commitMessages enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(NSString* message, NSUInteger idx, BOOL* stop){
 			NSString* title = message;
@@ -659,7 +659,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 
 - (void)clearPreviousCommitMessages:(id)sender
 {
-	[[NSUserDefaults standardUserDefaults] removeObjectForKey:kOakCommitWindowCommitMessages];
+	[NSUserDefaults.standardUserDefaults removeObjectForKey:kOakCommitWindowCommitMessages];
 	[self setupPreviousCommitMessagesMenu];
 }
 

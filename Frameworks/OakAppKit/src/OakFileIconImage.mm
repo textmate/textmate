@@ -60,7 +60,7 @@ static NSImage* IconBadgeForAlias ()
 
 static NSImage* SystemIconForHFSType (OSType hfsFileTypeCode)
 {
-	return [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(hfsFileTypeCode)];
+	return [NSWorkspace.sharedWorkspace iconForFileType:NSFileTypeForHFSTypeCode(hfsFileTypeCode)];
 }
 
 static NSImage* BadgeForSCMStatus (scm::status::type scmStatus)
@@ -167,7 +167,7 @@ enum {
 			{
 				NSImage* image;
 				if(![[NSURL fileURLWithPath:self.path isDirectory:self.isDirectory] getResourceValue:&image forKey:NSURLEffectiveIconKey error:NULL])
-					image = [[NSWorkspace sharedWorkspace] iconForFile:self.path];
+					image = [NSWorkspace.sharedWorkspace iconForFile:self.path];
 
 				if(image)
 					[res addObject:image];
@@ -175,7 +175,7 @@ enum {
 		}
 		else if(self.exists)
 		{
-			if(NSImage* image = [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(self.isDirectory ? kGenericFolderIcon : kGenericDocumentIcon)])
+			if(NSImage* image = [NSWorkspace.sharedWorkspace iconForFileType:NSFileTypeForHFSTypeCode(self.isDirectory ? kGenericFolderIcon : kGenericDocumentIcon)])
 				[res addObject:image];
 		}
 		else

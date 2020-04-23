@@ -27,9 +27,9 @@ static NSString* const FCExpandedStringKey = @"long";
 	if(self = [self init])
 	{
 		self.name     = aName;
-		self.bindings = [[[NSUserDefaults standardUserDefaults] arrayForKey:self.name] mutableCopy] ?: [NSMutableArray new];
+		self.bindings = [[NSUserDefaults.standardUserDefaults arrayForKey:self.name] mutableCopy] ?: [NSMutableArray new];
 		D(DBF_FilterList_Abbreviations, bug("%s\n", [[self.bindings description] UTF8String]););
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:NSApp];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:NSApp];
 	}
 	return self;
 }
@@ -37,7 +37,7 @@ static NSString* const FCExpandedStringKey = @"long";
 - (void)dealloc
 {
 	[self applicationWillTerminate:nil];
-	[[NSNotificationCenter defaultCenter] removeObserver:self name:NSApplicationWillTerminateNotification object:NSApp];
+	[NSNotificationCenter.defaultCenter removeObserver:self name:NSApplicationWillTerminateNotification object:NSApp];
 }
 
 - (void)applicationWillTerminate:(NSNotification*)aNotification
@@ -45,7 +45,7 @@ static NSString* const FCExpandedStringKey = @"long";
 	D(DBF_FilterList_Abbreviations, bug("%s\n", [[self.bindings description] UTF8String]););
 	if([self.bindings count] > 50)
 		[self.bindings setArray:[self.bindings subarrayWithRange:NSMakeRange(0, 50)]];
-	[[NSUserDefaults standardUserDefaults] setObject:self.bindings forKey:self.name];
+	[NSUserDefaults.standardUserDefaults setObject:self.bindings forKey:self.name];
 }
 
 - (NSArray*)stringsForAbbreviation:(NSString*)anAbbreviation

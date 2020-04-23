@@ -21,7 +21,7 @@ OAK_DEBUG_VAR(AppController_Documents);
 - (void)newFileBrowser:(id)sender
 {
 	D(DBF_AppController_Documents, bug("\n"););
-	NSString* urlString = [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsInitialFileBrowserURLKey];
+	NSString* urlString = [NSUserDefaults.standardUserDefaults stringForKey:kUserDefaultsInitialFileBrowserURLKey];
 	NSURL* url          = urlString ? [NSURL URLWithString:urlString] : nil;
 
 	DocumentWindowController* controller = [DocumentWindowController new];
@@ -55,7 +55,7 @@ OAK_DEBUG_VAR(AppController_Documents);
 - (BOOL)application:(NSApplication*)theApplication openFile:(NSString*)aPath
 {
 	D(DBF_AppController_Documents, bug("%s\n", [aPath UTF8String]););
-	if(!DidHandleODBEditorEvent([[[NSAppleEventManager sharedAppleEventManager] currentAppleEvent] aeDesc]))
+	if(!DidHandleODBEditorEvent([[NSAppleEventManager.sharedAppleEventManager currentAppleEvent] aeDesc]))
 		OakOpenDocuments(@[ aPath ]);
 	return YES;
 }
@@ -63,7 +63,7 @@ OAK_DEBUG_VAR(AppController_Documents);
 - (void)application:(NSApplication*)sender openFiles:(NSArray*)filenames
 {
 	D(DBF_AppController_Documents, bug("%s\n", [[filenames description] UTF8String]););
-	if(!DidHandleODBEditorEvent([[[NSAppleEventManager sharedAppleEventManager] currentAppleEvent] aeDesc]))
+	if(!DidHandleODBEditorEvent([[NSAppleEventManager.sharedAppleEventManager currentAppleEvent] aeDesc]))
 		OakOpenDocuments(filenames);
 	[sender replyToOpenOrPrint:NSApplicationDelegateReplySuccess];
 }
@@ -71,7 +71,7 @@ OAK_DEBUG_VAR(AppController_Documents);
 - (BOOL)applicationOpenUntitledFile:(NSApplication*)theApplication
 {
 	D(DBF_AppController_Documents, bug("\n"););
-	if([[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsShowFavoritesInsteadOfUntitledKey])
+	if([NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsShowFavoritesInsteadOfUntitledKey])
 			[self openFavorites:self];
 	else	[self newDocument:self];
 	return YES;
@@ -215,8 +215,8 @@ OAK_DEBUG_VAR(AppController_Documents);
 - (BOOL)applicationShouldHandleReopen:(NSApplication*)theApplication hasVisibleWindows:(BOOL)flag
 {
 	D(DBF_AppController_Documents, bug("%s\n", BSTR(flag)););
-	BOOL disableUntitledAtReactivationPrefs = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableNewDocumentAtReactivationKey];
-	BOOL showFavoritesInsteadPrefs          = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsShowFavoritesInsteadOfUntitledKey];
+	BOOL disableUntitledAtReactivationPrefs = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsDisableNewDocumentAtReactivationKey];
+	BOOL showFavoritesInsteadPrefs          = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsShowFavoritesInsteadOfUntitledKey];
 	return flag || !disableUntitledAtReactivationPrefs || showFavoritesInsteadPrefs;
 }
 

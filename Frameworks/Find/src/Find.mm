@@ -95,7 +95,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		[_windowController.replaceAllButton bind:NSTitleBinding toObject:self withKeyPath:@"replaceAllButtonTitle" options:nil];
 		[_windowController.replaceAllButton bind:@"enabled2" toObject:self withKeyPath:@"canReplaceAll" options:nil];
 
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowWillClose:) name:NSWindowWillCloseNotification object:_windowController.window];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(windowWillClose:) name:NSWindowWillCloseNotification object:_windowController.window];
 	}
 	return _windowController;
 }
@@ -419,8 +419,8 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	if(_documentSearch)
 	{
 		[_documentSearch removeObserver:self forKeyPath:@"currentPath"];
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:FFDocumentSearchDidReceiveResultsNotification object:_documentSearch];
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:FFDocumentSearchDidFinishNotification object:_documentSearch];
+		[NSNotificationCenter.defaultCenter removeObserver:self name:FFDocumentSearchDidReceiveResultsNotification object:_documentSearch];
+		[NSNotificationCenter.defaultCenter removeObserver:self name:FFDocumentSearchDidFinishNotification object:_documentSearch];
 		[_documentSearch stop];
 	}
 
@@ -431,8 +431,8 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		self.windowController.showsResultsOutlineView = YES;
 		self.windowController.resultsViewController.hideCheckBoxes = NO;
 
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(folderSearchDidReceiveResults:) name:FFDocumentSearchDidReceiveResultsNotification object:_documentSearch];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(folderSearchDidFinish:) name:FFDocumentSearchDidFinishNotification object:_documentSearch];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(folderSearchDidReceiveResults:) name:FFDocumentSearchDidReceiveResultsNotification object:_documentSearch];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(folderSearchDidFinish:) name:FFDocumentSearchDidFinishNotification object:_documentSearch];
 		[_documentSearch addObserver:self forKeyPath:@"currentPath" options:(NSKeyValueObservingOptionNew|NSKeyValueObservingOptionOld) context:NULL];
 		self.performingFolderSearch = YES;
 		[_documentSearch start];
@@ -509,11 +509,11 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		self.windowController.statusString = msg;
 	}
 
-	__weak __block id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:OakPasteboardDidChangeNotification object:OakPasteboard.findPasteboard queue:nil usingBlock:^(NSNotification*){
+	__weak __block id observerId = [NSNotificationCenter.defaultCenter addObserverForName:OakPasteboardDidChangeNotification object:OakPasteboard.findPasteboard queue:nil usingBlock:^(NSNotification*){
 		self.findMatches = nil;
 		for(FFResultNode* parent in _results.children)
 			[parent.document removeAllMarksOfType:kSearchMarkIdentifier];
-		[[NSNotificationCenter defaultCenter] removeObserver:observerId];
+		[NSNotificationCenter.defaultCenter removeObserver:observerId];
 	}];
 }
 
@@ -557,7 +557,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 - (void)didDoubleClickResult:(FFResultNode*)item
 {
-	if([[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsKeepSearchResultsOnDoubleClick] boolValue])
+	if([[NSUserDefaults.standardUserDefaults objectForKey:kUserDefaultsKeepSearchResultsOnDoubleClick] boolValue])
 		return;
 	[_resultsDelegate bringToFront];
 	[self.windowController close];

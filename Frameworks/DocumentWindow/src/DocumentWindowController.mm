@@ -212,10 +212,10 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		for(NSString* keyPath in kObservedKeyPaths)
 			[self addObserver:self forKeyPath:keyPath options:NSKeyValueObservingOptionInitial context:nullptr];
 
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidBecomeActiveNotification:) name:NSApplicationDidBecomeActiveNotification object:NSApp];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidResignActiveNotification:) name:NSApplicationDidResignActiveNotification object:NSApp];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(fileBrowserWillDelete:) name:FileBrowserWillDeleteNotification object:nil];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:NSUserDefaults.standardUserDefaults];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(applicationDidBecomeActiveNotification:) name:NSApplicationDidBecomeActiveNotification object:NSApp];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(applicationDidResignActiveNotification:) name:NSApplicationDidResignActiveNotification object:NSApp];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(fileBrowserWillDelete:) name:FileBrowserWillDeleteNotification object:nil];
 
 		[self userDefaultsDidChange:nil];
 	}
@@ -227,7 +227,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	for(NSString* keyPath in kObservedKeyPaths)
 		[self removeObserver:self forKeyPath:keyPath];
 
-	[[NSNotificationCenter defaultCenter] removeObserver:self];
+	[NSNotificationCenter.defaultCenter removeObserver:self];
 
 	self.window.delegate        = nil;
 	self.tabBarView.dataSource  = nil;
@@ -297,7 +297,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		return r;
 	}
 
-	if(NSString* rectStr = [[NSUserDefaults standardUserDefaults] stringForKey:@"DocumentControllerWindowFrame"])
+	if(NSString* rectStr = [NSUserDefaults.standardUserDefaults stringForKey:@"DocumentControllerWindowFrame"])
 		return NSRectFromString(rectStr);
 
 	NSRect r = [[NSScreen mainScreen] visibleFrame];
@@ -309,7 +309,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 - (void)windowWillClose:(NSNotification*)aNotification
 {
 	if((([self.window styleMask] & NSWindowStyleMaskFullScreen) != NSWindowStyleMaskFullScreen) && !self.window.isZoomed)
-		[[NSUserDefaults standardUserDefaults] setObject:NSStringFromRect([self windowFrame]) forKey:@"DocumentControllerWindowFrame"];
+		[NSUserDefaults.standardUserDefaults setObject:NSStringFromRect([self windowFrame]) forKey:@"DocumentControllerWindowFrame"];
 
 	[_arrayController unbind:NSContentBinding];
 
@@ -363,12 +363,12 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 - (void)userDefaultsDidChange:(NSNotification*)aNotification
 {
-	self.htmlOutputInWindow = [[[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsHTMLOutputPlacementKey] isEqualToString:@"window"];
-	self.disableFileBrowserWindowResize = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableFileBrowserWindowResizeKey];
-	self.autoRevealFile = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsAutoRevealFileKey];
-	self.documentView.hideStatusBar = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsHideStatusBarKey];
+	self.htmlOutputInWindow = [[NSUserDefaults.standardUserDefaults stringForKey:kUserDefaultsHTMLOutputPlacementKey] isEqualToString:@"window"];
+	self.disableFileBrowserWindowResize = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsDisableFileBrowserWindowResizeKey];
+	self.autoRevealFile = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsAutoRevealFileKey];
+	self.documentView.hideStatusBar = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsHideStatusBarKey];
 
-	if(self.layoutView.fileBrowserOnRight != [[[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsFileBrowserPlacementKey] isEqualToString:@"right"])
+	if(self.layoutView.fileBrowserOnRight != [[NSUserDefaults.standardUserDefaults stringForKey:kUserDefaultsFileBrowserPlacementKey] isEqualToString:@"right"])
 	{
 		self.oldWindowFrame = self.newWindowFrame = NSZeroRect;
 		self.layoutView.fileBrowserOnRight = !self.layoutView.fileBrowserOnRight;
@@ -647,7 +647,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 + (void)saveSessionAndDetachBackups
 {
-	BOOL restoresSession = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableSessionRestoreKey];
+	BOOL restoresSession = ![NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsDisableSessionRestoreKey];
 	[DocumentWindowController saveSessionIncludingUntitledDocuments:restoresSession];
 	for(DocumentWindowController* controller in [SortedControllers() reverseObjectEnumerator])
 	{
@@ -669,7 +669,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 - (NSArray<OakDocument*>*)documentsNeedingSaving
 {
-	BOOL restoresSession = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableSessionRestoreKey];
+	BOOL restoresSession = ![NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsDisableSessionRestoreKey];
 
 	NSMutableArray<OakDocument*>* res = [NSMutableArray array];
 	for(OakDocument* doc in _documents)
@@ -874,7 +874,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	NSMutableSet<NSUUID*>* oldUUIDs = [NSMutableSet setWithArray:[self.documents valueForKey:@"identifier"]];
 	[oldUUIDs minusSet:[NSSet setWithArray:closeDocuments]];
 
-	BOOL shouldReorder = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableTabReorderingKey];
+	BOOL shouldReorder = ![NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsDisableTabReorderingKey];
 	NSMutableArray<OakDocument*>* newDocuments = [NSMutableArray array];
 	for(NSUInteger i = 0; i <= _documents.count; ++i)
 	{
@@ -949,7 +949,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	[self insertDocuments:documents atIndex:_selectedTabIndex + 1 selecting:documents.lastObject andClosing:tabsToClose];
 	[self openAndSelectDocument:documents.lastObject activate:activateFlag];
 
-	if(self.tabBarView && ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableTabAutoCloseKey])
+	if(self.tabBarView && ![NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsDisableTabAutoCloseKey])
 	{
 		NSInteger excessTabs = _documents.count - std::max<NSUInteger>(self.tabBarView.countOfVisibleTabs, 8);
 		if(excessTabs > 0)
@@ -990,11 +990,11 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	[document loadModalForWindow:self.window completionHandler:^(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID){
 		if(result == OakDocumentIOResultSuccess)
 		{
-			BOOL showBundleSuggestions = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableBundleSuggestionsKey];
+			BOOL showBundleSuggestions = ![NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsDisableBundleSuggestionsKey];
 			if(!document.fileType && showBundleSuggestions)
 			{
 				NSArray<BundleGrammar*>* grammars = document.proposedGrammars;
-				if(NSArray* excludedGrammars = [[NSUserDefaults standardUserDefaults] stringArrayForKey:kUserDefaultsGrammarsToNeverSuggestKey])
+				if(NSArray* excludedGrammars = [NSUserDefaults.standardUserDefaults stringArrayForKey:kUserDefaultsGrammarsToNeverSuggestKey])
 					grammars = [grammars filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"NOT (identifier.UUIDString IN %@)", excludedGrammars]];
 				if(_bundlesAlreadySuggested)
 					grammars = [grammars filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"NOT (bundle IN %@)", _bundlesAlreadySuggested]];
@@ -1006,9 +1006,9 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 					SelectGrammarViewController* installer = [[SelectGrammarViewController alloc] init];
 					installer.documentDisplayName = document.path || document.customName ? document.displayName : nil;
 
-					__weak __block id documentCloseObserver = [[NSNotificationCenter defaultCenter] addObserverForName:OakDocumentWillCloseNotification object:document queue:nil usingBlock:^(NSNotification*){
+					__weak __block id documentCloseObserver = [NSNotificationCenter.defaultCenter addObserverForName:OakDocumentWillCloseNotification object:document queue:nil usingBlock:^(NSNotification*){
 						[installer dismiss];
-						[[NSNotificationCenter defaultCenter] removeObserver:documentCloseObserver];
+						[NSNotificationCenter.defaultCenter removeObserver:documentCloseObserver];
 					}];
 
 					[installer showGrammars:grammars forView:_documentView completionHandler:^(SelectGrammarResponse response, BundleGrammar* grammar){
@@ -1022,12 +1022,12 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 						}
 						else if(response == SelectGrammarResponseNever)
 						{
-							NSArray* excludedGrammars = [[NSUserDefaults standardUserDefaults] stringArrayForKey:kUserDefaultsGrammarsToNeverSuggestKey] ?: @[ ];
-							[[NSUserDefaults standardUserDefaults] setObject:[excludedGrammars arrayByAddingObject:grammar.identifier.UUIDString] forKey:kUserDefaultsGrammarsToNeverSuggestKey];
+							NSArray* excludedGrammars = [NSUserDefaults.standardUserDefaults stringArrayForKey:kUserDefaultsGrammarsToNeverSuggestKey] ?: @[ ];
+							[NSUserDefaults.standardUserDefaults setObject:[excludedGrammars arrayByAddingObject:grammar.identifier.UUIDString] forKey:kUserDefaultsGrammarsToNeverSuggestKey];
 						}
 
 						if(id observer = documentCloseObserver)
-							[[NSNotificationCenter defaultCenter] removeObserver:observer];
+							[NSNotificationCenter.defaultCenter removeObserver:observer];
 					}];
 				}
 
@@ -1130,7 +1130,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 {
 	if(OakDocument* document = [anEnumerator nextObject])
 	{
-		id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:OakDocumentWillShowAlertNotification object:document queue:nil usingBlock:^(NSNotification*){
+		id observerId = [NSNotificationCenter.defaultCenter addObserverForName:OakDocumentWillShowAlertNotification object:document queue:nil usingBlock:^(NSNotification*){
 			NSUInteger i = [_documents indexOfObject:document];
 			if(i != NSNotFound && document.isLoaded)
 			{
@@ -1146,7 +1146,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		}];
 
 		[document saveModalForWindow:self.window completionHandler:^(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID){
-			[[NSNotificationCenter defaultCenter] removeObserver:observerId];
+			[NSNotificationCenter.defaultCenter removeObserver:observerId];
 			if(result == OakDocumentIOResultSuccess)
 			{
 				[self saveDocumentsUsingEnumerator:anEnumerator completionHandler:callback];
@@ -1529,7 +1529,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 			if(path::is_absolute(userProjectDirectory))
 				projectPath = [NSString stringWithCxxString:path::normalize(userProjectDirectory)];
 		}
-		else if(NSString* urlString = [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsInitialFileBrowserURLKey])
+		else if(NSString* urlString = [NSUserDefaults.standardUserDefaults stringForKey:kUserDefaultsInitialFileBrowserURLKey])
 		{
 			if(NSURL* url = [NSURL URLWithString:urlString])
 				projectPath = [[url filePathURL] path];
@@ -1787,7 +1787,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 			}
 			[self updateFileBrowserStatus:self];
 
-			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(fileBrowserDidDuplicate:) name:FileBrowserDidDuplicateNotification object:nil];
+			[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(fileBrowserDidDuplicate:) name:FileBrowserDidDuplicateNotification object:nil];
 		}
 
 		if(!makeVisibleFlag && [[self.window firstResponder] isKindOfClass:[NSView class]] && [(NSView*)[self.window firstResponder] isDescendantOf:self.layoutView.fileBrowserView])
@@ -1997,7 +1997,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	[self prepareAndReturnFindPanel];
 
 	NSInteger mode = [sender respondsToSelector:@selector(tag)] ? [sender tag] : find_tags::in_document;
-	if(mode == find_tags::in_document && ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsAlwaysFindInDocument] && [self.window isKeyWindow] && self.textView.hasMultiLineSelection)
+	if(mode == find_tags::in_document && ![NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsAlwaysFindInDocument] && [self.window isKeyWindow] && self.textView.hasMultiLineSelection)
 		mode = find_tags::in_selection;
 
 	switch(mode)
@@ -2412,7 +2412,7 @@ static NSTouchBarItemIdentifier kTouchBarFavoritesItemIdentifier = @"com.macroma
 	static dispatch_once_t onceToken = 0;
 	dispatch_once(&onceToken, ^{
 		for(NSString* notification in @[ NSWindowDidBecomeKeyNotification, NSWindowDidDeminiaturizeNotification, NSWindowDidExposeNotification, NSWindowDidMiniaturizeNotification, NSWindowDidMoveNotification, NSWindowDidResizeNotification, NSWindowWillCloseNotification ])
-			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(scheduleSessionBackup:) name:notification object:nil];
+			[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(scheduleSessionBackup:) name:notification object:nil];
 	});
 }
 
@@ -2675,21 +2675,21 @@ static NSUInteger DisableSessionSavingCount = 0;
 	{
 		// If we call ‘mate -w’ in quick succession there is a chance that we have a pending “re-activate the terminal app” when this code is executed, which will make ‘isActive’ return ‘YES’ but shortly after, our application will become inactive. For this reason, we monitor the NSApplicationDidResignActiveNotification for 200 ms and re-activate TextMate if we see the notification.
 
-		__weak __block id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:NSApplicationDidResignActiveNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
-			[[NSNotificationCenter defaultCenter] removeObserver:observerId];
+		__weak __block id observerId = [NSNotificationCenter.defaultCenter addObserverForName:NSApplicationDidResignActiveNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
+			[NSNotificationCenter.defaultCenter removeObserver:observerId];
 			[NSApp activateIgnoringOtherApps:YES];
 		}];
 
 		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC / 5), dispatch_get_main_queue(), ^{
-			[[NSNotificationCenter defaultCenter] removeObserver:observerId];
+			[NSNotificationCenter.defaultCenter removeObserver:observerId];
 		});
 	}
 	else
 	{
-		__weak __block id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:NSApplicationDidBecomeActiveNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
+		__weak __block id observerId = [NSNotificationCenter.defaultCenter addObserverForName:NSApplicationDidBecomeActiveNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
 			// If our window is not on the active desktop but another one is, the system gives focus to the wrong window.
 			[self showWindow:nil];
-			[[NSNotificationCenter defaultCenter] removeObserver:observerId];
+			[NSNotificationCenter.defaultCenter removeObserver:observerId];
 		}];
 		[NSApp activateIgnoringOtherApps:YES];
 	}
@@ -2825,7 +2825,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 - (void)showFileBrowserAtPath:(NSString*)aPath
 {
 	NSString* const folder = to_ns(path::resolve(to_s(aPath)));
-	[[NSDocumentController sharedDocumentController] noteNewRecentDocumentURL:[NSURL fileURLWithPath:folder]];
+	[NSDocumentController.sharedDocumentController noteNewRecentDocumentURL:[NSURL fileURLWithPath:folder]];
 
 	for(DocumentWindowController* candidate in SortedControllers())
 	{
@@ -2849,7 +2849,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 		controller.selectedDocument.customName = @"not untitled"; // release potential untitled token used
 
 	NSDictionary* project;
-	if(![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableFolderStateRestore])
+	if(![NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsDisableFolderStateRestore])
 		project = [[DocumentWindowController sharedProjectStateDB] valueForKey:folder];
 
 	if(project && [project[@"documents"] count])

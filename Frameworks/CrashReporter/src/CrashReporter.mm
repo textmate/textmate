@@ -56,7 +56,7 @@ static std::string create_gzipped_file (std::string const& path)
 - (id)init
 {
 	if(self = [super init])
-		[[NSUserNotificationCenter defaultUserNotificationCenter] setDelegate:self];
+		[NSUserNotificationCenter.defaultUserNotificationCenter setDelegate:self];
 	return self;
 }
 
@@ -69,7 +69,7 @@ static std::string create_gzipped_file (std::string const& path)
 {
 	NSDictionary* userInfo = notification.userInfo;
 	if(NSString* urlString = userInfo[@"url"])
-		[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:urlString]];
+		[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:urlString]];
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification*)aNotification
@@ -77,20 +77,20 @@ static std::string create_gzipped_file (std::string const& path)
 	if(NSDictionary* userInfo = [aNotification userInfo])
 	{
 		if(NSUserNotification* notification = userInfo[NSApplicationLaunchUserNotificationKey])
-			[self userNotificationCenter:[NSUserNotificationCenter defaultUserNotificationCenter] didActivateNotification:notification];
+			[self userNotificationCenter:NSUserNotificationCenter.defaultUserNotificationCenter didActivateNotification:notification];
 	}
 }
 
 - (void)postNewCrashReportsToURLString:(NSString*)aURL
 {
-	if([[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableCrashReportingKey])
+	if([NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsDisableCrashReportingKey])
 		return;
 
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
 
 		// has sent: reports we already posted
 		std::set<std::string> hasSent;
-		for(NSString* path in [[NSUserDefaults standardUserDefaults] stringArrayForKey:kUserDefaultsCrashReportsSent])
+		for(NSString* path in [NSUserDefaults.standardUserDefaults stringArrayForKey:kUserDefaultsCrashReportsSent])
 			hasSent.insert([path fileSystemRepresentation]);
 
 		// can send: all reports from the last week
@@ -110,7 +110,7 @@ static std::string create_gzipped_file (std::string const& path)
 		if(!shouldSend.empty())
 		{
 			dispatch_sync(dispatch_get_main_queue(), ^{
-				contact = to_s([[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsCrashReportsContactInfoKey]);
+				contact = to_s([NSUserDefaults.standardUserDefaults stringForKey:kUserDefaultsCrashReportsContactInfoKey]);
 			});
 		}
 
@@ -140,7 +140,7 @@ static std::string create_gzipped_file (std::string const& path)
 						notification.title           = @"Crash Report Sent";
 						notification.informativeText = @"Diagnostic information has been sent to MacroMates.com regarding your last crash.";
 						notification.userInfo        = @{ @"path": path, @"url": url };
-						[[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
+						[NSUserNotificationCenter.defaultUserNotificationCenter deliverNotification:notification];
 					}
 				}
 
@@ -156,7 +156,7 @@ static std::string create_gzipped_file (std::string const& path)
 		for(auto path : updatedHasSent)
 			[array addObject:[NSString stringWithCxxString:path]];
 		dispatch_async(dispatch_get_main_queue(), ^{
-			[[NSUserDefaults standardUserDefaults] setObject:array forKey:kUserDefaultsCrashReportsSent];
+			[NSUserDefaults.standardUserDefaults setObject:array forKey:kUserDefaultsCrashReportsSent];
 		});
 	});
 }

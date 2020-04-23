@@ -306,14 +306,14 @@ static NSButton* OakCreateStopSearchButton ()
 		[self findClipboardDidChange:nil];
 		[self replaceClipboardDidChange:nil];
 
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(findClipboardDidChange:) name:OakPasteboardDidChangeNotification object:OakPasteboard.findPasteboard];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(replaceClipboardDidChange:) name:OakPasteboardDidChangeNotification object:OakPasteboard.replacePasteboard];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textViewWillPerformFindOperation:) name:@"OakTextViewWillPerformFindOperation" object:nil];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:NSUserDefaults.standardUserDefaults];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(findClipboardDidChange:) name:OakPasteboardDidChangeNotification object:OakPasteboard.findPasteboard];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(replaceClipboardDidChange:) name:OakPasteboardDidChangeNotification object:OakPasteboard.replacePasteboard];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(textViewWillPerformFindOperation:) name:@"OakTextViewWillPerformFindOperation" object:nil];
 
 		// Register to application activation/deactivation notification so we can tweak our collection behavior
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidActivate:) name:NSApplicationDidBecomeActiveNotification object:nil];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidDeactivate:) name:NSApplicationDidResignActiveNotification object:nil];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(applicationDidActivate:) name:NSApplicationDidBecomeActiveNotification object:nil];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(applicationDidDeactivate:) name:NSApplicationDidResignActiveNotification object:nil];
 
 		[self.window addObserver:self forKeyPath:@"firstResponder" options:0 context:NULL];
 	}
@@ -323,7 +323,7 @@ static NSButton* OakCreateStopSearchButton ()
 - (void)dealloc
 {
 	[self.window removeObserver:self forKeyPath:@"firstResponder"];
-	[[NSNotificationCenter defaultCenter] removeObserver:self];
+	[NSNotificationCenter.defaultCenter removeObserver:self];
 }
 
 - (void)applicationDidActivate:(NSNotification*)notification
@@ -465,10 +465,10 @@ static NSButton* OakCreateStopSearchButton ()
 
 - (void)userDefaultsDidChange:(NSNotification*)aNotification
 {
-	self.ignoreCase = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFindIgnoreCase];
-	self.wrapAround = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFindWrapAround];
+	self.ignoreCase = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsFindIgnoreCase];
+	self.wrapAround = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsFindWrapAround];
 
-	NSDictionary* options = [[NSUserDefaults standardUserDefaults] dictionaryForKey:kUserDefaultsFolderOptionsKey];
+	NSDictionary* options = [NSUserDefaults.standardUserDefaults dictionaryForKey:kUserDefaultsFolderOptionsKey];
 	self.searchHiddenFolders = [[options objectForKey:@"searchHiddenFolders"] boolValue];
 	self.searchFolderLinks   = [[options objectForKey:@"searchFolderLinks"] boolValue];
 	self.searchFileLinks     = ![[options objectForKey:@"skipFileLinks"] boolValue];
@@ -600,7 +600,7 @@ static NSButton* OakCreateStopSearchButton ()
 	auto it = std::find(paths.begin(), paths.end(), to_s(path));
 	if(it != paths.end())
 		return [NSString stringWithCxxString:path::display_name(*it, path::disambiguate(paths)[it - paths.begin()])];
-	return [[NSFileManager defaultManager] displayNameAtPath:path];
+	return [NSFileManager.defaultManager displayNameAtPath:path];
 }
 
 - (void)updateSearchInPopUpMenu
@@ -651,7 +651,7 @@ static NSButton* OakCreateStopSearchButton ()
 		NSString* path = [self.recentFolders objectAtIndex:i];
 		if([path isEqualToString:lastFolder] || [path isEqualToString:self.projectFolder])
 			continue;
-		if(![[NSFileManager defaultManager] fileExistsAtPath:path])
+		if(![NSFileManager.defaultManager fileExistsAtPath:path])
 			continue;
 
 		NSMenuItem* recentItem = [whereMenu addItemWithTitle:[self displayNameForFolder:path] action:@selector(takeSearchTargetFrom:) keyEquivalent:@""];
@@ -668,7 +668,7 @@ static NSButton* OakCreateStopSearchButton ()
 	self.showsResultsOutlineView = isFolderSearch;
 
 	BOOL isDirectory = NO;
-	if(_searchTarget == FFSearchTargetOther && [[NSFileManager defaultManager] fileExistsAtPath:self.otherFolder isDirectory:&isDirectory] && isDirectory)
+	if(_searchTarget == FFSearchTargetOther && [NSFileManager.defaultManager fileExistsAtPath:self.otherFolder isDirectory:&isDirectory] && isDirectory)
 		[self.recentFolders addObject:self.otherFolder];
 
 	[self updateSearchInPopUpMenu];
@@ -908,8 +908,8 @@ static NSButton* OakCreateStopSearchButton ()
 	[self.replaceTextField updateIntrinsicContentSizeToEncompassString:_replaceString];
 }
 
-- (void)setFindResultsHeight:(CGFloat)height { [[NSUserDefaults standardUserDefaults] setInteger:height forKey:kUserDefaultsFindResultsHeightKey]; }
-- (CGFloat)findResultsHeight                 { return [[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsFindResultsHeightKey] ?: 200; }
+- (void)setFindResultsHeight:(CGFloat)height { [NSUserDefaults.standardUserDefaults setInteger:height forKey:kUserDefaultsFindResultsHeightKey]; }
+- (CGFloat)findResultsHeight                 { return [NSUserDefaults.standardUserDefaults integerForKey:kUserDefaultsFindResultsHeightKey] ?: 200; }
 
 - (void)setRegularExpression:(BOOL)flag
 {
@@ -969,8 +969,8 @@ static NSButton* OakCreateStopSearchButton ()
 	[_replaceStringFormatter addStylesToString:((NSTextView*)_replaceTextField.currentEditor).textStorage];
 }
 
-- (void)setIgnoreCase:(BOOL)flag        { if(_ignoreCase != flag) [[NSUserDefaults standardUserDefaults] setObject:@(_ignoreCase = flag) forKey:kUserDefaultsFindIgnoreCase]; }
-- (void)setWrapAround:(BOOL)flag        { if(_wrapAround != flag) [[NSUserDefaults standardUserDefaults] setObject:@(_wrapAround = flag) forKey:kUserDefaultsFindWrapAround]; }
+- (void)setIgnoreCase:(BOOL)flag        { if(_ignoreCase != flag) [NSUserDefaults.standardUserDefaults setObject:@(_ignoreCase = flag) forKey:kUserDefaultsFindIgnoreCase]; }
+- (void)setWrapAround:(BOOL)flag        { if(_wrapAround != flag) [NSUserDefaults.standardUserDefaults setObject:@(_wrapAround = flag) forKey:kUserDefaultsFindWrapAround]; }
 - (BOOL)ignoreWhitespace                { return _ignoreWhitespace && self.canIgnoreWhitespace; }
 - (BOOL)canIgnoreWhitespace             { return _regularExpression == NO; }
 
@@ -1000,8 +1000,8 @@ static NSButton* OakCreateStopSearchButton ()
 	if(self.searchBinaryFiles)   options[@"searchBinaryFiles"]   = @YES;
 
 	if([options count])
-			[[NSUserDefaults standardUserDefaults] setObject:options forKey:kUserDefaultsFolderOptionsKey];
-	else	[[NSUserDefaults standardUserDefaults] removeObjectForKey:kUserDefaultsFolderOptionsKey];
+			[NSUserDefaults.standardUserDefaults setObject:options forKey:kUserDefaultsFolderOptionsKey];
+	else	[NSUserDefaults.standardUserDefaults removeObjectForKey:kUserDefaultsFolderOptionsKey];
 }
 
 - (void)setSearchHiddenFolders:(BOOL)flag { if(_searchHiddenFolders != flag) { _searchHiddenFolders = flag; [self updateFolderSearchUserDefaults]; } }

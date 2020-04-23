@@ -33,8 +33,8 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 		[self.window setCollectionBehavior:NSWindowCollectionBehaviorMoveToActiveSpace|NSWindowCollectionBehaviorFullScreenAuxiliary];
 
 		// Register to application activation/deactivation notification so we can tweak our collection behavior
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidActivate:) name:NSApplicationDidBecomeActiveNotification object:nil];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidDeactivate:) name:NSApplicationDidResignActiveNotification object:nil];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(applicationDidActivate:) name:NSApplicationDidBecomeActiveNotification object:nil];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(applicationDidDeactivate:) name:NSApplicationDidResignActiveNotification object:nil];
 	}
 	return self;
 }
@@ -97,7 +97,7 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 - (void)dealloc
 {
 	D(DBF_HTMLOutputWindow, bug("\n"););
-	[[NSNotificationCenter defaultCenter] removeObserver:self];
+	[NSNotificationCenter.defaultCenter removeObserver:self];
 	self.window.delegate = nil;
 }
 

@@ -123,12 +123,12 @@ static NSData* Digest (NSString* someString)
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
 		if(NSString* releaseNotes = [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:NULL])
 		{
-			NSData* lastDigest    = [[NSUserDefaults standardUserDefaults] dataForKey:kUserDefaultsReleaseNotesDigestKey];
+			NSData* lastDigest    = [NSUserDefaults.standardUserDefaults dataForKey:kUserDefaultsReleaseNotesDigestKey];
 			NSData* currentDigest = Digest(releaseNotes);
 			dispatch_async(dispatch_get_main_queue(), ^{
 				if(lastDigest && ![lastDigest isEqualToData:currentDigest])
 					[AboutWindowController.sharedInstance showChangesWindow:self];
-				[[NSUserDefaults standardUserDefaults] setObject:currentDigest forKey:kUserDefaultsReleaseNotesDigestKey];
+				[NSUserDefaults.standardUserDefaults setObject:currentDigest forKey:kUserDefaultsReleaseNotesDigestKey];
 			});
 		}
 	});
@@ -201,7 +201,7 @@ static NSData* Digest (NSString* someString)
 
 	NSURL* url = [[NSBundle mainBundle] URLForResource:@"Changes" withExtension:@"html"];
 	if(NSString* releaseNotes = [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:NULL])
-		[[NSUserDefaults standardUserDefaults] setObject:Digest(releaseNotes) forKey:kUserDefaultsReleaseNotesDigestKey];
+		[NSUserDefaults.standardUserDefaults setObject:Digest(releaseNotes) forKey:kUserDefaultsReleaseNotesDigestKey];
 }
 
 - (void)setSelectedPage:(NSString*)pageName
@@ -369,7 +369,7 @@ static NSDictionary* RemoveOldCommits (NSDictionary* src)
 
 - (void)webView:(WebView*)sender decidePolicyForNavigationAction:(NSDictionary*)actionInformation request:(NSURLRequest*)request frame:(WebFrame*)frame decisionListener:(id <WebPolicyDecisionListener>)listener
 {
-	if(![[request.URL scheme] isEqualToString:@"file"] && [[NSWorkspace sharedWorkspace] openURL:request.URL])
+	if(![[request.URL scheme] isEqualToString:@"file"] && [NSWorkspace.sharedWorkspace openURL:request.URL])
 		[listener ignore];
 	else if([NSURLConnection canHandleRequest:request])
 		[listener use];

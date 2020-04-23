@@ -518,15 +518,15 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		OakSetupKeyViewLoop(@[ self.searchField, self.actionsPopUpButton, self.scopeBar.view, self.editButton, self.selectButton ]);
 
 		[self.scopeBar bind:NSValueBinding toObject:self withKeyPath:@"sourceIndex" options:nil];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidChangeKeyStatus:) name:NSWindowDidBecomeKeyNotification object:self.window];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidChangeKeyStatus:) name:NSWindowDidResignKeyNotification object:self.window];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(windowDidChangeKeyStatus:) name:NSWindowDidBecomeKeyNotification object:self.window];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(windowDidChangeKeyStatus:) name:NSWindowDidResignKeyNotification object:self.window];
 	}
 	return self;
 }
 
 - (void)dealloc
 {
-	[[NSNotificationCenter defaultCenter] removeObserver:self];
+	[NSNotificationCenter.defaultCenter removeObserver:self];
 	[_keyEquivalentView removeObserver:self forKeyPath:@"recording" context:kRecordingBinding];
 	[_scopeBar unbind:NSValueBinding];
 }

@@ -242,7 +242,7 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 - (void)createItemOfType:(bundles::kind_t)aType
 {
 	NSString* path = [[NSBundle bundleForClass:[self class]] pathForResource:info_for(aType).file ofType:@"plist"];
-	if(!path || ![[NSFileManager defaultManager] fileExistsAtPath:path])
+	if(!path || ![NSFileManager.defaultManager fileExistsAtPath:path])
 		return;
 
 	NSInteger row = [browser selectedRowInColumn:0];
@@ -599,10 +599,10 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 			if(result == NSModalResponseOK)
 			{
 				NSString* path = [[savePanel.URL filePathURL] path];
-				if([[NSFileManager defaultManager] fileExistsAtPath:path])
+				if([NSFileManager.defaultManager fileExistsAtPath:path])
 				{
 					NSError* error;
-					if(![[NSFileManager defaultManager] removeItemAtPath:path error:&error])
+					if(![NSFileManager.defaultManager removeItemAtPath:path error:&error])
 					{
 						[self.window presentError:error];
 						return;
@@ -632,7 +632,7 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 	if(![sender respondsToSelector:@selector(representedObject)])
 		return;
 	if(NSString* path = [sender representedObject])
-		[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:@[ [NSURL fileURLWithPath:path] ]];
+		[NSWorkspace.sharedWorkspace activateFileViewerSelectingURLs:@[ [NSURL fileURLWithPath:path] ]];
 }
 
 // ====================
@@ -798,7 +798,7 @@ static NSMutableDictionary* DictionaryForPropertyList (plist::dictionary_t const
 	else
 	{
 		self.window.representedFilename = NSHomeDirectory();
-		[self.window standardWindowButton:NSWindowDocumentIconButton].image = [[NSWorkspace sharedWorkspace] iconForFileType:[NSString stringWithCxxString:info.file_type]];
+		[self.window standardWindowButton:NSWindowDocumentIconButton].image = [NSWorkspace.sharedWorkspace iconForFileType:[NSString stringWithCxxString:info.file_type]];
 	}
 
 	plist::dictionary_t const& plist = it != changes.end() ? it->second : bundleItem->plist();

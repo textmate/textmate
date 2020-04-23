@@ -24,7 +24,7 @@ static __weak OakToolTip* LastToolTip;
 @implementation OakToolTip
 + (void)initialize
 {
-	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
+	[NSUserDefaults.standardUserDefaults registerDefaults:@{
 		@"OakToolTipMouseMoveIgnorePeriod":  @1,
 		@"OakToolTipMouseDistanceThreshold": @5,
 	}];
@@ -100,7 +100,7 @@ static __weak OakToolTip* LastToolTip;
 	if(!_enforceMouseThreshold)
 		return YES;
 
-	CGFloat ignorePeriod = [[NSUserDefaults standardUserDefaults] floatForKey:@"OakToolTipMouseMoveIgnorePeriod"];
+	CGFloat ignorePeriod = [NSUserDefaults.standardUserDefaults floatForKey:@"OakToolTipMouseMoveIgnorePeriod"];
 	if([[NSDate date] timeIntervalSinceDate:didOpenAtDate] < ignorePeriod)
 		return NO;
 
@@ -116,7 +116,7 @@ static __weak OakToolTip* LastToolTip;
 	NSPoint const& p = mousePositionWhenOpened;
 	CGFloat dist = hypot(p.x - aPoint.x, p.y - aPoint.y);
 
-	CGFloat moveThreshold = [[NSUserDefaults standardUserDefaults] floatForKey:@"OakToolTipMouseDistanceThreshold"];
+	CGFloat moveThreshold = [NSUserDefaults.standardUserDefaults floatForKey:@"OakToolTipMouseDistanceThreshold"];
 	return dist > moveThreshold;
 }
 

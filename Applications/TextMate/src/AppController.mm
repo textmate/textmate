@@ -60,7 +60,7 @@ void OakOpenDocuments (NSArray* paths, BOOL treatFilePackageAsFolder)
 		{
 			[plugInsToInstall addObject:path];
 		}
-		else if([[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDirectory] && isDirectory)
+		else if([NSFileManager.defaultManager fileExistsAtPath:path isDirectory:&isDirectory] && isDirectory)
 		{
 			[OakDocumentController.sharedInstance showFileBrowserAtPath:path];
 		}
@@ -480,9 +480,9 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 - (void)userDefaultsDidChange:(id)sender
 {
-	BOOL disableRmate        = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableRMateServerKey];
-	NSString* rmateInterface = [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsRMateServerListenKey];
-	int rmatePort            = [[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsRMateServerPortKey];
+	BOOL disableRmate        = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsDisableRMateServerKey];
+	NSString* rmateInterface = [NSUserDefaults.standardUserDefaults stringForKey:kUserDefaultsRMateServerListenKey];
+	int rmatePort            = [NSUserDefaults.standardUserDefaults integerForKey:kUserDefaultsRMateServerPortKey];
 	setup_rmate_server(!disableRmate, rmatePort, [rmateInterface isEqualToString:kRMateServerListenRemote]);
 }
 
@@ -510,14 +510,14 @@ BOOL HasDocumentWindow (NSArray* windows)
 	if(path::exists(src) && !path::exists(dst))
 		rename(src.c_str(), dst.c_str());
 
-	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
+	[NSUserDefaults.standardUserDefaults registerDefaults:@{
 		@"NSRecentDocumentsLimit": @25,
 		@"WebKitDeveloperExtras":  @YES,
 	}];
 	RegisterDefaults();
 
 	// LEGACY format used prior to 2.0-beta.12.23
-	if(NSDictionary* volumeSettings = [[NSUserDefaults standardUserDefaults] dictionaryForKey:@"volumeSettings"])
+	if(NSDictionary* volumeSettings = [NSUserDefaults.standardUserDefaults dictionaryForKey:@"volumeSettings"])
 	{
 		for(NSString* pathPrefix in volumeSettings)
 		{
@@ -528,7 +528,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 				settings_t::set(kSettingsDisableExtendedAttributesKey, true, NULL_STR, glob);
 			}
 		}
-		[[NSUserDefaults standardUserDefaults] removeObjectForKey:@"volumeSettings"];
+		[NSUserDefaults.standardUserDefaults removeObjectForKey:@"volumeSettings"];
 	}
 
 	[TMPlugInController.sharedInstance loadAllPlugIns:nil];
@@ -575,7 +575,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 	}
 	[BundlesManager.sharedInstance loadBundlesIndex];
 
-	if(BOOL restoreSession = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableSessionRestoreKey])
+	if(BOOL restoreSession = ![NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsDisableSessionRestoreKey])
 	{
 		std::string const prematureTerminationDuringRestore = path::join(path::temp(), "textmate_session_restore");
 
@@ -621,8 +621,8 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 	if(!HasDocumentWindow([NSApp orderedWindows]))
 	{
-		BOOL disableUntitledAtStartupPrefs = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableNewDocumentAtStartupKey];
-		BOOL showFavoritesInsteadPrefs     = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsShowFavoritesInsteadOfUntitledKey];
+		BOOL disableUntitledAtStartupPrefs = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsDisableNewDocumentAtStartupKey];
+		BOOL showFavoritesInsteadPrefs     = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsShowFavoritesInsteadOfUntitledKey];
 
 		if(showFavoritesInsteadPrefs)
 			[self openFavorites:self];
@@ -631,7 +631,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 	}
 
 	[self userDefaultsDidChange:nil]; // setup mate/rmate server
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
+	[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:NSUserDefaults.standardUserDefaults];
 
 	NSMenu* selectMenu = [[[[[NSApp mainMenu] itemWithTitle:@"Edit"] submenu] itemWithTitle:@"Select"] submenu];
 	[[selectMenu itemWithTitle:@"Toggle Column Selection"] setActivationString:@"⌥" withFont:nil];
@@ -794,11 +794,11 @@ BOOL HasDocumentWindow (NSArray* windows)
 		{
 			switch([item tag])
 			{
-				case find::ignore_case:        active = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFindIgnoreCase]; break;
+				case find::ignore_case:        active = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsFindIgnoreCase]; break;
 				case find::regular_expression: active = [entry regularExpression]; break;
 				case find::full_words:         active = [entry fullWordMatch];     enabled = ![entry regularExpression]; break;
 				case find::ignore_whitespace:  active = [entry ignoreWhitespace];  enabled = ![entry regularExpression]; break;
-				case find::wrap_around:        active = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFindWrapAround]; break;
+				case find::wrap_around:        active = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsFindWrapAround]; break;
 			}
 			[item setState:(active ? NSControlStateValueOn : NSControlStateValueOff)];
 		}

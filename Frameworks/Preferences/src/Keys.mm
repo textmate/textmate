@@ -38,7 +38,7 @@ static NSDictionary* default_settings ()
 
 static bool register_defaults ()
 {
-	[[NSUserDefaults standardUserDefaults] registerDefaults:default_settings()];
+	[NSUserDefaults.standardUserDefaults registerDefaults:default_settings()];
 	return true;
 }
 

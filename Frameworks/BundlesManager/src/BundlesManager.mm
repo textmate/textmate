@@ -84,15 +84,15 @@ static NSString* CacheFileForDownload (NSURL* url, NSDate* date)
 		_remoteIndexURL   = [NSURL URLWithString:@REST_API "/bundles"];
 
 		[self userDefaultsDidChange:nil];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:NSApp];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:NSUserDefaults.standardUserDefaults];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:NSApp];
 	}
 	return self;
 }
 
 - (void)userDefaultsDidChange:(id)sender
 {
-	self.autoUpdateBundles = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableBundleUpdatesKey];
+	self.autoUpdateBundles = ![NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsDisableBundleUpdatesKey];
 }
 
 - (void)applicationWillTerminate:(NSNotification*)aNotification
@@ -113,11 +113,11 @@ static NSString* CacheFileForDownload (NSURL* url, NSDate* date)
 	_autoUpdateBundles = flag;
 	if(_autoUpdateBundles)
 	{
-		NSDate* lastCheck = [[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsLastBundleUpdateCheckKey] ?: [NSDate distantPast];
-		if(![[NSFileManager defaultManager] fileExistsAtPath:_remoteIndexPath])
+		NSDate* lastCheck = [NSUserDefaults.standardUserDefaults objectForKey:kUserDefaultsLastBundleUpdateCheckKey] ?: [NSDate distantPast];
+		if(![NSFileManager.defaultManager fileExistsAtPath:_remoteIndexPath])
 			lastCheck = [NSDate distantPast];
 
-		CGFloat updateFrequency = [[NSUserDefaults standardUserDefaults] floatForKey:kUserDefaultsBundleUpdateFrequencyKey] ?: kDefaultPollInterval;
+		CGFloat updateFrequency = [NSUserDefaults.standardUserDefaults floatForKey:kUserDefaultsBundleUpdateFrequencyKey] ?: kDefaultPollInterval;
 		NSDate* nextCheck = [lastCheck dateByAddingTimeInterval:updateFrequency];
 		nextCheck = [nextCheck laterDate:[[NSDate date] dateByAddingTimeInterval:5]];
 
@@ -133,7 +133,7 @@ static NSString* CacheFileForDownload (NSURL* url, NSDate* date)
 		NSArray* bundles = [self.bundles filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"(hasUpdate == YES AND isCompatible == YES) OR (isInstalled == NO AND (isMandatory == YES OR (isRecommended == YES AND isCompatible == YES AND NOT (SELF IN %@))))", oldRecommendations]];
 		[self installBundles:bundles completionHandler:^(NSArray<Bundle*>*){ }];
 	}];
-	[[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:kUserDefaultsLastBundleUpdateCheckKey];
+	[NSUserDefaults.standardUserDefaults setObject:[NSDate date] forKey:kUserDefaultsLastBundleUpdateCheckKey];
 }
 
 - (void)installBundleItemsAtPaths:(NSArray*)somePaths
@@ -262,7 +262,7 @@ static NSString* CacheFileForDownload (NSURL* url, NSDate* date)
 - (void)uninstallBundle:(Bundle*)bundle
 {
 	bundle.installed = NO;
-	if(!bundle.path || ![[NSFileManager defaultManager] removeItemAtPath:bundle.path error:nil])
+	if(!bundle.path || ![NSFileManager.defaultManager removeItemAtPath:bundle.path error:nil])
 		return;
 
 	[self erasePath:bundle.path];
@@ -441,7 +441,7 @@ namespace
 
 - (void)moveAvianBundles
 {
-	NSFileManager* fm = [NSFileManager defaultManager];
+	NSFileManager* fm = NSFileManager.defaultManager;
 
 	NSMutableArray* moves = [NSMutableArray array];
 	NSMutableString* moveDescription = [NSMutableString string];

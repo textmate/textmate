@@ -104,15 +104,15 @@ void OakPrintBadAssertion (char const* lhs, char const* op, char const* rhs, std
 + (void)load
 {
 	@autoreleasepool {
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(enableAllExceptions:) name:NSApplicationDidFinishLaunchingNotification object:NSApp];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(enableAllExceptions:) name:NSApplicationDidFinishLaunchingNotification object:NSApp];
 	}
 }
 
 + (void)enableAllExceptions:(NSNotification*)aNotification
 {
 	static OakExceptionHandlerDelegate* exceptionDelegate = [self new];
-	[[NSExceptionHandler defaultExceptionHandler] setExceptionHandlingMask:NSLogAndHandleEveryExceptionMask];
-	[[NSExceptionHandler defaultExceptionHandler] setDelegate:exceptionDelegate];
+	[NSExceptionHandler.defaultExceptionHandler setExceptionHandlingMask:NSLogAndHandleEveryExceptionMask];
+	[NSExceptionHandler.defaultExceptionHandler setDelegate:exceptionDelegate];
 }
 
 - (BOOL)exceptionHandler:(NSExceptionHandler*)sender shouldLogException:(NSException*)exception mask:(NSUInteger)mask

@@ -115,7 +115,7 @@ static NSDictionary* GlobOptionsForPath (std::string const& path, NSString* glob
 				_searching = NO;
 				_searchDuration = [[NSDate date] timeIntervalSinceDate:searchStartDate];
 				[self updateMatches:nil];
-				[[NSNotificationCenter defaultCenter] postNotificationName:FFDocumentSearchDidFinishNotification object:self];
+				[NSNotificationCenter.defaultCenter postNotificationName:FFDocumentSearchDidFinishNotification object:self];
 			}
 		});
 	});
@@ -133,7 +133,7 @@ static NSDictionary* GlobOptionsForPath (std::string const& path, NSString* glob
 	@synchronized(self) {
 		if(_matches.count)
 		{
-			[[NSNotificationCenter defaultCenter] postNotificationName:FFDocumentSearchDidReceiveResultsNotification object:self userInfo:@{ @"matches": _matches }];
+			[NSNotificationCenter.defaultCenter postNotificationName:FFDocumentSearchDidReceiveResultsNotification object:self userInfo:@{ @"matches": _matches }];
 			[_matches removeAllObjects];
 		}
 	}

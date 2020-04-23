@@ -14,7 +14,7 @@ static NSMutableArray* FoldersAtPath (NSString* folder)
 	ASSERT(folder && [folder length] > 0);
 	NSMutableArray* res = [NSMutableArray array];
 	BOOL isDirectory = NO;
-	if(![[NSFileManager defaultManager] fileExistsAtPath:folder isDirectory:&isDirectory] || isDirectory == NO)
+	if(![NSFileManager.defaultManager fileExistsAtPath:folder isDirectory:&isDirectory] || isDirectory == NO)
 		return res;
 
 	std::string const startPath = to_s(folder);
@@ -28,7 +28,7 @@ static NSMutableArray* FoldersAtPath (NSString* folder)
 				continue;
 
 			NSString* folderPath = [NSString stringWithCxxString:path];
-			if(![[NSWorkspace sharedWorkspace] isFilePackageAtPath:folderPath])
+			if(![NSWorkspace.sharedWorkspace isFilePackageAtPath:folderPath])
 				[res addObject:folderPath];
 		}
 	}
@@ -69,7 +69,7 @@ static NSMutableArray* FoldersAtPath (NSString* folder)
 		BOOL hasSubfolders = [FoldersAtPath(folder) count];
 		for(NSString* path = folder; OakNotEmptyString(path); path = [path stringByDeletingLastPathComponent])
 		{
-			NSMenuItem* menuItem = [aMenu addItemWithTitle:[[NSFileManager defaultManager] displayNameAtPath:path] action:parentItem.action keyEquivalent:@""];
+			NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSFileManager.defaultManager displayNameAtPath:path] action:parentItem.action keyEquivalent:@""];
 			[menuItem setTarget:parentItem.target];
 			[menuItem setRepresentedObject:path];
 			[menuItem setIconForFile:path];
@@ -84,7 +84,7 @@ static NSMutableArray* FoldersAtPath (NSString* folder)
 	{
 		for(NSString* path in FoldersAtPath(folder))
 		{
-			NSMenuItem* menuItem = [aMenu addItemWithTitle:[[NSFileManager defaultManager] displayNameAtPath:path] action:parentItem.action keyEquivalent:@""];
+			NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSFileManager.defaultManager displayNameAtPath:path] action:parentItem.action keyEquivalent:@""];
 			[menuItem setTarget:parentItem.target];
 			[menuItem setRepresentedObject:path];
 			[menuItem setIconForFile:path];

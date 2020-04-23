@@ -438,7 +438,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	if(_path)
 	{
 		if(!_cachedDisplayName)
-			_cachedDisplayName = [[NSFileManager defaultManager] displayNameAtPath:_path];
+			_cachedDisplayName = [NSFileManager.defaultManager displayNameAtPath:_path];
 		return _cachedDisplayName;
 	}
 
@@ -565,7 +565,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	[_backupTimer invalidate];
 	_backupTimer = _keepBackupFile ? [NSTimer scheduledTimerWithTimeInterval:kDocumentBackupDelay target:self selector:@selector(backupTimerDidFire:) userInfo:nil repeats:NO] : nil;
 
-	[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentContentDidChangeNotification object:self];
+	[NSNotificationCenter.defaultCenter postNotificationName:OakDocumentContentDidChangeNotification object:self];
 }
 
 - (void)setKeepBackupFile:(BOOL)flag
@@ -588,7 +588,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 
 	if(_backupPath)
 	{
-		[[NSFileManager defaultManager] removeItemAtPath:_backupPath error:nullptr];
+		[NSFileManager.defaultManager removeItemAtPath:_backupPath error:nullptr];
 		self.backupPath = nil;
 	}
 }
@@ -596,7 +596,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 - (NSString*)createAndReturnBackupPath
 {
 	NSString* path = [[NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES) firstObject] stringByAppendingPathComponent:@"TextMate/Session"];
-	if(![[NSFileManager defaultManager] createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nullptr])
+	if(![NSFileManager.defaultManager createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nullptr])
 		return nil;
 
 	path = [path stringByAppendingPathComponent:[self displayNameWithExtension:YES]];
@@ -672,7 +672,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	NSURL* url = [NSURL fileURLWithPath:_path];
 	CFRunLoopPerformBlock(CFRunLoopGetMain(), kCFRunLoopCommonModes, ^{
 		// This is not thread-safe so we ensure that we are on the main thread
-		[[NSDocumentController sharedDocumentController] noteNewRecentDocumentURL:url];
+		[NSDocumentController.sharedDocumentController noteNewRecentDocumentURL:url];
 	});
 }
 
@@ -720,7 +720,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 			if(!probabilities.empty() && probabilities.begin()->first < 1)
 				controller.encoding = [NSString stringWithCxxString:probabilities.begin()->second];
 
-			[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentWillShowAlertNotification object:_self];
+			[NSNotificationCenter.defaultCenter postNotificationName:OakDocumentWillShowAlertNotification object:_self];
 			[controller beginSheetModalForWindow:_window completionHandler:^(NSModalResponse response){
 				if(response != NSModalResponseCancel)
 				{
@@ -856,7 +856,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	if(_buffer)
 	{
 		self.observeFileSystem = NO;
-		[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentWillSaveNotification object:self];
+		[NSNotificationCenter.defaultCenter postNotificationName:OakDocumentWillSaveNotification object:self];
 
 		encoding::type encoding = encoding::type(to_s(_diskNewlines), to_s(_diskEncoding));
 
@@ -901,7 +901,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 				if(!_window)
 					return;
 
-				[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentWillShowAlertNotification object:_document];
+				[NSNotificationCenter.defaultCenter postNotificationName:OakDocumentWillShowAlertNotification object:_document];
 				NSAlert* alert = [NSAlert tmAlertWithMessageText:[NSString stringWithFormat:@"The file “%@” is locked.", _document.displayName] informativeText:@"Do you want to overwrite it anyway?" buttons:@"Overwrite", @"Cancel", nil];
 				[alert beginSheetModalForWindow:_window completionHandler:^(NSModalResponse returnCode){
 					if(returnCode == NSAlertFirstButtonReturn)
@@ -915,7 +915,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 				if(!_window)
 					return;
 
-				[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentWillShowAlertNotification object:_document];
+				[NSNotificationCenter.defaultCenter postNotificationName:OakDocumentWillShowAlertNotification object:_document];
 				NSAlert* alert = [NSAlert tmAlertWithMessageText:[NSString stringWithFormat:@"No parent folder for “%@”.", _document.displayName] informativeText:[NSString stringWithFormat:@"Do you wish to create a folder at “%@”?", [NSString stringWithCxxString:path::with_tilde(path::parent(path))]] buttons:@"Create Folder", @"Cancel", nil];
 				[alert beginSheetModalForWindow:_window completionHandler:^(NSModalResponse returnCode){
 					if(returnCode == NSAlertFirstButtonReturn)
@@ -941,7 +941,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 					if(!_window)
 						return;
 
-					[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentWillShowAlertNotification object:_document];
+					[NSNotificationCenter.defaultCenter postNotificationName:OakDocumentWillShowAlertNotification object:_document];
 					NSAlert* alert = [NSAlert tmAlertWithMessageText:[NSString stringWithFormat:@"Unable to save “%@” using “%@” as encoding.", _document.displayName, to_ns(charset)] informativeText:@"Please choose another encoding:" buttons:@"Save", @"Cancel", nil];
 					OakEncodingPopUpButton* encodingPopUp = [OakEncodingPopUpButton new];
 					[alert setAccessoryView:encodingPopUp];
@@ -988,7 +988,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 					[self removeBackup];
 					[self updateRecentDocumentMenu];
 
-					[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentDidSaveNotification object:self];
+					[NSNotificationCenter.defaultCenter postNotificationName:OakDocumentDidSaveNotification object:self];
 				}
 			}
 			self.observeFileSystem = self.isLoaded;
@@ -1020,7 +1020,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	if(--self.openCount != 0)
 		return;
 
-	[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentWillCloseNotification object:self];
+	[NSNotificationCenter.defaultCenter postNotificationName:OakDocumentWillCloseNotification object:self];
 
 	if(_path && _buffer)
 	{
@@ -1449,7 +1449,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	if(_buffer)
 	{
 		_buffer->set_mark(_buffer->convert(aPos), to_s(aMark), to_s(value ?: @""));
-		[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentMarksDidChangeNotification object:self];
+		[NSNotificationCenter.defaultCenter postNotificationName:OakDocumentMarksDidChangeNotification object:self];
 	}
 	else if(_path)
 	{
@@ -1465,7 +1465,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	if(_buffer)
 	{
 		_buffer->remove_mark(_buffer->convert(aPos), to_s(aMark));
-		[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentMarksDidChangeNotification object:self];
+		[NSNotificationCenter.defaultCenter postNotificationName:OakDocumentMarksDidChangeNotification object:self];
 	}
 	else if(_path)
 	{
@@ -1478,7 +1478,7 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	if(_buffer)
 	{
 		_buffer->remove_all_marks(to_s(aMark));
-		[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentMarksDidChangeNotification object:self];
+		[NSNotificationCenter.defaultCenter postNotificationName:OakDocumentMarksDidChangeNotification object:self];
 	}
 	else if(_path)
 	{
@@ -1652,8 +1652,8 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 		}
 		else
 		{
-			__weak __block id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:NSApplicationDidBecomeActiveNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
-				[[NSNotificationCenter defaultCenter] removeObserver:observerId];
+			__weak __block id observerId = [NSNotificationCenter.defaultCenter addObserverForName:NSApplicationDidBecomeActiveNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
+				[NSNotificationCenter.defaultCenter removeObserver:observerId];
 				if(self.isLoaded)
 					[self importDocumentChanges:self];
 			}];
@@ -1719,13 +1719,13 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 			}
 			else if(!_self.isDocumentEdited)
 			{
-				[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentWillReloadNotification object:_self];
+				[NSNotificationCenter.defaultCenter postNotificationName:OakDocumentWillReloadNotification object:_self];
 				[_self beginUndoGrouping];
 				buffer.replace(0, buffer.size(), yours);
 				[_self endUndoGrouping];
 
 				[_self markDocumentSaved];
-				[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentDidReloadNotification object:_self];
+				[NSNotificationCenter.defaultCenter postNotificationName:OakDocumentDidReloadNotification object:_self];
 			}
 			else if(_self->_snapshot)
 			{
@@ -1737,13 +1737,13 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 
 				if(utf8::is_valid(merged.begin(), merged.end()))
 				{
-					[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentWillReloadNotification object:_self];
+					[NSNotificationCenter.defaultCenter postNotificationName:OakDocumentWillReloadNotification object:_self];
 					[_self beginUndoGrouping];
 					buffer.replace(0, buffer.size(), merged);
 					[_self endUndoGrouping];
 
 					_self.savedRevision = merged == yours ? _self.revision : -1;
-					[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentDidReloadNotification object:_self];
+					[NSNotificationCenter.defaultCenter postNotificationName:OakDocumentDidReloadNotification object:_self];
 				}
 			}
 			else
@@ -1821,9 +1821,9 @@ NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
 	NSPrintOperation* printer = [NSPrintOperation printOperationWithView:[[OakDocumentPrintableView alloc] initWithDocument:self fontName:aFontName]];
 
 	NSMutableDictionary* info = [[printer printInfo] dictionary];
-	info[@"OakPrintThemeUUID"]   = [[NSUserDefaults standardUserDefaults] objectForKey:@"OakPrintThemeUUID"];
-	info[@"OakPrintFontSize"]    = [[NSUserDefaults standardUserDefaults] objectForKey:@"OakPrintFontSize"];
-	info[NSPrintHeaderAndFooter] = [[NSUserDefaults standardUserDefaults] objectForKey:@"OakPrintHeaderAndFooter"];
+	info[@"OakPrintThemeUUID"]   = [NSUserDefaults.standardUserDefaults objectForKey:@"OakPrintThemeUUID"];
+	info[@"OakPrintFontSize"]    = [NSUserDefaults.standardUserDefaults objectForKey:@"OakPrintFontSize"];
+	info[NSPrintHeaderAndFooter] = [NSUserDefaults.standardUserDefaults objectForKey:@"OakPrintHeaderAndFooter"];
 
 	[[printer printInfo] setVerticallyCentered:NO];
 	[[printer printPanel] setOptions:[[printer printPanel] options] | NSPrintPanelShowsPaperSize | NSPrintPanelShowsOrientation];

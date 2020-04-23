@@ -26,7 +26,7 @@ static void OakSetupApplicationWithView (NSResponder* aView, std::string testNam
 	if(!IsGUITestsEnabled(testName))
 		return;
 
-	[NSApplication sharedApplication];
+	NSApplication.sharedApplication;
 	[NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
 	[NSApp activateIgnoringOtherApps:YES];
 

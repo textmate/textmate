@@ -69,7 +69,7 @@ static NSString* const kUserDefaultsFilterOutputType = @"filterOutputType";
 		[self.commandComboBox bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.commandHistoryList.head" options:nil];
 		[self.commandComboBox bind:NSContentValuesBinding toObject:_objectController withKeyPath:@"content.commandHistoryList.list" options:nil];
 
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(commandChanged:) name:NSControlTextDidChangeNotification object:self.commandComboBox];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(commandChanged:) name:NSControlTextDidChangeNotification object:self.commandComboBox];
 		[self commandChanged:nil];
 
 		NSDictionary* views = @{
@@ -94,7 +94,7 @@ static NSString* const kUserDefaultsFilterOutputType = @"filterOutputType";
 		OakSetupKeyViewLoop(@[ self.commandComboBox, self.resultPopUpButton, self.cancelButton, self.executeButton ]);
 		self.window.defaultButtonCell = self.executeButton.cell;
 
-		self.outputType = (output::type)[[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsFilterOutputType];
+		self.outputType = (output::type)[NSUserDefaults.standardUserDefaults integerForKey:kUserDefaultsFilterOutputType];
 	}
 	return self;
 }
@@ -113,8 +113,8 @@ static NSString* const kUserDefaultsFilterOutputType = @"filterOutputType";
 	[self.resultPopUpButton selectItemWithTag:_outputType];
 
 	if(_outputType)
-			[[NSUserDefaults standardUserDefaults] setInteger:_outputType forKey:kUserDefaultsFilterOutputType];
-	else	[[NSUserDefaults standardUserDefaults] removeObjectForKey:kUserDefaultsFilterOutputType];
+			[NSUserDefaults.standardUserDefaults setInteger:_outputType forKey:kUserDefaultsFilterOutputType];
+	else	[NSUserDefaults.standardUserDefaults removeObjectForKey:kUserDefaultsFilterOutputType];
 }
 
 - (void)commandChanged:(NSNotification*)notification

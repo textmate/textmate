@@ -226,8 +226,8 @@ static bool uninstall_mate (std::string const& path)
 	{
 		if(access([path fileSystemRepresentation], F_OK) != 0)
 		{
-			[[NSUserDefaults standardUserDefaults] removeObjectForKey:kUserDefaultsMateInstallPathKey];
-			[[NSUserDefaults standardUserDefaults] removeObjectForKey:kUserDefaultsMateInstallVersionKey];
+			[NSUserDefaults.standardUserDefaults removeObjectForKey:kUserDefaultsMateInstallPathKey];
+			[NSUserDefaults.standardUserDefaults removeObjectForKey:kUserDefaultsMateInstallVersionKey];
 		}
 	}
 
@@ -244,15 +244,15 @@ static bool uninstall_mate (std::string const& path)
 
 - (NSString*)mateInstallPath
 {
-	NSString* path = [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsMateInstallPathKey];
+	NSString* path = [NSUserDefaults.standardUserDefaults stringForKey:kUserDefaultsMateInstallPathKey];
 	return [path stringByExpandingTildeInPath];
 }
 
 - (void)setMateInstallPath:(NSString*)aPath
 {
 	if(aPath)
-			[[NSUserDefaults standardUserDefaults] setObject:aPath forKey:kUserDefaultsMateInstallPathKey];
-	else	[[NSUserDefaults standardUserDefaults] removeObjectForKey:kUserDefaultsMateInstallPathKey];
+			[NSUserDefaults.standardUserDefaults setObject:aPath forKey:kUserDefaultsMateInstallPathKey];
+	else	[NSUserDefaults.standardUserDefaults removeObjectForKey:kUserDefaultsMateInstallPathKey];
 }
 
 - (void)installMateAs:(NSString*)dstPath
@@ -264,7 +264,7 @@ static bool uninstall_mate (std::string const& path)
 			[self setMateInstallPath:dstPath];
 			std::string res = io::exec(to_s(srcPath), "--version", NULL);
 			if(regexp::match_t const& m = regexp::search("\\Amate ([\\d.]+)", res))
-				[[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithCxxString:m[1]] forKey:kUserDefaultsMateInstallVersionKey];
+				[NSUserDefaults.standardUserDefaults setObject:[NSString stringWithCxxString:m[1]] forKey:kUserDefaultsMateInstallVersionKey];
 		}
 	}
 	else
@@ -322,8 +322,8 @@ static bool uninstall_mate (std::string const& path)
 
 + (void)updateMateIfRequired
 {
-	NSString* oldMate    = [[[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsMateInstallPathKey] stringByExpandingTildeInPath];
-	NSString* oldVersion = [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsMateInstallVersionKey];
+	NSString* oldMate    = [[NSUserDefaults.standardUserDefaults stringForKey:kUserDefaultsMateInstallPathKey] stringByExpandingTildeInPath];
+	NSString* oldVersion = [NSUserDefaults.standardUserDefaults stringForKey:kUserDefaultsMateInstallVersionKey];
 	NSString* newMate    = [[NSBundle mainBundle] pathForResource:@"mate" ofType:nil];
 
 	if(oldMate && newMate)
@@ -349,13 +349,13 @@ static bool uninstall_mate (std::string const& path)
 							}
 
 							// Avoid asking again by storing the new version number
-							[[NSUserDefaults standardUserDefaults] setObject:newVersion forKey:kUserDefaultsMateInstallVersionKey];
+							[NSUserDefaults.standardUserDefaults setObject:newVersion forKey:kUserDefaultsMateInstallVersionKey];
 						});
 					}
 					else
 					{
 						if(install_mate(to_s(newMate), to_s(oldMate)))
-							[[NSUserDefaults standardUserDefaults] setObject:newVersion forKey:kUserDefaultsMateInstallVersionKey];
+							[NSUserDefaults.standardUserDefaults setObject:newVersion forKey:kUserDefaultsMateInstallVersionKey];
 					}
 				}
 			}

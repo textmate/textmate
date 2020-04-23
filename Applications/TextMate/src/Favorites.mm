@@ -37,7 +37,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 
 + (void)initialize
 {
-	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
+	[NSUserDefaults.standardUserDefaults registerDefaults:@{
 		kUserDefaultsOpenProjectSourceIndex: @0,
 	}];
 }
@@ -97,7 +97,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 
 		OakSetupKeyViewLoop(@[ self.tableView, self.searchField, _scopeBar.view ]);
 
-		self.sourceIndex = [[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsOpenProjectSourceIndex];
+		self.sourceIndex = [NSUserDefaults.standardUserDefaults integerForKey:kUserDefaultsOpenProjectSourceIndex];
 		[_scopeBar bind:NSValueBinding toObject:self withKeyPath:@"sourceIndex" options:nil];
 	}
 	return self;
@@ -146,7 +146,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 	_sourceIndex = newIndex;
 	[self loadItems:self];
 	[self updateItems:self];
-	[[NSUserDefaults standardUserDefaults] setInteger:newIndex forKey:kUserDefaultsOpenProjectSourceIndex];
+	[NSUserDefaults.standardUserDefaults setInteger:newIndex forKey:kUserDefaultsOpenProjectSourceIndex];
 }
 
 - (void)loadItems:(id)sender
@@ -321,7 +321,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 	for(NSDictionary* item in [items objectsAtIndexes:anIndexSet])
 	{
 		if(NSString* link = item[@"link"])
-			[[NSFileManager defaultManager] trashItemAtURL:[NSURL fileURLWithPath:link] resultingItemURL:nil error:nil];
+			[NSFileManager.defaultManager trashItemAtURL:[NSURL fileURLWithPath:link] resultingItemURL:nil error:nil];
 		else if(NSString* path = item[@"path"])
 			[[self sharedProjectStateDB] removeObjectForKey:path];
 	}

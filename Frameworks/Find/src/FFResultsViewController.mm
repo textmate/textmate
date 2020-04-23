@@ -215,8 +215,8 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		[imageView bind:NSValueBinding toObject:self withKeyPath:@"objectValue.document.icon" options:nil];
 		[textField bind:NSValueBinding toObject:self withKeyPath:@"objectValue.displayPath" options:nil];
 
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(outlineViewItemDidExpandCollapse:) name:NSOutlineViewItemDidExpandNotification object:viewController.outlineView];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(outlineViewItemDidExpandCollapse:) name:NSOutlineViewItemDidCollapseNotification object:viewController.outlineView];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(outlineViewItemDidExpandCollapse:) name:NSOutlineViewItemDidExpandNotification object:viewController.outlineView];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(outlineViewItemDidExpandCollapse:) name:NSOutlineViewItemDidCollapseNotification object:viewController.outlineView];
 
 		self.imageView          = imageView;
 		self.textField          = textField;
@@ -228,7 +228,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 
 - (void)dealloc
 {
-	[[NSNotificationCenter defaultCenter] removeObserver:self];
+	[NSNotificationCenter.defaultCenter removeObserver:self];
 }
 
 - (void)setShowKeyEquivalent:(BOOL)flag
@@ -303,8 +303,8 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 {
 	if(!_scrollView)
 	{
-		NSString* fontName = [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsSearchResultsFontNameKey];
-		CGFloat fontSize   = [[NSUserDefaults standardUserDefaults] floatForKey:kUserDefaultsSearchResultsFontSizeKey] ?: 11.0;
+		NSString* fontName = [NSUserDefaults.standardUserDefaults stringForKey:kUserDefaultsSearchResultsFontNameKey];
+		CGFloat fontSize   = [NSUserDefaults.standardUserDefaults floatForKey:kUserDefaultsSearchResultsFontSizeKey] ?: 11.0;
 		_searchResultsFont = (fontName ? [NSFont fontWithName:fontName size:fontSize] : [NSFont controlContentFontOfSize:fontSize]);
 
 		NSTextField* label = OakCreateLabel(@"m", _searchResultsFont);

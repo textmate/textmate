@@ -331,7 +331,7 @@ struct document_view_t : ng::buffer_api_t
 			for(auto const& index : toRemove)
 				buf.remove_mark(index, to_s(OakDocumentBookmarkIdentifier));
 		}
-		[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentMarksDidChangeNotification object:_document];
+		[NSNotificationCenter.defaultCenter postNotificationName:OakDocumentMarksDidChangeNotification object:_document];
 	}
 
 	std::string invisibles_map;
@@ -848,10 +848,10 @@ static std::string shell_quote (std::vector<std::string> paths)
 	{
 		fontScaleFactor = documentView->font_scale_factor();
 
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:OakDocumentWillSaveNotification object:_document];
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:OakDocumentDidSaveNotification object:_document];
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:OakDocumentWillReloadNotification object:_document];
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:OakDocumentDidReloadNotification object:_document];
+		[NSNotificationCenter.defaultCenter removeObserver:self name:OakDocumentWillSaveNotification object:_document];
+		[NSNotificationCenter.defaultCenter removeObserver:self name:OakDocumentDidSaveNotification object:_document];
+		[NSNotificationCenter.defaultCenter removeObserver:self name:OakDocumentWillReloadNotification object:_document];
+		[NSNotificationCenter.defaultCenter removeObserver:self name:OakDocumentDidReloadNotification object:_document];
 
 		[self updateDocumentMetadata];
 
@@ -926,10 +926,10 @@ static std::string shell_quote (std::vector<std::string> paths)
 		documentView->add_callback(callback);
 
 		// TODO Pre and post save actions should be handled by OakDocument once we have OakDocumentEditor
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentWillSave:) name:OakDocumentWillSaveNotification object:_document];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentDidSave:) name:OakDocumentDidSaveNotification object:_document];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentWillReload:) name:OakDocumentWillReloadNotification object:_document];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentDidReload:) name:OakDocumentDidReloadNotification object:_document];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(documentWillSave:) name:OakDocumentWillSaveNotification object:_document];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(documentDidSave:) name:OakDocumentDidSaveNotification object:_document];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(documentWillReload:) name:OakDocumentWillReloadNotification object:_document];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(documentDidReload:) name:OakDocumentDidReloadNotification object:_document];
 
 		[self resetBlinkCaretTimer];
 		[self setNeedsDisplay:YES];
@@ -937,7 +937,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 		NSAccessibilityPostNotification(self, NSAccessibilityValueChangedNotification);
 
 		if(hasFocus)
-			[[NSFontManager sharedFontManager] setSelectedFont:self.font isMultiple:NO];
+			[NSFontManager.sharedFontManager setSelectedFont:self.font isMultiple:NO];
 	}
 }
 
@@ -948,9 +948,9 @@ static std::string shell_quote (std::vector<std::string> paths)
 		settings_t const& settings = settings_for_path();
 
 		_showInvisibles = settings.get(kSettingsShowInvisiblesKey, false);
-		_scrollPastEnd  = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsScrollPastEndKey];
-		_antiAlias      = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableAntiAliasKey];
-		_fontSmoothing  = (OTVFontSmoothing)[[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsFontSmoothingKey];
+		_scrollPastEnd  = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsScrollPastEndKey];
+		_antiAlias      = ![NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsDisableAntiAliasKey];
+		_fontSmoothing  = (OTVFontSmoothing)[NSUserDefaults.standardUserDefaults integerForKey:kUserDefaultsFontSmoothingKey];
 
 		spellingDotImage = [NSImage imageNamed:@"SpellingDot" inSameBundleAsClass:[self class]];
 		foldingDotsImage = [NSImage imageNamed:@"FoldingDots Template" inSameBundleAsClass:[self class]];
@@ -958,7 +958,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 		[self registerForDraggedTypes:[[self class] dropTypes]];
 
 		[self bind:@"scmStatus" toObject:self withKeyPath:@"document.scmStatus" options:nil];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:NSUserDefaults.standardUserDefaults];
 	}
 	return self;
 }
@@ -986,7 +986,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 - (void)dealloc
 {
-	[[NSNotificationCenter defaultCenter] removeObserver:self];
+	[NSNotificationCenter.defaultCenter removeObserver:self];
 	[self unbind:@"scmStatus"];
 	[self setDocument:nil];
 }
@@ -1152,7 +1152,7 @@ doScroll:
 
 + (BOOL)isCompatibleWithResponsiveScrolling
 {
-	return [[NSUserDefaults standardUserDefaults] boolForKey:@"enableResponsiveScroll"];
+	return [NSUserDefaults.standardUserDefaults boolForKey:@"enableResponsiveScroll"];
 }
 
 - (BOOL)acceptsFirstResponder       { return YES; }
@@ -2041,7 +2041,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 
 		update_menu_key_equivalents([NSApp mainMenu], actionToKey);
 
-		[[NSUserDefaults standardUserDefaults] registerDefaults:@{
+		[NSUserDefaults.standardUserDefaults registerDefaults:@{
 			kUserDefaultsFontSmoothingKey:     @(OTVFontSmoothingDisabledForDarkHiDPI),
 			kUserDefaultsWrapColumnPresetsKey: @[ @40, @80 ],
 		}];
@@ -2192,7 +2192,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	}
 
 	[NSCursor setHiddenUntilMouseMoves:YES];
-	[[NSNotificationCenter defaultCenter] postNotificationName:OakCursorDidHideNotification object:nil];
+	[NSNotificationCenter.defaultCenter postNotificationName:OakCursorDidHideNotification object:nil];
 }
 
 - (void)keyDown:(NSEvent*)anEvent
@@ -2346,7 +2346,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 
 	std::string const str = to_s(aString);
 	[self recordSelector:@selector(insertText:) withArgument:[NSString stringWithCxxString:str]];
-	bool autoPairing = !macroRecordingArray && ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableTypingPairsKey];
+	bool autoPairing = !macroRecordingArray && ![NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsDisableTypingPairsKey];
 	documentView->insert_with_pairing(str, [self indentCorrections], autoPairing, to_s([self scopeAttributes]));
 }
 
@@ -2362,7 +2362,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 		size_t line = documentView->convert(documentView->ranges().last().first.index).line;
 		documentView->toggle_fold_at_line(line, false);
 	}
-	[[NSNotificationCenter defaultCenter] postNotificationName:GVColumnDataSourceDidChange object:[[self enclosingScrollView] superview]];
+	[NSNotificationCenter.defaultCenter postNotificationName:GVColumnDataSourceDidChange object:[[self enclosingScrollView] superview]];
 }
 
 - (IBAction)toggleFoldingAtLine:(NSUInteger)lineNumber recursive:(BOOL)flag
@@ -2375,7 +2375,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 {
 	AUTO_REFRESH;
 	documentView->toggle_all_folds_at_level([sender tag]);
-	[[NSNotificationCenter defaultCenter] postNotificationName:GVColumnDataSourceDidChange object:[[self enclosingScrollView] superview]];
+	[NSNotificationCenter.defaultCenter postNotificationName:GVColumnDataSourceDidChange object:[[self enclosingScrollView] superview]];
 }
 
 - (NSPoint)positionForWindowUnderCaret
@@ -2412,7 +2412,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 		return menu;
 
 	NSString* word = [NSString stringWithCxxString:candidate];
-	if([[NSSpellChecker sharedSpellChecker] hasLearnedWord:word])
+	if([NSSpellChecker.sharedSpellChecker hasLearnedWord:word])
 	{
 		NSMenuItem* item = [menu addItemWithTitle:[NSString stringWithFormat:@"Unlearn “%@”", word] action:@selector(contextMenuPerformUnlearnSpelling:) keyEquivalent:@""];
 		[item setRepresentedObject:word];
@@ -2423,7 +2423,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 		AUTO_REFRESH;
 		documentView->set_ranges(wordRange);
 
-		[[NSSpellChecker sharedSpellChecker] updateSpellingPanelWithMisspelledWord:word];
+		[NSSpellChecker.sharedSpellChecker updateSpellingPanelWithMisspelledWord:word];
 
 		size_t bol = documentView->begin(documentView->convert(wordRange.min().index).line);
 		size_t eol = documentView->eol(documentView->convert(wordRange.max().index).line);
@@ -2433,7 +2433,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 
 		char key = 0;
 		NSMenuItem* item = nil;
-		for(NSString* guess in [[NSSpellChecker sharedSpellChecker] guessesForWordRange:NSMakeRange(location, length) inString:[NSString stringWithCxxString:line] language:[NSString stringWithCxxString:documentView->spelling_language()] inSpellDocumentWithTag:documentView->spelling_tag()])
+		for(NSString* guess in [NSSpellChecker.sharedSpellChecker guessesForWordRange:NSMakeRange(location, length) inString:[NSString stringWithCxxString:line] language:[NSString stringWithCxxString:documentView->spelling_language()] inSpellDocumentWithTag:documentView->spelling_tag()])
 		{
 			item = [menu addItemWithTitle:guess action:@selector(contextMenuPerformCorrectWord:) keyEquivalent:key < 10 ? [NSString stringWithFormat:@"%c", '0' + (++key % 10)] : @""];
 			[item setKeyEquivalentModifierMask:0];
@@ -2518,8 +2518,8 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	D(DBF_OakTextView_Spelling, bug("%s\n", [[menuItem representedObject] UTF8String]););
 	AUTO_REFRESH;
 	documentView->insert(to_s([menuItem representedObject]));
-	if([NSSpellChecker sharedSpellCheckerExists])
-		[[NSSpellChecker sharedSpellChecker] updateSpellingPanelWithMisspelledWord:[menuItem representedObject]];
+	if(NSSpellChecker.sharedSpellCheckerExists)
+		[NSSpellChecker.sharedSpellChecker updateSpellingPanelWithMisspelledWord:[menuItem representedObject]];
 }
 
 - (void)contextMenuPerformIgnoreSpelling:(id)sender
@@ -2531,7 +2531,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 - (void)contextMenuPerformLearnSpelling:(id)sender
 {
 	D(DBF_OakTextView_Spelling, bug("%s\n", [[sender representedObject] UTF8String]););
-	[[NSSpellChecker sharedSpellChecker] learnWord:[sender representedObject]];
+	[NSSpellChecker.sharedSpellChecker learnWord:[sender representedObject]];
 
 	documentView->recheck_spelling(0, documentView->size());
 	[self setNeedsDisplay:YES];
@@ -2540,7 +2540,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 - (void)contextMenuPerformUnlearnSpelling:(id)sender
 {
 	D(DBF_OakTextView_Spelling, bug("%s\n", [[sender representedObject] UTF8String]););
-	[[NSSpellChecker sharedSpellChecker] unlearnWord:[sender representedObject]];
+	[NSSpellChecker.sharedSpellChecker unlearnWord:[sender representedObject]];
 
 	documentView->recheck_spelling(0, documentView->size());
 	[self setNeedsDisplay:YES];
@@ -2557,7 +2557,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	D(DBF_OakTextView_Spelling, bug("%s → %s\n", [[sender description] UTF8String], [word UTF8String]););
 	if(word)
 	{
-		[[NSSpellChecker sharedSpellChecker] ignoreWord:word inSpellDocumentWithTag:documentView->spelling_tag()];
+		[NSSpellChecker.sharedSpellChecker ignoreWord:word inSpellDocumentWithTag:documentView->spelling_tag()];
 		documentView->recheck_spelling(0, documentView->size());
 		[self setNeedsDisplay:YES];
 	}
@@ -2579,7 +2579,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 
 - (void)performFindOperation:(id <OakFindServerProtocol>)aFindServer
 {
-	[[NSNotificationCenter defaultCenter] postNotificationName:@"OakTextViewWillPerformFindOperation" object:self];
+	[NSNotificationCenter.defaultCenter postNotificationName:@"OakTextViewWillPerformFindOperation" object:self];
 
 	if(![aFindServer isKindOfClass:[OakTextViewFindServer class]])
 	{
@@ -3290,7 +3290,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	if(_scrollPastEnd == flag)
 		return;
 	_scrollPastEnd = flag;
-	[[NSUserDefaults standardUserDefaults] setBool:flag forKey:kUserDefaultsScrollPastEndKey];
+	[NSUserDefaults.standardUserDefaults setBool:flag forKey:kUserDefaultsScrollPastEndKey];
 	if(documentView)
 	{
 		AUTO_REFRESH;
@@ -3326,12 +3326,12 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	{
 		NSInteger const kWrapColumnPresetsHistorySize = 5;
 
-		NSMutableArray* presets = [[[NSUserDefaults standardUserDefaults] arrayForKey:kUserDefaultsWrapColumnPresetsKey] mutableCopy];
+		NSMutableArray* presets = [[NSUserDefaults.standardUserDefaults arrayForKey:kUserDefaultsWrapColumnPresetsKey] mutableCopy];
 		[presets removeObject:@(newWrapColumn)];
 		[presets addObject:@(newWrapColumn)];
 		if(presets.count > kWrapColumnPresetsHistorySize)
 			[presets removeObjectsInRange:NSMakeRange(0, presets.count - kWrapColumnPresetsHistorySize)];
-		[[NSUserDefaults standardUserDefaults] setObject:presets forKey:kUserDefaultsWrapColumnPresetsKey];
+		[NSUserDefaults.standardUserDefaults setObject:presets forKey:kUserDefaultsWrapColumnPresetsKey];
 	}
 
 	AUTO_REFRESH;
@@ -3414,7 +3414,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (void)checkSpelling:(id)sender
 {
-	NSSpellChecker* speller = [NSSpellChecker sharedSpellChecker];
+	NSSpellChecker* speller = NSSpellChecker.sharedSpellChecker;
 
 	NSString* lang = [NSString stringWithCxxString:documentView->spelling_language()];
 	if([[speller spellingPanel] isVisible])
@@ -3478,7 +3478,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 - (void)takeSpellingLanguageFrom:(id)sender
 {
 	NSString* lang = (NSString*)[sender representedObject];
-	[[NSSpellChecker sharedSpellChecker] setLanguage:lang];
+	[NSSpellChecker.sharedSpellChecker setLanguage:lang];
 	documentView->set_spelling_language(to_s(lang));
 	settings_t::set(kSettingsSpellingLanguageKey, to_s(lang), "", documentView->path());
 	if(documentView->path() != NULL_STR)
@@ -3621,7 +3621,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	if(macroRecordingArray)
 	{
 		D(DBF_OakTextView_Macros, bug("%s\n", to_s(plist::convert((__bridge CFPropertyListRef)macroRecordingArray)).c_str()););
-		[[NSUserDefaults standardUserDefaults] setObject:[macroRecordingArray copy] forKey:@"OakMacroManagerScratchMacro"];
+		[NSUserDefaults.standardUserDefaults setObject:[macroRecordingArray copy] forKey:@"OakMacroManagerScratchMacro"];
 		macroRecordingArray = nil;
 	}
 	else
@@ -3632,16 +3632,16 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (IBAction)playScratchMacro:(id)anArgument
 {
-	D(DBF_OakTextView_Macros, bug("%s\n", to_s(plist::convert((__bridge CFPropertyListRef)[[NSUserDefaults standardUserDefaults] arrayForKey:@"OakMacroManagerScratchMacro"])).c_str()););
+	D(DBF_OakTextView_Macros, bug("%s\n", to_s(plist::convert((__bridge CFPropertyListRef)[NSUserDefaults.standardUserDefaults arrayForKey:@"OakMacroManagerScratchMacro"])).c_str()););
 	AUTO_REFRESH;
-	if(NSArray* scratchMacro = [[NSUserDefaults standardUserDefaults] arrayForKey:@"OakMacroManagerScratchMacro"])
+	if(NSArray* scratchMacro = [NSUserDefaults.standardUserDefaults arrayForKey:@"OakMacroManagerScratchMacro"])
 			documentView->macro_dispatch(plist::convert((__bridge CFDictionaryRef)@{ @"commands": scratchMacro }), [self variables]);
 	else	NSBeep();
 }
 
 - (IBAction)saveScratchMacro:(id)sender
 {
-	if(NSArray* scratchMacro = [[NSUserDefaults standardUserDefaults] arrayForKey:@"OakMacroManagerScratchMacro"])
+	if(NSArray* scratchMacro = [NSUserDefaults.standardUserDefaults arrayForKey:@"OakMacroManagerScratchMacro"])
 	{
 		bundles::item_ptr bundle;
 		if([BundlesManager.sharedInstance findBundleForInstall:&bundle])
@@ -3944,9 +3944,9 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (void)userDefaultsDidChange:(id)sender
 {
-	self.antiAlias     = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableAntiAliasKey];
-	self.fontSmoothing = (OTVFontSmoothing)[[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsFontSmoothingKey];
-	self.scrollPastEnd = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsScrollPastEndKey];
+	self.antiAlias     = ![NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsDisableAntiAliasKey];
+	self.fontSmoothing = (OTVFontSmoothing)[NSUserDefaults.standardUserDefaults integerForKey:kUserDefaultsFontSmoothingKey];
+	self.scrollPastEnd = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsScrollPastEndKey];
 }
 
 // =================
@@ -4092,7 +4092,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (int)dragDelay
 {
-	id dragDelayObj = [[NSUserDefaults standardUserDefaults] objectForKey:@"NSDragAndDropTextDelay"];
+	id dragDelayObj = [NSUserDefaults.standardUserDefaults objectForKey:@"NSDragAndDropTextDelay"];
 	return [dragDelayObj respondsToSelector:@selector(intValue)] ? [dragDelayObj intValue] : 150;
 }
 
@@ -4144,7 +4144,7 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 
 - (void)pressureChangeWithEvent:(NSEvent*)anEvent
 {
-	id forceClickFlag = [[NSUserDefaults standardUserDefaults] objectForKey:@"com.apple.trackpad.forceClick"];
+	id forceClickFlag = [NSUserDefaults.standardUserDefaults objectForKey:@"com.apple.trackpad.forceClick"];
 	if(forceClickFlag && ![forceClickFlag boolValue])
 		return;
 
@@ -4289,7 +4289,7 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 
 	if(doesHaveFocus)
 	{
-		[[NSFontManager sharedFontManager] setSelectedFont:self.font isMultiple:NO];
+		[NSFontManager.sharedFontManager setSelectedFont:self.font isMultiple:NO];
 		[self setShowLiveSearch:NO];
 	}
 	else

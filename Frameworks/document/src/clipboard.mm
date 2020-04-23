@@ -17,8 +17,8 @@ static clipboard_t::entry_ptr to_entry (OakPasteboardEntry* src, BOOL includeFin
 
 	if(includeFindOptions)
 	{
-		map["wrapAround"] = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFindWrapAround] ? "1" : "0";
-		map["ignoreCase"] = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFindIgnoreCase] ? "1" : "0";
+		map["wrapAround"] = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsFindWrapAround] ? "1" : "0";
+		map["ignoreCase"] = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsFindIgnoreCase] ? "1" : "0";
 	}
 
 	std::vector<std::string> contents;

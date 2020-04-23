@@ -36,7 +36,7 @@ namespace ns
 			NSInteger tag = _tag;
 			CFRunLoopPerformBlock(CFRunLoopGetMain(), kCFRunLoopCommonModes, ^{
 				@autoreleasepool {
-					[[NSSpellChecker sharedSpellChecker] closeSpellDocumentWithTag:tag];
+					[NSSpellChecker.sharedSpellChecker closeSpellDocumentWithTag:tag];
 				}
 			});
 		}
@@ -45,7 +45,7 @@ namespace ns
 	template <typename _OutputIter>
 	_OutputIter spellcheck (char const* first, char const* last, std::string const& language, long int tag, size_t offset, _OutputIter out)
 	{
-		NSSpellChecker* spellChecker = [NSSpellChecker sharedSpellChecker];
+		NSSpellChecker* spellChecker = NSSpellChecker.sharedSpellChecker;
 		NSString* lang               = language.length() ? [NSString stringWithCxxString:language] : nil;
 		NSString* str                = [NSString stringWithUTF8String:first length:last - first];
 		NSRange range                = [spellChecker checkSpellingOfString:str startingAt:0 language:lang wrap:NO inSpellDocumentWithTag:tag wordCount:NULL];

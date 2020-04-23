@@ -37,7 +37,7 @@
 @implementation OakDocumentPrintableView
 + (void)initialize
 {
-	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
+	[NSUserDefaults.standardUserDefaults registerDefaults:@{
 		@"OakPrintThemeUUID":       @(kMacClassicThemeUUID),
 		@"OakPrintFontSize":        @(11),
 		@"OakPrintHeaderAndFooter": @NO,
@@ -219,7 +219,7 @@
 	{
 		NSPrintInfo* info = [self representedObject];
 		[[info dictionary] setObject:to_ns(themeUUIDs[anIndex]) forKey:@"OakPrintThemeUUID"];
-		[[NSUserDefaults standardUserDefaults] setObject:to_ns(themeUUIDs[anIndex]) forKey:@"OakPrintThemeUUID"];
+		[NSUserDefaults.standardUserDefaults setObject:to_ns(themeUUIDs[anIndex]) forKey:@"OakPrintThemeUUID"];
 	}
 }
 
@@ -241,7 +241,7 @@
 {
 	NSPrintInfo* info = [self representedObject];
 	[[info dictionary] setObject:@(flag) forKey:NSPrintHeaderAndFooter];
-	[[NSUserDefaults standardUserDefaults] setObject:@(flag) forKey:@"OakPrintHeaderAndFooter"];
+	[NSUserDefaults.standardUserDefaults setObject:@(flag) forKey:@"OakPrintHeaderAndFooter"];
 }
 
 - (BOOL)printHeaderAndFooter
@@ -253,7 +253,7 @@
 {
 	NSPrintInfo* info = [self representedObject];
 	[[info dictionary] setObject:size forKey:@"OakPrintFontSize"];
-	[[NSUserDefaults standardUserDefaults] setObject:size forKey:@"OakPrintFontSize"];
+	[NSUserDefaults.standardUserDefaults setObject:size forKey:@"OakPrintFontSize"];
 }
 
 - (NSNumber*)printFontSize

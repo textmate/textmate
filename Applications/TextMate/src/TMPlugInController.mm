@@ -35,7 +35,7 @@ static id CreateInstanceOfPlugInClass (Class cl, TMPlugInController* controller)
 
 + (void)initialize
 {
-	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
+	[NSUserDefaults.standardUserDefaults registerDefaults:@{
 		kUserDefaultsDisabledPlugInsKey: @[ @"io.emmet.EmmetTextmate" ]
 	}];
 }
@@ -62,7 +62,7 @@ static id CreateInstanceOfPlugInClass (Class cl, TMPlugInController* controller)
 		NSString* identifier = [bundle objectForInfoDictionaryKey:@"CFBundleIdentifier"];
 		NSString* name = [bundle objectForInfoDictionaryKey:@"CFBundleName"];
 
-		NSArray* blacklist = [[NSUserDefaults standardUserDefaults] stringArrayForKey:kUserDefaultsDisabledPlugInsKey];
+		NSArray* blacklist = [NSUserDefaults.standardUserDefaults stringArrayForKey:kUserDefaultsDisabledPlugInsKey];
 		if([blacklist containsObject:identifier])
 			return;
 
@@ -76,7 +76,7 @@ static id CreateInstanceOfPlugInClass (Class cl, TMPlugInController* controller)
 					NSAlert* alert = [NSAlert tmAlertWithMessageText:[NSString stringWithFormat:@"Move “%@” plug-in to Trash?", name ?: identifier] informativeText:@"Previous attempt of loading the plug-in caused abnormal exit. Would you like to move it to trash?" buttons:@"Move to Trash", @"Cancel", @"Skip Loading", nil];
 					NSInteger choice = [alert runModal];
 					if(choice == NSAlertFirstButtonReturn) // "Move to Trash"
-						[[NSFileManager defaultManager] trashItemAtURL:[NSURL fileURLWithPath:aPath] resultingItemURL:nil error:nil];
+						[NSFileManager.defaultManager trashItemAtURL:[NSURL fileURLWithPath:aPath] resultingItemURL:nil error:nil];
 
 					if(choice != NSAlertThirdButtonReturn) // "Skip Loading"
 						unlink(crashedDuringPlugInLoad.c_str());
@@ -133,7 +133,7 @@ static id CreateInstanceOfPlugInClass (Class cl, TMPlugInController* controller)
 	for(NSString* path in paths)
 	{
 		D(DBF_PlugInController, bug("scan %s\n", [path UTF8String]););
-		for(NSString* plugInName in [[NSFileManager defaultManager] contentsOfDirectoryAtPath:path error:nil])
+		for(NSString* plugInName in [NSFileManager.defaultManager contentsOfDirectoryAtPath:path error:nil])
 		{
 			if([[[plugInName pathExtension] lowercaseString] isEqualToString:@"tmplugin"])
 				[self loadPlugInAtPath:[path stringByAppendingPathComponent:plugInName]];
@@ -143,7 +143,7 @@ static id CreateInstanceOfPlugInClass (Class cl, TMPlugInController* controller)
 
 - (void)installPlugInAtPath:(NSString*)src
 {
-	NSFileManager* fm = [NSFileManager defaultManager];
+	NSFileManager* fm = NSFileManager.defaultManager;
 
 	NSArray* libraryPaths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSAllDomainsMask, YES);
 	NSString* dst = [NSString pathWithComponents:@[ libraryPaths[0], @"TextMate", @"PlugIns", [src lastPathComponent] ]];
@@ -163,7 +163,7 @@ static id CreateInstanceOfPlugInClass (Class cl, TMPlugInController* controller)
 		return;
 	}
 
-	NSArray* blacklist = [[NSUserDefaults standardUserDefaults] stringArrayForKey:kUserDefaultsDisabledPlugInsKey];
+	NSArray* blacklist = [NSUserDefaults.standardUserDefaults stringArrayForKey:kUserDefaultsDisabledPlugInsKey];
 	if([blacklist containsObject:[plugInBundle objectForInfoDictionaryKey:@"CFBundleIdentifier"]])
 	{
 		NSAlert* alert        = [[NSAlert alloc] init];
