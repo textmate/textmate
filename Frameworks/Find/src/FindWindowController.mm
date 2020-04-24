@@ -310,6 +310,7 @@ static NSButton* OakCreateStopSearchButton ()
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(findClipboardDidChange:) name:OakPasteboardDidChangeNotification object:OakPasteboard.findPasteboard];
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(replaceClipboardDidChange:) name:OakPasteboardDidChangeNotification object:OakPasteboard.replacePasteboard];
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(textViewWillPerformFindOperation:) name:@"OakTextViewWillPerformFindOperation" object:nil];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(resultsFrameDidChange:) name:NSViewFrameDidChangeNotification object:self.resultsViewController.view];
 
 		// Register to application activation/deactivation notification so we can tweak our collection behavior
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(applicationDidActivate:) name:NSApplicationDidBecomeActiveNotification object:nil];
@@ -562,7 +563,7 @@ static NSButton* OakCreateStopSearchButton ()
 	return res;
 }
 
-- (void)windowDidResize:(NSNotification*)aNotification
+- (void)resultsFrameDidChange:(NSNotification*)aNotification
 {
 	if(self.showsResultsOutlineView)
 		self.findResultsHeight = NSHeight(self.resultsViewController.view.frame);
