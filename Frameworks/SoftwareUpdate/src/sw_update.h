@@ -1,7 +1,7 @@
 #ifndef SW_UPDATE_H_TW02442V
 #define SW_UPDATE_H_TW02442V
 
-#include <network/network.h>
+#include <network/key_chain.h>
 #include <oak/debug.h>
 
 namespace sw_update

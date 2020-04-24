@@ -1,7 +1,9 @@
 #include "sw_update.h"
+#include <network/network.h>
 #include <network/download_tbz.h>
 #include <plist/plist.h>
 #include <io/entries.h>
+#include <io/path.h>
 #include <text/decode.h>
 #include <text/trim.h>
 #include <ns/ns.h>
