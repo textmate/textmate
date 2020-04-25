@@ -1,5 +1,6 @@
 #import "FindWindowController.h"
 #import "FFResultsViewController.h"
+#import "FFStatusBarViewController.h"
 #import "FFFolderMenu.h"
 #import "CommonAncestor.h"
 #import <OakAppKit/OakAppKit.h>
@@ -21,22 +22,6 @@
 NSString* const kUserDefaultsFolderOptionsKey     = @"Folder Search Options";
 NSString* const kUserDefaultsFindResultsHeightKey = @"findResultsHeight";
 NSString* const kUserDefaultsDefaultFindGlobsKey  = @"defaultFindInFolderGlobs";
-
-static NSButton* OakCreateClickableStatusBar ()
-{
-	NSButton* res = [[NSButton alloc] initWithFrame:NSZeroRect];
-	[res.cell setLineBreakMode:NSLineBreakByTruncatingTail];
-	res.font        = [NSFont messageFontOfSize:[NSFont systemFontSizeForControlSize:NSControlSizeSmall]];
-	res.controlSize = NSControlSizeSmall;
-	res.alignment   = NSTextAlignmentLeft;
-	res.bordered    = NO;
-	res.buttonType  = NSButtonTypeToggle;
-	res.title       = @" "; // Ensure initial (fitting) size can fit a line of text
-
-	[res setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
-	[res setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationVertical];
-	return res;
-}
 
 @interface OakAutoSizingTextField : NSTextField
 @property (nonatomic) NSSize myIntrinsicContentSize;
@@ -81,34 +66,12 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 	return res;
 }
 
-static NSProgressIndicator* OakCreateProgressIndicator ()
-{
-	NSProgressIndicator* res = [[NSProgressIndicator alloc] initWithFrame:NSZeroRect];
-	res.style                = NSProgressIndicatorStyleSpinning;
-	res.controlSize          = NSControlSizeSmall;
-	res.displayedWhenStopped = NO;
-	return res;
-}
-
-static NSButton* OakCreateStopSearchButton ()
-{
-	NSButton* res = [[NSButton alloc] initWithFrame:NSZeroRect];
-	res.buttonType    = NSButtonTypeMomentaryChange;
-	res.bordered      = NO;
-	res.image         = [NSImage imageNamed:NSImageNameStopProgressFreestandingTemplate];
-	res.imagePosition = NSImageOnly;
-	res.toolTip       = @"Stop Search";
-	res.keyEquivalent = @".";
-	res.keyEquivalentModifierMask = NSEventModifierFlagCommand;
-	[res.cell setImageScaling:NSImageScaleProportionallyDown];
-	res.accessibilityLabel = res.toolTip;
-	return res;
-}
-
 @interface FindWindowController () <NSTextFieldDelegate, NSWindowDelegate, NSMenuDelegate, NSPopoverDelegate, NSTextStorageDelegate>
 {
 	BOOL _ignoreWhitespace;
 }
+@property (nonatomic) FFStatusBarViewController* statusBarViewController;
+
 @property (nonatomic) NSTextField*              findLabel;
 @property (nonatomic) OakAutoSizingTextField*   findTextField;
 @property (nonatomic) OakSyntaxFormatter*       findStringFormatter;
@@ -132,9 +95,6 @@ static NSButton* OakCreateStopSearchButton ()
 @property (nonatomic) NSTextField*              matchingLabel;
 @property (nonatomic) NSComboBox*               globTextField;
 @property (nonatomic) NSPopUpButton*            actionsPopUpButton;
-
-@property (nonatomic) NSProgressIndicator*      progressIndicator;
-@property (nonatomic) NSButton*                 statusTextField;
 
 @property (nonatomic, readwrite) NSButton*      findAllButton;
 @property (nonatomic, readwrite) NSButton*      replaceAllButton;
@@ -178,7 +138,8 @@ static NSButton* OakCreateStopSearchButton ()
 	{
 		_projectFolder = NSHomeDirectory();
 
-		self.resultsViewController     = [FFResultsViewController new];
+		self.resultsViewController     = [[FFResultsViewController alloc] init];
+		self.statusBarViewController   = [[FFStatusBarViewController alloc] init];
 
 		self.window.frameAutosaveName  = @"Find";
 		self.window.hidesOnDeactivate  = NO;
@@ -213,16 +174,12 @@ static NSButton* OakCreateStopSearchButton ()
 		self.globTextField             = OakCreateComboBox(self.matchingLabel);
 		self.actionsPopUpButton        = OakCreateActionPopUpButton(YES /* bordered */);
 
-		self.progressIndicator         = OakCreateProgressIndicator();
-		self.statusTextField           = OakCreateClickableStatusBar();
-
 		self.findAllButton             = OakCreateButton(@"Find All");
 		self.replaceAllButton          = OakCreateButton(@"Replace All");
 		self.replaceButton             = OakCreateButton(@"Replace");
 		self.replaceAndFindButton      = OakCreateButton(@"Replace & Find");
 		self.findPreviousButton        = OakCreateButton(@"Previous");
 		self.findNextButton            = OakCreateButton(@"Next");
-		self.stopSearchButton          = OakCreateStopSearchButton();
 
 		[self updateWindowTitle];
 		[self updateSearchInPopUpMenu];
@@ -266,7 +223,9 @@ static NSButton* OakCreateStopSearchButton ()
 		self.replaceAndFindButton.action  = @selector(replaceAndFind:);
 		self.findPreviousButton.action    = @selector(findPrevious:);
 		self.findNextButton.action        = @selector(findNext:);
-		self.stopSearchButton.action      = @selector(stopSearch:);
+
+		self.statusBarViewController.stopAction = @selector(stopSearch:);
+		self.statusBarViewController.stopTarget = Find.sharedInstance;
 
 		self.objectController = [[NSObjectController alloc] initWithContent:self];
 		self.globHistoryList  = [[OakHistoryList alloc] initWithName:@"Find in Folder Globs.default" stackSize:10 fallbackUserDefaultsKey:kUserDefaultsDefaultFindGlobsKey];
@@ -373,7 +332,7 @@ static NSButton* OakCreateStopSearchButton ()
 		@"actions":           self.actionsPopUpButton,
 
 		@"results":           self.showsResultsOutlineView ? self.resultsViewController.view : [NSNull null],
-		@"status":            self.statusTextField,
+		@"status":            self.statusBarViewController.view,
 
 		@"findAll":           self.findAllButton,
 		@"replaceAll":        self.replaceAllButton,
@@ -382,16 +341,6 @@ static NSButton* OakCreateStopSearchButton ()
 		@"previous":          self.findPreviousButton,
 		@"next":              self.findNextButton,
 	};
-
-	if(self.isBusy)
-	{
-		NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithDictionary:views];
-		[dict addEntriesFromDictionary:@{
-			@"busy":       self.progressIndicator,
-			@"stopSearch": self.stopSearchButton,
-		}];
-		views = dict;
-	}
 
 	return views;
 }
@@ -445,15 +394,7 @@ static NSButton* OakCreateStopSearchButton ()
 		CONSTRAINT(@"V:[where]-(8)-[status]", 0);
 	}
 
-	if(self.isBusy)
-	{
-		CONSTRAINT(@"H:|-[stopSearch(==13)]-(==6)-[busy]-[status]-|", NSLayoutFormatAlignAllCenterY);
-	}
-	else
-	{
-		CONSTRAINT(@"H:|-[status]-|", 0);
-	}
-
+	CONSTRAINT(@"H:|-[status]-|", 0);
 	CONSTRAINT(@"H:|-[findAll]-[replaceAll]-(>=8)-[replaceButton]-[replaceAndFind]-[previous]-[next]-|", NSLayoutFormatAlignAllBottom);
 	CONSTRAINT(@"V:[status]-(8)-[findAll]-|", 0);
 
@@ -799,66 +740,20 @@ static NSButton* OakCreateStopSearchButton ()
 
 - (void)setBusy:(BOOL)busyFlag
 {
-	if(_busy == busyFlag)
-		return;
-
-	NSArray* busyViews = @[ self.stopSearchButton, self.progressIndicator ];
-	if(_busy = busyFlag)
-	{
-		OakAddAutoLayoutViewsToSuperview(busyViews, self.window.contentView);
-		[self.progressIndicator startAnimation:self];
-	}
-	else
-	{
-		[self.progressIndicator stopAnimation:self];
-		[busyViews makeObjectsPerformSelector:@selector(removeFromSuperview)];
-	}
-	[self updateConstraints];
-}
-
-- (id)formatStatusString:(NSString*)aString
-{
-	if(OakIsEmptyString(aString))
-		return @" ";
-
-	static NSAttributedString* const lineJoiner = [[NSAttributedString alloc] initWithString:@"¬" attributes:@{ NSForegroundColorAttributeName: NSColor.tertiaryLabelColor }];
-	static NSAttributedString* const tabJoiner  = [[NSAttributedString alloc] initWithString:@"‣" attributes:@{ NSForegroundColorAttributeName: NSColor.tertiaryLabelColor }];
-
-	NSMutableAttributedString* res = [[NSMutableAttributedString alloc] init];
-
-	__block bool firstLine = true;
-	[aString enumerateLinesUsingBlock:^(NSString* line, BOOL* stop){
-		if(!std::exchange(firstLine, false))
-			[res appendAttributedString:lineJoiner];
-
-		bool firstTab = true;
-		for(NSString* str in [line componentsSeparatedByString:@"\t"])
-		{
-			if(!std::exchange(firstTab, false))
-				[res appendAttributedString:tabJoiner];
-			[res appendAttributedString:[[NSAttributedString alloc] initWithString:str]];
-		}
-	}];
-
-	NSMutableParagraphStyle* paragraphStyle = [[NSMutableParagraphStyle alloc] init];
-	[paragraphStyle setLineBreakMode:NSLineBreakByTruncatingMiddle];
-	NSDictionary* globalAttrs = @{
-		NSParagraphStyleAttributeName:  paragraphStyle,
-		NSForegroundColorAttributeName: NSColor.controlTextColor,
-	};
-	[res addAttributes:globalAttrs range:NSMakeRange(0, [[res string] length])];
-
-	return res;
+	_busy = busyFlag;
+	self.statusBarViewController.progressIndicatorVisible = busyFlag;
 }
 
 - (void)setStatusString:(NSString*)aString
 {
-	self.statusTextField.attributedTitle = self.statusTextField.attributedAlternateTitle = [self formatStatusString:_statusString = aString];
+	_statusString = aString;
+	self.statusBarViewController.statusText = _statusString;
 }
 
 - (void)setAlternateStatusString:(NSString*)aString
 {
-	self.statusTextField.attributedAlternateTitle = (_alternateStatusString = aString) ? [self formatStatusString:aString] : nil;
+	_alternateStatusString = aString;
+	self.statusBarViewController.alternateStatusText = _alternateStatusString;
 }
 
 - (NSString*)searchFolder
