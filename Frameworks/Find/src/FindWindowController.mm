@@ -70,6 +70,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 {
 	BOOL _ignoreWhitespace;
 	NSGridView* _gridView;
+	NSStackView* _actionButtonsStackView;
 }
 @property (nonatomic) FFStatusBarViewController* statusBarViewController;
 
@@ -375,21 +376,25 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 	return _gridView;
 }
 
+- (NSStackView*)actionButtonsStackView
+{
+	if(!_actionButtonsStackView)
+	{
+		_actionButtonsStackView = [NSStackView stackViewWithViews:@[ self.findAllButton, self.replaceAllButton ]];
+		[_actionButtonsStackView setViews:@[ self.replaceButton, self.replaceAndFindButton, self.findPreviousButton, self.findNextButton ] inGravity:NSStackViewGravityTrailing];
+		[_actionButtonsStackView setHuggingPriority:NSLayoutPriorityDefaultHigh forOrientation:NSLayoutConstraintOrientationVertical];
+	}
+	return _actionButtonsStackView;
+}
+
 - (NSDictionary*)allViews
 {
 	NSDictionary* views = @{
 		@"gridView":          self.gridView,
 		@"results":           self.showsResultsOutlineView ? self.resultsViewController.view : [NSNull null],
 		@"status":            self.statusBarViewController.view,
-
-		@"findAll":           self.findAllButton,
-		@"replaceAll":        self.replaceAllButton,
-		@"replaceButton":     self.replaceButton,
-		@"replaceAndFind":    self.replaceAndFindButton,
-		@"previous":          self.findPreviousButton,
-		@"next":              self.findNextButton,
+		@"actions":           self.actionButtonsStackView,
 	};
-
 	return views;
 }
 
@@ -418,8 +423,8 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 	}
 
 	CONSTRAINT(@"H:|-[status]-|", 0);
-	CONSTRAINT(@"H:|-[findAll]-[replaceAll]-(>=8)-[replaceButton]-[replaceAndFind]-[previous]-[next]-|", NSLayoutFormatAlignAllBottom);
-	CONSTRAINT(@"V:[status]-(8)-[findAll]-|", 0);
+	CONSTRAINT(@"H:|-[actions]-|", 0);
+	CONSTRAINT(@"V:[status]-(8)-[actions]-|", 0);
 
 	[self.window.contentView addConstraints:_myConstraints];
 
