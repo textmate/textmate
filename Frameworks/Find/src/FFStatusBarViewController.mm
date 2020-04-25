@@ -114,6 +114,7 @@ static id OakFormatStatusString (NSString* aString)
 		self.progressIndicator,
 		self.statusTextButton,
 	]];
+	stackView.edgeInsets = { .left = 20, .right = 20 };
 
 	[stackView setCustomSpacing:2 afterView:_progressIndicator];
 	[stackView setHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationVertical];

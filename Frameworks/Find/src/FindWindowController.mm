@@ -255,12 +255,28 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 
 		[self.resultsViewController     bind:@"replaceString"       toObject:_objectController withKeyPath:@"content.replaceString"        options:nil];
 
-		NSView* contentView = self.window.contentView;
-		OakAddAutoLayoutViewsToSuperview([self.allViews allValues], contentView);
+		NSStackView* stackView = [NSStackView stackViewWithViews:@[
+			self.gridView,
+			self.resultsViewController.view,
+			self.statusBarViewController.view,
+			self.actionButtonsStackView,
+		]];
+		stackView.orientation = NSUserInterfaceLayoutOrientationVertical;
+		stackView.alignment   = NSLayoutAttributeLeading;
+		stackView.edgeInsets  = { .bottom = 20 };
+		[stackView setHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationVertical];
+		[stackView setHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
 
-		[self updateConstraints];
+		self.actionButtonsStackView.edgeInsets = { .left = 20, .right = 20 };
 
+		self.resultsViewController.view.hidden = YES;
+
+		self.window.contentView = stackView;
 		self.window.defaultButtonCell = self.findNextButton.cell;
+
+		[self.window layoutIfNeeded]; // Incase autosaved window frame includes results, we want to shrink the frame
+
+		OakSetupKeyViewLoop(@[ self.findTextField, self.replaceTextField, self.countButton, self.regularExpressionCheckBox, self.ignoreWhitespaceCheckBox, self.ignoreCaseCheckBox, self.wrapAroundCheckBox, self.wherePopUpButton, self.globTextField, self.actionsPopUpButton, self.resultsViewController.outlineView, self.findAllButton, self.replaceAllButton, self.replaceButton, self.replaceAndFindButton, self.findPreviousButton, self.findNextButton ]);
 
 		// setup find/replace strings/options
 		[self userDefaultsDidChange:nil];
@@ -385,52 +401,6 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		[_actionButtonsStackView setHuggingPriority:NSLayoutPriorityDefaultHigh forOrientation:NSLayoutConstraintOrientationVertical];
 	}
 	return _actionButtonsStackView;
-}
-
-- (NSDictionary*)allViews
-{
-	NSDictionary* views = @{
-		@"gridView":          self.gridView,
-		@"results":           self.showsResultsOutlineView ? self.resultsViewController.view : [NSNull null],
-		@"status":            self.statusBarViewController.view,
-		@"actions":           self.actionButtonsStackView,
-	};
-	return views;
-}
-
-#ifndef CONSTRAINT
-#define CONSTRAINT(str, align) [_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:str options:align metrics:nil views:views]]
-#endif
-
-- (void)updateConstraints
-{
-	if(_myConstraints)
-		[self.window.contentView removeConstraints:_myConstraints];
-	self.myConstraints = [NSMutableArray array];
-
-	NSDictionary* views = self.allViews;
-
-	CONSTRAINT(@"H:|[gridView]|", 0);
-
-	if(self.showsResultsOutlineView)
-	{
-		CONSTRAINT(@"H:|[results]|", 0);
-		[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[gridView]-[results(>=50,==height@490)]-(8)-[status]" options:0 metrics:@{ @"height": @(self.findResultsHeight) } views:views]];
-	}
-	else
-	{
-		CONSTRAINT(@"V:|[gridView]-(8)-[status]", 0);
-	}
-
-	CONSTRAINT(@"H:|-[status]-|", 0);
-	CONSTRAINT(@"H:|-[actions]-|", 0);
-	CONSTRAINT(@"V:[status]-(8)-[actions]-|", 0);
-
-	[self.window.contentView addConstraints:_myConstraints];
-
-	if(self.showsResultsOutlineView)
-			OakSetupKeyViewLoop(@[ self.findTextField, self.replaceTextField, self.countButton, self.regularExpressionCheckBox, self.ignoreWhitespaceCheckBox, self.ignoreCaseCheckBox, self.wrapAroundCheckBox, self.wherePopUpButton, self.globTextField, self.actionsPopUpButton, self.resultsViewController.outlineView, self.findAllButton, self.replaceAllButton, self.replaceButton, self.replaceAndFindButton, self.findPreviousButton, self.findNextButton ]);
-	else	OakSetupKeyViewLoop(@[ self.findTextField, self.replaceTextField, self.countButton, self.regularExpressionCheckBox, self.ignoreWhitespaceCheckBox, self.ignoreCaseCheckBox, self.wrapAroundCheckBox, self.wherePopUpButton, self.globTextField, self.actionsPopUpButton, self.findAllButton, self.replaceAllButton, self.replaceButton, self.replaceAndFindButton, self.findPreviousButton, self.findNextButton ]);
 }
 
 - (void)userDefaultsDidChange:(NSNotification*)aNotification
@@ -726,44 +696,36 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 {
 	if(_showsResultsOutlineView == flag)
 		return;
+	_showsResultsOutlineView = flag;
 
-	BOOL isWindowLoaded = [self isWindowLoaded];
-	CGFloat desiredHeight = self.findResultsHeight;
+	if(!self.isWindowLoaded)
+		return;
 
-	NSView* view = self.resultsViewController.view;
-	if(_showsResultsOutlineView = flag)
-			OakAddAutoLayoutViewsToSuperview(@[ view ], self.window.contentView);
-	else	[view removeFromSuperview];
+	NSRect windowFrame = self.window.frame;
+	CGFloat minY = NSMinY(windowFrame);
+	CGFloat maxY = NSMaxY(windowFrame);
 
-	[self updateConstraints];
+	if(_showsResultsOutlineView)
+			minY -= MAX(50, self.findResultsHeight + 8);
+	else	minY += NSHeight(self.resultsViewController.view.frame) + 8;
 
-	if(flag && isWindowLoaded)
-	{
-		[self.window layoutIfNeeded];
+	NSRect screenFrame = self.window.screen.visibleFrame;
+	if(minY < NSMinY(screenFrame))
+		maxY += NSMinY(screenFrame) - minY;
+	if(maxY > NSMaxY(screenFrame))
+		minY -= maxY - NSMaxY(screenFrame);
 
-		NSRect screenFrame = [[self.window screen] visibleFrame];
-		NSRect windowFrame = self.window.frame;
-		CGFloat minY = NSMinY(windowFrame);
-		CGFloat maxY = NSMaxY(windowFrame);
+	minY = MAX(minY, NSMinY(screenFrame));
+	maxY = MIN(maxY, NSMaxY(screenFrame));
+	NSRect newWindowFrame = NSMakeRect(NSMinX(windowFrame), minY, NSWidth(windowFrame), maxY - minY);
 
-		CGFloat currentHeight = NSHeight(self.resultsViewController.view.frame);
-		minY -= desiredHeight - currentHeight;
+	if(_showsResultsOutlineView)
+		self.resultsViewController.view.hidden = NO;
+	[self.window setFrame:newWindowFrame display:YES animate:YES];
+	if(!_showsResultsOutlineView)
+		self.resultsViewController.view.hidden = YES;
 
-		if(minY < NSMinY(screenFrame))
-			maxY += NSMinY(screenFrame) - minY;
-		if(maxY > NSMaxY(screenFrame))
-			minY -= maxY - NSMaxY(screenFrame);
-
-		minY = MAX(minY, NSMinY(screenFrame));
-		maxY = MIN(maxY, NSMaxY(screenFrame));
-
-		windowFrame.origin.y    = minY;
-		windowFrame.size.height = maxY - minY;
-
-		[self.window setFrame:windowFrame display:YES];
-	}
-
-	self.window.defaultButtonCell = flag ? self.findAllButton.cell : self.findNextButton.cell;
+	self.window.defaultButtonCell = _showsResultsOutlineView ? self.findAllButton.cell : self.findNextButton.cell;
 }
 
 - (void)setBusy:(BOOL)busyFlag
