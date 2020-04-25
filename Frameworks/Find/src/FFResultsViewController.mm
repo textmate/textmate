@@ -299,6 +299,19 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 // ===========================
 
 @implementation FFResultsViewController
+- (NSView*)horizontalDividerView
+{
+	// We can’t use NSBoxSeparator because it creates a superview for the separator
+	// that is larger than the separator itself, and therefore overlaps with our
+	// scroll view, causing the scroll view to always show its scrollbars (bug?)
+
+	NSBox* boxView = [[NSBox alloc] initWithFrame:NSZeroRect];
+	boxView.boxType = NSBoxCustom;
+	boxView.borderColor = NSColor.quaternaryLabelColor;
+	[boxView addConstraint:[NSLayoutConstraint constraintWithItem:boxView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:1]];
+	return boxView;
+}
+
 - (void)loadView
 {
 	if(!_scrollView)
@@ -311,8 +324,8 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		[label sizeToFit];
 		CGFloat lineHeight = std::max(NSHeight(label.frame), ceil(_searchResultsFont.ascender) + ceil(fabs(_searchResultsFont.descender)) + ceil(_searchResultsFont.leading));
 
-		_topDivider    = OakCreateNSBoxSeparator();
-		_bottomDivider = OakCreateNSBoxSeparator();
+		_topDivider    = [self horizontalDividerView];
+		_bottomDivider = [self horizontalDividerView];
 
 		_outlineView = [[NSOutlineView alloc] initWithFrame:NSZeroRect];
 		_outlineView.accessibilityLabel                 = @"Results";
@@ -340,19 +353,15 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		_scrollView.borderType            = NSNoBorder;
 		_scrollView.documentView          = _outlineView;
 
-		NSDictionary* views = @{
-			@"topDivider":    _topDivider,
-			@"scrollView":    _scrollView,
-			@"bottomDivider": _bottomDivider,
-		};
+		NSStackView* stackView = [NSStackView stackViewWithViews:@[ _topDivider, _scrollView, _bottomDivider ]];
+		stackView.spacing      = 0;
+		stackView.orientation  = NSUserInterfaceLayoutOrientationVertical;
 
-		NSView* containerView = [[NSView alloc] initWithFrame:NSZeroRect];
-		OakAddAutoLayoutViewsToSuperview([views allValues], containerView);
+		[stackView setClippingResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationVertical];
+		[stackView setVisibilityPriority:NSStackViewVisibilityPriorityDetachOnlyIfNecessary-1 forView:_topDivider];
+		[stackView setVisibilityPriority:NSStackViewVisibilityPriorityDetachOnlyIfNecessary-2 forView:_bottomDivider];
 
-		[containerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[topDivider(==1)][scrollView][bottomDivider(==1)]|" options:NSLayoutFormatAlignAllLeading|NSLayoutFormatAlignAllTrailing metrics:nil views:views]];
-		[containerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView]|" options:0 metrics:nil views:views]];
-
-		self.view = containerView;
+		self.view = stackView;
 
 		_outlineView.dataSource   = self;
 		_outlineView.delegate     = self;
