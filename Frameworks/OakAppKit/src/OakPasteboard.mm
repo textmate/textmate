@@ -817,7 +817,7 @@ namespace
 
 - (void)selectItemForControl:(NSView*)controlView
 {
-	NSPoint origin = [[controlView window] convertRectToScreen:[controlView frame]].origin;
-	[self selectItemAtPosition:origin withWidth:[controlView frame].size.width respondToSingleClick:YES];
+	NSPoint origin = [controlView.window convertRectToScreen:[controlView convertRect:controlView.bounds toView:nil]].origin;
+	[self selectItemAtPosition:origin withWidth:NSWidth(controlView.frame) respondToSingleClick:YES];
 }
 @end
