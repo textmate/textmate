@@ -549,11 +549,26 @@ namespace
 {
 	NSMutableArray<OakPasteboardEntry*>* res = [NSMutableArray array];
 
-	char const* query = "SELECT history.id AS history_id FROM clipboards LEFT JOIN history ON clipboards.id = clipboard_id WHERE name = :name ORDER BY history.id DESC;";
+	NSNumber* lastHistoryId;
+	NSMutableArray* strings;
+
+	char const* query = "SELECT history.id AS history_id, options, flags.id AS flagged, string FROM history LEFT JOIN clipboards ON clipboards.id = clipboard_id LEFT JOIN flags USING (id) LEFT JOIN groups ON history.id = history_id LEFT JOIN strings ON strings.id = string_id WHERE name = :name ORDER BY history.id DESC;";
 	for(NSDictionary* row in RunSQLStatement(OakPasteboard.SQLDatabase, query, { { ":name", _name } }))
 	{
-		if(OakPasteboardEntry* entry = [self fetchEntryWithHistoryId:[row[@"history_id"] integerValue]])
-			[res addObject:entry];
+		NSNumber* historyId = row[@"history_id"];
+		if([lastHistoryId isEqual:historyId])
+		{
+			[strings addObject:row[@"string"]];
+		}
+		else
+		{
+			NSMutableDictionary* options = [NSMutableDictionary dictionaryWithObject:historyId forKey:@"historyId"];
+			if(NSData* optionsData = row[@"options"])
+				[options addEntriesFromDictionary:[NSPropertyListSerialization propertyListWithData:optionsData options:NSPropertyListImmutable format:nil error:nil]];
+			strings = [NSMutableArray arrayWithObject:row[@"string"]];
+			[res addObject:[[OakPasteboardEntry alloc] initWithStrings:strings options:options flagged:row[@"flagged"] ? YES : NO]];
+		}
+		lastHistoryId = historyId;
 	}
 
 	return res;
