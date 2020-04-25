@@ -118,13 +118,14 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 
 @property (nonatomic) BOOL                      findStringUpdated;
 @property (nonatomic) BOOL                      replaceStringUpdated;
+
+@property (nonatomic) BOOL                      canEditGlob;
+@property (nonatomic) BOOL                      canReplaceInDocument;
 @end
 
 @implementation FindWindowController
 + (NSSet*)keyPathsForValuesAffectingCanIgnoreWhitespace  { return [NSSet setWithObject:@"regularExpression"]; }
 + (NSSet*)keyPathsForValuesAffectingIgnoreWhitespace     { return [NSSet setWithObject:@"regularExpression"]; }
-+ (NSSet*)keyPathsForValuesAffectingCanEditGlob          { return [NSSet setWithObject:@"searchTarget"]; }
-+ (NSSet*)keyPathsForValuesAffectingCanReplaceInDocument { return [NSSet setWithObject:@"searchTarget"]; }
 
 + (void)initialize
 {
@@ -608,6 +609,9 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 	if(_searchTarget == FFSearchTargetOther && [NSFileManager.defaultManager fileExistsAtPath:self.otherFolder isDirectory:&isDirectory] && isDirectory)
 		[self.recentFolders addObject:self.otherFolder];
 
+	self.canEditGlob          = _searchTarget != FFSearchTargetDocument && _searchTarget != FFSearchTargetSelection;
+	self.canReplaceInDocument = _searchTarget == FFSearchTargetDocument || _searchTarget == FFSearchTargetSelection;
+
 	[self updateSearchInPopUpMenu];
 	[self updateWindowTitle];
 
@@ -859,9 +863,6 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 - (void)setWrapAround:(BOOL)flag        { if(_wrapAround != flag) [NSUserDefaults.standardUserDefaults setObject:@(_wrapAround = flag) forKey:kUserDefaultsFindWrapAround]; }
 - (BOOL)ignoreWhitespace                { return _ignoreWhitespace && self.canIgnoreWhitespace; }
 - (BOOL)canIgnoreWhitespace             { return _regularExpression == NO; }
-
-- (BOOL)canEditGlob                     { return _searchTarget != FFSearchTargetDocument && _searchTarget != FFSearchTargetSelection; }
-- (BOOL)canReplaceInDocument            { return _searchTarget == FFSearchTargetDocument || _searchTarget == FFSearchTargetSelection; }
 
 - (NSString*)globString                 { [self commitEditing]; return _globHistoryList.head; }
 - (void)setGlobString:(NSString*)aGlob  { [_globHistoryList addObject:aGlob]; }
