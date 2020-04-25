@@ -604,15 +604,15 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 {
 	_searchTarget = newTarget;
 
-	BOOL isFolderSearch = _searchTarget != FFSearchTargetDocument && _searchTarget != FFSearchTargetSelection;
-	self.showsResultsOutlineView = isFolderSearch;
-
 	BOOL isDirectory = NO;
 	if(_searchTarget == FFSearchTargetOther && [NSFileManager.defaultManager fileExistsAtPath:self.otherFolder isDirectory:&isDirectory] && isDirectory)
 		[self.recentFolders addObject:self.otherFolder];
 
 	[self updateSearchInPopUpMenu];
 	[self updateWindowTitle];
+
+	BOOL isFolderSearch = _searchTarget != FFSearchTargetDocument && _searchTarget != FFSearchTargetSelection;
+	self.showsResultsOutlineView = isFolderSearch;
 }
 
 - (void)takeSearchTargetFrom:(NSMenuItem*)menuItem
