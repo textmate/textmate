@@ -69,6 +69,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 @interface FindWindowController () <NSTextFieldDelegate, NSWindowDelegate, NSMenuDelegate, NSPopoverDelegate, NSTextStorageDelegate>
 {
 	BOOL _ignoreWhitespace;
+	NSGridView* _gridView;
 }
 @property (nonatomic) FFStatusBarViewController* statusBarViewController;
 
@@ -308,29 +309,76 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 	[NSApp sendAction:@selector(updateShowTabMenu:) to:nil from:aMenu];
 }
 
+- (NSGridView*)gridView
+{
+	if(!_gridView)
+	{
+		NSGridView* optionsGridView = [NSGridView gridViewWithViews:@[
+			@[ self.regularExpressionCheckBox, self.ignoreWhitespaceCheckBox ],
+			@[ self.ignoreCaseCheckBox,        self.wrapAroundCheckBox       ],
+		]];
+
+		optionsGridView.rowSpacing    = 8;
+		optionsGridView.columnSpacing = 20;
+		optionsGridView.rowAlignment  = NSGridRowAlignmentFirstBaseline;
+
+		NSStackView* whereStackView = [NSStackView stackViewWithViews:@[
+			self.wherePopUpButton, self.matchingLabel, self.globTextField
+		]];
+		whereStackView.alignment = NSLayoutAttributeLastBaseline;
+		[whereStackView setHuggingPriority:NSLayoutPriorityWindowSizeStayPut forOrientation:NSLayoutConstraintOrientationVertical];
+
+		_gridView = [NSGridView gridViewWithViews:@[
+			@[ self.findLabel,    self.findTextField,    self.findHistoryButton,   self.countButton ],
+			@[ self.replaceLabel, self.replaceTextField, self.replaceHistoryButton                  ],
+			@[ self.optionsLabel, optionsGridView                                                   ],
+			@[ self.whereLabel,   whereStackView,        self.actionsPopUpButton                    ],
+		]];
+
+		_gridView.rowSpacing    = 8;
+		_gridView.columnSpacing = 4;
+		_gridView.rowAlignment  = NSGridRowAlignmentFirstBaseline;
+
+		[_gridView rowAtIndex:0].topPadding        = 20;
+		[_gridView rowAtIndex:2].bottomPadding     = 12;
+		[_gridView columnAtIndex:0].xPlacement     = NSGridCellPlacementTrailing;
+		[_gridView columnAtIndex:0].leadingPadding = 20;
+		[_gridView columnAtIndex:1].leadingPadding = 4;
+		[_gridView columnAtIndex:3].leadingPadding = 4;
+		[_gridView columnAtIndex:_gridView.numberOfColumns-1].trailingPadding = 20;
+
+		[_gridView cellAtColumnIndex:2 rowIndex:0].yPlacement = NSGridCellPlacementTop;
+		[_gridView cellAtColumnIndex:3 rowIndex:0].yPlacement = NSGridCellPlacementTop;
+		[_gridView cellAtColumnIndex:2 rowIndex:1].yPlacement = NSGridCellPlacementTop;
+
+		[_gridView mergeCellsInHorizontalRange:NSMakeRange(2, 2) verticalRange:NSMakeRange(3, 1)];
+		[_gridView cellAtColumnIndex:2 rowIndex:3].xPlacement = NSGridCellPlacementFill;
+
+		[_gridView rowAtIndex:3].rowAlignment = NSGridRowAlignmentNone;
+		[_gridView rowAtIndex:3].yPlacement   = NSGridCellPlacementCenter;
+
+		NSDictionary<NSNumber*, NSView*>* baselineViews = @{ @2: self.regularExpressionCheckBox, @3: self.matchingLabel };
+		for(NSNumber* row in baselineViews)
+		{
+			NSGridCell* gridCell = [_gridView cellAtColumnIndex:0 rowIndex:row.integerValue];
+			gridCell.rowAlignment = NSGridRowAlignmentNone;
+			gridCell.yPlacement   = NSGridCellPlacementNone;
+			gridCell.customPlacementConstraints = @[ [gridCell.contentView.firstBaselineAnchor constraintEqualToAnchor:baselineViews[row].firstBaselineAnchor constant:0] ];
+		}
+
+		[_gridView setContentHuggingPriority:NSLayoutPriorityWindowSizeStayPut forOrientation:NSLayoutConstraintOrientationVertical];
+
+		[self.countButton.widthAnchor constraintEqualToAnchor:self.findHistoryButton.widthAnchor].active = YES;
+		[self.countButton.heightAnchor constraintEqualToAnchor:self.findHistoryButton.heightAnchor].active = YES;
+		[self.wherePopUpButton addConstraint:[NSLayoutConstraint constraintWithItem:self.wherePopUpButton attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationLessThanOrEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:150]];
+	}
+	return _gridView;
+}
+
 - (NSDictionary*)allViews
 {
 	NSDictionary* views = @{
-		@"findLabel":         self.findLabel,
-		@"find":              self.findTextField,
-		@"findHistory":       self.findHistoryButton,
-		@"count":             self.countButton,
-		@"replaceLabel":      self.replaceLabel,
-		@"replace":           self.replaceTextField,
-		@"replaceHistory":    self.replaceHistoryButton,
-
-		@"optionsLabel":      self.optionsLabel,
-		@"regularExpression": self.regularExpressionCheckBox,
-		@"ignoreWhitespace":  self.ignoreWhitespaceCheckBox,
-		@"ignoreCase":        self.ignoreCaseCheckBox,
-		@"wrapAround":        self.wrapAroundCheckBox,
-
-		@"whereLabel":        self.whereLabel,
-		@"where":             self.wherePopUpButton,
-		@"matching":          self.matchingLabel,
-		@"glob":              self.globTextField,
-		@"actions":           self.actionsPopUpButton,
-
+		@"gridView":          self.gridView,
 		@"results":           self.showsResultsOutlineView ? self.resultsViewController.view : [NSNull null],
 		@"status":            self.statusBarViewController.view,
 
@@ -357,41 +405,16 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 
 	NSDictionary* views = self.allViews;
 
-	CONSTRAINT(@"H:|-(>=20,==20@75)-[findLabel]-[find(>=100)]",        0);
-	CONSTRAINT(@"H:[find]-(5)-[findHistory]-[count(==findHistory)]-|", NSLayoutFormatAlignAllTop);
-	CONSTRAINT(@"V:[count(==21)]",                                     NSLayoutFormatAlignAllLeft|NSLayoutFormatAlignAllRight);
-	CONSTRAINT(@"H:|-(>=20,==20@75)-[replaceLabel]-[replace]",         0);
-	CONSTRAINT(@"H:[replace]-(5)-[replaceHistory]",                    NSLayoutFormatAlignAllTop);
-	CONSTRAINT(@"V:|-[find]-[replace]",                                NSLayoutFormatAlignAllLeft|NSLayoutFormatAlignAllRight);
-
-	[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self.findLabel attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.findTextField attribute:NSLayoutAttributeTop multiplier:1 constant:3]];
-	[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self.replaceLabel attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.replaceTextField attribute:NSLayoutAttributeTop multiplier:1 constant:3]];
-
-	CONSTRAINT(@"H:|-(>=20,==20@75)-[optionsLabel]-[regularExpression]-[ignoreWhitespace]-(>=20)-|", NSLayoutFormatAlignAllBaseline);
-	CONSTRAINT(@"H:[ignoreCase(==regularExpression)]-[wrapAround(==ignoreWhitespace)]",              NSLayoutFormatAlignAllTop|NSLayoutFormatAlignAllBottom);
-	CONSTRAINT(@"V:[replace]-[regularExpression]-[ignoreCase]",                                      NSLayoutFormatAlignAllLeft);
-	CONSTRAINT(@"V:[replace]-[ignoreWhitespace]-[wrapAround]",                                       0);
-
-	CONSTRAINT(@"H:|-(>=20,==20@75)-[whereLabel]-[where(<=180)]-[matching]", NSLayoutFormatAlignAllBaseline);
-	CONSTRAINT(@"H:[matching]-[glob]-[actions]",                             0);
-	[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self.actionsPopUpButton attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.globTextField    attribute:NSLayoutAttributeTop multiplier:1 constant:1]];
-	[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self.actionsPopUpButton attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.wherePopUpButton attribute:NSLayoutAttributeTop multiplier:1 constant:0]];
-
-	CONSTRAINT(@"V:[ignoreCase]-[where]",                                    NSLayoutFormatAlignAllLeft);
-	[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self.replaceTextField attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self.globTextField attribute:NSLayoutAttributeRight multiplier:1 constant:0]];
-
-	[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self.findLabel attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self.replaceLabel attribute:NSLayoutAttributeRight multiplier:1 constant:0]];
-	[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self.findLabel attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self.optionsLabel attribute:NSLayoutAttributeRight multiplier:1 constant:0]];
-	[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self.findLabel attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self.whereLabel   attribute:NSLayoutAttributeRight multiplier:1 constant:0]];
+	CONSTRAINT(@"H:|[gridView]|", 0);
 
 	if(self.showsResultsOutlineView)
 	{
 		CONSTRAINT(@"H:|[results]|", 0);
-		[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[where]-[results(>=50,==height@490)]-(8)-[status]" options:0 metrics:@{ @"height": @(self.findResultsHeight) } views:views]];
+		[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[gridView]-[results(>=50,==height@490)]-(8)-[status]" options:0 metrics:@{ @"height": @(self.findResultsHeight) } views:views]];
 	}
 	else
 	{
-		CONSTRAINT(@"V:[where]-(8)-[status]", 0);
+		CONSTRAINT(@"V:|[gridView]-(8)-[status]", 0);
 	}
 
 	CONSTRAINT(@"H:|-[status]-|", 0);
