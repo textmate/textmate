@@ -66,6 +66,7 @@
 @interface FileItemFinderTagsView : NSView
 @property (nonatomic) NSArray<OakFinderTag*>* finderTags;
 @property (nonatomic) NSBackgroundStyle backgroundStyle;
+@property (nonatomic) BOOL rightPadding;
 @end
 
 @interface FileItemTableCellView () <NSTextFieldDelegate>
@@ -109,12 +110,13 @@
 		[stackView.topAnchor      constraintEqualToAnchor:self.topAnchor      constant: 0].active = YES;
 		[stackView.bottomAnchor   constraintEqualToAnchor:self.bottomAnchor   constant: 0].active = YES;
 
-		[_openButton bind:NSImageBinding     toObject:self withKeyPath:@"objectValue.image"                 options:nil];
-		[textField bind:NSValueBinding       toObject:self withKeyPath:@"objectValue.editingAndDisplayName" options:nil];
-		[textField bind:NSEditableBinding    toObject:self withKeyPath:@"objectValue.canRename"             options:nil];
-		[textField bind:NSToolTipBinding     toObject:self withKeyPath:@"objectValue.toolTip"               options:nil];
-		[_finderTagsView bind:@"finderTags"  toObject:self withKeyPath:@"objectValue.finderTags"            options:nil];
-		[_closeButton bind:NSHiddenBinding   toObject:self withKeyPath:@"objectValue.open"                  options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
+		[_openButton bind:NSImageBinding      toObject:self withKeyPath:@"objectValue.image"                 options:nil];
+		[textField bind:NSValueBinding        toObject:self withKeyPath:@"objectValue.editingAndDisplayName" options:nil];
+		[textField bind:NSEditableBinding     toObject:self withKeyPath:@"objectValue.canRename"             options:nil];
+		[textField bind:NSToolTipBinding      toObject:self withKeyPath:@"objectValue.toolTip"               options:nil];
+		[_finderTagsView bind:@"finderTags"   toObject:self withKeyPath:@"objectValue.finderTags"            options:nil];
+		[_finderTagsView bind:@"rightPadding" toObject:self withKeyPath:@"objectValue.open"                  options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
+		[_closeButton bind:NSHiddenBinding    toObject:self withKeyPath:@"objectValue.open"                  options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
 
 		self.textField = textField;
 	}
@@ -158,6 +160,12 @@
 {
 	_backgroundStyle = newBackgroundStyle;
 	[self setNeedsDisplay:YES];
+}
+
+- (void)setRightPadding:(BOOL)flag
+{
+	_rightPadding = flag;
+	[self invalidateIntrinsicContentSize];
 }
 
 - (void)drawRect:(NSRect)aRect
@@ -213,6 +221,7 @@
 	};
 
 	NSRect r = [self bounds];
+	r.size.width -= _rightPadding ? 16 : 0;
 	switch([tagsWithLabelColor count])
 	{
 		case 0: return;
@@ -260,6 +269,6 @@
 
 - (NSSize)intrinsicContentSize
 {
-	return NSMakeSize(20, 10);
+	return NSMakeSize((_rightPadding ? 16 : 0) + 20, 10);
 }
 @end
