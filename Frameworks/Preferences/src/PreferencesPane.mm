@@ -15,6 +15,9 @@ NSView* OakSetupGridViewWithSeparators (NSGridView* gridView, std::vector<NSUInt
 	[gridView columnAtIndex:gridView.numberOfColumns-1].trailingPadding = 8;
 	[gridView columnAtIndex:gridView.numberOfColumns-1].width           = 400;
 
+	for(NSUInteger row = 0; row < gridView.numberOfRows; ++row)
+		[gridView cellAtColumnIndex:0 rowIndex:row].yPlacement = NSGridCellPlacementNone;
+
 	for(NSUInteger row : rows)
 	{
 		[gridView mergeCellsInHorizontalRange:NSMakeRange(0, gridView.numberOfColumns) verticalRange:NSMakeRange(row, 1)];
