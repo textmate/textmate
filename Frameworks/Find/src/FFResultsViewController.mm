@@ -358,6 +358,9 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		[stackView setVisibilityPriority:NSStackViewVisibilityPriorityDetachOnlyIfNecessary-1 forView:_topDivider];
 		[stackView setVisibilityPriority:NSStackViewVisibilityPriorityDetachOnlyIfNecessary-2 forView:_bottomDivider];
 
+		stackView.nextKeyView = _outlineView;
+		_outlineView.nextKeyView = stackView;
+
 		self.view = stackView;
 
 		_outlineView.dataSource   = self;
