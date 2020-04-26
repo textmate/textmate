@@ -85,16 +85,144 @@ enum FindActionTag
 }
 @end
 
-static OakAutoSizingTextField* OakCreateTextField (id <NSTextFieldDelegate> delegate, NSView* labelView, NSString* grammarName)
+@interface FFTextFieldViewController : NSViewController <NSTextFieldDelegate, NSTextStorageDelegate>
 {
-	OakAutoSizingTextField* res = [[OakAutoSizingTextField alloc] initWithFrame:NSZeroRect];
-	res.font = OakControlFont();
-	res.formatter = [[OakSyntaxFormatter alloc] initWithGrammarName:grammarName];
-	[[res cell] setWraps:YES];
-	res.accessibilityTitleUIElement = labelView;
-	res.delegate = delegate;
-	return res;
+	OakAutoSizingTextField* _textField;
+	OakSyntaxFormatter*     _syntaxFormatter;
+	OakPasteboard*          _pasteboard;
+	NSString*               _grammarName;
 }
+@property (nonatomic) BOOL syntaxHighlightEnabled;
+@property (nonatomic) BOOL hasFocus;
+
+- (void)showHistory:(id)sender;
+@end
+
+static void* kFirstResponderContext = &kFirstResponderContext;
+
+@implementation FFTextFieldViewController
+- (instancetype)initWithPasteboard:(OakPasteboard*)pasteboard grammarName:(NSString*)grammarName
+{
+	if(self = [self initWithNibName:nil bundle:nil])
+	{
+		_pasteboard  = pasteboard;
+		_grammarName = grammarName;
+	}
+	return self;
+}
+
+- (void)showHistory:(id)sender
+{
+	if(!OakPasteboardSelector.sharedInstance.window.isVisible)
+		[_pasteboard selectItemForControl:_textField];
+}
+
+- (void)setSyntaxHighlightEnabled:(BOOL)flag
+{
+	if(_syntaxHighlightEnabled == flag)
+		return;
+
+	_syntaxHighlightEnabled  = flag;
+	_syntaxFormatter.enabled = flag;
+
+	// Re-format current value
+	if(!_textField.currentEditor)
+	{
+		NSString* currentString = [_textField.stringValue copy];
+		_textField.objectValue = nil;
+		_textField.objectValue = currentString;;
+	}
+
+	[self addStylesToFieldEditor];
+}
+
+- (OakSyntaxFormatter*)syntaxFormatter
+{
+	if(!_syntaxFormatter)
+		_syntaxFormatter = [[OakSyntaxFormatter alloc] initWithGrammarName:_grammarName];
+	return _syntaxFormatter;
+}
+
+- (OakAutoSizingTextField*)textField
+{
+	if(!_textField)
+	{
+		_textField = [[OakAutoSizingTextField alloc] initWithFrame:NSZeroRect];
+		_textField.font       = OakControlFont();
+		_textField.formatter  = self.syntaxFormatter;
+		_textField.delegate   = self;
+		_textField.cell.wraps = YES;
+	}
+	return _textField;
+}
+
+- (void)loadView
+{
+	self.view = self.textField;
+}
+
+- (void)viewDidAppear
+{
+	[self.view.window addObserver:self forKeyPath:@"firstResponder" options:0 context:kFirstResponderContext];
+}
+
+- (void)viewWillDisappear
+{
+	[self.view.window removeObserver:self forKeyPath:@"firstResponder" context:kFirstResponderContext];
+}
+
+- (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)object change:(NSDictionary*)change context:(void*)context
+{
+	if(context == kFirstResponderContext)
+	{
+		id firstResponder = self.view.window.firstResponder;
+		self.hasFocus = firstResponder == _textField || firstResponder == _textField.currentEditor;
+	}
+}
+
+- (void)setHasFocus:(BOOL)flag
+{
+	_hasFocus = flag;
+	if(_hasFocus && [_textField.currentEditor isKindOfClass:[NSTextView class]])
+	{
+		NSTextView* textView = (NSTextView*)_textField.currentEditor;
+		textView.textStorage.delegate = self;
+		[self addStylesToFieldEditor];
+	}
+}
+
+- (BOOL)control:(NSControl*)control textView:(NSTextView*)textView doCommandBySelector:(SEL)command
+{
+	if(command == @selector(moveDown:))
+	{
+		NSRange lastNewline    = [textView.string rangeOfString:@"\n" options:NSBackwardsSearch];
+		NSRange insertionPoint = textView.selectedRanges.lastObject.rangeValue;
+
+		if(lastNewline.location == NSNotFound || lastNewline.location < NSMaxRange(insertionPoint))
+			return [self showHistory:self], YES;
+	}
+	return NO;
+}
+
+- (void)controlTextDidChange:(NSNotification*)aNotification
+{
+	OakAutoSizingTextField* textField = aNotification.object;
+	NSDictionary* userInfo = aNotification.userInfo;
+	NSTextView* textView = userInfo[@"NSFieldEditor"];
+	if(textView && textField)
+		[textField updateIntrinsicContentSizeToEncompassString:textView.string];
+}
+
+- (void)textStorageDidProcessEditing:(NSNotification*)aNotification
+{
+	[self addStylesToFieldEditor];
+}
+
+- (void)addStylesToFieldEditor
+{
+	[_syntaxFormatter addStylesToString:((NSTextView*)_textField.currentEditor).textStorage];
+}
+@end
 
 static NSButton* OakCreateHistoryButton (NSString* toolTip)
 {
@@ -112,14 +240,13 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 // = FindWindowController =
 // ========================
 
-@interface FindWindowController : NSWindowController <NSTextFieldDelegate, NSWindowDelegate, NSMenuDelegate, NSPopoverDelegate, NSTextStorageDelegate>
+@interface FindWindowController : NSWindowController <NSWindowDelegate, NSMenuDelegate, NSPopoverDelegate>
 {
 	NSObjectController*        _objectController;
 
-	OakAutoSizingTextField*    _findTextField;
-	OakSyntaxFormatter*        _findStringFormatter;
-	OakAutoSizingTextField*    _replaceTextField;
-	OakSyntaxFormatter*        _replaceStringFormatter;
+	FFTextFieldViewController* _findTextFieldViewController;
+	FFTextFieldViewController* _replaceTextFieldViewController;
+
 	NSPopUpButton*             _wherePopUpButton;
 	NSButton*                  _findAllButton;
 	NSButton*                  _findNextButton;
@@ -250,14 +377,13 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(applicationDidActivate:) name:NSApplicationDidBecomeActiveNotification object:nil];
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(applicationDidDeactivate:) name:NSApplicationDidResignActiveNotification object:nil];
 
-		[self.window addObserver:self forKeyPath:@"firstResponder" options:0 context:NULL];
+		[_resultsViewController bind:@"showReplacementPreviews" toObject:_replaceTextFieldViewController withKeyPath:@"hasFocus" options:nil];
 	}
 	return self;
 }
 
 - (void)dealloc
 {
-	[self.window removeObserver:self forKeyPath:@"firstResponder"];
 	[NSNotificationCenter.defaultCenter removeObserver:self];
 }
 
@@ -287,9 +413,10 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 {
 	if(!_gridView)
 	{
+		_findTextFieldViewController    = [[FFTextFieldViewController alloc] initWithPasteboard:OakPasteboard.findPasteboard grammarName:@"source.regexp.oniguruma"];
+		_replaceTextFieldViewController = [[FFTextFieldViewController alloc] initWithPasteboard:OakPasteboard.replacePasteboard grammarName:@"textmate.format-string"];
+
 		NSTextField* findLabel              = OakCreateLabel(@"Find:");
-		_findTextField                      = OakCreateTextField(self, findLabel, @"source.regexp.oniguruma");
-		_findStringFormatter                = _findTextField.formatter;
 		NSButton* findHistoryButton         = OakCreateHistoryButton(@"Show Find History");
 
 		NSButton* countButton               = OakCreateButton(@"Σ", NSBezelStyleSmallSquare);
@@ -297,8 +424,6 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		countButton.accessibilityLabel      = countButton.toolTip;
 
 		NSTextField* replaceLabel           = OakCreateLabel(@"Replace:");
-		_replaceTextField                   = OakCreateTextField(self, replaceLabel, @"textmate.format-string");
-		_replaceStringFormatter             = _replaceTextField.formatter;
 		NSButton* replaceHistoryButton      = OakCreateHistoryButton(@"Show Replace History");
 
 		NSTextField* optionsLabel           = OakCreateLabel(@"Options:");
@@ -330,10 +455,10 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		[whereStackView setHuggingPriority:NSLayoutPriorityWindowSizeStayPut forOrientation:NSLayoutConstraintOrientationVertical];
 
 		_gridView = [NSGridView gridViewWithViews:@[
-			@[ findLabel,    _findTextField,    findHistoryButton,   countButton ],
-			@[ replaceLabel, _replaceTextField, replaceHistoryButton             ],
-			@[ optionsLabel, optionsGridView                                     ],
-			@[ whereLabel,   whereStackView,    actionsPopUpButton               ],
+			@[ findLabel,    _findTextFieldViewController.view,    findHistoryButton,   countButton ],
+			@[ replaceLabel, _replaceTextFieldViewController.view, replaceHistoryButton             ],
+			@[ optionsLabel, optionsGridView                                                        ],
+			@[ whereLabel,   whereStackView,                       actionsPopUpButton               ],
 		]];
 
 		_gridView.rowSpacing    = 8;
@@ -368,6 +493,9 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		}
 
 		[_gridView setContentHuggingPriority:NSLayoutPriorityWindowSizeStayPut forOrientation:NSLayoutConstraintOrientationVertical];
+
+		_findTextFieldViewController.view.accessibilityTitleUIElement    = findLabel;
+		_replaceTextFieldViewController.view.accessibilityTitleUIElement = replaceLabel;
 
 		[countButton.widthAnchor constraintEqualToAnchor:findHistoryButton.widthAnchor].active = YES;
 		[countButton.heightAnchor constraintEqualToAnchor:findHistoryButton.heightAnchor].active = YES;
@@ -405,23 +533,25 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 
 		// =============================
 
-		findHistoryButton.action    = @selector(showFindHistory:);
-		replaceHistoryButton.action = @selector(showReplaceHistory:);
+		findHistoryButton.action    = @selector(showHistory:);
+		findHistoryButton.target    = _findTextFieldViewController;
+		replaceHistoryButton.action = @selector(showHistory:);
+		replaceHistoryButton.target = _replaceTextFieldViewController;
 		countButton.action          = @selector(countOccurrences:);
 
-		[_findTextField            bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.findString"           options:@{ NSContinuouslyUpdatesValueBindingOption: @YES }];
-		[_replaceTextField         bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.replaceString"        options:@{ NSContinuouslyUpdatesValueBindingOption: @YES }];
-		[globTextField             bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.globHistoryList.head" options:nil];
-		[globTextField             bind:NSContentValuesBinding toObject:_objectController withKeyPath:@"content.globHistoryList.list" options:nil];
-		[globTextField             bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.canEditGlob"          options:nil];
-		[ignoreCaseCheckBox        bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.ignoreCase"           options:nil];
-		[ignoreWhitespaceCheckBox  bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.ignoreWhitespace"     options:nil];
-		[regularExpressionCheckBox bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.regularExpression"    options:nil];
-		[wrapAroundCheckBox        bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.wrapAround"           options:nil];
-		[ignoreWhitespaceCheckBox  bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.canIgnoreWhitespace"  options:nil];
-		[countButton               bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.findString.length"    options:nil];
+		[_findTextFieldViewController.view    bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.findString"           options:@{ NSContinuouslyUpdatesValueBindingOption: @YES }];
+		[_replaceTextFieldViewController.view bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.replaceString"        options:@{ NSContinuouslyUpdatesValueBindingOption: @YES }];
+		[globTextField                        bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.globHistoryList.head" options:nil];
+		[globTextField                        bind:NSContentValuesBinding toObject:_objectController withKeyPath:@"content.globHistoryList.list" options:nil];
+		[globTextField                        bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.canEditGlob"          options:nil];
+		[ignoreCaseCheckBox                   bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.ignoreCase"           options:nil];
+		[ignoreWhitespaceCheckBox             bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.ignoreWhitespace"     options:nil];
+		[regularExpressionCheckBox            bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.regularExpression"    options:nil];
+		[wrapAroundCheckBox                   bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.wrapAround"           options:nil];
+		[ignoreWhitespaceCheckBox             bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.canIgnoreWhitespace"  options:nil];
+		[countButton                          bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.findString.length"    options:nil];
 
-		OakSetupKeyViewLoop(@[ _gridView, _findTextField, _replaceTextField, countButton, regularExpressionCheckBox, ignoreWhitespaceCheckBox, ignoreCaseCheckBox, wrapAroundCheckBox, _wherePopUpButton, globTextField, actionsPopUpButton ]);
+		OakSetupKeyViewLoop(@[ _gridView, _findTextFieldViewController.view, _replaceTextFieldViewController.view, countButton, regularExpressionCheckBox, ignoreWhitespaceCheckBox, ignoreCaseCheckBox, wrapAroundCheckBox, _wherePopUpButton, globTextField, actionsPopUpButton ]);
 	}
 	return _gridView;
 }
@@ -489,26 +619,6 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 	_replaceStringUpdated = NO;
 }
 
-- (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)object change:(NSDictionary*)change context:(void*)context
-{
-	if([keyPath isEqualToString:@"firstResponder"])
-	{
-		NSResponder* firstResponder = [self.window firstResponder];
-		_resultsViewController.showReplacementPreviews = firstResponder == _replaceTextField || firstResponder == _replaceTextField.currentEditor;
-
-		if([firstResponder isKindOfClass:[NSTextView class]])
-		{
-			NSTextView* textView = (NSTextView*)firstResponder;
-			if(textView.isFieldEditor)
-			{
-				BOOL enable = _findTextField.currentEditor || _replaceTextField.currentEditor;
-				if(textView.textStorage.delegate = enable ? self : nil)
-					[self addStylesToFieldEditor];
-			}
-		}
-	}
-}
-
 - (void)updateWindowTitle
 {
 	if(NSString* folder = self.searchFolder)
@@ -524,7 +634,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 	BOOL isVisibleAndKey = [self isWindowLoaded] && [self.window isVisible] && [self.window isKeyWindow];
 	[super showWindow:sender];
 	if(!isVisibleAndKey || ![[self.window firstResponder] isKindOfClass:[NSTextView class]])
-		[self.window makeFirstResponder:_findTextField];
+		[self.window makeFirstResponder:_findTextFieldViewController.view];
 }
 
 - (BOOL)commitEditing
@@ -691,20 +801,6 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 
 // ==============================
 
-- (IBAction)showFindHistory:(id)sender
-{
-	if(![[OakPasteboardSelector.sharedInstance window] isVisible])
-		[OakPasteboard.findPasteboard selectItemForControl:_findTextField];
-	// if the panel is visible it will automatically be hidden due to the mouse click
-}
-
-- (IBAction)showReplaceHistory:(id)sender
-{
-	if(![[OakPasteboardSelector.sharedInstance window] isVisible])
-		[OakPasteboard.replacePasteboard selectItemForControl:_replaceTextField];
-	// if the panel is visible it will automatically be hidden due to the mouse click
-}
-
 - (void)popoverDidClose:(NSNotification*)aNotification
 {
 	self.findErrorString = nil;
@@ -732,7 +828,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		textField.stringValue = _findErrorString;
 		[textField sizeToFit];
 
-		[self.findStringPopver showRelativeToRect:NSZeroRect ofView:_findTextField preferredEdge:NSMaxYEdge];
+		[self.findStringPopver showRelativeToRect:NSZeroRect ofView:_findTextFieldViewController.view preferredEdge:NSMaxYEdge];
 	}
 	else
 	{
@@ -839,7 +935,6 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 
 	_findString = aString ?: @"";
 	_findStringUpdated = YES;
-	[_findTextField updateIntrinsicContentSizeToEncompassString:_findString];
 
 	if(self.findErrorString)
 		[self updateFindErrorString];
@@ -852,7 +947,6 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 
 	_replaceString = aString ?: @"";
 	_replaceStringUpdated = YES;
-	[_replaceTextField updateIntrinsicContentSizeToEncompassString:_replaceString];
 }
 
 - (void)setFindResultsHeight:(CGFloat)height { [NSUserDefaults.standardUserDefaults setInteger:height forKey:kUserDefaultsFindResultsHeightKey]; }
@@ -868,23 +962,8 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 	if(self.findErrorString)
 		[self updateFindErrorString];
 
-	_findStringFormatter.enabled    = flag;
-	_replaceStringFormatter.enabled = flag;
-
-	// Re-format current value
-	if(!_findTextField.currentEditor)
-	{
-		_findTextField.objectValue = nil;
-		_findTextField.objectValue = _findString;
-	}
-
-	if(!_replaceTextField.currentEditor)
-	{
-		_replaceTextField.objectValue = nil;
-		_replaceTextField.objectValue = _replaceString;
-	}
-
-	[self addStylesToFieldEditor];
+	_findTextFieldViewController.syntaxHighlightEnabled    = flag;
+	_replaceTextFieldViewController.syntaxHighlightEnabled = flag;
 }
 
 - (void)setIgnoreWhitespace:(BOOL)flag
@@ -903,17 +982,6 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 
 	_fullWords         = flag;
 	_findStringUpdated = YES;
-}
-
-- (void)textStorageDidProcessEditing:(NSNotification*)aNotification
-{
-	[self addStylesToFieldEditor];
-}
-
-- (void)addStylesToFieldEditor
-{
-	[_findStringFormatter addStylesToString:((NSTextView*)_findTextField.currentEditor).textStorage];
-	[_replaceStringFormatter addStylesToString:((NSTextView*)_replaceTextField.currentEditor).textStorage];
 }
 
 - (void)setIgnoreCase:(BOOL)flag        { if(_ignoreCase != flag) [NSUserDefaults.standardUserDefaults setObject:@(_ignoreCase = flag) forKey:kUserDefaultsFindIgnoreCase]; }
@@ -963,34 +1031,6 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 - (IBAction)selectPreviousResult:(id)sender      { [_resultsViewController selectPreviousResultWrapAround:self.wrapAround]; }
 - (IBAction)selectNextTab:(id)sender             { [_resultsViewController selectNextDocument:sender];                      }
 - (IBAction)selectPreviousTab:(id)sender         { [_resultsViewController selectPreviousDocument:sender];                  }
-
-- (BOOL)control:(NSControl*)control textView:(NSTextView*)textView doCommandBySelector:(SEL)command
-{
-	if(command == @selector(moveDown:))
-	{
-		NSRange insertionPoint = [[textView.selectedRanges lastObject] rangeValue];
-		NSRange lastNewline    = [textView.string rangeOfString:@"\n" options:NSBackwardsSearch];
-
-		if(lastNewline.location == NSNotFound || lastNewline.location < NSMaxRange(insertionPoint))
-		{
-			if(control == _findTextField)
-				return [self showFindHistory:control], YES;
-			else if(control == _replaceTextField)
-				return [self showReplaceHistory:control], YES;
-		}
-	}
-	return NO;
-}
-
-- (void)controlTextDidChange:(NSNotification*)aNotification
-{
-	OakAutoSizingTextField* textField = [aNotification object];
-	NSDictionary* userInfo = [aNotification userInfo];
-	NSTextView* textView = userInfo[@"NSFieldEditor"];
-
-	if(textView && textField)
-		[textField updateIntrinsicContentSizeToEncompassString:textView.string];
-}
 
 - (BOOL)validateMenuItem:(NSMenuItem*)aMenuItem
 {
