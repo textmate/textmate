@@ -299,7 +299,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 
 		_gridView.rowSpacing    = 8;
 		_gridView.columnSpacing = 4;
-		_gridView.rowAlignment  = NSGridRowAlignmentFirstBaseline;
+		_gridView.yPlacement    = NSGridCellPlacementTop;
 
 		[_gridView rowAtIndex:0].topPadding        = 20;
 		[_gridView rowAtIndex:2].bottomPadding     = 12;
@@ -309,24 +309,20 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		[_gridView columnAtIndex:3].leadingPadding = 4;
 		[_gridView columnAtIndex:_gridView.numberOfColumns-1].trailingPadding = 20;
 
-		[_gridView cellAtColumnIndex:2 rowIndex:0].yPlacement = NSGridCellPlacementTop;
-		[_gridView cellAtColumnIndex:3 rowIndex:0].yPlacement = NSGridCellPlacementTop;
-		[_gridView cellAtColumnIndex:2 rowIndex:1].yPlacement = NSGridCellPlacementTop;
-
 		[_gridView mergeCellsInHorizontalRange:NSMakeRange(2, 2) verticalRange:NSMakeRange(3, 1)];
 		[_gridView cellAtColumnIndex:2 rowIndex:3].xPlacement = NSGridCellPlacementFill;
 
-		[_gridView rowAtIndex:3].rowAlignment = NSGridRowAlignmentNone;
-		[_gridView rowAtIndex:3].yPlacement   = NSGridCellPlacementCenter;
+		for(NSUInteger row = 0; row < _gridView.numberOfRows; ++row)
+			[_gridView cellAtColumnIndex:0 rowIndex:row].yPlacement = NSGridCellPlacementNone;
 
-		NSDictionary<NSNumber*, NSView*>* baselineViews = @{ @2: regularExpressionCheckBox, @3: matchingLabel };
-		for(NSNumber* row in baselineViews)
+		for(NSUInteger row = 0; row < 2; ++row)
 		{
-			NSGridCell* gridCell = [_gridView cellAtColumnIndex:0 rowIndex:row.integerValue];
-			gridCell.rowAlignment = NSGridRowAlignmentNone;
-			gridCell.yPlacement   = NSGridCellPlacementNone;
-			gridCell.customPlacementConstraints = @[ [gridCell.contentView.firstBaselineAnchor constraintEqualToAnchor:baselineViews[row].firstBaselineAnchor constant:0] ];
+			[_gridView cellAtColumnIndex:0 rowIndex:row].rowAlignment = NSGridRowAlignmentFirstBaseline;
+			[_gridView cellAtColumnIndex:1 rowIndex:row].rowAlignment = NSGridRowAlignmentFirstBaseline;
 		}
+
+		[_gridView cellAtColumnIndex:0 rowIndex:2].customPlacementConstraints = @[ [optionsLabel.firstBaselineAnchor constraintEqualToAnchor:regularExpressionCheckBox.firstBaselineAnchor constant:0] ];
+		[_gridView cellAtColumnIndex:0 rowIndex:3].customPlacementConstraints = @[ [whereLabel.firstBaselineAnchor constraintEqualToAnchor:matchingLabel.firstBaselineAnchor constant:0] ];
 
 		[_gridView setContentHuggingPriority:NSLayoutPriorityWindowSizeStayPut forOrientation:NSLayoutConstraintOrientationVertical];
 
