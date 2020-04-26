@@ -215,8 +215,8 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		[imageView bind:NSValueBinding toObject:self withKeyPath:@"objectValue.document.icon" options:nil];
 		[textField bind:NSValueBinding toObject:self withKeyPath:@"objectValue.displayPath" options:nil];
 
-		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(outlineViewItemDidExpandCollapse:) name:NSOutlineViewItemDidExpandNotification object:viewController.outlineView];
-		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(outlineViewItemDidExpandCollapse:) name:NSOutlineViewItemDidCollapseNotification object:viewController.outlineView];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(outlineViewItemDidExpandCollapse:) name:NSOutlineViewItemDidExpandNotification object:nil];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(outlineViewItemDidExpandCollapse:) name:NSOutlineViewItemDidCollapseNotification object:nil];
 
 		self.imageView          = imageView;
 		self.textField          = textField;
@@ -283,11 +283,8 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 
 - (void)outlineViewItemDidExpandCollapse:(NSNotification*)aNotification
 {
-	NSOutlineView* outlineView = [aNotification object];
-	NSDictionary* userInfo = [aNotification userInfo];
-	FFResultNode* item = userInfo[@"NSObject"];
-	if(item == self.objectValue)
-		_countOfLeafsButton.hidden = [outlineView isItemExpanded:item];
+	if(self.objectValue == aNotification.userInfo[@"NSObject"])
+		_countOfLeafsButton.hidden = [aNotification.object isItemExpanded:self.objectValue];
 }
 
 - (void)outlineViewItemDidExpand:(NSNotification*)aNotification   { [self outlineViewItemDidExpandCollapse:aNotification]; }
