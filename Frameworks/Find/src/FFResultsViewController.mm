@@ -24,6 +24,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 {
 	NSView*        _topDivider;
 	NSScrollView*  _scrollView;
+	NSOutlineView* _outlineView;
 	NSView*        _bottomDivider;
 	NSFont*        _searchResultsFont;
 

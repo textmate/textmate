@@ -9,7 +9,6 @@
 @property (nonatomic) FFResultNode* results;
 @property (nonatomic, readonly) NSArray* selectedResults;
 
-@property (nonatomic) NSOutlineView* outlineView;
 @property (nonatomic) BOOL hideCheckBoxes;
 
 @property (nonatomic) BOOL showReplacementPreviews;
