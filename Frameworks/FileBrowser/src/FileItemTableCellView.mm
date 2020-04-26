@@ -3,10 +3,6 @@
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakAppKit/OakFinderTag.h>
 
-@interface FileItemAuxiliaryView : NSView
-- (id)initWithCloseAction:(SEL)closeAction target:(id)target;
-@end
-
 @interface FileItemSelectBasenameCell : NSTextFieldCell
 @end
 
@@ -67,8 +63,13 @@
 }
 @end
 
+@interface FileItemFinderTagsView : NSView
+@property (nonatomic) NSArray<OakFinderTag*>* finderTags;
+@end
+
 @interface FileItemTableCellView () <NSTextFieldDelegate>
-@property (nonatomic) NSView* itemInfoButtons;
+@property (nonatomic) FileItemFinderTagsView* finderTagsView;
+@property (nonatomic) NSButton* closeButton;
 @end
 
 @implementation FileItemTableCellView
@@ -85,32 +86,37 @@
 		[_openButton setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
 		[_openButton setContentCompressionResistancePriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
 
-		_itemInfoButtons = [[FileItemAuxiliaryView alloc] initWithCloseAction:@selector(didClickCloseButton:) target:self];
-
 		NSTextField* textField = OakCreateLabel(@"", [NSFont controlContentFontOfSize:0]);
 		textField.cell = [[FileItemSelectBasenameCell alloc] initTextCell:@""];
 		[textField.cell setWraps:NO];
 		[textField.cell setLineBreakMode:NSLineBreakByTruncatingMiddle];
 		textField.formatter = [[FileItemFormatter alloc] initWithTableCellView:self];
 
-		NSDictionary* views = @{
-			@"icon":     _openButton,
-			@"filename": textField,
-			@"close":    _itemInfoButtons
-		};
-		OakAddAutoLayoutViewsToSuperview([views allValues], self);
+		_finderTagsView = [[FileItemFinderTagsView alloc] initWithFrame:NSZeroRect];
 
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(4)-[icon]-(4)-[filename]-(4)-[close]-(0@750)-|" options:0 metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[close]|" options:0 metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[filename]-(2)-|" options:NSLayoutFormatAlignAllLeading|NSLayoutFormatAlignAllTrailing metrics:nil views:views]];
-		[self addConstraint:[NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:_openButton attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
+		_closeButton = OakCreateCloseButton();
+		_closeButton.refusesFirstResponder = YES;
+		_closeButton.target = self;
+		_closeButton.action = @selector(didClickCloseButton:);
+
+		NSStackView* stackView = [NSStackView stackViewWithViews:@[
+			_openButton, textField, _finderTagsView, _closeButton
+		]];
+		stackView.spacing = 4;
+
+		[self addSubview:stackView];
+
+		[stackView.leadingAnchor  constraintEqualToAnchor:self.leadingAnchor  constant: 4].active = YES;
+		[stackView.trailingAnchor constraintEqualToAnchor:self.trailingAnchor constant:-8].active = YES;
+		[stackView.topAnchor      constraintEqualToAnchor:self.topAnchor      constant: 0].active = YES;
+		[stackView.bottomAnchor   constraintEqualToAnchor:self.bottomAnchor   constant: 0].active = YES;
 
 		[_openButton bind:NSImageBinding     toObject:self withKeyPath:@"objectValue.image"                 options:nil];
 		[textField bind:NSValueBinding       toObject:self withKeyPath:@"objectValue.editingAndDisplayName" options:nil];
 		[textField bind:NSEditableBinding    toObject:self withKeyPath:@"objectValue.canRename"             options:nil];
 		[textField bind:NSToolTipBinding     toObject:self withKeyPath:@"objectValue.toolTip"               options:nil];
-		[_itemInfoButtons bind:@"finderTags" toObject:self withKeyPath:@"objectValue.finderTags"            options:nil];
-		[_itemInfoButtons bind:@"open"       toObject:self withKeyPath:@"objectValue.open"                  options:nil];
+		[_finderTagsView bind:@"finderTags"  toObject:self withKeyPath:@"objectValue.finderTags"            options:nil];
+		[_closeButton bind:NSHiddenBinding   toObject:self withKeyPath:@"objectValue.open"                  options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
 
 		self.textField = textField;
 	}
@@ -129,8 +135,8 @@
 	[self.textField unbind:NSValueBinding];
 	[self.textField unbind:NSEditableBinding];
 	[self.textField unbind:NSToolTipBinding];
-	[_itemInfoButtons unbind:@"finderTags"];
-	[_itemInfoButtons unbind:@"open"];
+	[_finderTagsView unbind:@"finderTags"];
+	[_closeButton unbind:NSHiddenBinding];
 }
 
 - (void)resetCursorRects
@@ -139,18 +145,15 @@
 }
 @end
 
-@interface FileItemFinderTagsView : NSView
-@property (nonatomic) NSArray<OakFinderTag*>* finderTags;
-@end
-
 @implementation FileItemFinderTagsView
 - (void)setFinderTags:(NSArray<OakFinderTag*>*)newFinderTags
 {
-	if(![_finderTags isEqual:newFinderTags])
-	{
-		_finderTags = newFinderTags;
-		[self setNeedsDisplay:YES];
-	}
+	if([_finderTags isEqual:newFinderTags])
+		return;
+
+	_finderTags = newFinderTags;
+	self.hidden = _finderTags.count == 0;
+	[self setNeedsDisplay:YES];
 }
 
 - (BOOL)isSelectedAndEmphasized
@@ -259,124 +262,5 @@
 - (NSSize)intrinsicContentSize
 {
 	return NSMakeSize(20, 10);
-}
-@end
-
-@interface FileItemAuxiliaryView ()
-@property (nonatomic) NSArray<OakFinderTag*>* finderTags;
-@property (nonatomic) BOOL open;
-
-@property (nonatomic) SEL closeAction;
-@property (nonatomic, weak) id target;
-
-@property (nonatomic) FileItemFinderTagsView* labelSwatchView;
-@property (nonatomic) NSButton* closeButton;
-@property (nonatomic) NSMutableArray* myConstraints;
-@end
-
-@implementation FileItemAuxiliaryView
-- (id)initWithCloseAction:(SEL)closeAction target:(id)target
-{
-	if(self = [super initWithFrame:NSZeroRect])
-	{
-		_closeAction = closeAction;
-		_target      = target;
-
-		[self setContentHuggingPriority:NSLayoutPriorityDefaultHigh forOrientation:NSLayoutConstraintOrientationHorizontal];
-		[self setContentCompressionResistancePriority:NSLayoutPriorityDefaultHigh forOrientation:NSLayoutConstraintOrientationHorizontal];
-	}
-	return self;
-}
-
-- (void)setBackgroundStyle:(NSBackgroundStyle)newBackgroundStyle
-{
-	_closeButton.cell.backgroundStyle = newBackgroundStyle;
-}
-
-- (void)updateConstraints
-{
-	if(_myConstraints)
-		[self removeConstraints:_myConstraints];
-	_myConstraints = [NSMutableArray array];
-
-	if(_labelSwatchView)
-	{
-		NSDictionary* views = @{ @"labelSwatch": _labelSwatchView };
-		[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:_labelSwatchView attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
-		[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(>=0)-[labelSwatch]-(>=0)-|" options:0 metrics:nil views:views]];
-		[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[labelSwatch]-(24)-|" options:0 metrics:nil views:views]];
-	}
-
-	if(_closeButton)
-	{
-		NSDictionary* views = @{ @"closeButton": _closeButton };
-		[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:_closeButton attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
-		[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(>=0)-[closeButton]-(>=0)-|" options:0 metrics:nil views:views]];
-		[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[closeButton]-(8)-|" options:0 metrics:nil views:views]];
-		if(!_labelSwatchView)
-			[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[closeButton]" options:0 metrics:nil views:views]];
-	}
-
-	if(!_labelSwatchView && !_closeButton)
-		[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:0]];
-
-	[self addConstraints:_myConstraints];
-	[super updateConstraints];
-}
-
-- (NSArray<OakFinderTag*>*)finderTags
-{
-	return _labelSwatchView ? _labelSwatchView.finderTags : @[ ];
-}
-
-- (void)setFinderTags:(NSArray<OakFinderTag*>*)newFinderTags
-{
-	if([self.finderTags isEqual:newFinderTags])
-		return;
-
-	if(![newFinderTags count])
-	{
-		[_labelSwatchView removeFromSuperview];
-		_labelSwatchView = nil;
-		[self setNeedsUpdateConstraints:YES];
-	}
-	else if(!_labelSwatchView)
-	{
-		_labelSwatchView = [[FileItemFinderTagsView alloc] initWithFrame:NSZeroRect];
-		OakAddAutoLayoutViewsToSuperview(@[ _labelSwatchView ], self);
-		[self setNeedsUpdateConstraints:YES];
-	}
-	_labelSwatchView.finderTags = newFinderTags;
-}
-
-- (void)setNilValueForKey:(NSString*)aKey
-{
-	if([aKey isEqualToString:@"open"])
-			[self setValue:@NO forKey:aKey];
-	else	[super setNilValueForKey:aKey];
-}
-
-- (void)setOpen:(BOOL)flag
-{
-	if(_open == flag)
-		return;
-
-	if(!flag)
-	{
-		[_closeButton removeFromSuperview];
-		_closeButton = nil;
-	}
-	else if(!_closeButton)
-	{
-		_closeButton = OakCreateCloseButton();
-		_closeButton.refusesFirstResponder = YES;
-		_closeButton.target = _target;
-		_closeButton.action = _closeAction;
-
-		OakAddAutoLayoutViewsToSuperview(@[ _closeButton ], self);
-	}
-
-	_open = flag;
-	[self setNeedsUpdateConstraints:YES];
 }
 @end
