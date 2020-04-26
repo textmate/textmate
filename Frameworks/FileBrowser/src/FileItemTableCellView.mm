@@ -65,6 +65,7 @@
 
 @interface FileItemFinderTagsView : NSView
 @property (nonatomic) NSArray<OakFinderTag*>* finderTags;
+@property (nonatomic) NSBackgroundStyle backgroundStyle;
 @end
 
 @interface FileItemTableCellView () <NSTextFieldDelegate>
@@ -120,6 +121,12 @@
 	return self;
 }
 
+- (void)setBackgroundStyle:(NSBackgroundStyle)newBackgroundStyle
+{
+	[_finderTagsView setBackgroundStyle:newBackgroundStyle];
+	[super setBackgroundStyle:newBackgroundStyle];
+}
+
 - (void)dealloc
 {
 	[_openButton unbind:NSImageBinding];
@@ -147,12 +154,10 @@
 	[self setNeedsDisplay:YES];
 }
 
-- (BOOL)isSelectedAndEmphasized
+- (void)setBackgroundStyle:(NSBackgroundStyle)newBackgroundStyle
 {
-	NSView* view = self;
-	while(view && ![view isKindOfClass:[NSTableRowView class]])
-		view = [view superview];
-	return [view isKindOfClass:[NSTableRowView class]] && ((NSTableRowView*)view).isSelected && ((NSTableRowView*)view).isEmphasized;
+	_backgroundStyle = newBackgroundStyle;
+	[self setNeedsDisplay:YES];
 }
 
 - (void)drawRect:(NSRect)aRect
@@ -183,7 +188,10 @@
 		[fillColor set];
 		[path fill];
 
-		self.isSelectedAndEmphasized ? [[NSColor whiteColor] set] : [borderColor set];
+		if(_backgroundStyle == NSBackgroundStyleEmphasized)
+				[NSColor.whiteColor set];
+		else	[borderColor set];
+
 		[path stroke];
 	};
 
