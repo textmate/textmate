@@ -2055,10 +2055,10 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 	{
 		res = [[FileItemTableCellView alloc] init];
 		res.identifier  = tableColumn.identifier;
-		res.target      = self;
-		res.closeAction = @selector(takeItemToCloseFrom:);
-		res.openButton.target = self;
-		res.openButton.action = @selector(takeItemToOpenFrom:);
+		res.openButton.target  = self;
+		res.openButton.action  = @selector(takeItemToOpenFrom:);
+		res.closeButton.target = self;
+		res.closeButton.action = @selector(takeItemToCloseFrom:);
 		res.textField.delegate = self;
 	}
 	return res;

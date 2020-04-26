@@ -69,7 +69,6 @@
 
 @interface FileItemTableCellView () <NSTextFieldDelegate>
 @property (nonatomic) FileItemFinderTagsView* finderTagsView;
-@property (nonatomic) NSButton* closeButton;
 @end
 
 @implementation FileItemTableCellView
@@ -96,8 +95,6 @@
 
 		_closeButton = OakCreateCloseButton();
 		_closeButton.refusesFirstResponder = YES;
-		_closeButton.target = self;
-		_closeButton.action = @selector(didClickCloseButton:);
 
 		NSStackView* stackView = [NSStackView stackViewWithViews:@[
 			_openButton, textField, _finderTagsView, _closeButton
@@ -121,12 +118,6 @@
 		self.textField = textField;
 	}
 	return self;
-}
-
-- (void)didClickCloseButton:(id)sender
-{
-	if(self.closeAction)
-		[NSApp sendAction:self.closeAction to:self.target from:sender];
 }
 
 - (void)dealloc
