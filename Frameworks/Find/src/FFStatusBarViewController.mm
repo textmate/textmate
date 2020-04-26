@@ -102,7 +102,7 @@ static id OakFormatStatusString (NSString* aString)
 		[_statusTextButton setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
 		[_statusTextButton setContentHuggingPriority:NSLayoutPriorityDefaultHigh forOrientation:NSLayoutConstraintOrientationVertical];
 
-		[_statusTextButton addConstraint:[NSLayoutConstraint constraintWithItem:_statusTextButton attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:16]];
+		[_statusTextButton.heightAnchor constraintEqualToConstant:16].active = YES;
 	}
 	return _statusTextButton;
 }

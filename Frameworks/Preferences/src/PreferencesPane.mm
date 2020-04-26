@@ -28,10 +28,8 @@ NSView* OakSetupGridViewWithSeparators (NSGridView* gridView, std::vector<NSUInt
 
 	NSSize size = gridView.fittingSize;
 	gridView.frame = { .size = size };
-	[gridView addConstraints:@[
-		[NSLayoutConstraint constraintWithItem:gridView attribute:NSLayoutAttributeWidth  relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:size.width],
-		[NSLayoutConstraint constraintWithItem:gridView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:size.height],
-	]];
+	[gridView.widthAnchor constraintEqualToConstant:size.width].active   = YES;
+	[gridView.heightAnchor constraintEqualToConstant:size.height].active = YES;
 
 	return gridView;
 }

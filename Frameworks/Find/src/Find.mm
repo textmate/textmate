@@ -331,7 +331,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 
 		[countButton.widthAnchor constraintEqualToAnchor:findHistoryButton.widthAnchor].active = YES;
 		[countButton.heightAnchor constraintEqualToAnchor:findHistoryButton.heightAnchor].active = YES;
-		[_wherePopUpButton addConstraint:[NSLayoutConstraint constraintWithItem:_wherePopUpButton attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationLessThanOrEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:150]];
+		[_wherePopUpButton.widthAnchor constraintLessThanOrEqualToConstant:150].active = YES;
 
 		[self updateSearchInPopUpMenu];
 

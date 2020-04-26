@@ -306,7 +306,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 	NSBox* boxView = [[NSBox alloc] initWithFrame:NSZeroRect];
 	boxView.boxType = NSBoxCustom;
 	boxView.borderColor = NSColor.quaternaryLabelColor;
-	[boxView addConstraint:[NSLayoutConstraint constraintWithItem:boxView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:1]];
+	[boxView.heightAnchor constraintEqualToConstant:1].active = YES;
 	return boxView;
 }
 

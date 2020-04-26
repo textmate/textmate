@@ -165,7 +165,7 @@
 	for(NSView* popUpButton in @[ fileBrowserPositionPopUp, showCommandOutputPopUp ])
 		[popUpButton.widthAnchor constraintEqualToAnchor:fileBrowserLocationPopUp.widthAnchor].active = YES;
 
-	[excludeFilesTextField addConstraint:[NSLayoutConstraint constraintWithItem:excludeFilesTextField attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:360]];
+	[excludeFilesTextField.widthAnchor constraintEqualToConstant:360].active = YES;
 	for(NSView* textField in @[ includeFilesTextField, nonTextFilesTextField ])
 		[textField.widthAnchor constraintEqualToAnchor:excludeFilesTextField.widthAnchor].active = YES;
 
