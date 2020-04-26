@@ -84,9 +84,6 @@
 		_openButton.bordered              = NO;
 		_openButton.imagePosition         = NSImageOnly;
 
-		[_openButton setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
-		[_openButton setContentCompressionResistancePriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
-
 		NSTextField* textField = OakCreateLabel(@"", [NSFont controlContentFontOfSize:0]);
 		textField.cell = [[FileItemSelectBasenameCell alloc] initTextCell:@""];
 		[textField.cell setWraps:NO];
