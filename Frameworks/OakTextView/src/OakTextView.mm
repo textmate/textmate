@@ -3001,7 +3001,7 @@ static NSTouchBarItemIdentifier kOTVTouchBarItemIdentifierAddRemoveBookmark  = @
 		NSSegmentedControl* navigateMarkerSegmentedControl = [NSSegmentedControl new];
 		navigateMarkerSegmentedControl.segmentCount = 2;
 		navigateMarkerSegmentedControl.target       = self;
-		navigateMarkerSegmentedControl.action       = @selector(performNavigateBookMarksSegmentAction:);
+		navigateMarkerSegmentedControl.action       = @selector(performNavigateBookmarksSegmentAction:);
 		navigateMarkerSegmentedControl.trackingMode = NSSegmentSwitchTrackingMomentary;
 		navigateMarkerSegmentedControl.segmentStyle = NSSegmentStyleSeparated;
 
