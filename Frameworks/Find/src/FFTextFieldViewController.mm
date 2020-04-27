@@ -34,12 +34,13 @@
 
 static void* kFirstResponderContext = &kFirstResponderContext;
 
-@interface FFTextFieldViewController () <NSTextFieldDelegate, NSTextStorageDelegate>
+@interface FFTextFieldViewController () <NSTextFieldDelegate, NSTextStorageDelegate, NSPopoverDelegate>
 {
 	OakAutoSizingTextField* _textField;
 	OakSyntaxFormatter*     _syntaxFormatter;
 	OakPasteboard*          _pasteboard;
 	NSString*               _grammarName;
+	NSPopover*              _popover;
 }
 @property (nonatomic) NSString* stringValue;
 @end
@@ -59,6 +60,39 @@ static void* kFirstResponderContext = &kFirstResponderContext;
 {
 	if(!OakPasteboardSelector.sharedInstance.window.isVisible)
 		[_pasteboard selectItemForControl:_textField];
+}
+
+- (void)showPopoverWithString:(NSString*)aString
+{
+	if(aString)
+	{
+		if(!_popover)
+		{
+			NSViewController* viewController = [[NSViewController alloc] init];
+			viewController.view = OakCreateLabel();
+
+			_popover = [[NSPopover alloc] init];
+			_popover.behavior = NSPopoverBehaviorTransient;
+			_popover.contentViewController = viewController;
+			_popover.delegate = self;
+		}
+
+		NSTextField* textField = (NSTextField*)_popover.contentViewController.view;
+		textField.stringValue = aString;
+		[textField sizeToFit];
+
+		[_popover showRelativeToRect:NSZeroRect ofView:_textField preferredEdge:NSMaxYEdge];
+	}
+	else
+	{
+		[_popover close];
+		_popover = nil;
+	}
+}
+
+- (void)popoverDidClose:(NSNotification*)aNotification
+{
+	_popover = nil;
 }
 
 - (void)setSyntaxHighlightEnabled:(BOOL)flag
@@ -122,6 +156,7 @@ static void* kFirstResponderContext = &kFirstResponderContext;
 	if([_stringValue isEqualToString:newStringValue])
 		return;
 	_stringValue = newStringValue;
+	[self showPopoverWithString:nil];
 	[_textField updateIntrinsicContentSizeToEncompassString:newStringValue];
 
 	if(NSDictionary* info = [self infoForBinding:@"stringValue"])

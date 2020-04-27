@@ -77,7 +77,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 	return res;
 }
 
-@interface Find () <OakFindServerProtocol, NSWindowDelegate, NSMenuDelegate, NSPopoverDelegate>
+@interface Find () <OakFindServerProtocol, NSWindowDelegate, NSMenuDelegate>
 {
 	NSObjectController*        _objectController;
 
@@ -117,9 +117,6 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 @property (nonatomic) BOOL searchFolderLinks;
 @property (nonatomic) BOOL searchFileLinks;
 @property (nonatomic) BOOL searchBinaryFiles;
-
-@property (nonatomic) NSString*  findErrorString;
-@property (nonatomic) NSPopover* findStringPopver;
 
 @property (nonatomic) OakHistoryList* globHistoryList;
 @property (nonatomic) OakHistoryList* recentFolders;
@@ -653,54 +650,6 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 
 // ==============================
 
-- (void)popoverDidClose:(NSNotification*)aNotification
-{
-	self.findErrorString = nil;
-}
-
-- (void)setFindErrorString:(NSString*)aString
-{
-	if(_findErrorString == aString || [_findErrorString isEqualToString:aString])
-		return;
-
-	if(_findErrorString = aString)
-	{
-		if(!self.findStringPopver)
-		{
-			NSViewController* viewController = [NSViewController new];
-			viewController.view = OakCreateLabel();
-
-			self.findStringPopver = [NSPopover new];
-			self.findStringPopver.behavior = NSPopoverBehaviorTransient;
-			self.findStringPopver.contentViewController = viewController;
-			self.findStringPopver.delegate = self;
-		}
-
-		NSTextField* textField = (NSTextField*)self.findStringPopver.contentViewController.view;
-		textField.stringValue = _findErrorString;
-		[textField sizeToFit];
-
-		[self.findStringPopver showRelativeToRect:NSZeroRect ofView:_findTextFieldViewController.view preferredEdge:NSMaxYEdge];
-	}
-	else
-	{
-		[self.findStringPopver close];
-		self.findStringPopver = nil;
-	}
-}
-
-- (void)updateFindErrorString
-{
-	NSString* errorString = nil;
-	if(self.regularExpression)
-	{
-		std::string const& error = regexp::validate(to_s(self.findString));
-		if(error != NULL_STR)
-			errorString = [NSString stringWithCxxString:text::format("Invalid regular expression: %s.", error.c_str())];
-	}
-	self.findErrorString = errorString;
-}
-
 - (void)setShowsResultsOutlineView:(BOOL)flag
 {
 	if(_showsResultsOutlineView == flag)
@@ -779,9 +728,6 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 
 	_findString = aString ?: @"";
 	_findStringUpdated = YES;
-
-	if(self.findErrorString)
-		[self updateFindErrorString];
 }
 
 - (void)setReplaceString:(NSString*)aString
@@ -803,8 +749,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 
 	_regularExpression = flag;
 	_findStringUpdated = YES;
-	if(self.findErrorString)
-		[self updateFindErrorString];
+	[_findTextFieldViewController showPopoverWithString:nil];
 
 	_findTextFieldViewController.syntaxHighlightEnabled    = flag;
 	_replaceTextFieldViewController.syntaxHighlightEnabled = flag;
@@ -946,9 +891,15 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 
 - (void)performFindAction:(FindActionTag)action
 {
-	[self updateFindErrorString];
-	if(self.findErrorString != nil)
-		return;
+	if(self.regularExpression)
+	{
+		std::string error = regexp::validate(to_s(self.findString));
+		if(error != NULL_STR)
+		{
+			[_findTextFieldViewController showPopoverWithString:to_ns(text::format("Invalid regular expression: %s.", error.c_str()))];
+			return;
+		}
+	}
 
 	_findOptions = (self.regularExpression ? find::regular_expression : find::none) | (self.ignoreWhitespace ? find::ignore_whitespace : find::none) | (self.fullWords ? find::full_words : find::none) | (self.ignoreCase ? find::ignore_case : find::none) | (self.wrapAround ? find::wrap_around : find::none);
 	if(action == FindActionFindPrevious)
