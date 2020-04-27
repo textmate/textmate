@@ -201,12 +201,20 @@ static NSString* const kRecordingPlaceholderString = @"…";
 {
 	NSRect frame = [self bounds];
 
-	[[NSColor lightGrayColor] set];
-	NSFrameRect(frame);
+	NSColor* frameColor      = NSColor.lightGrayColor;
+	NSColor* backgroundColor = NSColor.whiteColor;
 
 	if(@available(macos 10.14, *))
-		[[NSColor controlColor] set];
-	else	[[NSColor whiteColor] set];
+	{
+		if([[NSApp.effectiveAppearance bestMatchFromAppearancesWithNames:@[ NSAppearanceNameAqua, NSAppearanceNameDarkAqua ]] isEqualToString:NSAppearanceNameDarkAqua])
+			frameColor = NSColor.tertiaryLabelColor;
+		backgroundColor = NSColor.controlColor;
+	}
+
+	[frameColor set];
+	NSFrameRect(frame);
+
+	[backgroundColor set];
 	NSRectFill(NSIntersectionRect(aRect, NSInsetRect(frame, 1, 1)));
 
 	NSDictionary* stringAttributes = @{
