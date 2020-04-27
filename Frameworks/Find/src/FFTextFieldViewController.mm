@@ -42,7 +42,6 @@ static void* kFirstResponderContext = &kFirstResponderContext;
 	NSString*               _grammarName;
 	NSPopover*              _popover;
 }
-@property (nonatomic) NSString* stringValue;
 @end
 
 @implementation FFTextFieldViewController
