@@ -122,8 +122,6 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 @property (nonatomic) BOOL searchBinaryFiles;
 
 @property (nonatomic, getter = isBusy) BOOL busy;
-@property (nonatomic) NSString* statusString;
-@property (nonatomic) NSString* alternateStatusString;
 @property (nonatomic) NSString* findErrorString;
 
 @property (nonatomic, readonly) NSButton*       replaceAllButton;
@@ -725,14 +723,12 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 
 - (void)setStatusString:(NSString*)aString
 {
-	_statusString = aString;
-	_statusBarViewController.statusText = _statusString;
+	_statusBarViewController.statusText = aString;
 }
 
 - (void)setAlternateStatusString:(NSString*)aString
 {
-	_alternateStatusString = aString;
-	_statusBarViewController.alternateStatusText = _alternateStatusString;
+	_statusBarViewController.alternateStatusText = aString;
 }
 
 - (NSString*)searchFolder
@@ -1167,12 +1163,13 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	variables["found"]  = to_s(aFindString);
 	variables["line"]   = aPosition ? std::to_string(aPosition.line + 1)   : NULL_STR;
 	variables["column"] = aPosition ? std::to_string(aPosition.column + 1) : NULL_STR;
-	self.windowController.statusString = [NSString stringWithCxxString:format_string::expand(formatStrings[(_findOptions & find::regular_expression) ? 1 : 0][std::min<size_t>(aNumber, 2)], variables)];
+	NSString* statusString = [NSString stringWithCxxString:format_string::expand(formatStrings[(_findOptions & find::regular_expression) ? 1 : 0][std::min<size_t>(aNumber, 2)], variables)];
+	self.windowController.statusString = statusString;
 
 	NSResponder* keyView = [[NSApp keyWindow] firstResponder];
 	id element = [keyView respondsToSelector:@selector(cell)] ? [keyView performSelector:@selector(cell)] : keyView;
 	if([element respondsToSelector:@selector(isAccessibilityElement)] && [element isAccessibilityElement])
-		NSAccessibilityPostNotificationWithUserInfo(element, NSAccessibilityAnnouncementRequestedNotification, @{ NSAccessibilityAnnouncementKey: self.windowController.statusString });
+		NSAccessibilityPostNotificationWithUserInfo(element, NSAccessibilityAnnouncementRequestedNotification, @{ NSAccessibilityAnnouncementKey: statusString });
 
 	if(self.closeWindowOnSuccess && aNumber != 0)
 		return [self.windowController close];
