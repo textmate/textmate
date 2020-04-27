@@ -477,11 +477,16 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		self.window.title = @"Find";
 }
 
+- (BOOL)isVisible
+{
+	return self.isWindowLoaded && self.window.isVisible;
+}
+
 - (void)showWindow:(id)sender
 {
-	BOOL isVisibleAndKey = [self isWindowLoaded] && [self.window isVisible] && [self.window isKeyWindow];
+	BOOL isVisibleAndKey = self.isVisible && self.window.isKeyWindow;
 	[super showWindow:sender];
-	if(!isVisibleAndKey || ![[self.window firstResponder] isKindOfClass:[NSTextView class]])
+	if(!isVisibleAndKey || ![self.window.firstResponder isKindOfClass:[NSTextView class]])
 		[self.window makeFirstResponder:_findTextFieldViewController.view];
 }
 
