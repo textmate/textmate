@@ -388,8 +388,8 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		replaceHistoryButton.target = _replaceTextFieldViewController;
 		countButton.action          = @selector(countOccurrences:);
 
-		[_findTextFieldViewController.view    bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.findString"           options:@{ NSContinuouslyUpdatesValueBindingOption: @YES }];
-		[_replaceTextFieldViewController.view bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.replaceString"        options:@{ NSContinuouslyUpdatesValueBindingOption: @YES }];
+		[_findTextFieldViewController         bind:@"stringValue"         toObject:_objectController withKeyPath:@"content.findString"           options:nil];
+		[_replaceTextFieldViewController      bind:@"stringValue"         toObject:_objectController withKeyPath:@"content.replaceString"        options:nil];
 		[globTextField                        bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.globHistoryList.head" options:nil];
 		[globTextField                        bind:NSContentValuesBinding toObject:_objectController withKeyPath:@"content.globHistoryList.list" options:nil];
 		[globTextField                        bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.canEditGlob"          options:nil];

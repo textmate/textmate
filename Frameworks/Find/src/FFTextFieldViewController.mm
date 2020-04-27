@@ -41,6 +41,7 @@ static void* kFirstResponderContext = &kFirstResponderContext;
 	OakPasteboard*          _pasteboard;
 	NSString*               _grammarName;
 }
+@property (nonatomic) NSString* stringValue;
 @end
 
 @implementation FFTextFieldViewController
@@ -107,11 +108,33 @@ static void* kFirstResponderContext = &kFirstResponderContext;
 - (void)viewDidAppear
 {
 	[self.view.window addObserver:self forKeyPath:@"firstResponder" options:0 context:kFirstResponderContext];
+	[self.textField bind:NSValueBinding toObject:self withKeyPath:@"stringValue" options:@{ NSContinuouslyUpdatesValueBindingOption: @YES }];
 }
 
 - (void)viewWillDisappear
 {
+	[self.textField unbind:NSValueBinding];
 	[self.view.window removeObserver:self forKeyPath:@"firstResponder" context:kFirstResponderContext];
+}
+
+- (void)setStringValue:(NSString*)newStringValue
+{
+	if([_stringValue isEqualToString:newStringValue])
+		return;
+	_stringValue = newStringValue;
+	[_textField updateIntrinsicContentSizeToEncompassString:newStringValue];
+
+	if(NSDictionary* info = [self infoForBinding:@"stringValue"])
+	{
+		id controller     = info[NSObservedObjectKey];
+		NSString* keyPath = info[NSObservedKeyPathKey];
+		if(controller && controller != [NSNull null] && keyPath && (id)keyPath != [NSNull null])
+		{
+			id oldValue = [controller valueForKeyPath:keyPath];
+			if(!oldValue || ![oldValue isEqual:newStringValue])
+				[controller setValue:newStringValue forKeyPath:keyPath];
+		}
+	}
 }
 
 - (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)object change:(NSDictionary*)change context:(void*)context
@@ -145,15 +168,6 @@ static void* kFirstResponderContext = &kFirstResponderContext;
 			return [self showHistory:self], YES;
 	}
 	return NO;
-}
-
-- (void)controlTextDidChange:(NSNotification*)aNotification
-{
-	OakAutoSizingTextField* textField = aNotification.object;
-	NSDictionary* userInfo = aNotification.userInfo;
-	NSTextView* textView = userInfo[@"NSFieldEditor"];
-	if(textView && textField)
-		[textField updateIntrinsicContentSizeToEncompassString:textView.string];
 }
 
 - (void)textStorageDidProcessEditing:(NSNotification*)aNotification
