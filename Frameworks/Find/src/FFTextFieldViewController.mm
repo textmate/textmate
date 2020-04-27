@@ -21,7 +21,7 @@
 - (void)updateIntrinsicContentSizeToEncompassString:(NSString*)aString
 {
 	NSTextFieldCell* cell = [self.cell copy];
-	cell.stringValue = aString;
+	cell.stringValue = aString ?: @"";
 
 	self.myIntrinsicContentSize = NSMakeSize(NSViewNoIntrinsicMetric, MAX(22, MIN([cell cellSizeForBounds:NSMakeRect(0, 0, NSWidth([self bounds]), CGFLOAT_MAX)].height, 225)));
 	[self invalidateIntrinsicContentSize];
