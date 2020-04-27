@@ -91,11 +91,6 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 	FFStatusBarViewController* _statusBarViewController;
 	NSGridView*                _gridView;
 	NSStackView*               _actionButtonsStackView;
-
-	BOOL                       _ignoreWhitespace;
-
-	BOOL                       _findStringUpdated;
-	BOOL                       _replaceStringUpdated;
 }
 @property (nonatomic, readonly)           FFResultsViewController* resultsViewController;
 @property (nonatomic) BOOL                showsResultsOutlineView;
@@ -458,13 +453,11 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 	self.regularExpression = entry.regularExpression;
 	self.ignoreWhitespace  = entry.ignoreWhitespace;
 	self.fullWords         = entry.fullWordMatch;
-	_findStringUpdated = NO;
 }
 
 - (void)replaceClipboardDidChange:(NSNotification*)aNotification
 {
-	self.replaceString    = [[OakPasteboard.replacePasteboard current] string];
-	_replaceStringUpdated = NO;
+	self.replaceString = [[OakPasteboard.replacePasteboard current] string];
 }
 
 - (void)updateWindowTitle
@@ -497,23 +490,27 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 	// = Update Pasteboard =
 	// =====================
 
-	if(_findStringUpdated && OakNotEmptyString(_findString))
+	if(OakNotEmptyString(_findString))
 	{
-		NSDictionary* newOptions = @{
-			OakFindRegularExpressionOption: @(self.regularExpression),
-			OakFindIgnoreWhitespaceOption:  @(self.ignoreWhitespace),
-			OakFindFullWordsOption:         @(self.fullWords),
-		};
+		OakPasteboardEntry* entry = OakPasteboard.findPasteboard.current;
+		BOOL newFindString        = ![_findString isEqualToString:entry.string];
+		BOOL newRegularExpression = entry.regularExpression != self.regularExpression;
+		BOOL newIgnoreWhitespace  = entry.ignoreWhitespace  != self.ignoreWhitespace;
+		BOOL newFullWords         = entry.fullWordMatch     != self.fullWords;
 
-		[OakPasteboard.findPasteboard addEntryWithString:_findString options:newOptions];
-		_findStringUpdated = NO;
+		if(newFindString || newRegularExpression || newIgnoreWhitespace || newFullWords)
+		{
+			NSDictionary* newOptions = @{
+				OakFindRegularExpressionOption: @(self.regularExpression),
+				OakFindIgnoreWhitespaceOption:  @(self.ignoreWhitespace),
+				OakFindFullWordsOption:         @(self.fullWords),
+			};
+			[OakPasteboard.findPasteboard addEntryWithString:_findString options:newOptions];
+		}
 	}
 
-	if(_replaceStringUpdated && _replaceString)
-	{
+	if(_replaceString && ![_replaceString isEqualToString:OakPasteboard.findPasteboard.current.string])
 		[OakPasteboard.replacePasteboard addEntryWithString:_replaceString];
-		_replaceStringUpdated = NO;
-	}
 
 	return res;
 }
@@ -721,24 +718,6 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 	}
 }
 
-- (void)setFindString:(NSString*)aString
-{
-	if(_findString == aString || [_findString isEqualToString:aString])
-		return;
-
-	_findString = aString ?: @"";
-	_findStringUpdated = YES;
-}
-
-- (void)setReplaceString:(NSString*)aString
-{
-	if(_replaceString == aString || [_replaceString isEqualToString:aString])
-		return;
-
-	_replaceString = aString ?: @"";
-	_replaceStringUpdated = YES;
-}
-
 - (void)setFindResultsHeight:(CGFloat)height { [NSUserDefaults.standardUserDefaults setInteger:height forKey:kUserDefaultsFindResultsHeightKey]; }
 - (CGFloat)findResultsHeight                 { return [NSUserDefaults.standardUserDefaults integerForKey:kUserDefaultsFindResultsHeightKey] ?: 200; }
 
@@ -748,29 +727,10 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		return;
 
 	_regularExpression = flag;
-	_findStringUpdated = YES;
 	[_findTextFieldViewController showPopoverWithString:nil];
 
 	_findTextFieldViewController.syntaxHighlightEnabled    = flag;
 	_replaceTextFieldViewController.syntaxHighlightEnabled = flag;
-}
-
-- (void)setIgnoreWhitespace:(BOOL)flag
-{
-	if(_ignoreWhitespace == flag)
-		return;
-
-	_ignoreWhitespace  = flag;
-	_findStringUpdated = YES;
-}
-
-- (void)setFullWords:(BOOL)flag
-{
-	if(_fullWords == flag)
-		return;
-
-	_fullWords         = flag;
-	_findStringUpdated = YES;
 }
 
 - (void)setIgnoreCase:(BOOL)flag        { if(_ignoreCase != flag) [NSUserDefaults.standardUserDefaults setObject:@(_ignoreCase = flag) forKey:kUserDefaultsFindIgnoreCase]; }
