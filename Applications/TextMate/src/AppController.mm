@@ -475,7 +475,15 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 - (void)applicationDidUpdate:(NSNotification*)aNotification
 {
-	self.currentResponderIsOakTextView = [NSApp targetForAction:@selector(shiftLeft:) to:nil from:self] != nil;
+	BOOL hasTextView = YES;
+	for(NSResponder* responder = NSApp.keyWindow.firstResponder; responder && hasTextView; responder = responder.nextResponder)
+	{
+		if([responder respondsToSelector:@selector(shiftLeft:)])
+			break;
+		else if([responder respondsToSelector:@selector(goBack:)])
+			hasTextView = NO;
+	}
+	self.currentResponderIsOakTextView = hasTextView;
 }
 
 - (void)userDefaultsDidChange:(id)sender
