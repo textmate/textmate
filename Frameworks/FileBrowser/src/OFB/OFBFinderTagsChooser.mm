@@ -204,7 +204,7 @@ static constexpr CGFloat SwatchButtonWidth  = 24;
 - (void)mouseDidEnterFinderTagButton:(NSNotification*)aNotificaiton
 {
 	OakRolloverButton* button = aNotificaiton.object;
-	if([self.subviews containsObject:button])
+	if(button.target == self)
 	{
 		self.hoverTag = _favoriteFinderTags[button.tag];
 		if([_selectedTagsToRemove containsObject:_hoverTag])
@@ -216,7 +216,7 @@ static constexpr CGFloat SwatchButtonWidth  = 24;
 - (void)mouseDidLeaveFinderTagButton:(NSNotification*)aNotificaiton
 {
 	OakRolloverButton* button = aNotificaiton.object;
-	if([self.subviews containsObject:button])
+	if(button.target == self)
 	{
 		self.hoverTag = nil;
 		_tagTextField.stringValue = @"Tags…";
