@@ -86,10 +86,11 @@ static NSString* const kRecordingPlaceholderString = @"…";
 			_clearButton.target = self;
 			_clearButton.action = @selector(clearKeyEquivalent:);
 
-			NSDictionary* views = @{ @"clear": _clearButton };
-			OakAddAutoLayoutViewsToSuperview([views allValues], self);
-			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(>=4)-[clear]-(4)-|" options:0 metrics:nil views:views]];
-			[self addConstraint:[NSLayoutConstraint constraintWithItem:_clearButton attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
+			_clearButton.translatesAutoresizingMaskIntoConstraints = NO;
+			[self addSubview:_clearButton];
+
+			[_clearButton.trailingAnchor constraintEqualToAnchor:self.trailingAnchor constant:-4].active = YES;
+			[_clearButton.centerYAnchor constraintEqualToAnchor:self.centerYAnchor].active = YES;
 		}
 		_clearButton.hidden = NO;
 		[_clearButton updateTrackingAreas];

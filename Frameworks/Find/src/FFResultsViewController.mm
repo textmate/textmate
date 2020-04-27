@@ -56,8 +56,8 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		_button.translatesAutoresizingMaskIntoConstraints = NO;
 		[self addSubview:_button];
 
-		[self addConstraint:[NSLayoutConstraint constraintWithItem:_button attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
-		[self addConstraint:[NSLayoutConstraint constraintWithItem:_button attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
+		[_button.centerXAnchor constraintEqualToAnchor:self.centerXAnchor].active = YES;
+		[_button.centerYAnchor constraintEqualToAnchor:self.centerYAnchor].active = YES;
 
 		[_button bind:NSEnabledBinding toObject:self withKeyPath:@"objectValue.readOnly" options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
 		[_button bind:NSValueBinding toObject:self withKeyPath:@"objectValue.excluded" options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
