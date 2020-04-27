@@ -98,8 +98,6 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 @property (nonatomic) NSString*           otherFolder;
 @property (nonatomic, readonly) NSString* searchFolder;
 
-@property (nonatomic) NSString* findString;
-@property (nonatomic) NSString* replaceString;
 @property (nonatomic) NSString* globString;
 
 @property (nonatomic) BOOL ignoreCase;
@@ -178,7 +176,6 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		self.window.restorable         = NO;
 
 		_resultsViewController = [[FFResultsViewController alloc] init];
-		[_resultsViewController bind:@"replaceString" toObject:_objectController withKeyPath:@"content.replaceString" options:nil];
 		_resultsViewController.selectResultAction      = @selector(didSelectResult:);
 		_resultsViewController.removeResultAction      = @selector(didRemoveResult:);
 		_resultsViewController.doubleClickResultAction = @selector(didDoubleClickResult:);
@@ -211,6 +208,8 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		[self.window layoutIfNeeded]; // Incase autosaved window frame includes results, we want to shrink the frame
 
 		OakSetupKeyViewLoop(@[ self.gridView, _resultsViewController.view, self.actionButtonsStackView ]);
+
+		[_resultsViewController bind:@"replaceString" toObject:_replaceTextFieldViewController withKeyPath:@"stringValue" options:nil];
 
 		// setup find/replace strings/options
 		[self userDefaultsDidChange:nil];
@@ -380,17 +379,15 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		replaceHistoryButton.target = _replaceTextFieldViewController;
 		countButton.action          = @selector(countOccurrences:);
 
-		[_findTextFieldViewController         bind:@"stringValue"         toObject:_objectController withKeyPath:@"content.findString"           options:nil];
-		[_replaceTextFieldViewController      bind:@"stringValue"         toObject:_objectController withKeyPath:@"content.replaceString"        options:nil];
-		[globTextField                        bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.globHistoryList.head" options:nil];
-		[globTextField                        bind:NSContentValuesBinding toObject:_objectController withKeyPath:@"content.globHistoryList.list" options:nil];
-		[globTextField                        bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.canEditGlob"          options:nil];
-		[ignoreCaseCheckBox                   bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.ignoreCase"           options:nil];
-		[ignoreWhitespaceCheckBox             bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.ignoreWhitespace"     options:nil];
-		[regularExpressionCheckBox            bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.regularExpression"    options:nil];
-		[wrapAroundCheckBox                   bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.wrapAround"           options:nil];
-		[ignoreWhitespaceCheckBox             bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.canIgnoreWhitespace"  options:nil];
-		[countButton                          bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.findString.length"    options:nil];
+		[globTextField                        bind:NSValueBinding         toObject:_objectController            withKeyPath:@"content.globHistoryList.head" options:nil];
+		[globTextField                        bind:NSContentValuesBinding toObject:_objectController            withKeyPath:@"content.globHistoryList.list" options:nil];
+		[globTextField                        bind:NSEnabledBinding       toObject:_objectController            withKeyPath:@"content.canEditGlob"          options:nil];
+		[ignoreCaseCheckBox                   bind:NSValueBinding         toObject:_objectController            withKeyPath:@"content.ignoreCase"           options:nil];
+		[ignoreWhitespaceCheckBox             bind:NSValueBinding         toObject:_objectController            withKeyPath:@"content.ignoreWhitespace"     options:nil];
+		[regularExpressionCheckBox            bind:NSValueBinding         toObject:_objectController            withKeyPath:@"content.regularExpression"    options:nil];
+		[wrapAroundCheckBox                   bind:NSValueBinding         toObject:_objectController            withKeyPath:@"content.wrapAround"           options:nil];
+		[ignoreWhitespaceCheckBox             bind:NSEnabledBinding       toObject:_objectController            withKeyPath:@"content.canIgnoreWhitespace"  options:nil];
+		[countButton                          bind:NSEnabledBinding       toObject:_findTextFieldViewController withKeyPath:@"stringValue.length"           options:nil];
 
 		OakSetupKeyViewLoop(@[ _gridView, _findTextFieldViewController.view, _replaceTextFieldViewController.view, countButton, regularExpressionCheckBox, ignoreWhitespaceCheckBox, ignoreCaseCheckBox, wrapAroundCheckBox, _wherePopUpButton, globTextField, actionsPopUpButton ]);
 	}
@@ -415,15 +412,15 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		findPreviousButton.action      = @selector(findPrevious:);
 		_findNextButton.action         = @selector(findNext:);
 
-		[replaceButton         bind:NSEnabledBinding toObject:_objectController withKeyPath:@"content.canReplaceInDocument"  options:nil];
-		[replaceAndFindButton  bind:NSEnabledBinding toObject:_objectController withKeyPath:@"content.canReplaceInDocument"  options:nil];
-		[_findAllButton        bind:NSEnabledBinding toObject:_objectController withKeyPath:@"content.findString.length"     options:nil];
-		[replaceAllButton      bind:NSTitleBinding   toObject:_objectController withKeyPath:@"content.replaceAllButtonTitle" options:nil];
-		[replaceAllButton      bind:NSEnabledBinding toObject:_objectController withKeyPath:@"content.findString.length"     options:nil];
-		[replaceAllButton      bind:@"enabled2"      toObject:_objectController withKeyPath:@"content.canReplaceAll"         options:nil];
-		[replaceAndFindButton  bind:@"enabled2"      toObject:_objectController withKeyPath:@"content.findString.length"     options:nil];
-		[findPreviousButton    bind:NSEnabledBinding toObject:_objectController withKeyPath:@"content.findString.length"     options:nil];
-		[_findNextButton       bind:NSEnabledBinding toObject:_objectController withKeyPath:@"content.findString.length"     options:nil];
+		[replaceButton         bind:NSEnabledBinding toObject:_objectController            withKeyPath:@"content.canReplaceInDocument"  options:nil];
+		[replaceAndFindButton  bind:NSEnabledBinding toObject:_objectController            withKeyPath:@"content.canReplaceInDocument"  options:nil];
+		[replaceAndFindButton  bind:@"enabled2"      toObject:_findTextFieldViewController withKeyPath:@"stringValue.length"            options:nil];
+		[_findAllButton        bind:NSEnabledBinding toObject:_findTextFieldViewController withKeyPath:@"stringValue.length"            options:nil];
+		[replaceAllButton      bind:NSTitleBinding   toObject:_objectController            withKeyPath:@"content.replaceAllButtonTitle" options:nil];
+		[replaceAllButton      bind:NSEnabledBinding toObject:_findTextFieldViewController withKeyPath:@"stringValue.length"            options:nil];
+		[replaceAllButton      bind:@"enabled2"      toObject:_objectController            withKeyPath:@"content.canReplaceAll"         options:nil];
+		[findPreviousButton    bind:NSEnabledBinding toObject:_findTextFieldViewController withKeyPath:@"stringValue.length"            options:nil];
+		[_findNextButton       bind:NSEnabledBinding toObject:_findTextFieldViewController withKeyPath:@"stringValue.length"            options:nil];
 
 		_actionButtonsStackView = [NSStackView stackViewWithViews:@[ _findAllButton, replaceAllButton ]];
 		[_actionButtonsStackView setViews:@[ replaceButton, replaceAndFindButton, findPreviousButton, _findNextButton ] inGravity:NSStackViewGravityTrailing];
@@ -448,8 +445,8 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 
 - (void)findClipboardDidChange:(NSNotification*)aNotification
 {
-	OakPasteboardEntry* entry = [OakPasteboard.findPasteboard current];
-	self.findString        = entry.string;
+	OakPasteboardEntry* entry = OakPasteboard.findPasteboard.current;
+	_findTextFieldViewController.stringValue = entry.string;
 	self.regularExpression = entry.regularExpression;
 	self.ignoreWhitespace  = entry.ignoreWhitespace;
 	self.fullWords         = entry.fullWordMatch;
@@ -457,7 +454,17 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 
 - (void)replaceClipboardDidChange:(NSNotification*)aNotification
 {
-	self.replaceString = [[OakPasteboard.replacePasteboard current] string];
+	_replaceTextFieldViewController.stringValue = OakPasteboard.replacePasteboard.current.string;
+}
+
+- (NSString*)findString
+{
+	return _findTextFieldViewController.stringValue;
+}
+
+- (NSString*)replaceString
+{
+	return _replaceTextFieldViewController.stringValue;
 }
 
 - (void)updateWindowTitle
@@ -490,10 +497,10 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 	// = Update Pasteboard =
 	// =====================
 
-	if(OakNotEmptyString(_findString))
+	if(OakNotEmptyString(self.findString))
 	{
 		OakPasteboardEntry* entry = OakPasteboard.findPasteboard.current;
-		BOOL newFindString        = ![_findString isEqualToString:entry.string];
+		BOOL newFindString        = ![self.findString isEqualToString:entry.string];
 		BOOL newRegularExpression = entry.regularExpression != self.regularExpression;
 		BOOL newIgnoreWhitespace  = entry.ignoreWhitespace  != self.ignoreWhitespace;
 		BOOL newFullWords         = entry.fullWordMatch     != self.fullWords;
@@ -505,12 +512,12 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 				OakFindIgnoreWhitespaceOption:  @(self.ignoreWhitespace),
 				OakFindFullWordsOption:         @(self.fullWords),
 			};
-			[OakPasteboard.findPasteboard addEntryWithString:_findString options:newOptions];
+			[OakPasteboard.findPasteboard addEntryWithString:self.findString options:newOptions];
 		}
 	}
 
-	if(_replaceString && ![_replaceString isEqualToString:OakPasteboard.findPasteboard.current.string])
-		[OakPasteboard.replacePasteboard addEntryWithString:_replaceString];
+	if(self.replaceString && ![self.replaceString isEqualToString:OakPasteboard.findPasteboard.current.string])
+		[OakPasteboard.replacePasteboard addEntryWithString:self.replaceString];
 
 	return res;
 }
