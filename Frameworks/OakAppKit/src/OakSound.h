@@ -4,7 +4,9 @@ enum OakSoundIdentifier
 {
 	OakSoundDidMoveItemUISound,
 	OakSoundDidTrashItemUISound,
-	OakSoundDidCompleteSomethingUISound
+	OakSoundDidCompleteSomethingUISound,
+	OakSoundDidBeginRecordingUISound,
+	OakSoundDidEndRecordingUISound
 };
 
 PUBLIC void OakPlayUISound (OakSoundIdentifier aSound);
