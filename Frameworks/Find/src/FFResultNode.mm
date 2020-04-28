@@ -44,15 +44,24 @@ namespace
 
 		void append (std::string const& cStr, NSDictionary* attrs = nil, NSFontTraitMask fontTraits = 0)
 		{
-			NSString* str = to_ns(cStr);
+			if(NSString* str = to_ns(cStr))
+			{
+				push_style(attrs, fontTraits);
 
-			push_style(attrs, fontTraits);
+				NSMutableAttributedString* aStr = [[NSMutableAttributedString alloc] initWithString:str attributes:_attributes.back()];
+				[aStr applyFontTraits:_font_traits.back() range:NSMakeRange(0, str.length)];
+				[_string appendAttributedString:aStr];
 
-			NSMutableAttributedString* aStr = [[NSMutableAttributedString alloc] initWithString:str attributes:_attributes.back()];
-			[aStr applyFontTraits:_font_traits.back() range:NSMakeRange(0, str.length)];
-			[_string appendAttributedString:aStr];
-
-			pop_style();
+				pop_style();
+			}
+			else
+			{
+				NSDictionary* attributes = @{
+					NSForegroundColorAttributeName: NSColor.systemYellowColor,
+					NSBackgroundColorAttributeName: NSColor.systemRedColor,
+				};
+				[_string appendAttributedString:[[NSMutableAttributedString alloc] initWithString:@"Error: Please file a bug report!" attributes:attributes]];
+			}
 		}
 
 		NSAttributedString* attributed_string () const
@@ -329,16 +338,6 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 
 	if(replacementString)
 		middle = m.captures.empty() ? to_s(replacementString) : format_string::expand(to_s(replacementString), m.captures);
-
-	if(!utf8::is_valid(prefix.begin(), prefix.end()) || !utf8::is_valid(middle.begin(), middle.end()) || !utf8::is_valid(suffix.begin(), suffix.end()))
-	{
-		string_builder_t builder(NSLineBreakByTruncatingTail);
-		builder.append(text::format("%zu-%zu: Range is not valid UTF-8, please contact: https://macromates.com/support", m.first, m.last), @{
-			NSFontAttributeName:            font,
-			NSForegroundColorAttributeName: [NSColor secondaryLabelColor]
-		});
-		return builder.attributed_string();
-	}
 
 	_excerpt = AttributedStringForMatch(prefix + middle + suffix, prefix.size(), prefix.size() + middle.size(), m.lineNumber, to_s(m.newlines), font);
 	_excerptReplaceString = replacementString;
