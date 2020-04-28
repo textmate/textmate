@@ -37,13 +37,15 @@ namespace
 			_font_traits.pop_back();
 		}
 
-		void append (NSString* str, NSFontTraitMask fontTraits)
+		void append (std::string const& cStr, NSFontTraitMask fontTraits)
 		{
-			append(str, nil, fontTraits);
+			append(cStr, nil, fontTraits);
 		}
 
-		void append (NSString* str, NSDictionary* attrs = nil, NSFontTraitMask fontTraits = 0)
+		void append (std::string const& cStr, NSDictionary* attrs = nil, NSFontTraitMask fontTraits = 0)
 		{
+			NSString* str = to_ns(cStr);
+
 			push_style(attrs, fontTraits);
 
 			NSMutableAttributedString* aStr = [[NSMutableAttributedString alloc] initWithString:str attributes:_attributes.back()];
@@ -81,8 +83,8 @@ static NSAttributedString* PathComponentString (std::string const& path, std::st
 		NSFontAttributeName:            font,
 		NSForegroundColorAttributeName: [NSColor secondaryLabelColor]
 	});
-	builder.append(to_ns(text::join(std::vector<std::string>(components.begin(), components.end()), " ‣ ")));
-	builder.append(to_ns((path::is_absolute(path) ? path::display_name(path) : path)), NSBoldFontMask);
+	builder.append(text::join(std::vector<std::string>(components.begin(), components.end()), " ‣ "));
+	builder.append((path::is_absolute(path) ? path::display_name(path) : path), NSBoldFontMask);
 	return builder.attributed_string();
 }
 
@@ -93,15 +95,15 @@ static void append (string_builder_t& dst, std::string const& src, size_t from, 
 	{
 		if(src[i] == '\t' || src[i] == '\r')
 		{
-			dst.append(to_ns(src.substr(begin, i-begin)));
+			dst.append(src.substr(begin, i-begin));
 			if(src[i] == '\t')
-				dst.append(@"\u2003");
+				dst.append("\u2003");
 			else if(src[i] == '\r')
-				dst.append(@"<CR>", @{ NSForegroundColorAttributeName: NSColor.tertiaryLabelColor });
+				dst.append("<CR>", @{ NSForegroundColorAttributeName: NSColor.tertiaryLabelColor });
 			begin = i+1;
 		}
 	}
-	dst.append(to_ns(src.substr(begin, to-begin)));
+	dst.append(src.substr(begin, to-begin));
 }
 
 static NSAttributedString* AttributedStringForMatch (std::string const& text, size_t from, size_t to, size_t n, std::string const& newlines, NSFont* font)
@@ -124,7 +126,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 	NSFontDescriptor* descriptor = [font.fontDescriptor fontDescriptorByAddingAttributes:@{
 		NSFontFeatureSettingsAttribute: @[ @{ NSFontFeatureTypeIdentifierKey: @(kNumberSpacingType), NSFontFeatureSelectorIdentifierKey: @(kMonospacedNumbersSelector) } ]
 	}];
-	builder.append(to_ns(text::pad(++n, 4) + ": "), @{ NSFontAttributeName: [NSFont fontWithDescriptor:descriptor size:0] });
+	builder.append(text::pad(++n, 4) + ": ", @{ NSFontAttributeName: [NSFont fontWithDescriptor:descriptor size:0] });
 
 	bool inMatch = false;
 	size_t last = text.size();
@@ -156,7 +158,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 
 		if(eol != last)
 		{
-			builder.append(@"¬");
+			builder.append("¬");
 
 			if((eol += newlines.size()) == to)
 			{
@@ -168,8 +170,8 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 			{
 				if(inMatch)
 					builder.pop_style();
-				builder.append(@"\n");
-				builder.append(to_ns(text::pad(++n, 4) + ": "), @{ NSFontAttributeName: [NSFont fontWithDescriptor:descriptor size:0] });
+				builder.append("\n");
+				builder.append(text::pad(++n, 4) + ": ", @{ NSFontAttributeName: [NSFont fontWithDescriptor:descriptor size:0] });
 				if(inMatch)
 					builder.push_style(matchAttributes, matchFontTraits);
 			}
@@ -331,7 +333,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 	if(!utf8::is_valid(prefix.begin(), prefix.end()) || !utf8::is_valid(middle.begin(), middle.end()) || !utf8::is_valid(suffix.begin(), suffix.end()))
 	{
 		string_builder_t builder(NSLineBreakByTruncatingTail);
-		builder.append(to_ns(text::format("%zu-%zu: Range is not valid UTF-8, please contact: https://macromates.com/support", m.first, m.last)), @{
+		builder.append(text::format("%zu-%zu: Range is not valid UTF-8, please contact: https://macromates.com/support", m.first, m.last), @{
 			NSFontAttributeName:            font,
 			NSForegroundColorAttributeName: [NSColor secondaryLabelColor]
 		});
