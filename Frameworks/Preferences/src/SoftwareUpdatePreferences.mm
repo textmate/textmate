@@ -3,7 +3,6 @@
 #import <BundlesManager/BundlesManager.h>
 #import <OakAppKit/NSImage Additions.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
-#import <OakFoundation/NSDate Additions.h>
 #import <OakFoundation/OakStringListTransformer.h>
 #import <SoftwareUpdate/SoftwareUpdate.h>
 #import <MenuBuilder/MenuBuilder.h>
@@ -59,7 +58,46 @@
 	}
 	else
 	{
-		self.lastPollString = [self.lastPoll humanReadableTimeElapsed];
+		NSTimeInterval const minute =  60;
+		NSTimeInterval const hour   =  60*minute;
+		NSTimeInterval const day    =  24*hour;
+		NSTimeInterval const week   =   7*day;
+		NSTimeInterval const month  =  31*day;
+		NSTimeInterval const year   = 365*day;
+
+		NSString* res;
+
+		NSTimeInterval t = [[NSDate date] timeIntervalSinceDate:_lastPoll];
+		if(t < 1)
+			res = @"Just now";
+		else if(t < minute)
+			res = @"Less than a minute ago";
+		else if(t < 2 * minute)
+			res = @"1 minute ago";
+		else if(t < hour)
+			res = [NSString stringWithFormat:@"%.0f minutes ago", t / minute];
+		else if(t < 2 * hour)
+			res = @"1 hour ago";
+		else if(t < day)
+			res = [NSString stringWithFormat:@"%.0f hours ago", t / hour];
+		else if(t < 2*day)
+			res = @"Yesterday";
+		else if(t < week)
+			res = [NSString stringWithFormat:@"%.0f days ago", t / day];
+		else if(t < 2*week)
+			res = @"Last week";
+		else if(t < month)
+			res = [NSString stringWithFormat:@"%.0f weeks ago", t / week];
+		else if(t < 2*month)
+			res = @"Last month";
+		else if(t < year)
+			res = [NSString stringWithFormat:@"%.0f months ago", t / month];
+		else if(t < 2*year)
+			res = @"Last year";
+		else
+			res = [NSString stringWithFormat:@"%.0f years ago", t / year];
+
+		self.lastPollString = res;
 	}
 }
 
