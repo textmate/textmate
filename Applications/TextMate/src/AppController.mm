@@ -91,7 +91,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 @interface AppController ()
 @property (nonatomic) BOOL didFinishLaunching;
-@property (nonatomic) BOOL currentResponderIsOakTextView;
+@property (nonatomic) BOOL keyWindowHasBackAndForwardActions;
 @end
 
 @implementation AppController
@@ -432,58 +432,48 @@ BOOL HasDocumentWindow (NSArray* windows)
 	return MBCreateMenu(items);
 }
 
-- (void)setCurrentResponderIsOakTextView:(BOOL)flag
+- (void)setKeyWindowHasBackAndForwardActions:(BOOL)flag
 {
-	if(_currentResponderIsOakTextView != flag)
-	{
-		_currentResponderIsOakTextView = flag;
+	if(_keyWindowHasBackAndForwardActions == flag)
+		return;
+	_keyWindowHasBackAndForwardActions = flag;
 
-		NSMenu* mainMenu = [NSApp mainMenu];
-		NSMenu* goMenu   = [[mainMenu itemWithTitle:@"File Browser"] submenu];
-		NSMenu* textMenu = [[mainMenu itemWithTitle:@"Text"] submenu];
+	NSMenu* textMenu        = [NSApp.mainMenu itemWithTitle:@"Text"].submenu;
+	NSMenu* fileBrowserMenu = [NSApp.mainMenu itemWithTitle:@"File Browser"].submenu;
 
-		NSMenuItem* backMenuItem       = [goMenu itemWithTitle:@"Back"];
-		NSMenuItem* forwardMenuItem    = [goMenu itemWithTitle:@"Forward"];
-		NSMenuItem* shiftLeftMenuItem  = [textMenu itemWithTitle:@"Shift Left"];
-		NSMenuItem* shiftRightMenuItem = [textMenu itemWithTitle:@"Shift Right"];
+	auto itemWithAction = ^NSMenuItem*(NSMenu* menu, SEL action){
+		NSInteger index = [menu indexOfItemWithTarget:nil andAction:action];
+		return index == -1 ? nil : menu.itemArray[index];
+	};
 
-		if(!backMenuItem || !forwardMenuItem || !shiftLeftMenuItem || !shiftRightMenuItem)
-			return;
+	NSMenuItem* backMenuItem       = itemWithAction(fileBrowserMenu, @selector(goBack:));
+	NSMenuItem* forwardMenuItem    = itemWithAction(fileBrowserMenu, @selector(goForward:));
+	NSMenuItem* shiftLeftMenuItem  = itemWithAction(textMenu,        @selector(shiftLeft:));
+	NSMenuItem* shiftRightMenuItem = itemWithAction(textMenu,        @selector(shiftRight:));
 
-		if(_currentResponderIsOakTextView)
-		{
-			backMenuItem.keyEquivalent                   = @"";
-			forwardMenuItem.keyEquivalent                = @"";
+	if(!backMenuItem || !forwardMenuItem || !shiftLeftMenuItem || !shiftRightMenuItem)
+		return;
 
-			shiftLeftMenuItem.keyEquivalent              = @"[";
-			shiftLeftMenuItem.keyEquivalentModifierMask  = NSEventModifierFlagCommand;
-			shiftRightMenuItem.keyEquivalent             = @"]";
-			shiftRightMenuItem.keyEquivalentModifierMask = NSEventModifierFlagCommand;
-		}
-		else
-		{
-			shiftLeftMenuItem.keyEquivalent           = @"";
-			shiftRightMenuItem.keyEquivalent          = @"";
+	for(NSMenuItem* menuItem in @[ backMenuItem, forwardMenuItem, shiftLeftMenuItem, shiftRightMenuItem ])
+		menuItem.keyEquivalent = @"";
 
-			backMenuItem.keyEquivalent                = @"[";
-			backMenuItem.keyEquivalentModifierMask    = NSEventModifierFlagCommand;
-			forwardMenuItem.keyEquivalent             = @"]";
-			forwardMenuItem.keyEquivalentModifierMask = NSEventModifierFlagCommand;
-		}
-	}
+	(flag ? backMenuItem : shiftLeftMenuItem).keyEquivalent                 = @"[";
+	(flag ? backMenuItem : shiftLeftMenuItem).keyEquivalentModifierMask     = NSEventModifierFlagCommand;
+	(flag ? forwardMenuItem : shiftRightMenuItem).keyEquivalent             = @"]";
+	(flag ? forwardMenuItem : shiftRightMenuItem).keyEquivalentModifierMask = NSEventModifierFlagCommand;
 }
 
 - (void)applicationDidUpdate:(NSNotification*)aNotification
 {
-	BOOL hasTextView = YES;
-	for(NSResponder* responder = NSApp.keyWindow.firstResponder; responder && hasTextView; responder = responder.nextResponder)
+	BOOL foundBackAndForwardActions = NO;
+	for(NSResponder* responder = NSApp.keyWindow.firstResponder; responder && !foundBackAndForwardActions; responder = responder.nextResponder)
 	{
 		if([responder respondsToSelector:@selector(shiftLeft:)])
 			break;
 		else if([responder respondsToSelector:@selector(goBack:)])
-			hasTextView = NO;
+			foundBackAndForwardActions = YES;
 	}
-	self.currentResponderIsOakTextView = hasTextView;
+	self.keyWindowHasBackAndForwardActions = foundBackAndForwardActions;
 }
 
 - (void)userDefaultsDidChange:(id)sender
