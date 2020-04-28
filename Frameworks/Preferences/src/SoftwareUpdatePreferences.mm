@@ -51,7 +51,16 @@
 
 - (void)updateLastPollString:(id)sender
 {
-	self.lastPollString = [self.lastPoll humanReadableTimeElapsed];
+	if(@available(macos 10.15, *))
+	{
+		NSRelativeDateTimeFormatter* formatter = [[NSRelativeDateTimeFormatter alloc] init];
+		formatter.dateTimeStyle = NSRelativeDateTimeFormatterStyleNamed;
+		self.lastPollString = [formatter localizedStringForDate:_lastPoll relativeToDate:NSDate.now];
+	}
+	else
+	{
+		self.lastPollString = [self.lastPoll humanReadableTimeElapsed];
+	}
 }
 
 - (void)setLastPoll:(NSDate*)aDate
