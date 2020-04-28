@@ -228,7 +228,7 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 
 			static NSInteger UniqueKey = 0; // Make each URL unique to avoid caching
 
-			_urlRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@://job/%@/%ld", kOakFileHandleURLScheme, to_ns(encode::url_part(_bundleCommand.name)), ++UniqueKey]] cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:6000];
+			_urlRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@://job/%@/%ld", kOakFileHandleURLScheme, to_ns(encode::url_part(_bundleCommand.name)), ++UniqueKey]] cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:FLT_MAX];
 			[NSURLProtocol setProperty:self.identifier forKey:@"commandIdentifier" inRequest:_urlRequest];
 			[NSURLProtocol setProperty:pipe.fileHandleForReading forKey:@"fileHandle" inRequest:_urlRequest];
 			[NSURLProtocol setProperty:@(_processIdentifier) forKey:@"processIdentifier" inRequest:_urlRequest];
