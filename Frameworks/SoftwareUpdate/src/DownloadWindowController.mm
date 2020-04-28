@@ -2,7 +2,6 @@
 #import <ns/ns.h>
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/NSImage Additions.h>
-#import <OakAppKit/OakImage.h>
 #import <OakFoundation/NSString Additions.h>
 #import <oak/debug.h>
 
@@ -29,14 +28,23 @@ OAK_DEBUG_VAR(SoftwareUpdate_Download);
 	if(_showUpdateBadge = flag)
 	{
 		D(DBF_SoftwareUpdate_Download, bug("alter application icon\n"););
-		NSImage* appIcon = [NSApp applicationIconImage];
-		NSImage* dlBadge = [[NSImage imageNamed:@"Update Badge" inSameBundleAsClass:[self class]] copy];
-		[dlBadge setSize:NSMakeSize(appIcon.size.width / 4, appIcon.size.height / 4)];
-		[NSApp setApplicationIconImage:[OakImage imageWithBase:appIcon badge:dlBadge edge:CGRectMaxXEdge]];
+		if(NSImage* dlBadge = [NSImage imageNamed:@"Update Badge" inSameBundleAsClass:[self class]])
+		{
+			NSImage* appIcon = NSApp.applicationIconImage;
+			NSApp.applicationIconImage = [NSImage imageWithSize:appIcon.size flipped:NO drawingHandler:^BOOL(NSRect dstRect){
+				[appIcon drawInRect:dstRect fromRect:NSZeroRect operation:NSCompositingOperationSourceOver fraction:1];
+
+				CGFloat minX = NSMinX(dstRect) + round(NSWidth(dstRect)  * 2 / 3), maxX = NSMaxX(dstRect);
+				CGFloat minY = NSMinY(dstRect) + round(NSHeight(dstRect) * 2 / 3), maxY = NSMaxY(dstRect);
+				[dlBadge drawInRect:NSMakeRect(minX, minY, maxX - minX, maxY - minY) fromRect:NSZeroRect operation:NSCompositingOperationSourceOver fraction:1];
+
+				return YES;
+			}];
+		}
 	}
 	else
 	{
-		[NSApp setApplicationIconImage:nil];
+		NSApp.applicationIconImage = nil;
 	}
 }
 
