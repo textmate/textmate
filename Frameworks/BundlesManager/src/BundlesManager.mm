@@ -2,7 +2,6 @@
 #import <bundles/load.h>
 #import "InstallBundleItems.h"
 #import <OakAppKit/NSAlert Additions.h>
-#import <OakFoundation/NSDate Additions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <network/network.h>
 #import <network/download_tbz.h>

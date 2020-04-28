@@ -6,7 +6,6 @@
 #import <OakAppKit/NSAlert Additions.h>
 #import <OakAppKit/OakSound.h>
 #import <OakAppKit/NSMenu Additions.h>
-#import <OakFoundation/NSDate Additions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakSystem/application.h>
 #import <io/move_path.h>
