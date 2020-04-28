@@ -1,6 +1,5 @@
 TESTS        = tests/*.cc
 SOURCES      = src/*.cc
 EXPORT       = src/*.h
-LINK        += crash
 FRAMEWORKS   = CoreFoundation
 LIBS         = iconv
