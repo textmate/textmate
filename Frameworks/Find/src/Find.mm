@@ -1177,7 +1177,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		NSString* seconds = [formatter stringFromNumber:@([_documentSearch searchDuration])];
 
 		self.statusString          = [msg stringByAppendingFormat:([_documentSearch scannedFileCount] == 1 ? @" (searched one file in %@ seconds)" : @" (searched %2$@ files in %1$@ seconds)"), seconds, [NSNumberFormatter localizedStringFromNumber:@([_documentSearch scannedFileCount]) numberStyle:NSNumberFormatterDecimalStyle]];
-		self.alternateStatusString = [msg stringByAppendingFormat:@" (searched %2$@ in %1$@ seconds)", seconds, [NSString stringWithCxxString:text::format_size([_documentSearch scannedByteCount])]];
+		self.alternateStatusString = [msg stringByAppendingFormat:@" (searched %2$@ in %1$@ seconds)", seconds, [NSByteCountFormatter stringFromByteCount:_documentSearch.scannedByteCount countStyle:NSByteCountFormatterCountStyleFile]];
 	}
 	else
 	{
