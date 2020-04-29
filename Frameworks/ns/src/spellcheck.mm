@@ -15,7 +15,7 @@ namespace ns
 				CFRunLoopPerformBlock(CFRunLoopGetMain(), kCFRunLoopCommonModes, ^{
 					_tag = [NSSpellChecker uniqueSpellDocumentTag];
 					_did_setup = true;
-				   dispatch_semaphore_signal(sem);
+					dispatch_semaphore_signal(sem);
 				});
 				CFRunLoopWakeUp(CFRunLoopGetMain());
 				dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);

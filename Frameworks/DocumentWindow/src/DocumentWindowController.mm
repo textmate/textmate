@@ -1089,7 +1089,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 			if(paths.size() > 1)
 			{
-				 // FIXME check if paths[0] already exists (overwrite)
+				// FIXME check if paths[0] already exists (overwrite)
 
 				NSMutableArray<OakDocument*>* documents = [NSMutableArray arrayWithObject:doc];
 				for(size_t i = 1; i < paths.size(); ++i)

@@ -270,7 +270,7 @@ namespace plist
 
 	bool equal (any_t const& lhs, any_t const& rhs)
 	{
-	   return boost::apply_visitor(equal_helper_t(), lhs, rhs);
+		return boost::apply_visitor(equal_helper_t(), lhs, rhs);
 	}
 
 	// ================

@@ -131,9 +131,9 @@ namespace oak
 					while(!_node->_left->is_null())
 						_node = _node->_left;
 				}
-		      else
+				else
 				{
-		         while(eq(_node, _node->_parent->_right))
+					while(eq(_node, _node->_parent->_right))
 						_node = _node->_parent;
 					_node = _node->_parent;
 				}
@@ -162,9 +162,9 @@ namespace oak
 						while(!_node->_right->is_null())
 							_node = _node->_right;
 					}
-			      else
+					else
 					{
-			         while(eq(_node, _node->_parent->_left))
+						while(eq(_node, _node->_parent->_left))
 							_node = _node->_parent;
 						_node = _node->_parent;
 					}
@@ -421,7 +421,7 @@ namespace oak
 			node_t* leaf     = node_t::null_ptr();
 			node_t* bottom   = node->_parent;
 
-		   if(!node->_left->is_null() || !node->_right->is_null())
+			if(!node->_left->is_null() || !node->_right->is_null())
 			{
 				leaf   = node->_left->is_null() ? succ(node) : pred(node);
 				bottom = leaf->_parent;

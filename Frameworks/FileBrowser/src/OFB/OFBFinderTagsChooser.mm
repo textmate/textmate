@@ -185,13 +185,13 @@ static constexpr CGFloat SwatchButtonWidth  = 24;
 			OakAddAutoLayoutViewsToSuperview(@[ stackView ], self);
 
 			NSDictionary* views = @{ @"tagButtons": stackView, @"tagTextField": _tagTextField };
-	  		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[tagButtons]-(5)-[tagTextField]|" options:0 metrics:nil views:views]];
+			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[tagButtons]-(5)-[tagTextField]|" options:0 metrics:nil views:views]];
 			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[tagTextField]|"                 options:0 metrics:nil views:views]];
 			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[tagButtons]-(>=20)-|"           options:0 metrics:nil views:views]];
 		}
 		else
 		{
-	  		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[tagTextField]|" options:0 metrics:nil views:@{ @"tagTextField" : _tagTextField }]];
+			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[tagTextField]|" options:0 metrics:nil views:@{ @"tagTextField" : _tagTextField }]];
 			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[tagTextField]|" options:0 metrics:nil views:@{ @"tagTextField" : _tagTextField }]];
 		}
 

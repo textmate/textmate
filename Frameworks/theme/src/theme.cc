@@ -477,7 +477,7 @@ static CGFloat read_font_size (std::string const& str_font_size)
 			else if(strcmp(last, "em") == 0)
 				return -size;
 			else if(strcmp(last, "%") == 0)
-				 return -size / 100;
+				return -size / 100;
 			else
 				fprintf(stderr, "*** unsupported font size unit: %s (%s)\n", last, str_font_size.c_str());
 		}

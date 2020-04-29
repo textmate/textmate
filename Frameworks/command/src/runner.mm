@@ -322,7 +322,7 @@ namespace command
 					placement = output::at_caret;
 				else
 					placement = output::after_input;
-			  format = output_format::snippet;
+				format = output_format::snippet;
 			}
 			break;
 			case exit_show_html:           placement = output::new_window;        format = output_format::html;    break;
