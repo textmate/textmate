@@ -176,7 +176,7 @@ static bool paths_share_inode (NSString* lhs, NSString* rhs)
 	}
 
 	NSUInteger mask = _accessible == YES ? DISPATCH_VNODE_WRITE : DISPATCH_VNODE_DELETE;
-	for(KEventManagerCallback* callback in _callbacks)
+	for(KEventManagerCallback* callback in [_callbacks copy])
 		callback.handler([NSURL fileURLWithPath:self.path], mask);
 }
 
@@ -325,7 +325,7 @@ static bool paths_share_inode (NSString* lhs, NSString* rhs)
 - (void)didUpdateObservedPath
 {
 	NSUInteger mask = DISPATCH_VNODE_WRITE;
-	for(KEventManagerCallback* callback in _callbacks)
+	for(KEventManagerCallback* callback in [_callbacks copy])
 		callback.handler([NSURL fileURLWithPath:self.path], mask);
 }
 
@@ -337,7 +337,7 @@ static bool paths_share_inode (NSString* lhs, NSString* rhs)
 		[childNode addToParentNode:newNode];
 	[_childNodesMap removeAllObjects];
 
-	for(KEventManagerCallback* callback in _callbacks)
+	for(KEventManagerCallback* callback in [_callbacks copy])
 		[newNode addCallback:callback];
 	[_callbacks removeAllObjects];
 
@@ -347,7 +347,7 @@ static bool paths_share_inode (NSString* lhs, NSString* rhs)
 - (void)didRenameObservedPath
 {
 	NSUInteger mask = DISPATCH_VNODE_RENAME;
-	for(KEventManagerCallback* callback in _callbacks)
+	for(KEventManagerCallback* callback in [_callbacks copy])
 		callback.handler([NSURL fileURLWithPath:self.path], mask);
 
 	for(KEventManagerNode* childNode in self.childNodes)
