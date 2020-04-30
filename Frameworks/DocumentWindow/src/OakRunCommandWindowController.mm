@@ -7,16 +7,16 @@
 static NSString* const kUserDefaultsFilterOutputType = @"filterOutputType";
 
 @interface OakRunCommandWindowController () <NSWindowDelegate>
-@property (nonatomic) NSTextField*         commandLabel;
-@property (nonatomic) NSComboBox*          commandComboBox;
-@property (nonatomic) NSTextField*         resultLabel;
-@property (nonatomic) NSPopUpButton*       resultPopUpButton;
-@property (nonatomic) NSButton*            executeButton;
-@property (nonatomic) NSButton*            cancelButton;
-@property (nonatomic) NSObjectController*  objectController;
-@property (nonatomic) OakHistoryList*      commandHistoryList;
-@property (nonatomic) NSMutableArray*      myConstraints;
-@property (nonatomic) output::type         outputType;
+@property (nonatomic) NSTextField*               commandLabel;
+@property (nonatomic) NSComboBox*                commandComboBox;
+@property (nonatomic) NSTextField*               resultLabel;
+@property (nonatomic) NSPopUpButton*             resultPopUpButton;
+@property (nonatomic) NSButton*                  executeButton;
+@property (nonatomic) NSButton*                  cancelButton;
+@property (nonatomic) NSObjectController*        objectController;
+@property (nonatomic) OakHistoryList<NSString*>* commandHistoryList;
+@property (nonatomic) NSMutableArray*            myConstraints;
+@property (nonatomic) output::type               outputType;
 @end
 
 #ifndef CONSTRAINT

@@ -111,9 +111,9 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 @property (nonatomic) BOOL searchFileLinks;
 @property (nonatomic) BOOL searchBinaryFiles;
 
-@property (nonatomic) OakHistoryList* globHistoryList;
-@property (nonatomic) OakHistoryList* recentFolders;
-@property (nonatomic) CGFloat         findResultsHeight;
+@property (nonatomic) OakHistoryList<NSString*>* globHistoryList;
+@property (nonatomic) OakHistoryList<NSString*>* recentFolders;
+@property (nonatomic) CGFloat                    findResultsHeight;
 
 @property (nonatomic, readonly) BOOL  canIgnoreWhitespace;
 @property (nonatomic) BOOL            canEditGlob;
