@@ -630,10 +630,6 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 {
 	_searchTarget = newTarget;
 
-	BOOL isDirectory = NO;
-	if(_searchTarget == FFSearchTargetOther && [NSFileManager.defaultManager fileExistsAtPath:self.otherFolder isDirectory:&isDirectory] && isDirectory)
-		[self.recentFolders addObject:self.otherFolder];
-
 	self.canEditGlob          = _searchTarget != FFSearchTargetDocument && _searchTarget != FFSearchTargetSelection;
 	self.canReplaceInDocument = _searchTarget == FFSearchTargetDocument || _searchTarget == FFSearchTargetSelection;
 
@@ -915,6 +911,10 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 						paths = self.fileBrowserItems;
 					else // searchTarget == FFSearchTargetOther
 						paths = @[ self.otherFolder ];
+
+					BOOL isDirectory = NO;
+					if((searchTarget == FFSearchTargetOther || searchTarget == FFSearchTargetFileBrowserItems) && paths.count == 1 && [NSFileManager.defaultManager fileExistsAtPath:paths.firstObject isDirectory:&isDirectory] && isDirectory)
+						[self.recentFolders addObject:paths.firstObject];
 
 					FFDocumentSearch* folderSearch = [FFDocumentSearch new];
 					folderSearch.searchBinaryFiles   = YES;
