@@ -18,6 +18,7 @@
 #    define a variable that ends up in build.ninja.
 require 'optparse'
 require 'shellwords'
+require 'fileutils'
 require 'set'
 
 BIN = File.dirname(__FILE__)
@@ -925,6 +926,7 @@ if __FILE__ == $PROGRAM_NAME
 
     cleaner = CleanupTargets.new(outfile, builddir)
 
+    FileUtils.mkdir_p(builddir)
     File.write("#{builddir}/build.ninja", buildfile.to_s)
     File.write("#{builddir}/build.ninja.d", "build.ninja: #{dependencies.sort.map { |dep| dep.gsub(/ /, '\\ ') }.join(" \\\n  ")}\n")
 
