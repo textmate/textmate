@@ -50,6 +50,7 @@
 
 - (void)updateLastPollString:(id)sender
 {
+#if defined(MAC_OS_X_VERSION_10_15) && (MAC_OS_X_VERSION_10_15 <= MAC_OS_X_VERSION_MAX_ALLOWED)
 	if(@available(macos 10.15, *))
 	{
 		NSRelativeDateTimeFormatter* formatter = [[NSRelativeDateTimeFormatter alloc] init];
@@ -57,6 +58,7 @@
 		self.lastPollString = [formatter localizedStringForDate:_lastPoll relativeToDate:NSDate.now];
 	}
 	else
+#endif
 	{
 		NSTimeInterval const minute =  60;
 		NSTimeInterval const hour   =  60*minute;
