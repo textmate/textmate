@@ -2,6 +2,15 @@ Title: Release Notes
 
 # Changes
 
+## 2020-04-30 (v2.0.11)
+
+* It is now possible to use ⌘[ in the Find dialog to go back to previously searched folders. The pop-up menu will show ⌘[ and ⌘] shortcuts next to the folders that the respective keys will select.
+* A sound is now played when starting/stopping macro recording (⌥⌘M).
+* Commands with output shown in the HTML output window (such as ⌘R for scripts) would timeout (and kill the script) after 1 hour and 40 minutes. This timeout has now been set to aeons (`FLT_MAX`).
+* Next/previous bookmark actions in the touch bar now work again. *[Ronald Wampler]*
+* Improved performance for showing clipboard history (only an issue since v2.0.8).
+* See [all changes since v2.0.10](https://github.com/textmate/textmate/compare/v2.0.10...v2.0.11)
+
 ## 2020-04-23 (v2.0.10)
 
 ### Clipboard and Clipboard History
