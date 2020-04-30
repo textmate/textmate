@@ -612,17 +612,44 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 	[whereMenu addItem:[NSMenuItem separatorItem]];
 	[whereMenu addItemWithTitle:@"Recent Places" action:@selector(nop:) keyEquivalent:@""];
 
-	for(NSUInteger i = 0; i < [self.recentFolders count]; ++i)
+	NSInteger selectedIndex = -1;
+	NSMutableArray<NSString*>* recentPaths = [NSMutableArray array];
+	for(NSUInteger i = 0; i < _recentFolders.count; ++i)
 	{
-		NSString* path = [self.recentFolders objectAtIndex:i];
-		if([path isEqualToString:lastFolder] || [path isEqualToString:self.projectFolder])
+		NSString* path = [_recentFolders objectAtIndex:i];
+		if([path isEqualToString:_projectFolder] || ![NSFileManager.defaultManager fileExistsAtPath:path])
 			continue;
-		if(![NSFileManager.defaultManager fileExistsAtPath:path])
+
+		if(_searchTarget == FFSearchTargetOther && [path isEqualToString:_otherFolder])
+			selectedIndex = recentPaths.count;
+		[recentPaths addObject:path];
+	}
+
+	for(NSUInteger i = 0; i < recentPaths.count; ++i)
+	{
+		if(i == selectedIndex)
 			continue;
+
+		NSString* path = recentPaths[i];
 
 		NSMenuItem* recentItem = [whereMenu addItemWithTitle:[self displayNameForFolder:path] action:@selector(takeSearchTargetFrom:) keyEquivalent:@""];
 		[recentItem setIconForFile:path];
 		[recentItem setRepresentedObject:path];
+
+		if(selectedIndex+1 == i)
+		{
+			recentItem.action        = @selector(goBack:);
+			recentItem.target        = self;
+			recentItem.keyEquivalent = @"[";
+			recentItem.keyEquivalentModifierMask = NSEventModifierFlagCommand;
+		}
+		else if(i+1 == selectedIndex)
+		{
+			recentItem.action        = @selector(goForward:);
+			recentItem.target        = self;
+			recentItem.keyEquivalent = @"]";
+			recentItem.keyEquivalentModifierMask = NSEventModifierFlagCommand;
+		}
 	}
 }
 
@@ -826,6 +853,22 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 			}
 		}];
 	}
+}
+
+- (void)goBack:(id)sender
+{
+	NSInteger index = [_wherePopUpButton.menu indexOfItemWithTarget:self andAction:_cmd];
+	if(index != -1)
+		[self takeSearchTargetFrom:_wherePopUpButton.menu.itemArray[index]];
+}
+
+- (void)goForward:(id)sender
+{
+	NSInteger index = [_wherePopUpButton.menu indexOfItemWithTarget:self andAction:_cmd];
+	if(index != -1)
+		[self takeSearchTargetFrom:_wherePopUpButton.menu.itemArray[index]];
+	else if(_searchTarget == FFSearchTargetOther && _otherFolder)
+		self.searchTarget = FFSearchTargetProject;
 }
 
 // ================
@@ -1384,6 +1427,10 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		aMenuItem.state = self.searchBinaryFiles ? NSControlStateValueOn : NSControlStateValueOff;
 	else if(aMenuItem.action == @selector(goToParentFolder:))
 		res = self.searchFolder != nil || _searchTarget == FFSearchTargetFileBrowserItems && CommonAncestor(_fileBrowserItems);
+	else if(aMenuItem.action == @selector(goBack:))
+		res = [_wherePopUpButton.menu indexOfItemWithTarget:self andAction:aMenuItem.action] != -1;
+	else if(aMenuItem.action == @selector(goForward:))
+		res = [_wherePopUpButton.menu indexOfItemWithTarget:self andAction:aMenuItem.action] != -1 || _searchTarget == FFSearchTargetOther && _otherFolder;
 	return res;
 }
 @end
