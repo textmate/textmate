@@ -62,70 +62,73 @@ static NSString* GetHardwareInfo (int field, BOOL isInteger = NO)
 	if([NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsDisableCrashReportingKey])
 		return;
 
-	NSDate* date   = [NSDate dateWithTimeIntervalSinceNow:-7*24*60*60];
-	NSURL* url     = [NSURL URLWithString:urlString];
-	NSString* name = NSProcessInfo.processInfo.processName;
-	[self postCrashReportsNotBeforeDate:date toURL:url forProcessName:name];
+	NSBackgroundActivityScheduler* activity = [[NSBackgroundActivityScheduler alloc] initWithIdentifier:[NSString stringWithFormat:@"%@.%@", NSBundle.mainBundle.bundleIdentifier, @"CrashReporting"]];
+	activity.interval = 30;
+	[activity scheduleWithBlock:^(NSBackgroundActivityCompletionHandler completionHandler){
+		NSDate* date   = [NSDate dateWithTimeIntervalSinceNow:-7*24*60*60];
+		NSURL* url     = [NSURL URLWithString:urlString];
+		NSString* name = NSProcessInfo.processInfo.processName;
+		[self postCrashReportsNotBeforeDate:date toURL:url forProcessName:name];
+		completionHandler(NSBackgroundActivityResultFinished);
+	}];
 }
 
 - (void)postCrashReportsNotBeforeDate:(NSDate*)date toURL:(NSURL*)postURL forProcessName:(NSString*)processName
 {
-	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
-		NSArray<NSString*>* canSend = [self reportsForProcessName:processName notBeforeDate:date];
+	NSArray<NSString*>* canSend = [self reportsForProcessName:processName notBeforeDate:date];
 
-		NSMutableSet<NSString*>* shouldSend = [NSMutableSet setWithArray:canSend];
-		if(NSArray<NSString*>* hasSent = [NSUserDefaults.standardUserDefaults stringArrayForKey:kUserDefaultsCrashReportsSent])
+	NSMutableSet<NSString*>* shouldSend = [NSMutableSet setWithArray:canSend];
+	if(NSArray<NSString*>* hasSent = [NSUserDefaults.standardUserDefaults stringArrayForKey:kUserDefaultsCrashReportsSent])
+	{
+		NSMutableSet* trimmedHasSent = [NSMutableSet setWithArray:hasSent];
+		[trimmedHasSent intersectSet:[NSSet setWithArray:canSend]];
+		if(trimmedHasSent.count < hasSent.count)
+			[NSUserDefaults.standardUserDefaults setObject:trimmedHasSent.allObjects forKey:kUserDefaultsCrashReportsSent];
+
+		[shouldSend minusSet:trimmedHasSent];
+	}
+
+	for(NSString* reportPath in shouldSend)
+	{
+		if(NSString* gzippedReport = [self pathForGZipCompressedFileAtPath:reportPath])
 		{
-			NSMutableSet* trimmedHasSent = [NSMutableSet setWithArray:hasSent];
-			[trimmedHasSent intersectSet:[NSSet setWithArray:canSend]];
-			if(trimmedHasSent.count < hasSent.count)
-				[NSUserDefaults.standardUserDefaults setObject:trimmedHasSent.allObjects forKey:kUserDefaultsCrashReportsSent];
+			NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:postURL cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:60];
 
-			[shouldSend minusSet:trimmedHasSent];
-		}
+			NSData* body = [self dataForURLRequest:request withFormValues:@{
+				@"hardware": [NSString stringWithFormat:@"%@/%@/%@", GetHardwareInfo(HW_MODEL), GetHardwareInfo(HW_MACHINE), GetHardwareInfo(HW_NCPU, true)],
+				@"contact":  [NSUserDefaults.standardUserDefaults stringForKey:kUserDefaultsCrashReportsContactInfoKey] ?: @"Anonymous",
+				@"report":   [@"@" stringByAppendingString:gzippedReport],
+			}];
 
-		for(NSString* reportPath in shouldSend)
-		{
-			if(NSString* gzippedReport = [self pathForGZipCompressedFileAtPath:reportPath])
-			{
-				NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:postURL cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:60];
-
-				NSData* body = [self dataForURLRequest:request withFormValues:@{
-					@"hardware": [NSString stringWithFormat:@"%@/%@/%@", GetHardwareInfo(HW_MODEL), GetHardwareInfo(HW_MACHINE), GetHardwareInfo(HW_NCPU, true)],
-					@"contact":  [NSUserDefaults.standardUserDefaults stringForKey:kUserDefaultsCrashReportsContactInfoKey] ?: @"Anonymous",
-					@"report":   [@"@" stringByAppendingString:gzippedReport],
-				}];
-
-				NSURLSessionUploadTask* uploadTask = [NSURLSession.sharedSession uploadTaskWithRequest:request fromData:body completionHandler:^(NSData* data, NSURLResponse* response, NSError* error){
-					NSInteger rc = ((NSHTTPURLResponse*)response).statusCode;
-					if(200 <= rc && rc < 300 || 400 <= rc && rc < 500) // We don’t resend reports on a 4xx failure.
-					{
-						@synchronized(NSUserDefaults.standardUserDefaults) {
-							NSArray<NSString*>* updatedHasSent = @[ reportPath ];
-							if(NSArray<NSString*>* oldHasSent = [NSUserDefaults.standardUserDefaults stringArrayForKey:kUserDefaultsCrashReportsSent])
-								updatedHasSent = [updatedHasSent arrayByAddingObjectsFromArray:oldHasSent];
-							[NSUserDefaults.standardUserDefaults setObject:updatedHasSent forKey:kUserDefaultsCrashReportsSent];
-						}
-
-						if(NSString* locationURLString = ((NSHTTPURLResponse*)response).allHeaderFields[@"Location"])
-						{
-							NSUserNotification* notification = [[NSUserNotification alloc] init];
-							notification.title           = @"Crash Report Sent";
-							notification.informativeText = @"Diagnostic information has been sent to MacroMates.com regarding your last crash.";
-							notification.userInfo        = @{ @"path": reportPath, @"url": locationURLString };
-							[NSUserNotificationCenter.defaultUserNotificationCenter deliverNotification:notification];
-						}
+			NSURLSessionUploadTask* uploadTask = [NSURLSession.sharedSession uploadTaskWithRequest:request fromData:body completionHandler:^(NSData* data, NSURLResponse* response, NSError* error){
+				NSInteger rc = ((NSHTTPURLResponse*)response).statusCode;
+				if(200 <= rc && rc < 300 || 400 <= rc && rc < 500) // We don’t resend reports on a 4xx failure.
+				{
+					@synchronized(NSUserDefaults.standardUserDefaults) {
+						NSArray<NSString*>* updatedHasSent = @[ reportPath ];
+						if(NSArray<NSString*>* oldHasSent = [NSUserDefaults.standardUserDefaults stringArrayForKey:kUserDefaultsCrashReportsSent])
+							updatedHasSent = [updatedHasSent arrayByAddingObjectsFromArray:oldHasSent];
+						[NSUserDefaults.standardUserDefaults setObject:updatedHasSent forKey:kUserDefaultsCrashReportsSent];
 					}
-					else
+
+					if(NSString* locationURLString = ((NSHTTPURLResponse*)response).allHeaderFields[@"Location"])
 					{
-						os_log_error(OS_LOG_DEFAULT, "Unexpected status code (%ld) from %{publuc}@", rc, request.URL);
+						NSUserNotification* notification = [[NSUserNotification alloc] init];
+						notification.title           = @"Crash Report Sent";
+						notification.informativeText = @"Diagnostic information has been sent to MacroMates.com regarding your last crash.";
+						notification.userInfo        = @{ @"path": reportPath, @"url": locationURLString };
+						[NSUserNotificationCenter.defaultUserNotificationCenter deliverNotification:notification];
 					}
-					unlink(gzippedReport.fileSystemRepresentation);
-				}];
-				[uploadTask resume];
-			}
+				}
+				else
+				{
+					os_log_error(OS_LOG_DEFAULT, "Unexpected status code (%ld) from %{publuc}@", rc, request.URL);
+				}
+				unlink(gzippedReport.fileSystemRepresentation);
+			}];
+			[uploadTask resume];
 		}
-	});
+	}
 }
 
 // ==================
