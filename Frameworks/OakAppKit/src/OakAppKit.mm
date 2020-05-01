@@ -69,7 +69,7 @@ NSUInteger const OakMoveNoActionReturn = 3;
 			{
 				if([_tableView.delegate tableView:_tableView shouldSelectRow:row])
 					break;
-				row += anOffset > 0 ? +1 : -1;;
+				row += anOffset > 0 ? +1 : -1;
 			}
 
 			if(row < 0 || row >= numberOfRows)

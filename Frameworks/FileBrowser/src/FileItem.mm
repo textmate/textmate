@@ -98,7 +98,7 @@ static NSMutableDictionary* SchemeToClass;
 	self.symbolicLink    = [_URL getResourceValue:&flag forKey:NSURLIsSymbolicLinkKey error:nil] && flag.boolValue;
 	self.package         = !_symbolicLink && [_URL getResourceValue:&flag forKey:NSURLIsPackageKey error:nil] && flag.boolValue;
 	self.linkToDirectory = _symbolicLink && [self.resolvedURL getResourceValue:&flag forKey:NSURLIsDirectoryKey error:nil] && flag.boolValue;
-	self.linkToPackage   = _symbolicLink && [self.resolvedURL getResourceValue:&flag forKey:NSURLIsPackageKey error:nil] && flag.boolValue;;
+	self.linkToPackage   = _symbolicLink && [self.resolvedURL getResourceValue:&flag forKey:NSURLIsPackageKey error:nil] && flag.boolValue;
 	self.finderTags      = [OakFinderTagManager finderTagsForURL:self.URL];
 	self.missing         = _missing && ![NSFileManager.defaultManager fileExistsAtPath:_URL.path];
 }

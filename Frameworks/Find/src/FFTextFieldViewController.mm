@@ -107,7 +107,7 @@ static void* kFirstResponderContext = &kFirstResponderContext;
 	{
 		NSString* currentString = [_textField.stringValue copy];
 		_textField.objectValue = nil;
-		_textField.objectValue = currentString;;
+		_textField.objectValue = currentString;
 	}
 
 	[self addStylesToFieldEditor];
