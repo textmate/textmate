@@ -9,8 +9,9 @@
 static os_log_t const kLogSQLite     = os_log_create("Pasteboard", "sqlite");
 static os_log_t const kLogPasteboard = os_log_create("Pasteboard", "history");
 
+NSNotificationName const OakPasteboardDidChangeNotification = @"OakClipboardDidChangeNotification";
+
 NSString* const OakReplacePboard                   = @"OakReplacePboard";
-NSString* const OakPasteboardDidChangeNotification = @"OakClipboardDidChangeNotification";
 NSString* const OakPasteboardOptionsPboardType     = @"OakPasteboardOptionsPboardType";
 
 NSString* const kUserDefaultsFindWrapAround        = @"findWrapAround";

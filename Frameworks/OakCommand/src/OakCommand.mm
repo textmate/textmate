@@ -20,8 +20,8 @@
 #import <settings/settings.h>
 #import <BundleEditor/BundleEditor.h>
 
-NSString* const OakCommandDidTerminateNotification = @"OakCommandDidTerminateNotification";
-NSString* const OakCommandErrorDomain              = @"com.macromates.TextMate.ErrorDomain";
+NSNotificationName const OakCommandDidTerminateNotification = @"OakCommandDidTerminateNotification";
+NSString* const OakCommandErrorDomain                       = @"com.macromates.TextMate.ErrorDomain";
 
 static NSString* const kOakFileHandleURLScheme = @"x-txmt-filehandle";
 

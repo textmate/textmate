@@ -1,6 +1,6 @@
 #include <command/parser.h>
 
-extern NSString* const OakCommandDidTerminateNotification;
+extern NSNotificationName const OakCommandDidTerminateNotification;
 extern NSString* const OakCommandErrorDomain;
 
 NS_ENUM(NSInteger) {

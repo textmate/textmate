@@ -1,7 +1,7 @@
 #import <oak/misc.h>
 
-PUBLIC extern NSString* const FileBrowserWillDeleteNotification;
+PUBLIC extern NSNotificationName const FileBrowserWillDeleteNotification;
 PUBLIC extern NSString* const FileBrowserPathKey;
 
-PUBLIC extern NSString* const FileBrowserDidDuplicateNotification;
+PUBLIC extern NSNotificationName const FileBrowserDidDuplicateNotification;
 PUBLIC extern NSString* const FileBrowserURLDictionaryKey;

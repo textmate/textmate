@@ -159,15 +159,15 @@ namespace document
 // = OakDocument Implementation =
 // ==============================
 
-NSString* OakDocumentContentDidChangeNotification = @"OakDocumentContentDidChangeNotification";
-NSString* OakDocumentMarksDidChangeNotification   = @"OakDocumentMarksDidChangeNotification";
-NSString* OakDocumentWillReloadNotification       = @"OakDocumentWillReloadNotification";
-NSString* OakDocumentDidReloadNotification        = @"OakDocumentDidReloadNotification";
-NSString* OakDocumentWillSaveNotification         = @"OakDocumentWillSaveNotification";
-NSString* OakDocumentDidSaveNotification          = @"OakDocumentDidSaveNotification";
-NSString* OakDocumentWillCloseNotification        = @"OakDocumentWillCloseNotification";
-NSString* OakDocumentWillShowAlertNotification    = @"OakDocumentWillShowAlertNotification";
-NSString* OakDocumentBookmarkIdentifier           = @"bookmark";
+NSNotificationName const OakDocumentContentDidChangeNotification = @"OakDocumentContentDidChangeNotification";
+NSNotificationName const OakDocumentMarksDidChangeNotification   = @"OakDocumentMarksDidChangeNotification";
+NSNotificationName const OakDocumentWillReloadNotification       = @"OakDocumentWillReloadNotification";
+NSNotificationName const OakDocumentDidReloadNotification        = @"OakDocumentDidReloadNotification";
+NSNotificationName const OakDocumentWillSaveNotification         = @"OakDocumentWillSaveNotification";
+NSNotificationName const OakDocumentDidSaveNotification          = @"OakDocumentDidSaveNotification";
+NSNotificationName const OakDocumentWillCloseNotification        = @"OakDocumentWillCloseNotification";
+NSNotificationName const OakDocumentWillShowAlertNotification    = @"OakDocumentWillShowAlertNotification";
+NSString* OakDocumentBookmarkIdentifier                          = @"bookmark";
 
 @interface OakDocument ()
 {

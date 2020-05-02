@@ -4,7 +4,7 @@
 #import <ns/ns.h>
 #import <oak/debug.h>
 
-NSString* const OakCursorDidHideNotification = @"OakCursorDidHideNotification";
+NSNotificationName const OakCursorDidHideNotification = @"OakCursorDidHideNotification";
 
 void OakRunIOAlertPanel (char const* format, ...)
 {

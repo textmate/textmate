@@ -1,7 +1,7 @@
 #import "OakRolloverButton.h"
 
-NSString* const OakRolloverButtonMouseDidEnterNotification = @"OakRolloverButtonMouseDidEnterNotification";
-NSString* const OakRolloverButtonMouseDidLeaveNotification = @"OakRolloverButtonMouseDidLeaveNotification";
+NSNotificationName const OakRolloverButtonMouseDidEnterNotification = @"OakRolloverButtonMouseDidEnterNotification";
+NSNotificationName const OakRolloverButtonMouseDidLeaveNotification = @"OakRolloverButtonMouseDidLeaveNotification";
 
 typedef NS_ENUM(NSUInteger, OakImageState) {
 	OakImageStateRegular = 0,
@@ -170,7 +170,7 @@ typedef NS_ENUM(NSUInteger, OakImageState) {
 	_mouseInside = flag;
 	[self updateImage];
 
-	NSString* notification = _mouseInside ? OakRolloverButtonMouseDidEnterNotification : OakRolloverButtonMouseDidLeaveNotification;
+	NSNotificationName notification = _mouseInside ? OakRolloverButtonMouseDidEnterNotification : OakRolloverButtonMouseDidLeaveNotification;
 	[NSNotificationCenter.defaultCenter postNotificationName:notification object:self];
 }
 @end

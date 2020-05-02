@@ -1,7 +1,7 @@
 #import <regexp/find.h>
 
-extern NSString* const FFDocumentSearchDidReceiveResultsNotification;
-extern NSString* const FFDocumentSearchDidFinishNotification;
+extern NSNotificationName const FFDocumentSearchDidReceiveResultsNotification;
+extern NSNotificationName const FFDocumentSearchDidFinishNotification;
 
 @interface FFDocumentSearch : NSObject
 // Set up the search with these options

@@ -7,8 +7,8 @@
 #import <ns/ns.h>
 #import <oak/oak.h>
 
-NSString* const FFDocumentSearchDidReceiveResultsNotification = @"FFDocumentSearchDidReceiveResultsNotification";
-NSString* const FFDocumentSearchDidFinishNotification         = @"FFDocumentSearchDidFinishNotification";
+NSNotificationName const FFDocumentSearchDidReceiveResultsNotification = @"FFDocumentSearchDidReceiveResultsNotification";
+NSNotificationName const FFDocumentSearchDidFinishNotification         = @"FFDocumentSearchDidFinishNotification";
 
 @interface FFDocumentSearch ()
 {

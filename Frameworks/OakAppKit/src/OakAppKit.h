@@ -1,7 +1,7 @@
 #include "IOAlertPanel.h"
 #include <oak/misc.h>
 
-PUBLIC extern NSString* const OakCursorDidHideNotification;
+PUBLIC extern NSNotificationName const OakCursorDidHideNotification;
 
 PUBLIC BOOL OakIsAlternateKeyOrMouseEvent (NSUInteger flags = NSEventModifierFlagOption, NSEvent* anEvent = [NSApp currentEvent]);
 

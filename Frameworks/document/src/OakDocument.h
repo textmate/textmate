@@ -5,14 +5,14 @@
 #import <regexp/find.h> // find::options_t
 #import <scm/scm.h>
 
-PUBLIC extern NSString* OakDocumentContentDidChangeNotification;
-PUBLIC extern NSString* OakDocumentMarksDidChangeNotification;
-PUBLIC extern NSString* OakDocumentWillReloadNotification;
-PUBLIC extern NSString* OakDocumentDidReloadNotification;
-PUBLIC extern NSString* OakDocumentWillSaveNotification;
-PUBLIC extern NSString* OakDocumentDidSaveNotification;
-PUBLIC extern NSString* OakDocumentWillCloseNotification;
-PUBLIC extern NSString* OakDocumentWillShowAlertNotification;
+PUBLIC extern NSNotificationName const OakDocumentContentDidChangeNotification;
+PUBLIC extern NSNotificationName const OakDocumentMarksDidChangeNotification;
+PUBLIC extern NSNotificationName const OakDocumentWillReloadNotification;
+PUBLIC extern NSNotificationName const OakDocumentDidReloadNotification;
+PUBLIC extern NSNotificationName const OakDocumentWillSaveNotification;
+PUBLIC extern NSNotificationName const OakDocumentDidSaveNotification;
+PUBLIC extern NSNotificationName const OakDocumentWillCloseNotification;
+PUBLIC extern NSNotificationName const OakDocumentWillShowAlertNotification;
 PUBLIC extern NSString* OakDocumentBookmarkIdentifier;
 
 typedef NS_ENUM(NSInteger, OakDocumentIOResult) {
