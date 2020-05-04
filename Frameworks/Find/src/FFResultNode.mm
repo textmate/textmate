@@ -196,7 +196,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 {
 	OBJC_WATCH_LEAKS(FFResultNode);
 	NSAttributedString* _excerpt;
-	NSString* _excerptReplaceString;
+	NSString* _cachedReplaceString;
 }
 @property (nonatomic, readwrite) OakDocumentMatch* match;
 @property (nonatomic, readwrite) NSUInteger countOfLeafs;
@@ -315,7 +315,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 
 - (NSAttributedString*)excerptWithReplacement:(NSString*)replacementString font:(NSFont*)font
 {
-	if(_excerpt && (replacementString == _excerptReplaceString || [replacementString isEqualToString:_excerptReplaceString]))
+	if(_excerpt && (replacementString == _cachedReplaceString || (replacementString && [replacementString isEqualToString:_cachedReplaceString])))
 		return _excerpt;
 
 	OakDocumentMatch* m = _match;
@@ -340,7 +340,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 		middle = m.captures.empty() ? to_s(replacementString) : format_string::expand(to_s(replacementString), m.captures);
 
 	_excerpt = AttributedStringForMatch(prefix + middle + suffix, prefix.size(), prefix.size() + middle.size(), m.lineNumber, to_s(m.newlines), font);
-	_excerptReplaceString = replacementString;
+	_cachedReplaceString = replacementString;
 	return _excerpt;
 }
 @end

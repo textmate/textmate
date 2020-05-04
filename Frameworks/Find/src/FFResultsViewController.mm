@@ -144,7 +144,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 - (NSAttributedString*)excerptString
 {
 	FFResultNode* item = self.objectValue;
-	NSAttributedString* res = [item excerptWithReplacement:(item.isReadOnly || item.excluded || !_showReplacementPreviews ? item.replaceString : self.replaceString) font:self.textField.font];
+	NSAttributedString* res = [item excerptWithReplacement:(item.isReadOnly || item.excluded || !_showReplacementPreviews ? item.replaceString : (self.replaceString ?: @"")) font:self.textField.font];
 	if(self.backgroundStyle == NSBackgroundStyleDark)
 	{
 		NSMutableAttributedString* str = [res mutableCopy];

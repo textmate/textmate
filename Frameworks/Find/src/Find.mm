@@ -464,7 +464,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 
 - (NSString*)replaceString
 {
-	return _replaceTextFieldViewController.stringValue;
+	return _replaceTextFieldViewController.stringValue ?: @"";
 }
 
 - (void)updateWindowTitle
