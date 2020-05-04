@@ -23,7 +23,6 @@
 #import <Find/Find.h>
 #import <BundlesManager/BundlesManager.h>
 #import <BundleEditor/BundleEditor.h>
-#import <network/network.h>
 #import <file/path_info.h>
 #import <io/entries.h>
 #import <scm/scm.h>
@@ -42,6 +41,22 @@ static NSString* const kUserDefaultsDisableFolderStateRestore = @"disableFolderS
 static NSString* const kUserDefaultsHideStatusBarKey = @"hideStatusBar";
 static NSString* const kUserDefaultsDisableBundleSuggestionsKey = @"disableBundleSuggestions";
 static NSString* const kUserDefaultsGrammarsToNeverSuggestKey = @"grammarsToNeverSuggest";
+
+static bool can_reach_host (char const* host)
+{
+	bool res = false;
+	if(SCNetworkReachabilityRef ref = SCNetworkReachabilityCreateWithName(kCFAllocatorDefault, host))
+	{
+		SCNetworkReachabilityFlags flags;
+		if(SCNetworkReachabilityGetFlags(ref, &flags))
+		{
+			if(flags & kSCNetworkReachabilityFlagsReachable)
+				res = true;
+		}
+		CFRelease(ref);
+	}
+	return res;
+}
 
 static void show_command_error (std::string const& message, oak::uuid_t const& uuid, NSWindow* window = nil, std::string commandName = NULL_STR)
 {
@@ -999,7 +1014,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 				if(_bundlesAlreadySuggested)
 					grammars = [grammars filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"NOT (bundle IN %@)", _bundlesAlreadySuggested]];
 
-				if([grammars count] && network::can_reach_host([[[NSURL URLWithString:@(REST_API)] host] UTF8String]))
+				if([grammars count] && can_reach_host([[[NSURL URLWithString:@(REST_API)] host] UTF8String]))
 				{
 					self.bundlesAlreadySuggested = [(_bundlesAlreadySuggested ?: @[ ]) arrayByAddingObject:[grammars firstObject].bundle];
 
