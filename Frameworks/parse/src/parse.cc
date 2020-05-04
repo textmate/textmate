@@ -31,7 +31,7 @@ namespace
 			{
 				if(!stack.empty() && stack.back() == scope)
 						stack.pop_back();
-				else	fprintf(stderr, "*** unbalanced scope removal: %s, on stack: %s\n", scope.c_str(), text::join(stack, " ").c_str());
+				else	os_log_error(OS_LOG_DEFAULT, "Unbalanced scope removal: %{public}s, on stack: %{public}s", scope.c_str(), text::join(stack, " ").c_str());
 			}
 		}
 
@@ -487,7 +487,7 @@ namespace parse
 
 				if(nothingMatched) // we left a begin/end rule but haven’t parsed any bytes, so we’re destined to repeat this mistake
 				{
-					fprintf(stderr, "*** no bytes parsed by rule ‘%s’, begin = ‘%s’, end = ‘%s’, position %zu for line: %.*s\n", rule->scope_string != NULL_STR ? rule->scope_string.c_str() : "(untitled)", rule->match_string.c_str(), rule->end_string.c_str(), i, (int)(last - first), first);
+					os_log_error(OS_LOG_DEFAULT, "No bytes parsed by rule ‘%{public}s’, begin = ‘%{public}s’, end = ‘%{public}s’, position %zu for line: %.*s", rule->scope_string != NULL_STR ? rule->scope_string.c_str() : "(untitled)", rule->match_string.c_str(), rule->end_string.c_str(), i, (int)(last - first), first);
 					break;
 				}
 			}
@@ -495,7 +495,7 @@ namespace parse
 			{
 				if(m.match.empty() && has_cycle(rule->rule_id, i, stack))
 				{
-					fprintf(stderr, "*** no bytes matched and recursive include of rule ‘%s’, begin = ‘%s’, end = ‘%s’, position %zu for line: %.*s\n", rule->scope_string != NULL_STR ? rule->scope_string.c_str() : "(untitled)", rule->match_string.c_str(), rule->end_string.c_str(), i, (int)(last - first), first);
+					os_log_error(OS_LOG_DEFAULT, "No bytes matched and recursive include of rule ‘%{public}s’, begin = ‘%{public}s’, end = ‘%{public}s’, position %zu for line: %.*s", rule->scope_string != NULL_STR ? rule->scope_string.c_str() : "(untitled)", rule->match_string.c_str(), rule->end_string.c_str(), i, (int)(last - first), first);
 					break;
 				}
 
@@ -536,7 +536,7 @@ namespace parse
 			{
 				if(m.match.empty())
 				{
-					fprintf(stderr, "*** no bytes parsed by rule ‘%s’, match = ‘%s’, position %zu for line: %.*s\n", rule->scope_string != NULL_STR ? rule->scope_string.c_str() : "(untitled)", rule->match_string.c_str(), i, (int)(last - first), first);
+					os_log_error(OS_LOG_DEFAULT, "No bytes parsed by rule ‘%{public}s’, match = ‘%{public}s’, position %zu for line: %.*s", rule->scope_string != NULL_STR ? rule->scope_string.c_str() : "(untitled)", rule->match_string.c_str(), i, (int)(last - first), first);
 					continue; // do not re-apply since this matched zero characters
 				}
 

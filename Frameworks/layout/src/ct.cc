@@ -180,7 +180,7 @@ namespace ct
 				}
 				else
 				{
-					fprintf(stderr, "%s: failed to create CFString for ‘%.*s’\n", getprogname(), int(j - i), text.data() + i);
+					os_log_error(OS_LOG_DEFAULT, "Failed to create CFString for ‘%{public}.*s’", int(j - i), text.data() + i);
 				}
 			}
 

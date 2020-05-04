@@ -295,7 +295,7 @@ namespace ng
 		}
 
 		if(from != to)
-			fprintf(stderr, "error erasing %zu-%zu, %zu\n", from, to, bufferOffset);
+			os_log_error(OS_LOG_DEFAULT, "Error erasing %zu-%zu, %zu", from, to, bufferOffset);
 
 		_dirty = true;
 	}

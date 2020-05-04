@@ -106,21 +106,21 @@ namespace parse
 			rule->match_pattern = regexp::pattern_t(rule->match_string);
 			rule->match_pattern_is_anchored = pattern_has_anchor(rule->match_string);
 			if(!rule->match_pattern)
-				fprintf(stderr, "bad begin/match pattern for %s\n", rule->scope_string.c_str());
+				os_log_error(OS_LOG_DEFAULT, "Bad begin/match pattern for %{public}s", rule->scope_string.c_str());
 		}
 
 		if(rule->while_string != NULL_STR && !pattern_has_back_reference(rule->while_string))
 		{
 			rule->while_pattern = regexp::pattern_t(rule->while_string);
 			if(!rule->while_pattern)
-				fprintf(stderr, "bad while pattern for %s\n", rule->scope_string.c_str());
+				os_log_error(OS_LOG_DEFAULT, "Bad while pattern for %{public}s", rule->scope_string.c_str());
 		}
 
 		if(rule->end_string != NULL_STR && !pattern_has_back_reference(rule->end_string))
 		{
 			rule->end_pattern = regexp::pattern_t(rule->end_string);
 			if(!rule->end_pattern)
-				fprintf(stderr, "bad end pattern for %s\n", rule->scope_string.c_str());
+				os_log_error(OS_LOG_DEFAULT, "Bad end pattern for %{public}s", rule->scope_string.c_str());
 		}
 
 		for(rule_ptr child : rule->children)
@@ -183,8 +183,8 @@ namespace parse
 			if(!rule->include)
 			{
 				if(base != self)
-						fprintf(stderr, "%s → %s: include not found ‘%s’\n", base->scope_string.c_str(), self->scope_string.c_str(), include.c_str());
-				else	fprintf(stderr, "%s: include not found ‘%s’\n", self->scope_string.c_str(), include.c_str());
+						os_log_error(OS_LOG_DEFAULT, "%{public}s → %{public}s: include not found ‘%{public}s’", base->scope_string.c_str(), self->scope_string.c_str(), include.c_str());
+				else	os_log_error(OS_LOG_DEFAULT, "%{public}s: include not found ‘%{public}s’", self->scope_string.c_str(), include.c_str());
 			}
 		}
 		else
@@ -267,7 +267,7 @@ namespace parse
 
 		if(!_rule)
 		{
-			fprintf(stderr, "*** grammar missing for ‘%s’\n", _item->name().c_str());
+			os_log_error(OS_LOG_DEFAULT, "Grammar missing for ‘%{public}s’", _item->name().c_str());
 			_rule = std::make_shared<rule_t>();
 		}
 

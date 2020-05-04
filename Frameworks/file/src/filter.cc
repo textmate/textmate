@@ -64,7 +64,7 @@ namespace
 		if(unit != input::entire_document || format != input_format::text)
 		{
 			close(fd);
-			fprintf(stderr, "*** write unit to fd: unhandled unit/format: %d/%d\n", unit, format);
+			os_log_error(OS_LOG_DEFAULT, "Write unit to fd: unhandled unit/format: %d/%d", unit, format);
 		}
 		else
 		{

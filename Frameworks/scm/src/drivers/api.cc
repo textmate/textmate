@@ -44,7 +44,7 @@ namespace scm
 					std::string const xcodePath = io::exec("/usr/bin/xcode-select", "-p", nullptr);
 					if(!path::is_directory(text::trim(xcodePath, "\n")))
 					{
-						fprintf(stderr, "*** ignore ‘%s’ because it appears to be a shim and Xcode is not installed\n", path.c_str());
+						os_log(OS_LOG_DEFAULT, "Ignore ‘%{public}s’ because it appears to be a shim and Xcode is not installed", path.c_str());
 						continue;
 					}
 				}
@@ -73,7 +73,7 @@ namespace scm
 		{
 			_resolved_executable = find_executable(_required_executable, "TM_" + text::uppercase(_name));
 			if(_resolved_executable == NULL_STR)
-				fprintf(stderr, "scm: unable to find ‘%s’ executable (set %s or PATH in ~/.tm_properties)\n", _required_executable.c_str(), ("TM_" + text::uppercase(_name)).c_str());
+				os_log_error(OS_LOG_DEFAULT, "scm: unable to find ‘%{public}s’ executable (set %{public}s or PATH in ~/.tm_properties)", _required_executable.c_str(), ("TM_" + text::uppercase(_name)).c_str());
 		}
 	}
 

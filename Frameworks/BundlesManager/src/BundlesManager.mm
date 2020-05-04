@@ -226,11 +226,11 @@ static NSString* CacheFileForDownload (NSURL* url, NSDate* date)
 			std::string const dst = to_s(bundle.path ?: [[[_installDirectory stringByAppendingPathComponent:@"Bundles"] stringByAppendingPathComponent:SafeBasename(bundle.name)] stringByAppendingPathExtension:@"tmbundle"]);
 
 			if(src == NULL_STR)
-				fprintf(stderr, "*** error downloading ‘%s’: %s\n", to_s(bundle.downloadURL).c_str(), error.c_str());
+				os_log_error(OS_LOG_DEFAULT, "Error downloading ‘%{public}@’: %{public}s", bundle.downloadURL, error.c_str());
 			else if(path::exists(dst) && !path::remove(dst))
-				fprintf(stderr, "*** unable to remove old bundle ‘%s’\n", dst.c_str());
+				os_log_error(OS_LOG_DEFAULT, "Unable to remove old bundle ‘%{public}s’", dst.c_str());
 			else if(!path::make_dir(path::parent(dst)))
-				fprintf(stderr, "*** destination directoy doesn’t exist ‘%s’\n", path::parent(dst).c_str());
+				os_log_error(OS_LOG_DEFAULT, "Destination directoy doesn’t exist ‘%{public}s’", path::parent(dst).c_str());
 			else if(path::move(src, dst))
 				res[i] = dst;
 		});
@@ -691,9 +691,9 @@ namespace
 		else if(res == 304) // Not modified
 			path::remove(archiver.path);
 		else if(res != 0)
-			fprintf(stderr, "*** %s(‘%s’): got ‘%ld’ from server (expected 200)\n", __FUNCTION__, url.c_str(), res);
+			os_log(OS_LOG_DEFAULT, "%{public}s(‘%{public}s’): got ‘%ld’ from server (expected 200)", __FUNCTION__, url.c_str(), res);
 		else
-			fprintf(stderr, "*** %s(‘%s’): %s\n", __FUNCTION__, url.c_str(), error.c_str());
+			os_log(OS_LOG_DEFAULT, "%{public}s(‘%{public}s’): %{public}s", __FUNCTION__, url.c_str(), error.c_str());
 
 		return { NULL_STR, NULL_STR };
 	}

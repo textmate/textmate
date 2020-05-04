@@ -33,7 +33,7 @@ namespace oak
 
 		if(uuid_parse(str.c_str(), data) != 0)
 		{
-			fprintf(stderr, "uuid_t: error parsing ‘%s’\n", str.c_str());
+			os_log_error(OS_LOG_DEFAULT, "uuid_t: error parsing ‘%{public}s’", str.c_str());
 			uuid_clear(data);
 		}
 	}

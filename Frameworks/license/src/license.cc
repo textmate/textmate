@@ -53,23 +53,23 @@ namespace
 					int len = RSA_public_decrypt(src.size(), (unsigned char*)src.data(), (unsigned char*)&dst[0], rsa_key, RSA_PKCS1_PADDING);
 					if(len > 0)
 							res = dst.substr(0, len);
-					else	fprintf(stderr, "RSA_public_decrypt failed\n");
+					else	os_log_error(OS_LOG_DEFAULT, "RSA_public_decrypt failed");
 				}
 				else
 				{
-					fprintf(stderr, "Wrong RSA size\n");
+					os_log_error(OS_LOG_DEFAULT, "Wrong RSA size");
 				}
 				RSA_free(rsa_key);
 			}
 			else
 			{
-				fprintf(stderr, "PEM_read_bio_RSA_PUBKEY failed\n");
+				os_log_error(OS_LOG_DEFAULT, "PEM_read_bio_RSA_PUBKEY failed");
 			}
 			BIO_free(bio);
 		}
 		else
 		{
-			fprintf(stderr, "BIO_new_mem_buf failed\n");
+			os_log_error(OS_LOG_DEFAULT, "BIO_new_mem_buf failed");
 		}
 		return res;
 	}

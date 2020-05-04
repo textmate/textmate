@@ -93,7 +93,7 @@ namespace ng
 			bundles::required_command_t failedRequirement;
 			if(missing_requirement(item, env, &failedRequirement))
 			{
-				fprintf(stderr, "Failed running “%s” due to missing dependency “%s”.\n", cmd.name.c_str(), failedRequirement.command.c_str());
+				os_log_error(OS_LOG_DEFAULT, "Failed running “%{public}s” due to missing dependency “%{public}s”.", cmd.name.c_str(), failedRequirement.command.c_str());
 			}
 			else
 			{

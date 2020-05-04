@@ -3909,7 +3909,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	}
 	else
 	{
-		fprintf(stderr, "unknown drop: %s\n", [[types description] UTF8String]);
+		os_log_error(OS_LOG_DEFAULT, "No known type for drop: %{public}@", [types description]);
 		res = NO;
 	}
 	return res;

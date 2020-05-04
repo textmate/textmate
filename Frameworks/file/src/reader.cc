@@ -102,7 +102,7 @@ namespace file
 
 			if(!_transcode)
 			{
-				fprintf(stderr, "unable to create text::transcode_t\n");
+				os_log_error(OS_LOG_DEFAULT, "Unable to create text::transcode_t");
 				return io::bytes_ptr();
 			}
 		}

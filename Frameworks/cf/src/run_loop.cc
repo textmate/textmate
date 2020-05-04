@@ -37,7 +37,7 @@ namespace cf
 				break;
 
 			if(_should_stop)
-				fprintf(stderr, "*** command completed but run-loop was not stopped.\n");
+				os_log_error(OS_LOG_DEFAULT, "Command completed but run-loop was not stopped.");
 
 			if(_should_stop || _timeout <= timer.duration())
 				return false;

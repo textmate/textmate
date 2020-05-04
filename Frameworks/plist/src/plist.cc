@@ -144,7 +144,7 @@ namespace plist
 			}
 			else
 			{
-				fprintf(stderr, "error parsing plist: ‘%s’\n", str.c_str());
+				os_log_error(OS_LOG_DEFAULT, "Error parsing plist: ‘%{public}s’", str.c_str());
 			}
 			CFRelease(data);
 		}

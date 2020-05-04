@@ -157,7 +157,7 @@ namespace encoding
 			real_load(path);
 		}
 		catch(std::exception const& e) {
-			fprintf(stderr, "exception thrown while loading ‘%s’: %s\n", path.c_str(), e.what());
+			os_log_error(OS_LOG_DEFAULT, "Exception thrown while loading ‘%{public}s’: %{public}s", path.c_str(), e.what());
 		}
 	}
 
@@ -170,7 +170,7 @@ namespace encoding
 			auto freq = message.getRoot<Frequencies>();
 			if(freq.getVersion() != kCapnpClassifierFormatVersion)
 			{
-				fprintf(stderr, "skip ‘%s’ version %u (expected %u)\n", path.c_str(), freq.getVersion(), kCapnpClassifierFormatVersion);
+				os_log_info(OS_LOG_DEFAULT, "Skip ‘%{public}s’ version %u (expected %u)", path.c_str(), freq.getVersion(), kCapnpClassifierFormatVersion);
 				return;
 			}
 

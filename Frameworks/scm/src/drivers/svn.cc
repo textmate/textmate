@@ -54,7 +54,7 @@ static void parse_status_output (scm::status_map_t& entries, std::string const& 
 		}
 		else if(line.size())
 		{
-			fprintf(stderr, "TextMate/svn: Unexpected line: ‘%s’\n", line.c_str());
+			os_log_error(OS_LOG_DEFAULT, "TextMate/svn: Unexpected line: ‘%{public}s’", line.c_str());
 		}
 	}
 }
@@ -103,7 +103,7 @@ namespace scm
 				_xslt_path = SourceTreePath;
 
 			if(_xslt_path == NULL_STR)
-				fprintf(stderr, "%s: Unable to locate ‘svn_status.xslt’.\n", getprogname());
+				os_log_error(OS_LOG_DEFAULT, "Unable to locate ‘svn_status.xslt’.");
 		}
 
 		std::map<std::string, std::string> variables (std::string const& wcPath) const

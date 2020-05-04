@@ -79,7 +79,7 @@ namespace ng
 			}
 			else
 			{
-				fprintf(stderr, "no parser state for %zu-%zu (%p)\n%s\n%s\n", from, to, this, substr(0, size()).c_str(), to_s(*this).c_str());
+				os_log_error(OS_LOG_DEFAULT, "No parser state for %zu-%zu (%p)\n%{public}s\n%{public}s", from, to, this, substr(0, size()).c_str(), to_s(*this).c_str());
 			}
 		}
 	}
@@ -142,7 +142,7 @@ namespace ng
 			auto state  = from == 0 ? _parser_states.begin() : _parser_states.find(from);
 			if(state == _parser_states.end())
 			{
-				fprintf(stderr, "*** no parser state for %zu-%zu (%p)\n%s\n", from, to, this, substr(0, size()).c_str());
+				os_log_error(OS_LOG_DEFAULT, "No parser state for %zu-%zu (%p)\n%{public}s", from, to, this, substr(0, size()).c_str());
 				break;
 			}
 

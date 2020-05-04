@@ -473,7 +473,7 @@ namespace
 		return;
 
 	if(self.changeCount == self.pasteboard.changeCount)
-		os_log_error(kLogPasteboard, "New content on %{public}@ pasteboard with stale change count (%lu): %{public}@", _name, self.pasteboard.changeCount, [strings componentsJoinedByString:@"\n"]);
+		os_log_error(kLogPasteboard, "New content on %{public}@ pasteboard with stale change count (%lu): %{public}@", _name, self.pasteboard.changeCount, [strings componentsJoinedByString:@""]);
 
 	[self addEntryWithStrings:strings options:nil];
 }

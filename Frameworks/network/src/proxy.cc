@@ -60,7 +60,7 @@ static proxy_settings_t user_pw_settings (CFStringRef server, CFNumberRef portNu
 	else if(err != errSecItemNotFound)
 	{
 		CFStringRef message = SecCopyErrorMessageString(err, nullptr);
-		fprintf(stderr, "TextMate/proxy: SecItemCopyMatching() failed with error ‘%s’\n", cf::to_s(message).c_str());
+		os_log_error(OS_LOG_DEFAULT, "TextMate/proxy: SecItemCopyMatching() failed with error ‘%{public}@’", message);
 		CFRelease(message);
 	}
 
@@ -95,14 +95,14 @@ proxy_settings_t first_proxy_from_array (CFArrayRef proxies, CFURLRef targetURL)
 		CFDictionaryRef proxy = (CFDictionaryRef)CFArrayGetValueAtIndex(proxies, i);
 		if(!proxy || CFGetTypeID(proxy) != CFDictionaryGetTypeID())
 		{
-			fprintf(stderr, "TextMate/proxy: Expected proxy info to be a CFDictionaryRef\n");
+			os_log_error(OS_LOG_DEFAULT, "TextMate/proxy: Expected proxy info to be a CFDictionaryRef");
 			continue;
 		}
 
 		CFStringRef type = (CFStringRef)CFDictionaryGetValue(proxy, kCFProxyTypeKey);
 		if(!type || CFGetTypeID(type) != CFStringGetTypeID())
 		{
-			fprintf(stderr, "TextMate/proxy: Expected kCFProxyTypeKey to be a CFStringRef\n");
+			os_log_error(OS_LOG_DEFAULT, "TextMate/proxy: Expected kCFProxyTypeKey to be a CFStringRef");
 			continue;
 		}
 
@@ -115,7 +115,7 @@ proxy_settings_t first_proxy_from_array (CFArrayRef proxies, CFURLRef targetURL)
 			CFURLRef pacURL = (CFURLRef)CFDictionaryGetValue(proxy, kCFProxyAutoConfigurationURLKey);
 			if(pacURL && CFGetTypeID(pacURL) == CFURLGetTypeID())
 			{
-				fprintf(stderr, "TextMate DEBUG: Resolving PAC URL ‘%s’\n", cf::to_s(CFURLGetString(pacURL)).c_str());
+				os_log_info(OS_LOG_DEFAULT, "Resolving PAC URL ‘%{public}@’", CFURLGetString(pacURL));
 
 				pac_proxy_callback_result_t result;
 
@@ -136,7 +136,7 @@ proxy_settings_t first_proxy_from_array (CFArrayRef proxies, CFURLRef targetURL)
 				if(result.error)
 				{
 					CFStringRef str = CFErrorCopyDescription(result.error);
-					fprintf(stderr, "TextMate/proxy: PAC error ‘%s’ for ‘%s’\n", cf::to_s(str).c_str(), cf::to_s(CFURLGetString(pacURL)).c_str());
+					os_log_error(OS_LOG_DEFAULT, "TextMate/proxy: PAC error ‘%{public}@’ for ‘%{public}@’", str, CFURLGetString(pacURL));
 					CFRelease(str);
 				}
 				else if(result.proxies)
@@ -145,7 +145,7 @@ proxy_settings_t first_proxy_from_array (CFArrayRef proxies, CFURLRef targetURL)
 				}
 				else
 				{
-					fprintf(stderr, "TextMate/proxy: No proxies returned from ‘%s’\n", cf::to_s(CFURLGetString(pacURL)).c_str());
+					os_log_error(OS_LOG_DEFAULT, "TextMate/proxy: No proxies returned from ‘%{public}@’", CFURLGetString(pacURL));
 				}
 
 				if(result.proxies)
@@ -155,13 +155,13 @@ proxy_settings_t first_proxy_from_array (CFArrayRef proxies, CFURLRef targetURL)
 
 				if(res)
 				{
-					fprintf(stderr, "return PAC proxy\n");
+					os_log(OS_LOG_DEFAULT, "Return PAC proxy");
 					return res;
 				}
 			}
 			else
 			{
-				fprintf(stderr, "TextMate/proxy: Expected kCFProxyAutoConfigurationURLKey to be a CFURLRef\n");
+				os_log_error(OS_LOG_DEFAULT, "TextMate/proxy: Expected kCFProxyAutoConfigurationURLKey to be a CFURLRef");
 			}
 		}
 		else if(CFEqual(type, kCFProxyTypeHTTP) || CFEqual(type, kCFProxyTypeHTTPS) || CFEqual(type, kCFProxyTypeSOCKS))
@@ -176,11 +176,11 @@ proxy_settings_t first_proxy_from_array (CFArrayRef proxies, CFURLRef targetURL)
 				return res;
 			}
 
-			fprintf(stderr, "TextMate/proxy: Expected kCFProxyHostNameKey/kCFProxyPortNumberKey to be CFStringRef/CFNumberRef\n");
+			os_log_error(OS_LOG_DEFAULT, "TextMate/proxy: Expected kCFProxyHostNameKey/kCFProxyPortNumberKey to be CFStringRef/CFNumberRef");
 		}
 		else
 		{
-			fprintf(stderr, "TextMate/proxy: Unknown proxy type: %s\n", cf::to_s(type).c_str());
+			os_log_error(OS_LOG_DEFAULT, "TextMate/proxy: Unknown proxy type: %{public}@", type);
 		}
 	}
 	return proxy_settings_t();
@@ -203,19 +203,19 @@ proxy_settings_t get_proxy_settings (std::string const& url)
 			}
 			else
 			{
-				fprintf(stderr, "TextMate/proxy: NULL returned from CFNetworkCopyProxiesForURL(‘%s’)\n", url.c_str());
+				os_log_error(OS_LOG_DEFAULT, "TextMate/proxy: NULL returned from CFNetworkCopyProxiesForURL(‘%{public}s’)", url.c_str());
 			}
 			CFRelease(proxySettings);
 		}
 		else
 		{
-			fprintf(stderr, "TextMate/proxy: NULL returned from SCDynamicStoreCopyProxies()\n");
+			os_log_error(OS_LOG_DEFAULT, "TextMate/proxy: NULL returned from SCDynamicStoreCopyProxies()");
 		}
 		CFRelease(targetURL);
 	}
 	else
 	{
-		fprintf(stderr, "TextMate/proxy: Unable to create CFURLRef from ‘%s’\n", url.c_str());
+		os_log_error(OS_LOG_DEFAULT, "TextMate/proxy: Unable to create CFURLRef from ‘%{public}s’", url.c_str());
 	}
 
 	return res;

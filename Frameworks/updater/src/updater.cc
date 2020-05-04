@@ -52,7 +52,7 @@ namespace bundles_db
 				std::string identity, name, publicKey;
 				if(plist::get_key_path(key, "identity", identity) && plist::get_key_path(key, "name", name) && plist::get_key_path(key, "publicKey", publicKey))
 						res.add(key_chain_t::key_t(identity, name, publicKey));
-				else	fprintf(stderr, "bad public key entry:\n%s\n", to_s(key).c_str());
+				else	os_log_error(OS_LOG_DEFAULT, "Bad public key entry:\n%{public}s", to_s(key).c_str());
 			}
 		}
 		else
@@ -83,7 +83,7 @@ namespace bundles_db
 		}
 		else if(etag == NULL_STR)
 		{
-			fprintf(stderr, "*** error retrieving ‘%s’ (no etag given)\n", source->url().c_str());
+			os_log_error(OS_LOG_DEFAULT, "Error retrieving ‘%{public}s’ (no etag given)", source->url().c_str());
 		}
 
 		path::set_attr(source->path(), "last-check", to_s(oak::date_t::now()));
@@ -335,7 +335,7 @@ namespace bundles_db
 					plist::get_key_path(item, "isDependency", bundle->_is_dependency);
 					if(inIndexButNotDisk.find(bundle->_path) == inIndexButNotDisk.end())
 							res.push_back(bundle);
-					else	fprintf(stderr, "Bundle missing on disk: ‘%s’ (source ‘%s’)\n", path::with_tilde(bundle->_path).c_str(), bundle->_origin.c_str());
+					else	os_log_error(OS_LOG_DEFAULT, "Bundle missing on disk: ‘%{public}s’ (source ‘%{public}s’)", path::with_tilde(bundle->_path).c_str(), bundle->_origin.c_str());
 				}
 			}
 		}
@@ -361,7 +361,7 @@ namespace bundles_db
 				res.push_back(bundle);
 			}
 
-			fprintf(stderr, "Bundle missing in local index: ‘%s’ (source ‘%s’)\n", bundle->name().c_str(), bundle->origin().c_str());
+			os_log_error(OS_LOG_DEFAULT, "Bundle missing in local index: ‘%{public}s’ (source ‘%{public}s’)", bundle->name().c_str(), bundle->origin().c_str());
 		}
 
 		return res;
@@ -390,7 +390,7 @@ namespace bundles_db
 			else
 			{
 				bundles.emplace(bundle->uuid(), bundle);
-				fprintf(stderr, "Bundle missing in remote index: ‘%s’ (source ‘%s’)\n", bundle->name().c_str(), bundle->origin().c_str());
+				os_log_error(OS_LOG_DEFAULT, "Bundle missing in remote index: ‘%{public}s’ (source ‘%{public}s’)", bundle->name().c_str(), bundle->origin().c_str());
 			}
 		}
 
@@ -472,7 +472,7 @@ namespace bundles_db
 
 			if(!path::make_dir(path::parent(dst)))
 			{
-				fprintf(stderr, "destination directoy doesn’t exist ‘%s’\n", path::parent(dst).c_str());
+				os_log_error(OS_LOG_DEFAULT, "Destination directoy doesn’t exist ‘%{public}s’", path::parent(dst).c_str());
 			}
 			else if(path::move(src, dst))
 			{
@@ -483,14 +483,14 @@ namespace bundles_db
 				path::set_attr(dst, kBundleAttributeOrigin, bundle->origin());
 
 				if(trash != NULL_STR && !path::remove(trash))
-					fprintf(stderr, "unable to remove old bundle ‘%s’\n", trash.c_str());
+					os_log_error(OS_LOG_DEFAULT, "Unable to remove old bundle ‘%{public}s’", trash.c_str());
 
 				return true;
 			}
 		}
 		else
 		{
-			fprintf(stderr, "*** error downloading ‘%s’: %s\n", bundle->url().c_str(), error.c_str());
+			os_log_error(OS_LOG_DEFAULT, "Error downloading ‘%{public}s’: %{public}s", bundle->url().c_str(), error.c_str());
 		}
 		return false;
 	}

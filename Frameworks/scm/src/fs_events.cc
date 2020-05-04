@@ -27,7 +27,7 @@ namespace scm
 		}
 		else
 		{
-			fprintf(stderr, "can’t observe ‘%s’\n", path.c_str());
+			os_log_error(OS_LOG_DEFAULT, "Can’t observe ‘%{public}s’", path.c_str());
 		}
 	}
 

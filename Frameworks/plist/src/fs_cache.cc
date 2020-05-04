@@ -21,7 +21,7 @@ static std::string read_link (std::string const& path)
 	else
 	{
 		std::string errStr = len == -1 ? strerror(errno) : text::format("Result outside allowed range %zd", len);
-		fprintf(stderr, "readlink(\"%s\"): %s\n", path.c_str(), errStr.c_str());
+		os_log_error(OS_LOG_DEFAULT, "readlink(\"%{public}s\"): %{public}s", path.c_str(), errStr.c_str());
 	}
 	return NULL_STR;
 }
@@ -94,7 +94,7 @@ namespace plist
 			real_load(path);
 		}
 		catch(std::exception const& e) {
-			fprintf(stderr, "exception thrown while loading ‘%s’: %s\n", path.c_str(), e.what());
+			os_log_error(OS_LOG_DEFAULT, "Exception thrown while loading ‘%{public}s’: %{public}s", path.c_str(), e.what());
 		}
 	}
 
@@ -107,7 +107,7 @@ namespace plist
 			auto cache = message.getRoot<Cache>();
 			if(cache.getVersion() != kCapnpCacheFormatVersion)
 			{
-				fprintf(stderr, "skip ‘%s’ version %u (expected %u)\n", path.c_str(), cache.getVersion(), kCapnpCacheFormatVersion);
+				os_log_error(OS_LOG_DEFAULT, "Skip ‘%{public}s’ version %u (expected %u)", path.c_str(), cache.getVersion(), kCapnpCacheFormatVersion);
 				return;
 			}
 
@@ -302,7 +302,7 @@ namespace plist
 		auto it = _cache.find(path);
 		if(it != _cache.end() && it->second.type() == entry_type_t::missing)
 		{
-			fprintf(stderr, "content requested for missing item: ‘%s’\n", path.c_str());
+			os_log_error(OS_LOG_DEFAULT, "Content requested for missing item: ‘%{public}s’", path.c_str());
 			_cache.erase(it);
 		}
 		return resolved(path).content();

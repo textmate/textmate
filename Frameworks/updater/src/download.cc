@@ -26,8 +26,8 @@ namespace bundles_db
 		else
 		{
 			if(res != 0)
-					fprintf(stderr, "*** download_etag(‘%s’): got ‘%ld’ from server (expected 200)\n", url.c_str(), res);
-			else	fprintf(stderr, "*** download_etag(‘%s’): %s\n", url.c_str(), error.c_str());
+					os_log_error(OS_LOG_DEFAULT, "download_etag(‘%{public}s’): got ‘%ld’ from server (expected 200)", url.c_str(), res);
+			else	os_log_error(OS_LOG_DEFAULT, "download_etag(‘%{public}s’): %{public}s", url.c_str(), error.c_str());
 		}
 		return NULL_STR;
 	}

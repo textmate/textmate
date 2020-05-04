@@ -57,19 +57,19 @@ namespace osx
 				}
 				else if(myStatus == errAuthorizationCanceled)
 				{
-					fprintf(stderr, "authorization (pid %d): user canceled\n", getpid());
+					os_log_info(OS_LOG_DEFAULT, "authorization (pid %d): user canceled", getpid());
 				}
 				else if(myStatus == errAuthorizationDenied)
 				{
-					fprintf(stderr, "authorization (pid %d): rights denied\n", getpid());
+					os_log_info(OS_LOG_DEFAULT, "authorization (pid %d): rights denied", getpid());
 				}
 				else if(myStatus == errAuthorizationInteractionNotAllowed)
 				{
-					fprintf(stderr, "authorization (pid %d): interaction not allowed\n", getpid());
+					os_log_info(OS_LOG_DEFAULT, "authorization (pid %d): interaction not allowed", getpid());
 				}
 				else
 				{
-					fprintf(stderr, "authorization (pid %d): error %d\n", getpid(), myStatus);
+					os_log_info(OS_LOG_DEFAULT, "authorization (pid %d): error %d", getpid(), myStatus);
 				}
 				return res;
 			}

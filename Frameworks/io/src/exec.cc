@@ -128,9 +128,9 @@ namespace io
 			if(waitpid(process.pid, &status, 0) != process.pid)
 				perror("io::vexec: waitpid");
 			else if(!WIFEXITED(status))
-				fprintf(stderr, "*** abnormal exit (%d) from ‘%s’\n", status, text::join(command, " ").c_str());
+				os_log_error(OS_LOG_DEFAULT, "Abnormal exit (%d) from ‘%{public}s’", status, text::join(command, " ").c_str());
 			else if(WEXITSTATUS(status) != 0)
-				fprintf(stderr, "*** exit code %d from ‘%s’\n", WEXITSTATUS(status), text::join(command, " ").c_str());
+				os_log_error(OS_LOG_DEFAULT, "Exit code %d from ‘%{public}s’", WEXITSTATUS(status), text::join(command, " ").c_str());
 			else
 				success = true;
 		});

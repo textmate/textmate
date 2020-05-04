@@ -14,7 +14,7 @@ static std::string error_keychain (char const* prefix, OSStatus status)
 
 static void perror_keychain (char const* prefix, OSStatus status)
 {
-	fprintf(stderr, "%s\n", error_keychain(prefix, status).c_str());
+	os_log_error(OS_LOG_DEFAULT, "%{public}s", error_keychain(prefix, status).c_str());
 }
 
 namespace license

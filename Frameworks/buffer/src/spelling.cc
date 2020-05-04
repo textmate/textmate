@@ -86,7 +86,7 @@ namespace ng
 			{
 				if(revision != buffer->revision())
 				{
-					fprintf(stderr, "*** buffer has changed after ns::spellcheck()\n");
+					os_log_error(OS_LOG_DEFAULT, "Buffer has changed after ns::spellcheck()");
 					break;
 				}
 

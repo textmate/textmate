@@ -185,7 +185,7 @@ static void update_key_path (plist::dictionary_t& plist, std::string const& keyP
 			else if(plist::array_t* array = boost::get<plist::array_t>(&it->second))
 				array->push_back(*key);
 			else
-				fprintf(stderr, "error: unable to update key path ‘%s’ for plist:\n%s\n", keyPath.c_str(), to_s(plist).c_str());
+				os_log_error(OS_LOG_DEFAULT, "Unable to update key path ‘%{public}s’ for plist:\n%{public}s", keyPath.c_str(), to_s(plist).c_str());
 		}
 		break;
 	}

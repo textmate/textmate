@@ -295,7 +295,7 @@ namespace // wrap in anonymous namespace to avoid clashing with other callbacks 
 				res = res && write_data();
 			res = res && write(socket, "\r\n", 2) == 2;
 			if(!res)
-				fprintf(stderr, "*** rmate: callback failed to save ‘%s’\n", document.displayName.UTF8String);
+				os_log_error(OS_LOG_DEFAULT, "rmate: callback failed to save ‘%{public}@’", document.displayName);
 		}
 
 		void close_document (OakDocument* document)
@@ -308,7 +308,7 @@ namespace // wrap in anonymous namespace to avoid clashing with other callbacks 
 				res = res && write_data();
 			res = res && write(socket, "\r\n", 2) == 2;
 			if(!res)
-				fprintf(stderr, "*** rmate: callback failed while closing ‘%s’\n", document.displayName.UTF8String);
+				os_log_error(OS_LOG_DEFAULT, "rmate: callback failed while closing ‘%{public}@’", document.displayName);
 		}
 
 	private:
@@ -648,7 +648,7 @@ struct socket_observer_t
 				std::string::size_type n = mark.find(':');
 				if(doc)
 						[doc setMarkOfType:to_ns(n == std::string::npos ? mark : mark.substr(0, n)) atPosition:line content:n == std::string::npos ? nil : to_ns(mark.substr(n+1))];
-				else	fprintf(stderr, "set-mark: no document\n");
+				else	os_log_error(OS_LOG_DEFAULT, "set-mark: no document");
 			}
 		}
 	}

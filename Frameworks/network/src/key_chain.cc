@@ -50,7 +50,7 @@ bool key_chain_t::key_t::setup () const
 	else
 	{
 		CFStringRef message = SecCopyErrorMessageString(err, nullptr);
-		fprintf(stderr, "*** error importing key: %s\n", cf::to_s(message).c_str());
+		os_log_error(OS_LOG_DEFAULT, "Error importing key: %{public}@", message);
 		CFRelease(message);
 	}
 

@@ -115,7 +115,7 @@ static BOOL IsProtocolRelativeURL (NSURL* url)
 - (void)webView:(WebView*)webView addMessageToConsole:(NSDictionary*)dictionary;
 {
 	if([dictionary respondsToSelector:@selector(objectForKey:)])
-		fprintf(stderr, "%s: %s on line %d\n", [[[[[[webView mainFrame] dataSource] request] URL] absoluteString] UTF8String], [[dictionary objectForKey:@"message"] UTF8String], [[dictionary objectForKey:@"lineNumber"] intValue]);
+		os_log(OS_LOG_DEFAULT, "%{public}@: %{public}@ on line %d\n", webView.mainFrame.dataSource.request.URL.absoluteString, [dictionary objectForKey:@"message"], [[dictionary objectForKey:@"lineNumber"] intValue]);
 }
 
 // =====================================================

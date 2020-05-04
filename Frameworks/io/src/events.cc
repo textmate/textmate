@@ -71,7 +71,7 @@ namespace
 
 				FSEventStreamContext contextInfo = { 0, this, nullptr, nullptr, nullptr };
 				if(!(_stream = FSEventStreamCreate(kCFAllocatorDefault, &events_t::callback, &contextInfo, cf::wrap(std::vector<std::string>(1, _observed.path())), eventId, latency, kFSEventStreamCreateFlagNone)))
-					fprintf(stderr, "can’t observe ‘%s’\n", path.c_str());
+					os_log_error(OS_LOG_DEFAULT, "Can’t observe ‘%{public}s’", path.c_str());
 
 				_event_id = FSEventsGetCurrentEventId();
 			}
@@ -140,7 +140,7 @@ namespace
 				if((*stream)->_requested.path() == path && (*stream)->_callback == cb)
 					return (void)streams.erase(stream);
 			}
-			fprintf(stderr, "*** not watching ‘%s’\n", path.c_str());
+			os_log_error(OS_LOG_DEFAULT, "Not watching ‘%{public}s’", path.c_str());
 		}
 
 		static void callback (ConstFSEventStreamRef streamRef, void* clientCallBackInfo, size_t numEvents, void* eventPaths, FSEventStreamEventFlags const eventFlags[], FSEventStreamEventId const eventIds[])

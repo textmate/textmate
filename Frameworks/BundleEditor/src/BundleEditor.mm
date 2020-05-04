@@ -129,7 +129,7 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 		NSInteger row = [aBrowser selectedRowInColumn:col];
 		if(row == -1)
 		{
-			fprintf(stderr, "*** abort\n");
+			os_log_error(OS_LOG_DEFAULT, "*** abort");
 			return be::entry_ptr();
 		}
 		entry = entry->children()[row];

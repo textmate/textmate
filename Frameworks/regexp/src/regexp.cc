@@ -41,7 +41,7 @@ namespace regexp
 		{
 			OnigUChar s[ONIG_MAX_ERROR_MESSAGE_LEN];
 			onig_error_code_to_str(s, r, &einfo);
-			fprintf(stderr, "ERROR %s (%s)\n", s, pattern.c_str());
+			os_log_error(OS_LOG_DEFAULT, "pattern_t: %{public}s (%{public}s)", s, pattern.c_str());
 
 			if(tmp)
 				onig_free(tmp);

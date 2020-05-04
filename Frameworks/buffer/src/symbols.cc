@@ -36,14 +36,14 @@ namespace
 
 					if(!parse_char(it, last, '/'))
 					{
-						fprintf(stderr, "malformed symbol transformation at offset %td (expected ‘/’): %s\n", it - src.data(), src.c_str());
+						os_log_error(OS_LOG_DEFAULT, "Malformed symbol transformation at offset %td (expected ‘/’): %{public}s", it - src.data(), src.c_str());
 						return;
 					}
 
 					format_string::format_string_t format(std::string(it, last), "/");
 					if(format.length() == 0)
 					{
-						fprintf(stderr, "malformed symbol transformation at offset %td (expected /format string/): %s\n", it - src.data(), src.c_str());
+						os_log_error(OS_LOG_DEFAULT, "Malformed symbol transformation at offset %td (expected /format string/): %{public}s", it - src.data(), src.c_str());
 						return;
 					}
 
@@ -59,7 +59,7 @@ namespace
 				}
 				else
 				{
-					fprintf(stderr, "malformed symbol transformation at offset %td (expected ‘s’, ‘#’, or space, found %c (0x%02x)): %s\n", it - src.data(), *it, *it, src.c_str());
+					os_log_error(OS_LOG_DEFAULT, "Malformed symbol transformation at offset %td (expected ‘s’, ‘#’, or space, found %c (0x%02x)): %{public}s", it - src.data(), *it, *it, src.c_str());
 					return;
 				}
 			}

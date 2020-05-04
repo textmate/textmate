@@ -479,11 +479,11 @@ static CGFloat read_font_size (std::string const& str_font_size)
 			else if(strcmp(last, "%") == 0)
 				return -size / 100;
 			else
-				fprintf(stderr, "*** unsupported font size unit: %s (%s)\n", last, str_font_size.c_str());
+				os_log_error(OS_LOG_DEFAULT, "Unsupported font size unit: %{public}s (%{public}s)", last, str_font_size.c_str());
 		}
 		else
 		{
-			fprintf(stderr, "*** unsupported font size format: %s\n", str_font_size.c_str());
+			os_log_error(OS_LOG_DEFAULT, "Unsupported font size format: %{public}s", str_font_size.c_str());
 		}
 	}
 	return -1;

@@ -327,7 +327,7 @@ namespace find
 			{
 				OnigUChar s[ONIG_MAX_ERROR_MESSAGE_LEN];
 				onig_error_code_to_str(s, r, &einfo);
-				fprintf(stderr, "ERROR %s (%s)\n", s, str.c_str());
+				os_log_error(OS_LOG_DEFAULT, "regexp_find_t: %{public}s (%{public}s)", s, str.c_str());
 
 				if(compiled_pattern)
 				{

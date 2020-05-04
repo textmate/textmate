@@ -7,13 +7,13 @@
 
 static void sig_int_handler (void* unused)
 {
-	fprintf(stderr, "%s received SIGINT: Regular shutdown.\n", getprogname());
+	os_log(OS_LOG_DEFAULT, "Received SIGINT: Regular shutdown.");
 	[NSApp terminate:nil];
 }
 
 static void sig_term_handler (void* unused)
 {
-	fprintf(stderr, "%s received SIGTERM: Quick shutdown.\n", getprogname());
+	os_log(OS_LOG_DEFAULT, "Received SIGTERM: Quick shutdown.");
 	[DocumentWindowController saveSessionIncludingUntitledDocuments:YES];
 	[NSNotificationCenter.defaultCenter postNotificationName:NSApplicationWillTerminateNotification object:NSApp];
 	[NSApp stop:nil];

@@ -32,7 +32,7 @@ static std::tuple<pid_t, int, int> my_fork (char const* cmd, int inputRead, std:
 			else
 			{
 				newEnv.emplace(pair.first, "(truncated)");
-				fprintf(stderr, "*** variable exceeds ARG_MAX: %s\n", pair.first.c_str());
+				os_log_error(OS_LOG_DEFAULT, "Variable exceeds ARG_MAX: %{public}s", pair.first.c_str());
 			}
 		}
 		return my_fork(cmd, inputRead, newEnv, workingDir);
@@ -287,9 +287,9 @@ namespace command
 	{
 		D(DBF_Command_Runner, bug("%d\n", status););
 		if(WIFSIGNALED(status))
-			fprintf(stderr, "*** process terminated: %s\n", strsignal(WTERMSIG(status)));
+			os_log_error(OS_LOG_DEFAULT, "Process terminated after receiving %{public}s", strsignal(WTERMSIG(status)));
 		else if(!WIFEXITED(status))
-			fprintf(stderr, "*** process terminated abnormally %d\n", status);
+			os_log_error(OS_LOG_DEFAULT, "Process terminated abnormally %d", status);
 
 		_process_id = -1;
 

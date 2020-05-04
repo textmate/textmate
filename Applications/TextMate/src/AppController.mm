@@ -529,7 +529,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 					{
 						if(write(tbz.input_fd(), buf, len) != len)
 						{
-							fprintf(stderr, "*** error writing bytes to tar\n");
+							os_log_error(OS_LOG_DEFAULT, "Failed writing bytes to tar");
 							break;
 						}
 					}
@@ -538,16 +538,16 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 				std::string output, error;
 				if(!tbz.wait_for_tbz(&output, &error))
-					fprintf(stderr, "%s: %s%s\n", getprogname(), output.c_str(), error.c_str());
+					os_log_error(OS_LOG_DEFAULT, "tar: %{public}s%{public}s", output.c_str(), error.c_str());
 			}
 			else
 			{
-				fprintf(stderr, "%s: unable to launch tar\n", getprogname());
+				os_log_error(OS_LOG_DEFAULT, "Unable to launch tar");
 			}
 		}
 		else
 		{
-			fprintf(stderr, "%s: no ‘DefaultBundles.tbz’ in TextMate.app\n", getprogname());
+			os_log_error(OS_LOG_DEFAULT, "No ‘DefaultBundles.tbz’ in TextMate.app");
 		}
 	}
 	[BundlesManager.sharedInstance loadBundlesIndex];

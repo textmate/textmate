@@ -43,7 +43,7 @@ namespace file
 				}
 				else
 				{
-					fprintf(stderr, "file mode %x\n", sbuf.st_mode);
+					os_log_error(OS_LOG_DEFAULT, "Unexpected file mode %x", sbuf.st_mode);
 				}
 			}
 			else if(errno == EACCES)

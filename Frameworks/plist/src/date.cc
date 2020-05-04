@@ -23,7 +23,7 @@ namespace oak
 		}
 		else
 		{
-			fprintf(stderr, "*** error parsing date: ‘%s’\n", str.c_str());
+			os_log_error(OS_LOG_DEFAULT, "Error parsing date: ‘%{public}s’", str.c_str());
 		}
 	}
 

@@ -66,9 +66,9 @@ namespace bundles
 		}
 		else
 		{
-			fprintf(stderr, "no PATH!!!\n");
+			os_log_error(OS_LOG_DEFAULT, "No PATH!!!");
 			for(auto const& pair : environment)
-				fprintf(stderr, "%s = %s\n", pair.first.c_str(), pair.second.c_str());
+				os_log_error(OS_LOG_DEFAULT, "%{public}s = %{public}s", pair.first.c_str(), pair.second.c_str());
 		}
 		return res;
 	}
@@ -228,7 +228,7 @@ namespace bundles
 			}
 			else
 			{
-				fprintf(stderr, "*** missing setting ‘%s’ in %s\n", setting.c_str(), item->name_with_bundle().c_str());
+				os_log_error(OS_LOG_DEFAULT, "Missing setting ‘%{public}s’ in %{public}s", setting.c_str(), item->name_with_bundle().c_str());
 			}
 		}
 		return res;
