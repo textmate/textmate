@@ -14,7 +14,7 @@ PUBLIC @interface BundlesManager : NSObject
 
 @property (nonatomic, readonly) NSArray<Bundle*>* bundles;
 
-- (void)installBundles:(NSArray<Bundle*>*)someBundles completionHandler:(void(^)(NSArray<Bundle*>*))callback;
+- (NSProgress*)installBundles:(NSArray<Bundle*>*)someBundles completionHandler:(void(^)(NSArray<Bundle*>*))callback;
 - (void)uninstallBundle:(Bundle*)aBundle;
 - (void)loadBundlesIndex;
 - (void)installBundleItemsAtPaths:(NSArray*)somePaths;
