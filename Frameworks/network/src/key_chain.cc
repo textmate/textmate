@@ -3,12 +3,12 @@
 #include <oak/oak.h>
 #include <plist/plist.h>
 
-key_chain_t::key_t::key_t (std::string const& identity, std::string const& name, std::string const& key_data) : _identity(identity), _name(name), _key_data(key_data)
+key_chain_t::key_t::key_t (std::string const& identity, std::string const& key_data) : _identity(identity), _key_data(key_data)
 {
 	init();
 }
 
-key_chain_t::key_t::key_t (key_t const& rhs) : _identity(rhs._identity), _name(rhs._name), _key_data(rhs._key_data)
+key_chain_t::key_t::key_t (key_t const& rhs) : _identity(rhs._identity), _key_data(rhs._key_data)
 {
 	init();
 }
@@ -73,7 +73,7 @@ void key_chain_t::key_t::cleanup () const
 
 void key_chain_t::add (key_t const& key)
 {
-	keys.push_back(std::make_shared<key_t>(key.identity(), key.name(), key._key_data));
+	keys.push_back(std::make_shared<key_t>(key.identity(), key._key_data));
 }
 
 key_chain_t::key_ptr key_chain_t::find (std::string const& identity) const
