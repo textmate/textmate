@@ -9,7 +9,7 @@ NSView* OakSetupGridViewWithSeparators (NSGridView* gridView, std::vector<NSUInt
 @property (nonatomic) NSDictionary*         defaultsProperties;
 @property (nonatomic) NSDictionary*         tmProperties;
 
-- (id)initWithNibName:(NSString*)aNibName label:(NSString*)aLabel image:(NSImage*)anImage;
+- (id)initWithNibName:(NSNibName)aNibName label:(NSString*)aLabel image:(NSImage*)anImage;
 
 - (IBAction)help:(id)sender;
 @end
