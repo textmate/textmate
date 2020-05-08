@@ -52,10 +52,10 @@ OAK_DEBUG_VAR(Preferences);
 	[self.windowController showWindow:self];
 }
 
-- (void)takeSelectedViewControllerIndexFrom:(id)sender
+- (void)takeSelectedViewControllerFrom:(id)sender
 {
-	NSUInteger index = [sender tag];
-	[self.windowController selectControllerAtIndex:index];
+	if([sender respondsToSelector:@selector(representedObject)])
+		[self.windowController selectControllerWithIdentifier:[sender representedObject]];
 }
 
 - (void)updateShowTabMenu:(NSMenu*)aMenu
@@ -68,8 +68,8 @@ OAK_DEBUG_VAR(Preferences);
 	int i = 0;
 	for(NSViewController <MASPreferencesViewController>* viewController in _viewControllers)
 	{
-		NSMenuItem* item = [aMenu addItemWithTitle:viewController.toolbarItemLabel action:@selector(takeSelectedViewControllerIndexFrom:) keyEquivalent:i < 9 ? [NSString stringWithFormat:@"%c", '1' + i] : @""];
-		item.tag = i;
+		NSMenuItem* item = [aMenu addItemWithTitle:viewController.title action:@selector(takeSelectedViewControllerFrom:) keyEquivalent:i < 9 ? [NSString stringWithFormat:@"%c", '1' + i] : @""];
+		item.representedObject = viewController.identifier;
 		item.target = self;
 		if([viewController.identifier isEqualToString:selectedIdentifier])
 			[item setState:NSControlStateValueOn];
