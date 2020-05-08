@@ -146,6 +146,7 @@
 	]];
 	contactStackView.alignment  = NSLayoutAttributeFirstBaseline;
 	contactStackView.edgeInsets = { .left = 18 };
+	[contactStackView setHuggingPriority:NSLayoutPriorityDefaultHigh-1 forOrientation:NSLayoutConstraintOrientationVertical];
 
 	MBMenu const updateChannelMenuItems = {
 		{ @"Normal Releases", .tag = 0 },
