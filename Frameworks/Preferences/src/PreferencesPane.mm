@@ -38,18 +38,19 @@ NSView* OakSetupGridViewWithSeparators (NSGridView* gridView, std::vector<NSUInt
 }
 
 @interface PreferencesPane ()
-@property (nonatomic, readwrite) NSString* toolbarItemLabel;
-@property (nonatomic, readwrite) NSImage*  toolbarItemImage;
+@property (nonatomic, readwrite) NSImage* toolbarItemImage;
 @end
 
 @implementation PreferencesPane
-- (NSString*)viewIdentifier { return _toolbarItemLabel; }
+- (NSString*)viewIdentifier   { return self.identifier; }
+- (NSString*)toolbarItemLabel { return self.title; }
 
 - (id)initWithNibName:(NSNibName)aNibName label:(NSString*)aLabel image:(NSImage*)anImage
 {
 	if(self = [super initWithNibName:aNibName bundle:[NSBundle bundleForClass:[self class]]])
 	{
-		_toolbarItemLabel = aLabel;
+		self.identifier   = aLabel;
+		self.title        = aLabel;
 		_toolbarItemImage = anImage;
 	}
 	return self;

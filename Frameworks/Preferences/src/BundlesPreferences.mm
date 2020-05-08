@@ -73,9 +73,9 @@ static NSMutableSet* BundlesBeingInstalled = [NSMutableSet set];
 @end
 
 @implementation BundlesPreferences
-- (NSString*)viewIdentifier        { return @"Bundles"; }
+- (NSString*)viewIdentifier        { return self.identifier; }
 - (NSImage*)toolbarItemImage       { return [NSWorkspace.sharedWorkspace iconForFileType:@"tmbundle"]; }
-- (NSString*)toolbarItemLabel      { return @"Bundles"; }
+- (NSString*)toolbarItemLabel      { return self.title; }
 - (NSView*)initialKeyView          { return _bundlesTableView; }
 - (BOOL)hasResizableWidth          { return YES; }
 - (BOOL)hasResizableHeight         { return YES; }
@@ -84,6 +84,9 @@ static NSMutableSet* BundlesBeingInstalled = [NSMutableSet set];
 {
 	if(self = [self initWithNibName:nil bundle:nil])
 	{
+		self.identifier = @"Bundles";
+		self.title      = @"Bundles";
+
 		_enabledCategories = [NSMutableSet set];
 		_selectedIndex     = NSNotFound;
 

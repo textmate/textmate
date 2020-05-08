@@ -17,15 +17,17 @@ static NSString* const kVariableKeyValue   = @"value";
 @end
 
 @implementation VariablesPreferences
-- (NSString*)viewIdentifier        { return @"Variables"; }
+- (NSString*)viewIdentifier        { return self.identifier; }
 - (NSImage*)toolbarItemImage       { return [NSImage imageNamed:@"Variables" inSameBundleAsClass:[self class]]; }
-- (NSString*)toolbarItemLabel      { return @"Variables"; }
+- (NSString*)toolbarItemLabel      { return self.title; }
 
 - (id)init
 {
 	if(self = [self initWithNibName:nil bundle:nil])
 	{
-		self.variables = [NSMutableArray arrayWithArray:[NSUserDefaults.standardUserDefaults arrayForKey:kUserDefaultsEnvironmentVariablesKey]];
+		self.identifier = @"Variables";
+		self.title      = @"Variables";
+		self.variables  = [NSMutableArray arrayWithArray:[NSUserDefaults.standardUserDefaults arrayForKey:kUserDefaultsEnvironmentVariablesKey]];
 	}
 	return self;
 }
