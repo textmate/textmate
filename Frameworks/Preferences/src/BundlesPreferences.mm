@@ -73,12 +73,8 @@ static NSMutableSet* BundlesBeingInstalled = [NSMutableSet set];
 @end
 
 @implementation BundlesPreferences
-- (NSString*)viewIdentifier        { return self.identifier; }
-- (NSImage*)toolbarItemImage       { return [NSWorkspace.sharedWorkspace iconForFileType:@"tmbundle"]; }
-- (NSString*)toolbarItemLabel      { return self.title; }
-- (NSView*)initialKeyView          { return _bundlesTableView; }
-- (BOOL)hasResizableWidth          { return YES; }
-- (BOOL)hasResizableHeight         { return YES; }
+- (NSImage*)toolbarItemImage { return [NSWorkspace.sharedWorkspace iconForFileType:@"tmbundle"]; }
+- (NSView*)initialKeyView    { return _bundlesTableView; }
 
 - (id)init
 {

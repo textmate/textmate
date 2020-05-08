@@ -17,9 +17,7 @@ static NSString* const kVariableKeyValue   = @"value";
 @end
 
 @implementation VariablesPreferences
-- (NSString*)viewIdentifier        { return self.identifier; }
-- (NSImage*)toolbarItemImage       { return [NSImage imageNamed:@"Variables" inSameBundleAsClass:[self class]]; }
-- (NSString*)toolbarItemLabel      { return self.title; }
+- (NSImage*)toolbarItemImage { return [NSImage imageNamed:@"Variables" inSameBundleAsClass:[self class]]; }
 
 - (id)init
 {

@@ -52,7 +52,7 @@ static NSString* const kMASPreferencesSelectedViewKey = @"MASPreferences Selecte
 	}
 
 	_selectedViewIdentifier = viewIdentifier;
-	if(NSViewController* newViewController = [self viewControllerForIdentifier:viewIdentifier])
+	if(NSViewController <PreferencesPaneProtocol>* newViewController = [self viewControllerForIdentifier:viewIdentifier])
 	{
 	   [NSUserDefaults.standardUserDefaults setObject:_selectedViewIdentifier forKey:kMASPreferencesSelectedViewKey];
 
@@ -79,7 +79,7 @@ static NSString* const kMASPreferencesSelectedViewKey = @"MASPreferences Selecte
 		[self.view addSubview:newView];
 		[self.view.window recalculateKeyViewLoop];
 
-		if(NSResponder* keyView = [newViewController respondsToSelector:@selector(initialKeyView)] ? [newViewController performSelector:@selector(initialKeyView)] : nil)
+		if(NSResponder* keyView = [newViewController respondsToSelector:@selector(initialKeyView)] ? newViewController.initialKeyView : nil)
 				[self.view.window makeFirstResponder:keyView];
 		else	[self.view.window selectKeyViewFollowingView:self.view];
 
@@ -93,9 +93,9 @@ static NSString* const kMASPreferencesSelectedViewKey = @"MASPreferences Selecte
 	}
 }
 
-- (NSViewController*)viewControllerForIdentifier:(NSString*)viewIdentifier
+- (NSViewController <PreferencesPaneProtocol>*)viewControllerForIdentifier:(NSString*)viewIdentifier
 {
-	for(NSViewController* viewController in self.childViewControllers)
+	for(NSViewController <PreferencesPaneProtocol>* viewController in self.childViewControllers)
 	{
 		if([viewController.identifier isEqual:viewIdentifier])
 			return viewController;
@@ -131,7 +131,7 @@ static NSString* const kMASPreferencesSelectedViewKey = @"MASPreferences Selecte
 	{
 		_preferencesViewController = contentViewController;
 
-		NSArray<NSViewController*>* viewControllers = @[
+		NSArray<NSViewController <PreferencesPaneProtocol>*>* viewControllers = @[
 			[[FilesPreferences alloc] init],
 			[[ProjectsPreferences alloc] init],
 			[[BundlesPreferences alloc] init],
@@ -210,7 +210,7 @@ static NSString* const kMASPreferencesSelectedViewKey = @"MASPreferences Selecte
 
 - (NSToolbarItem*)toolbar:(NSToolbar*)toolbar itemForItemIdentifier:(NSToolbarItemIdentifier)itemIdentifier willBeInsertedIntoToolbar:(BOOL)flag
 {
-	if(NSViewController* viewController = [_preferencesViewController viewControllerForIdentifier:itemIdentifier])
+	if(NSViewController <PreferencesPaneProtocol>* viewController = [_preferencesViewController viewControllerForIdentifier:itemIdentifier])
 	{
 		NSToolbarItem* res = [[NSToolbarItem alloc] initWithItemIdentifier:itemIdentifier];
 		res.label  = viewController.title;
@@ -218,7 +218,7 @@ static NSString* const kMASPreferencesSelectedViewKey = @"MASPreferences Selecte
 		res.target = self;
 
 		if([viewController respondsToSelector:@selector(toolbarItemImage)])
-			res.image = [viewController performSelector:@selector(toolbarItemImage)];
+			res.image = viewController.toolbarItemImage;
 
 		return res;
 	}

@@ -40,9 +40,6 @@ NSView* OakSetupGridViewWithSeparators (NSGridView* gridView, std::vector<NSUInt
 @end
 
 @implementation PreferencesPane
-- (NSString*)viewIdentifier   { return self.identifier; }
-- (NSString*)toolbarItemLabel { return self.title; }
-
 - (id)initWithNibName:(NSNibName)aNibName label:(NSString*)aLabel image:(NSImage*)anImage
 {
 	if(self = [super initWithNibName:aNibName bundle:[NSBundle bundleForClass:[self class]]])
