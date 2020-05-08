@@ -29,10 +29,8 @@ NSView* OakSetupGridViewWithSeparators (NSGridView* gridView, std::vector<NSUInt
 		[gridView rowAtIndex:row].rowAlignment = NSGridRowAlignmentNone;
 	}
 
-	NSSize size = gridView.fittingSize;
-	gridView.frame = { .size = size };
-	[gridView.widthAnchor constraintEqualToConstant:size.width].active   = YES;
-	[gridView.heightAnchor constraintEqualToConstant:size.height].active = YES;
+	[gridView setContentHuggingPriority:NSLayoutPriorityDefaultHigh-2 forOrientation:NSLayoutConstraintOrientationVertical];
+	gridView.frame = { .size = gridView.fittingSize };
 
 	return gridView;
 }
