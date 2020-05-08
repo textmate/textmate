@@ -194,8 +194,8 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		stackView.orientation = NSUserInterfaceLayoutOrientationVertical;
 		stackView.alignment   = NSLayoutAttributeLeading;
 		stackView.edgeInsets  = { .bottom = 20 };
-		[stackView setHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationVertical];
-		[stackView setHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
+		[stackView setHuggingPriority:NSLayoutPriorityDefaultHigh-1 forOrientation:NSLayoutConstraintOrientationVertical];
+		[stackView setHuggingPriority:NSLayoutPriorityDefaultHigh-1 forOrientation:NSLayoutConstraintOrientationHorizontal];
 
 		self.actionButtonsStackView.edgeInsets = { .left = 20, .right = 20 };
 
@@ -296,7 +296,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 			_wherePopUpButton, matchingLabel, globTextField
 		]];
 		whereStackView.alignment = NSLayoutAttributeLastBaseline;
-		[whereStackView setHuggingPriority:NSLayoutPriorityWindowSizeStayPut forOrientation:NSLayoutConstraintOrientationVertical];
+		[whereStackView setHuggingPriority:NSLayoutPriorityDefaultHigh-1 forOrientation:NSLayoutConstraintOrientationVertical];
 
 		_gridView = [NSGridView gridViewWithViews:@[
 			@[ findLabel,    _findTextFieldViewController.view,    findHistoryButton,   countButton ],
@@ -424,7 +424,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 
 		_actionButtonsStackView = [NSStackView stackViewWithViews:@[ _findAllButton, replaceAllButton ]];
 		[_actionButtonsStackView setViews:@[ replaceButton, replaceAndFindButton, findPreviousButton, _findNextButton ] inGravity:NSStackViewGravityTrailing];
-		[_actionButtonsStackView setHuggingPriority:NSLayoutPriorityDefaultHigh forOrientation:NSLayoutConstraintOrientationVertical];
+		[_actionButtonsStackView setHuggingPriority:NSLayoutPriorityDefaultHigh-1 forOrientation:NSLayoutConstraintOrientationVertical];
 
 		OakSetupKeyViewLoop(@[ _actionButtonsStackView, _findAllButton, replaceAllButton, replaceButton, replaceAndFindButton, findPreviousButton, _findNextButton ], NO);
 	}

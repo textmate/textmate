@@ -117,7 +117,7 @@ static id OakFormatStatusString (NSString* aString)
 	stackView.edgeInsets = { .left = 20, .right = 20 };
 
 	[stackView setCustomSpacing:2 afterView:_progressIndicator];
-	[stackView setHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationVertical];
+	[stackView setHuggingPriority:NSLayoutPriorityDefaultHigh-1 forOrientation:NSLayoutConstraintOrientationVertical];
 
 	_stopButton.hidden        = !_progressIndicatorVisible;
 	_progressIndicator.hidden = !_progressIndicatorVisible;
