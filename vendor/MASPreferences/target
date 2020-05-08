@@ -1,4 +1,0 @@
-SOURCES      = vendor/Framework/*.m
-EXPORT       = vendor/Framework/*.h
-CP_Resources = vendor/Framework/en.lproj/*.xib Info.plist
-FRAMEWORKS   = Cocoa
