@@ -242,6 +242,11 @@ static bool uninstall_mate (std::string const& path)
 	LSSetDefaultHandlerForURLScheme(CFSTR("txmt"), CFBundleGetIdentifier(CFBundleGetMainBundle()));
 }
 
+- (NSSize)preferredContentSize
+{
+	return self.view.frame.size;
+}
+
 - (NSString*)mateInstallPath
 {
 	NSString* path = [NSUserDefaults.standardUserDefaults stringForKey:kUserDefaultsMateInstallPathKey];
