@@ -1,8 +1,5 @@
 #import <oak/misc.h>
 
-@class MASPreferencesWindowController;
-
-PUBLIC @interface Preferences : NSResponder
+PUBLIC @interface Preferences : NSWindowController
 @property (class, readonly) Preferences* sharedInstance;
-- (void)showWindow:(id)sender;
 @end
