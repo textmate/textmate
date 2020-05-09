@@ -7,6 +7,8 @@
 NSView* OakSetupGridViewWithSeparators (NSGridView* gridView, std::vector<NSUInteger> rows)
 {
 	gridView.rowAlignment = NSGridRowAlignmentFirstBaseline;
+	gridView.rowSpacing   = 8;
+
 	[gridView rowAtIndex:0].topPadding                                  = 20;
 	[gridView rowAtIndex:gridView.numberOfRows-1].bottomPadding         = 20;
 	[gridView columnAtIndex:0].xPlacement                               = NSGridCellPlacementTrailing;
@@ -22,11 +24,11 @@ NSView* OakSetupGridViewWithSeparators (NSGridView* gridView, std::vector<NSUInt
 	{
 		[gridView mergeCellsInHorizontalRange:NSMakeRange(0, gridView.numberOfColumns) verticalRange:NSMakeRange(row, 1)];
 		[gridView cellAtColumnIndex:0 rowIndex:row].contentView = OakCreateNSBoxSeparator();
-		[gridView cellAtColumnIndex:0 rowIndex:row].xPlacement = NSGridCellPlacementFill;
-		[gridView cellAtColumnIndex:0 rowIndex:row].yPlacement = NSGridCellPlacementCenter;
-		[gridView rowAtIndex:row].topPadding = 8;
-		[gridView rowAtIndex:row].bottomPadding = 8;
-		[gridView rowAtIndex:row].rowAlignment = NSGridRowAlignmentNone;
+		[gridView cellAtColumnIndex:0 rowIndex:row].xPlacement  = NSGridCellPlacementFill;
+		[gridView cellAtColumnIndex:0 rowIndex:row].yPlacement  = NSGridCellPlacementCenter;
+		[gridView rowAtIndex:row].topPadding    = 12;
+		[gridView rowAtIndex:row].bottomPadding = 12;
+		[gridView rowAtIndex:row].rowAlignment  = NSGridRowAlignmentNone;
 	}
 
 	[gridView setContentHuggingPriority:NSLayoutPriorityDefaultHigh-2 forOrientation:NSLayoutConstraintOrientationVertical];
