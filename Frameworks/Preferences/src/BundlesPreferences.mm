@@ -74,7 +74,6 @@ static NSMutableSet* BundlesBeingInstalled = [NSMutableSet set];
 
 @implementation BundlesPreferences
 - (NSImage*)toolbarItemImage { return [NSWorkspace.sharedWorkspace iconForFileType:@"tmbundle"]; }
-- (NSView*)initialKeyView    { return _bundlesTableView; }
 
 - (id)init
 {
@@ -220,6 +219,12 @@ static NSMutableSet* BundlesBeingInstalled = [NSMutableSet set];
 	[updateBundlesCheckbox bind:NSValueBinding toObject:NSUserDefaultsController.sharedUserDefaultsController withKeyPath:@"values.disableBundleUpdates" options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
 
 	self.view = view;
+}
+
+- (void)viewDidAppear
+{
+	if(self.view.window.firstResponder == self.view.window)
+		[self.view.window makeFirstResponder:_bundlesTableView];
 }
 
 - (void)setSelectedIndex:(NSUInteger)newSelectedIndex
