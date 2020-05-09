@@ -574,15 +574,15 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 	NSMenuItem* folderItem;
 
 	MBMenu const items = {
-		{ @"Document",            @selector(takeSearchTargetFrom:), @"f", .tag = FFSearchTargetDocument          },
-		{ @"Selection",           @selector(takeSearchTargetFrom:),       .tag = FFSearchTargetSelection         },
+		{ @"Document",            @selector(orderFrontFindPanel:),  @"f", .tag = FFSearchTargetDocument          },
+		{ @"Selection",           @selector(orderFrontFindPanel:),        .tag = FFSearchTargetSelection         },
 		{ /* -------- */ },
-		{ @"Open Files",          @selector(takeSearchTargetFrom:),       .tag = FFSearchTargetOpenFiles         },
-		{ @"Project Folder",      @selector(takeSearchTargetFrom:), @"F", .tag = FFSearchTargetProject           },
-		{ @"File Browser Items",  @selector(takeSearchTargetFrom:),       .tag = FFSearchTargetFileBrowserItems  },
+		{ @"Open Files",          @selector(orderFrontFindPanel:),        .tag = FFSearchTargetOpenFiles         },
+		{ @"Project Folder",      @selector(orderFrontFindPanel:),  @"F", .tag = FFSearchTargetProject           },
+		{ @"File Browser Items",  @selector(orderFrontFindPanel:),        .tag = FFSearchTargetFileBrowserItems  },
 		{ @"Other Folder…",       @selector(showFolderSelectionPanel:),   .tag = FFSearchTargetOther             },
 		{ /* -------- */ },
-		{ @"«Last Folder»",       @selector(takeSearchTargetFrom:),       .ref = &folderItem                     },
+		{ @"«Last Folder»",       @selector(orderFrontFindPanel:),        .ref = &folderItem                     },
 		{ /* -------- */ },
 		{ @"Recent Places",       @selector(nop:),                                                               },
 	};
@@ -627,7 +627,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 
 		NSString* path = recentPaths[i];
 
-		NSMenuItem* recentItem = [whereMenu addItemWithTitle:[self displayNameForFolder:path] action:@selector(takeSearchTargetFrom:) keyEquivalent:@""];
+		NSMenuItem* recentItem = [whereMenu addItemWithTitle:[self displayNameForFolder:path] action:@selector(orderFrontFindPanel:) keyEquivalent:@""];
 		[recentItem setIconForFile:path];
 		[recentItem setRepresentedObject:path];
 
@@ -662,17 +662,20 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 	self.showsResultsOutlineView = isFolderSearch;
 }
 
-- (void)takeSearchTargetFrom:(NSMenuItem*)menuItem
+- (void)orderFrontFindPanel:(id)sender
 {
-	if(NSString* folder = menuItem.representedObject)
+	if([sender respondsToSelector:@selector(representedObject)])
 	{
-		self.otherFolder = folder;
-		self.searchTarget = FFSearchTargetOther;
+		if(NSString* folder = [sender representedObject])
+		{
+			self.otherFolder = folder;
+			self.searchTarget = FFSearchTargetOther;
+			return;
+		}
 	}
-	else
-	{
-		self.searchTarget = FFSearchTarget(menuItem.tag);
-	}
+
+	if([sender respondsToSelector:@selector(tag)])
+		self.searchTarget = FFSearchTarget([sender tag]);
 }
 
 // ==============================
@@ -854,14 +857,14 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 {
 	NSInteger index = [_wherePopUpButton.menu indexOfItemWithTarget:self andAction:_cmd];
 	if(index != -1)
-		[self takeSearchTargetFrom:_wherePopUpButton.menu.itemArray[index]];
+		[self orderFrontFindPanel:_wherePopUpButton.menu.itemArray[index]];
 }
 
 - (void)goForward:(id)sender
 {
 	NSInteger index = [_wherePopUpButton.menu indexOfItemWithTarget:self andAction:_cmd];
 	if(index != -1)
-		[self takeSearchTargetFrom:_wherePopUpButton.menu.itemArray[index]];
+		[self orderFrontFindPanel:_wherePopUpButton.menu.itemArray[index]];
 	else if(_searchTarget == FFSearchTargetOther && _otherFolder)
 		self.searchTarget = FFSearchTargetProject;
 }
