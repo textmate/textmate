@@ -201,7 +201,7 @@ static NSString* const kMASPreferencesSelectedViewKey = @"MASPreferences Selecte
 		toolbar.displayMode = hasToolbarImages ? NSToolbarDisplayModeIconAndLabel : NSToolbarDisplayModeLabelOnly;
 
 		window.autorecalculatesKeyViewLoop = NO;
-		window.collectionBehavior          = NSWindowCollectionBehaviorFullScreenAuxiliary;
+		window.collectionBehavior          = NSWindowCollectionBehaviorMoveToActiveSpace|NSWindowCollectionBehaviorFullScreenAuxiliary;
 		window.delegate                    = self;
 		window.hidesOnDeactivate           = NO;
 		window.toolbar                     = toolbar;
