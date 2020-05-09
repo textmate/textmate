@@ -10,11 +10,6 @@
 - (instancetype)initWithUUID:(NSUUID*)uuid firstRange:(text::range_t const&)firstRange lastRange:(text::range_t const&)lastRange;
 @end
 
-namespace find_tags
-{
-	enum { in_document = 1, in_selection, in_project, in_folder};
-}
-
 typedef NS_ENUM(NSInteger, FFSearchTarget) {
 	FFSearchTargetDocument = 0,
 	FFSearchTargetSelection,

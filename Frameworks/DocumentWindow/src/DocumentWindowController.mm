@@ -2011,17 +2011,17 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	BOOL didOwnDialog       = find.delegate == self;
 	[self prepareAndReturnFindPanel];
 
-	NSInteger mode = [sender respondsToSelector:@selector(tag)] ? [sender tag] : find_tags::in_document;
-	if(mode == find_tags::in_document && ![NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsAlwaysFindInDocument] && [self.window isKeyWindow] && self.textView.hasMultiLineSelection)
-		mode = find_tags::in_selection;
+	NSInteger mode = [sender respondsToSelector:@selector(tag)] ? [sender tag] : FFSearchTargetDocument;
+	if(mode == FFSearchTargetDocument && ![NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsAlwaysFindInDocument] && [self.window isKeyWindow] && self.textView.hasMultiLineSelection)
+		mode = FFSearchTargetSelection;
 
 	switch(mode)
 	{
-		case find_tags::in_document:  find.searchTarget = FFSearchTargetDocument;  break;
-		case find_tags::in_selection: find.searchTarget = FFSearchTargetSelection; break;
-		case find_tags::in_folder:    return [find showFolderSelectionPanel:self]; break;
+		case FFSearchTargetDocument:  find.searchTarget = FFSearchTargetDocument;  break;
+		case FFSearchTargetSelection: find.searchTarget = FFSearchTargetSelection; break;
+		case FFSearchTargetOther:     return [find showFolderSelectionPanel:self]; break;
 
-		case find_tags::in_project:
+		case FFSearchTargetProject:
 		{
 			// Only reset search target if the dialog is not already showing potential search results from “Other…”
 			if(!find.isVisible || !didOwnDialog || find.searchTarget == FFSearchTargetDocument || find.searchTarget == FFSearchTargetSelection)
@@ -2391,7 +2391,7 @@ static NSTouchBarItemIdentifier kTouchBarFavoritesItemIdentifier = @"com.macroma
 	else if([identifier isEqualToString:kTouchBarFindItemIdentifier])
 	{
 		NSButton* findInProjectButton = [NSButton buttonWithImage:[NSImage imageNamed:NSImageNameTouchBarSearchTemplate] target:self action:@selector(orderFrontFindPanel:)];
-		findInProjectButton.tag = find_tags::in_project;
+		findInProjectButton.tag = FFSearchTargetProject;
 		res = [[NSCustomTouchBarItem alloc] initWithIdentifier:identifier];
 		res.view = findInProjectButton;
 		res.visibilityPriority = NSTouchBarItemPriorityNormal;

@@ -188,9 +188,9 @@ BOOL HasDocumentWindow (NSArray* windows)
 				},
 				{ @"Find",
 					.submenu = {
-						{ @"Find and Replace…",           @selector(orderFrontFindPanel:),          @"f", .tag = 1 },
-						{ @"Find in Project…",            @selector(orderFrontFindPanel:),          @"F", .tag = 3 },
-						{ @"Find in Folder…",             @selector(orderFrontFindPanel:),                .tag = 4 },
+						{ @"Find and Replace…",           @selector(orderFrontFindPanel:),          @"f", .tag = FFSearchTargetDocument },
+						{ @"Find in Project…",            @selector(orderFrontFindPanel:),          @"F", .tag = FFSearchTargetProject  },
+						{ @"Find in Folder…",             @selector(orderFrontFindPanel:),                .tag = FFSearchTargetOther    },
 						{ /* -------- */ },
 						{ @"Show Find History",           @selector(showFindHistory:),              @"f", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption|NSEventModifierFlagControl },
 						{ /* -------- */ },
@@ -659,13 +659,13 @@ BOOL HasDocumentWindow (NSArray* windows)
 {
 	D(DBF_AppController, bug("\n"););
 	Find* find = Find.sharedInstance;
-	NSInteger mode = [sender respondsToSelector:@selector(tag)] ? [sender tag] : find_tags::in_document;
+	NSInteger mode = [sender respondsToSelector:@selector(tag)] ? [sender tag] : FFSearchTargetDocument;
 	switch(mode)
 	{
-		case find_tags::in_document:  find.searchTarget = FFSearchTargetDocument;  break;
-		case find_tags::in_selection: find.searchTarget = FFSearchTargetSelection; break;
-		case find_tags::in_project:   find.searchTarget = FFSearchTargetProject;   break;
-		case find_tags::in_folder:    return [find showFolderSelectionPanel:self]; break;
+		case FFSearchTargetDocument:  find.searchTarget = FFSearchTargetDocument;  break;
+		case FFSearchTargetSelection: find.searchTarget = FFSearchTargetSelection; break;
+		case FFSearchTargetProject:   find.searchTarget = FFSearchTargetProject;   break;
+		case FFSearchTargetOther:     return [find showFolderSelectionPanel:self]; break;
 	}
 	[find showWindow:self];
 }
