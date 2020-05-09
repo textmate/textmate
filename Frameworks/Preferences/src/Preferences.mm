@@ -15,14 +15,18 @@ static NSString* const kMASPreferencesSelectedViewKey = @"MASPreferences Selecte
 // =============================
 
 @interface PreferencesViewController : NSViewController
+{
+	NSUInteger                    _animationCounter;
+	NSArray<NSLayoutConstraint*>* _viewFrameConstraints;
+}
 @property (nonatomic) NSString* selectedViewIdentifier;
-@property (nonatomic) NSArray<NSLayoutConstraint*>* viewFrameConstraints;
 @end
 
 @implementation PreferencesViewController
 - (void)loadView
 {
 	self.view = [[NSView alloc] initWithFrame:NSZeroRect];
+	self.view.wantsLayer = YES;
 }
 
 - (void)viewWillAppear
@@ -31,66 +35,110 @@ static NSString* const kMASPreferencesSelectedViewKey = @"MASPreferences Selecte
 	self.selectedViewIdentifier = viewIdentifier ?: self.childViewControllers.firstObject.identifier;
 }
 
-- (void)setSelectedViewIdentifier:(NSString*)viewIdentifier
+- (void)transitionFromView:(NSView*)oldView toView:(NSView*)newView
 {
-	if(_selectedViewIdentifier == viewIdentifier)
+	if(!newView)
 		return;
 
-	if(NSViewController* oldViewController = [self viewControllerForIdentifier:_selectedViewIdentifier])
-	{
-		if(![oldViewController commitEditing])
+	NSWindow* window = self.view.window;
+	NSRect newFrame = window.frame;
+	newFrame.size      = [window frameRectForContentRect:newView.frame].size;
+	newFrame.origin.y += NSMaxY(window.frame) - NSMaxY(newFrame);
+
+	if([window.firstResponder isKindOfClass:[NSView class]] && [(NSView*)window.firstResponder isDescendantOf:oldView])
+		[window makeFirstResponder:window];
+
+	auto oldViewFrameConstraints = _viewFrameConstraints;
+	_viewFrameConstraints = @[
+		[newView.widthAnchor  constraintEqualToConstant:NSWidth(newView.frame)  ],
+		[newView.heightAnchor constraintEqualToConstant:NSHeight(newView.frame) ],
+	];
+	[NSLayoutConstraint activateConstraints:_viewFrameConstraints];
+
+	NSUInteger animationCounter = ++_animationCounter;
+
+	[NSAnimationContext runAnimationGroup:^(NSAnimationContext* context) {
+		if(window.isVisible && oldView)
 		{
-			self.view.window.toolbar.selectedItemIdentifier = oldViewController.identifier;
-			return;
+			context.allowsImplicitAnimation = YES;
+			context.duration = 0.2;
+		}
+		else
+		{
+			context.duration = 0;
 		}
 
-		[NSLayoutConstraint deactivateConstraints:_viewFrameConstraints];
-		_viewFrameConstraints = nil;
+		if(oldView)
+		{
+			oldView.hidden = YES;
+			[oldView removeFromSuperview];
+			[NSLayoutConstraint deactivateConstraints:oldViewFrameConstraints];
+		}
 
-		self.view.nextKeyView = nil;
-		[oldViewController.view removeFromSuperview];
+		newView.hidden = YES;
+		[self.view addSubview:newView];
+		self.view.nextKeyView = newView;
+		newView.hidden = NO;
+
+		[window setFrame:newFrame display:NO];
+	}
+	completionHandler:^{
+		if(animationCounter == _animationCounter)
+		{
+			[NSLayoutConstraint deactivateConstraints:_viewFrameConstraints];
+			_viewFrameConstraints = @[
+				[newView.leadingAnchor  constraintEqualToAnchor:self.view.leadingAnchor ],
+				[newView.bottomAnchor   constraintEqualToAnchor:self.view.bottomAnchor  ],
+				[newView.topAnchor      constraintEqualToAnchor:self.view.topAnchor     ],
+				[newView.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
+			];
+			[NSLayoutConstraint activateConstraints:_viewFrameConstraints];
+
+			[window recalculateKeyViewLoop];
+			if(window.firstResponder == window)
+			{
+				// selectKeyViewFollowingView: will select toolbar buttons when Full Keyboard Access is enabled
+
+				std::set<NSView*> avoidLoops;
+				for(NSView* keyView = newView; keyView && avoidLoops.find(keyView) == avoidLoops.end(); keyView = keyView.nextKeyView)
+				{
+					if(keyView.canBecomeKeyView)
+					{
+						[window makeFirstResponder:keyView];
+						break;
+					}
+					avoidLoops.insert(keyView);
+				}
+			}
+		}
+	}];
+}
+
+- (void)setSelectedViewIdentifier:(NSString*)viewIdentifier
+{
+	if(_selectedViewIdentifier == viewIdentifier || [_selectedViewIdentifier isEqual:viewIdentifier])
+		return;
+
+	NSViewController* oldViewController = [self viewControllerForIdentifier:_selectedViewIdentifier];
+	if(oldViewController && ![oldViewController commitEditing])
+	{
+		self.view.window.toolbar.selectedItemIdentifier = oldViewController.identifier;
+		return;
 	}
 
 	_selectedViewIdentifier = viewIdentifier;
-	if(NSViewController <PreferencesPaneProtocol>* newViewController = [self viewControllerForIdentifier:viewIdentifier])
-	{
-	   [NSUserDefaults.standardUserDefaults setObject:_selectedViewIdentifier forKey:kMASPreferencesSelectedViewKey];
+	self.view.window.toolbar.selectedItemIdentifier = viewIdentifier;
+	[NSUserDefaults.standardUserDefaults setObject:_selectedViewIdentifier forKey:kMASPreferencesSelectedViewKey];
 
-		NSView* newView = newViewController.view;
-		newView.translatesAutoresizingMaskIntoConstraints = NO;
+	NSViewController* newViewController = [self viewControllerForIdentifier:viewIdentifier];
+	self.title = newViewController.title ?: @"Preferences";
 
-		self.title = newViewController.title ?: @"Preferences";
-		self.view.window.toolbar.selectedItemIdentifier = viewIdentifier;
+	NSView* newView = newViewController.view;
+	newView.translatesAutoresizingMaskIntoConstraints = NO;
+	if(NSEqualSizes(newView.frame.size, NSZeroSize))
+		newView.frame = { .size = newView.fittingSize };
 
-		NSSize newSize = newView.frame.size;
-		if(NSEqualSizes(newSize, NSZeroSize))
-			newSize = newView.fittingSize;
-
-		NSSize oldSize = self.view.frame.size;
-		NSRect frame   = self.view.window.frame;
-
-		frame.origin.y    -= newSize.height - oldSize.height;
-		frame.size.height += newSize.height - oldSize.height;
-		frame.size.width  += newSize.width - oldSize.width;
-
-		BOOL animateFlag = self.view.window.isVisible && !NSEqualRects(frame, self.view.window.frame);
-		[self.view.window setFrame:frame display:YES animate:animateFlag];
-
-		[self.view addSubview:newView];
-		[self.view.window recalculateKeyViewLoop];
-
-		if(NSResponder* keyView = [newViewController respondsToSelector:@selector(initialKeyView)] ? newViewController.initialKeyView : nil)
-				[self.view.window makeFirstResponder:keyView];
-		else	[self.view.window selectKeyViewFollowingView:self.view];
-
-		_viewFrameConstraints = @[
-			[newView.leadingAnchor  constraintEqualToAnchor:self.view.leadingAnchor ],
-			[newView.bottomAnchor   constraintEqualToAnchor:self.view.bottomAnchor  ],
-			[newView.topAnchor      constraintEqualToAnchor:self.view.topAnchor     ],
-			[newView.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
-		];
-		[NSLayoutConstraint activateConstraints:_viewFrameConstraints];
-	}
+	[self transitionFromView:oldViewController.view toView:newView];
 }
 
 - (NSViewController <PreferencesPaneProtocol>*)viewControllerForIdentifier:(NSString*)viewIdentifier
