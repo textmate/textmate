@@ -171,7 +171,7 @@ static NSString* const kMASPreferencesSelectedViewKey = @"MASPreferences Selecte
 {
 	PreferencesViewController* contentViewController = [[PreferencesViewController alloc] init];
 
-	NSWindow* window = [NSWindow windowWithContentViewController:contentViewController];
+	NSWindow* window = [NSPanel windowWithContentViewController:contentViewController];
 	if(NSString* topLeft = [NSUserDefaults.standardUserDefaults stringForKey:kMASPreferencesFrameTopLeftKey])
 		[window setFrameTopLeftPoint:NSPointFromString(topLeft)];
 
@@ -203,6 +203,7 @@ static NSString* const kMASPreferencesSelectedViewKey = @"MASPreferences Selecte
 		window.autorecalculatesKeyViewLoop = NO;
 		window.collectionBehavior          = NSWindowCollectionBehaviorFullScreenAuxiliary;
 		window.delegate                    = self;
+		window.hidesOnDeactivate           = NO;
 		window.toolbar                     = toolbar;
 	}
 	return self;
