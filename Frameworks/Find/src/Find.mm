@@ -571,29 +571,27 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 
 - (void)updateSearchInPopUpMenu
 {
+	NSMenuItem* folderItem;
+
+	MBMenu const items = {
+		{ @"Document",            @selector(takeSearchTargetFrom:), @"f", .tag = FFSearchTargetDocument          },
+		{ @"Selection",           @selector(takeSearchTargetFrom:),       .tag = FFSearchTargetSelection         },
+		{ /* -------- */ },
+		{ @"Open Files",          @selector(takeSearchTargetFrom:),       .tag = FFSearchTargetOpenFiles         },
+		{ @"Project Folder",      @selector(takeSearchTargetFrom:), @"F", .tag = FFSearchTargetProject           },
+		{ @"File Browser Items",  @selector(takeSearchTargetFrom:),       .tag = FFSearchTargetFileBrowserItems  },
+		{ @"Other Folder…",       @selector(showFolderSelectionPanel:),   .tag = FFSearchTargetOther             },
+		{ /* -------- */ },
+		{ @"«Last Folder»",       @selector(takeSearchTargetFrom:),       .ref = &folderItem                     },
+		{ /* -------- */ },
+		{ @"Recent Places",       @selector(nop:),                                                               },
+	};
+
 	NSMenu* whereMenu = _wherePopUpButton.menu;
 	[whereMenu removeAllItems];
+	MBCreateMenu(items, whereMenu);
 
-	NSMenuItem* documentItem    = [whereMenu addItemWithTitle:@"Document"           action:@selector(takeSearchTargetFrom:) keyEquivalent:@"f"];
-	NSMenuItem* selectionItem   = [whereMenu addItemWithTitle:@"Selection"          action:@selector(takeSearchTargetFrom:) keyEquivalent:@""];
-	[whereMenu addItem:[NSMenuItem separatorItem]];
-	NSMenuItem* openFilesItem   = [whereMenu addItemWithTitle:@"Open Files"         action:@selector(takeSearchTargetFrom:) keyEquivalent:@""];
-	NSMenuItem* projectItem     = [whereMenu addItemWithTitle:@"Project Folder"     action:@selector(takeSearchTargetFrom:) keyEquivalent:@"F"];
-	NSMenuItem* fileBrowserItem = [whereMenu addItemWithTitle:@"File Browser Items" action:@selector(takeSearchTargetFrom:) keyEquivalent:@""];
-	NSMenuItem* otherItem       = [whereMenu addItemWithTitle:@"Other Folder…"      action:@selector(showFolderSelectionPanel:) keyEquivalent:@""];
-	[whereMenu addItem:[NSMenuItem separatorItem]];
-	NSMenuItem* folderItem      = [whereMenu addItemWithTitle:@"«Last Folder»"      action:@selector(takeSearchTargetFrom:) keyEquivalent:@""];
-	[whereMenu addItem:[NSMenuItem separatorItem]];
-
-	documentItem.tag    = FFSearchTargetDocument;
-	selectionItem.tag   = FFSearchTargetSelection;
-	openFilesItem.tag   = FFSearchTargetOpenFiles;
-	projectItem.tag     = FFSearchTargetProject;
-	fileBrowserItem.tag = FFSearchTargetFileBrowserItems;
-	otherItem.tag       = FFSearchTargetOther;
-
-	NSString* lastFolder = self.searchFolder ?: self.projectFolder;
-	if(lastFolder)
+	if(NSString* lastFolder = self.searchFolder ?: self.projectFolder)
 	{
 		[folderItem setTitle:[self displayNameForFolder:lastFolder]];
 		[folderItem setIconForFile:lastFolder];
@@ -608,9 +606,6 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 	// =================
 	// = Recent Places =
 	// =================
-
-	[whereMenu addItem:[NSMenuItem separatorItem]];
-	[whereMenu addItemWithTitle:@"Recent Places" action:@selector(nop:) keyEquivalent:@""];
 
 	NSInteger selectedIndex = -1;
 	NSMutableArray<NSString*>* recentPaths = [NSMutableArray array];
