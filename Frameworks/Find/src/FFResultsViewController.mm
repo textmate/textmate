@@ -22,10 +22,8 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 
 @interface FFResultsViewController () <NSOutlineViewDataSource, NSOutlineViewDelegate>
 {
-	NSView*        _topDivider;
 	NSScrollView*  _scrollView;
 	NSOutlineView* _outlineView;
-	NSView*        _bottomDivider;
 	NSFont*        _searchResultsFont;
 
 	__weak id      _eventMonitor;
@@ -297,19 +295,6 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 // ===========================
 
 @implementation FFResultsViewController
-- (NSView*)horizontalDividerView
-{
-	// We can’t use NSBoxSeparator because it creates a superview for the separator
-	// that is larger than the separator itself, and therefore overlaps with our
-	// scroll view, causing the scroll view to always show its scrollbars (bug?)
-
-	NSBox* boxView = [[NSBox alloc] initWithFrame:NSZeroRect];
-	boxView.boxType = NSBoxCustom;
-	boxView.borderColor = NSColor.quaternaryLabelColor;
-	[boxView.heightAnchor constraintEqualToConstant:1].active = YES;
-	return boxView;
-}
-
 - (void)loadView
 {
 	if(!_scrollView)
@@ -321,9 +306,6 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		NSTextField* label = OakCreateLabel(@"m", _searchResultsFont);
 		[label sizeToFit];
 		CGFloat lineHeight = std::max(NSHeight(label.frame), ceil(_searchResultsFont.ascender) + ceil(fabs(_searchResultsFont.descender)) + ceil(_searchResultsFont.leading));
-
-		_topDivider    = [self horizontalDividerView];
-		_bottomDivider = [self horizontalDividerView];
 
 		_outlineView = [[NSOutlineView alloc] initWithFrame:NSZeroRect];
 		_outlineView.accessibilityLabel                 = @"Results";
@@ -351,18 +333,21 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		_scrollView.borderType            = NSNoBorder;
 		_scrollView.documentView          = _outlineView;
 
-		NSStackView* stackView = [NSStackView stackViewWithViews:@[ _topDivider, _scrollView, _bottomDivider ]];
-		stackView.spacing      = 0;
-		stackView.orientation  = NSUserInterfaceLayoutOrientationVertical;
+		NSView* contentView = [[NSView alloc] initWithFrame:NSZeroRect];
 
-		[stackView setClippingResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationVertical];
-		[stackView setVisibilityPriority:NSStackViewVisibilityPriorityDetachOnlyIfNecessary-1 forView:_topDivider];
-		[stackView setVisibilityPriority:NSStackViewVisibilityPriorityDetachOnlyIfNecessary-2 forView:_bottomDivider];
+		NSDictionary* views = @{
+			@"topDivider":     OakCreateNSBoxSeparator(),
+			@"scrollView":     _scrollView,
+			@"bottomDividier": OakCreateNSBoxSeparator(),
+		};
 
-		stackView.nextKeyView = _outlineView;
-		_outlineView.nextKeyView = stackView;
+		OakAddAutoLayoutViewsToSuperview(views.allValues, contentView);
+		OakSetupKeyViewLoop(@[ contentView, _outlineView ], NO);
 
-		self.view = stackView;
+		[NSLayoutConstraint activateConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView]|"                                             options:0                                                            metrics:nil views:views]];
+		[NSLayoutConstraint activateConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[topDivider(==1)][scrollView(>=50)][bottomDividier(==1)]|" options:NSLayoutFormatAlignAllLeading|NSLayoutFormatAlignAllTrailing metrics:nil views:views]];
+
+		self.view = contentView;
 
 		_outlineView.dataSource   = self;
 		_outlineView.delegate     = self;

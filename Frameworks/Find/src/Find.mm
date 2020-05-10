@@ -14,6 +14,7 @@
 #import <OakAppKit/NSMenuItem Additions.h>
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakPasteboard.h>
+#import <OakAppKit/OakTransitionViewController.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <MenuBuilder/MenuBuilder.h>
 #import <Preferences/Keys.h>
@@ -81,16 +82,18 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 {
 	NSObjectController*        _objectController;
 
-	FFTextFieldViewController* _findTextFieldViewController;
-	FFTextFieldViewController* _replaceTextFieldViewController;
+	FFTextFieldViewController*   _findTextFieldViewController;
+	FFTextFieldViewController*   _replaceTextFieldViewController;
 
-	NSPopUpButton*             _wherePopUpButton;
-	NSButton*                  _findAllButton;
-	NSButton*                  _findNextButton;
+	NSPopUpButton*               _wherePopUpButton;
+	NSButton*                    _findAllButton;
+	NSButton*                    _findNextButton;
 
-	FFStatusBarViewController* _statusBarViewController;
-	NSGridView*                _gridView;
-	NSStackView*               _actionButtonsStackView;
+	OakTransitionViewController* _transitionViewController;
+
+	FFStatusBarViewController*   _statusBarViewController;
+	NSGridView*                  _gridView;
+	NSStackView*                 _actionButtonsStackView;
 }
 @property (nonatomic, readonly)           FFResultsViewController* resultsViewController;
 @property (nonatomic) BOOL                showsResultsOutlineView;
@@ -181,13 +184,15 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		_resultsViewController.doubleClickResultAction = @selector(didDoubleClickResult:);
 		_resultsViewController.target                  = self;
 
+		_transitionViewController = [[OakTransitionViewController alloc] init];
+
 		_statusBarViewController = [[FFStatusBarViewController alloc] init];
 		_statusBarViewController.stopAction = @selector(stopSearch:);
 		_statusBarViewController.stopTarget = self;
 
 		NSStackView* stackView = [NSStackView stackViewWithViews:@[
 			self.gridView,
-			_resultsViewController.view,
+			_transitionViewController.view,
 			_statusBarViewController.view,
 			self.actionButtonsStackView,
 		]];
@@ -199,15 +204,13 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 
 		self.actionButtonsStackView.edgeInsets = { .left = 20, .right = 20 };
 
-		_resultsViewController.view.hidden = YES;
-
 		self.window.contentView = stackView;
 		self.window.defaultButtonCell = _findNextButton.cell;
 
 		[self updateWindowTitle];
 		[self.window layoutIfNeeded]; // Incase autosaved window frame includes results, we want to shrink the frame
 
-		OakSetupKeyViewLoop(@[ self.gridView, _resultsViewController.view, self.actionButtonsStackView ]);
+		OakSetupKeyViewLoop(@[ self.gridView, _transitionViewController.view, self.actionButtonsStackView ]);
 
 		[_resultsViewController bind:@"replaceString" toObject:_replaceTextFieldViewController withKeyPath:@"stringValue" options:nil];
 
@@ -689,29 +692,10 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 	if(!self.isWindowLoaded)
 		return;
 
-	NSRect windowFrame = self.window.frame;
-	CGFloat minY = NSMinY(windowFrame);
-	CGFloat maxY = NSMaxY(windowFrame);
-
+	NSView* view = _showsResultsOutlineView ? _resultsViewController.view : nil;
 	if(_showsResultsOutlineView)
-			minY -= MAX(50, self.findResultsHeight + 8);
-	else	minY += NSHeight(_resultsViewController.view.frame) + 8;
-
-	NSRect screenFrame = self.window.screen.visibleFrame;
-	if(minY < NSMinY(screenFrame))
-		maxY += NSMinY(screenFrame) - minY;
-	if(maxY > NSMaxY(screenFrame))
-		minY -= maxY - NSMaxY(screenFrame);
-
-	minY = MAX(minY, NSMinY(screenFrame));
-	maxY = MIN(maxY, NSMaxY(screenFrame));
-	NSRect newWindowFrame = NSMakeRect(NSMinX(windowFrame), minY, NSWidth(windowFrame), maxY - minY);
-
-	if(_showsResultsOutlineView)
-		_resultsViewController.view.hidden = NO;
-	[self.window setFrame:newWindowFrame display:YES animate:YES];
-	if(!_showsResultsOutlineView)
-		_resultsViewController.view.hidden = YES;
+		view.frame = { .size = NSMakeSize(NSWidth(_transitionViewController.view.frame), MAX(50, self.findResultsHeight)) };
+	[_transitionViewController transitionToView:view];
 
 	self.window.defaultButtonCell = _showsResultsOutlineView ? _findAllButton.cell : _findNextButton.cell;
 }
