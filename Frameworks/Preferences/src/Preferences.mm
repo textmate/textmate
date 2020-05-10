@@ -259,19 +259,18 @@ static NSString* const kMASPreferencesSelectedViewKey = @"MASPreferences Selecte
 
 - (NSToolbarItem*)toolbar:(NSToolbar*)toolbar itemForItemIdentifier:(NSToolbarItemIdentifier)itemIdentifier willBeInsertedIntoToolbar:(BOOL)flag
 {
+	NSToolbarItem* res = [[NSToolbarItem alloc] initWithItemIdentifier:itemIdentifier];
+	res.action = @selector(takeSelectedViewControllerIdentifierFrom:);
+	res.target = self;
+
 	if(NSViewController <PreferencesPaneProtocol>* viewController = [_preferencesViewController viewControllerForIdentifier:itemIdentifier])
 	{
-		NSToolbarItem* res = [[NSToolbarItem alloc] initWithItemIdentifier:itemIdentifier];
-		res.label  = viewController.title;
-		res.action = @selector(takeSelectedViewControllerIdentifierFrom:);
-		res.target = self;
-
+		res.label = viewController.title;
 		if([viewController respondsToSelector:@selector(toolbarItemImage)])
 			res.image = viewController.toolbarItemImage;
-
-		return res;
 	}
-	return nil;
+
+	return res;
 }
 
 - (NSArray<NSToolbarItemIdentifier>*)toolbarAllowedItemIdentifiers:(NSToolbar*)toolbar
