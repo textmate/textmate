@@ -85,11 +85,13 @@
 
 	NSUInteger animationCounter = ++_animationCounter;
 
-	auto animationBody = ^{
+	auto animationBody = ^(BOOL animated){
 		_currentSubview.alphaValue = 0;
 		_currentSubview = newView;
 		newView.alphaValue = 1;
-		[window setFrame:newFrame display:YES];
+		if(animated)
+				[window setFrame:newFrame display:YES animate:YES];
+		else	[window setFrame:newFrame display:YES];
 	};
 
 	auto animationCompletion = ^{
@@ -144,17 +146,25 @@
 		}
 	};
 
-	if(window && window.isVisible)
+	if(@available(macos 10.15, *))
 	{
-		[NSAnimationContext runAnimationGroup:^(NSAnimationContext* context) {
-			context.allowsImplicitAnimation = YES;
-			context.duration                = 0.2;
-			animationBody();
-		} completionHandler:animationCompletion];
+		if(window && window.isVisible)
+		{
+			[NSAnimationContext runAnimationGroup:^(NSAnimationContext* context) {
+				context.allowsImplicitAnimation = YES;
+				context.duration                = 0.2;
+				animationBody(NO);
+			} completionHandler:animationCompletion];
+		}
+		else
+		{
+			animationBody(NO);
+			animationCompletion();
+		}
 	}
 	else
 	{
-		animationBody();
+		animationBody(YES);
 		animationCompletion();
 	}
 }
