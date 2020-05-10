@@ -193,27 +193,28 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		_statusBarViewController.stopAction = @selector(stopSearch:);
 		_statusBarViewController.stopTarget = self;
 
-		NSStackView* stackView = [NSStackView stackViewWithViews:@[
-			self.gridView,
-			_transitionViewController.view,
-			_statusBarViewController.view,
-			self.actionButtonsStackView,
-		]];
-		stackView.orientation = NSUserInterfaceLayoutOrientationVertical;
-		stackView.alignment   = NSLayoutAttributeLeading;
-		stackView.edgeInsets  = { .bottom = 20 };
-		[stackView setHuggingPriority:NSLayoutPriorityDefaultHigh-1 forOrientation:NSLayoutConstraintOrientationVertical];
-		[stackView setHuggingPriority:NSLayoutPriorityDefaultHigh-1 forOrientation:NSLayoutConstraintOrientationHorizontal];
+		NSDictionary* views = @{
+			@"options": self.gridView,
+			@"results": _transitionViewController.view,
+			@"status":  _statusBarViewController.view,
+			@"buttons": self.actionButtonsStackView,
+		};
+
+		NSView* contentView = [[NSView alloc] initWithFrame:NSZeroRect];
 
 		self.actionButtonsStackView.edgeInsets = { .left = 20, .right = 20 };
 
-		self.window.contentView = stackView;
+		OakAddAutoLayoutViewsToSuperview(views.allValues, contentView);
+		OakSetupKeyViewLoop(@[ self.gridView, _transitionViewController.view, self.actionButtonsStackView ]);
+
+		[NSLayoutConstraint activateConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[options]|"                               options:0                                                            metrics:nil views:views]];
+		[NSLayoutConstraint activateConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[options]-[results]-[status]-[buttons]-|" options:NSLayoutFormatAlignAllLeading|NSLayoutFormatAlignAllTrailing metrics:nil views:views]];
+
+		self.window.contentView = contentView;
 		self.window.defaultButtonCell = _findNextButton.cell;
 
 		[self updateWindowTitle];
 		[self.window layoutIfNeeded]; // Incase autosaved window frame includes results, we want to shrink the frame
-
-		OakSetupKeyViewLoop(@[ self.gridView, _transitionViewController.view, self.actionButtonsStackView ]);
 
 		[_resultsViewController bind:@"replaceString" toObject:_replaceTextFieldViewController withKeyPath:@"stringValue" options:nil];
 
