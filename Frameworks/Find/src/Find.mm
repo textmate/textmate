@@ -178,6 +178,9 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		self.window.delegate           = self;
 		self.window.restorable         = NO;
 
+		_findTextFieldViewController    = [[FFTextFieldViewController alloc] initWithPasteboard:OakPasteboard.findPasteboard grammarName:@"source.regexp.oniguruma"];
+		_replaceTextFieldViewController = [[FFTextFieldViewController alloc] initWithPasteboard:OakPasteboard.replacePasteboard grammarName:@"textmate.format-string"];
+
 		_resultsViewController = [[FFResultsViewController alloc] init];
 		_resultsViewController.selectResultAction      = @selector(didSelectResult:);
 		_resultsViewController.removeResultAction      = @selector(didRemoveResult:);
@@ -260,9 +263,6 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 {
 	if(!_gridView)
 	{
-		_findTextFieldViewController    = [[FFTextFieldViewController alloc] initWithPasteboard:OakPasteboard.findPasteboard grammarName:@"source.regexp.oniguruma"];
-		_replaceTextFieldViewController = [[FFTextFieldViewController alloc] initWithPasteboard:OakPasteboard.replacePasteboard grammarName:@"textmate.format-string"];
-
 		NSTextField* findLabel              = OakCreateLabel(@"Find:");
 		NSButton* findHistoryButton         = OakCreateHistoryButton(@"Show Find History");
 
