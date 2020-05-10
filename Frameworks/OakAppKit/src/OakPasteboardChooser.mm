@@ -502,7 +502,9 @@ static NSMutableDictionary* SharedChoosers;
 	[self updatePasteboardWithSelectedEntries:self];
 	[self.window orderOut:self];
 
-	if(_action)
+	if(_alternateAction && OakIsAlternateKeyOrMouseEvent() && [NSApp targetForAction:_alternateAction])
+		[NSApp sendAction:_alternateAction to:_target from:self];
+	else if(_action)
 		[NSApp sendAction:_action to:_target from:self];
 	[self.window close];
 }
