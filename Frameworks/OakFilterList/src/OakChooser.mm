@@ -301,6 +301,12 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 
 - (void)showWindow:(id)sender
 {
+	if(self.isWindowLoaded && self.window.isVisible && self.window.isKeyWindow)
+	{
+		[self.window close];
+		return;
+	}
+
 	[self.window makeFirstResponder:self.window.initialFirstResponder];
 	[super showWindow:sender];
 }
