@@ -354,23 +354,6 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		_outlineView.target       = self;
 		_outlineView.action       = @selector(didSingleClick:);
 		_outlineView.doubleAction = @selector(didDoubleClick:);
-
-		_eventMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:NSEventMaskFlagsChanged handler:^NSEvent*(NSEvent* event){
-			NSUInteger modifierFlags = [_outlineView.window isKeyWindow] ? ([event modifierFlags] & (NSEventModifierFlagShift|NSEventModifierFlagControl|NSEventModifierFlagOption|NSEventModifierFlagCommand)) : 0;
-			if(_longPressedCommandModifier)
-			{
-				self.showKeyEquivalent = modifierFlags == NSEventModifierFlagCommand;
-				if(modifierFlags == 0)
-					_longPressedCommandModifier = NO;
-			}
-			else
-			{
-				if(modifierFlags == NSEventModifierFlagCommand)
-						[self performSelector:@selector(delayedLongPressedCommandModifier:) withObject:self afterDelay:0.2];
-				else	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(delayedLongPressedCommandModifier:) object:self];
-			}
-			return event;
-		}];
 	}
 }
 
@@ -380,9 +363,30 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 	self.showKeyEquivalent = YES;
 }
 
-- (void)dealloc
+- (void)viewDidAppear
+{
+	_eventMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:NSEventMaskFlagsChanged handler:^NSEvent*(NSEvent* event){
+		NSUInteger modifierFlags = _outlineView.window.isKeyWindow ? (event.modifierFlags & (NSEventModifierFlagShift|NSEventModifierFlagControl|NSEventModifierFlagOption|NSEventModifierFlagCommand)) : 0;
+		if(_longPressedCommandModifier)
+		{
+			self.showKeyEquivalent = modifierFlags == NSEventModifierFlagCommand;
+			if(modifierFlags == 0)
+				_longPressedCommandModifier = NO;
+		}
+		else
+		{
+			if(modifierFlags == NSEventModifierFlagCommand)
+					[self performSelector:@selector(delayedLongPressedCommandModifier:) withObject:self afterDelay:0.2];
+			else	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(delayedLongPressedCommandModifier:) object:self];
+		}
+		return event;
+	}];
+}
+
+- (void)viewWillDisappear
 {
 	[NSEvent removeMonitor:_eventMonitor];
+	_eventMonitor = nil;
 }
 
 - (void)setResults:(FFResultNode*)someResults
