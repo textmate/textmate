@@ -67,6 +67,8 @@ static NSUserInterfaceItemIdentifier const kTableColumnIdentifierFlag = @"flag";
 	NSTitlebarAccessoryViewController* _accessoryViewController;
 	OakScopeBarViewController* _scopeBar;
 	BOOL _skipUpdatePasteboard;
+	NSButton* _actionButton;
+	id _eventMonitor;
 }
 @property (nonatomic) OakPasteboard*        pasteboard;
 @property (nonatomic) NSArrayController*    arrayController;
@@ -145,19 +147,19 @@ static NSMutableDictionary* SharedChoosers;
 		NSButton* flagButton     = OakCreateButton(@"⚑", NSBezelStyleTexturedRounded);
 		NSButton* deleteButton   = OakCreateButton(@"Delete", NSBezelStyleTexturedRounded);
 		NSButton* clearAllButton = OakCreateButton(@"Clear History", NSBezelStyleTexturedRounded);
-		NSButton* actionButton   = OakCreateButton(actionName, NSBezelStyleTexturedRounded);
+		_actionButton            = OakCreateButton(actionName, NSBezelStyleTexturedRounded);
 
 		flagButton.action     = @selector(toggleCurrentBookmark:);
 		deleteButton.action   = @selector(deleteForward:);
 		clearAllButton.action = @selector(clearAll:);
-		actionButton.action   = @selector(accept:);
+		_actionButton.action  = @selector(accept:);
 
 		NSDictionary* footerViews = @{
 			@"dividerView": OakCreateNSBoxSeparator(),
 			@"flag":        flagButton,
 			@"delete":      deleteButton,
 			@"clearAll":    clearAllButton,
-			@"action":      actionButton,
+			@"action":      _actionButton,
 		};
 
 		NSView* footerView = self.footerView;
@@ -169,26 +171,52 @@ static NSMutableDictionary* SharedChoosers;
 
 		[self updateScrollViewInsets];
 
-		self.window.defaultButtonCell = actionButton.cell;
+		self.window.defaultButtonCell = _actionButton.cell;
 
 		[flagButton bind:NSEnabledBinding toObject:self withKeyPath:@"hasSelection" options:nil];
 		[deleteButton bind:NSEnabledBinding toObject:self withKeyPath:@"hasSelection" options:nil];
-		[actionButton bind:NSEnabledBinding toObject:self withKeyPath:@"hasSelection" options:nil];
+		[_actionButton bind:NSEnabledBinding toObject:self withKeyPath:@"hasSelection" options:nil];
 		[_scopeBar bind:NSValueBinding toObject:self withKeyPath:@"sourceIndex" options:nil];
 
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(clipboardDidChange:) name:OakPasteboardDidChangeNotification object:_pasteboard];
+
+		if([_pasteboard isEqual:OakPasteboard.findPasteboard])
+		{
+			[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(windowDidChangeKeyStatus:) name:NSWindowDidBecomeKeyNotification object:self.window];
+			[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(windowDidChangeKeyStatus:) name:NSWindowDidResignKeyNotification object:self.window];
+		}
 	}
 	return self;
 }
 
 - (void)dealloc
 {
-	[NSNotificationCenter.defaultCenter removeObserver:self name:OakPasteboardDidChangeNotification object:_pasteboard];
+	[NSNotificationCenter.defaultCenter removeObserver:self];
 
 	self.window.delegate  = nil;
 	_tableView.dataSource = nil;
 	_tableView.delegate   = nil;
 	_tableView.target     = nil;
+}
+
+- (void)windowDidChangeKeyStatus:(NSNotification*)aNotification
+{
+	auto updateDefaultButton = ^NSEvent*(NSEvent* event){
+		BOOL optionDown = (event.modifierFlags & NSEventModifierFlagDeviceIndependentFlagsMask) == NSEventModifierFlagOption;
+		_actionButton.title = optionDown ? @"Find in Project" : @"Find Next";
+		return event;
+	};
+
+	updateDefaultButton(NSApp.currentEvent);
+	if(NSApp.keyWindow == self.window)
+	{
+		_eventMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:NSEventMaskFlagsChanged handler:updateDefaultButton];
+	}
+	else if(_eventMonitor)
+	{
+		[NSEvent removeMonitor:_eventMonitor];
+		_eventMonitor = nil;
+	}
 }
 
 // =====================
