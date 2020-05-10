@@ -56,7 +56,7 @@
 	NSSize newSize  = newView ? newView.frame.size : NSMakeSize(oldSize.width, 0);
 	NSRect newFrame = NSOffsetRect(NSInsetRect(window.frame, (oldSize.width - newSize.width) / 2, (oldSize.height - newSize.height) / 2), (newSize.width - oldSize.width) / 2, (oldSize.height - newSize.height) / 2);
 
-	NSRect screenFrame = self.view.window.screen.visibleFrame;
+	NSRect screenFrame = (self.view.window.screen ?: NSScreen.mainScreen).visibleFrame;
 	if(NSMinX(newFrame) < NSMinX(screenFrame))
 		newFrame.origin.x += NSMinX(screenFrame) - NSMinX(newFrame);
 	else if(NSMaxX(newFrame) > NSMaxX(screenFrame))
