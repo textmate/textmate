@@ -2,6 +2,11 @@ Title: Release Notes
 
 # Changes
 
+## 2020-05-10 (v2.0.12)
+
+* In the Find History window it is now possible to hold down option (⌥) to change the “Find Next” button to “Find in Project”.
+* See [all changes since v2.0.11](https://github.com/textmate/textmate/compare/v2.0.11...v2.0.12)
+
 ## 2020-04-30 (v2.0.11)
 
 * It is now possible to use ⌘[ in the Find dialog to go back to previously searched folders. The pop-up menu will show ⌘[ and ⌘] shortcuts next to the folders that the respective keys will select.
