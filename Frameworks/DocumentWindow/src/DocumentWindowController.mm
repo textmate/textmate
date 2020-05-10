@@ -2042,6 +2042,13 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	[find showWindow:self];
 }
 
+- (IBAction)orderFrontFindPanelForProject:(id)sender
+{
+	Find* find = [self prepareAndReturnFindPanel];
+	find.searchTarget = FFSearchTargetProject;
+	[find showWindow:self];
+}
+
 - (IBAction)orderFrontRunCommandWindow:(id)sender
 {
 	OakRunCommandWindowController* runCommand = OakRunCommandWindowController.sharedInstance;

@@ -490,7 +490,8 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 - (void)showFindHistory:(id)sender
 {
 	OakPasteboardChooser* chooser = [OakPasteboardChooser sharedChooserForPasteboard:OakPasteboard.findPasteboard];
-	chooser.action = @selector(findNext:);
+	chooser.action          = @selector(findNext:);
+	chooser.alternateAction = @selector(orderFrontFindPanelForProject:);
 	[chooser showWindowRelativeToFrame:[self.window convertRectToScreen:[_textView convertRect:[_textView visibleRect] toView:nil]]];
 }
 
