@@ -6,6 +6,7 @@
 #import "SoftwareUpdatePreferences.h"
 #import "TerminalPreferences.h"
 #import "Keys.h"
+#import <OakAppKit/OakTransitionViewController.h>
 
 static NSString* const kMASPreferencesFrameTopLeftKey = @"MASPreferences Frame Top Left";
 static NSString* const kMASPreferencesSelectedViewKey = @"MASPreferences Selected Identifier View";
@@ -14,104 +15,15 @@ static NSString* const kMASPreferencesSelectedViewKey = @"MASPreferences Selecte
 // = PreferencesViewController =
 // =============================
 
-@interface PreferencesViewController : NSViewController
-{
-	NSUInteger                    _animationCounter;
-	NSArray<NSLayoutConstraint*>* _viewFrameConstraints;
-}
+@interface PreferencesViewController : OakTransitionViewController
 @property (nonatomic) NSString* selectedViewIdentifier;
 @end
 
 @implementation PreferencesViewController
-- (void)loadView
-{
-	self.view = [[NSView alloc] initWithFrame:NSZeroRect];
-	self.view.wantsLayer = YES;
-}
-
 - (void)viewWillAppear
 {
 	NSString* viewIdentifier = [NSUserDefaults.standardUserDefaults stringForKey:kMASPreferencesSelectedViewKey];
 	self.selectedViewIdentifier = viewIdentifier ?: self.childViewControllers.firstObject.identifier;
-}
-
-- (void)transitionFromView:(NSView*)oldView toView:(NSView*)newView
-{
-	if(!newView)
-		return;
-
-	NSWindow* window = self.view.window;
-	NSRect newFrame = window.frame;
-	newFrame.size      = [window frameRectForContentRect:newView.frame].size;
-	newFrame.origin.y += NSMaxY(window.frame) - NSMaxY(newFrame);
-
-	if([window.firstResponder isKindOfClass:[NSView class]] && [(NSView*)window.firstResponder isDescendantOf:oldView])
-		[window makeFirstResponder:window];
-
-	auto oldViewFrameConstraints = _viewFrameConstraints;
-	_viewFrameConstraints = @[
-		[newView.widthAnchor  constraintEqualToConstant:NSWidth(newView.frame)  ],
-		[newView.heightAnchor constraintEqualToConstant:NSHeight(newView.frame) ],
-	];
-	[NSLayoutConstraint activateConstraints:_viewFrameConstraints];
-
-	NSUInteger animationCounter = ++_animationCounter;
-
-	[NSAnimationContext runAnimationGroup:^(NSAnimationContext* context) {
-		if(window.isVisible && oldView)
-		{
-			context.allowsImplicitAnimation = YES;
-			context.duration = 0.2;
-		}
-		else
-		{
-			context.duration = 0;
-		}
-
-		if(oldView)
-		{
-			oldView.hidden = YES;
-			[oldView removeFromSuperview];
-			[NSLayoutConstraint deactivateConstraints:oldViewFrameConstraints];
-		}
-
-		newView.hidden = YES;
-		[self.view addSubview:newView];
-		self.view.nextKeyView = newView;
-		newView.hidden = NO;
-
-		[window setFrame:newFrame display:NO];
-	}
-	completionHandler:^{
-		if(animationCounter == _animationCounter)
-		{
-			[NSLayoutConstraint deactivateConstraints:_viewFrameConstraints];
-			_viewFrameConstraints = @[
-				[newView.leadingAnchor  constraintEqualToAnchor:self.view.leadingAnchor ],
-				[newView.bottomAnchor   constraintEqualToAnchor:self.view.bottomAnchor  ],
-				[newView.topAnchor      constraintEqualToAnchor:self.view.topAnchor     ],
-				[newView.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
-			];
-			[NSLayoutConstraint activateConstraints:_viewFrameConstraints];
-
-			[window recalculateKeyViewLoop];
-			if(window.firstResponder == window)
-			{
-				// selectKeyViewFollowingView: will select toolbar buttons when Full Keyboard Access is enabled
-
-				std::set<NSView*> avoidLoops;
-				for(NSView* keyView = newView; keyView && avoidLoops.find(keyView) == avoidLoops.end(); keyView = keyView.nextKeyView)
-				{
-					if(keyView.canBecomeKeyView)
-					{
-						[window makeFirstResponder:keyView];
-						break;
-					}
-					avoidLoops.insert(keyView);
-				}
-			}
-		}
-	}];
 }
 
 - (void)setSelectedViewIdentifier:(NSString*)viewIdentifier
@@ -133,12 +45,7 @@ static NSString* const kMASPreferencesSelectedViewKey = @"MASPreferences Selecte
 	NSViewController* newViewController = [self viewControllerForIdentifier:viewIdentifier];
 	self.title = newViewController.title ?: @"Preferences";
 
-	NSView* newView = newViewController.view;
-	newView.translatesAutoresizingMaskIntoConstraints = NO;
-	if(NSEqualSizes(newView.frame.size, NSZeroSize))
-		newView.frame = { .size = newView.fittingSize };
-
-	[self transitionFromView:oldViewController.view toView:newView];
+	[self transitionToView:newViewController.view];
 }
 
 - (NSViewController <PreferencesPaneProtocol>*)viewControllerForIdentifier:(NSString*)viewIdentifier
