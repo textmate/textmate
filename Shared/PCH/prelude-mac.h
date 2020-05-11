@@ -14,6 +14,7 @@
 #import <libkern/OSAtomic.h>
 #import <machine/byte_order.h>
 
+#import <os/activity.h>
 #import <os/log.h>
 
 #endif /* end of include guard: PRELUDE_MAC_H_X1SR1JB2 */
