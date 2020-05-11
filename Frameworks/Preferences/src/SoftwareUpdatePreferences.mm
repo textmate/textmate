@@ -36,7 +36,6 @@
 			@"disableCrashReports":    kUserDefaultsDisableCrashReportingKey,
 			@"softwareUpdateChannel":  kUserDefaultsSoftwareUpdateChannelKey,
 			@"askBeforeDownloading":   kUserDefaultsAskBeforeUpdatingKey,
-			@"submitUsageInfo":        kUserDefaultsSubmitUsageInfoKey,
 			@"contactInfo":            kUserDefaultsCrashReportsContactInfoKey,
 		};
 	}

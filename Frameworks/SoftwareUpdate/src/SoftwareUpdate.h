@@ -3,7 +3,6 @@
 
 PUBLIC extern NSString* const kUserDefaultsDisableSoftwareUpdatesKey;
 PUBLIC extern NSString* const kUserDefaultsSoftwareUpdateChannelKey;
-PUBLIC extern NSString* const kUserDefaultsSubmitUsageInfoKey;
 PUBLIC extern NSString* const kUserDefaultsAskBeforeUpdatingKey;
 
 PUBLIC extern NSString* const kSoftwareUpdateChannelRelease;
