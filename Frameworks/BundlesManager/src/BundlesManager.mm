@@ -33,6 +33,8 @@ static NSString* SafeBasename (NSString* name)
 
 @interface BundlesManager ()
 {
+	NSBackgroundActivityScheduler* _updateBundleIndexScheduler;
+
 	std::vector<std::string> bundlesPaths;
 	std::string bundlesIndexPath;
 	std::set<std::string> watchList;
@@ -42,7 +44,6 @@ static NSString* SafeBasename (NSString* name)
 
 @property (nonatomic) BOOL      determinateProgress;
 @property (nonatomic) CGFloat   progress;
-@property (nonatomic) NSTimer*  updateTimer;
 
 @property (nonatomic) BOOL      needsCreateBundlesIndex;
 @property (nonatomic) BOOL      needsSaveBundlesIndex;
@@ -95,30 +96,35 @@ static NSString* SafeBasename (NSString* name)
 	if(_autoUpdateBundles == flag)
 		return;
 
-	[_updateTimer invalidate];
-	_updateTimer = nil;
+	[_updateBundleIndexScheduler invalidate];
+	_updateBundleIndexScheduler = nil;
 
 	_autoUpdateBundles = flag;
 	if(_autoUpdateBundles)
 	{
-		NSDate* lastCheck = [NSUserDefaults.standardUserDefaults objectForKey:kUserDefaultsLastBundleUpdateCheckKey] ?: [NSDate distantPast];
-		if(![NSFileManager.defaultManager fileExistsAtPath:_remoteIndexPath])
-			lastCheck = [NSDate distantPast];
-
 		CGFloat updateFrequency = [NSUserDefaults.standardUserDefaults floatForKey:kUserDefaultsBundleUpdateFrequencyKey] ?: kDefaultPollInterval;
-		NSDate* nextCheck = [lastCheck dateByAddingTimeInterval:updateFrequency];
-		nextCheck = [nextCheck laterDate:[[NSDate date] dateByAddingTimeInterval:5]];
 
-		_updateTimer = [[NSTimer alloc] initWithFireDate:nextCheck interval:updateFrequency target:self selector:@selector(didFireUpdateTimer:) userInfo:nil repeats:YES];
-		[[NSRunLoop currentRunLoop] addTimer:_updateTimer forMode:NSDefaultRunLoopMode];
+		_updateBundleIndexScheduler = [[NSBackgroundActivityScheduler alloc] initWithIdentifier:[NSString stringWithFormat:@"%@.%@", NSBundle.mainBundle.bundleIdentifier, @"UpdateBundleIndex"]];
+		_updateBundleIndexScheduler.interval = updateFrequency;
+		_updateBundleIndexScheduler.repeats  = YES;
+		[_updateBundleIndexScheduler scheduleWithBlock:^(NSBackgroundActivityCompletionHandler completionHandler){
+			os_activity_initiate("Update bundle index", OS_ACTIVITY_FLAG_DEFAULT, ^(){
+				os_log(OS_LOG_DEFAULT, "Try updating the bundle index");
+				[self tryUpdateBundleIndexAndCallback:^(BOOL wasUpdated){
+					os_log(OS_LOG_DEFAULT, "Newer bundle index retrieved: %{public}s", wasUpdated ? "YES" : "NO");
+					completionHandler(NSBackgroundActivityResultFinished);
+				}];
+			});
+		}];
 	}
 }
 
-- (void)didFireUpdateTimer:(NSTimer*)aTimer
+- (void)tryUpdateBundleIndexAndCallback:(void(^)(BOOL wasUpdated))completionHandler
 {
-	os_log(OS_LOG_DEFAULT, "Check if bundle index can be updated");
 	[OakNetworkManager.sharedInstance downloadFileAtURL:_remoteIndexURL replacingFileAtURL:[NSURL fileURLWithPath:_remoteIndexPath] publicKeys:self.publicKeys completionHandler:^(BOOL wasUpdated, NSError* error){
 		path::set_attr(_remoteIndexPath.fileSystemRepresentation, "last-check", to_s(oak::date_t::now()));
+		if(!error)
+			[NSUserDefaults.standardUserDefaults setObject:[NSDate date] forKey:kUserDefaultsLastBundleUpdateCheckKey];
 		if(wasUpdated)
 		{
 			os_log(OS_LOG_DEFAULT, "Bundle index updated: %{public}@", _remoteIndexPath);
@@ -131,19 +137,22 @@ static NSString* SafeBasename (NSString* name)
 					[self installBundles:bundlesToUpdate completionHandler:^(NSArray<Bundle*>* updatedBundles){
 						for(Bundle* bundle in updatedBundles)
 							os_log(OS_LOG_DEFAULT, "%{public}@ bundle updated: %{public}@", bundle.name, bundle.path);
+						completionHandler(wasUpdated);
 					}];
+				}
+				else
+				{
+					completionHandler(wasUpdated);
 				}
 			});
 		}
 		else
 		{
 			if(error)
-					os_log_error(OS_LOG_DEFAULT, "Failed to update bundle index: %{public}@", error.localizedDescription);
-			else	os_log(OS_LOG_DEFAULT, "Bundle index unchanged");
+				os_log_error(OS_LOG_DEFAULT, "Failed to update bundle index: %{public}@", error.localizedDescription);
+			completionHandler(wasUpdated);
 		}
 	}];
-
-	[NSUserDefaults.standardUserDefaults setObject:[NSDate date] forKey:kUserDefaultsLastBundleUpdateCheckKey];
 }
 
 - (void)installBundleItemsAtPaths:(NSArray*)somePaths
