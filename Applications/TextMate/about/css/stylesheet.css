@@ -1,3 +1,13 @@
+:root { --textColor:       #000000ff; }
+:root { --backgroundColor: #f1f1f1ff; }
+:root { --shadowColor:     #ffffffc0; }
+
+@media (prefers-color-scheme: dark) {
+	:root { --textColor:       #ffffffff; }
+	:root { --backgroundColor: #1e1e1eff; }
+	:root { --shadowColor:     #1e1e1ec0; }
+}
+
 html {
   font-size: 13px; }
 

@@ -30,7 +30,7 @@ static NSData* Digest (NSString* someString)
 @end
 
 @implementation AboutWindowJSBridge
-+ (BOOL)isSelectorExcludedFromWebScript:(SEL)aSelector { return aSelector != @selector(addLicense) && aSelector != @selector(themeColors); }
++ (BOOL)isSelectorExcludedFromWebScript:(SEL)aSelector { return aSelector != @selector(addLicense); }
 + (BOOL)isKeyExcludedFromWebScript:(char const*)name   { return strcmp(name, "version") != 0 && strcmp(name, "copyright") != 0 && strcmp(name, "licensees") != 0; }
 + (NSString*)webScriptNameForSelector:(SEL)aSelector   { return NSStringFromSelector(aSelector); }
 + (NSString*)webScriptNameForKey:(char const*)name     { return @(name); }
@@ -50,29 +50,6 @@ static NSData* Digest (NSString* someString)
 	return LicenseManager.sharedInstance.owner;
 }
 
-- (NSString*)themeColors
-{
-	NSString* css = @":root {"
-		" --textColor:       #000000ff;"
-		" --backgroundColor: #f1f1f1ff;"
-		" --shadowColor:     #ffffffc0;"
-	"}";
-
-	if(@available(macos 10.14, *))
-	{
-		NSAppearanceName appearanceName = [NSApp.effectiveAppearance bestMatchFromAppearancesWithNames:@[ NSAppearanceNameAqua, NSAppearanceNameDarkAqua ]];
-		if([appearanceName isEqualToString:NSAppearanceNameDarkAqua])
-		{
-			css = @":root {"
-				" --textColor:       #ffffffff;"
-				" --backgroundColor: #1e1e1eff;"
-				" --shadowColor:     #1e1e1ec0;"
-			"}";
-		}
-	}
-	return css;
-}
-
 - (void)addLicense
 {
 	[LicenseManager.sharedInstance showAddLicenseWindow:self];
@@ -80,33 +57,10 @@ static NSData* Digest (NSString* someString)
 @end
 
 // ====================================
-// = Auto-reload on appearance change =
-// ====================================
-
-@interface AboutWindowWebView : WebView
-@property (nonatomic, copy) NSURL* lastURLRequested;
-@end
-
-@implementation AboutWindowWebView
-- (void)loadRequest:(NSURLRequest*)urlRequest
-{
-	self.lastURLRequested = urlRequest.URL;
-	[self.mainFrame loadRequest:urlRequest];
-}
-
-- (void)viewDidChangeEffectiveAppearance
-{
-	[super viewDidChangeEffectiveAppearance];
-	if(NSURL* url = self.lastURLRequested)
-		[self.mainFrame loadRequest:[NSURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:60]];
-}
-@end
-
-// ====================================
 
 @interface AboutWindowController () <NSWindowDelegate, NSToolbarDelegate, WebFrameLoadDelegate, WebPolicyDelegate>
 @property (nonatomic) NSToolbar* toolbar;
-@property (nonatomic) AboutWindowWebView* webView;
+@property (nonatomic) WebView* webView;
 @property (nonatomic) NSString* selectedPage;
 @end
 
@@ -160,7 +114,7 @@ static NSData* Digest (NSString* someString)
 		[win setDelegate:self];
 		[win setAutorecalculatesKeyViewLoop:YES];
 
-		self.webView = [[AboutWindowWebView alloc] initWithFrame:[contentView bounds]];
+		self.webView = [[WebView alloc] initWithFrame:[contentView bounds]];
 		self.webView.drawsBackground = NO;
 		self.webView.translatesAutoresizingMaskIntoConstraints = NO;
 		self.webView.frameLoadDelegate = self;
@@ -222,7 +176,7 @@ static NSData* Digest (NSString* someString)
 	if(NSString* file = pages[pageName])
 	{
 		if(NSURL* url = [[NSBundle mainBundle] URLForResource:file withExtension:@"html"])
-			[self.webView loadRequest:[NSURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:60]];
+			[self.webView.mainFrame loadRequest:[NSURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:60]];
 
 		[self.window setTitle:pageName];
 		[self.toolbar setSelectedItemIdentifier:pageName];
