@@ -261,7 +261,7 @@ OakRolloverButton* OakCreateCloseButton (NSString* accessibilityLabel)
 	{
 		NSImage* image = value;
 		[[NSColor colorWithPatternImage:image] set];
-		CGContextRef context = (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort];
+		CGContextRef context = NSGraphicsContext.currentContext.CGContext;
 		CGAffineTransform affineTransform = CGContextGetCTM(context);
 		CGContextSetPatternPhase(context, CGSizeMake(affineTransform.tx, affineTransform.ty));
 		NSRectFillUsingOperation(aRect, NSCompositingOperationSourceOver);

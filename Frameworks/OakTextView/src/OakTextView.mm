@@ -767,7 +767,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 	[image lockFocusFlipped:[self isFlipped]];
 	[clip addClip];
 
-	CGContextRef context = (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort];
+	CGContextRef context = NSGraphicsContext.currentContext.CGContext;
 	CGContextTranslateCTM(context, -NSMinX(srcRect), -NSMinY(srcRect));
 
 	NSRectClip(srcRect);
@@ -1184,7 +1184,7 @@ doScroll:
 		NSRectFill(aRect);
 	}
 
-	CGContextRef context = (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort];
+	CGContextRef context = NSGraphicsContext.currentContext.CGContext;
 	if(!self.antiAlias)
 		CGContextSetShouldAntialias(context, false);
 

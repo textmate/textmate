@@ -300,7 +300,7 @@ static CGFloat WidthOfLineNumbers (NSUInteger lineNumber, NSFont* font)
 
 static void DrawText (std::string const& text, CGRect const& rect, CGFloat baseline, NSFont* font, NSColor* color)
 {
-	CGContextRef context = (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort];
+	CGContextRef context = NSGraphicsContext.currentContext.CGContext;
 	CGContextSaveGState(context);
 
 	CTLineRef line = CreateCTLineFromText(text, font, color);
@@ -329,7 +329,7 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 		NSRectFillUsingOperation(NSIntersectionRect(rect, NSIntersectionRect(aRect, self.frame)), NSCompositingOperationSourceOver);
 
 	if(!self.antiAlias)
-		CGContextSetShouldAntialias((CGContextRef)[[NSGraphicsContext currentContext] graphicsPort], false);
+		CGContextSetShouldAntialias(NSGraphicsContext.currentContext.CGContext, false);
 
 	std::pair<NSUInteger, NSUInteger> prevLine(NSNotFound, 0);
 	for(CGFloat y = NSMinY(aRect); y < NSMaxY(aRect); )
@@ -383,7 +383,7 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 						imageRect.origin.y = 0;
 
 						CGImageRef cgImage = [image CGImageForProposedRect:&imageRect context:[NSGraphicsContext currentContext] hints:nil];
-						CGContextClipToMask((CGContextRef)[[NSGraphicsContext currentContext] graphicsPort], imageRect, cgImage);
+						CGContextClipToMask(NSGraphicsContext.currentContext.CGContext, imageRect, cgImage);
 
 						NSRectFillUsingOperation(imageRect, NSCompositingOperationSourceOver);
 						[NSGraphicsContext restoreGraphicsState];
