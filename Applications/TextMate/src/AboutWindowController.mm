@@ -16,51 +16,9 @@ static NSData* Digest (NSString* someString)
 	return [NSData dataWithBytes:md length:sizeof(md)];
 }
 
-// ============================
-// = JavaScript Bridge Object =
-// ============================
-
-@interface AboutWindowJSBridge : NSObject
-{
-	NSString* version;
-	NSString* copyright;
-	NSString* licensees;
-}
-- (void)addLicense;
-@end
-
-@implementation AboutWindowJSBridge
-+ (BOOL)isSelectorExcludedFromWebScript:(SEL)aSelector { return aSelector != @selector(addLicense); }
-+ (BOOL)isKeyExcludedFromWebScript:(char const*)name   { return strcmp(name, "version") != 0 && strcmp(name, "copyright") != 0 && strcmp(name, "licensees") != 0; }
-+ (NSString*)webScriptNameForSelector:(SEL)aSelector   { return NSStringFromSelector(aSelector); }
-+ (NSString*)webScriptNameForKey:(char const*)name     { return @(name); }
-
-- (NSString*)version
-{
-	return [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
-}
-
-- (NSString*)copyright
-{
-	return [[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSHumanReadableCopyright"];
-}
-
-- (NSString*)licensees
-{
-	return LicenseManager.sharedInstance.owner;
-}
-
-- (void)addLicense
-{
-	[LicenseManager.sharedInstance showAddLicenseWindow:self];
-}
-@end
-
-// ====================================
-
-@interface AboutWindowController () <NSWindowDelegate, NSToolbarDelegate, WebFrameLoadDelegate, WebPolicyDelegate>
+@interface AboutWindowController () <NSWindowDelegate, NSToolbarDelegate, WKNavigationDelegate, WKScriptMessageHandler>
 @property (nonatomic) NSToolbar* toolbar;
-@property (nonatomic) WebView* webView;
+@property (nonatomic) WKWebView* webView;
 @property (nonatomic) NSString* selectedPage;
 @end
 
@@ -98,7 +56,7 @@ static NSData* Digest (NSString* someString)
 	rect.origin.y = round(NSMinY(visibleRect) + dy*3/4);
 	rect.origin.x = NSMaxY(visibleRect) - NSMaxY(rect);
 
-	NSWindow* win = [[NSPanel alloc] initWithContentRect:rect styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskMiniaturizable) backing:NSBackingStoreBuffered defer:NO];
+	NSWindow* win = [[NSPanel alloc] initWithContentRect:rect styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskMiniaturizable|NSWindowStyleMaskFullSizeContentView) backing:NSBackingStoreBuffered defer:NO];
 	if((self = [super initWithWindow:win]))
 	{
 		self.toolbar = [[NSToolbar alloc] initWithIdentifier:@"About TextMate"];
@@ -115,19 +73,42 @@ static NSData* Digest (NSString* someString)
 		[win setAutorecalculatesKeyViewLoop:YES];
 		[win setHidesOnDeactivate:NO];
 
-		self.webView = [[WebView alloc] initWithFrame:[contentView bounds]];
-		self.webView.drawsBackground = NO;
+		WKWebViewConfiguration* webConfig = [[WKWebViewConfiguration alloc] init];
+		[webConfig.userContentController addScriptMessageHandler:self name:@"textmate"];
+
+		self.webView = [[WKWebView alloc] initWithFrame:NSZeroRect configuration:webConfig];
 		self.webView.translatesAutoresizingMaskIntoConstraints = NO;
-		self.webView.frameLoadDelegate = self;
-		self.webView.policyDelegate = self;
+		self.webView.navigationDelegate = self;
+		[self.webView setValue:@NO forKey:@"drawsBackground"];
 		[contentView addSubview:self.webView];
 
-		NSString* const kAboutWindowPreferencesIdentifier = @"About Window Preferences Identifier";
-		WebPreferences* webViewPrefs = [[WebPreferences alloc] initWithIdentifier:kAboutWindowPreferencesIdentifier];
-		webViewPrefs.plugInsEnabled = NO;
-		webViewPrefs.usesPageCache  = NO;
-		webViewPrefs.cacheModel     = WebCacheModelDocumentViewer;
-		self.webView.preferencesIdentifier = kAboutWindowPreferencesIdentifier;
+		if(NSURL* url = [NSBundle.mainBundle URLForResource:@"WKWebView" withExtension:@"js"])
+		{
+			NSError* error;
+			if(NSMutableString* jsBridge = [NSMutableString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:&error])
+			{
+				NSDictionary* variables = @{
+					@"version":   [NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"],
+					@"copyright": [NSBundle.mainBundle objectForInfoDictionaryKey:@"NSHumanReadableCopyright"],
+					@"licensees": LicenseManager.sharedInstance.owner,
+				};
+
+				[variables enumerateKeysAndObjectsUsingBlock:^(NSString* key, NSString* value, BOOL* stop){
+					[jsBridge appendFormat:@"TextMate.%@ = %@;\n", key, [self javaScriptEscapedString:value]];
+				}];
+
+				WKUserScript* script = [[WKUserScript alloc] initWithSource:jsBridge injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
+				[self.webView.configuration.userContentController addUserScript:script];
+			}
+			else if(error)
+			{
+				os_log_error(OS_LOG_DEFAULT, "Failed to load WKWebView.js: %{public}@", error.localizedDescription);
+			}
+		}
+		else
+		{
+			os_log_error(OS_LOG_DEFAULT, "Failed to locate WKWebView.js in application bundle");
+		}
 
 		NSDictionary* views = @{ @"webView": self.webView };
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[webView(>=200)]|" options:NSLayoutFormatAlignAllTop     metrics:nil views:views]];
@@ -138,9 +119,9 @@ static NSData* Digest (NSString* someString)
 
 - (void)dealloc
 {
-	_webView.policyDelegate    = nil;
-	_webView.frameLoadDelegate = nil;
-	[[_webView mainFrame] stopLoading];
+	[_webView.configuration.userContentController removeAllUserScripts];
+	_webView.navigationDelegate = nil;
+	[_webView stopLoading];
 }
 
 - (void)showAboutWindow:(id)sender
@@ -177,7 +158,7 @@ static NSData* Digest (NSString* someString)
 	if(NSString* file = pages[pageName])
 	{
 		if(NSURL* url = [[NSBundle mainBundle] URLForResource:file withExtension:@"html"])
-			[self.webView.mainFrame loadRequest:[NSURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:60]];
+			[self.webView loadRequest:[NSURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:60]];
 
 		[self.window setTitle:pageName];
 		[self.toolbar setSelectedItemIdentifier:pageName];
@@ -255,7 +236,9 @@ static NSData* Digest (NSString* someString)
 	}
 }
 
-// ====================
+// =============
+// = WKWebView =
+// =============
 
 static NSDictionary* RemoveOldCommits (NSDictionary* src)
 {
@@ -281,7 +264,7 @@ static NSDictionary* RemoveOldCommits (NSDictionary* src)
 	return res;
 }
 
-- (void)webView:(WebView*)aWebView didFinishLoadForFrame:(WebFrame*)aFrame
+- (void)webView:(WKWebView*)webView didFinishNavigation:(WKNavigation*)navigation
 {
 	if(![[self.toolbar selectedItemIdentifier] isEqualToString:@"Bundles"])
 		return;
@@ -312,21 +295,51 @@ static NSDictionary* RemoveOldCommits (NSDictionary* src)
 	}
 	[str appendString:@"]}"];
 
-	WebScriptObject* scriptObject = [aWebView windowScriptObject];
-	[scriptObject callWebScriptMethod:@"setJSON" withArguments:@[ str ]];
+	[self.webView evaluateJavaScript:[NSString stringWithFormat:@"setJSON(%@);", [self javaScriptEscapedString:str]] completionHandler:^(id res, NSError* error){ }];
 }
 
-- (void)webView:(WebView*)sender didClearWindowObject:(WebScriptObject*)windowScriptObject forFrame:(WebFrame*)frame
+- (NSString*)javaScriptEscapedString:(NSString*)src
 {
-	AboutWindowJSBridge* bridge = [[AboutWindowJSBridge alloc] init];
-	[windowScriptObject setValue:bridge forKey:@"TextMate"];
+	static NSRegularExpression* const regex = [NSRegularExpression regularExpressionWithPattern:@"['\"\\\\]" options:0 error:nil];
+	NSString* escaped = src ? [regex stringByReplacingMatchesInString:src options:0 range:NSMakeRange(0, src.length) withTemplate:@"\\\\$0"] : @"";
+	escaped = [escaped stringByReplacingOccurrencesOfString:@"\n" withString:@"\\n"];
+	return [NSString stringWithFormat:@"'%@'", escaped];
 }
 
-- (void)webView:(WebView*)sender decidePolicyForNavigationAction:(NSDictionary*)actionInformation request:(NSURLRequest*)request frame:(WebFrame*)frame decisionListener:(id <WebPolicyDecisionListener>)listener
+- (void)webView:(WKWebView*)webView decidePolicyForNavigationAction:(WKNavigationAction*)navigationAction decisionHandler:(void(^)(WKNavigationActionPolicy))decisionHandler
 {
-	if(![[request.URL scheme] isEqualToString:@"file"] && [NSWorkspace.sharedWorkspace openURL:request.URL])
-		[listener ignore];
-	else if([NSURLConnection canHandleRequest:request])
-		[listener use];
+	if(![navigationAction.request.URL.scheme isEqualToString:@"file"] && [NSWorkspace.sharedWorkspace openURL:navigationAction.request.URL])
+			decisionHandler(WKNavigationActionPolicyCancel);
+	else	decisionHandler(WKNavigationActionPolicyAllow);
+}
+
+- (void)userContentController:(WKUserContentController*)userContentController didReceiveScriptMessage:(WKScriptMessage*)message
+{
+	if(![message.name isEqualToString:@"textmate"])
+	{
+		os_log_error(OS_LOG_DEFAULT, "Message received for unknown message handler: %{public}@", message.name);
+		return;
+	}
+
+	NSString* command     = message.body[@"command"];
+	NSDictionary* payload = message.body[@"payload"];
+
+	if([command isEqualToString:@"log"])
+	{
+		if([payload[@"level"] isEqualToString:@"error"])
+		{
+			static os_log_t log = os_log_create("com.macromates.JavaScript", "error");
+			os_log_error(log, "%{public}@:%{public}@: %{public}@", payload[@"filename"], payload[@"lineno"], payload[@"message"]);
+		}
+		else
+		{
+			static os_log_t log = os_log_create("com.macromates.JavaScript", "log");
+			os_log(log, "%{public}@: %{public}@", self.webView.title, payload[@"message"]);
+		}
+	}
+	else if([command isEqualToString:@"addLicense"])
+	{
+		[LicenseManager.sharedInstance showAddLicenseWindow:self];
+	}
 }
 @end
