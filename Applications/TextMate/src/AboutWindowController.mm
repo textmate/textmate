@@ -98,7 +98,7 @@ static NSData* Digest (NSString* someString)
 	rect.origin.y = round(NSMinY(visibleRect) + dy*3/4);
 	rect.origin.x = NSMaxY(visibleRect) - NSMaxY(rect);
 
-	NSWindow* win = [[NSWindow alloc] initWithContentRect:rect styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskMiniaturizable) backing:NSBackingStoreBuffered defer:NO];
+	NSWindow* win = [[NSPanel alloc] initWithContentRect:rect styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskMiniaturizable) backing:NSBackingStoreBuffered defer:NO];
 	if((self = [super initWithWindow:win]))
 	{
 		self.toolbar = [[NSToolbar alloc] initWithIdentifier:@"About TextMate"];
@@ -113,6 +113,7 @@ static NSData* Digest (NSString* someString)
 		[win setFrameAutosaveName:@"BundlesReleaseNotes"];
 		[win setDelegate:self];
 		[win setAutorecalculatesKeyViewLoop:YES];
+		[win setHidesOnDeactivate:NO];
 
 		self.webView = [[WebView alloc] initWithFrame:[contentView bounds]];
 		self.webView.drawsBackground = NO;
