@@ -22,7 +22,7 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 		NSRect rect = [[NSScreen mainScreen] visibleFrame];
 		rect = NSIntegralRect(NSInsetRect(rect, NSWidth(rect) / 3, NSHeight(rect) / 5));
 
-		self.window         = [[NSWindow alloc] initWithContentRect:rect styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskMiniaturizable) backing:NSBackingStoreBuffered defer:NO];
+		self.window         = [[NSPanel alloc] initWithContentRect:rect styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskMiniaturizable) backing:NSBackingStoreBuffered defer:NO];
 		self.htmlOutputView = [[OakHTMLOutputView alloc] init];
 
 		[self.window bind:NSTitleBinding toObject:self.htmlOutputView withKeyPath:@"mainFrameTitle" options:nil];
@@ -31,6 +31,7 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 		[self.window setDelegate:self];
 		[self.window setReleasedWhenClosed:NO];
 		[self.window setCollectionBehavior:NSWindowCollectionBehaviorMoveToActiveSpace|NSWindowCollectionBehaviorFullScreenAuxiliary];
+		[self.window setHidesOnDeactivate:NO];
 
 		// Register to application activation/deactivation notification so we can tweak our collection behavior
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(applicationDidActivate:) name:NSApplicationDidBecomeActiveNotification object:nil];
