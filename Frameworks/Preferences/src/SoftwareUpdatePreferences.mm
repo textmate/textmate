@@ -52,9 +52,7 @@
 #if defined(MAC_OS_X_VERSION_10_15) && (MAC_OS_X_VERSION_10_15 <= MAC_OS_X_VERSION_MAX_ALLOWED)
 	if(@available(macos 10.15, *))
 	{
-		NSRelativeDateTimeFormatter* formatter = [[NSRelativeDateTimeFormatter alloc] init];
-		formatter.dateTimeStyle = NSRelativeDateTimeFormatterStyleNamed;
-		self.lastPollString = [formatter localizedStringForDate:_lastPoll relativeToDate:NSDate.now];
+		self.lastPollString = -[_lastPoll timeIntervalSinceNow] < 5 ? @"Just now" : [[[NSRelativeDateTimeFormatter alloc] init] localizedStringForDate:_lastPoll relativeToDate:NSDate.now];
 	}
 	else
 #endif
