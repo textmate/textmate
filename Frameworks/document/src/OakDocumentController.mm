@@ -116,20 +116,27 @@ namespace
 - (OakDocument*)documentWithPath:(NSString*)aPath
 {
 	std::lock_guard<std::mutex> lock(_lock);
+	OakDocument* doc;
 
 	if(aPath)
 	{
 		auto pathIter = _documents_by_path.find(to_s(aPath));
 		if(pathIter != _documents_by_path.end())
-			return pathIter->second->document;
+			doc = pathIter->second->document;
 
-		auto inodeIter = _documents_by_inode.find(inode_t(to_s(aPath)));
-		if(inodeIter != _documents_by_inode.end())
-			return inodeIter->second->document;
+		if(!doc)
+		{
+			auto inodeIter = _documents_by_inode.find(inode_t(to_s(aPath)));
+			if(inodeIter != _documents_by_inode.end())
+				doc = inodeIter->second->document;
+		}
 	}
 
-	OakDocument* doc = [[OakDocument alloc] initWithPath:aPath];
-	[self internalAddDocument:doc];
+	if(!doc)
+	{
+		doc = [[OakDocument alloc] initWithPath:aPath];
+		[self internalAddDocument:doc];
+	}
 	return doc;
 }
 
