@@ -65,9 +65,7 @@ static NSData* Digest (NSString* someString)
 		[self.toolbar setDelegate:self];
 		[win setToolbar:self.toolbar];
 
-		NSView* contentView = [[NSView alloc] initWithFrame:NSZeroRect];
 		[win setTitle:@"About TextMate"];
-		[win setContentView:contentView];
 		[win setFrameAutosaveName:@"BundlesReleaseNotes"];
 		[win setDelegate:self];
 		[win setAutorecalculatesKeyViewLoop:YES];
@@ -77,10 +75,8 @@ static NSData* Digest (NSString* someString)
 		[webConfig.userContentController addScriptMessageHandler:self name:@"textmate"];
 
 		self.webView = [[WKWebView alloc] initWithFrame:NSZeroRect configuration:webConfig];
-		self.webView.translatesAutoresizingMaskIntoConstraints = NO;
 		self.webView.navigationDelegate = self;
 		[self.webView setValue:@NO forKey:@"drawsBackground"];
-		[contentView addSubview:self.webView];
 
 		if(NSURL* url = [NSBundle.mainBundle URLForResource:@"WKWebView" withExtension:@"js"])
 		{
@@ -110,9 +106,10 @@ static NSData* Digest (NSString* someString)
 			os_log_error(OS_LOG_DEFAULT, "Failed to locate WKWebView.js in application bundle");
 		}
 
-		NSDictionary* views = @{ @"webView": self.webView };
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[webView(>=200)]|" options:NSLayoutFormatAlignAllTop     metrics:nil views:views]];
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[webView(>=200)]|" options:NSLayoutFormatAlignAllLeading metrics:nil views:views]];
+		[self.webView.widthAnchor constraintGreaterThanOrEqualToConstant:200].active = YES;
+		[self.webView.heightAnchor constraintGreaterThanOrEqualToConstant:200].active = YES;
+
+		[win setContentView:self.webView];
 	}
 	return self;
 }
