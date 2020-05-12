@@ -64,33 +64,39 @@ static NSMutableArray* FoldersAtPath (NSString* folder)
 		return;
 
 	NSString* folder = [parentItem representedObject] ?: NSHomeDirectory();
-	if([parentItem parentItem] == nil) // root menu, show parent folders
+	for(NSString* path in FoldersAtPath(folder))
 	{
-		BOOL hasSubfolders = [FoldersAtPath(folder) count];
-		for(NSString* path = folder; OakNotEmptyString(path); path = [path stringByDeletingLastPathComponent])
+		NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSFileManager.defaultManager displayNameAtPath:path] action:parentItem.action keyEquivalent:@""];
+		[menuItem setTarget:parentItem.target];
+		[menuItem setRepresentedObject:path];
+		[menuItem setIconForFile:path];
+
+		if([FoldersAtPath(path) count])
+			[self addFolderSubmenuToMenuItem:menuItem];
+	}
+
+	if(![parentItem parentItem] && ![folder isEqualToString:@"/"]) // Add enclosing folders to root menu
+	{
+		if(aMenu.itemArray.count)
+			[aMenu addItem:[NSMenuItem separatorItem]];
+		[aMenu addItemWithTitle:@"Enclosing Folders" action:@selector(nop:) keyEquivalent:@""];
+
+		BOOL immediateParent = YES;
+		for(NSString* path = folder.stringByDeletingLastPathComponent; OakNotEmptyString(path); path = path.stringByDeletingLastPathComponent)
 		{
-			NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSFileManager.defaultManager displayNameAtPath:path] action:parentItem.action keyEquivalent:@""];
-			[menuItem setTarget:parentItem.target];
+			NSString* shortcut = immediateParent ? @"\uF700" : @"";
+			SEL action = immediateParent ? @selector(goToParentFolder:) : parentItem.action;
+			id target  = immediateParent ? nil : parentItem.target;
+
+			NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSFileManager.defaultManager displayNameAtPath:path] action:action keyEquivalent:shortcut];
+			[menuItem setTarget:target];
 			[menuItem setRepresentedObject:path];
 			[menuItem setIconForFile:path];
-			if(std::exchange(hasSubfolders, YES))
-				[self addFolderSubmenuToMenuItem:menuItem];
 
 			if([path isEqualToString:@"/"])
 				break;
-		}
-	}
-	else
-	{
-		for(NSString* path in FoldersAtPath(folder))
-		{
-			NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSFileManager.defaultManager displayNameAtPath:path] action:parentItem.action keyEquivalent:@""];
-			[menuItem setTarget:parentItem.target];
-			[menuItem setRepresentedObject:path];
-			[menuItem setIconForFile:path];
 
-			if([FoldersAtPath(path) count])
-				[self addFolderSubmenuToMenuItem:menuItem];
+			immediateParent = NO;
 		}
 	}
 }
