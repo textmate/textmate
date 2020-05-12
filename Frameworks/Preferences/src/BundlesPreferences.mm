@@ -10,7 +10,93 @@ static NSUserInterfaceItemIdentifier const kTableColumnIdentifierWebLink     = @
 static NSUserInterfaceItemIdentifier const kTableColumnIdentifierUpdated     = @"Updated";
 static NSUserInterfaceItemIdentifier const kTableColumnIdentifierDescription = @"Description";
 
-static NSMutableSet* BundlesBeingInstalled = [NSMutableSet set];
+@interface BundleInstallHelper : NSObject
+@property (nonatomic) NSMutableSet* bundlesBeingInstalled;
+@property (nonatomic) NSString* bundleInstallActivityText;
+@property (nonatomic, getter = isBusy, readonly) BOOL busy;
+@property (nonatomic, readonly) NSString* activityText;
+@end
+
+@implementation BundleInstallHelper
++ (instancetype)sharedInstance
+{
+	static BundleInstallHelper* sharedInstance = [self new];
+	return sharedInstance;
+}
+
++ (NSSet*)keyPathsForValuesAffectingBusy
+{
+	return [NSSet setWithObjects:@"bundlesBeingInstalled", nil];
+}
+
++ (NSSet*)keyPathsForValuesAffectingActivityText
+{
+	return [NSSet setWithObjects:@"bundleInstallActivityText", nil];
+}
+
+- (instancetype)init
+{
+	if(self = [super init])
+	{
+		_bundlesBeingInstalled = [NSMutableSet set];
+	}
+	return self;
+}
+
+- (BOOL)isBusy
+{
+	return _bundlesBeingInstalled.count != 0;
+}
+
+- (NSString*)activityText
+{
+	if(_bundleInstallActivityText)
+		return _bundleInstallActivityText;
+
+	if(NSDate* date = [NSUserDefaults.standardUserDefaults objectForKey:kUserDefaultsLastBundleUpdateCheckKey])
+	{
+		NSString* dateString = [NSDateFormatter localizedStringFromDate:date dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle];
+		if(@available(macos 10.15, *))
+			dateString = -[date timeIntervalSinceNow] < 5 ? @"Just now" : [[[NSRelativeDateTimeFormatter alloc] init] localizedStringForDate:date relativeToDate:NSDate.now];
+		return [NSString stringWithFormat:@"Bundle index last updated: %@", dateString];
+	}
+
+	return @"";
+}
+
+- (void)installBundle:(Bundle*)bundle
+{
+	if([_bundlesBeingInstalled containsObject:bundle])
+		return;
+
+	[self willChangeValueForKey:@"bundlesBeingInstalled"];
+	[_bundlesBeingInstalled addObject:bundle];
+	[self didChangeValueForKey:@"bundlesBeingInstalled"];
+
+	self.bundleInstallActivityText = [NSString stringWithFormat:@"Installing ‘%@’ bundle…", bundle.name];
+
+	[BundlesManager.sharedInstance installBundles:@[ bundle ] completionHandler:^(NSArray<Bundle*>* bundles){
+		if(!bundle.installed)
+			self.bundleInstallActivityText = [NSString stringWithFormat:@"Error installing ‘%@’ bundle.", bundle.name];
+		else if(bundles.count == 1)
+			self.bundleInstallActivityText = [NSString stringWithFormat:@"Installed ‘%@’ bundle.", bundle.name];
+		else if(bundles.count == 2)
+			self.bundleInstallActivityText = [NSString stringWithFormat:@"Installed ‘%@’ bundle and one dependency.", bundle.name];
+		else
+			self.bundleInstallActivityText = [NSString stringWithFormat:@"Installed ‘%@’ bundle and %ld dependencies.", bundle.name, bundles.count-1];
+
+		[self willChangeValueForKey:@"bundlesBeingInstalled"];
+		[_bundlesBeingInstalled removeObject:bundle];
+		[self didChangeValueForKey:@"bundlesBeingInstalled"];
+	}];
+}
+
+- (void)uninstallBundle:(Bundle*)bundle
+{
+	[BundlesManager.sharedInstance uninstallBundle:bundle];
+	self.bundleInstallActivityText = [NSString stringWithFormat:@"Uninstalled ‘%@’ bundle.", bundle.name];
+}
+@end
 
 @interface Bundle (BundlesInstallPreferences)
 @property (nonatomic) NSControlStateValue installedCellState;
@@ -19,45 +105,25 @@ static NSMutableSet* BundlesBeingInstalled = [NSMutableSet set];
 @implementation Bundle (BundlesInstallPreferences)
 + (NSSet*)keyPathsForValuesAffectingInstalledCellState
 {
-	return [NSSet setWithObjects:@"installed", nil];
+	return [NSSet setWithObjects:@"installed", @"bundleInstallHelper.bundlesBeingInstalled", nil];
+}
+
+- (BundleInstallHelper*)bundleInstallHelper
+{
+	return BundleInstallHelper.sharedInstance;
 }
 
 - (NSControlStateValue)installedCellState
 {
-	return [BundlesBeingInstalled containsObject:self] ? NSControlStateValueMixed : (self.isInstalled ? NSControlStateValueOn : NSControlStateValueOff);
+	return [self.bundleInstallHelper.bundlesBeingInstalled containsObject:self] ? NSControlStateValueMixed : (self.isInstalled ? NSControlStateValueOn : NSControlStateValueOff);
 }
 
 - (void)setInstalledCellState:(NSControlStateValue)newValue
 {
-	BundlesManager* manager = BundlesManager.sharedInstance;
-	if(newValue == NSControlStateValueOff)
-	{
-		[manager uninstallBundle:self];
-		manager.activityText = [NSString stringWithFormat:@"Uninstalled ‘%@’.", self.name];
-	}
-	else if(![BundlesBeingInstalled containsObject:self])
-	{
-		[BundlesBeingInstalled addObject:self];
-
-		manager.isBusy = YES;
-		manager.activityText = [NSString stringWithFormat:@"Installing ‘%@’…", self.name];
-
-		[manager installBundles:@[ self ] completionHandler:^(NSArray<Bundle*>* bundles){
-			[self willChangeValueForKey:@"installedCellState"];
-			[BundlesBeingInstalled removeObject:self];
-			[self didChangeValueForKey:@"installedCellState"];
-
-			if(!self.installed)
-				manager.activityText = [NSString stringWithFormat:@"Error installing ‘%@’.", self.name];
-			else if(bundles.count == 1)
-				manager.activityText = [NSString stringWithFormat:@"Installed ‘%@’.", self.name];
-			else if(bundles.count == 2)
-				manager.activityText = [NSString stringWithFormat:@"Installed ‘%@’ and one dependency.", self.name];
-			else
-				manager.activityText = [NSString stringWithFormat:@"Installed ‘%@’ and %ld dependencies.", self.name, bundles.count-1];
-			manager.isBusy = NO;
-		}];
-	}
+	if(self.installedCellState == NSControlStateValueOff && newValue != NSControlStateValueOff)
+		[self.bundleInstallHelper installBundle:self];
+	else if(self.installedCellState == NSControlStateValueOn && newValue != NSControlStateValueOn)
+		[self.bundleInstallHelper uninstallBundle:self];
 }
 @end
 
@@ -306,7 +372,7 @@ static NSMutableSet* BundlesBeingInstalled = [NSMutableSet set];
 	if([aTableColumn.identifier isEqualToString:kTableColumnIdentifierInstalled])
 	{
 		Bundle* bundle = _arrayController.arrangedObjects[rowIndex];
-		return ![BundlesBeingInstalled containsObject:bundle];
+		return bundle.installedCellState != NSControlStateValueMixed;
 	}
 	return NO;
 }
