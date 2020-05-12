@@ -42,9 +42,6 @@ static NSString* SafeBasename (NSString* name)
 }
 @property (nonatomic) BOOL      autoUpdateBundles;
 
-@property (nonatomic) BOOL      determinateProgress;
-@property (nonatomic) CGFloat   progress;
-
 @property (nonatomic) BOOL      needsCreateBundlesIndex;
 @property (nonatomic) BOOL      needsSaveBundlesIndex;
 

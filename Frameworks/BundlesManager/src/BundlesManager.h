@@ -7,11 +7,6 @@ PUBLIC extern NSString* const kUserDefaultsLastBundleUpdateCheckKey;
 PUBLIC @interface BundlesManager : NSObject
 @property (class, readonly) BundlesManager* sharedInstance;
 
-@property (nonatomic) NSString* activityText;
-@property (nonatomic) BOOL      isBusy;
-@property (nonatomic, readonly) BOOL      determinateProgress;
-@property (nonatomic, readonly) CGFloat   progress;
-
 @property (nonatomic, readonly) NSArray<Bundle*>* bundles;
 
 - (NSProgress*)installBundles:(NSArray<Bundle*>*)someBundles completionHandler:(void(^)(NSArray<Bundle*>*))callback;
