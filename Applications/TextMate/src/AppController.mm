@@ -634,6 +634,41 @@ BOOL HasDocumentWindow (NSArray* windows)
 	scm::enable();
 }
 
+- (void)applicationDidResignActive:(NSNotification*)aNotification
+{
+	// If the window to activate, when switching back to TextMate, has “Move to
+	// Active Space” set, then the system will move this window to the current
+	// space. This is not what we want for auxillary windows like the Find dialog
+	// or HTML output, as these windows are tied to a document window.
+	//
+	// Starting with macOS 10.11 we have to change collection behavior after the
+	// current event loop cycle, both when receiving the did become and did resign
+	// active notification.
+
+	dispatch_async(dispatch_get_main_queue(), ^{
+		NSMutableArray* changedWindows = [NSMutableArray array];
+		for(NSWindow* window in NSApp.windows)
+		{
+			if((window.collectionBehavior & (NSWindowCollectionBehaviorMoveToActiveSpace|NSWindowCollectionBehaviorFullScreenAuxiliary)) == (NSWindowCollectionBehaviorMoveToActiveSpace|NSWindowCollectionBehaviorFullScreenAuxiliary))
+			{
+				window.collectionBehavior &= ~NSWindowCollectionBehaviorMoveToActiveSpace;
+				[changedWindows addObject:window];
+			}
+		}
+
+		if(changedWindows.count)
+		{
+			__weak __block id observerId = [NSNotificationCenter.defaultCenter addObserverForName:NSApplicationDidBecomeActiveNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
+				[NSNotificationCenter.defaultCenter removeObserver:observerId];
+				dispatch_async(dispatch_get_main_queue(), ^{
+					for(NSWindow* window in changedWindows)
+						window.collectionBehavior |= NSWindowCollectionBehaviorMoveToActiveSpace;
+				});
+			}];
+		}
+	});
+}
+
 // =========================
 // = Past Startup Delegate =
 // =========================

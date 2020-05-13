@@ -229,29 +229,9 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(textViewWillPerformFindOperation:) name:@"OakTextViewWillPerformFindOperation" object:nil];
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(resultsFrameDidChange:) name:NSViewFrameDidChangeNotification object:_resultsViewController.view];
 
-		// Register to application activation/deactivation notification so we can tweak our collection behavior
-		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(applicationDidActivate:) name:NSApplicationDidBecomeActiveNotification object:nil];
-		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(applicationDidDeactivate:) name:NSApplicationDidResignActiveNotification object:nil];
-
 		[_resultsViewController bind:@"showReplacementPreviews" toObject:_replaceTextFieldViewController withKeyPath:@"hasFocus" options:nil];
 	}
 	return self;
-}
-
-- (void)applicationDidActivate:(NSNotification*)notification
-{
-	// Starting with 10.11 behavior must be changed after current event loop cycle <rdar://23587833>
-	dispatch_async(dispatch_get_main_queue(), ^{
-		self.window.collectionBehavior |= NSWindowCollectionBehaviorMoveToActiveSpace;
-	});
-}
-
-- (void)applicationDidDeactivate:(NSNotification*)notification
-{
-	// Starting with 10.11 behavior must be changed after current event loop cycle <rdar://23587833>
-	dispatch_async(dispatch_get_main_queue(), ^{
-		self.window.collectionBehavior &= ~NSWindowCollectionBehaviorMoveToActiveSpace;
-	});
 }
 
 - (void)menuNeedsUpdate:(NSMenu*)aMenu
