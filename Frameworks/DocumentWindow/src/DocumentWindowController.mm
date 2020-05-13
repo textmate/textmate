@@ -2272,7 +2272,8 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		[menuItem setTitle:self.fileBrowserVisible ? @"Hide File Browser" : @"Show File Browser"];
 	else if([menuItem action] == @selector(toggleHTMLOutput:))
 	{
-		[menuItem setTitle:(!self.htmlOutputVisible || self.htmlOutputInWindow) ? @"Show HTML Output" : @"Hide HTML Output"];
+		BOOL isVisibleAndKey = self.htmlOutputVisible && (!self.htmlOutputInWindow || self.htmlOutputWindowController.window.isKeyWindow);
+		[menuItem setTitle:isVisibleAndKey ? @"Hide HTML Output" : @"Show HTML Output"];
 		active = !self.htmlOutputInWindow || self.htmlOutputWindowController;
 	}
 	else if([menuItem action] == @selector(newDocumentInDirectory:))

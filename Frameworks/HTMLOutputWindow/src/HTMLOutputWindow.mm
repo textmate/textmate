@@ -77,16 +77,4 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 	[NSNotificationCenter.defaultCenter removeObserver:self];
 	self.window.delegate = nil;
 }
-
-- (IBAction)toggleHTMLOutput:(id)sender
-{
-	[self.window performClose:self];
-}
-
-- (BOOL)validateMenuItem:(NSMenuItem*)menuItem
-{
-	if([menuItem action] == @selector(toggleHTMLOutput:))
-		[menuItem setTitle:@"Hide HTML Output"];
-	return YES;
-}
 @end
