@@ -7,7 +7,7 @@
 
 OAK_DEBUG_VAR(HTMLOutputWindow);
 
-@interface HTMLOutputWindowController ()
+@interface HTMLOutputWindowController () <NSWindowDelegate>
 {
 	OBJC_WATCH_LEAKS(HTMLOutputWindowController);
 }
@@ -17,12 +17,13 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 @implementation HTMLOutputWindowController
 - (instancetype)init
 {
-	if(self = [super init])
-	{
-		NSRect rect = [[NSScreen mainScreen] visibleFrame];
-		rect = NSIntegralRect(NSInsetRect(rect, NSWidth(rect) / 3, NSHeight(rect) / 5));
+	NSRect rect = [[NSScreen mainScreen] visibleFrame];
+	rect = NSIntegralRect(NSInsetRect(rect, NSWidth(rect) / 3, NSHeight(rect) / 5));
+	NSWindow* window = [[NSPanel alloc] initWithContentRect:rect styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskMiniaturizable) backing:NSBackingStoreBuffered defer:NO];
 
-		self.window         = [[NSPanel alloc] initWithContentRect:rect styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskMiniaturizable) backing:NSBackingStoreBuffered defer:NO];
+	if(self = [super initWithWindow:window])
+	{
+		self.window         = window;
 		self.htmlOutputView = [[OakHTMLOutputView alloc] init];
 
 		[self.window bind:NSTitleBinding toObject:self.htmlOutputView withKeyPath:@"mainFrameTitle" options:nil];
@@ -66,12 +67,7 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 - (void)showWindow:(id)sender
 {
 	self.retainedSelf = self;
-	[self.window makeKeyAndOrderFront:nil];
-}
-
-- (void)close
-{
-	[self.window close];
+	[super showWindow:sender];
 }
 
 - (BOOL)windowShouldClose:(id)sender
