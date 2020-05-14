@@ -77,7 +77,7 @@ static NSMutableArray* FoldersAtPath (NSString* folder)
 
 	if(![parentItem parentItem] && ![folder isEqualToString:@"/"]) // Add enclosing folders to root menu
 	{
-		if(aMenu.itemArray.count)
+		if(aMenu.numberOfItems)
 			[aMenu addItem:[NSMenuItem separatorItem]];
 		[aMenu addItemWithTitle:@"Enclosing Folders" action:@selector(nop:) keyEquivalent:@""];
 
