@@ -2,6 +2,10 @@ Title: Release Notes
 
 # Changes
 
+## 2020-05-14 (v2.0.14)
+
+* Fix crash in 2.0.13 when no license key was found.
+
 ## 2020-05-14 (v2.0.13)
 
 * The View → Theme submenu now allows to set appearance to “auto” (follow system settings) and to configure light/dark themes separately. Note that prior to macOS 10.14 setting appearance to “auto” is the same as setting it to “light”.
