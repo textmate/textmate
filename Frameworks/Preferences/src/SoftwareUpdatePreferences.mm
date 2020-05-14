@@ -146,8 +146,8 @@
 	[contactStackView setHuggingPriority:NSLayoutPriorityDefaultHigh-1 forOrientation:NSLayoutConstraintOrientationVertical];
 
 	MBMenu const updateChannelMenuItems = {
-		{ @"Normal Releases", .tag = 0 },
-		{ @"Nightly Builds",  .tag = 1 },
+		{ @"Normal releases", .tag = 0 },
+		{ @"Prereleases",     .tag = 1 },
 	};
 	MBCreateMenu(updateChannelMenuItems, updateChannelPopUp.menu);
 
