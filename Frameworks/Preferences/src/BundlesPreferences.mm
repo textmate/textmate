@@ -56,8 +56,10 @@ static NSUserInterfaceItemIdentifier const kTableColumnIdentifierDescription = @
 	if(NSDate* date = [NSUserDefaults.standardUserDefaults objectForKey:kUserDefaultsLastBundleUpdateCheckKey])
 	{
 		NSString* dateString = [NSDateFormatter localizedStringFromDate:date dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle];
+#if defined(MAC_OS_X_VERSION_10_15) && (MAC_OS_X_VERSION_10_15 <= MAC_OS_X_VERSION_MAX_ALLOWED)
 		if(@available(macos 10.15, *))
 			dateString = -[date timeIntervalSinceNow] < 5 ? @"Just now" : [[[NSRelativeDateTimeFormatter alloc] init] localizedStringForDate:date relativeToDate:NSDate.now];
+#endif
 		return [NSString stringWithFormat:@"Bundle index last updated: %@", dateString];
 	}
 
