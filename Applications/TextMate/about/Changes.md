@@ -2,6 +2,13 @@ Title: Release Notes
 
 # Changes
 
+## 2020-05-14 (v2.0.13)
+
+* The View → Theme submenu now allows to set appearance to “auto” (follow system settings) and to configure light/dark themes separately. Note that prior to macOS 10.14 setting appearance to “auto” is the same as setting it to “light”.
+* Improve the folder pop-up submenu in the Find in Folder: We now show direct descendents in the first submenu and ancestors below these, with the first ancestor showing ⌘↑ as shortcut key (improved discoverability of this shortcut).
+* It’s now possible to see when bundle index was last updated in Preferences → Bundles.
+* See [all changes since v2.0.12](https://github.com/textmate/textmate/compare/v2.0.12...v2.0.13)
+
 ## 2020-05-10 (v2.0.12)
 
 * In the Find History window it is now possible to hold down option (⌥) to change the “Find Next” button to “Find in Project”.
