@@ -828,7 +828,29 @@ static std::string shell_quote (std::vector<std::string> paths)
 - (NSString*)effectiveThemeUUID
 {
 	settings_t const settings = settings_for_path(to_s(_document.virtualPath ?: _document.path), to_s(_document.fileType), to_s(_document.directory ?: [_document.path stringByDeletingLastPathComponent]));
-	return to_ns(settings.get(kSettingsThemeKey, NULL_STR));
+	std::string const scopedThemeUUID = settings.get(kSettingsThemeKey);
+	if(scopedThemeUUID != NULL_STR)
+		return to_ns(scopedThemeUUID);
+
+	NSString* appearance = [NSUserDefaults.standardUserDefaults stringForKey:@"themeAppearance"];
+	BOOL darkMode = [appearance isEqualToString:@"dark"];
+	if(@available(macos 10.14, *))
+	{
+		if(!darkMode && ![appearance isEqualToString:@"light"]) // If it is not ‘light’ then assume ‘auto’
+			darkMode = [[self.effectiveAppearance bestMatchFromAppearancesWithNames:@[ NSAppearanceNameAqua, NSAppearanceNameDarkAqua ]] isEqualToString:NSAppearanceNameDarkAqua];
+	}
+
+	return [NSUserDefaults.standardUserDefaults stringForKey:darkMode ? @"darkModeThemeUUID" : @"universalThemeUUID"];
+}
+
+- (void)setThemeUUID:(NSString*)newThemeUUID
+{
+	if(_themeUUID && [_themeUUID isEqualToString:newThemeUUID])
+		return;
+	_themeUUID = newThemeUUID;
+
+	if(bundles::item_ptr const& themeItem = bundles::lookup(to_s(_themeUUID)))
+		self.theme = parse_theme(themeItem);
 }
 
 - (void)setDocument:(OakDocument*)aDocument
@@ -879,7 +901,11 @@ static std::string shell_quote (std::vector<std::string> paths)
 	{
 		_scmStatus = scm::status::unknown;
 
-		documentView = std::make_shared<document_view_t>(_document, self.effectiveThemeUUID, to_s(self.scopeAttributes), self.scrollPastEnd, fontScaleFactor);
+		[self willChangeValueForKey:@"themeUUID"];
+		_themeUUID = self.effectiveThemeUUID;
+		[self didChangeValueForKey:@"themeUUID"];
+
+		documentView = std::make_shared<document_view_t>(_document, _themeUUID, to_s(self.scopeAttributes), self.scrollPastEnd, fontScaleFactor);
 		documentView->set_command_runner([self](bundle_command_t const& cmd, ng::buffer_api_t const& buffer, ng::ranges_t const& selection, std::map<std::string, std::string> const& variables){
 			[self executeBundleCommand:cmd buffer:buffer selection:selection variables:variables];
 		});
@@ -3958,6 +3984,12 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	self.antiAlias     = ![NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsDisableAntiAliasKey];
 	self.fontSmoothing = (OTVFontSmoothing)[NSUserDefaults.standardUserDefaults integerForKey:kUserDefaultsFontSmoothingKey];
 	self.scrollPastEnd = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsScrollPastEndKey];
+	self.themeUUID     = self.effectiveThemeUUID;
+}
+
+- (void)viewDidChangeEffectiveAppearance
+{
+	self.themeUUID = self.effectiveThemeUUID;
 }
 
 // =================

@@ -41,4 +41,8 @@
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication*)sender;
 @end
 
+@interface AppController (BundlesMenu)
+- (BOOL)validateThemeMenuItem:(NSMenuItem*)item;
+@end
+
 void OakOpenDocuments (NSArray* paths, BOOL treatFilePackageAsFolder = NO);

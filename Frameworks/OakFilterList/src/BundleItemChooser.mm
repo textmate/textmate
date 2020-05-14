@@ -213,7 +213,14 @@ _OutputIter copy_menu_items (NSMenu* menu, _OutputIter out, NSArray* parentNames
 {
 	for(NSMenuItem* item in [menu itemArray])
 	{
-		if([item action] == @selector(performBundleItemWithUUIDStringFrom:) || [item action] == @selector(takeThemeUUIDFrom:))
+		std::set<SEL> excludeItemsWithActions = {
+			@selector(performBundleItemWithUUIDStringFrom:),
+			@selector(takeThemeAppearanceFrom:),
+			@selector(takeUniversalThemeUUIDFrom:),
+			@selector(takeDarkThemeUUIDFrom:),
+		};
+
+		if(excludeItemsWithActions.find(item.action) != excludeItemsWithActions.end())
 			continue;
 
 		if(id target = [NSApp targetForAction:[item action]])

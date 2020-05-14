@@ -9,10 +9,13 @@
 #import <OakAppKit/NSMenu Additions.h>
 #import <OakAppKit/NSMenuItem Additions.h>
 #import <OakAppKit/OakToolTip.h>
+#import <MenuBuilder/MenuBuilder.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakTextView/OakTextView.h>
 #import <oak/debug.h>
 #import <BundleMenu/BundleMenu.h>
+#import <theme/theme.h>
+#import <settings/settings.h>
 
 OAK_DEBUG_VAR(AppController_Menus);
 
@@ -64,6 +67,88 @@ static NSString* NameForLocaleIdentifier (NSString* languageCode)
 		[aMenu addItemWithTitle:@"No Bundles Loaded" action:@selector(nop:) keyEquivalent:@""];
 }
 
++ (void)initialize
+{
+	[NSUserDefaults.standardUserDefaults registerDefaults:@{
+		@"universalThemeUUID": @(kMacClassicThemeUUID),
+		@"darkModeThemeUUID":  @(kTwilightThemeUUID),
+	}];
+
+	// MIGRATION from 2.0.12 and earlier
+	__block id token = [NSNotificationCenter.defaultCenter addObserverForName:NSApplicationDidFinishLaunchingNotification object:NSApp queue:nil usingBlock:^(NSNotification* notification){
+		[NSNotificationCenter.defaultCenter removeObserver:token];
+
+		std::string const savedThemeUUID = settings_for_path().get(kSettingsThemeKey);
+		if(savedThemeUUID != NULL_STR)
+		{
+			os_log(OS_LOG_DEFAULT, "Remove old theme setting from Global.tmProperties: %{public}@", to_ns(savedThemeUUID));
+			settings_t::set(kSettingsThemeKey, NULL_STR);
+
+			if(bundles::item_ptr themeItem = bundles::lookup(savedThemeUUID))
+			{
+				bool darkTheme = themeItem->value_for_field(bundles::kFieldSemanticClass).find("theme.dark") == 0;
+				NSString* mode        = darkTheme ? @"dark"              : @"light";
+				NSString* defaultsKey = darkTheme ? @"darkModeThemeUUID" : @"universalThemeUUID";
+
+				os_log(OS_LOG_DEFAULT, "Set preferred appearance to %{public}@", mode);
+				[NSUserDefaults.standardUserDefaults setObject:to_ns(savedThemeUUID) forKey:defaultsKey];
+				[NSUserDefaults.standardUserDefaults setObject:mode forKey:@"themeAppearance"];
+			}
+		}
+
+		[NSUserDefaults.standardUserDefaults removeObjectForKey:@"changeThemeBasedOnAppearance"];
+	}];
+}
+
+- (void)takeThemeAppearanceFrom:(id)sender
+{
+	[NSUserDefaults.standardUserDefaults setObject:[sender representedObject] forKey:@"themeAppearance"];
+}
+
+- (void)takeUniversalThemeUUIDFrom:(id)sender
+{
+	[NSUserDefaults.standardUserDefaults setObject:[sender representedObject] forKey:@"universalThemeUUID"];
+}
+
+- (void)takeDarkThemeUUIDFrom:(id)sender
+{
+	[NSUserDefaults.standardUserDefaults setObject:[sender representedObject] forKey:@"darkModeThemeUUID"];
+}
+
+- (BOOL)validateThemeMenuItem:(NSMenuItem*)item
+{
+	if(item.action == @selector(takeThemeAppearanceFrom:))
+	{
+		NSString* savedValue = [NSUserDefaults.standardUserDefaults stringForKey:@"themeAppearance"];
+		item.state = !item.representedObject && !savedValue || [item.representedObject isEqualToString:savedValue] ? NSControlStateValueOn : NSControlStateValueOff;
+
+		NSString* label;
+		NSString* defaultsKey;
+		if([item.representedObject isEqualToString:@"light"])
+		{
+			label = @"Light Theme";
+			defaultsKey = @"universalThemeUUID";
+		}
+		else if([item.representedObject isEqualToString:@"dark"])
+		{
+			label = @"Dark Theme";
+			defaultsKey = @"darkModeThemeUUID";
+		}
+
+		if(defaultsKey)
+		{
+			NSString* themeUUID = [NSUserDefaults.standardUserDefaults stringForKey:defaultsKey];
+			if(bundles::item_ptr themeItem = bundles::lookup(to_s(themeUUID)))
+				item.title = [NSString stringWithFormat:@"%@ (%@)", label, to_ns(themeItem->name())];
+		}
+	}
+	else if(item.action == @selector(takeUniversalThemeUUIDFrom:))
+		item.state = [item.representedObject isEqualToString:[NSUserDefaults.standardUserDefaults stringForKey:@"universalThemeUUID"]] ? NSControlStateValueOn : NSControlStateValueOff;
+	else if(item.action == @selector(takeDarkThemeUUIDFrom:))
+		item.state = [item.representedObject isEqualToString:[NSUserDefaults.standardUserDefaults stringForKey:@"darkModeThemeUUID"]] ? NSControlStateValueOn : NSControlStateValueOff;
+	return YES;
+}
+
 - (void)themesMenuNeedsUpdate:(NSMenu*)aMenu
 {
 	D(DBF_AppController_Menus, bug("\n"););
@@ -80,20 +165,47 @@ static NSString* NameForLocaleIdentifier (NSString* languageCode)
 		ordered[themeClass].emplace(item->name(), item);
 	}
 
-	for(auto const& themeClasses : ordered)
+	if(ordered.empty())
 	{
-		[aMenu addItemWithTitle:[[NSString stringWithCxxString:themeClasses.first] capitalizedString] action:@selector(nop:) keyEquivalent:@""];
-		for(auto const& pair : themeClasses.second)
-		{
-			NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithCxxString:pair.first] action:@selector(takeThemeUUIDFrom:) keyEquivalent:@""];
-			[menuItem setKeyEquivalentCxxString:key_equivalent(pair.second)];
-			[menuItem setRepresentedObject:[NSString stringWithCxxString:pair.second->uuid()]];
-			[menuItem setIndentationLevel:1];
-		}
+		[aMenu addItemWithTitle:@"No Themes Loaded" action:@selector(nop:) keyEquivalent:@""];
+		return;
 	}
 
-	if(ordered.empty())
-		[aMenu addItemWithTitle:@"No Themes Loaded" action:@selector(nop:) keyEquivalent:@""];
+	NSMenu* lightMenu;
+	NSMenu* darkMenu;
+
+	MBMenu const items = {
+		{ @"Appearance",       @selector(nop:),                                                                          },
+		{ @"Light",            @selector(takeThemeAppearanceFrom:), .target = self, .indent = 1, .representedObject = @"light" },
+		{ @"Dark",             @selector(takeThemeAppearanceFrom:), .target = self, .indent = 1, .representedObject = @"dark"  },
+		{ @"Auto",             @selector(takeThemeAppearanceFrom:), .target = self, .indent = 1, .representedObject = nil      },
+		{ /* -------- */ },
+		{ @"Theme for Light Appearance", .submenuRef = &lightMenu },
+		{ @"Theme for Dark Appearance",  .submenuRef = &darkMenu  },
+	};
+	MBCreateMenu(items, aMenu);
+
+	for(NSMenu* submenu : { lightMenu, darkMenu })
+	{
+		std::string skipThemeClass = submenu == lightMenu ? "dark" : "light";
+		SEL action = submenu == lightMenu ? @selector(takeUniversalThemeUUIDFrom:) : @selector(takeDarkThemeUUIDFrom:);
+
+		for(auto const& themeClasses : ordered)
+		{
+			if(themeClasses.first == skipThemeClass)
+				continue;
+
+			if(submenu.numberOfItems)
+				[submenu addItem:[NSMenuItem separatorItem]];
+
+			for(auto const& pair : themeClasses.second)
+			{
+				NSMenuItem* menuItem = [submenu addItemWithTitle:[NSString stringWithCxxString:pair.first] action:action keyEquivalent:@""];
+				[menuItem setKeyEquivalentCxxString:key_equivalent(pair.second)];
+				[menuItem setRepresentedObject:[NSString stringWithCxxString:pair.second->uuid()]];
+			}
+		}
+	}
 }
 
 - (void)spellingMenuNeedsUpdate:(NSMenu*)aMenu

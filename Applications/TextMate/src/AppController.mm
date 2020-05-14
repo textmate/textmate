@@ -830,6 +830,10 @@ BOOL HasDocumentWindow (NSArray* windows)
 		if(menuItemValidator != self && [menuItemValidator respondsToSelector:@selector(validateMenuItem:)])
 			enabled = [menuItemValidator validateMenuItem:item];
 	}
+	else
+	{
+		enabled = [self validateThemeMenuItem:item];
+	}
 	return enabled;
 }
 

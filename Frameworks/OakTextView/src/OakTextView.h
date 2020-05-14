@@ -30,6 +30,7 @@ enum OTVFontSmoothing : NSUInteger
 
 PUBLIC @interface OakTextView : OakView <NSAccessibilityNavigableStaticText, NSStandardKeyBindingResponding>
 @property (nonatomic) OakDocument* document;
+@property (nonatomic) NSString* themeUUID;
 
 @property (nonatomic, weak) id <OakTextViewDelegate>        delegate;
 @property (nonatomic) theme_ptr                             theme;

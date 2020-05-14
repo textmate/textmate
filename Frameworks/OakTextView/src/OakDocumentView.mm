@@ -100,7 +100,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 
 		self.document = [OakDocument documentWithString:@"" fileType:@"text.plain" customName:@"placeholder"];
 
-		self.observedKeys = @[ @"selectionString", @"symbol", @"recordingMacro"];
+		self.observedKeys = @[ @"selectionString", @"symbol", @"recordingMacro", @"themeUUID" ];
 		for(NSString* keyPath in self.observedKeys)
 			[_textView addObserver:self forKeyPath:keyPath options:NSKeyValueObservingOptionInitial context:NULL];
 	}
@@ -279,6 +279,10 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	{
 		_statusBar.softTabs = self.document.softTabs;
 	}
+	else if([aKeyPath isEqualToString:@"themeUUID"])
+	{
+		[self updateStyle];
+	}
 }
 
 - (void)dealloc
@@ -374,33 +378,6 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	}
 }
 
-- (IBAction)takeThemeUUIDFrom:(id)sender
-{
-	[self setThemeWithUUID:[sender representedObject]];
-}
-
-- (void)setThemeWithUUID:(NSString*)themeUUID
-{
-	if(bundles::item_ptr const& themeItem = bundles::lookup(to_s(themeUUID)))
-	{
-		_textView.theme = parse_theme(themeItem);
-		settings_t::set(kSettingsThemeKey, to_s(themeUUID));
-		[self updateStyle];
-	}
-}
-
-- (void)viewDidChangeEffectiveAppearance
-{
-	NSUserDefaults* defaults = NSUserDefaults.standardUserDefaults;
-	if([defaults boolForKey:@"changeThemeBasedOnAppearance"])
-	{
-		NSAppearanceName appearanceName = [self.effectiveAppearance bestMatchFromAppearancesWithNames:@[ NSAppearanceNameAqua, NSAppearanceNameDarkAqua ]];
-		if([appearanceName isEqualToString:NSAppearanceNameDarkAqua])
-				[self setThemeWithUUID:[defaults stringForKey:@"darkModeThemeUUID"]  ?: to_ns(kTwilightThemeUUID)];
-		else	[self setThemeWithUUID:[defaults stringForKey:@"universalThemeUUID"] ?: to_ns(kMacClassicThemeUUID)];
-	}
-}
-
 - (IBAction)toggleLineNumbers:(id)sender
 {
 	D(DBF_OakDocumentView, bug("show line numbers %s\n", BSTR([gutterView visibilityForColumnWithIdentifier:GVLineNumbersColumnIdentifier])););
@@ -415,8 +392,6 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 {
 	if([aMenuItem action] == @selector(toggleLineNumbers:))
 		[aMenuItem setTitle:[gutterView visibilityForColumnWithIdentifier:GVLineNumbersColumnIdentifier] ? @"Hide Line Numbers" : @"Show Line Numbers"];
-	else if([aMenuItem action] == @selector(takeThemeUUIDFrom:))
-		[aMenuItem setState:_textView.theme && _textView.theme->uuid() == [[aMenuItem representedObject] UTF8String] ? NSControlStateValueOn : NSControlStateValueOff];
 	else if([aMenuItem action] == @selector(takeTabSizeFrom:))
 		[aMenuItem setState:_textView.tabSize == [aMenuItem tag] ? NSControlStateValueOn : NSControlStateValueOff];
 	else if([aMenuItem action] == @selector(showTabSizeSelectorPanel:))

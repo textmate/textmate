@@ -667,7 +667,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 {
 	if(anItem->kind() == bundles::kItemTypeTheme)
 	{
-		[self.documentView setThemeWithUUID:[NSString stringWithCxxString:anItem->uuid()]];
+		self.documentView.textView.themeUUID = [NSString stringWithCxxString:anItem->uuid()];
 	}
 	else
 	{
