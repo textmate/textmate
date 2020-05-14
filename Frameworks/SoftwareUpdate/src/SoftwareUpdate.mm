@@ -6,6 +6,7 @@
 #import <OakAppKit/NSAlert Additions.h>
 #import <OakAppKit/OakSound.h>
 #import <OakAppKit/NSMenu Additions.h>
+#import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakSystem/application.h>
 #import <io/move_path.h>
@@ -33,7 +34,7 @@ struct shared_state_t
 
 typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 
-@interface SoftwareUpdate ()
+@interface SoftwareUpdate () <OakUserDefaultsObserver>
 {
 	key_chain_t keyChain;
 	NSTimeInterval pollInterval;
@@ -77,7 +78,7 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 		pollInterval = 60*60;
 
 		[[NSWorkspace.sharedWorkspace notificationCenter] addObserver:self selector:@selector(scheduleVersionCheck:) name:NSWorkspaceDidWakeNotification object:NSWorkspace.sharedWorkspace];
-		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:NSUserDefaults.standardUserDefaults];
+		OakObserveUserDefaults(self);
 	}
 	return self;
 }

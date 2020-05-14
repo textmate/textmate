@@ -78,7 +78,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 	return res;
 }
 
-@interface Find () <OakFindServerProtocol, NSWindowDelegate, NSMenuDelegate>
+@interface Find () <OakFindServerProtocol, OakUserDefaultsObserver, NSWindowDelegate, NSMenuDelegate>
 {
 	NSObjectController*        _objectController;
 
@@ -223,7 +223,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		[self findClipboardDidChange:nil];
 		[self replaceClipboardDidChange:nil];
 
-		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:NSUserDefaults.standardUserDefaults];
+		OakObserveUserDefaults(self);
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(findClipboardDidChange:) name:OakPasteboardDidChangeNotification object:OakPasteboard.findPasteboard];
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(replaceClipboardDidChange:) name:OakPasteboardDidChangeNotification object:OakPasteboard.replacePasteboard];
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(textViewWillPerformFindOperation:) name:@"OakTextViewWillPerformFindOperation" object:nil];

@@ -2,6 +2,7 @@
 #import <bundles/load.h>
 #import "InstallBundleItems.h"
 #import <OakAppKit/NSAlert Additions.h>
+#import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <network/OakNetworkManager.h>
 #import <bundles/locations.h>
@@ -31,7 +32,7 @@ static NSString* SafeBasename (NSString* name)
 	return [[name stringByReplacingOccurrencesOfString:@"/" withString:@":"] stringByReplacingOccurrencesOfString:@"." withString:@"_"];
 }
 
-@interface BundlesManager ()
+@interface BundlesManager () <OakUserDefaultsObserver>
 {
 	NSBackgroundActivityScheduler* _updateBundleIndexScheduler;
 
@@ -70,7 +71,7 @@ static NSString* SafeBasename (NSString* name)
 		_remoteIndexURL   = [NSURL URLWithString:@REST_API "/bundles"];
 
 		[self userDefaultsDidChange:nil];
-		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:NSUserDefaults.standardUserDefaults];
+		OakObserveUserDefaults(self);
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:NSApp];
 	}
 	return self;

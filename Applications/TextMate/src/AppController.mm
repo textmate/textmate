@@ -16,6 +16,7 @@
 #import <OakAppKit/OakPasteboard.h>
 #import <OakAppKit/OakSubmenuController.h>
 #import <OakFilterList/BundleItemChooser.h>
+#import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakTextView/OakDocumentView.h>
 #import <MenuBuilder/MenuBuilder.h>
@@ -89,7 +90,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 	return NO;
 }
 
-@interface AppController ()
+@interface AppController () <OakUserDefaultsObserver>
 @property (nonatomic) BOOL didFinishLaunching;
 @property (nonatomic) BOOL keyWindowHasBackAndForwardActions;
 @end
@@ -608,7 +609,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 	}
 
 	[self userDefaultsDidChange:nil]; // setup mate/rmate server
-	[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:NSUserDefaults.standardUserDefaults];
+	OakObserveUserDefaults(self);
 
 	NSMenu* selectMenu = [[[[[NSApp mainMenu] itemWithTitle:@"Edit"] submenu] itemWithTitle:@"Select"] submenu];
 	[[selectMenu itemWithTitle:@"Toggle Column Selection"] setActivationString:@"⌥" withFont:nil];

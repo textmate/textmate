@@ -1,5 +1,6 @@
 #import "ProjectLayoutView.h"
 #import <OakAppKit/OakUIConstructionFunctions.h>
+#import <OakFoundation/OakFoundation.h>
 #import <Preferences/Keys.h>
 #import <oak/misc.h>
 #import <oak/debug.h>
@@ -7,7 +8,7 @@
 NSString* const kUserDefaultsFileBrowserWidthKey = @"fileBrowserWidth";
 NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 
-@interface ProjectLayoutView ()
+@interface ProjectLayoutView () <OakUserDefaultsObserver>
 @property (nonatomic) NSView* fileBrowserDivider;
 @property (nonatomic) NSView* htmlOutputDivider;
 @property (nonatomic) NSLayoutConstraint* fileBrowserWidthConstraint;
@@ -34,7 +35,7 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 		_htmlOutputSize   = NSSizeFromString([NSUserDefaults.standardUserDefaults stringForKey:kUserDefaultsHTMLOutputSizeKey]);
 
 		[self userDefaultsDidChange:nil];
-		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:NSUserDefaults.standardUserDefaults];
+		OakObserveUserDefaults(self);
 	}
 	return self;
 }

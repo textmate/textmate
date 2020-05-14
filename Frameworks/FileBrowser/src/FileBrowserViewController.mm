@@ -81,7 +81,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 	return res;
 }
 
-@interface FileBrowserViewController () <NSMenuDelegate, NSOutlineViewDataSource, NSOutlineViewDelegate, NSTextFieldDelegate, QLPreviewPanelDataSource>
+@interface FileBrowserViewController () <NSMenuDelegate, NSOutlineViewDataSource, NSOutlineViewDelegate, NSTextFieldDelegate, QLPreviewPanelDataSource, OakUserDefaultsObserver>
 {
 	NSUndoManager* _fileBrowserUndoManager;
 	NSArray<FileItem*>* _previewItems;
@@ -140,15 +140,13 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 		_expandedURLs = [NSMutableSet set];
 		_selectedURLs = [NSMutableSet set];
 
-		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:NSUserDefaults.standardUserDefaults];
+		OakObserveUserDefaults(self);
 	}
 	return self;
 }
 
 - (void)dealloc
 {
-	[NSNotificationCenter.defaultCenter removeObserver:self name:NSUserDefaultsDidChangeNotification object:NSUserDefaults.standardUserDefaults];
-
 	for(id observer in _fileItemObservers.allValues)
 		[FileItem removeObserver:observer];
 	_fileItemObservers = nil;

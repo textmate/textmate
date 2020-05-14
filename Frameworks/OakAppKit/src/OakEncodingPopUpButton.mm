@@ -1,5 +1,6 @@
 #import "OakEncodingPopUpButton.h"
 #import "NSMenu Additions.h"
+#import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <io/path.h>
 #import <ns/ns.h>
@@ -102,7 +103,7 @@ namespace // PopulateMenu{Flat,Hierarchical}
 @property (class, readonly) OakCustomizeEncodingsWindowController* sharedInstance;
 @end
 
-@interface OakEncodingPopUpButton ()
+@interface OakEncodingPopUpButton () <OakUserDefaultsObserver>
 @property (nonatomic) NSArray*    availableEncodings;
 @property (nonatomic) NSMenuItem* firstMenuItem;
 @end
@@ -181,7 +182,7 @@ namespace // PopulateMenu{Flat,Hierarchical}
 		self.encoding = @"UTF-8";
 		[self updateAvailableEncodings];
 		[self updateMenu];
-		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:NSUserDefaults.standardUserDefaults];
+		OakObserveUserDefaults(self);
 	}
 	return self;
 }
@@ -193,7 +194,7 @@ namespace // PopulateMenu{Flat,Hierarchical}
 		self.encoding = @"UTF-8";
 		[self updateAvailableEncodings];
 		[self updateMenu];
-		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:NSUserDefaults.standardUserDefaults];
+		OakObserveUserDefaults(self);
 	}
 	return self;
 }

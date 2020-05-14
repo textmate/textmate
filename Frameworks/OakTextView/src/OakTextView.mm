@@ -469,7 +469,7 @@ private:
 	ng::layout_t* _layout;
 };
 
-@interface OakTextView () <NSTextInputClient, NSDraggingSource, NSIgnoreMisspelledWords, NSChangeSpelling, NSTextFieldDelegate, NSTouchBarDelegate, NSAccessibilityCustomRotorItemSearchDelegate>
+@interface OakTextView () <NSTextInputClient, NSDraggingSource, NSIgnoreMisspelledWords, NSChangeSpelling, NSTextFieldDelegate, NSTouchBarDelegate, NSAccessibilityCustomRotorItemSearchDelegate, OakUserDefaultsObserver>
 {
 	OBJC_WATCH_LEAKS(OakTextView);
 
@@ -959,7 +959,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 		[self registerForDraggedTypes:[[self class] dropTypes]];
 
 		[self bind:@"scmStatus" toObject:self withKeyPath:@"document.scmStatus" options:nil];
-		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:NSUserDefaults.standardUserDefaults];
+		OakObserveUserDefaults(self);
 	}
 	return self;
 }

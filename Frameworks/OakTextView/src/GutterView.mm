@@ -1,6 +1,7 @@
 #import "GutterView.h"
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/NSImage Additions.h>
+#import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <Preferences/Keys.h>
 #import <text/types.h>
@@ -28,7 +29,7 @@ struct data_source_t
 	CGFloat width;
 };
 
-@interface GutterView ()
+@interface GutterView () <OakUserDefaultsObserver>
 {
 	std::vector<data_source_t> columnDataSources;
 	NSMutableSet* hiddenColumns;
@@ -72,7 +73,7 @@ struct data_source_t
 		[self userDefaultsDidChange:nil];
 
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(cursorDidHide:) name:OakCursorDidHideNotification object:nil];
-		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:NSUserDefaults.standardUserDefaults];
+		OakObserveUserDefaults(self);
 	}
 	return self;
 }
