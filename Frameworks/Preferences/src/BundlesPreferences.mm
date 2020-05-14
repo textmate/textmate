@@ -251,21 +251,46 @@ static NSUserInterfaceItemIdentifier const kTableColumnIdentifierDescription = @
 
 	NSButton* updateBundlesCheckbox = [NSButton checkboxWithTitle:@"Check for and install updates automatically" target:nil action:nil];
 
-	NSView* view = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 622, 454)];
+	NSTextField* statusTextField = [NSTextField labelWithString:@""];
+	statusTextField.textColor = NSColor.secondaryLabelColor;
+	statusTextField.font = [NSFont messageFontOfSize:NSFont.smallSystemFontSize];
+
+	NSProgressIndicator* progressIndicator = [[NSProgressIndicator alloc] initWithFrame:NSZeroRect];
+	progressIndicator.controlSize          = NSControlSizeSmall;
+	progressIndicator.displayedWhenStopped = NO;
+	progressIndicator.style                = NSProgressIndicatorStyleSpinning;
+
+	NSVisualEffectView* footerView = [[NSVisualEffectView alloc] initWithFrame:NSZeroRect];
+	footerView.blendingMode = NSVisualEffectBlendingModeWithinWindow;
+	footerView.material     = NSVisualEffectMaterialTitlebar;
+
+	NSDictionary* footerViews = @{
+		@"divider": OakCreateNSBoxSeparator(),
+		@"spinner": progressIndicator,
+		@"status":  statusTextField,
+	};
+	OakAddAutoLayoutViewsToSuperview(footerViews.allValues, footerView);
+	[footerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[divider]|"                        options:0 metrics:nil views:footerViews]];
+	[footerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[spinner]-(>=8)-[status]-(>=8)-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:footerViews]];
+	[footerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[divider(==1)]-4-[status]-4-|"     options:0 metrics:nil views:footerViews]];
+	[statusTextField.centerXAnchor constraintEqualToAnchor:footerView.centerXAnchor].active = YES;
 
 	NSDictionary* views = @{
 		@"scopeBar":      _scopeBar.view,
 		@"search":        _searchField,
 		@"scrollView":    scrollView,
 		@"updateBundles": updateBundlesCheckbox,
+		@"footer":        footerView,
 	};
 
+	NSView* view = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 622, 454)];
 	OakAddAutoLayoutViewsToSuperview(views.allValues, view);
 
-	[view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-8-[scopeBar]-(>=8)-[search(>=50,<=100,==100@250)]-8-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
-	[view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[scrollView(>=50)]-|" options:0 metrics:nil views:views]];
-	[view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[updateBundles]-(>=8)-|" options:0 metrics:nil views:views]];
-	[view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-8-[search]-8-[scrollView(>=50)]-[updateBundles]-|" options:0 metrics:nil views:views]];
+	[view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-8-[scopeBar]-(>=8)-[search(>=50,<=100,==100@250)]-8-|"        options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
+	[view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[scrollView(>=50)]-|"                                         options:0 metrics:nil views:views]];
+	[view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[updateBundles]-(>=8)-|"                                      options:0 metrics:nil views:views]];
+	[view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[footer]|"                                                     options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
+	[view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-8-[search]-8-[scrollView(>=50)]-[updateBundles]-20-[footer]|" options:0 metrics:nil views:views]];
 
 	// ============
 	// = Bindings =
@@ -284,7 +309,15 @@ static NSUserInterfaceItemIdentifier const kTableColumnIdentifierDescription = @
 
 	[updateBundlesCheckbox bind:NSValueBinding toObject:NSUserDefaultsController.sharedUserDefaultsController withKeyPath:@"values.disableBundleUpdates" options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
 
+	[progressIndicator bind:NSAnimateBinding toObject:BundleInstallHelper.sharedInstance withKeyPath:@"busy" options:nil];
+	[statusTextField   bind:NSValueBinding   toObject:BundleInstallHelper.sharedInstance withKeyPath:@"activityText" options:nil];
+
 	self.view = view;
+}
+
+- (void)viewWillAppear
+{
+	BundleInstallHelper.sharedInstance.bundleInstallActivityText = nil;
 }
 
 - (void)viewDidAppear
