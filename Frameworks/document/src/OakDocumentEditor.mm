@@ -25,12 +25,12 @@ static int32_t const NSWrapColumnWindowWidth = 0;
 // ====================================
 
 @implementation OakDocumentEditor
-+ (instancetype)documentEditorWithDocument:(OakDocument*)aDocument fontScaleFactor:(CGFloat)scale
++ (instancetype)documentEditorWithDocument:(OakDocument*)aDocument fontScaleFactor:(CGFloat)scale themeUUID:(NSString*)themeUUID
 {
-	return [[OakDocumentEditor alloc] initWithDocument:aDocument fontScaleFactor:scale];
+	return [[OakDocumentEditor alloc] initWithDocument:aDocument fontScaleFactor:scale themeUUID:themeUUID];
 }
 
-- (instancetype)initWithDocument:(OakDocument*)aDocument fontScaleFactor:(CGFloat)scale
+- (instancetype)initWithDocument:(OakDocument*)aDocument fontScaleFactor:(CGFloat)scale themeUUID:(NSString*)themeUUID
 {
 	if(self = [self init])
 	{
@@ -58,7 +58,7 @@ static int32_t const NSWrapColumnWindowWidth = 0;
 		bool softWrap     = settings.get(kSettingsSoftWrapKey, false);
 		size_t wrapColumn = settings.get(kSettingsWrapColumnKey, NSWrapColumnWindowWidth);
 
-		theme_ptr theme = parse_theme(bundles::lookup(settings.get(kSettingsThemeKey, NULL_STR)));
+		theme_ptr theme = parse_theme(bundles::lookup(to_s(themeUUID)));
 		_layout = std::make_unique<ng::layout_t>([_document buffer], theme, to_s(_font.fontName), _font.pointSize * _fontScaleFactor, softWrap, scrollPastEnd, wrapColumn, to_s(_document.folded));
 
 		if(settings.get(kSettingsShowWrapColumnKey, false))

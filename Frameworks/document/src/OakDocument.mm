@@ -1777,7 +1777,7 @@ NSString* OakDocumentBookmarkIdentifier                          = @"bookmark";
 	[self tryLoadBackup];
 	if(self.isLoaded)
 	{
-		OakDocumentEditor* documentEditor = self.documentEditors.firstObject ?: [OakDocumentEditor documentEditorWithDocument:self fontScaleFactor:1];
+		OakDocumentEditor* documentEditor = self.documentEditors.firstObject ?: [OakDocumentEditor documentEditorWithDocument:self fontScaleFactor:1 themeUUID:nil];
 		[documentEditor performReplacements:someReplacements];
 		return YES;
 	}

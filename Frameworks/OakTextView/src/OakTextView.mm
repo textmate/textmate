@@ -242,9 +242,9 @@ typedef NS_ENUM(NSUInteger, OakFlagsState) {
 
 struct document_view_t : ng::buffer_api_t
 {
-	document_view_t (OakDocument* document, std::string const& scopeAttributes, bool scrollPastEnd, CGFloat fontScaleFactor = 1) : _document(document)
+	document_view_t (OakDocument* document, NSString* themeUUID, std::string const& scopeAttributes, bool scrollPastEnd, CGFloat fontScaleFactor = 1) : _document(document)
 	{
-		_document_editor = [OakDocumentEditor documentEditorWithDocument:document fontScaleFactor:fontScaleFactor];
+		_document_editor = [OakDocumentEditor documentEditorWithDocument:document fontScaleFactor:fontScaleFactor themeUUID:themeUUID];
 
 		_editor = &[_document_editor editor];
 		_layout = &[_document_editor layout];
@@ -825,6 +825,12 @@ static std::string shell_quote (std::vector<std::string> paths)
 		_document.visibleIndex = documentView->index_at_point([self visibleRect].origin);
 }
 
+- (NSString*)effectiveThemeUUID
+{
+	settings_t const settings = settings_for_path(to_s(_document.virtualPath ?: _document.path), to_s(_document.fileType), to_s(_document.directory ?: [_document.path stringByDeletingLastPathComponent]));
+	return to_ns(settings.get(kSettingsThemeKey, NULL_STR));
+}
+
 - (void)setDocument:(OakDocument*)aDocument
 {
 	if(aDocument && [_document isEqual:aDocument])
@@ -873,7 +879,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 	{
 		_scmStatus = scm::status::unknown;
 
-		documentView = std::make_shared<document_view_t>(_document, to_s(self.scopeAttributes), self.scrollPastEnd, fontScaleFactor);
+		documentView = std::make_shared<document_view_t>(_document, self.effectiveThemeUUID, to_s(self.scopeAttributes), self.scrollPastEnd, fontScaleFactor);
 		documentView->set_command_runner([self](bundle_command_t const& cmd, ng::buffer_api_t const& buffer, ng::ranges_t const& selection, std::map<std::string, std::string> const& variables){
 			[self executeBundleCommand:cmd buffer:buffer selection:selection variables:variables];
 		});

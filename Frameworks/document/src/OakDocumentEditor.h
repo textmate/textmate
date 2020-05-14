@@ -9,8 +9,8 @@ namespace ng
 } /* ng */
 
 PUBLIC @interface OakDocumentEditor : NSObject
-+ (instancetype)documentEditorWithDocument:(OakDocument*)aDocument fontScaleFactor:(CGFloat)scale;
-- (instancetype)initWithDocument:(OakDocument*)aDocument fontScaleFactor:(CGFloat)scale;
++ (instancetype)documentEditorWithDocument:(OakDocument*)aDocument fontScaleFactor:(CGFloat)scale themeUUID:(NSString*)themeUUID;
+- (instancetype)initWithDocument:(OakDocument*)aDocument fontScaleFactor:(CGFloat)scale themeUUID:(NSString*)themeUUID;
 @property (nonatomic, readonly) OakDocument* document;
 @property (nonatomic) ng::ranges_t selection;
 - (ng::buffer_t&)buffer;
