@@ -579,8 +579,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 	{
 		[folderItem setTitle:[self displayNameForFolder:lastFolder]];
 		[folderItem setIconForFile:lastFolder];
-		[folderItem setRepresentedObject:lastFolder];
-		[FFFolderMenu addFolderSubmenuToMenuItem:folderItem];
+		[FFFolderMenu addSubmenuForDirectoryAtPath:lastFolder toMenuItem:folderItem];
 	}
 
 	if(_searchTarget == FFSearchTargetProject || _searchTarget == FFSearchTargetOther || (_searchTarget == FFSearchTargetFileBrowserItems && _fileBrowserItems.count == 1))

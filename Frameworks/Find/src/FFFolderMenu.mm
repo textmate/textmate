@@ -46,13 +46,14 @@ static NSMutableArray* FoldersAtPath (NSString* folder)
 	return sharedInstance;
 }
 
-+ (void)addFolderSubmenuToMenuItem:(NSMenuItem*)aMenuItem
++ (void)addSubmenuForDirectoryAtPath:(NSString*)path toMenuItem:(NSMenuItem*)aMenuItem
 {
-	[FFFolderMenu.sharedInstance addFolderSubmenuToMenuItem:aMenuItem];
+	[FFFolderMenu.sharedInstance addSubmenuForDirectoryAtPath:path toMenuItem:aMenuItem];
 }
 
-- (void)addFolderSubmenuToMenuItem:(NSMenuItem*)aMenuItem
+- (void)addSubmenuForDirectoryAtPath:(NSString*)path toMenuItem:(NSMenuItem*)aMenuItem
 {
+	aMenuItem.representedObject = path;
 	aMenuItem.submenu = [NSMenu new];
 	aMenuItem.submenu.delegate = self;
 }
@@ -68,11 +69,10 @@ static NSMutableArray* FoldersAtPath (NSString* folder)
 	{
 		NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSFileManager.defaultManager displayNameAtPath:path] action:parentItem.action keyEquivalent:@""];
 		[menuItem setTarget:parentItem.target];
-		[menuItem setRepresentedObject:path];
 		[menuItem setIconForFile:path];
 
 		if([FoldersAtPath(path) count])
-			[self addFolderSubmenuToMenuItem:menuItem];
+			[self addSubmenuForDirectoryAtPath:path toMenuItem:menuItem];
 	}
 
 	if(![parentItem parentItem] && ![folder isEqualToString:@"/"]) // Add enclosing folders to root menu
