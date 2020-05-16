@@ -163,8 +163,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 
 - (id)init
 {
-	NSRect r = [[NSScreen mainScreen] visibleFrame];
-	if((self = [super initWithWindow:[[NSPanel alloc] initWithContentRect:NSMakeRect(NSMidX(r)-100, NSMidY(r)+100, 200, 200) styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskMiniaturizable) backing:NSBackingStoreBuffered defer:NO]]))
+	if(self = [super initWithWindowNibName:@"UNUSED"])
 	{
 		_objectController = [[NSObjectController alloc] initWithContent:self];
 		_projectFolder    = NSHomeDirectory();
@@ -172,20 +171,30 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		self.globHistoryList = [[OakHistoryList alloc] initWithName:@"Find in Folder Globs.default" stackSize:10 fallbackUserDefaultsKey:kUserDefaultsDefaultFindGlobsKey];
 		self.recentFolders   = [[OakHistoryList alloc] initWithName:@"findRecentPlaces" stackSize:21];
 
-		self.window.frameAutosaveName  = @"Find";
-		self.window.hidesOnDeactivate  = NO;
-		self.window.collectionBehavior = NSWindowCollectionBehaviorMoveToActiveSpace|NSWindowCollectionBehaviorFullScreenAuxiliary;
-		self.window.delegate           = self;
-		self.window.restorable         = NO;
-
 		_findTextFieldViewController    = [[FFTextFieldViewController alloc] initWithPasteboard:OakPasteboard.findPasteboard grammarName:@"source.regexp.oniguruma"];
 		_replaceTextFieldViewController = [[FFTextFieldViewController alloc] initWithPasteboard:OakPasteboard.replacePasteboard grammarName:@"textmate.format-string"];
+	}
+	return self;
+}
+
+- (void)loadWindow
+{
+	NSRect r = NSScreen.mainScreen.visibleFrame;
+	if(NSWindow* window = [[NSPanel alloc] initWithContentRect:NSMakeRect(NSMidX(r)-100, NSMidY(r)+100, 200, 200) styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskMiniaturizable) backing:NSBackingStoreBuffered defer:NO])
+	{
+		window.collectionBehavior = NSWindowCollectionBehaviorMoveToActiveSpace|NSWindowCollectionBehaviorFullScreenAuxiliary;
+		window.delegate           = self;
+		window.frameAutosaveName  = @"Find";
+		window.hidesOnDeactivate  = NO;
 
 		_resultsViewController = [[FFResultsViewController alloc] init];
 		_resultsViewController.selectResultAction      = @selector(didSelectResult:);
 		_resultsViewController.removeResultAction      = @selector(didRemoveResult:);
 		_resultsViewController.doubleClickResultAction = @selector(didDoubleClickResult:);
 		_resultsViewController.target                  = self;
+
+		[_resultsViewController bind:@"replaceString"           toObject:_replaceTextFieldViewController withKeyPath:@"stringValue" options:nil];
+		[_resultsViewController bind:@"showReplacementPreviews" toObject:_replaceTextFieldViewController withKeyPath:@"hasFocus"    options:nil];
 
 		_transitionViewController = [[OakTransitionViewController alloc] init];
 
@@ -202,21 +211,14 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 
 		NSView* contentView = [[NSView alloc] initWithFrame:NSZeroRect];
 
-		self.actionButtonsStackView.edgeInsets = { .left = 20, .right = 20 };
-
 		OakAddAutoLayoutViewsToSuperview(views.allValues, contentView);
 		OakSetupKeyViewLoop(@[ self.gridView, _transitionViewController.view, self.actionButtonsStackView ]);
 
 		[NSLayoutConstraint activateConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[options]|"                               options:0                                                            metrics:nil views:views]];
 		[NSLayoutConstraint activateConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[options]-[results]-[status]-[buttons]-|" options:NSLayoutFormatAlignAllLeading|NSLayoutFormatAlignAllTrailing metrics:nil views:views]];
 
-		self.window.contentView = contentView;
-		self.window.defaultButtonCell = _findNextButton.cell;
-
-		[self updateWindowTitle];
-		[self.window layoutIfNeeded]; // Incase autosaved window frame includes results, we want to shrink the frame
-
-		[_resultsViewController bind:@"replaceString" toObject:_replaceTextFieldViewController withKeyPath:@"stringValue" options:nil];
+		window.contentView = contentView;
+		window.defaultButtonCell = _findNextButton.cell;
 
 		// setup find/replace strings/options
 		[self userDefaultsDidChange:nil];
@@ -229,9 +231,10 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(textViewWillPerformFindOperation:) name:@"OakTextViewWillPerformFindOperation" object:nil];
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(resultsFrameDidChange:) name:NSViewFrameDidChangeNotification object:_resultsViewController.view];
 
-		[_resultsViewController bind:@"showReplacementPreviews" toObject:_replaceTextFieldViewController withKeyPath:@"hasFocus" options:nil];
+		[window layoutIfNeeded]; // Incase autosaved window frame includes results, we want to shrink the frame
+		self.window = window;
+		[self updateWindowTitle];
 	}
-	return self;
 }
 
 - (void)menuNeedsUpdate:(NSMenu*)aMenu
@@ -409,6 +412,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		_actionButtonsStackView = [NSStackView stackViewWithViews:@[ _findAllButton, replaceAllButton ]];
 		[_actionButtonsStackView setViews:@[ replaceButton, replaceAndFindButton, findPreviousButton, _findNextButton ] inGravity:NSStackViewGravityTrailing];
 		[_actionButtonsStackView setHuggingPriority:NSLayoutPriorityDefaultHigh-1 forOrientation:NSLayoutConstraintOrientationVertical];
+		_actionButtonsStackView.edgeInsets = { .left = 20, .right = 20 };
 
 		OakSetupKeyViewLoop(@[ _actionButtonsStackView, _findAllButton, replaceAllButton, replaceButton, replaceAndFindButton, findPreviousButton, _findNextButton ], NO);
 	}
