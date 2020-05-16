@@ -206,10 +206,20 @@ OSStatus TextMateQuickLookPlugIn_GeneratePreviewForURL (void* instance, QLPrevie
 	if(QLPreviewRequestIsCancelled(request))
 		return noErr;
 
+	NSUserDefaults* userDefaults = [[NSUserDefaults alloc] initWithSuiteName:@"com.macromates.TextMate"];
+	NSString* appearance = [userDefaults stringForKey:@"themeAppearance"];
+	BOOL darkMode = [appearance isEqualToString:@"dark"];
+	if(@available(macos 10.14, *))
+	{
+		if(!darkMode && ![appearance isEqualToString:@"light"]) // If it is not ‘light’ then assume ‘auto’
+			darkMode = [[NSAppearance.currentAppearance bestMatchFromAppearancesWithNames:@[ NSAppearanceNameAqua, NSAppearanceNameDarkAqua ]] isEqualToString:NSAppearanceNameDarkAqua];
+	}
+	NSString* themeUUID = [userDefaults stringForKey:darkMode ? @"darkModeThemeUUID" : @"universalThemeUUID"];
+
 	settings_t const settings = settings_for_path(URLtoString(url), fileType);
 	theme_ptr theme;
 	NSFont* font = [NSFont userFixedPitchFontOfSize:0];
-	NSAttributedString* output = create_attributed_string(buffer, settings.get(kSettingsThemeKey, NULL_STR), settings.get(kSettingsFontNameKey, to_s([font fontName])), settings.get(kSettingsFontSizeKey, [font pointSize]), &theme);
+	NSAttributedString* output = create_attributed_string(buffer, to_s(themeUUID), settings.get(kSettingsFontNameKey, to_s([font fontName])), settings.get(kSettingsFontSizeKey, [font pointSize]), &theme);
 	if(!output)
 	{
 		NSData* data = [NSData dataWithContentsOfURL:(__bridge NSURL*)url];
