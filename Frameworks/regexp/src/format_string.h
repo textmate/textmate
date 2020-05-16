@@ -15,7 +15,7 @@ namespace format_string
 		format_string_t (std::string const& str, char const* stopChars = "") { init(str, stopChars); }
 
 		format_string_t (parser::nodes_t const& nodes);
-		std::string expand (std::function<std::string(std::string const&, std::string const&)> const& getVariable) const;
+		std::string expand (std::function<std::optional<std::string>(std::string const&)> const& getVariable) const;
 
 		size_t length () const { return _length; }
 
@@ -28,7 +28,7 @@ namespace format_string
 	};
 
 	PUBLIC std::string replace (std::string const& src, regexp::pattern_t const& ptrn, format_string_t const& format, bool repeat = true, std::map<std::string, std::string> const& variables = std::map<std::string, std::string>());
-	PUBLIC std::string expand (std::string const& format, std::function<std::string(std::string const&, std::string const&)> const& getVariable);
+	PUBLIC std::string expand (std::string const& format, std::function<std::optional<std::string>(std::string const&)> const& getVariable);
 	PUBLIC std::string expand (std::string const& format, std::map<std::string, std::string> const& variables = std::map<std::string, std::string>());
 	PUBLIC std::string escape (std::string const& format);
 
