@@ -229,7 +229,6 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(findClipboardDidChange:) name:OakPasteboardDidChangeNotification object:OakPasteboard.findPasteboard];
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(replaceClipboardDidChange:) name:OakPasteboardDidChangeNotification object:OakPasteboard.replacePasteboard];
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(textViewWillPerformFindOperation:) name:@"OakTextViewWillPerformFindOperation" object:nil];
-		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(resultsFrameDidChange:) name:NSViewFrameDidChangeNotification object:_resultsViewController.view];
 
 		[window layoutIfNeeded]; // Incase autosaved window frame includes results, we want to shrink the frame
 		self.window = window;
@@ -671,17 +670,19 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 {
 	if(_showsResultsOutlineView == flag)
 		return;
-	_showsResultsOutlineView = flag;
 
-	if(!self.isWindowLoaded)
-		return;
+	if(_showsResultsOutlineView = flag)
+	{
+		_resultsViewController.view.frame = { .size = NSMakeSize(NSWidth(_transitionViewController.view.frame), MAX(50, self.findResultsHeight)) };
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(resultsFrameDidChange:) name:NSViewFrameDidChangeNotification object:_resultsViewController.view];
+	}
+	else
+	{
+		[NSNotificationCenter.defaultCenter removeObserver:self name:NSViewFrameDidChangeNotification object:_resultsViewController.view];
+	}
 
-	NSView* view = _showsResultsOutlineView ? _resultsViewController.view : nil;
-	if(_showsResultsOutlineView)
-		view.frame = { .size = NSMakeSize(NSWidth(_transitionViewController.view.frame), MAX(50, self.findResultsHeight)) };
-	[_transitionViewController transitionToView:view];
-
-	self.window.defaultButtonCell = _showsResultsOutlineView ? _findAllButton.cell : _findNextButton.cell;
+	[_transitionViewController transitionToView:flag ? _resultsViewController.view : nil];
+	self.window.defaultButtonCell = flag ? _findAllButton.cell : _findNextButton.cell;
 }
 
 - (void)setStatusString:(NSString*)aString
