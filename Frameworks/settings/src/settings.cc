@@ -179,9 +179,8 @@ namespace
 		{
 			if((sectionType & kScopeSelector) && section.has_scope_selector)
 			{
-				double rank = 0;
-				if(section.scope_selector.does_match(scope, &rank))
-					orderScopeMatches.emplace(rank, &section);
+				if(auto rank = section.scope_selector.does_match(scope))
+					orderScopeMatches.emplace(*rank, &section);
 			}
 			else if((sectionType & kGlob) && section.has_file_glob && section.file_glob.does_match(path == NULL_STR ? directory + "/" : path))
 			{

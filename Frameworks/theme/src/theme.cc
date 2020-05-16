@@ -387,16 +387,14 @@ styles_t const& theme_t::styles_for_scope (scope::scope_t const& scope) const
 		std::multimap<double, decomposed_style_t> ordering;
 		for(auto const& it : global_styles(scope))
 		{
-			double rank = 0;
-			if(it.scope_selector.does_match(scope, &rank))
-				ordering.emplace(rank, it);
+			if(auto rank = it.scope_selector.does_match(scope))
+				ordering.emplace(*rank, it);
 		}
 
 		for(auto const& it : _styles->_styles)
 		{
-			double rank = 0;
-			if(it.scope_selector.does_match(scope, &rank))
-				ordering.emplace(rank, it);
+			if(auto rank = it.scope_selector.does_match(scope))
+				ordering.emplace(*rank, it);
 		}
 
 		decomposed_style_t base(scope::selector_t(), _font_name, _font_size);

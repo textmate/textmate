@@ -310,11 +310,9 @@ namespace bundles
 				match = match || pair->second == value || (field == kFieldSemanticClass && pair->second.size() > value.size() && pair->second.find(value) == 0 && pair->second[value.size()] == '.');
 		}
 
-		double rank = 1;
-		match = match && (scope == scope::wildcard || _scope_selector.does_match(scope, &rank));
 		match = match && (_kind & kind) == _kind;
 		match = match && (!bundle || bundle == bundle_uuid());
-		return match ? std::optional<double>(rank) : std::optional<double>();
+		return match ? (scope == scope::wildcard ? 1 : _scope_selector.does_match(scope)) : std::optional<double>();
 	}
 
 	plist::dictionary_t erase_false_values (plist::dictionary_t const& plist)

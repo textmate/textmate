@@ -107,7 +107,7 @@ namespace scope
 		selector_t (char const* str);
 		selector_t (std::string const& str);
 
-		bool does_match (context_t const& scope, double* rank = NULL) const;
+		std::optional<double> does_match (context_t const& scope) const;
 
 	private:
 		void setup (std::string const& str);

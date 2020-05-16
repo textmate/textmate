@@ -407,16 +407,14 @@ static CGFloat ParseFontSize (NSString* fontSizeString)
 	std::multimap<double, OakThemeRawStyle*> ordering;
 	for(OakThemeRawStyle* style in _globalStyles)
 	{
-		double rank = 0;
-		if(style.scopeSelector.does_match(scope, &rank))
-			ordering.emplace(rank, style);
+		if(auto rank = style.scopeSelector.does_match(scope))
+			ordering.emplace(*rank, style);
 	}
 
 	for(OakThemeRawStyle* style in _themeStyles)
 	{
-		double rank = 0;
-		if(style.scopeSelector.does_match(scope, &rank))
-			ordering.emplace(rank, style);
+		if(auto rank = style.scopeSelector.does_match(scope))
+			ordering.emplace(*rank, style);
 	}
 
 	for(auto const pair : ordering)

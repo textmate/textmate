@@ -267,12 +267,11 @@ namespace scope
 	// = Matching =
 	// ============
 
-	bool selector_t::does_match (context_t const& scope, double* rank) const
+	std::optional<double> selector_t::does_match (context_t const& scope) const
 	{
+		double rank = 1;
 		if(selector)
-			return scope.left == wildcard || scope.right == wildcard || selector->does_match(scope.left, scope.right, rank);
-		if(rank)
-			*rank = 0;
-		return true;
+			return scope.left == wildcard || scope.right == wildcard || selector->does_match(scope.left, scope.right, &rank) ? rank : std::optional<double>();
+		return 0;
 	}
 }
