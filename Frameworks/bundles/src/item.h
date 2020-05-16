@@ -79,7 +79,7 @@ namespace bundles
 		void add_path (std::string const& path);
 		bool initialize (plist::dictionary_t const& plist);
 		void set_plist (plist::dictionary_t const& plist, bool shouldInitialize = true);
-		bool does_match (std::string const& field, std::string const& value, scope::context_t const& scope, int kind, oak::uuid_t const& bundle, double* rank);
+		std::optional<double> does_match (std::string const& field, std::string const& value, scope::context_t const& scope, int kind, oak::uuid_t const& bundle);
 
 	private:
 		struct required_bundle_t

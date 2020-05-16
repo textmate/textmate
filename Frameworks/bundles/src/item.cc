@@ -300,7 +300,7 @@ namespace bundles
 		return it == _fields.end() ? fallback : it->second;
 	}
 
-	bool item_t::does_match (std::string const& field, std::string const& value, scope::context_t const& scope, int kind, oak::uuid_t const& bundle, double* rank)
+	std::optional<double> item_t::does_match (std::string const& field, std::string const& value, scope::context_t const& scope, int kind, oak::uuid_t const& bundle)
 	{
 		bool match = true;
 		if(field != kFieldAny)
@@ -310,10 +310,11 @@ namespace bundles
 				match = match || pair->second == value || (field == kFieldSemanticClass && pair->second.size() > value.size() && pair->second.find(value) == 0 && pair->second[value.size()] == '.');
 		}
 
-		match = match && (scope == scope::wildcard || _scope_selector.does_match(scope, rank));
+		double rank = 1;
+		match = match && (scope == scope::wildcard || _scope_selector.does_match(scope, &rank));
 		match = match && (_kind & kind) == _kind;
 		match = match && (!bundle || bundle == bundle_uuid());
-		return match;
+		return match ? std::optional<double>(rank) : std::optional<double>();
 	}
 
 	plist::dictionary_t erase_false_values (plist::dictionary_t const& plist)

@@ -227,12 +227,11 @@ namespace bundles
 		std::multimap<std::string, item_ptr> const& values = cache().fetch(field);
 		foreach(pair, values.lower_bound(value), field == kFieldSemanticClass ? values.lower_bound(value + "/") : values.upper_bound(value)) // Since kFieldSemanticClass is a prefix match we want lower bound of the first item after the last possible prefix (which would be “value.zzzzz…” → “value/”).
 		{
-			double rank = 1.0;
-			if(pair->second->does_match(field, value, scope, kind, bundle, &rank))
+			if(auto rank = pair->second->does_match(field, value, scope, kind, bundle))
 			{
 				if(pair->second->kind() == kItemTypeProxy && resolveProxyItems)
 						resolve_proxy(pair->second, scope, kind, bundle, includeDisabledItems, ordered);
-				else	ordered.emplace(rank, pair->second);
+				else	ordered.emplace(*rank, pair->second);
 			}
 		}
 	}
@@ -244,12 +243,11 @@ namespace bundles
 			if(is_deleted(item) || !includeDisabledItems && is_disabled(item))
 				continue;
 
-			double rank = 1.0;
-			if(item->does_match(field, value, scope, kind, bundle, &rank))
+			if(auto rank = item->does_match(field, value, scope, kind, bundle))
 			{
 				if(item->kind() == kItemTypeProxy && resolveProxyItems)
 						resolve_proxy(item, scope, kind, bundle, includeDisabledItems, ordered);
-				else	ordered.emplace(rank, item);
+				else	ordered.emplace(*rank, item);
 			}
 		}
 	}
