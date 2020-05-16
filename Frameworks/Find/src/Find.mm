@@ -275,6 +275,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		optionsGridView.rowSpacing    = 8;
 		optionsGridView.columnSpacing = 20;
 		optionsGridView.rowAlignment  = NSGridRowAlignmentFirstBaseline;
+		[optionsGridView rowAtIndex:1].bottomPadding = 12;
 
 		NSStackView* whereStackView = [NSStackView stackViewWithViews:@[
 			_wherePopUpButton, matchingLabel, globTextField
@@ -294,7 +295,6 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		_gridView.yPlacement    = NSGridCellPlacementTop;
 
 		[_gridView rowAtIndex:0].topPadding        = 20;
-		[_gridView rowAtIndex:2].bottomPadding     = 12;
 		[_gridView columnAtIndex:0].xPlacement     = NSGridCellPlacementTrailing;
 		[_gridView columnAtIndex:0].leadingPadding = 20;
 		[_gridView columnAtIndex:1].leadingPadding = 4;
