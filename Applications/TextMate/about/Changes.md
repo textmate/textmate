@@ -2,6 +2,11 @@ Title: Release Notes
 
 # Changes
 
+## 2020-05-16 (v2.0.15)
+
+* Fix another potential crash in 2.0.13 related to transparent themes: We no longer support themes with a transparent background. This is due to technical challenges achieving this on macOS 10.14 and later, where each view is rendered into its own layer. The feature may come back, but probably not until we require macOS 10.14, because we may need different code paths (and testing) for different versions of macOS.
+* See [all changes since v2.0.14](https://github.com/textmate/textmate/compare/v2.0.14...v2.0.15)
+
 ## 2020-05-14 (v2.0.14)
 
 * Fix crash in 2.0.13 when no license key was found.
