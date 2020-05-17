@@ -1210,6 +1210,12 @@ doScroll:
 		return;
 	}
 
+	if(self.theme->is_transparent())
+	{
+		[NSColor.clearColor set];
+		NSRectFill(aRect);
+	}
+
 	CGContextRef context = NSGraphicsContext.currentContext.CGContext;
 	if(!self.antiAlias)
 		CGContextSetShouldAntialias(context, false);
