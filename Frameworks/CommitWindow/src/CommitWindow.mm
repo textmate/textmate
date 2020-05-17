@@ -163,7 +163,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 		_cancelButton.target                    = self;
 
 		_showTableButton = [[NSButton alloc] initWithFrame:NSZeroRect];
-		_showTableButton.buttonType = NSOnOffButton;
+		_showTableButton.buttonType = NSButtonTypeOnOff;
 		_showTableButton.bezelStyle = NSBezelStyleRoundedDisclosure;
 		_showTableButton.title = @"";
 		_showTableButton.action = @selector(toggleTableView:);

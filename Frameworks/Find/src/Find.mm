@@ -70,7 +70,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 {
 	NSButton* res = [[NSButton alloc] initWithFrame:NSZeroRect];
 	res.bezelStyle = NSBezelStyleRoundedDisclosure;
-	res.buttonType = NSMomentaryLightButton;
+	res.buttonType = NSButtonTypeMomentaryLight;
 	res.title      = @"";
 	res.toolTip    = toolTip;
 	res.accessibilityLabel = toolTip;
