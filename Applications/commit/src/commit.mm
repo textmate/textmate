@@ -1,7 +1,7 @@
 #include <CommitWindow/CommitWindow.h>
 #include <oak/oak.h>
 
-static double const AppVersion = 1.0;
+static double const AppVersion = 1.1;
 
 @interface OakCommitWindowClient : NSObject <OakCommitWindowClientProtocol>
 @property (nonatomic) NSString*     portName;
@@ -78,7 +78,8 @@ int main (int argc, char* argv[])
 				kOakCommitWindowEnvironment:    [[NSProcessInfo processInfo] environment],
 			};
 
-			if(id proxy = [NSConnection rootProxyForConnectionWithRegisteredName:kOakCommitWindowServerConnectionName host:nil])
+			NSString* serviceName = [NSString stringWithFormat:@"%@.CommitWindow.%@", NSProcessInfo.processInfo.environment[@"TM_APP_IDENTIFIER"], NSProcessInfo.processInfo.environment[@"TM_PID"]];
+			if(id proxy = [NSConnection rootProxyForConnectionWithRegisteredName:serviceName host:nil])
 			{
 				[proxy setProtocolForProxy:@protocol(OakCommitWindowServerProtocol)];
 				[proxy connectFromClientWithOptions:plist];
@@ -90,7 +91,7 @@ int main (int argc, char* argv[])
 			}
 			else
 			{
-				fprintf(stderr, "%s: failed connecting to ‘%s’\n", getprogname(), [kOakCommitWindowServerConnectionName UTF8String]);
+				fprintf(stderr, "%s: failed connecting to ‘%s’\n", getprogname(), serviceName.UTF8String);
 			}
 		}
 	}

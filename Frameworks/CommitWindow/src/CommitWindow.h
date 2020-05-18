@@ -1,6 +1,5 @@
 #import <oak/misc.h>
 
-static NSString* const kOakCommitWindowServerConnectionName = @"com.macromates.textmate.commit-window-server";
 static NSString* const kOakCommitWindowClientPortName       = @"clientPortName";
 static NSString* const kOakCommitWindowArguments            = @"arguments";
 static NSString* const kOakCommitWindowEnvironment          = @"environment";
