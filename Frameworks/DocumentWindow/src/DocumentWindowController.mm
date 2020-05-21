@@ -2518,7 +2518,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 
 	self.defaultProjectPath = project[@"projectPath"];
 	self.projectPath        = project[@"projectPath"];
-	self.fileBrowserHistory = project[@"fileBrowserState"];
+	self.fileBrowserHistory = project[@"archivedFileBrowserState"] ?: project[@"fileBrowserState"];
 	self.fileBrowserVisible = [project[@"fileBrowserVisible"] boolValue];
 
 	NSMutableArray<OakDocument*>* documents = [NSMutableArray array];
@@ -2569,7 +2569,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 	if(NSString* projectPath = self.defaultProjectPath)
 		res[@"projectPath"] = projectPath;
 	if(id history = self.fileBrowserHistory)
-		res[@"fileBrowserState"] = history;
+		res[@"archivedFileBrowserState"] = history;
 
 	if(([self.window styleMask] & NSWindowStyleMaskFullScreen) == NSWindowStyleMaskFullScreen)
 		res[@"fullScreen"] = @YES;
