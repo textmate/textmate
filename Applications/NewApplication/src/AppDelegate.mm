@@ -59,11 +59,11 @@
 				{ /* -------- */ },
 				{ @"Find",
 					.submenu = {
-						{ @"Find…",                  @selector(performFindPanelAction:),       @"f", .tag = 1 },
-						{ @"Find and Replace…",      @selector(performFindPanelAction:),       @"f", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption, .tag = 12 },
-						{ @"Find Next",              @selector(performFindPanelAction:),       @"g", .tag = 2 },
-						{ @"Find Previous",          @selector(performFindPanelAction:),       @"G", .tag = 3 },
-						{ @"Use Selection for Find", @selector(performFindPanelAction:),       @"e", .tag = 7 },
+						{ @"Find…",                  @selector(performFindPanelAction:),       @"f", .tag = NSFindPanelActionShowFindPanel  },
+						{ @"Find and Replace…",      @selector(performFindPanelAction:),       @"f", .tag = 12, .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption},
+						{ @"Find Next",              @selector(performFindPanelAction:),       @"g", .tag = NSFindPanelActionNext           },
+						{ @"Find Previous",          @selector(performFindPanelAction:),       @"G", .tag = NSFindPanelActionPrevious       },
+						{ @"Use Selection for Find", @selector(performFindPanelAction:),       @"e", .tag = NSFindPanelActionSetFindString  },
 						{ @"Jump to Selection",      @selector(centerSelectionInVisibleArea:), @"j"   },
 					}
 				},
@@ -109,12 +109,12 @@
 				{ @"Font",
 					.systemMenu = MBMenuTypeFont, .submenu = {
 						{ @"Show Fonts",  @selector(orderFrontFontPanel:),  @"t", .target = NSFontManager.sharedFontManager },
-						{ @"Bold",        @selector(addFontTrait:),         @"b", .target = NSFontManager.sharedFontManager, .tag = 2 },
-						{ @"Italic",      @selector(addFontTrait:),         @"i", .target = NSFontManager.sharedFontManager, .tag = 1 },
+						{ @"Bold",        @selector(addFontTrait:),         @"b", .target = NSFontManager.sharedFontManager, .tag = NSBoldFontMask },
+						{ @"Italic",      @selector(addFontTrait:),         @"i", .target = NSFontManager.sharedFontManager, .tag = NSItalicFontMask },
 						{ @"Underline",   @selector(underline:),            @"u"   },
 						{ /* -------- */ },
-						{ @"Bigger",      @selector(modifyFont:),           @"+", .target = NSFontManager.sharedFontManager, .tag = 3 },
-						{ @"Smaller",     @selector(modifyFont:),           @"-", .target = NSFontManager.sharedFontManager, .tag = 4 },
+						{ @"Bigger",      @selector(modifyFont:),           @"+", .target = NSFontManager.sharedFontManager, .tag = NSSizeUpFontAction },
+						{ @"Smaller",     @selector(modifyFont:),           @"-", .target = NSFontManager.sharedFontManager, .tag = NSSizeDownFontAction },
 						{ /* -------- */ },
 						{ @"Kern",
 							.submenu = {
