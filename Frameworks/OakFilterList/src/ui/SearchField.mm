@@ -39,7 +39,7 @@ static NSString* CreateSpacedString(NSUInteger length)
 // Workaround <rdar://problem/16271507> by pretending for accessibility
 // that the search field has one extra space after and before the actual
 // search string.
-// See also http://lists.apple.com/archives/accessibility-dev/2014/Feb/msg00019.html
+// See also https://lists.apple.com/archives/accessibility-dev/2014/Feb/msg00019.html
 @implementation OakLinkedSearchFieldCell
 - (id)accessibilityAttributeValue:(NSString*)attribute
 {

@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby -w
 #
-# http://developer.apple.com/library/mac/#technotes/tn2004/tn2123.html
+# https://developer.apple.com/library/mac/#technotes/tn2004/tn2123.html
 require "fileutils"
 require "shellwords"
 

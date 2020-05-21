@@ -127,7 +127,7 @@ def generate_credits(dbm_file, warn=false)
       date = DateTime.parse(fields[3])
       subject = CGI.escapeHTML(fields[4])
       body = CGI.escapeHTML(fields[5].sub(fields[4], '').sub(/[\s\x00]+$/, '').sub(/^[\s\x00]+/, ''))
-      userpic = "http://www.gravatar.com/avatar/#{emailhash}?s=48&amp;d=https://a248.e.akamai.net/assets.github.com%2Fimages%2Fgravatars%2Fgravatar-user-420.png"
+      userpic = "https://www.gravatar.com/avatar/#{emailhash}?s=48&amp;d=https://a248.e.akamai.net/assets.github.com%2Fimages%2Fgravatars%2Fgravatar-user-420.png"
 
       # if we have a github username, populate a link to their
       # profile.

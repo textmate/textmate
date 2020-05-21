@@ -369,7 +369,7 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 
 	[self updateFilterString:_filterString];
 
-	// see http://lists.apple.com/archives/accessibility-dev/2014/Aug/msg00024.html
+	// see https://lists.apple.com/archives/accessibility-dev/2014/Aug/msg00024.html
 	NSAccessibilityPostNotification(_tableView, NSAccessibilitySelectedRowsChangedNotification);
 }
 
