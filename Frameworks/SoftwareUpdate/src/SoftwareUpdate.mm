@@ -34,7 +34,7 @@ struct shared_state_t
 
 typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 
-@interface SoftwareUpdate () <OakUserDefaultsObserver>
+@interface SoftwareUpdate () <DownloadWindowControllerDelegate, OakUserDefaultsObserver>
 {
 	NSTimeInterval pollInterval;
 

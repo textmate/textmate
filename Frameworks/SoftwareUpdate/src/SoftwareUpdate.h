@@ -1,5 +1,3 @@
-#import "DownloadWindowController.h"
-
 PUBLIC extern NSString* const kUserDefaultsDisableSoftwareUpdatesKey;
 PUBLIC extern NSString* const kUserDefaultsSoftwareUpdateChannelKey;
 PUBLIC extern NSString* const kUserDefaultsAskBeforeUpdatingKey;
@@ -8,7 +6,7 @@ PUBLIC extern NSString* const kSoftwareUpdateChannelRelease;
 PUBLIC extern NSString* const kSoftwareUpdateChannelPrerelease;
 PUBLIC extern NSString* const kSoftwareUpdateChannelCanary;
 
-PUBLIC @interface SoftwareUpdate : NSObject <DownloadWindowControllerDelegate>
+PUBLIC @interface SoftwareUpdate : NSObject
 @property (class, readonly) SoftwareUpdate* sharedInstance;
 
 @property (nonatomic)           NSDictionary* channels;
