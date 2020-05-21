@@ -114,10 +114,12 @@ static NSString* GetHardwareInfo (int field, BOOL isInteger = NO)
 
 		dispatch_group_async(_extractorDispatchGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 			self.extractorTaskOutputData = [outputPipe.fileHandleForReading readDataToEndOfFile];
+			[outputPipe.fileHandleForReading closeFile];
 		});
 
 		dispatch_group_async(_extractorDispatchGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 			self.extractorTaskErrorData = [errorPipe.fileHandleForReading readDataToEndOfFile];
+			[errorPipe.fileHandleForReading closeFile];
 		});
 
 		dispatch_group_t group = _extractorDispatchGroup; // Avoid capturing ‘self’ in terminationHandler
