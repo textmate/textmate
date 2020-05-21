@@ -1,7 +1,6 @@
 #ifndef SW_UPDATE_H_TW02442V
 #define SW_UPDATE_H_TW02442V
 
-#include <network/key_chain.h>
 #include <oak/debug.h>
 
 namespace sw_update
@@ -15,7 +14,7 @@ namespace sw_update
 	};
 
 	PUBLIC version_info_t download_info (std::string const& url, std::string* error = NULL);
-	PUBLIC std::string download_update (std::string const& url, key_chain_t const& keyChain, std::string* error, double* progress = NULL, bool const* stopFlag = NULL);
+	PUBLIC std::string download_update (std::string const& url, std::string* error, double* progress = NULL, bool const* stopFlag = NULL);
 	PUBLIC std::string install_update (std::string const& src);
 }
 

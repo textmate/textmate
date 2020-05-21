@@ -138,9 +138,15 @@ namespace sw_update
 		return version_info_t();
 	}
 
-	std::string download_update (std::string const& url, key_chain_t const& keyChain, std::string* error, double* progress, bool const* stopFlag)
+	std::string download_update (std::string const& url, std::string* error, double* progress, bool const* stopFlag)
 	{
 		NSString* const bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
+
+		__block key_chain_t keyChain;
+		NSDictionary* signingKeys = NSBundle.mainBundle.infoDictionary[@"TMSigningKeys"];
+		[signingKeys enumerateKeysAndObjectsUsingBlock:^(NSString* key, NSString* value, BOOL* stop){
+			keyChain.add(key_chain_t::key_t(key.UTF8String, value.UTF8String));
+		}];
 
 		std::string dummy;
 		std::string const path = path::join({ path::home(), "Library/Caches", to_s(bundleIdentifier), path::name(url) });

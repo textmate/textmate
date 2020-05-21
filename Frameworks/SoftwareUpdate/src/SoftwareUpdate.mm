@@ -36,7 +36,6 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 
 @interface SoftwareUpdate () <OakUserDefaultsObserver>
 {
-	key_chain_t keyChain;
 	NSTimeInterval pollInterval;
 
 	shared_state_ptr sharedState;
@@ -280,7 +279,7 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
 		shared_state_ptr state = sharedState;
 		std::string error = NULL_STR;
-		std::string path = sw_update::download_update(to_s(downloadURL), keyChain, &error, &state->progress, &state->stop);
+		std::string path = sw_update::download_update(to_s(downloadURL), &error, &state->progress, &state->stop);
 
 		dispatch_async(dispatch_get_main_queue(), ^{
 			[updateProgressTimer invalidate];
@@ -400,11 +399,6 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 {
 	_channels = someChannels;
 	[self scheduleVersionCheck:nil];
-}
-
-- (void)setSignee:(key_chain_t::key_t const&)aSignee
-{
-	keyChain.add(aSignee);
 }
 
 - (NSDate*)lastPoll                  { return [NSUserDefaults.standardUserDefaults objectForKey:kUserDefaultsLastSoftwareUpdateCheckKey]; }
