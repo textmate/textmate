@@ -183,9 +183,8 @@
 {
 	if(_repository)
 	{
-		auto const variables = _repository.variables;
-		auto const branch    = variables.find("TM_SCM_BRANCH");
-		self.disambiguationSuffix = branch != variables.end() ? [NSString stringWithFormat:@" (%@)", to_ns(branch->second)] : @"";
+		NSString* branch = _repository.variables[@"TM_SCM_BRANCH"];
+		self.disambiguationSuffix = branch ? [NSString stringWithFormat:@" (%@)", branch] : @"";
 	}
 }
 

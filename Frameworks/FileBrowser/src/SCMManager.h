@@ -6,7 +6,7 @@
 @property (nonatomic, readonly) BOOL tracksDirectories;
 @property (nonatomic, readonly) BOOL hasStatus;
 @property (nonatomic, readonly) std::map<std::string, scm::status::type> status;
-@property (nonatomic, readonly) std::map<std::string, std::string> variables;
+@property (nonatomic, readonly) NSDictionary<NSString*, NSString*>* variables;
 @end
 
 @interface SCMManager : NSObject

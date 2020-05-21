@@ -2,6 +2,7 @@
 #import "FSEventsManager.h"
 #import "drivers/api.h"
 #import <scm/scm.h>
+#import <ns/ns.h>
 
 namespace scm
 {
@@ -21,7 +22,7 @@ namespace scm
 	NSDate* _noUpdateBefore;
 }
 @property (nonatomic, readwrite) std::map<std::string, scm::status::type> status;
-@property (nonatomic, readwrite) std::map<std::string, std::string> variables;
+@property (nonatomic, readwrite) NSDictionary<NSString*, NSString*>* variables;
 @property (nonatomic, readonly) scm::driver_t const* driver;
 @property (nonatomic, readonly) NSMutableArray<SCMRepositoryObserver*>* observers;
 @property (nonatomic) id fsEventsObserver;
@@ -171,14 +172,18 @@ namespace scm
 
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 		std::map<std::string, scm::status::type> const status = driver->status(url.fileSystemRepresentation);
-		std::map<std::string, std::string> const variables    = driver->variables(url.fileSystemRepresentation);
+
+		NSMutableDictionary* variables = [NSMutableDictionary dictionary];
+		for(auto pair : driver->variables(url.fileSystemRepresentation))
+			variables[to_ns(pair.first)] = to_ns(pair.second);
+
 		dispatch_async(dispatch_get_main_queue(), ^{
 			[weakSelf updateStatus:status variables:variables];
 		});
 	});
 }
 
-- (void)updateStatus:(std::map<std::string, scm::status::type> const&)status variables:(std::map<std::string, std::string> const&)variables
+- (void)updateStatus:(std::map<std::string, scm::status::type> const&)status variables:(NSDictionary<NSString*, NSString*>*)variables
 {
 	_status    = status;
 	_variables = variables;
