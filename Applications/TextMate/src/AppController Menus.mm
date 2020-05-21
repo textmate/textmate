@@ -75,7 +75,7 @@ static NSString* NameForLocaleIdentifier (NSString* languageCode)
 	}];
 
 	// MIGRATION from 2.0.12 and earlier
-	__block id token = [NSNotificationCenter.defaultCenter addObserverForName:NSApplicationDidFinishLaunchingNotification object:NSApp queue:nil usingBlock:^(NSNotification* notification){
+	__weak __block id token = [NSNotificationCenter.defaultCenter addObserverForName:NSApplicationDidFinishLaunchingNotification object:NSApp queue:nil usingBlock:^(NSNotification* notification){
 		[NSNotificationCenter.defaultCenter removeObserver:token];
 
 		std::string const savedThemeUUID = settings_for_path().get(kSettingsThemeKey);
