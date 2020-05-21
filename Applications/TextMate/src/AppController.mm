@@ -721,7 +721,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 - (IBAction)performSoftwareUpdateCheck:(id)sender
 {
-	[SoftwareUpdate.sharedInstance checkForUpdates:self];
+	[SoftwareUpdate.sharedInstance checkForUpdate:self];
 }
 
 - (IBAction)showPreferences:(id)sender

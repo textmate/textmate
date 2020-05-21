@@ -1,4 +1,4 @@
-PUBLIC extern NSString* const kUserDefaultsDisableSoftwareUpdatesKey;
+PUBLIC extern NSString* const kUserDefaultsDisableSoftwareUpdateKey;
 PUBLIC extern NSString* const kUserDefaultsSoftwareUpdateChannelKey;
 PUBLIC extern NSString* const kUserDefaultsAskBeforeUpdatingKey;
 
@@ -14,5 +14,5 @@ PUBLIC @interface SoftwareUpdate : NSObject
 @property (nonatomic, readonly, getter = isChecking) BOOL checking;
 @property (nonatomic, readonly) NSString*     errorString;
 
-- (IBAction)checkForUpdates:(id)sender;
+- (IBAction)checkForUpdate:(id)sender;
 @end

@@ -15,7 +15,7 @@
 
 OAK_DEBUG_VAR(SoftwareUpdate_Check);
 
-NSString* const kUserDefaultsDisableSoftwareUpdatesKey     = @"SoftwareUpdateDisablePolling";
+NSString* const kUserDefaultsDisableSoftwareUpdateKey      = @"SoftwareUpdateDisablePolling";
 NSString* const kUserDefaultsSoftwareUpdateChannelKey      = @"SoftwareUpdateChannel"; // release (default), beta, nightly
 NSString* const kUserDefaultsAskBeforeUpdatingKey          = @"SoftwareUpdateAskBeforeUpdating";
 NSString* const kUserDefaultsLastSoftwareUpdateCheckKey    = @"SoftwareUpdateLastPoll";
@@ -104,7 +104,7 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 
 	struct statfs sfsb;
 	BOOL readOnlyFileSystem = statfs([NSBundle mainBundle].bundlePath.fileSystemRepresentation, &sfsb) != 0 || (sfsb.f_flags & MNT_RDONLY);
-	BOOL disablePolling = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsDisableSoftwareUpdatesKey];
+	BOOL disablePolling = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsDisableSoftwareUpdateKey];
 	D(DBF_SoftwareUpdate_Check, bug("download visible %s, disable polling %s, read only file system %s → %s\n", BSTR(self.downloadWindow), BSTR(disablePolling), BSTR(readOnlyFileSystem), BSTR(!self.downloadWindow && !disablePolling && !readOnlyFileSystem)););
 	if(_downloadWindow.isWorking || disablePolling)
 		return;
@@ -146,7 +146,7 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 	[self checkVersionAtURL:url inBackground:YES allowRedownload:NO];
 }
 
-- (IBAction)checkForUpdates:(id)sender
+- (IBAction)checkForUpdate:(id)sender
 {
 	D(DBF_SoftwareUpdate_Check, bug("\n"););
 
