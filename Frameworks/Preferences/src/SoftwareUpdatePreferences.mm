@@ -1,35 +1,27 @@
 #import "SoftwareUpdatePreferences.h"
 #import "Keys.h"
-#import <BundlesManager/BundlesManager.h>
 #import <OakAppKit/NSImage Additions.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakFoundation/OakStringListTransformer.h>
 #import <SoftwareUpdate/SoftwareUpdate.h>
 #import <MenuBuilder/MenuBuilder.h>
 
-// kUserDefaultsLastSoftwareUpdateCheckKey
-
 @interface SoftwareUpdatePreferences ()
-@property (nonatomic, readonly) NSString* lastCheck;
-@property (nonatomic, getter = isChecking) BOOL checking;
-@property (nonatomic) NSDate* lastPoll;
-@property (nonatomic) NSString* errorString;
-
-@property (nonatomic) NSString* lastPollString;
-@property (nonatomic) NSTimer* updateLastPollStringTimer;
+{
+	id _relativeDateUserDefaultsObserver;
+	NSTimer* _relativeDateUpdateTimer;
+}
+@property (nonatomic) NSString* relativeStringForLastCheck;
 @end
 
 @implementation SoftwareUpdatePreferences
-+ (NSSet*)keyPathsForValuesAffectingLastCheck { return [NSSet setWithObjects:@"checking", @"lastPollString", @"errorString", nil]; }
++ (NSSet*)keyPathsForValuesAffectingLastCheckDescription { return [NSSet setWithObjects:@"softwareUpdateController.checking", @"softwareUpdateController.errorString", @"relativeStringForLastCheck", nil]; }
 
 - (id)init
 {
 	if(self = [super initWithNibName:nil label:@"Software Update" image:[NSImage imageNamed:@"Software Update" inSameBundleAsClass:[self class]]])
 	{
 		[OakStringListTransformer createTransformerWithName:@"OakSoftwareUpdateChannelTransformer" andObjectsArray:@[ kSoftwareUpdateChannelRelease, kSoftwareUpdateChannelPrerelease ]];
-		[self bind:@"checking"    toObject:SoftwareUpdate.sharedInstance withKeyPath:@"checking"    options:nil];
-		[self bind:@"lastPoll"    toObject:SoftwareUpdate.sharedInstance withKeyPath:@"lastPoll"    options:nil];
-		[self bind:@"errorString" toObject:SoftwareUpdate.sharedInstance withKeyPath:@"errorString" options:nil];
 
 		self.defaultsProperties = @{
 			@"disableSoftwareUpdate": kUserDefaultsDisableSoftwareUpdateKey,
@@ -42,17 +34,25 @@
 	return self;
 }
 
-- (NSString*)lastCheck
+- (SoftwareUpdate*)softwareUpdateController
 {
-	return _checking ? @"Checking…" : (_errorString ?: (_lastPollString ?: @"Never"));
+	return SoftwareUpdate.sharedInstance;
 }
 
-- (void)updateLastPollString:(id)sender
+- (NSString*)lastCheckDescription
 {
+	return self.softwareUpdateController.isChecking ? @"Checking…" : (self.softwareUpdateController.errorString ?: _relativeStringForLastCheck ?: @"Never");
+}
+
+- (NSString*)relativeStringForDate:(NSDate*)date
+{
+	if(!date)
+		return nil;
+
 #if defined(MAC_OS_X_VERSION_10_15) && (MAC_OS_X_VERSION_10_15 <= MAC_OS_X_VERSION_MAX_ALLOWED)
 	if(@available(macos 10.15, *))
 	{
-		self.lastPollString = -[_lastPoll timeIntervalSinceNow] < 5 ? @"Just now" : [[[NSRelativeDateTimeFormatter alloc] init] localizedStringForDate:_lastPoll relativeToDate:NSDate.now];
+		return -[date timeIntervalSinceNow] < 5 ? @"Just now" : [[[NSRelativeDateTimeFormatter alloc] init] localizedStringForDate:date relativeToDate:NSDate.now];
 	}
 	else
 #endif
@@ -66,7 +66,7 @@
 
 		NSString* res;
 
-		NSTimeInterval t = [[NSDate date] timeIntervalSinceDate:_lastPoll];
+		NSTimeInterval t = -[date timeIntervalSinceNow];
 		if(t < 1)
 			res = @"Just now";
 		else if(t < minute)
@@ -96,26 +96,27 @@
 		else
 			res = [NSString stringWithFormat:@"%.0f years ago", t / year];
 
-		self.lastPollString = res;
+		return res;
 	}
-}
-
-- (void)setLastPoll:(NSDate*)aDate
-{
-	_lastPoll = aDate;
-	[self updateLastPollString:self];
 }
 
 - (void)viewWillAppear
 {
-	[self updateLastPollString:nil];
-	self.updateLastPollStringTimer = [NSTimer scheduledTimerWithTimeInterval:60 target:self selector:@selector(updateLastPollString:) userInfo:nil repeats:YES];
+	_relativeDateUserDefaultsObserver = [NSNotificationCenter.defaultCenter addObserverForName:NSUserDefaultsDidChangeNotification object:NSUserDefaults.standardUserDefaults queue:NSOperationQueue.mainQueue usingBlock:^(NSNotification* notification){
+		self.relativeStringForLastCheck = [self relativeStringForDate:[NSUserDefaults.standardUserDefaults objectForKey:kUserDefaultsLastSoftwareUpdateCheckKey]];
+	}];
+
+	_relativeDateUpdateTimer = [NSTimer scheduledTimerWithTimeInterval:60 repeats:YES block:^(NSTimer* timer){
+		self.relativeStringForLastCheck = [self relativeStringForDate:[NSUserDefaults.standardUserDefaults objectForKey:kUserDefaultsLastSoftwareUpdateCheckKey]];
+	}];
+
+	self.relativeStringForLastCheck = [self relativeStringForDate:[NSUserDefaults.standardUserDefaults objectForKey:kUserDefaultsLastSoftwareUpdateCheckKey]];
 }
 
 - (void)viewDidDisappear
 {
-	[self.updateLastPollStringTimer invalidate];
-	self.updateLastPollStringTimer = nil;
+	[_relativeDateUpdateTimer invalidate];
+	[NSNotificationCenter.defaultCenter removeObserver:_relativeDateUserDefaultsObserver];
 }
 
 - (void)loadView
@@ -166,16 +167,16 @@
 
 	self.view = OakSetupGridViewWithSeparators(gridView, { 2, 5 });
 
-	[watchForUpdatesCheckBox      bind:NSValueBinding       toObject:self withKeyPath:@"disableSoftwareUpdate"  options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
-	[updateChannelPopUp           bind:NSSelectedTagBinding toObject:self withKeyPath:@"softwareUpdateChannel"  options:@{ NSValueTransformerNameBindingOption: @"OakSoftwareUpdateChannelTransformer" }];
-	[askBeforeDownloadingCheckBox bind:NSValueBinding       toObject:self withKeyPath:@"askBeforeDownloading"   options:nil];
-	[lastCheckTextField           bind:NSValueBinding       toObject:self withKeyPath:@"lastCheck"              options:nil];
-	[submitCrashReportsCheckBox   bind:NSValueBinding       toObject:self withKeyPath:@"disableCrashReports"    options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
-	[contactTextField             bind:NSValueBinding       toObject:self withKeyPath:@"contactInfo"            options:nil];
+	[watchForUpdatesCheckBox      bind:NSValueBinding       toObject:self withKeyPath:@"disableSoftwareUpdate"             options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
+	[updateChannelPopUp           bind:NSSelectedTagBinding toObject:self withKeyPath:@"softwareUpdateChannel"             options:@{ NSValueTransformerNameBindingOption: @"OakSoftwareUpdateChannelTransformer" }];
+	[askBeforeDownloadingCheckBox bind:NSValueBinding       toObject:self withKeyPath:@"askBeforeDownloading"              options:nil];
+	[lastCheckTextField           bind:NSValueBinding       toObject:self withKeyPath:@"lastCheckDescription"              options:nil];
+	[submitCrashReportsCheckBox   bind:NSValueBinding       toObject:self withKeyPath:@"disableCrashReports"               options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
+	[contactTextField             bind:NSValueBinding       toObject:self withKeyPath:@"contactInfo"                       options:nil];
 
-	[updateChannelPopUp           bind:NSEnabledBinding     toObject:self withKeyPath:@"disableSoftwareUpdate"  options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
-	[askBeforeDownloadingCheckBox bind:NSEnabledBinding     toObject:self withKeyPath:@"disableSoftwareUpdate"  options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
-	[checkNowButton               bind:NSEnabledBinding     toObject:self withKeyPath:@"checking"               options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
-	[contactTextField             bind:NSEnabledBinding     toObject:self withKeyPath:@"disableCrashReports"    options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
+	[updateChannelPopUp           bind:NSEnabledBinding     toObject:self withKeyPath:@"disableSoftwareUpdate"             options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
+	[askBeforeDownloadingCheckBox bind:NSEnabledBinding     toObject:self withKeyPath:@"disableSoftwareUpdate"             options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
+	[checkNowButton               bind:NSEnabledBinding     toObject:self.softwareUpdateController withKeyPath:@"checking" options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
+	[contactTextField             bind:NSEnabledBinding     toObject:self withKeyPath:@"disableCrashReports"               options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
 }
 @end
