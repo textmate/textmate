@@ -1146,7 +1146,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 {
 	if(OakDocument* document = [anEnumerator nextObject])
 	{
-		id observerId = [NSNotificationCenter.defaultCenter addObserverForName:OakDocumentWillShowAlertNotification object:document queue:nil usingBlock:^(NSNotification*){
+		id token = [NSNotificationCenter.defaultCenter addObserverForName:OakDocumentWillShowAlertNotification object:document queue:nil usingBlock:^(NSNotification*){
 			NSUInteger i = [_documents indexOfObject:document];
 			if(i != NSNotFound && document.isLoaded)
 			{
@@ -1162,7 +1162,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		}];
 
 		[document saveModalForWindow:self.window completionHandler:^(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID){
-			[NSNotificationCenter.defaultCenter removeObserver:observerId];
+			[NSNotificationCenter.defaultCenter removeObserver:token];
 			if(result == OakDocumentIOResultSuccess)
 			{
 				[self saveDocumentsUsingEnumerator:anEnumerator completionHandler:callback];
@@ -2699,21 +2699,21 @@ static NSUInteger DisableSessionSavingCount = 0;
 	{
 		// If we call ‘mate -w’ in quick succession there is a chance that we have a pending “re-activate the terminal app” when this code is executed, which will make ‘isActive’ return ‘YES’ but shortly after, our application will become inactive. For this reason, we monitor the NSApplicationDidResignActiveNotification for 200 ms and re-activate TextMate if we see the notification.
 
-		__weak __block id observerId = [NSNotificationCenter.defaultCenter addObserverForName:NSApplicationDidResignActiveNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
-			[NSNotificationCenter.defaultCenter removeObserver:observerId];
+		__weak __block id token = [NSNotificationCenter.defaultCenter addObserverForName:NSApplicationDidResignActiveNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
+			[NSNotificationCenter.defaultCenter removeObserver:token];
 			[NSApp activateIgnoringOtherApps:YES];
 		}];
 
 		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC / 5), dispatch_get_main_queue(), ^{
-			[NSNotificationCenter.defaultCenter removeObserver:observerId];
+			[NSNotificationCenter.defaultCenter removeObserver:token];
 		});
 	}
 	else
 	{
-		__weak __block id observerId = [NSNotificationCenter.defaultCenter addObserverForName:NSApplicationDidBecomeActiveNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
+		__weak __block id token = [NSNotificationCenter.defaultCenter addObserverForName:NSApplicationDidBecomeActiveNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
 			// If our window is not on the active desktop but another one is, the system gives focus to the wrong window.
 			[self showWindow:nil];
-			[NSNotificationCenter.defaultCenter removeObserver:observerId];
+			[NSNotificationCenter.defaultCenter removeObserver:token];
 		}];
 		[NSApp activateIgnoringOtherApps:YES];
 	}

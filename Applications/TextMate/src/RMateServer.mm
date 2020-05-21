@@ -361,13 +361,13 @@ namespace // wrap in anonymous namespace to avoid clashing with other callbacks 
 			{
 				// If we call ‘mate -w’ in quick succession there is a chance that we have not yet re-activated the terminal app when we are asked to open a new document. For this reason, we monitor the NSApplicationDidResignActiveNotification for 200 ms to see if the “real” frontmost application becomes active.
 
-				__weak __block id observerId = [NSNotificationCenter.defaultCenter addObserverForName:NSApplicationDidResignActiveNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
-					[NSNotificationCenter.defaultCenter removeObserver:observerId];
+				__weak __block id token = [NSNotificationCenter.defaultCenter addObserverForName:NSApplicationDidResignActiveNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
+					[NSNotificationCenter.defaultCenter removeObserver:token];
 					*terminal = [NSWorkspace.sharedWorkspace frontmostApplication];
 				}];
 
 				dispatch_after(dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC / 5), dispatch_get_main_queue(), ^{
-					[NSNotificationCenter.defaultCenter removeObserver:observerId];
+					[NSNotificationCenter.defaultCenter removeObserver:token];
 				});
 			}
 		}
@@ -378,11 +378,11 @@ namespace // wrap in anonymous namespace to avoid clashing with other callbacks 
 			auto terminal = _terminal;
 
 			++*counter;
-			__weak __block id observerId = [NSNotificationCenter.defaultCenter addObserverForName:OakDocumentWillCloseNotification object:document queue:nil usingBlock:^(NSNotification*){
+			__weak __block id token = [NSNotificationCenter.defaultCenter addObserverForName:OakDocumentWillCloseNotification object:document queue:nil usingBlock:^(NSNotification*){
 				D(DBF_RMateServer, bug("%zu → %zu\n", *counter, *counter - 1););
 				if(--*counter == 0)
 					[*terminal activateWithOptions:NSApplicationActivateIgnoringOtherApps];
-				[NSNotificationCenter.defaultCenter removeObserver:observerId];
+				[NSNotificationCenter.defaultCenter removeObserver:token];
 			}];
 		}
 

@@ -1652,8 +1652,8 @@ NSString* OakDocumentBookmarkIdentifier                          = @"bookmark";
 		}
 		else
 		{
-			__weak __block id observerId = [NSNotificationCenter.defaultCenter addObserverForName:NSApplicationDidBecomeActiveNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
-				[NSNotificationCenter.defaultCenter removeObserver:observerId];
+			__weak __block id token = [NSNotificationCenter.defaultCenter addObserverForName:NSApplicationDidBecomeActiveNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
+				[NSNotificationCenter.defaultCenter removeObserver:token];
 				if(self.isLoaded)
 					[self importDocumentChanges:self];
 			}];

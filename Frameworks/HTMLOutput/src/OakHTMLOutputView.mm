@@ -60,11 +60,11 @@
 	{
 		NSAlert* alert = askUserFlag ? [NSAlert tmAlertWithMessageText:[NSString stringWithFormat:@"Stop “%@”?", [NSURLProtocol propertyForKey:@"processName" inRequest:request]] informativeText:@"The job that the task is performing will not be completed." buttons:@"Stop", @"Cancel", nil] : nil;
 
-		__weak __block id observerId = [NSNotificationCenter.defaultCenter addObserverForName:@"OakCommandDidTerminateNotification" object:command queue:nil usingBlock:^(NSNotification* notification){
+		__weak __block id token = [NSNotificationCenter.defaultCenter addObserverForName:@"OakCommandDidTerminateNotification" object:command queue:nil usingBlock:^(NSNotification* notification){
 			if(alert)
 				[self.window endSheet:alert.window returnCode:NSAlertFirstButtonReturn];
 			handler(YES);
-			[NSNotificationCenter.defaultCenter removeObserver:observerId];
+			[NSNotificationCenter.defaultCenter removeObserver:token];
 		}];
 
 		if(alert)
@@ -77,7 +77,7 @@
 				else
 				{
 					handler(NO);
-					[NSNotificationCenter.defaultCenter removeObserver:observerId];
+					[NSNotificationCenter.defaultCenter removeObserver:token];
 				}
 			}];
 		}

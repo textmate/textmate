@@ -1194,11 +1194,11 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		self.statusString = msg;
 	}
 
-	__weak __block id observerId = [NSNotificationCenter.defaultCenter addObserverForName:OakPasteboardDidChangeNotification object:OakPasteboard.findPasteboard queue:nil usingBlock:^(NSNotification*){
+	__weak __block id token = [NSNotificationCenter.defaultCenter addObserverForName:OakPasteboardDidChangeNotification object:OakPasteboard.findPasteboard queue:nil usingBlock:^(NSNotification*){
 		self.findMatches = nil;
 		for(FFResultNode* parent in _results.children)
 			[parent.document removeAllMarksOfType:kSearchMarkIdentifier];
-		[NSNotificationCenter.defaultCenter removeObserver:observerId];
+		[NSNotificationCenter.defaultCenter removeObserver:token];
 	}];
 }
 

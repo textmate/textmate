@@ -659,8 +659,8 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 		if(changedWindows.count)
 		{
-			__weak __block id observerId = [NSNotificationCenter.defaultCenter addObserverForName:NSApplicationDidBecomeActiveNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
-				[NSNotificationCenter.defaultCenter removeObserver:observerId];
+			__weak __block id token = [NSNotificationCenter.defaultCenter addObserverForName:NSApplicationDidBecomeActiveNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
+				[NSNotificationCenter.defaultCenter removeObserver:token];
 				dispatch_async(dispatch_get_main_queue(), ^{
 					for(NSWindow* window in changedWindows)
 						window.collectionBehavior |= NSWindowCollectionBehaviorMoveToActiveSpace;
