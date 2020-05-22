@@ -1,4 +1,4 @@
-#import "OakNetworkManager.h"
+#import "OakDownloadManager.h"
 #import <oak/misc.h>
 
 static NSString* const OakHTTPHeaderSignee    = @"x-amz-meta-x-signee";

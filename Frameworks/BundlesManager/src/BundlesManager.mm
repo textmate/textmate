@@ -4,7 +4,7 @@
 #import <OakAppKit/NSAlert Additions.h>
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
-#import <network/OakNetworkManager.h>
+#import <network/OakDownloadManager.h>
 #import <bundles/locations.h>
 #import <bundles/query.h> // set_index
 #import <regexp/format_string.h>
