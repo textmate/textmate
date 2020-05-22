@@ -43,7 +43,6 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 
 	BOOL didShowReadOnlyFileSystemWarning;
 }
-@property (nonatomic) NSDate* lastPoll;
 @property (nonatomic, readwrite, getter = isChecking) BOOL checking;
 @property (nonatomic) NSString* lastVersionDownloaded;
 @property (nonatomic) NSString* errorString;
@@ -119,7 +118,7 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 		return;
 	}
 
-	NSDate* nextCheck = [(self.lastPoll ?: [NSDate distantPast]) dateByAddingTimeInterval:pollInterval];
+	NSDate* nextCheck = [([NSUserDefaults.standardUserDefaults objectForKey:kUserDefaultsLastSoftwareUpdateCheckKey] ?: [NSDate distantPast]) dateByAddingTimeInterval:pollInterval];
 	if(NSDate* suspendUntil = [NSUserDefaults.standardUserDefaults objectForKey:kUserDefaultsSoftwareUpdateSuspendUntilKey])
 		nextCheck = [nextCheck laterDate:suspendUntil];
 
@@ -138,7 +137,6 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 
 - (void)performVersionCheck:(NSTimer*)aTimer
 {
-	D(DBF_SoftwareUpdate_Check, bug("last check was %.1f hours ago\n", [[NSDate date] timeIntervalSinceDate:self.lastPoll] / (60*60)););
 	if(_downloadWindow.isWorking)
 		return;
 
@@ -166,8 +164,8 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 		auto info = sw_update::download_info(to_s([anURL absoluteString]), &error);
 
 		dispatch_async(dispatch_get_main_queue(), ^{
+			[NSUserDefaults.standardUserDefaults setObject:[NSDate date] forKey:kUserDefaultsLastSoftwareUpdateCheckKey];
 			self.errorString = [NSString stringWithCxxString:error];
-			self.lastPoll    = [NSDate date];
 			self.checking    = NO;
 
 			if(self.errorString)
@@ -400,7 +398,4 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 	_channels = someChannels;
 	[self scheduleVersionCheck:nil];
 }
-
-- (NSDate*)lastPoll                  { return [NSUserDefaults.standardUserDefaults objectForKey:kUserDefaultsLastSoftwareUpdateCheckKey]; }
-- (void)setLastPoll:(NSDate*)newDate { [NSUserDefaults.standardUserDefaults setObject:newDate forKey:kUserDefaultsLastSoftwareUpdateCheckKey]; }
 @end

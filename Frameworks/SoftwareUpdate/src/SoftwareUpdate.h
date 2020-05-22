@@ -11,7 +11,6 @@ PUBLIC @interface SoftwareUpdate : NSObject
 @property (class, readonly) SoftwareUpdate* sharedInstance;
 
 @property (nonatomic)           NSDictionary* channels;
-@property (nonatomic, readonly) NSDate*       lastPoll;
 @property (nonatomic, readonly, getter = isChecking) BOOL checking;
 @property (nonatomic, readonly) NSString*     errorString;
 
