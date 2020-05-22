@@ -5,7 +5,6 @@
 	NSUInteger                    _animationCounter;
 	NSArray<NSLayoutConstraint*>* _viewFrameConstraints;
 	NSMutableArray<NSView*>*      _hostedSubviews;
-	NSView*                       _currentSubview;
 }
 @end
 
@@ -28,13 +27,13 @@
 	[NSLayoutConstraint activateConstraints:_viewFrameConstraints];
 }
 
-- (void)transitionToView:(NSView*)newView
+- (void)setSubview:(NSView*)newView
 {
-	if(newView == _currentSubview)
+	if(_subview == newView)
 		return;
 
 	NSWindow* window = self.view.window;
-	if([window.firstResponder isKindOfClass:[NSView class]] && _currentSubview && [(NSView*)window.firstResponder isDescendantOf:_currentSubview])
+	if(_subview && [window.firstResponder isKindOfClass:[NSView class]] && [(NSView*)window.firstResponder isDescendantOf:_subview])
 		[window makeFirstResponder:window];
 
 	if(newView)
@@ -86,8 +85,8 @@
 	NSUInteger animationCounter = ++_animationCounter;
 
 	auto animationBody = ^(BOOL animated){
-		_currentSubview.alphaValue = 0;
-		_currentSubview = newView;
+		_subview.alphaValue = 0;
+		_subview = newView;
 		newView.alphaValue = 1;
 		if(animated)
 				[window setFrame:newFrame display:YES animate:YES];

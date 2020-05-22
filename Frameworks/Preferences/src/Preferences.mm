@@ -45,7 +45,7 @@ static NSString* const kMASPreferencesSelectedViewKey = @"MASPreferences Selecte
 	NSViewController* newViewController = [self viewControllerForIdentifier:viewIdentifier];
 	self.title = newViewController.title ?: @"Preferences";
 
-	[self transitionToView:newViewController.view];
+	self.subview = newViewController.view;
 }
 
 - (NSViewController <PreferencesPaneProtocol>*)viewControllerForIdentifier:(NSString*)viewIdentifier

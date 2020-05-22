@@ -681,7 +681,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		[NSNotificationCenter.defaultCenter removeObserver:self name:NSViewFrameDidChangeNotification object:_resultsViewController.view];
 	}
 
-	[_transitionViewController transitionToView:flag ? _resultsViewController.view : nil];
+	_transitionViewController.subview = flag ? _resultsViewController.view : nil;
 	self.window.defaultButtonCell = flag ? _findAllButton.cell : _findNextButton.cell;
 }
 

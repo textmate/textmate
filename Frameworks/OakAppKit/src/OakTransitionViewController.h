@@ -1,3 +1,3 @@
 @interface OakTransitionViewController : NSViewController
-- (void)transitionToView:(NSView*)newView;
+@property (nonatomic) NSView* subview;
 @end
