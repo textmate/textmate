@@ -4,7 +4,7 @@
 static NSString* const OakHTTPHeaderSignee    = @"x-amz-meta-x-signee";
 static NSString* const OakHTTPHeaderSignature = @"x-amz-meta-x-signature";
 
-@interface OakNetworkManager ()
+@interface OakDownloadManager ()
 - (BOOL)data:(NSData*)contentData hasValidBase64EncodedSignature:(NSString*)encodedSignature usingPublicKeyString:(NSString*)publicKeyString;
 @end
 
@@ -73,7 +73,7 @@ static NSString* GetHardwareInfo (int field, BOOL isInteger = NO)
 		_progress.localizedDescription = [NSString stringWithFormat:@"Downloading %@…", url.lastPathComponent];
 
 		NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:60];
-		[request setValue:OakNetworkManager.sharedInstance.userAgentString forHTTPHeaderField:@"User-Agent"];
+		[request setValue:OakDownloadManager.sharedInstance.userAgentString forHTTPHeaderField:@"User-Agent"];
 
 		NSURLSession* session = [NSURLSession sessionWithConfiguration:NSURLSessionConfiguration.defaultSessionConfiguration delegate:self delegateQueue:NSOperationQueue.mainQueue];
 		[[session dataTaskWithRequest:request] resume];
@@ -158,7 +158,7 @@ static NSString* GetHardwareInfo (int field, BOOL isInteger = NO)
 				[errorPipe.fileHandleForWriting closeFile];
 
 				_extractorTask  = nil;
-				_extractorError = [NSError errorWithDomain:@"OakNetworkManager" code:0 userInfo:@{ NSLocalizedDescriptionKey: [NSString stringWithFormat:@"-[NSTask launch]: %@", e.reason] }];
+				_extractorError = [NSError errorWithDomain:@"OakDownloadManager" code:0 userInfo:@{ NSLocalizedDescriptionKey: [NSString stringWithFormat:@"-[NSTask launch]: %@", e.reason] }];
 
 				return nil;
 			}
@@ -224,15 +224,15 @@ static NSString* GetHardwareInfo (int field, BOOL isInteger = NO)
 	[_extractorFileHandle closeFile];
 	_progress.totalUnitCount = dataTask.countOfBytesReceived;
 
-	if(NSError* error = _extractorError ?: (_extractorTask ? downloadError : [NSError errorWithDomain:@"OakNetworkManager" code:0 userInfo:@{ NSLocalizedDescriptionKey: @"Unable to launch tar." }]))
+	if(NSError* error = _extractorError ?: (_extractorTask ? downloadError : [NSError errorWithDomain:@"OakDownloadManager" code:0 userInfo:@{ NSLocalizedDescriptionKey: @"Unable to launch tar." }]))
 	{
 		os_log_error(OS_LOG_DEFAULT, "%{public}@", error.localizedDescription);
 		_completionHandler(nil, error);
 	}
-	else if(![OakNetworkManager.sharedInstance data:_data hasValidBase64EncodedSignature:_signature usingPublicKeyString:_publicKeys[_signee]])
+	else if(![OakDownloadManager.sharedInstance data:_data hasValidBase64EncodedSignature:_signature usingPublicKeyString:_publicKeys[_signee]])
 	{
 		os_log_error(OS_LOG_DEFAULT, "Unable to verify signature");
-		_completionHandler(nil, [NSError errorWithDomain:@"OakNetworkManager" code:0 userInfo:@{ NSLocalizedDescriptionKey: @"Unable to verify signature." }]);
+		_completionHandler(nil, [NSError errorWithDomain:@"OakDownloadManager" code:0 userInfo:@{ NSLocalizedDescriptionKey: @"Unable to verify signature." }]);
 	}
 	else
 	{
@@ -257,27 +257,27 @@ static NSString* GetHardwareInfo (int field, BOOL isInteger = NO)
 				NSString* description = errorString ?: outputString ?: [NSString stringWithFormat:@"Abnormal exit from tar: %d", _extractorTask.terminationStatus];
 				description = [description stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
 				description = [description stringByReplacingOccurrencesOfString:@"\n" withString:@" "];
-				_completionHandler(nil, [NSError errorWithDomain:@"OakNetworkManager" code:0 userInfo:@{ NSLocalizedDescriptionKey: description }]);
+				_completionHandler(nil, [NSError errorWithDomain:@"OakDownloadManager" code:0 userInfo:@{ NSLocalizedDescriptionKey: description }]);
 			}
 		});
 	}
 }
 @end
 
-// =====================
-// = OakNetworkManager =
-// =====================
+// ======================
+// = OakDownloadManager =
+// ======================
 
-@interface OakNetworkManager ()
+@interface OakDownloadManager ()
 {
 	NSString* _userAgentString;
 }
 @end
 
-@implementation OakNetworkManager
+@implementation OakDownloadManager
 + (instancetype)sharedInstance
 {
-	static OakNetworkManager* sharedInstance = [self new];
+	static OakDownloadManager* sharedInstance = [self new];
 	return sharedInstance;
 }
 
@@ -333,7 +333,7 @@ static NSString* GetHardwareInfo (int field, BOOL isInteger = NO)
 		if(error || statusCode != 200)
 		{
 			if(!error && statusCode != 304)
-				error = [NSError errorWithDomain:@"OakNetworkManager" code:0 userInfo:@{ NSLocalizedDescriptionKey: [NSString stringWithFormat:@"Server returned %ld for %@", statusCode, serverURL.absoluteString] }];
+				error = [NSError errorWithDomain:@"OakDownloadManager" code:0 userInfo:@{ NSLocalizedDescriptionKey: [NSString stringWithFormat:@"Server returned %ld for %@", statusCode, serverURL.absoluteString] }];
 		}
 		else
 		{
@@ -363,17 +363,17 @@ static NSString* GetHardwareInfo (int field, BOOL isInteger = NO)
 					}
 					else
 					{
-						error = [NSError errorWithDomain:@"OakNetworkManager" code:0 userInfo:@{ NSLocalizedDescriptionKey: @"Unable to verify signature." }];
+						error = [NSError errorWithDomain:@"OakDownloadManager" code:0 userInfo:@{ NSLocalizedDescriptionKey: @"Unable to verify signature." }];
 					}
 				}
 				else
 				{
-					error = [NSError errorWithDomain:@"OakNetworkManager" code:0 userInfo:@{ NSLocalizedDescriptionKey: [NSString stringWithFormat:@"Unable to obtain public key for %@.", signee] }];
+					error = [NSError errorWithDomain:@"OakDownloadManager" code:0 userInfo:@{ NSLocalizedDescriptionKey: [NSString stringWithFormat:@"Unable to obtain public key for %@.", signee] }];
 				}
 			}
 			else
 			{
-				error = [NSError errorWithDomain:@"OakNetworkManager" code:0 userInfo:@{ NSLocalizedDescriptionKey: @"Missing signature" }];
+				error = [NSError errorWithDomain:@"OakDownloadManager" code:0 userInfo:@{ NSLocalizedDescriptionKey: @"Missing signature" }];
 			}
 		}
 
