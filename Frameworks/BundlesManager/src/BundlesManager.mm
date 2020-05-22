@@ -107,7 +107,6 @@ static NSString* SafeBasename (NSString* name)
 		_updateBundleIndexScheduler.repeats  = YES;
 		[_updateBundleIndexScheduler scheduleWithBlock:^(NSBackgroundActivityCompletionHandler completionHandler){
 			os_activity_initiate("Update bundle index", OS_ACTIVITY_FLAG_DEFAULT, ^(){
-				os_log(OS_LOG_DEFAULT, "Try updating the bundle index");
 				[self tryUpdateBundleIndexAndCallback:^(BOOL wasUpdated){
 					os_log(OS_LOG_DEFAULT, "Newer bundle index retrieved: %{public}s", wasUpdated ? "YES" : "NO");
 					completionHandler(NSBackgroundActivityResultFinished);
