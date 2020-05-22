@@ -1,4 +1,3 @@
-TESTS        = tests/*.cc
 SOURCES      = src/*.{cc,mm}
 EXPORT       = src/SoftwareUpdate.h
 CP_Resources = resources/*
