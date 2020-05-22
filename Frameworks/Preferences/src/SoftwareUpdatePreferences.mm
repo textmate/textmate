@@ -121,7 +121,7 @@
 	watchForStackView.alignment = NSLayoutAttributeFirstBaseline;
 
 	NSTextField* lastCheckTextField        = OakCreateLabel(@"Some time ago");
-	NSButton* checkNowButton               = [NSButton buttonWithTitle:@"Check Now" target:nil action:@selector(performSoftwareUpdateCheck:)];
+	NSButton* checkNowButton               = [NSButton buttonWithTitle:@"Check Now" target:self.softwareUpdateController action:@selector(checkForUpdate:)];
 
 	NSButton* submitCrashReportsCheckBox   = OakCreateCheckBox(@"Submit to MacroMates");
 
