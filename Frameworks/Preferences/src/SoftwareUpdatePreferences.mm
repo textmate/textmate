@@ -22,14 +22,6 @@
 	if(self = [super initWithNibName:nil label:@"Software Update" image:[NSImage imageNamed:@"Software Update" inSameBundleAsClass:[self class]]])
 	{
 		[OakStringListTransformer createTransformerWithName:@"OakSoftwareUpdateChannelTransformer" andObjectsArray:@[ kSoftwareUpdateChannelRelease, kSoftwareUpdateChannelPrerelease ]];
-
-		self.defaultsProperties = @{
-			@"disableSoftwareUpdate": kUserDefaultsDisableSoftwareUpdateKey,
-			@"disableCrashReports":   kUserDefaultsDisableCrashReportingKey,
-			@"softwareUpdateChannel": kUserDefaultsSoftwareUpdateChannelKey,
-			@"askBeforeDownloading":  kUserDefaultsAskBeforeUpdatingKey,
-			@"contactInfo":           kUserDefaultsCrashReportsContactInfoKey,
-		};
 	}
 	return self;
 }
@@ -167,16 +159,16 @@
 
 	self.view = OakSetupGridViewWithSeparators(gridView, { 2, 5 });
 
-	[watchForUpdatesCheckBox      bind:NSValueBinding       toObject:self withKeyPath:@"disableSoftwareUpdate"             options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
-	[updateChannelPopUp           bind:NSSelectedTagBinding toObject:self withKeyPath:@"softwareUpdateChannel"             options:@{ NSValueTransformerNameBindingOption: @"OakSoftwareUpdateChannelTransformer" }];
-	[askBeforeDownloadingCheckBox bind:NSValueBinding       toObject:self withKeyPath:@"askBeforeDownloading"              options:nil];
-	[lastCheckTextField           bind:NSValueBinding       toObject:self withKeyPath:@"lastCheckDescription"              options:nil];
-	[submitCrashReportsCheckBox   bind:NSValueBinding       toObject:self withKeyPath:@"disableCrashReports"               options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
-	[contactTextField             bind:NSValueBinding       toObject:self withKeyPath:@"contactInfo"                       options:nil];
+	[watchForUpdatesCheckBox      bind:NSValueBinding       toObject:NSUserDefaultsController.sharedUserDefaultsController withKeyPath:[NSString stringWithFormat:@"values.%@", kUserDefaultsDisableSoftwareUpdateKey]   options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
+	[updateChannelPopUp           bind:NSSelectedTagBinding toObject:NSUserDefaultsController.sharedUserDefaultsController withKeyPath:[NSString stringWithFormat:@"values.%@", kUserDefaultsSoftwareUpdateChannelKey]   options:@{ NSValueTransformerNameBindingOption: @"OakSoftwareUpdateChannelTransformer" }];
+	[askBeforeDownloadingCheckBox bind:NSValueBinding       toObject:NSUserDefaultsController.sharedUserDefaultsController withKeyPath:[NSString stringWithFormat:@"values.%@", kUserDefaultsAskBeforeUpdatingKey]       options:nil];
+	[lastCheckTextField           bind:NSValueBinding       toObject:self                                                  withKeyPath:@"lastCheckDescription"                                                           options:nil];
+	[submitCrashReportsCheckBox   bind:NSValueBinding       toObject:NSUserDefaultsController.sharedUserDefaultsController withKeyPath:[NSString stringWithFormat:@"values.%@", kUserDefaultsDisableCrashReportingKey]   options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
+	[contactTextField             bind:NSValueBinding       toObject:NSUserDefaultsController.sharedUserDefaultsController withKeyPath:[NSString stringWithFormat:@"values.%@", kUserDefaultsCrashReportsContactInfoKey] options:nil];
 
-	[updateChannelPopUp           bind:NSEnabledBinding     toObject:self withKeyPath:@"disableSoftwareUpdate"             options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
-	[askBeforeDownloadingCheckBox bind:NSEnabledBinding     toObject:self withKeyPath:@"disableSoftwareUpdate"             options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
-	[checkNowButton               bind:NSEnabledBinding     toObject:self.softwareUpdateController withKeyPath:@"checking" options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
-	[contactTextField             bind:NSEnabledBinding     toObject:self withKeyPath:@"disableCrashReports"               options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
+	[updateChannelPopUp           bind:NSEnabledBinding     toObject:NSUserDefaultsController.sharedUserDefaultsController withKeyPath:[NSString stringWithFormat:@"values.%@", kUserDefaultsDisableSoftwareUpdateKey]   options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
+	[askBeforeDownloadingCheckBox bind:NSEnabledBinding     toObject:NSUserDefaultsController.sharedUserDefaultsController withKeyPath:[NSString stringWithFormat:@"values.%@", kUserDefaultsDisableSoftwareUpdateKey]   options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
+	[checkNowButton               bind:NSEnabledBinding     toObject:self.softwareUpdateController                         withKeyPath:@"checking"                                                                       options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
+	[contactTextField             bind:NSEnabledBinding     toObject:NSUserDefaultsController.sharedUserDefaultsController withKeyPath:[NSString stringWithFormat:@"values.%@", kUserDefaultsDisableCrashReportingKey]   options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
 }
 @end
