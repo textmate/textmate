@@ -187,7 +187,8 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 
 				BOOL downloadAndInstall = NO;
 
-				if(version::equal(info.version, to_s(version)) && !backgroundFlag)
+				NSComparisonResult comparisonResult = OakCompareVersionStrings(to_ns(info.version), version);
+				if(comparisonResult == NSOrderedSame && !backgroundFlag)
 				{
 					NSAlert* alert        = [[NSAlert alloc] init];
 					alert.alertStyle      = NSAlertStyleInformational;
@@ -200,7 +201,7 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 					if([alert runModal] == NSAlertSecondButtonReturn) // “Redownload”
 						downloadAndInstall = YES;
 				}
-				else if(version::less(info.version, to_s(version)) && !backgroundFlag)
+				else if(comparisonResult == NSOrderedAscending && !backgroundFlag)
 				{
 					NSAlert* alert        = [[NSAlert alloc] init];
 					alert.alertStyle      = NSAlertStyleInformational;
@@ -210,7 +211,7 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 					if([alert runModal] == NSAlertSecondButtonReturn) // “Downgrade”
 						downloadAndInstall = YES;
 				}
-				else if(version::less(to_s(version), info.version))
+				else if(comparisonResult == NSOrderedDescending)
 				{
 					if(!backgroundFlag || [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsAskBeforeUpdatingKey])
 					{
@@ -226,7 +227,7 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 						else if(choice == NSAlertSecondButtonReturn) // “Later”
 							[NSUserDefaults.standardUserDefaults setObject:[[NSDate date] dateByAddingTimeInterval:24*60*60] forKey:kUserDefaultsSoftwareUpdateSuspendUntilKey];
 					}
-					else if(version::less(to_s(self.lastVersionDownloaded), info.version))
+					else if(OakCompareVersionStrings(self.lastVersionDownloaded, to_ns(info.version)) == NSOrderedAscending)
 					{
 						downloadAndInstall = YES;
 					}

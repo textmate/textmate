@@ -50,8 +50,8 @@
 
 - (BOOL)isCompatible
 {
-	std::string appVersion = to_s([[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"]);
-	return !version::less(appVersion, to_s(_minimumAppVersion));
+	NSString* appVersion = [NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
+	return OakCompareVersionStrings(appVersion, _minimumAppVersion) != NSOrderedAscending;
 }
 @end
 
