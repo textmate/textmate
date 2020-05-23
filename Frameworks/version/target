@@ -1,5 +1,5 @@
-SOURCES      = src/*.cc
-TESTS        = tests/t_*.cc
+SOURCES      = src/*.mm
+TESTS        = tests/t_*.mm
 EXPORT       = src/version.h
 
 # required by the tests
