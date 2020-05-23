@@ -3,6 +3,8 @@
 
 #include <oak/misc.h>
 
+NSComparisonResult OakCompareVersionStrings (NSString* lhs, NSString* rhs);
+
 namespace version
 {
 	PUBLIC bool less (std::string const& lhs, std::string const& rhs);

@@ -1,6 +1,3 @@
 SOURCES      = src/*.mm
 TESTS        = tests/t_*.mm
 EXPORT       = src/version.h
-
-# required by the tests
-LINK        += text
