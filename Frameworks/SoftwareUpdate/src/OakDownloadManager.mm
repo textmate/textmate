@@ -226,7 +226,7 @@ static NSString* GetHardwareInfo (int field, BOOL isInteger = NO)
 
 	if(NSError* error = _extractorError ?: (_extractorTask ? downloadError : [NSError errorWithDomain:@"OakDownloadManager" code:0 userInfo:@{ NSLocalizedDescriptionKey: @"Unable to launch tar." }]))
 	{
-		os_log_error(OS_LOG_DEFAULT, "%{public}@", error.localizedDescription);
+		os_log_error(OS_LOG_DEFAULT, "Failed to download %{public}@: %{public}@", dataTask.originalRequest.URL, error.localizedDescription);
 		_completionHandler(nil, error);
 	}
 	else if(![OakDownloadManager.sharedInstance data:_data hasValidBase64EncodedSignature:_signature usingPublicKeyString:_publicKeys[_signee]])
