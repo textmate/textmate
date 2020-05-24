@@ -1,18 +1,18 @@
-PUBLIC extern NSString* const kUserDefaultsDisableSoftwareUpdateKey;
-PUBLIC extern NSString* const kUserDefaultsSoftwareUpdateChannelKey;
-PUBLIC extern NSString* const kUserDefaultsAskBeforeUpdatingKey;
-PUBLIC extern NSString* const kUserDefaultsLastSoftwareUpdateCheckKey;
+extern NSString* const kUserDefaultsDisableSoftwareUpdateKey;
+extern NSString* const kUserDefaultsSoftwareUpdateChannelKey;
+extern NSString* const kUserDefaultsAskBeforeUpdatingKey;
+extern NSString* const kUserDefaultsLastSoftwareUpdateCheckKey;
 
-PUBLIC extern NSString* const kSoftwareUpdateChannelRelease;
-PUBLIC extern NSString* const kSoftwareUpdateChannelPrerelease;
-PUBLIC extern NSString* const kSoftwareUpdateChannelCanary;
+extern NSString* const kSoftwareUpdateChannelRelease;
+extern NSString* const kSoftwareUpdateChannelPrerelease;
+extern NSString* const kSoftwareUpdateChannelCanary;
 
-PUBLIC @interface SoftwareUpdate : NSObject
+@interface SoftwareUpdate : NSObject
 @property (class, readonly) SoftwareUpdate* sharedInstance;
 
-@property (nonatomic)           NSDictionary* channels;
+@property (nonatomic) NSDictionary<NSString*, NSURL*>* channels;
 @property (nonatomic, readonly, getter = isChecking) BOOL checking;
-@property (nonatomic, readonly) NSString*     errorString;
+@property (nonatomic, readonly) NSString* errorString;
 
-- (IBAction)checkForUpdate:(id)sender;
+- (void)checkForUpdate:(id)sender;
 @end
