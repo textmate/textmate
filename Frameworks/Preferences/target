@@ -1,6 +1,6 @@
 SOURCES      = src/*.mm
 EXPORT       = src/{Preferences,Keys,TerminalPreferences,PreferencesPane}.h
 CP_Resources = resources/* icons/*
-LINK         = BundlesManager OakAppKit OakFoundation MenuBuilder SoftwareUpdate bundles io ns regexp settings text version
+LINK         = BundlesManager OakAppKit OakFoundation MenuBuilder SoftwareUpdate bundles io ns regexp settings text
 IMPORT       = OakTabBarView
 FRAMEWORKS   = Cocoa

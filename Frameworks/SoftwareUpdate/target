@@ -1,5 +1,6 @@
 SOURCES      = src/*.mm
+TESTS        = tests/t_*.mm
 EXPORT       = src/*.h
 CP_Resources = resources/*
-LINK        += OakAppKit version
+LINK        += OakAppKit
 FRAMEWORKS   = Cocoa WebKit

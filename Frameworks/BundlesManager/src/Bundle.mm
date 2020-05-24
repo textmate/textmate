@@ -1,9 +1,9 @@
 #import "Bundle.h"
 #import "BundlesManager.h"
+#import <SoftwareUpdate/SoftwareUpdate.h> // OakCompareVersionStrings()
 #import <ns/ns.h>
 #import <text/decode.h>
 #import <regexp/format_string.h>
-#import <version/version.h>
 
 @implementation Bundle
 - (BOOL)isEqual:(id)other    { return [other isKindOfClass:[self class]] && [self.identifier isEqual:[other identifier]]; }

@@ -1,4 +1,4 @@
-#include <version/version.h>
+#import <SoftwareUpdate/SoftwareUpdate.h>
 
 std::string to_s (NSComparisonResult result)
 {

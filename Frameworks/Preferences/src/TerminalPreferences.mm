@@ -5,11 +5,11 @@
 #import <OakAppKit/NSMenu Additions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakFoundation/OakStringListTransformer.h>
+#import <SoftwareUpdate/SoftwareUpdate.h> // OakCompareVersionStrings()
 #import <io/path.h>
 #import <io/exec.h>
 #import <ns/ns.h>
 #import <regexp/format_string.h>
-#import <version/version.h>
 #import <bundles/bundles.h>
 #import <oak/compat.h>
 

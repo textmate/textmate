@@ -1,4 +1,4 @@
-#include "version.h"
+#import "SoftwareUpdate.h"
 
 static bool is_numeric (std::string const& str)
 {

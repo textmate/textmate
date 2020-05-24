@@ -16,3 +16,5 @@ extern NSString* const kSoftwareUpdateChannelCanary;
 
 - (void)checkForUpdate:(id)sender;
 @end
+
+NSComparisonResult OakCompareVersionStrings (NSString* lhsString, NSString* rhsString);
