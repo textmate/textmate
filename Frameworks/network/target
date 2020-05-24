@@ -1,6 +1,6 @@
-SOURCES      = src/*.{mm,cc}
+SOURCES      = src/*.cc
 TESTS        = tests/*.cc
 LINK        += text cf io plist OakSystem regexp
 LIBS         = curl
-EXPORT       = src/OakDownloadManager.h src/{constants,download{,_tbz},filter_*,key_chain,network,post,proxy,tbz}.h
+EXPORT       = src/{constants,download{,_tbz},filter_*,key_chain,network,post,proxy,tbz}.h
 FRAMEWORKS   = SystemConfiguration Security

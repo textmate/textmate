@@ -1,10 +1,10 @@
 #import "SoftwareUpdate.h"
+#import "OakDownloadManager.h"
 #import <OakAppKit/NSImage Additions.h>
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakSound.h>
 #import <OakAppKit/OakTransitionViewController.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
-#import <network/OakDownloadManager.h>
 #import <version/version.h>
 
 NSString* const kUserDefaultsLastSoftwareUpdateCheckKey                        = @"SoftwareUpdateLastPoll";
