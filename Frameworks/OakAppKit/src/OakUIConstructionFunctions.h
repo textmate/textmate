@@ -30,5 +30,5 @@ PUBLIC OakRolloverButton* OakCreateCloseButton (NSString* accessibilityLabel = @
 PUBLIC NSView* OakCreateNSBoxSeparator ();
 
 PUBLIC OakBackgroundFillView* OakCreateVerticalLine (OakBackgroundFillViewStyle style);
-PUBLIC void OakSetupKeyViewLoop (NSArray* views, BOOL setFirstResponder = YES);
-PUBLIC void OakAddAutoLayoutViewsToSuperview (NSArray* views, NSView* superview);
+PUBLIC void OakSetupKeyViewLoop (NSArray<NSView*>* views, BOOL setFirstResponder = YES);
+PUBLIC void OakAddAutoLayoutViewsToSuperview (NSArray<NSView*>* views, NSView* superview);
