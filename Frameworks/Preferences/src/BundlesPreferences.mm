@@ -324,7 +324,8 @@ static NSUserInterfaceItemIdentifier const kTableColumnIdentifierDescription = @
 
 - (void)viewDidAppear
 {
-	if(self.view.window.firstResponder == self.view.window)
+	NSResponder* firstResponder = self.view.window.firstResponder;
+	if(!firstResponder || firstResponder == self.view.window || ([firstResponder isKindOfClass:[NSView class]] && [(NSView*)firstResponder isDescendantOf:self.view]))
 		[self.view.window makeFirstResponder:_bundlesTableView];
 }
 
