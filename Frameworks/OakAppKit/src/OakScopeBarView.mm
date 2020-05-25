@@ -53,7 +53,7 @@ static NSButton* OakCreateScopeButton (NSString* label, NSUInteger tag, SEL acti
 		[_stackView addArrangedSubview:button];
 	}
 
-	OakSetupKeyViewLoop([@[ _stackView ] arrayByAddingObjectsFromArray:_stackView.arrangedSubviews], NO);
+	OakSetupKeyViewLoop([@[ _stackView ] arrayByAddingObjectsFromArray:_stackView.arrangedSubviews]);
 }
 
 - (void)setControlSize:(NSControlSize)newControlSize

@@ -523,7 +523,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 
 		[self updateScrollViewInsets];
 
-		OakSetupKeyViewLoop(@[ self.searchField, self.actionsPopUpButton, self.scopeBar.view, self.editButton, self.selectButton ], NO);
+		OakSetupKeyViewLoop(@[ self.searchField, self.actionsPopUpButton, self.scopeBar.view, self.editButton, self.selectButton ]);
 		self.window.initialFirstResponder = self.searchField;
 
 		[self.scopeBar bind:NSValueBinding toObject:self withKeyPath:@"sourceIndex" options:nil];

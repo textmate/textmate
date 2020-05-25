@@ -212,7 +212,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		NSView* contentView = [[NSView alloc] initWithFrame:NSZeroRect];
 
 		OakAddAutoLayoutViewsToSuperview(views.allValues, contentView);
-		OakSetupKeyViewLoop(@[ self.gridView, _transitionViewController.view, self.actionButtonsStackView ], NO);
+		OakSetupKeyViewLoop(@[ self.gridView, _transitionViewController.view, self.actionButtonsStackView ]);
 
 		[NSLayoutConstraint activateConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[options]|"                               options:0                                                            metrics:nil views:views]];
 		[NSLayoutConstraint activateConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[options]-[results]-[status]-[buttons]-|" options:NSLayoutFormatAlignAllLeading|NSLayoutFormatAlignAllTrailing metrics:nil views:views]];
@@ -376,7 +376,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		[ignoreWhitespaceCheckBox             bind:NSEnabledBinding       toObject:_objectController            withKeyPath:@"content.canIgnoreWhitespace"  options:nil];
 		[countButton                          bind:NSEnabledBinding       toObject:_findTextFieldViewController withKeyPath:@"stringValue.length"           options:nil];
 
-		OakSetupKeyViewLoop(@[ _gridView, _findTextFieldViewController.view, _replaceTextFieldViewController.view, countButton, regularExpressionCheckBox, ignoreWhitespaceCheckBox, ignoreCaseCheckBox, wrapAroundCheckBox, _wherePopUpButton, globTextField, actionsPopUpButton ], NO);
+		OakSetupKeyViewLoop(@[ _gridView, _findTextFieldViewController.view, _replaceTextFieldViewController.view, countButton, regularExpressionCheckBox, ignoreWhitespaceCheckBox, ignoreCaseCheckBox, wrapAroundCheckBox, _wherePopUpButton, globTextField, actionsPopUpButton ]);
 	}
 	return _gridView;
 }
@@ -414,7 +414,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		[_actionButtonsStackView setHuggingPriority:NSLayoutPriorityDefaultHigh-1 forOrientation:NSLayoutConstraintOrientationVertical];
 		_actionButtonsStackView.edgeInsets = { .left = 20, .right = 20 };
 
-		OakSetupKeyViewLoop(@[ _actionButtonsStackView, _findAllButton, replaceAllButton, replaceButton, replaceAndFindButton, findPreviousButton, _findNextButton ], NO);
+		OakSetupKeyViewLoop(@[ _actionButtonsStackView, _findAllButton, replaceAllButton, replaceButton, replaceAndFindButton, findPreviousButton, _findNextButton ]);
 	}
 	return _actionButtonsStackView;
 }

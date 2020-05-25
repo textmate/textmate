@@ -342,7 +342,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		};
 
 		OakAddAutoLayoutViewsToSuperview(views.allValues, contentView);
-		OakSetupKeyViewLoop(@[ contentView, _outlineView ], NO);
+		OakSetupKeyViewLoop(@[ contentView, _outlineView ]);
 
 		[NSLayoutConstraint activateConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView]|"                                             options:0                                                            metrics:nil views:views]];
 		[NSLayoutConstraint activateConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[topDivider(==1)][scrollView(>=50)][bottomDividier(==1)]|" options:NSLayoutFormatAlignAllLeading|NSLayoutFormatAlignAllTrailing metrics:nil views:views]];

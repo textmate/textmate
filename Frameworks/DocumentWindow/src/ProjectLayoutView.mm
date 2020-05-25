@@ -71,7 +71,7 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 		if(view)
 			[views addObject:view];
 	}
-	OakSetupKeyViewLoop(views, NO);
+	OakSetupKeyViewLoop(views);
 }
 
 - (void)setDocumentView:(NSView*)aDocumentView       { _documentView = [self replaceView:_documentView withView:aDocumentView]; [self updateKeyViewLoop]; }

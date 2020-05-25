@@ -96,7 +96,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 		_statusBar.target = self;
 
 		OakAddAutoLayoutViewsToSuperview(@[ gutterScrollView, gutterDividerView, textScrollView, _statusBar ], self);
-		OakSetupKeyViewLoop(@[ self, _textView, _statusBar ], NO);
+		OakSetupKeyViewLoop(@[ self, _textView, _statusBar ]);
 
 		self.document = [OakDocument documentWithString:@"" fileType:@"text.plain" customName:@"placeholder"];
 

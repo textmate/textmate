@@ -216,7 +216,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		[LicenseManager.sharedInstance decorateWindow:self.window];
 
 		OakAddAutoLayoutViewsToSuperview(@[ self.layoutView ], self.window.contentView);
-		OakSetupKeyViewLoop(@[ self.layoutView ], NO);
+		OakSetupKeyViewLoop(@[ self.layoutView ]);
 		self.window.initialFirstResponder = self.textView;
 
 		[self.window.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[view]|" options:0 metrics:nil views:@{ @"view": self.layoutView }]];
