@@ -117,23 +117,6 @@
 					[newView.trailingAnchor constraintEqualToAnchor:newView.superview.trailingAnchor],
 				];
 				[NSLayoutConstraint activateConstraints:_viewFrameConstraints];
-
-				[window recalculateKeyViewLoop];
-				if(window && window.firstResponder == window)
-				{
-					// selectKeyViewFollowingView: will select toolbar buttons when Full Keyboard Access is enabled
-
-					std::set<NSView*> avoidLoops;
-					for(NSView* keyView = newView; keyView && avoidLoops.find(keyView) == avoidLoops.end(); keyView = keyView.nextKeyView)
-					{
-						if(keyView.canBecomeKeyView)
-						{
-							[window makeFirstResponder:keyView];
-							break;
-						}
-						avoidLoops.insert(keyView);
-					}
-				}
 			}
 			else
 			{
