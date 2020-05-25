@@ -65,11 +65,13 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 
 - (void)updateKeyViewLoop
 {
-	OakSetupKeyViewLoop(@[
-		_documentView    ?: [NSNull null],
-		_htmlOutputView  ?: [NSNull null],
-		_fileBrowserView ?: [NSNull null],
-	], NO);
+	NSMutableArray<NSView*>* views = [NSMutableArray array];
+	for(NSView* view : { _documentView, _htmlOutputView, _fileBrowserView })
+	{
+		if(view)
+			[views addObject:view];
+	}
+	OakSetupKeyViewLoop(views, NO);
 }
 
 - (void)setDocumentView:(NSView*)aDocumentView       { _documentView = [self replaceView:_documentView withView:aDocumentView]; [self updateKeyViewLoop]; }
