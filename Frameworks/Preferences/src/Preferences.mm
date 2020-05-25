@@ -107,11 +107,10 @@ static NSString* const kMASPreferencesSelectedViewKey = @"MASPreferences Selecte
 			hasToolbarImages = hasToolbarImages || [viewController respondsToSelector:@selector(toolbarItemImage)];
 		toolbar.displayMode = hasToolbarImages ? NSToolbarDisplayModeIconAndLabel : NSToolbarDisplayModeLabelOnly;
 
-		window.autorecalculatesKeyViewLoop = NO;
-		window.collectionBehavior          = NSWindowCollectionBehaviorMoveToActiveSpace|NSWindowCollectionBehaviorFullScreenAuxiliary;
-		window.delegate                    = self;
-		window.hidesOnDeactivate           = NO;
-		window.toolbar                     = toolbar;
+		window.collectionBehavior = NSWindowCollectionBehaviorMoveToActiveSpace|NSWindowCollectionBehaviorFullScreenAuxiliary;
+		window.delegate           = self;
+		window.hidesOnDeactivate  = NO;
+		window.toolbar            = toolbar;
 	}
 	return self;
 }
