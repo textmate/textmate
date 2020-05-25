@@ -95,7 +95,8 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 
 		[self updateScrollViewInsets];
 
-		OakSetupKeyViewLoop(@[ self.tableView, self.searchField, _scopeBar.view ]);
+		OakSetupKeyViewLoop(@[ self.tableView, self.searchField, _scopeBar.view ], NO);
+		self.window.initialFirstResponder = self.tableView;
 
 		self.sourceIndex = [NSUserDefaults.standardUserDefaults integerForKey:kUserDefaultsOpenProjectSourceIndex];
 		[_scopeBar bind:NSValueBinding toObject:self withKeyPath:@"sourceIndex" options:nil];

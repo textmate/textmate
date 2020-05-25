@@ -67,7 +67,8 @@ static SymbolChooserItem* CreateItem (OakDocument* document, text::pos_t const& 
 
 		[self updateScrollViewInsets];
 
-		OakSetupKeyViewLoop(@[ self.searchField ]);
+		OakSetupKeyViewLoop(@[ self.searchField ], NO);
+		self.window.initialFirstResponder = self.searchField;
 	}
 	return self;
 }

@@ -299,9 +299,7 @@ NSString* const kSoftwareUpdateChannelCanary                                   =
 	};
 
 	NSView* contentView = [[NSView alloc] initWithFrame:NSZeroRect];
-
 	OakAddAutoLayoutViewsToSuperview(views.allValues, contentView);
-	OakSetupKeyViewLoop(self.buttonStackView.views, NO);
 
 	[NSLayoutConstraint activateConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(24)-[image(==64)]-(16)-[content]-|"          options:NSLayoutFormatAlignAllTop metrics:nil views:views]];
 	[NSLayoutConstraint activateConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[image]-(>=20)-[buttons]-|"                     options:0                         metrics:nil views:views]];

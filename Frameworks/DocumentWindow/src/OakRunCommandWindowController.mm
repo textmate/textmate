@@ -91,7 +91,6 @@ static NSString* const kUserDefaultsFilterOutputType = @"filterOutputType";
 		CONSTRAINT(@"V:[result]-[execute]-|", 0);
 
 		[self.window.contentView addConstraints:_myConstraints];
-		OakSetupKeyViewLoop(@[ self.commandComboBox, self.resultPopUpButton, self.cancelButton, self.executeButton ]);
 		self.window.defaultButtonCell = self.executeButton.cell;
 
 		self.outputType = (output::type)[NSUserDefaults.standardUserDefaults integerForKey:kUserDefaultsFilterOutputType];

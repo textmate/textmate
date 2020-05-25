@@ -120,7 +120,6 @@ static NSTextField* OakCreateTextField ()
 	self.buyButton.action      = @selector(visitOnlineStore:);
 	self.buyButton.target      = self;
 
-	OakSetupKeyViewLoop(@[ self.ownerTextField, self.licenseTextField, self.buyButton, self.cancelButton, self.registerButton ]);
 	NSDictionary* views = @{
 		@"ownerLabel":   self.ownerLabel,
 		@"owner":        self.ownerTextField,
