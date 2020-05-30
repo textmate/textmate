@@ -604,7 +604,7 @@ class CompileRagel < Compiler
 
   def setup(buildfile, context)
     buildfile.rule('gen_ragel', {
-      'command'     => 'ragel -o $out $in',
+      'command'     => 'ragel $args -o $out $in',
       'description' => 'Generate source from ‘$in’…',
     })
   end
@@ -612,7 +612,7 @@ class CompileRagel < Compiler
   def transform(asset, buildfile)
     config = { 'FLAGS' => Shellwords.shelljoin([ '-iquote', File.dirname(asset.file) ]) }
     new_asset = self.derive_asset(asset, buildfile.dir, config)
-    buildfile.build('gen_ragel', asset.file, new_asset.file)
+    buildfile.build('gen_ragel', asset.file, new_asset.file, asset.context['RAGEL_FLAGS'])
     [ new_asset ]
   end
 end
