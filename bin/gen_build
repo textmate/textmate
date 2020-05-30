@@ -374,11 +374,13 @@ class Buildfile
     self.rule('run_test', {
       'command'     => '$in $test_runner_flags && touch $out',
       'description' => 'Run ‘$in’…',
+      'pool'        => 'console',
     })
 
     self.rule('always_run_test', {
       'command'     => '$in $test_runner_flags',
       'description' => 'Run ‘$in’…',
+      'pool'        => 'console',
     })
 
     self.rule('link', {
