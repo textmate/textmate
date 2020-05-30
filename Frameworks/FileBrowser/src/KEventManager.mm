@@ -406,6 +406,12 @@ static bool paths_share_inode (NSString* lhs, NSString* rhs)
 	NSNumber* isVolume;
 	while(!([url getResourceValue:&isVolume forKey:NSURLIsVolumeKey error:nil] && isVolume.boolValue))
 	{
+		if(url.path.length < url.URLByDeletingLastPathComponent.path.length)
+		{
+			os_log_error(kLogEventManager, "-[KEventManager nodeForURL:makeIfNecessary:] Unable to obtain wellformed parent for %{public}@", url);
+			return nil;
+		}
+
 		[pathComponents addObject:url.path.lastPathComponent];
 		url = url.URLByDeletingLastPathComponent;
 	}
