@@ -413,7 +413,7 @@ static bool paths_share_inode (NSString* lhs, NSString* rhs)
 
 	if(!isVolume)
 	{
-		os_log_error(kLogEventManager, "[%{public}@ nodeForURL:%{public}@ makeIfNecessary:%{public}s] No volume found in URL", [self class], url, flag ? "YES" : "NO");
+		os_log_error(kLogEventManager, "-[KEventManager nodeForURL:%{public}@ makeIfNecessary:%{public}s] No volume found in URL", url, flag ? "YES" : "NO");
 		return nil;
 	}
 
