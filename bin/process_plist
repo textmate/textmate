@@ -25,9 +25,9 @@ end
 
 variables = { }
 OptionParser.new do |opts|
-  opts.banner = "Usage: gen_build [options]"
+  opts.banner = "Usage: process_plist [options]"
   opts.separator "Synopsis:"
-  opts.separator "gen_build: substitute ${VARIABLES} in text files"
+  opts.separator "process_plist: substitute ${VARIABLES} in text files"
   opts.separator "Options:"
   opts.on("-h","--help", "show help.") do |v|
     puts opts
