@@ -517,9 +517,9 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		NSView* footerView = self.footerView;
 		OakAddAutoLayoutViewsToSuperview(footerViews.allValues, footerView);
 
-		[footerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[dividerView]|"                       options:0 metrics:nil views:footerViews]];
-		[footerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(24)-[status]-[edit]-[select]-|"     options:NSLayoutFormatAlignAllCenterY metrics:nil views:footerViews]];
-		[footerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[dividerView(==1)]-(4)-[select]-(5)-|" options:0 metrics:nil views:footerViews]];
+		[footerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[dividerView]|"                         options:0 metrics:nil views:footerViews]];
+		[footerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(24)-[status]-(>=0)-[edit]-[select]-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:footerViews]];
+		[footerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[dividerView(==1)]-(4)-[select]-(5)-|"  options:0 metrics:nil views:footerViews]];
 
 		[self updateScrollViewInsets];
 
