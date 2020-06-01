@@ -503,22 +503,27 @@ SHELL
   private
 
   def compiler_for(file)
-    Plugin.plugins_of_type(Compiler).each do |klass|
-      (klass.transforms || {}).each do |ext, dest_ext|
-        if file =~ /\b#{Regexp.escape ext}$/
-          return klass.new(self, @context, ext, ext, dest_ext)
-        end
-      end
+    candidates = []
 
-      (klass.extensions || {}).each do |canonical_ext, extensions|
+    Plugin.plugins_of_type(Compiler).each do |klass|
+      klass.transforms.each do |ext, dest_ext|
+        if file =~ /\b#{Regexp.escape ext}$/
+          candidates << { class: klass, ext: ext, dest_ext: dest_ext }
+        end
+      end unless klass.transforms.nil?
+
+      klass.extensions.each do |canonical_ext, extensions|
         extensions.each do |ext|
           if file =~ /\b#{Regexp.escape ext}$/
-            return klass.new(self, @context, ext, canonical_ext, klass.transforms[canonical_ext])
+            candidates << { class: klass, ext: ext, dest_ext: klass.transforms[canonical_ext], canonical_ext: canonical_ext }
           end
         end
-      end
+      end unless klass.extensions.nil?
     end
-    nil
+
+    if match = candidates.max { |lhs, rhs| lhs[:ext].length <=> rhs[:ext].length }
+      match[:class].new(self, @context, match[:ext], match[:canonical_ext] || match[:ext], match[:dest_ext])
+    end
   end
 end
 
