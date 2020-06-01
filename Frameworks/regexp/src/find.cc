@@ -41,8 +41,6 @@ namespace find
 	protected:
 		find_implementation_t () : skip_first(0), skip_last(0)  { }
 		virtual ~find_implementation_t ()                       { }
-		virtual void set_skip_first (ssize_t offset)            { skip_first = offset; }
-		virtual void set_skip_last (ssize_t offset)             { skip_last = offset; }
 		virtual std::pair<ssize_t, ssize_t> match (char const* buf, ssize_t len, std::map<std::string, std::string>* captures) = 0;
 
 		ssize_t skip_first, skip_last;
@@ -443,7 +441,5 @@ namespace find
 	}
 
 	std::pair<ssize_t, ssize_t> find_t::match (char const* buf, ssize_t len, std::map<std::string, std::string>* captures) { return pimpl->match(buf, len, captures); }
-	void find_t::set_skip_first (ssize_t offset)                                                                           { pimpl->set_skip_first(offset); }
-	void find_t::set_skip_last (ssize_t offset)                                                                            { pimpl->set_skip_last(offset); }
 
 } /* find */
