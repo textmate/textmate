@@ -605,7 +605,7 @@ class Compiler < Plugin
 end
 
 class CompileRagel < Compiler
-  transforms '.rl' => '.cc'
+  transforms '.rl' => '.cc', '.mm.rl' => '.mm', '.cc.rl' => '.cc'
 
   def setup(buildfile, context)
     buildfile.rule('gen_ragel', {
