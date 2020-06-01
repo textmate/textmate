@@ -440,8 +440,6 @@ namespace find
 		else	pimpl = std::make_shared<regular_find_t>(str, options);
 	}
 
-	std::pair<ssize_t, ssize_t> find_t::match (char const* buf, ssize_t len, std::map<std::string, std::string>* captures) { return pimpl->match(buf, len, captures); }
-
 	void find_t::each_match (char const* buf, size_t len, bool moreToCome, std::function<void(std::pair<size_t, size_t> const&, std::map<std::string, std::string> const&)> const& f)
 	{
 		for(size_t offset = 0; offset < len; )
