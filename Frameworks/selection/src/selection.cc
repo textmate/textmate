@@ -1312,35 +1312,18 @@ namespace ng
 		ranges_t ranges = dissect_columnar(buffer, searchRanges);
 		find::find_t f(searchFor, (find::options_t)(options & ~find::backwards));
 
-		ssize_t total = 0;
-		buffer.visit_data([&](char const* buf, size_t, size_t len, bool*){
-			for(ssize_t offset = 0; offset < len; )
-			{
-				std::map<std::string, std::string> captures;
-				std::pair<ssize_t, ssize_t> const& m = f.match(buf + offset, len - offset, &captures);
-				if(m.first <= m.second)
-				{
-					range_t r(total + offset + m.first, total + offset + m.second, false, false, true);
-					if(is_subset(r, ranges))
-						res.emplace(r, captures);
-				}
-				ASSERT_NE(m.second, 0); ASSERT_LE(m.second, len - offset);
-				offset += m.second;
-			}
-			total += len;
+		std::map< range_t, std::map<std::string, std::string> >* tmp = new std::map< range_t, std::map<std::string, std::string> >();
+
+		buffer.visit_data([&](char const* buf, size_t offset, size_t len, bool*){
+			f.each_match(buf, len, offset + len < buffer.size(), [&tmp, &ranges](std::pair<size_t, size_t> const& m, std::map<std::string, std::string> const& captures){
+				range_t r(m.first, m.second, false, false, true);
+				if(is_subset(r, ranges))
+					tmp->emplace(r, captures);
+			});
 		});
 
-		std::map<std::string, std::string> captures;
-		std::pair<ssize_t, ssize_t> m = f.match(nullptr, 0, &captures);
-		while(m.first <= m.second)
-		{
-			range_t r(total + m.first, total + m.second, false, false, true);
-			if(is_subset(r, ranges))
-				res.emplace(r, captures);
-			captures.clear();
-			m = f.match(nullptr, 0, &captures);
-		}
-
+		res.swap(*tmp);
+		delete tmp;
 		return res;
 	}
 
