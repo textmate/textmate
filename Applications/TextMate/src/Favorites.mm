@@ -19,9 +19,48 @@ static NSString* const kUserDefaultsOpenProjectSourceIndex = @"openProjectSource
 static NSUInteger const kOakSourceIndexRecentProjects = 0;
 static NSUInteger const kOakSourceIndexFavorites      = 1;
 
+@interface FavoritesItem : NSObject
+@property (nonatomic, readonly) NSImage* icon;
+@property (nonatomic) NSAttributedString* name;
+@property (nonatomic) NSAttributedString* folder;
+@property (nonatomic, getter = isRemovable) BOOL removable;
+
+@property (nonatomic, readonly) NSString* path; // Path of the recent project
+@property (nonatomic, readonly) NSString* link; // Path of symbolic link in Favorites folder (nullable)
+
+@property (nonatomic, readonly) NSString* displayName;
+@property (nonatomic) NSString* displayNameSuffix;
+@end
+
+@implementation FavoritesItem
+- (instancetype)initWithPath:(NSString*)path isLink:(BOOL)isLink isRemovable:(BOOL)isRemovable
+{
+	if(self = [super init])
+	{
+		NSError* error;
+
+		_path = isLink ? [NSFileManager.defaultManager destinationOfSymbolicLinkAtPath:path error:&error] : path;
+		_link = isLink ? path : nil;
+
+		if(error)
+			os_log_error(OS_LOG_DEFAULT, "Failed to read link: %{public}@", error.localizedDescription);
+
+		if(isLink && ![path.lastPathComponent isEqualToString:_path.lastPathComponent])
+				_displayName = path.lastPathComponent;
+		else	_displayName = [NSFileManager.defaultManager displayNameAtPath:_path];
+
+		_icon = [NSWorkspace.sharedWorkspace iconForFile:_path];
+		_icon.size = NSMakeSize(32, 32);
+
+		_removable = isRemovable;
+	}
+	return self;
+}
+@end
+
 @interface FavoriteChooser ()
 {
-	NSMutableArray* _originalItems;
+	NSArray<FavoritesItem*>* _originalItems;
 }
 @property (nonatomic) OakScopeBarViewController* scopeBar;
 @property (nonatomic) NSUInteger sourceIndex;
@@ -132,7 +171,7 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 		res = [[OakFileTableCellView alloc] initWithCloseButton:removeButton];
 		res.identifier = aTableColumn.identifier;
 
-		[removeButton bind:NSHiddenBinding toObject:res withKeyPath:@"objectValue.isRemoveDisabled" options:nil];
+		[removeButton bind:NSHiddenBinding toObject:res withKeyPath:@"objectValue.isRemovable" options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
 	}
 
 	res.objectValue = self.items[row];
@@ -152,14 +191,14 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 
 - (void)loadItems:(id)sender
 {
-	NSMutableArray* items = [NSMutableArray new];
+	NSMutableArray<FavoritesItem*>* items = [NSMutableArray array];
 	if(_sourceIndex == kOakSourceIndexRecentProjects)
 	{
 		std::vector<std::string> paths;
 		for(id pair in [[[self sharedProjectStateDB] allObjects] sortedArrayUsingDescriptors:@[ [NSSortDescriptor sortDescriptorWithKey:@"value.lastRecentlyUsed" ascending:NO], [NSSortDescriptor sortDescriptorWithKey:@"key.lastPathComponent" ascending:YES selector:@selector(localizedCompare:)] ]])
 		{
 			if(access([pair[@"key"] fileSystemRepresentation], F_OK) == 0)
-				[items addObject:@{ @"path": pair[@"key"] }];
+				[items addObject:[[FavoritesItem alloc] initWithPath:pair[@"key"] isLink:NO isRemovable:YES]];
 		}
 	}
 	else if(_sourceIndex == kOakSourceIndexFavorites)
@@ -169,65 +208,31 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 		{
 			if(entry->d_type == DT_LNK)
 			{
-				std::string const path = path::resolve(path::join(favoritesPath, entry->d_name));
 				if(strncmp("[DIR] ", entry->d_name, 6) == 0)
 				{
+					std::string const path = path::resolve(path::join(favoritesPath, entry->d_name));
 					bool includeSymlinkName = path::name(path) != std::string(entry->d_name + 6);
 					for(auto const& subentry : path::entries(path))
 					{
 						if(subentry->d_type == DT_DIR)
 						{
-							NSMutableDictionary* item = [NSMutableDictionary dictionaryWithDictionary:@{
-								@"path":             [NSString stringWithCxxString:path::join(path, subentry->d_name)],
-								@"isRemoveDisabled": @YES
-							}];
-
-							if(includeSymlinkName)
-								item[@"name"] = [NSString stringWithFormat:@"%s — %s", subentry->d_name, entry->d_name + 6];
-
+							FavoritesItem* item = [[FavoritesItem alloc] initWithPath:to_ns(path::join(path, subentry->d_name)) isLink:NO isRemovable:NO];
+							item.displayNameSuffix = includeSymlinkName ? [NSString stringWithFormat:@" — %s", entry->d_name + 6] : nil;
 							[items addObject:item];
 						}
 					}
 				}
 				else
 				{
-					NSMutableDictionary* item = [NSMutableDictionary dictionaryWithDictionary:@{
-						@"path": [NSString stringWithCxxString:path],
-						@"link": [NSString stringWithCxxString:path::join(favoritesPath, entry->d_name)]
-					}];
-
-					if(path::name(path) != entry->d_name)
-					{
-						item[@"name"]   = [NSString stringWithCxxString:entry->d_name];
-						item[@"folder"] = [item[@"path"] stringByAbbreviatingWithTildeInPath];
-					}
-
-					[items addObject:item];
+					[items addObject:[[FavoritesItem alloc] initWithPath:to_ns(path::join(favoritesPath, entry->d_name)) isLink:YES isRemovable:YES]];
 				}
 			}
 		}
 	}
 
-	_originalItems = [NSMutableArray new];
-	for(NSDictionary* item in items)
-	{
-		NSString* path = item[@"path"];
-
-		NSImage* image = [NSWorkspace.sharedWorkspace iconForFile:path];
-		image.size = NSMakeSize(32, 32);
-
-		NSMutableDictionary* tmp = [item mutableCopy];
-		[tmp addEntriesFromDictionary:@{
-			@"icon":   image,
-			@"name":   item[@"name"]   ?: [NSString stringWithCxxString:path::display_name(to_s(path))],
-			@"folder": item[@"folder"] ?: [[path stringByDeletingLastPathComponent] stringByAbbreviatingWithTildeInPath],
-			@"info":   [path stringByAbbreviatingWithTildeInPath]
-		}];
-		[_originalItems addObject:tmp];
-	}
-
+	_originalItems = items;
 	if(_sourceIndex == kOakSourceIndexFavorites)
-		_originalItems = [[_originalItems sortedArrayUsingDescriptors:@[ [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES selector:@selector(localizedCompare:)] ]] mutableCopy];
+		_originalItems = [items sortedArrayUsingDescriptors:@[ [NSSortDescriptor sortDescriptorWithKey:@"displayName" ascending:YES selector:@selector(localizedCompare:)] ]];
 }
 
 - (void)showWindow:(id)sender
@@ -248,10 +253,10 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 	NSArray* bindings = [[OakAbbreviations abbreviationsForName:@"OakFavoriteChooserBindings"] stringsForAbbreviation:self.filterString];
 	std::string const filter = to_s([self.filterString decomposedStringWithCanonicalMapping]);
 
-	std::multimap<double, NSDictionary*> ranked;
-	for(NSDictionary* item in _originalItems)
+	std::multimap<double, FavoritesItem*> ranked;
+	for(FavoritesItem* item in _originalItems)
 	{
-		NSString* name = item[@"name"];
+		NSString* name = item.displayName;
 
 		double rank = ranked.size();
 		std::vector<std::pair<size_t, size_t>> ranges;
@@ -261,19 +266,18 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 			if(rank <= 0)
 				continue;
 
-			NSUInteger bindingIndex = [bindings indexOfObject:item[@"path"]];
+			NSUInteger bindingIndex = [bindings indexOfObject:item.path];
 			if(bindingIndex != NSNotFound)
 					rank = -1.0 * (bindings.count - bindingIndex);
 			else	rank = -rank;
 		}
 
-		NSMutableDictionary* entry = [item mutableCopy];
-		entry[@"name"]   = CreateAttributedStringWithMarkedUpRanges(to_s(name), ranges, NSLineBreakByTruncatingTail);
-		entry[@"folder"] = CreateAttributedStringWithMarkedUpRanges(to_s(item[@"folder"]), { }, NSLineBreakByTruncatingHead);
-		ranked.emplace(rank, entry);
+		item.name   = CreateAttributedStringWithMarkedUpRanges(to_s(item.displayNameSuffix ? [name stringByAppendingString:item.displayNameSuffix] : name), ranges, NSLineBreakByTruncatingTail);
+		item.folder = CreateAttributedStringWithMarkedUpRanges(to_s(item.path.stringByDeletingLastPathComponent.stringByAbbreviatingWithTildeInPath), { }, NSLineBreakByTruncatingHead);
+		ranked.emplace(rank, item);
 	}
 
-	NSMutableArray* res = [NSMutableArray new];
+	NSMutableArray<FavoritesItem*>* res = [NSMutableArray array];
 	for(auto const& pair : ranked)
 		[res addObject:pair.second];
 	self.items = res;
@@ -283,8 +287,8 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 {
 	if(self.tableView.selectedRow != -1)
 	{
-		NSDictionary* item = self.items[self.tableView.selectedRow];
-		self.statusTextField.stringValue = [item objectForKey:@"info"];
+		FavoritesItem* item = self.items[self.tableView.selectedRow];
+		self.statusTextField.stringValue = item.path.stringByAbbreviatingWithTildeInPath;
 	}
 	else
 	{
@@ -296,16 +300,16 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 {
 	if(self.filterString)
 	{
-		for(NSDictionary* item in self.selectedItems)
-			[[OakAbbreviations abbreviationsForName:@"OakFavoriteChooserBindings"] learnAbbreviation:self.filterString forString:[item objectForKey:@"path"]];
+		for(FavoritesItem* item in self.selectedItems)
+			[[OakAbbreviations abbreviationsForName:@"OakFavoriteChooserBindings"] learnAbbreviation:self.filterString forString:item.path];
 	}
 
-	for(NSDictionary* item in self.selectedItems)
+	for(FavoritesItem* item in self.selectedItems)
 	{
-		if(NSMutableDictionary* tmp = [[[self sharedProjectStateDB] valueForKey:item[@"path"]] mutableCopy])
+		if(NSMutableDictionary* tmp = [[[self sharedProjectStateDB] valueForKey:item.path] mutableCopy])
 		{
 			tmp[@"lastRecentlyUsed"] = [NSDate date];
-			[[self sharedProjectStateDB] setValue:tmp forKey:item[@"path"]];
+			[[self sharedProjectStateDB] setValue:tmp forKey:item.path];
 		}
 	}
 
@@ -314,16 +318,16 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 
 - (NSUInteger)removeItemsAtIndexes:(NSIndexSet*)anIndexSet
 {
-	NSMutableArray* items = [self.items mutableCopy];
+	NSMutableArray<FavoritesItem*>* items = [self.items mutableCopy];
 	anIndexSet = [anIndexSet indexesPassingTest:^BOOL(NSUInteger idx, BOOL* stop){
-		return ![items[idx][@"isRemoveDisabled"] boolValue];
+		return items[idx].isRemovable;
 	}];
 
-	for(NSDictionary* item in [items objectsAtIndexes:anIndexSet])
+	for(FavoritesItem* item in [items objectsAtIndexes:anIndexSet])
 	{
-		if(NSString* link = item[@"link"])
-			[NSFileManager.defaultManager trashItemAtURL:[NSURL fileURLWithPath:link] resultingItemURL:nil error:nil];
-		else if(NSString* path = item[@"path"])
+		if(NSString* link = item.link)
+			[NSFileManager.defaultManager trashItemAtURL:[NSURL fileURLWithPath:item.link] resultingItemURL:nil error:nil];
+		else if(NSString* path = item.path)
 			[[self sharedProjectStateDB] removeObjectForKey:path];
 	}
 
