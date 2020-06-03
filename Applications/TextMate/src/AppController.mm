@@ -748,7 +748,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 {
 	NSMutableArray* paths = [NSMutableArray array];
 	for(id item in [sender selectedItems])
-		[paths addObject:[item objectForKey:@"path"]];
+		[paths addObject:[item valueForKey:@"path"]];
 	OakOpenDocuments(paths, YES);
 }
 
