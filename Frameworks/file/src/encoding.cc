@@ -8,8 +8,6 @@
 #include <oak/oak.h>
 #include <oak/debug.h>
 
-OAK_DEBUG_VAR(File_Charset);
-
 std::string const kCharsetNoEncoding = NULL_STR;
 std::string const kCharsetASCII      = "ASCII";
 std::string const kCharsetUTF8       = "UTF-8";

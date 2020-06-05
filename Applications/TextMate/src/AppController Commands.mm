@@ -14,8 +14,6 @@
 #import <plist/uuid.h>
 #import <HTMLOutputWindow/HTMLOutputWindow.h>
 
-OAK_DEBUG_VAR(AppController_Commands);
-
 @implementation AppController (Commands)
 - (void)performBundleItemWithUUIDStringFrom:(id)anArgument
 {

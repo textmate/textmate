@@ -46,15 +46,6 @@
 #import <io/exec.h>
 #import <Find/Find.h>
 
-OAK_DEBUG_VAR(OakTextView_TextInput);
-OAK_DEBUG_VAR(OakTextView_Accessibility);
-OAK_DEBUG_VAR(OakTextView_Spelling);
-OAK_DEBUG_VAR(OakTextView_ViewRect);
-OAK_DEBUG_VAR(OakTextView_NSView);
-OAK_DEBUG_VAR(OakTextView_DragNDrop);
-OAK_DEBUG_VAR(OakTextView_MouseEvents);
-OAK_DEBUG_VAR(OakTextView_Macros);
-
 int32_t const NSWrapColumnWindowWidth =  0;
 int32_t const NSWrapColumnAskUser     = -1;
 
@@ -1121,30 +1112,16 @@ static std::string shell_quote (std::vector<std::string> paths)
 	}
 
 	if(x + w - 2*r.size.width < r.origin.x)
-	{
-		D(DBF_OakTextView_ViewRect, bug("scroll right\n"););
 		x = r.origin.x + 5*r.size.width - w;
-	}
 	else if(r.origin.x < x + 2*r.size.width)
-	{
-		D(DBF_OakTextView_ViewRect, bug("scroll left\n"););
 		x = r.origin.x < w/2 ? 0 : r.origin.x - 5*r.size.width;
-	}
 
 	if(std::clamp<CGFloat>(r.origin.y, y + h - 1.5*r.size.height, y + h + 1.5*r.size.height) == r.origin.y) // scroll down
-	{
-		D(DBF_OakTextView_ViewRect, bug("scroll down\n"););
 		y = r.origin.y + 1.5*r.size.height - h;
-	}
 	else if(std::clamp<CGFloat>(r.origin.y, y - 3*r.size.height, y + 0.5*r.size.height) == r.origin.y) // scroll up
-	{
-		D(DBF_OakTextView_ViewRect, bug("scroll up\n"););
 		y = r.origin.y - 0.5*r.size.height;
-	}
 	else if(std::clamp(r.origin.y, y, y + h) != r.origin.y) // center y
-	{
 		y = r.origin.y - (h-r.size.height)/2;
-	}
 
 doScroll:
 	CGRect b = [self bounds];
@@ -1307,7 +1284,6 @@ doScroll:
 
 - (void)setMarkedText:(id)aString selectedRange:(NSRange)aRange replacementRange:(NSRange)replacementRange
 {
-	D(DBF_OakTextView_TextInput, bug("‘%s’ %s\n", to_s([aString description]).c_str(), [NSStringFromRange(aRange) UTF8String]););
 	if(!documentView)
 		return;
 
@@ -1341,13 +1317,11 @@ doScroll:
 		return { NSNotFound, 0 };
 
 	NSRange res = [self nsRangeForRange:documentView->ranges().last()];
-	D(DBF_OakTextView_TextInput, bug("%s\n", [NSStringFromRange(res) UTF8String]););
 	return res;
 }
 
 - (NSRange)markedRange
 {
-	D(DBF_OakTextView_TextInput, bug("%s\n", to_s(_markedRanges).c_str()););
 	if(!documentView || _markedRanges.empty())
 		return NSMakeRange(NSNotFound, 0);
 	return [self nsRangeForRange:_markedRanges.last()];
@@ -1355,20 +1329,17 @@ doScroll:
 
 - (void)unmarkText
 {
-	D(DBF_OakTextView_TextInput, bug("\n"););
 	AUTO_REFRESH;
 	_markedRanges = pendingMarkedRanges = ng::ranges_t();
 }
 
 - (BOOL)hasMarkedText
 {
-	D(DBF_OakTextView_TextInput, bug("%s\n", BSTR(!_markedRanges.empty())););
 	return !_markedRanges.empty();
 }
 
 - (NSArray*)validAttributesForMarkedText
 {
-	D(DBF_OakTextView_TextInput, bug("\n"););
 	return [NSArray array];
 }
 
@@ -1389,7 +1360,6 @@ doScroll:
 	NSPoint p = [self convertPoint:[[self window] convertRectFromScreen:(NSRect){ thePoint, NSZeroSize }].origin fromView:nil];
 	std::string const text = documentView->substr();
 	size_t index = documentView->index_at_point(p).index;
-	D(DBF_OakTextView_TextInput, bug("%s → %zu\n", [NSStringFromPoint(thePoint) UTF8String], index););
 	return utf16::distance(text.data(), text.data() + index);
 }
 
@@ -1444,13 +1414,11 @@ doScroll:
 		*actualRange = [self nsRangeForRange:r];
 
 	NSRect rect = [[self window] convertRectToScreen:[self convertRect:documentView->rect_at_index(r.min()) toView:nil]];
-	D(DBF_OakTextView_TextInput, bug("%s → %s\n", [NSStringFromRange(theRange) UTF8String], [NSStringFromRect(rect) UTF8String]););
 	return rect;
 }
 
 - (void)doCommandBySelector:(SEL)aSelector
 {
-	D(DBF_OakTextView_TextInput, bug("%s\n", sel_getName(aSelector)););
 	AUTO_REFRESH;
 	if(![self tryToPerform:aSelector with:self])
 		NSBeep();
@@ -2175,7 +2143,6 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	if(!hasKey && (otherTextViewHasKey || recordingShortcut || noCommandFlag))
 		return NO;
 
-	D(DBF_OakTextView_TextInput, bug("%s\n", [[anEvent description] UTF8String]););
 	std::string const eventString = to_s(anEvent);
 
 	std::vector<bundles::item_ptr> const& items = bundles::query(bundles::kFieldKeyEquivalent, eventString, [self scopeContext]);
@@ -2233,7 +2200,6 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 
 - (void)keyDown:(NSEvent*)anEvent
 {
-	D(DBF_OakTextView_TextInput, bug("%s\n", [[anEvent description] UTF8String]););
 	crash_reporter_info_t info("%s %s", sel_getName(_cmd), to_s(anEvent).c_str());
 	try {
 		[self realKeyDown:anEvent];
@@ -2363,8 +2329,6 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 
 - (void)insertText:(id)aString replacementRange:(NSRange)aRange
 {
-	D(DBF_OakTextView_TextInput, bug("‘%s’, has marked %s\n", [[aString description] UTF8String], BSTR(!_markedRanges.empty())););
-
 	AUTO_REFRESH;
 	if(!_markedRanges.empty())
 	{
@@ -2551,7 +2515,6 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 
 - (void)contextMenuPerformCorrectWord:(NSMenuItem*)menuItem
 {
-	D(DBF_OakTextView_Spelling, bug("%s\n", [[menuItem representedObject] UTF8String]););
 	AUTO_REFRESH;
 	documentView->insert(to_s([menuItem representedObject]));
 	if(NSSpellChecker.sharedSpellCheckerExists)
@@ -2560,13 +2523,11 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 
 - (void)contextMenuPerformIgnoreSpelling:(id)sender
 {
-	D(DBF_OakTextView_Spelling, bug("%s\n", [[sender representedObject] UTF8String]););
 	[self ignoreSpelling:[sender representedObject]];
 }
 
 - (void)contextMenuPerformLearnSpelling:(id)sender
 {
-	D(DBF_OakTextView_Spelling, bug("%s\n", [[sender representedObject] UTF8String]););
 	[NSSpellChecker.sharedSpellChecker learnWord:[sender representedObject]];
 
 	documentView->recheck_spelling(0, documentView->size());
@@ -2575,7 +2536,6 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 
 - (void)contextMenuPerformUnlearnSpelling:(id)sender
 {
-	D(DBF_OakTextView_Spelling, bug("%s\n", [[sender representedObject] UTF8String]););
 	[NSSpellChecker.sharedSpellChecker unlearnWord:[sender representedObject]];
 
 	documentView->recheck_spelling(0, documentView->size());
@@ -2590,7 +2550,6 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	else if([sender isKindOfClass:[NSString class]])
 		word = sender;
 
-	D(DBF_OakTextView_Spelling, bug("%s → %s\n", [[sender description] UTF8String], [word UTF8String]););
 	if(word)
 	{
 		[NSSpellChecker.sharedSpellChecker ignoreWord:word inSpellDocumentWithTag:documentView->spelling_tag()];
@@ -2601,7 +2560,6 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 
 - (void)changeSpelling:(id)sender
 {
-	D(DBF_OakTextView_Spelling, bug("%s\n", [[sender description] UTF8String]););
 	if([sender respondsToSelector:@selector(selectedCell)])
 	{
 		AUTO_REFRESH;
@@ -3236,7 +3194,6 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (void)setShowColumnSelectionCursor:(BOOL)flag
 {
-	D(DBF_OakTextView_TextInput, bug("%s → %s\n", BSTR(_showColumnSelectionCursor), BSTR(flag)););
 	if(flag != _showColumnSelectionCursor)
 	{
 		_showColumnSelectionCursor = flag;
@@ -3653,10 +3610,8 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	if(self.isRecordingMacro == flag)
 		return;
 
-	D(DBF_OakTextView_Macros, bug("%s\n", BSTR(flag)););
 	if(macroRecordingArray)
 	{
-		D(DBF_OakTextView_Macros, bug("%s\n", to_s(plist::convert((__bridge CFPropertyListRef)macroRecordingArray)).c_str()););
 		[NSUserDefaults.standardUserDefaults setObject:[macroRecordingArray copy] forKey:@"OakMacroManagerScratchMacro"];
 		macroRecordingArray = nil;
 	}
@@ -3669,7 +3624,6 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (IBAction)playScratchMacro:(id)anArgument
 {
-	D(DBF_OakTextView_Macros, bug("%s\n", to_s(plist::convert((__bridge CFPropertyListRef)[NSUserDefaults.standardUserDefaults arrayForKey:@"OakMacroManagerScratchMacro"])).c_str()););
 	AUTO_REFRESH;
 	if(NSArray* scratchMacro = [NSUserDefaults.standardUserDefaults arrayForKey:@"OakMacroManagerScratchMacro"])
 			documentView->macro_dispatch(plist::convert((__bridge CFDictionaryRef)@{ @"commands": scratchMacro }), [self variables]);
@@ -3703,7 +3657,6 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	if(!macroRecordingArray)
 		return;
 
-	D(DBF_OakTextView_Macros, bug("%s, %s\n", sel_getName(aSelector), [[anArgument description] UTF8String]););
 	[macroRecordingArray addObject:[NSDictionary dictionaryWithObjectsAndKeys:NSStringFromSelector(aSelector), @"command", anArgument, @"argument", nil]];
 }
 
@@ -3728,8 +3681,6 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (void)dropFiles:(NSArray*)someFiles
 {
-	D(DBF_OakTextView_DragNDrop, bug("%s\n", [[someFiles description] UTF8String]););
-
 	std::set<bundles::item_ptr> allHandlers;
 	std::map<oak::uuid_t, std::vector<std::string> > handlerToFiles;
 
@@ -3738,7 +3689,6 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	{
 		for(auto const& item : bundles::drag_commands_for_path(to_s(path), scope))
 		{
-			D(DBF_OakTextView_DragNDrop, bug("handler: %s\n", item->name_with_bundle().c_str()););
 			handlerToFiles[item->uuid()].push_back(to_s(path));
 			allHandlers.insert(item);
 		}
@@ -3750,7 +3700,6 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		std::string merged = "";
 		for(NSString* path in someFiles)
 		{
-			D(DBF_OakTextView_DragNDrop, bug("insert as text: %s\n", [path UTF8String]););
 			std::string const& content = path::content(to_s(path));
 			if(!utf8::is_valid(content.begin(), content.end()))
 			{
@@ -3781,8 +3730,6 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	}
 	else if(bundles::item_ptr handler = [self showMenuForBundleItems:std::vector<bundles::item_ptr>(allHandlers.begin(), allHandlers.end())])
 	{
-		D(DBF_OakTextView_DragNDrop, bug("execute %s\n", handler->name_with_bundle().c_str()););
-
 		static struct { NSUInteger mask; std::string name; } const qualNames[] =
 		{
 			{ NSEventModifierFlagShift,     "SHIFT"    },
@@ -3866,7 +3813,6 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)info
 {
-	D(DBF_OakTextView_DragNDrop, bug("hidden: %s\n", BSTR([self isHiddenOrHasHiddenAncestor])););
 	NSDragOperation flag = [self dragOperationForInfo:info];
 	[self setDropMarkAtPoint:flag == NSDragOperationNone ? NSZeroPoint : [self convertPoint:[info draggingLocation] fromView:nil]];
 	return flag;
@@ -3874,7 +3820,6 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (NSDragOperation)draggingUpdated:(id <NSDraggingInfo>)info
 {
-	D(DBF_OakTextView_DragNDrop, bug("\n"););
 	NSDragOperation flag = [self dragOperationForInfo:info];
 	[self setDropMarkAtPoint:flag == NSDragOperationNone ? NSZeroPoint : [self convertPoint:[info draggingLocation] fromView:nil]];
 	return flag;
@@ -3882,13 +3827,11 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (void)draggingExited:(id <NSDraggingInfo>)info
 {
-	D(DBF_OakTextView_DragNDrop, bug("\n"););
 	[self setDropMarkAtPoint:NSZeroPoint];
 }
 
 - (BOOL)performDragOperation:(id <NSDraggingInfo>)info
 {
-	D(DBF_OakTextView_DragNDrop, bug("\n"););
 	ASSERT(dropPosition);
 
 	BOOL res = YES;
@@ -3898,7 +3841,6 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	BOOL shouldMove       = ([info draggingSource] == self) && ([info draggingSourceOperationMask] & NSDragOperationMove);
 	BOOL shouldLink       = ([info draggingSource] != self) && ([info draggingSourceOperationMask] == NSDragOperationLink);
 
-	D(DBF_OakTextView_DragNDrop, bug("local %s, should move %s, type %s, all types %s\n", BSTR([info draggingSource] == self), BSTR(shouldMove), [type UTF8String], [[types description] UTF8String]););
 	crash_reporter_info_t crashInfo("local %s, should move %s, type %s, all types %s", BSTR([info draggingSource] == self), BSTR(shouldMove), [type UTF8String], [[types description] UTF8String]);
 
 	AUTO_REFRESH;
@@ -3917,7 +3859,6 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	}
 	else if(NSString* text = [pboard stringForType:[pboard availableTypeFromArray:@[ NSPasteboardTypeString ]]])
 	{
-		D(DBF_OakTextView_DragNDrop, bug("plain text: %s\n", [text UTF8String]););
 		if(shouldMove && documentView->has_selection())
 		{
 			crashInfo << text::format("buffer size: %zu, move selection (%s) to %s", documentView->size(), to_s(documentView->ranges()).c_str(), to_s(pos).c_str());
@@ -3962,7 +3903,6 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (void)resetCursorRects
 {
-	D(DBF_OakTextView_MouseEvents, bug("drag: %s, column selection: %s\n", BSTR(_showDragCursor), BSTR(_showColumnSelectionCursor)););
 	[self addCursorRect:[self visibleRect] cursor:_showDragCursor ? [NSCursor arrowCursor] : (_showColumnSelectionCursor ? [NSCursor crosshairCursor] : [self ibeamCursor])];
 }
 
@@ -4115,14 +4055,12 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 - (BOOL)acceptsFirstMouse:(NSEvent*)anEvent
 {
 	BOOL res = [self isPointInSelection:[self convertPoint:[anEvent locationInWindow] fromView:nil]];
-	D(DBF_OakTextView_MouseEvents, bug("%s\n", BSTR(res)););
 	return res;
 }
 
 - (BOOL)shouldDelayWindowOrderingForEvent:(NSEvent*)anEvent
 {
 	BOOL res = [self isPointInSelection:[self convertPoint:[anEvent locationInWindow] fromView:nil]];
-	D(DBF_OakTextView_MouseEvents, bug("%s\n", BSTR(res)););
 	return res;
 }
 

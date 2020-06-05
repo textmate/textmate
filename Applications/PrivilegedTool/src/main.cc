@@ -6,8 +6,6 @@
 #include <io/io.h>
 #include <oak/debug.h>
 
-OAK_DEBUG_VAR(AuthServer);
-
 static double const AppVersion = 1.3;
 
 extern char* optarg;
@@ -17,19 +15,15 @@ static bool running = true;
 
 static void handle_signal (int theSignal)
 {
-	D(DBF_AuthServer, bug("%s\n", strsignal(theSignal)););
 	running = false;
 }
 
 static void reap_children (int theSignal)
 {
-	D(DBF_AuthServer, bug("%s\n", strsignal(theSignal)););
 	pid_t pid;
 	int status;
 	while((pid = waitpid(-1, &status, WNOHANG)) > 0)
-	{
-		D(DBF_AuthServer, bug("child %d terminated\n", pid););
-	}
+		;
 }
 
 static void version ()
@@ -72,39 +66,28 @@ static int setup_socket ()
 
 static void handle_connection (int fd)
 {
-	D(DBF_AuthServer, bug("child %d\n", getpid()););
-
 	connection_t conn(fd);
 	conn << "AuthServer" << kAuthServerMajor << kAuthServerMinor;
 
 	std::string command;
 	conn >> command;
-	D(DBF_AuthServer, bug("> %s\n", command.c_str()););
-
 	if(command == "auth")
 	{
 		std::string authString;
 		conn >> authString;
 
-		D(DBF_AuthServer, bug("> auth: %s\n", authString.c_str()););
-
 		osx::authorization_t auth(authString);
 		if(!auth.check_right(kAuthRightName))
-		{
-			D(DBF_AuthServer, bug("failed authentication\n"););
 			return;
-		}
 	}
 	else
 	{
-		D(DBF_AuthServer, bug("no authentication\n"););
 		return;
 	}
 
 	std::string action;
 	conn >> action;
 
-	D(DBF_AuthServer, bug("> %s\n", action.c_str()););
 	if(action == "read")
 	{
 		std::string path;
@@ -125,10 +108,6 @@ static void handle_connection (int fd)
 
 		conn << error;
 	}
-	else
-	{
-		D(DBF_AuthServer, bug("unknown action: ‘%s’\n", action.c_str()););
-	}
 }
 
 static void close_socket (int fd)
@@ -139,8 +118,6 @@ static void close_socket (int fd)
 
 int main (int argc, char const* argv[])
 {
-	D(DBF_AuthServer, bug("\n"););
-
 	signal(SIGINT,  &handle_signal);
 	signal(SIGTERM, &handle_signal);
 	signal(SIGCHLD, &reap_children);
@@ -191,10 +168,7 @@ int main (int argc, char const* argv[])
 		FD_SET(fd, &readfds);
 		int rc = select(fd+1, &readfds, nullptr, nullptr, nullptr);
 		if(rc == -1)
-		{
-			D(DBF_AuthServer, bug("select: %s\n", strerror(errno)););
 			continue;
-		}
 
 		if(FD_ISSET(fd, &readfds))
 		{
@@ -203,7 +177,6 @@ int main (int argc, char const* argv[])
 			int newFd = accept(fd, (sockaddr*)&dummy[0], &len);
 			// if(fork() == 0)
 			{
-				D(DBF_AuthServer, bug("new connection\n"););
 				handle_connection(newFd);
 				// _exit(EXIT_SUCCESS);
 			}

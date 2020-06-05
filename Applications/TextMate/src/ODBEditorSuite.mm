@@ -7,8 +7,6 @@
 #include <text/hexdump.h>
 #include <oak/oak.h>
 
-OAK_DEBUG_VAR(ODBEditorSuite);
-
 struct ae_record_t;
 typedef std::shared_ptr<ae_record_t> ae_record_ptr;
 
@@ -93,13 +91,10 @@ namespace odb // wrap in namespace to avoid clashing with other callbacks named 
 	private:
 		static void send_event (AEEventID eventId, std::string const& path, std::string const& token, ae_record_ptr sender)
 		{
-			D(DBF_ODBEditorSuite, int c = htonl(eventId); bug("‘%.4s’\n", (char*)&c););
-
 			if(CFURLRef url = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault, (UInt8*)path.data(), path.size(), false))
 			{
 				AEAddressDesc target;
 				std::string const& senderData = sender->data();
-				D(DBF_ODBEditorSuite, int t = htonl(sender->type()); bug("send to: ‘%.*s’ (‘%.4s’)\n", (int)senderData.size(), senderData.data(), (char*)&t););
 				AECreateDesc(sender->type() == typeType ? typeApplSignature : sender->type(), senderData.data(), senderData.size(), &target);
 
 				AppleEvent event;
@@ -132,7 +127,6 @@ bool DidHandleODBEditorEvent (AppleEvent const* event)
 	if(!event)
 		return false;
 
-	D(DBF_ODBEditorSuite, int c = htonl(event->descriptorType); bug("descriptor: ‘%.4s’\n", (char*)&c););
 	// open content: file:///Developer/Documentation/DocSets/com.apple.ADC_Reference_Library.CoreReference.docset/Contents/Resources/Documents/documentation/AppleScript/Conceptual/AppleEvents/responding_aepg/chapter_6_section_4.html
 
 	DescType attr;
@@ -141,8 +135,6 @@ bool DidHandleODBEditorEvent (AppleEvent const* event)
 
 	if(noErr != AEGetAttributePtr(event, keyEventIDAttr, typeType, NULL, &attr, sizeof(attr), NULL) || attr != kAEOpenDocuments)
 		return false;
-
-	D(DBF_ODBEditorSuite, bug("Got ‘odoc’ event\n"););
 
 	ae_record_t ae(event);
 	ae_record_ptr files        = ae.record_for_key(keyDirectObject,    typeAEList);
@@ -190,8 +182,6 @@ bool DidHandleODBEditorEvent (AppleEvent const* event)
 			{
 				std::string token = (tokens && i < tokens->array_size()) ? tokens->record_at_index(i)->data() : NULL_STR;
 				new odb::save_close_callback_t(doc, file->path(), token, sender);
-
-				D(DBF_ODBEditorSuite, int c = htonl(sender->type()); bug("server: ‘%.*s’ (‘%.4s’), token: ‘%s’\n", (int)sender->data().size(), sender->data().data(), (char*)&c, token != NULL_STR ? token.c_str() : "(none)"););
 			}
 		}
 

@@ -17,8 +17,6 @@
 #import <theme/theme.h>
 #import <settings/settings.h>
 
-OAK_DEBUG_VAR(AppController_Menus);
-
 static NSString* NameForLocaleIdentifier (NSString* languageCode)
 {
 	NSString* localLanguage = nil;
@@ -35,13 +33,11 @@ static NSString* NameForLocaleIdentifier (NSString* languageCode)
 @implementation AppController (BundlesMenu)
 - (BOOL)menuHasKeyEquivalent:(NSMenu*)aMenu forEvent:(NSEvent*)theEvent target:(id*)aTarget action:(SEL*)anAction
 {
-	D(DBF_AppController_Menus, bug("%s (%s)\n", ns::glyphs_for_event_string(to_s(theEvent)).c_str(), to_s(theEvent).c_str()););
 	return NO;
 }
 
 - (void)bundlesMenuNeedsUpdate:(NSMenu*)aMenu
 {
-	D(DBF_AppController_Menus, bug("\n"););
 	for(NSInteger i = aMenu.numberOfItems; i--; )
 	{
 		if([[aMenu itemAtIndex:i] isSeparatorItem])
@@ -151,7 +147,6 @@ static NSString* NameForLocaleIdentifier (NSString* languageCode)
 
 - (void)themesMenuNeedsUpdate:(NSMenu*)aMenu
 {
-	D(DBF_AppController_Menus, bug("\n"););
 	[aMenu removeAllItems];
 
 	std::map<std::string, std::multimap<std::string, bundles::item_ptr, text::less_t>> ordered;
@@ -210,8 +205,6 @@ static NSString* NameForLocaleIdentifier (NSString* languageCode)
 
 - (void)spellingMenuNeedsUpdate:(NSMenu*)aMenu
 {
-	D(DBF_AppController_Menus, bug("\n"););
-
 	for(NSInteger i = aMenu.numberOfItems; i--; )
 	{
 		NSMenuItem* item = [aMenu itemAtIndex:i];
@@ -231,16 +224,13 @@ static NSString* NameForLocaleIdentifier (NSString* languageCode)
 
 	for(auto const& it : ordered)
 	{
-		D(DBF_AppController_Menus, bug("Add Item: %s\n", it.first.c_str()););
 		NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithCxxString:it.first] action:@selector(takeSpellingLanguageFrom:) keyEquivalent:@""];
-		D(DBF_AppController_Menus, bug("Represented Object: %s\n", [it.second UTF8String]););
 		menuItem.representedObject = it.second;
 	}
 }
 
 - (void)wrapColumnMenuNeedsUpdate:(NSMenu*)aMenu
 {
-	D(DBF_AppController_Menus, bug("\n"););
 	[aMenu removeAllItems];
 
 	SEL action = @selector(takeWrapColumnFrom:);

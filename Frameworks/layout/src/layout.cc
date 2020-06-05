@@ -11,8 +11,6 @@
 #include <oak/debug.h>
 #include <crash/info.h>
 
-OAK_DEBUG_VAR(Layout);
-
 // ====================
 // = Helper Functions =
 // ====================
@@ -437,7 +435,6 @@ namespace ng
 
 		for(auto const& range : foldedRanges)
 		{
-			D(DBF_Layout, bug("range: %zu-%zu\n", range.first, range.second););
 			if(range.second <= from || to <= range.first)
 				continue;
 
@@ -455,7 +452,6 @@ namespace ng
 
 	void layout_t::did_erase (size_t from, size_t to)
 	{
-		D(DBF_Layout, bug("%zu-%zu\n", from, to););
 		ASSERT_LE(from, to);
 		if(from == to)
 			return;
@@ -487,7 +483,6 @@ namespace ng
 
 	void layout_t::did_insert (size_t first, size_t last)
 	{
-		D(DBF_Layout, bug("%zu-%zu\n", first, last););
 		ASSERT_LE(first, last);
 		if(first == last)
 			return;
@@ -499,7 +494,6 @@ namespace ng
 		if(_buffer.convert(first).line != _buffer.convert(last).line)
 		{
 			suffixLen = row->offset._length + row->value.length() - first;
-			D(DBF_Layout, bug("multi-line insert, erase %zu-%zu\n", first, first + suffixLen););
 			row->value.erase(first, first + suffixLen, _buffer, row->offset._length);
 		}
 
@@ -519,7 +513,6 @@ namespace ng
 
 		if(suffixLen)
 		{
-			D(DBF_Layout, bug("multi-line insert, re-insert %zu-%zu\n", last, last + suffixLen););
 			row->value.insert(last, suffixLen, _buffer, row->offset._length);
 			fullRefresh = update_row(row) || fullRefresh;
 		}

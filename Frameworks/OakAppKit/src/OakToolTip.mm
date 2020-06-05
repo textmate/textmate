@@ -2,8 +2,6 @@
 #import <oak/debug.h>
 #import <oak/oak.h>
 
-OAK_DEBUG_VAR(OakToolTip);
-
 @interface OakToolTip : NSPanel
 {
 	OBJC_WATCH_LEAKS(OakToolTip);
@@ -32,7 +30,6 @@ static __weak OakToolTip* LastToolTip;
 
 - (id)init
 {
-	D(DBF_OakToolTip, bug("\n"););
 	if(self = [super initWithContentRect:NSZeroRect styleMask:NSWindowStyleMaskBorderless backing:NSBackingStoreBuffered defer:NO])
 	{
 		NSFont* defaultFont = [NSFont toolTipsFontOfSize:0];
@@ -90,7 +87,6 @@ static __weak OakToolTip* LastToolTip;
 
 - (void)setStringValue:(NSString*)aString
 {
-	D(DBF_OakToolTip, bug("%s\n", [aString UTF8String]););
 	ASSERT(aString != nil);
 	[field setStringValue:aString];
 }
@@ -139,7 +135,6 @@ static __weak OakToolTip* LastToolTip;
 
 - (void)showAtLocation:(NSPoint)aPoint forScreen:(NSScreen*)aScreen
 {
-	D(DBF_OakToolTip, bug("%s\n", [NSStringFromPoint(aPoint) UTF8String]););
 	aScreen = aScreen ?: [NSScreen mainScreen];
 
 	NSRect r = [aScreen visibleFrame];

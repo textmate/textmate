@@ -4,8 +4,6 @@
 #include <oak/debug.h>
 #include <cf/cf.h>
 
-OAK_DEBUG_VAR(Proxy);
-
 static proxy_settings_t user_pw_settings (CFStringRef server, CFNumberRef portNumber)
 {
 	std::string user = NULL_STR, pw = NULL_STR;
@@ -49,10 +47,7 @@ static proxy_settings_t user_pw_settings (CFStringRef server, CFNumberRef portNu
 				user = std::string((char const*)authAttrList->attr->data, ((char const*)authAttrList->attr->data) + authAttrList->attr->length);
 				pw   = std::string((char const*)data, ((char const*)data) + dataLen);
 				SecKeychainItemFreeAttributesAndData(authAttrList, data);
-				D(DBF_Proxy, bug("found user ‘%s’\n", user.c_str()););
 			}
-			else
-				D(DBF_Proxy, bug("unable to obtain attributes from key chain entry\n"););
 		}
 
 		CFRelease(results);

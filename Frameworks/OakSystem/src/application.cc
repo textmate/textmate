@@ -5,8 +5,6 @@
 #include <oak/datatypes.h>
 #include <oak/debug.h>
 
-OAK_DEBUG_VAR(Application);
-
 namespace oak
 {
 	static std::string _app_name     = NULL_STR;
@@ -97,7 +95,6 @@ namespace oak
 	void application_t::relaunch (char const* args)
 	{
 		std::string const appPath = path();
-		D(DBF_Application, bug("%s\n", appPath.c_str()););
 		std::string script = text::format("{ kill %1$d; while ps -xp %1$d; do if (( ++n == 300 )); then exit; fi; sleep .2; done; open \"$0\" --args $1; } &>/dev/null &", getpid());
 		io::exec("/bin/sh", "-c", script.c_str(), appPath.c_str(), args, nullptr);
 	}

@@ -9,8 +9,6 @@
 #include <ns/ns.h>
 #include <OakAppKit/IOAlertPanel.h>
 
-OAK_DEBUG_VAR(RMateServer);
-
 /*
 	open
 	path: [«path»|-]
@@ -43,8 +41,6 @@ struct socket_callback_t
 
 	socket_callback_t (std::function<bool(socket_t const&)> const& f, socket_t const& fd)
 	{
-		D(DBF_RMateServer, bug("%p, %d\n", this, (int)fd););
-
 		helper = std::make_shared<helper_t>(f, fd, this);
 
 		if(_dispatchSource = dispatch_source_create(DISPATCH_SOURCE_TYPE_READ, (int)fd, 0, dispatch_get_main_queue()))
@@ -58,8 +54,6 @@ struct socket_callback_t
 
 	~socket_callback_t ()
 	{
-		D(DBF_RMateServer, bug("%p\n", this););
-
 		if(_dispatchSource)
 			dispatch_source_cancel(_dispatchSource);
 	}
@@ -113,7 +107,6 @@ namespace
 		mate_server_t ()
 		{
 			_socket_path = socket_path();
-			D(DBF_RMateServer, bug("%s\n", _socket_path););
 			if(unlink(_socket_path) == -1 && errno != ENOENT)
 			{
 				OakRunIOAlertPanel("Unable to delete socket left from old instance:\n%s", _socket_path);
@@ -135,7 +128,6 @@ namespace
 
 		~mate_server_t ()
 		{
-			D(DBF_RMateServer, bug("%s\n", _socket_path););
 			unlink(_socket_path);
 		}
 
@@ -148,8 +140,6 @@ namespace
 	{
 		rmate_server_t (uint16_t port, bool listenForRemoteClients) : _port(port), _listen_for_remote_clients(listenForRemoteClients)
 		{
-			D(DBF_RMateServer, bug("port %ud, remote clients %s\n", _port, BSTR(_listen_for_remote_clients)););
-
 			static int const on = 1;
 			socket_t fd(socket(PF_INET6, SOCK_STREAM, 0));
 			setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
@@ -167,7 +157,6 @@ namespace
 
 		~rmate_server_t ()
 		{
-			D(DBF_RMateServer, bug("port %ud, remote clients %s\n", _port, BSTR(_listen_for_remote_clients)););
 		}
 
 		uint16_t port () const                  { return _port; }
@@ -200,7 +189,6 @@ struct temp_file_t
 	temp_file_t ()
 	{
 		path = path::temp("rmate_buffer");
-		D(DBF_RMateServer, bug("create temp file: %s\n", path.c_str()););
 	}
 
 	operator char const* () const { return path.c_str(); }
@@ -282,12 +270,10 @@ namespace // wrap in anonymous namespace to avoid clashing with other callbacks 
 
 		save_close_callback_t (OakDocument* document, std::string const& path, socket_t const& socket, bool data_on_save, bool data_on_close, std::string const& token) : base_t(document), path(path), socket(socket), data_on_save(data_on_save), data_on_close(data_on_close), token(token)
 		{
-			D(DBF_RMateServer, bug("%p\n", this););
 		}
 
 		void save_document (OakDocument* document)
 		{
-			D(DBF_RMateServer, bug("%s\n", document.path.UTF8String););
 			bool res = true;
 			res = res && write(socket, "save\r\n", 6) == 6;
 			res = res && write_token();
@@ -300,7 +286,6 @@ namespace // wrap in anonymous namespace to avoid clashing with other callbacks 
 
 		void close_document (OakDocument* document)
 		{
-			D(DBF_RMateServer, bug("%s\n", document.path.UTF8String););
 			bool res = true;
 			res = res && write(socket, "close\r\n", 7) == 7;
 			res = res && write_token();
@@ -353,7 +338,6 @@ namespace // wrap in anonymous namespace to avoid clashing with other callbacks 
 
 		reactivate_callback_t () : _shared_count(std::make_shared<size_t>(0))
 		{
-			D(DBF_RMateServer, bug("%p\n", this););
 			_terminal = std::make_shared<NSRunningApplication*>([NSWorkspace.sharedWorkspace frontmostApplication]);
 
 			auto terminal = _terminal;
@@ -379,7 +363,6 @@ namespace // wrap in anonymous namespace to avoid clashing with other callbacks 
 
 			++*counter;
 			__weak __block id token = [NSNotificationCenter.defaultCenter addObserverForName:OakDocumentWillCloseNotification object:document queue:nil usingBlock:^(NSNotification*){
-				D(DBF_RMateServer, bug("%zu → %zu\n", *counter, *counter - 1););
 				if(--*counter == 0)
 					[*terminal activateWithOptions:NSApplicationActivateIgnoringOtherApps];
 				[NSNotificationCenter.defaultCenter removeObserver:token];
@@ -411,7 +394,6 @@ struct socket_observer_t
 	{
 		char buf[1024];
 		ssize_t len = read(socket, buf, sizeof(buf));
-		D(DBF_RMateServer, bug("%p, %d — %zd bytes\n", this, (int)socket, len););
 		if(len == 0)
 			return false;
 
@@ -421,7 +403,6 @@ struct socket_observer_t
 			parse();
 			if(state == done)
 			{
-				D(DBF_RMateServer, bug("done\n"););
 				if(records.empty() || records.begin()->command == "open") // we treat no command as ‘open’ to bring our application to front
 					open_documents(socket);
 				else
@@ -437,7 +418,6 @@ struct socket_observer_t
 		if(state == data)
 		{
 			ssize_t dataLen = std::min(len, bytesLeft);
-			D(DBF_RMateServer, bug("Got data, %zd bytes\n", dataLen););
 			records.back().accept_data(buf, buf + dataLen);
 			bytesLeft -= dataLen;
 			state = bytesLeft == 0 ? arguments : data;
@@ -462,7 +442,6 @@ struct socket_observer_t
 
 			if(str.empty())
 			{
-				D(DBF_RMateServer, bug("Got ‘end of record’\n"););
 				state = command;
 			}
 			else if(state == command)
@@ -476,7 +455,6 @@ struct socket_observer_t
 					records.emplace_back(str);
 					state = arguments;
 				}
-				D(DBF_RMateServer, bug("Got command ‘%s’\n", str.c_str()););
 			}
 			else if(state == arguments)
 			{
@@ -490,7 +468,6 @@ struct socket_observer_t
 					{
 						bytesLeft = strtol(value.c_str(), NULL, 10);
 						size_t dataLen = std::min((ssize_t)line.size(), bytesLeft);
-						D(DBF_RMateServer, bug("Got data of size %zd (%zu in this packet)\n", bytesLeft, dataLen););
 						records.back().accept_data(line.data(), line.data() + dataLen);
 						line.erase(line.begin(), line.begin() + dataLen);
 						bytesLeft -= dataLen;
@@ -499,7 +476,6 @@ struct socket_observer_t
 					}
 					else
 					{
-						D(DBF_RMateServer, bug("Got argument: %s = %s\n", key.c_str(), value.c_str()););
 						if(!value.empty())
 						{
 							std::string unescaped;
@@ -580,7 +556,6 @@ struct socket_observer_t
 
 			if(args.find("real-path") != args.end())
 			{
-				D(DBF_RMateServer, bug("set document’s virtual path: %s\n", args["real-path"].c_str()););
 				doc.virtualPath = to_ns(args["real-path"]);
 			}
 

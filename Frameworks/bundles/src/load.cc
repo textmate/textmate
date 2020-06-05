@@ -4,8 +4,6 @@
 #include <text/format.h>
 #include <oak/debug.h>
 
-OAK_DEBUG_VAR(Bundles_Load);
-
 static std::string const kSeparatorString = "------------------------------------";
 
 static std::vector<oak::uuid_t> to_menu (plist::array_t const& uuids, std::string const& path)
@@ -100,7 +98,6 @@ std::pair<std::vector<bundles::item_ptr>, std::map< oak::uuid_t, std::vector<oak
 				}
 				else if(loadedItems.find(bundleUUID) != loadedItems.end())
 				{
-					D(DBF_Bundles_Load, bug("skip ‘%s’ (eclipsed by local bundle)\n", infoPlistPath.c_str()););
 					bundle.reset();
 					skipEclipsedBundle = true;
 					break;

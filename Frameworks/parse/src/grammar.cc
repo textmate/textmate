@@ -7,8 +7,6 @@
 #include <oak/oak.h>
 #include <oak/debug.h>
 
-OAK_DEBUG_VAR(Parser);
-
 namespace parse
 {
 	static rule_ptr convert_plist (plist::any_t const& plist);
@@ -73,13 +71,9 @@ namespace parse
 		for(char const& ch : ptrn)
 		{
 			if(escape && isdigit(ch))
-			{
-				D(DBF_Parser, bug("%s: %s\n", ptrn.c_str(), "YES"););
 				return true;
-			}
 			escape = !escape && ch == '\\';
 		}
-		D(DBF_Parser, bug("%s: %s\n", ptrn.c_str(), "NO"););
 		return false;
 	}
 

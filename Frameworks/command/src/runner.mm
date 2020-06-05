@@ -7,8 +7,6 @@
 #include <regexp/format_string.h>
 #include <oak/datatypes.h>
 
-OAK_DEBUG_VAR(Command_Runner);
-
 static std::string trim_right (std::string const& str, std::string const& trimChars = " \t\n")
 {
 	std::string::size_type len = str.find_last_not_of(trimChars);
@@ -285,7 +283,6 @@ namespace command
 
 	void runner_t::did_exit (int status)
 	{
-		D(DBF_Command_Runner, bug("%d\n", status););
 		if(WIFSIGNALED(status))
 			os_log_error(OS_LOG_DEFAULT, "Process terminated after receiving %{public}s", strsignal(WTERMSIG(status)));
 		else if(!WIFEXITED(status))
@@ -330,7 +327,6 @@ namespace command
 			case exit_create_new_document: placement = output::new_window;        format = output_format::text;    break;
 		}
 
-		D(DBF_Command_Runner, bug("placement %d, format %d\n", placement, format););
 		if(rc != 0 && !_user_abort && !(200 <= rc && rc < exit_last))
 		{
 			_delegate->show_error(_command, rc, _out, _err);

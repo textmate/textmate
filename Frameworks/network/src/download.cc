@@ -8,8 +8,6 @@
 #include <io/path.h>
 #include <oak/debug.h>
 
-OAK_DEBUG_VAR(Network_Download);
-
 namespace network
 {
 	static char const kCRLF[] = "\r\n";
@@ -73,7 +71,6 @@ namespace network
 
 		if(len > 5 && strncmp("HTTP/", bytes, 5) == 0 && std::find(bytes, bytes + len, ':') == bytes + len)
 		{
-			D(DBF_Network_Download, bug("New Response: %.*s", (int)len, bytes););
 			if(len > 12 && strncmp("HTTP/1", bytes, 6) == 0 && bytes[9] == '2')
 				userData.receiving_body = true;
 
@@ -90,7 +87,6 @@ namespace network
 		}
 		else if(len == 2 && strncmp("\r\n", bytes, 2) == 0)
 		{
-			D(DBF_Network_Download, bug("End of Response\n"););
 		}
 		else
 		{

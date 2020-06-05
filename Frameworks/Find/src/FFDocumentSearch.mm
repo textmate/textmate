@@ -30,8 +30,6 @@ NSNotificationName const FFDocumentSearchDidFinishNotification         = @"FFDoc
 @property NSString* lastDocumentPath;
 @end
 
-OAK_DEBUG_VAR(Find_FolderSearch);
-
 static NSDictionary* GlobOptionsForPath (std::string const& path, NSString* glob, BOOL searchBinaryFiles, BOOL searchHiddenFolders)
 {
 	static std::map<std::string, NSString*> const map = {
@@ -71,7 +69,6 @@ static NSDictionary* GlobOptionsForPath (std::string const& path, NSString* glob
 @implementation FFDocumentSearch
 - (void)start
 {
-	D(DBF_Find_FolderSearch, bug("folders %s, searchString ‘%s’\n", [[_paths description] UTF8String], [_searchString UTF8String]););
 	[self stop];
 	_matches = [NSMutableArray array];
 
@@ -127,8 +124,6 @@ static NSDictionary* GlobOptionsForPath (std::string const& path, NSString* glob
 
 - (void)updateMatches:(NSTimer*)timer
 {
-	D(DBF_Find_FolderSearch, bug("\n"););
-
 	self.currentPath = [self.lastDocumentPath stringByDeletingLastPathComponent];
 	@synchronized(self) {
 		if(_matches.count)
@@ -145,7 +140,6 @@ static NSDictionary* GlobOptionsForPath (std::string const& path, NSString* glob
 
 - (void)stop
 {
-	D(DBF_Find_FolderSearch, bug("\n"););
 	if(std::exchange(_searching, NO))
 		++_lastSearchToken;
 

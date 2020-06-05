@@ -28,8 +28,6 @@
 #import <io/path.h>
 #import <settings/settings.h>
 
-OAK_DEBUG_VAR(Find_Base);
-
 static NSString* const kUserDefaultsFolderOptionsKey               = @"Folder Search Options";
 static NSString* const kUserDefaultsFindResultsHeightKey           = @"findResultsHeight";
 static NSString* const kUserDefaultsDefaultFindGlobsKey            = @"defaultFindInFolderGlobs";

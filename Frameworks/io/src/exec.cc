@@ -6,8 +6,6 @@
 #include <oak/debug/OakDebugLog.h>
 #include <crash/info.h>
 
-OAK_DEBUG_VAR(IO_Exec);
-
 namespace io
 {
 	process_t spawn (std::vector<std::string> const& args, std::map<std::string, std::string> const& environment)
@@ -137,7 +135,6 @@ namespace io
 
 		dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
 		dispatch_release(group);
-		D(DBF_IO_Exec, if(!error.empty()) bug("error from command: “%s”\n", error.c_str()););
 		return success ? output : NULL_STR;
 	}
 

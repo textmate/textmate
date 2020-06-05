@@ -11,8 +11,6 @@
 #include <io/io.h>
 #include <cf/cf.h>
 
-OAK_DEBUG_VAR(Settings);
-
 namespace
 {
 	static std::string& default_settings_path ()
@@ -148,7 +146,6 @@ namespace
 		{
 			if(cache.size() > 64)
 			{
-				D(DBF_Settings, bug("clear cache\n"););
 				for(auto const& pair : cache)
 					tracked_paths.remove(pair.first);
 				cache.clear();
@@ -160,11 +157,7 @@ namespace
 		else
 		{
 			if(tracked_paths.is_changed(path))
-			{
-				D(DBF_Settings, if(cache.find(path) != cache.end()) bug("reload %s\n", path.c_str()););
 				cache[path] = parse_sections(path);
-				D(DBF_Settings, bug("%zu properties files cached\n", cache.size()););
-			}
 			return cache[path];
 		}
 	}
@@ -197,8 +190,6 @@ namespace
 
 	static void collect (std::string const& directory, std::string const& path, scope::scope_t const& scope, std::function<void(section_t::assignment_t const& assignment, section_t const& section)> filter)
 	{
-		D(DBF_Settings, bug("%s, %s, %s\n", directory.c_str(), path.c_str(), to_s(scope).c_str()););
-
 		static std::mutex mutex;
 		std::lock_guard<std::mutex> lock(mutex);
 		sections(NULL_STR); // clear cache if too big

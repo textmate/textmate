@@ -9,9 +9,6 @@
 #include <regexp/format_string.h>
 #include <cf/cf.h>
 
-OAK_DEBUG_VAR(IO_Path);
-OAK_DEBUG_VAR(IO_AuthIO);
-
 namespace path
 {
 	// ==============================
@@ -733,7 +730,6 @@ namespace path
 
 	bool make_dir (std::string const& path)
 	{
-		D(DBF_IO_Path, bug("%s\n", path.c_str()););
 		if(path != NULL_STR && !exists(path))
 		{
 			make_dir(parent(path));

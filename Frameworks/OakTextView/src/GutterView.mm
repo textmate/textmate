@@ -11,8 +11,6 @@
 #import <oak/debug.h>
 #import <oak/oak.h>
 
-OAK_DEBUG_VAR(GutterView);
-
 NSString* GVColumnDataSourceDidChange   = @"GVColumnDataSourceDidChange";
 NSString* GVLineNumbersColumnIdentifier = @"lineNumbers";
 
@@ -85,7 +83,6 @@ struct data_source_t
 
 - (void)updateTrackingAreas
 {
-	D(DBF_GutterView, bug("\n"););
 	[super updateTrackingAreas];
 	[self setupTrackingRects];
 }
@@ -104,7 +101,6 @@ struct data_source_t
 
 - (void)dealloc
 {
-	D(DBF_GutterView, bug("\n"););
 	for(auto const& it : columnDataSources)
 	{
 		if(it.datasource)
@@ -137,8 +133,6 @@ struct data_source_t
 
 - (void)setHighlightedRange:(std::string const&)str
 {
-	D(DBF_GutterView, bug("str: %s\n", str.c_str()););
-
 	std::vector<CGRect> oldBackgroundRects, oldBorderRects, refreshRects;
 	backgroundRects.swap(oldBackgroundRects);
 	borderRects.swap(oldBorderRects);
@@ -154,8 +148,6 @@ struct data_source_t
 
 - (void)setPartnerView:(NSView*)aView
 {
-	D(DBF_GutterView, bug("%s (%p)\n", [[[aView class] description] UTF8String], aView););
-
 	if(_partnerView)
 		[NSNotificationCenter.defaultCenter removeObserver:self];
 	if(_partnerView = aView)
@@ -433,7 +425,6 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 
 - (void)reloadData:(id)sender
 {
-	D(DBF_GutterView, bug("\n"););
 	[self updateSize];
 	[self setNeedsDisplay:YES];
 }
@@ -458,7 +449,6 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 
 - (void)mouseDown:(NSEvent*)event
 {
-	D(DBF_GutterView, bug("\n"););
 	NSPoint pos = [self convertPoint:[event locationInWindow] fromView:nil];
 	NSRect columnRect = [self columnRectForPoint:pos];
 	if(NSMouseInRect(pos, columnRect, [self isFlipped]))
@@ -523,14 +513,12 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 
 - (void)clearTrackingRects
 {
-	D(DBF_GutterView, bug("\n"););
 	for(NSTrackingArea* trackingArea in self.trackingAreas)
 		[self removeTrackingArea:trackingArea];
 }
 
 - (void)setupTrackingRects
 {
-	D(DBF_GutterView, bug("\n"););
 	[self clearTrackingRects];
 	[self addTrackingArea:[[NSTrackingArea alloc] initWithRect:[self visibleRect] options:NSTrackingMouseEnteredAndExited|NSTrackingMouseMoved|NSTrackingActiveInKeyWindow owner:self userInfo:nil]];
 }

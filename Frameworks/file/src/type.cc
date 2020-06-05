@@ -7,8 +7,6 @@
 #include <cf/cf.h>
 #include <oak/debug.h>
 
-OAK_DEBUG_VAR(File_UserBindings);
-
 // =====================
 // = File Type Support =
 // =====================

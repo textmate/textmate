@@ -16,8 +16,6 @@
 #include <text/newlines.h>
 #include <oak/debug.h>
 
-OAK_DEBUG_VAR(File_Charset);
-
 /*
 	TODO Assign UUID to open request and keep with content
 	TODO Harmonize line endings should do actual conversions (to make it reversable / not drop a single \r in a \n file)

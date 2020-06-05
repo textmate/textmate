@@ -5,8 +5,6 @@
 #include <oak/oak.h>
 #include <oak/debug.h>
 
-OAK_DEBUG_VAR(SCM_Git);
-
 static scm::status::type parse_status_flag (std::string const& str)
 {
 	static auto const StatusLetterConversionMap = new std::map<std::string, scm::status::type>
@@ -244,7 +242,6 @@ namespace scm
 
 		std::map<std::string, std::string> variables (std::string const& wcPath) const
 		{
-			D(DBF_SCM_Git, bug("%s\n", wcPath.c_str()););
 			std::map<std::string, std::string> res = { { "TM_SCM_NAME", name() } };
 			if(executable() != NULL_STR)
 			{
@@ -270,7 +267,6 @@ namespace scm
 
 		status_map_t status (std::string const& wcPath) const
 		{
-			D(DBF_SCM_Git, bug("%s\n", wcPath.c_str()););
 			if(executable() == NULL_STR)
 				return status_map_t();
 

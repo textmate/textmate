@@ -4,8 +4,6 @@
 #import <oak/debug.h>
 #import <ns/ns.h>
 
-OAK_DEBUG_VAR(OakSubmenuController);
-
 @interface OakProxyMenuItem : NSMenuItem
 @end
 
@@ -50,7 +48,6 @@ OAK_DEBUG_VAR(OakSubmenuController);
 	if(id delegate = [NSApp targetForAction:aSelector])
 			[NSApp sendAction:aSelector to:delegate from:aMenu];
 	else	[aMenu addItemWithTitle:@"no items" action:NULL keyEquivalent:@""];
-	D(DBF_OakSubmenuController, bug("%s\n", [[aMenu description] UTF8String]););
 }
 
 - (void)menuNeedsUpdate:(NSMenu*)aMenu
@@ -60,8 +57,6 @@ OAK_DEBUG_VAR(OakSubmenuController);
 
 - (BOOL)menuHasKeyEquivalent:(NSMenu*)aMenu forEvent:(NSEvent*)anEvent target:(id*)anId action:(SEL*)aSEL
 {
-	D(DBF_OakSubmenuController, bug("%s %s\n", to_s(anEvent).c_str(), [[aMenu description] UTF8String]););
-
 	if(![self isShowTabMenu:aMenu])
 		return NO;
 
@@ -75,7 +70,6 @@ OAK_DEBUG_VAR(OakSubmenuController);
 	{
 		if(eventString == ns::create_event_string(item.keyEquivalent, item.keyEquivalentModifierMask))
 		{
-			D(DBF_OakSubmenuController, bug("%s%ld\n", sel_getName(item.action), item.tag););
 			if(!self.proxyMenuItem)
 				self.proxyMenuItem = [OakProxyMenuItem new];
 

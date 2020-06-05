@@ -29,8 +29,6 @@
 		progress   (double, 0-1) Controls the value displayed in the determinate progress indicator.
 */
 
-OAK_DEBUG_VAR(HTMLOutput_JSBridge);
-
 @implementation HOJSBridge
 {
 	std::map<std::string, std::string> environment;
@@ -149,8 +147,6 @@ OAK_DEBUG_VAR(HTMLOutput_JSBridge);
 
 */
 
-OAK_DEBUG_VAR(HTMLOutput_JSShellCommand);
-
 @interface HOJSShellCommand ()
 {
 	OBJC_WATCH_LEAKS(HOJSShellCommand);
@@ -174,7 +170,6 @@ OAK_DEBUG_VAR(HTMLOutput_JSShellCommand);
 
 - (id)initShellCommand:(NSString*)aCommand withEnvironment:(const std::map<std::string, std::string>&)someEnvironment andExitHandler:(id)aHandler
 {
-	D(DBF_HTMLOutput_JSShellCommand, bug("run ‘%s’ with exit handler %s\n", to_s(aCommand).c_str(), BSTR(aHandler)););
 	if(self = [super init])
 	{
 		self.exitHandler = aHandler;
@@ -253,8 +248,6 @@ OAK_DEBUG_VAR(HTMLOutput_JSShellCommand);
 
 - (void)cancelCommand
 {
-	D(DBF_HTMLOutput_JSShellCommand, bug("%p\n", &process););
-
 	self.onreadoutput = nil;
 	self.onreaderror  = nil;
 	self.exitHandler  = nil;
@@ -267,7 +260,6 @@ OAK_DEBUG_VAR(HTMLOutput_JSShellCommand);
 
 - (void)writeToInput:(NSString*)someData
 {
-	D(DBF_HTMLOutput_JSShellCommand, bug("%zu bytes\n", strlen([someData UTF8String])););
 	if(process.in != -1)
 	{
 		char const* bytes = [someData UTF8String];
@@ -277,7 +269,6 @@ OAK_DEBUG_VAR(HTMLOutput_JSShellCommand);
 
 - (void)closeInput
 {
-	D(DBF_HTMLOutput_JSShellCommand, bug("\n"););
 	if(process.in != -1)
 	{
 		close(process.in);
@@ -287,7 +278,6 @@ OAK_DEBUG_VAR(HTMLOutput_JSShellCommand);
 
 - (void)dealloc
 {
-	D(DBF_HTMLOutput_JSShellCommand, bug("\n"););
 	[self cancelCommand];
 }
 
@@ -297,7 +287,6 @@ OAK_DEBUG_VAR(HTMLOutput_JSShellCommand);
 
 + (BOOL)isKeyExcludedFromWebScript:(char const*)name
 {
-	D(DBF_HTMLOutput_JSShellCommand, bug("%s\n", name););
 	static auto const PublicProperties = new std::set<std::string>{ "outputString", "errorString", "onreadoutput", "onreaderror" };
 	return PublicProperties->find(name) == PublicProperties->end();
 }
@@ -309,7 +298,6 @@ OAK_DEBUG_VAR(HTMLOutput_JSShellCommand);
 
 + (BOOL)isSelectorExcludedFromWebScript:(SEL)aSelector
 {
-	D(DBF_HTMLOutput_JSShellCommand, bug("%s\n", sel_getName(aSelector)););
 	static auto const PublicMethods = new std::set<SEL>{ @selector(cancelCommand), @selector(writeToInput:), @selector(closeInput) };
 	return PublicMethods->find(aSelector) == PublicMethods->end();
 }
@@ -332,21 +320,18 @@ OAK_DEBUG_VAR(HTMLOutput_JSShellCommand);
 
 - (void)setOnreadoutput:(id)aHandler
 {
-	D(DBF_HTMLOutput_JSShellCommand, bug("%s\n", [[aHandler description] UTF8String]););
 	if(onreadoutput = aHandler)
 		[onreadoutput callWebScriptMethod:@"call" withArguments:@[ onreadoutput, [self outputString] ]];
 }
 
 - (void)setOnreaderror:(id)aHandler
 {
-	D(DBF_HTMLOutput_JSShellCommand, bug("%s\n", [[aHandler description] UTF8String]););
 	if(onreaderror = aHandler)
 		[onreaderror callWebScriptMethod:@"call" withArguments:@[ onreaderror, [self errorString] ]];
 }
 
 - (void)finalizeForWebScript
 {
-	D(DBF_HTMLOutput_JSShellCommand, bug("\n"););
 	[self cancelCommand];
 }
 @end

@@ -9,8 +9,6 @@
 #include <cf/cf.h>
 #include <oak/debug.h>
 
-OAK_DEBUG_VAR(SCM_Svn);
-
 static scm::status::type parse_status_string (std::string const& status)
 {
 	// Based on subversion/svn/status.c (generate_status_desc)
@@ -108,7 +106,6 @@ namespace scm
 
 		std::map<std::string, std::string> variables (std::string const& wcPath) const
 		{
-			D(DBF_SCM_Svn, bug("%s\n", wcPath.c_str()););
 			std::map<std::string, std::string> res = { { "TM_SCM_NAME", name() } };
 			if(executable() != NULL_STR)
 			{
@@ -122,7 +119,6 @@ namespace scm
 
 		status_map_t status (std::string const& wcPath) const
 		{
-			D(DBF_SCM_Svn, bug("%s\n", wcPath.c_str()););
 			if(executable() == NULL_STR || _xslt_path == NULL_STR)
 				return status_map_t();
 

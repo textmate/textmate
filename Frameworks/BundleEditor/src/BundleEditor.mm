@@ -23,8 +23,6 @@
 #import <settings/settings.h>
 #import <oak/debug.h>
 
-OAK_DEBUG_VAR(BundleEditor);
-
 @class OakCommand;
 
 @interface BundleEditor () <OakTextViewDelegate>
@@ -148,8 +146,6 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 {
 	if(self = [super initWithWindowNibName:@"BundleEditor"])
 	{
-		D(DBF_BundleEditor, bug("\n"););
-
 		struct callback_t : bundles::callback_t
 		{
 			callback_t (BundleEditor* self) : self(self) { }

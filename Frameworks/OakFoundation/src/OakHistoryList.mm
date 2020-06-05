@@ -3,8 +3,6 @@
 #import "NSString Additions.h"
 #import <oak/debug.h>
 
-OAK_DEBUG_VAR(Find_HistoryList);
-
 static NSArray<NSString*>* SplitKeyPath (NSString* keyPath)
 {
 	NSRange r = [keyPath rangeOfString:@"."];
@@ -47,7 +45,6 @@ static id RetrieveObjectAtKeyPath (NSString* keyPath)
 @implementation OakHistoryList
 - (instancetype)initWithName:(NSString*)defaultsName stackSize:(NSUInteger)size
 {
-	D(DBF_Find_HistoryList, bug("Creating list with name %s and %zu items\n", [defaultsName UTF8String], (size_t)size););
 	if(self = [self init])
 	{
 		self.stackSize = size;
@@ -94,7 +91,6 @@ static id RetrieveObjectAtKeyPath (NSString* keyPath)
 
 - (void)addObject:(id)newItem;
 {
-	D(DBF_Find_HistoryList, bug("adding %s to list %s\n", [[newItem description] UTF8String], [self.name UTF8String]););
 	if(OakIsEmptyString(newItem) || [newItem isEqual:[self.list firstObject]])
 		return;
 

@@ -1,8 +1,6 @@
 #include "buffer.h"
 #include <oak/oak.h>
 
-OAK_DEBUG_VAR(Buffer_Pairs);
-
 namespace ng
 {
 	pairs_t::pairs_t () : _rank(0)
@@ -71,10 +69,8 @@ namespace ng
 	{
 		ASSERT(_pairs.find(index) != _pairs.end());
 		size_t rank = _pairs.find(index)->second;
-		D(DBF_Buffer_Pairs, bug("%zu, rank %zu\n", index, rank););
 		for(auto const& it : _pairs)
 		{
-			D(DBF_Buffer_Pairs, bug("%zd, rank %zu → %s\n", it.first, it.second, BSTR((it.second & ~1) == (rank & ~1) && it.second != rank)););
 			if((it.second & ~1) == (rank & ~1) && it.second != rank)
 				return it.first;
 		}

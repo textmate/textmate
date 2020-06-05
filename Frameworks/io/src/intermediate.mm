@@ -4,9 +4,6 @@
 #include <text/format.h>
 #include <oak/debug.h>
 
-OAK_DEBUG_VAR(IO_Intermediate);
-OAK_DEBUG_VAR(IO_Swap_File_Data);
-
 __attribute__ ((format (printf, 1, 2))) static std::string format_error (char const* format, ...)
 {
 	char* err = strerror(errno);
@@ -27,7 +24,6 @@ __attribute__ ((format (printf, 1, 2))) static std::string format_error (char co
 
 static bool swap_and_unlink (std::string const& src, std::string const& dst, std::string& errorMsg)
 {
-	D(DBF_IO_Swap_File_Data, bug("%s → %s\n", src.c_str(), dst.c_str()););
 	ASSERT_EQ(access(src.c_str(), F_OK), 0);
 	if(access(dst.c_str(), F_OK) != 0 && !path::make_dir(path::parent(dst)))
 	{
@@ -50,7 +46,6 @@ static bool swap_and_unlink (std::string const& src, std::string const& dst, std
 		errno = ENOTSUP;
 	}
 
-	D(DBF_IO_Swap_File_Data, bug("exchangedata() failed: %s\n", strerror(errno)););
 	if(errno == ENOTSUP || errno == ENOENT)
 	{
 		if(errno == ENOTSUP && access(dst.c_str(), F_OK) == 0)
@@ -72,7 +67,6 @@ static bool swap_and_unlink (std::string const& src, std::string const& dst, std
 		if(::rename(src.c_str(), dst.c_str()) == 0)
 			return true;
 		errorMsg = format_error("rename(\"%s\", \"%s\")", src.c_str(), dst.c_str());
-		D(DBF_IO_Swap_File_Data, bug("rename() failed: %s\n", strerror(errno)););
 	}
 
 	if(errno == EXDEV)
@@ -86,7 +80,6 @@ static bool swap_and_unlink (std::string const& src, std::string const& dst, std
 			return res;
 		}
 		errorMsg = format_error("copyfile(\"%s\", \"%s\", nullptr, COPYFILE_DATA|COPYFILE_MOVE)", src.c_str(), dst.c_str());
-		D(DBF_IO_Swap_File_Data, bug("copyfile() failed: %s\n", strerror(errno)););
 	}
 
 	return false;
@@ -167,7 +160,6 @@ namespace path
 	{
 		atomic_strategy_t (std::string const& dest) : _resolved(path::resolve_head(dest)), _intermediate(create_path(_resolved))
 		{
-			D(DBF_IO_Intermediate, bug("%s → %s → %s\n", dest.c_str(), _resolved.c_str(), _intermediate.c_str()););
 		}
 
 		char const* setup (std::string* errorMsg)
@@ -177,7 +169,6 @@ namespace path
 
 		bool commit (std::string* errorMsg)
 		{
-			D(DBF_IO_Intermediate, bug("%s ⇔ %s (swap: %s)\n", _resolved.c_str(), _intermediate.c_str(), BSTR(_intermediate != _resolved)););
 			return _intermediate == _resolved ? true : swap_and_unlink(_intermediate, _resolved, *errorMsg);
 		}
 

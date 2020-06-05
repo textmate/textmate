@@ -2,8 +2,6 @@
 #include "case.h"
 #include <oak/debug.h>
 
-OAK_DEBUG_VAR(Ranker);
-
 static bool is_subset (std::string const& needle, std::string const& haystack)
 {
 	std::string::size_type n = 0, m = 0;
@@ -13,7 +11,6 @@ static bool is_subset (std::string const& needle, std::string const& haystack)
 			++n;
 		++m;
 	}
-	D(DBF_Ranker, bug("‘%s’ ⊂ ‘%s’: %s\n", needle.c_str(), haystack.c_str(), BSTR(n == needle.size())););
 	return n == needle.size();
 }
 
@@ -104,8 +101,6 @@ static double calculate_rank (std::string const& lhs, std::string const& rhs, st
 		}
 	}
 
-	D(DBF_Ranker, print_matrix(&matrix[0][0], n, m, lhs, rhs););
-
 	// =========================
 	// = Greedy walk of Matrix =
 	// =========================
@@ -190,7 +185,6 @@ static double calculate_rank (std::string const& lhs, std::string const& rhs, st
 	score += capitalsTouched / (double)totalCapitals / (4*denom);
 	score += n / (double)m / (8*denom);
 
-	D(DBF_Ranker, bug("‘%s’ ⊂ ‘%s’: %.3f\n", lhs.c_str(), rhs.c_str(), score););
 	return score;
 }
 

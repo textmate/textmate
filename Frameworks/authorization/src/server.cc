@@ -7,8 +7,6 @@
 #include <oak/debug.h>
 #include <oak/compat.h>
 
-OAK_DEBUG_VAR(File_Auth);
-
 static std::string auth_tool_source_path ()
 {
 	return oak::application_t::path("Contents/Resources/PrivilegedTool");
@@ -16,7 +14,6 @@ static std::string auth_tool_source_path ()
 
 static bool install_auth_tool (osx::authorization_t const& auth)
 {
-	D(DBF_File_Auth, bug("\n"););
 	bool res = false;
 
 	std::string const toolPath = auth_tool_source_path();
@@ -84,11 +81,8 @@ connection_t connect_to_auth_server (osx::authorization_t const& auth, bool retr
 				std::string server;
 				int major, minor;
 				res >> server >> major >> minor;
-				D(DBF_File_Auth, bug("connected: %s %d.%d\n", server.c_str(), major, minor););
-
 				if(major != kAuthServerMajor)
 				{
-					D(DBF_File_Auth, bug("wrong version, wants %d.%d\n", kAuthServerMajor, kAuthServerMinor););
 					res << "quit" << "legacy" << "legacy" << "legacy";
 
 					if(retry || !install_auth_tool(auth))

@@ -17,9 +17,6 @@
 #import <io/events.h>
 #import <oak/debug.h>
 
-OAK_DEBUG_VAR(BundlesManager);
-OAK_DEBUG_VAR(BundlesManager_FSEvents);
-
 NSString* const kUserDefaultsDisableBundleUpdatesKey       = @"disableBundleUpdates";
 NSString* const kUserDefaultsLastBundleUpdateCheckKey      = @"lastBundleUpdateCheck";
 NSString* const kUserDefaultsBundleUpdateFrequencyKey      = @"bundleUpdateFrequency";
@@ -84,7 +81,6 @@ static NSString* SafeBasename (NSString* name)
 
 - (void)applicationWillTerminate:(NSNotification*)aNotification
 {
-	D(DBF_BundlesManager, bug("\n"););
 	if(self.needsSaveBundlesIndex)
 		[self saveBundlesIndex:self];
 }
@@ -316,7 +312,6 @@ static NSString* SafeBasename (NSString* name)
 
 - (void)createBundlesIndex:(id)sender
 {
-	D(DBF_BundlesManager, bug("%s\n", BSTR(_needsCreateBundlesIndex)););
 	if(_needsCreateBundlesIndex == NO)
 		return;
 	_needsCreateBundlesIndex = NO;
@@ -332,7 +327,6 @@ static NSString* SafeBasename (NSString* name)
 
 - (void)saveBundlesIndex:(id)sender
 {
-	D(DBF_BundlesManager, bug("\n"););
 	cache.cleanup(bundlesPaths);
 	if(cache.dirty())
 	{
@@ -344,14 +338,12 @@ static NSString* SafeBasename (NSString* name)
 
 - (void)setNeedsCreateBundlesIndex:(BOOL)flag
 {
-	D(DBF_BundlesManager, bug("%s\n", BSTR(flag)););
 	if(_needsCreateBundlesIndex != flag && (_needsCreateBundlesIndex = flag))
 		[self performSelector:@selector(createBundlesIndex:) withObject:self afterDelay:0];
 }
 
 - (void)setNeedsSaveBundlesIndex:(BOOL)flag
 {
-	D(DBF_BundlesManager, bug("%s\n", BSTR(flag)););
 	if(_needsSaveBundlesIndex != flag && (_needsSaveBundlesIndex = flag))
 		[self performSelector:@selector(saveBundlesIndex:) withObject:self afterDelay:5];
 }
@@ -368,13 +360,11 @@ static NSString* SafeBasename (NSString* name)
 	{
 		void set_replaying_history (bool flag, std::string const& observedPath, uint64_t eventId)
 		{
-			D(DBF_BundlesManager_FSEvents, bug("%s (observing ‘%s’)\n", BSTR(flag), observedPath.c_str()););
 			[BundlesManager.sharedInstance setEventId:eventId forPath:[NSString stringWithCxxString:observedPath]];
 		}
 
 		void did_change (std::string const& path, std::string const& observedPath, uint64_t eventId, bool recursive)
 		{
-			D(DBF_BundlesManager_FSEvents, bug("%s (observing ‘%s’)\n", path.c_str(), observedPath.c_str()););
 			[BundlesManager.sharedInstance reloadPath:[NSString stringWithCxxString:path] recursive:recursive];
 			[BundlesManager.sharedInstance setEventId:eventId forPath:[NSString stringWithCxxString:observedPath]];
 		}
@@ -390,28 +380,21 @@ static NSString* SafeBasename (NSString* name)
 
 	for(auto path : pathsRemoved)
 	{
-		D(DBF_BundlesManager_FSEvents, bug("unwatch ‘%s’\n", path.c_str()););
 		fs::unwatch(path, &callback);
 	}
 
 	for(auto path : pathsAdded)
 	{
-		D(DBF_BundlesManager_FSEvents, bug("watch ‘%s’\n", path.c_str()););
 		fs::watch(path, &callback, cache.event_id_for_path(path) ?: FSEventsGetCurrentEventId(), 1);
 	}
 }
 
 - (void)erasePath:(NSString*)aPath
 {
-	D(DBF_BundlesManager, bug("%s\n", [aPath UTF8String]););
 	if(cache.erase(to_s(aPath)))
 	{
 		self.needsCreateBundlesIndex = YES;
 		self.needsSaveBundlesIndex   = YES;
-	}
-	else
-	{
-		D(DBF_BundlesManager, bug("no changes\n"););
 	}
 }
 
@@ -422,15 +405,10 @@ static NSString* SafeBasename (NSString* name)
 
 - (void)reloadPath:(NSString*)aPath recursive:(BOOL)flag
 {
-	D(DBF_BundlesManager, bug("%s\n", [aPath UTF8String]););
 	if(cache.reload(to_s(aPath), flag))
 	{
 		self.needsCreateBundlesIndex = YES;
 		self.needsSaveBundlesIndex   = YES;
-	}
-	else
-	{
-		D(DBF_BundlesManager, bug("no changes\n"););
 	}
 }
 

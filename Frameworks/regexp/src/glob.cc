@@ -5,9 +5,6 @@
 #include <oak/oak.h>
 #include <oak/debug.h>
 
-OAK_DEBUG_VAR(Glob);
-OAK_DEBUG_VAR(Glob_Parser);
-
 namespace path
 {
 	std::string glob_t::escape (std::string const& src)
@@ -19,13 +16,11 @@ namespace path
 	{
 		std::string ptrn = convert_glob_to_regexp(glob, matchDotFiles);
 		_compiled = regexp::pattern_t(ptrn, caseSensitive ? ONIG_OPTION_NONE : ONIG_OPTION_IGNORECASE);
-		D(DBF_Glob, bug("%s → %s\n", glob.c_str(), ptrn.c_str()););
 	}
 
 	bool glob_t::does_match (std::string const& filename) const
 	{
 		bool res = (bool)regexp::search(_compiled, filename);
-		D(DBF_Glob, bug("%s → %s\n", filename.c_str(), BSTR(res)););
 		return res;
 	}
 

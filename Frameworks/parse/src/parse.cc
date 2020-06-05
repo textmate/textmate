@@ -6,9 +6,6 @@
 #include <text/utf8.h>
 #include <oak/oak.h>
 
-OAK_DEBUG_VAR(Parser);
-OAK_DEBUG_VAR(Parser_Flow);
-
 static size_t const kParserMaxLineSize = 4096;
 
 namespace
@@ -37,13 +34,10 @@ namespace
 
 		scope::scope_t update (scope::scope_t scope, std::map<size_t, scope::scope_t>& out) const
 		{
-			D(DBF_Parser, bug("%s\n", to_s(scope).c_str()););
-
 			size_t pos = 0;
 
 			for(auto const& pair : map)
 			{
-				D(DBF_Parser, bug("%3zu: %c%s\n", pair.first, pair.second.add ? '+' : '-', pair.second.scope.c_str()););
 				if(pos != pair.first)
 				{
 					out.emplace(pos, scope);
@@ -65,7 +59,6 @@ namespace
 						std::vector<std::string> stack;
 						while(scope.back() != pair.second.scope)
 						{
-							D(DBF_Parser, bug("%s != %s\n", scope.back().c_str(), pair.second.scope.c_str()););
 							stack.emplace_back(scope.back());
 							scope.pop_scope();
 						}
@@ -74,7 +67,6 @@ namespace
 							scope.push_scope(*it);
 					}
 				}
-				D(DBF_Parser, bug("→ %s\n", to_s(scope).c_str()););
 			}
 
 			out.emplace(pos, scope);
@@ -107,7 +99,6 @@ namespace parse
 	static bool pattern_is_format_string (std::string const& ptrn)
 	{
 		bool res = oak::contains(ptrn.begin(), ptrn.end(), '$');
-		D(DBF_Parser, bug("%s: %s\n", ptrn.c_str(), BSTR(res)););
 		return res;
 	}
 
@@ -126,20 +117,13 @@ namespace parse
 	template <typename _OutputIter>
 	_OutputIter escape_regexp (char const* it, char const* last, _OutputIter out)
 	{
-		DB(std::string tmp);
-		DB(std::string org(it, last));
 		static char const* special = "\\|([{}]).?*+^$";
 		while(it != last)
 		{
 			if(strchr(special, *it))
-			{
-				DB(tmp += '\\');
 				*out++ = '\\';
-			}
-			DB(tmp += *it);
 			*out++ = *it++;
 		}
-		D(DBF_Parser, bug("%s → %s\n", org.c_str(), tmp.c_str()););
 		return out;
 	}
 
@@ -163,7 +147,6 @@ namespace parse
 			if(!(escape = !escape && it == '\\'))
 				res += it;
 		}
-		D(DBF_Parser, bug("%s → %s\n", ptrn.c_str(), res.c_str()););
 		return res;
 	}
 
@@ -240,7 +223,6 @@ namespace parse
 
 			if(!rule->children.empty())
 			{
-				D(DBF_Parser, bug("re-parse: ‘%.*s’ (range %zu-%zu)\n", (int)(to - from), m.buffer() + from, from, to););
 				auto stack = std::make_shared<parse::stack_t>(rule.get(), scope);
 				stack->anchor = from;
 
@@ -298,7 +280,6 @@ namespace parse
 
 	static void collect_injections (stack_ptr const& stack, scope::context_t const& scope, std::vector<rule_t*> const& groups, std::vector<rule_t*>& res)
 	{
-		D(DBF_Parser_Flow, bug("%s\n", to_s(scope).c_str()););
 		for(stack_ptr node = stack; node; node = node->parent)
 		{
 			for(auto const& pair : node->rule->injections)
@@ -315,7 +296,6 @@ namespace parse
 
 			for(auto const& pair : rule->injections)
 			{
-				D(DBF_Parser_Flow, bug("selector: ‘%s’ → %s\n", to_s(pair.first).c_str(), BSTR(pair.first.does_match(scope))););
 				if(pair.first.does_match(scope))
 					collect_rule(pair.second.get(), res, nullptr);
 			}
@@ -369,7 +349,6 @@ namespace parse
 
 		if(stack->end_pattern)
 		{
-			D(DBF_Parser, bug("end pattern: %s\n", to_s(stack->end_pattern).c_str()););
 			if(regexp::match_t const& match = regexp::search(stack->end_pattern, first, last, first + i, last, options))
 				res.emplace(stack->rule, match, stack->apply_end_last ? ++rank : endPatternRank, true);
 		}
@@ -388,8 +367,6 @@ namespace parse
 
 	static stack_ptr parse (char const* first, char const* last, stack_ptr stack, scopes_t& scopes, bool firstLine, size_t i)
 	{
-		D(DBF_Parser_Flow, bug("%.*s", (int)(last - first), first););
-
 		// ==============================
 		// = apply the ‘while’ patterns =
 		// ==============================
@@ -405,13 +382,10 @@ namespace parse
 		}
 
 		scope::scope_t scope = while_rules.empty() ? stack->scope : while_rules.back()->parent->scope;
-		D(DBF_Parser, bug("%s, offset %zu, %zu while rules\n", to_s(scope).c_str(), i, while_rules.size()););
 		riterate(it, while_rules)
 		{
 			if(regexp::match_t const& m = regexp::search((*it)->while_pattern, first, last, first + i))
 			{
-				D(DBF_Parser_Flow, bug("while match %zu-%zu\n", m.begin(), m.end()););
-
 				rule_t const* rule = (*it)->rule;
 				if(rule->scope_string != NULL_STR)
 				{
@@ -447,15 +421,8 @@ namespace parse
 		std::map<size_t, regexp::match_t> match_cache;
 		collect_rules(first, last, i, firstLine, stack, rules, match_cache);
 
-		D(DBF_Parser, bug("%zu rules (out of %zu), parse: %.*s", rules.size(), stack->rule->children.size(), (int)(last - first - i), first + i););
 		while(!rules.empty())
 		{
-			DB(
-				D(DBF_Parser, bug("offset: %zu\n", i););
-				for(auto const& it : rules)
-					D(DBF_Parser, bug("\t%zu-%zu, %s\n", it.match.begin(), it.match.end(), to_s(it.rule->match_pattern).c_str()););
-			)
-
 			ranked_match_t m = *rules.begin();
 			rules.erase(rules.begin());
 
@@ -468,7 +435,6 @@ namespace parse
 			}
 
 			i = m.match.end();
-			D(DBF_Parser_Flow, bug("match %2zu-%2zu: %s\n", m.match.begin(), m.match.end(), m.rule->scope_string != NULL_STR ? m.rule->scope_string.c_str() : "(untitled)"););
 
 			rule_t* rule = m.rule;
 			if(m.is_end_pattern)
@@ -483,7 +449,6 @@ namespace parse
 
 				stack = stack->parent;
 				scope = stack->scope;
-				D(DBF_Parser_Flow, bug("leaving, new scope %s\n", to_s(scope).c_str()););
 
 				if(nothingMatched) // we left a begin/end rule but haven’t parsed any bytes, so we’re destined to repeat this mistake
 				{
@@ -529,8 +494,6 @@ namespace parse
 					stack->while_pattern = expand_back_references(rule->while_string, m.match);
 				if(!rule->end_pattern && rule->end_string != NULL_STR)
 					stack->end_pattern = expand_back_references(rule->end_string, m.match);
-
-				D(DBF_Parser_Flow, bug("descending, new scope %s\n", to_s(scope).c_str()););
 			}
 			else // regular match-rule
 			{
@@ -555,11 +518,8 @@ namespace parse
 				continue; // no context change, so skip finding rules for this context
 			}
 
-			D(DBF_Parser, bug("%zu rules before collecting\n", rules.size()););
 			collect_rules(first, last, i, firstLine, stack, rules, match_cache);
-			D(DBF_Parser, bug("%zu rules after collecting\n", rules.size()););
 		}
-		D(DBF_Parser_Flow, bug("line done (%zu rules)\n", rules.size()););
 		stack->anchor = first + stack->anchor == last ? 0 : SIZE_T_MAX;
 		return stack;
 	}

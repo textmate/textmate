@@ -6,8 +6,6 @@
 #import <ns/ns.h>
 #import <oak/debug.h>
 
-OAK_DEBUG_VAR(PlugInController);
-
 static NSInteger const kPlugInAPIVersion = 2;
 static NSString* const kUserDefaultsDisabledPlugInsKey = @"disabledPlugIns";
 
@@ -44,7 +42,6 @@ static id CreateInstanceOfPlugInClass (Class cl, TMPlugInController* controller)
 {
 	if(self = [super init])
 	{
-		D(DBF_PlugInController, bug("\n"););
 		self.loadedPlugIns = [NSMutableDictionary dictionary];
 	}
 	return self;
@@ -132,7 +129,6 @@ static id CreateInstanceOfPlugInClass (Class cl, TMPlugInController* controller)
 
 	for(NSString* path in paths)
 	{
-		D(DBF_PlugInController, bug("scan %s\n", [path UTF8String]););
 		for(NSString* plugInName in [NSFileManager.defaultManager contentsOfDirectoryAtPath:path error:nil])
 		{
 			if([[[plugInName pathExtension] lowercaseString] isEqualToString:@"tmplugin"])

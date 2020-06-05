@@ -1,8 +1,6 @@
 #import "HOAutoScroll.h"
 #import <oak/debug.h>
 
-OAK_DEBUG_VAR(HTMLOutput_AutoScroll);
-
 @interface HOAutoScroll ()
 @property (nonatomic) NSRect lastFrame;
 @property (nonatomic) NSRect lastVisibleRect;
@@ -18,13 +16,11 @@ OAK_DEBUG_VAR(HTMLOutput_AutoScroll);
 
 - (void)dealloc
 {
-	D(DBF_HTMLOutput_AutoScroll, bug("\n"););
 	self.webFrame = nil;
 }
 
 - (void)setWebFrame:(WebFrameView*)aWebFrame
 {
-	D(DBF_HTMLOutput_AutoScroll, bug("%s\n", [aWebFrame description].UTF8String););
 	if(aWebFrame == _webFrame)
 		return;
 
@@ -49,7 +45,6 @@ OAK_DEBUG_VAR(HTMLOutput_AutoScroll);
 	if(clipView != [aNotification object])
 		return;
 
-	D(DBF_HTMLOutput_AutoScroll, bug("bounds changed: %s → %s\n", NSStringFromRect(_lastVisibleRect).UTF8String, NSStringFromRect([[clipView documentView] visibleRect]).UTF8String););
 	_lastVisibleRect = [[clipView documentView] visibleRect];
 }
 
@@ -61,10 +56,8 @@ OAK_DEBUG_VAR(HTMLOutput_AutoScroll);
 
 	if(view == [_webFrame documentView])
 	{
-		D(DBF_HTMLOutput_AutoScroll, bug("frame changed: %s → %s\n", NSStringFromRect(_lastFrame).UTF8String, NSStringFromRect([view frame]).UTF8String););
 		if(NSMaxY(_lastVisibleRect) >= NSMaxY(_lastFrame))
 		{
-			D(DBF_HTMLOutput_AutoScroll, bug("scroll to bottom\n"););
 			[self scrollViewToBottom:view];
 			_lastVisibleRect = [view visibleRect];
 		}
@@ -73,12 +66,8 @@ OAK_DEBUG_VAR(HTMLOutput_AutoScroll);
 
 	if(view == _webFrame)
 	{
-		D(DBF_HTMLOutput_AutoScroll, bug("vislble rect changed: %s → %s\n", NSStringFromRect(_lastVisibleRect).UTF8String, NSStringFromRect([[_webFrame documentView] visibleRect]).UTF8String););
 		if(NSMaxY(_lastVisibleRect) >= NSMaxY(_lastFrame))
-		{
-			D(DBF_HTMLOutput_AutoScroll, bug("scroll to bottom\n"););
 			[self scrollViewToBottom:[_webFrame documentView]];
-		}
 	}
 }
 @end

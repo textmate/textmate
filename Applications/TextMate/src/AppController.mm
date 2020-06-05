@@ -38,8 +38,6 @@
 #import <scm/scm.h>
 #import <text/types.h>
 
-OAK_DEBUG_VAR(AppController);
-
 void OakOpenDocuments (NSArray* paths, BOOL treatFilePackageAsFolder)
 {
 	NSArray* const bundleExtensions = @[ @"tmbundle", @"tmcommand", @"tmdragcommand", @"tmlanguage", @"tmmacro", @"tmpreferences", @"tmsnippet", @"tmtheme" ];
@@ -486,7 +484,6 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 - (void)applicationWillFinishLaunching:(NSNotification*)aNotification
 {
-	D(DBF_AppController, bug("\n"););
 	if(NSMenu* menu = [self mainMenu])
 		NSApp.mainMenu = menu;
 
@@ -583,14 +580,11 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 - (BOOL)applicationShouldOpenUntitledFile:(NSApplication*)anApplication
 {
-	D(DBF_AppController, bug("\n"););
 	return self.didFinishLaunching;
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification*)aNotification
 {
-	D(DBF_AppController, bug("\n"););
-
 	NSWindow.allowsAutomaticWindowTabbing = NO;
 
 	if([NSApp respondsToSelector:@selector(setAutomaticCustomizeTouchBarMenuItemEnabled)]) // MAC_OS_X_VERSION_10_12_1
@@ -692,7 +686,6 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 - (IBAction)orderFrontFindPanel:(id)sender
 {
-	D(DBF_AppController, bug("\n"););
 	Find* find = Find.sharedInstance;
 	NSInteger mode = [sender respondsToSelector:@selector(tag)] ? [sender tag] : FFSearchTargetDocument;
 	switch(mode)
@@ -707,7 +700,6 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 - (IBAction)orderFrontGoToLinePanel:(id)sender;
 {
-	D(DBF_AppController, bug("\n"););
 	if(id textView = [NSApp targetForAction:@selector(selectionString)])
 		[goToLineTextField setStringValue:[textView selectionString]];
 	[goToLinePanel makeKeyAndOrderFront:self];
@@ -715,7 +707,6 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 - (IBAction)performGoToLine:(id)sender
 {
-	D(DBF_AppController, bug("\n"););
 	[goToLinePanel orderOut:self];
 	[NSApp sendAction:@selector(selectAndCenter:) to:nil from:[goToLineTextField stringValue]];
 }
@@ -727,13 +718,11 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 - (IBAction)showPreferences:(id)sender
 {
-	D(DBF_AppController, bug("\n"););
 	[Preferences.sharedInstance showWindow:self];
 }
 
 - (IBAction)showBundleEditor:(id)sender
 {
-	D(DBF_AppController, bug("\n"););
 	[BundleEditor.sharedInstance showWindow:self];
 }
 

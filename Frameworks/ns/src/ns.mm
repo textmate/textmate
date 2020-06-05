@@ -4,8 +4,6 @@
 #import <oak/debug.h>
 #import <text/utf8.h>
 
-OAK_DEBUG_VAR(NSEvent);
-
 NSString* to_ns (std::string const& str)
 {
 	return [NSString stringWithCxxString:str];
@@ -244,8 +242,6 @@ std::string to_s (NSEvent* anEvent, bool preserveNumPadFlag)
 	std::string const keyStringCommand = string_for(key, kCGEventFlagMaskCommand);
 	if((flags & kCGEventFlagMaskCommand) && keyStringNoFlags != keyStringCommand)
 	{
-		D(DBF_NSEvent, bug("command (⌘) changes key\n"););
-
 		newFlags |= flags & kCGEventFlagMaskAlternate;
 		flags    &= ~kCGEventFlagMaskAlternate;
 
@@ -253,12 +249,10 @@ std::string to_s (NSEvent* anEvent, bool preserveNumPadFlag)
 		{
 			if(keyStringCommand.size() == 1 && isalpha(keyStringCommand[0]))
 			{
-				D(DBF_NSEvent, bug("manually upcase key\n"););
 				keyString = std::string(1, toupper(keyStringCommand[0]));
 			}
 			else
 			{
-				D(DBF_NSEvent, bug("shift (⇧) is literal\n"););
 				newFlags |= kCGEventFlagMaskShift;
 			}
 		}
@@ -278,7 +272,6 @@ std::string to_s (NSEvent* anEvent, bool preserveNumPadFlag)
 				std::string const keyStringAlternate = string_for(key, flags & (kCGEventFlagMaskAlternate|kCGEventFlagMaskShift));
 				if(!is_ascii(keyStringAlternate) || keyStringNoFlags == keyStringAlternate)
 				{
-					D(DBF_NSEvent, bug("option (⌥) is literal\n"););
 					newFlags |= kCGEventFlagMaskAlternate;
 					flags    &= ~kCGEventFlagMaskAlternate;
 				}
@@ -289,13 +282,11 @@ std::string to_s (NSEvent* anEvent, bool preserveNumPadFlag)
 				std::string const keyStringShift = string_for(key, flags & (kCGEventFlagMaskAlternate|kCGEventFlagMaskShift));
 				if(!is_ascii(keyStringShift) || keyStringNoFlags == keyStringShift)
 				{
-					D(DBF_NSEvent, bug("shift (⇧) is literal\n"););
 					newFlags |= kCGEventFlagMaskShift;
 					flags    &= ~kCGEventFlagMaskShift;
 				}
 				else
 				{
-					D(DBF_NSEvent, bug("use NSEvent’s uppercased version\n"););
 					keyString = keyStringShift;
 				}
 			}

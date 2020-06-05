@@ -2,8 +2,6 @@
 #import <OakFoundation/OakFoundation.h>
 #import <oak/debug.h>
 
-OAK_DEBUG_VAR(FilterList_Abbreviations);
-
 static NSString* const FCAbbreviationKey   = @"short";
 static NSString* const FCExpandedStringKey = @"long";
 
@@ -28,7 +26,6 @@ static NSString* const FCExpandedStringKey = @"long";
 	{
 		self.name     = aName;
 		self.bindings = [[NSUserDefaults.standardUserDefaults arrayForKey:self.name] mutableCopy] ?: [NSMutableArray new];
-		D(DBF_FilterList_Abbreviations, bug("%s\n", [[self.bindings description] UTF8String]););
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:NSApp];
 	}
 	return self;
@@ -42,7 +39,6 @@ static NSString* const FCExpandedStringKey = @"long";
 
 - (void)applicationWillTerminate:(NSNotification*)aNotification
 {
-	D(DBF_FilterList_Abbreviations, bug("%s\n", [[self.bindings description] UTF8String]););
 	if([self.bindings count] > 50)
 		[self.bindings setArray:[self.bindings subarrayWithRange:NSMakeRange(0, 50)]];
 	[NSUserDefaults.standardUserDefaults setObject:self.bindings forKey:self.name];
@@ -67,15 +63,12 @@ static NSString* const FCExpandedStringKey = @"long";
 			[prefixMatches addObject:path];
 	}
 
-	D(DBF_FilterList_Abbreviations, bug("%s, exact → %s, prefix → %s\n", [anAbbreviation UTF8String], [[exactMatches description] UTF8String], [[prefixMatches description] UTF8String]););
-
 	[exactMatches addObjectsFromArray:prefixMatches];
 	return exactMatches;
 }
 
 - (void)learnAbbreviation:(NSString*)anAbbreviation forString:(NSString*)aString
 {
-	D(DBF_FilterList_Abbreviations, bug("%s → %s\n", [anAbbreviation UTF8String], [aString UTF8String]););
 	if(OakIsEmptyString(anAbbreviation) || OakIsEmptyString(aString))
 		return;
 

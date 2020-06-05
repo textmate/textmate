@@ -4,8 +4,6 @@
 #include <io/io.h>
 #include <oak/debug.h>
 
-OAK_DEBUG_VAR(SCM_Hg);
-
 static scm::status::type parse_status_flag (char flag)
 {
 	static struct { scm::status::type constant; char flag; } const StatusLetterConversionMap[] =
@@ -71,7 +69,6 @@ namespace scm
 
 		status_map_t status (std::string const& wcPath) const
 		{
-			D(DBF_SCM_Hg, bug("%s\n", wcPath.c_str()););
 			if(executable() == NULL_STR)
 				return status_map_t();
 

@@ -4,9 +4,6 @@
 #include <text/parse.h>
 #include <oak/debug.h>
 
-OAK_DEBUG_VAR(Snippet);
-OAK_DEBUG_VAR(Snippet_Stack);
-
 namespace snippet
 {
 	snippet_t::snippet_t (std::string const& text, std::map<size_t, field_ptr> const& fields, std::multimap<size_t, field_ptr> const& mirrors, std::map<std::string, std::string> const& variables, std::string const& indent_string, text::indent_t const& indent) : text(text), fields(fields), mirrors(mirrors), variables(variables), indent_string(indent_string), indent_info(indent)
@@ -82,14 +79,11 @@ namespace snippet
 				continue;
 
 			std::string const& src = fields[node]->range.to_s(text);
-			D(DBF_Snippet, bug("update mirrors of %zu (%s)\n", node, src.c_str()););
-
 			foreach(mirror, mirrors.lower_bound(node), mirrors.upper_bound(node))
 			{
 				std::string str = mirror->second->transform(src, variables);
 				str = tabs_to_spaces(str, indent_info.create());
 				str = format_string::replace(str, regexp::pattern_t("(?<=\n)(?!$)"), indent_string);
-				D(DBF_Snippet, bug(" → %s\n", str.c_str()););
 				snippet::replace(mirror->second->range, str, text, fields, mirrors);
 			}
 		}
@@ -116,11 +110,8 @@ namespace snippet
 				if(offset <= pos->offset)
 					pos->offset += indent_string.size();
 			}
-			D(DBF_Snippet, bug("indent line: %s", buffer.substr(offset, pair->second - pair->first).c_str()););
 			buffer.insert(buffer.begin() + offset, indent_string.begin(), indent_string.end());
 		}
-
-		D(DBF_Snippet, bug("new snippet:\n%s\n", buffer.c_str()););
 	}
 
 	static void tabs_to_spaces (std::string& buffer, std::string const& tabString, std::map<size_t, field_ptr>& fields, std::multimap<size_t, field_ptr>& mirrors)
@@ -155,8 +146,6 @@ namespace snippet
 		for(auto const& pos : positions)
 			pos->offset += (tabString.size() - 1) * std::distance(tabStops.begin(), std::lower_bound(tabStops.begin(), tabStops.end(), pos->offset));
 		buffer.swap(newBuffer);
-
-		D(DBF_Snippet, bug("new snippet:\n%s\n", buffer.c_str()););
 	}
 
 	void snippet_t::setup ()
@@ -211,7 +200,6 @@ namespace snippet
 		}
 
 		std::sort(updated.begin(), updated.end());
-		D(DBF_Snippet, for(auto const& it : updated) bug("%2zu-%2zu: %s\n", it.first.from.offset, it.first.to.offset, it.second.c_str()););
 		return updated;
 	}
 
@@ -236,19 +224,13 @@ namespace snippet
 		iterate(mirror, mirrors)
 		{
 			if(currentField.contains(mirror->second->range))
-			{
-				D(DBF_Snippet, bug("remove mirror: %zu (%zu-%zu, rank %zu-%zu)\n", mirror->first, mirror->second->range.from.offset, mirror->second->range.to.offset, mirror->second->range.from.rank, mirror->second->range.to.rank););
 				mirrors_to_remove.push_back(mirror);
-			}
 		}
 
 		for(auto const& mirror : mirrors_to_remove)
 			mirrors.erase(mirror);
 
-		D(DBF_Snippet, bug("replace range %zu (%zu) - %zu (%zu) with ‘%s’\n", currentField.from.offset, currentField.from.rank, currentField.to.offset, currentField.to.rank, str.c_str()););
 		replacements_t const& res = replace_helper(current_field, range, str);
-		D(DBF_Snippet, bug("new current field: %zu (%zu) - %zu (%zu)\n", currentField.from.offset, currentField.from.rank, currentField.to.offset, currentField.to.rank););
-
 		std::vector<size_t> fields_to_remove;
 		for(auto const& field : fields)
 		{
@@ -258,13 +240,9 @@ namespace snippet
 
 		for(auto const& field : fields_to_remove)
 		{
-			D(DBF_Snippet, bug("remove placeholder: %zu\n", field););
 			fields.erase(fields.find(field));
 			mirrors.erase(mirrors.lower_bound(field), mirrors.upper_bound(field));
 		}
-
-		D(DBF_Snippet, bug("Fields:\n");  for(auto const& field : fields)   bug("\t%zu) %zu (%zu) - %zu (%zu)\n", field.first,  field.second->range.from.offset,  field.second->range.from.rank,  field.second->range.to.offset,  field.second->range.to.rank););
-		D(DBF_Snippet, bug("Mirrors:\n"); for(auto const& mirror : mirrors) bug("\t%zu) %zu (%zu) - %zu (%zu)\n", mirror.first, mirror.second->range.from.offset, mirror.second->range.from.rank, mirror.second->range.to.offset, mirror.second->range.to.rank););
 
 		return res;
 	}
@@ -275,12 +253,8 @@ namespace snippet
 
 	void stack_t::push (snippet::snippet_t const& snippet, snippet::range_t const& range)
 	{
-		D(DBF_Snippet_Stack, bug("%s — %zu-%zu\n", snippet.text.c_str(), range.from.offset, range.to.offset););
 		if(!records.empty())
-		{
 			records.back().caret = range.from.offset - current().from.offset;
-			D(DBF_Snippet_Stack, bug("field offset for parent snippet: %zu\n", records.back().caret););
-		}
 		records.push_back(snippet);
 	}
 
@@ -296,8 +270,6 @@ namespace snippet
 		std::vector<size_t> offsets(1, 0);
 		for(auto& record : records)
 			offsets.push_back(offsets.back() + record.snippet.fields[record.snippet.current_field]->range.from.offset + record.caret);
-
-		D(DBF_Snippet_Stack, bug("offsets:\n"); for(auto const& offset : offsets) bug("\t%zu\n", offset););
 
 		riterate(record, records)
 		{
@@ -339,7 +311,6 @@ namespace snippet
 		std::map<size_t, snippet::field_ptr>::const_iterator field = records.back().snippet.fields.find(records.back().snippet.current_field);
 		ASSERT(field != records.back().snippet.fields.end());
 		snippet::range_t range = field->second->range;
-		D(DBF_Snippet_Stack, bug("%zu-%zu + %zu\n", range.from.offset, range.to.offset, offset););
 		return range + offset;
 	}
 
@@ -372,7 +343,6 @@ namespace snippet
 			pos.rank = current().from.rank+1;
 			if(current().contains(pos))
 				return;
-			D(DBF_Snippet_Stack, bug("%zu outside field %zu-%zu\n", pos.offset, current().from.offset, current().to.offset););
 			records.pop_back();
 		}
 	}

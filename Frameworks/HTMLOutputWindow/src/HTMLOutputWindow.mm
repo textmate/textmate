@@ -5,8 +5,6 @@
 #import <ns/ns.h>
 #import <oak/debug.h>
 
-OAK_DEBUG_VAR(HTMLOutputWindow);
-
 @interface HTMLOutputWindowController () <NSWindowDelegate>
 {
 	OBJC_WATCH_LEAKS(HTMLOutputWindowController);
@@ -52,7 +50,6 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 
 - (BOOL)windowShouldClose:(id)sender
 {
-	D(DBF_HTMLOutputWindow, bug("\n"););
 	if(!_htmlOutputView.isRunningCommand)
 		return YES;
 
@@ -73,7 +70,6 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 
 - (void)dealloc
 {
-	D(DBF_HTMLOutputWindow, bug("\n"););
 	[NSNotificationCenter.defaultCenter removeObserver:self];
 	self.window.delegate = nil;
 }

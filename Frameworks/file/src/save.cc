@@ -13,8 +13,6 @@
 #include <command/parser.h>
 #include <oak/debug.h>
 
-OAK_DEBUG_VAR(File_Save);
-
 namespace
 {
 	struct file_context_t : file::save_context_t
@@ -23,7 +21,6 @@ namespace
 
 		~file_context_t ()
 		{
-			D(DBF_File_Save, bug("\n"););
 			if(_state != kStateDone)
 			{
 				ASSERT(!_saved);
@@ -46,7 +43,6 @@ namespace
 
 		void proceed ()
 		{
-			D(DBF_File_Save, bug("state %d\n", _state););
 			_state = _next_state;
 			event_loop();
 		}
