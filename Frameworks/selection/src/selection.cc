@@ -1052,7 +1052,6 @@ namespace ng
 				scope::scope_t rightScope = buffer.scope(to, false).right;
 				if(leftScope == rightScope)
 				{
-					// D(DBF_TextView_Internal, bug("select both sides: %s\n", to_s(leftScope).c_str()););
 					from = extend_scope_left(buffer, from, leftScope);
 					to   = extend_scope_right(buffer, to, rightScope);
 				}
@@ -1061,13 +1060,7 @@ namespace ng
 					scope::scope_t innerLeftScope  = buffer.scope(from, false).right;
 					scope::scope_t innerRightScope = buffer.scope(to, false).left;
 
-					// D(DBF_TextView_Internal, bug("%s\n", to_s(leftScope).c_str()););
-					// D(DBF_TextView_Internal, bug("%s\n", to_s(innerLeftScope).c_str()););
-					// D(DBF_TextView_Internal, bug("%s\n", to_s(innerRightScope).c_str()););
-					// D(DBF_TextView_Internal, bug("%s\n", to_s(rightScope).c_str()););
-
 					scope::scope_t scope = shared_prefix(shared_prefix(leftScope, innerLeftScope), shared_prefix(rightScope, innerRightScope));
-					// D(DBF_TextView_Internal, bug("→ %s\n", to_s(scope).c_str()););
 
 					from = extend_scope_left(buffer, from, scope);
 					to   = extend_scope_right(buffer, to, scope);
@@ -1077,7 +1070,6 @@ namespace ng
 					scope::scope_t scope = leftScope;
 					for(leftScope.pop_scope(); leftScope != rightScope; leftScope.pop_scope())
 						scope = leftScope;
-					// D(DBF_TextView_Internal, bug("select left side: %s\n", to_s(scope).c_str()););
 					from = extend_scope_left(buffer, from, scope);
 				}
 				else if(rightScope.has_prefix(leftScope))
@@ -1085,7 +1077,6 @@ namespace ng
 					scope::scope_t scope = rightScope;
 					for(rightScope.pop_scope(); rightScope != leftScope; rightScope.pop_scope())
 						scope = rightScope;
-					// D(DBF_TextView_Internal, bug("select right side: %s\n", to_s(scope).c_str()););
 					to = extend_scope_right(buffer, to, scope);
 				}
 				else if(from == to && buffer.convert(to).column == 0)
@@ -1094,9 +1085,7 @@ namespace ng
 				}
 				else
 				{
-					// D(DBF_TextView_Internal, bug("intersection: %s\n           != %s\n", to_s(leftScope).c_str(), to_s(rightScope).c_str()););
 					scope::scope_t const& scope = shared_prefix(leftScope, rightScope);
-					// D(DBF_TextView_Internal, bug("→ %s\n", to_s(scope).c_str()););
 					from = extend_scope_left(buffer, from, scope);
 					to   = extend_scope_right(buffer, to, scope);
 				}
