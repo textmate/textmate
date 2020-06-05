@@ -10,8 +10,8 @@
 
 namespace command
 {
-	PUBLIC void fix_shebang (std::string* command);
-	PUBLIC std::string create_script_path (std::string const& command);
+	void fix_shebang (std::string* command);
+	std::string create_script_path (std::string const& command);
 
 	struct delegate_t;
 	struct runner_t;
@@ -19,7 +19,7 @@ namespace command
 	typedef std::shared_ptr<delegate_t>     delegate_ptr;
 	typedef std::shared_ptr<runner_t>       runner_ptr;
 
-	struct PUBLIC delegate_t : std::enable_shared_from_this<delegate_t>
+	struct delegate_t : std::enable_shared_from_this<delegate_t>
 	{
 		virtual ~delegate_t () { }
 
@@ -43,9 +43,9 @@ namespace command
 		virtual void done (runner_ptr runner)                                 { }
 	};
 
-	PUBLIC runner_ptr runner (bundle_command_t const& command, ng::buffer_api_t const& buffer, ng::ranges_t const& selection, std::map<std::string, std::string> const& environment, delegate_ptr delegate, std::string const& pwd = NULL_STR);
+	runner_ptr runner (bundle_command_t const& command, ng::buffer_api_t const& buffer, ng::ranges_t const& selection, std::map<std::string, std::string> const& environment, delegate_ptr delegate, std::string const& pwd = NULL_STR);
 
-	struct PUBLIC runner_t : std::enable_shared_from_this<runner_t>
+	struct runner_t : std::enable_shared_from_this<runner_t>
 	{
 		runner_t () = delete;
 		runner_t (bundle_command_t const& command, ng::buffer_api_t const& buffer, ng::ranges_t const& selection, std::map<std::string, std::string> const& environment, std::string const& pwd, delegate_ptr delegate);

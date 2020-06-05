@@ -3,8 +3,6 @@
 
 #include "authorization.h"
 #include "connection.h"
-#include <oak/misc.h>
-
-PUBLIC connection_t connect_to_auth_server (osx::authorization_t const& auth, bool retry = false);
+connection_t connect_to_auth_server (osx::authorization_t const& auth, bool retry = false);
 
 #endif /* end of include guard: AUTH_SERVER_H_G3FZ07F2 */

@@ -1,9 +1,7 @@
-#include <oak/misc.h>
-
 extern NSNotificationName const OakRolloverButtonMouseDidEnterNotification;
 extern NSNotificationName const OakRolloverButtonMouseDidLeaveNotification;
 
-PUBLIC @interface OakRolloverButton : NSButton
+@interface OakRolloverButton : NSButton
 @property (nonatomic) NSImage* regularImage;
 @property (nonatomic) NSImage* pressedImage;
 @property (nonatomic) NSImage* rolloverImage;

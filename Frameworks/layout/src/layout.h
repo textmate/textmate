@@ -6,8 +6,6 @@
 #include <selection/selection.h>
 #include <theme/theme.h>
 #include <oak/basic_tree.h>
-#include <oak/misc.h>
-
 namespace ct { struct metrics_t; struct line_t; };
 
 enum kRectsIncludeMode { kRectsIncludeAll, kRectsIncludeCarets, kRectsIncludeSelections };
@@ -16,7 +14,7 @@ namespace ng
 {
 	struct folds_t;
 
-	struct PUBLIC layout_t : layout_movement_t
+	struct layout_t : layout_movement_t
 	{
 		struct margin_t
 		{

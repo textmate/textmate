@@ -1,7 +1,6 @@
 #ifndef BUNDLES_ITEM_H_H2GEVOXK
 #define BUNDLES_ITEM_H_H2GEVOXK
 
-#include <oak/misc.h>
 #include <plist/plist.h>
 #include <scope/scope.h>
 
@@ -11,39 +10,39 @@ namespace bundles
 {
 	enum kind_t { kItemTypeCommand = 1, kItemTypeDragCommand = 2, kItemTypeGrammar = 4, kItemTypeMacro = 8, kItemTypeSettings = 16, kItemTypeSnippet = 32, kItemTypeProxy = 64, kItemTypeTheme = 128, kItemTypeBundle = 256, kItemTypeMenu = 512, kItemTypeMenuItemSeparator = 1024, kItemTypeUnknown = 2048 };
 
-	PUBLIC extern int kItemTypeMenuTypes;
-	PUBLIC extern int kItemTypeMost;
-	PUBLIC extern int kItemTypeAny;
+	extern int kItemTypeMenuTypes;
+	extern int kItemTypeMost;
+	extern int kItemTypeAny;
 
-	PUBLIC extern std::string const kFieldName;
-	PUBLIC extern std::string const kFieldUUID;
-	PUBLIC extern std::string const kFieldIsDisabled;
-	PUBLIC extern std::string const kFieldHideFromUser;
+	extern std::string const kFieldName;
+	extern std::string const kFieldUUID;
+	extern std::string const kFieldIsDisabled;
+	extern std::string const kFieldHideFromUser;
 
-	PUBLIC extern std::string const kFieldKeyEquivalent;
-	PUBLIC extern std::string const kFieldTabTrigger;
-	PUBLIC extern std::string const kFieldScopeSelector;
+	extern std::string const kFieldKeyEquivalent;
+	extern std::string const kFieldTabTrigger;
+	extern std::string const kFieldScopeSelector;
 
-	PUBLIC extern std::string const kFieldSemanticClass;
-	PUBLIC extern std::string const kFieldContentMatch;
-	PUBLIC extern std::string const kFieldDropExtension;
-	PUBLIC extern std::string const kFieldGrammarExtension;
-	PUBLIC extern std::string const kFieldGrammarFirstLineMatch;
-	PUBLIC extern std::string const kFieldGrammarScope;
-	PUBLIC extern std::string const kFieldGrammarInjectionSelector;
-	PUBLIC extern std::string const kFieldSettingName;
+	extern std::string const kFieldSemanticClass;
+	extern std::string const kFieldContentMatch;
+	extern std::string const kFieldDropExtension;
+	extern std::string const kFieldGrammarExtension;
+	extern std::string const kFieldGrammarFirstLineMatch;
+	extern std::string const kFieldGrammarScope;
+	extern std::string const kFieldGrammarInjectionSelector;
+	extern std::string const kFieldSettingName;
 
-	PUBLIC extern std::string const kFieldAny;
+	extern std::string const kFieldAny;
 
-	PUBLIC extern std::string const kFieldIsDelta;
-	PUBLIC extern std::string const kFieldIsDeleted;
-	PUBLIC extern std::string const kFieldRequiredItems;
-	PUBLIC extern oak::uuid_t const kSeparatorUUID;
+	extern std::string const kFieldIsDelta;
+	extern std::string const kFieldIsDeleted;
+	extern std::string const kFieldRequiredItems;
+	extern oak::uuid_t const kSeparatorUUID;
 
 	struct item_t;
 	typedef std::shared_ptr<item_t> item_ptr;
 
-	struct PUBLIC item_t
+	struct item_t
 	{
 		std::string const& name () const;
 		void set_name (std::string const& newName);

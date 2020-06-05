@@ -5,7 +5,7 @@
 
 namespace ng
 {
-	struct PUBLIC context_t
+	struct context_t
 	{
 		context_t (CGContextRef context, std::string const& invisibleMap = NULL_STR, CGImageRef spellingDot = nil, std::function<CGImageRef(double, double)> foldingDotsFactory = std::function<CGImageRef(double, double)>());
 		~context_t ();

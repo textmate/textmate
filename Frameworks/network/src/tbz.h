@@ -2,11 +2,9 @@
 #define NETWORK_TBZ_H_NEU56OWR
 
 #include <io/exec.h>
-#include <oak/misc.h>
-
 namespace network
 {
-	struct PUBLIC tbz_t
+	struct tbz_t
 	{
 		tbz_t (std::string const& dest);
 		~tbz_t ();

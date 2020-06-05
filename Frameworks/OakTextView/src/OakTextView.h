@@ -4,9 +4,9 @@
 #import <command/parser.h>
 #import <oak/debug.h>
 
-PUBLIC extern int32_t const NSWrapColumnWindowWidth;
-PUBLIC extern int32_t const NSWrapColumnAskUser;
-PUBLIC extern NSString* const kUserDefaultsWrapColumnPresetsKey;
+extern int32_t const NSWrapColumnWindowWidth;
+extern int32_t const NSWrapColumnAskUser;
+extern NSString* const kUserDefaultsWrapColumnPresetsKey;
 
 @class OakDocument;
 
@@ -28,7 +28,7 @@ enum OTVFontSmoothing : NSUInteger
 - (std::map<std::string, std::string>)variables;
 @end
 
-PUBLIC @interface OakTextView : OakView <NSAccessibilityNavigableStaticText, NSStandardKeyBindingResponding>
+@interface OakTextView : OakView <NSAccessibilityNavigableStaticText, NSStandardKeyBindingResponding>
 @property (nonatomic) OakDocument* document;
 @property (nonatomic) NSString* themeUUID;
 

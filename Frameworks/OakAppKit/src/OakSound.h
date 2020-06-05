@@ -1,5 +1,3 @@
-#import <oak/misc.h>
-
 enum OakSoundIdentifier
 {
 	OakSoundDidMoveItemUISound,
@@ -9,4 +7,4 @@ enum OakSoundIdentifier
 	OakSoundDidEndRecordingUISound
 };
 
-PUBLIC void OakPlayUISound (OakSoundIdentifier aSound);
+void OakPlayUISound (OakSoundIdentifier aSound);

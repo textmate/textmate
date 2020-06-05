@@ -2,4 +2,4 @@
 
 @class OakPasteboard;
 
-PUBLIC clipboard_ptr get_clipboard (OakPasteboard* pboard);
+clipboard_ptr get_clipboard (OakPasteboard* pboard);

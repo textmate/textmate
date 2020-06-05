@@ -1,7 +1,6 @@
 #ifndef SCOPE_SELECTOR_H_WZ1A8GIC
 #define SCOPE_SELECTOR_H_WZ1A8GIC
 
-#include <oak/misc.h>
 #include <oak/debug.h>
 
 namespace scope
@@ -14,7 +13,7 @@ namespace scope
 
 	} /* types */
 
-	struct PUBLIC scope_t
+	struct scope_t
 	{
 		WATCH_LEAKS(scope_t);
 
@@ -77,7 +76,7 @@ namespace scope
 		node_t* node = nullptr;
 	};
 
-	struct PUBLIC context_t
+	struct context_t
 	{
 		context_t () { }
 		context_t (char const* str) : left(str), right(str) { }
@@ -92,14 +91,14 @@ namespace scope
 		scope_t left, right;
 	};
 
-	PUBLIC extern scope_t wildcard;
+	extern scope_t wildcard;
 
-	PUBLIC scope_t shared_prefix (scope_t const& lhs, scope_t const& rhs);
-	PUBLIC std::string xml_difference (scope_t const& from, scope_t const& to, std::string const& open = "<", std::string const& close = ">");
-	PUBLIC std::string to_s (scope_t const& s);
-	PUBLIC std::string to_s (context_t const& s);
+	scope_t shared_prefix (scope_t const& lhs, scope_t const& rhs);
+	std::string xml_difference (scope_t const& from, scope_t const& to, std::string const& open = "<", std::string const& close = ">");
+	std::string to_s (scope_t const& s);
+	std::string to_s (context_t const& s);
 
-	struct PUBLIC selector_t
+	struct selector_t
 	{
 		WATCH_LEAKS(selector_t);
 
@@ -116,7 +115,7 @@ namespace scope
 		types::selector_ptr selector;
 	};
 
-	PUBLIC std::string to_s (selector_t const& s);
+	std::string to_s (selector_t const& s);
 
 } /* scope */
 

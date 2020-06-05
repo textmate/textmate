@@ -55,7 +55,7 @@ NSMenuItem* MBCreateMenuItem (MBMenuItem const& item)
 	return menuItem;
 }
 
-PUBLIC NSMenu* MBCreateMenu (MBMenu const& items, NSMenu* existingMenu)
+NSMenu* MBCreateMenu (MBMenu const& items, NSMenu* existingMenu)
 {
 	NSMenu* menu = existingMenu ?: [[NSMenu alloc] initWithTitle:@"AMainMenu"];
 	for(auto const& item : items)

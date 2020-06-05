@@ -1,4 +1,5 @@
 #include <oak/debug.h>
+#include <oak/misc.h>
 
 namespace text
 {

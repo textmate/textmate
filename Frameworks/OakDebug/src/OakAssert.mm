@@ -5,7 +5,7 @@
 @interface OakExceptionHandlerDelegate : NSObject { }
 @end
 
-PUBLIC std::string OakStackDump (int linesToSkip)
+std::string OakStackDump (int linesToSkip)
 {
 	void* callstack[256];
 	int frames = backtrace(callstack, sizeofA(callstack));

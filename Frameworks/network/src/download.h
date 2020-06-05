@@ -3,7 +3,7 @@
 
 #include <oak/oak.h>
 
-struct PUBLIC filter_t
+struct filter_t
 {
 	virtual ~filter_t () { }
 
@@ -17,7 +17,7 @@ struct PUBLIC filter_t
 
 namespace network
 {
-	struct PUBLIC request_t
+	struct request_t
 	{
 		request_t (std::string const& url, filter_t* firstFilter = NULL, ...);
 		request_t& add_filter (filter_t* filter);
@@ -42,7 +42,7 @@ namespace network
 		double                 _progress_max = 0;
 	};
 
-	PUBLIC long download (request_t const& request, std::string* error);
+	long download (request_t const& request, std::string* error);
 
 } /* net */
 

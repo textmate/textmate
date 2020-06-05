@@ -1,10 +1,10 @@
 #import "Bundle.h"
 #import <bundles/item.h>
 
-PUBLIC extern NSString* const kUserDefaultsDisableBundleUpdatesKey;
-PUBLIC extern NSString* const kUserDefaultsLastBundleUpdateCheckKey;
+extern NSString* const kUserDefaultsDisableBundleUpdatesKey;
+extern NSString* const kUserDefaultsLastBundleUpdateCheckKey;
 
-PUBLIC @interface BundlesManager : NSObject
+@interface BundlesManager : NSObject
 @property (class, readonly) BundlesManager* sharedInstance;
 
 @property (nonatomic, readonly) NSArray<Bundle*>* bundles;

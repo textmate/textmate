@@ -151,7 +151,7 @@ namespace ng
 		kNop
 	};
 
-	PUBLIC action_t to_action (std::string const& sel);
+	action_t to_action (std::string const& sel);
 
 	struct editor_delegate_t
 	{
@@ -161,7 +161,7 @@ namespace ng
 
 	enum indent_correction_t { kIndentCorrectNever, kIndentCorrectNonEmptyLines, kIndentCorrectAlways };
 
-	struct PUBLIC editor_t
+	struct editor_t
 	{
 		editor_t ();
 		editor_t (buffer_t& buffer);

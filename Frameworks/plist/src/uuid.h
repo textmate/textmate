@@ -1,11 +1,9 @@
 #ifndef UUID_H_7R1D1FHT
 #define UUID_H_7R1D1FHT
 
-#include <oak/misc.h>
-
 namespace oak
 {
-	struct PUBLIC uuid_t
+	struct uuid_t
 	{
 		uuid_t ();
 		uuid_t (char const* str);
@@ -30,7 +28,7 @@ namespace oak
 		void reset (std::string const& str);
 	};
 
-	PUBLIC std::string to_s (oak::uuid_t const& uuid);
+	std::string to_s (oak::uuid_t const& uuid);
 
 } /* oak */
 

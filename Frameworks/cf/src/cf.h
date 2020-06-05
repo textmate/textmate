@@ -5,10 +5,10 @@
 
 namespace cf
 {
-	PUBLIC std::string to_s (CFStringRef aString);
-	PUBLIC std::string to_s (CFErrorRef error);
+	std::string to_s (CFStringRef aString);
+	std::string to_s (CFErrorRef error);
 
-	struct PUBLIC string_t
+	struct string_t
 	{
 		string_t (std::string const& str);
 		operator CFStringRef () const { return string.get(); }
@@ -19,7 +19,7 @@ namespace cf
 
 	inline cf::string_t wrap (std::string const& str) { return cf::string_t(str); }
 
-	struct PUBLIC number_t
+	struct number_t
 	{
 		number_t (int32_t i)
 		{
@@ -33,7 +33,7 @@ namespace cf
 
 	inline cf::number_t wrap (int32_t number) { return cf::number_t(number); }
 
-	struct PUBLIC array_t
+	struct array_t
 	{
 		template <typename T>
 		array_t (std::vector<T> const& v)
@@ -51,7 +51,7 @@ namespace cf
 
 	template <typename T> cf::array_t wrap (std::vector<T> const& v) { return cf::array_t(v); }
 
-	struct PUBLIC dictionary_t
+	struct dictionary_t
 	{
 		template <typename K, typename V>
 		dictionary_t (std::map<K, V> const& map)
@@ -69,7 +69,7 @@ namespace cf
 
 	template <typename K, typename V> cf::dictionary_t wrap (std::map<K, V> const& map) { return cf::dictionary_t(map); }
 
-	struct PUBLIC set_t
+	struct set_t
 	{
 		template <typename T>
 		set_t (std::set<T> const& v)

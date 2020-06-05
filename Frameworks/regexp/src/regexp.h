@@ -14,7 +14,7 @@ namespace regexp
 	struct match_t;
 	struct pattern_t;
 
-	struct PUBLIC match_t
+	struct match_t
 	{
 		WATCH_LEAKS(regexp::match_t);
 	private:
@@ -50,7 +50,7 @@ namespace regexp
 		std::string operator[] (size_t i) const;
 	};
 
-	struct PUBLIC pattern_t
+	struct pattern_t
 	{
 		WATCH_LEAKS(regexp::pattern_t);
 	private:
@@ -75,10 +75,10 @@ namespace regexp
 
 	inline std::string to_s (pattern_t const& ptrn) { return ptrn.pattern_string; }
 
-	PUBLIC std::string validate (std::string const& ptrn);
-	PUBLIC std::string escape (std::string ptrn);
-	PUBLIC match_t search (pattern_t const& ptrn, char const* first, char const* last, char const* from = NULL, char const* to = NULL, OnigOptionType options = ONIG_OPTION_NONE);
-	PUBLIC match_t search (pattern_t const& ptrn, std::string const& str);
+	std::string validate (std::string const& ptrn);
+	std::string escape (std::string ptrn);
+	match_t search (pattern_t const& ptrn, char const* first, char const* last, char const* from = NULL, char const* to = NULL, OnigOptionType options = ONIG_OPTION_NONE);
+	match_t search (pattern_t const& ptrn, std::string const& str);
 
 } /* regexp */
 

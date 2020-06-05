@@ -44,7 +44,7 @@ inline char const* to_s (output_caret::type const& caret)
 }
 #endif
 
-struct PUBLIC bundle_command_t
+struct bundle_command_t
 {
 	std::string name = NULL_STR;
 	oak::uuid_t uuid;
@@ -69,9 +69,9 @@ struct PUBLIC bundle_command_t
 	bool disable_javascript_api       = false;
 };
 
-PUBLIC bundle_command_t parse_command (bundles::item_ptr bundleItem);
-PUBLIC bundle_command_t parse_command (plist::dictionary_t const& plist);
-PUBLIC bundle_command_t parse_drag_command (bundles::item_ptr bundleItem);
-PUBLIC plist::dictionary_t convert_command_from_v1 (plist::dictionary_t plist);
+bundle_command_t parse_command (bundles::item_ptr bundleItem);
+bundle_command_t parse_command (plist::dictionary_t const& plist);
+bundle_command_t parse_drag_command (bundles::item_ptr bundleItem);
+plist::dictionary_t convert_command_from_v1 (plist::dictionary_t plist);
 
 #endif /* end of include guard: COMMAND_PARSER_H_NXZKS6AZ */

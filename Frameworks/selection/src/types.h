@@ -6,7 +6,7 @@
 
 namespace ng
 {
-	struct PUBLIC index_t
+	struct index_t
 	{
 		index_t () : index(SIZE_T_MAX), carry(SIZE_T_MAX) { }
 		index_t (size_t index, size_t carry = 0) : index(index), carry(carry) { }
@@ -22,7 +22,7 @@ namespace ng
 		size_t carry;
 	};
 
-	struct PUBLIC range_t
+	struct range_t
 	{
 		range_t () : columnar(false), freehanded(false), unanchored(false) { }
 		range_t (index_t const& first, index_t const& last = index_t(), bool columnar = false, bool freehanded = false, bool unanchored = false, bool color = false) : first(first), last(last ?: first), columnar(columnar), freehanded(last ? freehanded : first.carry != 0), unanchored(unanchored), color(color) { }
@@ -52,7 +52,7 @@ namespace ng
 		}
 	};
 
-	struct PUBLIC ranges_t
+	struct ranges_t
 	{
 		typedef range_t                              value_type;
 		typedef std::vector<range_t>::iterator       iterator;
@@ -94,9 +94,9 @@ namespace ng
 		std::vector<range_t> ranges;
 	};
 
-	PUBLIC std::string to_s (index_t const& index);
-	PUBLIC std::string to_s (range_t const& range);
-	PUBLIC std::string to_s (ranges_t const& ranges);
+	std::string to_s (index_t const& index);
+	std::string to_s (range_t const& range);
+	std::string to_s (ranges_t const& ranges);
 
 } /* ng */
 

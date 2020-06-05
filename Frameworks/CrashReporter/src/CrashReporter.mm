@@ -1,6 +1,7 @@
 #import "CrashReporter.h"
 #import <Preferences/Keys.h>
 #import <UserNotifications/UserNotifications.h>
+#import <oak/misc.h>
 
 static NSString* const kUserDefaultsCrashReportsSent = @"CrashReportsSent";
 

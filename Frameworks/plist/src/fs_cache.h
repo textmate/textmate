@@ -6,7 +6,7 @@
 
 namespace plist
 {
-	struct PUBLIC cache_t
+	struct cache_t
 	{
 		void load (std::string const& path);
 		void load_capnp (std::string const& path);

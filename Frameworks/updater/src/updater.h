@@ -17,7 +17,7 @@ namespace bundles_db
 	struct dependency_info_t;
 	typedef std::shared_ptr<dependency_info_t> dependency_info_ptr;
 
-	struct PUBLIC source_t
+	struct source_t
 	{
 		source_t (std::string const& name, std::string const& identifier, std::string const& url, std::string const& path, int32_t rank = 0, bool disabled = false) : _name(name), _identifier(identifier), _url(url), _path(path), _rank(rank), _disabled(disabled) { }
 
@@ -42,7 +42,7 @@ namespace bundles_db
 		bool _disabled;
 	};
 
-	struct PUBLIC bundle_t
+	struct bundle_t
 	{
 		oak::uuid_t uuid () const              { return _uuid; }
 		std::string origin () const            { return _origin; }
@@ -106,7 +106,7 @@ namespace bundles_db
 		oak::date_t _path_updated;
 	};
 
-	struct PUBLIC grammar_info_t
+	struct grammar_info_t
 	{
 		grammar_info_t () : _name(NULL_STR), _scope(NULL_STR), _mode_line(NULL_STR) { }
 
@@ -126,23 +126,23 @@ namespace bundles_db
 		std::string _mode_line;
 	};
 
-	PUBLIC bool update (source_ptr source, double* progress = NULL, double min = 0, double max = 1);
-	PUBLIC std::vector<source_ptr> sources (std::string const& installDir = NULL_STR);
+	bool update (source_ptr source, double* progress = NULL, double min = 0, double max = 1);
+	std::vector<source_ptr> sources (std::string const& installDir = NULL_STR);
 
-	PUBLIC std::vector<bundle_ptr> index (std::string const& installDir = NULL_STR);
-	PUBLIC bool save_index (std::vector<bundle_ptr> const& bundles, std::string const& installDir = NULL_STR);
+	std::vector<bundle_ptr> index (std::string const& installDir = NULL_STR);
+	bool save_index (std::vector<bundle_ptr> const& bundles, std::string const& installDir = NULL_STR);
 
-	PUBLIC std::vector<bundle_ptr> dependencies (std::vector<bundle_ptr> const& index, std::vector<bundle_ptr> const& startBundles, bool excludeInstalledBundles = true, bool excludeStartBundles = true);
-	PUBLIC std::vector<bundle_ptr> dependents (std::vector<bundle_ptr> const& index, std::vector<bundle_ptr> const& bundles, bool onlyInstalledBundles = true);
+	std::vector<bundle_ptr> dependencies (std::vector<bundle_ptr> const& index, std::vector<bundle_ptr> const& startBundles, bool excludeInstalledBundles = true, bool excludeStartBundles = true);
+	std::vector<bundle_ptr> dependents (std::vector<bundle_ptr> const& index, std::vector<bundle_ptr> const& bundles, bool onlyInstalledBundles = true);
 
 	inline std::vector<bundle_ptr> dependencies (std::vector<bundle_ptr> const& index, bundle_ptr bundle, bool excludeInstalledBundles = true, bool excludeStartBundles = true) { return dependencies(index, std::vector<bundle_ptr>(1, bundle), excludeInstalledBundles, excludeStartBundles); }
 	inline std::vector<bundle_ptr> dependents (std::vector<bundle_ptr> const& index, bundle_ptr bundle, bool onlyInstalledBundles = true)                                       { return dependents(index, std::vector<bundle_ptr>(1, bundle), onlyInstalledBundles); }
 
-	PUBLIC bool update (bundle_ptr bundle, std::string const& installDir = NULL_STR, double* progress = NULL, double min = 0, double max = 1);
-	PUBLIC bool install (bundle_ptr bundle, std::string const& installDir = NULL_STR, double* progress = NULL, double min = 0, double max = 1);
-	PUBLIC bool uninstall (bundle_ptr bundle, std::string const& installDir = NULL_STR);
+	bool update (bundle_ptr bundle, std::string const& installDir = NULL_STR, double* progress = NULL, double min = 0, double max = 1);
+	bool install (bundle_ptr bundle, std::string const& installDir = NULL_STR, double* progress = NULL, double min = 0, double max = 1);
+	bool uninstall (bundle_ptr bundle, std::string const& installDir = NULL_STR);
 
-	PUBLIC std::vector<std::string> release_notes (std::string const& installDir = NULL_STR);
+	std::vector<std::string> release_notes (std::string const& installDir = NULL_STR);
 
 } /* bundles_db */
 

@@ -1,5 +1,3 @@
-#import <oak/misc.h>
-
 static NSString* const kOakCommitWindowClientPortName       = @"clientPortName";
 static NSString* const kOakCommitWindowArguments            = @"arguments";
 static NSString* const kOakCommitWindowEnvironment          = @"environment";
@@ -16,6 +14,6 @@ static NSString* const kOakCommitWindowContinue             = @"continue";
 - (void)connectFromClientWithOptions:(NSDictionary*)someOptions;
 @end
 
-PUBLIC @interface OakCommitWindowServer : NSObject <OakCommitWindowServerProtocol>
+@interface OakCommitWindowServer : NSObject <OakCommitWindowServerProtocol>
 @property (class, readonly) OakCommitWindowServer* sharedInstance;
 @end

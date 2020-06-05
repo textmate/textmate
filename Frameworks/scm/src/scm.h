@@ -13,7 +13,7 @@ namespace scm
 	typedef std::shared_ptr<shared_info_t> shared_info_ptr;
 	typedef std::weak_ptr<shared_info_t> shared_info_weak_ptr;
 
-	struct PUBLIC info_t
+	struct info_t
 	{
 		info_t (std::string const& path);
 		~info_t ();
@@ -43,12 +43,12 @@ namespace scm
 		shared_info_ptr _shared_info;
 	};
 
-	PUBLIC void disable ();
-	PUBLIC void enable ();
-	PUBLIC std::string root_for_path (std::string const& path);
-	PUBLIC bool scm_enabled_for_path (std::string const& path);
-	PUBLIC info_ptr info (std::string path);
-	PUBLIC void wait_for_status (info_ptr info);
+	void disable ();
+	void enable ();
+	std::string root_for_path (std::string const& path);
+	bool scm_enabled_for_path (std::string const& path);
+	info_ptr info (std::string path);
+	void wait_for_status (info_ptr info);
 
 } /* scm */
 

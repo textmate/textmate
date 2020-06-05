@@ -6,8 +6,8 @@
 
 namespace indent
 {
-	PUBLIC std::string create (size_t size, size_t tabSize, bool softTabs);
-	PUBLIC int leading_whitespace (char const* it, char const* last, size_t tabSize);
+	std::string create (size_t size, size_t tabSize, bool softTabs);
+	int leading_whitespace (char const* it, char const* last, size_t tabSize);
 
 	enum pattern_type
 	{
@@ -18,7 +18,7 @@ namespace indent
 	// = FSM Approach =
 	// ================
 
-	struct PUBLIC fsm_t
+	struct fsm_t
 	{
 		fsm_t (size_t indentSize, size_t tabSize) : _indent_size(indentSize), _tab_size(tabSize), _level(0), _carry(0), _seen(0)
 		{

@@ -1,39 +1,37 @@
-#include <oak/misc.h>
-
 // =======
 // = API =
 // =======
 
-PUBLIC void RegisterDefaults ();
+void RegisterDefaults ();
 
 // =========
 // = Files =
 // =========
 
-PUBLIC extern NSString* const kUserDefaultsDisableSessionRestoreKey;
-PUBLIC extern NSString* const kUserDefaultsDisableNewDocumentAtStartupKey;
-PUBLIC extern NSString* const kUserDefaultsDisableNewDocumentAtReactivationKey;
-PUBLIC extern NSString* const kUserDefaultsShowFavoritesInsteadOfUntitledKey;
+extern NSString* const kUserDefaultsDisableSessionRestoreKey;
+extern NSString* const kUserDefaultsDisableNewDocumentAtStartupKey;
+extern NSString* const kUserDefaultsDisableNewDocumentAtReactivationKey;
+extern NSString* const kUserDefaultsShowFavoritesInsteadOfUntitledKey;
 
 // ============
 // = Projects =
 // ============
 
-PUBLIC extern NSString* const kUserDefaultsFoldersOnTopKey;
-PUBLIC extern NSString* const kUserDefaultsShowFileExtensionsKey;
-PUBLIC extern NSString* const kUserDefaultsInitialFileBrowserURLKey;
-PUBLIC extern NSString* const kUserDefaultsFileBrowserPlacementKey;
-PUBLIC extern NSString* const kUserDefaultsFileBrowserSingleClickToOpenKey;
-PUBLIC extern NSString* const kUserDefaultsFileBrowserOpenAnimationDisabled;
-PUBLIC extern NSString* const kUserDefaultsFileBrowserStyleKey;
-PUBLIC extern NSString* const kUserDefaultsHTMLOutputPlacementKey;
-PUBLIC extern NSString* const kUserDefaultsDisableFileBrowserWindowResizeKey;
-PUBLIC extern NSString* const kUserDefaultsAutoRevealFileKey;
-PUBLIC extern NSString* const kUserDefaultsAllowExpandingLinksKey;
-PUBLIC extern NSString* const kUserDefaultsAllowExpandingPackagesKey;
-PUBLIC extern NSString* const kUserDefaultsDisableTabReorderingKey;
-PUBLIC extern NSString* const kUserDefaultsDisableTabAutoCloseKey;
-PUBLIC extern NSString* const kUserDefaultsDisableTabBarCollapsingKey;
+extern NSString* const kUserDefaultsFoldersOnTopKey;
+extern NSString* const kUserDefaultsShowFileExtensionsKey;
+extern NSString* const kUserDefaultsInitialFileBrowserURLKey;
+extern NSString* const kUserDefaultsFileBrowserPlacementKey;
+extern NSString* const kUserDefaultsFileBrowserSingleClickToOpenKey;
+extern NSString* const kUserDefaultsFileBrowserOpenAnimationDisabled;
+extern NSString* const kUserDefaultsFileBrowserStyleKey;
+extern NSString* const kUserDefaultsHTMLOutputPlacementKey;
+extern NSString* const kUserDefaultsDisableFileBrowserWindowResizeKey;
+extern NSString* const kUserDefaultsAutoRevealFileKey;
+extern NSString* const kUserDefaultsAllowExpandingLinksKey;
+extern NSString* const kUserDefaultsAllowExpandingPackagesKey;
+extern NSString* const kUserDefaultsDisableTabReorderingKey;
+extern NSString* const kUserDefaultsDisableTabAutoCloseKey;
+extern NSString* const kUserDefaultsDisableTabBarCollapsingKey;
 
 // ===========
 // = Bundles =
@@ -43,39 +41,39 @@ PUBLIC extern NSString* const kUserDefaultsDisableTabBarCollapsingKey;
 // = Variables =
 // =============
 
-PUBLIC extern NSString* const kUserDefaultsEnvironmentVariablesKey;
+extern NSString* const kUserDefaultsEnvironmentVariablesKey;
 
 // ============
 // = Terminal =
 // ============
 
-PUBLIC extern NSString* const kUserDefaultsMateInstallPathKey;
-PUBLIC extern NSString* const kUserDefaultsMateInstallVersionKey;
+extern NSString* const kUserDefaultsMateInstallPathKey;
+extern NSString* const kUserDefaultsMateInstallVersionKey;
 
-PUBLIC extern NSString* const kUserDefaultsDisableRMateServerKey;
-PUBLIC extern NSString* const kUserDefaultsRMateServerListenKey;
-PUBLIC extern NSString* const kUserDefaultsRMateServerPortKey;
+extern NSString* const kUserDefaultsDisableRMateServerKey;
+extern NSString* const kUserDefaultsRMateServerListenKey;
+extern NSString* const kUserDefaultsRMateServerPortKey;
 
-PUBLIC extern NSString* const kRMateServerListenLocalhost;
-PUBLIC extern NSString* const kRMateServerListenRemote;
+extern NSString* const kRMateServerListenLocalhost;
+extern NSString* const kRMateServerListenRemote;
 
 // ================
 // = Registration =
 // ================
 
-PUBLIC extern NSString* const kUserDefaultsLicenseOwnerKey;
+extern NSString* const kUserDefaultsLicenseOwnerKey;
 
 // ==============
 // = Appearance =
 // ==============
 
-PUBLIC extern NSString* const kUserDefaultsDisableAntiAliasKey;
-PUBLIC extern NSString* const kUserDefaultsLineNumbersKey;
+extern NSString* const kUserDefaultsDisableAntiAliasKey;
+extern NSString* const kUserDefaultsLineNumbersKey;
 
 // =========
 // = Other =
 // =========
 
-PUBLIC extern NSString* const kUserDefaultsFolderSearchFollowLinksKey;
-PUBLIC extern NSString* const kUserDefaultsDisableCrashReportingKey;
-PUBLIC extern NSString* const kUserDefaultsCrashReportsContactInfoKey;
+extern NSString* const kUserDefaultsFolderSearchFollowLinksKey;
+extern NSString* const kUserDefaultsDisableCrashReportingKey;
+extern NSString* const kUserDefaultsCrashReportsContactInfoKey;

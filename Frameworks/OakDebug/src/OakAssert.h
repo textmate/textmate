@@ -12,19 +12,19 @@
 #define ASSERTF(expr, format, args...)
 #else
 #include "OakDebugLog.h"
-PUBLIC std::string OakStackDump (int linesToSkip = 1);
-PUBLIC void OakBadAssertion (char const* name, char const* format = NULL, ...);
-PUBLIC void OakPrintBadAssertion (char const* lhs, char const* op, char const* rhs, std::string const& realLHS, char const* realOp, std::string const& realRHS, char const* file, int line);
+std::string OakStackDump (int linesToSkip = 1);
+void OakBadAssertion (char const* name, char const* format = NULL, ...);
+void OakPrintBadAssertion (char const* lhs, char const* op, char const* rhs, std::string const& realLHS, char const* realOp, std::string const& realRHS, char const* file, int line);
 
 namespace oak
 {
-	PUBLIC std::string to_s (bool value);
-	PUBLIC std::string to_s (int value);
-	PUBLIC std::string to_s (size_t value);
-	PUBLIC std::string to_s (ssize_t value);
-	PUBLIC std::string to_s (double value);
-	PUBLIC std::string to_s (char const* value);
-	PUBLIC std::string to_s (std::string const& value);
+	std::string to_s (bool value);
+	std::string to_s (int value);
+	std::string to_s (size_t value);
+	std::string to_s (ssize_t value);
+	std::string to_s (double value);
+	std::string to_s (char const* value);
+	std::string to_s (std::string const& value);
 #if 0
 	template <typename X, typename Y>
 	std::string to_s (std::pair<X, Y> const& pair)

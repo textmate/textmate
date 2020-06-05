@@ -5,11 +5,9 @@
 #include <buffer/buffer.h>
 #include <selection/types.h>
 #include <theme/theme.h>
-#include <oak/misc.h>
-
 namespace ng
 {
-	struct PUBLIC line_record_t
+	struct line_record_t
 	{
 		line_record_t (size_t line, size_t softline, CGFloat top, CGFloat bottom, CGFloat baseline) : line(line), softline(softline), top(top), bottom(bottom), baseline(baseline) { }
 

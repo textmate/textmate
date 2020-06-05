@@ -10,7 +10,7 @@ NS_ENUM(NSInteger) {
 
 @class OakHTMLOutputView;
 
-PUBLIC @interface OakCommand : NSObject
+@interface OakCommand : NSObject
 @property (nonatomic, weak) NSResponder* firstResponder;
 @property (nonatomic, readonly) NSUUID* identifier;
 @property (nonatomic, strong) void(^modalEventLoopRunner)(OakCommand*, BOOL* didTerminate);

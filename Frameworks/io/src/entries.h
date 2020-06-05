@@ -1,11 +1,9 @@
 #ifndef PATH_ENTRIES_H_NFV0WV76
 #define PATH_ENTRIES_H_NFV0WV76
 
-#include <oak/misc.h>
-
 namespace path
 {
-	struct PUBLIC entries
+	struct entries
 	{
 		typedef dirent const* const* const_iterator;
 

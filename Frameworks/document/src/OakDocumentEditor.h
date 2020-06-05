@@ -8,7 +8,7 @@ namespace ng
 
 } /* ng */
 
-PUBLIC @interface OakDocumentEditor : NSObject
+@interface OakDocumentEditor : NSObject
 + (instancetype)documentEditorWithDocument:(OakDocument*)aDocument fontScaleFactor:(CGFloat)scale themeUUID:(NSString*)themeUUID;
 - (instancetype)initWithDocument:(OakDocument*)aDocument fontScaleFactor:(CGFloat)scale themeUUID:(NSString*)themeUUID;
 @property (nonatomic, readonly) OakDocument* document;

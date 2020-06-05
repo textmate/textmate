@@ -3,7 +3,6 @@
 
 #include "date.h"
 #include "uuid.h"
-#include <oak/misc.h>
 #include <text/format.h>
 #include <oak/debug.h>
 
@@ -20,17 +19,17 @@ namespace plist
 
 	enum plist_format_t { kPlistFormatBinary, kPlistFormatXML };
 
-	PUBLIC dictionary_t load (std::string const& path);
-	PUBLIC bool save (std::string const& path, any_t const& plist, plist_format_t format = kPlistFormatBinary);
-	PUBLIC any_t parse (std::string const& str);
-	PUBLIC dictionary_t convert (CFPropertyListRef plist);
-	PUBLIC CFPropertyListRef create_cf_property_list (any_t const& plist);
-	PUBLIC bool equal (any_t const& lhs, any_t const& rhs);
+	dictionary_t load (std::string const& path);
+	bool save (std::string const& path, any_t const& plist, plist_format_t format = kPlistFormatBinary);
+	any_t parse (std::string const& str);
+	dictionary_t convert (CFPropertyListRef plist);
+	CFPropertyListRef create_cf_property_list (any_t const& plist);
+	bool equal (any_t const& lhs, any_t const& rhs);
 
-	PUBLIC bool is_true (any_t const& item);
+	bool is_true (any_t const& item);
 
-	template <typename T> PUBLIC bool get_key_path (any_t const& plist, std::string const& keyPath, T& ref);
-	template <typename T> PUBLIC T get (plist::any_t const& from);
+	template <typename T> bool get_key_path (any_t const& plist, std::string const& keyPath, T& ref);
+	template <typename T> T get (plist::any_t const& from);
 
 	// to_s flags
 	enum { kStandard = 0, kPreferSingleQuotedStrings = 1, kSingleLine = 2 };
@@ -39,7 +38,7 @@ namespace plist
 
 namespace boost // we place this in the boost namespace to support ADL
 {
-	PUBLIC std::string to_s (plist::any_t const& plist, int flags = plist::kStandard, std::vector<std::string> const& keySortOrder = std::vector<std::string>());
+	std::string to_s (plist::any_t const& plist, int flags = plist::kStandard, std::vector<std::string> const& keySortOrder = std::vector<std::string>());
 }
 
 #endif /* end of include guard: PLIST_H_34L7NUFO */

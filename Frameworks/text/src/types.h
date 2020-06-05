@@ -7,7 +7,7 @@
 
 namespace text
 {
-	struct PUBLIC pos_t
+	struct pos_t
 	{
 		size_t line, column, offset;
 
@@ -52,7 +52,7 @@ namespace text
 		std::string offset_str () const              { return offset ? text::format("+%zu", offset)   : ""; }
 	};
 
-	struct PUBLIC range_t
+	struct range_t
 	{
 		range_t (pos_t const& from = pos_t(), pos_t const& to = pos_t::undefined, bool columnar = false) : from(from), to(to == pos_t::undefined ? from : to), columnar(columnar) { }
 
@@ -95,7 +95,7 @@ namespace text
 		static range_t undefined;
 	};
 
-	struct PUBLIC selection_t
+	struct selection_t
 	{
 		typedef std::vector<range_t>::iterator        iterator;
 		typedef std::vector<range_t>::reference       reference;

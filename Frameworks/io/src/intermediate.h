@@ -1,15 +1,13 @@
 #ifndef INTERMEDIATE_H_LWU9YRUW
 #define INTERMEDIATE_H_LWU9YRUW
 
-#include <oak/misc.h>
-
 namespace path
 {
 	enum struct atomic_t {
 		always = 0, external_volumes, remote_volumes, never, legacy
 	};
 
-	struct PUBLIC intermediate_t
+	struct intermediate_t
 	{
 		struct strategy_t
 		{

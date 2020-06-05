@@ -7,7 +7,7 @@
 template <typename T> struct container_traits { typedef typename T::value_type insert_type; };
 template <template <typename, typename, typename, typename> class T, typename A, typename B, typename C, typename D> struct container_traits < T<A, B, C, D> > { typedef typename std::pair<A, B> insert_type; };
 
-struct PUBLIC connection_t
+struct connection_t
 {
 	connection_t (int socket = -1);
 	connection_t (std::string const& socketPath);

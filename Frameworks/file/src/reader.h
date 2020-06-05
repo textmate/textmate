@@ -7,7 +7,7 @@
 
 namespace file
 {
-	struct PUBLIC reader_t
+	struct reader_t
 	{
 		reader_t (std::string const& path);
 		~reader_t();
@@ -25,7 +25,7 @@ namespace file
 		encoding::type _encoding;
 	};
 
-	PUBLIC std::string read_utf8 (std::string const& path, std::string* charset = nullptr, size_t limit = SIZE_T_MAX);
+	std::string read_utf8 (std::string const& path, std::string* charset = nullptr, size_t limit = SIZE_T_MAX);
 
 } /* file */
 

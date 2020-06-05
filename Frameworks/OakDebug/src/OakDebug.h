@@ -2,7 +2,7 @@
 #define OAKDEBUG_H
 
 #ifndef PUBLIC
-#define PUBLIC __attribute__((__visibility__("default")))
+#define __attribute__((__visibility__("default")))
 #endif
 
 #include "OakAssert.h"

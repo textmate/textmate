@@ -1,8 +1,6 @@
 #ifndef FILE_STATUS_H_CIXQCEQO
 #define FILE_STATUS_H_CIXQCEQO
 
-#include <oak/misc.h>
-
 enum file_status_t
 {
 	kFileTestWritable,
@@ -31,7 +29,7 @@ inline std::string to_s (file_status_t status)
 
 namespace file
 {
-	PUBLIC file_status_t status (std::string const& path);
+	file_status_t status (std::string const& path);
 
 } /* file */
 

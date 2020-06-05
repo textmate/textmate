@@ -21,15 +21,15 @@ namespace find
 		filesize_limit     = (1 << 10),
 	};
 
-	PUBLIC options_t operator| (options_t lhs, options_t rhs);
-	PUBLIC options_t operator^ (options_t lhs, options_t rhs);
-	PUBLIC options_t operator& (options_t lhs, options_t rhs);
-	PUBLIC options_t& operator|= (options_t& lhs, options_t rhs);
-	PUBLIC options_t& operator&= (options_t& lhs, unsigned rhs);
+	options_t operator| (options_t lhs, options_t rhs);
+	options_t operator^ (options_t lhs, options_t rhs);
+	options_t operator& (options_t lhs, options_t rhs);
+	options_t& operator|= (options_t& lhs, options_t rhs);
+	options_t& operator&= (options_t& lhs, unsigned rhs);
 
 	struct find_implementation_t;
 
-	struct PUBLIC find_t
+	struct find_t
 	{
 		find_t (std::string const& str, options_t options = none);
 

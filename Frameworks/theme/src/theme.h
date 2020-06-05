@@ -4,14 +4,14 @@
 #include <bundles/bundles.h>
 #include <scope/scope.h>
 
-PUBLIC extern char const* kMacClassicThemeUUID;
-PUBLIC extern char const* kTwilightThemeUUID;
-PUBLIC extern char const* kSystemUIThemeUUID;
+extern char const* kMacClassicThemeUUID;
+extern char const* kTwilightThemeUUID;
+extern char const* kSystemUIThemeUUID;
 
 typedef std::shared_ptr<std::remove_pointer<CTFontRef>::type> CTFontPtr;
 typedef std::shared_ptr<std::remove_pointer<CGColorRef>::type> CGColorPtr;
 
-struct PUBLIC styles_t
+struct styles_t
 {
 	styles_t (CGColorPtr foreground, CGColorPtr background, CGColorPtr caret, CGColorPtr selection, CTFontPtr font, bool underlined, bool strikethrough, bool misspelled) : _foreground(foreground), _background(background), _caret(caret), _selection(selection), _font(font), _underlined(underlined), _strikethrough(strikethrough), _misspelled(misspelled) { }
 
@@ -36,7 +36,7 @@ private:
 	bool _misspelled;
 };
 
-struct PUBLIC gutter_styles_t
+struct gutter_styles_t
 {
 	gutter_styles_t () { }
 	gutter_styles_t (gutter_styles_t const& rhs) = delete;
@@ -65,7 +65,7 @@ struct PUBLIC gutter_styles_t
 struct theme_t;
 typedef std::shared_ptr<theme_t> theme_ptr;
 
-struct PUBLIC theme_t
+struct theme_t
 {
 	theme_t (bundles::item_ptr const& themeItem, std::string const& fontName = NULL_STR, CGFloat fontSize = 12);
 
@@ -151,6 +151,6 @@ private:
 	mutable google::dense_hash_map<scope::scope_t, styles_t> _cache;
 };
 
-PUBLIC theme_ptr parse_theme (bundles::item_ptr const& themeItem);
+theme_ptr parse_theme (bundles::item_ptr const& themeItem);
 
 #endif /* end of include guard: THEME_H_T0VVCP8F */

@@ -1,10 +1,8 @@
-#import <oak/misc.h>
+extern NSUInteger const OakViewApplicationIsActiveMask;
+extern NSUInteger const OakViewWindowIsMainMask;
+extern NSUInteger const OakViewWindowIsKeyMask;
+extern NSUInteger const OakViewViewIsFirstResponderMask;
 
-PUBLIC extern NSUInteger const OakViewApplicationIsActiveMask;
-PUBLIC extern NSUInteger const OakViewWindowIsMainMask;
-PUBLIC extern NSUInteger const OakViewWindowIsKeyMask;
-PUBLIC extern NSUInteger const OakViewViewIsFirstResponderMask;
-
-PUBLIC @interface OakView : NSView
+@interface OakView : NSView
 @property (nonatomic) NSUInteger keyState;
 @end

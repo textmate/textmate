@@ -1,20 +1,19 @@
-#import <oak/misc.h>
 #import <text/types.h>
 
 @class OakDocument;
 
-PUBLIC extern NSString* kSearchFollowDirectoryLinksKey;
-PUBLIC extern NSString* kSearchFollowFileLinksKey;
-PUBLIC extern NSString* kSearchDepthFirstSearchKey;
-PUBLIC extern NSString* kSearchIgnoreOrderingKey;
-PUBLIC extern NSString* kSearchExcludeDirectoryGlobsKey;
-PUBLIC extern NSString* kSearchExcludeFileGlobsKey;
-PUBLIC extern NSString* kSearchExcludeGlobsKey;
-PUBLIC extern NSString* kSearchDirectoryGlobsKey;
-PUBLIC extern NSString* kSearchFileGlobsKey;
-PUBLIC extern NSString* kSearchGlobsKey;
+extern NSString* kSearchFollowDirectoryLinksKey;
+extern NSString* kSearchFollowFileLinksKey;
+extern NSString* kSearchDepthFirstSearchKey;
+extern NSString* kSearchIgnoreOrderingKey;
+extern NSString* kSearchExcludeDirectoryGlobsKey;
+extern NSString* kSearchExcludeFileGlobsKey;
+extern NSString* kSearchExcludeGlobsKey;
+extern NSString* kSearchDirectoryGlobsKey;
+extern NSString* kSearchFileGlobsKey;
+extern NSString* kSearchGlobsKey;
 
-PUBLIC @interface OakDocumentController : NSObject
+@interface OakDocumentController : NSObject
 @property (class, readonly) OakDocumentController* sharedInstance;
 
 - (OakDocument*)untitledDocument;

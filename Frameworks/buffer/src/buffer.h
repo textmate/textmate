@@ -18,14 +18,14 @@ namespace ng
 {
 	struct buffer_t;
 
-	struct PUBLIC meta_data_t
+	struct meta_data_t
 	{
 		virtual ~meta_data_t ()                                                     { }
 		virtual void replace (buffer_t* buffer, size_t from, size_t to, size_t len) { }
 		virtual void did_parse (buffer_t const* buffer, size_t from, size_t to)     { }
 	};
 
-	struct PUBLIC pairs_t : meta_data_t
+	struct pairs_t : meta_data_t
 	{
 		pairs_t ();
 
@@ -46,7 +46,7 @@ namespace ng
 		tree_t _pairs;
 	};
 
-	struct PUBLIC callback_t
+	struct callback_t
 	{
 		WATCH_LEAKS(ng::callback_t);
 
@@ -60,7 +60,7 @@ namespace ng
 	struct symbols_t;
 	struct marks_t;
 
-	struct PUBLIC buffer_api_t
+	struct buffer_api_t
 	{
 		virtual ~buffer_api_t () = default;
 		virtual size_t size () const = 0;
@@ -80,7 +80,7 @@ namespace ng
 		virtual std::map<size_t, scope::scope_t> scopes (size_t from, size_t to) const = 0;
 	};
 
-	struct PUBLIC buffer_t : buffer_api_t
+	struct buffer_t : buffer_api_t
 	{
 		WATCH_LEAKS(ng::buffer_t);
 
@@ -243,7 +243,7 @@ namespace ng
 		friend struct symbols_t;  // _scopes
 	};
 
-	PUBLIC std::string to_s (buffer_t const& buf, size_t first = 0, size_t last = SIZE_T_MAX);
+	std::string to_s (buffer_t const& buf, size_t first = 0, size_t last = SIZE_T_MAX);
 
 } /* ng */
 

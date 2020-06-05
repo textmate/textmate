@@ -1,11 +1,9 @@
 #ifndef BYTES_H_ZGQQH1SH
 #define BYTES_H_ZGQQH1SH
 
-#include <oak/misc.h>
-
 namespace io
 {
-	struct PUBLIC bytes_t
+	struct bytes_t
 	{
 		bytes_t (size_t size);
 		bytes_t (std::string const& str);

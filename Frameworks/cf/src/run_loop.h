@@ -1,11 +1,9 @@
 #ifndef CF_RUN_LOOP_H_YH1AM5OH
 #define CF_RUN_LOOP_H_YH1AM5OH
 
-#include <oak/misc.h>
-
 namespace cf
 {
-	struct PUBLIC run_loop_t
+	struct run_loop_t
 	{
 		run_loop_t (CFStringRef mode = kCFRunLoopDefaultMode, double timeout = DBL_MAX);
 		run_loop_t (run_loop_t const& rhs) = delete;

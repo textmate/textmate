@@ -1,7 +1,6 @@
-#import <oak/misc.h>
 #import <scm/status.h>
 
-PUBLIC @interface OakFileIconImage : NSImage
+@interface OakFileIconImage : NSImage
 @property (nonatomic)                       NSString*         path;
 @property (nonatomic)                       BOOL              exists;
 @property (nonatomic, getter = isDirectory) BOOL              directory;

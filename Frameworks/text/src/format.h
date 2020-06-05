@@ -44,7 +44,7 @@ namespace text
 		return res;
 	}
 
-	PUBLIC std::string format_size (size_t inBytes);
+	std::string format_size (size_t inBytes);
 }
 
 #endif /* end of include guard: TEXT_FORMAT_H_ERKOWIHN */

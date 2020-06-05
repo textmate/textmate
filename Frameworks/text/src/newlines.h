@@ -1,11 +1,9 @@
 #ifndef TEXT_NEWLINES_H_CYET9RUW
 #define TEXT_NEWLINES_H_CYET9RUW
 
-#include <oak/misc.h>
-
-PUBLIC extern std::string const kLF;
-PUBLIC extern std::string const kCR;
-PUBLIC extern std::string const kCRLF;
+extern std::string const kLF;
+extern std::string const kCR;
+extern std::string const kCRLF;
 
 namespace text
 {

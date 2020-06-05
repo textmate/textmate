@@ -4,12 +4,11 @@
 #include "format_string.h"
 #include "regexp.h"
 #include <text/indent.h>
-#include <oak/misc.h>
 #include <oak/debug.h>
 
 namespace snippet
 {
-	struct PUBLIC pos_t
+	struct pos_t
 	{
 		pos_t (size_t offset = 0, size_t rank = 0) : offset(offset), rank(rank) { }
 		size_t offset, rank;
@@ -43,7 +42,7 @@ namespace snippet
 		WATCH_LEAKS(snippet::range_t);
 	};
 
-	struct PUBLIC placeholder_t
+	struct placeholder_t
 	{
 		placeholder_t (size_t index, pos_t const& from, pos_t const& to) : index(index), range(from, to) { }
 		virtual ~placeholder_t () { }
@@ -57,7 +56,7 @@ namespace snippet
 		WATCH_LEAKS(snippet::placeholder_t);
 	};
 
-	struct PUBLIC transform_t : placeholder_t
+	struct transform_t : placeholder_t
 	{
 		transform_t (size_t index, pos_t const& from, pos_t const& to, regexp::pattern_t const& pattern, format_string::format_string_t const& format, bool repeat) : placeholder_t(index, from, to), pattern(pattern), format(format), repeat(repeat) { }
 
@@ -70,7 +69,7 @@ namespace snippet
 		WATCH_LEAKS(snippet::transform_t);
 	};
 
-	struct PUBLIC choice_t : placeholder_t
+	struct choice_t : placeholder_t
 	{
 		choice_t (size_t index, pos_t const& from, pos_t const& to, std::vector<std::string> const& choices) : placeholder_t(index, from, to), _choices(choices) { }
 		virtual std::vector<std::string> const& choices () const { return _choices; }
@@ -82,7 +81,7 @@ namespace snippet
 
 	typedef std::shared_ptr<placeholder_t> field_ptr;
 
-	struct PUBLIC snippet_t
+	struct snippet_t
 	{
 		WATCH_LEAKS(snippet::snippet_t);
 		snippet_t (std::string const& text, std::map<size_t, field_ptr> const& fields, std::multimap<size_t, field_ptr> const& mirrors, std::map<std::string, std::string> const& variables, std::string const& indent_string, text::indent_t const& indent);
@@ -105,7 +104,7 @@ namespace snippet
 		replacements_t replace_helper (size_t n, range_t const& range, std::string const& replacement);
 	};
 
-	struct PUBLIC stack_t
+	struct stack_t
 	{
 		void push (snippet::snippet_t const& snippet, snippet::range_t const& range);
 		std::vector< std::pair<snippet::range_t, std::string> > replace (snippet::range_t range, std::string replacement);
@@ -138,7 +137,7 @@ namespace snippet
 		virtual std::string run_command (std::string const& cmd) = 0;
 	};
 
-	PUBLIC snippet_t parse (std::string const& str, std::map<std::string, std::string> const& variables, std::string const& indentString, text::indent_t const& indent, run_command_callback_t* callback);
+	snippet_t parse (std::string const& str, std::map<std::string, std::string> const& variables, std::string const& indentString, text::indent_t const& indent, run_command_callback_t* callback);
 
 } /* snippet */
 

@@ -248,7 +248,7 @@ static NSString* MBInternalDumpMenu (NSMenu* menu, NSInteger indent)
 	return res;
 }
 
-PUBLIC NSString* MBDumpMenu (NSMenu* menu)
+NSString* MBDumpMenu (NSMenu* menu)
 {
 	return [NSString stringWithFormat:@"MBMenu const items = {\n%@};\n", MBInternalDumpMenu(menu, 1)];
 }

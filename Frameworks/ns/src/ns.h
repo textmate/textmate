@@ -1,23 +1,22 @@
 #ifndef NS_H_SEBJ2BBY
 #define NS_H_SEBJ2BBY
 
-#include <oak/misc.h>
 #include "event.h"
 #include "to_dictionary.h"
 
-PUBLIC NSString* to_ns (std::string const& str);
+NSString* to_ns (std::string const& str);
 
-PUBLIC std::string to_s (NSString* aString);
-PUBLIC std::string to_s (NSAttributedString* anAttributedString);
-PUBLIC std::string to_s (NSUUID* identifier);
-PUBLIC std::string to_s (NSData* aString);
-PUBLIC std::string to_s (NSError* anError);
-PUBLIC std::string to_s (NSEvent* anEvent, bool preserveNumPadFlag = false);
-PUBLIC std::string to_s (id someObject);
+std::string to_s (NSString* aString);
+std::string to_s (NSAttributedString* anAttributedString);
+std::string to_s (NSUUID* identifier);
+std::string to_s (NSData* aString);
+std::string to_s (NSError* anError);
+std::string to_s (NSEvent* anEvent, bool preserveNumPadFlag = false);
+std::string to_s (id someObject);
 
 namespace ns
 {
-	PUBLIC std::string create_event_string (NSString* key, NSUInteger flags);
+	std::string create_event_string (NSString* key, NSUInteger flags);
 
 } /* ns */
 

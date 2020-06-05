@@ -5,7 +5,7 @@
 
 namespace path
 {
-	struct PUBLIC glob_t
+	struct glob_t
 	{
 		glob_t (char const* glob, bool matchDotFiles = false, bool caseSensitive = true)        { setup(glob, matchDotFiles, caseSensitive); }
 		glob_t (std::string const& glob, bool matchDotFiles = false, bool caseSensitive = true) { setup(glob, matchDotFiles, caseSensitive); }
@@ -25,7 +25,7 @@ namespace path
 	static size_t const kPathItemMask        = 0x007F;
 	static size_t const kPathItemExclude     = 0x0080;
 
-	struct PUBLIC glob_list_t
+	struct glob_list_t
 	{
 		glob_list_t (char const* glob = NULL)
 		{
@@ -52,8 +52,8 @@ namespace path
 		std::vector<record_t> _globs;
 	};
 
-	PUBLIC std::vector<std::string> expand_braces (std::string const& glob);
-	PUBLIC std::string to_s (glob_t const& glob);
+	std::vector<std::string> expand_braces (std::string const& glob);
+	std::string to_s (glob_t const& glob);
 
 } /* path */
 

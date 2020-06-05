@@ -4,14 +4,13 @@
 #include "bytes.h"
 #include "encoding.h"
 #include <authorization/authorization.h>
-#include <oak/misc.h>
 #include <plist/uuid.h>
 
 struct bundle_command_t;
 
 namespace file
 {
-	struct PUBLIC open_context_t : std::enable_shared_from_this<open_context_t>
+	struct open_context_t : std::enable_shared_from_this<open_context_t>
 	{
 		virtual ~open_context_t () { }
 		virtual void set_authorization (osx::authorization_t auth) = 0;
@@ -23,7 +22,7 @@ namespace file
 
 	typedef std::shared_ptr<open_context_t> open_context_ptr;
 
-	struct PUBLIC open_callback_t
+	struct open_callback_t
 	{
 		virtual ~open_callback_t () { }
 		virtual void obtain_authorization (std::string const& path, osx::authorization_t auth, open_context_ptr context);
@@ -34,7 +33,7 @@ namespace file
 
 	typedef std::shared_ptr<open_callback_t> open_callback_ptr;
 
-	PUBLIC void open (std::string const& path, osx::authorization_t auth, open_callback_ptr cb, io::bytes_ptr existingContent = io::bytes_ptr());
+	void open (std::string const& path, osx::authorization_t auth, open_callback_ptr cb, io::bytes_ptr existingContent = io::bytes_ptr());
 
 } /* file */
 

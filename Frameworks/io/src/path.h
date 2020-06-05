@@ -6,79 +6,79 @@
 
 namespace path
 {
-	PUBLIC std::string normalize (std::string path);                // remove “./”, “../”, and “//” from path
-	PUBLIC std::string resolve (std::string const& path);           // normalize and follow links/aliases
-	PUBLIC std::string resolve_head (std::string const& path);      // normalize and ensure path is not a link/alias (but parent components can be)
+	std::string normalize (std::string path);                // remove “./”, “../”, and “//” from path
+	std::string resolve (std::string const& path);           // normalize and follow links/aliases
+	std::string resolve_head (std::string const& path);      // normalize and ensure path is not a link/alias (but parent components can be)
 
-	PUBLIC std::string name (std::string const& path);              // /Users/me/foo.html.erb → foo.html.erb
-	PUBLIC std::string parent (std::string const& path);            // /Users/me/foo.html.erb → /Users/me
-	PUBLIC std::string strip_extension (std::string const& path);   // /Users/me/foo.html.erb → /Users/me/foo.html
-	PUBLIC std::string strip_extensions (std::string const& path);  // /Users/me/foo.html.erb → /Users/me/foo
-	PUBLIC std::string extension (std::string const& path);         // /Users/me/foo.html.erb → .erb
-	PUBLIC std::string extensions (std::string const& path);        // /Users/me/foo.html.erb → .html.erb
+	std::string name (std::string const& path);              // /Users/me/foo.html.erb → foo.html.erb
+	std::string parent (std::string const& path);            // /Users/me/foo.html.erb → /Users/me
+	std::string strip_extension (std::string const& path);   // /Users/me/foo.html.erb → /Users/me/foo.html
+	std::string strip_extensions (std::string const& path);  // /Users/me/foo.html.erb → /Users/me/foo
+	std::string extension (std::string const& path);         // /Users/me/foo.html.erb → .erb
+	std::string extensions (std::string const& path);        // /Users/me/foo.html.erb → .html.erb
 
-	PUBLIC std::string escape (std::string const& src);                // Shell escape path
-	PUBLIC std::vector<std::string> unescape (std::string const& src); // Split into “shell words”
+	std::string escape (std::string const& src);                // Shell escape path
+	std::vector<std::string> unescape (std::string const& src); // Split into “shell words”
 
-	PUBLIC size_t rank (std::string const& path, std::string const& ext); // returns a score for how well the “extension” covers the path (smaller values are better, except 0 means “no match”)
+	size_t rank (std::string const& path, std::string const& ext); // returns a score for how well the “extension” covers the path (smaller values are better, except 0 means “no match”)
 
-	PUBLIC std::string join (std::string const& base, std::string const& path); // this will normalize the (resulting) path
+	std::string join (std::string const& base, std::string const& path); // this will normalize the (resulting) path
 
-	PUBLIC std::string join (std::initializer_list<std::string> const& components);
+	std::string join (std::initializer_list<std::string> const& components);
 
-	PUBLIC bool is_absolute (std::string const& path);
-	PUBLIC bool is_child (std::string const& nonNormalizedChild, std::string const& nonNormalizedParent);
-	PUBLIC std::string with_tilde (std::string const& path);        // /Users/me/foo.html.erb → ~/foo.html.erb
-	PUBLIC std::string relative_to (std::string const& path, std::string const& base); // /Users/me/foo.html.erb (arg: ~/Desktop) → ../foo.html.erb
+	bool is_absolute (std::string const& path);
+	bool is_child (std::string const& nonNormalizedChild, std::string const& nonNormalizedParent);
+	std::string with_tilde (std::string const& path);        // /Users/me/foo.html.erb → ~/foo.html.erb
+	std::string relative_to (std::string const& path, std::string const& base); // /Users/me/foo.html.erb (arg: ~/Desktop) → ../foo.html.erb
 
-	PUBLIC std::string display_name (std::string const& path, size_t nunberOfParents = 0); // «whatever»
-	PUBLIC std::vector<size_t> disambiguate (std::vector<std::string> const& paths);
+	std::string display_name (std::string const& path, size_t nunberOfParents = 0); // «whatever»
+	std::vector<size_t> disambiguate (std::vector<std::string> const& paths);
 
-	PUBLIC std::string unique (std::string const& requestedPath, std::string const& suffix = ""); // /foo/bar.txt → /foo/bar«suffix» 2.txt
+	std::string unique (std::string const& requestedPath, std::string const& suffix = ""); // /foo/bar.txt → /foo/bar«suffix» 2.txt
 
-	PUBLIC dev_t device (std::string const& path);
+	dev_t device (std::string const& path);
 
-	PUBLIC bool exists (std::string const& path);
-	PUBLIC bool is_readable (std::string const& path);
-	PUBLIC bool is_writable (std::string const& path);
-	PUBLIC bool is_directory (std::string const& path);
-	PUBLIC bool is_executable (std::string const& path);
-	PUBLIC bool is_local (std::string const& path);
+	bool exists (std::string const& path);
+	bool is_readable (std::string const& path);
+	bool is_writable (std::string const& path);
+	bool is_directory (std::string const& path);
+	bool is_executable (std::string const& path);
+	bool is_local (std::string const& path);
 
-	PUBLIC std::string for_fd (int fd);
+	std::string for_fd (int fd);
 
 	// ===========
 	// = Actions =
 	// ===========
 
-	PUBLIC std::string content (std::string const& path);
-	PUBLIC bool set_content (std::string const& path, char const* first, char const* last);
+	std::string content (std::string const& path);
+	bool set_content (std::string const& path, char const* first, char const* last);
 	inline bool set_content (std::string const& path, std::string const& content) { return set_content(path, content.data(), content.data() + content.size()); }
 
-	PUBLIC std::string get_attr (std::string const& path, std::string const& attr);
-	PUBLIC void set_attr (std::string const& path, std::string const& attr, std::string const& value);
-	PUBLIC std::map<std::string, std::string> attributes (std::string const& path);
-	PUBLIC bool set_attributes (std::string const& path, std::map<std::string, std::string> const& attributes);
+	std::string get_attr (std::string const& path, std::string const& attr);
+	void set_attr (std::string const& path, std::string const& attr, std::string const& value);
+	std::map<std::string, std::string> attributes (std::string const& path);
+	bool set_attributes (std::string const& path, std::map<std::string, std::string> const& attributes);
 
-	PUBLIC bool link (std::string const& from, std::string const& to);
-	PUBLIC bool rename (std::string const& from, std::string const& to, bool overwrite = false);
-	PUBLIC std::string move_to_trash (std::string const& path);
-	PUBLIC std::string duplicate (std::string const& src, std::string dst = NULL_STR, bool overwrite = false);
-	PUBLIC bool make_dir (std::string const& path);
-	PUBLIC bool rename_or_copy (std::string const& src, std::string const& dst, bool createParent = true);
+	bool link (std::string const& from, std::string const& to);
+	bool rename (std::string const& from, std::string const& to, bool overwrite = false);
+	std::string move_to_trash (std::string const& path);
+	std::string duplicate (std::string const& src, std::string dst = NULL_STR, bool overwrite = false);
+	bool make_dir (std::string const& path);
+	bool rename_or_copy (std::string const& src, std::string const& dst, bool createParent = true);
 
 	// ===============
 	// = Global Info =
 	// ===============
 
-	PUBLIC passwd* passwd_entry (); // wrapper for getpwuid() that shows dialog incase of <rdar://10261043>
+	passwd* passwd_entry (); // wrapper for getpwuid() that shows dialog incase of <rdar://10261043>
 
-	PUBLIC std::vector<std::string> volumes ();
-	PUBLIC std::string cwd ();
-	PUBLIC std::string home ();
-	PUBLIC std::string temp (std::string const& file = NULL_STR, std::string const& content = NULL_STR);
-	PUBLIC std::string cache (std::string const& file = NULL_STR);
-	PUBLIC std::string desktop ();
+	std::vector<std::string> volumes ();
+	std::string cwd ();
+	std::string home ();
+	std::string temp (std::string const& file = NULL_STR, std::string const& content = NULL_STR);
+	std::string cache (std::string const& file = NULL_STR);
+	std::string desktop ();
 
 } /* path */
 

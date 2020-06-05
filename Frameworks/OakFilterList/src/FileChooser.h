@@ -6,7 +6,7 @@ extern NSUInteger const kFileChooserUncommittedChangesSourceIndex;
 
 @class OakDocument;
 
-PUBLIC @interface FileChooser : OakChooser
+@interface FileChooser : OakChooser
 @property (class, readonly) FileChooser* sharedInstance;
 
 @property (nonatomic) NSString* path;

@@ -5,14 +5,14 @@
 #include <oak/oak.h>
 #include <text/case.h>
 
-PUBLIC extern std::string const kCharsetNoEncoding;
-PUBLIC extern std::string const kCharsetASCII;
-PUBLIC extern std::string const kCharsetUTF8;
-PUBLIC extern std::string const kCharsetUTF16BE;
-PUBLIC extern std::string const kCharsetUTF16LE;
-PUBLIC extern std::string const kCharsetUTF32BE;
-PUBLIC extern std::string const kCharsetUTF32LE;
-PUBLIC extern std::string const kCharsetUnknown;
+extern std::string const kCharsetNoEncoding;
+extern std::string const kCharsetASCII;
+extern std::string const kCharsetUTF8;
+extern std::string const kCharsetUTF16BE;
+extern std::string const kCharsetUTF16LE;
+extern std::string const kCharsetUTF32BE;
+extern std::string const kCharsetUTF32LE;
+extern std::string const kCharsetUnknown;
 
 namespace encoding
 {
@@ -36,9 +36,9 @@ namespace encoding
 		return kCharsetNoEncoding;
 	}
 
-	PUBLIC io::bytes_ptr convert (io::bytes_ptr content, std::string const& from, std::string const& to);
+	io::bytes_ptr convert (io::bytes_ptr content, std::string const& from, std::string const& to);
 
-	struct PUBLIC type
+	struct type
 	{
 		type () { }
 		type (std::string const& newlines, std::string const& charset) : _newlines(newlines), _charset(charset) { }

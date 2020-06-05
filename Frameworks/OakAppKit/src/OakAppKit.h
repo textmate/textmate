@@ -1,14 +1,12 @@
 #include "IOAlertPanel.h"
-#include <oak/misc.h>
+extern NSNotificationName const OakCursorDidHideNotification;
 
-PUBLIC extern NSNotificationName const OakCursorDidHideNotification;
+BOOL OakIsAlternateKeyOrMouseEvent (NSUInteger flags = NSEventModifierFlagOption, NSEvent* anEvent = [NSApp currentEvent]);
 
-PUBLIC BOOL OakIsAlternateKeyOrMouseEvent (NSUInteger flags = NSEventModifierFlagOption, NSEvent* anEvent = [NSApp currentEvent]);
+extern NSUInteger const OakMoveMoveReturn;
+extern NSUInteger const OakMoveAcceptReturn;
+extern NSUInteger const OakMoveCancelReturn;
+extern NSUInteger const OakMoveNoActionReturn;
 
-PUBLIC extern NSUInteger const OakMoveMoveReturn;
-PUBLIC extern NSUInteger const OakMoveAcceptReturn;
-PUBLIC extern NSUInteger const OakMoveCancelReturn;
-PUBLIC extern NSUInteger const OakMoveNoActionReturn;
-
-PUBLIC NSUInteger OakPerformTableViewActionFromKeyEvent (NSTableView* tableView, NSEvent* event);
-PUBLIC NSUInteger OakPerformTableViewActionFromSelector (NSTableView* tableView, SEL selector);
+NSUInteger OakPerformTableViewActionFromKeyEvent (NSTableView* tableView, NSEvent* event);
+NSUInteger OakPerformTableViewActionFromSelector (NSTableView* tableView, SEL selector);

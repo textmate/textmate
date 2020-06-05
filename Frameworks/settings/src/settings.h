@@ -7,7 +7,7 @@
 #include <text/format.h>
 #include <scope/scope.h>
 
-struct PUBLIC settings_t
+struct settings_t
 {
 	settings_t ()                                                                        { }
 	settings_t (std::map<std::string, std::string> const& settings) : settings(settings) { }
@@ -67,8 +67,8 @@ private:
 	static std::string to_str (char const* value)               { return value;                     }
 };
 
-PUBLIC settings_t settings_for_path (std::string const& path = NULL_STR, scope::scope_t const& scope = "", std::string const& directory = NULL_STR, std::map<std::string, std::string> variables = std::map<std::string, std::string>());
-PUBLIC std::map<std::string, std::string> variables_for_path (std::map<std::string, std::string> const& base = std::map<std::string, std::string>(), std::string const& path = NULL_STR, scope::scope_t const& scope = "", std::string const& directory = NULL_STR);
+settings_t settings_for_path (std::string const& path = NULL_STR, scope::scope_t const& scope = "", std::string const& directory = NULL_STR, std::map<std::string, std::string> variables = std::map<std::string, std::string>());
+std::map<std::string, std::string> variables_for_path (std::map<std::string, std::string> const& base = std::map<std::string, std::string>(), std::string const& path = NULL_STR, scope::scope_t const& scope = "", std::string const& directory = NULL_STR);
 
 struct setting_info_t
 {
@@ -81,6 +81,6 @@ struct setting_info_t
 	std::string section;
 };
 
-PUBLIC std::vector<setting_info_t> settings_info_for_path (std::string const& path = NULL_STR, scope::scope_t const& scope = "", std::string const& directory = NULL_STR);
+std::vector<setting_info_t> settings_info_for_path (std::string const& path = NULL_STR, scope::scope_t const& scope = "", std::string const& directory = NULL_STR);
 
 #endif /* end of include guard: SETTINGS_H_F99MMG5F */

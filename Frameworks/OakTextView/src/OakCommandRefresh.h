@@ -1,5 +1,3 @@
-#include <oak/misc.h>
-
 @class OakCommand;
 @class OakDocument;
 
@@ -10,7 +8,7 @@ typedef NS_OPTIONS(NSUInteger, OakCommandRefresherOptions) {
 	OakCommandRefresherDocumentDidClose  = (1 << 3),
 };
 
-PUBLIC @interface OakCommandRefresher : NSResponder
+@interface OakCommandRefresher : NSResponder
 + (OakCommandRefresher*)scheduleRefreshForCommand:(OakCommand*)aCommand document:(OakDocument*)document window:(NSWindow*)window options:(OakCommandRefresherOptions)options variables:(std::map<std::string, std::string> const&)variables;
 + (OakCommandRefresher*)findRefresherForCommandUUID:(NSUUID*)anIdentifier document:(OakDocument*)document window:(NSWindow*)window;
 - (void)bringHTMLOutputToFront:(id)sender;

@@ -1,8 +1,6 @@
-#import <oak/misc.h>
-
 @class BundleGrammar;
 
-PUBLIC @interface Bundle : NSObject
+@interface Bundle : NSObject
 - (instancetype)initWithIdentifier:(NSUUID*)anIdentifier;
 
 @property (nonatomic) NSUUID*                       identifier;

@@ -1,16 +1,16 @@
 #import <oak/oak.h>
 #import <regexp/find.h> // for find::options_t
 
-extern PUBLIC NSNotificationName const OakPasteboardDidChangeNotification;
+extern NSNotificationName const OakPasteboardDidChangeNotification;
 
-extern PUBLIC NSString* const kUserDefaultsFindWrapAround;
-extern PUBLIC NSString* const kUserDefaultsFindIgnoreCase;
+extern NSString* const kUserDefaultsFindWrapAround;
+extern NSString* const kUserDefaultsFindIgnoreCase;
 
-extern PUBLIC NSString* const OakFindIgnoreWhitespaceOption;
-extern PUBLIC NSString* const OakFindFullWordsOption;
-extern PUBLIC NSString* const OakFindRegularExpressionOption;
+extern NSString* const OakFindIgnoreWhitespaceOption;
+extern NSString* const OakFindFullWordsOption;
+extern NSString* const OakFindRegularExpressionOption;
 
-PUBLIC @interface OakPasteboardEntry : NSObject
+@interface OakPasteboardEntry : NSObject
 @property (nonatomic, readonly) NSString* string;
 @property (nonatomic, readonly) NSArray<NSString*>* strings;
 @property (nonatomic, readonly) NSDictionary* options;
@@ -24,7 +24,7 @@ PUBLIC @interface OakPasteboardEntry : NSObject
 @property (nonatomic, readonly) find::options_t findOptions;
 @end
 
-PUBLIC @interface OakPasteboard : NSObject
+@interface OakPasteboard : NSObject
 @property (class, readonly) OakPasteboard* generalPasteboard;
 @property (class, readonly) OakPasteboard* findPasteboard;
 @property (class, readonly) OakPasteboard* replacePasteboard;

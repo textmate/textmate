@@ -1,12 +1,10 @@
 #import "OakRolloverButton.h"
-#import <oak/misc.h>
-
 typedef NS_ENUM(NSUInteger, OakBackgroundFillViewStyle) {
 	OakBackgroundFillViewStyleNone = 0,
 	OakBackgroundFillViewStyleHeader,
 };
 
-PUBLIC @interface OakBackgroundFillView : NSView
+@interface OakBackgroundFillView : NSView
 @property (nonatomic) OakBackgroundFillViewStyle style;
 @property (nonatomic) NSImage* activeBackgroundImage;
 @property (nonatomic) NSImage* inactiveBackgroundImage;
@@ -17,18 +15,18 @@ PUBLIC @interface OakBackgroundFillView : NSView
 @property (nonatomic) BOOL active;
 @end
 
-PUBLIC NSFont* OakStatusBarFont ();
-PUBLIC NSFont* OakControlFont ();
+NSFont* OakStatusBarFont ();
+NSFont* OakControlFont ();
 
-PUBLIC NSTextField* OakCreateLabel (NSString* label = @"", NSFont* font = nil, NSTextAlignment alignment = NSTextAlignmentLeft, NSLineBreakMode lineBreakMode = NSLineBreakByTruncatingMiddle);
-PUBLIC NSButton* OakCreateCheckBox (NSString* label);
-PUBLIC NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel = NSBezelStyleRounded);
-PUBLIC NSPopUpButton* OakCreatePopUpButton (BOOL pullsDown = NO, NSString* initialItemTitle = nil, NSView* labelView = nil);
-PUBLIC NSPopUpButton* OakCreateActionPopUpButton (BOOL bordered = NO);
-PUBLIC NSComboBox* OakCreateComboBox (NSView* labelView = nil);
-PUBLIC OakRolloverButton* OakCreateCloseButton (NSString* accessibilityLabel = @"Close document");
-PUBLIC NSView* OakCreateNSBoxSeparator ();
+NSTextField* OakCreateLabel (NSString* label = @"", NSFont* font = nil, NSTextAlignment alignment = NSTextAlignmentLeft, NSLineBreakMode lineBreakMode = NSLineBreakByTruncatingMiddle);
+NSButton* OakCreateCheckBox (NSString* label);
+NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel = NSBezelStyleRounded);
+NSPopUpButton* OakCreatePopUpButton (BOOL pullsDown = NO, NSString* initialItemTitle = nil, NSView* labelView = nil);
+NSPopUpButton* OakCreateActionPopUpButton (BOOL bordered = NO);
+NSComboBox* OakCreateComboBox (NSView* labelView = nil);
+OakRolloverButton* OakCreateCloseButton (NSString* accessibilityLabel = @"Close document");
+NSView* OakCreateNSBoxSeparator ();
 
-PUBLIC OakBackgroundFillView* OakCreateVerticalLine (OakBackgroundFillViewStyle style);
-PUBLIC void OakSetupKeyViewLoop (NSArray<NSView*>* views);
-PUBLIC void OakAddAutoLayoutViewsToSuperview (NSArray<NSView*>* views, NSView* superview);
+OakBackgroundFillView* OakCreateVerticalLine (OakBackgroundFillViewStyle style);
+void OakSetupKeyViewLoop (NSArray<NSView*>* views);
+void OakAddAutoLayoutViewsToSuperview (NSArray<NSView*>* views, NSView* superview);

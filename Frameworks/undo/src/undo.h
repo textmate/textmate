@@ -6,7 +6,7 @@
 
 namespace ng
 {
-	struct PUBLIC undo_manager_t
+	struct undo_manager_t
 	{
 		undo_manager_t (buffer_t& buffer);
 		~undo_manager_t ();

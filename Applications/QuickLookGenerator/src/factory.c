@@ -5,7 +5,7 @@
 // = Plugin Factory =
 // ==================
 
-PUBLIC void* TextMateQuickLookGeneratorPlugInFactory (CFAllocatorRef allocator, CFUUIDRef typeID)
+void* TextMateQuickLookGeneratorPlugInFactory (CFAllocatorRef allocator, CFUUIDRef typeID)
 {
 	if(!CFEqual(typeID, kQLGeneratorTypeID))
 	{

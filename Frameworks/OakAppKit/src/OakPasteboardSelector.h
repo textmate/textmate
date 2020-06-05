@@ -1,6 +1,4 @@
-#import <oak/misc.h>
-
-PUBLIC @interface OakPasteboardSelector : NSWindowController
+@interface OakPasteboardSelector : NSWindowController
 {
 	IBOutlet NSTableView* tableView;
 }

@@ -8,10 +8,10 @@
 
 namespace oak_debug
 {
-	void PUBLIC increase (char const* name);
-	void PUBLIC decrease (char const* name);
+	void increase (char const* name);
+	void decrease (char const* name);
 
-	struct PUBLIC watch_leaks_t
+	struct watch_leaks_t
 	{
 		char const* class_name;
 

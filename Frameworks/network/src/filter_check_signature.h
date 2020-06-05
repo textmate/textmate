@@ -10,7 +10,7 @@
 
 namespace network
 {
-	struct PUBLIC check_signature_t : filter_t
+	struct check_signature_t : filter_t
 	{
 		check_signature_t (key_chain_t const& keyChain, std::string const& signeeHeader, std::string const& signatureHeader);
 		~check_signature_t ();

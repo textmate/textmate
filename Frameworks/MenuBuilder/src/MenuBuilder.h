@@ -1,5 +1,3 @@
-#include <oak/misc.h>
-
 typedef NS_ENUM(NSInteger, MBMenuType) {
 	MBMenuTypeRegular = 0,
 	MBMenuTypeServices,
@@ -12,7 +10,7 @@ typedef NS_ENUM(NSInteger, MBMenuType) {
 struct MBMenuItem;
 typedef std::vector<MBMenuItem> MBMenu;
 
-struct PUBLIC MBMenuItem
+struct MBMenuItem
 {
 	NSString*             title             = nil;
 	SEL                   action            = NULL;
@@ -35,5 +33,5 @@ struct PUBLIC MBMenuItem
 	MBMenu                submenu;
 };
 
-PUBLIC NSMenu* MBCreateMenu (MBMenu const& menu, NSMenu* existingMenu = nil);
-PUBLIC NSString* MBDumpMenu (NSMenu* menu);
+NSMenu* MBCreateMenu (MBMenu const& menu, NSMenu* existingMenu = nil);
+NSString* MBDumpMenu (NSMenu* menu);

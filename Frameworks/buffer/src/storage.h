@@ -2,7 +2,6 @@
 #define BUFFER_H_FCAAENIG
 
 #include <oak/basic_tree.h>
-#include <oak/misc.h>
 #include <oak/debug.h>
 
 namespace ng
@@ -59,7 +58,7 @@ namespace ng
 			size_t _offset;
 		};
 
-		struct PUBLIC storage_t
+		struct storage_t
 		{
 			WATCH_LEAKS(ng::detail::storage_t);
 

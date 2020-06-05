@@ -1,8 +1,6 @@
 #ifndef SCM_STATUS_H_KRMEHC4M
 #define SCM_STATUS_H_KRMEHC4M
 
-#include <oak/misc.h>
-
 namespace scm
 {
 	namespace status
@@ -19,7 +17,7 @@ namespace scm
 			ignored     = 64,  // File is being ignored by the version control system
 			mixed       = 128, // Directory contains files with mixed state
 		};
-		PUBLIC std::string to_s (type status);
+		std::string to_s (type status);
 	};
 	typedef std::map<std::string, scm::status::type> status_map_t;
 

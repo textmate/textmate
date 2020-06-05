@@ -1,12 +1,10 @@
 #ifndef OAK_DATE_H_AIWA64W2
 #define OAK_DATE_H_AIWA64W2
 
-#include <oak/misc.h>
-
 namespace oak
 {
 	// the ‘at’ value is seconds relative to Jan 1 2001 00:00:00 GMT
-	struct PUBLIC date_t
+	struct date_t
 	{
 		date_t (time_t unixTime);
 		date_t (std::string const& str);
@@ -26,7 +24,7 @@ namespace oak
 		CFAbsoluteTime at;
 	};
 
-	PUBLIC std::string to_s (date_t const& date, std::string const& dateFormat = "%F %T %z");
+	std::string to_s (date_t const& date, std::string const& dateFormat = "%F %T %z");
 
 } /* oak */
 

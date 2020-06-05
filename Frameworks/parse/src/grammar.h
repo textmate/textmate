@@ -11,7 +11,7 @@ namespace parse
 	typedef std::shared_ptr<rule_t> rule_ptr;
 	typedef std::shared_ptr<stack_t> stack_ptr;
 
-	struct PUBLIC grammar_t
+	struct grammar_t
 	{
 		WATCH_LEAKS(grammar_t);
 
@@ -68,7 +68,7 @@ namespace parse
 	};
 
 	typedef std::shared_ptr<grammar_t> grammar_ptr;
-	PUBLIC grammar_ptr parse_grammar (bundles::item_ptr const& grammarItem);
+	grammar_ptr parse_grammar (bundles::item_ptr const& grammarItem);
 
 } /* parse */
 

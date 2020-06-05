@@ -5,8 +5,8 @@
 
 namespace ns
 {
-	PUBLIC NSDictionary* to_dictionary (plist::any_t const& plist);
-	PUBLIC NSMutableDictionary* to_mutable_dictionary (plist::any_t const& plist);
+	NSDictionary* to_dictionary (plist::any_t const& plist);
+	NSMutableDictionary* to_mutable_dictionary (plist::any_t const& plist);
 
 } /* ns */
 

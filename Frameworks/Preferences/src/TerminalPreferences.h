@@ -1,7 +1,5 @@
 #import "PreferencesPane.h"
-#import <oak/misc.h>
-
-PUBLIC @interface TerminalPreferences : PreferencesPane
+@interface TerminalPreferences : PreferencesPane
 {
 	IBOutlet NSTextField* installStatusText;
 	IBOutlet NSTextField* installSummaryText;

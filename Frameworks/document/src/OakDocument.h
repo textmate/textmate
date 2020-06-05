@@ -5,15 +5,15 @@
 #import <regexp/find.h> // find::options_t
 #import <scm/scm.h>
 
-PUBLIC extern NSNotificationName const OakDocumentContentDidChangeNotification;
-PUBLIC extern NSNotificationName const OakDocumentMarksDidChangeNotification;
-PUBLIC extern NSNotificationName const OakDocumentWillReloadNotification;
-PUBLIC extern NSNotificationName const OakDocumentDidReloadNotification;
-PUBLIC extern NSNotificationName const OakDocumentWillSaveNotification;
-PUBLIC extern NSNotificationName const OakDocumentDidSaveNotification;
-PUBLIC extern NSNotificationName const OakDocumentWillCloseNotification;
-PUBLIC extern NSNotificationName const OakDocumentWillShowAlertNotification;
-PUBLIC extern NSString* OakDocumentBookmarkIdentifier;
+extern NSNotificationName const OakDocumentContentDidChangeNotification;
+extern NSNotificationName const OakDocumentMarksDidChangeNotification;
+extern NSNotificationName const OakDocumentWillReloadNotification;
+extern NSNotificationName const OakDocumentDidReloadNotification;
+extern NSNotificationName const OakDocumentWillSaveNotification;
+extern NSNotificationName const OakDocumentDidSaveNotification;
+extern NSNotificationName const OakDocumentWillCloseNotification;
+extern NSNotificationName const OakDocumentWillShowAlertNotification;
+extern NSString* OakDocumentBookmarkIdentifier;
 
 typedef NS_ENUM(NSInteger, OakDocumentIOResult) {
 	OakDocumentIOResultSuccess = 0,
@@ -41,7 +41,7 @@ typedef NS_ENUM(NSInteger, OakDocumentIOResult) {
 @property (nonatomic) BOOL tailTruncated;
 @end
 
-PUBLIC @interface OakDocument : NSObject
+@interface OakDocument : NSObject
 + (instancetype)documentWithPath:(NSString*)aPath;
 + (instancetype)documentWithData:(NSData*)someData fileType:(NSString*)aFileType customName:(NSString*)aName;
 + (instancetype)documentWithString:(NSString*)content fileType:(NSString*)aFileType customName:(NSString*)aName;

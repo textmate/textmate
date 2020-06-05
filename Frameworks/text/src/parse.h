@@ -1,8 +1,6 @@
 #ifndef TEXT_PARSE_H_4CKIHQHS
 #define TEXT_PARSE_H_4CKIHQHS
 
-#include <oak/misc.h>
-
 namespace text
 {
 	template <typename _InputIter>
@@ -29,8 +27,8 @@ namespace text
 		return res;
 	}
 
-	PUBLIC std::vector<std::string> split (std::string const& str, std::string const& sep = ", ");
-	PUBLIC std::vector<size_t> soft_breaks (std::string const& str, size_t width, size_t tabSize, size_t prefixSize = 0);
+	std::vector<std::string> split (std::string const& str, std::string const& sep = ", ");
+	std::vector<size_t> soft_breaks (std::string const& str, size_t width, size_t tabSize, size_t prefixSize = 0);
 
 } /* text */
 
