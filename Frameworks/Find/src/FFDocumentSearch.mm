@@ -12,8 +12,6 @@ NSNotificationName const FFDocumentSearchDidFinishNotification         = @"FFDoc
 
 @interface FFDocumentSearch ()
 {
-	OBJC_WATCH_LEAKS(FFDocumentSearch);
-
 	BOOL           _searching;
 	NSUInteger     _lastSearchToken;
 

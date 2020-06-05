@@ -17,7 +17,7 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 @property (nonatomic) BOOL mouseDownRecursionGuard;
 @end
 
-@implementation ProjectLayoutView { OBJC_WATCH_LEAKS(ProjectLayoutView); }
+@implementation ProjectLayoutView
 + (void)initialize
 {
 	[NSUserDefaults.standardUserDefaults registerDefaults:@{

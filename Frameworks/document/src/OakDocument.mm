@@ -171,8 +171,6 @@ NSString* OakDocumentBookmarkIdentifier                          = @"bookmark";
 
 @interface OakDocument ()
 {
-	OBJC_WATCH_LEAKS(OakDocument);
-
 	NSHashTable* _documentEditors;
 	scm::status::type _scmStatus;
 	NSImage* _icon;

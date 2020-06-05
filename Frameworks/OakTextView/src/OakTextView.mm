@@ -462,8 +462,6 @@ private:
 
 @interface OakTextView () <NSTextInputClient, NSDraggingSource, NSIgnoreMisspelledWords, NSChangeSpelling, NSTextFieldDelegate, NSTouchBarDelegate, NSAccessibilityCustomRotorItemSearchDelegate, OakUserDefaultsObserver>
 {
-	OBJC_WATCH_LEAKS(OakTextView);
-
 	std::shared_ptr<document_view_t> documentView;
 	ng::callback_t* callback;
 

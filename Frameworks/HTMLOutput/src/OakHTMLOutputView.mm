@@ -11,9 +11,6 @@
 @end
 
 @interface OakHTMLOutputView ()
-{
-	OBJC_WATCH_LEAKS(OakHTMLOutputView);
-}
 @property (nonatomic, getter = isRunningCommand, readwrite) BOOL runningCommand;
 @property (nonatomic) HOAutoScroll* autoScrollHelper;
 @property (nonatomic) std::map<std::string, std::string> environment;

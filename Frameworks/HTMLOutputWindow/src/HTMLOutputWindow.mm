@@ -6,9 +6,6 @@
 #import <oak/debug.h>
 
 @interface HTMLOutputWindowController () <NSWindowDelegate>
-{
-	OBJC_WATCH_LEAKS(HTMLOutputWindowController);
-}
 @property (nonatomic) HTMLOutputWindowController* retainedSelf;
 @end
 

@@ -4,8 +4,6 @@
 
 @interface OakToolTip : NSPanel
 {
-	OBJC_WATCH_LEAKS(OakToolTip);
-
 	NSTextField* field;
 
 	NSDate* didOpenAtDate; // ignore mouse moves for the next second

@@ -1,11 +1,5 @@
 #import "OakZoomingIcon.h"
 
-@interface OakZoomingIcon ()
-{
-	OBJC_WATCH_LEAKS(OakZoomingIcon);
-}
-@end
-
 @implementation OakZoomingIcon
 - (id)initWithIcon:(NSImage*)icon rect:(NSRect)aRect
 {

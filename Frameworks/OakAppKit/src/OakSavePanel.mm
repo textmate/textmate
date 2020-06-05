@@ -9,7 +9,6 @@
 
 @interface OakEncodingSaveOptionsViewController : NSViewController <NSOpenSavePanelDelegate>
 {
-	OBJC_WATCH_LEAKS(OakEncodingSaveOptionsViewController);
 	encoding::type _encodingOptions;
 }
 @property (nonatomic) NSString* fileType;

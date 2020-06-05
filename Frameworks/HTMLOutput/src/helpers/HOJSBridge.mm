@@ -149,8 +149,6 @@
 
 @interface HOJSShellCommand ()
 {
-	OBJC_WATCH_LEAKS(HOJSShellCommand);
-
 	io::process_t process;
 	std::string output, error;
 

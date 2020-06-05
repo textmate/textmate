@@ -15,7 +15,6 @@ static double const  kFadeFinishTime = 0.70;
 
 @interface OakPopOutView : NSView <CAAnimationDelegate>
 {
-	OBJC_WATCH_LEAKS(OakPopOutView);
 	CALayer* imageLayer;
 	CAShapeLayer* shapeLayer;
 }
