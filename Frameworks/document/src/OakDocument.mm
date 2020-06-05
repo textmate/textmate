@@ -1008,7 +1008,7 @@ NSString* OakDocumentBookmarkIdentifier                          = @"bookmark";
 	}
 	else
 	{
-		NSString* errorMessage = [NSString stringWithFormat:@"Cannot save ‘%@’: no content. Has backup %s, is edited %s.", self.displayName, BSTR(_backupPath), BSTR(self.isDocumentEdited)];
+		NSString* errorMessage = [NSString stringWithFormat:@"Cannot save ‘%@’: no content. Has backup %s, is edited %s.", self.displayName, _backupPath ? "YES" : "NO", self.isDocumentEdited ? "YES" : "NO"];
 		block(OakDocumentIOResultFailure, errorMessage, oak::uuid_t());
 	}
 }
