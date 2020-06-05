@@ -3,7 +3,6 @@
 #include "pipe.h"
 #include <text/format.h>
 #include <oak/datatypes.h>
-#include <oak/debug/OakDebugLog.h>
 #include <crash/info.h>
 
 namespace io
