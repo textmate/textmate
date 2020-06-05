@@ -15,35 +15,6 @@ namespace output_caret  { enum type { after_output = 0, select_output, interpola
 namespace output_reuse  { enum type { reuse_available = 0, reuse_none, reuse_busy, abort_and_reuse_busy }; }
 namespace auto_refresh  { enum type { never = 0, on_document_change = (1 << 0), on_document_save = (1 << 1), on_document_close = (1 << 2) }; }
 
-#ifndef NDEBUG
-inline char const* to_s (input::type const& input)
-{
-	switch(input)
-	{
-		case input::character:        return "character";
-		case input::word:             return "word";
-		case input::line:             return "line";
-		case input::scope:            return "scope";
-		case input::selection:        return "selection";
-		case input::entire_document:  return "document";
-	};
-	return "undefined";
-}
-
-inline char const* to_s (output_caret::type const& caret)
-{
-	switch(caret)
-	{
-		case output_caret::after_output:        return "after output";        break;
-		case output_caret::select_output:       return "select output";       break;
-		case output_caret::interpolate_by_char: return "interpolate by char"; break;
-		case output_caret::interpolate_by_line: return "interpolate by line"; break;
-		case output_caret::heuristic:           return "heuristic";           break;
-	};
-	return "undefined";
-}
-#endif
-
 struct bundle_command_t
 {
 	std::string name = NULL_STR;

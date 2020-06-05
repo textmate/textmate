@@ -6,18 +6,6 @@
 
 namespace indent
 {
-#ifndef NDEBUG
-	static std::string to_s (pattern_type type)
-	{
-		std::vector<std::string> v;
-		if(type & kIgnore)       v.push_back("kIgnore");
-		if(type & kDecrease)     v.push_back("kDecrease");
-		if(type & kIncrease)     v.push_back("kIncrease");
-		if(type & kIncreaseNext) v.push_back("kIncreaseNext");
-		if(type & kZeroIndent)   v.push_back("kZeroIndent");
-		return text::join(v, "|");
-	}
-#endif
 	std::string create (size_t size, size_t tabSize, bool softTabs)
 	{
 		return softTabs ? std::string(size, ' ') : std::string(size / tabSize, '\t') + std::string(size % tabSize, ' ');
