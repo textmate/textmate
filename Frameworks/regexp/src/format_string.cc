@@ -13,8 +13,6 @@
 
 struct expand_visitor : boost::static_visitor<void>
 {
-	WATCH_LEAKS(expand_visitor);
-
 	std::function<std::optional<std::string>(std::string const&)> variable;
 	snippet::run_command_callback_t* callback;
 	std::string res;

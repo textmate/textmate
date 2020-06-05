@@ -48,8 +48,6 @@ namespace ng
 
 	struct callback_t
 	{
-		WATCH_LEAKS(ng::callback_t);
-
 		virtual ~callback_t ()                                                          { }
 		virtual void did_parse (size_t from, size_t to)                                 { }
 		virtual void will_replace (size_t from, size_t to, char const* buf, size_t len) { }
@@ -82,8 +80,6 @@ namespace ng
 
 	struct buffer_t : buffer_api_t
 	{
-		WATCH_LEAKS(ng::buffer_t);
-
 		buffer_t ();
 		buffer_t (char const* str);
 		buffer_t (buffer_t const& rhs) = delete;

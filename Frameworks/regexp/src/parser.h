@@ -11,20 +11,20 @@ namespace parser
 	namespace case_change              { enum type { none = 0, upper_next, lower_next, upper, lower }; };
 	namespace transform                { enum type { kNone = (0 << 0), kUpcase = (1 << 0), kDowncase = (1 << 1), kCapitalize = (1 << 2), kAsciify = (1 << 3), kUrlEncode = (1 << 4), kShellEscape = (1 << 5), kRelative = (1 << 6), kNumber = (1 << 7), kDuration = (1 << 8), kDirname = (1 << 9), kBasename = (1 << 10) }; };
 
-	struct text_t                      { std::string text; WATCH_LEAKS(parser::text); };
+	struct text_t                      { std::string text; };
 
-	struct placeholder_t               { size_t index; nodes_t content; WATCH_LEAKS(parser::placeholder_t); };
-	struct placeholder_choice_t        { size_t index; std::vector<nodes_t> choices; WATCH_LEAKS(parser::placeholder_choice_t); };
-	struct placeholder_transform_t     { size_t index; regexp::pattern_t pattern; nodes_t format; regexp_options::type options; WATCH_LEAKS(parser::placeholder_transform_t); };
+	struct placeholder_t               { size_t index; nodes_t content; };
+	struct placeholder_choice_t        { size_t index; std::vector<nodes_t> choices; };
+	struct placeholder_transform_t     { size_t index; regexp::pattern_t pattern; nodes_t format; regexp_options::type options; };
 
-	struct variable_t                  { std::string name; WATCH_LEAKS(parser::variable_t); };
-	struct variable_transform_t        { std::string name; nodes_t pattern; nodes_t format; regexp_options::type options; WATCH_LEAKS(parser::variable_transform_t); };
-	struct variable_fallback_t         { std::string name; nodes_t fallback; WATCH_LEAKS(parser::variable_fallback_t); };
-	struct variable_condition_t        { std::string name; nodes_t if_set, if_not_set; WATCH_LEAKS(parser::variable_condition_t); };
-	struct variable_change_t           { std::string name; uint16_t change; WATCH_LEAKS(parser::variable_change_t); };
+	struct variable_t                  { std::string name; };
+	struct variable_transform_t        { std::string name; nodes_t pattern; nodes_t format; regexp_options::type options; };
+	struct variable_fallback_t         { std::string name; nodes_t fallback; };
+	struct variable_condition_t        { std::string name; nodes_t if_set, if_not_set; };
+	struct variable_change_t           { std::string name; uint16_t change; };
 
-	struct case_change_t               { case_change_t (case_change::type type) : type(type) { } case_change::type type; WATCH_LEAKS(parser::case_change_t); };
-	struct code_t                      { std::string code; WATCH_LEAKS(parser::code_t); };
+	struct case_change_t               { case_change_t (case_change::type type) : type(type) { } case_change::type type; };
+	struct code_t                      { std::string code; };
 
 	OnigOptionType convert (regexp_options::type const& options);
 

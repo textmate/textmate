@@ -27,8 +27,6 @@ namespace scope
 
 		struct path_t : any_t
 		{
-			WATCH_LEAKS(path_t);
-
 			path_t () : anchor_to_bol(false), anchor_to_eol(false) { }
 			std::vector<scope_t> scopes;
 			bool anchor_to_bol;
@@ -57,8 +55,6 @@ namespace scope
 
 		struct selector_t
 		{
-			WATCH_LEAKS(selector_t);
-
 			std::vector<composite_t> composites;
 
 			bool does_match (scope::scope_t const& lhs, scope::scope_t const& rhs, double* rank) const;
@@ -66,8 +62,6 @@ namespace scope
 
 		struct group_t : any_t
 		{
-			WATCH_LEAKS(group_t);
-
 			selector_t selector;
 
 			bool does_match (scope::scope_t const& lhs, scope::scope_t const& rhs, double* rank) const;
@@ -76,8 +70,6 @@ namespace scope
 
 		struct filter_t : any_t
 		{
-			WATCH_LEAKS(filter_t);
-
 			filter_t () : filter(unset) { }
 			enum side_t { unset, left = 'L', right = 'R', both = 'B' } filter;
 			any_ptr selector;

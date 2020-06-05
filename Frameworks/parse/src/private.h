@@ -16,8 +16,6 @@ namespace parse
 
 	struct rule_t
 	{
-		WATCH_LEAKS(rule_t);
-
 		static size_t rule_id_counter;
 
 		rule_t () : rule_id(++rule_id_counter), include_string(NULL_STR), scope_string(NULL_STR), content_scope_string(NULL_STR), match_string(NULL_STR), while_string(NULL_STR), end_string(NULL_STR), apply_end_last(NULL_STR) { }
@@ -68,8 +66,6 @@ namespace parse
 
 	struct stack_t
 	{
-		WATCH_LEAKS(stack_t);
-
 		stack_t (rule_t* rule, scope::scope_t const& scope, stack_ptr const& parent = stack_ptr()) : parent(parent), rule(rule), scope(scope), anchor(0) { }
 
 		stack_ptr parent;

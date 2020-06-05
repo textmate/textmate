@@ -37,8 +37,6 @@
 
 struct socket_callback_t
 {
-	WATCH_LEAKS(socket_callback_t);
-
 	socket_callback_t (std::function<bool(socket_t const&)> const& f, socket_t const& fd)
 	{
 		helper = std::make_shared<helper_t>(f, fd, this);
@@ -202,8 +200,6 @@ typedef std::shared_ptr<temp_file_t> temp_file_ptr;
 
 struct record_t
 {
-	WATCH_LEAKS(record_t);
-
 	record_t (std::string const& command) : command(command) { }
 	~record_t ()                                             { }
 
@@ -231,8 +227,6 @@ namespace // wrap in anonymous namespace to avoid clashing with other callbacks 
 {
 	struct base_t
 	{
-		WATCH_LEAKS(base_t);
-
 		base_t (OakDocument* document)
 		{
 			_close_observer = [NSNotificationCenter.defaultCenter addObserverForName:OakDocumentWillCloseNotification object:document queue:nil usingBlock:^(NSNotification*){
@@ -266,8 +260,6 @@ namespace // wrap in anonymous namespace to avoid clashing with other callbacks 
 
 	struct save_close_callback_t : base_t
 	{
-		WATCH_LEAKS(save_close_callback_t);
-
 		save_close_callback_t (OakDocument* document, std::string const& path, socket_t const& socket, bool data_on_save, bool data_on_close, std::string const& token) : base_t(document), path(path), socket(socket), data_on_save(data_on_save), data_on_close(data_on_close), token(token)
 		{
 		}
@@ -334,8 +326,6 @@ namespace // wrap in anonymous namespace to avoid clashing with other callbacks 
 
 	struct reactivate_callback_t
 	{
-		WATCH_LEAKS(reactivate_callback_t);
-
 		reactivate_callback_t () : _shared_count(std::make_shared<size_t>(0))
 		{
 			_terminal = std::make_shared<NSRunningApplication*>([NSWorkspace.sharedWorkspace frontmostApplication]);
@@ -381,8 +371,6 @@ namespace // wrap in anonymous namespace to avoid clashing with other callbacks 
 
 struct socket_observer_t
 {
-	WATCH_LEAKS(socket_observer_t);
-
 	socket_observer_t () : state(command), bytesLeft(0) { }
 
 	std::vector<record_t> records;

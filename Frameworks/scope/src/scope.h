@@ -15,8 +15,6 @@ namespace scope
 
 	struct scope_t
 	{
-		WATCH_LEAKS(scope_t);
-
 		scope_t ();
 		scope_t (char const* scope);
 		scope_t (std::string const& scope);
@@ -46,8 +44,6 @@ namespace scope
 	private:
 		struct node_t
 		{
-			WATCH_LEAKS(scope_t::node_t);
-
 			node_t (std::string const& atoms, node_t* parent);
 			~node_t ();
 
@@ -100,8 +96,6 @@ namespace scope
 
 	struct selector_t
 	{
-		WATCH_LEAKS(selector_t);
-
 		selector_t ();
 		selector_t (char const* str);
 		selector_t (std::string const& str);

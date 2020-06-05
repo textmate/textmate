@@ -9,8 +9,6 @@
 template <typename _ValT = bool>
 struct indexed_map_t
 {
-	WATCH_LEAKS(indexed_map_t);
-
 private:
 	struct key_t
 	{

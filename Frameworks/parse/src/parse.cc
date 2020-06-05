@@ -174,8 +174,6 @@ namespace parse
 		size_t rank;
 		bool is_end_pattern;
 
-		WATCH_LEAKS(ranked_match_t);
-
 		bool operator< (ranked_match_t const& rhs) const
 		{
 			return match.begin() == rhs.match.begin() ? rank < rhs.rank : match.begin() < rhs.match.begin();

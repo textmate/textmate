@@ -12,8 +12,6 @@ typedef std::shared_ptr<ae_record_t> ae_record_ptr;
 
 struct ae_record_t
 {
-	WATCH_LEAKS(ae_record_t);
-
 	ae_record_t (AEDesc const& value) : value(value) { }
 	ae_record_t (AEDesc const* value)                { AEDuplicateDesc(value, &this->value); }
 	~ae_record_t ()                                  { AEDisposeDesc(&value); }
@@ -68,8 +66,6 @@ namespace odb // wrap in namespace to avoid clashing with other callbacks named 
 {
 	struct save_close_callback_t
 	{
-		WATCH_LEAKS(save_close_callback_t);
-
 		save_close_callback_t (OakDocument* document, std::string path, std::string token, ae_record_ptr sender)
 		{
 			_save_observer = [NSNotificationCenter.defaultCenter addObserverForName:OakDocumentDidSaveNotification object:document queue:nil usingBlock:^(NSNotification*){

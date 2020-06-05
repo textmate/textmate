@@ -16,7 +16,6 @@ namespace regexp
 
 	struct match_t
 	{
-		WATCH_LEAKS(regexp::match_t);
 	private:
 		region_ptr region;
 		regex_ptr compiled_pattern;
@@ -52,7 +51,6 @@ namespace regexp
 
 	struct pattern_t
 	{
-		WATCH_LEAKS(regexp::pattern_t);
 	private:
 		regex_ptr compiled_pattern;
 		std::string pattern_string;

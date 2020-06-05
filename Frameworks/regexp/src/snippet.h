@@ -18,8 +18,6 @@ namespace snippet
 
 		pos_t operator+ (ssize_t dist) const { return pos_t(offset + dist, rank); }
 		pos_t operator- (ssize_t dist) const { return pos_t(offset - dist, rank); }
-
-		WATCH_LEAKS(snippet::pos_t);
 	};
 
 	struct range_t
@@ -38,8 +36,6 @@ namespace snippet
 
 		range_t operator+ (ssize_t dist) const { return range_t(from + dist, to + dist); }
 		range_t operator- (ssize_t dist) const { return range_t(from - dist, to - dist); }
-
-		WATCH_LEAKS(snippet::range_t);
 	};
 
 	struct placeholder_t
@@ -52,8 +48,6 @@ namespace snippet
 
 		virtual std::string transform (std::string const& src, std::map<std::string, std::string> const& variables) const { return src; }
 		virtual std::vector<std::string> const& choices () const { static std::vector<std::string> const empty; return empty; }
-
-		WATCH_LEAKS(snippet::placeholder_t);
 	};
 
 	struct transform_t : placeholder_t
@@ -65,8 +59,6 @@ namespace snippet
 		regexp::pattern_t pattern;
 		format_string::format_string_t format;
 		bool repeat;
-
-		WATCH_LEAKS(snippet::transform_t);
 	};
 
 	struct choice_t : placeholder_t
@@ -76,14 +68,12 @@ namespace snippet
 
 	private:
 		std::vector<std::string> _choices;
-		WATCH_LEAKS(snippet::choice_t);
 	};
 
 	typedef std::shared_ptr<placeholder_t> field_ptr;
 
 	struct snippet_t
 	{
-		WATCH_LEAKS(snippet::snippet_t);
 		snippet_t (std::string const& text, std::map<size_t, field_ptr> const& fields, std::multimap<size_t, field_ptr> const& mirrors, std::map<std::string, std::string> const& variables, std::string const& indent_string, text::indent_t const& indent);
 
 		typedef std::vector< std::pair<range_t, std::string> > replacements_t;

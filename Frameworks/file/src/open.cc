@@ -124,8 +124,6 @@ namespace file
 		struct request_t { std::string path; osx::authorization_t authorization; };
 		struct result_t  { io::bytes_ptr bytes; std::map<std::string, std::string> attributes; int error_code; };
 
-		WATCH_LEAKS(read_t);
-
 		read_t (std::string const& path, osx::authorization_t auth, file_context_ptr context);
 		virtual ~read_t ();
 

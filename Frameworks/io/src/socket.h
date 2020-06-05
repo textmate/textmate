@@ -5,8 +5,6 @@
 
 struct socket_t
 {
-	WATCH_LEAKS(socket_t);
-
 	socket_t ()                     { }
 	socket_t (int fd)               { helper = std::make_shared<helper_t>(fd); }
 	operator int () const           { ASSERT(helper); return helper->fd; }
@@ -15,8 +13,6 @@ struct socket_t
 private:
 	struct helper_t
 	{
-		WATCH_LEAKS(helper_t);
-
 		helper_t (int fd) : fd(fd) { if(fd != -1) fcntl(fd, F_SETFD, FD_CLOEXEC); }
 		~helper_t ()               { if(fd != -1) close(fd); }
 		int fd;

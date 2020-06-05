@@ -9,8 +9,6 @@ namespace format_string
 {
 	struct format_string_t
 	{
-		WATCH_LEAKS(format_string::format_string_t);
-
 		format_string_t (char const* str = "", char const* stopChars = "")   { init(str, stopChars); }
 		format_string_t (std::string const& str, char const* stopChars = "") { init(str, stopChars); }
 

@@ -63,8 +63,6 @@ OnigOptionType convert (regexp_options::type const& options)
 
 struct parse_context_t : parser_base_t
 {
-	WATCH_LEAKS(parser::parse_context_t);
-
 	parse_context_t (std::string const& str) : parser_base_t(str) { }
 
 	bool parse_regexp_options (regexp_options::type& options);

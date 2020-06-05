@@ -13,8 +13,6 @@ namespace parse
 
 	struct grammar_t
 	{
-		WATCH_LEAKS(grammar_t);
-
 		struct callback_t
 		{
 			virtual ~callback_t () { }
