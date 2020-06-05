@@ -9,7 +9,6 @@ FLAGS += -Wall -Wwrite-strings -Wformat -Winit-self -Wmissing-include-dirs -Wno-
 FLAGS += -IShared/include
 FLAGS += -fcolor-diagnostics
 
-# FLAGS += -D_GLIBCXX_DEBUG
 FLAGS += -DNDEBUG -Os
 # LINK   = OakDebug
 
