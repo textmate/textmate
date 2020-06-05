@@ -113,8 +113,9 @@ namespace odb // wrap in namespace to avoid clashing with other callbacks named 
 					AEPutParamPtr(&event, keySenderToken, typeWildCard, token.data(), token.size());
 
 				AppleEvent reply;
-				OSStatus err DB_VAR = AESendMessage(&event, &reply, kAENoReply, kAEDefaultTimeout);
-				D(DBF_ODBEditorSuite, if(err != noErr) bug("*** AESendMessage(): error %d\n", (int)err););
+				OSStatus err = AESendMessage(&event, &reply, kAENoReply, kAEDefaultTimeout);
+				if(err != noErr)
+					os_log_error(OS_LOG_DEFAULT, "AESendMessage() failed with error code %d", (int)err);
 
 				AEDisposeDesc(&event);
 				AEDisposeDesc(&target);
