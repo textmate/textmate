@@ -1,5 +1,4 @@
 SOURCES      = src/*.{cc,mm}
 IMPORT       = text
-LN_FLAGS    += -bundle
 FRAMEWORKS   = Cocoa ExceptionHandling
 EXPORT       = src/*.h
