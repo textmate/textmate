@@ -473,7 +473,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 		{ /* -------- */ },
 		{ @"Rename",                  @selector(editSelectedEntries:)                },
 		{ @"Duplicate",               @selector(duplicateSelectedEntries:)           },
-		{ @"Quick Look",              @selector(toggleQuickLookPreview:), .target = self },
+		{ @"Quick Look",              @selector(toggleQuickLookPreview:)             },
 		{ @"Add to Favorites",        @selector(addSelectedEntriesToFavorites:)      },
 		{ @"Remove From Favorites",   @selector(removeSelectedEntriesFromFavorites:) },
 		{ /* -------- */ },
@@ -487,8 +487,8 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 		{ /* -------- */ },
 		{ @"Finder Tag", .ref = &finderTagsMenuItem,   .tag = kRequiresSelectionTag },
 		{ /* -------- */ },
-		{ @"Undo",                    @selector(undo:), .target = self },
-		{ @"Redo",                    @selector(redo:), .target = self },
+		{ @"Undo",                    @selector(undo:) },
+		{ @"Redo",                    @selector(redo:) },
 		{ /* -------- */ },
 	};
 
